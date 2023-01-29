@@ -1,6 +1,11 @@
-#include "DescMain.h"
+#include "../Message/Console.h"
+#include "../Test/TestOther.h"
 
-int main()
+int WinMain()
 {
+	Console::Log("Hello World\n");
+
+	TestOther::CallTestMessage();
+
 	return 0;
 }
