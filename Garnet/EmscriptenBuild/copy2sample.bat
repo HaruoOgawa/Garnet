@@ -1,0 +1,1 @@
+xcopy build\Garnet.* ..\..\Release\sample\ /y /s /i

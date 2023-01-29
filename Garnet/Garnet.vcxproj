@@ -90,7 +90,7 @@
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
@@ -104,7 +104,7 @@
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -118,7 +118,7 @@
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
@@ -132,22 +132,35 @@
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="src\DescApp\DescMain.h" />
-    <ClInclude Include="src\WebApp\WebMain.h" />
+    <ClInclude Include="src\ScriptApp\CScriptApp.h" />
+    <ClInclude Include="src\EditorApp\CEditorApp.h" />
+    <ClInclude Include="src\Message\Console.h" />
+    <ClInclude Include="src\Test\TestOther.h" />
+    <ClInclude Include="src\Test\TestSubFolder\TestSubClass.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\ScriptApp\CScriptApp.cpp" />
+    <ClCompile Include="src\EditorApp\CEditorApp.cpp" />
     <ClCompile Include="src\DescApp\DescMain.cpp" />
     <ClCompile Include="src\WebApp\WebMain.cpp" />
+    <ClCompile Include="src\Test\TestOther.cpp" />
+    <ClCompile Include="src\Test\TestSubFolder\TestSubClass.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <Text Include="CMakeLists.txt" />
+    <None Include="Commands\RemakeCmakeLists.bat" />
+    <None Include="Commands\RemakeCmakeLists.py" />
+    <None Include="Commands\RunLocalHost.bat" />
+    <None Include="EmscriptenBuild\build.bat" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="EmscriptenBuild\CMakeLists.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

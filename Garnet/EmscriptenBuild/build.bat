@@ -14,4 +14,4 @@ call ..\nmake.exe
 
 cd ..\
 
-pause
+call copy2sample.bat
