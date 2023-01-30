@@ -19,7 +19,7 @@ if(EMSCRIPTEN)
 endif()
 """
 
-ExcludedFolderList = ["DescApp", "EditorApp", "Message", "ScriptApp"]
+ExcludedFolderList = ["DescMain", "EditorApp", "ScriptApp"]
 
 #
 def Remake():
@@ -38,7 +38,7 @@ def Remake():
 
 	for path in pathList:
 		print("[RESULT] %s" %(path))
-		exportText += "	" + path
+		exportText += "	" + path + "\n"
 
 	exportText += Shared_Post
 
