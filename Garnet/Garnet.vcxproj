@@ -139,19 +139,19 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="src\ScriptApp\CScriptApp.h" />
-    <ClInclude Include="src\EditorApp\CEditorApp.h" />
-    <ClInclude Include="src\Message\Console.h" />
-    <ClInclude Include="src\Test\TestOther.h" />
-    <ClInclude Include="src\Test\TestSubFolder\TestSubClass.h" />
+    <ClInclude Include="src\App\CApp.h" />
+    <ClInclude Include="src\App\MainApp\CMainApp.h" />
+    <ClInclude Include="src\App\ScriptApp\CScriptApp.h" />
+    <ClInclude Include="src\App\EditorApp\CEditorApp.h" />
+    <ClInclude Include="src\Debug\Message\Console.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\ScriptApp\CScriptApp.cpp" />
-    <ClCompile Include="src\EditorApp\CEditorApp.cpp" />
-    <ClCompile Include="src\DescApp\DescMain.cpp" />
-    <ClCompile Include="src\WebApp\WebMain.cpp" />
-    <ClCompile Include="src\Test\TestOther.cpp" />
-    <ClCompile Include="src\Test\TestSubFolder\TestSubClass.cpp" />
+    <ClCompile Include="src\App\CApp.cpp" />
+    <ClCompile Include="src\App\MainApp\CMainApp.cpp" />
+    <ClCompile Include="src\App\ScriptApp\CScriptApp.cpp" />
+    <ClCompile Include="src\App\EditorApp\CEditorApp.cpp" />
+    <ClCompile Include="src\Main\DescMain\DescMain.cpp" />
+    <ClCompile Include="src\Main\WebMain\WebMain.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Commands\RemakeCmakeLists.bat" />

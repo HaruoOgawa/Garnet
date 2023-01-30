@@ -7,7 +7,13 @@ set(CMAKE_BUILD_TYPE Release)
 
 add_executable(
 	Garnet
-	../src/Test/TestOther.cpp	../src/Test/TestOther.h	../src/Test/TestSubFolder/TestSubClass.cpp	../src/Test/TestSubFolder/TestSubClass.h	../src/WebApp/WebMain.cpp
+	../src/App/CApp.cpp
+	../src/App/CApp.h
+	../src/App/MainApp/CMainApp.cpp
+	../src/App/MainApp/CMainApp.h
+	../src/Debug/Message/Console.h
+	../src/Main/WebMain/WebMain.cpp
+
 )
 
 if(EMSCRIPTEN)

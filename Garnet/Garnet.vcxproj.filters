@@ -15,39 +15,39 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\Message\Console.h">
+    <ClInclude Include="src\Debug\Message\Console.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\EditorApp\CEditorApp.h">
+    <ClInclude Include="src\App\EditorApp\CEditorApp.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\ScriptApp\CScriptApp.h">
+    <ClInclude Include="src\App\ScriptApp\CScriptApp.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\Test\TestOther.h">
+    <ClInclude Include="src\App\MainApp\CMainApp.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\Test\TestSubFolder\TestSubClass.h">
+    <ClInclude Include="src\App\CApp.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\DescApp\DescMain.cpp">
+    <ClCompile Include="src\Main\DescMain\DescMain.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\WebApp\WebMain.cpp">
+    <ClCompile Include="src\Main\WebMain\WebMain.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\EditorApp\CEditorApp.cpp">
+    <ClCompile Include="src\App\EditorApp\CEditorApp.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\ScriptApp\CScriptApp.cpp">
+    <ClCompile Include="src\App\ScriptApp\CScriptApp.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\Test\TestOther.cpp">
+    <ClCompile Include="src\App\MainApp\CMainApp.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\Test\TestSubFolder\TestSubClass.cpp">
+    <ClCompile Include="src\App\CApp.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
