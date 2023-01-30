@@ -1,14 +1,19 @@
-#include "../../Debug/Message/Console.h"
 #include "../../App/CApp.h"
+
+#ifndef __EMSCRIPTEN__
+app::CApp* g_App = nullptr;
+#endif // !__EMSCRIPTEN__
 
 int WinMain()
 {
-	Console::Log("Hello World\n");
+#ifndef __EMSCRIPTEN__
+	g_App = new app::CApp();
 
-	app::CApp app;
-	app.Initialize();
-	app.RunLopp();
-	app.Release();
+	g_App->Initialize();
+	g_App->RunLopp();
 
+	delete g_App;
+#endif // !__EMSCRIPTEN__
+	
 	return 0;
 }
