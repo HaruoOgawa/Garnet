@@ -6,8 +6,10 @@ int WinMain()
 {
 	g_DescApp = new descapp::CDescAppManager();
 
-	g_DescApp->Initialize();
-	g_DescApp->RunLopp();
+	if (g_DescApp->Initialize())
+	{
+		g_DescApp->RunLopp();
+	}
 
 	delete g_DescApp;
 	g_DescApp = nullptr;

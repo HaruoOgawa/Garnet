@@ -9,7 +9,7 @@
 namespace webapp
 {
 	CWebAppManager::CWebAppManager():
-		m_RunLoop(true)
+		m_IsRunLoop(true)
 	{
 		Console::Log("CWebAppManager::CWebAppManager\n");
 	}
@@ -37,7 +37,7 @@ namespace webapp
 	{
 		//Console::Log("CWebAppManager::RunLopp\n");
 
-		if (!m_RunLoop)
+		if (!m_IsRunLoop)
 		{
 #ifdef __EMSCRIPTEN__
 			emscripten_cancel_main_loop();
@@ -54,7 +54,7 @@ namespace webapp
 
 		if (key == "Escape")
 		{
-			m_RunLoop = false;
+			m_IsRunLoop = false;
 		}
 	}
 }
