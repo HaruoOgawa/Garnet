@@ -15,6 +15,7 @@ Shared_Post = """
 )
 
 if(EMSCRIPTEN)
+	target_link_options(Garnet PRIVATE -sEXPORTED_RUNTIME_METHODS=['ccall'])
 	set(CMAKE_EXECUTABLE_SUFFIX ".js")
 endif()
 """

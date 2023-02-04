@@ -5,12 +5,24 @@
 class Console
 {
 public:
+	// フォーマット指定子と引数無し
+	static void Log(const char* message) {
+#ifndef __EMSCRIPTEN__
+		_RPT0(_CRT_WARN, message);
+#else
+		// この関数を使う時に末尾に\nの改行を入れないとログが表示されないので注意
+		printf("%s", message);
+#endif // !__EMSCRIPTEN__
+	}
+	
+	// フォーマット指定子と引数有り
 	template<class... Variable>
 	static void Log(const char* message, Variable&&... args) {
 #ifndef __EMSCRIPTEN__
 		_RPTN(_CRT_WARN, message, (args)...);
 #else
-		printf("%s", message, (args)...);
+		// この関数を使う時に末尾に\nの改行を入れないとログが表示されないので注意
+		printf(message, (args)...);
 #endif // !__EMSCRIPTEN__
 	}
 };

@@ -1,19 +1,49 @@
 #include "../../App/CApp.h"
+#include "../../App/CWebAppManager.h"
+#include "../../Debug/Message/Console.h"
+#include <string>
 
 #ifdef __EMSCRIPTEN__
-app::CApp* g_App = nullptr;
-#endif // __EMSCRIPTEN__
+#include <emscripten.h>
 
-int main()
+extern "C"
 {
-#ifdef __EMSCRIPTEN__
-	g_App = new app::CApp();
 
-	g_App->Initialize();
-	g_App->RunLopp();
+	webapp::CWebAppManager* g_WebApp = nullptr;
 
-	delete g_App;
-#endif // __EMSCRIPTEN__
+	void Release()
+	{
+		delete g_WebApp;
+		g_WebApp = nullptr;
+	}
 
-	return 0;
+	void RunLopp()
+	{
+		g_WebApp->RunLopp();
+
+		if (!g_WebApp->IsRunLoop())
+		{
+			Release();
+		}
+	}
+
+	int main()
+	{
+		g_WebApp = new webapp::CWebAppManager();
+
+		g_WebApp->Initialize();
+		emscripten_set_main_loop(RunLopp, 60, true);
+
+		return 0;
+	}
+
+	EMSCRIPTEN_KEEPALIVE
+	void OnKeyDown(char* key)
+	{
+		if (g_WebApp)
+		{
+			g_WebApp->OnKeyDown(std::string(key));
+		}
+	}
 }
+#endif // __EMSCRIPTEN__

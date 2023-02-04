@@ -9,6 +9,10 @@ add_executable(
 	Garnet
 	../src/App/CApp.cpp
 	../src/App/CApp.h
+	../src/App/CDescAppManager.cpp
+	../src/App/CDescAppManager.h
+	../src/App/CWebAppManager.cpp
+	../src/App/CWebAppManager.h
 	../src/App/MainApp/CMainApp.cpp
 	../src/App/MainApp/CMainApp.h
 	../src/Debug/Message/Console.h
@@ -17,5 +21,6 @@ add_executable(
 )
 
 if(EMSCRIPTEN)
+	target_link_options(Garnet PRIVATE -sEXPORTED_RUNTIME_METHODS=['ccall'])
 	set(CMAKE_EXECUTABLE_SUFFIX ".js")
 endif()

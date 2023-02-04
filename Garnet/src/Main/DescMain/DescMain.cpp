@@ -1,19 +1,18 @@
-#include "../../App/CApp.h"
+#include "../../App/CDescAppManager.h"
 
-#ifndef __EMSCRIPTEN__
-app::CApp* g_App = nullptr;
-#endif // !__EMSCRIPTEN__
+descapp::CDescAppManager* g_DescApp = nullptr;
 
 int WinMain()
 {
-#ifndef __EMSCRIPTEN__
-	g_App = new app::CApp();
+	g_DescApp = new descapp::CDescAppManager();
 
-	g_App->Initialize();
-	g_App->RunLopp();
+	if (g_DescApp->Initialize())
+	{
+		g_DescApp->RunLopp();
+	}
 
-	delete g_App;
-#endif // !__EMSCRIPTEN__
+	delete g_DescApp;
+	g_DescApp = nullptr;
 	
 	return 0;
 }
