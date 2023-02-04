@@ -30,6 +30,12 @@
     <ClInclude Include="src\App\CApp.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="src\App\CDescAppManager.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="src\App\CWebAppManager.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Main\DescMain\DescMain.cpp">
@@ -50,6 +56,12 @@
     <ClCompile Include="src\App\CApp.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="src\App\CDescAppManager.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="src\App\CWebAppManager.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="EmscriptenBuild\build.bat">
@@ -62,6 +74,7 @@
     <None Include="Commands\RemakeCmakeLists.bat">
       <Filter>ソース ファイル</Filter>
     </None>
+    <None Include="EmscriptenBuild\Garnet_front.js" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="EmscriptenBuild\CMakeLists.txt" />
