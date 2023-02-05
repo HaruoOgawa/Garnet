@@ -6,8 +6,9 @@ classDiagram
     }
     
     class CWebAppManager{
-        - m_pGraphicAPI
+        - IGraphicAPI m_pGraphicAPI
         - m_pWindow
+        - IApp m_App
         + bool Initialize()
         + bool RunLoop()
         + void OnKeyDown(std::string key)
@@ -21,8 +22,9 @@ classDiagram
     }
     
     class CDescAppManager{
-        - m_pGraphicAPI
+        - IGraphicAPI m_pGraphicAPI
         - m_pWindow
+        - IApp m_App
         + bool Initialize()
         + bool RunLoop()
     }
