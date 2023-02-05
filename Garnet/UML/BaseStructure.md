@@ -6,12 +6,14 @@ classDiagram
     }
     
     class CWebAppManager{
+        - m_pGraphicAPI
+        - m_pWindow
         + bool Initialize()
         + bool RunLoop()
         + void OnKeyDown(std::string key)
     }
     
-    WebMain <|-- CWebAppManager
+    WebMain <|.. CWebAppManager
     
     class DescMain{
         + g_DescApp
@@ -19,11 +21,13 @@ classDiagram
     }
     
     class CDescAppManager{
+        - m_pGraphicAPI
+        - m_pWindow
         + bool Initialize()
         + bool RunLoop()
     }
     
-    DescMain <|-- CDescAppManager
+    DescMain <|.. CDescAppManager
     
     class CApp{
         + bool Initialize()
@@ -31,25 +35,31 @@ classDiagram
         + bool Draw()
     }
     
-    CWebAppManager <|-- CApp
-    CDescAppManager <|-- CApp
-    
-    class CMainApp{
-    
-    }
-    
-    CApp <|-- CMainApp
+    CWebAppManager <|.. CApp
+    CDescAppManager <|.. CApp
     
     class CScriptApp{
-    
+        + bool Initialize()
+        + bool Update()
+        + bool Draw()
     }
     
     CApp <|-- CScriptApp
     
     class CEditorApp{
-    
+        + bool Initialize()
+        + bool Update()
+        + bool Draw()
     }
     
     CApp <|-- CEditorApp
     
+    class CMainApp{
+        + bool Initialize()
+        + bool Update()
+        + bool Draw()
+    }
+    
+    CApp <|-- CMainApp
+    CEditorApp .. CMainApp
 ```
