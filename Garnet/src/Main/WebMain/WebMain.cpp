@@ -1,7 +1,6 @@
-#include "../../App/CApp.h"
 #include "../../App/CWebAppManager.h"
 #include "../../Debug/Message/Console.h"
-#include <string>
+#include "../../App/EAppType.h"
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
@@ -29,7 +28,7 @@ extern "C"
 
 	int main()
 	{
-		g_WebApp = new webapp::CWebAppManager();
+		g_WebApp = new webapp::CWebAppManager(app::EAppType::ScriptApp);
 
 		g_WebApp->Initialize();
 		emscripten_set_main_loop(RunLopp, 60, true);

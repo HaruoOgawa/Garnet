@@ -1,14 +1,38 @@
 #include "CDescAppManager.h"
 #include "../Debug/Message/Console.h"
 
+#include "../GraphicsAPI/CVulkanAPI.h"
+#include "./ScriptApp/CScriptApp.h"
+#include "./EditorApp/CEditorApp.h"
+#include "./MainApp/CMainApp.h"
+
 bool g_IsRunLoop = true;
 
 namespace descapp
 {
-	CDescAppManager::CDescAppManager():
-		m_pWindow(nullptr)
+	CDescAppManager::CDescAppManager(app::EAppType AppType):
+		m_pWindow(nullptr),
+		m_pGraphicsAPI(nullptr),
+		m_App(nullptr)
 	{
 		Console::Log("CDescAppManager::CDescAppManager\n");
+
+		//
+		m_pGraphicsAPI = std::make_shared<api::CVulkanAPI>();
+
+		//
+		if (AppType == app::EAppType::ScriptApp)
+		{
+			m_App = std::make_shared<app::CScriptApp>();
+		}
+		else if (AppType == app::EAppType::EditorApp)
+		{
+			m_App = std::make_shared<app::CEditorApp>();
+		}
+		else if (AppType == app::EAppType::MainApp)
+		{
+			m_App = std::make_shared<app::CMainApp>();
+		}
 	}
 
 	CDescAppManager::~CDescAppManager()

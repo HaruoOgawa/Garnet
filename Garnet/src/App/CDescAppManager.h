@@ -6,11 +6,19 @@
 //#define GLFW_EXPOSE_NATIVE_WIN32
 #include <glfw3native.h>
 
+#include <memory>
+#include "EAppType.h"
+
+namespace api { class IGraphicsAPI; }
+namespace app{ class IApp; }
+
 namespace descapp
 {
 	class CDescAppManager
 	{
 		GLFWwindow* m_pWindow;
+		std::shared_ptr<api::IGraphicsAPI> m_pGraphicsAPI;
+		std::shared_ptr<app::IApp> m_App;
 
 		const unsigned int WIDTH = 800;
 		const unsigned int HEIGHT = 600;
@@ -28,7 +36,7 @@ namespace descapp
 
 		bool Release();
 	public:
-		CDescAppManager();
+		CDescAppManager(app::EAppType AppType);
 		virtual ~CDescAppManager();
 		bool Initialize();
 		bool RunLopp();
