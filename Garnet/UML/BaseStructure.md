@@ -29,14 +29,14 @@ classDiagram
     
     DescMain <|.. CDescAppManager
     
-    class CApp{
+    class IApp{
         + bool Initialize()
         + bool Update()
         + bool Draw()
     }
     
-    CWebAppManager <|.. CApp
-    CDescAppManager <|.. CApp
+    CWebAppManager <|.. IApp
+    CDescAppManager <|.. IApp
     
     class CScriptApp{
         + bool Initialize()
@@ -44,7 +44,7 @@ classDiagram
         + bool Draw()
     }
     
-    CApp <|-- CScriptApp
+    IApp <|-- CScriptApp
     
     class CEditorApp{
         + bool Initialize()
@@ -52,7 +52,7 @@ classDiagram
         + bool Draw()
     }
     
-    CApp <|-- CEditorApp
+    IApp <|-- CEditorApp
     
     class CMainApp{
         + bool Initialize()
@@ -60,6 +60,6 @@ classDiagram
         + bool Draw()
     }
     
-    CApp <|-- CMainApp
+    IApp <|-- CMainApp
     CEditorApp .. CMainApp
 ```
