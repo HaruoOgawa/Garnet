@@ -6,7 +6,7 @@ classDiagram
     }
     
     class CWebAppManager{
-        - IGraphicAPI m_pGraphicAPI
+        - IGraphicsAPI m_pGraphicAPI
         - m_pWindow
         - IApp m_App
         + bool Initialize()
@@ -22,7 +22,7 @@ classDiagram
     }
     
     class CDescAppManager{
-        - IGraphicAPI m_pGraphicAPI
+        - IGraphicsAPI m_pGraphicAPI
         - m_pWindow
         - IApp m_App
         + bool Initialize()
