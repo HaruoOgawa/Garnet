@@ -151,17 +151,22 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="src\App\EAppType.h" />
+    <ClInclude Include="src\GraphicsAPI\CWebGPUAPI.h" />
+    <ClInclude Include="src\GraphicsAPI\CVulkanAPI.h" />
     <ClInclude Include="src\App\CDescAppManager.h" />
-    <ClInclude Include="src\App\CApp.h" />
     <ClInclude Include="src\App\MainApp\CMainApp.h" />
     <ClInclude Include="src\App\ScriptApp\CScriptApp.h" />
     <ClInclude Include="src\App\EditorApp\CEditorApp.h" />
     <ClInclude Include="src\Debug\Message\Console.h" />
     <ClInclude Include="src\App\CWebAppManager.h" />
+    <ClInclude Include="src\Interface\IApp.h" />
+    <ClInclude Include="src\Interface\IGraphicsAPI.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\GraphicsAPI\CWebGPUAPI.cpp" />
+    <ClCompile Include="src\GraphicsAPI\CVulkanAPI.cpp" />
     <ClCompile Include="src\App\CDescAppManager.cpp" />
-    <ClCompile Include="src\App\CApp.cpp" />
     <ClCompile Include="src\App\MainApp\CMainApp.cpp" />
     <ClCompile Include="src\App\ScriptApp\CScriptApp.cpp" />
     <ClCompile Include="src\App\EditorApp\CEditorApp.cpp" />

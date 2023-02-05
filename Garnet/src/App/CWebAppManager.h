@@ -1,12 +1,19 @@
 #pragma once
 #include <string>
+#include <memory>
+#include "EAppType.h"
+
+namespace api { class IGraphicsAPI; }
+namespace app { class IApp; }
 
 namespace webapp
 {
 	class CWebAppManager
 	{
 		bool m_IsRunLoop;
-
+		std::shared_ptr<api::IGraphicsAPI> m_pGraphicsAPI;
+		std::shared_ptr<app::IApp> m_App;
+		
 		// インプットプールを作成する
 		// 1フレームに1つしか受け取れなかったり、途中で処理を挟まれたりするのもよくないので、1フレームの間のインプットをプールに溜めて
 		// まとめて実行する
@@ -14,7 +21,7 @@ namespace webapp
 	private:
 		bool Release();
 	public:
-		CWebAppManager();
+		CWebAppManager(app::EAppType AppType);
 		virtual ~CWebAppManager();
 		bool Initialize();
 		bool RunLopp();
