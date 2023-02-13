@@ -1,9 +1,10 @@
+#include <Windows.h>
 #include "../../App/CDescAppManager.h"
 #include "../../App/EAppType.h"
 
 descapp::CDescAppManager* g_DescApp = nullptr;
 
-int WinMain()
+int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
 	g_DescApp = new descapp::CDescAppManager(app::EAppType::ScriptApp);
 
