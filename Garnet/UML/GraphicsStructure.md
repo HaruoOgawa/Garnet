@@ -9,7 +9,7 @@ classDiagram
     + IRenderer + CreateRenderer();
   }
   
-  IObject ..|> "Object uses API to Mesh and Texture, Shader etc..." IGraphicsAPI
+  CNode ..|> "Object uses API to Mesh and Texture, Shader etc..." IGraphicsAPI
 
   class CVulkanAPI{
     + bool Initialize()
