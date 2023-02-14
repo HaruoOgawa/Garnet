@@ -1,6 +1,6 @@
 ```mermaid
 classDiagram
-  class IObject{
+  class CNode{
     + IRenderer m_Renderer
   }
 
