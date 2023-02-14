@@ -5,7 +5,7 @@
 class Console
 {
 public:
-	// フォーマット指定子と引数無し
+	// フォーマット指定子と可変引数無し
 	static void Log(const char* message) {
 #ifndef __EMSCRIPTEN__
 		_RPT0(_CRT_WARN, message);
@@ -15,7 +15,7 @@ public:
 #endif // !__EMSCRIPTEN__
 	}
 	
-	// フォーマット指定子と引数有り
+	// フォーマット指定子と可変引数有り
 	template<class... Variable>
 	static void Log(const char* message, Variable&&... args) {
 #ifndef __EMSCRIPTEN__

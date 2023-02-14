@@ -9,7 +9,7 @@
 #include <memory>
 #include "EAppType.h"
 
-namespace api { class IGraphicsAPI; }
+namespace api { class CVulkanAPI; }
 namespace app{ class IApp; }
 
 namespace descapp
@@ -17,7 +17,7 @@ namespace descapp
 	class CDescAppManager
 	{
 		GLFWwindow* m_pWindow;
-		std::shared_ptr<api::IGraphicsAPI> m_GraphicsAPI;
+		std::shared_ptr<api::CVulkanAPI> m_GraphicsAPI;
 		std::shared_ptr<app::IApp> m_App;
 
 		const unsigned int WIDTH = 800;

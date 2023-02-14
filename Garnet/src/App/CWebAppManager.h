@@ -3,7 +3,7 @@
 #include <memory>
 #include "EAppType.h"
 
-namespace api { class IGraphicsAPI; }
+namespace api { class CWebGPUAPI; }
 namespace app { class IApp; }
 
 namespace webapp
@@ -11,7 +11,7 @@ namespace webapp
 	class CWebAppManager
 	{
 		bool m_IsRunLoop;
-		std::shared_ptr<api::IGraphicsAPI> m_pGraphicsAPI;
+		std::shared_ptr<api::CWebGPUAPI> m_pGraphicsAPI;
 		std::shared_ptr<app::IApp> m_App;
 		
 		// インプットプールを作成する

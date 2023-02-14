@@ -4,8 +4,12 @@
 
 #include "../Interface/IGraphicsAPI.h"
 
+#define NOMINMAX
+#define VK_USE_PLATFORM_WIN32_KHR
 #define GLFW_INCLUDE_VULKAN
 #include <glfw3.h>
+#define GLFW_EXPOSE_NATIVE_WIN32
+#include <glfw3native.h>
 
 namespace api
 {
@@ -28,10 +32,13 @@ namespace api
 		// インスタンス
 		VkInstance m_Instance;
 
+		// Window Surface
+		VkSurfaceKHR m_Surface;
 	private:
 		// 初期化関連の関数
 		bool CreateInstance();
-		
+		bool CreateSurface(GLFWwindow* pWindow);
+
 		// ヘルパー関数 ////////////////////////////////////////////////////
 		// レイヤー
 		void InitAvailableLayerList();
@@ -48,8 +55,8 @@ namespace api
 		CVulkanAPI();
 		virtual ~CVulkanAPI();
 
-		bool Initialize() override;
-		void Release() override;
+		bool Initialize(GLFWwindow* pWindow);
+		void Release();
 
 		std::shared_ptr<renderer::IRenderer> CreateRenderer() override;
 	};

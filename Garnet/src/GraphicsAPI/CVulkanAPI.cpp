@@ -13,10 +13,11 @@ namespace api
 		
 	}
 
-	bool CVulkanAPI::Initialize()
+	bool CVulkanAPI::Initialize(GLFWwindow* pWindow)
 	{
 		if (!CreateInstance()) return false; // インスタンスを作成
 		if (!SetupDebugMessengerEXT()) return false; // インスタンス生成時に設定したプリセットのDebugMessengerだけではカバーできない範囲のハンドリング
+		if (!CreateSurface(pWindow)) return false; // ウィンドウサーフェイスを作成(ウィンドウシステムとやり取りをする箇所)
 
 		return true;
 	}
@@ -39,7 +40,7 @@ namespace api
 		return Renderer;
 	}
 
-	// 初期化関連の関数
+	// 初期化関連の関数 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// インスタンスを作成
 	bool CVulkanAPI::CreateInstance()
 	{
@@ -96,7 +97,31 @@ namespace api
 		return (result == VK_SUCCESS);
 	}
 
-	// ヘルパー関数 ////////////////////////////////////////////////////
+	// Vulkanのウィンドウサーフェイスを作成(ウィンドウシステムとやり取りをする箇所)
+	bool CVulkanAPI::CreateSurface(GLFWwindow* pWindow)
+	{
+		VkWin32SurfaceCreateInfoKHR createInfo{};
+		createInfo.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
+		createInfo.hwnd = glfwGetWin32Window(pWindow); // ウィンドウへのハンドル
+		createInfo.hinstance = GetModuleHandle(nullptr); // 現在のプロセスへのハンドル
+
+		if (vkCreateWin32SurfaceKHR(m_Instance, &createInfo, nullptr, &m_Surface) != VK_SUCCESS)
+		{
+			Console::Log("[Error] vkCreateWin32SurfaceKHR\n");
+			return false;
+		}
+
+		// VulkanのウィンドウサーフェイスとGLFWを結び付ける
+		if (glfwCreateWindowSurface(m_Instance, pWindow, nullptr, &m_Surface) != VK_SUCCESS)
+		{
+			Console::Log("[Error] glfwCreateWindowSurface\n");
+			return false;
+		}
+
+		return true;
+	}
+
+	// ヘルパー関数 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// レイヤー
 	void CVulkanAPI::InitAvailableLayerList()
 	{
@@ -141,7 +166,13 @@ namespace api
 	VKAPI_ATTR VkBool32 VKAPI_CALL CVulkanAPI::DebugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageServerity,
 		VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData)
 	{
-		Console::Log(pCallbackData->pMessage);
+		std::string message(pCallbackData->pMessage);
+
+		if(messageType == VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT) message = "[GENERAL]" + message + "\n";
+		else if(messageType == VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT) message = "[VALIDATION]" + message + "\n";
+		else if(messageType == VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT) message = "[PERFORMANCE]" + message + "\n";
+		
+		Console::Log(message.c_str());
 
 		return VK_FALSE;
 	}

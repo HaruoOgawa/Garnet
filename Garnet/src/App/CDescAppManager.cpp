@@ -56,9 +56,8 @@ namespace descapp
 
 	bool CDescAppManager::Initialize()
 	{
-		if(!m_GraphicsAPI->Initialize()) return false;
-
-		if(!InitWindow()) return false;
+		if (!InitWindow()) return false;
+		if(!m_GraphicsAPI->Initialize(m_pWindow)) return false;
 
 		return true;
 	}
