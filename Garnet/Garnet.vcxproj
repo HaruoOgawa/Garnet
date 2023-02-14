@@ -89,6 +89,7 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(ProjectDir)src\Library\GLFW\include;$(ProjectDir)src\Library\Vulkan\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -123,6 +124,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(ProjectDir)src\Library\GLFW\include;$(ProjectDir)src\Library\Vulkan\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -151,6 +153,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="src\GraphicsAPI\CWebGPURenderer.h" />
+    <ClInclude Include="src\GraphicsAPI\CVulkanRenderer.h" />
     <ClInclude Include="src\App\EAppType.h" />
     <ClInclude Include="src\GraphicsAPI\CWebGPUAPI.h" />
     <ClInclude Include="src\GraphicsAPI\CVulkanAPI.h" />
@@ -162,8 +166,12 @@
     <ClInclude Include="src\App\CWebAppManager.h" />
     <ClInclude Include="src\Interface\IApp.h" />
     <ClInclude Include="src\Interface\IGraphicsAPI.h" />
+    <ClInclude Include="src\Interface\IObject.h" />
+    <ClInclude Include="src\Interface\IRenderer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\GraphicsAPI\CWebGPURenderer.cpp" />
+    <ClCompile Include="src\GraphicsAPI\CVulkanRenderer.cpp" />
     <ClCompile Include="src\GraphicsAPI\CWebGPUAPI.cpp" />
     <ClCompile Include="src\GraphicsAPI\CVulkanAPI.cpp" />
     <ClCompile Include="src\App\CDescAppManager.cpp" />

@@ -24,7 +24,7 @@ namespace webapp
 		CWebAppManager(app::EAppType AppType);
 		virtual ~CWebAppManager();
 		bool Initialize();
-		bool RunLopp();
+		bool RunLoop();
 		bool IsRunLoop(){ return m_IsRunLoop; }
 
 #ifndef __EMSCRIPTEN__

@@ -19,8 +19,12 @@ add_executable(
 	../src/Debug/Message/Console.h
 	../src/GraphicsAPI/CWebGPUAPI.cpp
 	../src/GraphicsAPI/CWebGPUAPI.h
+	../src/GraphicsAPI/CWebGPURenderer.cpp
+	../src/GraphicsAPI/CWebGPURenderer.h
 	../src/Interface/IApp.h
 	../src/Interface/IGraphicsAPI.h
+	../src/Interface/IObject.h
+	../src/Interface/IRenderer.h
 	../src/Main/WebMain/WebMain.cpp
 
 )

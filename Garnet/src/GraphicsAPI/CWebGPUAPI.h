@@ -10,5 +10,8 @@ namespace api
 		virtual ~CWebGPUAPI();
 
 		bool Initialize() override;
+		void Release() override;
+
+		std::shared_ptr<renderer::IRenderer> CreateRenderer() override;
 	};
 }

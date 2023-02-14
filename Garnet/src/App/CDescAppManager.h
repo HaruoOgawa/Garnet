@@ -17,7 +17,7 @@ namespace descapp
 	class CDescAppManager
 	{
 		GLFWwindow* m_pWindow;
-		std::shared_ptr<api::IGraphicsAPI> m_pGraphicsAPI;
+		std::shared_ptr<api::IGraphicsAPI> m_GraphicsAPI;
 		std::shared_ptr<app::IApp> m_App;
 
 		const unsigned int WIDTH = 800;

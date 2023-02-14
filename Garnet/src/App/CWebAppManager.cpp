@@ -54,10 +54,11 @@ namespace webapp
 	bool CWebAppManager::Initialize()
 	{
 		Console::Log("CWebAppManager::Initialize\n");
+		
 		return true;
 	}
 
-	bool CWebAppManager::RunLopp()
+	bool CWebAppManager::RunLoop()
 	{
 		//Console::Log("CWebAppManager::RunLopp\n");
 
@@ -66,6 +67,10 @@ namespace webapp
 #ifdef __EMSCRIPTEN__
 			emscripten_cancel_main_loop();
 #endif // __EMSCRIPTEN__
+		}
+		else
+		{
+
 		}
 
 		return true;

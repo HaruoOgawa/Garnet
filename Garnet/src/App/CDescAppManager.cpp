@@ -12,14 +12,12 @@ namespace descapp
 {
 	CDescAppManager::CDescAppManager(app::EAppType AppType):
 		m_pWindow(nullptr),
-		m_pGraphicsAPI(nullptr),
+		m_GraphicsAPI(nullptr),
 		m_App(nullptr)
 	{
-		Console::Log("CDescAppManager::CDescAppManager\n");
-
 		//
-		m_pGraphicsAPI = std::make_shared<api::CVulkanAPI>();
-
+		m_GraphicsAPI = std::make_shared<api::CVulkanAPI>();
+		
 		//
 		if (AppType == app::EAppType::ScriptApp)
 		{
@@ -38,13 +36,14 @@ namespace descapp
 	CDescAppManager::~CDescAppManager()
 	{
 		Release();
-
-		Console::Log("CDescAppManager::~CDescAppManager\n");
 	}
 
 	bool CDescAppManager::Release()
 	{
-		Console::Log("CDescAppManager::Release\n");
+		if (m_GraphicsAPI)
+		{
+			m_GraphicsAPI->Release();
+		}
 
 		if (m_pWindow)
 		{
@@ -57,9 +56,9 @@ namespace descapp
 
 	bool CDescAppManager::Initialize()
 	{
-		Console::Log("CDescAppManager::Initialize\n");
+		if(!m_GraphicsAPI->Initialize()) return false;
 
-		InitWindow();
+		if(!InitWindow()) return false;
 
 		return true;
 	}
@@ -72,6 +71,11 @@ namespace descapp
 		}
 	}
 
+	void Close_Callback(GLFWwindow* window)
+	{
+		g_IsRunLoop = false;
+	}
+
 	bool CDescAppManager::InitWindow()
 	{
 		glfwInit();
@@ -81,6 +85,7 @@ namespace descapp
 		m_pWindow = glfwCreateWindow(WIDTH, HEIGHT, "Garnet", nullptr, nullptr);
 
 		glfwSetKeyCallback(m_pWindow, Key_Callback);
+		glfwSetWindowCloseCallback(m_pWindow, Close_Callback);
 
 		return true;
 	}
@@ -89,8 +94,6 @@ namespace descapp
 	{
 		while (g_IsRunLoop)
 		{
-			//Console::Log("CDescAppManager::RunLopp\n");
-
 			glfwPollEvents();
 		}
 
