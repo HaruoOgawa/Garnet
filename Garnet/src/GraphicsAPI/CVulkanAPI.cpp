@@ -18,12 +18,19 @@ namespace api
 		if (!CreateInstance()) return false; // インスタンスを作成
 		if (!SetupDebugMessengerEXT()) return false; // インスタンス生成時に設定したプリセットのDebugMessengerだけではカバーできない範囲のハンドリング
 		if (!CreateSurface(pWindow)) return false; // ウィンドウサーフェイスを作成(ウィンドウシステムとやり取りをする箇所)
+		if (!CreateDevices()) return false; // デバイスを作成(物理デバイス/論理デバイス)
 
 		return true;
 	}
 
 	void CVulkanAPI::Release()
 	{
+		// デバイスの破棄
+		vkDestroyDevice(m_LogicalDevice, nullptr);
+
+		// ウィンドウサーフェイスの破棄
+		vkDestroySurfaceKHR(m_Instance, m_Surface, nullptr);
+
 		// 検証レイヤーを使用しているのなら破棄する
 		if (m_IsUseDebugValidationLayer) {
 			DestroyDebugUtilsMessengerEXT(m_Instance, m_DebugMessenger, nullptr);
@@ -119,6 +126,109 @@ namespace api
 		}
 
 		return true;
+	}
+
+	bool CVulkanAPI::CreateDevices()
+	{
+		// 物理デバイスの取得
+		uint32_t physicalDeviceCount = 0;
+		vkEnumeratePhysicalDevices(m_Instance, &physicalDeviceCount, nullptr);
+
+		// 物理デバイスのハンドル用配列を取得する
+		std::vector<VkPhysicalDevice> PhysicalDeviceList;
+		PhysicalDeviceList.resize(physicalDeviceCount);
+		vkEnumeratePhysicalDevices(m_Instance, &physicalDeviceCount, &PhysicalDeviceList[0]);
+
+		// 使用したい機能を持っている物理デバイスを探す
+		bool IsFindDevice = false;
+		for (const auto& device : PhysicalDeviceList)
+		{
+			if (IsDeviceSuitable(device))
+			{
+				m_PhysicalDevice = device;
+				IsFindDevice = true;
+
+				break;
+			}
+		}
+
+		if (!IsFindDevice)
+		{
+			Console::Log("[Error] Can not find device.\n");
+			return false;
+		}
+
+		// 論理デバイスの作成 ///////////////////////////////////////////////////////////////
+		// 物理デバイスのオプション機能を問い合わせる
+		// (ベンダー名やグラボ名などの基本的な情報はvkGetPhysicalDevicePropertiesで問い合わせる)
+		// vkGetPhysicalDeviceFeaturesでジオメトリシェーダー等の機能を処理対象グラボが持っているか確認する
+
+		// デフォルトで有効になっている設定一覧を取得する 
+		VkPhysicalDeviceFeatures supportedFeatures;
+		vkGetPhysicalDeviceFeatures(m_PhysicalDevice, &supportedFeatures);
+
+		// <<C++構文>> "{ }" のコンストラクターについて
+		// コンストラクタが単純な構造体は初期化時に構造体名のコンストラクタを呼ばずに簡潔に中括弧{}のみで初期化することができる.
+		// https://learn.microsoft.com/ja-jp/cpp/cpp/initializing-classes-and-structs-without-constructors-cpp?view=msvc-170
+		// https://www.ibm.com/docs/ja/zos/2.3.0?topic=initializers-initialization-structures-unions
+
+		// 必要なオプション機能を有効にする
+		VkPhysicalDeviceFeatures requiredFeatures = {};
+		requiredFeatures.multiDrawIndirect = supportedFeatures.multiDrawIndirect;
+		requiredFeatures.tessellationShader = VK_TRUE;
+		requiredFeatures.geometryShader = VK_TRUE;
+
+		// ファミリーキューの設定
+		QueueFamiryIndices indices = FindQueueFamilies(m_PhysicalDevice);
+
+		std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
+		std::set<uint32_t> uniqueQueueFamilies = { indices.m_GraphicsFamily.value(), indices.m_PresentFamily.value() };
+		float queuePriority = 1.0f;
+		for (uint32_t queueFamily : uniqueQueueFamilies)
+		{
+			VkDeviceQueueCreateInfo queueCreateInfo{};
+			queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+			queueCreateInfo.queueFamilyIndex = queueFamily;
+			queueCreateInfo.queueCount = 1;
+			queueCreateInfo.pQueuePriorities = &queuePriority;
+
+			queueCreateInfos.push_back(queueCreateInfo);
+		}
+
+		// 論理デバイスの設定
+		VkDeviceCreateInfo deviceCreateInfo = {  };
+		deviceCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+
+		// 基本的な設定
+		deviceCreateInfo.pEnabledFeatures = &requiredFeatures;
+
+		// 論理デバイスのQueue
+		deviceCreateInfo.queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size());
+		deviceCreateInfo.pQueueCreateInfos = &queueCreateInfos[0];
+
+		// 論理デバイスの拡張機能の設定
+		deviceCreateInfo.enabledExtensionCount = static_cast<uint32_t>(m_DeviceExtensions.size());
+		deviceCreateInfo.ppEnabledExtensionNames = &m_DeviceExtensions[0];
+
+		// レイヤーの設定
+		if (m_IsUseDebugValidationLayer)
+		{
+			deviceCreateInfo.enabledLayerCount = static_cast<uint32_t>(m_UseLayerList.size());
+			deviceCreateInfo.ppEnabledLayerNames = &m_UseLayerList[0];
+		}
+		else
+		{
+			deviceCreateInfo.enabledLayerCount = 0;
+		}
+
+		// 論理デバイスを作成
+		VkResult result = vkCreateDevice(m_PhysicalDevice, &deviceCreateInfo, nullptr, &m_LogicalDevice);
+
+		// キューへのハンドルを取得
+		vkGetDeviceQueue(m_LogicalDevice, indices.m_GraphicsFamily.value(), 0, &m_GraphicsQueue);
+		vkGetDeviceQueue(m_LogicalDevice, indices.m_PresentFamily.value(), 0, &m_PresentQueue);
+
+		return (result == VK_SUCCESS);
 	}
 
 	// ヘルパー関数 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -223,5 +333,119 @@ namespace api
 		if (func != nullptr) {
 			func(instance, debugMessenger, pAllocator);
 		}
+	}
+
+
+	// デバイス
+	bool CVulkanAPI::IsDeviceSuitable(VkPhysicalDevice device)
+	{
+		// 物理デバイスが持つキューファミリーを探す
+		// キューとは単純に待機中のコマンドの列。しかしキューにはグラフィックコマンドを処理するものだったりメモリだったり役割が異なるいくつかの種類がある
+		// キューファミリはそのキューの役割を説明するもの。(たぶんクラス的にはこれがキューのプロパティも持っている)
+		QueueFamiryIndices indices = FindQueueFamilies(device);
+
+		// 使用したい物理デバイス拡張機能が有効かチェックする
+		bool extensionsSupported = CheckDeviceExtensionSupport(device);
+
+		// デバイスが持っているスワップチェーン(画面に表示されるのを待っている画像のキューのこと)のキューの拡張機能をチェックする
+		bool swapChainAdequate = false;
+		if (extensionsSupported)
+		{
+			SwapChainSupportDetails swapChainSupport = QuerySwapChainSupport(device);
+			swapChainAdequate = !swapChainSupport.m_Formats.empty() && !swapChainSupport.m_PresentModes.empty();
+		}
+
+		// 物理デバイスが持っている機能をチェックする(例えば64bit float textureが使えるか, テクスチャ圧縮, マルチビューポート)
+		VkPhysicalDeviceFeatures supportedFeatures;
+		vkGetPhysicalDeviceFeatures(device, &supportedFeatures);
+
+		return indices.IsComplete() && extensionsSupported && swapChainAdequate && supportedFeatures.samplerAnisotropy;
+	}
+
+	bool CVulkanAPI::CheckDeviceExtensionSupport(VkPhysicalDevice device)
+	{
+		uint32_t extensionCount;
+		vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, nullptr);
+
+		std::vector<VkExtensionProperties> availableExtensions(extensionCount);
+		vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, &availableExtensions[0]);
+
+		std::set<std::string> requiredExtensions(m_DeviceExtensions.begin(), m_DeviceExtensions.end());
+
+		for (const auto& extension : availableExtensions)
+		{
+			requiredExtensions.erase(extension.extensionName);
+		}
+
+		return requiredExtensions.empty();
+	}
+
+	// Queue
+	QueueFamiryIndices CVulkanAPI::FindQueueFamilies(VkPhysicalDevice device)
+	{
+		QueueFamiryIndices indices;
+
+		// 使用可能なキューファミリのリストを取得する
+		uint32_t queueFamilyCount = 0;
+		vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, nullptr);
+
+		std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
+		vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, &queueFamilies[0]);
+
+		// リストの確認
+		for (int i = 0; i < queueFamilies.size(); i++)
+		{
+			const auto& QueueFamily = queueFamilies[i];
+
+			// グラフィックキューファミリが使用できるか
+			// &演算: 両方1なら1, そうでないなら0. if文は0でなければtrueを返す
+			if (QueueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT)
+			{
+				indices.m_GraphicsFamily = i;
+			}
+
+			//プレゼントキューファミリが使用できるかをウィンドウサーフェイスに問い合わせる
+			VkBool32 presentSupport = false;
+			vkGetPhysicalDeviceSurfaceSupportKHR(device, i, m_Surface, &presentSupport);
+			if (presentSupport)
+			{
+				indices.m_PresentFamily = i;
+			}
+		}
+
+		return indices;
+	}
+
+	// Presentation
+	// SwapChainの使用可否の詳細を問い合わせる
+	// ウィンドウサーフェイスがSwapChainに対応しているか確認する 
+	SwapChainSupportDetails CVulkanAPI::QuerySwapChainSupport(VkPhysicalDevice device)
+	{
+		SwapChainSupportDetails details;
+
+		// スワップ チェーン内の画像の最小/最大数、画像の最小/最大幅と高さ
+		vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, m_Surface, &details.m_Capabilities);
+
+		// 表面形式 (ピクセル形式、色空間)
+		uint32_t formatCount;
+		vkGetPhysicalDeviceSurfaceFormatsKHR(device, m_Surface, &formatCount, nullptr);
+
+		if (formatCount != 0)
+		{
+			details.m_Formats.resize(formatCount);
+			vkGetPhysicalDeviceSurfaceFormatsKHR(device, m_Surface, &formatCount, &details.m_Formats[0]);
+		}
+
+		// 利用可能なプレゼンテーション モード
+		uint32_t presentModeCount;
+		vkGetPhysicalDeviceSurfacePresentModesKHR(device, m_Surface, &presentModeCount, nullptr);
+
+		if (presentModeCount != 0)
+		{
+			details.m_PresentModes.resize(presentModeCount);
+			vkGetPhysicalDeviceSurfacePresentModesKHR(device, m_Surface, &presentModeCount, &details.m_PresentModes[0]);
+		}
+
+		return details;
 	}
 }
