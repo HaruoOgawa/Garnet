@@ -6,21 +6,21 @@ classDiagram
 
   class IGraphicsAPI{
     + bool Initialize()
-    + IRenderer + CreateRenderer();
+    + IRenderer + CreateRenderer(CRendererCreateInfo createInfo);
   }
   
   CNode ..|> "Object uses API to Mesh and Texture, Shader etc..." IGraphicsAPI
 
   class CVulkanAPI{
     + bool Initialize()
-    + CVulkanRenderer CreateRenderer();
+    + CVulkanRenderer CreateRenderer(CRendererCreateInfo createInfo);
   }
   
   IGraphicsAPI <|-- CVulkanAPI
   
   class CWebGPUAPI{
     + bool Initialize()
-    + CWebGPURenderer CreateRenderer();
+    + CWebGPURenderer CreateRenderer(CRendererCreateInfo createInfo);
   }
   
   IGraphicsAPI <|-- CWebGPUAPI
