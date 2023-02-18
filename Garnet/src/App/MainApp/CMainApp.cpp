@@ -12,7 +12,7 @@ namespace app
 
 	}
 
-	bool CMainApp::Initialize()
+	bool CMainApp::Initialize(api::IGraphicsAPI* pGraphicsAPI)
 	{
 		return true;
 	}

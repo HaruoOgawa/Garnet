@@ -59,6 +59,8 @@ namespace descapp
 		if (!InitWindow()) return false;
 		if(!m_GraphicsAPI->Initialize(m_pWindow)) return false;
 
+		if (!m_App->Initialize(m_GraphicsAPI.get())) return false;
+
 		return true;
 	}
 
@@ -94,7 +96,24 @@ namespace descapp
 		while (g_IsRunLoop)
 		{
 			glfwPollEvents();
+
+			if (!Update()) return false;
+			if (!Draw()) return false;
 		}
+
+		return true;
+	}
+
+	bool CDescAppManager::Update()
+	{
+		if (!m_App->Update()) return false;
+
+		return true;
+	}
+
+	bool CDescAppManager::Draw()
+	{
+		if (!m_App->Draw()) return false;
 
 		return true;
 	}

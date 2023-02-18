@@ -35,6 +35,9 @@ namespace descapp
 		bool InitWindow();
 
 		bool Release();
+
+		bool Update();
+		bool Draw();
 	public:
 		CDescAppManager(app::EAppType AppType);
 		virtual ~CDescAppManager();

@@ -12,7 +12,7 @@ namespace app
 
 	}
 
-	bool CScriptApp::Initialize()
+	bool CScriptApp::Initialize(api::IGraphicsAPI* pGraphicsAPI)
 	{
 		return true;
 	}

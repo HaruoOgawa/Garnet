@@ -9,6 +9,7 @@ namespace renderer
 		CWebGPURenderer();
 		virtual ~CWebGPURenderer();
 
+		bool Create(const IRendererCreateInfo& createInfo) override;
 		bool Draw() override;
 	};
 }

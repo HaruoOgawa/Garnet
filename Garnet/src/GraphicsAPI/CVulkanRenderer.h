@@ -9,6 +9,7 @@ namespace renderer
 		CVulkanRenderer();
 		virtual ~CVulkanRenderer();
 
+		bool Create(const IRendererCreateInfo& createInfo) override;
 		bool Draw() override;
 	};
 }

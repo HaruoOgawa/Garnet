@@ -157,6 +157,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="src\Node\CNode.h" />
+    <ClInclude Include="src\GraphicsAPI\CRendererCreateInfo.h" />
     <ClInclude Include="src\GraphicsAPI\CWebGPURenderer.h" />
     <ClInclude Include="src\GraphicsAPI\CVulkanRenderer.h" />
     <ClInclude Include="src\App\EAppType.h" />
@@ -172,8 +174,11 @@
     <ClInclude Include="src\Interface\IGraphicsAPI.h" />
     <ClInclude Include="src\Interface\IObject.h" />
     <ClInclude Include="src\Interface\IRenderer.h" />
+    <ClInclude Include="src\Interface\IRendererCreateInfo.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Node\CNode.cpp" />
+    <ClCompile Include="src\GraphicsAPI\CRendererCreateInfo.cpp" />
     <ClCompile Include="src\GraphicsAPI\CWebGPURenderer.cpp" />
     <ClCompile Include="src\GraphicsAPI\CVulkanRenderer.cpp" />
     <ClCompile Include="src\GraphicsAPI\CWebGPUAPI.cpp" />

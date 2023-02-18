@@ -1,4 +1,5 @@
 #include "CWebGPURenderer.h"
+#include "CRendererCreateInfo.h"
 
 namespace renderer
 {
@@ -8,6 +9,11 @@ namespace renderer
 
 	CWebGPURenderer::~CWebGPURenderer()
 	{
+	}
+
+	bool CWebGPURenderer::Create(const IRendererCreateInfo& createInfo)
+	{
+		return true;
 	}
 
 	bool CWebGPURenderer::Draw()

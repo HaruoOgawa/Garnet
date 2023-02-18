@@ -11,7 +11,7 @@ namespace webapp
 	class CWebAppManager
 	{
 		bool m_IsRunLoop;
-		std::shared_ptr<api::CWebGPUAPI> m_pGraphicsAPI;
+		std::shared_ptr<api::CWebGPUAPI> m_GraphicsAPI;
 		std::shared_ptr<app::IApp> m_App;
 		
 		// インプットプールを作成する
@@ -20,6 +20,9 @@ namespace webapp
 
 	private:
 		bool Release();
+
+		bool Update();
+		bool Draw();
 	public:
 		CWebAppManager(app::EAppType AppType);
 		virtual ~CWebAppManager();

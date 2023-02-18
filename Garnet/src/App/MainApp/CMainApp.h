@@ -9,7 +9,7 @@ namespace app
 		CMainApp();
 		virtual ~CMainApp();
 
-		bool Initialize() override;
+		bool Initialize(api::IGraphicsAPI* pGraphicsAPI) override;
 		bool ProcessInput() override;
 		bool Update() override;
 		bool Draw() override;
