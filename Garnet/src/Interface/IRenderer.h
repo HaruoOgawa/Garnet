@@ -5,6 +5,7 @@ namespace renderer
 {
 	class IRenderer
 	{
+	public:
 		virtual bool Create(const IRendererCreateInfo& createInfo) = 0;
 		virtual bool Draw() = 0;
 	};

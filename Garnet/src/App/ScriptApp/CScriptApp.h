@@ -2,6 +2,7 @@
 #include <memory>
 
 #include "../../Interface/IApp.h"
+#include "../../Interface/IGraphicsAPI.h"
 #include "../../Interface/IRenderer.h"
 
 namespace app
@@ -14,8 +15,8 @@ namespace app
 		virtual ~CScriptApp();
 
 		bool Initialize(api::IGraphicsAPI* pGraphicsAPI) override;
-		bool ProcessInput() override;
-		bool Update() override;
-		bool Draw() override;
+		bool ProcessInput(api::IGraphicsAPI* pGraphicsAPI) override;
+		bool Update(api::IGraphicsAPI* pGraphicsAPI) override;
+		bool Draw(api::IGraphicsAPI* pGraphicsAPI) override;
 	};
 }

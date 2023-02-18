@@ -8,8 +8,8 @@ namespace app
 	{
 	public:
 		virtual bool Initialize(api::IGraphicsAPI* pGraphicsAPI) = 0;
-		virtual bool ProcessInput() = 0;
-		virtual bool Update() = 0;
-		virtual bool Draw() = 0;
+		virtual bool ProcessInput(api::IGraphicsAPI* pGraphicsAPI) = 0;
+		virtual bool Update(api::IGraphicsAPI* pGraphicsAPI) = 0;
+		virtual bool Draw(api::IGraphicsAPI* pGraphicsAPI) = 0;
 	};
 }

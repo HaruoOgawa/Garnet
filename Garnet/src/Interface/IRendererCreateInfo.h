@@ -7,7 +7,5 @@ namespace renderer
 	public:
 		IRendererCreateInfo() = default;
 		virtual ~IRendererCreateInfo() = default;
-
-
 	};
 }

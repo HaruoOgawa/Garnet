@@ -29,4 +29,14 @@ namespace api
 
 		return Renderer;
 	}
+
+	bool CWebGPUAPI::BeginRender()
+	{
+		return true;
+	}
+
+	bool CWebGPUAPI::EndRender()
+	{
+		return true;
+	}
 }

@@ -106,14 +106,14 @@ namespace descapp
 
 	bool CDescAppManager::Update()
 	{
-		if (!m_App->Update()) return false;
+		if (!m_App->Update(m_GraphicsAPI.get())) return false;
 
 		return true;
 	}
 
 	bool CDescAppManager::Draw()
 	{
-		if (!m_App->Draw()) return false;
+		if (!m_App->Draw(m_GraphicsAPI.get())) return false;
 
 		return true;
 	}

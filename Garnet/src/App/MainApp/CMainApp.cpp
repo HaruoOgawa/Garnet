@@ -17,17 +17,17 @@ namespace app
 		return true;
 	}
 
-	bool CMainApp::ProcessInput()
+	bool CMainApp::ProcessInput(api::IGraphicsAPI* pGraphicsAPI)
 	{
 		return true;
 	}
 
-	bool CMainApp::Update()
+	bool CMainApp::Update(api::IGraphicsAPI* pGraphicsAPI)
 	{
 		return true;
 	}
 
-	bool CMainApp::Draw()
+	bool CMainApp::Draw(api::IGraphicsAPI* pGraphicsAPI)
 	{
 		return true;
 	}

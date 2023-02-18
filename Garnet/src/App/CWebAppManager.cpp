@@ -83,14 +83,14 @@ namespace webapp
 
 	bool CWebAppManager::Update()
 	{
-		if (!m_App->Update()) return false;
+		if (!m_App->Update(m_GraphicsAPI.get())) return false;
 
 		return true;
 	}
 
 	bool CWebAppManager::Draw()
 	{
-		if (!m_App->Draw()) return false;
+		if (!m_App->Draw(m_GraphicsAPI.get())) return false;
 
 		return true;
 	}

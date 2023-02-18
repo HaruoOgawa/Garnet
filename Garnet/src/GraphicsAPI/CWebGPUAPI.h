@@ -13,5 +13,8 @@ namespace api
 		void Release();
 
 		std::shared_ptr<renderer::IRenderer> CreateRenderer() override;
+
+		bool BeginRender() override;
+		bool EndRender() override;
 	};
 }

@@ -29,6 +29,10 @@ namespace api
 
 	void CVulkanAPI::Release()
 	{
+
+		// レンダーパスの破棄
+		vkDestroyRenderPass(m_LogicalDevice, m_RenderPass, nullptr);
+
 		// デバイスの破棄
 		vkDestroyDevice(m_LogicalDevice, nullptr);
 
@@ -728,5 +732,16 @@ namespace api
 	bool CVulkanAPI::HasStencilComponent(VkFormat format)
 	{
 		return format == VK_FORMAT_D32_SFLOAT_S8_UINT || format == VK_FORMAT_D24_UNORM_S8_UINT;
+	}
+
+	// ループ中の描画関連処理 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	bool CVulkanAPI::BeginRender()
+	{
+		return true;
+	}
+
+	bool CVulkanAPI::EndRender()
+	{
+		return true;
 	}
 }

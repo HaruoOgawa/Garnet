@@ -17,17 +17,17 @@ namespace app
 		return true;
 	}
 
-	bool CEditorApp::ProcessInput()
+	bool CEditorApp::ProcessInput(api::IGraphicsAPI* pGraphicsAPI)
 	{
 		return true;
 	}
 
-	bool CEditorApp::Update()
+	bool CEditorApp::Update(api::IGraphicsAPI* pGraphicsAPI)
 	{
 		return true;
 	}
 
-	bool CEditorApp::Draw()
+	bool CEditorApp::Draw(api::IGraphicsAPI* pGraphicsAPI)
 	{
 		return true;
 	}
