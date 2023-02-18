@@ -6,7 +6,6 @@ classDiagram
   }
 
   class CNode{
-    + IRenderer m_Renderer
   }
  
   CNode ..|> C3DObject
@@ -25,6 +24,7 @@ classDiagram
   CMesh ..|> CNode
   
   class CPrimitive{
+    + IRenderer m_Renderer
     + int m_MaterialIndex
     + CVertexBuffer m_VertexBuffer
   }
@@ -51,5 +51,24 @@ classDiagram
   }
   
   IGraphicsAPI <|-- CWebGPUAPI
+
+  class IRenderer{
+  
+  }
+  
+  CPrimitive ..|> IRenderer
+  IGraphicsAPI ..|> IRenderer
+  
+  class CVulkanRenderer{
+    + m_GraphicsPipeline
+  }
+  
+  IRenderer ..|> CVulkanRenderer
+  
+  class CWebGPURenderer{
+  
+  }
+  
+  IRenderer ..|> CWebGPURenderer
 
 ```
