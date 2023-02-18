@@ -3,6 +3,8 @@
 #include <vector>
 #include <optional>
 #include <set>
+#include <algorithm>
+#include <array>
 
 #include "../Interface/IGraphicsAPI.h"
 
@@ -65,11 +67,23 @@ namespace api
 		VkQueue m_GraphicsQueue;
 		VkQueue m_PresentQueue;
 
+		// SwapChain/Image
+		VkSwapchainKHR m_SwapChain;
+		std::vector<VkImage> m_SwapChainImages;
+		VkFormat m_SwapChainImageFormat;
+		VkExtent2D m_SwapChainExtent;
+		std::vector<VkImageView> m_SwapChainImageViews;
+
+		// 
+		VkRenderPass m_RenderPass;
 	private:
 		// èâä˙âªä÷òAÇÃä÷êî ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		bool CreateInstance();
 		bool CreateSurface(GLFWwindow* pWindow);
 		bool CreateDevices();
+		bool CreateSwapChain(GLFWwindow* pWindow);
+		bool CreateImageViews();
+		bool CreateRenderPass();
 
 		// ÉwÉãÉpÅ[ä÷êî ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		
@@ -94,6 +108,17 @@ namespace api
 
 		// Presentation
 		SwapChainSupportDetails QuerySwapChainSupport(VkPhysicalDevice device);
+		VkSurfaceFormatKHR ChooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR> availablePresentModes);
+		VkPresentModeKHR ChooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentMode);
+		VkExtent2D ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities, GLFWwindow* pWindow);
+
+		// Texture
+		VkImageView CreateImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags);
+
+		// Depth
+		VkFormat FIndDepthFormat();
+		VkFormat FindSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features);
+		bool	 HasStencilComponent(VkFormat format);
 	public:
 		CVulkanAPI();
 		virtual ~CVulkanAPI();
