@@ -152,16 +152,15 @@ namespace api
 
 		// Buffer
 		uint32_t FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags propertoes);
-
-		// Texture
-		VkImageView CreateImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags);
-		bool CreateImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage,
-			VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
-
+		
 		// Depth
 		VkFormat FIndDepthFormat();
 		VkFormat FindSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features);
 		bool	 HasStencilComponent(VkFormat format);
+
+		// Command
+		VkCommandBuffer BeginSingleTimeCommands();
+		void EndSingleTimeCommands(VkCommandBuffer commandBuffer);
 	public:
 		CVulkanAPI();
 		virtual ~CVulkanAPI();
@@ -184,5 +183,16 @@ namespace api
 
 		// Rendering
 		const VkRenderPass& GetRenderPass() const;
+
+		// Texture
+		VkImageView CreateImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags);
+		bool CreateImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage,
+			VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
+		void TransitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
+		void CopyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
+
+		// Buffer
+		void CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory);
+		void CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
 	};
 }

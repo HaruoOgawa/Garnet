@@ -6,7 +6,8 @@
 namespace renderer
 {
 	CVulkanRenderer::CVulkanRenderer():
-		m_pGraphicsAPI(nullptr)
+		m_pGraphicsAPI(nullptr),
+		m_UseMainTexture(false)
 	{
 	}
 
@@ -17,6 +18,19 @@ namespace renderer
 
 	void CVulkanRenderer::Release()
 	{
+		if (m_UseMainTexture)
+		{
+			// テクスチャサンプラーを破棄(各3Dオブジェクト固有)
+			vkDestroySampler(m_pGraphicsAPI->GetLogicalDevice(), m_TextureSampler, nullptr);
+
+			// テクスチャ用のイメージビューの破棄(各3Dオブジェクト固有)
+			vkDestroyImageView(m_pGraphicsAPI->GetLogicalDevice(), m_TextureImageView, nullptr);
+
+			// テクスチャイメージの破棄(各3Dオブジェクト固有)
+			vkDestroyImage(m_pGraphicsAPI->GetLogicalDevice(), m_TextureImage, nullptr);
+			vkFreeMemory(m_pGraphicsAPI->GetLogicalDevice(), m_TextureImageMemory, nullptr);
+		}
+
 		// グラフィックパイプラインの破棄
 		vkDestroyPipeline(m_pGraphicsAPI->GetLogicalDevice(), m_GraphicsPipeline, nullptr);
 
@@ -27,14 +41,19 @@ namespace renderer
 	bool CVulkanRenderer::Create(api::IGraphicsAPI* pGraphicsAPI, const CRendererCreateInfo& createInfo)
 	{
 		m_pGraphicsAPI = static_cast<api::CVulkanAPI*>(pGraphicsAPI);
+		m_UseMainTexture = createInfo.IsUseMainTexture();
 
 		if (!CreateDescriptorSetLayout(createInfo)) return false; // UBO(Uniform Buffer Object)をどのようにバインドするか
 		if (!CreateGraphicsPipeline(createInfo)) return false; // グラフィックパイプラインを作成
+		if (!CreateTextureImage(createInfo)) return false; // テクスチャイメージの生成(各3Dオブジェクト固有)
+		if (!CreateTextureImageView(createInfo)) return false;// シェーダーで取り扱う用のImageViewを作成(各3Dオブジェクト固有)
+		// テクスチャサンプラーを作成(各3Dオブジェクト固有)
+		if (!CreateTextureSampler(createInfo)) return false; // サンプラーとはテクスチャデータをフラグメント(3Dモデル)に合うように調整する機構
 
 		return true;
 	}
 
-	// 初期化関数 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	// Vulkanメインロジック /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	bool CVulkanRenderer::CreateDescriptorSetLayout(const CRendererCreateInfo& createInfo)
 	{
 		//
@@ -278,6 +297,100 @@ namespace renderer
 		// シェーダーモジュールを破棄する
 		vkDestroyShaderModule(m_pGraphicsAPI->GetLogicalDevice(), fragShaderModule, nullptr);
 		vkDestroyShaderModule(m_pGraphicsAPI->GetLogicalDevice(), vertShaderModule, nullptr);
+
+		return true;
+	}
+
+	bool CVulkanRenderer::CreateTextureImage(const CRendererCreateInfo& createInfo)
+	{
+		if (createInfo.IsUseMainTexture())
+		{
+			// テクスチャをロード
+			int texWidth = 1024, texHeight = 1024, texChannels;
+			//stbi_uc* pixels = stbi_load("src/Textures/texture.jpg", &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+			VkDeviceSize imageSize = texWidth * texHeight * 4;
+
+			/*if (!pixels)
+			{
+				return false;
+			}*/
+
+			// テクスチャイメージのステージングバッファを作成
+			VkBuffer stagingBuffer;
+			VkDeviceMemory stagingBufferMemory;
+			m_pGraphicsAPI->CreateBuffer(imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+				stagingBuffer, stagingBufferMemory);
+
+			void* data; // <-- dataにGPUへの入り口のポインタが渡される(あとで閉じられる) -> そこにテクスチャデータをコピーする(GPUのバッファに渡される)
+			vkMapMemory(m_pGraphicsAPI->GetLogicalDevice(), stagingBufferMemory, 0, imageSize, 0, &data);
+			//std::memcpy(data, pixels, static_cast<size_t>(imageSize));
+			vkUnmapMemory(m_pGraphicsAPI->GetLogicalDevice(), stagingBufferMemory);
+
+			// ロードしたピクセルデータはもう不要なので解放する
+			//stbi_image_free(pixels);
+
+			// テクスチャイメージオブジェクトを生成
+			m_pGraphicsAPI->CreateImage(texWidth, texHeight, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
+				VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_TextureImage, m_TextureImageMemory);
+
+			// イメージテクスチャのレイアウトを別形式へ移行する --> バッファにコピー可能な形式に変換
+			m_pGraphicsAPI->TransitionImageLayout(m_TextureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+
+			// ステージングバッファのデータをテクスチャイメージへコピーする
+			m_pGraphicsAPI->CopyBufferToImage(stagingBuffer, m_TextureImage, static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight));
+
+			// イメージテクスチャのレイアウトを別形式へ移行する --> シェーダーで読み込み可能な形式に変換
+			m_pGraphicsAPI->TransitionImageLayout(m_TextureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+
+			// ステージングバッファの破棄
+			vkDestroyBuffer(m_pGraphicsAPI->GetLogicalDevice(), stagingBuffer, nullptr);
+			vkFreeMemory(m_pGraphicsAPI->GetLogicalDevice(), stagingBufferMemory, nullptr);
+		}
+
+		return true;
+	}
+
+	bool CVulkanRenderer::CreateTextureImageView(const CRendererCreateInfo& createInfo)
+	{
+		if (createInfo.IsUseMainTexture())
+		{
+			m_TextureImageView = m_pGraphicsAPI->CreateImageView(m_TextureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT);
+		}
+
+		return true;
+	}
+
+	bool CVulkanRenderer::CreateTextureSampler(const CRendererCreateInfo& createInfo)
+	{
+		if (createInfo.IsUseMainTexture())
+		{
+			VkSamplerCreateInfo samplerInfo{};
+			samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+			samplerInfo.magFilter = VK_FILTER_LINEAR;
+			samplerInfo.minFilter = VK_FILTER_LINEAR;
+			samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+			samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+			samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+
+			VkPhysicalDeviceProperties properties{};
+			vkGetPhysicalDeviceProperties(m_pGraphicsAPI->GetPhysicalDevice(), &properties);
+			samplerInfo.anisotropyEnable = VK_TRUE; // 異方性フィルタリング --> 遠くの方のテクスチャがぼけてしまうのを調整する機能
+			samplerInfo.maxAnisotropy = properties.limits.maxSamplerAllocationCount;
+
+			samplerInfo.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
+			samplerInfo.unnormalizedCoordinates = VK_FALSE;
+			samplerInfo.compareEnable = VK_FALSE;
+			samplerInfo.compareOp = VK_COMPARE_OP_ALWAYS;
+			samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+			samplerInfo.mipLodBias = 0.0f;
+			samplerInfo.minLod = 0.0f;
+			samplerInfo.maxLod = 0.0f;
+
+			if (vkCreateSampler(m_pGraphicsAPI->GetLogicalDevice(), &samplerInfo, nullptr, &m_TextureSampler) != VK_SUCCESS)
+			{
+				return false;
+			}
+		}
 
 		return true;
 	}

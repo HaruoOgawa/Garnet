@@ -81,10 +81,20 @@ namespace renderer
 		VkPipelineLayout m_PipelineLayout;
 		VkPipeline m_GraphicsPipeline;
 
+		// Texture Image
+		bool m_UseMainTexture;
+		VkImage m_TextureImage;
+		VkDeviceMemory m_TextureImageMemory;
+		VkImageView m_TextureImageView; // シェーダーでテクスチャを取り扱う用のImageView
+		VkSampler m_TextureSampler;
+
 	private:
-		// 初期化関数 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		// Vulkanメインロジック /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		bool CreateDescriptorSetLayout(const CRendererCreateInfo& createInfo);
 		bool CreateGraphicsPipeline(const CRendererCreateInfo& createInfo);
+		bool CreateTextureImage(const CRendererCreateInfo& createInfo);
+		bool CreateTextureImageView(const CRendererCreateInfo& createInfo);
+		bool CreateTextureSampler(const CRendererCreateInfo& createInfo);
 
 		// ヘルパー関数 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// Shader
