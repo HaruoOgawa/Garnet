@@ -40,15 +40,26 @@ namespace descapp
 
 	bool CDescAppManager::Release()
 	{
+		if (m_App)
+		{
+			m_App->Release(m_GraphicsAPI.get());
+			m_App.reset();
+			m_App = nullptr;
+		}
+
 		if (m_GraphicsAPI)
 		{
 			m_GraphicsAPI->Release();
+			m_GraphicsAPI.reset();
+			m_GraphicsAPI = nullptr;
 		}
 
 		if (m_pWindow)
 		{
 			glfwDestroyWindow(m_pWindow);
 			glfwTerminate();
+
+			m_pWindow = nullptr;
 		}
 
 		return true;
@@ -81,7 +92,7 @@ namespace descapp
 	{
 		glfwInit();
 		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API); // OpenGLÇégópÇµÇΩÇ≠Ç»Ç¢ÇÃÇ≈Ç±Ç±Ç≈ñæé¶ìIÇ…êÿÇÈ
-		glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+		//glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
 		m_pWindow = glfwCreateWindow(WIDTH, HEIGHT, "Garnet", nullptr, nullptr);
 

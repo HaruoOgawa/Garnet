@@ -4,7 +4,10 @@
 
 namespace api
 {
-	CVulkanAPI::CVulkanAPI()
+	CVulkanAPI::CVulkanAPI():
+		m_pWindow(nullptr),
+		m_CurrentImageIndex(0),
+		m_IsReCreateSwapChain(false)
 	{
 	}
 
@@ -15,23 +18,42 @@ namespace api
 
 	bool CVulkanAPI::Initialize(GLFWwindow* pWindow)
 	{
+		m_pWindow = pWindow;
+
 		if (!CreateInstance()) return false; // インスタンスを作成
 		if (!SetupDebugMessengerEXT()) return false; // インスタンス生成時に設定したプリセットのDebugMessengerだけではカバーできない範囲のハンドリング
-		if (!CreateSurface(pWindow)) return false; // ウィンドウサーフェイスを作成(ウィンドウシステムとやり取りをする箇所)
+		if (!CreateSurface()) return false; // ウィンドウサーフェイスを作成(ウィンドウシステムとやり取りをする箇所)
 		if (!CreateDevices()) return false; // デバイスを作成(物理デバイス/論理デバイス)
-		if (!CreateSwapChain(pWindow)) return false; // スワップチェインを作成(画面に表示されるのを待っている画像のキューのマネージャーこと)
+		if (!CreateSwapChain()) return false; // スワップチェインを作成(画面に表示されるのを待っている画像のキューのマネージャーこと)
 		if (!CreateImageViews()) return false; // イメージビューの作成(APIが描画に使用する画像を管理するビューのこと)
-		// レンダーパスの作成(描画全体のマネージャーみたいなものかな？それで実際に描画に使用するのがサブパス。サブパスを複数個用意することでポストプロセスもできる)
-		if (!CreateRenderPass()) return false;
+		if (!CreateRenderPass()) return false; // レンダーパスの作成(描画全体のマネージャー。実際に描画に使用するのがサブパス。サブパスを複数個用意することでポストプロセスもできる)
+		if (!CreateDepthResources()) return false; // デプステスト用のリソースを生成
+		if (!CreateFrameBuffer()) return false; // フレームバッファの作成
+		if (!CreateCommandPool()) return false; // コマンドプールを作成(コマンドプールはコマンドバッファを格納するメモリを管理するのに使用する)
+		if (!CreateCommandBuffer()) return false; // コマンドバッファの作成
+		if (!CreateSyncObjects()) return false; // 同期オブジェクトの作成(各種コマンドの順序を操作するために使用)
 
 		return true;
 	}
 
 	void CVulkanAPI::Release()
 	{
+		// Release Vulkan(作成とは逆の順番で破棄していく)
+		CleanupSwapChain();
 
 		// レンダーパスの破棄
 		vkDestroyRenderPass(m_LogicalDevice, m_RenderPass, nullptr);
+
+		// 同期オブジェクトの破棄
+		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+		{
+			vkDestroySemaphore(m_LogicalDevice, m_ImageAvailableSemaphones[i], nullptr);
+			vkDestroySemaphore(m_LogicalDevice, m_RenderFinishedSemaphores[i], nullptr);
+			vkDestroyFence(m_LogicalDevice, m_InFlightFences[i], nullptr);
+		}
+
+		// コマンドプールの破棄
+		vkDestroyCommandPool(m_LogicalDevice, m_CommandPool, nullptr);
 
 		// デバイスの破棄
 		vkDestroyDevice(m_LogicalDevice, nullptr);
@@ -55,7 +77,7 @@ namespace api
 		return Renderer;
 	}
 
-	// 初期化関連の関数 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	// Vulkanメインロジック ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// インスタンスを作成
 	bool CVulkanAPI::CreateInstance()
 	{
@@ -113,11 +135,11 @@ namespace api
 	}
 
 	// Vulkanのウィンドウサーフェイスを作成(ウィンドウシステムとやり取りをする箇所)
-	bool CVulkanAPI::CreateSurface(GLFWwindow* pWindow)
+	bool CVulkanAPI::CreateSurface()
 	{
 		VkWin32SurfaceCreateInfoKHR createInfo{};
 		createInfo.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
-		createInfo.hwnd = glfwGetWin32Window(pWindow); // ウィンドウへのハンドル
+		createInfo.hwnd = glfwGetWin32Window(m_pWindow); // ウィンドウへのハンドル
 		createInfo.hinstance = GetModuleHandle(nullptr); // 現在のプロセスへのハンドル
 
 		if (vkCreateWin32SurfaceKHR(m_Instance, &createInfo, nullptr, &m_Surface) != VK_SUCCESS)
@@ -127,7 +149,7 @@ namespace api
 		}
 
 		// VulkanのウィンドウサーフェイスとGLFWを結び付ける
-		if (glfwCreateWindowSurface(m_Instance, pWindow, nullptr, &m_Surface) != VK_SUCCESS)
+		if (glfwCreateWindowSurface(m_Instance, m_pWindow, nullptr, &m_Surface) != VK_SUCCESS)
 		{
 			Console::Log("[Error] glfwCreateWindowSurface\n");
 			return false;
@@ -239,7 +261,7 @@ namespace api
 		return (result == VK_SUCCESS);
 	}
 
-	bool CVulkanAPI::CreateSwapChain(GLFWwindow* pWindow)
+	bool CVulkanAPI::CreateSwapChain()
 	{
 		// スワップチェーンのサポート状況をチェック
 		SwapChainSupportDetails swapChainSupport = QuerySwapChainSupport(m_PhysicalDevice);
@@ -247,7 +269,7 @@ namespace api
 		// 使用できるスワップチェーン情報をチェック
 		VkSurfaceFormatKHR surfaceFormat = ChooseSwapSurfaceFormat(swapChainSupport.m_Formats);
 		VkPresentModeKHR presentMode = ChooseSwapPresentMode(swapChainSupport.m_PresentModes);
-		VkExtent2D extent = ChooseSwapExtent(swapChainSupport.m_Capabilities, pWindow);
+		VkExtent2D extent = ChooseSwapExtent(swapChainSupport.m_Capabilities);
 
 		// スワップチェーンに含めるイメージの枚数を決める
 		uint32_t imageCount = swapChainSupport.m_Capabilities.minImageCount + 1;
@@ -403,6 +425,221 @@ namespace api
 		{
 			throw std::runtime_error("failed to create render pass!\n");
 		}
+
+		return true;
+	}
+
+	bool CVulkanAPI::CreateDepthResources()
+	{
+		VkFormat depthFormat = FIndDepthFormat();
+		CreateImage(m_SwapChainExtent.width, m_SwapChainExtent.height, depthFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
+			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_DepthImage, m_DepthImageMemory);
+
+		m_DepthImageView = CreateImageView(m_DepthImage, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT);
+
+		return true;
+	}
+
+	bool CVulkanAPI::CreateFrameBuffer()
+	{
+		m_SwapChainFrameBuffers.resize(m_SwapChainImageViews.size());
+
+		for (size_t i = 0; i < m_SwapChainImageViews.size(); i++)
+		{
+			std::array<VkImageView, 2> attachments[] = {
+				m_SwapChainImageViews[i],
+				m_DepthImageView
+			};
+
+			VkFramebufferCreateInfo frameBufferInfo{};
+			frameBufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+			frameBufferInfo.renderPass = m_RenderPass;
+			frameBufferInfo.attachmentCount = static_cast<uint32_t>(attachments->size());
+			frameBufferInfo.pAttachments = attachments->data();
+			frameBufferInfo.width = m_SwapChainExtent.width;
+			frameBufferInfo.height = m_SwapChainExtent.height;
+			frameBufferInfo.layers = 1;
+
+			if (vkCreateFramebuffer(m_LogicalDevice, &frameBufferInfo, nullptr, &m_SwapChainFrameBuffers[i]) != VK_SUCCESS)
+			{
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	bool CVulkanAPI::CreateCommandPool()
+	{
+		QueueFamiryIndices queueFamilyIndices = FindQueueFamilies(m_PhysicalDevice);
+
+		VkCommandPoolCreateInfo poolInfo{};
+		poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+		poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+		poolInfo.queueFamilyIndex = queueFamilyIndices.m_GraphicsFamily.value();
+
+		if (vkCreateCommandPool(m_LogicalDevice, &poolInfo, nullptr, &m_CommandPool) != VK_SUCCESS)
+		{
+			return false;
+		}
+
+		return true;
+	}
+
+	bool CVulkanAPI::CreateCommandBuffer()
+	{
+		m_CommandBuffers.resize(MAX_FRAMES_IN_FLIGHT);
+
+		VkCommandBufferAllocateInfo allocInfo{};
+		allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+		allocInfo.commandPool = m_CommandPool;
+		allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY; // メイン(プライマリ)コマンドバッファかサブ(セカンダリ)コマンドバッファかの選択
+		allocInfo.commandBufferCount = (uint32_t)m_CommandBuffers.size();
+
+		// Allocate は確保するという意味
+		if (vkAllocateCommandBuffers(m_LogicalDevice, &allocInfo, m_CommandBuffers.data()) != VK_SUCCESS)
+		{
+			return false;
+		}
+
+		return true;
+	}
+
+	bool CVulkanAPI::CreateSyncObjects()
+	{
+		//
+		m_ImageAvailableSemaphones.resize(MAX_FRAMES_IN_FLIGHT);
+		m_RenderFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
+		m_InFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
+
+		// セマフォの作成(セマフォとはキュー操作の間に順序を追加するためのもの。セマフォの処理はGPUのみで行われる) 
+		VkSemaphoreCreateInfo semaphoreInfo{};
+		semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+
+		// フェンスの作成(フェンスもセマフォと同様の機能を持つが、GPUでのコマンドの終了がCPUに知らされるということが違う)
+		// セマフォはGOUでの操作の実行順序を指定するために使用され、フェンスはCPUとGPUをお互い同期させるために使用される
+		VkFenceCreateInfo fenceInfo{};
+		fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+		fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT; // 初回は前のフレームがないため、このフラグを設定することで最初の呼び出しがすぐに行われるようにする
+
+		// 両者をまとめて作成
+		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+		{
+			if (vkCreateSemaphore(m_LogicalDevice, &semaphoreInfo, nullptr, &m_ImageAvailableSemaphones[i]) != VK_SUCCESS ||
+				vkCreateSemaphore(m_LogicalDevice, &semaphoreInfo, nullptr, &m_RenderFinishedSemaphores[i]) != VK_SUCCESS ||
+				vkCreateFence(m_LogicalDevice, &fenceInfo, nullptr, &m_InFlightFences[i]) != VK_SUCCESS)
+			{
+				throw std::runtime_error("failed to create semaphores!");
+			}
+		}
+
+		return true;
+	}
+
+	bool CVulkanAPI::BeginRecordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex)
+	{
+		// コマンドバッファの記録開始
+		VkCommandBufferBeginInfo beginInfo{}; // 記録に関する詳細な設定
+		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+		beginInfo.flags = 0; // このコマンドバッファをどのように使用するか
+		beginInfo.pInheritanceInfo = nullptr;
+
+		if (vkBeginCommandBuffer(m_CommandBuffers[m_CurrentFrame], &beginInfo) != VK_SUCCESS)
+		{
+			return false;
+		}
+
+		// レンダーパス開始 
+		VkRenderPassBeginInfo renderPassInfo{};
+		renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+		renderPassInfo.renderPass = m_RenderPass;
+		renderPassInfo.framebuffer = m_SwapChainFrameBuffers[imageIndex];
+		renderPassInfo.renderArea.offset = { 0, 0 };
+		renderPassInfo.renderArea.extent = m_SwapChainExtent;
+
+		std::array<VkClearValue, 2> clearValues{};
+		clearValues[0].color = { {0.0f, 0.0f, 0.0f, 1.0f} };
+		clearValues[1].depthStencil = { 1.0f, 0 };
+		renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
+		renderPassInfo.pClearValues = clearValues.data();
+
+		// レンダーパス開始コマンドを発行
+		vkCmdBeginRenderPass(m_CommandBuffers[m_CurrentFrame], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+		// 動的指定にしたビューポートとシザーの設定をここで行う(ウィンドウのリサイズにとても役立つやつ)
+		VkViewport viewport{};
+		viewport.x = 0.0f;
+		viewport.y = 0.0f;
+		viewport.width = static_cast<float>(m_SwapChainExtent.width);
+		viewport.height = static_cast<float>(m_SwapChainExtent.height);
+		viewport.minDepth = 0.0f;
+		viewport.maxDepth = 1.0f;
+		vkCmdSetViewport(m_CommandBuffers[m_CurrentFrame], 0, 1, &viewport); // ビューポート再設定用のコマンドを発行
+
+		VkRect2D scissor{};
+		scissor.offset = { 0, 0 };
+		scissor.extent = m_SwapChainExtent;
+		vkCmdSetScissor(m_CommandBuffers[m_CurrentFrame], 0, 1, &scissor); // シザーの再設定用のコマンドを発行
+
+		return true;
+	}
+
+	bool CVulkanAPI::EndRecordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex)
+	{
+		// レンダーパス終了
+		vkCmdEndRenderPass(m_CommandBuffers[m_CurrentFrame]);
+
+		// コマンドバッファの記録を終了
+		if (vkEndCommandBuffer(m_CommandBuffers[m_CurrentFrame]) != VK_SUCCESS)
+		{
+			return false;
+		}
+
+		return true;
+	}
+
+	bool CVulkanAPI::CleanupSwapChain()
+	{
+		vkDestroyImageView(m_LogicalDevice, m_DepthImageView, nullptr);
+		vkDestroyImage(m_LogicalDevice, m_DepthImage, nullptr);
+		vkFreeMemory(m_LogicalDevice, m_DepthImageMemory, nullptr);
+
+		for (size_t i = 0; i < m_SwapChainFrameBuffers.size(); i++)
+		{
+			vkDestroyFramebuffer(m_LogicalDevice, m_SwapChainFrameBuffers[i], nullptr);
+		}
+
+		for (size_t i = 0; i < m_SwapChainImageViews.size(); i++)
+		{
+			vkDestroyImageView(m_LogicalDevice, m_SwapChainImageViews[i], nullptr);
+		}
+
+		vkDestroySwapchainKHR(m_LogicalDevice, m_SwapChain, nullptr);
+
+		return true;
+	}
+	
+	bool CVulkanAPI::ReCreateSwapChain()
+	{
+		// ウィンドウが最小化された場合、それが再びアクティブになるまで処理を止める
+		int width = 0, height = 0;
+		glfwGetFramebufferSize(m_pWindow, &width, &height);
+		while (width == 0 || height == 0)
+		{
+			glfwGetFramebufferSize(m_pWindow, &width, &height);
+			glfwWaitEvents();
+		}
+
+		// 論理デバイスの処理がすべて終わるまで待つ
+		vkDeviceWaitIdle(m_LogicalDevice);
+
+		// スワップチェーンの削除と再生成
+		CleanupSwapChain();
+
+		CreateSwapChain();
+		CreateImageViews();
+		CreateDepthResources();
+		CreateFrameBuffer();
 
 		return true;
 	}
@@ -656,7 +893,7 @@ namespace api
 	}
 
 	// スワップ範囲 (スワップ チェーン内の画像の解像度を決定する)
-	VkExtent2D CVulkanAPI::ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities, GLFWwindow* pWindow)
+	VkExtent2D CVulkanAPI::ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities)
 	{
 		if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max()) // uint32_tの最大値ではないことかチェックする
 		{
@@ -665,7 +902,7 @@ namespace api
 		else
 		{
 			int width, height;
-			glfwGetFramebufferSize(pWindow, &width, &height);
+			glfwGetFramebufferSize(m_pWindow, &width, &height);
 
 			VkExtent2D actualExtent = {
 				static_cast<uint32_t>(width),
@@ -677,6 +914,26 @@ namespace api
 
 			return actualExtent;
 		}
+	}
+
+	// Buffer
+	// 物理デバイス(GPU)のメモリ要件を調べるための関数. つまりグラボが持っているメモリ関連の機能をチェックする
+	uint32_t CVulkanAPI::FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags propertoes)
+	{
+		VkPhysicalDeviceMemoryProperties memProperties;
+		vkGetPhysicalDeviceMemoryProperties(m_PhysicalDevice, &memProperties);
+
+		for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++)
+		{
+			// typeFilterには調べたいメモリの機能に関するフラグが入っている
+			// 
+			if (typeFilter & (1 << i) && (memProperties.memoryTypes[i].propertyFlags & propertoes) == propertoes)
+			{
+				return i;
+			}
+		}
+
+		return -1;
 	}
 
 	// Texture
@@ -700,6 +957,53 @@ namespace api
 		}
 
 		return imageView;
+	}
+
+	bool CVulkanAPI::CreateImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage,
+		VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory)
+	{
+		// テクスチャイメージを生成
+		VkImageCreateInfo imageInfo{};
+		imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+		imageInfo.imageType = VK_IMAGE_TYPE_2D;
+		imageInfo.extent.width = width;
+		imageInfo.extent.height = static_cast<uint32_t>(height);
+		imageInfo.extent.depth = 1;
+		imageInfo.mipLevels = 1;
+		imageInfo.arrayLayers = 1;
+		imageInfo.format = format;
+		imageInfo.tiling = tiling;
+		imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+		imageInfo.usage = usage;
+		imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+		imageInfo.samples = VK_SAMPLE_COUNT_1_BIT; // マルチサンプリングに関連
+		imageInfo.flags = 0;
+
+		if (vkCreateImage(m_LogicalDevice, &imageInfo, nullptr, &image) != VK_SUCCESS)
+		{
+			return false;
+		}
+
+		// テクスチャイメージにメモリを割り当てる
+		VkMemoryRequirements memRequirements;
+		vkGetImageMemoryRequirements(m_LogicalDevice, image, &memRequirements);
+
+		VkMemoryAllocateInfo allocInfo{};
+		allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+		allocInfo.allocationSize = memRequirements.size;
+		
+		uint32_t MemoryType = FindMemoryType(memRequirements.memoryTypeBits, properties);
+		if (MemoryType == -1) return false;
+		allocInfo.memoryTypeIndex = MemoryType;
+
+		if (vkAllocateMemory(m_LogicalDevice, &allocInfo, nullptr, &imageMemory) != VK_SUCCESS)
+		{
+			return false;
+		}
+
+		vkBindImageMemory(m_LogicalDevice, image, imageMemory, 0);
+
+		return true;
 	}
 
 	// Depth
@@ -737,12 +1041,116 @@ namespace api
 	// ループ中の描画関連処理 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	bool CVulkanAPI::BeginRender()
 	{
+		// 前のフレーム処理が終わるのを待つ
+		vkWaitForFences(m_LogicalDevice, 1, &m_InFlightFences[m_CurrentFrame], VK_TRUE, UINT64_MAX);
+
+		// スワップチェーンからイメージを取得する
+		// m_ImageAvailableSemaphoneのセマフォでGPU側の処理を止める
+		// 現在、スワップチェーンが古くないかチェックする(最新のウィンドウではサイズ等が変わっているかも!!)
+		VkResult result = vkAcquireNextImageKHR(m_LogicalDevice, m_SwapChain, UINT64_MAX, m_ImageAvailableSemaphones[m_CurrentFrame], VK_NULL_HANDLE, &m_CurrentImageIndex);
+		
+		// VK_ERROR_OUT_OF_DATE_KHR: スワップ チェーンはサーフェスと互換性がなくなり、レンダリングに使用できなくなりました(ウィンドウサイズの変更)
+		// VK_SUBOPTIMAL_KHR: スワップ チェーンを使用してサーフェスに正常に表示することはできますが、サーフェス プロパティは正確に一致しなくなりました。
+		m_IsReCreateSwapChain = false;
+		
+		if (result == VK_ERROR_OUT_OF_DATE_KHR)
+		{
+			ReCreateSwapChain(); // 最新ではなのでスワップチェーンを作り直す
+
+			m_IsReCreateSwapChain = true;
+			return true;
+		}
+		else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR)
+		{
+			return false;
+		}
+
+		// 処理が終わって次の処理に移るのでフェンスをまた使える状態にシグナルをリセットしておく
+		vkResetFences(m_LogicalDevice, 1, &m_InFlightFences[m_CurrentFrame]);
+
+		// ユニフォームデータの更新(各3Dオブジェクト固有)
+		//UpdateUniformBuffer(m_CurrentFrame);
+
+		// コマンドバッファの記録
+		vkResetCommandBuffer(m_CommandBuffers[m_CurrentFrame], 0); // まずリセット
+
+		// 記録スタート
+		if (!BeginRecordCommandBuffer(m_CommandBuffers[m_CurrentFrame], m_CurrentImageIndex)) return false;
+
 		return true;
 	}
 
 	bool CVulkanAPI::EndRender()
 	{
+		// スワップチェーンを作り直しているので1フレーム待つ
+		if (m_IsReCreateSwapChain) return true;
+
+		// 記録終了
+		if (!EndRecordCommandBuffer(m_CommandBuffers[m_CurrentFrame], m_CurrentImageIndex)) return false;
+
+		//
+		// コマンドバッファの送信(たぶんここで描画される？)
+		VkSubmitInfo submitInfo{};
+		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+
+		VkSemaphore waitSemaphore[] = { m_ImageAvailableSemaphones[m_CurrentFrame] }; // 画像に色が書き込まれて利用可能になるまで待つセマフォ
+		VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
+		submitInfo.waitSemaphoreCount = 1;
+		submitInfo.pWaitSemaphores = waitSemaphore;
+		submitInfo.pWaitDstStageMask = waitStages;
+
+		submitInfo.commandBufferCount = 1;
+		submitInfo.pCommandBuffers = &m_CommandBuffers[m_CurrentFrame];
+
+		VkSemaphore signalSemaphores[] = { m_RenderFinishedSemaphores[m_CurrentFrame] }; // コマンドの実行が終了したことを知らせるセマフォ
+		submitInfo.signalSemaphoreCount = 1;
+		submitInfo.pSignalSemaphores = signalSemaphores;
+
+		// コマンドバッファをグラフィックキューに送信
+		// コマンドバッファにはコマンドが入っていてそのコマンドをキューが実行する
+		// キューはタスクでその具体的なタスク内容がコマンドという理解もできる
+		if (vkQueueSubmit(m_GraphicsQueue, 1, &submitInfo, m_InFlightFences[m_CurrentFrame]) != VK_SUCCESS)
+		{
+			return false;
+		}
+
+		// プレゼンテーション(結果をスワップチェーンに送信して最終結果を画面に表示する)
+		VkPresentInfoKHR presentInfo{};
+		presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+		presentInfo.waitSemaphoreCount = 1;
+		presentInfo.pWaitSemaphores = signalSemaphores;
+		// イメージを表示するスワップチェーンを選択
+		VkSwapchainKHR swapChains[] = { m_SwapChain };
+		presentInfo.swapchainCount = 1;
+		presentInfo.pSwapchains = swapChains;
+		presentInfo.pImageIndices = &m_CurrentImageIndex;
+
+		presentInfo.pResults = nullptr;
+
+		// プレゼンテーションキューを実行
+		VkResult result = vkQueuePresentKHR(m_PresentQueue, &presentInfo);
+
+		// 可能な限り最良な結果を得るために念のためもう一度最新かチェックする
+		// VK_ERROR_OUT_OF_DATE_KHR: スワップ チェーンはサーフェスと互換性がなくなり、レンダリングに使用できなくなりました(ウィンドウサイズの変更)
+		// VK_SUBOPTIMAL_KHR: スワップ チェーンを使用してサーフェスに正常に表示することはできますが、サーフェス プロパティは正確に一致しなくなりました。
+		if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || m_FramebufferResized)
+		{
+			m_FramebufferResized = false;
+			ReCreateSwapChain();
+		}
+		else if (result != VK_SUCCESS)
+		{
+			throw std::runtime_error("failed to present swap chain image!");
+		}
+
+		// 現在処理するフレームを更新する
+		m_CurrentFrame = (m_CurrentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
 		return true;
+	}
+
+	bool CVulkanAPI::IsWaitting()
+	{
+		return m_IsReCreateSwapChain;
 	}
 
 	// Device

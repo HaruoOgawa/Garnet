@@ -39,4 +39,9 @@ namespace api
 	{
 		return true;
 	}
+
+	bool CWebGPUAPI::IsWaitting()
+	{
+		return false;
+	}
 }

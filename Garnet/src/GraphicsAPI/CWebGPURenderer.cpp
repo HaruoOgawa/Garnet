@@ -19,6 +19,11 @@ namespace renderer
 		return true;
 	}
 
+	bool CWebGPURenderer::Update()
+	{
+		return true;
+	}
+
 	bool CWebGPURenderer::Draw()
 	{
 		return true;

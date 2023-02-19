@@ -33,6 +33,8 @@ namespace graphics
 
 	bool CPrimitive::Update()
 	{
+		if (!m_Renderer->Update()) return false;
+
 		return true;
 	}
 

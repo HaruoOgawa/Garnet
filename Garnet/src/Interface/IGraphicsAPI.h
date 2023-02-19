@@ -13,5 +13,6 @@ namespace api
 
 		virtual bool BeginRender() = 0;
 		virtual bool EndRender() = 0;
+		virtual bool IsWaitting() = 0;
 	};
 }

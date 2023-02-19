@@ -15,6 +15,8 @@ namespace app
 		CScriptApp();
 		virtual ~CScriptApp();
 
+		bool Release(api::IGraphicsAPI* pGraphicsAPI) override;
+
 		bool Initialize(api::IGraphicsAPI* pGraphicsAPI) override;
 		bool ProcessInput(api::IGraphicsAPI* pGraphicsAPI) override;
 		bool Update(api::IGraphicsAPI* pGraphicsAPI) override;

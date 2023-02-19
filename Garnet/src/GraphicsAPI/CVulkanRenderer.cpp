@@ -5,25 +5,37 @@
 
 namespace renderer
 {
-	CVulkanRenderer::CVulkanRenderer()
+	CVulkanRenderer::CVulkanRenderer():
+		m_pGraphicsAPI(nullptr)
 	{
 	}
 
 	CVulkanRenderer::~CVulkanRenderer()
 	{
+		Release();
+	}
+
+	void CVulkanRenderer::Release()
+	{
+		// グラフィックパイプラインの破棄
+		vkDestroyPipeline(m_pGraphicsAPI->GetLogicalDevice(), m_GraphicsPipeline, nullptr);
+
+		// パイプラインレイアウトの破棄(たぶん本来は3Dオブジェクトごとにあるやつ) 
+		vkDestroyPipelineLayout(m_pGraphicsAPI->GetLogicalDevice(), m_PipelineLayout, nullptr);
 	}
 
 	bool CVulkanRenderer::Create(api::IGraphicsAPI* pGraphicsAPI, const CRendererCreateInfo& createInfo)
 	{
-		auto api = static_cast<api::CVulkanAPI*>(pGraphicsAPI);
+		m_pGraphicsAPI = static_cast<api::CVulkanAPI*>(pGraphicsAPI);
 
-		if (!CreateDescriptorSetLayout(api, createInfo)) return false; // UBO(Uniform Buffer Object)をどのようにバインドするか
-		if (!CreateGraphicsPipeline(api, createInfo)) return false; // グラフィックパイプラインを作成
+		if (!CreateDescriptorSetLayout(createInfo)) return false; // UBO(Uniform Buffer Object)をどのようにバインドするか
+		if (!CreateGraphicsPipeline(createInfo)) return false; // グラフィックパイプラインを作成
+
 		return true;
 	}
 
 	// 初期化関数 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	bool CVulkanRenderer::CreateDescriptorSetLayout(api::CVulkanAPI* pGraphicsAPI, const CRendererCreateInfo& createInfo)
+	bool CVulkanRenderer::CreateDescriptorSetLayout(const CRendererCreateInfo& createInfo)
 	{
 		//
 		std::vector<VkDescriptorSetLayoutBinding> bindings;
@@ -58,12 +70,12 @@ namespace renderer
 		layoutInfo.bindingCount = static_cast<uint32_t>(bindings.size());
 		layoutInfo.pBindings = bindings.data();
 
-		VkResult result = vkCreateDescriptorSetLayout(pGraphicsAPI->GetLogicalDevice(), &layoutInfo, nullptr, &m_DescriptorSetLayout);
+		VkResult result = vkCreateDescriptorSetLayout(m_pGraphicsAPI->GetLogicalDevice(), &layoutInfo, nullptr, &m_DescriptorSetLayout);
 
 		return (result == VK_SUCCESS);
 	}
 
-	bool CVulkanRenderer::CreateGraphicsPipeline(api::CVulkanAPI* pGraphicsAPI, const CRendererCreateInfo& createInfo)
+	bool CVulkanRenderer::CreateGraphicsPipeline(const CRendererCreateInfo& createInfo)
 	{
 		// シェーダーの準備
 		auto VertexShadeCode = createInfo.GetVertexShaderCode();
@@ -72,10 +84,10 @@ namespace renderer
 		// ShaderModuleの作成(Shaderをラップ・管理するためのもの)
 		// 使う時にGeometryとかTessellationも追加する
 		VkShaderModule vertShaderModule;
-		const bool UseVertexShader = CreateShaderModule(vertShaderModule, pGraphicsAPI, VertexShadeCode);
+		const bool UseVertexShader = CreateShaderModule(vertShaderModule, VertexShadeCode);
 		
 		VkShaderModule fragShaderModule;
-		const bool UseFragmentShader = CreateShaderModule(fragShaderModule, pGraphicsAPI, FragShadeCode);
+		const bool UseFragmentShader = CreateShaderModule(fragShaderModule, FragShadeCode);
 
 		// シェーダーステージの作成(VertexShaderとかFragment, Geometryとかそういうステージ)
 		std::vector<VkPipelineShaderStageCreateInfo> shaderStages;
@@ -137,8 +149,8 @@ namespace renderer
 		VkViewport viewport{};
 		viewport.x = 0.0f; // 基準の座標
 		viewport.y = 0.0f;
-		viewport.width = (float)pGraphicsAPI->GetSwapChainExtent().width;
-		viewport.height = (float)pGraphicsAPI->GetSwapChainExtent().height;
+		viewport.width = (float)m_pGraphicsAPI->GetSwapChainExtent().width;
+		viewport.height = (float)m_pGraphicsAPI->GetSwapChainExtent().height;
 		viewport.minDepth = 0.0f;
 		viewport.maxDepth = 1.0f;
 
@@ -146,7 +158,7 @@ namespace renderer
 		// 上記のダイナミックステートのことで動的変更を可能にする
 		VkRect2D scissor{};
 		scissor.offset = { 0, 0 };
-		scissor.extent = pGraphicsAPI->GetSwapChainExtent(); // 解像度
+		scissor.extent = m_pGraphicsAPI->GetSwapChainExtent(); // 解像度
 
 		// ビューポートとシザーの作成
 		VkPipelineViewportStateCreateInfo viewportStateInfo{};
@@ -221,7 +233,7 @@ namespace renderer
 		pipelineLayoutInfo.pushConstantRangeCount = 0;
 		pipelineLayoutInfo.pPushConstantRanges = nullptr;
 
-		if (vkCreatePipelineLayout(pGraphicsAPI->GetLogicalDevice(), &pipelineLayoutInfo, nullptr, &m_PipelineLayout) != VK_SUCCESS) return false;
+		if (vkCreatePipelineLayout(m_pGraphicsAPI->GetLogicalDevice(), &pipelineLayoutInfo, nullptr, &m_PipelineLayout) != VK_SUCCESS) return false;
 
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -255,17 +267,17 @@ namespace renderer
 
 		pipelineInfo.layout = m_PipelineLayout;
 
-		pipelineInfo.renderPass = pGraphicsAPI->GetRenderPass();
+		pipelineInfo.renderPass = m_pGraphicsAPI->GetRenderPass();
 		pipelineInfo.subpass = 0;
 
 		pipelineInfo.basePipelineHandle = VK_NULL_HANDLE; // パイプラインから新しいパイプラインを派生して作成するためのフィールド?
 		pipelineInfo.basePipelineIndex = -1; // 今は何もしていない
 
-		if (vkCreateGraphicsPipelines(pGraphicsAPI->GetLogicalDevice(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_GraphicsPipeline) != VK_SUCCESS) return false;
+		if (vkCreateGraphicsPipelines(m_pGraphicsAPI->GetLogicalDevice(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_GraphicsPipeline) != VK_SUCCESS) return false;
 
 		// シェーダーモジュールを破棄する
-		vkDestroyShaderModule(pGraphicsAPI->GetLogicalDevice(), fragShaderModule, nullptr);
-		vkDestroyShaderModule(pGraphicsAPI->GetLogicalDevice(), vertShaderModule, nullptr);
+		vkDestroyShaderModule(m_pGraphicsAPI->GetLogicalDevice(), fragShaderModule, nullptr);
+		vkDestroyShaderModule(m_pGraphicsAPI->GetLogicalDevice(), vertShaderModule, nullptr);
 
 		return true;
 	}
@@ -273,18 +285,23 @@ namespace renderer
 	// ヘルパー関数 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Shader
 	// ShaderModuleの作成(Shaderをラップ・管理するためのもの)
-	bool CVulkanRenderer::CreateShaderModule(VkShaderModule& shaderModule, api::CVulkanAPI* pGraphicsAPI, const std::vector<unsigned char>& code)
+	bool CVulkanRenderer::CreateShaderModule(VkShaderModule& shaderModule, const std::vector<unsigned char>& code)
 	{
 		VkShaderModuleCreateInfo createInfo{};
 		createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
 		createInfo.codeSize = code.size();
 		createInfo.pCode = reinterpret_cast<const uint32_t*>(code.data());
 
-		if (vkCreateShaderModule(pGraphicsAPI->GetLogicalDevice(), &createInfo, nullptr, &shaderModule) != VK_SUCCESS)
+		if (vkCreateShaderModule(m_pGraphicsAPI->GetLogicalDevice(), &createInfo, nullptr, &shaderModule) != VK_SUCCESS)
 		{
 			return false;
 		}
 
+		return true;
+	}
+
+	bool CVulkanRenderer::Update()
+	{
 		return true;
 	}
 

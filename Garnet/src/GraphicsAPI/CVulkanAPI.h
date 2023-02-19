@@ -36,6 +36,9 @@ namespace api
 
 	class CVulkanAPI : public IGraphicsAPI
 	{
+		// GLFW Window
+		GLFWwindow* m_pWindow;
+
 		// Layer
 #ifdef _DEBUG
 		const bool m_IsUseDebugValidationLayer = true;
@@ -74,20 +77,55 @@ namespace api
 		VkExtent2D m_SwapChainExtent;
 		std::vector<VkImageView> m_SwapChainImageViews;
 
+		uint32_t m_CurrentImageIndex;
+		bool m_IsReCreateSwapChain;
+
 		// Rendering
 		VkRenderPass m_RenderPass;
+
+		// Depth Test
+		VkImage m_DepthImage;
+		VkDeviceMemory m_DepthImageMemory;
+		VkImageView m_DepthImageView;
+
+		// Frame Buffer
+		const int MAX_FRAMES_IN_FLIGHT = 2;
+		std::vector<VkFramebuffer> m_SwapChainFrameBuffers;
+		uint32_t m_CurrentFrame = 0;
+
+		// Command Buffer
+		VkCommandPool m_CommandPool;
+		std::vector<VkCommandBuffer> m_CommandBuffers;
+
+		// Sync Obj
+		std::vector<VkSemaphore> m_ImageAvailableSemaphones;
+		std::vector<VkSemaphore> m_RenderFinishedSemaphores;
+		std::vector<VkFence> m_InFlightFences;
+
+		bool m_FramebufferResized = false;
 	private:
-		// 初期化関連の関数 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		// Vulkanメインロジック ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		bool CreateInstance();
-		bool CreateSurface(GLFWwindow* pWindow);
+		bool CreateSurface();
 		bool CreateDevices();
-		bool CreateSwapChain(GLFWwindow* pWindow);
+		bool CreateSwapChain();
 		bool CreateImageViews();
 		bool CreateRenderPass();
+		bool CreateDepthResources();
+		bool CreateFrameBuffer();
+		bool CreateCommandPool();
+		bool CreateCommandBuffer();
+		bool CreateSyncObjects();
+
+		bool BeginRecordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
+		bool EndRecordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
+
+		bool CleanupSwapChain();
+		bool ReCreateSwapChain();
 
 		// ヘルパー関数 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		
-		// レイヤー
+		// Layer
 		void InitAvailableLayerList();
 		bool CheckDebugValidationLayerSupport();
 		void SetDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo);
@@ -99,7 +137,7 @@ namespace api
 			const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger);
 		void DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks* pAllocator);
 
-		// デバイス
+		// Device
 		bool IsDeviceSuitable(VkPhysicalDevice device);
 		bool CheckDeviceExtensionSupport(VkPhysicalDevice device);
 
@@ -110,10 +148,15 @@ namespace api
 		SwapChainSupportDetails QuerySwapChainSupport(VkPhysicalDevice device);
 		VkSurfaceFormatKHR ChooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR> availablePresentModes);
 		VkPresentModeKHR ChooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentMode);
-		VkExtent2D ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities, GLFWwindow* pWindow);
+		VkExtent2D ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
+
+		// Buffer
+		uint32_t FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags propertoes);
 
 		// Texture
 		VkImageView CreateImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags);
+		bool CreateImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage,
+			VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
 
 		// Depth
 		VkFormat FIndDepthFormat();
@@ -130,6 +173,7 @@ namespace api
 
 		bool BeginRender() override;
 		bool EndRender() override;
+		bool IsWaitting() override;
 
 		// Device
 		const VkPhysicalDevice& GetPhysicalDevice() const;

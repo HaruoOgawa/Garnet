@@ -16,5 +16,6 @@ namespace api
 
 		bool BeginRender() override;
 		bool EndRender() override;
+		bool IsWaitting() override;
 	};
 }

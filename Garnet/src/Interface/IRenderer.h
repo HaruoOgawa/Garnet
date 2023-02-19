@@ -8,6 +8,7 @@ namespace renderer
 	{
 	public:
 		virtual bool Create(api::IGraphicsAPI* pGraphicsAPI, const renderer::CRendererCreateInfo& createInfo) = 0;
+		virtual bool Update() = 0;
 		virtual bool Draw() = 0;
 	};
 }

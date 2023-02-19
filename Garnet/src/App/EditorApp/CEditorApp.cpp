@@ -12,6 +12,11 @@ namespace app
 
 	}
 
+	bool CEditorApp::Release(api::IGraphicsAPI* pGraphicsAPI)
+	{
+		return true;
+	}
+
 	bool CEditorApp::Initialize(api::IGraphicsAPI* pGraphicsAPI)
 	{
 		return true;

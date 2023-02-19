@@ -20,6 +20,11 @@ namespace graphics
 
 	bool CMesh::Update()
 	{
+		for (const auto& Primitive : m_PrimitiveList)
+		{
+			if (!Primitive->Update()) return false;
+		}
+
 		return true;
 	}
 

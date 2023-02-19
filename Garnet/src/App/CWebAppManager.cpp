@@ -48,6 +48,20 @@ namespace webapp
 	{
 		Console::Log("CWebAppManager::Release\n");
 
+		if (m_App)
+		{
+			m_App->Release(m_GraphicsAPI.get());
+			m_App.reset();
+			m_App = nullptr;
+		}
+
+		if (m_GraphicsAPI)
+		{
+			m_GraphicsAPI->Release();
+			m_GraphicsAPI.reset();
+			m_GraphicsAPI = nullptr;
+		}
+
 		return true;
 	}
 

@@ -66,6 +66,9 @@ namespace renderer
 
 	class CVulkanRenderer : public IRenderer
 	{
+		// API
+		api::CVulkanAPI* m_pGraphicsAPI;
+
 		// Uniform Buffer Object
 		VkDescriptorSetLayout m_DescriptorSetLayout;
 		std::vector<VkBuffer> m_UniformBuffers;
@@ -80,17 +83,20 @@ namespace renderer
 
 	private:
 		// èâä˙âªä÷êî /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		bool CreateDescriptorSetLayout(api::CVulkanAPI* pGraphicsAPI, const CRendererCreateInfo& createInfo);
-		bool CreateGraphicsPipeline(api::CVulkanAPI* pGraphicsAPI, const CRendererCreateInfo& createInfo);
+		bool CreateDescriptorSetLayout(const CRendererCreateInfo& createInfo);
+		bool CreateGraphicsPipeline(const CRendererCreateInfo& createInfo);
 
 		// ÉwÉãÉpÅ[ä÷êî ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// Shader
-		bool CreateShaderModule(VkShaderModule& shaderModule, api::CVulkanAPI* pGraphicsAPI, const std::vector<unsigned char>& code);
+		bool CreateShaderModule(VkShaderModule& shaderModule, const std::vector<unsigned char>& code);
 	public:
 		CVulkanRenderer();
 		virtual ~CVulkanRenderer();
 
+		void Release();
+
 		bool Create(api::IGraphicsAPI* pGraphicsAPI, const CRendererCreateInfo& createInfo) override;
+		bool Update() override;
 		bool Draw() override;
 	};
 }

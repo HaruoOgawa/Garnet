@@ -12,6 +12,11 @@ namespace app
 
 	}
 
+	bool CMainApp::Release(api::IGraphicsAPI* pGraphicsAPI)
+	{
+		return true;
+	}
+
 	bool CMainApp::Initialize(api::IGraphicsAPI* pGraphicsAPI)
 	{
 		return true;
