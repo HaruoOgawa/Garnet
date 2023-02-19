@@ -1,8 +1,7 @@
 ```mermaid
 classDiagram
   class C3DObject{
-    + std::vector<CMaterial> m_MaterialList
-    + std::vector<CNode> m_NodeList
+    - std::vector<CNode> m_NodeList
   }
 
   class CNode{
@@ -10,27 +9,27 @@ classDiagram
  
   CNode ..|> C3DObject
  
-  class CMaterial{
-    + m_ShaderCode
-    + m_ShaderProperty
-  }
-
-  CMaterial ..|> C3DObject
-
   class CMesh{
-    + m_PrimitiveList
+    - m_PrimitiveList
   }
   
   CMesh ..|> CNode
   
   class CPrimitive{
-    + IRenderer m_Renderer
-    + int m_MaterialIndex
-    + CVertexBuffer m_VertexBuffer
+    - IRenderer m_Renderer
+    - std::vector<CMaterial> m_MaterialList
+    - CVertexBuffer m_VertexBuffer
   }
 
   CPrimitive ..|> CMesh
+  
+  class CMaterial{
+    - m_ShaderCode
+    - m_ShaderProperty
+  }
 
+  CMaterial ..|> CPrimitive
+  
   class IGraphicsAPI{
     + bool Initialize()
     + IRenderer + CreateRenderer(CRendererCreateInfo createInfo);
@@ -60,7 +59,7 @@ classDiagram
   IGraphicsAPI ..|> IRenderer
   
   class CVulkanRenderer{
-    + m_GraphicsPipeline
+    - m_GraphicsPipeline
   }
   
   IRenderer ..|> CVulkanRenderer
