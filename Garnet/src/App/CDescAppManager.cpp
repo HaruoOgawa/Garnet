@@ -12,14 +12,12 @@ namespace descapp
 {
 	CDescAppManager::CDescAppManager(app::EAppType AppType):
 		m_pWindow(nullptr),
-		m_pGraphicsAPI(nullptr),
+		m_GraphicsAPI(nullptr),
 		m_App(nullptr)
 	{
-		Console::Log("CDescAppManager::CDescAppManager\n");
-
 		//
-		m_pGraphicsAPI = std::make_shared<api::CVulkanAPI>();
-
+		m_GraphicsAPI = std::make_shared<api::CVulkanAPI>();
+		
 		//
 		if (AppType == app::EAppType::ScriptApp)
 		{
@@ -38,18 +36,30 @@ namespace descapp
 	CDescAppManager::~CDescAppManager()
 	{
 		Release();
-
-		Console::Log("CDescAppManager::~CDescAppManager\n");
 	}
 
 	bool CDescAppManager::Release()
 	{
-		Console::Log("CDescAppManager::Release\n");
+		if (m_App)
+		{
+			m_App->Release(m_GraphicsAPI.get());
+			m_App.reset();
+			m_App = nullptr;
+		}
+
+		if (m_GraphicsAPI)
+		{
+			m_GraphicsAPI->Release();
+			m_GraphicsAPI.reset();
+			m_GraphicsAPI = nullptr;
+		}
 
 		if (m_pWindow)
 		{
 			glfwDestroyWindow(m_pWindow);
 			glfwTerminate();
+
+			m_pWindow = nullptr;
 		}
 
 		return true;
@@ -57,9 +67,10 @@ namespace descapp
 
 	bool CDescAppManager::Initialize()
 	{
-		Console::Log("CDescAppManager::Initialize\n");
+		if (!InitWindow()) return false;
+		if(!m_GraphicsAPI->Initialize(m_pWindow)) return false;
 
-		InitWindow();
+		if (!m_App->Initialize(m_GraphicsAPI.get())) return false;
 
 		return true;
 	}
@@ -72,15 +83,21 @@ namespace descapp
 		}
 	}
 
+	void Close_Callback(GLFWwindow* window)
+	{
+		g_IsRunLoop = false;
+	}
+
 	bool CDescAppManager::InitWindow()
 	{
 		glfwInit();
 		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API); // OpenGL‚ðŽg—p‚µ‚½‚­‚È‚¢‚Ì‚Å‚±‚±‚Å–¾Ž¦“I‚ÉØ‚é
-		glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+		//glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
 		m_pWindow = glfwCreateWindow(WIDTH, HEIGHT, "Garnet", nullptr, nullptr);
 
 		glfwSetKeyCallback(m_pWindow, Key_Callback);
+		glfwSetWindowCloseCallback(m_pWindow, Close_Callback);
 
 		return true;
 	}
@@ -89,10 +106,25 @@ namespace descapp
 	{
 		while (g_IsRunLoop)
 		{
-			//Console::Log("CDescAppManager::RunLopp\n");
-
 			glfwPollEvents();
+
+			if (!Update()) return false;
+			if (!Draw()) return false;
 		}
+
+		return true;
+	}
+
+	bool CDescAppManager::Update()
+	{
+		if (!m_App->Update(m_GraphicsAPI.get())) return false;
+
+		return true;
+	}
+
+	bool CDescAppManager::Draw()
+	{
+		if (!m_App->Draw(m_GraphicsAPI.get())) return false;
 
 		return true;
 	}

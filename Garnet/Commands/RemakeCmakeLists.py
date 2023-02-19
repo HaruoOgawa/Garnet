@@ -20,7 +20,7 @@ if(EMSCRIPTEN)
 endif()
 """
 
-ExcludedFolderList = ["Library", "DescMain", "CDescAppManager.cpp", "CDescAppManager.h","CVulkanAPI.cpp", "CVulkanAPI.h"]
+ExcludedFolderList = ["Library", "DescMain", "CDescAppManager.cpp", "CDescAppManager.h","CVulkanAPI.cpp", "CVulkanAPI.h", "CVulkanRenderer.cpp", "CVulkanRenderer.h"]
 
 #
 def Remake():

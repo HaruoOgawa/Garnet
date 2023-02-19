@@ -17,11 +17,28 @@ add_executable(
 	../src/App/ScriptApp/CScriptApp.cpp
 	../src/App/ScriptApp/CScriptApp.h
 	../src/Debug/Message/Console.h
+	../src/Graphics/CMaterial.cpp
+	../src/Graphics/CMaterial.h
+	../src/Graphics/CMesh.cpp
+	../src/Graphics/CMesh.h
+	../src/Graphics/CPrimitive.cpp
+	../src/Graphics/CPrimitive.h
+	../src/Graphics/CVertexBuffer.cpp
+	../src/Graphics/CVertexBuffer.h
+	../src/GraphicsAPI/CRendererCreateInfo.cpp
+	../src/GraphicsAPI/CRendererCreateInfo.h
 	../src/GraphicsAPI/CWebGPUAPI.cpp
 	../src/GraphicsAPI/CWebGPUAPI.h
+	../src/GraphicsAPI/CWebGPURenderer.cpp
+	../src/GraphicsAPI/CWebGPURenderer.h
 	../src/Interface/IApp.h
 	../src/Interface/IGraphicsAPI.h
+	../src/Interface/IObject.h
+	../src/Interface/IRenderer.h
+	../src/Interface/IRendererCreateInfo.h
 	../src/Main/WebMain/WebMain.cpp
+	../src/Node/CNode.cpp
+	../src/Node/CNode.h
 
 )
 

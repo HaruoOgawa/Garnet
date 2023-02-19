@@ -12,22 +12,27 @@ namespace app
 
 	}
 
-	bool CEditorApp::Initialize()
+	bool CEditorApp::Release(api::IGraphicsAPI* pGraphicsAPI)
 	{
 		return true;
 	}
 
-	bool CEditorApp::ProcessInput()
+	bool CEditorApp::Initialize(api::IGraphicsAPI* pGraphicsAPI)
 	{
 		return true;
 	}
 
-	bool CEditorApp::Update()
+	bool CEditorApp::ProcessInput(api::IGraphicsAPI* pGraphicsAPI)
 	{
 		return true;
 	}
 
-	bool CEditorApp::Draw()
+	bool CEditorApp::Update(api::IGraphicsAPI* pGraphicsAPI)
+	{
+		return true;
+	}
+
+	bool CEditorApp::Draw(api::IGraphicsAPI* pGraphicsAPI)
 	{
 		return true;
 	}

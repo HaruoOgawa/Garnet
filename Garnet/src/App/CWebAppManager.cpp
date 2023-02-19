@@ -14,13 +14,13 @@ namespace webapp
 {
 	CWebAppManager::CWebAppManager(app::EAppType AppType):
 		m_IsRunLoop(true),
-		m_pGraphicsAPI(nullptr),
+		m_GraphicsAPI(nullptr),
 		m_App(nullptr)
 	{
 		Console::Log("CWebAppManager::CWebAppManager\n");
 
 		//
-		m_pGraphicsAPI = std::make_shared<api::CWebGPUAPI>();
+		m_GraphicsAPI = std::make_shared<api::CWebGPUAPI>();
 
 		//
 		if (AppType == app::EAppType::ScriptApp)
@@ -48,16 +48,35 @@ namespace webapp
 	{
 		Console::Log("CWebAppManager::Release\n");
 
+		if (m_App)
+		{
+			m_App->Release(m_GraphicsAPI.get());
+			m_App.reset();
+			m_App = nullptr;
+		}
+
+		if (m_GraphicsAPI)
+		{
+			m_GraphicsAPI->Release();
+			m_GraphicsAPI.reset();
+			m_GraphicsAPI = nullptr;
+		}
+
 		return true;
 	}
 
 	bool CWebAppManager::Initialize()
 	{
 		Console::Log("CWebAppManager::Initialize\n");
+
+		if (!m_GraphicsAPI->Initialize()) return false;
+
+		if (!m_App->Initialize(m_GraphicsAPI.get())) return false;
+		
 		return true;
 	}
 
-	bool CWebAppManager::RunLopp()
+	bool CWebAppManager::RunLoop()
 	{
 		//Console::Log("CWebAppManager::RunLopp\n");
 
@@ -67,6 +86,25 @@ namespace webapp
 			emscripten_cancel_main_loop();
 #endif // __EMSCRIPTEN__
 		}
+		else
+		{
+			if (!Update()) return false;
+			if (!Draw()) return false;
+		}
+
+		return true;
+	}
+
+	bool CWebAppManager::Update()
+	{
+		if (!m_App->Update(m_GraphicsAPI.get())) return false;
+
+		return true;
+	}
+
+	bool CWebAppManager::Draw()
+	{
+		if (!m_App->Draw(m_GraphicsAPI.get())) return false;
 
 		return true;
 	}

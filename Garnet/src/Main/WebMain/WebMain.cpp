@@ -18,9 +18,7 @@ extern "C"
 
 	void RunLopp()
 	{
-		g_WebApp->RunLopp();
-
-		if (!g_WebApp->IsRunLoop())
+		if (!g_WebApp->RunLoop() || !g_WebApp->IsRunLoop())
 		{
 			Release();
 		}

@@ -12,22 +12,27 @@ namespace app
 
 	}
 
-	bool CMainApp::Initialize()
+	bool CMainApp::Release(api::IGraphicsAPI* pGraphicsAPI)
 	{
 		return true;
 	}
 
-	bool CMainApp::ProcessInput()
+	bool CMainApp::Initialize(api::IGraphicsAPI* pGraphicsAPI)
 	{
 		return true;
 	}
 
-	bool CMainApp::Update()
+	bool CMainApp::ProcessInput(api::IGraphicsAPI* pGraphicsAPI)
 	{
 		return true;
 	}
 
-	bool CMainApp::Draw()
+	bool CMainApp::Update(api::IGraphicsAPI* pGraphicsAPI)
+	{
+		return true;
+	}
+
+	bool CMainApp::Draw(api::IGraphicsAPI* pGraphicsAPI)
 	{
 		return true;
 	}

@@ -1,15 +1,15 @@
 #pragma once
-//#define NOMINMAX
-//#define VK_USE_PLATFORM_WIN32_KHR
-//#define GLFW_INCLUDE_VULKAN
+#define NOMINMAX
+#define VK_USE_PLATFORM_WIN32_KHR
+#define GLFW_INCLUDE_VULKAN
 #include <glfw3.h>
-//#define GLFW_EXPOSE_NATIVE_WIN32
+#define GLFW_EXPOSE_NATIVE_WIN32
 #include <glfw3native.h>
 
 #include <memory>
 #include "EAppType.h"
 
-namespace api { class IGraphicsAPI; }
+namespace api { class CVulkanAPI; }
 namespace app{ class IApp; }
 
 namespace descapp
@@ -17,7 +17,7 @@ namespace descapp
 	class CDescAppManager
 	{
 		GLFWwindow* m_pWindow;
-		std::shared_ptr<api::IGraphicsAPI> m_pGraphicsAPI;
+		std::shared_ptr<api::CVulkanAPI> m_GraphicsAPI;
 		std::shared_ptr<app::IApp> m_App;
 
 		const unsigned int WIDTH = 800;
@@ -35,6 +35,9 @@ namespace descapp
 		bool InitWindow();
 
 		bool Release();
+
+		bool Update();
+		bool Draw();
 	public:
 		CDescAppManager(app::EAppType AppType);
 		virtual ~CDescAppManager();

@@ -1,4 +1,5 @@
 #include "CWebGPUAPI.h"
+#include "CWebGPURenderer.h"
 
 namespace api
 {
@@ -15,5 +16,32 @@ namespace api
 	bool CWebGPUAPI::Initialize()
 	{
 		return true;
+	}
+
+	void CWebGPUAPI::Release()
+	{
+
+	}
+
+	std::shared_ptr<renderer::IRenderer> CWebGPUAPI::CreateRenderer()
+	{
+		const auto Renderer = std::make_shared<renderer::CWebGPURenderer>();
+
+		return Renderer;
+	}
+
+	bool CWebGPUAPI::BeginRender()
+	{
+		return true;
+	}
+
+	bool CWebGPUAPI::EndRender()
+	{
+		return true;
+	}
+
+	bool CWebGPUAPI::IsWaitting()
+	{
+		return false;
 	}
 }
