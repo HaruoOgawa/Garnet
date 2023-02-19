@@ -63,9 +63,6 @@
     <ClInclude Include="src\GraphicsAPI\CRendererCreateInfo.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\Interface\IRendererCreateInfo.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="src\Node\CNode.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
@@ -79,6 +76,9 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\Graphics\CMaterial.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="src\File\CFile.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
@@ -134,6 +134,9 @@
     <ClCompile Include="src\Graphics\CMaterial.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="src\File\CFile.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="EmscriptenBuild\build.bat">
@@ -147,6 +150,7 @@
       <Filter>ソース ファイル</Filter>
     </None>
     <None Include="EmscriptenBuild\Garnet_front.js" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="EmscriptenBuild\CMakeLists.txt" />

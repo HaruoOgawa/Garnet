@@ -157,6 +157,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="src\File\CFile.h" />
     <ClInclude Include="src\Graphics\CMaterial.h" />
     <ClInclude Include="src\Graphics\CVertexBuffer.h" />
     <ClInclude Include="src\Graphics\CPrimitive.h" />
@@ -178,9 +179,9 @@
     <ClInclude Include="src\Interface\IGraphicsAPI.h" />
     <ClInclude Include="src\Interface\IObject.h" />
     <ClInclude Include="src\Interface\IRenderer.h" />
-    <ClInclude Include="src\Interface\IRendererCreateInfo.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\File\CFile.cpp" />
     <ClCompile Include="src\Graphics\CMaterial.cpp" />
     <ClCompile Include="src\Graphics\CVertexBuffer.cpp" />
     <ClCompile Include="src\Graphics\CPrimitive.cpp" />
@@ -205,11 +206,19 @@
     <None Include="Commands\RunLocalHost.bat" />
     <None Include="EmscriptenBuild\build.bat" />
     <None Include="EmscriptenBuild\Garnet_front.js" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="EmscriptenBuild\CMakeLists.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
+    <Import Project="packages\glm.0.9.9.800\build\native\glm.targets" Condition="Exists('packages\glm.0.9.9.800\build\native\glm.targets')" />
   </ImportGroup>
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>このプロジェクトは、このコンピューター上にない NuGet パッケージを参照しています。それらのパッケージをダウンロードするには、[NuGet パッケージの復元] を使用します。詳細については、http://go.microsoft.com/fwlink/?LinkID=322105 を参照してください。見つからないファイルは {0} です。</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('packages\glm.0.9.9.800\build\native\glm.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\glm.0.9.9.800\build\native\glm.targets'))" />
+  </Target>
 </Project>

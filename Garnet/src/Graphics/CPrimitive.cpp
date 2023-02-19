@@ -26,7 +26,7 @@ namespace graphics
 	bool CPrimitive::Create(api::IGraphicsAPI* pGraphicsAPI, const renderer::CRendererCreateInfo& createInfo)
 	{
 		m_Renderer = pGraphicsAPI->CreateRenderer();
-		if (!m_Renderer->Create(createInfo)) return false;
+		if (!m_Renderer->Create(pGraphicsAPI, createInfo)) return false;
 
 		return true;
 	}

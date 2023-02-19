@@ -4,6 +4,7 @@
 #include "../../Graphics/CMesh.h"
 #include "../../Graphics/CPrimitive.h"
 #include "../../GraphicsAPI/CRendererCreateInfo.h"
+#include "../../File/CFile.h"
 
 namespace app
 {
@@ -21,7 +22,13 @@ namespace app
 	bool CScriptApp::Initialize(api::IGraphicsAPI* pGraphicsAPI)
 	{
 		//
+		std::string ProjDir = "WebRelease\\sample\\";
+		std::string Resources = "Resources\\Shaders\\";
+
+		//
 		renderer::CRendererCreateInfo createInfo;
+		createInfo.SetVertexShaderCode(file::CFile::ReadFile(ProjDir + Resources + "vert.spv"));
+		createInfo.SetFragmentShaderCode(file::CFile::ReadFile(ProjDir + Resources + "frag.spv"));
 
 		//
 		m_TestMesh = std::make_shared<graphics::CMesh>();

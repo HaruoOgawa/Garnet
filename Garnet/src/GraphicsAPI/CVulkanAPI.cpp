@@ -744,4 +744,27 @@ namespace api
 	{
 		return true;
 	}
+
+	// Device
+	const VkPhysicalDevice& CVulkanAPI::GetPhysicalDevice() const
+	{
+		return m_PhysicalDevice;
+	}
+
+	const VkDevice& CVulkanAPI::GetLogicalDevice() const
+	{
+		return m_LogicalDevice;
+	}
+
+	// SwapChain/Image
+	const VkExtent2D& CVulkanAPI::GetSwapChainExtent() const
+	{
+		return m_SwapChainExtent;
+	}
+
+	// Rendering
+	const VkRenderPass& CVulkanAPI::GetRenderPass() const
+	{
+		return m_RenderPass;
+	}
 }

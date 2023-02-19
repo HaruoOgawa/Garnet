@@ -74,7 +74,7 @@ namespace api
 		VkExtent2D m_SwapChainExtent;
 		std::vector<VkImageView> m_SwapChainImageViews;
 
-		// 
+		// Rendering
 		VkRenderPass m_RenderPass;
 	private:
 		// èâä˙âªä÷òAÇÃä÷êî ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -130,5 +130,15 @@ namespace api
 
 		bool BeginRender() override;
 		bool EndRender() override;
+
+		// Device
+		const VkPhysicalDevice& GetPhysicalDevice() const;
+		const VkDevice& GetLogicalDevice() const;
+
+		// SwapChain/Image
+		const VkExtent2D& GetSwapChainExtent() const;
+
+		// Rendering
+		const VkRenderPass& GetRenderPass() const;
 	};
 }

@@ -1,5 +1,6 @@
 #include "CWebGPURenderer.h"
 #include "CRendererCreateInfo.h"
+#include "../GraphicsAPI/CWebGPUAPI.h"
 
 namespace renderer
 {
@@ -11,8 +12,10 @@ namespace renderer
 	{
 	}
 
-	bool CWebGPURenderer::Create(const IRendererCreateInfo& createInfo)
+	bool CWebGPURenderer::Create(api::IGraphicsAPI* pGraphicsAPI, const CRendererCreateInfo& createInfo)
 	{
+		auto api = static_cast<api::CWebGPUAPI*>(pGraphicsAPI);
+
 		return true;
 	}
 

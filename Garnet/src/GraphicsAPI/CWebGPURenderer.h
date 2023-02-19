@@ -1,15 +1,19 @@
 #pragma once
 #include "../Interface/IRenderer.h"
 
+namespace api { class CWebGPUAPI; }
+
 namespace renderer
 {
+	class CRendererCreateInfo;
+
 	class CWebGPURenderer : public IRenderer
 	{
 	public:
 		CWebGPURenderer();
 		virtual ~CWebGPURenderer();
 
-		bool Create(const IRendererCreateInfo& createInfo) override;
+		bool Create(api::IGraphicsAPI* pGraphicsAPI, const CRendererCreateInfo& createInfo) override;
 		bool Draw() override;
 	};
 }
