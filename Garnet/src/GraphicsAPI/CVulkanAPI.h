@@ -82,6 +82,7 @@ namespace api
 
 		// Rendering
 		VkRenderPass m_RenderPass;
+		bool m_WaitRendering;
 
 		// Depth Test
 		VkImage m_DepthImage;
@@ -174,6 +175,9 @@ namespace api
 		bool EndRender() override;
 		bool IsWaitting() override;
 
+		//
+		int GetMaxFramesInFlight() const { return MAX_FRAMES_IN_FLIGHT; }
+
 		// Device
 		const VkPhysicalDevice& GetPhysicalDevice() const;
 		const VkDevice& GetLogicalDevice() const;
@@ -194,5 +198,9 @@ namespace api
 		// Buffer
 		void CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory);
 		void CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
+		const std::vector<VkCommandBuffer>& GetCommandBuffers() const;
+
+		// Frame Buffer
+		uint32_t GetCurrentFrame() const;
 	};
 }

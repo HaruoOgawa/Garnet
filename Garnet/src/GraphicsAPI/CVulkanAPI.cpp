@@ -7,7 +7,8 @@ namespace api
 	CVulkanAPI::CVulkanAPI():
 		m_pWindow(nullptr),
 		m_CurrentImageIndex(0),
-		m_IsReCreateSwapChain(false)
+		m_IsReCreateSwapChain(false),
+		m_WaitRendering(true)
 	{
 	}
 
@@ -986,6 +987,16 @@ namespace api
 		EndSingleTimeCommands(commandBuffer);
 	}
 
+	const std::vector<VkCommandBuffer>& CVulkanAPI::GetCommandBuffers() const
+	{
+		return m_CommandBuffers;
+	}
+
+	// Frame Buffer
+	uint32_t CVulkanAPI::GetCurrentFrame() const
+	{
+		return m_CurrentFrame;
+	}
 
 	// Texture
 	VkImageView CVulkanAPI::CreateImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags)
@@ -1244,6 +1255,7 @@ namespace api
 		vkResetCommandBuffer(m_CommandBuffers[m_CurrentFrame], 0); // まずリセット
 
 		// 記録スタート
+		m_WaitRendering = false;
 		if (!BeginRecordCommandBuffer(m_CommandBuffers[m_CurrentFrame], m_CurrentImageIndex)) return false;
 
 		return true;
@@ -1251,6 +1263,8 @@ namespace api
 
 	bool CVulkanAPI::EndRender()
 	{
+		m_WaitRendering = true;
+
 		// スワップチェーンを作り直しているので1フレーム待つ
 		if (m_IsReCreateSwapChain) return true;
 
@@ -1319,7 +1333,7 @@ namespace api
 
 	bool CVulkanAPI::IsWaitting()
 	{
-		return m_IsReCreateSwapChain;
+		return m_IsReCreateSwapChain || m_WaitRendering;
 	}
 
 	// Device

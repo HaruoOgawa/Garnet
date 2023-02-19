@@ -5,6 +5,7 @@
 #include "../../Graphics/CPrimitive.h"
 #include "../../GraphicsAPI/CRendererCreateInfo.h"
 #include "../../File/CFile.h"
+#include "../../Graphics/SVertex.h"
 
 namespace app
 {
@@ -36,10 +37,24 @@ namespace app
 		std::string ProjDir = "WebRelease\\sample\\";
 		std::string Resources = "Resources\\Shaders\\";
 
+		// Vertex Buffer
+		std::vector<renderer::SVertex> Vertices = {
+			{{-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
+			{{0.5f, -0.5f, 0.0f},  {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
+			{{0.5f, 0.5f, 0.0f},   {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
+			{{-0.5f, 0.5f, 0.0f}, {1.0f, 1.0f, 1.0f},	 {1.0f, 1.0f}},
+		};
+
+		std::vector<uint16_t> Indices = {
+			0, 1, 2, 2, 3, 0,
+		};
+
 		//
 		renderer::CRendererCreateInfo createInfo;
 		createInfo.SetVertexShaderCode(file::CFile::ReadFile(ProjDir + Resources + "vert.spv"));
 		createInfo.SetFragmentShaderCode(file::CFile::ReadFile(ProjDir + Resources + "frag.spv"));
+		createInfo.SetVertices(Vertices);
+		createInfo.SetIndices(Indices);
 
 		//
 		m_TestMesh = std::make_shared<graphics::CMesh>();
@@ -59,7 +74,10 @@ namespace app
 
 	bool CScriptApp::Update(api::IGraphicsAPI* pGraphicsAPI)
 	{
-		if (!m_TestMesh->Update()) return false;
+		if (!pGraphicsAPI->IsWaitting())
+		{
+			if (!m_TestMesh->Update()) return false;
+		}
 
 		return true;
 	}

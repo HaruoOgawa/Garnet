@@ -7,6 +7,27 @@ namespace renderer
 	{
 	}
 
+	// VertexBuffer
+	void CRendererCreateInfo::SetVertices(const std::vector<SVertex>& Vertices)
+	{
+		m_Vertices = Vertices;
+	}
+
+	const std::vector<SVertex>& CRendererCreateInfo::GetVertices() const
+	{
+		return m_Vertices;
+	}
+
+	void CRendererCreateInfo::SetIndices(const std::vector<uint16_t>& Indices)
+	{
+		m_Indices = Indices;
+	}
+
+	const std::vector<uint16_t>& CRendererCreateInfo::GetIndices() const
+	{
+		return m_Indices;
+	}
+
 	// Shader
 	void CRendererCreateInfo::SetVertexShaderCode(const std::vector<unsigned char>& VertexShaderCode)
 	{

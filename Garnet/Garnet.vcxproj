@@ -162,6 +162,7 @@
     <ClInclude Include="src\Graphics\CVertexBuffer.h" />
     <ClInclude Include="src\Graphics\CPrimitive.h" />
     <ClInclude Include="src\Graphics\CMesh.h" />
+    <ClInclude Include="src\Graphics\SUniformBufferObject.h" />
     <ClInclude Include="src\Node\CNode.h" />
     <ClInclude Include="src\GraphicsAPI\CRendererCreateInfo.h" />
     <ClInclude Include="src\GraphicsAPI\CWebGPURenderer.h" />
@@ -179,6 +180,7 @@
     <ClInclude Include="src\Interface\IGraphicsAPI.h" />
     <ClInclude Include="src\Interface\IObject.h" />
     <ClInclude Include="src\Interface\IRenderer.h" />
+    <ClInclude Include="src\Graphics\SVertex.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\File\CFile.cpp" />

@@ -2,12 +2,12 @@
 #include "../GraphicsAPI/CVulkanAPI.h"
 #include "CRendererCreateInfo.h"
 
-
 namespace renderer
 {
 	CVulkanRenderer::CVulkanRenderer():
 		m_pGraphicsAPI(nullptr),
-		m_UseMainTexture(false)
+		m_UseMainTexture(false),
+		m_IndicesCount(0)
 	{
 	}
 
@@ -31,6 +31,31 @@ namespace renderer
 			vkFreeMemory(m_pGraphicsAPI->GetLogicalDevice(), m_TextureImageMemory, nullptr);
 		}
 
+		// ユニフォームの破棄(各3Dオブジェクト固有)
+		for (size_t i = 0; i < m_pGraphicsAPI->GetMaxFramesInFlight(); i++)
+		{
+			vkDestroyBuffer(m_pGraphicsAPI->GetLogicalDevice(), m_UniformBuffers[i], nullptr);
+			vkFreeMemory(m_pGraphicsAPI->GetLogicalDevice(), m_UniformBuffersMemory[i], nullptr);
+		}
+
+		// 記述子プールの破棄(各3Dオブジェクト固有)
+		vkDestroyDescriptorPool(m_pGraphicsAPI->GetLogicalDevice(), m_DescriptorPool, nullptr);
+
+		// ユニフォームレイアウトセットを破棄(各3Dオブジェクト固有)
+		vkDestroyDescriptorSetLayout(m_pGraphicsAPI->GetLogicalDevice(), m_DescriptorSetLayout, nullptr);
+
+		// インデックスバッファの破棄(各3Dオブジェクト固有)
+		vkDestroyBuffer(m_pGraphicsAPI->GetLogicalDevice(), m_IndexBuffer, nullptr);
+
+		// インデックスバッファ用に確保したメモリ領域を破棄(各3Dオブジェクト固有)
+		vkFreeMemory(m_pGraphicsAPI->GetLogicalDevice(), m_IndexBufferMemory, nullptr);
+
+		// 頂点バッファの破棄(各3Dオブジェクト固有)
+		vkDestroyBuffer(m_pGraphicsAPI->GetLogicalDevice(), m_VertexBuffer, nullptr);
+
+		// 頂点バッファ用に確保したメモリ領域を破棄(各3Dオブジェクト固有)
+		vkFreeMemory(m_pGraphicsAPI->GetLogicalDevice(), m_VertexBufferMemory, nullptr);
+
 		// グラフィックパイプラインの破棄
 		vkDestroyPipeline(m_pGraphicsAPI->GetLogicalDevice(), m_GraphicsPipeline, nullptr);
 
@@ -49,6 +74,13 @@ namespace renderer
 		if (!CreateTextureImageView(createInfo)) return false;// シェーダーで取り扱う用のImageViewを作成(各3Dオブジェクト固有)
 		// テクスチャサンプラーを作成(各3Dオブジェクト固有)
 		if (!CreateTextureSampler(createInfo)) return false; // サンプラーとはテクスチャデータをフラグメント(3Dモデル)に合うように調整する機構
+		if (!CreateVertexBuffer(createInfo)) return false; // 頂点バッファを作成(各3Dオブジェクト固有)
+		if (!CreateIndexBuffer(createInfo)) return false; // インデックスバッファを作成(各3Dオブジェクト固有)
+		if (!CreateUniformBuffers(createInfo)) return false; // ユニフォームバッファを作成(各3Dオブジェクト固有)
+		// 記述子プールを作成する -> 記述子セットはコマンドからを作成する必要がある。記述子プールはそのコマンド群のことかな？(各3Dオブジェクト固有)
+		if (!CreateDescriptorPool(createInfo)) return false;
+		// 記述子セットを作成 -> UBOのマネージャー,・ラッパーのことかな？(各3Dオブジェクト固有)
+		if (!CreateDescriptorSets(createInfo)) return false;
 
 		return true;
 	}
@@ -147,8 +179,8 @@ namespace renderer
 		dynamicStateCreateInfo.pDynamicStates = dynamicStates.data();
 
 		// 頂点バッファ入力(Vertex Shaderに渡すデータ形式について設定する)
-		auto bindingDescription = Vertex::GetBindingDescription();
-		auto attributeDescriptions = Vertex::GetAttributeDestriptions();
+		auto bindingDescription = SVertex::GetBindingDescription();
+		auto attributeDescriptions = SVertex::GetAttributeDestriptions();
 
 		VkPipelineVertexInputStateCreateInfo vertexInputInto{};
 		vertexInputInto.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
@@ -395,6 +427,198 @@ namespace renderer
 		return true;
 	}
 
+	bool CVulkanRenderer::CreateVertexBuffer(const CRendererCreateInfo& createInfo)
+	{
+		//
+		VkDeviceSize bufferSize = sizeof(createInfo.GetVertices()[0]) * createInfo.GetVertices().size();
+
+		// ステージングバッファの作成
+		// ステージングバッファは頂点データ配列からデータをアップロードするのに使用するCPUアクセス可能なバッファ
+		VkBuffer stagingBuffer;
+		VkDeviceMemory stagingBufferMemory;
+		m_pGraphicsAPI->CreateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+			stagingBuffer, stagingBufferMemory);
+
+		// 頂点データを渡すためのメモリのポインターを取得
+		void* data;
+		vkMapMemory(m_pGraphicsAPI->GetLogicalDevice(), stagingBufferMemory, 0, bufferSize, 0, &data);
+
+		// 取得したポインタにデータをコピーする
+		std::memcpy(data, createInfo.GetVertices().data(), (size_t)bufferSize);
+
+		// マップを解除する。たぶんマップというのはCPUからGPUへデータを渡すために一時的に確保される入口みたいなものかな？
+		// 渡し終わったのでポインタという名の通路・入口を破棄したみたいな
+		vkUnmapMemory(m_pGraphicsAPI->GetLogicalDevice(), stagingBufferMemory);
+
+		// 最終的に頂点バッファを保持するのに使用するバッファを作成
+		m_pGraphicsAPI->CreateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+			m_VertexBuffer, m_VertexBufferMemory);
+
+		// バッファをコピー
+		m_pGraphicsAPI->CopyBuffer(stagingBuffer, m_VertexBuffer, bufferSize);
+
+		// 不要なリソースを破棄
+		vkDestroyBuffer(m_pGraphicsAPI->GetLogicalDevice(), stagingBuffer, nullptr);
+		vkFreeMemory(m_pGraphicsAPI->GetLogicalDevice(), stagingBufferMemory, nullptr);
+
+		return true;
+	}
+	bool CVulkanRenderer::CreateIndexBuffer(const CRendererCreateInfo& createInfo)
+	{
+		VkDeviceSize bufferSize = sizeof(createInfo.GetIndices()[0]) * createInfo.GetIndices().size();
+
+		VkBuffer stagingBuffer;
+		VkDeviceMemory stagingBufferMemory;
+		m_pGraphicsAPI->CreateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
+
+		void* data;
+		vkMapMemory(m_pGraphicsAPI->GetLogicalDevice(), stagingBufferMemory, 0, bufferSize, 0, &data);
+		memcpy(data, createInfo.GetIndices().data(), (size_t)bufferSize);
+		vkUnmapMemory(m_pGraphicsAPI->GetLogicalDevice(), stagingBufferMemory);
+
+		m_pGraphicsAPI->CreateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+			m_IndexBuffer, m_IndexBufferMemory);
+
+		m_pGraphicsAPI->CopyBuffer(stagingBuffer, m_IndexBuffer, bufferSize);
+
+		vkDestroyBuffer(m_pGraphicsAPI->GetLogicalDevice(), stagingBuffer, nullptr);
+		vkFreeMemory(m_pGraphicsAPI->GetLogicalDevice(), stagingBufferMemory, nullptr);
+
+		m_IndicesCount = static_cast<uint32_t>(createInfo.GetIndices().size());
+
+		return true;
+	}
+	bool CVulkanRenderer::CreateUniformBuffers(const CRendererCreateInfo& createInfo)
+	{
+		VkDeviceSize bufferSize = sizeof(renderer::SUniformBufferObject);
+
+		m_UniformBuffers.resize(m_pGraphicsAPI->GetMaxFramesInFlight());
+		m_UniformBuffersMemory.resize(m_pGraphicsAPI->GetMaxFramesInFlight());
+		m_UniformBuffersMapped.resize(m_pGraphicsAPI->GetMaxFramesInFlight());
+
+		for (size_t i = 0; i < m_pGraphicsAPI->GetMaxFramesInFlight(); i++)
+		{
+			m_pGraphicsAPI->CreateBuffer(bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+				m_UniformBuffers[i], m_UniformBuffersMemory[i]);
+
+			// 後で書き込むのでひとまず空でマップする
+			vkMapMemory(m_pGraphicsAPI->GetLogicalDevice(), m_UniformBuffersMemory[i], 0, bufferSize, 0, &m_UniformBuffersMapped[i]);
+		}
+
+		return true;
+	}
+	bool CVulkanRenderer::CreateDescriptorPool(const CRendererCreateInfo& createInfo)
+	{
+		std::array<VkDescriptorPoolSize, 2> poolSizes{};
+		poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+		poolSizes[0].descriptorCount = static_cast<uint32_t>(m_pGraphicsAPI->GetMaxFramesInFlight());
+		poolSizes[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		poolSizes[1].descriptorCount = static_cast<uint32_t>(m_pGraphicsAPI->GetMaxFramesInFlight());
+
+		VkDescriptorPoolCreateInfo poolInfo{};
+		poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+		poolInfo.poolSizeCount = static_cast<uint32_t>(poolSizes.size());
+		poolInfo.pPoolSizes = poolSizes.data();
+		poolInfo.maxSets = static_cast<uint32_t>(m_pGraphicsAPI->GetMaxFramesInFlight());
+
+		if (vkCreateDescriptorPool(m_pGraphicsAPI->GetLogicalDevice(), &poolInfo, nullptr, &m_DescriptorPool) != VK_SUCCESS)
+		{
+			return false;
+		}
+
+		return true;
+	}
+	bool CVulkanRenderer::CreateDescriptorSets(const CRendererCreateInfo& createInfo)
+	{
+		std::vector<VkDescriptorSetLayout> layouts(m_pGraphicsAPI->GetMaxFramesInFlight(), m_DescriptorSetLayout);
+		VkDescriptorSetAllocateInfo allocInfo{};
+		allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+		allocInfo.descriptorPool = m_DescriptorPool;
+		allocInfo.descriptorSetCount = static_cast<uint32_t>(m_pGraphicsAPI->GetMaxFramesInFlight());
+		allocInfo.pSetLayouts = layouts.data();
+
+		//
+		m_DescriptorSets.resize(m_pGraphicsAPI->GetMaxFramesInFlight());
+		if (vkAllocateDescriptorSets(m_pGraphicsAPI->GetLogicalDevice(), &allocInfo, m_DescriptorSets.data()) != VK_SUCCESS)
+		{
+			return false;
+		}
+
+		//
+		for (size_t i = 0; i < m_pGraphicsAPI->GetMaxFramesInFlight(); i++)
+		{
+			// UBO用
+			VkDescriptorBufferInfo bufferInfo{};
+			bufferInfo.buffer = m_UniformBuffers[i]; // UBOの指定
+			bufferInfo.offset = 0;
+			bufferInfo.range = sizeof(renderer::SUniformBufferObject);
+
+			// テクスチャサンプラー用
+			VkDescriptorImageInfo imageInfo{};
+			imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+			imageInfo.imageView = m_TextureImageView;
+			imageInfo.sampler = m_TextureSampler;
+
+			//
+			std::vector<VkWriteDescriptorSet> descriptorWrites{};
+
+			// UniformBufferSet
+			{
+				VkWriteDescriptorSet descriptorWrite{};
+
+				descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+				descriptorWrite.dstSet = m_DescriptorSets[i];
+				descriptorWrite.dstBinding = 0;
+				descriptorWrite.dstArrayElement = 0;
+				descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+				descriptorWrite.descriptorCount = 1;
+				descriptorWrite.pBufferInfo = &bufferInfo;
+
+				descriptorWrites.push_back(descriptorWrite);
+			}
+
+			// ImageBufferSet
+			if (createInfo.IsUseMainTexture())
+			{
+				VkWriteDescriptorSet descriptorWrite{};
+
+				descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+				descriptorWrite.dstSet = m_DescriptorSets[i];
+				descriptorWrite.dstBinding = 1;
+				descriptorWrite.dstArrayElement = 0;
+				descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+				descriptorWrite.descriptorCount = 1;
+				descriptorWrite.pImageInfo = &imageInfo;
+
+				descriptorWrites.push_back(descriptorWrite);
+			}
+			
+			vkUpdateDescriptorSets(m_pGraphicsAPI->GetLogicalDevice(), static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
+		}
+
+		return true;
+	}
+
+	void CVulkanRenderer::UpdateUniformBuffer(uint32_t CurrentImage)
+	{
+		static auto startTime = std::chrono::high_resolution_clock::now();
+
+		auto currentTime = std::chrono::high_resolution_clock::now();
+		float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
+
+		SUniformBufferObject ubo{};
+		ubo.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+		ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+		ubo.proj = glm::perspective(
+			glm::radians(45.0f), 
+			m_pGraphicsAPI->GetSwapChainExtent().width / (float)m_pGraphicsAPI->GetSwapChainExtent().height, 0.1f, 10.0f
+		);
+		ubo.proj[1][1] *= -1.0f; // Y座標の向きを反転。VulkanとOpenGLは逆なのかな？
+
+		// 空の値を既にマップしているのでVulkan関数を使わなくても値がコピーできる
+		std::memcpy(m_UniformBuffersMapped[CurrentImage], &ubo, sizeof(ubo));
+	}
+
 	// ヘルパー関数 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Shader
 	// ShaderModuleの作成(Shaderをラップ・管理するためのもの)
@@ -415,11 +639,31 @@ namespace renderer
 
 	bool CVulkanRenderer::Update()
 	{
+		UpdateUniformBuffer(m_pGraphicsAPI->GetMaxFramesInFlight());
+
 		return true;
 	}
 
 	bool CVulkanRenderer::Draw()
 	{
+		// グラフィックパイプラインをコマンドにバインド
+		vkCmdBindPipeline(m_pGraphicsAPI->GetCommandBuffers()[m_pGraphicsAPI->GetCurrentFrame()], VK_PIPELINE_BIND_POINT_GRAPHICS, m_GraphicsPipeline);
+
+		// 頂点バッファとインデックスバッファをパイプラインにバインドする
+		VkBuffer vertexBuffer[] = { m_VertexBuffer };
+		VkDeviceSize offsets[] = { 0 };
+		vkCmdBindVertexBuffers(m_pGraphicsAPI->GetCommandBuffers()[m_pGraphicsAPI->GetCurrentFrame()], 0, 1, &m_VertexBuffer, offsets);
+		vkCmdBindIndexBuffer(m_pGraphicsAPI->GetCommandBuffers()[m_pGraphicsAPI->GetCurrentFrame()], m_IndexBuffer, 0, VK_INDEX_TYPE_UINT16);
+
+		// UBOのセット
+		vkCmdBindDescriptorSets(m_pGraphicsAPI->GetCommandBuffers()[m_pGraphicsAPI->GetCurrentFrame()], VK_PIPELINE_BIND_POINT_GRAPHICS, 
+			m_PipelineLayout, 0, 1, &m_DescriptorSets[m_pGraphicsAPI->GetCurrentFrame()], 0, nullptr);
+
+		// 描画コマンドを発行
+		//vkCmdDraw(m_CommandBuffers[m_CurrentFrame], 3, 1, 0, 0); // パラメーター: vertexCount, instanceCount, firstVertex, firstInstance
+		// インデックス付のドローコマンドはこちら
+		vkCmdDrawIndexed(m_pGraphicsAPI->GetCommandBuffers()[m_pGraphicsAPI->GetCurrentFrame()], m_IndicesCount, 1, 0, 0, 0);
+
 		return true;
 	}
 }
