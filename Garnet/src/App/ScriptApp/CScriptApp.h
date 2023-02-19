@@ -3,13 +3,14 @@
 
 #include "../../Interface/IApp.h"
 #include "../../Interface/IGraphicsAPI.h"
-#include "../../Interface/IRenderer.h"
+
+namespace graphics { class CMesh; }
 
 namespace app
 {
 	class CScriptApp: public IApp
 	{
-		std::shared_ptr<renderer::IRenderer> m_TestRenderer;
+		std::shared_ptr<graphics::CMesh> m_TestMesh;
 	public:
 		CScriptApp();
 		virtual ~CScriptApp();

@@ -1,10 +1,14 @@
 #include "CScriptApp.h"
+
+// ひとまず仮でテスト用にインクルードしている
+#include "../../Graphics/CMesh.h"
+#include "../../Graphics/CPrimitive.h"
 #include "../../GraphicsAPI/CRendererCreateInfo.h"
 
 namespace app
 {
 	CScriptApp::CScriptApp():
-		m_TestRenderer(nullptr)
+		m_TestMesh(nullptr)
 	{
 
 	}
@@ -16,14 +20,16 @@ namespace app
 
 	bool CScriptApp::Initialize(api::IGraphicsAPI* pGraphicsAPI)
 	{
-		// ひとまずトライアングルの描画テスト(後ほどリソース生成周りはもう少し整備する必要がある)
-		m_TestRenderer = pGraphicsAPI->CreateRenderer();
-
 		//
 		renderer::CRendererCreateInfo createInfo;
 
 		//
-		if (!m_TestRenderer->Create(createInfo)) return false;
+		m_TestMesh = std::make_shared<graphics::CMesh>();
+		std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>();
+		if (!Primitive->Create(pGraphicsAPI, createInfo)) return false;
+
+		//
+		m_TestMesh->AddPrimitive(Primitive);
 
 		return true;
 	}
@@ -43,7 +49,7 @@ namespace app
 		if (!pGraphicsAPI->BeginRender()) return false;
 
 		// CScriptScene.cppにいろいろとAssets類を書く感じでもいいかも？
-		if (!m_TestRenderer->Draw()) return false;
+		if (!m_TestMesh->Draw()) return false;
 
 		if (!pGraphicsAPI->EndRender()) return false;
 
