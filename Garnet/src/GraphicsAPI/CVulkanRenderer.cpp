@@ -509,11 +509,27 @@ namespace renderer
 	}
 	bool CVulkanRenderer::CreateDescriptorPool(const CRendererCreateInfo& createInfo)
 	{
-		std::array<VkDescriptorPoolSize, 2> poolSizes{};
-		poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-		poolSizes[0].descriptorCount = static_cast<uint32_t>(m_pGraphicsAPI->GetMaxFramesInFlight());
-		poolSizes[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-		poolSizes[1].descriptorCount = static_cast<uint32_t>(m_pGraphicsAPI->GetMaxFramesInFlight());
+		std::vector<VkDescriptorPoolSize> poolSizes;
+
+		{
+			VkDescriptorPoolSize poolSize{};
+
+			poolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+			poolSize.descriptorCount = static_cast<uint32_t>(m_pGraphicsAPI->GetMaxFramesInFlight());
+
+			poolSizes.push_back(poolSize);
+		}
+		
+		if(createInfo.IsUseMainTexture())
+		{
+			VkDescriptorPoolSize poolSize{};
+
+			poolSize.type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+			poolSize.descriptorCount = static_cast<uint32_t>(m_pGraphicsAPI->GetMaxFramesInFlight());
+
+			poolSizes.push_back(poolSize);
+		}
+		
 
 		VkDescriptorPoolCreateInfo poolInfo{};
 		poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
@@ -639,7 +655,8 @@ namespace renderer
 
 	bool CVulkanRenderer::Update()
 	{
-		UpdateUniformBuffer(m_pGraphicsAPI->GetMaxFramesInFlight());
+		// ユニフォームデータの更新
+		UpdateUniformBuffer(m_pGraphicsAPI->GetCurrentFrame());
 
 		return true;
 	}

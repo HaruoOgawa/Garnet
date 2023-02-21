@@ -74,10 +74,7 @@ namespace app
 
 	bool CScriptApp::Update(api::IGraphicsAPI* pGraphicsAPI)
 	{
-		if (!pGraphicsAPI->IsWaitting())
-		{
-			if (!m_TestMesh->Update()) return false;
-		}
+		if (!m_TestMesh->Update()) return false;
 
 		return true;
 	}
@@ -87,10 +84,7 @@ namespace app
 		if (!pGraphicsAPI->BeginRender()) return false;
 
 		// CScriptScene.cpp‚É‚¢‚ë‚¢‚ë‚ÆAssets—Ş‚ğ‘‚­Š´‚¶‚Å‚à‚¢‚¢‚©‚àH
-		if (!pGraphicsAPI->IsWaitting())
-		{
-			if (!m_TestMesh->Draw()) return false;
-		}
+		if (!m_TestMesh->Draw()) return false;
 
 		if (!pGraphicsAPI->EndRender()) return false;
 
