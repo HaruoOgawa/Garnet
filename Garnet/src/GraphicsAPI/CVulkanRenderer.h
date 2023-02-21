@@ -8,61 +8,23 @@
 #include <glfw3native.h>
 
 #include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 #include <vector>
 #include <array>
 
 #include "../Interface/IRenderer.h"
+#include "../Graphics/SVertex.h"
+#include "../Graphics/SUniformBufferObject.h"
+
+// はぇー時間を管理するstd標準ライブラリ
+#include <chrono>
 
 namespace api { class CVulkanAPI; }
 
 namespace renderer
 {
 	class CRendererCreateInfo;
-
-	struct Vertex
-	{
-		glm::vec3 pos;
-		glm::vec3 color;
-		glm::vec2 texCoord;
-
-		static VkVertexInputBindingDescription GetBindingDescription() {
-			// 頂点バッファのバインドに関する説明,設定
-			VkVertexInputBindingDescription bindingDescription{};
-			bindingDescription.binding = 0; // バインドする頂点バッファのインデックス(?)違う形式で頂点バッファを用意するときに使用する？
-			bindingDescription.stride = sizeof(Vertex); // 頂点バッファ内の要素一つあたりのサイズ。次の要素までのバイト数
-			bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX; // よくわからぬ。各頂点の後、次のデータ エントリに移動します。らしい
-
-			return bindingDescription;
-		}
-
-		static std::array<VkVertexInputAttributeDescription, 3> GetAttributeDestriptions() {
-			// アトリビュート(頂点データ)の設定
-			// 配列の要素数は頂点バッファのアトリビュートの数だけ
-			std::array<VkVertexInputAttributeDescription, 3> attributeDescriptions{};
-
-			// posotionアトリビュートの設定
-			attributeDescriptions[0].binding = 0; // BindingDescriptionの内どのバインド設定を使用するかのインデックス
-			attributeDescriptions[0].location = 0; // Shaderのlayout(location = 0)に設定すｒ数値
-			attributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT; // データ型. SFLOAT --> Signed Float
-			attributeDescriptions[0].offset = offsetof(Vertex, pos); // データオフセット
-
-			// colorアトリビュートの設定
-			attributeDescriptions[1].binding = 0;
-			attributeDescriptions[1].location = 1;
-			attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
-			attributeDescriptions[1].offset = offsetof(Vertex, color);
-
-			// texCoordアトリビュートの設定
-			attributeDescriptions[2].binding = 0;
-			attributeDescriptions[2].location = 2;
-			attributeDescriptions[2].format = VK_FORMAT_R32G32_SFLOAT;
-			attributeDescriptions[2].offset = offsetof(Vertex, texCoord);
-
-			return attributeDescriptions;
-		}
-	};
-
 
 	class CVulkanRenderer : public IRenderer
 	{
@@ -81,10 +43,34 @@ namespace renderer
 		VkPipelineLayout m_PipelineLayout;
 		VkPipeline m_GraphicsPipeline;
 
+		// Vertices/Indices
+		VkBuffer m_VertexBuffer;
+		VkDeviceMemory m_VertexBufferMemory;
+		VkBuffer m_IndexBuffer;
+		VkDeviceMemory m_IndexBufferMemory;
+		uint32_t m_IndicesCount;
+
+		// Texture Image
+		bool m_UseMainTexture;
+		VkImage m_TextureImage;
+		VkDeviceMemory m_TextureImageMemory;
+		VkImageView m_TextureImageView; // シェーダーでテクスチャを取り扱う用のImageView
+		VkSampler m_TextureSampler;
+
 	private:
-		// 初期化関数 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		// Vulkanメインロジック /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		bool CreateDescriptorSetLayout(const CRendererCreateInfo& createInfo);
 		bool CreateGraphicsPipeline(const CRendererCreateInfo& createInfo);
+		bool CreateTextureImage(const CRendererCreateInfo& createInfo);
+		bool CreateTextureImageView(const CRendererCreateInfo& createInfo);
+		bool CreateTextureSampler(const CRendererCreateInfo& createInfo);
+		bool CreateVertexBuffer(const CRendererCreateInfo& createInfo);
+		bool CreateIndexBuffer(const CRendererCreateInfo& createInfo);
+		bool CreateUniformBuffers(const CRendererCreateInfo& createInfo);
+		bool CreateDescriptorPool(const CRendererCreateInfo& createInfo);
+		bool CreateDescriptorSets(const CRendererCreateInfo& createInfo);
+
+		void UpdateUniformBuffer(uint32_t CurrentImage);
 
 		// ヘルパー関数 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// Shader

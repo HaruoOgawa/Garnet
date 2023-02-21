@@ -82,6 +82,7 @@ namespace api
 
 		// Rendering
 		VkRenderPass m_RenderPass;
+		bool m_WaitRendering;
 
 		// Depth Test
 		VkImage m_DepthImage;
@@ -152,16 +153,15 @@ namespace api
 
 		// Buffer
 		uint32_t FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags propertoes);
-
-		// Texture
-		VkImageView CreateImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags);
-		bool CreateImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage,
-			VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
-
+		
 		// Depth
 		VkFormat FIndDepthFormat();
 		VkFormat FindSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features);
 		bool	 HasStencilComponent(VkFormat format);
+
+		// Command
+		VkCommandBuffer BeginSingleTimeCommands();
+		void EndSingleTimeCommands(VkCommandBuffer commandBuffer);
 	public:
 		CVulkanAPI();
 		virtual ~CVulkanAPI();
@@ -175,6 +175,9 @@ namespace api
 		bool EndRender() override;
 		bool IsWaitting() override;
 
+		//
+		int GetMaxFramesInFlight() const { return MAX_FRAMES_IN_FLIGHT; }
+
 		// Device
 		const VkPhysicalDevice& GetPhysicalDevice() const;
 		const VkDevice& GetLogicalDevice() const;
@@ -184,5 +187,20 @@ namespace api
 
 		// Rendering
 		const VkRenderPass& GetRenderPass() const;
+
+		// Texture
+		VkImageView CreateImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags);
+		bool CreateImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage,
+			VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
+		void TransitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
+		void CopyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
+
+		// Buffer
+		void CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory);
+		void CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
+		const std::vector<VkCommandBuffer>& GetCommandBuffers() const;
+
+		// Frame Buffer
+		uint32_t GetCurrentFrame() const;
 	};
 }

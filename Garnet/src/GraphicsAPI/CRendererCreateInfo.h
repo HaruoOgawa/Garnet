@@ -1,11 +1,14 @@
 #pragma once
 #include <vector>
+#include "../Graphics/SVertex.h"
 
 namespace renderer
 {
 	class CRendererCreateInfo
 	{
 		// VertexBuffer
+		std::vector<SVertex> m_Vertices;
+		std::vector<uint16_t> m_Indices;
 
 		// Uniform
 
@@ -24,6 +27,13 @@ namespace renderer
 		CRendererCreateInfo();
 		virtual ~CRendererCreateInfo() = default;
 		
+		// VertexBuffer
+		void SetVertices(const std::vector<SVertex>& Vertices);
+		const std::vector<SVertex>& GetVertices() const;
+
+		void SetIndices(const std::vector<uint16_t>& Indices);
+		const std::vector<uint16_t>& GetIndices() const;
+
 		// Shader
 		void SetVertexShaderCode(const std::vector<unsigned char>& VertexShaderCode);
 		const std::vector<unsigned char>& GetVertexShaderCode() const;

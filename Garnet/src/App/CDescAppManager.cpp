@@ -112,6 +112,9 @@ namespace descapp
 			if (!Draw()) return false;
 		}
 
+		// 論理デバイスが操作を完了するのを待つ
+		vkDeviceWaitIdle(m_GraphicsAPI->GetLogicalDevice());
+
 		return true;
 	}
 
