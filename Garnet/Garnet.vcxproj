@@ -157,6 +157,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="src\Scene\CScriptScene.h" />
     <ClInclude Include="src\File\CFile.h" />
     <ClInclude Include="src\Graphics\CMaterial.h" />
     <ClInclude Include="src\Graphics\CVertexBuffer.h" />
@@ -183,6 +184,7 @@
     <ClInclude Include="src\Graphics\SVertex.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Scene\CScriptScene.cpp" />
     <ClCompile Include="src\File\CFile.cpp" />
     <ClCompile Include="src\Graphics\CMaterial.cpp" />
     <ClCompile Include="src\Graphics\CVertexBuffer.cpp" />

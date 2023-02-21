@@ -1,18 +1,11 @@
 #include "CScriptApp.h"
-
-// ひとまず仮でテスト用にインクルードしている
-#include "../../Graphics/CMesh.h"
-#include "../../Graphics/CPrimitive.h"
-#include "../../GraphicsAPI/CRendererCreateInfo.h"
-#include "../../File/CFile.h"
-#include "../../Graphics/SVertex.h"
+#include "../../Scene/CScriptScene.h"
 
 namespace app
 {
 	CScriptApp::CScriptApp():
-		m_TestMesh(nullptr)
+		m_ScriptScene(nullptr)
 	{
-
 	}
 
 	CScriptApp::~CScriptApp()
@@ -21,48 +14,18 @@ namespace app
 
 	bool CScriptApp::Release(api::IGraphicsAPI* pGraphicsAPI)
 	{
-		if (m_TestMesh)
+		if (m_ScriptScene)
 		{
-			m_TestMesh->Release();
-			m_TestMesh.reset();
-			m_TestMesh = nullptr;
+			m_ScriptScene->Release(pGraphicsAPI);
 		}
-		
+
 		return true;
 	}
 
 	bool CScriptApp::Initialize(api::IGraphicsAPI* pGraphicsAPI)
 	{
-		//
-		std::string ProjDir = "WebRelease\\sample\\";
-		std::string Resources = "Resources\\Shaders\\";
-
-		// Vertex Buffer
-		std::vector<renderer::SVertex> Vertices = {
-			{{-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
-			{{0.5f, -0.5f, 0.0f},  {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
-			{{0.5f, 0.5f, 0.0f},   {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
-			{{-0.5f, 0.5f, 0.0f}, {1.0f, 1.0f, 1.0f},	 {1.0f, 1.0f}},
-		};
-
-		std::vector<uint16_t> Indices = {
-			0, 1, 2, 2, 3, 0,
-		};
-
-		//
-		renderer::CRendererCreateInfo createInfo;
-		createInfo.SetVertexShaderCode(file::CFile::ReadFile(ProjDir + Resources + "vert.spv"));
-		createInfo.SetFragmentShaderCode(file::CFile::ReadFile(ProjDir + Resources + "frag.spv"));
-		createInfo.SetVertices(Vertices);
-		createInfo.SetIndices(Indices);
-
-		//
-		m_TestMesh = std::make_shared<graphics::CMesh>();
-		std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>();
-		if (!Primitive->Create(pGraphicsAPI, createInfo)) return false;
-
-		//
-		m_TestMesh->AddPrimitive(Primitive);
+		m_ScriptScene = std::make_shared<scene::CScriptScene>();
+		if (!m_ScriptScene->Initialize(pGraphicsAPI)) return false;
 
 		return true;
 	}
@@ -74,7 +37,7 @@ namespace app
 
 	bool CScriptApp::Update(api::IGraphicsAPI* pGraphicsAPI)
 	{
-		if (!m_TestMesh->Update()) return false;
+		if (!m_ScriptScene->Update(pGraphicsAPI)) return false;
 
 		return true;
 	}
@@ -83,8 +46,7 @@ namespace app
 	{
 		if (!pGraphicsAPI->BeginRender()) return false;
 
-		// CScriptScene.cppにいろいろとAssets類を書く感じでもいいかも？
-		if (!m_TestMesh->Draw()) return false;
+		if (!m_ScriptScene->Draw(pGraphicsAPI)) return false;
 
 		if (!pGraphicsAPI->EndRender()) return false;
 
