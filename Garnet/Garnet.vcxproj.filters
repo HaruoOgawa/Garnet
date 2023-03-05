@@ -163,6 +163,10 @@
     </None>
     <None Include="EmscriptenBuild\Garnet_front.js" />
     <None Include="packages.config" />
+    <None Include="Commands\RemakeCmakeLists_DescApp.bat">
+      <Filter>ソース ファイル</Filter>
+    </None>
+    <None Include="Commands\RemakeCmakeLists_DescApp.py" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="EmscriptenBuild\CMakeLists.txt" />

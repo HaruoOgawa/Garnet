@@ -7,7 +7,7 @@ class Console
 public:
 	// フォーマット指定子と可変引数無し
 	static void Log(const char* message) {
-#ifndef __EMSCRIPTEN__
+#if !defined(__EMSCRIPTEN__) && !defined(__Dawn__)
 		_RPT0(_CRT_WARN, message);
 #else
 		// この関数を使う時に末尾に\nの改行を入れないとログが表示されないので注意
@@ -18,7 +18,7 @@ public:
 	// フォーマット指定子と可変引数有り
 	template<class... Variable>
 	static void Log(const char* message, Variable&&... args) {
-#ifndef __EMSCRIPTEN__
+#if !defined(__EMSCRIPTEN__) && !defined(__Dawn__)
 		_RPTN(_CRT_WARN, message, (args)...);
 #else
 		// この関数を使う時に末尾に\nの改行を入れないとログが表示されないので注意

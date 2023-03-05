@@ -1,10 +1,13 @@
 #pragma once
 
+#ifndef __Dawn__
 #define NOMINMAX
 #define VK_USE_PLATFORM_WIN32_KHR
 #define GLFW_INCLUDE_VULKAN
-#include <glfw3.h>
 #define GLFW_EXPOSE_NATIVE_WIN32
+#endif // !__Dawn__
+
+#include <glfw3.h>
 #include <glfw3native.h>
 
 #include <glm/glm.hpp>
@@ -75,6 +78,8 @@ namespace renderer
 		// ÉwÉãÉpÅ[ä÷êî ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// Shader
 		bool CreateShaderModule(VkShaderModule& shaderModule, const std::vector<unsigned char>& code);
+		static VkVertexInputBindingDescription GetBindingDescription();
+		static std::array<VkVertexInputAttributeDescription, 3> GetAttributeDestriptions();
 	public:
 		CVulkanRenderer();
 		virtual ~CVulkanRenderer();

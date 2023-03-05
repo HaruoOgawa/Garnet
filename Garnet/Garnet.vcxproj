@@ -207,6 +207,8 @@
   <ItemGroup>
     <None Include="Commands\RemakeCmakeLists.bat" />
     <None Include="Commands\RemakeCmakeLists.py" />
+    <None Include="Commands\RemakeCmakeLists_DescApp.bat" />
+    <None Include="Commands\RemakeCmakeLists_DescApp.py" />
     <None Include="Commands\RunLocalHost.bat" />
     <None Include="EmscriptenBuild\build.bat" />
     <None Include="EmscriptenBuild\Garnet_front.js" />

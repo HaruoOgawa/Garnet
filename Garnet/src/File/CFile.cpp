@@ -1,5 +1,6 @@
 #include "CFile.h"
 #include <fstream>
+#include "../Debug/Message/Console.h"
 
 namespace file
 {
@@ -9,7 +10,7 @@ namespace file
 
 		if (!file.is_open())
 		{
-			throw std::runtime_error("failed to open file!\n");
+			Console::Log("failed to open file! / filename: %s\n", filename.c_str());
 		}
 
 		size_t fileSize = (size_t)file.tellg();

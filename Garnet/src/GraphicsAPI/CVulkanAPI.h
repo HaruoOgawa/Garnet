@@ -8,11 +8,14 @@
 
 #include "../Interface/IGraphicsAPI.h"
 
+#ifndef __Dawn__
 #define NOMINMAX
 #define VK_USE_PLATFORM_WIN32_KHR
 #define GLFW_INCLUDE_VULKAN
-#include <glfw3.h>
 #define GLFW_EXPOSE_NATIVE_WIN32
+#endif // !__Dawn__
+
+#include <glfw3.h>
 #include <glfw3native.h>
 
 namespace api
