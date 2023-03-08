@@ -9,6 +9,7 @@ namespace api
 	class IGraphicsAPI
 	{
 	public:
+		virtual bool Initialize() = 0;
 		virtual std::shared_ptr<renderer::IRenderer> CreateRenderer() = 0;
 
 		virtual bool BeginRender() = 0;

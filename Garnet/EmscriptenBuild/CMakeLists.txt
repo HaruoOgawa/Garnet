@@ -17,6 +17,8 @@ add_executable(
 	../src/App/ScriptApp/CScriptApp.cpp
 	../src/App/ScriptApp/CScriptApp.h
 	../src/Debug/Message/Console.h
+	../src/File/CFile.cpp
+	../src/File/CFile.h
 	../src/Graphics/CMaterial.cpp
 	../src/Graphics/CMaterial.h
 	../src/Graphics/CMesh.cpp
@@ -25,6 +27,8 @@ add_executable(
 	../src/Graphics/CPrimitive.h
 	../src/Graphics/CVertexBuffer.cpp
 	../src/Graphics/CVertexBuffer.h
+	../src/Graphics/SUniformBufferObject.h
+	../src/Graphics/SVertex.h
 	../src/GraphicsAPI/CRendererCreateInfo.cpp
 	../src/GraphicsAPI/CRendererCreateInfo.h
 	../src/GraphicsAPI/CWebGPUAPI.cpp
@@ -35,10 +39,11 @@ add_executable(
 	../src/Interface/IGraphicsAPI.h
 	../src/Interface/IObject.h
 	../src/Interface/IRenderer.h
-	../src/Interface/IRendererCreateInfo.h
 	../src/Main/WebMain/WebMain.cpp
 	../src/Node/CNode.cpp
 	../src/Node/CNode.h
+	../src/Scene/CScriptScene.cpp
+	../src/Scene/CScriptScene.h
 
 )
 

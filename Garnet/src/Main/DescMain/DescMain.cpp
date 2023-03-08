@@ -4,7 +4,11 @@
 
 descapp::CDescAppManager* g_DescApp = nullptr;
 
+#if defined(__DAWN__) && defined(__CMAKE__)
+int main()
+#else
 int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
+#endif
 {
 	g_DescApp = new descapp::CDescAppManager(app::EAppType::ScriptApp);
 

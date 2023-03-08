@@ -1,7 +1,12 @@
 #include "CDescAppManager.h"
 #include "../Debug/Message/Console.h"
 
+#ifdef __DAWN__
+#include "../GraphicsAPI/CWebGPUAPI.h"
+#else
 #include "../GraphicsAPI/CVulkanAPI.h"
+#endif // __DAWN__
+
 #include "./ScriptApp/CScriptApp.h"
 #include "./EditorApp/CEditorApp.h"
 #include "./MainApp/CMainApp.h"
@@ -16,7 +21,11 @@ namespace descapp
 		m_App(nullptr)
 	{
 		//
+#ifdef __DAWN__
+		m_GraphicsAPI = std::make_shared<api::CWebGPUAPI>();
+#else
 		m_GraphicsAPI = std::make_shared<api::CVulkanAPI>();
+#endif // __DAWN__
 		
 		//
 		if (AppType == app::EAppType::ScriptApp)
@@ -68,8 +77,9 @@ namespace descapp
 	bool CDescAppManager::Initialize()
 	{
 		if (!InitWindow()) return false;
-		if(!m_GraphicsAPI->Initialize(m_pWindow)) return false;
-
+#ifndef __DAWN__
+		if(!m_GraphicsAPI->InitializeWithGLFW(m_pWindow)) return false;
+#endif
 		if (!m_App->Initialize(m_GraphicsAPI.get())) return false;
 
 		return true;
@@ -112,9 +122,10 @@ namespace descapp
 			if (!Draw()) return false;
 		}
 
+#ifndef __DAWN__
 		// 論理デバイスが操作を完了するのを待つ
 		vkDeviceWaitIdle(m_GraphicsAPI->GetLogicalDevice());
-
+#endif
 		return true;
 	}
 

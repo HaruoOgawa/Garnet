@@ -27,8 +27,7 @@ namespace scene
 	bool CScriptScene::Initialize(api::IGraphicsAPI* pGraphicsAPI)
 	{
 		//
-		std::string ProjDir = "WebRelease\\sample\\";
-		std::string Resources = "Resources\\Shaders\\";
+		std::string ShaderPath = "Resources\\Shaders\\";
 
 		// Vertex Buffer
 		std::vector<renderer::SVertex> Vertices = {
@@ -44,8 +43,8 @@ namespace scene
 
 		//
 		renderer::CRendererCreateInfo createInfo;
-		createInfo.SetVertexShaderCode(file::CFile::ReadFile(ProjDir + Resources + "vert.spv"));
-		createInfo.SetFragmentShaderCode(file::CFile::ReadFile(ProjDir + Resources + "frag.spv"));
+		createInfo.SetVertexShaderCode(file::CFile::ReadFile(ShaderPath + "vert.spv"));
+		createInfo.SetFragmentShaderCode(file::CFile::ReadFile(ShaderPath + "frag.spv"));
 		createInfo.SetVertices(Vertices);
 		createInfo.SetIndices(Indices);
 
