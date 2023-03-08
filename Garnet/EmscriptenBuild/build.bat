@@ -14,4 +14,10 @@ call ..\nmake.exe
 
 cd ..\
 
-call copy2sample.bat
+mkdir ..\WebRelease
+del /s /q ..\WebRelease\*
+
+xcopy Garnet_front.js ..\WebRelease\ /y /s /i
+xcopy build\Garnet*.* ..\WebRelease\ /y /s /i
+xcopy ..\Resources ..\WebRelease\Resources /y /s /i
+xcopy index.html ..\WebRelease\ /y /s /i

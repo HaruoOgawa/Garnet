@@ -167,8 +167,14 @@
       <Filter>ソース ファイル</Filter>
     </None>
     <None Include="Commands\RemakeCmakeLists_DescApp.py" />
+    <None Include="EmscriptenBuild\nmake.exe" />
+    <None Include="CMakeBuild\build.bat">
+      <Filter>ソース ファイル</Filter>
+    </None>
+    <None Include="EmscriptenBuild\index.html" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="EmscriptenBuild\CMakeLists.txt" />
+    <Text Include="CMakeBuild\CMakeLists.txt" />
   </ItemGroup>
 </Project>

@@ -377,6 +377,7 @@ del $(OutDir)Garnet.pdb</Command>
     <ClCompile Include="src\App\CWebAppManager.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="CMakeBuild\build.bat" />
     <None Include="Commands\RemakeCmakeLists.bat" />
     <None Include="Commands\RemakeCmakeLists.py" />
     <None Include="Commands\RemakeCmakeLists_DescApp.bat" />
@@ -384,9 +385,12 @@ del $(OutDir)Garnet.pdb</Command>
     <None Include="Commands\RunLocalHost.bat" />
     <None Include="EmscriptenBuild\build.bat" />
     <None Include="EmscriptenBuild\Garnet_front.js" />
+    <None Include="EmscriptenBuild\index.html" />
+    <None Include="EmscriptenBuild\nmake.exe" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <Text Include="CMakeBuild\CMakeLists.txt" />
     <Text Include="EmscriptenBuild\CMakeLists.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
