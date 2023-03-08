@@ -27,12 +27,7 @@ namespace scene
 	bool CScriptScene::Initialize(api::IGraphicsAPI* pGraphicsAPI)
 	{
 		//
-		std::string ProjDir = "";
-#if defined(_DEBUG) && !defined(__Dawn__)
-		ProjDir = "WebRelease\\sample\\";
-#endif // _DEBUG
-
-		std::string ShaderPath = ProjDir + "Resources\\Shaders\\";
+		std::string ShaderPath = "Resources\\Shaders\\";
 
 		// Vertex Buffer
 		std::vector<renderer::SVertex> Vertices = {

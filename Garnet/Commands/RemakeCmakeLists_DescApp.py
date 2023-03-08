@@ -7,7 +7,7 @@ project(Garnet, CXX)
 
 set(CMAKE_BUILD_TYPE Release)
 
-add_definitions(-D__Dawn__)
+add_definitions(-D__DAWN__ -D__CMAKE__)
 
 add_executable(
 	Garnet

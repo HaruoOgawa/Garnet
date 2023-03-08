@@ -1,11 +1,11 @@
 #pragma once
 
-#ifndef __Dawn__
+#ifndef __DAWN__
 #define NOMINMAX
 #define VK_USE_PLATFORM_WIN32_KHR
 #define GLFW_INCLUDE_VULKAN
 #define GLFW_EXPOSE_NATIVE_WIN32
-#endif // !__Dawn__
+#endif // !__DAWN__
 
 #include <glfw3.h>
 #include <glfw3native.h>
@@ -13,7 +13,7 @@
 #include <memory>
 #include "EAppType.h"
 
-#ifdef __Dawn__
+#ifdef __DAWN__
 namespace api { class CWebGPUAPI; }
 #else
 namespace api { class CVulkanAPI; }
@@ -25,7 +25,7 @@ namespace descapp
 	class CDescAppManager
 	{
 		GLFWwindow* m_pWindow;
-#ifdef __Dawn__
+#ifdef __DAWN__
 		std::shared_ptr<api::CWebGPUAPI> m_GraphicsAPI;
 #else
 		std::shared_ptr<api::CVulkanAPI> m_GraphicsAPI;
