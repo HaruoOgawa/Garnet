@@ -1,3 +1,4 @@
+#ifdef __EMSCRIPTEN__
 #include "CWebAppManager.h"
 #include "../Debug/Message/Console.h"
 
@@ -120,3 +121,5 @@ namespace webapp
 		}
 	}
 }
+
+#endif

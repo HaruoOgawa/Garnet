@@ -1,10 +1,16 @@
 #pragma once
+#ifdef __DAWN__
 #include "../Interface/IGraphicsAPI.h"
+#include <webgpu.h>
 
 namespace api
 {
 	class CWebGPUAPI : public IGraphicsAPI
 	{
+	private:
+		// WebGPU メインロジック ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		bool CreateInstance();
+
 	public:
 		CWebGPUAPI();
 		virtual ~CWebGPUAPI();
@@ -19,3 +25,4 @@ namespace api
 		bool IsWaitting() override;
 	};
 }
+#endif

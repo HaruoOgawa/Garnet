@@ -1,3 +1,4 @@
+#ifndef __DAWN__
 #include "CVulkanAPI.h"
 #include "CVulkanRenderer.h"
 #include "../Debug/Message/Console.h"
@@ -1364,3 +1365,5 @@ namespace api
 		return m_RenderPass;
 	}
 }
+
+#endif // !__DAWN__

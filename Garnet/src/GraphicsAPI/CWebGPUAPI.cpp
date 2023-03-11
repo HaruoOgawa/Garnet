@@ -1,3 +1,4 @@
+#ifdef __DAWN__
 #include "CWebGPUAPI.h"
 #include "CWebGPURenderer.h"
 
@@ -13,8 +14,12 @@ namespace api
 
 	}
 
+	// IGraphicsAPI //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	bool CWebGPUAPI::Initialize()
 	{
+		if (!CreateInstance()) return false; // インスタンスを生成
+
 		return true;
 	}
 
@@ -44,4 +49,23 @@ namespace api
 	{
 		return false;
 	}
+
+	// WebGPU メインロジック ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	bool  CWebGPUAPI::CreateInstance()
+	{
+		// インスタンスの設定
+		WGPUInstanceDescriptor desc = {};
+		desc.nextInChain = nullptr; // ???
+
+		// インスタンスを生成
+		WGPUInstance instance = wgpuCreateInstance(&desc);
+
+		if (!instance)
+		{
+			return false;
+		}
+
+		return true;
+	}
 }
+#endif

@@ -1,4 +1,5 @@
 #pragma once
+#ifndef __DAWN__
 #include <memory>
 #include <vector>
 #include <optional>
@@ -206,3 +207,4 @@ namespace api
 		uint32_t GetCurrentFrame() const;
 	};
 }
+#endif

@@ -1,3 +1,4 @@
+#ifndef __DAWN__
 #include "CVulkanRenderer.h"
 #include "../GraphicsAPI/CVulkanAPI.h"
 #include "CRendererCreateInfo.h"
@@ -720,3 +721,5 @@ namespace renderer
 		return true;
 	}
 }
+
+#endif

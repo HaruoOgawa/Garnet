@@ -1,4 +1,5 @@
 #pragma once
+#ifdef __DAWN__
 #include "../Interface/IRenderer.h"
 
 namespace api { class CWebGPUAPI; }
@@ -18,3 +19,4 @@ namespace renderer
 		bool Draw() override;
 	};
 }
+#endif

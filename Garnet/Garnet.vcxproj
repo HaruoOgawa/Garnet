@@ -256,21 +256,23 @@ del $(OutDir)Garnet.pdb</Command>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;__DAWN__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)src\Library\GLFW\include;$(ProjectDir)src\Library\Vulkan\include;C:\emsdk\upstream\emscripten\system\include\webgpu;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src\Library\GLFW\include;$(ProjectDir)src\Library\WebGPU;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(ProjectDir)src\Library\GLFW\lib;$(ProjectDir)src\Library\Vulkan\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>glfw3.lib;vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)src\Library\GLFW\lib;$(ProjectDir)src\Library\WebGPU\windows-x86_64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>glfw3.lib;wgpu_native.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>mkdir $(OutDir)Resources
 del /s /q $(OutDir)Resources\*
 
 xcopy Resources $(OutDir)Resources /y /s /i
+xcopy $(ProjectDir)src\Library\WebGPU\windows-x86_64\wgpu_native.dll $(OutDir) /y /s /i
+
 del $(OutDir)Garnet.pdb</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -309,7 +311,7 @@ del $(OutDir)Garnet.pdb</Command>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;__DAWN__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)src\Library\GLFW\include;$(ProjectDir)src\Library\Vulkan\include;C:\emsdk\upstream\emscripten\system\include\webgpu;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src\Library\GLFW\include;$(ProjectDir)src\Library\WebGPU;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -317,18 +319,27 @@ del $(OutDir)Garnet.pdb</Command>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(ProjectDir)src\Library\GLFW\lib;$(ProjectDir)src\Library\Vulkan\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>glfw3.lib;vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)src\Library\GLFW\lib;$(ProjectDir)src\Library\WebGPU\windows-x86_64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>glfw3.lib;wgpu_native.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>mkdir $(OutDir)Resources
 del /s /q $(OutDir)Resources\*
 
 xcopy Resources $(OutDir)Resources /y /s /i
+xcopy $(ProjectDir)src\Library\WebGPU\windows-x86_64\wgpu_native.dll $(OutDir) /y /s /i
+
 del $(OutDir)Garnet.pdb</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="src\Library\WebGPU\webgpu.h" />
+    <ClInclude Include="src\Library\WebGPU\webgpu.hpp" />
+    <ClInclude Include="src\Library\WebGPU\wgpu.h" />
+    <ClInclude Include="src\Library\WebGPU\x64\webgpu.h" />
+    <ClInclude Include="src\Library\WebGPU\x64\wgpu.h" />
+    <ClInclude Include="src\Library\WebGPU\x86\webgpu.h" />
+    <ClInclude Include="src\Library\WebGPU\x86\wgpu.h" />
     <ClInclude Include="src\Scene\CScriptScene.h" />
     <ClInclude Include="src\File\CFile.h" />
     <ClInclude Include="src\Graphics\CMaterial.h" />

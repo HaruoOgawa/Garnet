@@ -23,9 +23,9 @@ set_target_properties(
 	LINK_FLAGS /SUBSYSTEM:CONSOLE
 )
 
-target_include_directories(Garnet PRIVATE ../src/Library/GLFW/include)
-target_link_directories(Garnet PRIVATE ../src/Library/GLFW/lib)
-target_link_libraries(Garnet glfw3.lib)
+target_include_directories(Garnet PRIVATE ../src/Library/GLFW/include ../src/Library/WebGPU)
+target_link_directories(Garnet PRIVATE ../src/Library/GLFW/lib ../src/Library/WebGPU/windows-x86_64)
+target_link_libraries(Garnet glfw3.lib wgpu_native.lib)
 
 if (MSVC)
 	target_compile_options(Garnet PRIVATE /W4)

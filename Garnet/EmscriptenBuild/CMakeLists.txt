@@ -47,6 +47,10 @@ add_executable(
 
 )
 
+target_include_directories(Garnet PRIVATE ../src/Library/WebGPU)
+target_link_directories(Garnet PRIVATE ../src/Library/WebGPU/windows-x86_64)
+target_link_libraries(Garnet wgpu_native.lib)
+
 if(EMSCRIPTEN)
 	target_link_options(Garnet PRIVATE -sEXPORTED_RUNTIME_METHODS=['ccall'])
 	set(CMAKE_EXECUTABLE_SUFFIX ".js")
