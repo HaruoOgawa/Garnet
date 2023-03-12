@@ -7,9 +7,12 @@ namespace api
 {
 	class CWebGPUAPI : public IGraphicsAPI
 	{
+		WGPUInstance m_Instance;
+		WGPUAdapter  m_Adapter;
 	private:
 		// WebGPU メインロジック ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		bool CreateInstance();
+		bool CreatePhysicalDevice();
 
 	public:
 		CWebGPUAPI();
