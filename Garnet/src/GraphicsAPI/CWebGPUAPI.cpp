@@ -2,12 +2,18 @@
 #include "CWebGPUAPI.h"
 #include "CWebGPURenderer.h"
 #include "../Debug/Message/Console.h"
+
+#ifndef __EMSCRIPTEN__
+#include <glfw3webgpu.h>
+#endif // !__EMSCRIPTEN__
+
 #include <cassert>
 
 namespace api
 {
 	CWebGPUAPI::CWebGPUAPI():
 		m_Instance(nullptr),
+		m_Surface(nullptr),
 		m_Adapter(nullptr)
 	{
 
@@ -19,10 +25,18 @@ namespace api
 	}
 
 	// IGraphicsAPI //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
+#ifdef __EMSCRIPTEN__
 	bool CWebGPUAPI::Initialize()
+#else
+	bool CWebGPUAPI::InitializeWithGLFW(GLFWwindow* pWindow)
+#endif // __EMSCRIPTEN__
 	{
 		if (!CreateInstance()) return false; // インスタンスを生成
+#ifdef __EMSCRIPTEN__
+		if (!CreateSurface()) return false; // ウィンドウサーフェイスを生成
+#else
+		if (!CreateSurface(pWindow)) return false; // ウィンドウサーフェイスを生成
+#endif // __EMSCRIPTEN__
 		if (!CreatePhysicalDevice()) return false; // 物理デバイス(アダプター)を生成
 
 		return true;
@@ -30,7 +44,6 @@ namespace api
 
 	void CWebGPUAPI::Release()
 	{
-
 	}
 
 	std::shared_ptr<renderer::IRenderer> CWebGPUAPI::CreateRenderer()
@@ -74,10 +87,47 @@ namespace api
 		return true;
 	}
 
+#ifdef __EMSCRIPTEN__
+	bool CWebGPUAPI::CreateSurface()
+#else
+	bool CWebGPUAPI::CreateSurface(GLFWwindow* pWindow)
+#endif // __EMSCRIPTEN__
+	{
+#ifdef __EMSCRIPTEN__
+		//
+		//m_Device = emscripten_webgpu_get_device();
+		
+		//
+		WGPUSurfaceDescriptorFromCanvasHTMLSelector canvDesc = {};
+		canvDesc.chain.sType = WGPUSType_SurfaceDescriptorFromCanvasHTMLSelector;
+		canvDesc.selector = "canvas";
+
+		//
+		WGPUSurfaceDescriptor surfDesc = {};
+		surfDesc.nextInChain = reinterpret_cast<WGPUChainedStruct*>(&surfDesc); // 拡張機能
+
+		//
+		m_Surface = wgpuInstanceCreateSurface(m_Instance, &surfDesc);
+#else
+		m_Surface = glfwGetWGPUSurface(m_Instance, pWindow);
+#endif // __EMSCRIPTEN__
+
+		//
+		if (!m_Surface)
+		{
+			Console::Log("[Error] Faliled to create Window Surface\n");
+			return false;
+		}
+
+		return true;
+	}
+
 	bool CWebGPUAPI::CreatePhysicalDevice()
 	{
 		// アダプターの生成オプション
 		WGPURequestAdapterOptions adapterOpts = {};
+		adapterOpts.nextInChain = nullptr; // 拡張機能
+		adapterOpts.compatibleSurface = m_Surface; // ウィンドウサーフェイスを渡す
 
 		// アダプターを取得するためのローカル構造体を定義
 		struct UserData
@@ -109,9 +159,15 @@ namespace api
 		m_Adapter = userData.adapter;
 		if (!m_Adapter)
 		{
-			Console::Log("Cound not get WebGPU Adapter\n");
+			Console::Log("[Error] Cound not get WebGPU Adapter\n");
 			return false;
 		}
+
+		// 物理デバイスの持つ機能を問い合わせる
+		std::vector<WGPUFeatureName> features;
+		std::size_t featureCount = wgpuAdapterEnumerateFeatures(m_Adapter, nullptr);
+		features.resize(featureCount);
+		wgpuAdapterEnumerateFeatures(m_Adapter, &features[0]);
 
 		return true;
 	}

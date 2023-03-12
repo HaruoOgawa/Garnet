@@ -168,10 +168,10 @@ namespace api
 		CVulkanAPI();
 		virtual ~CVulkanAPI();
 
-		bool InitializeWithGLFW(GLFWwindow* pWindow);
+		bool InitializeWithGLFW(GLFWwindow* pWindow) override;
 		void Release();
 
-		bool Initialize() override;
+		
 		std::shared_ptr<renderer::IRenderer> CreateRenderer() override;
 
 		bool BeginRender() override;

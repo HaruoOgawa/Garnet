@@ -18,11 +18,6 @@ namespace api
 		
 	}
 
-	bool CVulkanAPI::Initialize()
-	{
-		return true;
-	}
-
 	bool CVulkanAPI::InitializeWithGLFW(GLFWwindow* pWindow)
 	{
 		m_pWindow = pWindow;

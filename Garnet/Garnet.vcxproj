@@ -255,7 +255,7 @@ xcopy Resources $(OutDir)Resources /y /s /i</Command>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;__DAWN__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)src\Library\GLFW\include;$(ProjectDir)src\Library\WebGPU;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src\Library\GLFW\include;$(ProjectDir)src\Library\WebGPU;$(ProjectDir)src\Library\glfw3webgpu;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
@@ -308,7 +308,7 @@ del $(OutDir)Garnet.pdb</Command>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;__DAWN__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)src\Library\GLFW\include;$(ProjectDir)src\Library\WebGPU;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src\Library\GLFW\include;$(ProjectDir)src\Library\WebGPU;$(ProjectDir)src\Library\glfw3webgpu;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -330,6 +330,7 @@ del $(OutDir)Garnet.pdb</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="src\Library\glfw3webgpu\glfw3webgpu.h" />
     <ClInclude Include="src\Library\WebGPU\webgpu.h" />
     <ClInclude Include="src\Library\WebGPU\webgpu.hpp" />
     <ClInclude Include="src\Library\WebGPU\wgpu.h" />
@@ -364,6 +365,7 @@ del $(OutDir)Garnet.pdb</Command>
     <ClInclude Include="src\Graphics\SVertex.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Library\glfw3webgpu\glfw3webgpu.c" />
     <ClCompile Include="src\Scene\CScriptScene.cpp" />
     <ClCompile Include="src\File\CFile.cpp" />
     <ClCompile Include="src\Graphics\CMaterial.cpp" />

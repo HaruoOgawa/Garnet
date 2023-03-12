@@ -77,11 +77,7 @@ namespace descapp
 	bool CDescAppManager::Initialize()
 	{
 		if (!InitWindow()) return false;
-#ifndef __DAWN__
 		if(!m_GraphicsAPI->InitializeWithGLFW(m_pWindow)) return false;
-#else
-		if (!m_GraphicsAPI->Initialize()) return false;
-#endif
 		if (!m_App->Initialize(m_GraphicsAPI.get())) return false;
 
 		return true;
