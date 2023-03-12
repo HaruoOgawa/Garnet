@@ -7,6 +7,8 @@ project(Garnet, CXX)
 
 set(CMAKE_BUILD_TYPE Release)
 
+add_definitions(-D__DAWN__)
+
 add_executable(
 	Garnet
 """
@@ -15,11 +17,12 @@ Shared_Post = """
 )
 
 target_include_directories(Garnet PRIVATE ../src/Library/WebGPU)
-target_link_directories(Garnet PRIVATE ../src/Library/WebGPU/windows-x86_64)
-target_link_libraries(Garnet wgpu_native.lib)
 
 if(EMSCRIPTEN)
-	target_link_options(Garnet PRIVATE -sEXPORTED_RUNTIME_METHODS=['ccall'])
+	target_link_options(Garnet PRIVATE 
+		-sEXPORTED_RUNTIME_METHODS=['ccall']
+		-sUSE_WEBGPU
+	)
 	set(CMAKE_EXECUTABLE_SUFFIX ".js")
 endif()
 """
