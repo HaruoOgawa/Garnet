@@ -38,6 +38,7 @@ namespace api
 		if (!CreateSurface(pWindow)) return false; // ウィンドウサーフェイスを生成
 #endif // __EMSCRIPTEN__
 		if (!CreatePhysicalDevice()) return false; // 物理デバイス(アダプター)を生成
+		if (!CreateLogicalDevice()) return false; // 論理デバイスを生成
 
 		return true;
 	}
@@ -168,6 +169,63 @@ namespace api
 		std::size_t featureCount = wgpuAdapterEnumerateFeatures(m_Adapter, nullptr);
 		features.resize(featureCount);
 		wgpuAdapterEnumerateFeatures(m_Adapter, &features[0]);
+
+		return true;
+	}
+
+	bool CWebGPUAPI::CreateLogicalDevice()
+	{
+		// デバイスの取得オプション
+		WGPUDeviceDescriptor descriptor = {};
+		descriptor.nextInChain = nullptr; // 拡張機能
+		descriptor.label = "Garnet Device"; // デバイスを判別するためのラベル
+		descriptor.requiredFeaturesCount = 0; // 使用することを指定するデバイスの特徴の数
+		descriptor.requiredLimits = nullptr; // ???
+		descriptor.defaultQueue.nextInChain = nullptr; // デフォルトコマンドキューの拡張機能
+		descriptor.defaultQueue.label = "Default Queue"; // デフォルトコマンドキューの判別用ラベル
+
+		// 論理デバイスを取得する
+		struct UserData
+		{
+			WGPUDevice device = nullptr;
+			bool	   requestEnded = false;
+		};
+
+		UserData userData;
+
+		auto onDeviceRequestEnded = [](WGPURequestDeviceStatus status, WGPUDevice device, char const* message, void* pUserData)
+		{
+			UserData& userData = *reinterpret_cast<UserData*>(pUserData);
+			if (status == WGPURequestDeviceStatus_Success)
+			{
+				userData.device = device;
+			}
+
+			userData.requestEnded = true;
+		};
+
+		wgpuAdapterRequestDevice(
+			m_Adapter,
+			&descriptor,
+			onDeviceRequestEnded,
+			(void*)&userData
+		);
+
+		m_Device = userData.device;
+		if (!m_Device)
+		{
+			Console::Log("Could not get WebGPU Adapter\n");
+			return false;
+		}
+
+		// デバイスエラーをハンドリングするためのコールバックを登録しておく
+		auto onDeviceError = [](WGPUErrorType type, char const* message, void*)
+		{
+			Console::Log("Uncaptured device error: %d\n", type);
+			if (message) Console::Log("message: %s\n", message);
+		};
+
+		wgpuDeviceSetUncapturedErrorCallback(m_Device, onDeviceError, nullptr);
 
 		return true;
 	}
