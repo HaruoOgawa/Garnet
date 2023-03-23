@@ -29,7 +29,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
+#if defined(__DAWN__) 
 #include "glfw3webgpu.h"
 
 #include <webgpu.h>
@@ -157,3 +157,4 @@ WGPUSurface glfwGetWGPUSurface(WGPUInstance instance, GLFWwindow* window) {
 #endif
 }
 
+#endif
