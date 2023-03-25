@@ -15,14 +15,21 @@ namespace api
 		WGPUSurface m_Surface;
 
 		// Device
-		WGPUAdapter  m_Adapter;
-		WGPUDevice   m_Device;
+		WGPUAdapter  m_Adapter; // 物理デバイス
+		WGPUDevice   m_Device; // 論理デバイス
 
-		// Queue
+		// Queue, Command
 		WGPUQueue m_Queue;
-
-		// Command
+		WGPUCommandEncoder m_Encoder;
 		WGPUCommandBuffer m_CommandBuffer;
+
+		// SwapChain
+		WGPUTextureView m_NextTexture;
+		WGPUSwapChain m_SwapChain;
+
+		// RenderPass
+		WGPURenderPassEncoder m_RenderPass;
+
 	private:
 		// WebGPU メインロジック ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		bool CreateInstance();
@@ -34,6 +41,8 @@ namespace api
 		bool CreatePhysicalDevice();
 		bool CreateLogicalDevice();
 		bool CreateQueue();
+		bool CreateSwapChain();
+		bool CreateRenderPass();
 	public:
 		CWebGPUAPI();
 		virtual ~CWebGPUAPI();
