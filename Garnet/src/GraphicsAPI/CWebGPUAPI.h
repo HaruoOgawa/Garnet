@@ -17,6 +17,12 @@ namespace api
 		// Device
 		WGPUAdapter  m_Adapter;
 		WGPUDevice   m_Device;
+
+		// Queue
+		WGPUQueue m_Queue;
+
+		// Command
+		WGPUCommandBuffer m_CommandBuffer;
 	private:
 		// WebGPU メインロジック ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		bool CreateInstance();
@@ -27,6 +33,7 @@ namespace api
 #endif // __EMSCRIPTEN__
 		bool CreatePhysicalDevice();
 		bool CreateLogicalDevice();
+		bool CreateQueue();
 	public:
 		CWebGPUAPI();
 		virtual ~CWebGPUAPI();

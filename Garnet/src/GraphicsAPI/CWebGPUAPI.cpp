@@ -39,6 +39,7 @@ namespace api
 #endif // __EMSCRIPTEN__
 		if (!CreatePhysicalDevice()) return false; // 物理デバイス(アダプター)を生成
 		if (!CreateLogicalDevice()) return false; // 論理デバイスを生成
+		if (!CreateQueue()) return false; // キューを生成
 
 		return true;
 	}
@@ -226,6 +227,37 @@ namespace api
 		};
 
 		wgpuDeviceSetUncapturedErrorCallback(m_Device, onDeviceError, nullptr);
+
+		return true;
+	}
+
+	bool CWebGPUAPI::CreateQueue()
+	{
+		// キューファミリを生成
+		m_Queue = wgpuDeviceGetQueue(m_Device);
+
+		//
+		auto onQueueWorkDone = [](WGPUQueueWorkDoneStatus status, void*)
+		{
+			Console::Log("Queued work finished with status: %s\n", status);
+		};
+		//wgpuQueueOnSubmittedWorkDone(m_Queue, onQueueWorkDone, nullptr); // なんか未解決になる
+
+		// コマンドエンコーダーを生成
+		// (コマンドバッファの生成に必要なもの)
+		WGPUCommandEncoderDescriptor encoderDesc = {};
+		encoderDesc.nextInChain = nullptr;
+		encoderDesc.label = "Command Encoder";
+		WGPUCommandEncoder encoder = wgpuDeviceCreateCommandEncoder(m_Device, &encoderDesc);
+
+		// コマンドバッファを生成
+		WGPUCommandBufferDescriptor cmdBufferDesc = {};
+		cmdBufferDesc.nextInChain = nullptr;
+		cmdBufferDesc.label = "Command Buffer";
+		m_CommandBuffer = wgpuCommandEncoderFinish(encoder, &cmdBufferDesc);
+
+		// [テストコード] キューの送信
+		wgpuQueueSubmit(m_Queue, 1, &m_CommandBuffer);
 
 		return true;
 	}
