@@ -27,7 +27,7 @@ namespace scene
 	bool CScriptScene::Initialize(api::IGraphicsAPI* pGraphicsAPI)
 	{
 		//
-		std::string ShaderPath = "Resources\\Shaders\\";
+		/*std::string ShaderPath = "Resources\\Shaders\\";
 
 		// Vertex Buffer
 		std::vector<renderer::SVertex> Vertices = {
@@ -54,7 +54,7 @@ namespace scene
 		if (!Primitive->Create(pGraphicsAPI, createInfo)) return false;
 
 		//
-		m_TestMesh->AddPrimitive(Primitive);
+		m_TestMesh->AddPrimitive(Primitive);*/
 
 		return true;
 	}

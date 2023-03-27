@@ -2,6 +2,7 @@
 #ifdef __DAWN__
 #include "../Interface/IGraphicsAPI.h"
 #include <webgpu.h>
+#include <wgpu.h>
 #include <vector>
 
 namespace api
@@ -9,13 +10,16 @@ namespace api
 	class CWebGPUAPI : public IGraphicsAPI
 	{
 		// Instance
+#ifndef __EMSCRIPTEN__
 		WGPUInstance m_Instance;
-		
+#endif
 		// WIndow Surface
 		WGPUSurface m_Surface;
 
 		// Device
+#ifndef __EMSCRIPTEN__
 		WGPUAdapter  m_Adapter; // 物理デバイス
+#endif
 		WGPUDevice   m_Device; // 論理デバイス
 
 		// Queue, Command

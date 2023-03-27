@@ -54,7 +54,7 @@ target_include_directories(Garnet PRIVATE ../src/Library/WebGPU)
 if(EMSCRIPTEN)
 	target_link_options(Garnet PRIVATE 
 		-sEXPORTED_RUNTIME_METHODS=['ccall']
-		-sUSE_WEBGPU
+		-sUSE_WEBGPU=1
 	)
 	set(CMAKE_EXECUTABLE_SUFFIX ".js")
 endif()
