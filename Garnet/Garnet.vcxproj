@@ -388,6 +388,8 @@ del $(OutDir)Garnet.pdb</Command>
   </ItemGroup>
   <ItemGroup>
     <None Include="CMakeBuild\build.bat" />
+    <None Include="CMakeBuild\Garnet_front.js" />
+    <None Include="CMakeBuild\index.html" />
     <None Include="Commands\RemakeCmakeLists.bat" />
     <None Include="Commands\RemakeCmakeLists.py" />
     <None Include="Commands\RemakeCmakeLists_DescApp.bat" />

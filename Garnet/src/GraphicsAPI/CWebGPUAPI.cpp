@@ -136,7 +136,7 @@ namespace api
 		return false;
 	}
 
-#ifdef __EMSCRIPTEN__
+/*#ifdef __EMSCRIPTEN__
 	EM_JS(void, JS_wgpu_init, (), {
 	  async function init() {
 		Module.preinitializedWebGPUDevice = -1;
@@ -155,11 +155,11 @@ namespace api
 			alphaMode : 'opaque'
 		});
 
-		/*const swapChainFormat = "bgra8unorm";
+		const swapChainFormat = "bgra8unorm";
 		const swapChain = context.configureSwapChain({
 		  device,
 		  format: swapChainFormat,
-		});*/
+		});
 	  };
 	  init();
 		});
@@ -167,7 +167,7 @@ namespace api
 	EM_JS(bool, JS_wgpu_check, (), {
 	  return Module.preinitializedWebGPUDevice == -1;
 		});
-#endif
+#endif*/
 	
 	// WebGPU メインロジック ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	bool CWebGPUAPI::CreateInstance()
@@ -186,7 +186,7 @@ namespace api
 			Console::Log("[Error] Failed to create Instance\n");
 			return false;
 		}
-#else
+/*#else
 		JS_wgpu_init();
 		while (1) {
 			if (JS_wgpu_check()) {
@@ -195,7 +195,7 @@ namespace api
 				break;
 			}
 			emscripten_sleep(5);
-		}
+		}*/
 #endif
 		return true;
 	}

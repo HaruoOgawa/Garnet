@@ -1,3 +1,4 @@
+#ifndef __EMSCRIPTEN__
 /**
  * This is an extension of GLFW for WebGPU, abstracting away the details of
  * OS-specific operations.
@@ -156,5 +157,7 @@ WGPUSurface glfwGetWGPUSurface(WGPUInstance instance, GLFWwindow* window) {
 #error "Unsupported WGPU_TARGET"
 #endif
 }
+
+#endif
 
 #endif

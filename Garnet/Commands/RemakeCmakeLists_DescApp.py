@@ -3,7 +3,8 @@ import os
 Shared_Pre = """ 
 cmake_minimum_required(VERSION 3.22.1)
 
-project(Garnet, CXX)
+# declare using C and C++
+project(Garnet, C CXX)
 
 set(CMAKE_BUILD_TYPE Release)
 
@@ -14,21 +15,42 @@ add_executable(
 """
 
 Shared_Post = """
+	../src/Library/glfw3webgpu/glfw3webgpu.h
+	../src/Library/glfw3webgpu/glfw3webgpu.c
 )
 
-set_target_properties(
-	Garnet PROPERTIES
-	CXX_STANDARD 17
-	COMPILE_WARNING_AS_ERROR ON
-	LINK_FLAGS /SUBSYSTEM:CONSOLE
-)
+if(NOT EMSCRIPTEN)
+	set_target_properties(
+		Garnet PROPERTIES
+		CXX_STANDARD 17
+		COMPILE_WARNING_AS_ERROR ON
+		LINK_FLAGS /SUBSYSTEM:CONSOLE
+	)
 
-target_include_directories(Garnet PRIVATE ../src/Library/GLFW/include ../src/Library/WebGPU ../src/Library/glfw3webgpu)
-target_link_directories(Garnet PRIVATE ../src/Library/GLFW/lib ../src/Library/WebGPU/windows-x86_64 ../src/Library/glfw3webgpu)
-target_link_libraries(Garnet glfw3.lib wgpu_native.lib glfw3webgpu)
+	target_include_directories(Garnet PRIVATE ../src/Library/GLFW/include ../src/Library/WebGPU ../src/Library/glfw3webgpu)
+	target_link_directories(Garnet PRIVATE ../src/Library/GLFW/lib ../src/Library/WebGPU/windows-x86_64)
+	target_link_libraries(Garnet glfw3.lib wgpu_native.lib)
+else()
+	set_target_properties(
+		Garnet PROPERTIES
+		CXX_STANDARD 17
+		COMPILE_WARNING_AS_ERROR ON
+	)
+
+	target_include_directories(Garnet PRIVATE ../src/Library/GLFW/include ../src/Library/WebGPU)
+	target_link_directories(Garnet PRIVATE ../src/Library/GLFW/lib ../src/Library/WebGPU/windows-x86_64)
+endif()
 
 if (MSVC)
 	target_compile_options(Garnet PRIVATE /W4)
+elseif(EMSCRIPTEN)
+	target_link_options(Garnet PRIVATE 
+		-sEXPORTED_RUNTIME_METHODS=['ccall']
+		-sUSE_GLFW=3
+		-sUSE_WEBGPU=1
+		-sALLOW_MEMORY_GROWTH
+	)
+	set(CMAKE_EXECUTABLE_SUFFIX ".js")
 else()
 	target_compile_options(Garnet PRIVATE -Wall -Wextra -pedantic)
 endif()

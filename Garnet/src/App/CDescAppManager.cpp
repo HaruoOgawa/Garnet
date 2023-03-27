@@ -1,6 +1,12 @@
 #include "CDescAppManager.h"
 #include "../Debug/Message/Console.h"
 
+#ifdef __EMSCRIPTEN__
+#include <emscripten/emscripten.h>
+// emscripten_webgpu_get_deviceの使用に必要なインクルード
+#include <emscripten/html5_webgpu.h>
+#endif
+
 #ifdef __DAWN__
 #include "../GraphicsAPI/CWebGPUAPI.h"
 #else
@@ -77,7 +83,11 @@ namespace descapp
 	bool CDescAppManager::Initialize()
 	{
 		if (!InitWindow()) return false;
+#ifdef __EMSCRIPTEN__
+		if (!m_GraphicsAPI->Initialize()) return false;
+#else
 		if(!m_GraphicsAPI->InitializeWithGLFW(m_pWindow)) return false;
+#endif
 		if (!m_App->Initialize(m_GraphicsAPI.get())) return false;
 
 		return true;

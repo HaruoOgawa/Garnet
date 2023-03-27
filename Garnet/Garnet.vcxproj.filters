@@ -199,6 +199,8 @@
       <Filter>ソース ファイル</Filter>
     </None>
     <None Include="EmscriptenBuild\index.html" />
+    <None Include="CMakeBuild\Garnet_front.js" />
+    <None Include="CMakeBuild\index.html" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="EmscriptenBuild\CMakeLists.txt" />
