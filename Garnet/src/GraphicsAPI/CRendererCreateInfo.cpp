@@ -29,52 +29,52 @@ namespace renderer
 	}
 
 	// Shader
-	void CRendererCreateInfo::SetVertexShaderCode(const std::vector<unsigned char>& VertexShaderCode)
+	void CRendererCreateInfo::SetVertexShaderCode(const std::string& VertexShaderCode)
 	{
 		m_VertexShaderCode = VertexShaderCode;
 	}
 
-	const std::vector<unsigned char>& CRendererCreateInfo::GetVertexShaderCode() const
+	const std::string& CRendererCreateInfo::GetVertexShaderCode() const
 	{
 		return m_VertexShaderCode;
 	}
 
-	void CRendererCreateInfo::SetFragmentShaderCode(const std::vector<unsigned char>& FragmentShaderCode)
+	void CRendererCreateInfo::SetFragmentShaderCode(const std::string& FragmentShaderCode)
 	{
 		m_FragmentShaderCode = FragmentShaderCode;
 	}
 
-	const std::vector<unsigned char>& CRendererCreateInfo::GetFragmentShaderCode() const
+	const std::string& CRendererCreateInfo::GetFragmentShaderCode() const
 	{
 		return m_FragmentShaderCode;
 	}
 
-	void CRendererCreateInfo::SetGeometryShaderCode(const std::vector<unsigned char>& GeometryShaderCode)
+	void CRendererCreateInfo::SetGeometryShaderCode(const std::string& GeometryShaderCode)
 	{
 		m_GeometryShaderCode = GeometryShaderCode;
 	}
 
-	const std::vector<unsigned char>& CRendererCreateInfo::GetGeometryShaderCode() const
+	const std::string& CRendererCreateInfo::GetGeometryShaderCode() const
 	{
 		return m_GeometryShaderCode;
 	}
 
-	void CRendererCreateInfo::HullShaderCode(const std::vector<unsigned char>& HullShaderCode)
+	void CRendererCreateInfo::HullShaderCode(const std::string& HullShaderCode)
 	{
 		m_HullShaderCode = HullShaderCode;
 	}
 
-	const std::vector<unsigned char>& CRendererCreateInfo::GetHullShaderCode() const
+	const std::string& CRendererCreateInfo::GetHullShaderCode() const
 	{
 		return m_HullShaderCode;
 	}
 
-	void CRendererCreateInfo::SetDomainShaderCode(const std::vector<unsigned char>& DomainShaderCode)
+	void CRendererCreateInfo::SetDomainShaderCode(const std::string& DomainShaderCode)
 	{
 		m_DomainShaderCode = DomainShaderCode;
 	}
 
-	const std::vector<unsigned char>& CRendererCreateInfo::GetDomainShaderCode() const
+	const std::string& CRendererCreateInfo::GetDomainShaderCode() const
 	{
 		return m_DomainShaderCode;
 	}

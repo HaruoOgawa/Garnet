@@ -13,6 +13,7 @@
 
 #include <vector>
 #include <array>
+#include <string>
 
 #include "../Interface/IRenderer.h"
 #include "../Graphics/SVertex.h"
@@ -75,7 +76,7 @@ namespace renderer
 
 		// ÉwÉãÉpÅ[ä÷êî ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// Shader
-		bool CreateShaderModule(VkShaderModule& shaderModule, const std::vector<unsigned char>& code);
+		bool CreateShaderModule(VkShaderModule& shaderModule, const std::string& code);
 		static VkVertexInputBindingDescription GetBindingDescription();
 		static std::array<VkVertexInputAttributeDescription, 3> GetAttributeDestriptions();
 	public:

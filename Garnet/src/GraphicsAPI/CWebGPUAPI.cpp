@@ -133,6 +133,22 @@ namespace api
 		return false;
 	}
 
+	//
+	WGPUDevice CWebGPUAPI::GetLogicalDevice() const
+	{
+		return m_Device;
+	}
+
+	WGPUTextureFormat CWebGPUAPI::GetSwapChainFormat() const
+	{
+		return m_SwapChainFormat;
+	}
+
+	WGPURenderPassEncoder CWebGPUAPI::GetRenderPass() const
+	{
+		return m_RenderPass;
+	}
+
 	// WebGPU メインロジック ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	bool CWebGPUAPI::CreateInstance()
 	{
@@ -328,18 +344,16 @@ namespace api
 		swapChainDesc.height = 600;
 
 #ifdef __EMSCRIPTEN__
-		WGPUTextureFormat swapChainFormat = WGPUTextureFormat_BGRA8Unorm;
+		m_SwapChainFormat = WGPUTextureFormat_BGRA8Unorm;
 #else
-		WGPUTextureFormat swapChainFormat = wgpuSurfaceGetPreferredFormat(m_Surface, m_Adapter);
+		m_SwapChainFormat = wgpuSurfaceGetPreferredFormat(m_Surface, m_Adapter);
 #endif // __EMSCRIPTEN__
-		swapChainDesc.format = swapChainFormat;
+		swapChainDesc.format = m_SwapChainFormat;
 		swapChainDesc.usage = WGPUTextureUsage_RenderAttachment; // レンダーパスのターゲットとして使用することを宣言
 		swapChainDesc.presentMode = WGPUPresentMode_Fifo; // 各フレームで待機中のキューからどのようにテクスチャを表示するかを指定する https://eliemichel.github.io/LearnWebGPU/getting-started/first-color.html
 
 		//
-		Console::Log("[START] wgpuDeviceCreateSwapChain\n");
 		m_SwapChain = wgpuDeviceCreateSwapChain(m_Device, m_Surface, &swapChainDesc);
-		Console::Log("[END] wgpuDeviceCreateSwapChain\n");
 		return true;
 	}
 }

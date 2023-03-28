@@ -639,7 +639,7 @@ namespace renderer
 	// ヘルパー関数 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Shader
 	// ShaderModuleの作成(Shaderをラップ・管理するためのもの)
-	bool CVulkanRenderer::CreateShaderModule(VkShaderModule& shaderModule, const std::vector<unsigned char>& code)
+	bool CVulkanRenderer::CreateShaderModule(VkShaderModule& shaderModule, const std::string& code)
 	{
 		VkShaderModuleCreateInfo createInfo{};
 		createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;

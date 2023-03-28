@@ -30,6 +30,7 @@ namespace api
 		// SwapChain
 		WGPUTextureView m_NextTexture;
 		WGPUSwapChain m_SwapChain;
+		WGPUTextureFormat m_SwapChainFormat;
 
 		// RenderPass
 		WGPURenderPassEncoder m_RenderPass;
@@ -63,6 +64,11 @@ namespace api
 		bool BeginRender() override;
 		bool EndRender() override;
 		bool IsWaitting() override;
+
+		//
+		WGPUDevice GetLogicalDevice() const;
+		WGPUTextureFormat GetSwapChainFormat() const;
+		WGPURenderPassEncoder GetRenderPass() const;
 	};
 }
 #endif

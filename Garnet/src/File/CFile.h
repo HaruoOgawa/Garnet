@@ -7,6 +7,7 @@ namespace file
 	class CFile
 	{
 	public:
-		static std::vector<unsigned char> ReadFile(const std::string& filename);
+		static std::vector<char> ReadFile(const std::string& filename);
+		static std::string ReadFileAsString(const std::string& filename);
 	};
 }
