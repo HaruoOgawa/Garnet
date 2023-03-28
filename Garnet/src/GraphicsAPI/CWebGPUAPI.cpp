@@ -41,7 +41,6 @@ namespace api
 		if (!CreateLogicalDevice()) return false; // 論理デバイスを生成
 		if (!CreateQueue()) return false; // キューを生成
 		if (!CreateSwapChain()) return false; // スワップチェーンを生成
-		if (!CreateRenderPass()) return false; // レンダーパスを生成
 
 		return true;
 	}
@@ -60,43 +59,43 @@ namespace api
 	bool CWebGPUAPI::BeginRender()
 	{
 		// スワップチェーンから次の待機中テクスチャを取得
-		//m_NextTexture = wgpuSwapChainGetCurrentTextureView(m_SwapChain);
-		//if (!m_NextTexture)
-		//{
-		//	Console::Log("Not Exist nextTexture\n");
-		//	return false;
-		//}
-		//
-		//// レンダーパスの設定
-		//WGPURenderPassColorAttachment renderPassColorAttachment = {};
-		//renderPassColorAttachment.view = m_NextTexture; // レンダリングの描画先テクスチャを指定
-		//renderPassColorAttachment.resolveTarget = nullptr; // マルチサンプリングの設定
-		//renderPassColorAttachment.loadOp = WGPULoadOp_Clear; // レンダー パスを実行する前にビューで実行するロード操作を示します。例えばクリア値に初期化するだったり
-		//renderPassColorAttachment.storeOp = WGPUStoreOp_Store; // レンダリング実行後の操作
-		//renderPassColorAttachment.clearValue = WGPUColor{ 0.9f, 0.1f, 0.2f, 1.0f }; // 初期カラー
+		m_NextTexture = wgpuSwapChainGetCurrentTextureView(m_SwapChain);
+		if (!m_NextTexture)
+		{
+			Console::Log("Not Exist nextTexture\n");
+			return false;
+		}
+		
+		// レンダーパスの設定
+		WGPURenderPassColorAttachment renderPassColorAttachment = {};
+		renderPassColorAttachment.view = m_NextTexture; // レンダリングの描画先テクスチャを指定
+		renderPassColorAttachment.resolveTarget = nullptr; // マルチサンプリングの設定
+		renderPassColorAttachment.loadOp = WGPULoadOp_Clear; // レンダー パスを実行する前にビューで実行するロード操作を示します。例えばクリア値に初期化するだったり
+		renderPassColorAttachment.storeOp = WGPUStoreOp_Store; // レンダリング実行後の操作
+		renderPassColorAttachment.clearValue = WGPUColor{ 0.9f, 0.1f, 0.2f, 1.0f }; // 初期カラー
 
-		//WGPURenderPassDescriptor renderPassDesc = {};
-		//renderPassDesc.colorAttachmentCount = 1; 
-		//renderPassDesc.colorAttachments = &renderPassColorAttachment; // レンダーパスのカラーフォーマットを指定
-		//renderPassDesc.depthStencilAttachment = nullptr; // デプスステンシルバッファ
-		//renderPassDesc.timestampWriteCount = 0;
-		//renderPassDesc.timestampWrites = nullptr; // レンダリングの同期用のオブジェクト領域
-		//renderPassDesc.nextInChain = nullptr; // 拡張機能
+		WGPURenderPassDescriptor renderPassDesc = {};
+		renderPassDesc.colorAttachmentCount = 1; 
+		renderPassDesc.colorAttachments = &renderPassColorAttachment; // レンダーパスのカラーフォーマットを指定
+		renderPassDesc.depthStencilAttachment = nullptr; // デプスステンシルバッファ
+		renderPassDesc.timestampWriteCount = 0;
+		renderPassDesc.timestampWrites = nullptr; // レンダリングの同期用のオブジェクト領域
+		renderPassDesc.nextInChain = nullptr; // 拡張機能
 
-		//// コマンドエンコーダーを生成
-		//// (コマンドバッファの生成に必要なもの)
-		//WGPUCommandEncoderDescriptor encoderDesc = {};
-		//encoderDesc.nextInChain = nullptr;
-		//encoderDesc.label = "Command Encoder";
-		//m_Encoder = wgpuDeviceCreateCommandEncoder(m_Device, &encoderDesc);
-		//if (!m_Encoder)
-		//{
-		//	Console::Log("Failed to Create Encorder\n");
-		//	return false;
-		//}
+		// コマンドエンコーダーを生成
+		// (コマンドバッファの生成に必要なもの)
+		WGPUCommandEncoderDescriptor encoderDesc = {};
+		encoderDesc.nextInChain = nullptr;
+		encoderDesc.label = "Command Encoder";
+		m_Encoder = wgpuDeviceCreateCommandEncoder(m_Device, &encoderDesc);
+		if (!m_Encoder)
+		{
+			Console::Log("Failed to Create Encorder\n");
+			return false;
+		}
 
-		//// レンダーパス開始
-		//m_RenderPass = wgpuCommandEncoderBeginRenderPass(m_Encoder, &renderPassDesc);
+		// レンダーパス開始
+		m_RenderPass = wgpuCommandEncoderBeginRenderPass(m_Encoder, &renderPassDesc);
 
 		return true;
 	}
@@ -104,29 +103,27 @@ namespace api
 	bool CWebGPUAPI::EndRender()
 	{
 		// レンダーパス終了
-//		wgpuRenderPassEncoderEnd(m_RenderPass);
-//
-//		//
-//#ifdef __EMSCRIPTEN__
-//		//wgpuTextureViewDrop(m_NextTexture);
-//#endif // __EMSCRIPTEN__
-//
-//		// コマンドバッファを生成
-//		WGPUCommandBufferDescriptor cmdBufferDesc = {};
-//		cmdBufferDesc.nextInChain = nullptr;
-//		cmdBufferDesc.label = "Command Buffer";
-//		m_CommandBuffer = wgpuCommandEncoderFinish(m_Encoder, &cmdBufferDesc);
-//		if (!m_CommandBuffer)
-//		{
-//			Console::Log("Failed to Create CommandBuffer\n");
-//			return false;
-//		}
-//
-//		// コマンドの実行
-//		wgpuQueueSubmit(m_Queue, 1, &m_CommandBuffer);
-//
-//		// スワップチェーンに
-//		wgpuSwapChainPresent(m_SwapChain);
+		wgpuRenderPassEncoderEnd(m_RenderPass);
+
+		//
+#ifdef __EMSCRIPTEN__
+		//wgpuTextureViewDrop(m_NextTexture);
+#endif // __EMSCRIPTEN__
+
+		// コマンドバッファを生成
+		WGPUCommandBufferDescriptor cmdBufferDesc = {};
+		cmdBufferDesc.nextInChain = nullptr;
+		cmdBufferDesc.label = "Command Buffer";
+		m_CommandBuffer = wgpuCommandEncoderFinish(m_Encoder, &cmdBufferDesc);
+		if (!m_CommandBuffer)
+		{
+			Console::Log("Failed to Create CommandBuffer\n");
+			return false;
+		}
+		// コマンドの実行
+		wgpuQueueSubmit(m_Queue, 1, &m_CommandBuffer);
+		// スワップチェーンに
+		wgpuSwapChainPresent(m_SwapChain);
 
 		return true;
 	}
@@ -136,39 +133,6 @@ namespace api
 		return false;
 	}
 
-/*#ifdef __EMSCRIPTEN__
-	EM_JS(void, JS_wgpu_init, (), {
-	  async function init() {
-		Module.preinitializedWebGPUDevice = -1;
-		const adapter = await navigator.gpu.requestAdapter();
-		const device = await adapter.requestDevice();
-		Module.preinitializedWebGPUDevice = device;
-
-		var canvas = document.getElementById("MainCanvas");
-		const context = canvas.getContext('webgpu');
-
-		// コンテキストの設定
-		const presentationFormat = navigator.gpu.getPreferredCanvasFormat(); // Canvasのネイティブのピクセルフォーマット
-		context.configure({
-			device: device,
-			format : presentationFormat,
-			alphaMode : 'opaque'
-		});
-
-		const swapChainFormat = "bgra8unorm";
-		const swapChain = context.configureSwapChain({
-		  device,
-		  format: swapChainFormat,
-		});
-	  };
-	  init();
-		});
-
-	EM_JS(bool, JS_wgpu_check, (), {
-	  return Module.preinitializedWebGPUDevice == -1;
-		});
-#endif*/
-	
 	// WebGPU メインロジック ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	bool CWebGPUAPI::CreateInstance()
 	{
@@ -186,16 +150,6 @@ namespace api
 			Console::Log("[Error] Failed to create Instance\n");
 			return false;
 		}
-/*#else
-		JS_wgpu_init();
-		while (1) {
-			if (JS_wgpu_check()) {
-				Console::Log("WebGPU is Initialized!!\n");
-
-				break;
-			}
-			emscripten_sleep(5);
-		}*/
 #endif
 		return true;
 	}
@@ -386,14 +340,6 @@ namespace api
 		Console::Log("[START] wgpuDeviceCreateSwapChain\n");
 		m_SwapChain = wgpuDeviceCreateSwapChain(m_Device, m_Surface, &swapChainDesc);
 		Console::Log("[END] wgpuDeviceCreateSwapChain\n");
-		return true;
-	}
-
-	bool CWebGPUAPI::CreateRenderPass()
-	{
-		
-
-
 		return true;
 	}
 }

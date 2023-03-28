@@ -24,7 +24,8 @@ namespace descapp
 	CDescAppManager::CDescAppManager(app::EAppType AppType):
 		m_pWindow(nullptr),
 		m_GraphicsAPI(nullptr),
-		m_App(nullptr)
+		m_App(nullptr),
+		m_IsRunLoop(g_IsRunLoop)
 	{
 		//
 #ifdef __DAWN__
@@ -55,6 +56,11 @@ namespace descapp
 
 	bool CDescAppManager::Release()
 	{
+#ifndef __DAWN__
+		// 論理デバイスが操作を完了するのを待つ
+		vkDeviceWaitIdle(m_GraphicsAPI->GetLogicalDevice());
+#endif
+
 		if (m_App)
 		{
 			m_App->Release(m_GraphicsAPI.get());
@@ -122,18 +128,22 @@ namespace descapp
 
 	bool CDescAppManager::RunLopp()
 	{
-		while (g_IsRunLoop)
+		m_IsRunLoop = g_IsRunLoop;
+
+		if (g_IsRunLoop)
 		{
 			glfwPollEvents();
 
 			if (!Update()) return false;
 			if (!Draw()) return false;
 		}
+		else
+		{
+#ifdef __EMSCRIPTEN__
+			emscripten_cancel_main_loop();
+#endif // __EMSCRIPTEN__
+		}
 
-#ifndef __DAWN__
-		// 論理デバイスが操作を完了するのを待つ
-		vkDeviceWaitIdle(m_GraphicsAPI->GetLogicalDevice());
-#endif
 		return true;
 	}
 

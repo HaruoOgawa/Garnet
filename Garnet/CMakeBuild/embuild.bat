@@ -10,16 +10,16 @@ cmake .
 
 call C:\emsdk\emsdk_env.bat
 call emcmake cmake .. -G "MinGW Makefiles"
-call ..\nmake.exe
+call ..\..\EmscriptenBuild\nmake.exe
 
 cd ..\
 
 mkdir ..\WebRelease
 del /s /q ..\WebRelease\*
 
-xcopy Garnet_front.js ..\WebRelease\ /y /s /i
+xcopy ..\EmscriptenBuild\Garnet_front.js ..\WebRelease\ /y /s /i
 xcopy build\Garnet*.* ..\WebRelease\ /y /s /i
 xcopy ..\Resources ..\WebRelease\Resources /y /s /i
-xcopy index.html ..\WebRelease\ /y /s /i
+xcopy ..\EmscriptenBuild\index.html ..\WebRelease\ /y /s /i
 
 pause

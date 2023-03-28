@@ -14,6 +14,11 @@ extern "C" {
 
 descapp::CDescAppManager* g_DescApp = nullptr;
 
+void RunLopp()
+{
+	g_DescApp->RunLopp();
+}
+
 #ifdef __EMSCRIPTEN__
 EMSCRIPTEN_KEEPALIVE
 void OnKeyDown(char* key)
@@ -29,7 +34,15 @@ void StartApp()
 	
 	if (g_DescApp->Initialize())
 	{
-		g_DescApp->RunLopp();
+#ifndef __EMSCRIPTEN__
+		while (g_DescApp->IsRunLoop())
+		{
+			RunLopp();
+		}
+#else
+		emscripten_set_main_loop(RunLopp, 60, true);
+#endif
+		
 	}
 
 	delete g_DescApp;

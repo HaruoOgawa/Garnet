@@ -24,13 +24,17 @@ extern "C"
 		}
 	}
 
-	int main()
+	EMSCRIPTEN_KEEPALIVE
+		void StartApp()
 	{
 		g_WebApp = new webapp::CWebAppManager(app::EAppType::ScriptApp);
 
 		g_WebApp->Initialize();
 		emscripten_set_main_loop(RunLopp, 60, true);
+	}
 
+	int main()
+	{
 		return 0;
 	}
 

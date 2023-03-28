@@ -14,12 +14,12 @@ namespace scene
 
 	bool CScriptScene::Release(api::IGraphicsAPI* pGraphicsAPI)
 	{
-		if (m_TestMesh)
+		/*if (m_TestMesh)
 		{
 			m_TestMesh->Release();
 			m_TestMesh.reset();
 			m_TestMesh = nullptr;
-		}
+		}*/
 
 		return true;
 	}
@@ -60,14 +60,14 @@ namespace scene
 	}
 	bool CScriptScene::Update(api::IGraphicsAPI* pGraphicsAPI)
 	{
-		if (!m_TestMesh->Update()) return false;
+		//if (!m_TestMesh->Update()) return false;
 
 		return true;
 	}
 
 	bool CScriptScene::Draw(api::IGraphicsAPI* pGraphicsAPI)
 	{
-		if (!m_TestMesh->Draw()) return false;
+		//if (!m_TestMesh->Draw()) return false;
 
 		return true;
 	}

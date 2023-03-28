@@ -46,7 +46,6 @@ namespace api
 		bool CreateLogicalDevice();
 		bool CreateQueue();
 		bool CreateSwapChain();
-		bool CreateRenderPass();
 	public:
 		CWebGPUAPI();
 		virtual ~CWebGPUAPI();
