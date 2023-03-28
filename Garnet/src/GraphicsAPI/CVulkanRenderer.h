@@ -1,5 +1,5 @@
 #pragma once
-
+#ifndef __DAWN__
 #define NOMINMAX
 #define VK_USE_PLATFORM_WIN32_KHR
 #define GLFW_INCLUDE_VULKAN
@@ -89,3 +89,4 @@ namespace renderer
 		bool Draw() override;
 	};
 }
+#endif

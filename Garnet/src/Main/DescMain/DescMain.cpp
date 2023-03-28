@@ -1,8 +1,53 @@
-#include <Windows.h>
 #include "../../App/CDescAppManager.h"
 #include "../../App/EAppType.h"
+#include "../../Debug/Message/Console.h"
+
+#ifdef __EMSCRIPTEN__
+#include <emscripten/emscripten.h>
+#include <emscripten/html5_webgpu.h>
+#elif defined(__DAWN__) && defined(__CMAKE__)
+#else
+#include <Windows.h>
+#endif
+
+extern "C" {
 
 descapp::CDescAppManager* g_DescApp = nullptr;
+
+void RunLopp()
+{
+	g_DescApp->RunLopp();
+}
+
+#ifdef __EMSCRIPTEN__
+EMSCRIPTEN_KEEPALIVE
+void OnKeyDown(char* key)
+{
+	Console::Log("[OnKeyDown] key: %c\n", key);
+}
+
+EMSCRIPTEN_KEEPALIVE
+#endif
+void StartApp()
+{
+	g_DescApp = new descapp::CDescAppManager(app::EAppType::ScriptApp);
+	
+	if (g_DescApp->Initialize())
+	{
+#ifndef __EMSCRIPTEN__
+		while (g_DescApp->IsRunLoop())
+		{
+			RunLopp();
+		}
+#else
+		emscripten_set_main_loop(RunLopp, 60, true);
+#endif
+		
+	}
+
+	delete g_DescApp;
+	g_DescApp = nullptr;
+}
 
 #if defined(__DAWN__) && defined(__CMAKE__)
 int main()
@@ -10,15 +55,11 @@ int main()
 int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 #endif
 {
-	g_DescApp = new descapp::CDescAppManager(app::EAppType::ScriptApp);
+#ifndef __EMSCRIPTEN__
+	StartApp();
+#endif // !__EMSCRIPTEN__
 
-	if (g_DescApp->Initialize())
-	{
-		g_DescApp->RunLopp();
-	}
-
-	delete g_DescApp;
-	g_DescApp = nullptr;
-	
 	return 0;
+}
+
 }

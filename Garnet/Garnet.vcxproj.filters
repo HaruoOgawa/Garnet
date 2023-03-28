@@ -90,6 +90,30 @@
     <ClInclude Include="src\Scene\CScriptScene.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="src\Library\WebGPU\x64\webgpu.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Library\WebGPU\x64\wgpu.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Library\WebGPU\x86\webgpu.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Library\WebGPU\x86\wgpu.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Library\WebGPU\webgpu.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Library\WebGPU\webgpu.hpp">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Library\WebGPU\wgpu.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Library\glfw3webgpu\glfw3webgpu.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Main\DescMain\DescMain.cpp">
@@ -149,6 +173,9 @@
     <ClCompile Include="src\Scene\CScriptScene.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="src\Library\glfw3webgpu\glfw3webgpu.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="EmscriptenBuild\build.bat">
@@ -172,6 +199,8 @@
       <Filter>ソース ファイル</Filter>
     </None>
     <None Include="EmscriptenBuild\index.html" />
+    <None Include="CMakeBuild\Garnet_front.js" />
+    <None Include="CMakeBuild\index.html" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="EmscriptenBuild\CMakeLists.txt" />

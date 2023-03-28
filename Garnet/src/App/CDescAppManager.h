@@ -35,6 +35,8 @@ namespace descapp
 		const unsigned int WIDTH = 800;
 		const unsigned int HEIGHT = 600;
 
+		bool m_IsRunLoop;
+
 		// インプットプールを作成する
 		// 1フレームに1つしか受け取れなかったり、途中で処理を挟まれたりするのもよくないので、1フレームの間のインプットをプールに溜めて
 		// まとめて実行する
@@ -55,6 +57,8 @@ namespace descapp
 		virtual ~CDescAppManager();
 		bool Initialize();
 		bool RunLopp();
+
+		bool IsRunLoop() { return m_IsRunLoop; }
 
 		// インプットイベント
 	};

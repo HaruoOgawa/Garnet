@@ -1,6 +1,12 @@
 #include "CDescAppManager.h"
 #include "../Debug/Message/Console.h"
 
+#ifdef __EMSCRIPTEN__
+#include <emscripten/emscripten.h>
+// emscripten_webgpu_get_deviceの使用に必要なインクルード
+#include <emscripten/html5_webgpu.h>
+#endif
+
 #ifdef __DAWN__
 #include "../GraphicsAPI/CWebGPUAPI.h"
 #else
@@ -18,7 +24,8 @@ namespace descapp
 	CDescAppManager::CDescAppManager(app::EAppType AppType):
 		m_pWindow(nullptr),
 		m_GraphicsAPI(nullptr),
-		m_App(nullptr)
+		m_App(nullptr),
+		m_IsRunLoop(g_IsRunLoop)
 	{
 		//
 #ifdef __DAWN__
@@ -49,6 +56,11 @@ namespace descapp
 
 	bool CDescAppManager::Release()
 	{
+#ifndef __DAWN__
+		// 論理デバイスが操作を完了するのを待つ
+		vkDeviceWaitIdle(m_GraphicsAPI->GetLogicalDevice());
+#endif
+
 		if (m_App)
 		{
 			m_App->Release(m_GraphicsAPI.get());
@@ -77,7 +89,9 @@ namespace descapp
 	bool CDescAppManager::Initialize()
 	{
 		if (!InitWindow()) return false;
-#ifndef __DAWN__
+#ifdef __EMSCRIPTEN__
+		if (!m_GraphicsAPI->Initialize()) return false;
+#else
 		if(!m_GraphicsAPI->InitializeWithGLFW(m_pWindow)) return false;
 #endif
 		if (!m_App->Initialize(m_GraphicsAPI.get())) return false;
@@ -114,18 +128,22 @@ namespace descapp
 
 	bool CDescAppManager::RunLopp()
 	{
-		while (g_IsRunLoop)
+		m_IsRunLoop = g_IsRunLoop;
+
+		if (g_IsRunLoop)
 		{
 			glfwPollEvents();
 
 			if (!Update()) return false;
 			if (!Draw()) return false;
 		}
+		else
+		{
+#ifdef __EMSCRIPTEN__
+			emscripten_cancel_main_loop();
+#endif // __EMSCRIPTEN__
+		}
 
-#ifndef __DAWN__
-		// 論理デバイスが操作を完了するのを待つ
-		vkDeviceWaitIdle(m_GraphicsAPI->GetLogicalDevice());
-#endif
 		return true;
 	}
 

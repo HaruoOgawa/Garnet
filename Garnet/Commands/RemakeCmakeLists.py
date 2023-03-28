@@ -3,9 +3,12 @@ import os
 Shared_Pre = """ 
 cmake_minimum_required(VERSION 3.22.1)
 
-project(Garnet, CXX)
+# declare using C and C++
+project(Garnet, C CXX)
 
 set(CMAKE_BUILD_TYPE Release)
+
+add_definitions(-D__DAWN__)
 
 add_executable(
 	Garnet
@@ -14,8 +17,14 @@ add_executable(
 Shared_Post = """
 )
 
+target_include_directories(Garnet PRIVATE ../src/Library/WebGPU)
+
 if(EMSCRIPTEN)
-	target_link_options(Garnet PRIVATE -sEXPORTED_RUNTIME_METHODS=['ccall'])
+	target_link_options(Garnet PRIVATE 
+		-sEXPORTED_RUNTIME_METHODS=['ccall']
+		-sUSE_WEBGPU=1
+		-sALLOW_MEMORY_GROWTH
+	)
 	set(CMAKE_EXECUTABLE_SUFFIX ".js")
 endif()
 """

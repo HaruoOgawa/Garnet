@@ -1,3 +1,4 @@
+#ifdef __DAWN__
 #include "CWebGPURenderer.h"
 #include "CRendererCreateInfo.h"
 #include "../GraphicsAPI/CWebGPUAPI.h"
@@ -29,3 +30,4 @@ namespace renderer
 		return true;
 	}
 }
+#endif

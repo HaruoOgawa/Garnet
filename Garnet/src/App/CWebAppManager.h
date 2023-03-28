@@ -1,4 +1,5 @@
 #pragma once
+#ifdef __EMSCRIPTEN__
 #include <string>
 #include <memory>
 #include "EAppType.h"
@@ -38,3 +39,4 @@ namespace webapp
 		void OnKeyDown(std::string key);
 	};
 }
+#endif

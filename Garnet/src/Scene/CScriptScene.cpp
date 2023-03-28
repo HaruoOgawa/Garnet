@@ -14,12 +14,12 @@ namespace scene
 
 	bool CScriptScene::Release(api::IGraphicsAPI* pGraphicsAPI)
 	{
-		if (m_TestMesh)
+		/*if (m_TestMesh)
 		{
 			m_TestMesh->Release();
 			m_TestMesh.reset();
 			m_TestMesh = nullptr;
-		}
+		}*/
 
 		return true;
 	}
@@ -27,7 +27,7 @@ namespace scene
 	bool CScriptScene::Initialize(api::IGraphicsAPI* pGraphicsAPI)
 	{
 		//
-		std::string ShaderPath = "Resources\\Shaders\\";
+		/*std::string ShaderPath = "Resources\\Shaders\\";
 
 		// Vertex Buffer
 		std::vector<renderer::SVertex> Vertices = {
@@ -54,20 +54,20 @@ namespace scene
 		if (!Primitive->Create(pGraphicsAPI, createInfo)) return false;
 
 		//
-		m_TestMesh->AddPrimitive(Primitive);
+		m_TestMesh->AddPrimitive(Primitive);*/
 
 		return true;
 	}
 	bool CScriptScene::Update(api::IGraphicsAPI* pGraphicsAPI)
 	{
-		if (!m_TestMesh->Update()) return false;
+		//if (!m_TestMesh->Update()) return false;
 
 		return true;
 	}
 
 	bool CScriptScene::Draw(api::IGraphicsAPI* pGraphicsAPI)
 	{
-		if (!m_TestMesh->Draw()) return false;
+		//if (!m_TestMesh->Draw()) return false;
 
 		return true;
 	}
