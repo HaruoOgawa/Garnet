@@ -9,7 +9,9 @@ namespace renderer
 	CWebGPURenderer::CWebGPURenderer():
 		m_pGraphicsAPI(nullptr),
 		m_GraphicsPipeline(nullptr),
-		m_VertexCount(0)
+		m_VertexCount(0),
+		m_IndexBuffer(nullptr),
+		m_IndexCount(0)
 	{
 	}
 
@@ -22,6 +24,7 @@ namespace renderer
 		m_pGraphicsAPI = static_cast<api::CWebGPUAPI*>(pGraphicsAPI);
 
 		if (!CreateVertexBuffer(createInfo)) return false; // 頂点バッファを生成
+		if (!CreateIndexBuffer(createInfo)) return false; //インデックスバッファを生成
 		if (!CreateGraphicsPipeline(createInfo)) return false; // グラフィックスパイプラインを生成
 		
 		return true;
@@ -43,8 +46,11 @@ namespace renderer
 			wgpuRenderPassEncoderSetVertexBuffer(m_pGraphicsAPI->GetRenderPass(), i, m_BufferList[i], 0, m_BufferSizeList[i] * sizeof(float));
 		}
 		
+		// インデックスバッファを割り当てる
+		wgpuRenderPassEncoderSetIndexBuffer(m_pGraphicsAPI->GetRenderPass(), m_IndexBuffer, WGPUIndexFormat_Uint16, 0, m_IndexCount * sizeof(uint16_t));
+
 		// 描画を実行
-		wgpuRenderPassEncoderDraw(m_pGraphicsAPI->GetRenderPass(), m_VertexCount, 1, 0, 0);
+		wgpuRenderPassEncoderDrawIndexed(m_pGraphicsAPI->GetRenderPass(), static_cast<uint32_t>(m_IndexCount), 1, 0, 0, 0);
 
 		return true;
 	}
@@ -53,19 +59,13 @@ namespace renderer
 	bool CWebGPURenderer::CreateVertexBuffer(const CRendererCreateInfo& createInfo)
 	{
 		// バッファオブジェクトの生成
-		WGPUBufferDescriptor bufferDesc{};
-		bufferDesc.nextInChain = nullptr; // 拡張機能
-		bufferDesc.usage = WGPUBufferUsage_CopyDst | WGPUBufferUsage_Vertex; // バッファの用途
-		bufferDesc.mappedAtCreation = false; // ???
-
 		for (const auto& Data : createInfo.GetVertices())
 		{
-			//
-			bufferDesc.size = Data.size() * sizeof(float);
-			WGPUBuffer Buffer = wgpuDeviceCreateBuffer(m_pGraphicsAPI->GetLogicalDevice(), &bufferDesc);
+			// WGPUBufferUsage_CopyDst はCPUからGPUへメモリをコピーすることを指定する
+			// 反対にGPUからCPUへ読み戻したい場合はWGPUBufferUsage_CopySrcも指定する
 
-			// バッファにデータを書き込む
-			wgpuQueueWriteBuffer(m_pGraphicsAPI->GetQueue(), Buffer, 0, Data.data(), bufferDesc.size);
+			WGPUBuffer Buffer;
+			if (!CreateBuffer(Buffer, WGPUBufferUsage_CopyDst | WGPUBufferUsage_Vertex, &Data[0], Data.size() * sizeof(float))) return false;
 
 			// バッファを保存
 			m_BufferList.push_back(Buffer);
@@ -74,6 +74,15 @@ namespace renderer
 
 		// 頂点数
 		m_VertexCount = static_cast<int>(createInfo.GetVertices()[0].size() / createInfo.GetAttributeDimensions()[0]);
+
+		return true;
+	}
+
+	bool CWebGPURenderer::CreateIndexBuffer(const CRendererCreateInfo& createInfo)
+	{
+		m_IndexCount = createInfo.GetIndices().size();
+
+		if (!CreateBuffer(m_IndexBuffer, WGPUBufferUsage_CopyDst | WGPUBufferUsage_Index, &createInfo.GetIndices()[0], m_IndexCount * sizeof(uint16_t))) return false;
 
 		return true;
 	}
@@ -226,6 +235,22 @@ namespace renderer
 		}
 
 		return format;
+	}
+
+	bool CWebGPURenderer::CreateBuffer(WGPUBuffer& Buffer, WGPUBufferUsageFlags Usage, void const* Data, uint64_t ByteSize)
+	{
+		WGPUBufferDescriptor bufferDesc{};
+		bufferDesc.nextInChain = nullptr; // 拡張機能
+		bufferDesc.usage = Usage; // バッファの用途
+		bufferDesc.mappedAtCreation = false; // ???
+		bufferDesc.size = ByteSize;
+
+		Buffer = wgpuDeviceCreateBuffer(m_pGraphicsAPI->GetLogicalDevice(), &bufferDesc);
+
+		// バッファにデータを書き込む
+		wgpuQueueWriteBuffer(m_pGraphicsAPI->GetQueue(), Buffer, 0, Data, bufferDesc.size);
+
+		return true;
 	}
 }
 #endif
