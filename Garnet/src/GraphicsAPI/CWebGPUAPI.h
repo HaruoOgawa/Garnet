@@ -67,6 +67,7 @@ namespace api
 
 		//
 		WGPUDevice GetLogicalDevice() const;
+		WGPUQueue GetQueue() const;
 		WGPUTextureFormat GetSwapChainFormat() const;
 		WGPURenderPassEncoder GetRenderPass() const;
 	};

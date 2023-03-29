@@ -8,12 +8,12 @@ namespace renderer
 	}
 
 	// VertexBuffer
-	void CRendererCreateInfo::SetVertices(const std::vector<SVertex>& Vertices)
+	void CRendererCreateInfo::SetVertices(const std::vector<std::vector<float>>& Vertices)
 	{
 		m_Vertices = Vertices;
 	}
 
-	const std::vector<SVertex>& CRendererCreateInfo::GetVertices() const
+	const std::vector<std::vector<float>>& CRendererCreateInfo::GetVertices() const
 	{
 		return m_Vertices;
 	}
@@ -26,6 +26,15 @@ namespace renderer
 	const std::vector<uint16_t>& CRendererCreateInfo::GetIndices() const
 	{
 		return m_Indices;
+	}
+
+	void CRendererCreateInfo::SetAttributeDimensions(const std::vector<int>& AttributeDimensions)
+	{
+		m_AttributeDimensions = AttributeDimensions;
+	}
+	const std::vector<int>& CRendererCreateInfo::GetAttributeDimensions() const
+	{
+		return m_AttributeDimensions;
 	}
 
 	// Shader

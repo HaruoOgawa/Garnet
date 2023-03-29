@@ -139,6 +139,11 @@ namespace api
 		return m_Device;
 	}
 
+	WGPUQueue CWebGPUAPI::GetQueue() const
+	{
+		return m_Queue;
+	}
+
 	WGPUTextureFormat CWebGPUAPI::GetSwapChainFormat() const
 	{
 		return m_SwapChainFormat;
@@ -265,6 +270,16 @@ namespace api
 		descriptor.defaultQueue.nextInChain = nullptr; // デフォルトコマンドキューの拡張機能
 		descriptor.defaultQueue.label = "Default Queue"; // デフォルトコマンドキューの判別用ラベル
 
+		// バッファとアトリビュートの制限数を最大値に設定しておく
+		/*WGPUSupportedLimits supportedLimits;
+		wgpuAdapterGetLimits(m_Adapter, &supportedLimits);
+
+		WGPURequiredLimits requiredLimits{};
+		requiredLimits.limits.maxVertexAttributes = supportedLimits.limits.maxVertexAttributes;
+		requiredLimits.limits.maxVertexBuffers = supportedLimits.limits.maxVertexBuffers;
+
+		descriptor.requiredLimits = &requiredLimits;*/
+
 		// 論理デバイスを取得する
 		struct UserData
 		{
@@ -302,8 +317,33 @@ namespace api
 		// デバイスエラーをハンドリングするためのコールバックを登録しておく
 		auto onDeviceError = [](WGPUErrorType type, char const* message, void*)
 		{
-			Console::Log("Uncaptured device error: %d\n", type);
-			if (message) Console::Log("message: %s\n", message);
+			std::string TypeStr = "";
+
+			switch (type)
+			{
+			case WGPUErrorType_NoError:
+				TypeStr = "WGPUErrorType_NoError";
+				break;
+			case WGPUErrorType_Validation:
+				TypeStr = "WGPUErrorType_Validation";
+				break;
+			case WGPUErrorType_OutOfMemory:
+				TypeStr = "WGPUErrorType_OutOfMemory";
+				break;
+			case WGPUErrorType_Unknown:
+				TypeStr = "WGPUErrorType_Unknown";
+				break;
+			case WGPUErrorType_DeviceLost:
+				TypeStr = "WGPUErrorType_DeviceLost";
+				break;
+			case WGPUErrorType_Force32:
+				TypeStr = "WGPUErrorType_Force32";
+				break;
+			default:
+				break;
+			}
+			Console::Log("[Error Occured] Uncaptured device error: %s\n", TypeStr.c_str());
+			if (message) Console::Log("[Error Message] %s\n", message);
 		};
 
 		wgpuDeviceSetUncapturedErrorCallback(m_Device, onDeviceError, nullptr);

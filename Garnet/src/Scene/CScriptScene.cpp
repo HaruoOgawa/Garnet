@@ -30,11 +30,29 @@ namespace scene
 		std::string ShaderPath = "Resources\\Shaders\\";
 
 		// Vertex Buffer
-		std::vector<renderer::SVertex> Vertices = {
-			{{-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
-			{{0.5f, -0.5f, 0.0f},  {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
-			{{0.5f, 0.5f, 0.0f},   {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
-			{{-0.5f, 0.5f, 0.0f}, {1.0f, 1.0f, 1.0f},	 {1.0f, 1.0f}},
+		std::vector<float> Pos = {
+			-0.5f, -0.5f, 0.0f,
+			0.5f, -0.5f, 0.0f,
+			0.5f, 0.5f, 0.0f,
+			-0.5f, 0.5f, 0.0f
+		};
+
+		std::vector<float> Color = {
+			1.0f, 0.0f, 0.0f,
+			0.0f, 1.0f, 0.0f,
+			0.0f, 0.0f, 1.0f,
+			1.0f, 1.0f, 1.0f
+		};
+
+		std::vector<float> UV = {
+			1.0f, 0.0f,
+			0.0f, 0.0f,
+			0.0f, 1.0f,
+			1.0f, 1.0f
+		};
+
+		std::vector<std::vector<float>> Vertices = {
+			Pos, Color, UV
 		};
 
 		std::vector<uint16_t> Indices = {
@@ -44,24 +62,39 @@ namespace scene
 #ifdef __DAWN__
 		//
 		std::string VertexShaderCode = R"(
+			struct VertexInput {
+				@location(0) position: vec3<f32>,
+				@location(1) color: vec3<f32>,
+				@location(2) uv: vec2<f32>,
+			};	
+
+			struct VertexOutput {
+				@builtin(position) position: vec4<f32>,
+				@location(0) color: vec3<f32>,
+				@location(1) uv: vec2<f32>,
+			};	
+	
 			@vertex
-			fn main(@builtin(vertex_index) in_vertex_index: u32) -> @builtin(position) vec4<f32> {
-				var p = vec2<f32>(0.0, 0.0);
-				if (in_vertex_index == 0u) {
-					p = vec2<f32>(-0.5, -0.5);
-				} else if (in_vertex_index == 1u) {
-					p = vec2<f32>(0.5, -0.5);
-				} else {
-					p = vec2<f32>(0.0, 0.5);
-				}
-				return vec4<f32>(p, 0.0, 1.0);
+			fn main(in: VertexInput) -> VertexOutput {
+				var out: VertexOutput;
+				out.position = vec4<f32>(in.position, 1.0);			
+				out.color = in.color;			
+				out.uv = in.uv;			
+
+				return out;
 			}
 		)";
 		
 		std::string FragmentShaderCode = R"(
+			struct VertexOutput {
+				@builtin(position) position: vec4<f32>,
+				@location(0) color: vec3<f32>,
+				@location(1) uv: vec2<f32>,
+			};	
+
 			@fragment
-			fn main() -> @location(0) vec4<f32> {
-				return vec4<f32>(0.0, 0.4, 1.0, 1.0);
+			fn main(in: VertexOutput) -> @location(0) vec4<f32> {
+				return vec4<f32>(in.color, 1.0);
 			}
 		)";
 #endif
@@ -78,6 +111,7 @@ namespace scene
 		
 		createInfo.SetVertices(Vertices);
 		createInfo.SetIndices(Indices);
+		createInfo.SetAttributeDimensions(std::vector<int>({ 3 , 3 , 2 }));
 
 		//
 		m_TestMesh = std::make_shared<graphics::CMesh>();

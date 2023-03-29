@@ -2,10 +2,14 @@
 #include "CWebGPURenderer.h"
 #include "CRendererCreateInfo.h"
 #include "../GraphicsAPI/CWebGPUAPI.h"
+#include "../Debug/Message/Console.h"
 
 namespace renderer
 {
-	CWebGPURenderer::CWebGPURenderer()
+	CWebGPURenderer::CWebGPURenderer():
+		m_pGraphicsAPI(nullptr),
+		m_GraphicsPipeline(nullptr),
+		m_VertexCount(0)
 	{
 	}
 
@@ -17,8 +21,9 @@ namespace renderer
 	{
 		m_pGraphicsAPI = static_cast<api::CWebGPUAPI*>(pGraphicsAPI);
 
+		if (!CreateVertexBuffer(createInfo)) return false; // 頂点バッファを生成
 		if (!CreateGraphicsPipeline(createInfo)) return false; // グラフィックスパイプラインを生成
-
+		
 		return true;
 	}
 
@@ -29,13 +34,50 @@ namespace renderer
 
 	bool CWebGPURenderer::Draw()
 	{
-		wgpuRenderPassEncoderSetPipeline(m_pGraphicsAPI->GetRenderPass(), m_GraphicsPipeline);
-		wgpuRenderPassEncoderDraw(m_pGraphicsAPI->GetRenderPass(), 3, 1, 0, 0);
+		// レンダーパスにパイプラインを割り当てる
+		wgpuRenderPassEncoderSetPipeline(m_pGraphicsAPI->GetRenderPass(), m_GraphicsPipeline); 
+
+		// 頂点バッファを割り当てる
+		for (int i = 0; i < static_cast<int>(m_BufferList.size()); i++)
+		{
+			wgpuRenderPassEncoderSetVertexBuffer(m_pGraphicsAPI->GetRenderPass(), i, m_BufferList[i], 0, m_BufferSizeList[i] * sizeof(float));
+		}
+		
+		// 描画を実行
+		wgpuRenderPassEncoderDraw(m_pGraphicsAPI->GetRenderPass(), m_VertexCount, 1, 0, 0);
 
 		return true;
 	}
 
 	// WebGPU Main Logic /////////////////////////////////////////////////////////////////////
+	bool CWebGPURenderer::CreateVertexBuffer(const CRendererCreateInfo& createInfo)
+	{
+		// バッファオブジェクトの生成
+		WGPUBufferDescriptor bufferDesc{};
+		bufferDesc.nextInChain = nullptr; // 拡張機能
+		bufferDesc.usage = WGPUBufferUsage_CopyDst | WGPUBufferUsage_Vertex; // バッファの用途
+		bufferDesc.mappedAtCreation = false; // ???
+
+		for (const auto& Data : createInfo.GetVertices())
+		{
+			//
+			bufferDesc.size = Data.size() * sizeof(float);
+			WGPUBuffer Buffer = wgpuDeviceCreateBuffer(m_pGraphicsAPI->GetLogicalDevice(), &bufferDesc);
+
+			// バッファにデータを書き込む
+			wgpuQueueWriteBuffer(m_pGraphicsAPI->GetQueue(), Buffer, 0, Data.data(), bufferDesc.size);
+
+			// バッファを保存
+			m_BufferList.push_back(Buffer);
+			m_BufferSizeList.push_back(Data.size());
+		}
+
+		// 頂点数
+		m_VertexCount = static_cast<int>(createInfo.GetVertices()[0].size() / createInfo.GetAttributeDimensions()[0]);
+
+		return true;
+	}
+
 	bool CWebGPURenderer::CreateGraphicsPipeline(const CRendererCreateInfo& createInfo)
 	{
 		// シェーダーモジュールの生成 //////////////////////////////////////////////////////////////////
@@ -46,9 +88,33 @@ namespace renderer
 		WGPURenderPipelineDescriptor pipelineDesc{};
 		pipelineDesc.nextInChain = nullptr; // 拡張機能
 
-		// 頂点バッファ, 頂点シェーダー
-		pipelineDesc.vertex.bufferCount = 0; // 頂点バッファ
-		pipelineDesc.vertex.buffers = nullptr;
+		// 頂点バッファレイアウト
+		std::vector<WGPUVertexBufferLayout> vertexBufferLayouts(m_BufferList.size());
+		std::vector<WGPUVertexAttribute> attributes(m_BufferList.size()); // ここベクターにしないとなんかvertexBufferLayoutsに入れておいてもメモリが解放されててなんか数値がおかしなことに・・・
+		// ↑↑↑ 確かにスタックメモリに格納する変数はスコープを抜けたら解放されるよね・・・
+		// そしてその解放されたものを使用していると当然おかしくなる
+		// メモリの解放タイミングと使用タイミングには留意しよう！
+
+		for (int i = 0; i < static_cast<int>(m_BufferList.size()); i++)
+		{
+			//
+			int Dimension = createInfo.GetAttributeDimensions()[i];
+
+			//
+			attributes[i].shaderLocation = i; // Shaderでのアトリビュートインデックス
+			attributes[i].format = GetVertexFormat(Dimension);
+			attributes[i].offset = 0;
+
+			//
+			vertexBufferLayouts[i].attributeCount = 1;
+			vertexBufferLayouts[i].attributes = &attributes[i];
+			vertexBufferLayouts[i].arrayStride = Dimension * sizeof(float); // ストライドとは連続する要素間のバイト数のこと
+			vertexBufferLayouts[i].stepMode = WGPUVertexStepMode_Vertex; // ??? 頂点データが同じインスタンスなら共有されることを示す設定 ???
+		}
+
+		// 頂点シェーダー
+		pipelineDesc.vertex.bufferCount = static_cast<uint32_t>(vertexBufferLayouts.size()); // 頂点バッファ
+		pipelineDesc.vertex.buffers = &vertexBufferLayouts[0];
 		pipelineDesc.vertex.module = vertexShaderModele; // 頂点シェーダー
 		pipelineDesc.vertex.entryPoint = "main";
 		pipelineDesc.vertex.constantCount = 0; // ??? ユニフォームの指定に使用するやつかな？
@@ -107,6 +173,12 @@ namespace renderer
 		// パイプラインの生成 /////////////////////////////////////////////////////////////////////////////
 		m_GraphicsPipeline = wgpuDeviceCreateRenderPipeline(m_pGraphicsAPI->GetLogicalDevice(), &pipelineDesc);
 
+		if (!m_GraphicsPipeline)
+		{
+			Console::Log("[Error] m_GraphicsPipeline is null\n");
+			return false;
+		}
+
 		return true;
 	}
 
@@ -126,6 +198,34 @@ namespace renderer
 		WGPUShaderModule shaderModule = wgpuDeviceCreateShaderModule(m_pGraphicsAPI->GetLogicalDevice(), &shaderDesc);
 
 		return shaderModule;
+	}
+
+	WGPUVertexFormat CWebGPURenderer::GetVertexFormat(int Dimension)
+	{
+		WGPUVertexFormat format;
+
+		switch (Dimension)
+		{
+		case 1:
+			format = WGPUVertexFormat_Float32;
+			break;
+
+		case 2:
+			format = WGPUVertexFormat_Float32x2;
+			break;
+
+		case 3:
+			format = WGPUVertexFormat_Float32x3;
+			break;
+
+		case 4:
+			format = WGPUVertexFormat_Float32x4;
+			break;
+		default:
+			break;
+		}
+
+		return format;
 	}
 }
 #endif
