@@ -13,9 +13,9 @@
 
 #include <vector>
 #include <array>
+#include <string>
 
 #include "../Interface/IRenderer.h"
-#include "../Graphics/SVertex.h"
 #include "../Graphics/SUniformBufferObject.h"
 
 // はぇー時間を管理するstd標準ライブラリ
@@ -45,8 +45,8 @@ namespace renderer
 		VkPipeline m_GraphicsPipeline;
 
 		// Vertices/Indices
-		VkBuffer m_VertexBuffer;
-		VkDeviceMemory m_VertexBufferMemory;
+		std::vector<VkBuffer> m_VertexBufferList;
+		std::vector<VkDeviceMemory> m_VertexBufferMemoryList;
 		VkBuffer m_IndexBuffer;
 		VkDeviceMemory m_IndexBufferMemory;
 		uint32_t m_IndicesCount;
@@ -61,7 +61,6 @@ namespace renderer
 	private:
 		// Vulkanメインロジック /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		bool CreateDescriptorSetLayout(const CRendererCreateInfo& createInfo);
-		bool CreateGraphicsPipeline(const CRendererCreateInfo& createInfo);
 		bool CreateTextureImage(const CRendererCreateInfo& createInfo);
 		bool CreateTextureImageView(const CRendererCreateInfo& createInfo);
 		bool CreateTextureSampler(const CRendererCreateInfo& createInfo);
@@ -70,14 +69,14 @@ namespace renderer
 		bool CreateUniformBuffers(const CRendererCreateInfo& createInfo);
 		bool CreateDescriptorPool(const CRendererCreateInfo& createInfo);
 		bool CreateDescriptorSets(const CRendererCreateInfo& createInfo);
+		bool CreateGraphicsPipeline(const CRendererCreateInfo& createInfo);
 
 		void UpdateUniformBuffer(uint32_t CurrentImage);
 
 		// ヘルパー関数 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// Shader
-		bool CreateShaderModule(VkShaderModule& shaderModule, const std::vector<unsigned char>& code);
-		static VkVertexInputBindingDescription GetBindingDescription();
-		static std::array<VkVertexInputAttributeDescription, 3> GetAttributeDestriptions();
+		bool CreateShaderModule(VkShaderModule& shaderModule, const std::string& code);
+		VkFormat GetVertexFormat(int Dimention);
 	public:
 		CVulkanRenderer();
 		virtual ~CVulkanRenderer();

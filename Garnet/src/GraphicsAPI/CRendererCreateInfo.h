@@ -1,25 +1,26 @@
 #pragma once
 #include <vector>
-#include "../Graphics/SVertex.h"
+#include <string>
 
 namespace renderer
 {
 	class CRendererCreateInfo
 	{
 		// VertexBuffer
-		std::vector<SVertex> m_Vertices;
+		std::vector<std::vector<float>> m_Vertices;
 		std::vector<uint16_t> m_Indices;
+		std::vector<int> m_AttributeDimensions;
 
 		// Uniform
 
 		// Rendering
 
 		// Shader
-		std::vector<unsigned char> m_VertexShaderCode;
-		std::vector<unsigned char> m_FragmentShaderCode;
-		std::vector<unsigned char> m_GeometryShaderCode;
-		std::vector<unsigned char> m_HullShaderCode;
-		std::vector<unsigned char> m_DomainShaderCode;
+		std::string m_VertexShaderCode;
+		std::string m_FragmentShaderCode;
+		std::string m_GeometryShaderCode;
+		std::string m_HullShaderCode;
+		std::string m_DomainShaderCode;
 
 		// Texture
 		bool m_UseMainTexture;
@@ -28,27 +29,30 @@ namespace renderer
 		virtual ~CRendererCreateInfo() = default;
 		
 		// VertexBuffer
-		void SetVertices(const std::vector<SVertex>& Vertices);
-		const std::vector<SVertex>& GetVertices() const;
+		void SetVertices(const std::vector<std::vector<float>>& Vertices);
+		const std::vector<std::vector<float>>& GetVertices() const;
 
 		void SetIndices(const std::vector<uint16_t>& Indices);
 		const std::vector<uint16_t>& GetIndices() const;
 
+		void SetAttributeDimensions(const std::vector<int>& AttributeDimensions);
+		const std::vector<int>& GetAttributeDimensions() const;
+
 		// Shader
-		void SetVertexShaderCode(const std::vector<unsigned char>& VertexShaderCode);
-		const std::vector<unsigned char>& GetVertexShaderCode() const;
+		void SetVertexShaderCode(const std::string& VertexShaderCode);
+		const std::string& GetVertexShaderCode() const;
 
-		void SetFragmentShaderCode(const std::vector<unsigned char>& FragmentShaderCode);
-		const std::vector<unsigned char>& GetFragmentShaderCode() const;
+		void SetFragmentShaderCode(const std::string& FragmentShaderCode);
+		const std::string& GetFragmentShaderCode() const;
 
-		void SetGeometryShaderCode(const std::vector<unsigned char>& GeometryShaderCode);
-		const std::vector<unsigned char>& GetGeometryShaderCode() const;
+		void SetGeometryShaderCode(const std::string& GeometryShaderCode);
+		const std::string& GetGeometryShaderCode() const;
 
-		void HullShaderCode(const std::vector<unsigned char>& HullShaderCode);
-		const std::vector<unsigned char>& GetHullShaderCode() const;
+		void HullShaderCode(const std::string& HullShaderCode);
+		const std::string& GetHullShaderCode() const;
 
-		void SetDomainShaderCode(const std::vector<unsigned char>& DomainShaderCode);
-		const std::vector<unsigned char>& GetDomainShaderCode() const;
+		void SetDomainShaderCode(const std::string& DomainShaderCode);
+		const std::string& GetDomainShaderCode() const;
 
 		// Texture
 		void SetUseMainTexture(bool UseMainTexture);

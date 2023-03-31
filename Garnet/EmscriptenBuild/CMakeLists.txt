@@ -31,7 +31,6 @@ add_executable(
 	../src/Graphics/CVertexBuffer.cpp
 	../src/Graphics/CVertexBuffer.h
 	../src/Graphics/SUniformBufferObject.h
-	../src/Graphics/SVertex.h
 	../src/GraphicsAPI/CRendererCreateInfo.cpp
 	../src/GraphicsAPI/CRendererCreateInfo.h
 	../src/GraphicsAPI/CWebGPUAPI.cpp

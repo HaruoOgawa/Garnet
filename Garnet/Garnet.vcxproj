@@ -362,7 +362,6 @@ del $(OutDir)Garnet.pdb</Command>
     <ClInclude Include="src\Interface\IGraphicsAPI.h" />
     <ClInclude Include="src\Interface\IObject.h" />
     <ClInclude Include="src\Interface\IRenderer.h" />
-    <ClInclude Include="src\Graphics\SVertex.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Library\glfw3webgpu\glfw3webgpu.c" />
