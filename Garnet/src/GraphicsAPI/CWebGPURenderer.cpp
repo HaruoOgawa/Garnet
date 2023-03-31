@@ -241,6 +241,7 @@ namespace renderer
 	{
 		WGPUBufferDescriptor bufferDesc{};
 		bufferDesc.nextInChain = nullptr; // 拡張機能
+		bufferDesc.label = "Buffer";
 		bufferDesc.usage = Usage; // バッファの用途
 		bufferDesc.mappedAtCreation = false; // ???
 		bufferDesc.size = ByteSize;
