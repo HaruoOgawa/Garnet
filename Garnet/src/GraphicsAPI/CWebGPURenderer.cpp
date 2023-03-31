@@ -41,9 +41,9 @@ namespace renderer
 		wgpuRenderPassEncoderSetPipeline(m_pGraphicsAPI->GetRenderPass(), m_GraphicsPipeline); 
 
 		// 頂点バッファを割り当てる
-		for (int i = 0; i < static_cast<int>(m_BufferList.size()); i++)
+		for (int i = 0; i < static_cast<int>(m_VertexBufferList.size()); i++)
 		{
-			wgpuRenderPassEncoderSetVertexBuffer(m_pGraphicsAPI->GetRenderPass(), i, m_BufferList[i], 0, m_BufferSizeList[i] * sizeof(float));
+			wgpuRenderPassEncoderSetVertexBuffer(m_pGraphicsAPI->GetRenderPass(), i, m_VertexBufferList[i], 0, m_VertexBufferSizeList[i] * sizeof(float));
 		}
 		
 		// インデックスバッファを割り当てる
@@ -58,7 +58,7 @@ namespace renderer
 	// WebGPU Main Logic /////////////////////////////////////////////////////////////////////
 	bool CWebGPURenderer::CreateVertexBuffer(const CRendererCreateInfo& createInfo)
 	{
-		// バッファオブジェクトの生成
+		// 頂点バッファオブジェクトの生成
 		for (const auto& Data : createInfo.GetVertices())
 		{
 			// WGPUBufferUsage_CopyDst はCPUからGPUへメモリをコピーすることを指定する
@@ -68,8 +68,8 @@ namespace renderer
 			if (!CreateBuffer(Buffer, WGPUBufferUsage_CopyDst | WGPUBufferUsage_Vertex, &Data[0], Data.size() * sizeof(float))) return false;
 
 			// バッファを保存
-			m_BufferList.push_back(Buffer);
-			m_BufferSizeList.push_back(Data.size());
+			m_VertexBufferList.push_back(Buffer);
+			m_VertexBufferSizeList.push_back(Data.size());
 		}
 
 		// 頂点数
@@ -98,13 +98,13 @@ namespace renderer
 		pipelineDesc.nextInChain = nullptr; // 拡張機能
 
 		// 頂点バッファレイアウト
-		std::vector<WGPUVertexBufferLayout> vertexBufferLayouts(m_BufferList.size());
-		std::vector<WGPUVertexAttribute> attributes(m_BufferList.size()); // ここベクターにしないとなんかvertexBufferLayoutsに入れておいてもメモリが解放されててなんか数値がおかしなことに・・・
+		std::vector<WGPUVertexBufferLayout> vertexBufferLayouts(m_VertexBufferList.size());
+		std::vector<WGPUVertexAttribute> attributes(m_VertexBufferList.size()); // ここベクターにしないとなんかvertexBufferLayoutsに入れておいてもメモリが解放されててなんか数値がおかしなことに・・・
 		// ↑↑↑ 確かにスタックメモリに格納する変数はスコープを抜けたら解放されるよね・・・
 		// そしてその解放されたものを使用していると当然おかしくなる
 		// メモリの解放タイミングと使用タイミングには留意しよう！
 
-		for (int i = 0; i < static_cast<int>(m_BufferList.size()); i++)
+		for (int i = 0; i < static_cast<int>(m_VertexBufferList.size()); i++)
 		{
 			//
 			int Dimension = createInfo.GetAttributeDimensions()[i];

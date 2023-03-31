@@ -22,8 +22,8 @@ namespace renderer
 
 		// Vertex
 		int m_VertexCount;
-		std::vector<WGPUBuffer> m_BufferList;
-		std::vector<size_t> m_BufferSizeList;
+		std::vector<WGPUBuffer> m_VertexBufferList;
+		std::vector<size_t> m_VertexBufferSizeList;
 		
 		// Index
 		WGPUBuffer m_IndexBuffer;

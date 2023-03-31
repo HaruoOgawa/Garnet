@@ -3,7 +3,6 @@
 #include "../Graphics/CPrimitive.h"
 #include "../GraphicsAPI/CRendererCreateInfo.h"
 #include "../File/CFile.h"
-#include "../Graphics/SVertex.h"
 
 namespace scene
 {
