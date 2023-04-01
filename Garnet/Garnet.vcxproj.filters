@@ -111,6 +111,9 @@
     <ClInclude Include="src\Library\glfw3webgpu\glfw3webgpu.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="src\GraphicsAPI\ERenderPassType.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Main\DescMain\DescMain.cpp">

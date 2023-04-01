@@ -1220,7 +1220,7 @@ namespace api
 	}
 
 	// ループ中の描画関連処理 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	bool CVulkanAPI::BeginRender()
+	bool CVulkanAPI::BeginRender(ERenderPassType RenderPassType)
 	{
 		// 前のフレーム処理が終わるのを待つ
 		vkWaitForFences(m_LogicalDevice, 1, &m_InFlightFences[m_CurrentFrame], VK_TRUE, UINT64_MAX);

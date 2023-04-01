@@ -56,7 +56,7 @@ namespace api
 		return Renderer;
 	}
 
-	bool CWebGPUAPI::BeginRender()
+	bool CWebGPUAPI::BeginRender(ERenderPassType RenderPassType)
 	{
 		// スワップチェーンから次の待機中テクスチャを取得
 		m_NextTexture = wgpuSwapChainGetCurrentTextureView(m_SwapChain);

@@ -330,6 +330,7 @@ del $(OutDir)Garnet.pdb</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="src\GraphicsAPI\ERenderPassType.h" />
     <ClInclude Include="src\Library\glfw3webgpu\glfw3webgpu.h" />
     <ClInclude Include="src\Library\WebGPU\webgpu.h" />
     <ClInclude Include="src\Library\WebGPU\webgpu.hpp" />

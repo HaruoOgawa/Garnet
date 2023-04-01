@@ -11,12 +11,19 @@ namespace renderer
 		m_GraphicsPipeline(nullptr),
 		m_VertexCount(0),
 		m_IndexBuffer(nullptr),
-		m_IndexCount(0)
+		m_IndexCount(0),
+		m_UniformBuffer(nullptr)
 	{
 	}
 
 	CWebGPURenderer::~CWebGPURenderer()
 	{
+		wgpuBufferDestroy(m_UniformBuffer);
+		wgpuBufferDestroy(m_IndexBuffer);
+		for (auto& Buffer : m_VertexBufferList)
+		{
+			wgpuBufferDestroy(Buffer);
+		}
 	}
 
 	bool CWebGPURenderer::Create(api::IGraphicsAPI* pGraphicsAPI, const CRendererCreateInfo& createInfo)
@@ -25,6 +32,7 @@ namespace renderer
 
 		if (!CreateVertexBuffer(createInfo)) return false; // 頂点バッファを生成
 		if (!CreateIndexBuffer(createInfo)) return false; //インデックスバッファを生成
+		if (!CreateUniformBuffer(createInfo)) return false; // ユニフォームバッファを生成
 		if (!CreateGraphicsPipeline(createInfo)) return false; // グラフィックスパイプラインを生成
 		
 		return true;
@@ -83,6 +91,18 @@ namespace renderer
 		m_IndexCount = createInfo.GetIndices().size();
 
 		if (!CreateBuffer(m_IndexBuffer, WGPUBufferUsage_CopyDst | WGPUBufferUsage_Index, &createInfo.GetIndices()[0], m_IndexCount * sizeof(uint16_t))) return false;
+
+		return true;
+	}
+
+	bool CWebGPURenderer::CreateUniformBuffer(const CRendererCreateInfo& createInfo)
+	{
+		// バッファの生成
+		std::vector<float> Data = { 0.5f };
+	
+		if (!CreateBuffer(m_UniformBuffer, WGPUBufferUsage_CopyDst | WGPUBufferUsage_Uniform, &Data[0], Data.size() * sizeof(float))) return false;
+
+		//
 
 		return true;
 	}

@@ -73,10 +73,14 @@ namespace scene
 				@location(1) uv: vec2<f32>,
 			};	
 	
+			@group(0) @binding(0) var<uniform> uTime: f32;
+
 			@vertex
 			fn main(in: VertexInput) -> VertexOutput {
+				var offset = vec3<f32>(0.0, uTime, 0.0);
+
 				var out: VertexOutput;
-				out.position = vec4<f32>(in.position, 1.0);			
+				out.position = vec4<f32>(in.position + offset, 1.0);			
 				out.color = in.color;			
 				out.uv = in.uv;			
 

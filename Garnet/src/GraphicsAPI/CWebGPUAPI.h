@@ -61,7 +61,7 @@ namespace api
 
 		std::shared_ptr<renderer::IRenderer> CreateRenderer() override;
 
-		bool BeginRender() override;
+		bool BeginRender(ERenderPassType RenderPassType) override;
 		bool EndRender() override;
 		bool IsWaitting() override;
 
