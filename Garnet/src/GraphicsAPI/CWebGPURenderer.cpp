@@ -12,7 +12,8 @@ namespace renderer
 		m_VertexCount(0),
 		m_IndexBuffer(nullptr),
 		m_IndexCount(0),
-		m_UniformBuffer(nullptr)
+		m_UniformBuffer(nullptr),
+		m_BindGroup(nullptr)
 	{
 	}
 
@@ -33,6 +34,7 @@ namespace renderer
 		if (!CreateVertexBuffer(createInfo)) return false; // 頂点バッファを生成
 		if (!CreateIndexBuffer(createInfo)) return false; //インデックスバッファを生成
 		if (!CreateUniformBuffer(createInfo)) return false; // ユニフォームバッファを生成
+		if (!CreateBindGroup(createInfo)) return false; // バインドグループを生成(レンダリングパイプラインで使用するすべてのリソースをどのようにバインドするかを指定するオブジェクト)
 		if (!CreateGraphicsPipeline(createInfo)) return false; // グラフィックスパイプラインを生成
 		
 		return true;
@@ -40,6 +42,10 @@ namespace renderer
 
 	bool CWebGPURenderer::Update()
 	{
+		// ユニフォームバッファの更新
+		float t = static_cast<float>(glfwGetTime()); // glfwGetTime returns a double
+		wgpuQueueWriteBuffer(m_pGraphicsAPI->GetQueue(), m_UniformBuffer, 0, &t, sizeof(float));
+
 		return true;
 	}
 
@@ -56,6 +62,9 @@ namespace renderer
 		
 		// インデックスバッファを割り当てる
 		wgpuRenderPassEncoderSetIndexBuffer(m_pGraphicsAPI->GetRenderPass(), m_IndexBuffer, WGPUIndexFormat_Uint16, 0, m_IndexCount * sizeof(uint16_t));
+
+		// バインドグループを割り当てる
+		wgpuRenderPassEncoderSetBindGroup(m_pGraphicsAPI->GetRenderPass(), 0, m_BindGroup, 0, nullptr);
 
 		// 描画を実行
 		wgpuRenderPassEncoderDrawIndexed(m_pGraphicsAPI->GetRenderPass(), static_cast<uint32_t>(m_IndexCount), 1, 0, 0, 0);
@@ -102,7 +111,55 @@ namespace renderer
 	
 		if (!CreateBuffer(m_UniformBuffer, WGPUBufferUsage_CopyDst | WGPUBufferUsage_Uniform, &Data[0], Data.size() * sizeof(float))) return false;
 
+		return true;
+	}
+
+	bool CWebGPURenderer::CreateBindGroup(const CRendererCreateInfo& createInfo)
+	{
+		// WGSLでユニフォームを渡す場所は、groupを大枠にその中にbindingしていく
+		// @group(0) @binding(0) var<uniform> a: f32;
+		// @group(0) @binding(1) var<uniform> b: f32;
 		//
+		// @group(1) @binding(0) var<uniform> c: f32;
+		// @group(1) @binding(1) var<uniform> d: f32;
+		// @group(1) @binding(2) var<uniform> e: f32;
+		// なのでこのバインディング要素とグループを下記で作成する必要がある
+
+		// バインドレイアウトを作成
+		// どのようにメモリに配置されるか, バインドインデックスや読み取り専用かなど
+		// -->これがWGSLでいう @binding(n)
+		WGPUBindGroupLayoutEntry bindingLayout{};
+		bindingLayout.binding = 0; // バインドインデックス
+		bindingLayout.visibility = WGPUShaderStage_Vertex; // アクセス権限。ここではおそらく頂点バッファのみ読み取り可能
+		bindingLayout.buffer.type = WGPUBufferBindingType_Uniform; // バインド先のバッファの種類
+		bindingLayout.buffer.minBindingSize = sizeof(float); // データ一つ当たりのサイズかな???
+
+		// バインドグループレイアウトを作成
+		// たぶん上記のバインドレイアウトのマネージャー, 複数個束ねるやつ
+		// --> これがWGSLでいう @group(n) かな？
+		WGPUBindGroupLayoutDescriptor bindGroupLayoutDesc{}; //バインドグループの記述子
+		bindGroupLayoutDesc.nextInChain = nullptr; // 拡張機能
+		bindGroupLayoutDesc.entryCount = 1; // 上記のバインドレイアウトの数
+		bindGroupLayoutDesc.entries = &bindingLayout; // バインドレイアウトのデータ
+		m_BindGroupLayout = wgpuDeviceCreateBindGroupLayout(m_pGraphicsAPI->GetLogicalDevice(), &bindGroupLayoutDesc);
+
+		// バッファと結びつけるための記述かな？
+		// --> その通り、たぶんバッファのバインディング
+		WGPUBindGroupEntry binding{};
+		binding.nextInChain = nullptr; // 拡張機能
+		binding.binding = 0;
+		binding.buffer = m_UniformBuffer;
+		binding.offset = 0;
+		binding.size = sizeof(float);
+
+		// バインドグループを作成
+		// --> groupやbindingを最終的に全て束ねるためのもの
+		WGPUBindGroupDescriptor bindGroupDesc{};
+		bindGroupDesc.nextInChain = nullptr; // 拡張機能
+		bindGroupDesc.layout = m_BindGroupLayout; // バインドグループレイアウト
+		bindGroupDesc.entryCount = bindGroupLayoutDesc.entryCount;
+		bindGroupDesc.entries = &binding;
+		m_BindGroup = wgpuDeviceCreateBindGroup(m_pGraphicsAPI->GetLogicalDevice(), &bindGroupDesc);
 
 		return true;
 	}
@@ -190,11 +247,12 @@ namespace renderer
 
 		pipelineDesc.fragment = &fragmentState;
 		
-		// パイプラインレイアウトの指定(バッファへのメモリアクセスを制御する機構)
+		// パイプラインレイアウトの指定
+		// パイプラインレイアウトは、レンダリングパイプラインで使用されるすべてのリソースをどのようにバインドする必要があるかを示す
 		WGPUPipelineLayoutDescriptor layoutDesc{};
 		layoutDesc.nextInChain = nullptr;
-		layoutDesc.bindGroupLayoutCount = 0;
-		layoutDesc.bindGroupLayouts = nullptr;
+		layoutDesc.bindGroupLayoutCount = 1;
+		layoutDesc.bindGroupLayouts = &m_BindGroupLayout;
 		WGPUPipelineLayout layout = wgpuDeviceCreatePipelineLayout(m_pGraphicsAPI->GetLogicalDevice(), &layoutDesc);
 
 		pipelineDesc.layout = layout;

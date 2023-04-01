@@ -32,11 +32,16 @@ namespace renderer
 		// Uniform
 		WGPUBuffer m_UniformBuffer;
 
+		// BindGroup
+		WGPUBindGroupLayout m_BindGroupLayout;
+		WGPUBindGroup m_BindGroup;
+
 	private:
 		// WebGPU Main Logic /////////////////////////////////////////////////////////////////////
 		bool CreateVertexBuffer(const CRendererCreateInfo& createInfo);
 		bool CreateIndexBuffer(const CRendererCreateInfo& createInfo);
 		bool CreateUniformBuffer(const CRendererCreateInfo& createInfo);
+		bool CreateBindGroup(const CRendererCreateInfo& createInfo);
 		bool CreateGraphicsPipeline(const CRendererCreateInfo& createInfo);
 		
 		// Helper Function ///////////////////////////////////////////////////////////////////////

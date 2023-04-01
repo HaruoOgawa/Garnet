@@ -77,7 +77,7 @@ namespace scene
 
 			@vertex
 			fn main(in: VertexInput) -> VertexOutput {
-				var offset = vec3<f32>(0.0, uTime, 0.0);
+				var offset = vec3<f32>(0.0, sin(uTime), 0.0);
 
 				var out: VertexOutput;
 				out.position = vec4<f32>(in.position + offset, 1.0);			
