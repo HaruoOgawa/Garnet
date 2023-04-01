@@ -44,7 +44,7 @@ namespace renderer
 	{
 		// ユニフォームバッファの更新
 		float t = static_cast<float>(glfwGetTime()); // glfwGetTime returns a double
-		wgpuQueueWriteBuffer(m_pGraphicsAPI->GetQueue(), m_UniformBuffer, 0, &t, sizeof(float));
+		wgpuQueueWriteBuffer(m_pGraphicsAPI->GetQueue(), m_UniformBuffer, 4, &t, sizeof(float));
 
 		return true;
 	}
@@ -107,9 +107,13 @@ namespace renderer
 	bool CWebGPURenderer::CreateUniformBuffer(const CRendererCreateInfo& createInfo)
 	{
 		// バッファの生成
-		std::vector<float> Data = { 0.5f };
+		TestUniform Data = { 
+			{0.0f, 1.0f, 0.4f, 1.0f},
+			0.0f,
+			{0.0f, 0.0f, 0.0f}
+		};
 	
-		if (!CreateBuffer(m_UniformBuffer, WGPUBufferUsage_CopyDst | WGPUBufferUsage_Uniform, &Data[0], Data.size() * sizeof(float))) return false;
+		if (!CreateBuffer(m_UniformBuffer, WGPUBufferUsage_CopyDst | WGPUBufferUsage_Uniform, &Data, sizeof(TestUniform))) return false;
 
 		return true;
 	}
@@ -130,9 +134,9 @@ namespace renderer
 		// -->これがWGSLでいう @binding(n)
 		WGPUBindGroupLayoutEntry bindingLayout{};
 		bindingLayout.binding = 0; // バインドインデックス
-		bindingLayout.visibility = WGPUShaderStage_Vertex; // アクセス権限。ここではおそらく頂点バッファのみ読み取り可能
+		bindingLayout.visibility = WGPUShaderStage_Vertex | WGPUShaderStage_Fragment; // アクセス権限。ここではおそらく頂点シェーダーとフラグメントシェーダーのみ読み取り可能
 		bindingLayout.buffer.type = WGPUBufferBindingType_Uniform; // バインド先のバッファの種類
-		bindingLayout.buffer.minBindingSize = sizeof(float); // データ一つ当たりのサイズかな???
+		bindingLayout.buffer.minBindingSize = sizeof(TestUniform); // データ一つ当たりのサイズかな???
 
 		// バインドグループレイアウトを作成
 		// たぶん上記のバインドレイアウトのマネージャー, 複数個束ねるやつ
@@ -150,7 +154,7 @@ namespace renderer
 		binding.binding = 0;
 		binding.buffer = m_UniformBuffer;
 		binding.offset = 0;
-		binding.size = sizeof(float);
+		binding.size = sizeof(TestUniform);
 
 		// バインドグループを作成
 		// --> groupやbindingを最終的に全て束ねるためのもの

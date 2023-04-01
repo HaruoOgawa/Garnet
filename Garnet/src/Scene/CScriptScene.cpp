@@ -73,11 +73,17 @@ namespace scene
 				@location(1) uv: vec2<f32>,
 			};	
 	
-			@group(0) @binding(0) var<uniform> uTime: f32;
+			struct TestUniform {
+				color: vec4<f32>,
+				time: f32,
+				pad: vec3<f32>,
+			};
+
+			@group(0) @binding(0) var<uniform> uTestUniform: TestUniform;
 
 			@vertex
 			fn main(in: VertexInput) -> VertexOutput {
-				var offset = vec3<f32>(0.0, sin(uTime), 0.0);
+				var offset = vec3<f32>(0.0, sin(uTestUniform.time), 0.0);
 
 				var out: VertexOutput;
 				out.position = vec4<f32>(in.position + offset, 1.0);			
@@ -95,9 +101,18 @@ namespace scene
 				@location(1) uv: vec2<f32>,
 			};	
 
+			struct TestUniform {
+				color: vec4<f32>,
+				time: f32,
+				pad: vec3<f32>,
+			};
+
+			@group(0) @binding(0) var<uniform> uTestUniform: TestUniform;
+
 			@fragment
 			fn main(in: VertexOutput) -> @location(0) vec4<f32> {
-				return vec4<f32>(in.color, 1.0);
+				let color = in.color * uTestUniform.color.rgb;
+				return vec4<f32>(color, 1.0);
 			}
 		)";
 #endif

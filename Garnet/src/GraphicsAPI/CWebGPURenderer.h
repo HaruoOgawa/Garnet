@@ -12,6 +12,13 @@ namespace renderer
 {
 	class CRendererCreateInfo;
 
+	struct TestUniform
+	{
+		float color[4];
+		float time;
+		float pad[3];
+	};
+
 	class CWebGPURenderer : public IRenderer
 	{
 		// API
