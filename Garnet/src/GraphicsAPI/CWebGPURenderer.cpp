@@ -44,8 +44,10 @@ namespace renderer
 	bool CWebGPURenderer::Update()
 	{
 		// ユニフォームバッファの更新
-		float t = static_cast<float>(glfwGetTime()); // glfwGetTime returns a double
-		wgpuQueueWriteBuffer(m_pGraphicsAPI->GetQueue(), m_UniformBuffer, 4 * sizeof(float), &t, sizeof(float));
+		//float t = static_cast<float>(glfwGetTime()); // glfwGetTime returns a double
+		float t = 0.0f;
+		glm::vec3 testPos = glm::vec3(0.0f);
+		wgpuQueueWriteBuffer(m_pGraphicsAPI->GetQueue(), m_UniformBuffer, 4 * sizeof(float), &testPos.x, sizeof(float));
 
 		return true;
 	}

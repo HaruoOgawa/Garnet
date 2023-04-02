@@ -28,16 +28,18 @@ add_executable(
 	../src/Graphics/CMesh.h
 	../src/Graphics/CPrimitive.cpp
 	../src/Graphics/CPrimitive.h
+	../src/Graphics/CUniformBufferObject.cpp
+	../src/Graphics/CUniformBufferObject.h
 	../src/Graphics/CVertexBuffer.cpp
 	../src/Graphics/CVertexBuffer.h
 	../src/Graphics/SUniformBufferObject.h
-	../src/Graphics/SVertex.h
 	../src/GraphicsAPI/CRendererCreateInfo.cpp
 	../src/GraphicsAPI/CRendererCreateInfo.h
 	../src/GraphicsAPI/CWebGPUAPI.cpp
 	../src/GraphicsAPI/CWebGPUAPI.h
 	../src/GraphicsAPI/CWebGPURenderer.cpp
 	../src/GraphicsAPI/CWebGPURenderer.h
+	../src/GraphicsAPI/ERenderPassType.h
 	../src/Interface/IApp.h
 	../src/Interface/IGraphicsAPI.h
 	../src/Interface/IObject.h
@@ -60,7 +62,7 @@ if(NOT EMSCRIPTEN)
 		LINK_FLAGS /SUBSYSTEM:CONSOLE
 	)
 
-	target_include_directories(Garnet PRIVATE ../src/Library/GLFW/include ../src/Library/WebGPU ../src/Library/glfw3webgpu)
+	target_include_directories(Garnet PRIVATE ../src/Library/GLFW/include ../src/Library/WebGPU ../src/Library/glfw3webgpu ../src/Library/glm)
 	target_link_directories(Garnet PRIVATE ../src/Library/GLFW/lib ../src/Library/WebGPU/windows-x86_64)
 	target_link_libraries(Garnet glfw3.lib wgpu_native.lib)
 else()

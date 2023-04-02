@@ -5,6 +5,7 @@
 #include <wgpu.h>
 #include <vector>
 #include <string>
+#include <glm/glm.hpp>
 
 namespace api { class CWebGPUAPI; }
 
