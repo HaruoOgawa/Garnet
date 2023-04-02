@@ -13,6 +13,7 @@ namespace renderer
 		m_IndexBuffer(nullptr),
 		m_IndexCount(0),
 		m_UniformBuffer(nullptr),
+		m_UniformCount(0),
 		m_BindGroup(nullptr)
 	{
 	}
@@ -107,13 +108,15 @@ namespace renderer
 	bool CWebGPURenderer::CreateUniformBuffer(const CRendererCreateInfo& createInfo)
 	{
 		// バッファの生成
-		TestUniform Data = { 
-			{0.0f, 1.0f, 0.4f, 1.0f},
+		std::vector<float> Data = {
+			0.0f, 1.0f, 0.4f, 1.0f,
 			0.0f,
-			{0.0f, 0.0f, 0.0f}
+			0.0f, 0.0f, 0.0f
 		};
+
+		m_UniformCount = Data.size();
 	
-		if (!CreateBuffer(m_UniformBuffer, WGPUBufferUsage_CopyDst | WGPUBufferUsage_Uniform, &Data, sizeof(TestUniform))) return false;
+		if (!CreateBuffer(m_UniformBuffer, WGPUBufferUsage_CopyDst | WGPUBufferUsage_Uniform, &Data[0], m_UniformCount * sizeof(float))) return false;
 
 		return true;
 	}
@@ -136,7 +139,7 @@ namespace renderer
 		bindingLayout.binding = 0; // バインドインデックス
 		bindingLayout.visibility = WGPUShaderStage_Vertex | WGPUShaderStage_Fragment; // アクセス権限。ここではおそらく頂点シェーダーとフラグメントシェーダーのみ読み取り可能
 		bindingLayout.buffer.type = WGPUBufferBindingType_Uniform; // バインド先のバッファの種類
-		bindingLayout.buffer.minBindingSize = sizeof(TestUniform); // データ一つ当たりのサイズかな???
+		bindingLayout.buffer.minBindingSize = m_UniformCount * sizeof(float); // データ一つ当たりのサイズかな???
 
 		// バインドグループレイアウトを作成
 		// たぶん上記のバインドレイアウトのマネージャー, 複数個束ねるやつ
@@ -154,7 +157,7 @@ namespace renderer
 		binding.binding = 0;
 		binding.buffer = m_UniformBuffer;
 		binding.offset = 0;
-		binding.size = sizeof(TestUniform);
+		binding.size = m_UniformCount * sizeof(float);
 
 		// バインドグループを作成
 		// --> groupやbindingやbufferなどのをすべてを最終的に束ねるためのもの

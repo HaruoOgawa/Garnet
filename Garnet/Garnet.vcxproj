@@ -330,6 +330,7 @@ del $(OutDir)Garnet.pdb</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="src\Graphics\CUniformBufferObject.h" />
     <ClInclude Include="src\GraphicsAPI\ERenderPassType.h" />
     <ClInclude Include="src\Library\glfw3webgpu\glfw3webgpu.h" />
     <ClInclude Include="src\Library\WebGPU\webgpu.h" />
@@ -365,6 +366,7 @@ del $(OutDir)Garnet.pdb</Command>
     <ClInclude Include="src\Interface\IRenderer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Graphics\CUniformBufferObject.cpp" />
     <ClCompile Include="src\Library\glfw3webgpu\glfw3webgpu.c" />
     <ClCompile Include="src\Scene\CScriptScene.cpp" />
     <ClCompile Include="src\File\CFile.cpp" />

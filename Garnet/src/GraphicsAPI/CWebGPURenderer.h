@@ -12,13 +12,6 @@ namespace renderer
 {
 	class CRendererCreateInfo;
 
-	struct TestUniform
-	{
-		float color[4];
-		float time;
-		float pad[3];
-	};
-
 	class CWebGPURenderer : public IRenderer
 	{
 		// API
@@ -38,6 +31,7 @@ namespace renderer
 
 		// Uniform
 		WGPUBuffer m_UniformBuffer;
+		size_t	   m_UniformCount;
 
 		// BindGroup
 		WGPUBindGroupLayout m_BindGroupLayout;

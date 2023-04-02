@@ -82,6 +82,7 @@ namespace scene
 			};
 
 			@group(0) @binding(0) var<uniform> uTestUniform: TestUniform;
+			//@group(0) @binding(1) var<uniform> uTestXOff: f32;
 
 			@vertex
 			fn main(in: VertexInput) -> VertexOutput {
