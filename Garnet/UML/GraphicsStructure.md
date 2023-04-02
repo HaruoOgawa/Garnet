@@ -30,6 +30,27 @@ classDiagram
 
   CMaterial ..|> CPrimitive
   
+  class CUniformBufferObject{
+    - m_UniformBlockList
+  }
+  
+  CUniformBufferObject ..|> CMaterial
+  
+  class CUniformBlock{
+    - m_UniformList
+  }
+  
+  CUniformBlock ..|> CUniformBufferObject
+  
+  class CUniformValue{
+    - int m_Size
+    - int m_Offset
+    - int m_HashKey
+    - string m_UniformName
+  }
+  
+  CUniformValue ..|> CUniformBlock
+  
   class IGraphicsAPI{
     + bool Initialize()
     + IRenderer + CreateRenderer(CRendererCreateInfo createInfo);
