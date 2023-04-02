@@ -157,7 +157,7 @@ namespace renderer
 		binding.size = sizeof(TestUniform);
 
 		// バインドグループを作成
-		// --> groupやbindingを最終的に全て束ねるためのもの
+		// --> groupやbindingやbufferなどのをすべてを最終的に束ねるためのもの
 		WGPUBindGroupDescriptor bindGroupDesc{};
 		bindGroupDesc.nextInChain = nullptr; // 拡張機能
 		bindGroupDesc.layout = m_BindGroupLayout; // バインドグループレイアウト
@@ -321,6 +321,8 @@ namespace renderer
 
 	bool CWebGPURenderer::CreateBuffer(WGPUBuffer& Buffer, WGPUBufferUsageFlags Usage, void const* Data, uint64_t ByteSize)
 	{
+		// たぶんWebGPU, Vulkanでもvec3は16バイトオフセットと換算されるっぽいからvec3分(12バイト分)のパディングを入れたい場合はvec3ではなくfloatの変数を3つ定義するべき
+
 		WGPUBufferDescriptor bufferDesc{};
 		bufferDesc.nextInChain = nullptr; // 拡張機能
 		bufferDesc.label = "Buffer";
