@@ -44,7 +44,7 @@ namespace renderer
 	{
 		// ユニフォームバッファの更新
 		float t = static_cast<float>(glfwGetTime()); // glfwGetTime returns a double
-		wgpuQueueWriteBuffer(m_pGraphicsAPI->GetQueue(), m_UniformBuffer, 4, &t, sizeof(float));
+		wgpuQueueWriteBuffer(m_pGraphicsAPI->GetQueue(), m_UniformBuffer, 4 * sizeof(float), &t, sizeof(float));
 
 		return true;
 	}

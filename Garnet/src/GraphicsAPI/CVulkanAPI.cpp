@@ -89,7 +89,11 @@ namespace api
 		InitAvailableLayerList();
 
 		// デバッグ用の検証レイヤーが使用可能かチェックする
-		if (m_IsUseDebugValidationLayer && !CheckDebugValidationLayerSupport()) return false;
+		if (m_IsUseDebugValidationLayer && !CheckDebugValidationLayerSupport())
+		{
+			// 物理デバイスが検証レイヤー機能を持っていない場合は機能デバッグレイヤーの使用をオフにしておく
+			m_IsUseDebugValidationLayer = false;
+		}
 
 		// アプリケーション情報
 		VkApplicationInfo AppInfo{};
