@@ -50,6 +50,7 @@ namespace renderer
 		WGPUShaderModule CreateShaderModule(const std::string& shaderCode);
 		WGPUVertexFormat GetVertexFormat(int Dimension);
 		bool             CreateBuffer(WGPUBuffer& Buffer, WGPUBufferUsageFlags Usage, void const* Data, uint64_t ByteSize);
+		void			 InitDefalutBindGroupLayoutEntry(WGPUBindGroupLayoutEntry& bindingLayout);
 	public:
 		CWebGPURenderer();
 		virtual ~CWebGPURenderer();

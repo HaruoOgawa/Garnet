@@ -138,6 +138,7 @@ namespace renderer
 		// どのようにメモリに配置されるか, バインドインデックスや読み取り専用かなど
 		// -->これがWGSLでいう @binding(n)
 		WGPUBindGroupLayoutEntry bindingLayout{};
+		InitDefalutBindGroupLayoutEntry(bindingLayout); // 初期化しないとブラウザ側でいろいろとエラーがでる・・・
 		bindingLayout.binding = 0; // バインドインデックス
 		bindingLayout.visibility = WGPUShaderStage_Vertex | WGPUShaderStage_Fragment; // アクセス権限。ここではおそらく頂点シェーダーとフラグメントシェーダーのみ読み取り可能
 		bindingLayout.buffer.type = WGPUBufferBindingType_Uniform; // バインド先のバッファの種類
@@ -148,6 +149,7 @@ namespace renderer
 		// --> これがWGSLでいう @group(n) かな？
 		WGPUBindGroupLayoutDescriptor bindGroupLayoutDesc{}; //バインドグループの記述子
 		bindGroupLayoutDesc.nextInChain = nullptr; // 拡張機能
+		bindGroupLayoutDesc.label = "BindGroupLayout";
 		bindGroupLayoutDesc.entryCount = 1; // 上記のバインドレイアウトの数
 		bindGroupLayoutDesc.entries = &bindingLayout; // バインドレイアウトのデータ
 		m_BindGroupLayout = wgpuDeviceCreateBindGroupLayout(m_pGraphicsAPI->GetLogicalDevice(), &bindGroupLayoutDesc);
@@ -165,6 +167,7 @@ namespace renderer
 		// --> groupやbindingやbufferなどのをすべてを最終的に束ねるためのもの
 		WGPUBindGroupDescriptor bindGroupDesc{};
 		bindGroupDesc.nextInChain = nullptr; // 拡張機能
+		bindGroupDesc.label = "BindGroup";
 		bindGroupDesc.layout = m_BindGroupLayout; // バインドグループレイアウト
 		bindGroupDesc.entryCount = bindGroupLayoutDesc.entryCount;
 		bindGroupDesc.entries = &binding;
@@ -341,6 +344,26 @@ namespace renderer
 		wgpuQueueWriteBuffer(m_pGraphicsAPI->GetQueue(), Buffer, 0, Data, bufferDesc.size);
 
 		return true;
+	}
+
+	void CWebGPURenderer::InitDefalutBindGroupLayoutEntry(WGPUBindGroupLayoutEntry& bindingLayout)
+	{
+		bindingLayout.buffer.nextInChain = nullptr;
+		bindingLayout.buffer.type = WGPUBufferBindingType_Undefined;
+		bindingLayout.buffer.hasDynamicOffset = false;
+
+		bindingLayout.sampler.nextInChain = nullptr;
+		bindingLayout.sampler.type = WGPUSamplerBindingType_Undefined;
+
+		bindingLayout.storageTexture.nextInChain = nullptr;
+		bindingLayout.storageTexture.access = WGPUStorageTextureAccess_Undefined;
+		bindingLayout.storageTexture.format = WGPUTextureFormat_Undefined;
+		bindingLayout.storageTexture.viewDimension = WGPUTextureViewDimension_Undefined;
+
+		bindingLayout.texture.nextInChain = nullptr;
+		bindingLayout.texture.multisampled = false;
+		bindingLayout.texture.sampleType = WGPUTextureSampleType_Undefined;
+		bindingLayout.texture.viewDimension = WGPUTextureViewDimension_Undefined;
 	}
 }
 #endif
