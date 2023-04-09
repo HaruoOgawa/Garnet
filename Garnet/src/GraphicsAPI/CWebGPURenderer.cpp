@@ -44,8 +44,8 @@ namespace renderer
 	bool CWebGPURenderer::Update()
 	{
 		// ユニフォームバッファの更新
-		float t = static_cast<float>(glfwGetTime()); // glfwGetTime returns a double
-		//float t = 0.0f;
+		//float t = static_cast<float>(glfwGetTime()); // glfwGetTime returns a double
+		float t = 0.0f;
 		glm::vec3 testPos = glm::vec3(0.0f);
 
 		// 行列

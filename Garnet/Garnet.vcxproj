@@ -685,6 +685,7 @@ del $(OutDir)Garnet.pdb</Command>
     <None Include="Commands\RemakeCmakeLists_DescApp.bat" />
     <None Include="Commands\RemakeCmakeLists_DescApp.py" />
     <None Include="Commands\RunLocalHost.bat" />
+    <None Include="Commands\UTF8Encorder.py" />
     <None Include="EmscriptenBuild\build.bat" />
     <None Include="EmscriptenBuild\Garnet_front.js" />
     <None Include="EmscriptenBuild\index.html" />
