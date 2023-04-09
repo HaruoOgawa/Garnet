@@ -80,7 +80,7 @@ namespace api
 		renderPassDesc.depthStencilAttachment = nullptr; // デプスステンシルバッファ
 		renderPassDesc.timestampWriteCount = 0;
 		renderPassDesc.timestampWrites = nullptr; // レンダリングの同期用のオブジェクト領域
-		renderPassDesc.nextInChain = nullptr; // 拡張機能
+		renderPassDesc.nextInChain = nullptr; // 拡張機
 
 		// コマンドエンコーダーを生成
 		// (コマンドバッファの生成に必要なもの)
@@ -159,7 +159,7 @@ namespace api
 	{
 		// インスタンスの設定
 		WGPUInstanceDescriptor desc = {};
-		desc.nextInChain = nullptr; // 拡張機能を設定用のフィールド
+		desc.nextInChain = nullptr; // 拡張機を設定用のフィールド
 
 		// インスタンスを生成
 #ifndef __EMSCRIPTEN__
@@ -189,7 +189,7 @@ namespace api
 
 		//
 		WGPUSurfaceDescriptor surfDesc = {};
-		surfDesc.nextInChain = reinterpret_cast<WGPUChainedStruct*>(&canvDesc); // 拡張機能
+		surfDesc.nextInChain = reinterpret_cast<WGPUChainedStruct*>(&canvDesc); // 拡張機
 
 		//
 		m_Surface = wgpuInstanceCreateSurface(nullptr, &surfDesc); // Emscriptenの場合はInstanceを必要としない
@@ -212,7 +212,7 @@ namespace api
 #ifndef __EMSCRIPTEN__
 		// アダプターの生成オプション
 		WGPURequestAdapterOptions adapterOpts = {};
-		adapterOpts.nextInChain = nullptr; // 拡張機能
+		adapterOpts.nextInChain = nullptr; // 拡張機
 		adapterOpts.compatibleSurface = m_Surface; // ウィンドウサーフェイスを渡す
 
 		// アダプターを取得するためのローカル構造体を定義
@@ -249,7 +249,7 @@ namespace api
 			return false;
 		}
 
-		// 物理デバイスの持つ機能を問い合わせる
+		// 物理デバイスの持つ機を問い合わせる
 		std::vector<WGPUFeatureName> features;
 		std::size_t featureCount = wgpuAdapterEnumerateFeatures(m_Adapter, nullptr);
 		features.resize(featureCount);
@@ -263,11 +263,11 @@ namespace api
 #ifndef __EMSCRIPTEN__
 		// デバイスの取得オプション
 		WGPUDeviceDescriptor descriptor = {};
-		descriptor.nextInChain = nullptr; // 拡張機能
+		descriptor.nextInChain = nullptr; // 拡張機
 		descriptor.label = "Garnet Device"; // デバイスを判別するためのラベル
 		descriptor.requiredFeaturesCount = 0; // 使用することを指定するデバイスの特徴の数
 		descriptor.requiredLimits = nullptr; // ???
-		descriptor.defaultQueue.nextInChain = nullptr; // デフォルトコマンドキューの拡張機能
+		descriptor.defaultQueue.nextInChain = nullptr; // デフォルトコマンドキューの拡張機
 		descriptor.defaultQueue.label = "Default Queue"; // デフォルトコマンドキューの判別用ラベル
 
 		// バッファとアトリビュートの制限数を最大値に設定しておく
@@ -390,7 +390,7 @@ namespace api
 #endif // __EMSCRIPTEN__
 		swapChainDesc.format = m_SwapChainFormat;
 		swapChainDesc.usage = WGPUTextureUsage_RenderAttachment; // レンダーパスのターゲットとして使用することを宣言
-		swapChainDesc.presentMode = WGPUPresentMode_Fifo; // 各フレームで待機中のキューからどのようにテクスチャを表示するかを指定する https://eliemichel.github.io/LearnWebGPU/getting-started/first-color.html
+		swapChainDesc.presentMode = WGPUPresentMode_Fifo; // 各フレームで待機中のキューからどのようにテクスチャを示するかを指定する https://eliemichel.github.io/LearnWebGPU/getting-started/first-color.html
 
 		//
 		m_SwapChain = wgpuDeviceCreateSwapChain(m_Device, m_Surface, &swapChainDesc);

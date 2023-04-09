@@ -179,7 +179,7 @@ namespace renderer
 		WGPUBindGroupLayoutEntry bindingLayout{};
 		InitDefalutBindGroupLayoutEntry(bindingLayout); // 初期化しないとブラウザ側でいろいろとエラーがでる・・・
 		bindingLayout.binding = 0; // バインドインデックス
-		bindingLayout.visibility = WGPUShaderStage_Vertex | WGPUShaderStage_Fragment; // アクセス権限。ここではおそらく頂点シェーダーとフラグメントシェーダーのみ読み取り可能
+		bindingLayout.visibility = WGPUShaderStage_Vertex | WGPUShaderStage_Fragment; // アクセス権限。ここではおそらく頂点シェーダーとフラグメントシェーダーのみ読み取り可
 		bindingLayout.buffer.type = WGPUBufferBindingType_Uniform; // バインド先のバッファの種類
 		bindingLayout.buffer.minBindingSize = m_UniformCount * sizeof(float); // データ一つ当たりのサイズかな???
 
@@ -187,7 +187,7 @@ namespace renderer
 		// たぶん上記のバインドレイアウトのマネージャー, 複数個束ねるやつ
 		// --> これがWGSLでいう @group(n) かな？
 		WGPUBindGroupLayoutDescriptor bindGroupLayoutDesc{}; //バインドグループの記述子
-		bindGroupLayoutDesc.nextInChain = nullptr; // 拡張機能
+		bindGroupLayoutDesc.nextInChain = nullptr; // 拡張機
 		bindGroupLayoutDesc.label = "BindGroupLayout";
 		bindGroupLayoutDesc.entryCount = 1; // 上記のバインドレイアウトの数
 		bindGroupLayoutDesc.entries = &bindingLayout; // バインドレイアウトのデータ
@@ -196,7 +196,7 @@ namespace renderer
 		// バッファと結びつけるための記述かな？
 		// --> その通り、たぶんバッファのバインディング
 		WGPUBindGroupEntry binding{};
-		binding.nextInChain = nullptr; // 拡張機能
+		binding.nextInChain = nullptr; // 拡張機
 		binding.binding = 0;
 		binding.buffer = m_UniformBuffer;
 		binding.offset = 0;
@@ -205,7 +205,7 @@ namespace renderer
 		// バインドグループを作成
 		// --> groupやbindingやbufferなどのをすべてを最終的に束ねるためのもの
 		WGPUBindGroupDescriptor bindGroupDesc{};
-		bindGroupDesc.nextInChain = nullptr; // 拡張機能
+		bindGroupDesc.nextInChain = nullptr; // 拡張機
 		bindGroupDesc.label = "BindGroup";
 		bindGroupDesc.layout = m_BindGroupLayout; // バインドグループレイアウト
 		bindGroupDesc.entryCount = bindGroupLayoutDesc.entryCount;
@@ -223,7 +223,7 @@ namespace renderer
 
 		// パイプラインの設定 //////////////////////////////////////////////////////////////////////////
 		WGPURenderPipelineDescriptor pipelineDesc{};
-		pipelineDesc.nextInChain = nullptr; // 拡張機能
+		pipelineDesc.nextInChain = nullptr; // 拡張機
 
 		// 頂点バッファレイアウト
 		std::vector<WGPUVertexBufferLayout> vertexBufferLayouts(m_VertexBufferList.size());
@@ -371,7 +371,7 @@ namespace renderer
 		// たぶんWebGPU, Vulkanでもvec3は16バイトオフセットと換算されるっぽいからvec3分(12バイト分)のパディングを入れたい場合はvec3ではなくfloatの変数を3つ定義するべき
 
 		WGPUBufferDescriptor bufferDesc{};
-		bufferDesc.nextInChain = nullptr; // 拡張機能
+		bufferDesc.nextInChain = nullptr; // 拡張機
 		bufferDesc.label = "Buffer";
 		bufferDesc.usage = Usage; // バッファの用途
 		bufferDesc.mappedAtCreation = false; // ???

@@ -165,13 +165,13 @@ namespace renderer
 			m_pGraphicsAPI->CreateImage(texWidth, texHeight, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
 				VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_TextureImage, m_TextureImageMemory);
 
-			// イメージテクスチャのレイアウトを別形式へ移行する --> バッファにコピー可能な形式に変換
+			// イメージテクスチャのレイアウトを別形式へ移行する --> バッファにコピー可な形式に変換
 			m_pGraphicsAPI->TransitionImageLayout(m_TextureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 
 			// ステージングバッファのデータをテクスチャイメージへコピーする
 			m_pGraphicsAPI->CopyBufferToImage(stagingBuffer, m_TextureImage, static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight));
 
-			// イメージテクスチャのレイアウトを別形式へ移行する --> シェーダーで読み込み可能な形式に変換
+			// イメージテクスチャのレイアウトを別形式へ移行する --> シェーダーで読み込み可な形式に変換
 			m_pGraphicsAPI->TransitionImageLayout(m_TextureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
 			// ステージングバッファの破棄
@@ -206,7 +206,7 @@ namespace renderer
 
 			VkPhysicalDeviceProperties properties{};
 			vkGetPhysicalDeviceProperties(m_pGraphicsAPI->GetPhysicalDevice(), &properties);
-			samplerInfo.anisotropyEnable = VK_TRUE; // 異方性フィルタリング --> 遠くの方のテクスチャがぼけてしまうのを調整する機能
+			samplerInfo.anisotropyEnable = VK_TRUE; // 異方性フィルタリング --> 遠くの方のテクスチャがぼけてしまうのを調整する機
 			samplerInfo.maxAnisotropy = properties.limits.maxSamplerAllocationCount;
 
 			samplerInfo.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
@@ -236,7 +236,7 @@ namespace renderer
 			VkDeviceSize bufferSize = sizeof(VertexData[0]) * VertexData.size();
 
 			// ステージングバッファの作成
-			// ステージングバッファは頂点データ配列からデータをアップロードするのに使用するCPUアクセス可能なバッファ
+			// ステージングバッファは頂点データ配列からデータをアップロードするのに使用するCPUアクセス可なバッファ
 			VkBuffer stagingBuffer;
 			VkDeviceMemory stagingBufferMemory;
 			m_pGraphicsAPI->CreateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
@@ -465,7 +465,7 @@ namespace renderer
 			shaderStages.push_back(fragShaderStageInfo);
 		}
 
-		// グラフィックパイプラインの固定機能の設定 ///////////////////////////////////////////////////////////////////////////////////////
+		// グラフィックパイプラインの固定機の設定 ///////////////////////////////////////////////////////////////////////////////////////
 
 		// 動的状態(ダイナミックステート)の設定(パイプラインにベイクせずにマイフレームの描画時に設定できるようにするパラメーターの設定)
 		std::vector<VkDynamicState> dynamicStates = {
@@ -514,7 +514,7 @@ namespace renderer
 		inputAssemblyInfo.primitiveRestartEnable = VK_FALSE; // Trueにすると自分で定義したインデックスバッファが使用できる？
 
 		// ビューポートの設定
-		// 上記のダイナミックステートのことで動的変更を可能にする
+		// 上記のダイナミックステートのことで動的変更を可にする
 		VkViewport viewport{};
 		viewport.x = 0.0f; // 基準の座標
 		viewport.y = 0.0f;
@@ -524,7 +524,7 @@ namespace renderer
 		viewport.maxDepth = 1.0f;
 
 		// シザーの設定(シザーとはピクセルが実際に格納される領域を定義する. シザーよりも外側の領域はラスタライザにより破棄される)
-		// 上記のダイナミックステートのことで動的変更を可能にする
+		// 上記のダイナミックステートのことで動的変更を可にする
 		VkRect2D scissor{};
 		scissor.offset = { 0, 0 };
 		scissor.extent = m_pGraphicsAPI->GetSwapChainExtent(); // 解像度
