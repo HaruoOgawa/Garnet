@@ -44,10 +44,28 @@ namespace renderer
 	bool CWebGPURenderer::Update()
 	{
 		// ユニフォームバッファの更新
-		//float t = static_cast<float>(glfwGetTime()); // glfwGetTime returns a double
-		float t = 0.0f;
+		float t = static_cast<float>(glfwGetTime()); // glfwGetTime returns a double
+		//float t = 0.0f;
 		glm::vec3 testPos = glm::vec3(0.0f);
+
+		// 行列
+		glm::mat4 mmat = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f)) * glm::mat4_cast(glm::quat(glm::vec3(0.0f, t, 0.0f))) * glm::scale(glm::mat4(1.0f), glm::vec3(1.0f));
+		glm::mat4 vmat = glm::lookAt(
+			glm::vec3(0.0f, 0.0f, -3.0f),
+			glm::vec3(0.0f),
+			glm::vec3(0.0f, 1.0f, 0.0f)
+		);
+		glm::mat4 pmat = glm::perspective(
+			glm::radians(90.0f),
+			1.0f,
+			0.1f,
+			10000.0f
+		);
+
+		glm::mat4 mvp = pmat * vmat * mmat;
+
 		wgpuQueueWriteBuffer(m_pGraphicsAPI->GetQueue(), m_UniformBuffer, 4 * sizeof(float), &testPos.x, sizeof(float));
+		wgpuQueueWriteBuffer(m_pGraphicsAPI->GetQueue(), m_UniformBuffer, 8 * sizeof(float), reinterpret_cast<const float*>(&mvp[0][0]), 16 * sizeof(float));
 
 		return true;
 	}
@@ -116,6 +134,27 @@ namespace renderer
 			0.0f, 0.0f, 0.0f
 		};
 
+		// 行列
+		glm::mat4 mmat = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f)) * glm::mat4_cast(glm::quat(glm::vec3(0.0f))) * glm::scale(glm::mat4(1.0f), glm::vec3(1.0f));
+		glm::mat4 vmat = glm::lookAt(
+			glm::vec3(0.0f, 0.0f, -1.0f),
+			glm::vec3(0.0f),
+			glm::vec3(0.0f, 1.0f, 0.0f)
+		);
+		glm::mat4 pmat = glm::perspective(
+			glm::radians(90.0f),
+			1.0f,
+			0.1f,
+			10000.0f
+		);
+
+		glm::mat4 mvp = pmat * vmat * mmat;
+
+		Data.resize(Data.size() + 16);
+		std::memcpy(&Data[Data.size() - 16], reinterpret_cast<const float*>(&mvp[0][0]), 16 * sizeof(float));
+
+
+		//
 		m_UniformCount = Data.size();
 	
 		if (!CreateBuffer(m_UniformBuffer, WGPUBufferUsage_CopyDst | WGPUBufferUsage_Uniform, &Data[0], m_UniformCount * sizeof(float))) return false;
