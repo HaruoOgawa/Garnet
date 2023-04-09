@@ -148,9 +148,9 @@ namespace scene
 
 		return true;
 	}
-	bool CScriptScene::Update(api::IGraphicsAPI* pGraphicsAPI)
+	bool CScriptScene::Update(api::IGraphicsAPI* pGraphicsAPI, float SecondsTime)
 	{
-		if (!m_TestMesh->Update()) return false;
+		if (!m_TestMesh->Update(SecondsTime)) return false;
 
 		return true;
 	}

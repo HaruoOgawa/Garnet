@@ -25,7 +25,9 @@ namespace descapp
 		m_pWindow(nullptr),
 		m_GraphicsAPI(nullptr),
 		m_App(nullptr),
-		m_IsRunLoop(g_IsRunLoop)
+		m_IsRunLoop(g_IsRunLoop),
+		m_SecondsTime(0.0f),
+		m_DeltaSecondsTime(0.0f)
 	{
 		//
 #ifdef __DAWN__
@@ -149,7 +151,17 @@ namespace descapp
 
 	bool CDescAppManager::Update()
 	{
-		if (!m_App->Update(m_GraphicsAPI.get())) return false;
+		float PrevSecondsTime = m_SecondsTime;
+		m_SecondsTime = static_cast<float>(clock()) * 0.001f;
+		m_DeltaSecondsTime = m_SecondsTime - PrevSecondsTime;
+
+		if (!m_App->Update(m_GraphicsAPI.get(), m_SecondsTime)) return false;
+
+#ifdef _DEBUG
+		// FPS‚ÌŒv‘ª‚Æ•\¦(60FPS‚ğŠî€‚Æ‚·‚é)
+		float FPS = 60.0f / (m_DeltaSecondsTime * 60.0f);
+		//Console::Log("[FPS] %f fps / [CurrentTime] %f s\n", FPS, m_SecondsTime);
+#endif // _DEBUG
 
 		return true;
 	}

@@ -17,7 +17,7 @@ namespace scene
 		bool Release(api::IGraphicsAPI* pGraphicsAPI);
 
 		bool Initialize(api::IGraphicsAPI* pGraphicsAPI);
-		bool Update(api::IGraphicsAPI* pGraphicsAPI);
+		bool Update(api::IGraphicsAPI* pGraphicsAPI, float SecondsTime);
 		bool Draw(api::IGraphicsAPI* pGraphicsAPI) ;
 	};
 }

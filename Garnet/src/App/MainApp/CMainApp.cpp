@@ -27,7 +27,7 @@ namespace app
 		return true;
 	}
 
-	bool CMainApp::Update(api::IGraphicsAPI* pGraphicsAPI)
+	bool CMainApp::Update(api::IGraphicsAPI* pGraphicsAPI, float SecondsTime)
 	{
 		return true;
 	}

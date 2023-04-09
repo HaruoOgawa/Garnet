@@ -17,7 +17,7 @@ namespace node
 		return true;
 	}
 
-	bool CNode::Update()
+	bool CNode::Update(float SecondsTime)
 	{
 		return true;
 	}

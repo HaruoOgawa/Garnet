@@ -16,7 +16,9 @@ namespace webapp
 	CWebAppManager::CWebAppManager(app::EAppType AppType):
 		m_IsRunLoop(true),
 		m_GraphicsAPI(nullptr),
-		m_App(nullptr)
+		m_App(nullptr),
+		m_SecondsTime(0.0f),
+		m_DeltaSecondsTime(0.0f)
 	{
 		Console::Log("CWebAppManager::CWebAppManager\n");
 
@@ -98,7 +100,19 @@ namespace webapp
 
 	bool CWebAppManager::Update()
 	{
-		if (!m_App->Update(m_GraphicsAPI.get())) return false;
+		float PrevSecondsTime = m_SecondsTime;
+		m_SecondsTime = static_cast<float>(clock()) * 0.001f * 0.001f;
+		m_DeltaSecondsTime = m_SecondsTime - PrevSecondsTime;
+
+		if (!m_App->Update(m_GraphicsAPI.get(), m_SecondsTime)) return false;
+
+#ifdef _DEBUG
+		// FPS‚ÌŒv‘ª‚Æ•\Ž¦(60FPS‚ðŠî€‚Æ‚·‚é)
+		float FPS = 60.0f / (m_DeltaSecondsTime * 60.0f);
+		Console::Log("[FPS] %f fps / [CurrentTime] %f s\n", FPS, m_SecondsTime);
+#endif // _DEBUG
+
+		if (!m_App->Update(m_GraphicsAPI.get(), m_SecondsTime)) return false;
 
 		return true;
 	}

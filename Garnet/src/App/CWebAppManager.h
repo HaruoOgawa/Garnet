@@ -15,9 +15,8 @@ namespace webapp
 		std::shared_ptr<api::CWebGPUAPI> m_GraphicsAPI;
 		std::shared_ptr<app::IApp> m_App;
 		
-		// インプットプールを作成する
-		// 1フレームに1つしか受け取れなかったり、途中で処理を挟まれたりするのもよくないので、1フレームの間のインプットをプールに溜めて
-		// まとめて実行する
+		float m_SecondsTime;
+		float m_DeltaSecondsTime;
 
 	private:
 		bool Release();
