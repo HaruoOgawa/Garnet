@@ -1,6 +1,7 @@
 #pragma once
 #include <memory>
 #include "IRenderer.h"
+#include "../GraphicsAPI/ERenderPassType.h"
 
 #ifndef __EMSCRIPTEN__
 
@@ -30,7 +31,7 @@ namespace api
 		
 		virtual std::shared_ptr<renderer::IRenderer> CreateRenderer() = 0;
 
-		virtual bool BeginRender() = 0;
+		virtual bool BeginRender(ERenderPassType RenderPassType) = 0;
 		virtual bool EndRender() = 0;
 		virtual bool IsWaitting() = 0;
 	};

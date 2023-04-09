@@ -35,9 +35,9 @@ namespace api
 
 		// Layer
 #ifdef _DEBUG
-		const bool m_IsUseDebugValidationLayer = true;
+		bool m_IsUseDebugValidationLayer = true;
 #else
-		const bool m_IsUseDebugValidationLayer = false;
+		bool m_IsUseDebugValidationLayer = false;
 #endif // _DEBUG
 
 		const std::vector<const char*> m_UseLayerList = {
@@ -166,7 +166,7 @@ namespace api
 		
 		std::shared_ptr<renderer::IRenderer> CreateRenderer() override;
 
-		bool BeginRender() override;
+		bool BeginRender(ERenderPassType RenderPassType) override;
 		bool EndRender() override;
 		bool IsWaitting() override;
 

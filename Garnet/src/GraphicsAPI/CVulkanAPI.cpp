@@ -26,7 +26,7 @@ namespace api
 		if (!SetupDebugMessengerEXT()) return false; // インスタンス生成時に設定したプリセットのDebugMessengerだけではカバーできない範囲のハンドリング
 		if (!CreateSurface()) return false; // ウィンドウサーフェイスを作成(ウィンドウシステムとやり取りをする箇所)
 		if (!CreateDevices()) return false; // デバイスを作成(物理デバイス/論理デバイス)
-		if (!CreateSwapChain()) return false; // スワップチェインを作成(画面に表示されるのを待っている画像のキューのマネージャーこと)
+		if (!CreateSwapChain()) return false; // スワップチェインを作成(画面に示されるのを待っている画像のキューのマネージャーこと)
 		if (!CreateImageViews()) return false; // イメージビューの作成(APIが描画に使用する画像を管理するビューのこと)
 		if (!CreateRenderPass()) return false; // レンダーパスの作成(描画全体のマネージャー。実際に描画に使用するのがサブパス。サブパスを複数個用意することでポストプロセスもできる)
 		if (!CreateDepthResources()) return false; // デプステスト用のリソースを生成
@@ -85,11 +85,15 @@ namespace api
 	{
 		VkResult result = VK_SUCCESS;
 
-		// 使用可能レイヤーリストの初期化
+		// 使用可レイヤーリストの初期化
 		InitAvailableLayerList();
 
-		// デバッグ用の検証レイヤーが使用可能かチェックする
-		if (m_IsUseDebugValidationLayer && !CheckDebugValidationLayerSupport()) return false;
+		// デバッグ用の検証レイヤーが使用可かチェックする
+		if (m_IsUseDebugValidationLayer && !CheckDebugValidationLayerSupport())
+		{
+			// 物理デバイスが検証レイヤー機を持っていない場合は機デバッグレイヤーの使用をオフにしておく
+			m_IsUseDebugValidationLayer = false;
+		}
 
 		// アプリケーション情報
 		VkApplicationInfo AppInfo{};
@@ -109,15 +113,15 @@ namespace api
 		VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo{};
 		if (m_IsUseDebugValidationLayer)
 		{
-			// レイヤー(Layer) => インスタンスレイヤー => APIをラップして使う感じの拡張機能
-			// エクステンション(Extension) => 単純にAPIから派生させて生やす感じの拡張機能
+			// レイヤー(Layer) => インスタンスレイヤー => APIをラップして使う感じの拡張機
+			// エクステンション(Extension) => 単純にAPIから派生させて生やす感じの拡張機
 
 			//
-			InstanceInfo.enabledLayerCount = static_cast<uint32_t>(m_UseLayerList.size()); // 使用する拡張機能レイヤーの数
-			InstanceInfo.ppEnabledLayerNames = &m_UseLayerList[0]; // 使用する拡張機能レイヤーの名前リスト
+			InstanceInfo.enabledLayerCount = static_cast<uint32_t>(m_UseLayerList.size()); // 使用する拡張機レイヤーの数
+			InstanceInfo.ppEnabledLayerNames = &m_UseLayerList[0]; // 使用する拡張機レイヤーの名前リスト
 		
-			SetDebugMessengerCreateInfo(debugCreateInfo); // 使用する拡張機能本体の設定
-			InstanceInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT*)&debugCreateInfo; // pNextは拡張機能レイヤーの生成情報  
+			SetDebugMessengerCreateInfo(debugCreateInfo); // 使用する拡張機本体の設定
+			InstanceInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT*)&debugCreateInfo; // pNextは拡張機レイヤーの生成情報  
 		}
 		else
 		{
@@ -125,7 +129,7 @@ namespace api
 			InstanceInfo.ppEnabledLayerNames = nullptr;
 		}
 
-		// GLFWの拡張機能を設定(たぶんここで外部ツールの拡張機能を設定できる？)
+		// GLFWの拡張機を設定(たぶんここで外部ツールの拡張機を設定できる？)
 		auto extensions = GetRequiredExtensions();
 		InstanceInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
 		InstanceInfo.ppEnabledExtensionNames = &extensions[0];
@@ -171,7 +175,7 @@ namespace api
 		PhysicalDeviceList.resize(physicalDeviceCount);
 		vkEnumeratePhysicalDevices(m_Instance, &physicalDeviceCount, &PhysicalDeviceList[0]);
 
-		// 使用したい機能を持っている物理デバイスを探す
+		// 使用したい機を持っている物理デバイスを探す
 		bool IsFindDevice = false;
 		for (const auto& device : PhysicalDeviceList)
 		{
@@ -191,9 +195,9 @@ namespace api
 		}
 
 		// 論理デバイスの作成 ///////////////////////////////////////////////////////////////
-		// 物理デバイスのオプション機能を問い合わせる
+		// 物理デバイスのオプション機を問い合わせる
 		// (ベンダー名やグラボ名などの基本的な情報はvkGetPhysicalDevicePropertiesで問い合わせる)
-		// vkGetPhysicalDeviceFeaturesでジオメトリシェーダー等の機能を処理対象グラボが持っているか確認する
+		// vkGetPhysicalDeviceFeaturesでジオメトリシェーダー等の機を処理対象グラボが持っているか確認する
 
 		// デフォルトで有効になっている設定一覧を取得する 
 		VkPhysicalDeviceFeatures supportedFeatures;
@@ -204,7 +208,7 @@ namespace api
 		// https://learn.microsoft.com/ja-jp/cpp/cpp/initializing-classes-and-structs-without-constructors-cpp?view=msvc-170
 		// https://www.ibm.com/docs/ja/zos/2.3.0?topic=initializers-initialization-structures-unions
 
-		// 必要なオプション機能を有効にする
+		// 必要なオプション機を有効にする
 		VkPhysicalDeviceFeatures requiredFeatures = {};
 		requiredFeatures.multiDrawIndirect = supportedFeatures.multiDrawIndirect;
 		requiredFeatures.tessellationShader = VK_TRUE;
@@ -238,7 +242,7 @@ namespace api
 		deviceCreateInfo.queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size());
 		deviceCreateInfo.pQueueCreateInfos = &queueCreateInfos[0];
 
-		// 論理デバイスの拡張機能の設定
+		// 論理デバイスの拡張機の設定
 		deviceCreateInfo.enabledExtensionCount = static_cast<uint32_t>(m_DeviceExtensions.size());
 		deviceCreateInfo.ppEnabledExtensionNames = &m_DeviceExtensions[0];
 
@@ -312,7 +316,7 @@ namespace api
 			createInfo.pQueueFamilyIndices = nullptr;
 		}
 
-		// イメージが変換可能であるかの指定
+		// イメージが変換可であるかの指定
 		createInfo.preTransform = swapChainSupport.m_Capabilities.currentTransform;
 
 		// アルファブレンドを使用するかどうか
@@ -365,7 +369,7 @@ namespace api
 		colorAttachment.format = m_SwapChainImageFormat;
 		colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT; // マルチサンプリング
 		colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR; // レンダリングの前後にどのような処理を施すか(クリアの方法など)。デプスバッファに適応
-		colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE; // レンダリング結果をメモリに保存し読み取り可能にする。デプスバッファに適応
+		colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE; // レンダリング結果をメモリに保存し読み取り可にする。デプスバッファに適応
 		colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE; // 上記の設定をステンシルバッファに適応。 DONT_CAREは何もしない
 		colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE; // 上記の設定をステンシルバッファに適応
 		colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED; // レンダリング前にどのようなレイアウトとして使用するか
@@ -382,7 +386,7 @@ namespace api
 		depthAttachment.format = FIndDepthFormat();
 		depthAttachment.samples = VK_SAMPLE_COUNT_1_BIT; // マルチサンプリング
 		depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR; // レンダリングの前後にどのような処理を施すか(クリアの方法など)。デプスバッファに適応
-		depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE; // レンダリング結果をメモリに保存し読み取り可能にする。デプスバッファに適応
+		depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE; // レンダリング結果をメモリに保存し読み取り可にする。デプスバッファに適応
 		depthAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE; // 上記の設定をステンシルバッファに適応。 DONT_CAREは何もしない
 		depthAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE; // 上記の設定をステンシルバッファに適応
 		depthAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED; // レンダリング前にどのようなレイアウトとして使用するか
@@ -518,7 +522,7 @@ namespace api
 		VkSemaphoreCreateInfo semaphoreInfo{};
 		semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
 
-		// フェンスの作成(フェンスもセマフォと同様の機能を持つが、GPUでのコマンドの終了がCPUに知らされるということが違う)
+		// フェンスの作成(フェンスもセマフォと同様の機を持つが、GPUでのコマンドの終了がCPUに知らされるということが違う)
 		// セマフォはGOUでの操作の実行順序を指定するために使用され、フェンスはCPUとGPUをお互い同期させるために使用される
 		VkFenceCreateInfo fenceInfo{};
 		fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
@@ -650,7 +654,7 @@ namespace api
 	// レイヤー
 	void CVulkanAPI::InitAvailableLayerList()
 	{
-		// レイヤーとは拡張機能のこと
+		// レイヤーとは拡張機のこと
 		uint32_t layerCount;
 		vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
 
@@ -662,7 +666,7 @@ namespace api
 	{
 		const auto& LayerName = m_UseLayerList[0];
 
-		// 名前を比較して拡張機能をサポートしているかチェックする
+		// 名前を比較して拡張機をサポートしているかチェックする
 		for (const auto& layerProperties : m_AvailableLayers)
 		{
 			if (std::strcmp(LayerName, layerProperties.layerName) == 0)
@@ -681,7 +685,7 @@ namespace api
 		// 捕捉するメッセージの重要性の種類(冗長, 警告, エラー)
 		createInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT 
 			| VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
-		// コールバックが通知されるメッセージの種類(一般的, 検証用, 性能)
+		// コールバックが通知されるメッセージの種類(一般的, 検証用, 性)
 		createInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT 
 			| VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
 		// 呼び出すコールバック 
@@ -759,10 +763,10 @@ namespace api
 		// キューファミリはそのキューの役割を説明するもの。(たぶんクラス的にはこれがキューのプロパティも持っている)
 		QueueFamiryIndices indices = FindQueueFamilies(device);
 
-		// 使用したい物理デバイス拡張機能が有効かチェックする
+		// 使用したい物理デバイス拡張機が有効かチェックする
 		bool extensionsSupported = CheckDeviceExtensionSupport(device);
 
-		// デバイスが持っているスワップチェーン(画面に表示されるのを待っている画像のキューのこと)のキューの拡張機能をチェックする
+		// デバイスが持っているスワップチェーン(画面に示されるのを待っている画像のキューのこと)のキューの拡張機をチェックする
 		bool swapChainAdequate = false;
 		if (extensionsSupported)
 		{
@@ -770,7 +774,7 @@ namespace api
 			swapChainAdequate = !swapChainSupport.m_Formats.empty() && !swapChainSupport.m_PresentModes.empty();
 		}
 
-		// 物理デバイスが持っている機能をチェックする(例えば64bit float textureが使えるか, テクスチャ圧縮, マルチビューポート)
+		// 物理デバイスが持っている機をチェックする(例えば64bit float textureが使えるか, テクスチャ圧縮, マルチビューポート)
 		VkPhysicalDeviceFeatures supportedFeatures;
 		vkGetPhysicalDeviceFeatures(device, &supportedFeatures);
 
@@ -800,7 +804,7 @@ namespace api
 	{
 		QueueFamiryIndices indices;
 
-		// 使用可能なキューファミリのリストを取得する
+		// 使用可なキューファミリのリストを取得する
 		uint32_t queueFamilyCount = 0;
 		vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, nullptr);
 
@@ -843,7 +847,7 @@ namespace api
 		// スワップ チェーン内の画像の最小/最大数、画像の最小/最大幅と高さ
 		vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, m_Surface, &details.m_Capabilities);
 
-		// 表面形式 (ピクセル形式、色空間)
+		// 面形式 (ピクセル形式、色空間)
 		uint32_t formatCount;
 		vkGetPhysicalDeviceSurfaceFormatsKHR(device, m_Surface, &formatCount, nullptr);
 
@@ -853,7 +857,7 @@ namespace api
 			vkGetPhysicalDeviceSurfaceFormatsKHR(device, m_Surface, &formatCount, &details.m_Formats[0]);
 		}
 
-		// 利用可能なプレゼンテーション モード
+		// 利用可なプレゼンテーション モード
 		uint32_t presentModeCount;
 		vkGetPhysicalDeviceSurfacePresentModesKHR(device, m_Surface, &presentModeCount, nullptr);
 
@@ -919,7 +923,7 @@ namespace api
 	}
 
 	// Buffer
-	// 物理デバイス(GPU)のメモリ要件を調べるための関数. つまりグラボが持っているメモリ関連の機能をチェックする
+	// 物理デバイス(GPU)のメモリ要件を調べるための関数. つまりグラボが持っているメモリ関連の機をチェックする
 	uint32_t CVulkanAPI::FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags propertoes)
 	{
 		VkPhysicalDeviceMemoryProperties memProperties;
@@ -927,7 +931,7 @@ namespace api
 
 		for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++)
 		{
-			// typeFilterには調べたいメモリの機能に関するフラグが入っている
+			// typeFilterには調べたいメモリの機に関するフラグが入っている
 			// 
 			if (typeFilter & (1 << i) && (memProperties.memoryTypes[i].propertyFlags & propertoes) == propertoes)
 			{
@@ -1220,7 +1224,7 @@ namespace api
 	}
 
 	// ループ中の描画関連処理 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	bool CVulkanAPI::BeginRender()
+	bool CVulkanAPI::BeginRender(ERenderPassType RenderPassType)
 	{
 		// 前のフレーム処理が終わるのを待つ
 		vkWaitForFences(m_LogicalDevice, 1, &m_InFlightFences[m_CurrentFrame], VK_TRUE, UINT64_MAX);
@@ -1231,7 +1235,7 @@ namespace api
 		VkResult result = vkAcquireNextImageKHR(m_LogicalDevice, m_SwapChain, UINT64_MAX, m_ImageAvailableSemaphones[m_CurrentFrame], VK_NULL_HANDLE, &m_CurrentImageIndex);
 		
 		// VK_ERROR_OUT_OF_DATE_KHR: スワップ チェーンはサーフェスと互換性がなくなり、レンダリングに使用できなくなりました(ウィンドウサイズの変更)
-		// VK_SUBOPTIMAL_KHR: スワップ チェーンを使用してサーフェスに正常に表示することはできますが、サーフェス プロパティは正確に一致しなくなりました。
+		// VK_SUBOPTIMAL_KHR: スワップ チェーンを使用してサーフェスに正常に示することはできますが、サーフェス プロパティは正確に一致しなくなりました。
 		m_IsReCreateSwapChain = false;
 		
 		if (result == VK_ERROR_OUT_OF_DATE_KHR)
@@ -1277,7 +1281,7 @@ namespace api
 		VkSubmitInfo submitInfo{};
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
-		VkSemaphore waitSemaphore[] = { m_ImageAvailableSemaphones[m_CurrentFrame] }; // 画像に色が書き込まれて利用可能になるまで待つセマフォ
+		VkSemaphore waitSemaphore[] = { m_ImageAvailableSemaphones[m_CurrentFrame] }; // 画像に色が書き込まれて利用可になるまで待つセマフォ
 		VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
 		submitInfo.waitSemaphoreCount = 1;
 		submitInfo.pWaitSemaphores = waitSemaphore;
@@ -1298,12 +1302,12 @@ namespace api
 			return false;
 		}
 
-		// プレゼンテーション(結果をスワップチェーンに送信して最終結果を画面に表示する)
+		// プレゼンテーション(結果をスワップチェーンに送信して最終結果を画面に示する)
 		VkPresentInfoKHR presentInfo{};
 		presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
 		presentInfo.waitSemaphoreCount = 1;
 		presentInfo.pWaitSemaphores = signalSemaphores;
-		// イメージを表示するスワップチェーンを選択
+		// イメージを示するスワップチェーンを選択
 		VkSwapchainKHR swapChains[] = { m_SwapChain };
 		presentInfo.swapchainCount = 1;
 		presentInfo.pSwapchains = swapChains;
@@ -1314,9 +1318,9 @@ namespace api
 		// プレゼンテーションキューを実行
 		VkResult result = vkQueuePresentKHR(m_PresentQueue, &presentInfo);
 
-		// 可能な限り最良な結果を得るために念のためもう一度最新かチェックする
+		// 可な限り最良な結果を得るために念のためもう一度最新かチェックする
 		// VK_ERROR_OUT_OF_DATE_KHR: スワップ チェーンはサーフェスと互換性がなくなり、レンダリングに使用できなくなりました(ウィンドウサイズの変更)
-		// VK_SUBOPTIMAL_KHR: スワップ チェーンを使用してサーフェスに正常に表示することはできますが、サーフェス プロパティは正確に一致しなくなりました。
+		// VK_SUBOPTIMAL_KHR: スワップ チェーンを使用してサーフェスに正常に示することはできますが、サーフェス プロパティは正確に一致しなくなりました。
 		if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || m_FramebufferResized)
 		{
 			m_FramebufferResized = false;

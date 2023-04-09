@@ -10,7 +10,7 @@ public:
 #if !defined(__EMSCRIPTEN__) && defined(_CONSOLE)
 		_RPT0(_CRT_WARN, message);
 #else
-		// この関数を使う時に末尾に\nの改行を入れないとログが表示されないので注意
+		// この関数を使う時に末尾に\nの改行を入れないとログが示されないので注意
 		printf("%s", message);
 #endif // !__EMSCRIPTEN__
 	}
@@ -21,7 +21,7 @@ public:
 #if !defined(__EMSCRIPTEN__) && defined(_CONSOLE)
 		_RPTN(_CRT_WARN, message, (args)...);
 #else
-		// この関数を使う時に末尾に\nの改行を入れないとログが表示されないので注意
+		// この関数を使う時に末尾に\nの改行を入れないとログが示されないので注意
 		printf(message, (args)...);
 #endif // !__EMSCRIPTEN__
 	}

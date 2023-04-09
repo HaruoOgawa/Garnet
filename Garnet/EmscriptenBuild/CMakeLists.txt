@@ -28,6 +28,8 @@ add_executable(
 	../src/Graphics/CMesh.h
 	../src/Graphics/CPrimitive.cpp
 	../src/Graphics/CPrimitive.h
+	../src/Graphics/CUniformBufferObject.cpp
+	../src/Graphics/CUniformBufferObject.h
 	../src/Graphics/CVertexBuffer.cpp
 	../src/Graphics/CVertexBuffer.h
 	../src/Graphics/SUniformBufferObject.h
@@ -37,6 +39,7 @@ add_executable(
 	../src/GraphicsAPI/CWebGPUAPI.h
 	../src/GraphicsAPI/CWebGPURenderer.cpp
 	../src/GraphicsAPI/CWebGPURenderer.h
+	../src/GraphicsAPI/ERenderPassType.h
 	../src/Interface/IApp.h
 	../src/Interface/IGraphicsAPI.h
 	../src/Interface/IObject.h
@@ -49,7 +52,7 @@ add_executable(
 
 )
 
-target_include_directories(Garnet PRIVATE ../src/Library/WebGPU)
+target_include_directories(Garnet PRIVATE ../src/Library/WebGPU ../src/Library/glm)
 
 if(EMSCRIPTEN)
 	target_link_options(Garnet PRIVATE 

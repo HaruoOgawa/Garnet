@@ -17,7 +17,7 @@ add_executable(
 Shared_Post = """
 )
 
-target_include_directories(Garnet PRIVATE ../src/Library/WebGPU)
+target_include_directories(Garnet PRIVATE ../src/Library/WebGPU ../src/Library/glm)
 
 if(EMSCRIPTEN)
 	target_link_options(Garnet PRIVATE 

@@ -11,12 +11,21 @@ namespace renderer
 		m_GraphicsPipeline(nullptr),
 		m_VertexCount(0),
 		m_IndexBuffer(nullptr),
-		m_IndexCount(0)
+		m_IndexCount(0),
+		m_UniformBuffer(nullptr),
+		m_UniformCount(0),
+		m_BindGroup(nullptr)
 	{
 	}
 
 	CWebGPURenderer::~CWebGPURenderer()
 	{
+		wgpuBufferDestroy(m_UniformBuffer);
+		wgpuBufferDestroy(m_IndexBuffer);
+		for (auto& Buffer : m_VertexBufferList)
+		{
+			wgpuBufferDestroy(Buffer);
+		}
 	}
 
 	bool CWebGPURenderer::Create(api::IGraphicsAPI* pGraphicsAPI, const CRendererCreateInfo& createInfo)
@@ -25,6 +34,8 @@ namespace renderer
 
 		if (!CreateVertexBuffer(createInfo)) return false; // 頂点バッファを生成
 		if (!CreateIndexBuffer(createInfo)) return false; //インデックスバッファを生成
+		if (!CreateUniformBuffer(createInfo)) return false; // ユニフォームバッファを生成
+		if (!CreateBindGroup(createInfo)) return false; // バインドグループを生成(レンダリングパイプラインで使用するすべてのリソースをどのようにバインドするかを指定するオブジェクト)
 		if (!CreateGraphicsPipeline(createInfo)) return false; // グラフィックスパイプラインを生成
 		
 		return true;
@@ -32,6 +43,30 @@ namespace renderer
 
 	bool CWebGPURenderer::Update()
 	{
+		// ユニフォームバッファの更新
+		//float t = static_cast<float>(glfwGetTime()); // glfwGetTime returns a double
+		float t = 0.0f;
+		glm::vec3 testPos = glm::vec3(0.0f);
+
+		// 行列
+		glm::mat4 mmat = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f)) * glm::mat4_cast(glm::quat(glm::vec3(0.0f, t, 0.0f))) * glm::scale(glm::mat4(1.0f), glm::vec3(1.0f));
+		glm::mat4 vmat = glm::lookAt(
+			glm::vec3(0.0f, 0.0f, -3.0f),
+			glm::vec3(0.0f),
+			glm::vec3(0.0f, 1.0f, 0.0f)
+		);
+		glm::mat4 pmat = glm::perspective(
+			glm::radians(90.0f),
+			1.0f,
+			0.1f,
+			10000.0f
+		);
+
+		glm::mat4 mvp = pmat * vmat * mmat;
+
+		wgpuQueueWriteBuffer(m_pGraphicsAPI->GetQueue(), m_UniformBuffer, 4 * sizeof(float), &testPos.x, sizeof(float));
+		wgpuQueueWriteBuffer(m_pGraphicsAPI->GetQueue(), m_UniformBuffer, 8 * sizeof(float), reinterpret_cast<const float*>(&mvp[0][0]), 16 * sizeof(float));
+
 		return true;
 	}
 
@@ -48,6 +83,9 @@ namespace renderer
 		
 		// インデックスバッファを割り当てる
 		wgpuRenderPassEncoderSetIndexBuffer(m_pGraphicsAPI->GetRenderPass(), m_IndexBuffer, WGPUIndexFormat_Uint16, 0, m_IndexCount * sizeof(uint16_t));
+
+		// バインドグループを割り当てる
+		wgpuRenderPassEncoderSetBindGroup(m_pGraphicsAPI->GetRenderPass(), 0, m_BindGroup, 0, nullptr);
 
 		// 描画を実行
 		wgpuRenderPassEncoderDrawIndexed(m_pGraphicsAPI->GetRenderPass(), static_cast<uint32_t>(m_IndexCount), 1, 0, 0, 0);
@@ -87,6 +125,96 @@ namespace renderer
 		return true;
 	}
 
+	bool CWebGPURenderer::CreateUniformBuffer(const CRendererCreateInfo& createInfo)
+	{
+		// バッファの生成
+		std::vector<float> Data = {
+			0.0f, 1.0f, 0.4f, 1.0f,
+			0.0f,
+			0.0f, 0.0f, 0.0f
+		};
+
+		// 行列
+		glm::mat4 mmat = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f)) * glm::mat4_cast(glm::quat(glm::vec3(0.0f))) * glm::scale(glm::mat4(1.0f), glm::vec3(1.0f));
+		glm::mat4 vmat = glm::lookAt(
+			glm::vec3(0.0f, 0.0f, -1.0f),
+			glm::vec3(0.0f),
+			glm::vec3(0.0f, 1.0f, 0.0f)
+		);
+		glm::mat4 pmat = glm::perspective(
+			glm::radians(90.0f),
+			1.0f,
+			0.1f,
+			10000.0f
+		);
+
+		glm::mat4 mvp = pmat * vmat * mmat;
+
+		Data.resize(Data.size() + 16);
+		std::memcpy(&Data[Data.size() - 16], reinterpret_cast<const float*>(&mvp[0][0]), 16 * sizeof(float));
+
+
+		//
+		m_UniformCount = Data.size();
+	
+		if (!CreateBuffer(m_UniformBuffer, WGPUBufferUsage_CopyDst | WGPUBufferUsage_Uniform, &Data[0], m_UniformCount * sizeof(float))) return false;
+
+		return true;
+	}
+
+	bool CWebGPURenderer::CreateBindGroup(const CRendererCreateInfo& createInfo)
+	{
+		// WGSLでユニフォームを渡す場所は、groupを大枠にその中にbindingしていく
+		// @group(0) @binding(0) var<uniform> a: f32;
+		// @group(0) @binding(1) var<uniform> b: f32;
+		//
+		// @group(1) @binding(0) var<uniform> c: f32;
+		// @group(1) @binding(1) var<uniform> d: f32;
+		// @group(1) @binding(2) var<uniform> e: f32;
+		// なのでこのバインディング要素とグループを下記で作成する必要がある
+
+		// バインドレイアウトを作成
+		// どのようにメモリに配置されるか, バインドインデックスや読み取り専用かなど
+		// -->これがWGSLでいう @binding(n)
+		WGPUBindGroupLayoutEntry bindingLayout{};
+		InitDefalutBindGroupLayoutEntry(bindingLayout); // 初期化しないとブラウザ側でいろいろとエラーがでる・・・
+		bindingLayout.binding = 0; // バインドインデックス
+		bindingLayout.visibility = WGPUShaderStage_Vertex | WGPUShaderStage_Fragment; // アクセス権限。ここではおそらく頂点シェーダーとフラグメントシェーダーのみ読み取り可
+		bindingLayout.buffer.type = WGPUBufferBindingType_Uniform; // バインド先のバッファの種類
+		bindingLayout.buffer.minBindingSize = m_UniformCount * sizeof(float); // データ一つ当たりのサイズかな???
+
+		// バインドグループレイアウトを作成
+		// たぶん上記のバインドレイアウトのマネージャー, 複数個束ねるやつ
+		// --> これがWGSLでいう @group(n) かな？
+		WGPUBindGroupLayoutDescriptor bindGroupLayoutDesc{}; //バインドグループの記述子
+		bindGroupLayoutDesc.nextInChain = nullptr; // 拡張機
+		bindGroupLayoutDesc.label = "BindGroupLayout";
+		bindGroupLayoutDesc.entryCount = 1; // 上記のバインドレイアウトの数
+		bindGroupLayoutDesc.entries = &bindingLayout; // バインドレイアウトのデータ
+		m_BindGroupLayout = wgpuDeviceCreateBindGroupLayout(m_pGraphicsAPI->GetLogicalDevice(), &bindGroupLayoutDesc);
+
+		// バッファと結びつけるための記述かな？
+		// --> その通り、たぶんバッファのバインディング
+		WGPUBindGroupEntry binding{};
+		binding.nextInChain = nullptr; // 拡張機
+		binding.binding = 0;
+		binding.buffer = m_UniformBuffer;
+		binding.offset = 0;
+		binding.size = m_UniformCount * sizeof(float);
+
+		// バインドグループを作成
+		// --> groupやbindingやbufferなどのをすべてを最終的に束ねるためのもの
+		WGPUBindGroupDescriptor bindGroupDesc{};
+		bindGroupDesc.nextInChain = nullptr; // 拡張機
+		bindGroupDesc.label = "BindGroup";
+		bindGroupDesc.layout = m_BindGroupLayout; // バインドグループレイアウト
+		bindGroupDesc.entryCount = bindGroupLayoutDesc.entryCount;
+		bindGroupDesc.entries = &binding;
+		m_BindGroup = wgpuDeviceCreateBindGroup(m_pGraphicsAPI->GetLogicalDevice(), &bindGroupDesc);
+
+		return true;
+	}
+
 	bool CWebGPURenderer::CreateGraphicsPipeline(const CRendererCreateInfo& createInfo)
 	{
 		// シェーダーモジュールの生成 //////////////////////////////////////////////////////////////////
@@ -95,7 +223,7 @@ namespace renderer
 
 		// パイプラインの設定 //////////////////////////////////////////////////////////////////////////
 		WGPURenderPipelineDescriptor pipelineDesc{};
-		pipelineDesc.nextInChain = nullptr; // 拡張機能
+		pipelineDesc.nextInChain = nullptr; // 拡張機
 
 		// 頂点バッファレイアウト
 		std::vector<WGPUVertexBufferLayout> vertexBufferLayouts(m_VertexBufferList.size());
@@ -170,11 +298,12 @@ namespace renderer
 
 		pipelineDesc.fragment = &fragmentState;
 		
-		// パイプラインレイアウトの指定(バッファへのメモリアクセスを制御する機構)
+		// パイプラインレイアウトの指定
+		// パイプラインレイアウトは、レンダリングパイプラインで使用されるすべてのリソースをどのようにバインドする必要があるかを示す
 		WGPUPipelineLayoutDescriptor layoutDesc{};
 		layoutDesc.nextInChain = nullptr;
-		layoutDesc.bindGroupLayoutCount = 0;
-		layoutDesc.bindGroupLayouts = nullptr;
+		layoutDesc.bindGroupLayoutCount = 1;
+		layoutDesc.bindGroupLayouts = &m_BindGroupLayout;
 		WGPUPipelineLayout layout = wgpuDeviceCreatePipelineLayout(m_pGraphicsAPI->GetLogicalDevice(), &layoutDesc);
 
 		pipelineDesc.layout = layout;
@@ -239,8 +368,10 @@ namespace renderer
 
 	bool CWebGPURenderer::CreateBuffer(WGPUBuffer& Buffer, WGPUBufferUsageFlags Usage, void const* Data, uint64_t ByteSize)
 	{
+		// たぶんWebGPU, Vulkanでもvec3は16バイトオフセットと換算されるっぽいからvec3分(12バイト分)のパディングを入れたい場合はvec3ではなくfloatの変数を3つ定義するべき
+
 		WGPUBufferDescriptor bufferDesc{};
-		bufferDesc.nextInChain = nullptr; // 拡張機能
+		bufferDesc.nextInChain = nullptr; // 拡張機
 		bufferDesc.label = "Buffer";
 		bufferDesc.usage = Usage; // バッファの用途
 		bufferDesc.mappedAtCreation = false; // ???
@@ -252,6 +383,26 @@ namespace renderer
 		wgpuQueueWriteBuffer(m_pGraphicsAPI->GetQueue(), Buffer, 0, Data, bufferDesc.size);
 
 		return true;
+	}
+
+	void CWebGPURenderer::InitDefalutBindGroupLayoutEntry(WGPUBindGroupLayoutEntry& bindingLayout)
+	{
+		bindingLayout.buffer.nextInChain = nullptr;
+		bindingLayout.buffer.type = WGPUBufferBindingType_Undefined;
+		bindingLayout.buffer.hasDynamicOffset = false;
+
+		bindingLayout.sampler.nextInChain = nullptr;
+		bindingLayout.sampler.type = WGPUSamplerBindingType_Undefined;
+
+		bindingLayout.storageTexture.nextInChain = nullptr;
+		bindingLayout.storageTexture.access = WGPUStorageTextureAccess_Undefined;
+		bindingLayout.storageTexture.format = WGPUTextureFormat_Undefined;
+		bindingLayout.storageTexture.viewDimension = WGPUTextureViewDimension_Undefined;
+
+		bindingLayout.texture.nextInChain = nullptr;
+		bindingLayout.texture.multisampled = false;
+		bindingLayout.texture.sampleType = WGPUTextureSampleType_Undefined;
+		bindingLayout.texture.viewDimension = WGPUTextureViewDimension_Undefined;
 	}
 }
 #endif
