@@ -1,4 +1,4 @@
-import os
+﻿import os
 
 Shared_Pre = """ 
 cmake_minimum_required(VERSION 3.22.1)
@@ -14,6 +14,9 @@ add_executable(
 	Garnet
 """
 
+# EXPORTED_RUNTIME_METHODSを下記のような感じで,の後ろにスペースを入れるとうまくModuleに登録してくれないみたいなので注意
+# EXPORTED_RUNTIME_METHODS=['ccall', 'UTF8ToString']
+#									↑ これ
 Shared_Post = """
 )
 
@@ -21,7 +24,7 @@ target_include_directories(Garnet PRIVATE ../src/Library/WebGPU ../src/Library/g
 
 if(EMSCRIPTEN)
 	target_link_options(Garnet PRIVATE 
-		-sEXPORTED_RUNTIME_METHODS=['ccall']
+		-sEXPORTED_RUNTIME_METHODS=['ccall','UTF8ToString']
 		-sUSE_WEBGPU=1
 		-sALLOW_MEMORY_GROWTH
 	)

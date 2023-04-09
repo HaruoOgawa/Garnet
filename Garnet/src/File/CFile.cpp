@@ -2,6 +2,10 @@
 #include <fstream>
 #include "../Debug/Message/Console.h"
 
+#ifdef __EMSCRIPTEN__
+#include <emscripten/emscripten.h>
+#endif
+
 namespace file
 {
 	std::vector<char> CFile::ReadFile(const std::string& filename)
@@ -26,6 +30,21 @@ namespace file
 	
 	std::string CFile::ReadFileAsString(const std::string& filename)
 	{
+		std::string result = "";
+#ifdef __EMSCRIPTEN__
+		EM_ASM({
+			const filename = Module.UTF8ToString($0);
+			console.log("filename: %s", filename);
+			fetch(filename)
+			.then((res) => {
+				return res.text();
+			})
+			.then((val) => {
+				var result = val;
+				console.log("result: %s", result);
+			})
+		}, filename.c_str());
+#else
 		std::ifstream file(filename, std::ios::ate | std::ios::binary);
 
 		if (!file.is_open())
@@ -41,7 +60,8 @@ namespace file
 
 		file.close();
 
-		std::string result = std::string(&buffer[0], buffer.size());
+		result = std::string(&buffer[0], buffer.size());
+#endif
 		return result;
 	}
 }

@@ -3,6 +3,7 @@
 #include "../Graphics/CPrimitive.h"
 #include "../GraphicsAPI/CRendererCreateInfo.h"
 #include "../File/CFile.h"
+#include "../Debug/Message/Console.h"
 
 namespace scene
 {
@@ -134,6 +135,9 @@ namespace scene
 		createInfo.SetFragmentShaderCode(file::CFile::ReadFileAsString(ShaderPath + "frag.spv"));
 #endif
 		
+		file::CFile::ReadFileAsString(ShaderPath + "vert.spv");
+		Console::Log("file Loaded\n");
+
 		createInfo.SetVertices(Vertices);
 		createInfo.SetIndices(Indices);
 		createInfo.SetAttributeDimensions(std::vector<int>({ 3 , 3 , 2 }));

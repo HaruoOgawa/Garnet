@@ -56,7 +56,7 @@ target_include_directories(Garnet PRIVATE ../src/Library/WebGPU ../src/Library/g
 
 if(EMSCRIPTEN)
 	target_link_options(Garnet PRIVATE 
-		-sEXPORTED_RUNTIME_METHODS=['ccall']
+		-sEXPORTED_RUNTIME_METHODS=['ccall','UTF8ToString']
 		-sUSE_WEBGPU=1
 		-sALLOW_MEMORY_GROWTH
 	)
