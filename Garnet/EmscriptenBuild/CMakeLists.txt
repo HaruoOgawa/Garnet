@@ -20,8 +20,8 @@ add_executable(
 	../src/App/ScriptApp/CScriptApp.cpp
 	../src/App/ScriptApp/CScriptApp.h
 	../src/Debug/Message/Console.h
-	../src/File/CFile.cpp
-	../src/File/CFile.h
+	../src/File/CFileReader.cpp
+	../src/File/CFileReader.h
 	../src/Graphics/CMaterial.cpp
 	../src/Graphics/CMaterial.h
 	../src/Graphics/CMesh.cpp

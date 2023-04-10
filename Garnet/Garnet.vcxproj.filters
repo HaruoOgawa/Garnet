@@ -78,7 +78,7 @@
     <ClInclude Include="src\Graphics\CMaterial.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\File\CFile.h">
+    <ClInclude Include="src\File\CFileReader.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\Graphics\SUniformBufferObject.h">
@@ -1031,7 +1031,7 @@
     <ClCompile Include="src\Graphics\CMaterial.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\File\CFile.cpp">
+    <ClCompile Include="src\File\CFileReader.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="src\Scene\CScriptScene.cpp">
