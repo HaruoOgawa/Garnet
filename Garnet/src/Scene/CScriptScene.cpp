@@ -33,7 +33,8 @@ namespace scene
 	{
 		std::string ShaderPath = "Resources\\Shaders\\";
 
-		m_VertexShader->ReadFile(ShaderPath + "vert.spv");
+		m_VertexShader->ReadFile(ShaderPath + "wgtest.vert");
+		m_FragmentShader->ReadFile(ShaderPath + "wgtest.frag");
 
 		return true;
 	}
@@ -170,8 +171,14 @@ namespace scene
 	{
 		if (!m_IsLoaded)
 		{
-			if (m_VertexShader->IsDone())
+			if (m_VertexShader->IsDone() && m_FragmentShader->IsDone())
 			{
+				m_VertexShader->BuildData();
+				m_FragmentShader->BuildData();
+
+				Console::Log("m_VertexShader->GetData().size(): %d\n", m_VertexShader->GetData().size());
+				Console::Log("m_FragmentShader->GetData().size(): %d\n", m_FragmentShader->GetData().size());
+
 				Load(pGraphicsAPI);
 				m_IsLoaded = true;
 			}
