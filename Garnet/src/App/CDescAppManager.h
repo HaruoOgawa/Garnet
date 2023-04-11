@@ -37,14 +37,9 @@ namespace descapp
 
 		bool m_IsRunLoop;
 
-		// インプットプールを作成する
-		// 1フレームに1つしか受け取れなかったり、途中で処理を挟まれたりするのもよくないので、1フレームの間のインプットをプールに溜めて
-		// まとめて実行する
+		float m_SecondsTime;
+		float m_DeltaSecondsTime;
 
-		// 使用するGraphicsAPIのクラスもここでインスタンス化する
-		// Desctopなら
-
-		// アプリケーションタイプはメインからもらう
 	private:
 		bool InitWindow();
 

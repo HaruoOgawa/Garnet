@@ -41,11 +41,10 @@ namespace renderer
 		return true;
 	}
 
-	bool CWebGPURenderer::Update()
+	bool CWebGPURenderer::Update(float SecondsTime)
 	{
 		// ユニフォームバッファの更新
-		//float t = static_cast<float>(glfwGetTime()); // glfwGetTime returns a double
-		float t = 0.0f;
+		float t = SecondsTime;
 		glm::vec3 testPos = glm::vec3(0.0f);
 
 		// 行列

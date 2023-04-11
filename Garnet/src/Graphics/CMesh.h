@@ -15,7 +15,7 @@ namespace graphics
 
 		bool Release();
 
-		bool Update();
+		bool Update(float SecondsTime);
 		bool Draw();
 
 		void AddPrimitive(const std::shared_ptr<CPrimitive>& Primitive);

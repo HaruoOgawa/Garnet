@@ -36,9 +36,9 @@ namespace app
 		return true;
 	}
 
-	bool CScriptApp::Update(api::IGraphicsAPI* pGraphicsAPI)
+	bool CScriptApp::Update(api::IGraphicsAPI* pGraphicsAPI, float SecondsTime)
 	{
-		if (!m_ScriptScene->Update(pGraphicsAPI)) return false;
+		if (!m_ScriptScene->Update(pGraphicsAPI, SecondsTime)) return false;
 
 		return true;
 	}

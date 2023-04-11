@@ -23,7 +23,7 @@ namespace graphics
 
 		bool Create(api::IGraphicsAPI* pGraphicsAPI, const renderer::CRendererCreateInfo& createInfo);
 
-		bool Update();
+		bool Update(float SecondsTime);
 		bool Draw();
 	};
 }

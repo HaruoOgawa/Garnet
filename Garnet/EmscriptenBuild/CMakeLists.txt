@@ -20,8 +20,8 @@ add_executable(
 	../src/App/ScriptApp/CScriptApp.cpp
 	../src/App/ScriptApp/CScriptApp.h
 	../src/Debug/Message/Console.h
-	../src/File/CFile.cpp
-	../src/File/CFile.h
+	../src/File/CFileReader.cpp
+	../src/File/CFileReader.h
 	../src/Graphics/CMaterial.cpp
 	../src/Graphics/CMaterial.h
 	../src/Graphics/CMesh.cpp
@@ -56,9 +56,10 @@ target_include_directories(Garnet PRIVATE ../src/Library/WebGPU ../src/Library/g
 
 if(EMSCRIPTEN)
 	target_link_options(Garnet PRIVATE 
-		-sEXPORTED_RUNTIME_METHODS=['ccall']
+		-sEXPORTED_RUNTIME_METHODS=['ccall','UTF8ToString','malloc','free']
 		-sUSE_WEBGPU=1
 		-sALLOW_MEMORY_GROWTH
+		-sFETCH
 	)
 	set(CMAKE_EXECUTABLE_SUFFIX ".js")
 endif()

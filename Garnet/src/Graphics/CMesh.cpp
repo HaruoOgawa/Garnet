@@ -18,11 +18,11 @@ namespace graphics
 		return true;
 	}
 
-	bool CMesh::Update()
+	bool CMesh::Update(float SecondsTime)
 	{
 		for (const auto& Primitive : m_PrimitiveList)
 		{
-			if (!Primitive->Update()) return false;
+			if (!Primitive->Update(SecondsTime)) return false;
 		}
 
 		return true;

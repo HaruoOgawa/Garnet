@@ -71,7 +71,7 @@ namespace renderer
 		bool CreateDescriptorSets(const CRendererCreateInfo& createInfo);
 		bool CreateGraphicsPipeline(const CRendererCreateInfo& createInfo);
 
-		void UpdateUniformBuffer(uint32_t CurrentImage);
+		void UpdateUniformBuffer(uint32_t CurrentImage, float SecondsTime);
 
 		// ÉwÉãÉpÅ[ä÷êî ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// Shader
@@ -84,7 +84,7 @@ namespace renderer
 		void Release();
 
 		bool Create(api::IGraphicsAPI* pGraphicsAPI, const CRendererCreateInfo& createInfo) override;
-		bool Update() override;
+		bool Update(float SecondsTime) override;
 		bool Draw() override;
 	};
 }

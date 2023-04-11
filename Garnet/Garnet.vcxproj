@@ -628,7 +628,7 @@ del $(OutDir)Garnet.pdb</Command>
     <ClInclude Include="src\Library\WebGPU\x86\webgpu.h" />
     <ClInclude Include="src\Library\WebGPU\x86\wgpu.h" />
     <ClInclude Include="src\Scene\CScriptScene.h" />
-    <ClInclude Include="src\File\CFile.h" />
+    <ClInclude Include="src\File\CFileReader.h" />
     <ClInclude Include="src\Graphics\CMaterial.h" />
     <ClInclude Include="src\Graphics\CVertexBuffer.h" />
     <ClInclude Include="src\Graphics\CPrimitive.h" />
@@ -657,7 +657,7 @@ del $(OutDir)Garnet.pdb</Command>
     <ClCompile Include="src\Library\glfw3webgpu\glfw3webgpu.c" />
     <ClCompile Include="src\Library\glm\glm\detail\glm.cpp" />
     <ClCompile Include="src\Scene\CScriptScene.cpp" />
-    <ClCompile Include="src\File\CFile.cpp" />
+    <ClCompile Include="src\File\CFileReader.cpp" />
     <ClCompile Include="src\Graphics\CMaterial.cpp" />
     <ClCompile Include="src\Graphics\CVertexBuffer.cpp" />
     <ClCompile Include="src\Graphics\CPrimitive.cpp" />
@@ -690,6 +690,10 @@ del $(OutDir)Garnet.pdb</Command>
     <None Include="EmscriptenBuild\Garnet_front.js" />
     <None Include="EmscriptenBuild\index.html" />
     <None Include="EmscriptenBuild\nmake.exe" />
+    <None Include="Resources\Shaders\frag.spv" />
+    <None Include="Resources\Shaders\shader.frag" />
+    <None Include="Resources\Shaders\shader.vert" />
+    <None Include="Resources\Shaders\vert.spv" />
     <None Include="src\Library\glm\glm\detail\func_common.inl" />
     <None Include="src\Library\glm\glm\detail\func_common_simd.inl" />
     <None Include="src\Library\glm\glm\detail\func_exponential.inl" />
@@ -829,6 +833,12 @@ del $(OutDir)Garnet.pdb</Command>
     <None Include="src\Library\glm\glm\gtx\vector_angle.inl" />
     <None Include="src\Library\glm\glm\gtx\vector_query.inl" />
     <None Include="src\Library\glm\glm\gtx\wrap.inl" />
+    <None Include="WebRelease\Resources\Shaders\frag.spv" />
+    <None Include="WebRelease\Resources\Shaders\shader.frag" />
+    <None Include="WebRelease\Resources\Shaders\shader.vert" />
+    <None Include="WebRelease\Resources\Shaders\vert.spv" />
+    <None Include="Resources\Shaders\wgtest.frag" />
+    <None Include="Resources\Shaders\wgtest.vert" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="CMakeBuild\CMakeLists.txt" />

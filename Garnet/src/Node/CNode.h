@@ -9,7 +9,7 @@ namespace node
 		virtual ~CNode();
 
 		bool Create();
-		bool Update();
+		bool Update(float SecondsTime);
 		bool Draw();
 	};
 }

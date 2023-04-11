@@ -57,7 +57,7 @@ namespace renderer
 		virtual ~CWebGPURenderer();
 
 		bool Create(api::IGraphicsAPI* pGraphicsAPI, const CRendererCreateInfo& createInfo) override;
-		bool Update() override;
+		bool Update(float SecondsTime) override;
 		bool Draw() override;
 	};
 }

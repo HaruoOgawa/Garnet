@@ -2,12 +2,16 @@
 #include "../Graphics/CMesh.h"
 #include "../Graphics/CPrimitive.h"
 #include "../GraphicsAPI/CRendererCreateInfo.h"
-#include "../File/CFile.h"
+#include "../File/CFileReader.h"
+#include "../Debug/Message/Console.h"
 
 namespace scene
 {
 	CScriptScene::CScriptScene():
-		m_TestMesh(nullptr)
+		m_TestMesh(nullptr),
+		m_VertexShader(std::make_shared<file::CFileReader>()),
+		m_FragmentShader(std::make_shared<file::CFileReader>()),
+		m_IsLoaded(false)
 	{
 	}
 
@@ -20,10 +24,22 @@ namespace scene
 			m_TestMesh = nullptr;
 		}
 
+		m_IsLoaded = false;
+
 		return true;
 	}
 
 	bool CScriptScene::Initialize(api::IGraphicsAPI* pGraphicsAPI)
+	{
+		std::string ShaderPath = "Resources\\Shaders\\";
+
+		m_VertexShader->ReadFile(ShaderPath + "wgtest.vert");
+		m_FragmentShader->ReadFile(ShaderPath + "wgtest.frag");
+
+		return true;
+	}
+
+	bool CScriptScene::Load(api::IGraphicsAPI* pGraphicsAPI)
 	{
 		//
 		std::string ShaderPath = "Resources\\Shaders\\";
@@ -97,7 +113,7 @@ namespace scene
 				return out;
 			}
 		)";
-		
+
 		std::string FragmentShaderCode = R"(
 			struct VertexOutput {
 				@builtin(position) position: vec4<f32>,
@@ -123,17 +139,17 @@ namespace scene
 			}
 		)";
 #endif
-		
+
 		//
 		renderer::CRendererCreateInfo createInfo;
 #ifdef __DAWN__
-		createInfo.SetVertexShaderCode(std::string(VertexShaderCode.data(), VertexShaderCode.data() + VertexShaderCode.size()));
-		createInfo.SetFragmentShaderCode(std::string(FragmentShaderCode.data(), FragmentShaderCode.data() + FragmentShaderCode.size()));
+		createInfo.SetVertexShaderCode(std::string(&m_VertexShader->GetData()[0], &m_VertexShader->GetData()[0] + m_VertexShader->GetData().size()));
+		createInfo.SetFragmentShaderCode(std::string(&m_FragmentShader->GetData()[0], &m_FragmentShader->GetData()[0] + m_FragmentShader->GetData().size()));
 #else
-		createInfo.SetVertexShaderCode(file::CFile::ReadFileAsString(ShaderPath + "vert.spv"));
-		createInfo.SetFragmentShaderCode(file::CFile::ReadFileAsString(ShaderPath + "frag.spv"));
+		createInfo.SetVertexShaderCode(file::CFileReader::ReadFileAsString(ShaderPath + "vert.spv"));
+		createInfo.SetFragmentShaderCode(file::CFileReader::ReadFileAsString(ShaderPath + "frag.spv"));
 #endif
-		
+
 		createInfo.SetVertices(Vertices);
 		createInfo.SetIndices(Indices);
 		createInfo.SetAttributeDimensions(std::vector<int>({ 3 , 3 , 2 }));
@@ -146,19 +162,42 @@ namespace scene
 		//
 		m_TestMesh->AddPrimitive(Primitive);
 
+		Console::Log("Render is loaded\n");
+
 		return true;
 	}
-	bool CScriptScene::Update(api::IGraphicsAPI* pGraphicsAPI)
+
+	bool CScriptScene::Update(api::IGraphicsAPI* pGraphicsAPI, float SecondsTime)
 	{
-		if (!m_TestMesh->Update()) return false;
+		if (!m_IsLoaded)
+		{
+			if (m_VertexShader->IsDone() && m_FragmentShader->IsDone())
+			{
+				Console::Log("m_VertexShader->GetData().size(): %d\n", m_VertexShader->GetData().size());
+				Console::Log("m_FragmentShader->GetData().size(): %d\n", m_FragmentShader->GetData().size());
+
+				Load(pGraphicsAPI);
+				m_IsLoaded = true;
+			}
+		}
+
+		if (m_IsLoaded && m_TestMesh)
+		{
+			if (!m_TestMesh->Update(SecondsTime)) return false;
+
+		}
 
 		return true;
 	}
 
 	bool CScriptScene::Draw(api::IGraphicsAPI* pGraphicsAPI)
 	{
-		if (!m_TestMesh->Draw()) return false;
+		if (m_IsLoaded && m_TestMesh)
+		{
+			if (!m_TestMesh->Draw()) return false;
 
+		}
+		
 		return true;
 	}
 }

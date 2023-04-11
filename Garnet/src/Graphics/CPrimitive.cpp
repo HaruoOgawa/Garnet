@@ -31,9 +31,9 @@ namespace graphics
 		return true;
 	}
 
-	bool CPrimitive::Update()
+	bool CPrimitive::Update(float SecondsTime)
 	{
-		if (!m_Renderer->Update()) return false;
+		if (!m_Renderer->Update(SecondsTime)) return false;
 
 		return true;
 	}

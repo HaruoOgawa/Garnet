@@ -78,7 +78,7 @@
     <ClInclude Include="src\Graphics\CMaterial.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\File\CFile.h">
+    <ClInclude Include="src\File\CFileReader.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\Graphics\SUniformBufferObject.h">
@@ -1031,7 +1031,7 @@
     <ClCompile Include="src\Graphics\CMaterial.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\File\CFile.cpp">
+    <ClCompile Include="src\File\CFileReader.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="src\Scene\CScriptScene.cpp">
@@ -1488,6 +1488,16 @@
       <Filter>ヘッダー ファイル</Filter>
     </None>
     <None Include="Commands\UTF8Encorder.py" />
+    <None Include="Resources\Shaders\wgtest.vert" />
+    <None Include="Resources\Shaders\wgtest.frag" />
+    <None Include="WebRelease\Resources\Shaders\frag.spv" />
+    <None Include="WebRelease\Resources\Shaders\shader.frag" />
+    <None Include="WebRelease\Resources\Shaders\shader.vert" />
+    <None Include="WebRelease\Resources\Shaders\vert.spv" />
+    <None Include="Resources\Shaders\frag.spv" />
+    <None Include="Resources\Shaders\shader.frag" />
+    <None Include="Resources\Shaders\shader.vert" />
+    <None Include="Resources\Shaders\vert.spv" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="EmscriptenBuild\CMakeLists.txt" />
