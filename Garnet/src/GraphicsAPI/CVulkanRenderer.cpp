@@ -21,43 +21,43 @@ namespace renderer
 	{
 		if (m_UseMainTexture)
 		{
-			// テクスチャサンプラーを破棄(各3Dオブジェクト固有)
+			// テクスチャサンプラーを破棄
 			vkDestroySampler(m_pGraphicsAPI->GetLogicalDevice(), m_TextureSampler, nullptr);
 
-			// テクスチャ用のイメージビューの破棄(各3Dオブジェクト固有)
+			// テクスチャ用のイメージビューの破棄
 			vkDestroyImageView(m_pGraphicsAPI->GetLogicalDevice(), m_TextureImageView, nullptr);
 
-			// テクスチャイメージの破棄(各3Dオブジェクト固有)
+			// テクスチャイメージの破棄
 			vkDestroyImage(m_pGraphicsAPI->GetLogicalDevice(), m_TextureImage, nullptr);
 			vkFreeMemory(m_pGraphicsAPI->GetLogicalDevice(), m_TextureImageMemory, nullptr);
 		}
 
-		// ユニフォームの破棄(各3Dオブジェクト固有)
+		// ユニフォームの破棄
 		for (size_t i = 0; i < m_pGraphicsAPI->GetMaxFramesInFlight(); i++)
 		{
 			vkDestroyBuffer(m_pGraphicsAPI->GetLogicalDevice(), m_UniformBuffers[i], nullptr);
 			vkFreeMemory(m_pGraphicsAPI->GetLogicalDevice(), m_UniformBuffersMemory[i], nullptr);
 		}
 
-		// 記述子プールの破棄(各3Dオブジェクト固有)
+		// 記述子プールの破棄
 		vkDestroyDescriptorPool(m_pGraphicsAPI->GetLogicalDevice(), m_DescriptorPool, nullptr);
 
-		// ユニフォームレイアウトセットを破棄(各3Dオブジェクト固有)
+		// ユニフォームレイアウトセットを破棄
 		vkDestroyDescriptorSetLayout(m_pGraphicsAPI->GetLogicalDevice(), m_DescriptorSetLayout, nullptr);
 
-		// インデックスバッファの破棄(各3Dオブジェクト固有)
+		// インデックスバッファの破棄
 		vkDestroyBuffer(m_pGraphicsAPI->GetLogicalDevice(), m_IndexBuffer, nullptr);
 
-		// インデックスバッファ用に確保したメモリ領域を破棄(各3Dオブジェクト固有)
+		// インデックスバッファ用に確保したメモリ領域を破棄
 		vkFreeMemory(m_pGraphicsAPI->GetLogicalDevice(), m_IndexBufferMemory, nullptr);
 
-		// 頂点バッファの破棄(各3Dオブジェクト固有)
+		// 頂点バッファの破棄
 		for (auto& Buffer : m_VertexBufferList)
 		{
 			vkDestroyBuffer(m_pGraphicsAPI->GetLogicalDevice(), Buffer, nullptr);
 		}
 		
-		// 頂点バッファ用に確保したメモリ領域を破棄(各3Dオブジェクト固有)
+		// 頂点バッファ用に確保したメモリ領域を破棄
 		for (auto& Memory : m_VertexBufferMemoryList)
 		{
 			vkFreeMemory(m_pGraphicsAPI->GetLogicalDevice(), Memory, nullptr);
@@ -75,18 +75,18 @@ namespace renderer
 		m_pGraphicsAPI = static_cast<api::CVulkanAPI*>(pGraphicsAPI);
 		m_UseMainTexture = createInfo.IsUseMainTexture();
 
-		if (!CreateDescriptorSetLayout(createInfo)) return false; // UBO(Uniform Buffer Object)をどのようにバインドするか
-		if (!CreateTextureImage(createInfo)) return false; // テクスチャイメージの生成(各3Dオブジェクト固有)
-		if (!CreateTextureImageView(createInfo)) return false;// シェーダーで取り扱う用のImageViewを作成(各3Dオブジェクト固有)
-		// テクスチャサンプラーを作成(各3Dオブジェクト固有)
-		if (!CreateTextureSampler(createInfo)) return false; // サンプラーとはテクスチャデータをフラグメント(3Dモデル)に合うように調整する機構
-		if (!CreateVertexBuffer(createInfo)) return false; // 頂点バッファを作成(各3Dオブジェクト固有)
-		if (!CreateIndexBuffer(createInfo)) return false; // インデックスバッファを作成(各3Dオブジェクト固有)
-		if (!CreateUniformBuffers(createInfo)) return false; // ユニフォームバッファを作成(各3Dオブジェクト固有)
-		// 記述子プールを作成する -> 記述子セットはコマンドからを作成する必要がある。記述子プールはそのコマンド群のことかな？(各3Dオブジェクト固有)
-		if (!CreateDescriptorPool(createInfo)) return false;
-		// 記述子セットを作成 -> UBOのマネージャー,・ラッパーのことかな？(各3Dオブジェクト固有)
-		if (!CreateDescriptorSets(createInfo)) return false;
+		if (!CreateVertexBuffer(createInfo)) return false; // 頂点バッファを作成
+		if (!CreateIndexBuffer(createInfo)) return false; // インデックスバッファを作成
+
+		/*if (!CreateTextureImage(createInfo)) return false; // テクスチャイメージの生成
+		if (!CreateTextureImageView(createInfo)) return false;// シェーダーで取り扱う用のImageViewを作成
+		if (!CreateTextureSampler(createInfo)) return false; // テクスチャサンプラーを作成.サンプラーとはテクスチャデータをフラグメント(3Dモデル)に合うように調整する機構*/
+
+		if (!CreateDescriptorSetLayout(createInfo)) return false; // DescriptorSetLayoutの作成(Uniformをどのようにバインドするか), WebGPUでいうバインドグループの生成
+		if (!CreateUniformBuffers(createInfo)) return false; // ユニフォームバッファを作成
+		if (!CreateDescriptorPool(createInfo)) return false; // DescriptorPoolを作成する -> DescriptorSetsは直接生成できず、コマンドで生成する必要がある。記述子プールはそのコマンド群のことかな？
+		if (!CreateDescriptorSets(createInfo)) return false; // DescriptorSetsを作成 -> Uniformが使用するバッファをCPUからGPUに送信するための仕組みこと. https://vkguide.dev/docs/chapter-4/descriptors/
+
 		if (!CreateGraphicsPipeline(createInfo)) return false; // グラフィックパイプラインを作成
 
 		return true;

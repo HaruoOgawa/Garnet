@@ -72,7 +72,7 @@ namespace api
 		renderPassColorAttachment.resolveTarget = nullptr; // マルチサンプリングの設定
 		renderPassColorAttachment.loadOp = WGPULoadOp_Clear; // レンダー パスを実行する前にビューで実行するロード操作を示します。例えばクリア値に初期化するだったり
 		renderPassColorAttachment.storeOp = WGPUStoreOp_Store; // レンダリング実行後の操作
-		renderPassColorAttachment.clearValue = WGPUColor{ 0.9f, 0.1f, 0.2f, 1.0f }; // 初期カラー
+		renderPassColorAttachment.clearValue = WGPUColor{ 0.0f, 0.0f, 0.0f, 1.0f }; // 初期カラー
 
 		WGPURenderPassDescriptor renderPassDesc = {};
 		renderPassDesc.colorAttachmentCount = 1; 
