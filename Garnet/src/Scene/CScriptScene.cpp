@@ -143,8 +143,8 @@ namespace scene
 		//
 		renderer::CRendererCreateInfo createInfo;
 #ifdef __DAWN__
-		createInfo.SetVertexShaderCode(std::string(VertexShaderCode.data(), VertexShaderCode.data() + VertexShaderCode.size()));
-		createInfo.SetFragmentShaderCode(std::string(FragmentShaderCode.data(), FragmentShaderCode.data() + FragmentShaderCode.size()));
+		createInfo.SetVertexShaderCode(std::string(&m_VertexShader->GetData()[0], &m_VertexShader->GetData()[0] + m_VertexShader->GetData().size()));
+		createInfo.SetFragmentShaderCode(std::string(&m_FragmentShader->GetData()[0], &m_FragmentShader->GetData()[0] + m_FragmentShader->GetData().size()));
 #else
 		createInfo.SetVertexShaderCode(file::CFileReader::ReadFileAsString(ShaderPath + "vert.spv"));
 		createInfo.SetFragmentShaderCode(file::CFileReader::ReadFileAsString(ShaderPath + "frag.spv"));

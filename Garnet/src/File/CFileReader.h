@@ -21,7 +21,6 @@ namespace file
 
 		void ReadFile(const std::string& filename);
 
-
 		void SetData(const std::vector<char>& Data);
 		const std::vector<char>& GetData() const;
 	};

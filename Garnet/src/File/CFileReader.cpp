@@ -37,18 +37,24 @@ namespace file
 #ifdef __EMSCRIPTEN__
 	void downloadSucceded(emscripten_fetch_t* fetch)
 	{
-		Console::Log("[downloadSucceded] fetch->numBytes: %d, fetch->url: %s\n", static_cast<int>(fetch->numBytes), fetch->url);
+		//Console::Log("[downloadSucceded] fetch->numBytes: %d, fetch->url: %s\n", static_cast<int>(fetch->numBytes), fetch->url);
 
-		//std::vector<char> Data(fetch->data[0], fetch->data[fetch->numBytes - 1]);
+		std::vector<char> Data;
+		Data.resize(fetch->numBytes);
+
+		std::memcpy(&Data[0], fetch->data, fetch->numBytes);
 
 		auto fileReader = static_cast<CFileReader*>(fetch->userData);
-		//fileReader->SetData(Data);
+		fileReader->SetData(Data);
 		fileReader->SetIsDone(true);
+
+		emscripten_fetch_close(fetch);
 	}
 
 	void downloadFailed(emscripten_fetch_t* fetch)
 	{
 		Console::Log("[downloadFailed] fetch->url: %s\n", fetch->url);
+		emscripten_fetch_close(fetch);
 	}
 #endif
 
