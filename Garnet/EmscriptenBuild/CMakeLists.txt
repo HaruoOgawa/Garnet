@@ -59,6 +59,7 @@ if(EMSCRIPTEN)
 		-sEXPORTED_RUNTIME_METHODS=['ccall','UTF8ToString','malloc','free']
 		-sUSE_WEBGPU=1
 		-sALLOW_MEMORY_GROWTH
+		-sFETCH
 	)
 	set(CMAKE_EXECUTABLE_SUFFIX ".js")
 endif()

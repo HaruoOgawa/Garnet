@@ -173,9 +173,6 @@ namespace scene
 		{
 			if (m_VertexShader->IsDone() && m_FragmentShader->IsDone())
 			{
-				m_VertexShader->BuildData();
-				m_FragmentShader->BuildData();
-
 				Console::Log("m_VertexShader->GetData().size(): %d\n", m_VertexShader->GetData().size());
 				Console::Log("m_FragmentShader->GetData().size(): %d\n", m_FragmentShader->GetData().size());
 

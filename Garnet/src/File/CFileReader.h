@@ -9,8 +9,6 @@ namespace file
 		bool m_IsDone;
 		
 		std::vector<char> m_Data;
-		char* m_pData;
-		size_t m_BytesLength;
 
 	public:
 		CFileReader();
@@ -18,11 +16,13 @@ namespace file
 
 		void Release();
 
+		void SetIsDone(bool Done);
 		bool IsDone()const;
 
 		void ReadFile(const std::string& filename);
 
-		bool BuildData();
+
+		void SetData(const std::vector<char>& Data);
 		const std::vector<char>& GetData() const;
 	};
 }

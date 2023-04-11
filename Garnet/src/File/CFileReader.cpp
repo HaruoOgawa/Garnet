@@ -4,14 +4,13 @@
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten/emscripten.h>
+#include <emscripten/fetch.h>
 #endif
 
 namespace file
 {
 	CFileReader::CFileReader():
-		m_IsDone(false),
-		m_pData(nullptr),
-		m_BytesLength(0)
+		m_IsDone(false)
 	{
 	}
 
@@ -23,13 +22,11 @@ namespace file
 	{
 		m_IsDone = false;
 		m_Data.clear();
+	}
 
-		if (m_pData)
-		{
-			delete m_pData;
-		}
-
-		m_BytesLength = 0;
+	void CFileReader::SetIsDone(bool Done)
+	{
+		m_IsDone = Done;
 	}
 
 	bool CFileReader::IsDone()const
@@ -37,43 +34,37 @@ namespace file
 		return m_IsDone;
 	}
 
+#ifdef __EMSCRIPTEN__
+	void downloadSucceded(emscripten_fetch_t* fetch)
+	{
+		Console::Log("[downloadSucceded] fetch->numBytes: %d, fetch->url: %s\n", static_cast<int>(fetch->numBytes), fetch->url);
+
+		//std::vector<char> Data(fetch->data[0], fetch->data[fetch->numBytes - 1]);
+
+		auto fileReader = static_cast<CFileReader*>(fetch->userData);
+		//fileReader->SetData(Data);
+		fileReader->SetIsDone(true);
+	}
+
+	void downloadFailed(emscripten_fetch_t* fetch)
+	{
+		Console::Log("[downloadFailed] fetch->url: %s\n", fetch->url);
+	}
+#endif
+
 	void CFileReader::ReadFile(const std::string& filename)
 	{
 		std::string result = "";
 #ifdef __EMSCRIPTEN__
-		EM_ASM({
-			const filename = Module.UTF8ToString($0);
+		emscripten_fetch_attr_t attr;
+		emscripten_fetch_attr_init(&attr);
+		std::strcpy(attr.requestMethod, "GET");
+		attr.attributes = EMSCRIPTEN_FETCH_LOAD_TO_MEMORY;
+		attr.onsuccess = downloadSucceded;
+		attr.onerror = downloadFailed;
+		attr.userData = this;
+		emscripten_fetch(&attr, filename.c_str());
 
-			fetch(filename)
-			.then((res) => {
-				return res.arrayBuffer();
-			}, () => {
-				console.log("failed to load file! / filename: %s", filename);
-				HEAP32[$1 >> 2] = 0;
-			})
-			.then((val) => {
-				// ロードしたバッファのメモリをコピーする
-				const buffer = val;
-				const view = new Int8Array(buffer);
-				const stride = Module.HEAP8.BYTES_PER_ELEMENT;
-
-				const resultPtr = Module._malloc(buffer.byteLength);
-				Module.HEAP8.set(view, resultPtr / stride);
-				HEAP8[$2 >> 2] = resultPtr;
-				HEAP32[$3 >> 2] = buffer.byteLength;
-				//Module._free(resultPtr);
-
-				console.log("val: %o", val);
-				console.log("view: %o", view);
-				console.log("stride: %o", stride);
-				console.log("resultPtr: %o", resultPtr);
-
-				HEAP32[$1 >> 2] = 1;
-			}, () => {
-				console.log("failed to load file! / filename: %s", filename);
-				HEAP32[$1 >> 2] = 0;
-			})
-		}, filename.c_str(), &m_IsDone, m_pData, &m_BytesLength);
 #else
 		std::ifstream file(filename, std::ios::ate | std::ios::binary);
 
@@ -94,15 +85,10 @@ namespace file
 #endif
 	}
 
-	bool CFileReader::BuildData()
+	void CFileReader::SetData(const std::vector<char>& Data)
 	{
-		Console::Log("m_pData: %p / m_BytesLength: %d\n", m_pData, static_cast<int>(m_BytesLength));
-
-		if (!m_pData || m_BytesLength <= 0) return false;
-
-		return true;
+		m_Data = Data;
 	}
-
 
 	const std::vector<char>& CFileReader::GetData() const
 	{
