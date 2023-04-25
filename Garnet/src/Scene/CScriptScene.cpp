@@ -33,11 +33,11 @@ namespace scene
 	{
 		std::string ShaderPath = "Resources\\Shaders\\";
 #ifdef __DAWN__
-		m_VertexShader->ReadFile(ShaderPath + "wgtest.vert");
-		m_FragmentShader->ReadFile(ShaderPath + "wgtest.frag");
+		m_VertexShader->ReadFile(ShaderPath + "vert.wgsl");
+		m_FragmentShader->ReadFile(ShaderPath + "frag.wgsl");
 #else
-		m_VertexShader->ReadFile(ShaderPath + "vert.spv");
-		m_FragmentShader->ReadFile(ShaderPath + "frag.spv");
+		m_VertexShader->ReadFile(ShaderPath + "shader_vert.spv");
+		m_FragmentShader->ReadFile(ShaderPath + "shader_frag.spv");
 #endif
 		return true;
 	}

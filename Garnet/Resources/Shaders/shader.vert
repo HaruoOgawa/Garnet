@@ -8,13 +8,21 @@ layout(binding = 0) uniform UniformBufferObject{
     mat4 model;
     mat4 view;
     mat4 proj;
+    mat4 padMat;
 } ubo;
+
+layout(binding = 1) uniform TestBuffer{
+    vec4 MulColor;
+    vec4 val0;
+    vec4 val1;
+    vec4 val2;
+} testUBO;
 
 layout(location = 0) out vec3 fragColor;
 layout(location = 1) out vec2 fragTexCoord;
 
 void main() {
     gl_Position = ubo.proj * ubo.view * ubo.model * vec4(inPosition, 1.0);
-    fragColor = inColor;
+    fragColor = inColor * testUBO.MulColor.rgb;
     fragTexCoord = inTexCoord;
 }
