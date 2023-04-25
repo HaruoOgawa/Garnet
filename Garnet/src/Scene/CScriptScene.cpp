@@ -106,10 +106,7 @@ namespace scene
 		{
 			if (m_VertexShader->IsDone() && m_FragmentShader->IsDone())
 			{
-				Console::Log("m_VertexShader->GetData().size(): %d\n", m_VertexShader->GetData().size());
-				Console::Log("m_FragmentShader->GetData().size(): %d\n", m_FragmentShader->GetData().size());
-
-				Load(pGraphicsAPI);
+				if(!Load(pGraphicsAPI)) return false;
 				m_IsLoaded = true;
 			}
 		}

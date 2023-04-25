@@ -14,9 +14,11 @@ extern "C" {
 
 descapp::CDescAppManager* g_DescApp = nullptr;
 
-void RunLopp()
+bool RunLopp()
 {
-	g_DescApp->RunLopp();
+	if(!g_DescApp->RunLopp()) return false;
+
+	return true;
 }
 
 #ifdef __EMSCRIPTEN__
@@ -37,7 +39,7 @@ void StartApp()
 #ifndef __EMSCRIPTEN__
 		while (g_DescApp->IsRunLoop())
 		{
-			RunLopp();
+			if (!RunLopp()) break;
 		}
 #else
 		emscripten_set_main_loop(RunLopp, 60, true);

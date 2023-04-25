@@ -57,8 +57,8 @@ namespace renderer
 
 		glm::mat4 mvp = pmat * vmat * mmat;
 
-		wgpuQueueWriteBuffer(m_pGraphicsAPI->GetQueue(), m_UniformBuffer, 4 * sizeof(float), &testPos.x, sizeof(float));
-		wgpuQueueWriteBuffer(m_pGraphicsAPI->GetQueue(), m_UniformBuffer, 8 * sizeof(float), reinterpret_cast<const float*>(&mvp[0][0]), 16 * sizeof(float));
+		//wgpuQueueWriteBuffer(m_pGraphicsAPI->GetQueue(), m_UniformBuffer, 4 * sizeof(float), &t, sizeof(float));
+		wgpuQueueWriteBuffer(m_pGraphicsAPI->GetQueue(), m_UniformBuffer, 16 * 4 * sizeof(float), reinterpret_cast<const float*>(&mvp[0][0]), 16 * sizeof(float));
 
 		return true;
 	}
@@ -121,11 +121,15 @@ namespace renderer
 	bool CWebGPURenderer::CreateUniformBuffer(const CRendererCreateInfo& createInfo)
 	{
 		// バッファの生成
-		std::vector<float> Data = {
-			0.0f, 1.0f, 0.4f, 1.0f,
-			0.0f,
-			0.0f, 0.0f, 0.0f
-		};
+		std::vector<float> Data;
+
+		//
+		glm::mat4 testMat = glm::mat4(1.0f);
+		Data.resize(16 * 4);
+		std::memcpy(&Data[16 * 0], reinterpret_cast<const float*>(&testMat[0][0]), 16 * sizeof(float));
+		std::memcpy(&Data[16 * 1], reinterpret_cast<const float*>(&testMat[0][0]), 16 * sizeof(float));
+		std::memcpy(&Data[16 * 2], reinterpret_cast<const float*>(&testMat[0][0]), 16 * sizeof(float));
+		std::memcpy(&Data[16 * 3], reinterpret_cast<const float*>(&testMat[0][0]), 16 * sizeof(float));
 
 		// 行列
 		glm::mat4 mmat = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f)) * glm::mat4_cast(glm::quat(glm::vec3(0.0f))) * glm::scale(glm::mat4(1.0f), glm::vec3(1.0f));
@@ -144,8 +148,12 @@ namespace renderer
 		glm::mat4 mvp = pmat * vmat * mmat;
 
 		Data.resize(Data.size() + 16);
-		std::memcpy(&Data[Data.size() - 16], reinterpret_cast<const float*>(&mvp[0][0]), 16 * sizeof(float));
+		std::memcpy(&Data[16 * 4], reinterpret_cast<const float*>(&mvp[0][0]), 16 * sizeof(float));
 
+		// 色
+		/*float Color[4] = { 0.0f, 0.5f, 1.0f, 1.0f };
+		Data.resize(Data.size() + 4);
+		std::memcpy(&Data[16], &Color[0], 4 * sizeof(float));*/
 
 		//
 		m_UniformCount = Data.size();
@@ -169,31 +177,66 @@ namespace renderer
 		// バインドレイアウトを作成
 		// どのようにメモリに配置されるか, バインドインデックスや読み取り専用かなど
 		// -->これがWGSLでいう @binding(n)
-		WGPUBindGroupLayoutEntry bindingLayout{};
-		InitDefalutBindGroupLayoutEntry(bindingLayout); // 初期化しないとブラウザ側でいろいろとエラーがでる・・・
-		bindingLayout.binding = 0; // バインドインデックス
-		bindingLayout.visibility = WGPUShaderStage_Vertex | WGPUShaderStage_Fragment; // アクセス権限。ここではおそらく頂点シェーダーとフラグメントシェーダーのみ読み取り可
-		bindingLayout.buffer.type = WGPUBufferBindingType_Uniform; // バインド先のバッファの種類
-		bindingLayout.buffer.minBindingSize = m_UniformCount * sizeof(float); // データ一つ当たりのサイズかな???
+		std::vector<WGPUBindGroupLayoutEntry> bindingLayoutList(2);
+		
+		{
+			InitDefalutBindGroupLayoutEntry(bindingLayoutList[0]); // 初期化しないとブラウザ側でいろいろとエラーがでる・・・
+			bindingLayoutList[0].binding = 0; // バインドインデックス
+			bindingLayoutList[0].visibility = WGPUShaderStage_Vertex | WGPUShaderStage_Fragment; // アクセス権限。ここではおそらく頂点シェーダーとフラグメントシェーダーのみ読み取り可
+			bindingLayoutList[0].buffer.type = WGPUBufferBindingType_Uniform; // バインド先のバッファの種類
+			int Stride = 16 * 4;
+			bindingLayoutList[0].buffer.minBindingSize = Stride * sizeof(float); // データ一つ当たりのサイズかな???
+		}
 
+		{
+			InitDefalutBindGroupLayoutEntry(bindingLayoutList[1]); // 初期化しないとブラウザ側でいろいろとエラーがでる・・・
+			bindingLayoutList[1].binding = 1; // バインドインデックス
+			bindingLayoutList[1].visibility = WGPUShaderStage_Vertex | WGPUShaderStage_Fragment; // アクセス権限。ここではおそらく頂点シェーダーとフラグメントシェーダーのみ読み取り可
+			bindingLayoutList[1].buffer.type = WGPUBufferBindingType_Uniform; // バインド先のバッファの種類
+			int Stride = 16;
+			bindingLayoutList[1].buffer.minBindingSize = Stride * sizeof(float); // データ一つ当たりのサイズかな???
+		}
+		
 		// バインドグループレイアウトを作成
 		// たぶん上記のバインドレイアウトのマネージャー, 複数個束ねるやつ
 		// --> これがWGSLでいう @group(n) かな？
 		WGPUBindGroupLayoutDescriptor bindGroupLayoutDesc{}; //バインドグループの記述子
 		bindGroupLayoutDesc.nextInChain = nullptr; // 拡張機
 		bindGroupLayoutDesc.label = "BindGroupLayout";
-		bindGroupLayoutDesc.entryCount = 1; // 上記のバインドレイアウトの数
-		bindGroupLayoutDesc.entries = &bindingLayout; // バインドレイアウトのデータ
+		bindGroupLayoutDesc.entryCount = static_cast<uint32_t>(bindingLayoutList.size()); // 上記のバインドレイアウトの数
+		bindGroupLayoutDesc.entries = &bindingLayoutList[0]; // バインドレイアウトのデータ
 		m_BindGroupLayout = wgpuDeviceCreateBindGroupLayout(m_pGraphicsAPI->GetLogicalDevice(), &bindGroupLayoutDesc);
+		if (!m_BindGroupLayout)
+		{
+			Console::Log("[Error] BindGroupLayout is nullptr\n");
+			return false;
+		}
 
-		// バッファと結びつけるための記述かな？
-		// --> その通り、たぶんバッファのバインディング
-		WGPUBindGroupEntry binding{};
-		binding.nextInChain = nullptr; // 拡張機
-		binding.binding = 0;
-		binding.buffer = m_UniformBuffer;
-		binding.offset = 0;
-		binding.size = m_UniformCount * sizeof(float);
+		// バッファとバインディングを結びつけるための記述かな？
+		// --> その通り、たぶんバッファのバインディングとかバインディングのオフセットとか
+		std::vector<WGPUBindGroupEntry> bindingList(2);
+
+		{
+			int Offset = 0;
+			int Stride = 16 * 4;
+
+			bindingList[0].nextInChain = nullptr; // 拡張機
+			bindingList[0].binding = 0;
+			bindingList[0].buffer = m_UniformBuffer;
+			bindingList[0].offset = Offset;
+			bindingList[0].size = Stride * sizeof(float);
+		}
+
+		{
+			int Offset = 16 * 4 * sizeof(float);
+			int Stride = 16;
+
+			bindingList[1].nextInChain = nullptr; // 拡張機
+			bindingList[1].binding = 1;
+			bindingList[1].buffer = m_UniformBuffer;
+			bindingList[1].offset = Offset;
+			bindingList[1].size = Stride * sizeof(float);
+		}
 
 		// バインドグループを作成
 		// --> groupやbindingやbufferなどのをすべてを最終的に束ねるためのもの
@@ -201,9 +244,15 @@ namespace renderer
 		bindGroupDesc.nextInChain = nullptr; // 拡張機
 		bindGroupDesc.label = "BindGroup";
 		bindGroupDesc.layout = m_BindGroupLayout; // バインドグループレイアウト
-		bindGroupDesc.entryCount = bindGroupLayoutDesc.entryCount;
-		bindGroupDesc.entries = &binding;
+		bindGroupDesc.entryCount = static_cast<uint32_t>(bindingList.size());
+		bindGroupDesc.entries = &bindingList[0];
 		m_BindGroup = wgpuDeviceCreateBindGroup(m_pGraphicsAPI->GetLogicalDevice(), &bindGroupDesc);
+
+		if (!m_BindGroup)
+		{
+			Console::Log("[Error] BindGroup is nullptr\n");
+			return false;
+		}
 
 		return true;
 	}
