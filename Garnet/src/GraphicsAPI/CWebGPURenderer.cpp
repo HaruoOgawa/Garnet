@@ -58,7 +58,7 @@ namespace renderer
 		glm::mat4 mvp = pmat * vmat * mmat;
 
 		//wgpuQueueWriteBuffer(m_pGraphicsAPI->GetQueue(), m_UniformBuffer, 4 * sizeof(float), &t, sizeof(float));
-		wgpuQueueWriteBuffer(m_pGraphicsAPI->GetQueue(), m_UniformBuffer, 16 * 4 * sizeof(float), reinterpret_cast<const float*>(&mvp[0][0]), 16 * sizeof(float));
+		wgpuQueueWriteBuffer(m_pGraphicsAPI->GetQueue(), m_UniformBuffer, 16 * 3 * sizeof(float), reinterpret_cast<const float*>(&mvp[0][0]), 16 * sizeof(float));
 
 		return true;
 	}
@@ -123,14 +123,6 @@ namespace renderer
 		// バッファの生成
 		std::vector<float> Data;
 
-		//
-		glm::mat4 testMat = glm::mat4(1.0f);
-		Data.resize(16 * 4);
-		std::memcpy(&Data[16 * 0], reinterpret_cast<const float*>(&testMat[0][0]), 16 * sizeof(float));
-		std::memcpy(&Data[16 * 1], reinterpret_cast<const float*>(&testMat[0][0]), 16 * sizeof(float));
-		std::memcpy(&Data[16 * 2], reinterpret_cast<const float*>(&testMat[0][0]), 16 * sizeof(float));
-		std::memcpy(&Data[16 * 3], reinterpret_cast<const float*>(&testMat[0][0]), 16 * sizeof(float));
-
 		// 行列
 		glm::mat4 mmat = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f)) * glm::mat4_cast(glm::quat(glm::vec3(0.0f))) * glm::scale(glm::mat4(1.0f), glm::vec3(1.0f));
 		glm::mat4 vmat = glm::lookAt(
@@ -147,13 +139,22 @@ namespace renderer
 
 		glm::mat4 mvp = pmat * vmat * mmat;
 
-		Data.resize(Data.size() + 16);
-		std::memcpy(&Data[16 * 4], reinterpret_cast<const float*>(&mvp[0][0]), 16 * sizeof(float));
+		Data.resize(16 * 4);
+		std::memcpy(&Data[16 * 0], reinterpret_cast<const float*>(&mmat[0][0]), 16 * sizeof(float));
+		std::memcpy(&Data[16 * 1], reinterpret_cast<const float*>(&vmat[0][0]), 16 * sizeof(float));
+		std::memcpy(&Data[16 * 2], reinterpret_cast<const float*>(&pmat[0][0]), 16 * sizeof(float));
+		std::memcpy(&Data[16 * 3], reinterpret_cast<const float*>(&mvp[0][0]), 16 * sizeof(float));
 
 		// 色
-		/*float Color[4] = { 0.0f, 0.5f, 1.0f, 1.0f };
-		Data.resize(Data.size() + 4);
-		std::memcpy(&Data[16], &Color[0], 4 * sizeof(float));*/
+		std::vector<float> testUBO = {
+			0.01f, 0.01f, 1.0f, 1.0f,
+			0.0f, 0.0f, 0.0f, 0.0f,
+			0.0f, 0.0f, 0.0f, 0.0f,
+			0.0f, 0.0f, 0.0f, 0.0f
+		};
+
+		Data.resize(Data.size() + testUBO.size());
+		std::memcpy(&Data[16 * 4], &testUBO[0], sizeof(float) * testUBO.size());
 
 		//
 		m_UniformCount = Data.size();
@@ -193,7 +194,7 @@ namespace renderer
 			bindingLayoutList[1].binding = 1; // バインドインデックス
 			bindingLayoutList[1].visibility = WGPUShaderStage_Vertex | WGPUShaderStage_Fragment; // アクセス権限。ここではおそらく頂点シェーダーとフラグメントシェーダーのみ読み取り可
 			bindingLayoutList[1].buffer.type = WGPUBufferBindingType_Uniform; // バインド先のバッファの種類
-			int Stride = 16;
+			int Stride = 4 * 4;
 			bindingLayoutList[1].buffer.minBindingSize = Stride * sizeof(float); // データ一つ当たりのサイズかな???
 		}
 		
@@ -229,7 +230,7 @@ namespace renderer
 
 		{
 			int Offset = 16 * 4 * sizeof(float);
-			int Stride = 16;
+			int Stride = 4 * 4;
 
 			bindingList[1].nextInChain = nullptr; // 拡張機
 			bindingList[1].binding = 1;
@@ -260,8 +261,29 @@ namespace renderer
 	bool CWebGPURenderer::CreateGraphicsPipeline(const CRendererCreateInfo& createInfo)
 	{
 		// シェーダーモジュールの生成 //////////////////////////////////////////////////////////////////
-		WGPUShaderModule vertexShaderModele = CreateShaderModule(createInfo.GetVertexShaderCode());
-		WGPUShaderModule fragmentShaderModele = CreateShaderModule(createInfo.GetFragmentShaderCode());
+		WGPUShaderModule vertexShaderModele;
+		WGPUShaderModule fragmentShaderModele;
+
+		if (createInfo.GetShaderType() == EShaderType::SPIRV)
+		{
+			const auto& VertexShaderData = createInfo.GetVertexShaderCode();
+			vertexShaderModele = CreateShaderModuleFromSPIRV(VertexShaderData);
+
+			const auto& FragmentShaderCode = createInfo.GetFragmentShaderCode();
+			fragmentShaderModele = CreateShaderModuleFromSPIRV(FragmentShaderCode);
+		}
+		else if (createInfo.GetShaderType() == EShaderType::WGSL)
+		{
+			const auto& VertexShaderData = createInfo.GetVertexShaderCode();
+			vertexShaderModele = CreateShaderModuleFromWGSL(std::string(&VertexShaderData[0], &VertexShaderData[0] + VertexShaderData.size()));
+
+			const auto& FragmentShaderCode = createInfo.GetFragmentShaderCode();
+			fragmentShaderModele = CreateShaderModuleFromWGSL(std::string(&FragmentShaderCode[0], &FragmentShaderCode[0] + FragmentShaderCode.size()));
+		}
+		else
+		{
+			return false;
+		}
 
 		// パイプラインの設定 //////////////////////////////////////////////////////////////////////////
 		WGPURenderPipelineDescriptor pipelineDesc{};
@@ -363,8 +385,9 @@ namespace renderer
 	}
 
 	// Helper Function ///////////////////////////////////////////////////////////////////////
-	WGPUShaderModule CWebGPURenderer::CreateShaderModule(const std::string& shaderCode)
+	WGPUShaderModule CWebGPURenderer::CreateShaderModuleFromWGSL(const std::string& shaderCode)
 	{
+		//
 		WGPUShaderModuleWGSLDescriptor shaderCodeDesc{};
 		shaderCodeDesc.chain.next = nullptr; // ???
 		shaderCodeDesc.chain.sType = WGPUSType_ShaderModuleWGSLDescriptor;
@@ -375,6 +398,28 @@ namespace renderer
 		shaderDesc.hints = nullptr;
 		shaderDesc.nextInChain = &shaderCodeDesc.chain; // 使用するShaderの種類を指定(ここででWGSL)。WGPUShaderModuleSPIRVDescriptorを指定することでVulkanのSplivが使用できる(SplivはGLSLからコンパイルできて便利)
 
+		WGPUShaderModule shaderModule = wgpuDeviceCreateShaderModule(m_pGraphicsAPI->GetLogicalDevice(), &shaderDesc);
+
+		return shaderModule;
+	}
+	
+	WGPUShaderModule CWebGPURenderer::CreateShaderModuleFromSPIRV(const std::vector<char>& shaderCode)
+	{
+		std::vector<uint32_t> Data;
+		Data.resize(shaderCode.size() / 4);
+		std::memcpy(&Data[0], &shaderCode[0], shaderCode.size() * sizeof(char));
+
+		WGPUShaderModuleSPIRVDescriptor shaderCodeDesc{};
+		shaderCodeDesc.chain.next = nullptr;
+		shaderCodeDesc.chain.sType = WGPUSType_ShaderModuleSPIRVDescriptor;
+		shaderCodeDesc.code = &Data[0];
+		shaderCodeDesc.codeSize = Data.size();
+
+		WGPUShaderModuleDescriptor shaderDesc{};
+		shaderDesc.hintCount = 0;
+		shaderDesc.hints = nullptr;
+		shaderDesc.nextInChain = &shaderCodeDesc.chain;
+		
 		WGPUShaderModule shaderModule = wgpuDeviceCreateShaderModule(m_pGraphicsAPI->GetLogicalDevice(), &shaderDesc);
 
 		return shaderModule;

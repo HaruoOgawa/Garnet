@@ -113,7 +113,7 @@ namespace renderer
 			m_pGraphicsAPI->GetSwapChainExtent().width / (float)m_pGraphicsAPI->GetSwapChainExtent().height, 0.1f, 10.0f
 		);
 		ubo.proj[1][1] *= -1.0f; // Y座標の向きを反転。VulkanとOpenGLは逆なのかな？
-		ubo.padMat = glm::mat4(1.0f);
+		ubo.mvp = ubo.proj * ubo.view * ubo.model;
 
 		//
 		std::vector<float> testUBO = {
@@ -535,10 +535,12 @@ namespace renderer
 		// ShaderModuleの作成(Shaderをラップ・管理するためのもの)
 		// 使う時にGeometryとかTessellationも追加する
 		VkShaderModule vertShaderModule;
-		const bool UseVertexShader = CreateShaderModule(vertShaderModule, VertexShadeCode);
+		const auto& VertexShaderData = createInfo.GetVertexShaderCode();
+		const bool UseVertexShader = CreateShaderModule(vertShaderModule, std::string(&VertexShaderData[0], &VertexShaderData[0] + VertexShaderData.size()));
 
 		VkShaderModule fragShaderModule;
-		const bool UseFragmentShader = CreateShaderModule(fragShaderModule, FragShadeCode);
+		const auto& FragmentShaderCode = createInfo.GetFragmentShaderCode();
+		const bool UseFragmentShader = CreateShaderModule(fragShaderModule, std::string(&FragmentShaderCode[0], &FragmentShaderCode[0] + FragmentShaderCode.size()));
 
 		// シェーダーステージの作成(VertexShaderとかFragment, Geometryとかそういうステージ)
 		std::vector<VkPipelineShaderStageCreateInfo> shaderStages;

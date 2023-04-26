@@ -32,13 +32,10 @@ namespace scene
 	bool CScriptScene::Initialize(api::IGraphicsAPI* pGraphicsAPI)
 	{
 		std::string ShaderPath = "Resources\\Shaders\\";
-#ifdef __DAWN__
-		m_VertexShader->ReadFile(ShaderPath + "vert.wgsl");
-		m_FragmentShader->ReadFile(ShaderPath + "frag.wgsl");
-#else
+
 		m_VertexShader->ReadFile(ShaderPath + "shader_vert.spv");
 		m_FragmentShader->ReadFile(ShaderPath + "shader_frag.spv");
-#endif
+		
 		return true;
 	}
 
@@ -79,9 +76,10 @@ namespace scene
 
 		//
 		renderer::CRendererCreateInfo createInfo;
+		createInfo.SetShaderType(renderer::EShaderType::SPIRV);
 
-		createInfo.SetVertexShaderCode(std::string(&m_VertexShader->GetData()[0], &m_VertexShader->GetData()[0] + m_VertexShader->GetData().size()));
-		createInfo.SetFragmentShaderCode(std::string(&m_FragmentShader->GetData()[0], &m_FragmentShader->GetData()[0] + m_FragmentShader->GetData().size()));
+		createInfo.SetVertexShaderCode(m_VertexShader->GetData());
+		createInfo.SetFragmentShaderCode(m_FragmentShader->GetData());
 
 		createInfo.SetVertices(Vertices);
 		createInfo.SetIndices(Indices);
