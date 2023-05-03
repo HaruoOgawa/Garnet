@@ -23,7 +23,7 @@ namespace renderer
 		// Rendering
 
 		// Shader
-		EShaderType m_ShaderType;
+		const EShaderType m_ShaderType;
 
 		std::vector<char> m_VertexShaderCode;
 		std::vector<char> m_FragmentShaderCode;
@@ -48,7 +48,6 @@ namespace renderer
 		const std::vector<int>& GetAttributeDimensions() const;
 
 		// Shader
-		void SetShaderType(EShaderType ShaderType);
 		EShaderType GetShaderType() const;
 
 		void SetVertexShaderCode(const std::vector<char>& VertexShaderCode);

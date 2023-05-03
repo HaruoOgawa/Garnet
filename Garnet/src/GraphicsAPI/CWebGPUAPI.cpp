@@ -15,7 +15,8 @@
 
 namespace api
 {
-	CWebGPUAPI::CWebGPUAPI()
+	CWebGPUAPI::CWebGPUAPI():
+		m_ShaderExtension(".wgsl")
 	{
 	}
 
@@ -131,6 +132,11 @@ namespace api
 	bool CWebGPUAPI::IsWaitting()
 	{
 		return false;
+	}
+
+	const std::string& CWebGPUAPI::GetShaderExtension() const
+	{
+		return m_ShaderExtension;
 	}
 
 	//

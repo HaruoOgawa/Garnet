@@ -1498,6 +1498,14 @@
     <None Include="Resources\Shaders\shader.vert" />
     <None Include="Resources\Shaders\shader_frag.spv" />
     <None Include="Resources\Shaders\shader_vert.spv" />
+    <None Include="Commands\glslc_ALL.bat">
+      <Filter>ソース ファイル</Filter>
+    </None>
+    <None Include="Commands\wgslc_ALL.bat">
+      <Filter>ソース ファイル</Filter>
+    </None>
+    <None Include="Resources\Shaders\shader_frag.wgsl" />
+    <None Include="Resources\Shaders\shader_vert.wgsl" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="EmscriptenBuild\CMakeLists.txt" />

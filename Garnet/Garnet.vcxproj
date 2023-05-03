@@ -680,12 +680,14 @@ del $(OutDir)Garnet.pdb</Command>
     <None Include="CMakeBuild\build.bat" />
     <None Include="CMakeBuild\Garnet_front.js" />
     <None Include="CMakeBuild\index.html" />
+    <None Include="Commands\glslc_ALL.bat" />
     <None Include="Commands\RemakeCmakeLists.bat" />
     <None Include="Commands\RemakeCmakeLists.py" />
     <None Include="Commands\RemakeCmakeLists_DescApp.bat" />
     <None Include="Commands\RemakeCmakeLists_DescApp.py" />
     <None Include="Commands\RunLocalHost.bat" />
     <None Include="Commands\UTF8Encorder.py" />
+    <None Include="Commands\wgslc_ALL.bat" />
     <None Include="EmscriptenBuild\build.bat" />
     <None Include="EmscriptenBuild\Garnet_front.js" />
     <None Include="EmscriptenBuild\index.html" />
@@ -693,7 +695,9 @@ del $(OutDir)Garnet.pdb</Command>
     <None Include="Resources\Shaders\shader.frag" />
     <None Include="Resources\Shaders\shader.vert" />
     <None Include="Resources\Shaders\shader_frag.spv" />
+    <None Include="Resources\Shaders\shader_frag.wgsl" />
     <None Include="Resources\Shaders\shader_vert.spv" />
+    <None Include="Resources\Shaders\shader_vert.wgsl" />
     <None Include="src\Library\glm\glm\detail\func_common.inl" />
     <None Include="src\Library\glm\glm\detail\func_common_simd.inl" />
     <None Include="src\Library\glm\glm\detail\func_exponential.inl" />

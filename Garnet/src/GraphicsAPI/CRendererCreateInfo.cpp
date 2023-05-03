@@ -3,8 +3,12 @@
 namespace renderer
 {
 	CRendererCreateInfo::CRendererCreateInfo():
-		m_UseMainTexture(false),
-		m_ShaderType(EShaderType::SPIRV)
+#ifdef __DAWN__
+		m_ShaderType(EShaderType::WGSL),
+#else
+		m_ShaderType(EShaderType::SPIRV),
+#endif
+		m_UseMainTexture(false)
 	{
 	}
 
@@ -39,11 +43,6 @@ namespace renderer
 	}
 
 	// Shader
-	void CRendererCreateInfo::SetShaderType(EShaderType ShaderType)
-	{
-		m_ShaderType = ShaderType;
-	}
-
 	EShaderType CRendererCreateInfo::GetShaderType() const
 	{
 		return m_ShaderType;
