@@ -4,6 +4,13 @@
 
 namespace renderer
 {
+	enum class EShaderType
+	{
+		WGSL,
+		SPIRV,
+		GLSL,
+	};
+
 	class CRendererCreateInfo
 	{
 		// VertexBuffer
@@ -16,11 +23,13 @@ namespace renderer
 		// Rendering
 
 		// Shader
-		std::string m_VertexShaderCode;
-		std::string m_FragmentShaderCode;
-		std::string m_GeometryShaderCode;
-		std::string m_HullShaderCode;
-		std::string m_DomainShaderCode;
+		const EShaderType m_ShaderType;
+
+		std::vector<char> m_VertexShaderCode;
+		std::vector<char> m_FragmentShaderCode;
+		std::vector<char> m_GeometryShaderCode;
+		std::vector<char> m_HullShaderCode;
+		std::vector<char> m_DomainShaderCode;
 
 		// Texture
 		bool m_UseMainTexture;
@@ -39,20 +48,22 @@ namespace renderer
 		const std::vector<int>& GetAttributeDimensions() const;
 
 		// Shader
-		void SetVertexShaderCode(const std::string& VertexShaderCode);
-		const std::string& GetVertexShaderCode() const;
+		EShaderType GetShaderType() const;
 
-		void SetFragmentShaderCode(const std::string& FragmentShaderCode);
-		const std::string& GetFragmentShaderCode() const;
+		void SetVertexShaderCode(const std::vector<char>& VertexShaderCode);
+		const std::vector<char>& GetVertexShaderCode() const;
 
-		void SetGeometryShaderCode(const std::string& GeometryShaderCode);
-		const std::string& GetGeometryShaderCode() const;
+		void SetFragmentShaderCode(const std::vector<char>& FragmentShaderCode);
+		const std::vector<char>& GetFragmentShaderCode() const;
 
-		void HullShaderCode(const std::string& HullShaderCode);
-		const std::string& GetHullShaderCode() const;
+		void SetGeometryShaderCode(const std::vector<char>& GeometryShaderCode);
+		const std::vector<char>& GetGeometryShaderCode() const;
 
-		void SetDomainShaderCode(const std::string& DomainShaderCode);
-		const std::string& GetDomainShaderCode() const;
+		void HullShaderCode(const std::vector<char>& HullShaderCode);
+		const std::vector<char>& GetHullShaderCode() const;
+
+		void SetDomainShaderCode(const std::vector<char>& DomainShaderCode);
+		const std::vector<char>& GetDomainShaderCode() const;
 
 		// Texture
 		void SetUseMainTexture(bool UseMainTexture);

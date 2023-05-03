@@ -33,9 +33,9 @@ namespace scene
 	{
 		std::string ShaderPath = "Resources\\Shaders\\";
 
-		m_VertexShader->ReadFile(ShaderPath + "wgtest.vert");
-		m_FragmentShader->ReadFile(ShaderPath + "wgtest.frag");
-
+		m_VertexShader->ReadFile(ShaderPath + "shader_vert" + pGraphicsAPI->GetShaderExtension());
+		m_FragmentShader->ReadFile(ShaderPath + "shader_frag" + pGraphicsAPI->GetShaderExtension());
+		
 		return true;
 	}
 
@@ -74,81 +74,11 @@ namespace scene
 			0, 1, 2, 2, 3, 0,
 		};
 
-#ifdef __DAWN__
-		//
-		std::string VertexShaderCode = R"(
-			struct VertexInput {
-				@location(0) position: vec3<f32>,
-				@location(1) color: vec3<f32>,
-				@location(2) uv: vec2<f32>,
-			};	
-
-			struct VertexOutput {
-				@builtin(position) position: vec4<f32>,
-				@location(0) color: vec3<f32>,
-				@location(1) uv: vec2<f32>,
-			};	
-	
-			struct TestUniform {
-				color: vec4<f32>,
-				time: f32,
-				pad0: f32,
-				pad1: f32,
-				pad2: f32,
-				mvp : mat4x4<f32>,
-			};
-
-			@group(0) @binding(0) var<uniform> uTestUniform: TestUniform;
-			//@group(0) @binding(1) var<uniform> uTestXOff: f32;
-
-			@vertex
-			fn main(in: VertexInput) -> VertexOutput {
-				var offset = vec3<f32>(0.0, sin(uTestUniform.time), 0.0);
-
-				var out: VertexOutput;
-				out.position = uTestUniform.mvp * vec4<f32>(in.position + offset, 1.0);			
-				out.color = in.color;			
-				out.uv = in.uv;			
-
-				return out;
-			}
-		)";
-
-		std::string FragmentShaderCode = R"(
-			struct VertexOutput {
-				@builtin(position) position: vec4<f32>,
-				@location(0) color: vec3<f32>,
-				@location(1) uv: vec2<f32>,
-			};	
-
-			struct TestUniform {
-				color: vec4<f32>,
-				time: f32,
-				pad0: f32,
-				pad1: f32,
-				pad2: f32,
-				mvp : mat4x4<f32>,
-			};
-
-			@group(0) @binding(0) var<uniform> uTestUniform: TestUniform;
-
-			@fragment
-			fn main(in: VertexOutput) -> @location(0) vec4<f32> {
-				let color = in.color * uTestUniform.color.rgb;
-				return vec4<f32>(color, 1.0);
-			}
-		)";
-#endif
-
 		//
 		renderer::CRendererCreateInfo createInfo;
-#ifdef __DAWN__
-		createInfo.SetVertexShaderCode(std::string(&m_VertexShader->GetData()[0], &m_VertexShader->GetData()[0] + m_VertexShader->GetData().size()));
-		createInfo.SetFragmentShaderCode(std::string(&m_FragmentShader->GetData()[0], &m_FragmentShader->GetData()[0] + m_FragmentShader->GetData().size()));
-#else
-		createInfo.SetVertexShaderCode(file::CFileReader::ReadFileAsString(ShaderPath + "vert.spv"));
-		createInfo.SetFragmentShaderCode(file::CFileReader::ReadFileAsString(ShaderPath + "frag.spv"));
-#endif
+
+		createInfo.SetVertexShaderCode(m_VertexShader->GetData());
+		createInfo.SetFragmentShaderCode(m_FragmentShader->GetData());
 
 		createInfo.SetVertices(Vertices);
 		createInfo.SetIndices(Indices);
@@ -173,10 +103,7 @@ namespace scene
 		{
 			if (m_VertexShader->IsDone() && m_FragmentShader->IsDone())
 			{
-				Console::Log("m_VertexShader->GetData().size(): %d\n", m_VertexShader->GetData().size());
-				Console::Log("m_FragmentShader->GetData().size(): %d\n", m_FragmentShader->GetData().size());
-
-				Load(pGraphicsAPI);
+				if(!Load(pGraphicsAPI)) return false;
 				m_IsLoaded = true;
 			}
 		}

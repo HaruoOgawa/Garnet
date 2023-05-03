@@ -30,6 +30,9 @@ namespace api
 
 	class CVulkanAPI : public IGraphicsAPI
 	{
+		//
+		const std::string m_ShaderExtension;
+
 		// GLFW Window
 		GLFWwindow* m_pWindow;
 
@@ -163,12 +166,13 @@ namespace api
 		bool InitializeWithGLFW(GLFWwindow* pWindow) override;
 		void Release();
 
-		
 		std::shared_ptr<renderer::IRenderer> CreateRenderer() override;
 
 		bool BeginRender(ERenderPassType RenderPassType) override;
 		bool EndRender() override;
 		bool IsWaitting() override;
+
+		const std::string& GetShaderExtension() const override;
 
 		//
 		int GetMaxFramesInFlight() const { return MAX_FRAMES_IN_FLIGHT; }

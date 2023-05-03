@@ -21,43 +21,43 @@ namespace renderer
 	{
 		if (m_UseMainTexture)
 		{
-			// テクスチャサンプラーを破棄(各3Dオブジェクト固有)
+			// テクスチャサンプラーを破棄
 			vkDestroySampler(m_pGraphicsAPI->GetLogicalDevice(), m_TextureSampler, nullptr);
 
-			// テクスチャ用のイメージビューの破棄(各3Dオブジェクト固有)
+			// テクスチャ用のイメージビューの破棄
 			vkDestroyImageView(m_pGraphicsAPI->GetLogicalDevice(), m_TextureImageView, nullptr);
 
-			// テクスチャイメージの破棄(各3Dオブジェクト固有)
+			// テクスチャイメージの破棄
 			vkDestroyImage(m_pGraphicsAPI->GetLogicalDevice(), m_TextureImage, nullptr);
 			vkFreeMemory(m_pGraphicsAPI->GetLogicalDevice(), m_TextureImageMemory, nullptr);
 		}
 
-		// ユニフォームの破棄(各3Dオブジェクト固有)
+		// ユニフォームの破棄
 		for (size_t i = 0; i < m_pGraphicsAPI->GetMaxFramesInFlight(); i++)
 		{
 			vkDestroyBuffer(m_pGraphicsAPI->GetLogicalDevice(), m_UniformBuffers[i], nullptr);
 			vkFreeMemory(m_pGraphicsAPI->GetLogicalDevice(), m_UniformBuffersMemory[i], nullptr);
 		}
 
-		// 記述子プールの破棄(各3Dオブジェクト固有)
+		// 記述子プールの破棄
 		vkDestroyDescriptorPool(m_pGraphicsAPI->GetLogicalDevice(), m_DescriptorPool, nullptr);
 
-		// ユニフォームレイアウトセットを破棄(各3Dオブジェクト固有)
+		// ユニフォームレイアウトセットを破棄
 		vkDestroyDescriptorSetLayout(m_pGraphicsAPI->GetLogicalDevice(), m_DescriptorSetLayout, nullptr);
 
-		// インデックスバッファの破棄(各3Dオブジェクト固有)
+		// インデックスバッファの破棄
 		vkDestroyBuffer(m_pGraphicsAPI->GetLogicalDevice(), m_IndexBuffer, nullptr);
 
-		// インデックスバッファ用に確保したメモリ領域を破棄(各3Dオブジェクト固有)
+		// インデックスバッファ用に確保したメモリ領域を破棄
 		vkFreeMemory(m_pGraphicsAPI->GetLogicalDevice(), m_IndexBufferMemory, nullptr);
 
-		// 頂点バッファの破棄(各3Dオブジェクト固有)
+		// 頂点バッファの破棄
 		for (auto& Buffer : m_VertexBufferList)
 		{
 			vkDestroyBuffer(m_pGraphicsAPI->GetLogicalDevice(), Buffer, nullptr);
 		}
 		
-		// 頂点バッファ用に確保したメモリ領域を破棄(各3Dオブジェクト固有)
+		// 頂点バッファ用に確保したメモリ領域を破棄
 		for (auto& Memory : m_VertexBufferMemoryList)
 		{
 			vkFreeMemory(m_pGraphicsAPI->GetLogicalDevice(), Memory, nullptr);
@@ -75,64 +75,92 @@ namespace renderer
 		m_pGraphicsAPI = static_cast<api::CVulkanAPI*>(pGraphicsAPI);
 		m_UseMainTexture = createInfo.IsUseMainTexture();
 
-		if (!CreateDescriptorSetLayout(createInfo)) return false; // UBO(Uniform Buffer Object)をどのようにバインドするか
-		if (!CreateTextureImage(createInfo)) return false; // テクスチャイメージの生成(各3Dオブジェクト固有)
-		if (!CreateTextureImageView(createInfo)) return false;// シェーダーで取り扱う用のImageViewを作成(各3Dオブジェクト固有)
-		// テクスチャサンプラーを作成(各3Dオブジェクト固有)
-		if (!CreateTextureSampler(createInfo)) return false; // サンプラーとはテクスチャデータをフラグメント(3Dモデル)に合うように調整する機構
-		if (!CreateVertexBuffer(createInfo)) return false; // 頂点バッファを作成(各3Dオブジェクト固有)
-		if (!CreateIndexBuffer(createInfo)) return false; // インデックスバッファを作成(各3Dオブジェクト固有)
-		if (!CreateUniformBuffers(createInfo)) return false; // ユニフォームバッファを作成(各3Dオブジェクト固有)
-		// 記述子プールを作成する -> 記述子セットはコマンドからを作成する必要がある。記述子プールはそのコマンド群のことかな？(各3Dオブジェクト固有)
-		if (!CreateDescriptorPool(createInfo)) return false;
-		// 記述子セットを作成 -> UBOのマネージャー,・ラッパーのことかな？(各3Dオブジェクト固有)
-		if (!CreateDescriptorSets(createInfo)) return false;
+		if (!CreateVertexBuffer(createInfo)) return false; // 頂点バッファを作成
+		if (!CreateIndexBuffer(createInfo)) return false; // インデックスバッファを作成
+
+		/*if (!CreateTextureImage(createInfo)) return false; // テクスチャイメージの生成
+		if (!CreateTextureImageView(createInfo)) return false;// シェーダーで取り扱う用のImageViewを作成
+		if (!CreateTextureSampler(createInfo)) return false; // テクスチャサンプラーを作成.サンプラーとはテクスチャデータをフラグメント(3Dモデル)に合うように調整する機構*/
+
+		if (!CreateDescriptorSetLayout(createInfo)) return false; // DescriptorSetLayoutの作成(Uniformをどのようにバインドするか), WebGPUでいうバインドグループの生成
+		if (!CreateUniformBuffers(createInfo)) return false; // ユニフォームバッファを作成
+		if (!CreateDescriptorPool(createInfo)) return false; // DescriptorPoolを作成する -> DescriptorSetsは直接生成できず、コマンドで生成する必要がある。記述子プールはそのコマンド群のことかな？
+		if (!CreateDescriptorSets(createInfo)) return false; // DescriptorSetsを作成 -> Uniformが使用するバッファをCPUからGPUに送信するための仕組みこと. https://vkguide.dev/docs/chapter-4/descriptors/
+
 		if (!CreateGraphicsPipeline(createInfo)) return false; // グラフィックパイプラインを作成
 
 		return true;
 	}
 
-	// Vulkanメインロジック /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	bool CVulkanRenderer::CreateDescriptorSetLayout(const CRendererCreateInfo& createInfo)
+	bool CVulkanRenderer::Update(float SecondsTime)
 	{
-		//
-		std::vector<VkDescriptorSetLayoutBinding> bindings;
+		// ユニフォームデータの更新
+		UpdateUniformBuffer(m_pGraphicsAPI->GetCurrentFrame(), SecondsTime);
 
-		// レイアウトのバインドに関する設定
-		// Model, View Proj等のUBOのレイアウト
-		VkDescriptorSetLayoutBinding uboLayoutBinding{};
-		uboLayoutBinding.binding = 0; // バインディングインデックス？
-		uboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-		uboLayoutBinding.descriptorCount = 1;
-		uboLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-		uboLayoutBinding.pImmutableSamplers = nullptr; // 画像のサンプリングに使用するフィールド
-
-		bindings.push_back(uboLayoutBinding);
-
-		// TextureSampler用のレイアウトを設定
-		if (createInfo.IsUseMainTexture())
-		{
-			VkDescriptorSetLayoutBinding samplerLayoutBinding{};
-			samplerLayoutBinding.binding = 1; //バインディングインデックス. 上のやつが0だから1を設定
-			samplerLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-			samplerLayoutBinding.descriptorCount = 1;
-			samplerLayoutBinding.pImmutableSamplers = nullptr;
-			samplerLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-
-			bindings.push_back(samplerLayoutBinding);
-		}
-
-		// レイアウトの作成に関する設定
-		VkDescriptorSetLayoutCreateInfo layoutInfo{};
-		layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-		layoutInfo.bindingCount = static_cast<uint32_t>(bindings.size());
-		layoutInfo.pBindings = bindings.data();
-
-		VkResult result = vkCreateDescriptorSetLayout(m_pGraphicsAPI->GetLogicalDevice(), &layoutInfo, nullptr, &m_DescriptorSetLayout);
-
-		return (result == VK_SUCCESS);
+		return true;
 	}
 
+	void CVulkanRenderer::UpdateUniformBuffer(uint32_t CurrentImage, float SecondsTime)
+	{
+		VkDeviceSize bufferSize = sizeof(renderer::SUniformBufferObject) + sizeof(float) * 4 * 4;
+		
+		//
+		SUniformBufferObject ubo{};
+		ubo.model = glm::rotate(glm::mat4(1.0f), SecondsTime * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+		ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+		ubo.proj = glm::perspective(
+			glm::radians(45.0f),
+			m_pGraphicsAPI->GetSwapChainExtent().width / (float)m_pGraphicsAPI->GetSwapChainExtent().height, 0.1f, 10.0f
+		);
+		ubo.proj[1][1] *= -1.0f; // Y座標の向きを反転。VulkanとOpenGLは逆なのかな？
+		ubo.mvp = ubo.proj * ubo.view * ubo.model;
+
+		//
+		std::vector<float> testUBO = {
+			0.01f, 0.01f, 1.0f, 1.0f,
+			0.0f, 0.0f, 0.0f, 0.0f, 
+			0.0f, 0.0f, 0.0f, 0.0f, 
+			0.0f, 0.0f, 0.0f, 0.0f
+		};
+
+		//
+		std::vector<float> Data;
+		Data.resize(16 * 4 + testUBO.size());
+		std::memcpy(&Data[0], &ubo, sizeof(renderer::SUniformBufferObject));
+		std::memcpy(&Data[16 * 4], &testUBO[0], sizeof(float) * 4 * 4);
+
+		// 空の値を既にマップしているのでVulkan関数を使わなくても値がコピーできる
+		std::memcpy(m_UniformBuffersMapped[CurrentImage], &Data[0], bufferSize);
+	}
+
+	bool CVulkanRenderer::Draw()
+	{
+		// グラフィックパイプラインをコマンドにバインド
+		vkCmdBindPipeline(m_pGraphicsAPI->GetCommandBuffers()[m_pGraphicsAPI->GetCurrentFrame()], VK_PIPELINE_BIND_POINT_GRAPHICS, m_GraphicsPipeline);
+
+		// 頂点バッファをパイプラインにバインドする
+		VkDeviceSize offsets[] = { 0 };
+		for (int i = 0; i < static_cast<int>(m_VertexBufferList.size()); i++)
+		{
+			vkCmdBindVertexBuffers(m_pGraphicsAPI->GetCommandBuffers()[m_pGraphicsAPI->GetCurrentFrame()], i, 1, &m_VertexBufferList[i], offsets);
+		}
+
+		// インデックスバッファをパイプラインにバインドする
+		vkCmdBindIndexBuffer(m_pGraphicsAPI->GetCommandBuffers()[m_pGraphicsAPI->GetCurrentFrame()], m_IndexBuffer, 0, VK_INDEX_TYPE_UINT16);
+
+		// UBOのセット
+		vkCmdBindDescriptorSets(m_pGraphicsAPI->GetCommandBuffers()[m_pGraphicsAPI->GetCurrentFrame()], VK_PIPELINE_BIND_POINT_GRAPHICS,
+			m_PipelineLayout, 0, 1, &m_DescriptorSets[m_pGraphicsAPI->GetCurrentFrame()], 0, nullptr);
+
+		// 描画コマンドを発行
+		//vkCmdDraw(m_CommandBuffers[m_CurrentFrame], 3, 1, 0, 0); // パラメーター: vertexCount, instanceCount, firstVertex, firstInstance
+		// インデックス付のドローコマンドはこちら
+		vkCmdDrawIndexed(m_pGraphicsAPI->GetCommandBuffers()[m_pGraphicsAPI->GetCurrentFrame()], m_IndicesCount, 1, 0, 0, 0);
+
+		return true;
+	}
+
+	// Vulkanメインロジック /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	bool CVulkanRenderer::CreateTextureImage(const CRendererCreateInfo& createInfo)
 	{
 		if (createInfo.IsUseMainTexture())
@@ -299,9 +327,60 @@ namespace renderer
 
 		return true;
 	}
+
+	bool CVulkanRenderer::CreateDescriptorSetLayout(const CRendererCreateInfo& createInfo)
+	{
+		//
+		std::vector<VkDescriptorSetLayoutBinding> bindings;
+
+		// レイアウトのバインドに関する設定
+		// Model, View Proj等のUBOのレイアウト
+		VkDescriptorSetLayoutBinding uboLayoutBinding{}; // VkDescriptorSetLayoutBindingはおそらくlayout(location = 0), WebGPUでいう @binding(n)のこと. ただしVulkanは @groupは存在しない
+		uboLayoutBinding.binding = 0; // バインディングインデックス？ 
+		uboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER; // バッファタイプ
+		uboLayoutBinding.descriptorCount = 1; // 
+		uboLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT; // アクセス権限。ここでは頂点シェーダーのみ読み取り可
+		uboLayoutBinding.pImmutableSamplers = nullptr; // 画像のサンプリングに使用するフィールド
+
+		bindings.push_back(uboLayoutBinding);
+
+		//
+		VkDescriptorSetLayoutBinding testUBOLayoutBinding{};
+		testUBOLayoutBinding.binding = 1;
+		testUBOLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+		testUBOLayoutBinding.descriptorCount = 1;
+		testUBOLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+		testUBOLayoutBinding.pImmutableSamplers = nullptr;
+
+		bindings.push_back(testUBOLayoutBinding);
+
+		// TextureSampler用のレイアウトを設定
+		if (createInfo.IsUseMainTexture())
+		{
+			VkDescriptorSetLayoutBinding samplerLayoutBinding{};
+			samplerLayoutBinding.binding = 1; //バインディングインデックス. 上のやつが0だから1を設定
+			samplerLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER; // バッファタイプ
+			samplerLayoutBinding.descriptorCount = 1;
+			samplerLayoutBinding.pImmutableSamplers = nullptr;
+			samplerLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+
+			bindings.push_back(samplerLayoutBinding);
+		}
+
+		// レイアウトの作成に関する設定
+		VkDescriptorSetLayoutCreateInfo layoutInfo{}; // : bindingをまとめるためのオブジェクト
+		layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+		layoutInfo.bindingCount = static_cast<uint32_t>(bindings.size());
+		layoutInfo.pBindings = bindings.data();
+
+		VkResult result = vkCreateDescriptorSetLayout(m_pGraphicsAPI->GetLogicalDevice(), &layoutInfo, nullptr, &m_DescriptorSetLayout);
+
+		return (result == VK_SUCCESS);
+	}
+
 	bool CVulkanRenderer::CreateUniformBuffers(const CRendererCreateInfo& createInfo)
 	{
-		VkDeviceSize bufferSize = sizeof(renderer::SUniformBufferObject);
+		VkDeviceSize bufferSize = sizeof(renderer::SUniformBufferObject) + sizeof(float) * 4 * 4;
 
 		m_UniformBuffers.resize(m_pGraphicsAPI->GetMaxFramesInFlight());
 		m_UniformBuffersMemory.resize(m_pGraphicsAPI->GetMaxFramesInFlight());
@@ -377,8 +456,14 @@ namespace renderer
 			// UBO用
 			VkDescriptorBufferInfo bufferInfo{};
 			bufferInfo.buffer = m_UniformBuffers[i]; // UBOの指定
-			bufferInfo.offset = 0;
-			bufferInfo.range = sizeof(renderer::SUniformBufferObject);
+			bufferInfo.offset = 0; // でた、バッファオフセット!!!!!
+			bufferInfo.range = sizeof(renderer::SUniformBufferObject); // サイズかな？
+
+			//
+			VkDescriptorBufferInfo testBufferInfo{};
+			testBufferInfo.buffer = m_UniformBuffers[i];
+			testBufferInfo.offset = sizeof(renderer::SUniformBufferObject);
+			testBufferInfo.range = sizeof(float) * 4 * 4;
 
 			// テクスチャサンプラー用
 			VkDescriptorImageInfo imageInfo{};
@@ -394,12 +479,27 @@ namespace renderer
 				VkWriteDescriptorSet descriptorWrite{};
 
 				descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+				descriptorWrite.dstSet = m_DescriptorSets[i]; // どのDescriptorSets(キューファミリが入ってる？)でCPUからGPUにバッファを渡すコマンドを発行するか
+				descriptorWrite.dstBinding = 0; // layout(location = n)
+				descriptorWrite.dstArrayElement = 0; // ???
+				descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER; // どのタイプのコマンドを発行してもらうのか
+				descriptorWrite.descriptorCount = 1;
+				descriptorWrite.pBufferInfo = &bufferInfo;
+
+				descriptorWrites.push_back(descriptorWrite);
+			}
+
+			// testUBOSet
+			{
+				VkWriteDescriptorSet descriptorWrite{};
+
+				descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 				descriptorWrite.dstSet = m_DescriptorSets[i];
-				descriptorWrite.dstBinding = 0;
+				descriptorWrite.dstBinding = 1;
 				descriptorWrite.dstArrayElement = 0;
 				descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 				descriptorWrite.descriptorCount = 1;
-				descriptorWrite.pBufferInfo = &bufferInfo;
+				descriptorWrite.pBufferInfo = &testBufferInfo;
 
 				descriptorWrites.push_back(descriptorWrite);
 			}
@@ -435,10 +535,12 @@ namespace renderer
 		// ShaderModuleの作成(Shaderをラップ・管理するためのもの)
 		// 使う時にGeometryとかTessellationも追加する
 		VkShaderModule vertShaderModule;
-		const bool UseVertexShader = CreateShaderModule(vertShaderModule, VertexShadeCode);
+		const auto& VertexShaderData = createInfo.GetVertexShaderCode();
+		const bool UseVertexShader = CreateShaderModule(vertShaderModule, std::string(&VertexShaderData[0], &VertexShaderData[0] + VertexShaderData.size()));
 
 		VkShaderModule fragShaderModule;
-		const bool UseFragmentShader = CreateShaderModule(fragShaderModule, FragShadeCode);
+		const auto& FragmentShaderCode = createInfo.GetFragmentShaderCode();
+		const bool UseFragmentShader = CreateShaderModule(fragShaderModule, std::string(&FragmentShaderCode[0], &FragmentShaderCode[0] + FragmentShaderCode.size()));
 
 		// シェーダーステージの作成(VertexShaderとかFragment, Geometryとかそういうステージ)
 		std::vector<VkPipelineShaderStageCreateInfo> shaderStages;
@@ -651,22 +753,6 @@ namespace renderer
 		return true;
 	}
 
-
-	void CVulkanRenderer::UpdateUniformBuffer(uint32_t CurrentImage, float SecondsTime)
-	{
-		SUniformBufferObject ubo{};
-		ubo.model = glm::rotate(glm::mat4(1.0f), SecondsTime * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-		ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-		ubo.proj = glm::perspective(
-			glm::radians(45.0f), 
-			m_pGraphicsAPI->GetSwapChainExtent().width / (float)m_pGraphicsAPI->GetSwapChainExtent().height, 0.1f, 10.0f
-		);
-		ubo.proj[1][1] *= -1.0f; // Y座標の向きを反転。VulkanとOpenGLは逆なのかな？
-
-		// 空の値を既にマップしているのでVulkan関数を使わなくても値がコピーできる
-		std::memcpy(m_UniformBuffersMapped[CurrentImage], &ubo, sizeof(ubo));
-	}
-
 	// ヘルパー関数 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Shader
 	// ShaderModuleの作成(Shaderをラップ・管理するためのもの)
@@ -711,42 +797,6 @@ namespace renderer
 		}
 
 		return format;
-	}
-
-	/// ////////////////////////////////////////////////////////////////////////////////////////////////
-	bool CVulkanRenderer::Update(float SecondsTime)
-	{
-		// ユニフォームデータの更新
-		UpdateUniformBuffer(m_pGraphicsAPI->GetCurrentFrame(), SecondsTime);
-
-		return true;
-	}
-
-	bool CVulkanRenderer::Draw()
-	{
-		// グラフィックパイプラインをコマンドにバインド
-		vkCmdBindPipeline(m_pGraphicsAPI->GetCommandBuffers()[m_pGraphicsAPI->GetCurrentFrame()], VK_PIPELINE_BIND_POINT_GRAPHICS, m_GraphicsPipeline);
-
-		// 頂点バッファをパイプラインにバインドする
-		VkDeviceSize offsets[] = { 0 };
-		for (int i = 0; i < static_cast<int>(m_VertexBufferList.size()); i++)
-		{
-			vkCmdBindVertexBuffers(m_pGraphicsAPI->GetCommandBuffers()[m_pGraphicsAPI->GetCurrentFrame()], i, 1, &m_VertexBufferList[i], offsets);
-		}
-
-		// インデックスバッファをパイプラインにバインドする
-		vkCmdBindIndexBuffer(m_pGraphicsAPI->GetCommandBuffers()[m_pGraphicsAPI->GetCurrentFrame()], m_IndexBuffer, 0, VK_INDEX_TYPE_UINT16);
-
-		// UBOのセット
-		vkCmdBindDescriptorSets(m_pGraphicsAPI->GetCommandBuffers()[m_pGraphicsAPI->GetCurrentFrame()], VK_PIPELINE_BIND_POINT_GRAPHICS, 
-			m_PipelineLayout, 0, 1, &m_DescriptorSets[m_pGraphicsAPI->GetCurrentFrame()], 0, nullptr);
-
-		// 描画コマンドを発行
-		//vkCmdDraw(m_CommandBuffers[m_CurrentFrame], 3, 1, 0, 0); // パラメーター: vertexCount, instanceCount, firstVertex, firstInstance
-		// インデックス付のドローコマンドはこちら
-		vkCmdDrawIndexed(m_pGraphicsAPI->GetCommandBuffers()[m_pGraphicsAPI->GetCurrentFrame()], m_IndicesCount, 1, 0, 0, 0);
-
-		return true;
 	}
 }
 

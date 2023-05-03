@@ -3,6 +3,11 @@
 namespace renderer
 {
 	CRendererCreateInfo::CRendererCreateInfo():
+#ifdef __DAWN__
+		m_ShaderType(EShaderType::WGSL),
+#else
+		m_ShaderType(EShaderType::SPIRV),
+#endif
 		m_UseMainTexture(false)
 	{
 	}
@@ -38,52 +43,57 @@ namespace renderer
 	}
 
 	// Shader
-	void CRendererCreateInfo::SetVertexShaderCode(const std::string& VertexShaderCode)
+	EShaderType CRendererCreateInfo::GetShaderType() const
+	{
+		return m_ShaderType;
+	}
+
+	void CRendererCreateInfo::SetVertexShaderCode(const std::vector<char>& VertexShaderCode)
 	{
 		m_VertexShaderCode = VertexShaderCode;
 	}
 
-	const std::string& CRendererCreateInfo::GetVertexShaderCode() const
+	const std::vector<char>& CRendererCreateInfo::GetVertexShaderCode() const
 	{
 		return m_VertexShaderCode;
 	}
 
-	void CRendererCreateInfo::SetFragmentShaderCode(const std::string& FragmentShaderCode)
+	void CRendererCreateInfo::SetFragmentShaderCode(const std::vector<char>& FragmentShaderCode)
 	{
 		m_FragmentShaderCode = FragmentShaderCode;
 	}
 
-	const std::string& CRendererCreateInfo::GetFragmentShaderCode() const
+	const std::vector<char>& CRendererCreateInfo::GetFragmentShaderCode() const
 	{
 		return m_FragmentShaderCode;
 	}
 
-	void CRendererCreateInfo::SetGeometryShaderCode(const std::string& GeometryShaderCode)
+	void CRendererCreateInfo::SetGeometryShaderCode(const std::vector<char>& GeometryShaderCode)
 	{
 		m_GeometryShaderCode = GeometryShaderCode;
 	}
 
-	const std::string& CRendererCreateInfo::GetGeometryShaderCode() const
+	const std::vector<char>& CRendererCreateInfo::GetGeometryShaderCode() const
 	{
 		return m_GeometryShaderCode;
 	}
 
-	void CRendererCreateInfo::HullShaderCode(const std::string& HullShaderCode)
+	void CRendererCreateInfo::HullShaderCode(const std::vector<char>& HullShaderCode)
 	{
 		m_HullShaderCode = HullShaderCode;
 	}
 
-	const std::string& CRendererCreateInfo::GetHullShaderCode() const
+	const std::vector<char>& CRendererCreateInfo::GetHullShaderCode() const
 	{
 		return m_HullShaderCode;
 	}
 
-	void CRendererCreateInfo::SetDomainShaderCode(const std::string& DomainShaderCode)
+	void CRendererCreateInfo::SetDomainShaderCode(const std::vector<char>& DomainShaderCode)
 	{
 		m_DomainShaderCode = DomainShaderCode;
 	}
 
-	const std::string& CRendererCreateInfo::GetDomainShaderCode() const
+	const std::vector<char>& CRendererCreateInfo::GetDomainShaderCode() const
 	{
 		return m_DomainShaderCode;
 	}

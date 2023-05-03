@@ -9,6 +9,9 @@ namespace api
 {
 	class CWebGPUAPI : public IGraphicsAPI
 	{
+		//
+		const std::string m_ShaderExtension;
+
 		// Instance
 #ifndef __EMSCRIPTEN__
 		WGPUInstance m_Instance;
@@ -64,6 +67,8 @@ namespace api
 		bool BeginRender(ERenderPassType RenderPassType) override;
 		bool EndRender() override;
 		bool IsWaitting() override;
+
+		const std::string& GetShaderExtension() const override;
 
 		//
 		WGPUDevice GetLogicalDevice() const;

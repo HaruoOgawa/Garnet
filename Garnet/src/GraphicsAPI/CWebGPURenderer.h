@@ -48,7 +48,8 @@ namespace renderer
 		bool CreateGraphicsPipeline(const CRendererCreateInfo& createInfo);
 		
 		// Helper Function ///////////////////////////////////////////////////////////////////////
-		WGPUShaderModule CreateShaderModule(const std::string& shaderCode);
+		WGPUShaderModule CreateShaderModuleFromWGSL(const std::string& shaderCode);
+		WGPUShaderModule CreateShaderModuleFromSPIRV(const std::vector<char>& shaderCode);
 		WGPUVertexFormat GetVertexFormat(int Dimension);
 		bool             CreateBuffer(WGPUBuffer& Buffer, WGPUBufferUsageFlags Usage, void const* Data, uint64_t ByteSize);
 		void			 InitDefalutBindGroupLayoutEntry(WGPUBindGroupLayoutEntry& bindingLayout);

@@ -37,8 +37,6 @@ namespace file
 #ifdef __EMSCRIPTEN__
 	void downloadSucceded(emscripten_fetch_t* fetch)
 	{
-		//Console::Log("[downloadSucceded] fetch->numBytes: %d, fetch->url: %s\n", static_cast<int>(fetch->numBytes), fetch->url);
-
 		std::vector<char> Data;
 		Data.resize(fetch->numBytes);
 

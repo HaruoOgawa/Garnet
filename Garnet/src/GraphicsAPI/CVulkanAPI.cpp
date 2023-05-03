@@ -9,7 +9,8 @@ namespace api
 		m_pWindow(nullptr),
 		m_CurrentImageIndex(0),
 		m_IsReCreateSwapChain(false),
-		m_WaitRendering(true)
+		m_WaitRendering(true),
+		m_ShaderExtension(".spv")
 	{
 	}
 
@@ -1339,6 +1340,11 @@ namespace api
 	bool CVulkanAPI::IsWaitting()
 	{
 		return m_IsReCreateSwapChain || m_WaitRendering;
+	}
+
+	const std::string& CVulkanAPI::GetShaderExtension() const
+	{
+		return m_ShaderExtension;
 	}
 
 	// Device

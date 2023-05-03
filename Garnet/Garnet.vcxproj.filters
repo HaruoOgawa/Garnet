@@ -1488,16 +1488,24 @@
       <Filter>ヘッダー ファイル</Filter>
     </None>
     <None Include="Commands\UTF8Encorder.py" />
-    <None Include="Resources\Shaders\wgtest.vert" />
-    <None Include="Resources\Shaders\wgtest.frag" />
+    <None Include="Resources\Shaders\vert.wgsl" />
+    <None Include="Resources\Shaders\frag.wgsl" />
     <None Include="WebRelease\Resources\Shaders\frag.spv" />
     <None Include="WebRelease\Resources\Shaders\shader.frag" />
     <None Include="WebRelease\Resources\Shaders\shader.vert" />
     <None Include="WebRelease\Resources\Shaders\vert.spv" />
-    <None Include="Resources\Shaders\frag.spv" />
     <None Include="Resources\Shaders\shader.frag" />
     <None Include="Resources\Shaders\shader.vert" />
-    <None Include="Resources\Shaders\vert.spv" />
+    <None Include="Resources\Shaders\shader_frag.spv" />
+    <None Include="Resources\Shaders\shader_vert.spv" />
+    <None Include="Commands\glslc_ALL.bat">
+      <Filter>ソース ファイル</Filter>
+    </None>
+    <None Include="Commands\wgslc_ALL.bat">
+      <Filter>ソース ファイル</Filter>
+    </None>
+    <None Include="Resources\Shaders\shader_frag.wgsl" />
+    <None Include="Resources\Shaders\shader_vert.wgsl" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="EmscriptenBuild\CMakeLists.txt" />
