@@ -33,8 +33,8 @@ namespace scene
 	{
 		std::string ShaderPath = "Resources\\Shaders\\";
 
-		m_VertexShader->ReadFile(ShaderPath + "shader_vert" + pGraphicsAPI->GetShaderExtension());
-		m_FragmentShader->ReadFile(ShaderPath + "shader_frag" + pGraphicsAPI->GetShaderExtension());
+		m_VertexShader->ReadFile(ShaderPath + "sample_vert" + pGraphicsAPI->GetShaderExtension());
+		m_FragmentShader->ReadFile(ShaderPath + "sample_frag" + pGraphicsAPI->GetShaderExtension());
 		
 		return true;
 	}
