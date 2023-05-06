@@ -1,3 +1,4 @@
+#ifndef __DAWN__
 #include "CVulkanMaterial.h"
 #include "CVulkanAPI.h"
 #include "../CMaterialCreateInfo.h"
@@ -477,3 +478,4 @@ namespace api
 		return true;
 	}
 }
+#endif

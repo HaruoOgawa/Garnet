@@ -1,5 +1,5 @@
 #pragma once
-
+#ifndef __DAWN__
 #define NOMINMAX
 #define VK_USE_PLATFORM_WIN32_KHR
 #define GLFW_INCLUDE_VULKAN
@@ -69,7 +69,8 @@ namespace api
 		bool Update(float SecondsTime) override;
 
 		const std::vector<VkPipelineShaderStageCreateInfo>& GetShaderStages()const { return m_ShaderStages; }
-		const VkDescriptorSetLayout* GetDescriptorSetLayout() const { return &m_DescriptorSetLayout; }
+		const VkDescriptorSetLayout& GetDescriptorSetLayout() const { return m_DescriptorSetLayout; }
 		const std::vector<VkDescriptorSet>& GetDescriptorSets() const { return m_DescriptorSets; }
 	};
 }
+#endif
