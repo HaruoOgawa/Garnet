@@ -36,20 +36,25 @@ namespace scene
 		m_TestObject = std::make_shared<object::C3DObject>();
 
 		// MATERIAL
-		graphics::CMaterialCreateInfo createInfo;
-		createInfo.SetVertexShaderCode(m_VertexShader->GetData());
-		createInfo.SetFragmentShaderCode(m_FragmentShader->GetData());
-		auto Material = pGraphicsAPI->CreateMaterial();
-		if (!Material->Create(pGraphicsAPI, createInfo)) return false;
-		m_TestObject->AddMaterial(Material);
+		{
+			graphics::CMaterialCreateInfo createInfo;
+			createInfo.SetVertexShaderCode(m_VertexShader->GetData());
+			createInfo.SetFragmentShaderCode(m_FragmentShader->GetData());
+			auto Material = pGraphicsAPI->CreateMaterial();
+			if (!Material->Create(pGraphicsAPI, createInfo)) return false;
+			m_TestObject->AddMaterial(Material);
+		}
 
-		// RENDERER
-		std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(pGraphicsAPI, graphics::EPresetPrimitiveType::BOARD, 0, m_TestObject->GetMaterialList());
-		std::shared_ptr<graphics::CMesh> Mesh = std::make_shared<graphics::CMesh>();
-		Mesh->AddPrimitive(Primitive);
+		// MESH
+		{
+			std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(pGraphicsAPI, graphics::EPresetPrimitiveType::BOARD, 0, m_TestObject->GetMaterialList());
+			std::shared_ptr<graphics::CMesh> Mesh = std::make_shared<graphics::CMesh>();
+			Mesh->AddPrimitive(Primitive);
 
-		std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(Mesh);
-		m_TestObject->AddNode(Node);
+			// NODE
+			std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(Mesh);
+			m_TestObject->AddNode(Node);
+		}
 		
 		Console::Log("Render is loaded\n");
 
