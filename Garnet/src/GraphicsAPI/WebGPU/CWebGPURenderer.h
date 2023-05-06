@@ -1,6 +1,6 @@
 #pragma once
 #ifdef __DAWN__
-#include "../Interface/IRenderer.h"
+#include "../../Interface/IRenderer.h"
 #include <webgpu.h>
 #include <wgpu.h>
 #include <vector>

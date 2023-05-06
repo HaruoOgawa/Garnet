@@ -1,7 +1,7 @@
 #pragma once
 
-namespace renderer {
-	class CRendererCreateInfo;
+namespace vertex {
+	class CVertexCreateInfo;
 }
 
 namespace graphics
@@ -17,6 +17,6 @@ namespace graphics
 	class CPresetPrimitive
 	{
 	public:
-		static bool CreateBoard(renderer::CRendererCreateInfo& createInfo);
+		static bool CreateBoard(vertex::CVertexCreateInfo& createInfo);
 	};
 }

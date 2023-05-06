@@ -32,21 +32,23 @@ namespace scene
 
 	bool CScriptScene::Load(api::IGraphicsAPI* pGraphicsAPI)
 	{
-		//
-		std::string ShaderPath = "Resources\\Shaders\\";
-		/*renderer::CRendererCreateInfo createInfo;
-		createInfo.SetVertexShaderCode(m_VertexShader->GetData());
-		createInfo.SetFragmentShaderCode(m_FragmentShader->GetData());*/
-
-		//
+		// VERTEX
 		std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(pGraphicsAPI, graphics::EPresetPrimitiveType::BOARD, 0);
 		std::shared_ptr<graphics::CMesh> Mesh = std::make_shared<graphics::CMesh>();
 		Mesh->AddPrimitive(Primitive);
 		std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(Mesh);
 
-		//
+		// RENDERER
+		renderer::CRendererCreateInfo createInfo;
+		createInfo.SetVertexShaderCode(m_VertexShader->GetData());
+		createInfo.SetFragmentShaderCode(m_FragmentShader->GetData());
+		std::shared_ptr<graphics::CMaterial> Material = std::make_shared <graphics::CMaterial>();
+		if (!Material->Create(pGraphicsAPI, createInfo)) return false;
+
+		// OBJECT
 		m_TestObject = std::make_shared<object::C3DObject>();
 		m_TestObject->AddNode(Node);
+		m_TestObject->AddMaterial(Material);
 
 		Console::Log("Render is loaded\n");
 

@@ -1,14 +1,13 @@
 #ifndef __DAWN__
 #include "CVulkanRenderer.h"
-#include "../GraphicsAPI/CVulkanAPI.h"
-#include "CRendererCreateInfo.h"
+#include "CVulkanAPI.h"
+#include "../CRendererCreateInfo.h"
 
 namespace renderer
 {
 	CVulkanRenderer::CVulkanRenderer():
 		m_pGraphicsAPI(nullptr),
-		m_UseMainTexture(false),
-		m_IndicesCount(0)
+		m_UseMainTexture(false)
 	{
 	}
 
@@ -45,24 +44,6 @@ namespace renderer
 		// ユニフォームレイアウトセットを破棄
 		vkDestroyDescriptorSetLayout(m_pGraphicsAPI->GetLogicalDevice(), m_DescriptorSetLayout, nullptr);
 
-		// インデックスバッファの破棄
-		vkDestroyBuffer(m_pGraphicsAPI->GetLogicalDevice(), m_IndexBuffer, nullptr);
-
-		// インデックスバッファ用に確保したメモリ領域を破棄
-		vkFreeMemory(m_pGraphicsAPI->GetLogicalDevice(), m_IndexBufferMemory, nullptr);
-
-		// 頂点バッファの破棄
-		for (auto& Buffer : m_VertexBufferList)
-		{
-			vkDestroyBuffer(m_pGraphicsAPI->GetLogicalDevice(), Buffer, nullptr);
-		}
-		
-		// 頂点バッファ用に確保したメモリ領域を破棄
-		for (auto& Memory : m_VertexBufferMemoryList)
-		{
-			vkFreeMemory(m_pGraphicsAPI->GetLogicalDevice(), Memory, nullptr);
-		}
-
 		// グラフィックパイプラインの破棄
 		vkDestroyPipeline(m_pGraphicsAPI->GetLogicalDevice(), m_GraphicsPipeline, nullptr);
 
@@ -74,9 +55,6 @@ namespace renderer
 	{
 		m_pGraphicsAPI = static_cast<api::CVulkanAPI*>(pGraphicsAPI);
 		m_UseMainTexture = createInfo.IsUseMainTexture();
-
-		if (!CreateVertexBuffer(createInfo)) return false; // 頂点バッファを作成
-		if (!CreateIndexBuffer(createInfo)) return false; // インデックスバッファを作成
 
 		/*if (!CreateTextureImage(createInfo)) return false; // テクスチャイメージの生成
 		if (!CreateTextureImageView(createInfo)) return false;// シェーダーで取り扱う用のImageViewを作成
@@ -254,79 +232,6 @@ namespace renderer
 				return false;
 			}
 		}
-
-		return true;
-	}
-
-	bool CVulkanRenderer::CreateVertexBuffer(const CRendererCreateInfo& createInfo)
-	{
-		// 頂点バッファオブジェクトの生成
-		for (const auto& VertexData : createInfo.GetVertices())
-		{
-			//
-			VkDeviceSize bufferSize = sizeof(VertexData[0]) * VertexData.size();
-
-			// ステージングバッファの作成
-			// ステージングバッファは頂点データ配列からデータをアップロードするのに使用するCPUアクセス可なバッファ
-			VkBuffer stagingBuffer;
-			VkDeviceMemory stagingBufferMemory;
-			m_pGraphicsAPI->CreateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-				stagingBuffer, stagingBufferMemory);
-
-			// 頂点データを渡すためのメモリのポインターを取得
-			void* data;
-			vkMapMemory(m_pGraphicsAPI->GetLogicalDevice(), stagingBufferMemory, 0, bufferSize, 0, &data);
-
-			// 取得したポインタにデータをコピーする
-			std::memcpy(data, VertexData.data(), (size_t)bufferSize);
-
-			// マップを解除する。たぶんマップというのはCPUからGPUへデータを渡すために一時的に確保される入口みたいなものかな？
-			// 渡し終わったのでポインタという名の通路・入口を破棄したみたいな
-			vkUnmapMemory(m_pGraphicsAPI->GetLogicalDevice(), stagingBufferMemory);
-
-			// 最終的に頂点バッファを保持するのに使用するバッファを作成
-			VkBuffer Buffer;
-			VkDeviceMemory BufferMemory;
-
-			m_pGraphicsAPI->CreateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-				Buffer, BufferMemory);
-
-			// バッファをコピー
-			m_pGraphicsAPI->CopyBuffer(stagingBuffer, Buffer, bufferSize);
-
-			// 不要なリソースを破棄
-			vkDestroyBuffer(m_pGraphicsAPI->GetLogicalDevice(), stagingBuffer, nullptr);
-			vkFreeMemory(m_pGraphicsAPI->GetLogicalDevice(), stagingBufferMemory, nullptr);
-
-			// バッファを保存
-			m_VertexBufferList.push_back(Buffer);
-			m_VertexBufferMemoryList.push_back(BufferMemory);
-		}
-
-		return true;
-	}
-	bool CVulkanRenderer::CreateIndexBuffer(const CRendererCreateInfo& createInfo)
-	{
-		VkDeviceSize bufferSize = sizeof(createInfo.GetIndices()[0]) * createInfo.GetIndices().size();
-
-		VkBuffer stagingBuffer;
-		VkDeviceMemory stagingBufferMemory;
-		m_pGraphicsAPI->CreateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
-
-		void* data;
-		vkMapMemory(m_pGraphicsAPI->GetLogicalDevice(), stagingBufferMemory, 0, bufferSize, 0, &data);
-		memcpy(data, createInfo.GetIndices().data(), (size_t)bufferSize);
-		vkUnmapMemory(m_pGraphicsAPI->GetLogicalDevice(), stagingBufferMemory);
-
-		m_pGraphicsAPI->CreateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-			m_IndexBuffer, m_IndexBufferMemory);
-
-		m_pGraphicsAPI->CopyBuffer(stagingBuffer, m_IndexBuffer, bufferSize);
-
-		vkDestroyBuffer(m_pGraphicsAPI->GetLogicalDevice(), stagingBuffer, nullptr);
-		vkFreeMemory(m_pGraphicsAPI->GetLogicalDevice(), stagingBufferMemory, nullptr);
-
-		m_IndicesCount = static_cast<uint32_t>(createInfo.GetIndices().size());
 
 		return true;
 	}

@@ -1,7 +1,8 @@
 #ifdef __DAWN__
 #include "CWebGPUAPI.h"
 #include "CWebGPURenderer.h"
-#include "../Debug/Message/Console.h"
+#include "CWebGPUVertex.h"
+#include "../../Debug/Message/Console.h"
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten/emscripten.h>
@@ -48,6 +49,13 @@ namespace api
 
 	void CWebGPUAPI::Release()
 	{
+	}
+
+	std::shared_ptr<vertex::IVertex> CWebGPUAPI::CreateVertex()
+	{
+		const auto Vertex = std::make_shared<vertex::CWebGPUVertex>();
+
+		return Vertex;
 	}
 
 	std::shared_ptr<renderer::IRenderer> CWebGPUAPI::CreateRenderer()

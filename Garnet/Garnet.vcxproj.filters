@@ -39,10 +39,10 @@
     <ClInclude Include="src\Interface\IGraphicsAPI.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\GraphicsAPI\CVulkanAPI.h">
+    <ClInclude Include="src\GraphicsAPI\Vulkan\CVulkanAPI.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\GraphicsAPI\CWebGPUAPI.h">
+    <ClInclude Include="src\GraphicsAPI\WebGPU\CWebGPUAPI.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\App\EAppType.h">
@@ -51,10 +51,10 @@
     <ClInclude Include="src\Interface\IRenderer.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\GraphicsAPI\CVulkanRenderer.h">
+    <ClInclude Include="src\GraphicsAPI\Vulkan\CVulkanRenderer.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\GraphicsAPI\CWebGPURenderer.h">
+    <ClInclude Include="src\GraphicsAPI\WebGPU\CWebGPURenderer.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\GraphicsAPI\CRendererCreateInfo.h">
@@ -67,9 +67,6 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\Graphics\CPrimitive.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Graphics\CVertexBuffer.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\Graphics\CMaterial.h">
@@ -105,7 +102,7 @@
     <ClInclude Include="src\Library\glfw3webgpu\glfw3webgpu.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\GraphicsAPI\ERenderPassType.h">
+    <ClInclude Include="src\Graphics\ERenderPassType.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\Library\glm\glm\detail\_features.hpp">
@@ -972,12 +969,6 @@
     <ClInclude Include="src\Graphics\CUniformBufferDescriptor.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\Graphics\SPrimitiveCreateInfo.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Graphics\SRendererCreateInfo.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="src\Interface\IBindingBuffer.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
@@ -997,6 +988,21 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\Graphics\CPresetPrimitive.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="src\App\CDemoAppManager.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GraphicsAPI\Vulkan\CVulkanVertex.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GraphicsAPI\WebGPU\CWebGPUVertex.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Interface\IVertex.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GraphicsAPI\CVertexCreateInfo.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
@@ -1022,16 +1028,16 @@
     <ClCompile Include="src\App\CWebAppManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\GraphicsAPI\CVulkanAPI.cpp">
+    <ClCompile Include="src\GraphicsAPI\Vulkan\CVulkanAPI.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\GraphicsAPI\CWebGPUAPI.cpp">
+    <ClCompile Include="src\GraphicsAPI\WebGPU\CWebGPUAPI.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\GraphicsAPI\CVulkanRenderer.cpp">
+    <ClCompile Include="src\GraphicsAPI\Vulkan\CVulkanRenderer.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\GraphicsAPI\CWebGPURenderer.cpp">
+    <ClCompile Include="src\GraphicsAPI\WebGPU\CWebGPURenderer.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="src\GraphicsAPI\CRendererCreateInfo.cpp">
@@ -1044,9 +1050,6 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="src\Graphics\CPrimitive.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Graphics\CVertexBuffer.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="src\Graphics\CMaterial.cpp">
@@ -1080,6 +1083,21 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="src\Graphics\CPresetPrimitive.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Main\DemoMain\DemoMain.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="src\App\CDemoAppManager.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GraphicsAPI\Vulkan\CVulkanVertex.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GraphicsAPI\WebGPU\CWebGPUVertex.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GraphicsAPI\CVertexCreateInfo.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>

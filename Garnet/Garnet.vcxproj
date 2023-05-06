@@ -330,15 +330,18 @@ del $(OutDir)Garnet.pdb</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="src\GraphicsAPI\CVertexCreateInfo.h" />
+    <ClInclude Include="src\GraphicsAPI\WebGPU\CWebGPUVertex.h" />
+    <ClInclude Include="src\GraphicsAPI\Vulkan\CVulkanVertex.h" />
+    <ClInclude Include="src\App\CDemoAppManager.h" />
     <ClInclude Include="src\Graphics\CPresetPrimitive.h" />
+    <ClInclude Include="src\Interface\IVertex.h" />
     <ClInclude Include="src\Math\CTransform.h" />
     <ClInclude Include="src\Object\C3DObject.h" />
     <ClInclude Include="src\Object\CObject.h" />
     <ClInclude Include="src\Graphics\CUniformBuffer.h" />
     <ClInclude Include="src\Graphics\CUniformBufferDescriptor.h" />
-    <ClInclude Include="src\GraphicsAPI\ERenderPassType.h" />
-    <ClInclude Include="src\Graphics\SPrimitiveCreateInfo.h" />
-    <ClInclude Include="src\Graphics\SRendererCreateInfo.h" />
+    <ClInclude Include="src\Graphics\ERenderPassType.h" />
     <ClInclude Include="src\Interface\IBindingBuffer.h" />
     <ClInclude Include="src\Interface\IBindingDescriptor.h" />
     <ClInclude Include="src\Library\glfw3webgpu\glfw3webgpu.h" />
@@ -639,16 +642,15 @@ del $(OutDir)Garnet.pdb</Command>
     <ClInclude Include="src\Scene\CScriptScene.h" />
     <ClInclude Include="src\File\CFileReader.h" />
     <ClInclude Include="src\Graphics\CMaterial.h" />
-    <ClInclude Include="src\Graphics\CVertexBuffer.h" />
     <ClInclude Include="src\Graphics\CPrimitive.h" />
     <ClInclude Include="src\Graphics\CMesh.h" />
     <ClInclude Include="src\Object\CNode.h" />
     <ClInclude Include="src\GraphicsAPI\CRendererCreateInfo.h" />
-    <ClInclude Include="src\GraphicsAPI\CWebGPURenderer.h" />
-    <ClInclude Include="src\GraphicsAPI\CVulkanRenderer.h" />
+    <ClInclude Include="src\GraphicsAPI\WebGPU\CWebGPURenderer.h" />
+    <ClInclude Include="src\GraphicsAPI\Vulkan\CVulkanRenderer.h" />
     <ClInclude Include="src\App\EAppType.h" />
-    <ClInclude Include="src\GraphicsAPI\CWebGPUAPI.h" />
-    <ClInclude Include="src\GraphicsAPI\CVulkanAPI.h" />
+    <ClInclude Include="src\GraphicsAPI\WebGPU\CWebGPUAPI.h" />
+    <ClInclude Include="src\GraphicsAPI\Vulkan\CVulkanAPI.h" />
     <ClInclude Include="src\App\CDescAppManager.h" />
     <ClInclude Include="src\App\MainApp\CMainApp.h" />
     <ClInclude Include="src\App\ScriptApp\CScriptApp.h" />
@@ -660,7 +662,12 @@ del $(OutDir)Garnet.pdb</Command>
     <ClInclude Include="src\Interface\IRenderer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\GraphicsAPI\CVertexCreateInfo.cpp" />
+    <ClCompile Include="src\GraphicsAPI\WebGPU\CWebGPUVertex.cpp" />
+    <ClCompile Include="src\GraphicsAPI\Vulkan\CVulkanVertex.cpp" />
+    <ClCompile Include="src\App\CDemoAppManager.cpp" />
     <ClCompile Include="src\Graphics\CPresetPrimitive.cpp" />
+    <ClCompile Include="src\Main\DemoMain\DemoMain.cpp" />
     <ClCompile Include="src\Math\CTransform.cpp" />
     <ClCompile Include="src\Object\C3DObject.cpp" />
     <ClCompile Include="src\Object\CObject.cpp" />
@@ -671,15 +678,14 @@ del $(OutDir)Garnet.pdb</Command>
     <ClCompile Include="src\Scene\CScriptScene.cpp" />
     <ClCompile Include="src\File\CFileReader.cpp" />
     <ClCompile Include="src\Graphics\CMaterial.cpp" />
-    <ClCompile Include="src\Graphics\CVertexBuffer.cpp" />
     <ClCompile Include="src\Graphics\CPrimitive.cpp" />
     <ClCompile Include="src\Graphics\CMesh.cpp" />
     <ClCompile Include="src\Object\CNode.cpp" />
     <ClCompile Include="src\GraphicsAPI\CRendererCreateInfo.cpp" />
-    <ClCompile Include="src\GraphicsAPI\CWebGPURenderer.cpp" />
-    <ClCompile Include="src\GraphicsAPI\CVulkanRenderer.cpp" />
-    <ClCompile Include="src\GraphicsAPI\CWebGPUAPI.cpp" />
-    <ClCompile Include="src\GraphicsAPI\CVulkanAPI.cpp" />
+    <ClCompile Include="src\GraphicsAPI\WebGPU\CWebGPURenderer.cpp" />
+    <ClCompile Include="src\GraphicsAPI\Vulkan\CVulkanRenderer.cpp" />
+    <ClCompile Include="src\GraphicsAPI\WebGPU\CWebGPUAPI.cpp" />
+    <ClCompile Include="src\GraphicsAPI\Vulkan\CVulkanAPI.cpp" />
     <ClCompile Include="src\App\CDescAppManager.cpp" />
     <ClCompile Include="src\App\MainApp\CMainApp.cpp" />
     <ClCompile Include="src\App\ScriptApp\CScriptApp.cpp" />

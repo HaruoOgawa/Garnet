@@ -1,6 +1,6 @@
 #pragma once
 #ifdef __DAWN__
-#include "../Interface/IGraphicsAPI.h"
+#include "../../Interface/IGraphicsAPI.h"
 #include <webgpu.h>
 #include <wgpu.h>
 #include <vector>
@@ -62,6 +62,7 @@ namespace api
 
 		void Release();
 
+		std::shared_ptr<vertex::IVertex> CreateVertex() override;
 		std::shared_ptr<renderer::IRenderer> CreateRenderer() override;
 
 		bool BeginRender(ERenderPassType RenderPassType) override;

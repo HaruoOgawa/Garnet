@@ -2,7 +2,7 @@
 #include "CWebAppManager.h"
 #include "../Debug/Message/Console.h"
 
-#include "../GraphicsAPI/CWebGPUAPI.h"
+#include "../GraphicsAPI/WebGPU/CWebGPUAPI.h"
 #include "./ScriptApp/CScriptApp.h"
 #include "./EditorApp/CEditorApp.h"
 #include "./MainApp/CMainApp.h"

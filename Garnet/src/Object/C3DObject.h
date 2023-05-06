@@ -2,6 +2,7 @@
 
 #include "CObject.h"
 #include "CNode.h"
+#include "../Graphics/CMaterial.h"
 #include <vector>
 #include <memory>
 

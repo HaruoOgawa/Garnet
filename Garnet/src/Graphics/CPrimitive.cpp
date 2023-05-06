@@ -1,20 +1,19 @@
 #include "CPrimitive.h"
-#include "CMaterial.h"
 #include "../Interface/IGraphicsAPI.h"
-#include "../Interface/IRenderer.h"
-#include "../GraphicsAPI/CRendererCreateInfo.h"
+#include "../Interface/IVertex.h"
+#include "../GraphicsAPI/CVertexCreateInfo.h"
 
 namespace graphics
 {
-	CPrimitive::CPrimitive(api::IGraphicsAPI* pGraphicsAPI, const renderer::CRendererCreateInfo& createInfo, int MaterialIndex):
-		m_Renderer(nullptr),
+	CPrimitive::CPrimitive(api::IGraphicsAPI* pGraphicsAPI, const vertex::CVertexCreateInfo& createInfo, int MaterialIndex):
+		m_Vertex(nullptr),
 		m_MaterialIndex(MaterialIndex)
 	{
 		Create(pGraphicsAPI, createInfo);
 	}
 	
 	CPrimitive::CPrimitive(api::IGraphicsAPI* pGraphicsAPI, EPresetPrimitiveType Type, int MaterialIndex):
-		m_Renderer(nullptr),
+		m_Vertex(nullptr),
 		m_MaterialIndex(MaterialIndex)
 	{
 		Create(pGraphicsAPI, Type);
@@ -22,25 +21,19 @@ namespace graphics
 
 	CPrimitive::~CPrimitive()
 	{
-		Release();
 	}
 
-	bool CPrimitive::Release()
+	bool CPrimitive::Create(api::IGraphicsAPI* pGraphicsAPI, const vertex::CVertexCreateInfo& createInfo)
 	{
-		return true;
-	}
-
-	bool CPrimitive::Create(api::IGraphicsAPI* pGraphicsAPI, const renderer::CRendererCreateInfo& createInfo)
-	{
-		m_Renderer = pGraphicsAPI->CreateRenderer();
-		if (!m_Renderer->Create(pGraphicsAPI, createInfo)) return false;
+		m_Vertex = pGraphicsAPI->CreateVertex();
+		if (!m_Vertex->Create(pGraphicsAPI, createInfo)) return false;
 
 		return true;
 	}
 
 	bool CPrimitive::Create(api::IGraphicsAPI* pGraphicsAPI, EPresetPrimitiveType Type)
 	{
-		renderer::CRendererCreateInfo createInfo;
+		vertex::CVertexCreateInfo createInfo;
 
 		switch (Type)
 		{
@@ -57,22 +50,8 @@ namespace graphics
 			break;
 		}
 
-		m_Renderer = pGraphicsAPI->CreateRenderer();
-		if (!m_Renderer->Create(pGraphicsAPI, createInfo)) return false;
-
-		return true;
-	}
-
-	bool CPrimitive::Update(float SecondsTime)
-	{
-		if (!m_Renderer->Update(SecondsTime)) return false;
-
-		return true;
-	}
-
-	bool CPrimitive::Draw()
-	{
-		if (!m_Renderer->Draw()) return false;
+		m_Vertex = pGraphicsAPI->CreateVertex();
+		if (!m_Vertex->Create(pGraphicsAPI, createInfo)) return false;
 
 		return true;
 	}

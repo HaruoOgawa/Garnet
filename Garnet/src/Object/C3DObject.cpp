@@ -1,5 +1,4 @@
 #include "C3DObject.h"
-#include "../Graphics/CMaterial.h"
 
 namespace object
 {

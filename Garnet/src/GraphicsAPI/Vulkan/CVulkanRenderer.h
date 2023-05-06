@@ -15,7 +15,7 @@
 #include <array>
 #include <string>
 
-#include "../Interface/IRenderer.h"
+#include "../../Interface/IRenderer.h"
 
 // はぇー時間を管理するstd標準ライブラリ
 #include <chrono>
@@ -43,13 +43,6 @@ namespace renderer
 		VkPipelineLayout m_PipelineLayout;
 		VkPipeline m_GraphicsPipeline;
 
-		// Vertices/Indices
-		std::vector<VkBuffer> m_VertexBufferList;
-		std::vector<VkDeviceMemory> m_VertexBufferMemoryList;
-		VkBuffer m_IndexBuffer;
-		VkDeviceMemory m_IndexBufferMemory;
-		uint32_t m_IndicesCount;
-
 		// Texture Image
 		bool m_UseMainTexture;
 		VkImage m_TextureImage;
@@ -63,8 +56,7 @@ namespace renderer
 		bool CreateTextureImage(const CRendererCreateInfo& createInfo);
 		bool CreateTextureImageView(const CRendererCreateInfo& createInfo);
 		bool CreateTextureSampler(const CRendererCreateInfo& createInfo);
-		bool CreateVertexBuffer(const CRendererCreateInfo& createInfo);
-		bool CreateIndexBuffer(const CRendererCreateInfo& createInfo);
+		
 		bool CreateUniformBuffers(const CRendererCreateInfo& createInfo);
 		bool CreateDescriptorPool(const CRendererCreateInfo& createInfo);
 		bool CreateDescriptorSets(const CRendererCreateInfo& createInfo);

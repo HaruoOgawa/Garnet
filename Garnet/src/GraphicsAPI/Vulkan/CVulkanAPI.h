@@ -7,7 +7,7 @@
 #include <algorithm>
 #include <array>
 
-#include "../Interface/IGraphicsAPI.h"
+#include "../../Interface/IGraphicsAPI.h"
 
 namespace api
 {
@@ -166,6 +166,7 @@ namespace api
 		bool InitializeWithGLFW(GLFWwindow* pWindow) override;
 		void Release();
 
+		std::shared_ptr<vertex::IVertex> CreateVertex() override;
 		std::shared_ptr<renderer::IRenderer> CreateRenderer() override;
 
 		bool BeginRender(ERenderPassType RenderPassType) override;

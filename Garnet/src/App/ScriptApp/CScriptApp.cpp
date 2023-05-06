@@ -1,6 +1,6 @@
 #include "CScriptApp.h"
 #include "../../Scene/CScriptScene.h"
-#include "../../GraphicsAPI/ERenderPassType.h"
+#include "../../Graphics/ERenderPassType.h"
 
 namespace app
 {

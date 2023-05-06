@@ -1,7 +1,8 @@
 #ifndef __DAWN__
 #include "CVulkanAPI.h"
+#include "CVulkanVertex.h"
 #include "CVulkanRenderer.h"
-#include "../Debug/Message/Console.h"
+#include "../../Debug/Message/Console.h"
 
 namespace api
 {
@@ -71,6 +72,13 @@ namespace api
 
 		// インスタンスを破棄
 		vkDestroyInstance(m_Instance, nullptr);
+	}
+
+	std::shared_ptr<vertex::IVertex> CVulkanAPI::CreateVertex()
+	{
+		const auto Vertex = std::make_shared<vertex::CVulkanVertex>();
+
+		return Vertex;
 	}
 
 	std::shared_ptr<renderer::IRenderer> CVulkanAPI::CreateRenderer()

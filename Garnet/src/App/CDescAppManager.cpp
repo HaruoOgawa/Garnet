@@ -8,9 +8,9 @@
 #endif
 
 #ifdef __DAWN__
-#include "../GraphicsAPI/CWebGPUAPI.h"
+#include "../GraphicsAPI/WebGPU/CWebGPUAPI.h"
 #else
-#include "../GraphicsAPI/CVulkanAPI.h"
+#include "../GraphicsAPI/Vulkan/CVulkanAPI.h"
 #endif // __DAWN__
 
 #include "./ScriptApp/CScriptApp.h"

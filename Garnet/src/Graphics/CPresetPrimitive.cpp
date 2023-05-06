@@ -1,9 +1,9 @@
 #include "CPresetPrimitive.h"
-#include "../GraphicsAPI/CRendererCreateInfo.h"
+#include "../GraphicsAPI/CVertexCreateInfo.h"
 
 namespace graphics
 {
-	bool CPresetPrimitive::CreateBoard(renderer::CRendererCreateInfo& createInfo)
+	bool CPresetPrimitive::CreateBoard(vertex::CVertexCreateInfo& createInfo)
 	{
 		// Vertex Buffer
 		std::vector<float> Pos = {
