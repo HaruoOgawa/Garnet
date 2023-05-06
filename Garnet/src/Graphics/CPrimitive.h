@@ -1,5 +1,6 @@
 #pragma once
 #include <memory>
+#include "CPresetPrimitive.h"
 
 namespace renderer { 
 	class IRenderer; 
@@ -14,14 +15,16 @@ namespace graphics
 	class CPrimitive
 	{
 		std::shared_ptr<renderer::IRenderer> m_Renderer;
-		std::shared_ptr<CMaterial> m_Material;
+		int									 m_MaterialIndex;
+	private:
+		bool Create(api::IGraphicsAPI* pGraphicsAPI, const renderer::CRendererCreateInfo& createInfo);
+		bool Create(api::IGraphicsAPI* pGraphicsAPI, EPresetPrimitiveType Type);
 	public:
-		CPrimitive();
+		CPrimitive(api::IGraphicsAPI* pGraphicsAPI, const renderer::CRendererCreateInfo& createInfo, int MaterialIndex);
+		CPrimitive(api::IGraphicsAPI* pGraphicsAPI, EPresetPrimitiveType Type, int MaterialIndex);
 		virtual ~CPrimitive();
 
 		bool Release();
-
-		bool Create(api::IGraphicsAPI* pGraphicsAPI, const renderer::CRendererCreateInfo& createInfo);
 
 		bool Update(float SecondsTime);
 		bool Draw();

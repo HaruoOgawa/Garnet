@@ -1,16 +1,14 @@
 #include "CMesh.h"
-#include "CPrimitive.h"
 
 namespace graphics
 {
 	CMesh::CMesh()
 	{
-
 	}
 
 	CMesh::~CMesh()
 	{
-
+		Release();
 	}
 
 	bool CMesh::Release()

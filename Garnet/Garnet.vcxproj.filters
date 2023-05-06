@@ -51,9 +51,6 @@
     <ClInclude Include="src\Interface\IRenderer.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\Interface\IObject.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="src\GraphicsAPI\CVulkanRenderer.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
@@ -63,7 +60,7 @@
     <ClInclude Include="src\GraphicsAPI\CRendererCreateInfo.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\Node\CNode.h">
+    <ClInclude Include="src\Object\CNode.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\Graphics\CMesh.h">
@@ -990,6 +987,18 @@
     <ClInclude Include="src\Graphics\CUniformBuffer.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="src\Object\CObject.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Object\C3DObject.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Math\CTransform.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Graphics\CPresetPrimitive.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Main\DescMain\DescMain.cpp">
@@ -1028,7 +1037,7 @@
     <ClCompile Include="src\GraphicsAPI\CRendererCreateInfo.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\Node\CNode.cpp">
+    <ClCompile Include="src\Object\CNode.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="src\Graphics\CMesh.cpp">
@@ -1059,6 +1068,18 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="src\Graphics\CUniformBuffer.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Object\CObject.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Object\C3DObject.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Math\CTransform.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Graphics\CPresetPrimitive.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>

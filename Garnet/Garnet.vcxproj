@@ -330,6 +330,10 @@ del $(OutDir)Garnet.pdb</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="src\Graphics\CPresetPrimitive.h" />
+    <ClInclude Include="src\Math\CTransform.h" />
+    <ClInclude Include="src\Object\C3DObject.h" />
+    <ClInclude Include="src\Object\CObject.h" />
     <ClInclude Include="src\Graphics\CUniformBuffer.h" />
     <ClInclude Include="src\Graphics\CUniformBufferDescriptor.h" />
     <ClInclude Include="src\GraphicsAPI\ERenderPassType.h" />
@@ -638,7 +642,7 @@ del $(OutDir)Garnet.pdb</Command>
     <ClInclude Include="src\Graphics\CVertexBuffer.h" />
     <ClInclude Include="src\Graphics\CPrimitive.h" />
     <ClInclude Include="src\Graphics\CMesh.h" />
-    <ClInclude Include="src\Node\CNode.h" />
+    <ClInclude Include="src\Object\CNode.h" />
     <ClInclude Include="src\GraphicsAPI\CRendererCreateInfo.h" />
     <ClInclude Include="src\GraphicsAPI\CWebGPURenderer.h" />
     <ClInclude Include="src\GraphicsAPI\CVulkanRenderer.h" />
@@ -653,10 +657,13 @@ del $(OutDir)Garnet.pdb</Command>
     <ClInclude Include="src\App\CWebAppManager.h" />
     <ClInclude Include="src\Interface\IApp.h" />
     <ClInclude Include="src\Interface\IGraphicsAPI.h" />
-    <ClInclude Include="src\Interface\IObject.h" />
     <ClInclude Include="src\Interface\IRenderer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Graphics\CPresetPrimitive.cpp" />
+    <ClCompile Include="src\Math\CTransform.cpp" />
+    <ClCompile Include="src\Object\C3DObject.cpp" />
+    <ClCompile Include="src\Object\CObject.cpp" />
     <ClCompile Include="src\Graphics\CUniformBuffer.cpp" />
     <ClCompile Include="src\Graphics\CUniformBufferDescriptor.cpp" />
     <ClCompile Include="src\Library\glfw3webgpu\glfw3webgpu.c" />
@@ -667,7 +674,7 @@ del $(OutDir)Garnet.pdb</Command>
     <ClCompile Include="src\Graphics\CVertexBuffer.cpp" />
     <ClCompile Include="src\Graphics\CPrimitive.cpp" />
     <ClCompile Include="src\Graphics\CMesh.cpp" />
-    <ClCompile Include="src\Node\CNode.cpp" />
+    <ClCompile Include="src\Object\CNode.cpp" />
     <ClCompile Include="src\GraphicsAPI\CRendererCreateInfo.cpp" />
     <ClCompile Include="src\GraphicsAPI\CWebGPURenderer.cpp" />
     <ClCompile Include="src\GraphicsAPI\CVulkanRenderer.cpp" />
