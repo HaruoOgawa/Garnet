@@ -13,7 +13,6 @@ namespace renderer
 	{
 	public:
 		virtual bool Create(api::IGraphicsAPI* pGraphicsAPI, const CRendererCreateInfo& createInfo, const std::shared_ptr<graphics::CMaterial>& Material) = 0;
-		virtual bool Update(float SecondsTime) = 0;
 		virtual bool Draw(const std::shared_ptr<graphics::CMaterial>& Material) = 0;
 	};
 }

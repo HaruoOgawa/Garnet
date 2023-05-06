@@ -4,7 +4,6 @@ namespace object
 {
 	C3DObject::C3DObject()
 	{
-
 	}
 
 	C3DObject::~C3DObject()
@@ -13,13 +12,31 @@ namespace object
 		m_MaterialList.clear();
 	}
 
-	bool C3DObject::Update(float Time)
+	bool C3DObject::Update(float SecondsTime)
 	{
+		for (auto& Material : m_MaterialList)
+		{
+			if (!Material->Update(SecondsTime)) return false;
+		}
+
 		return true;
 	}
 
 	bool C3DObject::Draw()
 	{
+		for (const auto& Node : m_NodeList)
+		{
+			const auto& Mesh = Node->GetMesh();
+			for (const auto& Primitive : Mesh->GetPrimitiveList())
+			{
+				int MaterialIndex = Primitive->GetMaterialIndex();
+				if (MaterialIndex < 0 || MaterialIndex >= m_MaterialList.size()) continue;
+
+				const auto& Material = m_MaterialList[MaterialIndex];
+				if (!Primitive->Draw(Material)) return false;
+			}
+		}
+
 		return true;
 	}
 

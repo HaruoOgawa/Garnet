@@ -57,13 +57,10 @@ namespace graphics
 		return true;
 	}
 
-	bool CPrimitive::Update(float SecondsTime)
+	bool CPrimitive::Draw(const std::shared_ptr<CMaterial>& Material)
 	{
-		return true;
-	}
+		if (!m_Renderer->Draw(Material)) return false;
 
-	bool CPrimitive::Draw()
-	{
 		return true;
 	}
 }

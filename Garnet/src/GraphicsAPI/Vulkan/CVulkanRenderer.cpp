@@ -56,11 +56,6 @@ namespace renderer
 		return true;
 	}
 
-	bool CVulkanRenderer::Update(float SecondsTime)
-	{
-		return true;
-	}
-
 	bool CVulkanRenderer::Draw(const std::shared_ptr<graphics::CMaterial>& Material)
 	{
 		api::CVulkanMaterial* pVulkanMat = static_cast<api::CVulkanMaterial*>(Material.get());

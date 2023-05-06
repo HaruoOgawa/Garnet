@@ -47,7 +47,6 @@ namespace renderer
 		virtual ~CWebGPURenderer();
 
 		bool Create(api::IGraphicsAPI* pGraphicsAPI, const CRendererCreateInfo& createInfo, const std::shared_ptr<graphics::CMaterial>& Material) override;
-		bool Update(float SecondsTime) override;
 		bool Draw(const std::shared_ptr<graphics::CMaterial>& Material) override;
 	};
 }

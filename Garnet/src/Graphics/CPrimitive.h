@@ -26,8 +26,7 @@ namespace graphics
 		CPrimitive(api::IGraphicsAPI* pGraphicsAPI, EPresetPrimitiveType Type, int MaterialIndex, const std::vector<std::shared_ptr<CMaterial>>& MaterialList);
 		virtual ~CPrimitive();
 
-		bool Update(float SecondsTime);
-		bool Draw();
+		bool Draw(const std::shared_ptr<CMaterial>& Material);
 
 		int GetMaterialIndex()const { return m_MaterialIndex; }
 	};

@@ -37,11 +37,6 @@ namespace renderer
 		return true;
 	}
 
-	bool CWebGPURenderer::Update(float SecondsTime)
-	{
-		return true;
-	}
-
 	bool CWebGPURenderer::Draw(const std::shared_ptr<graphics::CMaterial>& Material)
 	{
 		api::CWebGPUMaterial* pWebGPUMat = static_cast<api::CWebGPUMaterial*>(Material.get());

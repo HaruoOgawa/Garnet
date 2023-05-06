@@ -16,8 +16,6 @@ namespace object
 		CNode(const std::shared_ptr<graphics::CMesh>& Mesh);
 		virtual ~CNode();
 
-		bool Create();
-		bool Update(float SecondsTime);
-		bool Draw();
+		const std::shared_ptr<graphics::CMesh>& GetMesh() const;
 	};
 }

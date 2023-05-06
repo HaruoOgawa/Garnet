@@ -15,18 +15,8 @@ namespace object
 	{
 	}
 
-	bool CNode::Create()
+	const std::shared_ptr<graphics::CMesh>& CNode::GetMesh() const
 	{
-		return true;
-	}
-
-	bool CNode::Update(float SecondsTime)
-	{
-		return true;
-	}
-
-	bool CNode::Draw()
-	{
-		return true;
+		return m_Mesh;
 	}
 }

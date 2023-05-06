@@ -253,7 +253,7 @@ namespace api
 		shaderCodeDesc.chain.next = nullptr;
 		shaderCodeDesc.chain.sType = WGPUSType_ShaderModuleSPIRVDescriptor;
 		shaderCodeDesc.code = &Data[0];
-		shaderCodeDesc.codeSize = Data.size();
+		shaderCodeDesc.codeSize = static_cast<uint32_t>(Data.size());
 
 		WGPUShaderModuleDescriptor shaderDesc{};
 		shaderDesc.hintCount = 0;
