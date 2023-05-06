@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <memory>
+#include "CPrimitive.h"
 
 namespace graphics
 {
@@ -13,11 +14,7 @@ namespace graphics
 		CMesh();
 		virtual ~CMesh();
 
-		bool Release();
-
-		bool Update(float SecondsTime);
-		bool Draw();
-
 		void AddPrimitive(const std::shared_ptr<CPrimitive>& Primitive);
+		const std::vector<std::shared_ptr<CPrimitive>>& GetPrimitiveList() const;
 	};
 }

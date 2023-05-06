@@ -1,7 +1,8 @@
 #ifdef __DAWN__
 #include "CWebGPUAPI.h"
 #include "CWebGPURenderer.h"
-#include "../Debug/Message/Console.h"
+#include "CWebGPUMaterial.h"
+#include "../../Debug/Message/Console.h"
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten/emscripten.h>
@@ -55,6 +56,13 @@ namespace api
 		const auto Renderer = std::make_shared<renderer::CWebGPURenderer>();
 
 		return Renderer;
+	}
+
+	std::shared_ptr<graphics::CMaterial> CWebGPUAPI::CreateMaterial()
+	{
+		auto Material = std::make_shared<api::CWebGPUMaterial>();
+
+		return Material;
 	}
 
 	bool CWebGPUAPI::BeginRender(ERenderPassType RenderPassType)

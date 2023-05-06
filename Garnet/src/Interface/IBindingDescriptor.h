@@ -2,7 +2,8 @@
 
 namespace graphics
 {
-	class CVertexBuffer
+	class IBindingDescriptor
 	{
+
 	};
 }

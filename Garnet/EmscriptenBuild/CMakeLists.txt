@@ -26,27 +26,39 @@ add_executable(
 	../src/Graphics/CMaterial.h
 	../src/Graphics/CMesh.cpp
 	../src/Graphics/CMesh.h
+	../src/Graphics/CPresetPrimitive.cpp
+	../src/Graphics/CPresetPrimitive.h
 	../src/Graphics/CPrimitive.cpp
 	../src/Graphics/CPrimitive.h
-	../src/Graphics/CUniformBufferObject.cpp
-	../src/Graphics/CUniformBufferObject.h
+	../src/Graphics/CUniformBuffer.cpp
+	../src/Graphics/CUniformBuffer.h
+	../src/Graphics/CUniformBufferDescriptor.cpp
+	../src/Graphics/CUniformBufferDescriptor.h
 	../src/Graphics/CVertexBuffer.cpp
 	../src/Graphics/CVertexBuffer.h
-	../src/Graphics/SUniformBufferObject.h
+	../src/Graphics/SPrimitiveCreateInfo.h
+	../src/Graphics/SRendererCreateInfo.h
 	../src/GraphicsAPI/CRendererCreateInfo.cpp
 	../src/GraphicsAPI/CRendererCreateInfo.h
-	../src/GraphicsAPI/CWebGPUAPI.cpp
-	../src/GraphicsAPI/CWebGPUAPI.h
-	../src/GraphicsAPI/CWebGPURenderer.cpp
-	../src/GraphicsAPI/CWebGPURenderer.h
 	../src/GraphicsAPI/ERenderPassType.h
+	../src/GraphicsAPI/WebGPU/CWebGPUAPI.cpp
+	../src/GraphicsAPI/WebGPU/CWebGPUAPI.h
+	../src/GraphicsAPI/WebGPU/CWebGPURenderer.cpp
+	../src/GraphicsAPI/WebGPU/CWebGPURenderer.h
 	../src/Interface/IApp.h
+	../src/Interface/IBindingBuffer.h
+	../src/Interface/IBindingDescriptor.h
 	../src/Interface/IGraphicsAPI.h
-	../src/Interface/IObject.h
 	../src/Interface/IRenderer.h
 	../src/Main/WebMain/WebMain.cpp
-	../src/Node/CNode.cpp
-	../src/Node/CNode.h
+	../src/Math/CTransform.cpp
+	../src/Math/CTransform.h
+	../src/Object/C3DObject.cpp
+	../src/Object/C3DObject.h
+	../src/Object/CNode.cpp
+	../src/Object/CNode.h
+	../src/Object/CObject.cpp
+	../src/Object/CObject.h
 	../src/Scene/CScriptScene.cpp
 	../src/Scene/CScriptScene.h
 

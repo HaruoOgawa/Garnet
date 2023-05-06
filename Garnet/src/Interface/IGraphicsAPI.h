@@ -2,7 +2,8 @@
 #include <memory>
 #include <string>
 #include "IRenderer.h"
-#include "../GraphicsAPI/ERenderPassType.h"
+
+#include "../Graphics/ERenderPassType.h"
 
 #ifndef __EMSCRIPTEN__
 
@@ -17,7 +18,10 @@
 
 #endif // !__EMSCRIPTEN__
 
-namespace renderer { class IRenderer; }
+namespace graphics
+{
+	class CMaterial;
+}
 
 namespace api
 {
@@ -31,6 +35,7 @@ namespace api
 #endif // __EMSCRIPTEN__
 		
 		virtual std::shared_ptr<renderer::IRenderer> CreateRenderer() = 0;
+		virtual std::shared_ptr<graphics::CMaterial> CreateMaterial() = 0;
 
 		virtual bool BeginRender(ERenderPassType RenderPassType) = 0;
 		virtual bool EndRender() = 0;

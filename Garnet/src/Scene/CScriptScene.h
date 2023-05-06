@@ -3,14 +3,15 @@
 
 #include "../Interface/IGraphicsAPI.h"
 
-namespace graphics { class CMesh; }
 namespace file { class CFileReader; }
+namespace object { class C3DObject; }
 
 namespace scene
 {
 	class CScriptScene
 	{
-		std::shared_ptr<graphics::CMesh> m_TestMesh;
+		std::shared_ptr<object::C3DObject> m_TestObject;
+
 		std::shared_ptr<file::CFileReader> m_VertexShader;
 		std::shared_ptr<file::CFileReader> m_FragmentShader;
 

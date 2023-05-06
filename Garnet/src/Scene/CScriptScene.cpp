@@ -1,14 +1,12 @@
 #include "CScriptScene.h"
-#include "../Graphics/CMesh.h"
-#include "../Graphics/CPrimitive.h"
-#include "../GraphicsAPI/CRendererCreateInfo.h"
+#include "../Object/C3DObject.h"
 #include "../File/CFileReader.h"
 #include "../Debug/Message/Console.h"
 
 namespace scene
 {
 	CScriptScene::CScriptScene():
-		m_TestMesh(nullptr),
+		m_TestObject(nullptr),
 		m_VertexShader(std::make_shared<file::CFileReader>()),
 		m_FragmentShader(std::make_shared<file::CFileReader>()),
 		m_IsLoaded(false)
@@ -17,13 +15,6 @@ namespace scene
 
 	bool CScriptScene::Release(api::IGraphicsAPI* pGraphicsAPI)
 	{
-		if (m_TestMesh)
-		{
-			m_TestMesh->Release();
-			m_TestMesh.reset();
-			m_TestMesh = nullptr;
-		}
-
 		m_IsLoaded = false;
 
 		return true;
@@ -41,57 +32,30 @@ namespace scene
 
 	bool CScriptScene::Load(api::IGraphicsAPI* pGraphicsAPI)
 	{
-		//
-		std::string ShaderPath = "Resources\\Shaders\\";
+		// OBJECT
+		m_TestObject = std::make_shared<object::C3DObject>();
 
-		// Vertex Buffer
-		std::vector<float> Pos = {
-			-0.5f, -0.5f, 0.0f,
-			0.5f, -0.5f, 0.0f,
-			0.5f, 0.5f, 0.0f,
-			-0.5f, 0.5f, 0.0f
-		};
+		// MATERIAL
+		{
+			graphics::CMaterialCreateInfo createInfo;
+			createInfo.SetVertexShaderCode(m_VertexShader->GetData());
+			createInfo.SetFragmentShaderCode(m_FragmentShader->GetData());
+			auto Material = pGraphicsAPI->CreateMaterial();
+			if (!Material->Create(pGraphicsAPI, createInfo)) return false;
+			m_TestObject->AddMaterial(Material);
+		}
 
-		std::vector<float> Color = {
-			1.0f, 0.0f, 0.0f,
-			0.0f, 1.0f, 0.0f,
-			0.0f, 0.0f, 1.0f,
-			1.0f, 1.0f, 1.0f
-		};
+		// MESH
+		{
+			std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(pGraphicsAPI, graphics::EPresetPrimitiveType::BOARD, 0, m_TestObject->GetMaterialList());
+			std::shared_ptr<graphics::CMesh> Mesh = std::make_shared<graphics::CMesh>();
+			Mesh->AddPrimitive(Primitive);
 
-		std::vector<float> UV = {
-			1.0f, 0.0f,
-			0.0f, 0.0f,
-			0.0f, 1.0f,
-			1.0f, 1.0f
-		};
-
-		std::vector<std::vector<float>> Vertices = {
-			Pos, Color, UV
-		};
-
-		std::vector<uint16_t> Indices = {
-			0, 1, 2, 2, 3, 0,
-		};
-
-		//
-		renderer::CRendererCreateInfo createInfo;
-
-		createInfo.SetVertexShaderCode(m_VertexShader->GetData());
-		createInfo.SetFragmentShaderCode(m_FragmentShader->GetData());
-
-		createInfo.SetVertices(Vertices);
-		createInfo.SetIndices(Indices);
-		createInfo.SetAttributeDimensions(std::vector<int>({ 3 , 3 , 2 }));
-
-		//
-		m_TestMesh = std::make_shared<graphics::CMesh>();
-		std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>();
-		if (!Primitive->Create(pGraphicsAPI, createInfo)) return false;
-
-		//
-		m_TestMesh->AddPrimitive(Primitive);
-
+			// NODE
+			std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(Mesh);
+			m_TestObject->AddNode(Node);
+		}
+		
 		Console::Log("Render is loaded\n");
 
 		return true;
@@ -108,9 +72,9 @@ namespace scene
 			}
 		}
 
-		if (m_IsLoaded && m_TestMesh)
+		if (m_IsLoaded && m_TestObject)
 		{
-			if (!m_TestMesh->Update(SecondsTime)) return false;
+			if (!m_TestObject->Update(SecondsTime)) return false;
 
 		}
 
@@ -119,9 +83,9 @@ namespace scene
 
 	bool CScriptScene::Draw(api::IGraphicsAPI* pGraphicsAPI)
 	{
-		if (m_IsLoaded && m_TestMesh)
+		if (m_IsLoaded && m_TestObject)
 		{
-			if (!m_TestMesh->Draw()) return false;
+			if (!m_TestObject->Draw()) return false;
 
 		}
 		
