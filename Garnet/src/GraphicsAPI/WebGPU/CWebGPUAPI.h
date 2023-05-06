@@ -62,8 +62,8 @@ namespace api
 
 		void Release();
 
-		std::shared_ptr<vertex::IVertex> CreateVertex() override;
 		std::shared_ptr<renderer::IRenderer> CreateRenderer() override;
+		std::shared_ptr<graphics::CMaterial> CreateMaterial() override;
 
 		bool BeginRender(ERenderPassType RenderPassType) override;
 		bool EndRender() override;

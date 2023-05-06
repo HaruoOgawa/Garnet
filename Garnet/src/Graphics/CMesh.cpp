@@ -30,7 +30,8 @@ namespace graphics
 	{
 		for (const auto& Primitive : m_PrimitiveList)
 		{
-			if (!Primitive->Draw()) return false;
+			//const auto& Material = 
+			//if (!Primitive->Draw()) return false;
 		}
 
 		return true;

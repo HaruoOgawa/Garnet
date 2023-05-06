@@ -330,12 +330,11 @@ del $(OutDir)Garnet.pdb</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="src\GraphicsAPI\CVertexCreateInfo.h" />
-    <ClInclude Include="src\GraphicsAPI\WebGPU\CWebGPUVertex.h" />
-    <ClInclude Include="src\GraphicsAPI\Vulkan\CVulkanVertex.h" />
+    <ClInclude Include="src\GraphicsAPI\WebGPU\CWebGPUMaterial.h" />
+    <ClInclude Include="src\GraphicsAPI\Vulkan\CVulkanMaterial.h" />
+    <ClInclude Include="src\GraphicsAPI\CMaterialCreateInfo.h" />
     <ClInclude Include="src\App\CDemoAppManager.h" />
     <ClInclude Include="src\Graphics\CPresetPrimitive.h" />
-    <ClInclude Include="src\Interface\IVertex.h" />
     <ClInclude Include="src\Math\CTransform.h" />
     <ClInclude Include="src\Object\C3DObject.h" />
     <ClInclude Include="src\Object\CObject.h" />
@@ -662,9 +661,9 @@ del $(OutDir)Garnet.pdb</Command>
     <ClInclude Include="src\Interface\IRenderer.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\GraphicsAPI\CVertexCreateInfo.cpp" />
-    <ClCompile Include="src\GraphicsAPI\WebGPU\CWebGPUVertex.cpp" />
-    <ClCompile Include="src\GraphicsAPI\Vulkan\CVulkanVertex.cpp" />
+    <ClCompile Include="src\GraphicsAPI\WebGPU\CWebGPUMaterial.cpp" />
+    <ClCompile Include="src\GraphicsAPI\Vulkan\CVulkanMaterial.cpp" />
+    <ClCompile Include="src\GraphicsAPI\CMaterialCreateInfo.cpp" />
     <ClCompile Include="src\App\CDemoAppManager.cpp" />
     <ClCompile Include="src\Graphics\CPresetPrimitive.cpp" />
     <ClCompile Include="src\Main\DemoMain\DemoMain.cpp" />

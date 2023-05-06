@@ -993,16 +993,13 @@
     <ClInclude Include="src\App\CDemoAppManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\GraphicsAPI\Vulkan\CVulkanVertex.h">
+    <ClInclude Include="src\GraphicsAPI\CMaterialCreateInfo.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\GraphicsAPI\WebGPU\CWebGPUVertex.h">
+    <ClInclude Include="src\GraphicsAPI\Vulkan\CVulkanMaterial.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\Interface\IVertex.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="src\GraphicsAPI\CVertexCreateInfo.h">
+    <ClInclude Include="src\GraphicsAPI\WebGPU\CWebGPUMaterial.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
@@ -1091,13 +1088,13 @@
     <ClCompile Include="src\App\CDemoAppManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\GraphicsAPI\Vulkan\CVulkanVertex.cpp">
+    <ClCompile Include="src\GraphicsAPI\CMaterialCreateInfo.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\GraphicsAPI\WebGPU\CWebGPUVertex.cpp">
+    <ClCompile Include="src\GraphicsAPI\Vulkan\CVulkanMaterial.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\GraphicsAPI\CVertexCreateInfo.cpp">
+    <ClCompile Include="src\GraphicsAPI\WebGPU\CWebGPUMaterial.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>

@@ -1,7 +1,8 @@
 #ifdef __DAWN__
 #include "CWebGPURenderer.h"
-#include "../CRendererCreateInfo.h"
 #include "CWebGPUAPI.h"
+#include "CWebGPUMaterial.h"
+#include "../CRendererCreateInfo.h"
 #include "../../Debug/Message/Console.h"
 
 namespace renderer
@@ -28,7 +29,7 @@ namespace renderer
 		}
 	}
 
-	bool CWebGPURenderer::Create(api::IGraphicsAPI* pGraphicsAPI, const CRendererCreateInfo& createInfo)
+	bool CWebGPURenderer::Create(api::IGraphicsAPI* pGraphicsAPI, const CRendererCreateInfo& createInfo, const std::shared_ptr<graphics::CMaterial>& Material)
 	{
 		m_pGraphicsAPI = static_cast<api::CWebGPUAPI*>(pGraphicsAPI);
 
@@ -63,7 +64,7 @@ namespace renderer
 		return true;
 	}
 
-	bool CWebGPURenderer::Draw()
+	bool CWebGPURenderer::Draw(const std::shared_ptr<graphics::CMaterial>& Material)
 	{
 		// レンダーパスにパイプラインを割り当てる
 		wgpuRenderPassEncoderSetPipeline(m_pGraphicsAPI->GetRenderPass(), m_GraphicsPipeline); 

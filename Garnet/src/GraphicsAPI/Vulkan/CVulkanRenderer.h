@@ -8,9 +8,6 @@
 #include <glfw3.h>
 #include <glfw3native.h>
 
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-
 #include <vector>
 #include <array>
 #include <string>
@@ -20,7 +17,10 @@
 // はぇー時間を管理するstd標準ライブラリ
 #include <chrono>
 
-namespace api { class CVulkanAPI; }
+namespace api { 
+	class CVulkanAPI; 
+	class CVulkanMaterial;
+}
 
 namespace renderer
 {
@@ -31,42 +31,23 @@ namespace renderer
 		// API
 		api::CVulkanAPI* m_pGraphicsAPI;
 
-		// Uniform Buffer Object
-		VkDescriptorSetLayout m_DescriptorSetLayout;
-		std::vector<VkBuffer> m_UniformBuffers;
-		std::vector<VkDeviceMemory> m_UniformBuffersMemory;
-		std::vector<void*> m_UniformBuffersMapped;
-		VkDescriptorPool m_DescriptorPool;
-		std::vector<VkDescriptorSet> m_DescriptorSets;
+		// Vertices/Indices
+		std::vector<VkBuffer> m_VertexBufferList;
+		std::vector<VkDeviceMemory> m_VertexBufferMemoryList;
+		VkBuffer m_IndexBuffer;
+		VkDeviceMemory m_IndexBufferMemory;
+		uint32_t m_IndicesCount;
 
 		// Pipeline
 		VkPipelineLayout m_PipelineLayout;
 		VkPipeline m_GraphicsPipeline;
-
-		// Texture Image
-		bool m_UseMainTexture;
-		VkImage m_TextureImage;
-		VkDeviceMemory m_TextureImageMemory;
-		VkImageView m_TextureImageView; // シェーダーでテクスチャを取り扱う用のImageView
-		VkSampler m_TextureSampler;
-
 	private:
 		// Vulkanメインロジック /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		bool CreateDescriptorSetLayout(const CRendererCreateInfo& createInfo);
-		bool CreateTextureImage(const CRendererCreateInfo& createInfo);
-		bool CreateTextureImageView(const CRendererCreateInfo& createInfo);
-		bool CreateTextureSampler(const CRendererCreateInfo& createInfo);
-		
-		bool CreateUniformBuffers(const CRendererCreateInfo& createInfo);
-		bool CreateDescriptorPool(const CRendererCreateInfo& createInfo);
-		bool CreateDescriptorSets(const CRendererCreateInfo& createInfo);
-		bool CreateGraphicsPipeline(const CRendererCreateInfo& createInfo);
-
-		void UpdateUniformBuffer(uint32_t CurrentImage, float SecondsTime);
+		bool CreateVertexBuffer(const CRendererCreateInfo& createInfo);
+		bool CreateIndexBuffer(const CRendererCreateInfo& createInfo);
+		bool CreateGraphicsPipeline(const CRendererCreateInfo& createInfo, api::CVulkanMaterial* pVulkanMat);
 
 		// ヘルパー関数 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		// Shader
-		bool CreateShaderModule(VkShaderModule& shaderModule, const std::string& code);
 		VkFormat GetVertexFormat(int Dimention);
 	public:
 		CVulkanRenderer();
@@ -74,9 +55,9 @@ namespace renderer
 
 		void Release();
 
-		bool Create(api::IGraphicsAPI* pGraphicsAPI, const CRendererCreateInfo& createInfo) override;
+		bool Create(api::IGraphicsAPI* pGraphicsAPI, const CRendererCreateInfo& createInfo, const std::shared_ptr<graphics::CMaterial>& Material) override;
 		bool Update(float SecondsTime) override;
-		bool Draw() override;
+		bool Draw(const std::shared_ptr<graphics::CMaterial>& Material) override;
 	};
 }
 #endif

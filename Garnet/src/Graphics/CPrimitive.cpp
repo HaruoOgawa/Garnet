@@ -1,39 +1,40 @@
 #include "CPrimitive.h"
+#include "CMaterial.h"
 #include "../Interface/IGraphicsAPI.h"
-#include "../Interface/IVertex.h"
-#include "../GraphicsAPI/CVertexCreateInfo.h"
+#include "../Interface/IRenderer.h"
+#include "../GraphicsAPI/CRendererCreateInfo.h"
 
 namespace graphics
 {
-	CPrimitive::CPrimitive(api::IGraphicsAPI* pGraphicsAPI, const vertex::CVertexCreateInfo& createInfo, int MaterialIndex):
-		m_Vertex(nullptr),
+	CPrimitive::CPrimitive(api::IGraphicsAPI* pGraphicsAPI, const renderer::CRendererCreateInfo& createInfo, int MaterialIndex, const std::vector<std::shared_ptr<CMaterial>>& MaterialList):
+		m_Renderer(nullptr),
 		m_MaterialIndex(MaterialIndex)
 	{
-		Create(pGraphicsAPI, createInfo);
+		Create(pGraphicsAPI, createInfo, MaterialList[MaterialIndex]);
 	}
 	
-	CPrimitive::CPrimitive(api::IGraphicsAPI* pGraphicsAPI, EPresetPrimitiveType Type, int MaterialIndex):
-		m_Vertex(nullptr),
+	CPrimitive::CPrimitive(api::IGraphicsAPI* pGraphicsAPI, EPresetPrimitiveType Type, int MaterialIndex, const std::vector<std::shared_ptr<CMaterial>>& MaterialList):
+		m_Renderer(nullptr),
 		m_MaterialIndex(MaterialIndex)
 	{
-		Create(pGraphicsAPI, Type);
+		Create(pGraphicsAPI, Type, MaterialList[MaterialIndex]);
 	}
 
 	CPrimitive::~CPrimitive()
 	{
 	}
 
-	bool CPrimitive::Create(api::IGraphicsAPI* pGraphicsAPI, const vertex::CVertexCreateInfo& createInfo)
+	bool CPrimitive::Create(api::IGraphicsAPI* pGraphicsAPI, const renderer::CRendererCreateInfo& createInfo, const std::shared_ptr<CMaterial>& Material)
 	{
-		m_Vertex = pGraphicsAPI->CreateVertex();
-		if (!m_Vertex->Create(pGraphicsAPI, createInfo)) return false;
+		m_Renderer = pGraphicsAPI->CreateRenderer();
+		if (!m_Renderer->Create(pGraphicsAPI, createInfo, Material)) return false;
 
 		return true;
 	}
 
-	bool CPrimitive::Create(api::IGraphicsAPI* pGraphicsAPI, EPresetPrimitiveType Type)
+	bool CPrimitive::Create(api::IGraphicsAPI* pGraphicsAPI, EPresetPrimitiveType Type, const std::shared_ptr<CMaterial>& Material)
 	{
-		vertex::CVertexCreateInfo createInfo;
+		renderer::CRendererCreateInfo createInfo;
 
 		switch (Type)
 		{
@@ -50,9 +51,19 @@ namespace graphics
 			break;
 		}
 
-		m_Vertex = pGraphicsAPI->CreateVertex();
-		if (!m_Vertex->Create(pGraphicsAPI, createInfo)) return false;
+		m_Renderer = pGraphicsAPI->CreateRenderer();
+		if (!m_Renderer->Create(pGraphicsAPI, createInfo, Material)) return false;
 
+		return true;
+	}
+
+	bool CPrimitive::Update(float SecondsTime)
+	{
+		return true;
+	}
+
+	bool CPrimitive::Draw()
+	{
 		return true;
 	}
 }

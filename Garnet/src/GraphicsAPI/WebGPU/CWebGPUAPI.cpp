@@ -1,7 +1,7 @@
 #ifdef __DAWN__
 #include "CWebGPUAPI.h"
 #include "CWebGPURenderer.h"
-#include "CWebGPUVertex.h"
+#include "CWebGPUMaterial.h"
 #include "../../Debug/Message/Console.h"
 
 #ifdef __EMSCRIPTEN__
@@ -51,18 +51,18 @@ namespace api
 	{
 	}
 
-	std::shared_ptr<vertex::IVertex> CWebGPUAPI::CreateVertex()
-	{
-		const auto Vertex = std::make_shared<vertex::CWebGPUVertex>();
-
-		return Vertex;
-	}
-
 	std::shared_ptr<renderer::IRenderer> CWebGPUAPI::CreateRenderer()
 	{
 		const auto Renderer = std::make_shared<renderer::CWebGPURenderer>();
 
 		return Renderer;
+	}
+
+	std::shared_ptr<graphics::CMaterial> CWebGPUAPI::CreateMaterial()
+	{
+		auto Material = std::make_shared<api::CWebGPUMaterial>();
+
+		return Material;
 	}
 
 	bool CWebGPUAPI::BeginRender(ERenderPassType RenderPassType)

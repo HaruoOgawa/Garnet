@@ -1,6 +1,6 @@
 #ifndef __DAWN__
 #include "CVulkanAPI.h"
-#include "CVulkanVertex.h"
+#include "CVulkanMaterial.h"
 #include "CVulkanRenderer.h"
 #include "../../Debug/Message/Console.h"
 
@@ -74,18 +74,18 @@ namespace api
 		vkDestroyInstance(m_Instance, nullptr);
 	}
 
-	std::shared_ptr<vertex::IVertex> CVulkanAPI::CreateVertex()
-	{
-		const auto Vertex = std::make_shared<vertex::CVulkanVertex>();
-
-		return Vertex;
-	}
-
 	std::shared_ptr<renderer::IRenderer> CVulkanAPI::CreateRenderer()
 	{
-		const auto Renderer = std::make_shared<renderer::CVulkanRenderer>();
+		auto Renderer = std::make_shared<renderer::CVulkanRenderer>();
 
 		return Renderer;
+	}
+
+	std::shared_ptr<graphics::CMaterial> CVulkanAPI::CreateMaterial()
+	{
+		auto Material = std::make_shared<api::CVulkanMaterial>();
+
+		return Material;
 	}
 
 	// Vulkanメインロジック ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

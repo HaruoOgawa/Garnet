@@ -2,7 +2,6 @@
 #include <memory>
 #include <string>
 #include "IRenderer.h"
-#include "IVertex.h"
 
 #include "../Graphics/ERenderPassType.h"
 
@@ -19,6 +18,11 @@
 
 #endif // !__EMSCRIPTEN__
 
+namespace graphics
+{
+	class CMaterial;
+}
+
 namespace api
 {
 	class IGraphicsAPI
@@ -30,8 +34,8 @@ namespace api
 		virtual bool InitializeWithGLFW(GLFWwindow* pWindow) = 0;
 #endif // __EMSCRIPTEN__
 		
-		virtual std::shared_ptr<vertex::IVertex> CreateVertex() = 0;
 		virtual std::shared_ptr<renderer::IRenderer> CreateRenderer() = 0;
+		virtual std::shared_ptr<graphics::CMaterial> CreateMaterial() = 0;
 
 		virtual bool BeginRender(ERenderPassType RenderPassType) = 0;
 		virtual bool EndRender() = 0;

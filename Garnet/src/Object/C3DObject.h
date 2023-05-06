@@ -23,5 +23,6 @@ namespace object
 
 		void AddNode(const std::shared_ptr<CNode>& Node);
 		void AddMaterial(const std::shared_ptr<graphics::CMaterial>& Material);
+		const std::vector<std::shared_ptr<graphics::CMaterial>>& GetMaterialList() const;
 	};
 }

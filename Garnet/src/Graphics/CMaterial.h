@@ -2,27 +2,23 @@
 
 #include <vector>
 #include <memory>
-#include "../GraphicsAPI/CRendererCreateInfo.h"
-
-namespace renderer {
-	class IRenderer;
-	class CRendererCreateInfo;
-}
+#include "../GraphicsAPI/CMaterialCreateInfo.h"
 
 namespace api { class IGraphicsAPI; }
 
 namespace graphics
 {
+	class CMaterialCreateInfo;
 	class CUniformBufferDescriptor;
 
 	class CMaterial
 	{
-		std::shared_ptr<renderer::IRenderer> m_Renderer;
-		std::vector<CUniformBufferDescriptor> m_UBODescList;
+		std::vector<std::shared_ptr<CUniformBufferDescriptor>> m_UBODescList;
 	public:
 		CMaterial();
-		virtual ~CMaterial();
+		virtual ~CMaterial() = default;
 
-		bool Create(api::IGraphicsAPI* pGraphicsAPI, const renderer::CRendererCreateInfo& createInfo);
+		virtual bool Create(api::IGraphicsAPI* pGraphicsAPI, const CMaterialCreateInfo& createInfo) = 0;
+		virtual bool Update(float SecondsTime) = 0;
 	};
 }

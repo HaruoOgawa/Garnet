@@ -32,4 +32,9 @@ namespace object
 	{
 		m_MaterialList.push_back(Material);
 	}
+
+	const std::vector<std::shared_ptr<graphics::CMaterial>>& C3DObject::GetMaterialList() const
+	{
+		return m_MaterialList;
+	}
 }
