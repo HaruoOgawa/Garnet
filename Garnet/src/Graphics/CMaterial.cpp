@@ -1,4 +1,5 @@
 #include "CMaterial.h"
+#include "CUniformBufferDescriptor.h"
 
 namespace graphics
 {

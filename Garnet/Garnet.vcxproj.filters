@@ -81,9 +81,6 @@
     <ClInclude Include="src\File\CFileReader.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\Graphics\SUniformBufferObject.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="src\Scene\CScriptScene.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
@@ -112,9 +109,6 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\GraphicsAPI\ERenderPassType.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Graphics\CUniformBufferObject.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\Library\glm\glm\detail\_features.hpp">
@@ -978,6 +972,24 @@
     <ClInclude Include="src\Library\glm\glm\vector_relational.hpp">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="src\Graphics\CUniformBufferDescriptor.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Graphics\SPrimitiveCreateInfo.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Graphics\SRendererCreateInfo.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Interface\IBindingBuffer.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Interface\IBindingDescriptor.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Graphics\CUniformBuffer.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Main\DescMain\DescMain.cpp">
@@ -1040,10 +1052,13 @@
     <ClCompile Include="src\Library\glfw3webgpu\glfw3webgpu.c">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\Graphics\CUniformBufferObject.cpp">
+    <ClCompile Include="src\Library\glm\glm\detail\glm.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\Library\glm\glm\detail\glm.cpp">
+    <ClCompile Include="src\Graphics\CUniformBufferDescriptor.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Graphics\CUniformBuffer.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>

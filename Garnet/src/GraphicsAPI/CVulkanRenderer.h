@@ -16,7 +16,6 @@
 #include <string>
 
 #include "../Interface/IRenderer.h"
-#include "../Graphics/SUniformBufferObject.h"
 
 // はぇー時間を管理するstd標準ライブラリ
 #include <chrono>

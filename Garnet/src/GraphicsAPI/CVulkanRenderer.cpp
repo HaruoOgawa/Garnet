@@ -102,18 +102,17 @@ namespace renderer
 
 	void CVulkanRenderer::UpdateUniformBuffer(uint32_t CurrentImage, float SecondsTime)
 	{
-		VkDeviceSize bufferSize = sizeof(renderer::SUniformBufferObject) + sizeof(float) * 4 * 4;
+		VkDeviceSize bufferSize = sizeof(float) * 16 * 4 + sizeof(float) * 4 * 4;
 		
 		//
-		SUniformBufferObject ubo{};
-		ubo.model = glm::rotate(glm::mat4(1.0f), SecondsTime * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-		ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-		ubo.proj = glm::perspective(
+		glm::mat4 model = glm::rotate(glm::mat4(1.0f), SecondsTime * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+		glm::mat4 view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+		glm::mat4 proj = glm::perspective(
 			glm::radians(45.0f),
 			m_pGraphicsAPI->GetSwapChainExtent().width / (float)m_pGraphicsAPI->GetSwapChainExtent().height, 0.1f, 10.0f
 		);
-		ubo.proj[1][1] *= -1.0f; // Y座標の向きを反転。VulkanとOpenGLは逆なのかな？
-		ubo.mvp = ubo.proj * ubo.view * ubo.model;
+		proj[1][1] *= -1.0f; // Y座標の向きを反転。VulkanとOpenGLは逆なのかな？
+		glm::mat4 mvp = proj * view * model;
 
 		//
 		std::vector<float> testUBO = {
@@ -126,7 +125,11 @@ namespace renderer
 		//
 		std::vector<float> Data;
 		Data.resize(16 * 4 + testUBO.size());
-		std::memcpy(&Data[0], &ubo, sizeof(renderer::SUniformBufferObject));
+		std::memcpy(&Data[16 * 0], &model[0][0], sizeof(float) * 16);
+		std::memcpy(&Data[16 * 1], &view[0][0], sizeof(float) * 16);
+		std::memcpy(&Data[16 * 2], &proj[0][0], sizeof(float) * 16);
+		std::memcpy(&Data[16 * 3], &mvp[0][0], sizeof(float) * 16);
+
 		std::memcpy(&Data[16 * 4], &testUBO[0], sizeof(float) * 4 * 4);
 
 		// 空の値を既にマップしているのでVulkan関数を使わなくても値がコピーできる
@@ -380,7 +383,7 @@ namespace renderer
 
 	bool CVulkanRenderer::CreateUniformBuffers(const CRendererCreateInfo& createInfo)
 	{
-		VkDeviceSize bufferSize = sizeof(renderer::SUniformBufferObject) + sizeof(float) * 4 * 4;
+		VkDeviceSize bufferSize = sizeof(float) * 16 * 4 + sizeof(float) * 4 * 4;
 
 		m_UniformBuffers.resize(m_pGraphicsAPI->GetMaxFramesInFlight());
 		m_UniformBuffersMemory.resize(m_pGraphicsAPI->GetMaxFramesInFlight());
@@ -457,12 +460,12 @@ namespace renderer
 			VkDescriptorBufferInfo bufferInfo{};
 			bufferInfo.buffer = m_UniformBuffers[i]; // UBOの指定
 			bufferInfo.offset = 0; // でた、バッファオフセット!!!!!
-			bufferInfo.range = sizeof(renderer::SUniformBufferObject); // サイズかな？
+			bufferInfo.range = sizeof(float) * 16 * 4; // サイズかな？
 
 			//
 			VkDescriptorBufferInfo testBufferInfo{};
 			testBufferInfo.buffer = m_UniformBuffers[i];
-			testBufferInfo.offset = sizeof(renderer::SUniformBufferObject);
+			testBufferInfo.offset = sizeof(float) * 16 * 4;;
 			testBufferInfo.range = sizeof(float) * 4 * 4;
 
 			// テクスチャサンプラー用
