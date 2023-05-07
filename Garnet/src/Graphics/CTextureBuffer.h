@@ -7,18 +7,18 @@
 
 namespace graphics
 {
-	class CUniformBufferDescriptor;
+	class CTextureBufferDescriptor;
 
-	class CUniformBuffer : public IBuffer
+	class CTextureBuffer : public IBuffer
 	{
 		std::vector<unsigned char> m_Buffer;
-		std::shared_ptr<CUniformBufferDescriptor> m_Descriptor;
+		std::shared_ptr<CTextureBufferDescriptor> m_Descriptor;
 		std::vector<SBindingLayout> m_BindingLayoutList;
 
 		const EBufferType m_BufferType;
 	public:
-		explicit CUniformBuffer(std::vector<int> BindIndexList);
-		virtual ~CUniformBuffer();
+		explicit CTextureBuffer(std::vector<int> BindIndexList);
+		virtual ~CTextureBuffer();
 
 		virtual void AddData(const std::string& Name, const void* Data, int ByteSize, int BindingIndex) override;
 		virtual const std::vector<unsigned char>& GetData() const override;

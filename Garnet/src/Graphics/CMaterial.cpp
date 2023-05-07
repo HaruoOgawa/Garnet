@@ -1,6 +1,4 @@
 #include "CMaterial.h"
-#include "CUniformBufferDescriptor.h"
-#include "../Interface/IGraphicsAPI.h"
 
 namespace graphics
 {
@@ -16,5 +14,10 @@ namespace graphics
 	bool CMaterial::Update(float SecondsTime)
 	{
 		return true;
+	}
+
+	void CMaterial::AddBindingDescriptor(const std::shared_ptr<IDescriptor>& Desc)
+	{
+		m_BindingDescList.push_back(Desc);
 	}
 }

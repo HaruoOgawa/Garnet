@@ -46,8 +46,8 @@ add_executable(
 	../src/GraphicsAPI/WebGPU/CWebGPURenderer.cpp
 	../src/GraphicsAPI/WebGPU/CWebGPURenderer.h
 	../src/Interface/IApp.h
-	../src/Interface/IBindingBuffer.h
-	../src/Interface/IBindingDescriptor.h
+	../src/Interface/IBuffer.h
+	../src/Interface/IDescriptor.h
 	../src/Interface/IGraphicsAPI.h
 	../src/Interface/IRenderer.h
 	../src/Main/WebMain/WebMain.cpp

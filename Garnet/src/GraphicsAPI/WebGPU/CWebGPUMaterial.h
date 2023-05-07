@@ -22,8 +22,8 @@ namespace api
 		WGPUShaderModule m_FragmentShaderModele;
 
 		// Uniform
-		WGPUBuffer m_UniformBuffer;
-		size_t	   m_UniformCount;
+		std::vector<WGPUBuffer> m_UniformBufferList;
+		std::vector<size_t>	    m_UniformSizeList;
 
 		// BindGroup
 		WGPUBindGroupLayout m_BindGroupLayout;

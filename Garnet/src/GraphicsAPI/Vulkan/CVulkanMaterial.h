@@ -30,9 +30,9 @@ namespace api
 
 		// Uniform Buffer Object
 		VkDescriptorSetLayout m_DescriptorSetLayout;
-		std::vector<VkBuffer> m_UniformBuffers;
-		std::vector<VkDeviceMemory> m_UniformBuffersMemory;
-		std::vector<void*> m_UniformBuffersMapped;
+		std::vector<std::vector<VkBuffer>> m_UniformBuffersList;
+		std::vector<std::vector<VkDeviceMemory>> m_UniformBuffersMemoryList;
+		std::vector<std::vector<void*>> m_UniformBuffersMappedList;
 		VkDescriptorPool m_DescriptorPool;
 		std::vector<VkDescriptorSet> m_DescriptorSets;
 

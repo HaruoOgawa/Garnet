@@ -2,6 +2,9 @@
 
 #include <vector>
 #include <string>
+#include "../Interface/IBuffer.h"
+#include "../Graphics/CUniformBuffer.h"
+#include "../Graphics/CTextureBuffer.h"
 
 namespace graphics
 {
@@ -12,9 +15,13 @@ namespace graphics
 		GLSL,
 	};
 
+	class CUniformBuffer;
+	class CTextureBuffer;
+
 	class CMaterialCreateInfo
 	{
 		// Uniform
+		std::vector<std::shared_ptr<graphics::IBuffer>> m_BufferList;
 
 		// Shader
 		const EShaderType m_ShaderType;
@@ -30,6 +37,12 @@ namespace graphics
 	public:
 		CMaterialCreateInfo();
 		virtual ~CMaterialCreateInfo() = default;
+
+		// Uniform
+		std::shared_ptr<graphics::IBuffer> CreateUniformBuffer(std::vector<int> BindIndexList);
+		std::shared_ptr<graphics::IBuffer> CreateTextureBuffer(std::vector<int> BindIndexList);
+		void AddBuffer(const std::shared_ptr<graphics::IBuffer>& Buffer);
+		const std::vector<std::shared_ptr<graphics::IBuffer>>& GetBufferList() const;
 
 		// Shader
 		EShaderType GetShaderType() const;

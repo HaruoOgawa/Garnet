@@ -92,7 +92,7 @@ namespace api
 		std::memcpy(&Data[16 * 4], &testUBO[0], sizeof(float) * 4 * 4);
 
 		// 空の値を既にマップしているのでVulkan関数を使わなくても値がコピーできる
-		std::memcpy(m_UniformBuffersMapped[CurrentImage], &Data[0], bufferSize);
+		//std::memcpy(m_UniformBuffersMapped[CurrentImage], &Data[0], bufferSize);
 	}
 
 	void CVulkanMaterial::Release()
@@ -117,8 +117,15 @@ namespace api
 		// ユニフォームの破棄
 		for (size_t i = 0; i < m_pGraphicsAPI->GetMaxFramesInFlight(); i++)
 		{
-			vkDestroyBuffer(m_pGraphicsAPI->GetLogicalDevice(), m_UniformBuffers[i], nullptr);
-			vkFreeMemory(m_pGraphicsAPI->GetLogicalDevice(), m_UniformBuffersMemory[i], nullptr);
+			for (auto& Buffer : m_UniformBuffersList[i])
+			{
+				vkDestroyBuffer(m_pGraphicsAPI->GetLogicalDevice(), Buffer, nullptr);
+			}
+			
+			for (auto& Memory : m_UniformBuffersMemoryList[i])
+			{
+				vkFreeMemory(m_pGraphicsAPI->GetLogicalDevice(), Memory, nullptr);
+			}
 		}
 
 		// 記述子プールの破棄
@@ -268,8 +275,37 @@ namespace api
 		std::vector<VkDescriptorSetLayoutBinding> bindings;
 
 		// レイアウトのバインドに関する設定
+		for (const auto& Buffer : createInfo.GetBufferList())
+		{
+			for (const auto& Layout : Buffer->GetBindingLayoutList())
+			{
+				VkDescriptorSetLayoutBinding LayoutBinding{}; // VkDescriptorSetLayoutBindingはおそらくlayout(location = 0), WebGPUでいう @binding(n)のこと. ただしVulkanは @groupは存在しない
+				LayoutBinding.binding = Layout.BindingIndex; // バインディングインデックス
+				
+				switch (Buffer->GetBufferType())
+				{
+					case graphics::EBufferType::UNIFROM:
+						LayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER; // バッファタイプ
+						break;
+				
+					case graphics::EBufferType::TEXTURE:
+						LayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER; // バッファタイプ
+						break;
+
+					default:
+						break;
+				}
+				
+				LayoutBinding.descriptorCount = 1; // 
+				LayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT; // アクセス権限。ここでは頂点シェーダーのみ読み取り可
+				LayoutBinding.pImmutableSamplers = nullptr; // 画像のサンプリングに使用するフィールド
+
+				bindings.push_back(LayoutBinding);
+			}
+		}
+
 		// Model, View Proj等のUBOのレイアウト
-		VkDescriptorSetLayoutBinding uboLayoutBinding{}; // VkDescriptorSetLayoutBindingはおそらくlayout(location = 0), WebGPUでいう @binding(n)のこと. ただしVulkanは @groupは存在しない
+		/*VkDescriptorSetLayoutBinding uboLayoutBinding{}; // VkDescriptorSetLayoutBindingはおそらくlayout(location = 0), WebGPUでいう @binding(n)のこと. ただしVulkanは @groupは存在しない
 		uboLayoutBinding.binding = 0; // バインディングインデックス？ 
 		uboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER; // バッファタイプ
 		uboLayoutBinding.descriptorCount = 1; // 
@@ -299,7 +335,7 @@ namespace api
 			samplerLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
 
 			bindings.push_back(samplerLayoutBinding);
-		}
+		}*/
 
 		// レイアウトの作成に関する設定
 		VkDescriptorSetLayoutCreateInfo layoutInfo{}; // : bindingをまとめるためのオブジェクト
@@ -316,17 +352,27 @@ namespace api
 	{
 		VkDeviceSize bufferSize = sizeof(float) * 16 * 4 + sizeof(float) * 4 * 4;
 
-		m_UniformBuffers.resize(m_pGraphicsAPI->GetMaxFramesInFlight());
-		m_UniformBuffersMemory.resize(m_pGraphicsAPI->GetMaxFramesInFlight());
-		m_UniformBuffersMapped.resize(m_pGraphicsAPI->GetMaxFramesInFlight());
+		m_UniformBuffersList.resize(m_pGraphicsAPI->GetMaxFramesInFlight());
+		m_UniformBuffersMemoryList.resize(m_pGraphicsAPI->GetMaxFramesInFlight());
+		m_UniformBuffersMappedList.resize(m_pGraphicsAPI->GetMaxFramesInFlight());
 
 		for (size_t i = 0; i < m_pGraphicsAPI->GetMaxFramesInFlight(); i++)
 		{
-			m_pGraphicsAPI->CreateBuffer(bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-				m_UniformBuffers[i], m_UniformBuffersMemory[i]);
+			for (const auto& Buffer : createInfo.GetBufferList())
+			{
+				VkBuffer UniformBuffer;
+				VkDeviceMemory BufferMemory;
+				void* BuffersMappedList;
 
-			// 後で書き込むのでひとまず空でマップする
-			vkMapMemory(m_pGraphicsAPI->GetLogicalDevice(), m_UniformBuffersMemory[i], 0, bufferSize, 0, &m_UniformBuffersMapped[i]);
+				m_pGraphicsAPI->CreateBuffer(bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, UniformBuffer, BufferMemory);
+
+				// 後で書き込むのでひとまず空でマップする
+				vkMapMemory(m_pGraphicsAPI->GetLogicalDevice(), BufferMemory, 0, bufferSize, 0, &BuffersMappedList);
+
+				m_UniformBuffersList[i].push_back(UniformBuffer);
+				m_UniformBuffersMemoryList[i].push_back(BufferMemory);
+				m_UniformBuffersMappedList[i].push_back(BuffersMappedList);
+			}
 		}
 
 		return true;
@@ -335,7 +381,30 @@ namespace api
 	{
 		std::vector<VkDescriptorPoolSize> poolSizes;
 
+		for (const auto& Buffer : createInfo.GetBufferList())
 		{
+			VkDescriptorPoolSize poolSize{};
+
+			switch (Buffer->GetBufferType())
+			{
+			case graphics::EBufferType::UNIFROM:
+				poolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+				break;
+
+			case graphics::EBufferType::TEXTURE:
+				poolSize.type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+				break;
+
+			default:
+				break;
+			}
+
+			poolSize.descriptorCount = static_cast<uint32_t>(m_pGraphicsAPI->GetMaxFramesInFlight());
+
+			poolSizes.push_back(poolSize);
+		}
+
+		/* {
 			VkDescriptorPoolSize poolSize{};
 
 			poolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
@@ -352,7 +421,7 @@ namespace api
 			poolSize.descriptorCount = static_cast<uint32_t>(m_pGraphicsAPI->GetMaxFramesInFlight());
 
 			poolSizes.push_back(poolSize);
-		}
+		}*/
 
 
 		VkDescriptorPoolCreateInfo poolInfo{};
@@ -387,7 +456,58 @@ namespace api
 		//
 		for (size_t i = 0; i < m_pGraphicsAPI->GetMaxFramesInFlight(); i++)
 		{
-			// UBO用
+			std::vector<VkWriteDescriptorSet> descriptorWrites{};
+
+			for (int n = 0; n < createInfo.GetBufferList().size(); n++)
+			{
+				const auto& Buffer = createInfo.GetBufferList()[n];
+
+				for (const auto& Layout : Buffer->GetBindingLayoutList())
+				{
+					VkWriteDescriptorSet descriptorWrite{};
+
+					descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+					descriptorWrite.dstSet = m_DescriptorSets[i]; // どのDescriptorSets(キューファミリが入ってる？)でCPUからGPUにバッファを渡すコマンドを発行するか
+					descriptorWrite.dstBinding = Layout.BindingIndex; // layout(location = n)
+					descriptorWrite.dstArrayElement = 0; // ???
+					
+					switch (Buffer->GetBufferType())
+					{
+					case graphics::EBufferType::UNIFROM:
+						{
+							VkDescriptorBufferInfo bufferInfo{};
+							bufferInfo.buffer = m_UniformBuffersList[i][n]; // UBOの指定
+							bufferInfo.offset = Layout.ByteOffset; // バッファオフセット
+							bufferInfo.range = Layout.ByteSize; // サイズかな？
+
+							descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER; // どのタイプのコマンドを発行してもらうのか
+							descriptorWrite.descriptorCount = 1;
+							descriptorWrite.pBufferInfo = &bufferInfo;
+						}
+						break;
+
+					case graphics::EBufferType::TEXTURE:
+						{
+							VkDescriptorImageInfo imageInfo{};
+							imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+							imageInfo.imageView = m_TextureImageView;
+							imageInfo.sampler = m_TextureSampler;
+
+							descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+							descriptorWrite.descriptorCount = 1;
+							descriptorWrite.pImageInfo = &imageInfo;
+						}
+						break;
+
+					default:
+						break;
+					}
+
+					descriptorWrites.push_back(descriptorWrite);
+				}
+			}
+
+			/*// UBO用
 			VkDescriptorBufferInfo bufferInfo{};
 			bufferInfo.buffer = m_UniformBuffers[i]; // UBOの指定
 			bufferInfo.offset = 0; // でた、バッファオフセット!!!!!
@@ -452,7 +572,7 @@ namespace api
 				descriptorWrite.pImageInfo = &imageInfo;
 
 				descriptorWrites.push_back(descriptorWrite);
-			}
+			}*/
 
 			vkUpdateDescriptorSets(m_pGraphicsAPI->GetLogicalDevice(), static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
 		}

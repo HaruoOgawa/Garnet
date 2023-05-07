@@ -12,6 +12,30 @@ namespace graphics
 	{
 	}
 
+	// Uniform
+	std::shared_ptr<graphics::IBuffer> CMaterialCreateInfo::CreateUniformBuffer(std::vector<int> BindIndexList)
+	{
+		auto Buffer = std::make_shared<graphics::CUniformBuffer>(BindIndexList);
+		
+		return Buffer;
+	}
+	std::shared_ptr<graphics::IBuffer> CMaterialCreateInfo::CreateTextureBuffer(std::vector<int> BindIndexList)
+	{
+		auto Buffer = std::make_shared<graphics::CTextureBuffer>(BindIndexList);
+
+		return Buffer;
+	}
+
+	void CMaterialCreateInfo::AddBuffer(const std::shared_ptr<graphics::IBuffer>& Buffer)
+	{
+		m_BufferList.push_back(Buffer);
+	}
+
+	const std::vector<std::shared_ptr<graphics::IBuffer>>& CMaterialCreateInfo::GetBufferList() const
+	{
+		return m_BufferList;
+	}
+
 	// Shader
 	EShaderType CMaterialCreateInfo::GetShaderType() const
 	{
