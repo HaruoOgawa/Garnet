@@ -20,5 +20,6 @@ namespace graphics
 		virtual ~CUniformBufferDescriptor();
 
 		void AddData(const std::string& Name, const SUniformBufferValue& Data);
+		const std::map<std::string, SUniformBufferValue>& GetDataList() const;
 	};
 }

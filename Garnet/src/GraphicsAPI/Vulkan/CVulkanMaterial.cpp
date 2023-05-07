@@ -2,6 +2,9 @@
 #include "CVulkanMaterial.h"
 #include "CVulkanAPI.h"
 #include "../CMaterialCreateInfo.h"
+#include "../../Debug/Message/Console.h"
+#include "../../Camera/CCamera.h"
+#include "../../Projection/CProjection.h"
 
 namespace api
 {
@@ -51,48 +54,32 @@ namespace api
 		return true;
 	}
 
-	bool CVulkanMaterial::Update(float SecondsTime)
+	bool CVulkanMaterial::Update(float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection)
 	{
-		// ユニフォームデータの更新
-		UpdateUniformBuffer(m_pGraphicsAPI->GetCurrentFrame(), SecondsTime);
+		// 共通のユニフォームバッファの更新
+		SetUniformValue("view", &Camera->GetViewMatrix()[0][0]);
+		SetUniformValue("proj", &Projection->GetPrejectionMatrix()[0][0]);
 
 		return true;
 	}
 
-	void CVulkanMaterial::UpdateUniformBuffer(uint32_t CurrentImage, float SecondsTime)
+	void CVulkanMaterial::SetUniformValue(const std::string Name, const void* Value)
 	{
-		VkDeviceSize bufferSize = sizeof(float) * 16 * 4 + sizeof(float) * 4 * 4;
+		for (int i = 0; i < m_UniformBufferDescList.size(); i++)
+		{
+			const auto& Desc = m_UniformBufferDescList[i];
+			auto BuffersMappedList = m_UniformBuffersMappedList[m_pGraphicsAPI->GetCurrentFrame()][i];
 
-		//
-		glm::mat4 model = glm::rotate(glm::mat4(1.0f), SecondsTime * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-		glm::mat4 view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-		glm::mat4 proj = glm::perspective(
-			glm::radians(45.0f),
-			m_pGraphicsAPI->GetSwapChainExtent().width / (float)m_pGraphicsAPI->GetSwapChainExtent().height, 0.1f, 10.0f
-		);
-		proj[1][1] *= -1.0f; // Y座標の向きを反転。VulkanとOpenGLは逆なのかな？
-		glm::mat4 mvp = proj * view * model;
+			const auto& DataList = Desc->GetDataList();
+			const auto& UniformData = DataList.find(Name);
+			if (UniformData != DataList.end())
+			{
+				const int ByteOffset = UniformData->second.ByteOffset;
+				const int ByteSize = UniformData->second.ByteSize;
 
-		//
-		std::vector<float> testUBO = {
-			0.01f, 0.01f, 1.0f, 1.0f,
-			0.0f, 0.0f, 0.0f, 0.0f,
-			0.0f, 0.0f, 0.0f, 0.0f,
-			0.0f, 0.0f, 0.0f, 0.0f
-		};
-
-		//
-		std::vector<float> Data;
-		Data.resize(16 * 4 + testUBO.size());
-		std::memcpy(&Data[16 * 0], &model[0][0], sizeof(float) * 16);
-		std::memcpy(&Data[16 * 1], &view[0][0], sizeof(float) * 16);
-		std::memcpy(&Data[16 * 2], &proj[0][0], sizeof(float) * 16);
-		std::memcpy(&Data[16 * 3], &mvp[0][0], sizeof(float) * 16);
-
-		std::memcpy(&Data[16 * 4], &testUBO[0], sizeof(float) * 4 * 4);
-
-		// 空の値を既にマップしているのでVulkan関数を使わなくても値がコピーできる
-		//std::memcpy(m_UniformBuffersMapped[CurrentImage], &Data[0], bufferSize);
+				std::memcpy(&BuffersMappedList + ByteOffset, Value, ByteSize);
+			}
+		}
 	}
 
 	void CVulkanMaterial::Release()
@@ -304,39 +291,6 @@ namespace api
 			}
 		}
 
-		// Model, View Proj等のUBOのレイアウト
-		/*VkDescriptorSetLayoutBinding uboLayoutBinding{}; // VkDescriptorSetLayoutBindingはおそらくlayout(location = 0), WebGPUでいう @binding(n)のこと. ただしVulkanは @groupは存在しない
-		uboLayoutBinding.binding = 0; // バインディングインデックス？ 
-		uboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER; // バッファタイプ
-		uboLayoutBinding.descriptorCount = 1; // 
-		uboLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT; // アクセス権限。ここでは頂点シェーダーのみ読み取り可
-		uboLayoutBinding.pImmutableSamplers = nullptr; // 画像のサンプリングに使用するフィールド
-
-		bindings.push_back(uboLayoutBinding);
-
-		//
-		VkDescriptorSetLayoutBinding testUBOLayoutBinding{};
-		testUBOLayoutBinding.binding = 1;
-		testUBOLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-		testUBOLayoutBinding.descriptorCount = 1;
-		testUBOLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-		testUBOLayoutBinding.pImmutableSamplers = nullptr;
-
-		bindings.push_back(testUBOLayoutBinding);
-
-		// TextureSampler用のレイアウトを設定
-		if (createInfo.IsUseMainTexture())
-		{
-			VkDescriptorSetLayoutBinding samplerLayoutBinding{};
-			samplerLayoutBinding.binding = 1; //バインディングインデックス. 上のやつが0だから1を設定
-			samplerLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER; // バッファタイプ
-			samplerLayoutBinding.descriptorCount = 1;
-			samplerLayoutBinding.pImmutableSamplers = nullptr;
-			samplerLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-
-			bindings.push_back(samplerLayoutBinding);
-		}*/
-
 		// レイアウトの作成に関する設定
 		VkDescriptorSetLayoutCreateInfo layoutInfo{}; // : bindingをまとめるためのオブジェクト
 		layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
@@ -350,8 +304,6 @@ namespace api
 
 	bool CVulkanMaterial::CreateUniformBuffers(const graphics::CMaterialCreateInfo& createInfo)
 	{
-		VkDeviceSize bufferSize = sizeof(float) * 16 * 4 + sizeof(float) * 4 * 4;
-
 		m_UniformBuffersList.resize(m_pGraphicsAPI->GetMaxFramesInFlight());
 		m_UniformBuffersMemoryList.resize(m_pGraphicsAPI->GetMaxFramesInFlight());
 		m_UniformBuffersMappedList.resize(m_pGraphicsAPI->GetMaxFramesInFlight());
@@ -360,15 +312,23 @@ namespace api
 		{
 			for (const auto& Buffer : createInfo.GetBufferList())
 			{
+				const auto& Data = Buffer->GetData();
+				size_t bufferSize = Data.size();
+
 				VkBuffer UniformBuffer;
 				VkDeviceMemory BufferMemory;
 				void* BuffersMappedList;
 
+				// バッファの作成
 				m_pGraphicsAPI->CreateBuffer(bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, UniformBuffer, BufferMemory);
 
-				// 後で書き込むのでひとまず空でマップする
+				// バッファ用のメモリを作成
 				vkMapMemory(m_pGraphicsAPI->GetLogicalDevice(), BufferMemory, 0, bufferSize, 0, &BuffersMappedList);
 
+				// メモリに値を代入
+				std::memcpy(BuffersMappedList, &Data[0], bufferSize);
+
+				//
 				m_UniformBuffersList[i].push_back(UniformBuffer);
 				m_UniformBuffersMemoryList[i].push_back(BufferMemory);
 				m_UniformBuffersMappedList[i].push_back(BuffersMappedList);
@@ -403,26 +363,6 @@ namespace api
 
 			poolSizes.push_back(poolSize);
 		}
-
-		/* {
-			VkDescriptorPoolSize poolSize{};
-
-			poolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-			poolSize.descriptorCount = static_cast<uint32_t>(m_pGraphicsAPI->GetMaxFramesInFlight());
-
-			poolSizes.push_back(poolSize);
-		}
-
-		if (createInfo.IsUseMainTexture())
-		{
-			VkDescriptorPoolSize poolSize{};
-
-			poolSize.type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-			poolSize.descriptorCount = static_cast<uint32_t>(m_pGraphicsAPI->GetMaxFramesInFlight());
-
-			poolSizes.push_back(poolSize);
-		}*/
-
 
 		VkDescriptorPoolCreateInfo poolInfo{};
 		poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
@@ -506,74 +446,7 @@ namespace api
 					descriptorWrites.push_back(descriptorWrite);
 				}
 			}
-
-			/*// UBO用
-			VkDescriptorBufferInfo bufferInfo{};
-			bufferInfo.buffer = m_UniformBuffers[i]; // UBOの指定
-			bufferInfo.offset = 0; // でた、バッファオフセット!!!!!
-			bufferInfo.range = sizeof(float) * 16 * 4; // サイズかな？
-
-			//
-			VkDescriptorBufferInfo testBufferInfo{};
-			testBufferInfo.buffer = m_UniformBuffers[i];
-			testBufferInfo.offset = sizeof(float) * 16 * 4;;
-			testBufferInfo.range = sizeof(float) * 4 * 4;
-
-			// テクスチャサンプラー用
-			VkDescriptorImageInfo imageInfo{};
-			imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-			imageInfo.imageView = m_TextureImageView;
-			imageInfo.sampler = m_TextureSampler;
-
-			//
-			std::vector<VkWriteDescriptorSet> descriptorWrites{};
-
-			// UniformBufferSet
-			{
-				VkWriteDescriptorSet descriptorWrite{};
-
-				descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-				descriptorWrite.dstSet = m_DescriptorSets[i]; // どのDescriptorSets(キューファミリが入ってる？)でCPUからGPUにバッファを渡すコマンドを発行するか
-				descriptorWrite.dstBinding = 0; // layout(location = n)
-				descriptorWrite.dstArrayElement = 0; // ???
-				descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER; // どのタイプのコマンドを発行してもらうのか
-				descriptorWrite.descriptorCount = 1;
-				descriptorWrite.pBufferInfo = &bufferInfo;
-
-				descriptorWrites.push_back(descriptorWrite);
-			}
-
-			// testUBOSet
-			{
-				VkWriteDescriptorSet descriptorWrite{};
-
-				descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-				descriptorWrite.dstSet = m_DescriptorSets[i];
-				descriptorWrite.dstBinding = 1;
-				descriptorWrite.dstArrayElement = 0;
-				descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-				descriptorWrite.descriptorCount = 1;
-				descriptorWrite.pBufferInfo = &testBufferInfo;
-
-				descriptorWrites.push_back(descriptorWrite);
-			}
-
-			// ImageBufferSet
-			if (createInfo.IsUseMainTexture())
-			{
-				VkWriteDescriptorSet descriptorWrite{};
-
-				descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-				descriptorWrite.dstSet = m_DescriptorSets[i];
-				descriptorWrite.dstBinding = 1;
-				descriptorWrite.dstArrayElement = 0;
-				descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-				descriptorWrite.descriptorCount = 1;
-				descriptorWrite.pImageInfo = &imageInfo;
-
-				descriptorWrites.push_back(descriptorWrite);
-			}*/
-
+			
 			vkUpdateDescriptorSets(m_pGraphicsAPI->GetLogicalDevice(), static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
 		}
 

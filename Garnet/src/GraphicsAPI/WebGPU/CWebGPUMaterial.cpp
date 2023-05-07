@@ -3,6 +3,8 @@
 #include "CWebGPUAPI.h"
 #include "../CMaterialCreateInfo.h"
 #include "../../Debug/Message/Console.h"
+#include "../../Camera/CCamera.h"
+#include "../../Projection/CProjection.h"
 
 namespace api
 {
@@ -36,26 +38,32 @@ namespace api
 		return true;
 	}
 
-	bool CWebGPUMaterial::Update(float SecondsTime)
+	bool CWebGPUMaterial::Update(float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection)
 	{
-		// ユニフォームバッファの更新
-		float t = SecondsTime;
-		glm::vec3 testPos = glm::vec3(0.0f);
-
-		// 行列
-		glm::mat4 mmat = glm::rotate(glm::mat4(1.0f), SecondsTime * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-		glm::mat4 vmat = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-		glm::mat4 pmat = glm::perspective(
-			glm::radians(45.0f),
-			1.0f, 0.1f, 10.0f
-		);
-
-		glm::mat4 mvp = pmat * vmat * mmat;
-
-		//wgpuQueueWriteBuffer(m_pGraphicsAPI->GetQueue(), m_UniformBuffer, 4 * sizeof(float), &t, sizeof(float));
-		//wgpuQueueWriteBuffer(m_pGraphicsAPI->GetQueue(), m_UniformBuffer, 16 * 3 * sizeof(float), reinterpret_cast<const float*>(&mvp[0][0]), 16 * sizeof(float));
+		// 共通のユニフォームバッファの更新
+		SetUniformValue("view", &Camera->GetViewMatrix()[0][0]);
+		SetUniformValue("proj", &Projection->GetPrejectionMatrix()[0][0]);
 
 		return true;
+	}
+
+	void CWebGPUMaterial::SetUniformValue(const std::string Name, const void* Value)
+	{
+		for (int i = 0; i < m_UniformBufferDescList.size(); i++)
+		{
+			const auto& Desc = m_UniformBufferDescList[i];
+			auto& UniformBuffer = m_UniformBufferList[i];
+
+			const auto& DataList = Desc->GetDataList();
+			const auto& UniformData = DataList.find(Name);
+			if (UniformData != DataList.end())
+			{
+				const int ByteOffset = UniformData->second.ByteOffset;
+				const int ByteSize = UniformData->second.ByteSize;
+
+				wgpuQueueWriteBuffer(m_pGraphicsAPI->GetQueue(), UniformBuffer, ByteOffset, Value, ByteSize);
+			}
+		}
 	}
 
 	// WebGPU Main Logic /////////////////////////////////////////////////////////////////////

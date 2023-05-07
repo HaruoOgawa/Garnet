@@ -12,11 +12,11 @@ namespace object
 		m_MaterialList.clear();
 	}
 
-	bool C3DObject::Update(float SecondsTime)
+	bool C3DObject::Update(float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection)
 	{
 		for (auto& Material : m_MaterialList)
 		{
-			if (!Material->Update(SecondsTime)) return false;
+			if (!Material->Update(SecondsTime, Camera, Projection)) return false;
 		}
 
 		return true;
@@ -33,6 +33,10 @@ namespace object
 				if (MaterialIndex < 0 || MaterialIndex >= m_MaterialList.size()) continue;
 
 				const auto& Material = m_MaterialList[MaterialIndex];
+				
+				const auto& ModelMatrix = Node->GetTransform()->GetModelMatrix();
+				Material->SetUniformValue("model", &ModelMatrix[0][0]);
+
 				if (!Primitive->Draw(Material)) return false;
 			}
 		}

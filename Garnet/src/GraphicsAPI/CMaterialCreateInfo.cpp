@@ -13,13 +13,13 @@ namespace graphics
 	}
 
 	// Uniform
-	std::shared_ptr<graphics::IBuffer> CMaterialCreateInfo::CreateUniformBuffer(std::vector<int> BindIndexList)
+	std::shared_ptr<graphics::CUniformBuffer> CMaterialCreateInfo::CreateUniformBuffer(std::vector<int> BindIndexList)
 	{
 		auto Buffer = std::make_shared<graphics::CUniformBuffer>(BindIndexList);
 		
 		return Buffer;
 	}
-	std::shared_ptr<graphics::IBuffer> CMaterialCreateInfo::CreateTextureBuffer(std::vector<int> BindIndexList)
+	std::shared_ptr<graphics::CTextureBuffer> CMaterialCreateInfo::CreateTextureBuffer(std::vector<int> BindIndexList)
 	{
 		auto Buffer = std::make_shared<graphics::CTextureBuffer>(BindIndexList);
 

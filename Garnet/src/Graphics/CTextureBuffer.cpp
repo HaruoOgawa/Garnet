@@ -27,7 +27,7 @@ namespace graphics
 		return m_Buffer;
 	}
 
-	std::shared_ptr<IDescriptor> CTextureBuffer::GetDescriptor() const
+	std::shared_ptr<CTextureBufferDescriptor> CTextureBuffer::GetDescriptor() const
 	{
 		return m_Descriptor;
 	}

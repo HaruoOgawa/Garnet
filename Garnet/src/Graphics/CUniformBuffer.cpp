@@ -49,7 +49,7 @@ namespace graphics
 		return m_Buffer;
 	}
 
-	std::shared_ptr<IDescriptor> CUniformBuffer::GetDescriptor() const
+	std::shared_ptr<CUniformBufferDescriptor> CUniformBuffer::GetDescriptor() const
 	{
 		return m_Descriptor;
 	}

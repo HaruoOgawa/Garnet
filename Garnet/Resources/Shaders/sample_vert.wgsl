@@ -9,7 +9,7 @@ struct UniformBufferObject {
     model: mat4x4<f32>,
     view: mat4x4<f32>,
     proj: mat4x4<f32>,
-    mvp: mat4x4<f32>,
+    test: mat4x4<f32>,
 }
 
 struct TestBuffer {
@@ -37,14 +37,16 @@ var<private> fragTexCoord: vec2<f32>;
 var<private> inTexCoord_1: vec2<f32>;
 
 fn main_1() {
-    let _e17 = ubo.mvp;
-    let _e18 = inPosition_1;
-    perVertexStruct.gl_Position = (_e17 * vec4<f32>(_e18.x, _e18.y, _e18.z, 1.0));
-    let _e25 = inColor_1;
-    let _e27 = testUBO.MulColor;
-    fragColor = (_e25 * _e27.xyz);
-    let _e30 = inTexCoord_1;
-    fragTexCoord = _e30;
+    let _e18 = ubo.proj;
+    let _e20 = ubo.view;
+    let _e23 = ubo.model;
+    let _e25 = inPosition_1;
+    perVertexStruct.gl_Position = (((_e18 * _e20) * _e23) * vec4<f32>(_e25.x, _e25.y, _e25.z, 1.0));
+    let _e32 = inColor_1;
+    let _e34 = testUBO.MulColor;
+    fragColor = (_e32 * _e34.xyz);
+    let _e37 = inTexCoord_1;
+    fragTexCoord = _e37;
     return;
 }
 

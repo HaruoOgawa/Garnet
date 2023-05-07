@@ -4,6 +4,5 @@ namespace graphics
 {
 	class IDescriptor
 	{
-
 	};
 }

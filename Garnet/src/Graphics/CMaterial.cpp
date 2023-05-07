@@ -11,13 +11,22 @@ namespace graphics
 		return true;
 	}
 
-	bool CMaterial::Update(float SecondsTime)
+	bool CMaterial::Update(float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection)
 	{
 		return true;
 	}
 
-	void CMaterial::AddBindingDescriptor(const std::shared_ptr<IDescriptor>& Desc)
+	void CMaterial::AddUniformBufferDescriptor(const std::shared_ptr<CUniformBufferDescriptor>& Desc)
 	{
-		m_BindingDescList.push_back(Desc);
+		m_UniformBufferDescList.push_back(Desc);
+	}
+	
+	void CMaterial::AddTextureBufferDescriptor(const std::shared_ptr<CTextureBufferDescriptor>& Desc)
+	{
+		m_TextureBufferDescList.push_back(Desc);
+	}
+
+	void CMaterial::SetUniformValue(const std::string Name, const void* Value)
+	{
 	}
 }

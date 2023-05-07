@@ -89,7 +89,7 @@ namespace scene
 
 				UniformBuffer->RecalculateBindingLayoutOffset();
 
-				Material->AddBindingDescriptor(UniformBuffer->GetDescriptor());
+				Material->AddUniformBufferDescriptor(UniformBuffer->GetDescriptor());
 				createInfo.AddBuffer(UniformBuffer);
 			}
 			
@@ -114,7 +114,7 @@ namespace scene
 		return true;
 	}
 
-	bool CScriptScene::Update(api::IGraphicsAPI* pGraphicsAPI, float SecondsTime)
+	bool CScriptScene::Update(api::IGraphicsAPI* pGraphicsAPI, float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection)
 	{
 		if (!m_IsLoaded)
 		{
@@ -127,7 +127,7 @@ namespace scene
 
 		if (m_IsLoaded && m_TestObject)
 		{
-			if (!m_TestObject->Update(SecondsTime)) return false;
+			if (!m_TestObject->Update(SecondsTime, Camera, Projection)) return false;
 
 		}
 

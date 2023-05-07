@@ -39,8 +39,8 @@ namespace graphics
 		virtual ~CMaterialCreateInfo() = default;
 
 		// Uniform
-		std::shared_ptr<graphics::IBuffer> CreateUniformBuffer(std::vector<int> BindIndexList);
-		std::shared_ptr<graphics::IBuffer> CreateTextureBuffer(std::vector<int> BindIndexList);
+		std::shared_ptr<graphics::CUniformBuffer> CreateUniformBuffer(std::vector<int> BindIndexList);
+		std::shared_ptr<graphics::CTextureBuffer> CreateTextureBuffer(std::vector<int> BindIndexList);
 		void AddBuffer(const std::shared_ptr<graphics::IBuffer>& Buffer);
 		const std::vector<std::shared_ptr<graphics::IBuffer>>& GetBufferList() const;
 

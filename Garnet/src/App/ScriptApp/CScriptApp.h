@@ -5,12 +5,16 @@
 #include "../../Interface/IGraphicsAPI.h"
 
 namespace scene { class CScriptScene; }
+namespace camera { class CCamera; }
+namespace projection { class CProjection; }
 
 namespace app
 {
 	class CScriptApp: public IApp
 	{
 		std::shared_ptr<scene::CScriptScene> m_ScriptScene;
+		std::shared_ptr<camera::CCamera> m_MainCamera;
+		std::shared_ptr<projection::CProjection> m_Projection;
 	public:
 		CScriptApp();
 		virtual ~CScriptApp();
