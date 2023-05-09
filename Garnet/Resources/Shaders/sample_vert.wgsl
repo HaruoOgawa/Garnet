@@ -39,14 +39,13 @@ var<private> inTexCoord_1: vec2<f32>;
 fn main_1() {
     let _e18 = ubo.proj;
     let _e20 = ubo.view;
-    let _e23 = ubo.model;
-    let _e25 = inPosition_1;
-    perVertexStruct.gl_Position = (((_e18 * _e20) * _e23) * vec4<f32>(_e25.x, _e25.y, _e25.z, 1.0));
-    let _e32 = inColor_1;
-    let _e34 = testUBO.MulColor;
-    fragColor = (_e32 * _e34.xyz);
-    let _e37 = inTexCoord_1;
-    fragTexCoord = _e37;
+    let _e22 = inPosition_1;
+    perVertexStruct.gl_Position = ((_e18 * _e20) * vec4<f32>(_e22.x, _e22.y, _e22.z, 1.0));
+    let _e29 = inColor_1;
+    let _e31 = testUBO.MulColor;
+    fragColor = (_e29 * _e31.xyz);
+    let _e34 = inTexCoord_1;
+    fragTexCoord = _e34;
     return;
 }
 

@@ -10,7 +10,6 @@ namespace api
 		m_pWindow(nullptr),
 		m_CurrentImageIndex(0),
 		m_IsReCreateSwapChain(false),
-		m_WaitRendering(true),
 		m_ShaderExtension(".spv")
 	{
 	}
@@ -86,6 +85,162 @@ namespace api
 		auto Material = std::make_shared<api::CVulkanMaterial>();
 
 		return Material;
+	}
+
+	bool CVulkanAPI::BeginRecordCommandBuffer()
+	{
+		// 前のフレーム処理が終わるのを待つ
+		vkWaitForFences(m_LogicalDevice, 1, &m_InFlightFences[m_CurrentFrame], VK_TRUE, UINT64_MAX);
+
+		// 処理が終わって次の処理に移るのでフェンスをまた使える状態にシグナルをリセットしておく
+		vkResetFences(m_LogicalDevice, 1, &m_InFlightFences[m_CurrentFrame]);
+
+		// コマンドバッファをリセット
+		vkResetCommandBuffer(m_CommandBuffers[m_CurrentFrame], 0);
+
+		// コマンドバッファの記録開始
+		VkCommandBufferBeginInfo beginInfo{}; // 記録に関する詳細な設定
+		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+		beginInfo.flags = 0; // このコマンドバッファをどのように使用するか
+		beginInfo.pInheritanceInfo = nullptr;
+
+		if (vkBeginCommandBuffer(m_CommandBuffers[m_CurrentFrame], &beginInfo) != VK_SUCCESS)
+		{
+			return false;
+		}
+
+		return true;
+	}
+
+	bool CVulkanAPI::EndRecordCommandBuffer()
+	{
+		// コマンドバッファの記録を終了
+		if (vkEndCommandBuffer(m_CommandBuffers[m_CurrentFrame]) != VK_SUCCESS)
+		{
+			return false;
+		}
+
+		return true;
+	}
+
+	bool CVulkanAPI::BeginRender(ERenderPassType RenderPassType)
+	{
+		// 記録スタート
+		if (!BeginRenderPass(m_CurrentImageIndex)) return false;
+
+		return true;
+	}
+
+	bool CVulkanAPI::EndRender()
+	{
+		// スワップチェーンを作り直しているので1フレーム待つ
+		if (m_IsReCreateSwapChain) return true;
+
+		// 記録終了
+		if (!EndRenderPass()) return false;
+
+		// コマンドバッファの送信
+		VkSubmitInfo submitInfo{};
+		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+
+		VkSemaphore waitSemaphore[] = { m_ImageAvailableSemaphones[m_CurrentFrame] }; // 画像に色が書き込まれて利用可になるまで待つセマフォ
+		VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
+		submitInfo.waitSemaphoreCount = 1;
+		submitInfo.pWaitSemaphores = waitSemaphore;
+		submitInfo.pWaitDstStageMask = waitStages;
+
+		submitInfo.commandBufferCount = 1;
+		submitInfo.pCommandBuffers = &m_CommandBuffers[m_CurrentFrame];
+
+		VkSemaphore signalSemaphores[] = { m_RenderFinishedSemaphores[m_CurrentFrame] }; // コマンドの実行が終了したことを知らせるセマフォ
+		submitInfo.signalSemaphoreCount = 1;
+		submitInfo.pSignalSemaphores = signalSemaphores;
+
+		// コマンドバッファをグラフィックキューに送信
+		// コマンドバッファにはコマンドが入っていてそのコマンドをキューが実行する
+		// キューはタスクでその具体的なタスク内容がコマンドという理解もできる
+		if (vkQueueSubmit(m_GraphicsQueue, 1, &submitInfo, m_InFlightFences[m_CurrentFrame]) != VK_SUCCESS)
+		{
+			return false;
+		}
+
+		// プレゼンテーション(結果をスワップチェーンに送信して最終結果を画面に示する)
+		VkPresentInfoKHR presentInfo{};
+		presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+		presentInfo.waitSemaphoreCount = 1;
+		presentInfo.pWaitSemaphores = signalSemaphores;
+		// イメージを示するスワップチェーンを選択
+		VkSwapchainKHR swapChains[] = { m_SwapChain };
+		presentInfo.swapchainCount = 1;
+		presentInfo.pSwapchains = swapChains;
+		presentInfo.pImageIndices = &m_CurrentImageIndex;
+
+		presentInfo.pResults = nullptr;
+
+		// プレゼンテーションキューを実行
+		VkResult result = vkQueuePresentKHR(m_PresentQueue, &presentInfo);
+
+		// 可な限り最良な結果を得るために念のためもう一度最新かチェックする
+		// VK_ERROR_OUT_OF_DATE_KHR: スワップ チェーンはサーフェスと互換性がなくなり、レンダリングに使用できなくなりました(ウィンドウサイズの変更)
+		// VK_SUBOPTIMAL_KHR: スワップ チェーンを使用してサーフェスに正常に示することはできますが、サーフェス プロパティは正確に一致しなくなりました。
+		if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || m_FramebufferResized)
+		{
+			m_FramebufferResized = false;
+			ReCreateSwapChain();
+		}
+		else if (result != VK_SUCCESS)
+		{
+			throw std::runtime_error("failed to present swap chain image!");
+		}
+
+		// 現在処理するフレームを更新する
+		m_CurrentFrame = (m_CurrentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
+		return true;
+	}
+
+	bool CVulkanAPI::SubmitCommandNoSemaphore()
+	{
+		// コマンドバッファの送信
+		VkSubmitInfo submitInfo{};
+		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+
+		// コマンドバッファをグラフィックキューに送信
+		// コマンドバッファにはコマンドが入っていてそのコマンドをキューが実行する
+		// キューはタスクでその具体的なタスク内容がコマンドという理解もできる
+		if (vkQueueSubmit(m_GraphicsQueue, 1, &submitInfo, m_InFlightFences[m_CurrentFrame]) != VK_SUCCESS)
+		{
+			return false;
+		}
+
+		return true;
+	}
+
+	const std::string& CVulkanAPI::GetShaderExtension() const
+	{
+		return m_ShaderExtension;
+	}
+
+	// Device
+	const VkPhysicalDevice& CVulkanAPI::GetPhysicalDevice() const
+	{
+		return m_PhysicalDevice;
+	}
+
+	const VkDevice& CVulkanAPI::GetLogicalDevice() const
+	{
+		return m_LogicalDevice;
+	}
+
+	// SwapChain/Image
+	const VkExtent2D& CVulkanAPI::GetSwapChainExtent() const
+	{
+		return m_SwapChainExtent;
+	}
+
+	// Rendering
+	const VkRenderPass& CVulkanAPI::GetRenderPass() const
+	{
+		return m_RenderPass;
 	}
 
 	// Vulkanメインロジック ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -551,15 +706,28 @@ namespace api
 		return true;
 	}
 
-	bool CVulkanAPI::BeginRecordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex)
+	bool CVulkanAPI::BeginRenderPass(uint32_t imageIndex)
 	{
 		// コマンドバッファの記録開始
-		VkCommandBufferBeginInfo beginInfo{}; // 記録に関する詳細な設定
-		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-		beginInfo.flags = 0; // このコマンドバッファをどのように使用するか
-		beginInfo.pInheritanceInfo = nullptr;
+		if (!BeginRecordCommandBuffer()) return false;
+	
+		// スワップチェーンからイメージを取得する
+		// m_ImageAvailableSemaphoneのセマフォでGPU側の処理を止める
+		// 現在、スワップチェーンが古くないかチェックする(最新のウィンドウではサイズ等が変わっているかも!!)
+		VkResult result = vkAcquireNextImageKHR(m_LogicalDevice, m_SwapChain, UINT64_MAX, m_ImageAvailableSemaphones[m_CurrentFrame], VK_NULL_HANDLE, &m_CurrentImageIndex);
 
-		if (vkBeginCommandBuffer(m_CommandBuffers[m_CurrentFrame], &beginInfo) != VK_SUCCESS)
+		// VK_ERROR_OUT_OF_DATE_KHR: スワップ チェーンはサーフェスと互換性がなくなり、レンダリングに使用できなくなりました(ウィンドウサイズの変更)
+		// VK_SUBOPTIMAL_KHR: スワップ チェーンを使用してサーフェスに正常に示することはできますが、サーフェス プロパティは正確に一致しなくなりました。
+		m_IsReCreateSwapChain = false;
+
+		if (result == VK_ERROR_OUT_OF_DATE_KHR)
+		{
+			ReCreateSwapChain(); // 最新ではなのでスワップチェーンを作り直す
+
+			m_IsReCreateSwapChain = true;
+			return true;
+		}
+		else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR)
 		{
 			return false;
 		}
@@ -599,17 +767,14 @@ namespace api
 		return true;
 	}
 
-	bool CVulkanAPI::EndRecordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex)
+	bool CVulkanAPI::EndRenderPass()
 	{
 		// レンダーパス終了
 		vkCmdEndRenderPass(m_CommandBuffers[m_CurrentFrame]);
 
 		// コマンドバッファの記録を終了
-		if (vkEndCommandBuffer(m_CommandBuffers[m_CurrentFrame]) != VK_SUCCESS)
-		{
-			return false;
-		}
-
+		if (!EndRecordCommandBuffer()) return false;
+		
 		return true;
 	}
 
@@ -1230,152 +1395,6 @@ namespace api
 		vkQueueWaitIdle(m_GraphicsQueue);
 
 		vkFreeCommandBuffers(m_LogicalDevice, m_CommandPool, 1, &commandBuffer);
-	}
-
-	// ループ中の描画関連処理 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	bool CVulkanAPI::BeginRender(ERenderPassType RenderPassType)
-	{
-		// 前のフレーム処理が終わるのを待つ
-		vkWaitForFences(m_LogicalDevice, 1, &m_InFlightFences[m_CurrentFrame], VK_TRUE, UINT64_MAX);
-
-		// スワップチェーンからイメージを取得する
-		// m_ImageAvailableSemaphoneのセマフォでGPU側の処理を止める
-		// 現在、スワップチェーンが古くないかチェックする(最新のウィンドウではサイズ等が変わっているかも!!)
-		VkResult result = vkAcquireNextImageKHR(m_LogicalDevice, m_SwapChain, UINT64_MAX, m_ImageAvailableSemaphones[m_CurrentFrame], VK_NULL_HANDLE, &m_CurrentImageIndex);
-		
-		// VK_ERROR_OUT_OF_DATE_KHR: スワップ チェーンはサーフェスと互換性がなくなり、レンダリングに使用できなくなりました(ウィンドウサイズの変更)
-		// VK_SUBOPTIMAL_KHR: スワップ チェーンを使用してサーフェスに正常に示することはできますが、サーフェス プロパティは正確に一致しなくなりました。
-		m_IsReCreateSwapChain = false;
-		
-		if (result == VK_ERROR_OUT_OF_DATE_KHR)
-		{
-			ReCreateSwapChain(); // 最新ではなのでスワップチェーンを作り直す
-
-			m_IsReCreateSwapChain = true;
-			return true;
-		}
-		else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR)
-		{
-			return false;
-		}
-
-		// 処理が終わって次の処理に移るのでフェンスをまた使える状態にシグナルをリセットしておく
-		vkResetFences(m_LogicalDevice, 1, &m_InFlightFences[m_CurrentFrame]);
-
-		// ユニフォームデータの更新(各3Dオブジェクト固有)
-		//UpdateUniformBuffer(m_CurrentFrame);
-
-		// コマンドバッファの記録
-		vkResetCommandBuffer(m_CommandBuffers[m_CurrentFrame], 0); // まずリセット
-
-		// 記録スタート
-		m_WaitRendering = false;
-		if (!BeginRecordCommandBuffer(m_CommandBuffers[m_CurrentFrame], m_CurrentImageIndex)) return false;
-
-		return true;
-	}
-
-	bool CVulkanAPI::EndRender()
-	{
-		m_WaitRendering = true;
-
-		// スワップチェーンを作り直しているので1フレーム待つ
-		if (m_IsReCreateSwapChain) return true;
-
-		// 記録終了
-		if (!EndRecordCommandBuffer(m_CommandBuffers[m_CurrentFrame], m_CurrentImageIndex)) return false;
-
-		//
-		// コマンドバッファの送信(たぶんここで描画される？)
-		VkSubmitInfo submitInfo{};
-		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-
-		VkSemaphore waitSemaphore[] = { m_ImageAvailableSemaphones[m_CurrentFrame] }; // 画像に色が書き込まれて利用可になるまで待つセマフォ
-		VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
-		submitInfo.waitSemaphoreCount = 1;
-		submitInfo.pWaitSemaphores = waitSemaphore;
-		submitInfo.pWaitDstStageMask = waitStages;
-
-		submitInfo.commandBufferCount = 1;
-		submitInfo.pCommandBuffers = &m_CommandBuffers[m_CurrentFrame];
-
-		VkSemaphore signalSemaphores[] = { m_RenderFinishedSemaphores[m_CurrentFrame] }; // コマンドの実行が終了したことを知らせるセマフォ
-		submitInfo.signalSemaphoreCount = 1;
-		submitInfo.pSignalSemaphores = signalSemaphores;
-
-		// コマンドバッファをグラフィックキューに送信
-		// コマンドバッファにはコマンドが入っていてそのコマンドをキューが実行する
-		// キューはタスクでその具体的なタスク内容がコマンドという理解もできる
-		if (vkQueueSubmit(m_GraphicsQueue, 1, &submitInfo, m_InFlightFences[m_CurrentFrame]) != VK_SUCCESS)
-		{
-			return false;
-		}
-
-		// プレゼンテーション(結果をスワップチェーンに送信して最終結果を画面に示する)
-		VkPresentInfoKHR presentInfo{};
-		presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
-		presentInfo.waitSemaphoreCount = 1;
-		presentInfo.pWaitSemaphores = signalSemaphores;
-		// イメージを示するスワップチェーンを選択
-		VkSwapchainKHR swapChains[] = { m_SwapChain };
-		presentInfo.swapchainCount = 1;
-		presentInfo.pSwapchains = swapChains;
-		presentInfo.pImageIndices = &m_CurrentImageIndex;
-
-		presentInfo.pResults = nullptr;
-
-		// プレゼンテーションキューを実行
-		VkResult result = vkQueuePresentKHR(m_PresentQueue, &presentInfo);
-
-		// 可な限り最良な結果を得るために念のためもう一度最新かチェックする
-		// VK_ERROR_OUT_OF_DATE_KHR: スワップ チェーンはサーフェスと互換性がなくなり、レンダリングに使用できなくなりました(ウィンドウサイズの変更)
-		// VK_SUBOPTIMAL_KHR: スワップ チェーンを使用してサーフェスに正常に示することはできますが、サーフェス プロパティは正確に一致しなくなりました。
-		if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || m_FramebufferResized)
-		{
-			m_FramebufferResized = false;
-			ReCreateSwapChain();
-		}
-		else if (result != VK_SUCCESS)
-		{
-			throw std::runtime_error("failed to present swap chain image!");
-		}
-
-		// 現在処理するフレームを更新する
-		m_CurrentFrame = (m_CurrentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
-		return true;
-	}
-
-	bool CVulkanAPI::IsWaitting()
-	{
-		return m_IsReCreateSwapChain || m_WaitRendering;
-	}
-
-	const std::string& CVulkanAPI::GetShaderExtension() const
-	{
-		return m_ShaderExtension;
-	}
-
-	// Device
-	const VkPhysicalDevice& CVulkanAPI::GetPhysicalDevice() const
-	{
-		return m_PhysicalDevice;
-	}
-
-	const VkDevice& CVulkanAPI::GetLogicalDevice() const
-	{
-		return m_LogicalDevice;
-	}
-
-	// SwapChain/Image
-	const VkExtent2D& CVulkanAPI::GetSwapChainExtent() const
-	{
-		return m_SwapChainExtent;
-	}
-
-	// Rendering
-	const VkRenderPass& CVulkanAPI::GetRenderPass() const
-	{
-		return m_RenderPass;
 	}
 }
 

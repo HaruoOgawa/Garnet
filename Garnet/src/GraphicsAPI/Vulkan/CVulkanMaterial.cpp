@@ -57,8 +57,13 @@ namespace api
 	bool CVulkanMaterial::Update(float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection)
 	{
 		// 共通のユニフォームバッファの更新
+		if (!m_pGraphicsAPI->BeginRecordCommandBuffer()) return false;
+
 		SetUniformValue("view", &Camera->GetViewMatrix()[0][0]);
 		SetUniformValue("proj", &Projection->GetPrejectionMatrix()[0][0]);
+
+		if (!m_pGraphicsAPI->EndRecordCommandBuffer()) return false;
+		if (!m_pGraphicsAPI->SubmitCommandNoSemaphore()) return false;
 
 		return true;
 	}
@@ -68,7 +73,7 @@ namespace api
 		for (int i = 0; i < m_UniformBufferDescList.size(); i++)
 		{
 			const auto& Desc = m_UniformBufferDescList[i];
-			auto BuffersMappedList = m_UniformBuffersMappedList[m_pGraphicsAPI->GetCurrentFrame()][i];
+			auto& UniformBuffer = m_UniformBuffersList[m_pGraphicsAPI->GetCurrentFrame()][i];
 
 			const auto& DataList = Desc->GetDataList();
 			const auto& UniformData = DataList.find(Name);
@@ -76,8 +81,8 @@ namespace api
 			{
 				const int ByteOffset = UniformData->second.ByteOffset;
 				const int ByteSize = UniformData->second.ByteSize;
-
-				std::memcpy(&BuffersMappedList + ByteOffset, Value, ByteSize);
+				
+				vkCmdUpdateBuffer(m_pGraphicsAPI->GetCommandBuffers()[m_pGraphicsAPI->GetCurrentFrame()], UniformBuffer, ByteOffset, ByteSize, Value);
 			}
 		}
 	}
@@ -320,7 +325,7 @@ namespace api
 				void* BuffersMappedList;
 
 				// バッファの作成
-				m_pGraphicsAPI->CreateBuffer(bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, UniformBuffer, BufferMemory);
+				m_pGraphicsAPI->CreateBuffer(bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, UniformBuffer, BufferMemory);
 
 				// バッファ用のメモリを作成
 				vkMapMemory(m_pGraphicsAPI->GetLogicalDevice(), BufferMemory, 0, bufferSize, 0, &BuffersMappedList);

@@ -116,6 +116,12 @@ namespace scene
 
 	bool CScriptScene::Update(api::IGraphicsAPI* pGraphicsAPI, float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection)
 	{
+		if (m_IsLoaded && m_TestObject)
+		{
+			if (!m_TestObject->Update(SecondsTime, Camera, Projection)) return false;
+
+		}
+
 		if (!m_IsLoaded)
 		{
 			if (m_VertexShader->IsDone() && m_FragmentShader->IsDone())
@@ -123,12 +129,6 @@ namespace scene
 				if(!Load(pGraphicsAPI)) return false;
 				m_IsLoaded = true;
 			}
-		}
-
-		if (m_IsLoaded && m_TestObject)
-		{
-			if (!m_TestObject->Update(SecondsTime, Camera, Projection)) return false;
-
 		}
 
 		return true;

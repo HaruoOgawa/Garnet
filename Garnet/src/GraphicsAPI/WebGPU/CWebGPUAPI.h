@@ -67,7 +67,6 @@ namespace api
 
 		bool BeginRender(ERenderPassType RenderPassType) override;
 		bool EndRender() override;
-		bool IsWaitting() override;
 
 		const std::string& GetShaderExtension() const override;
 
