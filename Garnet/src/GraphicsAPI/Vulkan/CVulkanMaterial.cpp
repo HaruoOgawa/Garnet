@@ -57,13 +57,13 @@ namespace api
 	bool CVulkanMaterial::Update(float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection)
 	{
 		// 共通のユニフォームバッファの更新
-		if (!m_pGraphicsAPI->BeginRecordCommandBuffer()) return false;
+		/*if (!m_pGraphicsAPI->BeginRecordCommandBuffer()) return false;
 
 		SetUniformValue("view", &Camera->GetViewMatrix()[0][0]);
 		SetUniformValue("proj", &Projection->GetPrejectionMatrix()[0][0]);
 
 		if (!m_pGraphicsAPI->EndRecordCommandBuffer()) return false;
-		if (!m_pGraphicsAPI->SubmitCommandNoSemaphore()) return false;
+		if (!m_pGraphicsAPI->SubmitCommandNoSemaphore()) return false;*/
 
 		return true;
 	}

@@ -9,7 +9,7 @@ namespace api
 	CVulkanAPI::CVulkanAPI():
 		m_pWindow(nullptr),
 		m_CurrentImageIndex(0),
-		m_IsReCreateSwapChain(false),
+		//m_IsReCreateSwapChain(false),
 		m_ShaderExtension(".spv")
 	{
 	}
@@ -134,7 +134,7 @@ namespace api
 	bool CVulkanAPI::EndRender()
 	{
 		// スワップチェーンを作り直しているので1フレーム待つ
-		if (m_IsReCreateSwapChain) return true;
+		//if (m_IsReCreateSwapChain) return true;
 
 		// 記録終了
 		if (!EndRenderPass()) return false;
@@ -718,13 +718,13 @@ namespace api
 
 		// VK_ERROR_OUT_OF_DATE_KHR: スワップ チェーンはサーフェスと互換性がなくなり、レンダリングに使用できなくなりました(ウィンドウサイズの変更)
 		// VK_SUBOPTIMAL_KHR: スワップ チェーンを使用してサーフェスに正常に示することはできますが、サーフェス プロパティは正確に一致しなくなりました。
-		m_IsReCreateSwapChain = false;
+		//m_IsReCreateSwapChain = false;
 
 		if (result == VK_ERROR_OUT_OF_DATE_KHR)
 		{
 			ReCreateSwapChain(); // 最新ではなのでスワップチェーンを作り直す
 
-			m_IsReCreateSwapChain = true;
+			//m_IsReCreateSwapChain = true;
 			return true;
 		}
 		else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR)
@@ -871,9 +871,9 @@ namespace api
 	{
 		std::string message(pCallbackData->pMessage);
 
-		if(messageType == VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT) message = "[GENERAL]" + message + "\n";
-		else if(messageType == VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT) message = "[VALIDATION]" + message + "\n";
-		else if(messageType == VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT) message = "[PERFORMANCE]" + message + "\n";
+		if(messageType == VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT) message = "[GENERAL Error]" + message + "\n";
+		else if(messageType == VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT) message = "[VALIDATION Error]" + message + "\n";
+		else if(messageType == VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT) message = "[PERFORMANCE Error]" + message + "\n";
 		
 		Console::Log(message.c_str());
 

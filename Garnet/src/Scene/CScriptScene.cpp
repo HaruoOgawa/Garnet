@@ -33,6 +33,8 @@ namespace scene
 
 	bool CScriptScene::Load(api::IGraphicsAPI* pGraphicsAPI)
 	{
+		Console::Log("___Loading Start____________________________________________________________________________________________________________________________________________________________\n");
+
 		// OBJECT
 		m_TestObject = std::make_shared<object::C3DObject>();
 
@@ -109,7 +111,7 @@ namespace scene
 			m_TestObject->AddNode(Node);
 		}
 		
-		Console::Log("Render is loaded\n");
+		Console::Log("___Render is loaded____________________________________________________________________________________________________________________________________________________________\n");
 
 		return true;
 	}

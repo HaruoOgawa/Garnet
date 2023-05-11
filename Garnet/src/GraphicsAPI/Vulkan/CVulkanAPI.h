@@ -75,7 +75,7 @@ namespace api
 		std::vector<VkImageView> m_SwapChainImageViews;
 
 		uint32_t m_CurrentImageIndex;
-		bool m_IsReCreateSwapChain;
+		//bool m_IsReCreateSwapChain;
 
 		// Rendering
 		VkRenderPass m_RenderPass;
