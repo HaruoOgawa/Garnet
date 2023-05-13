@@ -10,6 +10,8 @@ add_definitions(-D__DAWN__)
 
 add_executable(
 	Garnet
+	../src/App/CDemoAppManager.cpp
+	../src/App/CDemoAppManager.h
 	../src/App/CWebAppManager.cpp
 	../src/App/CWebAppManager.h
 	../src/App/EAppType.h
@@ -19,6 +21,8 @@ add_executable(
 	../src/App/MainApp/CMainApp.h
 	../src/App/ScriptApp/CScriptApp.cpp
 	../src/App/ScriptApp/CScriptApp.h
+	../src/Camera/CCamera.cpp
+	../src/Camera/CCamera.h
 	../src/Debug/Message/Console.h
 	../src/File/CFileReader.cpp
 	../src/File/CFileReader.h
@@ -30,19 +34,26 @@ add_executable(
 	../src/Graphics/CPresetPrimitive.h
 	../src/Graphics/CPrimitive.cpp
 	../src/Graphics/CPrimitive.h
+	../src/Graphics/CTextureBuffer.cpp
+	../src/Graphics/CTextureBuffer.h
+	../src/Graphics/CTextureBufferDescriptor.cpp
+	../src/Graphics/CTextureBufferDescriptor.h
 	../src/Graphics/CUniformBuffer.cpp
 	../src/Graphics/CUniformBuffer.h
 	../src/Graphics/CUniformBufferDescriptor.cpp
 	../src/Graphics/CUniformBufferDescriptor.h
-	../src/Graphics/CVertexBuffer.cpp
-	../src/Graphics/CVertexBuffer.h
-	../src/Graphics/SPrimitiveCreateInfo.h
-	../src/Graphics/SRendererCreateInfo.h
+	../src/Graphics/ERenderPassType.h
+	../src/Graphics/SBindingLayout.h
+	../src/GraphicsAPI/CMaterialCreateInfo.cpp
+	../src/GraphicsAPI/CMaterialCreateInfo.h
 	../src/GraphicsAPI/CRendererCreateInfo.cpp
 	../src/GraphicsAPI/CRendererCreateInfo.h
-	../src/GraphicsAPI/ERenderPassType.h
+	../src/GraphicsAPI/Vulkan/CVulkanMaterial.cpp
+	../src/GraphicsAPI/Vulkan/CVulkanMaterial.h
 	../src/GraphicsAPI/WebGPU/CWebGPUAPI.cpp
 	../src/GraphicsAPI/WebGPU/CWebGPUAPI.h
+	../src/GraphicsAPI/WebGPU/CWebGPUMaterial.cpp
+	../src/GraphicsAPI/WebGPU/CWebGPUMaterial.h
 	../src/GraphicsAPI/WebGPU/CWebGPURenderer.cpp
 	../src/GraphicsAPI/WebGPU/CWebGPURenderer.h
 	../src/Interface/IApp.h
@@ -50,6 +61,7 @@ add_executable(
 	../src/Interface/IDescriptor.h
 	../src/Interface/IGraphicsAPI.h
 	../src/Interface/IRenderer.h
+	../src/Main/DemoMain/DemoMain.cpp
 	../src/Main/WebMain/WebMain.cpp
 	../src/Math/CTransform.cpp
 	../src/Math/CTransform.h
@@ -59,6 +71,8 @@ add_executable(
 	../src/Object/CNode.h
 	../src/Object/CObject.cpp
 	../src/Object/CObject.h
+	../src/Projection/CProjection.cpp
+	../src/Projection/CProjection.h
 	../src/Scene/CScriptScene.cpp
 	../src/Scene/CScriptScene.h
 

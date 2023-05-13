@@ -6,6 +6,8 @@
 #include "../../Camera/CCamera.h"
 #include "../../Projection/CProjection.h"
 
+#include "../../Math/CTransform.h"
+
 namespace api
 {
 	CVulkanMaterial::CVulkanMaterial():
@@ -18,7 +20,6 @@ namespace api
 		m_DescriptorSetLayout(nullptr),
 		m_DescriptorPool(nullptr),
 
-		m_UseMainTexture(false),
 		m_TextureImage(nullptr),
 		m_TextureImageMemory(nullptr),
 		m_TextureImageView(nullptr),
@@ -34,7 +35,6 @@ namespace api
 	bool CVulkanMaterial::Create(api::IGraphicsAPI* pGraphicsAPI, const graphics::CMaterialCreateInfo& createInfo)
 	{
 		m_pGraphicsAPI = static_cast<api::CVulkanAPI*>(pGraphicsAPI);
-		m_UseMainTexture = createInfo.IsUseMainTexture();
 
 		if (!CreateShaderStages(createInfo)) return false; // Shaderの作成
 
@@ -47,61 +47,77 @@ namespace api
 		if (!CreateDescriptorPool(createInfo)) return false; // DescriptorPoolを作成する -> DescriptorSetsは直接生成できず、コマンドで生成する必要がある。記述子プールはそのコマンド群のことかな？
 		if (!CreateDescriptorSets(createInfo)) return false; // DescriptorSetsを作成 -> Uniformが使用するバッファをCPUからGPUに送信するための仕組みこと. https://vkguide.dev/docs/chapter-4/descriptors/
 
-		// シェーダーモジュールを破棄する
-		/*vkDestroyShaderModule(m_pGraphicsAPI->GetLogicalDevice(), m_FragShaderModule, nullptr);
-		vkDestroyShaderModule(m_pGraphicsAPI->GetLogicalDevice(), m_VertShaderModule, nullptr);*/
-
 		return true;
 	}
 
 	bool CVulkanMaterial::Update(float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection)
 	{
 		// 共通のユニフォームバッファの更新
-		/*if (!m_pGraphicsAPI->BeginRecordCommandBuffer()) return false;
-
 		SetUniformValue("view", &Camera->GetViewMatrix()[0][0]);
 		SetUniformValue("proj", &Projection->GetPrejectionMatrix()[0][0]);
 
-		if (!m_pGraphicsAPI->EndRecordCommandBuffer()) return false;
-		if (!m_pGraphicsAPI->SubmitCommandNoSemaphore()) return false;*/
+		return true;
+	}
+
+	bool CVulkanMaterial::BuildDrawBuffer()
+	{
+		for (int i = 0; i < m_UniformBufferList.size(); i++)
+		{
+			const auto& BufferData = m_UniformBufferList[i]->GetData();
+			auto bufferSize = BufferData.size();
+
+			std::memcpy(m_VKUniformBufferMappedList[m_pGraphicsAPI->GetCurrentFrame()][i], &BufferData[0], bufferSize);
+		}
 
 		return true;
 	}
 
 	void CVulkanMaterial::SetUniformValue(const std::string Name, const void* Value)
 	{
-		for (int i = 0; i < m_UniformBufferDescList.size(); i++)
+		for (int i = 0; i < m_UniformBufferList.size(); i++)
 		{
-			const auto& Desc = m_UniformBufferDescList[i];
-			auto& UniformBuffer = m_UniformBuffersList[m_pGraphicsAPI->GetCurrentFrame()][i];
+			auto& UniformBuffer = m_UniformBufferList[i];
+			const auto& UniformDesc = UniformBuffer->GetDescriptor();
 
-			const auto& DataList = Desc->GetDataList();
+			const auto& DataList = UniformDesc->GetDataList();
 			const auto& UniformData = DataList.find(Name);
 			if (UniformData != DataList.end())
 			{
 				const int ByteOffset = UniformData->second.ByteOffset;
 				const int ByteSize = UniformData->second.ByteSize;
 				
-				vkCmdUpdateBuffer(m_pGraphicsAPI->GetCommandBuffers()[m_pGraphicsAPI->GetCurrentFrame()], UniformBuffer, ByteOffset, ByteSize, Value);
+				UniformBuffer->SetValue(Value, ByteOffset, ByteSize);
 			}
 		}
 	}
 
 	void CVulkanMaterial::Release()
 	{
-		if (m_UseMainTexture)
+		// テクスチャサンプラーを破棄
+		if (m_TextureSampler)
 		{
-			// テクスチャサンプラーを破棄
 			vkDestroySampler(m_pGraphicsAPI->GetLogicalDevice(), m_TextureSampler, nullptr);
 			m_TextureSampler = nullptr;
+		}
 
-			// テクスチャ用のイメージビューの破棄
+
+		// テクスチャ用のイメージビューの破棄
+		if (m_TextureImageView)
+		{
 			vkDestroyImageView(m_pGraphicsAPI->GetLogicalDevice(), m_TextureImageView, nullptr);
 			m_TextureImageView = nullptr;
+		}
 
-			// テクスチャイメージの破棄
+
+		// テクスチャイメージの破棄
+		if (m_TextureImage)
+		{
 			vkDestroyImage(m_pGraphicsAPI->GetLogicalDevice(), m_TextureImage, nullptr);
 			m_TextureImage = nullptr;
+		}
+
+		if (m_TextureImageMemory)
+		{
 			vkFreeMemory(m_pGraphicsAPI->GetLogicalDevice(), m_TextureImageMemory, nullptr);
 			m_TextureImageMemory = nullptr;
 		}
@@ -109,12 +125,12 @@ namespace api
 		// ユニフォームの破棄
 		for (size_t i = 0; i < m_pGraphicsAPI->GetMaxFramesInFlight(); i++)
 		{
-			for (auto& Buffer : m_UniformBuffersList[i])
+			for (auto& Buffer : m_VKUniformBufferList[i])
 			{
 				vkDestroyBuffer(m_pGraphicsAPI->GetLogicalDevice(), Buffer, nullptr);
 			}
 			
-			for (auto& Memory : m_UniformBuffersMemoryList[i])
+			for (auto& Memory : m_VKUniformBufferMemoryList[i])
 			{
 				vkFreeMemory(m_pGraphicsAPI->GetLogicalDevice(), Memory, nullptr);
 			}
@@ -169,7 +185,8 @@ namespace api
 
 	bool CVulkanMaterial::CreateTextureImage(const graphics::CMaterialCreateInfo& createInfo)
 	{
-		if (createInfo.IsUseMainTexture())
+		//if (createInfo.IsUseMainTexture())
+		if (false)
 		{
 			// テクスチャをロード
 			int texWidth = 1024, texHeight = 1024, texChannels;
@@ -218,7 +235,7 @@ namespace api
 
 	bool CVulkanMaterial::CreateTextureImageView(const graphics::CMaterialCreateInfo& createInfo)
 	{
-		if (createInfo.IsUseMainTexture())
+		if (false)
 		{
 			m_TextureImageView = m_pGraphicsAPI->CreateImageView(m_TextureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT);
 		}
@@ -228,7 +245,7 @@ namespace api
 
 	bool CVulkanMaterial::CreateTextureSampler(const graphics::CMaterialCreateInfo& createInfo)
 	{
-		if (createInfo.IsUseMainTexture())
+		if (false)
 		{
 			VkSamplerCreateInfo samplerInfo{};
 			samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
@@ -265,9 +282,9 @@ namespace api
 	{
 		//
 		std::vector<VkDescriptorSetLayoutBinding> bindings;
-
+		
 		// レイアウトのバインドに関する設定
-		for (const auto& Buffer : createInfo.GetBufferList())
+		for (const auto& Buffer : m_UniformBufferList)
 		{
 			for (const auto& Layout : Buffer->GetBindingLayoutList())
 			{
@@ -309,13 +326,14 @@ namespace api
 
 	bool CVulkanMaterial::CreateUniformBuffers(const graphics::CMaterialCreateInfo& createInfo)
 	{
-		m_UniformBuffersList.resize(m_pGraphicsAPI->GetMaxFramesInFlight());
-		m_UniformBuffersMemoryList.resize(m_pGraphicsAPI->GetMaxFramesInFlight());
-		m_UniformBuffersMappedList.resize(m_pGraphicsAPI->GetMaxFramesInFlight());
+		m_VKUniformBufferList.resize(m_pGraphicsAPI->GetMaxFramesInFlight());
+		m_VKUniformBufferMemoryList.resize(m_pGraphicsAPI->GetMaxFramesInFlight());
+		m_VKUniformBufferMappedList.resize(m_pGraphicsAPI->GetMaxFramesInFlight());
+		m_VKUniformBufferSizeList.resize(m_pGraphicsAPI->GetMaxFramesInFlight());
 
 		for (size_t i = 0; i < m_pGraphicsAPI->GetMaxFramesInFlight(); i++)
 		{
-			for (const auto& Buffer : createInfo.GetBufferList())
+			for (const auto& Buffer : m_UniformBufferList)
 			{
 				const auto& Data = Buffer->GetData();
 				size_t bufferSize = Data.size();
@@ -334,9 +352,10 @@ namespace api
 				std::memcpy(BuffersMappedList, &Data[0], bufferSize);
 
 				//
-				m_UniformBuffersList[i].push_back(UniformBuffer);
-				m_UniformBuffersMemoryList[i].push_back(BufferMemory);
-				m_UniformBuffersMappedList[i].push_back(BuffersMappedList);
+				m_VKUniformBufferList[i].push_back(UniformBuffer);
+				m_VKUniformBufferMemoryList[i].push_back(BufferMemory);
+				m_VKUniformBufferMappedList[i].push_back(BuffersMappedList);
+				m_VKUniformBufferSizeList[i].push_back(bufferSize);
 			}
 		}
 
@@ -346,7 +365,7 @@ namespace api
 	{
 		std::vector<VkDescriptorPoolSize> poolSizes;
 
-		for (const auto& Buffer : createInfo.GetBufferList())
+		for (const auto& Buffer : m_UniformBufferList)
 		{
 			VkDescriptorPoolSize poolSize{};
 
@@ -399,60 +418,60 @@ namespace api
 		}
 
 		//
-		for (size_t i = 0; i < m_pGraphicsAPI->GetMaxFramesInFlight(); i++)
+		for (size_t FrameIndex = 0; FrameIndex < m_pGraphicsAPI->GetMaxFramesInFlight(); FrameIndex++)
 		{
-			std::vector<VkWriteDescriptorSet> descriptorWrites{};
-
-			for (int n = 0; n < createInfo.GetBufferList().size(); n++)
+			for (int BufferIndex = 0; BufferIndex < m_UniformBufferList.size(); BufferIndex++)
 			{
-				const auto& Buffer = createInfo.GetBufferList()[n];
+				const auto& Buffer = m_UniformBufferList[BufferIndex];
+				size_t LayoutListSize = Buffer->GetBindingLayoutList().size();
 
-				for (const auto& Layout : Buffer->GetBindingLayoutList())
+				std::vector<VkWriteDescriptorSet> descriptorWrites(LayoutListSize);
+				std::vector<VkDescriptorBufferInfo> bufferInfoList(LayoutListSize);
+				std::vector<VkDescriptorImageInfo> imageInfoList(LayoutListSize);
+
+				for (int LayoutIndex = 0; LayoutIndex < LayoutListSize; LayoutIndex++)
 				{
-					VkWriteDescriptorSet descriptorWrite{};
+					const auto& Layout = Buffer->GetBindingLayoutList()[LayoutIndex];
 
-					descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-					descriptorWrite.dstSet = m_DescriptorSets[i]; // どのDescriptorSets(キューファミリが入ってる？)でCPUからGPUにバッファを渡すコマンドを発行するか
-					descriptorWrite.dstBinding = Layout.BindingIndex; // layout(location = n)
-					descriptorWrite.dstArrayElement = 0; // ???
+					descriptorWrites[LayoutIndex].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+					descriptorWrites[LayoutIndex].dstSet = m_DescriptorSets[FrameIndex]; // どのDescriptorSets(キューファミリが入ってる？)でCPUからGPUにバッファを渡すコマンドを発行するか
+					descriptorWrites[LayoutIndex].dstBinding = Layout.BindingIndex; // layout(location = n)
+					descriptorWrites[LayoutIndex].dstArrayElement = 0; // ???
 					
 					switch (Buffer->GetBufferType())
 					{
 					case graphics::EBufferType::UNIFROM:
 						{
-							VkDescriptorBufferInfo bufferInfo{};
-							bufferInfo.buffer = m_UniformBuffersList[i][n]; // UBOの指定
-							bufferInfo.offset = Layout.ByteOffset; // バッファオフセット
-							bufferInfo.range = Layout.ByteSize; // サイズかな？
+							bufferInfoList[LayoutIndex].buffer = m_VKUniformBufferList[FrameIndex][BufferIndex]; // UBOの指定
+							bufferInfoList[LayoutIndex].offset = Layout.ByteOffset; // バッファオフセット
+							bufferInfoList[LayoutIndex].range = Layout.ByteSize; // サイズかな？
 
-							descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER; // どのタイプのコマンドを発行してもらうのか
-							descriptorWrite.descriptorCount = 1;
-							descriptorWrite.pBufferInfo = &bufferInfo;
+							descriptorWrites[LayoutIndex].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER; // どのタイプのコマンドを発行してもらうのか
+							descriptorWrites[LayoutIndex].descriptorCount = 1;
+							descriptorWrites[LayoutIndex].pBufferInfo = &bufferInfoList[LayoutIndex];
 						}
 						break;
 
 					case graphics::EBufferType::TEXTURE:
 						{
-							VkDescriptorImageInfo imageInfo{};
-							imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-							imageInfo.imageView = m_TextureImageView;
-							imageInfo.sampler = m_TextureSampler;
+							imageInfoList[LayoutIndex].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+							imageInfoList[LayoutIndex].imageView = m_TextureImageView;
+							imageInfoList[LayoutIndex].sampler = m_TextureSampler;
 
-							descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-							descriptorWrite.descriptorCount = 1;
-							descriptorWrite.pImageInfo = &imageInfo;
+							descriptorWrites[LayoutIndex].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+							descriptorWrites[LayoutIndex].descriptorCount = 1;
+							descriptorWrites[LayoutIndex].pImageInfo = &imageInfoList[LayoutIndex];
 						}
 						break;
 
 					default:
 						break;
 					}
-
-					descriptorWrites.push_back(descriptorWrite);
 				}
+
+				// たぶんバッファの転送を行うコマンドを発行している
+				vkUpdateDescriptorSets(m_pGraphicsAPI->GetLogicalDevice(), static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
 			}
-			
-			vkUpdateDescriptorSets(m_pGraphicsAPI->GetLogicalDevice(), static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
 		}
 
 		return true;

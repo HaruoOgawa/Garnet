@@ -31,14 +31,16 @@ namespace api
 
 		// Uniform Buffer Object
 		VkDescriptorSetLayout m_DescriptorSetLayout;
-		std::vector<std::vector<VkBuffer>> m_UniformBuffersList;
-		std::vector<std::vector<VkDeviceMemory>> m_UniformBuffersMemoryList;
-		std::vector<std::vector<void*>> m_UniformBuffersMappedList;
+
+		std::vector<std::vector<VkBuffer>> m_VKUniformBufferList;
+		std::vector<std::vector<VkDeviceMemory>> m_VKUniformBufferMemoryList;
+		std::vector<std::vector<void*>> m_VKUniformBufferMappedList;
+		std::vector<std::vector<size_t>> m_VKUniformBufferSizeList;
+
 		VkDescriptorPool m_DescriptorPool;
 		std::vector<VkDescriptorSet> m_DescriptorSets;
 
 		// Texture Image
-		bool m_UseMainTexture;
 		VkImage m_TextureImage;
 		VkDeviceMemory m_TextureImageMemory;
 		VkImageView m_TextureImageView; // シェーダーでテクスチャを取り扱う用のImageView
@@ -66,6 +68,7 @@ namespace api
 
 		virtual bool Create(api::IGraphicsAPI* pGraphicsAPI, const graphics::CMaterialCreateInfo& createInfo) override;
 		virtual bool Update(float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection) override;
+		virtual bool BuildDrawBuffer() override;
 
 		virtual void SetUniformValue(const std::string Name, const void* Value) override;
 

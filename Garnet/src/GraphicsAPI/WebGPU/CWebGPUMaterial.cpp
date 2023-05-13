@@ -20,11 +20,11 @@ namespace api
 
 	CWebGPUMaterial::~CWebGPUMaterial()
 	{
-		for (auto& UniformBuffer : m_UniformBufferList)
+		for (auto& UniformBuffer : m_WGPUUniformBufferList)
 		{
 			wgpuBufferDestroy(UniformBuffer);
 		}
-		m_UniformBufferList.clear();
+		m_WGPUUniformBufferList.clear();
 	}
 
 	bool CWebGPUMaterial::Create(api::IGraphicsAPI* pGraphicsAPI, const graphics::CMaterialCreateInfo& createInfo)
@@ -47,21 +47,26 @@ namespace api
 		return true;
 	}
 
+	bool CWebGPUMaterial::BuildDrawBuffer()
+	{
+		return true;
+	}
+
 	void CWebGPUMaterial::SetUniformValue(const std::string Name, const void* Value)
 	{
-		for (int i = 0; i < m_UniformBufferDescList.size(); i++)
+		for (int i = 0; i < m_UniformBufferList.size(); i++)
 		{
-			const auto& Desc = m_UniformBufferDescList[i];
 			auto& UniformBuffer = m_UniformBufferList[i];
+			const auto& UniformDesc = UniformBuffer->GetDescriptor();
 
-			const auto& DataList = Desc->GetDataList();
+			const auto& DataList = UniformDesc->GetDataList();
 			const auto& UniformData = DataList.find(Name);
 			if (UniformData != DataList.end())
 			{
 				const int ByteOffset = UniformData->second.ByteOffset;
 				const int ByteSize = UniformData->second.ByteSize;
 
-				wgpuQueueWriteBuffer(m_pGraphicsAPI->GetQueue(), UniformBuffer, ByteOffset, Value, ByteSize);
+				wgpuQueueWriteBuffer(m_pGraphicsAPI->GetQueue(), m_WGPUUniformBufferList[i], ByteOffset, Value, ByteSize);
 			}
 		}
 	}
@@ -96,7 +101,7 @@ namespace api
 
 	bool CWebGPUMaterial::CreateUniformBuffer(const graphics::CMaterialCreateInfo& createInfo)
 	{
-		for (const auto& Buffer : createInfo.GetBufferList())
+		for (const auto& Buffer : m_UniformBufferList)
 		{
 			const auto& Data = Buffer->GetData();
 
@@ -105,8 +110,8 @@ namespace api
 
 			if (!CreateBuffer(UniformBuffer, WGPUBufferUsage_CopyDst | WGPUBufferUsage_Uniform, &Data[0], UniformSize * sizeof(float))) return false;
 
-			m_UniformBufferList.push_back(UniformBuffer);
-			m_UniformSizeList.push_back(UniformSize);
+			m_WGPUUniformBufferList.push_back(UniformBuffer);
+			m_WGPUUniformSizeList.push_back(UniformSize);
 		}
 
 		return true;
@@ -119,7 +124,7 @@ namespace api
 		// -->これがWGSLでいう @binding(n)
 		std::vector<WGPUBindGroupLayoutEntry> bindingLayoutList;
 
-		for (const auto& Buffer : createInfo.GetBufferList())
+		for (const auto& Buffer : m_UniformBufferList)
 		{
 			for (const auto& Layout : Buffer->GetBindingLayoutList())
 			{
@@ -152,9 +157,9 @@ namespace api
 		// バッファとバインディングを結びつけるための記述かな？
 		// --> その通り、たぶんバッファのバインディングとかバインディングのオフセットとか
 		std::vector<WGPUBindGroupEntry> bindingList;
-		for (int i = 0; i < createInfo.GetBufferList().size(); i++)
+		for (int i = 0; i < m_UniformBufferList.size(); i++)
 		{
-			const auto& Buffer = createInfo.GetBufferList()[i];
+			const auto& Buffer = m_UniformBufferList[i];
 			for (const auto& Layout : Buffer->GetBindingLayoutList())
 			{
 				WGPUBindGroupEntry binding{};
@@ -163,7 +168,7 @@ namespace api
 
 				binding.nextInChain = nullptr; // 拡張機
 				binding.binding = Layout.BindingIndex;
-				binding.buffer = m_UniformBufferList[i];
+				binding.buffer = m_WGPUUniformBufferList[i];
 				binding.offset = Layout.ByteOffset;
 				binding.size = Layout.ByteSize;
 

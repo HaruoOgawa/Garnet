@@ -35,7 +35,7 @@ namespace object
 				const auto& Material = m_MaterialList[MaterialIndex];
 				
 				const auto& ModelMatrix = Node->GetTransform()->GetModelMatrix();
-				//Material->SetUniformValue("model", &ModelMatrix[0][0]);
+				Material->SetUniformValue("model", &ModelMatrix[0][0]);
 
 				if (!Primitive->Draw(Material)) return false;
 			}

@@ -20,8 +20,6 @@ namespace webapp
 		m_SecondsTime(0.0f),
 		m_DeltaSecondsTime(0.0f)
 	{
-		Console::Log("CWebAppManager::CWebAppManager\n");
-
 		//
 		m_GraphicsAPI = std::make_shared<api::CWebGPUAPI>();
 
@@ -43,14 +41,10 @@ namespace webapp
 	CWebAppManager::~CWebAppManager()
 	{
 		Release();
-
-		Console::Log("CWebAppManager::~CWebAppManager\n");
 	}
 
 	bool CWebAppManager::Release()
 	{
-		Console::Log("CWebAppManager::Release\n");
-
 		if (m_App)
 		{
 			m_App->Release(m_GraphicsAPI.get());
@@ -70,8 +64,6 @@ namespace webapp
 
 	bool CWebAppManager::Initialize()
 	{
-		Console::Log("CWebAppManager::Initialize\n");
-
 		if (!m_GraphicsAPI->Initialize()) return false;
 
 		if (!m_App->Initialize(m_GraphicsAPI.get())) return false;
@@ -81,8 +73,6 @@ namespace webapp
 
 	bool CWebAppManager::RunLoop()
 	{
-		//Console::Log("CWebAppManager::RunLopp\n");
-
 		if (!m_IsRunLoop)
 		{
 #ifdef __EMSCRIPTEN__
@@ -127,8 +117,6 @@ namespace webapp
 	// インプットイベント
 	void CWebAppManager::OnKeyDown(std::string key)
 	{
-		Console::Log("CWebAppManager::OnkeyDown / Key: %s\n", key.c_str());
-
 		if (key == "Escape")
 		{
 			m_IsRunLoop = false;

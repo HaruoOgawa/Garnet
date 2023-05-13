@@ -20,9 +20,6 @@ namespace graphics
 
 	class CMaterialCreateInfo
 	{
-		// Uniform
-		std::vector<std::shared_ptr<graphics::IBuffer>> m_BufferList;
-
 		// Shader
 		const EShaderType m_ShaderType;
 
@@ -31,9 +28,6 @@ namespace graphics
 		std::vector<char> m_GeometryShaderCode;
 		std::vector<char> m_HullShaderCode;
 		std::vector<char> m_DomainShaderCode;
-
-		// Texture
-		bool m_UseMainTexture;
 	public:
 		CMaterialCreateInfo();
 		virtual ~CMaterialCreateInfo() = default;
@@ -41,8 +35,6 @@ namespace graphics
 		// Uniform
 		std::shared_ptr<graphics::CUniformBuffer> CreateUniformBuffer(std::vector<int> BindIndexList);
 		std::shared_ptr<graphics::CTextureBuffer> CreateTextureBuffer(std::vector<int> BindIndexList);
-		void AddBuffer(const std::shared_ptr<graphics::IBuffer>& Buffer);
-		const std::vector<std::shared_ptr<graphics::IBuffer>>& GetBufferList() const;
 
 		// Shader
 		EShaderType GetShaderType() const;
@@ -63,8 +55,6 @@ namespace graphics
 		const std::vector<char>& GetDomainShaderCode() const;
 
 		// Texture
-		void SetUseMainTexture(bool UseMainTexture);
-		bool IsUseMainTexture() const;
 	};
 
 }

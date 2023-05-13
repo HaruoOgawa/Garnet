@@ -41,6 +41,9 @@ namespace renderer
 	{
 		api::CWebGPUMaterial* pWebGPUMat = static_cast<api::CWebGPUMaterial*>(Material.get());
 
+		// ユニフォームバッファの準備
+		if (!pWebGPUMat->BuildDrawBuffer()) return false;
+
 		// レンダーパスにパイプラインを割り当てる
 		wgpuRenderPassEncoderSetPipeline(m_pGraphicsAPI->GetRenderPass(), m_GraphicsPipeline); 
 

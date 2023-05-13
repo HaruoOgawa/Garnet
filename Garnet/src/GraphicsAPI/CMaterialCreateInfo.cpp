@@ -4,11 +4,10 @@ namespace graphics
 {
 	CMaterialCreateInfo::CMaterialCreateInfo():
 #ifdef __DAWN__
-		m_ShaderType(EShaderType::WGSL),
+		m_ShaderType(EShaderType::WGSL)
 #else
-		m_ShaderType(EShaderType::SPIRV),
+		m_ShaderType(EShaderType::SPIRV)
 #endif
-		m_UseMainTexture(false)
 	{
 	}
 
@@ -24,16 +23,6 @@ namespace graphics
 		auto Buffer = std::make_shared<graphics::CTextureBuffer>(BindIndexList);
 
 		return Buffer;
-	}
-
-	void CMaterialCreateInfo::AddBuffer(const std::shared_ptr<graphics::IBuffer>& Buffer)
-	{
-		m_BufferList.push_back(Buffer);
-	}
-
-	const std::vector<std::shared_ptr<graphics::IBuffer>>& CMaterialCreateInfo::GetBufferList() const
-	{
-		return m_BufferList;
 	}
 
 	// Shader
@@ -93,13 +82,4 @@ namespace graphics
 	}
 
 	// Texture
-	void CMaterialCreateInfo::SetUseMainTexture(bool UseMainTexture)
-	{
-		m_UseMainTexture = UseMainTexture;
-	}
-
-	bool CMaterialCreateInfo::IsUseMainTexture() const
-	{
-		return m_UseMainTexture;
-	}
 }

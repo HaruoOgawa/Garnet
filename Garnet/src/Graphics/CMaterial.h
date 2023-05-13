@@ -3,7 +3,9 @@
 #include <vector>
 #include <memory>
 #include <string>
+#include "CUniformBuffer.h"
 #include "CUniformBufferDescriptor.h"
+#include "CTextureBuffer.h"
 #include "CTextureBufferDescriptor.h"
 #include "../Interface/IGraphicsAPI.h"
 #include "../GraphicsAPI/CMaterialCreateInfo.h"
@@ -15,23 +17,24 @@ namespace projection { class CProjection; }
 namespace graphics
 {
 	class CMaterialCreateInfo;
-	class CUniformBufferDescriptor;
-	class CTextureBufferDescriptor;
+	class CUniformBuffer;
+	class CTextureBuffer;
 
 	class CMaterial
 	{
 	protected:
-		std::vector<std::shared_ptr<CUniformBufferDescriptor>> m_UniformBufferDescList;
-		std::vector<std::shared_ptr<CTextureBufferDescriptor>> m_TextureBufferDescList;
+		std::vector<std::shared_ptr<CUniformBuffer>> m_UniformBufferList;
+		std::vector<std::shared_ptr<CTextureBuffer>> m_TextureBufferList;
 	public:
 		CMaterial();
 		virtual ~CMaterial() = default;
 
 		virtual bool Create(api::IGraphicsAPI* pGraphicsAPI, const CMaterialCreateInfo& createInfo) = 0;
 		virtual bool Update(float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection) = 0;
+		virtual bool BuildDrawBuffer() = 0;
 
-		virtual void AddUniformBufferDescriptor(const std::shared_ptr<CUniformBufferDescriptor>& Desc);
-		virtual void AddTextureBufferDescriptor(const std::shared_ptr<CTextureBufferDescriptor>& Desc);
+		virtual void AddUniformBuffer(const std::shared_ptr<CUniformBuffer>& Buffer);
+		virtual void AddTextureBuffer(const std::shared_ptr<CTextureBuffer>& Buffer);
 
 		virtual void SetUniformValue(const std::string Name, const void* Value) = 0;
 	};

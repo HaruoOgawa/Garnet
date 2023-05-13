@@ -23,6 +23,8 @@ namespace graphics
 		virtual void AddData(const std::string& Name, const void* Data, int ByteSize, int BindingIndex) override;
 		virtual const std::vector<unsigned char>& GetData() const override;
 
+		void SetValue(const void* Value, int ByteOffset, int ByteSize);
+
 		virtual std::shared_ptr<CUniformBufferDescriptor> GetDescriptor() const;
 		virtual const std::vector<SBindingLayout>& GetBindingLayoutList() const override;
 

@@ -49,6 +49,11 @@ namespace graphics
 		return m_Buffer;
 	}
 
+	void CUniformBuffer::SetValue(const void* Value, int ByteOffset, int ByteSize)
+	{
+		std::memcpy(&m_Buffer[ByteOffset], Value, ByteSize);
+	}
+
 	std::shared_ptr<CUniformBufferDescriptor> CUniformBuffer::GetDescriptor() const
 	{
 		return m_Descriptor;

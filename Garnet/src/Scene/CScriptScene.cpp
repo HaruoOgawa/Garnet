@@ -33,8 +33,6 @@ namespace scene
 
 	bool CScriptScene::Load(api::IGraphicsAPI* pGraphicsAPI)
 	{
-		Console::Log("___Loading Start____________________________________________________________________________________________________________________________________________________________\n");
-
 		// OBJECT
 		m_TestObject = std::make_shared<object::C3DObject>();
 
@@ -91,8 +89,7 @@ namespace scene
 
 				UniformBuffer->RecalculateBindingLayoutOffset();
 
-				Material->AddUniformBufferDescriptor(UniformBuffer->GetDescriptor());
-				createInfo.AddBuffer(UniformBuffer);
+				Material->AddUniformBuffer(UniformBuffer);
 			}
 			
 			// CREATE MATERIAL
@@ -110,8 +107,6 @@ namespace scene
 			std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(Mesh);
 			m_TestObject->AddNode(Node);
 		}
-		
-		Console::Log("___Render is loaded____________________________________________________________________________________________________________________________________________________________\n");
 
 		return true;
 	}

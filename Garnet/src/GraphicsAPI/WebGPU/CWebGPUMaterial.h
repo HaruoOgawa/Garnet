@@ -22,8 +22,8 @@ namespace api
 		WGPUShaderModule m_FragmentShaderModele;
 
 		// Uniform
-		std::vector<WGPUBuffer> m_UniformBufferList;
-		std::vector<size_t>	    m_UniformSizeList;
+		std::vector<WGPUBuffer> m_WGPUUniformBufferList;
+		std::vector<size_t>	    m_WGPUUniformSizeList;
 
 		// BindGroup
 		WGPUBindGroupLayout m_BindGroupLayout;
@@ -45,6 +45,7 @@ namespace api
 
 		virtual bool Create(api::IGraphicsAPI* pGraphicsAPI, const graphics::CMaterialCreateInfo& createInfo) override;
 		virtual bool Update(float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection) override;
+		virtual bool BuildDrawBuffer() override;
 
 		virtual void SetUniformValue(const std::string Name, const void* Value) override;
 

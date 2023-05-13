@@ -16,14 +16,14 @@ namespace graphics
 		return true;
 	}
 
-	void CMaterial::AddUniformBufferDescriptor(const std::shared_ptr<CUniformBufferDescriptor>& Desc)
+	void CMaterial::AddUniformBuffer(const std::shared_ptr<CUniformBuffer>& Buffer)
 	{
-		m_UniformBufferDescList.push_back(Desc);
+		m_UniformBufferList.push_back(Buffer);
 	}
 	
-	void CMaterial::AddTextureBufferDescriptor(const std::shared_ptr<CTextureBufferDescriptor>& Desc)
+	void CMaterial::AddTextureBuffer(const std::shared_ptr<CTextureBuffer>& Buffer)
 	{
-		m_TextureBufferDescList.push_back(Desc);
+		m_TextureBufferList.push_back(Buffer);
 	}
 
 	void CMaterial::SetUniformValue(const std::string Name, const void* Value)
