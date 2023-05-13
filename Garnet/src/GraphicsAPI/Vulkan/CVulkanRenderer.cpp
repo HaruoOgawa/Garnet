@@ -43,8 +43,10 @@ namespace renderer
 		vkDestroyPipelineLayout(m_pGraphicsAPI->GetLogicalDevice(), m_PipelineLayout, nullptr);
 	}
 
-	bool CVulkanRenderer::Create(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CRendererCreateInfo>& createInfo, const std::shared_ptr<graphics::CMaterial>& Material)
+	bool CVulkanRenderer::Create(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CRendererCreateInfo>& createInfo, const std::shared_ptr<graphics::CMaterial>& Material, int DynamicOffsetNum)
 	{
+		m_DynamicOffsetNum = DynamicOffsetNum;
+
 		m_pGraphicsAPI = static_cast<api::CVulkanAPI*>(pGraphicsAPI);
 		api::CVulkanMaterial* pVulkanMat = static_cast<api::CVulkanMaterial*>(Material.get());
 

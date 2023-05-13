@@ -25,8 +25,10 @@ namespace renderer
 		}
 	}
 
-	bool CWebGPURenderer::Create(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CRendererCreateInfo>& createInfo, const std::shared_ptr<graphics::CMaterial>& Material)
+	bool CWebGPURenderer::Create(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CRendererCreateInfo>& createInfo, const std::shared_ptr<graphics::CMaterial>& Material, int DynamicOffsetNum)
 	{
+		m_DynamicOffsetNum = DynamicOffsetNum;
+
 		m_pGraphicsAPI = static_cast<api::CWebGPUAPI*>(pGraphicsAPI);
 		api::CWebGPUMaterial* pWebGPUMat = static_cast<api::CWebGPUMaterial*>(Material.get());
 

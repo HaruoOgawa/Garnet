@@ -28,6 +28,8 @@ namespace renderer
 
 	class CVulkanRenderer : public IRenderer
 	{
+		int	m_DynamicOffsetNum;
+
 		// API
 		api::CVulkanAPI* m_pGraphicsAPI;
 
@@ -55,7 +57,7 @@ namespace renderer
 
 		void Release();
 
-		bool Create(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CRendererCreateInfo>& createInfo, const std::shared_ptr<graphics::CMaterial>& Material) override;
+		bool Create(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CRendererCreateInfo>& createInfo, const std::shared_ptr<graphics::CMaterial>& Material, int DynamicOffsetNum) override;
 		bool Draw(const std::shared_ptr<graphics::CMaterial>& Material) override;
 	};
 }

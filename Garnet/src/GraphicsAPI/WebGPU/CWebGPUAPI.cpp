@@ -53,7 +53,7 @@ namespace api
 
 	std::shared_ptr<renderer::IRenderer> CWebGPUAPI::CreateRenderer()
 	{
-		const auto Renderer = std::make_shared<renderer::CWebGPURenderer>();
+		auto Renderer = std::make_shared<renderer::CWebGPURenderer>();
 
 		return Renderer;
 	}

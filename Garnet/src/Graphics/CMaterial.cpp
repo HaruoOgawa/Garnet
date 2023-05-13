@@ -36,4 +36,14 @@ namespace graphics
 	void CMaterial::SetUniformValue(const std::string Name, const void* Value)
 	{
 	}
+
+	void CMaterial::IncreaseRefCount()
+	{
+		m_RefCount++;
+	}
+
+	int CMaterial::GetRefCount() const
+	{
+		return m_RefCount;
+	}
 }

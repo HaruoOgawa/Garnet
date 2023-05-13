@@ -42,5 +42,8 @@ namespace graphics
 		virtual void AddTextureBuffer(const std::shared_ptr<CTextureBuffer>& Buffer);
 
 		virtual void SetUniformValue(const std::string Name, const void* Value) = 0;
+
+		virtual void IncreaseRefCount();
+		virtual int GetRefCount() const;
 	};
 }

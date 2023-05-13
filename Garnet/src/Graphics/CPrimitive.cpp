@@ -5,12 +5,18 @@
 
 namespace graphics
 {
-	CPrimitive::CPrimitive(int MaterialIndex, const std::shared_ptr<renderer::CRendererCreateInfo>& createInfo, EPresetPrimitiveType PresetType) :
+	CPrimitive::CPrimitive(int MaterialIndex, const std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList, const std::shared_ptr<renderer::CRendererCreateInfo>& createInfo, 
+		EPresetPrimitiveType PresetType) :
 		m_Renderer(nullptr),
 		m_MaterialIndex(MaterialIndex),
 		m_CreateInfo(createInfo),
-		m_PresetType(PresetType)
+		m_PresetType(PresetType),
+		m_DynamicOffsetNum(0)
 	{
+		const auto& Material = MaterialList[MaterialIndex];
+		Material->IncreaseRefCount();
+
+		m_DynamicOffsetNum = Material->GetRefCount();
 	}
 	
 	CPrimitive::~CPrimitive()
@@ -39,7 +45,7 @@ namespace graphics
 	bool CPrimitive::Create(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CMaterial>& Material, const std::shared_ptr<renderer::CRendererCreateInfo>& createInfo)
 	{
 		m_Renderer = pGraphicsAPI->CreateRenderer();
-		if (!m_Renderer->Create(pGraphicsAPI, createInfo, Material)) return false;
+		if (!m_Renderer->Create(pGraphicsAPI, createInfo, Material, m_DynamicOffsetNum)) return false;
 
 		return true;
 	}
@@ -64,7 +70,7 @@ namespace graphics
 		}
 
 		m_Renderer = pGraphicsAPI->CreateRenderer();
-		if (!m_Renderer->Create(pGraphicsAPI, createInfo, Material)) return false;
+		if (!m_Renderer->Create(pGraphicsAPI, createInfo, Material, m_DynamicOffsetNum)) return false;
 
 		return true;
 	}

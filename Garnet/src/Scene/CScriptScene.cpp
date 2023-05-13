@@ -100,7 +100,7 @@ namespace scene
 
 		{
 			// MESH
-			std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(0, std::make_shared<renderer::CRendererCreateInfo>(), graphics::EPresetPrimitiveType::BOARD);
+			std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(0, m_TestObject->GetMaterialList(), std::make_shared<renderer::CRendererCreateInfo>(), graphics::EPresetPrimitiveType::BOARD);
 			std::shared_ptr<graphics::CMesh> Mesh = std::make_shared<graphics::CMesh>();
 			Mesh->AddPrimitive(Primitive);
 
