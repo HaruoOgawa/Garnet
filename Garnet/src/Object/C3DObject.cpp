@@ -12,6 +12,28 @@ namespace object
 		m_MaterialList.clear();
 	}
 
+	bool C3DObject::Create(api::IGraphicsAPI* pGraphicsAPI)
+	{
+		// Material
+		for (auto& Material : m_MaterialList)
+		{
+			if (!Material->Create(pGraphicsAPI)) return false;
+		}
+
+		// Primitive
+		for (const auto& Node : m_NodeList)
+		{
+			const auto& Mesh = Node->GetMesh();
+
+			for (const auto& Primitive : Mesh->GetPrimitiveList())
+			{
+				if (!Primitive->Create(pGraphicsAPI, m_MaterialList)) return false;
+			}
+		}
+
+		return true;
+	}
+
 	bool C3DObject::Update(float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection)
 	{
 		for (auto& Material : m_MaterialList)

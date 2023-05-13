@@ -2,11 +2,18 @@
 
 namespace graphics
 {
-	CMaterial::CMaterial()
+	CMaterial::CMaterial():
+		m_CreateInfo(nullptr),
+		m_RefCount(0)
 	{
 	}
 
-	bool CMaterial::Create(api::IGraphicsAPI* pGraphicsAPI, const CMaterialCreateInfo& createInfo)
+	void CMaterial::SetCreateInfo(const std::shared_ptr<CMaterialCreateInfo>& createInfo)
+	{
+		m_CreateInfo = createInfo;
+	}
+
+	bool CMaterial::Create(api::IGraphicsAPI* pGraphicsAPI)
 	{
 		return true;
 	}

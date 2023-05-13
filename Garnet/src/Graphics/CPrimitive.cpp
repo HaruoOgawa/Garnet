@@ -2,29 +2,41 @@
 #include "CMaterial.h"
 #include "../Interface/IGraphicsAPI.h"
 #include "../Interface/IRenderer.h"
-#include "../GraphicsAPI/CRendererCreateInfo.h"
 
 namespace graphics
 {
-	CPrimitive::CPrimitive(api::IGraphicsAPI* pGraphicsAPI, const renderer::CRendererCreateInfo& createInfo, int MaterialIndex, const std::vector<std::shared_ptr<CMaterial>>& MaterialList):
+	CPrimitive::CPrimitive(int MaterialIndex, const std::shared_ptr<renderer::CRendererCreateInfo>& createInfo, EPresetPrimitiveType PresetType) :
 		m_Renderer(nullptr),
-		m_MaterialIndex(MaterialIndex)
+		m_MaterialIndex(MaterialIndex),
+		m_CreateInfo(createInfo),
+		m_PresetType(PresetType)
 	{
-		Create(pGraphicsAPI, createInfo, MaterialList[MaterialIndex]);
 	}
 	
-	CPrimitive::CPrimitive(api::IGraphicsAPI* pGraphicsAPI, EPresetPrimitiveType Type, int MaterialIndex, const std::vector<std::shared_ptr<CMaterial>>& MaterialList):
-		m_Renderer(nullptr),
-		m_MaterialIndex(MaterialIndex)
-	{
-		Create(pGraphicsAPI, Type, MaterialList[MaterialIndex]);
-	}
-
 	CPrimitive::~CPrimitive()
 	{
 	}
 
-	bool CPrimitive::Create(api::IGraphicsAPI* pGraphicsAPI, const renderer::CRendererCreateInfo& createInfo, const std::shared_ptr<CMaterial>& Material)
+	bool CPrimitive::Create(api::IGraphicsAPI* pGraphicsAPI, const std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList)
+	{
+		const auto& Material = MaterialList[m_MaterialIndex];
+
+		if (m_PresetType == EPresetPrimitiveType::None)
+		{
+			if (!Create(pGraphicsAPI, Material, m_CreateInfo)) return false;
+		}
+		else
+		{
+			if (!Create(pGraphicsAPI, Material, m_PresetType)) return false;
+		}
+
+		// 生成処理が終わったので不要なリソースを解放する
+		m_CreateInfo = nullptr;
+
+		return true;
+	}
+
+	bool CPrimitive::Create(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CMaterial>& Material, const std::shared_ptr<renderer::CRendererCreateInfo>& createInfo)
 	{
 		m_Renderer = pGraphicsAPI->CreateRenderer();
 		if (!m_Renderer->Create(pGraphicsAPI, createInfo, Material)) return false;
@@ -32,11 +44,11 @@ namespace graphics
 		return true;
 	}
 
-	bool CPrimitive::Create(api::IGraphicsAPI* pGraphicsAPI, EPresetPrimitiveType Type, const std::shared_ptr<CMaterial>& Material)
+	bool CPrimitive::Create(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CMaterial>& Material, EPresetPrimitiveType PresetType)
 	{
-		renderer::CRendererCreateInfo createInfo;
+		std::shared_ptr<renderer::CRendererCreateInfo> createInfo = std::make_shared<renderer::CRendererCreateInfo>();
 
-		switch (Type)
+		switch (PresetType)
 		{
 		case graphics::EPresetPrimitiveType::BOARD:
 			if (!CPresetPrimitive::CreateBoard(createInfo)) return false;

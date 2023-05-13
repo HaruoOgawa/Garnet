@@ -32,20 +32,23 @@ namespace api
 		Release();
 	}
 
-	bool CVulkanMaterial::Create(api::IGraphicsAPI* pGraphicsAPI, const graphics::CMaterialCreateInfo& createInfo)
+	bool CVulkanMaterial::Create(api::IGraphicsAPI* pGraphicsAPI)
 	{
 		m_pGraphicsAPI = static_cast<api::CVulkanAPI*>(pGraphicsAPI);
 
-		if (!CreateShaderStages(createInfo)) return false; // Shaderの作成
+		if (!CreateShaderStages(m_CreateInfo)) return false; // Shaderの作成
 
-		/*if (!CreateTextureImage(createInfo)) return false; // テクスチャイメージの生成
-		if (!CreateTextureImageView(createInfo)) return false;// シェーダーで取り扱う用のImageViewを作成
-		if (!CreateTextureSampler(createInfo)) return false; // テクスチャサンプラーを作成.サンプラーとはテクスチャデータをフラグメント(3Dモデル)に合うように調整する機構*/
+		/*if (!CreateTextureImage(m_CreateInfo)) return false; // テクスチャイメージの生成
+		if (!CreateTextureImageView(m_CreateInfo)) return false;// シェーダーで取り扱う用のImageViewを作成
+		if (!CreateTextureSampler(m_CreateInfo)) return false; // テクスチャサンプラーを作成.サンプラーとはテクスチャデータをフラグメント(3Dモデル)に合うように調整する機構*/
 
-		if (!CreateDescriptorSetLayout(createInfo)) return false; // DescriptorSetLayoutの作成(Uniformをどのようにバインドするか), WebGPUでいうバインドグループの生成
-		if (!CreateUniformBuffers(createInfo)) return false; // ユニフォームバッファを作成
-		if (!CreateDescriptorPool(createInfo)) return false; // DescriptorPoolを作成する -> DescriptorSetsは直接生成できず、コマンドで生成する必要がある。記述子プールはそのコマンド群のことかな？
-		if (!CreateDescriptorSets(createInfo)) return false; // DescriptorSetsを作成 -> Uniformが使用するバッファをCPUからGPUに送信するための仕組みこと. https://vkguide.dev/docs/chapter-4/descriptors/
+		if (!CreateDescriptorSetLayout(m_CreateInfo)) return false; // DescriptorSetLayoutの作成(Uniformをどのようにバインドするか), WebGPUでいうバインドグループの生成
+		if (!CreateUniformBuffers(m_CreateInfo)) return false; // ユニフォームバッファを作成
+		if (!CreateDescriptorPool(m_CreateInfo)) return false; // DescriptorPoolを作成する -> DescriptorSetsは直接生成できず、コマンドで生成する必要がある。記述子プールはそのコマンド群のことかな？
+		if (!CreateDescriptorSets(m_CreateInfo)) return false; // DescriptorSetsを作成 -> Uniformが使用するバッファをCPUからGPUに送信するための仕組みこと. https://vkguide.dev/docs/chapter-4/descriptors/
+
+		// 生成処理が終わったので不要なリソースを解放する
+		m_CreateInfo = nullptr;
 
 		return true;
 	}
@@ -146,15 +149,15 @@ namespace api
 	}
 
 	// Vulkanメインロジック /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	bool CVulkanMaterial::CreateShaderStages(const graphics::CMaterialCreateInfo& createInfo)
+	bool CVulkanMaterial::CreateShaderStages(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo)
 	{
 		// シェーダーの準備
 		// ShaderModuleの作成(Shaderをラップ・管理するためのもの)
 		// 使う時にGeometryとかTessellationも追加する
-		const auto& VertexShaderData = createInfo.GetVertexShaderCode();
+		const auto& VertexShaderData = createInfo->GetVertexShaderCode();
 		const bool UseVertexShader = CreateShaderModule(m_VertShaderModule, std::string(&VertexShaderData[0], &VertexShaderData[0] + VertexShaderData.size()));
 
-		const auto& FragmentShaderCode = createInfo.GetFragmentShaderCode();
+		const auto& FragmentShaderCode = createInfo->GetFragmentShaderCode();
 		const bool UseFragmentShader = CreateShaderModule(m_FragShaderModule, std::string(&FragmentShaderCode[0], &FragmentShaderCode[0] + FragmentShaderCode.size()));
 
 		// シェーダーステージの作成(VertexShaderとかFragment, Geometryとかそういうステージ)
@@ -183,7 +186,7 @@ namespace api
 		return true;
 	}
 
-	bool CVulkanMaterial::CreateTextureImage(const graphics::CMaterialCreateInfo& createInfo)
+	bool CVulkanMaterial::CreateTextureImage(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo)
 	{
 		//if (createInfo.IsUseMainTexture())
 		if (false)
@@ -233,7 +236,7 @@ namespace api
 		return true;
 	}
 
-	bool CVulkanMaterial::CreateTextureImageView(const graphics::CMaterialCreateInfo& createInfo)
+	bool CVulkanMaterial::CreateTextureImageView(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo)
 	{
 		if (false)
 		{
@@ -243,7 +246,7 @@ namespace api
 		return true;
 	}
 
-	bool CVulkanMaterial::CreateTextureSampler(const graphics::CMaterialCreateInfo& createInfo)
+	bool CVulkanMaterial::CreateTextureSampler(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo)
 	{
 		if (false)
 		{
@@ -278,7 +281,7 @@ namespace api
 		return true;
 	}
 
-	bool CVulkanMaterial::CreateDescriptorSetLayout(const graphics::CMaterialCreateInfo& createInfo)
+	bool CVulkanMaterial::CreateDescriptorSetLayout(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo)
 	{
 		//
 		std::vector<VkDescriptorSetLayoutBinding> bindings;
@@ -324,7 +327,7 @@ namespace api
 		return (result == VK_SUCCESS);
 	}
 
-	bool CVulkanMaterial::CreateUniformBuffers(const graphics::CMaterialCreateInfo& createInfo)
+	bool CVulkanMaterial::CreateUniformBuffers(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo)
 	{
 		m_VKUniformBufferList.resize(m_pGraphicsAPI->GetMaxFramesInFlight());
 		m_VKUniformBufferMemoryList.resize(m_pGraphicsAPI->GetMaxFramesInFlight());
@@ -361,7 +364,7 @@ namespace api
 
 		return true;
 	}
-	bool CVulkanMaterial::CreateDescriptorPool(const graphics::CMaterialCreateInfo& createInfo)
+	bool CVulkanMaterial::CreateDescriptorPool(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo)
 	{
 		std::vector<VkDescriptorPoolSize> poolSizes;
 
@@ -401,7 +404,7 @@ namespace api
 
 		return true;
 	}
-	bool CVulkanMaterial::CreateDescriptorSets(const graphics::CMaterialCreateInfo& createInfo)
+	bool CVulkanMaterial::CreateDescriptorSets(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo)
 	{
 		std::vector<VkDescriptorSetLayout> layouts(m_pGraphicsAPI->GetMaxFramesInFlight(), m_DescriptorSetLayout);
 		VkDescriptorSetAllocateInfo allocInfo{};

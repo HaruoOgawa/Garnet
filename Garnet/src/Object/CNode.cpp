@@ -28,4 +28,34 @@ namespace object
 	{
 		return m_Transform;
 	}
+
+	const glm::vec3& CNode::GetPos() const
+	{
+		return m_Transform->GetPos();
+	}
+
+	void CNode::SetPos(const glm::vec3& Pos)
+	{
+		m_Transform->SetPos(Pos);
+	}
+
+	const glm::vec3& CNode::GetRot() const
+	{
+		return m_Transform->GetRot();
+	}
+
+	void CNode::SetRot(const glm::vec3& Rot)
+	{
+		m_Transform->SetRot(Rot);
+	}
+
+	const glm::vec3& CNode::GetScale() const
+	{
+		return m_Transform->GetScale();
+	}
+
+	void CNode::SetScale(const glm::vec3& Scale)
+	{
+		m_Transform->SetScale(Scale);
+	}
 }

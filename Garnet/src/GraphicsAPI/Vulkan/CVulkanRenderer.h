@@ -43,9 +43,9 @@ namespace renderer
 		VkPipeline m_GraphicsPipeline;
 	private:
 		// Vulkanメインロジック /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		bool CreateVertexBuffer(const CRendererCreateInfo& createInfo);
-		bool CreateIndexBuffer(const CRendererCreateInfo& createInfo);
-		bool CreateGraphicsPipeline(const CRendererCreateInfo& createInfo, api::CVulkanMaterial* pVulkanMat);
+		bool CreateVertexBuffer(const std::shared_ptr<CRendererCreateInfo>& createInfo);
+		bool CreateIndexBuffer(const std::shared_ptr<CRendererCreateInfo>& createInfo);
+		bool CreateGraphicsPipeline(const std::shared_ptr<CRendererCreateInfo>& createInfo, api::CVulkanMaterial* pVulkanMat);
 
 		// ヘルパー関数 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		VkFormat GetVertexFormat(int Dimention);
@@ -55,7 +55,7 @@ namespace renderer
 
 		void Release();
 
-		bool Create(api::IGraphicsAPI* pGraphicsAPI, const CRendererCreateInfo& createInfo, const std::shared_ptr<graphics::CMaterial>& Material) override;
+		bool Create(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CRendererCreateInfo>& createInfo, const std::shared_ptr<graphics::CMaterial>& Material) override;
 		bool Draw(const std::shared_ptr<graphics::CMaterial>& Material) override;
 	};
 }

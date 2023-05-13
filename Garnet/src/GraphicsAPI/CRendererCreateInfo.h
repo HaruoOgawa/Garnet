@@ -11,7 +11,7 @@ namespace renderer
 		std::vector<int> m_AttributeDimensions;
 	public:
 		CRendererCreateInfo();
-		virtual ~CRendererCreateInfo() = default;
+		virtual ~CRendererCreateInfo();
 		
 		// VertexBuffer
 		void SetVertices(const std::vector<std::vector<float>>& Vertices);

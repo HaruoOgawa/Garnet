@@ -27,13 +27,16 @@ namespace api
 		m_WGPUUniformBufferList.clear();
 	}
 
-	bool CWebGPUMaterial::Create(api::IGraphicsAPI* pGraphicsAPI, const graphics::CMaterialCreateInfo& createInfo)
+	bool CWebGPUMaterial::Create(api::IGraphicsAPI* pGraphicsAPI)
 	{
 		m_pGraphicsAPI = static_cast<api::CWebGPUAPI*>(pGraphicsAPI);
 
-		if (!CreateShaderStages(createInfo)) return false;
-		if (!CreateUniformBuffer(createInfo)) return false; // ユニフォームバッファを生成
-		if (!CreateBindGroup(createInfo)) return false; // バインドグループを生成(レンダリングパイプラインで使用するすべてのリソースをどのようにバインドするかを指定するオブジェクト)
+		if (!CreateShaderStages(m_CreateInfo)) return false;
+		if (!CreateUniformBuffer(m_CreateInfo)) return false; // ユニフォームバッファを生成
+		if (!CreateBindGroup(m_CreateInfo)) return false; // バインドグループを生成(レンダリングパイプラインで使用するすべてのリソースをどのようにバインドするかを指定するオブジェクト)
+
+		// 生成処理が終わったので不要なリソースを解放する
+		m_CreateInfo = nullptr;
 
 		return true;
 	}
@@ -72,23 +75,23 @@ namespace api
 	}
 
 	// WebGPU Main Logic /////////////////////////////////////////////////////////////////////
-	bool CWebGPUMaterial::CreateShaderStages(const graphics::CMaterialCreateInfo& createInfo)
+	bool CWebGPUMaterial::CreateShaderStages(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo)
 	{
 		// シェーダーモジュールの生成 //////////////////////////////////////////////////////////////////
-		if (createInfo.GetShaderType() == graphics::EShaderType::SPIRV)
+		if (createInfo->GetShaderType() == graphics::EShaderType::SPIRV)
 		{
-			const auto& VertexShaderData = createInfo.GetVertexShaderCode();
+			const auto& VertexShaderData = createInfo->GetVertexShaderCode();
 			m_VertexShaderModele = CreateShaderModuleFromSPIRV(VertexShaderData);
 
-			const auto& FragmentShaderCode = createInfo.GetFragmentShaderCode();
+			const auto& FragmentShaderCode = createInfo->GetFragmentShaderCode();
 			m_FragmentShaderModele = CreateShaderModuleFromSPIRV(FragmentShaderCode);
 		}
-		else if (createInfo.GetShaderType() == graphics::EShaderType::WGSL)
+		else if (createInfo->GetShaderType() == graphics::EShaderType::WGSL)
 		{
-			const auto& VertexShaderData = createInfo.GetVertexShaderCode();
+			const auto& VertexShaderData = createInfo->GetVertexShaderCode();
 			m_VertexShaderModele = CreateShaderModuleFromWGSL(std::string(&VertexShaderData[0], &VertexShaderData[0] + VertexShaderData.size()));
 
-			const auto& FragmentShaderCode = createInfo.GetFragmentShaderCode();
+			const auto& FragmentShaderCode = createInfo->GetFragmentShaderCode();
 			m_FragmentShaderModele = CreateShaderModuleFromWGSL(std::string(&FragmentShaderCode[0], &FragmentShaderCode[0] + FragmentShaderCode.size()));
 		}
 		else
@@ -99,7 +102,7 @@ namespace api
 		return true;
 	}
 
-	bool CWebGPUMaterial::CreateUniformBuffer(const graphics::CMaterialCreateInfo& createInfo)
+	bool CWebGPUMaterial::CreateUniformBuffer(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo)
 	{
 		for (const auto& Buffer : m_UniformBufferList)
 		{
@@ -117,7 +120,7 @@ namespace api
 		return true;
 	}
 
-	bool CWebGPUMaterial::CreateBindGroup(const graphics::CMaterialCreateInfo& createInfo)
+	bool CWebGPUMaterial::CreateBindGroup(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo)
 	{
 		// バインドレイアウトを作成
 		// どのようにメモリに配置されるか, バインドインデックスや読み取り専用かなど

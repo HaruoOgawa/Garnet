@@ -5,6 +5,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/quaternion.hpp>
 #include "../../Graphics/CMaterial.h"
+#include <memory>
 
 namespace graphics{ class CMaterialCreateInfo; }
 
@@ -30,9 +31,9 @@ namespace api
 		WGPUBindGroup m_BindGroup;
 	private:
 		// WebGPU Main Logic /////////////////////////////////////////////////////////////////////
-		bool CreateShaderStages(const graphics::CMaterialCreateInfo& createInfo);
-		bool CreateUniformBuffer(const graphics::CMaterialCreateInfo& createInfo);
-		bool CreateBindGroup(const graphics::CMaterialCreateInfo& createInfo);
+		bool CreateShaderStages(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo);
+		bool CreateUniformBuffer(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo);
+		bool CreateBindGroup(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo);
 
 		// Helper Function ///////////////////////////////////////////////////////////////////////
 		WGPUShaderModule CreateShaderModuleFromWGSL(const std::string& shaderCode);
@@ -43,7 +44,7 @@ namespace api
 		CWebGPUMaterial();
 		virtual ~CWebGPUMaterial();
 
-		virtual bool Create(api::IGraphicsAPI* pGraphicsAPI, const graphics::CMaterialCreateInfo& createInfo) override;
+		virtual bool Create(api::IGraphicsAPI* pGraphicsAPI) override;
 		virtual bool Update(float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection) override;
 		virtual bool BuildDrawBuffer() override;
 

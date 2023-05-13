@@ -23,13 +23,18 @@ namespace graphics
 	class CMaterial
 	{
 	protected:
+		std::shared_ptr<CMaterialCreateInfo> m_CreateInfo;
+
 		std::vector<std::shared_ptr<CUniformBuffer>> m_UniformBufferList;
 		std::vector<std::shared_ptr<CTextureBuffer>> m_TextureBufferList;
+
+		int											 m_RefCount;
 	public:
 		CMaterial();
 		virtual ~CMaterial() = default;
 
-		virtual bool Create(api::IGraphicsAPI* pGraphicsAPI, const CMaterialCreateInfo& createInfo) = 0;
+		virtual void SetCreateInfo(const std::shared_ptr<CMaterialCreateInfo>& createInfo);
+		virtual bool Create(api::IGraphicsAPI* pGraphicsAPI) = 0;
 		virtual bool Update(float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection) = 0;
 		virtual bool BuildDrawBuffer() = 0;
 

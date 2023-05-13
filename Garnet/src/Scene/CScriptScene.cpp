@@ -33,19 +33,20 @@ namespace scene
 
 	bool CScriptScene::Load(api::IGraphicsAPI* pGraphicsAPI)
 	{
+		// ‰Šú‰»ˆ—
 		// OBJECT
 		m_TestObject = std::make_shared<object::C3DObject>();
 
 		{
 			// MATERIAL
-			graphics::CMaterialCreateInfo createInfo;
-			createInfo.SetVertexShaderCode(m_VertexShader->GetData());
-			createInfo.SetFragmentShaderCode(m_FragmentShader->GetData());
+			std::shared_ptr<graphics::CMaterialCreateInfo> createInfo = std::make_shared<graphics::CMaterialCreateInfo>();
+			createInfo->SetVertexShaderCode(m_VertexShader->GetData());
+			createInfo->SetFragmentShaderCode(m_FragmentShader->GetData());
 			auto Material = pGraphicsAPI->CreateMaterial();
 
 			// UBO, TEXTURE
 			{
-				auto UniformBuffer = createInfo.CreateUniformBuffer({0, 1});
+				auto UniformBuffer = createInfo->CreateUniformBuffer({0, 1});
 
 				{
 					glm::mat4 mat = glm::mat4(1.0f);
@@ -93,20 +94,33 @@ namespace scene
 			}
 			
 			// CREATE MATERIAL
-			if (!Material->Create(pGraphicsAPI, createInfo)) return false;
+			Material->SetCreateInfo(createInfo);
 			m_TestObject->AddMaterial(Material);
 		}
 
 		{
 			// MESH
-			std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(pGraphicsAPI, graphics::EPresetPrimitiveType::BOARD, 0, m_TestObject->GetMaterialList());
+			std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(0, std::make_shared<renderer::CRendererCreateInfo>(), graphics::EPresetPrimitiveType::BOARD);
 			std::shared_ptr<graphics::CMesh> Mesh = std::make_shared<graphics::CMesh>();
 			Mesh->AddPrimitive(Primitive);
 
 			// NODE
-			std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(Mesh);
-			m_TestObject->AddNode(Node);
+			{
+				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(Mesh);
+				Node->SetPos(glm::vec3(0.5f, 0.0f, -2.0f));
+				m_TestObject->AddNode(Node);
+			}
+
+			{
+				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(Mesh);
+				Node->SetPos(glm::vec3(-0.25f, 0.0f, -1.0f));
+				Node->SetRot(glm::vec3(0.0f, 0.0f, 45.0f));
+				m_TestObject->AddNode(Node);
+			}
 		}
+
+		// CreateŠÖ”ŒQ‚ğÀs
+		if (!m_TestObject->Create(pGraphicsAPI)) return false;
 
 		return true;
 	}
@@ -136,7 +150,6 @@ namespace scene
 		if (m_IsLoaded && m_TestObject)
 		{
 			if (!m_TestObject->Draw()) return false;
-
 		}
 		
 		return true;

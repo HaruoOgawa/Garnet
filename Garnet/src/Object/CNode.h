@@ -21,5 +21,14 @@ namespace object
 
 		void SetTransform(std::shared_ptr<math::CTransform>& Transform);
 		const std::shared_ptr<math::CTransform>& GetTransform() const;
+
+		const glm::vec3& GetPos() const;
+		void SetPos(const glm::vec3& Pos);
+
+		const glm::vec3& GetRot() const;
+		void SetRot(const glm::vec3& Rot);
+
+		const glm::vec3& GetScale() const;
+		void SetScale(const glm::vec3& Scale);
 	};
 }

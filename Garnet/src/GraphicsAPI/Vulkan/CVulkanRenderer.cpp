@@ -43,7 +43,7 @@ namespace renderer
 		vkDestroyPipelineLayout(m_pGraphicsAPI->GetLogicalDevice(), m_PipelineLayout, nullptr);
 	}
 
-	bool CVulkanRenderer::Create(api::IGraphicsAPI* pGraphicsAPI, const CRendererCreateInfo& createInfo, const std::shared_ptr<graphics::CMaterial>& Material)
+	bool CVulkanRenderer::Create(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CRendererCreateInfo>& createInfo, const std::shared_ptr<graphics::CMaterial>& Material)
 	{
 		m_pGraphicsAPI = static_cast<api::CVulkanAPI*>(pGraphicsAPI);
 		api::CVulkanMaterial* pVulkanMat = static_cast<api::CVulkanMaterial*>(Material.get());
@@ -89,10 +89,10 @@ namespace renderer
 	}
 
 	// Vulkanメインロジック /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	bool CVulkanRenderer::CreateVertexBuffer(const CRendererCreateInfo& createInfo)
+	bool CVulkanRenderer::CreateVertexBuffer(const std::shared_ptr<CRendererCreateInfo>& createInfo)
 	{
 		// 頂点バッファオブジェクトの生成
-		for (const auto& VertexData : createInfo.GetVertices())
+		for (const auto& VertexData : createInfo->GetVertices())
 		{
 			//
 			VkDeviceSize bufferSize = sizeof(VertexData[0]) * VertexData.size();
@@ -136,9 +136,9 @@ namespace renderer
 
 		return true;
 	}
-	bool CVulkanRenderer::CreateIndexBuffer(const CRendererCreateInfo& createInfo)
+	bool CVulkanRenderer::CreateIndexBuffer(const std::shared_ptr<CRendererCreateInfo>& createInfo)
 	{
-		VkDeviceSize bufferSize = sizeof(createInfo.GetIndices()[0]) * createInfo.GetIndices().size();
+		VkDeviceSize bufferSize = sizeof(createInfo->GetIndices()[0]) * createInfo->GetIndices().size();
 
 		VkBuffer stagingBuffer;
 		VkDeviceMemory stagingBufferMemory;
@@ -146,7 +146,7 @@ namespace renderer
 
 		void* data;
 		vkMapMemory(m_pGraphicsAPI->GetLogicalDevice(), stagingBufferMemory, 0, bufferSize, 0, &data);
-		memcpy(data, createInfo.GetIndices().data(), (size_t)bufferSize);
+		memcpy(data, createInfo->GetIndices().data(), (size_t)bufferSize);
 		vkUnmapMemory(m_pGraphicsAPI->GetLogicalDevice(), stagingBufferMemory);
 
 		m_pGraphicsAPI->CreateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
@@ -157,12 +157,12 @@ namespace renderer
 		vkDestroyBuffer(m_pGraphicsAPI->GetLogicalDevice(), stagingBuffer, nullptr);
 		vkFreeMemory(m_pGraphicsAPI->GetLogicalDevice(), stagingBufferMemory, nullptr);
 
-		m_IndicesCount = static_cast<uint32_t>(createInfo.GetIndices().size());
+		m_IndicesCount = static_cast<uint32_t>(createInfo->GetIndices().size());
 
 		return true;
 	}
 
-	bool CVulkanRenderer::CreateGraphicsPipeline(const CRendererCreateInfo& createInfo, api::CVulkanMaterial* pVulkanMat)
+	bool CVulkanRenderer::CreateGraphicsPipeline(const std::shared_ptr<CRendererCreateInfo>& createInfo, api::CVulkanMaterial* pVulkanMat)
 	{
 		// グラフィックパイプラインの固定機の設定 ///////////////////////////////////////////////////////////////////////////////////////
 		// 動的状態(ダイナミックステート)の設定(パイプラインにベイクせずにマイフレームの描画時に設定できるようにするパラメーターの設定)
@@ -184,11 +184,11 @@ namespace renderer
 		for (int i = 0; i < Size; i++)
 		{
 			//
-			int Dimension = createInfo.GetAttributeDimensions()[i];
+			int Dimension = createInfo->GetAttributeDimensions()[i];
 
 			// 頂点バッファのバインドに関する説明,設定(頂点バッファレイアウト)
 			bindingDescriptions[i].binding = i; // バインドする頂点バッファのインデックス(?)違う形式で頂点バッファを用意するときに使用する？
-			bindingDescriptions[i].stride = Dimension * sizeof(createInfo.GetVertices()[i][0]); // 頂点バッファ内の要素一つあたりのサイズ。次の要素までのバイト数
+			bindingDescriptions[i].stride = Dimension * sizeof(createInfo->GetVertices()[i][0]); // 頂点バッファ内の要素一つあたりのサイズ。次の要素までのバイト数
 			bindingDescriptions[i].inputRate = VK_VERTEX_INPUT_RATE_VERTEX; // よくわからぬ。各頂点の後、次のデータ エントリに移動します。らしい
 
 			// アトリビュート(頂点データ)の設定

@@ -47,16 +47,16 @@ namespace api
 		VkSampler m_TextureSampler;
 	private:
 		// Vulkanメインロジック /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		bool CreateShaderStages(const graphics::CMaterialCreateInfo& createInfo);
+		bool CreateShaderStages(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo);
 		
-		bool CreateTextureImage(const graphics::CMaterialCreateInfo& createInfo);
-		bool CreateTextureImageView(const graphics::CMaterialCreateInfo& createInfo);
-		bool CreateTextureSampler(const graphics::CMaterialCreateInfo& createInfo);
+		bool CreateTextureImage(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo);
+		bool CreateTextureImageView(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo);
+		bool CreateTextureSampler(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo);
 
-		bool CreateDescriptorSetLayout(const graphics::CMaterialCreateInfo& createInfo);
-		bool CreateUniformBuffers(const graphics::CMaterialCreateInfo& createInfo);
-		bool CreateDescriptorPool(const graphics::CMaterialCreateInfo& createInfo);
-		bool CreateDescriptorSets(const graphics::CMaterialCreateInfo& createInfo);
+		bool CreateDescriptorSetLayout(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo);
+		bool CreateUniformBuffers(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo);
+		bool CreateDescriptorPool(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo);
+		bool CreateDescriptorSets(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo);
 
 		void Release();
 
@@ -66,7 +66,7 @@ namespace api
 		CVulkanMaterial();
 		virtual ~CVulkanMaterial();
 
-		virtual bool Create(api::IGraphicsAPI* pGraphicsAPI, const graphics::CMaterialCreateInfo& createInfo) override;
+		virtual bool Create(api::IGraphicsAPI* pGraphicsAPI) override;
 		virtual bool Update(float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection) override;
 		virtual bool BuildDrawBuffer() override;
 
