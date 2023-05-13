@@ -18,23 +18,18 @@ namespace graphics
 	class CPrimitive
 	{
 		std::shared_ptr<renderer::IRenderer>				 m_Renderer;
-		int													 m_MaterialIndex;
-		int													 m_DynamicOffsetNum;
-
 		const EPresetPrimitiveType							 m_PresetType;
 		std::shared_ptr<renderer::CRendererCreateInfo>		 m_CreateInfo;
 	private:
-		bool Create(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CMaterial>& Material, const std::shared_ptr<renderer::CRendererCreateInfo>& createInfo);
-		bool Create(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CMaterial>& Material, EPresetPrimitiveType PresetType);
+		bool Create(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CMaterial>& Material, int DynamicOffsetNum, const std::shared_ptr<renderer::CRendererCreateInfo>& createInfo);
+		bool Create(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CMaterial>& Material, int DynamicOffsetNum, EPresetPrimitiveType PresetType);
 	public:
-		CPrimitive(int MaterialIndex, const std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList, const std::shared_ptr<renderer::CRendererCreateInfo>& createInfo, 
+		CPrimitive(const std::shared_ptr<renderer::CRendererCreateInfo>& createInfo, 
 			EPresetPrimitiveType PresetType = EPresetPrimitiveType::None);
 		virtual ~CPrimitive();
 
-		bool Create(api::IGraphicsAPI* pGraphicsAPI, const std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList);
+		bool Create(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<graphics::CMaterial>& Material, int DynamicOffsetNum);
 
 		bool Draw(const std::shared_ptr<CMaterial>& Material);
-
-		int GetMaterialIndex()const { return m_MaterialIndex; }
 	};
 }

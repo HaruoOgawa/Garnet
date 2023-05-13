@@ -1,4 +1,5 @@
 #include "CNode.h"
+#include "../Graphics/CMaterial.h"
 #include "../Interface/IGraphicsAPI.h"
 #include "../Interface/IRenderer.h"
 
@@ -6,7 +7,9 @@ namespace object
 {
 	CNode::CNode(const std::shared_ptr<graphics::CMesh>& Mesh):
 		m_Transform(std::make_shared<math::CTransform>()),
-		m_Mesh(Mesh)
+		m_Mesh(Mesh),
+		m_MaterialIndex(0),
+		m_DynamicOffsetNum(0)
 	{
 	}
 
@@ -57,5 +60,24 @@ namespace object
 	void CNode::SetScale(const glm::vec3& Scale)
 	{
 		m_Transform->SetScale(Scale);
+	}
+
+	void CNode::LinkMaterialReference(int MaterialIndex, const std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList)
+	{
+		const auto& Material = MaterialList[MaterialIndex];
+		Material->IncreaseRefCount();
+
+		m_MaterialIndex = MaterialIndex;
+		m_DynamicOffsetNum = Material->GetRefCount();
+	}
+
+	int CNode::GetMaterialIndex()const 
+	{
+		return m_MaterialIndex;
+	}
+
+	int CNode::GetDynamicOffsetNum() const
+	{
+		return m_DynamicOffsetNum;
 	}
 }

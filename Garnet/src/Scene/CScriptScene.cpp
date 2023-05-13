@@ -100,19 +100,21 @@ namespace scene
 
 		{
 			// MESH
-			std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(0, m_TestObject->GetMaterialList(), std::make_shared<renderer::CRendererCreateInfo>(), graphics::EPresetPrimitiveType::BOARD);
+			std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(std::make_shared<renderer::CRendererCreateInfo>(), graphics::EPresetPrimitiveType::BOARD);
 			std::shared_ptr<graphics::CMesh> Mesh = std::make_shared<graphics::CMesh>();
 			Mesh->AddPrimitive(Primitive);
 
 			// NODE
 			{
 				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(Mesh);
+				Node->LinkMaterialReference(0, m_TestObject->GetMaterialList());
 				Node->SetPos(glm::vec3(0.5f, 0.0f, -2.0f));
 				m_TestObject->AddNode(Node);
 			}
 
 			{
 				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(Mesh);
+				Node->LinkMaterialReference(0, m_TestObject->GetMaterialList());
 				Node->SetPos(glm::vec3(-0.25f, 0.0f, -1.0f));
 				Node->SetRot(glm::vec3(0.0f, 0.0f, 45.0f));
 				m_TestObject->AddNode(Node);
