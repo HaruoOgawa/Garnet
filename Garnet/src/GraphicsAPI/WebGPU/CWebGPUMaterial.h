@@ -22,8 +22,8 @@ namespace api
 		WGPUShaderModule m_FragmentShaderModele;
 
 		// Uniform
-		WGPUBuffer m_UniformBuffer;
-		size_t	   m_UniformCount;
+		std::vector<WGPUBuffer> m_WGPUUniformBufferList;
+		std::vector<size_t>	    m_WGPUUniformSizeList;
 
 		// BindGroup
 		WGPUBindGroupLayout m_BindGroupLayout;
@@ -43,8 +43,11 @@ namespace api
 		CWebGPUMaterial();
 		virtual ~CWebGPUMaterial();
 
-		bool Create(api::IGraphicsAPI* pGraphicsAPI, const graphics::CMaterialCreateInfo& createInfo) override;
-		bool Update(float SecondsTime) override;
+		virtual bool Create(api::IGraphicsAPI* pGraphicsAPI, const graphics::CMaterialCreateInfo& createInfo) override;
+		virtual bool Update(float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection) override;
+		virtual bool BuildDrawBuffer() override;
+
+		virtual void SetUniformValue(const std::string Name, const void* Value) override;
 
 		const WGPUShaderModule& GetVertexShaderModele() { return m_VertexShaderModele; }
 		const WGPUShaderModule& GetFragmentShaderModele() { return m_FragmentShaderModele; }

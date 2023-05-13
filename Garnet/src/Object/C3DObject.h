@@ -18,7 +18,7 @@ namespace object
 		C3DObject();
 		virtual ~C3DObject();
 
-		virtual bool Update(float SecondsTime) override;
+		virtual bool Update(float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection) override;
 		virtual bool Draw() override;
 
 		void AddNode(const std::shared_ptr<CNode>& Node);

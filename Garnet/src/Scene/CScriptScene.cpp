@@ -2,6 +2,7 @@
 #include "../Object/C3DObject.h"
 #include "../File/CFileReader.h"
 #include "../Debug/Message/Console.h"
+#include <glm/glm.hpp>
 
 namespace scene
 {
@@ -35,18 +36,69 @@ namespace scene
 		// OBJECT
 		m_TestObject = std::make_shared<object::C3DObject>();
 
-		// MATERIAL
 		{
+			// MATERIAL
 			graphics::CMaterialCreateInfo createInfo;
 			createInfo.SetVertexShaderCode(m_VertexShader->GetData());
 			createInfo.SetFragmentShaderCode(m_FragmentShader->GetData());
 			auto Material = pGraphicsAPI->CreateMaterial();
+
+			// UBO, TEXTURE
+			{
+				auto UniformBuffer = createInfo.CreateUniformBuffer({0, 1});
+
+				{
+					glm::mat4 mat = glm::mat4(1.0f);
+					UniformBuffer->AddData("model", &mat[0][0], sizeof(mat), 0);
+				}
+
+				{
+					glm::mat4 mat = glm::mat4(1.0f);
+					UniformBuffer->AddData("view", &mat[0][0], sizeof(mat), 0);
+				}
+
+				{
+					glm::mat4 mat = glm::mat4(1.0f);
+					UniformBuffer->AddData("proj", &mat[0][0], sizeof(mat), 0);
+				}
+
+				{
+					glm::mat4 mat = glm::mat4(1.0f);
+					UniformBuffer->AddData("mvp", &mat[0][0], sizeof(mat), 0);
+				}
+
+				{
+					glm::vec4 val = glm::vec4(1.0f);
+					UniformBuffer->AddData("MulColor", &val[0], sizeof(val), 1);
+				}
+
+				{
+					glm::vec4 val = glm::vec4(0.0f);
+					UniformBuffer->AddData("val0", &val[0], sizeof(val), 1);
+				}
+
+				{
+					glm::vec4 val = glm::vec4(0.0f);
+					UniformBuffer->AddData("val1", &val[0], sizeof(val), 1);
+				}
+
+				{
+					glm::vec4 val = glm::vec4(0.0f);
+					UniformBuffer->AddData("val2", &val[0], sizeof(val), 1);
+				}
+
+				UniformBuffer->RecalculateBindingLayoutOffset();
+
+				Material->AddUniformBuffer(UniformBuffer);
+			}
+			
+			// CREATE MATERIAL
 			if (!Material->Create(pGraphicsAPI, createInfo)) return false;
 			m_TestObject->AddMaterial(Material);
 		}
 
-		// MESH
 		{
+			// MESH
 			std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(pGraphicsAPI, graphics::EPresetPrimitiveType::BOARD, 0, m_TestObject->GetMaterialList());
 			std::shared_ptr<graphics::CMesh> Mesh = std::make_shared<graphics::CMesh>();
 			Mesh->AddPrimitive(Primitive);
@@ -55,14 +107,18 @@ namespace scene
 			std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(Mesh);
 			m_TestObject->AddNode(Node);
 		}
-		
-		Console::Log("Render is loaded\n");
 
 		return true;
 	}
 
-	bool CScriptScene::Update(api::IGraphicsAPI* pGraphicsAPI, float SecondsTime)
+	bool CScriptScene::Update(api::IGraphicsAPI* pGraphicsAPI, float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection)
 	{
+		if (m_IsLoaded && m_TestObject)
+		{
+			if (!m_TestObject->Update(SecondsTime, Camera, Projection)) return false;
+
+		}
+
 		if (!m_IsLoaded)
 		{
 			if (m_VertexShader->IsDone() && m_FragmentShader->IsDone())
@@ -70,12 +126,6 @@ namespace scene
 				if(!Load(pGraphicsAPI)) return false;
 				m_IsLoaded = true;
 			}
-		}
-
-		if (m_IsLoaded && m_TestObject)
-		{
-			if (!m_TestObject->Update(SecondsTime)) return false;
-
 		}
 
 		return true;

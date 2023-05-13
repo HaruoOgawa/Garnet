@@ -2,6 +2,9 @@
 
 #include <vector>
 #include <string>
+#include "../Interface/IBuffer.h"
+#include "../Graphics/CUniformBuffer.h"
+#include "../Graphics/CTextureBuffer.h"
 
 namespace graphics
 {
@@ -12,10 +15,11 @@ namespace graphics
 		GLSL,
 	};
 
+	class CUniformBuffer;
+	class CTextureBuffer;
+
 	class CMaterialCreateInfo
 	{
-		// Uniform
-
 		// Shader
 		const EShaderType m_ShaderType;
 
@@ -24,12 +28,13 @@ namespace graphics
 		std::vector<char> m_GeometryShaderCode;
 		std::vector<char> m_HullShaderCode;
 		std::vector<char> m_DomainShaderCode;
-
-		// Texture
-		bool m_UseMainTexture;
 	public:
 		CMaterialCreateInfo();
 		virtual ~CMaterialCreateInfo() = default;
+
+		// Uniform
+		std::shared_ptr<graphics::CUniformBuffer> CreateUniformBuffer(std::vector<int> BindIndexList);
+		std::shared_ptr<graphics::CTextureBuffer> CreateTextureBuffer(std::vector<int> BindIndexList);
 
 		// Shader
 		EShaderType GetShaderType() const;
@@ -50,8 +55,6 @@ namespace graphics
 		const std::vector<char>& GetDomainShaderCode() const;
 
 		// Texture
-		void SetUseMainTexture(bool UseMainTexture);
-		bool IsUseMainTexture() const;
 	};
 
 }

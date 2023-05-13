@@ -75,11 +75,10 @@ namespace api
 		std::vector<VkImageView> m_SwapChainImageViews;
 
 		uint32_t m_CurrentImageIndex;
-		bool m_IsReCreateSwapChain;
+		//bool m_IsReCreateSwapChain;
 
 		// Rendering
 		VkRenderPass m_RenderPass;
-		bool m_WaitRendering;
 
 		// Depth Test
 		VkImage m_DepthImage;
@@ -115,14 +114,13 @@ namespace api
 		bool CreateCommandBuffer();
 		bool CreateSyncObjects();
 
-		bool BeginRecordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
-		bool EndRecordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
+		bool BeginRenderPass(uint32_t imageIndex);
+		bool EndRenderPass();
 
 		bool CleanupSwapChain();
 		bool ReCreateSwapChain();
 
 		// ÉwÉãÉpÅ[ä÷êî ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		
 		// Layer
 		void InitAvailableLayerList();
 		bool CheckDebugValidationLayerSupport();
@@ -171,7 +169,6 @@ namespace api
 
 		bool BeginRender(ERenderPassType RenderPassType) override;
 		bool EndRender() override;
-		bool IsWaitting() override;
 
 		const std::string& GetShaderExtension() const override;
 
@@ -199,6 +196,9 @@ namespace api
 		void CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory);
 		void CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
 		const std::vector<VkCommandBuffer>& GetCommandBuffers() const;
+		bool BeginRecordCommandBuffer();
+		bool EndRecordCommandBuffer();
+		bool SubmitCommandNoSemaphore();
 
 		// Frame Buffer
 		uint32_t GetCurrentFrame() const;

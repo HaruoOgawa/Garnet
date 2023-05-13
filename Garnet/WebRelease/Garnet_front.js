@@ -13,7 +13,6 @@ const InitWG = async () => {
         const adapter = await navigator.gpu.requestAdapter();
         const device = await adapter.requestDevice();
         Module.preinitializedWebGPUDevice = device;
-        console.log("WebGPUDevice is pre initialized!!");
 
         // アプリケーション開始 
         Module.ccall('StartApp', 'null', [], []);

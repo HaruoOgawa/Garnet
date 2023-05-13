@@ -15,4 +15,9 @@ namespace graphics
 	{
 		m_DataList.insert({ Name, Data });
 	}
+
+	const std::map<std::string, SUniformBufferValue>& CUniformBufferDescriptor::GetDataList() const
+	{
+		return m_DataList;
+	}
 }

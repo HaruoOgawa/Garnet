@@ -137,11 +137,6 @@ namespace api
 		return true;
 	}
 
-	bool CWebGPUAPI::IsWaitting()
-	{
-		return false;
-	}
-
 	const std::string& CWebGPUAPI::GetShaderExtension() const
 	{
 		return m_ShaderExtension;

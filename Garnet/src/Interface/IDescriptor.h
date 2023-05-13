@@ -2,8 +2,7 @@
 
 namespace graphics
 {
-	class IBindingDescriptor
+	class IDescriptor
 	{
-
 	};
 }

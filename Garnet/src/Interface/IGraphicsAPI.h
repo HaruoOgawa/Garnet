@@ -39,7 +39,6 @@ namespace api
 
 		virtual bool BeginRender(ERenderPassType RenderPassType) = 0;
 		virtual bool EndRender() = 0;
-		virtual bool IsWaitting() = 0;
 
 		virtual const std::string& GetShaderExtension() const = 0;
 	};

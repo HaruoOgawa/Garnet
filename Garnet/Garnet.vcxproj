@@ -330,19 +330,24 @@ del $(OutDir)Garnet.pdb</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="src\Projection\CProjection.h" />
+    <ClInclude Include="src\Camera\CCamera.h" />
+    <ClInclude Include="src\Graphics\CTextureBuffer.h" />
+    <ClInclude Include="src\Graphics\CTextureBufferDescriptor.h" />
     <ClInclude Include="src\GraphicsAPI\WebGPU\CWebGPUMaterial.h" />
     <ClInclude Include="src\GraphicsAPI\Vulkan\CVulkanMaterial.h" />
     <ClInclude Include="src\GraphicsAPI\CMaterialCreateInfo.h" />
     <ClInclude Include="src\App\CDemoAppManager.h" />
     <ClInclude Include="src\Graphics\CPresetPrimitive.h" />
+    <ClInclude Include="src\Graphics\SBindingLayout.h" />
     <ClInclude Include="src\Math\CTransform.h" />
     <ClInclude Include="src\Object\C3DObject.h" />
     <ClInclude Include="src\Object\CObject.h" />
     <ClInclude Include="src\Graphics\CUniformBuffer.h" />
     <ClInclude Include="src\Graphics\CUniformBufferDescriptor.h" />
     <ClInclude Include="src\Graphics\ERenderPassType.h" />
-    <ClInclude Include="src\Interface\IBindingBuffer.h" />
-    <ClInclude Include="src\Interface\IBindingDescriptor.h" />
+    <ClInclude Include="src\Interface\IBuffer.h" />
+    <ClInclude Include="src\Interface\IDescriptor.h" />
     <ClInclude Include="src\Library\glfw3webgpu\glfw3webgpu.h" />
     <ClInclude Include="src\Library\glm\glm\common.hpp" />
     <ClInclude Include="src\Library\glm\glm\detail\compute_common.hpp" />
@@ -661,6 +666,10 @@ del $(OutDir)Garnet.pdb</Command>
     <ClInclude Include="src\Interface\IRenderer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Projection\CProjection.cpp" />
+    <ClCompile Include="src\Camera\CCamera.cpp" />
+    <ClCompile Include="src\Graphics\CTextureBuffer.cpp" />
+    <ClCompile Include="src\Graphics\CTextureBufferDescriptor.cpp" />
     <ClCompile Include="src\GraphicsAPI\WebGPU\CWebGPUMaterial.cpp" />
     <ClCompile Include="src\GraphicsAPI\Vulkan\CVulkanMaterial.cpp" />
     <ClCompile Include="src\GraphicsAPI\CMaterialCreateInfo.cpp" />

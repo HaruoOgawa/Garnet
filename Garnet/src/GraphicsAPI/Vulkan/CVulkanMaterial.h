@@ -8,6 +8,7 @@
 #include <glfw3.h>
 #include <glfw3native.h>
 #include <glm/glm.hpp>
+#include <glm/gtx/quaternion.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "../../Graphics/CMaterial.h"
@@ -30,14 +31,16 @@ namespace api
 
 		// Uniform Buffer Object
 		VkDescriptorSetLayout m_DescriptorSetLayout;
-		std::vector<VkBuffer> m_UniformBuffers;
-		std::vector<VkDeviceMemory> m_UniformBuffersMemory;
-		std::vector<void*> m_UniformBuffersMapped;
+
+		std::vector<std::vector<VkBuffer>> m_VKUniformBufferList;
+		std::vector<std::vector<VkDeviceMemory>> m_VKUniformBufferMemoryList;
+		std::vector<std::vector<void*>> m_VKUniformBufferMappedList;
+		std::vector<std::vector<size_t>> m_VKUniformBufferSizeList;
+
 		VkDescriptorPool m_DescriptorPool;
 		std::vector<VkDescriptorSet> m_DescriptorSets;
 
 		// Texture Image
-		bool m_UseMainTexture;
 		VkImage m_TextureImage;
 		VkDeviceMemory m_TextureImageMemory;
 		VkImageView m_TextureImageView; // シェーダーでテクスチャを取り扱う用のImageView
@@ -55,8 +58,6 @@ namespace api
 		bool CreateDescriptorPool(const graphics::CMaterialCreateInfo& createInfo);
 		bool CreateDescriptorSets(const graphics::CMaterialCreateInfo& createInfo);
 
-		void UpdateUniformBuffer(uint32_t CurrentImage, float SecondsTime);
-
 		void Release();
 
 		// ヘルパー関数 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -65,8 +66,11 @@ namespace api
 		CVulkanMaterial();
 		virtual ~CVulkanMaterial();
 
-		bool Create(api::IGraphicsAPI* pGraphicsAPI, const graphics::CMaterialCreateInfo& createInfo) override;
-		bool Update(float SecondsTime) override;
+		virtual bool Create(api::IGraphicsAPI* pGraphicsAPI, const graphics::CMaterialCreateInfo& createInfo) override;
+		virtual bool Update(float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection) override;
+		virtual bool BuildDrawBuffer() override;
+
+		virtual void SetUniformValue(const std::string Name, const void* Value) override;
 
 		const std::vector<VkPipelineShaderStageCreateInfo>& GetShaderStages()const { return m_ShaderStages; }
 		const VkDescriptorSetLayout& GetDescriptorSetLayout() const { return m_DescriptorSetLayout; }

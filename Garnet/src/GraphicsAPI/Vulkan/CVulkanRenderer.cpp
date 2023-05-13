@@ -60,6 +60,9 @@ namespace renderer
 	{
 		api::CVulkanMaterial* pVulkanMat = static_cast<api::CVulkanMaterial*>(Material.get());
 
+		// ユニフォームバッファの準備
+		if (!pVulkanMat->BuildDrawBuffer()) return false;
+
 		// グラフィックパイプラインをコマンドにバインド
 		vkCmdBindPipeline(m_pGraphicsAPI->GetCommandBuffers()[m_pGraphicsAPI->GetCurrentFrame()], VK_PIPELINE_BIND_POINT_GRAPHICS, m_GraphicsPipeline);
 

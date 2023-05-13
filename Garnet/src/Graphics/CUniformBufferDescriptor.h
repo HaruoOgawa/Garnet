@@ -2,17 +2,17 @@
 
 #include <map>
 #include <string>
-#include "../Interface/IBindingDescriptor.h"
+#include "../Interface/IDescriptor.h"
 
 namespace graphics
 {
 	struct SUniformBufferValue
 	{
-		int Stride;
-		int Offset;
+		int ByteSize;
+		int ByteOffset;
 	};
 
-	class CUniformBufferDescriptor: public IBindingDescriptor
+	class CUniformBufferDescriptor : public IDescriptor
 	{
 		std::map<std::string, SUniformBufferValue> m_DataList;
 	public:
@@ -20,5 +20,6 @@ namespace graphics
 		virtual ~CUniformBufferDescriptor();
 
 		void AddData(const std::string& Name, const SUniformBufferValue& Data);
+		const std::map<std::string, SUniformBufferValue>& GetDataList() const;
 	};
 }
