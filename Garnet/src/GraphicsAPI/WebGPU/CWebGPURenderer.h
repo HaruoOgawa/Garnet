@@ -42,6 +42,7 @@ namespace renderer
 		// Helper Function ///////////////////////////////////////////////////////////////////////
 		WGPUVertexFormat GetVertexFormat(int Dimension);
 		bool             CreateBuffer(WGPUBuffer& Buffer, WGPUBufferUsageFlags Usage, void const* Data, uint64_t ByteSize);
+		void			 SetDefaultDepthStencil(WGPUDepthStencilState& depthStencilState);
 	public:
 		CWebGPURenderer();
 		virtual ~CWebGPURenderer();

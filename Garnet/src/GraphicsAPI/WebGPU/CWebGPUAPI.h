@@ -35,6 +35,9 @@ namespace api
 		WGPUSwapChain m_SwapChain;
 		WGPUTextureFormat m_SwapChainFormat;
 
+		// DepthTexture
+		WGPUTextureView m_DepthTextureView;
+
 		// RenderPass
 		WGPURenderPassEncoder m_RenderPass;
 
@@ -50,6 +53,7 @@ namespace api
 		bool CreateLogicalDevice();
 		bool CreateQueue();
 		bool CreateSwapChain();
+		bool CreateDepthTexture();
 	public:
 		CWebGPUAPI();
 		virtual ~CWebGPUAPI();

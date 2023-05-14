@@ -149,7 +149,16 @@ namespace renderer
 		pipelineDesc.primitive.cullMode = WGPUCullMode_None; // カリングモードの設定
 
 		// ステンシルバッファ・デプスバッファ
-		pipelineDesc.depthStencil = nullptr;
+		WGPUDepthStencilState depthStencilState;
+		SetDefaultDepthStencil(depthStencilState);
+		depthStencilState.depthCompare = WGPUCompareFunction_Less;
+		depthStencilState.depthWriteEnabled = true;
+		WGPUTextureFormat depthTextureFormat = WGPUTextureFormat_Depth24Plus;
+		depthStencilState.format = depthTextureFormat;
+		depthStencilState.stencilReadMask = 0; // ステンシルバッファの読み書きをオフにしておく
+		depthStencilState.stencilWriteMask = 0;
+
+		pipelineDesc.depthStencil = &depthStencilState;
 
 		// ブレンディング
 		// <計算式> rgba = srcFactor * rgba [operation] dstFactor * rgba
@@ -251,6 +260,28 @@ namespace renderer
 		wgpuQueueWriteBuffer(m_pGraphicsAPI->GetQueue(), Buffer, 0, Data, bufferDesc.size);
 
 		return true;
+	}
+
+	void CWebGPURenderer::SetDefaultDepthStencil(WGPUDepthStencilState& depthStencilState)
+	{
+		depthStencilState.format = WGPUTextureFormat::WGPUTextureFormat_Undefined;
+		depthStencilState.depthWriteEnabled = false;
+		depthStencilState.depthCompare = WGPUCompareFunction_Always;
+		depthStencilState.stencilReadMask = 0xFFFFFFFF;
+		depthStencilState.stencilWriteMask = 0xFFFFFFFF;
+		depthStencilState.depthBias = 0;
+		depthStencilState.depthBiasSlopeScale = 0;
+		depthStencilState.depthBiasClamp = 0;
+
+		depthStencilState.stencilFront.compare = WGPUCompareFunction_Always;
+		depthStencilState.stencilFront.failOp = WGPUStencilOperation_Keep;
+		depthStencilState.stencilFront.depthFailOp = WGPUStencilOperation_Keep;
+		depthStencilState.stencilFront.passOp = WGPUStencilOperation_Keep;
+
+		depthStencilState.stencilBack.compare = WGPUCompareFunction_Always;
+		depthStencilState.stencilBack.failOp = WGPUStencilOperation_Keep;
+		depthStencilState.stencilBack.depthFailOp = WGPUStencilOperation_Keep;
+		depthStencilState.stencilBack.passOp = WGPUStencilOperation_Keep;
 	}
 }
 #endif

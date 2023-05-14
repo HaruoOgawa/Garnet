@@ -43,6 +43,7 @@ namespace api
 		if (!CreateLogicalDevice()) return false; // 論理デバイスを生成
 		if (!CreateQueue()) return false; // キューを生成
 		if (!CreateSwapChain()) return false; // スワップチェーンを生成
+		if (!CreateDepthTexture()) return false; // デプステクスチャを生成
 
 		return true;
 	}
@@ -83,10 +84,24 @@ namespace api
 		renderPassColorAttachment.storeOp = WGPUStoreOp_Store; // レンダリング実行後の操作
 		renderPassColorAttachment.clearValue = WGPUColor{ 0.0f, 0.0f, 0.0f, 1.0f }; // 初期カラー
 
+		// デプスステンシルバッファの設定
+		WGPURenderPassDepthStencilAttachment depthStencilAttachment;
+		depthStencilAttachment.view = m_DepthTextureView; // デプステクスチャ
+		depthStencilAttachment.depthClearValue = 1.0f; // デプスの初期値
+		depthStencilAttachment.depthLoadOp = WGPULoadOp_Clear; // 処理開始時(ロード)にどうするか。ここでは全てクリアする
+		depthStencilAttachment.depthStoreOp = WGPUStoreOp_Store; // デプスデータの保存処理(ストア)の時どうするか。普通に保存する
+		depthStencilAttachment.depthReadOnly = false;
+
+		depthStencilAttachment.stencilClearValue = 0;
+		depthStencilAttachment.stencilLoadOp = WGPULoadOp_Clear;
+		depthStencilAttachment.stencilStoreOp = WGPUStoreOp_Store;
+		depthStencilAttachment.stencilReadOnly = true;
+
+		//
 		WGPURenderPassDescriptor renderPassDesc = {};
 		renderPassDesc.colorAttachmentCount = 1; 
 		renderPassDesc.colorAttachments = &renderPassColorAttachment; // レンダーパスのカラーフォーマットを指定
-		renderPassDesc.depthStencilAttachment = nullptr; // デプスステンシルバッファ
+		renderPassDesc.depthStencilAttachment = &depthStencilAttachment; // デプスステンシルバッファ
 		renderPassDesc.timestampWriteCount = 0;
 		renderPassDesc.timestampWrites = nullptr; // レンダリングの同期用のオブジェクト領域
 		renderPassDesc.nextInChain = nullptr; // 拡張機
@@ -403,6 +418,39 @@ namespace api
 
 		//
 		m_SwapChain = wgpuDeviceCreateSwapChain(m_Device, m_Surface, &swapChainDesc);
+		return true;
+	}
+
+	bool CWebGPUAPI::CreateDepthTexture()
+	{
+		WGPUTextureFormat depthTextureFormat = WGPUTextureFormat_Depth24Plus;
+
+		// Textureを生成
+		WGPUTextureDescriptor depthTextureDesc{};
+		depthTextureDesc.nextInChain = nullptr;
+		depthTextureDesc.dimension = WGPUTextureDimension_2D;
+		depthTextureDesc.format = depthTextureFormat;
+		depthTextureDesc.mipLevelCount = 1;
+		depthTextureDesc.sampleCount = 1;
+		depthTextureDesc.size = { 800, 600, 1 };
+		depthTextureDesc.usage = WGPUTextureUsage_RenderAttachment;
+		depthTextureDesc.viewFormatCount = 1;
+		depthTextureDesc.viewFormats = &depthTextureFormat;
+		WGPUTexture depthTexture = wgpuDeviceCreateTexture(m_Device, &depthTextureDesc);
+
+		// TextureViewを生成
+		WGPUTextureViewDescriptor depthTextureViewDesc{};
+		depthTextureViewDesc.nextInChain = nullptr;
+		depthTextureViewDesc.aspect = WGPUTextureAspect_DepthOnly;
+		depthTextureViewDesc.baseArrayLayer = 0;
+		depthTextureViewDesc.arrayLayerCount = 1;
+		depthTextureViewDesc.baseMipLevel = 0;
+		depthTextureViewDesc.mipLevelCount = 1;
+		depthTextureViewDesc.dimension = WGPUTextureViewDimension_2D;
+		depthTextureViewDesc.format = depthTextureFormat;
+
+		m_DepthTextureView = wgpuTextureCreateView(depthTexture, &depthTextureViewDesc);
+
 		return true;
 	}
 }
