@@ -52,4 +52,9 @@ namespace graphics
 	{
 		return m_RefCount;
 	}
+
+	const std::vector<uint32_t>& CMaterial::GetBindingRefSizeList() const
+	{
+		return m_BindingRefSizeList;
+	}
 }

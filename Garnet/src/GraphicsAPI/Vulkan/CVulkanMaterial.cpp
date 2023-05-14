@@ -5,8 +5,8 @@
 #include "../../Debug/Message/Console.h"
 #include "../../Camera/CCamera.h"
 #include "../../Projection/CProjection.h"
-
 #include "../../Math/CTransform.h"
+#include "../../Math/CMath.h"
 
 namespace api
 {
@@ -62,14 +62,23 @@ namespace api
 		return true;
 	}
 
-	bool CVulkanMaterial::BuildDrawBuffer()
+	bool CVulkanMaterial::BuildDrawBuffer(int DynamicOffsetNum)
 	{
 		for (int i = 0; i < m_UniformBufferList.size(); i++)
 		{
+			auto ByteSize = m_VKUniformBufferSizeList[m_pGraphicsAPI->GetCurrentFrame()][i];
+			auto ByteOffset = ((m_UseDynamicUniform)? (DynamicOffsetNum - 1) * ByteSize : 0);
+
+			// バッファデータの更新
+			void* BuffersMappedList;
+			vkMapMemory(m_pGraphicsAPI->GetLogicalDevice(), m_VKUniformBufferMemoryList[m_pGraphicsAPI->GetCurrentFrame()][i], ByteOffset, ByteSize, 0, &BuffersMappedList);
+
 			const auto& BufferData = m_UniformBufferList[i]->GetData();
 			auto bufferSize = BufferData.size();
 
-			std::memcpy(m_VKUniformBufferMappedList[m_pGraphicsAPI->GetCurrentFrame()][i], &BufferData[0], bufferSize);
+			std::memcpy(BuffersMappedList, &BufferData[0], bufferSize);
+
+			vkUnmapMemory(m_pGraphicsAPI->GetLogicalDevice(), m_VKUniformBufferMemoryList[m_pGraphicsAPI->GetCurrentFrame()][i]);
 		}
 
 		return true;
@@ -261,7 +270,7 @@ namespace api
 			VkPhysicalDeviceProperties properties{};
 			vkGetPhysicalDeviceProperties(m_pGraphicsAPI->GetPhysicalDevice(), &properties);
 			samplerInfo.anisotropyEnable = VK_TRUE; // 異方性フィルタリング --> 遠くの方のテクスチャがぼけてしまうのを調整する機
-			samplerInfo.maxAnisotropy = properties.limits.maxSamplerAllocationCount;
+			samplerInfo.maxAnisotropy = static_cast<float>(properties.limits.maxSamplerAllocationCount);
 
 			samplerInfo.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
 			samplerInfo.unnormalizedCoordinates = VK_FALSE;
@@ -297,7 +306,16 @@ namespace api
 				switch (Buffer->GetBufferType())
 				{
 					case graphics::EBufferType::UNIFROM:
-						LayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER; // バッファタイプ
+						{
+							if (m_UseDynamicUniform)
+							{
+								LayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC; // バッファタイプ
+							}
+							else
+							{
+								LayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER; // バッファタイプ
+							}
+						}
 						break;
 				
 					case graphics::EBufferType::TEXTURE:
@@ -331,7 +349,6 @@ namespace api
 	{
 		m_VKUniformBufferList.resize(m_pGraphicsAPI->GetMaxFramesInFlight());
 		m_VKUniformBufferMemoryList.resize(m_pGraphicsAPI->GetMaxFramesInFlight());
-		m_VKUniformBufferMappedList.resize(m_pGraphicsAPI->GetMaxFramesInFlight());
 		m_VKUniformBufferSizeList.resize(m_pGraphicsAPI->GetMaxFramesInFlight());
 
 		for (size_t i = 0; i < m_pGraphicsAPI->GetMaxFramesInFlight(); i++)
@@ -339,26 +356,25 @@ namespace api
 			for (const auto& Buffer : m_UniformBufferList)
 			{
 				const auto& Data = Buffer->GetData();
-				size_t bufferSize = Data.size();
+				const uint32_t ByteSize = static_cast<uint32_t>(math::GetNextPowerOfTwo(static_cast<unsigned int>(Data.size()))); // 2のn乗にする
 
 				VkBuffer UniformBuffer;
 				VkDeviceMemory BufferMemory;
-				void* BuffersMappedList;
 
 				// バッファの作成
-				m_pGraphicsAPI->CreateBuffer(bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, UniformBuffer, BufferMemory);
-
-				// バッファ用のメモリを作成
-				vkMapMemory(m_pGraphicsAPI->GetLogicalDevice(), BufferMemory, 0, bufferSize, 0, &BuffersMappedList);
-
-				// メモリに値を代入
-				std::memcpy(BuffersMappedList, &Data[0], bufferSize);
+				if (m_UseDynamicUniform)
+				{
+					m_pGraphicsAPI->CreateBuffer(ByteSize * m_RefCount, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, UniformBuffer, BufferMemory);
+				}
+				else
+				{
+					m_pGraphicsAPI->CreateBuffer(ByteSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, UniformBuffer, BufferMemory);
+				}
 
 				//
 				m_VKUniformBufferList[i].push_back(UniformBuffer);
 				m_VKUniformBufferMemoryList[i].push_back(BufferMemory);
-				m_VKUniformBufferMappedList[i].push_back(BuffersMappedList);
-				m_VKUniformBufferSizeList[i].push_back(bufferSize);
+				m_VKUniformBufferSizeList[i].push_back(ByteSize);
 			}
 		}
 
@@ -375,7 +391,16 @@ namespace api
 			switch (Buffer->GetBufferType())
 			{
 			case graphics::EBufferType::UNIFROM:
-				poolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+				{
+					if (m_UseDynamicUniform)
+					{
+						poolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+					}
+					else
+					{
+						poolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+					}
+				}
 				break;
 
 			case graphics::EBufferType::TEXTURE:
@@ -421,6 +446,7 @@ namespace api
 		}
 
 		//
+
 		for (size_t FrameIndex = 0; FrameIndex < m_pGraphicsAPI->GetMaxFramesInFlight(); FrameIndex++)
 		{
 			for (int BufferIndex = 0; BufferIndex < m_UniformBufferList.size(); BufferIndex++)
@@ -449,9 +475,23 @@ namespace api
 							bufferInfoList[LayoutIndex].offset = Layout.ByteOffset; // バッファオフセット
 							bufferInfoList[LayoutIndex].range = Layout.ByteSize; // サイズかな？
 
-							descriptorWrites[LayoutIndex].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER; // どのタイプのコマンドを発行してもらうのか
+							if (m_UseDynamicUniform)
+							{
+								descriptorWrites[LayoutIndex].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC; // どのタイプのコマンドを発行してもらうのか
+							}
+							else
+							{
+								descriptorWrites[LayoutIndex].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER; // どのタイプのコマンドを発行してもらうのか
+							}
+							
 							descriptorWrites[LayoutIndex].descriptorCount = 1;
 							descriptorWrites[LayoutIndex].pBufferInfo = &bufferInfoList[LayoutIndex];
+
+							// 複数個入力しても意味がないので始めのFrameIndexだけを見る
+							if (FrameIndex == 0)
+							{
+								m_BindingRefSizeList.push_back(m_VKUniformBufferSizeList[FrameIndex][BufferIndex]);
+							}
 						}
 						break;
 

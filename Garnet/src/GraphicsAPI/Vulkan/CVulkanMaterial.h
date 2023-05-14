@@ -34,8 +34,7 @@ namespace api
 
 		std::vector<std::vector<VkBuffer>> m_VKUniformBufferList;
 		std::vector<std::vector<VkDeviceMemory>> m_VKUniformBufferMemoryList;
-		std::vector<std::vector<void*>> m_VKUniformBufferMappedList;
-		std::vector<std::vector<size_t>> m_VKUniformBufferSizeList;
+		std::vector<std::vector<uint32_t>> m_VKUniformBufferSizeList;
 
 		VkDescriptorPool m_DescriptorPool;
 		std::vector<VkDescriptorSet> m_DescriptorSets;
@@ -68,7 +67,7 @@ namespace api
 
 		virtual bool Create(api::IGraphicsAPI* pGraphicsAPI) override;
 		virtual bool Update(float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection) override;
-		virtual bool BuildDrawBuffer() override;
+		virtual bool BuildDrawBuffer(int DynamicOffsetNum) override;
 
 		virtual void SetUniformValue(const std::string Name, const void* Value, int DynamicOffsetNum) override;
 

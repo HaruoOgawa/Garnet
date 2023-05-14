@@ -29,7 +29,6 @@ namespace api
 		// BindGroup
 		WGPUBindGroupLayout m_BindGroupLayout;
 		WGPUBindGroup m_BindGroup;
-		std::vector<uint32_t> m_BindingRefSizeList; // GLSLの各bindingが参照しているバッファのサイズ
 	private:
 		// WebGPU Main Logic /////////////////////////////////////////////////////////////////////
 		bool CreateShaderStages(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo);
@@ -47,7 +46,7 @@ namespace api
 
 		virtual bool Create(api::IGraphicsAPI* pGraphicsAPI) override;
 		virtual bool Update(float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection) override;
-		virtual bool BuildDrawBuffer() override;
+		virtual bool BuildDrawBuffer(int DynamicOffsetNum) override;
 
 		virtual void SetUniformValue(const std::string Name, const void* Value, int DynamicOffsetNum) override;
 
@@ -56,8 +55,6 @@ namespace api
 
 		const WGPUBindGroupLayout& GetBindGroupLayout() { return m_BindGroupLayout; }
 		const WGPUBindGroup& GetBindGroup() { return m_BindGroup; }
-
-		const std::vector<uint32_t>& GetBindingRefSizeList() const;
 	};
 }
 #endif

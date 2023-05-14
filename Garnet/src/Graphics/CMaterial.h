@@ -30,6 +30,8 @@ namespace graphics
 
 		int											 m_RefCount;
 		bool										 m_UseDynamicUniform;
+
+		std::vector<uint32_t> m_BindingRefSizeList; // GLSLの各bindingが参照しているバッファのサイズ
 	public:
 		CMaterial();
 		virtual ~CMaterial() = default;
@@ -37,7 +39,7 @@ namespace graphics
 		virtual void SetCreateInfo(const std::shared_ptr<CMaterialCreateInfo>& createInfo);
 		virtual bool Create(api::IGraphicsAPI* pGraphicsAPI) = 0;
 		virtual bool Update(float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection) = 0;
-		virtual bool BuildDrawBuffer() = 0;
+		virtual bool BuildDrawBuffer(int DynamicOffsetNum) = 0;
 
 		virtual void AddUniformBuffer(const std::shared_ptr<CUniformBuffer>& Buffer);
 		virtual void AddTextureBuffer(const std::shared_ptr<CTextureBuffer>& Buffer);
@@ -46,5 +48,7 @@ namespace graphics
 
 		virtual void IncreaseRefCount();
 		virtual int GetRefCount() const;
+
+		virtual const std::vector<uint32_t>& GetBindingRefSizeList() const;
 	};
 }

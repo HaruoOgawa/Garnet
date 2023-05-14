@@ -51,7 +51,7 @@ namespace api
 		return true;
 	}
 
-	bool CWebGPUMaterial::BuildDrawBuffer()
+	bool CWebGPUMaterial::BuildDrawBuffer(int DynamicOffsetNum)
 	{
 		return true;
 	}
@@ -91,11 +91,6 @@ namespace api
 				}
 			}
 		}
-	}
-
-	const std::vector<uint32_t>& CWebGPUMaterial::GetBindingRefSizeList() const
-	{
-		return m_BindingRefSizeList;
 	}
 
 	// WebGPU Main Logic /////////////////////////////////////////////////////////////////////

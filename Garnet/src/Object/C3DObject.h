@@ -23,6 +23,8 @@ namespace object
 		virtual bool Draw() override;
 
 		void AddNode(const std::shared_ptr<CNode>& Node);
+		const std::vector<std::shared_ptr<CNode>>& GetNodeList() const;
+
 		void AddMaterial(const std::shared_ptr<graphics::CMaterial>& Material);
 		const std::vector<std::shared_ptr<graphics::CMaterial>>& GetMaterialList() const;
 	};

@@ -77,6 +77,11 @@ namespace object
 		m_NodeList.push_back(Node);
 	}
 
+	const std::vector<std::shared_ptr<CNode>>& C3DObject::GetNodeList() const
+	{
+		return m_NodeList;
+	}
+
 	void C3DObject::AddMaterial(const std::shared_ptr<graphics::CMaterial>& Material)
 	{
 		m_MaterialList.push_back(Material);

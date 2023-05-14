@@ -108,7 +108,9 @@ namespace scene
 			{
 				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(Mesh);
 				Node->LinkMaterialReference(0, m_TestObject->GetMaterialList());
-				Node->SetPos(glm::vec3(0.5f, 0.0f, -2.0f));
+				Node->SetPos(glm::vec3(0.0f, 0.0f, -0.25f));
+				Node->SetRot(glm::vec3(0.0f, 0.0f, 45.0f));
+				Node->SetScale(glm::vec3(1.0f, 0.1f, 1.0f));
 				m_TestObject->AddNode(Node);
 			}
 
@@ -123,9 +125,7 @@ namespace scene
 			{
 				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(Mesh);
 				Node->LinkMaterialReference(0, m_TestObject->GetMaterialList());
-				Node->SetPos(glm::vec3(0.0f, 0.0f, -0.25f));
-				Node->SetRot(glm::vec3(0.0f, 0.0f, 45.0f));
-				Node->SetScale(glm::vec3(1.0f, 0.1f, 1.0f));
+				Node->SetPos(glm::vec3(0.5f, 0.0f, -2.0f));
 				m_TestObject->AddNode(Node);
 			}
 		}
@@ -140,8 +140,9 @@ namespace scene
 	{
 		if (m_IsLoaded && m_TestObject)
 		{
-			if (!m_TestObject->Update(SecondsTime, Camera, Projection)) return false;
+			m_TestObject->GetNodeList()[0]->SetRot(glm::vec3(SecondsTime));
 
+			if (!m_TestObject->Update(SecondsTime, Camera, Projection)) return false;
 		}
 
 		if (!m_IsLoaded)

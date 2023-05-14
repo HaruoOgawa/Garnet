@@ -61,7 +61,7 @@ namespace renderer
 		api::CVulkanMaterial* pVulkanMat = static_cast<api::CVulkanMaterial*>(Material.get());
 
 		// ユニフォームバッファの準備
-		if (!pVulkanMat->BuildDrawBuffer()) return false;
+		if (!pVulkanMat->BuildDrawBuffer(DynamicOffsetNum)) return false;
 
 		// グラフィックパイプラインをコマンドにバインド
 		vkCmdBindPipeline(m_pGraphicsAPI->GetCommandBuffers()[m_pGraphicsAPI->GetCurrentFrame()], VK_PIPELINE_BIND_POINT_GRAPHICS, m_GraphicsPipeline);
@@ -77,8 +77,15 @@ namespace renderer
 		vkCmdBindIndexBuffer(m_pGraphicsAPI->GetCommandBuffers()[m_pGraphicsAPI->GetCurrentFrame()], m_IndexBuffer, 0, VK_INDEX_TYPE_UINT16);
 		
 		// UBOのセット
+		std::vector<uint32_t> dynamicOffsetList;
+		for (const auto& Size : pVulkanMat->GetBindingRefSizeList())
+		{
+			uint32_t dynamicOffset = (DynamicOffsetNum - 1) * Size;
+			dynamicOffsetList.push_back(dynamicOffset);
+		}
+
 		vkCmdBindDescriptorSets(m_pGraphicsAPI->GetCommandBuffers()[m_pGraphicsAPI->GetCurrentFrame()], VK_PIPELINE_BIND_POINT_GRAPHICS,
-			m_PipelineLayout, 0, 1, &pVulkanMat->GetDescriptorSets()[m_pGraphicsAPI->GetCurrentFrame()], 0, nullptr);
+			m_PipelineLayout, 0, 1, &pVulkanMat->GetDescriptorSets()[m_pGraphicsAPI->GetCurrentFrame()], static_cast<uint32_t>(dynamicOffsetList.size()), &dynamicOffsetList[0]);
 
 		// 描画コマンドを発行
 		//vkCmdDraw(m_CommandBuffers[m_CurrentFrame], 3, 1, 0, 0); // パラメーター: vertexCount, instanceCount, firstVertex, firstInstance
