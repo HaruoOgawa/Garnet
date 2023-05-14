@@ -18,10 +18,13 @@ namespace object
 		C3DObject();
 		virtual ~C3DObject();
 
+		bool		 Create(api::IGraphicsAPI* pGraphicsAPI);
 		virtual bool Update(float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection) override;
 		virtual bool Draw() override;
 
 		void AddNode(const std::shared_ptr<CNode>& Node);
+		const std::vector<std::shared_ptr<CNode>>& GetNodeList() const;
+
 		void AddMaterial(const std::shared_ptr<graphics::CMaterial>& Material);
 		const std::vector<std::shared_ptr<graphics::CMaterial>>& GetMaterialList() const;
 	};

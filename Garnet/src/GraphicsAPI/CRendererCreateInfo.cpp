@@ -6,6 +6,13 @@ namespace renderer
 	{
 	}
 
+	CRendererCreateInfo::~CRendererCreateInfo()
+	{
+		m_Vertices.clear();
+		m_Indices.clear();
+		m_AttributeDimensions.clear();
+	}
+
 	// VertexBuffer
 	void CRendererCreateInfo::SetVertices(const std::vector<std::vector<float>>& Vertices)
 	{

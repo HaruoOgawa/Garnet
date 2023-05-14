@@ -2,11 +2,19 @@
 
 namespace graphics
 {
-	CMaterial::CMaterial()
+	CMaterial::CMaterial():
+		m_CreateInfo(nullptr),
+		m_RefCount(0),
+		m_UseDynamicUniform(false)
 	{
 	}
 
-	bool CMaterial::Create(api::IGraphicsAPI* pGraphicsAPI, const CMaterialCreateInfo& createInfo)
+	void CMaterial::SetCreateInfo(const std::shared_ptr<CMaterialCreateInfo>& createInfo)
+	{
+		m_CreateInfo = createInfo;
+	}
+
+	bool CMaterial::Create(api::IGraphicsAPI* pGraphicsAPI)
 	{
 		return true;
 	}
@@ -26,7 +34,27 @@ namespace graphics
 		m_TextureBufferList.push_back(Buffer);
 	}
 
-	void CMaterial::SetUniformValue(const std::string Name, const void* Value)
+	void CMaterial::SetUniformValue(const std::string Name, const void* Value, int DynamicOffsetNum)
 	{
+	}
+
+	void CMaterial::IncreaseRefCount()
+	{
+		m_RefCount++;
+
+		if (m_RefCount > 1)
+		{
+			m_UseDynamicUniform = true;
+		}
+	}
+
+	int CMaterial::GetRefCount() const
+	{
+		return m_RefCount;
+	}
+
+	const std::vector<uint32_t>& CMaterial::GetBindingRefSizeList() const
+	{
+		return m_BindingRefSizeList;
 	}
 }

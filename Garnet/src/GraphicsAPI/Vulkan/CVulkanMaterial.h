@@ -34,8 +34,7 @@ namespace api
 
 		std::vector<std::vector<VkBuffer>> m_VKUniformBufferList;
 		std::vector<std::vector<VkDeviceMemory>> m_VKUniformBufferMemoryList;
-		std::vector<std::vector<void*>> m_VKUniformBufferMappedList;
-		std::vector<std::vector<size_t>> m_VKUniformBufferSizeList;
+		std::vector<std::vector<uint32_t>> m_VKUniformBufferSizeList;
 
 		VkDescriptorPool m_DescriptorPool;
 		std::vector<VkDescriptorSet> m_DescriptorSets;
@@ -47,16 +46,16 @@ namespace api
 		VkSampler m_TextureSampler;
 	private:
 		// Vulkanメインロジック /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		bool CreateShaderStages(const graphics::CMaterialCreateInfo& createInfo);
+		bool CreateShaderStages(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo);
 		
-		bool CreateTextureImage(const graphics::CMaterialCreateInfo& createInfo);
-		bool CreateTextureImageView(const graphics::CMaterialCreateInfo& createInfo);
-		bool CreateTextureSampler(const graphics::CMaterialCreateInfo& createInfo);
+		bool CreateTextureImage(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo);
+		bool CreateTextureImageView(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo);
+		bool CreateTextureSampler(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo);
 
-		bool CreateDescriptorSetLayout(const graphics::CMaterialCreateInfo& createInfo);
-		bool CreateUniformBuffers(const graphics::CMaterialCreateInfo& createInfo);
-		bool CreateDescriptorPool(const graphics::CMaterialCreateInfo& createInfo);
-		bool CreateDescriptorSets(const graphics::CMaterialCreateInfo& createInfo);
+		bool CreateDescriptorSetLayout(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo);
+		bool CreateUniformBuffers(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo);
+		bool CreateDescriptorPool(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo);
+		bool CreateDescriptorSets(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo);
 
 		void Release();
 
@@ -66,11 +65,11 @@ namespace api
 		CVulkanMaterial();
 		virtual ~CVulkanMaterial();
 
-		virtual bool Create(api::IGraphicsAPI* pGraphicsAPI, const graphics::CMaterialCreateInfo& createInfo) override;
+		virtual bool Create(api::IGraphicsAPI* pGraphicsAPI) override;
 		virtual bool Update(float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection) override;
-		virtual bool BuildDrawBuffer() override;
+		virtual bool BuildDrawBuffer(int DynamicOffsetNum) override;
 
-		virtual void SetUniformValue(const std::string Name, const void* Value) override;
+		virtual void SetUniformValue(const std::string Name, const void* Value, int DynamicOffsetNum) override;
 
 		const std::vector<VkPipelineShaderStageCreateInfo>& GetShaderStages()const { return m_ShaderStages; }
 		const VkDescriptorSetLayout& GetDescriptorSetLayout() const { return m_DescriptorSetLayout; }

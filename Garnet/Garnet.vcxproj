@@ -330,6 +330,7 @@ del $(OutDir)Garnet.pdb</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="src\Math\CMath.h" />
     <ClInclude Include="src\Projection\CProjection.h" />
     <ClInclude Include="src\Camera\CCamera.h" />
     <ClInclude Include="src\Graphics\CTextureBuffer.h" />

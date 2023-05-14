@@ -1,10 +1,14 @@
 #pragma once
 
 #include <memory>
+#include <vector>
 #include "../Graphics/CMesh.h"
 #include "../Math/CTransform.h"
 
-namespace graphics{ class CMesh; }
+namespace graphics{ 
+	class CMesh; 
+	class CMaterial;
+}
 namespace math { class CTransform; }
 
 namespace object
@@ -12,7 +16,9 @@ namespace object
 	class CNode
 	{
 		std::shared_ptr<math::CTransform> m_Transform;
-		std::shared_ptr<graphics::CMesh> m_Mesh;
+		std::shared_ptr<graphics::CMesh>  m_Mesh;
+		int								  m_MaterialIndex;
+		int								  m_DynamicOffsetNum;
 	public:
 		CNode(const std::shared_ptr<graphics::CMesh>& Mesh);
 		virtual ~CNode();
@@ -21,5 +27,18 @@ namespace object
 
 		void SetTransform(std::shared_ptr<math::CTransform>& Transform);
 		const std::shared_ptr<math::CTransform>& GetTransform() const;
+
+		const glm::vec3& GetPos() const;
+		void SetPos(const glm::vec3& Pos);
+
+		const glm::vec3& GetRot() const;
+		void SetRot(const glm::vec3& Rot);
+
+		const glm::vec3& GetScale() const;
+		void SetScale(const glm::vec3& Scale);
+
+		void LinkMaterialReference(int MaterialIndex, const std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList);
+		int GetMaterialIndex() const;
+		int GetDynamicOffsetNum() const;
 	};
 }

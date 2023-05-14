@@ -25,7 +25,7 @@ namespace renderer
 		}
 	}
 
-	bool CWebGPURenderer::Create(api::IGraphicsAPI* pGraphicsAPI, const CRendererCreateInfo& createInfo, const std::shared_ptr<graphics::CMaterial>& Material)
+	bool CWebGPURenderer::Create(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CRendererCreateInfo>& createInfo, const std::shared_ptr<graphics::CMaterial>& Material)
 	{
 		m_pGraphicsAPI = static_cast<api::CWebGPUAPI*>(pGraphicsAPI);
 		api::CWebGPUMaterial* pWebGPUMat = static_cast<api::CWebGPUMaterial*>(Material.get());
@@ -37,12 +37,12 @@ namespace renderer
 		return true;
 	}
 
-	bool CWebGPURenderer::Draw(const std::shared_ptr<graphics::CMaterial>& Material)
+	bool CWebGPURenderer::Draw(const std::shared_ptr<graphics::CMaterial>& Material, int DynamicOffsetNum)
 	{
 		api::CWebGPUMaterial* pWebGPUMat = static_cast<api::CWebGPUMaterial*>(Material.get());
 
 		// ユニフォームバッファの準備
-		if (!pWebGPUMat->BuildDrawBuffer()) return false;
+		if (!pWebGPUMat->BuildDrawBuffer(DynamicOffsetNum)) return false;
 
 		// レンダーパスにパイプラインを割り当てる
 		wgpuRenderPassEncoderSetPipeline(m_pGraphicsAPI->GetRenderPass(), m_GraphicsPipeline); 
@@ -57,7 +57,14 @@ namespace renderer
 		wgpuRenderPassEncoderSetIndexBuffer(m_pGraphicsAPI->GetRenderPass(), m_IndexBuffer, WGPUIndexFormat_Uint16, 0, m_IndexCount * sizeof(uint16_t));
 
 		// バインドグループを割り当てる
-		wgpuRenderPassEncoderSetBindGroup(m_pGraphicsAPI->GetRenderPass(), 0, pWebGPUMat->GetBindGroup(), 0, nullptr);
+		std::vector<uint32_t> dynamicOffsetList;
+		for (const auto& Size : pWebGPUMat->GetBindingRefSizeList())
+		{
+			uint32_t dynamicOffset = (DynamicOffsetNum - 1) * Size;
+			dynamicOffsetList.push_back(dynamicOffset);
+		}
+
+		wgpuRenderPassEncoderSetBindGroup(m_pGraphicsAPI->GetRenderPass(), 0, pWebGPUMat->GetBindGroup(), static_cast<uint32_t>(dynamicOffsetList.size()), &dynamicOffsetList[0]);
 
 		// 描画を実行
 		wgpuRenderPassEncoderDrawIndexed(m_pGraphicsAPI->GetRenderPass(), static_cast<uint32_t>(m_IndexCount), 1, 0, 0, 0);
@@ -66,10 +73,10 @@ namespace renderer
 	}
 
 	// WebGPU Main Logic /////////////////////////////////////////////////////////////////////
-	bool CWebGPURenderer::CreateVertexBuffer(const CRendererCreateInfo& createInfo)
+	bool CWebGPURenderer::CreateVertexBuffer(const std::shared_ptr<CRendererCreateInfo>& createInfo)
 	{
 		// 頂点バッファオブジェクトの生成
-		for (const auto& Data : createInfo.GetVertices())
+		for (const auto& Data : createInfo->GetVertices())
 		{
 			// WGPUBufferUsage_CopyDst はCPUからGPUへメモリをコピーすることを指定する
 			// 反対にGPUからCPUへ読み戻したい場合はWGPUBufferUsage_CopySrcも指定する
@@ -83,21 +90,21 @@ namespace renderer
 		}
 
 		// 頂点数
-		m_VertexCount = static_cast<int>(createInfo.GetVertices()[0].size() / createInfo.GetAttributeDimensions()[0]);
+		m_VertexCount = static_cast<int>(createInfo->GetVertices()[0].size() / createInfo->GetAttributeDimensions()[0]);
 
 		return true;
 	}
 
-	bool CWebGPURenderer::CreateIndexBuffer(const CRendererCreateInfo& createInfo)
+	bool CWebGPURenderer::CreateIndexBuffer(const std::shared_ptr<CRendererCreateInfo>& createInfo)
 	{
-		m_IndexCount = createInfo.GetIndices().size();
+		m_IndexCount = createInfo->GetIndices().size();
 
-		if (!CreateBuffer(m_IndexBuffer, WGPUBufferUsage_CopyDst | WGPUBufferUsage_Index, &createInfo.GetIndices()[0], m_IndexCount * sizeof(uint16_t))) return false;
+		if (!CreateBuffer(m_IndexBuffer, WGPUBufferUsage_CopyDst | WGPUBufferUsage_Index, &createInfo->GetIndices()[0], m_IndexCount * sizeof(uint16_t))) return false;
 
 		return true;
 	}
 
-	bool CWebGPURenderer::CreateGraphicsPipeline(const CRendererCreateInfo& createInfo, api::CWebGPUMaterial* pWebGPUMat)
+	bool CWebGPURenderer::CreateGraphicsPipeline(const std::shared_ptr<CRendererCreateInfo>& createInfo, api::CWebGPUMaterial* pWebGPUMat)
 	{
 		// パイプラインの設定 //////////////////////////////////////////////////////////////////////////
 		WGPURenderPipelineDescriptor pipelineDesc{};
@@ -113,7 +120,7 @@ namespace renderer
 		for (int i = 0; i < static_cast<int>(m_VertexBufferList.size()); i++)
 		{
 			//
-			int Dimension = createInfo.GetAttributeDimensions()[i];
+			int Dimension = createInfo->GetAttributeDimensions()[i];
 
 			//
 			attributes[i].shaderLocation = i; // Shaderでのアトリビュートインデックス

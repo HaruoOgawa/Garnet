@@ -11,6 +11,15 @@ namespace graphics
 	{
 	}
 
+	CMaterialCreateInfo::~CMaterialCreateInfo()
+	{
+		m_VertexShaderCode.clear();
+		m_FragmentShaderCode.clear();
+		m_GeometryShaderCode.clear();
+		m_HullShaderCode.clear();
+		m_DomainShaderCode.clear();
+	}
+
 	// Uniform
 	std::shared_ptr<graphics::CUniformBuffer> CMaterialCreateInfo::CreateUniformBuffer(std::vector<int> BindIndexList)
 	{

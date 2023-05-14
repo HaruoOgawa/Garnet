@@ -30,7 +30,7 @@ namespace graphics
 		std::vector<char> m_DomainShaderCode;
 	public:
 		CMaterialCreateInfo();
-		virtual ~CMaterialCreateInfo() = default;
+		virtual ~CMaterialCreateInfo();
 
 		// Uniform
 		std::shared_ptr<graphics::CUniformBuffer> CreateUniformBuffer(std::vector<int> BindIndexList);

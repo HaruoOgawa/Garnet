@@ -1,4 +1,5 @@
 #pragma once
+#include <memory>
 
 namespace renderer {
 	class CRendererCreateInfo;
@@ -8,6 +9,8 @@ namespace graphics
 {
 	enum class EPresetPrimitiveType
 	{
+		None = -1,
+
 		BOARD,
 		BOX,
 		POINT,
@@ -17,6 +20,6 @@ namespace graphics
 	class CPresetPrimitive
 	{
 	public:
-		static bool CreateBoard(renderer::CRendererCreateInfo& createInfo);
+		static bool CreateBoard(std::shared_ptr<renderer::CRendererCreateInfo>& createInfo);
 	};
 }

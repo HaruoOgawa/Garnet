@@ -5,6 +5,7 @@
 #include "../../Debug/Message/Console.h"
 #include "../../Camera/CCamera.h"
 #include "../../Projection/CProjection.h"
+#include "../../Math/CMath.h"
 
 namespace api
 {
@@ -27,13 +28,16 @@ namespace api
 		m_WGPUUniformBufferList.clear();
 	}
 
-	bool CWebGPUMaterial::Create(api::IGraphicsAPI* pGraphicsAPI, const graphics::CMaterialCreateInfo& createInfo)
+	bool CWebGPUMaterial::Create(api::IGraphicsAPI* pGraphicsAPI)
 	{
 		m_pGraphicsAPI = static_cast<api::CWebGPUAPI*>(pGraphicsAPI);
 
-		if (!CreateShaderStages(createInfo)) return false;
-		if (!CreateUniformBuffer(createInfo)) return false; // ユニフォームバッファを生成
-		if (!CreateBindGroup(createInfo)) return false; // バインドグループを生成(レンダリングパイプラインで使用するすべてのリソースをどのようにバインドするかを指定するオブジェクト)
+		if (!CreateShaderStages(m_CreateInfo)) return false;
+		if (!CreateUniformBuffer(m_CreateInfo)) return false; // ユニフォームバッファを生成
+		if (!CreateBindGroup(m_CreateInfo)) return false; // バインドグループを生成(レンダリングパイプラインで使用するすべてのリソースをどのようにバインドするかを指定するオブジェクト)
+
+		// 生成処理が終わったので不要なリソースを解放する
+		m_CreateInfo = nullptr;
 
 		return true;
 	}
@@ -41,22 +45,23 @@ namespace api
 	bool CWebGPUMaterial::Update(float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection)
 	{
 		// 共通のユニフォームバッファの更新
-		SetUniformValue("view", &Camera->GetViewMatrix()[0][0]);
-		SetUniformValue("proj", &Projection->GetPrejectionMatrix()[0][0]);
+		SetUniformValue("view", &Camera->GetViewMatrix()[0][0], -1);
+		SetUniformValue("proj", &Projection->GetPrejectionMatrix()[0][0], -1);
 
 		return true;
 	}
 
-	bool CWebGPUMaterial::BuildDrawBuffer()
+	bool CWebGPUMaterial::BuildDrawBuffer(int DynamicOffsetNum)
 	{
 		return true;
 	}
 
-	void CWebGPUMaterial::SetUniformValue(const std::string Name, const void* Value)
+	void CWebGPUMaterial::SetUniformValue(const std::string Name, const void* Value, int DynamicOffsetNum)
 	{
 		for (int i = 0; i < m_UniformBufferList.size(); i++)
 		{
 			auto& UniformBuffer = m_UniformBufferList[i];
+			auto UniformBufferByteSize = static_cast<uint64_t>(m_WGPUUniformBufferByteSizeList[i]);
 			const auto& UniformDesc = UniformBuffer->GetDescriptor();
 
 			const auto& DataList = UniformDesc->GetDataList();
@@ -66,29 +71,46 @@ namespace api
 				const int ByteOffset = UniformData->second.ByteOffset;
 				const int ByteSize = UniformData->second.ByteSize;
 
-				wgpuQueueWriteBuffer(m_pGraphicsAPI->GetQueue(), m_WGPUUniformBufferList[i], ByteOffset, Value, ByteSize);
+				if (m_UseDynamicUniform)
+				{
+					if (DynamicOffsetNum == -1)
+					{
+						for (int r = 0; r < m_RefCount; r++)
+						{
+							wgpuQueueWriteBuffer(m_pGraphicsAPI->GetQueue(), m_WGPUUniformBufferList[i], ByteOffset + UniformBufferByteSize * r, Value, ByteSize);
+						}
+					}
+					else
+					{
+						wgpuQueueWriteBuffer(m_pGraphicsAPI->GetQueue(), m_WGPUUniformBufferList[i], ByteOffset + UniformBufferByteSize * (DynamicOffsetNum - 1), Value, ByteSize);
+					}
+				}
+				else
+				{
+					wgpuQueueWriteBuffer(m_pGraphicsAPI->GetQueue(), m_WGPUUniformBufferList[i], ByteOffset, Value, ByteSize);
+				}
 			}
 		}
 	}
 
 	// WebGPU Main Logic /////////////////////////////////////////////////////////////////////
-	bool CWebGPUMaterial::CreateShaderStages(const graphics::CMaterialCreateInfo& createInfo)
+	bool CWebGPUMaterial::CreateShaderStages(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo)
 	{
 		// シェーダーモジュールの生成 //////////////////////////////////////////////////////////////////
-		if (createInfo.GetShaderType() == graphics::EShaderType::SPIRV)
+		if (createInfo->GetShaderType() == graphics::EShaderType::SPIRV)
 		{
-			const auto& VertexShaderData = createInfo.GetVertexShaderCode();
+			const auto& VertexShaderData = createInfo->GetVertexShaderCode();
 			m_VertexShaderModele = CreateShaderModuleFromSPIRV(VertexShaderData);
 
-			const auto& FragmentShaderCode = createInfo.GetFragmentShaderCode();
+			const auto& FragmentShaderCode = createInfo->GetFragmentShaderCode();
 			m_FragmentShaderModele = CreateShaderModuleFromSPIRV(FragmentShaderCode);
 		}
-		else if (createInfo.GetShaderType() == graphics::EShaderType::WGSL)
+		else if (createInfo->GetShaderType() == graphics::EShaderType::WGSL)
 		{
-			const auto& VertexShaderData = createInfo.GetVertexShaderCode();
+			const auto& VertexShaderData = createInfo->GetVertexShaderCode();
 			m_VertexShaderModele = CreateShaderModuleFromWGSL(std::string(&VertexShaderData[0], &VertexShaderData[0] + VertexShaderData.size()));
 
-			const auto& FragmentShaderCode = createInfo.GetFragmentShaderCode();
+			const auto& FragmentShaderCode = createInfo->GetFragmentShaderCode();
 			m_FragmentShaderModele = CreateShaderModuleFromWGSL(std::string(&FragmentShaderCode[0], &FragmentShaderCode[0] + FragmentShaderCode.size()));
 		}
 		else
@@ -99,25 +121,25 @@ namespace api
 		return true;
 	}
 
-	bool CWebGPUMaterial::CreateUniformBuffer(const graphics::CMaterialCreateInfo& createInfo)
+	bool CWebGPUMaterial::CreateUniformBuffer(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo)
 	{
 		for (const auto& Buffer : m_UniformBufferList)
 		{
 			const auto& Data = Buffer->GetData();
 
 			WGPUBuffer UniformBuffer;
-			size_t UniformSize = Data.size();
+			const uint64_t ByteSize = static_cast<uint64_t>(math::GetNextPowerOfTwo(static_cast<unsigned int>(Data.size()))); // 2のn乗にする
 
-			if (!CreateBuffer(UniformBuffer, WGPUBufferUsage_CopyDst | WGPUBufferUsage_Uniform, &Data[0], UniformSize * sizeof(float))) return false;
+			if (!CreateWGUniformBuffer(UniformBuffer, WGPUBufferUsage_CopyDst | WGPUBufferUsage_Uniform, &Data[0], ByteSize)) return false;
 
 			m_WGPUUniformBufferList.push_back(UniformBuffer);
-			m_WGPUUniformSizeList.push_back(UniformSize);
+			m_WGPUUniformBufferByteSizeList.push_back(static_cast<uint32_t>(ByteSize));
 		}
 
 		return true;
 	}
 
-	bool CWebGPUMaterial::CreateBindGroup(const graphics::CMaterialCreateInfo& createInfo)
+	bool CWebGPUMaterial::CreateBindGroup(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo)
 	{
 		// バインドレイアウトを作成
 		// どのようにメモリに配置されるか, バインドインデックスや読み取り専用かなど
@@ -134,6 +156,7 @@ namespace api
 				bindingLayout.visibility = WGPUShaderStage_Vertex | WGPUShaderStage_Fragment; // アクセス権限。ここではおそらく頂点シェーダーとフラグメントシェーダーのみ読み取り可
 				bindingLayout.buffer.type = WGPUBufferBindingType_Uniform; // バインド先のバッファの種類
 				bindingLayout.buffer.minBindingSize = Layout.ByteSize; // データ一つ当たりのサイズかな???
+				bindingLayout.buffer.hasDynamicOffset = true; // ダイナミックユニフォーム
 
 				bindingLayoutList.push_back(bindingLayout);
 			}
@@ -173,6 +196,7 @@ namespace api
 				binding.size = Layout.ByteSize;
 
 				bindingList.push_back(binding);
+				m_BindingRefSizeList.push_back(m_WGPUUniformBufferByteSizeList[i]);
 			}
 		}
 
@@ -236,7 +260,7 @@ namespace api
 		return shaderModule;
 	}
 
-	bool CWebGPUMaterial::CreateBuffer(WGPUBuffer& Buffer, WGPUBufferUsageFlags Usage, void const* Data, uint64_t ByteSize)
+	bool CWebGPUMaterial::CreateWGUniformBuffer(WGPUBuffer& Buffer, WGPUBufferUsageFlags Usage, void const* Data, uint64_t ByteSize)
 	{
 		// たぶんWebGPU, Vulkanでもvec3は16バイトオフセットと換算されるっぽいからvec3分(12バイト分)のパディングを入れたい場合はvec3ではなくfloatの変数を3つ定義するべき
 
@@ -245,12 +269,22 @@ namespace api
 		bufferDesc.label = "Buffer";
 		bufferDesc.usage = Usage; // バッファの用途
 		bufferDesc.mappedAtCreation = false; // ???
-		bufferDesc.size = ByteSize;
+		bufferDesc.size = ByteSize * ((m_UseDynamicUniform) ? m_RefCount : 1);
 
 		Buffer = wgpuDeviceCreateBuffer(m_pGraphicsAPI->GetLogicalDevice(), &bufferDesc);
 
 		// バッファにデータを書き込む
-		wgpuQueueWriteBuffer(m_pGraphicsAPI->GetQueue(), Buffer, 0, Data, bufferDesc.size);
+		if (m_UseDynamicUniform)
+		{
+			for (int i = 0; i < m_RefCount; i++)
+			{
+				wgpuQueueWriteBuffer(m_pGraphicsAPI->GetQueue(), Buffer, ByteSize * i, Data, ByteSize);
+			}
+		}
+		else
+		{
+			wgpuQueueWriteBuffer(m_pGraphicsAPI->GetQueue(), Buffer, 0, Data, ByteSize);
+		}
 
 		return true;
 	}

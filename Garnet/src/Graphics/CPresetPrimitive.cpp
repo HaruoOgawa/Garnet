@@ -3,7 +3,7 @@
 
 namespace graphics
 {
-	bool CPresetPrimitive::CreateBoard(renderer::CRendererCreateInfo& createInfo)
+	bool CPresetPrimitive::CreateBoard(std::shared_ptr<renderer::CRendererCreateInfo>& createInfo)
 	{
 		// Vertex Buffer
 		std::vector<float> Pos = {
@@ -37,9 +37,9 @@ namespace graphics
 		};
 
 		//
-		createInfo.SetVertices(Vertices);
-		createInfo.SetIndices(Indices);
-		createInfo.SetAttributeDimensions(std::vector<int>({ 3 , 3 , 2 }));
+		createInfo->SetVertices(Vertices);
+		createInfo->SetIndices(Indices);
+		createInfo->SetAttributeDimensions(std::vector<int>({ 3 , 3 , 2 }));
 
 		return true;
 	}
