@@ -63,6 +63,7 @@ add_executable(
 	../src/Interface/IRenderer.h
 	../src/Main/DemoMain/DemoMain.cpp
 	../src/Main/WebMain/WebMain.cpp
+	../src/Math/CMath.h
 	../src/Math/CTransform.cpp
 	../src/Math/CTransform.h
 	../src/Object/C3DObject.cpp

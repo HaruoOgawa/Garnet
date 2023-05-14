@@ -5,6 +5,7 @@
 #include "../../Debug/Message/Console.h"
 #include "../../Camera/CCamera.h"
 #include "../../Projection/CProjection.h"
+#include "../../Math/CMath.h"
 
 namespace api
 {
@@ -60,7 +61,7 @@ namespace api
 		for (int i = 0; i < m_UniformBufferList.size(); i++)
 		{
 			auto& UniformBuffer = m_UniformBufferList[i];
-			auto UniformBufferByteSize = m_WGPUUniformBufferByteSizeList[i];
+			auto UniformBufferByteSize = static_cast<uint64_t>(m_WGPUUniformBufferByteSizeList[i]);
 			const auto& UniformDesc = UniformBuffer->GetDescriptor();
 
 			const auto& DataList = UniformDesc->GetDataList();
@@ -92,16 +93,9 @@ namespace api
 		}
 	}
 
-	uint32_t CWebGPUMaterial::GetUnitDynamicOffset()
+	const std::vector<uint32_t>& CWebGPUMaterial::GetBindingRefSizeList() const
 	{
-		uint32_t sum = 0;
-
-		for (const auto& size : m_WGPUUniformBufferByteSizeList)
-		{
-			sum += static_cast<uint32_t>(size);
-		}
-
-		return sum;
+		return m_BindingRefSizeList;
 	}
 
 	// WebGPU Main Logic /////////////////////////////////////////////////////////////////////
@@ -139,12 +133,12 @@ namespace api
 			const auto& Data = Buffer->GetData();
 
 			WGPUBuffer UniformBuffer;
-			uint64_t ByteSize = Data.size();
+			const uint64_t ByteSize = static_cast<uint64_t>(math::GetNextPowerOfTwo(static_cast<unsigned int>(Data.size()))); // 2ÇÃnèÊÇ…Ç∑ÇÈ
 
 			if (!CreateWGUniformBuffer(UniformBuffer, WGPUBufferUsage_CopyDst | WGPUBufferUsage_Uniform, &Data[0], ByteSize)) return false;
 
 			m_WGPUUniformBufferList.push_back(UniformBuffer);
-			m_WGPUUniformBufferByteSizeList.push_back(ByteSize);
+			m_WGPUUniformBufferByteSizeList.push_back(static_cast<uint32_t>(ByteSize));
 		}
 
 		return true;
@@ -207,6 +201,7 @@ namespace api
 				binding.size = Layout.ByteSize;
 
 				bindingList.push_back(binding);
+				m_BindingRefSizeList.push_back(m_WGPUUniformBufferByteSizeList[i]);
 			}
 		}
 

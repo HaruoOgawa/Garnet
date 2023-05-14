@@ -24,11 +24,12 @@ namespace api
 
 		// Uniform
 		std::vector<WGPUBuffer> m_WGPUUniformBufferList;
-		std::vector<uint64_t>	    m_WGPUUniformBufferByteSizeList;
+		std::vector<uint32_t>	m_WGPUUniformBufferByteSizeList;
 
 		// BindGroup
 		WGPUBindGroupLayout m_BindGroupLayout;
 		WGPUBindGroup m_BindGroup;
+		std::vector<uint32_t> m_BindingRefSizeList; // GLSLの各bindingが参照しているバッファのサイズ
 	private:
 		// WebGPU Main Logic /////////////////////////////////////////////////////////////////////
 		bool CreateShaderStages(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo);
@@ -55,7 +56,8 @@ namespace api
 
 		const WGPUBindGroupLayout& GetBindGroupLayout() { return m_BindGroupLayout; }
 		const WGPUBindGroup& GetBindGroup() { return m_BindGroup; }
-		uint32_t GetUnitDynamicOffset();
+
+		const std::vector<uint32_t>& GetBindingRefSizeList() const;
 	};
 }
 #endif
