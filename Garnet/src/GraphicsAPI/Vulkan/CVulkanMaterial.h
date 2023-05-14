@@ -70,7 +70,7 @@ namespace api
 		virtual bool Update(float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection) override;
 		virtual bool BuildDrawBuffer() override;
 
-		virtual void SetUniformValue(const std::string Name, const void* Value) override;
+		virtual void SetUniformValue(const std::string Name, const void* Value, int DynamicOffsetNum) override;
 
 		const std::vector<VkPipelineShaderStageCreateInfo>& GetShaderStages()const { return m_ShaderStages; }
 		const VkDescriptorSetLayout& GetDescriptorSetLayout() const { return m_DescriptorSetLayout; }

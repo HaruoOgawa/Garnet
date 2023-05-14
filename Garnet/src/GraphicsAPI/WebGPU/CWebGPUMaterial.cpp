@@ -44,8 +44,8 @@ namespace api
 	bool CWebGPUMaterial::Update(float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection)
 	{
 		// 共通のユニフォームバッファの更新
-		SetUniformValue("view", &Camera->GetViewMatrix()[0][0]);
-		SetUniformValue("proj", &Projection->GetPrejectionMatrix()[0][0]);
+		SetUniformValue("view", &Camera->GetViewMatrix()[0][0], -1);
+		SetUniformValue("proj", &Projection->GetPrejectionMatrix()[0][0], -1);
 
 		return true;
 	}
@@ -55,11 +55,12 @@ namespace api
 		return true;
 	}
 
-	void CWebGPUMaterial::SetUniformValue(const std::string Name, const void* Value)
+	void CWebGPUMaterial::SetUniformValue(const std::string Name, const void* Value, int DynamicOffsetNum)
 	{
 		for (int i = 0; i < m_UniformBufferList.size(); i++)
 		{
 			auto& UniformBuffer = m_UniformBufferList[i];
+			auto UniformBufferByteSize = m_WGPUUniformBufferByteSizeList[i];
 			const auto& UniformDesc = UniformBuffer->GetDescriptor();
 
 			const auto& DataList = UniformDesc->GetDataList();
@@ -69,9 +70,38 @@ namespace api
 				const int ByteOffset = UniformData->second.ByteOffset;
 				const int ByteSize = UniformData->second.ByteSize;
 
-				wgpuQueueWriteBuffer(m_pGraphicsAPI->GetQueue(), m_WGPUUniformBufferList[i], ByteOffset, Value, ByteSize);
+				if (m_UseDynamicUniform)
+				{
+					if (DynamicOffsetNum == -1)
+					{
+						for (int r = 0; r < m_RefCount; r++)
+						{
+							wgpuQueueWriteBuffer(m_pGraphicsAPI->GetQueue(), m_WGPUUniformBufferList[i], ByteOffset + UniformBufferByteSize * r, Value, ByteSize);
+						}
+					}
+					else
+					{
+						wgpuQueueWriteBuffer(m_pGraphicsAPI->GetQueue(), m_WGPUUniformBufferList[i], ByteOffset + UniformBufferByteSize * (DynamicOffsetNum - 1), Value, ByteSize);
+					}
+				}
+				else
+				{
+					wgpuQueueWriteBuffer(m_pGraphicsAPI->GetQueue(), m_WGPUUniformBufferList[i], ByteOffset, Value, ByteSize);
+				}
 			}
 		}
+	}
+
+	uint32_t CWebGPUMaterial::GetUnitDynamicOffset()
+	{
+		uint32_t sum = 0;
+
+		for (const auto& size : m_WGPUUniformBufferByteSizeList)
+		{
+			sum += static_cast<uint32_t>(size);
+		}
+
+		return sum;
 	}
 
 	// WebGPU Main Logic /////////////////////////////////////////////////////////////////////
@@ -109,12 +139,12 @@ namespace api
 			const auto& Data = Buffer->GetData();
 
 			WGPUBuffer UniformBuffer;
-			size_t UniformSize = Data.size();
+			uint64_t ByteSize = Data.size();
 
-			if (!CreateBuffer(UniformBuffer, WGPUBufferUsage_CopyDst | WGPUBufferUsage_Uniform, &Data[0], UniformSize * sizeof(float))) return false;
+			if (!CreateWGUniformBuffer(UniformBuffer, WGPUBufferUsage_CopyDst | WGPUBufferUsage_Uniform, &Data[0], ByteSize)) return false;
 
 			m_WGPUUniformBufferList.push_back(UniformBuffer);
-			m_WGPUUniformSizeList.push_back(UniformSize);
+			m_WGPUUniformBufferByteSizeList.push_back(ByteSize);
 		}
 
 		return true;
@@ -137,6 +167,7 @@ namespace api
 				bindingLayout.visibility = WGPUShaderStage_Vertex | WGPUShaderStage_Fragment; // アクセス権限。ここではおそらく頂点シェーダーとフラグメントシェーダーのみ読み取り可
 				bindingLayout.buffer.type = WGPUBufferBindingType_Uniform; // バインド先のバッファの種類
 				bindingLayout.buffer.minBindingSize = Layout.ByteSize; // データ一つ当たりのサイズかな???
+				bindingLayout.buffer.hasDynamicOffset = true; // ダイナミックユニフォーム
 
 				bindingLayoutList.push_back(bindingLayout);
 			}
@@ -239,7 +270,7 @@ namespace api
 		return shaderModule;
 	}
 
-	bool CWebGPUMaterial::CreateBuffer(WGPUBuffer& Buffer, WGPUBufferUsageFlags Usage, void const* Data, uint64_t ByteSize)
+	bool CWebGPUMaterial::CreateWGUniformBuffer(WGPUBuffer& Buffer, WGPUBufferUsageFlags Usage, void const* Data, uint64_t ByteSize)
 	{
 		// たぶんWebGPU, Vulkanでもvec3は16バイトオフセットと換算されるっぽいからvec3分(12バイト分)のパディングを入れたい場合はvec3ではなくfloatの変数を3つ定義するべき
 
@@ -248,12 +279,22 @@ namespace api
 		bufferDesc.label = "Buffer";
 		bufferDesc.usage = Usage; // バッファの用途
 		bufferDesc.mappedAtCreation = false; // ???
-		bufferDesc.size = ByteSize;
+		bufferDesc.size = ByteSize * ((m_UseDynamicUniform) ? m_RefCount : 1);
 
 		Buffer = wgpuDeviceCreateBuffer(m_pGraphicsAPI->GetLogicalDevice(), &bufferDesc);
 
 		// バッファにデータを書き込む
-		wgpuQueueWriteBuffer(m_pGraphicsAPI->GetQueue(), Buffer, 0, Data, bufferDesc.size);
+		if (m_UseDynamicUniform)
+		{
+			for (int i = 0; i < m_RefCount; i++)
+			{
+				wgpuQueueWriteBuffer(m_pGraphicsAPI->GetQueue(), Buffer, ByteSize * i, Data, ByteSize);
+			}
+		}
+		else
+		{
+			wgpuQueueWriteBuffer(m_pGraphicsAPI->GetQueue(), Buffer, 0, Data, ByteSize);
+		}
 
 		return true;
 	}

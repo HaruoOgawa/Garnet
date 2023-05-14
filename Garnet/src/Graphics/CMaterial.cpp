@@ -4,7 +4,8 @@ namespace graphics
 {
 	CMaterial::CMaterial():
 		m_CreateInfo(nullptr),
-		m_RefCount(0)
+		m_RefCount(0),
+		m_UseDynamicUniform(false)
 	{
 	}
 
@@ -33,13 +34,18 @@ namespace graphics
 		m_TextureBufferList.push_back(Buffer);
 	}
 
-	void CMaterial::SetUniformValue(const std::string Name, const void* Value)
+	void CMaterial::SetUniformValue(const std::string Name, const void* Value, int DynamicOffsetNum)
 	{
 	}
 
 	void CMaterial::IncreaseRefCount()
 	{
 		m_RefCount++;
+
+		if (m_RefCount > 1)
+		{
+			m_UseDynamicUniform = true;
+		}
 	}
 
 	int CMaterial::GetRefCount() const

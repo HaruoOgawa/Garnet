@@ -24,7 +24,7 @@ namespace api
 
 		// Uniform
 		std::vector<WGPUBuffer> m_WGPUUniformBufferList;
-		std::vector<size_t>	    m_WGPUUniformSizeList;
+		std::vector<uint64_t>	    m_WGPUUniformBufferByteSizeList;
 
 		// BindGroup
 		WGPUBindGroupLayout m_BindGroupLayout;
@@ -38,7 +38,7 @@ namespace api
 		// Helper Function ///////////////////////////////////////////////////////////////////////
 		WGPUShaderModule CreateShaderModuleFromWGSL(const std::string& shaderCode);
 		WGPUShaderModule CreateShaderModuleFromSPIRV(const std::vector<char>& shaderCode);
-		bool             CreateBuffer(WGPUBuffer& Buffer, WGPUBufferUsageFlags Usage, void const* Data, uint64_t ByteSize);
+		bool             CreateWGUniformBuffer(WGPUBuffer& Buffer, WGPUBufferUsageFlags Usage, void const* Data, uint64_t ByteSize);
 		void			 InitDefalutBindGroupLayoutEntry(WGPUBindGroupLayoutEntry& bindingLayout);
 	public:
 		CWebGPUMaterial();
@@ -48,13 +48,14 @@ namespace api
 		virtual bool Update(float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection) override;
 		virtual bool BuildDrawBuffer() override;
 
-		virtual void SetUniformValue(const std::string Name, const void* Value) override;
+		virtual void SetUniformValue(const std::string Name, const void* Value, int DynamicOffsetNum) override;
 
 		const WGPUShaderModule& GetVertexShaderModele() { return m_VertexShaderModele; }
 		const WGPUShaderModule& GetFragmentShaderModele() { return m_FragmentShaderModele; }
 
 		const WGPUBindGroupLayout& GetBindGroupLayout() { return m_BindGroupLayout; }
 		const WGPUBindGroup& GetBindGroup() { return m_BindGroup; }
+		uint32_t GetUnitDynamicOffset();
 	};
 }
 #endif

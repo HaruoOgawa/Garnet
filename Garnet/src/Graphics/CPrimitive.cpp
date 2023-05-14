@@ -17,15 +17,15 @@ namespace graphics
 	{
 	}
 
-	bool CPrimitive::Create(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<graphics::CMaterial>& Material, int DynamicOffsetNum)
+	bool CPrimitive::Create(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<graphics::CMaterial>& Material)
 	{
 		if (m_PresetType == EPresetPrimitiveType::None)
 		{
-			if (!Create(pGraphicsAPI, Material, DynamicOffsetNum, m_CreateInfo)) return false;
+			if (!Create(pGraphicsAPI, Material, m_CreateInfo)) return false;
 		}
 		else
 		{
-			if (!Create(pGraphicsAPI, Material, DynamicOffsetNum, m_PresetType)) return false;
+			if (!Create(pGraphicsAPI, Material, m_PresetType)) return false;
 		}
 
 		// 生成処理が終わったので不要なリソースを解放する
@@ -34,15 +34,15 @@ namespace graphics
 		return true;
 	}
 
-	bool CPrimitive::Create(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CMaterial>& Material, int DynamicOffsetNum, const std::shared_ptr<renderer::CRendererCreateInfo>& createInfo)
+	bool CPrimitive::Create(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CMaterial>& Material, const std::shared_ptr<renderer::CRendererCreateInfo>& createInfo)
 	{
 		m_Renderer = pGraphicsAPI->CreateRenderer();
-		if (!m_Renderer->Create(pGraphicsAPI, createInfo, Material, DynamicOffsetNum)) return false;
+		if (!m_Renderer->Create(pGraphicsAPI, createInfo, Material)) return false;
 
 		return true;
 	}
 
-	bool CPrimitive::Create(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CMaterial>& Material, int DynamicOffsetNum, EPresetPrimitiveType PresetType)
+	bool CPrimitive::Create(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CMaterial>& Material, EPresetPrimitiveType PresetType)
 	{
 		std::shared_ptr<renderer::CRendererCreateInfo> createInfo = std::make_shared<renderer::CRendererCreateInfo>();
 
@@ -62,14 +62,14 @@ namespace graphics
 		}
 
 		m_Renderer = pGraphicsAPI->CreateRenderer();
-		if (!m_Renderer->Create(pGraphicsAPI, createInfo, Material, DynamicOffsetNum)) return false;
+		if (!m_Renderer->Create(pGraphicsAPI, createInfo, Material)) return false;
 
 		return true;
 	}
 
-	bool CPrimitive::Draw(const std::shared_ptr<CMaterial>& Material)
+	bool CPrimitive::Draw(const std::shared_ptr<CMaterial>& Material, int DynamicOffsetNum)
 	{
-		if (!m_Renderer->Draw(Material)) return false;
+		if (!m_Renderer->Draw(Material, DynamicOffsetNum)) return false;
 
 		return true;
 	}

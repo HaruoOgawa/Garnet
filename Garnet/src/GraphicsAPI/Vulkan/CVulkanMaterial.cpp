@@ -56,8 +56,8 @@ namespace api
 	bool CVulkanMaterial::Update(float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection)
 	{
 		// 共通のユニフォームバッファの更新
-		SetUniformValue("view", &Camera->GetViewMatrix()[0][0]);
-		SetUniformValue("proj", &Projection->GetPrejectionMatrix()[0][0]);
+		SetUniformValue("view", &Camera->GetViewMatrix()[0][0], -1);
+		SetUniformValue("proj", &Projection->GetPrejectionMatrix()[0][0], -1);
 
 		return true;
 	}
@@ -75,7 +75,7 @@ namespace api
 		return true;
 	}
 
-	void CVulkanMaterial::SetUniformValue(const std::string Name, const void* Value)
+	void CVulkanMaterial::SetUniformValue(const std::string Name, const void* Value, int DynamicOffsetNum)
 	{
 		for (int i = 0; i < m_UniformBufferList.size(); i++)
 		{

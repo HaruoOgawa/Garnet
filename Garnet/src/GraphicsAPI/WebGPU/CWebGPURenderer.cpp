@@ -25,10 +25,8 @@ namespace renderer
 		}
 	}
 
-	bool CWebGPURenderer::Create(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CRendererCreateInfo>& createInfo, const std::shared_ptr<graphics::CMaterial>& Material, int DynamicOffsetNum)
+	bool CWebGPURenderer::Create(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CRendererCreateInfo>& createInfo, const std::shared_ptr<graphics::CMaterial>& Material)
 	{
-		m_DynamicOffsetNum = DynamicOffsetNum;
-
 		m_pGraphicsAPI = static_cast<api::CWebGPUAPI*>(pGraphicsAPI);
 		api::CWebGPUMaterial* pWebGPUMat = static_cast<api::CWebGPUMaterial*>(Material.get());
 
@@ -39,7 +37,7 @@ namespace renderer
 		return true;
 	}
 
-	bool CWebGPURenderer::Draw(const std::shared_ptr<graphics::CMaterial>& Material)
+	bool CWebGPURenderer::Draw(const std::shared_ptr<graphics::CMaterial>& Material, int DynamicOffsetNum)
 	{
 		api::CWebGPUMaterial* pWebGPUMat = static_cast<api::CWebGPUMaterial*>(Material.get());
 
@@ -59,7 +57,9 @@ namespace renderer
 		wgpuRenderPassEncoderSetIndexBuffer(m_pGraphicsAPI->GetRenderPass(), m_IndexBuffer, WGPUIndexFormat_Uint16, 0, m_IndexCount * sizeof(uint16_t));
 
 		// バインドグループを割り当てる
-		wgpuRenderPassEncoderSetBindGroup(m_pGraphicsAPI->GetRenderPass(), 0, pWebGPUMat->GetBindGroup(), 0, nullptr);
+		// dynamicOffset間違ってるかも。だって複数のマテリアルはバッファを持ってる可能性があるよね？
+		uint32_t dynamicOffset = (DynamicOffsetNum - 1) * pWebGPUMat->GetUnitDynamicOffset();
+		wgpuRenderPassEncoderSetBindGroup(m_pGraphicsAPI->GetRenderPass(), 0, pWebGPUMat->GetBindGroup(), 1, &dynamicOffset);
 
 		// 描画を実行
 		wgpuRenderPassEncoderDrawIndexed(m_pGraphicsAPI->GetRenderPass(), static_cast<uint32_t>(m_IndexCount), 1, 0, 0, 0);

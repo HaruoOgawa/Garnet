@@ -24,7 +24,6 @@ namespace object
 		for (const auto& Node : m_NodeList)
 		{
 			int MaterialIndex = Node->GetMaterialIndex();
-			int DynamicOffsetNum = Node->GetDynamicOffsetNum();
 			if (MaterialIndex < 0 || MaterialIndex >= m_MaterialList.size()) continue;
 
 			const auto& Material = m_MaterialList[MaterialIndex];
@@ -33,7 +32,7 @@ namespace object
 
 			for (const auto& Primitive : Mesh->GetPrimitiveList())
 			{
-				if (!Primitive->Create(pGraphicsAPI, Material, DynamicOffsetNum)) return false;
+				if (!Primitive->Create(pGraphicsAPI, Material)) return false;
 			}
 		}
 
@@ -55,17 +54,18 @@ namespace object
 		for (const auto& Node : m_NodeList)
 		{
 			int MaterialIndex = Node->GetMaterialIndex();
+			int DynamicOffsetNum = Node->GetDynamicOffsetNum();
 			if (MaterialIndex < 0 || MaterialIndex >= m_MaterialList.size()) continue;
 
 			const auto& Material = m_MaterialList[MaterialIndex];
 			const auto& ModelMatrix = Node->GetTransform()->GetModelMatrix();
-			Material->SetUniformValue("model", &ModelMatrix[0][0]);
+			Material->SetUniformValue("model", &ModelMatrix[0][0], DynamicOffsetNum);
 
 			const auto& Mesh = Node->GetMesh();
 
 			for (const auto& Primitive : Mesh->GetPrimitiveList())
 			{
-				if (!Primitive->Draw(Material)) return false;
+				if (!Primitive->Draw(Material, DynamicOffsetNum)) return false;
 			}
 		}
 

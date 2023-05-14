@@ -29,6 +29,7 @@ namespace graphics
 		std::vector<std::shared_ptr<CTextureBuffer>> m_TextureBufferList;
 
 		int											 m_RefCount;
+		bool										 m_UseDynamicUniform;
 	public:
 		CMaterial();
 		virtual ~CMaterial() = default;
@@ -41,7 +42,7 @@ namespace graphics
 		virtual void AddUniformBuffer(const std::shared_ptr<CUniformBuffer>& Buffer);
 		virtual void AddTextureBuffer(const std::shared_ptr<CTextureBuffer>& Buffer);
 
-		virtual void SetUniformValue(const std::string Name, const void* Value) = 0;
+		virtual void SetUniformValue(const std::string Name, const void* Value, int DynamicOffsetNum) = 0;
 
 		virtual void IncreaseRefCount();
 		virtual int GetRefCount() const;
