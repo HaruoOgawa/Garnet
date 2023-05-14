@@ -93,9 +93,12 @@ namespace api
 		depthStencilAttachment.depthReadOnly = false;
 
 		depthStencilAttachment.stencilClearValue = 0;
+#ifndef __EMSCRIPTEN__
+		// このパラメーターはWebブラウザ側のWebGPUでは非推奨とのこと. https://github.com/emscripten-core/emscripten/issues/16471
 		depthStencilAttachment.stencilLoadOp = WGPULoadOp_Clear;
 		depthStencilAttachment.stencilStoreOp = WGPUStoreOp_Store;
 		depthStencilAttachment.stencilReadOnly = true;
+#endif // !__EMSCRIPTEN__
 
 		//
 		WGPURenderPassDescriptor renderPassDesc = {};
