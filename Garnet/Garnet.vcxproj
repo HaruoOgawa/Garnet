@@ -330,6 +330,9 @@ del $(OutDir)Garnet.pdb</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="src\GraphicsAPI\WebGPU\CWebGPUTexture.h" />
+    <ClInclude Include="src\GraphicsAPI\Vulkan\CVulkanTexture.h" />
+    <ClInclude Include="src\Graphics\CTexture.h" />
     <ClInclude Include="src\Math\CMath.h" />
     <ClInclude Include="src\Projection\CProjection.h" />
     <ClInclude Include="src\Camera\CCamera.h" />
@@ -667,6 +670,9 @@ del $(OutDir)Garnet.pdb</Command>
     <ClInclude Include="src\Interface\IRenderer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\GraphicsAPI\WebGPU\CWebGPUTexture.cpp" />
+    <ClCompile Include="src\GraphicsAPI\Vulkan\CVulkanTexture.cpp" />
+    <ClCompile Include="src\Graphics\CTexture.cpp" />
     <ClCompile Include="src\Projection\CProjection.cpp" />
     <ClCompile Include="src\Camera\CCamera.cpp" />
     <ClCompile Include="src\Graphics\CTextureBuffer.cpp" />

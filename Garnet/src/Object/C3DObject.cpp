@@ -91,4 +91,14 @@ namespace object
 	{
 		return m_MaterialList;
 	}
+
+	void C3DObject::AddTexture(const std::shared_ptr<graphics::CTexture>& Texture)
+	{
+		m_TextureList.push_back(Texture);
+	}
+
+	const std::vector<std::shared_ptr<graphics::CTexture>>& C3DObject::GetTextureList() const
+	{
+		return m_TextureList;
+	}
 }

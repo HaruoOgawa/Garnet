@@ -38,12 +38,16 @@ namespace api
 
 		if (!CreateShaderStages(m_CreateInfo)) return false; // Shaderの作成
 
+		// Uniform Buffer
+		if (!CreateUniformBuffers(m_CreateInfo)) return false; // ユニフォームバッファを作成
+
+		// Texture Buffer
 		/*if (!CreateTextureImage(m_CreateInfo)) return false; // テクスチャイメージの生成
 		if (!CreateTextureImageView(m_CreateInfo)) return false;// シェーダーで取り扱う用のImageViewを作成
 		if (!CreateTextureSampler(m_CreateInfo)) return false; // テクスチャサンプラーを作成.サンプラーとはテクスチャデータをフラグメント(3Dモデル)に合うように調整する機構*/
 
+		// バインドグループ(UniformとTextureで共通項)
 		if (!CreateDescriptorSetLayout(m_CreateInfo)) return false; // DescriptorSetLayoutの作成(Uniformをどのようにバインドするか), WebGPUでいうバインドグループの生成
-		if (!CreateUniformBuffers(m_CreateInfo)) return false; // ユニフォームバッファを作成
 		if (!CreateDescriptorPool(m_CreateInfo)) return false; // DescriptorPoolを作成する -> DescriptorSetsは直接生成できず、コマンドで生成する必要がある。記述子プールはそのコマンド群のことかな？
 		if (!CreateDescriptorSets(m_CreateInfo)) return false; // DescriptorSetsを作成 -> Uniformが使用するバッファをCPUからGPUに送信するための仕組みこと. https://vkguide.dev/docs/chapter-4/descriptors/
 

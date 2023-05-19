@@ -21,6 +21,7 @@
 namespace graphics
 {
 	class CMaterial;
+	class CTexture;
 }
 
 namespace api
@@ -36,6 +37,7 @@ namespace api
 		
 		virtual std::shared_ptr<renderer::IRenderer> CreateRenderer() = 0;
 		virtual std::shared_ptr<graphics::CMaterial> CreateMaterial() = 0;
+		virtual std::shared_ptr<graphics::CTexture> CreateTexture() = 0;
 
 		virtual bool BeginRender(ERenderPassType RenderPassType) = 0;
 		virtual bool EndRender() = 0;

@@ -2,6 +2,7 @@
 #include "CWebGPUAPI.h"
 #include "CWebGPURenderer.h"
 #include "CWebGPUMaterial.h"
+#include "CWebGPUTexture.h"
 #include "../../Debug/Message/Console.h"
 
 #ifdef __EMSCRIPTEN__
@@ -64,6 +65,13 @@ namespace api
 		auto Material = std::make_shared<api::CWebGPUMaterial>();
 
 		return Material;
+	}
+
+	std::shared_ptr<graphics::CTexture> CWebGPUAPI::CreateTexture()
+	{
+		auto Texture = std::make_shared<api::CWebGPUTexture>();
+
+		return Texture;
 	}
 
 	bool CWebGPUAPI::BeginRender(ERenderPassType RenderPassType)

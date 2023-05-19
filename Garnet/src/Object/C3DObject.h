@@ -3,6 +3,7 @@
 #include "CObject.h"
 #include "CNode.h"
 #include "../Graphics/CMaterial.h"
+#include "../Graphics/CTexture.h"
 #include <vector>
 #include <memory>
 
@@ -14,6 +15,7 @@ namespace object
 	{
 		std::vector<std::shared_ptr<CNode>> m_NodeList;
 		std::vector<std::shared_ptr<graphics::CMaterial>> m_MaterialList;
+		std::vector<std::shared_ptr<graphics::CTexture>> m_TextureList;
 	public:
 		C3DObject();
 		virtual ~C3DObject();
@@ -27,5 +29,8 @@ namespace object
 
 		void AddMaterial(const std::shared_ptr<graphics::CMaterial>& Material);
 		const std::vector<std::shared_ptr<graphics::CMaterial>>& GetMaterialList() const;
+		
+		void AddTexture(const std::shared_ptr<graphics::CTexture>& Texture);
+		const std::vector<std::shared_ptr<graphics::CTexture>>& GetTextureList() const;
 	};
 }

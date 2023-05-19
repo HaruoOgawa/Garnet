@@ -17,6 +17,9 @@ namespace scene
 		std::shared_ptr<file::CFileReader> m_VertexShader;
 		std::shared_ptr<file::CFileReader> m_FragmentShader;
 
+		std::shared_ptr<file::CFileReader> m_Texture0;
+		std::shared_ptr<file::CFileReader> m_Texture1;
+
 		bool m_IsLoaded;
 	private:
 		bool Load(api::IGraphicsAPI* pGraphicsAPI);

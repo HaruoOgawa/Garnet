@@ -10,6 +10,8 @@ namespace scene
 		m_TestObject(nullptr),
 		m_VertexShader(std::make_shared<file::CFileReader>()),
 		m_FragmentShader(std::make_shared<file::CFileReader>()),
+		m_Texture0(std::make_shared<file::CFileReader>()),
+		m_Texture1(std::make_shared<file::CFileReader>()),
 		m_IsLoaded(false)
 	{
 	}
@@ -23,11 +25,18 @@ namespace scene
 
 	bool CScriptScene::Initialize(api::IGraphicsAPI* pGraphicsAPI)
 	{
+		// Shader
 		std::string ShaderPath = "Resources\\Shaders\\";
-
+		
 		m_VertexShader->ReadFile(ShaderPath + "sample_vert" + pGraphicsAPI->GetShaderExtension());
 		m_FragmentShader->ReadFile(ShaderPath + "sample_frag" + pGraphicsAPI->GetShaderExtension());
 		
+		// Texture
+		std::string TexturePath = "Resources\\Textures\\";
+		
+		m_Texture0->ReadFile(TexturePath + "perlinnoise.png");
+		m_Texture1->ReadFile(TexturePath + "uvtile.jpg");
+
 		return true;
 	}
 
@@ -46,7 +55,7 @@ namespace scene
 
 			// UBO, TEXTURE
 			{
-				auto UniformBuffer = createInfo->CreateUniformBuffer({0, 1});
+				auto UniformBuffer = graphics::CMaterialCreateInfo::CreateUniformBuffer({0, 1});
 
 				{
 					glm::mat4 mat = glm::mat4(1.0f);
@@ -91,6 +100,13 @@ namespace scene
 				UniformBuffer->RecalculateBindingLayoutOffset();
 
 				Material->AddUniformBuffer(UniformBuffer);
+			}
+
+			{
+				auto TextureBuffer = graphics::CMaterialCreateInfo::CreateTextureBuffer({ 2 });
+
+				auto Texture = pGraphicsAPI->CreateTexture();
+				if(!Texture->Create(m_Texture0->GetData())) return false;
 			}
 			
 			// CREATE MATERIAL
@@ -147,7 +163,7 @@ namespace scene
 
 		if (!m_IsLoaded)
 		{
-			if (m_VertexShader->IsDone() && m_FragmentShader->IsDone())
+			if (m_VertexShader->IsLoaded() && m_FragmentShader->IsLoaded() && m_Texture0->IsLoaded() && m_Texture1->IsLoaded())
 			{
 				if(!Load(pGraphicsAPI)) return false;
 				m_IsLoaded = true;

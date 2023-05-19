@@ -6,7 +6,7 @@ namespace file
 {
 	class CFileReader
 	{
-		bool m_IsDone;
+		bool m_IsLoaded;
 		
 		std::vector<char> m_Data;
 
@@ -16,8 +16,7 @@ namespace file
 
 		void Release();
 
-		void SetIsDone(bool Done);
-		bool IsDone()const;
+		bool IsLoaded()const;
 
 		void ReadFile(const std::string& filename);
 

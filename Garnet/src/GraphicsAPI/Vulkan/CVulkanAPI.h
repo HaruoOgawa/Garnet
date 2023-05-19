@@ -161,16 +161,17 @@ namespace api
 		CVulkanAPI();
 		virtual ~CVulkanAPI();
 
-		bool InitializeWithGLFW(GLFWwindow* pWindow) override;
+		virtual bool InitializeWithGLFW(GLFWwindow* pWindow) override;
 		void Release();
 
-		std::shared_ptr<renderer::IRenderer> CreateRenderer() override;
-		std::shared_ptr<graphics::CMaterial> CreateMaterial() override;
+		virtual std::shared_ptr<renderer::IRenderer> CreateRenderer() override;
+		virtual std::shared_ptr<graphics::CMaterial> CreateMaterial() override;
+		virtual std::shared_ptr<graphics::CTexture> CreateTexture() override;
 
-		bool BeginRender(ERenderPassType RenderPassType) override;
+		virtual bool BeginRender(ERenderPassType RenderPassType) override;
 		bool EndRender() override;
 
-		const std::string& GetShaderExtension() const override;
+		virtual const std::string& GetShaderExtension() const override;
 
 		//
 		int GetMaxFramesInFlight() const { return MAX_FRAMES_IN_FLIGHT; }

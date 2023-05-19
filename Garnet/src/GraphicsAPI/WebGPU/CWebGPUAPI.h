@@ -59,20 +59,21 @@ namespace api
 		virtual ~CWebGPUAPI();
 
 #ifdef __EMSCRIPTEN__
-		bool Initialize() override;
+		virtual bool Initialize() override;
 #else
-		bool InitializeWithGLFW(GLFWwindow* pWindow) override;
+		virtual bool InitializeWithGLFW(GLFWwindow* pWindow) override;
 #endif // __EMSCRIPTEN__
 
 		void Release();
 
-		std::shared_ptr<renderer::IRenderer> CreateRenderer() override;
-		std::shared_ptr<graphics::CMaterial> CreateMaterial() override;
+		virtual std::shared_ptr<renderer::IRenderer> CreateRenderer() override;
+		virtual std::shared_ptr<graphics::CMaterial> CreateMaterial() override;
+		virtual std::shared_ptr<graphics::CTexture> CreateTexture() override;
 
-		bool BeginRender(ERenderPassType RenderPassType) override;
-		bool EndRender() override;
+		virtual bool BeginRender(ERenderPassType RenderPassType) override;
+		virtual bool EndRender() override;
 
-		const std::string& GetShaderExtension() const override;
+		virtual const std::string& GetShaderExtension() const override;
 
 		//
 		WGPUDevice GetLogicalDevice() const;

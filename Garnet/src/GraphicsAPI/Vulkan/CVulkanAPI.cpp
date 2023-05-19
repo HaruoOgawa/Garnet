@@ -1,7 +1,8 @@
 #ifndef __DAWN__
 #include "CVulkanAPI.h"
-#include "CVulkanMaterial.h"
 #include "CVulkanRenderer.h"
+#include "CVulkanMaterial.h"
+#include "CVulkanTexture.h"
 #include "../../Debug/Message/Console.h"
 
 namespace api
@@ -85,6 +86,13 @@ namespace api
 		auto Material = std::make_shared<api::CVulkanMaterial>();
 
 		return Material;
+	}
+
+	std::shared_ptr<graphics::CTexture> CVulkanAPI::CreateTexture()
+	{
+		auto Texture = std::make_shared<api::CVulkanTexture>();
+
+		return Texture;
 	}
 
 	bool CVulkanAPI::BeginRecordCommandBuffer()

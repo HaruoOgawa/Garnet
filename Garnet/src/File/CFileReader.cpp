@@ -10,7 +10,7 @@
 namespace file
 {
 	CFileReader::CFileReader():
-		m_IsDone(false)
+		m_IsLoaded(false)
 	{
 	}
 
@@ -20,18 +20,13 @@ namespace file
 
 	void CFileReader::Release()
 	{
-		m_IsDone = false;
+		m_IsLoaded = false;
 		m_Data.clear();
 	}
 
-	void CFileReader::SetIsDone(bool Done)
+	bool CFileReader::IsLoaded()const
 	{
-		m_IsDone = Done;
-	}
-
-	bool CFileReader::IsDone()const
-	{
-		return m_IsDone;
+		return m_IsLoaded;
 	}
 
 #ifdef __EMSCRIPTEN__
@@ -85,7 +80,7 @@ namespace file
 
 		file.close();
 
-		m_IsDone = true;
+		m_IsLoaded = true;
 #endif
 	}
 
