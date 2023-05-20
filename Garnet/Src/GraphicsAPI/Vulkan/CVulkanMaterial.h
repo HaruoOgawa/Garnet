@@ -52,10 +52,10 @@ namespace api
 		// ÉwÉãÉpÅ[ä÷êî ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		bool CreateShaderModule(VkShaderModule& shaderModule, const std::string& code);
 	public:
-		CVulkanMaterial();
+		CVulkanMaterial(api::CVulkanAPI* pGraphicsAPI);
 		virtual ~CVulkanMaterial();
 
-		virtual bool Create(api::IGraphicsAPI* pGraphicsAPI, const std::vector<std::shared_ptr<graphics::CTexture>>& TextureList) override;
+		virtual bool Create(const std::vector<std::shared_ptr<graphics::CTexture>>& TextureList) override;
 		virtual bool Update(float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection) override;
 		virtual bool BuildDrawBuffer(int DynamicOffsetNum) override;
 

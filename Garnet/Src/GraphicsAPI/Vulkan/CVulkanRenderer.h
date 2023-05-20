@@ -52,12 +52,12 @@ namespace renderer
 		// ƒwƒ‹ƒp[ŠÖ” ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		VkFormat GetVertexFormat(int Dimention);
 	public:
-		CVulkanRenderer();
+		CVulkanRenderer(api::CVulkanAPI* pGraphicsAPI);
 		virtual ~CVulkanRenderer();
 
 		void Release();
 
-		bool Create(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CRendererCreateInfo>& createInfo, const std::shared_ptr<graphics::CMaterial>& Material) override;
+		bool Create(const std::shared_ptr<CRendererCreateInfo>& createInfo, const std::shared_ptr<graphics::CMaterial>& Material) override;
 		bool Draw(const std::shared_ptr<graphics::CMaterial>& Material, int DynamicOffsetNum) override;
 	};
 }

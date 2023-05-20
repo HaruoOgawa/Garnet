@@ -9,9 +9,9 @@
 
 namespace api
 {
-	CWebGPUMaterial::CWebGPUMaterial():
+	CWebGPUMaterial::CWebGPUMaterial(api::CWebGPUAPI* pGraphicsAPI):
 		CMaterial(),
-		m_pGraphicsAPI(nullptr),
+		m_pGraphicsAPI(pGraphicsAPI),
 		m_VertexShaderModele(nullptr),
 		m_FragmentShaderModele(nullptr),
 		m_BindGroupLayout(nullptr),
@@ -28,10 +28,8 @@ namespace api
 		m_WGPUUniformBufferList.clear();
 	}
 
-	bool CWebGPUMaterial::Create(api::IGraphicsAPI* pGraphicsAPI)
+	bool CWebGPUMaterial::Create(const std::vector<std::shared_ptr<graphics::CTexture>>& TextureList)
 	{
-		m_pGraphicsAPI = static_cast<api::CWebGPUAPI*>(pGraphicsAPI);
-
 		if (!CreateShaderStages(m_CreateInfo)) return false;
 		if (!CreateUniformBuffer(m_CreateInfo)) return false; // ユニフォームバッファを生成
 		if (!CreateBindGroup(m_CreateInfo)) return false; // バインドグループを生成(レンダリングパイプラインで使用するすべてのリソースをどのようにバインドするかを指定するオブジェクト)

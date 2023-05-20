@@ -11,9 +11,9 @@
 
 namespace api
 {
-	CVulkanMaterial::CVulkanMaterial():
+	CVulkanMaterial::CVulkanMaterial(api::CVulkanAPI* pGraphicsAPI):
 		CMaterial(),
-		m_pGraphicsAPI(nullptr),
+		m_pGraphicsAPI(pGraphicsAPI),
 
 		m_VertShaderModule(nullptr),
 		m_FragShaderModule(nullptr),
@@ -28,10 +28,8 @@ namespace api
 		Release();
 	}
 
-	bool CVulkanMaterial::Create(api::IGraphicsAPI* pGraphicsAPI, const std::vector<std::shared_ptr<graphics::CTexture>>& TextureList)
+	bool CVulkanMaterial::Create(const std::vector<std::shared_ptr<graphics::CTexture>>& TextureList)
 	{
-		m_pGraphicsAPI = static_cast<api::CVulkanAPI*>(pGraphicsAPI);
-
 		if (!CreateShaderStages(m_CreateInfo)) return false; // Shaderの作成
 
 		// Uniform Buffer
@@ -103,24 +101,42 @@ namespace api
 		// ユニフォームの破棄
 		for (size_t i = 0; i < m_pGraphicsAPI->GetMaxFramesInFlight(); i++)
 		{
-			for (auto& Buffer : m_VKUniformBufferList[i])
+			if (m_VKUniformBufferList.size() > 0)
 			{
-				vkDestroyBuffer(m_pGraphicsAPI->GetLogicalDevice(), Buffer, nullptr);
+				for (auto& Buffer : m_VKUniformBufferList[i])
+				{
+					if (Buffer)
+					{
+						vkDestroyBuffer(m_pGraphicsAPI->GetLogicalDevice(), Buffer, nullptr);
+					}
+				}
 			}
-			
-			for (auto& Memory : m_VKUniformBufferMemoryList[i])
+
+			if (m_VKUniformBufferMemoryList.size() > 0)
 			{
-				vkFreeMemory(m_pGraphicsAPI->GetLogicalDevice(), Memory, nullptr);
+				for (auto& Memory : m_VKUniformBufferMemoryList[i])
+				{
+					if (Memory)
+					{
+						vkFreeMemory(m_pGraphicsAPI->GetLogicalDevice(), Memory, nullptr);
+					}
+				}
 			}
 		}
 
 		// 記述子プールの破棄
-		vkDestroyDescriptorPool(m_pGraphicsAPI->GetLogicalDevice(), m_DescriptorPool, nullptr);
-		m_DescriptorPool = nullptr;
+		if (m_DescriptorPool)
+		{
+			vkDestroyDescriptorPool(m_pGraphicsAPI->GetLogicalDevice(), m_DescriptorPool, nullptr);
+			m_DescriptorPool = nullptr;
+		}
 
 		// ユニフォームレイアウトセットを破棄
-		vkDestroyDescriptorSetLayout(m_pGraphicsAPI->GetLogicalDevice(), m_DescriptorSetLayout, nullptr);
-		m_DescriptorSetLayout = nullptr;
+		if (m_DescriptorSetLayout)
+		{
+			vkDestroyDescriptorSetLayout(m_pGraphicsAPI->GetLogicalDevice(), m_DescriptorSetLayout, nullptr);
+			m_DescriptorSetLayout = nullptr;
+		}
 	}
 
 	// Vulkanメインロジック /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -166,7 +182,7 @@ namespace api
 		//
 		std::vector<VkDescriptorSetLayoutBinding> bindings;
 		
-		// レイアウトのバインドに関する設定
+		// UBOのバインドに関する設定
 		for (const auto& Buffer : m_UniformBufferList)
 		{
 			for (const auto& Layout : Buffer->GetBindingLayoutList())
@@ -256,6 +272,7 @@ namespace api
 	{
 		std::vector<VkDescriptorPoolSize> poolSizes;
 
+		// UBOのプール
 		for (const auto& Buffer : m_UniformBufferList)
 		{
 			VkDescriptorPoolSize poolSize{};
@@ -314,7 +331,6 @@ namespace api
 		}
 
 		//
-
 		for (size_t FrameIndex = 0; FrameIndex < m_pGraphicsAPI->GetMaxFramesInFlight(); FrameIndex++)
 		{
 			//
@@ -330,7 +346,7 @@ namespace api
 				
 				int LayoutIndex = 0;
 
-				//
+				// UBO
 				for (int BufferLayoutIndex = 0; BufferLayoutIndex < UniformLayoutSize; BufferLayoutIndex++)
 				{
 					auto& Layout = Buffer->GetBindingLayoutList()[BufferLayoutIndex];
@@ -364,7 +380,7 @@ namespace api
 					LayoutIndex++;
 				}
 
-				//
+				// テクスチャ
 				for (int TexLayoutIndex = 0; TexLayoutIndex < TexLayoutSize; TexLayoutIndex++)
 				{
 					const auto& TexLayout = m_TextureBindingLayoutList[TexLayoutIndex];
@@ -388,12 +404,6 @@ namespace api
 
 				// たぶんバッファの転送を行うコマンドを発行している
 				vkUpdateDescriptorSets(m_pGraphicsAPI->GetLogicalDevice(), static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
-			}
-		
-			//
-			for (const auto& TexLayout : m_TextureBindingLayoutList)
-			{
-
 			}
 		}
 

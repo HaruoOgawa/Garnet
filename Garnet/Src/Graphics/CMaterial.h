@@ -5,12 +5,10 @@
 #include <string>
 #include "CUniformBuffer.h"
 #include "CUniformBufferDescriptor.h"
-#include "../Interface/IGraphicsAPI.h"
 #include "../GraphicsAPI/CMaterialCreateInfo.h"
 #include "STextureBindingLayout.h"
 #include "CTexture.h"
 
-namespace api { class IGraphicsAPI; }
 namespace camera { class CCamera; }
 namespace projection { class CProjection; }
 
@@ -36,7 +34,7 @@ namespace graphics
 		virtual ~CMaterial() = default;
 
 		virtual void SetCreateInfo(const std::shared_ptr<CMaterialCreateInfo>& createInfo);
-		virtual bool Create(api::IGraphicsAPI* pGraphicsAPI, const std::vector<std::shared_ptr<graphics::CTexture>>& TextureList) = 0;
+		virtual bool Create(const std::vector<std::shared_ptr<graphics::CTexture>>& TextureList) = 0;
 		virtual bool Update(float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection) = 0;
 		virtual bool BuildDrawBuffer(int DynamicOffsetNum) = 0;
 

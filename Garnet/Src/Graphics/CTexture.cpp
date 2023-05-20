@@ -19,7 +19,7 @@ namespace graphics
 	}
 
 #ifdef USE_TEXTURE_LOADER
-	bool CTexture::Create(api::IGraphicsAPI* pGraphicsAPI, const std::vector<char>& Data)
+	bool CTexture::Create(const std::vector<char>& Data)
 	{
 #ifdef __EMSCRIPTEN__
 		
@@ -36,12 +36,12 @@ namespace graphics
 		stbi_image_free(stbi_pixelData);
 
 		// APIÇ…ÉfÅ[É^ÇìnÇ∑
-		if (!Create(pGraphicsAPI, pixelData, pixelSize)) return false;
+		if (!Create(pixelData, pixelSize)) return false;
 #endif
 		return true;
 	}
 
-	bool CTexture::Create(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& pixelData, int pixelSize)
+	bool CTexture::Create(const std::vector<unsigned char>& pixelData, int pixelSize)
 	{
 		return true;
 	}

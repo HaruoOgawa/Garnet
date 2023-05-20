@@ -17,7 +17,7 @@ namespace object
 		// Material
 		for (auto& Material : m_MaterialList)
 		{
-			if (!Material->Create(pGraphicsAPI, m_TextureList)) return false;
+			if (!Material->Create(m_TextureList)) return false;
 		}
 
 		// Primitive

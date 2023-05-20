@@ -30,11 +30,11 @@ namespace api
 		bool CreateTextureImageView();
 		bool CreateTextureSampler();
 	public:
-		CVulkanTexture();
+		CVulkanTexture(api::CVulkanAPI* pGraphicsAPI);
 		virtual ~CVulkanTexture();
 
 #ifdef USE_TEXTURE_LOADER
-		virtual bool Create(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& pixelData, int pixelSize) override;
+		virtual bool Create(const std::vector<unsigned char>& pixelData, int pixelSize) override;
 #endif
 		const VkImage& GetTextureImage() const;
 		const VkDeviceMemory& GetTextureImageMemory() const;

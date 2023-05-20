@@ -51,7 +51,8 @@ namespace scene
 			std::shared_ptr<graphics::CMaterialCreateInfo> createInfo = std::make_shared<graphics::CMaterialCreateInfo>();
 			createInfo->SetVertexShaderCode(m_VertexShader->GetData());
 			createInfo->SetFragmentShaderCode(m_FragmentShader->GetData());
-			auto Material = pGraphicsAPI->CreateMaterial();
+			auto Material0 = pGraphicsAPI->CreateMaterial();
+			auto Material1 = pGraphicsAPI->CreateMaterial();
 
 			// UBO, TEXTURE
 			{
@@ -99,20 +100,20 @@ namespace scene
 
 				UniformBuffer->RecalculateBindingLayoutOffset();
 
-				Material->AddUniformBuffer(UniformBuffer);
+				Material0->AddUniformBuffer(UniformBuffer);
 			}
 
 			{
 				auto Texture = pGraphicsAPI->CreateTexture();
-				if(!Texture->Create(pGraphicsAPI, m_Texture0->GetData())) return false;
+				if(!Texture->Create(m_Texture0->GetData())) return false;
 
-				Material->AddTextureBindingLayout({ 2, 0 });
+				Material0->AddTextureBindingLayout({ 2, 0 });
 				m_TestObject->AddTexture(Texture);
 			}
 			
 			// CREATE MATERIAL
-			Material->SetCreateInfo(createInfo);
-			m_TestObject->AddMaterial(Material);
+			Material0->SetCreateInfo(createInfo);
+			m_TestObject->AddMaterial(Material0);
 		}
 
 		{

@@ -4,10 +4,14 @@
 
 namespace api
 {
+	class CWebGPUAPI;
+
 	class CWebGPUTexture : public graphics::CTexture
 	{
+		// API
+		api::CWebGPUAPI* m_pGraphicsAPI;
 	public:
-		CWebGPUTexture();
+		CWebGPUTexture(api::CWebGPUAPI* pGraphicsAPI);
 		virtual ~CWebGPUTexture();
 
 #ifdef USE_TEXTURE_LOADER

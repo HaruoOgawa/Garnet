@@ -1,9 +1,11 @@
-#include "CWebGPUTexture.h"
 #ifdef __DAWN__
+#include "CWebGPUTexture.h"
+#include "CWebGPUAPI.h"
 namespace api
 {
-	CWebGPUTexture::CWebGPUTexture():
-		CTexture()
+	CWebGPUTexture::CWebGPUTexture(api::CWebGPUAPI* pGraphicsAPI):
+		CTexture(),
+		m_pGraphicsAPI(pGraphicsAPI)
 	{
 	}
 

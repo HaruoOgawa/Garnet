@@ -7,8 +7,8 @@
 
 namespace renderer
 {
-	CWebGPURenderer::CWebGPURenderer():
-		m_pGraphicsAPI(nullptr),
+	CWebGPURenderer::CWebGPURenderer(api::CWebGPUAPI* pGraphicsAPI):
+		m_pGraphicsAPI(pGraphicsAPI),
 		m_GraphicsPipeline(nullptr),
 		m_VertexCount(0),
 		m_IndexBuffer(nullptr),
@@ -18,16 +18,23 @@ namespace renderer
 
 	CWebGPURenderer::~CWebGPURenderer()
 	{
-		wgpuBufferDestroy(m_IndexBuffer);
+		if (m_IndexBuffer)
+		{
+			wgpuBufferDestroy(m_IndexBuffer);
+			m_IndexBuffer = nullptr;
+		}
+
 		for (auto& Buffer : m_VertexBufferList)
 		{
-			wgpuBufferDestroy(Buffer);
+			if (Buffer)
+			{
+				wgpuBufferDestroy(Buffer);
+			}
 		}
 	}
 
-	bool CWebGPURenderer::Create(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CRendererCreateInfo>& createInfo, const std::shared_ptr<graphics::CMaterial>& Material)
+	bool CWebGPURenderer::Create(const std::shared_ptr<CRendererCreateInfo>& createInfo, const std::shared_ptr<graphics::CMaterial>& Material)
 	{
-		m_pGraphicsAPI = static_cast<api::CWebGPUAPI*>(pGraphicsAPI);
 		api::CWebGPUMaterial* pWebGPUMat = static_cast<api::CWebGPUMaterial*>(Material.get());
 
 		if (!CreateVertexBuffer(createInfo)) return false; // 頂点バッファを生成

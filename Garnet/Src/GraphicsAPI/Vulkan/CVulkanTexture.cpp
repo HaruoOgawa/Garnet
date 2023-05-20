@@ -3,9 +3,9 @@
 #include "CVulkanAPI.h"
 namespace api
 {
-	CVulkanTexture::CVulkanTexture():
+	CVulkanTexture::CVulkanTexture(api::CVulkanAPI* pGraphicsAPI):
 		CTexture(),
-		m_pGraphicsAPI(nullptr),
+		m_pGraphicsAPI(pGraphicsAPI),
 		m_TextureImage(nullptr),
 		m_TextureImageMemory(nullptr),
 		m_TextureImageView(nullptr),
@@ -66,10 +66,8 @@ namespace api
 	}
 
 #ifdef USE_TEXTURE_LOADER
-	bool CVulkanTexture::Create(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& pixelData, int pixelSize)
+	bool CVulkanTexture::Create(const std::vector<unsigned char>& pixelData, int pixelSize)
 	{
-		m_pGraphicsAPI = static_cast<api::CVulkanAPI*>(pGraphicsAPI);
-
 		// Texture Buffer
 		if (!CreateTextureImage(pixelData, pixelSize)) return false; // テクスチャイメージの生成
 		if (!CreateTextureImageView()) return false;// シェーダーで取り扱う用のImageViewを作成(イメージマネージャーみたいなやつかな)

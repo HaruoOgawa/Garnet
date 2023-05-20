@@ -14,7 +14,7 @@ namespace graphics
 		m_CreateInfo = createInfo;
 	}
 
-	bool CMaterial::Create(api::IGraphicsAPI* pGraphicsAPI, const std::vector<std::shared_ptr<graphics::CTexture>>& TextureList)
+	bool CMaterial::Create(const std::vector<std::shared_ptr<graphics::CTexture>>& TextureList)
 	{
 		return true;
 	}

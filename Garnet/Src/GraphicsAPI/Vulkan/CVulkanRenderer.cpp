@@ -6,8 +6,14 @@
 
 namespace renderer
 {
-	CVulkanRenderer::CVulkanRenderer():
-		m_pGraphicsAPI(nullptr)
+	CVulkanRenderer::CVulkanRenderer(api::CVulkanAPI* pGraphicsAPI):
+		m_pGraphicsAPI(pGraphicsAPI),
+		m_DynamicOffsetNum(0),
+		m_IndexBuffer(nullptr),
+		m_IndexBufferMemory(nullptr),
+		m_IndicesCount(0),
+		m_PipelineLayout(nullptr),
+		m_GraphicsPipeline(nullptr)
 	{
 	}
 
@@ -19,33 +25,56 @@ namespace renderer
 	void CVulkanRenderer::Release()
 	{
 		// インデックスバッファの破棄
-		vkDestroyBuffer(m_pGraphicsAPI->GetLogicalDevice(), m_IndexBuffer, nullptr);
+		if (m_IndexBuffer)
+		{
+			vkDestroyBuffer(m_pGraphicsAPI->GetLogicalDevice(), m_IndexBuffer, nullptr);
+			m_IndexBuffer = nullptr;
+		}
 
 		// インデックスバッファ用に確保したメモリ領域を破棄
-		vkFreeMemory(m_pGraphicsAPI->GetLogicalDevice(), m_IndexBufferMemory, nullptr);
+		if (m_IndexBufferMemory)
+		{
+			vkFreeMemory(m_pGraphicsAPI->GetLogicalDevice(), m_IndexBufferMemory, nullptr);
+			m_IndexBufferMemory = nullptr;
+		}
 
 		// 頂点バッファの破棄
 		for (auto& Buffer : m_VertexBufferList)
 		{
-			vkDestroyBuffer(m_pGraphicsAPI->GetLogicalDevice(), Buffer, nullptr);
+			if (Buffer)
+			{
+				vkDestroyBuffer(m_pGraphicsAPI->GetLogicalDevice(), Buffer, nullptr);
+			}
 		}
+		m_VertexBufferList.clear();
 
 		// 頂点バッファ用に確保したメモリ領域を破棄
 		for (auto& Memory : m_VertexBufferMemoryList)
 		{
-			vkFreeMemory(m_pGraphicsAPI->GetLogicalDevice(), Memory, nullptr);
+			if (Memory)
+			{
+				vkFreeMemory(m_pGraphicsAPI->GetLogicalDevice(), Memory, nullptr);
+			}
 		}
+		m_VertexBufferMemoryList.clear();
 
 		// グラフィックパイプラインの破棄
-		vkDestroyPipeline(m_pGraphicsAPI->GetLogicalDevice(), m_GraphicsPipeline, nullptr);
+		if (m_GraphicsPipeline)
+		{
+			vkDestroyPipeline(m_pGraphicsAPI->GetLogicalDevice(), m_GraphicsPipeline, nullptr);
+			m_GraphicsPipeline = nullptr;
+		}
 
 		// パイプラインレイアウトの破棄(たぶん本来は3Dオブジェクトごとにあるやつ) 
-		vkDestroyPipelineLayout(m_pGraphicsAPI->GetLogicalDevice(), m_PipelineLayout, nullptr);
+		if (m_PipelineLayout)
+		{
+			vkDestroyPipelineLayout(m_pGraphicsAPI->GetLogicalDevice(), m_PipelineLayout, nullptr);
+			m_PipelineLayout = nullptr;
+		}
 	}
 
-	bool CVulkanRenderer::Create(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CRendererCreateInfo>& createInfo, const std::shared_ptr<graphics::CMaterial>& Material)
+	bool CVulkanRenderer::Create(const std::shared_ptr<CRendererCreateInfo>& createInfo, const std::shared_ptr<graphics::CMaterial>& Material)
 	{
-		m_pGraphicsAPI = static_cast<api::CVulkanAPI*>(pGraphicsAPI);
 		api::CVulkanMaterial* pVulkanMat = static_cast<api::CVulkanMaterial*>(Material.get());
 
 		if (!CreateVertexBuffer(createInfo)) return false; // 頂点バッファを作成

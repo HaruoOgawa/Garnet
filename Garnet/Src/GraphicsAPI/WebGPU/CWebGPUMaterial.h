@@ -41,10 +41,10 @@ namespace api
 		bool             CreateWGUniformBuffer(WGPUBuffer& Buffer, WGPUBufferUsageFlags Usage, void const* Data, uint64_t ByteSize);
 		void			 InitDefalutBindGroupLayoutEntry(WGPUBindGroupLayoutEntry& bindingLayout);
 	public:
-		CWebGPUMaterial();
+		CWebGPUMaterial(api::CWebGPUAPI* pGraphicsAPI);
 		virtual ~CWebGPUMaterial();
 
-		virtual bool Create(api::IGraphicsAPI* pGraphicsAPI) override;
+		virtual bool Create(const std::vector<std::shared_ptr<graphics::CTexture>>& TextureList) override;
 		virtual bool Update(float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection) override;
 		virtual bool BuildDrawBuffer(int DynamicOffsetNum) override;
 

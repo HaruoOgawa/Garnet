@@ -44,10 +44,10 @@ namespace renderer
 		bool             CreateBuffer(WGPUBuffer& Buffer, WGPUBufferUsageFlags Usage, void const* Data, uint64_t ByteSize);
 		void			 SetDefaultDepthStencil(WGPUDepthStencilState& depthStencilState);
 	public:
-		CWebGPURenderer();
+		CWebGPURenderer(api::CWebGPUAPI* pGraphicsAPI);
 		virtual ~CWebGPURenderer();
 
-		bool Create(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CRendererCreateInfo>& createInfo, const std::shared_ptr<graphics::CMaterial>& Material) override;
+		bool Create(const std::shared_ptr<CRendererCreateInfo>& createInfo, const std::shared_ptr<graphics::CMaterial>& Material) override;
 		bool Draw(const std::shared_ptr<graphics::CMaterial>& Material, int DynamicOffsetNum) override;
 	};
 }

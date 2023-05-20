@@ -76,21 +76,21 @@ namespace api
 
 	std::shared_ptr<renderer::IRenderer> CVulkanAPI::CreateRenderer()
 	{
-		auto Renderer = std::make_shared<renderer::CVulkanRenderer>();
+		auto Renderer = std::make_shared<renderer::CVulkanRenderer>(this);
 
 		return Renderer;
 	}
 
 	std::shared_ptr<graphics::CMaterial> CVulkanAPI::CreateMaterial()
 	{
-		auto Material = std::make_shared<api::CVulkanMaterial>();
+		auto Material = std::make_shared<api::CVulkanMaterial>(this);
 
 		return Material;
 	}
 
 	std::shared_ptr<graphics::CTexture> CVulkanAPI::CreateTexture()
 	{
-		auto Texture = std::make_shared<api::CVulkanTexture>();
+		auto Texture = std::make_shared<api::CVulkanTexture>(this);
 
 		return Texture;
 	}

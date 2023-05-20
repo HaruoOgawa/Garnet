@@ -37,7 +37,7 @@ namespace graphics
 	bool CPrimitive::Create(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CMaterial>& Material, const std::shared_ptr<renderer::CRendererCreateInfo>& createInfo)
 	{
 		m_Renderer = pGraphicsAPI->CreateRenderer();
-		if (!m_Renderer->Create(pGraphicsAPI, createInfo, Material)) return false;
+		if (!m_Renderer->Create(createInfo, Material)) return false;
 
 		return true;
 	}
@@ -62,7 +62,7 @@ namespace graphics
 		}
 
 		m_Renderer = pGraphicsAPI->CreateRenderer();
-		if (!m_Renderer->Create(pGraphicsAPI, createInfo, Material)) return false;
+		if (!m_Renderer->Create(createInfo, Material)) return false;
 
 		return true;
 	}

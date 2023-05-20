@@ -55,21 +55,21 @@ namespace api
 
 	std::shared_ptr<renderer::IRenderer> CWebGPUAPI::CreateRenderer()
 	{
-		auto Renderer = std::make_shared<renderer::CWebGPURenderer>();
+		auto Renderer = std::make_shared<renderer::CWebGPURenderer>(this);
 
 		return Renderer;
 	}
 
 	std::shared_ptr<graphics::CMaterial> CWebGPUAPI::CreateMaterial()
 	{
-		auto Material = std::make_shared<api::CWebGPUMaterial>();
+		auto Material = std::make_shared<api::CWebGPUMaterial>(this);
 
 		return Material;
 	}
 
 	std::shared_ptr<graphics::CTexture> CWebGPUAPI::CreateTexture()
 	{
-		auto Texture = std::make_shared<api::CWebGPUTexture>();
+		auto Texture = std::make_shared<api::CWebGPUTexture>(this);
 
 		return Texture;
 	}
