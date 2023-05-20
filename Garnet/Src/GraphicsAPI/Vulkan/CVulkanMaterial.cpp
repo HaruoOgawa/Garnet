@@ -1,6 +1,7 @@
 #ifndef __DAWN__
 #include "CVulkanMaterial.h"
 #include "CVulkanAPI.h"
+#include "CVulkanTexture.h"
 #include "../CMaterialCreateInfo.h"
 #include "../../Debug/Message/Console.h"
 #include "../../Camera/CCamera.h"
@@ -27,7 +28,7 @@ namespace api
 		Release();
 	}
 
-	bool CVulkanMaterial::Create(api::IGraphicsAPI* pGraphicsAPI)
+	bool CVulkanMaterial::Create(api::IGraphicsAPI* pGraphicsAPI, const std::vector<std::shared_ptr<graphics::CTexture>>& TextureList)
 	{
 		m_pGraphicsAPI = static_cast<api::CVulkanAPI*>(pGraphicsAPI);
 
@@ -39,7 +40,7 @@ namespace api
 		// バインドグループ(UniformとTextureで共通項)
 		if (!CreateDescriptorSetLayout(m_CreateInfo)) return false; // DescriptorSetLayoutの作成(Uniformをどのようにバインドするか), WebGPUでいうバインドグループの生成
 		if (!CreateDescriptorPool(m_CreateInfo)) return false; // DescriptorPoolを作成する -> DescriptorSetsは直接生成できず、コマンドで生成する必要がある。記述子プールはそのコマンド群のことかな？
-		if (!CreateDescriptorSets(m_CreateInfo)) return false; // DescriptorSetsを作成 -> Uniformが使用するバッファをCPUからGPUに送信するための仕組みこと. https://vkguide.dev/docs/chapter-4/descriptors/
+		if (!CreateDescriptorSets(m_CreateInfo, TextureList)) return false; // DescriptorSetsを作成 -> Uniformが使用するバッファをCPUからGPUに送信するための仕組みこと. https://vkguide.dev/docs/chapter-4/descriptors/
 
 		// 生成処理が終わったので不要なリソースを解放する
 		m_CreateInfo = nullptr;
@@ -173,27 +174,13 @@ namespace api
 				VkDescriptorSetLayoutBinding LayoutBinding{}; // VkDescriptorSetLayoutBindingはおそらくlayout(location = 0), WebGPUでいう @binding(n)のこと. ただしVulkanは @groupは存在しない
 				LayoutBinding.binding = Layout.BindingIndex; // バインディングインデックス
 				
-				switch (Buffer->GetBufferType())
+				if (m_UseDynamicUniform)
 				{
-					case graphics::EBufferType::UNIFROM:
-						{
-							if (m_UseDynamicUniform)
-							{
-								LayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC; // バッファタイプ
-							}
-							else
-							{
-								LayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER; // バッファタイプ
-							}
-						}
-						break;
-				
-					case graphics::EBufferType::TEXTURE:
-						LayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER; // バッファタイプ
-						break;
-
-					default:
-						break;
+					LayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC; // バッファタイプ
+				}
+				else
+				{
+					LayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER; // バッファタイプ
 				}
 				
 				LayoutBinding.descriptorCount = 1; // 
@@ -202,6 +189,21 @@ namespace api
 
 				bindings.push_back(LayoutBinding);
 			}
+		}
+
+		// テクスチャバインドに関する設定
+		for (const auto& TexLayout : m_TextureBindingLayoutList)
+		{
+			VkDescriptorSetLayoutBinding LayoutBinding{}; // VkDescriptorSetLayoutBindingはおそらくlayout(location = 0), WebGPUでいう @binding(n)のこと. ただしVulkanは @groupは存在しない
+			LayoutBinding.binding = TexLayout.BindingIndex; // バインディングインデックス
+
+			LayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER; // バッファタイプ
+
+			LayoutBinding.descriptorCount = 1; // 
+			LayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT; // アクセス権限。ここでは頂点シェーダーのみ読み取り可
+			LayoutBinding.pImmutableSamplers = nullptr; // 画像のサンプリングに使用するフィールド
+
+			bindings.push_back(LayoutBinding);
 		}
 
 		// レイアウトの作成に関する設定
@@ -258,29 +260,25 @@ namespace api
 		{
 			VkDescriptorPoolSize poolSize{};
 
-			switch (Buffer->GetBufferType())
+			if (m_UseDynamicUniform)
 			{
-			case graphics::EBufferType::UNIFROM:
-				{
-					if (m_UseDynamicUniform)
-					{
-						poolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
-					}
-					else
-					{
-						poolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-					}
-				}
-				break;
-
-			case graphics::EBufferType::TEXTURE:
-				poolSize.type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-				break;
-
-			default:
-				break;
+				poolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+			}
+			else
+			{
+				poolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 			}
 
+			poolSize.descriptorCount = static_cast<uint32_t>(m_pGraphicsAPI->GetMaxFramesInFlight());
+
+			poolSizes.push_back(poolSize);
+		}
+
+		// テクスチャのプール
+		for (const auto& TexLayout : m_TextureBindingLayoutList)
+		{
+			VkDescriptorPoolSize poolSize{};
+			poolSize.type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 			poolSize.descriptorCount = static_cast<uint32_t>(m_pGraphicsAPI->GetMaxFramesInFlight());
 
 			poolSizes.push_back(poolSize);
@@ -299,7 +297,7 @@ namespace api
 
 		return true;
 	}
-	bool CVulkanMaterial::CreateDescriptorSets(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo)
+	bool CVulkanMaterial::CreateDescriptorSets(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, const std::vector<std::shared_ptr<graphics::CTexture>>& TextureList)
 	{
 		std::vector<VkDescriptorSetLayout> layouts(m_pGraphicsAPI->GetMaxFramesInFlight(), m_DescriptorSetLayout);
 		VkDescriptorSetAllocateInfo allocInfo{};
@@ -319,71 +317,83 @@ namespace api
 
 		for (size_t FrameIndex = 0; FrameIndex < m_pGraphicsAPI->GetMaxFramesInFlight(); FrameIndex++)
 		{
+			//
 			for (int BufferIndex = 0; BufferIndex < m_UniformBufferList.size(); BufferIndex++)
 			{
 				const auto& Buffer = m_UniformBufferList[BufferIndex];
-				size_t LayoutListSize = Buffer->GetBindingLayoutList().size();
+				size_t UniformLayoutSize = Buffer->GetBindingLayoutList().size();
+				size_t TexLayoutSize = m_TextureBindingLayoutList.size();
 
-				std::vector<VkWriteDescriptorSet> descriptorWrites(LayoutListSize);
-				std::vector<VkDescriptorBufferInfo> bufferInfoList(LayoutListSize);
-				std::vector<VkDescriptorImageInfo> imageInfoList(LayoutListSize);
+				std::vector<VkWriteDescriptorSet> descriptorWrites(UniformLayoutSize + TexLayoutSize);
+				std::vector<VkDescriptorBufferInfo> bufferInfoList(UniformLayoutSize);
+				std::vector<VkDescriptorImageInfo> imageInfoList(TexLayoutSize);
+				
+				int LayoutIndex = 0;
 
-				for (int LayoutIndex = 0; LayoutIndex < LayoutListSize; LayoutIndex++)
+				//
+				for (int BufferLayoutIndex = 0; BufferLayoutIndex < UniformLayoutSize; BufferLayoutIndex++)
 				{
-					const auto& Layout = Buffer->GetBindingLayoutList()[LayoutIndex];
-
+					auto& Layout = Buffer->GetBindingLayoutList()[BufferLayoutIndex];
 					descriptorWrites[LayoutIndex].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 					descriptorWrites[LayoutIndex].dstSet = m_DescriptorSets[FrameIndex]; // どのDescriptorSets(キューファミリが入ってる？)でCPUからGPUにバッファを渡すコマンドを発行するか
 					descriptorWrites[LayoutIndex].dstBinding = Layout.BindingIndex; // layout(location = n)
 					descriptorWrites[LayoutIndex].dstArrayElement = 0; // ???
 					
-					switch (Buffer->GetBufferType())
+					bufferInfoList[BufferLayoutIndex].buffer = m_VKUniformBufferList[FrameIndex][BufferIndex]; // UBOの指定
+					bufferInfoList[BufferLayoutIndex].offset = Layout.ByteOffset; // バッファオフセット
+					bufferInfoList[BufferLayoutIndex].range = Layout.ByteSize; // サイズかな？
+
+					if (m_UseDynamicUniform)
 					{
-					case graphics::EBufferType::UNIFROM:
-						{
-							bufferInfoList[LayoutIndex].buffer = m_VKUniformBufferList[FrameIndex][BufferIndex]; // UBOの指定
-							bufferInfoList[LayoutIndex].offset = Layout.ByteOffset; // バッファオフセット
-							bufferInfoList[LayoutIndex].range = Layout.ByteSize; // サイズかな？
-
-							if (m_UseDynamicUniform)
-							{
-								descriptorWrites[LayoutIndex].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC; // どのタイプのコマンドを発行してもらうのか
-							}
-							else
-							{
-								descriptorWrites[LayoutIndex].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER; // どのタイプのコマンドを発行してもらうのか
-							}
-							
-							descriptorWrites[LayoutIndex].descriptorCount = 1;
-							descriptorWrites[LayoutIndex].pBufferInfo = &bufferInfoList[LayoutIndex];
-
-							// 複数個入力しても意味がないので始めのFrameIndexだけを見る
-							if (FrameIndex == 0)
-							{
-								m_BindingRefSizeList.push_back(m_VKUniformBufferSizeList[FrameIndex][BufferIndex]);
-							}
-						}
-						break;
-
-					case graphics::EBufferType::TEXTURE:
-						{
-							imageInfoList[LayoutIndex].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-							imageInfoList[LayoutIndex].imageView = m_TextureImageView;
-							imageInfoList[LayoutIndex].sampler = m_TextureSampler;
-
-							descriptorWrites[LayoutIndex].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-							descriptorWrites[LayoutIndex].descriptorCount = 1;
-							descriptorWrites[LayoutIndex].pImageInfo = &imageInfoList[LayoutIndex];
-						}
-						break;
-
-					default:
-						break;
+						descriptorWrites[LayoutIndex].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC; // どのタイプのコマンドを発行してもらうのか
 					}
+					else
+					{
+						descriptorWrites[LayoutIndex].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER; // どのタイプのコマンドを発行してもらうのか
+					}
+
+					descriptorWrites[LayoutIndex].descriptorCount = 1;
+					descriptorWrites[LayoutIndex].pBufferInfo = &bufferInfoList[BufferLayoutIndex];
+
+					// 複数個入力しても意味がないので始めのFrameIndexだけを見る
+					if (FrameIndex == 0)
+					{
+						m_BindingRefSizeList.push_back(m_VKUniformBufferSizeList[FrameIndex][BufferIndex]);
+					}
+
+					LayoutIndex++;
+				}
+
+				//
+				for (int TexLayoutIndex = 0; TexLayoutIndex < TexLayoutSize; TexLayoutIndex++)
+				{
+					const auto& TexLayout = m_TextureBindingLayoutList[TexLayoutIndex];
+					const auto& Texture = static_cast<api::CVulkanTexture*>(TextureList[TexLayout.TextureIndex].get());
+
+					descriptorWrites[LayoutIndex].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+					descriptorWrites[LayoutIndex].dstSet = m_DescriptorSets[FrameIndex]; // どのDescriptorSets(キューファミリが入ってる？)でCPUからGPUにバッファを渡すコマンドを発行するか
+					descriptorWrites[LayoutIndex].dstBinding = TexLayout.BindingIndex; // layout(location = n)
+					descriptorWrites[LayoutIndex].dstArrayElement = 0; // ???
+
+					imageInfoList[TexLayoutIndex].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+					imageInfoList[TexLayoutIndex].imageView = Texture->GetTextureImageView();
+					imageInfoList[TexLayoutIndex].sampler = Texture->GetTextureSampler();
+
+					descriptorWrites[LayoutIndex].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+					descriptorWrites[LayoutIndex].descriptorCount = 1;
+					descriptorWrites[LayoutIndex].pImageInfo = &imageInfoList[TexLayoutIndex];
+
+					LayoutIndex++;
 				}
 
 				// たぶんバッファの転送を行うコマンドを発行している
 				vkUpdateDescriptorSets(m_pGraphicsAPI->GetLogicalDevice(), static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
+			}
+		
+			//
+			for (const auto& TexLayout : m_TextureBindingLayoutList)
+			{
+
 			}
 		}
 

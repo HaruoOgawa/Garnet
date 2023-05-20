@@ -4,7 +4,6 @@
 #include <string>
 #include "../Interface/IBuffer.h"
 #include "../Graphics/CUniformBuffer.h"
-#include "../Graphics/CTextureBuffer.h"
 
 namespace graphics
 {
@@ -16,7 +15,6 @@ namespace graphics
 	};
 
 	class CUniformBuffer;
-	class CTextureBuffer;
 
 	class CMaterialCreateInfo
 	{
@@ -34,7 +32,6 @@ namespace graphics
 
 		// Uniform
 		static std::shared_ptr<graphics::CUniformBuffer> CreateUniformBuffer(std::vector<int> BindIndexList);
-		static std::shared_ptr<graphics::CTextureBuffer> CreateTextureBuffer(std::vector<int> BindIndexList);
 
 		// Shader
 		EShaderType GetShaderType() const;

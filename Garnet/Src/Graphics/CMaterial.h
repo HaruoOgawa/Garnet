@@ -5,10 +5,10 @@
 #include <string>
 #include "CUniformBuffer.h"
 #include "CUniformBufferDescriptor.h"
-#include "CTextureBuffer.h"
-#include "CTextureBufferDescriptor.h"
 #include "../Interface/IGraphicsAPI.h"
 #include "../GraphicsAPI/CMaterialCreateInfo.h"
+#include "STextureBindingLayout.h"
+#include "CTexture.h"
 
 namespace api { class IGraphicsAPI; }
 namespace camera { class CCamera; }
@@ -18,7 +18,6 @@ namespace graphics
 {
 	class CMaterialCreateInfo;
 	class CUniformBuffer;
-	class CTextureBuffer;
 
 	class CMaterial
 	{
@@ -26,7 +25,7 @@ namespace graphics
 		std::shared_ptr<CMaterialCreateInfo> m_CreateInfo;
 
 		std::vector<std::shared_ptr<CUniformBuffer>> m_UniformBufferList;
-		std::vector<std::shared_ptr<CTextureBuffer>> m_TextureBufferList;
+		std::vector<STextureBindingLayout> m_TextureBindingLayoutList;
 
 		int											 m_RefCount;
 		bool										 m_UseDynamicUniform;
@@ -37,12 +36,12 @@ namespace graphics
 		virtual ~CMaterial() = default;
 
 		virtual void SetCreateInfo(const std::shared_ptr<CMaterialCreateInfo>& createInfo);
-		virtual bool Create(api::IGraphicsAPI* pGraphicsAPI) = 0;
+		virtual bool Create(api::IGraphicsAPI* pGraphicsAPI, const std::vector<std::shared_ptr<graphics::CTexture>>& TextureList) = 0;
 		virtual bool Update(float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection) = 0;
 		virtual bool BuildDrawBuffer(int DynamicOffsetNum) = 0;
 
 		virtual void AddUniformBuffer(const std::shared_ptr<CUniformBuffer>& Buffer);
-		virtual void AddTextureBuffer(const std::shared_ptr<CTextureBuffer>& Buffer);
+		virtual void AddTextureBindingLayout(const STextureBindingLayout& Layout);
 
 		virtual void SetUniformValue(const std::string Name, const void* Value, int DynamicOffsetNum) = 0;
 

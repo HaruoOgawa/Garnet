@@ -333,12 +333,11 @@ del $(OutDir)Garnet.pdb</Command>
     <ClInclude Include="Src\GraphicsAPI\WebGPU\CWebGPUTexture.h" />
     <ClInclude Include="Src\GraphicsAPI\Vulkan\CVulkanTexture.h" />
     <ClInclude Include="Src\Graphics\CTexture.h" />
+    <ClInclude Include="Src\Graphics\STextureBindingLayout.h" />
     <ClInclude Include="Src\Library\stb\stb_image.h" />
     <ClInclude Include="Src\Math\CMath.h" />
     <ClInclude Include="Src\Projection\CProjection.h" />
     <ClInclude Include="Src\Camera\CCamera.h" />
-    <ClInclude Include="Src\Graphics\CTextureBuffer.h" />
-    <ClInclude Include="Src\Graphics\CTextureBufferDescriptor.h" />
     <ClInclude Include="Src\GraphicsAPI\WebGPU\CWebGPUMaterial.h" />
     <ClInclude Include="Src\GraphicsAPI\Vulkan\CVulkanMaterial.h" />
     <ClInclude Include="Src\GraphicsAPI\CMaterialCreateInfo.h" />
@@ -676,8 +675,6 @@ del $(OutDir)Garnet.pdb</Command>
     <ClCompile Include="Src\Graphics\CTexture.cpp" />
     <ClCompile Include="Src\Projection\CProjection.cpp" />
     <ClCompile Include="Src\Camera\CCamera.cpp" />
-    <ClCompile Include="Src\Graphics\CTextureBuffer.cpp" />
-    <ClCompile Include="Src\Graphics\CTextureBufferDescriptor.cpp" />
     <ClCompile Include="Src\GraphicsAPI\WebGPU\CWebGPUMaterial.cpp" />
     <ClCompile Include="Src\GraphicsAPI\Vulkan\CVulkanMaterial.cpp" />
     <ClCompile Include="Src\GraphicsAPI\CMaterialCreateInfo.cpp" />

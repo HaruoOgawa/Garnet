@@ -27,12 +27,6 @@ namespace graphics
 		
 		return Buffer;
 	}
-	std::shared_ptr<graphics::CTextureBuffer> CMaterialCreateInfo::CreateTextureBuffer(std::vector<int> BindIndexList)
-	{
-		auto Buffer = std::make_shared<graphics::CTextureBuffer>(BindIndexList);
-
-		return Buffer;
-	}
 
 	// Shader
 	EShaderType CMaterialCreateInfo::GetShaderType() const

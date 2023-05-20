@@ -45,7 +45,7 @@ namespace api
 		bool CreateDescriptorSetLayout(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo);
 		bool CreateUniformBuffers(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo);
 		bool CreateDescriptorPool(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo);
-		bool CreateDescriptorSets(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo);
+		bool CreateDescriptorSets(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, const std::vector<std::shared_ptr<graphics::CTexture>>& TextureList);
 
 		void Release();
 
@@ -55,7 +55,7 @@ namespace api
 		CVulkanMaterial();
 		virtual ~CVulkanMaterial();
 
-		virtual bool Create(api::IGraphicsAPI* pGraphicsAPI) override;
+		virtual bool Create(api::IGraphicsAPI* pGraphicsAPI, const std::vector<std::shared_ptr<graphics::CTexture>>& TextureList) override;
 		virtual bool Update(float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection) override;
 		virtual bool BuildDrawBuffer(int DynamicOffsetNum) override;
 

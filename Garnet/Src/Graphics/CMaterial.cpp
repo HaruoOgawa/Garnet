@@ -14,7 +14,7 @@ namespace graphics
 		m_CreateInfo = createInfo;
 	}
 
-	bool CMaterial::Create(api::IGraphicsAPI* pGraphicsAPI)
+	bool CMaterial::Create(api::IGraphicsAPI* pGraphicsAPI, const std::vector<std::shared_ptr<graphics::CTexture>>& TextureList)
 	{
 		return true;
 	}
@@ -29,9 +29,9 @@ namespace graphics
 		m_UniformBufferList.push_back(Buffer);
 	}
 	
-	void CMaterial::AddTextureBuffer(const std::shared_ptr<CTextureBuffer>& Buffer)
+	void CMaterial::AddTextureBindingLayout(const STextureBindingLayout& Layout)
 	{
-		m_TextureBufferList.push_back(Buffer);
+		m_TextureBindingLayoutList.push_back(Layout);
 	}
 
 	void CMaterial::SetUniformValue(const std::string Name, const void* Value, int DynamicOffsetNum)
