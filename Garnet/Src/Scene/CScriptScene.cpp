@@ -106,7 +106,9 @@ namespace scene
 				auto TextureBuffer = graphics::CMaterialCreateInfo::CreateTextureBuffer({ 2 });
 
 				auto Texture = pGraphicsAPI->CreateTexture();
-				if(!Texture->Create(m_Texture0->GetData())) return false;
+				if(!Texture->Create(pGraphicsAPI, m_Texture0->GetData())) return false;
+
+				m_TestObject->AddTexture(Texture);
 			}
 			
 			// CREATE MATERIAL

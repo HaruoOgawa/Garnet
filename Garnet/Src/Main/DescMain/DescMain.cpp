@@ -10,8 +10,6 @@
 #include <Windows.h>
 #endif
 
-//#define USE_TEXTURE_LOADER
-
 extern "C" {
 
 descapp::CDescAppManager* g_DescApp = nullptr;

@@ -38,20 +38,10 @@ namespace api
 
 		VkDescriptorPool m_DescriptorPool;
 		std::vector<VkDescriptorSet> m_DescriptorSets;
-
-		// Texture Image
-		VkImage m_TextureImage;
-		VkDeviceMemory m_TextureImageMemory;
-		VkImageView m_TextureImageView; // シェーダーでテクスチャを取り扱う用のImageView
-		VkSampler m_TextureSampler;
 	private:
 		// Vulkanメインロジック /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		bool CreateShaderStages(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo);
 		
-		bool CreateTextureImage(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo);
-		bool CreateTextureImageView(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo);
-		bool CreateTextureSampler(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo);
-
 		bool CreateDescriptorSetLayout(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo);
 		bool CreateUniformBuffers(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo);
 		bool CreateDescriptorPool(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo);

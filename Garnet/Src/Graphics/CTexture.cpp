@@ -18,9 +18,12 @@ namespace graphics
 	{
 	}
 
-	bool CTexture::Create(const std::vector<char>& Data)
+#ifdef USE_TEXTURE_LOADER
+	bool CTexture::Create(api::IGraphicsAPI* pGraphicsAPI, const std::vector<char>& Data)
 	{
-#if defined(USE_TEXTURE_LOADER) && !defined(__EMSCRIPTEN__)
+#ifdef __EMSCRIPTEN__
+		
+#else
 		// stbiでテクスチャバイナリを解析してピクセルデータを取得する
 		stbi_uc* stbi_pixelData = stbi_load_from_memory(reinterpret_cast<const stbi_uc*>(&Data[0]), Data.size(), &m_Width, &m_Height, &m_NumOfChannels, STBI_rgb_alpha);
 
@@ -33,15 +36,14 @@ namespace graphics
 		stbi_image_free(stbi_pixelData);
 
 		// APIにデータを渡す
-		if (!Create(pixelData, pixelSize)) return false;
-#elif defined(__EMSCRIPTEN__)
-		
+		if (!Create(pGraphicsAPI, pixelData, pixelSize)) return false;
 #endif
 		return true;
 	}
 
-	bool CTexture::Create(const std::vector<unsigned char>& pixelData, int pixelSize)
+	bool CTexture::Create(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& pixelData, int pixelSize)
 	{
 		return true;
 	}
+#endif // USE_TEXTURE_LOADER
 }
