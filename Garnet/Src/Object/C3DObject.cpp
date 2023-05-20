@@ -10,6 +10,7 @@ namespace object
 	{
 		m_NodeList.clear();
 		m_MaterialList.clear();
+		m_TextureList.clear();
 	}
 
 	bool C3DObject::Create(api::IGraphicsAPI* pGraphicsAPI)

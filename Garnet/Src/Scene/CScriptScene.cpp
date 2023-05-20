@@ -101,19 +101,27 @@ namespace scene
 				UniformBuffer->RecalculateBindingLayoutOffset();
 
 				Material0->AddUniformBuffer(UniformBuffer);
+				Material1->AddUniformBuffer(UniformBuffer);
 			}
 
 			{
-				auto Texture = pGraphicsAPI->CreateTexture();
-				if(!Texture->Create(m_Texture0->GetData())) return false;
+				auto APITex0 = pGraphicsAPI->CreateTexture();
+				if(!APITex0->Create(m_Texture0->GetData())) return false;
+
+				auto APITex1 = pGraphicsAPI->CreateTexture();
+				if (!APITex1->Create(m_Texture1->GetData())) return false;
 
 				Material0->AddTextureBindingLayout({ 2, 0 });
-				m_TestObject->AddTexture(Texture);
+				Material1->AddTextureBindingLayout({ 2, 1 });
+				m_TestObject->AddTexture(APITex0);
+				m_TestObject->AddTexture(APITex1);
 			}
 			
 			// CREATE MATERIAL
 			Material0->SetCreateInfo(createInfo);
+			Material1->SetCreateInfo(createInfo);
 			m_TestObject->AddMaterial(Material0);
+			m_TestObject->AddMaterial(Material1);
 		}
 
 		{
@@ -134,7 +142,7 @@ namespace scene
 
 			{
 				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(Mesh);
-				Node->LinkMaterialReference(0, m_TestObject->GetMaterialList());
+				Node->LinkMaterialReference(1, m_TestObject->GetMaterialList());
 				Node->SetPos(glm::vec3(-0.25f, 0.0f, -1.0f));
 				Node->SetRot(glm::vec3(0.0f, 0.0f, 45.0f));
 				m_TestObject->AddNode(Node);

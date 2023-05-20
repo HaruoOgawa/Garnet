@@ -8,7 +8,7 @@ namespace object
 	CNode::CNode(const std::shared_ptr<graphics::CMesh>& Mesh):
 		m_Transform(std::make_shared<math::CTransform>()),
 		m_Mesh(Mesh),
-		m_MaterialIndex(0),
+		m_MaterialIndex(-1),
 		m_DynamicOffsetNum(0)
 	{
 	}
@@ -64,6 +64,8 @@ namespace object
 
 	void CNode::LinkMaterialReference(int MaterialIndex, const std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList)
 	{
+		if (MaterialIndex < 0 || MaterialIndex >= MaterialList.size()) return;
+
 		const auto& Material = MaterialList[MaterialIndex];
 		Material->IncreaseRefCount();
 

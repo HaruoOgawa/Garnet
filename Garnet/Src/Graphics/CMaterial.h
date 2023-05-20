@@ -26,7 +26,7 @@ namespace graphics
 		std::vector<STextureBindingLayout> m_TextureBindingLayoutList;
 
 		int											 m_RefCount;
-		bool										 m_UseDynamicUniform;
+		const bool								     m_UseDynamicUniform;
 
 		std::vector<uint32_t> m_BindingRefSizeList; // GLSLの各bindingが参照しているバッファのサイズ
 	public:
@@ -47,5 +47,7 @@ namespace graphics
 		virtual int GetRefCount() const;
 
 		virtual const std::vector<uint32_t>& GetBindingRefSizeList() const;
+
+		virtual bool IsUseDynamicUniform() const;
 	};
 }

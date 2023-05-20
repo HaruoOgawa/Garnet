@@ -883,7 +883,11 @@ namespace api
 		else if(messageType == VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT) message = "[VALIDATION Error]" + message + "\n";
 		else if(messageType == VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT) message = "[PERFORMANCE Error]" + message + "\n";
 		
-		Console::Log(message.c_str());
+		// ひとまずエラー表示はVALIDATION Errorだけにしておく(重要なエラーは大抵これだから)
+		if (messageType == VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT)
+		{
+			Console::Log(message.c_str());
+		}
 
 		return VK_FALSE;
 	}

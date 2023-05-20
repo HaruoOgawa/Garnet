@@ -5,7 +5,7 @@ namespace graphics
 	CMaterial::CMaterial():
 		m_CreateInfo(nullptr),
 		m_RefCount(0),
-		m_UseDynamicUniform(false)
+		m_UseDynamicUniform(true)
 	{
 	}
 
@@ -42,10 +42,10 @@ namespace graphics
 	{
 		m_RefCount++;
 
-		if (m_RefCount > 1)
+		/*if (m_RefCount > 1)
 		{
 			m_UseDynamicUniform = true;
-		}
+		}*/
 	}
 
 	int CMaterial::GetRefCount() const
@@ -56,5 +56,10 @@ namespace graphics
 	const std::vector<uint32_t>& CMaterial::GetBindingRefSizeList() const
 	{
 		return m_BindingRefSizeList;
+	}
+
+	bool CMaterial::IsUseDynamicUniform() const
+	{
+		return m_UseDynamicUniform;
 	}
 }
