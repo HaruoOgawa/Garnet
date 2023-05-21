@@ -4,7 +4,8 @@ namespace graphics
 {
 	struct STextureBindingLayout
 	{
-		int BindingIndex = -1;
+		int ViewBindingIndex = -1;
+		int SamplerBindingIndex = -1;
 		int TextureIndex = -1;
 	};
 }

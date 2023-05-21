@@ -210,16 +210,31 @@ namespace api
 		// テクスチャバインドに関する設定
 		for (const auto& TexLayout : m_TextureBindingLayoutList)
 		{
-			VkDescriptorSetLayoutBinding LayoutBinding{}; // VkDescriptorSetLayoutBindingはおそらくlayout(location = 0), WebGPUでいう @binding(n)のこと. ただしVulkanは @groupは存在しない
-			LayoutBinding.binding = TexLayout.BindingIndex; // バインディングインデックス
+			{
+				VkDescriptorSetLayoutBinding LayoutBinding{}; // VkDescriptorSetLayoutBindingはおそらくlayout(location = 0), WebGPUでいう @binding(n)のこと. ただしVulkanは @groupは存在しない
+				LayoutBinding.binding = TexLayout.ViewBindingIndex; // バインディングインデックス
 
-			LayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER; // バッファタイプ
+				LayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE; // バッファタイプ
 
-			LayoutBinding.descriptorCount = 1; // 
-			LayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT; // アクセス権限。ここでは頂点シェーダーのみ読み取り可
-			LayoutBinding.pImmutableSamplers = nullptr; // 画像のサンプリングに使用するフィールド
+				LayoutBinding.descriptorCount = 1; // 
+				LayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT; // アクセス権限。ここでは頂点シェーダーのみ読み取り可
+				LayoutBinding.pImmutableSamplers = nullptr; // 画像のサンプリングに使用するフィールド
 
-			bindings.push_back(LayoutBinding);
+				bindings.push_back(LayoutBinding);
+			}
+
+			{
+				VkDescriptorSetLayoutBinding LayoutBinding{}; // VkDescriptorSetLayoutBindingはおそらくlayout(location = 0), WebGPUでいう @binding(n)のこと. ただしVulkanは @groupは存在しない
+				LayoutBinding.binding = TexLayout.SamplerBindingIndex; // バインディングインデックス
+
+				LayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER; // バッファタイプ
+
+				LayoutBinding.descriptorCount = 1; // 
+				LayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT; // アクセス権限。ここでは頂点シェーダーのみ読み取り可
+				LayoutBinding.pImmutableSamplers = nullptr; // 画像のサンプリングに使用するフィールド
+
+				bindings.push_back(LayoutBinding);
+			}
 		}
 
 		// レイアウトの作成に関する設定
@@ -294,11 +309,21 @@ namespace api
 		// テクスチャのプール
 		for (const auto& TexLayout : m_TextureBindingLayoutList)
 		{
-			VkDescriptorPoolSize poolSize{};
-			poolSize.type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-			poolSize.descriptorCount = static_cast<uint32_t>(m_pGraphicsAPI->GetMaxFramesInFlight());
+			{
+				VkDescriptorPoolSize poolSize{};
+				poolSize.type = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
+				poolSize.descriptorCount = static_cast<uint32_t>(m_pGraphicsAPI->GetMaxFramesInFlight());
 
-			poolSizes.push_back(poolSize);
+				poolSizes.push_back(poolSize);
+			}
+
+			{
+				VkDescriptorPoolSize poolSize{};
+				poolSize.type = VK_DESCRIPTOR_TYPE_SAMPLER;
+				poolSize.descriptorCount = static_cast<uint32_t>(m_pGraphicsAPI->GetMaxFramesInFlight());
+
+				poolSizes.push_back(poolSize);
+			}
 		}
 
 		VkDescriptorPoolCreateInfo poolInfo{};
@@ -338,7 +363,7 @@ namespace api
 			{
 				const auto& Buffer = m_UniformBufferList[BufferIndex];
 				size_t UniformLayoutSize = Buffer->GetBindingLayoutList().size();
-				size_t TexLayoutSize = m_TextureBindingLayoutList.size();
+				size_t TexLayoutSize = m_TextureBindingLayoutList.size() * 2; // ImageViewとSamplerがあるので2倍にしている
 
 				std::vector<VkWriteDescriptorSet> descriptorWrites(UniformLayoutSize + TexLayoutSize);
 				std::vector<VkDescriptorBufferInfo> bufferInfoList(UniformLayoutSize);
@@ -381,25 +406,41 @@ namespace api
 				}
 
 				// テクスチャ
-				for (int TexLayoutIndex = 0; TexLayoutIndex < TexLayoutSize; TexLayoutIndex++)
+				for (int TexLayoutIndex = 0; TexLayoutIndex < TexLayoutSize; TexLayoutIndex += 2)
 				{
 					const auto& TexLayout = m_TextureBindingLayoutList[TexLayoutIndex];
 					const auto& Texture = static_cast<api::CVulkanTexture*>(TextureList[TexLayout.TextureIndex].get());
 
-					descriptorWrites[LayoutIndex].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-					descriptorWrites[LayoutIndex].dstSet = m_DescriptorSets[FrameIndex]; // どのDescriptorSets(キューファミリが入ってる？)でCPUからGPUにバッファを渡すコマンドを発行するか
-					descriptorWrites[LayoutIndex].dstBinding = TexLayout.BindingIndex; // layout(location = n)
-					descriptorWrites[LayoutIndex].dstArrayElement = 0; // ???
+					{
+						descriptorWrites[LayoutIndex].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+						descriptorWrites[LayoutIndex].dstSet = m_DescriptorSets[FrameIndex]; // どのDescriptorSets(キューファミリが入ってる？)でCPUからGPUにバッファを渡すコマンドを発行するか
+						descriptorWrites[LayoutIndex].dstBinding = TexLayout.ViewBindingIndex; // layout(location = n)
+						descriptorWrites[LayoutIndex].dstArrayElement = 0; // ???
 
-					imageInfoList[TexLayoutIndex].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-					imageInfoList[TexLayoutIndex].imageView = Texture->GetTextureImageView();
-					imageInfoList[TexLayoutIndex].sampler = Texture->GetTextureSampler();
+						imageInfoList[TexLayoutIndex].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+						imageInfoList[TexLayoutIndex].imageView = Texture->GetTextureImageView();
 
-					descriptorWrites[LayoutIndex].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-					descriptorWrites[LayoutIndex].descriptorCount = 1;
-					descriptorWrites[LayoutIndex].pImageInfo = &imageInfoList[TexLayoutIndex];
+						descriptorWrites[LayoutIndex].descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
+						descriptorWrites[LayoutIndex].descriptorCount = 1;
+						descriptorWrites[LayoutIndex].pImageInfo = &imageInfoList[TexLayoutIndex];
 
-					LayoutIndex++;
+						LayoutIndex++;
+					}
+
+					{
+						descriptorWrites[LayoutIndex].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+						descriptorWrites[LayoutIndex].dstSet = m_DescriptorSets[FrameIndex]; // どのDescriptorSets(キューファミリが入ってる？)でCPUからGPUにバッファを渡すコマンドを発行するか
+						descriptorWrites[LayoutIndex].dstBinding = TexLayout.SamplerBindingIndex; // layout(location = n)
+						descriptorWrites[LayoutIndex].dstArrayElement = 0; // ???
+
+						imageInfoList[TexLayoutIndex + 1].sampler = Texture->GetTextureSampler();
+
+						descriptorWrites[LayoutIndex].descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER;
+						descriptorWrites[LayoutIndex].descriptorCount = 1;
+						descriptorWrites[LayoutIndex].pImageInfo = &imageInfoList[TexLayoutIndex + 1];
+
+						LayoutIndex++;
+					}
 				}
 
 				// たぶんバッファの転送を行うコマンドを発行している

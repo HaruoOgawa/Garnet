@@ -165,14 +165,26 @@ namespace api
 		// Texture
 		for (const auto& TexLayout : m_TextureBindingLayoutList)
 		{
-			WGPUBindGroupLayoutEntry bindingLayout{};
-			InitDefalutBindGroupLayoutEntry(bindingLayout);
-			bindingLayout.binding = TexLayout.BindingIndex;
-			bindingLayout.visibility = WGPUShaderStage_Fragment;
-			bindingLayout.texture.sampleType = WGPUTextureSampleType_Float;
-			bindingLayout.texture.viewDimension = WGPUTextureViewDimension_2D;
+			{
+				WGPUBindGroupLayoutEntry bindingLayout{};
+				InitDefalutBindGroupLayoutEntry(bindingLayout);
+				bindingLayout.binding = TexLayout.ViewBindingIndex;
+				bindingLayout.visibility = WGPUShaderStage_Fragment;
+				bindingLayout.texture.sampleType = WGPUTextureSampleType_Float;
+				bindingLayout.texture.viewDimension = WGPUTextureViewDimension_2D;
 
-			bindingLayoutList.push_back(bindingLayout);
+				bindingLayoutList.push_back(bindingLayout);
+			}
+
+			{
+				WGPUBindGroupLayoutEntry bindingLayout{};
+				InitDefalutBindGroupLayoutEntry(bindingLayout);
+				bindingLayout.binding = TexLayout.SamplerBindingIndex;
+				bindingLayout.visibility = WGPUShaderStage_Fragment;
+				bindingLayout.sampler.type = WGPUSamplerBindingType_Filtering;
+
+				bindingLayoutList.push_back(bindingLayout);
+			}
 		}
 
 		// バインドグループレイアウトを作成
@@ -219,11 +231,23 @@ namespace api
 		{
 			const auto& Texture = static_cast<api::CWebGPUTexture*>(TextureList[TexLayout.TextureIndex].get());
 
-			WGPUBindGroupEntry binding{};
-			binding.nextInChain = nullptr;
-			binding.binding = TexLayout.BindingIndex;
-			binding.textureView = Texture->GetTextureImageView();
-			binding.sampler = Texture->GetTextureSampler();
+			{
+				WGPUBindGroupEntry binding{};
+				binding.nextInChain = nullptr;
+				binding.binding = TexLayout.ViewBindingIndex;
+				binding.textureView = Texture->GetTextureImageView();
+
+				bindingList.push_back(binding);
+			}
+
+			{
+				WGPUBindGroupEntry binding{};
+				binding.nextInChain = nullptr;
+				binding.binding = TexLayout.SamplerBindingIndex;
+				binding.sampler = Texture->GetTextureSampler();
+
+				bindingList.push_back(binding);
+			}
 		}
 
 		// バインドグループを作成

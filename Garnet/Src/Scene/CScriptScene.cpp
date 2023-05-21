@@ -111,8 +111,8 @@ namespace scene
 				auto APITex1 = pGraphicsAPI->CreateTexture();
 				if (!APITex1->Create(m_Texture1->GetData())) return false;
 
-				Material0->AddTextureBindingLayout({ 2, 0 });
-				Material1->AddTextureBindingLayout({ 2, 1 });
+				Material0->AddTextureBindingLayout({ 2, 3, 0 });
+				Material1->AddTextureBindingLayout({ 2, 3, 1 });
 				m_TestObject->AddTexture(APITex0);
 				m_TestObject->AddTexture(APITex1);
 			}
