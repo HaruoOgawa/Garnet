@@ -6,10 +6,14 @@ project(Garnet, C CXX)
 
 set(CMAKE_BUILD_TYPE Release)
 
-add_definitions(-D__DAWN__)
+add_definitions(
+	-D__DAWN__
+	-DUSE_TEXTURE_LOADER
+)
 
 add_executable(
 	Garnet
+	../src/Library/stb/stb_image.h
 	../src/App/CDemoAppManager.cpp
 	../src/App/CDemoAppManager.h
 	../src/App/CWebAppManager.cpp
@@ -34,28 +38,31 @@ add_executable(
 	../src/Graphics/CPresetPrimitive.h
 	../src/Graphics/CPrimitive.cpp
 	../src/Graphics/CPrimitive.h
-	../src/Graphics/CTextureBuffer.cpp
-	../src/Graphics/CTextureBuffer.h
-	../src/Graphics/CTextureBufferDescriptor.cpp
-	../src/Graphics/CTextureBufferDescriptor.h
+	../src/Graphics/CTexture.cpp
+	../src/Graphics/CTexture.h
 	../src/Graphics/CUniformBuffer.cpp
 	../src/Graphics/CUniformBuffer.h
 	../src/Graphics/CUniformBufferDescriptor.cpp
 	../src/Graphics/CUniformBufferDescriptor.h
 	../src/Graphics/ERenderPassType.h
 	../src/Graphics/SBindingLayout.h
+	../src/Graphics/STextureBindingLayout.h
 	../src/GraphicsAPI/CMaterialCreateInfo.cpp
 	../src/GraphicsAPI/CMaterialCreateInfo.h
 	../src/GraphicsAPI/CRendererCreateInfo.cpp
 	../src/GraphicsAPI/CRendererCreateInfo.h
 	../src/GraphicsAPI/Vulkan/CVulkanMaterial.cpp
 	../src/GraphicsAPI/Vulkan/CVulkanMaterial.h
+	../src/GraphicsAPI/Vulkan/CVulkanTexture.cpp
+	../src/GraphicsAPI/Vulkan/CVulkanTexture.h
 	../src/GraphicsAPI/WebGPU/CWebGPUAPI.cpp
 	../src/GraphicsAPI/WebGPU/CWebGPUAPI.h
 	../src/GraphicsAPI/WebGPU/CWebGPUMaterial.cpp
 	../src/GraphicsAPI/WebGPU/CWebGPUMaterial.h
 	../src/GraphicsAPI/WebGPU/CWebGPURenderer.cpp
 	../src/GraphicsAPI/WebGPU/CWebGPURenderer.h
+	../src/GraphicsAPI/WebGPU/CWebGPUTexture.cpp
+	../src/GraphicsAPI/WebGPU/CWebGPUTexture.h
 	../src/Interface/IApp.h
 	../src/Interface/IBuffer.h
 	../src/Interface/IDescriptor.h

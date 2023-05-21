@@ -8,10 +8,14 @@ project(Garnet, C CXX)
 
 set(CMAKE_BUILD_TYPE Release)
 
-add_definitions(-D__DAWN__)
+add_definitions(
+	-D__DAWN__
+	-DUSE_TEXTURE_LOADER
+)
 
 add_executable(
 	Garnet
+	../src/Library/stb/stb_image.h
 """
 
 # EXPORTED_RUNTIME_METHODSを下記のような感じで,の後ろにスペースを入れるとうまくModuleに登録してくれないみたいなので注意
