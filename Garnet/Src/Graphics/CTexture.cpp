@@ -1,6 +1,6 @@
 #include "CTexture.h"
 
-#if defined(USE_TEXTURE_LOADER) && !defined(__EMSCRIPTEN__) 
+#if defined(USE_TEXTURE_LOADER)
 #define STB_IMAGE_IMPLEMENTATION
 #include "../Library/stb/stb_image.h"
 #endif // USE_TEXTURE_LOADER
@@ -21,9 +21,6 @@ namespace graphics
 #ifdef USE_TEXTURE_LOADER
 	bool CTexture::Create(const std::vector<char>& Data)
 	{
-#ifdef __EMSCRIPTEN__
-		
-#else
 		// stbiでテクスチャバイナリを解析してピクセルデータを取得する
 		stbi_uc* stbi_pixelData = stbi_load_from_memory(reinterpret_cast<const stbi_uc*>(&Data[0]), static_cast<int>(Data.size()), &m_Width, &m_Height, &m_NumOfChannels, STBI_rgb_alpha);
 
@@ -37,7 +34,7 @@ namespace graphics
 
 		// APIにデータを渡す
 		if (!Create(pixelData, pixelSize)) return false;
-#endif
+		
 		return true;
 	}
 

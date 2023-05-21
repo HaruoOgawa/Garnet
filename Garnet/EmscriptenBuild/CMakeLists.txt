@@ -13,6 +13,7 @@ add_definitions(
 
 add_executable(
 	Garnet
+	../src/Library/stb/stb_image.h
 	../src/App/CDemoAppManager.cpp
 	../src/App/CDemoAppManager.h
 	../src/App/CWebAppManager.cpp

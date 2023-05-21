@@ -15,6 +15,7 @@ add_definitions(
 
 add_executable(
 	Garnet
+	../src/Library/stb/stb_image.h
 """
 
 # EXPORTED_RUNTIME_METHODSを下記のような感じで,の後ろにスペースを入れるとうまくModuleに登録してくれないみたいなので注意
