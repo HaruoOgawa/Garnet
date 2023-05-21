@@ -240,13 +240,15 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(ProjectDir)src\Library\GLFW\lib;$(ProjectDir)src\Library\Vulkan\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>glfw3.lib;vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glfw3dll.lib;vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>mkdir $(OutDir)Resources
 del /s /q $(OutDir)Resources\*
 
-xcopy Resources $(OutDir)Resources /y /s /i</Command>
+xcopy Resources $(OutDir)Resources /y /s /i
+
+xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugWG|x64'">
@@ -263,14 +265,15 @@ xcopy Resources $(OutDir)Resources /y /s /i</Command>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(ProjectDir)src\Library\GLFW\lib;$(ProjectDir)src\Library\WebGPU\windows-x86_64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>glfw3.lib;wgpu_native.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glfw3dll.lib;wgpu_native.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>mkdir $(OutDir)Resources
 del /s /q $(OutDir)Resources\*
 
 xcopy Resources $(OutDir)Resources /y /s /i
-xcopy $(ProjectDir)src\Library\WebGPU\windows-x86_64\wgpu_native.dll $(OutDir) /y /s /i</Command>
+xcopy $(ProjectDir)src\Library\WebGPU\windows-x86_64\wgpu_native.dll $(OutDir) /y /s /i
+xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -290,14 +293,15 @@ xcopy $(ProjectDir)src\Library\WebGPU\windows-x86_64\wgpu_native.dll $(OutDir) /
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(ProjectDir)src\Library\GLFW\lib;$(ProjectDir)src\Library\Vulkan\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>glfw3.lib;vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glfw3dll.lib;vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>mkdir $(OutDir)Resources
 del /s /q $(OutDir)Resources\*
 
 xcopy Resources $(OutDir)Resources /y /s /i
-del $(OutDir)Garnet.pdb</Command>
+del $(OutDir)Garnet.pdb
+xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseWG|x64'">
@@ -317,7 +321,7 @@ del $(OutDir)Garnet.pdb</Command>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(ProjectDir)src\Library\GLFW\lib;$(ProjectDir)src\Library\WebGPU\windows-x86_64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>glfw3.lib;wgpu_native.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glfw3dll.lib;wgpu_native.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>mkdir $(OutDir)Resources
@@ -326,7 +330,8 @@ del /s /q $(OutDir)Resources\*
 xcopy Resources $(OutDir)Resources /y /s /i
 xcopy $(ProjectDir)src\Library\WebGPU\windows-x86_64\wgpu_native.dll $(OutDir) /y /s /i
 
-del $(OutDir)Garnet.pdb</Command>
+del $(OutDir)Garnet.pdb
+xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
