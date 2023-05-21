@@ -96,35 +96,6 @@ namespace api
 		m_Width = Width;
 		m_Height = Height;
 
-		if (m_Width > m_Height)
-		{
-			float fw = static_cast<float>(Width);
-			float fh = static_cast<float>(Height);
-			float aspect = fh / fw;
-			
-			if (m_Width > 2048)
-			{
-				m_Width = 2048;
-				fw = 2048.0f;
-			}
-
-			m_Height = static_cast<int>(fw * aspect);
-		}
-		else if (m_Height > m_Width)
-		{
-			float fw = static_cast<float>(Width);
-			float fh = static_cast<float>(Height);
-			float aspect = fw / fh;
-
-			if (m_Height > 2048)
-			{
-				m_Height = 2048;
-				fh = 2048.0f;
-			}
-
-			m_Width = static_cast<int>(fh * aspect);
-		}
-
 		if (!CreateSwapChain()) return false;
 		if (!CreateDepthTexture()) return false;
 
@@ -362,15 +333,16 @@ namespace api
 		descriptor.defaultQueue.nextInChain = nullptr; // デフォルトコマンドキューの拡張機
 		descriptor.defaultQueue.label = "Default Queue"; // デフォルトコマンドキューの判別用ラベル
 
-		// バッファとアトリビュートの制限数を最大値に設定しておく
-		/*WGPUSupportedLimits supportedLimits;
+		// 論理デバイスの制限の設定
+		WGPUSupportedLimits supportedLimits{};
 		wgpuAdapterGetLimits(m_Adapter, &supportedLimits);
 
 		WGPURequiredLimits requiredLimits{};
-		requiredLimits.limits.maxVertexAttributes = supportedLimits.limits.maxVertexAttributes;
-		requiredLimits.limits.maxVertexBuffers = supportedLimits.limits.maxVertexBuffers;
+		requiredLimits.nextInChain = nullptr;
+		requiredLimits.limits = supportedLimits.limits;
+		requiredLimits.limits.maxTextureDimension2D = 8192;
 
-		descriptor.requiredLimits = &requiredLimits;*/
+		descriptor.requiredLimits = &requiredLimits;
 
 		// 論理デバイスを取得する
 		struct UserData
