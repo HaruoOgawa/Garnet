@@ -11,6 +11,8 @@ namespace api
 	{
 		//
 		const std::string m_ShaderExtension;
+		int m_Width;
+		int m_Height;
 
 		// Instance
 #ifndef __EMSCRIPTEN__
@@ -36,6 +38,7 @@ namespace api
 		WGPUTextureFormat m_SwapChainFormat;
 
 		// DepthTexture
+		WGPUTexture		m_DepthTexture;
 		WGPUTextureView m_DepthTextureView;
 
 		// RenderPass
@@ -55,7 +58,7 @@ namespace api
 		bool CreateSwapChain();
 		bool CreateDepthTexture();
 	public:
-		CWebGPUAPI();
+		CWebGPUAPI(int Width, int Height);
 		virtual ~CWebGPUAPI();
 
 #ifdef __EMSCRIPTEN__
@@ -69,6 +72,8 @@ namespace api
 		virtual std::shared_ptr<renderer::IRenderer> CreateRenderer() override;
 		virtual std::shared_ptr<graphics::CMaterial> CreateMaterial() override;
 		virtual std::shared_ptr<graphics::CTexture> CreateTexture() override;
+
+		virtual bool Resize(int Width, int Height) override;
 
 		virtual bool BeginRender(ERenderPassType RenderPassType) override;
 		virtual bool EndRender() override;

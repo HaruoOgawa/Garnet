@@ -40,6 +40,13 @@ namespace app
 		return true;
 	}
 
+	bool CScriptApp::Resize(int Width, int Height)
+	{
+		m_Projection->SetAspect(static_cast<float>(Width) / static_cast<float>(Height));
+
+		return true;
+	}
+
 	bool CScriptApp::Update(api::IGraphicsAPI* pGraphicsAPI, float SecondsTime)
 	{
 		if (!m_ScriptScene->Update(pGraphicsAPI, SecondsTime, m_MainCamera, m_Projection)) return false;

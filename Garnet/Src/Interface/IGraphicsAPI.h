@@ -39,6 +39,8 @@ namespace api
 		virtual std::shared_ptr<graphics::CMaterial> CreateMaterial() = 0;
 		virtual std::shared_ptr<graphics::CTexture> CreateTexture() = 0;
 
+		virtual bool Resize(int Width, int Height) = 0;
+
 		virtual bool BeginRender(ERenderPassType RenderPassType) = 0;
 		virtual bool EndRender() = 0;
 
