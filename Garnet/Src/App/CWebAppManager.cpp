@@ -13,15 +13,17 @@
 
 namespace webapp
 {
-	CWebAppManager::CWebAppManager(app::EAppType AppType):
+	CWebAppManager::CWebAppManager(app::EAppType AppType, int Width, int Height):
 		m_IsRunLoop(true),
 		m_GraphicsAPI(nullptr),
 		m_App(nullptr),
 		m_SecondsTime(0.0f),
-		m_DeltaSecondsTime(0.0f)
+		m_DeltaSecondsTime(0.0f),
+		m_Width(Width),
+		m_Height(Height)
 	{
 		//
-		m_GraphicsAPI = std::make_shared<api::CWebGPUAPI>();
+		m_GraphicsAPI = std::make_shared<api::CWebGPUAPI>(Width, Height);
 
 		//
 		if (AppType == app::EAppType::ScriptApp)
@@ -68,6 +70,9 @@ namespace webapp
 
 		if (!m_App->Initialize(m_GraphicsAPI.get())) return false;
 		
+		m_GraphicsAPI->Resize(m_Width, m_Height);
+		m_App->Resize(m_Width, m_Height);
+
 		return true;
 	}
 
@@ -122,6 +127,14 @@ namespace webapp
 			m_IsRunLoop = false;
 		}
 	}
+
+	// リサイズイベント
+	void CWebAppManager::OnResize(int w, int h)
+	{
+		m_GraphicsAPI->Resize(w, h);
+		m_App->Resize(w, h);
+	}
+
 }
 
 #endif

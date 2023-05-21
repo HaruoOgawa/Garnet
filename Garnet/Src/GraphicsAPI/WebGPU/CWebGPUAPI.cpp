@@ -17,8 +17,25 @@
 
 namespace api
 {
-	CWebGPUAPI::CWebGPUAPI():
-		m_ShaderExtension(".wgsl")
+	CWebGPUAPI::CWebGPUAPI(int Width, int Height):
+		m_ShaderExtension(".wgsl"),
+		m_Width(Width),
+		m_Height(Height),
+#ifndef __EMSCRIPTEN__
+		m_Instance(nullptr),
+		m_Adapter(nullptr),
+#endif
+		m_Surface(nullptr),
+		m_Device(nullptr),
+		m_Queue(nullptr),
+		m_Encoder(nullptr),
+		m_CommandBuffer(nullptr),
+		m_NextTexture(nullptr),
+		m_SwapChain(nullptr),
+		m_SwapChainFormat(WGPUTextureFormat_Undefined),
+		m_DepthTexture(nullptr),
+		m_DepthTextureView(nullptr),
+		m_RenderPass(nullptr)
 	{
 	}
 
@@ -72,6 +89,17 @@ namespace api
 		auto Texture = std::make_shared<api::CWebGPUTexture>(this);
 
 		return Texture;
+	}
+
+	bool CWebGPUAPI::Resize(int Width, int Height)
+	{
+		m_Width = Width;
+		m_Height = Height;
+
+		if (!CreateSwapChain()) return false;
+		if (!CreateDepthTexture()) return false;
+
+		return true;
 	}
 
 	bool CWebGPUAPI::BeginRender(ERenderPassType RenderPassType)
@@ -305,15 +333,16 @@ namespace api
 		descriptor.defaultQueue.nextInChain = nullptr; // デフォルトコマンドキューの拡張機
 		descriptor.defaultQueue.label = "Default Queue"; // デフォルトコマンドキューの判別用ラベル
 
-		// バッファとアトリビュートの制限数を最大値に設定しておく
-		/*WGPUSupportedLimits supportedLimits;
+		// 論理デバイスの制限の設定
+		WGPUSupportedLimits supportedLimits{};
 		wgpuAdapterGetLimits(m_Adapter, &supportedLimits);
 
 		WGPURequiredLimits requiredLimits{};
-		requiredLimits.limits.maxVertexAttributes = supportedLimits.limits.maxVertexAttributes;
-		requiredLimits.limits.maxVertexBuffers = supportedLimits.limits.maxVertexBuffers;
+		requiredLimits.nextInChain = nullptr;
+		requiredLimits.limits = supportedLimits.limits;
+		requiredLimits.limits.maxTextureDimension2D = 8192;
 
-		descriptor.requiredLimits = &requiredLimits;*/
+		descriptor.requiredLimits = &requiredLimits;
 
 		// 論理デバイスを取得する
 		struct UserData
@@ -415,8 +444,8 @@ namespace api
 	{
 		//
 		WGPUSwapChainDescriptor swapChainDesc = {};
-		swapChainDesc.width = 800;
-		swapChainDesc.height = 600;
+		swapChainDesc.width = static_cast<uint32_t>(m_Width);
+		swapChainDesc.height = static_cast<uint32_t>(m_Height);
 
 #ifdef __EMSCRIPTEN__
 		m_SwapChainFormat = WGPUTextureFormat_BGRA8Unorm;
@@ -434,6 +463,12 @@ namespace api
 
 	bool CWebGPUAPI::CreateDepthTexture()
 	{
+		if (m_DepthTexture)
+		{
+			wgpuTextureDestroy(m_DepthTexture);
+			m_DepthTexture = nullptr;
+		}
+
 		WGPUTextureFormat depthTextureFormat = WGPUTextureFormat_Depth24Plus;
 
 		// Textureを生成
@@ -443,11 +478,11 @@ namespace api
 		depthTextureDesc.format = depthTextureFormat;
 		depthTextureDesc.mipLevelCount = 1;
 		depthTextureDesc.sampleCount = 1;
-		depthTextureDesc.size = { 800, 600, 1 };
+		depthTextureDesc.size = { static_cast<uint32_t>(m_Width), static_cast<uint32_t>(m_Height), 1 };
 		depthTextureDesc.usage = WGPUTextureUsage_RenderAttachment;
 		depthTextureDesc.viewFormatCount = 1;
 		depthTextureDesc.viewFormats = &depthTextureFormat;
-		WGPUTexture depthTexture = wgpuDeviceCreateTexture(m_Device, &depthTextureDesc);
+		m_DepthTexture = wgpuDeviceCreateTexture(m_Device, &depthTextureDesc);
 
 		// TextureViewを生成
 		WGPUTextureViewDescriptor depthTextureViewDesc{};
@@ -460,7 +495,7 @@ namespace api
 		depthTextureViewDesc.dimension = WGPUTextureViewDimension_2D;
 		depthTextureViewDesc.format = depthTextureFormat;
 
-		m_DepthTextureView = wgpuTextureCreateView(depthTexture, &depthTextureViewDesc);
+		m_DepthTextureView = wgpuTextureCreateView(m_DepthTexture, &depthTextureViewDesc);
 
 		return true;
 	}

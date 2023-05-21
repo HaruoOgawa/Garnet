@@ -7,11 +7,26 @@
 
 namespace api
 {
-	CVulkanAPI::CVulkanAPI():
+	CVulkanAPI::CVulkanAPI(int Width, int Height):
 		m_pWindow(nullptr),
 		m_CurrentImageIndex(0),
-		//m_IsReCreateSwapChain(false),
-		m_ShaderExtension(".spv")
+		m_ShaderExtension(".spv"),
+		m_Width(Width),
+		m_Height(Height),
+		m_DebugMessenger(nullptr),
+		m_Instance(nullptr),
+		m_Surface(nullptr),
+		m_PhysicalDevice(nullptr),
+		m_LogicalDevice(nullptr),
+		m_GraphicsQueue(nullptr),
+		m_PresentQueue(nullptr),
+		m_SwapChain(nullptr),
+		m_SwapChainImageFormat(VK_FORMAT_UNDEFINED),
+		m_RenderPass(nullptr),
+		m_DepthImage(nullptr),
+		m_DepthImageMemory(nullptr),
+		m_DepthImageView(nullptr),
+		m_CommandPool(nullptr)
 	{
 	}
 
@@ -93,6 +108,11 @@ namespace api
 		auto Texture = std::make_shared<api::CVulkanTexture>(this);
 
 		return Texture;
+	}
+
+	bool CVulkanAPI::Resize(int Width, int Height)
+	{
+		return true;
 	}
 
 	bool CVulkanAPI::BeginRecordCommandBuffer()

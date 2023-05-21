@@ -18,13 +18,16 @@ namespace webapp
 		float m_SecondsTime;
 		float m_DeltaSecondsTime;
 
+		int m_Width;
+		int m_Height;
+
 	private:
 		bool Release();
 
 		bool Update();
 		bool Draw();
 	public:
-		CWebAppManager(app::EAppType AppType);
+		CWebAppManager(app::EAppType AppType, int Width, int Height);
 		virtual ~CWebAppManager();
 		bool Initialize();
 		bool RunLoop();
@@ -36,6 +39,9 @@ namespace webapp
 
 		// インプットイベント
 		void OnKeyDown(std::string key);
+
+		// リサイズイベント
+		void OnResize(int w, int h);
 	};
 }
 #endif

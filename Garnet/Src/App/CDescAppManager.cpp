@@ -31,9 +31,9 @@ namespace descapp
 	{
 		//
 #ifdef __DAWN__
-		m_GraphicsAPI = std::make_shared<api::CWebGPUAPI>();
+		m_GraphicsAPI = std::make_shared<api::CWebGPUAPI>(WIDTH, HEIGHT);
 #else
-		m_GraphicsAPI = std::make_shared<api::CVulkanAPI>();
+		m_GraphicsAPI = std::make_shared<api::CVulkanAPI>(WIDTH, HEIGHT);
 #endif // __DAWN__
 		
 		//
@@ -98,6 +98,12 @@ namespace descapp
 #endif
 		if (!m_App->Initialize(m_GraphicsAPI.get())) return false;
 
+		int w, h;
+		glfwGetWindowSize(m_pWindow, &w, &h);
+
+		m_GraphicsAPI->Resize(w, h);
+		m_App->Resize(w, h);
+
 		return true;
 	}
 
@@ -107,6 +113,12 @@ namespace descapp
 		{
 			g_IsRunLoop = false;
 		}
+	}
+
+	void Resize_Callback(GLFWwindow* window, int width, int height)
+	{
+		auto AppManager = reinterpret_cast<CDescAppManager*>(glfwGetWindowUserPointer(window));
+		AppManager->ResizeWindow(width, height);
 	}
 
 	void Close_Callback(GLFWwindow* window)
@@ -122,10 +134,19 @@ namespace descapp
 
 		m_pWindow = glfwCreateWindow(WIDTH, HEIGHT, "Garnet", nullptr, nullptr);
 
+		glfwSetWindowUserPointer(m_pWindow, this);
+
 		glfwSetKeyCallback(m_pWindow, Key_Callback);
+		glfwSetFramebufferSizeCallback(m_pWindow, Resize_Callback);
 		glfwSetWindowCloseCallback(m_pWindow, Close_Callback);
 
 		return true;
+	}
+
+	void CDescAppManager::ResizeWindow(int w, int h)
+	{
+		m_GraphicsAPI->Resize(w, h);
+		m_App->Resize(w, h);
 	}
 
 	bool CDescAppManager::RunLopp()

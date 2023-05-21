@@ -27,6 +27,11 @@ namespace app
 		return true;
 	}
 
+	bool CMainApp::Resize(int Width, int Height)
+	{
+		return true;
+	}
+
 	bool CMainApp::Update(api::IGraphicsAPI* pGraphicsAPI, float SecondsTime)
 	{
 		return true;

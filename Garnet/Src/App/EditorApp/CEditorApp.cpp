@@ -27,6 +27,11 @@ namespace app
 		return true;
 	}
 
+	bool CEditorApp::Resize(int Width, int Height)
+	{
+		return true;
+	}
+
 	bool CEditorApp::Update(api::IGraphicsAPI* pGraphicsAPI, float SecondsTime)
 	{
 		return true;

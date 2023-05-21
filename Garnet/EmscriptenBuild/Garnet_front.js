@@ -1,3 +1,5 @@
+document.body.style.overflow = 'hidden';
+
 const InitWG = async () => {
     // WebGPUのサポート状況をチェック
     if (!navigator.gpu) {
@@ -7,7 +9,11 @@ const InitWG = async () => {
     else
     {
         // モジュールの設定
-        Module.canvas = document.getElementById('MainCanvas');
+        const canvas = document.getElementById('MainCanvas');
+        const width = canvas.clientWidth;
+        const height = canvas.clientHeight;
+
+        Module.canvas = canvas;
 
         // デバイスを事前取得
         const adapter = await navigator.gpu.requestAdapter();
@@ -15,7 +21,12 @@ const InitWG = async () => {
         Module.preinitializedWebGPUDevice = device;
 
         // アプリケーション開始 
-        Module.ccall('StartApp', 'null', [], []);
+        Module.ccall(
+            'StartApp',
+            'null',
+            ['number', 'number'],
+            [width, height]
+        );
     }
 };
 
@@ -29,5 +40,18 @@ addEventListener("keydown", (event) => {
         'null',
         ['string'],
         [event.key]
+    );
+});
+
+addEventListener("resize", (event) => {
+    const canvas = document.getElementById('MainCanvas');
+    const width = canvas.clientWidth;
+    const height = canvas.clientHeight;
+
+    Module.ccall(
+        'OnResize',
+        'null',
+        ['number', 'number'],
+        [width, height]
     );
 });

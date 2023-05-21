@@ -32,8 +32,8 @@ namespace descapp
 #endif
 		std::shared_ptr<app::IApp> m_App;
 
-		const unsigned int WIDTH = 800;
-		const unsigned int HEIGHT = 600;
+		const int WIDTH = 1920;
+		const int HEIGHT = 1080;
 
 		bool m_IsRunLoop;
 
@@ -55,6 +55,6 @@ namespace descapp
 
 		bool IsRunLoop() { return m_IsRunLoop; }
 
-		// インプットイベント
+		void ResizeWindow(int w, int h);
 	};
 }

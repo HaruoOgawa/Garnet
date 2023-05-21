@@ -32,7 +32,9 @@ namespace api
 	{
 		//
 		const std::string m_ShaderExtension;
-
+		int m_Width;
+		int m_Height;
+		
 		// GLFW Window
 		GLFWwindow* m_pWindow;
 
@@ -158,7 +160,7 @@ namespace api
 		VkCommandBuffer BeginSingleTimeCommands();
 		void EndSingleTimeCommands(VkCommandBuffer commandBuffer);
 	public:
-		CVulkanAPI();
+		CVulkanAPI(int Width, int Height);
 		virtual ~CVulkanAPI();
 
 		virtual bool InitializeWithGLFW(GLFWwindow* pWindow) override;
@@ -167,6 +169,8 @@ namespace api
 		virtual std::shared_ptr<renderer::IRenderer> CreateRenderer() override;
 		virtual std::shared_ptr<graphics::CMaterial> CreateMaterial() override;
 		virtual std::shared_ptr<graphics::CTexture> CreateTexture() override;
+
+		virtual bool Resize(int Width, int Height) override;
 
 		virtual bool BeginRender(ERenderPassType RenderPassType) override;
 		bool EndRender() override;

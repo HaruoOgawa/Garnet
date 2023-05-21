@@ -25,9 +25,9 @@ extern "C"
 	}
 
 	EMSCRIPTEN_KEEPALIVE
-		void StartApp()
+	void StartApp(int Width, int Height)
 	{
-		g_WebApp = new webapp::CWebAppManager(app::EAppType::ScriptApp);
+		g_WebApp = new webapp::CWebAppManager(app::EAppType::ScriptApp, Width, Height);
 
 		g_WebApp->Initialize();
 		emscripten_set_main_loop(RunLopp, 60, true);
@@ -44,6 +44,15 @@ extern "C"
 		if (g_WebApp)
 		{
 			g_WebApp->OnKeyDown(std::string(key));
+		}
+	}
+
+	EMSCRIPTEN_KEEPALIVE
+	void OnResize(int w, int h)
+	{
+		if (g_WebApp)
+		{
+			g_WebApp->OnResize(w, h);
 		}
 	}
 }
