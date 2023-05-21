@@ -1,6 +1,7 @@
 #ifdef __DAWN__
 #include "CWebGPUMaterial.h"
 #include "CWebGPUAPI.h"
+#include "CWebGPUTexture.h"
 #include "../CMaterialCreateInfo.h"
 #include "../../Debug/Message/Console.h"
 #include "../../Camera/CCamera.h"
@@ -32,7 +33,7 @@ namespace api
 	{
 		if (!CreateShaderStages(m_CreateInfo)) return false;
 		if (!CreateUniformBuffer(m_CreateInfo)) return false; // ユニフォームバッファを生成
-		if (!CreateBindGroup(m_CreateInfo)) return false; // バインドグループを生成(レンダリングパイプラインで使用するすべてのリソースをどのようにバインドするかを指定するオブジェクト)
+		if (!CreateBindGroup(m_CreateInfo, TextureList)) return false; // バインドグループを生成(レンダリングパイプラインで使用するすべてのリソースをどのようにバインドするかを指定するオブジェクト)
 
 		// 生成処理が終わったので不要なリソースを解放する
 		m_CreateInfo = nullptr;
@@ -137,13 +138,14 @@ namespace api
 		return true;
 	}
 
-	bool CWebGPUMaterial::CreateBindGroup(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo)
+	bool CWebGPUMaterial::CreateBindGroup(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, const std::vector<std::shared_ptr<graphics::CTexture>>& TextureList)
 	{
 		// バインドレイアウトを作成
 		// どのようにメモリに配置されるか, バインドインデックスや読み取り専用かなど
 		// -->これがWGSLでいう @binding(n)
 		std::vector<WGPUBindGroupLayoutEntry> bindingLayoutList;
 
+		// UBO
 		for (const auto& Buffer : m_UniformBufferList)
 		{
 			for (const auto& Layout : Buffer->GetBindingLayoutList())
@@ -158,6 +160,19 @@ namespace api
 
 				bindingLayoutList.push_back(bindingLayout);
 			}
+		}
+
+		// Texture
+		for (const auto& TexLayout : m_TextureBindingLayoutList)
+		{
+			WGPUBindGroupLayoutEntry bindingLayout{};
+			InitDefalutBindGroupLayoutEntry(bindingLayout);
+			bindingLayout.binding = TexLayout.BindingIndex;
+			bindingLayout.visibility = WGPUShaderStage_Fragment;
+			bindingLayout.texture.sampleType = WGPUTextureSampleType_Float;
+			bindingLayout.texture.viewDimension = WGPUTextureViewDimension_2D;
+
+			bindingLayoutList.push_back(bindingLayout);
 		}
 
 		// バインドグループレイアウトを作成
@@ -177,6 +192,7 @@ namespace api
 
 		// バッファとバインディングを結びつけるための記述かな？
 		// --> その通り、たぶんバッファのバインディングとかバインディングのオフセットとか
+		// UBO
 		std::vector<WGPUBindGroupEntry> bindingList;
 		for (int i = 0; i < m_UniformBufferList.size(); i++)
 		{
@@ -196,6 +212,18 @@ namespace api
 				bindingList.push_back(binding);
 				m_BindingRefSizeList.push_back(m_WGPUUniformBufferByteSizeList[i]);
 			}
+		}
+
+		// Texture
+		for (const auto& TexLayout : m_TextureBindingLayoutList)
+		{
+			const auto& Texture = static_cast<api::CWebGPUTexture*>(TextureList[TexLayout.TextureIndex].get());
+
+			WGPUBindGroupEntry binding{};
+			binding.nextInChain = nullptr;
+			binding.binding = TexLayout.BindingIndex;
+			binding.textureView = Texture->GetTextureImageView();
+			binding.sampler = Texture->GetTextureSampler();
 		}
 
 		// バインドグループを作成

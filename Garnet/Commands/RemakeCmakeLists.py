@@ -8,7 +8,10 @@ project(Garnet, C CXX)
 
 set(CMAKE_BUILD_TYPE Release)
 
-add_definitions(-D__DAWN__)
+add_definitions(
+	-D__DAWN__
+	-DUSE_TEXTURE_LOADER
+)
 
 add_executable(
 	Garnet

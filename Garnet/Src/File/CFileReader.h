@@ -16,6 +16,7 @@ namespace file
 
 		void Release();
 
+		void SetIsLoaded(bool val);
 		bool IsLoaded()const;
 
 		void ReadFile(const std::string& filename);

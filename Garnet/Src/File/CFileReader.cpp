@@ -24,6 +24,11 @@ namespace file
 		m_Data.clear();
 	}
 
+	void CFileReader::SetIsLoaded(bool val)
+	{
+		m_IsLoaded = val;
+	}
+
 	bool CFileReader::IsLoaded()const
 	{
 		return m_IsLoaded;
@@ -39,7 +44,7 @@ namespace file
 
 		auto fileReader = static_cast<CFileReader*>(fetch->userData);
 		fileReader->SetData(Data);
-		fileReader->SetIsDone(true);
+		fileReader->SetIsLoaded(true);
 
 		emscripten_fetch_close(fetch);
 	}

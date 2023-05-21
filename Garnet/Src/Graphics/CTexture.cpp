@@ -25,7 +25,7 @@ namespace graphics
 		
 #else
 		// stbiでテクスチャバイナリを解析してピクセルデータを取得する
-		stbi_uc* stbi_pixelData = stbi_load_from_memory(reinterpret_cast<const stbi_uc*>(&Data[0]), Data.size(), &m_Width, &m_Height, &m_NumOfChannels, STBI_rgb_alpha);
+		stbi_uc* stbi_pixelData = stbi_load_from_memory(reinterpret_cast<const stbi_uc*>(&Data[0]), static_cast<int>(Data.size()), &m_Width, &m_Height, &m_NumOfChannels, STBI_rgb_alpha);
 
 		// stbiから取得したピクセルデータを扱いやすいデータにコピーしておく
 		int pixelSize = m_Width * m_Height * 4;

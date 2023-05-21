@@ -33,7 +33,7 @@ namespace api
 		// WebGPU Main Logic /////////////////////////////////////////////////////////////////////
 		bool CreateShaderStages(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo);
 		bool CreateUniformBuffer(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo);
-		bool CreateBindGroup(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo);
+		bool CreateBindGroup(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, const std::vector<std::shared_ptr<graphics::CTexture>>& TextureList);
 
 		// Helper Function ///////////////////////////////////////////////////////////////////////
 		WGPUShaderModule CreateShaderModuleFromWGSL(const std::string& shaderCode);
