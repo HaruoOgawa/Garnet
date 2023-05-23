@@ -35,7 +35,7 @@ namespace scene
 		std::string TexturePath = "Resources\\Textures\\";
 		
 		m_Texture0->ReadFile(TexturePath + "perlinnoise.png");
-		m_Texture1->ReadFile(TexturePath + "uvtile.jpg");
+		m_Texture1->ReadFile(TexturePath + "UVTile.jpg");
 
 		return true;
 	}
