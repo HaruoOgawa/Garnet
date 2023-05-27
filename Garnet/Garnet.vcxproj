@@ -248,7 +248,7 @@ del /s /q $(OutDir)Resources\*
 
 xcopy Resources $(OutDir)Resources /y /s /i
 
-xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir)</Command>
+xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugWG|x64'">
@@ -273,7 +273,7 @@ del /s /q $(OutDir)Resources\*
 
 xcopy Resources $(OutDir)Resources /y /s /i
 xcopy $(ProjectDir)src\Library\WebGPU\windows-x86_64\wgpu_native.dll $(OutDir) /y /s /i
-xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir)</Command>
+xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -301,7 +301,7 @@ del /s /q $(OutDir)Resources\*
 
 xcopy Resources $(OutDir)Resources /y /s /i
 del $(OutDir)Garnet.pdb
-xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir)</Command>
+xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseWG|x64'">
@@ -331,7 +331,7 @@ xcopy Resources $(OutDir)Resources /y /s /i
 xcopy $(ProjectDir)src\Library\WebGPU\windows-x86_64\wgpu_native.dll $(OutDir) /y /s /i
 
 del $(OutDir)Garnet.pdb
-xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir)</Command>
+xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
