@@ -13,7 +13,6 @@ add_definitions(
 
 add_executable(
 	Garnet
-	../src/Library/stb/stb_image.h
 	../src/App/CDemoAppManager.cpp
 	../src/App/CDemoAppManager.h
 	../src/App/CWebAppManager.cpp
@@ -30,6 +29,8 @@ add_executable(
 	../src/Debug/Message/Console.h
 	../src/File/CFileReader.cpp
 	../src/File/CFileReader.h
+	../src/GLTF/CGLTFImporter.cpp
+	../src/GLTF/CGLTFImporter.h
 	../src/Graphics/CMaterial.cpp
 	../src/Graphics/CMaterial.h
 	../src/Graphics/CMesh.cpp
@@ -86,7 +87,7 @@ add_executable(
 
 )
 
-target_include_directories(Garnet PRIVATE ../src/Library/WebGPU ../src/Library/glm)
+target_include_directories(Garnet PRIVATE ../src/Library/WebGPU ../src/Library/glm  ../src/Library/tinygltf)
 
 if(EMSCRIPTEN)
 	target_link_options(Garnet PRIVATE 

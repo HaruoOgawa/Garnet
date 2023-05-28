@@ -1,8 +1,10 @@
 #include "CTexture.h"
 
 #if defined(USE_TEXTURE_LOADER)
+#ifndef STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_IMPLEMENTATION
-#include "../Library/stb/stb_image.h"
+#endif // !STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
 #endif // USE_TEXTURE_LOADER
 
 namespace graphics

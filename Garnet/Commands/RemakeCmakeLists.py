@@ -15,7 +15,6 @@ add_definitions(
 
 add_executable(
 	Garnet
-	../src/Library/stb/stb_image.h
 """
 
 # EXPORTED_RUNTIME_METHODSを下記のような感じで,の後ろにスペースを入れるとうまくModuleに登録してくれないみたいなので注意
@@ -24,7 +23,7 @@ add_executable(
 Shared_Post = """
 )
 
-target_include_directories(Garnet PRIVATE ../src/Library/WebGPU ../src/Library/glm)
+target_include_directories(Garnet PRIVATE ../src/Library/WebGPU ../src/Library/glm  ../src/Library/tinygltf)
 
 if(EMSCRIPTEN)
 	target_link_options(Garnet PRIVATE 

@@ -2,16 +2,21 @@
 #include "../Object/C3DObject.h"
 #include "../File/CFileReader.h"
 #include "../Debug/Message/Console.h"
+#include "../GLTF/CGLTFImporter.h"
 #include <glm/glm.hpp>
 
 namespace scene
 {
 	CScriptScene::CScriptScene():
-		m_TestObject(nullptr),
+		m_TestObject(std::make_shared<object::C3DObject>()),
 		m_VertexShader(std::make_shared<file::CFileReader>()),
 		m_FragmentShader(std::make_shared<file::CFileReader>()),
 		m_Texture0(std::make_shared<file::CFileReader>()),
 		m_Texture1(std::make_shared<file::CFileReader>()),
+
+		m_glTFObj(std::make_shared<object::C3DObject>()),
+		m_glTFData(std::make_shared<file::CFileReader>()),
+
 		m_IsLoaded(false)
 	{
 	}
@@ -37,15 +42,16 @@ namespace scene
 		m_Texture0->ReadFile(TexturePath + "perlinnoise.png");
 		m_Texture1->ReadFile(TexturePath + "UVTile.jpg");
 
+		// GLTF
+		std::string ModelPath = "Resources\\Models\\";
+
+		m_glTFData->ReadFile(ModelPath + "Triangle\\glTF\\Triangle.glb");
+
 		return true;
 	}
 
 	bool CScriptScene::Load(api::IGraphicsAPI* pGraphicsAPI)
 	{
-		// 初期化処理
-		// OBJECT
-		m_TestObject = std::make_shared<object::C3DObject>();
-
 		{
 			// MATERIAL
 			std::shared_ptr<graphics::CMaterialCreateInfo> createInfo = std::make_shared<graphics::CMaterialCreateInfo>();
@@ -159,6 +165,9 @@ namespace scene
 		// Create関数群を実行
 		if (!m_TestObject->Create(pGraphicsAPI)) return false;
 
+		// テストのglTFをロード
+		if (!gltf::CGLTFImporter::Create(m_glTFData->GetData(), m_glTFObj)) return false;
+
 		return true;
 	}
 
@@ -173,7 +182,7 @@ namespace scene
 
 		if (!m_IsLoaded)
 		{
-			if (m_VertexShader->IsLoaded() && m_FragmentShader->IsLoaded() && m_Texture0->IsLoaded() && m_Texture1->IsLoaded())
+			if (m_VertexShader->IsLoaded() && m_FragmentShader->IsLoaded() && m_Texture0->IsLoaded() && m_Texture1->IsLoaded() && m_glTFData->IsLoaded())
 			{
 				if(!Load(pGraphicsAPI)) return false;
 				m_IsLoaded = true;

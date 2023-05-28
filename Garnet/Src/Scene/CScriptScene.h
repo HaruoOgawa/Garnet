@@ -12,6 +12,7 @@ namespace scene
 {
 	class CScriptScene
 	{
+		//
 		std::shared_ptr<object::C3DObject> m_TestObject;
 
 		std::shared_ptr<file::CFileReader> m_VertexShader;
@@ -19,6 +20,10 @@ namespace scene
 
 		std::shared_ptr<file::CFileReader> m_Texture0;
 		std::shared_ptr<file::CFileReader> m_Texture1;
+
+		//
+		std::shared_ptr<object::C3DObject> m_glTFObj;
+		std::shared_ptr<file::CFileReader> m_glTFData;
 
 		bool m_IsLoaded;
 	private:
