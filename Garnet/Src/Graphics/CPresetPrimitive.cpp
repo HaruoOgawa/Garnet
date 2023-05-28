@@ -32,7 +32,7 @@ namespace graphics
 		};
 
 		// Indices
-		std::vector<uint16_t> Indices = {
+		std::vector<unsigned short> Indices = {
 			0, 1, 2, 2, 3, 0,
 		};
 

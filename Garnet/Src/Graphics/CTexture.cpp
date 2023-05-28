@@ -1,6 +1,7 @@
 #include "CTexture.h"
 
 #if defined(USE_TEXTURE_LOADER)
+#define STB_IMAGE_STATIC
 #ifndef STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_IMPLEMENTATION
 #endif // !STB_IMAGE_IMPLEMENTATION

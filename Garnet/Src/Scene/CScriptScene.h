@@ -24,6 +24,8 @@ namespace scene
 		//
 		std::shared_ptr<object::C3DObject> m_glTFObj;
 		std::shared_ptr<file::CFileReader> m_glTFData;
+		std::shared_ptr<file::CFileReader> m_glTFVert;
+		std::shared_ptr<file::CFileReader> m_glTFFrag;
 
 		bool m_IsLoaded;
 	private:

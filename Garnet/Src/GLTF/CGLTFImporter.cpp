@@ -1,13 +1,11 @@
-#include "CGLTFImporter.h"
+#ifdef USE_GLTF
 
+#include "CGLTFImporter.h"
 #include "../Object/C3DObject.h"
 
 #ifndef TINYGLTF_IMPLEMENTATION
 #define TINYGLTF_IMPLEMENTATION
 #endif // !TINYGLTF_IMPLEMENTATION
-
-#define TINYGLTF_NO_STB_IMAGE
-#define TINYGLTF_NO_INCLUDE_STB_IMAGE
 
 #ifndef STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_IMPLEMENTATION
@@ -24,18 +22,265 @@
 #endif // !__EMSCRIPTEN__
 
 #include <tiny_gltf.h>
+#include "../Debug/Message/Console.h"
 
 namespace gltf
 {
-	bool CGLTFImporter::Create(const std::vector<char>& Data, std::shared_ptr<object::C3DObject>& Object)
+	bool CGLTFImporter::Import(api::IGraphicsAPI* pGraphicsAPI, const std::vector<char>& Data, std::shared_ptr<object::C3DObject>& Object,
+		std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo)
 	{
 		tinygltf::Model model;
 		tinygltf::TinyGLTF loader;
 		std::string err;
 		std::string warn;
 
+		// glTFのロード
 		bool result = loader.LoadBinaryFromMemory(&model, &err, &warn, reinterpret_cast<const unsigned char*>(&Data[0]), static_cast<unsigned int>(Data.size()));
 
-		return result;
+		if (!err.empty())
+		{
+			Console::Log("[glTF Error] %s\n", err.c_str());
+		}
+		
+		if (!warn.empty())
+		{
+			Console::Log("[glTF Warning] %s\n", warn.c_str());
+		}
+
+		if (!result) return false;
+
+		// テクスチャ
+		std::vector<std::shared_ptr<graphics::CTexture>> TextureList;
+		if (!CreateTexture(pGraphicsAPI, model, TextureList)) return false;
+
+		// マテリアル
+		std::vector<std::shared_ptr<graphics::CMaterial>> MaterialList;
+		if (!CreateMaterial(pGraphicsAPI, model, MaterialList, createInfo)) return false;
+
+		// メッシュ
+		std::vector<std::shared_ptr<graphics::CMesh>> MeshList;
+		if (!CreateMesh(model, MeshList)) return false;
+		
+		// ノード
+		std::vector<std::shared_ptr<object::CNode>> NodeList;
+		if (!CreateNode(model, NodeList, MeshList, MaterialList)) return false;
+
+		// オブジェクトにリソースを登録
+		for (const auto& Texture : TextureList)
+		{
+			Object->AddTexture(Texture);
+		}
+
+		for (const auto& Material : MaterialList)
+		{
+			Object->AddMaterial(Material);
+		}
+
+		for (const auto& Node : NodeList)
+		{
+			Object->AddNode(Node);
+		}
+
+		// オブジェクトを生成
+		if (!Object->Create(pGraphicsAPI)) return false;
+
+		return true;
+	}
+
+	bool CGLTFImporter::CreateTexture(api::IGraphicsAPI* pGraphicsAPI, const tinygltf::Model& model, std::vector<std::shared_ptr<graphics::CTexture>>& TextureList)
+	{
+		return true;
+	}
+
+	bool CGLTFImporter::CreateMaterial(api::IGraphicsAPI* pGraphicsAPI, const tinygltf::Model& model, std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList, 
+		std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo)
+	{
+		for (const auto& glTfMaterial : model.materials)
+		{
+			std::shared_ptr<graphics::CMaterial> material = pGraphicsAPI->CreateMaterial();
+			
+			// マテリアルにシェーダーを設定
+			material->SetCreateInfo(createInfo);
+
+			// UBO
+			{
+				auto UniformBuffer = graphics::CMaterialCreateInfo::CreateUniformBuffer({ 0 });
+
+				// UBOの初期化
+				{
+					glm::mat4 mat = glm::mat4(1.0f);
+					UniformBuffer->AddData("model", &mat[0][0], sizeof(mat), 0);
+				}
+
+				{
+					glm::mat4 mat = glm::mat4(1.0f);
+					UniformBuffer->AddData("view", &mat[0][0], sizeof(mat), 0);
+				}
+
+				{
+					glm::mat4 mat = glm::mat4(1.0f);
+					UniformBuffer->AddData("proj", &mat[0][0], sizeof(mat), 0);
+				}
+
+				// オフセットの再計算
+				UniformBuffer->RecalculateBindingLayoutOffset();
+
+				// マテリアルにUBOを割り当てる
+				material->AddUniformBuffer(UniformBuffer);
+			}
+
+			// テクスチャの割り当て
+			
+			// 登録
+			MaterialList.push_back(material);
+		}
+
+		return true;
+	}
+
+	bool CGLTFImporter::CreateMesh(const tinygltf::Model& model, std::vector<std::shared_ptr<graphics::CMesh>>& MeshList)
+	{
+		for (const auto& glTFMesh : model.meshes)
+		{
+			std::shared_ptr<graphics::CMesh> Mesh = std::make_shared<graphics::CMesh>();
+
+			for (const auto& glTFPrimitive : glTFMesh.primitives)
+			{
+				int MaterialIndex = glTFPrimitive.material;
+
+				//
+				std::shared_ptr<renderer::CRendererCreateInfo> createInfo = std::make_shared<renderer::CRendererCreateInfo>();
+
+				// 頂点バッファ本体
+				std::vector<std::vector<float>> VertexDataList;
+				std::vector<int> DimentionList;
+				std::vector<unsigned short> Indices;
+
+				// 頂点データの初期化用(例えばWeightとかNormalを持っていないならそれを0埋めするみたいな処理)
+				std::map<std::string, std::vector<float>> ReservedVertexDataList;
+				ReservedVertexDataList.insert({ "POSITION", std::vector<float>()});
+				ReservedVertexDataList.insert({ "NORMAL", std::vector<float>()});
+				ReservedVertexDataList.insert({ "TEXCOORD_0", std::vector<float>()});
+
+				// 頂点バッファを読む
+				{
+					for (const auto& attribute : glTFPrimitive.attributes)
+					{
+						// アクセサーを取得
+						std::string Name = attribute.first;
+						int AccessorIndex = attribute.second;
+
+						if (AccessorIndex < 0 || AccessorIndex >= model.accessors.size()) continue;
+
+						const auto& Accessor = model.accessors[AccessorIndex];
+						int BufferViewIndex = Accessor.bufferView;
+
+						// バッファビューを取得
+						if (BufferViewIndex < 0 || BufferViewIndex >= model.bufferViews.size()) continue;
+
+						const auto& BufferView = model.bufferViews[BufferViewIndex];
+
+						int BufferIndex = BufferView.buffer;
+						size_t byteOffset = BufferView.byteOffset;
+						size_t byteLength = BufferView.byteLength;
+						int target = BufferView.target;
+
+						// データを取得
+						std::vector<float> AttributeData;
+						AttributeData.resize(byteLength / 4);
+
+						std::memcpy(&AttributeData[0], &model.buffers[BufferIndex].data[byteOffset], byteLength);
+
+						// データを登録
+						ReservedVertexDataList[Name] = AttributeData;
+					}
+
+					// 頂点バッファを再構築
+					int VertexDataSize = static_cast<int>(ReservedVertexDataList["POSITION"].size()) / 3;
+					for (auto& Data : ReservedVertexDataList)
+					{
+						std::string AttribName = Data.first;
+
+						// ディメンションを取得
+						int Dimention = 1;
+
+						if (AttribName == "POSITION" || AttribName == "NORMAL")
+						{
+							Dimention = 3;
+						}
+						else if (AttribName == "TEXCOORD_0")
+						{
+							Dimention = 2;
+						}
+
+						DimentionList.push_back(Dimention);
+
+						//
+						if (Data.second.empty())
+						{
+							Data.second = std::vector<float>(VertexDataSize * Dimention, 0.0f);
+						}
+					}
+
+					VertexDataList.push_back(ReservedVertexDataList["POSITION"]);
+					VertexDataList.push_back(ReservedVertexDataList["NORMAL"]);
+					VertexDataList.push_back(ReservedVertexDataList["TEXCOORD_0"]);
+				}
+
+				// インデックスバッファを読む
+				{
+					int AccessorIndex = glTFPrimitive.indices;
+
+					if (AccessorIndex < 0 || AccessorIndex >= model.accessors.size()) continue;
+
+					const auto& Accessor = model.accessors[AccessorIndex];
+					int BufferViewIndex = Accessor.bufferView;
+					size_t Count = Accessor.count;
+
+					// バッファビューを取得
+					if (BufferViewIndex < 0 || BufferViewIndex >= model.bufferViews.size()) continue;
+
+					const auto& BufferView = model.bufferViews[BufferViewIndex];
+
+					int BufferIndex = BufferView.buffer;
+					size_t byteOffset = BufferView.byteOffset;
+					size_t byteLength = BufferView.byteLength;
+					int target = BufferView.target;
+
+					// データを取得
+					Indices.resize(Count);
+					std::memcpy(&Indices[0], &model.buffers[BufferIndex].data[byteOffset], byteLength);
+				}
+
+				createInfo->SetVertices(VertexDataList);
+				createInfo->SetIndices(Indices);
+				createInfo->SetAttributeDimensions(DimentionList);
+
+				// プリミティブを作成する
+				std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(createInfo, MaterialIndex);
+				Mesh->AddPrimitive(Primitive);
+			}
+		}
+
+		return true;
+	}
+	
+	bool CGLTFImporter::CreateNode(const tinygltf::Model& model, std::vector<std::shared_ptr<object::CNode>>& NodeList, const std::vector<std::shared_ptr<graphics::CMesh>>& MeshList,
+		const std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList)
+	{
+		for (const auto& glTFNode : model.nodes)
+		{
+			//
+			int MeshIndex = glTFNode.mesh;
+			if (MeshIndex < 0 || glTFNode.mesh >= MeshList.size()) continue;
+
+			//
+			std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(MeshList[MeshIndex], MaterialList);
+
+			NodeList.push_back(Node);
+		}
+
+		return true;
 	}
 }
+#endif // USE_GLTF

@@ -16,6 +16,8 @@ namespace scene
 
 		m_glTFObj(std::make_shared<object::C3DObject>()),
 		m_glTFData(std::make_shared<file::CFileReader>()),
+		m_glTFVert(std::make_shared<file::CFileReader>()),
+		m_glTFFrag(std::make_shared<file::CFileReader>()),
 
 		m_IsLoaded(false)
 	{
@@ -36,6 +38,9 @@ namespace scene
 		m_VertexShader->ReadFile(ShaderPath + "sample_vert" + pGraphicsAPI->GetShaderExtension());
 		m_FragmentShader->ReadFile(ShaderPath + "sample_frag" + pGraphicsAPI->GetShaderExtension());
 		
+		m_glTFVert->ReadFile(ShaderPath + "gltfpbr_vert" + pGraphicsAPI->GetShaderExtension());
+		m_glTFFrag->ReadFile(ShaderPath + "gltfpbr_frag" + pGraphicsAPI->GetShaderExtension());
+		
 		// Texture
 		std::string TexturePath = "Resources\\Textures\\";
 		
@@ -45,7 +50,8 @@ namespace scene
 		// GLTF
 		std::string ModelPath = "Resources\\Models\\";
 
-		m_glTFData->ReadFile(ModelPath + "Triangle\\glTF\\Triangle.glb");
+		//m_glTFData->ReadFile(ModelPath + "Triangle\\glTF\\Triangle.glb");
+		m_glTFData->ReadFile(ModelPath + "DamagedHelmet\\glTF-Binary\\DamagedHelmet.glb");
 
 		return true;
 	}
@@ -172,7 +178,13 @@ namespace scene
 		if (!m_TestObject->Create(pGraphicsAPI)) return false;
 
 		// テストのglTFをインポート
-		if (!gltf::CGLTFImporter::Import(pGraphicsAPI, m_glTFData->GetData(), m_glTFObj)) return false;
+		{
+			std::shared_ptr<graphics::CMaterialCreateInfo> createInfo = std::make_shared<graphics::CMaterialCreateInfo>();
+			createInfo->SetVertexShaderCode(m_glTFVert->GetData());
+			createInfo->SetFragmentShaderCode(m_glTFFrag->GetData());
+
+			if (!gltf::CGLTFImporter::Import(pGraphicsAPI, m_glTFData->GetData(), m_glTFObj, createInfo)) return false;
+		}
 
 		return true;
 	}
@@ -185,10 +197,16 @@ namespace scene
 
 			if (!m_TestObject->Update(SecondsTime, Camera, Projection)) return false;
 		}
+		
+		if (m_IsLoaded && m_glTFObj)
+		{
+			if (!m_glTFObj->Update(SecondsTime, Camera, Projection)) return false;
+		}
 
 		if (!m_IsLoaded)
 		{
-			if (m_VertexShader->IsLoaded() && m_FragmentShader->IsLoaded() && m_Texture0->IsLoaded() && m_Texture1->IsLoaded() && m_glTFData->IsLoaded())
+			if (m_VertexShader->IsLoaded() && m_FragmentShader->IsLoaded() && m_Texture0->IsLoaded() && m_Texture1->IsLoaded() && m_glTFData->IsLoaded()
+				&& m_glTFVert->IsLoaded() && m_glTFFrag->IsLoaded())
 			{
 				if(!Load(pGraphicsAPI)) return false;
 				m_IsLoaded = true;
@@ -203,6 +221,11 @@ namespace scene
 		if (m_IsLoaded && m_TestObject)
 		{
 			if (!m_TestObject->Draw()) return false;
+		}
+		
+		if (m_IsLoaded && m_glTFObj)
+		{
+			if (!m_glTFObj->Draw()) return false;
 		}
 		
 		return true;

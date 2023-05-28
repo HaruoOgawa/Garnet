@@ -733,6 +733,8 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <None Include="EmscriptenBuild\Garnet_front.js" />
     <None Include="EmscriptenBuild\index.html" />
     <None Include="EmscriptenBuild\nmake.exe" />
+    <None Include="Resources\Shaders\gltfpbr.frag" />
+    <None Include="Resources\Shaders\gltfpbr.vert" />
     <None Include="Resources\Shaders\sample.frag" />
     <None Include="Resources\Shaders\sample.vert" />
     <None Include="Resources\Shaders\sample_frag.spv" />
