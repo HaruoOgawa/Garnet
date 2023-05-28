@@ -11,6 +11,7 @@ namespace app
 		m_MainCamera(std::make_shared<camera::CCamera>()),
 		m_Projection(std::make_shared<projection::CProjection>())
 	{
+		m_MainCamera->SetPos(glm::vec3(0.0f, 0.0f, 5.0f));
 	}
 
 	CScriptApp::~CScriptApp()

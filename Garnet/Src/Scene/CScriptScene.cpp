@@ -156,7 +156,7 @@ namespace scene
 				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(Mesh0, m_TestObject->GetMaterialList());
 				Node->SetPos(glm::vec3(0.0f, 0.0f, -0.25f));
 				Node->SetRot(glm::vec3(0.0f, 0.0f, 45.0f));
-				Node->SetScale(glm::vec3(1.0f, 0.1f, 1.0f));
+				Node->SetScale(glm::vec3(1.0f, 0.1f, 1.0f) * 5.0f);
 				m_TestObject->AddNode(Node);
 			}
 
@@ -164,12 +164,14 @@ namespace scene
 				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(Mesh1, m_TestObject->GetMaterialList());
 				Node->SetPos(glm::vec3(-0.25f, 0.0f, -1.0f));
 				Node->SetRot(glm::vec3(0.0f, 0.0f, 45.0f));
+				Node->SetScale(glm::vec3(1.0f, 1.0f, 1.0f) * 5.0f);
 				m_TestObject->AddNode(Node);
 			}
 
 			{
 				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(Mesh0, m_TestObject->GetMaterialList());
 				Node->SetPos(glm::vec3(0.5f, 0.0f, -2.0f));
+				Node->SetScale(glm::vec3(1.0f, 1.0f, 1.0f) * 5.0f);
 				m_TestObject->AddNode(Node);
 			}
 		}

@@ -260,6 +260,9 @@ namespace gltf
 				std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(createInfo, MaterialIndex);
 				Mesh->AddPrimitive(Primitive);
 			}
+
+			// ƒƒbƒVƒ…‚ğ“o˜^‚·‚é
+			MeshList.push_back(Mesh);
 		}
 
 		return true;
@@ -272,10 +275,28 @@ namespace gltf
 		{
 			//
 			int MeshIndex = glTFNode.mesh;
-			if (MeshIndex < 0 || glTFNode.mesh >= MeshList.size()) continue;
+			if (MeshIndex < 0 || MeshIndex >= MeshList.size()) continue;
 
 			//
 			std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(MeshList[MeshIndex], MaterialList);
+			
+			const auto& scale = glTFNode.scale;
+			if (scale.size() >= 3)
+			{
+				Node->SetScale(glm::vec3(scale[0], scale[1], scale[2]));
+			}
+
+			const auto& rotation = glTFNode.rotation;
+			if (rotation.size() >= 3)
+			{
+				Node->SetRot(glm::vec3(rotation[0], rotation[1], rotation[2]));
+			}
+
+			const auto& position = glTFNode.translation;
+			if (position.size() >= 3)
+			{
+				Node->SetPos(glm::vec3(position[0], position[1], position[2]));
+			}
 
 			NodeList.push_back(Node);
 		}
