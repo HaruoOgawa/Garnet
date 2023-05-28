@@ -24,15 +24,15 @@ namespace object
 		// Primitive
 		for (const auto& Node : m_NodeList)
 		{
-			int MaterialIndex = Node->GetMaterialIndex();
-			if (MaterialIndex < 0 || MaterialIndex >= m_MaterialList.size()) continue;
-
-			const auto& Material = m_MaterialList[MaterialIndex];
-
 			const auto& Mesh = Node->GetMesh();
 
 			for (const auto& Primitive : Mesh->GetPrimitiveList())
 			{
+				int MaterialIndex = Primitive->GetMaterialIndex();
+				if (MaterialIndex < 0 || MaterialIndex >= m_MaterialList.size()) continue;
+
+				const auto& Material = m_MaterialList[MaterialIndex];
+
 				if (!Primitive->Create(pGraphicsAPI, Material)) return false;
 			}
 		}
@@ -54,18 +54,25 @@ namespace object
 	{
 		for (const auto& Node : m_NodeList)
 		{
-			int MaterialIndex = Node->GetMaterialIndex();
-			int DynamicOffsetNum = Node->GetDynamicOffsetNum();
-			if (MaterialIndex < 0 || MaterialIndex >= m_MaterialList.size()) continue;
-
-			const auto& Material = m_MaterialList[MaterialIndex];
 			const auto& ModelMatrix = Node->GetTransform()->GetModelMatrix();
-			Material->SetUniformValue("model", &ModelMatrix[0][0], DynamicOffsetNum);
-
 			const auto& Mesh = Node->GetMesh();
+			const auto& DynamicOffsetList = Node->GetDynamicOffsetNumList();
 
-			for (const auto& Primitive : Mesh->GetPrimitiveList())
+			if (DynamicOffsetList.size() != Mesh->GetPrimitiveList().size()) continue; // PrimitiveList‚ÆNode‚ÌDynamicOffsetNumList‚Íˆê’v‚µ‚Ä‚¢‚é
+
+			for (int PrimitiveIndex = 0; PrimitiveIndex < Mesh->GetPrimitiveList().size(); PrimitiveIndex++)
 			{
+				const auto& Primitive = Mesh->GetPrimitiveList()[PrimitiveIndex];
+
+				//
+				int MaterialIndex = Primitive->GetMaterialIndex();
+				int DynamicOffsetNum = DynamicOffsetList[PrimitiveIndex]; 
+				if (MaterialIndex < 0 || MaterialIndex >= m_MaterialList.size()) continue;
+
+				//
+				const auto& Material = m_MaterialList[MaterialIndex];
+				Material->SetUniformValue("model", &ModelMatrix[0][0], DynamicOffsetNum);
+
 				if (!Primitive->Draw(Material, DynamicOffsetNum)) return false;
 			}
 		}

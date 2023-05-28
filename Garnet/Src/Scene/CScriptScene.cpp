@@ -132,14 +132,22 @@ namespace scene
 
 		{
 			// MESH
-			std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(std::make_shared<renderer::CRendererCreateInfo>(), graphics::EPresetPrimitiveType::BOARD);
-			std::shared_ptr<graphics::CMesh> Mesh = std::make_shared<graphics::CMesh>();
-			Mesh->AddPrimitive(Primitive);
+			std::shared_ptr<graphics::CMesh> Mesh0 = std::make_shared<graphics::CMesh>();
+			std::shared_ptr<graphics::CMesh> Mesh1 = std::make_shared<graphics::CMesh>();
+
+			{
+				std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(nullptr, 0, graphics::EPresetPrimitiveType::BOARD);
+				Mesh0->AddPrimitive(Primitive);
+			}
+			
+			{
+				std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(nullptr, 1, graphics::EPresetPrimitiveType::BOARD);
+				Mesh1->AddPrimitive(Primitive);
+			}
 
 			// NODE
 			{
-				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(Mesh);
-				Node->LinkMaterialReference(0, m_TestObject->GetMaterialList());
+				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(Mesh0, m_TestObject->GetMaterialList());
 				Node->SetPos(glm::vec3(0.0f, 0.0f, -0.25f));
 				Node->SetRot(glm::vec3(0.0f, 0.0f, 45.0f));
 				Node->SetScale(glm::vec3(1.0f, 0.1f, 1.0f));
@@ -147,16 +155,14 @@ namespace scene
 			}
 
 			{
-				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(Mesh);
-				Node->LinkMaterialReference(1, m_TestObject->GetMaterialList());
+				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(Mesh1, m_TestObject->GetMaterialList());
 				Node->SetPos(glm::vec3(-0.25f, 0.0f, -1.0f));
 				Node->SetRot(glm::vec3(0.0f, 0.0f, 45.0f));
 				m_TestObject->AddNode(Node);
 			}
 
 			{
-				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(Mesh);
-				Node->LinkMaterialReference(0, m_TestObject->GetMaterialList());
+				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(Mesh0, m_TestObject->GetMaterialList());
 				Node->SetPos(glm::vec3(0.5f, 0.0f, -2.0f));
 				m_TestObject->AddNode(Node);
 			}
@@ -165,8 +171,8 @@ namespace scene
 		// Create関数群を実行
 		if (!m_TestObject->Create(pGraphicsAPI)) return false;
 
-		// テストのglTFをロード
-		if (!gltf::CGLTFImporter::Create(m_glTFData->GetData(), m_glTFObj)) return false;
+		// テストのglTFをインポート
+		if (!gltf::CGLTFImporter::Import(pGraphicsAPI, m_glTFData->GetData(), m_glTFObj)) return false;
 
 		return true;
 	}

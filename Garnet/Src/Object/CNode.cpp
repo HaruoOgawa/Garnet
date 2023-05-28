@@ -5,12 +5,31 @@
 
 namespace object
 {
-	CNode::CNode(const std::shared_ptr<graphics::CMesh>& Mesh):
+	CNode::CNode(const std::shared_ptr<graphics::CMesh>& Mesh, const std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList):
 		m_Transform(std::make_shared<math::CTransform>()),
-		m_Mesh(Mesh),
-		m_MaterialIndex(-1),
-		m_DynamicOffsetNum(0)
+		m_Mesh(Mesh)
 	{
+		if (m_Mesh)
+		{
+			for (const auto& Primitive : m_Mesh->GetPrimitiveList())
+			{
+				int MaterialIndex = Primitive->GetMaterialIndex();
+				if (MaterialIndex < 0 || MaterialIndex >= MaterialList.size())
+				{
+					// PrimitiveListとDynamicOffsetNumListの順番と数は一致している必要があるのでマテリアルインデックスが無効ならひとまず0を入れておく
+					m_DynamicOffsetNumList.push_back(0);
+					continue;
+				}
+				else
+				{
+					const auto& Material = MaterialList[MaterialIndex];
+					Material->IncreaseRefCount();
+
+					int DynamicOffsetNum = Material->GetRefCount();
+					m_DynamicOffsetNumList.push_back(DynamicOffsetNum);
+				}
+			}
+		}
 	}
 
 	CNode::~CNode()
@@ -62,24 +81,8 @@ namespace object
 		m_Transform->SetScale(Scale);
 	}
 
-	void CNode::LinkMaterialReference(int MaterialIndex, const std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList)
+	const std::vector<int>& CNode::GetDynamicOffsetNumList() const
 	{
-		if (MaterialIndex < 0 || MaterialIndex >= MaterialList.size()) return;
-
-		const auto& Material = MaterialList[MaterialIndex];
-		Material->IncreaseRefCount();
-
-		m_MaterialIndex = MaterialIndex;
-		m_DynamicOffsetNum = Material->GetRefCount();
-	}
-
-	int CNode::GetMaterialIndex()const 
-	{
-		return m_MaterialIndex;
-	}
-
-	int CNode::GetDynamicOffsetNum() const
-	{
-		return m_DynamicOffsetNum;
+		return m_DynamicOffsetNumList;
 	}
 }
