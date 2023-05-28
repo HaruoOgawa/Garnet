@@ -156,7 +156,7 @@ namespace api
 				bindingLayout.visibility = WGPUShaderStage_Vertex | WGPUShaderStage_Fragment; // アクセス権限。ここではおそらく頂点シェーダーとフラグメントシェーダーのみ読み取り可
 				bindingLayout.buffer.type = WGPUBufferBindingType_Uniform; // バインド先のバッファの種類
 				bindingLayout.buffer.minBindingSize = Layout.ByteSize; // データ一つ当たりのサイズかな???
-				bindingLayout.buffer.hasDynamicOffset = true; // ダイナミックユニフォーム
+				bindingLayout.buffer.hasDynamicOffset = m_UseDynamicUniform; // ダイナミックユニフォーム
 
 				bindingLayoutList.push_back(bindingLayout);
 			}

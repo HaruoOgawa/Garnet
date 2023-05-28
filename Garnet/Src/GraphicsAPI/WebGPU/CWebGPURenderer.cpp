@@ -64,14 +64,21 @@ namespace renderer
 		wgpuRenderPassEncoderSetIndexBuffer(m_pGraphicsAPI->GetRenderPass(), m_IndexBuffer, WGPUIndexFormat_Uint16, 0, m_IndexCount * sizeof(uint16_t));
 
 		// バインドグループを割り当てる
-		std::vector<uint32_t> dynamicOffsetList;
-		for (const auto& Size : pWebGPUMat->GetBindingRefSizeList())
+		if (pWebGPUMat->IsUseDynamicUniform())
 		{
-			uint32_t dynamicOffset = (DynamicOffsetNum - 1) * Size;
-			dynamicOffsetList.push_back(dynamicOffset);
-		}
+			std::vector<uint32_t> dynamicOffsetList;
+			for (const auto& Size : pWebGPUMat->GetBindingRefSizeList())
+			{
+				uint32_t dynamicOffset = (DynamicOffsetNum - 1) * Size;
+				dynamicOffsetList.push_back(dynamicOffset);
+			}
 
-		wgpuRenderPassEncoderSetBindGroup(m_pGraphicsAPI->GetRenderPass(), 0, pWebGPUMat->GetBindGroup(), static_cast<uint32_t>(dynamicOffsetList.size()), &dynamicOffsetList[0]);
+			wgpuRenderPassEncoderSetBindGroup(m_pGraphicsAPI->GetRenderPass(), 0, pWebGPUMat->GetBindGroup(), static_cast<uint32_t>(dynamicOffsetList.size()), &dynamicOffsetList[0]);
+		}
+		else
+		{
+			wgpuRenderPassEncoderSetBindGroup(m_pGraphicsAPI->GetRenderPass(), 0, pWebGPUMat->GetBindGroup(), 0, nullptr);
+		}
 
 		// 描画を実行
 		wgpuRenderPassEncoderDrawIndexed(m_pGraphicsAPI->GetRenderPass(), static_cast<uint32_t>(m_IndexCount), 1, 0, 0, 0);
