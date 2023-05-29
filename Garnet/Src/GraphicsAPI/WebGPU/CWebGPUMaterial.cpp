@@ -44,8 +44,9 @@ namespace api
 	bool CWebGPUMaterial::Update(float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection)
 	{
 		// 共通のユニフォームバッファの更新
-		SetUniformValue("view", &Camera->GetViewMatrix()[0][0], -1);
-		SetUniformValue("proj", &Projection->GetPrejectionMatrix()[0][0], -1);
+		SetUniformValue("view", &Camera->GetViewMatrix()[0][0]);
+		SetUniformValue("proj", &Projection->GetPrejectionMatrix()[0][0]);
+		SetUniformValue("time", &SecondsTime);
 
 		return true;
 	}
@@ -288,11 +289,11 @@ namespace api
 		return shaderModule;
 	}
 
-	WGPUShaderModule CWebGPUMaterial::CreateShaderModuleFromSPIRV(const std::vector<char>& shaderCode)
+	WGPUShaderModule CWebGPUMaterial::CreateShaderModuleFromSPIRV(const std::vector<unsigned char>& shaderCode)
 	{
 		std::vector<uint32_t> Data;
 		Data.resize(shaderCode.size() / 4);
-		std::memcpy(&Data[0], &shaderCode[0], shaderCode.size() * sizeof(char));
+		std::memcpy(&Data[0], &shaderCode[0], shaderCode.size() * sizeof(unsigned char));
 
 		WGPUShaderModuleSPIRVDescriptor shaderCodeDesc{};
 		shaderCodeDesc.chain.next = nullptr;

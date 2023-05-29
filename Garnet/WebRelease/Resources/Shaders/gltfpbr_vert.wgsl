@@ -9,6 +9,10 @@ struct UniformBufferObject {
     model: mat4x4<f32>,
     view: mat4x4<f32>,
     proj: mat4x4<f32>,
+    time: f32,
+    padding0_: f32,
+    padding1_: f32,
+    padding2_: f32,
 }
 
 struct VertexOutput {

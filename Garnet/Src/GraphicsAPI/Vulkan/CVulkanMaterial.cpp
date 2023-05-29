@@ -49,9 +49,9 @@ namespace api
 	bool CVulkanMaterial::Update(float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection)
 	{
 		// 共通のユニフォームバッファの更新
-		SetUniformValue("view", &Camera->GetViewMatrix()[0][0], -1);
-		SetUniformValue("proj", &Projection->GetPrejectionMatrix()[0][0], -1);
-
+		SetUniformValue("view", &Camera->GetViewMatrix()[0][0]);
+		SetUniformValue("proj", &Projection->GetPrejectionMatrix()[0][0]);
+		SetUniformValue("time", &SecondsTime);
 		return true;
 	}
 
@@ -406,9 +406,9 @@ namespace api
 				}
 
 				// テクスチャ
-				for (int TexLayoutIndex = 0; TexLayoutIndex < TexLayoutSize; TexLayoutIndex += 2)
+				for (int TexLayoutIndex = 0, TextureIndex = 0; TexLayoutIndex < TexLayoutSize; TexLayoutIndex += 2, TextureIndex++)
 				{
-					const auto& TexLayout = m_TextureBindingLayoutList[TexLayoutIndex];
+					const auto& TexLayout = m_TextureBindingLayoutList[TextureIndex];
 					const auto& Texture = static_cast<api::CVulkanTexture*>(TextureList[TexLayout.TextureIndex].get());
 
 					{

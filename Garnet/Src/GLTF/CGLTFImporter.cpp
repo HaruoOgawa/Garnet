@@ -26,7 +26,7 @@
 
 namespace gltf
 {
-	bool CGLTFImporter::Import(api::IGraphicsAPI* pGraphicsAPI, const std::vector<char>& Data, std::shared_ptr<object::C3DObject>& Object,
+	bool CGLTFImporter::Import(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& Data, std::shared_ptr<object::C3DObject>& Object,
 		std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo)
 	{
 		tinygltf::Model model;
@@ -55,7 +55,7 @@ namespace gltf
 
 		// マテリアル
 		std::vector<std::shared_ptr<graphics::CMaterial>> MaterialList;
-		if (!CreateMaterial(pGraphicsAPI, model, MaterialList, createInfo)) return false;
+		if (!CreateMaterial(pGraphicsAPI, model, MaterialList, TextureList, createInfo)) return false;
 
 		// メッシュ
 		std::vector<std::shared_ptr<graphics::CMesh>> MeshList;
@@ -89,24 +89,75 @@ namespace gltf
 
 	bool CGLTFImporter::CreateTexture(api::IGraphicsAPI* pGraphicsAPI, const tinygltf::Model& model, std::vector<std::shared_ptr<graphics::CTexture>>& TextureList)
 	{
+		for (const auto& glTFTexture : model.textures)
+		{
+			// テクスチャサンプラーの形式を選択(まだ未実装)
+			const auto& sampler = glTFTexture.sampler;
+
+			// テクスチャを取得
+			const auto& source = glTFTexture.source;
+			if (source < 0 || source >= model.images.size()) continue;
+			
+			const auto& image = model.images[source];
+
+			if (image.uri.empty())
+			{
+				// uriが定義されていないのならbufferViewから取得する
+				int bufferViewIndex = image.bufferView;
+				if (bufferViewIndex < 0 || bufferViewIndex >= model.bufferViews.size()) continue;
+
+				const auto& bufferView = model.bufferViews[bufferViewIndex];
+				int bufferIndex = bufferView.buffer;
+				size_t byteOffset = bufferView.byteOffset;
+				size_t byteLength = bufferView.byteLength;
+
+				if (bufferIndex < 0 || bufferIndex >= model.buffers.size()) continue;
+				const auto& buffer = model.buffers[bufferIndex];
+				std::vector<unsigned char> textureData;
+				textureData.resize(byteLength);
+
+				std::memcpy(&textureData[0], &buffer.data[byteOffset], byteLength);
+
+				std::shared_ptr<graphics::CTexture> Texture = pGraphicsAPI->CreateTexture();
+				if (!Texture->Create(textureData)) return false;
+
+				// 登録する
+				TextureList.push_back(Texture);
+			}
+			else
+			{
+				// uriが定義されているのでディレクトリからテクスチャを取得する
+
+			}
+			
+		}
+
 		return true;
 	}
 
 	bool CGLTFImporter::CreateMaterial(api::IGraphicsAPI* pGraphicsAPI, const tinygltf::Model& model, std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList, 
-		std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo)
+		const std::vector<std::shared_ptr<graphics::CTexture>>& TextureList, std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo)
 	{
 		for (const auto& glTfMaterial : model.materials)
 		{
-			std::shared_ptr<graphics::CMaterial> material = pGraphicsAPI->CreateMaterial();
+			//
+			const auto& pbrParam = glTfMaterial.pbrMetallicRoughness;
+			
+			int baseColorTextureIndex = pbrParam.baseColorTexture.index;
+			int metallicRoughnessTextureIndex = pbrParam.metallicRoughnessTexture.index;
+			int emissiveTextureIndex = glTfMaterial.emissiveTexture.index;
+			int normalTextureIndex = glTfMaterial.normalTexture.index;
+			int occlusionTextureIndex = glTfMaterial.occlusionTexture.index;
 			
 			// マテリアルにシェーダーを設定
+			std::shared_ptr<graphics::CMaterial> material = pGraphicsAPI->CreateMaterial();
 			material->SetCreateInfo(createInfo);
 
 			// UBO
 			{
 				auto UniformBuffer = graphics::CMaterialCreateInfo::CreateUniformBuffer({ 0 });
 
-				// UBOの初期化
+				// UBOの初期値を設定する
 				{
 					glm::mat4 mat = glm::mat4(1.0f);
 					UniformBuffer->AddData("model", &mat[0][0], sizeof(mat), 0);
@@ -120,6 +171,47 @@ namespace gltf
 				{
 					glm::mat4 mat = glm::mat4(1.0f);
 					UniformBuffer->AddData("proj", &mat[0][0], sizeof(mat), 0);
+				}
+
+				{
+					float val = 0.0f;
+					UniformBuffer->AddData("time", &val, sizeof(float), 0);
+					UniformBuffer->AddData("padding0", &val, sizeof(float), 0);
+					UniformBuffer->AddData("padding1", &val, sizeof(float), 0);
+					UniformBuffer->AddData("padding2", &val, sizeof(float), 0);
+				}
+
+				// テクスチャを紐づける
+				{
+					//
+					if (baseColorTextureIndex >= 0 && baseColorTextureIndex < TextureList.size())
+					{
+						material->AddTextureBindingLayout({ 1, 2, baseColorTextureIndex });
+					}
+
+					//
+					if (metallicRoughnessTextureIndex >= 0 && metallicRoughnessTextureIndex < TextureList.size())
+					{
+						material->AddTextureBindingLayout({ 3, 4, metallicRoughnessTextureIndex });
+					}
+
+					//
+					if (emissiveTextureIndex >= 0 && emissiveTextureIndex < TextureList.size())
+					{
+						material->AddTextureBindingLayout({ 5, 6, emissiveTextureIndex });
+					}
+
+					//
+					if (normalTextureIndex >= 0 && normalTextureIndex < TextureList.size())
+					{
+						material->AddTextureBindingLayout({ 7, 8, normalTextureIndex });
+					}
+
+					//
+					if (occlusionTextureIndex >= 0 && occlusionTextureIndex < TextureList.size())
+					{
+						material->AddTextureBindingLayout({ 9, 10, occlusionTextureIndex });
+					}
 				}
 
 				// オフセットの再計算
