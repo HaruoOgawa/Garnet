@@ -13,9 +13,9 @@ namespace projection
 	glm::mat4 CProjection::GetPrejectionMatrix()
 	{
 		glm::mat4 pmat = glm::perspective(glm::radians(m_FOV), m_Aspect, m_Near, m_Far);
-#ifndef __DAWN__
-		pmat[1][1] *= -1.0f; /// Y座標の向きを反転。VulkanとOpenGLは逆なのかな？
-#endif
+//#ifndef __DAWN__
+		pmat[1][1] *= -1.0f; /// Y座標の向きを反転。Vulkan(WebGPU)とOpenGLは逆なのかな？
+//#endif
 		return pmat;
 	}
 
