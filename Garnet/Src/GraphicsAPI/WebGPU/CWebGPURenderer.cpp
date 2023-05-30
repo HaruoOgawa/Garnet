@@ -177,12 +177,12 @@ namespace renderer
 		// ブレンディング
 		// <計算式> rgba = srcFactor * rgba [operation] dstFactor * rgba
 		WGPUBlendState blendState{};
-		blendState.color.srcFactor = WGPUBlendFactor_SrcAlpha;
-		blendState.color.dstFactor = WGPUBlendFactor_OneMinusSrc;
+		blendState.color.srcFactor = WGPUBlendFactor_One;
+		blendState.color.dstFactor = WGPUBlendFactor_Zero;
 		blendState.color.operation = WGPUBlendOperation_Add;
 
-		blendState.alpha.srcFactor = WGPUBlendFactor_Zero;
-		blendState.alpha.dstFactor = WGPUBlendFactor_One;
+		blendState.alpha.srcFactor = WGPUBlendFactor_One;
+		blendState.alpha.dstFactor = WGPUBlendFactor_Zero;
 		blendState.alpha.operation = WGPUBlendOperation_Add;
 
 		WGPUColorTargetState colorTarget{};

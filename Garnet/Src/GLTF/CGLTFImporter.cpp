@@ -141,6 +141,7 @@ namespace gltf
 		for (const auto& glTfMaterial : model.materials)
 		{
 			//
+			const auto& emissiveFactor = glTfMaterial.emissiveFactor;
 			const auto& pbrParam = glTfMaterial.pbrMetallicRoughness;
 			
 			int baseColorTextureIndex = pbrParam.baseColorTexture.index;
@@ -171,6 +172,11 @@ namespace gltf
 				{
 					glm::mat4 mat = glm::mat4(1.0f);
 					UniformBuffer->AddData("proj", &mat[0][0], sizeof(mat), 0);
+				}
+
+				{
+					glm::vec4 data = glm::vec4(emissiveFactor[0], emissiveFactor[1], emissiveFactor[2], 0.0f);
+					UniformBuffer->AddData("emissiveFactor", &data[0], sizeof(float) * 4, 0);
 				}
 
 				{
