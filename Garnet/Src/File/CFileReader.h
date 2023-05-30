@@ -8,7 +8,7 @@ namespace file
 	{
 		bool m_IsLoaded;
 		
-		std::vector<char> m_Data;
+		std::vector<unsigned char> m_Data;
 
 	public:
 		CFileReader();
@@ -21,7 +21,7 @@ namespace file
 
 		void ReadFile(const std::string& filename);
 
-		void SetData(const std::vector<char>& Data);
-		const std::vector<char>& GetData() const;
+		void SetData(const std::vector<unsigned char>& Data);
+		const std::vector<unsigned char>& GetData() const;
 	};
 }

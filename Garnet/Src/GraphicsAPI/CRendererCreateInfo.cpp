@@ -24,12 +24,12 @@ namespace renderer
 		return m_Vertices;
 	}
 
-	void CRendererCreateInfo::SetIndices(const std::vector<uint16_t>& Indices)
+	void CRendererCreateInfo::SetIndices(const std::vector<unsigned short>& Indices)
 	{
 		m_Indices = Indices;
 	}
 
-	const std::vector<uint16_t>& CRendererCreateInfo::GetIndices() const
+	const std::vector<unsigned short>& CRendererCreateInfo::GetIndices() const
 	{
 		return m_Indices;
 	}

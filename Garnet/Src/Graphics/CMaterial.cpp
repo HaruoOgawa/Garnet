@@ -5,7 +5,7 @@ namespace graphics
 	CMaterial::CMaterial():
 		m_CreateInfo(nullptr),
 		m_RefCount(0),
-		m_UseDynamicUniform(true)
+		m_UseDynamicUniform(false)
 	{
 	}
 
@@ -42,10 +42,10 @@ namespace graphics
 	{
 		m_RefCount++;
 
-		/*if (m_RefCount > 1)
+		if (m_RefCount > 1)
 		{
 			m_UseDynamicUniform = true;
-		}*/
+		}
 	}
 
 	int CMaterial::GetRefCount() const

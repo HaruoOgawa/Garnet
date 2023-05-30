@@ -2,16 +2,23 @@
 #include "../Object/C3DObject.h"
 #include "../File/CFileReader.h"
 #include "../Debug/Message/Console.h"
+#include "../GLTF/CGLTFImporter.h"
 #include <glm/glm.hpp>
 
 namespace scene
 {
 	CScriptScene::CScriptScene():
-		m_TestObject(nullptr),
+		m_TestObject(std::make_shared<object::C3DObject>()),
 		m_VertexShader(std::make_shared<file::CFileReader>()),
 		m_FragmentShader(std::make_shared<file::CFileReader>()),
 		m_Texture0(std::make_shared<file::CFileReader>()),
 		m_Texture1(std::make_shared<file::CFileReader>()),
+
+		m_glTFObj(std::make_shared<object::C3DObject>()),
+		m_glTFData(std::make_shared<file::CFileReader>()),
+		m_glTFVert(std::make_shared<file::CFileReader>()),
+		m_glTFFrag(std::make_shared<file::CFileReader>()),
+
 		m_IsLoaded(false)
 	{
 	}
@@ -31,21 +38,26 @@ namespace scene
 		m_VertexShader->ReadFile(ShaderPath + "sample_vert" + pGraphicsAPI->GetShaderExtension());
 		m_FragmentShader->ReadFile(ShaderPath + "sample_frag" + pGraphicsAPI->GetShaderExtension());
 		
+		m_glTFVert->ReadFile(ShaderPath + "gltfpbr_vert" + pGraphicsAPI->GetShaderExtension());
+		m_glTFFrag->ReadFile(ShaderPath + "gltfpbr_frag" + pGraphicsAPI->GetShaderExtension());
+		
 		// Texture
 		std::string TexturePath = "Resources\\Textures\\";
 		
 		m_Texture0->ReadFile(TexturePath + "perlinnoise.png");
 		m_Texture1->ReadFile(TexturePath + "UVTile.jpg");
 
+		// GLTF
+		std::string ModelPath = "Resources\\Models\\";
+
+		//m_glTFData->ReadFile(ModelPath + "Triangle\\glTF\\Triangle.glb");
+		m_glTFData->ReadFile(ModelPath + "DamagedHelmet\\glTF-Binary\\DamagedHelmet.glb");
+
 		return true;
 	}
 
 	bool CScriptScene::Load(api::IGraphicsAPI* pGraphicsAPI)
 	{
-		// 初期化処理
-		// OBJECT
-		m_TestObject = std::make_shared<object::C3DObject>();
-
 		{
 			// MATERIAL
 			std::shared_ptr<graphics::CMaterialCreateInfo> createInfo = std::make_shared<graphics::CMaterialCreateInfo>();
@@ -126,38 +138,55 @@ namespace scene
 
 		{
 			// MESH
-			std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(std::make_shared<renderer::CRendererCreateInfo>(), graphics::EPresetPrimitiveType::BOARD);
-			std::shared_ptr<graphics::CMesh> Mesh = std::make_shared<graphics::CMesh>();
-			Mesh->AddPrimitive(Primitive);
+			std::shared_ptr<graphics::CMesh> Mesh0 = std::make_shared<graphics::CMesh>();
+			std::shared_ptr<graphics::CMesh> Mesh1 = std::make_shared<graphics::CMesh>();
+
+			{
+				std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(nullptr, 0, graphics::EPresetPrimitiveType::BOARD);
+				Mesh0->AddPrimitive(Primitive);
+			}
+			
+			{
+				std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(nullptr, 1, graphics::EPresetPrimitiveType::BOARD);
+				Mesh1->AddPrimitive(Primitive);
+			}
 
 			// NODE
 			{
-				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(Mesh);
-				Node->LinkMaterialReference(0, m_TestObject->GetMaterialList());
+				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(Mesh0, m_TestObject->GetMaterialList());
 				Node->SetPos(glm::vec3(0.0f, 0.0f, -0.25f));
 				Node->SetRot(glm::vec3(0.0f, 0.0f, 45.0f));
-				Node->SetScale(glm::vec3(1.0f, 0.1f, 1.0f));
+				Node->SetScale(glm::vec3(1.0f, 0.1f, 1.0f) * 5.0f);
 				m_TestObject->AddNode(Node);
 			}
 
 			{
-				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(Mesh);
-				Node->LinkMaterialReference(1, m_TestObject->GetMaterialList());
+				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(Mesh1, m_TestObject->GetMaterialList());
 				Node->SetPos(glm::vec3(-0.25f, 0.0f, -1.0f));
 				Node->SetRot(glm::vec3(0.0f, 0.0f, 45.0f));
+				Node->SetScale(glm::vec3(1.0f, 1.0f, 1.0f) * 5.0f);
 				m_TestObject->AddNode(Node);
 			}
 
 			{
-				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(Mesh);
-				Node->LinkMaterialReference(0, m_TestObject->GetMaterialList());
+				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(Mesh0, m_TestObject->GetMaterialList());
 				Node->SetPos(glm::vec3(0.5f, 0.0f, -2.0f));
+				Node->SetScale(glm::vec3(1.0f, 1.0f, 1.0f) * 5.0f);
 				m_TestObject->AddNode(Node);
 			}
 		}
 
 		// Create関数群を実行
 		if (!m_TestObject->Create(pGraphicsAPI)) return false;
+
+		// テストのglTFをインポート
+		{
+			std::shared_ptr<graphics::CMaterialCreateInfo> createInfo = std::make_shared<graphics::CMaterialCreateInfo>();
+			createInfo->SetVertexShaderCode(m_glTFVert->GetData());
+			createInfo->SetFragmentShaderCode(m_glTFFrag->GetData());
+
+			if (!gltf::CGLTFImporter::Import(pGraphicsAPI, m_glTFData->GetData(), m_glTFObj, createInfo)) return false;
+		}
 
 		return true;
 	}
@@ -170,10 +199,16 @@ namespace scene
 
 			if (!m_TestObject->Update(SecondsTime, Camera, Projection)) return false;
 		}
+		
+		if (m_IsLoaded && m_glTFObj)
+		{
+			if (!m_glTFObj->Update(SecondsTime, Camera, Projection)) return false;
+		}
 
 		if (!m_IsLoaded)
 		{
-			if (m_VertexShader->IsLoaded() && m_FragmentShader->IsLoaded() && m_Texture0->IsLoaded() && m_Texture1->IsLoaded())
+			if (m_VertexShader->IsLoaded() && m_FragmentShader->IsLoaded() && m_Texture0->IsLoaded() && m_Texture1->IsLoaded() && m_glTFData->IsLoaded()
+				&& m_glTFVert->IsLoaded() && m_glTFFrag->IsLoaded())
 			{
 				if(!Load(pGraphicsAPI)) return false;
 				m_IsLoaded = true;
@@ -188,6 +223,11 @@ namespace scene
 		if (m_IsLoaded && m_TestObject)
 		{
 			if (!m_TestObject->Draw()) return false;
+		}
+		
+		if (m_IsLoaded && m_glTFObj)
+		{
+			if (!m_glTFObj->Draw()) return false;
 		}
 		
 		return true;

@@ -37,7 +37,7 @@ namespace api
 
 		// Helper Function ///////////////////////////////////////////////////////////////////////
 		WGPUShaderModule CreateShaderModuleFromWGSL(const std::string& shaderCode);
-		WGPUShaderModule CreateShaderModuleFromSPIRV(const std::vector<char>& shaderCode);
+		WGPUShaderModule CreateShaderModuleFromSPIRV(const std::vector<unsigned char>& shaderCode);
 		bool             CreateWGUniformBuffer(WGPUBuffer& Buffer, WGPUBufferUsageFlags Usage, void const* Data, uint64_t ByteSize);
 		void			 InitDefalutBindGroupLayoutEntry(WGPUBindGroupLayoutEntry& bindingLayout);
 	public:
@@ -48,7 +48,7 @@ namespace api
 		virtual bool Update(float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection) override;
 		virtual bool BuildDrawBuffer(int DynamicOffsetNum) override;
 
-		virtual void SetUniformValue(const std::string Name, const void* Value, int DynamicOffsetNum) override;
+		virtual void SetUniformValue(const std::string Name, const void* Value, int DynamicOffsetNum = -1) override;
 
 		const WGPUShaderModule& GetVertexShaderModele() { return m_VertexShaderModele; }
 		const WGPUShaderModule& GetFragmentShaderModele() { return m_FragmentShaderModele; }

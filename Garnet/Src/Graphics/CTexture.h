@@ -15,7 +15,7 @@ namespace graphics
 		virtual ~CTexture();
 
 #ifdef USE_TEXTURE_LOADER
-		virtual bool Create(const std::vector<char>& Data);
+		virtual bool Create(const std::vector<unsigned char>& Data);
 		virtual bool Create(const std::vector<unsigned char>& pixelData, int pixelSize) = 0;
 #endif // USE_TEXTURE_LOADER
 	};

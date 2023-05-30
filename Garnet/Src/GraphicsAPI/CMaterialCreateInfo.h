@@ -21,11 +21,11 @@ namespace graphics
 		// Shader
 		const EShaderType m_ShaderType;
 
-		std::vector<char> m_VertexShaderCode;
-		std::vector<char> m_FragmentShaderCode;
-		std::vector<char> m_GeometryShaderCode;
-		std::vector<char> m_HullShaderCode;
-		std::vector<char> m_DomainShaderCode;
+		std::vector<unsigned char> m_VertexShaderCode;
+		std::vector<unsigned char> m_FragmentShaderCode;
+		std::vector<unsigned char> m_GeometryShaderCode;
+		std::vector<unsigned char> m_HullShaderCode;
+		std::vector<unsigned char> m_DomainShaderCode;
 	public:
 		CMaterialCreateInfo();
 		virtual ~CMaterialCreateInfo();
@@ -36,20 +36,20 @@ namespace graphics
 		// Shader
 		EShaderType GetShaderType() const;
 
-		void SetVertexShaderCode(const std::vector<char>& VertexShaderCode);
-		const std::vector<char>& GetVertexShaderCode() const;
+		void SetVertexShaderCode(const std::vector<unsigned char>& VertexShaderCode);
+		const std::vector<unsigned char>& GetVertexShaderCode() const;
 
-		void SetFragmentShaderCode(const std::vector<char>& FragmentShaderCode);
-		const std::vector<char>& GetFragmentShaderCode() const;
+		void SetFragmentShaderCode(const std::vector<unsigned char>& FragmentShaderCode);
+		const std::vector<unsigned char>& GetFragmentShaderCode() const;
 
-		void SetGeometryShaderCode(const std::vector<char>& GeometryShaderCode);
-		const std::vector<char>& GetGeometryShaderCode() const;
+		void SetGeometryShaderCode(const std::vector<unsigned char>& GeometryShaderCode);
+		const std::vector<unsigned char>& GetGeometryShaderCode() const;
 
-		void HullShaderCode(const std::vector<char>& HullShaderCode);
-		const std::vector<char>& GetHullShaderCode() const;
+		void HullShaderCode(const std::vector<unsigned char>& HullShaderCode);
+		const std::vector<unsigned char>& GetHullShaderCode() const;
 
-		void SetDomainShaderCode(const std::vector<char>& DomainShaderCode);
-		const std::vector<char>& GetDomainShaderCode() const;
+		void SetDomainShaderCode(const std::vector<unsigned char>& DomainShaderCode);
+		const std::vector<unsigned char>& GetDomainShaderCode() const;
 
 		// Texture
 	};

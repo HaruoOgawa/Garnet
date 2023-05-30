@@ -17,10 +17,10 @@ namespace object
 	{
 		std::shared_ptr<math::CTransform> m_Transform;
 		std::shared_ptr<graphics::CMesh>  m_Mesh;
-		int								  m_MaterialIndex;
-		int								  m_DynamicOffsetNum;
+		std::vector<int>                  m_DynamicOffsetNumList;
+
 	public:
-		CNode(const std::shared_ptr<graphics::CMesh>& Mesh);
+		CNode(const std::shared_ptr<graphics::CMesh>& Mesh, const std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList);
 		virtual ~CNode();
 
 		const std::shared_ptr<graphics::CMesh>& GetMesh() const;
@@ -37,8 +37,6 @@ namespace object
 		const glm::vec3& GetScale() const;
 		void SetScale(const glm::vec3& Scale);
 
-		void LinkMaterialReference(int MaterialIndex, const std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList);
-		int GetMaterialIndex() const;
-		int GetDynamicOffsetNum() const;
+		const std::vector<int>& GetDynamicOffsetNumList() const;
 	};
 }

@@ -5,11 +5,12 @@
 
 namespace graphics
 {
-	CPrimitive::CPrimitive(const std::shared_ptr<renderer::CRendererCreateInfo>& createInfo, 
+	CPrimitive::CPrimitive(const std::shared_ptr<renderer::CRendererCreateInfo>& createInfo, int MaterialIndex,
 		EPresetPrimitiveType PresetType) :
 		m_Renderer(nullptr),
 		m_CreateInfo(createInfo),
-		m_PresetType(PresetType)
+		m_PresetType(PresetType),
+		m_MaterialIndex(MaterialIndex)
 	{
 	}
 	
@@ -19,7 +20,7 @@ namespace graphics
 
 	bool CPrimitive::Create(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<graphics::CMaterial>& Material)
 	{
-		if (m_PresetType == EPresetPrimitiveType::None)
+		if (m_CreateInfo)
 		{
 			if (!Create(pGraphicsAPI, Material, m_CreateInfo)) return false;
 		}
@@ -72,5 +73,10 @@ namespace graphics
 		if (!m_Renderer->Draw(Material, DynamicOffsetNum)) return false;
 
 		return true;
+	}
+
+	int CPrimitive::GetMaterialIndex()const
+	{
+		return m_MaterialIndex;
 	}
 }

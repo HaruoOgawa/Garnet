@@ -1023,10 +1023,22 @@
     <ClInclude Include="Src\GraphicsAPI\WebGPU\CWebGPUTexture.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Src\Library\stb\stb_image.h">
+    <ClInclude Include="Src\Graphics\STextureBindingLayout.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Src\Graphics\STextureBindingLayout.h">
+    <ClInclude Include="Src\Library\tinygltf\json.hpp">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Library\tinygltf\stb_image.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Library\tinygltf\stb_image_write.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Library\tinygltf\tiny_gltf.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\GLTF\CGLTFImporter.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
@@ -1137,6 +1149,9 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Src\GraphicsAPI\WebGPU\CWebGPUTexture.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\GLTF\CGLTFImporter.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1595,6 +1610,8 @@
     <None Include="Resources\Shaders\sample_frag.wgsl" />
     <None Include="Resources\Shaders\sample_vert.spv" />
     <None Include="Resources\Shaders\sample_vert.wgsl" />
+    <None Include="Resources\Shaders\gltfpbr.vert" />
+    <None Include="Resources\Shaders\gltfpbr.frag" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="EmscriptenBuild\CMakeLists.txt" />

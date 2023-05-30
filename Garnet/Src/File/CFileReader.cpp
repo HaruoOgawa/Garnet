@@ -37,10 +37,10 @@ namespace file
 #ifdef __EMSCRIPTEN__
 	void downloadSucceded(emscripten_fetch_t* fetch)
 	{
-		std::vector<char> Data;
+		std::vector<unsigned char> Data;
 		Data.resize(fetch->numBytes);
 
-		std::memcpy(&Data[0], fetch->data, fetch->numBytes);
+		std::memcpy(&Data[0], reinterpret_cast<const unsigned char*>(fetch->data), fetch->numBytes);
 
 		auto fileReader = static_cast<CFileReader*>(fetch->userData);
 		fileReader->SetData(Data);
@@ -78,23 +78,28 @@ namespace file
 		}
 
 		size_t fileSize = (size_t)file.tellg();
-		m_Data.resize(fileSize);
+		std::vector<char> ReadData;
+		ReadData.resize(fileSize);
 
 		file.seekg(0);
-		file.read(m_Data.data(), fileSize);
+		file.read(ReadData.data(), fileSize);
 
 		file.close();
+
+		//
+		m_Data.resize(fileSize);
+		std::memcpy(&m_Data[0], reinterpret_cast<const unsigned char*>(&ReadData[0]), fileSize);
 
 		m_IsLoaded = true;
 #endif
 	}
 
-	void CFileReader::SetData(const std::vector<char>& Data)
+	void CFileReader::SetData(const std::vector<unsigned char>& Data)
 	{
 		m_Data = Data;
 	}
 
-	const std::vector<char>& CFileReader::GetData() const
+	const std::vector<unsigned char>& CFileReader::GetData() const
 	{
 		return m_Data;
 	}
