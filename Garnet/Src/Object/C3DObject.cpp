@@ -40,11 +40,11 @@ namespace object
 		return true;
 	}
 
-	bool C3DObject::Update(float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection)
+	bool C3DObject::Update(float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, const glm::vec4& LightDir)
 	{
 		for (auto& Material : m_MaterialList)
 		{
-			if (!Material->Update(SecondsTime, Camera, Projection)) return false;
+			if (!Material->Update(SecondsTime, Camera, Projection, LightDir)) return false;
 		}
 
 		return true;

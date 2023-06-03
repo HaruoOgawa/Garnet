@@ -41,11 +41,13 @@ namespace api
 		return true;
 	}
 
-	bool CWebGPUMaterial::Update(float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection)
+	bool CWebGPUMaterial::Update(float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, const glm::vec4& LightDir)
 	{
 		// 共通のユニフォームバッファの更新
 		SetUniformValue("view", &Camera->GetViewMatrix()[0][0]);
 		SetUniformValue("proj", &Projection->GetPrejectionMatrix()[0][0]);
+		SetUniformValue("lightDir", &LightDir[0]);
+		SetUniformValue("cameraPos", &Camera->GetPos()[0]);
 		SetUniformValue("time", &SecondsTime);
 
 		return true;

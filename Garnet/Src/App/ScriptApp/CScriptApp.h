@@ -3,6 +3,7 @@
 
 #include "../../Interface/IApp.h"
 #include "../../Interface/IGraphicsAPI.h"
+#include <glm/glm.hpp>
 
 namespace scene { class CScriptScene; }
 namespace camera { class CCamera; }
@@ -15,6 +16,7 @@ namespace app
 		std::shared_ptr<scene::CScriptScene> m_ScriptScene;
 		std::shared_ptr<camera::CCamera> m_MainCamera;
 		std::shared_ptr<projection::CProjection> m_Projection;
+		glm::vec4 m_LightDir;
 	public:
 		CScriptApp();
 		virtual ~CScriptApp();

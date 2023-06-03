@@ -4,12 +4,15 @@
 #include "../../Camera/CCamera.h"
 #include "../../Projection/CProjection.h"
 
+// CScriptApp は旧エンジンでもやっていたof風にCppでエンジンコードを直接シーンを構築していくアプリ
+
 namespace app
 {
 	CScriptApp::CScriptApp():
 		m_ScriptScene(nullptr),
 		m_MainCamera(std::make_shared<camera::CCamera>()),
-		m_Projection(std::make_shared<projection::CProjection>())
+		m_Projection(std::make_shared<projection::CProjection>()),
+		m_LightDir(glm::vec4(0.0f, 0.5f, 0.5f,1.0f))
 	{
 		m_MainCamera->SetPos(glm::vec3(0.0f, 0.0f, 5.0f));
 	}
@@ -50,7 +53,7 @@ namespace app
 
 	bool CScriptApp::Update(api::IGraphicsAPI* pGraphicsAPI, float SecondsTime)
 	{
-		if (!m_ScriptScene->Update(pGraphicsAPI, SecondsTime, m_MainCamera, m_Projection)) return false;
+		if (!m_ScriptScene->Update(pGraphicsAPI, SecondsTime, m_MainCamera, m_Projection, m_LightDir)) return false;
 
 		return true;
 	}

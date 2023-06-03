@@ -141,9 +141,17 @@ namespace gltf
 		for (const auto& glTfMaterial : model.materials)
 		{
 			//
-			const auto& emissiveFactor = glTfMaterial.emissiveFactor;
 			const auto& pbrParam = glTfMaterial.pbrMetallicRoughness;
+
+			// Vec4
+			const auto& baseColorFactor = glTfMaterial.pbrMetallicRoughness.baseColorFactor;
+			const auto& emissiveFactor = glTfMaterial.emissiveFactor;
 			
+			// Scaler
+			float metallicFactor = static_cast<float>(pbrParam.metallicFactor);
+			float roughnessFactor = static_cast<float>(pbrParam.roughnessFactor);
+			
+			// Tex
 			int baseColorTextureIndex = pbrParam.baseColorTexture.index;
 			int metallicRoughnessTextureIndex = pbrParam.metallicRoughnessTexture.index;
 			int emissiveTextureIndex = glTfMaterial.emissiveTexture.index;
@@ -175,6 +183,21 @@ namespace gltf
 				}
 
 				{
+					glm::vec4 data = glm::vec4(0.0f);
+					UniformBuffer->AddData("lightDir", &data[0], sizeof(float) * 4, 0);
+				}
+				
+				{
+					glm::vec4 data = glm::vec4(0.0f);
+					UniformBuffer->AddData("cameraPos", &data[0], sizeof(float) * 4, 0);
+				}
+				
+				{
+					glm::vec4 data = glm::vec4(baseColorFactor[0], baseColorFactor[1], baseColorFactor[2], baseColorFactor[3]);
+					UniformBuffer->AddData("baseColorFactor", &data[0], sizeof(float) * 4, 0);
+				}
+				
+				{
 					glm::vec4 data = glm::vec4(emissiveFactor[0], emissiveFactor[1], emissiveFactor[2], 0.0f);
 					UniformBuffer->AddData("emissiveFactor", &data[0], sizeof(float) * 4, 0);
 				}
@@ -182,8 +205,8 @@ namespace gltf
 				{
 					float val = 0.0f;
 					UniformBuffer->AddData("time", &val, sizeof(float), 0);
-					UniformBuffer->AddData("padding0", &val, sizeof(float), 0);
-					UniformBuffer->AddData("padding1", &val, sizeof(float), 0);
+					UniformBuffer->AddData("metallicFactor", &metallicFactor, sizeof(float), 0);
+					UniformBuffer->AddData("roughnessFactor", &roughnessFactor, sizeof(float), 0);
 					UniformBuffer->AddData("padding2", &val, sizeof(float), 0);
 				}
 

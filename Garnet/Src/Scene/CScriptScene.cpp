@@ -191,18 +191,18 @@ namespace scene
 		return true;
 	}
 
-	bool CScriptScene::Update(api::IGraphicsAPI* pGraphicsAPI, float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection)
+	bool CScriptScene::Update(api::IGraphicsAPI* pGraphicsAPI, float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, const glm::vec4& LightDir)
 	{
 		if (m_IsLoaded && m_TestObject)
 		{
 			m_TestObject->GetNodeList()[0]->SetRot(glm::vec3(SecondsTime));
 
-			if (!m_TestObject->Update(SecondsTime, Camera, Projection)) return false;
+			if (!m_TestObject->Update(SecondsTime, Camera, Projection, LightDir)) return false;
 		}
 		
 		if (m_IsLoaded && m_glTFObj)
 		{
-			if (!m_glTFObj->Update(SecondsTime, Camera, Projection)) return false;
+			if (!m_glTFObj->Update(SecondsTime, Camera, Projection, LightDir)) return false;
 		}
 
 		if (!m_IsLoaded)
