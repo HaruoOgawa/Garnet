@@ -189,6 +189,11 @@ namespace gltf
 				
 				{
 					glm::vec4 data = glm::vec4(0.0f);
+					UniformBuffer->AddData("lightColor", &data[0], sizeof(float) * 4, 0);
+				}
+				
+				{
+					glm::vec4 data = glm::vec4(0.0f);
 					UniformBuffer->AddData("cameraPos", &data[0], sizeof(float) * 4, 0);
 				}
 				

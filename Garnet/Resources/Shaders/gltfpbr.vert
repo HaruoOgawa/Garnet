@@ -10,6 +10,7 @@ layout(binding = 0) uniform UniformBufferObject{
     mat4 proj;
 
 	vec4 lightDir;
+	vec4 lightColor;
 	vec4 cameraPos;
 
 	vec4 baseColorFactor;

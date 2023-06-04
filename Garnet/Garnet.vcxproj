@@ -335,6 +335,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Src\Graphics\CDrawInfo.h" />
     <ClInclude Include="Src\GLTF\CGLTFImporter.h" />
     <ClInclude Include="Src\GraphicsAPI\WebGPU\CWebGPUTexture.h" />
     <ClInclude Include="Src\GraphicsAPI\Vulkan\CVulkanTexture.h" />
@@ -679,6 +680,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClInclude Include="Src\Interface\IRenderer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\Graphics\CDrawInfo.cpp" />
     <ClCompile Include="Src\GLTF\CGLTFImporter.cpp" />
     <ClCompile Include="Src\GraphicsAPI\WebGPU\CWebGPUTexture.cpp" />
     <ClCompile Include="Src\GraphicsAPI\Vulkan\CVulkanTexture.cpp" />

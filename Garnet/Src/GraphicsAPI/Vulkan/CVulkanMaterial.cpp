@@ -46,12 +46,13 @@ namespace api
 		return true;
 	}
 
-	bool CVulkanMaterial::Update(float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, const glm::vec4& LightDir)
+	bool CVulkanMaterial::Update(float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo)
 	{
 		// 共通のユニフォームバッファの更新
 		SetUniformValue("view", &Camera->GetViewMatrix()[0][0]);
 		SetUniformValue("proj", &Projection->GetPrejectionMatrix()[0][0]);
-		SetUniformValue("lightDir", &LightDir[0]);
+		SetUniformValue("lightDir", &DrawInfo->GetLightDir()[0]);
+		SetUniformValue("lightColor", &DrawInfo->GetLightColor()[0]);
 		SetUniformValue("cameraPos", &Camera->GetPos()[0]);
 		SetUniformValue("time", &SecondsTime);
 		

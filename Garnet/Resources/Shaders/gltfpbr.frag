@@ -16,6 +16,7 @@ layout(binding = 0) uniform UniformBufferObject{
     mat4 proj;
 
 	vec4 lightDir;
+	vec4 lightColor;
 	vec4 cameraPos;
 
 	vec4 baseColorFactor;
@@ -227,7 +228,7 @@ void main(){
 	vec3 diffuseBRDF = (1.0 - F) * CalcDiffuseBRDF(pbrParam);
 
 	// レンダリング方程式を構築
-	col.rgb = NdotL * vec3(1.0) * (specularBRDF + diffuseBRDF);
+	col.rgb = NdotL * ubo.lightColor.rgb * (specularBRDF + diffuseBRDF);
 
 	// カラースペースをリニアにする
 	col.rgb = pow(col.rgb, vec3(1.0/2.2));

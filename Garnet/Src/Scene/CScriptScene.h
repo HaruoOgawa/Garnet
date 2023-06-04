@@ -7,7 +7,7 @@ namespace file { class CFileReader; }
 namespace object { class C3DObject; }
 namespace camera { class CCamera; }
 namespace projection { class CProjection; }
-#include <glm/glm.hpp>
+namespace graphics { class CDrawInfo; }
 
 namespace scene
 {
@@ -38,7 +38,7 @@ namespace scene
 		bool Release(api::IGraphicsAPI* pGraphicsAPI);
 
 		bool Initialize(api::IGraphicsAPI* pGraphicsAPI);
-		bool Update(api::IGraphicsAPI* pGraphicsAPI, float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, const glm::vec4& LightDir);
+		bool Update(api::IGraphicsAPI* pGraphicsAPI, float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo);
 		bool Draw(api::IGraphicsAPI* pGraphicsAPI) ;
 	};
 }
