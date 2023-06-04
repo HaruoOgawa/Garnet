@@ -122,8 +122,10 @@ vec3 CalcFrenelReflection(PBRParam param)
 	return param.reflectance0 + (param.reflectance90 - param.reflectance0) * pow(clamp(1.0 - param.VdotH, 0.0, 1.0), 5.0);
 }
 
-// ?????????????????????????????????
-vec3 CalcDiffuse(PBRParam param)
+// ディフューズのBRDFを計算
+// https://google.github.io/filament/Filament.md.html#materialsystem/diffusebrdf
+// この記事によると拡散色のBRDFは近似的に『1.0 / PI』と定まるとのこと
+vec3 CalcDiffuseBRDF(PBRParam param)
 {
 	return param.diffuseColor / PI;
 }
@@ -218,14 +220,14 @@ void main(){
 	float G = CalcGeometricOcculusion(pbrParam); // 幾何減衰項
 	vec3 F = CalcFrenelReflection(pbrParam); // フレネル項
 	
-	// BRDFを構築
-	vec3 specBRDF = D * G * F / (4.0 * NdotL * NdotV);
+	// スペキュラーBRDFを構築
+	vec3 specularBRDF = D * G * F / (4.0 * NdotL * NdotV);
 
-	// ???
-	vec3 diffuseBRDF = (1.0 - F) * CalcDiffuse(pbrParam);
+	// ディフューズBRDFを計算
+	vec3 diffuseBRDF = (1.0 - F) * CalcDiffuseBRDF(pbrParam);
 
 	// レンダリング方程式を構築
-	col.rgb = NdotL * vec3(1.0) * (specBRDF + diffuseBRDF);
+	col.rgb = NdotL * vec3(1.0) * (specularBRDF + diffuseBRDF);
 
 	// カラースペースをリニアにする
 	col.rgb = pow(col.rgb, vec3(1.0/2.2));

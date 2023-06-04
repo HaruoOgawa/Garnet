@@ -54,7 +54,7 @@ var occlusionTexture: texture_2d<f32>;
 @group(0) @binding(10) 
 var occlusionTextureSampler: sampler;
 
-fn CalcDiffusestructPBRParamf1f1f1f1f1f1f1vf3vf3f1vf3vf31_(param: ptr<function, PBRParam>) -> vec3<f32> {
+fn CalcDiffuseBRDFstructPBRParamf1f1f1f1f1f1f1vf3vf3f1vf3vf31_(param: ptr<function, PBRParam>) -> vec3<f32> {
     let _e48 = (*param).diffuseColor;
     return (_e48 / vec3<f32>(3.1415927410125732));
 }
@@ -152,7 +152,7 @@ fn main_1() {
     var param_5: PBRParam;
     var F: vec3<f32>;
     var param_6: PBRParam;
-    var specBRDF: vec3<f32>;
+    var specularBRDF: vec3<f32>;
     var diffuseBRDF: vec3<f32>;
     var param_7: PBRParam;
 
@@ -259,14 +259,14 @@ fn main_1() {
     let _e195 = F;
     let _e197 = NdotL_1;
     let _e199 = NdotV_1;
-    specBRDF = ((_e195 * (_e192 * _e193)) / vec3<f32>(((4.0 * _e197) * _e199)));
+    specularBRDF = ((_e195 * (_e192 * _e193)) / vec3<f32>(((4.0 * _e197) * _e199)));
     let _e203 = F;
     let _e206 = pbrParam;
     param_7 = _e206;
-    let _e207 = CalcDiffusestructPBRParamf1f1f1f1f1f1f1vf3vf3f1vf3vf31_((&param_7));
+    let _e207 = CalcDiffuseBRDFstructPBRParamf1f1f1f1f1f1f1vf3vf3f1vf3vf31_((&param_7));
     diffuseBRDF = ((vec3<f32>(1.0) - _e203) * _e207);
     let _e209 = NdotL_1;
-    let _e211 = specBRDF;
+    let _e211 = specularBRDF;
     let _e212 = diffuseBRDF;
     let _e214 = ((vec3<f32>(1.0, 1.0, 1.0) * _e209) * (_e211 + _e212));
     col[0u] = _e214.x;
