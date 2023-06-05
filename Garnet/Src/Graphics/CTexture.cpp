@@ -11,9 +11,9 @@
 namespace graphics
 {
 	CTexture::CTexture():
-		m_Width(0),
-		m_Height(0),
-		m_NumOfChannels(0)
+		m_Width(1),
+		m_Height(1),
+		m_NumOfChannels(1)
 	{
 	}
 

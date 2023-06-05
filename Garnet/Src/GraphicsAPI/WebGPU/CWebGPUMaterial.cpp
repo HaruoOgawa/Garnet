@@ -16,8 +16,13 @@ namespace api
 		m_VertexShaderModele(nullptr),
 		m_FragmentShaderModele(nullptr),
 		m_BindGroupLayout(nullptr),
-		m_BindGroup(nullptr)
+		m_BindGroup(nullptr),
+
+		m_EmptyTexture(nullptr)
 	{
+		m_EmptyTexture = std::make_shared<CWebGPUTexture>(pGraphicsAPI);
+		std::vector<unsigned char> emptyPixel = { 0, 0, 0, 0 };
+		m_EmptyTexture->Create(emptyPixel, static_cast<int>(emptyPixel.size() * sizeof(unsigned char)));
 	}
 
 	CWebGPUMaterial::~CWebGPUMaterial()
@@ -233,7 +238,7 @@ namespace api
 		// Texture
 		for (const auto& TexLayout : m_TextureBindingLayoutList)
 		{
-			const auto& Texture = static_cast<api::CWebGPUTexture*>(TextureList[TexLayout.TextureIndex].get());
+			const auto& Texture = (TexLayout.TextureIndex >= 0) ? static_cast<api::CWebGPUTexture*>(TextureList[TexLayout.TextureIndex].get()) : m_EmptyTexture.get();
 
 			{
 				WGPUBindGroupEntry binding{};

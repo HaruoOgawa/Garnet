@@ -5,6 +5,8 @@
 #define GLFW_INCLUDE_VULKAN
 #define GLFW_EXPOSE_NATIVE_WIN32
 
+#include <memory>
+
 #include <glfw3.h>
 #include <glfw3native.h>
 #include <glm/glm.hpp>
@@ -18,6 +20,7 @@ namespace graphics { class CMaterialCreateInfo; }
 namespace api
 {
 	class CVulkanAPI;
+	class CVulkanTexture;
 
 	class CVulkanMaterial : public graphics::CMaterial
 	{
@@ -38,6 +41,9 @@ namespace api
 
 		VkDescriptorPool m_DescriptorPool;
 		std::vector<VkDescriptorSet> m_DescriptorSets;
+
+		// Texture
+		std::shared_ptr<CVulkanTexture> m_EmptyTexture;
 	private:
 		// Vulkanメインロジック /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		bool CreateShaderStages(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo);

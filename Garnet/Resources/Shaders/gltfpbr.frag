@@ -1,9 +1,5 @@
 #version 450
 
-// ひとまずバージョンとプリプロセッサはこちらで仮で入力しておく(別glTFを使用するにはここを対応する必要がある)
-#define USE_BASECOLOR_MAP
-#define USE_METALLICROUGHNESS_MAP
-
 layout(location = 0) in vec3 f_WorldNormal;
 layout(location = 1) in vec2 f_Texcoord;
 layout(location = 2) in vec4 f_WorldPos;
@@ -25,18 +21,19 @@ layout(binding = 0) uniform UniformBufferObject{
     float time;
     float metallicFactor;
     float roughnessFactor;
-    float padding2;
+    int   useBaseColorTexture;
+
+    int   useMetallicRoughnessTexture;
+    int   useEmissiveTexture;
+    int   useNormalTexture;
+    int   useOcclusionTexture;
 } ubo;
 
-#ifdef USE_BASECOLOR_MAP
 layout(binding = 1) uniform texture2D baseColorTexture;
 layout(binding = 2) uniform sampler baseColorTextureSampler;
-#endif
 
-#ifdef USE_METALLICROUGHNESS_MAP
 layout(binding = 3) uniform texture2D metallicRoughnessTexture;
 layout(binding = 4) uniform sampler metallicRoughnessTextureSampler;
-#endif
 
 layout(binding = 5) uniform texture2D emissiveTexture;
 layout(binding = 6) uniform sampler emissiveTextureSampler;
@@ -138,12 +135,13 @@ void main(){
 	float perceptualRoughness = ubo.roughnessFactor;
 	float metallic = ubo.metallicFactor;
 
-	#ifdef USE_METALLICROUGHNESS_MAP
-	// G Channel: Roughness Map, B Channel: Metallic Map 
-	vec4 metallicRoughnessColor = texture(sampler2D(metallicRoughnessTexture, metallicRoughnessTextureSampler), f_Texcoord);
-	perceptualRoughness = perceptualRoughness * metallicRoughnessColor.g;
-	metallic  = metallic  * metallicRoughnessColor.b;
-	#endif
+	if(ubo.useMetallicRoughnessTexture != 0)
+	{
+		// G Channel: Roughness Map, B Channel: Metallic Map 
+		vec4 metallicRoughnessColor = texture(sampler2D(metallicRoughnessTexture, metallicRoughnessTextureSampler), f_Texcoord);
+		perceptualRoughness = perceptualRoughness * metallicRoughnessColor.g;
+		metallic  = metallic  * metallicRoughnessColor.b;
+	}
 
 	perceptualRoughness = clamp(perceptualRoughness, MIN_ROUGHNESS, 1.0);
 	metallic  = clamp(metallic, 0.0, 1.0);
@@ -152,11 +150,15 @@ void main(){
 	float alphaRoughness = perceptualRoughness * perceptualRoughness;
 
 	// ベースカラーの取得. ベースカラーは単純な表面色
-	#ifdef USE_BASECOLOR_MAP
-	vec4 baseColor = texture(sampler2D(baseColorTexture, baseColorTextureSampler), f_Texcoord);
-	#else
-	vec4 baseColor = ubo.baseColorFactor;
-	#endif
+	vec4 baseColor;
+	if(ubo.useBaseColorTexture != 0)
+	{
+		baseColor = texture(sampler2D(baseColorTexture, baseColorTextureSampler), f_Texcoord);
+	}
+	else
+	{
+		baseColor = ubo.baseColorFactor;
+	}
 	
 	// 
 	vec3 f0 = vec3(0.04);

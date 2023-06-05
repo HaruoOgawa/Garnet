@@ -12,6 +12,7 @@ namespace graphics{ class CMaterialCreateInfo; }
 namespace api
 {
 	class CWebGPUAPI;
+	class CWebGPUTexture;
 
 	class CWebGPUMaterial : public graphics::CMaterial
 	{
@@ -29,6 +30,9 @@ namespace api
 		// BindGroup
 		WGPUBindGroupLayout m_BindGroupLayout;
 		WGPUBindGroup m_BindGroup;
+
+		// Texture
+		std::shared_ptr<CWebGPUTexture> m_EmptyTexture;
 	private:
 		// WebGPU Main Logic /////////////////////////////////////////////////////////////////////
 		bool CreateShaderStages(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo);

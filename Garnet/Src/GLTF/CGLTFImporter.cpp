@@ -127,9 +127,7 @@ namespace gltf
 			else
 			{
 				// uriが定義されているのでディレクトリからテクスチャを取得する
-
 			}
-			
 		}
 
 		return true;
@@ -212,7 +210,6 @@ namespace gltf
 					UniformBuffer->AddData("time", &val, sizeof(float), 0);
 					UniformBuffer->AddData("metallicFactor", &metallicFactor, sizeof(float), 0);
 					UniformBuffer->AddData("roughnessFactor", &roughnessFactor, sizeof(float), 0);
-					UniformBuffer->AddData("padding2", &val, sizeof(float), 0);
 				}
 
 				// テクスチャを紐づける
@@ -221,30 +218,80 @@ namespace gltf
 					if (baseColorTextureIndex >= 0 && baseColorTextureIndex < TextureList.size())
 					{
 						material->AddTextureBindingLayout({ 1, 2, baseColorTextureIndex });
+
+						int Flag = 1;
+						UniformBuffer->AddData("useBaseColorTexture", &Flag, sizeof(int), 0);
+					}
+					else
+					{
+						material->AddTextureBindingLayout({ 1, 2, -1 }); // TextureIndex -1 は EmptyTextureである
+
+						int Flag = 0;
+						UniformBuffer->AddData("useBaseColorTexture", &Flag, sizeof(int), 0);
 					}
 
 					//
 					if (metallicRoughnessTextureIndex >= 0 && metallicRoughnessTextureIndex < TextureList.size())
 					{
 						material->AddTextureBindingLayout({ 3, 4, metallicRoughnessTextureIndex });
+
+						int Flag = 1;
+						UniformBuffer->AddData("useMetallicRoughnessTexture", &Flag, sizeof(int), 0);
+					}
+					else
+					{
+						material->AddTextureBindingLayout({ 1, 2, -1 }); // TextureIndex -1 は EmptyTextureである
+
+						int Flag = 0;
+						UniformBuffer->AddData("useMetallicRoughnessTexture", &Flag, sizeof(int), 0);
 					}
 
 					//
 					if (emissiveTextureIndex >= 0 && emissiveTextureIndex < TextureList.size())
 					{
 						material->AddTextureBindingLayout({ 5, 6, emissiveTextureIndex });
+
+						int Flag = 1;
+						UniformBuffer->AddData("useEmissiveTexture", &Flag, sizeof(int), 0);
+					}
+					else
+					{
+						material->AddTextureBindingLayout({ 1, 2, -1 }); // TextureIndex -1 は EmptyTextureである
+
+						int Flag = 0;
+						UniformBuffer->AddData("useEmissiveTexture", &Flag, sizeof(int), 0);
 					}
 
 					//
 					if (normalTextureIndex >= 0 && normalTextureIndex < TextureList.size())
 					{
 						material->AddTextureBindingLayout({ 7, 8, normalTextureIndex });
+
+						int Flag = 1;
+						UniformBuffer->AddData("useNormalTexture", &Flag, sizeof(int), 0);
+					}
+					else
+					{
+						material->AddTextureBindingLayout({ 1, 2, -1 }); // TextureIndex -1 は EmptyTextureである
+
+						int Flag = 0;
+						UniformBuffer->AddData("useNormalTexture", &Flag, sizeof(int), 0);
 					}
 
 					//
 					if (occlusionTextureIndex >= 0 && occlusionTextureIndex < TextureList.size())
 					{
 						material->AddTextureBindingLayout({ 9, 10, occlusionTextureIndex });
+
+						int Flag = 1;
+						UniformBuffer->AddData("useOcclusionTexture", &Flag, sizeof(int), 0);
+					}
+					else
+					{
+						material->AddTextureBindingLayout({ 1, 2, -1 }); // TextureIndex -1 は EmptyTextureである
+
+						int Flag = 0;
+						UniformBuffer->AddData("useOcclusionTexture", &Flag, sizeof(int), 0);
 					}
 				}
 

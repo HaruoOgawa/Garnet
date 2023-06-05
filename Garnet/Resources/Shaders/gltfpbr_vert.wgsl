@@ -10,7 +10,11 @@ struct UniformBufferObject {
     time: f32,
     metallicFactor: f32,
     roughnessFactor: f32,
-    padding2_: f32,
+    useBaseColorTexture: i32,
+    useMetallicRoughnessTexture: i32,
+    useEmissiveTexture: i32,
+    useNormalTexture: i32,
+    useOcclusionTexture: i32,
 }
 
 struct gl_PerVertex {

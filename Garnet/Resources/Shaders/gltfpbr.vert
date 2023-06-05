@@ -19,7 +19,12 @@ layout(binding = 0) uniform UniformBufferObject{
     float time;
     float metallicFactor;
     float roughnessFactor;
-    float padding2;
+    int   useBaseColorTexture;
+
+    int   useMetallicRoughnessTexture;
+    int   useEmissiveTexture;
+    int   useNormalTexture;
+    int   useOcclusionTexture;
 } ubo;
 
 layout(location = 0) out vec3 f_WorldNormal;
