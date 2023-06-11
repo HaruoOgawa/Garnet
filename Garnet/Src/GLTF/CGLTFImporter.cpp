@@ -330,10 +330,12 @@ namespace gltf
 				std::vector<unsigned short> Indices;
 
 				// 頂点データの初期化用(例えばWeightとかNormalを持っていないならそれを0埋めするみたいな処理)
+				std::vector<std::string> NeedAttribNameList = {
+					"POSITION",
+					"NORMAL",
+					"TEXCOORD_0",
+				};
 				std::map<std::string, std::vector<float>> ReservedVertexDataList;
-				ReservedVertexDataList.insert({ "POSITION", std::vector<float>()});
-				ReservedVertexDataList.insert({ "NORMAL", std::vector<float>()});
-				ReservedVertexDataList.insert({ "TEXCOORD_0", std::vector<float>()});
 
 				// 頂点バッファを読む
 				{
@@ -347,6 +349,20 @@ namespace gltf
 
 						const auto& Accessor = model.accessors[AccessorIndex];
 						int BufferViewIndex = Accessor.bufferView;
+						size_t Count = Accessor.count;
+						
+						// Accessor_byteOffset: 複数のアクセサーがバッファビューを共有する場合に使用するそのバッファビュー内でのオフセットのこと
+						size_t Accessor_byteOffset = Accessor.byteOffset;
+						
+						// 使用する型のバイト数. 5123のunsigned short か 5126のfloat
+						int componentType = Accessor.componentType;
+						int Stride = (componentType == 5126) ? 4 : 2;
+
+						// SCALAR, VEC2, VEC3などがある 
+						int Dimension = Accessor.type;
+
+						// byteLength: アクセサーのデータの長さ. (使用する型のバイト数, Stride) x (ディメンション) x (データ数)
+						size_t byteLength = Stride * Dimension * Count;
 
 						// バッファビューを取得
 						if (BufferViewIndex < 0 || BufferViewIndex >= model.bufferViews.size()) continue;
@@ -354,27 +370,24 @@ namespace gltf
 						const auto& BufferView = model.bufferViews[BufferViewIndex];
 
 						int BufferIndex = BufferView.buffer;
-						size_t byteOffset = BufferView.byteOffset;
-						size_t byteLength = BufferView.byteLength;
+						size_t byteOffset = BufferView.byteOffset + Accessor_byteOffset; // アクセサーのオフセットを考慮する
 						int target = BufferView.target;
 
 						// データを取得
 						std::vector<float> AttributeData;
-						AttributeData.resize(byteLength / 4);
+						AttributeData.resize(byteLength / Stride);
 
 						std::memcpy(&AttributeData[0], &model.buffers[BufferIndex].data[byteOffset], byteLength);
 
 						// データを登録
-						ReservedVertexDataList[Name] = AttributeData;
+						ReservedVertexDataList.insert({ Name, AttributeData });
 					}
 
 					// 頂点バッファを再構築
 					int VertexDataSize = static_cast<int>(ReservedVertexDataList["POSITION"].size()) / 3;
-					for (auto& Data : ReservedVertexDataList)
+					for (const auto& AttribName : NeedAttribNameList)
 					{
-						std::string AttribName = Data.first;
-
-						// ディメンションを取得
+						// ディメンションを登録
 						int Dimention = 1;
 
 						if (AttribName == "POSITION" || AttribName == "NORMAL")
@@ -388,16 +401,15 @@ namespace gltf
 
 						DimentionList.push_back(Dimention);
 
-						//
-						if (Data.second.empty())
+						// アトリビュートがまだ登録されていなければここで0埋めの値を渡す
+						if (ReservedVertexDataList.find(AttribName) == ReservedVertexDataList.end())
 						{
-							Data.second = std::vector<float>(VertexDataSize * Dimention, 0.0f);
+							ReservedVertexDataList.insert({ AttribName, std::vector<float>(VertexDataSize * Dimention, 0.0f) });
 						}
-					}
 
-					VertexDataList.push_back(ReservedVertexDataList["POSITION"]);
-					VertexDataList.push_back(ReservedVertexDataList["NORMAL"]);
-					VertexDataList.push_back(ReservedVertexDataList["TEXCOORD_0"]);
+						// 頂点バッファにデータを渡す
+						VertexDataList.push_back(ReservedVertexDataList[AttribName]);
+					}
 				}
 
 				// インデックスバッファを読む
@@ -409,6 +421,10 @@ namespace gltf
 					const auto& Accessor = model.accessors[AccessorIndex];
 					int BufferViewIndex = Accessor.bufferView;
 					size_t Count = Accessor.count;
+					int componentType = Accessor.componentType;
+					int Stride = (componentType == 5126) ? 4 : 2;
+					size_t Accessor_byteOffset = Accessor.byteOffset;
+					size_t byteLength = Stride * Count;
 
 					// バッファビューを取得
 					if (BufferViewIndex < 0 || BufferViewIndex >= model.bufferViews.size()) continue;
@@ -416,12 +432,12 @@ namespace gltf
 					const auto& BufferView = model.bufferViews[BufferViewIndex];
 
 					int BufferIndex = BufferView.buffer;
-					size_t byteOffset = BufferView.byteOffset;
-					size_t byteLength = BufferView.byteLength;
+					size_t byteOffset = BufferView.byteOffset + Accessor_byteOffset;
+					
 					int target = BufferView.target;
 
 					// データを取得
-					Indices.resize(Count);
+					Indices.resize(byteLength / Stride);
 					std::memcpy(&Indices[0], &model.buffers[BufferIndex].data[byteOffset], byteLength);
 				}
 
