@@ -51,7 +51,8 @@ namespace scene
 		std::string ModelPath = "Resources\\Models\\";
 
 		//m_glTFData->ReadFile(ModelPath + "Triangle\\glTF\\Triangle.glb");
-		m_glTFData->ReadFile(ModelPath + "DamagedHelmet\\glTF-Binary\\DamagedHelmet.glb");
+		//m_glTFData->ReadFile(ModelPath + "DamagedHelmet\\glTF-Binary\\DamagedHelmet.glb");
+		m_glTFData->ReadFile(ModelPath + "MetalRoughSpheresNoTextures\\glTF-Binary\\MetalRoughSpheresNoTextures.glb");
 
 		return true;
 	}
