@@ -240,7 +240,7 @@ namespace gltf
 					}
 					else
 					{
-						material->AddTextureBindingLayout({ 1, 2, -1 }); // TextureIndex -1 ‚Í EmptyTexture‚Å‚ ‚é
+						material->AddTextureBindingLayout({ 3, 4, -1 }); // TextureIndex -1 ‚Í EmptyTexture‚Å‚ ‚é
 
 						int Flag = 0;
 						UniformBuffer->AddData("useMetallicRoughnessTexture", &Flag, sizeof(int), 0);
@@ -256,7 +256,7 @@ namespace gltf
 					}
 					else
 					{
-						material->AddTextureBindingLayout({ 1, 2, -1 }); // TextureIndex -1 ‚Í EmptyTexture‚Å‚ ‚é
+						material->AddTextureBindingLayout({ 5, 6, -1 }); // TextureIndex -1 ‚Í EmptyTexture‚Å‚ ‚é
 
 						int Flag = 0;
 						UniformBuffer->AddData("useEmissiveTexture", &Flag, sizeof(int), 0);
@@ -272,7 +272,7 @@ namespace gltf
 					}
 					else
 					{
-						material->AddTextureBindingLayout({ 1, 2, -1 }); // TextureIndex -1 ‚Í EmptyTexture‚Å‚ ‚é
+						material->AddTextureBindingLayout({ 7, 8, -1 }); // TextureIndex -1 ‚Í EmptyTexture‚Å‚ ‚é
 
 						int Flag = 0;
 						UniformBuffer->AddData("useNormalTexture", &Flag, sizeof(int), 0);
@@ -288,7 +288,7 @@ namespace gltf
 					}
 					else
 					{
-						material->AddTextureBindingLayout({ 1, 2, -1 }); // TextureIndex -1 ‚Í EmptyTexture‚Å‚ ‚é
+						material->AddTextureBindingLayout({ 9, 10, -1 }); // TextureIndex -1 ‚Í EmptyTexture‚Å‚ ‚é
 
 						int Flag = 0;
 						UniformBuffer->AddData("useOcclusionTexture", &Flag, sizeof(int), 0);
