@@ -6,8 +6,10 @@
 namespace object
 {
 	CNode::CNode(const std::shared_ptr<graphics::CMesh>& Mesh, const std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList):
-		m_Transform(std::make_shared<math::CTransform>()),
-		m_Mesh(Mesh)
+		m_Name(""),
+		m_LocalTransform(std::make_shared<math::CTransform>()),
+		m_Mesh(Mesh),
+		m_WorldMatrix(glm::mat4(1.0f))
 	{
 		if (m_Mesh)
 		{
@@ -41,44 +43,69 @@ namespace object
 		return m_Mesh;
 	}
 
-	void CNode::SetTransform(std::shared_ptr<math::CTransform>& Transform)
+	void CNode::SetName(const std::string& Name)
 	{
-		m_Transform = Transform;
+		m_Name = Name;
 	}
 
-	const std::shared_ptr<math::CTransform>& CNode::GetTransform() const
+	void CNode::SetLocalTransform(std::shared_ptr<math::CTransform>& LocalTransform)
 	{
-		return m_Transform;
+		m_LocalTransform = LocalTransform;
+	}
+
+	const std::shared_ptr<math::CTransform>& CNode::GetLocalTransform() const
+	{
+		return m_LocalTransform;
+	}
+
+	void CNode::SetWorldMatrix(const glm::mat4& WorldMatrix)
+	{
+		m_WorldMatrix = WorldMatrix;
+	}
+
+	const glm::mat4& CNode::GetWorldMatrix() const
+	{
+		return m_WorldMatrix;
 	}
 
 	const glm::vec3& CNode::GetPos() const
 	{
-		return m_Transform->GetPos();
+		return m_LocalTransform->GetPos();
 	}
 
 	void CNode::SetPos(const glm::vec3& Pos)
 	{
-		m_Transform->SetPos(Pos);
+		m_LocalTransform->SetPos(Pos);
 	}
 
 	const glm::vec3& CNode::GetRot() const
 	{
-		return m_Transform->GetRot();
+		return m_LocalTransform->GetRot();
 	}
 
 	void CNode::SetRot(const glm::vec3& Rot)
 	{
-		m_Transform->SetRot(Rot);
+		m_LocalTransform->SetRot(Rot);
 	}
 
 	const glm::vec3& CNode::GetScale() const
 	{
-		return m_Transform->GetScale();
+		return m_LocalTransform->GetScale();
 	}
 
 	void CNode::SetScale(const glm::vec3& Scale)
 	{
-		m_Transform->SetScale(Scale);
+		m_LocalTransform->SetScale(Scale);
+	}
+
+	const std::vector<int>& CNode::GetChildrenNodeIndexList() const
+	{
+		return m_ChildrenNodeIndexList;
+	}
+
+	void CNode::SetChildrenNodeIndexList(const std::vector<int>& NodeList)
+	{
+		m_ChildrenNodeIndexList = NodeList;
 	}
 
 	const std::vector<int>& CNode::GetDynamicOffsetNumList() const

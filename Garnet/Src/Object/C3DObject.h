@@ -4,6 +4,7 @@
 #include "CNode.h"
 #include "../Graphics/CMaterial.h"
 #include "../Graphics/CTexture.h"
+#include "../Math/CTransform.h"
 #include <vector>
 #include <memory>
 
@@ -13,9 +14,16 @@ namespace object
 
 	class C3DObject : public CObject
 	{
+		std::shared_ptr<math::CTransform> m_ObjectTransform;
+
 		std::vector<std::shared_ptr<CNode>> m_NodeList;
 		std::vector<std::shared_ptr<graphics::CMaterial>> m_MaterialList;
 		std::vector<std::shared_ptr<graphics::CTexture>> m_TextureList;
+
+		std::vector<std::vector<int>> m_RootNodeIndexList;
+	private:
+		void CalcWorldMatrix();
+		void CalcWorldMatrix(std::shared_ptr<CNode>& Node, const glm::mat4& ParentWorldMatrix);
 	public:
 		C3DObject();
 		virtual ~C3DObject();
@@ -32,5 +40,8 @@ namespace object
 		
 		void AddTexture(const std::shared_ptr<graphics::CTexture>& Texture);
 		const std::vector<std::shared_ptr<graphics::CTexture>>& GetTextureList() const;
+
+		void SetRootNodeIndexList(const std::vector<std::vector<int>>& RootNodeIndexList);
+		const std::vector<std::vector<int>>& GetRootNodeIndexList() const;
 	};
 }

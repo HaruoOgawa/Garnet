@@ -63,7 +63,8 @@ namespace gltf
 		
 		// ノード
 		std::vector<std::shared_ptr<object::CNode>> NodeList;
-		if (!CreateNode(model, NodeList, MeshList, MaterialList)) return false;
+		std::vector<std::vector<int>> RootNodeIndexList;
+		if (!CreateNode(model, NodeList, MeshList, MaterialList, RootNodeIndexList)) return false;
 
 		// オブジェクトにリソースを登録
 		for (const auto& Texture : TextureList)
@@ -80,6 +81,8 @@ namespace gltf
 		{
 			Object->AddNode(Node);
 		}
+
+		Object->SetRootNodeIndexList(RootNodeIndexList);
 
 		// オブジェクトを生成
 		if (!Object->Create(pGraphicsAPI)) return false;
@@ -458,7 +461,7 @@ namespace gltf
 	}
 	
 	bool CGLTFImporter::CreateNode(const tinygltf::Model& model, std::vector<std::shared_ptr<object::CNode>>& NodeList, const std::vector<std::shared_ptr<graphics::CMesh>>& MeshList,
-		const std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList)
+		const std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList, std::vector<std::vector<int>>& RootNodeIndexList)
 	{
 		for (const auto& glTFNode : model.nodes)
 		{
@@ -469,6 +472,8 @@ namespace gltf
 			//
 			std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(MeshList[MeshIndex], MaterialList);
 			
+			Node->SetName(glTFNode.name);
+
 			const auto& scale = glTFNode.scale;
 			if (scale.size() >= 3)
 			{
@@ -487,7 +492,15 @@ namespace gltf
 				Node->SetPos(glm::vec3(position[0], position[1], position[2]));
 			}
 
+			Node->SetChildrenNodeIndexList(glTFNode.children);
+
 			NodeList.push_back(Node);
+		}
+
+		// scenesのnodesはルートノードを示すのでそこから走破をスタートする必要がある(たぶん以前glTFアニメーションがうまくいかなかったのはこれが原因. それと親要素から子要素ではなく子要素から親要素に走破していたのも原因かも)
+		for (const auto& scene : model.scenes)
+		{
+			RootNodeIndexList.push_back(scene.nodes);
 		}
 
 		return true;
