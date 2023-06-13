@@ -5,15 +5,17 @@
 
 namespace object
 {
-	CNode::CNode(const std::shared_ptr<graphics::CMesh>& Mesh, const std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList):
+	CNode::CNode(int MeshIndex, const std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, const std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList):
 		m_Name(""),
+		m_MeshIndex(-1),
 		m_LocalTransform(std::make_shared<math::CTransform>()),
-		m_Mesh(Mesh),
 		m_WorldMatrix(glm::mat4(1.0f))
 	{
-		if (m_Mesh)
+		if (MeshIndex >= 0 && MeshIndex < MeshList.size())
 		{
-			for (const auto& Primitive : m_Mesh->GetPrimitiveList())
+			const auto& Mesh = MeshList[MeshIndex];
+
+			for (const auto& Primitive : Mesh->GetPrimitiveList())
 			{
 				int MaterialIndex = Primitive->GetMaterialIndex();
 				if (MaterialIndex < 0 || MaterialIndex >= MaterialList.size())
@@ -38,14 +40,19 @@ namespace object
 	{
 	}
 
-	const std::shared_ptr<graphics::CMesh>& CNode::GetMesh() const
-	{
-		return m_Mesh;
-	}
-
 	void CNode::SetName(const std::string& Name)
 	{
 		m_Name = Name;
+	}
+
+	void CNode::SetMeshIndex(int MeshIndex)
+	{
+		m_MeshIndex = MeshIndex;
+	}
+
+	int CNode::GetMeshIndex() const
+	{
+		return m_MeshIndex;
 	}
 
 	void CNode::SetLocalTransform(std::shared_ptr<math::CTransform>& LocalTransform)

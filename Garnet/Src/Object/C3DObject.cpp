@@ -26,10 +26,8 @@ namespace object
 		}
 
 		// Primitive
-		for (const auto& Node : m_NodeList)
+		for (const auto& Mesh : m_MeshList)
 		{
-			const auto& Mesh = Node->GetMesh();
-
 			for (const auto& Primitive : Mesh->GetPrimitiveList())
 			{
 				int MaterialIndex = Primitive->GetMaterialIndex();
@@ -115,8 +113,11 @@ namespace object
 	{
 		for (const auto& Node : m_NodeList)
 		{
+			int MeshIndex = Node->GetMeshIndex();
+			if (MeshIndex < 0 || MeshIndex >= m_MeshList.size()) continue;
+
 			const auto& WorldMatrix = Node->GetWorldMatrix();
-			const auto& Mesh = Node->GetMesh();
+			const auto& Mesh = m_MeshList[MeshIndex];
 			const auto& DynamicOffsetList = Node->GetDynamicOffsetNumList();
 
 			if (DynamicOffsetList.size() != Mesh->GetPrimitiveList().size()) continue; // PrimitiveList‚ÆNode‚ÌDynamicOffsetNumList‚Íˆê’v‚µ‚Ä‚¢‚é
@@ -149,6 +150,16 @@ namespace object
 	const std::vector<std::shared_ptr<CNode>>& C3DObject::GetNodeList() const
 	{
 		return m_NodeList;
+	}
+
+	void C3DObject::AddMesh(const std::shared_ptr<graphics::CMesh>& Mesh)
+	{
+		m_MeshList.push_back(Mesh);
+	}
+
+	const std::vector<std::shared_ptr<graphics::CMesh>>& C3DObject::GetMeshList() const
+	{
+		return m_MeshList;
 	}
 
 	void C3DObject::AddMaterial(const std::shared_ptr<graphics::CMaterial>& Material)

@@ -18,19 +18,21 @@ namespace object
 	{
 		std::string						  m_Name;
 
+		int								  m_MeshIndex;
+
 		std::shared_ptr<math::CTransform> m_LocalTransform;
 		glm::mat4						  m_WorldMatrix;
 		std::vector<int>                  m_ChildrenNodeIndexList;
-		std::shared_ptr<graphics::CMesh>  m_Mesh;
 		std::vector<int>                  m_DynamicOffsetNumList;
 
 	public:
-		CNode(const std::shared_ptr<graphics::CMesh>& Mesh, const std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList);
+		CNode(int MeshIndex, const std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, const std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList);
 		virtual ~CNode();
 
-		const std::shared_ptr<graphics::CMesh>& GetMesh() const;
-
 		void SetName(const std::string& Name);
+
+		void SetMeshIndex(int MeshIndex);
+		int GetMeshIndex() const;
 
 		void SetLocalTransform(std::shared_ptr<math::CTransform>& LocalTransform);
 		const std::shared_ptr<math::CTransform>& GetLocalTransform() const;

@@ -17,6 +17,7 @@ namespace object
 		std::shared_ptr<math::CTransform> m_ObjectTransform;
 
 		std::vector<std::shared_ptr<CNode>> m_NodeList;
+		std::vector<std::shared_ptr<graphics::CMesh>> m_MeshList;
 		std::vector<std::shared_ptr<graphics::CMaterial>> m_MaterialList;
 		std::vector<std::shared_ptr<graphics::CTexture>> m_TextureList;
 
@@ -34,6 +35,9 @@ namespace object
 
 		void AddNode(const std::shared_ptr<CNode>& Node);
 		const std::vector<std::shared_ptr<CNode>>& GetNodeList() const;
+		
+		void AddMesh(const std::shared_ptr<graphics::CMesh>& Mesh);
+		const std::vector<std::shared_ptr<graphics::CMesh>>& GetMeshList() const;
 
 		void AddMaterial(const std::shared_ptr<graphics::CMaterial>& Material);
 		const std::vector<std::shared_ptr<graphics::CMaterial>>& GetMaterialList() const;

@@ -77,6 +77,11 @@ namespace gltf
 			Object->AddMaterial(Material);
 		}
 
+		for (const auto& Mesh : MeshList)
+		{
+			Object->AddMesh(Mesh);
+		}
+
 		for (const auto& Node : NodeList)
 		{
 			Object->AddNode(Node);
@@ -465,14 +470,14 @@ namespace gltf
 	{
 		for (const auto& glTFNode : model.nodes)
 		{
-			//
+			// メッシュを持っていないノードもあることを考慮する必要がある
 			int MeshIndex = glTFNode.mesh;
-			if (MeshIndex < 0 || MeshIndex >= MeshList.size()) continue;
 
-			//
-			std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(MeshList[MeshIndex], MaterialList);
+			std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(MeshIndex, MeshList, MaterialList);
 			
 			Node->SetName(glTFNode.name);
+			
+			Node->SetMeshIndex(MeshIndex);
 
 			const auto& scale = glTFNode.scale;
 			if (scale.size() >= 3)
