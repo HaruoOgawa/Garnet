@@ -116,7 +116,7 @@ namespace object
 			int MeshIndex = Node->GetMeshIndex();
 			if (MeshIndex < 0 || MeshIndex >= m_MeshList.size()) continue;
 
-			const auto& WorldMatrix = Node->GetWorldMatrix();
+			const auto& WorldMatrix = m_ObjectTransform->GetModelMatrix() * Node->GetWorldMatrix();
 			const auto& Mesh = m_MeshList[MeshIndex];
 			const auto& DynamicOffsetList = Node->GetDynamicOffsetNumList();
 
@@ -190,5 +190,35 @@ namespace object
 	const std::vector<std::vector<int>>& C3DObject::GetRootNodeIndexList() const
 	{
 		return m_RootNodeIndexList;
+	}
+
+	const glm::vec3& C3DObject::GetPos() const
+	{
+		return m_ObjectTransform->GetPos();
+	}
+
+	void C3DObject::SetPos(const glm::vec3& Pos)
+	{
+		m_ObjectTransform->SetPos(Pos);
+	}
+
+	const glm::vec3& C3DObject::GetRot() const
+	{
+		return m_ObjectTransform->GetRot();
+	}
+
+	void C3DObject::SetRot(const glm::vec3& Rot)
+	{
+		m_ObjectTransform->SetRot(Rot);
+	}
+
+	const glm::vec3& C3DObject::GetScale() const
+	{
+		return m_ObjectTransform->GetScale();
+	}
+
+	void C3DObject::SetScale(const glm::vec3& Scale)
+	{
+		m_ObjectTransform->SetScale(Scale);
 	}
 }

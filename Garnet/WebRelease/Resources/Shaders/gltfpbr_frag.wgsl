@@ -18,13 +18,18 @@ struct UniformBufferObject {
     view: mat4x4<f32>,
     proj: mat4x4<f32>,
     lightDir: vec4<f32>,
+    lightColor: vec4<f32>,
     cameraPos: vec4<f32>,
     baseColorFactor: vec4<f32>,
     emissiveFactor: vec4<f32>,
     time: f32,
     metallicFactor: f32,
     roughnessFactor: f32,
-    padding2_: f32,
+    useBaseColorTexture: i32,
+    useMetallicRoughnessTexture: i32,
+    useEmissiveTexture: i32,
+    useNormalTexture: i32,
+    useOcclusionTexture: i32,
 }
 
 @group(0) @binding(0) 
@@ -55,16 +60,16 @@ var occlusionTexture: texture_2d<f32>;
 var occlusionTextureSampler: sampler;
 
 fn CalcDiffuseBRDFstructPBRParamf1f1f1f1f1f1f1vf3vf3f1vf3vf31_(param: ptr<function, PBRParam>) -> vec3<f32> {
-    let _e48 = (*param).diffuseColor;
-    return (_e48 / vec3<f32>(3.1415927410125732));
+    let _e52 = (*param).diffuseColor;
+    return (_e52 / vec3<f32>(3.1415927410125732));
 }
 
 fn CalcFrenelReflectionstructPBRParamf1f1f1f1f1f1f1vf3vf3f1vf3vf31_(param_1: ptr<function, PBRParam>) -> vec3<f32> {
-    let _e48 = (*param_1).reflectance0_;
-    let _e50 = (*param_1).reflectance90_;
     let _e52 = (*param_1).reflectance0_;
-    let _e55 = (*param_1).VdotH;
-    return (_e48 + ((_e50 - _e52) * pow(clamp((1.0 - _e55), 0.0, 1.0), 5.0)));
+    let _e54 = (*param_1).reflectance90_;
+    let _e56 = (*param_1).reflectance0_;
+    let _e59 = (*param_1).VdotH;
+    return (_e52 + ((_e54 - _e56) * pow(clamp((1.0 - _e59), 0.0, 1.0), 5.0)));
 }
 
 fn CalcGeometricOcculusionstructPBRParamf1f1f1f1f1f1f1vf3vf3f1vf3vf31_(param_2: ptr<function, PBRParam>) -> f32 {
@@ -74,51 +79,51 @@ fn CalcGeometricOcculusionstructPBRParamf1f1f1f1f1f1f1vf3vf3f1vf3vf31_(param_2: 
     var attenuationL: f32;
     var attenuationV: f32;
 
-    let _e53 = (*param_2).NdotL;
-    NdotL = _e53;
-    let _e55 = (*param_2).NdotV;
-    NdotV = _e55;
-    let _e57 = (*param_2).alphaRoughness;
-    r = _e57;
-    let _e58 = NdotL;
-    let _e60 = NdotL;
-    let _e61 = r;
-    let _e62 = r;
-    let _e64 = r;
+    let _e57 = (*param_2).NdotL;
+    NdotL = _e57;
+    let _e59 = (*param_2).NdotV;
+    NdotV = _e59;
+    let _e61 = (*param_2).alphaRoughness;
+    r = _e61;
+    let _e62 = NdotL;
+    let _e64 = NdotL;
     let _e65 = r;
-    let _e68 = NdotL;
-    let _e69 = NdotL;
-    attenuationL = ((2.0 * _e58) / (_e60 + sqrt(((_e61 * _e62) + ((1.0 - (_e64 * _e65)) * (_e68 * _e69))))));
-    let _e76 = NdotV;
-    let _e78 = NdotV;
-    let _e79 = r;
-    let _e80 = r;
-    let _e82 = r;
+    let _e66 = r;
+    let _e68 = r;
+    let _e69 = r;
+    let _e72 = NdotL;
+    let _e73 = NdotL;
+    attenuationL = ((2.0 * _e62) / (_e64 + sqrt(((_e65 * _e66) + ((1.0 - (_e68 * _e69)) * (_e72 * _e73))))));
+    let _e80 = NdotV;
+    let _e82 = NdotV;
     let _e83 = r;
-    let _e86 = NdotV;
-    let _e87 = NdotV;
-    attenuationV = ((2.0 * _e76) / (_e78 + sqrt(((_e79 * _e80) + ((1.0 - (_e82 * _e83)) * (_e86 * _e87))))));
-    let _e94 = attenuationL;
-    let _e95 = attenuationV;
-    return (_e94 * _e95);
+    let _e84 = r;
+    let _e86 = r;
+    let _e87 = r;
+    let _e90 = NdotV;
+    let _e91 = NdotV;
+    attenuationV = ((2.0 * _e80) / (_e82 + sqrt(((_e83 * _e84) + ((1.0 - (_e86 * _e87)) * (_e90 * _e91))))));
+    let _e98 = attenuationL;
+    let _e99 = attenuationV;
+    return (_e98 * _e99);
 }
 
 fn CalcMicrofacetstructPBRParamf1f1f1f1f1f1f1vf3vf3f1vf3vf31_(param_3: ptr<function, PBRParam>) -> f32 {
     var roughness2_: f32;
     var f: f32;
 
-    let _e50 = (*param_3).alphaRoughness;
-    let _e52 = (*param_3).alphaRoughness;
-    roughness2_ = (_e50 * _e52);
-    let _e55 = (*param_3).NdotH;
-    let _e56 = roughness2_;
+    let _e54 = (*param_3).alphaRoughness;
+    let _e56 = (*param_3).alphaRoughness;
+    roughness2_ = (_e54 * _e56);
     let _e59 = (*param_3).NdotH;
-    let _e62 = (*param_3).NdotH;
-    f = ((((_e55 * _e56) - _e59) * _e62) + 1.0);
-    let _e65 = roughness2_;
-    let _e66 = f;
-    let _e68 = f;
-    return (_e65 / ((3.1415927410125732 * _e66) * _e68));
+    let _e60 = roughness2_;
+    let _e63 = (*param_3).NdotH;
+    let _e66 = (*param_3).NdotH;
+    f = ((((_e59 * _e60) - _e63) * _e66) + 1.0);
+    let _e69 = roughness2_;
+    let _e70 = f;
+    let _e72 = f;
+    return (_e69 / ((3.1415927410125732 * _e70) * _e72));
 }
 
 fn main_1() {
@@ -152,135 +157,145 @@ fn main_1() {
     var param_5: PBRParam;
     var F: vec3<f32>;
     var param_6: PBRParam;
-    var specBRDF: vec3<f32>;
+    var specularBRDF: vec3<f32>;
     var diffuseBRDF: vec3<f32>;
     var param_7: PBRParam;
 
     col = vec4<f32>(1.0, 1.0, 1.0, 1.0);
-    let _e80 = ubo.roughnessFactor;
-    perceptualRoughness = _e80;
-    let _e82 = ubo.metallicFactor;
-    metallic = _e82;
-    let _e83 = f_Texcoord_1;
-    let _e84 = textureSample(metallicRoughnessTexture, metallicRoughnessTextureSampler, _e83);
-    metallicRoughnessColor = _e84;
-    let _e85 = perceptualRoughness;
-    let _e87 = metallicRoughnessColor[1u];
-    perceptualRoughness = (_e85 * _e87);
-    let _e89 = metallic;
-    let _e91 = metallicRoughnessColor[2u];
-    metallic = (_e89 * _e91);
-    let _e93 = perceptualRoughness;
-    perceptualRoughness = clamp(_e93, 0.03999999910593033, 1.0);
-    let _e95 = metallic;
-    metallic = clamp(_e95, 0.0, 1.0);
-    let _e97 = perceptualRoughness;
-    let _e98 = perceptualRoughness;
-    alphaRoughness = (_e97 * _e98);
-    let _e100 = f_Texcoord_1;
-    let _e101 = textureSample(baseColorTexture, baseColorTextureSampler, _e100);
-    baseColor = _e101;
+    let _e84 = ubo.roughnessFactor;
+    perceptualRoughness = _e84;
+    let _e86 = ubo.metallicFactor;
+    metallic = _e86;
+    let _e88 = ubo.useMetallicRoughnessTexture;
+    if (_e88 != 0) {
+        let _e90 = f_Texcoord_1;
+        let _e91 = textureSample(metallicRoughnessTexture, metallicRoughnessTextureSampler, _e90);
+        metallicRoughnessColor = _e91;
+        let _e92 = perceptualRoughness;
+        let _e94 = metallicRoughnessColor[1u];
+        perceptualRoughness = (_e92 * _e94);
+        let _e96 = metallic;
+        let _e98 = metallicRoughnessColor[2u];
+        metallic = (_e96 * _e98);
+    }
+    let _e100 = perceptualRoughness;
+    perceptualRoughness = clamp(_e100, 0.03999999910593033, 1.0);
+    let _e102 = metallic;
+    metallic = clamp(_e102, 0.0, 1.0);
+    let _e104 = perceptualRoughness;
+    let _e105 = perceptualRoughness;
+    alphaRoughness = (_e104 * _e105);
+    let _e108 = ubo.useBaseColorTexture;
+    if (_e108 != 0) {
+        let _e110 = f_Texcoord_1;
+        let _e111 = textureSample(baseColorTexture, baseColorTextureSampler, _e110);
+        baseColor = _e111;
+    } else {
+        let _e113 = ubo.baseColorFactor;
+        baseColor = _e113;
+    }
     f0_ = vec3<f32>(0.03999999910593033, 0.03999999910593033, 0.03999999910593033);
-    let _e102 = baseColor;
-    let _e104 = f0_;
-    diffuseColor = (_e102.xyz * (vec3<f32>(1.0, 1.0, 1.0) - _e104));
-    let _e107 = metallic;
-    let _e109 = diffuseColor;
-    diffuseColor = (_e109 * (1.0 - _e107));
-    let _e111 = f0_;
-    let _e112 = baseColor;
-    let _e114 = metallic;
-    specularColor = mix(_e111, _e112.xyz, vec3<f32>(_e114));
-    let _e118 = specularColor[0u];
-    let _e120 = specularColor[1u];
-    let _e123 = specularColor[2u];
-    reflectance = max(max(_e118, _e120), _e123);
-    let _e125 = reflectance;
-    reflectance90_ = clamp((_e125 * 25.0), 0.0, 1.0);
-    let _e128 = specularColor;
-    specularEnvironmentR0_ = _e128;
-    let _e129 = reflectance90_;
-    specularEnvironmentR90_ = (vec3<f32>(1.0, 1.0, 1.0) * _e129);
-    let _e131 = f_WorldNormal_1;
-    n = _e131;
-    let _e133 = ubo.cameraPos;
-    let _e135 = f_WorldPos_1;
-    v = normalize((_e133.xyz - _e135.xyz));
-    let _e140 = ubo.lightDir;
-    l = normalize(_e140.xyz);
-    let _e143 = v;
-    let _e144 = l;
-    h = normalize((_e143 + _e144));
-    let _e147 = v;
-    let _e148 = n;
-    reflection = -(normalize(reflect(_e147, _e148)));
-    let _e152 = n;
-    let _e153 = l;
-    NdotL_1 = clamp(dot(_e152, _e153), 0.0010000000474974513, 1.0);
-    let _e156 = n;
-    let _e157 = v;
-    NdotV_1 = clamp(abs(dot(_e156, _e157)), 0.0010000000474974513, 1.0);
-    let _e161 = n;
-    let _e162 = h;
-    NdotH = clamp(dot(_e161, _e162), 0.0, 1.0);
+    let _e114 = baseColor;
+    let _e116 = f0_;
+    diffuseColor = (_e114.xyz * (vec3<f32>(1.0, 1.0, 1.0) - _e116));
+    let _e119 = metallic;
+    let _e121 = diffuseColor;
+    diffuseColor = (_e121 * (1.0 - _e119));
+    let _e123 = f0_;
+    let _e124 = baseColor;
+    let _e126 = metallic;
+    specularColor = mix(_e123, _e124.xyz, vec3<f32>(_e126));
+    let _e130 = specularColor[0u];
+    let _e132 = specularColor[1u];
+    let _e135 = specularColor[2u];
+    reflectance = max(max(_e130, _e132), _e135);
+    let _e137 = reflectance;
+    reflectance90_ = clamp((_e137 * 25.0), 0.0, 1.0);
+    let _e140 = specularColor;
+    specularEnvironmentR0_ = _e140;
+    let _e141 = reflectance90_;
+    specularEnvironmentR90_ = (vec3<f32>(1.0, 1.0, 1.0) * _e141);
+    let _e143 = f_WorldNormal_1;
+    n = _e143;
+    let _e145 = ubo.cameraPos;
+    let _e147 = f_WorldPos_1;
+    v = normalize((_e145.xyz - _e147.xyz));
+    let _e152 = ubo.lightDir;
+    l = normalize(_e152.xyz);
+    let _e155 = v;
+    let _e156 = l;
+    h = normalize((_e155 + _e156));
+    let _e159 = v;
+    let _e160 = n;
+    reflection = -(normalize(reflect(_e159, _e160)));
+    let _e164 = n;
     let _e165 = l;
-    let _e166 = h;
-    LdotH = clamp(dot(_e165, _e166), 0.0, 1.0);
+    NdotL_1 = clamp(dot(_e164, _e165), 0.0010000000474974513, 1.0);
+    let _e168 = n;
     let _e169 = v;
-    let _e170 = h;
-    VdotH = clamp(dot(_e169, _e170), 0.0, 1.0);
-    let _e173 = NdotL_1;
-    let _e174 = NdotV_1;
-    let _e175 = NdotH;
-    let _e176 = LdotH;
-    let _e177 = VdotH;
-    let _e178 = perceptualRoughness;
-    let _e179 = metallic;
-    let _e180 = specularEnvironmentR0_;
-    let _e181 = specularEnvironmentR90_;
-    let _e182 = alphaRoughness;
-    let _e183 = diffuseColor;
-    let _e184 = specularColor;
-    pbrParam = PBRParam(_e173, _e174, _e175, _e176, _e177, _e178, _e179, _e180, _e181, _e182, _e183, _e184);
-    let _e186 = pbrParam;
-    param_4 = _e186;
-    let _e187 = CalcMicrofacetstructPBRParamf1f1f1f1f1f1f1vf3vf3f1vf3vf31_((&param_4));
-    D = _e187;
-    let _e188 = pbrParam;
-    param_5 = _e188;
-    let _e189 = CalcGeometricOcculusionstructPBRParamf1f1f1f1f1f1f1vf3vf3f1vf3vf31_((&param_5));
-    G = _e189;
-    let _e190 = pbrParam;
-    param_6 = _e190;
-    let _e191 = CalcFrenelReflectionstructPBRParamf1f1f1f1f1f1f1vf3vf3f1vf3vf31_((&param_6));
-    F = _e191;
-    let _e192 = D;
-    let _e193 = G;
-    let _e195 = F;
-    let _e197 = NdotL_1;
-    let _e199 = NdotV_1;
-    specBRDF = ((_e195 * (_e192 * _e193)) / vec3<f32>(((4.0 * _e197) * _e199)));
-    let _e203 = F;
-    let _e206 = pbrParam;
-    param_7 = _e206;
-    let _e207 = CalcDiffuseBRDFstructPBRParamf1f1f1f1f1f1f1vf3vf3f1vf3vf31_((&param_7));
-    diffuseBRDF = ((vec3<f32>(1.0) - _e203) * _e207);
+    NdotV_1 = clamp(abs(dot(_e168, _e169)), 0.0010000000474974513, 1.0);
+    let _e173 = n;
+    let _e174 = h;
+    NdotH = clamp(dot(_e173, _e174), 0.0, 1.0);
+    let _e177 = l;
+    let _e178 = h;
+    LdotH = clamp(dot(_e177, _e178), 0.0, 1.0);
+    let _e181 = v;
+    let _e182 = h;
+    VdotH = clamp(dot(_e181, _e182), 0.0, 1.0);
+    let _e185 = NdotL_1;
+    let _e186 = NdotV_1;
+    let _e187 = NdotH;
+    let _e188 = LdotH;
+    let _e189 = VdotH;
+    let _e190 = perceptualRoughness;
+    let _e191 = metallic;
+    let _e192 = specularEnvironmentR0_;
+    let _e193 = specularEnvironmentR90_;
+    let _e194 = alphaRoughness;
+    let _e195 = diffuseColor;
+    let _e196 = specularColor;
+    pbrParam = PBRParam(_e185, _e186, _e187, _e188, _e189, _e190, _e191, _e192, _e193, _e194, _e195, _e196);
+    let _e198 = pbrParam;
+    param_4 = _e198;
+    let _e199 = CalcMicrofacetstructPBRParamf1f1f1f1f1f1f1vf3vf3f1vf3vf31_((&param_4));
+    D = _e199;
+    let _e200 = pbrParam;
+    param_5 = _e200;
+    let _e201 = CalcGeometricOcculusionstructPBRParamf1f1f1f1f1f1f1vf3vf3f1vf3vf31_((&param_5));
+    G = _e201;
+    let _e202 = pbrParam;
+    param_6 = _e202;
+    let _e203 = CalcFrenelReflectionstructPBRParamf1f1f1f1f1f1f1vf3vf3f1vf3vf31_((&param_6));
+    F = _e203;
+    let _e204 = D;
+    let _e205 = G;
+    let _e207 = F;
     let _e209 = NdotL_1;
-    let _e211 = specBRDF;
-    let _e212 = diffuseBRDF;
-    let _e214 = ((vec3<f32>(1.0, 1.0, 1.0) * _e209) * (_e211 + _e212));
-    col[0u] = _e214.x;
-    col[1u] = _e214.y;
-    col[2u] = _e214.z;
-    let _e221 = col;
-    let _e223 = pow(_e221.xyz, vec3<f32>(0.4545454680919647, 0.4545454680919647, 0.4545454680919647));
-    col[0u] = _e223.x;
-    col[1u] = _e223.y;
-    col[2u] = _e223.z;
-    let _e231 = baseColor[3u];
-    col[3u] = _e231;
-    let _e233 = col;
-    outColor = _e233;
+    let _e211 = NdotV_1;
+    specularBRDF = ((_e207 * (_e204 * _e205)) / vec3<f32>(((4.0 * _e209) * _e211)));
+    let _e215 = F;
+    let _e218 = pbrParam;
+    param_7 = _e218;
+    let _e219 = CalcDiffuseBRDFstructPBRParamf1f1f1f1f1f1f1vf3vf3f1vf3vf31_((&param_7));
+    diffuseBRDF = ((vec3<f32>(1.0) - _e215) * _e219);
+    let _e221 = NdotL_1;
+    let _e223 = ubo.lightColor;
+    let _e226 = specularBRDF;
+    let _e227 = diffuseBRDF;
+    let _e229 = ((_e223.xyz * _e221) * (_e226 + _e227));
+    col[0u] = _e229.x;
+    col[1u] = _e229.y;
+    col[2u] = _e229.z;
+    let _e236 = col;
+    let _e238 = pow(_e236.xyz, vec3<f32>(0.4545454680919647, 0.4545454680919647, 0.4545454680919647));
+    col[0u] = _e238.x;
+    col[1u] = _e238.y;
+    col[2u] = _e238.z;
+    let _e246 = baseColor[3u];
+    col[3u] = _e246;
+    let _e248 = col;
+    outColor = _e248;
     return;
 }
 

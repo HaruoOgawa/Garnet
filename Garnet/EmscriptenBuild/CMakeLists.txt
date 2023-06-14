@@ -32,6 +32,8 @@ add_executable(
 	../src/File/CFileReader.h
 	../src/GLTF/CGLTFImporter.cpp
 	../src/GLTF/CGLTFImporter.h
+	../src/Graphics/CDrawInfo.cpp
+	../src/Graphics/CDrawInfo.h
 	../src/Graphics/CMaterial.cpp
 	../src/Graphics/CMaterial.h
 	../src/Graphics/CMesh.cpp
@@ -65,6 +67,8 @@ add_executable(
 	../src/GraphicsAPI/WebGPU/CWebGPURenderer.h
 	../src/GraphicsAPI/WebGPU/CWebGPUTexture.cpp
 	../src/GraphicsAPI/WebGPU/CWebGPUTexture.h
+	../src/Input/CInputState.cpp
+	../src/Input/CInputState.h
 	../src/Interface/IApp.h
 	../src/Interface/IBuffer.h
 	../src/Interface/IDescriptor.h

@@ -47,5 +47,14 @@ namespace object
 
 		void SetRootNodeIndexList(const std::vector<std::vector<int>>& RootNodeIndexList);
 		const std::vector<std::vector<int>>& GetRootNodeIndexList() const;
+
+		const glm::vec3& GetPos() const;
+		void SetPos(const glm::vec3& Pos);
+
+		const glm::vec3& GetRot() const;
+		void SetRot(const glm::vec3& Rot);
+
+		const glm::vec3& GetScale() const;
+		void SetScale(const glm::vec3& Scale);
 	};
 }

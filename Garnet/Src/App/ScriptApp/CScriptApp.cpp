@@ -16,6 +16,7 @@ namespace app
 		m_DrawInfo(std::make_shared<graphics::CDrawInfo>())
 	{
 		m_MainCamera->SetPos(glm::vec3(0.0f, 0.0f, 5.0f));
+		m_Projection->SetNear(0.001f);
 	}
 
 	CScriptApp::~CScriptApp()
