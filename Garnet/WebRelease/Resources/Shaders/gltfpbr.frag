@@ -4,6 +4,7 @@ layout(location = 0) in vec3 f_WorldNormal;
 layout(location = 1) in vec2 f_Texcoord;
 layout(location = 2) in vec4 f_WorldPos;
 layout(location = 3) in vec4 f_WorldTangent;
+layout(location = 4) in vec4 f_WorldBioTangent;
 
 layout(location = 0) out vec4 outColor;
 
@@ -23,6 +24,11 @@ layout(binding = 0) uniform UniformBufferObject{
     float metallicFactor;
     float roughnessFactor;
     float normalMapScale;
+
+	float occlusionStrength;
+    float s_pad0;
+    float s_pad1;
+    float s_pad2;
 
     int   useBaseColorTexture;
     int   useMetallicRoughnessTexture;
@@ -155,10 +161,11 @@ vec3 getNormal()
 		// ※ これはメモだが接線空間記事のE1・E2が表すのは面積ではなく、P1・P2・P3を使った『ベクトル』
 		// ※ なのでベクトルで三角形が作れれば計算はできるので、実質Planeではなくポリゴン単位で接線の計算を行うことができる
 		// Shaderベースの頂点算出はパフォーマンス悪いので、ひとまず計算はCPUで行っている
+		// 数式はこれ(https://drive.google.com/file/d/1A4WK5GLRzWRD9yt9_yxSjyz8Yrmb5Is8/view?usp=sharing)
 
-		vec3 n = normalize(f_WorldNormal.xyz);
 		vec3 t = normalize(f_WorldTangent.xyz);
-		vec3 b = normalize(cross(n, t));
+		vec3 b = normalize(f_WorldTangent.xyz);
+		vec3 n = normalize(f_WorldNormal.xyz);
 
 		mat3 tbn = mat3(t, b, n);
 
@@ -171,6 +178,13 @@ vec3 getNormal()
 	}
 
 	return nomral;
+}
+
+// SRGBとは私が今までガンマと思っていた色が暗くなるやつとのこと。今後はSRGBと呼ぼう
+// https://lettier.github.io/3d-game-shaders-for-beginners/gamma-correction.html
+vec4 SRGBtoLINEAR(vec4 srgbIn)
+{
+	return vec4(pow(srgbIn.xyz, vec3(2.2)), srgbIn.a);
 }
 
 void main(){
@@ -276,6 +290,20 @@ void main(){
 
 	// レンダリング方程式を構築
 	col.rgb = NdotL * ubo.lightColor.rgb * (specularBRDF + diffuseBRDF);
+
+	// AO Mapの適応
+	if(ubo.useOcclusionTexture != 0)
+	{ 
+		float ao = texture(sampler2D(occlusionTexture, occlusionTextureSampler), f_Texcoord).r;
+		col.rgb = mix(col.rgb, col.rgb * ao, ubo.occlusionStrength);
+	}
+
+	// Emissive Mapの適応
+	if(ubo.useEmissiveTexture != 0)
+	{
+		vec3 emissive = SRGBtoLINEAR(texture(sampler2D(emissiveTexture, emissiveTextureSampler), f_Texcoord)).rgb * ubo.emissiveFactor.rgb;
+		col.rgb += emissive;
+	}
 
 	// カラースペースをリニアにする
 	col.rgb = pow(col.rgb, vec3(1.0/2.2));

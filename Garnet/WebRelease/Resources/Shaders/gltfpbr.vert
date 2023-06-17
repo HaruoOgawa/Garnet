@@ -4,6 +4,7 @@ layout(location = 0) in vec3 inPosition;
 layout(location = 1) in vec3 inNormal;
 layout(location = 2) in vec2 inTexcoord;
 layout(location = 3) in vec4 inTangent;
+layout(location = 4) in vec4 inBioTangent;
 
 layout(binding = 0) uniform UniformBufferObject{
 	mat4 model;
@@ -22,6 +23,11 @@ layout(binding = 0) uniform UniformBufferObject{
     float roughnessFactor;
     float normalMapScale;
 
+    float occlusionStrength;
+    float s_pad0;
+    float s_pad1;
+    float s_pad2;
+
     int   useBaseColorTexture;
     int   useMetallicRoughnessTexture;
     int   useEmissiveTexture;
@@ -37,6 +43,7 @@ layout(location = 0) out vec3 f_WorldNormal;
 layout(location = 1) out vec2 f_Texcoord;
 layout(location = 2) out vec4 f_WorldPos;
 layout(location = 3) out vec4 f_WorldTangent;
+layout(location = 4) out vec4 f_WorldBioTangent;
 
 #define rot(a) mat2(cos(a), -sin(a), sin(a), cos(a))
 
@@ -48,4 +55,5 @@ void main(){
     f_Texcoord = inTexcoord;
     f_WorldPos = ubo.model * vec4(inPosition, 1.0);
     f_WorldTangent = ubo.model * inTangent;
+    f_WorldBioTangent = ubo.model * inBioTangent;
 }
