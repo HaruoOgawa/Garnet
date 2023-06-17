@@ -3,6 +3,7 @@
 layout(location = 0) in vec3 f_WorldNormal;
 layout(location = 1) in vec2 f_Texcoord;
 layout(location = 2) in vec4 f_WorldPos;
+layout(location = 3) in vec4 f_WorldTangent;
 
 layout(location = 0) out vec4 outColor;
 
@@ -21,12 +22,17 @@ layout(binding = 0) uniform UniformBufferObject{
     float time;
     float metallicFactor;
     float roughnessFactor;
-    int   useBaseColorTexture;
+    float normalMapScale;
 
+    int   useBaseColorTexture;
     int   useMetallicRoughnessTexture;
     int   useEmissiveTexture;
     int   useNormalTexture;
+    
     int   useOcclusionTexture;
+    int   t_pad_0;
+    int   t_pad_1;
+    int   t_pad_2;
 } ubo;
 
 layout(binding = 1) uniform texture2D baseColorTexture;
@@ -117,6 +123,7 @@ vec3 CalcFrenelReflection(PBRParam param)
 	// 基本の反射率: reflectance0
 	// それに対して視野方向による反射率の変化分を加算している
 	// 割と数式だとreflectance90は1.0なので今はあんまり深く考えなくてもいいかも？
+	// もしかしてreflectance90は媒質の屈折率に関係している？真空だと1.0なので、他の数式とかだとひとます真空と仮定している？
 	return param.reflectance0 + (param.reflectance90 - param.reflectance0) * pow(clamp(1.0 - param.VdotH, 0.0, 1.0), 5.0);
 }
 
@@ -126,6 +133,44 @@ vec3 CalcFrenelReflection(PBRParam param)
 vec3 CalcDiffuseBRDF(PBRParam param)
 {
 	return param.diffuseColor / PI;
+}
+
+// 法線の取得(ノーマルマップを使うことがある. → ついでに勉強する)
+vec3 getNormal()
+{
+	vec3 nomral = vec3(0.0);
+
+	if(ubo.useNormalTexture != 0)
+	{
+		// Tangent, SubTangent, Normalで構成される座標変換ベクトルを作成する
+		// このような変換行列のことを頭文字をとって TBN Matrix と呼ぶ
+		// 法線マップの示す法線方向は常に定数であり、オブジェクトを回転させるとワールド座標上の向きが合わなくなるので、座標変換して正しいものにする必要がある
+		// 例えばZ軸正を示す法線マップを持つPlaneオブジェクトをX軸を基準に90度回転させると、法線方向はY軸正になるのが正しいはずなのに、法線マップの値が定数であるため、
+		// そのままZ軸正を示しライティングがおかしなことになる
+		// https://learnopengl.com/Advanced-Lighting/Normal-Mapping#:~:text=tangent%20space.-,Tangent%20space,-Normal%20vectors%20in
+		// TBN Matrixの計算手法
+		// 法線は良しなに.
+		// 接点と複接線のベクトル方向がサーフェイスのテクスチャ座標の方向と一致しているということを利用して計算する(上記の接線空間の項目より)
+		// 三角形の頂点とそのテクスチャ座標から接線と複接線を計算することができる
+		// ※ これはメモだが接線空間記事のE1・E2が表すのは面積ではなく、P1・P2・P3を使った『ベクトル』
+		// ※ なのでベクトルで三角形が作れれば計算はできるので、実質Planeではなくポリゴン単位で接線の計算を行うことができる
+		// Shaderベースの頂点算出はパフォーマンス悪いので、ひとまず計算はCPUで行っている
+
+		vec3 n = normalize(f_WorldNormal.xyz);
+		vec3 t = normalize(f_WorldTangent.xyz);
+		vec3 b = normalize(cross(n, t));
+
+		mat3 tbn = mat3(t, b, n);
+
+		nomral = texture(sampler2D(normalTexture, normalTextureSampler), f_Texcoord).rgb;
+		nomral = normalize( tbn * ((2.0 * nomral - 1.0) * vec3(ubo.normalMapScale, ubo.normalMapScale, 1.0)) );
+	}
+	else
+	{
+		nomral = f_WorldNormal;
+	}
+
+	return nomral;
 }
 
 void main(){
@@ -186,7 +231,7 @@ void main(){
 	vec3 specularEnvironmentR90 = vec3(1.0, 1.0, 1.0) * reflectance90; // 急勾配ば反射率
 
 	// PBRに使うベクトル系のパラメーターを計算する
-	vec3 n = f_WorldNormal;
+	vec3 n = getNormal();
 	vec3 v = normalize(ubo.cameraPos.xyz - f_WorldPos.xyz);
 	vec3 l = normalize(ubo.lightDir.xyz);
 	// ハーフベクトルはvとlの中間ベクトル
@@ -237,33 +282,6 @@ void main(){
 
 	// アルファを指定
 	col.a = baseColor.a;
-
-	//
-	//vec4 emissiveColor = texture(sampler2D(emissiveTexture, emissiveTextureSampler), f_Texcoord);
-	//vec4 normalColor = texture(sampler2D(normalTexture, normalTextureSampler), f_Texcoord);
-	//vec4 occlusionColor = texture(sampler2D(occlusionTexture, occlusionTextureSampler), f_Texcoord);
-
-	/*float loopTime = mod(ubo.time * 0.1, 1.0);
-	if(loopTime >= 0.0 && loopTime < 0.2)
-	{
-		col.rgb = baseColor.rgb;
-	}
-	else if(loopTime >= 0.2 && loopTime < 0.4)
-	{
-		col.rgb = metallicRoughnessColor.rgb;
-	}
-	else if(loopTime >= 0.4 && loopTime < 0.6)
-	{
-		col.rgb = emissiveColor.rgb;
-	}
-	else if(loopTime >= 0.6 && loopTime < 0.8)
-	{
-		col.rgb = normalColor.rgb;
-	}
-	else if(loopTime >= 0.8 && loopTime < 1.0)
-	{
-		col.rgb = occlusionColor.rgb;
-	}*/
 
 	outColor = col;
 }
