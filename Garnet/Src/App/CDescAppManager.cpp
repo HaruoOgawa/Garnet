@@ -13,6 +13,8 @@
 #include "../GraphicsAPI/Vulkan/CVulkanAPI.h"
 #endif // __DAWN__
 
+#include "../Input/CInputState.h"
+
 #include "./ScriptApp/CScriptApp.h"
 #include "./EditorApp/CEditorApp.h"
 #include "./MainApp/CMainApp.h"
@@ -26,7 +28,8 @@ namespace descapp
 		m_GraphicsAPI(nullptr),
 		m_App(nullptr),
 		m_IsRunLoop(g_IsRunLoop),
-		m_SecondsTime(0.0f),
+		m_SecondsTime(0.0f), 
+		m_InputState(std::make_shared<input::CInputState>()),
 		m_DeltaSecondsTime(0.0f)
 	{
 		//
@@ -126,6 +129,19 @@ namespace descapp
 		g_IsRunLoop = false;
 	}
 
+	void MousebuttonCallback(GLFWwindow* window, int button, int action, int mods)
+	{
+		if (button == GLFW_MOUSE_BUTTON_LEFT)
+		{
+			double PosX, PosY;
+			glfwGetCursorPos(window, &PosX, &PosY);
+
+			auto AppManager = reinterpret_cast<CDescAppManager*>(glfwGetWindowUserPointer(window));
+			auto InputState = AppManager->GetInputState();
+			InputState->SetMouseState(glm::vec2(static_cast<float>(PosX), static_cast<float>(PosY)), (button == GLFW_MOUSE_BUTTON_LEFT));
+		}
+	}
+
 	bool CDescAppManager::InitWindow()
 	{
 		glfwInit();
@@ -139,6 +155,7 @@ namespace descapp
 		glfwSetKeyCallback(m_pWindow, Key_Callback);
 		glfwSetFramebufferSizeCallback(m_pWindow, Resize_Callback);
 		glfwSetWindowCloseCallback(m_pWindow, Close_Callback);
+		glfwSetMouseButtonCallback(m_pWindow, MousebuttonCallback);
 
 		return true;
 	}
@@ -159,6 +176,8 @@ namespace descapp
 
 			if (!Update()) return false;
 			if (!Draw()) return false;
+
+			m_InputState->Clear();
 		}
 		else
 		{

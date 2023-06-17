@@ -9,6 +9,10 @@ namespace camera
 	{
 	}
 
+	void CCamera::Update(float SecondsTime)
+	{
+	}
+
 	glm::mat4 CCamera::GetViewMatrix()
 	{
 		glm::mat4 vmat = glm::lookAt(m_Pos, m_Center, m_Up);

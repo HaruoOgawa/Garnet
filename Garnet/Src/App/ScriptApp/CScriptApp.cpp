@@ -55,6 +55,8 @@ namespace app
 
 	bool CScriptApp::Update(api::IGraphicsAPI* pGraphicsAPI, float SecondsTime)
 	{
+		m_MainCamera->Update(SecondsTime);
+
 		if (!m_ScriptScene->Update(pGraphicsAPI, SecondsTime, m_MainCamera, m_Projection, m_DrawInfo)) return false;
 
 		return true;
