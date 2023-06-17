@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <vector>
+#include <string>
 #include "../Graphics/CMesh.h"
 #include "../Math/CTransform.h"
 
@@ -15,18 +16,29 @@ namespace object
 {
 	class CNode
 	{
-		std::shared_ptr<math::CTransform> m_Transform;
-		std::shared_ptr<graphics::CMesh>  m_Mesh;
+		std::string						  m_Name;
+
+		int								  m_MeshIndex;
+
+		std::shared_ptr<math::CTransform> m_LocalTransform;
+		glm::mat4						  m_WorldMatrix;
+		std::vector<int>                  m_ChildrenNodeIndexList;
 		std::vector<int>                  m_DynamicOffsetNumList;
 
 	public:
-		CNode(const std::shared_ptr<graphics::CMesh>& Mesh, const std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList);
+		CNode(int MeshIndex, const std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, const std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList);
 		virtual ~CNode();
 
-		const std::shared_ptr<graphics::CMesh>& GetMesh() const;
+		void SetName(const std::string& Name);
 
-		void SetTransform(std::shared_ptr<math::CTransform>& Transform);
-		const std::shared_ptr<math::CTransform>& GetTransform() const;
+		void SetMeshIndex(int MeshIndex);
+		int GetMeshIndex() const;
+
+		void SetLocalTransform(std::shared_ptr<math::CTransform>& LocalTransform);
+		const std::shared_ptr<math::CTransform>& GetLocalTransform() const;
+
+		void SetWorldMatrix(const glm::mat4& WorldMatrix);
+		const glm::mat4& GetWorldMatrix() const;
 
 		const glm::vec3& GetPos() const;
 		void SetPos(const glm::vec3& Pos);
@@ -36,6 +48,9 @@ namespace object
 
 		const glm::vec3& GetScale() const;
 		void SetScale(const glm::vec3& Scale);
+
+		const std::vector<int>& GetChildrenNodeIndexList() const;
+		void SetChildrenNodeIndexList(const std::vector<int>& NodeList);
 
 		const std::vector<int>& GetDynamicOffsetNumList() const;
 	};

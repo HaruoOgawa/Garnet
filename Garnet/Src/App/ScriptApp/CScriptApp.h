@@ -7,6 +7,7 @@
 namespace scene { class CScriptScene; }
 namespace camera { class CCamera; }
 namespace projection { class CProjection; }
+namespace graphics { class CDrawInfo; }
 
 namespace app
 {
@@ -15,6 +16,7 @@ namespace app
 		std::shared_ptr<scene::CScriptScene> m_ScriptScene;
 		std::shared_ptr<camera::CCamera> m_MainCamera;
 		std::shared_ptr<projection::CProjection> m_Projection;
+		std::shared_ptr<graphics::CDrawInfo> m_DrawInfo;
 	public:
 		CScriptApp();
 		virtual ~CScriptApp();

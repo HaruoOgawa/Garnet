@@ -27,6 +27,11 @@ namespace graphics
 			Console::Log("[ERROR] BindingIndex is out of range. %d\n", BindingIndex);
 			return;
 		}
+		else if (BindingIndex >= 1 && BindingIndex < m_BindingLayoutList.size() && m_BindingLayoutList[BindingIndex - 1].ByteSize < 256)
+		{
+			Console::Log("[WARNING] UBO(%d) is smaller than 256 byte.(UBO ByteSize: %d) But you are going to use the following buffer.\n",
+				BindingIndex - 1, m_BindingLayoutList[BindingIndex - 1].ByteSize);
+		}
 
 		// BUFFER
 		int ByteOffset = static_cast<int>(m_Buffer.size());

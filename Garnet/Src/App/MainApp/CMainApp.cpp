@@ -1,5 +1,7 @@
 #include "CMainApp.h"
 
+// CMainApp はシーンファイル(JSON or 独自ファイル)でシーンを構築してくアプリ。シーンファイルはCEditorAppで作成する
+
 namespace app
 {
 	CMainApp::CMainApp()

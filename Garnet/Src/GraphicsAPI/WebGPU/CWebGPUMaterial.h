@@ -12,6 +12,7 @@ namespace graphics{ class CMaterialCreateInfo; }
 namespace api
 {
 	class CWebGPUAPI;
+	class CWebGPUTexture;
 
 	class CWebGPUMaterial : public graphics::CMaterial
 	{
@@ -29,6 +30,9 @@ namespace api
 		// BindGroup
 		WGPUBindGroupLayout m_BindGroupLayout;
 		WGPUBindGroup m_BindGroup;
+
+		// Texture
+		std::shared_ptr<CWebGPUTexture> m_EmptyTexture;
 	private:
 		// WebGPU Main Logic /////////////////////////////////////////////////////////////////////
 		bool CreateShaderStages(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo);
@@ -45,7 +49,7 @@ namespace api
 		virtual ~CWebGPUMaterial();
 
 		virtual bool Create(const std::vector<std::shared_ptr<graphics::CTexture>>& TextureList) override;
-		virtual bool Update(float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection) override;
+		virtual bool Update(float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo) override;
 		virtual bool BuildDrawBuffer(int DynamicOffsetNum) override;
 
 		virtual void SetUniformValue(const std::string Name, const void* Value, int DynamicOffsetNum = -1) override;

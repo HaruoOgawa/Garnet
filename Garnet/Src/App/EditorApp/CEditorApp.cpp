@@ -1,5 +1,7 @@
 #include "CEditorApp.h"
 
+// CEditorApp はCMainAppで使うシーンファイルを作成するためのアプリ
+
 namespace app
 {
 	CEditorApp::CEditorApp()

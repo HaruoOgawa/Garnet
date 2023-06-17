@@ -5,6 +5,8 @@
 #define GLFW_INCLUDE_VULKAN
 #define GLFW_EXPOSE_NATIVE_WIN32
 
+#include <memory>
+
 #include <glfw3.h>
 #include <glfw3native.h>
 #include <glm/glm.hpp>
@@ -18,6 +20,7 @@ namespace graphics { class CMaterialCreateInfo; }
 namespace api
 {
 	class CVulkanAPI;
+	class CVulkanTexture;
 
 	class CVulkanMaterial : public graphics::CMaterial
 	{
@@ -38,6 +41,9 @@ namespace api
 
 		VkDescriptorPool m_DescriptorPool;
 		std::vector<VkDescriptorSet> m_DescriptorSets;
+
+		// Texture
+		std::shared_ptr<CVulkanTexture> m_EmptyTexture;
 	private:
 		// Vulkanメインロジック /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		bool CreateShaderStages(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo);
@@ -56,7 +62,7 @@ namespace api
 		virtual ~CVulkanMaterial();
 
 		virtual bool Create(const std::vector<std::shared_ptr<graphics::CTexture>>& TextureList) override;
-		virtual bool Update(float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection) override;
+		virtual bool Update(float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo) override;
 		virtual bool BuildDrawBuffer(int DynamicOffsetNum) override;
 
 		virtual void SetUniformValue(const std::string Name, const void* Value, int DynamicOffsetNum = -1) override;

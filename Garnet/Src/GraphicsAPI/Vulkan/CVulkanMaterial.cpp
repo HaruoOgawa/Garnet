@@ -19,8 +19,13 @@ namespace api
 		m_FragShaderModule(nullptr),
 
 		m_DescriptorSetLayout(nullptr),
-		m_DescriptorPool(nullptr)
+		m_DescriptorPool(nullptr),
+
+		m_EmptyTexture(nullptr)
 	{
+		m_EmptyTexture = std::make_shared<CVulkanTexture>(pGraphicsAPI);
+		std::vector<unsigned char> emptyPixel = { 0, 0, 0, 0 };
+		m_EmptyTexture->Create(emptyPixel, static_cast<int>(emptyPixel.size() * sizeof(unsigned char)));
 	}
 
 	CVulkanMaterial::~CVulkanMaterial()
@@ -46,12 +51,16 @@ namespace api
 		return true;
 	}
 
-	bool CVulkanMaterial::Update(float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection)
+	bool CVulkanMaterial::Update(float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo)
 	{
 		// 共通のユニフォームバッファの更新
 		SetUniformValue("view", &Camera->GetViewMatrix()[0][0]);
 		SetUniformValue("proj", &Projection->GetPrejectionMatrix()[0][0]);
+		SetUniformValue("lightDir", &DrawInfo->GetLightDir()[0]);
+		SetUniformValue("lightColor", &DrawInfo->GetLightColor()[0]);
+		SetUniformValue("cameraPos", &Camera->GetPos()[0]);
 		SetUniformValue("time", &SecondsTime);
+		
 		return true;
 	}
 
@@ -406,10 +415,10 @@ namespace api
 				}
 
 				// テクスチャ
-				for (int TexLayoutIndex = 0, TextureIndex = 0; TexLayoutIndex < TexLayoutSize; TexLayoutIndex += 2, TextureIndex++)
+				for (int ImageInfoIndex = 0, TextureBindingLayoutIndex = 0; ImageInfoIndex < TexLayoutSize; ImageInfoIndex += 2, TextureBindingLayoutIndex++)
 				{
-					const auto& TexLayout = m_TextureBindingLayoutList[TextureIndex];
-					const auto& Texture = static_cast<api::CVulkanTexture*>(TextureList[TexLayout.TextureIndex].get());
+					const auto& TexLayout = m_TextureBindingLayoutList[TextureBindingLayoutIndex];
+					const auto& Texture = (TexLayout.TextureIndex >= 0) ? static_cast<api::CVulkanTexture*>(TextureList[TexLayout.TextureIndex].get()) : m_EmptyTexture.get();
 
 					{
 						descriptorWrites[LayoutIndex].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -417,12 +426,12 @@ namespace api
 						descriptorWrites[LayoutIndex].dstBinding = TexLayout.ViewBindingIndex; // layout(location = n)
 						descriptorWrites[LayoutIndex].dstArrayElement = 0; // ???
 
-						imageInfoList[TexLayoutIndex].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-						imageInfoList[TexLayoutIndex].imageView = Texture->GetTextureImageView();
+						imageInfoList[ImageInfoIndex].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+						imageInfoList[ImageInfoIndex].imageView = Texture->GetTextureImageView();
 
 						descriptorWrites[LayoutIndex].descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
 						descriptorWrites[LayoutIndex].descriptorCount = 1;
-						descriptorWrites[LayoutIndex].pImageInfo = &imageInfoList[TexLayoutIndex];
+						descriptorWrites[LayoutIndex].pImageInfo = &imageInfoList[ImageInfoIndex];
 
 						LayoutIndex++;
 					}
@@ -433,11 +442,11 @@ namespace api
 						descriptorWrites[LayoutIndex].dstBinding = TexLayout.SamplerBindingIndex; // layout(location = n)
 						descriptorWrites[LayoutIndex].dstArrayElement = 0; // ???
 
-						imageInfoList[TexLayoutIndex + 1].sampler = Texture->GetTextureSampler();
+						imageInfoList[ImageInfoIndex + 1].sampler = Texture->GetTextureSampler();
 
 						descriptorWrites[LayoutIndex].descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER;
 						descriptorWrites[LayoutIndex].descriptorCount = 1;
-						descriptorWrites[LayoutIndex].pImageInfo = &imageInfoList[TexLayoutIndex + 1];
+						descriptorWrites[LayoutIndex].pImageInfo = &imageInfoList[ImageInfoIndex + 1];
 
 						LayoutIndex++;
 					}

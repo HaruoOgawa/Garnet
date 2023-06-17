@@ -52,6 +52,8 @@ namespace scene
 
 		//m_glTFData->ReadFile(ModelPath + "Triangle\\glTF\\Triangle.glb");
 		m_glTFData->ReadFile(ModelPath + "DamagedHelmet\\glTF-Binary\\DamagedHelmet.glb");
+		//m_glTFData->ReadFile(ModelPath + "MetalRoughSpheresNoTextures\\glTF-Binary\\MetalRoughSpheresNoTextures.glb");
+		//m_glTFObj->SetPos(glm::vec3(-0.003f, -0.003f, 4.99f));
 
 		return true;
 	}
@@ -144,16 +146,19 @@ namespace scene
 			{
 				std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(nullptr, 0, graphics::EPresetPrimitiveType::BOARD);
 				Mesh0->AddPrimitive(Primitive);
+				m_TestObject->AddMesh(Mesh0);
 			}
 			
 			{
 				std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(nullptr, 1, graphics::EPresetPrimitiveType::BOARD);
 				Mesh1->AddPrimitive(Primitive);
+				m_TestObject->AddMesh(Mesh1);
 			}
 
 			// NODE
 			{
-				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(Mesh0, m_TestObject->GetMaterialList());
+				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(0, m_TestObject->GetMeshList(), m_TestObject->GetMaterialList());
+				Node->SetMeshIndex(0);
 				Node->SetPos(glm::vec3(0.0f, 0.0f, -0.25f));
 				Node->SetRot(glm::vec3(0.0f, 0.0f, 45.0f));
 				Node->SetScale(glm::vec3(1.0f, 0.1f, 1.0f) * 5.0f);
@@ -161,7 +166,8 @@ namespace scene
 			}
 
 			{
-				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(Mesh1, m_TestObject->GetMaterialList());
+				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(1, m_TestObject->GetMeshList(), m_TestObject->GetMaterialList());
+				Node->SetMeshIndex(1);
 				Node->SetPos(glm::vec3(-0.25f, 0.0f, -1.0f));
 				Node->SetRot(glm::vec3(0.0f, 0.0f, 45.0f));
 				Node->SetScale(glm::vec3(1.0f, 1.0f, 1.0f) * 5.0f);
@@ -169,7 +175,8 @@ namespace scene
 			}
 
 			{
-				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(Mesh0, m_TestObject->GetMaterialList());
+				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(0, m_TestObject->GetMeshList(), m_TestObject->GetMaterialList());
+				Node->SetMeshIndex(0);
 				Node->SetPos(glm::vec3(0.5f, 0.0f, -2.0f));
 				Node->SetScale(glm::vec3(1.0f, 1.0f, 1.0f) * 5.0f);
 				m_TestObject->AddNode(Node);
@@ -191,18 +198,18 @@ namespace scene
 		return true;
 	}
 
-	bool CScriptScene::Update(api::IGraphicsAPI* pGraphicsAPI, float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection)
+	bool CScriptScene::Update(api::IGraphicsAPI* pGraphicsAPI, float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo)
 	{
 		if (m_IsLoaded && m_TestObject)
 		{
 			m_TestObject->GetNodeList()[0]->SetRot(glm::vec3(SecondsTime));
 
-			if (!m_TestObject->Update(SecondsTime, Camera, Projection)) return false;
+			if (!m_TestObject->Update(SecondsTime, Camera, Projection, DrawInfo)) return false;
 		}
 		
 		if (m_IsLoaded && m_glTFObj)
 		{
-			if (!m_glTFObj->Update(SecondsTime, Camera, Projection)) return false;
+			if (!m_glTFObj->Update(SecondsTime, Camera, Projection, DrawInfo)) return false;
 		}
 
 		if (!m_IsLoaded)
