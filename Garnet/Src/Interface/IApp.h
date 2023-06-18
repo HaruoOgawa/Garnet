@@ -1,6 +1,9 @@
 #pragma once
 
 #include "IGraphicsAPI.h"
+#include <memory>
+
+namespace camera { class CCamera; }
 
 namespace app
 {
@@ -13,5 +16,7 @@ namespace app
 		virtual bool Resize(int Width, int Height) = 0;
 		virtual bool Update(api::IGraphicsAPI* pGraphicsAPI, float SecondsTime) = 0;
 		virtual bool Draw(api::IGraphicsAPI* pGraphicsAPI) = 0;
+
+		virtual const std::shared_ptr<camera::CCamera>& GetMainCamera() const = 0;
 	};
 }

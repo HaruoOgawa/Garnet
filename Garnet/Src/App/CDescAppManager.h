@@ -20,6 +20,8 @@ namespace api { class CVulkanAPI; }
 #endif
 namespace app{ class IApp; }
 
+namespace input { class CInputState; }
+
 namespace descapp
 {
 	class CDescAppManager
@@ -31,6 +33,8 @@ namespace descapp
 		std::shared_ptr<api::CVulkanAPI> m_GraphicsAPI;
 #endif
 		std::shared_ptr<app::IApp> m_App;
+
+		std::shared_ptr<input::CInputState> m_InputState;
 
 		const int WIDTH = 1920;
 		const int HEIGHT = 1080;
@@ -54,6 +58,8 @@ namespace descapp
 		bool RunLopp();
 
 		bool IsRunLoop() { return m_IsRunLoop; }
+
+		const std::shared_ptr<input::CInputState>& GetInputState()const { return m_InputState; }
 
 		void ResizeWindow(int w, int h);
 	};

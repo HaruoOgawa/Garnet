@@ -2,11 +2,18 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtx/quaternion.hpp>
+#include <memory>
+
+#ifdef USE_INPUT_SYSTEM
+#include "../Input/CInputState.h"
+#endif // USE_INPUT_SYSTEM
+
 
 namespace camera
 {
 	class CCamera
 	{
+	protected:
 		glm::vec3 m_Pos;
 		glm::vec3 m_Center;
 		const glm::vec3 m_Up;
@@ -14,12 +21,16 @@ namespace camera
 		CCamera();
 		virtual ~CCamera() = default;
 
-		glm::mat4 GetViewMatrix();
+#ifdef USE_INPUT_SYSTEM
+		virtual void Update(float SecondsTime, const std::shared_ptr<input::CInputState>& InputState);
+#endif // USE_INPUT_SYSTEM
 
-		void SetPos(const glm::vec3& Pos);
-		const glm::vec3& GetPos() const;
+		virtual glm::mat4 GetViewMatrix();
 
-		void SetCenter(const glm::vec3& Center);
-		const glm::vec3& GetCenter() const;
+		virtual void SetPos(const glm::vec3& Pos);
+		virtual const glm::vec3& GetPos() const;
+
+		virtual void SetCenter(const glm::vec3& Center);
+		virtual const glm::vec3& GetCenter() const;
 	};
 }

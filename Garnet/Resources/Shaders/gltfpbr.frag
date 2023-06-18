@@ -25,6 +25,11 @@ layout(binding = 0) uniform UniformBufferObject{
     float roughnessFactor;
     float normalMapScale;
 
+	float occlusionStrength;
+    float s_pad0;
+    float s_pad1;
+    float s_pad2;
+
     int   useBaseColorTexture;
     int   useMetallicRoughnessTexture;
     int   useEmissiveTexture;
@@ -175,6 +180,13 @@ vec3 getNormal()
 	return nomral;
 }
 
+// SRGBとは私が今までガンマと思っていた色が暗くなるやつとのこと。今後はSRGBと呼ぼう
+// https://lettier.github.io/3d-game-shaders-for-beginners/gamma-correction.html
+vec4 SRGBtoLINEAR(vec4 srgbIn)
+{
+	return vec4(pow(srgbIn.xyz, vec3(2.2)), srgbIn.a);
+}
+
 void main(){
 	vec4 col = vec4(1.0);
 
@@ -278,6 +290,20 @@ void main(){
 
 	// レンダリング方程式を構築
 	col.rgb = NdotL * ubo.lightColor.rgb * (specularBRDF + diffuseBRDF);
+
+	// AO Mapの適応
+	if(ubo.useOcclusionTexture != 0)
+	{ 
+		float ao = texture(sampler2D(occlusionTexture, occlusionTextureSampler), f_Texcoord).r;
+		col.rgb = mix(col.rgb, col.rgb * ao, ubo.occlusionStrength);
+	}
+
+	// Emissive Mapの適応
+	if(ubo.useEmissiveTexture != 0)
+	{
+		vec3 emissive = SRGBtoLINEAR(texture(sampler2D(emissiveTexture, emissiveTextureSampler), f_Texcoord)).rgb * ubo.emissiveFactor.rgb;
+		col.rgb += emissive;
+	}
 
 	// カラースペースをリニアにする
 	col.rgb = pow(col.rgb, vec3(1.0/2.2));

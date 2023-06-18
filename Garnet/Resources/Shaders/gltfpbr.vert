@@ -23,6 +23,11 @@ layout(binding = 0) uniform UniformBufferObject{
     float roughnessFactor;
     float normalMapScale;
 
+    float occlusionStrength;
+    float s_pad0;
+    float s_pad1;
+    float s_pad2;
+
     int   useBaseColorTexture;
     int   useMetallicRoughnessTexture;
     int   useEmissiveTexture;

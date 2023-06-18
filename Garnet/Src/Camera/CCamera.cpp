@@ -9,6 +9,12 @@ namespace camera
 	{
 	}
 
+#ifdef USE_INPUT_SYSTEM
+	void CCamera::Update(float SecondsTime, const std::shared_ptr<input::CInputState>& InputState)
+	{
+	}
+#endif // USE_INPUT_SYSTEM
+
 	glm::mat4 CCamera::GetViewMatrix()
 	{
 		glm::mat4 vmat = glm::lookAt(m_Pos, m_Center, m_Up);

@@ -230,7 +230,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;USE_TEXTURE_LOADER;USE_GLTF;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;USE_TEXTURE_LOADER;USE_GLTF;USE_VIEWER_CAMERA;USE_INPUT_SYSTEM;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(ProjectDir)src\Library\glm;$(ProjectDir)src\Library\GLFW\include;$(ProjectDir)src\Library\Vulkan\include;$(ProjectDir)src\Library\tinygltf\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -255,7 +255,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;__DAWN__;USE_TEXTURE_LOADER;USE_GLTF;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;__DAWN__;USE_TEXTURE_LOADER;USE_GLTF;USE_VIEWER_CAMERA;USE_INPUT_SYSTEM;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(ProjectDir)src\Library\glm;$(ProjectDir)src\Library\GLFW\include;$(ProjectDir)src\Library\WebGPU;$(ProjectDir)src\Library\glfw3webgpu;$(ProjectDir)src\Library\tinygltf\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -282,7 +282,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions);USE_TEXTURE_LOADER;USE_GLTF</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions);USE_TEXTURE_LOADER;USE_GLTF;USE_VIEWER_CAMERA;USE_INPUT_SYSTEM</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(ProjectDir)src\Library\glm;$(ProjectDir)src\Library\GLFW\include;$(ProjectDir)src\Library\Vulkan\include;$(ProjectDir)src\Library\tinygltf\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -310,7 +310,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;__DAWN__;%(PreprocessorDefinitions);USE_TEXTURE_LOADER;USE_GLTF</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;__DAWN__;%(PreprocessorDefinitions);USE_TEXTURE_LOADER;USE_GLTF;USE_VIEWER_CAMERA;USE_INPUT_SYSTEM</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(ProjectDir)src\Library\glm;$(ProjectDir)src\Library\GLFW\include;$(ProjectDir)src\Library\WebGPU;$(ProjectDir)src\Library\glfw3webgpu;$(ProjectDir)src\Library\tinygltf\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -335,6 +335,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Src\Camera\CViewerCamera.h" />
     <ClInclude Include="Src\Input\CInputState.h" />
     <ClInclude Include="Src\Graphics\CDrawInfo.h" />
     <ClInclude Include="Src\GLTF\CGLTFImporter.h" />
@@ -681,6 +682,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClInclude Include="Src\Interface\IRenderer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\Camera\CViewerCamera.cpp" />
     <ClCompile Include="Src\Input\CInputState.cpp" />
     <ClCompile Include="Src\Graphics\CDrawInfo.cpp" />
     <ClCompile Include="Src\GLTF\CGLTFImporter.cpp" />

@@ -5,13 +5,21 @@
 #include "../../Camera/CCamera.h"
 #include "../../Projection/CProjection.h"
 
+#ifdef USE_VIEWER_CAMERA
+#include "../../Camera/CViewerCamera.h"
+#endif // USE_VIEWER_CAMERA
+
 // CScriptApp は旧エンジンでもやっていたof風にCppでエンジンコードを直接シーンを構築していくアプリ
 
 namespace app
 {
 	CScriptApp::CScriptApp():
 		m_ScriptScene(nullptr),
+#ifdef USE_VIEWER_CAMERA
+		m_MainCamera(std::make_shared<camera::CViewerCamera>()),
+#else
 		m_MainCamera(std::make_shared<camera::CCamera>()),
+#endif // USE_VIEWER_CAMERA
 		m_Projection(std::make_shared<projection::CProjection>()),
 		m_DrawInfo(std::make_shared<graphics::CDrawInfo>())
 	{
@@ -69,5 +77,10 @@ namespace app
 		if (!pGraphicsAPI->EndRender()) return false;
 
 		return true;
+	}
+
+	const std::shared_ptr<camera::CCamera>& CScriptApp::GetMainCamera() const
+	{
+		return m_MainCamera;
 	}
 }

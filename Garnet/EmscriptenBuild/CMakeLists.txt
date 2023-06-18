@@ -10,6 +10,8 @@ add_definitions(
 	-D__DAWN__
 	-DUSE_TEXTURE_LOADER
 	-DUSE_GLTF
+	-DUSE_VIEWER_CAMERA
+	-DUSE_INPUT_SYSTEM
 )
 
 add_executable(
@@ -27,6 +29,8 @@ add_executable(
 	../src/App/ScriptApp/CScriptApp.h
 	../src/Camera/CCamera.cpp
 	../src/Camera/CCamera.h
+	../src/Camera/CViewerCamera.cpp
+	../src/Camera/CViewerCamera.h
 	../src/Debug/Message/Console.h
 	../src/File/CFileReader.cpp
 	../src/File/CFileReader.h

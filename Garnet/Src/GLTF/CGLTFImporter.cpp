@@ -157,6 +157,7 @@ namespace gltf
 			float metallicFactor = static_cast<float>(pbrParam.metallicFactor);
 			float roughnessFactor = static_cast<float>(pbrParam.roughnessFactor);
 			float normalMapScale = static_cast<float>(glTfMaterial.normalTexture.scale);
+			float occlusionStrength = static_cast<float>(glTfMaterial.occlusionTexture.strength);
 
 			// Tex
 			int baseColorTextureIndex = pbrParam.baseColorTexture.index;
@@ -224,6 +225,11 @@ namespace gltf
 					UniformBuffer->AddData("metallicFactor", &metallicFactor, sizeof(float), 0);
 					UniformBuffer->AddData("roughnessFactor", &roughnessFactor, sizeof(float), 0);
 					UniformBuffer->AddData("normalMapScale", &normalMapScale, sizeof(float), 0);
+
+					UniformBuffer->AddData("occlusionStrength", &occlusionStrength, sizeof(float), 0);
+					UniformBuffer->AddData("s_pad0", &val, sizeof(float), 0);
+					UniformBuffer->AddData("s_pad1", &val, sizeof(float), 0);
+					UniformBuffer->AddData("s_pad2", &val, sizeof(float), 0);
 				}
 
 				// テクスチャを紐づける

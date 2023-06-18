@@ -13,6 +13,12 @@
 #include "../GraphicsAPI/Vulkan/CVulkanAPI.h"
 #endif // __DAWN__
 
+#ifdef USE_VIEWER_CAMERA
+#include "../../Camera/CViewerCamera.h"
+#endif // USE_VIEWER_CAMERA
+
+#include "../Input/CInputState.h"
+
 #include "./ScriptApp/CScriptApp.h"
 #include "./EditorApp/CEditorApp.h"
 #include "./MainApp/CMainApp.h"
@@ -26,7 +32,8 @@ namespace descapp
 		m_GraphicsAPI(nullptr),
 		m_App(nullptr),
 		m_IsRunLoop(g_IsRunLoop),
-		m_SecondsTime(0.0f),
+		m_SecondsTime(0.0f), 
+		m_InputState(std::make_shared<input::CInputState>()),
 		m_DeltaSecondsTime(0.0f)
 	{
 		//
@@ -126,6 +133,53 @@ namespace descapp
 		g_IsRunLoop = false;
 	}
 
+	void MousebuttonCallback(GLFWwindow* window, int button, int action, int mods)
+	{
+		auto AppManager = reinterpret_cast<CDescAppManager*>(glfwGetWindowUserPointer(window));
+		auto InputState = AppManager->GetInputState();
+
+		if (button == GLFW_MOUSE_BUTTON_LEFT)
+		{
+			InputState->SetDownMouseLeft((action != GLFW_RELEASE));
+
+			// à íuÇê≥ãKâªÇ∑ÇÈ
+			double PosX, PosY;
+			glfwGetCursorPos(window, &PosX, &PosY);
+			
+			int w, h;
+			glfwGetWindowSize(window, &w, &h);
+
+			float rPosX = static_cast<float>(PosX) / static_cast<float>(w);
+			float rPosY = static_cast<float>(PosY) / static_cast<float>(h);
+
+			rPosX = rPosX * 2.0f - 1.0f;
+			rPosY = rPosY * 2.0f - 1.0f;
+
+			InputState->StartMousePos(glm::vec2(rPosX, rPosY));
+		}
+	}
+
+	void CursorPosCallback(GLFWwindow* window, double PosX, double PosY)
+	{
+		auto AppManager = reinterpret_cast<CDescAppManager*>(glfwGetWindowUserPointer(window));
+		auto InputState = AppManager->GetInputState();
+
+		if (InputState->IsDownMouseLeft())
+		{
+			// à íuÇê≥ãKâªÇ∑ÇÈ
+			int w, h;
+			glfwGetWindowSize(window, &w, &h);
+
+			float rPosX = static_cast<float>(PosX) / static_cast<float>(w);
+			float rPosY = static_cast<float>(PosY) / static_cast<float>(h);
+
+			rPosX = rPosX * 2.0f - 1.0f;
+			rPosY = rPosY * 2.0f - 1.0f;
+
+			InputState->SetMousePos(glm::vec2(rPosX, rPosY));
+		}
+	}
+
 	bool CDescAppManager::InitWindow()
 	{
 		glfwInit();
@@ -139,6 +193,8 @@ namespace descapp
 		glfwSetKeyCallback(m_pWindow, Key_Callback);
 		glfwSetFramebufferSizeCallback(m_pWindow, Resize_Callback);
 		glfwSetWindowCloseCallback(m_pWindow, Close_Callback);
+		glfwSetMouseButtonCallback(m_pWindow, MousebuttonCallback);
+		glfwSetCursorPosCallback(m_pWindow, CursorPosCallback);
 
 		return true;
 	}
@@ -159,6 +215,8 @@ namespace descapp
 
 			if (!Update()) return false;
 			if (!Draw()) return false;
+
+			m_InputState->Clear();
 		}
 		else
 		{
@@ -176,6 +234,13 @@ namespace descapp
 		m_SecondsTime = static_cast<float>(clock()) * 0.001f;
 		m_DeltaSecondsTime = m_SecondsTime - PrevSecondsTime;
 
+		// ViewCameraÇÃUpdate
+#ifdef USE_INPUT_SYSTEM
+		const auto& MainCamera = m_App->GetMainCamera();
+		if (MainCamera) MainCamera->Update(m_SecondsTime, m_InputState);
+#endif // USE_INPUT_SYSTEM
+
+		//
 		if (!m_App->Update(m_GraphicsAPI.get(), m_SecondsTime)) return false;
 
 #ifdef _DEBUG
