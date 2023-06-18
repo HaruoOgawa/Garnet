@@ -28,5 +28,7 @@ namespace app
 		bool Resize(int Width, int Height) override;
 		bool Update(api::IGraphicsAPI* pGraphicsAPI, float SecondsTime) override;
 		bool Draw(api::IGraphicsAPI* pGraphicsAPI) override;
+
+		virtual const std::shared_ptr<camera::CCamera>& GetMainCamera() const override;
 	};
 }

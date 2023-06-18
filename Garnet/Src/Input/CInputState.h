@@ -1,5 +1,6 @@
 #pragma once
 
+#ifdef USE_INPUT_SYSTEM
 #include <glm/glm.hpp>
 
 namespace input
@@ -16,9 +17,12 @@ namespace input
 
 		void Clear();
 
-		void SetMouseState(const glm::vec2& MousePos, bool OnDownMouseLeft);
+		void StartMousePos(const glm::vec2& MousePos);
+		void SetMousePos(const glm::vec2& MousePos);
+		void SetDownMouseLeft(bool OnDownMouseLeft);
 
 		bool IsDownMouseLeft()const { return m_OnDownMouseLeft; }
 		glm::vec2 GetDragAmount();
 	};
 }
+#endif // #ifdef USE_INPUT_SYSTEM

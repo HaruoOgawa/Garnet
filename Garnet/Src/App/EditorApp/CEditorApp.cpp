@@ -43,4 +43,9 @@ namespace app
 	{
 		return true;
 	}
+
+	const std::shared_ptr<camera::CCamera>& CEditorApp::GetMainCamera() const
+	{
+		return nullptr;
+	}
 }
