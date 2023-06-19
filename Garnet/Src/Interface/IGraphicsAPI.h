@@ -22,6 +22,7 @@ namespace graphics
 {
 	class CMaterial;
 	class CTexture;
+	enum class ETextureType;
 }
 
 namespace api

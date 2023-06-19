@@ -78,6 +78,25 @@ namespace api
 
 	bool CVulkanTexture::Create(const std::vector<std::vector<unsigned char>>& pixelDataList, const std::vector<int>& pixelSizeList)
 	{
+		std::vector<unsigned char> pixelData;
+		int pixelSize = 0;
+
+		for (int i = 0; i < pixelDataList.size(); i++)
+		{
+			int ByteSize = pixelSizeList[i];
+			int ByteOffset = static_cast<int>(pixelData.size());
+
+			pixelData.resize(ByteOffset + ByteSize);
+
+			std::memcpy(&pixelData[ByteOffset], &pixelDataList[i][0], ByteSize);
+
+			pixelSize += ByteSize;
+		}
+
+		if (!CreateTextureImage(pixelData, pixelSize)) return false; // テクスチャイメージの生成
+		if (!CreateTextureImageView()) return false;// シェーダーで取り扱う用のImageViewを作成(イメージマネージャーみたいなやつかな)
+		if (!CreateTextureSampler()) return false; // テクスチャサンプラーを作成.サンプラーとはテクスチャデータをフラグメント(3Dモデル)に合うように調整する機構
+
 		return true;
 	}
 #endif
@@ -97,7 +116,7 @@ namespace api
 
 		// テクスチャイメージオブジェクトを生成
 		m_pGraphicsAPI->CreateImage(m_Width, m_Height, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
-			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_TextureImage, m_TextureImageMemory);
+			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_TextureImage, m_TextureImageMemory, m_TextureType);
 
 		// イメージテクスチャのレイアウトを別形式へ移行する --> バッファにコピー可な形式に変換
 		m_pGraphicsAPI->TransitionImageLayout(m_TextureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
@@ -117,7 +136,7 @@ namespace api
 
 	bool CVulkanTexture::CreateTextureImageView()
 	{
-		m_TextureImageView = m_pGraphicsAPI->CreateImageView(m_TextureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT);
+		m_TextureImageView = m_pGraphicsAPI->CreateImageView(m_TextureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT, m_TextureType);
 
 		return true;
 	}

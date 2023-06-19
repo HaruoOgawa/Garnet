@@ -17,8 +17,6 @@ namespace graphics
 
 		int m_Width;
 		int m_Height;
-		std::vector<int> m_WidthList;
-		std::vector<int> m_HeightList;
 		int m_NumOfChannels;
 	public:
 		CTexture();

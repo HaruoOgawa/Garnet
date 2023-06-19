@@ -63,14 +63,11 @@ namespace graphics
 
 		for (int i = 0; i < DataList.size(); i++)
 		{
-			int Width = 0;
-			int Height = 0;
-
 			// stbiでテクスチャバイナリを解析してピクセルデータを取得する
-			stbi_uc* stbi_pixelData = stbi_load_from_memory(reinterpret_cast<const stbi_uc*>(&DataList[i][0]), static_cast<int>(DataList[i].size()), &Width, &Height, &m_NumOfChannels, STBI_rgb_alpha);
+			stbi_uc* stbi_pixelData = stbi_load_from_memory(reinterpret_cast<const stbi_uc*>(&DataList[i][0]), static_cast<int>(DataList[i].size()), &m_Width, &m_Height, &m_NumOfChannels, STBI_rgb_alpha);
 
 			// stbiから取得したピクセルデータを扱いやすいデータにコピーしておく
-			int pixelSize = Width * Height * 4;
+			int pixelSize = m_Width * m_Height * 4;
 			std::vector<unsigned char> pixelData(pixelSize);
 			std::memcpy(&pixelData[0], stbi_pixelData, pixelSize);
 
@@ -80,8 +77,6 @@ namespace graphics
 			//
 			pixelDataList.push_back(pixelData);
 			pixelSizeList.push_back(pixelSize);
-			m_WidthList.push_back(Width);
-			m_HeightList.push_back(Height);
 		}
 
 		// APIにデータを渡す
