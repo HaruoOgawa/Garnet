@@ -75,6 +75,11 @@ namespace api
 
 		return true;
 	}
+
+	bool CVulkanTexture::Create(const std::vector<std::vector<unsigned char>>& pixelDataList, const std::vector<int>& pixelSizeList)
+	{
+		return true;
+	}
 #endif
 	// Vulkanメインロジック /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	bool CVulkanTexture::CreateTextureImage(const std::vector<unsigned char>& pixelData, int pixelSize)

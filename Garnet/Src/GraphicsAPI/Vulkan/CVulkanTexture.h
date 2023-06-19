@@ -35,6 +35,7 @@ namespace api
 
 #ifdef USE_TEXTURE_LOADER
 		virtual bool Create(const std::vector<unsigned char>& pixelData, int pixelSize) override;
+		virtual bool Create(const std::vector<std::vector<unsigned char>>& pixelDataList, const std::vector<int>& pixelSizeList) override;
 #endif
 		const VkImage& GetTextureImage() const;
 		const VkDeviceMemory& GetTextureImageMemory() const;

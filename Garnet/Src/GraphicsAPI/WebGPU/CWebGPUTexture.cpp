@@ -23,6 +23,11 @@ namespace api
 
 		return true;
 	}
+
+	bool CWebGPUTexture::Create(const std::vector<std::vector<unsigned char>>& pixelDataList, const std::vector<int>& pixelSizeList)
+	{
+		return true;
+	}
 #endif
 
 	const WGPUTextureView& CWebGPUTexture::GetTextureImageView() const

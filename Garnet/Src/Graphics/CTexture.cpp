@@ -13,7 +13,8 @@ namespace graphics
 	CTexture::CTexture():
 		m_Width(1),
 		m_Height(1),
-		m_NumOfChannels(1)
+		m_NumOfChannels(1),
+		m_TextureType(ETextureType::TEXTURE_2D)
 	{
 	}
 
@@ -24,6 +25,9 @@ namespace graphics
 #ifdef USE_TEXTURE_LOADER
 	bool CTexture::Create(const std::vector<unsigned char>& Data)
 	{
+		// 単一のピクセル配列を使用しているので2D
+		m_TextureType = ETextureType::TEXTURE_2D;
+
 		// stbiでテクスチャバイナリを解析してピクセルデータを取得する
 		stbi_uc* stbi_pixelData = stbi_load_from_memory(reinterpret_cast<const stbi_uc*>(&Data[0]), static_cast<int>(Data.size()), &m_Width, &m_Height, &m_NumOfChannels, STBI_rgb_alpha);
 
@@ -42,6 +46,51 @@ namespace graphics
 	}
 
 	bool CTexture::Create(const std::vector<unsigned char>& pixelData, int pixelSize)
+	{
+		return true;
+	}
+
+	bool CTexture::Create(const std::vector<std::vector<unsigned char>>& DataList)
+	{
+		if (DataList.size() < 6) return false;
+
+		// 複数のピクセル配列を使用しているのでCUBE
+		m_TextureType = ETextureType::TEXTURE_CUBE;
+
+		//
+		std::vector<std::vector<unsigned char>> pixelDataList;
+		std::vector<int> pixelSizeList;
+
+		for (int i = 0; i < DataList.size(); i++)
+		{
+			int Width = 0;
+			int Height = 0;
+
+			// stbiでテクスチャバイナリを解析してピクセルデータを取得する
+			stbi_uc* stbi_pixelData = stbi_load_from_memory(reinterpret_cast<const stbi_uc*>(&DataList[i][0]), static_cast<int>(DataList[i].size()), &Width, &Height, &m_NumOfChannels, STBI_rgb_alpha);
+
+			// stbiから取得したピクセルデータを扱いやすいデータにコピーしておく
+			int pixelSize = Width * Height * 4;
+			std::vector<unsigned char> pixelData(pixelSize);
+			std::memcpy(&pixelData[0], stbi_pixelData, pixelSize);
+
+			// stbiのメモリを解放
+			stbi_image_free(stbi_pixelData);
+
+			//
+			pixelDataList.push_back(pixelData);
+			pixelSizeList.push_back(pixelSize);
+			m_WidthList.push_back(Width);
+			m_HeightList.push_back(Height);
+		}
+
+		// APIにデータを渡す
+		if (!Create(pixelDataList, pixelSizeList)) return false;
+
+		return true;
+	}
+
+	bool CTexture::Create(const std::vector<std::vector<unsigned char>>& pixelDataList, const std::vector<int>& pixelSizeList)
 	{
 		return true;
 	}
