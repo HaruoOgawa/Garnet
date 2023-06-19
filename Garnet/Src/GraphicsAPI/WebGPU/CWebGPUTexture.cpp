@@ -92,9 +92,9 @@ namespace api
 	bool CWebGPUTexture::CreateTextureSampler()
 	{
 		WGPUSamplerDescriptor samplerDesc{};
-		samplerDesc.addressModeU = WGPUAddressMode_ClampToEdge;
-		samplerDesc.addressModeV = WGPUAddressMode_ClampToEdge;
-		samplerDesc.addressModeW = WGPUAddressMode_ClampToEdge;
+		samplerDesc.addressModeU = WGPUAddressMode_Repeat;
+		samplerDesc.addressModeV = WGPUAddressMode_Repeat;
+		samplerDesc.addressModeW = WGPUAddressMode_Repeat;
 		samplerDesc.magFilter = WGPUFilterMode_Linear;
 		samplerDesc.minFilter = WGPUFilterMode_Linear;
 		samplerDesc.lodMinClamp = 0.0f;
