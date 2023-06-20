@@ -198,29 +198,31 @@ namespace scene
 			}
 		}
 
+		// Cubemap
+		std::vector<std::vector<unsigned char>> CubeDataList;
+		CubeDataList.push_back(m_Cube0->GetData());
+		CubeDataList.push_back(m_Cube1->GetData());
+		CubeDataList.push_back(m_Cube2->GetData());
+		CubeDataList.push_back(m_Cube3->GetData());
+		CubeDataList.push_back(m_Cube4->GetData());
+		CubeDataList.push_back(m_Cube5->GetData());
+
+		auto CubeTex0 = pGraphicsAPI->CreateTexture();
+		if (!CubeTex0->Create(CubeDataList)) return false;
+
+		std::vector<std::shared_ptr<graphics::CTexture>> CubeTexList;
+		CubeTexList.push_back(CubeTex0);
+
 		// Create関数群を実行
 		if (!m_TestObject->Create(pGraphicsAPI)) return false;
 
 		// テストのglTFをインポート
 		{
-			// Cubemap
-			std::vector<std::vector<unsigned char>> CubeDataList;
-			CubeDataList.push_back(m_Cube0->GetData());
-			CubeDataList.push_back(m_Cube1->GetData());
-			CubeDataList.push_back(m_Cube2->GetData());
-			CubeDataList.push_back(m_Cube3->GetData());
-			CubeDataList.push_back(m_Cube4->GetData());
-			CubeDataList.push_back(m_Cube5->GetData());
-
-			auto CubeTex = pGraphicsAPI->CreateTexture();
-			if (!CubeTex->Create(CubeDataList)) return false;
-
-			//
 			std::shared_ptr<graphics::CMaterialCreateInfo> createInfo = std::make_shared<graphics::CMaterialCreateInfo>();
 			createInfo->SetVertexShaderCode(m_glTFVert->GetData());
 			createInfo->SetFragmentShaderCode(m_glTFFrag->GetData());
 
-			if (!gltf::CGLTFImporter::Import(pGraphicsAPI, m_glTFData->GetData(), m_glTFObj, createInfo)) return false;
+			if (!gltf::CGLTFImporter::Import(pGraphicsAPI, m_glTFData->GetData(), m_glTFObj, createInfo, CubeTexList)) return false;
 		}
 
 		return true;

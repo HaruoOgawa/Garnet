@@ -27,7 +27,7 @@
 namespace gltf
 {
 	bool CGLTFImporter::Import(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& Data, std::shared_ptr<object::C3DObject>& Object,
-		std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo)
+		std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, const std::vector<std::shared_ptr<graphics::CTexture>>& CubeTexList)
 	{
 		tinygltf::Model model;
 		tinygltf::TinyGLTF loader;
@@ -68,6 +68,12 @@ namespace gltf
 
 		// オブジェクトにリソースを登録
 		for (const auto& Texture : TextureList)
+		{
+			Object->AddTexture(Texture);
+		}
+
+		// 末尾にCubemapを追加
+		for (const auto& Texture : CubeTexList)
 		{
 			Object->AddTexture(Texture);
 		}
@@ -312,6 +318,11 @@ namespace gltf
 
 						int Flag = 0;
 						UniformBuffer->AddData("useOcclusionTexture", &Flag, sizeof(int), 0);
+					}
+
+					// Cubemap, ひとまずTextureListの末尾に入れている
+					{
+						material->AddTextureBindingLayout({ 11, 12, (static_cast<int>(TextureList.size()) - 1) });
 					}
 
 					{

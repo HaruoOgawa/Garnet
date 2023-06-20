@@ -56,6 +56,9 @@ layout(binding = 8) uniform sampler normalTextureSampler;
 layout(binding = 9) uniform texture2D occlusionTexture;
 layout(binding = 10) uniform sampler occlusionTextureSampler;
 
+layout(binding = 11) uniform textureCube cubemapTexture;
+layout(binding = 12) uniform sampler cubemapTextureSampler;
+
 // なんかUnityPBRでもみた値だなぁ
 const float MIN_ROUGHNESS = 0.04;
 const float PI = 3.14159265;
@@ -287,6 +290,9 @@ void main(){
 
 	// ディフューズBRDFを計算
 	vec3 diffuseBRDF = (1.0 - F) * CalcDiffuseBRDF(pbrParam);
+
+	// 反射カラーを計算
+	vec3 reflectColor = texture(samplerCube(cubemapTexture, cubemapTextureSampler), reflect(v, n)).rgb;
 
 	// レンダリング方程式を構築
 	col.rgb = NdotL * ubo.lightColor.rgb * (specularBRDF + diffuseBRDF);
