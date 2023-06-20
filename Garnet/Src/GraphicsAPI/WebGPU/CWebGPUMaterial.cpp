@@ -174,13 +174,15 @@ namespace api
 		// Texture
 		for (const auto& TexLayout : m_TextureBindingLayoutList)
 		{
+			const auto& Texture = (TexLayout.TextureIndex >= 0) ? static_cast<api::CWebGPUTexture*>(TextureList[TexLayout.TextureIndex].get()) : m_EmptyTexture.get();
+			
 			{
 				WGPUBindGroupLayoutEntry bindingLayout{};
 				InitDefalutBindGroupLayoutEntry(bindingLayout);
 				bindingLayout.binding = TexLayout.ViewBindingIndex;
 				bindingLayout.visibility = WGPUShaderStage_Fragment;
 				bindingLayout.texture.sampleType = WGPUTextureSampleType_Float;
-				bindingLayout.texture.viewDimension = WGPUTextureViewDimension_2D;
+				bindingLayout.texture.viewDimension = (Texture->GetTextureType() == graphics::ETextureType::TEXTURE_CUBE) ? WGPUTextureViewDimension_Cube : WGPUTextureViewDimension_2D;
 
 				bindingLayoutList.push_back(bindingLayout);
 			}

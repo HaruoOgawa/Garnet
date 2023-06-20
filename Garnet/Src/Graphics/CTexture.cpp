@@ -22,6 +22,11 @@ namespace graphics
 	{
 	}
 
+	ETextureType CTexture::GetTextureType() const
+	{
+		return m_TextureType;
+	}
+
 #ifdef USE_TEXTURE_LOADER
 	bool CTexture::Create(const std::vector<unsigned char>& Data)
 	{
