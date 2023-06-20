@@ -75,30 +75,6 @@ namespace api
 
 		return true;
 	}
-
-	bool CVulkanTexture::Create(const std::vector<std::vector<unsigned char>>& pixelDataList, const std::vector<int>& pixelSizeList)
-	{
-		std::vector<unsigned char> pixelData;
-		int pixelSize = 0;
-
-		for (int i = 0; i < pixelDataList.size(); i++)
-		{
-			int ByteSize = pixelSizeList[i];
-			int ByteOffset = static_cast<int>(pixelData.size());
-
-			pixelData.resize(ByteOffset + ByteSize);
-
-			std::memcpy(&pixelData[ByteOffset], &pixelDataList[i][0], ByteSize);
-
-			pixelSize += ByteSize;
-		}
-
-		if (!CreateTextureImage(pixelData, pixelSize)) return false; // テクスチャイメージの生成
-		if (!CreateTextureImageView()) return false;// シェーダーで取り扱う用のImageViewを作成(イメージマネージャーみたいなやつかな)
-		if (!CreateTextureSampler()) return false; // テクスチャサンプラーを作成.サンプラーとはテクスチャデータをフラグメント(3Dモデル)に合うように調整する機構
-
-		return true;
-	}
 #endif
 	// Vulkanメインロジック /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	bool CVulkanTexture::CreateTextureImage(const std::vector<unsigned char>& pixelData, int pixelSize)

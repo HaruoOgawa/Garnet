@@ -24,10 +24,8 @@ namespace graphics
 
 #ifdef USE_TEXTURE_LOADER
 		virtual bool Create(const std::vector<unsigned char>& Data);
-		virtual bool Create(const std::vector<unsigned char>& pixelData, int pixelSize) = 0;
-
 		virtual bool Create(const std::vector<std::vector<unsigned char>>& DataList);
-		virtual bool Create(const std::vector<std::vector<unsigned char>>& pixelDataList, const std::vector<int>& pixelSizeList) = 0;
+		virtual bool Create(const std::vector<unsigned char>& pixelData, int pixelSize) = 0;
 #endif // USE_TEXTURE_LOADER
 	};
 }

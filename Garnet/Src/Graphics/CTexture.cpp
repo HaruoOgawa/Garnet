@@ -45,11 +45,6 @@ namespace graphics
 		return true;
 	}
 
-	bool CTexture::Create(const std::vector<unsigned char>& pixelData, int pixelSize)
-	{
-		return true;
-	}
-
 	bool CTexture::Create(const std::vector<std::vector<unsigned char>>& DataList)
 	{
 		if (DataList.size() < 6) return false;
@@ -57,7 +52,7 @@ namespace graphics
 		// 複数のピクセル配列を使用しているのでCUBE
 		m_TextureType = ETextureType::TEXTURE_CUBE;
 
-		//
+		// データを取得
 		std::vector<std::vector<unsigned char>> pixelDataList;
 		std::vector<int> pixelSizeList;
 
@@ -79,13 +74,29 @@ namespace graphics
 			pixelSizeList.push_back(pixelSize);
 		}
 
+		// データをまとめる
+		std::vector<unsigned char> pixelData;
+		int pixelSize = 0;
+
+		for (int i = 0; i < pixelDataList.size(); i++)
+		{
+			int ByteSize = pixelSizeList[i];
+			int ByteOffset = static_cast<int>(pixelData.size());
+
+			pixelData.resize(ByteOffset + ByteSize);
+
+			std::memcpy(&pixelData[ByteOffset], &pixelDataList[i][0], ByteSize);
+
+			pixelSize += ByteSize;
+		}
+
 		// APIにデータを渡す
-		if (!Create(pixelDataList, pixelSizeList)) return false;
+		if (!Create(pixelData, pixelSize)) return false;
 
 		return true;
 	}
 
-	bool CTexture::Create(const std::vector<std::vector<unsigned char>>& pixelDataList, const std::vector<int>& pixelSizeList)
+	bool CTexture::Create(const std::vector<unsigned char>& pixelData, int pixelSize)
 	{
 		return true;
 	}
