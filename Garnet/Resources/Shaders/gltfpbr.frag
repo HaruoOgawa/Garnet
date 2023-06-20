@@ -295,7 +295,7 @@ void main(){
 	vec3 reflectColor = texture(samplerCube(cubemapTexture, cubemapTextureSampler), reflect(v, n)).rgb;
 
 	// レンダリング方程式を構築
-	col.rgb = NdotL * ubo.lightColor.rgb * (specularBRDF + diffuseBRDF);
+	col.rgb = NdotL * ubo.lightColor.rgb * (specularBRDF + diffuseBRDF) + reflectColor;
 
 	// AO Mapの適応
 	if(ubo.useOcclusionTexture != 0)

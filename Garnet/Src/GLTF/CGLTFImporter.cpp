@@ -53,6 +53,12 @@ namespace gltf
 		std::vector<std::shared_ptr<graphics::CTexture>> TextureList;
 		if (!CreateTexture(pGraphicsAPI, model, TextureList)) return false;
 
+		// ひとまず仮で末尾にCubemapを追加
+		for (const auto& Texture : CubeTexList)
+		{
+			TextureList.push_back(Texture);
+		}
+
 		// マテリアル
 		std::vector<std::shared_ptr<graphics::CMaterial>> MaterialList;
 		if (!CreateMaterial(pGraphicsAPI, model, MaterialList, TextureList, createInfo)) return false;
@@ -68,12 +74,6 @@ namespace gltf
 
 		// オブジェクトにリソースを登録
 		for (const auto& Texture : TextureList)
-		{
-			Object->AddTexture(Texture);
-		}
-
-		// 末尾にCubemapを追加
-		for (const auto& Texture : CubeTexList)
 		{
 			Object->AddTexture(Texture);
 		}
