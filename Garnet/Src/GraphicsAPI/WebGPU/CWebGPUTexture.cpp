@@ -76,7 +76,7 @@ namespace api
 			{
 				size_t TexSize = static_cast<size_t>(m_Width * m_Height * 4);
 				size_t byteOffset = TexSize * layer;
-				destination.origin = { 0, 0, layer };
+				destination.origin = { 0, 0, layer }; // Cubemap‚ÍZŽ²•ûŒü‚ÉÏ‚Ýd‚È‚Á‚½Texture2D Array‚Æ‚Ý‚é
 
 				wgpuQueueWriteTexture(m_pGraphicsAPI->GetQueue(), &destination, &pixelData[byteOffset], TexSize, &source, &singleLayerSize);
 			}
@@ -112,7 +112,7 @@ namespace api
 		samplerDesc.magFilter = WGPUFilterMode_Linear;
 		samplerDesc.minFilter = WGPUFilterMode_Linear;
 		samplerDesc.lodMinClamp = 0.0f;
-		samplerDesc.lodMaxClamp = 1.0f;
+		samplerDesc.lodMaxClamp = m_MipCount;
 		samplerDesc.compare = WGPUCompareFunction_Undefined;
 		samplerDesc.maxAnisotropy = 0;
 

@@ -19,7 +19,7 @@ struct UniformBufferObject {
     roughnessFactor: f32,
     normalMapScale: f32,
     occlusionStrength: f32,
-    s_pad0_: f32,
+    mipCount: f32,
     s_pad1_: f32,
     s_pad2_: f32,
     useBaseColorTexture: i32,

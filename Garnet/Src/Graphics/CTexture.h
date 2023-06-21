@@ -18,12 +18,15 @@ namespace graphics
 		int m_Width;
 		int m_Height;
 		int m_NumOfChannels;
+		float m_MipCount;
+	private:
+		bool IsPowerOfTwo(int n);
 	public:
 		CTexture();
 		virtual ~CTexture();
 
 		ETextureType GetTextureType() const;
-
+		float GetMipCount() const;
 #ifdef USE_TEXTURE_LOADER
 		virtual bool Create(const std::vector<unsigned char>& Data);
 		virtual bool Create(const std::vector<std::vector<unsigned char>>& DataList);

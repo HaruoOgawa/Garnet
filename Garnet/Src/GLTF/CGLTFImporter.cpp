@@ -233,7 +233,10 @@ namespace gltf
 					UniformBuffer->AddData("normalMapScale", &normalMapScale, sizeof(float), 0);
 
 					UniformBuffer->AddData("occlusionStrength", &occlusionStrength, sizeof(float), 0);
-					UniformBuffer->AddData("s_pad0", &val, sizeof(float), 0);
+
+					float mipCount = TextureList[TextureList.size() - 1]->GetMipCount();
+					UniformBuffer->AddData("mipCount", &mipCount, sizeof(float), 0);
+					
 					UniformBuffer->AddData("s_pad1", &val, sizeof(float), 0);
 					UniformBuffer->AddData("s_pad2", &val, sizeof(float), 0);
 				}

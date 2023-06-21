@@ -1332,30 +1332,56 @@ namespace api
 		EndSingleTimeCommands(comandBuffer);
 	}
 
-	void CVulkanAPI::CopyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height)
+	void CVulkanAPI::CopyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height, graphics::ETextureType TextureType, float MipCount)
 	{
-		//
+		// コマンドバッファの記録開始
 		VkCommandBuffer commandBuffer = BeginSingleTimeCommands();
 
-		//
-		VkBufferImageCopy region{};
-		region.bufferOffset = 0;
-		region.bufferRowLength = 0;
-		region.bufferImageHeight = 0;
-		region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-		region.imageSubresource.mipLevel = 0;
-		region.imageSubresource.baseArrayLayer = 0;
-		region.imageSubresource.layerCount = 1;
-		region.imageOffset = { 0 ,0, 0 };
-		region.imageExtent = {
-			width,
-			height,
-			1
-		};
+		// バッファのコピーレイアウトを決める
+		std::vector<VkBufferImageCopy> regionList;
 
-		vkCmdCopyBufferToImage(commandBuffer, buffer, image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
+		if (TextureType == graphics::ETextureType::TEXTURE_2D)
+		{
+			VkBufferImageCopy region{};
+			region.bufferOffset = 0;
+			region.bufferRowLength = 0;
+			region.bufferImageHeight = 0;
+			region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+			region.imageSubresource.mipLevel = 0;
+			region.imageSubresource.baseArrayLayer = 0;
+			region.imageSubresource.layerCount = 1;
+			region.imageOffset = { 0 ,0, 0 };
+			region.imageExtent = { width, height, 1 };
 
-		//
+			regionList.push_back(region);
+		}
+		else if (TextureType == graphics::ETextureType::TEXTURE_CUBE)
+		{
+			for (uint32_t layer = 0; layer < 6; layer++)
+			{
+				uint32_t level = 0; // MipMapを持っていない通常のPNGを使っているのでいったん無視で(どちらにせよ後で必要だけど)
+				//for (uint32_t level = 0; level < static_cast<uint32_t>(MipCount); level++)
+				{
+					VkBufferImageCopy region{};
+					region.bufferOffset = 0;
+					region.bufferRowLength = 0;
+					region.bufferImageHeight = 0;
+					region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+					region.imageSubresource.mipLevel = level;
+					region.imageSubresource.baseArrayLayer = layer; // 最初の0を基準としてもいいかもしれないが、ここでは1つずつMipMapを計算したいので今のレベルにしている
+					// layerの数はCreateImageの時に指定したarrayLayersの数
+					region.imageSubresource.layerCount = 1; // 6つ全部ではなく1つずつ計算
+					region.imageOffset = { 0 ,0, static_cast<int>(layer) };
+					region.imageExtent = { width >> level, height >> level, 1 };
+
+					regionList.push_back(region);
+				}
+			}
+		}
+
+		vkCmdCopyBufferToImage(commandBuffer, buffer, image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, static_cast<uint32_t>(regionList.size()), &regionList[0]);
+
+		// コマンドバッファの記録終了(Singleなので同時に実行も行われる?)
 		EndSingleTimeCommands(commandBuffer);
 	}
 

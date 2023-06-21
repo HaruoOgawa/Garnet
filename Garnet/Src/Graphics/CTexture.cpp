@@ -14,6 +14,7 @@ namespace graphics
 		m_Width(1),
 		m_Height(1),
 		m_NumOfChannels(1),
+		m_MipCount(0.0f),
 		m_TextureType(ETextureType::TEXTURE_2D)
 	{
 	}
@@ -25,6 +26,11 @@ namespace graphics
 	ETextureType CTexture::GetTextureType() const
 	{
 		return m_TextureType;
+	}
+
+	float CTexture::GetMipCount() const
+	{
+		return m_MipCount;
 	}
 
 #ifdef USE_TEXTURE_LOADER
@@ -43,6 +49,21 @@ namespace graphics
 
 		// stbiのメモリを解放
 		stbi_image_free(stbi_pixelData);
+
+		// MipCountを計算
+		int CurrentSize = (m_Width < m_Height) ? m_Width : m_Height;
+		int MipCount = 0;
+
+		if (IsPowerOfTwo(CurrentSize))
+		{
+			while (CurrentSize != 1)
+			{
+				CurrentSize /= 2;
+				MipCount++;
+			}
+
+			m_MipCount = static_cast<float>(MipCount);
+		}
 
 		// APIにデータを渡す
 		if (!Create(pixelData, pixelSize)) return false;
@@ -95,6 +116,21 @@ namespace graphics
 			pixelSize += ByteSize;
 		}
 
+		// MipCountを計算
+		int CurrentSize = (m_Width < m_Height) ? m_Width : m_Height;
+		int MipCount = 0;
+
+		if (IsPowerOfTwo(CurrentSize))
+		{
+			while (CurrentSize != 1)
+			{
+				CurrentSize /= 2;
+				MipCount++;
+			}
+
+			m_MipCount = static_cast<float>(MipCount);
+		}
+
 		// APIにデータを渡す
 		if (!Create(pixelData, pixelSize)) return false;
 
@@ -106,4 +142,16 @@ namespace graphics
 		return true;
 	}
 #endif // USE_TEXTURE_LOADER
+
+	bool CTexture::IsPowerOfTwo(int n)
+	{
+		if (n == 0)
+			return false;
+		while (n != 1) {
+			if (n % 2 != 0)
+				return 0;
+			n = n / 2;
+		}
+		return true;
+	}
 }
