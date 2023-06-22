@@ -207,7 +207,7 @@ namespace scene
 		CubeDataList.push_back(m_Cube4->GetData());
 		CubeDataList.push_back(m_Cube5->GetData());
 
-		auto CubeTex0 = pGraphicsAPI->CreateTexture();
+		auto CubeTex0 = pGraphicsAPI->CreateTexture(true);
 		if (!CubeTex0->Create(CubeDataList)) return false;
 
 		std::vector<std::shared_ptr<graphics::CTexture>> CubeTexList;

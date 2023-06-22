@@ -23,7 +23,7 @@ namespace api
 
 		m_EmptyTexture(nullptr)
 	{
-		m_EmptyTexture = std::make_shared<CVulkanTexture>(pGraphicsAPI);
+		m_EmptyTexture = std::make_shared<CVulkanTexture>(pGraphicsAPI, false);
 		std::vector<unsigned char> emptyPixel = { 0, 0, 0, 0 };
 		m_EmptyTexture->Create(emptyPixel, static_cast<int>(emptyPixel.size() * sizeof(unsigned char)));
 	}

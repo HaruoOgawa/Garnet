@@ -18,11 +18,14 @@ namespace graphics
 		int m_Width;
 		int m_Height;
 		int m_NumOfChannels;
+
+		const bool m_UseMipMap;  // コンストラクタでのみ設定可能
+		bool  m_HasMipData; // 画像データ生成時に拡張子名から自動判断
 		float m_MipCount;
 	private:
 		bool IsPowerOfTwo(int n);
 	public:
-		CTexture();
+		CTexture(bool UseMipMap);
 		virtual ~CTexture();
 
 		ETextureType GetTextureType() const;

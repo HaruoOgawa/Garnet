@@ -3,8 +3,8 @@
 #include "CVulkanAPI.h"
 namespace api
 {
-	CVulkanTexture::CVulkanTexture(api::CVulkanAPI* pGraphicsAPI):
-		CTexture(),
+	CVulkanTexture::CVulkanTexture(api::CVulkanAPI* pGraphicsAPI, bool UseMipMap):
+		CTexture(UseMipMap),
 		m_pGraphicsAPI(pGraphicsAPI),
 		m_TextureImage(nullptr),
 		m_TextureImageMemory(nullptr),
@@ -80,8 +80,8 @@ namespace api
 	bool CVulkanTexture::CreateTextureImage(const std::vector<unsigned char>& pixelData, int pixelSize)
 	{
 		// テクスチャイメージオブジェクトを生成
-		m_pGraphicsAPI->CreateImage(m_Width, m_Height, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
-			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_TextureImage, m_TextureImageMemory, m_TextureType);
+		m_pGraphicsAPI->CreateImage(m_Width, m_Height, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
+			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_TextureImage, m_TextureImageMemory, m_TextureType, m_MipCount, m_UseMipMap);
 
 		// テクスチャイメージのステージングバッファを作成
 		VkBuffer stagingBuffer;
@@ -95,24 +95,30 @@ namespace api
 		vkUnmapMemory(m_pGraphicsAPI->GetLogicalDevice(), stagingBufferMemory);
 
 		// イメージテクスチャのレイアウトを別形式へ移行する --> バッファにコピー可な形式に変換
-		m_pGraphicsAPI->TransitionImageLayout(m_TextureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+		m_pGraphicsAPI->TransitionImageLayout(m_TextureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, m_MipCount, m_UseMipMap);
 
 		// ステージングバッファのデータをテクスチャイメージへコピーする
-		m_pGraphicsAPI->CopyBufferToImage(stagingBuffer, m_TextureImage, static_cast<uint32_t>(m_Width), static_cast<uint32_t>(m_Height), m_TextureType, m_MipCount);
+		m_pGraphicsAPI->CopyBufferToImage(stagingBuffer, m_TextureImage, static_cast<uint32_t>(m_Width), static_cast<uint32_t>(m_Height), m_TextureType, m_MipCount, m_HasMipData);
 
 		// イメージテクスチャのレイアウトを別形式へ移行する --> シェーダーで読み込み可な形式に変換
-		m_pGraphicsAPI->TransitionImageLayout(m_TextureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+		m_pGraphicsAPI->TransitionImageLayout(m_TextureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, m_MipCount, m_UseMipMap);
 
 		// ステージングバッファの破棄
 		vkDestroyBuffer(m_pGraphicsAPI->GetLogicalDevice(), stagingBuffer, nullptr);
 		vkFreeMemory(m_pGraphicsAPI->GetLogicalDevice(), stagingBufferMemory, nullptr);
+
+		// 元のデータがミップマップデータを持っていないなら動的生成する
+		if (!m_HasMipData)
+		{
+			if (!GenerateMipMap()) return false;
+		}
 
 		return true;
 	}
 
 	bool CVulkanTexture::CreateTextureImageView()
 	{
-		m_TextureImageView = m_pGraphicsAPI->CreateImageView(m_TextureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT, m_TextureType);
+		m_TextureImageView = m_pGraphicsAPI->CreateImageView(m_TextureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT, m_TextureType, m_MipCount, m_UseMipMap);
 
 		return true;
 	}
@@ -146,6 +152,12 @@ namespace api
 			return false;
 		}
 
+		return true;
+	}
+
+	// Helper Function ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	bool CVulkanTexture::GenerateMipMap()
+	{
 		return true;
 	}
 }

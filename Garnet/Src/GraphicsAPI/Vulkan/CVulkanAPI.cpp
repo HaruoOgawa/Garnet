@@ -103,9 +103,9 @@ namespace api
 		return Material;
 	}
 
-	std::shared_ptr<graphics::CTexture> CVulkanAPI::CreateTexture()
+	std::shared_ptr<graphics::CTexture> CVulkanAPI::CreateTexture(bool UseMipMap)
 	{
-		auto Texture = std::make_shared<api::CVulkanTexture>(this);
+		auto Texture = std::make_shared<api::CVulkanTexture>(this, UseMipMap);
 
 		return Texture;
 	}
@@ -547,7 +547,7 @@ namespace api
 
 		for (size_t i = 0; i < m_SwapChainImages.size(); i++)
 		{
-			m_SwapChainImageViews[i] = CreateImageView(m_SwapChainImages[i], m_SwapChainImageFormat, VK_IMAGE_ASPECT_COLOR_BIT, graphics::ETextureType::TEXTURE_2D);
+			m_SwapChainImageViews[i] = CreateImageView(m_SwapChainImages[i], m_SwapChainImageFormat, VK_IMAGE_ASPECT_COLOR_BIT, graphics::ETextureType::TEXTURE_2D, 1, false);
 		}
 
 		return true;
@@ -631,9 +631,9 @@ namespace api
 	{
 		VkFormat depthFormat = FIndDepthFormat();
 		CreateImage(m_SwapChainExtent.width, m_SwapChainExtent.height, depthFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
-			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_DepthImage, m_DepthImageMemory, graphics::ETextureType::TEXTURE_2D);
+			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_DepthImage, m_DepthImageMemory, graphics::ETextureType::TEXTURE_2D, 1, false);
 
-		m_DepthImageView = CreateImageView(m_DepthImage, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT, graphics::ETextureType::TEXTURE_2D);
+		m_DepthImageView = CreateImageView(m_DepthImage, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT, graphics::ETextureType::TEXTURE_2D, 1, false);
 
 		return true;
 	}
@@ -1210,7 +1210,7 @@ namespace api
 	}
 
 	// Texture
-	VkImageView CVulkanAPI::CreateImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, graphics::ETextureType TextureType)
+	VkImageView CVulkanAPI::CreateImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, graphics::ETextureType TextureType, float MipCount, bool UseMipMap)
 	{
 		VkImageViewCreateInfo viewInfo{};
 		viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -1219,7 +1219,7 @@ namespace api
 		viewInfo.format = format;
 		viewInfo.subresourceRange.aspectMask = aspectFlags;
 		viewInfo.subresourceRange.baseMipLevel = 0;
-		viewInfo.subresourceRange.levelCount = 1;
+		viewInfo.subresourceRange.levelCount = (UseMipMap) ? static_cast<uint32_t>(MipCount) : 1;
 		viewInfo.subresourceRange.baseArrayLayer = 0;
 		viewInfo.subresourceRange.layerCount = 1;
 
@@ -1233,7 +1233,7 @@ namespace api
 	}
 
 	bool CVulkanAPI::CreateImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage,
-		VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory, graphics::ETextureType TextureType)
+		VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory, graphics::ETextureType TextureType, float MipCount, bool UseMipMap)
 	{
 		// テクスチャイメージを生成
 		VkImageCreateInfo imageInfo{};
@@ -1242,7 +1242,7 @@ namespace api
 		imageInfo.extent.width = width;
 		imageInfo.extent.height = static_cast<uint32_t>(height);
 		imageInfo.extent.depth = 1;
-		imageInfo.mipLevels = 1;
+		imageInfo.mipLevels = (UseMipMap)? static_cast<uint32_t>(MipCount) : 1;
 		imageInfo.arrayLayers = (TextureType == graphics::ETextureType::TEXTURE_CUBE)? 6 : 1;
 		imageInfo.format = format;
 		imageInfo.tiling = tiling;
@@ -1279,7 +1279,7 @@ namespace api
 		return true;
 	}
 
-	void CVulkanAPI::TransitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout)
+	void CVulkanAPI::TransitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, float MipCount, bool UseMipMap)
 	{
 		// コマンド記録開始
 		VkCommandBuffer comandBuffer = BeginSingleTimeCommands();
@@ -1294,7 +1294,7 @@ namespace api
 		barrier.image = image;
 		barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 		barrier.subresourceRange.baseMipLevel = 0;
-		barrier.subresourceRange.levelCount = 1;
+		barrier.subresourceRange.levelCount = (UseMipMap)? static_cast<uint32_t>(MipCount) : 1;
 		barrier.subresourceRange.baseArrayLayer = 0;
 		barrier.subresourceRange.layerCount = 1;
 
@@ -1332,7 +1332,7 @@ namespace api
 		EndSingleTimeCommands(comandBuffer);
 	}
 
-	void CVulkanAPI::CopyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height, graphics::ETextureType TextureType, float MipCount)
+	void CVulkanAPI::CopyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height, graphics::ETextureType TextureType, float MipCount, bool HasMipData)
 	{
 		// コマンドバッファの記録開始
 		VkCommandBuffer commandBuffer = BeginSingleTimeCommands();
@@ -1359,8 +1359,9 @@ namespace api
 		{
 			for (uint32_t layer = 0; layer < 6; layer++)
 			{
-				uint32_t level = 0; // MipMapを持っていない通常のPNGを使っているのでいったん無視で(どちらにせよ後で必要だけど)
-				//for (uint32_t level = 0; level < static_cast<uint32_t>(MipCount); level++)
+				// 元のテクスチャデータにミップマップデータが入っているのならそれを使用する(例えば圧縮テクスチャ, hdr, exr など)
+				uint32_t LoopCount = (HasMipData)? static_cast<uint32_t>(MipCount) : 1; 
+				for (uint32_t level = 0; level < LoopCount; level++)
 				{
 					VkBufferImageCopy region{};
 					region.bufferOffset = 0;

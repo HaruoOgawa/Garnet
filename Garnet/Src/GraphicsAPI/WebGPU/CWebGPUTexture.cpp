@@ -3,8 +3,8 @@
 #include "CWebGPUAPI.h"
 namespace api
 {
-	CWebGPUTexture::CWebGPUTexture(api::CWebGPUAPI* pGraphicsAPI):
-		CTexture(),
+	CWebGPUTexture::CWebGPUTexture(api::CWebGPUAPI* pGraphicsAPI, bool UseMipMap):
+		CTexture(UseMipMap),
 		m_pGraphicsAPI(pGraphicsAPI),
 		m_TextureImageView(nullptr),
 		m_TextureSampler(nullptr)
