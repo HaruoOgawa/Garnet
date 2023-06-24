@@ -20,7 +20,7 @@ namespace api
 		bool CreateTextureImageView(const std::vector<unsigned char>& pixelData, int pixelSize);
 		bool CreateTextureSampler();
 	public:
-		CWebGPUTexture(api::CWebGPUAPI* pGraphicsAPI);
+		CWebGPUTexture(api::CWebGPUAPI* pGraphicsAPI, bool UseMipMap);
 		virtual ~CWebGPUTexture();
 
 #ifdef USE_TEXTURE_LOADER

@@ -28,6 +28,14 @@ namespace scene
 		std::shared_ptr<file::CFileReader> m_glTFVert;
 		std::shared_ptr<file::CFileReader> m_glTFFrag;
 
+		// 
+		std::shared_ptr<file::CFileReader> m_Cube0;
+		std::shared_ptr<file::CFileReader> m_Cube1;
+		std::shared_ptr<file::CFileReader> m_Cube2;
+		std::shared_ptr<file::CFileReader> m_Cube3;
+		std::shared_ptr<file::CFileReader> m_Cube4;
+		std::shared_ptr<file::CFileReader> m_Cube5;
+
 		bool m_IsLoaded;
 	private:
 		bool Load(api::IGraphicsAPI* pGraphicsAPI);

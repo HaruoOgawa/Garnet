@@ -103,9 +103,9 @@ namespace api
 		return Material;
 	}
 
-	std::shared_ptr<graphics::CTexture> CVulkanAPI::CreateTexture()
+	std::shared_ptr<graphics::CTexture> CVulkanAPI::CreateTexture(bool UseMipMap)
 	{
-		auto Texture = std::make_shared<api::CVulkanTexture>(this);
+		auto Texture = std::make_shared<api::CVulkanTexture>(this, UseMipMap);
 
 		return Texture;
 	}
@@ -547,7 +547,7 @@ namespace api
 
 		for (size_t i = 0; i < m_SwapChainImages.size(); i++)
 		{
-			m_SwapChainImageViews[i] = CreateImageView(m_SwapChainImages[i], m_SwapChainImageFormat, VK_IMAGE_ASPECT_COLOR_BIT);
+			m_SwapChainImageViews[i] = CreateImageView(m_SwapChainImages[i], m_SwapChainImageFormat, VK_IMAGE_ASPECT_COLOR_BIT, graphics::ETextureType::TEXTURE_2D, 1, false);
 		}
 
 		return true;
@@ -631,9 +631,9 @@ namespace api
 	{
 		VkFormat depthFormat = FIndDepthFormat();
 		CreateImage(m_SwapChainExtent.width, m_SwapChainExtent.height, depthFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
-			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_DepthImage, m_DepthImageMemory);
+			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_DepthImage, m_DepthImageMemory, graphics::ETextureType::TEXTURE_2D, 1, false);
 
-		m_DepthImageView = CreateImageView(m_DepthImage, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT);
+		m_DepthImageView = CreateImageView(m_DepthImage, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT, graphics::ETextureType::TEXTURE_2D, 1, false);
 
 		return true;
 	}
@@ -1210,16 +1210,16 @@ namespace api
 	}
 
 	// Texture
-	VkImageView CVulkanAPI::CreateImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags)
+	VkImageView CVulkanAPI::CreateImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, graphics::ETextureType TextureType, float MipCount, bool UseMipMap)
 	{
 		VkImageViewCreateInfo viewInfo{};
 		viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
 		viewInfo.image = image;
-		viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+		viewInfo.viewType = (TextureType == graphics::ETextureType::TEXTURE_CUBE) ? VK_IMAGE_VIEW_TYPE_CUBE : VK_IMAGE_VIEW_TYPE_2D;
 		viewInfo.format = format;
 		viewInfo.subresourceRange.aspectMask = aspectFlags;
 		viewInfo.subresourceRange.baseMipLevel = 0;
-		viewInfo.subresourceRange.levelCount = 1;
+		viewInfo.subresourceRange.levelCount = (UseMipMap) ? static_cast<uint32_t>(MipCount) : 1;
 		viewInfo.subresourceRange.baseArrayLayer = 0;
 		viewInfo.subresourceRange.layerCount = 1;
 
@@ -1233,7 +1233,7 @@ namespace api
 	}
 
 	bool CVulkanAPI::CreateImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage,
-		VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory)
+		VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory, graphics::ETextureType TextureType, float MipCount, bool UseMipMap)
 	{
 		// テクスチャイメージを生成
 		VkImageCreateInfo imageInfo{};
@@ -1242,8 +1242,8 @@ namespace api
 		imageInfo.extent.width = width;
 		imageInfo.extent.height = static_cast<uint32_t>(height);
 		imageInfo.extent.depth = 1;
-		imageInfo.mipLevels = 1;
-		imageInfo.arrayLayers = 1;
+		imageInfo.mipLevels = (UseMipMap)? static_cast<uint32_t>(MipCount) : 1;
+		imageInfo.arrayLayers = (TextureType == graphics::ETextureType::TEXTURE_CUBE)? 6 : 1;
 		imageInfo.format = format;
 		imageInfo.tiling = tiling;
 		imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
@@ -1279,7 +1279,7 @@ namespace api
 		return true;
 	}
 
-	void CVulkanAPI::TransitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout)
+	void CVulkanAPI::TransitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, float MipCount, bool UseMipMap)
 	{
 		// コマンド記録開始
 		VkCommandBuffer comandBuffer = BeginSingleTimeCommands();
@@ -1294,7 +1294,7 @@ namespace api
 		barrier.image = image;
 		barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 		barrier.subresourceRange.baseMipLevel = 0;
-		barrier.subresourceRange.levelCount = 1;
+		barrier.subresourceRange.levelCount = (UseMipMap)? static_cast<uint32_t>(MipCount) : 1;
 		barrier.subresourceRange.baseArrayLayer = 0;
 		barrier.subresourceRange.layerCount = 1;
 
@@ -1332,30 +1332,97 @@ namespace api
 		EndSingleTimeCommands(comandBuffer);
 	}
 
-	void CVulkanAPI::CopyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height)
+	void CVulkanAPI::CopyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height, graphics::ETextureType TextureType, float MipCount, bool UseMipMap, bool HasMipData)
 	{
-		//
+		// コマンドバッファの記録開始
 		VkCommandBuffer commandBuffer = BeginSingleTimeCommands();
 
-		//
-		VkBufferImageCopy region{};
-		region.bufferOffset = 0;
-		region.bufferRowLength = 0;
-		region.bufferImageHeight = 0;
-		region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-		region.imageSubresource.mipLevel = 0;
-		region.imageSubresource.baseArrayLayer = 0;
-		region.imageSubresource.layerCount = 1;
-		region.imageOffset = { 0 ,0, 0 };
-		region.imageExtent = {
-			width,
-			height,
-			1
-		};
+		// バッファのコピーレイアウトを決める
+		std::vector<VkBufferImageCopy> regionList;
 
-		vkCmdCopyBufferToImage(commandBuffer, buffer, image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
+		if (TextureType == graphics::ETextureType::TEXTURE_2D)
+		{
+			if (UseMipMap && HasMipData)
+			{
+				// 元のテクスチャデータにミップマップデータが入っているのならそれを使用する(例えば圧縮テクスチャ, hdr, exr など)
+				for (uint32_t level = 1; level < static_cast<uint32_t>(MipCount); level++)
+				{
+					VkBufferImageCopy region{};
+					region.bufferOffset = 0;
+					region.bufferRowLength = 0;
+					region.bufferImageHeight = 0;
+					region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+					region.imageSubresource.mipLevel = level - 1;
+					region.imageSubresource.baseArrayLayer = 0;
+					region.imageSubresource.layerCount = 1;
+					region.imageOffset = { 0 ,0, 0 };
+					region.imageExtent = { width >> (level - 1), height >> (level - 1), 1 };
 
-		//
+					regionList.push_back(region);
+				}
+			}
+			else
+			{
+				VkBufferImageCopy region{};
+				region.bufferOffset = 0;
+				region.bufferRowLength = 0;
+				region.bufferImageHeight = 0;
+				region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+				region.imageSubresource.mipLevel = 0;
+				region.imageSubresource.baseArrayLayer = 0;
+				region.imageSubresource.layerCount = 1;
+				region.imageOffset = { 0 ,0, 0 };
+				region.imageExtent = { width, height, 1 };
+
+				regionList.push_back(region);
+			}
+		}
+		else if (TextureType == graphics::ETextureType::TEXTURE_CUBE)
+		{
+			for (uint32_t layer = 0; layer < 6; layer++)
+			{
+				if (UseMipMap && HasMipData)
+				{
+					// 元のテクスチャデータにミップマップデータが入っているのならそれを使用する(例えば圧縮テクスチャ, hdr, exr など)
+					for (uint32_t level = 1; level < static_cast<uint32_t>(MipCount); level++)
+					{
+						VkBufferImageCopy region{};
+						region.bufferOffset = 0;
+						region.bufferRowLength = 0;
+						region.bufferImageHeight = 0;
+						region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+						region.imageSubresource.mipLevel = level - 1;
+						region.imageSubresource.baseArrayLayer = layer; // 最初の0を基準としてもいいかもしれないが、ここでは1つずつMipMapを計算したいので今のレベルにしている
+						// layerの数はCreateImageの時に指定したarrayLayersの数
+						region.imageSubresource.layerCount = 1; // 6つ全部ではなく1つずつ計算
+						region.imageOffset = { 0 ,0, static_cast<int>(layer) };
+						region.imageExtent = { width >> (level - 1), height >> (level - 1), 1 };
+
+						regionList.push_back(region);
+					}
+				}
+				else
+				{
+					VkBufferImageCopy region{};
+					region.bufferOffset = 0;
+					region.bufferRowLength = 0;
+					region.bufferImageHeight = 0;
+					region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+					region.imageSubresource.mipLevel = 0;
+					region.imageSubresource.baseArrayLayer = layer; // 最初の0を基準としてもいいかもしれないが、ここでは1つずつMipMapを計算したいので今のレベルにしている
+					// layerの数はCreateImageの時に指定したarrayLayersの数
+					region.imageSubresource.layerCount = 1; // 6つ全部ではなく1つずつ計算
+					region.imageOffset = { 0 ,0, static_cast<int>(layer) };
+					region.imageExtent = { width, height, 1 };
+
+					regionList.push_back(region);
+				}
+			}
+		}
+
+		vkCmdCopyBufferToImage(commandBuffer, buffer, image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, static_cast<uint32_t>(regionList.size()), &regionList[0]);
+
+		// コマンドバッファの記録終了(Singleなので同時に実行も行われる?)
 		EndSingleTimeCommands(commandBuffer);
 	}
 

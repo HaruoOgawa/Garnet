@@ -23,7 +23,7 @@ namespace api
 
 		m_EmptyTexture(nullptr)
 	{
-		m_EmptyTexture = std::make_shared<CVulkanTexture>(pGraphicsAPI);
+		m_EmptyTexture = std::make_shared<CVulkanTexture>(pGraphicsAPI, false);
 		std::vector<unsigned char> emptyPixel = { 0, 0, 0, 0 };
 		m_EmptyTexture->Create(emptyPixel, static_cast<int>(emptyPixel.size() * sizeof(unsigned char)));
 	}
@@ -33,7 +33,7 @@ namespace api
 		Release();
 	}
 
-	bool CVulkanMaterial::Create(const std::vector<std::shared_ptr<graphics::CTexture>>& TextureList)
+	bool CVulkanMaterial::Create(const std::vector<std::shared_ptr<graphics::CTexture>>& TextureList, const std::vector<std::shared_ptr<graphics::CTexture>>& CubeMapList)
 	{
 		if (!CreateShaderStages(m_CreateInfo)) return false; // Shaderの作成
 
@@ -43,7 +43,7 @@ namespace api
 		// バインドグループ(UniformとTextureで共通項)
 		if (!CreateDescriptorSetLayout(m_CreateInfo)) return false; // DescriptorSetLayoutの作成(Uniformをどのようにバインドするか), WebGPUでいうバインドグループの生成
 		if (!CreateDescriptorPool(m_CreateInfo)) return false; // DescriptorPoolを作成する -> DescriptorSetsは直接生成できず、コマンドで生成する必要がある。記述子プールはそのコマンド群のことかな？
-		if (!CreateDescriptorSets(m_CreateInfo, TextureList)) return false; // DescriptorSetsを作成 -> Uniformが使用するバッファをCPUからGPUに送信するための仕組みこと. https://vkguide.dev/docs/chapter-4/descriptors/
+		if (!CreateDescriptorSets(m_CreateInfo, TextureList, CubeMapList)) return false; // DescriptorSetsを作成 -> Uniformが使用するバッファをCPUからGPUに送信するための仕組みこと. https://vkguide.dev/docs/chapter-4/descriptors/
 
 		// 生成処理が終わったので不要なリソースを解放する
 		m_CreateInfo = nullptr;
@@ -348,7 +348,8 @@ namespace api
 
 		return true;
 	}
-	bool CVulkanMaterial::CreateDescriptorSets(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, const std::vector<std::shared_ptr<graphics::CTexture>>& TextureList)
+	bool CVulkanMaterial::CreateDescriptorSets(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, const std::vector<std::shared_ptr<graphics::CTexture>>& TextureList, 
+		const std::vector<std::shared_ptr<graphics::CTexture>>& CubeMapList)
 	{
 		std::vector<VkDescriptorSetLayout> layouts(m_pGraphicsAPI->GetMaxFramesInFlight(), m_DescriptorSetLayout);
 		VkDescriptorSetAllocateInfo allocInfo{};
@@ -418,7 +419,24 @@ namespace api
 				for (int ImageInfoIndex = 0, TextureBindingLayoutIndex = 0; ImageInfoIndex < TexLayoutSize; ImageInfoIndex += 2, TextureBindingLayoutIndex++)
 				{
 					const auto& TexLayout = m_TextureBindingLayoutList[TextureBindingLayoutIndex];
-					const auto& Texture = (TexLayout.TextureIndex >= 0) ? static_cast<api::CVulkanTexture*>(TextureList[TexLayout.TextureIndex].get()) : m_EmptyTexture.get();
+
+					api::CVulkanTexture* Texture = nullptr;
+					int TextureIndex = TexLayout.TextureIndex;
+
+					if (TexLayout.TextureType == graphics::ETextureType::TEXTURE_2D)
+					{
+						Texture = (TextureIndex >= 0 && TextureIndex < TextureList.size()) ? static_cast<api::CVulkanTexture*>(TextureList[TextureIndex].get()) : m_EmptyTexture.get();
+					}
+					else if (TexLayout.TextureType == graphics::ETextureType::TEXTURE_CUBE)
+					{
+						Texture = (TextureIndex >= 0 && TextureIndex < CubeMapList.size()) ? static_cast<api::CVulkanTexture*>(CubeMapList[TextureIndex].get()) : m_EmptyTexture.get();
+					}
+
+					if (!Texture)
+					{
+						Console::Log("[ERROR] Texture is nullpte\n");
+						return false;
+					}
 
 					{
 						descriptorWrites[LayoutIndex].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;

@@ -14,7 +14,7 @@ namespace graphics
 		m_CreateInfo = createInfo;
 	}
 
-	bool CMaterial::Create(const std::vector<std::shared_ptr<graphics::CTexture>>& TextureList)
+	bool CMaterial::Create(const std::vector<std::shared_ptr<graphics::CTexture>>& TextureList, const std::vector<std::shared_ptr<graphics::CTexture>>& CubeMapList)
 	{
 		return true;
 	}

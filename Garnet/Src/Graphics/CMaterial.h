@@ -36,7 +36,7 @@ namespace graphics
 		virtual ~CMaterial() = default;
 
 		virtual void SetCreateInfo(const std::shared_ptr<CMaterialCreateInfo>& createInfo);
-		virtual bool Create(const std::vector<std::shared_ptr<graphics::CTexture>>& TextureList) = 0;
+		virtual bool Create(const std::vector<std::shared_ptr<graphics::CTexture>>& TextureList, const std::vector<std::shared_ptr<graphics::CTexture>>& CubeMapList) = 0;
 		virtual bool Update(float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo) = 0;
 		virtual bool BuildDrawBuffer(int DynamicOffsetNum) = 0;
 

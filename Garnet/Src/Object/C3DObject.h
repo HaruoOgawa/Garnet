@@ -20,6 +20,7 @@ namespace object
 		std::vector<std::shared_ptr<graphics::CMesh>> m_MeshList;
 		std::vector<std::shared_ptr<graphics::CMaterial>> m_MaterialList;
 		std::vector<std::shared_ptr<graphics::CTexture>> m_TextureList;
+		std::vector<std::shared_ptr<graphics::CTexture>> m_CubeMapList;
 
 		std::vector<std::vector<int>> m_RootNodeIndexList;
 	private:
@@ -44,6 +45,9 @@ namespace object
 		
 		void AddTexture(const std::shared_ptr<graphics::CTexture>& Texture);
 		const std::vector<std::shared_ptr<graphics::CTexture>>& GetTextureList() const;
+		
+		void AddCubeMap(const std::shared_ptr<graphics::CTexture>& CubeMap);
+		const std::vector<std::shared_ptr<graphics::CTexture>>& GetCubeMapList() const;
 
 		void SetRootNodeIndexList(const std::vector<std::vector<int>>& RootNodeIndexList);
 		const std::vector<std::vector<int>>& GetRootNodeIndexList() const;

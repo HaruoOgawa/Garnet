@@ -29,8 +29,11 @@ namespace api
 		bool CreateTextureImage(const std::vector<unsigned char>& pixelData, int pixelSize);
 		bool CreateTextureImageView();
 		bool CreateTextureSampler();
+
+		// Helper Function ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		bool GenerateMipMap(uint32_t layer);
 	public:
-		CVulkanTexture(api::CVulkanAPI* pGraphicsAPI);
+		CVulkanTexture(api::CVulkanAPI* pGraphicsAPI, bool UseMipMap);
 		virtual ~CVulkanTexture();
 
 #ifdef USE_TEXTURE_LOADER

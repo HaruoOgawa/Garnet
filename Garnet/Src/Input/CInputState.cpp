@@ -3,10 +3,11 @@
 
 namespace input
 {
-	CInputState::CInputState() :
+	CInputState::CInputState(float MouseRotSpeed) :
 		m_MousePos(glm::vec2(0.0f)),
 		m_PrevMousePos(glm::vec2(0.0f)),
-		m_OnDownMouseLeft(false)
+		m_OnDownMouseLeft(false),
+		m_MouseRotSpeed(MouseRotSpeed)
 	{
 	}
 
@@ -46,6 +47,11 @@ namespace input
 		glm::vec2 result = m_MousePos - m_PrevMousePos;
 
 		return result;
+	}
+
+	float CInputState::GetMouseRotSpeed() const
+	{
+		return m_MouseRotSpeed;
 	}
 }
 #endif // #ifdef USE_INPUT_SYSTEM

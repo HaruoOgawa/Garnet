@@ -26,7 +26,7 @@ layout(binding = 0) uniform UniformBufferObject{
     float normalMapScale;
 
 	float occlusionStrength;
-    float s_pad0;
+    float mipCount;
     float s_pad1;
     float s_pad2;
 
@@ -55,6 +55,9 @@ layout(binding = 8) uniform sampler normalTextureSampler;
 
 layout(binding = 9) uniform texture2D occlusionTexture;
 layout(binding = 10) uniform sampler occlusionTextureSampler;
+
+layout(binding = 11) uniform textureCube cubemapTexture;
+layout(binding = 12) uniform sampler cubemapTextureSampler;
 
 // なんかUnityPBRでもみた値だなぁ
 const float MIN_ROUGHNESS = 0.04;
@@ -288,8 +291,13 @@ void main(){
 	// ディフューズBRDFを計算
 	vec3 diffuseBRDF = (1.0 - F) * CalcDiffuseBRDF(pbrParam);
 
+	// 反射カラーを計算
+	float mipCount = ubo.mipCount;
+	float lod = mipCount * perceptualRoughness;
+	vec3 reflectColor = textureLod(samplerCube(cubemapTexture, cubemapTextureSampler), reflect(v, n), lod).rgb;
+
 	// レンダリング方程式を構築
-	col.rgb = NdotL * ubo.lightColor.rgb * (specularBRDF + diffuseBRDF);
+	col.rgb = NdotL * ubo.lightColor.rgb * (specularBRDF + diffuseBRDF) + reflectColor;
 
 	// AO Mapの適応
 	if(ubo.useOcclusionTexture != 0)

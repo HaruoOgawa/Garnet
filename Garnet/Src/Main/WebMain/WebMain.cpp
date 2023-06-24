@@ -55,5 +55,32 @@ extern "C"
 			g_WebApp->OnResize(w, h);
 		}
 	}
+
+	EMSCRIPTEN_KEEPALIVE
+	void OnMouseDown(int buttonNum, int x, int y)
+	{
+		if (g_WebApp)
+		{
+			g_WebApp->OnMouseDown(buttonNum, x, y);
+		}
+	}
+	
+	EMSCRIPTEN_KEEPALIVE
+	void OnMouseUp(int buttonNum, int x, int y)
+	{
+		if (g_WebApp)
+		{
+			g_WebApp->OnMouseUp(buttonNum, x, y);
+		}
+	}
+
+	EMSCRIPTEN_KEEPALIVE
+	void OnMouseMove(int x, int y)
+	{
+		if (g_WebApp)
+		{
+			g_WebApp->OnMouseMove(x, y);
+		}
+	}
 }
 #endif // __EMSCRIPTEN__

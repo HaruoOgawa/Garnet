@@ -11,8 +11,10 @@ namespace input
 		glm::vec2 m_PrevMousePos;
 
 		bool m_OnDownMouseLeft;
+
+		const float m_MouseRotSpeed;
 	public:
-		CInputState();
+		CInputState(float MouseRotSpeed);
 		virtual ~CInputState();
 
 		void Clear();
@@ -23,6 +25,8 @@ namespace input
 
 		bool IsDownMouseLeft()const { return m_OnDownMouseLeft; }
 		glm::vec2 GetDragAmount();
+
+		float GetMouseRotSpeed() const;
 	};
 }
 #endif // #ifdef USE_INPUT_SYSTEM

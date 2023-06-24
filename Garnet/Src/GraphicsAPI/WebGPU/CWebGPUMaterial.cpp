@@ -20,7 +20,7 @@ namespace api
 
 		m_EmptyTexture(nullptr)
 	{
-		m_EmptyTexture = std::make_shared<CWebGPUTexture>(pGraphicsAPI);
+		m_EmptyTexture = std::make_shared<CWebGPUTexture>(pGraphicsAPI, false);
 		std::vector<unsigned char> emptyPixel = { 0, 0, 0, 0 };
 		m_EmptyTexture->Create(emptyPixel, static_cast<int>(emptyPixel.size() * sizeof(unsigned char)));
 	}
@@ -34,11 +34,11 @@ namespace api
 		m_WGPUUniformBufferList.clear();
 	}
 
-	bool CWebGPUMaterial::Create(const std::vector<std::shared_ptr<graphics::CTexture>>& TextureList)
+	bool CWebGPUMaterial::Create(const std::vector<std::shared_ptr<graphics::CTexture>>& TextureList, const std::vector<std::shared_ptr<graphics::CTexture>>& CubeMapList)
 	{
 		if (!CreateShaderStages(m_CreateInfo)) return false;
 		if (!CreateUniformBuffer(m_CreateInfo)) return false; // ユニフォームバッファを生成
-		if (!CreateBindGroup(m_CreateInfo, TextureList)) return false; // バインドグループを生成(レンダリングパイプラインで使用するすべてのリソースをどのようにバインドするかを指定するオブジェクト)
+		if (!CreateBindGroup(m_CreateInfo, TextureList, CubeMapList)) return false; // バインドグループを生成(レンダリングパイプラインで使用するすべてのリソースをどのようにバインドするかを指定するオブジェクト)
 
 		// 生成処理が終わったので不要なリソースを解放する
 		m_CreateInfo = nullptr;
@@ -147,7 +147,8 @@ namespace api
 		return true;
 	}
 
-	bool CWebGPUMaterial::CreateBindGroup(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, const std::vector<std::shared_ptr<graphics::CTexture>>& TextureList)
+	bool CWebGPUMaterial::CreateBindGroup(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, const std::vector<std::shared_ptr<graphics::CTexture>>& TextureList, 
+		const std::vector<std::shared_ptr<graphics::CTexture>>& CubeMapList)
 	{
 		// バインドレイアウトを作成
 		// どのようにメモリに配置されるか, バインドインデックスや読み取り専用かなど
@@ -174,13 +175,31 @@ namespace api
 		// Texture
 		for (const auto& TexLayout : m_TextureBindingLayoutList)
 		{
+			api::CWebGPUTexture* Texture = nullptr;
+			int TextureIndex = TexLayout.TextureIndex;
+
+			if (TexLayout.TextureType == graphics::ETextureType::TEXTURE_2D)
+			{
+				Texture = (TextureIndex >= 0 && TextureIndex < TextureList.size()) ? static_cast<api::CWebGPUTexture*>(TextureList[TextureIndex].get()) : m_EmptyTexture.get();
+			}
+			else if (TexLayout.TextureType == graphics::ETextureType::TEXTURE_CUBE)
+			{
+				Texture = (TextureIndex >= 0 && TextureIndex < CubeMapList.size()) ? static_cast<api::CWebGPUTexture*>(CubeMapList[TextureIndex].get()) : m_EmptyTexture.get();
+			}
+
+			if (!Texture)
+			{
+				Console::Log("[ERROR] Texture is nullpte\n");
+				return false;
+			}
+
 			{
 				WGPUBindGroupLayoutEntry bindingLayout{};
 				InitDefalutBindGroupLayoutEntry(bindingLayout);
 				bindingLayout.binding = TexLayout.ViewBindingIndex;
 				bindingLayout.visibility = WGPUShaderStage_Fragment;
 				bindingLayout.texture.sampleType = WGPUTextureSampleType_Float;
-				bindingLayout.texture.viewDimension = WGPUTextureViewDimension_2D;
+				bindingLayout.texture.viewDimension = (Texture->GetTextureType() == graphics::ETextureType::TEXTURE_CUBE) ? WGPUTextureViewDimension_Cube : WGPUTextureViewDimension_2D;
 
 				bindingLayoutList.push_back(bindingLayout);
 			}
@@ -238,7 +257,23 @@ namespace api
 		// Texture
 		for (const auto& TexLayout : m_TextureBindingLayoutList)
 		{
-			const auto& Texture = (TexLayout.TextureIndex >= 0) ? static_cast<api::CWebGPUTexture*>(TextureList[TexLayout.TextureIndex].get()) : m_EmptyTexture.get();
+			api::CWebGPUTexture* Texture = nullptr;
+			int TextureIndex = TexLayout.TextureIndex;
+
+			if (TexLayout.TextureType == graphics::ETextureType::TEXTURE_2D)
+			{
+				Texture = (TextureIndex >= 0 && TextureIndex < TextureList.size()) ? static_cast<api::CWebGPUTexture*>(TextureList[TextureIndex].get()) : m_EmptyTexture.get();
+			}
+			else if (TexLayout.TextureType == graphics::ETextureType::TEXTURE_CUBE)
+			{
+				Texture = (TextureIndex >= 0 && TextureIndex < CubeMapList.size()) ? static_cast<api::CWebGPUTexture*>(CubeMapList[TextureIndex].get()) : m_EmptyTexture.get();
+			}
+
+			if (!Texture)
+			{
+				Console::Log("[ERROR] Texture is nullpte\n");
+				return false;
+			}
 
 			{
 				WGPUBindGroupEntry binding{};

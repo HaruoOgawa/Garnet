@@ -19,6 +19,13 @@ namespace scene
 		m_glTFVert(std::make_shared<file::CFileReader>()),
 		m_glTFFrag(std::make_shared<file::CFileReader>()),
 
+		m_Cube0(std::make_shared<file::CFileReader>()),
+		m_Cube1(std::make_shared<file::CFileReader>()),
+		m_Cube2(std::make_shared<file::CFileReader>()),
+		m_Cube3(std::make_shared<file::CFileReader>()),
+		m_Cube4(std::make_shared<file::CFileReader>()),
+		m_Cube5(std::make_shared<file::CFileReader>()),
+
 		m_IsLoaded(false)
 	{
 	}
@@ -54,6 +61,14 @@ namespace scene
 		m_glTFData->ReadFile(ModelPath + "DamagedHelmet\\glTF-Binary\\DamagedHelmet.glb");
 		//m_glTFData->ReadFile(ModelPath + "MetalRoughSpheresNoTextures\\glTF-Binary\\MetalRoughSpheresNoTextures.glb");
 		//m_glTFObj->SetPos(glm::vec3(-0.003f, -0.003f, 4.99f));
+
+		// Cubemap
+		m_Cube0->ReadFile("Resources\\Cubemaps\\environment\\environment_back_0.jpg");
+		m_Cube1->ReadFile("Resources\\Cubemaps\\environment\\environment_bottom_0.jpg");
+		m_Cube2->ReadFile("Resources\\Cubemaps\\environment\\environment_front_0.jpg");
+		m_Cube3->ReadFile("Resources\\Cubemaps\\environment\\environment_left_0.jpg");
+		m_Cube4->ReadFile("Resources\\Cubemaps\\environment\\environment_right_0.jpg");
+		m_Cube5->ReadFile("Resources\\Cubemaps\\environment\\environment_top_0.jpg");
 
 		return true;
 	}
@@ -125,8 +140,8 @@ namespace scene
 				auto APITex1 = pGraphicsAPI->CreateTexture();
 				if (!APITex1->Create(m_Texture1->GetData())) return false;
 
-				Material0->AddTextureBindingLayout({ 2, 3, 0 });
-				Material1->AddTextureBindingLayout({ 2, 3, 1 });
+				Material0->AddTextureBindingLayout({ 2, 3, 0, graphics::ETextureType::TEXTURE_2D });
+				Material1->AddTextureBindingLayout({ 2, 3, 1, graphics::ETextureType::TEXTURE_2D });
 				m_TestObject->AddTexture(APITex0);
 				m_TestObject->AddTexture(APITex1);
 			}
@@ -183,6 +198,21 @@ namespace scene
 			}
 		}
 
+		// Cubemap
+		std::vector<std::vector<unsigned char>> CubeDataList;
+		CubeDataList.push_back(m_Cube0->GetData());
+		CubeDataList.push_back(m_Cube1->GetData());
+		CubeDataList.push_back(m_Cube2->GetData());
+		CubeDataList.push_back(m_Cube3->GetData());
+		CubeDataList.push_back(m_Cube4->GetData());
+		CubeDataList.push_back(m_Cube5->GetData());
+
+		auto CubeTex0 = pGraphicsAPI->CreateTexture(true);
+		if (!CubeTex0->Create(CubeDataList)) return false;
+
+		std::vector<std::shared_ptr<graphics::CTexture>> CubeTexList;
+		CubeTexList.push_back(CubeTex0);
+
 		// CreateŠÖ”ŒQ‚ğÀs
 		if (!m_TestObject->Create(pGraphicsAPI)) return false;
 
@@ -192,7 +222,7 @@ namespace scene
 			createInfo->SetVertexShaderCode(m_glTFVert->GetData());
 			createInfo->SetFragmentShaderCode(m_glTFFrag->GetData());
 
-			if (!gltf::CGLTFImporter::Import(pGraphicsAPI, m_glTFData->GetData(), m_glTFObj, createInfo)) return false;
+			if (!gltf::CGLTFImporter::Import(pGraphicsAPI, m_glTFData->GetData(), m_glTFObj, createInfo, CubeTexList)) return false;
 		}
 
 		return true;
@@ -215,7 +245,9 @@ namespace scene
 		if (!m_IsLoaded)
 		{
 			if (m_VertexShader->IsLoaded() && m_FragmentShader->IsLoaded() && m_Texture0->IsLoaded() && m_Texture1->IsLoaded() && m_glTFData->IsLoaded()
-				&& m_glTFVert->IsLoaded() && m_glTFFrag->IsLoaded())
+				&& m_glTFVert->IsLoaded() && m_glTFFrag->IsLoaded()
+				&& m_Cube0->IsLoaded() && m_Cube1->IsLoaded() && m_Cube2->IsLoaded() && m_Cube3->IsLoaded() && m_Cube4->IsLoaded() && m_Cube5->IsLoaded() 
+			)
 			{
 				if(!Load(pGraphicsAPI)) return false;
 				m_IsLoaded = true;

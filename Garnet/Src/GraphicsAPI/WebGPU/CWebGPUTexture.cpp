@@ -3,8 +3,8 @@
 #include "CWebGPUAPI.h"
 namespace api
 {
-	CWebGPUTexture::CWebGPUTexture(api::CWebGPUAPI* pGraphicsAPI):
-		CTexture(),
+	CWebGPUTexture::CWebGPUTexture(api::CWebGPUAPI* pGraphicsAPI, bool UseMipMap):
+		CTexture(UseMipMap),
 		m_pGraphicsAPI(pGraphicsAPI),
 		m_TextureImageView(nullptr),
 		m_TextureSampler(nullptr)
@@ -39,6 +39,8 @@ namespace api
 	{
 		WGPUTextureFormat textureFormat = WGPUTextureFormat_RGBA8Unorm;
 
+		unsigned int TexCount = (m_TextureType == graphics::ETextureType::TEXTURE_CUBE) ? 6 : 1;
+
 		// TextureÇê∂ê¨
 		WGPUTextureDescriptor textureDesc{};
 		textureDesc.nextInChain = nullptr;
@@ -46,7 +48,7 @@ namespace api
 		textureDesc.format = textureFormat;
 		textureDesc.mipLevelCount = 1;
 		textureDesc.sampleCount = 1;
-		textureDesc.size = { static_cast<unsigned int>(m_Width), static_cast<unsigned int>(m_Height), 1 };
+		textureDesc.size = { static_cast<unsigned int>(m_Width), static_cast<unsigned int>(m_Height), TexCount };
 		textureDesc.usage = WGPUTextureUsage_TextureBinding | WGPUTextureUsage_CopyDst;
 		textureDesc.viewFormatCount = 0;
 		textureDesc.viewFormats = nullptr;
@@ -66,19 +68,36 @@ namespace api
 		source.bytesPerRow = 4 * m_Width;
 		source.rowsPerImage = m_Height;
 
-		wgpuQueueWriteTexture(m_pGraphicsAPI->GetQueue(), &destination, &pixelData[0], pixelSize, &source, &textureDesc.size);
+		if (m_TextureType == graphics::ETextureType::TEXTURE_CUBE)
+		{
+			// TEXTURE_CUBE
+			WGPUExtent3D singleLayerSize = { static_cast<uint32_t>(m_Width) , static_cast<uint32_t>(m_Height) , 1 };
+			for (unsigned int layer = 0; layer < 6; layer++)
+			{
+				size_t TexSize = static_cast<size_t>(m_Width * m_Height * 4);
+				size_t byteOffset = TexSize * layer;
+				destination.origin = { 0, 0, layer }; // CubemapÇÕZé≤ï˚å¸Ç…êœÇ›èdÇ»Ç¡ÇΩTexture2D ArrayÇ∆Ç›ÇÈ
+
+				wgpuQueueWriteTexture(m_pGraphicsAPI->GetQueue(), &destination, &pixelData[byteOffset], TexSize, &source, &singleLayerSize);
+			}
+		}
+		else
+		{
+			// TEXTURE_2D
+			wgpuQueueWriteTexture(m_pGraphicsAPI->GetQueue(), &destination, &pixelData[0], pixelSize, &source, &textureDesc.size);
+		}
 
 		// TextureViewÇê∂ê¨
 		WGPUTextureViewDescriptor textureViewDesc{};
 		textureViewDesc.nextInChain = nullptr;
 		textureViewDesc.aspect = WGPUTextureAspect_All;
 		textureViewDesc.baseArrayLayer = 0;
-		textureViewDesc.arrayLayerCount = 1;
+		textureViewDesc.arrayLayerCount = (m_TextureType == graphics::ETextureType::TEXTURE_CUBE)? 6 : 1;
 		textureViewDesc.baseMipLevel = 0;
 		textureViewDesc.mipLevelCount = 1;
-		textureViewDesc.dimension = WGPUTextureViewDimension_2D;
+		textureViewDesc.dimension = (m_TextureType == graphics::ETextureType::TEXTURE_CUBE)? WGPUTextureViewDimension_Cube : WGPUTextureViewDimension_2D;
 		textureViewDesc.format = textureFormat;
-
+		
 		m_TextureImageView = wgpuTextureCreateView(texture, &textureViewDesc);
 
 		return true;
@@ -87,13 +106,13 @@ namespace api
 	bool CWebGPUTexture::CreateTextureSampler()
 	{
 		WGPUSamplerDescriptor samplerDesc{};
-		samplerDesc.addressModeU = WGPUAddressMode_ClampToEdge;
-		samplerDesc.addressModeV = WGPUAddressMode_ClampToEdge;
-		samplerDesc.addressModeW = WGPUAddressMode_ClampToEdge;
+		samplerDesc.addressModeU = WGPUAddressMode_Repeat;
+		samplerDesc.addressModeV = WGPUAddressMode_Repeat;
+		samplerDesc.addressModeW = WGPUAddressMode_Repeat;
 		samplerDesc.magFilter = WGPUFilterMode_Linear;
 		samplerDesc.minFilter = WGPUFilterMode_Linear;
 		samplerDesc.lodMinClamp = 0.0f;
-		samplerDesc.lodMaxClamp = 1.0f;
+		samplerDesc.lodMaxClamp = m_MipCount;
 		samplerDesc.compare = WGPUCompareFunction_Undefined;
 		samplerDesc.maxAnisotropy = 0;
 

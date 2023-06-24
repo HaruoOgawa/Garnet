@@ -71,7 +71,7 @@ namespace api
 
 		virtual std::shared_ptr<renderer::IRenderer> CreateRenderer() override;
 		virtual std::shared_ptr<graphics::CMaterial> CreateMaterial() override;
-		virtual std::shared_ptr<graphics::CTexture> CreateTexture() override;
+		virtual std::shared_ptr<graphics::CTexture> CreateTexture(bool UseMipMap = false) override;
 
 		virtual bool Resize(int Width, int Height) override;
 

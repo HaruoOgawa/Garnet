@@ -22,7 +22,7 @@ namespace object
 		// Material
 		for (auto& Material : m_MaterialList)
 		{
-			if (!Material->Create(m_TextureList)) return false;
+			if (!Material->Create(m_TextureList, m_CubeMapList)) return false;
 		}
 
 		// Primitive
@@ -175,6 +175,16 @@ namespace object
 	void C3DObject::AddTexture(const std::shared_ptr<graphics::CTexture>& Texture)
 	{
 		m_TextureList.push_back(Texture);
+	}
+
+	void C3DObject::AddCubeMap(const std::shared_ptr<graphics::CTexture>& CubeMap)
+	{
+		m_CubeMapList.push_back(CubeMap);
+	}
+
+	const std::vector<std::shared_ptr<graphics::CTexture>>& C3DObject::GetCubeMapList() const
+	{
+		return m_CubeMapList;
 	}
 
 	const std::vector<std::shared_ptr<graphics::CTexture>>& C3DObject::GetTextureList() const

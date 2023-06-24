@@ -11,12 +11,19 @@
 #include <emscripten.h>
 #endif // __EMSCRIPTEN__
 
+#ifdef USE_VIEWER_CAMERA
+#include "../../Camera/CViewerCamera.h"
+#endif // USE_VIEWER_CAMERA
+
+#include "../Input/CInputState.h"
+
 namespace webapp
 {
 	CWebAppManager::CWebAppManager(app::EAppType AppType, int Width, int Height):
 		m_IsRunLoop(true),
 		m_GraphicsAPI(nullptr),
 		m_App(nullptr),
+		m_InputState(std::make_shared<input::CInputState>(1.0f)),
 		m_SecondsTime(0.0f),
 		m_DeltaSecondsTime(0.0f),
 		m_Width(Width),
@@ -88,6 +95,8 @@ namespace webapp
 		{
 			if (!Update()) return false;
 			if (!Draw()) return false;
+
+			m_InputState->Clear();
 		}
 
 		return true;
@@ -99,6 +108,13 @@ namespace webapp
 		m_SecondsTime = static_cast<float>(clock()) * 0.001f * 0.001f;
 		m_DeltaSecondsTime = m_SecondsTime - PrevSecondsTime;
 
+		// ViewCameraのUpdate
+#ifdef USE_INPUT_SYSTEM
+		const auto& MainCamera = m_App->GetMainCamera();
+		if (MainCamera) MainCamera->Update(m_SecondsTime, m_InputState);
+#endif // USE_INPUT_SYSTEM
+
+		//
 		if (!m_App->Update(m_GraphicsAPI.get(), m_SecondsTime)) return false;
 
 #ifdef _DEBUG
@@ -135,6 +151,55 @@ namespace webapp
 		m_App->Resize(w, h);
 	}
 
+	// マウスイベント
+	void CWebAppManager::OnMouseDown(int buttonNum, int x, int y)
+	{
+		if (buttonNum == 0)
+		{
+			m_InputState->SetDownMouseLeft(true);
+
+			// 位置を正規化する
+			float rPosX = static_cast<float>(x) / static_cast<float>(m_Width);
+			float rPosY = static_cast<float>(y) / static_cast<float>(m_Height);
+
+			rPosX = rPosX * 2.0f - 1.0f;
+			rPosY = rPosY * 2.0f - 1.0f;
+
+			m_InputState->StartMousePos(glm::vec2(rPosX, rPosY));
+		}
+	}
+
+	void CWebAppManager::OnMouseUp(int buttonNum, int x, int y)
+	{
+		if (buttonNum == 0)
+		{
+			m_InputState->SetDownMouseLeft(false);
+
+			// 位置を正規化する
+			float rPosX = static_cast<float>(x) / static_cast<float>(m_Width);
+			float rPosY = static_cast<float>(y) / static_cast<float>(m_Height);
+
+			rPosX = rPosX * 2.0f - 1.0f;
+			rPosY = rPosY * 2.0f - 1.0f;
+
+			m_InputState->StartMousePos(glm::vec2(rPosX, rPosY));
+		}
+	}
+
+	void CWebAppManager::OnMouseMove(int x, int y)
+	{
+		if (m_InputState->IsDownMouseLeft())
+		{
+			// 位置を正規化する
+			float rPosX = static_cast<float>(x) / static_cast<float>(m_Width);
+			float rPosY = static_cast<float>(y) / static_cast<float>(m_Height);
+
+			rPosX = rPosX * 2.0f - 1.0f;
+			rPosY = rPosY * 2.0f - 1.0f;
+
+			m_InputState->SetMousePos(glm::vec2(rPosX, rPosY));
+		}
+	}
 }
 
 #endif

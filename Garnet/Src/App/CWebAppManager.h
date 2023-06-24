@@ -6,6 +6,7 @@
 
 namespace api { class CWebGPUAPI; }
 namespace app { class IApp; }
+namespace input { class CInputState; }
 
 namespace webapp
 {
@@ -15,6 +16,8 @@ namespace webapp
 		std::shared_ptr<api::CWebGPUAPI> m_GraphicsAPI;
 		std::shared_ptr<app::IApp> m_App;
 		
+		std::shared_ptr<input::CInputState> m_InputState;
+
 		float m_SecondsTime;
 		float m_DeltaSecondsTime;
 
@@ -42,6 +45,11 @@ namespace webapp
 
 		// リサイズイベント
 		void OnResize(int w, int h);
+
+		// マウスイベント
+		void OnMouseDown(int buttonNum, int x, int y);
+		void OnMouseUp(int buttonNum, int x, int y);
+		void OnMouseMove(int x, int y);
 	};
 }
 #endif

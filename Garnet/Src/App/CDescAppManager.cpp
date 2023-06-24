@@ -33,7 +33,11 @@ namespace descapp
 		m_App(nullptr),
 		m_IsRunLoop(g_IsRunLoop),
 		m_SecondsTime(0.0f), 
-		m_InputState(std::make_shared<input::CInputState>()),
+#ifdef __DAWN__
+		m_InputState(std::make_shared<input::CInputState>(1.0f)),
+#else
+		m_InputState(std::make_shared<input::CInputState>(0.1f)),
+#endif // __DAWN__
 		m_DeltaSecondsTime(0.0f)
 	{
 		//
