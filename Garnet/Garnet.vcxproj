@@ -336,6 +336,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Src\Camera\CViewerCamera.h" />
+    <ClInclude Include="Src\Graphics\ETextureType.h" />
     <ClInclude Include="Src\Input\CInputState.h" />
     <ClInclude Include="Src\Graphics\CDrawInfo.h" />
     <ClInclude Include="Src\GLTF\CGLTFImporter.h" />

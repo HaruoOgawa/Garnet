@@ -53,6 +53,7 @@ add_executable(
 	../src/Graphics/CUniformBufferDescriptor.cpp
 	../src/Graphics/CUniformBufferDescriptor.h
 	../src/Graphics/ERenderPassType.h
+	../src/Graphics/ETextureType.h
 	../src/Graphics/SBindingLayout.h
 	../src/Graphics/STextureBindingLayout.h
 	../src/GraphicsAPI/CMaterialCreateInfo.cpp

@@ -1,15 +1,10 @@
 #pragma once
 
 #include <vector>
+#include "ETextureType.h"
 
 namespace graphics
 {
-	enum class ETextureType
-	{
-		TEXTURE_2D,
-		TEXTURE_CUBE,
-	};
-
 	class CTexture
 	{
 	protected:
@@ -19,7 +14,7 @@ namespace graphics
 		int m_Height;
 		int m_NumOfChannels;
 
-		const bool m_UseMipMap;  // コンストラクタでのみ設定可能
+		const bool m_UseMipMap;
 		bool  m_HasMipData; // 画像データ生成時に拡張子名から自動判断
 		float m_MipCount;
 	private:

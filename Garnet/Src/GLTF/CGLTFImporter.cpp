@@ -53,15 +53,9 @@ namespace gltf
 		std::vector<std::shared_ptr<graphics::CTexture>> TextureList;
 		if (!CreateTexture(pGraphicsAPI, model, TextureList)) return false;
 
-		// ひとまず仮で末尾にCubemapを追加
-		for (const auto& Texture : CubeTexList)
-		{
-			TextureList.push_back(Texture);
-		}
-
 		// マテリアル
 		std::vector<std::shared_ptr<graphics::CMaterial>> MaterialList;
-		if (!CreateMaterial(pGraphicsAPI, model, MaterialList, TextureList, createInfo)) return false;
+		if (!CreateMaterial(pGraphicsAPI, model, MaterialList, TextureList, CubeTexList, createInfo)) return false;
 
 		// メッシュ
 		std::vector<std::shared_ptr<graphics::CMesh>> MeshList;
@@ -76,6 +70,11 @@ namespace gltf
 		for (const auto& Texture : TextureList)
 		{
 			Object->AddTexture(Texture);
+		}
+
+		for (const auto& Texture : CubeTexList)
+		{
+			Object->AddCubeMap(Texture);
 		}
 
 		for (const auto& Material : MaterialList)
@@ -148,7 +147,7 @@ namespace gltf
 	}
 
 	bool CGLTFImporter::CreateMaterial(api::IGraphicsAPI* pGraphicsAPI, const tinygltf::Model& model, std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList, 
-		const std::vector<std::shared_ptr<graphics::CTexture>>& TextureList, std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo)
+		const std::vector<std::shared_ptr<graphics::CTexture>>& TextureList, const std::vector<std::shared_ptr<graphics::CTexture>>& CubeTexList, std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo)
 	{
 		for (const auto& glTfMaterial : model.materials)
 		{
@@ -234,7 +233,7 @@ namespace gltf
 
 					UniformBuffer->AddData("occlusionStrength", &occlusionStrength, sizeof(float), 0);
 
-					float mipCount = TextureList[TextureList.size() - 1]->GetMipCount();
+					float mipCount = CubeTexList[0]->GetMipCount();
 					UniformBuffer->AddData("mipCount", &mipCount, sizeof(float), 0);
 					
 					UniformBuffer->AddData("s_pad1", &val, sizeof(float), 0);
@@ -246,14 +245,14 @@ namespace gltf
 					//
 					if (baseColorTextureIndex >= 0 && baseColorTextureIndex < TextureList.size())
 					{
-						material->AddTextureBindingLayout({ 1, 2, baseColorTextureIndex });
+						material->AddTextureBindingLayout({ 1, 2, baseColorTextureIndex, graphics::ETextureType::TEXTURE_2D });
 
 						int Flag = 1;
 						UniformBuffer->AddData("useBaseColorTexture", &Flag, sizeof(int), 0);
 					}
 					else
 					{
-						material->AddTextureBindingLayout({ 1, 2, -1 }); // TextureIndex -1 は EmptyTextureである
+						material->AddTextureBindingLayout({ 1, 2, -1, graphics::ETextureType::TEXTURE_2D }); // TextureIndex -1 は EmptyTextureである
 
 						int Flag = 0;
 						UniformBuffer->AddData("useBaseColorTexture", &Flag, sizeof(int), 0);
@@ -262,14 +261,14 @@ namespace gltf
 					//
 					if (metallicRoughnessTextureIndex >= 0 && metallicRoughnessTextureIndex < TextureList.size())
 					{
-						material->AddTextureBindingLayout({ 3, 4, metallicRoughnessTextureIndex });
+						material->AddTextureBindingLayout({ 3, 4, metallicRoughnessTextureIndex, graphics::ETextureType::TEXTURE_2D });
 
 						int Flag = 1;
 						UniformBuffer->AddData("useMetallicRoughnessTexture", &Flag, sizeof(int), 0);
 					}
 					else
 					{
-						material->AddTextureBindingLayout({ 3, 4, -1 }); // TextureIndex -1 は EmptyTextureである
+						material->AddTextureBindingLayout({ 3, 4, -1, graphics::ETextureType::TEXTURE_2D }); // TextureIndex -1 は EmptyTextureである
 
 						int Flag = 0;
 						UniformBuffer->AddData("useMetallicRoughnessTexture", &Flag, sizeof(int), 0);
@@ -278,14 +277,14 @@ namespace gltf
 					//
 					if (emissiveTextureIndex >= 0 && emissiveTextureIndex < TextureList.size())
 					{
-						material->AddTextureBindingLayout({ 5, 6, emissiveTextureIndex });
+						material->AddTextureBindingLayout({ 5, 6, emissiveTextureIndex, graphics::ETextureType::TEXTURE_2D });
 
 						int Flag = 1;
 						UniformBuffer->AddData("useEmissiveTexture", &Flag, sizeof(int), 0);
 					}
 					else
 					{
-						material->AddTextureBindingLayout({ 5, 6, -1 }); // TextureIndex -1 は EmptyTextureである
+						material->AddTextureBindingLayout({ 5, 6, -1, graphics::ETextureType::TEXTURE_2D }); // TextureIndex -1 は EmptyTextureである
 
 						int Flag = 0;
 						UniformBuffer->AddData("useEmissiveTexture", &Flag, sizeof(int), 0);
@@ -294,14 +293,14 @@ namespace gltf
 					//
 					if (normalTextureIndex >= 0 && normalTextureIndex < TextureList.size())
 					{
-						material->AddTextureBindingLayout({ 7, 8, normalTextureIndex });
+						material->AddTextureBindingLayout({ 7, 8, normalTextureIndex, graphics::ETextureType::TEXTURE_2D });
 
 						int Flag = 1;
 						UniformBuffer->AddData("useNormalTexture", &Flag, sizeof(int), 0);
 					}
 					else
 					{
-						material->AddTextureBindingLayout({ 7, 8, -1 }); // TextureIndex -1 は EmptyTextureである
+						material->AddTextureBindingLayout({ 7, 8, -1, graphics::ETextureType::TEXTURE_2D }); // TextureIndex -1 は EmptyTextureである
 
 						int Flag = 0;
 						UniformBuffer->AddData("useNormalTexture", &Flag, sizeof(int), 0);
@@ -310,22 +309,22 @@ namespace gltf
 					//
 					if (occlusionTextureIndex >= 0 && occlusionTextureIndex < TextureList.size())
 					{
-						material->AddTextureBindingLayout({ 9, 10, occlusionTextureIndex });
+						material->AddTextureBindingLayout({ 9, 10, occlusionTextureIndex, graphics::ETextureType::TEXTURE_2D });
 
 						int Flag = 1;
 						UniformBuffer->AddData("useOcclusionTexture", &Flag, sizeof(int), 0);
 					}
 					else
 					{
-						material->AddTextureBindingLayout({ 9, 10, -1 }); // TextureIndex -1 は EmptyTextureである
+						material->AddTextureBindingLayout({ 9, 10, -1, graphics::ETextureType::TEXTURE_2D }); // TextureIndex -1 は EmptyTextureである
 
 						int Flag = 0;
 						UniformBuffer->AddData("useOcclusionTexture", &Flag, sizeof(int), 0);
 					}
 
-					// Cubemap, ひとまずTextureListの末尾に入れている
+					// CubeMap
 					{
-						material->AddTextureBindingLayout({ 11, 12, (static_cast<int>(TextureList.size()) - 1) });
+						material->AddTextureBindingLayout({ 11, 12, 0, graphics::ETextureType::TEXTURE_CUBE });
 					}
 
 					{
