@@ -135,6 +135,21 @@ namespace webapp
 		m_App->Resize(w, h);
 	}
 
+	// マウスイベント
+	void CWebAppManager::OnMouseDown(int buttonNum)
+	{
+		Console::Log("[CPP OnMouseDown] buttonNum: %d\n", buttonNum);
+	}
+
+	void CWebAppManager::OnMouseUp(int buttonNum)
+	{
+		Console::Log("[CPP OnMouseUp] buttonNum: %d\n", buttonNum);
+	}
+
+	void CWebAppManager::OnMouseMove(int x, int y)
+	{
+		Console::Log("[CPP OnMouseMove] x: %d, y: %d\n", x, y);
+	}
 }
 
 #endif

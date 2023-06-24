@@ -55,3 +55,30 @@ addEventListener("resize", (event) => {
         [width, height]
     );
 });
+
+addEventListener("mousedown", (event) => {
+    Module.ccall(
+        `OnMouseDown`,
+        `null`,
+        ['number'],
+        [event.button]
+    );
+});
+
+addEventListener("mouseup", (event) => {
+    Module.ccall(
+        `OnMouseUp`,
+        `null`,
+        ['number'],
+        [event.button]
+    );
+});
+
+addEventListener("mousemove", (event) => {
+    Module.ccall(
+        `OnMouseMove`,
+        `null`,
+        ['number', 'number'],
+        [event.clientX, event.clientY]
+    );
+});

@@ -42,6 +42,11 @@ namespace webapp
 
 		// リサイズイベント
 		void OnResize(int w, int h);
+
+		// マウスイベント
+		void OnMouseDown(int buttonNum);
+		void OnMouseUp(int buttonNum);
+		void OnMouseMove(int x, int y);
 	};
 }
 #endif
