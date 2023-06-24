@@ -294,7 +294,7 @@ void main(){
 	// 反射カラーを計算
 	float mipCount = ubo.mipCount;
 	float lod = mipCount * perceptualRoughness;
-	vec3 reflectColor = textureLod(samplerCube(cubemapTexture, cubemapTextureSampler), reflect(v, n), mipIndex).rgb;
+	vec3 reflectColor = textureLod(samplerCube(cubemapTexture, cubemapTextureSampler), reflect(v, n), lod).rgb;
 
 	// レンダリング方程式を構築
 	col.rgb = NdotL * ubo.lightColor.rgb * (specularBRDF + diffuseBRDF) + reflectColor;
