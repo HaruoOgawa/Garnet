@@ -16,7 +16,7 @@ namespace camera
 	{
 		if (InputState->IsDownMouseLeft())
 		{
-			float Speed = 0.1f;
+			float Speed = InputState->GetMouseRotSpeed();
 
 			glm::vec4 Pos = glm::vec4(m_Pos, 1.0f) 
 				* glm::mat4_cast(glm::angleAxis(InputState->GetDragAmount().x * Speed, glm::vec3(0.0f, 1.0f, 0.0f)))

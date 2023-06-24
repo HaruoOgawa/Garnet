@@ -57,20 +57,20 @@ extern "C"
 	}
 
 	EMSCRIPTEN_KEEPALIVE
-	void OnMouseDown(int buttonNum)
+	void OnMouseDown(int buttonNum, int x, int y)
 	{
 		if (g_WebApp)
 		{
-			g_WebApp->OnMouseDown(buttonNum);
+			g_WebApp->OnMouseDown(buttonNum, x, y);
 		}
 	}
 	
 	EMSCRIPTEN_KEEPALIVE
-	void OnMouseUp(int buttonNum)
+	void OnMouseUp(int buttonNum, int x, int y)
 	{
 		if (g_WebApp)
 		{
-			g_WebApp->OnMouseUp(buttonNum);
+			g_WebApp->OnMouseUp(buttonNum, x, y);
 		}
 	}
 

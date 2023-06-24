@@ -60,8 +60,8 @@ addEventListener("mousedown", (event) => {
     Module.ccall(
         `OnMouseDown`,
         `null`,
-        ['number'],
-        [event.button]
+        ['number', 'number', 'number'],
+        [event.button, event.clientX, event.clientY]
     );
 });
 
@@ -69,8 +69,8 @@ addEventListener("mouseup", (event) => {
     Module.ccall(
         `OnMouseUp`,
         `null`,
-        ['number'],
-        [event.button]
+        ['number', 'number', 'number'],
+        [event.button, event.clientX, event.clientY]
     );
 });
 
