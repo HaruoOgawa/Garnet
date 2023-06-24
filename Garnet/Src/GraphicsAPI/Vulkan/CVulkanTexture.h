@@ -31,7 +31,7 @@ namespace api
 		bool CreateTextureSampler();
 
 		// Helper Function ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		bool GenerateMipMap();
+		bool GenerateMipMap(uint32_t layer);
 	public:
 		CVulkanTexture(api::CVulkanAPI* pGraphicsAPI, bool UseMipMap);
 		virtual ~CVulkanTexture();

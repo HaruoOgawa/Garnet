@@ -1332,7 +1332,7 @@ namespace api
 		EndSingleTimeCommands(comandBuffer);
 	}
 
-	void CVulkanAPI::CopyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height, graphics::ETextureType TextureType, float MipCount, bool HasMipData)
+	void CVulkanAPI::CopyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height, graphics::ETextureType TextureType, float MipCount, bool UseMipMap, bool HasMipData)
 	{
 		// コマンドバッファの記録開始
 		VkCommandBuffer commandBuffer = BeginSingleTimeCommands();
@@ -1342,38 +1342,78 @@ namespace api
 
 		if (TextureType == graphics::ETextureType::TEXTURE_2D)
 		{
-			VkBufferImageCopy region{};
-			region.bufferOffset = 0;
-			region.bufferRowLength = 0;
-			region.bufferImageHeight = 0;
-			region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-			region.imageSubresource.mipLevel = 0;
-			region.imageSubresource.baseArrayLayer = 0;
-			region.imageSubresource.layerCount = 1;
-			region.imageOffset = { 0 ,0, 0 };
-			region.imageExtent = { width, height, 1 };
-
-			regionList.push_back(region);
-		}
-		else if (TextureType == graphics::ETextureType::TEXTURE_CUBE)
-		{
-			for (uint32_t layer = 0; layer < 6; layer++)
+			if (UseMipMap && HasMipData)
 			{
 				// 元のテクスチャデータにミップマップデータが入っているのならそれを使用する(例えば圧縮テクスチャ, hdr, exr など)
-				uint32_t LoopCount = (HasMipData)? static_cast<uint32_t>(MipCount) : 1; 
-				for (uint32_t level = 0; level < LoopCount; level++)
+				for (uint32_t level = 1; level < static_cast<uint32_t>(MipCount); level++)
 				{
 					VkBufferImageCopy region{};
 					region.bufferOffset = 0;
 					region.bufferRowLength = 0;
 					region.bufferImageHeight = 0;
 					region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-					region.imageSubresource.mipLevel = level;
+					region.imageSubresource.mipLevel = level - 1;
+					region.imageSubresource.baseArrayLayer = 0;
+					region.imageSubresource.layerCount = 1;
+					region.imageOffset = { 0 ,0, 0 };
+					region.imageExtent = { width >> (level - 1), height >> (level - 1), 1 };
+
+					regionList.push_back(region);
+				}
+			}
+			else
+			{
+				VkBufferImageCopy region{};
+				region.bufferOffset = 0;
+				region.bufferRowLength = 0;
+				region.bufferImageHeight = 0;
+				region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+				region.imageSubresource.mipLevel = 0;
+				region.imageSubresource.baseArrayLayer = 0;
+				region.imageSubresource.layerCount = 1;
+				region.imageOffset = { 0 ,0, 0 };
+				region.imageExtent = { width, height, 1 };
+
+				regionList.push_back(region);
+			}
+		}
+		else if (TextureType == graphics::ETextureType::TEXTURE_CUBE)
+		{
+			for (uint32_t layer = 0; layer < 6; layer++)
+			{
+				if (UseMipMap && HasMipData)
+				{
+					// 元のテクスチャデータにミップマップデータが入っているのならそれを使用する(例えば圧縮テクスチャ, hdr, exr など)
+					for (uint32_t level = 1; level < static_cast<uint32_t>(MipCount); level++)
+					{
+						VkBufferImageCopy region{};
+						region.bufferOffset = 0;
+						region.bufferRowLength = 0;
+						region.bufferImageHeight = 0;
+						region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+						region.imageSubresource.mipLevel = level - 1;
+						region.imageSubresource.baseArrayLayer = layer; // 最初の0を基準としてもいいかもしれないが、ここでは1つずつMipMapを計算したいので今のレベルにしている
+						// layerの数はCreateImageの時に指定したarrayLayersの数
+						region.imageSubresource.layerCount = 1; // 6つ全部ではなく1つずつ計算
+						region.imageOffset = { 0 ,0, static_cast<int>(layer) };
+						region.imageExtent = { width >> (level - 1), height >> (level - 1), 1 };
+
+						regionList.push_back(region);
+					}
+				}
+				else
+				{
+					VkBufferImageCopy region{};
+					region.bufferOffset = 0;
+					region.bufferRowLength = 0;
+					region.bufferImageHeight = 0;
+					region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+					region.imageSubresource.mipLevel = 0;
 					region.imageSubresource.baseArrayLayer = layer; // 最初の0を基準としてもいいかもしれないが、ここでは1つずつMipMapを計算したいので今のレベルにしている
 					// layerの数はCreateImageの時に指定したarrayLayersの数
 					region.imageSubresource.layerCount = 1; // 6つ全部ではなく1つずつ計算
 					region.imageOffset = { 0 ,0, static_cast<int>(layer) };
-					region.imageExtent = { width >> level, height >> level, 1 };
+					region.imageExtent = { width, height, 1 };
 
 					regionList.push_back(region);
 				}
