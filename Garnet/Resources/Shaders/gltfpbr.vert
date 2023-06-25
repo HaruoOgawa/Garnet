@@ -42,8 +42,8 @@ layout(binding = 0) uniform UniformBufferObject{
 layout(location = 0) out vec3 f_WorldNormal;
 layout(location = 1) out vec2 f_Texcoord;
 layout(location = 2) out vec4 f_WorldPos;
-layout(location = 3) out vec4 f_WorldTangent;
-layout(location = 4) out vec4 f_WorldBioTangent;
+layout(location = 3) out vec3 f_WorldTangent;
+layout(location = 4) out vec3 f_WorldBioTangent;
 
 #define rot(a) mat2(cos(a), -sin(a), sin(a), cos(a))
 
@@ -51,9 +51,9 @@ void main(){
     vec4 pos = vec4(inPosition, 1.0);
 
     gl_Position = ubo.proj * ubo.view * ubo.model * pos;
-    f_WorldNormal = (ubo.model * vec4(inNormal, 0.0)).xyz;
+    f_WorldNormal = normalize((ubo.model * vec4(inNormal, 0.0)).xyz);
     f_Texcoord = inTexcoord;
     f_WorldPos = ubo.model * vec4(inPosition, 1.0);
-    f_WorldTangent = ubo.model * inTangent;
-    f_WorldBioTangent = ubo.model * inBioTangent;
+    f_WorldTangent = normalize((ubo.model * inTangent).xyz);
+    f_WorldBioTangent = normalize((ubo.model * inBioTangent).xyz);
 }

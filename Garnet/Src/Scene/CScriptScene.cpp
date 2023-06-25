@@ -58,9 +58,10 @@ namespace scene
 		std::string ModelPath = "Resources\\Models\\";
 
 		//m_glTFData->ReadFile(ModelPath + "Triangle\\glTF\\Triangle.glb");
-		m_glTFData->ReadFile(ModelPath + "DamagedHelmet\\glTF-Binary\\DamagedHelmet.glb");
-		//m_glTFData->ReadFile(ModelPath + "MetalRoughSpheresNoTextures\\glTF-Binary\\MetalRoughSpheresNoTextures.glb");
-		//m_glTFObj->SetPos(glm::vec3(-0.003f, -0.003f, 4.99f));
+		//m_glTFData->ReadFile(ModelPath + "DamagedHelmet\\glTF-Binary\\DamagedHelmet.glb");
+		m_glTFData->ReadFile(ModelPath + "MetalRoughSpheresNoTextures\\glTF-Binary\\MetalRoughSpheresNoTextures.glb");
+		m_glTFObj->SetScale(glm::vec3(500.0f, 500.0f, 500.0f));
+		m_glTFObj->SetPos(glm::vec3(-1.5f, -1.5f, 0.0f));
 
 		// Cubemap
 		m_Cube0->ReadFile("Resources\\Cubemaps\\environment\\environment_back_0.jpg");

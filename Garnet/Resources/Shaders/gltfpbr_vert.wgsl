@@ -37,8 +37,8 @@ struct VertexOutput {
     @location(0) member: vec3<f32>,
     @location(1) member_1: vec2<f32>,
     @location(2) member_2: vec4<f32>,
-    @location(3) member_3: vec4<f32>,
-    @location(4) member_4: vec4<f32>,
+    @location(3) member_3: vec3<f32>,
+    @location(4) member_4: vec3<f32>,
 }
 
 var<private> inPosition_1: vec3<f32>;
@@ -50,9 +50,9 @@ var<private> inNormal_1: vec3<f32>;
 var<private> f_Texcoord: vec2<f32>;
 var<private> inTexcoord_1: vec2<f32>;
 var<private> f_WorldPos: vec4<f32>;
-var<private> f_WorldTangent: vec4<f32>;
+var<private> f_WorldTangent: vec3<f32>;
 var<private> inTangent_1: vec4<f32>;
-var<private> f_WorldBioTangent: vec4<f32>;
+var<private> f_WorldBioTangent: vec3<f32>;
 var<private> inBioTangent_1: vec4<f32>;
 
 fn main_1() {
@@ -67,18 +67,18 @@ fn main_1() {
     perVertexStruct.gl_Position = (((_e29 * _e31) * _e34) * _e36);
     let _e40 = ubo.model;
     let _e41 = inNormal_1;
-    f_WorldNormal = (_e40 * vec4<f32>(_e41.x, _e41.y, _e41.z, 0.0)).xyz;
-    let _e48 = inTexcoord_1;
-    f_Texcoord = _e48;
-    let _e50 = ubo.model;
-    let _e51 = inPosition_1;
-    f_WorldPos = (_e50 * vec4<f32>(_e51.x, _e51.y, _e51.z, 1.0));
-    let _e58 = ubo.model;
-    let _e59 = inTangent_1;
-    f_WorldTangent = (_e58 * _e59);
-    let _e62 = ubo.model;
-    let _e63 = inBioTangent_1;
-    f_WorldBioTangent = (_e62 * _e63);
+    f_WorldNormal = normalize((_e40 * vec4<f32>(_e41.x, _e41.y, _e41.z, 0.0)).xyz);
+    let _e49 = inTexcoord_1;
+    f_Texcoord = _e49;
+    let _e51 = ubo.model;
+    let _e52 = inPosition_1;
+    f_WorldPos = (_e51 * vec4<f32>(_e52.x, _e52.y, _e52.z, 1.0));
+    let _e59 = ubo.model;
+    let _e60 = inTangent_1;
+    f_WorldTangent = normalize((_e59 * _e60).xyz);
+    let _e65 = ubo.model;
+    let _e66 = inBioTangent_1;
+    f_WorldBioTangent = normalize((_e65 * _e66).xyz);
     return;
 }
 

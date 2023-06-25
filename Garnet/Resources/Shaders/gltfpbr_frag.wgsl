@@ -42,7 +42,8 @@ struct UniformBufferObject {
 
 @group(0) @binding(0) 
 var<uniform> ubo: UniformBufferObject;
-var<private> f_WorldTangent_1: vec4<f32>;
+var<private> f_WorldTangent_1: vec3<f32>;
+var<private> f_WorldBioTangent_1: vec3<f32>;
 var<private> f_WorldNormal_1: vec3<f32>;
 @group(0) @binding(7) 
 var normalTexture: texture_2d<f32>;
@@ -71,7 +72,6 @@ var emissiveTexture: texture_2d<f32>;
 @group(0) @binding(6) 
 var emissiveTextureSampler: sampler;
 var<private> outColor: vec4<f32>;
-var<private> f_WorldBioTangent_1: vec4<f32>;
 
 fn SRGBtoLINEARvf4_(srgbIn: ptr<function, vec4<f32>>) -> vec4<f32> {
     let _e64 = (*srgbIn);
@@ -165,29 +165,29 @@ fn getNormal() -> vec3<f32> {
     let _e69 = ubo.useNormalTexture;
     if (_e69 != 0) {
         let _e71 = f_WorldTangent_1;
-        t = normalize(_e71.xyz);
-        let _e74 = f_WorldTangent_1;
-        b = normalize(_e74.xyz);
-        let _e77 = f_WorldNormal_1;
-        n = normalize(_e77);
-        let _e79 = t;
-        let _e80 = b;
-        let _e81 = n;
-        tbn = mat3x3<f32>(vec3<f32>(_e79.x, _e79.y, _e79.z), vec3<f32>(_e80.x, _e80.y, _e80.z), vec3<f32>(_e81.x, _e81.y, _e81.z));
-        let _e95 = f_Texcoord_1;
-        let _e96 = textureSample(normalTexture, normalTextureSampler, _e95);
-        nomral = _e96.xyz;
-        let _e98 = tbn;
-        let _e99 = nomral;
+        t = normalize(_e71);
+        let _e73 = f_WorldBioTangent_1;
+        b = normalize(_e73);
+        let _e75 = f_WorldNormal_1;
+        n = normalize(_e75);
+        let _e77 = t;
+        let _e78 = b;
+        let _e79 = n;
+        tbn = mat3x3<f32>(vec3<f32>(_e77.x, _e77.y, _e77.z), vec3<f32>(_e78.x, _e78.y, _e78.z), vec3<f32>(_e79.x, _e79.y, _e79.z));
+        let _e93 = f_Texcoord_1;
+        let _e94 = textureSample(normalTexture, normalTextureSampler, _e93);
+        nomral = _e94.xyz;
+        let _e96 = tbn;
+        let _e97 = nomral;
+        let _e102 = ubo.normalMapScale;
         let _e104 = ubo.normalMapScale;
-        let _e106 = ubo.normalMapScale;
-        nomral = normalize((_e98 * (((_e99 * 2.0) - vec3<f32>(1.0)) * vec3<f32>(_e104, _e106, 1.0))));
+        nomral = normalize((_e96 * (((_e97 * 2.0) - vec3<f32>(1.0)) * vec3<f32>(_e102, _e104, 1.0))));
     } else {
-        let _e111 = f_WorldNormal_1;
-        nomral = _e111;
+        let _e109 = f_WorldNormal_1;
+        nomral = _e109;
     }
-    let _e112 = nomral;
-    return _e112;
+    let _e110 = nomral;
+    return _e110;
 }
 
 fn main_1() {
@@ -414,12 +414,12 @@ fn main_1() {
 }
 
 @fragment 
-fn main(@location(3) f_WorldTangent: vec4<f32>, @location(0) f_WorldNormal: vec3<f32>, @location(1) f_Texcoord: vec2<f32>, @location(2) f_WorldPos: vec4<f32>, @location(4) f_WorldBioTangent: vec4<f32>) -> @location(0) vec4<f32> {
+fn main(@location(3) f_WorldTangent: vec3<f32>, @location(4) f_WorldBioTangent: vec3<f32>, @location(0) f_WorldNormal: vec3<f32>, @location(1) f_Texcoord: vec2<f32>, @location(2) f_WorldPos: vec4<f32>) -> @location(0) vec4<f32> {
     f_WorldTangent_1 = f_WorldTangent;
+    f_WorldBioTangent_1 = f_WorldBioTangent;
     f_WorldNormal_1 = f_WorldNormal;
     f_Texcoord_1 = f_Texcoord;
     f_WorldPos_1 = f_WorldPos;
-    f_WorldBioTangent_1 = f_WorldBioTangent;
     main_1();
     let _e11 = outColor;
     return _e11;
