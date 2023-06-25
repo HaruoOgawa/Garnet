@@ -183,11 +183,19 @@ vec3 getNormal()
 	return nomral;
 }
 
-// SRGBとは私が今までガンマと思っていた色が暗くなるやつとのこと。今後はSRGBと呼ぼう
+// Lenearは光学に則した色空間(現実の光の仕組み
+// sRGBはモニターに使われる色空間で人間の色の知覚に則している
+// LinearよりsRGBの方が明るい
+// https://www.willgibbons.com/linear-workflow/#:~:text=sRGB%20is%20a%20non%2Dlinear,curve%20applied%20to%20the%20brightness.
 // https://lettier.github.io/3d-game-shaders-for-beginners/gamma-correction.html
 vec4 SRGBtoLINEAR(vec4 srgbIn)
 {
 	return vec4(pow(srgbIn.xyz, vec3(2.2)), srgbIn.a);
+}
+
+vec4 LINEARtoSRGB(vec4 srgbIn)
+{
+	return vec4(pow(srgbIn.xyz, vec3(1.0 / 2.2)), srgbIn.a);
 }
 
 void main(){
@@ -294,10 +302,10 @@ void main(){
 	// 反射カラーを計算
 	float mipCount = ubo.mipCount;
 	float lod = mipCount * perceptualRoughness;
-	vec3 reflectColor = textureLod(samplerCube(cubemapTexture, cubemapTextureSampler), reflect(v, n), lod).rgb;
+	vec3 reflectColor = LINEARtoSRGB(textureLod(samplerCube(cubemapTexture, cubemapTextureSampler), reflect(v, n), lod)).rgb;
 
 	// レンダリング方程式を構築
-	col.rgb = NdotL * ubo.lightColor.rgb * (specularBRDF + diffuseBRDF) + reflectColor;
+	col.rgb = NdotL * ubo.lightColor.rgb * (specularBRDF + diffuseBRDF) + reflectColor * specularColor;
 
 	// AO Mapの適応
 	if(ubo.useOcclusionTexture != 0)

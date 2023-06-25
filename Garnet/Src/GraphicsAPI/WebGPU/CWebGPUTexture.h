@@ -17,8 +17,11 @@ namespace api
 		WGPUTextureView m_TextureImageView;
 		WGPUSampler		m_TextureSampler;
 	private:
-		bool CreateTextureImageView(const std::vector<unsigned char>& pixelData, int pixelSize);
+		bool CreateTextureImageView(const std::vector<unsigned char>& OriginalPixels, int pixelSize);
 		bool CreateTextureSampler();
+
+		// Helper Function ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		bool ComputeShrinkPixels(const std::vector<unsigned char>& SrcPixels, std::vector<unsigned char>& DstPixles, uint32_t w, uint32_t h);
 	public:
 		CWebGPUTexture(api::CWebGPUAPI* pGraphicsAPI, bool UseMipMap);
 		virtual ~CWebGPUTexture();
