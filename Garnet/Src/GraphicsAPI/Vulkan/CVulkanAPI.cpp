@@ -532,7 +532,7 @@ namespace api
 		m_SwapChainImages.resize(imageCount);
 		vkGetSwapchainImagesKHR(m_LogicalDevice, m_SwapChain, &imageCount, &m_SwapChainImages[0]);
 
-		//
+		// スワップチェーンの色空間を指定 ///////////////////////////////////////////////
 		m_SwapChainImageFormat = surfaceFormat.format;
 		m_SwapChainExtent = extent;
 
