@@ -447,11 +447,9 @@ namespace api
 		swapChainDesc.width = static_cast<uint32_t>(m_Width);
 		swapChainDesc.height = static_cast<uint32_t>(m_Height);
 
-#ifdef __EMSCRIPTEN__
+		// スワップチェーンの色空間を指定 ///////////////////////////////////////////////
 		m_SwapChainFormat = WGPUTextureFormat_BGRA8Unorm;
-#else
-		m_SwapChainFormat = wgpuSurfaceGetPreferredFormat(m_Surface, m_Adapter);
-#endif // __EMSCRIPTEN__
+
 		swapChainDesc.format = m_SwapChainFormat;
 		swapChainDesc.usage = WGPUTextureUsage_RenderAttachment; // レンダーパスのターゲットとして使用することを宣言
 		swapChainDesc.presentMode = WGPUPresentMode_Fifo; // 各フレームで待機中のキューからどのようにテクスチャを示するかを指定する https://eliemichel.github.io/LearnWebGPU/getting-started/first-color.html

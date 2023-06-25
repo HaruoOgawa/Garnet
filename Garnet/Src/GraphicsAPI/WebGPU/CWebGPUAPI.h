@@ -85,6 +85,9 @@ namespace api
 		WGPUQueue GetQueue() const;
 		WGPUTextureFormat GetSwapChainFormat() const;
 		WGPURenderPassEncoder GetRenderPass() const;
+
+		// 縮小も同時に行い、元のテクスチャを別のテクスチャにコピー
+		//bool Blit
 	};
 }
 #endif
