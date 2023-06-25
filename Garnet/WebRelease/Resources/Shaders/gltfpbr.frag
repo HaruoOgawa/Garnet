@@ -3,8 +3,8 @@
 layout(location = 0) in vec3 f_WorldNormal;
 layout(location = 1) in vec2 f_Texcoord;
 layout(location = 2) in vec4 f_WorldPos;
-layout(location = 3) in vec4 f_WorldTangent;
-layout(location = 4) in vec4 f_WorldBioTangent;
+layout(location = 3) in vec3 f_WorldTangent;
+layout(location = 4) in vec3 f_WorldBioTangent;
 
 layout(location = 0) out vec4 outColor;
 
@@ -167,7 +167,7 @@ vec3 getNormal()
 		// êîéÆÇÕÇ±ÇÍ(https://drive.google.com/file/d/1A4WK5GLRzWRD9yt9_yxSjyz8Yrmb5Is8/view?usp=sharing)
 
 		vec3 t = normalize(f_WorldTangent.xyz);
-		vec3 b = normalize(f_WorldTangent.xyz);
+		vec3 b = normalize(f_WorldBioTangent.xyz);
 		vec3 n = normalize(f_WorldNormal.xyz);
 
 		mat3 tbn = mat3(t, b, n);

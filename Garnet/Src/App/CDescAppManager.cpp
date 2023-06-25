@@ -36,7 +36,7 @@ namespace descapp
 #ifdef __DAWN__
 		m_InputState(std::make_shared<input::CInputState>(1.0f)),
 #else
-		m_InputState(std::make_shared<input::CInputState>(0.1f)),
+		m_InputState(std::make_shared<input::CInputState>(1.0f)),
 #endif // __DAWN__
 		m_DeltaSecondsTime(0.0f)
 	{

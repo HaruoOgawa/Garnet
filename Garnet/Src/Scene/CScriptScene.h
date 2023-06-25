@@ -13,7 +13,7 @@ namespace scene
 {
 	class CScriptScene
 	{
-		//
+		// Test Obj
 		std::shared_ptr<object::C3DObject> m_TestObject;
 
 		std::shared_ptr<file::CFileReader> m_VertexShader;
@@ -22,13 +22,15 @@ namespace scene
 		std::shared_ptr<file::CFileReader> m_Texture0;
 		std::shared_ptr<file::CFileReader> m_Texture1;
 
-		//
-		std::shared_ptr<object::C3DObject> m_glTFObj;
-		std::shared_ptr<file::CFileReader> m_glTFData;
+		// glTF
+		std::shared_ptr<object::C3DObject> m_Sphere_glTFObj;
+		std::shared_ptr<file::CFileReader> m_Sphere_glTFData;
+		std::shared_ptr<object::C3DObject> m_Helmet_glTFObj;
+		std::shared_ptr<file::CFileReader> m_Helmet_glTFData;
 		std::shared_ptr<file::CFileReader> m_glTFVert;
 		std::shared_ptr<file::CFileReader> m_glTFFrag;
 
-		// 
+		// Cubemap
 		std::shared_ptr<file::CFileReader> m_Cube0;
 		std::shared_ptr<file::CFileReader> m_Cube1;
 		std::shared_ptr<file::CFileReader> m_Cube2;

@@ -14,8 +14,10 @@ namespace scene
 		m_Texture0(std::make_shared<file::CFileReader>()),
 		m_Texture1(std::make_shared<file::CFileReader>()),
 
-		m_glTFObj(std::make_shared<object::C3DObject>()),
-		m_glTFData(std::make_shared<file::CFileReader>()),
+		m_Sphere_glTFObj(std::make_shared<object::C3DObject>()),
+		m_Sphere_glTFData(std::make_shared<file::CFileReader>()),
+		m_Helmet_glTFObj(std::make_shared<object::C3DObject>()),
+		m_Helmet_glTFData(std::make_shared<file::CFileReader>()),
 		m_glTFVert(std::make_shared<file::CFileReader>()),
 		m_glTFFrag(std::make_shared<file::CFileReader>()),
 
@@ -57,11 +59,11 @@ namespace scene
 		// GLTF
 		std::string ModelPath = "Resources\\Models\\";
 
-		//m_glTFData->ReadFile(ModelPath + "Triangle\\glTF\\Triangle.glb");
-		//m_glTFData->ReadFile(ModelPath + "DamagedHelmet\\glTF-Binary\\DamagedHelmet.glb");
-		m_glTFData->ReadFile(ModelPath + "MetalRoughSpheresNoTextures\\glTF-Binary\\MetalRoughSpheresNoTextures.glb");
-		m_glTFObj->SetScale(glm::vec3(500.0f, 500.0f, 500.0f));
-		m_glTFObj->SetPos(glm::vec3(-1.5f, -1.5f, 0.0f));
+		m_Helmet_glTFData->ReadFile(ModelPath + "DamagedHelmet\\glTF-Binary\\DamagedHelmet.glb");
+
+		m_Sphere_glTFData->ReadFile(ModelPath + "MetalRoughSpheresNoTextures\\glTF-Binary\\MetalRoughSpheresNoTextures.glb");
+		m_Sphere_glTFObj->SetScale(glm::vec3(500.0f, 500.0f, 500.0f));
+		m_Sphere_glTFObj->SetPos(glm::vec3(-1.5f, -1.5f, -1.5f));
 
 		// Cubemap
 		m_Cube0->ReadFile("Resources\\Cubemaps\\environment\\environment_back_0.jpg");
@@ -172,20 +174,20 @@ namespace scene
 			}
 
 			// NODE
-			{
+			/*{
 				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(0, m_TestObject->GetMeshList(), m_TestObject->GetMaterialList());
 				Node->SetMeshIndex(0);
-				Node->SetPos(glm::vec3(0.0f, 0.0f, -0.25f));
-				Node->SetRot(glm::vec3(0.0f, 0.0f, 45.0f));
+				Node->SetPos(glm::vec3(0.0f, -1.0f, -0.25f));
+				Node->SetRot(glm::vec3(90.0f, 0.0f, 45.0f));
 				Node->SetScale(glm::vec3(1.0f, 0.1f, 1.0f) * 5.0f);
 				m_TestObject->AddNode(Node);
-			}
+			}*/
 
 			{
 				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(1, m_TestObject->GetMeshList(), m_TestObject->GetMaterialList());
 				Node->SetMeshIndex(1);
-				Node->SetPos(glm::vec3(-0.25f, 0.0f, -1.0f));
-				Node->SetRot(glm::vec3(0.0f, 0.0f, 45.0f));
+				Node->SetPos(glm::vec3(-1.25f, 0.0f, -5.0f));
+				Node->SetRot(glm::vec3(0.0f, 45.0f, 45.0f));
 				Node->SetScale(glm::vec3(1.0f, 1.0f, 1.0f) * 5.0f);
 				m_TestObject->AddNode(Node);
 			}
@@ -193,7 +195,8 @@ namespace scene
 			{
 				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(0, m_TestObject->GetMeshList(), m_TestObject->GetMaterialList());
 				Node->SetMeshIndex(0);
-				Node->SetPos(glm::vec3(0.5f, 0.0f, -2.0f));
+				Node->SetPos(glm::vec3(1.5f, 0.0f, -5.0f));
+				Node->SetRot(glm::vec3(0.0f, -45.0f, 0.0f));
 				Node->SetScale(glm::vec3(1.0f, 1.0f, 1.0f) * 5.0f);
 				m_TestObject->AddNode(Node);
 			}
@@ -223,7 +226,8 @@ namespace scene
 			createInfo->SetVertexShaderCode(m_glTFVert->GetData());
 			createInfo->SetFragmentShaderCode(m_glTFFrag->GetData());
 
-			if (!gltf::CGLTFImporter::Import(pGraphicsAPI, m_glTFData->GetData(), m_glTFObj, createInfo, CubeTexList)) return false;
+			if (!gltf::CGLTFImporter::Import(pGraphicsAPI, m_Sphere_glTFData->GetData(), m_Sphere_glTFObj, createInfo, CubeTexList)) return false;
+			if (!gltf::CGLTFImporter::Import(pGraphicsAPI, m_Helmet_glTFData->GetData(), m_Helmet_glTFObj, createInfo, CubeTexList)) return false;
 		}
 
 		return true;
@@ -238,14 +242,19 @@ namespace scene
 			if (!m_TestObject->Update(SecondsTime, Camera, Projection, DrawInfo)) return false;
 		}
 		
-		if (m_IsLoaded && m_glTFObj)
+		if (m_IsLoaded && m_Sphere_glTFObj)
 		{
-			if (!m_glTFObj->Update(SecondsTime, Camera, Projection, DrawInfo)) return false;
+			if (!m_Sphere_glTFObj->Update(SecondsTime, Camera, Projection, DrawInfo)) return false;
+		}
+		
+		if (m_IsLoaded && m_Helmet_glTFObj)
+		{
+			if (!m_Helmet_glTFObj->Update(SecondsTime, Camera, Projection, DrawInfo)) return false;
 		}
 
 		if (!m_IsLoaded)
 		{
-			if (m_VertexShader->IsLoaded() && m_FragmentShader->IsLoaded() && m_Texture0->IsLoaded() && m_Texture1->IsLoaded() && m_glTFData->IsLoaded()
+			if (m_VertexShader->IsLoaded() && m_FragmentShader->IsLoaded() && m_Texture0->IsLoaded() && m_Texture1->IsLoaded() && m_Sphere_glTFData->IsLoaded() && m_Helmet_glTFData->IsLoaded()
 				&& m_glTFVert->IsLoaded() && m_glTFFrag->IsLoaded()
 				&& m_Cube0->IsLoaded() && m_Cube1->IsLoaded() && m_Cube2->IsLoaded() && m_Cube3->IsLoaded() && m_Cube4->IsLoaded() && m_Cube5->IsLoaded() 
 			)
@@ -265,9 +274,14 @@ namespace scene
 			if (!m_TestObject->Draw()) return false;
 		}
 		
-		if (m_IsLoaded && m_glTFObj)
+		if (m_IsLoaded && m_Sphere_glTFObj)
 		{
-			if (!m_glTFObj->Draw()) return false;
+			if (!m_Sphere_glTFObj->Draw()) return false;
+		}
+		
+		if (m_IsLoaded && m_Helmet_glTFObj)
+		{
+			if (!m_Helmet_glTFObj->Draw()) return false;
 		}
 		
 		return true;
