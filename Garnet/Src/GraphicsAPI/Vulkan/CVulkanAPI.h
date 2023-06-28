@@ -162,13 +162,14 @@ namespace api
 		virtual bool InitializeWithGLFW(GLFWwindow* pWindow) override;
 		void Release();
 
+		virtual bool CreateRenderPass(const std::string& PassName, int Width, int Height, ERenderPassFormat RenderPassFormat) override;
 		virtual std::shared_ptr<renderer::IRenderer> CreateRenderer() override;
 		virtual std::shared_ptr<graphics::CMaterial> CreateMaterial() override;
 		virtual std::shared_ptr<graphics::CTexture> CreateTexture(bool UseMipMap = false) override;
 
 		virtual bool Resize(int Width, int Height) override;
 
-		virtual bool BeginRender(ERenderPassType RenderPassType) override;
+		virtual bool BeginRender(const std::string& PassName = "") override;
 		bool EndRender() override;
 
 		virtual const std::string& GetShaderExtension() const override;

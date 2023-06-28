@@ -89,6 +89,11 @@ namespace api
 		vkDestroyInstance(m_Instance, nullptr);
 	}
 
+	bool CVulkanAPI::CreateRenderPass(const std::string& PassName, int Width, int Height, ERenderPassFormat RenderPassFormat)
+	{
+		return true;
+	}
+
 	std::shared_ptr<renderer::IRenderer> CVulkanAPI::CreateRenderer()
 	{
 		auto Renderer = std::make_shared<renderer::CVulkanRenderer>(this);
@@ -151,7 +156,7 @@ namespace api
 		return true;
 	}
 
-	bool CVulkanAPI::BeginRender(ERenderPassType RenderPassType)
+	bool CVulkanAPI::BeginRender(const std::string& PassName)
 	{
 		// 記録スタート
 		if (!BeginRenderPass(m_CurrentImageIndex)) return false;

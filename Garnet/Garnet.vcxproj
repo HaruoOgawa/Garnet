@@ -336,6 +336,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Src\Camera\CViewerCamera.h" />
+    <ClInclude Include="Src\GraphicsAPI\ERenderPassFormat.h" />
     <ClInclude Include="Src\Graphics\ETextureType.h" />
     <ClInclude Include="Src\Input\CInputState.h" />
     <ClInclude Include="Src\Graphics\CDrawInfo.h" />
@@ -362,7 +363,6 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClInclude Include="Src\Object\CObject.h" />
     <ClInclude Include="Src\Graphics\CUniformBuffer.h" />
     <ClInclude Include="Src\Graphics\CUniformBufferDescriptor.h" />
-    <ClInclude Include="Src\Graphics\ERenderPassType.h" />
     <ClInclude Include="Src\Interface\IBuffer.h" />
     <ClInclude Include="Src\Interface\IDescriptor.h" />
     <ClInclude Include="Src\Library\glfw3webgpu\glfw3webgpu.h" />

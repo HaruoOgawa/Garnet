@@ -1,6 +1,5 @@
 #include "CScriptApp.h"
 #include "../../Scene/CScriptScene.h"
-#include "../../Graphics/ERenderPassType.h"
 #include "../../Graphics/CDrawInfo.h"
 #include "../../Camera/CCamera.h"
 #include "../../Projection/CProjection.h"
@@ -70,7 +69,7 @@ namespace app
 
 	bool CScriptApp::Draw(api::IGraphicsAPI* pGraphicsAPI)
 	{
-		if (!pGraphicsAPI->BeginRender(api::ERenderPassType::FORWARD_POLYGONE)) return false;
+		if (!pGraphicsAPI->BeginRender()) return false;
 
 		if (!m_ScriptScene->Draw(pGraphicsAPI)) return false;
 

@@ -70,6 +70,11 @@ namespace api
 	{
 	}
 
+	bool CWebGPUAPI::CreateRenderPass(const std::string& PassName, int Width, int Height, ERenderPassFormat RenderPassFormat)
+	{
+		return true;
+	}
+
 	std::shared_ptr<renderer::IRenderer> CWebGPUAPI::CreateRenderer()
 	{
 		auto Renderer = std::make_shared<renderer::CWebGPURenderer>(this);
@@ -102,7 +107,7 @@ namespace api
 		return true;
 	}
 
-	bool CWebGPUAPI::BeginRender(ERenderPassType RenderPassType)
+	bool CWebGPUAPI::BeginRender(const std::string& PassName)
 	{
 		// スワップチェーンから次の待機中テクスチャを取得
 		m_NextTexture = wgpuSwapChainGetCurrentTextureView(m_SwapChain);
