@@ -1,5 +1,6 @@
 #ifdef __DAWN__
 #include "CWebGPUAPI.h"
+#include "CWebGPURenderPass.h"
 #include "CWebGPURenderer.h"
 #include "CWebGPUMaterial.h"
 #include "CWebGPUTexture.h"
@@ -72,6 +73,13 @@ namespace api
 
 	bool CWebGPUAPI::CreateRenderPass(const std::string& PassName, int Width, int Height, ERenderPassFormat RenderPassFormat)
 	{
+		std::shared_ptr<CWebGPURenderPass> RenderPass = std::make_shared<CWebGPURenderPass>(PassName, Width, Height, RenderPassFormat);
+		if (!RenderPass->Create()) return false;
+
+		m_RenderPassMap.insert({ PassName, RenderPass });
+
+		return true;
+
 		return true;
 	}
 

@@ -6,11 +6,14 @@
 #include <set>
 #include <algorithm>
 #include <array>
+#include <unordered_map>
 
 #include "../../Interface/IGraphicsAPI.h"
 
 namespace api
 {
+	class CVulkanRenderPass;
+
 	struct QueueFamiryIndices
 	{
 		std::optional<uint32_t> m_GraphicsFamily;
@@ -80,6 +83,7 @@ namespace api
 		//bool m_IsReCreateSwapChain;
 
 		// Rendering
+		std::unordered_map<std::string, std::shared_ptr<CVulkanRenderPass>> m_RenderPassMap;
 		VkRenderPass m_RenderPass;
 
 		// Depth Test

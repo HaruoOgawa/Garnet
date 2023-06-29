@@ -4,9 +4,12 @@
 #include <webgpu.h>
 #include <wgpu.h>
 #include <vector>
+#include <unordered_map>
 
 namespace api
 {
+	class CWebGPURenderPass;
+
 	class CWebGPUAPI : public IGraphicsAPI
 	{
 		//
@@ -42,6 +45,7 @@ namespace api
 		WGPUTextureView m_DepthTextureView;
 
 		// RenderPass
+		std::unordered_map<std::string, std::shared_ptr<CWebGPURenderPass>> m_RenderPassMap;
 		WGPURenderPassEncoder m_RenderPass;
 
 	private:

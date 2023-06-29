@@ -335,6 +335,8 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Src\GraphicsAPI\WebGPU\CWebGPURenderPass.h" />
+    <ClInclude Include="Src\GraphicsAPI\Vulkan\CVulkanRenderPass.h" />
     <ClInclude Include="Src\Camera\CViewerCamera.h" />
     <ClInclude Include="Src\GraphicsAPI\ERenderPassFormat.h" />
     <ClInclude Include="Src\Graphics\ETextureType.h" />
@@ -683,6 +685,8 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClInclude Include="Src\Interface\IRenderer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\GraphicsAPI\WebGPU\CWebGPURenderPass.cpp" />
+    <ClCompile Include="Src\GraphicsAPI\Vulkan\CVulkanRenderPass.cpp" />
     <ClCompile Include="Src\Camera\CViewerCamera.cpp" />
     <ClCompile Include="Src\Input\CInputState.cpp" />
     <ClCompile Include="Src\Graphics\CDrawInfo.cpp" />

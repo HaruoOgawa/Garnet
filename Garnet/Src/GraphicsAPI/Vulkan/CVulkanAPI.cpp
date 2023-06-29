@@ -1,6 +1,7 @@
 #ifndef __DAWN__
 #include "CVulkanAPI.h"
 #include "CVulkanRenderer.h"
+#include "CVulkanRenderPass.h"
 #include "CVulkanMaterial.h"
 #include "CVulkanTexture.h"
 #include "../../Debug/Message/Console.h"
@@ -91,6 +92,11 @@ namespace api
 
 	bool CVulkanAPI::CreateRenderPass(const std::string& PassName, int Width, int Height, ERenderPassFormat RenderPassFormat)
 	{
+		std::shared_ptr<CVulkanRenderPass> RenderPass = std::make_shared<CVulkanRenderPass>(PassName, Width, Height, RenderPassFormat);
+		if (!RenderPass->Create()) return false;
+
+		m_RenderPassMap.insert({ PassName, RenderPass });
+
 		return true;
 	}
 
