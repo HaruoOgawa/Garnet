@@ -28,6 +28,9 @@ namespace api
 		virtual std::shared_ptr<graphics::CTexture> GetFrameTexture() override;
 
 		bool Create();
+
+		virtual bool BeginRenderPass() override;
+		virtual bool EndRenderPass() override;
 	};
 }
 #endif

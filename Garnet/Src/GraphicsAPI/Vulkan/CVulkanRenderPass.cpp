@@ -16,6 +16,9 @@ namespace api
 		m_Height(Height),
 		m_RenderPassFormat(RenderPassFormat),
 		m_FrameTexture(nullptr),
+		
+		m_CommandPool(nullptr),
+		m_CommandBuffer(nullptr),
 
 		m_RenderPass(nullptr),
 		m_FrameBuffer(nullptr),
@@ -28,6 +31,16 @@ namespace api
 
 	CVulkanRenderPass::~CVulkanRenderPass()
 	{
+		if (m_CommandPool)
+		{
+
+		}
+
+		if (m_CommandBuffer)
+		{
+
+		}
+
 		// デプスリソースを破棄
 		if (m_DepthImageView)
 		{
@@ -75,6 +88,8 @@ namespace api
 		if (!CreateRenderPass()) return false; // レンダーパスの作成(描画全体のマネージャー。実際に描画に使用するのがサブパス。サブパスを複数個用意することでポストプロセスもできる)
 		if (!CreateDepthResources()) return false; // デプステスト用のリソースを生成
 		if (!CreateFrameBuffer()) return false; // フレームバッファの作成
+		if (!CreateCommandPool()) return false;
+		if (!CreateCommandBuffer()) return false;
 
 		return true;
 	}
@@ -191,6 +206,143 @@ namespace api
 		frameBufferInfo.layers = 1;
 
 		if (vkCreateFramebuffer(m_pGraphicsAPI->GetLogicalDevice(), &frameBufferInfo, nullptr, &m_FrameBuffer) != VK_SUCCESS)
+		{
+			return false;
+		}
+
+		return true;
+	}
+
+	bool CVulkanRenderPass::BeginRenderPass()
+	{
+		// コマンドバッファの記録開始
+		if (!BeginRecordCommandBuffer()) return false;
+
+		// レンダーパス開始 
+		VkRenderPassBeginInfo renderPassInfo{};
+		renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+		renderPassInfo.renderPass = m_RenderPass;
+		renderPassInfo.framebuffer = m_FrameBuffer;
+		renderPassInfo.renderArea.offset = { 0, 0 };
+		renderPassInfo.renderArea.extent = {static_cast<unsigned int>(m_Width), static_cast<unsigned int>(m_Height)};
+
+		std::array<VkClearValue, 2> clearValues{};
+		clearValues[0].color = { {0.0f, 0.0f, 0.0f, 1.0f} };
+		clearValues[1].depthStencil = { 1.0f, 0 };
+		renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
+		renderPassInfo.pClearValues = clearValues.data();
+
+		// レンダーパス開始コマンドを発行
+		vkCmdBeginRenderPass(m_CommandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+		// 動的指定にしたビューポートとシザーの設定をここで行う(ウィンドウのリサイズにとても役立つやつ)
+		VkViewport viewport{};
+		viewport.x = 0.0f;
+		viewport.y = 0.0f;
+		viewport.width = static_cast<float>(m_Width);
+		viewport.height = static_cast<float>(m_Height);
+		viewport.minDepth = 0.0f;
+		viewport.maxDepth = 1.0f;
+		vkCmdSetViewport(m_CommandBuffer, 0, 1, &viewport); // ビューポート再設定用のコマンドを発行
+
+		VkRect2D scissor{};
+		scissor.offset = { 0, 0 };
+		scissor.extent = { static_cast<unsigned int>(m_Width), static_cast<unsigned int>(m_Height) };
+		vkCmdSetScissor(m_CommandBuffer, 0, 1, &scissor); // シザーの再設定用のコマンドを発行
+
+		return true;
+	}
+
+	bool CVulkanRenderPass::EndRenderPass()
+	{
+		// レンダーパス終了
+		vkCmdEndRenderPass(m_CommandBuffer);
+
+		// コマンドバッファの記録を終了
+		if (!EndRecordCommandBuffer()) return false;
+
+		// コマンドバッファの送信
+		VkSubmitInfo submitInfo{};
+		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+
+		submitInfo.commandBufferCount = 1;
+		submitInfo.pCommandBuffers = &m_CommandBuffer;
+
+		submitInfo.waitSemaphoreCount = 0;
+		submitInfo.pWaitSemaphores = nullptr;
+		submitInfo.pWaitDstStageMask = nullptr;
+		submitInfo.signalSemaphoreCount = 0;
+		submitInfo.pSignalSemaphores = nullptr;
+
+		// コマンドバッファをグラフィックキューに送信
+		// コマンドバッファにはコマンドが入っていてそのコマンドをキューが実行する
+		// キューはタスクでその具体的なタスク内容がコマンドという理解もできる
+		// レンダーパスへの描画コマンドを実行する
+		if (vkQueueSubmit(m_pGraphicsAPI->GetGraphicsQueue(), 1, &submitInfo, nullptr) != VK_SUCCESS)
+		{
+			return false;
+		}
+
+		return true;
+	}
+
+	bool CVulkanRenderPass::BeginRecordCommandBuffer()
+	{
+		// コマンドバッファをリセットする
+		//vkResetCommandBuffer(m_CommandBuffer, 0);
+
+		// コマンドバッファの記録開始
+		VkCommandBufferBeginInfo beginInfo{};
+		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+		beginInfo.flags = 0;
+		beginInfo.pInheritanceInfo = nullptr;
+
+		if (vkBeginCommandBuffer(m_CommandBuffer, &beginInfo) != VK_SUCCESS)
+		{
+			return false;
+		}
+
+		return true;
+	}
+
+	bool CVulkanRenderPass::EndRecordCommandBuffer()
+	{
+		// コマンドバッファの記録を終了
+		if (vkEndCommandBuffer(m_CommandBuffer) != VK_SUCCESS)
+		{
+			return false;
+		}
+
+		return true;
+	}
+
+	bool CVulkanRenderPass::CreateCommandPool()
+	{
+		QueueFamiryIndices queueFamilyIndices = m_pGraphicsAPI->FindQueueFamilies(m_pGraphicsAPI->GetPhysicalDevice());
+
+		VkCommandPoolCreateInfo poolInfo{};
+		poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+		poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+		poolInfo.queueFamilyIndex = queueFamilyIndices.m_GraphicsFamily.value();
+
+		if (vkCreateCommandPool(m_pGraphicsAPI->GetLogicalDevice(), &poolInfo, nullptr, &m_CommandPool) != VK_SUCCESS)
+		{
+			return false;
+		}
+
+		return true;
+	}
+
+	bool CVulkanRenderPass::CreateCommandBuffer()
+	{
+		VkCommandBufferAllocateInfo allocInfo{};
+		allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+		allocInfo.commandPool = m_CommandPool;
+		allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY; // メイン(プライマリ)コマンドバッファかサブ(セカンダリ)コマンドバッファかの選択
+		allocInfo.commandBufferCount = 1;
+
+		// Allocate は確保するという意味
+		if (vkAllocateCommandBuffers(m_pGraphicsAPI->GetLogicalDevice(), &allocInfo, &m_CommandBuffer) != VK_SUCCESS)
 		{
 			return false;
 		}

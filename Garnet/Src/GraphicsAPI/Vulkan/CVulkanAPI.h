@@ -86,6 +86,7 @@ namespace api
 		std::map<std::string, std::shared_ptr<graphics::IRenderPass>> m_OffScreenRenderPassMap;
 		VkRenderPass m_SwapChainRenderPass;
 		VkRenderPass m_CurrentRenderPass;
+		CVulkanRenderPass* m_pCurrentVulkanRenderPass;
 
 		// Depth Test
 		VkImage m_SwapChainDepthImage;
@@ -144,9 +145,6 @@ namespace api
 		bool IsDeviceSuitable(VkPhysicalDevice device);
 		bool CheckDeviceExtensionSupport(VkPhysicalDevice device);
 
-		// Queue
-		QueueFamiryIndices FindQueueFamilies(VkPhysicalDevice device);
-
 		// Presentation
 		SwapChainSupportDetails QuerySwapChainSupport(VkPhysicalDevice device);
 		VkSurfaceFormatKHR ChooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR> availablePresentModes);
@@ -200,6 +198,11 @@ namespace api
 		VkCommandBuffer BeginSingleTimeCommands();
 		void EndSingleTimeCommands(VkCommandBuffer commandBuffer);
 
+		// Queue
+		QueueFamiryIndices FindQueueFamilies(VkPhysicalDevice device);
+		VkQueue GetGraphicsQueue()const { return m_GraphicsQueue; }
+		VkQueue GetPresentQueue() const { return m_PresentQueue; }
+
 		// Texture
 		VkImageView CreateImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, graphics::ETextureType TextureType, float MipCount, bool UseMipMap);
 		bool CreateImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage,
@@ -210,7 +213,9 @@ namespace api
 		// Buffer
 		void CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory);
 		void CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
+		VkCommandBuffer GetCurrentCommandBuffer() const;
 		const std::vector<VkCommandBuffer>& GetCommandBuffers() const;
+
 		bool BeginRecordCommandBuffer();
 		bool EndRecordCommandBuffer();
 		bool SubmitCommandNoSemaphore();

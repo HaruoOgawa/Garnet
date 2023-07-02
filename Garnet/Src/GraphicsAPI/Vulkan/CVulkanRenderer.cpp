@@ -95,17 +95,17 @@ namespace renderer
 		if (!pVulkanMat->BuildDrawBuffer(DynamicOffsetNum)) return false;
 
 		// グラフィックパイプラインをコマンドにバインド
-		vkCmdBindPipeline(m_pGraphicsAPI->GetCommandBuffers()[m_pGraphicsAPI->GetCurrentFrame()], VK_PIPELINE_BIND_POINT_GRAPHICS, m_GraphicsPipeline);
+		vkCmdBindPipeline(m_pGraphicsAPI->GetCurrentCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, m_GraphicsPipeline);
 
 		// 頂点バッファをパイプラインにバインドする
 		VkDeviceSize offsets[] = { 0 };
 		for (int i = 0; i < static_cast<int>(m_VertexBufferList.size()); i++)
 		{
-			vkCmdBindVertexBuffers(m_pGraphicsAPI->GetCommandBuffers()[m_pGraphicsAPI->GetCurrentFrame()], i, 1, &m_VertexBufferList[i], offsets);
+			vkCmdBindVertexBuffers(m_pGraphicsAPI->GetCurrentCommandBuffer(), i, 1, &m_VertexBufferList[i], offsets);
 		}
 
 		// インデックスバッファをパイプラインにバインドする
-		vkCmdBindIndexBuffer(m_pGraphicsAPI->GetCommandBuffers()[m_pGraphicsAPI->GetCurrentFrame()], m_IndexBuffer, 0, VK_INDEX_TYPE_UINT16);
+		vkCmdBindIndexBuffer(m_pGraphicsAPI->GetCurrentCommandBuffer(), m_IndexBuffer, 0, VK_INDEX_TYPE_UINT16);
 		
 		// UBOのセット
 		std::vector<uint32_t> dynamicOffsetList;
@@ -117,19 +117,19 @@ namespace renderer
 
 		if (pVulkanMat->IsUseDynamicUniform())
 		{
-			vkCmdBindDescriptorSets(m_pGraphicsAPI->GetCommandBuffers()[m_pGraphicsAPI->GetCurrentFrame()], VK_PIPELINE_BIND_POINT_GRAPHICS,
+			vkCmdBindDescriptorSets(m_pGraphicsAPI->GetCurrentCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS,
 				m_PipelineLayout, 0, 1, &pVulkanMat->GetDescriptorSets()[m_pGraphicsAPI->GetCurrentFrame()], static_cast<uint32_t>(dynamicOffsetList.size()), &dynamicOffsetList[0]);
 		}
 		else
 		{
-			vkCmdBindDescriptorSets(m_pGraphicsAPI->GetCommandBuffers()[m_pGraphicsAPI->GetCurrentFrame()], VK_PIPELINE_BIND_POINT_GRAPHICS,
+			vkCmdBindDescriptorSets(m_pGraphicsAPI->GetCurrentCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS,
 				m_PipelineLayout, 0, 1, &pVulkanMat->GetDescriptorSets()[m_pGraphicsAPI->GetCurrentFrame()], 0, nullptr);
 		}
 
 		// 描画コマンドを発行
 		//vkCmdDraw(m_CommandBuffers[m_CurrentFrame], 3, 1, 0, 0); // パラメーター: vertexCount, instanceCount, firstVertex, firstInstance
 		// インデックス付のドローコマンドはこちら
-		vkCmdDrawIndexed(m_pGraphicsAPI->GetCommandBuffers()[m_pGraphicsAPI->GetCurrentFrame()], m_IndicesCount, 1, 0, 0, 0);
+		vkCmdDrawIndexed(m_pGraphicsAPI->GetCurrentCommandBuffer(), m_IndicesCount, 1, 0, 0, 0);
 
 		return true;
 	}

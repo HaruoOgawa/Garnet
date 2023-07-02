@@ -57,6 +57,7 @@ namespace scene
 		bool Initialize(api::IGraphicsAPI* pGraphicsAPI);
 		bool Update(api::IGraphicsAPI* pGraphicsAPI, float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo);
 		bool Draw(api::IGraphicsAPI* pGraphicsAPI) ;
+		bool DrawTest(api::IGraphicsAPI* pGraphicsAPI);
 
 		// Tex of FrameBuffer
 		void SetFrameTexture(const std::shared_ptr<graphics::CTexture>& FrameTexture);

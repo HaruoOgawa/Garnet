@@ -25,6 +25,7 @@ namespace api
 		m_SwapChainImageFormat(VK_FORMAT_UNDEFINED),
 		m_SwapChainRenderPass(nullptr),
 		m_CurrentRenderPass(nullptr),
+		m_pCurrentVulkanRenderPass(nullptr),
 		m_SwapChainDepthImage(nullptr),
 		m_SwapChainDepthImageMemory(nullptr),
 		m_SwapChainDepthImageView(nullptr),
@@ -172,84 +173,42 @@ namespace api
 		const auto& Pass = m_OffScreenRenderPassMap.find(PassName);
 		if (Pass != m_OffScreenRenderPassMap.end())
 		{
-			CVulkanRenderPass* pVulkanRenderPass = static_cast<CVulkanRenderPass*>(Pass->second.get());
-			m_CurrentRenderPass = pVulkanRenderPass->GetRenderPass();
+			m_pCurrentVulkanRenderPass = static_cast<CVulkanRenderPass*>(Pass->second.get());
+			m_CurrentRenderPass = m_pCurrentVulkanRenderPass->GetRenderPass();
+
+			// 記録スタート
+			if (!m_pCurrentVulkanRenderPass->BeginRenderPass()) return false;
 		}
 		else
 		{
 			m_CurrentRenderPass = m_SwapChainRenderPass;
-		}
 
-		// 記録スタート
-		if (!BeginRenderPass(m_CurrentImageIndex)) return false;
+			// 記録スタート
+			if (!BeginRenderPass(m_CurrentImageIndex)) return false;
+		}
 
 		return true;
 	}
 
 	bool CVulkanAPI::EndRender()
 	{
-		// スワップチェーンを作り直しているので1フレーム待つ
-		//if (m_IsReCreateSwapChain) return true;
-
 		// 記録終了
-		if (!EndRenderPass()) return false;
-
-		// コマンドバッファの送信
-		VkSubmitInfo submitInfo{};
-		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-
-		VkSemaphore waitSemaphore[] = { m_ImageAvailableSemaphones[m_CurrentFrame] }; // 画像に色が書き込まれて利用可になるまで待つセマフォ
-		VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
-		submitInfo.waitSemaphoreCount = 1;
-		submitInfo.pWaitSemaphores = waitSemaphore;
-		submitInfo.pWaitDstStageMask = waitStages;
-
-		submitInfo.commandBufferCount = 1;
-		submitInfo.pCommandBuffers = &m_CommandBuffers[m_CurrentFrame];
-
-		VkSemaphore signalSemaphores[] = { m_RenderFinishedSemaphores[m_CurrentFrame] }; // コマンドの実行が終了したことを知らせるセマフォ
-		submitInfo.signalSemaphoreCount = 1;
-		submitInfo.pSignalSemaphores = signalSemaphores;
-
-		// コマンドバッファをグラフィックキューに送信
-		// コマンドバッファにはコマンドが入っていてそのコマンドをキューが実行する
-		// キューはタスクでその具体的なタスク内容がコマンドという理解もできる
-		if (vkQueueSubmit(m_GraphicsQueue, 1, &submitInfo, m_InFlightFences[m_CurrentFrame]) != VK_SUCCESS)
+		if (m_CurrentRenderPass != m_SwapChainRenderPass)
 		{
-			return false;
+			// オフスクリーンレンダーパス
+			if (m_pCurrentVulkanRenderPass)
+			{
+				if (!m_pCurrentVulkanRenderPass->EndRenderPass()) return false;
+
+				m_pCurrentVulkanRenderPass = nullptr;
+			}
+		}
+		else
+		{
+			// デフォルトレンダーパス
+			if (!EndRenderPass()) return false;
 		}
 
-		// プレゼンテーション(結果をスワップチェーンに送信して最終結果を画面に示する)
-		VkPresentInfoKHR presentInfo{};
-		presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
-		presentInfo.waitSemaphoreCount = 1;
-		presentInfo.pWaitSemaphores = signalSemaphores;
-		// イメージを示するスワップチェーンを選択
-		VkSwapchainKHR swapChains[] = { m_SwapChain };
-		presentInfo.swapchainCount = 1;
-		presentInfo.pSwapchains = swapChains;
-		presentInfo.pImageIndices = &m_CurrentImageIndex;
-
-		presentInfo.pResults = nullptr;
-
-		// プレゼンテーションキューを実行
-		VkResult result = vkQueuePresentKHR(m_PresentQueue, &presentInfo);
-
-		// 可な限り最良な結果を得るために念のためもう一度最新かチェックする
-		// VK_ERROR_OUT_OF_DATE_KHR: スワップ チェーンはサーフェスと互換性がなくなり、レンダリングに使用できなくなりました(ウィンドウサイズの変更)
-		// VK_SUBOPTIMAL_KHR: スワップ チェーンを使用してサーフェスに正常に示することはできますが、サーフェス プロパティは正確に一致しなくなりました。
-		if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || m_FramebufferResized)
-		{
-			m_FramebufferResized = false;
-			ReCreateSwapChain();
-		}
-		else if (result != VK_SUCCESS)
-		{
-			throw std::runtime_error("failed to present swap chain image!");
-		}
-
-		// 現在処理するフレームを更新する
-		m_CurrentFrame = (m_CurrentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
 		return true;
 	}
 
@@ -840,6 +799,73 @@ namespace api
 		// コマンドバッファの記録を終了
 		if (!EndRecordCommandBuffer()) return false;
 		
+		// コマンドバッファの送信
+		VkSubmitInfo submitInfo{};
+		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+
+		VkSemaphore waitSemaphore[] = { m_ImageAvailableSemaphones[m_CurrentFrame] }; // 画像に色が書き込まれて利用可になるまで待つセマフォ
+		VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
+		submitInfo.waitSemaphoreCount = 1;
+		submitInfo.pWaitSemaphores = waitSemaphore;
+		submitInfo.pWaitDstStageMask = waitStages;
+
+		submitInfo.commandBufferCount = 1;
+		submitInfo.pCommandBuffers = &m_CommandBuffers[m_CurrentFrame];
+
+		VkSemaphore signalSemaphores[] = { m_RenderFinishedSemaphores[m_CurrentFrame] }; // コマンドの実行が終了したことを知らせるセマフォ
+		submitInfo.signalSemaphoreCount = 1;
+		submitInfo.pSignalSemaphores = signalSemaphores;
+
+		// コマンドバッファをグラフィックキューに送信
+		// コマンドバッファにはコマンドが入っていてそのコマンドをキューが実行する
+		// キューはタスクでその具体的なタスク内容がコマンドという理解もできる
+		// レンダーパスへの描画コマンドを実行する
+		
+		// キューは複数のコマンドを記録するのに必要
+		// BeginSingleTimeCommandsみたいなやつは一つのコマンドだけを記録して即時実行する
+		// レンダリングのような複数コマンドを記録するにはキューが必須である
+		
+		// そしてそのキューには格納できるコマンドの種類が決まっていて、描画系だとGraphicsQueue、プレゼント系だとPresentQueueといった感じで分かれている
+		if (vkQueueSubmit(m_GraphicsQueue, 1, &submitInfo, m_InFlightFences[m_CurrentFrame]) != VK_SUCCESS)
+		{
+			return false;
+		}
+
+		// プレゼンテーション(結果をスワップチェーンに送信して最終結果を画面に示する)
+		VkPresentInfoKHR presentInfo{};
+		presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+		presentInfo.waitSemaphoreCount = 1;
+		presentInfo.pWaitSemaphores = signalSemaphores;
+		// イメージを示するスワップチェーンを選択
+		VkSwapchainKHR swapChains[] = { m_SwapChain };
+		presentInfo.swapchainCount = 1;
+		presentInfo.pSwapchains = swapChains;
+		presentInfo.pImageIndices = &m_CurrentImageIndex;
+
+		presentInfo.pResults = nullptr;
+
+		// プレゼンテーションキューを実行
+		// ここでSemaphoreを使っているのは、スワップチェーンのデータを画面ウィンドウに渡すのを待つため
+		// たぶん渡し終わってないのに次々実行すると無駄なメモリが増えていくんだと思う.
+		// 逆にオフスクリーンレンダリングでは画面への受け渡しは発生しないのでSemaphoreやFenceの考慮は必要ないはず(コマンドキューは必須)
+		VkResult result = vkQueuePresentKHR(m_PresentQueue, &presentInfo);
+
+		// 可な限り最良な結果を得るために念のためもう一度最新かチェックする
+		// VK_ERROR_OUT_OF_DATE_KHR: スワップ チェーンはサーフェスと互換性がなくなり、レンダリングに使用できなくなりました(ウィンドウサイズの変更)
+		// VK_SUBOPTIMAL_KHR: スワップ チェーンを使用してサーフェスに正常に示することはできますが、サーフェス プロパティは正確に一致しなくなりました。
+		if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || m_FramebufferResized)
+		{
+			m_FramebufferResized = false;
+			ReCreateSwapChain();
+		}
+		else if (result != VK_SUCCESS)
+		{
+			throw std::runtime_error("failed to present swap chain image!");
+		}
+
+		// 現在処理するフレームを更新する
+		m_CurrentFrame = (m_CurrentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
+
 		return true;
 	}
 
@@ -1233,6 +1259,18 @@ namespace api
 
 		// コマンドの記録終了
 		EndSingleTimeCommands(commandBuffer);
+	}
+
+	VkCommandBuffer CVulkanAPI::GetCurrentCommandBuffer() const
+	{
+		if (m_pCurrentVulkanRenderPass)
+		{
+			return m_pCurrentVulkanRenderPass->GetCommandBuffer();
+		}
+		else
+		{
+			return m_CommandBuffers[GetCurrentFrame()];
+		}
 	}
 
 	const std::vector<VkCommandBuffer>& CVulkanAPI::GetCommandBuffers() const

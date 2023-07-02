@@ -8,7 +8,7 @@
 namespace scene
 {
 	CScriptScene::CScriptScene():
-		m_TestObject(std::make_shared<object::C3DObject>()),
+		m_TestObject(std::make_shared<object::C3DObject>("Test")),
 		m_VertexShader(std::make_shared<file::CFileReader>()),
 		m_FragmentShader(std::make_shared<file::CFileReader>()),
 		m_Texture0(std::make_shared<file::CFileReader>()),
@@ -269,11 +269,6 @@ namespace scene
 
 	bool CScriptScene::Draw(api::IGraphicsAPI* pGraphicsAPI)
 	{
-		if (m_IsLoaded && m_TestObject)
-		{
-			if (!m_TestObject->Draw()) return false;
-		}
-		
 		if (m_IsLoaded && m_Sphere_glTFObj)
 		{
 			if (!m_Sphere_glTFObj->Draw()) return false;
@@ -282,6 +277,16 @@ namespace scene
 		if (m_IsLoaded && m_Helmet_glTFObj)
 		{
 			if (!m_Helmet_glTFObj->Draw()) return false;
+		}
+		
+		return true;
+	}
+	
+	bool CScriptScene::DrawTest(api::IGraphicsAPI* pGraphicsAPI)
+	{
+		if (m_IsLoaded && m_TestObject)
+		{
+			if (!m_TestObject->Draw()) return false;
 		}
 		
 		return true;

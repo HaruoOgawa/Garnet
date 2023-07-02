@@ -85,10 +85,14 @@ namespace app
 
 	bool CScriptApp::Draw(api::IGraphicsAPI* pGraphicsAPI)
 	{
+		// "Test"
+		if (!pGraphicsAPI->BeginRender("Test")) return false;
+		if (!m_ScriptScene->DrawTest(pGraphicsAPI)) return false;
+		if (!pGraphicsAPI->EndRender()) return false;
+		
+		// Default(SwapChain)
 		if (!pGraphicsAPI->BeginRender()) return false;
-
 		if (!m_ScriptScene->Draw(pGraphicsAPI)) return false;
-
 		if (!pGraphicsAPI->EndRender()) return false;
 
 		return true;
