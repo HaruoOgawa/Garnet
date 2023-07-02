@@ -6,7 +6,7 @@
 #include <set>
 #include <algorithm>
 #include <array>
-#include <unordered_map>
+#include <map>
 
 #include "../../Interface/IGraphicsAPI.h"
 
@@ -83,7 +83,7 @@ namespace api
 		//bool m_IsReCreateSwapChain;
 
 		// Rendering
-		std::unordered_map<std::string, std::shared_ptr<CVulkanRenderPass>> m_RenderPassMap;
+		std::map<std::string, std::shared_ptr<graphics::IRenderPass>> m_RenderPassMap;
 		VkRenderPass m_RenderPass;
 
 		// Depth Test
@@ -155,10 +155,6 @@ namespace api
 		// Buffer
 		uint32_t FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags propertoes);
 		
-		// Depth
-		VkFormat FIndDepthFormat();
-		VkFormat FindSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features);
-		bool	 HasStencilComponent(VkFormat format);
 	public:
 		CVulkanAPI(int Width, int Height);
 		virtual ~CVulkanAPI();
@@ -178,6 +174,8 @@ namespace api
 
 		virtual const std::string& GetShaderExtension() const override;
 
+		virtual const std::map<std::string, std::shared_ptr<graphics::IRenderPass>>& GetRenderPassMap() const override;
+
 		//
 		int GetMaxFramesInFlight() const { return MAX_FRAMES_IN_FLIGHT; }
 
@@ -190,6 +188,11 @@ namespace api
 
 		// Rendering
 		const VkRenderPass& GetRenderPass() const;
+
+		// Depth
+		VkFormat FindDepthFormat();
+		VkFormat FindSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features);
+		bool	 HasStencilComponent(VkFormat format);
 
 		// Command
 		VkCommandBuffer BeginSingleTimeCommands();

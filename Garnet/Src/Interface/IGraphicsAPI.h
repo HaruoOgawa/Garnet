@@ -1,7 +1,10 @@
 #pragma once
 #include <memory>
 #include <string>
+#include <map>
+
 #include "IRenderer.h"
+#include "IRenderPass.h"
 
 #include "../GraphicsAPI/ERenderPassFormat.h"
 
@@ -47,5 +50,6 @@ namespace api
 		virtual bool EndRender() = 0;
 
 		virtual const std::string& GetShaderExtension() const = 0;
+		virtual const std::map<std::string, std::shared_ptr<graphics::IRenderPass>>& GetRenderPassMap() const = 0;
 	};
 }

@@ -117,6 +117,13 @@ namespace api
 
 	bool CWebGPUAPI::BeginRender(const std::string& PassName)
 	{
+		// レンダーパスを切り替える
+		const auto& Pass = m_RenderPassMap.find(PassName);
+		if (Pass != m_RenderPassMap.end())
+		{
+			CWebGPURenderPass* RenderPassPass = static_cast<CWebGPURenderPass*>(Pass->second.get());
+		}
+
 		// スワップチェーンから次の待機中テクスチャを取得
 		m_NextTexture = wgpuSwapChainGetCurrentTextureView(m_SwapChain);
 		if (!m_NextTexture)
@@ -207,6 +214,11 @@ namespace api
 	const std::string& CWebGPUAPI::GetShaderExtension() const
 	{
 		return m_ShaderExtension;
+	}
+
+	const std::map<std::string, std::shared_ptr<graphics::IRenderPass>>& CWebGPUAPI::GetRenderPassMap() const
+	{
+		return m_RenderPassMap;
 	}
 
 	//

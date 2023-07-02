@@ -1059,6 +1059,9 @@
     <ClInclude Include="Src\GraphicsAPI\WebGPU\CWebGPURenderPass.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Interface\IRenderPass.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\Main\DescMain\DescMain.cpp">

@@ -10,6 +10,12 @@
 
 // CScriptApp は旧エンジンでもやっていたof風にCppでエンジンコードを直接シーンを構築していくアプリ
 
+// MVVMで設計する
+// App => ViewModel, Scene => View, API => Model
+// Garnetで作品を作る時、View(Scene)とViewModel(App)は編集していいが、Modelの変更は一切許さない
+
+// FrameBufferListはAppで作り、そのテクスチャリストをViewにInitializeの最後辺りで渡す
+
 namespace app
 {
 	CScriptApp::CScriptApp():
@@ -42,8 +48,14 @@ namespace app
 
 	bool CScriptApp::Initialize(api::IGraphicsAPI* pGraphicsAPI)
 	{
+		// Viewの初期化
 		m_ScriptScene = std::make_shared<scene::CScriptScene>();
 		if (!m_ScriptScene->Initialize(pGraphicsAPI)) return false;
+
+		// オフスクリーンレンダリング用のFrameBufferを生成する
+
+		// FrameTextureを渡す
+		//m_ScriptScene->SetFrameTexture();
 
 		return true;
 	}

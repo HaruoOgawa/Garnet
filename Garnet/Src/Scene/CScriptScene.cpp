@@ -286,4 +286,10 @@ namespace scene
 		
 		return true;
 	}
+
+	// Tex of FrameBuffer
+	void CScriptScene::SetFrameTexture(const std::shared_ptr<graphics::CTexture>& FrameTexture)
+	{
+		m_FrameTextureList.push_back(FrameTexture);
+	}
 }

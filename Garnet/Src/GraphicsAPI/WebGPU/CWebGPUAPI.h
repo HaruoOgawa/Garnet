@@ -4,7 +4,7 @@
 #include <webgpu.h>
 #include <wgpu.h>
 #include <vector>
-#include <unordered_map>
+#include <map>
 
 namespace api
 {
@@ -45,7 +45,7 @@ namespace api
 		WGPUTextureView m_DepthTextureView;
 
 		// RenderPass
-		std::unordered_map<std::string, std::shared_ptr<CWebGPURenderPass>> m_RenderPassMap;
+		std::map<std::string, std::shared_ptr<graphics::IRenderPass>> m_RenderPassMap;
 		WGPURenderPassEncoder m_RenderPass;
 
 	private:
@@ -84,6 +84,8 @@ namespace api
 		virtual bool EndRender() override;
 
 		virtual const std::string& GetShaderExtension() const override;
+
+		virtual const std::map<std::string, std::shared_ptr<graphics::IRenderPass>>& GetRenderPassMap() const override;
 
 		//
 		WGPUDevice GetLogicalDevice() const;

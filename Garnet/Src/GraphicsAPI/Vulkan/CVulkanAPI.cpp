@@ -93,7 +93,7 @@ namespace api
 	bool CVulkanAPI::CreateRenderPass(const std::string& PassName, int Width, int Height, ERenderPassFormat RenderPassFormat)
 	{
 		std::shared_ptr<CVulkanRenderPass> RenderPass = std::make_shared<CVulkanRenderPass>(PassName, Width, Height, RenderPassFormat);
-		if (!RenderPass->Create()) return false;
+		if (!RenderPass->Create(this)) return false;
 
 		m_RenderPassMap.insert({ PassName, RenderPass });
 
@@ -164,6 +164,13 @@ namespace api
 
 	bool CVulkanAPI::BeginRender(const std::string& PassName)
 	{
+		// レンダーパスを切り替える
+		const auto& Pass = m_RenderPassMap.find(PassName);
+		if (Pass != m_RenderPassMap.end())
+		{
+			CVulkanRenderPass* RenderPassPass = static_cast<CVulkanRenderPass*>(Pass->second.get());
+		}
+
 		// 記録スタート
 		if (!BeginRenderPass(m_CurrentImageIndex)) return false;
 
@@ -257,6 +264,11 @@ namespace api
 	const std::string& CVulkanAPI::GetShaderExtension() const
 	{
 		return m_ShaderExtension;
+	}
+
+	const std::map<std::string, std::shared_ptr<graphics::IRenderPass>>& CVulkanAPI::GetRenderPassMap() const
+	{
+		return m_RenderPassMap;
 	}
 
 	// Device
@@ -586,7 +598,7 @@ namespace api
 		// <デプスバッファ> ////////////////////////////////////////////////////////////////
 		// レンダーパスの基本的な設定
 		VkAttachmentDescription depthAttachment{};
-		depthAttachment.format = FIndDepthFormat();
+		depthAttachment.format = FindDepthFormat();
 		depthAttachment.samples = VK_SAMPLE_COUNT_1_BIT; // マルチサンプリング
 		depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR; // レンダリングの前後にどのような処理を施すか(クリアの方法など)。デプスバッファに適応
 		depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE; // レンダリング結果をメモリに保存し読み取り可にする。デプスバッファに適応
@@ -640,7 +652,7 @@ namespace api
 
 	bool CVulkanAPI::CreateDepthResources()
 	{
-		VkFormat depthFormat = FIndDepthFormat();
+		VkFormat depthFormat = FindDepthFormat();
 		CreateImage(m_SwapChainExtent.width, m_SwapChainExtent.height, depthFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
 			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_DepthImage, m_DepthImageMemory, graphics::ETextureType::TEXTURE_2D, 1, false);
 
@@ -1438,7 +1450,7 @@ namespace api
 	}
 
 	// Depth
-	VkFormat CVulkanAPI::FIndDepthFormat()
+	VkFormat CVulkanAPI::FindDepthFormat()
 	{
 		return FindSupportedFormat({ VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT },
 			VK_IMAGE_TILING_OPTIMAL, VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);

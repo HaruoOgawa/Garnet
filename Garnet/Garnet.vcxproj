@@ -347,6 +347,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClInclude Include="Src\GraphicsAPI\Vulkan\CVulkanTexture.h" />
     <ClInclude Include="Src\Graphics\CTexture.h" />
     <ClInclude Include="Src\Graphics\STextureBindingLayout.h" />
+    <ClInclude Include="Src\Interface\IRenderPass.h" />
     <ClInclude Include="Src\Library\tinygltf\json.hpp" />
     <ClInclude Include="Src\Library\tinygltf\stb_image.h" />
     <ClInclude Include="Src\Library\tinygltf\stb_image_write.h" />
