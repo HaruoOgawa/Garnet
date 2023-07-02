@@ -711,7 +711,7 @@ namespace api
 		semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
 
 		// フェンスの作成(フェンスもセマフォと同様の機を持つが、GPUでのコマンドの終了がCPUに知らされるということが違う)
-		// セマフォはGOUでの操作の実行順序を指定するために使用され、フェンスはCPUとGPUをお互い同期させるために使用される
+		// セマフォはGPUでの操作の実行順序を指定するために使用され、フェンスはCPUとGPUをお互い同期させるために使用される
 		VkFenceCreateInfo fenceInfo{};
 		fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
 		fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT; // 初回は前のフレームがないため、このフラグを設定することで最初の呼び出しがすぐに行われるようにする

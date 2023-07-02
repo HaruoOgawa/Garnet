@@ -33,12 +33,8 @@ namespace api
 	{
 		if (m_CommandPool)
 		{
-
-		}
-
-		if (m_CommandBuffer)
-		{
-
+			vkDestroyCommandPool(m_pGraphicsAPI->GetLogicalDevice(), m_CommandPool, nullptr);
+			m_CommandPool = nullptr;
 		}
 
 		// デプスリソースを破棄
@@ -278,7 +274,11 @@ namespace api
 		// コマンドバッファにはコマンドが入っていてそのコマンドをキューが実行する
 		// キューはタスクでその具体的なタスク内容がコマンドという理解もできる
 		// レンダーパスへの描画コマンドを実行する
-		if (vkQueueSubmit(m_pGraphicsAPI->GetGraphicsQueue(), 1, &submitInfo, nullptr) != VK_SUCCESS)
+
+		// 描画が終わるまでフェンスで次の処理を待たせる
+		const auto& Fence = m_pGraphicsAPI->GetInFlightFence();
+
+		if (vkQueueSubmit(m_pGraphicsAPI->GetGraphicsQueue(), 1, &submitInfo, Fence) != VK_SUCCESS)
 		{
 			return false;
 		}
@@ -288,8 +288,15 @@ namespace api
 
 	bool CVulkanRenderPass::BeginRecordCommandBuffer()
 	{
+		// 前のフレームの処理が終わるのを待つ
+		const auto& Fence = m_pGraphicsAPI->GetInFlightFence();
+		vkWaitForFences(m_pGraphicsAPI->GetLogicalDevice(), 1, &Fence, VK_TRUE, UINT32_MAX);
+
+		// 処理が終わったのでフェンスをリセットしてまた使える状態にしておく
+		vkResetFences(m_pGraphicsAPI->GetLogicalDevice(), 1, &Fence);
+
 		// コマンドバッファをリセットする
-		//vkResetCommandBuffer(m_CommandBuffer, 0);
+		vkResetCommandBuffer(m_CommandBuffer, 0);
 
 		// コマンドバッファの記録開始
 		VkCommandBufferBeginInfo beginInfo{};

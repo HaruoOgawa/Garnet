@@ -203,6 +203,9 @@ namespace api
 		VkQueue GetGraphicsQueue()const { return m_GraphicsQueue; }
 		VkQueue GetPresentQueue() const { return m_PresentQueue; }
 
+		// Sync
+		VkFence GetInFlightFence()const { return m_InFlightFences[m_CurrentFrame]; }
+
 		// Texture
 		VkImageView CreateImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, graphics::ETextureType TextureType, float MipCount, bool UseMipMap);
 		bool CreateImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage,
