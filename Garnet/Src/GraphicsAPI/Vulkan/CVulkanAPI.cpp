@@ -23,10 +23,11 @@ namespace api
 		m_PresentQueue(nullptr),
 		m_SwapChain(nullptr),
 		m_SwapChainImageFormat(VK_FORMAT_UNDEFINED),
-		m_RenderPass(nullptr),
-		m_DepthImage(nullptr),
-		m_DepthImageMemory(nullptr),
-		m_DepthImageView(nullptr),
+		m_SwapChainRenderPass(nullptr),
+		m_CurrentRenderPass(nullptr),
+		m_SwapChainDepthImage(nullptr),
+		m_SwapChainDepthImageMemory(nullptr),
+		m_SwapChainDepthImageView(nullptr),
 		m_CommandPool(nullptr)
 	{
 	}
@@ -46,9 +47,9 @@ namespace api
 		if (!CreateDevices()) return false; // デバイスを作成(物理デバイス/論理デバイス)
 		if (!CreateSwapChain()) return false; // スワップチェインを作成(画面に示されるのを待っている画像のキューのマネージャーこと)
 		if (!CreateImageViews()) return false; // イメージビューの作成(APIが描画に使用する画像を管理するビューのこと)
-		if (!CreateRenderPass()) return false; // レンダーパスの作成(描画全体のマネージャー。実際に描画に使用するのがサブパス。サブパスを複数個用意することでポストプロセスもできる)
-		if (!CreateDepthResources()) return false; // デプステスト用のリソースを生成
-		if (!CreateFrameBuffer()) return false; // フレームバッファの作成
+		if (!CreateSwapChainRenderPass()) return false; // レンダーパスの作成(描画全体のマネージャー。実際に描画に使用するのがサブパス。サブパスを複数個用意することでポストプロセスもできる)
+		if (!CreateSwapChainDepthResources()) return false; // デプステスト用のリソースを生成
+		if (!CreateSwapChainFrameBuffer()) return false; // フレームバッファの作成
 		if (!CreateCommandPool()) return false; // コマンドプールを作成(コマンドプールはコマンドバッファを格納するメモリを管理するのに使用する)
 		if (!CreateCommandBuffer()) return false; // コマンドバッファの作成
 		if (!CreateSyncObjects()) return false; // 同期オブジェクトの作成(各種コマンドの順序を操作するために使用)
@@ -58,11 +59,14 @@ namespace api
 
 	void CVulkanAPI::Release()
 	{
+		// オフスクリーンレンダリング用のフレームバッファを解放
+		m_OffScreenRenderPassMap.clear();
+
 		// Release Vulkan(作成とは逆の順番で破棄していく)
 		CleanupSwapChain();
 
 		// レンダーパスの破棄
-		vkDestroyRenderPass(m_LogicalDevice, m_RenderPass, nullptr);
+		vkDestroyRenderPass(m_LogicalDevice, m_SwapChainRenderPass, nullptr);
 
 		// 同期オブジェクトの破棄
 		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
@@ -92,17 +96,17 @@ namespace api
 
 	bool CVulkanAPI::CreateRenderPass(const std::string& PassName, int Width, int Height, ERenderPassFormat RenderPassFormat)
 	{
-		std::shared_ptr<CVulkanRenderPass> RenderPass = std::make_shared<CVulkanRenderPass>(PassName, Width, Height, RenderPassFormat);
-		if (!RenderPass->Create(this)) return false;
+		std::shared_ptr<CVulkanRenderPass> RenderPass = std::make_shared<CVulkanRenderPass>(this, PassName, Width, Height, RenderPassFormat);
+		if (!RenderPass->Create()) return false;
 
-		m_RenderPassMap.insert({ PassName, RenderPass });
+		m_OffScreenRenderPassMap.insert({ PassName, RenderPass });
 
 		return true;
 	}
 
-	std::shared_ptr<renderer::IRenderer> CVulkanAPI::CreateRenderer()
+	std::shared_ptr<renderer::IRenderer> CVulkanAPI::CreateRenderer(const std::string& PassName)
 	{
-		auto Renderer = std::make_shared<renderer::CVulkanRenderer>(this);
+		auto Renderer = std::make_shared<renderer::CVulkanRenderer>(this, PassName);
 
 		return Renderer;
 	}
@@ -165,10 +169,15 @@ namespace api
 	bool CVulkanAPI::BeginRender(const std::string& PassName)
 	{
 		// レンダーパスを切り替える
-		const auto& Pass = m_RenderPassMap.find(PassName);
-		if (Pass != m_RenderPassMap.end())
+		const auto& Pass = m_OffScreenRenderPassMap.find(PassName);
+		if (Pass != m_OffScreenRenderPassMap.end())
 		{
-			CVulkanRenderPass* RenderPassPass = static_cast<CVulkanRenderPass*>(Pass->second.get());
+			CVulkanRenderPass* pVulkanRenderPass = static_cast<CVulkanRenderPass*>(Pass->second.get());
+			m_CurrentRenderPass = pVulkanRenderPass->GetRenderPass();
+		}
+		else
+		{
+			m_CurrentRenderPass = m_SwapChainRenderPass;
 		}
 
 		// 記録スタート
@@ -266,9 +275,14 @@ namespace api
 		return m_ShaderExtension;
 	}
 
-	const std::map<std::string, std::shared_ptr<graphics::IRenderPass>>& CVulkanAPI::GetRenderPassMap() const
+	const std::map<std::string, std::shared_ptr<graphics::IRenderPass>>& CVulkanAPI::GetOffScreenRenderPassMap() const
 	{
-		return m_RenderPassMap;
+		return m_OffScreenRenderPassMap;
+	}
+
+	VkRenderPass CVulkanAPI::GetSwapChainRenderPass() const
+	{
+		return m_SwapChainRenderPass;
 	}
 
 	// Device
@@ -289,9 +303,9 @@ namespace api
 	}
 
 	// Rendering
-	const VkRenderPass& CVulkanAPI::GetRenderPass() const
+	const VkRenderPass& CVulkanAPI::GetCurrentRenderPass() const
 	{
-		return m_RenderPass;
+		return m_CurrentRenderPass;
 	}
 
 	// Vulkanメインロジック ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -576,7 +590,7 @@ namespace api
 		return true;
 	}
 
-	bool CVulkanAPI::CreateRenderPass()
+	bool CVulkanAPI::CreateSwapChainRenderPass()
 	{
 		// <カラーバッファ> ////////////////////////////////////////////////////////////////
 		// レンダーパスの基本的な設定
@@ -642,7 +656,7 @@ namespace api
 		renderPassInfo.dependencyCount = 1;
 		renderPassInfo.pDependencies = &dependency;
 
-		if (vkCreateRenderPass(m_LogicalDevice, &renderPassInfo, nullptr, &m_RenderPass) != VK_SUCCESS)
+		if (vkCreateRenderPass(m_LogicalDevice, &renderPassInfo, nullptr, &m_SwapChainRenderPass) != VK_SUCCESS)
 		{
 			throw std::runtime_error("failed to create render pass!\n");
 		}
@@ -650,18 +664,18 @@ namespace api
 		return true;
 	}
 
-	bool CVulkanAPI::CreateDepthResources()
+	bool CVulkanAPI::CreateSwapChainDepthResources()
 	{
 		VkFormat depthFormat = FindDepthFormat();
 		CreateImage(m_SwapChainExtent.width, m_SwapChainExtent.height, depthFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
-			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_DepthImage, m_DepthImageMemory, graphics::ETextureType::TEXTURE_2D, 1, false);
+			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_SwapChainDepthImage, m_SwapChainDepthImageMemory, graphics::ETextureType::TEXTURE_2D, 1, false);
 
-		m_DepthImageView = CreateImageView(m_DepthImage, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT, graphics::ETextureType::TEXTURE_2D, 1, false);
+		m_SwapChainDepthImageView = CreateImageView(m_SwapChainDepthImage, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT, graphics::ETextureType::TEXTURE_2D, 1, false);
 
 		return true;
 	}
 
-	bool CVulkanAPI::CreateFrameBuffer()
+	bool CVulkanAPI::CreateSwapChainFrameBuffer()
 	{
 		m_SwapChainFrameBuffers.resize(m_SwapChainImageViews.size());
 
@@ -669,12 +683,12 @@ namespace api
 		{
 			std::array<VkImageView, 2> attachments[] = {
 				m_SwapChainImageViews[i],
-				m_DepthImageView
+				m_SwapChainDepthImageView
 			};
 
 			VkFramebufferCreateInfo frameBufferInfo{};
 			frameBufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-			frameBufferInfo.renderPass = m_RenderPass;
+			frameBufferInfo.renderPass = m_SwapChainRenderPass;
 			frameBufferInfo.attachmentCount = static_cast<uint32_t>(attachments->size());
 			frameBufferInfo.pAttachments = attachments->data();
 			frameBufferInfo.width = m_SwapChainExtent.width;
@@ -786,7 +800,7 @@ namespace api
 		// レンダーパス開始 
 		VkRenderPassBeginInfo renderPassInfo{};
 		renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-		renderPassInfo.renderPass = m_RenderPass;
+		renderPassInfo.renderPass = m_CurrentRenderPass;
 		renderPassInfo.framebuffer = m_SwapChainFrameBuffers[imageIndex];
 		renderPassInfo.renderArea.offset = { 0, 0 };
 		renderPassInfo.renderArea.extent = m_SwapChainExtent;
@@ -831,9 +845,9 @@ namespace api
 
 	bool CVulkanAPI::CleanupSwapChain()
 	{
-		vkDestroyImageView(m_LogicalDevice, m_DepthImageView, nullptr);
-		vkDestroyImage(m_LogicalDevice, m_DepthImage, nullptr);
-		vkFreeMemory(m_LogicalDevice, m_DepthImageMemory, nullptr);
+		vkDestroyImageView(m_LogicalDevice, m_SwapChainDepthImageView, nullptr);
+		vkDestroyImage(m_LogicalDevice, m_SwapChainDepthImage, nullptr);
+		vkFreeMemory(m_LogicalDevice, m_SwapChainDepthImageMemory, nullptr);
 
 		for (size_t i = 0; i < m_SwapChainFrameBuffers.size(); i++)
 		{
@@ -869,8 +883,8 @@ namespace api
 
 		CreateSwapChain();
 		CreateImageViews();
-		CreateDepthResources();
-		CreateFrameBuffer();
+		CreateSwapChainDepthResources();
+		CreateSwapChainFrameBuffer();
 
 		return true;
 	}

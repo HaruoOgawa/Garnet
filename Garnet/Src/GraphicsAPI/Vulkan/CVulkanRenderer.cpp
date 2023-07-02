@@ -1,13 +1,15 @@
 #ifndef __DAWN__
 #include "CVulkanRenderer.h"
 #include "CVulkanAPI.h"
+#include "CVulkanRenderPass.h"
 #include "CVulkanMaterial.h"
 #include "../CRendererCreateInfo.h"
 
 namespace renderer
 {
-	CVulkanRenderer::CVulkanRenderer(api::CVulkanAPI* pGraphicsAPI):
+	CVulkanRenderer::CVulkanRenderer(api::CVulkanAPI* pGraphicsAPI, const std::string& PassName):
 		m_pGraphicsAPI(pGraphicsAPI),
+		m_PassName(PassName),
 		m_DynamicOffsetNum(0),
 		m_IndexBuffer(nullptr),
 		m_IndexBufferMemory(nullptr),
@@ -378,7 +380,27 @@ namespace renderer
 
 		pipelineInfo.layout = m_PipelineLayout;
 
-		pipelineInfo.renderPass = m_pGraphicsAPI->GetRenderPass();
+		if (!m_PassName.empty())
+		{
+			const auto& RenderPassMap = m_pGraphicsAPI->GetOffScreenRenderPassMap();
+			const auto& RenderPass = RenderPassMap.find(m_PassName);
+			if (RenderPass != RenderPassMap.end())
+			{
+				api::CVulkanRenderPass* pVulkanRenderPass = static_cast<api::CVulkanRenderPass*>(RenderPass->second.get());
+				if (pVulkanRenderPass) pipelineInfo.renderPass = pVulkanRenderPass->GetRenderPass();
+			}
+			else
+			{
+				// デフォルトレンダーパスを使用(スワップチェーンに渡すやつ)
+				pipelineInfo.renderPass = m_pGraphicsAPI->GetSwapChainRenderPass();
+			}
+		}
+		else
+		{
+			// デフォルトレンダーパスを使用(スワップチェーンに渡すやつ)
+			pipelineInfo.renderPass = m_pGraphicsAPI->GetSwapChainRenderPass();
+		}
+		
 		pipelineInfo.subpass = 0;
 
 		pipelineInfo.basePipelineHandle = VK_NULL_HANDLE; // パイプラインから新しいパイプラインを派生して作成するためのフィールド?

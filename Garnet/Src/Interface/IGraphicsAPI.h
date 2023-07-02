@@ -40,7 +40,7 @@ namespace api
 #endif // __EMSCRIPTEN__
 		
 		virtual bool CreateRenderPass(const std::string& PassName, int Width, int Height, ERenderPassFormat RenderPassFormat) = 0;
-		virtual std::shared_ptr<renderer::IRenderer> CreateRenderer() = 0;
+		virtual std::shared_ptr<renderer::IRenderer> CreateRenderer(const std::string& PassName) = 0;
 		virtual std::shared_ptr<graphics::CMaterial> CreateMaterial() = 0;
 		virtual std::shared_ptr<graphics::CTexture> CreateTexture(bool UseMipMap = false) = 0;
 
@@ -50,6 +50,6 @@ namespace api
 		virtual bool EndRender() = 0;
 
 		virtual const std::string& GetShaderExtension() const = 0;
-		virtual const std::map<std::string, std::shared_ptr<graphics::IRenderPass>>& GetRenderPassMap() const = 0;
+		virtual const std::map<std::string, std::shared_ptr<graphics::IRenderPass>>& GetOffScreenRenderPassMap() const = 0;
 	};
 }

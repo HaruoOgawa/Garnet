@@ -69,6 +69,8 @@ namespace api
 
 	void CWebGPUAPI::Release()
 	{
+		// オフスクリーンレンダリング用のフレームバッファを解放
+		m_OffScreenRenderPassMap.clear();
 	}
 
 	bool CWebGPUAPI::CreateRenderPass(const std::string& PassName, int Width, int Height, ERenderPassFormat RenderPassFormat)
@@ -76,16 +78,16 @@ namespace api
 		std::shared_ptr<CWebGPURenderPass> RenderPass = std::make_shared<CWebGPURenderPass>(PassName, Width, Height, RenderPassFormat);
 		if (!RenderPass->Create()) return false;
 
-		m_RenderPassMap.insert({ PassName, RenderPass });
+		m_OffScreenRenderPassMap.insert({ PassName, RenderPass });
 
 		return true;
 
 		return true;
 	}
 
-	std::shared_ptr<renderer::IRenderer> CWebGPUAPI::CreateRenderer()
+	std::shared_ptr<renderer::IRenderer> CWebGPUAPI::CreateRenderer(const std::string& PassName)
 	{
-		auto Renderer = std::make_shared<renderer::CWebGPURenderer>(this);
+		auto Renderer = std::make_shared<renderer::CWebGPURenderer>(this, PassName);
 
 		return Renderer;
 	}
@@ -118,8 +120,8 @@ namespace api
 	bool CWebGPUAPI::BeginRender(const std::string& PassName)
 	{
 		// レンダーパスを切り替える
-		const auto& Pass = m_RenderPassMap.find(PassName);
-		if (Pass != m_RenderPassMap.end())
+		const auto& Pass = m_OffScreenRenderPassMap.find(PassName);
+		if (Pass != m_OffScreenRenderPassMap.end())
 		{
 			CWebGPURenderPass* RenderPassPass = static_cast<CWebGPURenderPass*>(Pass->second.get());
 		}
@@ -216,9 +218,9 @@ namespace api
 		return m_ShaderExtension;
 	}
 
-	const std::map<std::string, std::shared_ptr<graphics::IRenderPass>>& CWebGPUAPI::GetRenderPassMap() const
+	const std::map<std::string, std::shared_ptr<graphics::IRenderPass>>& CWebGPUAPI::GetOffScreenRenderPassMap() const
 	{
-		return m_RenderPassMap;
+		return m_OffScreenRenderPassMap;
 	}
 
 	//

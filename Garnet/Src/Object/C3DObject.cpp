@@ -2,7 +2,8 @@
 
 namespace object
 {
-	C3DObject::C3DObject():
+	C3DObject::C3DObject(const std::string& PassName):
+		m_PassName(PassName),
 		m_ObjectTransform(std::make_shared<math::CTransform>())
 	{
 	}
@@ -35,7 +36,7 @@ namespace object
 
 				const auto& Material = m_MaterialList[MaterialIndex];
 
-				if (!Primitive->Create(pGraphicsAPI, Material)) return false;
+				if (!Primitive->Create(pGraphicsAPI, m_PassName, Material)) return false;
 			}
 		}
 

@@ -35,6 +35,11 @@ namespace graphics
 		return m_MipCount;
 	}
 
+	bool CTexture::CreateFrameTexture(int Width, int Height, api::ERenderPassFormat RenderPassFormat)
+	{
+		return true;
+	}
+
 #ifdef USE_TEXTURE_LOADER
 	bool CTexture::Create(const std::vector<unsigned char>& Data)
 	{

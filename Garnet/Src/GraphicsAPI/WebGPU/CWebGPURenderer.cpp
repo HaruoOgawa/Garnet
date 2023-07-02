@@ -7,8 +7,9 @@
 
 namespace renderer
 {
-	CWebGPURenderer::CWebGPURenderer(api::CWebGPUAPI* pGraphicsAPI):
+	CWebGPURenderer::CWebGPURenderer(api::CWebGPUAPI* pGraphicsAPI, const std::string& PassName):
 		m_pGraphicsAPI(pGraphicsAPI),
+		m_PassName(PassName),
 		m_GraphicsPipeline(nullptr),
 		m_VertexCount(0),
 		m_IndexBuffer(nullptr),

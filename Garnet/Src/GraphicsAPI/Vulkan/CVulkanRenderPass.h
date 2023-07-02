@@ -24,6 +24,9 @@ namespace api
 
 	class CVulkanRenderPass : public graphics::IRenderPass
 	{
+		// API
+		api::CVulkanAPI* m_pGraphicsAPI;
+
 		// Base Param
 		std::string m_PassName;
 		int m_Width;
@@ -40,16 +43,17 @@ namespace api
 		VkDeviceMemory m_DepthImageMemory;
 		VkImageView m_DepthImageView;
 	public:
-		CVulkanRenderPass(const std::string& PassName, int Width, int Height, ERenderPassFormat RenderPassFormat);
+		CVulkanRenderPass(api::CVulkanAPI* pGraphicsAPI, const std::string& PassName, int Width, int Height, ERenderPassFormat RenderPassFormat);
 		virtual ~CVulkanRenderPass();
 
 		virtual std::shared_ptr<graphics::CTexture> GetFrameTexture() override;
+		VkRenderPass GetRenderPass() const { return m_RenderPass; }
 
-		bool Create(api::CVulkanAPI* pGraphicsAPI);
+		bool Create();
 
-		bool CreateRenderPass(api::CVulkanAPI* pGraphicsAPI);
-		bool CreateDepthResources(api::CVulkanAPI* pGraphicsAPI);
-		bool CreateFrameBuffer(api::CVulkanAPI* pGraphicsAPI);
+		bool CreateRenderPass();
+		bool CreateDepthResources();
+		bool CreateFrameBuffer();
 	};
 }
 #endif

@@ -8,7 +8,9 @@
 
 namespace api
 {
-	CVulkanRenderPass::CVulkanRenderPass(const std::string& PassName, int Width, int Height, ERenderPassFormat RenderPassFormat):
+	CVulkanRenderPass::CVulkanRenderPass(api::CVulkanAPI* pGraphicsAPI, const std::string& PassName, int Width, int Height, ERenderPassFormat RenderPassFormat):
+		m_pGraphicsAPI(pGraphicsAPI),
+		
 		m_PassName(PassName),
 		m_Width(Width),
 		m_Height(Height),
@@ -16,12 +18,48 @@ namespace api
 		m_FrameTexture(nullptr),
 
 		m_RenderPass(nullptr),
-		m_FrameBuffer(nullptr)
+		m_FrameBuffer(nullptr),
+
+		m_DepthImage(nullptr),
+		m_DepthImageMemory(nullptr),
+		m_DepthImageView(nullptr)
 	{
 	}
 
 	CVulkanRenderPass::~CVulkanRenderPass()
 	{
+		// デプスリソースを破棄
+		if (m_DepthImageView)
+		{
+			vkDestroyImageView(m_pGraphicsAPI->GetLogicalDevice(), m_DepthImageView, nullptr);
+			m_DepthImageView = nullptr;
+		}
+		
+		if (m_DepthImage)
+		{
+			vkDestroyImage(m_pGraphicsAPI->GetLogicalDevice(), m_DepthImage, nullptr);
+			m_DepthImage = nullptr;
+		}
+		
+		if (m_DepthImageMemory)
+		{
+			vkFreeMemory(m_pGraphicsAPI->GetLogicalDevice(), m_DepthImageMemory, nullptr);
+			m_DepthImageMemory = nullptr;
+		}
+		
+		// フレームバッファの破棄
+		if (m_FrameBuffer)
+		{
+			vkDestroyFramebuffer(m_pGraphicsAPI->GetLogicalDevice(), m_FrameBuffer, nullptr);
+			m_FrameBuffer = nullptr;
+		}
+
+		// レンダーパスの破棄
+		if (m_RenderPass)
+		{
+			vkDestroyRenderPass(m_pGraphicsAPI->GetLogicalDevice(), m_RenderPass, nullptr);
+			m_RenderPass = nullptr;
+		}
 	}
 
 	std::shared_ptr<graphics::CTexture> CVulkanRenderPass::GetFrameTexture()
@@ -29,18 +67,19 @@ namespace api
 		return m_FrameTexture;
 	}
 
-	bool CVulkanRenderPass::Create(api::CVulkanAPI* pGraphicsAPI)
+	bool CVulkanRenderPass::Create()
 	{
-		m_FrameTexture = std::make_shared<CVulkanTexture>(pGraphicsAPI, false);
+		m_FrameTexture = std::make_shared<CVulkanTexture>(m_pGraphicsAPI, false);
+		if (!m_FrameTexture->CreateFrameTexture(m_Width, m_Height, m_RenderPassFormat)) return false;
 
-		if (!CreateRenderPass(pGraphicsAPI)) return false; // レンダーパスの作成(描画全体のマネージャー。実際に描画に使用するのがサブパス。サブパスを複数個用意することでポストプロセスもできる)
-		if (!CreateDepthResources(pGraphicsAPI)) return false; // デプステスト用のリソースを生成
-		if (!CreateFrameBuffer(pGraphicsAPI)) return false; // フレームバッファの作成
+		if (!CreateRenderPass()) return false; // レンダーパスの作成(描画全体のマネージャー。実際に描画に使用するのがサブパス。サブパスを複数個用意することでポストプロセスもできる)
+		if (!CreateDepthResources()) return false; // デプステスト用のリソースを生成
+		if (!CreateFrameBuffer()) return false; // フレームバッファの作成
 
 		return true;
 	}
 
-	bool CVulkanRenderPass::CreateRenderPass(api::CVulkanAPI* pGraphicsAPI)
+	bool CVulkanRenderPass::CreateRenderPass()
 	{
 		//
 		std::vector<VkAttachmentDescription> attachments;
@@ -70,7 +109,7 @@ namespace api
 		// <デプスバッファ> ////////////////////////////////////////////////////////////////
 		// レンダーパスの基本的な設定
 		VkAttachmentDescription depthAttachment{};
-		depthAttachment.format = pGraphicsAPI->FindDepthFormat();
+		depthAttachment.format = m_pGraphicsAPI->FindDepthFormat();
 		depthAttachment.samples = VK_SAMPLE_COUNT_1_BIT; // マルチサンプリング
 		depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR; // レンダリングの前後にどのような処理を施すか(クリアの方法など)。デプスバッファに適応
 		depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE; // レンダリング結果をメモリに保存し読み取り可にする。デプスバッファに適応
@@ -114,7 +153,7 @@ namespace api
 		renderPassInfo.dependencyCount = 1;
 		renderPassInfo.pDependencies = &dependency;
 
-		if (vkCreateRenderPass(pGraphicsAPI->GetLogicalDevice(), &renderPassInfo, nullptr, &m_RenderPass) != VK_SUCCESS)
+		if (vkCreateRenderPass(m_pGraphicsAPI->GetLogicalDevice(), &renderPassInfo, nullptr, &m_RenderPass) != VK_SUCCESS)
 		{
 			Console::Log("[ERROR] failed to create render pass!\n");
 
@@ -124,18 +163,18 @@ namespace api
 		return true;
 	}
 
-	bool CVulkanRenderPass::CreateDepthResources(api::CVulkanAPI* pGraphicsAPI)
+	bool CVulkanRenderPass::CreateDepthResources()
 	{
-		VkFormat depthFormat = pGraphicsAPI->FindDepthFormat();
-		pGraphicsAPI->CreateImage(m_Width, m_Height, depthFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
+		VkFormat depthFormat = m_pGraphicsAPI->FindDepthFormat();
+		m_pGraphicsAPI->CreateImage(m_Width, m_Height, depthFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
 			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_DepthImage, m_DepthImageMemory, graphics::ETextureType::TEXTURE_2D, 1, false);
 
-		m_DepthImageView = pGraphicsAPI->CreateImageView(m_DepthImage, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT, graphics::ETextureType::TEXTURE_2D, 1, false);
+		m_DepthImageView = m_pGraphicsAPI->CreateImageView(m_DepthImage, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT, graphics::ETextureType::TEXTURE_2D, 1, false);
 
 		return true;
 	}
 
-	bool CVulkanRenderPass::CreateFrameBuffer(api::CVulkanAPI* pGraphicsAPI)
+	bool CVulkanRenderPass::CreateFrameBuffer()
 	{
 		std::array<VkImageView, 2> attachments[] = {
 				m_FrameTexture->GetTextureImageView(),
@@ -151,7 +190,7 @@ namespace api
 		frameBufferInfo.height = m_Height;
 		frameBufferInfo.layers = 1;
 
-		if (vkCreateFramebuffer(pGraphicsAPI->GetLogicalDevice(), &frameBufferInfo, nullptr, &m_FrameBuffer) != VK_SUCCESS)
+		if (vkCreateFramebuffer(m_pGraphicsAPI->GetLogicalDevice(), &frameBufferInfo, nullptr, &m_FrameBuffer) != VK_SUCCESS)
 		{
 			return false;
 		}

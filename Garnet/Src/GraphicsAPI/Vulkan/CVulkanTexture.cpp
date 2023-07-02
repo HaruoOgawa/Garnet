@@ -6,6 +6,7 @@ namespace api
 	CVulkanTexture::CVulkanTexture(api::CVulkanAPI* pGraphicsAPI, bool UseMipMap):
 		CTexture(UseMipMap),
 		m_pGraphicsAPI(pGraphicsAPI),
+		m_ImageFormat(VK_FORMAT_UNDEFINED),
 		m_TextureImage(nullptr),
 		m_TextureImageMemory(nullptr),
 		m_TextureImageView(nullptr),
@@ -65,9 +66,25 @@ namespace api
 		return m_TextureSampler;
 	}
 
+	bool CVulkanTexture::CreateFrameTexture(int Width, int Height, api::ERenderPassFormat RenderPassFormat)
+	{
+		m_Width = Width;
+		m_Height = Height;
+
+		m_ImageFormat = ((RenderPassFormat == ERenderPassFormat::COLOR_DEPTH_FLOAT_RENDERPASS) ? VK_FORMAT_R16G16B16A16_SFLOAT : VK_FORMAT_R8G8B8A8_UNORM);
+
+		if (!CreateFrameTextureImage()) return false; // テクスチャイメージの生成
+		if (!CreateTextureImageView()) return false;// シェーダーで取り扱う用のImageViewを作成(イメージマネージャーみたいなやつかな)
+		if (!CreateTextureSampler()) return false; // テクスチャサンプラーを作成.サンプラーとはテクスチャデータをフラグメント(3Dモデル)に合うように調整する機構
+
+		return true;
+	}
+
 #ifdef USE_TEXTURE_LOADER
 	bool CVulkanTexture::Create(const std::vector<unsigned char>& pixelData, int pixelSize)
 	{
+		m_ImageFormat = VK_FORMAT_R8G8B8A8_SRGB;
+
 		// Texture Buffer
 		if (!CreateTextureImage(pixelData, pixelSize)) return false; // テクスチャイメージの生成
 		if (!CreateTextureImageView()) return false;// シェーダーで取り扱う用のImageViewを作成(イメージマネージャーみたいなやつかな)
@@ -77,10 +94,19 @@ namespace api
 	}
 #endif
 	// Vulkanメインロジック /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	bool CVulkanTexture::CreateFrameTextureImage()
+	{
+		// テクスチャイメージオブジェクトを生成
+		m_pGraphicsAPI->CreateImage(m_Width, m_Height, m_ImageFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
+			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_TextureImage, m_TextureImageMemory, m_TextureType, m_MipCount, m_UseMipMap);
+
+		return true;
+	}
+
 	bool CVulkanTexture::CreateTextureImage(const std::vector<unsigned char>& pixelData, int pixelSize)
 	{
 		// テクスチャイメージオブジェクトを生成
-		m_pGraphicsAPI->CreateImage(m_Width, m_Height, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
+		m_pGraphicsAPI->CreateImage(m_Width, m_Height, m_ImageFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
 			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_TextureImage, m_TextureImageMemory, m_TextureType, m_MipCount, m_UseMipMap);
 
 		// テクスチャイメージのステージングバッファを作成
@@ -95,13 +121,13 @@ namespace api
 		vkUnmapMemory(m_pGraphicsAPI->GetLogicalDevice(), stagingBufferMemory);
 
 		// イメージテクスチャのレイアウトを別形式へ移行する --> バッファにコピー可な形式に変換
-		m_pGraphicsAPI->TransitionImageLayout(m_TextureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, m_MipCount, m_UseMipMap);
+		m_pGraphicsAPI->TransitionImageLayout(m_TextureImage, m_ImageFormat, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, m_MipCount, m_UseMipMap);
 
 		// ステージングバッファのデータをテクスチャイメージへコピーする
 		m_pGraphicsAPI->CopyBufferToImage(stagingBuffer, m_TextureImage, static_cast<uint32_t>(m_Width), static_cast<uint32_t>(m_Height), m_TextureType, m_MipCount, m_UseMipMap, m_HasMipData);
 
 		// イメージテクスチャのレイアウトを別形式へ移行する --> シェーダーで読み込み可な形式に変換
-		m_pGraphicsAPI->TransitionImageLayout(m_TextureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, m_MipCount, m_UseMipMap);
+		m_pGraphicsAPI->TransitionImageLayout(m_TextureImage, m_ImageFormat, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, m_MipCount, m_UseMipMap);
 
 		// ステージングバッファの破棄
 		vkDestroyBuffer(m_pGraphicsAPI->GetLogicalDevice(), stagingBuffer, nullptr);
@@ -128,7 +154,7 @@ namespace api
 
 	bool CVulkanTexture::CreateTextureImageView()
 	{
-		m_TextureImageView = m_pGraphicsAPI->CreateImageView(m_TextureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT, m_TextureType, m_MipCount, m_UseMipMap);
+		m_TextureImageView = m_pGraphicsAPI->CreateImageView(m_TextureImage, m_ImageFormat, VK_IMAGE_ASPECT_COLOR_BIT, m_TextureType, m_MipCount, m_UseMipMap);
 
 		return true;
 	}

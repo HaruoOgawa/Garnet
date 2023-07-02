@@ -83,13 +83,14 @@ namespace api
 		//bool m_IsReCreateSwapChain;
 
 		// Rendering
-		std::map<std::string, std::shared_ptr<graphics::IRenderPass>> m_RenderPassMap;
-		VkRenderPass m_RenderPass;
+		std::map<std::string, std::shared_ptr<graphics::IRenderPass>> m_OffScreenRenderPassMap;
+		VkRenderPass m_SwapChainRenderPass;
+		VkRenderPass m_CurrentRenderPass;
 
 		// Depth Test
-		VkImage m_DepthImage;
-		VkDeviceMemory m_DepthImageMemory;
-		VkImageView m_DepthImageView;
+		VkImage m_SwapChainDepthImage;
+		VkDeviceMemory m_SwapChainDepthImageMemory;
+		VkImageView m_SwapChainDepthImageView;
 
 		// Frame Buffer
 		const int MAX_FRAMES_IN_FLIGHT = 2;
@@ -113,9 +114,9 @@ namespace api
 		bool CreateDevices();
 		bool CreateSwapChain();
 		bool CreateImageViews();
-		bool CreateRenderPass();
-		bool CreateDepthResources();
-		bool CreateFrameBuffer();
+		bool CreateSwapChainRenderPass();
+		bool CreateSwapChainDepthResources();
+		bool CreateSwapChainFrameBuffer();
 		bool CreateCommandPool();
 		bool CreateCommandBuffer();
 		bool CreateSyncObjects();
@@ -163,7 +164,7 @@ namespace api
 		void Release();
 
 		virtual bool CreateRenderPass(const std::string& PassName, int Width, int Height, ERenderPassFormat RenderPassFormat) override;
-		virtual std::shared_ptr<renderer::IRenderer> CreateRenderer() override;
+		virtual std::shared_ptr<renderer::IRenderer> CreateRenderer(const std::string& PassName) override;
 		virtual std::shared_ptr<graphics::CMaterial> CreateMaterial() override;
 		virtual std::shared_ptr<graphics::CTexture> CreateTexture(bool UseMipMap = false) override;
 
@@ -174,7 +175,8 @@ namespace api
 
 		virtual const std::string& GetShaderExtension() const override;
 
-		virtual const std::map<std::string, std::shared_ptr<graphics::IRenderPass>>& GetRenderPassMap() const override;
+		virtual const std::map<std::string, std::shared_ptr<graphics::IRenderPass>>& GetOffScreenRenderPassMap() const override;
+		VkRenderPass GetSwapChainRenderPass() const;
 
 		//
 		int GetMaxFramesInFlight() const { return MAX_FRAMES_IN_FLIGHT; }
@@ -187,7 +189,7 @@ namespace api
 		const VkExtent2D& GetSwapChainExtent() const;
 
 		// Rendering
-		const VkRenderPass& GetRenderPass() const;
+		const VkRenderPass& GetCurrentRenderPass() const;
 
 		// Depth
 		VkFormat FindDepthFormat();

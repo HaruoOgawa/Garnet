@@ -14,6 +14,8 @@ namespace object
 
 	class C3DObject : public CObject
 	{
+		const std::string m_PassName;
+
 		std::shared_ptr<math::CTransform> m_ObjectTransform;
 
 		std::vector<std::shared_ptr<CNode>> m_NodeList;
@@ -27,7 +29,7 @@ namespace object
 		void CalcWorldMatrix();
 		void CalcWorldMatrix(std::shared_ptr<CNode>& Node, const glm::mat4& ParentWorldMatrix);
 	public:
-		C3DObject();
+		C3DObject(const std::string& PassName = "");
 		virtual ~C3DObject();
 
 		bool		 Create(api::IGraphicsAPI* pGraphicsAPI);
