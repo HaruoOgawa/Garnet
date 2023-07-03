@@ -19,6 +19,9 @@ namespace api
 		// API
 		api::CVulkanAPI* m_pGraphicsAPI;
 
+		//
+		VkFormat m_ImageFormat;
+
 		// Texture Image
 		VkImage m_TextureImage;
 		VkDeviceMemory m_TextureImageMemory;
@@ -26,6 +29,7 @@ namespace api
 		VkSampler m_TextureSampler;
 	private:
 		// Vulkanメインロジック /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		bool CreateFrameTextureImage();
 		bool CreateTextureImage(const std::vector<unsigned char>& pixelData, int pixelSize);
 		bool CreateTextureImageView();
 		bool CreateTextureSampler();
@@ -36,6 +40,7 @@ namespace api
 		CVulkanTexture(api::CVulkanAPI* pGraphicsAPI, bool UseMipMap);
 		virtual ~CVulkanTexture();
 
+		virtual bool CreateFrameTexture(int Width, int Height, api::ERenderPassFormat RenderPassFormat) override;
 #ifdef USE_TEXTURE_LOADER
 		virtual bool Create(const std::vector<unsigned char>& pixelData, int pixelSize) override;
 #endif

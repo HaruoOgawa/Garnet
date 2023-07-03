@@ -22,6 +22,9 @@ namespace renderer
 		// API
 		api::CWebGPUAPI* m_pGraphicsAPI;
 
+		//
+		const std::string m_PassName;
+
 		// Pipeline
 		WGPURenderPipeline m_GraphicsPipeline;
 
@@ -44,7 +47,7 @@ namespace renderer
 		bool             CreateBuffer(WGPUBuffer& Buffer, WGPUBufferUsageFlags Usage, void const* Data, uint64_t ByteSize);
 		void			 SetDefaultDepthStencil(WGPUDepthStencilState& depthStencilState);
 	public:
-		CWebGPURenderer(api::CWebGPUAPI* pGraphicsAPI);
+		CWebGPURenderer(api::CWebGPUAPI* pGraphicsAPI, const std::string& PassName);
 		virtual ~CWebGPURenderer();
 
 		bool Create(const std::shared_ptr<CRendererCreateInfo>& createInfo, const std::shared_ptr<graphics::CMaterial>& Material) override;

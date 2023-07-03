@@ -16,7 +16,7 @@ namespace graphics
 		m_NumOfChannels(1),
 		m_UseMipMap(UseMipMap),
 		m_HasMipData(false),
-		m_MipCount(0.0f),
+		m_MipCount(1.0f),
 		m_TextureType(ETextureType::TEXTURE_2D)
 	{
 	}
@@ -33,6 +33,11 @@ namespace graphics
 	float CTexture::GetMipCount() const
 	{
 		return m_MipCount;
+	}
+
+	bool CTexture::CreateFrameTexture(int Width, int Height, api::ERenderPassFormat RenderPassFormat)
+	{
+		return true;
 	}
 
 #ifdef USE_TEXTURE_LOADER

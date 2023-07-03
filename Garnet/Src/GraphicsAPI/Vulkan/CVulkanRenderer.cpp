@@ -1,13 +1,15 @@
 #ifndef __DAWN__
 #include "CVulkanRenderer.h"
 #include "CVulkanAPI.h"
+#include "CVulkanRenderPass.h"
 #include "CVulkanMaterial.h"
 #include "../CRendererCreateInfo.h"
 
 namespace renderer
 {
-	CVulkanRenderer::CVulkanRenderer(api::CVulkanAPI* pGraphicsAPI):
+	CVulkanRenderer::CVulkanRenderer(api::CVulkanAPI* pGraphicsAPI, const std::string& PassName):
 		m_pGraphicsAPI(pGraphicsAPI),
+		m_PassName(PassName),
 		m_DynamicOffsetNum(0),
 		m_IndexBuffer(nullptr),
 		m_IndexBufferMemory(nullptr),
@@ -93,17 +95,17 @@ namespace renderer
 		if (!pVulkanMat->BuildDrawBuffer(DynamicOffsetNum)) return false;
 
 		// グラフィックパイプラインをコマンドにバインド
-		vkCmdBindPipeline(m_pGraphicsAPI->GetCommandBuffers()[m_pGraphicsAPI->GetCurrentFrame()], VK_PIPELINE_BIND_POINT_GRAPHICS, m_GraphicsPipeline);
+		vkCmdBindPipeline(m_pGraphicsAPI->GetCurrentCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, m_GraphicsPipeline);
 
 		// 頂点バッファをパイプラインにバインドする
 		VkDeviceSize offsets[] = { 0 };
 		for (int i = 0; i < static_cast<int>(m_VertexBufferList.size()); i++)
 		{
-			vkCmdBindVertexBuffers(m_pGraphicsAPI->GetCommandBuffers()[m_pGraphicsAPI->GetCurrentFrame()], i, 1, &m_VertexBufferList[i], offsets);
+			vkCmdBindVertexBuffers(m_pGraphicsAPI->GetCurrentCommandBuffer(), i, 1, &m_VertexBufferList[i], offsets);
 		}
 
 		// インデックスバッファをパイプラインにバインドする
-		vkCmdBindIndexBuffer(m_pGraphicsAPI->GetCommandBuffers()[m_pGraphicsAPI->GetCurrentFrame()], m_IndexBuffer, 0, VK_INDEX_TYPE_UINT16);
+		vkCmdBindIndexBuffer(m_pGraphicsAPI->GetCurrentCommandBuffer(), m_IndexBuffer, 0, VK_INDEX_TYPE_UINT16);
 		
 		// UBOのセット
 		std::vector<uint32_t> dynamicOffsetList;
@@ -115,19 +117,19 @@ namespace renderer
 
 		if (pVulkanMat->IsUseDynamicUniform())
 		{
-			vkCmdBindDescriptorSets(m_pGraphicsAPI->GetCommandBuffers()[m_pGraphicsAPI->GetCurrentFrame()], VK_PIPELINE_BIND_POINT_GRAPHICS,
+			vkCmdBindDescriptorSets(m_pGraphicsAPI->GetCurrentCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS,
 				m_PipelineLayout, 0, 1, &pVulkanMat->GetDescriptorSets()[m_pGraphicsAPI->GetCurrentFrame()], static_cast<uint32_t>(dynamicOffsetList.size()), &dynamicOffsetList[0]);
 		}
 		else
 		{
-			vkCmdBindDescriptorSets(m_pGraphicsAPI->GetCommandBuffers()[m_pGraphicsAPI->GetCurrentFrame()], VK_PIPELINE_BIND_POINT_GRAPHICS,
+			vkCmdBindDescriptorSets(m_pGraphicsAPI->GetCurrentCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS,
 				m_PipelineLayout, 0, 1, &pVulkanMat->GetDescriptorSets()[m_pGraphicsAPI->GetCurrentFrame()], 0, nullptr);
 		}
 
 		// 描画コマンドを発行
 		//vkCmdDraw(m_CommandBuffers[m_CurrentFrame], 3, 1, 0, 0); // パラメーター: vertexCount, instanceCount, firstVertex, firstInstance
 		// インデックス付のドローコマンドはこちら
-		vkCmdDrawIndexed(m_pGraphicsAPI->GetCommandBuffers()[m_pGraphicsAPI->GetCurrentFrame()], m_IndicesCount, 1, 0, 0, 0);
+		vkCmdDrawIndexed(m_pGraphicsAPI->GetCurrentCommandBuffer(), m_IndicesCount, 1, 0, 0, 0);
 
 		return true;
 	}
@@ -378,7 +380,27 @@ namespace renderer
 
 		pipelineInfo.layout = m_PipelineLayout;
 
-		pipelineInfo.renderPass = m_pGraphicsAPI->GetRenderPass();
+		if (!m_PassName.empty())
+		{
+			const auto& RenderPassMap = m_pGraphicsAPI->GetOffScreenRenderPassMap();
+			const auto& RenderPass = RenderPassMap.find(m_PassName);
+			if (RenderPass != RenderPassMap.end())
+			{
+				api::CVulkanRenderPass* pVulkanRenderPass = static_cast<api::CVulkanRenderPass*>(RenderPass->second.get());
+				if (pVulkanRenderPass) pipelineInfo.renderPass = pVulkanRenderPass->GetRenderPass();
+			}
+			else
+			{
+				// デフォルトレンダーパスを使用(スワップチェーンに渡すやつ)
+				pipelineInfo.renderPass = m_pGraphicsAPI->GetSwapChainRenderPass();
+			}
+		}
+		else
+		{
+			// デフォルトレンダーパスを使用(スワップチェーンに渡すやつ)
+			pipelineInfo.renderPass = m_pGraphicsAPI->GetSwapChainRenderPass();
+		}
+		
 		pipelineInfo.subpass = 0;
 
 		pipelineInfo.basePipelineHandle = VK_NULL_HANDLE; // パイプラインから新しいパイプラインを派生して作成するためのフィールド?

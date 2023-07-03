@@ -18,15 +18,15 @@ namespace graphics
 	{
 	}
 
-	bool CPrimitive::Create(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<graphics::CMaterial>& Material)
+	bool CPrimitive::Create(api::IGraphicsAPI* pGraphicsAPI, const std::string& PassName, const std::shared_ptr<graphics::CMaterial>& Material)
 	{
 		if (m_CreateInfo)
 		{
-			if (!Create(pGraphicsAPI, Material, m_CreateInfo)) return false;
+			if (!Create(pGraphicsAPI, PassName, Material, m_CreateInfo)) return false;
 		}
 		else
 		{
-			if (!Create(pGraphicsAPI, Material, m_PresetType)) return false;
+			if (!Create(pGraphicsAPI, PassName, Material, m_PresetType)) return false;
 		}
 
 		// 生成処理が終わったので不要なリソースを解放する
@@ -35,15 +35,15 @@ namespace graphics
 		return true;
 	}
 
-	bool CPrimitive::Create(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CMaterial>& Material, const std::shared_ptr<renderer::CRendererCreateInfo>& createInfo)
+	bool CPrimitive::Create(api::IGraphicsAPI* pGraphicsAPI, const std::string& PassName, const std::shared_ptr<CMaterial>& Material, const std::shared_ptr<renderer::CRendererCreateInfo>& createInfo)
 	{
-		m_Renderer = pGraphicsAPI->CreateRenderer();
+		m_Renderer = pGraphicsAPI->CreateRenderer(PassName);
 		if (!m_Renderer->Create(createInfo, Material)) return false;
 
 		return true;
 	}
 
-	bool CPrimitive::Create(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CMaterial>& Material, EPresetPrimitiveType PresetType)
+	bool CPrimitive::Create(api::IGraphicsAPI* pGraphicsAPI, const std::string& PassName, const std::shared_ptr<CMaterial>& Material, EPresetPrimitiveType PresetType)
 	{
 		std::shared_ptr<renderer::CRendererCreateInfo> createInfo = std::make_shared<renderer::CRendererCreateInfo>();
 
@@ -62,7 +62,7 @@ namespace graphics
 			break;
 		}
 
-		m_Renderer = pGraphicsAPI->CreateRenderer();
+		m_Renderer = pGraphicsAPI->CreateRenderer(PassName);
 		if (!m_Renderer->Create(createInfo, Material)) return false;
 
 		return true;

@@ -6,11 +6,14 @@
 #include <set>
 #include <algorithm>
 #include <array>
+#include <map>
 
 #include "../../Interface/IGraphicsAPI.h"
 
 namespace api
 {
+	class CVulkanRenderPass;
+
 	struct QueueFamiryIndices
 	{
 		std::optional<uint32_t> m_GraphicsFamily;
@@ -80,12 +83,15 @@ namespace api
 		//bool m_IsReCreateSwapChain;
 
 		// Rendering
-		VkRenderPass m_RenderPass;
+		std::map<std::string, std::shared_ptr<graphics::IRenderPass>> m_OffScreenRenderPassMap;
+		VkRenderPass m_SwapChainRenderPass;
+		VkRenderPass m_CurrentRenderPass;
+		CVulkanRenderPass* m_pCurrentVulkanRenderPass;
 
 		// Depth Test
-		VkImage m_DepthImage;
-		VkDeviceMemory m_DepthImageMemory;
-		VkImageView m_DepthImageView;
+		VkImage m_SwapChainDepthImage;
+		VkDeviceMemory m_SwapChainDepthImageMemory;
+		VkImageView m_SwapChainDepthImageView;
 
 		// Frame Buffer
 		const int MAX_FRAMES_IN_FLIGHT = 2;
@@ -109,9 +115,9 @@ namespace api
 		bool CreateDevices();
 		bool CreateSwapChain();
 		bool CreateImageViews();
-		bool CreateRenderPass();
-		bool CreateDepthResources();
-		bool CreateFrameBuffer();
+		bool CreateSwapChainRenderPass();
+		bool CreateSwapChainDepthResources();
+		bool CreateSwapChainFrameBuffer();
 		bool CreateCommandPool();
 		bool CreateCommandBuffer();
 		bool CreateSyncObjects();
@@ -139,9 +145,6 @@ namespace api
 		bool IsDeviceSuitable(VkPhysicalDevice device);
 		bool CheckDeviceExtensionSupport(VkPhysicalDevice device);
 
-		// Queue
-		QueueFamiryIndices FindQueueFamilies(VkPhysicalDevice device);
-
 		// Presentation
 		SwapChainSupportDetails QuerySwapChainSupport(VkPhysicalDevice device);
 		VkSurfaceFormatKHR ChooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR> availablePresentModes);
@@ -151,10 +154,6 @@ namespace api
 		// Buffer
 		uint32_t FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags propertoes);
 		
-		// Depth
-		VkFormat FIndDepthFormat();
-		VkFormat FindSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features);
-		bool	 HasStencilComponent(VkFormat format);
 	public:
 		CVulkanAPI(int Width, int Height);
 		virtual ~CVulkanAPI();
@@ -162,16 +161,20 @@ namespace api
 		virtual bool InitializeWithGLFW(GLFWwindow* pWindow) override;
 		void Release();
 
-		virtual std::shared_ptr<renderer::IRenderer> CreateRenderer() override;
+		virtual bool CreateRenderPass(const std::string& PassName, int Width, int Height, ERenderPassFormat RenderPassFormat) override;
+		virtual std::shared_ptr<renderer::IRenderer> CreateRenderer(const std::string& PassName) override;
 		virtual std::shared_ptr<graphics::CMaterial> CreateMaterial() override;
 		virtual std::shared_ptr<graphics::CTexture> CreateTexture(bool UseMipMap = false) override;
 
 		virtual bool Resize(int Width, int Height) override;
 
-		virtual bool BeginRender(ERenderPassType RenderPassType) override;
+		virtual bool BeginRender(const std::string& PassName = "") override;
 		bool EndRender() override;
 
 		virtual const std::string& GetShaderExtension() const override;
+
+		virtual const std::map<std::string, std::shared_ptr<graphics::IRenderPass>>& GetOffScreenRenderPassMap() const override;
+		VkRenderPass GetSwapChainRenderPass() const;
 
 		//
 		int GetMaxFramesInFlight() const { return MAX_FRAMES_IN_FLIGHT; }
@@ -184,11 +187,24 @@ namespace api
 		const VkExtent2D& GetSwapChainExtent() const;
 
 		// Rendering
-		const VkRenderPass& GetRenderPass() const;
+		const VkRenderPass& GetCurrentRenderPass() const;
+
+		// Depth
+		VkFormat FindDepthFormat();
+		VkFormat FindSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features);
+		bool	 HasStencilComponent(VkFormat format);
 
 		// Command
 		VkCommandBuffer BeginSingleTimeCommands();
 		void EndSingleTimeCommands(VkCommandBuffer commandBuffer);
+
+		// Queue
+		QueueFamiryIndices FindQueueFamilies(VkPhysicalDevice device);
+		VkQueue GetGraphicsQueue()const { return m_GraphicsQueue; }
+		VkQueue GetPresentQueue() const { return m_PresentQueue; }
+
+		// Sync
+		VkFence GetInFlightFence()const { return m_InFlightFences[m_CurrentFrame]; }
 
 		// Texture
 		VkImageView CreateImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, graphics::ETextureType TextureType, float MipCount, bool UseMipMap);
@@ -200,7 +216,9 @@ namespace api
 		// Buffer
 		void CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory);
 		void CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
+		VkCommandBuffer GetCurrentCommandBuffer() const;
 		const std::vector<VkCommandBuffer>& GetCommandBuffers() const;
+
 		bool BeginRecordCommandBuffer();
 		bool EndRecordCommandBuffer();
 		bool SubmitCommandNoSemaphore();

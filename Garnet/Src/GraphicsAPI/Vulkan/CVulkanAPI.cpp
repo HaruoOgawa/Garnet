@@ -1,6 +1,7 @@
 #ifndef __DAWN__
 #include "CVulkanAPI.h"
 #include "CVulkanRenderer.h"
+#include "CVulkanRenderPass.h"
 #include "CVulkanMaterial.h"
 #include "CVulkanTexture.h"
 #include "../../Debug/Message/Console.h"
@@ -22,10 +23,12 @@ namespace api
 		m_PresentQueue(nullptr),
 		m_SwapChain(nullptr),
 		m_SwapChainImageFormat(VK_FORMAT_UNDEFINED),
-		m_RenderPass(nullptr),
-		m_DepthImage(nullptr),
-		m_DepthImageMemory(nullptr),
-		m_DepthImageView(nullptr),
+		m_SwapChainRenderPass(nullptr),
+		m_CurrentRenderPass(nullptr),
+		m_pCurrentVulkanRenderPass(nullptr),
+		m_SwapChainDepthImage(nullptr),
+		m_SwapChainDepthImageMemory(nullptr),
+		m_SwapChainDepthImageView(nullptr),
 		m_CommandPool(nullptr)
 	{
 	}
@@ -45,9 +48,9 @@ namespace api
 		if (!CreateDevices()) return false; // デバイスを作成(物理デバイス/論理デバイス)
 		if (!CreateSwapChain()) return false; // スワップチェインを作成(画面に示されるのを待っている画像のキューのマネージャーこと)
 		if (!CreateImageViews()) return false; // イメージビューの作成(APIが描画に使用する画像を管理するビューのこと)
-		if (!CreateRenderPass()) return false; // レンダーパスの作成(描画全体のマネージャー。実際に描画に使用するのがサブパス。サブパスを複数個用意することでポストプロセスもできる)
-		if (!CreateDepthResources()) return false; // デプステスト用のリソースを生成
-		if (!CreateFrameBuffer()) return false; // フレームバッファの作成
+		if (!CreateSwapChainRenderPass()) return false; // レンダーパスの作成(描画全体のマネージャー。実際に描画に使用するのがサブパス。サブパスを複数個用意することでポストプロセスもできる)
+		if (!CreateSwapChainDepthResources()) return false; // デプステスト用のリソースを生成
+		if (!CreateSwapChainFrameBuffer()) return false; // フレームバッファの作成
 		if (!CreateCommandPool()) return false; // コマンドプールを作成(コマンドプールはコマンドバッファを格納するメモリを管理するのに使用する)
 		if (!CreateCommandBuffer()) return false; // コマンドバッファの作成
 		if (!CreateSyncObjects()) return false; // 同期オブジェクトの作成(各種コマンドの順序を操作するために使用)
@@ -57,11 +60,14 @@ namespace api
 
 	void CVulkanAPI::Release()
 	{
+		// オフスクリーンレンダリング用のフレームバッファを解放
+		m_OffScreenRenderPassMap.clear();
+
 		// Release Vulkan(作成とは逆の順番で破棄していく)
 		CleanupSwapChain();
 
 		// レンダーパスの破棄
-		vkDestroyRenderPass(m_LogicalDevice, m_RenderPass, nullptr);
+		vkDestroyRenderPass(m_LogicalDevice, m_SwapChainRenderPass, nullptr);
 
 		// 同期オブジェクトの破棄
 		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
@@ -89,9 +95,19 @@ namespace api
 		vkDestroyInstance(m_Instance, nullptr);
 	}
 
-	std::shared_ptr<renderer::IRenderer> CVulkanAPI::CreateRenderer()
+	bool CVulkanAPI::CreateRenderPass(const std::string& PassName, int Width, int Height, ERenderPassFormat RenderPassFormat)
 	{
-		auto Renderer = std::make_shared<renderer::CVulkanRenderer>(this);
+		std::shared_ptr<CVulkanRenderPass> RenderPass = std::make_shared<CVulkanRenderPass>(this, PassName, Width, Height, RenderPassFormat);
+		if (!RenderPass->Create()) return false;
+
+		m_OffScreenRenderPassMap.insert({ PassName, RenderPass });
+
+		return true;
+	}
+
+	std::shared_ptr<renderer::IRenderer> CVulkanAPI::CreateRenderer(const std::string& PassName)
+	{
+		auto Renderer = std::make_shared<renderer::CVulkanRenderer>(this, PassName);
 
 		return Renderer;
 	}
@@ -151,78 +167,48 @@ namespace api
 		return true;
 	}
 
-	bool CVulkanAPI::BeginRender(ERenderPassType RenderPassType)
+	bool CVulkanAPI::BeginRender(const std::string& PassName)
 	{
-		// 記録スタート
-		if (!BeginRenderPass(m_CurrentImageIndex)) return false;
+		// レンダーパスを切り替える
+		const auto& Pass = m_OffScreenRenderPassMap.find(PassName);
+		if (Pass != m_OffScreenRenderPassMap.end())
+		{
+			m_pCurrentVulkanRenderPass = static_cast<CVulkanRenderPass*>(Pass->second.get());
+			m_CurrentRenderPass = m_pCurrentVulkanRenderPass->GetRenderPass();
+
+			// 記録スタート
+			if (!m_pCurrentVulkanRenderPass->BeginRenderPass()) return false;
+		}
+		else
+		{
+			m_CurrentRenderPass = m_SwapChainRenderPass;
+
+			// 記録スタート
+			if (!BeginRenderPass(m_CurrentImageIndex)) return false;
+		}
 
 		return true;
 	}
 
 	bool CVulkanAPI::EndRender()
 	{
-		// スワップチェーンを作り直しているので1フレーム待つ
-		//if (m_IsReCreateSwapChain) return true;
-
 		// 記録終了
-		if (!EndRenderPass()) return false;
-
-		// コマンドバッファの送信
-		VkSubmitInfo submitInfo{};
-		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-
-		VkSemaphore waitSemaphore[] = { m_ImageAvailableSemaphones[m_CurrentFrame] }; // 画像に色が書き込まれて利用可になるまで待つセマフォ
-		VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
-		submitInfo.waitSemaphoreCount = 1;
-		submitInfo.pWaitSemaphores = waitSemaphore;
-		submitInfo.pWaitDstStageMask = waitStages;
-
-		submitInfo.commandBufferCount = 1;
-		submitInfo.pCommandBuffers = &m_CommandBuffers[m_CurrentFrame];
-
-		VkSemaphore signalSemaphores[] = { m_RenderFinishedSemaphores[m_CurrentFrame] }; // コマンドの実行が終了したことを知らせるセマフォ
-		submitInfo.signalSemaphoreCount = 1;
-		submitInfo.pSignalSemaphores = signalSemaphores;
-
-		// コマンドバッファをグラフィックキューに送信
-		// コマンドバッファにはコマンドが入っていてそのコマンドをキューが実行する
-		// キューはタスクでその具体的なタスク内容がコマンドという理解もできる
-		if (vkQueueSubmit(m_GraphicsQueue, 1, &submitInfo, m_InFlightFences[m_CurrentFrame]) != VK_SUCCESS)
+		if (m_CurrentRenderPass != m_SwapChainRenderPass)
 		{
-			return false;
+			// オフスクリーンレンダーパス
+			if (m_pCurrentVulkanRenderPass)
+			{
+				if (!m_pCurrentVulkanRenderPass->EndRenderPass()) return false;
+
+				m_pCurrentVulkanRenderPass = nullptr;
+			}
+		}
+		else
+		{
+			// デフォルトレンダーパス
+			if (!EndRenderPass()) return false;
 		}
 
-		// プレゼンテーション(結果をスワップチェーンに送信して最終結果を画面に示する)
-		VkPresentInfoKHR presentInfo{};
-		presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
-		presentInfo.waitSemaphoreCount = 1;
-		presentInfo.pWaitSemaphores = signalSemaphores;
-		// イメージを示するスワップチェーンを選択
-		VkSwapchainKHR swapChains[] = { m_SwapChain };
-		presentInfo.swapchainCount = 1;
-		presentInfo.pSwapchains = swapChains;
-		presentInfo.pImageIndices = &m_CurrentImageIndex;
-
-		presentInfo.pResults = nullptr;
-
-		// プレゼンテーションキューを実行
-		VkResult result = vkQueuePresentKHR(m_PresentQueue, &presentInfo);
-
-		// 可な限り最良な結果を得るために念のためもう一度最新かチェックする
-		// VK_ERROR_OUT_OF_DATE_KHR: スワップ チェーンはサーフェスと互換性がなくなり、レンダリングに使用できなくなりました(ウィンドウサイズの変更)
-		// VK_SUBOPTIMAL_KHR: スワップ チェーンを使用してサーフェスに正常に示することはできますが、サーフェス プロパティは正確に一致しなくなりました。
-		if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || m_FramebufferResized)
-		{
-			m_FramebufferResized = false;
-			ReCreateSwapChain();
-		}
-		else if (result != VK_SUCCESS)
-		{
-			throw std::runtime_error("failed to present swap chain image!");
-		}
-
-		// 現在処理するフレームを更新する
-		m_CurrentFrame = (m_CurrentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
 		return true;
 	}
 
@@ -248,6 +234,16 @@ namespace api
 		return m_ShaderExtension;
 	}
 
+	const std::map<std::string, std::shared_ptr<graphics::IRenderPass>>& CVulkanAPI::GetOffScreenRenderPassMap() const
+	{
+		return m_OffScreenRenderPassMap;
+	}
+
+	VkRenderPass CVulkanAPI::GetSwapChainRenderPass() const
+	{
+		return m_SwapChainRenderPass;
+	}
+
 	// Device
 	const VkPhysicalDevice& CVulkanAPI::GetPhysicalDevice() const
 	{
@@ -266,9 +262,9 @@ namespace api
 	}
 
 	// Rendering
-	const VkRenderPass& CVulkanAPI::GetRenderPass() const
+	const VkRenderPass& CVulkanAPI::GetCurrentRenderPass() const
 	{
-		return m_RenderPass;
+		return m_CurrentRenderPass;
 	}
 
 	// Vulkanメインロジック ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -553,7 +549,7 @@ namespace api
 		return true;
 	}
 
-	bool CVulkanAPI::CreateRenderPass()
+	bool CVulkanAPI::CreateSwapChainRenderPass()
 	{
 		// <カラーバッファ> ////////////////////////////////////////////////////////////////
 		// レンダーパスの基本的な設定
@@ -575,7 +571,7 @@ namespace api
 		// <デプスバッファ> ////////////////////////////////////////////////////////////////
 		// レンダーパスの基本的な設定
 		VkAttachmentDescription depthAttachment{};
-		depthAttachment.format = FIndDepthFormat();
+		depthAttachment.format = FindDepthFormat();
 		depthAttachment.samples = VK_SAMPLE_COUNT_1_BIT; // マルチサンプリング
 		depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR; // レンダリングの前後にどのような処理を施すか(クリアの方法など)。デプスバッファに適応
 		depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE; // レンダリング結果をメモリに保存し読み取り可にする。デプスバッファに適応
@@ -619,7 +615,7 @@ namespace api
 		renderPassInfo.dependencyCount = 1;
 		renderPassInfo.pDependencies = &dependency;
 
-		if (vkCreateRenderPass(m_LogicalDevice, &renderPassInfo, nullptr, &m_RenderPass) != VK_SUCCESS)
+		if (vkCreateRenderPass(m_LogicalDevice, &renderPassInfo, nullptr, &m_SwapChainRenderPass) != VK_SUCCESS)
 		{
 			throw std::runtime_error("failed to create render pass!\n");
 		}
@@ -627,18 +623,18 @@ namespace api
 		return true;
 	}
 
-	bool CVulkanAPI::CreateDepthResources()
+	bool CVulkanAPI::CreateSwapChainDepthResources()
 	{
-		VkFormat depthFormat = FIndDepthFormat();
+		VkFormat depthFormat = FindDepthFormat();
 		CreateImage(m_SwapChainExtent.width, m_SwapChainExtent.height, depthFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
-			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_DepthImage, m_DepthImageMemory, graphics::ETextureType::TEXTURE_2D, 1, false);
+			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_SwapChainDepthImage, m_SwapChainDepthImageMemory, graphics::ETextureType::TEXTURE_2D, 1, false);
 
-		m_DepthImageView = CreateImageView(m_DepthImage, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT, graphics::ETextureType::TEXTURE_2D, 1, false);
+		m_SwapChainDepthImageView = CreateImageView(m_SwapChainDepthImage, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT, graphics::ETextureType::TEXTURE_2D, 1, false);
 
 		return true;
 	}
 
-	bool CVulkanAPI::CreateFrameBuffer()
+	bool CVulkanAPI::CreateSwapChainFrameBuffer()
 	{
 		m_SwapChainFrameBuffers.resize(m_SwapChainImageViews.size());
 
@@ -646,12 +642,12 @@ namespace api
 		{
 			std::array<VkImageView, 2> attachments[] = {
 				m_SwapChainImageViews[i],
-				m_DepthImageView
+				m_SwapChainDepthImageView
 			};
 
 			VkFramebufferCreateInfo frameBufferInfo{};
 			frameBufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-			frameBufferInfo.renderPass = m_RenderPass;
+			frameBufferInfo.renderPass = m_SwapChainRenderPass;
 			frameBufferInfo.attachmentCount = static_cast<uint32_t>(attachments->size());
 			frameBufferInfo.pAttachments = attachments->data();
 			frameBufferInfo.width = m_SwapChainExtent.width;
@@ -715,7 +711,7 @@ namespace api
 		semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
 
 		// フェンスの作成(フェンスもセマフォと同様の機を持つが、GPUでのコマンドの終了がCPUに知らされるということが違う)
-		// セマフォはGOUでの操作の実行順序を指定するために使用され、フェンスはCPUとGPUをお互い同期させるために使用される
+		// セマフォはGPUでの操作の実行順序を指定するために使用され、フェンスはCPUとGPUをお互い同期させるために使用される
 		VkFenceCreateInfo fenceInfo{};
 		fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
 		fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT; // 初回は前のフレームがないため、このフラグを設定することで最初の呼び出しがすぐに行われるようにする
@@ -763,7 +759,7 @@ namespace api
 		// レンダーパス開始 
 		VkRenderPassBeginInfo renderPassInfo{};
 		renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-		renderPassInfo.renderPass = m_RenderPass;
+		renderPassInfo.renderPass = m_CurrentRenderPass;
 		renderPassInfo.framebuffer = m_SwapChainFrameBuffers[imageIndex];
 		renderPassInfo.renderArea.offset = { 0, 0 };
 		renderPassInfo.renderArea.extent = m_SwapChainExtent;
@@ -803,14 +799,81 @@ namespace api
 		// コマンドバッファの記録を終了
 		if (!EndRecordCommandBuffer()) return false;
 		
+		// コマンドバッファの送信
+		VkSubmitInfo submitInfo{};
+		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+
+		VkSemaphore waitSemaphore[] = { m_ImageAvailableSemaphones[m_CurrentFrame] }; // 画像に色が書き込まれて利用可になるまで待つセマフォ
+		VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
+		submitInfo.waitSemaphoreCount = 1;
+		submitInfo.pWaitSemaphores = waitSemaphore;
+		submitInfo.pWaitDstStageMask = waitStages;
+
+		submitInfo.commandBufferCount = 1;
+		submitInfo.pCommandBuffers = &m_CommandBuffers[m_CurrentFrame];
+
+		VkSemaphore signalSemaphores[] = { m_RenderFinishedSemaphores[m_CurrentFrame] }; // コマンドの実行が終了したことを知らせるセマフォ
+		submitInfo.signalSemaphoreCount = 1;
+		submitInfo.pSignalSemaphores = signalSemaphores;
+
+		// コマンドバッファをグラフィックキューに送信
+		// コマンドバッファにはコマンドが入っていてそのコマンドをキューが実行する
+		// キューはタスクでその具体的なタスク内容がコマンドという理解もできる
+		// レンダーパスへの描画コマンドを実行する
+		
+		// キューは複数のコマンドを記録するのに必要
+		// BeginSingleTimeCommandsみたいなやつは一つのコマンドだけを記録して即時実行する
+		// レンダリングのような複数コマンドを記録するにはキューが必須である
+		
+		// そしてそのキューには格納できるコマンドの種類が決まっていて、描画系だとGraphicsQueue、プレゼント系だとPresentQueueといった感じで分かれている
+		if (vkQueueSubmit(m_GraphicsQueue, 1, &submitInfo, m_InFlightFences[m_CurrentFrame]) != VK_SUCCESS)
+		{
+			return false;
+		}
+
+		// プレゼンテーション(結果をスワップチェーンに送信して最終結果を画面に示する)
+		VkPresentInfoKHR presentInfo{};
+		presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+		presentInfo.waitSemaphoreCount = 1;
+		presentInfo.pWaitSemaphores = signalSemaphores;
+		// イメージを示するスワップチェーンを選択
+		VkSwapchainKHR swapChains[] = { m_SwapChain };
+		presentInfo.swapchainCount = 1;
+		presentInfo.pSwapchains = swapChains;
+		presentInfo.pImageIndices = &m_CurrentImageIndex;
+
+		presentInfo.pResults = nullptr;
+
+		// プレゼンテーションキューを実行
+		// ここでSemaphoreを使っているのは、スワップチェーンのデータを画面ウィンドウに渡すのを待つため
+		// たぶん渡し終わってないのに次々実行すると無駄なメモリが増えていくんだと思う.
+		// 逆にオフスクリーンレンダリングでは画面への受け渡しは発生しないのでSemaphoreやFenceの考慮は必要ないはず(コマンドキューは必須)
+		VkResult result = vkQueuePresentKHR(m_PresentQueue, &presentInfo);
+
+		// 可な限り最良な結果を得るために念のためもう一度最新かチェックする
+		// VK_ERROR_OUT_OF_DATE_KHR: スワップ チェーンはサーフェスと互換性がなくなり、レンダリングに使用できなくなりました(ウィンドウサイズの変更)
+		// VK_SUBOPTIMAL_KHR: スワップ チェーンを使用してサーフェスに正常に示することはできますが、サーフェス プロパティは正確に一致しなくなりました。
+		if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || m_FramebufferResized)
+		{
+			m_FramebufferResized = false;
+			ReCreateSwapChain();
+		}
+		else if (result != VK_SUCCESS)
+		{
+			throw std::runtime_error("failed to present swap chain image!");
+		}
+
+		// 現在処理するフレームを更新する
+		m_CurrentFrame = (m_CurrentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
+
 		return true;
 	}
 
 	bool CVulkanAPI::CleanupSwapChain()
 	{
-		vkDestroyImageView(m_LogicalDevice, m_DepthImageView, nullptr);
-		vkDestroyImage(m_LogicalDevice, m_DepthImage, nullptr);
-		vkFreeMemory(m_LogicalDevice, m_DepthImageMemory, nullptr);
+		vkDestroyImageView(m_LogicalDevice, m_SwapChainDepthImageView, nullptr);
+		vkDestroyImage(m_LogicalDevice, m_SwapChainDepthImage, nullptr);
+		vkFreeMemory(m_LogicalDevice, m_SwapChainDepthImageMemory, nullptr);
 
 		for (size_t i = 0; i < m_SwapChainFrameBuffers.size(); i++)
 		{
@@ -846,8 +909,8 @@ namespace api
 
 		CreateSwapChain();
 		CreateImageViews();
-		CreateDepthResources();
-		CreateFrameBuffer();
+		CreateSwapChainDepthResources();
+		CreateSwapChainFrameBuffer();
 
 		return true;
 	}
@@ -1198,6 +1261,18 @@ namespace api
 		EndSingleTimeCommands(commandBuffer);
 	}
 
+	VkCommandBuffer CVulkanAPI::GetCurrentCommandBuffer() const
+	{
+		if (m_pCurrentVulkanRenderPass)
+		{
+			return m_pCurrentVulkanRenderPass->GetCommandBuffer();
+		}
+		else
+		{
+			return m_CommandBuffers[GetCurrentFrame()];
+		}
+	}
+
 	const std::vector<VkCommandBuffer>& CVulkanAPI::GetCommandBuffers() const
 	{
 		return m_CommandBuffers;
@@ -1427,7 +1502,7 @@ namespace api
 	}
 
 	// Depth
-	VkFormat CVulkanAPI::FIndDepthFormat()
+	VkFormat CVulkanAPI::FindDepthFormat()
 	{
 		return FindSupportedFormat({ VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT },
 			VK_IMAGE_TILING_OPTIMAL, VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);

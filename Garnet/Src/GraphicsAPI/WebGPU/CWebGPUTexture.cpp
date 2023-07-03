@@ -15,6 +15,11 @@ namespace api
 	{
 	}
 
+	bool CWebGPUTexture::CreateFrameTexture(int Width, int Height, api::ERenderPassFormat RenderPassFormat)
+	{
+		return true;
+	}
+
 #ifdef USE_TEXTURE_LOADER
 	bool CWebGPUTexture::Create(const std::vector<unsigned char>& OriginalPixels, int pixelSize)
 	{

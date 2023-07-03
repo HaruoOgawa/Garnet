@@ -1,9 +1,12 @@
 #pragma once
 #include <memory>
 #include <string>
-#include "IRenderer.h"
+#include <map>
 
-#include "../Graphics/ERenderPassType.h"
+#include "IRenderer.h"
+#include "IRenderPass.h"
+
+#include "../GraphicsAPI/ERenderPassFormat.h"
 
 #ifndef __EMSCRIPTEN__
 
@@ -36,15 +39,17 @@ namespace api
 		virtual bool InitializeWithGLFW(GLFWwindow* pWindow) = 0;
 #endif // __EMSCRIPTEN__
 		
-		virtual std::shared_ptr<renderer::IRenderer> CreateRenderer() = 0;
+		virtual bool CreateRenderPass(const std::string& PassName, int Width, int Height, ERenderPassFormat RenderPassFormat) = 0;
+		virtual std::shared_ptr<renderer::IRenderer> CreateRenderer(const std::string& PassName) = 0;
 		virtual std::shared_ptr<graphics::CMaterial> CreateMaterial() = 0;
 		virtual std::shared_ptr<graphics::CTexture> CreateTexture(bool UseMipMap = false) = 0;
 
 		virtual bool Resize(int Width, int Height) = 0;
 
-		virtual bool BeginRender(ERenderPassType RenderPassType) = 0;
+		virtual bool BeginRender(const std::string& PassName = "") = 0;
 		virtual bool EndRender() = 0;
 
 		virtual const std::string& GetShaderExtension() const = 0;
+		virtual const std::map<std::string, std::shared_ptr<graphics::IRenderPass>>& GetOffScreenRenderPassMap() const = 0;
 	};
 }

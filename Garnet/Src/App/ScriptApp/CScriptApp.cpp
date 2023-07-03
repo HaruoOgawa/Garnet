@@ -1,6 +1,5 @@
 #include "CScriptApp.h"
 #include "../../Scene/CScriptScene.h"
-#include "../../Graphics/ERenderPassType.h"
 #include "../../Graphics/CDrawInfo.h"
 #include "../../Camera/CCamera.h"
 #include "../../Projection/CProjection.h"
@@ -10,6 +9,12 @@
 #endif // USE_VIEWER_CAMERA
 
 // CScriptApp は旧エンジンでもやっていたof風にCppでエンジンコードを直接シーンを構築していくアプリ
+
+// MVVMで設計する
+// App => ViewModel, Scene => View, API => Model
+// Garnetで作品を作る時、View(Scene)とViewModel(App)は編集していいが、Modelの変更は一切許さない
+
+// FrameBufferListはAppで作り、そのテクスチャリストをViewにInitializeの最後辺りで渡す
 
 namespace app
 {
@@ -43,8 +48,18 @@ namespace app
 
 	bool CScriptApp::Initialize(api::IGraphicsAPI* pGraphicsAPI)
 	{
+		// Viewの初期化
 		m_ScriptScene = std::make_shared<scene::CScriptScene>();
 		if (!m_ScriptScene->Initialize(pGraphicsAPI)) return false;
+
+		// オフスクリーンレンダリング用のFrameBufferを生成する
+		if (!pGraphicsAPI->CreateRenderPass("Test", 256, 256, api::ERenderPassFormat::COLOR_DEPTH_RENDERPASS)) return false;
+
+		// FrameTextureを渡す
+		for (const auto& RenderPass : pGraphicsAPI->GetOffScreenRenderPassMap())
+		{
+			m_ScriptScene->SetFrameTexture(RenderPass.second->GetFrameTexture());
+		}
 
 		return true;
 	}
@@ -70,10 +85,14 @@ namespace app
 
 	bool CScriptApp::Draw(api::IGraphicsAPI* pGraphicsAPI)
 	{
-		if (!pGraphicsAPI->BeginRender(api::ERenderPassType::FORWARD_POLYGONE)) return false;
-
+		// "Test"
+		if (!pGraphicsAPI->BeginRender("Test")) return false;
+		if (!m_ScriptScene->DrawTest(pGraphicsAPI)) return false;
+		if (!pGraphicsAPI->EndRender()) return false;
+		
+		// Default(SwapChain)
+		if (!pGraphicsAPI->BeginRender()) return false;
 		if (!m_ScriptScene->Draw(pGraphicsAPI)) return false;
-
 		if (!pGraphicsAPI->EndRender()) return false;
 
 		return true;

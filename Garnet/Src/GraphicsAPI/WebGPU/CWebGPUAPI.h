@@ -4,9 +4,12 @@
 #include <webgpu.h>
 #include <wgpu.h>
 #include <vector>
+#include <map>
 
 namespace api
 {
+	class CWebGPURenderPass;
+
 	class CWebGPUAPI : public IGraphicsAPI
 	{
 		//
@@ -42,6 +45,7 @@ namespace api
 		WGPUTextureView m_DepthTextureView;
 
 		// RenderPass
+		std::map<std::string, std::shared_ptr<graphics::IRenderPass>> m_OffScreenRenderPassMap;
 		WGPURenderPassEncoder m_RenderPass;
 
 	private:
@@ -69,16 +73,19 @@ namespace api
 
 		void Release();
 
-		virtual std::shared_ptr<renderer::IRenderer> CreateRenderer() override;
+		virtual bool CreateRenderPass(const std::string& PassName, int Width, int Height, ERenderPassFormat RenderPassFormat) override;
+		virtual std::shared_ptr<renderer::IRenderer> CreateRenderer(const std::string& PassName) override;
 		virtual std::shared_ptr<graphics::CMaterial> CreateMaterial() override;
 		virtual std::shared_ptr<graphics::CTexture> CreateTexture(bool UseMipMap = false) override;
 
 		virtual bool Resize(int Width, int Height) override;
 
-		virtual bool BeginRender(ERenderPassType RenderPassType) override;
+		virtual bool BeginRender(const std::string& PassName = "") override;
 		virtual bool EndRender() override;
 
 		virtual const std::string& GetShaderExtension() const override;
+
+		virtual const std::map<std::string, std::shared_ptr<graphics::IRenderPass>>& GetOffScreenRenderPassMap() const override;
 
 		//
 		WGPUDevice GetLogicalDevice() const;

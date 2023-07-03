@@ -1,5 +1,6 @@
 #ifdef __DAWN__
 #include "CWebGPUAPI.h"
+#include "CWebGPURenderPass.h"
 #include "CWebGPURenderer.h"
 #include "CWebGPUMaterial.h"
 #include "CWebGPUTexture.h"
@@ -68,11 +69,25 @@ namespace api
 
 	void CWebGPUAPI::Release()
 	{
+		// オフスクリーンレンダリング用のフレームバッファを解放
+		m_OffScreenRenderPassMap.clear();
 	}
 
-	std::shared_ptr<renderer::IRenderer> CWebGPUAPI::CreateRenderer()
+	bool CWebGPUAPI::CreateRenderPass(const std::string& PassName, int Width, int Height, ERenderPassFormat RenderPassFormat)
 	{
-		auto Renderer = std::make_shared<renderer::CWebGPURenderer>(this);
+		std::shared_ptr<CWebGPURenderPass> RenderPass = std::make_shared<CWebGPURenderPass>(PassName, Width, Height, RenderPassFormat);
+		if (!RenderPass->Create()) return false;
+
+		m_OffScreenRenderPassMap.insert({ PassName, RenderPass });
+
+		return true;
+
+		return true;
+	}
+
+	std::shared_ptr<renderer::IRenderer> CWebGPUAPI::CreateRenderer(const std::string& PassName)
+	{
+		auto Renderer = std::make_shared<renderer::CWebGPURenderer>(this, PassName);
 
 		return Renderer;
 	}
@@ -102,8 +117,15 @@ namespace api
 		return true;
 	}
 
-	bool CWebGPUAPI::BeginRender(ERenderPassType RenderPassType)
+	bool CWebGPUAPI::BeginRender(const std::string& PassName)
 	{
+		// レンダーパスを切り替える
+		const auto& Pass = m_OffScreenRenderPassMap.find(PassName);
+		if (Pass != m_OffScreenRenderPassMap.end())
+		{
+			CWebGPURenderPass* RenderPassPass = static_cast<CWebGPURenderPass*>(Pass->second.get());
+		}
+
 		// スワップチェーンから次の待機中テクスチャを取得
 		m_NextTexture = wgpuSwapChainGetCurrentTextureView(m_SwapChain);
 		if (!m_NextTexture)
@@ -194,6 +216,11 @@ namespace api
 	const std::string& CWebGPUAPI::GetShaderExtension() const
 	{
 		return m_ShaderExtension;
+	}
+
+	const std::map<std::string, std::shared_ptr<graphics::IRenderPass>>& CWebGPUAPI::GetOffScreenRenderPassMap() const
+	{
+		return m_OffScreenRenderPassMap;
 	}
 
 	//

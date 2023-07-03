@@ -18,9 +18,13 @@ namespace camera
 		{
 			float Speed = InputState->GetMouseRotSpeed();
 
+			glm::vec3 ViewDir = glm::normalize(m_Center - m_Pos);
+			glm::vec3 RotAxisX = glm::cross(ViewDir, glm::vec3(0.0f, 1.0f, 0.0f));
+			glm::vec3 RotAxisY = glm::cross(ViewDir, RotAxisX);
+
 			glm::vec4 Pos = glm::vec4(m_Pos, 1.0f) 
-				* glm::mat4_cast(glm::angleAxis(InputState->GetDragAmount().x * Speed, glm::vec3(0.0f, 1.0f, 0.0f)))
-				* glm::mat4_cast(glm::angleAxis(InputState->GetDragAmount().y * Speed, glm::vec3(1.0f, 0.0f, 0.0f)));
+				* glm::mat4_cast(glm::angleAxis(InputState->GetDragAmount().x * Speed * (-1.0f), RotAxisY))
+				* glm::mat4_cast(glm::angleAxis(InputState->GetDragAmount().y * Speed, RotAxisX));
 
 			m_Pos.x = Pos.x;
 			m_Pos.y = Pos.y;

@@ -28,10 +28,13 @@ namespace renderer
 
 	class CVulkanRenderer : public IRenderer
 	{
-		int	m_DynamicOffsetNum;
-
 		// API
 		api::CVulkanAPI* m_pGraphicsAPI;
+
+		//
+		const std::string m_PassName;
+
+		int	m_DynamicOffsetNum;
 
 		// Vertices/Indices
 		std::vector<VkBuffer> m_VertexBufferList;
@@ -52,7 +55,7 @@ namespace renderer
 		// ÉwÉãÉpÅ[ä÷êî ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		VkFormat GetVertexFormat(int Dimention);
 	public:
-		CVulkanRenderer(api::CVulkanAPI* pGraphicsAPI);
+		CVulkanRenderer(api::CVulkanAPI* pGraphicsAPI, const std::string& PassName);
 		virtual ~CVulkanRenderer();
 
 		void Release();

@@ -2,6 +2,7 @@
 
 #include <vector>
 #include "ETextureType.h"
+#include "../GraphicsAPI/ERenderPassFormat.h"
 
 namespace graphics
 {
@@ -25,6 +26,8 @@ namespace graphics
 
 		ETextureType GetTextureType() const;
 		float GetMipCount() const;
+
+		virtual bool CreateFrameTexture(int Width, int Height, api::ERenderPassFormat RenderPassFormat) = 0;
 #ifdef USE_TEXTURE_LOADER
 		virtual bool Create(const std::vector<unsigned char>& Data);
 		virtual bool Create(const std::vector<std::vector<unsigned char>>& DataList);
