@@ -17,6 +17,12 @@ namespace api
 
 	bool CWebGPUTexture::CreateFrameTexture(int Width, int Height, api::ERenderPassFormat RenderPassFormat)
 	{
+		m_Width = Width;
+		m_Height = Height;
+
+		if (!CreateFrameTextureImageView(RenderPassFormat)) return false; // SamplerÇê∂ê¨
+		if (!CreateTextureSampler()) return false; // SamplerÇê∂ê¨
+
 		return true;
 	}
 
@@ -38,6 +44,39 @@ namespace api
 	const WGPUSampler& CWebGPUTexture::GetTextureSampler() const
 	{
 		return m_TextureSampler;
+	}
+
+	bool CWebGPUTexture::CreateFrameTextureImageView(api::ERenderPassFormat RenderPassFormat)
+	{
+		WGPUTextureFormat textureFormat = (RenderPassFormat == api::ERenderPassFormat::COLOR_DEPTH_FLOAT_RENDERPASS)? WGPUTextureFormat_RGBA16Float : WGPUTextureFormat_RGBA8Unorm;
+
+		// TextureÇê∂ê¨
+		WGPUTextureDescriptor textureDesc{};
+		textureDesc.nextInChain = nullptr;
+		textureDesc.dimension = WGPUTextureDimension_2D;
+		textureDesc.format = textureFormat;
+		textureDesc.mipLevelCount = 1;
+		textureDesc.sampleCount = 1;
+		textureDesc.size = { static_cast<unsigned int>(m_Width), static_cast<unsigned int>(m_Height), 1 };
+		textureDesc.usage = WGPUTextureUsage_RenderAttachment | WGPUTextureUsage_TextureBinding;
+		textureDesc.viewFormatCount = 0;
+		textureDesc.viewFormats = nullptr;
+		WGPUTexture texture = wgpuDeviceCreateTexture(m_pGraphicsAPI->GetLogicalDevice(), &textureDesc);
+
+		// TextureViewÇê∂ê¨
+		WGPUTextureViewDescriptor textureViewDesc{};
+		textureViewDesc.nextInChain = nullptr;
+		textureViewDesc.aspect = WGPUTextureAspect_All;
+		textureViewDesc.baseArrayLayer = 0;
+		textureViewDesc.arrayLayerCount = 1;
+		textureViewDesc.baseMipLevel = 0;
+		textureViewDesc.mipLevelCount = 1;
+		textureViewDesc.dimension = WGPUTextureViewDimension_2D;
+		textureViewDesc.format = textureFormat;
+
+		m_TextureImageView = wgpuTextureCreateView(texture, &textureViewDesc);
+
+		return true;
 	}
 
 	bool CWebGPUTexture::CreateTextureImageView(const std::vector<unsigned char>& OriginalPixels, int pixelSize)

@@ -41,12 +41,15 @@ namespace api
 		WGPUTextureFormat m_SwapChainFormat;
 
 		// DepthTexture
-		WGPUTexture		m_DepthTexture;
-		WGPUTextureView m_DepthTextureView;
+		WGPUTexture		m_SwapChainDepthTexture;
+		WGPUTextureView m_SwapChainDepthTextureView;
 
 		// RenderPass
 		std::map<std::string, std::shared_ptr<graphics::IRenderPass>> m_OffScreenRenderPassMap;
-		WGPURenderPassEncoder m_RenderPass;
+		WGPURenderPassEncoder m_SwapChainRenderPass;
+
+		WGPURenderPassEncoder m_CurrentRenderPass;
+		CWebGPURenderPass* m_pWebGPURenderPass;
 
 	private:
 		// WebGPU メインロジック ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -61,6 +64,10 @@ namespace api
 		bool CreateQueue();
 		bool CreateSwapChain();
 		bool CreateDepthTexture();
+
+		bool BeginRenderPass();
+		bool EndRenderPass();
+
 	public:
 		CWebGPUAPI(int Width, int Height);
 		virtual ~CWebGPUAPI();
@@ -91,7 +98,7 @@ namespace api
 		WGPUDevice GetLogicalDevice() const;
 		WGPUQueue GetQueue() const;
 		WGPUTextureFormat GetSwapChainFormat() const;
-		WGPURenderPassEncoder GetRenderPass() const;
+		WGPURenderPassEncoder GetCurrentRenderPass() const;
 
 		// 縮小も同時に行い、元のテクスチャを別のテクスチャにコピー
 		//bool Blit

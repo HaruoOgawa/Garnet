@@ -170,10 +170,10 @@ namespace api
 	bool CVulkanAPI::BeginRender(const std::string& PassName)
 	{
 		// レンダーパスを切り替える
-		const auto& Pass = m_OffScreenRenderPassMap.find(PassName);
-		if (Pass != m_OffScreenRenderPassMap.end())
+		const auto& OffScreenRenderPass = m_OffScreenRenderPassMap.find(PassName);
+		if (OffScreenRenderPass != m_OffScreenRenderPassMap.end())
 		{
-			m_pCurrentVulkanRenderPass = static_cast<CVulkanRenderPass*>(Pass->second.get());
+			m_pCurrentVulkanRenderPass = static_cast<CVulkanRenderPass*>(OffScreenRenderPass->second.get());
 			m_CurrentRenderPass = m_pCurrentVulkanRenderPass->GetRenderPass();
 
 			// 記録スタート

@@ -34,9 +34,11 @@ namespace api
 		m_NextTexture(nullptr),
 		m_SwapChain(nullptr),
 		m_SwapChainFormat(WGPUTextureFormat_Undefined),
-		m_DepthTexture(nullptr),
-		m_DepthTextureView(nullptr),
-		m_RenderPass(nullptr)
+		m_SwapChainDepthTexture(nullptr),
+		m_SwapChainDepthTextureView(nullptr),
+		m_SwapChainRenderPass(nullptr),
+		m_CurrentRenderPass(nullptr),
+		m_pWebGPURenderPass(nullptr)
 	{
 	}
 
@@ -75,12 +77,10 @@ namespace api
 
 	bool CWebGPUAPI::CreateRenderPass(const std::string& PassName, int Width, int Height, ERenderPassFormat RenderPassFormat)
 	{
-		std::shared_ptr<CWebGPURenderPass> RenderPass = std::make_shared<CWebGPURenderPass>(PassName, Width, Height, RenderPassFormat);
+		std::shared_ptr<CWebGPURenderPass> RenderPass = std::make_shared<CWebGPURenderPass>(this, PassName, Width, Height, RenderPassFormat);
 		if (!RenderPass->Create()) return false;
 
 		m_OffScreenRenderPassMap.insert({ PassName, RenderPass });
-
-		return true;
 
 		return true;
 	}
@@ -120,95 +120,41 @@ namespace api
 	bool CWebGPUAPI::BeginRender(const std::string& PassName)
 	{
 		// レンダーパスを切り替える
-		const auto& Pass = m_OffScreenRenderPassMap.find(PassName);
-		if (Pass != m_OffScreenRenderPassMap.end())
+		const auto& OffScreenRenderPass = m_OffScreenRenderPassMap.find(PassName);
+		if (OffScreenRenderPass != m_OffScreenRenderPassMap.end())
 		{
-			CWebGPURenderPass* RenderPassPass = static_cast<CWebGPURenderPass*>(Pass->second.get());
+			m_pWebGPURenderPass = static_cast<CWebGPURenderPass*>(OffScreenRenderPass->second.get());
+			m_CurrentRenderPass = m_pWebGPURenderPass->GetRenderPass();
 		}
-
-		// スワップチェーンから次の待機中テクスチャを取得
-		m_NextTexture = wgpuSwapChainGetCurrentTextureView(m_SwapChain);
-		if (!m_NextTexture)
+		else
 		{
-			Console::Log("Not Exist nextTexture\n");
-			return false;
+			m_pWebGPURenderPass = nullptr;
+			m_CurrentRenderPass = m_SwapChainRenderPass;
+
+			if (!BeginRenderPass()) return false;
 		}
-		
-		// レンダーパスの設定
-		WGPURenderPassColorAttachment renderPassColorAttachment = {};
-		renderPassColorAttachment.view = m_NextTexture; // レンダリングの描画先テクスチャを指定
-		renderPassColorAttachment.resolveTarget = nullptr; // マルチサンプリングの設定
-		renderPassColorAttachment.loadOp = WGPULoadOp_Clear; // レンダー パスを実行する前にビューで実行するロード操作を示します。例えばクリア値に初期化するだったり
-		renderPassColorAttachment.storeOp = WGPUStoreOp_Store; // レンダリング実行後の操作
-		renderPassColorAttachment.clearValue = WGPUColor{ 0.0f, 0.0f, 0.0f, 1.0f }; // 初期カラー
-
-		// デプスステンシルバッファの設定
-		WGPURenderPassDepthStencilAttachment depthStencilAttachment;
-		depthStencilAttachment.view = m_DepthTextureView; // デプステクスチャ
-		depthStencilAttachment.depthClearValue = 1.0f; // デプスの初期値
-		depthStencilAttachment.depthLoadOp = WGPULoadOp_Clear; // 処理開始時(ロード)にどうするか。ここでは全てクリアする
-		depthStencilAttachment.depthStoreOp = WGPUStoreOp_Store; // デプスデータの保存処理(ストア)の時どうするか。普通に保存する
-		depthStencilAttachment.depthReadOnly = false;
-
-		depthStencilAttachment.stencilClearValue = 0;
-#ifndef __EMSCRIPTEN__
-		// このパラメーターはWebブラウザ側のWebGPUでは非推奨とのこと. https://github.com/emscripten-core/emscripten/issues/16471
-		depthStencilAttachment.stencilLoadOp = WGPULoadOp_Clear;
-		depthStencilAttachment.stencilStoreOp = WGPUStoreOp_Store;
-		depthStencilAttachment.stencilReadOnly = true;
-#endif // !__EMSCRIPTEN__
-
-		//
-		WGPURenderPassDescriptor renderPassDesc = {};
-		renderPassDesc.colorAttachmentCount = 1; 
-		renderPassDesc.colorAttachments = &renderPassColorAttachment; // レンダーパスのカラーフォーマットを指定
-		renderPassDesc.depthStencilAttachment = &depthStencilAttachment; // デプスステンシルバッファ
-		renderPassDesc.timestampWriteCount = 0;
-		renderPassDesc.timestampWrites = nullptr; // レンダリングの同期用のオブジェクト領域
-		renderPassDesc.nextInChain = nullptr; // 拡張機
-
-		// コマンドエンコーダーを生成
-		// (コマンドバッファの生成に必要なもの)
-		WGPUCommandEncoderDescriptor encoderDesc = {};
-		encoderDesc.nextInChain = nullptr;
-		encoderDesc.label = "Command Encoder";
-		m_Encoder = wgpuDeviceCreateCommandEncoder(m_Device, &encoderDesc);
-		if (!m_Encoder)
-		{
-			Console::Log("Failed to Create Encorder\n");
-			return false;
-		}
-
-		// レンダーパス開始
-		m_RenderPass = wgpuCommandEncoderBeginRenderPass(m_Encoder, &renderPassDesc);
 
 		return true;
 	}
 
 	bool CWebGPUAPI::EndRender()
 	{
-		// レンダーパス終了
-		wgpuRenderPassEncoderEnd(m_RenderPass);
-
-		//
-#ifdef __EMSCRIPTEN__
-		//wgpuTextureViewDrop(m_NextTexture);
-#endif // __EMSCRIPTEN__
-
-		// コマンドバッファを生成
-		WGPUCommandBufferDescriptor cmdBufferDesc = {};
-		cmdBufferDesc.nextInChain = nullptr;
-		cmdBufferDesc.label = "Command Buffer";
-		m_CommandBuffer = wgpuCommandEncoderFinish(m_Encoder, &cmdBufferDesc);
-		if (!m_CommandBuffer)
+		// 記録終了
+		if (m_CurrentRenderPass != m_SwapChainRenderPass)
 		{
-			Console::Log("Failed to Create CommandBuffer\n");
-			return false;
+			// オフスクリーンレンダーパス
+			if (m_pWebGPURenderPass)
+			{
+				if (!m_pWebGPURenderPass->EndRenderPass()) return false;
+
+				m_pWebGPURenderPass = nullptr;
+			}
 		}
-		// コマンドの実行
-		wgpuQueueSubmit(m_Queue, 1, &m_CommandBuffer);
-		// スワップチェーンに
-		wgpuSwapChainPresent(m_SwapChain);
+		else
+		{
+			// デフォルトレンダーパス
+			if (!EndRenderPass()) return false;
+		}
 
 		return true;
 	}
@@ -239,9 +185,9 @@ namespace api
 		return m_SwapChainFormat;
 	}
 
-	WGPURenderPassEncoder CWebGPUAPI::GetRenderPass() const
+	WGPURenderPassEncoder CWebGPUAPI::GetCurrentRenderPass() const
 	{
-		return m_RenderPass;
+		return m_CurrentRenderPass;
 	}
 
 	// WebGPU メインロジック ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -488,10 +434,10 @@ namespace api
 
 	bool CWebGPUAPI::CreateDepthTexture()
 	{
-		if (m_DepthTexture)
+		if (m_SwapChainDepthTexture)
 		{
-			wgpuTextureDestroy(m_DepthTexture);
-			m_DepthTexture = nullptr;
+			wgpuTextureDestroy(m_SwapChainDepthTexture);
+			m_SwapChainDepthTexture = nullptr;
 		}
 
 		WGPUTextureFormat depthTextureFormat = WGPUTextureFormat_Depth24Plus;
@@ -507,7 +453,7 @@ namespace api
 		depthTextureDesc.usage = WGPUTextureUsage_RenderAttachment;
 		depthTextureDesc.viewFormatCount = 1;
 		depthTextureDesc.viewFormats = &depthTextureFormat;
-		m_DepthTexture = wgpuDeviceCreateTexture(m_Device, &depthTextureDesc);
+		m_SwapChainDepthTexture = wgpuDeviceCreateTexture(m_Device, &depthTextureDesc);
 
 		// TextureViewを生成
 		WGPUTextureViewDescriptor depthTextureViewDesc{};
@@ -520,7 +466,97 @@ namespace api
 		depthTextureViewDesc.dimension = WGPUTextureViewDimension_2D;
 		depthTextureViewDesc.format = depthTextureFormat;
 
-		m_DepthTextureView = wgpuTextureCreateView(m_DepthTexture, &depthTextureViewDesc);
+		m_SwapChainDepthTextureView = wgpuTextureCreateView(m_SwapChainDepthTexture, &depthTextureViewDesc);
+
+		return true;
+	}
+
+	bool CWebGPUAPI::BeginRenderPass()
+	{
+		// スワップチェーンから次の待機中テクスチャを取得
+		m_NextTexture = wgpuSwapChainGetCurrentTextureView(m_SwapChain);
+		if (!m_NextTexture)
+		{
+			Console::Log("Not Exist nextTexture\n");
+			return false;
+		}
+
+		// レンダーパスの設定
+		WGPURenderPassColorAttachment renderPassColorAttachment = {};
+		renderPassColorAttachment.view = m_NextTexture; // レンダリングの描画先テクスチャを指定
+		renderPassColorAttachment.resolveTarget = nullptr; // マルチサンプリングの設定
+		renderPassColorAttachment.loadOp = WGPULoadOp_Clear; // レンダー パスを実行する前にビューで実行するロード操作を示します。例えばクリア値に初期化するだったり
+		renderPassColorAttachment.storeOp = WGPUStoreOp_Store; // レンダリング実行後の操作
+		renderPassColorAttachment.clearValue = WGPUColor{ 0.0f, 0.0f, 0.0f, 1.0f }; // 初期カラー
+
+		// デプスステンシルバッファの設定
+		WGPURenderPassDepthStencilAttachment depthStencilAttachment;
+		depthStencilAttachment.view = m_SwapChainDepthTextureView; // デプステクスチャ
+		depthStencilAttachment.depthClearValue = 1.0f; // デプスの初期値
+		depthStencilAttachment.depthLoadOp = WGPULoadOp_Clear; // 処理開始時(ロード)にどうするか。ここでは全てクリアする
+		depthStencilAttachment.depthStoreOp = WGPUStoreOp_Store; // デプスデータの保存処理(ストア)の時どうするか。普通に保存する
+		depthStencilAttachment.depthReadOnly = false;
+
+		depthStencilAttachment.stencilClearValue = 0;
+#ifndef __EMSCRIPTEN__
+		// このパラメーターはWebブラウザ側のWebGPUでは非推奨とのこと. https://github.com/emscripten-core/emscripten/issues/16471
+		depthStencilAttachment.stencilLoadOp = WGPULoadOp_Clear;
+		depthStencilAttachment.stencilStoreOp = WGPUStoreOp_Store;
+		depthStencilAttachment.stencilReadOnly = true;
+#endif // !__EMSCRIPTEN__
+
+		//
+		WGPURenderPassDescriptor renderPassDesc = {};
+		renderPassDesc.colorAttachmentCount = 1;
+		renderPassDesc.colorAttachments = &renderPassColorAttachment; // レンダーパスのカラーフォーマットを指定
+		renderPassDesc.depthStencilAttachment = &depthStencilAttachment; // デプスステンシルバッファ
+		renderPassDesc.timestampWriteCount = 0;
+		renderPassDesc.timestampWrites = nullptr; // レンダリングの同期用のオブジェクト領域
+		renderPassDesc.nextInChain = nullptr; // 拡張機
+
+		// コマンドエンコーダーを生成
+		// (コマンドバッファの生成に必要なもの)
+		WGPUCommandEncoderDescriptor encoderDesc = {};
+		encoderDesc.nextInChain = nullptr;
+		encoderDesc.label = "Command Encoder";
+		m_Encoder = wgpuDeviceCreateCommandEncoder(m_Device, &encoderDesc);
+		if (!m_Encoder)
+		{
+			Console::Log("Failed to Create Encorder\n");
+			return false;
+		}
+
+		// レンダーパス開始
+		m_SwapChainRenderPass = wgpuCommandEncoderBeginRenderPass(m_Encoder, &renderPassDesc);
+
+		return true;
+	}
+
+	bool CWebGPUAPI::EndRenderPass()
+	{
+		// レンダーパス終了
+		wgpuRenderPassEncoderEnd(m_SwapChainRenderPass);
+
+		//
+#ifdef __EMSCRIPTEN__
+		//wgpuTextureViewDrop(m_NextTexture);
+#endif // __EMSCRIPTEN__
+
+		// コマンドバッファを生成
+		WGPUCommandBufferDescriptor cmdBufferDesc = {};
+		cmdBufferDesc.nextInChain = nullptr;
+		cmdBufferDesc.label = "Command Buffer";
+		m_CommandBuffer = wgpuCommandEncoderFinish(m_Encoder, &cmdBufferDesc);
+		if (!m_CommandBuffer)
+		{
+			Console::Log("Failed to Create CommandBuffer\n");
+			return false;
+		}
+		// コマンドの実行
+		wgpuQueueSubmit(m_Queue, 1, &m_CommandBuffer);
+
+		// スワップチェーンに描画結果を送る
+		wgpuSwapChainPresent(m_SwapChain);
 
 		return true;
 	}

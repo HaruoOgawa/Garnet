@@ -2,6 +2,9 @@
 
 #ifdef __DAWN__
 
+#include <webgpu.h>
+#include <wgpu.h>
+
 #include <string>
 
 #include "../ERenderPassFormat.h"
@@ -11,21 +14,39 @@ namespace graphics { class CTexture; }
 
 namespace api
 {
+	class CWebGPUAPI;
 	class CWebGPUTexture;
 
 	class CWebGPURenderPass : public graphics::IRenderPass
 	{
+		// API
+		api::CWebGPUAPI* m_pGraphicsAPI;
+
 		// Base Param
 		std::string m_PassName;
 		int m_Width;
 		int m_Height;
 		api::ERenderPassFormat m_RenderPassFormat;
 		std::shared_ptr<CWebGPUTexture> m_FrameTexture;
+
+		// RenderPass
+		WGPURenderPassEncoder m_RenderPass;
+
+		// DepthTexture
+		WGPUTexture		m_DepthTexture;
+		WGPUTextureView m_DepthTextureView;
+
+		// Queue, Command
+		WGPUCommandEncoder m_Encoder;
+		WGPUCommandBuffer m_CommandBuffer;
+	private:
+		bool CreateDepthTexture();
 	public:
-		CWebGPURenderPass(const std::string& PassName, int Width, int Height, ERenderPassFormat RenderPassFormat);
+		CWebGPURenderPass(api::CWebGPUAPI* pGraphicsAPI, const std::string& PassName, int Width, int Height, ERenderPassFormat RenderPassFormat);
 		virtual ~CWebGPURenderPass();
 
 		virtual std::shared_ptr<graphics::CTexture> GetFrameTexture() override;
+		WGPURenderPassEncoder GetRenderPass() { return m_RenderPass; }
 
 		bool Create();
 
