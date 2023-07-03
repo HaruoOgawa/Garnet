@@ -102,6 +102,11 @@ namespace object
 
 	bool C3DObject::Update(float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo)
 	{
+		// ワールド行列の更新
+		// 全ノードマイフレーム更新しているので、そのうちキャッシュを入れて更新は必要なものだけにする
+		CalcWorldMatrix();
+
+		//
 		for (auto& Material : m_MaterialList)
 		{
 			if (!Material->Update(SecondsTime, Camera, Projection, DrawInfo)) return false;

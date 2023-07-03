@@ -17,6 +17,9 @@ namespace scene
 {
 	class CScriptScene
 	{
+		//
+		std::shared_ptr<object::C3DObject> m_OffScreenRenderObj;
+
 		// Tex of FrameBuffer
 		std::vector<std::shared_ptr<graphics::CTexture>> m_FrameTextureList;
 

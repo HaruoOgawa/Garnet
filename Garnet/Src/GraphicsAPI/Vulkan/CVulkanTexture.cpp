@@ -97,7 +97,7 @@ namespace api
 	bool CVulkanTexture::CreateFrameTextureImage()
 	{
 		// テクスチャイメージオブジェクトを生成
-		m_pGraphicsAPI->CreateImage(m_Width, m_Height, m_ImageFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
+		m_pGraphicsAPI->CreateImage(m_Width, m_Height, m_ImageFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
 			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_TextureImage, m_TextureImageMemory, m_TextureType, m_MipCount, m_UseMipMap);
 
 		return true;

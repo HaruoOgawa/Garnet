@@ -8,6 +8,8 @@
 namespace scene
 {
 	CScriptScene::CScriptScene():
+		m_OffScreenRenderObj(std::make_shared<object::C3DObject>()),
+
 		m_TestObject(std::make_shared<object::C3DObject>("Test")),
 		m_VertexShader(std::make_shared<file::CFileReader>()),
 		m_FragmentShader(std::make_shared<file::CFileReader>()),
@@ -85,6 +87,7 @@ namespace scene
 			createInfo->SetFragmentShaderCode(m_FragmentShader->GetData());
 			auto Material0 = pGraphicsAPI->CreateMaterial();
 			auto Material1 = pGraphicsAPI->CreateMaterial();
+			auto Material2 = pGraphicsAPI->CreateMaterial();
 
 			// UBO, TEXTURE
 			{
@@ -134,6 +137,7 @@ namespace scene
 
 				Material0->AddUniformBuffer(UniformBuffer);
 				Material1->AddUniformBuffer(UniformBuffer);
+				Material2->AddUniformBuffer(UniformBuffer);
 			}
 
 			{
@@ -145,21 +149,31 @@ namespace scene
 
 				Material0->AddTextureBindingLayout({ 2, 3, 0, graphics::ETextureType::TEXTURE_2D });
 				Material1->AddTextureBindingLayout({ 2, 3, 1, graphics::ETextureType::TEXTURE_2D });
+
+				Material2->AddTextureBindingLayout({ 2, 3, 0, graphics::ETextureType::TEXTURE_2D });
+				
 				m_TestObject->AddTexture(APITex0);
 				m_TestObject->AddTexture(APITex1);
+
+				m_OffScreenRenderObj->AddTexture(m_FrameTextureList[0]);
 			}
 			
 			// CREATE MATERIAL
 			Material0->SetCreateInfo(createInfo);
 			Material1->SetCreateInfo(createInfo);
+			Material2->SetCreateInfo(createInfo);
+
 			m_TestObject->AddMaterial(Material0);
 			m_TestObject->AddMaterial(Material1);
+
+			m_OffScreenRenderObj->AddMaterial(Material2);
 		}
 
 		{
 			// MESH
 			std::shared_ptr<graphics::CMesh> Mesh0 = std::make_shared<graphics::CMesh>();
 			std::shared_ptr<graphics::CMesh> Mesh1 = std::make_shared<graphics::CMesh>();
+			std::shared_ptr<graphics::CMesh> Mesh2 = std::make_shared<graphics::CMesh>();
 
 			{
 				std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(nullptr, 0, graphics::EPresetPrimitiveType::BOARD);
@@ -172,16 +186,22 @@ namespace scene
 				Mesh1->AddPrimitive(Primitive);
 				m_TestObject->AddMesh(Mesh1);
 			}
+			
+			{
+				std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(nullptr, 0, graphics::EPresetPrimitiveType::BOARD);
+				Mesh2->AddPrimitive(Primitive);
+				m_OffScreenRenderObj->AddMesh(Mesh2);
+			}
 
 			// NODE
-			/*{
+			{
 				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(0, m_TestObject->GetMeshList(), m_TestObject->GetMaterialList());
 				Node->SetMeshIndex(0);
-				Node->SetPos(glm::vec3(0.0f, -1.0f, -0.25f));
-				Node->SetRot(glm::vec3(90.0f, 0.0f, 45.0f));
+				Node->SetPos(glm::vec3(0.0f, -1.0f, 0.0f));
+				Node->SetRot(glm::vec3(0.0f, 0.0f, 45.0f));
 				Node->SetScale(glm::vec3(1.0f, 0.1f, 1.0f) * 5.0f);
 				m_TestObject->AddNode(Node);
-			}*/
+			}
 
 			{
 				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(1, m_TestObject->GetMeshList(), m_TestObject->GetMaterialList());
@@ -199,6 +219,15 @@ namespace scene
 				Node->SetRot(glm::vec3(0.0f, -45.0f, 0.0f));
 				Node->SetScale(glm::vec3(1.0f, 1.0f, 1.0f) * 5.0f);
 				m_TestObject->AddNode(Node);
+			}
+			
+			{
+				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(0, m_OffScreenRenderObj->GetMeshList(), m_OffScreenRenderObj->GetMaterialList());
+				Node->SetMeshIndex(0);
+				Node->SetPos(glm::vec3(0.0f, 0.0f, 0.0f));
+				Node->SetRot(glm::vec3(0.0f, 0.0f, 0.0f));
+				Node->SetScale(glm::vec3(1.0f, 1.0f, 1.0f) * 5.0f);
+				m_OffScreenRenderObj->AddNode(Node);
 			}
 		}
 
@@ -219,6 +248,9 @@ namespace scene
 
 		// Create関数群を実行
 		if (!m_TestObject->Create(pGraphicsAPI)) return false;
+
+		//
+		if (!m_OffScreenRenderObj->Create(pGraphicsAPI)) return false;
 
 		// テストのglTFをインポート
 		{
@@ -277,6 +309,11 @@ namespace scene
 		if (m_IsLoaded && m_Helmet_glTFObj)
 		{
 			if (!m_Helmet_glTFObj->Draw()) return false;
+		}
+		
+		if (m_IsLoaded && m_OffScreenRenderObj)
+		{
+			if (!m_OffScreenRenderObj->Draw()) return false;
 		}
 		
 		return true;

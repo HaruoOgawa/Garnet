@@ -16,7 +16,7 @@ namespace graphics
 		m_NumOfChannels(1),
 		m_UseMipMap(UseMipMap),
 		m_HasMipData(false),
-		m_MipCount(0.0f),
+		m_MipCount(1.0f),
 		m_TextureType(ETextureType::TEXTURE_2D)
 	{
 	}
