@@ -31,7 +31,6 @@ namespace api
 		m_Queue(nullptr),
 		m_Encoder(nullptr),
 		m_CommandBuffer(nullptr),
-		m_NextTexture(nullptr),
 		m_SwapChain(nullptr),
 		m_SwapChainFormat(WGPUTextureFormat_Undefined),
 		m_SwapChainDepthTexture(nullptr),
@@ -117,6 +116,23 @@ namespace api
 		return true;
 	}
 
+	bool CWebGPUAPI::PrepareRender()
+	{
+		// コマンドエンコーダーを生成
+		// (コマンドバッファの生成に必要なもの)
+		WGPUCommandEncoderDescriptor encoderDesc = {};
+		encoderDesc.nextInChain = nullptr;
+		encoderDesc.label = "Command Encoder";
+		m_Encoder = wgpuDeviceCreateCommandEncoder(m_Device, &encoderDesc);
+		if (!m_Encoder)
+		{
+			Console::Log("Failed to Create Encorder\n");
+			return false;
+		}
+
+		return true;
+	}
+
 	bool CWebGPUAPI::BeginRender(const std::string& PassName)
 	{
 		// レンダーパスを切り替える
@@ -124,14 +140,18 @@ namespace api
 		if (OffScreenRenderPass != m_OffScreenRenderPassMap.end())
 		{
 			m_pWebGPURenderPass = static_cast<CWebGPURenderPass*>(OffScreenRenderPass->second.get());
+
+			if (!m_pWebGPURenderPass->BeginRenderPass()) return false;
+
 			m_CurrentRenderPass = m_pWebGPURenderPass->GetRenderPass();
 		}
 		else
 		{
 			m_pWebGPURenderPass = nullptr;
-			m_CurrentRenderPass = m_SwapChainRenderPass;
 
 			if (!BeginRenderPass()) return false;
+
+			m_CurrentRenderPass = m_SwapChainRenderPass;
 		}
 
 		return true;
@@ -155,6 +175,28 @@ namespace api
 			// デフォルトレンダーパス
 			if (!EndRenderPass()) return false;
 		}
+
+		return true;
+	}
+
+	bool CWebGPUAPI::SubmitRender()
+	{
+		// コマンドバッファを生成
+		WGPUCommandBufferDescriptor cmdBufferDesc = {};
+		cmdBufferDesc.nextInChain = nullptr;
+		cmdBufferDesc.label = "Command Buffer";
+		m_CommandBuffer = wgpuCommandEncoderFinish(m_Encoder, &cmdBufferDesc);
+		if (!m_CommandBuffer)
+		{
+			Console::Log("Failed to Create CommandBuffer\n");
+			return false;
+		}
+
+		// コマンドの実行
+		wgpuQueueSubmit(m_Queue, 1, &m_CommandBuffer);
+
+		// スワップチェーンに描画結果を送る
+		wgpuSwapChainPresent(m_SwapChain);
 
 		return true;
 	}
@@ -474,8 +516,8 @@ namespace api
 	bool CWebGPUAPI::BeginRenderPass()
 	{
 		// スワップチェーンから次の待機中テクスチャを取得
-		m_NextTexture = wgpuSwapChainGetCurrentTextureView(m_SwapChain);
-		if (!m_NextTexture)
+		WGPUTextureView NextTexture = wgpuSwapChainGetCurrentTextureView(m_SwapChain);
+		if (!NextTexture)
 		{
 			Console::Log("Not Exist nextTexture\n");
 			return false;
@@ -483,7 +525,7 @@ namespace api
 
 		// レンダーパスの設定
 		WGPURenderPassColorAttachment renderPassColorAttachment = {};
-		renderPassColorAttachment.view = m_NextTexture; // レンダリングの描画先テクスチャを指定
+		renderPassColorAttachment.view = NextTexture; // レンダリングの描画先テクスチャを指定
 		renderPassColorAttachment.resolveTarget = nullptr; // マルチサンプリングの設定
 		renderPassColorAttachment.loadOp = WGPULoadOp_Clear; // レンダー パスを実行する前にビューで実行するロード操作を示します。例えばクリア値に初期化するだったり
 		renderPassColorAttachment.storeOp = WGPUStoreOp_Store; // レンダリング実行後の操作
@@ -514,18 +556,6 @@ namespace api
 		renderPassDesc.timestampWrites = nullptr; // レンダリングの同期用のオブジェクト領域
 		renderPassDesc.nextInChain = nullptr; // 拡張機
 
-		// コマンドエンコーダーを生成
-		// (コマンドバッファの生成に必要なもの)
-		WGPUCommandEncoderDescriptor encoderDesc = {};
-		encoderDesc.nextInChain = nullptr;
-		encoderDesc.label = "Command Encoder";
-		m_Encoder = wgpuDeviceCreateCommandEncoder(m_Device, &encoderDesc);
-		if (!m_Encoder)
-		{
-			Console::Log("Failed to Create Encorder\n");
-			return false;
-		}
-
 		// レンダーパス開始
 		m_SwapChainRenderPass = wgpuCommandEncoderBeginRenderPass(m_Encoder, &renderPassDesc);
 
@@ -536,27 +566,6 @@ namespace api
 	{
 		// レンダーパス終了
 		wgpuRenderPassEncoderEnd(m_SwapChainRenderPass);
-
-		//
-#ifdef __EMSCRIPTEN__
-		//wgpuTextureViewDrop(m_NextTexture);
-#endif // __EMSCRIPTEN__
-
-		// コマンドバッファを生成
-		WGPUCommandBufferDescriptor cmdBufferDesc = {};
-		cmdBufferDesc.nextInChain = nullptr;
-		cmdBufferDesc.label = "Command Buffer";
-		m_CommandBuffer = wgpuCommandEncoderFinish(m_Encoder, &cmdBufferDesc);
-		if (!m_CommandBuffer)
-		{
-			Console::Log("Failed to Create CommandBuffer\n");
-			return false;
-		}
-		// コマンドの実行
-		wgpuQueueSubmit(m_Queue, 1, &m_CommandBuffer);
-
-		// スワップチェーンに描画結果を送る
-		wgpuSwapChainPresent(m_SwapChain);
 
 		return true;
 	}

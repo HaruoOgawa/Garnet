@@ -17,10 +17,7 @@ namespace api
 
 		m_RenderPass(nullptr),
 		m_DepthTexture(nullptr),
-		m_DepthTextureView(nullptr),
-
-		m_Encoder(nullptr),
-		m_CommandBuffer(nullptr)
+		m_DepthTextureView(nullptr)
 	{
 	}
 
@@ -78,20 +75,8 @@ namespace api
 		renderPassDesc.timestampWrites = nullptr; // レンダリングの同期用のオブジェクト領域
 		renderPassDesc.nextInChain = nullptr; // 拡張機
 
-		// コマンドエンコーダーを生成
-		// (コマンドバッファの生成に必要なもの)
-		WGPUCommandEncoderDescriptor encoderDesc = {};
-		encoderDesc.nextInChain = nullptr;
-		encoderDesc.label = "Command Encoder";
-		m_Encoder = wgpuDeviceCreateCommandEncoder(m_pGraphicsAPI->GetLogicalDevice(), &encoderDesc);
-		if (!m_Encoder)
-		{
-			Console::Log("Failed to Create Encorder\n");
-			return false;
-		}
-
 		// レンダーパス開始
-		m_RenderPass = wgpuCommandEncoderBeginRenderPass(m_Encoder, &renderPassDesc);
+		m_RenderPass = wgpuCommandEncoderBeginRenderPass(m_pGraphicsAPI->GetEncoder(), &renderPassDesc);
 
 		return true;
 	}
@@ -100,24 +85,6 @@ namespace api
 	{
 		// レンダーパス終了
 		wgpuRenderPassEncoderEnd(m_RenderPass);
-
-		//
-#ifdef __EMSCRIPTEN__
-		//wgpuTextureViewDrop(m_NextTexture);
-#endif // __EMSCRIPTEN__
-
-		// コマンドバッファを生成
-		WGPUCommandBufferDescriptor cmdBufferDesc = {};
-		cmdBufferDesc.nextInChain = nullptr;
-		cmdBufferDesc.label = "Command Buffer";
-		m_CommandBuffer = wgpuCommandEncoderFinish(m_Encoder, &cmdBufferDesc);
-		if (!m_CommandBuffer)
-		{
-			Console::Log("Failed to Create CommandBuffer\n");
-			return false;
-		}
-		// コマンドの実行
-		wgpuQueueSubmit(m_pGraphicsAPI->GetQueue(), 1, &m_CommandBuffer);
 
 		return true;
 	}
@@ -140,7 +107,7 @@ namespace api
 		depthTextureDesc.mipLevelCount = 1;
 		depthTextureDesc.sampleCount = 1;
 		depthTextureDesc.size = { static_cast<uint32_t>(m_Width), static_cast<uint32_t>(m_Height), 1 };
-		depthTextureDesc.usage = WGPUTextureUsage_RenderAttachment;
+		depthTextureDesc.usage = WGPUTextureUsage_RenderAttachment | WGPUTextureUsage_TextureBinding;
 		depthTextureDesc.viewFormatCount = 1;
 		depthTextureDesc.viewFormats = &depthTextureFormat;
 		m_DepthTexture = wgpuDeviceCreateTexture(m_pGraphicsAPI->GetLogicalDevice(), &depthTextureDesc);

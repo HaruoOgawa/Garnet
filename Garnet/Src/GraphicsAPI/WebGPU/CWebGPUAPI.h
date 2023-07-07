@@ -36,7 +36,6 @@ namespace api
 		WGPUCommandBuffer m_CommandBuffer;
 
 		// SwapChain
-		WGPUTextureView m_NextTexture;
 		WGPUSwapChain m_SwapChain;
 		WGPUTextureFormat m_SwapChainFormat;
 
@@ -87,17 +86,27 @@ namespace api
 
 		virtual bool Resize(int Width, int Height) override;
 
+		virtual bool PrepareRender() override;
 		virtual bool BeginRender(const std::string& PassName = "") override;
 		virtual bool EndRender() override;
+		virtual bool SubmitRender() override;
 
 		virtual const std::string& GetShaderExtension() const override;
 
 		virtual const std::map<std::string, std::shared_ptr<graphics::IRenderPass>>& GetOffScreenRenderPassMap() const override;
 
+		WGPUCommandEncoder GetEncoder() { return m_Encoder; }
+		WGPUCommandBuffer GetCommandBuffer() { return m_CommandBuffer; }
+
+		WGPUTextureView GetSwapChainDepthTextureView() { return m_SwapChainDepthTextureView; }
+
+		// SwapChain
+		WGPUSwapChain GetSwapChain() { return m_SwapChain; }
+		WGPUTextureFormat GetSwapChainFormat() const;
+
 		//
 		WGPUDevice GetLogicalDevice() const;
 		WGPUQueue GetQueue() const;
-		WGPUTextureFormat GetSwapChainFormat() const;
 		WGPURenderPassEncoder GetCurrentRenderPass() const;
 
 		// 縮小も同時に行い、元のテクスチャを別のテクスチャにコピー

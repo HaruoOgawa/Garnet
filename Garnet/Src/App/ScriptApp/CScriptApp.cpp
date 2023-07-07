@@ -85,6 +85,8 @@ namespace app
 
 	bool CScriptApp::Draw(api::IGraphicsAPI* pGraphicsAPI)
 	{
+		if (!pGraphicsAPI->PrepareRender()) return false;
+		
 		// "Test"
 		if (!pGraphicsAPI->BeginRender("Test")) return false;
 		if (!m_ScriptScene->DrawTest(pGraphicsAPI)) return false;
@@ -94,6 +96,8 @@ namespace app
 		if (!pGraphicsAPI->BeginRender()) return false;
 		if (!m_ScriptScene->Draw(pGraphicsAPI)) return false;
 		if (!pGraphicsAPI->EndRender()) return false;
+
+		if (!pGraphicsAPI->SubmitRender()) return false;
 
 		return true;
 	}

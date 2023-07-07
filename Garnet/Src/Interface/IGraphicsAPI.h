@@ -46,8 +46,10 @@ namespace api
 
 		virtual bool Resize(int Width, int Height) = 0;
 
+		virtual bool PrepareRender() = 0;
 		virtual bool BeginRender(const std::string& PassName = "") = 0;
 		virtual bool EndRender() = 0;
+		virtual bool SubmitRender() = 0;
 
 		virtual const std::string& GetShaderExtension() const = 0;
 		virtual const std::map<std::string, std::shared_ptr<graphics::IRenderPass>>& GetOffScreenRenderPassMap() const = 0;

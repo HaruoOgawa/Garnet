@@ -35,10 +35,6 @@ namespace api
 		// DepthTexture
 		WGPUTexture		m_DepthTexture;
 		WGPUTextureView m_DepthTextureView;
-
-		// Queue, Command
-		WGPUCommandEncoder m_Encoder;
-		WGPUCommandBuffer m_CommandBuffer;
 	private:
 		bool CreateDepthTexture();
 	public:
