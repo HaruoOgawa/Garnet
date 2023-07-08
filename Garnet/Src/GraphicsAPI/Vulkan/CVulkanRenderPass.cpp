@@ -12,6 +12,8 @@ namespace api
 		m_pGraphicsAPI(pGraphicsAPI),
 		
 		m_PassName(PassName),
+		m_Width(0),
+		m_Height(0),
 		m_RenderPassFormat(RenderPassFormat),
 		m_FrameTexture(nullptr),
 		
@@ -76,6 +78,9 @@ namespace api
 
 	bool CVulkanRenderPass::Create(int Width, int Height)
 	{
+		m_Width = Width;
+		m_Height = Height;
+
 		m_FrameTexture = std::make_shared<CVulkanTexture>(m_pGraphicsAPI, false);
 		if (!m_FrameTexture->CreateFrameTexture(Width, Height, m_RenderPassFormat)) return false;
 
@@ -218,7 +223,7 @@ namespace api
 		renderPassInfo.renderPass = m_RenderPass;
 		renderPassInfo.framebuffer = m_FrameBuffer;
 		renderPassInfo.renderArea.offset = { 0, 0 };
-		renderPassInfo.renderArea.extent = {static_cast<unsigned int>(m_pGraphicsAPI->GetWidth()), static_cast<unsigned int>(m_pGraphicsAPI->GetHeight())};
+		renderPassInfo.renderArea.extent = {static_cast<unsigned int>(m_Width), static_cast<unsigned int>(m_Height)};
 
 		std::array<VkClearValue, 2> clearValues{};
 		clearValues[0].color = { {0.0f, 0.0f, 0.0f, 1.0f} };
@@ -233,15 +238,15 @@ namespace api
 		VkViewport viewport{};
 		viewport.x = 0.0f;
 		viewport.y = 0.0f;
-		viewport.width = static_cast<float>(m_pGraphicsAPI->GetWidth());
-		viewport.height = static_cast<float>(m_pGraphicsAPI->GetHeight());
+		viewport.width = static_cast<float>(m_Width);
+		viewport.height = static_cast<float>(m_Height);
 		viewport.minDepth = 0.0f;
 		viewport.maxDepth = 1.0f;
 		vkCmdSetViewport(m_CommandBuffer, 0, 1, &viewport); // ビューポート再設定用のコマンドを発行
 
 		VkRect2D scissor{};
 		scissor.offset = { 0, 0 };
-		scissor.extent = { static_cast<unsigned int>(m_pGraphicsAPI->GetWidth()), static_cast<unsigned int>(m_pGraphicsAPI->GetHeight()) };
+		scissor.extent = { static_cast<unsigned int>(m_Width), static_cast<unsigned int>(m_Height) };
 		vkCmdSetScissor(m_CommandBuffer, 0, 1, &scissor); // シザーの再設定用のコマンドを発行
 
 		return true;

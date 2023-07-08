@@ -128,6 +128,9 @@ namespace api
 
 	bool CVulkanAPI::Resize(int Width, int Height)
 	{
+		m_Width = Width;
+		m_Height = Height;
+
 		return true;
 	}
 

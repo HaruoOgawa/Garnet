@@ -29,6 +29,8 @@ namespace api
 
 		// Base Param
 		std::string m_PassName;
+		int m_Width;
+		int m_Height;
 		api::ERenderPassFormat m_RenderPassFormat;
 		std::shared_ptr<CVulkanTexture> m_FrameTexture;
 
