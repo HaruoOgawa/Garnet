@@ -17,6 +17,7 @@ namespace api
 		WGPUTextureView m_TextureImageView;
 		WGPUSampler		m_TextureSampler;
 	private:
+		bool CreateFrameTextureImageView(api::ERenderPassFormat RenderPassFormat);
 		bool CreateTextureImageView(const std::vector<unsigned char>& OriginalPixels, int pixelSize);
 		bool CreateTextureSampler();
 

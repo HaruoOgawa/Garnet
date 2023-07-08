@@ -51,20 +51,20 @@ namespace api
 		bool EndRecordCommandBuffer();
 
 		bool CreateRenderPass();
-		bool CreateDepthResources();
-		bool CreateFrameBuffer();
+		bool CreateDepthResources(int Width, int Height);
+		bool CreateFrameBuffer(int Width, int Height);
 
 		bool CreateCommandPool();
 		bool CreateCommandBuffer();
 	public:
-		CVulkanRenderPass(api::CVulkanAPI* pGraphicsAPI, const std::string& PassName, int Width, int Height, ERenderPassFormat RenderPassFormat);
+		CVulkanRenderPass(api::CVulkanAPI* pGraphicsAPI, const std::string& PassName, ERenderPassFormat RenderPassFormat);
 		virtual ~CVulkanRenderPass();
 
 		virtual std::shared_ptr<graphics::CTexture> GetFrameTexture() override;
 		VkRenderPass GetRenderPass() const { return m_RenderPass; }
 		VkCommandBuffer GetCommandBuffer() const { return m_CommandBuffer; }
 
-		bool Create();
+		bool Create(int Width, int Height) override;
 
 		virtual bool BeginRenderPass() override;
 		virtual bool EndRenderPass() override;

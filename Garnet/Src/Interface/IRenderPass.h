@@ -9,6 +9,8 @@ namespace graphics
 	class IRenderPass
 	{
 	public:
+		virtual bool Create(int Width, int Height) = 0;
+		
 		virtual std::shared_ptr<CTexture> GetFrameTexture() = 0;
 
 		virtual bool BeginRenderPass() = 0;

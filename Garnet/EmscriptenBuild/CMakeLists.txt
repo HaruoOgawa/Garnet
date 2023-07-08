@@ -52,7 +52,6 @@ add_executable(
 	../src/Graphics/CUniformBuffer.h
 	../src/Graphics/CUniformBufferDescriptor.cpp
 	../src/Graphics/CUniformBufferDescriptor.h
-	../src/Graphics/ERenderPassType.h
 	../src/Graphics/ETextureType.h
 	../src/Graphics/SBindingLayout.h
 	../src/Graphics/STextureBindingLayout.h
@@ -60,8 +59,11 @@ add_executable(
 	../src/GraphicsAPI/CMaterialCreateInfo.h
 	../src/GraphicsAPI/CRendererCreateInfo.cpp
 	../src/GraphicsAPI/CRendererCreateInfo.h
+	../src/GraphicsAPI/ERenderPassFormat.h
 	../src/GraphicsAPI/Vulkan/CVulkanMaterial.cpp
 	../src/GraphicsAPI/Vulkan/CVulkanMaterial.h
+	../src/GraphicsAPI/Vulkan/CVulkanRenderPass.cpp
+	../src/GraphicsAPI/Vulkan/CVulkanRenderPass.h
 	../src/GraphicsAPI/Vulkan/CVulkanTexture.cpp
 	../src/GraphicsAPI/Vulkan/CVulkanTexture.h
 	../src/GraphicsAPI/WebGPU/CWebGPUAPI.cpp
@@ -70,6 +72,8 @@ add_executable(
 	../src/GraphicsAPI/WebGPU/CWebGPUMaterial.h
 	../src/GraphicsAPI/WebGPU/CWebGPURenderer.cpp
 	../src/GraphicsAPI/WebGPU/CWebGPURenderer.h
+	../src/GraphicsAPI/WebGPU/CWebGPURenderPass.cpp
+	../src/GraphicsAPI/WebGPU/CWebGPURenderPass.h
 	../src/GraphicsAPI/WebGPU/CWebGPUTexture.cpp
 	../src/GraphicsAPI/WebGPU/CWebGPUTexture.h
 	../src/Input/CInputState.cpp
@@ -79,6 +83,7 @@ add_executable(
 	../src/Interface/IDescriptor.h
 	../src/Interface/IGraphicsAPI.h
 	../src/Interface/IRenderer.h
+	../src/Interface/IRenderPass.h
 	../src/Main/DemoMain/DemoMain.cpp
 	../src/Main/WebMain/WebMain.cpp
 	../src/Math/CMath.h

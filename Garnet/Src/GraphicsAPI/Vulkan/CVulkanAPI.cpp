@@ -95,10 +95,10 @@ namespace api
 		vkDestroyInstance(m_Instance, nullptr);
 	}
 
-	bool CVulkanAPI::CreateRenderPass(const std::string& PassName, int Width, int Height, ERenderPassFormat RenderPassFormat)
+	bool CVulkanAPI::CreateRenderPass(const std::string& PassName, ERenderPassFormat RenderPassFormat)
 	{
-		std::shared_ptr<CVulkanRenderPass> RenderPass = std::make_shared<CVulkanRenderPass>(this, PassName, Width, Height, RenderPassFormat);
-		if (!RenderPass->Create()) return false;
+		std::shared_ptr<CVulkanRenderPass> RenderPass = std::make_shared<CVulkanRenderPass>(this, PassName, RenderPassFormat);
+		if (!RenderPass->Create(m_Width, m_Height)) return false;
 
 		m_OffScreenRenderPassMap.insert({ PassName, RenderPass });
 
@@ -128,6 +128,9 @@ namespace api
 
 	bool CVulkanAPI::Resize(int Width, int Height)
 	{
+		m_Width = Width;
+		m_Height = Height;
+
 		return true;
 	}
 
@@ -167,13 +170,18 @@ namespace api
 		return true;
 	}
 
+	bool CVulkanAPI::PrepareRender()
+	{
+		return true;
+	}
+
 	bool CVulkanAPI::BeginRender(const std::string& PassName)
 	{
 		// レンダーパスを切り替える
-		const auto& Pass = m_OffScreenRenderPassMap.find(PassName);
-		if (Pass != m_OffScreenRenderPassMap.end())
+		const auto& OffScreenRenderPass = m_OffScreenRenderPassMap.find(PassName);
+		if (OffScreenRenderPass != m_OffScreenRenderPassMap.end())
 		{
-			m_pCurrentVulkanRenderPass = static_cast<CVulkanRenderPass*>(Pass->second.get());
+			m_pCurrentVulkanRenderPass = static_cast<CVulkanRenderPass*>(OffScreenRenderPass->second.get());
 			m_CurrentRenderPass = m_pCurrentVulkanRenderPass->GetRenderPass();
 
 			// 記録スタート
@@ -212,6 +220,11 @@ namespace api
 		return true;
 	}
 
+	bool CVulkanAPI::SubmitRender()
+	{
+		return true;
+	}
+
 	bool CVulkanAPI::SubmitCommandNoSemaphore()
 	{
 		// コマンドバッファの送信
@@ -232,6 +245,16 @@ namespace api
 	const std::string& CVulkanAPI::GetShaderExtension() const
 	{
 		return m_ShaderExtension;
+	}
+
+	int CVulkanAPI::GetWidth() const
+	{
+		return m_Width;
+	}
+
+	int CVulkanAPI::GetHeight() const
+	{
+		return m_Height;
 	}
 
 	const std::map<std::string, std::shared_ptr<graphics::IRenderPass>>& CVulkanAPI::GetOffScreenRenderPassMap() const

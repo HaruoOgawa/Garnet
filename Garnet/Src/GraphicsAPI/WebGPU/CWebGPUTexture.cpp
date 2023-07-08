@@ -17,6 +17,12 @@ namespace api
 
 	bool CWebGPUTexture::CreateFrameTexture(int Width, int Height, api::ERenderPassFormat RenderPassFormat)
 	{
+		m_Width = Width;
+		m_Height = Height;
+
+		if (!CreateFrameTextureImageView(RenderPassFormat)) return false; // Samplerを生成
+		if (!CreateTextureSampler()) return false; // Samplerを生成
+
 		return true;
 	}
 
@@ -38,6 +44,41 @@ namespace api
 	const WGPUSampler& CWebGPUTexture::GetTextureSampler() const
 	{
 		return m_TextureSampler;
+	}
+
+	bool CWebGPUTexture::CreateFrameTextureImageView(api::ERenderPassFormat RenderPassFormat)
+	{
+		// レンダーパスに使用するTextureViewのフォーマットはWGPUTextureFormat_BGRA8Unormのみ対応している. RGBAの順番じゃないことに要注意!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		// https://eliemichel.github.io/LearnWebGPU/getting-started/first-color.html#:~:text=WGPUTextureFormat_BGRA8Unorm
+		WGPUTextureFormat textureFormat = WGPUTextureFormat_BGRA8Unorm;
+
+		// Textureを生成
+		WGPUTextureDescriptor textureDesc{};
+		textureDesc.nextInChain = nullptr;
+		textureDesc.dimension = WGPUTextureDimension_2D;
+		textureDesc.format = textureFormat;
+		textureDesc.mipLevelCount = 1;
+		textureDesc.sampleCount = 1;
+		textureDesc.size = { static_cast<unsigned int>(m_Width), static_cast<unsigned int>(m_Height), 1 };
+		textureDesc.usage = WGPUTextureUsage_RenderAttachment | WGPUTextureUsage_TextureBinding;
+		textureDesc.viewFormatCount = 0;
+		textureDesc.viewFormats = nullptr;
+		WGPUTexture texture = wgpuDeviceCreateTexture(m_pGraphicsAPI->GetLogicalDevice(), &textureDesc);
+
+		// TextureViewを生成
+		WGPUTextureViewDescriptor textureViewDesc{};
+		textureViewDesc.nextInChain = nullptr;
+		textureViewDesc.aspect = WGPUTextureAspect_All;
+		textureViewDesc.baseArrayLayer = 0;
+		textureViewDesc.arrayLayerCount = 1;
+		textureViewDesc.baseMipLevel = 0;
+		textureViewDesc.mipLevelCount = 1;
+		textureViewDesc.dimension = WGPUTextureViewDimension_2D;
+		textureViewDesc.format = textureFormat;
+
+		m_TextureImageView = wgpuTextureCreateView(texture, &textureViewDesc);
+
+		return true;
 	}
 
 	bool CWebGPUTexture::CreateTextureImageView(const std::vector<unsigned char>& OriginalPixels, int pixelSize)
