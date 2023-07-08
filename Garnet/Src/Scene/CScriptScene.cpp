@@ -8,8 +8,6 @@
 namespace scene
 {
 	CScriptScene::CScriptScene():
-		m_OffScreenRenderObj(std::make_shared<object::C3DObject>()),
-
 		m_TestObject(std::make_shared<object::C3DObject>("Test")),
 		m_VertexShader(std::make_shared<file::CFileReader>()),
 		m_FragmentShader(std::make_shared<file::CFileReader>()),
@@ -29,6 +27,10 @@ namespace scene
 		m_Cube3(std::make_shared<file::CFileReader>()),
 		m_Cube4(std::make_shared<file::CFileReader>()),
 		m_Cube5(std::make_shared<file::CFileReader>()),
+
+		m_DepthDebugObj(std::make_shared<object::C3DObject>()),
+		m_ShadowVertex(std::make_shared<file::CFileReader>()),
+		m_ShadowFragment(std::make_shared<file::CFileReader>()),
 
 		m_IsLoaded(false)
 	{
@@ -51,6 +53,9 @@ namespace scene
 		
 		m_glTFVert->ReadFile(ShaderPath + "gltfpbr_vert" + pGraphicsAPI->GetShaderExtension());
 		m_glTFFrag->ReadFile(ShaderPath + "gltfpbr_frag" + pGraphicsAPI->GetShaderExtension());
+		
+		m_ShadowVertex->ReadFile(ShaderPath + "shadow_vert" + pGraphicsAPI->GetShaderExtension());
+		m_ShadowFragment->ReadFile(ShaderPath + "shadow_frag" + pGraphicsAPI->GetShaderExtension());
 		
 		// Texture
 		std::string TexturePath = "Resources\\Textures\\";
@@ -80,6 +85,7 @@ namespace scene
 
 	bool CScriptScene::Load(api::IGraphicsAPI* pGraphicsAPI)
 	{
+		// TestObj
 		{
 			// MATERIAL
 			std::shared_ptr<graphics::CMaterialCreateInfo> createInfo = std::make_shared<graphics::CMaterialCreateInfo>();
@@ -87,57 +93,24 @@ namespace scene
 			createInfo->SetFragmentShaderCode(m_FragmentShader->GetData());
 			auto Material0 = pGraphicsAPI->CreateMaterial();
 			auto Material1 = pGraphicsAPI->CreateMaterial();
-			auto Material2 = pGraphicsAPI->CreateMaterial();
 
 			// UBO, TEXTURE
 			{
 				auto UniformBuffer = graphics::CMaterialCreateInfo::CreateUniformBuffer({0, 1});
 
-				{
-					glm::mat4 mat = glm::mat4(1.0f);
-					UniformBuffer->AddData("model", &mat[0][0], sizeof(mat), 0);
-				}
-
-				{
-					glm::mat4 mat = glm::mat4(1.0f);
-					UniformBuffer->AddData("view", &mat[0][0], sizeof(mat), 0);
-				}
-
-				{
-					glm::mat4 mat = glm::mat4(1.0f);
-					UniformBuffer->AddData("proj", &mat[0][0], sizeof(mat), 0);
-				}
-
-				{
-					glm::mat4 mat = glm::mat4(1.0f);
-					UniformBuffer->AddData("mvp", &mat[0][0], sizeof(mat), 0);
-				}
-
-				{
-					glm::vec4 val = glm::vec4(1.0f);
-					UniformBuffer->AddData("MulColor", &val[0], sizeof(val), 1);
-				}
-
-				{
-					glm::vec4 val = glm::vec4(0.0f);
-					UniformBuffer->AddData("val0", &val[0], sizeof(val), 1);
-				}
-
-				{
-					glm::vec4 val = glm::vec4(0.0f);
-					UniformBuffer->AddData("val1", &val[0], sizeof(val), 1);
-				}
-
-				{
-					glm::vec4 val = glm::vec4(0.0f);
-					UniformBuffer->AddData("val2", &val[0], sizeof(val), 1);
-				}
+				UniformBuffer->AddData("model", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
+				UniformBuffer->AddData("view", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
+				UniformBuffer->AddData("proj", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
+				UniformBuffer->AddData("mvp", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
+				UniformBuffer->AddData("MulColor", &glm::vec4(1.0f)[0], sizeof(glm::vec4), 1);
+				UniformBuffer->AddData("val0", &glm::vec4(0.0f)[0], sizeof(glm::vec4), 1);
+				UniformBuffer->AddData("val1", &glm::vec4(0.0f)[0], sizeof(glm::vec4), 1);
+				UniformBuffer->AddData("val2", &glm::vec4(0.0f)[0], sizeof(glm::vec4), 1);
 
 				UniformBuffer->RecalculateBindingLayoutOffset();
 
 				Material0->AddUniformBuffer(UniformBuffer);
 				Material1->AddUniformBuffer(UniformBuffer);
-				Material2->AddUniformBuffer(UniformBuffer);
 			}
 
 			{
@@ -150,47 +123,32 @@ namespace scene
 				Material0->AddTextureBindingLayout({ 2, 3, 0, graphics::ETextureType::TEXTURE_2D });
 				Material1->AddTextureBindingLayout({ 2, 3, 1, graphics::ETextureType::TEXTURE_2D });
 
-				Material2->AddTextureBindingLayout({ 2, 3, 0, graphics::ETextureType::TEXTURE_2D });
-				
 				m_TestObject->AddTexture(APITex0);
 				m_TestObject->AddTexture(APITex1);
-
-				m_OffScreenRenderObj->AddTexture(m_FrameTextureList[0]);
 			}
 			
 			// CREATE MATERIAL
 			Material0->SetCreateInfo(createInfo);
 			Material1->SetCreateInfo(createInfo);
-			Material2->SetCreateInfo(createInfo);
-
+			
 			m_TestObject->AddMaterial(Material0);
 			m_TestObject->AddMaterial(Material1);
 
-			m_OffScreenRenderObj->AddMaterial(Material2);
-		}
-
-		{
 			// MESH
 			std::shared_ptr<graphics::CMesh> Mesh0 = std::make_shared<graphics::CMesh>();
 			std::shared_ptr<graphics::CMesh> Mesh1 = std::make_shared<graphics::CMesh>();
-			std::shared_ptr<graphics::CMesh> Mesh2 = std::make_shared<graphics::CMesh>();
+			
 
 			{
 				std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(nullptr, 0, graphics::EPresetPrimitiveType::BOARD);
 				Mesh0->AddPrimitive(Primitive);
 				m_TestObject->AddMesh(Mesh0);
 			}
-			
+
 			{
 				std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(nullptr, 1, graphics::EPresetPrimitiveType::BOARD);
 				Mesh1->AddPrimitive(Primitive);
 				m_TestObject->AddMesh(Mesh1);
-			}
-			
-			{
-				std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(nullptr, 0, graphics::EPresetPrimitiveType::BOARD);
-				Mesh2->AddPrimitive(Primitive);
-				m_OffScreenRenderObj->AddMesh(Mesh2);
 			}
 
 			// NODE
@@ -220,15 +178,44 @@ namespace scene
 				Node->SetScale(glm::vec3(1.0f, 1.0f, 1.0f) * 5.0f);
 				m_TestObject->AddNode(Node);
 			}
+
+			// Create関数を実行
+			if (!m_TestObject->Create(pGraphicsAPI)) return false;
+		}
+
+		// DepthDebug
+		{
+			std::shared_ptr<graphics::CMaterialCreateInfo> createInfo = std::make_shared<graphics::CMaterialCreateInfo>();
+			createInfo->SetVertexShaderCode(m_ShadowVertex->GetData());
+			createInfo->SetFragmentShaderCode(m_ShadowFragment->GetData());
 			
-			{
-				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(0, m_OffScreenRenderObj->GetMeshList(), m_OffScreenRenderObj->GetMaterialList());
-				Node->SetMeshIndex(0);
-				Node->SetPos(glm::vec3(0.0f, 0.0f, 0.0f));
-				Node->SetRot(glm::vec3(0.0f, 0.0f, 0.0f));
-				Node->SetScale(glm::vec3(1.0f, 1.0f, 1.0f) * 5.0f);
-				m_OffScreenRenderObj->AddNode(Node);
-			}
+			auto UniformBuffer = graphics::CMaterialCreateInfo::CreateUniformBuffer({ 0 });
+			UniformBuffer->AddData("model", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
+			UniformBuffer->AddData("view", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
+			UniformBuffer->AddData("proj", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
+
+			auto Material = pGraphicsAPI->CreateMaterial();
+			Material->SetCreateInfo(createInfo);
+			Material->AddUniformBuffer(UniformBuffer);
+			Material->AddTextureBindingLayout({ 1, 2, 0, graphics::ETextureType::TEXTURE_2D });
+
+			std::shared_ptr<graphics::CMesh> Mesh = std::make_shared<graphics::CMesh>();
+			std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(nullptr, 0, graphics::EPresetPrimitiveType::BOARD);
+			Mesh->AddPrimitive(Primitive);
+
+			m_DepthDebugObj->AddTexture(m_FrameTextureList[0]);
+			m_DepthDebugObj->AddMaterial(Material);
+			m_DepthDebugObj->AddMesh(Mesh);
+
+			std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(0, m_DepthDebugObj->GetMeshList(), m_DepthDebugObj->GetMaterialList());
+			Node->SetMeshIndex(0);
+			Node->SetPos(glm::vec3(0.0f, 0.0f, 0.0f));
+			Node->SetRot(glm::vec3(0.0f, 0.0f, 0.0f));
+			Node->SetScale(glm::vec3(1.0f, 1.0f, 1.0f) * 5.0f);
+
+			m_DepthDebugObj->AddNode(Node);
+
+			if (!m_DepthDebugObj->Create(pGraphicsAPI)) return false;
 		}
 
 		// Cubemap
@@ -245,12 +232,6 @@ namespace scene
 
 		std::vector<std::shared_ptr<graphics::CTexture>> CubeTexList;
 		CubeTexList.push_back(CubeTex0);
-
-		// Create関数群を実行
-		if (!m_TestObject->Create(pGraphicsAPI)) return false;
-
-		//
-		if (!m_OffScreenRenderObj->Create(pGraphicsAPI)) return false;
 
 		// テストのglTFをインポート
 		{
@@ -274,9 +255,9 @@ namespace scene
 			if (!m_TestObject->Update(SecondsTime, Camera, Projection, DrawInfo)) return false;
 		}
 		
-		if (m_IsLoaded && m_OffScreenRenderObj)
+		if (m_IsLoaded && m_DepthDebugObj)
 		{
-			if (!m_OffScreenRenderObj->Update(SecondsTime, Camera, Projection, DrawInfo)) return false;
+			if (!m_DepthDebugObj->Update(SecondsTime, Camera, Projection, DrawInfo)) return false;
 		}
 		
 		if (m_IsLoaded && m_Sphere_glTFObj)
@@ -292,7 +273,7 @@ namespace scene
 		if (!m_IsLoaded)
 		{
 			if (m_VertexShader->IsLoaded() && m_FragmentShader->IsLoaded() && m_Texture0->IsLoaded() && m_Texture1->IsLoaded() && m_Sphere_glTFData->IsLoaded() && m_Helmet_glTFData->IsLoaded()
-				&& m_glTFVert->IsLoaded() && m_glTFFrag->IsLoaded()
+				&& m_glTFVert->IsLoaded() && m_glTFFrag->IsLoaded()&& m_ShadowVertex->IsLoaded() && m_ShadowFragment->IsLoaded()
 				&& m_Cube0->IsLoaded() && m_Cube1->IsLoaded() && m_Cube2->IsLoaded() && m_Cube3->IsLoaded() && m_Cube4->IsLoaded() && m_Cube5->IsLoaded() 
 			)
 			{
@@ -316,9 +297,9 @@ namespace scene
 			if (!m_Helmet_glTFObj->Draw()) return false;
 		}
 		
-		if (m_IsLoaded && m_OffScreenRenderObj)
+		if (m_IsLoaded && m_DepthDebugObj)
 		{
-			if (!m_OffScreenRenderObj->Draw()) return false;
+			if (!m_DepthDebugObj->Draw()) return false;
 		}
 		
 		return true;

@@ -180,50 +180,15 @@ namespace gltf
 				auto UniformBuffer = graphics::CMaterialCreateInfo::CreateUniformBuffer({ 0 });
 
 				// UBO‚Ì‰Šú’l‚ðÝ’è‚·‚é
+				UniformBuffer->AddData("model", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
+				UniformBuffer->AddData("view", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
+				UniformBuffer->AddData("proj", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
+				UniformBuffer->AddData("lightDir", &glm::vec4(0.0f)[0], sizeof(float) * 4, 0);
+				UniformBuffer->AddData("lightColor", &glm::vec4(0.0f)[0], sizeof(float) * 4, 0);
+				UniformBuffer->AddData("cameraPos", &glm::vec4(0.0f)[0], sizeof(float) * 4, 0);
+				UniformBuffer->AddData("baseColorFactor", &glm::vec4(baseColorFactor[0], baseColorFactor[1], baseColorFactor[2], baseColorFactor[3])[0], sizeof(float) * 4, 0);
+				UniformBuffer->AddData("emissiveFactor", &glm::vec4(emissiveFactor[0], emissiveFactor[1], emissiveFactor[2], 0.0f)[0], sizeof(float) * 4, 0);
 
-				// mat4
-				{
-					glm::mat4 mat = glm::mat4(1.0f);
-					UniformBuffer->AddData("model", &mat[0][0], sizeof(mat), 0);
-				}
-
-				{
-					glm::mat4 mat = glm::mat4(1.0f);
-					UniformBuffer->AddData("view", &mat[0][0], sizeof(mat), 0);
-				}
-
-				{
-					glm::mat4 mat = glm::mat4(1.0f);
-					UniformBuffer->AddData("proj", &mat[0][0], sizeof(mat), 0);
-				}
-
-				// Vec4
-				{
-					glm::vec4 data = glm::vec4(0.0f);
-					UniformBuffer->AddData("lightDir", &data[0], sizeof(float) * 4, 0);
-				}
-				
-				{
-					glm::vec4 data = glm::vec4(0.0f);
-					UniformBuffer->AddData("lightColor", &data[0], sizeof(float) * 4, 0);
-				}
-				
-				{
-					glm::vec4 data = glm::vec4(0.0f);
-					UniformBuffer->AddData("cameraPos", &data[0], sizeof(float) * 4, 0);
-				}
-				
-				{
-					glm::vec4 data = glm::vec4(baseColorFactor[0], baseColorFactor[1], baseColorFactor[2], baseColorFactor[3]);
-					UniformBuffer->AddData("baseColorFactor", &data[0], sizeof(float) * 4, 0);
-				}
-				
-				{
-					glm::vec4 data = glm::vec4(emissiveFactor[0], emissiveFactor[1], emissiveFactor[2], 0.0f);
-					UniformBuffer->AddData("emissiveFactor", &data[0], sizeof(float) * 4, 0);
-				}
-
-				// Scaler
 				{
 					float val = 0.0f;
 					UniformBuffer->AddData("time", &val, sizeof(float), 0);
@@ -232,10 +197,8 @@ namespace gltf
 					UniformBuffer->AddData("normalMapScale", &normalMapScale, sizeof(float), 0);
 
 					UniformBuffer->AddData("occlusionStrength", &occlusionStrength, sizeof(float), 0);
-
 					float mipCount = CubeTexList[0]->GetMipCount();
 					UniformBuffer->AddData("mipCount", &mipCount, sizeof(float), 0);
-					
 					UniformBuffer->AddData("s_pad1", &val, sizeof(float), 0);
 					UniformBuffer->AddData("s_pad2", &val, sizeof(float), 0);
 				}

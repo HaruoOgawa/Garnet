@@ -51,20 +51,25 @@ namespace api
 		// レンダーパスに使用するカラーバッファのTextureViewフォーマットはWGPUTextureFormat_BGRA8Unormのみ対応している. RGBAの順番じゃないことに要注意!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 		// https://eliemichel.github.io/LearnWebGPU/getting-started/first-color.html#:~:text=WGPUTextureFormat_BGRA8Unorm
 		WGPUTextureFormat textureFormat = WGPUTextureFormat_Undefined;
+		WGPUTextureAspect aspect;
 
 		switch (RenderPassFormat)
 		{
 		case api::ERenderPassFormat::COLOR_RENDERPASS:
 			textureFormat = WGPUTextureFormat_BGRA8Unorm;
+			aspect = WGPUTextureAspect_All;
 			break;
 		case api::ERenderPassFormat::DEPTH_RENDERPASS:
 			textureFormat = WGPUTextureFormat_Depth24Plus;
+			aspect = WGPUTextureAspect_DepthOnly;
 			break;
 		case api::ERenderPassFormat::COLOR_FLOAT_RENDERPASS:
 			textureFormat = WGPUTextureFormat_BGRA8Unorm;
+			aspect = WGPUTextureAspect_All;
 			break;
 		case api::ERenderPassFormat::DEPTH_FLOAT_RENDERPASS:
 			textureFormat = WGPUTextureFormat_Depth24Plus;
+			aspect = WGPUTextureAspect_DepthOnly;
 			break;
 		default:
 			textureFormat = WGPUTextureFormat_BGRA8Unorm;
@@ -87,7 +92,7 @@ namespace api
 		// TextureViewを生成
 		WGPUTextureViewDescriptor textureViewDesc{};
 		textureViewDesc.nextInChain = nullptr;
-		textureViewDesc.aspect = WGPUTextureAspect_All;
+		textureViewDesc.aspect = aspect;
 		textureViewDesc.baseArrayLayer = 0;
 		textureViewDesc.arrayLayerCount = 1;
 		textureViewDesc.baseMipLevel = 0;

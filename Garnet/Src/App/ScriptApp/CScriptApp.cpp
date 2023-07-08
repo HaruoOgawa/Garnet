@@ -29,7 +29,6 @@ namespace app
 		m_DrawInfo(std::make_shared<graphics::CDrawInfo>())
 	{
 		m_MainCamera->SetPos(glm::vec3(0.0f, 0.0f, 5.0f));
-		m_Projection->SetNear(0.001f);
 	}
 
 	CScriptApp::~CScriptApp()
@@ -58,7 +57,7 @@ namespace app
 		// FrameTexture‚ð“n‚·
 		for (const auto& RenderPass : pGraphicsAPI->GetOffScreenRenderPassMap())
 		{
-			m_ScriptScene->SetFrameTexture(RenderPass.second->GetFrameTexture());
+			m_ScriptScene->SetFrameTexture(RenderPass.second->GetDepthTexture());
 		}
 
 		return true;

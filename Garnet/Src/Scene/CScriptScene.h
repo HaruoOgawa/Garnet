@@ -17,9 +17,6 @@ namespace scene
 {
 	class CScriptScene
 	{
-		//
-		std::shared_ptr<object::C3DObject> m_OffScreenRenderObj;
-
 		// Tex of FrameBuffer
 		std::vector<std::shared_ptr<graphics::CTexture>> m_FrameTextureList;
 
@@ -48,6 +45,12 @@ namespace scene
 		std::shared_ptr<file::CFileReader> m_Cube4;
 		std::shared_ptr<file::CFileReader> m_Cube5;
 
+		// ShadowMapping
+		std::shared_ptr<object::C3DObject> m_DepthDebugObj;
+		std::shared_ptr<file::CFileReader> m_ShadowVertex;
+		std::shared_ptr<file::CFileReader> m_ShadowFragment;
+
+		//
 		bool m_IsLoaded;
 	private:
 		bool Load(api::IGraphicsAPI* pGraphicsAPI);

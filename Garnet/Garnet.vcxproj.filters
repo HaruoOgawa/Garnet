@@ -1648,6 +1648,8 @@
     <None Include="Resources\Shaders\sample_vert.wgsl" />
     <None Include="Resources\Shaders\gltfpbr.vert" />
     <None Include="Resources\Shaders\gltfpbr.frag" />
+    <None Include="Resources\Shaders\shadow.vert" />
+    <None Include="Resources\Shaders\shadow.frag" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="EmscriptenBuild\CMakeLists.txt" />
