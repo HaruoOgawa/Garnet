@@ -274,6 +274,11 @@ namespace scene
 			if (!m_TestObject->Update(SecondsTime, Camera, Projection, DrawInfo)) return false;
 		}
 		
+		if (m_IsLoaded && m_OffScreenRenderObj)
+		{
+			if (!m_OffScreenRenderObj->Update(SecondsTime, Camera, Projection, DrawInfo)) return false;
+		}
+		
 		if (m_IsLoaded && m_Sphere_glTFObj)
 		{
 			if (!m_Sphere_glTFObj->Update(SecondsTime, Camera, Projection, DrawInfo)) return false;
