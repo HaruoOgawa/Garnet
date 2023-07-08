@@ -26,20 +26,16 @@ namespace api
 		std::string m_PassName;
 		api::ERenderPassFormat m_RenderPassFormat;
 		std::shared_ptr<CWebGPUTexture> m_FrameTexture;
+		std::shared_ptr<CWebGPUTexture> m_DepthTexture;
 
 		// RenderPass
 		WGPURenderPassEncoder m_RenderPass;
-
-		// DepthTexture
-		WGPUTexture		m_DepthTexture;
-		WGPUTextureView m_DepthTextureView;
-	private:
-		bool CreateDepthTexture(int Width, int Height);
 	public:
 		CWebGPURenderPass(api::CWebGPUAPI* pGraphicsAPI, const std::string& PassName, ERenderPassFormat RenderPassFormat);
 		virtual ~CWebGPURenderPass();
 
 		virtual std::shared_ptr<graphics::CTexture> GetFrameTexture() override;
+		virtual std::shared_ptr<graphics::CTexture> GetDepthTexture() override;
 		WGPURenderPassEncoder GetRenderPass() const { return m_RenderPass; }
 
 		virtual bool Create(int Width, int Height) override;

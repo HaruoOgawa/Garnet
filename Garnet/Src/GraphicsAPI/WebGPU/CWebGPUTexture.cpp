@@ -48,9 +48,28 @@ namespace api
 
 	bool CWebGPUTexture::CreateFrameTextureImageView(api::ERenderPassFormat RenderPassFormat)
 	{
-		// レンダーパスに使用するTextureViewのフォーマットはWGPUTextureFormat_BGRA8Unormのみ対応している. RGBAの順番じゃないことに要注意!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		// レンダーパスに使用するカラーバッファのTextureViewフォーマットはWGPUTextureFormat_BGRA8Unormのみ対応している. RGBAの順番じゃないことに要注意!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 		// https://eliemichel.github.io/LearnWebGPU/getting-started/first-color.html#:~:text=WGPUTextureFormat_BGRA8Unorm
-		WGPUTextureFormat textureFormat = WGPUTextureFormat_BGRA8Unorm;
+		WGPUTextureFormat textureFormat = WGPUTextureFormat_Undefined;
+
+		switch (RenderPassFormat)
+		{
+		case api::ERenderPassFormat::COLOR_RENDERPASS:
+			textureFormat = WGPUTextureFormat_BGRA8Unorm;
+			break;
+		case api::ERenderPassFormat::DEPTH_RENDERPASS:
+			textureFormat = WGPUTextureFormat_Depth24Plus;
+			break;
+		case api::ERenderPassFormat::COLOR_FLOAT_RENDERPASS:
+			textureFormat = WGPUTextureFormat_BGRA8Unorm;
+			break;
+		case api::ERenderPassFormat::DEPTH_FLOAT_RENDERPASS:
+			textureFormat = WGPUTextureFormat_Depth24Plus;
+			break;
+		default:
+			textureFormat = WGPUTextureFormat_BGRA8Unorm;
+			break;
+		}
 
 		// Textureを生成
 		WGPUTextureDescriptor textureDesc{};

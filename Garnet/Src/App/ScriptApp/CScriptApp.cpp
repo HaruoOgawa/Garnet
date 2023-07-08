@@ -53,7 +53,7 @@ namespace app
 		if (!m_ScriptScene->Initialize(pGraphicsAPI)) return false;
 
 		// オフスクリーンレンダリング用のFrameBufferを生成する
-		if (!pGraphicsAPI->CreateRenderPass("Test", api::ERenderPassFormat::COLOR_DEPTH_RENDERPASS)) return false;
+		if (!pGraphicsAPI->CreateRenderPass("Test", api::ERenderPassFormat::COLOR_RENDERPASS)) return false;
 
 		// FrameTextureを渡す
 		for (const auto& RenderPass : pGraphicsAPI->GetOffScreenRenderPassMap())
