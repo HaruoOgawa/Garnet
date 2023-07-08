@@ -79,7 +79,7 @@ namespace api
 
 		void Release();
 
-		virtual bool CreateRenderPass(const std::string& PassName, int Width, int Height, ERenderPassFormat RenderPassFormat) override;
+		virtual bool CreateRenderPass(const std::string& PassName, ERenderPassFormat RenderPassFormat) override;
 		virtual std::shared_ptr<renderer::IRenderer> CreateRenderer(const std::string& PassName) override;
 		virtual std::shared_ptr<graphics::CMaterial> CreateMaterial() override;
 		virtual std::shared_ptr<graphics::CTexture> CreateTexture(bool UseMipMap = false) override;
@@ -92,7 +92,9 @@ namespace api
 		virtual bool SubmitRender() override;
 
 		virtual const std::string& GetShaderExtension() const override;
-
+		virtual int GetWidth() const override;
+		virtual int GetHeight() const override;
+		
 		virtual const std::map<std::string, std::shared_ptr<graphics::IRenderPass>>& GetOffScreenRenderPassMap() const override;
 
 		WGPUCommandEncoder GetEncoder() { return m_Encoder; }

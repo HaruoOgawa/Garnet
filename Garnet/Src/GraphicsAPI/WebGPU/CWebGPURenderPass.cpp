@@ -6,12 +6,10 @@
 
 namespace api
 {
-	CWebGPURenderPass::CWebGPURenderPass(api::CWebGPUAPI* pGraphicsAPI, const std::string& PassName, int Width, int Height, ERenderPassFormat RenderPassFormat):
+	CWebGPURenderPass::CWebGPURenderPass(api::CWebGPUAPI* pGraphicsAPI, const std::string& PassName, ERenderPassFormat RenderPassFormat):
 		m_pGraphicsAPI(pGraphicsAPI),
 		
 		m_PassName(PassName),
-		m_Width(Width),
-		m_Height(Height),
 		m_RenderPassFormat(RenderPassFormat),
 		m_FrameTexture(nullptr),
 
@@ -30,12 +28,12 @@ namespace api
 		return m_FrameTexture;
 	}
 
-	bool CWebGPURenderPass::Create()
+	bool CWebGPURenderPass::Create(int Width, int Height)
 	{
 		m_FrameTexture = std::make_shared<CWebGPUTexture>(m_pGraphicsAPI, false);
-		if (!m_FrameTexture->CreateFrameTexture(m_Width, m_Height, m_RenderPassFormat)) return false;
+		if (!m_FrameTexture->CreateFrameTexture(Width, Height, m_RenderPassFormat)) return false;
 
-		if (!CreateDepthTexture()) return false; // デプステクスチャを生成
+		if (!CreateDepthTexture(Width, Height)) return false; // デプステクスチャを生成
 
 		return true;
 	}
@@ -89,7 +87,7 @@ namespace api
 		return true;
 	}
 
-	bool CWebGPURenderPass::CreateDepthTexture()
+	bool CWebGPURenderPass::CreateDepthTexture(int Width, int Height)
 	{
 		if (m_DepthTexture)
 		{
@@ -106,7 +104,7 @@ namespace api
 		depthTextureDesc.format = depthTextureFormat;
 		depthTextureDesc.mipLevelCount = 1;
 		depthTextureDesc.sampleCount = 1;
-		depthTextureDesc.size = { static_cast<uint32_t>(m_Width), static_cast<uint32_t>(m_Height), 1 };
+		depthTextureDesc.size = { static_cast<uint32_t>(Width), static_cast<uint32_t>(Height), 1 };
 		depthTextureDesc.usage = WGPUTextureUsage_RenderAttachment | WGPUTextureUsage_TextureBinding;
 		depthTextureDesc.viewFormatCount = 1;
 		depthTextureDesc.viewFormats = &depthTextureFormat;

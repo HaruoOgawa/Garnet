@@ -74,10 +74,10 @@ namespace api
 		m_OffScreenRenderPassMap.clear();
 	}
 
-	bool CWebGPUAPI::CreateRenderPass(const std::string& PassName, int Width, int Height, ERenderPassFormat RenderPassFormat)
+	bool CWebGPUAPI::CreateRenderPass(const std::string& PassName, ERenderPassFormat RenderPassFormat)
 	{
-		std::shared_ptr<CWebGPURenderPass> RenderPass = std::make_shared<CWebGPURenderPass>(this, PassName, Width, Height, RenderPassFormat);
-		if (!RenderPass->Create()) return false;
+		std::shared_ptr<CWebGPURenderPass> RenderPass = std::make_shared<CWebGPURenderPass>(this, PassName, RenderPassFormat);
+		if (!RenderPass->Create(m_Width, m_Height)) return false;
 
 		m_OffScreenRenderPassMap.insert({ PassName, RenderPass });
 
@@ -204,6 +204,16 @@ namespace api
 	const std::string& CWebGPUAPI::GetShaderExtension() const
 	{
 		return m_ShaderExtension;
+	}
+
+	int CWebGPUAPI::GetWidth() const
+	{
+		return m_Width;
+	}
+
+	int CWebGPUAPI::GetHeight() const
+	{
+		return m_Width;
 	}
 
 	const std::map<std::string, std::shared_ptr<graphics::IRenderPass>>& CWebGPUAPI::GetOffScreenRenderPassMap() const

@@ -39,7 +39,7 @@ namespace api
 		virtual bool InitializeWithGLFW(GLFWwindow* pWindow) = 0;
 #endif // __EMSCRIPTEN__
 		
-		virtual bool CreateRenderPass(const std::string& PassName, int Width, int Height, ERenderPassFormat RenderPassFormat) = 0;
+		virtual bool CreateRenderPass(const std::string& PassName, ERenderPassFormat RenderPassFormat) = 0;
 		virtual std::shared_ptr<renderer::IRenderer> CreateRenderer(const std::string& PassName) = 0;
 		virtual std::shared_ptr<graphics::CMaterial> CreateMaterial() = 0;
 		virtual std::shared_ptr<graphics::CTexture> CreateTexture(bool UseMipMap = false) = 0;
@@ -52,6 +52,9 @@ namespace api
 		virtual bool SubmitRender() = 0;
 
 		virtual const std::string& GetShaderExtension() const = 0;
+		virtual int GetWidth() const = 0;
+		virtual int GetHeight() const = 0;
+
 		virtual const std::map<std::string, std::shared_ptr<graphics::IRenderPass>>& GetOffScreenRenderPassMap() const = 0;
 	};
 }
