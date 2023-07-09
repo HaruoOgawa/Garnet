@@ -87,12 +87,13 @@ namespace app
 		if (!pGraphicsAPI->PrepareRender()) return false;
 		
 		// "Test"
-		if (!pGraphicsAPI->BeginRender("Test")) return false;
+		/*if (!pGraphicsAPI->BeginRender("Test")) return false;
 		if (!m_ScriptScene->DrawTest(pGraphicsAPI)) return false;
-		if (!pGraphicsAPI->EndRender()) return false;
+		if (!pGraphicsAPI->EndRender()) return false;*/
 		
 		// Default(SwapChain)
 		if (!pGraphicsAPI->BeginRender()) return false;
+		if (!m_ScriptScene->DrawTest(pGraphicsAPI)) return false;
 		if (!m_ScriptScene->Draw(pGraphicsAPI)) return false;
 		if (!pGraphicsAPI->EndRender()) return false;
 

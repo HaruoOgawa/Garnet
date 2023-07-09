@@ -21,29 +21,33 @@ var<private> perVertexStruct: gl_PerVertex = gl_PerVertex(vec4<f32>(0.0, 0.0, 0.
 var<uniform> ubo: UniformBufferObject;
 var<private> inPosition_1: vec3<f32>;
 var<private> fragTexCoord: vec2<f32>;
-var<private> inTexCoord_1: vec2<f32>;
-var<private> inColor_1: vec3<f32>;
+var<private> inTexcoord_1: vec2<f32>;
+var<private> inNormal_1: vec3<f32>;
+var<private> inTangent_1: vec4<f32>;
+var<private> inBioTangent_1: vec4<f32>;
 
 fn main_1() {
-    let _e16 = ubo.proj;
-    let _e18 = ubo.view;
-    let _e21 = ubo.model;
-    let _e23 = inPosition_1;
-    perVertexStruct.gl_Position = (((_e16 * _e18) * _e21) * vec4<f32>(_e23.x, _e23.y, _e23.z, 1.0));
-    let _e30 = inTexCoord_1;
-    fragTexCoord = _e30;
+    let _e18 = ubo.proj;
+    let _e20 = ubo.view;
+    let _e23 = ubo.model;
+    let _e25 = inPosition_1;
+    perVertexStruct.gl_Position = (((_e18 * _e20) * _e23) * vec4<f32>(_e25.x, _e25.y, _e25.z, 1.0));
+    let _e32 = inTexcoord_1;
+    fragTexCoord = _e32;
     return;
 }
 
 @vertex 
-fn main(@location(0) inPosition: vec3<f32>, @location(2) inTexCoord: vec2<f32>, @location(1) inColor: vec3<f32>) -> VertexOutput {
+fn main(@location(0) inPosition: vec3<f32>, @location(2) inTexcoord: vec2<f32>, @location(1) inNormal: vec3<f32>, @location(3) inTangent: vec4<f32>, @location(4) inBioTangent: vec4<f32>) -> VertexOutput {
     inPosition_1 = inPosition;
-    inTexCoord_1 = inTexCoord;
-    inColor_1 = inColor;
+    inTexcoord_1 = inTexcoord;
+    inNormal_1 = inNormal;
+    inTangent_1 = inTangent;
+    inBioTangent_1 = inBioTangent;
     main_1();
-    let _e10 = perVertexStruct.gl_Position.y;
-    perVertexStruct.gl_Position.y = -(_e10);
-    let _e12 = perVertexStruct.gl_Position;
-    let _e13 = fragTexCoord;
-    return VertexOutput(_e12, _e13);
+    let _e14 = perVertexStruct.gl_Position.y;
+    perVertexStruct.gl_Position.y = -(_e14);
+    let _e16 = perVertexStruct.gl_Position;
+    let _e17 = fragTexCoord;
+    return VertexOutput(_e16, _e17);
 }

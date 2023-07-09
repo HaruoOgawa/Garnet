@@ -8,7 +8,7 @@
 namespace scene
 {
 	CScriptScene::CScriptScene():
-		m_TestObject(std::make_shared<object::C3DObject>("Test")),
+		m_TestObject(std::make_shared<object::C3DObject>()),
 		m_VertexShader(std::make_shared<file::CFileReader>()),
 		m_FragmentShader(std::make_shared<file::CFileReader>()),
 		m_Texture0(std::make_shared<file::CFileReader>()),
@@ -85,59 +85,91 @@ namespace scene
 
 	bool CScriptScene::Load(api::IGraphicsAPI* pGraphicsAPI)
 	{
+		// Cubemap
+		std::vector<std::shared_ptr<graphics::CTexture>> CubeTexList;
+		{
+			std::vector<std::vector<unsigned char>> CubeDataList;
+			CubeDataList.push_back(m_Cube0->GetData());
+			CubeDataList.push_back(m_Cube1->GetData());
+			CubeDataList.push_back(m_Cube2->GetData());
+			CubeDataList.push_back(m_Cube3->GetData());
+			CubeDataList.push_back(m_Cube4->GetData());
+			CubeDataList.push_back(m_Cube5->GetData());
+
+			auto CubeTex0 = pGraphicsAPI->CreateTexture(true);
+			if (!CubeTex0->Create(CubeDataList)) return false;
+
+			CubeTexList.push_back(CubeTex0);
+		}
+
 		// TestObj
 		{
 			// MATERIAL
 			std::shared_ptr<graphics::CMaterialCreateInfo> createInfo = std::make_shared<graphics::CMaterialCreateInfo>();
-			createInfo->SetVertexShaderCode(m_VertexShader->GetData());
-			createInfo->SetFragmentShaderCode(m_FragmentShader->GetData());
+			createInfo->SetVertexShaderCode(m_glTFVert->GetData());
+			createInfo->SetFragmentShaderCode(m_glTFFrag->GetData());
 			auto Material0 = pGraphicsAPI->CreateMaterial();
-			auto Material1 = pGraphicsAPI->CreateMaterial();
 
 			// UBO, TEXTURE
 			{
-				auto UniformBuffer = graphics::CMaterialCreateInfo::CreateUniformBuffer({0, 1});
+				auto UniformBuffer = graphics::CMaterialCreateInfo::CreateUniformBuffer({0});
 
 				UniformBuffer->AddData("model", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
 				UniformBuffer->AddData("view", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
 				UniformBuffer->AddData("proj", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
-				UniformBuffer->AddData("mvp", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
-				UniformBuffer->AddData("MulColor", &glm::vec4(1.0f)[0], sizeof(glm::vec4), 1);
-				UniformBuffer->AddData("val0", &glm::vec4(0.0f)[0], sizeof(glm::vec4), 1);
-				UniformBuffer->AddData("val1", &glm::vec4(0.0f)[0], sizeof(glm::vec4), 1);
-				UniformBuffer->AddData("val2", &glm::vec4(0.0f)[0], sizeof(glm::vec4), 1);
+				UniformBuffer->AddData("lightDir", &glm::vec4(0.0f)[0], sizeof(float) * 4, 0);
+				UniformBuffer->AddData("lightColor", &glm::vec4(0.0f)[0], sizeof(float) * 4, 0);
+				UniformBuffer->AddData("cameraPos", &glm::vec4(0.0f)[0], sizeof(float) * 4, 0);
+				UniformBuffer->AddData("baseColorFactor", &glm::vec4(1.0f)[0], sizeof(float) * 4, 0);
+				UniformBuffer->AddData("emissiveFactor", &glm::vec4(0.0f)[0], sizeof(float) * 4, 0);
+
+				UniformBuffer->AddData("time", &glm::vec1(0.0f)[0], sizeof(float), 0);
+				UniformBuffer->AddData("metallicFactor", &glm::vec1(0.5f)[0], sizeof(float), 0);
+				UniformBuffer->AddData("roughnessFactor", &glm::vec1(0.1f)[0], sizeof(float), 0);
+				UniformBuffer->AddData("normalMapScale", &glm::vec1(0.0f)[0], sizeof(float), 0);
+
+				UniformBuffer->AddData("occlusionStrength", &glm::vec1(0.0f)[0], sizeof(float), 0);
+				UniformBuffer->AddData("mipCount", &glm::vec1(CubeTexList[0]->GetMipCount())[0], sizeof(float), 0);
+				UniformBuffer->AddData("s_pad1", &glm::vec1(0.0f)[0], sizeof(float), 0);
+				UniformBuffer->AddData("s_pad2", &glm::vec1(0.0f)[0], sizeof(float), 0);
+
+				UniformBuffer->AddData("useBaseColorTexture", &glm::uvec1(0)[0], sizeof(int), 0);
+				UniformBuffer->AddData("useMetallicRoughnessTexture", &glm::uvec1(0)[0], sizeof(int), 0);
+				UniformBuffer->AddData("useEmissiveTexture", &glm::uvec1(0)[0], sizeof(int), 0);
+				UniformBuffer->AddData("useNormalTexture", &glm::uvec1(0)[0], sizeof(int), 0);
+				
+				UniformBuffer->AddData("useOcclusionTexture", &glm::uvec1(0)[0], sizeof(int), 0);
+				UniformBuffer->AddData("t_pad_0", &glm::uvec1(0)[0], sizeof(int), 0);
+				UniformBuffer->AddData("t_pad_1", &glm::uvec1(0)[0], sizeof(int), 0);
+				UniformBuffer->AddData("t_pad_2", &glm::uvec1(0)[0], sizeof(int), 0);
+				
+				Material0->AddTextureBindingLayout({ 1, 2, 0, graphics::ETextureType::TEXTURE_2D });
+				Material0->AddTextureBindingLayout({ 3, 4, -1, graphics::ETextureType::TEXTURE_2D }); // TextureIndex -1 は EmptyTextureである
+				Material0->AddTextureBindingLayout({ 5, 6, -1, graphics::ETextureType::TEXTURE_2D }); // TextureIndex -1 は EmptyTextureである
+				Material0->AddTextureBindingLayout({ 7, 8, -1, graphics::ETextureType::TEXTURE_2D }); // TextureIndex -1 は EmptyTextureである
+				Material0->AddTextureBindingLayout({ 9, 10, -1, graphics::ETextureType::TEXTURE_2D }); // TextureIndex -1 は EmptyTextureである
+				Material0->AddTextureBindingLayout({ 11, 12, 0, graphics::ETextureType::TEXTURE_CUBE });
 
 				UniformBuffer->RecalculateBindingLayoutOffset();
 
 				Material0->AddUniformBuffer(UniformBuffer);
-				Material1->AddUniformBuffer(UniformBuffer);
 			}
 
 			{
 				auto APITex0 = pGraphicsAPI->CreateTexture();
 				if(!APITex0->Create(m_Texture0->GetData())) return false;
 
-				auto APITex1 = pGraphicsAPI->CreateTexture();
-				if (!APITex1->Create(m_Texture1->GetData())) return false;
-
-				Material0->AddTextureBindingLayout({ 2, 3, 0, graphics::ETextureType::TEXTURE_2D });
-				Material1->AddTextureBindingLayout({ 2, 3, 1, graphics::ETextureType::TEXTURE_2D });
-
 				m_TestObject->AddTexture(APITex0);
-				m_TestObject->AddTexture(APITex1);
+				m_TestObject->AddCubeMap(CubeTexList[0]);
 			}
 			
 			// CREATE MATERIAL
 			Material0->SetCreateInfo(createInfo);
-			Material1->SetCreateInfo(createInfo);
 			
 			m_TestObject->AddMaterial(Material0);
-			m_TestObject->AddMaterial(Material1);
 
 			// MESH
 			std::shared_ptr<graphics::CMesh> Mesh0 = std::make_shared<graphics::CMesh>();
-			std::shared_ptr<graphics::CMesh> Mesh1 = std::make_shared<graphics::CMesh>();
-			
 
 			{
 				std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(nullptr, 0, graphics::EPresetPrimitiveType::BOARD);
@@ -145,37 +177,13 @@ namespace scene
 				m_TestObject->AddMesh(Mesh0);
 			}
 
-			{
-				std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(nullptr, 1, graphics::EPresetPrimitiveType::BOARD);
-				Mesh1->AddPrimitive(Primitive);
-				m_TestObject->AddMesh(Mesh1);
-			}
-
 			// NODE
 			{
 				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(0, m_TestObject->GetMeshList(), m_TestObject->GetMaterialList());
 				Node->SetMeshIndex(0);
 				Node->SetPos(glm::vec3(0.0f, -1.0f, 0.0f));
-				Node->SetRot(glm::vec3(0.0f, 0.0f, 45.0f));
-				Node->SetScale(glm::vec3(1.0f, 0.1f, 1.0f) * 5.0f);
-				m_TestObject->AddNode(Node);
-			}
-
-			{
-				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(1, m_TestObject->GetMeshList(), m_TestObject->GetMaterialList());
-				Node->SetMeshIndex(1);
-				Node->SetPos(glm::vec3(-1.25f, 0.0f, -5.0f));
-				Node->SetRot(glm::vec3(0.0f, 45.0f, 45.0f));
-				Node->SetScale(glm::vec3(1.0f, 1.0f, 1.0f) * 5.0f);
-				m_TestObject->AddNode(Node);
-			}
-
-			{
-				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(0, m_TestObject->GetMeshList(), m_TestObject->GetMaterialList());
-				Node->SetMeshIndex(0);
-				Node->SetPos(glm::vec3(1.5f, 0.0f, -5.0f));
-				Node->SetRot(glm::vec3(0.0f, -45.0f, 0.0f));
-				Node->SetScale(glm::vec3(1.0f, 1.0f, 1.0f) * 5.0f);
+				Node->SetRot(glm::vec3(3.14f * (-0.5f), 0.0f, 0.0f));
+				Node->SetScale(glm::vec3(1.0f, 1.0f, 1.0f) * 50.0f);
 				m_TestObject->AddNode(Node);
 			}
 
@@ -218,21 +226,6 @@ namespace scene
 			if (!m_DepthDebugObj->Create(pGraphicsAPI)) return false;
 		}
 
-		// Cubemap
-		std::vector<std::vector<unsigned char>> CubeDataList;
-		CubeDataList.push_back(m_Cube0->GetData());
-		CubeDataList.push_back(m_Cube1->GetData());
-		CubeDataList.push_back(m_Cube2->GetData());
-		CubeDataList.push_back(m_Cube3->GetData());
-		CubeDataList.push_back(m_Cube4->GetData());
-		CubeDataList.push_back(m_Cube5->GetData());
-
-		auto CubeTex0 = pGraphicsAPI->CreateTexture(true);
-		if (!CubeTex0->Create(CubeDataList)) return false;
-
-		std::vector<std::shared_ptr<graphics::CTexture>> CubeTexList;
-		CubeTexList.push_back(CubeTex0);
-
 		// テストのglTFをインポート
 		{
 			std::shared_ptr<graphics::CMaterialCreateInfo> createInfo = std::make_shared<graphics::CMaterialCreateInfo>();
@@ -250,8 +243,6 @@ namespace scene
 	{
 		if (m_IsLoaded && m_TestObject)
 		{
-			m_TestObject->GetNodeList()[0]->SetRot(glm::vec3(SecondsTime));
-
 			if (!m_TestObject->Update(SecondsTime, Camera, Projection, DrawInfo)) return false;
 		}
 		
@@ -299,7 +290,12 @@ namespace scene
 		
 		if (m_IsLoaded && m_DepthDebugObj)
 		{
-			if (!m_DepthDebugObj->Draw()) return false;
+			//if (!m_DepthDebugObj->Draw()) return false;
+		}
+
+		if (m_IsLoaded && m_TestObject)
+		{
+			if (!m_TestObject->Draw()) return false;
 		}
 		
 		return true;
@@ -307,11 +303,6 @@ namespace scene
 	
 	bool CScriptScene::DrawTest(api::IGraphicsAPI* pGraphicsAPI)
 	{
-		if (m_IsLoaded && m_TestObject)
-		{
-			if (!m_TestObject->Draw()) return false;
-		}
-		
 		return true;
 	}
 

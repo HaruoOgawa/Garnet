@@ -188,20 +188,14 @@ namespace gltf
 				UniformBuffer->AddData("cameraPos", &glm::vec4(0.0f)[0], sizeof(float) * 4, 0);
 				UniformBuffer->AddData("baseColorFactor", &glm::vec4(baseColorFactor[0], baseColorFactor[1], baseColorFactor[2], baseColorFactor[3])[0], sizeof(float) * 4, 0);
 				UniformBuffer->AddData("emissiveFactor", &glm::vec4(emissiveFactor[0], emissiveFactor[1], emissiveFactor[2], 0.0f)[0], sizeof(float) * 4, 0);
-
-				{
-					float val = 0.0f;
-					UniformBuffer->AddData("time", &val, sizeof(float), 0);
-					UniformBuffer->AddData("metallicFactor", &metallicFactor, sizeof(float), 0);
-					UniformBuffer->AddData("roughnessFactor", &roughnessFactor, sizeof(float), 0);
-					UniformBuffer->AddData("normalMapScale", &normalMapScale, sizeof(float), 0);
-
-					UniformBuffer->AddData("occlusionStrength", &occlusionStrength, sizeof(float), 0);
-					float mipCount = CubeTexList[0]->GetMipCount();
-					UniformBuffer->AddData("mipCount", &mipCount, sizeof(float), 0);
-					UniformBuffer->AddData("s_pad1", &val, sizeof(float), 0);
-					UniformBuffer->AddData("s_pad2", &val, sizeof(float), 0);
-				}
+				UniformBuffer->AddData("time", &glm::vec1(0.0f)[0], sizeof(float), 0);
+				UniformBuffer->AddData("metallicFactor", &metallicFactor, sizeof(float), 0);
+				UniformBuffer->AddData("roughnessFactor", &roughnessFactor, sizeof(float), 0);
+				UniformBuffer->AddData("normalMapScale", &normalMapScale, sizeof(float), 0);
+				UniformBuffer->AddData("occlusionStrength", &occlusionStrength, sizeof(float), 0);
+				UniformBuffer->AddData("mipCount", &glm::vec1(CubeTexList[0]->GetMipCount())[0], sizeof(float), 0);
+				UniformBuffer->AddData("s_pad1", &glm::vec1(0.0f)[0], sizeof(float), 0);
+				UniformBuffer->AddData("s_pad2", &glm::vec1(0.0f)[0], sizeof(float), 0);
 
 				// テクスチャを紐づける
 				{
@@ -209,80 +203,60 @@ namespace gltf
 					if (baseColorTextureIndex >= 0 && baseColorTextureIndex < TextureList.size())
 					{
 						material->AddTextureBindingLayout({ 1, 2, baseColorTextureIndex, graphics::ETextureType::TEXTURE_2D });
-
-						int Flag = 1;
-						UniformBuffer->AddData("useBaseColorTexture", &Flag, sizeof(int), 0);
+						UniformBuffer->AddData("useBaseColorTexture", &glm::uvec1(1)[0], sizeof(int), 0);
 					}
 					else
 					{
 						material->AddTextureBindingLayout({ 1, 2, -1, graphics::ETextureType::TEXTURE_2D }); // TextureIndex -1 は EmptyTextureである
-
-						int Flag = 0;
-						UniformBuffer->AddData("useBaseColorTexture", &Flag, sizeof(int), 0);
+						UniformBuffer->AddData("useBaseColorTexture", &glm::uvec1(0)[0], sizeof(int), 0);
 					}
 
 					//
 					if (metallicRoughnessTextureIndex >= 0 && metallicRoughnessTextureIndex < TextureList.size())
 					{
 						material->AddTextureBindingLayout({ 3, 4, metallicRoughnessTextureIndex, graphics::ETextureType::TEXTURE_2D });
-
-						int Flag = 1;
-						UniformBuffer->AddData("useMetallicRoughnessTexture", &Flag, sizeof(int), 0);
+						UniformBuffer->AddData("useMetallicRoughnessTexture", &glm::uvec1(1)[0], sizeof(int), 0);
 					}
 					else
 					{
 						material->AddTextureBindingLayout({ 3, 4, -1, graphics::ETextureType::TEXTURE_2D }); // TextureIndex -1 は EmptyTextureである
-
-						int Flag = 0;
-						UniformBuffer->AddData("useMetallicRoughnessTexture", &Flag, sizeof(int), 0);
+						UniformBuffer->AddData("useMetallicRoughnessTexture", &glm::uvec1(0)[0], sizeof(int), 0);
 					}
 
 					//
 					if (emissiveTextureIndex >= 0 && emissiveTextureIndex < TextureList.size())
 					{
 						material->AddTextureBindingLayout({ 5, 6, emissiveTextureIndex, graphics::ETextureType::TEXTURE_2D });
-
-						int Flag = 1;
-						UniformBuffer->AddData("useEmissiveTexture", &Flag, sizeof(int), 0);
+						UniformBuffer->AddData("useEmissiveTexture", &glm::uvec1(1)[0], sizeof(int), 0);
 					}
 					else
 					{
 						material->AddTextureBindingLayout({ 5, 6, -1, graphics::ETextureType::TEXTURE_2D }); // TextureIndex -1 は EmptyTextureである
-
-						int Flag = 0;
-						UniformBuffer->AddData("useEmissiveTexture", &Flag, sizeof(int), 0);
+						UniformBuffer->AddData("useEmissiveTexture", &glm::uvec1(0)[0], sizeof(int), 0);
 					}
 
 					//
 					if (normalTextureIndex >= 0 && normalTextureIndex < TextureList.size())
 					{
 						material->AddTextureBindingLayout({ 7, 8, normalTextureIndex, graphics::ETextureType::TEXTURE_2D });
-
-						int Flag = 1;
-						UniformBuffer->AddData("useNormalTexture", &Flag, sizeof(int), 0);
+						UniformBuffer->AddData("useNormalTexture", &glm::uvec1(1)[0], sizeof(int), 0);
 					}
 					else
 					{
 						material->AddTextureBindingLayout({ 7, 8, -1, graphics::ETextureType::TEXTURE_2D }); // TextureIndex -1 は EmptyTextureである
-
-						int Flag = 0;
-						UniformBuffer->AddData("useNormalTexture", &Flag, sizeof(int), 0);
+						UniformBuffer->AddData("useNormalTexture", &glm::uvec1(0)[0], sizeof(int), 0);
 					}
 
 					//
 					if (occlusionTextureIndex >= 0 && occlusionTextureIndex < TextureList.size())
 					{
 						material->AddTextureBindingLayout({ 9, 10, occlusionTextureIndex, graphics::ETextureType::TEXTURE_2D });
-
-						int Flag = 1;
-						UniformBuffer->AddData("useOcclusionTexture", &Flag, sizeof(int), 0);
+						UniformBuffer->AddData("useOcclusionTexture", &glm::uvec1(1)[0], sizeof(int), 0);
 					}
 					else
 					{
 						material->AddTextureBindingLayout({ 9, 10, -1, graphics::ETextureType::TEXTURE_2D }); // TextureIndex -1 は EmptyTextureである
-
-						int Flag = 0;
-						UniformBuffer->AddData("useOcclusionTexture", &Flag, sizeof(int), 0);
+						UniformBuffer->AddData("useOcclusionTexture", &glm::uvec1(0)[0], sizeof(int), 0);
 					}
 
 					// CubeMap
