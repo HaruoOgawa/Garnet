@@ -69,6 +69,7 @@ namespace api
 	{
 		m_Width = Width;
 		m_Height = Height;
+		m_RenderPassFormat = RenderPassFormat;
 
 		VkFormat ImageFormat = VK_FORMAT_UNDEFINED;
 		VkImageUsageFlags Usage;
@@ -105,6 +106,7 @@ namespace api
 	bool CVulkanTexture::Create(const std::vector<unsigned char>& pixelData, int pixelSize)
 	{
 		VkFormat ImageFormat = VK_FORMAT_R8G8B8A8_SRGB;
+		m_RenderPassFormat = api::ERenderPassFormat::COLOR_RENDERPASS;
 
 		// Texture Buffer
 		if (!CreateTextureImage(pixelData, pixelSize, ImageFormat)) return false; // テクスチャイメージの生成

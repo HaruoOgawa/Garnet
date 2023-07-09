@@ -10,6 +10,7 @@ namespace graphics
 	{
 	protected:
 		ETextureType m_TextureType;
+		api::ERenderPassFormat m_RenderPassFormat;
 
 		int m_Width;
 		int m_Height;
@@ -25,6 +26,7 @@ namespace graphics
 		virtual ~CTexture();
 
 		ETextureType GetTextureType() const;
+		api::ERenderPassFormat GetRenderPassFormat()const;
 		float GetMipCount() const;
 
 		virtual bool CreateFrameTexture(int Width, int Height, api::ERenderPassFormat RenderPassFormat) = 0;

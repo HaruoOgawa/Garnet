@@ -19,6 +19,7 @@ namespace api
 	{
 		m_Width = Width;
 		m_Height = Height;
+		m_RenderPassFormat = RenderPassFormat;
 
 		if (!CreateFrameTextureImageView(RenderPassFormat)) return false; // Samplerを生成
 		if (!CreateTextureSampler()) return false; // Samplerを生成
@@ -29,6 +30,8 @@ namespace api
 #ifdef USE_TEXTURE_LOADER
 	bool CWebGPUTexture::Create(const std::vector<unsigned char>& OriginalPixels, int pixelSize)
 	{
+		m_RenderPassFormat = api::ERenderPassFormat::COLOR_RENDERPASS;
+
 		if (!CreateTextureImageView(OriginalPixels, pixelSize)) return false; // ImageViewを生成
 		if (!CreateTextureSampler()) return false; // Samplerを生成
 
@@ -51,13 +54,12 @@ namespace api
 		// レンダーパスに使用するカラーバッファのTextureViewフォーマットはWGPUTextureFormat_BGRA8Unormのみ対応している. RGBAの順番じゃないことに要注意!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 		// https://eliemichel.github.io/LearnWebGPU/getting-started/first-color.html#:~:text=WGPUTextureFormat_BGRA8Unorm
 		WGPUTextureFormat textureFormat = WGPUTextureFormat_Undefined;
-		WGPUTextureAspect aspect;
+		WGPUTextureAspect aspect = WGPUTextureAspect_All;
 
 		switch (RenderPassFormat)
 		{
 		case api::ERenderPassFormat::COLOR_RENDERPASS:
 			textureFormat = WGPUTextureFormat_BGRA8Unorm;
-			aspect = WGPUTextureAspect_All;
 			break;
 		case api::ERenderPassFormat::DEPTH_RENDERPASS:
 			textureFormat = WGPUTextureFormat_Depth24Plus;
@@ -65,7 +67,6 @@ namespace api
 			break;
 		case api::ERenderPassFormat::COLOR_FLOAT_RENDERPASS:
 			textureFormat = WGPUTextureFormat_BGRA8Unorm;
-			aspect = WGPUTextureAspect_All;
 			break;
 		case api::ERenderPassFormat::DEPTH_FLOAT_RENDERPASS:
 			textureFormat = WGPUTextureFormat_Depth24Plus;
@@ -108,7 +109,7 @@ namespace api
 	bool CWebGPUTexture::CreateTextureImageView(const std::vector<unsigned char>& OriginalPixels, int pixelSize)
 	{
 		WGPUTextureFormat textureFormat = WGPUTextureFormat_RGBA8Unorm;
-
+		
 		unsigned int TexCount = (m_TextureType == graphics::ETextureType::TEXTURE_CUBE) ? 6 : 1;
 
 		// Textureを生成

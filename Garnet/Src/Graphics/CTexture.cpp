@@ -17,7 +17,8 @@ namespace graphics
 		m_UseMipMap(UseMipMap),
 		m_HasMipData(false),
 		m_MipCount(1.0f),
-		m_TextureType(ETextureType::TEXTURE_2D)
+		m_TextureType(ETextureType::TEXTURE_2D),
+		m_RenderPassFormat(api::ERenderPassFormat::NONE)
 	{
 	}
 
@@ -28,6 +29,11 @@ namespace graphics
 	ETextureType CTexture::GetTextureType() const
 	{
 		return m_TextureType;
+	}
+
+	api::ERenderPassFormat CTexture::GetRenderPassFormat()const
+	{
+		return m_RenderPassFormat;
 	}
 
 	float CTexture::GetMipCount() const
