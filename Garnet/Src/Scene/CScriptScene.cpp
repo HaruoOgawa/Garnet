@@ -60,8 +60,8 @@ namespace scene
 		// Texture
 		std::string TexturePath = "Resources\\Textures\\";
 		
-		m_Texture0->ReadFile(TexturePath + "perlinnoise.png");
-		m_Texture1->ReadFile(TexturePath + "UVTile.jpg");
+		m_Texture0->ReadFile(TexturePath + "brick.jpg");
+		m_Texture1->ReadFile(TexturePath + "brick_norm.jpg");
 
 		// GLTF
 		std::string ModelPath = "Resources\\Models\\";
@@ -124,19 +124,19 @@ namespace scene
 				UniformBuffer->AddData("emissiveFactor", &glm::vec4(0.0f)[0], sizeof(float) * 4, 0);
 
 				UniformBuffer->AddData("time", &glm::vec1(0.0f)[0], sizeof(float), 0);
-				UniformBuffer->AddData("metallicFactor", &glm::vec1(0.5f)[0], sizeof(float), 0);
+				UniformBuffer->AddData("metallicFactor", &glm::vec1(0.1f)[0], sizeof(float), 0);
 				UniformBuffer->AddData("roughnessFactor", &glm::vec1(0.1f)[0], sizeof(float), 0);
-				UniformBuffer->AddData("normalMapScale", &glm::vec1(0.0f)[0], sizeof(float), 0);
+				UniformBuffer->AddData("normalMapScale", &glm::vec1(1.0f)[0], sizeof(float), 0);
 
 				UniformBuffer->AddData("occlusionStrength", &glm::vec1(0.0f)[0], sizeof(float), 0);
 				UniformBuffer->AddData("mipCount", &glm::vec1(CubeTexList[0]->GetMipCount())[0], sizeof(float), 0);
 				UniformBuffer->AddData("s_pad1", &glm::vec1(0.0f)[0], sizeof(float), 0);
 				UniformBuffer->AddData("s_pad2", &glm::vec1(0.0f)[0], sizeof(float), 0);
 
-				UniformBuffer->AddData("useBaseColorTexture", &glm::uvec1(0)[0], sizeof(int), 0);
+				UniformBuffer->AddData("useBaseColorTexture", &glm::uvec1(1)[0], sizeof(int), 0);
 				UniformBuffer->AddData("useMetallicRoughnessTexture", &glm::uvec1(0)[0], sizeof(int), 0);
 				UniformBuffer->AddData("useEmissiveTexture", &glm::uvec1(0)[0], sizeof(int), 0);
-				UniformBuffer->AddData("useNormalTexture", &glm::uvec1(0)[0], sizeof(int), 0);
+				UniformBuffer->AddData("useNormalTexture", &glm::uvec1(1)[0], sizeof(int), 0);
 				
 				UniformBuffer->AddData("useOcclusionTexture", &glm::uvec1(0)[0], sizeof(int), 0);
 				UniformBuffer->AddData("t_pad_0", &glm::uvec1(0)[0], sizeof(int), 0);
@@ -146,7 +146,7 @@ namespace scene
 				Material0->AddTextureBindingLayout({ 1, 2, 0, graphics::ETextureType::TEXTURE_2D });
 				Material0->AddTextureBindingLayout({ 3, 4, -1, graphics::ETextureType::TEXTURE_2D }); // TextureIndex -1 ‚Í EmptyTexture‚Å‚ ‚é
 				Material0->AddTextureBindingLayout({ 5, 6, -1, graphics::ETextureType::TEXTURE_2D }); // TextureIndex -1 ‚Í EmptyTexture‚Å‚ ‚é
-				Material0->AddTextureBindingLayout({ 7, 8, -1, graphics::ETextureType::TEXTURE_2D }); // TextureIndex -1 ‚Í EmptyTexture‚Å‚ ‚é
+				Material0->AddTextureBindingLayout({ 7, 8, 1, graphics::ETextureType::TEXTURE_2D }); // TextureIndex -1 ‚Í EmptyTexture‚Å‚ ‚é
 				Material0->AddTextureBindingLayout({ 9, 10, -1, graphics::ETextureType::TEXTURE_2D }); // TextureIndex -1 ‚Í EmptyTexture‚Å‚ ‚é
 				Material0->AddTextureBindingLayout({ 11, 12, 0, graphics::ETextureType::TEXTURE_CUBE });
 
@@ -183,7 +183,7 @@ namespace scene
 				Node->SetMeshIndex(0);
 				Node->SetPos(glm::vec3(0.0f, -1.0f, 0.0f));
 				Node->SetRot(glm::vec3(3.14f * (-0.5f), 0.0f, 0.0f));
-				Node->SetScale(glm::vec3(1.0f, 1.0f, 1.0f) * 50.0f);
+				Node->SetScale(glm::vec3(1.0f, 1.0f, 1.0f) * 10.0f);
 				m_TestObject->AddNode(Node);
 			}
 
@@ -280,7 +280,7 @@ namespace scene
 	{
 		if (m_IsLoaded && m_Sphere_glTFObj)
 		{
-			if (!m_Sphere_glTFObj->Draw()) return false;
+			//if (!m_Sphere_glTFObj->Draw()) return false;
 		}
 		
 		if (m_IsLoaded && m_Helmet_glTFObj)
