@@ -9,6 +9,7 @@ struct UniformBufferObject {
     model: mat4x4<f32>,
     view: mat4x4<f32>,
     proj: mat4x4<f32>,
+    lightView: mat4x4<f32>,
     lightDir: vec4<f32>,
     lightColor: vec4<f32>,
     cameraPos: vec4<f32>,

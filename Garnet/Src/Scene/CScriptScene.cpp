@@ -8,15 +8,19 @@
 namespace scene
 {
 	CScriptScene::CScriptScene():
-		m_TestObject(std::make_shared<object::C3DObject>()),
+		m_TestObject(std::make_shared<object::C3DObject>("", "ShadowPass")),
+
+		m_DepthVertex(std::make_shared<file::CFileReader>()),
+		m_DepthFragment(std::make_shared<file::CFileReader>()),
+		
 		m_VertexShader(std::make_shared<file::CFileReader>()),
 		m_FragmentShader(std::make_shared<file::CFileReader>()),
 		m_Texture0(std::make_shared<file::CFileReader>()),
 		m_Texture1(std::make_shared<file::CFileReader>()),
 
-		m_Sphere_glTFObj(std::make_shared<object::C3DObject>()),
+		m_Sphere_glTFObj(std::make_shared<object::C3DObject>("", "ShadowPass")),
 		m_Sphere_glTFData(std::make_shared<file::CFileReader>()),
-		m_Helmet_glTFObj(std::make_shared<object::C3DObject>()),
+		m_Helmet_glTFObj(std::make_shared<object::C3DObject>("", "ShadowPass")),
 		m_Helmet_glTFData(std::make_shared<file::CFileReader>()),
 		m_glTFVert(std::make_shared<file::CFileReader>()),
 		m_glTFFrag(std::make_shared<file::CFileReader>()),
@@ -28,7 +32,7 @@ namespace scene
 		m_Cube4(std::make_shared<file::CFileReader>()),
 		m_Cube5(std::make_shared<file::CFileReader>()),
 
-		m_DepthDebugObj(std::make_shared<object::C3DObject>()),
+		m_DepthDebugObj(std::make_shared<object::C3DObject>("", "ShadowPass")),
 		m_ShadowVertex(std::make_shared<file::CFileReader>()),
 		m_ShadowFragment(std::make_shared<file::CFileReader>()),
 
@@ -47,6 +51,9 @@ namespace scene
 	{
 		// Shader
 		std::string ShaderPath = "Resources\\Shaders\\";
+		
+		m_DepthVertex->ReadFile(ShaderPath + "depth_vert" + pGraphicsAPI->GetShaderExtension());
+		m_DepthFragment->ReadFile(ShaderPath + "depth_frag" + pGraphicsAPI->GetShaderExtension());
 		
 		m_VertexShader->ReadFile(ShaderPath + "sample_vert" + pGraphicsAPI->GetShaderExtension());
 		m_FragmentShader->ReadFile(ShaderPath + "sample_frag" + pGraphicsAPI->GetShaderExtension());
@@ -117,6 +124,7 @@ namespace scene
 				UniformBuffer->AddData("model", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
 				UniformBuffer->AddData("view", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
 				UniformBuffer->AddData("proj", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
+				UniformBuffer->AddData("lightView", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
 				UniformBuffer->AddData("lightDir", &glm::vec4(0.0f)[0], sizeof(float) * 4, 0);
 				UniformBuffer->AddData("lightColor", &glm::vec4(0.0f)[0], sizeof(float) * 4, 0);
 				UniformBuffer->AddData("cameraPos", &glm::vec4(0.0f)[0], sizeof(float) * 4, 0);
@@ -188,7 +196,7 @@ namespace scene
 			}
 
 			// Create関数を実行
-			if (!m_TestObject->Create(pGraphicsAPI)) return false;
+			if (!m_TestObject->Create(pGraphicsAPI, m_DepthVertex, m_DepthFragment)) return false;
 		}
 
 		// DepthDebug
@@ -201,6 +209,7 @@ namespace scene
 			UniformBuffer->AddData("model", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
 			UniformBuffer->AddData("view", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
 			UniformBuffer->AddData("proj", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
+			UniformBuffer->AddData("lightView", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
 
 			auto Material = pGraphicsAPI->CreateMaterial();
 			Material->SetCreateInfo(createInfo);
@@ -217,13 +226,13 @@ namespace scene
 
 			std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(0, m_DepthDebugObj->GetMeshList(), m_DepthDebugObj->GetMaterialList());
 			Node->SetMeshIndex(0);
-			Node->SetPos(glm::vec3(0.0f, 0.0f, 0.0f));
+			Node->SetPos(glm::vec3(0.0f, 1.0f, -3.0f));
 			Node->SetRot(glm::vec3(0.0f, 0.0f, 0.0f));
 			Node->SetScale(glm::vec3(1.0f, 1.0f, 1.0f) * 5.0f);
 
 			m_DepthDebugObj->AddNode(Node);
 
-			if (!m_DepthDebugObj->Create(pGraphicsAPI)) return false;
+			if (!m_DepthDebugObj->Create(pGraphicsAPI, m_DepthVertex, m_DepthFragment)) return false;
 		}
 
 		// テストのglTFをインポート
@@ -232,39 +241,39 @@ namespace scene
 			createInfo->SetVertexShaderCode(m_glTFVert->GetData());
 			createInfo->SetFragmentShaderCode(m_glTFFrag->GetData());
 
-			if (!gltf::CGLTFImporter::Import(pGraphicsAPI, m_Sphere_glTFData->GetData(), m_Sphere_glTFObj, createInfo, CubeTexList)) return false;
-			if (!gltf::CGLTFImporter::Import(pGraphicsAPI, m_Helmet_glTFData->GetData(), m_Helmet_glTFObj, createInfo, CubeTexList)) return false;
+			if (!gltf::CGLTFImporter::Import(pGraphicsAPI, m_Sphere_glTFData->GetData(), m_Sphere_glTFObj, createInfo, CubeTexList, m_DepthVertex, m_DepthFragment)) return false;
+			if (!gltf::CGLTFImporter::Import(pGraphicsAPI, m_Helmet_glTFData->GetData(), m_Helmet_glTFObj, createInfo, CubeTexList, m_DepthVertex, m_DepthFragment)) return false;
 		}
 
 		return true;
 	}
 
-	bool CScriptScene::Update(api::IGraphicsAPI* pGraphicsAPI, float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo)
+	bool CScriptScene::Update(api::IGraphicsAPI* pGraphicsAPI)
 	{
 		if (m_IsLoaded && m_TestObject)
 		{
-			if (!m_TestObject->Update(SecondsTime, Camera, Projection, DrawInfo)) return false;
+			if (!m_TestObject->Update()) return false;
 		}
 		
 		if (m_IsLoaded && m_DepthDebugObj)
 		{
-			if (!m_DepthDebugObj->Update(SecondsTime, Camera, Projection, DrawInfo)) return false;
+			if (!m_DepthDebugObj->Update()) return false;
 		}
 		
 		if (m_IsLoaded && m_Sphere_glTFObj)
 		{
-			if (!m_Sphere_glTFObj->Update(SecondsTime, Camera, Projection, DrawInfo)) return false;
+			if (!m_Sphere_glTFObj->Update()) return false;
 		}
 		
 		if (m_IsLoaded && m_Helmet_glTFObj)
 		{
-			if (!m_Helmet_glTFObj->Update(SecondsTime, Camera, Projection, DrawInfo)) return false;
+			if (!m_Helmet_glTFObj->Update()) return false;
 		}
 
 		if (!m_IsLoaded)
 		{
-			if (m_VertexShader->IsLoaded() && m_FragmentShader->IsLoaded() && m_Texture0->IsLoaded() && m_Texture1->IsLoaded() && m_Sphere_glTFData->IsLoaded() && m_Helmet_glTFData->IsLoaded()
-				&& m_glTFVert->IsLoaded() && m_glTFFrag->IsLoaded()&& m_ShadowVertex->IsLoaded() && m_ShadowFragment->IsLoaded()
+			if (m_DepthVertex->IsLoaded() && m_DepthFragment->IsLoaded() &&m_VertexShader->IsLoaded() && m_FragmentShader->IsLoaded() && m_Texture0->IsLoaded() && m_Texture1->IsLoaded()
+				&& m_Sphere_glTFData->IsLoaded() && m_Helmet_glTFData->IsLoaded() && m_glTFVert->IsLoaded() && m_glTFFrag->IsLoaded()&& m_ShadowVertex->IsLoaded() && m_ShadowFragment->IsLoaded()
 				&& m_Cube0->IsLoaded() && m_Cube1->IsLoaded() && m_Cube2->IsLoaded() && m_Cube3->IsLoaded() && m_Cube4->IsLoaded() && m_Cube5->IsLoaded() 
 			)
 			{
@@ -276,33 +285,34 @@ namespace scene
 		return true;
 	}
 
-	bool CScriptScene::Draw(api::IGraphicsAPI* pGraphicsAPI)
+	bool CScriptScene::Draw(api::IGraphicsAPI* pGraphicsAPI, bool IsDepthPass, float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, 
+		const std::shared_ptr<graphics::CDrawInfo>& DrawInfo)
 	{
 		if (m_IsLoaded && m_Sphere_glTFObj)
 		{
-			//if (!m_Sphere_glTFObj->Draw()) return false;
+			//if (!m_Sphere_glTFObj->Draw(IsDepthPass, SecondsTime, Camera, Projection, DrawInfo)) return false;
 		}
 		
 		if (m_IsLoaded && m_Helmet_glTFObj)
 		{
-			if (!m_Helmet_glTFObj->Draw()) return false;
+			if (!m_Helmet_glTFObj->Draw(IsDepthPass, SecondsTime, Camera, Projection, DrawInfo)) return false;
 		}
 		
-		if (m_IsLoaded && m_DepthDebugObj)
-		{
-			//if (!m_DepthDebugObj->Draw()) return false;
-		}
-
 		if (m_IsLoaded && m_TestObject)
 		{
-			if (!m_TestObject->Draw()) return false;
+			if (!m_TestObject->Draw(IsDepthPass, SecondsTime, Camera, Projection, DrawInfo)) return false;
 		}
 		
 		return true;
 	}
 	
-	bool CScriptScene::DrawTest(api::IGraphicsAPI* pGraphicsAPI)
+	bool CScriptScene::DrawDebugObj(api::IGraphicsAPI* pGraphicsAPI, float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo)
 	{
+		if (m_IsLoaded && m_DepthDebugObj)
+		{
+			if (!m_DepthDebugObj->Draw(false, SecondsTime, Camera, Projection, DrawInfo)) return false;
+		}
+
 		return true;
 	}
 

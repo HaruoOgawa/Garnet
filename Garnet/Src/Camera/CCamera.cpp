@@ -22,6 +22,13 @@ namespace camera
 		return vmat;
 	}
 
+	glm::vec3 CCamera::GetViewDir() const
+	{
+		glm::vec3 ViewDir = glm::normalize(m_Center - m_Pos);
+
+		return ViewDir;
+	}
+
 	void CCamera::SetPos(const glm::vec3& Pos)
 	{
 		m_Pos = Pos;

@@ -20,15 +20,15 @@ namespace app
 {
 	CScriptApp::CScriptApp():
 		m_ScriptScene(nullptr),
-#ifdef USE_VIEWER_CAMERA
 		m_MainCamera(std::make_shared<camera::CViewerCamera>()),
-#else
-		m_MainCamera(std::make_shared<camera::CCamera>()),
-#endif // USE_VIEWER_CAMERA
 		m_Projection(std::make_shared<projection::CProjection>()),
+		m_ShadowProjection(std::make_shared<projection::CProjection>()),
 		m_DrawInfo(std::make_shared<graphics::CDrawInfo>())
 	{
 		m_MainCamera->SetPos(glm::vec3(0.0f, 0.0f, 5.0f));
+		m_DrawInfo->GetLightCamera()->SetPos(glm::vec3(3.0f, 3.0f, -3.0f));
+		m_ShadowProjection->SetNear(1.0f);
+		m_ShadowProjection->SetFar(10.0f);
 	}
 
 	CScriptApp::~CScriptApp()
@@ -52,12 +52,12 @@ namespace app
 		if (!m_ScriptScene->Initialize(pGraphicsAPI)) return false;
 
 		// オフスクリーンレンダリング用のFrameBufferを生成する
-		if (!pGraphicsAPI->CreateRenderPass("Test", api::ERenderPassFormat::COLOR_RENDERPASS)) return false;
+		if (!pGraphicsAPI->CreateRenderPass("ShadowPass", api::ERenderPassFormat::COLOR_RENDERPASS)) return false;
 
 		// FrameTextureを渡す
 		for (const auto& RenderPass : pGraphicsAPI->GetOffScreenRenderPassMap())
 		{
-			m_ScriptScene->SetFrameTexture(RenderPass.second->GetDepthTexture());
+			m_ScriptScene->SetFrameTexture(RenderPass.second->GetFrameTexture());
 		}
 
 		return true;
@@ -71,32 +71,35 @@ namespace app
 	bool CScriptApp::Resize(int Width, int Height)
 	{
 		m_Projection->SetAspect(static_cast<float>(Width) / static_cast<float>(Height));
+		m_ShadowProjection->SetAspect(static_cast<float>(Width) / static_cast<float>(Height));
 
 		return true;
 	}
 
 	bool CScriptApp::Update(api::IGraphicsAPI* pGraphicsAPI, float SecondsTime)
 	{
-		if (!m_ScriptScene->Update(pGraphicsAPI, SecondsTime, m_MainCamera, m_Projection, m_DrawInfo)) return false;
+		if (!m_ScriptScene->Update(pGraphicsAPI)) return false;
 
 		return true;
 	}
 
-	bool CScriptApp::Draw(api::IGraphicsAPI* pGraphicsAPI)
+	bool CScriptApp::Draw(api::IGraphicsAPI* pGraphicsAPI, float SecondsTime)
 	{
+		// Prepare
 		if (!pGraphicsAPI->PrepareRender()) return false;
 		
-		// "Test"
-		/*if (!pGraphicsAPI->BeginRender("Test")) return false;
-		if (!m_ScriptScene->DrawTest(pGraphicsAPI)) return false;
-		if (!pGraphicsAPI->EndRender()) return false;*/
+		// ShadowPass
+		if (!pGraphicsAPI->BeginRender("ShadowPass")) return false;
+		if (!m_ScriptScene->Draw(pGraphicsAPI, true, SecondsTime, m_MainCamera, m_ShadowProjection, m_DrawInfo)) return false;
+		if (!pGraphicsAPI->EndRender()) return false;
 		
-		// Default(SwapChain)
+		// DefaultPass(SwapChain)
 		if (!pGraphicsAPI->BeginRender()) return false;
-		if (!m_ScriptScene->DrawTest(pGraphicsAPI)) return false;
-		if (!m_ScriptScene->Draw(pGraphicsAPI)) return false;
+		if (!m_ScriptScene->Draw(pGraphicsAPI, false, SecondsTime, m_MainCamera, m_Projection, m_DrawInfo)) return false;
+		if (!m_ScriptScene->DrawDebugObj(pGraphicsAPI, SecondsTime, m_MainCamera, m_Projection, m_DrawInfo)) return false;
 		if (!pGraphicsAPI->EndRender()) return false;
 
+		// Submit
 		if (!pGraphicsAPI->SubmitRender()) return false;
 
 		return true;

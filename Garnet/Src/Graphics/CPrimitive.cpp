@@ -8,6 +8,7 @@ namespace graphics
 	CPrimitive::CPrimitive(const std::shared_ptr<renderer::CRendererCreateInfo>& createInfo, int MaterialIndex,
 		EPresetPrimitiveType PresetType) :
 		m_Renderer(nullptr),
+		m_DepthRenderer(nullptr),
 		m_CreateInfo(createInfo),
 		m_PresetType(PresetType),
 		m_MaterialIndex(MaterialIndex)
@@ -18,32 +19,43 @@ namespace graphics
 	{
 	}
 
-	bool CPrimitive::Create(api::IGraphicsAPI* pGraphicsAPI, const std::string& PassName, const std::shared_ptr<graphics::CMaterial>& Material)
+	void CPrimitive::Release()
+	{
+		// 生成処理が終わったので不要なリソースを解放する
+		m_CreateInfo = nullptr;
+	}
+
+	bool CPrimitive::Create(api::IGraphicsAPI* pGraphicsAPI, const std::string& PassName, const std::shared_ptr<graphics::CMaterial>& Material, bool IsDepth)
 	{
 		if (m_CreateInfo)
 		{
-			if (!Create(pGraphicsAPI, PassName, Material, m_CreateInfo)) return false;
+			if (!Create(pGraphicsAPI, PassName, Material, m_CreateInfo, IsDepth)) return false;
 		}
 		else
 		{
-			if (!Create(pGraphicsAPI, PassName, Material, m_PresetType)) return false;
+			if (!Create(pGraphicsAPI, PassName, Material, m_PresetType, IsDepth)) return false;
 		}
 
-		// 生成処理が終わったので不要なリソースを解放する
-		m_CreateInfo = nullptr;
-
 		return true;
 	}
 
-	bool CPrimitive::Create(api::IGraphicsAPI* pGraphicsAPI, const std::string& PassName, const std::shared_ptr<CMaterial>& Material, const std::shared_ptr<renderer::CRendererCreateInfo>& createInfo)
+	bool CPrimitive::Create(api::IGraphicsAPI* pGraphicsAPI, const std::string& PassName, const std::shared_ptr<CMaterial>& Material, const std::shared_ptr<renderer::CRendererCreateInfo>& createInfo, bool IsDepth)
 	{
-		m_Renderer = pGraphicsAPI->CreateRenderer(PassName);
-		if (!m_Renderer->Create(createInfo, Material)) return false;
+		if (IsDepth)
+		{
+			m_DepthRenderer = pGraphicsAPI->CreateRenderer(PassName);
+			if (!m_DepthRenderer->Create(createInfo, Material)) return false;
+		}
+		else
+		{
+			m_Renderer = pGraphicsAPI->CreateRenderer(PassName);
+			if (!m_Renderer->Create(createInfo, Material)) return false;
+		}
 
 		return true;
 	}
 
-	bool CPrimitive::Create(api::IGraphicsAPI* pGraphicsAPI, const std::string& PassName, const std::shared_ptr<CMaterial>& Material, EPresetPrimitiveType PresetType)
+	bool CPrimitive::Create(api::IGraphicsAPI* pGraphicsAPI, const std::string& PassName, const std::shared_ptr<CMaterial>& Material, EPresetPrimitiveType PresetType, bool IsDepth)
 	{
 		std::shared_ptr<renderer::CRendererCreateInfo> createInfo = std::make_shared<renderer::CRendererCreateInfo>();
 
@@ -62,16 +74,31 @@ namespace graphics
 			break;
 		}
 
-		m_Renderer = pGraphicsAPI->CreateRenderer(PassName);
-		if (!m_Renderer->Create(createInfo, Material)) return false;
+		if (IsDepth)
+		{
+			m_DepthRenderer = pGraphicsAPI->CreateRenderer(PassName);
+			if (!m_DepthRenderer->Create(createInfo, Material)) return false;
+		}
+		else
+		{
+			m_Renderer = pGraphicsAPI->CreateRenderer(PassName);
+			if (!m_Renderer->Create(createInfo, Material)) return false;
+		}
 
 		return true;
 	}
 
-	bool CPrimitive::Draw(const std::shared_ptr<CMaterial>& Material, int DynamicOffsetNum)
+	bool CPrimitive::Draw(const std::shared_ptr<CMaterial>& Material, int DynamicOffsetNum, bool IsDepth)
 	{
-		if (!m_Renderer->Draw(Material, DynamicOffsetNum)) return false;
-
+		if (IsDepth)
+		{
+			if (!m_DepthRenderer->Draw(Material, DynamicOffsetNum)) return false;
+		}
+		else
+		{
+			if (!m_Renderer->Draw(Material, DynamicOffsetNum)) return false;
+		}
+		
 		return true;
 	}
 

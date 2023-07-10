@@ -1,6 +1,5 @@
 #pragma once
 
-#include "CObject.h"
 #include "CNode.h"
 #include "../Graphics/CMaterial.h"
 #include "../Graphics/CTexture.h"
@@ -12,10 +11,11 @@ namespace object
 {
 	class CNode;
 
-	class C3DObject : public CObject
+	class C3DObject
 	{
 		const std::string m_PassName;
-
+		const std::string m_DepthPassName;
+		
 		std::shared_ptr<math::CTransform> m_ObjectTransform;
 
 		std::vector<std::shared_ptr<CNode>> m_NodeList;
@@ -29,12 +29,13 @@ namespace object
 		void CalcWorldMatrix();
 		void CalcWorldMatrix(std::shared_ptr<CNode>& Node, const glm::mat4& ParentWorldMatrix);
 	public:
-		C3DObject(const std::string& PassName = "");
+		C3DObject(const std::string& PassName, const std::string& DepthPassName);
 		virtual ~C3DObject();
 
-		bool		 Create(api::IGraphicsAPI* pGraphicsAPI);
-		virtual bool Update(float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo) override;
-		virtual bool Draw() override;
+		bool		 Create(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<file::CFileReader>& DepthVertex, const std::shared_ptr<file::CFileReader>& DepthFragment);
+		virtual bool Update();
+		virtual bool Draw(bool IsDepthPass, float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, 
+			const std::shared_ptr<graphics::CDrawInfo>& DrawInfo);
 
 		void AddNode(const std::shared_ptr<CNode>& Node);
 		const std::vector<std::shared_ptr<CNode>>& GetNodeList() const;

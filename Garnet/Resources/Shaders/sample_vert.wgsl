@@ -9,7 +9,7 @@ struct UniformBufferObject {
     model: mat4x4<f32>,
     view: mat4x4<f32>,
     proj: mat4x4<f32>,
-    test: mat4x4<f32>,
+    lightView: mat4x4<f32>,
 }
 
 struct TestBuffer {

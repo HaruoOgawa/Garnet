@@ -13,9 +13,9 @@ layout(binding = 0) uniform UniformBufferObject{
     mat4 lightView;
 } ubo;
 
-layout(location = 0) out vec2 fragTexCoord;
+layout(location = 0) out vec4 fragPos;
 
 void main() {
-    gl_Position = ubo.proj * ubo.view * ubo.model * vec4(inPosition, 1.0);
-    fragTexCoord = inTexcoord;
+    gl_Position = ubo.proj * ubo.lightView * ubo.model * vec4(inPosition, 1.0);
+    fragPos = gl_Position;
 }

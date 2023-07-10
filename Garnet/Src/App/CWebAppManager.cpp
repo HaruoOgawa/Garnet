@@ -130,7 +130,7 @@ namespace webapp
 
 	bool CWebAppManager::Draw()
 	{
-		if (!m_App->Draw(m_GraphicsAPI.get())) return false;
+		if (!m_App->Draw(m_GraphicsAPI.get(), m_SecondsTime)) return false;
 
 		return true;
 	}

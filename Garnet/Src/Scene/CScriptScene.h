@@ -20,6 +20,10 @@ namespace scene
 		// Tex of FrameBuffer
 		std::vector<std::shared_ptr<graphics::CTexture>> m_FrameTextureList;
 
+		// DepthMaterial(LoadWorkerÇ∆MaterialFrameé¿ëïÇ‹Ç≈ÇÕÇ–Ç∆Ç‹Ç∏SceneÇ…èëÇ¢ÇƒÇ®Ç≠ Å® å„ÅXC3DObjectÇ…à⁄çsÇ∑ÇÈ)
+		std::shared_ptr<file::CFileReader> m_DepthVertex;
+		std::shared_ptr<file::CFileReader> m_DepthFragment;
+
 		// Test Obj
 		std::shared_ptr<object::C3DObject> m_TestObject;
 
@@ -61,9 +65,10 @@ namespace scene
 		bool Release(api::IGraphicsAPI* pGraphicsAPI);
 
 		bool Initialize(api::IGraphicsAPI* pGraphicsAPI);
-		bool Update(api::IGraphicsAPI* pGraphicsAPI, float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo);
-		bool Draw(api::IGraphicsAPI* pGraphicsAPI) ;
-		bool DrawTest(api::IGraphicsAPI* pGraphicsAPI);
+		bool Update(api::IGraphicsAPI* pGraphicsAPI);
+		bool Draw(api::IGraphicsAPI* pGraphicsAPI, bool IsDepthPass, float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, 
+			const std::shared_ptr<graphics::CDrawInfo>& DrawInfo) ;
+		bool DrawDebugObj(api::IGraphicsAPI* pGraphicsAPI, float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo);
 
 		// Tex of FrameBuffer
 		void SetFrameTexture(const std::shared_ptr<graphics::CTexture>& FrameTexture);

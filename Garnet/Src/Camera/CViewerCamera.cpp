@@ -18,7 +18,7 @@ namespace camera
 		{
 			float Speed = InputState->GetMouseRotSpeed();
 
-			glm::vec3 ViewDir = glm::normalize(m_Center - m_Pos);
+			const auto& ViewDir = GetViewDir();
 			glm::vec3 RotAxisX = glm::cross(ViewDir, glm::vec3(0.0f, 1.0f, 0.0f));
 			glm::vec3 RotAxisY = glm::cross(ViewDir, RotAxisX);
 

@@ -7,6 +7,7 @@
 #include <map>
 
 #include "../Interface/IGraphicsAPI.h"
+#include "../File/CFileReader.h"
 
 namespace graphics
 {
@@ -39,7 +40,8 @@ namespace gltf
 		static bool RecalculateTangent(std::vector<float>& TangentData, std::vector<float>& BioTangentData, const std::vector<float>& PosotionData, const std::vector<float>& TexcoordData, const std::vector<unsigned short>& Indices);
 	public:
 		static bool Import(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& Data, std::shared_ptr<object::C3DObject>& Object, 
-			std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, const std::vector<std::shared_ptr<graphics::CTexture>>& CubeTexList);
+			std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, const std::vector<std::shared_ptr<graphics::CTexture>>& CubeTexList,
+			const std::shared_ptr<file::CFileReader>& DepthVertex, const std::shared_ptr<file::CFileReader>& DepthFragment);
 	};
 }
 #endif // USE_GLTF

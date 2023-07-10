@@ -1,21 +1,22 @@
 #include "CDrawInfo.h"
+#include "../../Camera/CCamera.h"
 
 namespace graphics
 {
 	CDrawInfo::CDrawInfo() :
-		m_LightDir(glm::vec4(0.0f, 0.5f, 0.5f, 0.0f)),
+		m_LightCamera(std::make_shared<camera::CCamera>()),
 		m_LightColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f))
 	{
 	}
 
-	void CDrawInfo::SetLightDir(const glm::vec4& LightDir)
+	void CDrawInfo::SetLightCamera(const std::shared_ptr<camera::CCamera>& LightCamera)
 	{
-		m_LightDir = LightDir;
+		m_LightCamera = LightCamera;
 	}
 
-	const glm::vec4& CDrawInfo::GetLightDir() const
+	const std::shared_ptr<camera::CCamera>& CDrawInfo::GetLightCamera() const
 	{
-		return m_LightDir;
+		return m_LightCamera;
 	}
 
 	void CDrawInfo::SetLightColor(const glm::vec4& LightColor)
