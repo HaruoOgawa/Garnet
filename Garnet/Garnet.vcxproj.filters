@@ -975,9 +975,6 @@
     <ClInclude Include="Src\Graphics\CUniformBuffer.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Src\Object\CObject.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="Src\Object\C3DObject.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
@@ -1128,9 +1125,6 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Src\Graphics\CUniformBuffer.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Object\CObject.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Src\Object\C3DObject.cpp">
@@ -1648,6 +1642,10 @@
     <None Include="Resources\Shaders\sample_vert.wgsl" />
     <None Include="Resources\Shaders\gltfpbr.vert" />
     <None Include="Resources\Shaders\gltfpbr.frag" />
+    <None Include="Resources\Shaders\shadow.vert" />
+    <None Include="Resources\Shaders\shadow.frag" />
+    <None Include="Resources\Shaders\depth.vert" />
+    <None Include="Resources\Shaders\depth.frag" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="EmscriptenBuild\CMakeLists.txt" />

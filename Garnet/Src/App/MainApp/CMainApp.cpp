@@ -39,7 +39,7 @@ namespace app
 		return true;
 	}
 
-	bool CMainApp::Draw(api::IGraphicsAPI* pGraphicsAPI)
+	bool CMainApp::Draw(api::IGraphicsAPI* pGraphicsAPI, float SecondsTime)
 	{
 		return true;
 	}

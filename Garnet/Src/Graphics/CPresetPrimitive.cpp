@@ -13,11 +13,11 @@ namespace graphics
 			-0.5f, 0.5f, 0.0f
 		};
 
-		std::vector<float> Color = {
-			1.0f, 0.0f, 0.0f,
-			0.0f, 1.0f, 0.0f,
+		std::vector<float> Normal = {
 			0.0f, 0.0f, 1.0f,
-			1.0f, 1.0f, 1.0f
+			0.0f, 0.0f, 1.0f,
+			0.0f, 0.0f, 1.0f,
+			0.0f, 0.0f, 1.0f,
 		};
 
 		std::vector<float> UV = {
@@ -27,8 +27,11 @@ namespace graphics
 			1.0f, 1.0f
 		};
 
+		std::vector<float> Tangent(16, 0.0f);
+		std::vector<float> BioTangent(16, 0.0f);
+
 		std::vector<std::vector<float>> Vertices = {
-			Pos, Color, UV
+			Pos, Normal, UV, Tangent, BioTangent
 		};
 
 		// Indices
@@ -39,7 +42,7 @@ namespace graphics
 		//
 		createInfo->SetVertices(Vertices);
 		createInfo->SetIndices(Indices);
-		createInfo->SetAttributeDimensions(std::vector<int>({ 3 , 3 , 2 }));
+		createInfo->SetAttributeDimensions(std::vector<int>({ 3 , 3 , 2, 4, 4 }));
 
 		return true;
 	}

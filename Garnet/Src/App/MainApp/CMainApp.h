@@ -15,7 +15,7 @@ namespace app
 		bool ProcessInput(api::IGraphicsAPI* pGraphicsAPI) override;
 		bool Resize(int Width, int Height) override;
 		bool Update(api::IGraphicsAPI* pGraphicsAPI, float SecondsTime) override;
-		bool Draw(api::IGraphicsAPI* pGraphicsAPI) override;
+		bool Draw(api::IGraphicsAPI* pGraphicsAPI, float SecondsTime) override;
 
 		virtual const std::shared_ptr<camera::CCamera>& GetMainCamera() const override;
 	};

@@ -19,9 +19,6 @@ namespace api
 		// API
 		api::CVulkanAPI* m_pGraphicsAPI;
 
-		//
-		VkFormat m_ImageFormat;
-
 		// Texture Image
 		VkImage m_TextureImage;
 		VkDeviceMemory m_TextureImageMemory;
@@ -29,9 +26,9 @@ namespace api
 		VkSampler m_TextureSampler;
 	private:
 		// Vulkanメインロジック /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		bool CreateFrameTextureImage();
-		bool CreateTextureImage(const std::vector<unsigned char>& pixelData, int pixelSize);
-		bool CreateTextureImageView();
+		bool CreateFrameTextureImage(VkFormat ImageFormat, VkImageUsageFlags Usage);
+		bool CreateTextureImage(const std::vector<unsigned char>& pixelData, int pixelSize, VkFormat ImageFormat);
+		bool CreateTextureImageView(VkFormat ImageFormat);
 		bool CreateTextureSampler();
 
 		// Helper Function ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

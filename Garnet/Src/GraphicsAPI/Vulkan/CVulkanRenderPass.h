@@ -33,6 +33,7 @@ namespace api
 		int m_Height;
 		api::ERenderPassFormat m_RenderPassFormat;
 		std::shared_ptr<CVulkanTexture> m_FrameTexture;
+		std::shared_ptr<CVulkanTexture> m_DepthTexture;
 
 		// Command
 		VkCommandPool   m_CommandPool;
@@ -41,17 +42,11 @@ namespace api
 		// Rendering
 		VkRenderPass m_RenderPass;
 		VkFramebuffer m_FrameBuffer;
-
-		// Depth Test
-		VkImage m_DepthImage;
-		VkDeviceMemory m_DepthImageMemory;
-		VkImageView m_DepthImageView;
 	private:
 		bool BeginRecordCommandBuffer();
 		bool EndRecordCommandBuffer();
 
 		bool CreateRenderPass();
-		bool CreateDepthResources(int Width, int Height);
 		bool CreateFrameBuffer(int Width, int Height);
 
 		bool CreateCommandPool();
@@ -61,6 +56,7 @@ namespace api
 		virtual ~CVulkanRenderPass();
 
 		virtual std::shared_ptr<graphics::CTexture> GetFrameTexture() override;
+		virtual std::shared_ptr<graphics::CTexture> GetDepthTexture() override;
 		VkRenderPass GetRenderPass() const { return m_RenderPass; }
 		VkCommandBuffer GetCommandBuffer() const { return m_CommandBuffer; }
 

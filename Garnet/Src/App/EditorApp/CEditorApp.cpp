@@ -39,7 +39,7 @@ namespace app
 		return true;
 	}
 
-	bool CEditorApp::Draw(api::IGraphicsAPI* pGraphicsAPI)
+	bool CEditorApp::Draw(api::IGraphicsAPI* pGraphicsAPI, float SecondsTime)
 	{
 		return true;
 	}

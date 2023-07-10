@@ -16,44 +16,25 @@ namespace api
 		m_Height(0),
 		m_RenderPassFormat(RenderPassFormat),
 		m_FrameTexture(nullptr),
+		m_DepthTexture(nullptr),
 		
 		m_CommandPool(nullptr),
 		m_CommandBuffer(nullptr),
 
 		m_RenderPass(nullptr),
-		m_FrameBuffer(nullptr),
-
-		m_DepthImage(nullptr),
-		m_DepthImageMemory(nullptr),
-		m_DepthImageView(nullptr)
+		m_FrameBuffer(nullptr)
 	{
 	}
 
 	CVulkanRenderPass::~CVulkanRenderPass()
 	{
+		m_FrameTexture = nullptr;
+		m_DepthTexture = nullptr;
+
 		if (m_CommandPool)
 		{
 			vkDestroyCommandPool(m_pGraphicsAPI->GetLogicalDevice(), m_CommandPool, nullptr);
 			m_CommandPool = nullptr;
-		}
-
-		// デプスリソースを破棄
-		if (m_DepthImageView)
-		{
-			vkDestroyImageView(m_pGraphicsAPI->GetLogicalDevice(), m_DepthImageView, nullptr);
-			m_DepthImageView = nullptr;
-		}
-		
-		if (m_DepthImage)
-		{
-			vkDestroyImage(m_pGraphicsAPI->GetLogicalDevice(), m_DepthImage, nullptr);
-			m_DepthImage = nullptr;
-		}
-		
-		if (m_DepthImageMemory)
-		{
-			vkFreeMemory(m_pGraphicsAPI->GetLogicalDevice(), m_DepthImageMemory, nullptr);
-			m_DepthImageMemory = nullptr;
 		}
 		
 		// フレームバッファの破棄
@@ -75,6 +56,11 @@ namespace api
 	{
 		return m_FrameTexture;
 	}
+	
+	std::shared_ptr<graphics::CTexture> CVulkanRenderPass::GetDepthTexture()
+	{
+		return m_DepthTexture;
+	}
 
 	bool CVulkanRenderPass::Create(int Width, int Height)
 	{
@@ -83,9 +69,11 @@ namespace api
 
 		m_FrameTexture = std::make_shared<CVulkanTexture>(m_pGraphicsAPI, false);
 		if (!m_FrameTexture->CreateFrameTexture(Width, Height, m_RenderPassFormat)) return false;
+		
+		m_DepthTexture = std::make_shared<CVulkanTexture>(m_pGraphicsAPI, false);
+		if (!m_DepthTexture->CreateFrameTexture(Width, Height, api::ERenderPassFormat::DEPTH_RENDERPASS)) return false;
 
 		if (!CreateRenderPass()) return false; // レンダーパスの作成(描画全体のマネージャー。実際に描画に使用するのがサブパス。サブパスを複数個用意することでポストプロセスもできる)
-		if (!CreateDepthResources(Width, Height)) return false; // デプステスト用のリソースを生成
 		if (!CreateFrameBuffer(Width, Height)) return false; // フレームバッファの作成
 		if (!CreateCommandPool()) return false;
 		if (!CreateCommandBuffer()) return false;
@@ -100,20 +88,17 @@ namespace api
 
 		// <カラーバッファ> ////////////////////////////////////////////////////////////////
 		// レンダーパスの基本的な設定
-		if (m_RenderPassFormat != ERenderPassFormat::DEPTH_ONLY_RENDERPASS && m_RenderPassFormat != ERenderPassFormat::DEPTH_ONLY_FLOAT_RENDERPASS)
-		{
-			VkAttachmentDescription colorAttachment{};
-			colorAttachment.format = (m_RenderPassFormat == ERenderPassFormat::COLOR_DEPTH_FLOAT_RENDERPASS) ? VK_FORMAT_R16G16B16A16_SFLOAT : VK_FORMAT_R8G8B8A8_UNORM;
-			colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT; // マルチサンプリング
-			colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR; // レンダリングの前後にどのような処理を施すか(クリアの方法など)
-			colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE; // レンダリング結果をメモリに保存し読み取り可にする
-			colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE; // 上記の設定をステンシルバッファに適応。 DONT_CAREは何もしない
-			colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE; // 上記の設定をステンシルバッファに適応
-			colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED; // レンダリング前にどのようなレイアウトとして使用するか
-			colorAttachment.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL; // レンダリング後にどのようなレイアウトとして使用するか
+		VkAttachmentDescription colorAttachment{};
+		colorAttachment.format = (m_RenderPassFormat == ERenderPassFormat::COLOR_FLOAT_RENDERPASS) ? VK_FORMAT_R16G16B16A16_SFLOAT : VK_FORMAT_R8G8B8A8_UNORM;
+		colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT; // マルチサンプリング
+		colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR; // レンダリングの前後にどのような処理を施すか(クリアの方法など)
+		colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE; // レンダリング結果をメモリに保存し読み取り可にする
+		colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE; // 上記の設定をステンシルバッファに適応。 DONT_CAREは何もしない
+		colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE; // 上記の設定をステンシルバッファに適応
+		colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED; // レンダリング前にどのようなレイアウトとして使用するか
+		colorAttachment.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL; // レンダリング後にどのようなレイアウトとして使用するか
 
-			attachments.push_back(colorAttachment);
-		}
+		attachments.push_back(colorAttachment);
 
 		// サブパスの設定(サブパスとは前のパスのフレームバッファの内容を参照するレンダリング操作。ポストプロセスなどに有用)
 		VkAttachmentReference colorAttachmentRef{}; // 前のパスの参照方法の定義(かな？)
@@ -126,11 +111,11 @@ namespace api
 		depthAttachment.format = m_pGraphicsAPI->FindDepthFormat();
 		depthAttachment.samples = VK_SAMPLE_COUNT_1_BIT; // マルチサンプリング
 		depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR; // レンダリングの前後にどのような処理を施すか(クリアの方法など)。デプスバッファに適応
-		depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE; // レンダリング結果をメモリに保存し読み取り可にする。デプスバッファに適応
+		depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE; // レンダリング結果をメモリに保存し読み取り可にする。デプスバッファに適応
 		depthAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE; // 上記の設定をステンシルバッファに適応。 DONT_CAREは何もしない
 		depthAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE; // 上記の設定をステンシルバッファに適応
 		depthAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED; // レンダリング前にどのようなレイアウトとして使用するか
-		depthAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL; // レンダリング後にどのようなレイアウトとして使用するか
+		depthAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL; // レンダリング後にどのようなレイアウトとして使用するか
 
 		attachments.push_back(depthAttachment);
 
@@ -177,22 +162,11 @@ namespace api
 		return true;
 	}
 
-	bool CVulkanRenderPass::CreateDepthResources(int Width, int Height)
-	{
-		VkFormat depthFormat = m_pGraphicsAPI->FindDepthFormat();
-		m_pGraphicsAPI->CreateImage(Width, Height, depthFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
-			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_DepthImage, m_DepthImageMemory, graphics::ETextureType::TEXTURE_2D, 1, false);
-
-		m_DepthImageView = m_pGraphicsAPI->CreateImageView(m_DepthImage, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT, graphics::ETextureType::TEXTURE_2D, 1, false);
-
-		return true;
-	}
-
 	bool CVulkanRenderPass::CreateFrameBuffer(int Width, int Height)
 	{
 		std::array<VkImageView, 2> attachments[] = {
 				m_FrameTexture->GetTextureImageView(),
-				m_DepthImageView
+				m_DepthTexture->GetTextureImageView()
 		};
 
 		VkFramebufferCreateInfo frameBufferInfo{};

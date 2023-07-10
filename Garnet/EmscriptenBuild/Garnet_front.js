@@ -17,7 +17,21 @@ const InitWG = async () => {
 
         // デバイスを事前取得
         const adapter = await navigator.gpu.requestAdapter();
-        const device = await adapter.requestDevice();
+
+        const requiredFeatures = [];
+        if (adapter.features.has("depth32float-stencil8"))
+        {
+            requiredFeatures.push("depth32float-stencil8");
+        }
+
+        const requiredLimits = [];
+
+        const device = await adapter.requestDevice({
+            defaultQueue: {
+            },
+            requiredFeatures,
+            requiredLimits
+        });
         Module.preinitializedWebGPUDevice = device;
 
         // アプリケーション開始 

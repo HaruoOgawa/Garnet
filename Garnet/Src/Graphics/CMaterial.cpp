@@ -5,7 +5,8 @@ namespace graphics
 	CMaterial::CMaterial():
 		m_CreateInfo(nullptr),
 		m_RefCount(0),
-		m_UseDynamicUniform(false)
+		m_UseDynamicUniform(false),
+		m_DepthMaterial(nullptr)
 	{
 	}
 
@@ -19,7 +20,37 @@ namespace graphics
 		return true;
 	}
 
-	bool CMaterial::Update(float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo)
+	bool CMaterial::CreateDepthMaterial(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<file::CFileReader>& DepthVertex, const std::shared_ptr<file::CFileReader>& DepthFragment)
+	{
+		std::shared_ptr<graphics::CMaterialCreateInfo> createInfo = std::make_shared<graphics::CMaterialCreateInfo>();
+		createInfo->SetVertexShaderCode(DepthVertex->GetData());
+		createInfo->SetFragmentShaderCode(DepthFragment->GetData());
+
+		auto UniformBuffer = graphics::CMaterialCreateInfo::CreateUniformBuffer({ 0 });
+		UniformBuffer->AddData("model", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
+		UniformBuffer->AddData("view", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
+		UniformBuffer->AddData("proj", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
+		UniformBuffer->AddData("lightView", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
+		UniformBuffer->RecalculateBindingLayoutOffset();
+
+		m_DepthMaterial = pGraphicsAPI->CreateMaterial();
+
+		m_DepthMaterial->SetCreateInfo(createInfo);
+		m_DepthMaterial->AddUniformBuffer(UniformBuffer);
+
+		m_DepthMaterial->SetRefStatus(m_RefCount, m_UseDynamicUniform);
+
+		if (!m_DepthMaterial->Create(std::vector<std::shared_ptr<graphics::CTexture>>(), std::vector<std::shared_ptr<graphics::CTexture>>())) return false;
+
+		return true;
+	}
+
+	std::shared_ptr<graphics::CMaterial> CMaterial::GetDepthMaterial() 
+	{
+		return m_DepthMaterial; 
+	}
+
+	bool CMaterial::SetCommonUniform(float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo)
 	{
 		return true;
 	}
@@ -51,6 +82,12 @@ namespace graphics
 	int CMaterial::GetRefCount() const
 	{
 		return m_RefCount;
+	}
+
+	void CMaterial::SetRefStatus(int RefCount, bool UseDynamicUniform)
+	{
+		m_RefCount = RefCount;
+		m_UseDynamicUniform = UseDynamicUniform;
 	}
 
 	const std::vector<uint32_t>& CMaterial::GetBindingRefSizeList() const

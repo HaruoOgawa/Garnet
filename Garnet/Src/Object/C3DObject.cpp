@@ -2,8 +2,9 @@
 
 namespace object
 {
-	C3DObject::C3DObject(const std::string& PassName):
+	C3DObject::C3DObject(const std::string& PassName, const std::string& DepthPassName):
 		m_PassName(PassName),
+		m_DepthPassName(DepthPassName),
 		m_ObjectTransform(std::make_shared<math::CTransform>())
 	{
 	}
@@ -15,7 +16,7 @@ namespace object
 		m_TextureList.clear();
 	}
 
-	bool C3DObject::Create(api::IGraphicsAPI* pGraphicsAPI)
+	bool C3DObject::Create(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<file::CFileReader>& DepthVertex, const std::shared_ptr<file::CFileReader>& DepthFragment)
 	{
 		// ワールド行列の計算
 		CalcWorldMatrix();
@@ -24,6 +25,7 @@ namespace object
 		for (auto& Material : m_MaterialList)
 		{
 			if (!Material->Create(m_TextureList, m_CubeMapList)) return false;
+			if (!Material->CreateDepthMaterial(pGraphicsAPI, DepthVertex, DepthFragment)) return false;
 		}
 
 		// Primitive
@@ -36,7 +38,11 @@ namespace object
 
 				const auto& Material = m_MaterialList[MaterialIndex];
 
-				if (!Primitive->Create(pGraphicsAPI, m_PassName, Material)) return false;
+				if (!Primitive->Create(pGraphicsAPI, m_PassName, Material, false)) return false;
+				if (!Primitive->Create(pGraphicsAPI, m_DepthPassName, Material->GetDepthMaterial(), true)) return false;
+
+				// 生成処理が終わったので不要なリソースを解放する
+				Primitive->Release();
 			}
 		}
 
@@ -100,23 +106,36 @@ namespace object
 		}
 	}
 
-	bool C3DObject::Update(float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo)
+	bool C3DObject::Update()
 	{
 		// ワールド行列の更新
 		// 全ノードマイフレーム更新しているので、そのうちキャッシュを入れて更新は必要なものだけにする
 		CalcWorldMatrix();
 
-		//
-		for (auto& Material : m_MaterialList)
-		{
-			if (!Material->Update(SecondsTime, Camera, Projection, DrawInfo)) return false;
-		}
-
 		return true;
 	}
 
-	bool C3DObject::Draw()
+	bool C3DObject::Draw(bool IsDepthPass, float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo)
 	{
+		// 共通ユニフォームの更新
+		for (auto& Material : m_MaterialList)
+		{
+			if (!Material) continue;
+			if (!Material->SetCommonUniform(SecondsTime, Camera, Projection, DrawInfo)) return false;
+		}
+
+		for (auto& Material : m_MaterialList)
+		{
+			if (!Material) continue;
+
+			auto DepthMaterial = Material->GetDepthMaterial();
+
+			if (!DepthMaterial) continue;
+
+			if (!DepthMaterial->SetCommonUniform(SecondsTime, Camera, Projection, DrawInfo)) return false;
+		}
+
+		// 描画
 		for (const auto& Node : m_NodeList)
 		{
 			int MeshIndex = Node->GetMeshIndex();
@@ -132,16 +151,26 @@ namespace object
 			{
 				const auto& Primitive = Mesh->GetPrimitiveList()[PrimitiveIndex];
 
-				//
 				int MaterialIndex = Primitive->GetMaterialIndex();
-				int DynamicOffsetNum = DynamicOffsetList[PrimitiveIndex]; 
+				int DynamicOffsetNum = DynamicOffsetList[PrimitiveIndex];
 				if (MaterialIndex < 0 || MaterialIndex >= m_MaterialList.size()) continue;
 
-				//
-				const auto& Material = m_MaterialList[MaterialIndex];
+				std::shared_ptr<graphics::CMaterial> Material = nullptr;
+
+				if (IsDepthPass)
+				{
+					Material = m_MaterialList[MaterialIndex]->GetDepthMaterial();
+				}
+				else
+				{
+					Material = m_MaterialList[MaterialIndex];
+				}
+
+				if (!Material) continue;
+				
 				Material->SetUniformValue("model", &WorldMatrix[0][0], DynamicOffsetNum);
 
-				if (!Primitive->Draw(Material, DynamicOffsetNum)) return false;
+				if (!Primitive->Draw(Material, DynamicOffsetNum, IsDepthPass)) return false;
 			}
 		}
 

@@ -8,17 +8,19 @@
 namespace scene
 {
 	CScriptScene::CScriptScene():
-		m_OffScreenRenderObj(std::make_shared<object::C3DObject>()),
+		m_TestObject(std::make_shared<object::C3DObject>("", "ShadowPass")),
 
-		m_TestObject(std::make_shared<object::C3DObject>("Test")),
+		m_DepthVertex(std::make_shared<file::CFileReader>()),
+		m_DepthFragment(std::make_shared<file::CFileReader>()),
+		
 		m_VertexShader(std::make_shared<file::CFileReader>()),
 		m_FragmentShader(std::make_shared<file::CFileReader>()),
 		m_Texture0(std::make_shared<file::CFileReader>()),
 		m_Texture1(std::make_shared<file::CFileReader>()),
 
-		m_Sphere_glTFObj(std::make_shared<object::C3DObject>()),
+		m_Sphere_glTFObj(std::make_shared<object::C3DObject>("", "ShadowPass")),
 		m_Sphere_glTFData(std::make_shared<file::CFileReader>()),
-		m_Helmet_glTFObj(std::make_shared<object::C3DObject>()),
+		m_Helmet_glTFObj(std::make_shared<object::C3DObject>("", "ShadowPass")),
 		m_Helmet_glTFData(std::make_shared<file::CFileReader>()),
 		m_glTFVert(std::make_shared<file::CFileReader>()),
 		m_glTFFrag(std::make_shared<file::CFileReader>()),
@@ -29,6 +31,10 @@ namespace scene
 		m_Cube3(std::make_shared<file::CFileReader>()),
 		m_Cube4(std::make_shared<file::CFileReader>()),
 		m_Cube5(std::make_shared<file::CFileReader>()),
+
+		m_DepthDebugObj(std::make_shared<object::C3DObject>("", "ShadowPass")),
+		m_ShadowVertex(std::make_shared<file::CFileReader>()),
+		m_ShadowFragment(std::make_shared<file::CFileReader>()),
 
 		m_IsLoaded(false)
 	{
@@ -46,17 +52,23 @@ namespace scene
 		// Shader
 		std::string ShaderPath = "Resources\\Shaders\\";
 		
+		m_DepthVertex->ReadFile(ShaderPath + "depth_vert" + pGraphicsAPI->GetShaderExtension());
+		m_DepthFragment->ReadFile(ShaderPath + "depth_frag" + pGraphicsAPI->GetShaderExtension());
+		
 		m_VertexShader->ReadFile(ShaderPath + "sample_vert" + pGraphicsAPI->GetShaderExtension());
 		m_FragmentShader->ReadFile(ShaderPath + "sample_frag" + pGraphicsAPI->GetShaderExtension());
 		
 		m_glTFVert->ReadFile(ShaderPath + "gltfpbr_vert" + pGraphicsAPI->GetShaderExtension());
 		m_glTFFrag->ReadFile(ShaderPath + "gltfpbr_frag" + pGraphicsAPI->GetShaderExtension());
 		
+		m_ShadowVertex->ReadFile(ShaderPath + "shadow_vert" + pGraphicsAPI->GetShaderExtension());
+		m_ShadowFragment->ReadFile(ShaderPath + "shadow_frag" + pGraphicsAPI->GetShaderExtension());
+		
 		// Texture
 		std::string TexturePath = "Resources\\Textures\\";
 		
-		m_Texture0->ReadFile(TexturePath + "perlinnoise.png");
-		m_Texture1->ReadFile(TexturePath + "UVTile.jpg");
+		m_Texture0->ReadFile(TexturePath + "brick.jpg");
+		m_Texture1->ReadFile(TexturePath + "brick_norm.jpg");
 
 		// GLTF
 		std::string ModelPath = "Resources\\Models\\";
@@ -80,117 +92,97 @@ namespace scene
 
 	bool CScriptScene::Load(api::IGraphicsAPI* pGraphicsAPI)
 	{
+		// Cubemap
+		std::vector<std::shared_ptr<graphics::CTexture>> CubeTexList;
+		{
+			std::vector<std::vector<unsigned char>> CubeDataList;
+			CubeDataList.push_back(m_Cube0->GetData());
+			CubeDataList.push_back(m_Cube1->GetData());
+			CubeDataList.push_back(m_Cube2->GetData());
+			CubeDataList.push_back(m_Cube3->GetData());
+			CubeDataList.push_back(m_Cube4->GetData());
+			CubeDataList.push_back(m_Cube5->GetData());
+
+			auto CubeTex0 = pGraphicsAPI->CreateTexture(true);
+			if (!CubeTex0->Create(CubeDataList)) return false;
+
+			CubeTexList.push_back(CubeTex0);
+		}
+
+		// TestObj
 		{
 			// MATERIAL
 			std::shared_ptr<graphics::CMaterialCreateInfo> createInfo = std::make_shared<graphics::CMaterialCreateInfo>();
-			createInfo->SetVertexShaderCode(m_VertexShader->GetData());
-			createInfo->SetFragmentShaderCode(m_FragmentShader->GetData());
+			createInfo->SetVertexShaderCode(m_glTFVert->GetData());
+			createInfo->SetFragmentShaderCode(m_glTFFrag->GetData());
 			auto Material0 = pGraphicsAPI->CreateMaterial();
-			auto Material1 = pGraphicsAPI->CreateMaterial();
-			auto Material2 = pGraphicsAPI->CreateMaterial();
 
 			// UBO, TEXTURE
 			{
-				auto UniformBuffer = graphics::CMaterialCreateInfo::CreateUniformBuffer({0, 1});
+				auto UniformBuffer = graphics::CMaterialCreateInfo::CreateUniformBuffer({0});
 
-				{
-					glm::mat4 mat = glm::mat4(1.0f);
-					UniformBuffer->AddData("model", &mat[0][0], sizeof(mat), 0);
-				}
+				UniformBuffer->AddData("model", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
+				UniformBuffer->AddData("view", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
+				UniformBuffer->AddData("proj", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
+				UniformBuffer->AddData("lightView", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
+				UniformBuffer->AddData("lightDir", &glm::vec4(0.0f)[0], sizeof(float) * 4, 0);
+				UniformBuffer->AddData("lightColor", &glm::vec4(0.0f)[0], sizeof(float) * 4, 0);
+				UniformBuffer->AddData("cameraPos", &glm::vec4(0.0f)[0], sizeof(float) * 4, 0);
+				UniformBuffer->AddData("baseColorFactor", &glm::vec4(1.0f)[0], sizeof(float) * 4, 0);
+				UniformBuffer->AddData("emissiveFactor", &glm::vec4(0.0f)[0], sizeof(float) * 4, 0);
 
-				{
-					glm::mat4 mat = glm::mat4(1.0f);
-					UniformBuffer->AddData("view", &mat[0][0], sizeof(mat), 0);
-				}
+				UniformBuffer->AddData("time", &glm::vec1(0.0f)[0], sizeof(float), 0);
+				UniformBuffer->AddData("metallicFactor", &glm::vec1(0.1f)[0], sizeof(float), 0);
+				UniformBuffer->AddData("roughnessFactor", &glm::vec1(0.1f)[0], sizeof(float), 0);
+				UniformBuffer->AddData("normalMapScale", &glm::vec1(1.0f)[0], sizeof(float), 0);
 
-				{
-					glm::mat4 mat = glm::mat4(1.0f);
-					UniformBuffer->AddData("proj", &mat[0][0], sizeof(mat), 0);
-				}
+				UniformBuffer->AddData("occlusionStrength", &glm::vec1(0.0f)[0], sizeof(float), 0);
+				UniformBuffer->AddData("mipCount", &glm::vec1(CubeTexList[0]->GetMipCount())[0], sizeof(float), 0);
+				UniformBuffer->AddData("s_pad1", &glm::vec1(0.0f)[0], sizeof(float), 0);
+				UniformBuffer->AddData("s_pad2", &glm::vec1(0.0f)[0], sizeof(float), 0);
 
-				{
-					glm::mat4 mat = glm::mat4(1.0f);
-					UniformBuffer->AddData("mvp", &mat[0][0], sizeof(mat), 0);
-				}
-
-				{
-					glm::vec4 val = glm::vec4(1.0f);
-					UniformBuffer->AddData("MulColor", &val[0], sizeof(val), 1);
-				}
-
-				{
-					glm::vec4 val = glm::vec4(0.0f);
-					UniformBuffer->AddData("val0", &val[0], sizeof(val), 1);
-				}
-
-				{
-					glm::vec4 val = glm::vec4(0.0f);
-					UniformBuffer->AddData("val1", &val[0], sizeof(val), 1);
-				}
-
-				{
-					glm::vec4 val = glm::vec4(0.0f);
-					UniformBuffer->AddData("val2", &val[0], sizeof(val), 1);
-				}
+				UniformBuffer->AddData("useBaseColorTexture", &glm::uvec1(1)[0], sizeof(int), 0);
+				UniformBuffer->AddData("useMetallicRoughnessTexture", &glm::uvec1(0)[0], sizeof(int), 0);
+				UniformBuffer->AddData("useEmissiveTexture", &glm::uvec1(0)[0], sizeof(int), 0);
+				UniformBuffer->AddData("useNormalTexture", &glm::uvec1(1)[0], sizeof(int), 0);
+				
+				UniformBuffer->AddData("useOcclusionTexture", &glm::uvec1(0)[0], sizeof(int), 0);
+				UniformBuffer->AddData("t_pad_0", &glm::uvec1(0)[0], sizeof(int), 0);
+				UniformBuffer->AddData("t_pad_1", &glm::uvec1(0)[0], sizeof(int), 0);
+				UniformBuffer->AddData("t_pad_2", &glm::uvec1(0)[0], sizeof(int), 0);
+				
+				Material0->AddTextureBindingLayout({ 1, 2, 0, graphics::ETextureType::TEXTURE_2D });
+				Material0->AddTextureBindingLayout({ 3, 4, -1, graphics::ETextureType::TEXTURE_2D }); // TextureIndex -1 は EmptyTextureである
+				Material0->AddTextureBindingLayout({ 5, 6, -1, graphics::ETextureType::TEXTURE_2D }); // TextureIndex -1 は EmptyTextureである
+				Material0->AddTextureBindingLayout({ 7, 8, 1, graphics::ETextureType::TEXTURE_2D }); // TextureIndex -1 は EmptyTextureである
+				Material0->AddTextureBindingLayout({ 9, 10, -1, graphics::ETextureType::TEXTURE_2D }); // TextureIndex -1 は EmptyTextureである
+				Material0->AddTextureBindingLayout({ 11, 12, 0, graphics::ETextureType::TEXTURE_CUBE });
 
 				UniformBuffer->RecalculateBindingLayoutOffset();
 
 				Material0->AddUniformBuffer(UniformBuffer);
-				Material1->AddUniformBuffer(UniformBuffer);
-				Material2->AddUniformBuffer(UniformBuffer);
 			}
 
 			{
 				auto APITex0 = pGraphicsAPI->CreateTexture();
 				if(!APITex0->Create(m_Texture0->GetData())) return false;
 
-				auto APITex1 = pGraphicsAPI->CreateTexture();
-				if (!APITex1->Create(m_Texture1->GetData())) return false;
-
-				Material0->AddTextureBindingLayout({ 2, 3, 0, graphics::ETextureType::TEXTURE_2D });
-				Material1->AddTextureBindingLayout({ 2, 3, 1, graphics::ETextureType::TEXTURE_2D });
-
-				Material2->AddTextureBindingLayout({ 2, 3, 0, graphics::ETextureType::TEXTURE_2D });
-				
 				m_TestObject->AddTexture(APITex0);
-				m_TestObject->AddTexture(APITex1);
-
-				m_OffScreenRenderObj->AddTexture(m_FrameTextureList[0]);
+				m_TestObject->AddCubeMap(CubeTexList[0]);
 			}
 			
 			// CREATE MATERIAL
 			Material0->SetCreateInfo(createInfo);
-			Material1->SetCreateInfo(createInfo);
-			Material2->SetCreateInfo(createInfo);
-
+			
 			m_TestObject->AddMaterial(Material0);
-			m_TestObject->AddMaterial(Material1);
 
-			m_OffScreenRenderObj->AddMaterial(Material2);
-		}
-
-		{
 			// MESH
 			std::shared_ptr<graphics::CMesh> Mesh0 = std::make_shared<graphics::CMesh>();
-			std::shared_ptr<graphics::CMesh> Mesh1 = std::make_shared<graphics::CMesh>();
-			std::shared_ptr<graphics::CMesh> Mesh2 = std::make_shared<graphics::CMesh>();
 
 			{
 				std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(nullptr, 0, graphics::EPresetPrimitiveType::BOARD);
 				Mesh0->AddPrimitive(Primitive);
 				m_TestObject->AddMesh(Mesh0);
-			}
-			
-			{
-				std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(nullptr, 1, graphics::EPresetPrimitiveType::BOARD);
-				Mesh1->AddPrimitive(Primitive);
-				m_TestObject->AddMesh(Mesh1);
-			}
-			
-			{
-				std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(nullptr, 0, graphics::EPresetPrimitiveType::BOARD);
-				Mesh2->AddPrimitive(Primitive);
-				m_OffScreenRenderObj->AddMesh(Mesh2);
 			}
 
 			// NODE
@@ -198,59 +190,50 @@ namespace scene
 				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(0, m_TestObject->GetMeshList(), m_TestObject->GetMaterialList());
 				Node->SetMeshIndex(0);
 				Node->SetPos(glm::vec3(0.0f, -1.0f, 0.0f));
-				Node->SetRot(glm::vec3(0.0f, 0.0f, 45.0f));
-				Node->SetScale(glm::vec3(1.0f, 0.1f, 1.0f) * 5.0f);
+				Node->SetRot(glm::vec3(3.14f * (-0.5f), 0.0f, 0.0f));
+				Node->SetScale(glm::vec3(1.0f, 1.0f, 1.0f) * 10.0f);
 				m_TestObject->AddNode(Node);
 			}
 
-			{
-				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(1, m_TestObject->GetMeshList(), m_TestObject->GetMaterialList());
-				Node->SetMeshIndex(1);
-				Node->SetPos(glm::vec3(-1.25f, 0.0f, -5.0f));
-				Node->SetRot(glm::vec3(0.0f, 45.0f, 45.0f));
-				Node->SetScale(glm::vec3(1.0f, 1.0f, 1.0f) * 5.0f);
-				m_TestObject->AddNode(Node);
-			}
-
-			{
-				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(0, m_TestObject->GetMeshList(), m_TestObject->GetMaterialList());
-				Node->SetMeshIndex(0);
-				Node->SetPos(glm::vec3(1.5f, 0.0f, -5.0f));
-				Node->SetRot(glm::vec3(0.0f, -45.0f, 0.0f));
-				Node->SetScale(glm::vec3(1.0f, 1.0f, 1.0f) * 5.0f);
-				m_TestObject->AddNode(Node);
-			}
-			
-			{
-				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(0, m_OffScreenRenderObj->GetMeshList(), m_OffScreenRenderObj->GetMaterialList());
-				Node->SetMeshIndex(0);
-				Node->SetPos(glm::vec3(0.0f, 0.0f, 0.0f));
-				Node->SetRot(glm::vec3(0.0f, 0.0f, 0.0f));
-				Node->SetScale(glm::vec3(1.0f, 1.0f, 1.0f) * 5.0f);
-				m_OffScreenRenderObj->AddNode(Node);
-			}
+			// Create関数を実行
+			if (!m_TestObject->Create(pGraphicsAPI, m_DepthVertex, m_DepthFragment)) return false;
 		}
 
-		// Cubemap
-		std::vector<std::vector<unsigned char>> CubeDataList;
-		CubeDataList.push_back(m_Cube0->GetData());
-		CubeDataList.push_back(m_Cube1->GetData());
-		CubeDataList.push_back(m_Cube2->GetData());
-		CubeDataList.push_back(m_Cube3->GetData());
-		CubeDataList.push_back(m_Cube4->GetData());
-		CubeDataList.push_back(m_Cube5->GetData());
+		// DepthDebug
+		{
+			std::shared_ptr<graphics::CMaterialCreateInfo> createInfo = std::make_shared<graphics::CMaterialCreateInfo>();
+			createInfo->SetVertexShaderCode(m_ShadowVertex->GetData());
+			createInfo->SetFragmentShaderCode(m_ShadowFragment->GetData());
+			
+			auto UniformBuffer = graphics::CMaterialCreateInfo::CreateUniformBuffer({ 0 });
+			UniformBuffer->AddData("model", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
+			UniformBuffer->AddData("view", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
+			UniformBuffer->AddData("proj", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
+			UniformBuffer->AddData("lightView", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
 
-		auto CubeTex0 = pGraphicsAPI->CreateTexture(true);
-		if (!CubeTex0->Create(CubeDataList)) return false;
+			auto Material = pGraphicsAPI->CreateMaterial();
+			Material->SetCreateInfo(createInfo);
+			Material->AddUniformBuffer(UniformBuffer);
+			Material->AddTextureBindingLayout({ 1, 2, 0, graphics::ETextureType::TEXTURE_2D });
 
-		std::vector<std::shared_ptr<graphics::CTexture>> CubeTexList;
-		CubeTexList.push_back(CubeTex0);
+			std::shared_ptr<graphics::CMesh> Mesh = std::make_shared<graphics::CMesh>();
+			std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(nullptr, 0, graphics::EPresetPrimitiveType::BOARD);
+			Mesh->AddPrimitive(Primitive);
 
-		// Create関数群を実行
-		if (!m_TestObject->Create(pGraphicsAPI)) return false;
+			m_DepthDebugObj->AddTexture(m_FrameTextureList[0]);
+			m_DepthDebugObj->AddMaterial(Material);
+			m_DepthDebugObj->AddMesh(Mesh);
 
-		//
-		if (!m_OffScreenRenderObj->Create(pGraphicsAPI)) return false;
+			std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(0, m_DepthDebugObj->GetMeshList(), m_DepthDebugObj->GetMaterialList());
+			Node->SetMeshIndex(0);
+			Node->SetPos(glm::vec3(0.0f, 1.0f, -3.0f));
+			Node->SetRot(glm::vec3(0.0f, 0.0f, 0.0f));
+			Node->SetScale(glm::vec3(1.0f, 1.0f, 1.0f) * 5.0f);
+
+			m_DepthDebugObj->AddNode(Node);
+
+			if (!m_DepthDebugObj->Create(pGraphicsAPI, m_DepthVertex, m_DepthFragment)) return false;
+		}
 
 		// テストのglTFをインポート
 		{
@@ -258,41 +241,39 @@ namespace scene
 			createInfo->SetVertexShaderCode(m_glTFVert->GetData());
 			createInfo->SetFragmentShaderCode(m_glTFFrag->GetData());
 
-			if (!gltf::CGLTFImporter::Import(pGraphicsAPI, m_Sphere_glTFData->GetData(), m_Sphere_glTFObj, createInfo, CubeTexList)) return false;
-			if (!gltf::CGLTFImporter::Import(pGraphicsAPI, m_Helmet_glTFData->GetData(), m_Helmet_glTFObj, createInfo, CubeTexList)) return false;
+			if (!gltf::CGLTFImporter::Import(pGraphicsAPI, m_Sphere_glTFData->GetData(), m_Sphere_glTFObj, createInfo, CubeTexList, m_DepthVertex, m_DepthFragment)) return false;
+			if (!gltf::CGLTFImporter::Import(pGraphicsAPI, m_Helmet_glTFData->GetData(), m_Helmet_glTFObj, createInfo, CubeTexList, m_DepthVertex, m_DepthFragment)) return false;
 		}
 
 		return true;
 	}
 
-	bool CScriptScene::Update(api::IGraphicsAPI* pGraphicsAPI, float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo)
+	bool CScriptScene::Update(api::IGraphicsAPI* pGraphicsAPI)
 	{
 		if (m_IsLoaded && m_TestObject)
 		{
-			m_TestObject->GetNodeList()[0]->SetRot(glm::vec3(SecondsTime));
-
-			if (!m_TestObject->Update(SecondsTime, Camera, Projection, DrawInfo)) return false;
+			if (!m_TestObject->Update()) return false;
 		}
 		
-		if (m_IsLoaded && m_OffScreenRenderObj)
+		if (m_IsLoaded && m_DepthDebugObj)
 		{
-			if (!m_OffScreenRenderObj->Update(SecondsTime, Camera, Projection, DrawInfo)) return false;
+			if (!m_DepthDebugObj->Update()) return false;
 		}
 		
 		if (m_IsLoaded && m_Sphere_glTFObj)
 		{
-			if (!m_Sphere_glTFObj->Update(SecondsTime, Camera, Projection, DrawInfo)) return false;
+			if (!m_Sphere_glTFObj->Update()) return false;
 		}
 		
 		if (m_IsLoaded && m_Helmet_glTFObj)
 		{
-			if (!m_Helmet_glTFObj->Update(SecondsTime, Camera, Projection, DrawInfo)) return false;
+			if (!m_Helmet_glTFObj->Update()) return false;
 		}
 
 		if (!m_IsLoaded)
 		{
-			if (m_VertexShader->IsLoaded() && m_FragmentShader->IsLoaded() && m_Texture0->IsLoaded() && m_Texture1->IsLoaded() && m_Sphere_glTFData->IsLoaded() && m_Helmet_glTFData->IsLoaded()
-				&& m_glTFVert->IsLoaded() && m_glTFFrag->IsLoaded()
+			if (m_DepthVertex->IsLoaded() && m_DepthFragment->IsLoaded() &&m_VertexShader->IsLoaded() && m_FragmentShader->IsLoaded() && m_Texture0->IsLoaded() && m_Texture1->IsLoaded()
+				&& m_Sphere_glTFData->IsLoaded() && m_Helmet_glTFData->IsLoaded() && m_glTFVert->IsLoaded() && m_glTFFrag->IsLoaded()&& m_ShadowVertex->IsLoaded() && m_ShadowFragment->IsLoaded()
 				&& m_Cube0->IsLoaded() && m_Cube1->IsLoaded() && m_Cube2->IsLoaded() && m_Cube3->IsLoaded() && m_Cube4->IsLoaded() && m_Cube5->IsLoaded() 
 			)
 			{
@@ -304,33 +285,34 @@ namespace scene
 		return true;
 	}
 
-	bool CScriptScene::Draw(api::IGraphicsAPI* pGraphicsAPI)
+	bool CScriptScene::Draw(api::IGraphicsAPI* pGraphicsAPI, bool IsDepthPass, float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, 
+		const std::shared_ptr<graphics::CDrawInfo>& DrawInfo)
 	{
 		if (m_IsLoaded && m_Sphere_glTFObj)
 		{
-			if (!m_Sphere_glTFObj->Draw()) return false;
+			//if (!m_Sphere_glTFObj->Draw(IsDepthPass, SecondsTime, Camera, Projection, DrawInfo)) return false;
 		}
 		
 		if (m_IsLoaded && m_Helmet_glTFObj)
 		{
-			if (!m_Helmet_glTFObj->Draw()) return false;
+			if (!m_Helmet_glTFObj->Draw(IsDepthPass, SecondsTime, Camera, Projection, DrawInfo)) return false;
 		}
 		
-		if (m_IsLoaded && m_OffScreenRenderObj)
+		if (m_IsLoaded && m_TestObject)
 		{
-			if (!m_OffScreenRenderObj->Draw()) return false;
+			if (!m_TestObject->Draw(IsDepthPass, SecondsTime, Camera, Projection, DrawInfo)) return false;
 		}
 		
 		return true;
 	}
 	
-	bool CScriptScene::DrawTest(api::IGraphicsAPI* pGraphicsAPI)
+	bool CScriptScene::DrawDebugObj(api::IGraphicsAPI* pGraphicsAPI, float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo)
 	{
-		if (m_IsLoaded && m_TestObject)
+		if (m_IsLoaded && m_DepthDebugObj)
 		{
-			if (!m_TestObject->Draw()) return false;
+			if (!m_DepthDebugObj->Draw(false, SecondsTime, Camera, Projection, DrawInfo)) return false;
 		}
-		
+
 		return true;
 	}
 

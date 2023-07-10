@@ -363,7 +363,6 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClInclude Include="Src\Graphics\SBindingLayout.h" />
     <ClInclude Include="Src\Math\CTransform.h" />
     <ClInclude Include="Src\Object\C3DObject.h" />
-    <ClInclude Include="Src\Object\CObject.h" />
     <ClInclude Include="Src\Graphics\CUniformBuffer.h" />
     <ClInclude Include="Src\Graphics\CUniformBufferDescriptor.h" />
     <ClInclude Include="Src\Interface\IBuffer.h" />
@@ -705,7 +704,6 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClCompile Include="Src\Main\DemoMain\DemoMain.cpp" />
     <ClCompile Include="Src\Math\CTransform.cpp" />
     <ClCompile Include="Src\Object\C3DObject.cpp" />
-    <ClCompile Include="Src\Object\CObject.cpp" />
     <ClCompile Include="Src\Graphics\CUniformBuffer.cpp" />
     <ClCompile Include="Src\Graphics\CUniformBufferDescriptor.cpp" />
     <ClCompile Include="Src\Library\glfw3webgpu\glfw3webgpu.c" />
@@ -745,6 +743,8 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <None Include="EmscriptenBuild\Garnet_front.js" />
     <None Include="EmscriptenBuild\index.html" />
     <None Include="EmscriptenBuild\nmake.exe" />
+    <None Include="Resources\Shaders\depth.frag" />
+    <None Include="Resources\Shaders\depth.vert" />
     <None Include="Resources\Shaders\gltfpbr.frag" />
     <None Include="Resources\Shaders\gltfpbr.vert" />
     <None Include="Resources\Shaders\sample.frag" />
@@ -753,6 +753,8 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <None Include="Resources\Shaders\sample_frag.wgsl" />
     <None Include="Resources\Shaders\sample_vert.spv" />
     <None Include="Resources\Shaders\sample_vert.wgsl" />
+    <None Include="Resources\Shaders\shadow.frag" />
+    <None Include="Resources\Shaders\shadow.vert" />
     <None Include="Src\Library\glm\glm\detail\func_common.inl" />
     <None Include="Src\Library\glm\glm\detail\func_common_simd.inl" />
     <None Include="Src\Library\glm\glm\detail\func_exponential.inl" />
