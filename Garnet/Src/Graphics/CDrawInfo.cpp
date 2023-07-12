@@ -1,11 +1,13 @@
 #include "CDrawInfo.h"
 #include "../../Camera/CCamera.h"
+#include "../../Projection/CProjection.h"
 
 namespace graphics
 {
 	CDrawInfo::CDrawInfo() :
 		m_LightCamera(std::make_shared<camera::CCamera>()),
-		m_LightColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f))
+		m_LightColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)),
+		m_LightProjection(std::make_shared<projection::CProjection>())
 	{
 	}
 

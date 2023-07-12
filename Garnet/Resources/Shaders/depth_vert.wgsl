@@ -9,7 +9,7 @@ struct UniformBufferObject {
     model: mat4x4<f32>,
     view: mat4x4<f32>,
     proj: mat4x4<f32>,
-    lightView: mat4x4<f32>,
+    lightVPMat: mat4x4<f32>,
 }
 
 struct VertexOutput {
@@ -28,13 +28,12 @@ var<private> inTangent_1: vec4<f32>;
 var<private> inBioTangent_1: vec4<f32>;
 
 fn main_1() {
-    let _e18 = ubo.proj;
-    let _e20 = ubo.lightView;
-    let _e23 = ubo.model;
-    let _e25 = inPosition_1;
-    perVertexStruct.gl_Position = (((_e18 * _e20) * _e23) * vec4<f32>(_e25.x, _e25.y, _e25.z, 1.0));
-    let _e33 = perVertexStruct.gl_Position;
-    fragPos = _e33;
+    let _e17 = ubo.lightVPMat;
+    let _e19 = ubo.model;
+    let _e21 = inPosition_1;
+    perVertexStruct.gl_Position = ((_e17 * _e19) * vec4<f32>(_e21.x, _e21.y, _e21.z, 1.0));
+    let _e29 = perVertexStruct.gl_Position;
+    fragPos = _e29;
     return;
 }
 

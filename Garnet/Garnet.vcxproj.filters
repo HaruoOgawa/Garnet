@@ -1642,8 +1642,8 @@
     <None Include="Resources\Shaders\sample_vert.wgsl" />
     <None Include="Resources\Shaders\gltfpbr.vert" />
     <None Include="Resources\Shaders\gltfpbr.frag" />
-    <None Include="Resources\Shaders\shadow.vert" />
-    <None Include="Resources\Shaders\shadow.frag" />
+    <None Include="Resources\Shaders\shadow_debug.vert" />
+    <None Include="Resources\Shaders\shadow_debug.frag" />
     <None Include="Resources\Shaders\depth.vert" />
     <None Include="Resources\Shaders\depth.frag" />
   </ItemGroup>
