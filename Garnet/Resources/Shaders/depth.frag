@@ -5,10 +5,10 @@ layout(location = 0) in vec4 fragPos;
 layout(location = 0) out vec4 outColor;
 
 void main() {
-    //float depth = fragPos.z / fragPos.w;
-    //depth = depth * 0.5 + 0.5;
+    float depth = fragPos.z / fragPos.w;
+    depth = depth * 0.5 + 0.5;
 
-    float depth = gl_FragCoord.z;
+    //float depth = gl_FragCoord.z;
 
     float moment1 = depth;
     float moment2 = depth * depth;

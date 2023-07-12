@@ -4,6 +4,8 @@
 #include "../Debug/Message/Console.h"
 #include "../GLTF/CGLTFImporter.h"
 #include <glm/glm.hpp>
+#include "../Graphics/CDrawInfo.h"
+#include "../Camera/CCamera.h"
 
 namespace scene
 {
@@ -33,8 +35,8 @@ namespace scene
 		m_Cube5(std::make_shared<file::CFileReader>()),
 
 		m_DepthDebugObj(std::make_shared<object::C3DObject>("", "ShadowPass")),
-		m_ShadowVertex(std::make_shared<file::CFileReader>()),
-		m_ShadowFragment(std::make_shared<file::CFileReader>()),
+		m_ShadowDebugVertex(std::make_shared<file::CFileReader>()),
+		m_ShadowDebugFragment(std::make_shared<file::CFileReader>()),
 
 		m_IsLoaded(false)
 	{
@@ -61,8 +63,8 @@ namespace scene
 		m_glTFVert->ReadFile(ShaderPath + "gltfpbr_vert" + pGraphicsAPI->GetShaderExtension());
 		m_glTFFrag->ReadFile(ShaderPath + "gltfpbr_frag" + pGraphicsAPI->GetShaderExtension());
 		
-		m_ShadowVertex->ReadFile(ShaderPath + "shadow_vert" + pGraphicsAPI->GetShaderExtension());
-		m_ShadowFragment->ReadFile(ShaderPath + "shadow_frag" + pGraphicsAPI->GetShaderExtension());
+		m_ShadowDebugVertex->ReadFile(ShaderPath + "shadow_debug_vert" + pGraphicsAPI->GetShaderExtension());
+		m_ShadowDebugFragment->ReadFile(ShaderPath + "shadow_debug_frag" + pGraphicsAPI->GetShaderExtension());
 		
 		// Texture
 		std::string TexturePath = "Resources\\Textures\\";
@@ -124,7 +126,7 @@ namespace scene
 				UniformBuffer->AddData("model", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
 				UniformBuffer->AddData("view", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
 				UniformBuffer->AddData("proj", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
-				UniformBuffer->AddData("lightView", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
+				UniformBuffer->AddData("lightVPMat", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
 				UniformBuffer->AddData("lightDir", &glm::vec4(0.0f)[0], sizeof(float) * 4, 0);
 				UniformBuffer->AddData("lightColor", &glm::vec4(0.0f)[0], sizeof(float) * 4, 0);
 				UniformBuffer->AddData("cameraPos", &glm::vec4(0.0f)[0], sizeof(float) * 4, 0);
@@ -157,6 +159,7 @@ namespace scene
 				Material0->AddTextureBindingLayout({ 7, 8, 1, graphics::ETextureType::TEXTURE_2D }); // TextureIndex -1 ‚Í EmptyTexture‚Å‚ ‚é
 				Material0->AddTextureBindingLayout({ 9, 10, -1, graphics::ETextureType::TEXTURE_2D }); // TextureIndex -1 ‚Í EmptyTexture‚Å‚ ‚é
 				Material0->AddTextureBindingLayout({ 11, 12, 0, graphics::ETextureType::TEXTURE_CUBE });
+				Material0->AddTextureBindingLayout({ 13, 14, 1, graphics::ETextureType::TEXTURE_2D }); // ‚Ð‚Æ‚Ü‚¸1‚ÉShadowMap‚ð“ü‚ê‚Ä‚¢‚é
 
 				UniformBuffer->RecalculateBindingLayoutOffset();
 
@@ -168,6 +171,7 @@ namespace scene
 				if(!APITex0->Create(m_Texture0->GetData())) return false;
 
 				m_TestObject->AddTexture(APITex0);
+				m_TestObject->AddTexture(m_FrameTextureList[0]); // ShadowMap
 				m_TestObject->AddCubeMap(CubeTexList[0]);
 			}
 			
@@ -202,14 +206,14 @@ namespace scene
 		// DepthDebug
 		{
 			std::shared_ptr<graphics::CMaterialCreateInfo> createInfo = std::make_shared<graphics::CMaterialCreateInfo>();
-			createInfo->SetVertexShaderCode(m_ShadowVertex->GetData());
-			createInfo->SetFragmentShaderCode(m_ShadowFragment->GetData());
+			createInfo->SetVertexShaderCode(m_ShadowDebugVertex->GetData());
+			createInfo->SetFragmentShaderCode(m_ShadowDebugFragment->GetData());
 			
 			auto UniformBuffer = graphics::CMaterialCreateInfo::CreateUniformBuffer({ 0 });
 			UniformBuffer->AddData("model", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
 			UniformBuffer->AddData("view", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
 			UniformBuffer->AddData("proj", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
-			UniformBuffer->AddData("lightView", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
+			UniformBuffer->AddData("lightVPMat", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
 
 			auto Material = pGraphicsAPI->CreateMaterial();
 			Material->SetCreateInfo(createInfo);
@@ -241,8 +245,8 @@ namespace scene
 			createInfo->SetVertexShaderCode(m_glTFVert->GetData());
 			createInfo->SetFragmentShaderCode(m_glTFFrag->GetData());
 
-			if (!gltf::CGLTFImporter::Import(pGraphicsAPI, m_Sphere_glTFData->GetData(), m_Sphere_glTFObj, createInfo, CubeTexList, m_DepthVertex, m_DepthFragment)) return false;
-			if (!gltf::CGLTFImporter::Import(pGraphicsAPI, m_Helmet_glTFData->GetData(), m_Helmet_glTFObj, createInfo, CubeTexList, m_DepthVertex, m_DepthFragment)) return false;
+			if (!gltf::CGLTFImporter::Import(pGraphicsAPI, m_Sphere_glTFData->GetData(), m_Sphere_glTFObj, createInfo, CubeTexList, m_FrameTextureList, m_DepthVertex, m_DepthFragment)) return false;
+			if (!gltf::CGLTFImporter::Import(pGraphicsAPI, m_Helmet_glTFData->GetData(), m_Helmet_glTFObj, createInfo, CubeTexList, m_FrameTextureList, m_DepthVertex, m_DepthFragment)) return false;
 		}
 
 		return true;
@@ -273,7 +277,7 @@ namespace scene
 		if (!m_IsLoaded)
 		{
 			if (m_DepthVertex->IsLoaded() && m_DepthFragment->IsLoaded() &&m_VertexShader->IsLoaded() && m_FragmentShader->IsLoaded() && m_Texture0->IsLoaded() && m_Texture1->IsLoaded()
-				&& m_Sphere_glTFData->IsLoaded() && m_Helmet_glTFData->IsLoaded() && m_glTFVert->IsLoaded() && m_glTFFrag->IsLoaded()&& m_ShadowVertex->IsLoaded() && m_ShadowFragment->IsLoaded()
+				&& m_Sphere_glTFData->IsLoaded() && m_Helmet_glTFData->IsLoaded() && m_glTFVert->IsLoaded() && m_glTFFrag->IsLoaded()&& m_ShadowDebugVertex->IsLoaded() && m_ShadowDebugFragment->IsLoaded()
 				&& m_Cube0->IsLoaded() && m_Cube1->IsLoaded() && m_Cube2->IsLoaded() && m_Cube3->IsLoaded() && m_Cube4->IsLoaded() && m_Cube5->IsLoaded() 
 			)
 			{
@@ -310,6 +314,7 @@ namespace scene
 	{
 		if (m_IsLoaded && m_DepthDebugObj)
 		{
+			m_DepthDebugObj->SetPos(DrawInfo->GetLightCamera()->GetPos());
 			if (!m_DepthDebugObj->Draw(false, SecondsTime, Camera, Projection, DrawInfo)) return false;
 		}
 

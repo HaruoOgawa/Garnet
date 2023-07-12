@@ -22,13 +22,12 @@ namespace app
 		m_ScriptScene(nullptr),
 		m_MainCamera(std::make_shared<camera::CViewerCamera>()),
 		m_Projection(std::make_shared<projection::CProjection>()),
-		m_ShadowProjection(std::make_shared<projection::CProjection>()),
 		m_DrawInfo(std::make_shared<graphics::CDrawInfo>())
 	{
 		m_MainCamera->SetPos(glm::vec3(0.0f, 0.0f, 5.0f));
 		m_DrawInfo->GetLightCamera()->SetPos(glm::vec3(3.0f, 3.0f, -3.0f));
-		m_ShadowProjection->SetNear(1.0f);
-		m_ShadowProjection->SetFar(10.0f);
+		m_DrawInfo->GetLightProjection()->SetNear(1.0f);
+		m_DrawInfo->GetLightProjection()->SetFar(100.0f);
 	}
 
 	CScriptApp::~CScriptApp()
@@ -71,7 +70,7 @@ namespace app
 	bool CScriptApp::Resize(int Width, int Height)
 	{
 		m_Projection->SetAspect(static_cast<float>(Width) / static_cast<float>(Height));
-		m_ShadowProjection->SetAspect(static_cast<float>(Width) / static_cast<float>(Height));
+		m_DrawInfo->GetLightProjection()->SetAspect(static_cast<float>(Width) / static_cast<float>(Height));
 
 		return true;
 	}
@@ -90,7 +89,7 @@ namespace app
 		
 		// ShadowPass
 		if (!pGraphicsAPI->BeginRender("ShadowPass")) return false;
-		if (!m_ScriptScene->Draw(pGraphicsAPI, true, SecondsTime, m_MainCamera, m_ShadowProjection, m_DrawInfo)) return false;
+		if (!m_ScriptScene->Draw(pGraphicsAPI, true, SecondsTime, m_MainCamera, m_Projection, m_DrawInfo)) return false;
 		if (!pGraphicsAPI->EndRender()) return false;
 		
 		// DefaultPass(SwapChain)

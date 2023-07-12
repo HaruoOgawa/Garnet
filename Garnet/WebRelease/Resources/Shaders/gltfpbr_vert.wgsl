@@ -9,7 +9,7 @@ struct UniformBufferObject {
     model: mat4x4<f32>,
     view: mat4x4<f32>,
     proj: mat4x4<f32>,
-    lightView: mat4x4<f32>,
+    lightVPMat: mat4x4<f32>,
     lightDir: vec4<f32>,
     lightColor: vec4<f32>,
     cameraPos: vec4<f32>,
@@ -40,6 +40,7 @@ struct VertexOutput {
     @location(2) member_2: vec4<f32>,
     @location(3) member_3: vec3<f32>,
     @location(4) member_4: vec3<f32>,
+    @location(5) member_5: vec4<f32>,
 }
 
 var<private> inPosition_1: vec3<f32>;
@@ -55,31 +56,36 @@ var<private> f_WorldTangent: vec3<f32>;
 var<private> inTangent_1: vec4<f32>;
 var<private> f_WorldBioTangent: vec3<f32>;
 var<private> inBioTangent_1: vec4<f32>;
+var<private> f_LightSpacePos: vec4<f32>;
 
 fn main_1() {
     var pos: vec4<f32>;
 
-    let _e23 = inPosition_1;
-    pos = vec4<f32>(_e23.x, _e23.y, _e23.z, 1.0);
-    let _e29 = ubo.proj;
-    let _e31 = ubo.view;
-    let _e34 = ubo.model;
-    let _e36 = pos;
-    perVertexStruct.gl_Position = (((_e29 * _e31) * _e34) * _e36);
-    let _e40 = ubo.model;
-    let _e41 = inNormal_1;
-    f_WorldNormal = normalize((_e40 * vec4<f32>(_e41.x, _e41.y, _e41.z, 0.0)).xyz);
-    let _e49 = inTexcoord_1;
-    f_Texcoord = _e49;
-    let _e51 = ubo.model;
-    let _e52 = inPosition_1;
-    f_WorldPos = (_e51 * vec4<f32>(_e52.x, _e52.y, _e52.z, 1.0));
-    let _e59 = ubo.model;
-    let _e60 = inTangent_1;
-    f_WorldTangent = normalize((_e59 * _e60).xyz);
-    let _e65 = ubo.model;
-    let _e66 = inBioTangent_1;
-    f_WorldBioTangent = normalize((_e65 * _e66).xyz);
+    let _e25 = inPosition_1;
+    pos = vec4<f32>(_e25.x, _e25.y, _e25.z, 1.0);
+    let _e31 = ubo.proj;
+    let _e33 = ubo.view;
+    let _e36 = ubo.model;
+    let _e38 = pos;
+    perVertexStruct.gl_Position = (((_e31 * _e33) * _e36) * _e38);
+    let _e42 = ubo.model;
+    let _e43 = inNormal_1;
+    f_WorldNormal = normalize((_e42 * vec4<f32>(_e43.x, _e43.y, _e43.z, 0.0)).xyz);
+    let _e51 = inTexcoord_1;
+    f_Texcoord = _e51;
+    let _e53 = ubo.model;
+    let _e54 = inPosition_1;
+    f_WorldPos = (_e53 * vec4<f32>(_e54.x, _e54.y, _e54.z, 1.0));
+    let _e61 = ubo.model;
+    let _e62 = inTangent_1;
+    f_WorldTangent = normalize((_e61 * _e62).xyz);
+    let _e67 = ubo.model;
+    let _e68 = inBioTangent_1;
+    f_WorldBioTangent = normalize((_e67 * _e68).xyz);
+    let _e73 = ubo.lightVPMat;
+    let _e75 = ubo.model;
+    let _e77 = pos;
+    f_LightSpacePos = ((_e73 * _e75) * _e77);
     return;
 }
 
@@ -91,13 +97,14 @@ fn main(@location(0) inPosition: vec3<f32>, @location(1) inNormal: vec3<f32>, @l
     inTangent_1 = inTangent;
     inBioTangent_1 = inBioTangent;
     main_1();
-    let _e18 = perVertexStruct.gl_Position.y;
-    perVertexStruct.gl_Position.y = -(_e18);
-    let _e20 = perVertexStruct.gl_Position;
-    let _e21 = f_WorldNormal;
-    let _e22 = f_Texcoord;
-    let _e23 = f_WorldPos;
-    let _e24 = f_WorldTangent;
-    let _e25 = f_WorldBioTangent;
-    return VertexOutput(_e20, _e21, _e22, _e23, _e24, _e25);
+    let _e19 = perVertexStruct.gl_Position.y;
+    perVertexStruct.gl_Position.y = -(_e19);
+    let _e21 = perVertexStruct.gl_Position;
+    let _e22 = f_WorldNormal;
+    let _e23 = f_Texcoord;
+    let _e24 = f_WorldPos;
+    let _e25 = f_WorldTangent;
+    let _e26 = f_WorldBioTangent;
+    let _e27 = f_LightSpacePos;
+    return VertexOutput(_e21, _e22, _e23, _e24, _e25, _e26, _e27);
 }

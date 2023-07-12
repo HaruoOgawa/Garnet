@@ -4,6 +4,7 @@
 #include <memory>
 
 namespace camera { class CCamera; }
+namespace projection { class CProjection; }
 
 namespace graphics
 {
@@ -11,6 +12,7 @@ namespace graphics
 	{
 		std::shared_ptr<camera::CCamera> m_LightCamera;
 		glm::vec4 m_LightColor;
+		std::shared_ptr<projection::CProjection> m_LightProjection;
 	public:
 		CDrawInfo();
 		virtual ~CDrawInfo() = default;
@@ -20,5 +22,7 @@ namespace graphics
 
 		void SetLightColor(const glm::vec4& LightColor);
 		const glm::vec4& GetLightColor() const;
+
+		const std::shared_ptr<projection::CProjection>& GetLightProjection() const { return m_LightProjection; };
 	};
 }

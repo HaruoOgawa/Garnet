@@ -30,7 +30,7 @@ namespace graphics
 		UniformBuffer->AddData("model", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
 		UniformBuffer->AddData("view", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
 		UniformBuffer->AddData("proj", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
-		UniformBuffer->AddData("lightView", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
+		UniformBuffer->AddData("lightVPMat", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
 		UniformBuffer->RecalculateBindingLayoutOffset();
 
 		m_DepthMaterial = pGraphicsAPI->CreateMaterial();

@@ -27,7 +27,7 @@
 namespace gltf
 {
 	bool CGLTFImporter::Import(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& Data, std::shared_ptr<object::C3DObject>& Object,
-		std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, const std::vector<std::shared_ptr<graphics::CTexture>>& CubeTexList,
+		std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, const std::vector<std::shared_ptr<graphics::CTexture>>& CubeTexList, const std::vector<std::shared_ptr<graphics::CTexture>>& FrameTextureList,
 		const std::shared_ptr<file::CFileReader>& DepthVertex, const std::shared_ptr<file::CFileReader>& DepthFragment)
 	{
 		tinygltf::Model model;
@@ -53,6 +53,9 @@ namespace gltf
 		// テクスチャ
 		std::vector<std::shared_ptr<graphics::CTexture>> TextureList;
 		if (!CreateTexture(pGraphicsAPI, model, TextureList)) return false;
+
+		// ひとまず末尾にShadowMapを追加しておく
+		TextureList.push_back(FrameTextureList[0]);
 
 		// マテリアル
 		std::vector<std::shared_ptr<graphics::CMaterial>> MaterialList;
@@ -184,7 +187,7 @@ namespace gltf
 				UniformBuffer->AddData("model", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
 				UniformBuffer->AddData("view", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
 				UniformBuffer->AddData("proj", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
-				UniformBuffer->AddData("lightView", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
+				UniformBuffer->AddData("lightVPMat", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
 				UniformBuffer->AddData("lightDir", &glm::vec4(0.0f)[0], sizeof(float) * 4, 0);
 				UniformBuffer->AddData("lightColor", &glm::vec4(0.0f)[0], sizeof(float) * 4, 0);
 				UniformBuffer->AddData("cameraPos", &glm::vec4(0.0f)[0], sizeof(float) * 4, 0);
@@ -264,6 +267,12 @@ namespace gltf
 					// CubeMap
 					{
 						material->AddTextureBindingLayout({ 11, 12, 0, graphics::ETextureType::TEXTURE_CUBE });
+					}
+
+					// ShadowMap
+					{
+						// ひとまず末尾から取得
+						material->AddTextureBindingLayout({ 13, 14, (static_cast<int>(TextureList.size()) - 1), graphics::ETextureType::TEXTURE_2D });
 					}
 
 					{

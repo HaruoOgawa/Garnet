@@ -5,6 +5,7 @@ layout(location = 1) in vec2 f_Texcoord;
 layout(location = 2) in vec4 f_WorldPos;
 layout(location = 3) in vec3 f_WorldTangent;
 layout(location = 4) in vec3 f_WorldBioTangent;
+layout(location = 5) in vec4 f_LightSpacePos;
 
 layout(location = 0) out vec4 outColor;
 
@@ -12,7 +13,7 @@ layout(binding = 0) uniform UniformBufferObject{
 	mat4 model;
     mat4 view;
     mat4 proj;
-	mat4 lightView;
+	mat4 lightVPMat;
 
 	vec4 lightDir;
 	vec4 lightColor;
@@ -59,6 +60,9 @@ layout(binding = 10) uniform sampler occlusionTextureSampler;
 
 layout(binding = 11) uniform textureCube cubemapTexture;
 layout(binding = 12) uniform sampler cubemapTextureSampler;
+
+layout(binding = 13) uniform texture2D shadowmapTexture;
+layout(binding = 14) uniform sampler shadowmapTextureSampler;
 
 // なんかUnityPBRでもみた値だなぁ
 const float MIN_ROUGHNESS = 0.04;
@@ -199,6 +203,22 @@ vec4 LINEARtoSRGB(vec4 srgbIn)
 	return vec4(pow(srgbIn.xyz, vec3(1.0 / 2.2)), srgbIn.a);
 }
 
+float CalcShadow(vec3 lsp)
+{
+	vec2 moments = texture(sampler2D(shadowmapTexture, shadowmapTextureSampler), lsp.xy).rg;
+
+	if(lsp.z <= moments.x)
+	{
+		// 手前なので普通に描画する
+		return 1.0;
+	}
+	else
+	{
+		// 後ろなので影にする
+		return 0.0;
+	}
+}
+
 void main(){
 	vec4 col = vec4(1.0);
 
@@ -321,6 +341,21 @@ void main(){
 		vec3 emissive = SRGBtoLINEAR(texture(sampler2D(emissiveTexture, emissiveTextureSampler), f_Texcoord)).rgb * ubo.emissiveFactor.rgb;
 		col.rgb += emissive;
 	}
+
+	// Shadow
+	// LightSpaceScreenPos
+	vec3 lsp = f_LightSpacePos.xyz / f_LightSpacePos.w;
+	lsp = lsp * 0.5 + 0.5;
+	float shadowCol = 1.0;
+
+	bool outSide = f_LightSpacePos.z <= 0.0f || (lsp.x < 0 || lsp.y < 0) || (lsp.x >= 1 || lsp.y >= 1);
+
+	if(!outSide)
+	{
+		shadowCol = CalcShadow(lsp);
+	}
+
+	col.rgb *= shadowCol;
 
 	// カラースペースをリニアにする
 	col.rgb = pow(col.rgb, vec3(1.0/2.2));

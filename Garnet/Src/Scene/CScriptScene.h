@@ -51,8 +51,8 @@ namespace scene
 
 		// ShadowMapping
 		std::shared_ptr<object::C3DObject> m_DepthDebugObj;
-		std::shared_ptr<file::CFileReader> m_ShadowVertex;
-		std::shared_ptr<file::CFileReader> m_ShadowFragment;
+		std::shared_ptr<file::CFileReader> m_ShadowDebugVertex;
+		std::shared_ptr<file::CFileReader> m_ShadowDebugFragment;
 
 		//
 		bool m_IsLoaded;

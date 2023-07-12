@@ -10,7 +10,7 @@ layout(binding = 0) uniform UniformBufferObject{
 	mat4 model;
     mat4 view;
     mat4 proj;
-    mat4 lightView;
+    mat4 lightVPMat;
 
 	vec4 lightDir;
 	vec4 lightColor;
@@ -45,6 +45,7 @@ layout(location = 1) out vec2 f_Texcoord;
 layout(location = 2) out vec4 f_WorldPos;
 layout(location = 3) out vec3 f_WorldTangent;
 layout(location = 4) out vec3 f_WorldBioTangent;
+layout(location = 5) out vec4 f_LightSpacePos;
 
 #define rot(a) mat2(cos(a), -sin(a), sin(a), cos(a))
 
@@ -57,4 +58,5 @@ void main(){
     f_WorldPos = ubo.model * vec4(inPosition, 1.0);
     f_WorldTangent = normalize((ubo.model * inTangent).xyz);
     f_WorldBioTangent = normalize((ubo.model * inBioTangent).xyz);
+    f_LightSpacePos = ubo.lightVPMat * ubo.model * pos;
 }
