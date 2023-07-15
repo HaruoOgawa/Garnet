@@ -26,7 +26,7 @@ namespace app
 	{
 		m_MainCamera->SetPos(glm::vec3(0.0f, 0.0f, 5.0f));
 		m_DrawInfo->GetLightCamera()->SetPos(glm::vec3(3.0f, 3.0f, -3.0f));
-		m_DrawInfo->GetLightProjection()->SetNear(1.0f);
+		m_DrawInfo->GetLightProjection()->SetNear(2.0f);
 		m_DrawInfo->GetLightProjection()->SetFar(100.0f);
 	}
 
@@ -51,7 +51,7 @@ namespace app
 		if (!m_ScriptScene->Initialize(pGraphicsAPI)) return false;
 
 		// オフスクリーンレンダリング用のFrameBufferを生成する
-		if (!pGraphicsAPI->CreateRenderPass("ShadowPass", api::ERenderPassFormat::COLOR_RENDERPASS)) return false;
+		if (!pGraphicsAPI->CreateRenderPass("ShadowPass", api::ERenderPassFormat::COLOR_RENDERPASS, glm::vec4(1.0f))) return false;
 
 		// FrameTextureを渡す
 		for (const auto& RenderPass : pGraphicsAPI->GetOffScreenRenderPassMap())

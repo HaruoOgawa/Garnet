@@ -14,6 +14,7 @@
 
 #include "../ERenderPassFormat.h"
 #include "../../Interface/IRenderPass.h"
+#include <glm/glm.hpp>
 
 namespace graphics { class CTexture; }
 
@@ -31,6 +32,7 @@ namespace api
 		std::string m_PassName;
 		int m_Width;
 		int m_Height;
+		glm::vec4 m_InitColor;
 		api::ERenderPassFormat m_RenderPassFormat;
 		std::shared_ptr<CVulkanTexture> m_FrameTexture;
 		std::shared_ptr<CVulkanTexture> m_DepthTexture;
@@ -52,7 +54,7 @@ namespace api
 		bool CreateCommandPool();
 		bool CreateCommandBuffer();
 	public:
-		CVulkanRenderPass(api::CVulkanAPI* pGraphicsAPI, const std::string& PassName, ERenderPassFormat RenderPassFormat);
+		CVulkanRenderPass(api::CVulkanAPI* pGraphicsAPI, const std::string& PassName, ERenderPassFormat RenderPassFormat, const glm::vec4& InitColor);
 		virtual ~CVulkanRenderPass();
 
 		virtual std::shared_ptr<graphics::CTexture> GetFrameTexture() override;

@@ -77,9 +77,9 @@ namespace scene
 
 		m_Helmet_glTFData->ReadFile(ModelPath + "DamagedHelmet\\glTF-Binary\\DamagedHelmet.glb");
 
-		m_Sphere_glTFData->ReadFile(ModelPath + "MetalRoughSpheresNoTextures\\glTF-Binary\\MetalRoughSpheresNoTextures.glb");
-		m_Sphere_glTFObj->SetScale(glm::vec3(500.0f, 500.0f, 500.0f));
-		m_Sphere_glTFObj->SetPos(glm::vec3(-1.5f, -1.5f, -1.5f));
+		m_Sphere_glTFData->ReadFile(ModelPath + "Box\\glTF-Binary\\Box.glb");
+		//m_Sphere_glTFObj->SetScale(glm::vec3(500.0f, 500.0f, 500.0f));
+		m_Sphere_glTFObj->SetPos(glm::vec3(-1.5f, 0.0f, -1.5f));
 
 		// Cubemap
 		m_Cube0->ReadFile("Resources\\Cubemaps\\environment\\environment_back_0.jpg");
@@ -134,7 +134,7 @@ namespace scene
 				UniformBuffer->AddData("emissiveFactor", &glm::vec4(0.0f)[0], sizeof(float) * 4, 0);
 
 				UniformBuffer->AddData("time", &glm::vec1(0.0f)[0], sizeof(float), 0);
-				UniformBuffer->AddData("metallicFactor", &glm::vec1(0.1f)[0], sizeof(float), 0);
+				UniformBuffer->AddData("metallicFactor", &glm::vec1(1.0f)[0], sizeof(float), 0);
 				UniformBuffer->AddData("roughnessFactor", &glm::vec1(0.1f)[0], sizeof(float), 0);
 				UniformBuffer->AddData("normalMapScale", &glm::vec1(1.0f)[0], sizeof(float), 0);
 
@@ -159,7 +159,7 @@ namespace scene
 				Material0->AddTextureBindingLayout({ 7, 8, 1, graphics::ETextureType::TEXTURE_2D }); // TextureIndex -1 ‚Í EmptyTexture‚Å‚ ‚é
 				Material0->AddTextureBindingLayout({ 9, 10, -1, graphics::ETextureType::TEXTURE_2D }); // TextureIndex -1 ‚Í EmptyTexture‚Å‚ ‚é
 				Material0->AddTextureBindingLayout({ 11, 12, 0, graphics::ETextureType::TEXTURE_CUBE });
-				Material0->AddTextureBindingLayout({ 13, 14, 1, graphics::ETextureType::TEXTURE_2D }); // ‚Ð‚Æ‚Ü‚¸1‚ÉShadowMap‚ð“ü‚ê‚Ä‚¢‚é
+				Material0->AddTextureBindingLayout({ 13, 14, 2, graphics::ETextureType::TEXTURE_2D }); // ‚Ð‚Æ‚Ü‚¸1‚ÉShadowMap‚ð“ü‚ê‚Ä‚¢‚é
 
 				UniformBuffer->RecalculateBindingLayoutOffset();
 
@@ -169,8 +169,12 @@ namespace scene
 			{
 				auto APITex0 = pGraphicsAPI->CreateTexture();
 				if(!APITex0->Create(m_Texture0->GetData())) return false;
+				
+				auto APITex1 = pGraphicsAPI->CreateTexture();
+				if(!APITex1->Create(m_Texture1->GetData())) return false;
 
 				m_TestObject->AddTexture(APITex0);
+				m_TestObject->AddTexture(APITex1);
 				m_TestObject->AddTexture(m_FrameTextureList[0]); // ShadowMap
 				m_TestObject->AddCubeMap(CubeTexList[0]);
 			}
@@ -294,7 +298,7 @@ namespace scene
 	{
 		if (m_IsLoaded && m_Sphere_glTFObj)
 		{
-			//if (!m_Sphere_glTFObj->Draw(IsDepthPass, SecondsTime, Camera, Projection, DrawInfo)) return false;
+			if (!m_Sphere_glTFObj->Draw(IsDepthPass, SecondsTime, Camera, Projection, DrawInfo)) return false;
 		}
 		
 		if (m_IsLoaded && m_Helmet_glTFObj)

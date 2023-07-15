@@ -74,9 +74,9 @@ namespace api
 		m_OffScreenRenderPassMap.clear();
 	}
 
-	bool CWebGPUAPI::CreateRenderPass(const std::string& PassName, ERenderPassFormat RenderPassFormat)
+	bool CWebGPUAPI::CreateRenderPass(const std::string& PassName, ERenderPassFormat RenderPassFormat, const glm::vec4& InitColor)
 	{
-		std::shared_ptr<CWebGPURenderPass> RenderPass = std::make_shared<CWebGPURenderPass>(this, PassName, RenderPassFormat);
+		std::shared_ptr<CWebGPURenderPass> RenderPass = std::make_shared<CWebGPURenderPass>(this, PassName, RenderPassFormat, InitColor);
 		if (!RenderPass->Create(m_Width, m_Height)) return false;
 
 		m_OffScreenRenderPassMap.insert({ PassName, RenderPass });

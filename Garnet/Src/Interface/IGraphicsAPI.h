@@ -18,6 +18,7 @@
 #endif
 #include <glfw3.h>
 #include <glfw3native.h>
+#include <glm/glm.hpp>
 
 #endif // !__EMSCRIPTEN__
 
@@ -39,7 +40,7 @@ namespace api
 		virtual bool InitializeWithGLFW(GLFWwindow* pWindow) = 0;
 #endif // __EMSCRIPTEN__
 		
-		virtual bool CreateRenderPass(const std::string& PassName, ERenderPassFormat RenderPassFormat) = 0;
+		virtual bool CreateRenderPass(const std::string& PassName, ERenderPassFormat RenderPassFormat, const glm::vec4& InitColor) = 0;
 		virtual std::shared_ptr<renderer::IRenderer> CreateRenderer(const std::string& PassName) = 0;
 		virtual std::shared_ptr<graphics::CMaterial> CreateMaterial() = 0;
 		virtual std::shared_ptr<graphics::CTexture> CreateTexture(bool UseMipMap = false) = 0;

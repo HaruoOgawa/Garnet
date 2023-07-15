@@ -79,23 +79,73 @@ var emissiveTextureSampler: sampler;
 var<private> f_LightSpacePos_1: vec4<f32>;
 var<private> outColor: vec4<f32>;
 
+fn linstepf1f1f1_(min: ptr<function, f32>, max: ptr<function, f32>, v: ptr<function, f32>) -> f32 {
+    let _e73 = (*v);
+    let _e74 = (*min);
+    let _e76 = (*max);
+    let _e77 = (*min);
+    return clamp(((_e73 - _e74) / (_e76 - _e77)), 0.0, 1.0);
+}
+
+fn ReduceLightBleedingf1f1_(p_max: ptr<function, f32>, Amount: ptr<function, f32>) -> f32 {
+    var param: f32;
+    var param_1: f32;
+    var param_2: f32;
+
+    let _e75 = (*Amount);
+    param = _e75;
+    param_1 = 1.0;
+    let _e76 = (*p_max);
+    param_2 = _e76;
+    let _e77 = linstepf1f1f1_((&param), (&param_1), (&param_2));
+    return _e77;
+}
+
 fn CalcShadowvf3vf3vf3_(lsp: ptr<function, vec3<f32>>, nomral: ptr<function, vec3<f32>>, lightDir: ptr<function, vec3<f32>>) -> f32 {
     var moments: vec2<f32>;
-    var bias: f32;
+    var ShadowBias: f32;
+    var distance: f32;
+    var variance: f32;
+    var d: f32;
+    var p_max_1: f32;
+    var param_3: f32;
+    var param_4: f32;
 
-    let _e75 = (*lsp);
-    let _e77 = textureSample(shadowmapTexture, shadowmapTextureSampler, _e75.xy);
-    moments = _e77.xy;
-    let _e79 = (*nomral);
-    let _e80 = (*lightDir);
-    bias = max(0.004999999888241291, (0.05000000074505806 * (1.0 - dot(_e79, _e80))));
-    let _e86 = (*lsp)[2u];
-    let _e87 = bias;
-    let _e90 = moments[0u];
-    if ((_e86 - _e87) <= _e90) {
+    let _e81 = (*lsp);
+    let _e83 = textureSample(shadowmapTexture, shadowmapTextureSampler, _e81.xy);
+    moments = _e83.xy;
+    let _e85 = (*nomral);
+    let _e86 = (*lightDir);
+    ShadowBias = max(0.004999999888241291, (0.05000000074505806 * (1.0 - dot(_e85, _e86))));
+    let _e92 = (*lsp)[2u];
+    let _e93 = ShadowBias;
+    distance = (_e92 - _e93);
+    let _e95 = distance;
+    let _e97 = moments[0u];
+    if (_e95 <= _e97) {
         return 1.0;
     }
-    return 0.10000000149011612;
+    let _e100 = moments[1u];
+    let _e102 = moments[0u];
+    let _e104 = moments[0u];
+    variance = (_e100 - (_e102 * _e104));
+    let _e107 = variance;
+    variance = max(0.004999999888241291, _e107);
+    let _e109 = distance;
+    let _e111 = moments[0u];
+    d = (_e109 - _e111);
+    let _e113 = variance;
+    let _e114 = variance;
+    let _e115 = d;
+    let _e116 = d;
+    p_max_1 = (_e113 / (_e114 + (_e115 * _e116)));
+    param_3 = 0.10000000149011612;
+    let _e120 = p_max_1;
+    param_4 = _e120;
+    let _e121 = ReduceLightBleedingf1f1_((&param_3), (&param_4));
+    p_max_1 = _e121;
+    let _e122 = p_max_1;
+    return _e122;
 }
 
 fn SRGBtoLINEARvf4_(srgbIn: ptr<function, vec4<f32>>) -> vec4<f32> {
@@ -112,31 +162,31 @@ fn LINEARtoSRGBvf4_(srgbIn_1: ptr<function, vec4<f32>>) -> vec4<f32> {
     return vec4<f32>(_e73.x, _e73.y, _e73.z, _e75);
 }
 
-fn CalcDiffuseBRDFstructPBRParamf1f1f1f1f1f1f1vf3vf3f1vf3vf31_(param: ptr<function, PBRParam>) -> vec3<f32> {
-    let _e72 = (*param).diffuseColor;
+fn CalcDiffuseBRDFstructPBRParamf1f1f1f1f1f1f1vf3vf3f1vf3vf31_(param_5: ptr<function, PBRParam>) -> vec3<f32> {
+    let _e72 = (*param_5).diffuseColor;
     return (_e72 / vec3<f32>(3.1415927410125732));
 }
 
-fn CalcFrenelReflectionstructPBRParamf1f1f1f1f1f1f1vf3vf3f1vf3vf31_(param_1: ptr<function, PBRParam>) -> vec3<f32> {
-    let _e72 = (*param_1).reflectance0_;
-    let _e74 = (*param_1).reflectance90_;
-    let _e76 = (*param_1).reflectance0_;
-    let _e79 = (*param_1).VdotH;
+fn CalcFrenelReflectionstructPBRParamf1f1f1f1f1f1f1vf3vf3f1vf3vf31_(param_6: ptr<function, PBRParam>) -> vec3<f32> {
+    let _e72 = (*param_6).reflectance0_;
+    let _e74 = (*param_6).reflectance90_;
+    let _e76 = (*param_6).reflectance0_;
+    let _e79 = (*param_6).VdotH;
     return (_e72 + ((_e74 - _e76) * pow(clamp((1.0 - _e79), 0.0, 1.0), 5.0)));
 }
 
-fn CalcGeometricOcculusionstructPBRParamf1f1f1f1f1f1f1vf3vf3f1vf3vf31_(param_2: ptr<function, PBRParam>) -> f32 {
+fn CalcGeometricOcculusionstructPBRParamf1f1f1f1f1f1f1vf3vf3f1vf3vf31_(param_7: ptr<function, PBRParam>) -> f32 {
     var NdotL: f32;
     var NdotV: f32;
     var r: f32;
     var attenuationL: f32;
     var attenuationV: f32;
 
-    let _e77 = (*param_2).NdotL;
+    let _e77 = (*param_7).NdotL;
     NdotL = _e77;
-    let _e79 = (*param_2).NdotV;
+    let _e79 = (*param_7).NdotV;
     NdotV = _e79;
-    let _e81 = (*param_2).alphaRoughness;
+    let _e81 = (*param_7).alphaRoughness;
     r = _e81;
     let _e82 = NdotL;
     let _e84 = NdotL;
@@ -161,17 +211,17 @@ fn CalcGeometricOcculusionstructPBRParamf1f1f1f1f1f1f1vf3vf3f1vf3vf31_(param_2: 
     return (_e118 * _e119);
 }
 
-fn CalcMicrofacetstructPBRParamf1f1f1f1f1f1f1vf3vf3f1vf3vf31_(param_3: ptr<function, PBRParam>) -> f32 {
+fn CalcMicrofacetstructPBRParamf1f1f1f1f1f1f1vf3vf3f1vf3vf31_(param_8: ptr<function, PBRParam>) -> f32 {
     var roughness2_: f32;
     var f: f32;
 
-    let _e74 = (*param_3).alphaRoughness;
-    let _e76 = (*param_3).alphaRoughness;
+    let _e74 = (*param_8).alphaRoughness;
+    let _e76 = (*param_8).alphaRoughness;
     roughness2_ = (_e74 * _e76);
-    let _e79 = (*param_3).NdotH;
+    let _e79 = (*param_8).NdotH;
     let _e80 = roughness2_;
-    let _e83 = (*param_3).NdotH;
-    let _e86 = (*param_3).NdotH;
+    let _e83 = (*param_8).NdotH;
+    let _e86 = (*param_8).NdotH;
     f = ((((_e79 * _e80) - _e83) * _e86) + 1.0);
     let _e89 = roughness2_;
     let _e90 = f;
@@ -230,7 +280,7 @@ fn main_1() {
     var specularEnvironmentR0_: vec3<f32>;
     var specularEnvironmentR90_: vec3<f32>;
     var n_1: vec3<f32>;
-    var v: vec3<f32>;
+    var v_1: vec3<f32>;
     var l: vec3<f32>;
     var h: vec3<f32>;
     var reflection: vec3<f32>;
@@ -241,31 +291,31 @@ fn main_1() {
     var VdotH: f32;
     var pbrParam: PBRParam;
     var D: f32;
-    var param_4: PBRParam;
+    var param_9: PBRParam;
     var G: f32;
-    var param_5: PBRParam;
+    var param_10: PBRParam;
     var F: vec3<f32>;
-    var param_6: PBRParam;
+    var param_11: PBRParam;
     var specularBRDF: vec3<f32>;
     var diffuseBRDF: vec3<f32>;
-    var param_7: PBRParam;
+    var param_12: PBRParam;
     var mipCount: f32;
     var lod: f32;
     var reflectColor: vec3<f32>;
-    var param_8: vec4<f32>;
+    var param_13: vec4<f32>;
     var ao: f32;
     var emissive: vec3<f32>;
-    var param_9: vec4<f32>;
+    var param_14: vec4<f32>;
     var lsp_1: vec3<f32>;
     var shadowCol: f32;
     var outSide: bool;
-    var param_10: vec3<f32>;
-    var param_11: vec3<f32>;
-    var param_12: vec3<f32>;
-    var phi_644_: bool;
-    var phi_645_: bool;
-    var phi_658_: bool;
-    var phi_659_: bool;
+    var param_15: vec3<f32>;
+    var param_16: vec3<f32>;
+    var param_17: vec3<f32>;
+    var phi_704_: bool;
+    var phi_705_: bool;
+    var phi_718_: bool;
+    var phi_719_: bool;
 
     col = vec4<f32>(1.0, 1.0, 1.0, 1.0);
     let _e117 = ubo.roughnessFactor;
@@ -325,20 +375,20 @@ fn main_1() {
     n_1 = _e176;
     let _e178 = ubo.cameraPos;
     let _e180 = f_WorldPos_1;
-    v = normalize((_e178.xyz - _e180.xyz));
+    v_1 = normalize((_e178.xyz - _e180.xyz));
     let _e185 = ubo.lightDir;
     l = normalize(_e185.xyz);
-    let _e188 = v;
+    let _e188 = v_1;
     let _e189 = l;
     h = normalize((_e188 + _e189));
-    let _e192 = v;
+    let _e192 = v_1;
     let _e193 = n_1;
     reflection = -(normalize(reflect(_e192, _e193)));
     let _e197 = n_1;
     let _e198 = l;
     NdotL_1 = clamp(dot(_e197, _e198), 0.0010000000474974513, 1.0);
     let _e201 = n_1;
-    let _e202 = v;
+    let _e202 = v_1;
     NdotV_1 = clamp(abs(dot(_e201, _e202)), 0.0010000000474974513, 1.0);
     let _e206 = n_1;
     let _e207 = h;
@@ -346,7 +396,7 @@ fn main_1() {
     let _e210 = l;
     let _e211 = h;
     LdotH = clamp(dot(_e210, _e211), 0.0, 1.0);
-    let _e214 = v;
+    let _e214 = v_1;
     let _e215 = h;
     VdotH = clamp(dot(_e214, _e215), 0.0, 1.0);
     let _e218 = NdotL_1;
@@ -363,16 +413,16 @@ fn main_1() {
     let _e229 = specularColor;
     pbrParam = PBRParam(_e218, _e219, _e220, _e221, _e222, _e223, _e224, _e225, _e226, _e227, _e228, _e229);
     let _e231 = pbrParam;
-    param_4 = _e231;
-    let _e232 = CalcMicrofacetstructPBRParamf1f1f1f1f1f1f1vf3vf3f1vf3vf31_((&param_4));
+    param_9 = _e231;
+    let _e232 = CalcMicrofacetstructPBRParamf1f1f1f1f1f1f1vf3vf3f1vf3vf31_((&param_9));
     D = _e232;
     let _e233 = pbrParam;
-    param_5 = _e233;
-    let _e234 = CalcGeometricOcculusionstructPBRParamf1f1f1f1f1f1f1vf3vf3f1vf3vf31_((&param_5));
+    param_10 = _e233;
+    let _e234 = CalcGeometricOcculusionstructPBRParamf1f1f1f1f1f1f1vf3vf3f1vf3vf31_((&param_10));
     G = _e234;
     let _e235 = pbrParam;
-    param_6 = _e235;
-    let _e236 = CalcFrenelReflectionstructPBRParamf1f1f1f1f1f1f1vf3vf3f1vf3vf31_((&param_6));
+    param_11 = _e235;
+    let _e236 = CalcFrenelReflectionstructPBRParamf1f1f1f1f1f1f1vf3vf3f1vf3vf31_((&param_11));
     F = _e236;
     let _e237 = D;
     let _e238 = G;
@@ -382,20 +432,20 @@ fn main_1() {
     specularBRDF = ((_e240 * (_e237 * _e238)) / vec3<f32>(((4.0 * _e242) * _e244)));
     let _e248 = F;
     let _e251 = pbrParam;
-    param_7 = _e251;
-    let _e252 = CalcDiffuseBRDFstructPBRParamf1f1f1f1f1f1f1vf3vf3f1vf3vf31_((&param_7));
+    param_12 = _e251;
+    let _e252 = CalcDiffuseBRDFstructPBRParamf1f1f1f1f1f1f1vf3vf3f1vf3vf31_((&param_12));
     diffuseBRDF = ((vec3<f32>(1.0) - _e248) * _e252);
     let _e255 = ubo.mipCount;
     mipCount = _e255;
     let _e256 = mipCount;
     let _e257 = perceptualRoughness;
     lod = (_e256 * _e257);
-    let _e259 = v;
+    let _e259 = v_1;
     let _e260 = n_1;
     let _e262 = lod;
     let _e263 = textureSampleLevel(cubemapTexture, cubemapTextureSampler, reflect(_e259, _e260), _e262);
-    param_8 = _e263;
-    let _e264 = LINEARtoSRGBvf4_((&param_8));
+    param_13 = _e263;
+    let _e264 = LINEARtoSRGBvf4_((&param_13));
     reflectColor = _e264.xyz;
     let _e266 = NdotL_1;
     let _e268 = ubo.lightColor;
@@ -425,8 +475,8 @@ fn main_1() {
     if (_e308 != 0) {
         let _e310 = f_Texcoord_1;
         let _e311 = textureSample(emissiveTexture, emissiveTextureSampler, _e310);
-        param_9 = _e311;
-        let _e312 = SRGBtoLINEARvf4_((&param_9));
+        param_14 = _e311;
+        let _e312 = SRGBtoLINEARvf4_((&param_14));
         let _e315 = ubo.emissiveFactor;
         emissive = (_e312.xyz * _e315.xyz);
         let _e318 = emissive;
@@ -444,42 +494,42 @@ fn main_1() {
     shadowCol = 1.0;
     let _e339 = f_LightSpacePos_1[2u];
     let _e340 = (_e339 <= 0.0);
-    phi_645_ = _e340;
+    phi_705_ = _e340;
     if !(_e340) {
         let _e343 = lsp_1[0u];
         let _e344 = (_e343 < 0.0);
-        phi_644_ = _e344;
+        phi_704_ = _e344;
         if !(_e344) {
             let _e347 = lsp_1[1u];
-            phi_644_ = (_e347 < 0.0);
+            phi_704_ = (_e347 < 0.0);
         }
-        let _e350 = phi_644_;
-        phi_645_ = _e350;
+        let _e350 = phi_704_;
+        phi_705_ = _e350;
     }
-    let _e352 = phi_645_;
-    phi_659_ = _e352;
+    let _e352 = phi_705_;
+    phi_719_ = _e352;
     if !(_e352) {
         let _e355 = lsp_1[0u];
         let _e356 = (_e355 > 1.0);
-        phi_658_ = _e356;
+        phi_718_ = _e356;
         if !(_e356) {
             let _e359 = lsp_1[1u];
-            phi_658_ = (_e359 > 1.0);
+            phi_718_ = (_e359 > 1.0);
         }
-        let _e362 = phi_658_;
-        phi_659_ = _e362;
+        let _e362 = phi_718_;
+        phi_719_ = _e362;
     }
-    let _e364 = phi_659_;
+    let _e364 = phi_719_;
     outSide = _e364;
     let _e365 = outSide;
     if !(_e365) {
         let _e367 = lsp_1;
-        param_10 = _e367;
+        param_15 = _e367;
         let _e368 = n_1;
-        param_11 = _e368;
+        param_16 = _e368;
         let _e369 = l;
-        param_12 = _e369;
-        let _e370 = CalcShadowvf3vf3vf3_((&param_10), (&param_11), (&param_12));
+        param_17 = _e369;
+        let _e370 = CalcShadowvf3vf3vf3_((&param_15), (&param_16), (&param_17));
         shadowCol = _e370;
     }
     let _e371 = shadowCol;
