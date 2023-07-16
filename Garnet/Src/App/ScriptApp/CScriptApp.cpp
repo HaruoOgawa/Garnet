@@ -3,6 +3,7 @@
 #include "../../Graphics/CDrawInfo.h"
 #include "../../Camera/CCamera.h"
 #include "../../Projection/CProjection.h"
+#include "../../ImageEffect/CBlurEffect.h"
 
 #ifdef USE_VIEWER_CAMERA
 #include "../../Camera/CViewerCamera.h"
@@ -22,7 +23,8 @@ namespace app
 		m_ScriptScene(nullptr),
 		m_MainCamera(std::make_shared<camera::CViewerCamera>()),
 		m_Projection(std::make_shared<projection::CProjection>()),
-		m_DrawInfo(std::make_shared<graphics::CDrawInfo>())
+		m_DrawInfo(std::make_shared<graphics::CDrawInfo>()),
+		m_BlurEffect(std::make_shared<imageeffect::CBlurEffect>())
 	{
 		m_MainCamera->SetPos(glm::vec3(0.0f, 0.0f, 5.0f));
 		m_DrawInfo->GetLightCamera()->SetPos(glm::vec3(3.0f, 3.0f, -3.0f));
@@ -58,6 +60,8 @@ namespace app
 		{
 			m_ScriptScene->SetFrameTexture(RenderPass.second->GetFrameTexture());
 		}
+
+		if (!m_BlurEffect->Create(5)) return false;
 
 		return true;
 	}
