@@ -61,7 +61,7 @@ namespace app
 			m_ScriptScene->SetFrameTexture(RenderPass.second->GetFrameTexture());
 		}
 
-		if (!m_BlurEffect->Create(5)) return false;
+		if (!m_BlurEffect->Create()) return false;
 
 		return true;
 	}

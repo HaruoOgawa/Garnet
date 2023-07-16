@@ -9,11 +9,11 @@ namespace imageeffect
 	{
 		std::vector<float> m_GaussianKernel;
 	private:
-		bool CalcGaussianKernel(int KernelWidth);
+		bool CalcGaussianKernel();
 	public:
 		CBlurEffect();
 		virtual ~CBlurEffect() = default;
 
-		bool Create(int KernelWidth);
+		bool Create();
 	};
 }
