@@ -42,6 +42,8 @@ namespace graphics
 
 		m_DepthMaterial->SetRefStatus(m_RefCount, m_UseDynamicUniform);
 
+		m_DepthMaterial->SetCullMode(graphics::ECullMode::CULL_FRONT);
+
 		if (!m_DepthMaterial->Create(std::vector<std::shared_ptr<graphics::CTexture>>(), std::vector<std::shared_ptr<graphics::CTexture>>())) return false;
 
 		return true;

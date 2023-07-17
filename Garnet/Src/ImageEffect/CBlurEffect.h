@@ -15,6 +15,7 @@ namespace imageeffect
 	{
 		api::IGraphicsAPI* m_pGraphicsAPI;
 
+		int m_KernelSize;
 		std::vector<float> m_GaussianKernel;
 
 		bool m_IsLoaded;

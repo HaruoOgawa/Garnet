@@ -1,18 +1,13 @@
 struct UniformBufferObject {
-    model: mat4x4<f32>,
-    view: mat4x4<f32>,
-    proj: mat4x4<f32>,
-    lightVPMat: mat4x4<f32>,
+    Kernal: array<f32,32u>,
     IsXBlur: i32,
     KernelSize: i32,
-    pad1_: i32,
-    pad2_: i32,
-    Kernal: array<f32,32u>,
+    Direction: vec2<f32>,
 }
 
-@group(0) @binding(2) 
+@group(0) @binding(1) 
 var SrcTex: texture_2d<f32>;
-@group(0) @binding(3) 
+@group(0) @binding(2) 
 var SamplerSrcTex: sampler;
 var<private> f_UV_1: vec2<f32>;
 var<private> outColor: vec4<f32>;

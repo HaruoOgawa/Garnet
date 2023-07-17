@@ -6,20 +6,6 @@ layout(location = 2) in vec2 inTexcoord;
 layout(location = 3) in vec4 inTangent;
 layout(location = 4) in vec4 inBioTangent;
 
-layout(binding = 0) uniform UniformBufferObject{
-    mat4 model;
-    mat4 view;
-    mat4 proj;
-    mat4 lightVPMat;
-
-    int IsXBlur;
-    int KernelSize;
-    int pad1;
-    int pad2;
-
-    float Kernal[32];
-} ubo;
-
 layout(location = 0) out vec2 f_UV;
 
 void main() {

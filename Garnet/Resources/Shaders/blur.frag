@@ -5,17 +5,11 @@ layout(location = 0) in vec2 f_UV;
 layout(location = 0) out vec4 outColor;
 
 layout(binding = 0) uniform UniformBufferObject{
-    mat4 model;
-    mat4 view;
-    mat4 proj;
-    mat4 lightVPMat;
+    float Kernal[32];
 
     int IsXBlur;
     int KernelSize;
-    int pad1;
-    int pad2;
-
-    float Kernal[32];
+    vec2 Direction;
 } ubo;
 
 // カーネルサイズを可変にしたいときは大きめの値(例えば33とか)を事前に確保しておいて、それよりも小さい時は空いたとことを0詰めして使用する
@@ -25,10 +19,19 @@ layout(binding = 0) uniform UniformBufferObject{
   //  float Kernal[32];
 //} kernel;
 
-layout(binding = 2) uniform texture2D SrcTex;
-layout(binding = 3) uniform sampler SamplerSrcTex;
+layout(binding = 1) uniform texture2D SrcTex;
+layout(binding = 2) uniform sampler SamplerSrcTex;
 
 void main() {
-    vec3 col = texture(sampler2D(SrcTex, SamplerSrcTex), f_UV).rgb;
+    vec3 col = vec3(0.0);
+    vec2 dir = ubo.Direction;
+
+    int halfSize = (ubo.KernelSize - 1) / 2;
+
+    for(int i = 0; i < ubo.KernelSize; i++)
+    {
+        col += texture(sampler2D(SrcTex, SamplerSrcTex), f_UV + dir * float(i - halfSize)).rgb * ubo.Kernal[i];
+    }
+    
     outColor = vec4(col, 1.0);
 }

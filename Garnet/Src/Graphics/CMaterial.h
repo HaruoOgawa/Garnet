@@ -69,7 +69,7 @@ namespace graphics
 		virtual void AddUniformBuffer(const std::shared_ptr<CUniformBuffer>& Buffer);
 		virtual void AddTextureBindingLayout(const STextureBindingLayout& Layout);
 
-		virtual void SetUniformValue(const std::string Name, const void* Value, int DynamicOffsetNum) = 0;
+		virtual void SetUniformValue(const std::string Name, const void* Value, int DynamicOffsetNum = -1) = 0;
 
 		virtual void IncreaseRefCount();
 		virtual int GetRefCount() const;

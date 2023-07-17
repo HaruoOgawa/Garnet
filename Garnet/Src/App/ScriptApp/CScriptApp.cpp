@@ -82,6 +82,8 @@ namespace app
 		if (!m_BlurEffect->Update()) return false;
 		if (!m_ScriptScene->Update(pGraphicsAPI)) return false;
 
+		m_DrawInfo->GetLightCamera()->SetPos(glm::vec3(glm::cos(SecondsTime), 1.0f, glm::sin(SecondsTime)) * 3.0f);
+
 		return true;
 	}
 
@@ -101,7 +103,7 @@ namespace app
 		// DefaultPass(SwapChain)
 		if (!pGraphicsAPI->BeginRender()) return false;
 		if (!m_ScriptScene->Draw(pGraphicsAPI, false, SecondsTime, m_MainCamera, m_Projection, m_DrawInfo)) return false;
-		if (!m_ScriptScene->DrawDebugObj(pGraphicsAPI, SecondsTime, m_MainCamera, m_Projection, m_DrawInfo)) return false;
+		//if (!m_ScriptScene->DrawDebugObj(pGraphicsAPI, SecondsTime, m_MainCamera, m_Projection, m_DrawInfo)) return false;
 		if (!pGraphicsAPI->EndRender()) return false;
 
 		// Submit

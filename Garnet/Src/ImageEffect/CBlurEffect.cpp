@@ -9,6 +9,7 @@ namespace imageeffect
 		m_pGraphicsAPI(pGraphicsAPI),
 
 		m_IsLoaded(false),
+		m_KernelSize(0),
 		m_BlurVertex(std::make_shared<file::CFileReader>()),
 		m_BlurFrag(std::make_shared<file::CFileReader>()),
 		m_ScreenObjX(std::make_shared<object::C3DObject>("BlurX", "")),
@@ -64,13 +65,31 @@ namespace imageeffect
 	{
 		if (!m_IsLoaded) return true;
 
-		if (!m_pGraphicsAPI->BeginRender("BlurX")) return false;
-		if (!m_ScreenObjX->Draw(false, SecondsTime, Camera, Projection, DrawInfo)) return false;
-		if (!m_pGraphicsAPI->EndRender()) return false;
+		const auto& Tex = m_ScreenObjX->GetTextureList()[0];
+		if (!Tex) return true;
+
+		float w = static_cast<float>(Tex->GetWidth());
+		float h = static_cast<float>(Tex->GetHeight());
+
+		{
+			if (!m_pGraphicsAPI->BeginRender("BlurX")) return false;
+
+			glm::vec2 OffsetV = glm::vec2(1.0f / w, 0.0f);
+			m_ScreenObjX->GetMaterialList()[0]->SetUniformValue("Direction", &OffsetV[0]);
+
+			if (!m_ScreenObjX->Draw(false, SecondsTime, Camera, Projection, DrawInfo)) return false;
+			if (!m_pGraphicsAPI->EndRender()) return false;
+		}
 		
-		if (!m_pGraphicsAPI->BeginRender("BlurY")) return false;
-		if(!m_ScreenObjY->Draw(false, SecondsTime, Camera, Projection, DrawInfo)) return false;
-		if (!m_pGraphicsAPI->EndRender()) return false;
+		{
+			if (!m_pGraphicsAPI->BeginRender("BlurY")) return false;
+
+			glm::vec2 OffsetV = glm::vec2(0.0f, 1.0f / h);
+			m_ScreenObjY->GetMaterialList()[0]->SetUniformValue("Direction", &OffsetV[0]);
+
+			if (!m_ScreenObjY->Draw(false, SecondsTime, Camera, Projection, DrawInfo)) return false;
+			if (!m_pGraphicsAPI->EndRender()) return false;
+		}
 
 		return true;
 	}
@@ -84,6 +103,8 @@ namespace imageeffect
 		float pi = 3.1415f;
 		float support = 0.995f;
 
+		std::vector<float> Kernel;
+
 		// radiusはこのように求めると結構適切な値が得られる
 		// http://demofox.org/gauss.html
 		float radius = glm::ceil(glm::sqrt(-2.0f * sigma * sigma * glm::log(1.0f - support)));
@@ -96,21 +117,33 @@ namespace imageeffect
 			float v = glm::exp(-(x * x) / (2.0f * sigma * sigma)) / (sigma * glm::sqrt(2.0f * pi));
 			Sum += v;
 
-			m_GaussianKernel.push_back(v);
+			Kernel.push_back(v);
 		}
 
+		//
+		m_KernelSize = static_cast<int>(Kernel.size());
+
 		// 正規化
-		for (auto& v : m_GaussianKernel)
+		for (auto& v : Kernel)
 		{
 			v /= Sum;
 		}
 		
 		// 空いた分を0詰めする
-		m_GaussianKernel.resize(32, 0.0f);
+		Kernel.resize(32, 0.0f);
 
 		//Console::Log("[CalcGaussianKernel] radius: %f ___________________________________\n", radius);
-		//for (int i = 0; i < m_GaussianKernel.size(); i++){ Console::Log("[%d] %f\n", i, m_GaussianKernel[i]); }
+		//for (int i = 0; i < Kernel.size(); i++){ Console::Log("[%d] %f\n", i, Kernel[i]); }
 		//Console::Log("___________________________________________________________________\n");
+
+		// floatのuniform array(float test[32] のような値)は、なぜか一つの要素辺り、16バイトでオフセットされてしまうのでパディングを入れる
+		for (const float v : Kernel)
+		{
+			m_GaussianKernel.push_back(v);
+			m_GaussianKernel.push_back(0.0f);
+			m_GaussianKernel.push_back(0.0f);
+			m_GaussianKernel.push_back(0.0f);
+		}
 
 		return true;
 	}
@@ -135,17 +168,11 @@ namespace imageeffect
 		// UBO0
 		{
 			auto UniformBuffer = graphics::CMaterialCreateInfo::CreateUniformBuffer({ 0 });
-			UniformBuffer->AddData("model", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
-			UniformBuffer->AddData("view", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
-			UniformBuffer->AddData("proj", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
-			UniformBuffer->AddData("lightVPMat", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
-
-			UniformBuffer->AddData("IsXBlur", &glm::ivec1(1)[0], sizeof(glm::ivec1), 0);
-			UniformBuffer->AddData("KernelSize", &glm::ivec1(static_cast<int>(m_GaussianKernel.size()))[0], sizeof(glm::ivec1), 0);
-			UniformBuffer->AddData("pad1", &glm::ivec1(0)[0], sizeof(glm::ivec1), 0);
-			UniformBuffer->AddData("pad2", &glm::ivec1(0)[0], sizeof(glm::ivec1), 0);
-
 			UniformBuffer->AddData("kernel", &m_GaussianKernel[0], sizeof(float) * static_cast<int>(m_GaussianKernel.size()), 0);
+			
+			UniformBuffer->AddData("IsXBlur", &glm::ivec1(1)[0], sizeof(glm::ivec1), 0);
+			UniformBuffer->AddData("KernelSize", &glm::ivec1(m_KernelSize)[0], sizeof(glm::ivec1), 0);
+			UniformBuffer->AddData("Direction", &glm::vec2(0.0f)[0], sizeof(glm::vec2), 0);
 
 			UniformBuffer->RecalculateBindingLayoutOffset();
 
@@ -154,17 +181,12 @@ namespace imageeffect
 		
 		{
 			auto UniformBuffer = graphics::CMaterialCreateInfo::CreateUniformBuffer({ 0 });
-			UniformBuffer->AddData("model", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
-			UniformBuffer->AddData("view", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
-			UniformBuffer->AddData("proj", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
-			UniformBuffer->AddData("lightVPMat", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
-
-			UniformBuffer->AddData("IsXBlur", &glm::ivec1(0)[0], sizeof(glm::ivec1), 0);
-			UniformBuffer->AddData("KernelSize", &glm::ivec1(static_cast<int>(m_GaussianKernel.size()))[0], sizeof(glm::ivec1), 0);
-			UniformBuffer->AddData("pad1", &glm::ivec1(0)[0], sizeof(glm::ivec1), 0);
-			UniformBuffer->AddData("pad2", &glm::ivec1(0)[0], sizeof(glm::ivec1), 0);
 
 			UniformBuffer->AddData("kernel", &m_GaussianKernel[0], sizeof(float) * static_cast<int>(m_GaussianKernel.size()), 0);
+
+			UniformBuffer->AddData("IsXBlur", &glm::ivec1(0)[0], sizeof(glm::ivec1), 0);
+			UniformBuffer->AddData("KernelSize", &glm::ivec1(m_KernelSize)[0], sizeof(glm::ivec1), 0);
+			UniformBuffer->AddData("Direction", &glm::vec2(0.0f)[0], sizeof(glm::vec2), 0);
 
 			UniformBuffer->RecalculateBindingLayoutOffset();
 
@@ -185,7 +207,7 @@ namespace imageeffect
 		{
 			const auto& RenderPass = m_pGraphicsAPI->GetOffScreenRenderPassMap().find("ShadowPass");
 			if (RenderPass != m_pGraphicsAPI->GetOffScreenRenderPassMap().end()) m_ScreenObjX->AddTexture(RenderPass->second->GetFrameTexture());
-			MaterialX->AddTextureBindingLayout({ 2, 3, 0, graphics::ETextureType::TEXTURE_2D });
+			MaterialX->AddTextureBindingLayout({ 1, 2, 0, graphics::ETextureType::TEXTURE_2D });
 
 			m_ScreenObjX->AddMaterial(MaterialX);
 		}
@@ -193,7 +215,7 @@ namespace imageeffect
 		{
 			const auto& RenderPass = m_pGraphicsAPI->GetOffScreenRenderPassMap().find("BlurX");
 			if (RenderPass != m_pGraphicsAPI->GetOffScreenRenderPassMap().end()) m_ScreenObjY->AddTexture(RenderPass->second->GetFrameTexture());
-			MaterialY->AddTextureBindingLayout({ 2, 3, 0, graphics::ETextureType::TEXTURE_2D });
+			MaterialY->AddTextureBindingLayout({ 1, 2, 0, graphics::ETextureType::TEXTURE_2D });
 
 			m_ScreenObjY->AddMaterial(MaterialY);
 		}

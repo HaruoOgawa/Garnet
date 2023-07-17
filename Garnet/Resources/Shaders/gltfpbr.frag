@@ -244,7 +244,7 @@ float CalcShadow(vec3 lsp, vec3 nomral, vec3 lightDir)
 	float p_max = variance / (variance + d * d);
 
 	// 本来影になるところに光がにじんでいるようなアーティファクトが出ることがあるのでその対策
-	p_max = ReduceLightBleeding(0.1, p_max);
+	//p_max = ReduceLightBleeding(0.1, p_max);
 
 	return p_max;
 }
