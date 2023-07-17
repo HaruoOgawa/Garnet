@@ -1652,6 +1652,8 @@
     <None Include="Resources\Shaders\shadow_debug.frag" />
     <None Include="Resources\Shaders\depth.vert" />
     <None Include="Resources\Shaders\depth.frag" />
+    <None Include="Resources\Shaders\blur.vert" />
+    <None Include="Resources\Shaders\blur.frag" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="EmscriptenBuild\CMakeLists.txt" />

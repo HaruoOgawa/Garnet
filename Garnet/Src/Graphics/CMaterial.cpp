@@ -6,7 +6,9 @@ namespace graphics
 		m_CreateInfo(nullptr),
 		m_RefCount(0),
 		m_UseDynamicUniform(false),
-		m_DepthMaterial(nullptr)
+		m_DepthMaterial(nullptr),
+		m_EnabledZTest(true),
+		m_CullMode(ECullMode::CULL_BACK)
 	{
 	}
 
@@ -48,6 +50,26 @@ namespace graphics
 	std::shared_ptr<graphics::CMaterial> CMaterial::GetDepthMaterial() 
 	{
 		return m_DepthMaterial; 
+	}
+
+	void CMaterial::SetEnabledZTest(bool EnabledZTest)
+	{
+		m_EnabledZTest = EnabledZTest;
+	}
+
+	bool CMaterial::IsEnabledZTest() const
+	{
+		return m_EnabledZTest;
+	}
+
+	void CMaterial::SetCullMode(ECullMode CullMode)
+	{
+		m_CullMode = CullMode;
+	}
+
+	ECullMode CMaterial::GetCullMode() const
+	{
+		return m_CullMode;
 	}
 
 	bool CMaterial::SetCommonUniform(float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo)
