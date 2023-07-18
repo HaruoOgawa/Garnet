@@ -29,8 +29,8 @@ layout(binding = 0) uniform UniformBufferObject{
 
 	float occlusionStrength;
     float mipCount;
-    float s_pad1;
-    float s_pad2;
+    float ShadowMapX;
+    float ShadowMapY;
 
     int   useBaseColorTexture;
     int   useMetallicRoughnessTexture;
@@ -203,20 +203,69 @@ vec4 LINEARtoSRGB(vec4 srgbIn)
 	return vec4(pow(srgbIn.xyz, vec3(1.0 / 2.2)), srgbIn.a);
 }
 
-float CalcShadow(vec3 lsp)
+float linstep(float min, float max, float v)
 {
-	vec2 moments = texture(sampler2D(shadowmapTexture, shadowmapTextureSampler), lsp.xy).rg;
+	return clamp((v - min) / (max - min), 0.0, 1.0);
+}
 
-	if(lsp.z <= moments.x)
+float ReduceLightBleeding(float p_max, float Amount)
+{
+	return linstep(Amount, 1.0, p_max);
+}
+
+vec2 ComputePCF(vec2 uv)
+{
+	vec2 moments = vec2(0.0);
+
+	vec2 texelSize = vec2(1.0 / ubo.ShadowMapX, 1.0 / ubo.ShadowMapY);
+
+	for(int x = -1; x <= 1; x++)
 	{
-		// 手前なので普通に描画する
+		for(int y = -1; y <= 1; y++)
+		{
+			moments += texture(sampler2D(shadowmapTexture, shadowmapTextureSampler), uv + vec2(x, y) * texelSize).rg;
+		}
+	}
+
+	moments /= 9.0;
+
+	return moments;
+}
+
+float CalcShadow(vec3 lsp, vec3 nomral, vec3 lightDir)
+{
+	vec2 moments = ComputePCF(lsp.xy);
+
+	// マッハバンド対策のShadow Bias
+	// ShadowBiasとは深度のオフセットのこと
+	// マッハバンドはShawMapの解像度により発生する。複数のフラグメントが光源から比較的離れている場合、深度マップから同じ値をサンプリングする可能性がある。
+	// 光の入射角がオクルーダーの法線に対して斜めなとき、上記の理由から例えば少し深度が大きい隣の表面の深度をサンプリングしてしまい、結果ShadowMapの元の深度より大ききなってしまうことで縞々になる(大きいということは影になる, 黒色)
+	// その対策でオクルーダーをほんの少しだけ手前にする。手前にすることでShadowmapよりも深度が小さくなるため影になりにくくなる
+	// https://drive.google.com/file/d/1tyDT7xQVSYzKnZXt6vvDwt-rlWEjVGDP/view?usp=sharing
+	// 床の法線とライト方向の成す角度が垂直になるほど、Biasを強くする
+	// https://learnopengl.com/Advanced-Lighting/Shadows/Shadow-Mapping
+	float ShadowBias = max(0.005, 0.05 * (1.0 - dot(nomral, lightDir)) );
+
+	float distance = lsp.z - ShadowBias;
+
+	// ShadowMapの深度よりも手前なので普通に描画する
+	if((distance) <= moments.x)
+	{
 		return 1.0;
 	}
-	else
-	{
-		// 後ろなので影にする
-		return 0.0;
-	}
+	
+	// 後ろなので影にする
+	// バリアンスの計算
+	float variance = moments.y - (moments.x * moments.x);
+	variance = max(0.005, variance);
+
+	float d = distance - moments.x;
+	float p_max = variance / (variance + d * d);
+
+	// 本来影になるところに光がにじんでいるようなアーティファクトが出ることがあるのでその対策
+	//p_max = ReduceLightBleeding(0.1, p_max);
+
+	return p_max;
 }
 
 void main(){
@@ -348,11 +397,11 @@ void main(){
 	lsp = lsp * 0.5 + 0.5;
 	float shadowCol = 1.0;
 
-	bool outSide = f_LightSpacePos.z <= 0.0f || (lsp.x < 0 || lsp.y < 0) || (lsp.x >= 1 || lsp.y >= 1);
+	bool outSide = f_LightSpacePos.z <= 0.0f || (lsp.x < 0 || lsp.y < 0) || (lsp.x > 1 || lsp.y > 1);
 
 	if(!outSide)
 	{
-		shadowCol = CalcShadow(lsp);
+		shadowCol = CalcShadow(lsp, n, l);
 	}
 
 	col.rgb *= shadowCol;

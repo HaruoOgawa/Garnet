@@ -8,12 +8,13 @@
 
 namespace api
 {
-	CVulkanRenderPass::CVulkanRenderPass(api::CVulkanAPI* pGraphicsAPI, const std::string& PassName, ERenderPassFormat RenderPassFormat):
+	CVulkanRenderPass::CVulkanRenderPass(api::CVulkanAPI* pGraphicsAPI, const std::string& PassName, ERenderPassFormat RenderPassFormat, const glm::vec4& InitColor):
 		m_pGraphicsAPI(pGraphicsAPI),
 		
 		m_PassName(PassName),
 		m_Width(0),
 		m_Height(0),
+		m_InitColor(InitColor),
 		m_RenderPassFormat(RenderPassFormat),
 		m_FrameTexture(nullptr),
 		m_DepthTexture(nullptr),
@@ -200,7 +201,7 @@ namespace api
 		renderPassInfo.renderArea.extent = {static_cast<unsigned int>(m_Width), static_cast<unsigned int>(m_Height)};
 
 		std::array<VkClearValue, 2> clearValues{};
-		clearValues[0].color = { {0.0f, 0.0f, 0.0f, 1.0f} };
+		clearValues[0].color = { {m_InitColor.x, m_InitColor.y, m_InitColor.z, m_InitColor.w} };
 		clearValues[1].depthStencil = { 1.0f, 0 };
 		renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
 		renderPassInfo.pClearValues = clearValues.data();

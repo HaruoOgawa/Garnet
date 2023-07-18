@@ -26,6 +26,16 @@ namespace graphics
 	{
 	}
 
+	int CTexture::GetWidth() const
+	{
+		return m_Width;
+	}
+
+	int CTexture::GetHeight() const
+	{
+		return m_Height;
+	}
+
 	ETextureType CTexture::GetTextureType() const
 	{
 		return m_TextureType;

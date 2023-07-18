@@ -288,7 +288,26 @@ namespace renderer
 		rasterizer.rasterizerDiscardEnable = VK_FALSE;
 		rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
 		rasterizer.lineWidth = 1.0f;
-		rasterizer.cullMode = VK_CULL_MODE_BACK_BIT; // カリングの設定
+		
+		switch (pVulkanMat->GetCullMode())
+		{
+			case graphics::ECullMode::CULL_BACK :
+				rasterizer.cullMode = VK_CULL_MODE_BACK_BIT; // カリングの設定
+				break;
+
+			case graphics::ECullMode::CULL_FRONT :
+				rasterizer.cullMode = VK_CULL_MODE_FRONT_BIT; // カリングの設定
+				break;
+
+			case graphics::ECullMode::CULL_NONE :
+				rasterizer.cullMode = VK_CULL_MODE_NONE; // カリングの設定
+				break;
+
+			default:
+				rasterizer.cullMode = VK_CULL_MODE_BACK_BIT; // カリングの設定
+				break;
+		}
+
 		rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE; // カリングする際の頂点の順番かな？ GL_CWWみたいな
 		rasterizer.depthBiasEnable = VK_FALSE; // デプステストに関する設定
 		rasterizer.depthBiasConstantFactor = 0.0f;
@@ -353,8 +372,8 @@ namespace renderer
 		// レンダリングパイプラインでデプスとステンシルを有効にする
 		VkPipelineDepthStencilStateCreateInfo depthStencil{};
 		depthStencil.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
-		depthStencil.depthTestEnable = VK_TRUE;
-		depthStencil.depthWriteEnable = VK_TRUE;
+		depthStencil.depthTestEnable = (pVulkanMat->IsEnabledZTest()) ? VK_TRUE : VK_FALSE;
+		depthStencil.depthWriteEnable = (pVulkanMat->IsEnabledZTest()) ? VK_TRUE : VK_FALSE;
 		depthStencil.depthCompareOp = VK_COMPARE_OP_LESS;
 		depthStencil.depthBoundsTestEnable = VK_FALSE;
 		depthStencil.minDepthBounds = 0.0f;

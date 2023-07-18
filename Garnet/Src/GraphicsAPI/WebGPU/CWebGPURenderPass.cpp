@@ -6,10 +6,11 @@
 
 namespace api
 {
-	CWebGPURenderPass::CWebGPURenderPass(api::CWebGPUAPI* pGraphicsAPI, const std::string& PassName, ERenderPassFormat RenderPassFormat):
+	CWebGPURenderPass::CWebGPURenderPass(api::CWebGPUAPI* pGraphicsAPI, const std::string& PassName, ERenderPassFormat RenderPassFormat, const glm::vec4& InitColor):
 		m_pGraphicsAPI(pGraphicsAPI),
 		
 		m_PassName(PassName),
+		m_InitColor(InitColor),
 		m_RenderPassFormat(RenderPassFormat),
 		m_FrameTexture(nullptr),
 		m_DepthTexture(nullptr),
@@ -51,7 +52,7 @@ namespace api
 		renderPassColorAttachment.resolveTarget = nullptr; // マルチサンプリングの設定
 		renderPassColorAttachment.loadOp = WGPULoadOp_Clear; // レンダー パスを実行する前にビューで実行するロード操作を示します。例えばクリア値に初期化するだったり
 		renderPassColorAttachment.storeOp = WGPUStoreOp_Store; // レンダリング実行後の操作
-		renderPassColorAttachment.clearValue = WGPUColor{ 0.0f, 0.0f, 0.0f, 1.0f }; // 初期カラー
+		renderPassColorAttachment.clearValue = WGPUColor{ m_InitColor.x, m_InitColor.y, m_InitColor.z, m_InitColor.w }; // 初期カラー
 
 		// デプスステンシルバッファの設定
 		WGPURenderPassDepthStencilAttachment depthStencilAttachment;

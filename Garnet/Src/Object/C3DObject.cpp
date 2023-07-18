@@ -25,7 +25,11 @@ namespace object
 		for (auto& Material : m_MaterialList)
 		{
 			if (!Material->Create(m_TextureList, m_CubeMapList)) return false;
-			if (!Material->CreateDepthMaterial(pGraphicsAPI, DepthVertex, DepthFragment)) return false;
+			
+			if (DepthVertex && DepthFragment)
+			{
+				if (!Material->CreateDepthMaterial(pGraphicsAPI, DepthVertex, DepthFragment)) return false;
+			}
 		}
 
 		// Primitive
@@ -39,7 +43,11 @@ namespace object
 				const auto& Material = m_MaterialList[MaterialIndex];
 
 				if (!Primitive->Create(pGraphicsAPI, m_PassName, Material, false)) return false;
-				if (!Primitive->Create(pGraphicsAPI, m_DepthPassName, Material->GetDepthMaterial(), true)) return false;
+				
+				if (Material->GetDepthMaterial())
+				{
+					if (!Primitive->Create(pGraphicsAPI, m_DepthPassName, Material->GetDepthMaterial(), true)) return false;
+				}
 
 				// 生成処理が終わったので不要なリソースを解放する
 				Primitive->Release();

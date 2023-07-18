@@ -25,6 +25,9 @@ namespace graphics
 		CTexture(bool UseMipMap);
 		virtual ~CTexture();
 
+		int GetWidth() const;
+		int GetHeight() const;
+
 		ETextureType GetTextureType() const;
 		api::ERenderPassFormat GetRenderPassFormat()const;
 		float GetMipCount() const;

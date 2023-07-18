@@ -95,10 +95,18 @@ namespace api
 		vkDestroyInstance(m_Instance, nullptr);
 	}
 
-	bool CVulkanAPI::CreateRenderPass(const std::string& PassName, ERenderPassFormat RenderPassFormat)
+	bool CVulkanAPI::CreateRenderPass(const std::string& PassName, ERenderPassFormat RenderPassFormat, const glm::vec4& InitColor, int Width, int Height)
 	{
-		std::shared_ptr<CVulkanRenderPass> RenderPass = std::make_shared<CVulkanRenderPass>(this, PassName, RenderPassFormat);
-		if (!RenderPass->Create(m_Width, m_Height)) return false;
+		std::shared_ptr<CVulkanRenderPass> RenderPass = std::make_shared<CVulkanRenderPass>(this, PassName, RenderPassFormat, InitColor);
+		
+		if (Width != -1 && Height != -1)
+		{
+			if (!RenderPass->Create(Width, Height)) return false;
+		}
+		else
+		{
+			if (!RenderPass->Create(m_Width, m_Height)) return false;
+		}
 
 		m_OffScreenRenderPassMap.insert({ PassName, RenderPass });
 

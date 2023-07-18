@@ -59,7 +59,7 @@ namespace gltf
 
 		// マテリアル
 		std::vector<std::shared_ptr<graphics::CMaterial>> MaterialList;
-		if (!CreateMaterial(pGraphicsAPI, model, MaterialList, TextureList, CubeTexList, createInfo)) return false;
+		if (!CreateMaterial(pGraphicsAPI, model, MaterialList, TextureList, CubeTexList, FrameTextureList, createInfo)) return false;
 
 		// メッシュ
 		std::vector<std::shared_ptr<graphics::CMesh>> MeshList;
@@ -150,8 +150,9 @@ namespace gltf
 		return true;
 	}
 
-	bool CGLTFImporter::CreateMaterial(api::IGraphicsAPI* pGraphicsAPI, const tinygltf::Model& model, std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList, 
-		const std::vector<std::shared_ptr<graphics::CTexture>>& TextureList, const std::vector<std::shared_ptr<graphics::CTexture>>& CubeTexList, std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo)
+	bool CGLTFImporter::CreateMaterial(api::IGraphicsAPI* pGraphicsAPI, const tinygltf::Model& model, std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList,
+		const std::vector<std::shared_ptr<graphics::CTexture>>& TextureList, const std::vector<std::shared_ptr<graphics::CTexture>>& CubeTexList,
+		const std::vector<std::shared_ptr<graphics::CTexture>>& FrameTextureList, std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo)
 	{
 		for (const auto& glTfMaterial : model.materials)
 		{
@@ -199,8 +200,8 @@ namespace gltf
 				UniformBuffer->AddData("normalMapScale", &normalMapScale, sizeof(float), 0);
 				UniformBuffer->AddData("occlusionStrength", &occlusionStrength, sizeof(float), 0);
 				UniformBuffer->AddData("mipCount", &glm::vec1(CubeTexList[0]->GetMipCount())[0], sizeof(float), 0);
-				UniformBuffer->AddData("s_pad1", &glm::vec1(0.0f)[0], sizeof(float), 0);
-				UniformBuffer->AddData("s_pad2", &glm::vec1(0.0f)[0], sizeof(float), 0);
+				UniformBuffer->AddData("ShadowMapX", &glm::vec1(static_cast<float>(FrameTextureList[0]->GetWidth()))[0], sizeof(float), 0);
+				UniformBuffer->AddData("ShadowMapY", &glm::vec1(static_cast<float>(FrameTextureList[0]->GetHeight()))[0], sizeof(float), 0);
 
 				// テクスチャを紐づける
 				{

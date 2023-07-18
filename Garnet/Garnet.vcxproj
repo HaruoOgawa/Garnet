@@ -335,6 +335,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Src\ImageEffect\CBlurEffect.h" />
     <ClInclude Include="Src\GraphicsAPI\WebGPU\CWebGPURenderPass.h" />
     <ClInclude Include="Src\GraphicsAPI\Vulkan\CVulkanRenderPass.h" />
     <ClInclude Include="Src\Camera\CViewerCamera.h" />
@@ -685,6 +686,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClInclude Include="Src\Interface\IRenderer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\ImageEffect\CBlurEffect.cpp" />
     <ClCompile Include="Src\GraphicsAPI\WebGPU\CWebGPURenderPass.cpp" />
     <ClCompile Include="Src\GraphicsAPI\Vulkan\CVulkanRenderPass.cpp" />
     <ClCompile Include="Src\Camera\CViewerCamera.cpp" />
@@ -743,6 +745,8 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <None Include="EmscriptenBuild\Garnet_front.js" />
     <None Include="EmscriptenBuild\index.html" />
     <None Include="EmscriptenBuild\nmake.exe" />
+    <None Include="Resources\Shaders\blur.frag" />
+    <None Include="Resources\Shaders\blur.vert" />
     <None Include="Resources\Shaders\depth.frag" />
     <None Include="Resources\Shaders\depth.vert" />
     <None Include="Resources\Shaders\gltfpbr.frag" />

@@ -161,13 +161,31 @@ namespace renderer
 		pipelineDesc.primitive.topology = WGPUPrimitiveTopology_TriangleList; // トポロジー
 		pipelineDesc.primitive.stripIndexFormat = WGPUIndexFormat_Undefined; // インデックスバッファの型かな
 		pipelineDesc.primitive.frontFace = WGPUFrontFace_CCW; // カリングの方向
-		pipelineDesc.primitive.cullMode = WGPUCullMode_None; // カリングモードの設定
+		
+		switch (pWebGPUMat->GetCullMode())
+		{
+		case graphics::ECullMode::CULL_BACK:
+			pipelineDesc.primitive.cullMode = WGPUCullMode_Back; // カリングモードの設定
+			break;
+
+		case graphics::ECullMode::CULL_FRONT:
+			pipelineDesc.primitive.cullMode = WGPUCullMode_Front; // カリングモードの設定
+			break;
+
+		case graphics::ECullMode::CULL_NONE:
+			pipelineDesc.primitive.cullMode = WGPUCullMode_None; // カリングモードの設定
+			break;
+
+		default:
+			pipelineDesc.primitive.cullMode = WGPUCullMode_Back; // カリングモードの設定
+			break;
+		}
 
 		// ステンシルバッファ・デプスバッファ
 		WGPUDepthStencilState depthStencilState;
 		SetDefaultDepthStencil(depthStencilState);
 		depthStencilState.depthCompare = WGPUCompareFunction_Less;
-		depthStencilState.depthWriteEnabled = true;
+		depthStencilState.depthWriteEnabled = pWebGPUMat->IsEnabledZTest();
 		WGPUTextureFormat depthTextureFormat = WGPUTextureFormat_Depth24Plus;
 		depthStencilState.format = depthTextureFormat;
 		depthStencilState.stencilReadMask = 0; // ステンシルバッファの読み書きをオフにしておく

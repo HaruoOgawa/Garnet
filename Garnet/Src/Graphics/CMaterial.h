@@ -11,6 +11,7 @@
 #include "STextureBindingLayout.h"
 #include "CTexture.h"
 #include "CDrawInfo.h"
+#include "../Camera/CCamera.h"
 
 namespace camera { class CCamera; }
 namespace projection { class CProjection; }
@@ -20,6 +21,13 @@ namespace graphics
 {
 	class CMaterialCreateInfo;
 	class CUniformBuffer;
+
+	enum class ECullMode
+	{
+		CULL_NONE,
+		CULL_BACK,
+		CULL_FRONT,
+	};
 
 	class CMaterial
 	{
@@ -35,6 +43,9 @@ namespace graphics
 		std::vector<uint32_t> m_BindingRefSizeList; // GLSLの各bindingが参照しているバッファのサイズ
 
 		std::shared_ptr<graphics::CMaterial> m_DepthMaterial;
+
+		bool m_EnabledZTest;
+		ECullMode m_CullMode;
 	public:
 		CMaterial();
 		virtual ~CMaterial() = default;
@@ -46,13 +57,19 @@ namespace graphics
 
 		virtual std::shared_ptr<graphics::CMaterial> GetDepthMaterial();
 
+		virtual void SetEnabledZTest(bool EnabledZTest);
+		virtual bool IsEnabledZTest() const;
+
+		virtual void SetCullMode(ECullMode CullMode);
+		virtual ECullMode GetCullMode() const;
+
 		virtual bool SetCommonUniform(float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo) = 0;
 		virtual bool BuildDrawBuffer(int DynamicOffsetNum) = 0;
 
 		virtual void AddUniformBuffer(const std::shared_ptr<CUniformBuffer>& Buffer);
 		virtual void AddTextureBindingLayout(const STextureBindingLayout& Layout);
 
-		virtual void SetUniformValue(const std::string Name, const void* Value, int DynamicOffsetNum) = 0;
+		virtual void SetUniformValue(const std::string Name, const void* Value, int DynamicOffsetNum = -1) = 0;
 
 		virtual void IncreaseRefCount();
 		virtual int GetRefCount() const;
