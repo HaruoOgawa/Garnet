@@ -53,7 +53,7 @@ namespace app
 		if (!m_ScriptScene->Initialize(pGraphicsAPI)) return false;
 
 		// オフスクリーンレンダリング用のFrameBufferを生成する
-		if (!pGraphicsAPI->CreateRenderPass("ShadowPass", api::ERenderPassFormat::COLOR_RENDERPASS, glm::vec4(1.0f))) return false;
+		if (!pGraphicsAPI->CreateRenderPass("ShadowPass", api::ERenderPassFormat::COLOR_RENDERPASS, glm::vec4(1.0f), 512, 512)) return false;
 
 		m_BlurEffect = std::make_shared<imageeffect::CBlurEffect>(pGraphicsAPI);
 		if (!m_BlurEffect->Create()) return false;
@@ -82,7 +82,7 @@ namespace app
 		if (!m_BlurEffect->Update()) return false;
 		if (!m_ScriptScene->Update(pGraphicsAPI)) return false;
 
-		m_DrawInfo->GetLightCamera()->SetPos(glm::vec3(glm::cos(SecondsTime), 1.0f, glm::sin(SecondsTime)) * 3.0f);
+		//m_DrawInfo->GetLightCamera()->SetPos(glm::vec3(glm::cos(SecondsTime), 1.0f, glm::sin(SecondsTime)) * 3.0f);
 
 		return true;
 	}

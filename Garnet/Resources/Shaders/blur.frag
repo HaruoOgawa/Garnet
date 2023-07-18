@@ -7,7 +7,7 @@ layout(location = 0) out vec4 outColor;
 layout(binding = 0) uniform UniformBufferObject{
     float Kernal[32];
 
-    int IsXBlur;
+    int UseBlur;
     int KernelSize;
     vec2 Direction;
 } ubo;
@@ -28,9 +28,16 @@ void main() {
 
     int halfSize = (ubo.KernelSize - 1) / 2;
 
-    for(int i = 0; i < ubo.KernelSize; i++)
+    if(ubo.UseBlur != 0)
     {
-        col += texture(sampler2D(SrcTex, SamplerSrcTex), f_UV + dir * float(i - halfSize)).rgb * ubo.Kernal[i];
+        for(int i = 0; i < ubo.KernelSize; i++)
+        {
+            col += texture(sampler2D(SrcTex, SamplerSrcTex), f_UV + dir * float(i - halfSize)).rgb * ubo.Kernal[i];
+        }
+    }
+    else
+    {
+        col = texture(sampler2D(SrcTex, SamplerSrcTex), f_UV).rgb;
     }
     
     outColor = vec4(col, 1.0);

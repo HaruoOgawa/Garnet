@@ -39,8 +39,8 @@ namespace imageeffect
 		m_BlurVertex->ReadFile("Resources\\Shaders\\blur_vert" + m_pGraphicsAPI->GetShaderExtension());
 		m_BlurFrag->ReadFile("Resources\\Shaders\\blur_frag" + m_pGraphicsAPI->GetShaderExtension());
 
-		if (!m_pGraphicsAPI->CreateRenderPass("BlurX", api::ERenderPassFormat::COLOR_RENDERPASS, glm::vec4(0.0f, 0.0f, 0.0f, 1.0f))) return false;
-		if (!m_pGraphicsAPI->CreateRenderPass("BlurY", api::ERenderPassFormat::COLOR_RENDERPASS, glm::vec4(0.0f, 0.0f, 0.0f, 1.0f))) return false;
+		if (!m_pGraphicsAPI->CreateRenderPass("BlurX", api::ERenderPassFormat::COLOR_RENDERPASS, glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), 512, 512)) return false;
+		if (!m_pGraphicsAPI->CreateRenderPass("BlurY", api::ERenderPassFormat::COLOR_RENDERPASS, glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), 512, 512)) return false;
 
 		return true;
 	}
@@ -70,6 +70,11 @@ namespace imageeffect
 
 		float w = static_cast<float>(Tex->GetWidth());
 		float h = static_cast<float>(Tex->GetHeight());
+
+		{
+			m_ScreenObjX->GetMaterialList()[0]->SetUniformValue("UseBlur", (GetKeyState(VK_SPACE)? &glm::ivec1(0)[0] : &glm::ivec1(1)[0]));
+			m_ScreenObjY->GetMaterialList()[0]->SetUniformValue("UseBlur", (GetKeyState(VK_SPACE)? &glm::ivec1(0)[0] : &glm::ivec1(1)[0]));
+		}
 
 		{
 			if (!m_pGraphicsAPI->BeginRender("BlurX")) return false;
@@ -170,7 +175,7 @@ namespace imageeffect
 			auto UniformBuffer = graphics::CMaterialCreateInfo::CreateUniformBuffer({ 0 });
 			UniformBuffer->AddData("kernel", &m_GaussianKernel[0], sizeof(float) * static_cast<int>(m_GaussianKernel.size()), 0);
 			
-			UniformBuffer->AddData("IsXBlur", &glm::ivec1(1)[0], sizeof(glm::ivec1), 0);
+			UniformBuffer->AddData("UseBlur", &glm::ivec1(1)[0], sizeof(glm::ivec1), 0);
 			UniformBuffer->AddData("KernelSize", &glm::ivec1(m_KernelSize)[0], sizeof(glm::ivec1), 0);
 			UniformBuffer->AddData("Direction", &glm::vec2(0.0f)[0], sizeof(glm::vec2), 0);
 
@@ -184,7 +189,7 @@ namespace imageeffect
 
 			UniformBuffer->AddData("kernel", &m_GaussianKernel[0], sizeof(float) * static_cast<int>(m_GaussianKernel.size()), 0);
 
-			UniformBuffer->AddData("IsXBlur", &glm::ivec1(0)[0], sizeof(glm::ivec1), 0);
+			UniformBuffer->AddData("UseBlur", &glm::ivec1(1)[0], sizeof(glm::ivec1), 0);
 			UniformBuffer->AddData("KernelSize", &glm::ivec1(m_KernelSize)[0], sizeof(glm::ivec1), 0);
 			UniformBuffer->AddData("Direction", &glm::vec2(0.0f)[0], sizeof(glm::vec2), 0);
 
