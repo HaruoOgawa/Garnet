@@ -29,8 +29,8 @@ layout(binding = 0) uniform UniformBufferObject{
 
 	float occlusionStrength;
     float mipCount;
-    float s_pad1;
-    float s_pad2;
+    float ShadowMapX;
+    float ShadowMapY;
 
     int   useBaseColorTexture;
     int   useMetallicRoughnessTexture;
@@ -213,9 +213,28 @@ float ReduceLightBleeding(float p_max, float Amount)
 	return linstep(Amount, 1.0, p_max);
 }
 
+vec2 ComputePCF(vec2 uv)
+{
+	vec2 moments = vec2(0.0);
+
+	vec2 texelSize = vec2(1.0 / ubo.ShadowMapX, 1.0 / ubo.ShadowMapY);
+
+	for(int x = -1; x <= 1; x++)
+	{
+		for(int y = -1; y <= 1; y++)
+		{
+			moments += texture(sampler2D(shadowmapTexture, shadowmapTextureSampler), uv + vec2(x, y) * texelSize).rg;
+		}
+	}
+
+	moments /= 9.0;
+
+	return moments;
+}
+
 float CalcShadow(vec3 lsp, vec3 nomral, vec3 lightDir)
 {
-	vec2 moments = texture(sampler2D(shadowmapTexture, shadowmapTextureSampler), lsp.xy).rg;
+	vec2 moments = ComputePCF(lsp.xy);
 
 	// マッハバンド対策のShadow Bias
 	// ShadowBiasとは深度のオフセットのこと

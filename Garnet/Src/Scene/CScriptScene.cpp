@@ -140,9 +140,8 @@ namespace scene
 
 				UniformBuffer->AddData("occlusionStrength", &glm::vec1(0.0f)[0], sizeof(float), 0);
 				UniformBuffer->AddData("mipCount", &glm::vec1(CubeTexList[0]->GetMipCount())[0], sizeof(float), 0);
-				UniformBuffer->AddData("s_pad1", &glm::vec1(0.0f)[0], sizeof(float), 0);
-				UniformBuffer->AddData("s_pad2", &glm::vec1(0.0f)[0], sizeof(float), 0);
-
+				UniformBuffer->AddData("ShadowMapX", &glm::vec1(static_cast<float>(m_FrameTextureList[0]->GetWidth()))[0], sizeof(float), 0);
+				UniformBuffer->AddData("ShadowMapY", &glm::vec1(static_cast<float>(m_FrameTextureList[0]->GetHeight()))[0], sizeof(float), 0);
 				UniformBuffer->AddData("useBaseColorTexture", &glm::uvec1(1)[0], sizeof(int), 0);
 				UniformBuffer->AddData("useMetallicRoughnessTexture", &glm::uvec1(0)[0], sizeof(int), 0);
 				UniformBuffer->AddData("useEmissiveTexture", &glm::uvec1(0)[0], sizeof(int), 0);
