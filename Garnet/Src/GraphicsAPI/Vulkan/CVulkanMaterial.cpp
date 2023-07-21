@@ -200,7 +200,7 @@ namespace api
 			for (const auto& Layout : Buffer->GetBindingLayoutList())
 			{
 				VkDescriptorSetLayoutBinding LayoutBinding{}; // VkDescriptorSetLayoutBindingはおそらくlayout(location = 0), WebGPUでいう @binding(n)のこと. ただしVulkanは @groupは存在しない
-				LayoutBinding.binding = Layout.BindingIndex; // バインディングインデックス
+				LayoutBinding.binding = Layout.second.BindingIndex; // バインディングインデックス
 				
 				if (m_UseDynamicUniform)
 				{
@@ -385,17 +385,17 @@ namespace api
 				int LayoutIndex = 0;
 
 				// UBO
-				for (int BufferLayoutIndex = 0; BufferLayoutIndex < UniformLayoutSize; BufferLayoutIndex++)
+				int BufferLayoutIndex = 0;
+				for (const auto& Layout : Buffer->GetBindingLayoutList())
 				{
-					auto& Layout = Buffer->GetBindingLayoutList()[BufferLayoutIndex];
 					descriptorWrites[LayoutIndex].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 					descriptorWrites[LayoutIndex].dstSet = m_DescriptorSets[FrameIndex]; // どのDescriptorSets(キューファミリが入ってる？)でCPUからGPUにバッファを渡すコマンドを発行するか
-					descriptorWrites[LayoutIndex].dstBinding = Layout.BindingIndex; // layout(location = n)
+					descriptorWrites[LayoutIndex].dstBinding = Layout.second.BindingIndex; // layout(location = n)
 					descriptorWrites[LayoutIndex].dstArrayElement = 0; // ???
 					
 					bufferInfoList[BufferLayoutIndex].buffer = m_VKUniformBufferList[FrameIndex][BufferIndex]; // UBOの指定
-					bufferInfoList[BufferLayoutIndex].offset = Layout.ByteOffset; // バッファオフセット
-					bufferInfoList[BufferLayoutIndex].range = Layout.ByteSize; // サイズかな？
+					bufferInfoList[BufferLayoutIndex].offset = Layout.second.ByteOffset; // バッファオフセット
+					bufferInfoList[BufferLayoutIndex].range = Layout.second.ByteSize; // サイズかな？
 
 					if (m_UseDynamicUniform)
 					{
@@ -415,6 +415,7 @@ namespace api
 						m_BindingRefSizeList.push_back(m_VKUniformBufferSizeList[FrameIndex][BufferIndex]);
 					}
 
+					BufferLayoutIndex++;
 					LayoutIndex++;
 				}
 

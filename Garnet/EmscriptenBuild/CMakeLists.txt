@@ -76,6 +76,8 @@ add_executable(
 	../src/GraphicsAPI/WebGPU/CWebGPURenderPass.h
 	../src/GraphicsAPI/WebGPU/CWebGPUTexture.cpp
 	../src/GraphicsAPI/WebGPU/CWebGPUTexture.h
+	../src/ImageEffect/CBlurEffect.cpp
+	../src/ImageEffect/CBlurEffect.h
 	../src/Input/CInputState.cpp
 	../src/Input/CInputState.h
 	../src/Interface/IApp.h

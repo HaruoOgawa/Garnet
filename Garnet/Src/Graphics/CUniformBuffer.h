@@ -2,6 +2,7 @@
 
 #include "../Interface/IBuffer.h"
 #include <vector>
+#include <map>
 #include <memory>
 #include "SBindingLayout.h"
 
@@ -13,7 +14,7 @@ namespace graphics
 	{
 		std::vector<unsigned char> m_Buffer;
 		std::shared_ptr<CUniformBufferDescriptor> m_Descriptor;
-		std::vector<SBindingLayout> m_BindingLayoutList;
+		std::map<int, SBindingLayout> m_BindingLayoutList;
 
 		const EBufferType m_BufferType;
 	public:
@@ -26,7 +27,7 @@ namespace graphics
 		void SetValue(const void* Value, int ByteOffset, int ByteSize);
 
 		virtual std::shared_ptr<CUniformBufferDescriptor> GetDescriptor() const;
-		virtual const std::vector<SBindingLayout>& GetBindingLayoutList() const override;
+		virtual const std::map<int, SBindingLayout>& GetBindingLayoutList() const override;
 
 		virtual EBufferType GetBufferType() const override;
 

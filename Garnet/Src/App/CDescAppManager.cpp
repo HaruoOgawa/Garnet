@@ -244,7 +244,6 @@ namespace descapp
 		if (MainCamera) MainCamera->Update(m_SecondsTime, m_InputState);
 #endif // USE_INPUT_SYSTEM
 
-		//
 		if (!m_App->Update(m_GraphicsAPI.get(), m_SecondsTime)) return false;
 
 #ifdef _DEBUG

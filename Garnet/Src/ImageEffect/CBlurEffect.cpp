@@ -47,11 +47,11 @@ namespace imageeffect
 
 	bool CBlurEffect::Update()
 	{
-		if (!m_BlurVertex->IsLoaded()) return false;
-		if (!m_BlurFrag->IsLoaded()) return false;
-
 		if (!m_IsLoaded)
 		{
+			if (!m_BlurVertex->IsLoaded()) return true;
+			if (!m_BlurFrag->IsLoaded()) return true;
+
 			if (!Load()) return false;
 
 			m_IsLoaded = true;
@@ -71,10 +71,10 @@ namespace imageeffect
 		float w = static_cast<float>(Tex->GetWidth());
 		float h = static_cast<float>(Tex->GetHeight());
 
-		{
+		/*{
 			m_ScreenObjX->GetMaterialList()[0]->SetUniformValue("UseBlur", (GetKeyState(VK_SPACE)? &glm::ivec1(0)[0] : &glm::ivec1(1)[0]));
 			m_ScreenObjY->GetMaterialList()[0]->SetUniformValue("UseBlur", (GetKeyState(VK_SPACE)? &glm::ivec1(0)[0] : &glm::ivec1(1)[0]));
-		}
+		}*/
 
 		{
 			if (!m_pGraphicsAPI->BeginRender("BlurX")) return false;
@@ -173,7 +173,6 @@ namespace imageeffect
 		// UBO0
 		{
 			auto UniformBuffer = graphics::CMaterialCreateInfo::CreateUniformBuffer({ 0 });
-			UniformBuffer->AddData("kernel", &m_GaussianKernel[0], sizeof(float) * static_cast<int>(m_GaussianKernel.size()), 0);
 			
 			UniformBuffer->AddData("UseBlur", &glm::ivec1(1)[0], sizeof(glm::ivec1), 0);
 			UniformBuffer->AddData("KernelSize", &glm::ivec1(m_KernelSize)[0], sizeof(glm::ivec1), 0);
@@ -185,13 +184,29 @@ namespace imageeffect
 		}
 		
 		{
-			auto UniformBuffer = graphics::CMaterialCreateInfo::CreateUniformBuffer({ 0 });
+			auto UniformBuffer = graphics::CMaterialCreateInfo::CreateUniformBuffer({ 1 });
+			UniformBuffer->AddData("kernel", &m_GaussianKernel[0], sizeof(float) * static_cast<int>(m_GaussianKernel.size()), 1);
 
-			UniformBuffer->AddData("kernel", &m_GaussianKernel[0], sizeof(float) * static_cast<int>(m_GaussianKernel.size()), 0);
+			UniformBuffer->RecalculateBindingLayoutOffset();
+
+			MaterialX->AddUniformBuffer(UniformBuffer);
+		}
+		
+		{
+			auto UniformBuffer = graphics::CMaterialCreateInfo::CreateUniformBuffer({ 0 });
 
 			UniformBuffer->AddData("UseBlur", &glm::ivec1(1)[0], sizeof(glm::ivec1), 0);
 			UniformBuffer->AddData("KernelSize", &glm::ivec1(m_KernelSize)[0], sizeof(glm::ivec1), 0);
 			UniformBuffer->AddData("Direction", &glm::vec2(0.0f)[0], sizeof(glm::vec2), 0);
+
+			UniformBuffer->RecalculateBindingLayoutOffset();
+
+			MaterialY->AddUniformBuffer(UniformBuffer);
+		}
+
+		{
+			auto UniformBuffer = graphics::CMaterialCreateInfo::CreateUniformBuffer({ 1 });
+			UniformBuffer->AddData("kernel", &m_GaussianKernel[0], sizeof(float) * static_cast<int>(m_GaussianKernel.size()), 1);
 
 			UniformBuffer->RecalculateBindingLayoutOffset();
 
@@ -212,7 +227,7 @@ namespace imageeffect
 		{
 			const auto& RenderPass = m_pGraphicsAPI->GetOffScreenRenderPassMap().find("ShadowPass");
 			if (RenderPass != m_pGraphicsAPI->GetOffScreenRenderPassMap().end()) m_ScreenObjX->AddTexture(RenderPass->second->GetFrameTexture());
-			MaterialX->AddTextureBindingLayout({ 1, 2, 0, graphics::ETextureType::TEXTURE_2D });
+			MaterialX->AddTextureBindingLayout({ 2, 3, 0, graphics::ETextureType::TEXTURE_2D });
 
 			m_ScreenObjX->AddMaterial(MaterialX);
 		}
@@ -220,7 +235,7 @@ namespace imageeffect
 		{
 			const auto& RenderPass = m_pGraphicsAPI->GetOffScreenRenderPassMap().find("BlurX");
 			if (RenderPass != m_pGraphicsAPI->GetOffScreenRenderPassMap().end()) m_ScreenObjY->AddTexture(RenderPass->second->GetFrameTexture());
-			MaterialY->AddTextureBindingLayout({ 1, 2, 0, graphics::ETextureType::TEXTURE_2D });
+			MaterialY->AddTextureBindingLayout({ 2, 3, 0, graphics::ETextureType::TEXTURE_2D });
 
 			m_ScreenObjY->AddMaterial(MaterialY);
 		}

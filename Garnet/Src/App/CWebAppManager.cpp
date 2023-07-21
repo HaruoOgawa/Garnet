@@ -114,15 +114,6 @@ namespace webapp
 		if (MainCamera) MainCamera->Update(m_SecondsTime, m_InputState);
 #endif // USE_INPUT_SYSTEM
 
-		//
-		if (!m_App->Update(m_GraphicsAPI.get(), m_SecondsTime)) return false;
-
-#ifdef _DEBUG
-		// FPS‚ÌŒv‘ª‚Æ•\Ž¦(60FPS‚ðŠî€‚Æ‚·‚é)
-		float FPS = 60.0f / (m_DeltaSecondsTime * 60.0f);
-		Console::Log("[FPS] %f fps / [CurrentTime] %f s\n", FPS, m_SecondsTime);
-#endif // _DEBUG
-
 		if (!m_App->Update(m_GraphicsAPI.get(), m_SecondsTime)) return false;
 
 		return true;

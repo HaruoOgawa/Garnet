@@ -6,6 +6,7 @@
 #define GLFW_EXPOSE_NATIVE_WIN32
 
 #include <memory>
+#include <map>
 
 #include <glfw3.h>
 #include <glfw3native.h>
