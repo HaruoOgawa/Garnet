@@ -183,14 +183,14 @@ namespace imageeffect
 			MaterialX->AddUniformBuffer(UniformBuffer);
 		}
 		
-		{
+		/*{
 			auto UniformBuffer = graphics::CMaterialCreateInfo::CreateUniformBuffer({ 1 });
 			UniformBuffer->AddData("kernel", &m_GaussianKernel[0], sizeof(float) * static_cast<int>(m_GaussianKernel.size()), 1);
 
 			UniformBuffer->RecalculateBindingLayoutOffset();
 
 			MaterialX->AddUniformBuffer(UniformBuffer);
-		}
+		}*/
 		
 		{
 			auto UniformBuffer = graphics::CMaterialCreateInfo::CreateUniformBuffer({ 0 });
@@ -204,14 +204,14 @@ namespace imageeffect
 			MaterialY->AddUniformBuffer(UniformBuffer);
 		}
 
-		{
+		/*{
 			auto UniformBuffer = graphics::CMaterialCreateInfo::CreateUniformBuffer({ 1 });
 			UniformBuffer->AddData("kernel", &m_GaussianKernel[0], sizeof(float) * static_cast<int>(m_GaussianKernel.size()), 1);
 
 			UniformBuffer->RecalculateBindingLayoutOffset();
 
 			MaterialY->AddUniformBuffer(UniformBuffer);
-		}
+		}*/
 		
 		// UBO1
 		/*{

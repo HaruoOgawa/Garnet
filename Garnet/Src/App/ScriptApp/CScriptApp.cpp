@@ -82,7 +82,7 @@ namespace app
 		if (!m_BlurEffect->Update()) return false;
 		if (!m_ScriptScene->Update(pGraphicsAPI)) return false;
 
-		//m_DrawInfo->GetLightCamera()->SetPos(glm::vec3(glm::cos(SecondsTime), 1.0f, glm::sin(SecondsTime)) * 3.0f);
+		m_DrawInfo->GetLightCamera()->SetPos(glm::vec3(glm::cos(SecondsTime * 0.1f), 1.0f, glm::sin(SecondsTime * 0.1f)) * 3.0f);
 
 		return true;
 	}

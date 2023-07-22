@@ -1654,6 +1654,7 @@
     <None Include="Resources\Shaders\depth.frag" />
     <None Include="Resources\Shaders\blur.vert" />
     <None Include="Resources\Shaders\blur.frag" />
+    <None Include="Resources\Shaders\gltfpbr_frag_NativeSafe.wgsl" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="EmscriptenBuild\CMakeLists.txt" />
