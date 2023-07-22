@@ -1,4 +1,4 @@
-#ifdef __DAWN__
+#ifdef USE_WEBGPU
 #include "CWebGPURenderPass.h"
 #include "CWebGPUAPI.h"
 #include "CWebGPUTexture.h"

@@ -8,7 +8,7 @@ project(Garnet, C CXX)
 
 set(CMAKE_BUILD_TYPE Release)
 
-add_definitions(-D__DAWN__ -D__CMAKE__)
+add_definitions(-DUSE_WEBGPU -D__CMAKE__)
 
 add_executable(
 	Garnet

@@ -2,15 +2,14 @@
 #include <memory>
 #include <string>
 #include <map>
+#include <glm/glm.hpp>
 
 #include "IRenderer.h"
 #include "IRenderPass.h"
-
 #include "../GraphicsAPI/ERenderPassFormat.h"
 
 #ifndef __EMSCRIPTEN__
-
-#ifndef __DAWN__ 
+#ifdef USE_VULKAN 
 #define NOMINMAX
 #define VK_USE_PLATFORM_WIN32_KHR
 #define GLFW_INCLUDE_VULKAN
@@ -18,8 +17,6 @@
 #endif
 #include <glfw3.h>
 #include <glfw3native.h>
-#include <glm/glm.hpp>
-
 #endif // !__EMSCRIPTEN__
 
 namespace graphics

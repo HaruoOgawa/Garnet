@@ -7,7 +7,7 @@ project(Garnet, C CXX)
 set(CMAKE_BUILD_TYPE Release)
 
 add_definitions(
-	-D__DAWN__
+	-DUSE_WEBGPU
 	-DUSE_TEXTURE_LOADER
 	-DUSE_GLTF
 	-DUSE_VIEWER_CAMERA
@@ -76,6 +76,8 @@ add_executable(
 	../src/GraphicsAPI/WebGPU/CWebGPURenderPass.h
 	../src/GraphicsAPI/WebGPU/CWebGPUTexture.cpp
 	../src/GraphicsAPI/WebGPU/CWebGPUTexture.h
+	../src/ImageEffect/CBlurEffect.cpp
+	../src/ImageEffect/CBlurEffect.h
 	../src/Input/CInputState.cpp
 	../src/Input/CInputState.h
 	../src/Interface/IApp.h

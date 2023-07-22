@@ -1,4 +1,4 @@
-#ifndef __DAWN__
+#ifdef USE_VULKAN
 #include "CVulkanTexture.h"
 #include "CVulkanAPI.h"
 namespace api

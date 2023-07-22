@@ -1,4 +1,4 @@
-#ifndef __DAWN__
+#ifdef USE_VULKAN
 #include "CVulkanRenderer.h"
 #include "CVulkanAPI.h"
 #include "CVulkanRenderPass.h"

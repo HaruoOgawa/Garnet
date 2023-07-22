@@ -1,6 +1,6 @@
 #pragma once
 
-#ifndef __DAWN__
+#ifdef USE_VULKAN
 
 #include <string>
 

@@ -1,4 +1,4 @@
-#ifdef __DAWN__
+#ifdef USE_WEBGPU
 #include "CWebGPUMaterial.h"
 #include "CWebGPUAPI.h"
 #include "CWebGPUTexture.h"
@@ -165,10 +165,10 @@ namespace api
 			{
 				WGPUBindGroupLayoutEntry bindingLayout{};
 				InitDefalutBindGroupLayoutEntry(bindingLayout); // 初期化しないとブラウザ側でいろいろとエラーがでる・・・
-				bindingLayout.binding = Layout.BindingIndex; // バインドインデックス
+				bindingLayout.binding = Layout.second.BindingIndex; // バインドインデックス
 				bindingLayout.visibility = WGPUShaderStage_Vertex | WGPUShaderStage_Fragment; // アクセス権限。ここではおそらく頂点シェーダーとフラグメントシェーダーのみ読み取り可
 				bindingLayout.buffer.type = WGPUBufferBindingType_Uniform; // バインド先のバッファの種類
-				bindingLayout.buffer.minBindingSize = Layout.ByteSize; // データ一つ当たりのサイズかな???
+				bindingLayout.buffer.minBindingSize = Layout.second.ByteSize; // データ一つ当たりのサイズかな???
 				bindingLayout.buffer.hasDynamicOffset = m_UseDynamicUniform; // ダイナミックユニフォーム
 
 				bindingLayoutList.push_back(bindingLayout);
@@ -247,10 +247,10 @@ namespace api
 				int Stride = 16 * 4;
 
 				binding.nextInChain = nullptr; // 拡張機
-				binding.binding = Layout.BindingIndex;
+				binding.binding = Layout.second.BindingIndex;
 				binding.buffer = m_WGPUUniformBufferList[i];
-				binding.offset = Layout.ByteOffset;
-				binding.size = Layout.ByteSize;
+				binding.offset = Layout.second.ByteOffset;
+				binding.size = Layout.second.ByteSize;
 
 				bindingList.push_back(binding);
 				m_BindingRefSizeList.push_back(m_WGPUUniformBufferByteSizeList[i]);

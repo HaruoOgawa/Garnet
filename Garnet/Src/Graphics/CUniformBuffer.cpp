@@ -8,11 +8,12 @@ namespace graphics
 		m_Descriptor(std::make_shared<CUniformBufferDescriptor>()),
 		m_BufferType(EBufferType::UNIFROM)
 	{
-		m_BindingLayoutList.resize(BindIndexList.size());
-
-		for (int i = 0; i < m_BindingLayoutList.size(); i++)
+		for (int i = 0; i < BindIndexList.size(); i++)
 		{
-			m_BindingLayoutList[i].BindingIndex = BindIndexList[i];
+			SBindingLayout Layout{};
+			Layout.BindingIndex = BindIndexList[i];
+
+			m_BindingLayoutList.insert({ BindIndexList[i], Layout });
 		}
 	}
 
@@ -22,12 +23,14 @@ namespace graphics
 
 	void CUniformBuffer::AddData(const std::string& Name, const void* Data, int ByteSize, int BindingIndex)
 	{
-		if (BindingIndex < 0 || BindingIndex >= m_BindingLayoutList.size())
+		const auto& Layout = m_BindingLayoutList.find(BindingIndex);
+
+		if (BindingIndex < 0 || Layout == m_BindingLayoutList.end())
 		{
 			Console::Log("[ERROR] BindingIndex is out of range. %d\n", BindingIndex);
 			return;
 		}
-		else if (BindingIndex >= 1 && BindingIndex < m_BindingLayoutList.size() && m_BindingLayoutList[BindingIndex - 1].ByteSize < 256)
+		else if (BindingIndex >= 1 && m_BindingLayoutList.size() >= 2 && m_BindingLayoutList[BindingIndex - 1].ByteSize < 256)
 		{
 			Console::Log("[WARNING] UBO(%d) is smaller than 256 byte.(UBO ByteSize: %d) But you are going to use the following buffer.\n",
 				BindingIndex - 1, m_BindingLayoutList[BindingIndex - 1].ByteSize);
@@ -64,7 +67,7 @@ namespace graphics
 		return m_Descriptor;
 	}
 
-	const std::vector<SBindingLayout>& CUniformBuffer::GetBindingLayoutList() const
+	const std::map<int, SBindingLayout>& CUniformBuffer::GetBindingLayoutList() const
 	{
 		return m_BindingLayoutList;
 	}

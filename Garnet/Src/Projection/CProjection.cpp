@@ -13,7 +13,7 @@ namespace projection
 	glm::mat4 CProjection::GetPrejectionMatrix()
 	{
 		glm::mat4 pmat = glm::perspective(glm::radians(m_FOV), m_Aspect, m_Near, m_Far);
-//#ifndef __DAWN__
+//#ifdef USE_VULKAN
 		pmat[1][1] *= -1.0f; /// YÀ•W‚ÌŒü‚«‚ğ”½“]BVulkan(WebGPU)‚ÆOpenGL‚Í‹t‚È‚Ì‚©‚ÈH
 //#endif
 		return pmat;

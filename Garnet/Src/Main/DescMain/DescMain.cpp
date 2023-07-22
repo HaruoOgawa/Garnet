@@ -5,7 +5,7 @@
 #ifdef __EMSCRIPTEN__
 #include <emscripten/emscripten.h>
 #include <emscripten/html5_webgpu.h>
-#elif defined(__DAWN__) && defined(__CMAKE__)
+#elif defined(USE_WEBGPU) && defined(__CMAKE__)
 #else
 #include <Windows.h>
 #endif
@@ -51,7 +51,7 @@ void StartApp()
 	g_DescApp = nullptr;
 }
 
-#if defined(__DAWN__) && defined(__CMAKE__)
+#if defined(USE_WEBGPU) && defined(__CMAKE__)
 int main()
 #else
 int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)

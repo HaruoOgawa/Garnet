@@ -3,7 +3,7 @@
 namespace graphics
 {
 	CMaterialCreateInfo::CMaterialCreateInfo():
-#ifdef __DAWN__
+#ifdef USE_WEBGPU
 		m_ShaderType(EShaderType::WGSL)
 #else
 		m_ShaderType(EShaderType::SPIRV)

@@ -1,5 +1,5 @@
 #pragma once
-#ifndef __DAWN__
+#ifdef USE_VULKAN
 #include <memory>
 #include <vector>
 #include <optional>
