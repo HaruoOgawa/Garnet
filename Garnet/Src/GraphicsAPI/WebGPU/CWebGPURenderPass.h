@@ -1,6 +1,6 @@
 #pragma once
 
-#ifdef __DAWN__
+#ifdef USE_WEBGPU
 
 #include <webgpu.h>
 #include <wgpu.h>

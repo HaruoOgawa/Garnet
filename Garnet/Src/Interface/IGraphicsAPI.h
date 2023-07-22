@@ -9,7 +9,7 @@
 #include "../GraphicsAPI/ERenderPassFormat.h"
 
 #ifndef __EMSCRIPTEN__
-#ifndef __DAWN__ 
+#ifdef USE_VULKAN 
 #define NOMINMAX
 #define VK_USE_PLATFORM_WIN32_KHR
 #define GLFW_INCLUDE_VULKAN

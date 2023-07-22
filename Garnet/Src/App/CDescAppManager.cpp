@@ -7,11 +7,11 @@
 #include <emscripten/html5_webgpu.h>
 #endif
 
-#ifdef __DAWN__
+#ifdef USE_WEBGPU
 #include "../GraphicsAPI/WebGPU/CWebGPUAPI.h"
 #else
 #include "../GraphicsAPI/Vulkan/CVulkanAPI.h"
-#endif // __DAWN__
+#endif // USE_WEBGPU
 
 #ifdef USE_VIEWER_CAMERA
 #include "../../Camera/CViewerCamera.h"
@@ -33,19 +33,19 @@ namespace descapp
 		m_App(nullptr),
 		m_IsRunLoop(g_IsRunLoop),
 		m_SecondsTime(0.0f), 
-#ifdef __DAWN__
+#ifdef USE_WEBGPU
 		m_InputState(std::make_shared<input::CInputState>(1.0f)),
 #else
 		m_InputState(std::make_shared<input::CInputState>(1.0f)),
-#endif // __DAWN__
+#endif // USE_WEBGPU
 		m_DeltaSecondsTime(0.0f)
 	{
 		//
-#ifdef __DAWN__
+#ifdef USE_WEBGPU
 		m_GraphicsAPI = std::make_shared<api::CWebGPUAPI>(WIDTH, HEIGHT);
 #else
 		m_GraphicsAPI = std::make_shared<api::CVulkanAPI>(WIDTH, HEIGHT);
-#endif // __DAWN__
+#endif // USE_WEBGPU
 		
 		//
 		if (AppType == app::EAppType::ScriptApp)
@@ -69,7 +69,7 @@ namespace descapp
 
 	bool CDescAppManager::Release()
 	{
-#ifndef __DAWN__
+#ifdef USE_VULKAN
 		// 論理デバイスが操作を完了するのを待つ
 		vkDeviceWaitIdle(m_GraphicsAPI->GetLogicalDevice());
 #endif

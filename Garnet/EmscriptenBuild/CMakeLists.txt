@@ -7,7 +7,7 @@ project(Garnet, C CXX)
 set(CMAKE_BUILD_TYPE Release)
 
 add_definitions(
-	-D__DAWN__
+	-DUSE_WEBGPU
 	-DUSE_TEXTURE_LOADER
 	-DUSE_GLTF
 	-DUSE_VIEWER_CAMERA

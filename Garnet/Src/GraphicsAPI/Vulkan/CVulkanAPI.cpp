@@ -1,4 +1,4 @@
-#ifndef __DAWN__
+#ifdef USE_VULKAN
 #include "CVulkanAPI.h"
 #include "CVulkanRenderer.h"
 #include "CVulkanRenderPass.h"
@@ -1603,4 +1603,4 @@ namespace api
 	}
 }
 
-#endif // !__DAWN__
+#endif // !USE_WEBGPU
