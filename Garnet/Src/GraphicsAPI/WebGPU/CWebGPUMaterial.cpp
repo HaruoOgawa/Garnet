@@ -326,8 +326,6 @@ namespace api
 		shaderCodeDesc.code = &shaderCode[0]; // Shaderコードを渡す
 
 		WGPUShaderModuleDescriptor shaderDesc{};
-		shaderDesc.hintCount = 0; // ???
-		shaderDesc.hints = nullptr;
 		shaderDesc.nextInChain = &shaderCodeDesc.chain; // 使用するShaderの種類を指定(ここででWGSL)。WGPUShaderModuleSPIRVDescriptorを指定することでVulkanのSplivが使用できる(SplivはGLSLからコンパイルできて便利)
 
 		WGPUShaderModule shaderModule = wgpuDeviceCreateShaderModule(m_pGraphicsAPI->GetLogicalDevice(), &shaderDesc);
@@ -348,8 +346,6 @@ namespace api
 		shaderCodeDesc.codeSize = static_cast<uint32_t>(Data.size());
 
 		WGPUShaderModuleDescriptor shaderDesc{};
-		shaderDesc.hintCount = 0;
-		shaderDesc.hints = nullptr;
 		shaderDesc.nextInChain = &shaderCodeDesc.chain;
 
 		WGPUShaderModule shaderModule = wgpuDeviceCreateShaderModule(m_pGraphicsAPI->GetLogicalDevice(), &shaderDesc);

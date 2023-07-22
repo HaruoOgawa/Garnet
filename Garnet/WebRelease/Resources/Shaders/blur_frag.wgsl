@@ -12,11 +12,9 @@ struct strided_arr {
   el : f32,
 }
 
-alias Arr = array<strided_arr, 32u>;
-
 struct GaussianKernelBuffer {
   /* @offset(0) */
-  Kernal : Arr,
+  Kernal : array<strided_arr, 32u>,
 }
 
 @group(0) @binding(0) var<uniform> ubo : UniformBufferObject;

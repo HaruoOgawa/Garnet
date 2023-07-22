@@ -1,12 +1,12 @@
 #pragma once
 #ifdef USE_WEBGPU
 #include "../../Interface/IRenderer.h"
-#include <webgpu.h>
-#include <wgpu.h>
 #include <vector>
 #include <string>
 #include <glm/glm.hpp>
 #include <glm/gtx/quaternion.hpp>
+
+#include <webgpu.h>
 
 namespace api { 
 	class CWebGPUAPI; 

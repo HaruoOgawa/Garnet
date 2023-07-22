@@ -1,11 +1,11 @@
 #pragma once
 #ifdef USE_WEBGPU
-#include <webgpu.h>
-#include <wgpu.h>
 #include <glm/glm.hpp>
 #include <glm/gtx/quaternion.hpp>
 #include "../../Graphics/CMaterial.h"
 #include <memory>
+
+#include <webgpu.h>
 
 namespace graphics{ class CMaterialCreateInfo; }
 

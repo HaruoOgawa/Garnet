@@ -1,10 +1,10 @@
 #pragma once
 #ifdef USE_WEBGPU
 #include "../../Interface/IGraphicsAPI.h"
-#include <webgpu.h>
-#include <wgpu.h>
 #include <vector>
 #include <map>
+
+#include <webgpu.h>
 
 namespace api
 {

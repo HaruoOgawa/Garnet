@@ -2,14 +2,13 @@
 
 #ifdef USE_WEBGPU
 
-#include <webgpu.h>
-#include <wgpu.h>
-
 #include <string>
 
 #include "../ERenderPassFormat.h"
 #include "../../Interface/IRenderPass.h"
 #include <glm/glm.hpp>
+
+#include <webgpu.h>
 
 namespace graphics { class CTexture; }
 
