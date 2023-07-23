@@ -11,7 +11,13 @@ namespace app
 {
 	class CDemoAppManager
 	{
+		GLFWwindow* m_pWindow;
+		const int WIDTH = 1920;
+		const int HEIGHT = 1080;
+
 		bool m_IsRunLoop;
+	private:
+		bool InitWindow();
 	public:
 		CDemoAppManager(app::EAppType AppType);
 		virtual ~CDemoAppManager();
@@ -20,6 +26,7 @@ namespace app
 		bool RunLopp();
 
 		bool IsRunLoop() { return m_IsRunLoop; }
+		void SetRunLoop(bool RunLoop) { m_IsRunLoop = RunLoop; }
 
 		void ResizeWindow(int w, int h);
 	};
