@@ -1,3 +1,5 @@
+#ifdef USE_VULKAN
+
 #include "CDescAppManager.h"
 #include "../Debug/Message/Console.h"
 
@@ -262,3 +264,4 @@ namespace descapp
 		return true;
 	}
 }
+#endif
