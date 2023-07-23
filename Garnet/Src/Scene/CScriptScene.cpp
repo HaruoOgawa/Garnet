@@ -61,7 +61,15 @@ namespace scene
 		m_FragmentShader->ReadFile(ShaderPath + "sample_frag" + pGraphicsAPI->GetShaderExtension());
 		
 		m_glTFVert->ReadFile(ShaderPath + "gltfpbr_vert" + pGraphicsAPI->GetShaderExtension());
-		m_glTFFrag->ReadFile(ShaderPath + "gltfpbr_frag" + pGraphicsAPI->GetShaderExtension());
+
+		{
+			// これ以上のWebGPU Nativeのバグ対策で進まないのはだるいのでDescのWebGPU NativeではPCFをオフにした安全なものを使用する
+#if defined(USE_WEBGPU) && !defined(__EMSCRIPTEN__)
+			m_glTFFrag->ReadFile(ShaderPath + "gltfpbr_frag_NativeSafe" + pGraphicsAPI->GetShaderExtension());
+#else
+			m_glTFFrag->ReadFile(ShaderPath + "gltfpbr_frag" + pGraphicsAPI->GetShaderExtension());
+#endif
+		}
 		
 		m_ShadowDebugVertex->ReadFile(ShaderPath + "shadow_debug_vert" + pGraphicsAPI->GetShaderExtension());
 		m_ShadowDebugFragment->ReadFile(ShaderPath + "shadow_debug_frag" + pGraphicsAPI->GetShaderExtension());
@@ -79,7 +87,7 @@ namespace scene
 
 		m_Sphere_glTFData->ReadFile(ModelPath + "Box\\glTF-Binary\\Box.glb");
 		//m_Sphere_glTFObj->SetScale(glm::vec3(500.0f, 500.0f, 500.0f));
-		m_Sphere_glTFObj->SetPos(glm::vec3(-1.5f, 0.0f, -1.5f));
+		m_Sphere_glTFObj->SetPos(glm::vec3(-1.5f, -0.5f, -1.5f));
 
 		// Cubemap
 		m_Cube0->ReadFile("Resources\\Cubemaps\\environment\\environment_back_0.jpg");

@@ -219,9 +219,9 @@ vec2 ComputePCF(vec2 uv)
 
 	vec2 texelSize = vec2(1.0 / ubo.ShadowMapX, 1.0 / ubo.ShadowMapY);
 
-	for(int x = -1; x <= 1; x++)
+	for(float x = -1.0; x <= 1.0; x++)
 	{
-		for(int y = -1; y <= 1; y++)
+		for(float y = -1.0; y <= 1.0; y++)
 		{
 			moments += texture(sampler2D(shadowmapTexture, shadowmapTextureSampler), uv + vec2(x, y) * texelSize).rg;
 		}
