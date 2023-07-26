@@ -1,6 +1,8 @@
 #ifdef USE_OPENGL
 
 #include "COpenGLAPI.h"
+#define GL_IMPLEMENTATION
+#include "glDef.h"
 
 namespace api
 {

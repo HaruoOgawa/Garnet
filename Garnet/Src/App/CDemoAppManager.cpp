@@ -1,17 +1,26 @@
 #ifdef USE_OPENGL
 
 #include "CDemoAppManager.h"
+#include "../GraphicsAPI/OpenGL/COpenGLAPI.h"
 
 namespace app
 {
 	CDemoAppManager::CDemoAppManager(app::EAppType AppType):
 		m_pWindow(nullptr),
-		m_IsRunLoop(true)
+		m_IsRunLoop(true),
+		m_GraphicsAPI(std::make_shared<api::COpenGLAPI>(WIDTH, HEIGHT))
 	{
 	}
 
 	CDemoAppManager::~CDemoAppManager()
 	{
+		if (m_GraphicsAPI)
+		{
+			m_GraphicsAPI->Release();
+			m_GraphicsAPI.reset();
+			m_GraphicsAPI = nullptr;
+		}
+
 		if (m_pWindow)
 		{
 			glfwDestroyWindow(m_pWindow);

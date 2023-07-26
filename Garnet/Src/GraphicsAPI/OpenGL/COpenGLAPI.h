@@ -7,6 +7,7 @@
 #include <map>
 #include <glm/glm.hpp>
 
+#include "glDef.h"
 #include "../../Interface/IGraphicsAPI.h"
 
 namespace api
