@@ -65,8 +65,6 @@ GL_FUNC_LIST
 // OpenGLコンテキストの初期化関数
 bool InitGL()
 {
-	Console::Log("___ InitGL Start __________________________________________\n");
-
 	// OpenGLのdllの読み込み
 	HINSTANCE dll = LoadLibraryA("opengl32.dll");
 	typedef PROC WINAPI wglGetProcAddressproc(LPCSTR lpszProc);
@@ -83,6 +81,8 @@ bool InitGL()
 	// この中でプリプロセッサを一気に展開している(プリプロセッサ芸ってやつ？・・・)
 	// 改行文字を入れつつ複数行のプログラミングをしているのか・・・
 	// 次のGL_FUNC_LISTをProcと結びつけるために展開する
+	
+	// あと最後の行には円マークは付けないように注意. 正常に処理が呼ばれなくなる
 #define GL_FUNC(ret, name, ...) \
 		gl##name = (name##proc *)wglGetProcAddress("gl" #name); \
 		if(!gl##name) { \
@@ -92,11 +92,10 @@ bool InitGL()
 		else \
 		{ \
 			Console::Log("[Success] gl" #name " Loaded\n"); \
-		} \
+		} 
 		GL_FUNC_LIST
 #undef GL_FUNC
 
-	Console::Log("___ InitGL Finish __________________________________________\n"); 
 	return true;
 }
 

@@ -114,6 +114,10 @@ namespace app
 
 	bool CDemoAppManager::InitWindow()
 	{
+		// OpenGL バージョンの指定
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+
 		glfwInit();
 		m_pWindow = glfwCreateWindow(WIDTH, HEIGHT, "Garnet", nullptr, nullptr);
 
@@ -123,13 +127,16 @@ namespace app
 		glfwSetFramebufferSizeCallback(m_pWindow, Resize_Callback);
 		glfwSetWindowCloseCallback(m_pWindow, Close_Callback);
 
+		// コンテキストを作成
+		glfwMakeContextCurrent(m_pWindow);
+
 		return true;
 	}
 
 	bool CDemoAppManager::Update()
 	{
 		float PrevSecondsTime = m_SecondsTime;
-		m_SecondsTime = static_cast<float>(clock()) * 0.001f;
+		//m_SecondsTime = static_cast<float>(clock()) * 0.001f;
 		m_DeltaSecondsTime = m_SecondsTime - PrevSecondsTime;
 
 		if (!m_App->Update(m_GraphicsAPI.get(), m_SecondsTime)) return false;
@@ -139,7 +146,11 @@ namespace app
 
 	bool CDemoAppManager::Draw()
 	{
+		// Appの描画
 		if (!m_App->Draw(m_GraphicsAPI.get(), m_SecondsTime)) return false;
+
+		//カラーバッファを入れ替える
+		glfwSwapBuffers(m_pWindow);
 
 		return true;
 	}

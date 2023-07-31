@@ -20,7 +20,6 @@ namespace api
 
 	bool COpenGLAPI::InitializeWithGLFW(GLFWwindow* pWindow)
 	{
-		if (!MakeGLContext(pWindow)) return false;
 		if (!InitGL()) return false;
 		
 		return true;
@@ -98,18 +97,6 @@ namespace api
 	const std::map<std::string, std::shared_ptr<graphics::IRenderPass>>& COpenGLAPI::GetOffScreenRenderPassMap() const
 	{
 		return m_OffScreenRenderPassMap;
-	}
-
-	bool COpenGLAPI::MakeGLContext(GLFWwindow* pWindow)
-	{
-		// OpenGL バージョンの指定
-		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
-
-		// コンテキストを作成
-		glfwMakeContextCurrent(pWindow);
-
-		return true;
 	}
 }
 
