@@ -1,17 +1,18 @@
-#pragma once
+// シングルファイルで宣言と実装でそれぞれ一回ずつ読みたいのでここはコメントアウト. 3回目以降はプリプロセッサが止めてくれる
+//#pragma once
 
 // Reference: https://github.com/ApoorvaJ/Papaya/blob/3808e39b0f45d4ca4972621c847586e4060c042a/src/libs/gl_lite.h#L113
 
 #ifdef USE_OPENGL
-
-#ifndef GL_H
-#define GL_H
 
 #define NOMINMAX
 #define WIN32_LEAN_AND_MEAD
 #include <Windows.h>
 
 #include "../../Debug/Message/Console.h"
+
+#ifndef GL_H //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#define GL_H
 
 // OpenGLの定数を定義
 #define GL_ARRAY_BUFFER                   0x8892 // Acquired from:
@@ -52,12 +53,20 @@ GL_FUNC_LIST
 #undef GL_FUNC
 
 bool InitGL();
-#endif // !GL_H
+
+#endif // !GL_H //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #ifdef GL_IMPLEMENTATION
+
+#define GL_FUNC(ret, name, ...) name##proc * gl##name;
+GL_FUNC_LIST
+#undef GL_FUNC
+
 // OpenGLコンテキストの初期化関数
 bool InitGL()
 {
+	Console::Log("___ InitGL Start __________________________________________\n");
+
 	// OpenGLのdllの読み込み
 	HINSTANCE dll = LoadLibraryA("opengl32.dll");
 	typedef PROC WINAPI wglGetProcAddressproc(LPCSTR lpszProc);
@@ -80,12 +89,17 @@ bool InitGL()
 			Console::Log("[ERROR] gl" #name "could=t loaded from opengl32.dll\n"); \
 			return false; \
 		} \
+		else \
+		{ \
+			Console::Log("[Success] gl" #name " Loaded\n"); \
+		} \
 		GL_FUNC_LIST
 #undef GL_FUNC
 
+	Console::Log("___ InitGL Finish __________________________________________\n"); 
 	return true;
 }
-#endif // GL_IMPLEMENTATION
 
+#endif // GL_IMPLEMENTATION
 
 #endif // USE_OPENGL

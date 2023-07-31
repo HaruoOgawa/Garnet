@@ -19,6 +19,8 @@ namespace api
 		int m_Height;
 
 		std::map<std::string, std::shared_ptr<graphics::IRenderPass>> m_OffScreenRenderPassMap;
+	private:
+		bool MakeGLContext(GLFWwindow* pWindow);
 	public:
 		COpenGLAPI(int Width, int Height);
 		virtual ~COpenGLAPI();

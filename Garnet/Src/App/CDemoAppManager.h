@@ -11,6 +11,7 @@
 #include "EAppType.h"
 
 namespace api { class COpenGLAPI; }
+namespace app { class IApp; }
 
 namespace app
 {
@@ -22,9 +23,16 @@ namespace app
 
 		bool m_IsRunLoop;
 
+		float m_SecondsTime;
+		float m_DeltaSecondsTime;
+
 		std::shared_ptr<api::COpenGLAPI> m_GraphicsAPI;
+		std::shared_ptr<app::IApp> m_App;
 	private:
 		bool InitWindow();
+
+		bool Update();
+		bool Draw();
 	public:
 		CDemoAppManager(app::EAppType AppType);
 		virtual ~CDemoAppManager();

@@ -6,6 +6,8 @@
 # Custom
 Garnet/CMakeBuild/build/
 Garnet/EmscriptenBuild/build/
+Garnet/DebugGL/
+Garnet/ReleaseGL/
 
 # User-specific files
 *.rsuser
