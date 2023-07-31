@@ -7,16 +7,24 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Garnet", "Garnet.vcxproj", 
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		DebugGL|x64 = DebugGL|x64
+		DebugGL|x86 = DebugGL|x86
 		DebugVK|x64 = DebugVK|x64
 		DebugVK|x86 = DebugVK|x86
 		DebugWG|x64 = DebugWG|x64
 		DebugWG|x86 = DebugWG|x86
+		ReleaseGL|x64 = ReleaseGL|x64
+		ReleaseGL|x86 = ReleaseGL|x86
 		ReleaseVK|x64 = ReleaseVK|x64
 		ReleaseVK|x86 = ReleaseVK|x86
 		ReleaseWG|x64 = ReleaseWG|x64
 		ReleaseWG|x86 = ReleaseWG|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9BB5F0A3-4CD3-470F-8D71-8C187FA3332B}.DebugGL|x64.ActiveCfg = DebugGL|x64
+		{9BB5F0A3-4CD3-470F-8D71-8C187FA3332B}.DebugGL|x64.Build.0 = DebugGL|x64
+		{9BB5F0A3-4CD3-470F-8D71-8C187FA3332B}.DebugGL|x86.ActiveCfg = DebugGL|Win32
+		{9BB5F0A3-4CD3-470F-8D71-8C187FA3332B}.DebugGL|x86.Build.0 = DebugGL|Win32
 		{9BB5F0A3-4CD3-470F-8D71-8C187FA3332B}.DebugVK|x64.ActiveCfg = Debug|x64
 		{9BB5F0A3-4CD3-470F-8D71-8C187FA3332B}.DebugVK|x64.Build.0 = Debug|x64
 		{9BB5F0A3-4CD3-470F-8D71-8C187FA3332B}.DebugVK|x86.ActiveCfg = Debug|Win32
@@ -25,6 +33,10 @@ Global
 		{9BB5F0A3-4CD3-470F-8D71-8C187FA3332B}.DebugWG|x64.Build.0 = DebugWG|x64
 		{9BB5F0A3-4CD3-470F-8D71-8C187FA3332B}.DebugWG|x86.ActiveCfg = DebugWG|Win32
 		{9BB5F0A3-4CD3-470F-8D71-8C187FA3332B}.DebugWG|x86.Build.0 = DebugWG|Win32
+		{9BB5F0A3-4CD3-470F-8D71-8C187FA3332B}.ReleaseGL|x64.ActiveCfg = ReleaseGL|x64
+		{9BB5F0A3-4CD3-470F-8D71-8C187FA3332B}.ReleaseGL|x64.Build.0 = ReleaseGL|x64
+		{9BB5F0A3-4CD3-470F-8D71-8C187FA3332B}.ReleaseGL|x86.ActiveCfg = ReleaseGL|Win32
+		{9BB5F0A3-4CD3-470F-8D71-8C187FA3332B}.ReleaseGL|x86.Build.0 = ReleaseGL|Win32
 		{9BB5F0A3-4CD3-470F-8D71-8C187FA3332B}.ReleaseVK|x64.ActiveCfg = Release|x64
 		{9BB5F0A3-4CD3-470F-8D71-8C187FA3332B}.ReleaseVK|x64.Build.0 = Release|x64
 		{9BB5F0A3-4CD3-470F-8D71-8C187FA3332B}.ReleaseVK|x86.ActiveCfg = Release|Win32

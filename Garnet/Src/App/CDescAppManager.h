@@ -1,6 +1,8 @@
 #pragma once
 
 #ifdef USE_VULKAN
+
+#ifdef USE_VULKAN
 #define NOMINMAX
 #define VK_USE_PLATFORM_WIN32_KHR
 #define GLFW_INCLUDE_VULKAN
@@ -64,3 +66,4 @@ namespace descapp
 		void ResizeWindow(int w, int h);
 	};
 }
+#endif

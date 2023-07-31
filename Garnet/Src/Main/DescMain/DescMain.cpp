@@ -1,3 +1,5 @@
+#ifdef USE_VULKAN
+
 #include "../../App/CDescAppManager.h"
 #include "../../App/EAppType.h"
 #include "../../Debug/Message/Console.h"
@@ -65,3 +67,5 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
 }
 
 }
+
+#endif // USE_VULKAN
