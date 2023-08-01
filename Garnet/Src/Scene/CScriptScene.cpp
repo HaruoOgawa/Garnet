@@ -9,17 +9,94 @@
 
 namespace scene
 {
-	CScriptScene::CScriptScene()
+	CScriptScene::CScriptScene():
+		m_TestObject(std::make_shared<object::C3DObject>("", "ShadowPass")),
+
+		m_DepthVertex(std::make_shared<file::CFileReader>()),
+		m_DepthFragment(std::make_shared<file::CFileReader>()),
+
+		m_VertexShader(std::make_shared<file::CFileReader>()),
+		m_FragmentShader(std::make_shared<file::CFileReader>()),
+		m_Texture0(std::make_shared<file::CFileReader>()),
+		m_Texture1(std::make_shared<file::CFileReader>()),
+
+		m_Sphere_glTFObj(std::make_shared<object::C3DObject>("", "ShadowPass")),
+		m_Sphere_glTFData(std::make_shared<file::CFileReader>()),
+		m_Helmet_glTFObj(std::make_shared<object::C3DObject>("", "ShadowPass")),
+		m_Helmet_glTFData(std::make_shared<file::CFileReader>()),
+		m_glTFVert(std::make_shared<file::CFileReader>()),
+		m_glTFFrag(std::make_shared<file::CFileReader>()),
+
+		m_Cube0(std::make_shared<file::CFileReader>()),
+		m_Cube1(std::make_shared<file::CFileReader>()),
+		m_Cube2(std::make_shared<file::CFileReader>()),
+		m_Cube3(std::make_shared<file::CFileReader>()),
+		m_Cube4(std::make_shared<file::CFileReader>()),
+		m_Cube5(std::make_shared<file::CFileReader>()),
+
+		m_DepthDebugObj(std::make_shared<object::C3DObject>("", "ShadowPass")),
+		m_ShadowDebugVertex(std::make_shared<file::CFileReader>()),
+		m_ShadowDebugFragment(std::make_shared<file::CFileReader>()),
+
+		m_IsLoaded(false)
 	{
 	}
 
 	bool CScriptScene::Release(api::IGraphicsAPI* pGraphicsAPI)
 	{
+		m_IsLoaded = false;
+
 		return true;
 	}
 
 	bool CScriptScene::Initialize(api::IGraphicsAPI* pGraphicsAPI)
 	{
+		// Shader
+		std::string ShaderPath = "Resources\\Shaders\\";
+
+		m_DepthVertex->ReadFile(ShaderPath + "depth" + pGraphicsAPI->GetVertexShaderExtension());
+		m_DepthFragment->ReadFile(ShaderPath + "depth" + pGraphicsAPI->GetFragmentShaderExtension());
+
+		m_VertexShader->ReadFile(ShaderPath + "sample" + pGraphicsAPI->GetVertexShaderExtension());
+		m_FragmentShader->ReadFile(ShaderPath + "sample" + pGraphicsAPI->GetFragmentShaderExtension());
+
+		m_glTFVert->ReadFile(ShaderPath + "gltfpbr" + pGraphicsAPI->GetVertexShaderExtension());
+
+		{
+			// これ以上のWebGPU Nativeのバグ対策で進まないのはだるいのでDescのWebGPU NativeではPCFをオフにした安全なものを使用する
+#if defined(USE_WEBGPU) && !defined(__EMSCRIPTEN__)
+			m_glTFFrag->ReadFile(ShaderPath + "gltfpbr_NativeSafe" + pGraphicsAPI->GetFragmentShaderExtension());
+#else
+			m_glTFFrag->ReadFile(ShaderPath + "gltfpbr" + pGraphicsAPI->GetFragmentShaderExtension());
+#endif
+		}
+
+		m_ShadowDebugVertex->ReadFile(ShaderPath + "shadow_debug" + pGraphicsAPI->GetVertexShaderExtension());
+		m_ShadowDebugFragment->ReadFile(ShaderPath + "shadow_debug" + pGraphicsAPI->GetFragmentShaderExtension());
+
+		// Texture
+		std::string TexturePath = "Resources\\Textures\\";
+
+		m_Texture0->ReadFile(TexturePath + "brick.jpg");
+		m_Texture1->ReadFile(TexturePath + "brick_norm.jpg");
+
+		// GLTF
+		std::string ModelPath = "Resources\\Models\\";
+
+		m_Helmet_glTFData->ReadFile(ModelPath + "DamagedHelmet\\glTF-Binary\\DamagedHelmet.glb");
+
+		m_Sphere_glTFData->ReadFile(ModelPath + "Box\\glTF-Binary\\Box.glb");
+		//m_Sphere_glTFObj->SetScale(glm::vec3(500.0f, 500.0f, 500.0f));
+		m_Sphere_glTFObj->SetPos(glm::vec3(-1.5f, -0.5f, -1.5f));
+
+		// Cubemap
+		m_Cube0->ReadFile("Resources\\Cubemaps\\environment\\environment_back_0.jpg");
+		m_Cube1->ReadFile("Resources\\Cubemaps\\environment\\environment_bottom_0.jpg");
+		m_Cube2->ReadFile("Resources\\Cubemaps\\environment\\environment_front_0.jpg");
+		m_Cube3->ReadFile("Resources\\Cubemaps\\environment\\environment_left_0.jpg");
+		m_Cube4->ReadFile("Resources\\Cubemaps\\environment\\environment_right_0.jpg");
+		m_Cube5->ReadFile("Resources\\Cubemaps\\environment\\environment_top_0.jpg");
+
 		return true;
 	}
 
@@ -30,6 +107,18 @@ namespace scene
 
 	bool CScriptScene::Update(api::IGraphicsAPI* pGraphicsAPI)
 	{
+		if (!m_IsLoaded)
+		{
+			if (m_DepthVertex->IsLoaded() && m_DepthFragment->IsLoaded() && m_VertexShader->IsLoaded() && m_FragmentShader->IsLoaded() && m_Texture0->IsLoaded() && m_Texture1->IsLoaded()
+				&& m_Sphere_glTFData->IsLoaded() && m_Helmet_glTFData->IsLoaded() && m_glTFVert->IsLoaded() && m_glTFFrag->IsLoaded() && m_ShadowDebugVertex->IsLoaded() && m_ShadowDebugFragment->IsLoaded()
+				&& m_Cube0->IsLoaded() && m_Cube1->IsLoaded() && m_Cube2->IsLoaded() && m_Cube3->IsLoaded() && m_Cube4->IsLoaded() && m_Cube5->IsLoaded()
+				)
+			{
+				if (!Load(pGraphicsAPI)) return false;
+				m_IsLoaded = true;
+			}
+		}
+
 		return true;
 	}
 

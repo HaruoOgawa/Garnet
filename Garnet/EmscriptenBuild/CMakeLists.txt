@@ -16,8 +16,6 @@ add_definitions(
 
 add_executable(
 	Garnet
-	../src/App/CDemoAppManager.cpp
-	../src/App/CDemoAppManager.h
 	../src/App/CWebAppManager.cpp
 	../src/App/CWebAppManager.h
 	../src/App/EAppType.h
@@ -60,12 +58,6 @@ add_executable(
 	../src/GraphicsAPI/CRendererCreateInfo.cpp
 	../src/GraphicsAPI/CRendererCreateInfo.h
 	../src/GraphicsAPI/ERenderPassFormat.h
-	../src/GraphicsAPI/Vulkan/CVulkanMaterial.cpp
-	../src/GraphicsAPI/Vulkan/CVulkanMaterial.h
-	../src/GraphicsAPI/Vulkan/CVulkanRenderPass.cpp
-	../src/GraphicsAPI/Vulkan/CVulkanRenderPass.h
-	../src/GraphicsAPI/Vulkan/CVulkanTexture.cpp
-	../src/GraphicsAPI/Vulkan/CVulkanTexture.h
 	../src/GraphicsAPI/WebGPU/CWebGPUAPI.cpp
 	../src/GraphicsAPI/WebGPU/CWebGPUAPI.h
 	../src/GraphicsAPI/WebGPU/CWebGPUMaterial.cpp
@@ -86,7 +78,6 @@ add_executable(
 	../src/Interface/IGraphicsAPI.h
 	../src/Interface/IRenderer.h
 	../src/Interface/IRenderPass.h
-	../src/Main/DemoMain/DemoMain.cpp
 	../src/Main/WebMain/WebMain.cpp
 	../src/Math/CMath.h
 	../src/Math/CTransform.cpp

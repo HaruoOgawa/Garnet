@@ -912,7 +912,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <None Include="Resources\Shaders\depth.vert" />
     <None Include="Resources\Shaders\gltfpbr.frag" />
     <None Include="Resources\Shaders\gltfpbr.vert" />
-    <None Include="Resources\Shaders\gltfpbr_frag_NativeSafe.wgsl" />
+    <None Include="Resources\Shaders\gltfpbr_NativeSafe_frag.wgsl" />
     <None Include="Resources\Shaders\sample.frag" />
     <None Include="Resources\Shaders\sample.vert" />
     <None Include="Resources\Shaders\sample_frag.spv" />

@@ -17,6 +17,44 @@ namespace scene
 {
 	class CScriptScene
 	{
+		bool m_IsLoaded;
+
+		// Tex of FrameBuffer
+		std::vector<std::shared_ptr<graphics::CTexture>> m_FrameTextureList;
+
+		// DepthMaterial(LoadWorker‚ÆMaterialFrameÀ‘•‚Ü‚Å‚Í‚Ğ‚Æ‚Ü‚¸Scene‚É‘‚¢‚Ä‚¨‚­ ¨ ŒãXC3DObject‚ÉˆÚs‚·‚é)
+		std::shared_ptr<file::CFileReader> m_DepthVertex;
+		std::shared_ptr<file::CFileReader> m_DepthFragment;
+
+		// Test Obj
+		std::shared_ptr<object::C3DObject> m_TestObject;
+
+		std::shared_ptr<file::CFileReader> m_VertexShader;
+		std::shared_ptr<file::CFileReader> m_FragmentShader;
+
+		std::shared_ptr<file::CFileReader> m_Texture0;
+		std::shared_ptr<file::CFileReader> m_Texture1;
+
+		// glTF
+		std::shared_ptr<object::C3DObject> m_Sphere_glTFObj;
+		std::shared_ptr<file::CFileReader> m_Sphere_glTFData;
+		std::shared_ptr<object::C3DObject> m_Helmet_glTFObj;
+		std::shared_ptr<file::CFileReader> m_Helmet_glTFData;
+		std::shared_ptr<file::CFileReader> m_glTFVert;
+		std::shared_ptr<file::CFileReader> m_glTFFrag;
+
+		// Cubemap
+		std::shared_ptr<file::CFileReader> m_Cube0;
+		std::shared_ptr<file::CFileReader> m_Cube1;
+		std::shared_ptr<file::CFileReader> m_Cube2;
+		std::shared_ptr<file::CFileReader> m_Cube3;
+		std::shared_ptr<file::CFileReader> m_Cube4;
+		std::shared_ptr<file::CFileReader> m_Cube5;
+
+		// ShadowMapping
+		std::shared_ptr<object::C3DObject> m_DepthDebugObj;
+		std::shared_ptr<file::CFileReader> m_ShadowDebugVertex;
+		std::shared_ptr<file::CFileReader> m_ShadowDebugFragment;
 	private:
 		bool Load(api::IGraphicsAPI* pGraphicsAPI);
 	public:

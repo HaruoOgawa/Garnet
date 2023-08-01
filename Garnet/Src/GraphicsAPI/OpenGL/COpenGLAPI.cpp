@@ -8,7 +8,12 @@
 namespace api
 {
 	COpenGLAPI::COpenGLAPI(int Width, int Height):
-		m_ShaderExtension(".glsl"),
+		m_VertexShaderExtension(".vert"),
+		m_FragmentShaderExtension(".frag"),
+		m_GeometryShaderExtension(".geom"),
+		m_HullShaderExtension(".tesc"),
+		m_DomainShaderExtension(".tese"),
+		m_ComputeShaderExtension(".comp"),
 		m_Width(Width),
 		m_Height(Height)
 	{
@@ -18,7 +23,7 @@ namespace api
 	{
 	}
 
-	bool COpenGLAPI::InitializeWithGLFW(GLFWwindow* pWindow)
+	bool COpenGLAPI::Initialize()
 	{
 		if (!InitGL()) return false;
 		
@@ -79,11 +84,37 @@ namespace api
 		return true;
 	}
 
-	const std::string& COpenGLAPI::GetShaderExtension() const
+	const std::string& COpenGLAPI::GetVertexShaderExtension() const
 	{
-		return m_ShaderExtension;
+		return m_VertexShaderExtension;
 	}
-	
+
+	const std::string& COpenGLAPI::GetFragmentShaderExtension() const
+	{
+		return m_FragmentShaderExtension;
+	}
+
+	const std::string& COpenGLAPI::GetGeometryShaderExtension() const
+	{
+		return m_GeometryShaderExtension;
+	}
+
+	const std::string& COpenGLAPI::GetHullShaderExtension() const
+	{
+		return m_HullShaderExtension;
+	}
+
+	const std::string& COpenGLAPI::GetDomainShaderExtension() const
+	{
+		return m_DomainShaderExtension;
+	}
+
+	const std::string& COpenGLAPI::GetComputeShaderExtension() const
+	{
+		return m_ComputeShaderExtension;
+	}
+
+
 	int COpenGLAPI::GetWidth() const
 	{
 		return m_Width;

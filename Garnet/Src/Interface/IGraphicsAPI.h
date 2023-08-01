@@ -31,7 +31,7 @@ namespace api
 	class IGraphicsAPI
 	{
 	public:
-#ifdef __EMSCRIPTEN__
+#if defined(__EMSCRIPTEN__) || defined(USE_OPENGL) 
 		virtual bool Initialize() = 0;
 #else
 		virtual bool InitializeWithGLFW(GLFWwindow* pWindow) = 0;
@@ -49,7 +49,13 @@ namespace api
 		virtual bool EndRender() = 0;
 		virtual bool SubmitRender() = 0;
 
-		virtual const std::string& GetShaderExtension() const = 0;
+		virtual const std::string& GetVertexShaderExtension() const = 0;
+		virtual const std::string& GetFragmentShaderExtension() const = 0;
+		virtual const std::string& GetGeometryShaderExtension() const = 0;
+		virtual const std::string& GetHullShaderExtension() const = 0;
+		virtual const std::string& GetDomainShaderExtension() const = 0;
+		virtual const std::string& GetComputeShaderExtension() const = 0;
+
 		virtual int GetWidth() const = 0;
 		virtual int GetHeight() const = 0;
 

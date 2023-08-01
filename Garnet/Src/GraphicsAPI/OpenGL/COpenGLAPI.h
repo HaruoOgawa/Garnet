@@ -14,7 +14,12 @@ namespace api
 {
 	class COpenGLAPI : public IGraphicsAPI
 	{
-		const std::string m_ShaderExtension;
+		const std::string m_VertexShaderExtension;
+		const std::string m_FragmentShaderExtension;
+		const std::string m_GeometryShaderExtension;
+		const std::string m_HullShaderExtension;
+		const std::string m_DomainShaderExtension;
+		const std::string m_ComputeShaderExtension;
 		int m_Width;
 		int m_Height;
 
@@ -24,7 +29,7 @@ namespace api
 		COpenGLAPI(int Width, int Height);
 		virtual ~COpenGLAPI();
 
-		virtual bool InitializeWithGLFW(GLFWwindow* pWindow) override;
+		virtual bool Initialize() override;
 		void Release();
 
 		virtual bool CreateRenderPass(const std::string& PassName, ERenderPassFormat RenderPassFormat, const glm::vec4& InitColor, int Width = -1, int Height = -1) override;
@@ -39,7 +44,13 @@ namespace api
 		virtual bool EndRender() override;
 		virtual bool SubmitRender() override;
 
-		virtual const std::string& GetShaderExtension() const override;
+		virtual const std::string& GetVertexShaderExtension() const override;
+		virtual const std::string& GetFragmentShaderExtension() const override;
+		virtual const std::string& GetGeometryShaderExtension() const override;
+		virtual const std::string& GetHullShaderExtension() const override;
+		virtual const std::string& GetDomainShaderExtension() const override;
+		virtual const std::string& GetComputeShaderExtension() const override;
+
 		virtual int GetWidth() const override;
 		virtual int GetHeight() const override;
 

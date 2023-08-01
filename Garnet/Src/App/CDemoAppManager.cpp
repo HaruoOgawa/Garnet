@@ -58,7 +58,7 @@ namespace app
 	bool CDemoAppManager::Initialize()
 	{
 		if (!InitWindow()) return false;
-		if (!m_GraphicsAPI->InitializeWithGLFW(m_pWindow)) return false;
+		if (!m_GraphicsAPI->Initialize()) return false;
 
 		if (!m_App->Initialize(m_GraphicsAPI.get())) return false;
 

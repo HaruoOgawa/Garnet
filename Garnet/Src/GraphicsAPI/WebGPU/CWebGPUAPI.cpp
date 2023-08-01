@@ -19,7 +19,12 @@
 namespace api
 {
 	CWebGPUAPI::CWebGPUAPI(int Width, int Height):
-		m_ShaderExtension(".wgsl"),
+		m_VertexShaderExtension("_vert.wgsl"),
+		m_FragmentShaderExtension("_frag.wgsl"),
+		m_GeometryShaderExtension("_geom.wgsl"),
+		m_HullShaderExtension("_tesc.wgsl"),
+		m_DomainShaderExtension("_tese.wgsl"),
+		m_ComputeShaderExtension("_comp.wgsl"),
 		m_Width(Width),
 		m_Height(Height),
 #ifndef __EMSCRIPTEN__
@@ -209,9 +214,34 @@ namespace api
 		return true;
 	}
 
-	const std::string& CWebGPUAPI::GetShaderExtension() const
+	const std::string& CWebGPUAPI::GetVertexShaderExtension() const
 	{
-		return m_ShaderExtension;
+		return m_VertexShaderExtension;
+	}
+
+	const std::string& CWebGPUAPI::GetFragmentShaderExtension() const
+	{
+		return m_FragmentShaderExtension;
+	}
+
+	const std::string& CWebGPUAPI::GetGeometryShaderExtension() const
+	{
+		return m_GeometryShaderExtension;
+	}
+
+	const std::string& CWebGPUAPI::GetHullShaderExtension() const
+	{
+		return m_HullShaderExtension;
+	}
+
+	const std::string& CWebGPUAPI::GetDomainShaderExtension() const
+	{
+		return m_DomainShaderExtension;
+	}
+
+	const std::string& CWebGPUAPI::GetComputeShaderExtension() const
+	{
+		return m_ComputeShaderExtension;
 	}
 
 	int CWebGPUAPI::GetWidth() const
