@@ -1,0 +1,52 @@
+#pragma once
+
+#ifdef USE_OPENGL
+#include <memory>
+#include <map>
+
+#include <glm/glm.hpp>
+#include <glm/gtx/quaternion.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+
+#include "../../Graphics/CMaterial.h"
+#include "COpenGLAPI.h"
+
+namespace graphics { class CMaterialCreateInfo; }
+
+namespace api
+{
+	class COpenGLTexture;
+
+	class COpenGLMaterial : public graphics::CMaterial
+	{
+		// API
+		api::COpenGLAPI* m_pGraphicsAPI;
+
+		// Shader Program
+		GLuint m_ShaderPrg;
+
+#ifdef USE_TEXTURE_LOADER
+		// Texture
+		std::shared_ptr<COpenGLTexture> m_EmptyTexture;
+#endif
+	private:
+		// Main Logics
+		bool LoadShader();
+		bool InitializeUniformBuffer();
+
+		// Helper Functions
+		static bool CompileShader(const std::vector<unsigned char>& shaderCode, GLenum shaderType, GLuint& shaderPrg);
+	public:
+		COpenGLMaterial(api::COpenGLAPI* pGraphicsAPI);
+		virtual ~COpenGLMaterial();
+
+		virtual bool Create(const std::vector<std::shared_ptr<graphics::CTexture>>& TextureList, const std::vector<std::shared_ptr<graphics::CTexture>>& CubeMapList) override;
+		virtual bool SetCommonUniform(float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo) override;
+		virtual bool BuildDrawBuffer(int DynamicOffsetNum) override;
+
+		virtual void SetUniformValue(const std::string Name, const void* Value, int DynamicOffsetNum = -1) override;
+
+		void SetActive();
+	};
+}
+#endif // USE_OPENGL

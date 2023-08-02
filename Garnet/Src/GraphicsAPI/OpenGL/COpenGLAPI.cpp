@@ -5,6 +5,9 @@
 #define GL_IMPLEMENTATION
 #include "glDef.h"
 
+#include "COpenGLMaterial.h"
+#include "COpenGLTexture.h"
+
 namespace api
 {
 	COpenGLAPI::COpenGLAPI(int Width, int Height):
@@ -46,13 +49,18 @@ namespace api
 
 	std::shared_ptr<graphics::CMaterial> COpenGLAPI::CreateMaterial()
 	{
-		return nullptr;
+		auto Material = std::make_shared<api::COpenGLMaterial>(this);
+
+		return Material;
 	}
 
 	std::shared_ptr<graphics::CTexture> COpenGLAPI::CreateTexture(bool UseMipMap)
 	{
-		return nullptr;
+		auto Texture = std::make_shared<api::COpenGLTexture>(this, UseMipMap);
+
+		return Texture;
 	}
+
 
 	bool COpenGLAPI::Resize(int Width, int Height)
 	{

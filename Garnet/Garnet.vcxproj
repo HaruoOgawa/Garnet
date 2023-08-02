@@ -493,6 +493,8 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Src\GraphicsAPI\OpenGL\COpenGLTexture.h" />
+    <ClInclude Include="Src\GraphicsAPI\OpenGL\COpenGLMaterial.h" />
     <ClInclude Include="Src\GraphicsAPI\OpenGL\COpenGLAPI.h" />
     <ClInclude Include="Src\GraphicsAPI\OpenGL\glDef.h" />
     <ClInclude Include="Src\ImageEffect\CBlurEffect.h" />
@@ -846,6 +848,8 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClInclude Include="Src\Interface\IRenderer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\GraphicsAPI\OpenGL\COpenGLTexture.cpp" />
+    <ClCompile Include="Src\GraphicsAPI\OpenGL\COpenGLMaterial.cpp" />
     <ClCompile Include="Src\GraphicsAPI\OpenGL\COpenGLAPI.cpp" />
     <ClCompile Include="Src\ImageEffect\CBlurEffect.cpp" />
     <ClCompile Include="Src\GraphicsAPI\WebGPU\CWebGPURenderPass.cpp" />
