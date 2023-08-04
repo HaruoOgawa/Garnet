@@ -53,6 +53,8 @@ typedef ptrdiff_t GLsizeiptr;
 	GL_FUNC(void,	GetShaderiv,	  GLuint shader, GLenum pname, GLint* params) \
 	GL_FUNC(void,	GetShaderInfoLog, GLuint shader, GLsizei maxLength, GLsizei* length, GLchar* infoLog) \
 	GL_FUNC(void,	UseProgram,		  GLuint program) \
+	GL_FUNC(GLuint, GetUniformBlockIndex, GLuint program, const GLchar* uniformBlockName) \
+	GL_FUNC(void , UniformBlockBinding, 	GLuint program, GLuint uniformBlockIndex, GLuint uniformBlockBinding) \
 /* end */
 
 // プリプロセッサ芸でまずGL_FUNC_LISTの中身をtypedef や externで展開する

@@ -31,7 +31,7 @@ namespace graphics
 		virtual ~CMaterialCreateInfo();
 
 		// Uniform
-		static std::shared_ptr<graphics::CUniformBuffer> CreateUniformBuffer(std::vector<int> BindIndexList);
+		static std::shared_ptr<graphics::CUniformBuffer> CreateUniformBuffer(const std::vector<SBindingLayout>& BindingLayoutList);
 
 		// Shader
 		EShaderType GetShaderType() const;

@@ -66,6 +66,18 @@ namespace api
 
 	bool COpenGLMaterial::InitializeUniformBuffer()
 	{
+		SetActive();
+
+		for (const auto& Buffer : m_UniformBufferList)
+		{
+			
+		}
+		
+		for (const auto& TexLayout : m_TextureBindingLayoutList)
+		{
+
+		}
+
 		return true;
 	}
 

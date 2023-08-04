@@ -493,6 +493,8 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Src\GraphicsAPI\OpenGL\COpenGLRenderPass.h" />
+    <ClInclude Include="Src\GraphicsAPI\OpenGL\COpenGLRenderer.h" />
     <ClInclude Include="Src\GraphicsAPI\OpenGL\COpenGLTexture.h" />
     <ClInclude Include="Src\GraphicsAPI\OpenGL\COpenGLMaterial.h" />
     <ClInclude Include="Src\GraphicsAPI\OpenGL\COpenGLAPI.h" />
@@ -848,6 +850,8 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClInclude Include="Src\Interface\IRenderer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\GraphicsAPI\OpenGL\COpenGLRenderPass.cpp" />
+    <ClCompile Include="Src\GraphicsAPI\OpenGL\COpenGLRenderer.cpp" />
     <ClCompile Include="Src\GraphicsAPI\OpenGL\COpenGLTexture.cpp" />
     <ClCompile Include="Src\GraphicsAPI\OpenGL\COpenGLMaterial.cpp" />
     <ClCompile Include="Src\GraphicsAPI\OpenGL\COpenGLAPI.cpp" />

@@ -21,9 +21,9 @@ namespace graphics
 	}
 
 	// Uniform
-	std::shared_ptr<graphics::CUniformBuffer> CMaterialCreateInfo::CreateUniformBuffer(std::vector<int> BindIndexList)
+	std::shared_ptr<graphics::CUniformBuffer> CMaterialCreateInfo::CreateUniformBuffer(const std::vector<SBindingLayout>& BindingLayoutList)
 	{
-		auto Buffer = std::make_shared<graphics::CUniformBuffer>(BindIndexList);
+		auto Buffer = std::make_shared<graphics::CUniformBuffer>(BindingLayoutList);
 		
 		return Buffer;
 	}

@@ -28,7 +28,7 @@ namespace graphics
 		createInfo->SetVertexShaderCode(DepthVertex->GetData());
 		createInfo->SetFragmentShaderCode(DepthFragment->GetData());
 
-		auto UniformBuffer = graphics::CMaterialCreateInfo::CreateUniformBuffer({ 0 });
+		auto UniformBuffer = graphics::CMaterialCreateInfo::CreateUniformBuffer({ graphics::SBindingLayout("UniformBufferObject", 0) });
 		UniformBuffer->AddData("model", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
 		UniformBuffer->AddData("view", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
 		UniformBuffer->AddData("proj", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);

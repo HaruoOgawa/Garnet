@@ -172,7 +172,7 @@ namespace imageeffect
 
 		// UBO0
 		{
-			auto UniformBuffer = graphics::CMaterialCreateInfo::CreateUniformBuffer({ 0 });
+			auto UniformBuffer = graphics::CMaterialCreateInfo::CreateUniformBuffer({ graphics::SBindingLayout("UniformBufferObject", 0) });
 			
 			UniformBuffer->AddData("UseBlur", &glm::ivec1(1)[0], sizeof(glm::ivec1), 0);
 			UniformBuffer->AddData("KernelSize", &glm::ivec1(m_KernelSize)[0], sizeof(glm::ivec1), 0);
@@ -193,7 +193,7 @@ namespace imageeffect
 		}*/
 		
 		{
-			auto UniformBuffer = graphics::CMaterialCreateInfo::CreateUniformBuffer({ 0 });
+			auto UniformBuffer = graphics::CMaterialCreateInfo::CreateUniformBuffer({ graphics::SBindingLayout("UniformBufferObject", 0) });
 
 			UniformBuffer->AddData("UseBlur", &glm::ivec1(1)[0], sizeof(glm::ivec1), 0);
 			UniformBuffer->AddData("KernelSize", &glm::ivec1(m_KernelSize)[0], sizeof(glm::ivec1), 0);
