@@ -106,8 +106,8 @@ namespace scene
 		{
 			// MATERIAL
 			std::shared_ptr<graphics::CMaterialCreateInfo> createInfo = std::make_shared<graphics::CMaterialCreateInfo>();
-			createInfo->SetVertexShaderCode(m_glTFVert->GetData());
-			createInfo->SetFragmentShaderCode(m_glTFFrag->GetData());
+			createInfo->SetVertexShaderCode(m_VertexShader->GetData());
+			createInfo->SetFragmentShaderCode(m_FragmentShader->GetData());
 			auto Material0 = pGraphicsAPI->CreateMaterial();
 
 			// UBO, TEXTURE
@@ -118,45 +118,8 @@ namespace scene
 				UniformBuffer->AddData("view", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
 				UniformBuffer->AddData("proj", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
 				UniformBuffer->AddData("lightVPMat", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
-				UniformBuffer->AddData("lightDir", &glm::vec4(0.0f)[0], sizeof(float) * 4, 0);
-				UniformBuffer->AddData("lightColor", &glm::vec4(0.0f)[0], sizeof(float) * 4, 0);
-				UniformBuffer->AddData("cameraPos", &glm::vec4(0.0f)[0], sizeof(float) * 4, 0);
-				UniformBuffer->AddData("baseColorFactor", &glm::vec4(1.0f)[0], sizeof(float) * 4, 0);
-				UniformBuffer->AddData("emissiveFactor", &glm::vec4(0.0f)[0], sizeof(float) * 4, 0);
 
-				UniformBuffer->AddData("time", &glm::vec1(0.0f)[0], sizeof(float), 0);
-				UniformBuffer->AddData("metallicFactor", &glm::vec1(1.0f)[0], sizeof(float), 0);
-				UniformBuffer->AddData("roughnessFactor", &glm::vec1(0.1f)[0], sizeof(float), 0);
-				UniformBuffer->AddData("normalMapScale", &glm::vec1(1.0f)[0], sizeof(float), 0);
-
-				UniformBuffer->AddData("occlusionStrength", &glm::vec1(0.0f)[0], sizeof(float), 0);
-				//UniformBuffer->AddData("mipCount", &glm::vec1(CubeTexList[0]->GetMipCount())[0], sizeof(float), 0);
-				UniformBuffer->AddData("mipCount", &glm::vec1(1.0f)[0], sizeof(float), 0);
-				UniformBuffer->AddData("ShadowMapX", &glm::vec1(0.0f)[0], sizeof(float), 0);
-				UniformBuffer->AddData("ShadowMapY", &glm::vec1(0.0f)[0], sizeof(float), 0);
-				/*UniformBuffer->AddData("ShadowMapX", &glm::vec1(static_cast<float>(m_FrameTextureList[0]->GetWidth()))[0], sizeof(float), 0);
-				UniformBuffer->AddData("ShadowMapY", &glm::vec1(static_cast<float>(m_FrameTextureList[0]->GetHeight()))[0], sizeof(float), 0);*/
-				UniformBuffer->AddData("useBaseColorTexture", &glm::uvec1(1)[0], sizeof(int), 0);
-				UniformBuffer->AddData("useMetallicRoughnessTexture", &glm::uvec1(0)[0], sizeof(int), 0);
-				UniformBuffer->AddData("useEmissiveTexture", &glm::uvec1(0)[0], sizeof(int), 0);
-				UniformBuffer->AddData("useNormalTexture", &glm::uvec1(1)[0], sizeof(int), 0);
-
-				UniformBuffer->AddData("useOcclusionTexture", &glm::uvec1(0)[0], sizeof(int), 0);
-				UniformBuffer->AddData("t_pad_0", &glm::uvec1(0)[0], sizeof(int), 0);
-				UniformBuffer->AddData("t_pad_1", &glm::uvec1(0)[0], sizeof(int), 0);
-				UniformBuffer->AddData("t_pad_2", &glm::uvec1(0)[0], sizeof(int), 0);
-
-				Material0->AddTextureBindingLayout({ 1, 2, -1, graphics::ETextureType::TEXTURE_2D });
-				//Material0->AddTextureBindingLayout({ 1, 2, 0, graphics::ETextureType::TEXTURE_2D });
-				Material0->AddTextureBindingLayout({ 3, 4, -1, graphics::ETextureType::TEXTURE_2D }); // TextureIndex -1 ‚Í EmptyTexture‚Å‚ ‚é
-				Material0->AddTextureBindingLayout({ 5, 6, -1, graphics::ETextureType::TEXTURE_2D }); // TextureIndex -1 ‚Í EmptyTexture‚Å‚ ‚é
-				Material0->AddTextureBindingLayout({ 7, 8, -1, graphics::ETextureType::TEXTURE_2D }); // TextureIndex -1 ‚Í EmptyTexture‚Å‚ ‚é
-				//Material0->AddTextureBindingLayout({ 7, 8, 1, graphics::ETextureType::TEXTURE_2D }); // TextureIndex -1 ‚Í EmptyTexture‚Å‚ ‚é
-				Material0->AddTextureBindingLayout({ 9, 10, -1, graphics::ETextureType::TEXTURE_2D }); // TextureIndex -1 ‚Í EmptyTexture‚Å‚ ‚é
-				Material0->AddTextureBindingLayout({ 11, 12, -1, graphics::ETextureType::TEXTURE_CUBE });
-				//Material0->AddTextureBindingLayout({ 11, 12, 0, graphics::ETextureType::TEXTURE_CUBE });
-				Material0->AddTextureBindingLayout({ 13, 14, -1, graphics::ETextureType::TEXTURE_2D }); // ‚Ð‚Æ‚Ü‚¸1‚ÉShadowMap‚ð“ü‚ê‚Ä‚¢‚é
-				//Material0->AddTextureBindingLayout({ 13, 14, 2, graphics::ETextureType::TEXTURE_2D }); // ‚Ð‚Æ‚Ü‚¸1‚ÉShadowMap‚ð“ü‚ê‚Ä‚¢‚é
+				//Material0->AddTextureBindingLayout({ 2, 3, -1, graphics::ETextureType::TEXTURE_2D });
 
 				UniformBuffer->RecalculateBindingLayoutOffset();
 
@@ -201,7 +164,7 @@ namespace scene
 			}
 
 			// CreateŠÖ”‚ðŽÀs
-			//if (!m_TestObject->Create(pGraphicsAPI, m_DepthVertex, m_DepthFragment)) return false;
+			if (!m_TestObject->Create(pGraphicsAPI, m_DepthVertex, m_DepthFragment)) return false;
 		}
 
 		return true;

@@ -23,8 +23,8 @@ namespace api
 
 	bool COpenGLMaterial::Create(const std::vector<std::shared_ptr<graphics::CTexture>>& TextureList, const std::vector<std::shared_ptr<graphics::CTexture>>& CubeMapList)
 	{
-		if (!LoadShader()) return false;
-		if (!InitializeUniformBuffer()) return false;
+		if (!CreateShaderStages()) return false;
+		if (!CreateUniformBuffers()) return false;
 
 		return true;
 	}
@@ -50,7 +50,7 @@ namespace api
 		glUseProgram(m_ShaderPrg);
 	}
 
-	bool COpenGLMaterial::LoadShader()
+	bool COpenGLMaterial::CreateShaderStages()
 	{
 		m_ShaderPrg = glCreateProgram();
 
@@ -64,15 +64,35 @@ namespace api
 		return true;
 	}
 
-	bool COpenGLMaterial::InitializeUniformBuffer()
+	bool COpenGLMaterial::CreateUniformBuffers()
 	{
 		SetActive();
 
 		for (const auto& Buffer : m_UniformBufferList)
 		{
-			
+			for (const auto& Layout : Buffer->GetBindingLayoutList())
+			{
+				// UBOを生成
+				GLuint uboIndex;
+				glGenBuffers(1, &uboIndex);
+
+				// Uniformのbinding indexを割り当てる
+				GLuint blockIndex = glGetUniformBlockIndex(m_ShaderPrg, Layout.second.BindingName.c_str());
+				glUniformBlockBinding(m_ShaderPrg, blockIndex, Layout.second.BindingIndex); // ShaderPrgとBinding Blockを紐づける
+				glBindBufferBase(GL_UNIFORM_BUFFER, Layout.second.BindingIndex, uboIndex); // UBOとBinding Blockを紐づける
+
+				// データの受け渡し
+				glBindBuffer(GL_UNIFORM_BUFFER, uboIndex);
+				glBufferData(GL_UNIFORM_BUFFER, Layout.second.ByteSize, &Buffer->GetData()[Layout.second.ByteOffset], GL_STATIC_DRAW); // Bufferのデータを初期化・メモリ確保
+				//glBufferSubData(GL_UNIFORM_BUFFER, 0, Layout.second.ByteSize, &Buffer->GetData()[Layout.second.ByteOffset]); // Bufferのデータを更新
+				glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+				//
+				m_UBOList.push_back(uboIndex);
+			}
 		}
 		
+		// テクスチャの扱いは後で考える
 		for (const auto& TexLayout : m_TextureBindingLayoutList)
 		{
 
@@ -89,7 +109,10 @@ namespace api
 
 		// Shader Objectを生成
 		GLuint shader = glCreateShader(shaderType);
-		const char* content = reinterpret_cast<const char*>(&shaderCode[0]);
+
+		std::string code_str = std::string(shaderCode.begin(), shaderCode.end());
+		const char* content = code_str.c_str();
+
 		glShaderSource(shader, 1, &(content), nullptr);
 		glCompileShader(shader);
 

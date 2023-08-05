@@ -25,14 +25,17 @@ namespace api
 		// Shader Program
 		GLuint m_ShaderPrg;
 
+		// Uniform Buffer Object
+		std::vector<GLuint> m_UBOList;
+
 #ifdef USE_TEXTURE_LOADER
 		// Texture
 		std::shared_ptr<COpenGLTexture> m_EmptyTexture;
 #endif
 	private:
 		// Main Logics
-		bool LoadShader();
-		bool InitializeUniformBuffer();
+		bool CreateShaderStages();
+		bool CreateUniformBuffers();
 
 		// Helper Functions
 		static bool CompileShader(const std::vector<unsigned char>& shaderCode, GLenum shaderType, GLuint& shaderPrg);

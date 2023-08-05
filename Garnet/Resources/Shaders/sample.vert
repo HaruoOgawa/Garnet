@@ -10,15 +10,15 @@ layout(binding = 0) uniform UniformBufferObject{
     mat4 model;
     mat4 view;
     mat4 proj;
-    mat4 lightView;
+    mat4 lightVPMat;
 } ubo;
 
-layout(binding = 1) uniform TestBuffer{
+/*layout(binding = 1) uniform TestBuffer{
     vec4 MulColor;
     vec4 val0;
     vec4 val1;
     vec4 val2;
-} testUBO;
+} testUBO;*/
 
 layout(location = 0) out vec3 fragColor;
 layout(location = 1) out vec2 fragTexCoord;

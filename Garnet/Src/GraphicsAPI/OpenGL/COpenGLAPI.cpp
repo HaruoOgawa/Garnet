@@ -7,6 +7,7 @@
 
 #include "COpenGLMaterial.h"
 #include "COpenGLTexture.h"
+#include "COpenGLRenderer.h"
 
 namespace api
 {
@@ -44,7 +45,9 @@ namespace api
 
 	std::shared_ptr<renderer::IRenderer> COpenGLAPI::CreateRenderer(const std::string& PassName)
 	{
-		return nullptr;
+		auto Renderer = std::make_shared<renderer::COpenGLRenderer>(this, PassName);
+
+		return Renderer;
 	}
 
 	std::shared_ptr<graphics::CMaterial> COpenGLAPI::CreateMaterial()
