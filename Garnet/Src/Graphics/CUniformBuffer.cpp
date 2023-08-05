@@ -4,16 +4,13 @@
 
 namespace graphics
 {
-	CUniformBuffer::CUniformBuffer(std::vector<int> BindIndexList):
+	CUniformBuffer::CUniformBuffer(const std::vector<SBindingLayout>& BindingLayoutList) :
 		m_Descriptor(std::make_shared<CUniformBufferDescriptor>()),
 		m_BufferType(EBufferType::UNIFROM)
 	{
-		for (int i = 0; i < BindIndexList.size(); i++)
+		for (const auto& Layout : BindingLayoutList)
 		{
-			SBindingLayout Layout{};
-			Layout.BindingIndex = BindIndexList[i];
-
-			m_BindingLayoutList.insert({ BindIndexList[i], Layout });
+			m_BindingLayoutList.insert({ Layout.BindingIndex, Layout });
 		}
 	}
 

@@ -58,7 +58,7 @@ namespace app
 	bool CDemoAppManager::Initialize()
 	{
 		if (!InitWindow()) return false;
-		if (!m_GraphicsAPI->InitializeWithGLFW(m_pWindow)) return false;
+		if (!m_GraphicsAPI->Initialize()) return false;
 
 		if (!m_App->Initialize(m_GraphicsAPI.get())) return false;
 
@@ -136,7 +136,7 @@ namespace app
 	bool CDemoAppManager::Update()
 	{
 		float PrevSecondsTime = m_SecondsTime;
-		//m_SecondsTime = static_cast<float>(clock()) * 0.001f;
+		m_SecondsTime = static_cast<float>(clock()) * 0.001f;
 		m_DeltaSecondsTime = m_SecondsTime - PrevSecondsTime;
 
 		if (!m_App->Update(m_GraphicsAPI.get(), m_SecondsTime)) return false;

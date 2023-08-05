@@ -36,8 +36,8 @@ namespace imageeffect
 	{
 		if (!CalcGaussianKernel()) return false;
 
-		m_BlurVertex->ReadFile("Resources\\Shaders\\blur_vert" + m_pGraphicsAPI->GetShaderExtension());
-		m_BlurFrag->ReadFile("Resources\\Shaders\\blur_frag" + m_pGraphicsAPI->GetShaderExtension());
+		m_BlurVertex->ReadFile("Resources\\Shaders\\blur" + m_pGraphicsAPI->GetVertexShaderExtension());
+		m_BlurFrag->ReadFile("Resources\\Shaders\\blur" + m_pGraphicsAPI->GetFragmentShaderExtension());
 
 		if (!m_pGraphicsAPI->CreateRenderPass("BlurX", api::ERenderPassFormat::COLOR_RENDERPASS, glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), 512, 512)) return false;
 		if (!m_pGraphicsAPI->CreateRenderPass("BlurY", api::ERenderPassFormat::COLOR_RENDERPASS, glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), 512, 512)) return false;
@@ -172,7 +172,7 @@ namespace imageeffect
 
 		// UBO0
 		{
-			auto UniformBuffer = graphics::CMaterialCreateInfo::CreateUniformBuffer({ 0 });
+			auto UniformBuffer = graphics::CMaterialCreateInfo::CreateUniformBuffer({ graphics::SBindingLayout("UniformBufferObject", 0) });
 			
 			UniformBuffer->AddData("UseBlur", &glm::ivec1(1)[0], sizeof(glm::ivec1), 0);
 			UniformBuffer->AddData("KernelSize", &glm::ivec1(m_KernelSize)[0], sizeof(glm::ivec1), 0);
@@ -193,7 +193,7 @@ namespace imageeffect
 		}*/
 		
 		{
-			auto UniformBuffer = graphics::CMaterialCreateInfo::CreateUniformBuffer({ 0 });
+			auto UniformBuffer = graphics::CMaterialCreateInfo::CreateUniformBuffer({ graphics::SBindingLayout("UniformBufferObject", 0) });
 
 			UniformBuffer->AddData("UseBlur", &glm::ivec1(1)[0], sizeof(glm::ivec1), 0);
 			UniformBuffer->AddData("KernelSize", &glm::ivec1(m_KernelSize)[0], sizeof(glm::ivec1), 0);

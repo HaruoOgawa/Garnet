@@ -18,7 +18,7 @@ namespace graphics
 
 		const EBufferType m_BufferType;
 	public:
-		explicit CUniformBuffer(std::vector<int> BindIndexList);
+		CUniformBuffer(const std::vector<SBindingLayout>& BindingLayoutList);
 		virtual ~CUniformBuffer();
 
 		virtual void AddData(const std::string& Name, const void* Data, int ByteSize, int BindingIndex) override;

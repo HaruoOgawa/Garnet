@@ -19,21 +19,25 @@
 #define GL_ARRAY_BUFFER_BINDING           0x8894 // https://www.opengl.org/registry/api/GL/glext.h
 #define GL_COLOR_ATTACHMENT0              0x8CE0
 #define GL_COMPILE_STATUS                 0x8B81
-#define GL_CURRENT_PROGRAM                0x8B8D
 #define GL_DYNAMIC_DRAW                   0x88E8
 #define GL_ELEMENT_ARRAY_BUFFER           0x8893
 #define GL_ELEMENT_ARRAY_BUFFER_BINDING   0x8895
-#define GL_FRAGMENT_SHADER                0x8B30
+
 #define GL_FRAMEBUFFER                    0x8D40
 #define GL_FRAMEBUFFER_COMPLETE           0x8CD5
 #define GL_FUNC_ADD                       0x8006
-#define GL_INVALID_FRAMEBUFFER_OPERATION  0x0506
 #define GL_MAJOR_VERSION                  0x821B
 #define GL_MINOR_VERSION                  0x821C
-#define GL_STATIC_DRAW                    0x88E4
-#define GL_STREAM_DRAW                    0x88E0
 #define GL_TEXTURE0                       0x84C0
 #define GL_VERTEX_SHADER                  0x8B31
+#define GL_FRAGMENT_SHADER                0x8B30
+#define GL_GEOMETRY_SHADER                0x8DD9
+#define GL_TESS_CONTROL_SHADER            0x8E88
+#define GL_TESS_EVALUATION_SHADER         0x8E87
+#define GL_COMPUTE_SHADER                 0x91B9
+#define GL_UNIFORM_BUFFER                 0x8A11
+#define GL_STATIC_DRAW                    0x88E4
+#define GL_DYNAMIC_DRAW                   0x88E8
 
 typedef char GLchar;
 typedef ptrdiff_t GLintptr;
@@ -43,8 +47,27 @@ typedef ptrdiff_t GLsizeiptr;
 
 // OpenGLの関数を定義
 #define GL_FUNC_LIST \
-	GL_FUNC(void, AttachShader, GLuint program, GLuint shader) \
-	GL_FUNC(void, BindBuffer,	GLenum target, GLuint buffer) \
+	GL_FUNC(void,	BindBuffer,			  GLenum target, GLuint buffer) \
+	GL_FUNC(GLuint, CreateProgram) \
+	GL_FUNC(GLuint, CreateShader,		  GLenum shaderType) \
+	GL_FUNC(void,	ShaderSource,		  GLuint shader, GLsizei count, const GLchar** string, const GLint* length) \
+	GL_FUNC(void ,  CompileShader,		  GLuint shader) \
+	GL_FUNC(void,	AttachShader,		  GLuint program, GLuint shader) \
+	GL_FUNC(void,	GetShaderiv,		  GLuint shader, GLenum pname, GLint* params) \
+	GL_FUNC(void,	GetShaderInfoLog,	  GLuint shader, GLsizei maxLength, GLsizei* length, GLchar* infoLog) \
+	GL_FUNC(void,	UseProgram,			  GLuint program) \
+	GL_FUNC(void,   GenBuffers, 		  GLsizei n, GLuint* buffers) \
+	GL_FUNC(void,   BufferData, 		  GLenum target, GLsizeiptr size, const void* data, GLenum usage) \
+	GL_FUNC(void,   BufferSubData, 		  GLenum target, GLintptr offset, GLsizeiptr size, const void* data) \
+	GL_FUNC(GLuint, GetUniformBlockIndex, GLuint program, const GLchar* uniformBlockName) \
+	GL_FUNC(void,   UniformBlockBinding,  GLuint program, GLuint uniformBlockIndex, GLuint uniformBlockBinding) \
+	GL_FUNC(void,   BindBufferBase, 	  GLenum target, GLuint index, GLuint buffer) \
+	GL_FUNC(void,   BindBufferRange, 	  GLenum target, GLuint index, GLuint buffer, GLintptr offset, GLsizeiptr size) \
+	GL_FUNC(void,   GenVertexArrays, 	  GLsizei n, GLuint* arrays) \
+	GL_FUNC(void,   BindVertexArray, 	  GLuint array) \
+	GL_FUNC(void,   EnableVertexAttribArray, GLuint index) \
+	GL_FUNC(void,   VertexAttribPointer,  GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const void* pointer) \
+	GL_FUNC(void,   LinkProgram,		  GLuint program) \
 /* end */
 
 // プリプロセッサ芸でまずGL_FUNC_LISTの中身をtypedef や externで展開する

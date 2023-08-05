@@ -11,7 +11,12 @@ namespace api
 	CVulkanAPI::CVulkanAPI(int Width, int Height):
 		m_pWindow(nullptr),
 		m_CurrentImageIndex(0),
-		m_ShaderExtension(".spv"),
+		m_VertexShaderExtension("_vert.spv"),
+		m_FragmentShaderExtension("_frag.spv"),
+		m_GeometryShaderExtension("_geom.spv"),
+		m_HullShaderExtension("_tesc.spv"),
+		m_DomainShaderExtension("_tese.spv"),
+		m_ComputeShaderExtension("_comp.spv"),
 		m_Width(Width),
 		m_Height(Height),
 		m_DebugMessenger(nullptr),
@@ -250,9 +255,34 @@ namespace api
 		return true;
 	}
 
-	const std::string& CVulkanAPI::GetShaderExtension() const
+	const std::string& CVulkanAPI::GetVertexShaderExtension() const
 	{
-		return m_ShaderExtension;
+		return m_VertexShaderExtension;
+	}
+
+	const std::string& CVulkanAPI::GetFragmentShaderExtension() const
+	{
+		return m_FragmentShaderExtension;
+	}
+
+	const std::string& CVulkanAPI::GetGeometryShaderExtension() const
+	{
+		return m_GeometryShaderExtension;
+	}
+
+	const std::string& CVulkanAPI::GetHullShaderExtension() const
+	{
+		return m_HullShaderExtension;
+	}
+
+	const std::string& CVulkanAPI::GetDomainShaderExtension() const
+	{
+		return m_DomainShaderExtension;
+	}
+
+	const std::string& CVulkanAPI::GetComputeShaderExtension() const
+	{
+		return m_ComputeShaderExtension;
 	}
 
 	int CVulkanAPI::GetWidth() const

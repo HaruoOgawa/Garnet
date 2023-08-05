@@ -9,14 +9,7 @@ struct UniformBufferObject {
     model: mat4x4<f32>,
     view: mat4x4<f32>,
     proj: mat4x4<f32>,
-    lightView: mat4x4<f32>,
-}
-
-struct TestBuffer {
-    MulColor: vec4<f32>,
-    val0_: vec4<f32>,
-    val1_: vec4<f32>,
-    val2_: vec4<f32>,
+    lightVPMat: mat4x4<f32>,
 }
 
 struct VertexOutput {
@@ -35,18 +28,16 @@ var<private> inTexcoord_1: vec2<f32>;
 var<private> inNormal_1: vec3<f32>;
 var<private> inTangent_1: vec4<f32>;
 var<private> inBioTangent_1: vec4<f32>;
-@group(0) @binding(1) 
-var<uniform> testUBO: TestBuffer;
 
 fn main_1() {
-    let _e21 = ubo.proj;
-    let _e23 = ubo.view;
-    let _e26 = ubo.model;
-    let _e28 = inPosition_1;
-    perVertexStruct.gl_Position = (((_e21 * _e23) * _e26) * vec4<f32>(_e28.x, _e28.y, _e28.z, 1.0));
+    let _e20 = ubo.proj;
+    let _e22 = ubo.view;
+    let _e25 = ubo.model;
+    let _e27 = inPosition_1;
+    perVertexStruct.gl_Position = (((_e20 * _e22) * _e25) * vec4<f32>(_e27.x, _e27.y, _e27.z, 1.0));
     fragColor = vec3<f32>(1.0, 1.0, 1.0);
-    let _e35 = inTexcoord_1;
-    fragTexCoord = _e35;
+    let _e34 = inTexcoord_1;
+    fragTexCoord = _e34;
     return;
 }
 

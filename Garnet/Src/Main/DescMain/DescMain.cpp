@@ -1,4 +1,4 @@
-#ifdef USE_VULKAN
+#if (defined(USE_VULKAN) || defined(USE_WEBGPU)) && !defined(__EMSCRIPTEN__)
 
 #include "../../App/CDescAppManager.h"
 #include "../../App/EAppType.h"

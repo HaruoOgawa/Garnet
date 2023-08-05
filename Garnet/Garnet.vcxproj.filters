@@ -1068,6 +1068,18 @@
     <ClInclude Include="Src\GraphicsAPI\OpenGL\glDef.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="Src\GraphicsAPI\OpenGL\COpenGLMaterial.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\GraphicsAPI\OpenGL\COpenGLTexture.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\GraphicsAPI\OpenGL\COpenGLRenderer.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\GraphicsAPI\OpenGL\COpenGLRenderPass.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\Main\DescMain\DescMain.cpp">
@@ -1197,6 +1209,18 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Src\GraphicsAPI\OpenGL\COpenGLAPI.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\GraphicsAPI\OpenGL\COpenGLMaterial.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\GraphicsAPI\OpenGL\COpenGLTexture.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\GraphicsAPI\OpenGL\COpenGLRenderer.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\GraphicsAPI\OpenGL\COpenGLRenderPass.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1663,7 +1687,7 @@
     <None Include="Resources\Shaders\depth.frag" />
     <None Include="Resources\Shaders\blur.vert" />
     <None Include="Resources\Shaders\blur.frag" />
-    <None Include="Resources\Shaders\gltfpbr_frag_NativeSafe.wgsl" />
+    <None Include="Resources\Shaders\gltfpbr_NativeSafe_frag.wgsl" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="EmscriptenBuild\CMakeLists.txt" />

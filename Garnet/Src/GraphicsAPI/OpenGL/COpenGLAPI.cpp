@@ -5,10 +5,19 @@
 #define GL_IMPLEMENTATION
 #include "glDef.h"
 
+#include "COpenGLMaterial.h"
+#include "COpenGLTexture.h"
+#include "COpenGLRenderer.h"
+
 namespace api
 {
 	COpenGLAPI::COpenGLAPI(int Width, int Height):
-		m_ShaderExtension(".glsl"),
+		m_VertexShaderExtension(".vert"),
+		m_FragmentShaderExtension(".frag"),
+		m_GeometryShaderExtension(".geom"),
+		m_HullShaderExtension(".tesc"),
+		m_DomainShaderExtension(".tese"),
+		m_ComputeShaderExtension(".comp"),
 		m_Width(Width),
 		m_Height(Height)
 	{
@@ -18,7 +27,7 @@ namespace api
 	{
 	}
 
-	bool COpenGLAPI::InitializeWithGLFW(GLFWwindow* pWindow)
+	bool COpenGLAPI::Initialize()
 	{
 		if (!InitGL()) return false;
 		
@@ -36,18 +45,25 @@ namespace api
 
 	std::shared_ptr<renderer::IRenderer> COpenGLAPI::CreateRenderer(const std::string& PassName)
 	{
-		return nullptr;
+		auto Renderer = std::make_shared<renderer::COpenGLRenderer>(this, PassName);
+
+		return Renderer;
 	}
 
 	std::shared_ptr<graphics::CMaterial> COpenGLAPI::CreateMaterial()
 	{
-		return nullptr;
+		auto Material = std::make_shared<api::COpenGLMaterial>(this);
+
+		return Material;
 	}
 
 	std::shared_ptr<graphics::CTexture> COpenGLAPI::CreateTexture(bool UseMipMap)
 	{
-		return nullptr;
+		auto Texture = std::make_shared<api::COpenGLTexture>(this, UseMipMap);
+
+		return Texture;
 	}
+
 
 	bool COpenGLAPI::Resize(int Width, int Height)
 	{
@@ -79,11 +95,37 @@ namespace api
 		return true;
 	}
 
-	const std::string& COpenGLAPI::GetShaderExtension() const
+	const std::string& COpenGLAPI::GetVertexShaderExtension() const
 	{
-		return m_ShaderExtension;
+		return m_VertexShaderExtension;
 	}
-	
+
+	const std::string& COpenGLAPI::GetFragmentShaderExtension() const
+	{
+		return m_FragmentShaderExtension;
+	}
+
+	const std::string& COpenGLAPI::GetGeometryShaderExtension() const
+	{
+		return m_GeometryShaderExtension;
+	}
+
+	const std::string& COpenGLAPI::GetHullShaderExtension() const
+	{
+		return m_HullShaderExtension;
+	}
+
+	const std::string& COpenGLAPI::GetDomainShaderExtension() const
+	{
+		return m_DomainShaderExtension;
+	}
+
+	const std::string& COpenGLAPI::GetComputeShaderExtension() const
+	{
+		return m_ComputeShaderExtension;
+	}
+
+
 	int COpenGLAPI::GetWidth() const
 	{
 		return m_Width;
