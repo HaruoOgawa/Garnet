@@ -25,6 +25,7 @@ layout(location = 1) out vec2 fragTexCoord;
 
 void main() {
     gl_Position = ubo.proj * ubo.view * ubo.model * vec4(inPosition, 1.0);
+    //gl_Position = vec4(inPosition, 1.0);
     fragColor = vec3(1.0);
     fragTexCoord = inTexcoord;
 }

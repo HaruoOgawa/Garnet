@@ -10,7 +10,8 @@ namespace renderer
 		m_PassName(PassName),
 		m_DynamicOffsetNum(0),
 
-		m_VertexArray(-1)
+		m_VertexArray(-1),
+		m_IndicesCount(0)
 	{
 	}
 
@@ -29,6 +30,21 @@ namespace renderer
 
 	bool COpenGLRenderer::Draw(const std::shared_ptr<graphics::CMaterial>& Material, int DynamicOffsetNum)
 	{
+		api::COpenGLMaterial* pOpenGLMat = static_cast<api::COpenGLMaterial*>(Material.get());
+
+		// ユニフォームバッファの準備
+		if (!pOpenGLMat->BuildDrawBuffer(DynamicOffsetNum)) return false;
+
+		// マテリアルをバインド
+		pOpenGLMat->SetActive();
+
+		// レンダラーをバインド
+		SetActive();
+
+		// 描画を実行
+		// あとで描画形式をカスタマイズできるようする
+		glDrawElements(GL_TRIANGLES, m_IndicesCount, GL_UNSIGNED_SHORT, nullptr);
+
 		return true;
 	}
 
@@ -79,6 +95,8 @@ namespace renderer
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, createInfo->GetIndices().size() * sizeof(unsigned short), createInfo->GetIndices().data(), GL_STATIC_DRAW);
 
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+		m_IndicesCount = static_cast<GLsizei>(createInfo->GetIndices().size());
 
 		return true;
 	}

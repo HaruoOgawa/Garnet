@@ -136,7 +136,7 @@ namespace app
 	bool CDemoAppManager::Update()
 	{
 		float PrevSecondsTime = m_SecondsTime;
-		//m_SecondsTime = static_cast<float>(clock()) * 0.001f;
+		m_SecondsTime = static_cast<float>(clock()) * 0.001f;
 		m_DeltaSecondsTime = m_SecondsTime - PrevSecondsTime;
 
 		if (!m_App->Update(m_GraphicsAPI.get(), m_SecondsTime)) return false;

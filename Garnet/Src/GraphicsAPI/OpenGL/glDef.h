@@ -62,10 +62,12 @@ typedef ptrdiff_t GLsizeiptr;
 	GL_FUNC(GLuint, GetUniformBlockIndex, GLuint program, const GLchar* uniformBlockName) \
 	GL_FUNC(void,   UniformBlockBinding,  GLuint program, GLuint uniformBlockIndex, GLuint uniformBlockBinding) \
 	GL_FUNC(void,   BindBufferBase, 	  GLenum target, GLuint index, GLuint buffer) \
+	GL_FUNC(void,   BindBufferRange, 	  GLenum target, GLuint index, GLuint buffer, GLintptr offset, GLsizeiptr size) \
 	GL_FUNC(void,   GenVertexArrays, 	  GLsizei n, GLuint* arrays) \
 	GL_FUNC(void,   BindVertexArray, 	  GLuint array) \
 	GL_FUNC(void,   EnableVertexAttribArray, GLuint index) \
 	GL_FUNC(void,   VertexAttribPointer,  GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const void* pointer) \
+	GL_FUNC(void,   LinkProgram,		  GLuint program) \
 /* end */
 
 // プリプロセッサ芸でまずGL_FUNC_LISTの中身をtypedef や externで展開する

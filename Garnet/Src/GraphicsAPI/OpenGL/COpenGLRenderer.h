@@ -24,8 +24,8 @@ namespace renderer
 
 		//
 		GLuint m_VertexArray;
+		GLsizei m_IndicesCount;
 	private:
-		void SetActive();
 		bool CreateVertexArray();
 		bool CreateVertexBuffer(const std::shared_ptr<CRendererCreateInfo>& createInfo);
 		bool CreateIndexBuffer(const std::shared_ptr<CRendererCreateInfo>& createInfo);
@@ -35,6 +35,8 @@ namespace renderer
 
 		bool Create(const std::shared_ptr<CRendererCreateInfo>& createInfo, const std::shared_ptr<graphics::CMaterial>& Material) override;
 		bool Draw(const std::shared_ptr<graphics::CMaterial>& Material, int DynamicOffsetNum) override;
+
+		void SetActive();
 	};
 }
 

@@ -157,9 +157,10 @@ namespace scene
 			{
 				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(0, m_TestObject->GetMeshList(), m_TestObject->GetMaterialList());
 				Node->SetMeshIndex(0);
-				Node->SetPos(glm::vec3(0.0f, -1.0f, 0.0f));
-				Node->SetRot(glm::vec3(3.14f * (-0.5f), 0.0f, 0.0f));
-				Node->SetScale(glm::vec3(1.0f, 1.0f, 1.0f) * 10.0f);
+				//Node->SetPos(glm::vec3(0.0f, -1.0f, 0.0f));
+				//Node->SetRot(glm::vec3(3.14f * (-0.5f), 0.0f, 0.0f));
+				//Node->SetScale(glm::vec3(1.0f, 1.0f, 1.0f) * 10.0f);
+				Node->SetScale(glm::vec3(1.0f, 1.0f, 1.0f));
 				m_TestObject->AddNode(Node);
 			}
 
@@ -172,6 +173,11 @@ namespace scene
 
 	bool CScriptScene::Update(api::IGraphicsAPI* pGraphicsAPI)
 	{
+		if (m_IsLoaded && m_TestObject)
+		{
+			if (!m_TestObject->Update()) return false;
+		}
+
 		if (!m_IsLoaded)
 		{
 			if (m_DepthVertex->IsLoaded() && m_DepthFragment->IsLoaded() && m_VertexShader->IsLoaded() && m_FragmentShader->IsLoaded() && m_Texture0->IsLoaded() && m_Texture1->IsLoaded()
@@ -190,6 +196,11 @@ namespace scene
 	bool CScriptScene::Draw(api::IGraphicsAPI* pGraphicsAPI, bool IsDepthPass, float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, 
 		const std::shared_ptr<graphics::CDrawInfo>& DrawInfo)
 	{
+		if (m_IsLoaded && m_TestObject)
+		{
+			if (!m_TestObject->Draw(IsDepthPass, SecondsTime, Camera, Projection, DrawInfo)) return false;
+		}
+
 		return true;
 	}
 
