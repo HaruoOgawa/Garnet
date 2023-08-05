@@ -22,6 +22,7 @@ namespace graphics
 		virtual ~CUniformBuffer();
 
 		virtual void AddData(const std::string& Name, const void* Data, int ByteSize, int BindingIndex) override;
+		virtual void SetData(const std::string& Name, const void* Data, int ByteSize) override;
 		virtual const std::vector<unsigned char>& GetData() const override;
 
 		void SetValue(const void* Value, int ByteOffset, int ByteSize);

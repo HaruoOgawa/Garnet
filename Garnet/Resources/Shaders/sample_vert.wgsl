@@ -12,6 +12,13 @@ struct UniformBufferObject {
     lightVPMat: mat4x4<f32>,
 }
 
+struct TestBuffer {
+    UBOColor: vec4<f32>,
+    val0_: vec4<f32>,
+    val1_: vec4<f32>,
+    val2_: vec4<f32>,
+}
+
 struct VertexOutput {
     @builtin(position) gl_Position: vec4<f32>,
     @location(0) member: vec3<f32>,
@@ -23,6 +30,8 @@ var<private> perVertexStruct: gl_PerVertex = gl_PerVertex(vec4<f32>(0.0, 0.0, 0.
 var<uniform> ubo: UniformBufferObject;
 var<private> inPosition_1: vec3<f32>;
 var<private> fragColor: vec3<f32>;
+@group(0) @binding(1) 
+var<uniform> testUBO: TestBuffer;
 var<private> fragTexCoord: vec2<f32>;
 var<private> inTexcoord_1: vec2<f32>;
 var<private> inNormal_1: vec3<f32>;
@@ -35,9 +44,10 @@ fn main_1() {
     let _e25 = ubo.model;
     let _e27 = inPosition_1;
     perVertexStruct.gl_Position = (((_e20 * _e22) * _e25) * vec4<f32>(_e27.x, _e27.y, _e27.z, 1.0));
-    fragColor = vec3<f32>(1.0, 1.0, 1.0);
-    let _e34 = inTexcoord_1;
-    fragTexCoord = _e34;
+    let _e35 = testUBO.UBOColor;
+    fragColor = _e35.xyz;
+    let _e37 = inTexcoord_1;
+    fragTexCoord = _e37;
     return;
 }
 

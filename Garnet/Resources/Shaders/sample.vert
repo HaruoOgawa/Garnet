@@ -13,19 +13,18 @@ layout(binding = 0) uniform UniformBufferObject{
     mat4 lightVPMat;
 } ubo;
 
-/*layout(binding = 1) uniform TestBuffer{
-    vec4 MulColor;
+layout(binding = 1) uniform TestBuffer{
+    vec4 UBOColor;
     vec4 val0;
     vec4 val1;
     vec4 val2;
-} testUBO;*/
+} testUBO;
 
 layout(location = 0) out vec3 fragColor;
 layout(location = 1) out vec2 fragTexCoord;
 
 void main() {
     gl_Position = ubo.proj * ubo.view * ubo.model * vec4(inPosition, 1.0);
-    //gl_Position = vec4(inPosition, 1.0);
-    fragColor = vec3(1.0);
+    fragColor = testUBO.UBOColor.rgb;
     fragTexCoord = inTexcoord;
 }

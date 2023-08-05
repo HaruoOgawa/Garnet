@@ -2,19 +2,14 @@
 
 namespace graphics
 {
-	CMaterial::CMaterial():
-		m_CreateInfo(nullptr),
+	CMaterial::CMaterial(const std::shared_ptr<CMaterialCreateInfo>& createInfo):
+		m_CreateInfo(createInfo),
 		m_RefCount(0),
 		m_UseDynamicUniform(false),
 		m_DepthMaterial(nullptr),
 		m_EnabledZTest(true),
 		m_CullMode(ECullMode::CULL_BACK)
 	{
-	}
-
-	void CMaterial::SetCreateInfo(const std::shared_ptr<CMaterialCreateInfo>& createInfo)
-	{
-		m_CreateInfo = createInfo;
 	}
 
 	bool CMaterial::Create(const std::vector<std::shared_ptr<graphics::CTexture>>& TextureList, const std::vector<std::shared_ptr<graphics::CTexture>>& CubeMapList)
@@ -33,11 +28,9 @@ namespace graphics
 		UniformBuffer->AddData("view", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
 		UniformBuffer->AddData("proj", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
 		UniformBuffer->AddData("lightVPMat", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
-		UniformBuffer->RecalculateBindingLayoutOffset();
 
-		m_DepthMaterial = pGraphicsAPI->CreateMaterial();
+		m_DepthMaterial = pGraphicsAPI->CreateMaterial(createInfo);
 
-		m_DepthMaterial->SetCreateInfo(createInfo);
 		m_DepthMaterial->AddUniformBuffer(UniformBuffer);
 
 		m_DepthMaterial->SetRefStatus(m_RefCount, m_UseDynamicUniform);
@@ -81,7 +74,9 @@ namespace graphics
 
 	void CMaterial::AddUniformBuffer(const std::shared_ptr<CUniformBuffer>& Buffer)
 	{
-		m_UniformBufferList.push_back(Buffer);
+		Buffer->RecalculateBindingLayoutOffset();
+
+		m_UniformBufferList.push_back(std::make_shared<CUniformBuffer>(*Buffer));
 	}
 	
 	void CMaterial::AddTextureBindingLayout(const STextureBindingLayout& Layout)

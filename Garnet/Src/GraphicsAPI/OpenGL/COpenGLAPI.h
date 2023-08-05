@@ -34,7 +34,7 @@ namespace api
 
 		virtual bool CreateRenderPass(const std::string& PassName, ERenderPassFormat RenderPassFormat, const glm::vec4& InitColor, int Width = -1, int Height = -1) override;
 		virtual std::shared_ptr<renderer::IRenderer> CreateRenderer(const std::string& PassName) override;
-		virtual std::shared_ptr<graphics::CMaterial> CreateMaterial() override;
+		virtual std::shared_ptr<graphics::CMaterial> CreateMaterial(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo) override;
 		virtual std::shared_ptr<graphics::CTexture> CreateTexture(bool UseMipMap = false) override;
 
 		virtual bool Resize(int Width, int Height) override;

@@ -49,6 +49,22 @@ namespace graphics
 		m_BindingLayoutList[BindingIndex].ByteSize += ByteSize;
 	}
 
+	void CUniformBuffer::SetData(const std::string& Name, const void* Data, int ByteSize)
+	{
+		if (m_Descriptor)
+		{
+			const auto& DataList = m_Descriptor->GetDataList();
+			const auto& UniformData = DataList.find(Name);
+			if (UniformData != DataList.end())
+			{
+				const int Offset = UniformData->second.ByteOffset;
+				const int Size = UniformData->second.ByteSize;
+
+				if (ByteSize == Size) SetValue(Data, Offset, Size);
+			}
+		}
+	}
+
 	const std::vector<unsigned char>& CUniformBuffer::GetData() const
 	{
 		return m_Buffer;

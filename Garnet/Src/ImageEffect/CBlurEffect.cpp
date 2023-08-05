@@ -160,13 +160,11 @@ namespace imageeffect
 		createInfo->SetVertexShaderCode(m_BlurVertex->GetData());
 		createInfo->SetFragmentShaderCode(m_BlurFrag->GetData());
 
-		auto MaterialX = m_pGraphicsAPI->CreateMaterial();
-		MaterialX->SetCreateInfo(createInfo);
+		auto MaterialX = m_pGraphicsAPI->CreateMaterial(createInfo);
 		MaterialX->SetEnabledZTest(false);
 		MaterialX->SetCullMode(graphics::ECullMode::CULL_NONE);
 		
-		auto MaterialY = m_pGraphicsAPI->CreateMaterial();
-		MaterialY->SetCreateInfo(createInfo);
+		auto MaterialY = m_pGraphicsAPI->CreateMaterial(createInfo);
 		MaterialY->SetEnabledZTest(false);
 		MaterialY->SetCullMode(graphics::ECullMode::CULL_NONE);
 
@@ -177,8 +175,6 @@ namespace imageeffect
 			UniformBuffer->AddData("UseBlur", &glm::ivec1(1)[0], sizeof(glm::ivec1), 0);
 			UniformBuffer->AddData("KernelSize", &glm::ivec1(m_KernelSize)[0], sizeof(glm::ivec1), 0);
 			UniformBuffer->AddData("Direction", &glm::vec2(0.0f)[0], sizeof(glm::vec2), 0);
-
-			UniformBuffer->RecalculateBindingLayoutOffset();
 
 			MaterialX->AddUniformBuffer(UniformBuffer);
 		}
@@ -198,8 +194,6 @@ namespace imageeffect
 			UniformBuffer->AddData("UseBlur", &glm::ivec1(1)[0], sizeof(glm::ivec1), 0);
 			UniformBuffer->AddData("KernelSize", &glm::ivec1(m_KernelSize)[0], sizeof(glm::ivec1), 0);
 			UniformBuffer->AddData("Direction", &glm::vec2(0.0f)[0], sizeof(glm::vec2), 0);
-
-			UniformBuffer->RecalculateBindingLayoutOffset();
 
 			MaterialY->AddUniformBuffer(UniformBuffer);
 		}

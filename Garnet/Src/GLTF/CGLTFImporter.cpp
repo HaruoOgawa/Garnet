@@ -177,8 +177,7 @@ namespace gltf
 			int occlusionTextureIndex = glTfMaterial.occlusionTexture.index;
 			
 			// マテリアルにシェーダーを設定
-			std::shared_ptr<graphics::CMaterial> material = pGraphicsAPI->CreateMaterial();
-			material->SetCreateInfo(createInfo);
+			std::shared_ptr<graphics::CMaterial> material = pGraphicsAPI->CreateMaterial(createInfo);
 
 			// UBO
 			{
@@ -283,9 +282,6 @@ namespace gltf
 						UniformBuffer->AddData("t_pad_2", &Flag, sizeof(int), 0);
 					}
 				}
-
-				// オフセットの再計算
-				UniformBuffer->RecalculateBindingLayoutOffset();
 
 				// マテリアルにUBOを割り当てる
 				material->AddUniformBuffer(UniformBuffer);

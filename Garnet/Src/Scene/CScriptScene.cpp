@@ -108,22 +108,29 @@ namespace scene
 			std::shared_ptr<graphics::CMaterialCreateInfo> createInfo = std::make_shared<graphics::CMaterialCreateInfo>();
 			createInfo->SetVertexShaderCode(m_VertexShader->GetData());
 			createInfo->SetFragmentShaderCode(m_FragmentShader->GetData());
-			auto Material0 = pGraphicsAPI->CreateMaterial();
+			auto Material0 = pGraphicsAPI->CreateMaterial(createInfo);
+			auto Material1 = pGraphicsAPI->CreateMaterial(createInfo);
 
 			// UBO, TEXTURE
 			{
-				auto UniformBuffer = graphics::CMaterialCreateInfo::CreateUniformBuffer({ graphics::SBindingLayout("UniformBufferObject", 0) });
+				auto UniformBuffer = graphics::CMaterialCreateInfo::CreateUniformBuffer({ graphics::SBindingLayout("UniformBufferObject", 0), graphics::SBindingLayout("TestBuffer", 1) });
 
 				UniformBuffer->AddData("model", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
 				UniformBuffer->AddData("view", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
 				UniformBuffer->AddData("proj", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
 				UniformBuffer->AddData("lightVPMat", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
+				
+				UniformBuffer->AddData("UBOColor", &glm::vec4(0.0f, 0.0f, 1.0f, 1.0f)[0], sizeof(glm::vec4), 1);
+				UniformBuffer->AddData("val0", &glm::vec4(0.0f)[0], sizeof(glm::vec4), 1);
+				UniformBuffer->AddData("val1", &glm::vec4(0.0f)[0], sizeof(glm::vec4), 1);
+				UniformBuffer->AddData("val2", &glm::vec4(0.0f)[0], sizeof(glm::vec4), 1);
 
 				//Material0->AddTextureBindingLayout({ 2, 3, -1, graphics::ETextureType::TEXTURE_2D });
 
-				UniformBuffer->RecalculateBindingLayoutOffset();
-
 				Material0->AddUniformBuffer(UniformBuffer);
+
+				UniformBuffer->SetData("UBOColor", &glm::vec4(0.0f, 1.0f, 0.0f, 1.0f)[0], sizeof(glm::vec4));
+				Material1->AddUniformBuffer(UniformBuffer);
 			}
 
 			{
@@ -140,12 +147,12 @@ namespace scene
 			}
 
 			// CREATE MATERIAL
-			Material0->SetCreateInfo(createInfo);
-
 			m_TestObject->AddMaterial(Material0);
+			m_TestObject->AddMaterial(Material1);
 
 			// MESH
 			std::shared_ptr<graphics::CMesh> Mesh0 = std::make_shared<graphics::CMesh>();
+			std::shared_ptr<graphics::CMesh> Mesh1 = std::make_shared<graphics::CMesh>();
 
 			{
 				std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(nullptr, 0, graphics::EPresetPrimitiveType::BOARD);
@@ -153,14 +160,27 @@ namespace scene
 				m_TestObject->AddMesh(Mesh0);
 			}
 
+			{
+				std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(nullptr, 1, graphics::EPresetPrimitiveType::BOARD);
+				Mesh1->AddPrimitive(Primitive);
+				m_TestObject->AddMesh(Mesh1);
+			}
+
 			// NODE
 			{
 				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(0, m_TestObject->GetMeshList(), m_TestObject->GetMaterialList());
 				Node->SetMeshIndex(0);
-				//Node->SetPos(glm::vec3(0.0f, -1.0f, 0.0f));
-				//Node->SetRot(glm::vec3(3.14f * (-0.5f), 0.0f, 0.0f));
-				//Node->SetScale(glm::vec3(1.0f, 1.0f, 1.0f) * 10.0f);
+				Node->SetPos(glm::vec3(-1.0f, 0.0f, 0.0f));
 				Node->SetScale(glm::vec3(1.0f, 1.0f, 1.0f));
+				m_TestObject->AddNode(Node);
+			}
+
+			{
+				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(0, m_TestObject->GetMeshList(), m_TestObject->GetMaterialList());
+				Node->SetMeshIndex(1);
+				Node->SetPos(glm::vec3(1.0f, 0.0f, 0.0f));
+				Node->SetRot(glm::vec3(0.0f, 0.0f, 3.14f * (-0.25f)));
+				Node->SetScale(glm::vec3(1.0f, 0.5, 1.0f));
 				m_TestObject->AddNode(Node);
 			}
 

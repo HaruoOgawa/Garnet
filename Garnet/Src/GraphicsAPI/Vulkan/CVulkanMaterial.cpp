@@ -11,8 +11,8 @@
 
 namespace api
 {
-	CVulkanMaterial::CVulkanMaterial(api::CVulkanAPI* pGraphicsAPI):
-		CMaterial(),
+	CVulkanMaterial::CVulkanMaterial(api::CVulkanAPI* pGraphicsAPI, const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo):
+		CMaterial(createInfo),
 		m_pGraphicsAPI(pGraphicsAPI),
 
 		m_VertShaderModule(nullptr),

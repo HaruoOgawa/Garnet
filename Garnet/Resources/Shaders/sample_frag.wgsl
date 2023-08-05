@@ -1,9 +1,16 @@
-var<private> outColor: vec4<f32>;
 var<private> fragColor_1: vec3<f32>;
+var<private> outColor: vec4<f32>;
 var<private> fragTexCoord_1: vec2<f32>;
 
 fn main_1() {
-    outColor = vec4<f32>(1.0, 0.0, 0.0, 1.0);
+    var col: vec3<f32>;
+
+    col = vec3<f32>(1.0, 1.0, 1.0);
+    let _e10 = fragColor_1;
+    let _e11 = col;
+    col = (_e11 * _e10);
+    let _e13 = col;
+    outColor = vec4<f32>(_e13.x, _e13.y, _e13.z, 1.0);
     return;
 }
 

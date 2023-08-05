@@ -47,10 +47,8 @@ namespace graphics
 		bool m_EnabledZTest;
 		ECullMode m_CullMode;
 	public:
-		CMaterial();
+		CMaterial(const std::shared_ptr<CMaterialCreateInfo>& createInfo);
 		virtual ~CMaterial() = default;
-
-		virtual void SetCreateInfo(const std::shared_ptr<CMaterialCreateInfo>& createInfo);
 
 		virtual bool Create(const std::vector<std::shared_ptr<graphics::CTexture>>& TextureList, const std::vector<std::shared_ptr<graphics::CTexture>>& CubeMapList) = 0;
 		virtual bool CreateDepthMaterial(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<file::CFileReader>& DepthVertex, const std::shared_ptr<file::CFileReader>& DepthFragment);

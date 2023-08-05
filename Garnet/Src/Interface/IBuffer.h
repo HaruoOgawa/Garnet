@@ -20,6 +20,7 @@ namespace graphics
 	{
 	public:
 		virtual void AddData(const std::string& Name, const void* Data, int ByteSize, int BindingIndex) = 0;
+		virtual void SetData(const std::string& Name, const void* Data, int ByteSize) = 0;
 		virtual const std::vector<unsigned char>& GetData() const = 0;
 
 		virtual const std::map<int, SBindingLayout>& GetBindingLayoutList() const = 0;
