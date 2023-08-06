@@ -42,6 +42,44 @@ namespace renderer
 		// レンダラーをバインド
 		SetActive();
 
+		// 描画方法の設定
+		// ZTest
+		if (pOpenGLMat->IsEnabledZTest())
+		{
+			glEnable(GL_DEPTH_TEST);
+		}
+		else
+		{
+			glDisable(GL_DEPTH_TEST);
+		}
+
+		// Alpha Test(ひとまず通常のアルファブレンドのみ)
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+		// Culling
+		switch (pOpenGLMat->GetCullMode())
+		{
+		case graphics::ECullMode::CULL_BACK:
+			glEnable(GL_CULL_FACE);
+			glCullFace(GL_BACK);
+			break;
+
+		case graphics::ECullMode::CULL_FRONT:
+			glEnable(GL_CULL_FACE);
+			glCullFace(GL_FRONT);
+			break;
+
+		case graphics::ECullMode::CULL_NONE:
+			glDisable(GL_CULL_FACE);
+			break;
+
+		default:
+			glEnable(GL_CULL_FACE);
+			glCullFace(GL_BACK);
+			break;
+		}
+
 		// 描画を実行
 		// あとで描画形式をカスタマイズできるようする
 		glDrawElements(GL_TRIANGLES, m_IndicesCount, GL_UNSIGNED_SHORT, nullptr);

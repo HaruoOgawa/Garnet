@@ -35,9 +35,9 @@ namespace descapp
 		std::shared_ptr<api::CVulkanAPI> m_GraphicsAPI;
 #endif
 		std::shared_ptr<app::IApp> m_App;
-
+#ifdef USE_INPUT_SYSTEM
 		std::shared_ptr<input::CInputState> m_InputState;
-
+#endif
 		const int WIDTH = 1920;
 		const int HEIGHT = 1080;
 
@@ -60,9 +60,9 @@ namespace descapp
 		bool RunLopp();
 
 		bool IsRunLoop() { return m_IsRunLoop; }
-
+#ifdef USE_INPUT_SYSTEM
 		const std::shared_ptr<input::CInputState>& GetInputState()const { return m_InputState; }
-
+#endif
 		void ResizeWindow(int w, int h);
 	};
 }

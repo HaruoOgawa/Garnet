@@ -85,9 +85,12 @@ namespace scene
 
 		m_Helmet_glTFData->ReadFile(ModelPath + "DamagedHelmet\\glTF-Binary\\DamagedHelmet.glb");
 
-		m_Sphere_glTFData->ReadFile(ModelPath + "Box\\glTF-Binary\\Box.glb");
-		//m_Sphere_glTFObj->SetScale(glm::vec3(500.0f, 500.0f, 500.0f));
-		m_Sphere_glTFObj->SetPos(glm::vec3(-1.5f, -0.5f, -1.5f));
+		//m_Sphere_glTFData->ReadFile(ModelPath + "Box\\glTF-Binary\\Box.glb");
+		//m_Sphere_glTFObj->SetPos(glm::vec3(-1.5f, -0.5f, -1.5f));
+		
+		m_Sphere_glTFData->ReadFile(ModelPath + "MetalRoughSpheresNoTextures\\glTF-Binary\\MetalRoughSpheresNoTextures.glb");
+		m_Sphere_glTFObj->SetScale(glm::vec3(500.0f, 500.0f, 500.0f));
+		m_Sphere_glTFObj->SetPos(glm::vec3(-1.5f, -1.5f, -1.5f));
 
 		// Cubemap
 		m_Cube0->ReadFile("Resources\\Cubemaps\\environment\\environment_back_0.jpg");
@@ -218,7 +221,7 @@ namespace scene
 			createInfo->SetVertexShaderCode(m_glTFVert->GetData());
 			createInfo->SetFragmentShaderCode(m_glTFFrag->GetData());
 
-			//if (!gltf::CGLTFImporter::Import(pGraphicsAPI, m_Sphere_glTFData->GetData(), m_Sphere_glTFObj, createInfo, CubeTexList, m_FrameTextureList, m_DepthVertex, m_DepthFragment)) return false;
+			if (!gltf::CGLTFImporter::Import(pGraphicsAPI, m_Sphere_glTFData->GetData(), m_Sphere_glTFObj, createInfo, CubeTexList, m_FrameTextureList, m_DepthVertex, m_DepthFragment)) return false;
 			if (!gltf::CGLTFImporter::Import(pGraphicsAPI, m_Helmet_glTFData->GetData(), m_Helmet_glTFObj, createInfo, CubeTexList, m_FrameTextureList, m_DepthVertex, m_DepthFragment)) return false;
 		}
 
@@ -235,6 +238,11 @@ namespace scene
 		if (m_IsLoaded && m_Helmet_glTFObj)
 		{
 			if (!m_Helmet_glTFObj->Update()) return false;
+		}
+
+		if (m_IsLoaded && m_Sphere_glTFObj)
+		{
+			if (!m_Sphere_glTFObj->Update()) return false;
 		}
 
 		if (!m_IsLoaded)
@@ -258,6 +266,11 @@ namespace scene
 		if (m_IsLoaded && m_TestObject)
 		{
 			if (!m_TestObject->Draw(IsDepthPass, SecondsTime, Camera, Projection, DrawInfo)) return false;
+		}
+
+		if (m_IsLoaded && m_Sphere_glTFObj)
+		{
+			if (!m_Sphere_glTFObj->Draw(IsDepthPass, SecondsTime, Camera, Projection, DrawInfo)) return false;
 		}
 
 		if (m_IsLoaded && m_Helmet_glTFObj)

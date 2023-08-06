@@ -67,6 +67,9 @@ namespace api
 
 	bool COpenGLAPI::Resize(int Width, int Height)
 	{
+		m_Width = Width;
+		m_Height = Height;
+
 		return true;
 	}
 

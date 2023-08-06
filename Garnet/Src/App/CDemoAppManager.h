@@ -12,6 +12,7 @@
 
 namespace api { class COpenGLAPI; }
 namespace app { class IApp; }
+namespace input { class CInputState; }
 
 namespace app
 {
@@ -28,6 +29,10 @@ namespace app
 
 		std::shared_ptr<api::COpenGLAPI> m_GraphicsAPI;
 		std::shared_ptr<app::IApp> m_App;
+
+#ifdef USE_INPUT_SYSTEM
+		std::shared_ptr<input::CInputState> m_InputState;
+#endif
 	private:
 		bool InitWindow();
 
@@ -42,7 +47,9 @@ namespace app
 
 		bool IsRunLoop() { return m_IsRunLoop; }
 		void SetRunLoop(bool RunLoop) { m_IsRunLoop = RunLoop; }
-
+#ifdef USE_INPUT_SYSTEM
+		const std::shared_ptr<input::CInputState>& GetInputState()const { return m_InputState; }
+#endif
 		void ResizeWindow(int w, int h);
 	};
 }

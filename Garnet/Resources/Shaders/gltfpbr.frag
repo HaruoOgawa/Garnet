@@ -435,7 +435,7 @@ void main(){
 
 	// Shadow
 	// LightSpaceScreenPos
-	vec3 lsp = f_LightSpacePos.xyz / f_LightSpacePos.w;
+	/*vec3 lsp = f_LightSpacePos.xyz / f_LightSpacePos.w;
 	lsp = lsp * 0.5 + 0.5;
 	float shadowCol = 1.0;
 
@@ -446,7 +446,7 @@ void main(){
 		shadowCol = CalcShadow(lsp, n, l);
 	}
 
-	col.rgb *= shadowCol;
+	col.rgb *= shadowCol;*/
 
 	// カラースペースをリニアにする
 	col.rgb = pow(col.rgb, vec3(1.0/2.2));
