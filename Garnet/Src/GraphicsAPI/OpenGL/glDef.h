@@ -50,6 +50,8 @@
 #define GL_TEXTURE_CUBE_MAP_NEGATIVE_Y    0x8518
 #define GL_TEXTURE_CUBE_MAP_POSITIVE_Z    0x8519
 #define GL_TEXTURE_CUBE_MAP_NEGATIVE_Z    0x851A
+#define GL_INFO_LOG_LENGTH                0x8B84
+#define GL_LINK_STATUS                    0x8B82
 
 typedef char GLchar;
 typedef ptrdiff_t GLintptr;
@@ -61,6 +63,10 @@ typedef ptrdiff_t GLsizeiptr;
 #define GL_FUNC_LIST \
 	GL_FUNC(void,	BindBuffer,			  GLenum target, GLuint buffer) \
 	GL_FUNC(GLuint, CreateProgram) \
+	GL_FUNC(void,   GetProgramiv,		  GLuint program, GLenum pname, GLint* params) \
+	GL_FUNC(void,	UseProgram,			  GLuint program) \
+	GL_FUNC(void,	DeleteProgram,		  GLuint program) \
+	GL_FUNC(void,	GetProgramInfoLog,	  GLuint program, GLsizei maxLength, GLsizei* length, GLchar* infoLog) \
 	GL_FUNC(GLuint, CreateShader,		  GLenum shaderType) \
 	GL_FUNC(void,	ShaderSource,		  GLuint shader, GLsizei count, const GLchar** string, const GLint* length) \
 	GL_FUNC(void ,  CompileShader,		  GLuint shader) \
@@ -68,8 +74,6 @@ typedef ptrdiff_t GLsizeiptr;
 	GL_FUNC(void,	DeleteShader,		  GLuint shader) \
 	GL_FUNC(void,	GetShaderiv,		  GLuint shader, GLenum pname, GLint* params) \
 	GL_FUNC(void,	GetShaderInfoLog,	  GLuint shader, GLsizei maxLength, GLsizei* length, GLchar* infoLog) \
-	GL_FUNC(void,	UseProgram,			  GLuint program) \
-	GL_FUNC(void,	DeleteProgram,		  GLuint program) \
 	GL_FUNC(void,   GenBuffers, 		  GLsizei n, GLuint* buffers) \
 	GL_FUNC(void,   BufferData, 		  GLenum target, GLsizeiptr size, const void* data, GLenum usage) \
 	GL_FUNC(void,   BufferSubData, 		  GLenum target, GLintptr offset, GLsizeiptr size, const void* data) \

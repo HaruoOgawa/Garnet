@@ -145,9 +145,11 @@ namespace scene
 
 				Material0->AddTextureBindingLayout({ "u_texture",		2, 3, 0, graphics::ETextureType::TEXTURE_2D});
 				Material0->AddTextureBindingLayout({ "u_NormalTexture", 4, 5, 1, graphics::ETextureType::TEXTURE_2D});
+				Material0->AddTextureBindingLayout({ "cubemapTexture", 6, 7, 0, graphics::ETextureType::TEXTURE_CUBE});
 
 				Material1->AddTextureBindingLayout({ "u_texture",		2, 3, 1, graphics::ETextureType::TEXTURE_2D});
 				Material1->AddTextureBindingLayout({ "u_NormalTexture", 4, 5, 0, graphics::ETextureType::TEXTURE_2D});
+				Material1->AddTextureBindingLayout({ "cubemapTexture", 6, 7, 0, graphics::ETextureType::TEXTURE_CUBE });
 
 				Material0->AddUniformBuffer(UniformBuffer);
 
@@ -165,7 +167,7 @@ namespace scene
 				m_TestObject->AddTexture(APITex0);
 				m_TestObject->AddTexture(APITex1);
 				//m_TestObject->AddTexture(m_FrameTextureList[0]); // ShadowMap
-				//m_TestObject->AddCubeMap(CubeTexList[0]);
+				m_TestObject->AddCubeMap(CubeTexList[0]);
 			}
 
 			// CREATE MATERIAL

@@ -160,6 +160,22 @@ namespace api
 		// ShaderをProgramにリンクする
 		glLinkProgram(m_ShaderPrg);
 
+		// リンクステータスをチェックする
+		// このエラーハンドリングの仕方は覚えておくと便利かも
+		GLint status;
+		glGetProgramiv(m_ShaderPrg, GL_LINK_STATUS, &status);
+
+		if (status != GL_TRUE)
+		{
+			char buffer[512];
+			std::memset(buffer, 0, 512);
+			glGetProgramInfoLog(m_ShaderPrg, 512, nullptr, buffer);
+
+			Console::Log("[Error] Program Link Error - {Error Message: %s}\n", buffer);
+
+			return false;
+		}
+
 		return true;
 	}
 

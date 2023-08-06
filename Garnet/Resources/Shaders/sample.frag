@@ -15,6 +15,7 @@ layout(binding = 1) uniform TestBuffer{
 #ifdef USE_OPENGL
 layout(binding = 2) uniform sampler2D u_texture;
 layout(binding = 4) uniform sampler2D u_NormalTexture;
+layout(binding = 11) uniform samplerCube cubemapTexture;
 #else
 layout(binding = 2) uniform texture2D u_texture;
 layout(binding = 3) uniform sampler u_sampler;
@@ -34,6 +35,8 @@ void main() {
 #else
     col = mix(texture(sampler2D(u_texture, u_sampler), fragTexCoord).rgb, texture(sampler2D(u_NormalTexture, u_NormalSampler), fragTexCoord).rgb, sin(testUBO.time) * 0.5 + 0.5);
 #endif
+
+    col += texture(cubemapTexture, vec3(0.0)).rgb;
 
     outColor = vec4(col, 1.0);
 }
