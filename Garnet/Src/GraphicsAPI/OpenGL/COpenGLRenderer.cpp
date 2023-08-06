@@ -17,6 +17,7 @@ namespace renderer
 
 	COpenGLRenderer::~COpenGLRenderer()
 	{
+		glDeleteVertexArrays(1, &m_VertexArray);
 	}
 
 	bool COpenGLRenderer::Create(const std::shared_ptr<CRendererCreateInfo>& createInfo, const std::shared_ptr<graphics::CMaterial>& Material)

@@ -121,11 +121,16 @@ namespace scene
 				UniformBuffer->AddData("lightVPMat", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
 				
 				UniformBuffer->AddData("UBOColor", &glm::vec4(0.0f, 0.0f, 1.0f, 1.0f)[0], sizeof(glm::vec4), 1);
-				UniformBuffer->AddData("val0", &glm::vec4(0.0f)[0], sizeof(glm::vec4), 1);
-				UniformBuffer->AddData("val1", &glm::vec4(0.0f)[0], sizeof(glm::vec4), 1);
-				UniformBuffer->AddData("val2", &glm::vec4(0.0f)[0], sizeof(glm::vec4), 1);
+				UniformBuffer->AddData("time", &glm::vec1(0.0f)[0], sizeof(glm::vec1), 1);
+				UniformBuffer->AddData("pad_0", &glm::vec1(0.0f)[0], sizeof(glm::vec1), 1);
+				UniformBuffer->AddData("pad_1", &glm::vec1(0.0f)[0], sizeof(glm::vec1), 1);
+				UniformBuffer->AddData("pad_2", &glm::vec1(0.0f)[0], sizeof(glm::vec1), 1);
 
-				//Material0->AddTextureBindingLayout({ 2, 3, -1, graphics::ETextureType::TEXTURE_2D });
+				Material0->AddTextureBindingLayout({ "u_texture",		2, 3, 0, graphics::ETextureType::TEXTURE_2D});
+				Material0->AddTextureBindingLayout({ "u_NormalTexture", 4, 5, 1, graphics::ETextureType::TEXTURE_2D});
+
+				Material1->AddTextureBindingLayout({ "u_texture",		2, 3, 1, graphics::ETextureType::TEXTURE_2D});
+				Material1->AddTextureBindingLayout({ "u_NormalTexture", 4, 5, 0, graphics::ETextureType::TEXTURE_2D});
 
 				Material0->AddUniformBuffer(UniformBuffer);
 
@@ -134,7 +139,7 @@ namespace scene
 			}
 
 			{
-				/*auto APITex0 = pGraphicsAPI->CreateTexture();
+				auto APITex0 = pGraphicsAPI->CreateTexture();
 				if (!APITex0->Create(m_Texture0->GetData())) return false;
 
 				auto APITex1 = pGraphicsAPI->CreateTexture();
@@ -142,7 +147,7 @@ namespace scene
 
 				m_TestObject->AddTexture(APITex0);
 				m_TestObject->AddTexture(APITex1);
-				m_TestObject->AddTexture(m_FrameTextureList[0]); // ShadowMap*/
+				//m_TestObject->AddTexture(m_FrameTextureList[0]); // ShadowMap
 				//m_TestObject->AddCubeMap(CubeTexList[0]);
 			}
 

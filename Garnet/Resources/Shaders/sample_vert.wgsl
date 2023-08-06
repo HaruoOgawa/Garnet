@@ -14,9 +14,10 @@ struct UniformBufferObject {
 
 struct TestBuffer {
     UBOColor: vec4<f32>,
-    val0_: vec4<f32>,
-    val1_: vec4<f32>,
-    val2_: vec4<f32>,
+    time: f32,
+    pad_0_: f32,
+    pad_1_: f32,
+    pad_2_: f32,
 }
 
 struct VertexOutput {

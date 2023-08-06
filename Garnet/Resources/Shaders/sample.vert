@@ -15,9 +15,11 @@ layout(binding = 0) uniform UniformBufferObject{
 
 layout(binding = 1) uniform TestBuffer{
     vec4 UBOColor;
-    vec4 val0;
-    vec4 val1;
-    vec4 val2;
+    float time;
+    float pad_0;
+    float pad_1;
+    float pad_2;
+
 } testUBO;
 
 layout(location = 0) out vec3 fragColor;
