@@ -12,26 +12,27 @@ layout(binding = 1) uniform TestBuffer{
 
 } testUBO;
 
-#ifndef USE_OPENGL
+#ifdef USE_OPENGL
+layout(binding = 2) uniform sampler2D u_texture;
+layout(binding = 4) uniform sampler2D u_NormalTexture;
+#else
 layout(binding = 2) uniform texture2D u_texture;
 layout(binding = 3) uniform sampler u_sampler;
 
 layout(binding = 4) uniform texture2D u_NormalTexture;
 layout(binding = 5) uniform sampler u_NormalSampler;
-#else
-layout(binding = 2) uniform sampler2D u_texture;
-layout(binding = 4) uniform sampler2D u_NormalTexture;
 #endif
+
 layout(location = 0) out vec4 outColor;
 
 void main() {
     vec3 col = vec3(0.0);
     col.rg = fragTexCoord;
 
-#ifndef USE_OPENGL
-    col = mix(texture(sampler2D(u_texture, u_sampler), fragTexCoord).rgb, texture(sampler2D(u_NormalTexture, u_NormalSampler), fragTexCoord).rgb, sin(testUBO.time) * 0.5 + 0.5);
-#else
+#ifdef USE_OPENGL
     col = mix(texture(u_texture, fragTexCoord).rgb, texture(u_NormalTexture, fragTexCoord).rgb, sin(testUBO.time) * 0.5 + 0.5);
+#else
+    col = mix(texture(sampler2D(u_texture, u_sampler), fragTexCoord).rgb, texture(sampler2D(u_NormalTexture, u_NormalSampler), fragTexCoord).rgb, sin(testUBO.time) * 0.5 + 0.5);
 #endif
 
     outColor = vec4(col, 1.0);

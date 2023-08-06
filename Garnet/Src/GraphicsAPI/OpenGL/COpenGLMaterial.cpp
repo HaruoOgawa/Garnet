@@ -224,7 +224,8 @@ namespace api
 			std::memset(buffer, 0, 512);
 			glGetShaderInfoLog(shader, 512, nullptr, buffer);
 
-			Console::Log("[Error] GLSL Compile Error - {Error Message: %s, ShaderCode: %s}\n", buffer, content);
+			Console::Log("[Error] GLSL Compile Error - {Error Message: %s}\n", buffer);
+			Console::Log("[Error] ShaderCode: {%s}\n", content);
 
 			return false;
 		}

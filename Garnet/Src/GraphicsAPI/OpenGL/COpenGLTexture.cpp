@@ -112,16 +112,42 @@ namespace api
 			break;
 		}
 
-		glGenTextures(1, &m_TextureID);
-		glBindTexture(GL_TEXTURE_2D, m_TextureID);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		
-		glTexImage2D(GL_TEXTURE_2D, 0, internalformat, m_Width, m_Height, 0, format, type, &pixelData[0]);
+		if (m_TextureType == graphics::ETextureType::TEXTURE_2D)
+		{
+			glGenTextures(1, &m_TextureID);
+			glBindTexture(GL_TEXTURE_2D, m_TextureID);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-		glBindTexture(GL_TEXTURE_2D, 0);
+			glTexImage2D(GL_TEXTURE_2D, 0, internalformat, m_Width, m_Height, 0, format, type, &pixelData[0]);
+
+			glBindTexture(GL_TEXTURE_2D, 0);
+		}
+		else if (m_TextureType == graphics::ETextureType::TEXTURE_CUBE)
+		{
+			glGenTextures(1, &m_TextureID);
+			glBindTexture(GL_TEXTURE_CUBE_MAP, m_TextureID);
+			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+			for (unsigned int i = 0; i < 6; i++)
+			{
+				size_t byteSize = m_Width * m_Height * 4;
+				size_t byteOffsset = i * byteSize;
+
+				std::vector<unsigned char> data;
+				data.resize(byteSize);
+				std::memcpy(&data[0], &pixelData[byteOffsset], byteSize);
+
+				glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, internalformat, m_Width, m_Height, 0, format, type, &data[0]);
+			}
+			
+			glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+		}
 
 		return true;
 	}
@@ -129,15 +155,32 @@ namespace api
 #endif
 	void COpenGLTexture::SetActive(GLenum texture)
 	{
-		glActiveTexture(texture);
-		glEnable(GL_TEXTURE_2D);
-		glBindTexture(GL_TEXTURE_2D, m_TextureID);
+		if (m_TextureType == graphics::ETextureType::TEXTURE_2D)
+		{
+			glActiveTexture(texture);
+			glEnable(GL_TEXTURE_2D);
+			glBindTexture(GL_TEXTURE_2D, m_TextureID);
+		}
+		else if (m_TextureType == graphics::ETextureType::TEXTURE_CUBE)
+		{
+			glActiveTexture(texture);
+			glEnable(GL_TEXTURE_CUBE_MAP);
+			glBindTexture(GL_TEXTURE_CUBE_MAP, m_TextureID);
+		}
 	}
 
 	void COpenGLTexture::SetEactive(GLenum texture)
 	{
-		glActiveTexture(texture);
-		glDisable(GL_TEXTURE_2D);
+		if (m_TextureType == graphics::ETextureType::TEXTURE_2D)
+		{
+			glActiveTexture(texture);
+			glDisable(GL_TEXTURE_2D);
+		}
+		else if (m_TextureType == graphics::ETextureType::TEXTURE_CUBE)
+		{
+			glActiveTexture(texture);
+			glDisable(GL_TEXTURE_CUBE_MAP);
+		}
 	}
 
 	GLuint COpenGLTexture::GetTextureID() const

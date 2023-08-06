@@ -102,6 +102,23 @@ namespace scene
 
 	bool CScriptScene::Load(api::IGraphicsAPI* pGraphicsAPI)
 	{
+		// Cubemap
+		std::vector<std::shared_ptr<graphics::CTexture>> CubeTexList;
+		{
+			std::vector<std::vector<unsigned char>> CubeDataList;
+			CubeDataList.push_back(m_Cube0->GetData());
+			CubeDataList.push_back(m_Cube1->GetData());
+			CubeDataList.push_back(m_Cube2->GetData());
+			CubeDataList.push_back(m_Cube3->GetData());
+			CubeDataList.push_back(m_Cube4->GetData());
+			CubeDataList.push_back(m_Cube5->GetData());
+
+			auto CubeTex0 = pGraphicsAPI->CreateTexture(true);
+			if (!CubeTex0->Create(CubeDataList)) return false;
+
+			CubeTexList.push_back(CubeTex0);
+		}
+
 		// TestObj
 		{
 			// MATERIAL
@@ -193,6 +210,16 @@ namespace scene
 			if (!m_TestObject->Create(pGraphicsAPI, m_DepthVertex, m_DepthFragment)) return false;
 		}
 
+		// テストのglTFをインポート
+		{
+			std::shared_ptr<graphics::CMaterialCreateInfo> createInfo = std::make_shared<graphics::CMaterialCreateInfo>();
+			createInfo->SetVertexShaderCode(m_glTFVert->GetData());
+			createInfo->SetFragmentShaderCode(m_glTFFrag->GetData());
+
+			//if (!gltf::CGLTFImporter::Import(pGraphicsAPI, m_Sphere_glTFData->GetData(), m_Sphere_glTFObj, createInfo, CubeTexList, m_FrameTextureList, m_DepthVertex, m_DepthFragment)) return false;
+			if (!gltf::CGLTFImporter::Import(pGraphicsAPI, m_Helmet_glTFData->GetData(), m_Helmet_glTFObj, createInfo, CubeTexList, m_FrameTextureList, m_DepthVertex, m_DepthFragment)) return false;
+		}
+
 		return true;
 	}
 
@@ -201,6 +228,11 @@ namespace scene
 		if (m_IsLoaded && m_TestObject)
 		{
 			if (!m_TestObject->Update()) return false;
+		}
+
+		if (m_IsLoaded && m_Helmet_glTFObj)
+		{
+			if (!m_Helmet_glTFObj->Update()) return false;
 		}
 
 		if (!m_IsLoaded)
@@ -224,6 +256,11 @@ namespace scene
 		if (m_IsLoaded && m_TestObject)
 		{
 			if (!m_TestObject->Draw(IsDepthPass, SecondsTime, Camera, Projection, DrawInfo)) return false;
+		}
+
+		if (m_IsLoaded && m_Helmet_glTFObj)
+		{
+			if (!m_Helmet_glTFObj->Draw(IsDepthPass, SecondsTime, Camera, Projection, DrawInfo)) return false;
 		}
 
 		return true;
