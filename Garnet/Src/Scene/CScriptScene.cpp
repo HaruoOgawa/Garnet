@@ -265,7 +265,7 @@ namespace scene
 	{
 		if (m_IsLoaded && m_TestObject)
 		{
-			if (!m_TestObject->Draw(IsDepthPass, SecondsTime, Camera, Projection, DrawInfo)) return false;
+			//if (!m_TestObject->Draw(IsDepthPass, SecondsTime, Camera, Projection, DrawInfo)) return false;
 		}
 
 		if (m_IsLoaded && m_Sphere_glTFObj)

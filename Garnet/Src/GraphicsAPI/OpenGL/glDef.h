@@ -50,6 +50,7 @@
 #define GL_TEXTURE_CUBE_MAP_NEGATIVE_Y    0x8518
 #define GL_TEXTURE_CUBE_MAP_POSITIVE_Z    0x8519
 #define GL_TEXTURE_CUBE_MAP_NEGATIVE_Z    0x851A
+#define GL_TEXTURE_CUBE_MAP_SEAMLESS      0x884F
 #define GL_INFO_LOG_LENGTH                0x8B84
 #define GL_LINK_STATUS                    0x8B82
 
@@ -88,6 +89,7 @@ typedef ptrdiff_t GLsizeiptr;
 	GL_FUNC(void,   VertexAttribPointer,  GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const void* pointer) \
 	GL_FUNC(void,   LinkProgram,		  GLuint program) \
 	GL_FUNC(void,   ActiveTexture,		  GLenum texture) \
+	GL_FUNC(void,   GenerateMipmap,		  GLenum target) \
 	GL_FUNC(GLint,  GetUniformLocation,	  GLuint program, const GLchar* name) \
 	GL_FUNC(void,   Uniform1i,			  GLint location, GLint v0) \
 /* end */

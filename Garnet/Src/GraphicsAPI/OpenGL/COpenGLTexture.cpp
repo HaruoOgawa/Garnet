@@ -67,6 +67,8 @@ namespace api
 
 		glTexImage2D(GL_TEXTURE_2D, 0, internalformat, m_Width, m_Height, 0, format, type, 0);
 
+		glDisable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+
 		glBindTexture(GL_TEXTURE_2D, 0);
 
 		return true;
@@ -117,11 +119,14 @@ namespace api
 			glGenTextures(1, &m_TextureID);
 			glBindTexture(GL_TEXTURE_2D, m_TextureID);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
 			glTexImage2D(GL_TEXTURE_2D, 0, internalformat, m_Width, m_Height, 0, format, type, &pixelData[0]);
+
+			glDisable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+			glGenerateMipmap(GL_TEXTURE_2D); // ミップマップを生成
 
 			glBindTexture(GL_TEXTURE_2D, 0);
 		}
@@ -130,7 +135,7 @@ namespace api
 			glGenTextures(1, &m_TextureID);
 			glBindTexture(GL_TEXTURE_CUBE_MAP, m_TextureID);
 			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_REPEAT);
 			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
@@ -145,6 +150,9 @@ namespace api
 
 				glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, internalformat, m_Width, m_Height, 0, format, type, &data[0]);
 			}
+			
+			glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS); // ミップマップをシームレスにする
+			glGenerateMipmap(GL_TEXTURE_CUBE_MAP); // ミップマップを生成
 			
 			glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 		}
