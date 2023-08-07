@@ -28,7 +28,6 @@
 #define GL_FUNC_ADD                       0x8006
 #define GL_MAJOR_VERSION                  0x821B
 #define GL_MINOR_VERSION                  0x821C
-#define GL_TEXTURE0                       0x84C0
 #define GL_VERTEX_SHADER                  0x8B31
 #define GL_FRAGMENT_SHADER                0x8B30
 #define GL_GEOMETRY_SHADER                0x8DD9
@@ -38,6 +37,25 @@
 #define GL_UNIFORM_BUFFER                 0x8A11
 #define GL_STATIC_DRAW                    0x88E4
 #define GL_DYNAMIC_DRAW                   0x88E8
+#define GL_CLAMP_TO_EDGE                  0x812F
+#define GL_RGBA16F                        0x881A
+#define GL_DEPTH24_STENCIL8               0x88F0
+#define GL_DEPTH_STENCIL                  0x84F9
+#define GL_TEXTURE0                       0x84C0
+#define GL_TEXTURE_CUBE_MAP               0x8513
+#define GL_TEXTURE_BINDING_CUBE_MAP       0x8514
+#define GL_TEXTURE_CUBE_MAP_POSITIVE_X    0x8515
+#define GL_TEXTURE_CUBE_MAP_NEGATIVE_X    0x8516
+#define GL_TEXTURE_CUBE_MAP_POSITIVE_Y    0x8517
+#define GL_TEXTURE_CUBE_MAP_NEGATIVE_Y    0x8518
+#define GL_TEXTURE_CUBE_MAP_POSITIVE_Z    0x8519
+#define GL_TEXTURE_CUBE_MAP_NEGATIVE_Z    0x851A
+#define GL_TEXTURE_CUBE_MAP_SEAMLESS      0x884F
+#define GL_INFO_LOG_LENGTH                0x8B84
+#define GL_LINK_STATUS                    0x8B82
+#define GL_DEPTH_COMPONENT32F             0x8CAC
+#define GL_RENDERBUFFER                   0x8D41
+#define GL_DEPTH_ATTACHMENT               0x8D00
 
 typedef char GLchar;
 typedef ptrdiff_t GLintptr;
@@ -49,13 +67,17 @@ typedef ptrdiff_t GLsizeiptr;
 #define GL_FUNC_LIST \
 	GL_FUNC(void,	BindBuffer,			  GLenum target, GLuint buffer) \
 	GL_FUNC(GLuint, CreateProgram) \
+	GL_FUNC(void,   GetProgramiv,		  GLuint program, GLenum pname, GLint* params) \
+	GL_FUNC(void,	UseProgram,			  GLuint program) \
+	GL_FUNC(void,	DeleteProgram,		  GLuint program) \
+	GL_FUNC(void,	GetProgramInfoLog,	  GLuint program, GLsizei maxLength, GLsizei* length, GLchar* infoLog) \
 	GL_FUNC(GLuint, CreateShader,		  GLenum shaderType) \
 	GL_FUNC(void,	ShaderSource,		  GLuint shader, GLsizei count, const GLchar** string, const GLint* length) \
 	GL_FUNC(void ,  CompileShader,		  GLuint shader) \
 	GL_FUNC(void,	AttachShader,		  GLuint program, GLuint shader) \
+	GL_FUNC(void,	DeleteShader,		  GLuint shader) \
 	GL_FUNC(void,	GetShaderiv,		  GLuint shader, GLenum pname, GLint* params) \
 	GL_FUNC(void,	GetShaderInfoLog,	  GLuint shader, GLsizei maxLength, GLsizei* length, GLchar* infoLog) \
-	GL_FUNC(void,	UseProgram,			  GLuint program) \
 	GL_FUNC(void,   GenBuffers, 		  GLsizei n, GLuint* buffers) \
 	GL_FUNC(void,   BufferData, 		  GLenum target, GLsizeiptr size, const void* data, GLenum usage) \
 	GL_FUNC(void,   BufferSubData, 		  GLenum target, GLintptr offset, GLsizeiptr size, const void* data) \
@@ -65,9 +87,21 @@ typedef ptrdiff_t GLsizeiptr;
 	GL_FUNC(void,   BindBufferRange, 	  GLenum target, GLuint index, GLuint buffer, GLintptr offset, GLsizeiptr size) \
 	GL_FUNC(void,   GenVertexArrays, 	  GLsizei n, GLuint* arrays) \
 	GL_FUNC(void,   BindVertexArray, 	  GLuint array) \
+	GL_FUNC(void,   DeleteVertexArrays,   GLsizei n, const GLuint* arrays) \
 	GL_FUNC(void,   EnableVertexAttribArray, GLuint index) \
 	GL_FUNC(void,   VertexAttribPointer,  GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const void* pointer) \
 	GL_FUNC(void,   LinkProgram,		  GLuint program) \
+	GL_FUNC(void,   ActiveTexture,		  GLenum texture) \
+	GL_FUNC(void,   GenerateMipmap,		  GLenum target) \
+	GL_FUNC(GLint,  GetUniformLocation,	  GLuint program, const GLchar* name) \
+	GL_FUNC(void,   Uniform1i,			  GLint location, GLint v0) \
+	GL_FUNC(void,   GenFramebuffers,	  GLsizei n, GLuint* ids) \
+	GL_FUNC(void,   BindFramebuffer,	  GLenum target, GLuint framebuffer) \
+	GL_FUNC(void,   FramebufferTexture2D, GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level) \
+	GL_FUNC(void,   GenRenderbuffers,	  GLsizei n, GLuint* renderbuffers) \
+	GL_FUNC(void,   BindRenderbuffer,	  GLenum target, GLuint renderbuffer) \
+	GL_FUNC(void,   RenderbufferStorage,  GLenum target, GLenum internalformat, GLsizei width, GLsizei height) \
+	GL_FUNC(void,   FramebufferRenderbuffer, GLenum target, GLenum attachment, GLenum renderbuffertarget, GLuint renderbuffer) \
 /* end */
 
 // プリプロセッサ芸でまずGL_FUNC_LISTの中身をtypedef や externで展開する

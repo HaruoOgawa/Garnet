@@ -46,7 +46,7 @@ namespace api
 		bool             CreateWGUniformBuffer(WGPUBuffer& Buffer, WGPUBufferUsageFlags Usage, void const* Data, uint64_t ByteSize);
 		void			 InitDefalutBindGroupLayoutEntry(WGPUBindGroupLayoutEntry& bindingLayout);
 	public:
-		CWebGPUMaterial(api::CWebGPUAPI* pGraphicsAPI);
+		CWebGPUMaterial(api::CWebGPUAPI* pGraphicsAPI, const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo);
 		virtual ~CWebGPUMaterial();
 
 		virtual bool Create(const std::vector<std::shared_ptr<graphics::CTexture>>& TextureList, const std::vector<std::shared_ptr<graphics::CTexture>>& CubeMapList) override;

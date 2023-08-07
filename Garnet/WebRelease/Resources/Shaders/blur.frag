@@ -19,8 +19,12 @@ layout(binding = 0) uniform UniformBufferObject{
 //    float Kernal[32];
 //} kbo;
 
+#ifdef USE_OPENGL
+layout(binding = 2) uniform sampler2D SrcTex;
+#else
 layout(binding = 2) uniform texture2D SrcTex;
 layout(binding = 3) uniform sampler SamplerSrcTex;
+#endif
 
 float[21] CalcGaussianKernel()
 {
@@ -66,13 +70,20 @@ void main() {
     {
         for(int i = 0; i < ubo.KernelSize; i++)
         {
-            //col += texture(sampler2D(SrcTex, SamplerSrcTex), f_UV + dir * float(i - halfSize)).rgb * kbo.Kernal[i];
+            #ifdef USE_OPENGL
+            col += texture(SrcTex, f_UV + dir * float(i - halfSize)).rgb * Kernal[i];
+            #else
             col += texture(sampler2D(SrcTex, SamplerSrcTex), f_UV + dir * float(i - halfSize)).rgb * Kernal[i];
+            #endif
         }
     }
     else
     {
+        #ifdef USE_OPENGL
+        col = texture(SrcTex, f_UV).rgb;
+        #else
         col = texture(sampler2D(SrcTex, SamplerSrcTex), f_UV).rgb;
+        #endif
     }
     
     outColor = vec4(col, 1.0);

@@ -7,11 +7,12 @@
 #include "../../Projection/CProjection.h"
 #include "../../Math/CTransform.h"
 #include "../../Math/CMath.h"
+#include "COpenGLTexture.h"
 
 namespace api
 {
-	COpenGLMaterial::COpenGLMaterial(api::COpenGLAPI* pGraphicsAPI):
-		CMaterial(),
+	COpenGLMaterial::COpenGLMaterial(api::COpenGLAPI* pGraphicsAPI, const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo):
+		CMaterial(createInfo),
 		m_pGraphicsAPI(pGraphicsAPI),
 
 		m_ShaderPrg(-1)
@@ -25,12 +26,16 @@ namespace api
 
 	COpenGLMaterial::~COpenGLMaterial()
 	{
+		glDeleteProgram(m_ShaderPrg);
 	}
 
 	bool COpenGLMaterial::Create(const std::vector<std::shared_ptr<graphics::CTexture>>& TextureList, const std::vector<std::shared_ptr<graphics::CTexture>>& CubeMapList)
 	{
 		if (!CreateShaderStages()) return false;
-		if (!CreateUniformBuffers()) return false;
+		if (!CreateUniformBuffers(TextureList, CubeMapList)) return false;
+
+		m_TextureList = TextureList;
+		m_CubeMapList = CubeMapList;
 
 		return true;
 	}
@@ -64,24 +69,51 @@ namespace api
 
 				GLuint uboIndex = m_UBOList[index];
 
-				// UBOを生成
-				/*GLuint uboIndex;
-				glGenBuffers(1, &uboIndex);*/
-
 				// Uniformのbinding indexを割り当てる
 				GLuint blockIndex = glGetUniformBlockIndex(m_ShaderPrg, Layout.second.BindingName.c_str());
 				glUniformBlockBinding(m_ShaderPrg, blockIndex, Layout.second.BindingIndex); // ShaderPrgとBinding Blockを紐づける
-				//glBindBufferBase(GL_UNIFORM_BUFFER, Layout.second.BindingIndex, uboIndex); // UBOとBinding Blockを紐づける
 				glBindBufferRange(GL_UNIFORM_BUFFER, Layout.second.BindingIndex, uboIndex, 0, Layout.second.ByteSize); // UBOとBinding Blockを紐づける
 
 				// データの受け渡し
 				glBindBuffer(GL_UNIFORM_BUFFER, uboIndex);
-				glBufferSubData(GL_UNIFORM_BUFFER, 0, Layout.second.ByteSize, &Buffer->GetData()[Layout.second.ByteOffset]); // Bufferのデータを更新
 				//glBufferData(GL_UNIFORM_BUFFER, Layout.second.ByteSize, &Buffer->GetData()[Layout.second.ByteOffset], GL_STATIC_DRAW); // Bufferのデータを初期化・メモリ確保
+				glBufferSubData(GL_UNIFORM_BUFFER, 0, Layout.second.ByteSize, &Buffer->GetData()[Layout.second.ByteOffset]); // Bufferのデータを更新
 				glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
 				index++;
 			}
+		}
+
+		// テクスチャをShaderにバインドする
+		int TexOrderIndex = 0;
+		for (const auto& TexLayout : m_TextureBindingLayoutList)
+		{
+			COpenGLTexture* Texture = nullptr;
+			int TextureIndex = TexLayout.TextureIndex;
+
+			if (TexLayout.TextureType == graphics::ETextureType::TEXTURE_2D)
+			{
+				Texture = (TextureIndex >= 0 && TextureIndex < m_TextureList.size()) ? static_cast<api::COpenGLTexture*>(m_TextureList[TextureIndex].get()) : m_EmptyTexture.get();
+			}
+			else if (TexLayout.TextureType == graphics::ETextureType::TEXTURE_CUBE)
+			{
+				Texture = (TextureIndex >= 0 && TextureIndex < m_CubeMapList.size()) ? static_cast<api::COpenGLTexture*>(m_CubeMapList[TextureIndex].get()) : m_EmptyTexture.get();
+			}
+
+			if (!Texture)
+			{
+				Console::Log("[ERROR] Texture is nullpte\n");
+				return false;
+			}
+
+			Texture->SetActive(GL_TEXTURE0 + TexOrderIndex);
+
+			GLuint location = glGetUniformLocation(m_ShaderPrg, TexLayout.TextureName.c_str());
+			glUniform1i(location, TexOrderIndex);
+
+			Texture->SetEactive(GL_TEXTURE0 + TexOrderIndex);
+
+			TexOrderIndex++;
 		}
 
 		return true;
@@ -128,10 +160,26 @@ namespace api
 		// ShaderをProgramにリンクする
 		glLinkProgram(m_ShaderPrg);
 
+		// リンクステータスをチェックする
+		// このエラーハンドリングの仕方は覚えておくと便利かも
+		GLint status;
+		glGetProgramiv(m_ShaderPrg, GL_LINK_STATUS, &status);
+
+		if (status != GL_TRUE)
+		{
+			char buffer[512];
+			std::memset(buffer, 0, 512);
+			glGetProgramInfoLog(m_ShaderPrg, 512, nullptr, buffer);
+
+			Console::Log("[Error] Program Link Error - {Error Message: %s}\n", buffer);
+
+			return false;
+		}
+
 		return true;
 	}
 
-	bool COpenGLMaterial::CreateUniformBuffers()
+	bool COpenGLMaterial::CreateUniformBuffers(const std::vector<std::shared_ptr<graphics::CTexture>>& TextureList, const std::vector<std::shared_ptr<graphics::CTexture>>& CubeMapList)
 	{
 		SetActive();
 
@@ -146,7 +194,6 @@ namespace api
 				// Uniformのbinding indexを割り当てる
 				GLuint blockIndex = glGetUniformBlockIndex(m_ShaderPrg, Layout.second.BindingName.c_str());
 				glUniformBlockBinding(m_ShaderPrg, blockIndex, Layout.second.BindingIndex); // ShaderPrgとBinding Blockを紐づける
-				//glBindBufferBase(GL_UNIFORM_BUFFER, Layout.second.BindingIndex, uboIndex); // UBOとBinding Blockを紐づける
 				glBindBufferRange(GL_UNIFORM_BUFFER, Layout.second.BindingIndex, uboIndex, 0, Layout.second.ByteSize); // UBOとBinding Blockを紐づける
 
 				// データの受け渡し
@@ -155,15 +202,8 @@ namespace api
 				//glBufferSubData(GL_UNIFORM_BUFFER, 0, Layout.second.ByteSize, &Buffer->GetData()[Layout.second.ByteOffset]); // Bufferのデータを更新
 				glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
-				//
 				m_UBOList.push_back(uboIndex);
 			}
-		}
-		
-		// テクスチャの扱いは後で考える
-		for (const auto& TexLayout : m_TextureBindingLayoutList)
-		{
-
 		}
 
 		return true;
@@ -179,6 +219,12 @@ namespace api
 		GLuint shader = glCreateShader(shaderType);
 
 		std::string code_str = std::string(shaderCode.begin(), shaderCode.end());
+		
+		// プリプロセッサを差し込む位置を検索する(Versionの後)
+		int firstNextLine = static_cast<int>(code_str.find_first_of('\n'));
+		//Console::Log("firstNextLine: %d\n", firstNextLine);
+
+		code_str = code_str.substr(0, firstNextLine) + "\n" + PreparePreprocessor() + code_str.substr(firstNextLine + 1, code_str.size() - firstNextLine - 1);
 		const char* content = code_str.c_str();
 
 		glShaderSource(shader, 1, &(content), nullptr);
@@ -194,7 +240,8 @@ namespace api
 			std::memset(buffer, 0, 512);
 			glGetShaderInfoLog(shader, 512, nullptr, buffer);
 
-			Console::Log("[Error] GLSL Compile Error - {Error Message: %s, ShaderCode: %s}\n", buffer, content);
+			Console::Log("[Error] GLSL Compile Error - {Error Message: %s}\n", buffer);
+			Console::Log("[Error] ShaderCode: {%s}\n", content);
 
 			return false;
 		}
@@ -202,7 +249,19 @@ namespace api
 		// コンパイルに成功したのでShader ProgramにShaderをアタッチする
 		glAttachShader(shaderPrg, shader);
 
+		// アタッチしたので削除する
+		glDeleteShader(shader);
+
 		return true;
+	}
+
+	std::string COpenGLMaterial::PreparePreprocessor()
+	{
+		std::string preprocessor = "";
+
+		preprocessor += "#define USE_OPENGL\n";
+
+		return preprocessor;
 	}
 }
 #endif // USE_OPENGL

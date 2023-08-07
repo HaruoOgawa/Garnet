@@ -10,8 +10,8 @@
 
 namespace api
 {
-	CWebGPUMaterial::CWebGPUMaterial(api::CWebGPUAPI* pGraphicsAPI):
-		CMaterial(),
+	CWebGPUMaterial::CWebGPUMaterial(api::CWebGPUAPI* pGraphicsAPI, const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo):
+		CMaterial(createInfo),
 		m_pGraphicsAPI(pGraphicsAPI),
 		m_VertexShaderModele(nullptr),
 		m_FragmentShaderModele(nullptr),

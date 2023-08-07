@@ -24,6 +24,7 @@ namespace graphics
 	class CMaterial;
 	class CTexture;
 	enum class ETextureType;
+	class CMaterialCreateInfo;
 }
 
 namespace api
@@ -39,7 +40,7 @@ namespace api
 		
 		virtual bool CreateRenderPass(const std::string& PassName, ERenderPassFormat RenderPassFormat, const glm::vec4& InitColor, int Width = -1, int Height = -1) = 0;
 		virtual std::shared_ptr<renderer::IRenderer> CreateRenderer(const std::string& PassName) = 0;
-		virtual std::shared_ptr<graphics::CMaterial> CreateMaterial() = 0;
+		virtual std::shared_ptr<graphics::CMaterial> CreateMaterial(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo) = 0;
 		virtual std::shared_ptr<graphics::CTexture> CreateTexture(bool UseMipMap = false) = 0;
 
 		virtual bool Resize(int Width, int Height) = 0;

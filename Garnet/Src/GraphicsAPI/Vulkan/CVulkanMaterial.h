@@ -59,7 +59,7 @@ namespace api
 		// ƒwƒ‹ƒp[ŠÖ” ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		bool CreateShaderModule(VkShaderModule& shaderModule, const std::string& code);
 	public:
-		CVulkanMaterial(api::CVulkanAPI* pGraphicsAPI);
+		CVulkanMaterial(api::CVulkanAPI* pGraphicsAPI, const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo);
 		virtual ~CVulkanMaterial();
 
 		virtual bool Create(const std::vector<std::shared_ptr<graphics::CTexture>>& TextureList, const std::vector<std::shared_ptr<graphics::CTexture>>& CubeMapList) override;

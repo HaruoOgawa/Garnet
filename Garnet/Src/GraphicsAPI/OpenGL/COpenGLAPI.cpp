@@ -8,6 +8,7 @@
 #include "COpenGLMaterial.h"
 #include "COpenGLTexture.h"
 #include "COpenGLRenderer.h"
+#include "COpenGLRenderPass.h"
 
 namespace api
 {
@@ -38,8 +39,21 @@ namespace api
 	{
 	}
 
-	bool COpenGLAPI::CreateRenderPass(const std::string& PassName, ERenderPassFormat RenderPassFormat, const glm::vec4& InitColor, int Width, int Heigh)
+	bool COpenGLAPI::CreateRenderPass(const std::string& PassName, ERenderPassFormat RenderPassFormat, const glm::vec4& InitColor, int Width, int Height)
 	{
+		std::shared_ptr<COpenGLRenderPass> RenderPass = std::make_shared<COpenGLRenderPass>(this, PassName, RenderPassFormat, InitColor);
+
+		if (Width != -1 && Height != -1)
+		{
+			if (!RenderPass->Create(Width, Height)) return false;
+		}
+		else
+		{
+			if (!RenderPass->Create(m_Width, m_Height)) return false;
+		}
+
+		m_OffScreenRenderPassMap.insert({ PassName, RenderPass });
+
 		return true;
 	}
 
@@ -50,9 +64,9 @@ namespace api
 		return Renderer;
 	}
 
-	std::shared_ptr<graphics::CMaterial> COpenGLAPI::CreateMaterial()
+	std::shared_ptr<graphics::CMaterial> COpenGLAPI::CreateMaterial(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo)
 	{
-		auto Material = std::make_shared<api::COpenGLMaterial>(this);
+		auto Material = std::make_shared<api::COpenGLMaterial>(this, createInfo);
 
 		return Material;
 	}
@@ -67,6 +81,9 @@ namespace api
 
 	bool COpenGLAPI::Resize(int Width, int Height)
 	{
+		m_Width = Width;
+		m_Height = Height;
+
 		return true;
 	}
 
@@ -77,10 +94,20 @@ namespace api
 
 	bool COpenGLAPI::BeginRender(const std::string& PassName)
 	{
-		glBindBuffer(GL_FRAMEBUFFER, 0);
-		glViewport(0, 0, m_Width, m_Height);
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		// レンダーパスを切り替える
+		const auto& OffScreenRenderPass = m_OffScreenRenderPassMap.find(PassName);
+		if (OffScreenRenderPass != m_OffScreenRenderPassMap.end())
+		{
+			if (!OffScreenRenderPass->second->BeginRenderPass()) return false;
+		}
+		else
+		{
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+			glViewport(0, 0, m_Width, m_Height);
+			glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		}
 
 		return true;
 	}

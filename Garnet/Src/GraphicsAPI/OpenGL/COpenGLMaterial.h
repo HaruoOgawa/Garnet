@@ -32,15 +32,18 @@ namespace api
 		// Texture
 		std::shared_ptr<COpenGLTexture> m_EmptyTexture;
 #endif
+		std::vector<std::shared_ptr<graphics::CTexture>> m_TextureList;
+		std::vector<std::shared_ptr<graphics::CTexture>> m_CubeMapList;
 	private:
 		// Main Logics
 		bool CreateShaderStages();
-		bool CreateUniformBuffers();
+		bool CreateUniformBuffers(const std::vector<std::shared_ptr<graphics::CTexture>>& TextureList, const std::vector<std::shared_ptr<graphics::CTexture>>& CubeMapList);
 
 		// Helper Functions
 		static bool CompileShader(const std::vector<unsigned char>& shaderCode, GLenum shaderType, GLuint& shaderPrg);
+		static std::string PreparePreprocessor();
 	public:
-		COpenGLMaterial(api::COpenGLAPI* pGraphicsAPI);
+		COpenGLMaterial(api::COpenGLAPI* pGraphicsAPI, const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo);
 		virtual ~COpenGLMaterial();
 
 		virtual bool Create(const std::vector<std::shared_ptr<graphics::CTexture>>& TextureList, const std::vector<std::shared_ptr<graphics::CTexture>>& CubeMapList) override;

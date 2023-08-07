@@ -43,6 +43,15 @@ layout(binding = 0) uniform UniformBufferObject{
     int   t_pad_2;
 } ubo;
 
+#ifdef USE_OPENGL
+layout(binding = 1) uniform sampler2D baseColorTexture;
+layout(binding = 3) uniform sampler2D metallicRoughnessTexture;
+layout(binding = 5) uniform sampler2D emissiveTexture;
+layout(binding = 7) uniform sampler2D normalTexture;
+layout(binding = 9) uniform sampler2D occlusionTexture;
+layout(binding = 11) uniform samplerCube cubemapTexture;
+layout(binding = 13) uniform sampler2D shadowmapTexture;
+#else
 layout(binding = 1) uniform texture2D baseColorTexture;
 layout(binding = 2) uniform sampler baseColorTextureSampler;
 
@@ -63,6 +72,7 @@ layout(binding = 12) uniform sampler cubemapTextureSampler;
 
 layout(binding = 13) uniform texture2D shadowmapTexture;
 layout(binding = 14) uniform sampler shadowmapTextureSampler;
+#endif
 
 // なんかUnityPBRでもみた値だなぁ
 const float MIN_ROUGHNESS = 0.04;
@@ -177,7 +187,12 @@ vec3 getNormal()
 
 		mat3 tbn = mat3(t, b, n);
 
+		#ifdef USE_OPENGL
+		nomral = texture(normalTexture, f_Texcoord).rgb;
+		#else
 		nomral = texture(sampler2D(normalTexture, normalTextureSampler), f_Texcoord).rgb;
+		#endif
+		
 		nomral = normalize( tbn * ((2.0 * nomral - 1.0) * vec3(ubo.normalMapScale, ubo.normalMapScale, 1.0)) );
 	}
 	else
@@ -223,7 +238,11 @@ vec2 ComputePCF(vec2 uv)
 	{
 		for(float y = -1.0; y <= 1.0; y++)
 		{
+			#ifdef USE_OPENGL
+			moments += texture(shadowmapTexture, uv + vec2(x, y) * texelSize).rg;
+			#else
 			moments += texture(sampler2D(shadowmapTexture, shadowmapTextureSampler), uv + vec2(x, y) * texelSize).rg;
+			#endif
 		}
 	}
 
@@ -278,7 +297,12 @@ void main(){
 	if(ubo.useMetallicRoughnessTexture != 0)
 	{
 		// G Channel: Roughness Map, B Channel: Metallic Map 
+		#ifdef USE_OPENGL
+		vec4 metallicRoughnessColor = texture(metallicRoughnessTexture, f_Texcoord);
+		#else
 		vec4 metallicRoughnessColor = texture(sampler2D(metallicRoughnessTexture, metallicRoughnessTextureSampler), f_Texcoord);
+		#endif
+		
 		perceptualRoughness = perceptualRoughness * metallicRoughnessColor.g;
 		metallic  = metallic  * metallicRoughnessColor.b;
 	}
@@ -293,7 +317,11 @@ void main(){
 	vec4 baseColor;
 	if(ubo.useBaseColorTexture != 0)
 	{
+		#ifdef USE_OPENGL
+		baseColor = texture(baseColorTexture, f_Texcoord);
+		#else
 		baseColor = texture(sampler2D(baseColorTexture, baseColorTextureSampler), f_Texcoord);
+		#endif
 	}
 	else
 	{
@@ -372,22 +400,36 @@ void main(){
 	// 反射カラーを計算
 	float mipCount = ubo.mipCount;
 	float lod = mipCount * perceptualRoughness;
+	#ifdef USE_OPENGL
+	vec3 reflectColor = LINEARtoSRGB(textureLod(cubemapTexture, reflect(v, n), lod)).rgb;
+	#else
 	vec3 reflectColor = LINEARtoSRGB(textureLod(samplerCube(cubemapTexture, cubemapTextureSampler), reflect(v, n), lod)).rgb;
-
+	#endif
+	
 	// レンダリング方程式を構築
 	col.rgb = NdotL * ubo.lightColor.rgb * (specularBRDF + diffuseBRDF) + reflectColor * specularColor;
 
 	// AO Mapの適応
 	if(ubo.useOcclusionTexture != 0)
 	{ 
+		#ifdef USE_OPENGL
+		float ao = texture(occlusionTexture, f_Texcoord).r;
+		#else
 		float ao = texture(sampler2D(occlusionTexture, occlusionTextureSampler), f_Texcoord).r;
+		#endif
+		
 		col.rgb = mix(col.rgb, col.rgb * ao, ubo.occlusionStrength);
 	}
 
 	// Emissive Mapの適応
 	if(ubo.useEmissiveTexture != 0)
 	{
+		#ifdef USE_OPENGL
+		vec3 emissive = SRGBtoLINEAR(texture(emissiveTexture, f_Texcoord)).rgb * ubo.emissiveFactor.rgb;
+		#else
 		vec3 emissive = SRGBtoLINEAR(texture(sampler2D(emissiveTexture, emissiveTextureSampler), f_Texcoord)).rgb * ubo.emissiveFactor.rgb;
+		#endif
+		
 		col.rgb += emissive;
 	}
 

@@ -10,7 +10,7 @@ layout(binding = 0) uniform UniformBufferObject{
 	mat4 model;
     mat4 view;
     mat4 proj;
-    mat4 lightVPMat;
+	mat4 lightVPMat;
 
 	vec4 lightDir;
 	vec4 lightColor;
@@ -24,10 +24,10 @@ layout(binding = 0) uniform UniformBufferObject{
     float roughnessFactor;
     float normalMapScale;
 
-    float occlusionStrength;
+	float occlusionStrength;
     float mipCount;
-    float s_pad1;
-    float s_pad2;
+    float ShadowMapX;
+    float ShadowMapY;
 
     int   useBaseColorTexture;
     int   useMetallicRoughnessTexture;
