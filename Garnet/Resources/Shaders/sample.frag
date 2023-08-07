@@ -15,13 +15,20 @@ layout(binding = 1) uniform TestBuffer{
 #ifdef USE_OPENGL
 layout(binding = 2) uniform sampler2D u_texture;
 layout(binding = 4) uniform sampler2D u_NormalTexture;
-layout(binding = 11) uniform samplerCube cubemapTexture;
+layout(binding = 6) uniform samplerCube cubemapTexture;
+layout(binding = 8) uniform sampler2D shadowmapTexture;
 #else
 layout(binding = 2) uniform texture2D u_texture;
 layout(binding = 3) uniform sampler u_sampler;
 
 layout(binding = 4) uniform texture2D u_NormalTexture;
 layout(binding = 5) uniform sampler u_NormalSampler;
+
+layout(binding = 6) uniform textureCube cubemapTexture;
+layout(binding = 7) uniform sampler cubemapTextureSampler;
+
+layout(binding = 8) uniform texture2D shadowmapTexture;
+layout(binding = 9) uniform sampler shadowmapTextureSampler;
 #endif
 
 layout(location = 0) out vec4 outColor;
@@ -31,12 +38,12 @@ void main() {
     col.rg = fragTexCoord;
 
 #ifdef USE_OPENGL
-    col = mix(texture(u_texture, fragTexCoord).rgb, texture(u_NormalTexture, fragTexCoord).rgb, sin(testUBO.time) * 0.5 + 0.5);
+    col = mix(texture(u_texture, fragTexCoord).rgb, texture(shadowmapTexture, fragTexCoord).rgb, sin(testUBO.time) * 0.5 + 0.5);
 #else
-    col = mix(texture(sampler2D(u_texture, u_sampler), fragTexCoord).rgb, texture(sampler2D(u_NormalTexture, u_NormalSampler), fragTexCoord).rgb, sin(testUBO.time) * 0.5 + 0.5);
+    col = mix(texture(sampler2D(u_texture, u_sampler), fragTexCoord).rgb, texture(sampler2D(shadowmapTexture, shadowmapTextureSampler), fragTexCoord).rgb, sin(testUBO.time) * 0.5 + 0.5);
 #endif
 
-    col += texture(cubemapTexture, vec3(0.0)).rgb;
+    //col += texture(cubemapTexture, vec3(0.0)).rgb;
 
     outColor = vec4(col, 1.0);
 }

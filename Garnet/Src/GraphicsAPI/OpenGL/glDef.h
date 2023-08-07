@@ -53,6 +53,9 @@
 #define GL_TEXTURE_CUBE_MAP_SEAMLESS      0x884F
 #define GL_INFO_LOG_LENGTH                0x8B84
 #define GL_LINK_STATUS                    0x8B82
+#define GL_DEPTH_COMPONENT32F             0x8CAC
+#define GL_RENDERBUFFER                   0x8D41
+#define GL_DEPTH_ATTACHMENT               0x8D00
 
 typedef char GLchar;
 typedef ptrdiff_t GLintptr;
@@ -92,6 +95,13 @@ typedef ptrdiff_t GLsizeiptr;
 	GL_FUNC(void,   GenerateMipmap,		  GLenum target) \
 	GL_FUNC(GLint,  GetUniformLocation,	  GLuint program, const GLchar* name) \
 	GL_FUNC(void,   Uniform1i,			  GLint location, GLint v0) \
+	GL_FUNC(void,   GenFramebuffers,	  GLsizei n, GLuint* ids) \
+	GL_FUNC(void,   BindFramebuffer,	  GLenum target, GLuint framebuffer) \
+	GL_FUNC(void,   FramebufferTexture2D, GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level) \
+	GL_FUNC(void,   GenRenderbuffers,	  GLsizei n, GLuint* renderbuffers) \
+	GL_FUNC(void,   BindRenderbuffer,	  GLenum target, GLuint renderbuffer) \
+	GL_FUNC(void,   RenderbufferStorage,  GLenum target, GLenum internalformat, GLsizei width, GLsizei height) \
+	GL_FUNC(void,   FramebufferRenderbuffer, GLenum target, GLenum attachment, GLenum renderbuffertarget, GLuint renderbuffer) \
 /* end */
 
 // プリプロセッサ芸でまずGL_FUNC_LISTの中身をtypedef や externで展開する

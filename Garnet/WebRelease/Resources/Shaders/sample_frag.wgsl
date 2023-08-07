@@ -11,30 +11,38 @@ var<private> fragTexCoord_1: vec2<f32>;
 var u_texture: texture_2d<f32>;
 @group(0) @binding(3) 
 var u_sampler: sampler;
-@group(0) @binding(4) 
-var u_NormalTexture: texture_2d<f32>;
-@group(0) @binding(5) 
-var u_NormalSampler: sampler;
+@group(0) @binding(8) 
+var shadowmapTexture: texture_2d<f32>;
+@group(0) @binding(9) 
+var shadowmapTextureSampler: sampler;
 @group(0) @binding(1) 
 var<uniform> testUBO: TestBuffer;
 var<private> outColor: vec4<f32>;
 var<private> fragColor_1: vec3<f32>;
+@group(0) @binding(4) 
+var u_NormalTexture: texture_2d<f32>;
+@group(0) @binding(5) 
+var u_NormalSampler: sampler;
+@group(0) @binding(6) 
+var cubemapTexture: texture_cube<f32>;
+@group(0) @binding(7) 
+var cubemapTextureSampler: sampler;
 
 fn main_1() {
     var col: vec3<f32>;
 
     col = vec3<f32>(0.0, 0.0, 0.0);
-    let _e20 = fragTexCoord_1;
-    col[0u] = _e20.x;
-    col[1u] = _e20.y;
-    let _e25 = fragTexCoord_1;
-    let _e26 = textureSample(u_texture, u_sampler, _e25);
-    let _e28 = fragTexCoord_1;
-    let _e29 = textureSample(u_NormalTexture, u_NormalSampler, _e28);
-    let _e32 = testUBO.time;
-    col = mix(_e26.xyz, _e29.xyz, vec3<f32>(((sin(_e32) * 0.5) + 0.5)));
-    let _e38 = col;
-    outColor = vec4<f32>(_e38.x, _e38.y, _e38.z, 1.0);
+    let _e24 = fragTexCoord_1;
+    col[0u] = _e24.x;
+    col[1u] = _e24.y;
+    let _e29 = fragTexCoord_1;
+    let _e30 = textureSample(u_texture, u_sampler, _e29);
+    let _e32 = fragTexCoord_1;
+    let _e33 = textureSample(shadowmapTexture, shadowmapTextureSampler, _e32);
+    let _e36 = testUBO.time;
+    col = mix(_e30.xyz, _e33.xyz, vec3<f32>(((sin(_e36) * 0.5) + 0.5)));
+    let _e42 = col;
+    outColor = vec4<f32>(_e42.x, _e42.y, _e42.z, 1.0);
     return;
 }
 

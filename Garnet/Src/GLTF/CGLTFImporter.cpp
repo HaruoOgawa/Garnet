@@ -55,7 +55,7 @@ namespace gltf
 		if (!CreateTexture(pGraphicsAPI, model, TextureList)) return false;
 
 		// ひとまず末尾にShadowMapを追加しておく
-		//TextureList.push_back(FrameTextureList[0]);
+		TextureList.push_back(FrameTextureList[0]);
 
 		// マテリアル
 		std::vector<std::shared_ptr<graphics::CMaterial>> MaterialList;
@@ -199,10 +199,8 @@ namespace gltf
 				UniformBuffer->AddData("normalMapScale", &normalMapScale, sizeof(float), 0);
 				UniformBuffer->AddData("occlusionStrength", &occlusionStrength, sizeof(float), 0);
 				UniformBuffer->AddData("mipCount", &glm::vec1(CubeTexList[0]->GetMipCount())[0], sizeof(float), 0);
-				/*UniformBuffer->AddData("ShadowMapX", &glm::vec1(static_cast<float>(FrameTextureList[0]->GetWidth()))[0], sizeof(float), 0);
-				UniformBuffer->AddData("ShadowMapY", &glm::vec1(static_cast<float>(FrameTextureList[0]->GetHeight()))[0], sizeof(float), 0);*/
-				UniformBuffer->AddData("ShadowMapX", &glm::vec1(0.0f)[0], sizeof(float), 0);
-				UniformBuffer->AddData("ShadowMapY", &glm::vec1(0.0f)[0], sizeof(float), 0);
+				UniformBuffer->AddData("ShadowMapX", &glm::vec1(static_cast<float>(FrameTextureList[0]->GetWidth()))[0], sizeof(float), 0);
+				UniformBuffer->AddData("ShadowMapY", &glm::vec1(static_cast<float>(FrameTextureList[0]->GetHeight()))[0], sizeof(float), 0);
 
 				// テクスチャを紐づける
 				{
@@ -274,8 +272,7 @@ namespace gltf
 					// ShadowMap
 					{
 						// ひとまず末尾から取得
-						//material->AddTextureBindingLayout({ "shadowmapTexture", 13, 14, (static_cast<int>(TextureList.size()) - 1), graphics::ETextureType::TEXTURE_2D});
-						material->AddTextureBindingLayout({ "shadowmapTexture", 13, 14, -1, graphics::ETextureType::TEXTURE_2D});
+						material->AddTextureBindingLayout({ "shadowmapTexture", 13, 14, (static_cast<int>(TextureList.size()) - 1), graphics::ETextureType::TEXTURE_2D});
 					}
 
 					{
