@@ -17,11 +17,11 @@ extern "C" {
 		return true;
 	}
 
-	void StartApp()
+	void StartApp(HINSTANCE hInstance)
 	{
 		g_DemoApp = new app::CDemoAppManager(app::EAppType::ScriptApp);
 
-		if (g_DemoApp->Initialize())
+		if (g_DemoApp->Initialize(hInstance))
 		{
 			while (g_DemoApp->IsRunLoop())
 			{
@@ -35,7 +35,7 @@ extern "C" {
 
 	int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 	{
-		StartApp();
+		StartApp(hInstance);
 
 		return 0;
 	}
