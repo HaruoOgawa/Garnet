@@ -14,6 +14,7 @@ namespace app
 	class CDemoAppManager
 	{
 		HWND  m_Window; // ハンドルウィンドウ
+		RECT  m_WorkArea; // スクリーンサイズ
 		HDC   m_Device_Context; // デバイスのコンテキスト
 		HGLRC m_Rendering_Context; // OpenGLのコンテキスト
 

@@ -14,6 +14,7 @@ namespace app
 {
 	// 仮のグローバル変数
 	bool g_IsRunLoop = true;
+	CDemoAppManager* g_AppManager = nullptr;
 
 	CDemoAppManager::CDemoAppManager(app::EAppType AppType):
 		m_Window(nullptr),
@@ -28,6 +29,8 @@ namespace app
 		m_GraphicsAPI(std::make_shared<api::COpenGLAPI>(WIDTH, HEIGHT)),
 		m_App(nullptr)
 	{
+		g_AppManager = this; // 仮のグローバル変数
+
 		if (AppType == app::EAppType::ScriptApp)
 		{
 			m_App = std::make_shared<app::CScriptApp>();
@@ -65,6 +68,8 @@ namespace app
 		}
 
 		ReleaseDC(m_Window,m_Device_Context);
+
+		g_AppManager = nullptr;
 	}
 
 	bool CDemoAppManager::Initialize(HINSTANCE hInstance)
@@ -75,13 +80,85 @@ namespace app
 
 		if (!m_App->Initialize(m_GraphicsAPI.get())) return false;
 
-		int w = WIDTH, h = HEIGHT; // 仮で適当な値を渡しておく
+		RECT rect;
+		if (GetWindowRect(m_Window, &rect))
+		{
+			int w = rect.right - rect.left;
+			int h = rect.bottom - rect.top;
 
-		m_GraphicsAPI->Resize(w, h);
-		m_App->Resize(w, h);
+			m_GraphicsAPI->Resize(w, h);
+			m_App->Resize(w, h);
+		}
 
 		return true;
 	}
+
+	/*void Resize_Callback(GLFWwindow* window, int width, int height)
+	{
+		auto AppManager = reinterpret_cast<CDemoAppManager*>(glfwGetWindowUserPointer(window));
+		AppManager->ResizeWindow(width, height);
+	}*/
+
+#ifdef USE_INPUT_SYSTEM
+	void MousebuttonCallback(HWND window, UINT msg, WPARAM w_param, LPARAM l_param)
+	{
+		if (!g_AppManager) return;
+
+		auto AppManager = g_AppManager;
+		auto InputState = AppManager->GetInputState();
+
+		InputState->SetDownMouseLeft(true);
+
+		POINT p;
+		GetCursorPos(&p);
+
+		double PosX = (double)p.x, PosY = (double)p.y;
+
+		RECT rect;
+		GetWindowRect(window, &rect);
+		int w = rect.right - rect.left;
+		int h = rect.bottom - rect.top;
+
+		// 位置を正規化する
+		float rPosX = static_cast<float>(PosX) / static_cast<float>(w);
+		float rPosY = static_cast<float>(PosY) / static_cast<float>(h);
+
+		rPosX = rPosX * 2.0f - 1.0f;
+		rPosY = rPosY * 2.0f - 1.0f;
+
+		InputState->StartMousePos(glm::vec2(rPosX, rPosY));
+	}
+
+	void CursorPosCallback(HWND window, UINT msg, WPARAM w_param, LPARAM l_param)
+	{
+		if (!g_AppManager) return;
+
+		auto AppManager = g_AppManager;
+		auto InputState = AppManager->GetInputState();
+
+		if (InputState->IsDownMouseLeft())
+		{
+			POINT p;
+			GetCursorPos(&p);
+			
+			double PosX = (double)p.x, PosY = (double)p.y;
+
+			RECT rect;
+			GetWindowRect(window, &rect);
+			int w = rect.right - rect.left;
+			int h = rect.bottom - rect.top;
+
+			// 位置を正規化する
+			float rPosX = static_cast<float>(PosX) / static_cast<float>(w);
+			float rPosY = static_cast<float>(PosY) / static_cast<float>(h);
+
+			rPosX = rPosX * 2.0f - 1.0f;
+			rPosY = rPosY * 2.0f - 1.0f;
+
+			InputState->SetMousePos(glm::vec2(rPosX, rPosY));
+		}
+	}
+#endif
 
 	// ウィンドウのコールバック関数
 	LRESULT MainWindowCallback(HWND window, UINT msg, WPARAM w_param, LPARAM l_param)
@@ -91,96 +168,49 @@ namespace app
 		// インプット
 		switch (msg)
 		{
-		case WM_KEYDOWN : 
-		{
-			if (w_param < 256)
+
+			case WM_KEYDOWN : 
 			{
-				// WPARAM Key Codes
-				// https://learn.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes
-				if (w_param == VK_ESCAPE)
+				if (w_param < 256)
 				{
-					g_IsRunLoop = false;
+					// WPARAM Key Codes
+					// https://learn.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes
+					if (w_param == VK_ESCAPE)
+					{
+						g_IsRunLoop = false;
+					}
 				}
 			}
-		}
-			break;
-		default:
-			break;
+				break;
+
+#ifdef USE_INPUT_SYSTEM
+			case WM_LBUTTONDOWN:
+				MousebuttonCallback(window, msg, w_param, l_param);
+				break;
+
+			case WM_LBUTTONUP:
+				{
+					if (g_AppManager)
+					{
+						auto AppManager = g_AppManager;
+						auto InputState = AppManager->GetInputState();
+
+						InputState->SetDownMouseLeft(false);
+					}
+				}
+				break;
+
+			case WM_MOUSEMOVE:
+				CursorPosCallback(window, msg, w_param, l_param);
+				break;
+#endif
+
+			default:
+				break;
 		}
 
 		return true;
 	}
-
-//	void Key_Callback(GLFWwindow* window, int key, int scancode, int action, int mods)
-//	{
-//		auto AppManager = reinterpret_cast<CDemoAppManager*>(glfwGetWindowUserPointer(window));
-//
-//		if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-//		{
-//			AppManager->SetRunLoop(false);
-//		}
-//	}
-//
-//	void Resize_Callback(GLFWwindow* window, int width, int height)
-//	{
-//		auto AppManager = reinterpret_cast<CDemoAppManager*>(glfwGetWindowUserPointer(window));
-//		AppManager->ResizeWindow(width, height);
-//	}
-//
-//	void Close_Callback(GLFWwindow* window)
-//	{
-//		auto AppManager = reinterpret_cast<CDemoAppManager*>(glfwGetWindowUserPointer(window));
-//		AppManager->SetRunLoop(false);
-//	}
-//
-//#ifdef USE_INPUT_SYSTEM
-//	void MousebuttonCallback(GLFWwindow* window, int button, int action, int mods)
-//	{
-//		auto AppManager = reinterpret_cast<CDemoAppManager*>(glfwGetWindowUserPointer(window));
-//		auto InputState = AppManager->GetInputState();
-//
-//		if (button == GLFW_MOUSE_BUTTON_LEFT)
-//		{
-//			InputState->SetDownMouseLeft((action != GLFW_RELEASE));
-//
-//			// 位置を正規化する
-//			double PosX, PosY;
-//			glfwGetCursorPos(window, &PosX, &PosY);
-//
-//			int w, h;
-//			glfwGetWindowSize(window, &w, &h);
-//
-//			float rPosX = static_cast<float>(PosX) / static_cast<float>(w);
-//			float rPosY = static_cast<float>(PosY) / static_cast<float>(h);
-//
-//			rPosX = rPosX * 2.0f - 1.0f;
-//			rPosY = rPosY * 2.0f - 1.0f;
-//
-//			InputState->StartMousePos(glm::vec2(rPosX, rPosY));
-//		}
-//	}
-//
-//	void CursorPosCallback(GLFWwindow* window, double PosX, double PosY)
-//	{
-//		auto AppManager = reinterpret_cast<CDemoAppManager*>(glfwGetWindowUserPointer(window));
-//		auto InputState = AppManager->GetInputState();
-//
-//		if (InputState->IsDownMouseLeft())
-//		{
-//			// 位置を正規化する
-//			int w, h;
-//			glfwGetWindowSize(window, &w, &h);
-//
-//			float rPosX = static_cast<float>(PosX) / static_cast<float>(w);
-//			float rPosY = static_cast<float>(PosY) / static_cast<float>(h);
-//
-//			rPosX = rPosX * 2.0f - 1.0f;
-//			rPosY = rPosY * 2.0f - 1.0f;
-//
-//			InputState->SetMousePos(glm::vec2(rPosX, rPosY));
-//		}
-//	}
-//#endif
 
 	bool CDemoAppManager::RunLopp()
 	{
@@ -188,6 +218,17 @@ namespace app
 
 		if (m_IsRunLoop)
 		{
+			// Windows Message Handling(Send msg to MainWindowCallback)
+			{
+				MSG msg;
+				if(PeekMessage(&msg, 0, 0, 0, PM_REMOVE))
+				{
+					TranslateMessage(&msg);
+					DispatchMessageA(&msg);
+				}
+			}
+
+			//
 			if (!Update()) return false;
 			if (!Draw()) return false;
 		}
@@ -233,8 +274,8 @@ namespace app
 			"Garnet", // WindowName
 			// WindowStyle : https://learn.microsoft.com/en-us/windows/win32/winmsg/window-styles
 			WS_POPUP | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_VISIBLE | WS_CAPTION, // WindosStyle. たぶんWindowに出てくるボタンとかタブの設定
-			CW_USEDEFAULT, // 位置 X
-			CW_USEDEFAULT, // 位置 Y
+			200, // 位置 X (適当な値)
+			200, // 位置 Y (適当な値)
 			WIDTH,         // Width
 			HEIGHT,        // HEIGHT
 			0,             // Window Parent. ウィンドウを複数個作ってグループ化できるのかな？ 例えばUnityのGame Viewと Scene ViewがあってUnityエディタ全体を動かすとそれもついてくるみたいな
@@ -249,6 +290,26 @@ namespace app
 
 			return false;
 		}
+
+		// スクリーンサイズを取得
+		SystemParametersInfo(SPI_GETWORKAREA, 0, &m_WorkArea, 0);
+
+#ifdef _DEBUG
+		RECT rect;
+		if (GetWindowRect(m_Window, &rect))
+		{
+			int w = rect.right - rect.left;
+			int h = rect.bottom - rect.top;
+
+			SetWindowPos(m_Window, HWND_TOP, rect.left, rect.top, w, h, NULL);
+		}
+#else
+		// Full Screen
+		int workAreaWidth = m_WorkArea.right - m_WorkArea.left;
+		int workAreaHeight = m_WorkArea.bottom - m_WorkArea.top;
+
+		SetWindowPos(m_Window, HWND_TOP, m_WorkArea.left, m_WorkArea.top, workAreaWidth, workAreaHeight, NULL);
+#endif // _DEBUG
 
 		return true;
 	}
