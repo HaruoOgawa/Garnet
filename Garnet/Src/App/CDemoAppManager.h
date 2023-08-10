@@ -1,13 +1,8 @@
 #pragma once
 
 #ifdef USE_OPENGL
-#define NOMINMAX
-#define VK_USE_PLATFORM_WIN32_KHR
-#define GLFW_EXPOSE_NATIVE_WIN32
-#include <glfw3.h>
-#include <glfw3native.h>
-
 #include <memory>
+#include <Windows.h>
 #include "EAppType.h"
 
 namespace api { class COpenGLAPI; }
@@ -18,7 +13,11 @@ namespace app
 {
 	class CDemoAppManager
 	{
-		GLFWwindow* m_pWindow;
+		HWND  m_Window; // ハンドルウィンドウ
+		RECT  m_WorkArea; // スクリーンサイズ
+		HDC   m_Device_Context; // デバイスのコンテキスト
+		HGLRC m_Rendering_Context; // OpenGLのコンテキスト
+
 		const int WIDTH = 1920;
 		const int HEIGHT = 1080;
 
@@ -34,7 +33,8 @@ namespace app
 		std::shared_ptr<input::CInputState> m_InputState;
 #endif
 	private:
-		bool InitWindow();
+		bool InitWindow(HINSTANCE hInstance);
+		bool InitGLContext();
 
 		bool Update();
 		bool Draw();
@@ -42,7 +42,7 @@ namespace app
 		CDemoAppManager(app::EAppType AppType);
 		virtual ~CDemoAppManager();
 
-		bool Initialize();
+		bool Initialize(HINSTANCE hInstance);
 		bool RunLopp();
 
 		bool IsRunLoop() { return m_IsRunLoop; }

@@ -91,6 +91,7 @@ namespace api
 			COpenGLTexture* Texture = nullptr;
 			int TextureIndex = TexLayout.TextureIndex;
 
+#ifdef USE_TEXTURE_LOADER
 			if (TexLayout.TextureType == graphics::ETextureType::TEXTURE_2D)
 			{
 				Texture = (TextureIndex >= 0 && TextureIndex < m_TextureList.size()) ? static_cast<api::COpenGLTexture*>(m_TextureList[TextureIndex].get()) : m_EmptyTexture.get();
@@ -99,7 +100,17 @@ namespace api
 			{
 				Texture = (TextureIndex >= 0 && TextureIndex < m_CubeMapList.size()) ? static_cast<api::COpenGLTexture*>(m_CubeMapList[TextureIndex].get()) : m_EmptyTexture.get();
 			}
-
+#else
+			if (TexLayout.TextureType == graphics::ETextureType::TEXTURE_2D)
+			{
+				Texture = (TextureIndex >= 0 && TextureIndex < m_TextureList.size()) ? static_cast<api::COpenGLTexture*>(m_TextureList[TextureIndex].get()) : nullptr;
+			}
+			else if (TexLayout.TextureType == graphics::ETextureType::TEXTURE_CUBE)
+			{
+				Texture = (TextureIndex >= 0 && TextureIndex < m_CubeMapList.size()) ? static_cast<api::COpenGLTexture*>(m_CubeMapList[TextureIndex].get()) : nullptr;
+			}
+#endif
+			
 			if (!Texture)
 			{
 				Console::Log("[ERROR] Texture is nullpte\n");

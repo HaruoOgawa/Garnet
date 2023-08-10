@@ -12,8 +12,14 @@
 
 namespace app
 {
+	// 仮のグローバル変数
+	bool g_IsRunLoop = true;
+	CDemoAppManager* g_AppManager = nullptr;
+
 	CDemoAppManager::CDemoAppManager(app::EAppType AppType):
-		m_pWindow(nullptr),
+		m_Window(nullptr),
+		m_Device_Context(nullptr),
+		m_Rendering_Context(nullptr),
 		m_IsRunLoop(true),
 		m_SecondsTime(0.0f),
 		m_DeltaSecondsTime(0.0f),
@@ -23,6 +29,8 @@ namespace app
 		m_GraphicsAPI(std::make_shared<api::COpenGLAPI>(WIDTH, HEIGHT)),
 		m_App(nullptr)
 	{
+		g_AppManager = this; // 仮のグローバル変数
+
 		if (AppType == app::EAppType::ScriptApp)
 		{
 			m_App = std::make_shared<app::CScriptApp>();
@@ -53,91 +61,94 @@ namespace app
 			m_GraphicsAPI = nullptr;
 		}
 
-		if (m_pWindow)
+		if (m_Rendering_Context)
 		{
-			glfwDestroyWindow(m_pWindow);
-			glfwTerminate();
-
-			m_pWindow = nullptr;
+			wglMakeCurrent(NULL, NULL);
+			wglDeleteContext(m_Rendering_Context);
 		}
+
+		ReleaseDC(m_Window,m_Device_Context);
+
+		g_AppManager = nullptr;
 	}
 
-	bool CDemoAppManager::Initialize()
+	bool CDemoAppManager::Initialize(HINSTANCE hInstance)
 	{
-		if (!InitWindow()) return false;
+		if (!InitWindow(hInstance)) return false;
+		if (!InitGLContext()) return false;
 		if (!m_GraphicsAPI->Initialize()) return false;
 
 		if (!m_App->Initialize(m_GraphicsAPI.get())) return false;
 
-		int w, h;
-		glfwGetWindowSize(m_pWindow, &w, &h);
+		RECT rect;
+		if (GetWindowRect(m_Window, &rect))
+		{
+			int w = rect.right - rect.left;
+			int h = rect.bottom - rect.top;
 
-		m_GraphicsAPI->Resize(w, h);
-		m_App->Resize(w, h);
+			m_GraphicsAPI->Resize(w, h);
+			m_App->Resize(w, h);
+		}
 
 		return true;
 	}
 
-	void Key_Callback(GLFWwindow* window, int key, int scancode, int action, int mods)
-	{
-		auto AppManager = reinterpret_cast<CDemoAppManager*>(glfwGetWindowUserPointer(window));
-
-		if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-		{
-			AppManager->SetRunLoop(false);
-		}
-	}
-
-	void Resize_Callback(GLFWwindow* window, int width, int height)
+	/*void Resize_Callback(GLFWwindow* window, int width, int height)
 	{
 		auto AppManager = reinterpret_cast<CDemoAppManager*>(glfwGetWindowUserPointer(window));
 		AppManager->ResizeWindow(width, height);
-	}
-
-	void Close_Callback(GLFWwindow* window)
-	{
-		auto AppManager = reinterpret_cast<CDemoAppManager*>(glfwGetWindowUserPointer(window));
-		AppManager->SetRunLoop(false);
-	}
+	}*/
 
 #ifdef USE_INPUT_SYSTEM
-	void MousebuttonCallback(GLFWwindow* window, int button, int action, int mods)
+	void MousebuttonCallback(HWND window, UINT msg, WPARAM w_param, LPARAM l_param)
 	{
-		auto AppManager = reinterpret_cast<CDemoAppManager*>(glfwGetWindowUserPointer(window));
+		if (!g_AppManager) return;
+
+		auto AppManager = g_AppManager;
 		auto InputState = AppManager->GetInputState();
 
-		if (button == GLFW_MOUSE_BUTTON_LEFT)
-		{
-			InputState->SetDownMouseLeft((action != GLFW_RELEASE));
+		InputState->SetDownMouseLeft(true);
 
-			// 位置を正規化する
-			double PosX, PosY;
-			glfwGetCursorPos(window, &PosX, &PosY);
+		POINT p;
+		GetCursorPos(&p);
 
-			int w, h;
-			glfwGetWindowSize(window, &w, &h);
+		double PosX = (double)p.x, PosY = (double)p.y;
 
-			float rPosX = static_cast<float>(PosX) / static_cast<float>(w);
-			float rPosY = static_cast<float>(PosY) / static_cast<float>(h);
+		RECT rect;
+		GetWindowRect(window, &rect);
+		int w = rect.right - rect.left;
+		int h = rect.bottom - rect.top;
 
-			rPosX = rPosX * 2.0f - 1.0f;
-			rPosY = rPosY * 2.0f - 1.0f;
+		// 位置を正規化する
+		float rPosX = static_cast<float>(PosX) / static_cast<float>(w);
+		float rPosY = static_cast<float>(PosY) / static_cast<float>(h);
 
-			InputState->StartMousePos(glm::vec2(rPosX, rPosY));
-		}
+		rPosX = rPosX * 2.0f - 1.0f;
+		rPosY = rPosY * 2.0f - 1.0f;
+
+		InputState->StartMousePos(glm::vec2(rPosX, rPosY));
 	}
 
-	void CursorPosCallback(GLFWwindow* window, double PosX, double PosY)
+	void CursorPosCallback(HWND window, UINT msg, WPARAM w_param, LPARAM l_param)
 	{
-		auto AppManager = reinterpret_cast<CDemoAppManager*>(glfwGetWindowUserPointer(window));
+		if (!g_AppManager) return;
+
+		auto AppManager = g_AppManager;
 		auto InputState = AppManager->GetInputState();
 
 		if (InputState->IsDownMouseLeft())
 		{
-			// 位置を正規化する
-			int w, h;
-			glfwGetWindowSize(window, &w, &h);
+			POINT p;
+			GetCursorPos(&p);
+			
+			double PosX = (double)p.x, PosY = (double)p.y;
 
+			RECT rect;
+			GetWindowRect(window, &rect);
+			int w = rect.right - rect.left;
+			int h = rect.bottom - rect.top;
+
+			// 位置を正規化する
 			float rPosX = static_cast<float>(PosX) / static_cast<float>(w);
 			float rPosY = static_cast<float>(PosY) / static_cast<float>(h);
 
@@ -149,12 +160,75 @@ namespace app
 	}
 #endif
 
+	// ウィンドウのコールバック関数
+	LRESULT MainWindowCallback(HWND window, UINT msg, WPARAM w_param, LPARAM l_param)
+	{
+		LRESULT result = 0;
+
+		// インプット
+		switch (msg)
+		{
+
+			case WM_KEYDOWN : 
+			{
+				if (w_param < 256)
+				{
+					// WPARAM Key Codes
+					// https://learn.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes
+					if (w_param == VK_ESCAPE)
+					{
+						g_IsRunLoop = false;
+					}
+				}
+			}
+				break;
+
+#ifdef USE_INPUT_SYSTEM
+			case WM_LBUTTONDOWN:
+				MousebuttonCallback(window, msg, w_param, l_param);
+				break;
+
+			case WM_LBUTTONUP:
+				{
+					if (g_AppManager)
+					{
+						auto AppManager = g_AppManager;
+						auto InputState = AppManager->GetInputState();
+
+						InputState->SetDownMouseLeft(false);
+					}
+				}
+				break;
+
+			case WM_MOUSEMOVE:
+				CursorPosCallback(window, msg, w_param, l_param);
+				break;
+#endif
+
+			default:
+				break;
+		}
+
+		return true;
+	}
+
 	bool CDemoAppManager::RunLopp()
 	{
+		m_IsRunLoop = g_IsRunLoop;
+
 		if (m_IsRunLoop)
 		{
-			glfwPollEvents();
+			// Windows Message Handling(Send msg to MainWindowCallback)
+			{
+				MSG msg;
+				if(PeekMessage(&msg, 0, 0, 0, PM_REMOVE))
+				{
+					TranslateMessage(&msg);
+					DispatchMessageA(&msg);
+				}
+			}
 
+			//
 			if (!Update()) return false;
 			if (!Draw()) return false;
 		}
@@ -168,28 +242,114 @@ namespace app
 		m_App->Resize(w, h);
 	}
 
-	bool CDemoAppManager::InitWindow()
+	bool CDemoAppManager::InitWindow(HINSTANCE hInstance)
 	{
-		// OpenGL バージョンの指定
-		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+		/// <summary>
+		/// ウィンドウの設定
+		/// </summary>
+		/// <returns></returns>
+		WNDCLASSA window_class = {}; 
+		
+		window_class.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
+		// https://learn.microsoft.com/en-us/windows/win32/winmsg/window-class-styles
+		// CS_HREDRAW : 移動またはサイズ調整によってクライアント領域の幅が変化した場合、ウィンドウ全体を再描画します。
+		// CS_VREDRAW : 移動またはサイズ調整によってクライアント領域の高さが変化した場合、ウィンドウ全体を再描画します。
+		// CS_OWNDC   : クラス内の各ウィンドウに一意のデバイス コンテキストを割り当てます。
+		window_class.lpfnWndProc = MainWindowCallback; // ウィンドウのコールバック関数
+		window_class.hInstance = hInstance; // アプリのインスタンス
+		//window_class.hIcon = ""; // ウィンドウのアイコン(?)ひとまず今は要らない
+		window_class.lpszClassName = "GarnetWindowClass"; // WindosClassの名前. たぶんVulkanとかでいうラベルみたいなやつだと思う
 
-		glfwInit();
-		m_pWindow = glfwCreateWindow(WIDTH, HEIGHT, "Garnet", nullptr, nullptr);
+		if (!RegisterClassA(&window_class)) // WindowClassを登録する
+		{
+			Console::Log("[Error] could not regist WindowClass\n");
 
-		glfwSetWindowUserPointer(m_pWindow, this);
+			return false;
+		}
 
-		glfwSetKeyCallback(m_pWindow, Key_Callback);
-		glfwSetFramebufferSizeCallback(m_pWindow, Resize_Callback);
-		glfwSetWindowCloseCallback(m_pWindow, Close_Callback);
+		// ウィンドウを生成
+		m_Window = CreateWindowExA(
+			0, // WindowStyleの拡張
+			window_class.lpszClassName, // WindowClassの名前. 先ほど登録しておいたもの
+			"Garnet", // WindowName
+			// WindowStyle : https://learn.microsoft.com/en-us/windows/win32/winmsg/window-styles
+			WS_POPUP | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_VISIBLE | WS_CAPTION, // WindosStyle. たぶんWindowに出てくるボタンとかタブの設定
+			200, // 位置 X (適当な値)
+			200, // 位置 Y (適当な値)
+			WIDTH,         // Width
+			HEIGHT,        // HEIGHT
+			0,             // Window Parent. ウィンドウを複数個作ってグループ化できるのかな？ 例えばUnityのGame Viewと Scene ViewがあってUnityエディタ全体を動かすとそれもついてくるみたいな
+			0,             // Menu(?)
+			hInstance,     // アプリのインスタンス
+			0              // lpParam(?)
+		);
 
-#ifdef USE_INPUT_SYSTEM
-		glfwSetMouseButtonCallback(m_pWindow, MousebuttonCallback);
-		glfwSetCursorPosCallback(m_pWindow, CursorPosCallback);
-#endif
+		if (!m_Window)
+		{
+			Console::Log("[Error] Failed to create window\n");
 
-		// コンテキストを作成
-		glfwMakeContextCurrent(m_pWindow);
+			return false;
+		}
+
+		// スクリーンサイズを取得
+		SystemParametersInfo(SPI_GETWORKAREA, 0, &m_WorkArea, 0);
+
+#ifdef _DEBUG
+		RECT rect;
+		if (GetWindowRect(m_Window, &rect))
+		{
+			int w = rect.right - rect.left;
+			int h = rect.bottom - rect.top;
+
+			SetWindowPos(m_Window, HWND_TOP, rect.left, rect.top, w, h, NULL);
+		}
+#else
+		// Full Screen
+		int workAreaWidth = m_WorkArea.right - m_WorkArea.left;
+		int workAreaHeight = m_WorkArea.bottom - m_WorkArea.top;
+
+		SetWindowPos(m_Window, HWND_TOP, m_WorkArea.left, m_WorkArea.top, workAreaWidth, workAreaHeight, NULL);
+#endif // _DEBUG
+
+		return true;
+	}
+
+	bool CDemoAppManager::InitGLContext()
+	{
+		// デバイスコンテキストの取得
+		m_Device_Context = GetDC(m_Window); 
+
+		// PixelFormatの設定 https://learn.microsoft.com/en-us/windows/win32/api/wingdi/ns-wingdi-pixelformatdescriptor
+		PIXELFORMATDESCRIPTOR pixel_format_desc = { 0 };
+		pixel_format_desc.nSize = sizeof(PIXELFORMATDESCRIPTOR); // PIXELFORMATDESCRIPTORのサイズ. たぶん環境ごとにサイズが異なるのかな
+		pixel_format_desc.nVersion = 1; // Version
+		pixel_format_desc.dwFlags = PFD_SUPPORT_OPENGL | PFD_DRAW_TO_WINDOW | PFD_DOUBLEBUFFER; // ピクセル バッファーのプロパティを指定するビット フラグのセット
+		// PFD_SUPPORT_OPENGL : バッファのOpenGLサポート
+		// PFD_DRAW_TO_WINDOW : バッファーはウィンドウまたはデバイスのサーフェイスに描画できます。
+		// PFD_DOUBLEBUFFER   : ダブルバッファであることを示す。 たぶんこれで垂直同期(SwapBuffers)が使えるようになる
+		pixel_format_desc.iPixelType = PFD_TYPE_RGBA; // ピクセルタイプ
+		pixel_format_desc.cColorBits = 32; // バッファデータのビット数
+		pixel_format_desc.cDepthBits = 32; // バッファデータのビット数
+		pixel_format_desc.dwLayerMask = PFD_MAIN_PLANE; // ??? なんか現在は使用されていないらしい？
+
+		INT32 pixel_format = ChoosePixelFormat(m_Device_Context, &pixel_format_desc);
+		if(!pixel_format)
+		{
+			Console::Log("[Error] Failed to choose Pixel Format\n");
+
+			return false;
+		}
+
+		if (!SetPixelFormat(m_Device_Context, pixel_format, &pixel_format_desc))
+		{
+			Console::Log("[Error] Failed to set Pixel Format\n");
+
+			return false;
+		}
+
+		// RenderingContextを作成
+		m_Rendering_Context = wglCreateContext(m_Device_Context);
+		wglMakeCurrent(m_Device_Context, m_Rendering_Context);
 
 		return true;
 	}
@@ -217,7 +377,7 @@ namespace app
 		if (!m_App->Draw(m_GraphicsAPI.get(), m_SecondsTime)) return false;
 
 		//カラーバッファを入れ替える
-		glfwSwapBuffers(m_pWindow);
+		SwapBuffers(m_Device_Context);
 
 		return true;
 	}

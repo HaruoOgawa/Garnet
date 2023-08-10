@@ -21,10 +21,13 @@ namespace app
 {
 	CScriptApp::CScriptApp():
 		m_ScriptScene(nullptr),
+#ifdef USE_VIEWER_CAMERA
 		m_MainCamera(std::make_shared<camera::CViewerCamera>()),
+#else
+		m_MainCamera(std::make_shared<camera::CCamera>()),
+#endif
 		m_Projection(std::make_shared<projection::CProjection>()),
-		m_DrawInfo(std::make_shared<graphics::CDrawInfo>()),
-		m_BlurEffect(nullptr)
+		m_DrawInfo(std::make_shared<graphics::CDrawInfo>())
 	{
 		m_MainCamera->SetPos(glm::vec3(0.0f, 0.0f, 5.0f));
 		m_DrawInfo->GetLightCamera()->SetPos(glm::vec3(3.0f, 3.0f, -3.0f));
@@ -52,15 +55,6 @@ namespace app
 		m_ScriptScene = std::make_shared<scene::CScriptScene>();
 		if (!m_ScriptScene->Initialize(pGraphicsAPI)) return false;
 
-		// オフスクリーンレンダリング用のFrameBufferを生成する
-		if (!pGraphicsAPI->CreateRenderPass("ShadowPass", api::ERenderPassFormat::COLOR_RENDERPASS, glm::vec4(1.0f), 512, 512)) return false;
-
-		m_BlurEffect = std::make_shared<imageeffect::CBlurEffect>(pGraphicsAPI);
-		if (!m_BlurEffect->Create()) return false;
-
-		// FrameTextureを渡す
-		m_ScriptScene->SetFrameTexture(m_BlurEffect->GetFrameTexture());
-
 		return true;
 	}
 
@@ -79,7 +73,6 @@ namespace app
 
 	bool CScriptApp::Update(api::IGraphicsAPI* pGraphicsAPI, float SecondsTime)
 	{
-		if (!m_BlurEffect->Update()) return false;
 		if (!m_ScriptScene->Update(pGraphicsAPI)) return false;
 
 		//m_DrawInfo->GetLightCamera()->SetPos(glm::vec3(glm::cos(SecondsTime * 0.1f), 1.0f, glm::sin(SecondsTime * 0.1f)) * 3.0f);
@@ -92,18 +85,9 @@ namespace app
 		// Prepare
 		if (!pGraphicsAPI->PrepareRender()) return false;
 
-		// ShadowPass
-		if (!pGraphicsAPI->BeginRender("ShadowPass")) return false;
-		if (!m_ScriptScene->Draw(pGraphicsAPI, true, SecondsTime, m_MainCamera, m_Projection, m_DrawInfo)) return false;
-		if (!pGraphicsAPI->EndRender()) return false;
-
-		// ShadowMapにブラーをかける
-		if (!m_BlurEffect->Draw(SecondsTime, m_MainCamera, m_Projection, m_DrawInfo)) return false;
-
 		// DefaultPass(SwapChain)
 		if (!pGraphicsAPI->BeginRender()) return false;
 		if (!m_ScriptScene->Draw(pGraphicsAPI, false, SecondsTime, m_MainCamera, m_Projection, m_DrawInfo)) return false;
-		//if (!m_ScriptScene->DrawDebugObj(pGraphicsAPI, SecondsTime, m_MainCamera, m_Projection, m_DrawInfo)) return false;
 		if (!pGraphicsAPI->EndRender()) return false;
 
 		// Submit
