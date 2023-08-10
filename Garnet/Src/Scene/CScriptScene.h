@@ -19,9 +19,6 @@ namespace scene
 	{
 		bool m_IsLoaded;
 
-		// Tex of FrameBuffer
-		std::vector<std::shared_ptr<graphics::CTexture>> m_FrameTextureList;
-
 		// DepthMaterial(LoadWorkerÇ∆MaterialFrameé¿ëïÇ‹Ç≈ÇÕÇ–Ç∆Ç‹Ç∏SceneÇ…èëÇ¢ÇƒÇ®Ç≠ Å® å„ÅXC3DObjectÇ…à⁄çsÇ∑ÇÈ)
 		std::shared_ptr<file::CFileReader> m_DepthVertex;
 		std::shared_ptr<file::CFileReader> m_DepthFragment;
@@ -31,30 +28,6 @@ namespace scene
 
 		std::shared_ptr<file::CFileReader> m_VertexShader;
 		std::shared_ptr<file::CFileReader> m_FragmentShader;
-
-		std::shared_ptr<file::CFileReader> m_Texture0;
-		std::shared_ptr<file::CFileReader> m_Texture1;
-
-		// glTF
-		std::shared_ptr<object::C3DObject> m_Sphere_glTFObj;
-		std::shared_ptr<file::CFileReader> m_Sphere_glTFData;
-		std::shared_ptr<object::C3DObject> m_Helmet_glTFObj;
-		std::shared_ptr<file::CFileReader> m_Helmet_glTFData;
-		std::shared_ptr<file::CFileReader> m_glTFVert;
-		std::shared_ptr<file::CFileReader> m_glTFFrag;
-
-		// Cubemap
-		std::shared_ptr<file::CFileReader> m_Cube0;
-		std::shared_ptr<file::CFileReader> m_Cube1;
-		std::shared_ptr<file::CFileReader> m_Cube2;
-		std::shared_ptr<file::CFileReader> m_Cube3;
-		std::shared_ptr<file::CFileReader> m_Cube4;
-		std::shared_ptr<file::CFileReader> m_Cube5;
-
-		// ShadowMapping
-		std::shared_ptr<object::C3DObject> m_DepthDebugObj;
-		std::shared_ptr<file::CFileReader> m_ShadowDebugVertex;
-		std::shared_ptr<file::CFileReader> m_ShadowDebugFragment;
 	private:
 		bool Load(api::IGraphicsAPI* pGraphicsAPI);
 	public:
@@ -67,8 +40,5 @@ namespace scene
 		bool Update(api::IGraphicsAPI* pGraphicsAPI);
 		bool Draw(api::IGraphicsAPI* pGraphicsAPI, bool IsDepthPass, float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, 
 			const std::shared_ptr<graphics::CDrawInfo>& DrawInfo) ;
-
-		// Tex of FrameBuffer
-		void SetFrameTexture(const std::shared_ptr<graphics::CTexture>& FrameTexture);
 	};
 }

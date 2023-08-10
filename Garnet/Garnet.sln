@@ -7,6 +7,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Garnet", "Garnet.vcxproj", 
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		CompGL|x64 = CompGL|x64
+		CompGL|x86 = CompGL|x86
 		DebugGL|x64 = DebugGL|x64
 		DebugGL|x86 = DebugGL|x86
 		DebugVK|x64 = DebugVK|x64
@@ -21,6 +23,10 @@ Global
 		ReleaseWG|x86 = ReleaseWG|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9BB5F0A3-4CD3-470F-8D71-8C187FA3332B}.CompGL|x64.ActiveCfg = CompGL|x64
+		{9BB5F0A3-4CD3-470F-8D71-8C187FA3332B}.CompGL|x64.Build.0 = CompGL|x64
+		{9BB5F0A3-4CD3-470F-8D71-8C187FA3332B}.CompGL|x86.ActiveCfg = CompGL|Win32
+		{9BB5F0A3-4CD3-470F-8D71-8C187FA3332B}.CompGL|x86.Build.0 = CompGL|Win32
 		{9BB5F0A3-4CD3-470F-8D71-8C187FA3332B}.DebugGL|x64.ActiveCfg = DebugGL|x64
 		{9BB5F0A3-4CD3-470F-8D71-8C187FA3332B}.DebugGL|x64.Build.0 = DebugGL|x64
 		{9BB5F0A3-4CD3-470F-8D71-8C187FA3332B}.DebugGL|x86.ActiveCfg = DebugGL|Win32

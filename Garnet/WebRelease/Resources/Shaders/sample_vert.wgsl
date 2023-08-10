@@ -12,27 +12,15 @@ struct UniformBufferObject {
     lightVPMat: mat4x4<f32>,
 }
 
-struct TestBuffer {
-    UBOColor: vec4<f32>,
-    time: f32,
-    pad_0_: f32,
-    pad_1_: f32,
-    pad_2_: f32,
-}
-
 struct VertexOutput {
     @builtin(position) gl_Position: vec4<f32>,
-    @location(0) member: vec3<f32>,
-    @location(1) member_1: vec2<f32>,
+    @location(0) member: vec2<f32>,
 }
 
 var<private> perVertexStruct: gl_PerVertex = gl_PerVertex(vec4<f32>(0.0, 0.0, 0.0, 1.0), 1.0, array<f32,1u>(0.0), array<f32,1u>(0.0));
 @group(0) @binding(0) 
 var<uniform> ubo: UniformBufferObject;
 var<private> inPosition_1: vec3<f32>;
-var<private> fragColor: vec3<f32>;
-@group(0) @binding(1) 
-var<uniform> testUBO: TestBuffer;
 var<private> fragTexCoord: vec2<f32>;
 var<private> inTexcoord_1: vec2<f32>;
 var<private> inNormal_1: vec3<f32>;
@@ -40,15 +28,13 @@ var<private> inTangent_1: vec4<f32>;
 var<private> inBioTangent_1: vec4<f32>;
 
 fn main_1() {
-    let _e20 = ubo.proj;
-    let _e22 = ubo.view;
-    let _e25 = ubo.model;
-    let _e27 = inPosition_1;
-    perVertexStruct.gl_Position = (((_e20 * _e22) * _e25) * vec4<f32>(_e27.x, _e27.y, _e27.z, 1.0));
-    let _e35 = testUBO.UBOColor;
-    fragColor = _e35.xyz;
-    let _e37 = inTexcoord_1;
-    fragTexCoord = _e37;
+    let _e18 = ubo.proj;
+    let _e20 = ubo.view;
+    let _e23 = ubo.model;
+    let _e25 = inPosition_1;
+    perVertexStruct.gl_Position = (((_e18 * _e20) * _e23) * vec4<f32>(_e25.x, _e25.y, _e25.z, 1.0));
+    let _e32 = inTexcoord_1;
+    fragTexCoord = _e32;
     return;
 }
 
@@ -60,10 +46,9 @@ fn main(@location(0) inPosition: vec3<f32>, @location(2) inTexcoord: vec2<f32>, 
     inTangent_1 = inTangent;
     inBioTangent_1 = inBioTangent;
     main_1();
-    let _e15 = perVertexStruct.gl_Position.y;
-    perVertexStruct.gl_Position.y = -(_e15);
-    let _e17 = perVertexStruct.gl_Position;
-    let _e18 = fragColor;
-    let _e19 = fragTexCoord;
-    return VertexOutput(_e17, _e18, _e19);
+    let _e14 = perVertexStruct.gl_Position.y;
+    perVertexStruct.gl_Position.y = -(_e14);
+    let _e16 = perVertexStruct.gl_Position;
+    let _e17 = fragTexCoord;
+    return VertexOutput(_e16, _e17);
 }
