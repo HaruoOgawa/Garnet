@@ -19,7 +19,7 @@ namespace app
 		return true;
 	}
 
-	bool CEditorApp::Initialize(api::IGraphicsAPI* pGraphicsAPI)
+	bool CEditorApp::Initialize(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker)
 	{
 		return true;
 	}
@@ -34,12 +34,12 @@ namespace app
 		return true;
 	}
 
-	bool CEditorApp::Update(api::IGraphicsAPI* pGraphicsAPI, float SecondsTime)
+	bool CEditorApp::Update(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, float SecondsTime)
 	{
 		return true;
 	}
 
-	bool CEditorApp::Draw(api::IGraphicsAPI* pGraphicsAPI, float SecondsTime)
+	bool CEditorApp::Draw(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, float SecondsTime)
 	{
 		return true;
 	}

@@ -21,8 +21,6 @@
 namespace app
 {
 	CScriptApp::CScriptApp():
-		m_LoadWorker(std::make_shared<resource::CLoadWorker>()),
-
 		m_ScriptScene(nullptr),
 		m_MainCamera(std::make_shared<camera::CViewerCamera>()),
 		m_Projection(std::make_shared<projection::CProjection>()),
@@ -44,16 +42,16 @@ namespace app
 		return true;
 	}
 
-	bool CScriptApp::Initialize(api::IGraphicsAPI* pGraphicsAPI)
+	bool CScriptApp::Initialize(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker)
 	{
 		// Viewの初期化
-		m_ScriptScene = std::make_shared<scene::CScriptScene>(pGraphicsAPI, m_LoadWorker.get());
+		m_ScriptScene = std::make_shared<scene::CScriptScene>(pGraphicsAPI, pLoadWorker);
 
 		// オフスクリーンレンダリング用のFrameBufferを生成する
 		if (!pGraphicsAPI->CreateRenderPass("ShadowPass", api::ERenderPassFormat::COLOR_RENDERPASS, glm::vec4(1.0f), 512, 512)) return false;
 
 		m_BlurEffect = std::make_shared<imageeffect::CBlurEffect>(pGraphicsAPI);
-		if (!m_BlurEffect->Create(m_LoadWorker.get())) return false;
+		if (!m_BlurEffect->Create(pLoadWorker)) return false;
 
 		// FrameTextureを渡す
 		m_ScriptScene->SetFrameTexture(m_BlurEffect->GetFrameTexture());
@@ -74,22 +72,20 @@ namespace app
 		return true;
 	}
 
-	bool CScriptApp::Update(api::IGraphicsAPI* pGraphicsAPI, float SecondsTime)
+	bool CScriptApp::Update(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, float SecondsTime)
 	{
-		if (!m_LoadWorker->Update()) return false;
+		if (!pLoadWorker->Update()) return false;
 
-		if (!m_BlurEffect->Update(m_LoadWorker.get())) return false;
-		if (!m_ScriptScene->Update(pGraphicsAPI, m_LoadWorker.get())) return false;
+		if (!m_BlurEffect->Update(pLoadWorker)) return false;
+		if (!m_ScriptScene->Update(pGraphicsAPI, pLoadWorker)) return false;
 
 		//m_DrawInfo->GetLightCamera()->SetPos(glm::vec3(glm::cos(SecondsTime * 0.1f), 1.0f, glm::sin(SecondsTime * 0.1f)) * 3.0f);
 
 		return true;
 	}
 
-	bool CScriptApp::Draw(api::IGraphicsAPI* pGraphicsAPI, float SecondsTime)
+	bool CScriptApp::Draw(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, float SecondsTime)
 	{
-		if (!m_LoadWorker->Draw()) return false;
-
 		// Prepare
 		if (!pGraphicsAPI->PrepareRender()) return false;
 
@@ -103,8 +99,10 @@ namespace app
 
 		// DefaultPass(SwapChain)
 		if (!pGraphicsAPI->BeginRender()) return false;
+
 		if (!m_ScriptScene->Draw(pGraphicsAPI, false, SecondsTime, m_MainCamera, m_Projection, m_DrawInfo)) return false;
-		//if (!m_ScriptScene->DrawDebugObj(pGraphicsAPI, SecondsTime, m_MainCamera, m_Projection, m_DrawInfo)) return false;
+		if (!pLoadWorker->Draw(pGraphicsAPI, false, SecondsTime, m_MainCamera, m_Projection, m_DrawInfo)) return false;
+		
 		if (!pGraphicsAPI->EndRender()) return false;
 
 		// Submit

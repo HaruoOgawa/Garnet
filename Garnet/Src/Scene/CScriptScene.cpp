@@ -46,24 +46,24 @@ namespace scene
 		m_IsLoaded(false)
 	{
 		//
-		pLoadWorker->AddLoadResource(m_DepthVertex);
-		pLoadWorker->AddLoadResource(m_DepthFragment);
-		pLoadWorker->AddLoadResource(m_VertexShader);
-		pLoadWorker->AddLoadResource(m_FragmentShader);
-		pLoadWorker->AddLoadResource(m_glTFVert);
-		pLoadWorker->AddLoadResource(m_glTFFrag);
-		pLoadWorker->AddLoadResource(m_ShadowDebugVertex);
-		pLoadWorker->AddLoadResource(m_ShadowDebugFragment);
-		pLoadWorker->AddLoadResource(m_Texture0);
-		pLoadWorker->AddLoadResource(m_Texture1);
-		pLoadWorker->AddLoadResource(m_Helmet_glTFData);
-		pLoadWorker->AddLoadResource(m_Sphere_glTFData);
-		pLoadWorker->AddLoadResource(m_Cube0);
-		pLoadWorker->AddLoadResource(m_Cube1);
-		pLoadWorker->AddLoadResource(m_Cube2);
-		pLoadWorker->AddLoadResource(m_Cube3);
-		pLoadWorker->AddLoadResource(m_Cube4);
-		pLoadWorker->AddLoadResource(m_Cube5);
+		pLoadWorker->AddFirstLoadResource(m_DepthVertex);
+		pLoadWorker->AddFirstLoadResource(m_DepthFragment);
+		pLoadWorker->AddFirstLoadResource(m_VertexShader);
+		pLoadWorker->AddFirstLoadResource(m_FragmentShader);
+		pLoadWorker->AddFirstLoadResource(m_glTFVert);
+		pLoadWorker->AddFirstLoadResource(m_glTFFrag);
+		pLoadWorker->AddFirstLoadResource(m_ShadowDebugVertex);
+		pLoadWorker->AddFirstLoadResource(m_ShadowDebugFragment);
+		pLoadWorker->AddFirstLoadResource(m_Texture0);
+		pLoadWorker->AddFirstLoadResource(m_Texture1);
+		pLoadWorker->AddFirstLoadResource(m_Helmet_glTFData);
+		pLoadWorker->AddFirstLoadResource(m_Sphere_glTFData);
+		pLoadWorker->AddFirstLoadResource(m_Cube0);
+		pLoadWorker->AddFirstLoadResource(m_Cube1);
+		pLoadWorker->AddFirstLoadResource(m_Cube2);
+		pLoadWorker->AddFirstLoadResource(m_Cube3);
+		pLoadWorker->AddFirstLoadResource(m_Cube4);
+		pLoadWorker->AddFirstLoadResource(m_Cube5);
 
 		//
 		m_Sphere_glTFObj->SetPos(glm::vec3(-1.5f, -0.5f, -1.5f));

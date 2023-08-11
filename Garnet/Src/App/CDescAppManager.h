@@ -23,6 +23,7 @@ namespace api { class CVulkanAPI; }
 namespace app{ class IApp; }
 
 namespace input { class CInputState; }
+namespace resource { class CLoadWorker; }
 
 namespace descapp
 {
@@ -45,6 +46,8 @@ namespace descapp
 
 		float m_SecondsTime;
 		float m_DeltaSecondsTime;
+
+		std::shared_ptr<resource::CLoadWorker> m_LoadWorker;
 
 	private:
 		bool InitWindow();

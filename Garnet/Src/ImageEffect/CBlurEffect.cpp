@@ -37,8 +37,8 @@ namespace imageeffect
 	{
 		if (!CalcGaussianKernel()) return false;
 
-		pLoadWorker->AddLoadResource(m_BlurVertex);
-		pLoadWorker->AddLoadResource(m_BlurFrag);
+		pLoadWorker->AddFirstLoadResource(m_BlurVertex);
+		pLoadWorker->AddFirstLoadResource(m_BlurFrag);
 
 		if (!m_pGraphicsAPI->CreateRenderPass("BlurX", api::ERenderPassFormat::COLOR_RENDERPASS, glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), 512, 512)) return false;
 		if (!m_pGraphicsAPI->CreateRenderPass("BlurY", api::ERenderPassFormat::COLOR_RENDERPASS, glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), 512, 512)) return false;

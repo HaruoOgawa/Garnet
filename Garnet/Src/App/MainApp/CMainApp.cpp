@@ -19,7 +19,7 @@ namespace app
 		return true;
 	}
 
-	bool CMainApp::Initialize(api::IGraphicsAPI* pGraphicsAPI)
+	bool CMainApp::Initialize(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker)
 	{
 		return true;
 	}
@@ -34,12 +34,12 @@ namespace app
 		return true;
 	}
 
-	bool CMainApp::Update(api::IGraphicsAPI* pGraphicsAPI, float SecondsTime)
+	bool CMainApp::Update(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, float SecondsTime)
 	{
 		return true;
 	}
 
-	bool CMainApp::Draw(api::IGraphicsAPI* pGraphicsAPI, float SecondsTime)
+	bool CMainApp::Draw(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, float SecondsTime)
 	{
 		return true;
 	}

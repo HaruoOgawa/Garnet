@@ -1,48 +1,139 @@
 #include "CLoadWorker.h"
+#include "../File/CFile.h"
 
 namespace resource
 {
-	CLoadWorker::CLoadWorker()
+	CLoadWorker::CLoadWorker(api::IGraphicsAPI* pGraphicsAPI):
+		m_Status(ELoadStatus::None),
+		m_LoadingBar(std::make_shared<object::C3DObject>("", "ShadowPass")),
+		m_VertexShader(std::make_shared<file::CFile>("Resources\\Shaders\\loadingbar" + pGraphicsAPI->GetVertexShaderExtension())),
+		m_FragmentShader(std::make_shared<file::CFile>("Resources\\Shaders\\loadingbar" + pGraphicsAPI->GetFragmentShaderExtension()))
 	{
+		m_VertexShader->Load();
+		m_FragmentShader->Load();
+
+		// MATERIAL
+		std::shared_ptr<graphics::CMaterialCreateInfo> createInfo = std::make_shared<graphics::CMaterialCreateInfo>();
+		createInfo->SetVertexShaderCode(m_VertexShader->GetData());
+		createInfo->SetFragmentShaderCode(m_FragmentShader->GetData());
+		auto Material = pGraphicsAPI->CreateMaterial(createInfo);
+
+		Material->SetEnabledZTest(false);
+		Material->SetCullMode(graphics::ECullMode::CULL_NONE);
+
+		m_LoadingBar->AddMaterial(Material);
+
+		// MESH
+		std::shared_ptr<graphics::CMesh> Mesh = std::make_shared<graphics::CMesh>();
+		std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(nullptr, 0, graphics::EPresetPrimitiveType::BOARD);
+		Mesh->AddPrimitive(Primitive);
+		m_LoadingBar->AddMesh(Mesh);
+
+		// NODE
+		std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(0, m_LoadingBar->GetMeshList(), m_LoadingBar->GetMaterialList());
+		Node->SetMeshIndex(0);
+		m_LoadingBar->AddNode(Node);
+
+		// Create関数を実行
+		m_LoadingBar->Create(pGraphicsAPI, nullptr, nullptr);
 	}
 
 	CLoadWorker::~CLoadWorker()
 	{
-		m_LoadResourceList.clear();
+		m_FirstLoadResourceList.clear();
+		m_RuntimeLoadResourceList.clear();
 	}
 
 	bool CLoadWorker::Update()
 	{
-		if (m_LoadResourceList.size() <= 0) return true;
-
-		for (auto& Resource : m_LoadResourceList)
+		if (m_LoadingBar)
 		{
-			if (Resource->IsLoaded()) continue;
-
-			if (Resource->GetStatus() == resource::ELoadStatus::Loading) return true;
-
-			if (!Resource->Load()) return false;
-
-			return true;
+			if (!m_LoadingBar->Update()) return false;
 		}
 
-		m_LoadResourceList.clear();
+		if (m_Status != ELoadStatus::Loaded) // 初回リソースのロード
+		{
+			m_Status = ELoadStatus::Loading;
+
+			for (auto& Resource : m_FirstLoadResourceList)
+			{
+				switch (Resource->GetStatus())
+				{
+				case resource::ELoadStatus::None:
+					if (!Resource->Load()) return false;
+					return true;
+
+				case resource::ELoadStatus::Loading:
+					return true;
+
+				case resource::ELoadStatus::Loaded:
+				{
+					m_FirstLoadResourceList.erase(m_FirstLoadResourceList.begin());
+					m_FirstLoadResourceList.shrink_to_fit();
+				}
+				return true;
+
+				default:
+					return true;
+				}
+			}
+
+			m_Status = ELoadStatus::Loaded;
+		}
+		else // ランタイムリソースのロード
+		{
+			for (auto& Resource : m_RuntimeLoadResourceList)
+			{
+				switch (Resource->GetStatus())
+				{
+				case resource::ELoadStatus::None:
+					if (!Resource->Load()) return false;
+					return true;
+
+				case resource::ELoadStatus::Loading:
+					return true;
+
+				case resource::ELoadStatus::Loaded:
+				{
+					m_RuntimeLoadResourceList.erase(m_RuntimeLoadResourceList.begin());
+					m_RuntimeLoadResourceList.shrink_to_fit();
+				}
+				return true;
+
+				default:
+					return true;
+				}
+			}
+		}
 
 		return true;
 	}
 
-	bool CLoadWorker::Draw()
+	bool CLoadWorker::Draw(api::IGraphicsAPI* pGraphicsAPI, bool IsDepthPass, float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
+		const std::shared_ptr<graphics::CDrawInfo>& DrawInfo)
 	{
+		if(m_Status == ELoadStatus::Loaded) return true;
+
+		if (m_LoadingBar)
+		{
+			if (!m_LoadingBar->Draw(IsDepthPass, SecondsTime, Camera, Projection, DrawInfo)) return false;
+		}
+
 		return true;
 	}
 
 	bool CLoadWorker::IsLoaded()
 	{
-		return (m_LoadResourceList.size() <= 0);
+		return (m_Status == ELoadStatus::Loaded);
 	}
 
-	void CLoadWorker::AddLoadResource(const std::shared_ptr<resource::IResource>& Resource)
+	void CLoadWorker::AddFirstLoadResource(const std::shared_ptr<resource::IResource>& Resource)
 	{
-		m_LoadResourceList.push_back(Resource);
+		m_FirstLoadResourceList.push_back(Resource);
+	}
+
+	void CLoadWorker::AddRuntimeLoadResource(const std::shared_ptr<resource::IResource>& Resource)
+	{
+		m_RuntimeLoadResourceList.push_back(Resource);
 	}
 }

@@ -15,8 +15,6 @@ namespace app
 {
 	class CScriptApp : public IApp
 	{
-		std::shared_ptr<resource::CLoadWorker> m_LoadWorker;
-
 		std::shared_ptr<scene::CScriptScene> m_ScriptScene;
 		std::shared_ptr<camera::CCamera> m_MainCamera;
 		std::shared_ptr<projection::CProjection> m_Projection;
@@ -28,11 +26,11 @@ namespace app
 
 		bool Release(api::IGraphicsAPI* pGraphicsAPI) override;
 
-		bool Initialize(api::IGraphicsAPI* pGraphicsAPI) override;
+		bool Initialize(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker) override;
 		bool ProcessInput(api::IGraphicsAPI* pGraphicsAPI) override;
 		bool Resize(int Width, int Height) override;
-		bool Update(api::IGraphicsAPI* pGraphicsAPI, float SecondsTime) override;
-		bool Draw(api::IGraphicsAPI* pGraphicsAPI, float SecondsTime) override;
+		bool Update(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, float SecondsTime) override;
+		bool Draw(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, float SecondsTime) override;
 
 		virtual const std::shared_ptr<camera::CCamera>& GetMainCamera() const override;
 	};
