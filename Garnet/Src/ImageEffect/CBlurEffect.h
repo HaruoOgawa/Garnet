@@ -5,9 +5,10 @@
 #include <glm/glm.hpp>
 #include "../Object/C3DObject.h"
 
-namespace file { class CFileReader; }
+namespace file { class CFile; }
 namespace api { class IGraphicsAPI; }
 namespace object { class C3DObject; }
+namespace resource { class CLoadWorker; }
 
 namespace imageeffect
 {
@@ -20,8 +21,8 @@ namespace imageeffect
 
 		bool m_IsLoaded;
 
-		std::shared_ptr<file::CFileReader> m_BlurVertex;
-		std::shared_ptr<file::CFileReader> m_BlurFrag;
+		std::shared_ptr<file::CFile> m_BlurVertex;
+		std::shared_ptr<file::CFile> m_BlurFrag;
 
 		std::shared_ptr<object::C3DObject> m_ScreenObjX;
 		std::shared_ptr<object::C3DObject> m_ScreenObjY;
@@ -36,9 +37,9 @@ namespace imageeffect
 
 		std::shared_ptr<graphics::CTexture> GetFrameTexture();
 
-		bool Create();
+		bool Create(resource::CLoadWorker* pLoadWorker);
 
-		bool Update();
+		bool Update(resource::CLoadWorker* pLoadWorker);
 
 		bool Draw(float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
 			const std::shared_ptr<graphics::CDrawInfo>& DrawInfo);

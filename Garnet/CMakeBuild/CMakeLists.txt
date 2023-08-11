@@ -26,8 +26,8 @@ add_executable(
 	../src/Camera/CViewerCamera.cpp
 	../src/Camera/CViewerCamera.h
 	../src/Debug/Message/Console.h
-	../src/File/CFileReader.cpp
-	../src/File/CFileReader.h
+	../src/File/CFile.cpp
+	../src/File/CFile.h
 	../src/GLTF/CGLTFImporter.cpp
 	../src/GLTF/CGLTFImporter.h
 	../src/Graphics/CDrawInfo.cpp

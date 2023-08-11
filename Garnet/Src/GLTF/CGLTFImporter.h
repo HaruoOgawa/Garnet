@@ -7,7 +7,7 @@
 #include <map>
 
 #include "../Interface/IGraphicsAPI.h"
-#include "../File/CFileReader.h"
+#include "../File/CFile.h"
 
 namespace graphics
 {
@@ -42,7 +42,7 @@ namespace gltf
 	public:
 		static bool Import(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& Data, std::shared_ptr<object::C3DObject>& Object, 
 			std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, const std::vector<std::shared_ptr<graphics::CTexture>>& CubeTexList, const std::vector<std::shared_ptr<graphics::CTexture>>& FrameTextureList,
-			const std::shared_ptr<file::CFileReader>& DepthVertex, const std::shared_ptr<file::CFileReader>& DepthFragment);
+			const std::shared_ptr<file::CFile>& DepthVertex, const std::shared_ptr<file::CFile>& DepthFragment);
 	};
 }
 #endif // USE_GLTF

@@ -1,4 +1,4 @@
-#include "CFileReader.h"
+#include "CFile.h"
 #include <fstream>
 #include "../Debug/Message/Console.h"
 
@@ -9,29 +9,35 @@
 
 namespace file
 {
-	CFileReader::CFileReader():
-		m_IsLoaded(false)
+	CFile::CFile(const std::string& filename):
+		m_Status(resource::ELoadStatus::None),
+		m_Filename(filename)
 	{
 	}
 
-	CFileReader::~CFileReader()
+	CFile::~CFile()
 	{
 	}
 
-	void CFileReader::Release()
+	void CFile::Release()
 	{
-		m_IsLoaded = false;
+		m_Status = resource::ELoadStatus::None;
 		m_Data.clear();
 	}
 
-	void CFileReader::SetIsLoaded(bool val)
+	void CFile::SetLoadStatus(resource::ELoadStatus Status)
 	{
-		m_IsLoaded = val;
+		m_Status = Status;
 	}
 
-	bool CFileReader::IsLoaded()const
+	resource::ELoadStatus CFile::GetStatus() const
 	{
-		return m_IsLoaded;
+		return m_Status;
+	}
+
+	bool CFile::IsLoaded()const
+	{
+		return (m_Status == resource::ELoadStatus::Loaded);
 	}
 
 #ifdef __EMSCRIPTEN__
@@ -42,9 +48,9 @@ namespace file
 
 		std::memcpy(&Data[0], reinterpret_cast<const unsigned char*>(fetch->data), fetch->numBytes);
 
-		auto fileReader = static_cast<CFileReader*>(fetch->userData);
+		auto fileReader = static_cast<CFile*>(fetch->userData);
 		fileReader->SetData(Data);
-		fileReader->SetIsLoaded(true);
+		fileReader->SetLoadStatus(resource::ELoadStatus::Loaded);
 
 		emscripten_fetch_close(fetch);
 	}
@@ -56,8 +62,10 @@ namespace file
 	}
 #endif
 
-	void CFileReader::ReadFile(const std::string& filename)
+	bool CFile::Load()
 	{
+		m_Status = resource::ELoadStatus::Loading;
+
 		std::string result = "";
 #ifdef __EMSCRIPTEN__
 		emscripten_fetch_attr_t attr;
@@ -67,14 +75,14 @@ namespace file
 		attr.onsuccess = downloadSucceded;
 		attr.onerror = downloadFailed;
 		attr.userData = this;
-		emscripten_fetch(&attr, filename.c_str());
+		emscripten_fetch(&attr, m_Filename.c_str());
 
 #else
-		std::ifstream file(filename, std::ios::ate | std::ios::binary);
+		std::ifstream file(m_Filename, std::ios::ate | std::ios::binary);
 
 		if (!file.is_open())
 		{
-			Console::Log("failed to open file! / filename: %s\n", filename.c_str());
+			Console::Log("failed to open file! / m_Filename: %s\n", m_Filename.c_str());
 		}
 
 		size_t fileSize = (size_t)file.tellg();
@@ -90,16 +98,18 @@ namespace file
 		m_Data.resize(fileSize);
 		std::memcpy(&m_Data[0], reinterpret_cast<const unsigned char*>(&ReadData[0]), fileSize);
 
-		m_IsLoaded = true;
+		m_Status = resource::ELoadStatus::Loaded;
 #endif
+
+		return true;
 	}
 
-	void CFileReader::SetData(const std::vector<unsigned char>& Data)
+	void CFile::SetData(const std::vector<unsigned char>& Data)
 	{
 		m_Data = Data;
 	}
 
-	const std::vector<unsigned char>& CFileReader::GetData() const
+	const std::vector<unsigned char>& CFile::GetData() const
 	{
 		return m_Data;
 	}
