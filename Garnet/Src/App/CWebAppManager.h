@@ -7,6 +7,7 @@
 namespace api { class CWebGPUAPI; }
 namespace app { class IApp; }
 namespace input { class CInputState; }
+namespace resource { class CLoadWorker; }
 
 namespace webapp
 {
@@ -20,6 +21,8 @@ namespace webapp
 
 		float m_SecondsTime;
 		float m_DeltaSecondsTime;
+
+		std::shared_ptr<resource::CLoadWorker> m_LoadWorker;
 
 		int m_Width;
 		int m_Height;

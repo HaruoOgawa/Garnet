@@ -72,7 +72,7 @@
     <ClInclude Include="Src\Graphics\CMaterial.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Src\File\CFileReader.h">
+    <ClInclude Include="Src\File\CFile.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Src\Scene\CScriptScene.h">
@@ -1080,6 +1080,18 @@
     <ClInclude Include="Src\GraphicsAPI\OpenGL\COpenGLRenderPass.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="Src\LoadWorker\CLoadWorker.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Interface\IResource.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\LoadWorker\ELoadStatus.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Object\CSimple3DObject.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\Main\DescMain\DescMain.cpp">
@@ -1130,7 +1142,7 @@
     <ClCompile Include="Src\Graphics\CMaterial.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Src\File\CFileReader.cpp">
+    <ClCompile Include="Src\File\CFile.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Src\Scene\CScriptScene.cpp">
@@ -1221,6 +1233,12 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Src\GraphicsAPI\OpenGL\COpenGLRenderPass.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\LoadWorker\CLoadWorker.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Object\CSimple3DObject.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1688,6 +1706,8 @@
     <None Include="Resources\Shaders\blur.vert" />
     <None Include="Resources\Shaders\blur.frag" />
     <None Include="Resources\Shaders\gltfpbr_NativeSafe_frag.wgsl" />
+    <None Include="Resources\Shaders\loadingbar.frag" />
+    <None Include="Resources\Shaders\loadingbar.vert" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="EmscriptenBuild\CMakeLists.txt" />

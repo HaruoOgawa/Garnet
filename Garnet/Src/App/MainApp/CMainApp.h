@@ -1,5 +1,6 @@
 #pragma once
 #include "../../Interface/IApp.h"
+namespace resource { class CLoadWorker; }
 
 namespace app
 {
@@ -11,11 +12,11 @@ namespace app
 
 		bool Release(api::IGraphicsAPI* pGraphicsAPI) override;
 
-		bool Initialize(api::IGraphicsAPI* pGraphicsAPI) override;
+		bool Initialize(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker) override;
 		bool ProcessInput(api::IGraphicsAPI* pGraphicsAPI) override;
 		bool Resize(int Width, int Height) override;
-		bool Update(api::IGraphicsAPI* pGraphicsAPI, float SecondsTime) override;
-		bool Draw(api::IGraphicsAPI* pGraphicsAPI, float SecondsTime) override;
+		bool Update(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, float SecondsTime) override;
+		bool Draw(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, float SecondsTime) override;
 
 		virtual const std::shared_ptr<camera::CCamera>& GetMainCamera() const override;
 	};

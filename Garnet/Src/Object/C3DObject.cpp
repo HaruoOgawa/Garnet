@@ -16,7 +16,7 @@ namespace object
 		m_TextureList.clear();
 	}
 
-	bool C3DObject::Create(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<file::CFileReader>& DepthVertex, const std::shared_ptr<file::CFileReader>& DepthFragment)
+	bool C3DObject::Create(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<file::CFile>& DepthVertex, const std::shared_ptr<file::CFile>& DepthFragment)
 	{
 		// ワールド行列の計算
 		CalcWorldMatrix();

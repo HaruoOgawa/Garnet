@@ -574,6 +574,9 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Src\Object\CSimple3DObject.h" />
+    <ClInclude Include="Src\Interface\IResource.h" />
+    <ClInclude Include="Src\LoadWorker\CLoadWorker.h" />
     <ClInclude Include="Src\GraphicsAPI\OpenGL\COpenGLRenderPass.h" />
     <ClInclude Include="Src\GraphicsAPI\OpenGL\COpenGLRenderer.h" />
     <ClInclude Include="Src\GraphicsAPI\OpenGL\COpenGLTexture.h" />
@@ -598,6 +601,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClInclude Include="Src\Library\tinygltf\stb_image.h" />
     <ClInclude Include="Src\Library\tinygltf\stb_image_write.h" />
     <ClInclude Include="Src\Library\tinygltf\tiny_gltf.h" />
+    <ClInclude Include="Src\LoadWorker\ELoadStatus.h" />
     <ClInclude Include="Src\Math\CMath.h" />
     <ClInclude Include="Src\Projection\CProjection.h" />
     <ClInclude Include="Src\Camera\CCamera.h" />
@@ -909,7 +913,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClInclude Include="src\Library\WebGPU\x86\webgpu.h" />
     <ClInclude Include="src\Library\WebGPU\x86\wgpu.h" />
     <ClInclude Include="Src\Scene\CScriptScene.h" />
-    <ClInclude Include="Src\File\CFileReader.h" />
+    <ClInclude Include="Src\File\CFile.h" />
     <ClInclude Include="Src\Graphics\CMaterial.h" />
     <ClInclude Include="Src\Graphics\CPrimitive.h" />
     <ClInclude Include="Src\Graphics\CMesh.h" />
@@ -931,6 +935,8 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClInclude Include="Src\Interface\IRenderer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\Object\CSimple3DObject.cpp" />
+    <ClCompile Include="Src\LoadWorker\CLoadWorker.cpp" />
     <ClCompile Include="Src\GraphicsAPI\OpenGL\COpenGLRenderPass.cpp" />
     <ClCompile Include="Src\GraphicsAPI\OpenGL\COpenGLRenderer.cpp" />
     <ClCompile Include="Src\GraphicsAPI\OpenGL\COpenGLTexture.cpp" />
@@ -961,7 +967,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClCompile Include="Src\Library\glfw3webgpu\glfw3webgpu.c" />
     <ClCompile Include="Src\Library\glm\glm\detail\glm.cpp" />
     <ClCompile Include="Src\Scene\CScriptScene.cpp" />
-    <ClCompile Include="Src\File\CFileReader.cpp" />
+    <ClCompile Include="Src\File\CFile.cpp" />
     <ClCompile Include="Src\Graphics\CMaterial.cpp" />
     <ClCompile Include="Src\Graphics\CPrimitive.cpp" />
     <ClCompile Include="Src\Graphics\CMesh.cpp" />
@@ -1002,6 +1008,8 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <None Include="Resources\Shaders\gltfpbr.frag" />
     <None Include="Resources\Shaders\gltfpbr.vert" />
     <None Include="Resources\Shaders\gltfpbr_NativeSafe_frag.wgsl" />
+    <None Include="Resources\Shaders\loadingbar.frag" />
+    <None Include="Resources\Shaders\loadingbar.vert" />
     <None Include="Resources\Shaders\sample.frag" />
     <None Include="Resources\Shaders\sample.vert" />
     <None Include="Resources\Shaders\sample_frag.spv" />

@@ -1,6 +1,7 @@
 #include "CBlurEffect.h"
+#include "../../LoadWorker/CLoadWorker.h"
 #include "../Debug/Message/Console.h"
-#include "../File/CFileReader.h"
+#include "../File/CFile.h"
 #include "../Interface/IGraphicsAPI.h"
 
 namespace imageeffect
@@ -10,8 +11,8 @@ namespace imageeffect
 
 		m_IsLoaded(false),
 		m_KernelSize(0),
-		m_BlurVertex(std::make_shared<file::CFileReader>()),
-		m_BlurFrag(std::make_shared<file::CFileReader>()),
+		m_BlurVertex(std::make_shared<file::CFile>("Resources\\Shaders\\blur" + m_pGraphicsAPI->GetVertexShaderExtension())),
+		m_BlurFrag(std::make_shared<file::CFile>("Resources\\Shaders\\blur" + m_pGraphicsAPI->GetFragmentShaderExtension())),
 		m_ScreenObjX(std::make_shared<object::C3DObject>("BlurX", "")),
 		m_ScreenObjY(std::make_shared<object::C3DObject>("BlurY", ""))
 	{
@@ -32,12 +33,12 @@ namespace imageeffect
 		return Tex;
 	}
 
-	bool CBlurEffect::Create()
+	bool CBlurEffect::Create(resource::CLoadWorker* pLoadWorker)
 	{
 		if (!CalcGaussianKernel()) return false;
 
-		m_BlurVertex->ReadFile("Resources\\Shaders\\blur" + m_pGraphicsAPI->GetVertexShaderExtension());
-		m_BlurFrag->ReadFile("Resources\\Shaders\\blur" + m_pGraphicsAPI->GetFragmentShaderExtension());
+		pLoadWorker->AddFirstLoadResource(m_BlurVertex);
+		pLoadWorker->AddFirstLoadResource(m_BlurFrag);
 
 		if (!m_pGraphicsAPI->CreateRenderPass("BlurX", api::ERenderPassFormat::COLOR_RENDERPASS, glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), 512, 512)) return false;
 		if (!m_pGraphicsAPI->CreateRenderPass("BlurY", api::ERenderPassFormat::COLOR_RENDERPASS, glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), 512, 512)) return false;
@@ -45,12 +46,11 @@ namespace imageeffect
 		return true;
 	}
 
-	bool CBlurEffect::Update()
+	bool CBlurEffect::Update(resource::CLoadWorker* pLoadWorker)
 	{
 		if (!m_IsLoaded)
 		{
-			if (!m_BlurVertex->IsLoaded()) return true;
-			if (!m_BlurFrag->IsLoaded()) return true;
+			if (!pLoadWorker->IsLoaded()) return true;
 
 			if (!Load()) return false;
 

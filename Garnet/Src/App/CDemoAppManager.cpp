@@ -1,6 +1,7 @@
 #ifdef USE_OPENGL
 
 #include "CDemoAppManager.h"
+#include "../LoadWorker/CLoadWorker.h"
 #include "../GraphicsAPI/OpenGL/COpenGLAPI.h"
 #include "./ScriptApp/CScriptApp.h"
 #include "./EditorApp/CEditorApp.h"
@@ -23,6 +24,7 @@ namespace app
 		m_IsRunLoop(true),
 		m_SecondsTime(0.0f),
 		m_DeltaSecondsTime(0.0f),
+		m_LoadWorker(nullptr),
 #ifdef USE_INPUT_SYSTEM
 		m_InputState(std::make_shared<input::CInputState>(1.0f)),
 #endif
@@ -31,6 +33,7 @@ namespace app
 	{
 		g_AppManager = this; // 仮のグローバル変数
 
+		//
 		if (AppType == app::EAppType::ScriptApp)
 		{
 			m_App = std::make_shared<app::CScriptApp>();
@@ -52,6 +55,12 @@ namespace app
 			m_App->Release(m_GraphicsAPI.get());
 			m_App.reset();
 			m_App = nullptr;
+		}
+
+		if (m_LoadWorker)
+		{
+			m_LoadWorker.reset();
+			m_LoadWorker = nullptr;
 		}
 
 		if (m_GraphicsAPI)
@@ -78,7 +87,10 @@ namespace app
 		if (!InitGLContext()) return false;
 		if (!m_GraphicsAPI->Initialize()) return false;
 
-		if (!m_App->Initialize(m_GraphicsAPI.get())) return false;
+		// ロードワーカー
+		m_LoadWorker = std::make_shared<resource::CLoadWorker>(m_GraphicsAPI.get());
+
+		if (!m_App->Initialize(m_GraphicsAPI.get(), m_LoadWorker.get())) return false;
 
 		RECT rect;
 		if (GetWindowRect(m_Window, &rect))
@@ -366,7 +378,7 @@ namespace app
 		if (MainCamera) MainCamera->Update(m_SecondsTime, m_InputState);
 #endif // USE_INPUT_SYSTEM
 
-		if (!m_App->Update(m_GraphicsAPI.get(), m_SecondsTime)) return false;
+		if (!m_App->Update(m_GraphicsAPI.get(), m_LoadWorker.get(), m_SecondsTime)) return false;
 
 		return true;
 	}
@@ -374,7 +386,7 @@ namespace app
 	bool CDemoAppManager::Draw()
 	{
 		// Appの描画
-		if (!m_App->Draw(m_GraphicsAPI.get(), m_SecondsTime)) return false;
+		if (!m_App->Draw(m_GraphicsAPI.get(), m_LoadWorker.get(), m_SecondsTime)) return false;
 
 		//カラーバッファを入れ替える
 		SwapBuffers(m_Device_Context);

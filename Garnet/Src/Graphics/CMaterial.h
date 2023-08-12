@@ -6,7 +6,7 @@
 #include "CUniformBuffer.h"
 #include "CUniformBufferDescriptor.h"
 #include "../GraphicsAPI/CMaterialCreateInfo.h"
-#include "../File/CFileReader.h"
+#include "../File/CFile.h"
 #include "../../Interface/IGraphicsAPI.h"
 #include "STextureBindingLayout.h"
 #include "CTexture.h"
@@ -51,7 +51,7 @@ namespace graphics
 		virtual ~CMaterial() = default;
 
 		virtual bool Create(const std::vector<std::shared_ptr<graphics::CTexture>>& TextureList, const std::vector<std::shared_ptr<graphics::CTexture>>& CubeMapList) = 0;
-		virtual bool CreateDepthMaterial(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<file::CFileReader>& DepthVertex, const std::shared_ptr<file::CFileReader>& DepthFragment);
+		virtual bool CreateDepthMaterial(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<file::CFile>& DepthVertex, const std::shared_ptr<file::CFile>& DepthFragment);
 
 		virtual std::shared_ptr<graphics::CMaterial> GetDepthMaterial();
 

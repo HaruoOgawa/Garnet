@@ -8,6 +8,7 @@
 namespace api { class COpenGLAPI; }
 namespace app { class IApp; }
 namespace input { class CInputState; }
+namespace resource { class CLoadWorker; }
 
 namespace app
 {
@@ -25,6 +26,8 @@ namespace app
 
 		float m_SecondsTime;
 		float m_DeltaSecondsTime;
+
+		std::shared_ptr<resource::CLoadWorker> m_LoadWorker;
 
 		std::shared_ptr<api::COpenGLAPI> m_GraphicsAPI;
 		std::shared_ptr<app::IApp> m_App;

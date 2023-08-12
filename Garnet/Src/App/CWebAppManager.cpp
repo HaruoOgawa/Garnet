@@ -1,5 +1,6 @@
 #ifdef __EMSCRIPTEN__
 #include "CWebAppManager.h"
+#include "../LoadWorker/CLoadWorker.h"
 #include "../Debug/Message/Console.h"
 
 #include "../GraphicsAPI/WebGPU/CWebGPUAPI.h"
@@ -26,6 +27,7 @@ namespace webapp
 		m_InputState(std::make_shared<input::CInputState>(1.0f)),
 		m_SecondsTime(0.0f),
 		m_DeltaSecondsTime(0.0f),
+		m_LoadWorker(nullptr),
 		m_Width(Width),
 		m_Height(Height)
 	{
@@ -61,6 +63,12 @@ namespace webapp
 			m_App = nullptr;
 		}
 
+		if (m_LoadWorker)
+		{
+			m_LoadWorker.reset();
+			m_LoadWorker = nullptr;
+		}
+
 		if (m_GraphicsAPI)
 		{
 			m_GraphicsAPI->Release();
@@ -75,7 +83,10 @@ namespace webapp
 	{
 		if (!m_GraphicsAPI->Initialize()) return false;
 
-		if (!m_App->Initialize(m_GraphicsAPI.get())) return false;
+		// ロードワーカー
+		m_LoadWorker = std::make_shared<resource::CLoadWorker>(m_GraphicsAPI.get());
+
+		if (!m_App->Initialize(m_GraphicsAPI.get(), m_LoadWorker.get())) return false;
 		
 		m_GraphicsAPI->Resize(m_Width, m_Height);
 		m_App->Resize(m_Width, m_Height);
@@ -114,14 +125,14 @@ namespace webapp
 		if (MainCamera) MainCamera->Update(m_SecondsTime, m_InputState);
 #endif // USE_INPUT_SYSTEM
 
-		if (!m_App->Update(m_GraphicsAPI.get(), m_SecondsTime)) return false;
+		if (!m_App->Update(m_GraphicsAPI.get(), m_LoadWorker.get(), m_SecondsTime)) return false;
 
 		return true;
 	}
 
 	bool CWebAppManager::Draw()
 	{
-		if (!m_App->Draw(m_GraphicsAPI.get(), m_SecondsTime)) return false;
+		if (!m_App->Draw(m_GraphicsAPI.get(), m_LoadWorker.get(), m_SecondsTime)) return false;
 
 		return true;
 	}

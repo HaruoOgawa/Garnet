@@ -1,6 +1,7 @@
 #if (defined(USE_VULKAN) || defined(USE_WEBGPU)) && !defined(__EMSCRIPTEN__)
 
 #include "CDescAppManager.h"
+#include "../LoadWorker/CLoadWorker.h"
 #include "../Debug/Message/Console.h"
 
 #ifdef __EMSCRIPTEN__
@@ -35,6 +36,7 @@ namespace descapp
 		m_App(nullptr),
 		m_IsRunLoop(g_IsRunLoop),
 		m_SecondsTime(0.0f), 
+		m_LoadWorker(nullptr),
 #ifdef USE_WEBGPU
 		m_InputState(std::make_shared<input::CInputState>(1.0f)),
 #else
@@ -83,6 +85,12 @@ namespace descapp
 			m_App = nullptr;
 		}
 
+		if (m_LoadWorker)
+		{
+			m_LoadWorker.reset();
+			m_LoadWorker = nullptr;
+		}
+
 		if (m_GraphicsAPI)
 		{
 			m_GraphicsAPI->Release();
@@ -109,7 +117,10 @@ namespace descapp
 #else
 		if(!m_GraphicsAPI->InitializeWithGLFW(m_pWindow)) return false;
 #endif
-		if (!m_App->Initialize(m_GraphicsAPI.get())) return false;
+		// ロードワーカー
+		m_LoadWorker = std::make_shared<resource::CLoadWorker>(m_GraphicsAPI.get());
+
+		if (!m_App->Initialize(m_GraphicsAPI.get(), m_LoadWorker.get())) return false;
 
 		int w, h;
 		glfwGetWindowSize(m_pWindow, &w, &h);
@@ -246,7 +257,7 @@ namespace descapp
 		if (MainCamera) MainCamera->Update(m_SecondsTime, m_InputState);
 #endif // USE_INPUT_SYSTEM
 
-		if (!m_App->Update(m_GraphicsAPI.get(), m_SecondsTime)) return false;
+		if (!m_App->Update(m_GraphicsAPI.get(), m_LoadWorker.get(), m_SecondsTime)) return false;
 
 #ifdef _DEBUG
 		// FPSの計測と表示(60FPSを基準とする)
@@ -259,7 +270,7 @@ namespace descapp
 
 	bool CDescAppManager::Draw()
 	{
-		if (!m_App->Draw(m_GraphicsAPI.get(), m_SecondsTime)) return false;
+		if (!m_App->Draw(m_GraphicsAPI.get(), m_LoadWorker.get(), m_SecondsTime)) return false;
 
 		return true;
 	}
