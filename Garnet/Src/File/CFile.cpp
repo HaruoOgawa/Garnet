@@ -11,12 +11,18 @@ namespace file
 {
 	CFile::CFile(const std::string& filename):
 		m_Status(resource::ELoadStatus::None),
-		m_Filename(filename)
+		m_Filename(filename),
+		m_IsSync(false)
 	{
 	}
 
 	CFile::~CFile()
 	{
+	}
+
+	void CFile::SetIsSync(bool IsSync)
+	{
+		m_IsSync = IsSync;
 	}
 
 	void CFile::Release()
@@ -72,6 +78,7 @@ namespace file
 		emscripten_fetch_attr_init(&attr);
 		std::strcpy(attr.requestMethod, "GET");
 		attr.attributes = EMSCRIPTEN_FETCH_LOAD_TO_MEMORY;
+		if (m_IsSync) attr.attributes |= EMSCRIPTEN_FETCH_SYNCHRONOUS;
 		attr.onsuccess = downloadSucceded;
 		attr.onerror = downloadFailed;
 		attr.userData = this;

@@ -5,18 +5,37 @@ namespace resource
 {
 	CLoadWorker::CLoadWorker(api::IGraphicsAPI* pGraphicsAPI):
 		m_Status(ELoadStatus::None),
+		m_FirstResourceCount(0),
+		m_Alpha(1.0f),
 		m_LoadingBar(std::make_shared<object::C3DObject>("", "ShadowPass")),
 		m_VertexShader(std::make_shared<file::CFile>("Resources\\Shaders\\loadingbar" + pGraphicsAPI->GetVertexShaderExtension())),
 		m_FragmentShader(std::make_shared<file::CFile>("Resources\\Shaders\\loadingbar" + pGraphicsAPI->GetFragmentShaderExtension()))
 	{
 		m_VertexShader->Load();
 		m_FragmentShader->Load();
+	}
 
+	CLoadWorker::~CLoadWorker()
+	{
+		m_FirstLoadResourceList.clear();
+		m_RuntimeLoadResourceList.clear();
+	}
+
+	bool CLoadWorker::Create(api::IGraphicsAPI* pGraphicsAPI)
+	{
 		// MATERIAL
 		std::shared_ptr<graphics::CMaterialCreateInfo> createInfo = std::make_shared<graphics::CMaterialCreateInfo>();
 		createInfo->SetVertexShaderCode(m_VertexShader->GetData());
 		createInfo->SetFragmentShaderCode(m_FragmentShader->GetData());
 		auto Material = pGraphicsAPI->CreateMaterial(createInfo);
+
+		auto UniforBuffer = createInfo->CreateUniformBuffer({ graphics::SBindingLayout("UniformBufferObject", 0) });
+		UniforBuffer->AddData("rate", &glm::vec1(0.0f)[0], sizeof(glm::vec1), 0);
+		UniforBuffer->AddData("time", &glm::vec1(0.0f)[0], sizeof(glm::vec1), 0);
+		UniforBuffer->AddData("alpha", &m_Alpha, sizeof(float), 0);
+		UniforBuffer->AddData("pad", &glm::vec1(0.0f)[0], sizeof(glm::vec1), 0);
+
+		Material->AddUniformBuffer(UniforBuffer);
 
 		Material->SetEnabledZTest(false);
 		Material->SetCullMode(graphics::ECullMode::CULL_NONE);
@@ -35,26 +54,34 @@ namespace resource
 		m_LoadingBar->AddNode(Node);
 
 		// Create関数を実行
-		m_LoadingBar->Create(pGraphicsAPI, nullptr, nullptr);
+		if (!m_LoadingBar->Create(pGraphicsAPI, nullptr, nullptr)) return false;
+
+		return true;
 	}
 
-	CLoadWorker::~CLoadWorker()
+	bool CLoadWorker::Update(api::IGraphicsAPI* pGraphicsAPI)
 	{
-		m_FirstLoadResourceList.clear();
-		m_RuntimeLoadResourceList.clear();
-	}
+		// 初期化
+		if (m_Status == ELoadStatus::None)
+		{
+			if (!m_VertexShader->IsLoaded() || !m_FragmentShader->IsLoaded()) return true;
 
-	bool CLoadWorker::Update()
-	{
+			if (!Create(pGraphicsAPI)) return false;
+
+			m_FirstResourceCount = static_cast<int>(m_FirstLoadResourceList.size()); // 初回ロードのリソース数を取得
+
+			m_Status = ELoadStatus::Loading;
+		}
+
+		// ローディングバー
 		if (m_LoadingBar)
 		{
 			if (!m_LoadingBar->Update()) return false;
 		}
 
+		// ローディング
 		if (m_Status != ELoadStatus::Loaded) // 初回リソースのロード
 		{
-			m_Status = ELoadStatus::Loading;
-
 			for (auto& Resource : m_FirstLoadResourceList)
 			{
 				switch (Resource->GetStatus())
@@ -114,8 +141,12 @@ namespace resource
 	{
 		if(m_Status == ELoadStatus::Loaded) return true;
 
-		if (m_LoadingBar)
+		if (m_Status == ELoadStatus::Loading && m_LoadingBar)
 		{
+			float rate = 1.0f - (static_cast<float>(m_FirstLoadResourceList.size()) / m_FirstResourceCount);
+			m_LoadingBar->GetMaterialList()[0]->SetUniformValue("rate", &glm::vec1(rate)[0]);
+			m_LoadingBar->GetMaterialList()[0]->SetUniformValue("alpha", &m_Alpha);
+
 			if (!m_LoadingBar->Draw(IsDepthPass, SecondsTime, Camera, Projection, DrawInfo)) return false;
 		}
 

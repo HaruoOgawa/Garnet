@@ -10,11 +10,15 @@ namespace file
 		resource::ELoadStatus m_Status;
 		const std::string m_Filename;
 
+		bool m_IsSync; // 同期的にロードするかどうか. 基本的には非同期
+
 		std::vector<unsigned char> m_Data;
 
 	public:
 		CFile(const std::string& filename);
 		virtual ~CFile();
+
+		void SetIsSync(bool IsSync);
 
 		void Release();
 

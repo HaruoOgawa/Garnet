@@ -74,7 +74,7 @@ namespace app
 
 	bool CScriptApp::Update(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, float SecondsTime)
 	{
-		if (!pLoadWorker->Update()) return false;
+		if (!pLoadWorker->Update(pGraphicsAPI)) return false;
 
 		if (!m_BlurEffect->Update(pLoadWorker)) return false;
 		if (!m_ScriptScene->Update(pGraphicsAPI, pLoadWorker)) return false;

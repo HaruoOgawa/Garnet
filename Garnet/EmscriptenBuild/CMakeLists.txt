@@ -90,6 +90,8 @@ add_executable(
 	../src/Object/C3DObject.h
 	../src/Object/CNode.cpp
 	../src/Object/CNode.h
+	../src/Object/CSimple3DObject.cpp
+	../src/Object/CSimple3DObject.h
 	../src/Projection/CProjection.cpp
 	../src/Projection/CProjection.h
 	../src/Scene/CScriptScene.cpp
