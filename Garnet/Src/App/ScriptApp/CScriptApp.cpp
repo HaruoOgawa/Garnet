@@ -24,8 +24,7 @@ namespace app
 		m_ScriptScene(nullptr),
 		m_MainCamera(std::make_shared<camera::CViewerCamera>()),
 		m_Projection(std::make_shared<projection::CProjection>()),
-		m_DrawInfo(std::make_shared<graphics::CDrawInfo>()),
-		m_BlurEffect(nullptr)
+		m_DrawInfo(std::make_shared<graphics::CDrawInfo>())
 	{
 		m_MainCamera->SetPos(glm::vec3(0.0f, 0.0f, 5.0f));
 		m_DrawInfo->GetLightCamera()->SetPos(glm::vec3(3.0f, 3.0f, -3.0f));
@@ -47,15 +46,6 @@ namespace app
 		// Viewの初期化
 		m_ScriptScene = std::make_shared<scene::CScriptScene>(pGraphicsAPI, pLoadWorker);
 
-		// オフスクリーンレンダリング用のFrameBufferを生成する
-		if (!pGraphicsAPI->CreateRenderPass("ShadowPass", api::ERenderPassFormat::COLOR_RENDERPASS, glm::vec4(1.0f), 512, 512)) return false;
-
-		m_BlurEffect = std::make_shared<imageeffect::CBlurEffect>(pGraphicsAPI);
-		if (!m_BlurEffect->Create(pLoadWorker)) return false;
-
-		// FrameTextureを渡す
-		m_ScriptScene->SetFrameTexture(m_BlurEffect->GetFrameTexture());
-
 		return true;
 	}
 
@@ -76,10 +66,7 @@ namespace app
 	{
 		if (!pLoadWorker->Update(pGraphicsAPI)) return false;
 
-		if (!m_BlurEffect->Update(pLoadWorker)) return false;
 		if (!m_ScriptScene->Update(pGraphicsAPI, pLoadWorker)) return false;
-
-		//m_DrawInfo->GetLightCamera()->SetPos(glm::vec3(glm::cos(SecondsTime * 0.1f), 1.0f, glm::sin(SecondsTime * 0.1f)) * 3.0f);
 
 		return true;
 	}
@@ -88,14 +75,6 @@ namespace app
 	{
 		// Prepare
 		if (!pGraphicsAPI->PrepareRender()) return false;
-
-		// ShadowPass
-		if (!pGraphicsAPI->BeginRender("ShadowPass")) return false;
-		if (!m_ScriptScene->Draw(pGraphicsAPI, true, SecondsTime, m_MainCamera, m_Projection, m_DrawInfo)) return false;
-		if (!pGraphicsAPI->EndRender()) return false;
-
-		// ShadowMapにブラーをかける
-		if (!m_BlurEffect->Draw(SecondsTime, m_MainCamera, m_Projection, m_DrawInfo)) return false;
 
 		// DefaultPass(SwapChain)
 		if (!pGraphicsAPI->BeginRender()) return false;

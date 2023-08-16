@@ -65,10 +65,13 @@ namespace graphics
 			if (!CPresetPrimitive::CreateBoard(createInfo)) return false;
 			break;
 		case graphics::EPresetPrimitiveType::BOX:
+			if (!CPresetPrimitive::CreateBox(createInfo)) return false;
 			break;
 		case graphics::EPresetPrimitiveType::POINT:
+			if (!CPresetPrimitive::CreatePoint(createInfo)) return false;
 			break;
 		case graphics::EPresetPrimitiveType::SPHERE:
+			//if (!CPresetPrimitive::CreateSphere(createInfo)) return false;
 			break;
 		default:
 			break;

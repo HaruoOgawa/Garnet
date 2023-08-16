@@ -70,7 +70,15 @@ namespace resource
 
 			m_FirstResourceCount = static_cast<int>(m_FirstLoadResourceList.size()); // 初回ロードのリソース数を取得
 
-			m_Status = ELoadStatus::Loading;
+			if (m_FirstResourceCount > 0)
+			{
+				m_Status = ELoadStatus::Loading;
+			}
+			else
+			{
+				// 初回ロードリソースがない場合は即ロード完了にする
+				m_Status = ELoadStatus::Loaded;
+			}
 		}
 
 		// ローディングバー

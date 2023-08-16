@@ -32,30 +32,6 @@ namespace scene
 
 		std::shared_ptr<file::CFile> m_VertexShader;
 		std::shared_ptr<file::CFile> m_FragmentShader;
-
-		std::shared_ptr<file::CFile> m_Texture0;
-		std::shared_ptr<file::CFile> m_Texture1;
-
-		// glTF
-		std::shared_ptr<object::C3DObject> m_Sphere_glTFObj;
-		std::shared_ptr<file::CFile> m_Sphere_glTFData;
-		std::shared_ptr<object::C3DObject> m_Helmet_glTFObj;
-		std::shared_ptr<file::CFile> m_Helmet_glTFData;
-		std::shared_ptr<file::CFile> m_glTFVert;
-		std::shared_ptr<file::CFile> m_glTFFrag;
-
-		// Cubemap
-		std::shared_ptr<file::CFile> m_Cube0;
-		std::shared_ptr<file::CFile> m_Cube1;
-		std::shared_ptr<file::CFile> m_Cube2;
-		std::shared_ptr<file::CFile> m_Cube3;
-		std::shared_ptr<file::CFile> m_Cube4;
-		std::shared_ptr<file::CFile> m_Cube5;
-
-		// ShadowMapping
-		std::shared_ptr<object::C3DObject> m_DepthDebugObj;
-		std::shared_ptr<file::CFile> m_ShadowDebugVertex;
-		std::shared_ptr<file::CFile> m_ShadowDebugFragment;
 	private:
 		bool Load(api::IGraphicsAPI* pGraphicsAPI);
 	public:
