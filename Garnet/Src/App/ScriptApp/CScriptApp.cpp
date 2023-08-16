@@ -22,7 +22,11 @@ namespace app
 {
 	CScriptApp::CScriptApp():
 		m_ScriptScene(nullptr),
+#ifdef USE_VIEWER_CAMERA
 		m_MainCamera(std::make_shared<camera::CViewerCamera>()),
+#else
+		m_MainCamera(std::make_shared<camera::CCamera>()),
+#endif // USE_VIEWER_CAMERA
 		m_Projection(std::make_shared<projection::CProjection>()),
 		m_DrawInfo(std::make_shared<graphics::CDrawInfo>())
 	{

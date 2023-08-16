@@ -22,7 +22,7 @@ namespace camera
 		virtual ~CCamera() = default;
 
 #ifdef USE_INPUT_SYSTEM
-		virtual void Update(float SecondsTime, const std::shared_ptr<input::CInputState>& InputState);
+		virtual void Update(float DeltaTime, const std::shared_ptr<input::CInputState>& InputState);
 #endif // USE_INPUT_SYSTEM
 
 		virtual glm::mat4 GetViewMatrix();
