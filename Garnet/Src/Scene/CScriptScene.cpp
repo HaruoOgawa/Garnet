@@ -37,32 +37,38 @@ namespace scene
 		// TestObj
 		{
 			// MATERIAL
-			std::shared_ptr<graphics::CMaterialCreateInfo> createInfo = std::make_shared<graphics::CMaterialCreateInfo>();
-			createInfo->SetVertexShaderCode(m_VertexShader->GetData());
-			createInfo->SetFragmentShaderCode(m_FragmentShader->GetData());
-			auto Material0 = pGraphicsAPI->CreateMaterial(createInfo);
-
-			// UBO, TEXTURE
 			{
-				auto UniformBuffer = graphics::CMaterialCreateInfo::CreateUniformBuffer({ graphics::SBindingLayout("UniformBufferObject", 0) });
+				std::shared_ptr<graphics::CMaterialCreateInfo> createInfo = std::make_shared<graphics::CMaterialCreateInfo>();
+				createInfo->SetVertexShaderCode(m_VertexShader->GetData());
+				createInfo->SetFragmentShaderCode(m_FragmentShader->GetData());
+				auto Material0 = pGraphicsAPI->CreateMaterial(createInfo);
 
-				UniformBuffer->AddData("model", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
-				UniformBuffer->AddData("view", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
-				UniformBuffer->AddData("proj", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
-				UniformBuffer->AddData("lightVPMat", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
+				// UBO, TEXTURE
+				{
+					auto UniformBuffer = graphics::CMaterialCreateInfo::CreateUniformBuffer({ graphics::SBindingLayout("UniformBufferObject", 0) });
 
-				UniformBuffer->RecalculateBindingLayoutOffset();
+					UniformBuffer->AddData("model", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
+					UniformBuffer->AddData("view", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
+					UniformBuffer->AddData("proj", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
+					UniformBuffer->AddData("lightVPMat", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
 
-				Material0->AddUniformBuffer(UniformBuffer);
+					UniformBuffer->RecalculateBindingLayoutOffset();
+
+					Material0->AddUniformBuffer(UniformBuffer);
+				}
+
+				m_TestObject->AddMaterial(Material0);
 			}
 
-			m_TestObject->AddMaterial(Material0);
-
 			// MESH
-			std::shared_ptr<graphics::CMesh> Mesh0 = std::make_shared<graphics::CMesh>();
-
 			{
-				std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(nullptr, 0, graphics::EPresetPrimitiveType::BOX);
+				std::shared_ptr<graphics::CMesh> Mesh0 = std::make_shared<graphics::CMesh>();
+
+				std::shared_ptr<renderer::CRendererCreateInfo> createInfo = std::make_shared<renderer::CRendererCreateInfo>();
+				if (!graphics::CPresetPrimitive::CreateBox(createInfo)) return false;
+				createInfo->SetInstanceDrawCount(512);
+
+				std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(createInfo, 0);
 				Mesh0->AddPrimitive(Primitive);
 				m_TestObject->AddMesh(Mesh0);
 			}

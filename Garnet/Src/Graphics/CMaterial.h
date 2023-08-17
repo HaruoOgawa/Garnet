@@ -76,5 +76,9 @@ namespace graphics
 		virtual const std::vector<uint32_t>& GetBindingRefSizeList() const;
 
 		virtual bool IsUseDynamicUniform() const;
+
+#ifdef USE_GPGPU
+		virtual bool Dispatch(const glm::ivec3& Threads, const glm::ivec3& KernelSize) = 0;
+#endif // USE_GPGPU
 	};
 }

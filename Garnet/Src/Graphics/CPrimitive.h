@@ -20,16 +20,11 @@ namespace graphics
 	{
 		std::shared_ptr<renderer::IRenderer>				 m_Renderer;
 		std::shared_ptr<renderer::IRenderer>				 m_DepthRenderer;
-		const EPresetPrimitiveType							 m_PresetType;
 		std::shared_ptr<renderer::CRendererCreateInfo>		 m_CreateInfo;
 
 		int													 m_MaterialIndex;
-	private:
-		bool Create(api::IGraphicsAPI* pGraphicsAPI, const std::string& PassName, const std::shared_ptr<CMaterial>& Material, const std::shared_ptr<renderer::CRendererCreateInfo>& createInfo, bool IsDepth);
-		bool Create(api::IGraphicsAPI* pGraphicsAPI, const std::string& PassName, const std::shared_ptr<CMaterial>& Material, EPresetPrimitiveType PresetType, bool IsDepth);
 	public:
-		CPrimitive(const std::shared_ptr<renderer::CRendererCreateInfo>& createInfo, int MaterialIndex,
-			EPresetPrimitiveType PresetType = EPresetPrimitiveType::None);
+		CPrimitive(const std::shared_ptr<renderer::CRendererCreateInfo>& createInfo, int MaterialIndex);
 		virtual ~CPrimitive();
 
 		void Release();

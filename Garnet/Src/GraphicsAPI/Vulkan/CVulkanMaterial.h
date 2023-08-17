@@ -71,6 +71,10 @@ namespace api
 		const std::vector<VkPipelineShaderStageCreateInfo>& GetShaderStages()const { return m_ShaderStages; }
 		const VkDescriptorSetLayout& GetDescriptorSetLayout() const { return m_DescriptorSetLayout; }
 		const std::vector<VkDescriptorSet>& GetDescriptorSets() const { return m_DescriptorSets; }
+
+#ifdef USE_GPGPU
+		virtual bool Dispatch(const glm::ivec3& Threads, const glm::ivec3& KernelSize) override;
+#endif // USE_GPGPU
 	};
 }
 #endif

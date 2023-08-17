@@ -2,7 +2,8 @@
 
 namespace renderer
 {
-	CRendererCreateInfo::CRendererCreateInfo()
+	CRendererCreateInfo::CRendererCreateInfo():
+		m_InstanceCount(1)
 	{
 	}
 
@@ -41,5 +42,17 @@ namespace renderer
 	const std::vector<int>& CRendererCreateInfo::GetAttributeDimensions() const
 	{
 		return m_AttributeDimensions;
+	}
+
+#ifdef USE_GPGPU
+	void CRendererCreateInfo::SetInstanceDrawCount(int InstanceCount)
+	{
+		m_InstanceCount = InstanceCount;
+	}
+#endif // USE_GPGPU
+
+	int CRendererCreateInfo::GetInstanceCount() const
+	{
+		return m_InstanceCount;
 	}
 }

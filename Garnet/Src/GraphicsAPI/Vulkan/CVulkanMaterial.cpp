@@ -482,6 +482,13 @@ namespace api
 		return true;
 	}
 
+#ifdef USE_GPGPU
+	bool CVulkanMaterial::Dispatch(const glm::ivec3& Threads, const glm::ivec3& KernelSize)
+	{
+		return true;
+	}
+#endif // USE_GPGPU
+
 	// ヘルパー関数 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Shader
 	// ShaderModuleの作成(Shaderをラップ・管理するためのもの)
