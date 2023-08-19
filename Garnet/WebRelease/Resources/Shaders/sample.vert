@@ -13,7 +13,19 @@ layout(binding = 0) uniform UniformBufferObject{
     mat4 lightVPMat;
 } ubo;
 
+struct TestData
+{
+    vec4 offset;
+    vec4 color;
+};
+
+layout(std430, binding = 1) buffer TestBufferObject
+{
+    TestData data[];
+} rw_TBO;
+
 layout(location = 0) out vec2 fragTexCoord;
+layout(location = 1) out vec4 fragColor;
 
 float rand(vec2 st)
 {
@@ -30,12 +42,15 @@ void main() {
     float f_id = float(id);
     float w = 10.0;
 
-    vec3 offset = vec3(
+    /*vec3 offset = vec3(
         w * (rand(vec2(f_id, 55.5)) * 2.0 - 1.0),
         w * (rand(vec2(943.22, f_id)) * 2.0 - 1.0),
         w * (rand(vec2(f_id + 11.111, f_id + 456.123)) * 2.0 - 1.0)
-    );
+    );*/
+
+    vec3 offset = rw_TBO.data[id].offset.xyz;
 
     gl_Position = ubo.proj * ubo.view * ubo.model * vec4(inPosition + offset, 1.0);
     fragTexCoord = inTexcoord;
+    fragColor = rw_TBO.data[id].color;
 }

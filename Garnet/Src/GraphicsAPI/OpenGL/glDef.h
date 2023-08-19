@@ -56,6 +56,7 @@
 #define GL_DEPTH_COMPONENT32F             0x8CAC
 #define GL_RENDERBUFFER                   0x8D41
 #define GL_DEPTH_ATTACHMENT               0x8D00
+#define GL_SHADER_STORAGE_BUFFER          0x90D2
 
 typedef char GLchar;
 typedef ptrdiff_t GLintptr;

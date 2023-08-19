@@ -7,7 +7,6 @@ layout(location = 0) out vec4 outColor;
 
 void main() {
     vec3 col = vec3(0.0);
-    //col.rg = fragTexCoord;
     col = fragColor.rgb;
 
     outColor = vec4(col, 1.0);

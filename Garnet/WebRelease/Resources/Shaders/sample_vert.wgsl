@@ -1,3 +1,12 @@
+struct TestData {
+    offset: vec4<f32>,
+    color: vec4<f32>,
+}
+
+struct TestBufferObject {
+    data: array<TestData>,
+}
+
 struct gl_PerVertex {
     @builtin(position) gl_Position: vec4<f32>,
     gl_PointSize: f32,
@@ -15,61 +24,49 @@ struct UniformBufferObject {
 struct VertexOutput {
     @builtin(position) gl_Position: vec4<f32>,
     @location(0) member: vec2<f32>,
+    @location(1) member_1: vec4<f32>,
 }
 
 var<private> gl_InstanceIndex_1: i32;
+@group(0) @binding(1) 
+var<storage, read_write> rw_TBO: TestBufferObject;
 var<private> perVertexStruct: gl_PerVertex = gl_PerVertex(vec4<f32>(0.0, 0.0, 0.0, 1.0), 1.0, array<f32,1u>(0.0), array<f32,1u>(0.0));
 @group(0) @binding(0) 
 var<uniform> ubo: UniformBufferObject;
 var<private> inPosition_1: vec3<f32>;
 var<private> fragTexCoord: vec2<f32>;
 var<private> inTexcoord_1: vec2<f32>;
+var<private> fragColor: vec4<f32>;
 var<private> inNormal_1: vec3<f32>;
 var<private> inTangent_1: vec4<f32>;
 var<private> inBioTangent_1: vec4<f32>;
-
-fn randvf2_(st: ptr<function, vec2<f32>>) -> f32 {
-    let _e29 = (*st);
-    return fract((sin(dot(_e29, vec2<f32>(12.989800453186035, 78.23300170898438))) * 43758.546875));
-}
 
 fn main_1() {
     var id: i32;
     var f_id: f32;
     var w: f32;
     var offset: vec3<f32>;
-    var param: vec2<f32>;
-    var param_1: vec2<f32>;
-    var param_2: vec2<f32>;
 
-    let _e35 = gl_InstanceIndex_1;
-    id = _e35;
-    let _e36 = id;
-    f_id = f32(_e36);
+    let _e25 = gl_InstanceIndex_1;
+    id = _e25;
+    let _e26 = id;
+    f_id = f32(_e26);
     w = 10.0;
-    let _e38 = w;
-    let _e39 = f_id;
-    param = vec2<f32>(_e39, 55.5);
-    let _e41 = randvf2_((&param));
-    let _e45 = w;
-    let _e46 = f_id;
-    param_1 = vec2<f32>(943.219970703125, _e46);
-    let _e48 = randvf2_((&param_1));
-    let _e52 = w;
-    let _e53 = f_id;
-    let _e55 = f_id;
-    param_2 = vec2<f32>((_e53 + 11.111000061035156), (_e55 + 456.12298583984375));
-    let _e58 = randvf2_((&param_2));
-    offset = vec3<f32>((_e38 * ((_e41 * 2.0) - 1.0)), (_e45 * ((_e48 * 2.0) - 1.0)), (_e52 * ((_e58 * 2.0) - 1.0)));
-    let _e64 = ubo.proj;
-    let _e66 = ubo.view;
-    let _e69 = ubo.model;
-    let _e71 = inPosition_1;
-    let _e72 = offset;
-    let _e73 = (_e71 + _e72);
-    perVertexStruct.gl_Position = (((_e64 * _e66) * _e69) * vec4<f32>(_e73.x, _e73.y, _e73.z, 1.0));
-    let _e80 = inTexcoord_1;
-    fragTexCoord = _e80;
+    let _e28 = id;
+    let _e32 = rw_TBO.data[_e28].offset;
+    offset = _e32.xyz;
+    let _e35 = ubo.proj;
+    let _e37 = ubo.view;
+    let _e40 = ubo.model;
+    let _e42 = inPosition_1;
+    let _e43 = offset;
+    let _e44 = (_e42 + _e43);
+    perVertexStruct.gl_Position = (((_e35 * _e37) * _e40) * vec4<f32>(_e44.x, _e44.y, _e44.z, 1.0));
+    let _e51 = inTexcoord_1;
+    fragTexCoord = _e51;
+    let _e52 = id;
+    let _e56 = rw_TBO.data[_e52].color;
+    fragColor = _e56;
     return;
 }
 
@@ -82,9 +79,10 @@ fn main(@builtin(instance_index) gl_InstanceIndex: u32, @location(0) inPosition:
     inTangent_1 = inTangent;
     inBioTangent_1 = inBioTangent;
     main_1();
-    let _e17 = perVertexStruct.gl_Position.y;
-    perVertexStruct.gl_Position.y = -(_e17);
-    let _e19 = perVertexStruct.gl_Position;
-    let _e20 = fragTexCoord;
-    return VertexOutput(_e19, _e20);
+    let _e18 = perVertexStruct.gl_Position.y;
+    perVertexStruct.gl_Position.y = -(_e18);
+    let _e20 = perVertexStruct.gl_Position;
+    let _e21 = fragTexCoord;
+    let _e22 = fragColor;
+    return VertexOutput(_e20, _e21, _e22);
 }

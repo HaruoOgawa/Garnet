@@ -23,7 +23,7 @@ namespace graphics
 	// Uniform
 	std::shared_ptr<graphics::CShaderBuffer> CMaterialCreateInfo::CreateUniformBuffer(const std::vector<SBindingLayout>& BindingLayoutList)
 	{
-		auto Buffer = std::make_shared<graphics::CShaderBuffer>(EBufferType::UNIFROM, BindingLayoutList);
+		auto Buffer = std::make_shared<graphics::CShaderBuffer>(EBufferType::UNIFORM, BindingLayoutList);
 		
 		return Buffer;
 	}

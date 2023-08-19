@@ -12,7 +12,7 @@ namespace graphics
 
 	enum class EBufferType
 	{
-		UNIFROM,
+		UNIFORM,
 		TEXTURE,
 		SHADERSTORAGE, // SSBO(Shader Storage Buffer Object)
 	};

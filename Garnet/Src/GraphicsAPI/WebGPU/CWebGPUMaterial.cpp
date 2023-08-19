@@ -37,7 +37,7 @@ namespace api
 	bool CWebGPUMaterial::Create(const std::vector<std::shared_ptr<graphics::CTexture>>& TextureList, const std::vector<std::shared_ptr<graphics::CTexture>>& CubeMapList)
 	{
 		if (!CreateShaderStages(m_CreateInfo)) return false;
-		if (!CreateUniformBuffer(m_CreateInfo)) return false; // ユニフォームバッファを生成
+		if (!CreateShaderBuffers(m_CreateInfo)) return false; // ユニフォームバッファを生成
 		if (!CreateBindGroup(m_CreateInfo, TextureList, CubeMapList)) return false; // バインドグループを生成(レンダリングパイプラインで使用するすべてのリソースをどのようにバインドするかを指定するオブジェクト)
 
 		// 生成処理が終わったので不要なリソースを解放する
@@ -132,7 +132,7 @@ namespace api
 		return true;
 	}
 
-	bool CWebGPUMaterial::CreateUniformBuffer(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo)
+	bool CWebGPUMaterial::CreateShaderBuffers(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo)
 	{
 		for (const auto& Buffer : m_ShaderBufferList)
 		{
@@ -141,7 +141,14 @@ namespace api
 			WGPUBuffer UniformBuffer;
 			const uint64_t ByteSize = static_cast<uint64_t>(math::GetNextPowerOfTwo(static_cast<unsigned int>(Data.size()))); // 2のn乗にする
 
-			if (!CreateWGUniformBuffer(UniformBuffer, WGPUBufferUsage_CopyDst | WGPUBufferUsage_Uniform, &Data[0], ByteSize)) return false;
+			if (Buffer->GetBufferType() == graphics::EBufferType::UNIFORM)
+			{
+				if (!CreateWGUniformBuffer(UniformBuffer, WGPUBufferUsage_CopyDst | WGPUBufferUsage_Uniform, &Data[0], ByteSize)) return false;
+			}
+			else if (Buffer->GetBufferType() == graphics::EBufferType::SHADERSTORAGE)
+			{
+				if (!CreateWGUniformBuffer(UniformBuffer, WGPUBufferUsage_CopyDst | WGPUBufferUsage_Storage, &Data[0], ByteSize)) return false;
+			}
 
 			m_WGPUUniformBufferList.push_back(UniformBuffer);
 			m_WGPUUniformBufferByteSizeList.push_back(static_cast<uint32_t>(ByteSize));
@@ -167,7 +174,16 @@ namespace api
 				InitDefalutBindGroupLayoutEntry(bindingLayout); // 初期化しないとブラウザ側でいろいろとエラーがでる・・・
 				bindingLayout.binding = Layout.second.BindingIndex; // バインドインデックス
 				bindingLayout.visibility = WGPUShaderStage_Vertex | WGPUShaderStage_Fragment; // アクセス権限。ここではおそらく頂点シェーダーとフラグメントシェーダーのみ読み取り可
-				bindingLayout.buffer.type = WGPUBufferBindingType_Uniform; // バインド先のバッファの種類
+				
+				if (Buffer->GetBufferType() == graphics::EBufferType::UNIFORM)
+				{
+					bindingLayout.buffer.type = WGPUBufferBindingType_Uniform; // バインド先のバッファの種類
+				}
+				else if (Buffer->GetBufferType() == graphics::EBufferType::SHADERSTORAGE)
+				{
+					bindingLayout.buffer.type = WGPUBufferBindingType_Storage; // バインド先のバッファの種類
+				}
+
 				bindingLayout.buffer.minBindingSize = Layout.second.ByteSize; // データ一つ当たりのサイズかな???
 				bindingLayout.buffer.hasDynamicOffset = m_UseDynamicBufferOffset; // ダイナミックユニフォーム
 
@@ -243,9 +259,7 @@ namespace api
 			for (const auto& Layout : Buffer->GetBindingLayoutList())
 			{
 				WGPUBindGroupEntry binding{};
-				int Offset = 0;
-				int Stride = 16 * 4;
-
+				
 				binding.nextInChain = nullptr; // 拡張機
 				binding.binding = Layout.second.BindingIndex;
 				binding.buffer = m_WGPUUniformBufferList[i];

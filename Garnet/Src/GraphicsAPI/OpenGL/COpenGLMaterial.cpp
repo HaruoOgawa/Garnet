@@ -32,7 +32,7 @@ namespace api
 	bool COpenGLMaterial::Create(const std::vector<std::shared_ptr<graphics::CTexture>>& TextureList, const std::vector<std::shared_ptr<graphics::CTexture>>& CubeMapList)
 	{
 		if (!CreateShaderStages()) return false;
-		if (!CreateUniformBuffers(TextureList, CubeMapList)) return false;
+		if (!CreateShaderBuffers(TextureList, CubeMapList)) return false;
 
 		m_TextureList = TextureList;
 		m_CubeMapList = CubeMapList;
@@ -63,6 +63,8 @@ namespace api
 		int index = 0;
 		for (const auto& Buffer : m_ShaderBufferList)
 		{
+			if (Buffer->GetBufferType() == graphics::EBufferType::SHADERSTORAGE) continue;
+
 			for (const auto& Layout : Buffer->GetBindingLayoutList())
 			{
 				if (index >= m_UBOList.size()) continue;
@@ -190,7 +192,7 @@ namespace api
 		return true;
 	}
 
-	bool COpenGLMaterial::CreateUniformBuffers(const std::vector<std::shared_ptr<graphics::CTexture>>& TextureList, const std::vector<std::shared_ptr<graphics::CTexture>>& CubeMapList)
+	bool COpenGLMaterial::CreateShaderBuffers(const std::vector<std::shared_ptr<graphics::CTexture>>& TextureList, const std::vector<std::shared_ptr<graphics::CTexture>>& CubeMapList)
 	{
 		SetActive();
 
@@ -198,6 +200,33 @@ namespace api
 		{
 			for (const auto& Layout : Buffer->GetBindingLayoutList())
 			{
+				GLenum target;
+				GLenum usage;
+
+				switch (Buffer->GetBufferType())
+				{
+					case graphics::EBufferType::UNIFORM:
+						{
+							target = GL_UNIFORM_BUFFER;
+							usage = GL_STATIC_DRAW;
+						}
+						break;
+
+					case graphics::EBufferType::SHADERSTORAGE:
+						{
+							target = GL_SHADER_STORAGE_BUFFER;
+							usage = GL_DYNAMIC_DRAW;
+						}
+						break;
+
+					default:
+						{
+							target = GL_UNIFORM_BUFFER;
+							usage = GL_STATIC_DRAW;
+						}
+						break;
+				}
+
 				// UBOを生成
 				GLuint uboIndex;
 				glGenBuffers(1, &uboIndex);
@@ -205,13 +234,12 @@ namespace api
 				// Uniformのbinding indexを割り当てる
 				GLuint blockIndex = glGetUniformBlockIndex(m_ShaderPrg, Layout.second.BindingName.c_str());
 				glUniformBlockBinding(m_ShaderPrg, blockIndex, Layout.second.BindingIndex); // ShaderPrgとBinding Blockを紐づける
-				glBindBufferRange(GL_UNIFORM_BUFFER, Layout.second.BindingIndex, uboIndex, 0, Layout.second.ByteSize); // UBOとBinding Blockを紐づける
+				glBindBufferRange(target, Layout.second.BindingIndex, uboIndex, 0, Layout.second.ByteSize); // UBOとBinding Blockを紐づける
 
 				// データの受け渡し
-				glBindBuffer(GL_UNIFORM_BUFFER, uboIndex);
-				glBufferData(GL_UNIFORM_BUFFER, Layout.second.ByteSize, &Buffer->GetData()[Layout.second.ByteOffset], GL_STATIC_DRAW); // Bufferのデータを初期化・メモリ確保
-				//glBufferSubData(GL_UNIFORM_BUFFER, 0, Layout.second.ByteSize, &Buffer->GetData()[Layout.second.ByteOffset]); // Bufferのデータを更新
-				glBindBuffer(GL_UNIFORM_BUFFER, 0);
+				glBindBuffer(target, uboIndex);
+				glBufferData(target, Layout.second.ByteSize, &Buffer->GetData()[Layout.second.ByteOffset], usage); // Bufferのデータを初期化・メモリ確保
+				glBindBuffer(target, 0);
 
 				m_UBOList.push_back(uboIndex);
 			}
