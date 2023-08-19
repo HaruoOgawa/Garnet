@@ -176,7 +176,7 @@ namespace imageeffect
 			UniformBuffer->AddData("KernelSize", &glm::ivec1(m_KernelSize)[0], sizeof(glm::ivec1), 0);
 			UniformBuffer->AddData("Direction", &glm::vec2(0.0f)[0], sizeof(glm::vec2), 0);
 
-			MaterialX->AddUniformBuffer(UniformBuffer);
+			MaterialX->AddShaderBuffer(UniformBuffer);
 		}
 		
 		/*{
@@ -185,7 +185,7 @@ namespace imageeffect
 
 			UniformBuffer->RecalculateBindingLayoutOffset();
 
-			MaterialX->AddUniformBuffer(UniformBuffer);
+			MaterialX->AddShaderBuffer(UniformBuffer);
 		}*/
 		
 		{
@@ -195,7 +195,7 @@ namespace imageeffect
 			UniformBuffer->AddData("KernelSize", &glm::ivec1(m_KernelSize)[0], sizeof(glm::ivec1), 0);
 			UniformBuffer->AddData("Direction", &glm::vec2(0.0f)[0], sizeof(glm::vec2), 0);
 
-			MaterialY->AddUniformBuffer(UniformBuffer);
+			MaterialY->AddShaderBuffer(UniformBuffer);
 		}
 
 		/*{
@@ -204,7 +204,7 @@ namespace imageeffect
 
 			UniformBuffer->RecalculateBindingLayoutOffset();
 
-			MaterialY->AddUniformBuffer(UniformBuffer);
+			MaterialY->AddShaderBuffer(UniformBuffer);
 		}*/
 		
 		// UBO1
@@ -214,7 +214,7 @@ namespace imageeffect
 
 			UniformBuffer->RecalculateBindingLayoutOffset();
 
-			Material->AddUniformBuffer(UniformBuffer);
+			Material->AddShaderBuffer(UniformBuffer);
 		}*/
 
 		// Bind Texture

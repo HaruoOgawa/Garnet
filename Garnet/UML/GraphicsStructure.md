@@ -66,17 +66,17 @@ classDiagram
 
   CMaterial ..|> CPrimitive
   
-  class CUniformBufferObject{
+  class CShaderBufferObject{
     - m_UniformBlockList
   }
   
-  CUniformBufferObject ..|> CMaterial
+  CShaderBufferObject ..|> CMaterial
   
   class CUniformBlock{
     - m_UniformList
   }
   
-  CUniformBlock ..|> CUniformBufferObject
+  CUniformBlock ..|> CShaderBufferObject
   
   class CUniformValue{
     - int m_Size

@@ -35,7 +35,7 @@ namespace resource
 		UniforBuffer->AddData("alpha", &m_Alpha, sizeof(float), 0);
 		UniforBuffer->AddData("pad", &glm::vec1(0.0f)[0], sizeof(glm::vec1), 0);
 
-		Material->AddUniformBuffer(UniforBuffer);
+		Material->AddShaderBuffer(UniforBuffer);
 
 		Material->SetEnabledZTest(false);
 		Material->SetCullMode(graphics::ECullMode::CULL_NONE);

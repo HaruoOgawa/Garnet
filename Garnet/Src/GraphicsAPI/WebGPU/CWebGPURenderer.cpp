@@ -68,7 +68,7 @@ namespace renderer
 		wgpuRenderPassEncoderSetIndexBuffer(m_pGraphicsAPI->GetCurrentRenderPass(), m_IndexBuffer, WGPUIndexFormat_Uint16, 0, m_IndexCount * sizeof(uint16_t));
 
 		// バインドグループを割り当てる
-		if (pWebGPUMat->IsUseDynamicUniform())
+		if (pWebGPUMat->IsUseDynamicBufferOffset())
 		{
 			std::vector<uint32_t> dynamicOffsetList;
 			for (const auto& Size : pWebGPUMat->GetBindingRefSizeList())

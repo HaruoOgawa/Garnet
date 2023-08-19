@@ -14,6 +14,7 @@ namespace graphics
 	{
 		UNIFROM,
 		TEXTURE,
+		SHADERSTORAGE, // SSBO(Shader Storage Buffer Object)
 	};
 
 	class IBuffer
@@ -22,8 +23,6 @@ namespace graphics
 		virtual void AddData(const std::string& Name, const void* Data, int ByteSize, int BindingIndex) = 0;
 		virtual void SetData(const std::string& Name, const void* Data, int ByteSize) = 0;
 		virtual const std::vector<unsigned char>& GetData() const = 0;
-
-		virtual const std::map<int, SBindingLayout>& GetBindingLayoutList() const = 0;
 
 		virtual EBufferType GetBufferType() const = 0;
 

@@ -3,8 +3,8 @@
 #include <vector>
 #include <memory>
 #include <string>
-#include "CUniformBuffer.h"
-#include "CUniformBufferDescriptor.h"
+#include "CShaderBuffer.h"
+#include "CShaderBufferDescriptor.h"
 #include "../GraphicsAPI/CMaterialCreateInfo.h"
 #include "../File/CFile.h"
 #include "../../Interface/IGraphicsAPI.h"
@@ -20,7 +20,7 @@ namespace graphics { class CDrawInfo; }
 namespace graphics
 {
 	class CMaterialCreateInfo;
-	class CUniformBuffer;
+	class CShaderBuffer;
 
 	enum class ECullMode
 	{
@@ -34,11 +34,11 @@ namespace graphics
 	protected:
 		std::shared_ptr<CMaterialCreateInfo> m_CreateInfo;
 
-		std::vector<std::shared_ptr<CUniformBuffer>> m_UniformBufferList;
+		std::vector<std::shared_ptr<CShaderBuffer>> m_ShaderBufferList;
 		std::vector<STextureBindingLayout> m_TextureBindingLayoutList;
 
 		int											 m_RefCount;
-		bool									     m_UseDynamicUniform;
+		bool									     m_UseDynamicBufferOffset;
 
 		std::vector<uint32_t> m_BindingRefSizeList; // GLSLの各bindingが参照しているバッファのサイズ
 
@@ -64,18 +64,18 @@ namespace graphics
 		virtual bool SetCommonUniform(float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo) = 0;
 		virtual bool BuildDrawBuffer(int DynamicOffsetNum) = 0;
 
-		virtual void AddUniformBuffer(const std::shared_ptr<CUniformBuffer>& Buffer);
+		virtual void AddShaderBuffer(const std::shared_ptr<CShaderBuffer>& Buffer);
 		virtual void AddTextureBindingLayout(const STextureBindingLayout& Layout);
 
 		virtual void SetUniformValue(const std::string Name, const void* Value, int DynamicOffsetNum = -1) = 0;
 
 		virtual void IncreaseRefCount();
 		virtual int GetRefCount() const;
-		virtual void SetRefStatus(int RefCount, bool UseDynamicUniform);
+		virtual void SetRefStatus(int RefCount, bool UseDynamicBufferOffset);
 
 		virtual const std::vector<uint32_t>& GetBindingRefSizeList() const;
 
-		virtual bool IsUseDynamicUniform() const;
+		virtual bool IsUseDynamicBufferOffset() const;
 
 #ifdef USE_GPGPU
 		virtual bool Dispatch(const glm::ivec3& Threads, const glm::ivec3& KernelSize) = 0;

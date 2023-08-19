@@ -3,7 +3,7 @@
 #include <vector>
 #include <string>
 #include "../Interface/IBuffer.h"
-#include "../Graphics/CUniformBuffer.h"
+#include "../Graphics/CShaderBuffer.h"
 
 namespace graphics
 {
@@ -14,7 +14,7 @@ namespace graphics
 		GLSL,
 	};
 
-	class CUniformBuffer;
+	class CShaderBuffer;
 
 	class CMaterialCreateInfo
 	{
@@ -31,7 +31,8 @@ namespace graphics
 		virtual ~CMaterialCreateInfo();
 
 		// Uniform
-		static std::shared_ptr<graphics::CUniformBuffer> CreateUniformBuffer(const std::vector<SBindingLayout>& BindingLayoutList);
+		static std::shared_ptr<graphics::CShaderBuffer> CreateUniformBuffer(const std::vector<SBindingLayout>& BindingLayoutList);
+		static std::shared_ptr<graphics::CShaderBuffer> CreateShaderStorageBuffer(const std::vector<SBindingLayout>& BindingLayoutList);
 
 		// Shader
 		EShaderType GetShaderType() const;

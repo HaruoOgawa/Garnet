@@ -69,9 +69,9 @@ namespace api
 
 	void CWebGPUMaterial::SetUniformValue(const std::string Name, const void* Value, int DynamicOffsetNum)
 	{
-		for (int i = 0; i < m_UniformBufferList.size(); i++)
+		for (int i = 0; i < m_ShaderBufferList.size(); i++)
 		{
-			auto& UniformBuffer = m_UniformBufferList[i];
+			auto& UniformBuffer = m_ShaderBufferList[i];
 			auto UniformBufferByteSize = static_cast<uint64_t>(m_WGPUUniformBufferByteSizeList[i]);
 			const auto& UniformDesc = UniformBuffer->GetDescriptor();
 
@@ -82,7 +82,7 @@ namespace api
 				const int ByteOffset = UniformData->second.ByteOffset;
 				const int ByteSize = UniformData->second.ByteSize;
 
-				if (m_UseDynamicUniform)
+				if (m_UseDynamicBufferOffset)
 				{
 					if (DynamicOffsetNum == -1)
 					{
@@ -134,7 +134,7 @@ namespace api
 
 	bool CWebGPUMaterial::CreateUniformBuffer(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo)
 	{
-		for (const auto& Buffer : m_UniformBufferList)
+		for (const auto& Buffer : m_ShaderBufferList)
 		{
 			const auto& Data = Buffer->GetData();
 
@@ -159,7 +159,7 @@ namespace api
 		std::vector<WGPUBindGroupLayoutEntry> bindingLayoutList;
 
 		// UBO
-		for (const auto& Buffer : m_UniformBufferList)
+		for (const auto& Buffer : m_ShaderBufferList)
 		{
 			for (const auto& Layout : Buffer->GetBindingLayoutList())
 			{
@@ -169,7 +169,7 @@ namespace api
 				bindingLayout.visibility = WGPUShaderStage_Vertex | WGPUShaderStage_Fragment; // アクセス権限。ここではおそらく頂点シェーダーとフラグメントシェーダーのみ読み取り可
 				bindingLayout.buffer.type = WGPUBufferBindingType_Uniform; // バインド先のバッファの種類
 				bindingLayout.buffer.minBindingSize = Layout.second.ByteSize; // データ一つ当たりのサイズかな???
-				bindingLayout.buffer.hasDynamicOffset = m_UseDynamicUniform; // ダイナミックユニフォーム
+				bindingLayout.buffer.hasDynamicOffset = m_UseDynamicBufferOffset; // ダイナミックユニフォーム
 
 				bindingLayoutList.push_back(bindingLayout);
 			}
@@ -237,9 +237,9 @@ namespace api
 		// --> その通り、たぶんバッファのバインディングとかバインディングのオフセットとか
 		// UBO
 		std::vector<WGPUBindGroupEntry> bindingList;
-		for (int i = 0; i < m_UniformBufferList.size(); i++)
+		for (int i = 0; i < m_ShaderBufferList.size(); i++)
 		{
-			const auto& Buffer = m_UniformBufferList[i];
+			const auto& Buffer = m_ShaderBufferList[i];
 			for (const auto& Layout : Buffer->GetBindingLayoutList())
 			{
 				WGPUBindGroupEntry binding{};
@@ -369,12 +369,12 @@ namespace api
 		bufferDesc.label = "Buffer";
 		bufferDesc.usage = Usage; // バッファの用途
 		bufferDesc.mappedAtCreation = false; // ???
-		bufferDesc.size = ByteSize * ((m_UseDynamicUniform) ? m_RefCount : 1);
+		bufferDesc.size = ByteSize * ((m_UseDynamicBufferOffset) ? m_RefCount : 1);
 
 		Buffer = wgpuDeviceCreateBuffer(m_pGraphicsAPI->GetLogicalDevice(), &bufferDesc);
 
 		// バッファにデータを書き込む
-		if (m_UseDynamicUniform)
+		if (m_UseDynamicBufferOffset)
 		{
 			for (int i = 0; i < m_RefCount; i++)
 			{

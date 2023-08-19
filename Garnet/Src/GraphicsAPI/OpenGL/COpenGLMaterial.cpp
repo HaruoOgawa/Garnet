@@ -61,7 +61,7 @@ namespace api
 		SetActive();
 
 		int index = 0;
-		for (const auto& Buffer : m_UniformBufferList)
+		for (const auto& Buffer : m_ShaderBufferList)
 		{
 			for (const auto& Layout : Buffer->GetBindingLayoutList())
 			{
@@ -132,9 +132,9 @@ namespace api
 
 	void COpenGLMaterial::SetUniformValue(const std::string Name, const void* Value, int DynamicOffsetNum)
 	{
-		for (int i = 0; i < m_UniformBufferList.size(); i++)
+		for (int i = 0; i < m_ShaderBufferList.size(); i++)
 		{
-			auto& UniformBuffer = m_UniformBufferList[i];
+			auto& UniformBuffer = m_ShaderBufferList[i];
 			const auto& UniformDesc = UniformBuffer->GetDescriptor();
 
 			const auto& DataList = UniformDesc->GetDataList();
@@ -194,7 +194,7 @@ namespace api
 	{
 		SetActive();
 
-		for (const auto& Buffer : m_UniformBufferList)
+		for (const auto& Buffer : m_ShaderBufferList)
 		{
 			for (const auto& Layout : Buffer->GetBindingLayoutList())
 			{

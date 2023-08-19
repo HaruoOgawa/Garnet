@@ -613,8 +613,8 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClInclude Include="Src\Graphics\SBindingLayout.h" />
     <ClInclude Include="Src\Math\CTransform.h" />
     <ClInclude Include="Src\Object\C3DObject.h" />
-    <ClInclude Include="Src\Graphics\CUniformBuffer.h" />
-    <ClInclude Include="Src\Graphics\CUniformBufferDescriptor.h" />
+    <ClInclude Include="Src\Graphics\CShaderBuffer.h" />
+    <ClInclude Include="Src\Graphics\CShaderBufferDescriptor.h" />
     <ClInclude Include="Src\Interface\IBuffer.h" />
     <ClInclude Include="Src\Interface\IDescriptor.h" />
     <ClInclude Include="Src\Library\glfw3webgpu\glfw3webgpu.h" />
@@ -962,8 +962,8 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClCompile Include="Src\Main\DemoMain\DemoMain.cpp" />
     <ClCompile Include="Src\Math\CTransform.cpp" />
     <ClCompile Include="Src\Object\C3DObject.cpp" />
-    <ClCompile Include="Src\Graphics\CUniformBuffer.cpp" />
-    <ClCompile Include="Src\Graphics\CUniformBufferDescriptor.cpp" />
+    <ClCompile Include="Src\Graphics\CShaderBuffer.cpp" />
+    <ClCompile Include="Src\Graphics\CShaderBufferDescriptor.cpp" />
     <ClCompile Include="Src\Library\glfw3webgpu\glfw3webgpu.c" />
     <ClCompile Include="Src\Library\glm\glm\detail\glm.cpp" />
     <ClCompile Include="Src\Scene\CScriptScene.cpp" />

@@ -47,10 +47,10 @@ add_executable(
 	../src/Graphics/CPrimitive.h
 	../src/Graphics/CTexture.cpp
 	../src/Graphics/CTexture.h
-	../src/Graphics/CUniformBuffer.cpp
-	../src/Graphics/CUniformBuffer.h
-	../src/Graphics/CUniformBufferDescriptor.cpp
-	../src/Graphics/CUniformBufferDescriptor.h
+	../src/Graphics/CShaderBuffer.cpp
+	../src/Graphics/CShaderBuffer.h
+	../src/Graphics/CShaderBufferDescriptor.cpp
+	../src/Graphics/CShaderBufferDescriptor.h
 	../src/Graphics/ETextureType.h
 	../src/Graphics/SBindingLayout.h
 	../src/Graphics/STextureBindingLayout.h

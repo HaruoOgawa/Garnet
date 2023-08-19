@@ -284,7 +284,7 @@ namespace gltf
 				}
 
 				// マテリアルにUBOを割り当てる
-				material->AddUniformBuffer(UniformBuffer);
+				material->AddShaderBuffer(UniformBuffer);
 			}
 
 			// テクスチャの割り当て

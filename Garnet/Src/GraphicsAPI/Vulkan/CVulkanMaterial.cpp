@@ -69,16 +69,16 @@ namespace api
 
 	bool CVulkanMaterial::BuildDrawBuffer(int DynamicOffsetNum)
 	{
-		for (int i = 0; i < m_UniformBufferList.size(); i++)
+		for (int i = 0; i < m_ShaderBufferList.size(); i++)
 		{
 			auto ByteSize = m_VKUniformBufferSizeList[m_pGraphicsAPI->GetCurrentFrame()][i];
-			auto ByteOffset = ((m_UseDynamicUniform)? (DynamicOffsetNum - 1) * ByteSize : 0);
+			auto ByteOffset = ((m_UseDynamicBufferOffset)? (DynamicOffsetNum - 1) * ByteSize : 0);
 
 			// バッファデータの更新
 			void* BuffersMappedList;
 			vkMapMemory(m_pGraphicsAPI->GetLogicalDevice(), m_VKUniformBufferMemoryList[m_pGraphicsAPI->GetCurrentFrame()][i], ByteOffset, ByteSize, 0, &BuffersMappedList);
 
-			const auto& BufferData = m_UniformBufferList[i]->GetData();
+			const auto& BufferData = m_ShaderBufferList[i]->GetData();
 			auto bufferSize = BufferData.size();
 
 			std::memcpy(BuffersMappedList, &BufferData[0], bufferSize);
@@ -91,9 +91,9 @@ namespace api
 
 	void CVulkanMaterial::SetUniformValue(const std::string Name, const void* Value, int DynamicOffsetNum)
 	{
-		for (int i = 0; i < m_UniformBufferList.size(); i++)
+		for (int i = 0; i < m_ShaderBufferList.size(); i++)
 		{
-			auto& UniformBuffer = m_UniformBufferList[i];
+			auto& UniformBuffer = m_ShaderBufferList[i];
 			const auto& UniformDesc = UniformBuffer->GetDescriptor();
 
 			const auto& DataList = UniformDesc->GetDataList();
@@ -195,14 +195,14 @@ namespace api
 		std::vector<VkDescriptorSetLayoutBinding> bindings;
 		
 		// UBOのバインドに関する設定
-		for (const auto& Buffer : m_UniformBufferList)
+		for (const auto& Buffer : m_ShaderBufferList)
 		{
 			for (const auto& Layout : Buffer->GetBindingLayoutList())
 			{
 				VkDescriptorSetLayoutBinding LayoutBinding{}; // VkDescriptorSetLayoutBindingはおそらくlayout(location = 0), WebGPUでいう @binding(n)のこと. ただしVulkanは @groupは存在しない
 				LayoutBinding.binding = Layout.second.BindingIndex; // バインディングインデックス
 				
-				if (m_UseDynamicUniform)
+				if (m_UseDynamicBufferOffset)
 				{
 					LayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC; // バッファタイプ
 				}
@@ -268,7 +268,7 @@ namespace api
 
 		for (size_t i = 0; i < m_pGraphicsAPI->GetMaxFramesInFlight(); i++)
 		{
-			for (const auto& Buffer : m_UniformBufferList)
+			for (const auto& Buffer : m_ShaderBufferList)
 			{
 				const auto& Data = Buffer->GetData();
 				const uint32_t ByteSize = static_cast<uint32_t>(math::GetNextPowerOfTwo(static_cast<unsigned int>(Data.size()))); // 2のn乗にする
@@ -277,7 +277,7 @@ namespace api
 				VkDeviceMemory BufferMemory;
 
 				// バッファの作成
-				if (m_UseDynamicUniform)
+				if (m_UseDynamicBufferOffset)
 				{
 					m_pGraphicsAPI->CreateBuffer(ByteSize * m_RefCount, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, UniformBuffer, BufferMemory);
 				}
@@ -300,11 +300,11 @@ namespace api
 		std::vector<VkDescriptorPoolSize> poolSizes;
 
 		// UBOのプール
-		for (const auto& Buffer : m_UniformBufferList)
+		for (const auto& Buffer : m_ShaderBufferList)
 		{
 			VkDescriptorPoolSize poolSize{};
 
-			if (m_UseDynamicUniform)
+			if (m_UseDynamicBufferOffset)
 			{
 				poolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
 			}
@@ -372,9 +372,9 @@ namespace api
 		for (size_t FrameIndex = 0; FrameIndex < m_pGraphicsAPI->GetMaxFramesInFlight(); FrameIndex++)
 		{
 			//
-			for (int BufferIndex = 0; BufferIndex < m_UniformBufferList.size(); BufferIndex++)
+			for (int BufferIndex = 0; BufferIndex < m_ShaderBufferList.size(); BufferIndex++)
 			{
-				const auto& Buffer = m_UniformBufferList[BufferIndex];
+				const auto& Buffer = m_ShaderBufferList[BufferIndex];
 				size_t UniformLayoutSize = Buffer->GetBindingLayoutList().size();
 				size_t TexLayoutSize = m_TextureBindingLayoutList.size() * 2; // ImageViewとSamplerがあるので2倍にしている
 
@@ -397,7 +397,7 @@ namespace api
 					bufferInfoList[BufferLayoutIndex].offset = Layout.second.ByteOffset; // バッファオフセット
 					bufferInfoList[BufferLayoutIndex].range = Layout.second.ByteSize; // サイズかな？
 
-					if (m_UseDynamicUniform)
+					if (m_UseDynamicBufferOffset)
 					{
 						descriptorWrites[LayoutIndex].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC; // どのタイプのコマンドを発行してもらうのか
 					}

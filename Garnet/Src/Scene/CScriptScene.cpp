@@ -54,7 +54,16 @@ namespace scene
 
 					UniformBuffer->RecalculateBindingLayoutOffset();
 
-					Material0->AddUniformBuffer(UniformBuffer);
+					Material0->AddShaderBuffer(UniformBuffer);
+
+					//
+					auto SSBO = graphics::CMaterialCreateInfo::CreateShaderStorageBuffer({ graphics::SBindingLayout("TestBufferObject", 1) });
+
+					SSBO->AddData("rw_TBO", &std::vector(0.0f, 512)[0], sizeof(float) * 512, 1);
+
+					SSBO->RecalculateBindingLayoutOffset();
+
+					Material0->AddShaderBuffer(SSBO);
 				}
 
 				m_TestObject->AddMaterial(Material0);
