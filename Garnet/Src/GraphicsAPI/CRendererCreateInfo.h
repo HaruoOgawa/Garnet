@@ -27,7 +27,7 @@ namespace renderer
 
 #ifdef USE_GPGPU
 		void SetInstanceDrawCount(int InstanceCount);
-		int  GetInstanceCount() const;
 #endif // USE_GPGPU
+		int  GetInstanceCount() const;
 	};
 }

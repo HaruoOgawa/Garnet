@@ -10,6 +10,7 @@ namespace renderer
 	CWebGPURenderer::CWebGPURenderer(api::CWebGPUAPI* pGraphicsAPI, const std::string& PassName):
 		m_pGraphicsAPI(pGraphicsAPI),
 		m_PassName(PassName),
+		m_InstanceCount(1),
 		m_GraphicsPipeline(nullptr),
 		m_VertexCount(0),
 		m_IndexBuffer(nullptr),
@@ -37,6 +38,8 @@ namespace renderer
 	bool CWebGPURenderer::Create(const std::shared_ptr<CRendererCreateInfo>& createInfo, const std::shared_ptr<graphics::CMaterial>& Material)
 	{
 		api::CWebGPUMaterial* pWebGPUMat = static_cast<api::CWebGPUMaterial*>(Material.get());
+
+		m_InstanceCount = createInfo->GetInstanceCount();
 
 		if (!CreateVertexBuffer(createInfo)) return false; // 頂点バッファを生成
 		if (!CreateIndexBuffer(createInfo)) return false; //インデックスバッファを生成
@@ -82,7 +85,7 @@ namespace renderer
 		}
 
 		// 描画を実行
-		wgpuRenderPassEncoderDrawIndexed(m_pGraphicsAPI->GetCurrentRenderPass(), static_cast<uint32_t>(m_IndexCount), 1, 0, 0, 0);
+		wgpuRenderPassEncoderDrawIndexed(m_pGraphicsAPI->GetCurrentRenderPass(), static_cast<uint32_t>(m_IndexCount), m_InstanceCount, 0, 0, 0);
 
 		return true;
 	}

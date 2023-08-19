@@ -102,6 +102,7 @@ typedef ptrdiff_t GLsizeiptr;
 	GL_FUNC(void,   BindRenderbuffer,	  GLenum target, GLuint renderbuffer) \
 	GL_FUNC(void,   RenderbufferStorage,  GLenum target, GLenum internalformat, GLsizei width, GLsizei height) \
 	GL_FUNC(void,   FramebufferRenderbuffer, GLenum target, GLenum attachment, GLenum renderbuffertarget, GLuint renderbuffer) \
+	GL_FUNC(void,	DrawElementsInstanced, 	GLenum mode, GLsizei count, GLenum type, const void* indices, GLsizei instancecount) \
 /* end */
 
 // プリプロセッサ芸でまずGL_FUNC_LISTの中身をtypedef や externで展開する
