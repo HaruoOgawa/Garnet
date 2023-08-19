@@ -29,7 +29,7 @@ struct VertexOutput {
 
 var<private> gl_InstanceIndex_1: i32;
 @group(0) @binding(1) 
-var<storage, read_write> rw_TBO: TestBufferObject;
+var<storage> rw_TBO: TestBufferObject;
 var<private> perVertexStruct: gl_PerVertex = gl_PerVertex(vec4<f32>(0.0, 0.0, 0.0, 1.0), 1.0, array<f32,1u>(0.0), array<f32,1u>(0.0));
 @group(0) @binding(0) 
 var<uniform> ubo: UniformBufferObject;
@@ -43,30 +43,25 @@ var<private> inBioTangent_1: vec4<f32>;
 
 fn main_1() {
     var id: i32;
-    var f_id: f32;
-    var w: f32;
     var offset: vec3<f32>;
 
-    let _e25 = gl_InstanceIndex_1;
-    id = _e25;
-    let _e26 = id;
-    f_id = f32(_e26);
-    w = 10.0;
-    let _e28 = id;
-    let _e32 = rw_TBO.data[_e28].offset;
-    offset = _e32.xyz;
-    let _e35 = ubo.proj;
-    let _e37 = ubo.view;
-    let _e40 = ubo.model;
-    let _e42 = inPosition_1;
-    let _e43 = offset;
-    let _e44 = (_e42 + _e43);
-    perVertexStruct.gl_Position = (((_e35 * _e37) * _e40) * vec4<f32>(_e44.x, _e44.y, _e44.z, 1.0));
-    let _e51 = inTexcoord_1;
-    fragTexCoord = _e51;
-    let _e52 = id;
-    let _e56 = rw_TBO.data[_e52].color;
-    fragColor = _e56;
+    let _e22 = gl_InstanceIndex_1;
+    id = _e22;
+    let _e23 = id;
+    let _e27 = rw_TBO.data[_e23].offset;
+    offset = _e27.xyz;
+    let _e30 = ubo.proj;
+    let _e32 = ubo.view;
+    let _e35 = ubo.model;
+    let _e37 = inPosition_1;
+    let _e38 = offset;
+    let _e39 = (_e37 + _e38);
+    perVertexStruct.gl_Position = (((_e30 * _e32) * _e35) * vec4<f32>(_e39.x, _e39.y, _e39.z, 1.0));
+    let _e46 = inTexcoord_1;
+    fragTexCoord = _e46;
+    let _e47 = id;
+    let _e51 = rw_TBO.data[_e47].color;
+    fragColor = _e51;
     return;
 }
 

@@ -173,15 +173,16 @@ namespace api
 				WGPUBindGroupLayoutEntry bindingLayout{};
 				InitDefalutBindGroupLayoutEntry(bindingLayout); // 初期化しないとブラウザ側でいろいろとエラーがでる・・・
 				bindingLayout.binding = Layout.second.BindingIndex; // バインドインデックス
-				bindingLayout.visibility = WGPUShaderStage_Vertex | WGPUShaderStage_Fragment; // アクセス権限。ここではおそらく頂点シェーダーとフラグメントシェーダーのみ読み取り可
 				
 				if (Buffer->GetBufferType() == graphics::EBufferType::UNIFORM)
 				{
+					bindingLayout.visibility = WGPUShaderStage_Vertex | WGPUShaderStage_Fragment; // アクセス権限。ここではおそらく頂点シェーダーとフラグメントシェーダーのみ読み取り可
 					bindingLayout.buffer.type = WGPUBufferBindingType_Uniform; // バインド先のバッファの種類
 				}
 				else if (Buffer->GetBufferType() == graphics::EBufferType::SHADERSTORAGE)
 				{
-					bindingLayout.buffer.type = WGPUBufferBindingType_Storage; // バインド先のバッファの種類
+					bindingLayout.visibility = WGPUShaderStage_Vertex | WGPUShaderStage_Fragment;
+					bindingLayout.buffer.type = WGPUBufferBindingType_ReadOnlyStorage; // Compute Shader以外に渡すSSBOの場合はReadOnlyのものを使用する必要がある
 				}
 
 				bindingLayout.buffer.minBindingSize = Layout.second.ByteSize; // データ一つ当たりのサイズかな???
