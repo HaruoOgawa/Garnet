@@ -29,7 +29,7 @@ struct VertexOutput {
 
 var<private> gl_InstanceIndex_1: i32;
 @group(0) @binding(1) 
-var<storage> rw_TBO: TestBufferObject;
+var<storage> r_TBO: TestBufferObject;
 var<private> perVertexStruct: gl_PerVertex = gl_PerVertex(vec4<f32>(0.0, 0.0, 0.0, 1.0), 1.0, array<f32,1u>(0.0), array<f32,1u>(0.0));
 @group(0) @binding(0) 
 var<uniform> ubo: UniformBufferObject;
@@ -48,7 +48,7 @@ fn main_1() {
     let _e22 = gl_InstanceIndex_1;
     id = _e22;
     let _e23 = id;
-    let _e27 = rw_TBO.data[_e23].offset;
+    let _e27 = r_TBO.data[_e23].offset;
     offset = _e27.xyz;
     let _e30 = ubo.proj;
     let _e32 = ubo.view;
@@ -60,7 +60,7 @@ fn main_1() {
     let _e46 = inTexcoord_1;
     fragTexCoord = _e46;
     let _e47 = id;
-    let _e51 = rw_TBO.data[_e47].color;
+    let _e51 = r_TBO.data[_e47].color;
     fragColor = _e51;
     return;
 }

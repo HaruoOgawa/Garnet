@@ -1685,18 +1685,14 @@
     <None Include="Commands\UTF8Encorder.py" />
     <None Include="WebRelease\Resources\Shaders\frag.spv" />
     <None Include="WebRelease\Resources\Shaders\vert.spv" />
-    <None Include="Resources\Shaders\sample.frag" />
-    <None Include="Resources\Shaders\sample.vert" />
+    <None Include="Resources\Shaders\gpgpu_sample.frag" />
+    <None Include="Resources\Shaders\gpgpu_sample.vert" />
     <None Include="Commands\glslc_ALL.bat">
       <Filter>ソース ファイル</Filter>
     </None>
     <None Include="Commands\wgslc_ALL.bat">
       <Filter>ソース ファイル</Filter>
     </None>
-    <None Include="Resources\Shaders\sample_frag.spv" />
-    <None Include="Resources\Shaders\sample_frag.wgsl" />
-    <None Include="Resources\Shaders\sample_vert.spv" />
-    <None Include="Resources\Shaders\sample_vert.wgsl" />
     <None Include="Resources\Shaders\gltfpbr.vert" />
     <None Include="Resources\Shaders\gltfpbr.frag" />
     <None Include="Resources\Shaders\shadow_debug.vert" />
@@ -1708,6 +1704,7 @@
     <None Include="Resources\Shaders\gltfpbr_NativeSafe_frag.wgsl" />
     <None Include="Resources\Shaders\loadingbar.frag" />
     <None Include="Resources\Shaders\loadingbar.vert" />
+    <None Include="Resources\Shaders\gpgpu_sample.comp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="EmscriptenBuild\CMakeLists.txt" />

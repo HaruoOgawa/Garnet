@@ -18,8 +18,9 @@ namespace scene
 		m_DepthVertex(std::make_shared<file::CFile>("Resources\\Shaders\\depth" + pGraphicsAPI->GetVertexShaderExtension())),
 		m_DepthFragment(std::make_shared<file::CFile>("Resources\\Shaders\\depth" + pGraphicsAPI->GetFragmentShaderExtension())),
 
-		m_VertexShader(std::make_shared<file::CFile>("Resources\\Shaders\\sample" + pGraphicsAPI->GetVertexShaderExtension())),
-		m_FragmentShader(std::make_shared<file::CFile>("Resources\\Shaders\\sample" + pGraphicsAPI->GetFragmentShaderExtension())),
+		m_VertexShader(std::make_shared<file::CFile>("Resources\\Shaders\\gpgpu_sample" + pGraphicsAPI->GetVertexShaderExtension())),
+		m_FragmentShader(std::make_shared<file::CFile>("Resources\\Shaders\\gpgpu_sample" + pGraphicsAPI->GetFragmentShaderExtension())),
+		m_ComputeShader(std::make_shared<file::CFile>("Resources\\Shaders\\gpgpu_sample" + pGraphicsAPI->GetComputeShaderExtension())),
 
 		m_IsLoaded(false)
 	{
@@ -27,6 +28,7 @@ namespace scene
 		pLoadWorker->AddFirstLoadResource(m_DepthFragment);
 		pLoadWorker->AddFirstLoadResource(m_VertexShader);
 		pLoadWorker->AddFirstLoadResource(m_FragmentShader);
+		pLoadWorker->AddFirstLoadResource(m_ComputeShader);
 	}
 
 	CScriptScene::~CScriptScene()

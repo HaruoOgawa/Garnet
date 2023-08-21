@@ -34,6 +34,7 @@ namespace scene
 
 		std::shared_ptr<file::CFile> m_VertexShader;
 		std::shared_ptr<file::CFile> m_FragmentShader;
+		std::shared_ptr<file::CFile> m_ComputeShader;
 	private:
 		bool Load(api::IGraphicsAPI* pGraphicsAPI);
 

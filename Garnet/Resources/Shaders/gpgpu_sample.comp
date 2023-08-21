@@ -1,0 +1,31 @@
+#version 450
+
+layout(binding = 0) uniform ParamUBO
+{
+	float time;
+} ubo;
+
+struct TestData
+{
+    vec4 offset;
+    vec4 color;
+};
+
+readonly layout(std430, binding = 1) buffer ReadOnlyTestBufferObject
+{
+    TestData data[];
+} r_TBO;
+
+layout(std430, binding = 2) buffer WriteOnlyTestBufferObject
+{
+    TestData data[];
+} w_TBO;
+
+layout(local_size_x = 256, local_size_y = 1, local_size_z =1) in;
+
+void main()
+{
+    uint id = gl_GlobalInvocationID.x;
+
+    w_TBO.data[id].offset.y += sin(ubo.time); 
+}
