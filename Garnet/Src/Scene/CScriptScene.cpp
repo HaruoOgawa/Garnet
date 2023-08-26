@@ -7,11 +7,14 @@
 #include <glm/glm.hpp>
 #include "../Graphics/CDrawInfo.h"
 #include "../Camera/CCamera.h"
+#include "../Interface/IGPGPUHandler.h"
 
 namespace scene
 {
 	CScriptScene::CScriptScene(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker):
 		m_InstanceCount(512),
+
+		m_GPGPUHandler(nullptr),
 
 		m_TestObject(std::make_shared<object::C3DObject>("", "ShadowPass")),
 
@@ -59,8 +62,6 @@ namespace scene
 					Material0->AddShaderBuffer(UniformBuffer);
 
 					//
-					auto SSBO = graphics::CMaterialCreateInfo::CreateShaderStorageBuffer({ graphics::SBindingLayout("TestBufferObject", 1) });
-
 					std::vector<float> InitData;
 					for (int i = 0; i < m_InstanceCount; i++)
 					{
@@ -84,9 +85,33 @@ namespace scene
 						InitData.push_back(color.x); InitData.push_back(color.y); InitData.push_back(color.z); InitData.push_back(color.w);
 					}
 
-					SSBO->AddData("rw_TBO", &InitData[0], sizeof(float) * static_cast<int>(InitData.size()), 1);
+					{
+						auto SSBO = graphics::CMaterialCreateInfo::CreateShaderStorageBuffer({ graphics::SBindingLayout("TestBufferObject", 1) });
+						SSBO->AddData("rw_TBO", &InitData[0], sizeof(float) * static_cast<int>(InitData.size()), 1);
 
-					Material0->AddShaderBuffer(SSBO);
+						Material0->AddShaderBuffer(SSBO);
+					}
+
+					{
+						std::shared_ptr<graphics::CMaterialCreateInfo> computeCreateInfo = std::make_shared<graphics::CMaterialCreateInfo>();
+						computeCreateInfo->SetComputeShaderCode(m_ComputeShader->GetData());
+
+						auto ComputeMaterial = pGraphicsAPI->CreateMaterial(computeCreateInfo);
+
+						auto ReadSSBO = graphics::CMaterialCreateInfo::CreateShaderStorageBuffer({ graphics::SBindingLayout("ReadOnlyTestBufferObject", 1) });
+						ReadSSBO->AddData("r_TBO", &InitData[0], sizeof(float) * static_cast<int>(InitData.size()), 1);
+
+						ComputeMaterial->AddShaderBuffer(ReadSSBO);
+						
+						auto WriteSSBO = graphics::CMaterialCreateInfo::CreateShaderStorageBuffer({ graphics::SBindingLayout("WriteOnlyTestBufferObject", 2) });
+						WriteSSBO->AddData("w_TBO", &InitData[0], sizeof(float) * static_cast<int>(InitData.size()), 2);
+
+						ComputeMaterial->AddShaderBuffer(WriteSSBO);
+
+						//
+						m_GPGPUHandler = pGraphicsAPI->CreateGPGPUHandler(ComputeMaterial);
+						if (!m_GPGPUHandler->Create()) return false;
+					}
 				}
 
 				m_TestObject->AddMaterial(Material0);

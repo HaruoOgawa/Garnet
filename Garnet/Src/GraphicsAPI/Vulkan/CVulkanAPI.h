@@ -16,11 +16,12 @@ namespace api
 
 	struct QueueFamiryIndices
 	{
-		std::optional<uint32_t> m_GraphicsFamily;
+		// GPGPUだけのQueueもあるが、今回はGraphicsとの同期が必要なため、GraphicsとComputeの両方のBitに対応しているQueueを取得する
+		std::optional<uint32_t> m_GraphicsAndComputeFamily;
 		std::optional<uint32_t> m_PresentFamily;
 
 		bool IsComplete() {
-			return m_GraphicsFamily.has_value() && m_PresentFamily.has_value();
+			return m_GraphicsAndComputeFamily.has_value() && m_PresentFamily.has_value();
 		}
 	};
 
@@ -76,6 +77,7 @@ namespace api
 
 		// Queue
 		VkQueue m_GraphicsQueue;
+		VkQueue m_ComputeQueue;
 		VkQueue m_PresentQueue;
 
 		// SwapChain/Image
@@ -118,7 +120,7 @@ namespace api
 		// Vulkanメインロジック ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		bool CreateInstance();
 		bool CreateSurface();
-		bool CreateDevices();
+		bool CreateDevicesWithQueues();
 		bool CreateSwapChain();
 		bool CreateImageViews();
 		bool CreateSwapChainRenderPass();
@@ -171,6 +173,9 @@ namespace api
 		virtual std::shared_ptr<renderer::IRenderer> CreateRenderer(const std::string& PassName) override;
 		virtual std::shared_ptr<graphics::CMaterial> CreateMaterial(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo) override;
 		virtual std::shared_ptr<graphics::CTexture> CreateTexture(bool UseMipMap = false) override;
+#ifdef USE_GPGPU
+		virtual std::shared_ptr<graphics::IGPGPUHandler> CreateGPGPUHandler(const std::shared_ptr<graphics::CMaterial>& ComputeMaterial) override;
+#endif // USE_GPGPU
 
 		virtual bool Resize(int Width, int Height) override;
 

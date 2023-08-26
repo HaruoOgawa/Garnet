@@ -53,10 +53,6 @@ namespace api
 		virtual void SetUniformValue(const std::string Name, const void* Value, int DynamicOffsetNum = -1) override;
 
 		void SetActive();
-
-#ifdef USE_GPGPU
-		virtual bool Dispatch(const glm::ivec3& Threads, const glm::ivec3& KernelSize) override;
-#endif // USE_GPGPU
 	};
 }
 #endif // USE_OPENGL

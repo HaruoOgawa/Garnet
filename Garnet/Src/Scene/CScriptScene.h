@@ -11,6 +11,7 @@ namespace projection { class CProjection; }
 namespace graphics { 
 	class CDrawInfo; 
 	class CTexture;
+	class IGPGPUHandler;
 }
 namespace resource { class CLoadWorker; }
 
@@ -21,6 +22,8 @@ namespace scene
 		bool m_IsLoaded;
 
 		const int m_InstanceCount;
+
+		std::shared_ptr<graphics::IGPGPUHandler> m_GPGPUHandler;
 
 		// Tex of FrameBuffer
 		std::vector<std::shared_ptr<graphics::CTexture>> m_FrameTextureList;

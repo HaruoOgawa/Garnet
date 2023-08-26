@@ -26,6 +26,7 @@ namespace graphics
 		std::vector<unsigned char> m_GeometryShaderCode;
 		std::vector<unsigned char> m_HullShaderCode;
 		std::vector<unsigned char> m_DomainShaderCode;
+		std::vector<unsigned char> m_ComputeShaderCode;
 	public:
 		CMaterialCreateInfo();
 		virtual ~CMaterialCreateInfo();
@@ -51,6 +52,9 @@ namespace graphics
 
 		void SetDomainShaderCode(const std::vector<unsigned char>& DomainShaderCode);
 		const std::vector<unsigned char>& GetDomainShaderCode() const;
+		
+		void SetComputeShaderCode(const std::vector<unsigned char>& ComputeShaderCode);
+		const std::vector<unsigned char>& GetComputeShaderCode() const;
 
 		// Texture
 	};

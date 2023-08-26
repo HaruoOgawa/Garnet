@@ -17,6 +17,7 @@ namespace api
 
 		m_VertShaderModule(nullptr),
 		m_FragShaderModule(nullptr),
+		m_ComputeShaderModule(nullptr),
 
 		m_DescriptorSetLayout(nullptr),
 		m_DescriptorPool(nullptr),
@@ -158,10 +159,16 @@ namespace api
 		// ShaderModuleの作成(Shaderをラップ・管理するためのもの)
 		// 使う時にGeometryとかTessellationも追加する
 		const auto& VertexShaderData = createInfo->GetVertexShaderCode();
-		const bool UseVertexShader = CreateShaderModule(m_VertShaderModule, std::string(&VertexShaderData[0], &VertexShaderData[0] + VertexShaderData.size()));
+		bool UseVertexShader = false;
+		if (!VertexShaderData.empty()) UseVertexShader = CreateShaderModule(m_VertShaderModule, std::string(&VertexShaderData[0], &VertexShaderData[0] + VertexShaderData.size()));
 
 		const auto& FragmentShaderCode = createInfo->GetFragmentShaderCode();
-		const bool UseFragmentShader = CreateShaderModule(m_FragShaderModule, std::string(&FragmentShaderCode[0], &FragmentShaderCode[0] + FragmentShaderCode.size()));
+		bool UseFragmentShader = false;
+		if(!FragmentShaderCode.empty()) UseFragmentShader = CreateShaderModule(m_FragShaderModule, std::string(&FragmentShaderCode[0], &FragmentShaderCode[0] + FragmentShaderCode.size()));
+
+		const auto& ComputeShaderCode = createInfo->GetComputeShaderCode();
+		bool UseComputeShader = false;
+		if(!ComputeShaderCode.empty()) UseComputeShader = CreateShaderModule(m_ComputeShaderModule, std::string(&ComputeShaderCode[0], &ComputeShaderCode[0] + ComputeShaderCode.size()));
 
 		// シェーダーステージの作成(VertexShaderとかFragment, Geometryとかそういうステージ)
 		if (UseVertexShader)
@@ -184,6 +191,15 @@ namespace api
 			fragShaderStageInfo.pName = "main";
 
 			m_ShaderStages.push_back(fragShaderStageInfo);
+		}
+
+		if (UseComputeShader)
+		{
+			VkPipelineShaderStageCreateInfo computeShaderStageInfo{};
+			computeShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+			computeShaderStageInfo.stage = VK_SHADER_STAGE_COMPUTE_BIT;
+			computeShaderStageInfo.module = m_ComputeShaderModule;
+			computeShaderStageInfo.pName = "main";
 		}
 
 		return true;
@@ -538,18 +554,13 @@ namespace api
 		return true;
 	}
 
-#ifdef USE_GPGPU
-	bool CVulkanMaterial::Dispatch(const glm::ivec3& Threads, const glm::ivec3& KernelSize)
-	{
-		return true;
-	}
-#endif // USE_GPGPU
-
 	// ヘルパー関数 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Shader
 	// ShaderModuleの作成(Shaderをラップ・管理するためのもの)
 	bool CVulkanMaterial::CreateShaderModule(VkShaderModule& shaderModule, const std::string& code)
 	{
+		if (code.empty()) return false;
+
 		VkShaderModuleCreateInfo createInfo{};
 		createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
 		createInfo.codeSize = code.size();

@@ -4,6 +4,7 @@
 #include "CVulkanRenderPass.h"
 #include "CVulkanMaterial.h"
 #include "CVulkanTexture.h"
+#include "CVulkanGPGPUHandler.h"
 #include "../../Debug/Message/Console.h"
 
 namespace api
@@ -25,6 +26,7 @@ namespace api
 		m_PhysicalDevice(nullptr),
 		m_LogicalDevice(nullptr),
 		m_GraphicsQueue(nullptr),
+		m_ComputeQueue(nullptr),
 		m_PresentQueue(nullptr),
 		m_SwapChain(nullptr),
 		m_SwapChainImageFormat(VK_FORMAT_UNDEFINED),
@@ -50,7 +52,7 @@ namespace api
 		if (!CreateInstance()) return false; // インスタンスを作成
 		if (!SetupDebugMessengerEXT()) return false; // インスタンス生成時に設定したプリセットのDebugMessengerだけではカバーできない範囲のハンドリング
 		if (!CreateSurface()) return false; // ウィンドウサーフェイスを作成(ウィンドウシステムとやり取りをする箇所)
-		if (!CreateDevices()) return false; // デバイスを作成(物理デバイス/論理デバイス)
+		if (!CreateDevicesWithQueues()) return false; // デバイスを作成(物理デバイス/論理デバイス)
 		if (!CreateSwapChain()) return false; // スワップチェインを作成(画面に示されるのを待っている画像のキューのマネージャーこと)
 		if (!CreateImageViews()) return false; // イメージビューの作成(APIが描画に使用する画像を管理するビューのこと)
 		if (!CreateSwapChainRenderPass()) return false; // レンダーパスの作成(描画全体のマネージャー。実際に描画に使用するのがサブパス。サブパスを複数個用意することでポストプロセスもできる)
@@ -138,6 +140,15 @@ namespace api
 
 		return Texture;
 	}
+
+#ifdef USE_GPGPU
+	std::shared_ptr<graphics::IGPGPUHandler> CVulkanAPI::CreateGPGPUHandler(const std::shared_ptr<graphics::CMaterial>& ComputeMaterial)
+	{
+		auto GPGPUHandler = std::make_shared<graphics::CVulkanGPGPUHandler>(ComputeMaterial);
+
+		return GPGPUHandler;
+	}
+#endif // USE_GPGPU
 
 	bool CVulkanAPI::Resize(int Width, int Height)
 	{
@@ -413,7 +424,7 @@ namespace api
 		return true;
 	}
 
-	bool CVulkanAPI::CreateDevices()
+	bool CVulkanAPI::CreateDevicesWithQueues()
 	{
 		// 物理デバイスの取得
 		uint32_t physicalDeviceCount = 0;
@@ -467,7 +478,7 @@ namespace api
 		QueueFamiryIndices indices = FindQueueFamilies(m_PhysicalDevice);
 
 		std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
-		std::set<uint32_t> uniqueQueueFamilies = { indices.m_GraphicsFamily.value(), indices.m_PresentFamily.value() };
+		std::set<uint32_t> uniqueQueueFamilies = { indices.m_GraphicsAndComputeFamily.value(), indices.m_PresentFamily.value() };
 		float queuePriority = 1.0f;
 		for (uint32_t queueFamily : uniqueQueueFamilies)
 		{
@@ -510,7 +521,8 @@ namespace api
 		VkResult result = vkCreateDevice(m_PhysicalDevice, &deviceCreateInfo, nullptr, &m_LogicalDevice);
 
 		// キューへのハンドルを取得
-		vkGetDeviceQueue(m_LogicalDevice, indices.m_GraphicsFamily.value(), 0, &m_GraphicsQueue);
+		vkGetDeviceQueue(m_LogicalDevice, indices.m_GraphicsAndComputeFamily.value(), 0, &m_GraphicsQueue);
+		vkGetDeviceQueue(m_LogicalDevice, indices.m_GraphicsAndComputeFamily.value(), 0, &m_ComputeQueue); // 同期するので同じQueueIndexでいいのかな？
 		vkGetDeviceQueue(m_LogicalDevice, indices.m_PresentFamily.value(), 0, &m_PresentQueue);
 
 		return (result == VK_SUCCESS);
@@ -547,10 +559,10 @@ namespace api
 		createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
 		QueueFamiryIndices indices = FindQueueFamilies(m_PhysicalDevice);
-		uint32_t queueFamilyIndices[] = { indices.m_GraphicsFamily.value(), indices.m_PresentFamily.value() };
+		uint32_t queueFamilyIndices[] = { indices.m_GraphicsAndComputeFamily.value(), indices.m_PresentFamily.value() };
 
 		// キューファミリー(キューのマネージャー)が異なる場合の処理を指定する
-		if (indices.m_GraphicsFamily != indices.m_PresentFamily)
+		if (indices.m_GraphicsAndComputeFamily != indices.m_PresentFamily)
 		{
 			// VK_SHARING_MODE_CONCURRENTはスワップチェインイメージを複数のキューファミリ間で共有する(少しパフォーマンスが悪くなる)
 			createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
@@ -731,7 +743,7 @@ namespace api
 		VkCommandPoolCreateInfo poolInfo{};
 		poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
 		poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-		poolInfo.queueFamilyIndex = queueFamilyIndices.m_GraphicsFamily.value();
+		poolInfo.queueFamilyIndex = queueFamilyIndices.m_GraphicsAndComputeFamily.value();
 
 		if (vkCreateCommandPool(m_LogicalDevice, &poolInfo, nullptr, &m_CommandPool) != VK_SUCCESS)
 		{
@@ -1148,9 +1160,10 @@ namespace api
 
 			// グラフィックキューファミリが使用できるか
 			// &演算: 両方1なら1, そうでないなら0. if文は0でなければtrueを返す
-			if (QueueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT)
+			// GPGPUだけのQueueもあるが、今回はGraphicsとの同期が必要なため、GraphicsとComputeの両方のBitに対応しているQueueを取得する
+			if ((QueueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT) && (QueueFamily.queueFlags & VK_QUEUE_COMPUTE_BIT))
 			{
-				indices.m_GraphicsFamily = i;
+				indices.m_GraphicsAndComputeFamily = i;
 			}
 
 			//プレゼントキューファミリが使用できるかをウィンドウサーフェイスに問い合わせる

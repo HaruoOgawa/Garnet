@@ -18,6 +18,7 @@ namespace graphics
 		m_GeometryShaderCode.clear();
 		m_HullShaderCode.clear();
 		m_DomainShaderCode.clear();
+		m_ComputeShaderCode.clear();
 	}
 
 	// Uniform
@@ -89,6 +90,15 @@ namespace graphics
 	const std::vector<unsigned char>& CMaterialCreateInfo::GetDomainShaderCode() const
 	{
 		return m_DomainShaderCode;
+	}
+
+	void CMaterialCreateInfo::SetComputeShaderCode(const std::vector<unsigned char>& ComputeShaderCode)
+	{
+		m_ComputeShaderCode = ComputeShaderCode;
+	}
+	const std::vector<unsigned char>& CMaterialCreateInfo::GetComputeShaderCode() const
+	{
+		return m_ComputeShaderCode;
 	}
 
 	// Texture

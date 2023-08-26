@@ -248,13 +248,6 @@ namespace api
 		return true;
 	}
 
-#ifdef USE_GPGPU
-	bool COpenGLMaterial::Dispatch(const glm::ivec3& Threads, const glm::ivec3& KernelSize)
-	{
-		return true;
-	}
-#endif // USE_GPGPU
-
 	// Helper Functions //////////////////////////////////////////////////
 	bool COpenGLMaterial::CompileShader(const std::vector<unsigned char>& shaderCode, GLenum shaderType, GLuint& shaderPrg)
 	{

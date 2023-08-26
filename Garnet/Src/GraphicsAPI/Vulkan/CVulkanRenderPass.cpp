@@ -308,7 +308,7 @@ namespace api
 		VkCommandPoolCreateInfo poolInfo{};
 		poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
 		poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-		poolInfo.queueFamilyIndex = queueFamilyIndices.m_GraphicsFamily.value();
+		poolInfo.queueFamilyIndex = queueFamilyIndices.m_GraphicsAndComputeFamily.value();
 
 		if (vkCreateCommandPool(m_pGraphicsAPI->GetLogicalDevice(), &poolInfo, nullptr, &m_CommandPool) != VK_SUCCESS)
 		{

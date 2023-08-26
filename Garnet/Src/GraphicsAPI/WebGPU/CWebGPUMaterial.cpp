@@ -331,13 +331,6 @@ namespace api
 		return true;
 	}
 
-#ifdef USE_GPGPU
-	bool CWebGPUMaterial::Dispatch(const glm::ivec3& Threads, const glm::ivec3& KernelSize)
-	{
-		return true;
-	}
-#endif // USE_GPGPU
-
 	// Helper Function ///////////////////////////////////////////////////////////////////////
 	WGPUShaderModule CWebGPUMaterial::CreateShaderModuleFromWGSL(const std::string& shaderCode)
 	{

@@ -60,10 +60,6 @@ namespace api
 
 		const WGPUBindGroupLayout& GetBindGroupLayout() { return m_BindGroupLayout; }
 		const WGPUBindGroup& GetBindGroup() { return m_BindGroup; }
-
-#ifdef USE_GPGPU
-		virtual bool Dispatch(const glm::ivec3& Threads, const glm::ivec3& KernelSize) override;
-#endif // USE_GPGPU
 	};
 }
 #endif
