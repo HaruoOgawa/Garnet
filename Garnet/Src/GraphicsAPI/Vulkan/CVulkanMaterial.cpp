@@ -200,6 +200,10 @@ namespace api
 			computeShaderStageInfo.stage = VK_SHADER_STAGE_COMPUTE_BIT;
 			computeShaderStageInfo.module = m_ComputeShaderModule;
 			computeShaderStageInfo.pName = "main";
+
+			m_ShaderStages.clear(); // ComputeShaderは単体でしか使わないので念のためリセットしておく
+
+			m_ShaderStages.push_back(computeShaderStageInfo);
 		}
 
 		return true;

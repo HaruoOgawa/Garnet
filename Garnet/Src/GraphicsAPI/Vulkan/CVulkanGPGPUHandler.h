@@ -1,14 +1,22 @@
 #pragma once
 #ifdef USE_GPGPU
 #include "../../Interface/IGPGPUHandler.h"
+#include "CVulkanAPI.h"
 
 namespace graphics
 {
 	class CVulkanGPGPUHandler : public IGPGPUHandler
 	{
+		// API
+		api::CVulkanAPI* m_pGraphicsAPI;
+
 		std::shared_ptr<graphics::CMaterial> m_ComputeMaterial;
+
+		VkPipeline m_ComputePipeline;
+	private:
+		bool CreateComputePipeline();
 	public:
-		CVulkanGPGPUHandler(const std::shared_ptr<graphics::CMaterial>& ComputeMaterial);
+		CVulkanGPGPUHandler(api::CVulkanAPI* pGraphicsAPI, const std::shared_ptr<graphics::CMaterial>& ComputeMaterial);
 		virtual ~CVulkanGPGPUHandler();
 
 		virtual bool Create() override;
