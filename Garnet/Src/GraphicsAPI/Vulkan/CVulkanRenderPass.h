@@ -50,9 +50,6 @@ namespace api
 
 		bool CreateRenderPass();
 		bool CreateFrameBuffer(int Width, int Height);
-
-		bool CreateCommandPool();
-		bool CreateCommandBuffer();
 	public:
 		CVulkanRenderPass(api::CVulkanAPI* pGraphicsAPI, const std::string& PassName, ERenderPassFormat RenderPassFormat, const glm::vec4& InitColor);
 		virtual ~CVulkanRenderPass();

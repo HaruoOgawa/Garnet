@@ -1644,6 +1644,40 @@ namespace api
 
 		vkFreeCommandBuffers(m_LogicalDevice, m_CommandPool, 1, &commandBuffer);
 	}
+
+	bool CVulkanAPI::CreateCommandPool(VkCommandPool& CommandPool)
+	{
+		QueueFamiryIndices queueFamilyIndices = FindQueueFamilies(GetPhysicalDevice());
+
+		VkCommandPoolCreateInfo poolInfo{};
+		poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+		poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+		poolInfo.queueFamilyIndex = queueFamilyIndices.m_GraphicsAndComputeFamily.value();
+
+		if (vkCreateCommandPool(GetLogicalDevice(), &poolInfo, nullptr, &CommandPool) != VK_SUCCESS)
+		{
+			return false;
+		}
+
+		return true;
+	}
+
+	bool CVulkanAPI::CreateCommandBuffer(VkCommandBuffer& CommandBuffer, VkCommandPool CommandPool)
+	{
+		VkCommandBufferAllocateInfo allocInfo{};
+		allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+		allocInfo.commandPool = CommandPool;
+		allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY; // メイン(プライマリ)コマンドバッファかサブ(セカンダリ)コマンドバッファかの選択
+		allocInfo.commandBufferCount = 1;
+
+		// Allocate は確保するという意味
+		if (vkAllocateCommandBuffers(GetLogicalDevice(), &allocInfo, &CommandBuffer) != VK_SUCCESS)
+		{
+			return false;
+		}
+
+		return true;
+	}
 }
 
 #endif // !USE_WEBGPU

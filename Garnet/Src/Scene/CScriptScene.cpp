@@ -98,6 +98,11 @@ namespace scene
 
 						auto ComputeMaterial = pGraphicsAPI->CreateMaterial(computeCreateInfo);
 
+						auto ParamUBO = graphics::CMaterialCreateInfo::CreateUniformBuffer({ graphics::SBindingLayout("ParamUBO", 0) });
+						ParamUBO->AddData("time", &glm::vec1(0.0f)[0], sizeof(glm::vec1), 0);
+
+						ComputeMaterial->AddShaderBuffer(ParamUBO);
+
 						auto ReadSSBO = graphics::CMaterialCreateInfo::CreateShaderStorageBuffer({ graphics::SBindingLayout("ReadOnlyTestBufferObject", 1) });
 						ReadSSBO->AddData("r_TBO", &InitData[0], sizeof(float) * static_cast<int>(InitData.size()), 1);
 
@@ -167,6 +172,8 @@ namespace scene
 		const std::shared_ptr<graphics::CDrawInfo>& DrawInfo)
 	{
 		if (!m_IsLoaded) return true;
+
+		if (!m_GPGPUHandler || !m_GPGPUHandler->Dispatch(glm::ivec3(m_InstanceCount / 256, 1, 1), SecondsTime, Camera, Projection, DrawInfo)) return false;
 
 		if (m_TestObject)
 		{

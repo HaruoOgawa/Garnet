@@ -219,9 +219,13 @@ namespace api
 		VkCommandBuffer BeginSingleTimeCommands();
 		void EndSingleTimeCommands(VkCommandBuffer commandBuffer);
 
+		bool CreateCommandPool(VkCommandPool& CommandPool);
+		bool CreateCommandBuffer(VkCommandBuffer& CommandBuffer, VkCommandPool CommandPool);
+
 		// Queue
 		QueueFamiryIndices FindQueueFamilies(VkPhysicalDevice device);
 		VkQueue GetGraphicsQueue()const { return m_GraphicsQueue; }
+		VkQueue GetComputeQueue()const { return m_ComputeQueue; }
 		VkQueue GetPresentQueue() const { return m_PresentQueue; }
 
 		// Sync

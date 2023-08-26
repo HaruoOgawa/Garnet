@@ -76,8 +76,8 @@ namespace api
 
 		if (!CreateRenderPass()) return false; // レンダーパスの作成(描画全体のマネージャー。実際に描画に使用するのがサブパス。サブパスを複数個用意することでポストプロセスもできる)
 		if (!CreateFrameBuffer(Width, Height)) return false; // フレームバッファの作成
-		if (!CreateCommandPool()) return false;
-		if (!CreateCommandBuffer()) return false;
+		if (!m_pGraphicsAPI->CreateCommandPool(m_CommandPool)) return false;
+		if (!m_pGraphicsAPI->CreateCommandBuffer(m_CommandBuffer, m_CommandPool)) return false;
 
 		return true;
 	}
@@ -294,40 +294,6 @@ namespace api
 	{
 		// コマンドバッファの記録を終了
 		if (vkEndCommandBuffer(m_CommandBuffer) != VK_SUCCESS)
-		{
-			return false;
-		}
-
-		return true;
-	}
-
-	bool CVulkanRenderPass::CreateCommandPool()
-	{
-		QueueFamiryIndices queueFamilyIndices = m_pGraphicsAPI->FindQueueFamilies(m_pGraphicsAPI->GetPhysicalDevice());
-
-		VkCommandPoolCreateInfo poolInfo{};
-		poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-		poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-		poolInfo.queueFamilyIndex = queueFamilyIndices.m_GraphicsAndComputeFamily.value();
-
-		if (vkCreateCommandPool(m_pGraphicsAPI->GetLogicalDevice(), &poolInfo, nullptr, &m_CommandPool) != VK_SUCCESS)
-		{
-			return false;
-		}
-
-		return true;
-	}
-
-	bool CVulkanRenderPass::CreateCommandBuffer()
-	{
-		VkCommandBufferAllocateInfo allocInfo{};
-		allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-		allocInfo.commandPool = m_CommandPool;
-		allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY; // メイン(プライマリ)コマンドバッファかサブ(セカンダリ)コマンドバッファかの選択
-		allocInfo.commandBufferCount = 1;
-
-		// Allocate は確保するという意味
-		if (vkAllocateCommandBuffers(m_pGraphicsAPI->GetLogicalDevice(), &allocInfo, &m_CommandBuffer) != VK_SUCCESS)
 		{
 			return false;
 		}

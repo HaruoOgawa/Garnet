@@ -246,7 +246,7 @@ namespace api
 				}
 
 				LayoutBinding.descriptorCount = 1; // 
-				LayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT; // アクセス権限。ここでは頂点シェーダーのみ読み取り可
+				LayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_COMPUTE_BIT; // アクセス権限。ここでは頂点シェーダーのみ読み取り可
 				LayoutBinding.pImmutableSamplers = nullptr; // 画像のサンプリングに使用するフィールド
 
 				bindings.push_back(LayoutBinding);

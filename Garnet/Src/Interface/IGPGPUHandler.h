@@ -12,7 +12,8 @@ namespace graphics
 	public:
 		virtual bool Create() = 0;
 
-		virtual bool Dispatch(const glm::ivec3& Threads, const glm::ivec3& KernelSize) = 0;
+		virtual bool Dispatch(const glm::ivec3& GroupCount, float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
+			const std::shared_ptr<graphics::CDrawInfo>& DrawInfo) = 0;
 
 		virtual const std::shared_ptr<graphics::CMaterial>& GetComputeMaterial() = 0;
 	};
