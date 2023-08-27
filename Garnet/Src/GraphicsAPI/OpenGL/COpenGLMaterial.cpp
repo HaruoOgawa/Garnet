@@ -63,7 +63,8 @@ namespace api
 		int index = 0;
 		for (const auto& Buffer : m_ShaderBufferList)
 		{
-			if (Buffer->GetBufferType() == graphics::EBufferType::SHADERSTORAGE) continue;
+			// SharedBufferは処理しない
+			if (Buffer->GetSharedBufferParam().IsShared) continue;
 
 			for (const auto& Layout : Buffer->GetBindingLayoutList())
 			{
@@ -136,6 +137,9 @@ namespace api
 	{
 		for (int i = 0; i < m_ShaderBufferList.size(); i++)
 		{
+			// SharedBufferは処理しない
+			if (m_ShaderBufferList[i]->GetSharedBufferParam().IsShared) continue;
+
 			auto& UniformBuffer = m_ShaderBufferList[i];
 			const auto& UniformDesc = UniformBuffer->GetDescriptor();
 
@@ -168,7 +172,7 @@ namespace api
 		if (!CompileShader(m_CreateInfo->GetGeometryShaderCode(), GL_GEOMETRY_SHADER, m_ShaderPrg)) return false;
 		if (!CompileShader(m_CreateInfo->GetHullShaderCode(), GL_TESS_CONTROL_SHADER, m_ShaderPrg)) return false;
 		if (!CompileShader(m_CreateInfo->GetDomainShaderCode(), GL_TESS_EVALUATION_SHADER, m_ShaderPrg)) return false;
-		//if (!CompileShader(m_CreateInfo->GetComputeShaderCode(), GL_COMPUTE_SHADER, m_ShaderPrg)) return false;
+		if (!CompileShader(m_CreateInfo->GetComputeShaderCode(), GL_COMPUTE_SHADER, m_ShaderPrg)) return false;
 
 		// ShaderをProgramにリンクする
 		glLinkProgram(m_ShaderPrg);
@@ -198,6 +202,10 @@ namespace api
 
 		for (const auto& Buffer : m_ShaderBufferList)
 		{
+			// 共有バッファ
+			const auto& SharedBufferParam = Buffer->GetSharedBufferParam();
+			
+			//
 			for (const auto& Layout : Buffer->GetBindingLayoutList())
 			{
 				GLenum target;
@@ -227,21 +235,36 @@ namespace api
 						break;
 				}
 
-				// UBOを生成
-				GLuint uboIndex;
-				glGenBuffers(1, &uboIndex);
+				if (SharedBufferParam.IsShared) // バッファを他のマテリアルと共有する
+				{
+					COpenGLMaterial* pSharedOpenGLMat = static_cast<COpenGLMaterial*>(SharedBufferParam.SharedBufferMaterial.get());
+					GLuint sharedUboIndex = pSharedOpenGLMat->GetUBOList()[SharedBufferParam.BufferIndex];
 
-				// Uniformのbinding indexを割り当てる
-				GLuint blockIndex = glGetUniformBlockIndex(m_ShaderPrg, Layout.second.BindingName.c_str());
-				glUniformBlockBinding(m_ShaderPrg, blockIndex, Layout.second.BindingIndex); // ShaderPrgとBinding Blockを紐づける
-				glBindBufferRange(target, Layout.second.BindingIndex, uboIndex, 0, Layout.second.ByteSize); // UBOとBinding Blockを紐づける
+					// Uniformのbinding indexを割り当てる
+					GLuint blockIndex = glGetUniformBlockIndex(m_ShaderPrg, Layout.second.BindingName.c_str());
+					glUniformBlockBinding(m_ShaderPrg, blockIndex, Layout.second.BindingIndex); // ShaderPrgとBinding Blockを紐づける
+					glBindBufferRange(target, Layout.second.BindingIndex, sharedUboIndex, 0, Layout.second.ByteSize); // UBOとBinding Blockを紐づける
 
-				// データの受け渡し
-				glBindBuffer(target, uboIndex);
-				glBufferData(target, Layout.second.ByteSize, &Buffer->GetData()[Layout.second.ByteOffset], usage); // Bufferのデータを初期化・メモリ確保
-				glBindBuffer(target, 0);
+					m_UBOList.push_back(sharedUboIndex);
+				}
+				else // 通常のバッファ使用
+				{
+					// UBOを生成
+					GLuint uboIndex;
+					glGenBuffers(1, &uboIndex);
 
-				m_UBOList.push_back(uboIndex);
+					// Uniformのbinding indexを割り当てる
+					GLuint blockIndex = glGetUniformBlockIndex(m_ShaderPrg, Layout.second.BindingName.c_str());
+					glUniformBlockBinding(m_ShaderPrg, blockIndex, Layout.second.BindingIndex); // ShaderPrgとBinding Blockを紐づける
+					glBindBufferRange(target, Layout.second.BindingIndex, uboIndex, 0, Layout.second.ByteSize); // UBOとBinding Blockを紐づける
+
+					// データの受け渡し
+					glBindBuffer(target, uboIndex);
+					glBufferData(target, Layout.second.ByteSize, &Buffer->GetData()[Layout.second.ByteOffset], usage); // Bufferのデータを初期化・メモリ確保
+					glBindBuffer(target, 0);
+
+					m_UBOList.push_back(uboIndex);
+				}
 			}
 		}
 

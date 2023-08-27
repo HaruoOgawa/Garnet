@@ -53,6 +53,9 @@ namespace api
 		virtual void SetUniformValue(const std::string Name, const void* Value, int DynamicOffsetNum = -1) override;
 
 		void SetActive();
+
+		// Uniform Buffer Object
+		const std::vector<GLuint>& GetUBOList() const { return m_UBOList; }
 	};
 }
 #endif // USE_OPENGL

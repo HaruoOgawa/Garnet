@@ -80,9 +80,9 @@ namespace api
 	}
 
 #ifdef USE_GPGPU
-	std::shared_ptr<graphics::IGPGPUHandler> COpenGLAPI::CreateGPGPUHandler(const std::shared_ptr<graphics::CMaterial>& ComputeMaterial)
+	std::shared_ptr<api::IGPGPUHandler> COpenGLAPI::CreateGPGPUHandler(const std::shared_ptr<graphics::CMaterial>& ComputeMaterial)
 	{
-		auto GPGPUHandler = std::make_shared<graphics::COpenGLGPGPUHandler>(ComputeMaterial);
+		auto GPGPUHandler = std::make_shared<api::COpenGLGPGPUHandler>(this, ComputeMaterial);
 
 		return GPGPUHandler;
 	}
