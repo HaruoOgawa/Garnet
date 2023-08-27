@@ -4,7 +4,7 @@
 #include <glm/gtx/quaternion.hpp>
 #include "../../Graphics/CMaterial.h"
 #include <memory>
-
+#include <vector>
 #include <webgpu.h>
 
 namespace graphics{ class CMaterialCreateInfo; }
@@ -22,6 +22,7 @@ namespace api
 		// Shader
 		WGPUShaderModule m_VertexShaderModele;
 		WGPUShaderModule m_FragmentShaderModele;
+		WGPUShaderModule m_ComputeShaderModele;
 
 		// Uniform
 		std::vector<WGPUBuffer> m_WGPUUniformBufferList;
@@ -36,7 +37,7 @@ namespace api
 	private:
 		// WebGPU Main Logic /////////////////////////////////////////////////////////////////////
 		bool CreateShaderStages(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo);
-		bool CreateUniformBuffer(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo);
+		bool CreateShaderBuffers(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo);
 		bool CreateBindGroup(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, const std::vector<std::shared_ptr<graphics::CTexture>>& TextureList, 
 			const std::vector<std::shared_ptr<graphics::CTexture>>& CubeMapList);
 
@@ -50,16 +51,21 @@ namespace api
 		virtual ~CWebGPUMaterial();
 
 		virtual bool Create(const std::vector<std::shared_ptr<graphics::CTexture>>& TextureList, const std::vector<std::shared_ptr<graphics::CTexture>>& CubeMapList) override;
-		virtual bool SetCommonUniform(float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo) override;
+		virtual bool SetCommonUniform(const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo) override;
 		virtual bool BuildDrawBuffer(int DynamicOffsetNum) override;
 
 		virtual void SetUniformValue(const std::string Name, const void* Value, int DynamicOffsetNum = -1) override;
 
 		const WGPUShaderModule& GetVertexShaderModele() { return m_VertexShaderModele; }
 		const WGPUShaderModule& GetFragmentShaderModele() { return m_FragmentShaderModele; }
+		const WGPUShaderModule& GetComputeShaderModele() { return m_ComputeShaderModele; }
 
 		const WGPUBindGroupLayout& GetBindGroupLayout() { return m_BindGroupLayout; }
 		const WGPUBindGroup& GetBindGroup() { return m_BindGroup; }
+
+		// Uniform
+		const std::vector<WGPUBuffer>& GetWGPUUniformBufferList() const { return m_WGPUUniformBufferList; };
+		const std::vector<uint32_t>& GetWGPUUniformBufferByteSizeList() const { return m_WGPUUniformBufferByteSizeList; }
 	};
 }
 #endif

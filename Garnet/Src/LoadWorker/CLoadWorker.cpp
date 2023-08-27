@@ -35,7 +35,7 @@ namespace resource
 		UniforBuffer->AddData("alpha", &m_Alpha, sizeof(float), 0);
 		UniforBuffer->AddData("pad", &glm::vec1(0.0f)[0], sizeof(glm::vec1), 0);
 
-		Material->AddUniformBuffer(UniforBuffer);
+		Material->AddShaderBuffer(UniforBuffer);
 
 		Material->SetEnabledZTest(false);
 		Material->SetCullMode(graphics::ECullMode::CULL_NONE);
@@ -44,7 +44,9 @@ namespace resource
 
 		// MESH
 		std::shared_ptr<graphics::CMesh> Mesh = std::make_shared<graphics::CMesh>();
-		std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(nullptr, 0, graphics::EPresetPrimitiveType::BOARD);
+		std::shared_ptr<renderer::CRendererCreateInfo> rendererCreateInfo = std::make_shared<renderer::CRendererCreateInfo>();
+		if (!graphics::CPresetPrimitive::CreateBoard(rendererCreateInfo)) return false;
+		std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(rendererCreateInfo, 0);
 		Mesh->AddPrimitive(Primitive);
 		m_LoadingBar->AddMesh(Mesh);
 
@@ -70,7 +72,15 @@ namespace resource
 
 			m_FirstResourceCount = static_cast<int>(m_FirstLoadResourceList.size()); // 初回ロードのリソース数を取得
 
-			m_Status = ELoadStatus::Loading;
+			if (m_FirstResourceCount > 0)
+			{
+				m_Status = ELoadStatus::Loading;
+			}
+			else
+			{
+				// 初回ロードリソースがない場合は即ロード完了にする
+				m_Status = ELoadStatus::Loaded;
+			}
 		}
 
 		// ローディングバー
@@ -136,7 +146,7 @@ namespace resource
 		return true;
 	}
 
-	bool CLoadWorker::Draw(api::IGraphicsAPI* pGraphicsAPI, bool IsDepthPass, float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
+	bool CLoadWorker::Draw(api::IGraphicsAPI* pGraphicsAPI, bool IsDepthPass, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
 		const std::shared_ptr<graphics::CDrawInfo>& DrawInfo)
 	{
 		if(m_Status == ELoadStatus::Loaded) return true;
@@ -147,7 +157,7 @@ namespace resource
 			m_LoadingBar->GetMaterialList()[0]->SetUniformValue("rate", &glm::vec1(rate)[0]);
 			m_LoadingBar->GetMaterialList()[0]->SetUniformValue("alpha", &m_Alpha);
 
-			if (!m_LoadingBar->Draw(IsDepthPass, SecondsTime, Camera, Projection, DrawInfo)) return false;
+			if (!m_LoadingBar->Draw(IsDepthPass, Camera, Projection, DrawInfo)) return false;
 		}
 
 		return true;

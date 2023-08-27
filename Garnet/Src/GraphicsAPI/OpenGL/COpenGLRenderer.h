@@ -19,8 +19,8 @@ namespace renderer
 		api::COpenGLAPI* m_pGraphicsAPI;
 
 		const std::string m_PassName;
-
 		int	m_DynamicOffsetNum;
+		int m_InstanceCount;
 
 		//
 		GLuint m_VertexArray;

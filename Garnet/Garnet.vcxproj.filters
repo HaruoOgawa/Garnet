@@ -18,13 +18,7 @@
     <ClInclude Include="Src\Debug\Message\Console.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Src\App\EditorApp\CEditorApp.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="Src\App\ScriptApp\CScriptApp.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\App\MainApp\CMainApp.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Src\App\CDescAppManager.h">
@@ -963,7 +957,7 @@
     <ClInclude Include="Src\Library\glm\glm\vector_relational.hpp">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Src\Graphics\CUniformBufferDescriptor.h">
+    <ClInclude Include="Src\Graphics\CShaderBufferDescriptor.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Src\Interface\IBuffer.h">
@@ -972,7 +966,7 @@
     <ClInclude Include="Src\Interface\IDescriptor.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Src\Graphics\CUniformBuffer.h">
+    <ClInclude Include="Src\Graphics\CShaderBuffer.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Src\Object\C3DObject.h">
@@ -1092,6 +1086,18 @@
     <ClInclude Include="Src\Object\CSimple3DObject.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Interface\IGPGPUHandler.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\GraphicsAPI\Vulkan\CVulkanGPGPUHandler.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\GraphicsAPI\WebGPU\CWebGPUGPGPUHandler.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\GraphicsAPI\OpenGL\COpenGLGPGPUHandler.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\Main\DescMain\DescMain.cpp">
@@ -1100,13 +1106,7 @@
     <ClCompile Include="Src\Main\WebMain\WebMain.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Src\App\EditorApp\CEditorApp.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="Src\App\ScriptApp\CScriptApp.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\App\MainApp\CMainApp.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Src\App\CDescAppManager.cpp">
@@ -1154,10 +1154,10 @@
     <ClCompile Include="Src\Library\glm\glm\detail\glm.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Graphics\CUniformBufferDescriptor.cpp">
+    <ClCompile Include="Src\Graphics\CShaderBufferDescriptor.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Graphics\CUniformBuffer.cpp">
+    <ClCompile Include="Src\Graphics\CShaderBuffer.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Src\Object\C3DObject.cpp">
@@ -1239,6 +1239,15 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Src\Object\CSimple3DObject.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\GraphicsAPI\Vulkan\CVulkanGPGPUHandler.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\GraphicsAPI\WebGPU\CWebGPUGPGPUHandler.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\GraphicsAPI\OpenGL\COpenGLGPGPUHandler.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1685,18 +1694,14 @@
     <None Include="Commands\UTF8Encorder.py" />
     <None Include="WebRelease\Resources\Shaders\frag.spv" />
     <None Include="WebRelease\Resources\Shaders\vert.spv" />
-    <None Include="Resources\Shaders\sample.frag" />
-    <None Include="Resources\Shaders\sample.vert" />
+    <None Include="Resources\Shaders\gpgpu_sample.frag" />
+    <None Include="Resources\Shaders\gpgpu_sample.vert" />
     <None Include="Commands\glslc_ALL.bat">
       <Filter>ソース ファイル</Filter>
     </None>
     <None Include="Commands\wgslc_ALL.bat">
       <Filter>ソース ファイル</Filter>
     </None>
-    <None Include="Resources\Shaders\sample_frag.spv" />
-    <None Include="Resources\Shaders\sample_frag.wgsl" />
-    <None Include="Resources\Shaders\sample_vert.spv" />
-    <None Include="Resources\Shaders\sample_vert.wgsl" />
     <None Include="Resources\Shaders\gltfpbr.vert" />
     <None Include="Resources\Shaders\gltfpbr.frag" />
     <None Include="Resources\Shaders\shadow_debug.vert" />
@@ -1708,6 +1713,7 @@
     <None Include="Resources\Shaders\gltfpbr_NativeSafe_frag.wgsl" />
     <None Include="Resources\Shaders\loadingbar.frag" />
     <None Include="Resources\Shaders\loadingbar.vert" />
+    <None Include="Resources\Shaders\gpgpu_sample.comp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="EmscriptenBuild\CMakeLists.txt" />

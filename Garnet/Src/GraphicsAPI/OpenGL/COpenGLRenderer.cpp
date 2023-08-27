@@ -9,7 +9,7 @@ namespace renderer
 		m_pGraphicsAPI(pGraphicsAPI),
 		m_PassName(PassName),
 		m_DynamicOffsetNum(0),
-
+		m_InstanceCount(1),
 		m_VertexArray(-1),
 		m_IndicesCount(0)
 	{
@@ -22,6 +22,8 @@ namespace renderer
 
 	bool COpenGLRenderer::Create(const std::shared_ptr<CRendererCreateInfo>& createInfo, const std::shared_ptr<graphics::CMaterial>& Material)
 	{
+		m_InstanceCount = createInfo->GetInstanceCount();
+
 		if (!CreateVertexArray()) return false; // 頂点配列を作成
 		if (!CreateVertexBuffer(createInfo)) return false; // 頂点バッファを作成
 		if (!CreateIndexBuffer(createInfo)) return false; // インデックスバッファを作成
@@ -82,8 +84,15 @@ namespace renderer
 
 		// 描画を実行
 		// あとで描画形式をカスタマイズできるようする
-		glDrawElements(GL_TRIANGLES, m_IndicesCount, GL_UNSIGNED_SHORT, nullptr);
-
+		if (m_InstanceCount > 1) // インスタンス描画
+		{
+			glDrawElementsInstanced(GL_TRIANGLES, m_IndicesCount, GL_UNSIGNED_SHORT, nullptr, m_InstanceCount);
+		}
+		else // 通常描画
+		{
+			glDrawElements(GL_TRIANGLES, m_IndicesCount, GL_UNSIGNED_SHORT, nullptr);
+		}
+		
 		return true;
 	}
 

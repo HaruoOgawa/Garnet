@@ -9,6 +9,7 @@
 #include "COpenGLTexture.h"
 #include "COpenGLRenderer.h"
 #include "COpenGLRenderPass.h"
+#include "COpenGLGPGPUHandler.h"
 
 namespace api
 {
@@ -78,6 +79,14 @@ namespace api
 		return Texture;
 	}
 
+#ifdef USE_GPGPU
+	std::shared_ptr<api::IGPGPUHandler> COpenGLAPI::CreateGPGPUHandler(const std::shared_ptr<graphics::CMaterial>& ComputeMaterial)
+	{
+		auto GPGPUHandler = std::make_shared<api::COpenGLGPGPUHandler>(this, ComputeMaterial);
+
+		return GPGPUHandler;
+	}
+#endif // USE_GPGPU
 
 	bool COpenGLAPI::Resize(int Width, int Height)
 	{

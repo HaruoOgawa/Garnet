@@ -14,6 +14,7 @@ add_definitions(
 	-DUSE_GLTF
 	-DUSE_VIEWER_CAMERA
 	-DUSE_INPUT_SYSTEM
+	-DUSE_GPGPU
 )
 
 add_executable(

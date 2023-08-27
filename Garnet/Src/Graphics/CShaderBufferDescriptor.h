@@ -12,12 +12,12 @@ namespace graphics
 		int ByteOffset;
 	};
 
-	class CUniformBufferDescriptor : public IDescriptor
+	class CShaderBufferDescriptor : public IDescriptor
 	{
 		std::map<std::string, SUniformBufferValue> m_DataList;
 	public:
-		CUniformBufferDescriptor();
-		virtual ~CUniformBufferDescriptor();
+		CShaderBufferDescriptor();
+		virtual ~CShaderBufferDescriptor();
 
 		void AddData(const std::string& Name, const SUniformBufferValue& Data);
 		const std::map<std::string, SUniformBufferValue>& GetDataList() const;

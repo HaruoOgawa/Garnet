@@ -4,6 +4,7 @@
 #include "CWebGPURenderer.h"
 #include "CWebGPUMaterial.h"
 #include "CWebGPUTexture.h"
+#include "CWebGPUGPGPUHandler.h"
 #include "../../Debug/Message/Console.h"
 
 #ifdef __EMSCRIPTEN__
@@ -117,6 +118,15 @@ namespace api
 
 		return Texture;
 	}
+
+#ifdef USE_GPGPU
+	std::shared_ptr<api::IGPGPUHandler> CWebGPUAPI::CreateGPGPUHandler(const std::shared_ptr<graphics::CMaterial>& ComputeMaterial)
+	{
+		auto GPGPUHandler = std::make_shared<api::CWebGPUGPGPUHandler>(this, ComputeMaterial);
+
+		return GPGPUHandler;
+	}
+#endif // USE_GPGPU
 
 	bool CWebGPUAPI::Resize(int Width, int Height)
 	{

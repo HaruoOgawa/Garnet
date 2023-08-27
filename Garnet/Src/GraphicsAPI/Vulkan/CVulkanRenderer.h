@@ -33,8 +33,8 @@ namespace renderer
 
 		//
 		const std::string m_PassName;
-
 		int	m_DynamicOffsetNum;
+		int m_InstanceCount;
 
 		// Vertices/Indices
 		std::vector<VkBuffer> m_VertexBufferList;

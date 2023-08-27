@@ -24,6 +24,7 @@ namespace renderer
 
 		//
 		const std::string m_PassName;
+		int m_InstanceCount;
 
 		// Pipeline
 		WGPURenderPipeline m_GraphicsPipeline;

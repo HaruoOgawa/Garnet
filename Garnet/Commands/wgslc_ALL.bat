@@ -6,6 +6,8 @@ for /R %ShaderDir% %%i in (*.vert) do %EXEDir%glslc.exe -o %%~pi%%~ni_vert.spv %
 
 for /R %ShaderDir% %%i in (*.frag) do %EXEDir%glslc.exe -o %%~pi%%~ni_frag.spv %%~i
 
+for /R %ShaderDir% %%i in (*.comp) do %EXEDir%glslc.exe -o %%~pi%%~ni_comp.spv %%~i
+
 for /R %ShaderDir% %%i in (*.spv) do naga %%~i %%~pi%%~ni.wgsl 
 
 pause

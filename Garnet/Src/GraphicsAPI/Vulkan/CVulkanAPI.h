@@ -16,11 +16,12 @@ namespace api
 
 	struct QueueFamiryIndices
 	{
-		std::optional<uint32_t> m_GraphicsFamily;
+		// GPGPUだけのQueueもあるが、今回はGraphicsとの同期が必要なため、GraphicsとComputeの両方のBitに対応しているQueueを取得する
+		std::optional<uint32_t> m_GraphicsAndComputeFamily;
 		std::optional<uint32_t> m_PresentFamily;
 
 		bool IsComplete() {
-			return m_GraphicsFamily.has_value() && m_PresentFamily.has_value();
+			return m_GraphicsAndComputeFamily.has_value() && m_PresentFamily.has_value();
 		}
 	};
 
@@ -76,6 +77,7 @@ namespace api
 
 		// Queue
 		VkQueue m_GraphicsQueue;
+		VkQueue m_ComputeQueue;
 		VkQueue m_PresentQueue;
 
 		// SwapChain/Image
@@ -111,14 +113,16 @@ namespace api
 		// Sync Obj
 		std::vector<VkSemaphore> m_ImageAvailableSemaphones;
 		std::vector<VkSemaphore> m_RenderFinishedSemaphores;
+		std::vector<VkSemaphore> m_ComputeFinishedSemaphores;
 		std::vector<VkFence> m_InFlightFences;
+		std::vector<VkFence> m_ComputeInFlightFences;
 
 		bool m_FramebufferResized = false;
 	private:
 		// Vulkanメインロジック ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		bool CreateInstance();
 		bool CreateSurface();
-		bool CreateDevices();
+		bool CreateDevicesWithQueues();
 		bool CreateSwapChain();
 		bool CreateImageViews();
 		bool CreateSwapChainRenderPass();
@@ -171,6 +175,9 @@ namespace api
 		virtual std::shared_ptr<renderer::IRenderer> CreateRenderer(const std::string& PassName) override;
 		virtual std::shared_ptr<graphics::CMaterial> CreateMaterial(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo) override;
 		virtual std::shared_ptr<graphics::CTexture> CreateTexture(bool UseMipMap = false) override;
+#ifdef USE_GPGPU
+		virtual std::shared_ptr<api::IGPGPUHandler> CreateGPGPUHandler(const std::shared_ptr<graphics::CMaterial>& ComputeMaterial) override;
+#endif // USE_GPGPU
 
 		virtual bool Resize(int Width, int Height) override;
 
@@ -214,13 +221,20 @@ namespace api
 		VkCommandBuffer BeginSingleTimeCommands();
 		void EndSingleTimeCommands(VkCommandBuffer commandBuffer);
 
+		bool CreateCommandPool(VkCommandPool& CommandPool);
+		bool CreateCommandBuffer(VkCommandBuffer& CommandBuffer, VkCommandPool CommandPool);
+
 		// Queue
 		QueueFamiryIndices FindQueueFamilies(VkPhysicalDevice device);
 		VkQueue GetGraphicsQueue()const { return m_GraphicsQueue; }
+		VkQueue GetComputeQueue()const { return m_ComputeQueue; }
 		VkQueue GetPresentQueue() const { return m_PresentQueue; }
 
 		// Sync
+		VkSemaphore GetRenderFlightSemaphore()const { return m_RenderFinishedSemaphores[m_CurrentFrame]; }
+		VkSemaphore GetComputeFlightSemaphore()const { return m_ComputeFinishedSemaphores[m_CurrentFrame]; }
 		VkFence GetInFlightFence()const { return m_InFlightFences[m_CurrentFrame]; }
+		VkFence GetComputeInFlightFence()const { return m_ComputeInFlightFences[m_CurrentFrame]; }
 
 		// Texture
 		VkImageView CreateImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, graphics::ETextureType TextureType, float MipCount, bool UseMipMap);

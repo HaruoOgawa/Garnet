@@ -19,7 +19,6 @@ namespace app
 		std::shared_ptr<camera::CCamera> m_MainCamera;
 		std::shared_ptr<projection::CProjection> m_Projection;
 		std::shared_ptr<graphics::CDrawInfo> m_DrawInfo;
-		std::shared_ptr<imageeffect::CBlurEffect> m_BlurEffect;
 	public:
 		CScriptApp();
 		virtual ~CScriptApp();
@@ -29,9 +28,10 @@ namespace app
 		bool Initialize(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker) override;
 		bool ProcessInput(api::IGraphicsAPI* pGraphicsAPI) override;
 		bool Resize(int Width, int Height) override;
-		bool Update(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, float SecondsTime) override;
-		bool Draw(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, float SecondsTime) override;
+		bool Update(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker) override;
+		bool Draw(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker) override;
 
 		virtual const std::shared_ptr<camera::CCamera>& GetMainCamera() const override;
+		virtual const std::shared_ptr<graphics::CDrawInfo>& GetDrawInfo() const override;
 	};
 }

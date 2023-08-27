@@ -4,6 +4,7 @@
 #include "CVulkanRenderPass.h"
 #include "CVulkanMaterial.h"
 #include "CVulkanTexture.h"
+#include "CVulkanGPGPUHandler.h"
 #include "../../Debug/Message/Console.h"
 
 namespace api
@@ -25,6 +26,7 @@ namespace api
 		m_PhysicalDevice(nullptr),
 		m_LogicalDevice(nullptr),
 		m_GraphicsQueue(nullptr),
+		m_ComputeQueue(nullptr),
 		m_PresentQueue(nullptr),
 		m_SwapChain(nullptr),
 		m_SwapChainImageFormat(VK_FORMAT_UNDEFINED),
@@ -50,7 +52,7 @@ namespace api
 		if (!CreateInstance()) return false; // インスタンスを作成
 		if (!SetupDebugMessengerEXT()) return false; // インスタンス生成時に設定したプリセットのDebugMessengerだけではカバーできない範囲のハンドリング
 		if (!CreateSurface()) return false; // ウィンドウサーフェイスを作成(ウィンドウシステムとやり取りをする箇所)
-		if (!CreateDevices()) return false; // デバイスを作成(物理デバイス/論理デバイス)
+		if (!CreateDevicesWithQueues()) return false; // デバイスを作成(物理デバイス/論理デバイス)
 		if (!CreateSwapChain()) return false; // スワップチェインを作成(画面に示されるのを待っている画像のキューのマネージャーこと)
 		if (!CreateImageViews()) return false; // イメージビューの作成(APIが描画に使用する画像を管理するビューのこと)
 		if (!CreateSwapChainRenderPass()) return false; // レンダーパスの作成(描画全体のマネージャー。実際に描画に使用するのがサブパス。サブパスを複数個用意することでポストプロセスもできる)
@@ -79,7 +81,9 @@ namespace api
 		{
 			vkDestroySemaphore(m_LogicalDevice, m_ImageAvailableSemaphones[i], nullptr);
 			vkDestroySemaphore(m_LogicalDevice, m_RenderFinishedSemaphores[i], nullptr);
+			vkDestroySemaphore(m_LogicalDevice, m_ComputeFinishedSemaphores[i], nullptr);
 			vkDestroyFence(m_LogicalDevice, m_InFlightFences[i], nullptr);
+			vkDestroyFence(m_LogicalDevice, m_ComputeInFlightFences[i], nullptr);
 		}
 
 		// コマンドプールの破棄
@@ -138,6 +142,15 @@ namespace api
 
 		return Texture;
 	}
+
+#ifdef USE_GPGPU
+	std::shared_ptr<api::IGPGPUHandler> CVulkanAPI::CreateGPGPUHandler(const std::shared_ptr<graphics::CMaterial>& ComputeMaterial)
+	{
+		auto GPGPUHandler = std::make_shared<api::CVulkanGPGPUHandler>(this, ComputeMaterial);
+
+		return GPGPUHandler;
+	}
+#endif // USE_GPGPU
 
 	bool CVulkanAPI::Resize(int Width, int Height)
 	{
@@ -413,7 +426,7 @@ namespace api
 		return true;
 	}
 
-	bool CVulkanAPI::CreateDevices()
+	bool CVulkanAPI::CreateDevicesWithQueues()
 	{
 		// 物理デバイスの取得
 		uint32_t physicalDeviceCount = 0;
@@ -467,7 +480,7 @@ namespace api
 		QueueFamiryIndices indices = FindQueueFamilies(m_PhysicalDevice);
 
 		std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
-		std::set<uint32_t> uniqueQueueFamilies = { indices.m_GraphicsFamily.value(), indices.m_PresentFamily.value() };
+		std::set<uint32_t> uniqueQueueFamilies = { indices.m_GraphicsAndComputeFamily.value(), indices.m_PresentFamily.value() };
 		float queuePriority = 1.0f;
 		for (uint32_t queueFamily : uniqueQueueFamilies)
 		{
@@ -510,7 +523,8 @@ namespace api
 		VkResult result = vkCreateDevice(m_PhysicalDevice, &deviceCreateInfo, nullptr, &m_LogicalDevice);
 
 		// キューへのハンドルを取得
-		vkGetDeviceQueue(m_LogicalDevice, indices.m_GraphicsFamily.value(), 0, &m_GraphicsQueue);
+		vkGetDeviceQueue(m_LogicalDevice, indices.m_GraphicsAndComputeFamily.value(), 0, &m_GraphicsQueue);
+		vkGetDeviceQueue(m_LogicalDevice, indices.m_GraphicsAndComputeFamily.value(), 0, &m_ComputeQueue); // 同期するので同じQueueIndexでいいのかな？
 		vkGetDeviceQueue(m_LogicalDevice, indices.m_PresentFamily.value(), 0, &m_PresentQueue);
 
 		return (result == VK_SUCCESS);
@@ -547,10 +561,10 @@ namespace api
 		createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
 		QueueFamiryIndices indices = FindQueueFamilies(m_PhysicalDevice);
-		uint32_t queueFamilyIndices[] = { indices.m_GraphicsFamily.value(), indices.m_PresentFamily.value() };
+		uint32_t queueFamilyIndices[] = { indices.m_GraphicsAndComputeFamily.value(), indices.m_PresentFamily.value() };
 
 		// キューファミリー(キューのマネージャー)が異なる場合の処理を指定する
-		if (indices.m_GraphicsFamily != indices.m_PresentFamily)
+		if (indices.m_GraphicsAndComputeFamily != indices.m_PresentFamily)
 		{
 			// VK_SHARING_MODE_CONCURRENTはスワップチェインイメージを複数のキューファミリ間で共有する(少しパフォーマンスが悪くなる)
 			createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
@@ -731,7 +745,7 @@ namespace api
 		VkCommandPoolCreateInfo poolInfo{};
 		poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
 		poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-		poolInfo.queueFamilyIndex = queueFamilyIndices.m_GraphicsFamily.value();
+		poolInfo.queueFamilyIndex = queueFamilyIndices.m_GraphicsAndComputeFamily.value();
 
 		if (vkCreateCommandPool(m_LogicalDevice, &poolInfo, nullptr, &m_CommandPool) != VK_SUCCESS)
 		{
@@ -765,7 +779,9 @@ namespace api
 		//
 		m_ImageAvailableSemaphones.resize(MAX_FRAMES_IN_FLIGHT);
 		m_RenderFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
+		m_ComputeFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
 		m_InFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
+		m_ComputeInFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
 
 		// セマフォの作成(セマフォとはキュー操作の間に順序を追加するためのもの。セマフォの処理はGPUのみで行われる) 
 		VkSemaphoreCreateInfo semaphoreInfo{};
@@ -782,7 +798,10 @@ namespace api
 		{
 			if (vkCreateSemaphore(m_LogicalDevice, &semaphoreInfo, nullptr, &m_ImageAvailableSemaphones[i]) != VK_SUCCESS ||
 				vkCreateSemaphore(m_LogicalDevice, &semaphoreInfo, nullptr, &m_RenderFinishedSemaphores[i]) != VK_SUCCESS ||
-				vkCreateFence(m_LogicalDevice, &fenceInfo, nullptr, &m_InFlightFences[i]) != VK_SUCCESS)
+				vkCreateSemaphore(m_LogicalDevice, &semaphoreInfo, nullptr, &m_ComputeFinishedSemaphores[i]) != VK_SUCCESS ||
+				vkCreateFence(m_LogicalDevice, &fenceInfo, nullptr, &m_InFlightFences[i]) != VK_SUCCESS ||
+				vkCreateFence(m_LogicalDevice, &fenceInfo, nullptr, &m_ComputeInFlightFences[i]) != VK_SUCCESS
+			)
 			{
 				throw std::runtime_error("failed to create semaphores!");
 			}
@@ -864,9 +883,9 @@ namespace api
 		VkSubmitInfo submitInfo{};
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
-		VkSemaphore waitSemaphore[] = { m_ImageAvailableSemaphones[m_CurrentFrame] }; // 画像に色が書き込まれて利用可になるまで待つセマフォ
-		VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
-		submitInfo.waitSemaphoreCount = 1;
+		VkSemaphore waitSemaphore[] = { m_ComputeFinishedSemaphores[m_CurrentFrame] , m_ImageAvailableSemaphones[m_CurrentFrame] }; // セマフォで待つ
+		VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_VERTEX_INPUT_BIT | VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
+		submitInfo.waitSemaphoreCount = 2;
 		submitInfo.pWaitSemaphores = waitSemaphore;
 		submitInfo.pWaitDstStageMask = waitStages;
 
@@ -1148,9 +1167,10 @@ namespace api
 
 			// グラフィックキューファミリが使用できるか
 			// &演算: 両方1なら1, そうでないなら0. if文は0でなければtrueを返す
-			if (QueueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT)
+			// GPGPUだけのQueueもあるが、今回はGraphicsとの同期が必要なため、GraphicsとComputeの両方のBitに対応しているQueueを取得する
+			if ((QueueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT) && (QueueFamily.queueFlags & VK_QUEUE_COMPUTE_BIT))
 			{
-				indices.m_GraphicsFamily = i;
+				indices.m_GraphicsAndComputeFamily = i;
 			}
 
 			//プレゼントキューファミリが使用できるかをウィンドウサーフェイスに問い合わせる
@@ -1630,6 +1650,40 @@ namespace api
 		vkQueueWaitIdle(m_GraphicsQueue);
 
 		vkFreeCommandBuffers(m_LogicalDevice, m_CommandPool, 1, &commandBuffer);
+	}
+
+	bool CVulkanAPI::CreateCommandPool(VkCommandPool& CommandPool)
+	{
+		QueueFamiryIndices queueFamilyIndices = FindQueueFamilies(GetPhysicalDevice());
+
+		VkCommandPoolCreateInfo poolInfo{};
+		poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+		poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+		poolInfo.queueFamilyIndex = queueFamilyIndices.m_GraphicsAndComputeFamily.value();
+
+		if (vkCreateCommandPool(GetLogicalDevice(), &poolInfo, nullptr, &CommandPool) != VK_SUCCESS)
+		{
+			return false;
+		}
+
+		return true;
+	}
+
+	bool CVulkanAPI::CreateCommandBuffer(VkCommandBuffer& CommandBuffer, VkCommandPool CommandPool)
+	{
+		VkCommandBufferAllocateInfo allocInfo{};
+		allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+		allocInfo.commandPool = CommandPool;
+		allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY; // メイン(プライマリ)コマンドバッファかサブ(セカンダリ)コマンドバッファかの選択
+		allocInfo.commandBufferCount = 1;
+
+		// Allocate は確保するという意味
+		if (vkAllocateCommandBuffers(GetLogicalDevice(), &allocInfo, &CommandBuffer) != VK_SUCCESS)
+		{
+			return false;
+		}
+
+		return true;
 	}
 }
 

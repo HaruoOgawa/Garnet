@@ -17,6 +17,7 @@ namespace api
 
 		m_VertShaderModule(nullptr),
 		m_FragShaderModule(nullptr),
+		m_ComputeShaderModule(nullptr),
 
 		m_DescriptorSetLayout(nullptr),
 		m_DescriptorPool(nullptr),
@@ -38,7 +39,7 @@ namespace api
 		if (!CreateShaderStages(m_CreateInfo)) return false; // Shaderの作成
 
 		// Uniform Buffer
-		if (!CreateUniformBuffers(m_CreateInfo)) return false; // ユニフォームバッファを作成
+		if (!CreateShaderBuffers(m_CreateInfo)) return false; // ユニフォームバッファを作成
 
 		// バインドグループ(UniformとTextureで共通項)
 		if (!CreateDescriptorSetLayout(m_CreateInfo)) return false; // DescriptorSetLayoutの作成(Uniformをどのようにバインドするか), WebGPUでいうバインドグループの生成
@@ -51,7 +52,7 @@ namespace api
 		return true;
 	}
 
-	bool CVulkanMaterial::SetCommonUniform(float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo)
+	bool CVulkanMaterial::SetCommonUniform(const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo)
 	{
 		glm::mat4 lightVPMat = DrawInfo->GetLightProjection()->GetPrejectionMatrix() * DrawInfo->GetLightCamera()->GetViewMatrix();
 
@@ -62,23 +63,27 @@ namespace api
 		SetUniformValue("lightDir", &DrawInfo->GetLightCamera()->GetViewDir()[0]);
 		SetUniformValue("lightColor", &DrawInfo->GetLightColor()[0]);
 		SetUniformValue("cameraPos", &Camera->GetPos()[0]);
-		SetUniformValue("time", &SecondsTime);
+		SetUniformValue("time", &glm::vec1(DrawInfo->GetSecondsTime())[0]);
+		SetUniformValue("deltaTime", &glm::vec1(DrawInfo->GetDeltaSecondsTime())[0]);
 		
 		return true;
 	}
 
 	bool CVulkanMaterial::BuildDrawBuffer(int DynamicOffsetNum)
 	{
-		for (int i = 0; i < m_UniformBufferList.size(); i++)
+		for (int i = 0; i < m_ShaderBufferList.size(); i++)
 		{
+			// SharedBufferは処理しない
+			if (m_ShaderBufferList[i]->GetSharedBufferParam().IsShared) continue;
+
 			auto ByteSize = m_VKUniformBufferSizeList[m_pGraphicsAPI->GetCurrentFrame()][i];
-			auto ByteOffset = ((m_UseDynamicUniform)? (DynamicOffsetNum - 1) * ByteSize : 0);
+			auto ByteOffset = ((m_UseDynamicBufferOffset)? (DynamicOffsetNum - 1) * ByteSize : 0);
 
 			// バッファデータの更新
 			void* BuffersMappedList;
 			vkMapMemory(m_pGraphicsAPI->GetLogicalDevice(), m_VKUniformBufferMemoryList[m_pGraphicsAPI->GetCurrentFrame()][i], ByteOffset, ByteSize, 0, &BuffersMappedList);
 
-			const auto& BufferData = m_UniformBufferList[i]->GetData();
+			const auto& BufferData = m_ShaderBufferList[i]->GetData();
 			auto bufferSize = BufferData.size();
 
 			std::memcpy(BuffersMappedList, &BufferData[0], bufferSize);
@@ -91,9 +96,12 @@ namespace api
 
 	void CVulkanMaterial::SetUniformValue(const std::string Name, const void* Value, int DynamicOffsetNum)
 	{
-		for (int i = 0; i < m_UniformBufferList.size(); i++)
+		for (int i = 0; i < m_ShaderBufferList.size(); i++)
 		{
-			auto& UniformBuffer = m_UniformBufferList[i];
+			// SharedBufferは処理しない
+			if (m_ShaderBufferList[i]->GetSharedBufferParam().IsShared) continue;
+
+			auto& UniformBuffer = m_ShaderBufferList[i];
 			const auto& UniformDesc = UniformBuffer->GetDescriptor();
 
 			const auto& DataList = UniformDesc->GetDataList();
@@ -158,10 +166,16 @@ namespace api
 		// ShaderModuleの作成(Shaderをラップ・管理するためのもの)
 		// 使う時にGeometryとかTessellationも追加する
 		const auto& VertexShaderData = createInfo->GetVertexShaderCode();
-		const bool UseVertexShader = CreateShaderModule(m_VertShaderModule, std::string(&VertexShaderData[0], &VertexShaderData[0] + VertexShaderData.size()));
+		bool UseVertexShader = false;
+		if (!VertexShaderData.empty()) UseVertexShader = CreateShaderModule(m_VertShaderModule, std::string(&VertexShaderData[0], &VertexShaderData[0] + VertexShaderData.size()));
 
 		const auto& FragmentShaderCode = createInfo->GetFragmentShaderCode();
-		const bool UseFragmentShader = CreateShaderModule(m_FragShaderModule, std::string(&FragmentShaderCode[0], &FragmentShaderCode[0] + FragmentShaderCode.size()));
+		bool UseFragmentShader = false;
+		if(!FragmentShaderCode.empty()) UseFragmentShader = CreateShaderModule(m_FragShaderModule, std::string(&FragmentShaderCode[0], &FragmentShaderCode[0] + FragmentShaderCode.size()));
+
+		const auto& ComputeShaderCode = createInfo->GetComputeShaderCode();
+		bool UseComputeShader = false;
+		if(!ComputeShaderCode.empty()) UseComputeShader = CreateShaderModule(m_ComputeShaderModule, std::string(&ComputeShaderCode[0], &ComputeShaderCode[0] + ComputeShaderCode.size()));
 
 		// シェーダーステージの作成(VertexShaderとかFragment, Geometryとかそういうステージ)
 		if (UseVertexShader)
@@ -186,6 +200,19 @@ namespace api
 			m_ShaderStages.push_back(fragShaderStageInfo);
 		}
 
+		if (UseComputeShader)
+		{
+			VkPipelineShaderStageCreateInfo computeShaderStageInfo{};
+			computeShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+			computeShaderStageInfo.stage = VK_SHADER_STAGE_COMPUTE_BIT;
+			computeShaderStageInfo.module = m_ComputeShaderModule;
+			computeShaderStageInfo.pName = "main";
+
+			m_ShaderStages.clear(); // ComputeShaderは単体でしか使わないので念のためリセットしておく
+
+			m_ShaderStages.push_back(computeShaderStageInfo);
+		}
+
 		return true;
 	}
 
@@ -195,24 +222,38 @@ namespace api
 		std::vector<VkDescriptorSetLayoutBinding> bindings;
 		
 		// UBOのバインドに関する設定
-		for (const auto& Buffer : m_UniformBufferList)
+		for (const auto& Buffer : m_ShaderBufferList)
 		{
 			for (const auto& Layout : Buffer->GetBindingLayoutList())
 			{
 				VkDescriptorSetLayoutBinding LayoutBinding{}; // VkDescriptorSetLayoutBindingはおそらくlayout(location = 0), WebGPUでいう @binding(n)のこと. ただしVulkanは @groupは存在しない
 				LayoutBinding.binding = Layout.second.BindingIndex; // バインディングインデックス
 				
-				if (m_UseDynamicUniform)
+				if (Buffer->GetBufferType() == graphics::EBufferType::UNIFORM)
 				{
-					LayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC; // バッファタイプ
+					if (m_UseDynamicBufferOffset)
+					{
+						LayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC; // バッファタイプ
+					}
+					else
+					{
+						LayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER; // バッファタイプ
+					}
 				}
-				else
+				else if (Buffer->GetBufferType() == graphics::EBufferType::SHADERSTORAGE)
 				{
-					LayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER; // バッファタイプ
+					if (m_UseDynamicBufferOffset)
+					{
+						LayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC; // バッファタイプ
+					}
+					else
+					{
+						LayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER; // バッファタイプ
+					}
 				}
-				
+
 				LayoutBinding.descriptorCount = 1; // 
-				LayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT; // アクセス権限。ここでは頂点シェーダーのみ読み取り可
+				LayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_COMPUTE_BIT; // アクセス権限。ここでは頂点シェーダーのみ読み取り可
 				LayoutBinding.pImmutableSamplers = nullptr; // 画像のサンプリングに使用するフィールド
 
 				bindings.push_back(LayoutBinding);
@@ -260,7 +301,7 @@ namespace api
 		return (result == VK_SUCCESS);
 	}
 
-	bool CVulkanMaterial::CreateUniformBuffers(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo)
+	bool CVulkanMaterial::CreateShaderBuffers(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo)
 	{
 		m_VKUniformBufferList.resize(m_pGraphicsAPI->GetMaxFramesInFlight());
 		m_VKUniformBufferMemoryList.resize(m_pGraphicsAPI->GetMaxFramesInFlight());
@@ -268,8 +309,11 @@ namespace api
 
 		for (size_t i = 0; i < m_pGraphicsAPI->GetMaxFramesInFlight(); i++)
 		{
-			for (const auto& Buffer : m_UniformBufferList)
+			for (const auto& Buffer : m_ShaderBufferList)
 			{
+				// SharedBufferは処理しない
+				if (Buffer->GetSharedBufferParam().IsShared) continue;
+
 				const auto& Data = Buffer->GetData();
 				const uint32_t ByteSize = static_cast<uint32_t>(math::GetNextPowerOfTwo(static_cast<unsigned int>(Data.size()))); // 2のn乗にする
 
@@ -277,13 +321,27 @@ namespace api
 				VkDeviceMemory BufferMemory;
 
 				// バッファの作成
-				if (m_UseDynamicUniform)
+				if (Buffer->GetBufferType() == graphics::EBufferType::UNIFORM)
 				{
-					m_pGraphicsAPI->CreateBuffer(ByteSize * m_RefCount, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, UniformBuffer, BufferMemory);
+					if (m_UseDynamicBufferOffset)
+					{
+						m_pGraphicsAPI->CreateBuffer(ByteSize * m_RefCount, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, UniformBuffer, BufferMemory);
+					}
+					else
+					{
+						m_pGraphicsAPI->CreateBuffer(ByteSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, UniformBuffer, BufferMemory);
+					}
 				}
-				else
+				else if (Buffer->GetBufferType() == graphics::EBufferType::SHADERSTORAGE)
 				{
-					m_pGraphicsAPI->CreateBuffer(ByteSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, UniformBuffer, BufferMemory);
+					if (m_UseDynamicBufferOffset)
+					{
+						m_pGraphicsAPI->CreateBuffer(ByteSize * m_RefCount, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, UniformBuffer, BufferMemory);
+					}
+					else
+					{
+						m_pGraphicsAPI->CreateBuffer(ByteSize, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, UniformBuffer, BufferMemory);
+					}
 				}
 
 				//
@@ -300,17 +358,34 @@ namespace api
 		std::vector<VkDescriptorPoolSize> poolSizes;
 
 		// UBOのプール
-		for (const auto& Buffer : m_UniformBufferList)
+		for (const auto& Buffer : m_ShaderBufferList)
 		{
+			// SharedBufferは処理しない
+			if (Buffer->GetSharedBufferParam().IsShared) continue;
+
 			VkDescriptorPoolSize poolSize{};
 
-			if (m_UseDynamicUniform)
+			if (Buffer->GetBufferType() == graphics::EBufferType::UNIFORM)
 			{
-				poolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+				if (m_UseDynamicBufferOffset)
+				{
+					poolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+				}
+				else
+				{
+					poolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+				}
 			}
-			else
+			else if (Buffer->GetBufferType() == graphics::EBufferType::SHADERSTORAGE)
 			{
-				poolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+				if (m_UseDynamicBufferOffset)
+				{
+					poolSize.type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC;
+				}
+				else
+				{
+					poolSize.type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+				}
 			}
 
 			poolSize.descriptorCount = static_cast<uint32_t>(m_pGraphicsAPI->GetMaxFramesInFlight());
@@ -372,9 +447,9 @@ namespace api
 		for (size_t FrameIndex = 0; FrameIndex < m_pGraphicsAPI->GetMaxFramesInFlight(); FrameIndex++)
 		{
 			//
-			for (int BufferIndex = 0; BufferIndex < m_UniformBufferList.size(); BufferIndex++)
+			for (int BufferIndex = 0; BufferIndex < m_ShaderBufferList.size(); BufferIndex++)
 			{
-				const auto& Buffer = m_UniformBufferList[BufferIndex];
+				const auto& Buffer = m_ShaderBufferList[BufferIndex];
 				size_t UniformLayoutSize = Buffer->GetBindingLayoutList().size();
 				size_t TexLayoutSize = m_TextureBindingLayoutList.size() * 2; // ImageViewとSamplerがあるので2倍にしている
 
@@ -384,6 +459,9 @@ namespace api
 				
 				int LayoutIndex = 0;
 
+				// 共有バッファ
+				const auto& SharedBufferParam = m_ShaderBufferList[BufferIndex]->GetSharedBufferParam();
+
 				// UBO
 				int BufferLayoutIndex = 0;
 				for (const auto& Layout : Buffer->GetBindingLayoutList())
@@ -392,18 +470,42 @@ namespace api
 					descriptorWrites[LayoutIndex].dstSet = m_DescriptorSets[FrameIndex]; // どのDescriptorSets(キューファミリが入ってる？)でCPUからGPUにバッファを渡すコマンドを発行するか
 					descriptorWrites[LayoutIndex].dstBinding = Layout.second.BindingIndex; // layout(location = n)
 					descriptorWrites[LayoutIndex].dstArrayElement = 0; // ???
-					
-					bufferInfoList[BufferLayoutIndex].buffer = m_VKUniformBufferList[FrameIndex][BufferIndex]; // UBOの指定
+
+					if (SharedBufferParam.IsShared) // バッファを他のマテリアルと共有する
+					{
+						CVulkanMaterial* pSharedVulkanMat = static_cast<CVulkanMaterial*>(SharedBufferParam.SharedBufferMaterial.get());
+
+						bufferInfoList[BufferLayoutIndex].buffer = pSharedVulkanMat->GetVKUniformBufferList()[FrameIndex][SharedBufferParam.BufferIndex]; // UBOの指定
+					}
+					else // 通常のバッファ使用
+					{
+						bufferInfoList[BufferLayoutIndex].buffer = m_VKUniformBufferList[FrameIndex][BufferIndex]; // UBOの指定
+					}
+
 					bufferInfoList[BufferLayoutIndex].offset = Layout.second.ByteOffset; // バッファオフセット
 					bufferInfoList[BufferLayoutIndex].range = Layout.second.ByteSize; // サイズかな？
 
-					if (m_UseDynamicUniform)
+					if (Buffer->GetBufferType() == graphics::EBufferType::UNIFORM)
 					{
-						descriptorWrites[LayoutIndex].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC; // どのタイプのコマンドを発行してもらうのか
+						if (m_UseDynamicBufferOffset)
+						{
+							descriptorWrites[LayoutIndex].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC; // どのタイプのコマンドを発行してもらうのか
+						}
+						else
+						{
+							descriptorWrites[LayoutIndex].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER; // どのタイプのコマンドを発行してもらうのか
+						}
 					}
-					else
+					else if (Buffer->GetBufferType() == graphics::EBufferType::SHADERSTORAGE)
 					{
-						descriptorWrites[LayoutIndex].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER; // どのタイプのコマンドを発行してもらうのか
+						if (m_UseDynamicBufferOffset)
+						{
+							descriptorWrites[LayoutIndex].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC; // どのタイプのコマンドを発行してもらうのか
+						}
+						else
+						{
+							descriptorWrites[LayoutIndex].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER; // どのタイプのコマンドを発行してもらうのか
+						}
 					}
 
 					descriptorWrites[LayoutIndex].descriptorCount = 1;
@@ -412,7 +514,16 @@ namespace api
 					// 複数個入力しても意味がないので始めのFrameIndexだけを見る
 					if (FrameIndex == 0)
 					{
-						m_BindingRefSizeList.push_back(m_VKUniformBufferSizeList[FrameIndex][BufferIndex]);
+						if (SharedBufferParam.IsShared) // バッファを他のマテリアルと共有する
+						{
+							CVulkanMaterial* pSharedVulkanMat = static_cast<CVulkanMaterial*>(SharedBufferParam.SharedBufferMaterial.get());
+
+							m_BindingRefSizeList.push_back(pSharedVulkanMat->GetVKUniformBufferSizeList()[FrameIndex][BufferIndex]);
+						}
+						else
+						{
+							m_BindingRefSizeList.push_back(m_VKUniformBufferSizeList[FrameIndex][BufferIndex]);
+						}
 					}
 
 					BufferLayoutIndex++;
@@ -487,6 +598,8 @@ namespace api
 	// ShaderModuleの作成(Shaderをラップ・管理するためのもの)
 	bool CVulkanMaterial::CreateShaderModule(VkShaderModule& shaderModule, const std::string& code)
 	{
+		if (code.empty()) return false;
+
 		VkShaderModuleCreateInfo createInfo{};
 		createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
 		createInfo.codeSize = code.size();

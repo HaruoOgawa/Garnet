@@ -10,7 +10,7 @@ namespace camera
 	}
 
 #ifdef USE_INPUT_SYSTEM
-	void CCamera::Update(float SecondsTime, const std::shared_ptr<input::CInputState>& InputState)
+	void CCamera::Update(float DeltaTime, const std::shared_ptr<input::CInputState>& InputState)
 	{
 	}
 #endif // USE_INPUT_SYSTEM

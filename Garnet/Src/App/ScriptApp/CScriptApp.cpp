@@ -22,10 +22,13 @@ namespace app
 {
 	CScriptApp::CScriptApp():
 		m_ScriptScene(nullptr),
+#ifdef USE_VIEWER_CAMERA
 		m_MainCamera(std::make_shared<camera::CViewerCamera>()),
+#else
+		m_MainCamera(std::make_shared<camera::CCamera>()),
+#endif // USE_VIEWER_CAMERA
 		m_Projection(std::make_shared<projection::CProjection>()),
-		m_DrawInfo(std::make_shared<graphics::CDrawInfo>()),
-		m_BlurEffect(nullptr)
+		m_DrawInfo(std::make_shared<graphics::CDrawInfo>())
 	{
 		m_MainCamera->SetPos(glm::vec3(0.0f, 0.0f, 5.0f));
 		m_DrawInfo->GetLightCamera()->SetPos(glm::vec3(3.0f, 3.0f, -3.0f));
@@ -47,15 +50,6 @@ namespace app
 		// Viewの初期化
 		m_ScriptScene = std::make_shared<scene::CScriptScene>(pGraphicsAPI, pLoadWorker);
 
-		// オフスクリーンレンダリング用のFrameBufferを生成する
-		if (!pGraphicsAPI->CreateRenderPass("ShadowPass", api::ERenderPassFormat::COLOR_RENDERPASS, glm::vec4(1.0f), 512, 512)) return false;
-
-		m_BlurEffect = std::make_shared<imageeffect::CBlurEffect>(pGraphicsAPI);
-		if (!m_BlurEffect->Create(pLoadWorker)) return false;
-
-		// FrameTextureを渡す
-		m_ScriptScene->SetFrameTexture(m_BlurEffect->GetFrameTexture());
-
 		return true;
 	}
 
@@ -72,36 +66,28 @@ namespace app
 		return true;
 	}
 
-	bool CScriptApp::Update(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, float SecondsTime)
+	bool CScriptApp::Update(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker)
 	{
 		if (!pLoadWorker->Update(pGraphicsAPI)) return false;
 
-		if (!m_BlurEffect->Update(pLoadWorker)) return false;
-		if (!m_ScriptScene->Update(pGraphicsAPI, pLoadWorker)) return false;
-
-		//m_DrawInfo->GetLightCamera()->SetPos(glm::vec3(glm::cos(SecondsTime * 0.1f), 1.0f, glm::sin(SecondsTime * 0.1f)) * 3.0f);
+		if (!m_ScriptScene->Update(pGraphicsAPI, pLoadWorker, m_MainCamera, m_Projection, m_DrawInfo)) return false;
 
 		return true;
 	}
 
-	bool CScriptApp::Draw(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, float SecondsTime)
+	bool CScriptApp::Draw(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker)
 	{
 		// Prepare
 		if (!pGraphicsAPI->PrepareRender()) return false;
 
-		// ShadowPass
-		if (!pGraphicsAPI->BeginRender("ShadowPass")) return false;
-		if (!m_ScriptScene->Draw(pGraphicsAPI, true, SecondsTime, m_MainCamera, m_Projection, m_DrawInfo)) return false;
-		if (!pGraphicsAPI->EndRender()) return false;
-
-		// ShadowMapにブラーをかける
-		if (!m_BlurEffect->Draw(SecondsTime, m_MainCamera, m_Projection, m_DrawInfo)) return false;
+		// Dispatch GPGPU
+		if (!m_ScriptScene->Dispatch(pGraphicsAPI, pLoadWorker, m_MainCamera, m_Projection, m_DrawInfo)) return false;
 
 		// DefaultPass(SwapChain)
 		if (!pGraphicsAPI->BeginRender()) return false;
 
-		if (!m_ScriptScene->Draw(pGraphicsAPI, false, SecondsTime, m_MainCamera, m_Projection, m_DrawInfo)) return false;
-		if (!pLoadWorker->Draw(pGraphicsAPI, false, SecondsTime, m_MainCamera, m_Projection, m_DrawInfo)) return false;
+		if (!m_ScriptScene->Draw(pGraphicsAPI, false, m_MainCamera, m_Projection, m_DrawInfo)) return false;
+		if (!pLoadWorker->Draw(pGraphicsAPI, false, m_MainCamera, m_Projection, m_DrawInfo)) return false;
 		
 		if (!pGraphicsAPI->EndRender()) return false;
 
@@ -114,5 +100,10 @@ namespace app
 	const std::shared_ptr<camera::CCamera>& CScriptApp::GetMainCamera() const
 	{
 		return m_MainCamera;
+	}
+
+	const std::shared_ptr<graphics::CDrawInfo>& CScriptApp::GetDrawInfo() const
+	{
+		return m_DrawInfo;
 	}
 }

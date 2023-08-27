@@ -23,8 +23,6 @@
 #include "../Input/CInputState.h"
 
 #include "./ScriptApp/CScriptApp.h"
-#include "./EditorApp/CEditorApp.h"
-#include "./MainApp/CMainApp.h"
 
 bool g_IsRunLoop = true;
 
@@ -51,19 +49,7 @@ namespace descapp
 		m_GraphicsAPI = std::make_shared<api::CVulkanAPI>(WIDTH, HEIGHT);
 #endif // USE_WEBGPU
 		
-		//
-		if (AppType == app::EAppType::ScriptApp)
-		{
-			m_App = std::make_shared<app::CScriptApp>();
-		}
-		else if (AppType == app::EAppType::EditorApp)
-		{
-			m_App = std::make_shared<app::CEditorApp>();
-		}
-		else if (AppType == app::EAppType::MainApp)
-		{
-			m_App = std::make_shared<app::CMainApp>();
-		}
+		m_App = std::make_shared<app::CScriptApp>();
 	}
 
 	CDescAppManager::~CDescAppManager()
@@ -251,13 +237,16 @@ namespace descapp
 		m_SecondsTime = static_cast<float>(clock()) * 0.001f;
 		m_DeltaSecondsTime = m_SecondsTime - PrevSecondsTime;
 
+		m_App->GetDrawInfo()->SetSecondsTime(m_SecondsTime);
+		m_App->GetDrawInfo()->SetDeltaSecondsTime(m_DeltaSecondsTime);
+
 		// ViewCamera‚ÌUpdate
 #ifdef USE_INPUT_SYSTEM
 		const auto& MainCamera = m_App->GetMainCamera();
-		if (MainCamera) MainCamera->Update(m_SecondsTime, m_InputState);
+		if (MainCamera) MainCamera->Update(m_DeltaSecondsTime, m_InputState);
 #endif // USE_INPUT_SYSTEM
 
-		if (!m_App->Update(m_GraphicsAPI.get(), m_LoadWorker.get(), m_SecondsTime)) return false;
+		if (!m_App->Update(m_GraphicsAPI.get(), m_LoadWorker.get())) return false;
 
 #ifdef _DEBUG
 		// FPS‚ÌŒv‘ª‚Æ•\Ž¦(60FPS‚ðŠî€‚Æ‚·‚é)
@@ -270,7 +259,7 @@ namespace descapp
 
 	bool CDescAppManager::Draw()
 	{
-		if (!m_App->Draw(m_GraphicsAPI.get(), m_LoadWorker.get(), m_SecondsTime)) return false;
+		if (!m_App->Draw(m_GraphicsAPI.get(), m_LoadWorker.get())) return false;
 
 		return true;
 	}

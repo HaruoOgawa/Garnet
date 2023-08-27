@@ -60,7 +60,7 @@ namespace imageeffect
 		return true;
 	}
 
-	bool CBlurEffect::Draw(float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
+	bool CBlurEffect::Draw(const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
 		const std::shared_ptr<graphics::CDrawInfo>& DrawInfo)
 	{
 		if (!m_IsLoaded) return true;
@@ -82,7 +82,7 @@ namespace imageeffect
 			glm::vec2 OffsetV = glm::vec2(1.0f / w, 0.0f);
 			m_ScreenObjX->GetMaterialList()[0]->SetUniformValue("Direction", &OffsetV[0]);
 
-			if (!m_ScreenObjX->Draw(false, SecondsTime, Camera, Projection, DrawInfo)) return false;
+			if (!m_ScreenObjX->Draw(false, Camera, Projection, DrawInfo)) return false;
 			if (!m_pGraphicsAPI->EndRender()) return false;
 		}
 		
@@ -92,7 +92,7 @@ namespace imageeffect
 			glm::vec2 OffsetV = glm::vec2(0.0f, 1.0f / h);
 			m_ScreenObjY->GetMaterialList()[0]->SetUniformValue("Direction", &OffsetV[0]);
 
-			if (!m_ScreenObjY->Draw(false, SecondsTime, Camera, Projection, DrawInfo)) return false;
+			if (!m_ScreenObjY->Draw(false, Camera, Projection, DrawInfo)) return false;
 			if (!m_pGraphicsAPI->EndRender()) return false;
 		}
 
@@ -176,7 +176,7 @@ namespace imageeffect
 			UniformBuffer->AddData("KernelSize", &glm::ivec1(m_KernelSize)[0], sizeof(glm::ivec1), 0);
 			UniformBuffer->AddData("Direction", &glm::vec2(0.0f)[0], sizeof(glm::vec2), 0);
 
-			MaterialX->AddUniformBuffer(UniformBuffer);
+			MaterialX->AddShaderBuffer(UniformBuffer);
 		}
 		
 		/*{
@@ -185,7 +185,7 @@ namespace imageeffect
 
 			UniformBuffer->RecalculateBindingLayoutOffset();
 
-			MaterialX->AddUniformBuffer(UniformBuffer);
+			MaterialX->AddShaderBuffer(UniformBuffer);
 		}*/
 		
 		{
@@ -195,7 +195,7 @@ namespace imageeffect
 			UniformBuffer->AddData("KernelSize", &glm::ivec1(m_KernelSize)[0], sizeof(glm::ivec1), 0);
 			UniformBuffer->AddData("Direction", &glm::vec2(0.0f)[0], sizeof(glm::vec2), 0);
 
-			MaterialY->AddUniformBuffer(UniformBuffer);
+			MaterialY->AddShaderBuffer(UniformBuffer);
 		}
 
 		/*{
@@ -204,7 +204,7 @@ namespace imageeffect
 
 			UniformBuffer->RecalculateBindingLayoutOffset();
 
-			MaterialY->AddUniformBuffer(UniformBuffer);
+			MaterialY->AddShaderBuffer(UniformBuffer);
 		}*/
 		
 		// UBO1
@@ -214,7 +214,7 @@ namespace imageeffect
 
 			UniformBuffer->RecalculateBindingLayoutOffset();
 
-			Material->AddUniformBuffer(UniformBuffer);
+			Material->AddShaderBuffer(UniformBuffer);
 		}*/
 
 		// Bind Texture
@@ -236,7 +236,11 @@ namespace imageeffect
 
 		// Mesh
 		std::shared_ptr<graphics::CMesh> Mesh = std::make_shared<graphics::CMesh>();
-		std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(nullptr, 0, graphics::EPresetPrimitiveType::BOARD);
+
+		std::shared_ptr<renderer::CRendererCreateInfo> rendererCreateInfo = std::make_shared<renderer::CRendererCreateInfo>();
+		if (!graphics::CPresetPrimitive::CreateBoard(rendererCreateInfo)) return false;
+
+		std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(rendererCreateInfo, 0);
 		Mesh->AddPrimitive(Primitive);
 		m_ScreenObjX->AddMesh(Mesh);
 		m_ScreenObjY->AddMesh(Mesh);

@@ -7,66 +7,31 @@
 #include <glm/glm.hpp>
 #include "../Graphics/CDrawInfo.h"
 #include "../Camera/CCamera.h"
+#include "../Interface/IGPGPUHandler.h"
 
 namespace scene
 {
 	CScriptScene::CScriptScene(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker):
+		m_InstanceCount(512),
+
+		m_GPGPUHandler(nullptr),
+
 		m_TestObject(std::make_shared<object::C3DObject>("", "ShadowPass")),
 
 		m_DepthVertex(std::make_shared<file::CFile>("Resources\\Shaders\\depth" + pGraphicsAPI->GetVertexShaderExtension())),
 		m_DepthFragment(std::make_shared<file::CFile>("Resources\\Shaders\\depth" + pGraphicsAPI->GetFragmentShaderExtension())),
 
-		m_VertexShader(std::make_shared<file::CFile>("Resources\\Shaders\\sample" + pGraphicsAPI->GetVertexShaderExtension())),
-		m_FragmentShader(std::make_shared<file::CFile>("Resources\\Shaders\\sample" + pGraphicsAPI->GetFragmentShaderExtension())),
-		m_Texture0(std::make_shared<file::CFile>("Resources\\Textures\\brick.jpg")),
-		m_Texture1(std::make_shared<file::CFile>("Resources\\Textures\\brick_norm.jpg")),
-
-		m_Sphere_glTFObj(std::make_shared<object::C3DObject>("", "ShadowPass")),
-		m_Sphere_glTFData(std::make_shared<file::CFile>("Resources\\Models\\Box\\glTF-Binary\\Box.glb")),
-		m_Helmet_glTFObj(std::make_shared<object::C3DObject>("", "ShadowPass")),
-		m_Helmet_glTFData(std::make_shared<file::CFile>("Resources\\Models\\DamagedHelmet\\glTF-Binary\\DamagedHelmet.glb")),
-		m_glTFVert(std::make_shared<file::CFile>("Resources\\Shaders\\gltfpbr" + pGraphicsAPI->GetVertexShaderExtension())),
-		// これ以上のWebGPU Nativeのバグ対策で進まないのはだるいのでDescのWebGPU NativeではPCFをオフにした安全なものを使用する
-#if defined(USE_WEBGPU) && !defined(__EMSCRIPTEN__)
-		m_glTFFrag(std::make_shared<file::CFile>("Resources\\Shaders\\gltfpbr_NativeSafe" + pGraphicsAPI->GetFragmentShaderExtension())),
-#else
-		m_glTFFrag(std::make_shared<file::CFile>("Resources\\Shaders\\gltfpbr" + pGraphicsAPI->GetFragmentShaderExtension())),
-#endif
-		m_Cube0(std::make_shared<file::CFile>("Resources\\Cubemaps\\environment\\environment_back_0.jpg")),
-		m_Cube1(std::make_shared<file::CFile>("Resources\\Cubemaps\\environment\\environment_bottom_0.jpg")),
-		m_Cube2(std::make_shared<file::CFile>("Resources\\Cubemaps\\environment\\environment_front_0.jpg")),
-		m_Cube3(std::make_shared<file::CFile>("Resources\\Cubemaps\\environment\\environment_left_0.jpg")),
-		m_Cube4(std::make_shared<file::CFile>("Resources\\Cubemaps\\environment\\environment_right_0.jpg")),
-		m_Cube5(std::make_shared<file::CFile>("Resources\\Cubemaps\\environment\\environment_top_0.jpg")),
-
-		m_DepthDebugObj(std::make_shared<object::C3DObject>("", "ShadowPass")),
-		m_ShadowDebugVertex(std::make_shared<file::CFile>("Resources\\Shaders\\shadow_debug" + pGraphicsAPI->GetVertexShaderExtension())),
-		m_ShadowDebugFragment(std::make_shared<file::CFile>("Resources\\Shaders\\shadow_debug" + pGraphicsAPI->GetFragmentShaderExtension())),
+		m_VertexShader(std::make_shared<file::CFile>("Resources\\Shaders\\gpgpu_sample" + pGraphicsAPI->GetVertexShaderExtension())),
+		m_FragmentShader(std::make_shared<file::CFile>("Resources\\Shaders\\gpgpu_sample" + pGraphicsAPI->GetFragmentShaderExtension())),
+		m_ComputeShader(std::make_shared<file::CFile>("Resources\\Shaders\\gpgpu_sample" + pGraphicsAPI->GetComputeShaderExtension())),
 
 		m_IsLoaded(false)
 	{
-		//
 		pLoadWorker->AddFirstLoadResource(m_DepthVertex);
 		pLoadWorker->AddFirstLoadResource(m_DepthFragment);
 		pLoadWorker->AddFirstLoadResource(m_VertexShader);
 		pLoadWorker->AddFirstLoadResource(m_FragmentShader);
-		pLoadWorker->AddFirstLoadResource(m_glTFVert);
-		pLoadWorker->AddFirstLoadResource(m_glTFFrag);
-		pLoadWorker->AddFirstLoadResource(m_ShadowDebugVertex);
-		pLoadWorker->AddFirstLoadResource(m_ShadowDebugFragment);
-		pLoadWorker->AddFirstLoadResource(m_Texture0);
-		pLoadWorker->AddFirstLoadResource(m_Texture1);
-		pLoadWorker->AddFirstLoadResource(m_Helmet_glTFData);
-		pLoadWorker->AddFirstLoadResource(m_Sphere_glTFData);
-		pLoadWorker->AddFirstLoadResource(m_Cube0);
-		pLoadWorker->AddFirstLoadResource(m_Cube1);
-		pLoadWorker->AddFirstLoadResource(m_Cube2);
-		pLoadWorker->AddFirstLoadResource(m_Cube3);
-		pLoadWorker->AddFirstLoadResource(m_Cube4);
-		pLoadWorker->AddFirstLoadResource(m_Cube5);
-
-		//
-		m_Sphere_glTFObj->SetPos(glm::vec3(-1.5f, -0.5f, -1.5f));
+		pLoadWorker->AddFirstLoadResource(m_ComputeShader);
 	}
 
 	CScriptScene::~CScriptScene()
@@ -76,97 +41,98 @@ namespace scene
 
 	bool CScriptScene::Load(api::IGraphicsAPI* pGraphicsAPI)
 	{
-		// Cubemap
-		std::vector<std::shared_ptr<graphics::CTexture>> CubeTexList;
+		//
+		std::vector<float> InitData;
+		for (int i = 0; i < m_InstanceCount; i++)
 		{
-			std::vector<std::vector<unsigned char>> CubeDataList;
-			CubeDataList.push_back(m_Cube0->GetData());
-			CubeDataList.push_back(m_Cube1->GetData());
-			CubeDataList.push_back(m_Cube2->GetData());
-			CubeDataList.push_back(m_Cube3->GetData());
-			CubeDataList.push_back(m_Cube4->GetData());
-			CubeDataList.push_back(m_Cube5->GetData());
+			float w = 10.0;
+			float f_id = static_cast<float>(i);
 
-			auto CubeTex0 = pGraphicsAPI->CreateTexture(true);
-			if (!CubeTex0->Create(CubeDataList)) return false;
+			glm::vec4 offset = glm::vec4(
+				w * (rand(glm::vec2(f_id, 55.5)) * 2.0 - 1.0),
+				w * (rand(glm::vec2(943.22, f_id)) * 2.0 - 1.0),
+				w * (rand(glm::vec2(f_id + 11.111, f_id + 456.123)) * 2.0 - 1.0),
+				1.0f
+			);
+			glm::vec4 color = glm::vec4(
+				rand(glm::vec2(f_id, 55.5)),
+				rand(glm::vec2(943.22, f_id)),
+				rand(glm::vec2(f_id + 11.111, f_id + 456.123)),
+				1.0f
+			);
 
-			CubeTexList.push_back(CubeTex0);
+			InitData.push_back(offset.x); InitData.push_back(offset.y); InitData.push_back(offset.z); InitData.push_back(offset.w);
+			InitData.push_back(color.x); InitData.push_back(color.y); InitData.push_back(color.z); InitData.push_back(color.w);
+			InitData.push_back(0.0f);
+			InitData.push_back(0.0f);
+			InitData.push_back(0.0f);
+			InitData.push_back(0.0f);
+		}
+
+		// Compute Buffer
+		{
+			std::shared_ptr<graphics::CMaterialCreateInfo> computeCreateInfo = std::make_shared<graphics::CMaterialCreateInfo>();
+			computeCreateInfo->SetComputeShaderCode(m_ComputeShader->GetData());
+
+			auto ComputeMaterial = pGraphicsAPI->CreateMaterial(computeCreateInfo);
+
+			auto ParamUBO = graphics::CMaterialCreateInfo::CreateUniformBuffer({ graphics::SBindingLayout("ParamUBO", 0) });
+			ParamUBO->AddData("time", &glm::vec1(0.0f)[0], sizeof(glm::vec1), 0);
+			ParamUBO->AddData("deltaTime", &glm::vec1(0.0f)[0], sizeof(glm::vec1), 0);
+
+			ComputeMaterial->AddShaderBuffer(ParamUBO);
+
+			auto ReadSSBO = graphics::CMaterialCreateInfo::CreateShaderStorageBuffer({ graphics::SBindingLayout("ReadOnlyTestBufferObject", 1) });
+			ReadSSBO->AddData("r_TBO", &InitData[0], sizeof(float) * static_cast<int>(InitData.size()), 1);
+
+			ComputeMaterial->AddShaderBuffer(ReadSSBO);
+
+			auto WriteSSBO = graphics::CMaterialCreateInfo::CreateShaderStorageBuffer({ graphics::SBindingLayout("WriteOnlyTestBufferObject", 2, true) });
+			WriteSSBO->AddData("w_TBO", &InitData[0], sizeof(float) * static_cast<int>(InitData.size()), 2);
+
+			ComputeMaterial->AddShaderBuffer(WriteSSBO);
+
+			//
+			m_GPGPUHandler = pGraphicsAPI->CreateGPGPUHandler(ComputeMaterial);
+			if (!m_GPGPUHandler->Create()) return false;
 		}
 
 		// TestObj
 		{
 			// MATERIAL
-			std::shared_ptr<graphics::CMaterialCreateInfo> createInfo = std::make_shared<graphics::CMaterialCreateInfo>();
-			createInfo->SetVertexShaderCode(m_glTFVert->GetData());
-			createInfo->SetFragmentShaderCode(m_glTFFrag->GetData());
-			auto Material0 = pGraphicsAPI->CreateMaterial(createInfo);
-
-			// UBO, TEXTURE
 			{
+				std::shared_ptr<graphics::CMaterialCreateInfo> createInfo = std::make_shared<graphics::CMaterialCreateInfo>();
+				createInfo->SetVertexShaderCode(m_VertexShader->GetData());
+				createInfo->SetFragmentShaderCode(m_FragmentShader->GetData());
+				auto Material0 = pGraphicsAPI->CreateMaterial(createInfo);
+
 				auto UniformBuffer = graphics::CMaterialCreateInfo::CreateUniformBuffer({ graphics::SBindingLayout("UniformBufferObject", 0) });
 
 				UniformBuffer->AddData("model", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
 				UniformBuffer->AddData("view", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
 				UniformBuffer->AddData("proj", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
 				UniformBuffer->AddData("lightVPMat", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
-				UniformBuffer->AddData("lightDir", &glm::vec4(0.0f)[0], sizeof(float) * 4, 0);
-				UniformBuffer->AddData("lightColor", &glm::vec4(0.0f)[0], sizeof(float) * 4, 0);
-				UniformBuffer->AddData("cameraPos", &glm::vec4(0.0f)[0], sizeof(float) * 4, 0);
-				UniformBuffer->AddData("baseColorFactor", &glm::vec4(1.0f)[0], sizeof(float) * 4, 0);
-				UniformBuffer->AddData("emissiveFactor", &glm::vec4(0.0f)[0], sizeof(float) * 4, 0);
 
-				UniformBuffer->AddData("time", &glm::vec1(0.0f)[0], sizeof(float), 0);
-				UniformBuffer->AddData("metallicFactor", &glm::vec1(1.0f)[0], sizeof(float), 0);
-				UniformBuffer->AddData("roughnessFactor", &glm::vec1(0.1f)[0], sizeof(float), 0);
-				UniformBuffer->AddData("normalMapScale", &glm::vec1(1.0f)[0], sizeof(float), 0);
+				Material0->AddShaderBuffer(UniformBuffer);
+				auto SSBO = graphics::CMaterialCreateInfo::CreateShaderStorageBuffer({ graphics::SBindingLayout("TestBufferObject", 1) });
+				
+				SSBO->AddData("rw_TBO", &InitData[0], sizeof(float) * static_cast<int>(InitData.size()), 1);
+				SSBO->SetSharedBufferParam({ true, 2, m_GPGPUHandler->GetComputeMaterial() });
 
-				UniformBuffer->AddData("occlusionStrength", &glm::vec1(0.0f)[0], sizeof(float), 0);
-				UniformBuffer->AddData("mipCount", &glm::vec1(CubeTexList[0]->GetMipCount())[0], sizeof(float), 0);
-				UniformBuffer->AddData("ShadowMapX", &glm::vec1(static_cast<float>(m_FrameTextureList[0]->GetWidth()))[0], sizeof(float), 0);
-				UniformBuffer->AddData("ShadowMapY", &glm::vec1(static_cast<float>(m_FrameTextureList[0]->GetHeight()))[0], sizeof(float), 0);
-				UniformBuffer->AddData("useBaseColorTexture", &glm::uvec1(1)[0], sizeof(int), 0);
-				UniformBuffer->AddData("useMetallicRoughnessTexture", &glm::uvec1(0)[0], sizeof(int), 0);
-				UniformBuffer->AddData("useEmissiveTexture", &glm::uvec1(0)[0], sizeof(int), 0);
-				UniformBuffer->AddData("useNormalTexture", &glm::uvec1(1)[0], sizeof(int), 0);
+				Material0->AddShaderBuffer(SSBO);
 
-				UniformBuffer->AddData("useOcclusionTexture", &glm::uvec1(0)[0], sizeof(int), 0);
-				UniformBuffer->AddData("t_pad_0", &glm::uvec1(0)[0], sizeof(int), 0);
-				UniformBuffer->AddData("t_pad_1", &glm::uvec1(0)[0], sizeof(int), 0);
-				UniformBuffer->AddData("t_pad_2", &glm::uvec1(0)[0], sizeof(int), 0);
-
-				Material0->AddTextureBindingLayout({ "baseColorTexture", 1, 2, 0, graphics::ETextureType::TEXTURE_2D });
-				Material0->AddTextureBindingLayout({ "metallicRoughnessTexture", 3, 4, -1, graphics::ETextureType::TEXTURE_2D }); // TextureIndex -1 は EmptyTextureである
-				Material0->AddTextureBindingLayout({ "emissiveTexture", 5, 6, -1, graphics::ETextureType::TEXTURE_2D }); // TextureIndex -1 は EmptyTextureである
-				Material0->AddTextureBindingLayout({ "normalTexture", 7, 8, 1, graphics::ETextureType::TEXTURE_2D }); // TextureIndex -1 は EmptyTextureである
-				Material0->AddTextureBindingLayout({ "occlusionTexture", 9, 10, -1, graphics::ETextureType::TEXTURE_2D }); // TextureIndex -1 は EmptyTextureである
-				Material0->AddTextureBindingLayout({ "cubemapTexture", 11, 12, 0, graphics::ETextureType::TEXTURE_CUBE });
-				Material0->AddTextureBindingLayout({ "shadowmapTexture", 13, 14, 2, graphics::ETextureType::TEXTURE_2D }); // ひとまず1にShadowMapを入れている
-
-				UniformBuffer->RecalculateBindingLayoutOffset();
-
-				Material0->AddUniformBuffer(UniformBuffer);
+				m_TestObject->AddMaterial(Material0);
 			}
-
-			{
-				auto APITex0 = pGraphicsAPI->CreateTexture();
-				if (!APITex0->Create(m_Texture0->GetData())) return false;
-
-				auto APITex1 = pGraphicsAPI->CreateTexture();
-				if (!APITex1->Create(m_Texture1->GetData())) return false;
-
-				m_TestObject->AddTexture(APITex0);
-				m_TestObject->AddTexture(APITex1);
-				m_TestObject->AddTexture(m_FrameTextureList[0]); // ShadowMap
-				m_TestObject->AddCubeMap(CubeTexList[0]);
-			}
-
-			m_TestObject->AddMaterial(Material0);
 
 			// MESH
-			std::shared_ptr<graphics::CMesh> Mesh0 = std::make_shared<graphics::CMesh>();
-
 			{
-				std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(nullptr, 0, graphics::EPresetPrimitiveType::BOARD);
+				std::shared_ptr<graphics::CMesh> Mesh0 = std::make_shared<graphics::CMesh>();
+
+				std::shared_ptr<renderer::CRendererCreateInfo> createInfo = std::make_shared<renderer::CRendererCreateInfo>();
+				if (!graphics::CPresetPrimitive::CreateBox(createInfo)) return false;
+				createInfo->SetInstanceDrawCount(m_InstanceCount);
+
+				std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(createInfo, 0);
 				Mesh0->AddPrimitive(Primitive);
 				m_TestObject->AddMesh(Mesh0);
 			}
@@ -175,9 +141,7 @@ namespace scene
 			{
 				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(0, m_TestObject->GetMeshList(), m_TestObject->GetMaterialList());
 				Node->SetMeshIndex(0);
-				Node->SetPos(glm::vec3(0.0f, -1.0f, 0.0f));
-				Node->SetRot(glm::vec3(3.14f * (-0.5f), 0.0f, 0.0f));
-				Node->SetScale(glm::vec3(1.0f, 1.0f, 1.0f) * 10.0f);
+				Node->SetPos(glm::vec3(0.0f, 0.0f, -1.0f));
 				m_TestObject->AddNode(Node);
 			}
 
@@ -185,20 +149,11 @@ namespace scene
 			if (!m_TestObject->Create(pGraphicsAPI, m_DepthVertex, m_DepthFragment)) return false;
 		}
 
-		// テストのglTFをインポート
-		{
-			std::shared_ptr<graphics::CMaterialCreateInfo> createInfo = std::make_shared<graphics::CMaterialCreateInfo>();
-			createInfo->SetVertexShaderCode(m_glTFVert->GetData());
-			createInfo->SetFragmentShaderCode(m_glTFFrag->GetData());
-
-			if (!gltf::CGLTFImporter::Import(pGraphicsAPI, m_Sphere_glTFData->GetData(), m_Sphere_glTFObj, createInfo, CubeTexList, m_FrameTextureList, m_DepthVertex, m_DepthFragment)) return false;
-			if (!gltf::CGLTFImporter::Import(pGraphicsAPI, m_Helmet_glTFData->GetData(), m_Helmet_glTFObj, createInfo, CubeTexList, m_FrameTextureList, m_DepthVertex, m_DepthFragment)) return false;
-		}
-
 		return true;
 	}
 
-	bool CScriptScene::Update(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker)
+	bool CScriptScene::Update(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
+		const std::shared_ptr<graphics::CDrawInfo>& DrawInfo)
 	{
 		if (!m_IsLoaded)
 		{
@@ -213,37 +168,27 @@ namespace scene
 			if (!m_TestObject->Update()) return false;
 		}
 
-		if (m_Helmet_glTFObj)
-		{
-			if (!m_Helmet_glTFObj->Update()) return false;
-		}
+		return true;
+	}
 
-		if (m_Sphere_glTFObj)
-		{
-			if (!m_Sphere_glTFObj->Update()) return false;
-		}
+	bool CScriptScene::Dispatch(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
+		const std::shared_ptr<graphics::CDrawInfo>& DrawInfo)
+	{
+		if (!m_IsLoaded || !m_GPGPUHandler) return true;
+
+		if (!m_GPGPUHandler->Dispatch(glm::ivec3(m_InstanceCount / 256, 1, 1), Camera, Projection, DrawInfo)) return false;
 
 		return true;
 	}
 
-	bool CScriptScene::Draw(api::IGraphicsAPI* pGraphicsAPI, bool IsDepthPass, float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, 
+	bool CScriptScene::Draw(api::IGraphicsAPI* pGraphicsAPI, bool IsDepthPass, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, 
 		const std::shared_ptr<graphics::CDrawInfo>& DrawInfo)
 	{
 		if (!m_IsLoaded) return true;
 
 		if (m_TestObject)
 		{
-			if (!m_TestObject->Draw(IsDepthPass, SecondsTime, Camera, Projection, DrawInfo)) return false;
-		}
-
-		if (m_Sphere_glTFObj)
-		{
-			if (!m_Sphere_glTFObj->Draw(IsDepthPass, SecondsTime, Camera, Projection, DrawInfo)) return false;
-		}
-
-		if (m_Helmet_glTFObj)
-		{
-			if (!m_Helmet_glTFObj->Draw(IsDepthPass, SecondsTime, Camera, Projection, DrawInfo)) return false;
+			if (!m_TestObject->Draw(IsDepthPass, Camera, Projection, DrawInfo)) return false;
 		}
 
 		return true;

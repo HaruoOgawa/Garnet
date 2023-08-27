@@ -1883,7 +1883,7 @@ struct WGPULimitsTransfer {
     uint32_t maxBindGroups;
     uint32_t maxBindGroupsPlusVertexBuffers;
     uint32_t maxBindingsPerBindGroup;
-    uint32_t maxDynamicUniformBuffersPerPipelineLayout;
+    uint32_t maxDynamiCShaderBuffersPerPipelineLayout;
     uint32_t maxDynamicStorageBuffersPerPipelineLayout;
     uint32_t maxSampledTexturesPerShaderStage;
     uint32_t maxSamplersPerShaderStage;
@@ -1935,7 +1935,7 @@ DAWN_DECLARE_UNUSED WireResult WGPULimitsSerialize(
     transfer->maxBindGroups = record.maxBindGroups;
     transfer->maxBindGroupsPlusVertexBuffers = record.maxBindGroupsPlusVertexBuffers;
     transfer->maxBindingsPerBindGroup = record.maxBindingsPerBindGroup;
-    transfer->maxDynamicUniformBuffersPerPipelineLayout = record.maxDynamicUniformBuffersPerPipelineLayout;
+    transfer->maxDynamiCShaderBuffersPerPipelineLayout = record.maxDynamiCShaderBuffersPerPipelineLayout;
     transfer->maxDynamicStorageBuffersPerPipelineLayout = record.maxDynamicStorageBuffersPerPipelineLayout;
     transfer->maxSampledTexturesPerShaderStage = record.maxSampledTexturesPerShaderStage;
     transfer->maxSamplersPerShaderStage = record.maxSamplersPerShaderStage;
@@ -1988,8 +1988,8 @@ DAWN_DECLARE_UNUSED WireResult WGPULimitsDeserialize(
     record->maxBindGroupsPlusVertexBuffers = transfer->maxBindGroupsPlusVertexBuffers;
     static_assert(sizeof(record->maxBindingsPerBindGroup) >= sizeof(transfer->maxBindingsPerBindGroup), "Deserialize assignment may not narrow.");
     record->maxBindingsPerBindGroup = transfer->maxBindingsPerBindGroup;
-    static_assert(sizeof(record->maxDynamicUniformBuffersPerPipelineLayout) >= sizeof(transfer->maxDynamicUniformBuffersPerPipelineLayout), "Deserialize assignment may not narrow.");
-    record->maxDynamicUniformBuffersPerPipelineLayout = transfer->maxDynamicUniformBuffersPerPipelineLayout;
+    static_assert(sizeof(record->maxDynamiCShaderBuffersPerPipelineLayout) >= sizeof(transfer->maxDynamiCShaderBuffersPerPipelineLayout), "Deserialize assignment may not narrow.");
+    record->maxDynamiCShaderBuffersPerPipelineLayout = transfer->maxDynamiCShaderBuffersPerPipelineLayout;
     static_assert(sizeof(record->maxDynamicStorageBuffersPerPipelineLayout) >= sizeof(transfer->maxDynamicStorageBuffersPerPipelineLayout), "Deserialize assignment may not narrow.");
     record->maxDynamicStorageBuffersPerPipelineLayout = transfer->maxDynamicStorageBuffersPerPipelineLayout;
     static_assert(sizeof(record->maxSampledTexturesPerShaderStage) >= sizeof(transfer->maxSampledTexturesPerShaderStage), "Deserialize assignment may not narrow.");

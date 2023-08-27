@@ -1059,8 +1059,8 @@ namespace wgpu {
             "offsetof mismatch for Limits::maxBindGroupsPlusVertexBuffers");
     static_assert(offsetof(Limits, maxBindingsPerBindGroup) == offsetof(WGPULimits, maxBindingsPerBindGroup),
             "offsetof mismatch for Limits::maxBindingsPerBindGroup");
-    static_assert(offsetof(Limits, maxDynamicUniformBuffersPerPipelineLayout) == offsetof(WGPULimits, maxDynamicUniformBuffersPerPipelineLayout),
-            "offsetof mismatch for Limits::maxDynamicUniformBuffersPerPipelineLayout");
+    static_assert(offsetof(Limits, maxDynamiCShaderBuffersPerPipelineLayout) == offsetof(WGPULimits, maxDynamiCShaderBuffersPerPipelineLayout),
+            "offsetof mismatch for Limits::maxDynamiCShaderBuffersPerPipelineLayout");
     static_assert(offsetof(Limits, maxDynamicStorageBuffersPerPipelineLayout) == offsetof(WGPULimits, maxDynamicStorageBuffersPerPipelineLayout),
             "offsetof mismatch for Limits::maxDynamicStorageBuffersPerPipelineLayout");
     static_assert(offsetof(Limits, maxSampledTexturesPerShaderStage) == offsetof(WGPULimits, maxSampledTexturesPerShaderStage),

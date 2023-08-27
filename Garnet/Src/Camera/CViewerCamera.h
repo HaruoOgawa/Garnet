@@ -12,7 +12,7 @@ namespace camera
 		virtual ~CViewerCamera() = default;
 
 #ifdef USE_INPUT_SYSTEM
-		virtual void Update(float SecondsTime, const std::shared_ptr<input::CInputState>& InputState) override;
+		virtual void Update(float DeltaTime, const std::shared_ptr<input::CInputState>& InputState) override;
 #endif // USE_INPUT_SYSTEM
 	};
 }

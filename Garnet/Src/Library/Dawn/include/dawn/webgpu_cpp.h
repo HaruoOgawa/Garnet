@@ -1452,7 +1452,7 @@ namespace wgpu {
         uint32_t maxBindGroups = WGPU_LIMIT_U32_UNDEFINED;
         uint32_t maxBindGroupsPlusVertexBuffers = WGPU_LIMIT_U32_UNDEFINED;
         uint32_t maxBindingsPerBindGroup = WGPU_LIMIT_U32_UNDEFINED;
-        uint32_t maxDynamicUniformBuffersPerPipelineLayout = WGPU_LIMIT_U32_UNDEFINED;
+        uint32_t maxDynamiCShaderBuffersPerPipelineLayout = WGPU_LIMIT_U32_UNDEFINED;
         uint32_t maxDynamicStorageBuffersPerPipelineLayout = WGPU_LIMIT_U32_UNDEFINED;
         uint32_t maxSampledTexturesPerShaderStage = WGPU_LIMIT_U32_UNDEFINED;
         uint32_t maxSamplersPerShaderStage = WGPU_LIMIT_U32_UNDEFINED;

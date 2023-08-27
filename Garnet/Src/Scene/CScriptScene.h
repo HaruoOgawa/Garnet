@@ -12,6 +12,7 @@ namespace graphics {
 	class CDrawInfo; 
 	class CTexture;
 }
+namespace api { class IGPGPUHandler; }
 namespace resource { class CLoadWorker; }
 
 namespace scene
@@ -19,6 +20,10 @@ namespace scene
 	class CScriptScene
 	{
 		bool m_IsLoaded;
+
+		const int m_InstanceCount;
+
+		std::shared_ptr<api::IGPGPUHandler> m_GPGPUHandler;
 
 		// Tex of FrameBuffer
 		std::vector<std::shared_ptr<graphics::CTexture>> m_FrameTextureList;
@@ -32,38 +37,22 @@ namespace scene
 
 		std::shared_ptr<file::CFile> m_VertexShader;
 		std::shared_ptr<file::CFile> m_FragmentShader;
-
-		std::shared_ptr<file::CFile> m_Texture0;
-		std::shared_ptr<file::CFile> m_Texture1;
-
-		// glTF
-		std::shared_ptr<object::C3DObject> m_Sphere_glTFObj;
-		std::shared_ptr<file::CFile> m_Sphere_glTFData;
-		std::shared_ptr<object::C3DObject> m_Helmet_glTFObj;
-		std::shared_ptr<file::CFile> m_Helmet_glTFData;
-		std::shared_ptr<file::CFile> m_glTFVert;
-		std::shared_ptr<file::CFile> m_glTFFrag;
-
-		// Cubemap
-		std::shared_ptr<file::CFile> m_Cube0;
-		std::shared_ptr<file::CFile> m_Cube1;
-		std::shared_ptr<file::CFile> m_Cube2;
-		std::shared_ptr<file::CFile> m_Cube3;
-		std::shared_ptr<file::CFile> m_Cube4;
-		std::shared_ptr<file::CFile> m_Cube5;
-
-		// ShadowMapping
-		std::shared_ptr<object::C3DObject> m_DepthDebugObj;
-		std::shared_ptr<file::CFile> m_ShadowDebugVertex;
-		std::shared_ptr<file::CFile> m_ShadowDebugFragment;
+		std::shared_ptr<file::CFile> m_ComputeShader;
 	private:
 		bool Load(api::IGraphicsAPI* pGraphicsAPI);
+
+		float rand(const glm::vec2& st) { return static_cast<float>(glm::fract(glm::sin(glm::dot(st, glm::vec2(12.9898, 78.233))) * 43758.5453123)); }
 	public:
 		CScriptScene(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker);
 		virtual ~CScriptScene();
 
-		bool Update(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker);
-		bool Draw(api::IGraphicsAPI* pGraphicsAPI, bool IsDepthPass, float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, 
+		bool Update(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
+			const std::shared_ptr<graphics::CDrawInfo>& DrawInfo);
+		
+		bool Dispatch(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
+			const std::shared_ptr<graphics::CDrawInfo>& DrawInfo);
+
+		bool Draw(api::IGraphicsAPI* pGraphicsAPI, bool IsDepthPass, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, 
 			const std::shared_ptr<graphics::CDrawInfo>& DrawInfo) ;
 
 		// Tex of FrameBuffer

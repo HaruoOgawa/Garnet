@@ -12,6 +12,7 @@ add_definitions(
 	-DUSE_GLTF
 	-DUSE_VIEWER_CAMERA
 	-DUSE_INPUT_SYSTEM
+	-DUSE_GPGPU
 )
 
 add_executable(
@@ -21,8 +22,6 @@ add_executable(
 	../src/App/EAppType.h
 	../src/App/EditorApp/CEditorApp.cpp
 	../src/App/EditorApp/CEditorApp.h
-	../src/App/MainApp/CMainApp.cpp
-	../src/App/MainApp/CMainApp.h
 	../src/App/ScriptApp/CScriptApp.cpp
 	../src/App/ScriptApp/CScriptApp.h
 	../src/Camera/CCamera.cpp
@@ -44,12 +43,12 @@ add_executable(
 	../src/Graphics/CPresetPrimitive.h
 	../src/Graphics/CPrimitive.cpp
 	../src/Graphics/CPrimitive.h
+	../src/Graphics/CShaderBuffer.cpp
+	../src/Graphics/CShaderBuffer.h
+	../src/Graphics/CShaderBufferDescriptor.cpp
+	../src/Graphics/CShaderBufferDescriptor.h
 	../src/Graphics/CTexture.cpp
 	../src/Graphics/CTexture.h
-	../src/Graphics/CUniformBuffer.cpp
-	../src/Graphics/CUniformBuffer.h
-	../src/Graphics/CUniformBufferDescriptor.cpp
-	../src/Graphics/CUniformBufferDescriptor.h
 	../src/Graphics/ETextureType.h
 	../src/Graphics/SBindingLayout.h
 	../src/Graphics/STextureBindingLayout.h
@@ -60,6 +59,8 @@ add_executable(
 	../src/GraphicsAPI/ERenderPassFormat.h
 	../src/GraphicsAPI/WebGPU/CWebGPUAPI.cpp
 	../src/GraphicsAPI/WebGPU/CWebGPUAPI.h
+	../src/GraphicsAPI/WebGPU/CWebGPUGPGPUHandler.cpp
+	../src/GraphicsAPI/WebGPU/CWebGPUGPGPUHandler.h
 	../src/GraphicsAPI/WebGPU/CWebGPUMaterial.cpp
 	../src/GraphicsAPI/WebGPU/CWebGPUMaterial.h
 	../src/GraphicsAPI/WebGPU/CWebGPURenderer.cpp
@@ -75,6 +76,7 @@ add_executable(
 	../src/Interface/IApp.h
 	../src/Interface/IBuffer.h
 	../src/Interface/IDescriptor.h
+	../src/Interface/IGPGPUHandler.h
 	../src/Interface/IGraphicsAPI.h
 	../src/Interface/IRenderer.h
 	../src/Interface/IRenderPass.h

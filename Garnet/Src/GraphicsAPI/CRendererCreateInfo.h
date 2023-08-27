@@ -9,6 +9,8 @@ namespace renderer
 		std::vector<std::vector<float>> m_Vertices;
 		std::vector<unsigned short> m_Indices;
 		std::vector<int> m_AttributeDimensions;
+
+		int  m_InstanceCount;
 	public:
 		CRendererCreateInfo();
 		virtual ~CRendererCreateInfo();
@@ -22,5 +24,10 @@ namespace renderer
 
 		void SetAttributeDimensions(const std::vector<int>& AttributeDimensions);
 		const std::vector<int>& GetAttributeDimensions() const;
+
+#ifdef USE_GPGPU
+		void SetInstanceDrawCount(int InstanceCount);
+#endif // USE_GPGPU
+		int  GetInstanceCount() const;
 	};
 }

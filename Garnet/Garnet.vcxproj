@@ -390,7 +390,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;USE_VULKAN;USE_TEXTURE_LOADER;USE_GLTF;USE_VIEWER_CAMERA;USE_INPUT_SYSTEM;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;USE_VULKAN;USE_TEXTURE_LOADER;USE_GLTF;USE_VIEWER_CAMERA;USE_INPUT_SYSTEM;USE_GPGPU;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(ProjectDir)src\Library\glm;$(ProjectDir)src\Library\GLFW\include;$(ProjectDir)src\Library\Vulkan\include;$(ProjectDir)src\Library\tinygltf\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -415,7 +415,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;USE_OPENGL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;USE_OPENGL;USE_GPGPU;USE_VIEWER_CAMERA;USE_INPUT_SYSTEM;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(ProjectDir)src\Library\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -438,7 +438,7 @@ xcopy Resources $(OutDir)Resources /y /s /i</Command>
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;USE_WEBGPU;USE_TEXTURE_LOADER;USE_GLTF;USE_VIEWER_CAMERA;USE_INPUT_SYSTEM;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;USE_WEBGPU;USE_TEXTURE_LOADER;USE_GLTF;USE_VIEWER_CAMERA;USE_INPUT_SYSTEM;USE_GPGPU;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(ProjectDir)src\Library\glm;$(ProjectDir)src\Library\GLFW\include;$(ProjectDir)src\Library\WebGPU;$(ProjectDir)src\Library\glfw3webgpu;$(ProjectDir)src\Library\tinygltf\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -465,7 +465,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions);USE_VULKAN;USE_TEXTURE_LOADER;USE_GLTF;USE_VIEWER_CAMERA;USE_INPUT_SYSTEM</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions);USE_VULKAN;USE_TEXTURE_LOADER;USE_GLTF;USE_VIEWER_CAMERA;USE_INPUT_SYSTEM;USE_GPGPU</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(ProjectDir)src\Library\glm;$(ProjectDir)src\Library\GLFW\include;$(ProjectDir)src\Library\Vulkan\include;$(ProjectDir)src\Library\tinygltf\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -493,7 +493,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;USE_OPENGL</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;USE_OPENGL;USE_GPGPU</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(ProjectDir)src\Library\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -520,7 +520,7 @@ del $(OutDir)Garnet.pdb</Command>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;USE_OPENGL</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;USE_OPENGL;USE_GPGPU</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(ProjectDir)src\Library\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -549,7 +549,7 @@ call $(ProjectDir)compress_tools\squishy-x64 -i "$(OutDir)Garnet.exe" -o "$(OutD
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;USE_WEBGPU;%(PreprocessorDefinitions);USE_TEXTURE_LOADER;USE_GLTF;USE_VIEWER_CAMERA;USE_INPUT_SYSTEM</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;USE_WEBGPU;%(PreprocessorDefinitions);USE_TEXTURE_LOADER;USE_GLTF;USE_VIEWER_CAMERA;USE_INPUT_SYSTEM;USE_GPGPU</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(ProjectDir)src\Library\glm;$(ProjectDir)src\Library\GLFW\include;$(ProjectDir)Src\Library\Dawn\include\dawn;$(ProjectDir)src\Library\glfw3webgpu;$(ProjectDir)src\Library\tinygltf\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -574,6 +574,10 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Src\GraphicsAPI\OpenGL\COpenGLGPGPUHandler.h" />
+    <ClInclude Include="Src\GraphicsAPI\WebGPU\CWebGPUGPGPUHandler.h" />
+    <ClInclude Include="Src\GraphicsAPI\Vulkan\CVulkanGPGPUHandler.h" />
+    <ClInclude Include="Src\Interface\IGPGPUHandler.h" />
     <ClInclude Include="Src\Object\CSimple3DObject.h" />
     <ClInclude Include="Src\Interface\IResource.h" />
     <ClInclude Include="Src\LoadWorker\CLoadWorker.h" />
@@ -613,8 +617,8 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClInclude Include="Src\Graphics\SBindingLayout.h" />
     <ClInclude Include="Src\Math\CTransform.h" />
     <ClInclude Include="Src\Object\C3DObject.h" />
-    <ClInclude Include="Src\Graphics\CUniformBuffer.h" />
-    <ClInclude Include="Src\Graphics\CUniformBufferDescriptor.h" />
+    <ClInclude Include="Src\Graphics\CShaderBuffer.h" />
+    <ClInclude Include="Src\Graphics\CShaderBufferDescriptor.h" />
     <ClInclude Include="Src\Interface\IBuffer.h" />
     <ClInclude Include="Src\Interface\IDescriptor.h" />
     <ClInclude Include="Src\Library\glfw3webgpu\glfw3webgpu.h" />
@@ -925,9 +929,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClInclude Include="Src\GraphicsAPI\WebGPU\CWebGPUAPI.h" />
     <ClInclude Include="Src\GraphicsAPI\Vulkan\CVulkanAPI.h" />
     <ClInclude Include="Src\App\CDescAppManager.h" />
-    <ClInclude Include="Src\App\MainApp\CMainApp.h" />
     <ClInclude Include="Src\App\ScriptApp\CScriptApp.h" />
-    <ClInclude Include="Src\App\EditorApp\CEditorApp.h" />
     <ClInclude Include="Src\Debug\Message\Console.h" />
     <ClInclude Include="Src\App\CWebAppManager.h" />
     <ClInclude Include="Src\Interface\IApp.h" />
@@ -935,6 +937,9 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClInclude Include="Src\Interface\IRenderer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\GraphicsAPI\OpenGL\COpenGLGPGPUHandler.cpp" />
+    <ClCompile Include="Src\GraphicsAPI\WebGPU\CWebGPUGPGPUHandler.cpp" />
+    <ClCompile Include="Src\GraphicsAPI\Vulkan\CVulkanGPGPUHandler.cpp" />
     <ClCompile Include="Src\Object\CSimple3DObject.cpp" />
     <ClCompile Include="Src\LoadWorker\CLoadWorker.cpp" />
     <ClCompile Include="Src\GraphicsAPI\OpenGL\COpenGLRenderPass.cpp" />
@@ -962,8 +967,8 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClCompile Include="Src\Main\DemoMain\DemoMain.cpp" />
     <ClCompile Include="Src\Math\CTransform.cpp" />
     <ClCompile Include="Src\Object\C3DObject.cpp" />
-    <ClCompile Include="Src\Graphics\CUniformBuffer.cpp" />
-    <ClCompile Include="Src\Graphics\CUniformBufferDescriptor.cpp" />
+    <ClCompile Include="Src\Graphics\CShaderBuffer.cpp" />
+    <ClCompile Include="Src\Graphics\CShaderBufferDescriptor.cpp" />
     <ClCompile Include="Src\Library\glfw3webgpu\glfw3webgpu.c" />
     <ClCompile Include="Src\Library\glm\glm\detail\glm.cpp" />
     <ClCompile Include="Src\Scene\CScriptScene.cpp" />
@@ -978,9 +983,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClCompile Include="Src\GraphicsAPI\WebGPU\CWebGPUAPI.cpp" />
     <ClCompile Include="Src\GraphicsAPI\Vulkan\CVulkanAPI.cpp" />
     <ClCompile Include="Src\App\CDescAppManager.cpp" />
-    <ClCompile Include="Src\App\MainApp\CMainApp.cpp" />
     <ClCompile Include="Src\App\ScriptApp\CScriptApp.cpp" />
-    <ClCompile Include="Src\App\EditorApp\CEditorApp.cpp" />
     <ClCompile Include="Src\Main\DescMain\DescMain.cpp" />
     <ClCompile Include="Src\Main\WebMain\WebMain.cpp" />
     <ClCompile Include="Src\App\CWebAppManager.cpp" />
@@ -1010,12 +1013,9 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <None Include="Resources\Shaders\gltfpbr_NativeSafe_frag.wgsl" />
     <None Include="Resources\Shaders\loadingbar.frag" />
     <None Include="Resources\Shaders\loadingbar.vert" />
-    <None Include="Resources\Shaders\sample.frag" />
-    <None Include="Resources\Shaders\sample.vert" />
-    <None Include="Resources\Shaders\sample_frag.spv" />
-    <None Include="Resources\Shaders\sample_frag.wgsl" />
-    <None Include="Resources\Shaders\sample_vert.spv" />
-    <None Include="Resources\Shaders\sample_vert.wgsl" />
+    <None Include="Resources\Shaders\gpgpu_sample.comp" />
+    <None Include="Resources\Shaders\gpgpu_sample.frag" />
+    <None Include="Resources\Shaders\gpgpu_sample.vert" />
     <None Include="Resources\Shaders\shadow_debug.frag" />
     <None Include="Resources\Shaders\shadow_debug.vert" />
     <None Include="Src\Library\glm\glm\detail\func_common.inl" />

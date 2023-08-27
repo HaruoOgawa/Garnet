@@ -21,5 +21,8 @@ namespace graphics
 	{
 	public:
 		static bool CreateBoard(std::shared_ptr<renderer::CRendererCreateInfo>& createInfo);
+		static bool CreateBox(std::shared_ptr<renderer::CRendererCreateInfo>& createInfo);
+		static bool CreatePoint(std::shared_ptr<renderer::CRendererCreateInfo>& createInfo);
+		//static bool CreateSphere(std::shared_ptr<renderer::CRendererCreateInfo>& createInfo);
 	};
 }

@@ -5,7 +5,7 @@ namespace graphics
 	CMaterial::CMaterial(const std::shared_ptr<CMaterialCreateInfo>& createInfo):
 		m_CreateInfo(createInfo),
 		m_RefCount(0),
-		m_UseDynamicUniform(false),
+		m_UseDynamicBufferOffset(false),
 		m_DepthMaterial(nullptr),
 		m_EnabledZTest(true),
 		m_CullMode(ECullMode::CULL_BACK)
@@ -31,9 +31,9 @@ namespace graphics
 
 		m_DepthMaterial = pGraphicsAPI->CreateMaterial(createInfo);
 
-		m_DepthMaterial->AddUniformBuffer(UniformBuffer);
+		m_DepthMaterial->AddShaderBuffer(UniformBuffer);
 
-		m_DepthMaterial->SetRefStatus(m_RefCount, m_UseDynamicUniform);
+		m_DepthMaterial->SetRefStatus(m_RefCount, m_UseDynamicBufferOffset);
 
 		m_DepthMaterial->SetCullMode(graphics::ECullMode::CULL_FRONT);
 
@@ -67,16 +67,16 @@ namespace graphics
 		return m_CullMode;
 	}
 
-	bool CMaterial::SetCommonUniform(float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo)
+	bool CMaterial::SetCommonUniform(const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo)
 	{
 		return true;
 	}
 
-	void CMaterial::AddUniformBuffer(const std::shared_ptr<CUniformBuffer>& Buffer)
+	void CMaterial::AddShaderBuffer(const std::shared_ptr<CShaderBuffer>& Buffer)
 	{
 		Buffer->RecalculateBindingLayoutOffset();
 
-		m_UniformBufferList.push_back(std::make_shared<CUniformBuffer>(*Buffer));
+		m_ShaderBufferList.push_back(std::make_shared<CShaderBuffer>(*Buffer));
 	}
 	
 	void CMaterial::AddTextureBindingLayout(const STextureBindingLayout& Layout)
@@ -94,7 +94,7 @@ namespace graphics
 
 		if (m_RefCount > 1)
 		{
-			m_UseDynamicUniform = true;
+			m_UseDynamicBufferOffset = true;
 		}
 	}
 
@@ -103,10 +103,10 @@ namespace graphics
 		return m_RefCount;
 	}
 
-	void CMaterial::SetRefStatus(int RefCount, bool UseDynamicUniform)
+	void CMaterial::SetRefStatus(int RefCount, bool UseDynamicBufferOffset)
 	{
 		m_RefCount = RefCount;
-		m_UseDynamicUniform = UseDynamicUniform;
+		m_UseDynamicBufferOffset = UseDynamicBufferOffset;
 	}
 
 	const std::vector<uint32_t>& CMaterial::GetBindingRefSizeList() const
@@ -114,8 +114,8 @@ namespace graphics
 		return m_BindingRefSizeList;
 	}
 
-	bool CMaterial::IsUseDynamicUniform() const
+	bool CMaterial::IsUseDynamicBufferOffset() const
 	{
-		return m_UseDynamicUniform;
+		return m_UseDynamicBufferOffset;
 	}
 }

@@ -18,12 +18,20 @@ namespace graphics
 		m_GeometryShaderCode.clear();
 		m_HullShaderCode.clear();
 		m_DomainShaderCode.clear();
+		m_ComputeShaderCode.clear();
 	}
 
 	// Uniform
-	std::shared_ptr<graphics::CUniformBuffer> CMaterialCreateInfo::CreateUniformBuffer(const std::vector<SBindingLayout>& BindingLayoutList)
+	std::shared_ptr<graphics::CShaderBuffer> CMaterialCreateInfo::CreateUniformBuffer(const std::vector<SBindingLayout>& BindingLayoutList)
 	{
-		auto Buffer = std::make_shared<graphics::CUniformBuffer>(BindingLayoutList);
+		auto Buffer = std::make_shared<graphics::CShaderBuffer>(EBufferType::UNIFORM, BindingLayoutList);
+		
+		return Buffer;
+	}
+	
+	std::shared_ptr<graphics::CShaderBuffer> CMaterialCreateInfo::CreateShaderStorageBuffer(const std::vector<SBindingLayout>& BindingLayoutList)
+	{
+		auto Buffer = std::make_shared<graphics::CShaderBuffer>(EBufferType::SHADERSTORAGE, BindingLayoutList);
 		
 		return Buffer;
 	}
@@ -82,6 +90,15 @@ namespace graphics
 	const std::vector<unsigned char>& CMaterialCreateInfo::GetDomainShaderCode() const
 	{
 		return m_DomainShaderCode;
+	}
+
+	void CMaterialCreateInfo::SetComputeShaderCode(const std::vector<unsigned char>& ComputeShaderCode)
+	{
+		m_ComputeShaderCode = ComputeShaderCode;
+	}
+	const std::vector<unsigned char>& CMaterialCreateInfo::GetComputeShaderCode() const
+	{
+		return m_ComputeShaderCode;
 	}
 
 	// Texture

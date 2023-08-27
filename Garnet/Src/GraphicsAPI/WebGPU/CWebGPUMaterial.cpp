@@ -15,6 +15,7 @@ namespace api
 		m_pGraphicsAPI(pGraphicsAPI),
 		m_VertexShaderModele(nullptr),
 		m_FragmentShaderModele(nullptr),
+		m_ComputeShaderModele(nullptr),
 		m_BindGroupLayout(nullptr),
 		m_BindGroup(nullptr),
 
@@ -37,7 +38,7 @@ namespace api
 	bool CWebGPUMaterial::Create(const std::vector<std::shared_ptr<graphics::CTexture>>& TextureList, const std::vector<std::shared_ptr<graphics::CTexture>>& CubeMapList)
 	{
 		if (!CreateShaderStages(m_CreateInfo)) return false;
-		if (!CreateUniformBuffer(m_CreateInfo)) return false; // ユニフォームバッファを生成
+		if (!CreateShaderBuffers(m_CreateInfo)) return false; // ユニフォームバッファを生成
 		if (!CreateBindGroup(m_CreateInfo, TextureList, CubeMapList)) return false; // バインドグループを生成(レンダリングパイプラインで使用するすべてのリソースをどのようにバインドするかを指定するオブジェクト)
 
 		// 生成処理が終わったので不要なリソースを解放する
@@ -46,7 +47,7 @@ namespace api
 		return true;
 	}
 
-	bool CWebGPUMaterial::SetCommonUniform(float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo)
+	bool CWebGPUMaterial::SetCommonUniform(const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo)
 	{
 		glm::mat4 lightVPMat = DrawInfo->GetLightProjection()->GetPrejectionMatrix() * DrawInfo->GetLightCamera()->GetViewMatrix();
 
@@ -57,7 +58,8 @@ namespace api
 		SetUniformValue("lightDir", &DrawInfo->GetLightCamera()->GetViewDir()[0]);
 		SetUniformValue("lightColor", &DrawInfo->GetLightColor()[0]);
 		SetUniformValue("cameraPos", &Camera->GetPos()[0]);
-		SetUniformValue("time", &SecondsTime);
+		SetUniformValue("time", &glm::vec1(DrawInfo->GetSecondsTime())[0]);
+		SetUniformValue("deltaTime", &glm::vec1(DrawInfo->GetDeltaSecondsTime())[0]);
 		
 		return true;
 	}
@@ -69,9 +71,12 @@ namespace api
 
 	void CWebGPUMaterial::SetUniformValue(const std::string Name, const void* Value, int DynamicOffsetNum)
 	{
-		for (int i = 0; i < m_UniformBufferList.size(); i++)
+		for (int i = 0; i < m_ShaderBufferList.size(); i++)
 		{
-			auto& UniformBuffer = m_UniformBufferList[i];
+			// SharedBufferは処理しない
+			if (m_ShaderBufferList[i]->GetSharedBufferParam().IsShared) continue;
+
+			auto& UniformBuffer = m_ShaderBufferList[i];
 			auto UniformBufferByteSize = static_cast<uint64_t>(m_WGPUUniformBufferByteSizeList[i]);
 			const auto& UniformDesc = UniformBuffer->GetDescriptor();
 
@@ -82,7 +87,7 @@ namespace api
 				const int ByteOffset = UniformData->second.ByteOffset;
 				const int ByteSize = UniformData->second.ByteSize;
 
-				if (m_UseDynamicUniform)
+				if (m_UseDynamicBufferOffset)
 				{
 					if (DynamicOffsetNum == -1)
 					{
@@ -111,18 +116,24 @@ namespace api
 		if (createInfo->GetShaderType() == graphics::EShaderType::SPIRV)
 		{
 			const auto& VertexShaderData = createInfo->GetVertexShaderCode();
-			m_VertexShaderModele = CreateShaderModuleFromSPIRV(VertexShaderData);
+			if (!VertexShaderData.empty()) m_VertexShaderModele = CreateShaderModuleFromSPIRV(VertexShaderData);
 
 			const auto& FragmentShaderCode = createInfo->GetFragmentShaderCode();
-			m_FragmentShaderModele = CreateShaderModuleFromSPIRV(FragmentShaderCode);
+			if(!FragmentShaderCode.empty()) m_FragmentShaderModele = CreateShaderModuleFromSPIRV(FragmentShaderCode);
+			
+			const auto& ComputeShaderCode = createInfo->GetComputeShaderCode();
+			if(!ComputeShaderCode.empty()) m_ComputeShaderModele = CreateShaderModuleFromSPIRV(ComputeShaderCode);
 		}
 		else if (createInfo->GetShaderType() == graphics::EShaderType::WGSL)
 		{
 			const auto& VertexShaderData = createInfo->GetVertexShaderCode();
-			m_VertexShaderModele = CreateShaderModuleFromWGSL(std::string(&VertexShaderData[0], &VertexShaderData[0] + VertexShaderData.size()));
+			if (!VertexShaderData.empty()) m_VertexShaderModele = CreateShaderModuleFromWGSL(std::string(&VertexShaderData[0], &VertexShaderData[0] + VertexShaderData.size()));
 
 			const auto& FragmentShaderCode = createInfo->GetFragmentShaderCode();
-			m_FragmentShaderModele = CreateShaderModuleFromWGSL(std::string(&FragmentShaderCode[0], &FragmentShaderCode[0] + FragmentShaderCode.size()));
+			if (!FragmentShaderCode.empty()) m_FragmentShaderModele = CreateShaderModuleFromWGSL(std::string(&FragmentShaderCode[0], &FragmentShaderCode[0] + FragmentShaderCode.size()));
+			
+			const auto& ComputeShaderCode = createInfo->GetComputeShaderCode();
+			if (!ComputeShaderCode.empty()) m_ComputeShaderModele = CreateShaderModuleFromWGSL(std::string(&ComputeShaderCode[0], &ComputeShaderCode[0] + ComputeShaderCode.size()));
 		}
 		else
 		{
@@ -132,16 +143,26 @@ namespace api
 		return true;
 	}
 
-	bool CWebGPUMaterial::CreateUniformBuffer(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo)
+	bool CWebGPUMaterial::CreateShaderBuffers(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo)
 	{
-		for (const auto& Buffer : m_UniformBufferList)
+		for (const auto& Buffer : m_ShaderBufferList)
 		{
+			// SharedBufferは処理しない
+			if (Buffer->GetSharedBufferParam().IsShared) continue;
+
 			const auto& Data = Buffer->GetData();
 
 			WGPUBuffer UniformBuffer;
 			const uint64_t ByteSize = static_cast<uint64_t>(math::GetNextPowerOfTwo(static_cast<unsigned int>(Data.size()))); // 2のn乗にする
 
-			if (!CreateWGUniformBuffer(UniformBuffer, WGPUBufferUsage_CopyDst | WGPUBufferUsage_Uniform, &Data[0], ByteSize)) return false;
+			if (Buffer->GetBufferType() == graphics::EBufferType::UNIFORM)
+			{
+				if (!CreateWGUniformBuffer(UniformBuffer, WGPUBufferUsage_CopyDst | WGPUBufferUsage_Uniform, &Data[0], ByteSize)) return false;
+			}
+			else if (Buffer->GetBufferType() == graphics::EBufferType::SHADERSTORAGE)
+			{
+				if (!CreateWGUniformBuffer(UniformBuffer, WGPUBufferUsage_CopyDst | WGPUBufferUsage_Storage, &Data[0], ByteSize)) return false;
+			}
 
 			m_WGPUUniformBufferList.push_back(UniformBuffer);
 			m_WGPUUniformBufferByteSizeList.push_back(static_cast<uint32_t>(ByteSize));
@@ -159,17 +180,36 @@ namespace api
 		std::vector<WGPUBindGroupLayoutEntry> bindingLayoutList;
 
 		// UBO
-		for (const auto& Buffer : m_UniformBufferList)
+		for (const auto& Buffer : m_ShaderBufferList)
 		{
 			for (const auto& Layout : Buffer->GetBindingLayoutList())
 			{
 				WGPUBindGroupLayoutEntry bindingLayout{};
 				InitDefalutBindGroupLayoutEntry(bindingLayout); // 初期化しないとブラウザ側でいろいろとエラーがでる・・・
 				bindingLayout.binding = Layout.second.BindingIndex; // バインドインデックス
-				bindingLayout.visibility = WGPUShaderStage_Vertex | WGPUShaderStage_Fragment; // アクセス権限。ここではおそらく頂点シェーダーとフラグメントシェーダーのみ読み取り可
-				bindingLayout.buffer.type = WGPUBufferBindingType_Uniform; // バインド先のバッファの種類
+				
+				if (Buffer->GetBufferType() == graphics::EBufferType::UNIFORM)
+				{
+					bindingLayout.visibility = WGPUShaderStage_Vertex | WGPUShaderStage_Fragment | WGPUShaderStage_Compute; // アクセス権限。ここではおそらく頂点シェーダーとフラグメントシェーダーのみ読み取り可
+					bindingLayout.buffer.type = WGPUBufferBindingType_Uniform; // バインド先のバッファの種類
+				}
+				else if (Buffer->GetBufferType() == graphics::EBufferType::SHADERSTORAGE)
+				{
+					if (Layout.second.IsGPGPUWritable) // 読み書き可能なGPGPU用のバッファ
+					{
+						// WGPUBufferBindingType_StorageはWGPUShaderStage_Computeだけに割り当てることができｒｙ
+						bindingLayout.visibility = WGPUShaderStage_Compute;
+						bindingLayout.buffer.type = WGPUBufferBindingType_Storage; 
+					}
+					else
+					{
+						bindingLayout.visibility = WGPUShaderStage_Vertex | WGPUShaderStage_Fragment | WGPUShaderStage_Compute;
+						bindingLayout.buffer.type = WGPUBufferBindingType_ReadOnlyStorage; // 基本的にStorage BufferはReadOnly. ComputeのみRead_Writeが使える
+					}
+				}
+
 				bindingLayout.buffer.minBindingSize = Layout.second.ByteSize; // データ一つ当たりのサイズかな???
-				bindingLayout.buffer.hasDynamicOffset = m_UseDynamicUniform; // ダイナミックユニフォーム
+				bindingLayout.buffer.hasDynamicOffset = m_UseDynamicBufferOffset; // ダイナミックユニフォーム
 
 				bindingLayoutList.push_back(bindingLayout);
 			}
@@ -237,23 +277,46 @@ namespace api
 		// --> その通り、たぶんバッファのバインディングとかバインディングのオフセットとか
 		// UBO
 		std::vector<WGPUBindGroupEntry> bindingList;
-		for (int i = 0; i < m_UniformBufferList.size(); i++)
+		for (int i = 0; i < m_ShaderBufferList.size(); i++)
 		{
-			const auto& Buffer = m_UniformBufferList[i];
+			// 共有バッファ
+			const auto& SharedBufferParam = m_ShaderBufferList[i]->GetSharedBufferParam();
+
+			const auto& Buffer = m_ShaderBufferList[i];
 			for (const auto& Layout : Buffer->GetBindingLayoutList())
 			{
 				WGPUBindGroupEntry binding{};
-				int Offset = 0;
-				int Stride = 16 * 4;
-
+				
 				binding.nextInChain = nullptr; // 拡張機
 				binding.binding = Layout.second.BindingIndex;
-				binding.buffer = m_WGPUUniformBufferList[i];
+
+				if (SharedBufferParam.IsShared) // バッファを他のマテリアルと共有する
+				{
+					CWebGPUMaterial* pSharedWebGPUMat = static_cast<CWebGPUMaterial*>(SharedBufferParam.SharedBufferMaterial.get());
+
+					binding.buffer = pSharedWebGPUMat->GetWGPUUniformBufferList()[SharedBufferParam.BufferIndex];
+				}
+				else // 通常のバッファ使用
+				{
+					binding.buffer = m_WGPUUniformBufferList[i];
+				}
+				
 				binding.offset = Layout.second.ByteOffset;
 				binding.size = Layout.second.ByteSize;
 
 				bindingList.push_back(binding);
-				m_BindingRefSizeList.push_back(m_WGPUUniformBufferByteSizeList[i]);
+
+				if (SharedBufferParam.IsShared) // バッファを他のマテリアルと共有する
+				{
+					CWebGPUMaterial* pSharedWebGPUMat = static_cast<CWebGPUMaterial*>(SharedBufferParam.SharedBufferMaterial.get());
+
+					m_BindingRefSizeList.push_back(pSharedWebGPUMat->GetWGPUUniformBufferByteSizeList()[SharedBufferParam.BufferIndex]);
+				}
+				else
+				{
+					m_BindingRefSizeList.push_back(m_WGPUUniformBufferByteSizeList[i]);
+				}
+				
 			}
 		}
 
@@ -362,12 +425,12 @@ namespace api
 		bufferDesc.label = "Buffer";
 		bufferDesc.usage = Usage; // バッファの用途
 		bufferDesc.mappedAtCreation = false; // ???
-		bufferDesc.size = ByteSize * ((m_UseDynamicUniform) ? m_RefCount : 1);
+		bufferDesc.size = ByteSize * ((m_UseDynamicBufferOffset) ? m_RefCount : 1);
 
 		Buffer = wgpuDeviceCreateBuffer(m_pGraphicsAPI->GetLogicalDevice(), &bufferDesc);
 
 		// バッファにデータを書き込む
-		if (m_UseDynamicUniform)
+		if (m_UseDynamicBufferOffset)
 		{
 			for (int i = 0; i < m_RefCount; i++)
 			{

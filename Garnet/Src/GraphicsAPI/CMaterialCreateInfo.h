@@ -3,7 +3,7 @@
 #include <vector>
 #include <string>
 #include "../Interface/IBuffer.h"
-#include "../Graphics/CUniformBuffer.h"
+#include "../Graphics/CShaderBuffer.h"
 
 namespace graphics
 {
@@ -14,7 +14,7 @@ namespace graphics
 		GLSL,
 	};
 
-	class CUniformBuffer;
+	class CShaderBuffer;
 
 	class CMaterialCreateInfo
 	{
@@ -26,12 +26,14 @@ namespace graphics
 		std::vector<unsigned char> m_GeometryShaderCode;
 		std::vector<unsigned char> m_HullShaderCode;
 		std::vector<unsigned char> m_DomainShaderCode;
+		std::vector<unsigned char> m_ComputeShaderCode;
 	public:
 		CMaterialCreateInfo();
 		virtual ~CMaterialCreateInfo();
 
 		// Uniform
-		static std::shared_ptr<graphics::CUniformBuffer> CreateUniformBuffer(const std::vector<SBindingLayout>& BindingLayoutList);
+		static std::shared_ptr<graphics::CShaderBuffer> CreateUniformBuffer(const std::vector<SBindingLayout>& BindingLayoutList);
+		static std::shared_ptr<graphics::CShaderBuffer> CreateShaderStorageBuffer(const std::vector<SBindingLayout>& BindingLayoutList);
 
 		// Shader
 		EShaderType GetShaderType() const;
@@ -50,6 +52,9 @@ namespace graphics
 
 		void SetDomainShaderCode(const std::vector<unsigned char>& DomainShaderCode);
 		const std::vector<unsigned char>& GetDomainShaderCode() const;
+		
+		void SetComputeShaderCode(const std::vector<unsigned char>& ComputeShaderCode);
+		const std::vector<unsigned char>& GetComputeShaderCode() const;
 
 		// Texture
 	};

@@ -4,8 +4,6 @@
 #include "../LoadWorker/CLoadWorker.h"
 #include "../GraphicsAPI/OpenGL/COpenGLAPI.h"
 #include "./ScriptApp/CScriptApp.h"
-#include "./EditorApp/CEditorApp.h"
-#include "./MainApp/CMainApp.h"
 
 #ifdef USE_VIEWER_CAMERA
 #include "../../Camera/CViewerCamera.h"
@@ -33,19 +31,7 @@ namespace app
 	{
 		g_AppManager = this; // 仮のグローバル変数
 
-		//
-		if (AppType == app::EAppType::ScriptApp)
-		{
-			m_App = std::make_shared<app::CScriptApp>();
-		}
-		else if (AppType == app::EAppType::EditorApp)
-		{
-			m_App = std::make_shared<app::CEditorApp>();
-		}
-		else if (AppType == app::EAppType::MainApp)
-		{
-			m_App = std::make_shared<app::CMainApp>();
-		}
+		m_App = std::make_shared<app::CScriptApp>();
 	}
 
 	CDemoAppManager::~CDemoAppManager()
@@ -372,13 +358,16 @@ namespace app
 		m_SecondsTime = static_cast<float>(clock()) * 0.001f;
 		m_DeltaSecondsTime = m_SecondsTime - PrevSecondsTime;
 
+		m_App->GetDrawInfo()->SetSecondsTime(m_SecondsTime);
+		m_App->GetDrawInfo()->SetDeltaSecondsTime(m_DeltaSecondsTime);
+
 		// ViewCameraのUpdate
 #ifdef USE_INPUT_SYSTEM
 		const auto& MainCamera = m_App->GetMainCamera();
-		if (MainCamera) MainCamera->Update(m_SecondsTime, m_InputState);
+		if (MainCamera) MainCamera->Update(m_DeltaSecondsTime, m_InputState);
 #endif // USE_INPUT_SYSTEM
 
-		if (!m_App->Update(m_GraphicsAPI.get(), m_LoadWorker.get(), m_SecondsTime)) return false;
+		if (!m_App->Update(m_GraphicsAPI.get(), m_LoadWorker.get())) return false;
 
 		return true;
 	}
@@ -386,7 +375,7 @@ namespace app
 	bool CDemoAppManager::Draw()
 	{
 		// Appの描画
-		if (!m_App->Draw(m_GraphicsAPI.get(), m_LoadWorker.get(), m_SecondsTime)) return false;
+		if (!m_App->Draw(m_GraphicsAPI.get(), m_LoadWorker.get())) return false;
 
 		//カラーバッファを入れ替える
 		SwapBuffers(m_Device_Context);

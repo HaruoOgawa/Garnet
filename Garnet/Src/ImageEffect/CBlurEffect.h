@@ -41,7 +41,7 @@ namespace imageeffect
 
 		bool Update(resource::CLoadWorker* pLoadWorker);
 
-		bool Draw(float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
+		bool Draw(const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
 			const std::shared_ptr<graphics::CDrawInfo>& DrawInfo);
 	};
 }

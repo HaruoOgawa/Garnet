@@ -1,12 +1,13 @@
-#include "CUniformBuffer.h"
-#include "CUniformBufferDescriptor.h"
+#include "CShaderBuffer.h"
+#include "CShaderBufferDescriptor.h"
 #include "../Debug/Message/Console.h"
+#include "CMaterial.h"
 
 namespace graphics
 {
-	CUniformBuffer::CUniformBuffer(const std::vector<SBindingLayout>& BindingLayoutList) :
-		m_Descriptor(std::make_shared<CUniformBufferDescriptor>()),
-		m_BufferType(EBufferType::UNIFROM)
+	CShaderBuffer::CShaderBuffer(EBufferType BufferType, const std::vector<SBindingLayout>& BindingLayoutList) :
+		m_Descriptor(std::make_shared<CShaderBufferDescriptor>()),
+		m_BufferType(BufferType)
 	{
 		for (const auto& Layout : BindingLayoutList)
 		{
@@ -14,11 +15,11 @@ namespace graphics
 		}
 	}
 
-	CUniformBuffer::~CUniformBuffer()
+	CShaderBuffer::~CShaderBuffer()
 	{
 	}
 
-	void CUniformBuffer::AddData(const std::string& Name, const void* Data, int ByteSize, int BindingIndex)
+	void CShaderBuffer::AddData(const std::string& Name, const void* Data, int ByteSize, int BindingIndex)
 	{
 		const auto& Layout = m_BindingLayoutList.find(BindingIndex);
 
@@ -49,7 +50,7 @@ namespace graphics
 		m_BindingLayoutList[BindingIndex].ByteSize += ByteSize;
 	}
 
-	void CUniformBuffer::SetData(const std::string& Name, const void* Data, int ByteSize)
+	void CShaderBuffer::SetData(const std::string& Name, const void* Data, int ByteSize)
 	{
 		if (m_Descriptor)
 		{
@@ -65,36 +66,46 @@ namespace graphics
 		}
 	}
 
-	const std::vector<unsigned char>& CUniformBuffer::GetData() const
+	const std::vector<unsigned char>& CShaderBuffer::GetData() const
 	{
 		return m_Buffer;
 	}
 
-	void CUniformBuffer::SetValue(const void* Value, int ByteOffset, int ByteSize)
+	void CShaderBuffer::SetValue(const void* Value, int ByteOffset, int ByteSize)
 	{
 		std::memcpy(&m_Buffer[ByteOffset], Value, ByteSize);
 	}
 
-	std::shared_ptr<CUniformBufferDescriptor> CUniformBuffer::GetDescriptor() const
+	std::shared_ptr<CShaderBufferDescriptor> CShaderBuffer::GetDescriptor() const
 	{
 		return m_Descriptor;
 	}
 
-	const std::map<int, SBindingLayout>& CUniformBuffer::GetBindingLayoutList() const
+	const std::map<int, SBindingLayout>& CShaderBuffer::GetBindingLayoutList() const
 	{
 		return m_BindingLayoutList;
 	}
 
-	EBufferType CUniformBuffer::GetBufferType() const
+	EBufferType CShaderBuffer::GetBufferType() const
 	{
 		return m_BufferType;
 	}
 
-	void CUniformBuffer::RecalculateBindingLayoutOffset()
+	void CShaderBuffer::RecalculateBindingLayoutOffset()
 	{
 		for (int i = 1; i < m_BindingLayoutList.size(); i++)
 		{
 			m_BindingLayoutList[i].ByteOffset = m_BindingLayoutList[i - 1].ByteSize;
 		}
+	}
+
+	void CShaderBuffer::SetSharedBufferParam(const SSharedBufferParam& Param)
+	{
+		m_SharedBufferParam = Param;
+	}
+
+	const SSharedBufferParam& CShaderBuffer::GetSharedBufferParam() const
+	{
+		return m_SharedBufferParam;
 	}
 }

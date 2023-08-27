@@ -56,6 +56,7 @@
 #define GL_DEPTH_COMPONENT32F             0x8CAC
 #define GL_RENDERBUFFER                   0x8D41
 #define GL_DEPTH_ATTACHMENT               0x8D00
+#define GL_SHADER_STORAGE_BUFFER          0x90D2
 
 typedef char GLchar;
 typedef ptrdiff_t GLintptr;
@@ -102,6 +103,8 @@ typedef ptrdiff_t GLsizeiptr;
 	GL_FUNC(void,   BindRenderbuffer,	  GLenum target, GLuint renderbuffer) \
 	GL_FUNC(void,   RenderbufferStorage,  GLenum target, GLenum internalformat, GLsizei width, GLsizei height) \
 	GL_FUNC(void,   FramebufferRenderbuffer, GLenum target, GLenum attachment, GLenum renderbuffertarget, GLuint renderbuffer) \
+	GL_FUNC(void,	DrawElementsInstanced, 	GLenum mode, GLsizei count, GLenum type, const void* indices, GLsizei instancecount) \
+	GL_FUNC(void,	DispatchCompute, 	  GLuint num_groups_x, GLuint num_groups_y, GLuint num_groups_z) \
 /* end */
 
 // プリプロセッサ芸でまずGL_FUNC_LISTの中身をtypedef や externで展開する

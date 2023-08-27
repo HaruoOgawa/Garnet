@@ -11,6 +11,7 @@ namespace renderer
 		m_pGraphicsAPI(pGraphicsAPI),
 		m_PassName(PassName),
 		m_DynamicOffsetNum(0),
+		m_InstanceCount(1),
 		m_IndexBuffer(nullptr),
 		m_IndexBufferMemory(nullptr),
 		m_IndicesCount(0),
@@ -79,6 +80,8 @@ namespace renderer
 	{
 		api::CVulkanMaterial* pVulkanMat = static_cast<api::CVulkanMaterial*>(Material.get());
 
+		m_InstanceCount = createInfo->GetInstanceCount();
+
 		if (!CreateVertexBuffer(createInfo)) return false; // 頂点バッファを作成
 		if (!CreateIndexBuffer(createInfo)) return false; // インデックスバッファを作成
 
@@ -115,7 +118,7 @@ namespace renderer
 			dynamicOffsetList.push_back(dynamicOffset);
 		}
 
-		if (pVulkanMat->IsUseDynamicUniform())
+		if (pVulkanMat->IsUseDynamicBufferOffset())
 		{
 			vkCmdBindDescriptorSets(m_pGraphicsAPI->GetCurrentCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS,
 				m_PipelineLayout, 0, 1, &pVulkanMat->GetDescriptorSets()[m_pGraphicsAPI->GetCurrentFrame()], static_cast<uint32_t>(dynamicOffsetList.size()), &dynamicOffsetList[0]);
@@ -129,7 +132,7 @@ namespace renderer
 		// 描画コマンドを発行
 		//vkCmdDraw(m_CommandBuffers[m_CurrentFrame], 3, 1, 0, 0); // パラメーター: vertexCount, instanceCount, firstVertex, firstInstance
 		// インデックス付のドローコマンドはこちら
-		vkCmdDrawIndexed(m_pGraphicsAPI->GetCurrentCommandBuffer(), m_IndicesCount, 1, 0, 0, 0);
+		vkCmdDrawIndexed(m_pGraphicsAPI->GetCurrentCommandBuffer(), m_IndicesCount, m_InstanceCount, 0, 0, 0);
 
 		return true;
 	}
