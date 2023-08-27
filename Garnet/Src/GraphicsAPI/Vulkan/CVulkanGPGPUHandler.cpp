@@ -16,6 +16,11 @@ namespace graphics
 	{
 	}
 
+	const std::shared_ptr<graphics::CMaterial>& CVulkanGPGPUHandler::GetComputeMaterial()
+	{
+		return m_ComputeMaterial;
+	}
+
 	bool CVulkanGPGPUHandler::Create()
 	{
 		if (!m_ComputeMaterial) return false;
@@ -26,35 +31,6 @@ namespace graphics
 		if (!m_pGraphicsAPI->CreateCommandBuffer(m_CommandBuffer, m_CommandPool)) return false;
 
 		return true;
-	}
-
-	bool CVulkanGPGPUHandler::Dispatch(const glm::ivec3& GroupCount, float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
-		const std::shared_ptr<graphics::CDrawInfo>& DrawInfo)
-	{
-		api::CVulkanMaterial* pVulkanMat = static_cast<api::CVulkanMaterial*>(m_ComputeMaterial.get());
-
-		// データの更新
-		if (!pVulkanMat->SetCommonUniform(SecondsTime, Camera, Projection, DrawInfo)) return false;
-		if (!pVulkanMat->BuildDrawBuffer(0)) return false;
-
-		// コマンドバッファの記録開始
-		if (!BeginRecordCommandBuffer()) return false;
-
-		// Cmd
-		vkCmdBindPipeline(m_CommandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, m_ComputePipeline);
-		vkCmdBindDescriptorSets(m_CommandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE,
-			m_ComputePipelineLayout, 0, 1, &pVulkanMat->GetDescriptorSets()[m_pGraphicsAPI->GetCurrentFrame()], 0, nullptr);
-		vkCmdDispatch(m_CommandBuffer, GroupCount.x, GroupCount.y, GroupCount.z);
-
-		// コマンドバッファの記録終了
-		if (!EndRecordCommandBuffer()) return false;
-
-		return true;
-	}
-
-	const std::shared_ptr<graphics::CMaterial>& CVulkanGPGPUHandler::GetComputeMaterial()
-	{
-		return m_ComputeMaterial;
 	}
 
 	bool CVulkanGPGPUHandler::CreateComputePipeline()
@@ -86,11 +62,35 @@ namespace graphics
 		return true;
 	}
 
+	bool CVulkanGPGPUHandler::Dispatch(const glm::ivec3& GroupCount, float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
+		const std::shared_ptr<graphics::CDrawInfo>& DrawInfo)
+	{
+		api::CVulkanMaterial* pVulkanMat = static_cast<api::CVulkanMaterial*>(m_ComputeMaterial.get());
+
+		// データの更新
+		if (!pVulkanMat->SetCommonUniform(SecondsTime, Camera, Projection, DrawInfo)) return false;
+		if (!pVulkanMat->BuildDrawBuffer(0)) return false;
+
+		// コマンドバッファの記録開始
+		if (!BeginRecordCommandBuffer()) return false;
+
+		// Cmd
+		vkCmdBindPipeline(m_CommandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, m_ComputePipeline);
+		vkCmdBindDescriptorSets(m_CommandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE,
+			m_ComputePipelineLayout, 0, 1, &pVulkanMat->GetDescriptorSets()[m_pGraphicsAPI->GetCurrentFrame()], 0, nullptr);
+		vkCmdDispatch(m_CommandBuffer, GroupCount.x, GroupCount.y, GroupCount.z);
+
+		// コマンドバッファの記録終了
+		if (!EndRecordCommandBuffer()) return false;
+
+		return true;
+	}
+
 	bool CVulkanGPGPUHandler::BeginRecordCommandBuffer()
 	{
 		// 前のフレームの処理が終わるのを待つ
-		const auto& Fence = m_pGraphicsAPI->GetInFlightFence();
-		vkWaitForFences(m_pGraphicsAPI->GetLogicalDevice(), 1, &Fence, VK_TRUE, UINT32_MAX);
+		const auto& Fence = m_pGraphicsAPI->GetComputeInFlightFence();
+		vkWaitForFences(m_pGraphicsAPI->GetLogicalDevice(), 1, &Fence, VK_TRUE, UINT64_MAX);
 
 		// 処理が終わったのでフェンスをリセットしてまた使える状態にしておく
 		vkResetFences(m_pGraphicsAPI->GetLogicalDevice(), 1, &Fence);
@@ -131,10 +131,13 @@ namespace graphics
 		submitInfo.waitSemaphoreCount = 0;
 		submitInfo.pWaitSemaphores = nullptr;
 		submitInfo.pWaitDstStageMask = nullptr;
-		submitInfo.signalSemaphoreCount = 0;
-		submitInfo.pSignalSemaphores = nullptr;
 
-		const auto& Fence = m_pGraphicsAPI->GetInFlightFence();
+		const auto& Semaphore = m_pGraphicsAPI->GetComputeFlightSemaphore();
+
+		submitInfo.signalSemaphoreCount = 1;
+		submitInfo.pSignalSemaphores = &Semaphore;
+
+		const auto& Fence = m_pGraphicsAPI->GetComputeInFlightFence();
 
 		if (vkQueueSubmit(m_pGraphicsAPI->GetComputeQueue(), 1, &submitInfo, Fence) != VK_SUCCESS) // Compute Queueを実行
 		{

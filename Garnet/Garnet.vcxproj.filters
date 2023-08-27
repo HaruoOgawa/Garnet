@@ -24,9 +24,6 @@
     <ClInclude Include="Src\App\ScriptApp\CScriptApp.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Src\App\MainApp\CMainApp.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="Src\App\CDescAppManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
@@ -1116,9 +1113,6 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Src\App\ScriptApp\CScriptApp.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\App\MainApp\CMainApp.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Src\App\CDescAppManager.cpp">

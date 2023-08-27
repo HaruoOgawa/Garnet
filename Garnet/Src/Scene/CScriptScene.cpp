@@ -150,7 +150,8 @@ namespace scene
 		return true;
 	}
 
-	bool CScriptScene::Update(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker)
+	bool CScriptScene::Update(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
+		const std::shared_ptr<graphics::CDrawInfo>& DrawInfo)
 	{
 		if (!m_IsLoaded)
 		{
@@ -165,6 +166,8 @@ namespace scene
 			if (!m_TestObject->Update()) return false;
 		}
 
+		if (!m_GPGPUHandler || !m_GPGPUHandler->Dispatch(glm::ivec3(m_InstanceCount / 256, 1, 1), SecondsTime, Camera, Projection, DrawInfo)) return false;
+
 		return true;
 	}
 
@@ -172,8 +175,6 @@ namespace scene
 		const std::shared_ptr<graphics::CDrawInfo>& DrawInfo)
 	{
 		if (!m_IsLoaded) return true;
-
-		if (!m_GPGPUHandler || !m_GPGPUHandler->Dispatch(glm::ivec3(m_InstanceCount / 256, 1, 1), SecondsTime, Camera, Projection, DrawInfo)) return false;
 
 		if (m_TestObject)
 		{

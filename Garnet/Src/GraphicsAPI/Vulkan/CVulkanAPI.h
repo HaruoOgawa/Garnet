@@ -113,7 +113,9 @@ namespace api
 		// Sync Obj
 		std::vector<VkSemaphore> m_ImageAvailableSemaphones;
 		std::vector<VkSemaphore> m_RenderFinishedSemaphores;
+		std::vector<VkSemaphore> m_ComputeFinishedSemaphores;
 		std::vector<VkFence> m_InFlightFences;
+		std::vector<VkFence> m_ComputeInFlightFences;
 
 		bool m_FramebufferResized = false;
 	private:
@@ -229,7 +231,10 @@ namespace api
 		VkQueue GetPresentQueue() const { return m_PresentQueue; }
 
 		// Sync
+		VkSemaphore GetRenderFlightSemaphore()const { return m_RenderFinishedSemaphores[m_CurrentFrame]; }
+		VkSemaphore GetComputeFlightSemaphore()const { return m_ComputeFinishedSemaphores[m_CurrentFrame]; }
 		VkFence GetInFlightFence()const { return m_InFlightFences[m_CurrentFrame]; }
+		VkFence GetComputeInFlightFence()const { return m_ComputeInFlightFences[m_CurrentFrame]; }
 
 		// Texture
 		VkImageView CreateImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, graphics::ETextureType TextureType, float MipCount, bool UseMipMap);

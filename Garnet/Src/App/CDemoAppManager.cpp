@@ -5,7 +5,6 @@
 #include "../GraphicsAPI/OpenGL/COpenGLAPI.h"
 #include "./ScriptApp/CScriptApp.h"
 #include "./EditorApp/CEditorApp.h"
-#include "./MainApp/CMainApp.h"
 
 #ifdef USE_VIEWER_CAMERA
 #include "../../Camera/CViewerCamera.h"
@@ -41,10 +40,6 @@ namespace app
 		else if (AppType == app::EAppType::EditorApp)
 		{
 			m_App = std::make_shared<app::CEditorApp>();
-		}
-		else if (AppType == app::EAppType::MainApp)
-		{
-			m_App = std::make_shared<app::CMainApp>();
 		}
 	}
 

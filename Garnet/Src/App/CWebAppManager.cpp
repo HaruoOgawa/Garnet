@@ -6,7 +6,6 @@
 #include "../GraphicsAPI/WebGPU/CWebGPUAPI.h"
 #include "./ScriptApp/CScriptApp.h"
 #include "./EditorApp/CEditorApp.h"
-#include "./MainApp/CMainApp.h"
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
@@ -42,10 +41,6 @@ namespace webapp
 		else if (AppType == app::EAppType::EditorApp)
 		{
 			m_App = std::make_shared<app::CEditorApp>();
-		}
-		else if (AppType == app::EAppType::MainApp)
-		{
-			m_App = std::make_shared<app::CMainApp>();
 		}
 	}
 

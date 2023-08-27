@@ -6,6 +6,5 @@ namespace app
 	{
 		ScriptApp,
 		EditorApp,
-		MainApp,
 	};
 }

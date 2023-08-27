@@ -81,7 +81,9 @@ namespace api
 		{
 			vkDestroySemaphore(m_LogicalDevice, m_ImageAvailableSemaphones[i], nullptr);
 			vkDestroySemaphore(m_LogicalDevice, m_RenderFinishedSemaphores[i], nullptr);
+			vkDestroySemaphore(m_LogicalDevice, m_ComputeFinishedSemaphores[i], nullptr);
 			vkDestroyFence(m_LogicalDevice, m_InFlightFences[i], nullptr);
+			vkDestroyFence(m_LogicalDevice, m_ComputeInFlightFences[i], nullptr);
 		}
 
 		// コマンドプールの破棄
@@ -777,7 +779,9 @@ namespace api
 		//
 		m_ImageAvailableSemaphones.resize(MAX_FRAMES_IN_FLIGHT);
 		m_RenderFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
+		m_ComputeFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
 		m_InFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
+		m_ComputeInFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
 
 		// セマフォの作成(セマフォとはキュー操作の間に順序を追加するためのもの。セマフォの処理はGPUのみで行われる) 
 		VkSemaphoreCreateInfo semaphoreInfo{};
@@ -794,7 +798,10 @@ namespace api
 		{
 			if (vkCreateSemaphore(m_LogicalDevice, &semaphoreInfo, nullptr, &m_ImageAvailableSemaphones[i]) != VK_SUCCESS ||
 				vkCreateSemaphore(m_LogicalDevice, &semaphoreInfo, nullptr, &m_RenderFinishedSemaphores[i]) != VK_SUCCESS ||
-				vkCreateFence(m_LogicalDevice, &fenceInfo, nullptr, &m_InFlightFences[i]) != VK_SUCCESS)
+				vkCreateSemaphore(m_LogicalDevice, &semaphoreInfo, nullptr, &m_ComputeFinishedSemaphores[i]) != VK_SUCCESS ||
+				vkCreateFence(m_LogicalDevice, &fenceInfo, nullptr, &m_InFlightFences[i]) != VK_SUCCESS ||
+				vkCreateFence(m_LogicalDevice, &fenceInfo, nullptr, &m_ComputeInFlightFences[i]) != VK_SUCCESS
+			)
 			{
 				throw std::runtime_error("failed to create semaphores!");
 			}
@@ -876,9 +883,9 @@ namespace api
 		VkSubmitInfo submitInfo{};
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
-		VkSemaphore waitSemaphore[] = { m_ImageAvailableSemaphones[m_CurrentFrame] }; // 画像に色が書き込まれて利用可になるまで待つセマフォ
-		VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
-		submitInfo.waitSemaphoreCount = 1;
+		VkSemaphore waitSemaphore[] = { m_ComputeFinishedSemaphores[m_CurrentFrame] , m_ImageAvailableSemaphones[m_CurrentFrame] }; // セマフォで待つ
+		VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_VERTEX_INPUT_BIT | VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
+		submitInfo.waitSemaphoreCount = 2;
 		submitInfo.pWaitSemaphores = waitSemaphore;
 		submitInfo.pWaitDstStageMask = waitStages;
 

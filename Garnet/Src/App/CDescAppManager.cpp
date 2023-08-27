@@ -24,7 +24,6 @@
 
 #include "./ScriptApp/CScriptApp.h"
 #include "./EditorApp/CEditorApp.h"
-#include "./MainApp/CMainApp.h"
 
 bool g_IsRunLoop = true;
 
@@ -59,10 +58,6 @@ namespace descapp
 		else if (AppType == app::EAppType::EditorApp)
 		{
 			m_App = std::make_shared<app::CEditorApp>();
-		}
-		else if (AppType == app::EAppType::MainApp)
-		{
-			m_App = std::make_shared<app::CMainApp>();
 		}
 	}
 
