@@ -23,9 +23,15 @@ layout(std430, binding = 2) buffer WriteOnlyTestBufferObject
 
 layout(local_size_x = 256, local_size_y = 1, local_size_z =1) in;
 
+float rand(vec2 st)
+{
+    return fract(sin(dot(st.xy, vec2(12.9898, 78.233))) * 43758.5453123);
+}
+
 void main()
 {
     uint id = gl_GlobalInvocationID.x;
+    float id_f = float(id);
 
-    w_TBO.data[id].offset.y += sin(ubo.time); 
+    w_TBO.data[id].offset.y += sin(ubo.time + rand(vec2(id_f, id_f + 12.394)) * 10.0); 
 }

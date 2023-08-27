@@ -72,6 +72,8 @@ namespace api
 		const std::vector<VkPipelineShaderStageCreateInfo>& GetShaderStages()const { return m_ShaderStages; }
 		const VkDescriptorSetLayout& GetDescriptorSetLayout() const { return m_DescriptorSetLayout; }
 		const std::vector<VkDescriptorSet>& GetDescriptorSets() const { return m_DescriptorSets; }
+		const std::vector<std::vector<VkBuffer>>& GetVKUniformBufferList() const { return m_VKUniformBufferList; }
+		const std::vector<std::vector<uint32_t>>& GetVKUniformBufferSizeList() const { return m_VKUniformBufferSizeList; }
 	};
 }
 #endif

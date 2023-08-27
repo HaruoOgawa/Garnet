@@ -1,6 +1,7 @@
 #include "CShaderBuffer.h"
 #include "CShaderBufferDescriptor.h"
 #include "../Debug/Message/Console.h"
+#include "CMaterial.h"
 
 namespace graphics
 {
@@ -96,5 +97,15 @@ namespace graphics
 		{
 			m_BindingLayoutList[i].ByteOffset = m_BindingLayoutList[i - 1].ByteSize;
 		}
+	}
+
+	void CShaderBuffer::SetSharedBufferParam(const SSharedBufferParam& Param)
+	{
+		m_SharedBufferParam = Param;
+	}
+
+	const SSharedBufferParam& CShaderBuffer::GetSharedBufferParam() const
+	{
+		return m_SharedBufferParam;
 	}
 }

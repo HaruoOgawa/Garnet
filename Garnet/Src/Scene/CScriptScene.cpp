@@ -41,6 +41,57 @@ namespace scene
 
 	bool CScriptScene::Load(api::IGraphicsAPI* pGraphicsAPI)
 	{
+		//
+		std::vector<float> InitData;
+		for (int i = 0; i < m_InstanceCount; i++)
+		{
+			float w = 10.0;
+			float f_id = static_cast<float>(i);
+
+			glm::vec4 offset = glm::vec4(
+				w * (rand(glm::vec2(f_id, 55.5)) * 2.0 - 1.0),
+				w * (rand(glm::vec2(943.22, f_id)) * 2.0 - 1.0),
+				w * (rand(glm::vec2(f_id + 11.111, f_id + 456.123)) * 2.0 - 1.0),
+				1.0f
+			);
+			glm::vec4 color = glm::vec4(
+				rand(glm::vec2(f_id, 55.5)),
+				rand(glm::vec2(943.22, f_id)),
+				rand(glm::vec2(f_id + 11.111, f_id + 456.123)),
+				1.0f
+			);
+
+			InitData.push_back(offset.x); InitData.push_back(offset.y); InitData.push_back(offset.z); InitData.push_back(offset.w);
+			InitData.push_back(color.x); InitData.push_back(color.y); InitData.push_back(color.z); InitData.push_back(color.w);
+		}
+
+		// Compute Buffer
+		{
+			std::shared_ptr<graphics::CMaterialCreateInfo> computeCreateInfo = std::make_shared<graphics::CMaterialCreateInfo>();
+			computeCreateInfo->SetComputeShaderCode(m_ComputeShader->GetData());
+
+			auto ComputeMaterial = pGraphicsAPI->CreateMaterial(computeCreateInfo);
+
+			auto ParamUBO = graphics::CMaterialCreateInfo::CreateUniformBuffer({ graphics::SBindingLayout("ParamUBO", 0) });
+			ParamUBO->AddData("time", &glm::vec1(0.0f)[0], sizeof(glm::vec1), 0);
+
+			ComputeMaterial->AddShaderBuffer(ParamUBO);
+
+			auto ReadSSBO = graphics::CMaterialCreateInfo::CreateShaderStorageBuffer({ graphics::SBindingLayout("ReadOnlyTestBufferObject", 1) });
+			ReadSSBO->AddData("r_TBO", &InitData[0], sizeof(float) * static_cast<int>(InitData.size()), 1);
+
+			ComputeMaterial->AddShaderBuffer(ReadSSBO);
+
+			auto WriteSSBO = graphics::CMaterialCreateInfo::CreateShaderStorageBuffer({ graphics::SBindingLayout("WriteOnlyTestBufferObject", 2) });
+			WriteSSBO->AddData("w_TBO", &InitData[0], sizeof(float) * static_cast<int>(InitData.size()), 2);
+
+			ComputeMaterial->AddShaderBuffer(WriteSSBO);
+
+			//
+			m_GPGPUHandler = pGraphicsAPI->CreateGPGPUHandler(ComputeMaterial);
+			if (!m_GPGPUHandler->Create()) return false;
+		}
+
 		// TestObj
 		{
 			// MATERIAL
@@ -50,74 +101,20 @@ namespace scene
 				createInfo->SetFragmentShaderCode(m_FragmentShader->GetData());
 				auto Material0 = pGraphicsAPI->CreateMaterial(createInfo);
 
-				// UBO, TEXTURE
-				{
-					auto UniformBuffer = graphics::CMaterialCreateInfo::CreateUniformBuffer({ graphics::SBindingLayout("UniformBufferObject", 0) });
+				auto UniformBuffer = graphics::CMaterialCreateInfo::CreateUniformBuffer({ graphics::SBindingLayout("UniformBufferObject", 0) });
 
-					UniformBuffer->AddData("model", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
-					UniformBuffer->AddData("view", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
-					UniformBuffer->AddData("proj", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
-					UniformBuffer->AddData("lightVPMat", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
+				UniformBuffer->AddData("model", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
+				UniformBuffer->AddData("view", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
+				UniformBuffer->AddData("proj", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
+				UniformBuffer->AddData("lightVPMat", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
 
-					Material0->AddShaderBuffer(UniformBuffer);
+				Material0->AddShaderBuffer(UniformBuffer);
+				auto SSBO = graphics::CMaterialCreateInfo::CreateShaderStorageBuffer({ graphics::SBindingLayout("TestBufferObject", 1) });
+				
+				SSBO->AddData("rw_TBO", &InitData[0], sizeof(float) * static_cast<int>(InitData.size()), 1);
+				SSBO->SetSharedBufferParam({ true, 2, m_GPGPUHandler->GetComputeMaterial() });
 
-					//
-					std::vector<float> InitData;
-					for (int i = 0; i < m_InstanceCount; i++)
-					{
-						float w = 10.0;
-						float f_id = static_cast<float>(i);
-
-						glm::vec4 offset = glm::vec4(
-							w * (rand(glm::vec2(f_id, 55.5)) * 2.0 - 1.0),
-							w * (rand(glm::vec2(943.22, f_id)) * 2.0 - 1.0),
-							w * (rand(glm::vec2(f_id + 11.111, f_id + 456.123)) * 2.0 - 1.0),
-							1.0f
-						);
-						glm::vec4 color = glm::vec4(
-							rand(glm::vec2(f_id, 55.5)),
-							rand(glm::vec2(943.22, f_id)),
-							rand(glm::vec2(f_id + 11.111, f_id + 456.123)),
-							1.0f
-						);
-
-						InitData.push_back(offset.x); InitData.push_back(offset.y); InitData.push_back(offset.z); InitData.push_back(offset.w);
-						InitData.push_back(color.x); InitData.push_back(color.y); InitData.push_back(color.z); InitData.push_back(color.w);
-					}
-
-					{
-						auto SSBO = graphics::CMaterialCreateInfo::CreateShaderStorageBuffer({ graphics::SBindingLayout("TestBufferObject", 1) });
-						SSBO->AddData("rw_TBO", &InitData[0], sizeof(float) * static_cast<int>(InitData.size()), 1);
-
-						Material0->AddShaderBuffer(SSBO);
-					}
-
-					{
-						std::shared_ptr<graphics::CMaterialCreateInfo> computeCreateInfo = std::make_shared<graphics::CMaterialCreateInfo>();
-						computeCreateInfo->SetComputeShaderCode(m_ComputeShader->GetData());
-
-						auto ComputeMaterial = pGraphicsAPI->CreateMaterial(computeCreateInfo);
-
-						auto ParamUBO = graphics::CMaterialCreateInfo::CreateUniformBuffer({ graphics::SBindingLayout("ParamUBO", 0) });
-						ParamUBO->AddData("time", &glm::vec1(0.0f)[0], sizeof(glm::vec1), 0);
-
-						ComputeMaterial->AddShaderBuffer(ParamUBO);
-
-						auto ReadSSBO = graphics::CMaterialCreateInfo::CreateShaderStorageBuffer({ graphics::SBindingLayout("ReadOnlyTestBufferObject", 1) });
-						ReadSSBO->AddData("r_TBO", &InitData[0], sizeof(float) * static_cast<int>(InitData.size()), 1);
-
-						ComputeMaterial->AddShaderBuffer(ReadSSBO);
-						
-						auto WriteSSBO = graphics::CMaterialCreateInfo::CreateShaderStorageBuffer({ graphics::SBindingLayout("WriteOnlyTestBufferObject", 2) });
-						WriteSSBO->AddData("w_TBO", &InitData[0], sizeof(float) * static_cast<int>(InitData.size()), 2);
-
-						ComputeMaterial->AddShaderBuffer(WriteSSBO);
-
-						//
-						m_GPGPUHandler = pGraphicsAPI->CreateGPGPUHandler(ComputeMaterial);
-						if (!m_GPGPUHandler->Create()) return false;
-					}
-				}
+				Material0->AddShaderBuffer(SSBO);
 
 				m_TestObject->AddMaterial(Material0);
 			}

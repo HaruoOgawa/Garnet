@@ -72,6 +72,9 @@ namespace api
 	{
 		for (int i = 0; i < m_ShaderBufferList.size(); i++)
 		{
+			// SharedBufferは処理しない
+			if (m_ShaderBufferList[i]->GetSharedBufferParam().IsShared) continue;
+
 			auto ByteSize = m_VKUniformBufferSizeList[m_pGraphicsAPI->GetCurrentFrame()][i];
 			auto ByteOffset = ((m_UseDynamicBufferOffset)? (DynamicOffsetNum - 1) * ByteSize : 0);
 
@@ -94,6 +97,9 @@ namespace api
 	{
 		for (int i = 0; i < m_ShaderBufferList.size(); i++)
 		{
+			// SharedBufferは処理しない
+			if (m_ShaderBufferList[i]->GetSharedBufferParam().IsShared) continue;
+
 			auto& UniformBuffer = m_ShaderBufferList[i];
 			const auto& UniformDesc = UniformBuffer->GetDescriptor();
 
@@ -304,6 +310,9 @@ namespace api
 		{
 			for (const auto& Buffer : m_ShaderBufferList)
 			{
+				// SharedBufferは処理しない
+				if (Buffer->GetSharedBufferParam().IsShared) continue;
+
 				const auto& Data = Buffer->GetData();
 				const uint32_t ByteSize = static_cast<uint32_t>(math::GetNextPowerOfTwo(static_cast<unsigned int>(Data.size()))); // 2のn乗にする
 
@@ -350,6 +359,9 @@ namespace api
 		// UBOのプール
 		for (const auto& Buffer : m_ShaderBufferList)
 		{
+			// SharedBufferは処理しない
+			if (Buffer->GetSharedBufferParam().IsShared) continue;
+
 			VkDescriptorPoolSize poolSize{};
 
 			if (Buffer->GetBufferType() == graphics::EBufferType::UNIFORM)
@@ -446,6 +458,9 @@ namespace api
 				
 				int LayoutIndex = 0;
 
+				// 共有バッファ
+				const auto& SharedBufferParam = m_ShaderBufferList[BufferIndex]->GetSharedBufferParam();
+
 				// UBO
 				int BufferLayoutIndex = 0;
 				for (const auto& Layout : Buffer->GetBindingLayoutList())
@@ -454,8 +469,18 @@ namespace api
 					descriptorWrites[LayoutIndex].dstSet = m_DescriptorSets[FrameIndex]; // どのDescriptorSets(キューファミリが入ってる？)でCPUからGPUにバッファを渡すコマンドを発行するか
 					descriptorWrites[LayoutIndex].dstBinding = Layout.second.BindingIndex; // layout(location = n)
 					descriptorWrites[LayoutIndex].dstArrayElement = 0; // ???
-					
-					bufferInfoList[BufferLayoutIndex].buffer = m_VKUniformBufferList[FrameIndex][BufferIndex]; // UBOの指定
+
+					if (SharedBufferParam.IsShared) // バッファを他のマテリアルと共有する
+					{
+						CVulkanMaterial* pSharedVulkanMat = static_cast<CVulkanMaterial*>(SharedBufferParam.SharedBufferMaterial.get());
+
+						bufferInfoList[BufferLayoutIndex].buffer = pSharedVulkanMat->GetVKUniformBufferList()[FrameIndex][SharedBufferParam.BufferIndex]; // UBOの指定
+					}
+					else // 通常のバッファ使用
+					{
+						bufferInfoList[BufferLayoutIndex].buffer = m_VKUniformBufferList[FrameIndex][BufferIndex]; // UBOの指定
+					}
+
 					bufferInfoList[BufferLayoutIndex].offset = Layout.second.ByteOffset; // バッファオフセット
 					bufferInfoList[BufferLayoutIndex].range = Layout.second.ByteSize; // サイズかな？
 
@@ -488,7 +513,16 @@ namespace api
 					// 複数個入力しても意味がないので始めのFrameIndexだけを見る
 					if (FrameIndex == 0)
 					{
-						m_BindingRefSizeList.push_back(m_VKUniformBufferSizeList[FrameIndex][BufferIndex]);
+						if (SharedBufferParam.IsShared) // バッファを他のマテリアルと共有する
+						{
+							CVulkanMaterial* pSharedVulkanMat = static_cast<CVulkanMaterial*>(SharedBufferParam.SharedBufferMaterial.get());
+
+							m_BindingRefSizeList.push_back(pSharedVulkanMat->GetVKUniformBufferSizeList()[FrameIndex][BufferIndex]);
+						}
+						else
+						{
+							m_BindingRefSizeList.push_back(m_VKUniformBufferSizeList[FrameIndex][BufferIndex]);
+						}
 					}
 
 					BufferLayoutIndex++;

@@ -11,6 +11,14 @@
 namespace graphics
 {
 	class CShaderBufferDescriptor;
+	class CMaterial;
+
+	struct SSharedBufferParam
+	{
+		bool IsShared = false;
+		int BufferIndex = -1;
+		std::shared_ptr<CMaterial> SharedBufferMaterial = nullptr;
+	};
 
 	class CShaderBuffer : public IBuffer
 	{
@@ -19,6 +27,9 @@ namespace graphics
 		std::map<int, SBindingLayout> m_BindingLayoutList;
 
 		const EBufferType m_BufferType;
+
+		// バッファを共有するかどうか
+		SSharedBufferParam m_SharedBufferParam{};
 	public:
 		CShaderBuffer(EBufferType BufferType, const std::vector<SBindingLayout>& BindingLayoutList);
 		virtual ~CShaderBuffer();
@@ -35,5 +46,8 @@ namespace graphics
 		virtual EBufferType GetBufferType() const override;
 
 		virtual void RecalculateBindingLayoutOffset() override;
+
+		void SetSharedBufferParam(const SSharedBufferParam& Param);
+		const SSharedBufferParam& GetSharedBufferParam() const;
 	};
 }
