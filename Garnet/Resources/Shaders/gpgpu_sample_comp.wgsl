@@ -14,6 +14,8 @@ struct WriteOnlyTestBufferObject {
 struct ParamUBO {
     time: f32,
     deltaTime: f32,
+    pad0_: f32,
+    pad1_: f32,
 }
 
 struct ReadOnlyTestBufferObject {
@@ -29,8 +31,8 @@ var<uniform> ubo: ParamUBO;
 var<storage> r_TBO: ReadOnlyTestBufferObject;
 
 fn randvf2_(st: ptr<function, vec2<f32>>) -> f32 {
-    let _e20 = (*st);
-    return fract((sin(dot(_e20, vec2<f32>(12.989800453186035, 78.23300170898438))) * 43758.546875));
+    let _e21 = (*st);
+    return fract((sin(dot(_e21, vec2<f32>(12.989800453186035, 78.23300170898438))) * 43758.546875));
 }
 
 fn main_1() {
@@ -38,18 +40,18 @@ fn main_1() {
     var id_f: f32;
     var param: vec2<f32>;
 
-    let _e23 = gl_GlobalInvocationID_1[0u];
-    id = _e23;
-    let _e24 = id;
-    id_f = f32(_e24);
-    let _e26 = id;
-    let _e28 = ubo.time;
-    let _e29 = id_f;
+    let _e24 = gl_GlobalInvocationID_1[0u];
+    id = _e24;
+    let _e25 = id;
+    id_f = f32(_e25);
+    let _e27 = id;
+    let _e29 = ubo.time;
     let _e30 = id_f;
-    param = vec2<f32>(_e29, (_e30 + 12.394000053405762));
-    let _e33 = randvf2_((&param));
-    let _e41 = w_TBO.data[_e26].offset[1u];
-    w_TBO.data[_e26].offset[1u] = (_e41 + sin((_e28 + (_e33 * 10.0))));
+    let _e31 = id_f;
+    param = vec2<f32>(_e30, (_e31 + 12.394000053405762));
+    let _e34 = randvf2_((&param));
+    let _e43 = w_TBO.data[_e27].offset[1u];
+    w_TBO.data[_e27].offset[1u] = (_e43 + (sin((_e29 + (_e34 * 10.0))) * 0.10000000149011612));
     return;
 }
 

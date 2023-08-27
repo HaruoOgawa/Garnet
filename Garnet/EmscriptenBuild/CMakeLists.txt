@@ -20,8 +20,6 @@ add_executable(
 	../src/App/CWebAppManager.cpp
 	../src/App/CWebAppManager.h
 	../src/App/EAppType.h
-	../src/App/EditorApp/CEditorApp.cpp
-	../src/App/EditorApp/CEditorApp.h
 	../src/App/ScriptApp/CScriptApp.cpp
 	../src/App/ScriptApp/CScriptApp.h
 	../src/Camera/CCamera.cpp
