@@ -69,13 +69,13 @@ namespace api
 		return true;
 	}
 
-	bool CWebGPUGPGPUHandler::Dispatch(const glm::ivec3& GroupCount, float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
+	bool CWebGPUGPGPUHandler::Dispatch(const glm::ivec3& GroupCount, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
 		const std::shared_ptr<graphics::CDrawInfo>& DrawInfo)
 	{
 		CWebGPUMaterial* pWebGPUMat = static_cast<CWebGPUMaterial*>(m_ComputeMaterial.get());
 
 		// データの更新
-		if (!pWebGPUMat->SetCommonUniform(SecondsTime, Camera, Projection, DrawInfo)) return false;
+		if (!pWebGPUMat->SetCommonUniform(Camera, Projection, DrawInfo)) return false;
 		if (!pWebGPUMat->BuildDrawBuffer(0)) return false;
 
 		// コマンドバッファの記録開始

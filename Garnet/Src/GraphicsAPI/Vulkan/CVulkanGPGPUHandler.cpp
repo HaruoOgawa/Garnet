@@ -62,13 +62,13 @@ namespace api
 		return true;
 	}
 
-	bool CVulkanGPGPUHandler::Dispatch(const glm::ivec3& GroupCount, float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
+	bool CVulkanGPGPUHandler::Dispatch(const glm::ivec3& GroupCount, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
 		const std::shared_ptr<graphics::CDrawInfo>& DrawInfo)
 	{
 		api::CVulkanMaterial* pVulkanMat = static_cast<api::CVulkanMaterial*>(m_ComputeMaterial.get());
 
 		// データの更新
-		if (!pVulkanMat->SetCommonUniform(SecondsTime, Camera, Projection, DrawInfo)) return false;
+		if (!pVulkanMat->SetCommonUniform(Camera, Projection, DrawInfo)) return false;
 		if (!pVulkanMat->BuildDrawBuffer(0)) return false;
 
 		// コマンドバッファの記録開始

@@ -123,13 +123,13 @@ namespace object
 		return true;
 	}
 
-	bool C3DObject::Draw(bool IsDepthPass, float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo)
+	bool C3DObject::Draw(bool IsDepthPass, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo)
 	{
 		// 共通ユニフォームの更新
 		for (auto& Material : m_MaterialList)
 		{
 			if (!Material) continue;
-			if (!Material->SetCommonUniform(SecondsTime, Camera, Projection, DrawInfo)) return false;
+			if (!Material->SetCommonUniform(Camera, Projection, DrawInfo)) return false;
 		}
 
 		for (auto& Material : m_MaterialList)
@@ -140,7 +140,7 @@ namespace object
 
 			if (!DepthMaterial) continue;
 
-			if (!DepthMaterial->SetCommonUniform(SecondsTime, Camera, Projection, DrawInfo)) return false;
+			if (!DepthMaterial->SetCommonUniform(Camera, Projection, DrawInfo)) return false;
 		}
 
 		// 描画

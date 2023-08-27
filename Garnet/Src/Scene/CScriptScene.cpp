@@ -78,6 +78,7 @@ namespace scene
 
 			auto ParamUBO = graphics::CMaterialCreateInfo::CreateUniformBuffer({ graphics::SBindingLayout("ParamUBO", 0) });
 			ParamUBO->AddData("time", &glm::vec1(0.0f)[0], sizeof(glm::vec1), 0);
+			ParamUBO->AddData("deltaTime", &glm::vec1(0.0f)[0], sizeof(glm::vec1), 0);
 
 			ComputeMaterial->AddShaderBuffer(ParamUBO);
 
@@ -151,7 +152,7 @@ namespace scene
 		return true;
 	}
 
-	bool CScriptScene::Update(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
+	bool CScriptScene::Update(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
 		const std::shared_ptr<graphics::CDrawInfo>& DrawInfo)
 	{
 		if (!m_IsLoaded)
@@ -170,24 +171,24 @@ namespace scene
 		return true;
 	}
 
-	bool CScriptScene::Dispatch(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
+	bool CScriptScene::Dispatch(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
 		const std::shared_ptr<graphics::CDrawInfo>& DrawInfo)
 	{
 		if (!m_IsLoaded || !m_GPGPUHandler) return true;
 
-		if (!m_GPGPUHandler->Dispatch(glm::ivec3(m_InstanceCount / 256, 1, 1), SecondsTime, Camera, Projection, DrawInfo)) return false;
+		if (!m_GPGPUHandler->Dispatch(glm::ivec3(m_InstanceCount / 256, 1, 1), Camera, Projection, DrawInfo)) return false;
 
 		return true;
 	}
 
-	bool CScriptScene::Draw(api::IGraphicsAPI* pGraphicsAPI, bool IsDepthPass, float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, 
+	bool CScriptScene::Draw(api::IGraphicsAPI* pGraphicsAPI, bool IsDepthPass, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, 
 		const std::shared_ptr<graphics::CDrawInfo>& DrawInfo)
 	{
 		if (!m_IsLoaded) return true;
 
 		if (m_TestObject)
 		{
-			if (!m_TestObject->Draw(IsDepthPass, SecondsTime, Camera, Projection, DrawInfo)) return false;
+			if (!m_TestObject->Draw(IsDepthPass, Camera, Projection, DrawInfo)) return false;
 		}
 
 		return true;

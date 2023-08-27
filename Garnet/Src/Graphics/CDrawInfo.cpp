@@ -7,7 +7,9 @@ namespace graphics
 	CDrawInfo::CDrawInfo() :
 		m_LightCamera(std::make_shared<camera::CCamera>()),
 		m_LightColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)),
-		m_LightProjection(std::make_shared<projection::CProjection>())
+		m_LightProjection(std::make_shared<projection::CProjection>()),
+		m_SecondsTime(0.0f),
+		m_DeltaSecondsTime(0.0f)
 	{
 	}
 
@@ -29,5 +31,25 @@ namespace graphics
 	const glm::vec4& CDrawInfo::GetLightColor() const
 	{
 		return m_LightColor;
+	}
+
+	void CDrawInfo::SetSecondsTime(float SecondsTime)
+	{
+		m_SecondsTime = SecondsTime;
+	}
+
+	float CDrawInfo::GetSecondsTime() const
+	{
+		return m_SecondsTime;
+	}
+	
+	void CDrawInfo::SetDeltaSecondsTime(float DeltaSecondsTime)
+	{
+		m_DeltaSecondsTime = DeltaSecondsTime;
+	}
+
+	float CDrawInfo::GetDeltaSecondsTime() const
+	{
+		return m_DeltaSecondsTime;
 	}
 }

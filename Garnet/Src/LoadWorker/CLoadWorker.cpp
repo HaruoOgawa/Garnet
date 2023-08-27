@@ -146,7 +146,7 @@ namespace resource
 		return true;
 	}
 
-	bool CLoadWorker::Draw(api::IGraphicsAPI* pGraphicsAPI, bool IsDepthPass, float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
+	bool CLoadWorker::Draw(api::IGraphicsAPI* pGraphicsAPI, bool IsDepthPass, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
 		const std::shared_ptr<graphics::CDrawInfo>& DrawInfo)
 	{
 		if(m_Status == ELoadStatus::Loaded) return true;
@@ -157,7 +157,7 @@ namespace resource
 			m_LoadingBar->GetMaterialList()[0]->SetUniformValue("rate", &glm::vec1(rate)[0]);
 			m_LoadingBar->GetMaterialList()[0]->SetUniformValue("alpha", &m_Alpha);
 
-			if (!m_LoadingBar->Draw(IsDepthPass, SecondsTime, Camera, Projection, DrawInfo)) return false;
+			if (!m_LoadingBar->Draw(IsDepthPass, Camera, Projection, DrawInfo)) return false;
 		}
 
 		return true;

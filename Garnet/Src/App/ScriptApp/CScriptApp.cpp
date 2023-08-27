@@ -66,28 +66,28 @@ namespace app
 		return true;
 	}
 
-	bool CScriptApp::Update(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, float SecondsTime)
+	bool CScriptApp::Update(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker)
 	{
 		if (!pLoadWorker->Update(pGraphicsAPI)) return false;
 
-		if (!m_ScriptScene->Update(pGraphicsAPI, pLoadWorker, SecondsTime, m_MainCamera, m_Projection, m_DrawInfo)) return false;
+		if (!m_ScriptScene->Update(pGraphicsAPI, pLoadWorker, m_MainCamera, m_Projection, m_DrawInfo)) return false;
 
 		return true;
 	}
 
-	bool CScriptApp::Draw(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, float SecondsTime)
+	bool CScriptApp::Draw(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker)
 	{
 		// Prepare
 		if (!pGraphicsAPI->PrepareRender()) return false;
 
 		// Dispatch GPGPU
-		if (!m_ScriptScene->Dispatch(pGraphicsAPI, pLoadWorker, SecondsTime, m_MainCamera, m_Projection, m_DrawInfo)) return false;
+		if (!m_ScriptScene->Dispatch(pGraphicsAPI, pLoadWorker, m_MainCamera, m_Projection, m_DrawInfo)) return false;
 
 		// DefaultPass(SwapChain)
 		if (!pGraphicsAPI->BeginRender()) return false;
 
-		if (!m_ScriptScene->Draw(pGraphicsAPI, false, SecondsTime, m_MainCamera, m_Projection, m_DrawInfo)) return false;
-		if (!pLoadWorker->Draw(pGraphicsAPI, false, SecondsTime, m_MainCamera, m_Projection, m_DrawInfo)) return false;
+		if (!m_ScriptScene->Draw(pGraphicsAPI, false, m_MainCamera, m_Projection, m_DrawInfo)) return false;
+		if (!pLoadWorker->Draw(pGraphicsAPI, false, m_MainCamera, m_Projection, m_DrawInfo)) return false;
 		
 		if (!pGraphicsAPI->EndRender()) return false;
 
@@ -100,5 +100,10 @@ namespace app
 	const std::shared_ptr<camera::CCamera>& CScriptApp::GetMainCamera() const
 	{
 		return m_MainCamera;
+	}
+
+	const std::shared_ptr<graphics::CDrawInfo>& CScriptApp::GetDrawInfo() const
+	{
+		return m_DrawInfo;
 	}
 }

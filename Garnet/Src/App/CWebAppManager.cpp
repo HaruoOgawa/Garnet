@@ -5,7 +5,6 @@
 
 #include "../GraphicsAPI/WebGPU/CWebGPUAPI.h"
 #include "./ScriptApp/CScriptApp.h"
-#include "./EditorApp/CEditorApp.h"
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
@@ -30,18 +29,9 @@ namespace webapp
 		m_Width(Width),
 		m_Height(Height)
 	{
-		//
 		m_GraphicsAPI = std::make_shared<api::CWebGPUAPI>(Width, Height);
 
-		//
-		if (AppType == app::EAppType::ScriptApp)
-		{
-			m_App = std::make_shared<app::CScriptApp>();
-		}
-		else if (AppType == app::EAppType::EditorApp)
-		{
-			m_App = std::make_shared<app::CEditorApp>();
-		}
+		m_App = std::make_shared<app::CScriptApp>();
 	}
 
 	CWebAppManager::~CWebAppManager()
@@ -114,20 +104,23 @@ namespace webapp
 		m_SecondsTime = static_cast<float>(clock()) * 0.001f * 0.001f;
 		m_DeltaSecondsTime = m_SecondsTime - PrevSecondsTime;
 
+		m_App->GetDrawInfo()->SetSecondsTime(m_SecondsTime);
+		m_App->GetDrawInfo()->SetDeltaSecondsTime(m_DeltaSecondsTime);
+
 		// ViewCamera‚ÌUpdate
 #ifdef USE_INPUT_SYSTEM
 		const auto& MainCamera = m_App->GetMainCamera();
 		if (MainCamera) MainCamera->Update(m_DeltaSecondsTime, m_InputState);
 #endif // USE_INPUT_SYSTEM
 
-		if (!m_App->Update(m_GraphicsAPI.get(), m_LoadWorker.get(), m_SecondsTime)) return false;
+		if (!m_App->Update(m_GraphicsAPI.get(), m_LoadWorker.get())) return false;
 
 		return true;
 	}
 
 	bool CWebAppManager::Draw()
 	{
-		if (!m_App->Draw(m_GraphicsAPI.get(), m_LoadWorker.get(), m_SecondsTime)) return false;
+		if (!m_App->Draw(m_GraphicsAPI.get(), m_LoadWorker.get())) return false;
 
 		return true;
 	}

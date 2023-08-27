@@ -51,7 +51,7 @@ namespace api
 		virtual ~CWebGPUMaterial();
 
 		virtual bool Create(const std::vector<std::shared_ptr<graphics::CTexture>>& TextureList, const std::vector<std::shared_ptr<graphics::CTexture>>& CubeMapList) override;
-		virtual bool SetCommonUniform(float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo) override;
+		virtual bool SetCommonUniform(const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo) override;
 		virtual bool BuildDrawBuffer(int DynamicOffsetNum) override;
 
 		virtual void SetUniformValue(const std::string Name, const void* Value, int DynamicOffsetNum = -1) override;

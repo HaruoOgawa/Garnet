@@ -28,9 +28,10 @@ namespace app
 		bool Initialize(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker) override;
 		bool ProcessInput(api::IGraphicsAPI* pGraphicsAPI) override;
 		bool Resize(int Width, int Height) override;
-		bool Update(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, float SecondsTime) override;
-		bool Draw(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, float SecondsTime) override;
+		bool Update(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker) override;
+		bool Draw(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker) override;
 
 		virtual const std::shared_ptr<camera::CCamera>& GetMainCamera() const override;
+		virtual const std::shared_ptr<graphics::CDrawInfo>& GetDrawInfo() const override;
 	};
 }

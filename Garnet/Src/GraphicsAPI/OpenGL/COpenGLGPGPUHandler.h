@@ -19,7 +19,7 @@ namespace api
 
 		virtual bool Create() override;
 
-		virtual bool Dispatch(const glm::ivec3& GroupCount, float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
+		virtual bool Dispatch(const glm::ivec3& GroupCount, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
 			const std::shared_ptr<graphics::CDrawInfo>& DrawInfo) override;
 
 		virtual const std::shared_ptr<graphics::CMaterial>& GetComputeMaterial() override;

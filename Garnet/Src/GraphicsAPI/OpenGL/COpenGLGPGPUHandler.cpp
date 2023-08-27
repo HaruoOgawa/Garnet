@@ -23,14 +23,14 @@ namespace api
 		return true;
 	}
 
-	bool COpenGLGPGPUHandler::Dispatch(const glm::ivec3& GroupCount, float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
+	bool COpenGLGPGPUHandler::Dispatch(const glm::ivec3& GroupCount, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
 		const std::shared_ptr<graphics::CDrawInfo>& DrawInfo)
 	{
 		COpenGLMaterial* pSharedOpenGLMat = static_cast<COpenGLMaterial*>(m_ComputeMaterial.get());
 
 		pSharedOpenGLMat->SetActive();
 
-		if (!pSharedOpenGLMat->SetCommonUniform(SecondsTime, Camera, Projection, DrawInfo)) return false;
+		if (!pSharedOpenGLMat->SetCommonUniform(Camera, Projection, DrawInfo)) return false;
 		if (!pSharedOpenGLMat->BuildDrawBuffer(0)) return false;
 
 		glDispatchCompute(GroupCount.x, GroupCount.y, GroupCount.z);

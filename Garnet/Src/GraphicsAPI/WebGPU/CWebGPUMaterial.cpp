@@ -47,7 +47,7 @@ namespace api
 		return true;
 	}
 
-	bool CWebGPUMaterial::SetCommonUniform(float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo)
+	bool CWebGPUMaterial::SetCommonUniform(const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo)
 	{
 		glm::mat4 lightVPMat = DrawInfo->GetLightProjection()->GetPrejectionMatrix() * DrawInfo->GetLightCamera()->GetViewMatrix();
 
@@ -58,7 +58,8 @@ namespace api
 		SetUniformValue("lightDir", &DrawInfo->GetLightCamera()->GetViewDir()[0]);
 		SetUniformValue("lightColor", &DrawInfo->GetLightColor()[0]);
 		SetUniformValue("cameraPos", &Camera->GetPos()[0]);
-		SetUniformValue("time", &SecondsTime);
+		SetUniformValue("time", &glm::vec1(DrawInfo->GetSecondsTime())[0]);
+		SetUniformValue("deltaTime", &glm::vec1(DrawInfo->GetDeltaSecondsTime())[0]);
 		
 		return true;
 	}

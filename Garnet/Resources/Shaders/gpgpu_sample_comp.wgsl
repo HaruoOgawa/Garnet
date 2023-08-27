@@ -13,6 +13,7 @@ struct WriteOnlyTestBufferObject {
 
 struct ParamUBO {
     time: f32,
+    deltaTime: f32,
 }
 
 struct ReadOnlyTestBufferObject {

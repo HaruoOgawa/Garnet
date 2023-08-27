@@ -13,6 +13,9 @@ namespace graphics
 		std::shared_ptr<camera::CCamera> m_LightCamera;
 		glm::vec4 m_LightColor;
 		std::shared_ptr<projection::CProjection> m_LightProjection;
+
+		float m_SecondsTime;
+		float m_DeltaSecondsTime;
 	public:
 		CDrawInfo();
 		virtual ~CDrawInfo() = default;
@@ -24,5 +27,11 @@ namespace graphics
 		const glm::vec4& GetLightColor() const;
 
 		const std::shared_ptr<projection::CProjection>& GetLightProjection() const { return m_LightProjection; };
+
+		void SetSecondsTime(float SecondsTime);
+		float GetSecondsTime() const;
+		
+		void SetDeltaSecondsTime(float DeltaSecondsTime);
+		float GetDeltaSecondsTime() const;
 	};
 }
