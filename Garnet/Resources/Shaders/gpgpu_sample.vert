@@ -17,6 +17,10 @@ struct TestData
 {
     vec4 offset;
     vec4 color;
+    float AccumulateDeltaTime;
+    float pad0;
+    float pad1;
+    float pad2;
 };
 
 readonly layout(std430, binding = 1) buffer TestBufferObject

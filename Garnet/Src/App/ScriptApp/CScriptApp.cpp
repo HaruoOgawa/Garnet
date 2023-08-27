@@ -80,6 +80,9 @@ namespace app
 		// Prepare
 		if (!pGraphicsAPI->PrepareRender()) return false;
 
+		// Dispatch GPGPU
+		if (!m_ScriptScene->Dispatch(pGraphicsAPI, pLoadWorker, SecondsTime, m_MainCamera, m_Projection, m_DrawInfo)) return false;
+
 		// DefaultPass(SwapChain)
 		if (!pGraphicsAPI->BeginRender()) return false;
 

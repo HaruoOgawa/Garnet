@@ -4,7 +4,7 @@
 #include <glm/gtx/quaternion.hpp>
 #include "../../Graphics/CMaterial.h"
 #include <memory>
-
+#include <vector>
 #include <webgpu.h>
 
 namespace graphics{ class CMaterialCreateInfo; }
@@ -22,6 +22,7 @@ namespace api
 		// Shader
 		WGPUShaderModule m_VertexShaderModele;
 		WGPUShaderModule m_FragmentShaderModele;
+		WGPUShaderModule m_ComputeShaderModele;
 
 		// Uniform
 		std::vector<WGPUBuffer> m_WGPUUniformBufferList;
@@ -57,9 +58,14 @@ namespace api
 
 		const WGPUShaderModule& GetVertexShaderModele() { return m_VertexShaderModele; }
 		const WGPUShaderModule& GetFragmentShaderModele() { return m_FragmentShaderModele; }
+		const WGPUShaderModule& GetComputeShaderModele() { return m_ComputeShaderModele; }
 
 		const WGPUBindGroupLayout& GetBindGroupLayout() { return m_BindGroupLayout; }
 		const WGPUBindGroup& GetBindGroup() { return m_BindGroup; }
+
+		// Uniform
+		const std::vector<WGPUBuffer>& GetWGPUUniformBufferList() const { return m_WGPUUniformBufferList; };
+		const std::vector<uint32_t>& GetWGPUUniformBufferByteSizeList() const { return m_WGPUUniformBufferByteSizeList; }
 	};
 }
 #endif

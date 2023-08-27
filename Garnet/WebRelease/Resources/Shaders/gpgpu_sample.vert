@@ -22,7 +22,7 @@ struct TestData
 readonly layout(std430, binding = 1) buffer TestBufferObject
 {
     TestData data[];
-} rw_TBO;
+} r_TBO;
 
 layout(location = 0) out vec2 fragTexCoord;
 layout(location = 1) out vec4 fragColor;
@@ -38,9 +38,9 @@ void main() {
 #else
     int id = gl_InstanceIndex;
 #endif
-    vec3 offset = rw_TBO.data[id].offset.xyz;
+    vec3 offset = r_TBO.data[id].offset.xyz;
 
     gl_Position = ubo.proj * ubo.view * ubo.model * vec4(inPosition + offset, 1.0);
     fragTexCoord = inTexcoord;
-    fragColor = rw_TBO.data[id].color;
+    fragColor = r_TBO.data[id].color;
 }

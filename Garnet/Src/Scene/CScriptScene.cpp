@@ -63,6 +63,10 @@ namespace scene
 
 			InitData.push_back(offset.x); InitData.push_back(offset.y); InitData.push_back(offset.z); InitData.push_back(offset.w);
 			InitData.push_back(color.x); InitData.push_back(color.y); InitData.push_back(color.z); InitData.push_back(color.w);
+			InitData.push_back(0.0f);
+			InitData.push_back(0.0f);
+			InitData.push_back(0.0f);
+			InitData.push_back(0.0f);
 		}
 
 		// Compute Buffer
@@ -82,7 +86,7 @@ namespace scene
 
 			ComputeMaterial->AddShaderBuffer(ReadSSBO);
 
-			auto WriteSSBO = graphics::CMaterialCreateInfo::CreateShaderStorageBuffer({ graphics::SBindingLayout("WriteOnlyTestBufferObject", 2) });
+			auto WriteSSBO = graphics::CMaterialCreateInfo::CreateShaderStorageBuffer({ graphics::SBindingLayout("WriteOnlyTestBufferObject", 2, true) });
 			WriteSSBO->AddData("w_TBO", &InitData[0], sizeof(float) * static_cast<int>(InitData.size()), 2);
 
 			ComputeMaterial->AddShaderBuffer(WriteSSBO);
@@ -163,7 +167,15 @@ namespace scene
 			if (!m_TestObject->Update()) return false;
 		}
 
-		if (!m_GPGPUHandler || !m_GPGPUHandler->Dispatch(glm::ivec3(m_InstanceCount / 256, 1, 1), SecondsTime, Camera, Projection, DrawInfo)) return false;
+		return true;
+	}
+
+	bool CScriptScene::Dispatch(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, float SecondsTime, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
+		const std::shared_ptr<graphics::CDrawInfo>& DrawInfo)
+	{
+		if (!m_IsLoaded || !m_GPGPUHandler) return true;
+
+		if (!m_GPGPUHandler->Dispatch(glm::ivec3(m_InstanceCount / 256, 1, 1), SecondsTime, Camera, Projection, DrawInfo)) return false;
 
 		return true;
 	}

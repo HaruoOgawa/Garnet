@@ -1,6 +1,10 @@
 struct TestData {
     offset: vec4<f32>,
     color: vec4<f32>,
+    AccumulateDeltaTime: f32,
+    pad0_: f32,
+    pad1_: f32,
+    pad2_: f32,
 }
 
 struct TestBufferObject {

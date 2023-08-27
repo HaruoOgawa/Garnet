@@ -120,9 +120,9 @@ namespace api
 	}
 
 #ifdef USE_GPGPU
-	std::shared_ptr<graphics::IGPGPUHandler> CWebGPUAPI::CreateGPGPUHandler(const std::shared_ptr<graphics::CMaterial>& ComputeMaterial)
+	std::shared_ptr<api::IGPGPUHandler> CWebGPUAPI::CreateGPGPUHandler(const std::shared_ptr<graphics::CMaterial>& ComputeMaterial)
 	{
-		auto GPGPUHandler = std::make_shared<graphics::CWebGPUGPGPUHandler>(ComputeMaterial);
+		auto GPGPUHandler = std::make_shared<api::CWebGPUGPGPUHandler>(this, ComputeMaterial);
 
 		return GPGPUHandler;
 	}

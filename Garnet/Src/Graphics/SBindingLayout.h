@@ -9,14 +9,15 @@ namespace graphics
 		int BindingIndex = -1;
 		int ByteSize = 0;
 		int ByteOffset = 0;
+		bool IsGPGPUWritable = false;
 
 		SBindingLayout() :
-			BindingName(""), BindingIndex(-1), ByteSize(0), ByteOffset(0)
+			BindingName(""), BindingIndex(-1), ByteSize(0), ByteOffset(0), IsGPGPUWritable(false)
 		{
 		}
 
-		SBindingLayout(const std::string& Name, int Index):
-			BindingName(Name), BindingIndex(Index), ByteSize(0), ByteOffset(0)
+		SBindingLayout(const std::string& Name, int Index, bool Writable = false):
+			BindingName(Name), BindingIndex(Index), ByteSize(0), ByteOffset(0), IsGPGPUWritable(Writable)
 		{
 		}
 	};

@@ -22,8 +22,6 @@ add_executable(
 	../src/App/EAppType.h
 	../src/App/EditorApp/CEditorApp.cpp
 	../src/App/EditorApp/CEditorApp.h
-	../src/App/MainApp/CMainApp.cpp
-	../src/App/MainApp/CMainApp.h
 	../src/App/ScriptApp/CScriptApp.cpp
 	../src/App/ScriptApp/CScriptApp.h
 	../src/Camera/CCamera.cpp
@@ -61,6 +59,8 @@ add_executable(
 	../src/GraphicsAPI/ERenderPassFormat.h
 	../src/GraphicsAPI/WebGPU/CWebGPUAPI.cpp
 	../src/GraphicsAPI/WebGPU/CWebGPUAPI.h
+	../src/GraphicsAPI/WebGPU/CWebGPUGPGPUHandler.cpp
+	../src/GraphicsAPI/WebGPU/CWebGPUGPGPUHandler.h
 	../src/GraphicsAPI/WebGPU/CWebGPUMaterial.cpp
 	../src/GraphicsAPI/WebGPU/CWebGPUMaterial.h
 	../src/GraphicsAPI/WebGPU/CWebGPURenderer.cpp
@@ -76,6 +76,7 @@ add_executable(
 	../src/Interface/IApp.h
 	../src/Interface/IBuffer.h
 	../src/Interface/IDescriptor.h
+	../src/Interface/IGPGPUHandler.h
 	../src/Interface/IGraphicsAPI.h
 	../src/Interface/IRenderer.h
 	../src/Interface/IRenderPass.h

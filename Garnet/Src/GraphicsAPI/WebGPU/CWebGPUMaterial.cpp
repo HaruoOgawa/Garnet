@@ -15,6 +15,7 @@ namespace api
 		m_pGraphicsAPI(pGraphicsAPI),
 		m_VertexShaderModele(nullptr),
 		m_FragmentShaderModele(nullptr),
+		m_ComputeShaderModele(nullptr),
 		m_BindGroupLayout(nullptr),
 		m_BindGroup(nullptr),
 
@@ -71,6 +72,9 @@ namespace api
 	{
 		for (int i = 0; i < m_ShaderBufferList.size(); i++)
 		{
+			// SharedBufferは処理しない
+			if (m_ShaderBufferList[i]->GetSharedBufferParam().IsShared) continue;
+
 			auto& UniformBuffer = m_ShaderBufferList[i];
 			auto UniformBufferByteSize = static_cast<uint64_t>(m_WGPUUniformBufferByteSizeList[i]);
 			const auto& UniformDesc = UniformBuffer->GetDescriptor();
@@ -111,18 +115,24 @@ namespace api
 		if (createInfo->GetShaderType() == graphics::EShaderType::SPIRV)
 		{
 			const auto& VertexShaderData = createInfo->GetVertexShaderCode();
-			m_VertexShaderModele = CreateShaderModuleFromSPIRV(VertexShaderData);
+			if (!VertexShaderData.empty()) m_VertexShaderModele = CreateShaderModuleFromSPIRV(VertexShaderData);
 
 			const auto& FragmentShaderCode = createInfo->GetFragmentShaderCode();
-			m_FragmentShaderModele = CreateShaderModuleFromSPIRV(FragmentShaderCode);
+			if(!FragmentShaderCode.empty()) m_FragmentShaderModele = CreateShaderModuleFromSPIRV(FragmentShaderCode);
+			
+			const auto& ComputeShaderCode = createInfo->GetComputeShaderCode();
+			if(!ComputeShaderCode.empty()) m_ComputeShaderModele = CreateShaderModuleFromSPIRV(ComputeShaderCode);
 		}
 		else if (createInfo->GetShaderType() == graphics::EShaderType::WGSL)
 		{
 			const auto& VertexShaderData = createInfo->GetVertexShaderCode();
-			m_VertexShaderModele = CreateShaderModuleFromWGSL(std::string(&VertexShaderData[0], &VertexShaderData[0] + VertexShaderData.size()));
+			if (!VertexShaderData.empty()) m_VertexShaderModele = CreateShaderModuleFromWGSL(std::string(&VertexShaderData[0], &VertexShaderData[0] + VertexShaderData.size()));
 
 			const auto& FragmentShaderCode = createInfo->GetFragmentShaderCode();
-			m_FragmentShaderModele = CreateShaderModuleFromWGSL(std::string(&FragmentShaderCode[0], &FragmentShaderCode[0] + FragmentShaderCode.size()));
+			if (!FragmentShaderCode.empty()) m_FragmentShaderModele = CreateShaderModuleFromWGSL(std::string(&FragmentShaderCode[0], &FragmentShaderCode[0] + FragmentShaderCode.size()));
+			
+			const auto& ComputeShaderCode = createInfo->GetComputeShaderCode();
+			if (!ComputeShaderCode.empty()) m_ComputeShaderModele = CreateShaderModuleFromWGSL(std::string(&ComputeShaderCode[0], &ComputeShaderCode[0] + ComputeShaderCode.size()));
 		}
 		else
 		{
@@ -136,6 +146,9 @@ namespace api
 	{
 		for (const auto& Buffer : m_ShaderBufferList)
 		{
+			// SharedBufferは処理しない
+			if (Buffer->GetSharedBufferParam().IsShared) continue;
+
 			const auto& Data = Buffer->GetData();
 
 			WGPUBuffer UniformBuffer;
@@ -176,13 +189,22 @@ namespace api
 				
 				if (Buffer->GetBufferType() == graphics::EBufferType::UNIFORM)
 				{
-					bindingLayout.visibility = WGPUShaderStage_Vertex | WGPUShaderStage_Fragment; // アクセス権限。ここではおそらく頂点シェーダーとフラグメントシェーダーのみ読み取り可
+					bindingLayout.visibility = WGPUShaderStage_Vertex | WGPUShaderStage_Fragment | WGPUShaderStage_Compute; // アクセス権限。ここではおそらく頂点シェーダーとフラグメントシェーダーのみ読み取り可
 					bindingLayout.buffer.type = WGPUBufferBindingType_Uniform; // バインド先のバッファの種類
 				}
 				else if (Buffer->GetBufferType() == graphics::EBufferType::SHADERSTORAGE)
 				{
-					bindingLayout.visibility = WGPUShaderStage_Vertex | WGPUShaderStage_Fragment;
-					bindingLayout.buffer.type = WGPUBufferBindingType_ReadOnlyStorage; // Compute Shader以外に渡すSSBOの場合はReadOnlyのものを使用する必要がある
+					if (Layout.second.IsGPGPUWritable) // 読み書き可能なGPGPU用のバッファ
+					{
+						// WGPUBufferBindingType_StorageはWGPUShaderStage_Computeだけに割り当てることができｒｙ
+						bindingLayout.visibility = WGPUShaderStage_Compute;
+						bindingLayout.buffer.type = WGPUBufferBindingType_Storage; 
+					}
+					else
+					{
+						bindingLayout.visibility = WGPUShaderStage_Vertex | WGPUShaderStage_Fragment | WGPUShaderStage_Compute;
+						bindingLayout.buffer.type = WGPUBufferBindingType_ReadOnlyStorage; // 基本的にStorage BufferはReadOnly. ComputeのみRead_Writeが使える
+					}
 				}
 
 				bindingLayout.buffer.minBindingSize = Layout.second.ByteSize; // データ一つ当たりのサイズかな???
@@ -256,6 +278,9 @@ namespace api
 		std::vector<WGPUBindGroupEntry> bindingList;
 		for (int i = 0; i < m_ShaderBufferList.size(); i++)
 		{
+			// 共有バッファ
+			const auto& SharedBufferParam = m_ShaderBufferList[i]->GetSharedBufferParam();
+
 			const auto& Buffer = m_ShaderBufferList[i];
 			for (const auto& Layout : Buffer->GetBindingLayoutList())
 			{
@@ -263,12 +288,34 @@ namespace api
 				
 				binding.nextInChain = nullptr; // 拡張機
 				binding.binding = Layout.second.BindingIndex;
-				binding.buffer = m_WGPUUniformBufferList[i];
+
+				if (SharedBufferParam.IsShared) // バッファを他のマテリアルと共有する
+				{
+					CWebGPUMaterial* pSharedWebGPUMat = static_cast<CWebGPUMaterial*>(SharedBufferParam.SharedBufferMaterial.get());
+
+					binding.buffer = pSharedWebGPUMat->GetWGPUUniformBufferList()[SharedBufferParam.BufferIndex];
+				}
+				else // 通常のバッファ使用
+				{
+					binding.buffer = m_WGPUUniformBufferList[i];
+				}
+				
 				binding.offset = Layout.second.ByteOffset;
 				binding.size = Layout.second.ByteSize;
 
 				bindingList.push_back(binding);
-				m_BindingRefSizeList.push_back(m_WGPUUniformBufferByteSizeList[i]);
+
+				if (SharedBufferParam.IsShared) // バッファを他のマテリアルと共有する
+				{
+					CWebGPUMaterial* pSharedWebGPUMat = static_cast<CWebGPUMaterial*>(SharedBufferParam.SharedBufferMaterial.get());
+
+					m_BindingRefSizeList.push_back(pSharedWebGPUMat->GetWGPUUniformBufferByteSizeList()[SharedBufferParam.BufferIndex]);
+				}
+				else
+				{
+					m_BindingRefSizeList.push_back(m_WGPUUniformBufferByteSizeList[i]);
+				}
+				
 			}
 		}
 
