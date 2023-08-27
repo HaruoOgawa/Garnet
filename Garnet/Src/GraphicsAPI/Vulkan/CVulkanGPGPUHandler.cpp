@@ -1,8 +1,8 @@
-#ifdef USE_GPGPU
+#if defined(USE_GPGPU) && defined(USE_VULKAN)
 #include "CVulkanGPGPUHandler.h"
 #include "CVulkanMaterial.h"
 
-namespace graphics
+namespace api
 {
 	CVulkanGPGPUHandler::CVulkanGPGPUHandler(api::CVulkanAPI* pGraphicsAPI, const std::shared_ptr<graphics::CMaterial>& ComputeMaterial):
 		m_pGraphicsAPI(pGraphicsAPI),

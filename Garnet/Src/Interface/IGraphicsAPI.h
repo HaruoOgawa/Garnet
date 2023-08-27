@@ -28,13 +28,14 @@ namespace graphics
 {
 	class CMaterial;
 	class CTexture;
-	class IGPGPUHandler;
 	enum class ETextureType;
 	class CMaterialCreateInfo;
 }
 
 namespace api
 {
+	class IGPGPUHandler;
+
 	class IGraphicsAPI
 	{
 	public:
@@ -49,7 +50,7 @@ namespace api
 		virtual std::shared_ptr<graphics::CMaterial> CreateMaterial(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo) = 0;
 		virtual std::shared_ptr<graphics::CTexture> CreateTexture(bool UseMipMap = false) = 0;
 #ifdef USE_GPGPU
-		virtual std::shared_ptr<graphics::IGPGPUHandler> CreateGPGPUHandler(const std::shared_ptr<graphics::CMaterial>& ComputeMaterial) = 0;
+		virtual std::shared_ptr<api::IGPGPUHandler> CreateGPGPUHandler(const std::shared_ptr<graphics::CMaterial>& ComputeMaterial) = 0;
 #endif // USE_GPGPU
 		virtual bool Resize(int Width, int Height) = 0;
 

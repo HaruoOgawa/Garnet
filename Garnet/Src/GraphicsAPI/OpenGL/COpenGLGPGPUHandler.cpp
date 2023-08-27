@@ -1,5 +1,5 @@
+#if defined(USE_GPGPU) && defined(USE_OPENGL)
 #include "COpenGLGPGPUHandler.h"
 
-#ifdef USE_GPGPU
 
-#endif // USE_GPGPU
+#endif // USE_GPGPU && USE_OPENGL

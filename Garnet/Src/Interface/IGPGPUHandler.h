@@ -5,7 +5,7 @@
 #include <glm/glm.hpp>
 #include "../Graphics/CMaterial.h"
 
-namespace graphics
+namespace api
 {
 	class IGPGPUHandler
 	{

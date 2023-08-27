@@ -144,9 +144,9 @@ namespace api
 	}
 
 #ifdef USE_GPGPU
-	std::shared_ptr<graphics::IGPGPUHandler> CVulkanAPI::CreateGPGPUHandler(const std::shared_ptr<graphics::CMaterial>& ComputeMaterial)
+	std::shared_ptr<api::IGPGPUHandler> CVulkanAPI::CreateGPGPUHandler(const std::shared_ptr<graphics::CMaterial>& ComputeMaterial)
 	{
-		auto GPGPUHandler = std::make_shared<graphics::CVulkanGPGPUHandler>(this, ComputeMaterial);
+		auto GPGPUHandler = std::make_shared<api::CVulkanGPGPUHandler>(this, ComputeMaterial);
 
 		return GPGPUHandler;
 	}

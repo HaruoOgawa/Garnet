@@ -1,9 +1,9 @@
 #pragma once
-#ifdef USE_GPGPU
+#if defined(USE_GPGPU) && defined(USE_VULKAN)
 #include "../../Interface/IGPGPUHandler.h"
 #include "CVulkanAPI.h"
 
-namespace graphics
+namespace api
 {
 	class CVulkanGPGPUHandler : public IGPGPUHandler
 	{
