@@ -8,7 +8,8 @@ namespace api
 		m_pGraphicsAPI(pGraphicsAPI),
 		m_ComputeMaterial(ComputeMaterial),
 		m_ComputePipelineLayout(nullptr),
-		m_ComputePipeline(nullptr)
+		m_ComputePipeline(nullptr),
+		m_MinDeltaSecondsTime(1.0f / 60.0f)
 	{
 	}
 
@@ -68,8 +69,15 @@ namespace api
 		api::CVulkanMaterial* pVulkanMat = static_cast<api::CVulkanMaterial*>(m_ComputeMaterial.get());
 
 		// データの更新
+		// DeltaTimeが毎フレーム大きくなったり小さくなったりすると、シミュレーションがガタガタするので0.001000f以上の最小の数を固定のdeltaTimeとする
+		const float CurrentDeltaSecondsTime = DrawInfo->GetDeltaSecondsTime();
+		m_MinDeltaSecondsTime = glm::max(0.001000f, glm::min(CurrentDeltaSecondsTime, m_MinDeltaSecondsTime));
+		DrawInfo->SetDeltaSecondsTime(m_MinDeltaSecondsTime);
+
 		if (!pVulkanMat->SetCommonUniform(Camera, Projection, DrawInfo)) return false;
 		if (!pVulkanMat->BuildDrawBuffer(0)) return false;
+
+		DrawInfo->SetDeltaSecondsTime(CurrentDeltaSecondsTime); // DeltaTimeを元に戻す
 
 		// コマンドバッファの記録開始
 		if (!BeginRecordCommandBuffer()) return false;
