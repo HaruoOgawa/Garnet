@@ -120,6 +120,25 @@ namespace api
 
 	void CVulkanMaterial::Release()
 	{
+		// ShaderModuleの破棄
+		if (m_VertShaderModule)
+		{
+			vkDestroyShaderModule(m_pGraphicsAPI->GetLogicalDevice(), m_VertShaderModule, nullptr);
+			m_VertShaderModule = nullptr;
+		}
+		
+		if (m_FragShaderModule)
+		{
+			vkDestroyShaderModule(m_pGraphicsAPI->GetLogicalDevice(), m_FragShaderModule, nullptr);
+			m_FragShaderModule = nullptr;
+		}
+		
+		if (m_ComputeShaderModule)
+		{
+			vkDestroyShaderModule(m_pGraphicsAPI->GetLogicalDevice(), m_ComputeShaderModule, nullptr);
+			m_ComputeShaderModule = nullptr;
+		}
+
 		// ユニフォームの破棄
 		for (size_t i = 0; i < m_pGraphicsAPI->GetMaxFramesInFlight(); i++)
 		{

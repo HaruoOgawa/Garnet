@@ -6,15 +6,35 @@ namespace api
 {
 	CVulkanGPGPUHandler::CVulkanGPGPUHandler(api::CVulkanAPI* pGraphicsAPI, const std::shared_ptr<graphics::CMaterial>& ComputeMaterial):
 		m_pGraphicsAPI(pGraphicsAPI),
+		m_MinDeltaSecondsTime(1.0f / 60.0f),
 		m_ComputeMaterial(ComputeMaterial),
+
 		m_ComputePipelineLayout(nullptr),
 		m_ComputePipeline(nullptr),
-		m_MinDeltaSecondsTime(1.0f / 60.0f)
+		m_CommandPool(nullptr),
+		m_CommandBuffer(nullptr)
 	{
 	}
 
 	CVulkanGPGPUHandler::~CVulkanGPGPUHandler()
 	{
+		if (m_ComputePipelineLayout)
+		{
+			vkDestroyPipelineLayout(m_pGraphicsAPI->GetLogicalDevice(), m_ComputePipelineLayout, nullptr);
+			m_ComputePipelineLayout = nullptr;
+		}
+
+		if (m_ComputePipeline)
+		{
+			vkDestroyPipeline(m_pGraphicsAPI->GetLogicalDevice(), m_ComputePipeline, nullptr);
+			m_ComputePipeline = nullptr;
+		}
+
+		if (m_CommandPool)
+		{
+			vkDestroyCommandPool(m_pGraphicsAPI->GetLogicalDevice(), m_CommandPool, nullptr);
+			m_CommandPool = nullptr;
+		}
 	}
 
 	const std::shared_ptr<graphics::CMaterial>& CVulkanGPGPUHandler::GetComputeMaterial()
@@ -130,22 +150,18 @@ namespace api
 		}
 
 		// コマンドバッファの送信
+		const auto& Semaphore = m_pGraphicsAPI->GetComputeFlightSemaphore();
+		const auto& Fence = m_pGraphicsAPI->GetComputeInFlightFence();
+		VkSemaphore waitSemaphore[] = { m_pGraphicsAPI->GetRenderFlightSemaphore()}; // セマフォで待つ
+
 		VkSubmitInfo submitInfo{};
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-
+		submitInfo.pWaitSemaphores = waitSemaphore;
+		submitInfo.waitSemaphoreCount = 1;
 		submitInfo.commandBufferCount = 1;
 		submitInfo.pCommandBuffers = &m_CommandBuffer;
-
-		submitInfo.waitSemaphoreCount = 0;
-		submitInfo.pWaitSemaphores = nullptr;
-		submitInfo.pWaitDstStageMask = nullptr;
-
-		const auto& Semaphore = m_pGraphicsAPI->GetComputeFlightSemaphore();
-
 		submitInfo.signalSemaphoreCount = 1;
 		submitInfo.pSignalSemaphores = &Semaphore;
-
-		const auto& Fence = m_pGraphicsAPI->GetComputeInFlightFence();
 
 		if (vkQueueSubmit(m_pGraphicsAPI->GetComputeQueue(), 1, &submitInfo, Fence) != VK_SUCCESS) // Compute Queueを実行
 		{

@@ -42,7 +42,7 @@ void main()
 
     w_TBO.data[id].AccumulateDeltaTime += ubo.deltaTime;
 
-    if(w_TBO.data[id].AccumulateDeltaTime >= (1.0 / 60.0))
+    if(w_TBO.data[id].AccumulateDeltaTime >= (1.0 / 120.0))
     {
         w_TBO.data[id].AccumulateDeltaTime = 0.0;
 

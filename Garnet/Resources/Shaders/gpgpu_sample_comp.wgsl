@@ -50,7 +50,7 @@ fn main_1() {
     w_TBO.data[_e31].AccumulateDeltaTime = (_e37 + _e33);
     let _e42 = id;
     let _e46 = w_TBO.data[_e42].AccumulateDeltaTime;
-    if (_e46 >= 0.01666666753590107) {
+    if (_e46 >= 0.008333333767950535) {
         let _e48 = id;
         w_TBO.data[_e48].AccumulateDeltaTime = 0.0;
         let _e52 = id;
