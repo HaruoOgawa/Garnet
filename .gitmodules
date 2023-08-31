@@ -1,0 +1,3 @@
+[submodule "Garnet/Src/Library/dawn"]
+	path = Garnet/Src/Library/dawn
+	url = https://dawn.googlesource.com/dawn
