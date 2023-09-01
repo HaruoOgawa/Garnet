@@ -40,5 +40,12 @@ void main()
     uint id = gl_GlobalInvocationID.x;
     float id_f = float(id);
 
-    w_TBO.data[id].offset.y += sin(ubo.time + rand(vec2(id_f, id_f + 12.394)) * 10.0) * 0.1; 
+    w_TBO.data[id].AccumulateDeltaTime += ubo.deltaTime;
+
+    if(w_TBO.data[id].AccumulateDeltaTime >= (1.0 / 120.0))
+    {
+        w_TBO.data[id].AccumulateDeltaTime = 0.0;
+
+        w_TBO.data[id].offset.y += sin(ubo.time + rand(vec2(id_f, id_f + 12.394)) * 10.0) * 0.1; 
+    }
 }

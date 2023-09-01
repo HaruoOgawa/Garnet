@@ -401,7 +401,7 @@ namespace api
 		WGPUDeviceDescriptor descriptor = {};
 		descriptor.nextInChain = nullptr; // 拡張機
 		descriptor.label = "Garnet Device"; // デバイスを判別するためのラベル
-		descriptor.requiredFeaturesCount = 0; // 使用することを指定するデバイスの特徴の数
+		descriptor.requiredFeatureCount = 0; // 使用することを指定するデバイスの特徴の数
 		descriptor.requiredLimits = nullptr; // ???
 		descriptor.defaultQueue.nextInChain = nullptr; // デフォルトコマンドキューの拡張機
 		descriptor.defaultQueue.label = "Default Queue"; // デフォルトコマンドキューの判別用ラベル
@@ -583,6 +583,8 @@ namespace api
 
 		// レンダーパスの設定
 		WGPURenderPassColorAttachment renderPassColorAttachment = {};
+		renderPassColorAttachment.nextInChain = nullptr;
+		renderPassColorAttachment.depthSlice = 0;
 		renderPassColorAttachment.view = NextTexture; // レンダリングの描画先テクスチャを指定
 		renderPassColorAttachment.resolveTarget = nullptr; // マルチサンプリングの設定
 		renderPassColorAttachment.loadOp = WGPULoadOp_Clear; // レンダー パスを実行する前にビューで実行するロード操作を示します。例えばクリア値に初期化するだったり

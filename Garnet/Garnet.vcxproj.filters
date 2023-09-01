@@ -1714,6 +1714,9 @@
     <None Include="Resources\Shaders\loadingbar.frag" />
     <None Include="Resources\Shaders\loadingbar.vert" />
     <None Include="Resources\Shaders\gpgpu_sample.comp" />
+    <None Include="Commands\CopyDawnLib.bat">
+      <Filter>ソース ファイル</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="EmscriptenBuild\CMakeLists.txt" />
