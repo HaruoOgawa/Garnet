@@ -4,7 +4,8 @@
 #include <vector>
 #include <map>
 
-#include <webgpu.h>
+#include <dawn/webgpu.h>
+#include <dawn/webgpu_cpp.h>
 
 namespace api
 {

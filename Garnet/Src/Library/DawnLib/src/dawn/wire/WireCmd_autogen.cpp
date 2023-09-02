@@ -85,7 +85,7 @@ struct WGPUAdapterPropertiesTransfer {
     uint64_t driverDescriptionStrlen;
     WGPUAdapterType adapterType;
     WGPUBackendType backendType;
-    WGPUBool compatibilityMode;
+    bool compatibilityMode;
 };
 
 
@@ -392,7 +392,7 @@ struct WGPUBufferBindingLayoutTransfer {
     bool hasNextInChain;
 
     WGPUBufferBindingType type;
-    WGPUBool hasDynamicOffset;
+    bool hasDynamicOffset;
     uint64_t minBindingSize;
 };
 
@@ -464,7 +464,7 @@ struct WGPUBufferDescriptorTransfer {
     bool has_label;
     WGPUBufferUsageFlags usage;
     uint64_t size;
-    WGPUBool mappedAtCreation;
+    bool mappedAtCreation;
 };
 
 
@@ -1060,14 +1060,14 @@ struct WGPUCopyTextureForBrowserOptionsTransfer {
                   "Record must be at most one of is_cmd, extensible, and chained.");
     bool hasNextInChain;
 
-    WGPUBool flipY;
-    WGPUBool needsColorSpaceConversion;
+    bool flipY;
+    bool needsColorSpaceConversion;
     WGPUAlphaMode srcAlphaMode;
     bool has_srcTransferFunctionParameters;
     bool has_conversionMatrix;
     bool has_dstTransferFunctionParameters;
     WGPUAlphaMode dstAlphaMode;
-    WGPUBool internalUsage;
+    bool internalUsage;
 };
 
 
@@ -1295,7 +1295,7 @@ struct WGPUDawnBufferDescriptorErrorInfoFromWireClientTransfer {
                   "Record must be at most one of is_cmd, extensible, and chained.");
     WGPUChainedStructTransfer chain;
 
-    WGPUBool outOfMemory;
+    bool outOfMemory;
 };
 
 static_assert(offsetof(WGPUDawnBufferDescriptorErrorInfoFromWireClientTransfer, chain) == 0);
@@ -1348,7 +1348,7 @@ struct WGPUDawnEncoderInternalUsageDescriptorTransfer {
                   "Record must be at most one of is_cmd, extensible, and chained.");
     WGPUChainedStructTransfer chain;
 
-    WGPUBool useInternalUsages;
+    bool useInternalUsages;
 };
 
 static_assert(offsetof(WGPUDawnEncoderInternalUsageDescriptorTransfer, chain) == 0);
@@ -1401,7 +1401,7 @@ struct WGPUDawnMultisampleStateRenderToSingleSampledTransfer {
                   "Record must be at most one of is_cmd, extensible, and chained.");
     WGPUChainedStructTransfer chain;
 
-    WGPUBool enabled;
+    bool enabled;
 };
 
 static_assert(offsetof(WGPUDawnMultisampleStateRenderToSingleSampledTransfer, chain) == 0);
@@ -1507,7 +1507,7 @@ struct WGPUDawnShaderModuleSPIRVOptionsDescriptorTransfer {
                   "Record must be at most one of is_cmd, extensible, and chained.");
     WGPUChainedStructTransfer chain;
 
-    WGPUBool allowNonUniformDerivatives;
+    bool allowNonUniformDerivatives;
 };
 
 static_assert(offsetof(WGPUDawnShaderModuleSPIRVOptionsDescriptorTransfer, chain) == 0);
@@ -2050,7 +2050,7 @@ struct WGPUMultisampleStateTransfer {
 
     uint32_t count;
     uint32_t mask;
-    WGPUBool alphaToCoverageEnabled;
+    bool alphaToCoverageEnabled;
 };
 
 
@@ -2340,77 +2340,12 @@ DAWN_DECLARE_UNUSED WireResult WGPUPipelineLayoutDescriptorDeserialize(
 }
 DAWN_UNUSED_FUNC(WGPUPipelineLayoutDescriptorDeserialize);
 
-struct WGPUPipelineLayoutStorageAttachmentTransfer {
-    static_assert(0 <= 1,
-                  "Record must be at most one of is_cmd, extensible, and chained.");
-    bool hasNextInChain;
-
-    uint64_t offset;
-    WGPUTextureFormat format;
-};
-
-
-DAWN_DECLARE_UNUSED size_t WGPUPipelineLayoutStorageAttachmentGetExtraRequiredSize(const WGPUPipelineLayoutStorageAttachment& record) {
-    DAWN_UNUSED(record);
-    size_t result = 0;
-
-    if (record.nextInChain != nullptr) {
-        result += GetChainedStructExtraRequiredSize(record.nextInChain);
-    }
-    return result;
-}
-// GetExtraRequiredSize isn't used for structures that are value members of other structures
-// because we assume they cannot contain pointers themselves.
-DAWN_UNUSED_FUNC(WGPUPipelineLayoutStorageAttachmentGetExtraRequiredSize);
-
-DAWN_DECLARE_UNUSED WireResult WGPUPipelineLayoutStorageAttachmentSerialize(
-    const WGPUPipelineLayoutStorageAttachment& record,
-    WGPUPipelineLayoutStorageAttachmentTransfer* transfer,
-    SerializeBuffer* buffer, const ObjectIdProvider& provider) {
-    DAWN_UNUSED(buffer);
-
-    if (record.nextInChain != nullptr) {
-        transfer->hasNextInChain = true;
-        WIRE_TRY(SerializeChainedStruct(record.nextInChain, buffer, provider));
-    } else {
-        transfer->hasNextInChain = false;
-    }
-
-    transfer->offset = record.offset;
-    transfer->format = record.format;
-
-    return WireResult::Success;
-}
-DAWN_UNUSED_FUNC(WGPUPipelineLayoutStorageAttachmentSerialize);
-
-DAWN_DECLARE_UNUSED WireResult WGPUPipelineLayoutStorageAttachmentDeserialize(
-    WGPUPipelineLayoutStorageAttachment* record,
-    const volatile WGPUPipelineLayoutStorageAttachmentTransfer* transfer,
-    DeserializeBuffer* deserializeBuffer,
-    DeserializeAllocator* allocator, const ObjectIdResolver& resolver) {
-    DAWN_UNUSED(allocator);
-
-
-    record->nextInChain = nullptr;
-    if (transfer->hasNextInChain) {
-        WIRE_TRY(DeserializeChainedStruct(&record->nextInChain, deserializeBuffer, allocator, resolver));
-    }
-
-    static_assert(sizeof(record->offset) >= sizeof(transfer->offset), "Deserialize assignment may not narrow.");
-    record->offset = transfer->offset;
-    static_assert(sizeof(record->format) >= sizeof(transfer->format), "Deserialize assignment may not narrow.");
-    record->format = transfer->format;
-
-    return WireResult::Success;
-}
-DAWN_UNUSED_FUNC(WGPUPipelineLayoutStorageAttachmentDeserialize);
-
 struct WGPUPrimitiveDepthClipControlTransfer {
     static_assert(0 <= 1,
                   "Record must be at most one of is_cmd, extensible, and chained.");
     WGPUChainedStructTransfer chain;
 
-    WGPUBool unclippedDepth;
+    bool unclippedDepth;
 };
 
 static_assert(offsetof(WGPUPrimitiveDepthClipControlTransfer, chain) == 0);
@@ -2540,7 +2475,7 @@ struct WGPUQuerySetDescriptorTransfer {
     bool has_label;
     WGPUQueryType type;
     uint32_t count;
-    uint64_t pipelineStatisticCount;
+    uint64_t pipelineStatisticsCount;
 };
 
 
@@ -2555,7 +2490,7 @@ DAWN_DECLARE_UNUSED size_t WGPUQuerySetDescriptorGetExtraRequiredSize(const WGPU
         result += Align(std::strlen(record.label), kWireBufferAlignment);
     }
     {
-        auto memberLength = record.pipelineStatisticCount;
+        auto memberLength = record.pipelineStatisticsCount;
         auto size = WireAlignSizeofN<WGPUPipelineStatisticName>(memberLength);
         ASSERT(size);
         result += *size;
@@ -2581,7 +2516,7 @@ DAWN_DECLARE_UNUSED WireResult WGPUQuerySetDescriptorSerialize(
 
     transfer->type = record.type;
     transfer->count = record.count;
-    transfer->pipelineStatisticCount = record.pipelineStatisticCount;
+    transfer->pipelineStatisticsCount = record.pipelineStatisticsCount;
     bool has_label = record.label != nullptr;
     transfer->has_label = has_label;
     if (has_label) {
@@ -2592,7 +2527,7 @@ DAWN_DECLARE_UNUSED WireResult WGPUQuerySetDescriptorSerialize(
         memcpy(stringInBuffer, record.label, transfer->labelStrlen);
     }
     {
-        auto memberLength = record.pipelineStatisticCount;
+        auto memberLength = record.pipelineStatisticsCount;
 
         WGPUPipelineStatisticName* memberBuffer;
         WIRE_TRY(buffer->NextN(memberLength, &memberBuffer));
@@ -2623,8 +2558,8 @@ DAWN_DECLARE_UNUSED WireResult WGPUQuerySetDescriptorDeserialize(
     record->type = transfer->type;
     static_assert(sizeof(record->count) >= sizeof(transfer->count), "Deserialize assignment may not narrow.");
     record->count = transfer->count;
-    if (transfer->pipelineStatisticCount > std::numeric_limits<size_t>::max()) return WireResult::FatalError;
-    record->pipelineStatisticCount = checked_cast<size_t>(transfer->pipelineStatisticCount);
+    if (transfer->pipelineStatisticsCount > std::numeric_limits<size_t>::max()) return WireResult::FatalError;
+    record->pipelineStatisticsCount = checked_cast<size_t>(transfer->pipelineStatisticsCount);
     bool has_label = transfer->has_label;
     record->label = nullptr;
     if (has_label) {
@@ -2644,7 +2579,7 @@ DAWN_DECLARE_UNUSED WireResult WGPUQuerySetDescriptorDeserialize(
         record->label = copiedString;
     }
     {
-        auto memberLength = record->pipelineStatisticCount;
+        auto memberLength = record->pipelineStatisticsCount;
         const volatile WGPUPipelineStatisticName* memberBuffer;
         WIRE_TRY(deserializeBuffer->ReadN(memberLength, &memberBuffer));
 
@@ -2847,11 +2782,11 @@ struct WGPURenderBundleEncoderDescriptorTransfer {
 
     uint64_t labelStrlen;
     bool has_label;
-    uint64_t colorFormatCount;
+    uint64_t colorFormatsCount;
     WGPUTextureFormat depthStencilFormat;
     uint32_t sampleCount;
-    WGPUBool depthReadOnly;
-    WGPUBool stencilReadOnly;
+    bool depthReadOnly;
+    bool stencilReadOnly;
 };
 
 
@@ -2866,7 +2801,7 @@ DAWN_DECLARE_UNUSED size_t WGPURenderBundleEncoderDescriptorGetExtraRequiredSize
         result += Align(std::strlen(record.label), kWireBufferAlignment);
     }
     {
-        auto memberLength = record.colorFormatCount;
+        auto memberLength = record.colorFormatsCount;
         auto size = WireAlignSizeofN<WGPUTextureFormat>(memberLength);
         ASSERT(size);
         result += *size;
@@ -2890,7 +2825,7 @@ DAWN_DECLARE_UNUSED WireResult WGPURenderBundleEncoderDescriptorSerialize(
         transfer->hasNextInChain = false;
     }
 
-    transfer->colorFormatCount = record.colorFormatCount;
+    transfer->colorFormatsCount = record.colorFormatsCount;
     transfer->depthStencilFormat = record.depthStencilFormat;
     transfer->sampleCount = record.sampleCount;
     transfer->depthReadOnly = record.depthReadOnly;
@@ -2905,7 +2840,7 @@ DAWN_DECLARE_UNUSED WireResult WGPURenderBundleEncoderDescriptorSerialize(
         memcpy(stringInBuffer, record.label, transfer->labelStrlen);
     }
     {
-        auto memberLength = record.colorFormatCount;
+        auto memberLength = record.colorFormatsCount;
 
         WGPUTextureFormat* memberBuffer;
         WIRE_TRY(buffer->NextN(memberLength, &memberBuffer));
@@ -2932,8 +2867,8 @@ DAWN_DECLARE_UNUSED WireResult WGPURenderBundleEncoderDescriptorDeserialize(
         WIRE_TRY(DeserializeChainedStruct(&record->nextInChain, deserializeBuffer, allocator, resolver));
     }
 
-    if (transfer->colorFormatCount > std::numeric_limits<size_t>::max()) return WireResult::FatalError;
-    record->colorFormatCount = checked_cast<size_t>(transfer->colorFormatCount);
+    if (transfer->colorFormatsCount > std::numeric_limits<size_t>::max()) return WireResult::FatalError;
+    record->colorFormatsCount = checked_cast<size_t>(transfer->colorFormatsCount);
     static_assert(sizeof(record->depthStencilFormat) >= sizeof(transfer->depthStencilFormat), "Deserialize assignment may not narrow.");
     record->depthStencilFormat = transfer->depthStencilFormat;
     static_assert(sizeof(record->sampleCount) >= sizeof(transfer->sampleCount), "Deserialize assignment may not narrow.");
@@ -2961,7 +2896,7 @@ DAWN_DECLARE_UNUSED WireResult WGPURenderBundleEncoderDescriptorDeserialize(
         record->label = copiedString;
     }
     {
-        auto memberLength = record->colorFormatCount;
+        auto memberLength = record->colorFormatsCount;
         const volatile WGPUTextureFormat* memberBuffer;
         WIRE_TRY(deserializeBuffer->ReadN(memberLength, &memberBuffer));
 
@@ -2987,11 +2922,11 @@ struct WGPURenderPassDepthStencilAttachmentTransfer {
     WGPULoadOp depthLoadOp;
     WGPUStoreOp depthStoreOp;
     float depthClearValue;
-    WGPUBool depthReadOnly;
+    bool depthReadOnly;
     WGPULoadOp stencilLoadOp;
     WGPUStoreOp stencilStoreOp;
     uint32_t stencilClearValue;
-    WGPUBool stencilReadOnly;
+    bool stencilReadOnly;
 };
 
 
@@ -3172,8 +3107,8 @@ struct WGPURequestAdapterOptionsTransfer {
     ObjectId compatibleSurface;
     WGPUPowerPreference powerPreference;
     WGPUBackendType backendType;
-    WGPUBool forceFallbackAdapter;
-    WGPUBool compatibilityMode;
+    bool forceFallbackAdapter;
+    bool compatibilityMode;
 };
 
 
@@ -4085,7 +4020,7 @@ struct WGPUTextureBindingLayoutTransfer {
 
     WGPUTextureSampleType sampleType;
     WGPUTextureViewDimension viewDimension;
-    WGPUBool multisampled;
+    bool multisampled;
 };
 
 
@@ -4886,7 +4821,7 @@ struct WGPUDepthStencilStateTransfer {
     bool hasNextInChain;
 
     WGPUTextureFormat format;
-    WGPUBool depthWriteEnabled;
+    bool depthWriteEnabled;
     WGPUCompareFunction depthCompare;
     WGPUStencilFaceStateTransfer stencilFront;
     WGPUStencilFaceStateTransfer stencilBack;
@@ -4994,9 +4929,9 @@ struct WGPUExternalTextureDescriptorTransfer {
     ObjectId plane1;
     WGPUOrigin2DTransfer visibleOrigin;
     WGPUExtent2DTransfer visibleSize;
-    WGPUBool doYuvToRgbConversionOnly;
+    bool doYuvToRgbConversionOnly;
     bool has_yuvToRgbConversionMatrix;
-    WGPUBool flipY;
+    bool flipY;
     WGPUExternalTextureRotation rotation;
 };
 
@@ -5444,95 +5379,6 @@ DAWN_DECLARE_UNUSED WireResult WGPUImageCopyTextureDeserialize(
 }
 DAWN_UNUSED_FUNC(WGPUImageCopyTextureDeserialize);
 
-struct WGPUPipelineLayoutPixelLocalStorageTransfer {
-    static_assert(0 <= 1,
-                  "Record must be at most one of is_cmd, extensible, and chained.");
-    WGPUChainedStructTransfer chain;
-
-    uint64_t totalPixelLocalStorageSize;
-    uint64_t storageAttachmentCount;
-};
-
-static_assert(offsetof(WGPUPipelineLayoutPixelLocalStorageTransfer, chain) == 0);
-
-DAWN_DECLARE_UNUSED size_t WGPUPipelineLayoutPixelLocalStorageGetExtraRequiredSize(const WGPUPipelineLayoutPixelLocalStorage& record) {
-    DAWN_UNUSED(record);
-    size_t result = 0;
-
-    {
-        auto memberLength = record.storageAttachmentCount;
-        auto size = WireAlignSizeofN<WGPUPipelineLayoutStorageAttachmentTransfer>(memberLength);
-        ASSERT(size);
-        result += *size;
-        for (decltype(memberLength) i = 0; i < memberLength; ++i) {
-            result += WGPUPipelineLayoutStorageAttachmentGetExtraRequiredSize(record.storageAttachments[i]);
-        }
-    }
-    return result;
-}
-// GetExtraRequiredSize isn't used for structures that are value members of other structures
-// because we assume they cannot contain pointers themselves.
-DAWN_UNUSED_FUNC(WGPUPipelineLayoutPixelLocalStorageGetExtraRequiredSize);
-
-DAWN_DECLARE_UNUSED WireResult WGPUPipelineLayoutPixelLocalStorageSerialize(
-    const WGPUPipelineLayoutPixelLocalStorage& record,
-    WGPUPipelineLayoutPixelLocalStorageTransfer* transfer,
-    SerializeBuffer* buffer, const ObjectIdProvider& provider) {
-    DAWN_UNUSED(buffer);
-
-    ASSERT(transfer->chain.sType == WGPUSType_PipelineLayoutPixelLocalStorage);
-    ASSERT(transfer->chain.hasNext == (record.chain.next != nullptr));
-
-    transfer->totalPixelLocalStorageSize = record.totalPixelLocalStorageSize;
-    transfer->storageAttachmentCount = record.storageAttachmentCount;
-    {
-        auto memberLength = record.storageAttachmentCount;
-
-        WGPUPipelineLayoutStorageAttachmentTransfer* memberBuffer;
-        WIRE_TRY(buffer->NextN(memberLength, &memberBuffer));
-
-        for (decltype(memberLength) i = 0; i < memberLength; ++i) {
-            WIRE_TRY(WGPUPipelineLayoutStorageAttachmentSerialize(record.storageAttachments[i], &memberBuffer[i], buffer, provider));
-        }
-    }
-
-    return WireResult::Success;
-}
-DAWN_UNUSED_FUNC(WGPUPipelineLayoutPixelLocalStorageSerialize);
-
-DAWN_DECLARE_UNUSED WireResult WGPUPipelineLayoutPixelLocalStorageDeserialize(
-    WGPUPipelineLayoutPixelLocalStorage* record,
-    const volatile WGPUPipelineLayoutPixelLocalStorageTransfer* transfer,
-    DeserializeBuffer* deserializeBuffer,
-    DeserializeAllocator* allocator, const ObjectIdResolver& resolver) {
-    DAWN_UNUSED(allocator);
-
-
-    ASSERT(record->chain.sType == WGPUSType_PipelineLayoutPixelLocalStorage);
-    ASSERT(record->chain.next == nullptr);
-
-    if (transfer->totalPixelLocalStorageSize > std::numeric_limits<size_t>::max()) return WireResult::FatalError;
-    record->totalPixelLocalStorageSize = checked_cast<size_t>(transfer->totalPixelLocalStorageSize);
-    if (transfer->storageAttachmentCount > std::numeric_limits<size_t>::max()) return WireResult::FatalError;
-    record->storageAttachmentCount = checked_cast<size_t>(transfer->storageAttachmentCount);
-    {
-        auto memberLength = record->storageAttachmentCount;
-        const volatile WGPUPipelineLayoutStorageAttachmentTransfer* memberBuffer;
-        WIRE_TRY(deserializeBuffer->ReadN(memberLength, &memberBuffer));
-
-        WGPUPipelineLayoutStorageAttachment* copiedMembers;
-        WIRE_TRY(GetSpace(allocator, memberLength, &copiedMembers));
-        record->storageAttachments = copiedMembers;
-
-        for (decltype(memberLength) i = 0; i < memberLength; ++i) {
-            WIRE_TRY(WGPUPipelineLayoutStorageAttachmentDeserialize(&copiedMembers[i], &memberBuffer[i], deserializeBuffer, allocator, resolver));
-        }
-    }
-
-    return WireResult::Success;
-}
-DAWN_UNUSED_FUNC(WGPUPipelineLayoutPixelLocalStorageDeserialize);
-
 struct WGPUProgrammableStageDescriptorTransfer {
     static_assert(0 <= 1,
                   "Record must be at most one of is_cmd, extensible, and chained.");
@@ -5661,7 +5507,6 @@ struct WGPURenderPassColorAttachmentTransfer {
     bool hasNextInChain;
 
     ObjectId view;
-    uint32_t depthSlice;
     ObjectId resolveTarget;
     WGPULoadOp loadOp;
     WGPUStoreOp storeOp;
@@ -5699,7 +5544,6 @@ DAWN_DECLARE_UNUSED WireResult WGPURenderPassColorAttachmentSerialize(
     }
 
     WIRE_TRY(provider.GetOptionalId(record.view, &transfer->view));
-    transfer->depthSlice = record.depthSlice;
     WIRE_TRY(provider.GetOptionalId(record.resolveTarget, &transfer->resolveTarget));
     transfer->loadOp = record.loadOp;
     transfer->storeOp = record.storeOp;
@@ -5723,8 +5567,6 @@ DAWN_DECLARE_UNUSED WireResult WGPURenderPassColorAttachmentDeserialize(
     }
 
     WIRE_TRY(resolver.GetOptionalFromId(transfer->view, &record->view));
-    static_assert(sizeof(record->depthSlice) >= sizeof(transfer->depthSlice), "Deserialize assignment may not narrow.");
-    record->depthSlice = transfer->depthSlice;
     WIRE_TRY(resolver.GetOptionalFromId(transfer->resolveTarget, &record->resolveTarget));
     static_assert(sizeof(record->loadOp) >= sizeof(transfer->loadOp), "Deserialize assignment may not narrow.");
     record->loadOp = transfer->loadOp;
@@ -5736,85 +5578,6 @@ DAWN_DECLARE_UNUSED WireResult WGPURenderPassColorAttachmentDeserialize(
     return WireResult::Success;
 }
 DAWN_UNUSED_FUNC(WGPURenderPassColorAttachmentDeserialize);
-
-struct WGPURenderPassStorageAttachmentTransfer {
-    static_assert(0 <= 1,
-                  "Record must be at most one of is_cmd, extensible, and chained.");
-    bool hasNextInChain;
-
-    uint64_t offset;
-    ObjectId storage;
-    WGPULoadOp loadOp;
-    WGPUStoreOp storeOp;
-    WGPUColorTransfer clearValue;
-};
-
-
-DAWN_DECLARE_UNUSED size_t WGPURenderPassStorageAttachmentGetExtraRequiredSize(const WGPURenderPassStorageAttachment& record) {
-    DAWN_UNUSED(record);
-    size_t result = 0;
-
-    if (record.nextInChain != nullptr) {
-        result += GetChainedStructExtraRequiredSize(record.nextInChain);
-    }
-    {
-        result += WGPUColorGetExtraRequiredSize(record.clearValue);
-    }
-    return result;
-}
-// GetExtraRequiredSize isn't used for structures that are value members of other structures
-// because we assume they cannot contain pointers themselves.
-DAWN_UNUSED_FUNC(WGPURenderPassStorageAttachmentGetExtraRequiredSize);
-
-DAWN_DECLARE_UNUSED WireResult WGPURenderPassStorageAttachmentSerialize(
-    const WGPURenderPassStorageAttachment& record,
-    WGPURenderPassStorageAttachmentTransfer* transfer,
-    SerializeBuffer* buffer, const ObjectIdProvider& provider) {
-    DAWN_UNUSED(buffer);
-
-    if (record.nextInChain != nullptr) {
-        transfer->hasNextInChain = true;
-        WIRE_TRY(SerializeChainedStruct(record.nextInChain, buffer, provider));
-    } else {
-        transfer->hasNextInChain = false;
-    }
-
-    transfer->offset = record.offset;
-    WIRE_TRY(provider.GetId(record.storage, &transfer->storage));
-    transfer->loadOp = record.loadOp;
-    transfer->storeOp = record.storeOp;
-    WIRE_TRY(WGPUColorSerialize(record.clearValue, &transfer->clearValue, buffer));
-
-    return WireResult::Success;
-}
-DAWN_UNUSED_FUNC(WGPURenderPassStorageAttachmentSerialize);
-
-DAWN_DECLARE_UNUSED WireResult WGPURenderPassStorageAttachmentDeserialize(
-    WGPURenderPassStorageAttachment* record,
-    const volatile WGPURenderPassStorageAttachmentTransfer* transfer,
-    DeserializeBuffer* deserializeBuffer,
-    DeserializeAllocator* allocator, const ObjectIdResolver& resolver) {
-    DAWN_UNUSED(allocator);
-
-
-    record->nextInChain = nullptr;
-    if (transfer->hasNextInChain) {
-        WIRE_TRY(DeserializeChainedStruct(&record->nextInChain, deserializeBuffer, allocator, resolver));
-    }
-
-    static_assert(sizeof(record->offset) >= sizeof(transfer->offset), "Deserialize assignment may not narrow.");
-    record->offset = transfer->offset;
-    WIRE_TRY(resolver.GetFromId(transfer->storage, &record->storage));
-    static_assert(sizeof(record->loadOp) >= sizeof(transfer->loadOp), "Deserialize assignment may not narrow.");
-    record->loadOp = transfer->loadOp;
-    static_assert(sizeof(record->storeOp) >= sizeof(transfer->storeOp), "Deserialize assignment may not narrow.");
-    record->storeOp = transfer->storeOp;
-    static_assert(sizeof(record->clearValue) == sizeof(transfer->clearValue), "Deserialize memcpy size must match.");
-    memcpy(&record->clearValue, const_cast<const WGPUColorTransfer*>(&transfer->clearValue), sizeof(WGPUColorTransfer));
-
-    return WireResult::Success;
-}
-DAWN_UNUSED_FUNC(WGPURenderPassStorageAttachmentDeserialize);
 
 struct WGPURequiredLimitsTransfer {
     static_assert(0 <= 1,
@@ -6515,7 +6278,7 @@ struct WGPUDeviceDescriptorTransfer {
 
     uint64_t labelStrlen;
     bool has_label;
-    uint64_t requiredFeatureCount;
+    uint64_t requiredFeaturesCount;
     bool has_requiredLimits;
     WGPUQueueDescriptorTransfer defaultQueue;
 };
@@ -6532,7 +6295,7 @@ DAWN_DECLARE_UNUSED size_t WGPUDeviceDescriptorGetExtraRequiredSize(const WGPUDe
         result += Align(std::strlen(record.label), kWireBufferAlignment);
     }
     {
-        auto memberLength = record.requiredFeatureCount;
+        auto memberLength = record.requiredFeaturesCount;
         auto size = WireAlignSizeofN<WGPUFeatureName>(memberLength);
         ASSERT(size);
         result += *size;
@@ -6568,7 +6331,7 @@ DAWN_DECLARE_UNUSED WireResult WGPUDeviceDescriptorSerialize(
         transfer->hasNextInChain = false;
     }
 
-    transfer->requiredFeatureCount = record.requiredFeatureCount;
+    transfer->requiredFeaturesCount = record.requiredFeaturesCount;
     WIRE_TRY(WGPUQueueDescriptorSerialize(record.defaultQueue, &transfer->defaultQueue, buffer, provider));
     if (record.deviceLostCallback != nullptr) return WireResult::FatalError;
     if (record.deviceLostUserdata != nullptr) return WireResult::FatalError;
@@ -6582,7 +6345,7 @@ DAWN_DECLARE_UNUSED WireResult WGPUDeviceDescriptorSerialize(
         memcpy(stringInBuffer, record.label, transfer->labelStrlen);
     }
     {
-        auto memberLength = record.requiredFeatureCount;
+        auto memberLength = record.requiredFeaturesCount;
 
         WGPUFeatureName* memberBuffer;
         WIRE_TRY(buffer->NextN(memberLength, &memberBuffer));
@@ -6621,8 +6384,8 @@ DAWN_DECLARE_UNUSED WireResult WGPUDeviceDescriptorDeserialize(
         WIRE_TRY(DeserializeChainedStruct(&record->nextInChain, deserializeBuffer, allocator, resolver));
     }
 
-    if (transfer->requiredFeatureCount > std::numeric_limits<size_t>::max()) return WireResult::FatalError;
-    record->requiredFeatureCount = checked_cast<size_t>(transfer->requiredFeatureCount);
+    if (transfer->requiredFeaturesCount > std::numeric_limits<size_t>::max()) return WireResult::FatalError;
+    record->requiredFeaturesCount = checked_cast<size_t>(transfer->requiredFeaturesCount);
     WIRE_TRY(WGPUQueueDescriptorDeserialize(&record->defaultQueue, &transfer->defaultQueue, deserializeBuffer, allocator, resolver));
     record->deviceLostCallback = nullptr;
     record->deviceLostUserdata = nullptr;
@@ -6645,7 +6408,7 @@ DAWN_DECLARE_UNUSED WireResult WGPUDeviceDescriptorDeserialize(
         record->label = copiedString;
     }
     {
-        auto memberLength = record->requiredFeatureCount;
+        auto memberLength = record->requiredFeaturesCount;
         const volatile WGPUFeatureName* memberBuffer;
         WIRE_TRY(deserializeBuffer->ReadN(memberLength, &memberBuffer));
 
@@ -6878,95 +6641,6 @@ DAWN_DECLARE_UNUSED WireResult WGPURenderPassDescriptorDeserialize(
     return WireResult::Success;
 }
 DAWN_UNUSED_FUNC(WGPURenderPassDescriptorDeserialize);
-
-struct WGPURenderPassPixelLocalStorageTransfer {
-    static_assert(0 <= 1,
-                  "Record must be at most one of is_cmd, extensible, and chained.");
-    WGPUChainedStructTransfer chain;
-
-    uint64_t totalPixelLocalStorageSize;
-    uint64_t storageAttachmentCount;
-};
-
-static_assert(offsetof(WGPURenderPassPixelLocalStorageTransfer, chain) == 0);
-
-DAWN_DECLARE_UNUSED size_t WGPURenderPassPixelLocalStorageGetExtraRequiredSize(const WGPURenderPassPixelLocalStorage& record) {
-    DAWN_UNUSED(record);
-    size_t result = 0;
-
-    {
-        auto memberLength = record.storageAttachmentCount;
-        auto size = WireAlignSizeofN<WGPURenderPassStorageAttachmentTransfer>(memberLength);
-        ASSERT(size);
-        result += *size;
-        for (decltype(memberLength) i = 0; i < memberLength; ++i) {
-            result += WGPURenderPassStorageAttachmentGetExtraRequiredSize(record.storageAttachments[i]);
-        }
-    }
-    return result;
-}
-// GetExtraRequiredSize isn't used for structures that are value members of other structures
-// because we assume they cannot contain pointers themselves.
-DAWN_UNUSED_FUNC(WGPURenderPassPixelLocalStorageGetExtraRequiredSize);
-
-DAWN_DECLARE_UNUSED WireResult WGPURenderPassPixelLocalStorageSerialize(
-    const WGPURenderPassPixelLocalStorage& record,
-    WGPURenderPassPixelLocalStorageTransfer* transfer,
-    SerializeBuffer* buffer, const ObjectIdProvider& provider) {
-    DAWN_UNUSED(buffer);
-
-    ASSERT(transfer->chain.sType == WGPUSType_RenderPassPixelLocalStorage);
-    ASSERT(transfer->chain.hasNext == (record.chain.next != nullptr));
-
-    transfer->totalPixelLocalStorageSize = record.totalPixelLocalStorageSize;
-    transfer->storageAttachmentCount = record.storageAttachmentCount;
-    {
-        auto memberLength = record.storageAttachmentCount;
-
-        WGPURenderPassStorageAttachmentTransfer* memberBuffer;
-        WIRE_TRY(buffer->NextN(memberLength, &memberBuffer));
-
-        for (decltype(memberLength) i = 0; i < memberLength; ++i) {
-            WIRE_TRY(WGPURenderPassStorageAttachmentSerialize(record.storageAttachments[i], &memberBuffer[i], buffer, provider));
-        }
-    }
-
-    return WireResult::Success;
-}
-DAWN_UNUSED_FUNC(WGPURenderPassPixelLocalStorageSerialize);
-
-DAWN_DECLARE_UNUSED WireResult WGPURenderPassPixelLocalStorageDeserialize(
-    WGPURenderPassPixelLocalStorage* record,
-    const volatile WGPURenderPassPixelLocalStorageTransfer* transfer,
-    DeserializeBuffer* deserializeBuffer,
-    DeserializeAllocator* allocator, const ObjectIdResolver& resolver) {
-    DAWN_UNUSED(allocator);
-
-
-    ASSERT(record->chain.sType == WGPUSType_RenderPassPixelLocalStorage);
-    ASSERT(record->chain.next == nullptr);
-
-    if (transfer->totalPixelLocalStorageSize > std::numeric_limits<size_t>::max()) return WireResult::FatalError;
-    record->totalPixelLocalStorageSize = checked_cast<size_t>(transfer->totalPixelLocalStorageSize);
-    if (transfer->storageAttachmentCount > std::numeric_limits<size_t>::max()) return WireResult::FatalError;
-    record->storageAttachmentCount = checked_cast<size_t>(transfer->storageAttachmentCount);
-    {
-        auto memberLength = record->storageAttachmentCount;
-        const volatile WGPURenderPassStorageAttachmentTransfer* memberBuffer;
-        WIRE_TRY(deserializeBuffer->ReadN(memberLength, &memberBuffer));
-
-        WGPURenderPassStorageAttachment* copiedMembers;
-        WIRE_TRY(GetSpace(allocator, memberLength, &copiedMembers));
-        record->storageAttachments = copiedMembers;
-
-        for (decltype(memberLength) i = 0; i < memberLength; ++i) {
-            WIRE_TRY(WGPURenderPassStorageAttachmentDeserialize(&copiedMembers[i], &memberBuffer[i], deserializeBuffer, allocator, resolver));
-        }
-    }
-
-    return WireResult::Success;
-}
-DAWN_UNUSED_FUNC(WGPURenderPassPixelLocalStorageDeserialize);
 
 struct WGPUVertexStateTransfer {
     static_assert(0 <= 1,
@@ -7565,20 +7239,6 @@ size_t GetChainedStructExtraRequiredSize(const WGPUChainedStruct* chainedStruct)
                 chainedStruct = typedStruct.chain.next;
                 break;
             }
-            case WGPUSType_RenderPassPixelLocalStorage: {
-                const auto& typedStruct = *reinterpret_cast<WGPURenderPassPixelLocalStorage const *>(chainedStruct);
-                result += WireAlignSizeof<WGPURenderPassPixelLocalStorageTransfer>();
-                result += WGPURenderPassPixelLocalStorageGetExtraRequiredSize(typedStruct);
-                chainedStruct = typedStruct.chain.next;
-                break;
-            }
-            case WGPUSType_PipelineLayoutPixelLocalStorage: {
-                const auto& typedStruct = *reinterpret_cast<WGPUPipelineLayoutPixelLocalStorage const *>(chainedStruct);
-                result += WireAlignSizeof<WGPUPipelineLayoutPixelLocalStorageTransfer>();
-                result += WGPUPipelineLayoutPixelLocalStorageGetExtraRequiredSize(typedStruct);
-                chainedStruct = typedStruct.chain.next;
-                break;
-            }
             // Explicitly list the Invalid enum. MSVC complains about no case labels.
             case WGPUSType_Invalid:
             default:
@@ -7725,26 +7385,6 @@ size_t GetChainedStructExtraRequiredSize(const WGPUChainedStruct* chainedStruct)
                 transfer->chain.hasNext = chainedStruct->next != nullptr;
 
                 WIRE_TRY(WGPUDawnRenderPassColorAttachmentRenderToSingleSampledSerialize(*reinterpret_cast<WGPUDawnRenderPassColorAttachmentRenderToSingleSampled const*>(chainedStruct), transfer, buffer, provider));
-
-                chainedStruct = chainedStruct->next;
-            } break;
-            case WGPUSType_RenderPassPixelLocalStorage: {
-                WGPURenderPassPixelLocalStorageTransfer* transfer;
-                WIRE_TRY(buffer->Next(&transfer));
-                transfer->chain.sType = chainedStruct->sType;
-                transfer->chain.hasNext = chainedStruct->next != nullptr;
-
-                WIRE_TRY(WGPURenderPassPixelLocalStorageSerialize(*reinterpret_cast<WGPURenderPassPixelLocalStorage const*>(chainedStruct), transfer, buffer, provider));
-
-                chainedStruct = chainedStruct->next;
-            } break;
-            case WGPUSType_PipelineLayoutPixelLocalStorage: {
-                WGPUPipelineLayoutPixelLocalStorageTransfer* transfer;
-                WIRE_TRY(buffer->Next(&transfer));
-                transfer->chain.sType = chainedStruct->sType;
-                transfer->chain.hasNext = chainedStruct->next != nullptr;
-
-                WIRE_TRY(WGPUPipelineLayoutPixelLocalStorageSerialize(*reinterpret_cast<WGPUPipelineLayoutPixelLocalStorage const*>(chainedStruct), transfer, buffer, provider));
 
                 chainedStruct = chainedStruct->next;
             } break;
@@ -7986,38 +7626,6 @@ WireResult DeserializeChainedStruct(const WGPUChainedStruct** outChainNext,
                 outChainNext = &outStruct->chain.next;
 
                 WIRE_TRY(WGPUDawnRenderPassColorAttachmentRenderToSingleSampledDeserialize(outStruct, transfer, deserializeBuffer, allocator, resolver));
-
-                hasNext = transfer->chain.hasNext;
-            } break;
-            case WGPUSType_RenderPassPixelLocalStorage: {
-                const volatile WGPURenderPassPixelLocalStorageTransfer* transfer;
-                WIRE_TRY(deserializeBuffer->Read(&transfer));
-
-                WGPURenderPassPixelLocalStorage* outStruct;
-                WIRE_TRY(GetSpace(allocator, 1u, &outStruct));
-                outStruct->chain.sType = sType;
-                outStruct->chain.next = nullptr;
-
-                *outChainNext = &outStruct->chain;
-                outChainNext = &outStruct->chain.next;
-
-                WIRE_TRY(WGPURenderPassPixelLocalStorageDeserialize(outStruct, transfer, deserializeBuffer, allocator, resolver));
-
-                hasNext = transfer->chain.hasNext;
-            } break;
-            case WGPUSType_PipelineLayoutPixelLocalStorage: {
-                const volatile WGPUPipelineLayoutPixelLocalStorageTransfer* transfer;
-                WIRE_TRY(deserializeBuffer->Read(&transfer));
-
-                WGPUPipelineLayoutPixelLocalStorage* outStruct;
-                WIRE_TRY(GetSpace(allocator, 1u, &outStruct));
-                outStruct->chain.sType = sType;
-                outStruct->chain.next = nullptr;
-
-                *outChainNext = &outStruct->chain;
-                outChainNext = &outStruct->chain.next;
-
-                WIRE_TRY(WGPUPipelineLayoutPixelLocalStorageDeserialize(outStruct, transfer, deserializeBuffer, allocator, resolver));
 
                 hasNext = transfer->chain.hasNext;
             } break;
@@ -9607,6 +9215,155 @@ DAWN_DECLARE_UNUSED WireResult CommandEncoderCopyTextureToTextureDeserialize(
     return WireResult::Success;
 }
 DAWN_UNUSED_FUNC(CommandEncoderCopyTextureToTextureDeserialize);
+
+struct CommandEncoderCopyTextureToTextureInternalTransfer : CmdHeader {
+    static_assert(1 <= 1,
+                  "Record must be at most one of is_cmd, extensible, and chained.");
+    WireCmd commandId;
+
+    ObjectId self;
+};
+
+static_assert(offsetof(CommandEncoderCopyTextureToTextureInternalTransfer, commandSize) == 0);
+static_assert(offsetof(CommandEncoderCopyTextureToTextureInternalTransfer, commandId) == sizeof(CmdHeader));
+
+DAWN_DECLARE_UNUSED size_t CommandEncoderCopyTextureToTextureInternalGetExtraRequiredSize(const CommandEncoderCopyTextureToTextureInternalCmd& record) {
+    DAWN_UNUSED(record);
+    size_t result = 0;
+
+    {
+        auto memberLength = 1u;
+        auto size = WireAlignSizeofN<WGPUImageCopyTextureTransfer>(memberLength);
+        ASSERT(size);
+        result += *size;
+        for (decltype(memberLength) i = 0; i < memberLength; ++i) {
+            result += WGPUImageCopyTextureGetExtraRequiredSize(record.source[i]);
+        }
+    }
+    {
+        auto memberLength = 1u;
+        auto size = WireAlignSizeofN<WGPUImageCopyTextureTransfer>(memberLength);
+        ASSERT(size);
+        result += *size;
+        for (decltype(memberLength) i = 0; i < memberLength; ++i) {
+            result += WGPUImageCopyTextureGetExtraRequiredSize(record.destination[i]);
+        }
+    }
+    {
+        auto memberLength = 1u;
+        auto size = WireAlignSizeofN<WGPUExtent3DTransfer>(memberLength);
+        ASSERT(size);
+        result += *size;
+        for (decltype(memberLength) i = 0; i < memberLength; ++i) {
+            result += WGPUExtent3DGetExtraRequiredSize(record.copySize[i]);
+        }
+    }
+    return result;
+}
+// GetExtraRequiredSize isn't used for structures that are value members of other structures
+// because we assume they cannot contain pointers themselves.
+DAWN_UNUSED_FUNC(CommandEncoderCopyTextureToTextureInternalGetExtraRequiredSize);
+
+DAWN_DECLARE_UNUSED WireResult CommandEncoderCopyTextureToTextureInternalSerialize(
+    const CommandEncoderCopyTextureToTextureInternalCmd& record,
+    CommandEncoderCopyTextureToTextureInternalTransfer* transfer,
+    SerializeBuffer* buffer, const ObjectIdProvider& provider) {
+    DAWN_UNUSED(buffer);
+    transfer->commandId = WireCmd::CommandEncoderCopyTextureToTextureInternal;
+
+
+    WIRE_TRY(provider.GetId(record.self, &transfer->self));
+    {
+        auto memberLength = 1u;
+
+        WGPUImageCopyTextureTransfer* memberBuffer;
+        WIRE_TRY(buffer->NextN(memberLength, &memberBuffer));
+
+        for (decltype(memberLength) i = 0; i < memberLength; ++i) {
+            WIRE_TRY(WGPUImageCopyTextureSerialize(record.source[i], &memberBuffer[i], buffer, provider));
+        }
+    }
+    {
+        auto memberLength = 1u;
+
+        WGPUImageCopyTextureTransfer* memberBuffer;
+        WIRE_TRY(buffer->NextN(memberLength, &memberBuffer));
+
+        for (decltype(memberLength) i = 0; i < memberLength; ++i) {
+            WIRE_TRY(WGPUImageCopyTextureSerialize(record.destination[i], &memberBuffer[i], buffer, provider));
+        }
+    }
+    {
+        auto memberLength = 1u;
+
+        WGPUExtent3DTransfer* memberBuffer;
+        WIRE_TRY(buffer->NextN(memberLength, &memberBuffer));
+
+        memcpy(
+            memberBuffer, record.copySize,
+            sizeof(WGPUExtent3DTransfer) * memberLength);
+    }
+
+    return WireResult::Success;
+}
+DAWN_UNUSED_FUNC(CommandEncoderCopyTextureToTextureInternalSerialize);
+
+DAWN_DECLARE_UNUSED WireResult CommandEncoderCopyTextureToTextureInternalDeserialize(
+    CommandEncoderCopyTextureToTextureInternalCmd* record,
+    const volatile CommandEncoderCopyTextureToTextureInternalTransfer* transfer,
+    DeserializeBuffer* deserializeBuffer,
+    DeserializeAllocator* allocator, const ObjectIdResolver& resolver) {
+    DAWN_UNUSED(allocator);
+
+    ASSERT(transfer->commandId == WireCmd::CommandEncoderCopyTextureToTextureInternal);
+    record->selfId = transfer->self;
+
+
+    WIRE_TRY(resolver.GetFromId(transfer->self, &record->self));
+    {
+        auto memberLength = 1u;
+        const volatile WGPUImageCopyTextureTransfer* memberBuffer;
+        WIRE_TRY(deserializeBuffer->ReadN(memberLength, &memberBuffer));
+
+        WGPUImageCopyTexture* copiedMembers;
+        WIRE_TRY(GetSpace(allocator, memberLength, &copiedMembers));
+        record->source = copiedMembers;
+
+        for (decltype(memberLength) i = 0; i < memberLength; ++i) {
+            WIRE_TRY(WGPUImageCopyTextureDeserialize(&copiedMembers[i], &memberBuffer[i], deserializeBuffer, allocator, resolver));
+        }
+    }
+    {
+        auto memberLength = 1u;
+        const volatile WGPUImageCopyTextureTransfer* memberBuffer;
+        WIRE_TRY(deserializeBuffer->ReadN(memberLength, &memberBuffer));
+
+        WGPUImageCopyTexture* copiedMembers;
+        WIRE_TRY(GetSpace(allocator, memberLength, &copiedMembers));
+        record->destination = copiedMembers;
+
+        for (decltype(memberLength) i = 0; i < memberLength; ++i) {
+            WIRE_TRY(WGPUImageCopyTextureDeserialize(&copiedMembers[i], &memberBuffer[i], deserializeBuffer, allocator, resolver));
+        }
+    }
+    {
+        auto memberLength = 1u;
+        const volatile WGPUExtent3DTransfer* memberBuffer;
+        WIRE_TRY(deserializeBuffer->ReadN(memberLength, &memberBuffer));
+
+        WGPUExtent3D* copiedMembers;
+        WIRE_TRY(GetSpace(allocator, memberLength, &copiedMembers));
+        record->copySize = copiedMembers;
+
+        memcpy(
+            copiedMembers,
+            const_cast<const WGPUExtent3DTransfer*>(memberBuffer),
+           sizeof(WGPUExtent3DTransfer) * memberLength);
+    }
+
+    return WireResult::Success;
+}
+DAWN_UNUSED_FUNC(CommandEncoderCopyTextureToTextureInternalDeserialize);
 
 struct CommandEncoderFinishTransfer : CmdHeader {
     static_assert(1 <= 1,
@@ -16667,58 +16424,6 @@ DAWN_DECLARE_UNUSED WireResult RenderPassEncoderInsertDebugMarkerDeserialize(
 }
 DAWN_UNUSED_FUNC(RenderPassEncoderInsertDebugMarkerDeserialize);
 
-struct RenderPassEncoderPixelLocalStorageBarrierTransfer : CmdHeader {
-    static_assert(1 <= 1,
-                  "Record must be at most one of is_cmd, extensible, and chained.");
-    WireCmd commandId;
-
-    ObjectId self;
-};
-
-static_assert(offsetof(RenderPassEncoderPixelLocalStorageBarrierTransfer, commandSize) == 0);
-static_assert(offsetof(RenderPassEncoderPixelLocalStorageBarrierTransfer, commandId) == sizeof(CmdHeader));
-
-DAWN_DECLARE_UNUSED size_t RenderPassEncoderPixelLocalStorageBarrierGetExtraRequiredSize(const RenderPassEncoderPixelLocalStorageBarrierCmd& record) {
-    DAWN_UNUSED(record);
-    size_t result = 0;
-
-    return result;
-}
-// GetExtraRequiredSize isn't used for structures that are value members of other structures
-// because we assume they cannot contain pointers themselves.
-DAWN_UNUSED_FUNC(RenderPassEncoderPixelLocalStorageBarrierGetExtraRequiredSize);
-
-DAWN_DECLARE_UNUSED WireResult RenderPassEncoderPixelLocalStorageBarrierSerialize(
-    const RenderPassEncoderPixelLocalStorageBarrierCmd& record,
-    RenderPassEncoderPixelLocalStorageBarrierTransfer* transfer,
-    SerializeBuffer* buffer, const ObjectIdProvider& provider) {
-    DAWN_UNUSED(buffer);
-    transfer->commandId = WireCmd::RenderPassEncoderPixelLocalStorageBarrier;
-
-
-    WIRE_TRY(provider.GetId(record.self, &transfer->self));
-
-    return WireResult::Success;
-}
-DAWN_UNUSED_FUNC(RenderPassEncoderPixelLocalStorageBarrierSerialize);
-
-DAWN_DECLARE_UNUSED WireResult RenderPassEncoderPixelLocalStorageBarrierDeserialize(
-    RenderPassEncoderPixelLocalStorageBarrierCmd* record,
-    const volatile RenderPassEncoderPixelLocalStorageBarrierTransfer* transfer,
-    DeserializeBuffer* deserializeBuffer,
-    DeserializeAllocator* allocator, const ObjectIdResolver& resolver) {
-    DAWN_UNUSED(allocator);
-
-    ASSERT(transfer->commandId == WireCmd::RenderPassEncoderPixelLocalStorageBarrier);
-    record->selfId = transfer->self;
-
-
-    WIRE_TRY(resolver.GetFromId(transfer->self, &record->self));
-
-    return WireResult::Success;
-}
-DAWN_UNUSED_FUNC(RenderPassEncoderPixelLocalStorageBarrierDeserialize);
-
 struct RenderPassEncoderPopDebugGroupTransfer : CmdHeader {
     static_assert(1 <= 1,
                   "Record must be at most one of is_cmd, extensible, and chained.");
@@ -20298,6 +20003,37 @@ WireResult CommandEncoderCopyTextureToTextureCmd::Deserialize(DeserializeBuffer*
     return Deserialize(deserializeBuffer, allocator, resolver);
 }
 
+size_t CommandEncoderCopyTextureToTextureInternalCmd::GetRequiredSize() const {
+    return WireAlignSizeof<CommandEncoderCopyTextureToTextureInternalTransfer>() + CommandEncoderCopyTextureToTextureInternalGetExtraRequiredSize(*this);
+}
+
+WireResult CommandEncoderCopyTextureToTextureInternalCmd::Serialize(
+    size_t commandSize,
+    SerializeBuffer* serializeBuffer,
+    const ObjectIdProvider& provider) const {
+    CommandEncoderCopyTextureToTextureInternalTransfer* transfer;
+    WIRE_TRY(serializeBuffer->Next(&transfer));
+    transfer->commandSize = commandSize;
+    return (CommandEncoderCopyTextureToTextureInternalSerialize(*this, transfer, serializeBuffer, provider));
+}
+WireResult CommandEncoderCopyTextureToTextureInternalCmd::Serialize(size_t commandSize, SerializeBuffer* serializeBuffer) const {
+    ErrorObjectIdProvider provider;
+    return Serialize(commandSize, serializeBuffer, provider);
+}
+
+WireResult CommandEncoderCopyTextureToTextureInternalCmd::Deserialize(
+    DeserializeBuffer* deserializeBuffer,
+    DeserializeAllocator* allocator,
+    const ObjectIdResolver& resolver) {
+    const volatile CommandEncoderCopyTextureToTextureInternalTransfer* transfer;
+    WIRE_TRY(deserializeBuffer->Read(&transfer));
+    return CommandEncoderCopyTextureToTextureInternalDeserialize(this, transfer, deserializeBuffer, allocator, resolver);
+}
+WireResult CommandEncoderCopyTextureToTextureInternalCmd::Deserialize(DeserializeBuffer* deserializeBuffer, DeserializeAllocator* allocator) {
+    ErrorObjectIdResolver resolver;
+    return Deserialize(deserializeBuffer, allocator, resolver);
+}
+
 size_t CommandEncoderFinishCmd::GetRequiredSize() const {
     return WireAlignSizeof<CommandEncoderFinishTransfer>() + CommandEncoderFinishGetExtraRequiredSize(*this);
 }
@@ -23107,37 +22843,6 @@ WireResult RenderPassEncoderInsertDebugMarkerCmd::Deserialize(
     return RenderPassEncoderInsertDebugMarkerDeserialize(this, transfer, deserializeBuffer, allocator, resolver);
 }
 WireResult RenderPassEncoderInsertDebugMarkerCmd::Deserialize(DeserializeBuffer* deserializeBuffer, DeserializeAllocator* allocator) {
-    ErrorObjectIdResolver resolver;
-    return Deserialize(deserializeBuffer, allocator, resolver);
-}
-
-size_t RenderPassEncoderPixelLocalStorageBarrierCmd::GetRequiredSize() const {
-    return WireAlignSizeof<RenderPassEncoderPixelLocalStorageBarrierTransfer>() + RenderPassEncoderPixelLocalStorageBarrierGetExtraRequiredSize(*this);
-}
-
-WireResult RenderPassEncoderPixelLocalStorageBarrierCmd::Serialize(
-    size_t commandSize,
-    SerializeBuffer* serializeBuffer,
-    const ObjectIdProvider& provider) const {
-    RenderPassEncoderPixelLocalStorageBarrierTransfer* transfer;
-    WIRE_TRY(serializeBuffer->Next(&transfer));
-    transfer->commandSize = commandSize;
-    return (RenderPassEncoderPixelLocalStorageBarrierSerialize(*this, transfer, serializeBuffer, provider));
-}
-WireResult RenderPassEncoderPixelLocalStorageBarrierCmd::Serialize(size_t commandSize, SerializeBuffer* serializeBuffer) const {
-    ErrorObjectIdProvider provider;
-    return Serialize(commandSize, serializeBuffer, provider);
-}
-
-WireResult RenderPassEncoderPixelLocalStorageBarrierCmd::Deserialize(
-    DeserializeBuffer* deserializeBuffer,
-    DeserializeAllocator* allocator,
-    const ObjectIdResolver& resolver) {
-    const volatile RenderPassEncoderPixelLocalStorageBarrierTransfer* transfer;
-    WIRE_TRY(deserializeBuffer->Read(&transfer));
-    return RenderPassEncoderPixelLocalStorageBarrierDeserialize(this, transfer, deserializeBuffer, allocator, resolver);
-}
-WireResult RenderPassEncoderPixelLocalStorageBarrierCmd::Deserialize(DeserializeBuffer* deserializeBuffer, DeserializeAllocator* allocator) {
     ErrorObjectIdResolver resolver;
     return Deserialize(deserializeBuffer, allocator, resolver);
 }

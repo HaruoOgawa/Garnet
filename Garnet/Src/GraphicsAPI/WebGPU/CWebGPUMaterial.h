@@ -5,7 +5,7 @@
 #include "../../Graphics/CMaterial.h"
 #include <memory>
 #include <vector>
-#include <webgpu.h>
+#include "CWebGPUAPI.h"
 
 namespace graphics{ class CMaterialCreateInfo; }
 

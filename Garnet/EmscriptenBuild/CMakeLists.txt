@@ -99,7 +99,7 @@ add_executable(
 
 )
 
-target_include_directories(Garnet PRIVATE ../src/Library/DawnLib/include/dawn ../src/Library/glm  ../src/Library/tinygltf)
+target_include_directories(Garnet PRIVATE ../src/Library/DawnLegacy/include/dawn ../src/Library/glm  ../src/Library/tinygltf)
 # target_include_directories(Garnet PRIVATE ../src/Library/WebGPU ../src/Library/glm  ../src/Library/tinygltf)
 
 if(EMSCRIPTEN)

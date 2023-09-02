@@ -5,8 +5,7 @@
 #include <string>
 #include <glm/glm.hpp>
 #include <glm/gtx/quaternion.hpp>
-
-#include <webgpu.h>
+#include "CWebGPUAPI.h"
 
 namespace api { 
 	class CWebGPUAPI; 

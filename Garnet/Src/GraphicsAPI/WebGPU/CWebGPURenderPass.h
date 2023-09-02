@@ -7,8 +7,7 @@
 #include "../ERenderPassFormat.h"
 #include "../../Interface/IRenderPass.h"
 #include <glm/glm.hpp>
-
-#include <webgpu.h>
+#include "CWebGPUAPI.h"
 
 namespace graphics { class CTexture; }
 

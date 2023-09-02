@@ -33,7 +33,7 @@
 #if defined(USE_WEBGPU) 
 #include "glfw3webgpu.h"
 
-#include <webgpu.h>
+#include <dawn/webgpu.h>
 
 #define WGPU_TARGET_MACOS 1
 #define WGPU_TARGET_LINUX_X11 2

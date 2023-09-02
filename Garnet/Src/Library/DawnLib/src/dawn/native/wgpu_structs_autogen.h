@@ -13,23 +13,16 @@ namespace dawn::native {
     using wgpu::ChainedStructOut;
 
     struct AdapterProperties {
-        AdapterProperties() = default;
-        ~AdapterProperties();
-        AdapterProperties(const AdapterProperties&) = delete;
-        AdapterProperties& operator=(const AdapterProperties&) = delete;
-        AdapterProperties(AdapterProperties&&);
-        AdapterProperties& operator=(AdapterProperties&&);
-
         ChainedStructOut * nextInChain = nullptr;
         uint32_t vendorID;
-        char const * vendorName = nullptr;
-        char const * architecture = nullptr;
+        char const * vendorName;
+        char const * architecture;
         uint32_t deviceID;
-        char const * name = nullptr;
-        char const * driverDescription = nullptr;
+        char const * name;
+        char const * driverDescription;
         wgpu::AdapterType adapterType;
         wgpu::BackendType backendType;
-        wgpu::Bool compatibilityMode = false;
+        bool compatibilityMode = false;
 
         // Equality operators, mostly for testing. Note that this tests
         // strict pointer-pointer equality if the struct contains member pointers.
@@ -63,7 +56,7 @@ namespace dawn::native {
     struct BufferBindingLayout {
         ChainedStruct const * nextInChain = nullptr;
         wgpu::BufferBindingType type = wgpu::BufferBindingType::Undefined;
-        wgpu::Bool hasDynamicOffset = false;
+        bool hasDynamicOffset = false;
         uint64_t minBindingSize = 0;
 
         // Equality operators, mostly for testing. Note that this tests
@@ -76,7 +69,7 @@ namespace dawn::native {
         char const * label = nullptr;
         wgpu::BufferUsage usage;
         uint64_t size;
-        wgpu::Bool mappedAtCreation = false;
+        bool mappedAtCreation = false;
 
         // Equality operators, mostly for testing. Note that this tests
         // strict pointer-pointer equality if the struct contains member pointers.
@@ -151,14 +144,14 @@ namespace dawn::native {
 
     struct CopyTextureForBrowserOptions {
         ChainedStruct const * nextInChain = nullptr;
-        wgpu::Bool flipY = false;
-        wgpu::Bool needsColorSpaceConversion = false;
+        bool flipY = false;
+        bool needsColorSpaceConversion = false;
         wgpu::AlphaMode srcAlphaMode = wgpu::AlphaMode::Unpremultiplied;
         float const * srcTransferFunctionParameters = nullptr;
         float const * conversionMatrix = nullptr;
         float const * dstTransferFunctionParameters = nullptr;
         wgpu::AlphaMode dstAlphaMode = wgpu::AlphaMode::Unpremultiplied;
-        wgpu::Bool internalUsage = false;
+        bool internalUsage = false;
 
         // Equality operators, mostly for testing. Note that this tests
         // strict pointer-pointer equality if the struct contains member pointers.
@@ -180,7 +173,7 @@ namespace dawn::native {
         DawnBufferDescriptorErrorInfoFromWireClient() {
             sType = wgpu::SType::DawnBufferDescriptorErrorInfoFromWireClient;
         }
-        alignas(wgpu::DawnBufferDescriptorErrorInfoFromWireClient::kFirstMemberAlignment) wgpu::Bool outOfMemory = false;
+        alignas(wgpu::DawnBufferDescriptorErrorInfoFromWireClient::kFirstMemberAlignment) bool outOfMemory = false;
 
         // Equality operators, mostly for testing. Note that this tests
         // strict pointer-pointer equality if the struct contains member pointers.
@@ -202,7 +195,7 @@ namespace dawn::native {
         DawnEncoderInternalUsageDescriptor() {
             sType = wgpu::SType::DawnEncoderInternalUsageDescriptor;
         }
-        alignas(wgpu::DawnEncoderInternalUsageDescriptor::kFirstMemberAlignment) wgpu::Bool useInternalUsages = false;
+        alignas(wgpu::DawnEncoderInternalUsageDescriptor::kFirstMemberAlignment) bool useInternalUsages = false;
 
         // Equality operators, mostly for testing. Note that this tests
         // strict pointer-pointer equality if the struct contains member pointers.
@@ -213,7 +206,7 @@ namespace dawn::native {
         DawnMultisampleStateRenderToSingleSampled() {
             sType = wgpu::SType::DawnMultisampleStateRenderToSingleSampled;
         }
-        alignas(wgpu::DawnMultisampleStateRenderToSingleSampled::kFirstMemberAlignment) wgpu::Bool enabled = false;
+        alignas(wgpu::DawnMultisampleStateRenderToSingleSampled::kFirstMemberAlignment) bool enabled = false;
 
         // Equality operators, mostly for testing. Note that this tests
         // strict pointer-pointer equality if the struct contains member pointers.
@@ -235,7 +228,7 @@ namespace dawn::native {
         DawnShaderModuleSPIRVOptionsDescriptor() {
             sType = wgpu::SType::DawnShaderModuleSPIRVOptionsDescriptor;
         }
-        alignas(wgpu::DawnShaderModuleSPIRVOptionsDescriptor::kFirstMemberAlignment) wgpu::Bool allowNonUniformDerivatives = false;
+        alignas(wgpu::DawnShaderModuleSPIRVOptionsDescriptor::kFirstMemberAlignment) bool allowNonUniformDerivatives = false;
 
         // Equality operators, mostly for testing. Note that this tests
         // strict pointer-pointer equality if the struct contains member pointers.
@@ -257,9 +250,9 @@ namespace dawn::native {
         DawnTogglesDescriptor() {
             sType = wgpu::SType::DawnTogglesDescriptor;
         }
-        alignas(wgpu::DawnTogglesDescriptor::kFirstMemberAlignment) size_t enabledToggleCount = 0;
+        alignas(wgpu::DawnTogglesDescriptor::kFirstMemberAlignment) size_t enabledTogglesCount = 0;
         const char* const * enabledToggles;
-        size_t disabledToggleCount = 0;
+        size_t disabledTogglesCount = 0;
         const char* const * disabledToggles;
 
         // Equality operators, mostly for testing. Note that this tests
@@ -268,8 +261,8 @@ namespace dawn::native {
     };
 
     struct Extent2D {
-        uint32_t width;
-        uint32_t height;
+        uint32_t width = 0;
+        uint32_t height = 1;
 
         // Equality operators, mostly for testing. Note that this tests
         // strict pointer-pointer equality if the struct contains member pointers.
@@ -358,7 +351,7 @@ namespace dawn::native {
         ChainedStruct const * nextInChain = nullptr;
         uint32_t count = 1;
         uint32_t mask = 0xFFFFFFFF;
-        wgpu::Bool alphaToCoverageEnabled = false;
+        bool alphaToCoverageEnabled = false;
 
         // Equality operators, mostly for testing. Note that this tests
         // strict pointer-pointer equality if the struct contains member pointers.
@@ -395,21 +388,11 @@ namespace dawn::native {
         bool operator==(const PipelineLayoutDescriptor& rhs) const;
     };
 
-    struct PipelineLayoutStorageAttachment {
-        ChainedStruct const * nextInChain = nullptr;
-        uint64_t offset = 0;
-        wgpu::TextureFormat format;
-
-        // Equality operators, mostly for testing. Note that this tests
-        // strict pointer-pointer equality if the struct contains member pointers.
-        bool operator==(const PipelineLayoutStorageAttachment& rhs) const;
-    };
-
     struct PrimitiveDepthClipControl : ChainedStruct {
         PrimitiveDepthClipControl() {
             sType = wgpu::SType::PrimitiveDepthClipControl;
         }
-        alignas(wgpu::PrimitiveDepthClipControl::kFirstMemberAlignment) wgpu::Bool unclippedDepth = false;
+        alignas(wgpu::PrimitiveDepthClipControl::kFirstMemberAlignment) bool unclippedDepth = false;
 
         // Equality operators, mostly for testing. Note that this tests
         // strict pointer-pointer equality if the struct contains member pointers.
@@ -434,7 +417,7 @@ namespace dawn::native {
         wgpu::QueryType type;
         uint32_t count;
         wgpu::PipelineStatisticName const * pipelineStatistics;
-        size_t pipelineStatisticCount = 0;
+        size_t pipelineStatisticsCount = 0;
 
         // Equality operators, mostly for testing. Note that this tests
         // strict pointer-pointer equality if the struct contains member pointers.
@@ -462,12 +445,12 @@ namespace dawn::native {
     struct RenderBundleEncoderDescriptor {
         ChainedStruct const * nextInChain = nullptr;
         char const * label = nullptr;
-        size_t colorFormatCount;
+        size_t colorFormatsCount;
         wgpu::TextureFormat const * colorFormats;
         wgpu::TextureFormat depthStencilFormat = wgpu::TextureFormat::Undefined;
         uint32_t sampleCount = 1;
-        wgpu::Bool depthReadOnly = false;
-        wgpu::Bool stencilReadOnly = false;
+        bool depthReadOnly = false;
+        bool stencilReadOnly = false;
 
         // Equality operators, mostly for testing. Note that this tests
         // strict pointer-pointer equality if the struct contains member pointers.
@@ -479,11 +462,11 @@ namespace dawn::native {
         wgpu::LoadOp depthLoadOp = wgpu::LoadOp::Undefined;
         wgpu::StoreOp depthStoreOp = wgpu::StoreOp::Undefined;
         float depthClearValue = NAN;
-        wgpu::Bool depthReadOnly = false;
+        bool depthReadOnly = false;
         wgpu::LoadOp stencilLoadOp = wgpu::LoadOp::Undefined;
         wgpu::StoreOp stencilStoreOp = wgpu::StoreOp::Undefined;
         uint32_t stencilClearValue = 0;
-        wgpu::Bool stencilReadOnly = false;
+        bool stencilReadOnly = false;
 
         // Equality operators, mostly for testing. Note that this tests
         // strict pointer-pointer equality if the struct contains member pointers.
@@ -516,8 +499,8 @@ namespace dawn::native {
         SurfaceBase* compatibleSurface = nullptr;
         wgpu::PowerPreference powerPreference = wgpu::PowerPreference::Undefined;
         wgpu::BackendType backendType = wgpu::BackendType::Undefined;
-        wgpu::Bool forceFallbackAdapter = false;
-        wgpu::Bool compatibilityMode = false;
+        bool forceFallbackAdapter = false;
+        bool compatibilityMode = false;
 
         // Equality operators, mostly for testing. Note that this tests
         // strict pointer-pointer equality if the struct contains member pointers.
@@ -582,293 +565,6 @@ namespace dawn::native {
         // Equality operators, mostly for testing. Note that this tests
         // strict pointer-pointer equality if the struct contains member pointers.
         bool operator==(const ShaderModuleWGSLDescriptor& rhs) const;
-    };
-
-    struct SharedFenceDescriptor {
-        ChainedStruct const * nextInChain = nullptr;
-        char const * label = nullptr;
-
-        // Equality operators, mostly for testing. Note that this tests
-        // strict pointer-pointer equality if the struct contains member pointers.
-        bool operator==(const SharedFenceDescriptor& rhs) const;
-    };
-
-    struct SharedFenceDXGISharedHandleDescriptor : ChainedStruct {
-        SharedFenceDXGISharedHandleDescriptor() {
-            sType = wgpu::SType::SharedFenceDXGISharedHandleDescriptor;
-        }
-        alignas(wgpu::SharedFenceDXGISharedHandleDescriptor::kFirstMemberAlignment) void * handle;
-
-        // Equality operators, mostly for testing. Note that this tests
-        // strict pointer-pointer equality if the struct contains member pointers.
-        bool operator==(const SharedFenceDXGISharedHandleDescriptor& rhs) const;
-    };
-
-    struct SharedFenceDXGISharedHandleExportInfo : ChainedStructOut {
-        SharedFenceDXGISharedHandleExportInfo() {
-            sType = wgpu::SType::SharedFenceDXGISharedHandleExportInfo;
-        }
-        alignas(wgpu::SharedFenceDXGISharedHandleExportInfo::kFirstMemberAlignment) void * handle;
-
-        // Equality operators, mostly for testing. Note that this tests
-        // strict pointer-pointer equality if the struct contains member pointers.
-        bool operator==(const SharedFenceDXGISharedHandleExportInfo& rhs) const;
-    };
-
-    struct SharedFenceExportInfo {
-        ChainedStructOut * nextInChain = nullptr;
-        wgpu::SharedFenceType type;
-
-        // Equality operators, mostly for testing. Note that this tests
-        // strict pointer-pointer equality if the struct contains member pointers.
-        bool operator==(const SharedFenceExportInfo& rhs) const;
-    };
-
-    struct SharedFenceMTLSharedEventDescriptor : ChainedStruct {
-        SharedFenceMTLSharedEventDescriptor() {
-            sType = wgpu::SType::SharedFenceMTLSharedEventDescriptor;
-        }
-        alignas(wgpu::SharedFenceMTLSharedEventDescriptor::kFirstMemberAlignment) void * sharedEvent;
-
-        // Equality operators, mostly for testing. Note that this tests
-        // strict pointer-pointer equality if the struct contains member pointers.
-        bool operator==(const SharedFenceMTLSharedEventDescriptor& rhs) const;
-    };
-
-    struct SharedFenceMTLSharedEventExportInfo : ChainedStructOut {
-        SharedFenceMTLSharedEventExportInfo() {
-            sType = wgpu::SType::SharedFenceMTLSharedEventExportInfo;
-        }
-        alignas(wgpu::SharedFenceMTLSharedEventExportInfo::kFirstMemberAlignment) void * sharedEvent;
-
-        // Equality operators, mostly for testing. Note that this tests
-        // strict pointer-pointer equality if the struct contains member pointers.
-        bool operator==(const SharedFenceMTLSharedEventExportInfo& rhs) const;
-    };
-
-    struct SharedFenceVkSemaphoreOpaqueFDDescriptor : ChainedStruct {
-        SharedFenceVkSemaphoreOpaqueFDDescriptor() {
-            sType = wgpu::SType::SharedFenceVkSemaphoreOpaqueFDDescriptor;
-        }
-        alignas(wgpu::SharedFenceVkSemaphoreOpaqueFDDescriptor::kFirstMemberAlignment) int handle;
-
-        // Equality operators, mostly for testing. Note that this tests
-        // strict pointer-pointer equality if the struct contains member pointers.
-        bool operator==(const SharedFenceVkSemaphoreOpaqueFDDescriptor& rhs) const;
-    };
-
-    struct SharedFenceVkSemaphoreOpaqueFDExportInfo : ChainedStructOut {
-        SharedFenceVkSemaphoreOpaqueFDExportInfo() {
-            sType = wgpu::SType::SharedFenceVkSemaphoreOpaqueFDExportInfo;
-        }
-        alignas(wgpu::SharedFenceVkSemaphoreOpaqueFDExportInfo::kFirstMemberAlignment) int handle;
-
-        // Equality operators, mostly for testing. Note that this tests
-        // strict pointer-pointer equality if the struct contains member pointers.
-        bool operator==(const SharedFenceVkSemaphoreOpaqueFDExportInfo& rhs) const;
-    };
-
-    struct SharedFenceVkSemaphoreSyncFDDescriptor : ChainedStruct {
-        SharedFenceVkSemaphoreSyncFDDescriptor() {
-            sType = wgpu::SType::SharedFenceVkSemaphoreSyncFDDescriptor;
-        }
-        alignas(wgpu::SharedFenceVkSemaphoreSyncFDDescriptor::kFirstMemberAlignment) int handle;
-
-        // Equality operators, mostly for testing. Note that this tests
-        // strict pointer-pointer equality if the struct contains member pointers.
-        bool operator==(const SharedFenceVkSemaphoreSyncFDDescriptor& rhs) const;
-    };
-
-    struct SharedFenceVkSemaphoreSyncFDExportInfo : ChainedStructOut {
-        SharedFenceVkSemaphoreSyncFDExportInfo() {
-            sType = wgpu::SType::SharedFenceVkSemaphoreSyncFDExportInfo;
-        }
-        alignas(wgpu::SharedFenceVkSemaphoreSyncFDExportInfo::kFirstMemberAlignment) int handle;
-
-        // Equality operators, mostly for testing. Note that this tests
-        // strict pointer-pointer equality if the struct contains member pointers.
-        bool operator==(const SharedFenceVkSemaphoreSyncFDExportInfo& rhs) const;
-    };
-
-    struct SharedFenceVkSemaphoreZirconHandleDescriptor : ChainedStruct {
-        SharedFenceVkSemaphoreZirconHandleDescriptor() {
-            sType = wgpu::SType::SharedFenceVkSemaphoreZirconHandleDescriptor;
-        }
-        alignas(wgpu::SharedFenceVkSemaphoreZirconHandleDescriptor::kFirstMemberAlignment) uint32_t handle;
-
-        // Equality operators, mostly for testing. Note that this tests
-        // strict pointer-pointer equality if the struct contains member pointers.
-        bool operator==(const SharedFenceVkSemaphoreZirconHandleDescriptor& rhs) const;
-    };
-
-    struct SharedFenceVkSemaphoreZirconHandleExportInfo : ChainedStructOut {
-        SharedFenceVkSemaphoreZirconHandleExportInfo() {
-            sType = wgpu::SType::SharedFenceVkSemaphoreZirconHandleExportInfo;
-        }
-        alignas(wgpu::SharedFenceVkSemaphoreZirconHandleExportInfo::kFirstMemberAlignment) uint32_t handle;
-
-        // Equality operators, mostly for testing. Note that this tests
-        // strict pointer-pointer equality if the struct contains member pointers.
-        bool operator==(const SharedFenceVkSemaphoreZirconHandleExportInfo& rhs) const;
-    };
-
-    struct SharedTextureMemoryAHardwareBufferDescriptor : ChainedStruct {
-        SharedTextureMemoryAHardwareBufferDescriptor() {
-            sType = wgpu::SType::SharedTextureMemoryAHardwareBufferDescriptor;
-        }
-        alignas(wgpu::SharedTextureMemoryAHardwareBufferDescriptor::kFirstMemberAlignment) void * handle;
-
-        // Equality operators, mostly for testing. Note that this tests
-        // strict pointer-pointer equality if the struct contains member pointers.
-        bool operator==(const SharedTextureMemoryAHardwareBufferDescriptor& rhs) const;
-    };
-
-    struct SharedTextureMemoryBeginAccessDescriptor {
-        ChainedStruct const * nextInChain = nullptr;
-        wgpu::Bool initialized;
-        size_t fenceCount;
-        SharedFenceBase* const * fences;
-        uint64_t const * signaledValues;
-
-        // Equality operators, mostly for testing. Note that this tests
-        // strict pointer-pointer equality if the struct contains member pointers.
-        bool operator==(const SharedTextureMemoryBeginAccessDescriptor& rhs) const;
-    };
-
-    struct SharedTextureMemoryDescriptor {
-        ChainedStruct const * nextInChain = nullptr;
-        char const * label = nullptr;
-
-        // Equality operators, mostly for testing. Note that this tests
-        // strict pointer-pointer equality if the struct contains member pointers.
-        bool operator==(const SharedTextureMemoryDescriptor& rhs) const;
-    };
-
-    struct SharedTextureMemoryDmaBufDescriptor : ChainedStruct {
-        SharedTextureMemoryDmaBufDescriptor() {
-            sType = wgpu::SType::SharedTextureMemoryDmaBufDescriptor;
-        }
-        alignas(wgpu::SharedTextureMemoryDmaBufDescriptor::kFirstMemberAlignment) int memoryFD;
-        uint64_t allocationSize;
-        uint64_t drmModifier;
-        size_t planeCount;
-        uint64_t const * planeOffsets;
-        uint32_t const * planeStrides;
-
-        // Equality operators, mostly for testing. Note that this tests
-        // strict pointer-pointer equality if the struct contains member pointers.
-        bool operator==(const SharedTextureMemoryDmaBufDescriptor& rhs) const;
-    };
-
-    struct SharedTextureMemoryDXGISharedHandleDescriptor : ChainedStruct {
-        SharedTextureMemoryDXGISharedHandleDescriptor() {
-            sType = wgpu::SType::SharedTextureMemoryDXGISharedHandleDescriptor;
-        }
-        alignas(wgpu::SharedTextureMemoryDXGISharedHandleDescriptor::kFirstMemberAlignment) void * handle;
-
-        // Equality operators, mostly for testing. Note that this tests
-        // strict pointer-pointer equality if the struct contains member pointers.
-        bool operator==(const SharedTextureMemoryDXGISharedHandleDescriptor& rhs) const;
-    };
-
-    struct SharedTextureMemoryEGLImageDescriptor : ChainedStruct {
-        SharedTextureMemoryEGLImageDescriptor() {
-            sType = wgpu::SType::SharedTextureMemoryEGLImageDescriptor;
-        }
-        alignas(wgpu::SharedTextureMemoryEGLImageDescriptor::kFirstMemberAlignment) void * image;
-
-        // Equality operators, mostly for testing. Note that this tests
-        // strict pointer-pointer equality if the struct contains member pointers.
-        bool operator==(const SharedTextureMemoryEGLImageDescriptor& rhs) const;
-    };
-
-    struct SharedTextureMemoryEndAccessState {
-        SharedTextureMemoryEndAccessState() = default;
-        ~SharedTextureMemoryEndAccessState();
-        SharedTextureMemoryEndAccessState(const SharedTextureMemoryEndAccessState&) = delete;
-        SharedTextureMemoryEndAccessState& operator=(const SharedTextureMemoryEndAccessState&) = delete;
-        SharedTextureMemoryEndAccessState(SharedTextureMemoryEndAccessState&&);
-        SharedTextureMemoryEndAccessState& operator=(SharedTextureMemoryEndAccessState&&);
-
-        ChainedStructOut * nextInChain = nullptr;
-        wgpu::Bool initialized;
-        size_t fenceCount;
-        SharedFenceBase* const * fences;
-        uint64_t const * signaledValues;
-
-        // Equality operators, mostly for testing. Note that this tests
-        // strict pointer-pointer equality if the struct contains member pointers.
-        bool operator==(const SharedTextureMemoryEndAccessState& rhs) const;
-    };
-
-    struct SharedTextureMemoryIOSurfaceDescriptor : ChainedStruct {
-        SharedTextureMemoryIOSurfaceDescriptor() {
-            sType = wgpu::SType::SharedTextureMemoryIOSurfaceDescriptor;
-        }
-        alignas(wgpu::SharedTextureMemoryIOSurfaceDescriptor::kFirstMemberAlignment) void * ioSurface;
-
-        // Equality operators, mostly for testing. Note that this tests
-        // strict pointer-pointer equality if the struct contains member pointers.
-        bool operator==(const SharedTextureMemoryIOSurfaceDescriptor& rhs) const;
-    };
-
-    struct SharedTextureMemoryOpaqueFDDescriptor : ChainedStruct {
-        SharedTextureMemoryOpaqueFDDescriptor() {
-            sType = wgpu::SType::SharedTextureMemoryOpaqueFDDescriptor;
-        }
-        alignas(wgpu::SharedTextureMemoryOpaqueFDDescriptor::kFirstMemberAlignment) int memoryFD;
-        uint64_t allocationSize;
-
-        // Equality operators, mostly for testing. Note that this tests
-        // strict pointer-pointer equality if the struct contains member pointers.
-        bool operator==(const SharedTextureMemoryOpaqueFDDescriptor& rhs) const;
-    };
-
-    struct SharedTextureMemoryVkDedicatedAllocationDescriptor : ChainedStruct {
-        SharedTextureMemoryVkDedicatedAllocationDescriptor() {
-            sType = wgpu::SType::SharedTextureMemoryVkDedicatedAllocationDescriptor;
-        }
-        alignas(wgpu::SharedTextureMemoryVkDedicatedAllocationDescriptor::kFirstMemberAlignment) wgpu::Bool dedicatedAllocation;
-
-        // Equality operators, mostly for testing. Note that this tests
-        // strict pointer-pointer equality if the struct contains member pointers.
-        bool operator==(const SharedTextureMemoryVkDedicatedAllocationDescriptor& rhs) const;
-    };
-
-    struct SharedTextureMemoryVkImageLayoutBeginState : ChainedStruct {
-        SharedTextureMemoryVkImageLayoutBeginState() {
-            sType = wgpu::SType::SharedTextureMemoryVkImageLayoutBeginState;
-        }
-        alignas(wgpu::SharedTextureMemoryVkImageLayoutBeginState::kFirstMemberAlignment) int32_t oldLayout;
-        int32_t newLayout;
-
-        // Equality operators, mostly for testing. Note that this tests
-        // strict pointer-pointer equality if the struct contains member pointers.
-        bool operator==(const SharedTextureMemoryVkImageLayoutBeginState& rhs) const;
-    };
-
-    struct SharedTextureMemoryVkImageLayoutEndState : ChainedStructOut {
-        SharedTextureMemoryVkImageLayoutEndState() {
-            sType = wgpu::SType::SharedTextureMemoryVkImageLayoutEndState;
-        }
-        alignas(wgpu::SharedTextureMemoryVkImageLayoutEndState::kFirstMemberAlignment) int32_t oldLayout;
-        int32_t newLayout;
-
-        // Equality operators, mostly for testing. Note that this tests
-        // strict pointer-pointer equality if the struct contains member pointers.
-        bool operator==(const SharedTextureMemoryVkImageLayoutEndState& rhs) const;
-    };
-
-    struct SharedTextureMemoryZirconHandleDescriptor : ChainedStruct {
-        SharedTextureMemoryZirconHandleDescriptor() {
-            sType = wgpu::SType::SharedTextureMemoryZirconHandleDescriptor;
-        }
-        alignas(wgpu::SharedTextureMemoryZirconHandleDescriptor::kFirstMemberAlignment) uint32_t memoryFD;
-        uint64_t allocationSize;
-
-        // Equality operators, mostly for testing. Note that this tests
-        // strict pointer-pointer equality if the struct contains member pointers.
-        bool operator==(const SharedTextureMemoryZirconHandleDescriptor& rhs) const;
     };
 
     struct StencilFaceState {
@@ -1011,7 +707,7 @@ namespace dawn::native {
         ChainedStruct const * nextInChain = nullptr;
         wgpu::TextureSampleType sampleType = wgpu::TextureSampleType::Undefined;
         wgpu::TextureViewDimension viewDimension = wgpu::TextureViewDimension::Undefined;
-        wgpu::Bool multisampled = false;
+        bool multisampled = false;
 
         // Equality operators, mostly for testing. Note that this tests
         // strict pointer-pointer equality if the struct contains member pointers.
@@ -1114,7 +810,7 @@ namespace dawn::native {
     struct DepthStencilState {
         ChainedStruct const * nextInChain = nullptr;
         wgpu::TextureFormat format;
-        wgpu::Bool depthWriteEnabled;
+        bool depthWriteEnabled;
         wgpu::CompareFunction depthCompare;
         StencilFaceState stencilFront;
         StencilFaceState stencilBack;
@@ -1136,12 +832,12 @@ namespace dawn::native {
         TextureViewBase* plane1 = nullptr;
         Origin2D visibleOrigin;
         Extent2D visibleSize;
-        wgpu::Bool doYuvToRgbConversionOnly = false;
+        bool doYuvToRgbConversionOnly = false;
         float const * yuvToRgbConversionMatrix = nullptr;
         float const * srcTransferFunctionParameters;
         float const * dstTransferFunctionParameters;
         float const * gamutConversionMatrix;
-        wgpu::Bool flipY = false;
+        bool flipY = false;
         wgpu::ExternalTextureRotation rotation = wgpu::ExternalTextureRotation::Rotate0Degrees;
 
         // Equality operators, mostly for testing. Note that this tests
@@ -1182,19 +878,6 @@ namespace dawn::native {
         bool operator==(const ImageCopyTexture& rhs) const;
     };
 
-    struct PipelineLayoutPixelLocalStorage : ChainedStruct {
-        PipelineLayoutPixelLocalStorage() {
-            sType = wgpu::SType::PipelineLayoutPixelLocalStorage;
-        }
-        alignas(wgpu::PipelineLayoutPixelLocalStorage::kFirstMemberAlignment) size_t totalPixelLocalStorageSize;
-        size_t storageAttachmentCount = 0;
-        PipelineLayoutStorageAttachment const * storageAttachments;
-
-        // Equality operators, mostly for testing. Note that this tests
-        // strict pointer-pointer equality if the struct contains member pointers.
-        bool operator==(const PipelineLayoutPixelLocalStorage& rhs) const;
-    };
-
     struct ProgrammableStageDescriptor {
         ChainedStruct const * nextInChain = nullptr;
         ShaderModuleBase* module;
@@ -1210,7 +893,6 @@ namespace dawn::native {
     struct RenderPassColorAttachment {
         ChainedStruct const * nextInChain = nullptr;
         TextureViewBase* view = nullptr;
-        uint32_t depthSlice = 0;
         TextureViewBase* resolveTarget = nullptr;
         wgpu::LoadOp loadOp;
         wgpu::StoreOp storeOp;
@@ -1221,19 +903,6 @@ namespace dawn::native {
         bool operator==(const RenderPassColorAttachment& rhs) const;
     };
 
-    struct RenderPassStorageAttachment {
-        ChainedStruct const * nextInChain = nullptr;
-        uint64_t offset = 0;
-        TextureViewBase* storage;
-        wgpu::LoadOp loadOp;
-        wgpu::StoreOp storeOp;
-        Color clearValue;
-
-        // Equality operators, mostly for testing. Note that this tests
-        // strict pointer-pointer equality if the struct contains member pointers.
-        bool operator==(const RenderPassStorageAttachment& rhs) const;
-    };
-
     struct RequiredLimits {
         ChainedStruct const * nextInChain = nullptr;
         Limits limits;
@@ -1241,30 +910,6 @@ namespace dawn::native {
         // Equality operators, mostly for testing. Note that this tests
         // strict pointer-pointer equality if the struct contains member pointers.
         bool operator==(const RequiredLimits& rhs) const;
-    };
-
-    struct SharedTextureMemoryProperties {
-        ChainedStructOut * nextInChain = nullptr;
-        wgpu::TextureUsage usage;
-        Extent3D size;
-        wgpu::TextureFormat format;
-
-        // Equality operators, mostly for testing. Note that this tests
-        // strict pointer-pointer equality if the struct contains member pointers.
-        bool operator==(const SharedTextureMemoryProperties& rhs) const;
-    };
-
-    struct SharedTextureMemoryVkImageDescriptor : ChainedStruct {
-        SharedTextureMemoryVkImageDescriptor() {
-            sType = wgpu::SType::SharedTextureMemoryVkImageDescriptor;
-        }
-        alignas(wgpu::SharedTextureMemoryVkImageDescriptor::kFirstMemberAlignment) int32_t vkFormat;
-        int32_t vkUsageFlags;
-        Extent3D vkExtent3D;
-
-        // Equality operators, mostly for testing. Note that this tests
-        // strict pointer-pointer equality if the struct contains member pointers.
-        bool operator==(const SharedTextureMemoryVkImageDescriptor& rhs) const;
     };
 
     struct SupportedLimits {
@@ -1340,7 +985,7 @@ namespace dawn::native {
     struct DeviceDescriptor {
         ChainedStruct const * nextInChain = nullptr;
         char const * label = nullptr;
-        size_t requiredFeatureCount = 0;
+        size_t requiredFeaturesCount = 0;
         wgpu::FeatureName const * requiredFeatures = nullptr;
         RequiredLimits const * requiredLimits = nullptr;
         QueueDescriptor defaultQueue;
@@ -1365,19 +1010,6 @@ namespace dawn::native {
         // Equality operators, mostly for testing. Note that this tests
         // strict pointer-pointer equality if the struct contains member pointers.
         bool operator==(const RenderPassDescriptor& rhs) const;
-    };
-
-    struct RenderPassPixelLocalStorage : ChainedStruct {
-        RenderPassPixelLocalStorage() {
-            sType = wgpu::SType::RenderPassPixelLocalStorage;
-        }
-        alignas(wgpu::RenderPassPixelLocalStorage::kFirstMemberAlignment) size_t totalPixelLocalStorageSize;
-        size_t storageAttachmentCount = 0;
-        RenderPassStorageAttachment const * storageAttachments;
-
-        // Equality operators, mostly for testing. Note that this tests
-        // strict pointer-pointer equality if the struct contains member pointers.
-        bool operator==(const RenderPassPixelLocalStorage& rhs) const;
     };
 
     struct VertexState {
@@ -1424,11 +1056,6 @@ namespace dawn::native {
     };
 
 
-
-    // AdapterProperties
-    void APIAdapterPropertiesFreeMembers(WGPUAdapterProperties);
-    // SharedTextureMemoryEndAccessState
-    void APISharedTextureMemoryEndAccessStateFreeMembers(WGPUSharedTextureMemoryEndAccessState);
 
 } // namespace dawn::native
 

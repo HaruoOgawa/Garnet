@@ -20,7 +20,7 @@
 namespace dawn {
 
 // The version string should either be a valid git hash or empty.
-static constexpr std::string_view kDawnVersion("d48e1fe74399616bf0db37e7fc3ebe0cbf850161");
+static constexpr std::string_view kDawnVersion("e0a623c1a63c56a731b682449fbec4d8a7085645");
 static_assert(kDawnVersion.size() == 40 || kDawnVersion.size() == 0);
 
 } // namespace dawn
