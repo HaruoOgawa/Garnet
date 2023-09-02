@@ -5,7 +5,6 @@
 #include <map>
 
 #include <dawn/webgpu.h>
-#include <dawn/webgpu_cpp.h>
 
 namespace api
 {

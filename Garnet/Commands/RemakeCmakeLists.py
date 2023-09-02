@@ -27,7 +27,7 @@ add_executable(
 Shared_Post = """
 )
 
-target_include_directories(Garnet PRIVATE ../src/Library/DawnLegacy/include/dawn ../src/Library/glm  ../src/Library/tinygltf)
+target_include_directories(Garnet PRIVATE ../src/Library/DawnLib/include ../src/Library/glm  ../src/Library/tinygltf)
 # target_include_directories(Garnet PRIVATE ../src/Library/WebGPU ../src/Library/glm  ../src/Library/tinygltf)
 
 if(EMSCRIPTEN)
