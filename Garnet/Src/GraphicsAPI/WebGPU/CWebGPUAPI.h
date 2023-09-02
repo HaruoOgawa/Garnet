@@ -5,6 +5,10 @@
 #include <map>
 
 #include <dawn/webgpu.h>
+#include <dawn/dawn_proc.h>
+#include <dawn/dawn_proc_table.h>
+#include <dawn/wire/WireClient.h>
+#include <dawn/wire/WireServer.h>
 
 namespace api
 {
@@ -58,6 +62,7 @@ namespace api
 
 	private:
 		// WebGPU メインロジック ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		bool SetDawnProcs();
 		bool CreateInstance();
 #ifdef __EMSCRIPTEN__
 		bool CreateSurface();
