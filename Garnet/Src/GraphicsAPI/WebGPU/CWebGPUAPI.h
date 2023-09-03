@@ -8,7 +8,7 @@
 #ifdef __EMSCRIPTEN__
 #include <dawn/webgpu.h>
 #else
-#include <webgpu.h>
+#include <dawn/webgpu_cpp.h>
 #endif
 
 /*#include <dawn/webgpu.h>
