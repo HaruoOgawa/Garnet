@@ -1,1 +1,2 @@
 Garnet/Src/Library/Dawn/bin/tint filter=lfs diff=lfs merge=lfs -text
+Garnet/Src/Library/DawnLib/bin/dawn_native.lib filter=lfs diff=lfs merge=lfs -text

@@ -1,8 +1,7 @@
 #pragma once
 #ifdef USE_WEBGPU
 #include "../../Graphics/CTexture.h"
-
-#include <webgpu.h>
+#include "CWebGPUAPI.h"
 
 namespace api
 {

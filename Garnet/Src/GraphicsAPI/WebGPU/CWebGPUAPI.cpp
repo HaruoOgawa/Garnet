@@ -297,9 +297,9 @@ namespace api
 		WGPUInstanceDescriptor desc = {};
 		desc.nextInChain = nullptr; // 拡張機を設定用のフィールド
 
-		// インスタンスを生成
-#ifndef __EMSCRIPTEN__
 		// Emscriptenの場合はInstanceを必要としない
+#ifndef __EMSCRIPTEN__
+		// インスタンスを生成
 		m_Instance = wgpuCreateInstance(&desc);
 
 		if (!m_Instance)
@@ -583,6 +583,8 @@ namespace api
 
 		// レンダーパスの設定
 		WGPURenderPassColorAttachment renderPassColorAttachment = {};
+		//renderPassColorAttachment.nextInChain = nullptr;
+		//renderPassColorAttachment.depthSlice = 0;
 		renderPassColorAttachment.view = NextTexture; // レンダリングの描画先テクスチャを指定
 		renderPassColorAttachment.resolveTarget = nullptr; // マルチサンプリングの設定
 		renderPassColorAttachment.loadOp = WGPULoadOp_Clear; // レンダー パスを実行する前にビューで実行するロード操作を示します。例えばクリア値に初期化するだったり

@@ -79,6 +79,8 @@ namespace scene
 			auto ParamUBO = graphics::CMaterialCreateInfo::CreateUniformBuffer({ graphics::SBindingLayout("ParamUBO", 0) });
 			ParamUBO->AddData("time", &glm::vec1(0.0f)[0], sizeof(glm::vec1), 0);
 			ParamUBO->AddData("deltaTime", &glm::vec1(0.0f)[0], sizeof(glm::vec1), 0);
+			ParamUBO->AddData("pad0", &glm::vec1(0.0f)[0], sizeof(glm::vec1), 0);
+			ParamUBO->AddData("pad1", &glm::vec1(0.0f)[0], sizeof(glm::vec1), 0);
 
 			ComputeMaterial->AddShaderBuffer(ParamUBO);
 

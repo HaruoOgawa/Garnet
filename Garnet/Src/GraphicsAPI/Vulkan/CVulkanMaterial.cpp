@@ -76,6 +76,8 @@ namespace api
 			// SharedBufferは処理しない
 			if (m_ShaderBufferList[i]->GetSharedBufferParam().IsShared) continue;
 
+			if (m_ShaderBufferList[i]->GetBufferType() == graphics::EBufferType::SHADERSTORAGE) continue;
+
 			auto ByteSize = m_VKUniformBufferSizeList[m_pGraphicsAPI->GetCurrentFrame()][i];
 			auto ByteOffset = ((m_UseDynamicBufferOffset)? (DynamicOffsetNum - 1) * ByteSize : 0);
 
@@ -118,6 +120,25 @@ namespace api
 
 	void CVulkanMaterial::Release()
 	{
+		// ShaderModuleの破棄
+		if (m_VertShaderModule)
+		{
+			vkDestroyShaderModule(m_pGraphicsAPI->GetLogicalDevice(), m_VertShaderModule, nullptr);
+			m_VertShaderModule = nullptr;
+		}
+		
+		if (m_FragShaderModule)
+		{
+			vkDestroyShaderModule(m_pGraphicsAPI->GetLogicalDevice(), m_FragShaderModule, nullptr);
+			m_FragShaderModule = nullptr;
+		}
+		
+		if (m_ComputeShaderModule)
+		{
+			vkDestroyShaderModule(m_pGraphicsAPI->GetLogicalDevice(), m_ComputeShaderModule, nullptr);
+			m_ComputeShaderModule = nullptr;
+		}
+
 		// ユニフォームの破棄
 		for (size_t i = 0; i < m_pGraphicsAPI->GetMaxFramesInFlight(); i++)
 		{
@@ -317,8 +338,8 @@ namespace api
 				const auto& Data = Buffer->GetData();
 				const uint32_t ByteSize = static_cast<uint32_t>(math::GetNextPowerOfTwo(static_cast<unsigned int>(Data.size()))); // 2のn乗にする
 
-				VkBuffer UniformBuffer;
-				VkDeviceMemory BufferMemory;
+				VkBuffer UniformBuffer = nullptr;
+				VkDeviceMemory BufferMemory = nullptr;
 
 				// バッファの作成
 				if (Buffer->GetBufferType() == graphics::EBufferType::UNIFORM)
@@ -344,7 +365,18 @@ namespace api
 					}
 				}
 
-				//
+				// バッファの初期化
+				if (Buffer->GetBufferType() == graphics::EBufferType::SHADERSTORAGE)
+				{
+					// ひとまずDynamicOffset周りでいろいろ問題が起こりそうなのでSSBOの時だけ初期化する
+					// (様子をみて変えるかも)
+					void* BuffersMappedList;
+					vkMapMemory(m_pGraphicsAPI->GetLogicalDevice(), BufferMemory, 0, ByteSize, 0, &BuffersMappedList);
+					std::memcpy(BuffersMappedList, &Data[0], ByteSize);
+					vkUnmapMemory(m_pGraphicsAPI->GetLogicalDevice(), BufferMemory);
+				}
+
+				// バッファをリストに追加
 				m_VKUniformBufferList[i].push_back(UniformBuffer);
 				m_VKUniformBufferMemoryList[i].push_back(BufferMemory);
 				m_VKUniformBufferSizeList[i].push_back(ByteSize);

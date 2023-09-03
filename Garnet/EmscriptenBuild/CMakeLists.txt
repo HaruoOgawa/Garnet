@@ -20,8 +20,6 @@ add_executable(
 	../src/App/CWebAppManager.cpp
 	../src/App/CWebAppManager.h
 	../src/App/EAppType.h
-	../src/App/EditorApp/CEditorApp.cpp
-	../src/App/EditorApp/CEditorApp.h
 	../src/App/ScriptApp/CScriptApp.cpp
 	../src/App/ScriptApp/CScriptApp.h
 	../src/Camera/CCamera.cpp
@@ -101,8 +99,8 @@ add_executable(
 
 )
 
-# target_include_directories(Garnet PRIVATE ../src/Library/Dawn/include/dawn ../src/Library/glm  ../src/Library/tinygltf)
-target_include_directories(Garnet PRIVATE ../src/Library/WebGPU ../src/Library/glm  ../src/Library/tinygltf)
+target_include_directories(Garnet PRIVATE ../src/Library/DawnLib/include ../src/Library/glm  ../src/Library/tinygltf)
+# target_include_directories(Garnet PRIVATE ../src/Library/WebGPU ../src/Library/glm  ../src/Library/tinygltf)
 
 if(EMSCRIPTEN)
 	target_link_options(Garnet PRIVATE 

@@ -153,6 +153,7 @@ namespace renderer
 		}
 
 		// 頂点シェーダー
+		pipelineDesc.vertex.nextInChain = nullptr;
 		pipelineDesc.vertex.bufferCount = static_cast<uint32_t>(vertexBufferLayouts.size()); // 頂点バッファ
 		pipelineDesc.vertex.buffers = &vertexBufferLayouts[0];
 		pipelineDesc.vertex.module = pWebGPUMat->GetVertexShaderModele(); // 頂点シェーダー
@@ -161,6 +162,7 @@ namespace renderer
 		pipelineDesc.vertex.constants = nullptr;
 
 		// プリミティブの設定
+		pipelineDesc.primitive.nextInChain = nullptr;
 		pipelineDesc.primitive.topology = WGPUPrimitiveTopology_TriangleList; // トポロジー
 		pipelineDesc.primitive.stripIndexFormat = WGPUIndexFormat_Undefined; // インデックスバッファの型かな
 		pipelineDesc.primitive.frontFace = WGPUFrontFace_CCW; // カリングの方向
@@ -187,6 +189,7 @@ namespace renderer
 		// ステンシルバッファ・デプスバッファ
 		WGPUDepthStencilState depthStencilState;
 		SetDefaultDepthStencil(depthStencilState);
+		depthStencilState.nextInChain = nullptr;
 		depthStencilState.depthCompare = WGPUCompareFunction_Less;
 		depthStencilState.depthWriteEnabled = pWebGPUMat->IsEnabledZTest();
 		WGPUTextureFormat depthTextureFormat = WGPUTextureFormat_Depth24Plus;
@@ -208,17 +211,20 @@ namespace renderer
 		blendState.alpha.operation = WGPUBlendOperation_Add;
 
 		WGPUColorTargetState colorTarget{};
+		colorTarget.nextInChain = nullptr;
 		colorTarget.format = m_pGraphicsAPI->GetSwapChainFormat();
 		colorTarget.blend = &blendState;
 		colorTarget.writeMask = WGPUColorWriteMask_All;
 
 		// マルチサンプリング(MSAA)
+		pipelineDesc.multisample.nextInChain = nullptr;
 		pipelineDesc.multisample.count = 1;
 		pipelineDesc.multisample.mask = ~0u; // ??? Bit Mask ???
 		pipelineDesc.multisample.alphaToCoverageEnabled = false; // ???
 
 		// フラグメントシェーダー
 		WGPUFragmentState fragmentState{};
+		fragmentState.nextInChain = nullptr;
 		fragmentState.module = pWebGPUMat->GetFragmentShaderModele();
 		fragmentState.entryPoint = "main";
 		fragmentState.constantCount = 0;
@@ -300,6 +306,8 @@ namespace renderer
 
 	void CWebGPURenderer::SetDefaultDepthStencil(WGPUDepthStencilState& depthStencilState)
 	{
+		depthStencilState.nextInChain = nullptr;
+
 		depthStencilState.format = WGPUTextureFormat::WGPUTextureFormat_Undefined;
 		depthStencilState.depthWriteEnabled = false;
 		depthStencilState.depthCompare = WGPUCompareFunction_Always;

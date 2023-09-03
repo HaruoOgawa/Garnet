@@ -6,14 +6,35 @@ namespace api
 {
 	CVulkanGPGPUHandler::CVulkanGPGPUHandler(api::CVulkanAPI* pGraphicsAPI, const std::shared_ptr<graphics::CMaterial>& ComputeMaterial):
 		m_pGraphicsAPI(pGraphicsAPI),
+		m_MinDeltaSecondsTime(1.0f / 60.0f),
 		m_ComputeMaterial(ComputeMaterial),
+
 		m_ComputePipelineLayout(nullptr),
-		m_ComputePipeline(nullptr)
+		m_ComputePipeline(nullptr),
+		m_CommandPool(nullptr),
+		m_CommandBuffer(nullptr)
 	{
 	}
 
 	CVulkanGPGPUHandler::~CVulkanGPGPUHandler()
 	{
+		if (m_ComputePipelineLayout)
+		{
+			vkDestroyPipelineLayout(m_pGraphicsAPI->GetLogicalDevice(), m_ComputePipelineLayout, nullptr);
+			m_ComputePipelineLayout = nullptr;
+		}
+
+		if (m_ComputePipeline)
+		{
+			vkDestroyPipeline(m_pGraphicsAPI->GetLogicalDevice(), m_ComputePipeline, nullptr);
+			m_ComputePipeline = nullptr;
+		}
+
+		if (m_CommandPool)
+		{
+			vkDestroyCommandPool(m_pGraphicsAPI->GetLogicalDevice(), m_CommandPool, nullptr);
+			m_CommandPool = nullptr;
+		}
 	}
 
 	const std::shared_ptr<graphics::CMaterial>& CVulkanGPGPUHandler::GetComputeMaterial()
@@ -68,8 +89,15 @@ namespace api
 		api::CVulkanMaterial* pVulkanMat = static_cast<api::CVulkanMaterial*>(m_ComputeMaterial.get());
 
 		// データの更新
+		// DeltaTimeが毎フレーム大きくなったり小さくなったりすると、シミュレーションがガタガタするので0.001000f以上の最小の数を固定のdeltaTimeとする
+		const float CurrentDeltaSecondsTime = DrawInfo->GetDeltaSecondsTime();
+		m_MinDeltaSecondsTime = glm::max(0.001000f, glm::min(CurrentDeltaSecondsTime, m_MinDeltaSecondsTime));
+		DrawInfo->SetDeltaSecondsTime(m_MinDeltaSecondsTime);
+
 		if (!pVulkanMat->SetCommonUniform(Camera, Projection, DrawInfo)) return false;
 		if (!pVulkanMat->BuildDrawBuffer(0)) return false;
+
+		DrawInfo->SetDeltaSecondsTime(CurrentDeltaSecondsTime); // DeltaTimeを元に戻す
 
 		// コマンドバッファの記録開始
 		if (!BeginRecordCommandBuffer()) return false;
@@ -122,22 +150,18 @@ namespace api
 		}
 
 		// コマンドバッファの送信
+		const auto& Semaphore = m_pGraphicsAPI->GetComputeFlightSemaphore();
+		const auto& Fence = m_pGraphicsAPI->GetComputeInFlightFence();
+		VkSemaphore waitSemaphore[] = { m_pGraphicsAPI->GetRenderFlightSemaphore()}; // セマフォで待つ
+
 		VkSubmitInfo submitInfo{};
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-
+		submitInfo.pWaitSemaphores = waitSemaphore;
+		submitInfo.waitSemaphoreCount = 1;
 		submitInfo.commandBufferCount = 1;
 		submitInfo.pCommandBuffers = &m_CommandBuffer;
-
-		submitInfo.waitSemaphoreCount = 0;
-		submitInfo.pWaitSemaphores = nullptr;
-		submitInfo.pWaitDstStageMask = nullptr;
-
-		const auto& Semaphore = m_pGraphicsAPI->GetComputeFlightSemaphore();
-
 		submitInfo.signalSemaphoreCount = 1;
 		submitInfo.pSignalSemaphores = &Semaphore;
-
-		const auto& Fence = m_pGraphicsAPI->GetComputeInFlightFence();
 
 		if (vkQueueSubmit(m_pGraphicsAPI->GetComputeQueue(), 1, &submitInfo, Fence) != VK_SUCCESS) // Compute Queueを実行
 		{

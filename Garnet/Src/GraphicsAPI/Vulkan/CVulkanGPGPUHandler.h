@@ -12,6 +12,8 @@ namespace api
 
 		std::shared_ptr<graphics::CMaterial> m_ComputeMaterial;
 
+		float m_MinDeltaSecondsTime;
+
 		// Pipeline
 		VkPipelineLayout m_ComputePipelineLayout;
 		VkPipeline m_ComputePipeline;
