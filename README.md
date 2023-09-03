@@ -5,7 +5,7 @@
 * [VSYASM](https://github.com/ShiftMediaProject/VSYASM)
   * compile 4klang
 * emsdk 3.1.44
-* Google Dawn [chromium/5902](https://dawn.googlesource.com/dawn/+/refs/heads/chromium/5902)
+* Google Dawn [chromium/5904](https://dawn.googlesource.com/dawn/+/refs/heads/chromium/5904)
 * [ninja 1.11.1](https://github.com/ninja-build/ninja)
 ## Overview
 Garnet is Computer Graphics Engine running on Vulkan and WebGPU.
