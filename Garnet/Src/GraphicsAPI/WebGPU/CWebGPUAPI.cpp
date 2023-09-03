@@ -583,7 +583,7 @@ namespace api
 
 		// レンダーパスの設定
 		WGPURenderPassColorAttachment renderPassColorAttachment = {};
-		renderPassColorAttachment.nextInChain = nullptr;
+		//renderPassColorAttachment.nextInChain = nullptr;
 		//renderPassColorAttachment.depthSlice = 0;
 		renderPassColorAttachment.view = NextTexture; // レンダリングの描画先テクスチャを指定
 		renderPassColorAttachment.resolveTarget = nullptr; // マルチサンプリングの設定
