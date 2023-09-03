@@ -2,7 +2,8 @@ import os
 
 def Main():
 	#
-	srcPath = "../Src/Library/dawn/"
+	# E:\CppDev\Garnet\Garnet\Src/Library/dawn/out_win
+	srcPath = "../Src/Library/dawn"
 	exportText = ""
 
 	# FindLib
@@ -37,6 +38,9 @@ def Main():
 def FindDir(subfolders, libFileList, libDirList, parentPath):
 	for folder in subfolders:
 		currentPath = parentPath + "/" + folder
+
+		if(currentPath == "E:\CppDev\Garnet\Garnet\Src/Library/dawn/out_win"):
+			continue
 
 		if(os.path.isdir(currentPath)):
 			FindDir(os.listdir(currentPath), libFileList, libDirList, currentPath)

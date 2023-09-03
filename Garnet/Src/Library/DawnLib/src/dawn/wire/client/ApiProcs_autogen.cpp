@@ -269,13 +269,7 @@ namespace dawn::wire::client {
 
         cmd.self = cSelf;
 
-
-        ComputePassEncoder* returnObject;
-        if constexpr (std::is_constructible_v<ComputePassEncoder, const ObjectBaseParams&, decltype(descriptor)>) {
-            returnObject = self->GetClient()->Make<ComputePassEncoder>(descriptor);
-        } else {
-            returnObject = self->GetClient()->Make<ComputePassEncoder>();
-        }
+        auto* returnObject = self->GetClient()->Make<ComputePassEncoder>();
         cmd.result = returnObject->GetWireHandle();
 
         
@@ -292,13 +286,7 @@ namespace dawn::wire::client {
 
         cmd.self = cSelf;
 
-
-        RenderPassEncoder* returnObject;
-        if constexpr (std::is_constructible_v<RenderPassEncoder, const ObjectBaseParams&, decltype(descriptor)>) {
-            returnObject = self->GetClient()->Make<RenderPassEncoder>(descriptor);
-        } else {
-            returnObject = self->GetClient()->Make<RenderPassEncoder>();
-        }
+        auto* returnObject = self->GetClient()->Make<RenderPassEncoder>();
         cmd.result = returnObject->GetWireHandle();
 
         
@@ -427,13 +415,7 @@ namespace dawn::wire::client {
 
         cmd.self = cSelf;
 
-
-        CommandBuffer* returnObject;
-        if constexpr (std::is_constructible_v<CommandBuffer, const ObjectBaseParams&, decltype(descriptor)>) {
-            returnObject = self->GetClient()->Make<CommandBuffer>(descriptor);
-        } else {
-            returnObject = self->GetClient()->Make<CommandBuffer>();
-        }
+        auto* returnObject = self->GetClient()->Make<CommandBuffer>();
         cmd.result = returnObject->GetWireHandle();
 
         
@@ -768,13 +750,7 @@ namespace dawn::wire::client {
 
         cmd.self = cSelf;
 
-
-        BindGroupLayout* returnObject;
-        if constexpr (std::is_constructible_v<BindGroupLayout, const ObjectBaseParams&, decltype(groupIndex)>) {
-            returnObject = self->GetClient()->Make<BindGroupLayout>(groupIndex);
-        } else {
-            returnObject = self->GetClient()->Make<BindGroupLayout>();
-        }
+        auto* returnObject = self->GetClient()->Make<BindGroupLayout>();
         cmd.result = returnObject->GetWireHandle();
 
         
@@ -826,13 +802,7 @@ namespace dawn::wire::client {
 
         cmd.self = cSelf;
 
-
-        BindGroup* returnObject;
-        if constexpr (std::is_constructible_v<BindGroup, const ObjectBaseParams&, decltype(descriptor)>) {
-            returnObject = self->GetClient()->Make<BindGroup>(descriptor);
-        } else {
-            returnObject = self->GetClient()->Make<BindGroup>();
-        }
+        auto* returnObject = self->GetClient()->Make<BindGroup>();
         cmd.result = returnObject->GetWireHandle();
 
         
@@ -849,13 +819,7 @@ namespace dawn::wire::client {
 
         cmd.self = cSelf;
 
-
-        BindGroupLayout* returnObject;
-        if constexpr (std::is_constructible_v<BindGroupLayout, const ObjectBaseParams&, decltype(descriptor)>) {
-            returnObject = self->GetClient()->Make<BindGroupLayout>(descriptor);
-        } else {
-            returnObject = self->GetClient()->Make<BindGroupLayout>();
-        }
+        auto* returnObject = self->GetClient()->Make<BindGroupLayout>();
         cmd.result = returnObject->GetWireHandle();
 
         
@@ -878,13 +842,7 @@ namespace dawn::wire::client {
 
         cmd.self = cSelf;
 
-
-        CommandEncoder* returnObject;
-        if constexpr (std::is_constructible_v<CommandEncoder, const ObjectBaseParams&, decltype(descriptor)>) {
-            returnObject = self->GetClient()->Make<CommandEncoder>(descriptor);
-        } else {
-            returnObject = self->GetClient()->Make<CommandEncoder>();
-        }
+        auto* returnObject = self->GetClient()->Make<CommandEncoder>();
         cmd.result = returnObject->GetWireHandle();
 
         
@@ -901,13 +859,7 @@ namespace dawn::wire::client {
 
         cmd.self = cSelf;
 
-
-        ComputePipeline* returnObject;
-        if constexpr (std::is_constructible_v<ComputePipeline, const ObjectBaseParams&, decltype(descriptor)>) {
-            returnObject = self->GetClient()->Make<ComputePipeline>(descriptor);
-        } else {
-            returnObject = self->GetClient()->Make<ComputePipeline>();
-        }
+        auto* returnObject = self->GetClient()->Make<ComputePipeline>();
         cmd.result = returnObject->GetWireHandle();
 
         
@@ -924,27 +876,10 @@ namespace dawn::wire::client {
         return self->CreateComputePipelineAsync( descriptor,  callback,  userdata);
     }
 
+    static
     WGPUBuffer ClientDeviceCreateErrorBuffer(WGPUDevice cSelf, WGPUBufferDescriptor const * descriptor) {
         auto self = reinterpret_cast<Device*>(cSelf);
-        DeviceCreateErrorBufferCmd cmd;
-
-        cmd.self = cSelf;
-
-
-        Buffer* returnObject;
-        if constexpr (std::is_constructible_v<Buffer, const ObjectBaseParams&, decltype(descriptor)>) {
-            returnObject = self->GetClient()->Make<Buffer>(descriptor);
-        } else {
-            returnObject = self->GetClient()->Make<Buffer>();
-        }
-        cmd.result = returnObject->GetWireHandle();
-
-        
-        cmd.descriptor = descriptor;
-
-        self->GetClient()->SerializeCommand(cmd);
-
-        return ToAPI(returnObject);
+        return self->CreateErrorBuffer( descriptor);
     }
 
     WGPUExternalTexture ClientDeviceCreateErrorExternalTexture(WGPUDevice cSelf) {
@@ -953,13 +888,7 @@ namespace dawn::wire::client {
 
         cmd.self = cSelf;
 
-
-        ExternalTexture* returnObject;
-        if constexpr (std::is_constructible_v<ExternalTexture, const ObjectBaseParams&>) {
-            returnObject = self->GetClient()->Make<ExternalTexture>();
-        } else {
-            returnObject = self->GetClient()->Make<ExternalTexture>();
-        }
+        auto* returnObject = self->GetClient()->Make<ExternalTexture>();
         cmd.result = returnObject->GetWireHandle();
 
 
@@ -974,13 +903,7 @@ namespace dawn::wire::client {
 
         cmd.self = cSelf;
 
-
-        ShaderModule* returnObject;
-        if constexpr (std::is_constructible_v<ShaderModule, const ObjectBaseParams&, decltype(descriptor), decltype(errorMessage)>) {
-            returnObject = self->GetClient()->Make<ShaderModule>(descriptor, errorMessage);
-        } else {
-            returnObject = self->GetClient()->Make<ShaderModule>();
-        }
+        auto* returnObject = self->GetClient()->Make<ShaderModule>();
         cmd.result = returnObject->GetWireHandle();
 
         
@@ -993,27 +916,10 @@ namespace dawn::wire::client {
         return ToAPI(returnObject);
     }
 
+    static
     WGPUTexture ClientDeviceCreateErrorTexture(WGPUDevice cSelf, WGPUTextureDescriptor const * descriptor) {
         auto self = reinterpret_cast<Device*>(cSelf);
-        DeviceCreateErrorTextureCmd cmd;
-
-        cmd.self = cSelf;
-
-
-        Texture* returnObject;
-        if constexpr (std::is_constructible_v<Texture, const ObjectBaseParams&, decltype(descriptor)>) {
-            returnObject = self->GetClient()->Make<Texture>(descriptor);
-        } else {
-            returnObject = self->GetClient()->Make<Texture>();
-        }
-        cmd.result = returnObject->GetWireHandle();
-
-        
-        cmd.descriptor = descriptor;
-
-        self->GetClient()->SerializeCommand(cmd);
-
-        return ToAPI(returnObject);
+        return self->CreateErrorTexture( descriptor);
     }
 
     WGPUExternalTexture ClientDeviceCreateExternalTexture(WGPUDevice cSelf, WGPUExternalTextureDescriptor const * externalTextureDescriptor) {
@@ -1022,13 +928,7 @@ namespace dawn::wire::client {
 
         cmd.self = cSelf;
 
-
-        ExternalTexture* returnObject;
-        if constexpr (std::is_constructible_v<ExternalTexture, const ObjectBaseParams&, decltype(externalTextureDescriptor)>) {
-            returnObject = self->GetClient()->Make<ExternalTexture>(externalTextureDescriptor);
-        } else {
-            returnObject = self->GetClient()->Make<ExternalTexture>();
-        }
+        auto* returnObject = self->GetClient()->Make<ExternalTexture>();
         cmd.result = returnObject->GetWireHandle();
 
         
@@ -1045,13 +945,7 @@ namespace dawn::wire::client {
 
         cmd.self = cSelf;
 
-
-        PipelineLayout* returnObject;
-        if constexpr (std::is_constructible_v<PipelineLayout, const ObjectBaseParams&, decltype(descriptor)>) {
-            returnObject = self->GetClient()->Make<PipelineLayout>(descriptor);
-        } else {
-            returnObject = self->GetClient()->Make<PipelineLayout>();
-        }
+        auto* returnObject = self->GetClient()->Make<PipelineLayout>();
         cmd.result = returnObject->GetWireHandle();
 
         
@@ -1062,27 +956,10 @@ namespace dawn::wire::client {
         return ToAPI(returnObject);
     }
 
+    static
     WGPUQuerySet ClientDeviceCreateQuerySet(WGPUDevice cSelf, WGPUQuerySetDescriptor const * descriptor) {
         auto self = reinterpret_cast<Device*>(cSelf);
-        DeviceCreateQuerySetCmd cmd;
-
-        cmd.self = cSelf;
-
-
-        QuerySet* returnObject;
-        if constexpr (std::is_constructible_v<QuerySet, const ObjectBaseParams&, decltype(descriptor)>) {
-            returnObject = self->GetClient()->Make<QuerySet>(descriptor);
-        } else {
-            returnObject = self->GetClient()->Make<QuerySet>();
-        }
-        cmd.result = returnObject->GetWireHandle();
-
-        
-        cmd.descriptor = descriptor;
-
-        self->GetClient()->SerializeCommand(cmd);
-
-        return ToAPI(returnObject);
+        return self->CreateQuerySet( descriptor);
     }
 
     WGPURenderBundleEncoder ClientDeviceCreateRenderBundleEncoder(WGPUDevice cSelf, WGPURenderBundleEncoderDescriptor const * descriptor) {
@@ -1091,13 +968,7 @@ namespace dawn::wire::client {
 
         cmd.self = cSelf;
 
-
-        RenderBundleEncoder* returnObject;
-        if constexpr (std::is_constructible_v<RenderBundleEncoder, const ObjectBaseParams&, decltype(descriptor)>) {
-            returnObject = self->GetClient()->Make<RenderBundleEncoder>(descriptor);
-        } else {
-            returnObject = self->GetClient()->Make<RenderBundleEncoder>();
-        }
+        auto* returnObject = self->GetClient()->Make<RenderBundleEncoder>();
         cmd.result = returnObject->GetWireHandle();
 
         
@@ -1114,13 +985,7 @@ namespace dawn::wire::client {
 
         cmd.self = cSelf;
 
-
-        RenderPipeline* returnObject;
-        if constexpr (std::is_constructible_v<RenderPipeline, const ObjectBaseParams&, decltype(descriptor)>) {
-            returnObject = self->GetClient()->Make<RenderPipeline>(descriptor);
-        } else {
-            returnObject = self->GetClient()->Make<RenderPipeline>();
-        }
+        auto* returnObject = self->GetClient()->Make<RenderPipeline>();
         cmd.result = returnObject->GetWireHandle();
 
         
@@ -1143,13 +1008,7 @@ namespace dawn::wire::client {
 
         cmd.self = cSelf;
 
-
-        Sampler* returnObject;
-        if constexpr (std::is_constructible_v<Sampler, const ObjectBaseParams&, decltype(descriptor)>) {
-            returnObject = self->GetClient()->Make<Sampler>(descriptor);
-        } else {
-            returnObject = self->GetClient()->Make<Sampler>();
-        }
+        auto* returnObject = self->GetClient()->Make<Sampler>();
         cmd.result = returnObject->GetWireHandle();
 
         
@@ -1166,13 +1025,7 @@ namespace dawn::wire::client {
 
         cmd.self = cSelf;
 
-
-        ShaderModule* returnObject;
-        if constexpr (std::is_constructible_v<ShaderModule, const ObjectBaseParams&, decltype(descriptor)>) {
-            returnObject = self->GetClient()->Make<ShaderModule>(descriptor);
-        } else {
-            returnObject = self->GetClient()->Make<ShaderModule>();
-        }
+        auto* returnObject = self->GetClient()->Make<ShaderModule>();
         cmd.result = returnObject->GetWireHandle();
 
         
@@ -1183,52 +1036,16 @@ namespace dawn::wire::client {
         return ToAPI(returnObject);
     }
 
+    static
     WGPUSwapChain ClientDeviceCreateSwapChain(WGPUDevice cSelf, WGPUSurface surface, WGPUSwapChainDescriptor const * descriptor) {
         auto self = reinterpret_cast<Device*>(cSelf);
-        DeviceCreateSwapChainCmd cmd;
-
-        cmd.self = cSelf;
-
-
-        SwapChain* returnObject;
-        if constexpr (std::is_constructible_v<SwapChain, const ObjectBaseParams&, decltype(surface), decltype(descriptor)>) {
-            returnObject = self->GetClient()->Make<SwapChain>(surface, descriptor);
-        } else {
-            returnObject = self->GetClient()->Make<SwapChain>();
-        }
-        cmd.result = returnObject->GetWireHandle();
-
-        
-        cmd.surface = surface;
-        
-        cmd.descriptor = descriptor;
-
-        self->GetClient()->SerializeCommand(cmd);
-
-        return ToAPI(returnObject);
+        return self->CreateSwapChain( surface,  descriptor);
     }
 
+    static
     WGPUTexture ClientDeviceCreateTexture(WGPUDevice cSelf, WGPUTextureDescriptor const * descriptor) {
         auto self = reinterpret_cast<Device*>(cSelf);
-        DeviceCreateTextureCmd cmd;
-
-        cmd.self = cSelf;
-
-
-        Texture* returnObject;
-        if constexpr (std::is_constructible_v<Texture, const ObjectBaseParams&, decltype(descriptor)>) {
-            returnObject = self->GetClient()->Make<Texture>(descriptor);
-        } else {
-            returnObject = self->GetClient()->Make<Texture>();
-        }
-        cmd.result = returnObject->GetWireHandle();
-
-        
-        cmd.descriptor = descriptor;
-
-        self->GetClient()->SerializeCommand(cmd);
-
-        return ToAPI(returnObject);
+        return self->CreateTexture( descriptor);
     }
 
     void ClientDeviceDestroy(WGPUDevice cSelf) {
@@ -1266,6 +1083,12 @@ namespace dawn::wire::client {
     }
 
     static
+    WGPUAdapter ClientDeviceGetAdapter(WGPUDevice cSelf) {
+        auto self = reinterpret_cast<Device*>(cSelf);
+        return self->GetAdapter();
+    }
+
+    static
     bool ClientDeviceGetLimits(WGPUDevice cSelf, WGPUSupportedLimits * limits) {
         auto self = reinterpret_cast<Device*>(cSelf);
         return self->GetLimits( limits);
@@ -1275,6 +1098,12 @@ namespace dawn::wire::client {
     WGPUQueue ClientDeviceGetQueue(WGPUDevice cSelf) {
         auto self = reinterpret_cast<Device*>(cSelf);
         return self->GetQueue();
+    }
+
+    static
+    WGPUTextureUsageFlags ClientDeviceGetSupportedSurfaceUsage(WGPUDevice cSelf, WGPUSurface surface) {
+        auto self = reinterpret_cast<Device*>(cSelf);
+        return self->GetSupportedSurfaceUsage( surface);
     }
 
     static
@@ -1465,13 +1294,7 @@ namespace dawn::wire::client {
 
         cmd.self = cSelf;
 
-
-        Surface* returnObject;
-        if constexpr (std::is_constructible_v<Surface, const ObjectBaseParams&, decltype(descriptor)>) {
-            returnObject = self->GetClient()->Make<Surface>(descriptor);
-        } else {
-            returnObject = self->GetClient()->Make<Surface>();
-        }
+        auto* returnObject = self->GetClient()->Make<Surface>();
         cmd.result = returnObject->GetWireHandle();
 
         
@@ -1839,13 +1662,7 @@ namespace dawn::wire::client {
 
         cmd.self = cSelf;
 
-
-        RenderBundle* returnObject;
-        if constexpr (std::is_constructible_v<RenderBundle, const ObjectBaseParams&, decltype(descriptor)>) {
-            returnObject = self->GetClient()->Make<RenderBundle>(descriptor);
-        } else {
-            returnObject = self->GetClient()->Make<RenderBundle>();
-        }
+        auto* returnObject = self->GetClient()->Make<RenderBundle>();
         cmd.result = returnObject->GetWireHandle();
 
         
@@ -2376,13 +2193,7 @@ namespace dawn::wire::client {
 
         cmd.self = cSelf;
 
-
-        BindGroupLayout* returnObject;
-        if constexpr (std::is_constructible_v<BindGroupLayout, const ObjectBaseParams&, decltype(groupIndex)>) {
-            returnObject = self->GetClient()->Make<BindGroupLayout>(groupIndex);
-        } else {
-            returnObject = self->GetClient()->Make<BindGroupLayout>();
-        }
+        auto* returnObject = self->GetClient()->Make<BindGroupLayout>();
         cmd.result = returnObject->GetWireHandle();
 
         
@@ -2537,13 +2348,7 @@ namespace dawn::wire::client {
 
         cmd.self = cSelf;
 
-
-        TextureView* returnObject;
-        if constexpr (std::is_constructible_v<TextureView, const ObjectBaseParams&>) {
-            returnObject = self->GetClient()->Make<TextureView>();
-        } else {
-            returnObject = self->GetClient()->Make<TextureView>();
-        }
+        auto* returnObject = self->GetClient()->Make<TextureView>();
         cmd.result = returnObject->GetWireHandle();
 
 
@@ -2591,13 +2396,7 @@ namespace dawn::wire::client {
 
         cmd.self = cSelf;
 
-
-        TextureView* returnObject;
-        if constexpr (std::is_constructible_v<TextureView, const ObjectBaseParams&, decltype(descriptor)>) {
-            returnObject = self->GetClient()->Make<TextureView>(descriptor);
-        } else {
-            returnObject = self->GetClient()->Make<TextureView>();
-        }
+        auto* returnObject = self->GetClient()->Make<TextureView>();
         cmd.result = returnObject->GetWireHandle();
 
         
@@ -2835,8 +2634,10 @@ namespace dawn::wire::client {
             { reinterpret_cast<WGPUProc>(ClientDeviceDestroy), "wgpuDeviceDestroy" },
             { reinterpret_cast<WGPUProc>(ClientDeviceEnumerateFeatures), "wgpuDeviceEnumerateFeatures" },
             { reinterpret_cast<WGPUProc>(ClientDeviceForceLoss), "wgpuDeviceForceLoss" },
+            { reinterpret_cast<WGPUProc>(ClientDeviceGetAdapter), "wgpuDeviceGetAdapter" },
             { reinterpret_cast<WGPUProc>(ClientDeviceGetLimits), "wgpuDeviceGetLimits" },
             { reinterpret_cast<WGPUProc>(ClientDeviceGetQueue), "wgpuDeviceGetQueue" },
+            { reinterpret_cast<WGPUProc>(ClientDeviceGetSupportedSurfaceUsage), "wgpuDeviceGetSupportedSurfaceUsage" },
             { reinterpret_cast<WGPUProc>(ClientDeviceHasFeature), "wgpuDeviceHasFeature" },
             { reinterpret_cast<WGPUProc>(ClientDeviceInjectError), "wgpuDeviceInjectError" },
             { reinterpret_cast<WGPUProc>(ClientDevicePopErrorScope), "wgpuDevicePopErrorScope" },
@@ -2993,226 +2794,217 @@ namespace dawn::wire::client {
         return result;
     }
 
-
-    template <typename... MemberPtrPairs>
-    constexpr DawnProcTable MakeProcTable(int, MemberPtrPairs... pairs) {
-        DawnProcTable procs = {};
-        ([&](auto& pair){
-            procs.*(pair.first) = pair.second;
-        }(pairs), ...);
-        return procs;
-    }
-
-    static DawnProcTable gProcTable = MakeProcTable(
-        /* unused */ 0
-        , std::make_pair(&DawnProcTable::createInstance, ClientCreateInstance)
-        , std::make_pair(&DawnProcTable::getProcAddress, ClientGetProcAddress)
-        , std::make_pair(&DawnProcTable::adapterCreateDevice, ClientAdapterCreateDevice)
-        , std::make_pair(&DawnProcTable::adapterEnumerateFeatures, ClientAdapterEnumerateFeatures)
-        , std::make_pair(&DawnProcTable::adapterGetInstance, ClientAdapterGetInstance)
-        , std::make_pair(&DawnProcTable::adapterGetLimits, ClientAdapterGetLimits)
-        , std::make_pair(&DawnProcTable::adapterGetProperties, ClientAdapterGetProperties)
-        , std::make_pair(&DawnProcTable::adapterHasFeature, ClientAdapterHasFeature)
-        , std::make_pair(&DawnProcTable::adapterRequestDevice, ClientAdapterRequestDevice)
-        , std::make_pair(&DawnProcTable::adapterReference, ClientAdapterReference)
-        , std::make_pair(&DawnProcTable::adapterRelease, ClientAdapterRelease)
-        , std::make_pair(&DawnProcTable::bindGroupSetLabel, ClientBindGroupSetLabel)
-        , std::make_pair(&DawnProcTable::bindGroupReference, ClientBindGroupReference)
-        , std::make_pair(&DawnProcTable::bindGroupRelease, ClientBindGroupRelease)
-        , std::make_pair(&DawnProcTable::bindGroupLayoutSetLabel, ClientBindGroupLayoutSetLabel)
-        , std::make_pair(&DawnProcTable::bindGroupLayoutReference, ClientBindGroupLayoutReference)
-        , std::make_pair(&DawnProcTable::bindGroupLayoutRelease, ClientBindGroupLayoutRelease)
-        , std::make_pair(&DawnProcTable::bufferDestroy, ClientBufferDestroy)
-        , std::make_pair(&DawnProcTable::bufferGetConstMappedRange, ClientBufferGetConstMappedRange)
-        , std::make_pair(&DawnProcTable::bufferGetMapState, ClientBufferGetMapState)
-        , std::make_pair(&DawnProcTable::bufferGetMappedRange, ClientBufferGetMappedRange)
-        , std::make_pair(&DawnProcTable::bufferGetSize, ClientBufferGetSize)
-        , std::make_pair(&DawnProcTable::bufferGetUsage, ClientBufferGetUsage)
-        , std::make_pair(&DawnProcTable::bufferMapAsync, ClientBufferMapAsync)
-        , std::make_pair(&DawnProcTable::bufferSetLabel, ClientBufferSetLabel)
-        , std::make_pair(&DawnProcTable::bufferUnmap, ClientBufferUnmap)
-        , std::make_pair(&DawnProcTable::bufferReference, ClientBufferReference)
-        , std::make_pair(&DawnProcTable::bufferRelease, ClientBufferRelease)
-        , std::make_pair(&DawnProcTable::commandBufferSetLabel, ClientCommandBufferSetLabel)
-        , std::make_pair(&DawnProcTable::commandBufferReference, ClientCommandBufferReference)
-        , std::make_pair(&DawnProcTable::commandBufferRelease, ClientCommandBufferRelease)
-        , std::make_pair(&DawnProcTable::commandEncoderBeginComputePass, ClientCommandEncoderBeginComputePass)
-        , std::make_pair(&DawnProcTable::commandEncoderBeginRenderPass, ClientCommandEncoderBeginRenderPass)
-        , std::make_pair(&DawnProcTable::commandEncoderClearBuffer, ClientCommandEncoderClearBuffer)
-        , std::make_pair(&DawnProcTable::commandEncoderCopyBufferToBuffer, ClientCommandEncoderCopyBufferToBuffer)
-        , std::make_pair(&DawnProcTable::commandEncoderCopyBufferToTexture, ClientCommandEncoderCopyBufferToTexture)
-        , std::make_pair(&DawnProcTable::commandEncoderCopyTextureToBuffer, ClientCommandEncoderCopyTextureToBuffer)
-        , std::make_pair(&DawnProcTable::commandEncoderCopyTextureToTexture, ClientCommandEncoderCopyTextureToTexture)
-        , std::make_pair(&DawnProcTable::commandEncoderCopyTextureToTextureInternal, ClientCommandEncoderCopyTextureToTextureInternal)
-        , std::make_pair(&DawnProcTable::commandEncoderFinish, ClientCommandEncoderFinish)
-        , std::make_pair(&DawnProcTable::commandEncoderInjectValidationError, ClientCommandEncoderInjectValidationError)
-        , std::make_pair(&DawnProcTable::commandEncoderInsertDebugMarker, ClientCommandEncoderInsertDebugMarker)
-        , std::make_pair(&DawnProcTable::commandEncoderPopDebugGroup, ClientCommandEncoderPopDebugGroup)
-        , std::make_pair(&DawnProcTable::commandEncoderPushDebugGroup, ClientCommandEncoderPushDebugGroup)
-        , std::make_pair(&DawnProcTable::commandEncoderResolveQuerySet, ClientCommandEncoderResolveQuerySet)
-        , std::make_pair(&DawnProcTable::commandEncoderSetLabel, ClientCommandEncoderSetLabel)
-        , std::make_pair(&DawnProcTable::commandEncoderWriteBuffer, ClientCommandEncoderWriteBuffer)
-        , std::make_pair(&DawnProcTable::commandEncoderWriteTimestamp, ClientCommandEncoderWriteTimestamp)
-        , std::make_pair(&DawnProcTable::commandEncoderReference, ClientCommandEncoderReference)
-        , std::make_pair(&DawnProcTable::commandEncoderRelease, ClientCommandEncoderRelease)
-        , std::make_pair(&DawnProcTable::computePassEncoderDispatchWorkgroups, ClientComputePassEncoderDispatchWorkgroups)
-        , std::make_pair(&DawnProcTable::computePassEncoderDispatchWorkgroupsIndirect, ClientComputePassEncoderDispatchWorkgroupsIndirect)
-        , std::make_pair(&DawnProcTable::computePassEncoderEnd, ClientComputePassEncoderEnd)
-        , std::make_pair(&DawnProcTable::computePassEncoderInsertDebugMarker, ClientComputePassEncoderInsertDebugMarker)
-        , std::make_pair(&DawnProcTable::computePassEncoderPopDebugGroup, ClientComputePassEncoderPopDebugGroup)
-        , std::make_pair(&DawnProcTable::computePassEncoderPushDebugGroup, ClientComputePassEncoderPushDebugGroup)
-        , std::make_pair(&DawnProcTable::computePassEncoderSetBindGroup, ClientComputePassEncoderSetBindGroup)
-        , std::make_pair(&DawnProcTable::computePassEncoderSetLabel, ClientComputePassEncoderSetLabel)
-        , std::make_pair(&DawnProcTable::computePassEncoderSetPipeline, ClientComputePassEncoderSetPipeline)
-        , std::make_pair(&DawnProcTable::computePassEncoderWriteTimestamp, ClientComputePassEncoderWriteTimestamp)
-        , std::make_pair(&DawnProcTable::computePassEncoderReference, ClientComputePassEncoderReference)
-        , std::make_pair(&DawnProcTable::computePassEncoderRelease, ClientComputePassEncoderRelease)
-        , std::make_pair(&DawnProcTable::computePipelineGetBindGroupLayout, ClientComputePipelineGetBindGroupLayout)
-        , std::make_pair(&DawnProcTable::computePipelineSetLabel, ClientComputePipelineSetLabel)
-        , std::make_pair(&DawnProcTable::computePipelineReference, ClientComputePipelineReference)
-        , std::make_pair(&DawnProcTable::computePipelineRelease, ClientComputePipelineRelease)
-        , std::make_pair(&DawnProcTable::deviceCreateBindGroup, ClientDeviceCreateBindGroup)
-        , std::make_pair(&DawnProcTable::deviceCreateBindGroupLayout, ClientDeviceCreateBindGroupLayout)
-        , std::make_pair(&DawnProcTable::deviceCreateBuffer, ClientDeviceCreateBuffer)
-        , std::make_pair(&DawnProcTable::deviceCreateCommandEncoder, ClientDeviceCreateCommandEncoder)
-        , std::make_pair(&DawnProcTable::deviceCreateComputePipeline, ClientDeviceCreateComputePipeline)
-        , std::make_pair(&DawnProcTable::deviceCreateComputePipelineAsync, ClientDeviceCreateComputePipelineAsync)
-        , std::make_pair(&DawnProcTable::deviceCreateErrorBuffer, ClientDeviceCreateErrorBuffer)
-        , std::make_pair(&DawnProcTable::deviceCreateErrorExternalTexture, ClientDeviceCreateErrorExternalTexture)
-        , std::make_pair(&DawnProcTable::deviceCreateErrorShaderModule, ClientDeviceCreateErrorShaderModule)
-        , std::make_pair(&DawnProcTable::deviceCreateErrorTexture, ClientDeviceCreateErrorTexture)
-        , std::make_pair(&DawnProcTable::deviceCreateExternalTexture, ClientDeviceCreateExternalTexture)
-        , std::make_pair(&DawnProcTable::deviceCreatePipelineLayout, ClientDeviceCreatePipelineLayout)
-        , std::make_pair(&DawnProcTable::deviceCreateQuerySet, ClientDeviceCreateQuerySet)
-        , std::make_pair(&DawnProcTable::deviceCreateRenderBundleEncoder, ClientDeviceCreateRenderBundleEncoder)
-        , std::make_pair(&DawnProcTable::deviceCreateRenderPipeline, ClientDeviceCreateRenderPipeline)
-        , std::make_pair(&DawnProcTable::deviceCreateRenderPipelineAsync, ClientDeviceCreateRenderPipelineAsync)
-        , std::make_pair(&DawnProcTable::deviceCreateSampler, ClientDeviceCreateSampler)
-        , std::make_pair(&DawnProcTable::deviceCreateShaderModule, ClientDeviceCreateShaderModule)
-        , std::make_pair(&DawnProcTable::deviceCreateSwapChain, ClientDeviceCreateSwapChain)
-        , std::make_pair(&DawnProcTable::deviceCreateTexture, ClientDeviceCreateTexture)
-        , std::make_pair(&DawnProcTable::deviceDestroy, ClientDeviceDestroy)
-        , std::make_pair(&DawnProcTable::deviceEnumerateFeatures, ClientDeviceEnumerateFeatures)
-        , std::make_pair(&DawnProcTable::deviceForceLoss, ClientDeviceForceLoss)
-        , std::make_pair(&DawnProcTable::deviceGetLimits, ClientDeviceGetLimits)
-        , std::make_pair(&DawnProcTable::deviceGetQueue, ClientDeviceGetQueue)
-        , std::make_pair(&DawnProcTable::deviceHasFeature, ClientDeviceHasFeature)
-        , std::make_pair(&DawnProcTable::deviceInjectError, ClientDeviceInjectError)
-        , std::make_pair(&DawnProcTable::devicePopErrorScope, ClientDevicePopErrorScope)
-        , std::make_pair(&DawnProcTable::devicePushErrorScope, ClientDevicePushErrorScope)
-        , std::make_pair(&DawnProcTable::deviceSetDeviceLostCallback, ClientDeviceSetDeviceLostCallback)
-        , std::make_pair(&DawnProcTable::deviceSetLabel, ClientDeviceSetLabel)
-        , std::make_pair(&DawnProcTable::deviceSetLoggingCallback, ClientDeviceSetLoggingCallback)
-        , std::make_pair(&DawnProcTable::deviceSetUncapturedErrorCallback, ClientDeviceSetUncapturedErrorCallback)
-        , std::make_pair(&DawnProcTable::deviceTick, ClientDeviceTick)
-        , std::make_pair(&DawnProcTable::deviceValidateTextureDescriptor, ClientDeviceValidateTextureDescriptor)
-        , std::make_pair(&DawnProcTable::deviceReference, ClientDeviceReference)
-        , std::make_pair(&DawnProcTable::deviceRelease, ClientDeviceRelease)
-        , std::make_pair(&DawnProcTable::externalTextureDestroy, ClientExternalTextureDestroy)
-        , std::make_pair(&DawnProcTable::externalTextureExpire, ClientExternalTextureExpire)
-        , std::make_pair(&DawnProcTable::externalTextureRefresh, ClientExternalTextureRefresh)
-        , std::make_pair(&DawnProcTable::externalTextureSetLabel, ClientExternalTextureSetLabel)
-        , std::make_pair(&DawnProcTable::externalTextureReference, ClientExternalTextureReference)
-        , std::make_pair(&DawnProcTable::externalTextureRelease, ClientExternalTextureRelease)
-        , std::make_pair(&DawnProcTable::instanceCreateSurface, ClientInstanceCreateSurface)
-        , std::make_pair(&DawnProcTable::instanceProcessEvents, ClientInstanceProcessEvents)
-        , std::make_pair(&DawnProcTable::instanceRequestAdapter, ClientInstanceRequestAdapter)
-        , std::make_pair(&DawnProcTable::instanceReference, ClientInstanceReference)
-        , std::make_pair(&DawnProcTable::instanceRelease, ClientInstanceRelease)
-        , std::make_pair(&DawnProcTable::pipelineLayoutSetLabel, ClientPipelineLayoutSetLabel)
-        , std::make_pair(&DawnProcTable::pipelineLayoutReference, ClientPipelineLayoutReference)
-        , std::make_pair(&DawnProcTable::pipelineLayoutRelease, ClientPipelineLayoutRelease)
-        , std::make_pair(&DawnProcTable::querySetDestroy, ClientQuerySetDestroy)
-        , std::make_pair(&DawnProcTable::querySetGetCount, ClientQuerySetGetCount)
-        , std::make_pair(&DawnProcTable::querySetGetType, ClientQuerySetGetType)
-        , std::make_pair(&DawnProcTable::querySetSetLabel, ClientQuerySetSetLabel)
-        , std::make_pair(&DawnProcTable::querySetReference, ClientQuerySetReference)
-        , std::make_pair(&DawnProcTable::querySetRelease, ClientQuerySetRelease)
-        , std::make_pair(&DawnProcTable::queueCopyExternalTextureForBrowser, ClientQueueCopyExternalTextureForBrowser)
-        , std::make_pair(&DawnProcTable::queueCopyTextureForBrowser, ClientQueueCopyTextureForBrowser)
-        , std::make_pair(&DawnProcTable::queueOnSubmittedWorkDone, ClientQueueOnSubmittedWorkDone)
-        , std::make_pair(&DawnProcTable::queueSetLabel, ClientQueueSetLabel)
-        , std::make_pair(&DawnProcTable::queueSubmit, ClientQueueSubmit)
-        , std::make_pair(&DawnProcTable::queueWriteBuffer, ClientQueueWriteBuffer)
-        , std::make_pair(&DawnProcTable::queueWriteTexture, ClientQueueWriteTexture)
-        , std::make_pair(&DawnProcTable::queueReference, ClientQueueReference)
-        , std::make_pair(&DawnProcTable::queueRelease, ClientQueueRelease)
-        , std::make_pair(&DawnProcTable::renderBundleSetLabel, ClientRenderBundleSetLabel)
-        , std::make_pair(&DawnProcTable::renderBundleReference, ClientRenderBundleReference)
-        , std::make_pair(&DawnProcTable::renderBundleRelease, ClientRenderBundleRelease)
-        , std::make_pair(&DawnProcTable::renderBundleEncoderDraw, ClientRenderBundleEncoderDraw)
-        , std::make_pair(&DawnProcTable::renderBundleEncoderDrawIndexed, ClientRenderBundleEncoderDrawIndexed)
-        , std::make_pair(&DawnProcTable::renderBundleEncoderDrawIndexedIndirect, ClientRenderBundleEncoderDrawIndexedIndirect)
-        , std::make_pair(&DawnProcTable::renderBundleEncoderDrawIndirect, ClientRenderBundleEncoderDrawIndirect)
-        , std::make_pair(&DawnProcTable::renderBundleEncoderFinish, ClientRenderBundleEncoderFinish)
-        , std::make_pair(&DawnProcTable::renderBundleEncoderInsertDebugMarker, ClientRenderBundleEncoderInsertDebugMarker)
-        , std::make_pair(&DawnProcTable::renderBundleEncoderPopDebugGroup, ClientRenderBundleEncoderPopDebugGroup)
-        , std::make_pair(&DawnProcTable::renderBundleEncoderPushDebugGroup, ClientRenderBundleEncoderPushDebugGroup)
-        , std::make_pair(&DawnProcTable::renderBundleEncoderSetBindGroup, ClientRenderBundleEncoderSetBindGroup)
-        , std::make_pair(&DawnProcTable::renderBundleEncoderSetIndexBuffer, ClientRenderBundleEncoderSetIndexBuffer)
-        , std::make_pair(&DawnProcTable::renderBundleEncoderSetLabel, ClientRenderBundleEncoderSetLabel)
-        , std::make_pair(&DawnProcTable::renderBundleEncoderSetPipeline, ClientRenderBundleEncoderSetPipeline)
-        , std::make_pair(&DawnProcTable::renderBundleEncoderSetVertexBuffer, ClientRenderBundleEncoderSetVertexBuffer)
-        , std::make_pair(&DawnProcTable::renderBundleEncoderReference, ClientRenderBundleEncoderReference)
-        , std::make_pair(&DawnProcTable::renderBundleEncoderRelease, ClientRenderBundleEncoderRelease)
-        , std::make_pair(&DawnProcTable::renderPassEncoderBeginOcclusionQuery, ClientRenderPassEncoderBeginOcclusionQuery)
-        , std::make_pair(&DawnProcTable::renderPassEncoderDraw, ClientRenderPassEncoderDraw)
-        , std::make_pair(&DawnProcTable::renderPassEncoderDrawIndexed, ClientRenderPassEncoderDrawIndexed)
-        , std::make_pair(&DawnProcTable::renderPassEncoderDrawIndexedIndirect, ClientRenderPassEncoderDrawIndexedIndirect)
-        , std::make_pair(&DawnProcTable::renderPassEncoderDrawIndirect, ClientRenderPassEncoderDrawIndirect)
-        , std::make_pair(&DawnProcTable::renderPassEncoderEnd, ClientRenderPassEncoderEnd)
-        , std::make_pair(&DawnProcTable::renderPassEncoderEndOcclusionQuery, ClientRenderPassEncoderEndOcclusionQuery)
-        , std::make_pair(&DawnProcTable::renderPassEncoderExecuteBundles, ClientRenderPassEncoderExecuteBundles)
-        , std::make_pair(&DawnProcTable::renderPassEncoderInsertDebugMarker, ClientRenderPassEncoderInsertDebugMarker)
-        , std::make_pair(&DawnProcTable::renderPassEncoderPopDebugGroup, ClientRenderPassEncoderPopDebugGroup)
-        , std::make_pair(&DawnProcTable::renderPassEncoderPushDebugGroup, ClientRenderPassEncoderPushDebugGroup)
-        , std::make_pair(&DawnProcTable::renderPassEncoderSetBindGroup, ClientRenderPassEncoderSetBindGroup)
-        , std::make_pair(&DawnProcTable::renderPassEncoderSetBlendConstant, ClientRenderPassEncoderSetBlendConstant)
-        , std::make_pair(&DawnProcTable::renderPassEncoderSetIndexBuffer, ClientRenderPassEncoderSetIndexBuffer)
-        , std::make_pair(&DawnProcTable::renderPassEncoderSetLabel, ClientRenderPassEncoderSetLabel)
-        , std::make_pair(&DawnProcTable::renderPassEncoderSetPipeline, ClientRenderPassEncoderSetPipeline)
-        , std::make_pair(&DawnProcTable::renderPassEncoderSetScissorRect, ClientRenderPassEncoderSetScissorRect)
-        , std::make_pair(&DawnProcTable::renderPassEncoderSetStencilReference, ClientRenderPassEncoderSetStencilReference)
-        , std::make_pair(&DawnProcTable::renderPassEncoderSetVertexBuffer, ClientRenderPassEncoderSetVertexBuffer)
-        , std::make_pair(&DawnProcTable::renderPassEncoderSetViewport, ClientRenderPassEncoderSetViewport)
-        , std::make_pair(&DawnProcTable::renderPassEncoderWriteTimestamp, ClientRenderPassEncoderWriteTimestamp)
-        , std::make_pair(&DawnProcTable::renderPassEncoderReference, ClientRenderPassEncoderReference)
-        , std::make_pair(&DawnProcTable::renderPassEncoderRelease, ClientRenderPassEncoderRelease)
-        , std::make_pair(&DawnProcTable::renderPipelineGetBindGroupLayout, ClientRenderPipelineGetBindGroupLayout)
-        , std::make_pair(&DawnProcTable::renderPipelineSetLabel, ClientRenderPipelineSetLabel)
-        , std::make_pair(&DawnProcTable::renderPipelineReference, ClientRenderPipelineReference)
-        , std::make_pair(&DawnProcTable::renderPipelineRelease, ClientRenderPipelineRelease)
-        , std::make_pair(&DawnProcTable::samplerSetLabel, ClientSamplerSetLabel)
-        , std::make_pair(&DawnProcTable::samplerReference, ClientSamplerReference)
-        , std::make_pair(&DawnProcTable::samplerRelease, ClientSamplerRelease)
-        , std::make_pair(&DawnProcTable::shaderModuleGetCompilationInfo, ClientShaderModuleGetCompilationInfo)
-        , std::make_pair(&DawnProcTable::shaderModuleSetLabel, ClientShaderModuleSetLabel)
-        , std::make_pair(&DawnProcTable::shaderModuleReference, ClientShaderModuleReference)
-        , std::make_pair(&DawnProcTable::shaderModuleRelease, ClientShaderModuleRelease)
-        , std::make_pair(&DawnProcTable::surfaceReference, ClientSurfaceReference)
-        , std::make_pair(&DawnProcTable::surfaceRelease, ClientSurfaceRelease)
-        , std::make_pair(&DawnProcTable::swapChainGetCurrentTexture, ClientSwapChainGetCurrentTexture)
-        , std::make_pair(&DawnProcTable::swapChainGetCurrentTextureView, ClientSwapChainGetCurrentTextureView)
-        , std::make_pair(&DawnProcTable::swapChainPresent, ClientSwapChainPresent)
-        , std::make_pair(&DawnProcTable::swapChainReference, ClientSwapChainReference)
-        , std::make_pair(&DawnProcTable::swapChainRelease, ClientSwapChainRelease)
-        , std::make_pair(&DawnProcTable::textureCreateView, ClientTextureCreateView)
-        , std::make_pair(&DawnProcTable::textureDestroy, ClientTextureDestroy)
-        , std::make_pair(&DawnProcTable::textureGetDepthOrArrayLayers, ClientTextureGetDepthOrArrayLayers)
-        , std::make_pair(&DawnProcTable::textureGetDimension, ClientTextureGetDimension)
-        , std::make_pair(&DawnProcTable::textureGetFormat, ClientTextureGetFormat)
-        , std::make_pair(&DawnProcTable::textureGetHeight, ClientTextureGetHeight)
-        , std::make_pair(&DawnProcTable::textureGetMipLevelCount, ClientTextureGetMipLevelCount)
-        , std::make_pair(&DawnProcTable::textureGetSampleCount, ClientTextureGetSampleCount)
-        , std::make_pair(&DawnProcTable::textureGetUsage, ClientTextureGetUsage)
-        , std::make_pair(&DawnProcTable::textureGetWidth, ClientTextureGetWidth)
-        , std::make_pair(&DawnProcTable::textureSetLabel, ClientTextureSetLabel)
-        , std::make_pair(&DawnProcTable::textureReference, ClientTextureReference)
-        , std::make_pair(&DawnProcTable::textureRelease, ClientTextureRelease)
-        , std::make_pair(&DawnProcTable::textureViewSetLabel, ClientTextureViewSetLabel)
-        , std::make_pair(&DawnProcTable::textureViewReference, ClientTextureViewReference)
-        , std::make_pair(&DawnProcTable::textureViewRelease, ClientTextureViewRelease)
-    );
+    static DawnProcTable gProcTable = {
+        ClientCreateInstance,
+        ClientGetProcAddress,
+        ClientAdapterCreateDevice,
+        ClientAdapterEnumerateFeatures,
+        ClientAdapterGetInstance,
+        ClientAdapterGetLimits,
+        ClientAdapterGetProperties,
+        ClientAdapterHasFeature,
+        ClientAdapterRequestDevice,
+        ClientAdapterReference,
+        ClientAdapterRelease,
+        ClientBindGroupSetLabel,
+        ClientBindGroupReference,
+        ClientBindGroupRelease,
+        ClientBindGroupLayoutSetLabel,
+        ClientBindGroupLayoutReference,
+        ClientBindGroupLayoutRelease,
+        ClientBufferDestroy,
+        ClientBufferGetConstMappedRange,
+        ClientBufferGetMapState,
+        ClientBufferGetMappedRange,
+        ClientBufferGetSize,
+        ClientBufferGetUsage,
+        ClientBufferMapAsync,
+        ClientBufferSetLabel,
+        ClientBufferUnmap,
+        ClientBufferReference,
+        ClientBufferRelease,
+        ClientCommandBufferSetLabel,
+        ClientCommandBufferReference,
+        ClientCommandBufferRelease,
+        ClientCommandEncoderBeginComputePass,
+        ClientCommandEncoderBeginRenderPass,
+        ClientCommandEncoderClearBuffer,
+        ClientCommandEncoderCopyBufferToBuffer,
+        ClientCommandEncoderCopyBufferToTexture,
+        ClientCommandEncoderCopyTextureToBuffer,
+        ClientCommandEncoderCopyTextureToTexture,
+        ClientCommandEncoderCopyTextureToTextureInternal,
+        ClientCommandEncoderFinish,
+        ClientCommandEncoderInjectValidationError,
+        ClientCommandEncoderInsertDebugMarker,
+        ClientCommandEncoderPopDebugGroup,
+        ClientCommandEncoderPushDebugGroup,
+        ClientCommandEncoderResolveQuerySet,
+        ClientCommandEncoderSetLabel,
+        ClientCommandEncoderWriteBuffer,
+        ClientCommandEncoderWriteTimestamp,
+        ClientCommandEncoderReference,
+        ClientCommandEncoderRelease,
+        ClientComputePassEncoderDispatchWorkgroups,
+        ClientComputePassEncoderDispatchWorkgroupsIndirect,
+        ClientComputePassEncoderEnd,
+        ClientComputePassEncoderInsertDebugMarker,
+        ClientComputePassEncoderPopDebugGroup,
+        ClientComputePassEncoderPushDebugGroup,
+        ClientComputePassEncoderSetBindGroup,
+        ClientComputePassEncoderSetLabel,
+        ClientComputePassEncoderSetPipeline,
+        ClientComputePassEncoderWriteTimestamp,
+        ClientComputePassEncoderReference,
+        ClientComputePassEncoderRelease,
+        ClientComputePipelineGetBindGroupLayout,
+        ClientComputePipelineSetLabel,
+        ClientComputePipelineReference,
+        ClientComputePipelineRelease,
+        ClientDeviceCreateBindGroup,
+        ClientDeviceCreateBindGroupLayout,
+        ClientDeviceCreateBuffer,
+        ClientDeviceCreateCommandEncoder,
+        ClientDeviceCreateComputePipeline,
+        ClientDeviceCreateComputePipelineAsync,
+        ClientDeviceCreateErrorBuffer,
+        ClientDeviceCreateErrorExternalTexture,
+        ClientDeviceCreateErrorShaderModule,
+        ClientDeviceCreateErrorTexture,
+        ClientDeviceCreateExternalTexture,
+        ClientDeviceCreatePipelineLayout,
+        ClientDeviceCreateQuerySet,
+        ClientDeviceCreateRenderBundleEncoder,
+        ClientDeviceCreateRenderPipeline,
+        ClientDeviceCreateRenderPipelineAsync,
+        ClientDeviceCreateSampler,
+        ClientDeviceCreateShaderModule,
+        ClientDeviceCreateSwapChain,
+        ClientDeviceCreateTexture,
+        ClientDeviceDestroy,
+        ClientDeviceEnumerateFeatures,
+        ClientDeviceForceLoss,
+        ClientDeviceGetAdapter,
+        ClientDeviceGetLimits,
+        ClientDeviceGetQueue,
+        ClientDeviceGetSupportedSurfaceUsage,
+        ClientDeviceHasFeature,
+        ClientDeviceInjectError,
+        ClientDevicePopErrorScope,
+        ClientDevicePushErrorScope,
+        ClientDeviceSetDeviceLostCallback,
+        ClientDeviceSetLabel,
+        ClientDeviceSetLoggingCallback,
+        ClientDeviceSetUncapturedErrorCallback,
+        ClientDeviceTick,
+        ClientDeviceValidateTextureDescriptor,
+        ClientDeviceReference,
+        ClientDeviceRelease,
+        ClientExternalTextureDestroy,
+        ClientExternalTextureExpire,
+        ClientExternalTextureRefresh,
+        ClientExternalTextureSetLabel,
+        ClientExternalTextureReference,
+        ClientExternalTextureRelease,
+        ClientInstanceCreateSurface,
+        ClientInstanceProcessEvents,
+        ClientInstanceRequestAdapter,
+        ClientInstanceReference,
+        ClientInstanceRelease,
+        ClientPipelineLayoutSetLabel,
+        ClientPipelineLayoutReference,
+        ClientPipelineLayoutRelease,
+        ClientQuerySetDestroy,
+        ClientQuerySetGetCount,
+        ClientQuerySetGetType,
+        ClientQuerySetSetLabel,
+        ClientQuerySetReference,
+        ClientQuerySetRelease,
+        ClientQueueCopyExternalTextureForBrowser,
+        ClientQueueCopyTextureForBrowser,
+        ClientQueueOnSubmittedWorkDone,
+        ClientQueueSetLabel,
+        ClientQueueSubmit,
+        ClientQueueWriteBuffer,
+        ClientQueueWriteTexture,
+        ClientQueueReference,
+        ClientQueueRelease,
+        ClientRenderBundleSetLabel,
+        ClientRenderBundleReference,
+        ClientRenderBundleRelease,
+        ClientRenderBundleEncoderDraw,
+        ClientRenderBundleEncoderDrawIndexed,
+        ClientRenderBundleEncoderDrawIndexedIndirect,
+        ClientRenderBundleEncoderDrawIndirect,
+        ClientRenderBundleEncoderFinish,
+        ClientRenderBundleEncoderInsertDebugMarker,
+        ClientRenderBundleEncoderPopDebugGroup,
+        ClientRenderBundleEncoderPushDebugGroup,
+        ClientRenderBundleEncoderSetBindGroup,
+        ClientRenderBundleEncoderSetIndexBuffer,
+        ClientRenderBundleEncoderSetLabel,
+        ClientRenderBundleEncoderSetPipeline,
+        ClientRenderBundleEncoderSetVertexBuffer,
+        ClientRenderBundleEncoderReference,
+        ClientRenderBundleEncoderRelease,
+        ClientRenderPassEncoderBeginOcclusionQuery,
+        ClientRenderPassEncoderDraw,
+        ClientRenderPassEncoderDrawIndexed,
+        ClientRenderPassEncoderDrawIndexedIndirect,
+        ClientRenderPassEncoderDrawIndirect,
+        ClientRenderPassEncoderEnd,
+        ClientRenderPassEncoderEndOcclusionQuery,
+        ClientRenderPassEncoderExecuteBundles,
+        ClientRenderPassEncoderInsertDebugMarker,
+        ClientRenderPassEncoderPopDebugGroup,
+        ClientRenderPassEncoderPushDebugGroup,
+        ClientRenderPassEncoderSetBindGroup,
+        ClientRenderPassEncoderSetBlendConstant,
+        ClientRenderPassEncoderSetIndexBuffer,
+        ClientRenderPassEncoderSetLabel,
+        ClientRenderPassEncoderSetPipeline,
+        ClientRenderPassEncoderSetScissorRect,
+        ClientRenderPassEncoderSetStencilReference,
+        ClientRenderPassEncoderSetVertexBuffer,
+        ClientRenderPassEncoderSetViewport,
+        ClientRenderPassEncoderWriteTimestamp,
+        ClientRenderPassEncoderReference,
+        ClientRenderPassEncoderRelease,
+        ClientRenderPipelineGetBindGroupLayout,
+        ClientRenderPipelineSetLabel,
+        ClientRenderPipelineReference,
+        ClientRenderPipelineRelease,
+        ClientSamplerSetLabel,
+        ClientSamplerReference,
+        ClientSamplerRelease,
+        ClientShaderModuleGetCompilationInfo,
+        ClientShaderModuleSetLabel,
+        ClientShaderModuleReference,
+        ClientShaderModuleRelease,
+        ClientSurfaceReference,
+        ClientSurfaceRelease,
+        ClientSwapChainGetCurrentTexture,
+        ClientSwapChainGetCurrentTextureView,
+        ClientSwapChainPresent,
+        ClientSwapChainReference,
+        ClientSwapChainRelease,
+        ClientTextureCreateView,
+        ClientTextureDestroy,
+        ClientTextureGetDepthOrArrayLayers,
+        ClientTextureGetDimension,
+        ClientTextureGetFormat,
+        ClientTextureGetHeight,
+        ClientTextureGetMipLevelCount,
+        ClientTextureGetSampleCount,
+        ClientTextureGetUsage,
+        ClientTextureGetWidth,
+        ClientTextureSetLabel,
+        ClientTextureReference,
+        ClientTextureRelease,
+        ClientTextureViewSetLabel,
+        ClientTextureViewReference,
+        ClientTextureViewRelease,
+    };
 
     const DawnProcTable& GetProcs() {
         return gProcTable;

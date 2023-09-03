@@ -1,6 +1,0 @@
-## dawnのlibのビルド手順
-* dawnのsubmoduleに入る
-* out\Debug等のビルドファイルを置くディレクトリを作成
-* cmake ../.. でmakefileを作成
-* cmake --build . でビルドを実行
-  * このコマンドを実行することでdawn\out_win\Debug\src\dawn\native\Debug にwebgpu_dawn.lib等が作成される

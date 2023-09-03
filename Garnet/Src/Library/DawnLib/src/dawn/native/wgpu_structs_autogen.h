@@ -202,28 +202,6 @@ namespace dawn::native {
         bool operator==(const DawnEncoderInternalUsageDescriptor& rhs) const;
     };
 
-    struct DawnMultisampleStateRenderToSingleSampled : ChainedStruct {
-        DawnMultisampleStateRenderToSingleSampled() {
-            sType = wgpu::SType::DawnMultisampleStateRenderToSingleSampled;
-        }
-        alignas(wgpu::DawnMultisampleStateRenderToSingleSampled::kFirstMemberAlignment) bool enabled = false;
-
-        // Equality operators, mostly for testing. Note that this tests
-        // strict pointer-pointer equality if the struct contains member pointers.
-        bool operator==(const DawnMultisampleStateRenderToSingleSampled& rhs) const;
-    };
-
-    struct DawnRenderPassColorAttachmentRenderToSingleSampled : ChainedStruct {
-        DawnRenderPassColorAttachmentRenderToSingleSampled() {
-            sType = wgpu::SType::DawnRenderPassColorAttachmentRenderToSingleSampled;
-        }
-        alignas(wgpu::DawnRenderPassColorAttachmentRenderToSingleSampled::kFirstMemberAlignment) uint32_t implicitSampleCount = 1;
-
-        // Equality operators, mostly for testing. Note that this tests
-        // strict pointer-pointer equality if the struct contains member pointers.
-        bool operator==(const DawnRenderPassColorAttachmentRenderToSingleSampled& rhs) const;
-    };
-
     struct DawnShaderModuleSPIRVOptionsDescriptor : ChainedStruct {
         DawnShaderModuleSPIRVOptionsDescriptor() {
             sType = wgpu::SType::DawnShaderModuleSPIRVOptionsDescriptor;
@@ -314,7 +292,6 @@ namespace dawn::native {
         uint32_t maxTextureDimension3D = WGPU_LIMIT_U32_UNDEFINED;
         uint32_t maxTextureArrayLayers = WGPU_LIMIT_U32_UNDEFINED;
         uint32_t maxBindGroups = WGPU_LIMIT_U32_UNDEFINED;
-        uint32_t maxBindGroupsPlusVertexBuffers = WGPU_LIMIT_U32_UNDEFINED;
         uint32_t maxBindingsPerBindGroup = WGPU_LIMIT_U32_UNDEFINED;
         uint32_t maxDynamicUniformBuffersPerPipelineLayout = WGPU_LIMIT_U32_UNDEFINED;
         uint32_t maxDynamicStorageBuffersPerPipelineLayout = WGPU_LIMIT_U32_UNDEFINED;
@@ -498,13 +475,23 @@ namespace dawn::native {
         ChainedStruct const * nextInChain = nullptr;
         SurfaceBase* compatibleSurface = nullptr;
         wgpu::PowerPreference powerPreference = wgpu::PowerPreference::Undefined;
-        wgpu::BackendType backendType = wgpu::BackendType::Undefined;
         bool forceFallbackAdapter = false;
         bool compatibilityMode = false;
 
         // Equality operators, mostly for testing. Note that this tests
         // strict pointer-pointer equality if the struct contains member pointers.
         bool operator==(const RequestAdapterOptions& rhs) const;
+    };
+
+    struct RequestAdapterOptionsBackendType : ChainedStruct {
+        RequestAdapterOptionsBackendType() {
+            sType = wgpu::SType::RequestAdapterOptionsBackendType;
+        }
+        alignas(wgpu::RequestAdapterOptionsBackendType::kFirstMemberAlignment) wgpu::BackendType backendType;
+
+        // Equality operators, mostly for testing. Note that this tests
+        // strict pointer-pointer equality if the struct contains member pointers.
+        bool operator==(const RequestAdapterOptionsBackendType& rhs) const;
     };
 
     struct SamplerBindingLayout {
@@ -891,7 +878,6 @@ namespace dawn::native {
     };
 
     struct RenderPassColorAttachment {
-        ChainedStruct const * nextInChain = nullptr;
         TextureViewBase* view = nullptr;
         TextureViewBase* resolveTarget = nullptr;
         wgpu::LoadOp loadOp;

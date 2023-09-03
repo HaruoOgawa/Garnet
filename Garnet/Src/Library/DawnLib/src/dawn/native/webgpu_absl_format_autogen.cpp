@@ -468,9 +468,6 @@ namespace wgpu {
         if (spec.conversion_char() == absl::FormatConversionChar::s) {
             s->Append("BackendType::");
             switch (value) {
-            case BackendType::Undefined:
-                s->Append("Undefined");
-                break;
             case BackendType::Null:
                 s->Append("Null");
                 break;
@@ -997,9 +994,6 @@ namespace wgpu {
             case FeatureName::TransientAttachments:
                 s->Append("TransientAttachments");
                 break;
-            case FeatureName::MSAARenderToSingleSampled:
-                s->Append("MSAARenderToSingleSampled");
-                break;
             }
         } else {
             s->Append(absl::StrFormat("%u", static_cast<typename std::underlying_type<FeatureName>::type>(value)));
@@ -1421,17 +1415,14 @@ namespace wgpu {
             case SType::DawnShaderModuleSPIRVOptionsDescriptor:
                 s->Append("DawnShaderModuleSPIRVOptionsDescriptor");
                 break;
+            case SType::RequestAdapterOptionsBackendType:
+                s->Append("RequestAdapterOptionsBackendType");
+                break;
             case SType::RequestAdapterOptionsLUID:
                 s->Append("RequestAdapterOptionsLUID");
                 break;
             case SType::RequestAdapterOptionsGetGLProc:
                 s->Append("RequestAdapterOptionsGetGLProc");
-                break;
-            case SType::DawnMultisampleStateRenderToSingleSampled:
-                s->Append("DawnMultisampleStateRenderToSingleSampled");
-                break;
-            case SType::DawnRenderPassColorAttachmentRenderToSingleSampled:
-                s->Append("DawnRenderPassColorAttachmentRenderToSingleSampled");
                 break;
             }
         } else {

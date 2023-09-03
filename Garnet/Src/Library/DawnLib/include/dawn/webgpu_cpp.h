@@ -41,15 +41,14 @@ namespace wgpu {
     };
 
     enum class BackendType : uint32_t {
-        Undefined = 0x00000000,
-        Null = 0x00000001,
-        WebGPU = 0x00000002,
-        D3D11 = 0x00000003,
-        D3D12 = 0x00000004,
-        Metal = 0x00000005,
-        Vulkan = 0x00000006,
-        OpenGL = 0x00000007,
-        OpenGLES = 0x00000008,
+        Null = 0x00000000,
+        WebGPU = 0x00000001,
+        D3D11 = 0x00000002,
+        D3D12 = 0x00000003,
+        Metal = 0x00000004,
+        Vulkan = 0x00000005,
+        OpenGL = 0x00000006,
+        OpenGLES = 0x00000007,
     };
 
     enum class BlendFactor : uint32_t {
@@ -196,7 +195,6 @@ namespace wgpu {
         ImplicitDeviceSynchronization = 0x000003EF,
         SurfaceCapabilities = 0x000003F0,
         TransientAttachments = 0x000003F1,
-        MSAARenderToSingleSampled = 0x000003F2,
     };
 
     enum class FilterMode : uint32_t {
@@ -316,10 +314,9 @@ namespace wgpu {
         DawnBufferDescriptorErrorInfoFromWireClient = 0x000003EF,
         DawnTogglesDescriptor = 0x000003F0,
         DawnShaderModuleSPIRVOptionsDescriptor = 0x000003F1,
-        RequestAdapterOptionsLUID = 0x000003F2,
-        RequestAdapterOptionsGetGLProc = 0x000003F3,
-        DawnMultisampleStateRenderToSingleSampled = 0x000003F4,
-        DawnRenderPassColorAttachmentRenderToSingleSampled = 0x000003F5,
+        RequestAdapterOptionsBackendType = 0x000003F2,
+        RequestAdapterOptionsLUID = 0x000003F3,
+        RequestAdapterOptionsGetGLProc = 0x000003F4,
     };
 
     enum class SamplerBindingType : uint32_t {
@@ -624,8 +621,6 @@ namespace wgpu {
     struct DawnBufferDescriptorErrorInfoFromWireClient;
     struct DawnCacheDeviceDescriptor;
     struct DawnEncoderInternalUsageDescriptor;
-    struct DawnMultisampleStateRenderToSingleSampled;
-    struct DawnRenderPassColorAttachmentRenderToSingleSampled;
     struct DawnShaderModuleSPIRVOptionsDescriptor;
     struct DawnTextureInternalUsageDescriptor;
     struct DawnTogglesDescriptor;
@@ -649,6 +644,7 @@ namespace wgpu {
     struct RenderPassDescriptorMaxDrawCount;
     struct RenderPassTimestampWrite;
     struct RequestAdapterOptions;
+    struct RequestAdapterOptionsBackendType;
     struct SamplerBindingLayout;
     struct SamplerDescriptor;
     struct ShaderModuleDescriptor;
@@ -1363,24 +1359,6 @@ namespace wgpu {
         alignas(kFirstMemberAlignment) bool useInternalUsages = false;
     };
 
-    // Can be chained in MultisampleState
-    struct DawnMultisampleStateRenderToSingleSampled : ChainedStruct {
-        DawnMultisampleStateRenderToSingleSampled() {
-            sType = SType::DawnMultisampleStateRenderToSingleSampled;
-        }
-        static constexpr size_t kFirstMemberAlignment = detail::ConstexprMax(alignof(ChainedStruct), alignof(bool ));
-        alignas(kFirstMemberAlignment) bool enabled = false;
-    };
-
-    // Can be chained in RenderPassColorAttachment
-    struct DawnRenderPassColorAttachmentRenderToSingleSampled : ChainedStruct {
-        DawnRenderPassColorAttachmentRenderToSingleSampled() {
-            sType = SType::DawnRenderPassColorAttachmentRenderToSingleSampled;
-        }
-        static constexpr size_t kFirstMemberAlignment = detail::ConstexprMax(alignof(ChainedStruct), alignof(uint32_t ));
-        alignas(kFirstMemberAlignment) uint32_t implicitSampleCount = 1;
-    };
-
     // Can be chained in ShaderModuleDescriptor
     struct DawnShaderModuleSPIRVOptionsDescriptor : ChainedStruct {
         DawnShaderModuleSPIRVOptionsDescriptor() {
@@ -1400,7 +1378,6 @@ namespace wgpu {
     };
 
     // Can be chained in InstanceDescriptor
-    // Can be chained in RequestAdapterOptions
     // Can be chained in DeviceDescriptor
     struct DawnTogglesDescriptor : ChainedStruct {
         DawnTogglesDescriptor() {
@@ -1450,7 +1427,6 @@ namespace wgpu {
         uint32_t maxTextureDimension3D = WGPU_LIMIT_U32_UNDEFINED;
         uint32_t maxTextureArrayLayers = WGPU_LIMIT_U32_UNDEFINED;
         uint32_t maxBindGroups = WGPU_LIMIT_U32_UNDEFINED;
-        uint32_t maxBindGroupsPlusVertexBuffers = WGPU_LIMIT_U32_UNDEFINED;
         uint32_t maxBindingsPerBindGroup = WGPU_LIMIT_U32_UNDEFINED;
         uint32_t maxDynamicUniformBuffersPerPipelineLayout = WGPU_LIMIT_U32_UNDEFINED;
         uint32_t maxDynamicStorageBuffersPerPipelineLayout = WGPU_LIMIT_U32_UNDEFINED;
@@ -1582,9 +1558,17 @@ namespace wgpu {
         ChainedStruct const * nextInChain = nullptr;
         Surface compatibleSurface = nullptr;
         PowerPreference powerPreference = PowerPreference::Undefined;
-        BackendType backendType = BackendType::Undefined;
         bool forceFallbackAdapter = false;
         bool compatibilityMode = false;
+    };
+
+    // Can be chained in RequestAdapterOptions
+    struct RequestAdapterOptionsBackendType : ChainedStruct {
+        RequestAdapterOptionsBackendType() {
+            sType = SType::RequestAdapterOptionsBackendType;
+        }
+        static constexpr size_t kFirstMemberAlignment = detail::ConstexprMax(alignof(ChainedStruct), alignof(BackendType ));
+        alignas(kFirstMemberAlignment) BackendType backendType;
     };
 
     struct SamplerBindingLayout {
@@ -1863,7 +1847,6 @@ namespace wgpu {
     };
 
     struct RenderPassColorAttachment {
-        ChainedStruct const * nextInChain = nullptr;
         TextureView view = nullptr;
         TextureView resolveTarget = nullptr;
         LoadOp loadOp;
