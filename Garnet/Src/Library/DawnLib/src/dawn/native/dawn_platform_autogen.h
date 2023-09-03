@@ -523,70 +523,6 @@ namespace dawn::native {
         return reinterpret_cast<DawnEncoderInternalUsageDescriptor*>(rhs);
     }
 
-    inline const WGPUDawnMultisampleStateRenderToSingleSampled* ToAPI(const DawnMultisampleStateRenderToSingleSampled* rhs) {
-        return reinterpret_cast<const WGPUDawnMultisampleStateRenderToSingleSampled*>(rhs);
-    }
-
-    inline WGPUDawnMultisampleStateRenderToSingleSampled* ToAPI(DawnMultisampleStateRenderToSingleSampled* rhs) {
-        return reinterpret_cast<WGPUDawnMultisampleStateRenderToSingleSampled*>(rhs);
-    }
-
-    inline const DawnMultisampleStateRenderToSingleSampled* FromAPI(const WGPUDawnMultisampleStateRenderToSingleSampled* rhs) {
-        return reinterpret_cast<const DawnMultisampleStateRenderToSingleSampled*>(rhs);
-    }
-
-    inline DawnMultisampleStateRenderToSingleSampled* FromAPI(WGPUDawnMultisampleStateRenderToSingleSampled* rhs) {
-        return reinterpret_cast<DawnMultisampleStateRenderToSingleSampled*>(rhs);
-    }
-
-    inline const wgpu::DawnMultisampleStateRenderToSingleSampled* ToCppAPI(const DawnMultisampleStateRenderToSingleSampled* rhs) {
-        return reinterpret_cast<const wgpu::DawnMultisampleStateRenderToSingleSampled*>(rhs);
-    }
-
-    inline wgpu::DawnMultisampleStateRenderToSingleSampled* ToCppAPI(DawnMultisampleStateRenderToSingleSampled* rhs) {
-        return reinterpret_cast<wgpu::DawnMultisampleStateRenderToSingleSampled*>(rhs);
-    }
-
-    inline const DawnMultisampleStateRenderToSingleSampled* FromCppAPI(const wgpu::DawnMultisampleStateRenderToSingleSampled* rhs) {
-        return reinterpret_cast<const DawnMultisampleStateRenderToSingleSampled*>(rhs);
-    }
-
-    inline DawnMultisampleStateRenderToSingleSampled* FromCppAPI(wgpu::DawnMultisampleStateRenderToSingleSampled* rhs) {
-        return reinterpret_cast<DawnMultisampleStateRenderToSingleSampled*>(rhs);
-    }
-
-    inline const WGPUDawnRenderPassColorAttachmentRenderToSingleSampled* ToAPI(const DawnRenderPassColorAttachmentRenderToSingleSampled* rhs) {
-        return reinterpret_cast<const WGPUDawnRenderPassColorAttachmentRenderToSingleSampled*>(rhs);
-    }
-
-    inline WGPUDawnRenderPassColorAttachmentRenderToSingleSampled* ToAPI(DawnRenderPassColorAttachmentRenderToSingleSampled* rhs) {
-        return reinterpret_cast<WGPUDawnRenderPassColorAttachmentRenderToSingleSampled*>(rhs);
-    }
-
-    inline const DawnRenderPassColorAttachmentRenderToSingleSampled* FromAPI(const WGPUDawnRenderPassColorAttachmentRenderToSingleSampled* rhs) {
-        return reinterpret_cast<const DawnRenderPassColorAttachmentRenderToSingleSampled*>(rhs);
-    }
-
-    inline DawnRenderPassColorAttachmentRenderToSingleSampled* FromAPI(WGPUDawnRenderPassColorAttachmentRenderToSingleSampled* rhs) {
-        return reinterpret_cast<DawnRenderPassColorAttachmentRenderToSingleSampled*>(rhs);
-    }
-
-    inline const wgpu::DawnRenderPassColorAttachmentRenderToSingleSampled* ToCppAPI(const DawnRenderPassColorAttachmentRenderToSingleSampled* rhs) {
-        return reinterpret_cast<const wgpu::DawnRenderPassColorAttachmentRenderToSingleSampled*>(rhs);
-    }
-
-    inline wgpu::DawnRenderPassColorAttachmentRenderToSingleSampled* ToCppAPI(DawnRenderPassColorAttachmentRenderToSingleSampled* rhs) {
-        return reinterpret_cast<wgpu::DawnRenderPassColorAttachmentRenderToSingleSampled*>(rhs);
-    }
-
-    inline const DawnRenderPassColorAttachmentRenderToSingleSampled* FromCppAPI(const wgpu::DawnRenderPassColorAttachmentRenderToSingleSampled* rhs) {
-        return reinterpret_cast<const DawnRenderPassColorAttachmentRenderToSingleSampled*>(rhs);
-    }
-
-    inline DawnRenderPassColorAttachmentRenderToSingleSampled* FromCppAPI(wgpu::DawnRenderPassColorAttachmentRenderToSingleSampled* rhs) {
-        return reinterpret_cast<DawnRenderPassColorAttachmentRenderToSingleSampled*>(rhs);
-    }
-
     inline const WGPUDawnShaderModuleSPIRVOptionsDescriptor* ToAPI(const DawnShaderModuleSPIRVOptionsDescriptor* rhs) {
         return reinterpret_cast<const WGPUDawnShaderModuleSPIRVOptionsDescriptor*>(rhs);
     }
@@ -1321,6 +1257,38 @@ namespace dawn::native {
 
     inline RequestAdapterOptions* FromCppAPI(wgpu::RequestAdapterOptions* rhs) {
         return reinterpret_cast<RequestAdapterOptions*>(rhs);
+    }
+
+    inline const WGPURequestAdapterOptionsBackendType* ToAPI(const RequestAdapterOptionsBackendType* rhs) {
+        return reinterpret_cast<const WGPURequestAdapterOptionsBackendType*>(rhs);
+    }
+
+    inline WGPURequestAdapterOptionsBackendType* ToAPI(RequestAdapterOptionsBackendType* rhs) {
+        return reinterpret_cast<WGPURequestAdapterOptionsBackendType*>(rhs);
+    }
+
+    inline const RequestAdapterOptionsBackendType* FromAPI(const WGPURequestAdapterOptionsBackendType* rhs) {
+        return reinterpret_cast<const RequestAdapterOptionsBackendType*>(rhs);
+    }
+
+    inline RequestAdapterOptionsBackendType* FromAPI(WGPURequestAdapterOptionsBackendType* rhs) {
+        return reinterpret_cast<RequestAdapterOptionsBackendType*>(rhs);
+    }
+
+    inline const wgpu::RequestAdapterOptionsBackendType* ToCppAPI(const RequestAdapterOptionsBackendType* rhs) {
+        return reinterpret_cast<const wgpu::RequestAdapterOptionsBackendType*>(rhs);
+    }
+
+    inline wgpu::RequestAdapterOptionsBackendType* ToCppAPI(RequestAdapterOptionsBackendType* rhs) {
+        return reinterpret_cast<wgpu::RequestAdapterOptionsBackendType*>(rhs);
+    }
+
+    inline const RequestAdapterOptionsBackendType* FromCppAPI(const wgpu::RequestAdapterOptionsBackendType* rhs) {
+        return reinterpret_cast<const RequestAdapterOptionsBackendType*>(rhs);
+    }
+
+    inline RequestAdapterOptionsBackendType* FromCppAPI(wgpu::RequestAdapterOptionsBackendType* rhs) {
+        return reinterpret_cast<RequestAdapterOptionsBackendType*>(rhs);
     }
 
     inline const WGPUSamplerBindingLayout* ToAPI(const SamplerBindingLayout* rhs) {
@@ -3142,7 +3110,7 @@ namespace dawn::native {
     };
     template<>
     struct EnumCount<wgpu::BackendType> {
-        static constexpr uint32_t value = 9;
+        static constexpr uint32_t value = 8;
     };
     template<>
     struct EnumCount<wgpu::BlendFactor> {

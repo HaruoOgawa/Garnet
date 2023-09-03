@@ -68,9 +68,6 @@ namespace wgpu {
   template <typename CharT, typename Traits>
   std::basic_ostream<CharT, Traits>& operator<<(std::basic_ostream<CharT, Traits>& o, BackendType value) {
       switch (value) {
-      case BackendType::Undefined:
-        o << "BackendType::Undefined";
-        break;
       case BackendType::Null:
         o << "BackendType::Null";
         break;
@@ -517,9 +514,6 @@ namespace wgpu {
       case FeatureName::TransientAttachments:
         o << "FeatureName::TransientAttachments";
         break;
-      case FeatureName::MSAARenderToSingleSampled:
-        o << "FeatureName::MSAARenderToSingleSampled";
-        break;
           default:
             o << "FeatureName::" << std::showbase << std::hex << std::setfill('0') << std::setw(4) << static_cast<typename std::underlying_type<FeatureName>::type>(value);
       }
@@ -861,17 +855,14 @@ namespace wgpu {
       case SType::DawnShaderModuleSPIRVOptionsDescriptor:
         o << "SType::DawnShaderModuleSPIRVOptionsDescriptor";
         break;
+      case SType::RequestAdapterOptionsBackendType:
+        o << "SType::RequestAdapterOptionsBackendType";
+        break;
       case SType::RequestAdapterOptionsLUID:
         o << "SType::RequestAdapterOptionsLUID";
         break;
       case SType::RequestAdapterOptionsGetGLProc:
         o << "SType::RequestAdapterOptionsGetGLProc";
-        break;
-      case SType::DawnMultisampleStateRenderToSingleSampled:
-        o << "SType::DawnMultisampleStateRenderToSingleSampled";
-        break;
-      case SType::DawnRenderPassColorAttachmentRenderToSingleSampled:
-        o << "SType::DawnRenderPassColorAttachmentRenderToSingleSampled";
         break;
           default:
             o << "SType::" << std::showbase << std::hex << std::setfill('0') << std::setw(4) << static_cast<typename std::underlying_type<SType>::type>(value);

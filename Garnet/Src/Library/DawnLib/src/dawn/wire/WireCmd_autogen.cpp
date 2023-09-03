@@ -1396,112 +1396,6 @@ DAWN_DECLARE_UNUSED WireResult WGPUDawnEncoderInternalUsageDescriptorDeserialize
 }
 DAWN_UNUSED_FUNC(WGPUDawnEncoderInternalUsageDescriptorDeserialize);
 
-struct WGPUDawnMultisampleStateRenderToSingleSampledTransfer {
-    static_assert(0 <= 1,
-                  "Record must be at most one of is_cmd, extensible, and chained.");
-    WGPUChainedStructTransfer chain;
-
-    bool enabled;
-};
-
-static_assert(offsetof(WGPUDawnMultisampleStateRenderToSingleSampledTransfer, chain) == 0);
-
-DAWN_DECLARE_UNUSED size_t WGPUDawnMultisampleStateRenderToSingleSampledGetExtraRequiredSize(const WGPUDawnMultisampleStateRenderToSingleSampled& record) {
-    DAWN_UNUSED(record);
-    size_t result = 0;
-
-    return result;
-}
-// GetExtraRequiredSize isn't used for structures that are value members of other structures
-// because we assume they cannot contain pointers themselves.
-DAWN_UNUSED_FUNC(WGPUDawnMultisampleStateRenderToSingleSampledGetExtraRequiredSize);
-
-DAWN_DECLARE_UNUSED WireResult WGPUDawnMultisampleStateRenderToSingleSampledSerialize(
-    const WGPUDawnMultisampleStateRenderToSingleSampled& record,
-    WGPUDawnMultisampleStateRenderToSingleSampledTransfer* transfer,
-    SerializeBuffer* buffer, const ObjectIdProvider& provider) {
-    DAWN_UNUSED(buffer);
-
-    ASSERT(transfer->chain.sType == WGPUSType_DawnMultisampleStateRenderToSingleSampled);
-    ASSERT(transfer->chain.hasNext == (record.chain.next != nullptr));
-
-    transfer->enabled = record.enabled;
-
-    return WireResult::Success;
-}
-DAWN_UNUSED_FUNC(WGPUDawnMultisampleStateRenderToSingleSampledSerialize);
-
-DAWN_DECLARE_UNUSED WireResult WGPUDawnMultisampleStateRenderToSingleSampledDeserialize(
-    WGPUDawnMultisampleStateRenderToSingleSampled* record,
-    const volatile WGPUDawnMultisampleStateRenderToSingleSampledTransfer* transfer,
-    DeserializeBuffer* deserializeBuffer,
-    DeserializeAllocator* allocator, const ObjectIdResolver& resolver) {
-    DAWN_UNUSED(allocator);
-
-
-    ASSERT(record->chain.sType == WGPUSType_DawnMultisampleStateRenderToSingleSampled);
-    ASSERT(record->chain.next == nullptr);
-
-    static_assert(sizeof(record->enabled) >= sizeof(transfer->enabled), "Deserialize assignment may not narrow.");
-    record->enabled = transfer->enabled;
-
-    return WireResult::Success;
-}
-DAWN_UNUSED_FUNC(WGPUDawnMultisampleStateRenderToSingleSampledDeserialize);
-
-struct WGPUDawnRenderPassColorAttachmentRenderToSingleSampledTransfer {
-    static_assert(0 <= 1,
-                  "Record must be at most one of is_cmd, extensible, and chained.");
-    WGPUChainedStructTransfer chain;
-
-    uint32_t implicitSampleCount;
-};
-
-static_assert(offsetof(WGPUDawnRenderPassColorAttachmentRenderToSingleSampledTransfer, chain) == 0);
-
-DAWN_DECLARE_UNUSED size_t WGPUDawnRenderPassColorAttachmentRenderToSingleSampledGetExtraRequiredSize(const WGPUDawnRenderPassColorAttachmentRenderToSingleSampled& record) {
-    DAWN_UNUSED(record);
-    size_t result = 0;
-
-    return result;
-}
-// GetExtraRequiredSize isn't used for structures that are value members of other structures
-// because we assume they cannot contain pointers themselves.
-DAWN_UNUSED_FUNC(WGPUDawnRenderPassColorAttachmentRenderToSingleSampledGetExtraRequiredSize);
-
-DAWN_DECLARE_UNUSED WireResult WGPUDawnRenderPassColorAttachmentRenderToSingleSampledSerialize(
-    const WGPUDawnRenderPassColorAttachmentRenderToSingleSampled& record,
-    WGPUDawnRenderPassColorAttachmentRenderToSingleSampledTransfer* transfer,
-    SerializeBuffer* buffer, const ObjectIdProvider& provider) {
-    DAWN_UNUSED(buffer);
-
-    ASSERT(transfer->chain.sType == WGPUSType_DawnRenderPassColorAttachmentRenderToSingleSampled);
-    ASSERT(transfer->chain.hasNext == (record.chain.next != nullptr));
-
-    transfer->implicitSampleCount = record.implicitSampleCount;
-
-    return WireResult::Success;
-}
-DAWN_UNUSED_FUNC(WGPUDawnRenderPassColorAttachmentRenderToSingleSampledSerialize);
-
-DAWN_DECLARE_UNUSED WireResult WGPUDawnRenderPassColorAttachmentRenderToSingleSampledDeserialize(
-    WGPUDawnRenderPassColorAttachmentRenderToSingleSampled* record,
-    const volatile WGPUDawnRenderPassColorAttachmentRenderToSingleSampledTransfer* transfer,
-    DeserializeBuffer* deserializeBuffer,
-    DeserializeAllocator* allocator, const ObjectIdResolver& resolver) {
-    DAWN_UNUSED(allocator);
-
-
-    ASSERT(record->chain.sType == WGPUSType_DawnRenderPassColorAttachmentRenderToSingleSampled);
-    ASSERT(record->chain.next == nullptr);
-
-    static_assert(sizeof(record->implicitSampleCount) >= sizeof(transfer->implicitSampleCount), "Deserialize assignment may not narrow.");
-    record->implicitSampleCount = transfer->implicitSampleCount;
-
-    return WireResult::Success;
-}
-DAWN_UNUSED_FUNC(WGPUDawnRenderPassColorAttachmentRenderToSingleSampledDeserialize);
-
 struct WGPUDawnShaderModuleSPIRVOptionsDescriptorTransfer {
     static_assert(0 <= 1,
                   "Record must be at most one of is_cmd, extensible, and chained.");
@@ -1881,7 +1775,6 @@ struct WGPULimitsTransfer {
     uint32_t maxTextureDimension3D;
     uint32_t maxTextureArrayLayers;
     uint32_t maxBindGroups;
-    uint32_t maxBindGroupsPlusVertexBuffers;
     uint32_t maxBindingsPerBindGroup;
     uint32_t maxDynamicUniformBuffersPerPipelineLayout;
     uint32_t maxDynamicStorageBuffersPerPipelineLayout;
@@ -1933,7 +1826,6 @@ DAWN_DECLARE_UNUSED WireResult WGPULimitsSerialize(
     transfer->maxTextureDimension3D = record.maxTextureDimension3D;
     transfer->maxTextureArrayLayers = record.maxTextureArrayLayers;
     transfer->maxBindGroups = record.maxBindGroups;
-    transfer->maxBindGroupsPlusVertexBuffers = record.maxBindGroupsPlusVertexBuffers;
     transfer->maxBindingsPerBindGroup = record.maxBindingsPerBindGroup;
     transfer->maxDynamicUniformBuffersPerPipelineLayout = record.maxDynamicUniformBuffersPerPipelineLayout;
     transfer->maxDynamicStorageBuffersPerPipelineLayout = record.maxDynamicStorageBuffersPerPipelineLayout;
@@ -1984,8 +1876,6 @@ DAWN_DECLARE_UNUSED WireResult WGPULimitsDeserialize(
     record->maxTextureArrayLayers = transfer->maxTextureArrayLayers;
     static_assert(sizeof(record->maxBindGroups) >= sizeof(transfer->maxBindGroups), "Deserialize assignment may not narrow.");
     record->maxBindGroups = transfer->maxBindGroups;
-    static_assert(sizeof(record->maxBindGroupsPlusVertexBuffers) >= sizeof(transfer->maxBindGroupsPlusVertexBuffers), "Deserialize assignment may not narrow.");
-    record->maxBindGroupsPlusVertexBuffers = transfer->maxBindGroupsPlusVertexBuffers;
     static_assert(sizeof(record->maxBindingsPerBindGroup) >= sizeof(transfer->maxBindingsPerBindGroup), "Deserialize assignment may not narrow.");
     record->maxBindingsPerBindGroup = transfer->maxBindingsPerBindGroup;
     static_assert(sizeof(record->maxDynamicUniformBuffersPerPipelineLayout) >= sizeof(transfer->maxDynamicUniformBuffersPerPipelineLayout), "Deserialize assignment may not narrow.");
@@ -3106,7 +2996,6 @@ struct WGPURequestAdapterOptionsTransfer {
 
     ObjectId compatibleSurface;
     WGPUPowerPreference powerPreference;
-    WGPUBackendType backendType;
     bool forceFallbackAdapter;
     bool compatibilityMode;
 };
@@ -3140,7 +3029,6 @@ DAWN_DECLARE_UNUSED WireResult WGPURequestAdapterOptionsSerialize(
 
     WIRE_TRY(provider.GetOptionalId(record.compatibleSurface, &transfer->compatibleSurface));
     transfer->powerPreference = record.powerPreference;
-    transfer->backendType = record.backendType;
     transfer->forceFallbackAdapter = record.forceFallbackAdapter;
     transfer->compatibilityMode = record.compatibilityMode;
 
@@ -3164,8 +3052,6 @@ DAWN_DECLARE_UNUSED WireResult WGPURequestAdapterOptionsDeserialize(
     WIRE_TRY(resolver.GetOptionalFromId(transfer->compatibleSurface, &record->compatibleSurface));
     static_assert(sizeof(record->powerPreference) >= sizeof(transfer->powerPreference), "Deserialize assignment may not narrow.");
     record->powerPreference = transfer->powerPreference;
-    static_assert(sizeof(record->backendType) >= sizeof(transfer->backendType), "Deserialize assignment may not narrow.");
-    record->backendType = transfer->backendType;
     static_assert(sizeof(record->forceFallbackAdapter) >= sizeof(transfer->forceFallbackAdapter), "Deserialize assignment may not narrow.");
     record->forceFallbackAdapter = transfer->forceFallbackAdapter;
     static_assert(sizeof(record->compatibilityMode) >= sizeof(transfer->compatibilityMode), "Deserialize assignment may not narrow.");
@@ -3174,6 +3060,59 @@ DAWN_DECLARE_UNUSED WireResult WGPURequestAdapterOptionsDeserialize(
     return WireResult::Success;
 }
 DAWN_UNUSED_FUNC(WGPURequestAdapterOptionsDeserialize);
+
+struct WGPURequestAdapterOptionsBackendTypeTransfer {
+    static_assert(0 <= 1,
+                  "Record must be at most one of is_cmd, extensible, and chained.");
+    WGPUChainedStructTransfer chain;
+
+    WGPUBackendType backendType;
+};
+
+static_assert(offsetof(WGPURequestAdapterOptionsBackendTypeTransfer, chain) == 0);
+
+DAWN_DECLARE_UNUSED size_t WGPURequestAdapterOptionsBackendTypeGetExtraRequiredSize(const WGPURequestAdapterOptionsBackendType& record) {
+    DAWN_UNUSED(record);
+    size_t result = 0;
+
+    return result;
+}
+// GetExtraRequiredSize isn't used for structures that are value members of other structures
+// because we assume they cannot contain pointers themselves.
+DAWN_UNUSED_FUNC(WGPURequestAdapterOptionsBackendTypeGetExtraRequiredSize);
+
+DAWN_DECLARE_UNUSED WireResult WGPURequestAdapterOptionsBackendTypeSerialize(
+    const WGPURequestAdapterOptionsBackendType& record,
+    WGPURequestAdapterOptionsBackendTypeTransfer* transfer,
+    SerializeBuffer* buffer, const ObjectIdProvider& provider) {
+    DAWN_UNUSED(buffer);
+
+    ASSERT(transfer->chain.sType == WGPUSType_RequestAdapterOptionsBackendType);
+    ASSERT(transfer->chain.hasNext == (record.chain.next != nullptr));
+
+    transfer->backendType = record.backendType;
+
+    return WireResult::Success;
+}
+DAWN_UNUSED_FUNC(WGPURequestAdapterOptionsBackendTypeSerialize);
+
+DAWN_DECLARE_UNUSED WireResult WGPURequestAdapterOptionsBackendTypeDeserialize(
+    WGPURequestAdapterOptionsBackendType* record,
+    const volatile WGPURequestAdapterOptionsBackendTypeTransfer* transfer,
+    DeserializeBuffer* deserializeBuffer,
+    DeserializeAllocator* allocator, const ObjectIdResolver& resolver) {
+    DAWN_UNUSED(allocator);
+
+
+    ASSERT(record->chain.sType == WGPUSType_RequestAdapterOptionsBackendType);
+    ASSERT(record->chain.next == nullptr);
+
+    static_assert(sizeof(record->backendType) >= sizeof(transfer->backendType), "Deserialize assignment may not narrow.");
+    record->backendType = transfer->backendType;
+
+    return WireResult::Success;
+}
+DAWN_UNUSED_FUNC(WGPURequestAdapterOptionsBackendTypeDeserialize);
 
 struct WGPUSamplerBindingLayoutTransfer {
     static_assert(0 <= 1,
@@ -5504,7 +5443,6 @@ DAWN_UNUSED_FUNC(WGPUProgrammableStageDescriptorDeserialize);
 struct WGPURenderPassColorAttachmentTransfer {
     static_assert(0 <= 1,
                   "Record must be at most one of is_cmd, extensible, and chained.");
-    bool hasNextInChain;
 
     ObjectId view;
     ObjectId resolveTarget;
@@ -5518,9 +5456,6 @@ DAWN_DECLARE_UNUSED size_t WGPURenderPassColorAttachmentGetExtraRequiredSize(con
     DAWN_UNUSED(record);
     size_t result = 0;
 
-    if (record.nextInChain != nullptr) {
-        result += GetChainedStructExtraRequiredSize(record.nextInChain);
-    }
     {
         result += WGPUColorGetExtraRequiredSize(record.clearValue);
     }
@@ -5536,12 +5471,6 @@ DAWN_DECLARE_UNUSED WireResult WGPURenderPassColorAttachmentSerialize(
     SerializeBuffer* buffer, const ObjectIdProvider& provider) {
     DAWN_UNUSED(buffer);
 
-    if (record.nextInChain != nullptr) {
-        transfer->hasNextInChain = true;
-        WIRE_TRY(SerializeChainedStruct(record.nextInChain, buffer, provider));
-    } else {
-        transfer->hasNextInChain = false;
-    }
 
     WIRE_TRY(provider.GetOptionalId(record.view, &transfer->view));
     WIRE_TRY(provider.GetOptionalId(record.resolveTarget, &transfer->resolveTarget));
@@ -5561,10 +5490,6 @@ DAWN_DECLARE_UNUSED WireResult WGPURenderPassColorAttachmentDeserialize(
     DAWN_UNUSED(allocator);
 
 
-    record->nextInChain = nullptr;
-    if (transfer->hasNextInChain) {
-        WIRE_TRY(DeserializeChainedStruct(&record->nextInChain, deserializeBuffer, allocator, resolver));
-    }
 
     WIRE_TRY(resolver.GetOptionalFromId(transfer->view, &record->view));
     WIRE_TRY(resolver.GetOptionalFromId(transfer->resolveTarget, &record->resolveTarget));
@@ -7225,17 +7150,10 @@ size_t GetChainedStructExtraRequiredSize(const WGPUChainedStruct* chainedStruct)
                 chainedStruct = typedStruct.chain.next;
                 break;
             }
-            case WGPUSType_DawnMultisampleStateRenderToSingleSampled: {
-                const auto& typedStruct = *reinterpret_cast<WGPUDawnMultisampleStateRenderToSingleSampled const *>(chainedStruct);
-                result += WireAlignSizeof<WGPUDawnMultisampleStateRenderToSingleSampledTransfer>();
-                result += WGPUDawnMultisampleStateRenderToSingleSampledGetExtraRequiredSize(typedStruct);
-                chainedStruct = typedStruct.chain.next;
-                break;
-            }
-            case WGPUSType_DawnRenderPassColorAttachmentRenderToSingleSampled: {
-                const auto& typedStruct = *reinterpret_cast<WGPUDawnRenderPassColorAttachmentRenderToSingleSampled const *>(chainedStruct);
-                result += WireAlignSizeof<WGPUDawnRenderPassColorAttachmentRenderToSingleSampledTransfer>();
-                result += WGPUDawnRenderPassColorAttachmentRenderToSingleSampledGetExtraRequiredSize(typedStruct);
+            case WGPUSType_RequestAdapterOptionsBackendType: {
+                const auto& typedStruct = *reinterpret_cast<WGPURequestAdapterOptionsBackendType const *>(chainedStruct);
+                result += WireAlignSizeof<WGPURequestAdapterOptionsBackendTypeTransfer>();
+                result += WGPURequestAdapterOptionsBackendTypeGetExtraRequiredSize(typedStruct);
                 chainedStruct = typedStruct.chain.next;
                 break;
             }
@@ -7368,23 +7286,13 @@ size_t GetChainedStructExtraRequiredSize(const WGPUChainedStruct* chainedStruct)
 
                 chainedStruct = chainedStruct->next;
             } break;
-            case WGPUSType_DawnMultisampleStateRenderToSingleSampled: {
-                WGPUDawnMultisampleStateRenderToSingleSampledTransfer* transfer;
+            case WGPUSType_RequestAdapterOptionsBackendType: {
+                WGPURequestAdapterOptionsBackendTypeTransfer* transfer;
                 WIRE_TRY(buffer->Next(&transfer));
                 transfer->chain.sType = chainedStruct->sType;
                 transfer->chain.hasNext = chainedStruct->next != nullptr;
 
-                WIRE_TRY(WGPUDawnMultisampleStateRenderToSingleSampledSerialize(*reinterpret_cast<WGPUDawnMultisampleStateRenderToSingleSampled const*>(chainedStruct), transfer, buffer, provider));
-
-                chainedStruct = chainedStruct->next;
-            } break;
-            case WGPUSType_DawnRenderPassColorAttachmentRenderToSingleSampled: {
-                WGPUDawnRenderPassColorAttachmentRenderToSingleSampledTransfer* transfer;
-                WIRE_TRY(buffer->Next(&transfer));
-                transfer->chain.sType = chainedStruct->sType;
-                transfer->chain.hasNext = chainedStruct->next != nullptr;
-
-                WIRE_TRY(WGPUDawnRenderPassColorAttachmentRenderToSingleSampledSerialize(*reinterpret_cast<WGPUDawnRenderPassColorAttachmentRenderToSingleSampled const*>(chainedStruct), transfer, buffer, provider));
+                WIRE_TRY(WGPURequestAdapterOptionsBackendTypeSerialize(*reinterpret_cast<WGPURequestAdapterOptionsBackendType const*>(chainedStruct), transfer, buffer, provider));
 
                 chainedStruct = chainedStruct->next;
             } break;
@@ -7597,11 +7505,11 @@ WireResult DeserializeChainedStruct(const WGPUChainedStruct** outChainNext,
 
                 hasNext = transfer->chain.hasNext;
             } break;
-            case WGPUSType_DawnMultisampleStateRenderToSingleSampled: {
-                const volatile WGPUDawnMultisampleStateRenderToSingleSampledTransfer* transfer;
+            case WGPUSType_RequestAdapterOptionsBackendType: {
+                const volatile WGPURequestAdapterOptionsBackendTypeTransfer* transfer;
                 WIRE_TRY(deserializeBuffer->Read(&transfer));
 
-                WGPUDawnMultisampleStateRenderToSingleSampled* outStruct;
+                WGPURequestAdapterOptionsBackendType* outStruct;
                 WIRE_TRY(GetSpace(allocator, 1u, &outStruct));
                 outStruct->chain.sType = sType;
                 outStruct->chain.next = nullptr;
@@ -7609,23 +7517,7 @@ WireResult DeserializeChainedStruct(const WGPUChainedStruct** outChainNext,
                 *outChainNext = &outStruct->chain;
                 outChainNext = &outStruct->chain.next;
 
-                WIRE_TRY(WGPUDawnMultisampleStateRenderToSingleSampledDeserialize(outStruct, transfer, deserializeBuffer, allocator, resolver));
-
-                hasNext = transfer->chain.hasNext;
-            } break;
-            case WGPUSType_DawnRenderPassColorAttachmentRenderToSingleSampled: {
-                const volatile WGPUDawnRenderPassColorAttachmentRenderToSingleSampledTransfer* transfer;
-                WIRE_TRY(deserializeBuffer->Read(&transfer));
-
-                WGPUDawnRenderPassColorAttachmentRenderToSingleSampled* outStruct;
-                WIRE_TRY(GetSpace(allocator, 1u, &outStruct));
-                outStruct->chain.sType = sType;
-                outStruct->chain.next = nullptr;
-
-                *outChainNext = &outStruct->chain;
-                outChainNext = &outStruct->chain.next;
-
-                WIRE_TRY(WGPUDawnRenderPassColorAttachmentRenderToSingleSampledDeserialize(outStruct, transfer, deserializeBuffer, allocator, resolver));
+                WIRE_TRY(WGPURequestAdapterOptionsBackendTypeDeserialize(outStruct, transfer, deserializeBuffer, allocator, resolver));
 
                 hasNext = transfer->chain.hasNext;
             } break;
@@ -12850,6 +12742,62 @@ DAWN_DECLARE_UNUSED WireResult DeviceForceLossDeserialize(
     return WireResult::Success;
 }
 DAWN_UNUSED_FUNC(DeviceForceLossDeserialize);
+
+struct DeviceGetAdapterTransfer : CmdHeader {
+    static_assert(1 <= 1,
+                  "Record must be at most one of is_cmd, extensible, and chained.");
+    WireCmd commandId;
+
+    ObjectId self;
+    ObjectHandle result;
+};
+
+static_assert(offsetof(DeviceGetAdapterTransfer, commandSize) == 0);
+static_assert(offsetof(DeviceGetAdapterTransfer, commandId) == sizeof(CmdHeader));
+
+DAWN_DECLARE_UNUSED size_t DeviceGetAdapterGetExtraRequiredSize(const DeviceGetAdapterCmd& record) {
+    DAWN_UNUSED(record);
+    size_t result = 0;
+
+    return result;
+}
+// GetExtraRequiredSize isn't used for structures that are value members of other structures
+// because we assume they cannot contain pointers themselves.
+DAWN_UNUSED_FUNC(DeviceGetAdapterGetExtraRequiredSize);
+
+DAWN_DECLARE_UNUSED WireResult DeviceGetAdapterSerialize(
+    const DeviceGetAdapterCmd& record,
+    DeviceGetAdapterTransfer* transfer,
+    SerializeBuffer* buffer, const ObjectIdProvider& provider) {
+    DAWN_UNUSED(buffer);
+    transfer->commandId = WireCmd::DeviceGetAdapter;
+
+
+    WIRE_TRY(provider.GetId(record.self, &transfer->self));
+    transfer->result = record.result;
+
+    return WireResult::Success;
+}
+DAWN_UNUSED_FUNC(DeviceGetAdapterSerialize);
+
+DAWN_DECLARE_UNUSED WireResult DeviceGetAdapterDeserialize(
+    DeviceGetAdapterCmd* record,
+    const volatile DeviceGetAdapterTransfer* transfer,
+    DeserializeBuffer* deserializeBuffer,
+    DeserializeAllocator* allocator, const ObjectIdResolver& resolver) {
+    DAWN_UNUSED(allocator);
+
+    ASSERT(transfer->commandId == WireCmd::DeviceGetAdapter);
+    record->selfId = transfer->self;
+
+
+    WIRE_TRY(resolver.GetFromId(transfer->self, &record->self));
+    static_assert(sizeof(record->result) >= sizeof(transfer->result), "Deserialize assignment may not narrow.");
+    record->result = transfer->result;
+
+    return WireResult::Success;
+}
+DAWN_UNUSED_FUNC(DeviceGetAdapterDeserialize);
 
 struct DeviceGetQueueTransfer : CmdHeader {
     static_assert(1 <= 1,
@@ -21392,6 +21340,37 @@ WireResult DeviceForceLossCmd::Deserialize(
     return DeviceForceLossDeserialize(this, transfer, deserializeBuffer, allocator, resolver);
 }
 WireResult DeviceForceLossCmd::Deserialize(DeserializeBuffer* deserializeBuffer, DeserializeAllocator* allocator) {
+    ErrorObjectIdResolver resolver;
+    return Deserialize(deserializeBuffer, allocator, resolver);
+}
+
+size_t DeviceGetAdapterCmd::GetRequiredSize() const {
+    return WireAlignSizeof<DeviceGetAdapterTransfer>() + DeviceGetAdapterGetExtraRequiredSize(*this);
+}
+
+WireResult DeviceGetAdapterCmd::Serialize(
+    size_t commandSize,
+    SerializeBuffer* serializeBuffer,
+    const ObjectIdProvider& provider) const {
+    DeviceGetAdapterTransfer* transfer;
+    WIRE_TRY(serializeBuffer->Next(&transfer));
+    transfer->commandSize = commandSize;
+    return (DeviceGetAdapterSerialize(*this, transfer, serializeBuffer, provider));
+}
+WireResult DeviceGetAdapterCmd::Serialize(size_t commandSize, SerializeBuffer* serializeBuffer) const {
+    ErrorObjectIdProvider provider;
+    return Serialize(commandSize, serializeBuffer, provider);
+}
+
+WireResult DeviceGetAdapterCmd::Deserialize(
+    DeserializeBuffer* deserializeBuffer,
+    DeserializeAllocator* allocator,
+    const ObjectIdResolver& resolver) {
+    const volatile DeviceGetAdapterTransfer* transfer;
+    WIRE_TRY(deserializeBuffer->Read(&transfer));
+    return DeviceGetAdapterDeserialize(this, transfer, deserializeBuffer, allocator, resolver);
+}
+WireResult DeviceGetAdapterCmd::Deserialize(DeserializeBuffer* deserializeBuffer, DeserializeAllocator* allocator) {
     ErrorObjectIdResolver resolver;
     return Deserialize(deserializeBuffer, allocator, resolver);
 }
