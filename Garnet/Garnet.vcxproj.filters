@@ -1717,6 +1717,7 @@
     <None Include="Commands\CopyDawnLib.bat">
       <Filter>ソース ファイル</Filter>
     </None>
+    <None Include="Commands\GetLibAndPath.py" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="EmscriptenBuild\CMakeLists.txt" />

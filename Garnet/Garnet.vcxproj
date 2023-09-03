@@ -447,8 +447,8 @@ xcopy Resources $(OutDir)Resources /y /s /i</Command>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(ProjectDir)src\Library\GLFW\lib;$(ProjectDir)src\Library\DawnLib\bin;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>glfw3dll.lib;dawn_common.lib;dawn_glfw.lib;dawn_headers.lib;dawn_native.lib;dawn_platform.lib;dawn_proc.lib;dawn_sample_utils.lib;dawn_utils.lib;dawn_wire.lib;dawncpp.lib;dawncpp_headers.lib;webgpu_dawn.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)src\Library\GLFW\lib;$(ProjectDir)src\Library\DawnLib\bin;$(ProjectDir)Src\Library\dawn\out_win\Debug\src\tint\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>glfw3dll.lib;dawn_common.lib;dawn_glfw.lib;dawn_headers.lib;dawn_native.lib;dawn_platform.lib;dawn_proc.lib;dawn_sample_utils.lib;dawn_utils.lib;dawn_wire.lib;dawncpp.lib;dawncpp_headers.lib;webgpu_dawn.lib;tint.lib;tint_diagnostic_utils.lib;tint_utils_io.lib;tint_val.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>mkdir $(OutDir)Resources
@@ -993,6 +993,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <None Include="CMakeBuild\Garnet_front.js" />
     <None Include="CMakeBuild\index.html" />
     <None Include="Commands\CopyDawnLib.bat" />
+    <None Include="Commands\GetLibAndPath.py" />
     <None Include="Commands\glslc_ALL.bat" />
     <None Include="Commands\RemakeCmakeLists.bat" />
     <None Include="Commands\RemakeCmakeLists.py" />

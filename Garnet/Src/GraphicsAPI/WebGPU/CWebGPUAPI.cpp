@@ -59,7 +59,6 @@ namespace api
 	bool CWebGPUAPI::InitializeWithGLFW(GLFWwindow* pWindow)
 #endif // __EMSCRIPTEN__
 	{
-		if (!SetDawnProcs()) return false; // DawnのProcsをセット. Dawnを動かすにはこの設定が必須
 		if (!CreateInstance()) return false; // インスタンスを生成
 #ifdef __EMSCRIPTEN__
 		if (!CreateSurface()) return false; // ウィンドウサーフェイスを生成
@@ -291,17 +290,6 @@ namespace api
 		return m_CurrentRenderPass;
 	}
 
-	bool CWebGPUAPI::SetDawnProcs()
-	{
-		// ProcTableを作成
-		DawnProcTable procs = dawn::wire::client::GetProcs();
-
-		// ProcTableをセット
-		dawnProcSetProcs(&procs);
-
-		return true;
-	}
-
 	// WebGPU メインロジック ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	bool CWebGPUAPI::CreateInstance()
 	{
@@ -309,9 +297,9 @@ namespace api
 		WGPUInstanceDescriptor desc = {};
 		desc.nextInChain = nullptr; // 拡張機を設定用のフィールド
 
-		// インスタンスを生成
-#ifndef __EMSCRIPTEN__
 		// Emscriptenの場合はInstanceを必要としない
+#ifndef __EMSCRIPTEN__
+		// インスタンスを生成
 		m_Instance = wgpuCreateInstance(&desc);
 
 		if (!m_Instance)
