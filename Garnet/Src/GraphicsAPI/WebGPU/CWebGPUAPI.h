@@ -8,7 +8,11 @@
 #ifdef __EMSCRIPTEN__
 #include <dawn/webgpu.h>
 #else
+#ifdef USE_WebGPUNative
+#include <webgpu.h>
+#else
 #include <dawn/webgpu.h>
+#endif // USE_WebGPUNative
 #endif
 
 namespace api
