@@ -67,7 +67,9 @@ namespace dawn::native {
     template <>
     inline wgpu::SType STypeFor<DawnShaderModuleSPIRVOptionsDescriptor> = wgpu::SType::DawnShaderModuleSPIRVOptionsDescriptor;
     template <>
-    inline wgpu::SType STypeFor<RequestAdapterOptionsBackendType> = wgpu::SType::RequestAdapterOptionsBackendType;
+    inline wgpu::SType STypeFor<DawnMultisampleStateRenderToSingleSampled> = wgpu::SType::DawnMultisampleStateRenderToSingleSampled;
+    template <>
+    inline wgpu::SType STypeFor<DawnRenderPassColorAttachmentRenderToSingleSampled> = wgpu::SType::DawnRenderPassColorAttachmentRenderToSingleSampled;
 
     template <typename T>
     void FindInChain(const ChainedStruct* chain, const T** out) {

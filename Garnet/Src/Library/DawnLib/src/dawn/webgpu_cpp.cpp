@@ -40,6 +40,7 @@ namespace wgpu {
     static_assert(sizeof(BackendType) == sizeof(WGPUBackendType), "sizeof mismatch for BackendType");
     static_assert(alignof(BackendType) == alignof(WGPUBackendType), "alignof mismatch for BackendType");
 
+    static_assert(static_cast<uint32_t>(BackendType::Undefined) == WGPUBackendType_Undefined, "value mismatch for BackendType::Undefined");
     static_assert(static_cast<uint32_t>(BackendType::Null) == WGPUBackendType_Null, "value mismatch for BackendType::Null");
     static_assert(static_cast<uint32_t>(BackendType::WebGPU) == WGPUBackendType_WebGPU, "value mismatch for BackendType::WebGPU");
     static_assert(static_cast<uint32_t>(BackendType::D3D11) == WGPUBackendType_D3D11, "value mismatch for BackendType::D3D11");
@@ -242,6 +243,7 @@ namespace wgpu {
     static_assert(static_cast<uint32_t>(FeatureName::ImplicitDeviceSynchronization) == WGPUFeatureName_ImplicitDeviceSynchronization, "value mismatch for FeatureName::ImplicitDeviceSynchronization");
     static_assert(static_cast<uint32_t>(FeatureName::SurfaceCapabilities) == WGPUFeatureName_SurfaceCapabilities, "value mismatch for FeatureName::SurfaceCapabilities");
     static_assert(static_cast<uint32_t>(FeatureName::TransientAttachments) == WGPUFeatureName_TransientAttachments, "value mismatch for FeatureName::TransientAttachments");
+    static_assert(static_cast<uint32_t>(FeatureName::MSAARenderToSingleSampled) == WGPUFeatureName_MSAARenderToSingleSampled, "value mismatch for FeatureName::MSAARenderToSingleSampled");
 
     // FilterMode
 
@@ -409,9 +411,10 @@ namespace wgpu {
     static_assert(static_cast<uint32_t>(SType::DawnBufferDescriptorErrorInfoFromWireClient) == WGPUSType_DawnBufferDescriptorErrorInfoFromWireClient, "value mismatch for SType::DawnBufferDescriptorErrorInfoFromWireClient");
     static_assert(static_cast<uint32_t>(SType::DawnTogglesDescriptor) == WGPUSType_DawnTogglesDescriptor, "value mismatch for SType::DawnTogglesDescriptor");
     static_assert(static_cast<uint32_t>(SType::DawnShaderModuleSPIRVOptionsDescriptor) == WGPUSType_DawnShaderModuleSPIRVOptionsDescriptor, "value mismatch for SType::DawnShaderModuleSPIRVOptionsDescriptor");
-    static_assert(static_cast<uint32_t>(SType::RequestAdapterOptionsBackendType) == WGPUSType_RequestAdapterOptionsBackendType, "value mismatch for SType::RequestAdapterOptionsBackendType");
     static_assert(static_cast<uint32_t>(SType::RequestAdapterOptionsLUID) == WGPUSType_RequestAdapterOptionsLUID, "value mismatch for SType::RequestAdapterOptionsLUID");
     static_assert(static_cast<uint32_t>(SType::RequestAdapterOptionsGetGLProc) == WGPUSType_RequestAdapterOptionsGetGLProc, "value mismatch for SType::RequestAdapterOptionsGetGLProc");
+    static_assert(static_cast<uint32_t>(SType::DawnMultisampleStateRenderToSingleSampled) == WGPUSType_DawnMultisampleStateRenderToSingleSampled, "value mismatch for SType::DawnMultisampleStateRenderToSingleSampled");
+    static_assert(static_cast<uint32_t>(SType::DawnRenderPassColorAttachmentRenderToSingleSampled) == WGPUSType_DawnRenderPassColorAttachmentRenderToSingleSampled, "value mismatch for SType::DawnRenderPassColorAttachmentRenderToSingleSampled");
 
     // SamplerBindingType
 
@@ -947,6 +950,22 @@ namespace wgpu {
     static_assert(offsetof(DawnEncoderInternalUsageDescriptor, useInternalUsages) == offsetof(WGPUDawnEncoderInternalUsageDescriptor, useInternalUsages),
             "offsetof mismatch for DawnEncoderInternalUsageDescriptor::useInternalUsages");
 
+    // DawnMultisampleStateRenderToSingleSampled
+
+    static_assert(sizeof(DawnMultisampleStateRenderToSingleSampled) == sizeof(WGPUDawnMultisampleStateRenderToSingleSampled), "sizeof mismatch for DawnMultisampleStateRenderToSingleSampled");
+    static_assert(alignof(DawnMultisampleStateRenderToSingleSampled) == alignof(WGPUDawnMultisampleStateRenderToSingleSampled), "alignof mismatch for DawnMultisampleStateRenderToSingleSampled");
+
+    static_assert(offsetof(DawnMultisampleStateRenderToSingleSampled, enabled) == offsetof(WGPUDawnMultisampleStateRenderToSingleSampled, enabled),
+            "offsetof mismatch for DawnMultisampleStateRenderToSingleSampled::enabled");
+
+    // DawnRenderPassColorAttachmentRenderToSingleSampled
+
+    static_assert(sizeof(DawnRenderPassColorAttachmentRenderToSingleSampled) == sizeof(WGPUDawnRenderPassColorAttachmentRenderToSingleSampled), "sizeof mismatch for DawnRenderPassColorAttachmentRenderToSingleSampled");
+    static_assert(alignof(DawnRenderPassColorAttachmentRenderToSingleSampled) == alignof(WGPUDawnRenderPassColorAttachmentRenderToSingleSampled), "alignof mismatch for DawnRenderPassColorAttachmentRenderToSingleSampled");
+
+    static_assert(offsetof(DawnRenderPassColorAttachmentRenderToSingleSampled, implicitSampleCount) == offsetof(WGPUDawnRenderPassColorAttachmentRenderToSingleSampled, implicitSampleCount),
+            "offsetof mismatch for DawnRenderPassColorAttachmentRenderToSingleSampled::implicitSampleCount");
+
     // DawnShaderModuleSPIRVOptionsDescriptor
 
     static_assert(sizeof(DawnShaderModuleSPIRVOptionsDescriptor) == sizeof(WGPUDawnShaderModuleSPIRVOptionsDescriptor), "sizeof mismatch for DawnShaderModuleSPIRVOptionsDescriptor");
@@ -1036,6 +1055,8 @@ namespace wgpu {
             "offsetof mismatch for Limits::maxTextureArrayLayers");
     static_assert(offsetof(Limits, maxBindGroups) == offsetof(WGPULimits, maxBindGroups),
             "offsetof mismatch for Limits::maxBindGroups");
+    static_assert(offsetof(Limits, maxBindGroupsPlusVertexBuffers) == offsetof(WGPULimits, maxBindGroupsPlusVertexBuffers),
+            "offsetof mismatch for Limits::maxBindGroupsPlusVertexBuffers");
     static_assert(offsetof(Limits, maxBindingsPerBindGroup) == offsetof(WGPULimits, maxBindingsPerBindGroup),
             "offsetof mismatch for Limits::maxBindingsPerBindGroup");
     static_assert(offsetof(Limits, maxDynamicUniformBuffersPerPipelineLayout) == offsetof(WGPULimits, maxDynamicUniformBuffersPerPipelineLayout),
@@ -1278,18 +1299,12 @@ namespace wgpu {
             "offsetof mismatch for RequestAdapterOptions::compatibleSurface");
     static_assert(offsetof(RequestAdapterOptions, powerPreference) == offsetof(WGPURequestAdapterOptions, powerPreference),
             "offsetof mismatch for RequestAdapterOptions::powerPreference");
+    static_assert(offsetof(RequestAdapterOptions, backendType) == offsetof(WGPURequestAdapterOptions, backendType),
+            "offsetof mismatch for RequestAdapterOptions::backendType");
     static_assert(offsetof(RequestAdapterOptions, forceFallbackAdapter) == offsetof(WGPURequestAdapterOptions, forceFallbackAdapter),
             "offsetof mismatch for RequestAdapterOptions::forceFallbackAdapter");
     static_assert(offsetof(RequestAdapterOptions, compatibilityMode) == offsetof(WGPURequestAdapterOptions, compatibilityMode),
             "offsetof mismatch for RequestAdapterOptions::compatibilityMode");
-
-    // RequestAdapterOptionsBackendType
-
-    static_assert(sizeof(RequestAdapterOptionsBackendType) == sizeof(WGPURequestAdapterOptionsBackendType), "sizeof mismatch for RequestAdapterOptionsBackendType");
-    static_assert(alignof(RequestAdapterOptionsBackendType) == alignof(WGPURequestAdapterOptionsBackendType), "alignof mismatch for RequestAdapterOptionsBackendType");
-
-    static_assert(offsetof(RequestAdapterOptionsBackendType, backendType) == offsetof(WGPURequestAdapterOptionsBackendType, backendType),
-            "offsetof mismatch for RequestAdapterOptionsBackendType::backendType");
 
     // SamplerBindingLayout
 
@@ -1746,6 +1761,8 @@ namespace wgpu {
     static_assert(sizeof(RenderPassColorAttachment) == sizeof(WGPURenderPassColorAttachment), "sizeof mismatch for RenderPassColorAttachment");
     static_assert(alignof(RenderPassColorAttachment) == alignof(WGPURenderPassColorAttachment), "alignof mismatch for RenderPassColorAttachment");
 
+    static_assert(offsetof(RenderPassColorAttachment, nextInChain) == offsetof(WGPURenderPassColorAttachment, nextInChain),
+            "offsetof mismatch for RenderPassColorAttachment::nextInChain");
     static_assert(offsetof(RenderPassColorAttachment, view) == offsetof(WGPURenderPassColorAttachment, view),
             "offsetof mismatch for RenderPassColorAttachment::view");
     static_assert(offsetof(RenderPassColorAttachment, resolveTarget) == offsetof(WGPURenderPassColorAttachment, resolveTarget),

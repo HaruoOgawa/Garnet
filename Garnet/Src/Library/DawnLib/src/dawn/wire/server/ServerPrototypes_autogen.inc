@@ -186,9 +186,6 @@ WireResult DoDeviceDestroy(WGPUDevice self);
 WireResult HandleDeviceForceLoss(DeserializeBuffer* deserializeBuffer);
 
 WireResult DoDeviceForceLoss(WGPUDevice self, WGPUDeviceLostReason type, char const * message);
-WireResult HandleDeviceGetAdapter(DeserializeBuffer* deserializeBuffer);
-
-WireResult DoDeviceGetAdapter(WGPUDevice self, WGPUAdapter* result);
 WireResult HandleDeviceGetQueue(DeserializeBuffer* deserializeBuffer);
 
 WireResult DoDeviceGetQueue(WGPUDevice self, WGPUQueue* result);

@@ -366,6 +366,8 @@ namespace dawn::native {
                 return {};
             case wgpu::FeatureName::TransientAttachments:
                 return {};
+            case wgpu::FeatureName::MSAARenderToSingleSampled:
+                return {};
             default:
                 return DAWN_VALIDATION_ERROR("Value %i is invalid for WGPUFeatureName.", static_cast<uint32_t>(value));
         }
@@ -618,11 +620,13 @@ namespace dawn::native {
                 return {};
             case wgpu::SType::DawnShaderModuleSPIRVOptionsDescriptor:
                 return {};
-            case wgpu::SType::RequestAdapterOptionsBackendType:
-                return {};
             case wgpu::SType::RequestAdapterOptionsLUID:
                 return {};
             case wgpu::SType::RequestAdapterOptionsGetGLProc:
+                return {};
+            case wgpu::SType::DawnMultisampleStateRenderToSingleSampled:
+                return {};
+            case wgpu::SType::DawnRenderPassColorAttachmentRenderToSingleSampled:
                 return {};
             default:
                 return DAWN_VALIDATION_ERROR("Value %i is invalid for WGPUSType.", static_cast<uint32_t>(value));
