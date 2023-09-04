@@ -640,20 +640,6 @@ WIRE_TRY(DoDeviceForceLoss(cmd.self, cmd.type, cmd.message));
         return WireResult::Success;
     }
 
-    WireResult Server::HandleDeviceGetAdapter(DeserializeBuffer* deserializeBuffer) {
-        DeviceGetAdapterCmd cmd;
-        WIRE_TRY(cmd.Deserialize(deserializeBuffer, &mAllocator, *this));
-
-
-
-        Known<WGPUAdapter> resultData;
-        WIRE_TRY(AdapterObjects().Allocate(&resultData, cmd.result));
-        resultData->generation = cmd.result.generation;
-WIRE_TRY(DoDeviceGetAdapter(cmd.self, &resultData->handle));
-
-        return WireResult::Success;
-    }
-
     WireResult Server::HandleDeviceGetQueue(DeserializeBuffer* deserializeBuffer) {
         DeviceGetQueueCmd cmd;
         WIRE_TRY(cmd.Deserialize(deserializeBuffer, &mAllocator, *this));
@@ -1475,9 +1461,6 @@ WIRE_TRY(DoTextureViewSetLabel(cmd.self, cmd.label));
                     break;
                 case WireCmd::DeviceForceLoss:
                     result = HandleDeviceForceLoss(&deserializeBuffer);
-                    break;
-                case WireCmd::DeviceGetAdapter:
-                    result = HandleDeviceGetAdapter(&deserializeBuffer);
                     break;
                 case WireCmd::DeviceGetQueue:
                     result = HandleDeviceGetQueue(&deserializeBuffer);

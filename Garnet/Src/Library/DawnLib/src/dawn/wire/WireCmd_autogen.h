@@ -188,7 +188,6 @@ namespace dawn::wire {
         DeviceCreateTexture,
         DeviceDestroy,
         DeviceForceLoss,
-        DeviceGetAdapter,
         DeviceGetQueue,
         DeviceInjectError,
         DevicePopErrorScope,
@@ -1389,23 +1388,6 @@ namespace dawn::wire {
     WGPUDevice self;
     WGPUDeviceLostReason type;
     char const * message;
-};
-
-    struct DeviceGetAdapterCmd {
-    size_t GetRequiredSize() const;
-
-    WireResult Serialize(size_t commandSize, SerializeBuffer* serializeBuffer, const ObjectIdProvider& objectIdProvider) const;
-    // Override which produces a FatalError if any object is used.
-    WireResult Serialize(size_t commandSize, SerializeBuffer* serializeBuffer) const;
-
-    WireResult Deserialize(DeserializeBuffer* deserializeBuffer, DeserializeAllocator* allocator, const ObjectIdResolver& resolver);
-    // Override which produces a FatalError if any object is used.
-    WireResult Deserialize(DeserializeBuffer* deserializeBuffer, DeserializeAllocator* allocator);
-
-    ObjectId selfId;
-
-    WGPUDevice self;
-    ObjectHandle result;
 };
 
     struct DeviceGetQueueCmd {

@@ -19,6 +19,12 @@ namespace dawn::wire::server {
       protected:
         void DestroyAllObjects(const DawnProcTable& procs) {
             {
+                std::vector<WGPUDevice> handles = mKnownDevice.AcquireAllHandles();
+                for (WGPUDevice handle : handles) {
+                    procs.deviceRelease(handle);
+                }
+            }
+            {
                 std::vector<WGPUAdapter> handles = mKnownAdapter.AcquireAllHandles();
                 for (WGPUAdapter handle : handles) {
                     procs.adapterRelease(handle);
@@ -154,12 +160,6 @@ namespace dawn::wire::server {
                 std::vector<WGPUTextureView> handles = mKnownTextureView.AcquireAllHandles();
                 for (WGPUTextureView handle : handles) {
                     procs.textureViewRelease(handle);
-                }
-            }
-            {
-                std::vector<WGPUDevice> handles = mKnownDevice.AcquireAllHandles();
-                for (WGPUDevice handle : handles) {
-                    procs.deviceRelease(handle);
                 }
             }
         }

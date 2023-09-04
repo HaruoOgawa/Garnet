@@ -8,17 +8,8 @@
 #ifdef __EMSCRIPTEN__
 #include <dawn/webgpu.h>
 #else
-#include <webgpu.h>
+#include <dawn/webgpu.h>
 #endif
-
-/*#include <dawn/webgpu.h>
-#ifndef __EMSCRIPTEN__
-#include <dawn/dawn_proc.h>
-#include <dawn/dawn_proc_table.h>
-#include <dawn/wire/WireClient.h>
-#include <dawn/wire/WireServer.h>
-#include <dawn/native/DawnNative.h>
-#endif*/
 
 namespace api
 {

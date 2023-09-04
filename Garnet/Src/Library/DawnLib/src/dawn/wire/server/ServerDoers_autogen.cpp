@@ -363,13 +363,6 @@ namespace dawn::wire::server {
         return WireResult::Success;
     }
 
-    WireResult Server::DoDeviceGetAdapter(WGPUDevice self, WGPUAdapter* result) {
-        *result =
-        mProcs.deviceGetAdapter(self);
-        ASSERT(*result != nullptr);
-        return WireResult::Success;
-    }
-
     WireResult Server::DoDeviceGetQueue(WGPUDevice self, WGPUQueue* result) {
         *result =
         mProcs.deviceGetQueue(self);

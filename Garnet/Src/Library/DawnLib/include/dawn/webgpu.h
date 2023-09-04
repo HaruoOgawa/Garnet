@@ -28,7 +28,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifdef __EMSCRIPTEN__
-#error "Do not include this header. Emscripten already provides headers needed for WebGPU."
+//#error "Do not include this header. Emscripten already provides headers needed for WebGPU."
 #endif
 #ifndef WEBGPU_H_
 #define WEBGPU_H_
@@ -123,6 +123,8 @@ struct WGPUDawnAdapterPropertiesPowerPreference;
 struct WGPUDawnBufferDescriptorErrorInfoFromWireClient;
 struct WGPUDawnCacheDeviceDescriptor;
 struct WGPUDawnEncoderInternalUsageDescriptor;
+struct WGPUDawnMultisampleStateRenderToSingleSampled;
+struct WGPUDawnRenderPassColorAttachmentRenderToSingleSampled;
 struct WGPUDawnShaderModuleSPIRVOptionsDescriptor;
 struct WGPUDawnTextureInternalUsageDescriptor;
 struct WGPUDawnTogglesDescriptor;
@@ -146,7 +148,6 @@ struct WGPURenderPassDepthStencilAttachment;
 struct WGPURenderPassDescriptorMaxDrawCount;
 struct WGPURenderPassTimestampWrite;
 struct WGPURequestAdapterOptions;
-struct WGPURequestAdapterOptionsBackendType;
 struct WGPUSamplerBindingLayout;
 struct WGPUSamplerDescriptor;
 struct WGPUShaderModuleDescriptor;
@@ -216,14 +217,15 @@ typedef enum WGPUAlphaMode {
 } WGPUAlphaMode WGPU_ENUM_ATTRIBUTE;
 
 typedef enum WGPUBackendType {
-    WGPUBackendType_Null = 0x00000000,
-    WGPUBackendType_WebGPU = 0x00000001,
-    WGPUBackendType_D3D11 = 0x00000002,
-    WGPUBackendType_D3D12 = 0x00000003,
-    WGPUBackendType_Metal = 0x00000004,
-    WGPUBackendType_Vulkan = 0x00000005,
-    WGPUBackendType_OpenGL = 0x00000006,
-    WGPUBackendType_OpenGLES = 0x00000007,
+    WGPUBackendType_Undefined = 0x00000000,
+    WGPUBackendType_Null = 0x00000001,
+    WGPUBackendType_WebGPU = 0x00000002,
+    WGPUBackendType_D3D11 = 0x00000003,
+    WGPUBackendType_D3D12 = 0x00000004,
+    WGPUBackendType_Metal = 0x00000005,
+    WGPUBackendType_Vulkan = 0x00000006,
+    WGPUBackendType_OpenGL = 0x00000007,
+    WGPUBackendType_OpenGLES = 0x00000008,
     WGPUBackendType_Force32 = 0x7FFFFFFF
 } WGPUBackendType WGPU_ENUM_ATTRIBUTE;
 
@@ -386,6 +388,7 @@ typedef enum WGPUFeatureName {
     WGPUFeatureName_ImplicitDeviceSynchronization = 0x000003EF,
     WGPUFeatureName_SurfaceCapabilities = 0x000003F0,
     WGPUFeatureName_TransientAttachments = 0x000003F1,
+    WGPUFeatureName_MSAARenderToSingleSampled = 0x000003F2,
     WGPUFeatureName_Force32 = 0x7FFFFFFF
 } WGPUFeatureName WGPU_ENUM_ATTRIBUTE;
 
@@ -521,9 +524,10 @@ typedef enum WGPUSType {
     WGPUSType_DawnBufferDescriptorErrorInfoFromWireClient = 0x000003EF,
     WGPUSType_DawnTogglesDescriptor = 0x000003F0,
     WGPUSType_DawnShaderModuleSPIRVOptionsDescriptor = 0x000003F1,
-    WGPUSType_RequestAdapterOptionsBackendType = 0x000003F2,
-    WGPUSType_RequestAdapterOptionsLUID = 0x000003F3,
-    WGPUSType_RequestAdapterOptionsGetGLProc = 0x000003F4,
+    WGPUSType_RequestAdapterOptionsLUID = 0x000003F2,
+    WGPUSType_RequestAdapterOptionsGetGLProc = 0x000003F3,
+    WGPUSType_DawnMultisampleStateRenderToSingleSampled = 0x000003F4,
+    WGPUSType_DawnRenderPassColorAttachmentRenderToSingleSampled = 0x000003F5,
     WGPUSType_Force32 = 0x7FFFFFFF
 } WGPUSType WGPU_ENUM_ATTRIBUTE;
 
@@ -939,6 +943,18 @@ typedef struct WGPUDawnEncoderInternalUsageDescriptor {
     bool useInternalUsages;
 } WGPUDawnEncoderInternalUsageDescriptor WGPU_STRUCTURE_ATTRIBUTE;
 
+// Can be chained in WGPUMultisampleState
+typedef struct WGPUDawnMultisampleStateRenderToSingleSampled {
+    WGPUChainedStruct chain;
+    bool enabled;
+} WGPUDawnMultisampleStateRenderToSingleSampled WGPU_STRUCTURE_ATTRIBUTE;
+
+// Can be chained in WGPURenderPassColorAttachment
+typedef struct WGPUDawnRenderPassColorAttachmentRenderToSingleSampled {
+    WGPUChainedStruct chain;
+    uint32_t implicitSampleCount;
+} WGPUDawnRenderPassColorAttachmentRenderToSingleSampled WGPU_STRUCTURE_ATTRIBUTE;
+
 // Can be chained in WGPUShaderModuleDescriptor
 typedef struct WGPUDawnShaderModuleSPIRVOptionsDescriptor {
     WGPUChainedStruct chain;
@@ -952,6 +968,7 @@ typedef struct WGPUDawnTextureInternalUsageDescriptor {
 } WGPUDawnTextureInternalUsageDescriptor WGPU_STRUCTURE_ATTRIBUTE;
 
 // Can be chained in WGPUInstanceDescriptor
+// Can be chained in WGPURequestAdapterOptions
 // Can be chained in WGPUDeviceDescriptor
 typedef struct WGPUDawnTogglesDescriptor {
     WGPUChainedStruct chain;
@@ -993,6 +1010,7 @@ typedef struct WGPULimits {
     uint32_t maxTextureDimension3D;
     uint32_t maxTextureArrayLayers;
     uint32_t maxBindGroups;
+    uint32_t maxBindGroupsPlusVertexBuffers;
     uint32_t maxBindingsPerBindGroup;
     uint32_t maxDynamicUniformBuffersPerPipelineLayout;
     uint32_t maxDynamicStorageBuffersPerPipelineLayout;
@@ -1118,15 +1136,10 @@ typedef struct WGPURequestAdapterOptions {
     WGPUChainedStruct const * nextInChain;
     WGPU_NULLABLE WGPUSurface compatibleSurface;
     WGPUPowerPreference powerPreference;
+    WGPUBackendType backendType;
     bool forceFallbackAdapter;
     bool compatibilityMode;
 } WGPURequestAdapterOptions WGPU_STRUCTURE_ATTRIBUTE;
-
-// Can be chained in WGPURequestAdapterOptions
-typedef struct WGPURequestAdapterOptionsBackendType {
-    WGPUChainedStruct chain;
-    WGPUBackendType backendType;
-} WGPURequestAdapterOptionsBackendType WGPU_STRUCTURE_ATTRIBUTE;
 
 typedef struct WGPUSamplerBindingLayout {
     WGPUChainedStruct const * nextInChain;
@@ -1374,6 +1387,7 @@ typedef struct WGPUProgrammableStageDescriptor {
 } WGPUProgrammableStageDescriptor WGPU_STRUCTURE_ATTRIBUTE;
 
 typedef struct WGPURenderPassColorAttachment {
+    WGPUChainedStruct const * nextInChain;
     WGPU_NULLABLE WGPUTextureView view;
     WGPU_NULLABLE WGPUTextureView resolveTarget;
     WGPULoadOp loadOp;

@@ -442,6 +442,36 @@ namespace dawn::native {
     }
 
 
+    static_assert(sizeof(DawnMultisampleStateRenderToSingleSampled) == sizeof(WGPUDawnMultisampleStateRenderToSingleSampled), "sizeof mismatch for DawnMultisampleStateRenderToSingleSampled");
+    static_assert(alignof(DawnMultisampleStateRenderToSingleSampled) == alignof(WGPUDawnMultisampleStateRenderToSingleSampled), "alignof mismatch for DawnMultisampleStateRenderToSingleSampled");
+
+    static_assert(offsetof(DawnMultisampleStateRenderToSingleSampled, enabled) == offsetof(WGPUDawnMultisampleStateRenderToSingleSampled, enabled),
+            "offsetof mismatch for DawnMultisampleStateRenderToSingleSampled::enabled");
+
+    bool DawnMultisampleStateRenderToSingleSampled::operator==(const DawnMultisampleStateRenderToSingleSampled& rhs) const {
+        return (nextInChain == rhs.nextInChain) && std::tie(
+            enabled
+        ) == std::tie(
+            rhs.enabled
+        );
+    }
+
+
+    static_assert(sizeof(DawnRenderPassColorAttachmentRenderToSingleSampled) == sizeof(WGPUDawnRenderPassColorAttachmentRenderToSingleSampled), "sizeof mismatch for DawnRenderPassColorAttachmentRenderToSingleSampled");
+    static_assert(alignof(DawnRenderPassColorAttachmentRenderToSingleSampled) == alignof(WGPUDawnRenderPassColorAttachmentRenderToSingleSampled), "alignof mismatch for DawnRenderPassColorAttachmentRenderToSingleSampled");
+
+    static_assert(offsetof(DawnRenderPassColorAttachmentRenderToSingleSampled, implicitSampleCount) == offsetof(WGPUDawnRenderPassColorAttachmentRenderToSingleSampled, implicitSampleCount),
+            "offsetof mismatch for DawnRenderPassColorAttachmentRenderToSingleSampled::implicitSampleCount");
+
+    bool DawnRenderPassColorAttachmentRenderToSingleSampled::operator==(const DawnRenderPassColorAttachmentRenderToSingleSampled& rhs) const {
+        return (nextInChain == rhs.nextInChain) && std::tie(
+            implicitSampleCount
+        ) == std::tie(
+            rhs.implicitSampleCount
+        );
+    }
+
+
     static_assert(sizeof(DawnShaderModuleSPIRVOptionsDescriptor) == sizeof(WGPUDawnShaderModuleSPIRVOptionsDescriptor), "sizeof mismatch for DawnShaderModuleSPIRVOptionsDescriptor");
     static_assert(alignof(DawnShaderModuleSPIRVOptionsDescriptor) == alignof(WGPUDawnShaderModuleSPIRVOptionsDescriptor), "alignof mismatch for DawnShaderModuleSPIRVOptionsDescriptor");
 
@@ -593,6 +623,8 @@ namespace dawn::native {
             "offsetof mismatch for Limits::maxTextureArrayLayers");
     static_assert(offsetof(Limits, maxBindGroups) == offsetof(WGPULimits, maxBindGroups),
             "offsetof mismatch for Limits::maxBindGroups");
+    static_assert(offsetof(Limits, maxBindGroupsPlusVertexBuffers) == offsetof(WGPULimits, maxBindGroupsPlusVertexBuffers),
+            "offsetof mismatch for Limits::maxBindGroupsPlusVertexBuffers");
     static_assert(offsetof(Limits, maxBindingsPerBindGroup) == offsetof(WGPULimits, maxBindingsPerBindGroup),
             "offsetof mismatch for Limits::maxBindingsPerBindGroup");
     static_assert(offsetof(Limits, maxDynamicUniformBuffersPerPipelineLayout) == offsetof(WGPULimits, maxDynamicUniformBuffersPerPipelineLayout),
@@ -653,6 +685,7 @@ namespace dawn::native {
             maxTextureDimension3D,
             maxTextureArrayLayers,
             maxBindGroups,
+            maxBindGroupsPlusVertexBuffers,
             maxBindingsPerBindGroup,
             maxDynamicUniformBuffersPerPipelineLayout,
             maxDynamicStorageBuffersPerPipelineLayout,
@@ -685,6 +718,7 @@ namespace dawn::native {
             rhs.maxTextureDimension3D,
             rhs.maxTextureArrayLayers,
             rhs.maxBindGroups,
+            rhs.maxBindGroupsPlusVertexBuffers,
             rhs.maxBindingsPerBindGroup,
             rhs.maxDynamicUniformBuffersPerPipelineLayout,
             rhs.maxDynamicStorageBuffersPerPipelineLayout,
@@ -1053,6 +1087,8 @@ namespace dawn::native {
             "offsetof mismatch for RequestAdapterOptions::compatibleSurface");
     static_assert(offsetof(RequestAdapterOptions, powerPreference) == offsetof(WGPURequestAdapterOptions, powerPreference),
             "offsetof mismatch for RequestAdapterOptions::powerPreference");
+    static_assert(offsetof(RequestAdapterOptions, backendType) == offsetof(WGPURequestAdapterOptions, backendType),
+            "offsetof mismatch for RequestAdapterOptions::backendType");
     static_assert(offsetof(RequestAdapterOptions, forceFallbackAdapter) == offsetof(WGPURequestAdapterOptions, forceFallbackAdapter),
             "offsetof mismatch for RequestAdapterOptions::forceFallbackAdapter");
     static_assert(offsetof(RequestAdapterOptions, compatibilityMode) == offsetof(WGPURequestAdapterOptions, compatibilityMode),
@@ -1062,28 +1098,15 @@ namespace dawn::native {
         return (nextInChain == rhs.nextInChain) && std::tie(
             compatibleSurface,
             powerPreference,
+            backendType,
             forceFallbackAdapter,
             compatibilityMode
         ) == std::tie(
             rhs.compatibleSurface,
             rhs.powerPreference,
+            rhs.backendType,
             rhs.forceFallbackAdapter,
             rhs.compatibilityMode
-        );
-    }
-
-
-    static_assert(sizeof(RequestAdapterOptionsBackendType) == sizeof(WGPURequestAdapterOptionsBackendType), "sizeof mismatch for RequestAdapterOptionsBackendType");
-    static_assert(alignof(RequestAdapterOptionsBackendType) == alignof(WGPURequestAdapterOptionsBackendType), "alignof mismatch for RequestAdapterOptionsBackendType");
-
-    static_assert(offsetof(RequestAdapterOptionsBackendType, backendType) == offsetof(WGPURequestAdapterOptionsBackendType, backendType),
-            "offsetof mismatch for RequestAdapterOptionsBackendType::backendType");
-
-    bool RequestAdapterOptionsBackendType::operator==(const RequestAdapterOptionsBackendType& rhs) const {
-        return (nextInChain == rhs.nextInChain) && std::tie(
-            backendType
-        ) == std::tie(
-            rhs.backendType
         );
     }
 
@@ -1921,6 +1944,8 @@ namespace dawn::native {
     static_assert(sizeof(RenderPassColorAttachment) == sizeof(WGPURenderPassColorAttachment), "sizeof mismatch for RenderPassColorAttachment");
     static_assert(alignof(RenderPassColorAttachment) == alignof(WGPURenderPassColorAttachment), "alignof mismatch for RenderPassColorAttachment");
 
+    static_assert(offsetof(RenderPassColorAttachment, nextInChain) == offsetof(WGPURenderPassColorAttachment, nextInChain),
+            "offsetof mismatch for RenderPassColorAttachment::nextInChain");
     static_assert(offsetof(RenderPassColorAttachment, view) == offsetof(WGPURenderPassColorAttachment, view),
             "offsetof mismatch for RenderPassColorAttachment::view");
     static_assert(offsetof(RenderPassColorAttachment, resolveTarget) == offsetof(WGPURenderPassColorAttachment, resolveTarget),
@@ -1933,7 +1958,7 @@ namespace dawn::native {
             "offsetof mismatch for RenderPassColorAttachment::clearValue");
 
     bool RenderPassColorAttachment::operator==(const RenderPassColorAttachment& rhs) const {
-        return  std::tie(
+        return (nextInChain == rhs.nextInChain) && std::tie(
             view,
             resolveTarget,
             loadOp,

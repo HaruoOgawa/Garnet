@@ -31,8 +31,8 @@
 #ifndef _glfw3_webgpu_h_
 #define _glfw3_webgpu_h_
 
-//#include <dawn/webgpu.h>
-#include <webgpu.h>
+#include <dawn/webgpu.h>
+//#include <webgpu.h>
 #include <glfw3.h>
 
 #ifdef __cplusplus

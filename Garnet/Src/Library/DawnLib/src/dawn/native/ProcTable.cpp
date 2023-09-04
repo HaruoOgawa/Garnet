@@ -2324,217 +2324,228 @@ namespace dawn::native {
         return result;
     }
 
-    static DawnProcTable gProcTable = {
-        NativeCreateInstance,
-        NativeGetProcAddress,
-        NativeAdapterCreateDevice,
-        NativeAdapterEnumerateFeatures,
-        NativeAdapterGetInstance,
-        NativeAdapterGetLimits,
-        NativeAdapterGetProperties,
-        NativeAdapterHasFeature,
-        NativeAdapterRequestDevice,
-        NativeAdapterReference,
-        NativeAdapterRelease,
-        NativeBindGroupSetLabel,
-        NativeBindGroupReference,
-        NativeBindGroupRelease,
-        NativeBindGroupLayoutSetLabel,
-        NativeBindGroupLayoutReference,
-        NativeBindGroupLayoutRelease,
-        NativeBufferDestroy,
-        NativeBufferGetConstMappedRange,
-        NativeBufferGetMapState,
-        NativeBufferGetMappedRange,
-        NativeBufferGetSize,
-        NativeBufferGetUsage,
-        NativeBufferMapAsync,
-        NativeBufferSetLabel,
-        NativeBufferUnmap,
-        NativeBufferReference,
-        NativeBufferRelease,
-        NativeCommandBufferSetLabel,
-        NativeCommandBufferReference,
-        NativeCommandBufferRelease,
-        NativeCommandEncoderBeginComputePass,
-        NativeCommandEncoderBeginRenderPass,
-        NativeCommandEncoderClearBuffer,
-        NativeCommandEncoderCopyBufferToBuffer,
-        NativeCommandEncoderCopyBufferToTexture,
-        NativeCommandEncoderCopyTextureToBuffer,
-        NativeCommandEncoderCopyTextureToTexture,
-        NativeCommandEncoderCopyTextureToTextureInternal,
-        NativeCommandEncoderFinish,
-        NativeCommandEncoderInjectValidationError,
-        NativeCommandEncoderInsertDebugMarker,
-        NativeCommandEncoderPopDebugGroup,
-        NativeCommandEncoderPushDebugGroup,
-        NativeCommandEncoderResolveQuerySet,
-        NativeCommandEncoderSetLabel,
-        NativeCommandEncoderWriteBuffer,
-        NativeCommandEncoderWriteTimestamp,
-        NativeCommandEncoderReference,
-        NativeCommandEncoderRelease,
-        NativeComputePassEncoderDispatchWorkgroups,
-        NativeComputePassEncoderDispatchWorkgroupsIndirect,
-        NativeComputePassEncoderEnd,
-        NativeComputePassEncoderInsertDebugMarker,
-        NativeComputePassEncoderPopDebugGroup,
-        NativeComputePassEncoderPushDebugGroup,
-        NativeComputePassEncoderSetBindGroup,
-        NativeComputePassEncoderSetLabel,
-        NativeComputePassEncoderSetPipeline,
-        NativeComputePassEncoderWriteTimestamp,
-        NativeComputePassEncoderReference,
-        NativeComputePassEncoderRelease,
-        NativeComputePipelineGetBindGroupLayout,
-        NativeComputePipelineSetLabel,
-        NativeComputePipelineReference,
-        NativeComputePipelineRelease,
-        NativeDeviceCreateBindGroup,
-        NativeDeviceCreateBindGroupLayout,
-        NativeDeviceCreateBuffer,
-        NativeDeviceCreateCommandEncoder,
-        NativeDeviceCreateComputePipeline,
-        NativeDeviceCreateComputePipelineAsync,
-        NativeDeviceCreateErrorBuffer,
-        NativeDeviceCreateErrorExternalTexture,
-        NativeDeviceCreateErrorShaderModule,
-        NativeDeviceCreateErrorTexture,
-        NativeDeviceCreateExternalTexture,
-        NativeDeviceCreatePipelineLayout,
-        NativeDeviceCreateQuerySet,
-        NativeDeviceCreateRenderBundleEncoder,
-        NativeDeviceCreateRenderPipeline,
-        NativeDeviceCreateRenderPipelineAsync,
-        NativeDeviceCreateSampler,
-        NativeDeviceCreateShaderModule,
-        NativeDeviceCreateSwapChain,
-        NativeDeviceCreateTexture,
-        NativeDeviceDestroy,
-        NativeDeviceEnumerateFeatures,
-        NativeDeviceForceLoss,
-        NativeDeviceGetAdapter,
-        NativeDeviceGetLimits,
-        NativeDeviceGetQueue,
-        NativeDeviceGetSupportedSurfaceUsage,
-        NativeDeviceHasFeature,
-        NativeDeviceInjectError,
-        NativeDevicePopErrorScope,
-        NativeDevicePushErrorScope,
-        NativeDeviceSetDeviceLostCallback,
-        NativeDeviceSetLabel,
-        NativeDeviceSetLoggingCallback,
-        NativeDeviceSetUncapturedErrorCallback,
-        NativeDeviceTick,
-        NativeDeviceValidateTextureDescriptor,
-        NativeDeviceReference,
-        NativeDeviceRelease,
-        NativeExternalTextureDestroy,
-        NativeExternalTextureExpire,
-        NativeExternalTextureRefresh,
-        NativeExternalTextureSetLabel,
-        NativeExternalTextureReference,
-        NativeExternalTextureRelease,
-        NativeInstanceCreateSurface,
-        NativeInstanceProcessEvents,
-        NativeInstanceRequestAdapter,
-        NativeInstanceReference,
-        NativeInstanceRelease,
-        NativePipelineLayoutSetLabel,
-        NativePipelineLayoutReference,
-        NativePipelineLayoutRelease,
-        NativeQuerySetDestroy,
-        NativeQuerySetGetCount,
-        NativeQuerySetGetType,
-        NativeQuerySetSetLabel,
-        NativeQuerySetReference,
-        NativeQuerySetRelease,
-        NativeQueueCopyExternalTextureForBrowser,
-        NativeQueueCopyTextureForBrowser,
-        NativeQueueOnSubmittedWorkDone,
-        NativeQueueSetLabel,
-        NativeQueueSubmit,
-        NativeQueueWriteBuffer,
-        NativeQueueWriteTexture,
-        NativeQueueReference,
-        NativeQueueRelease,
-        NativeRenderBundleSetLabel,
-        NativeRenderBundleReference,
-        NativeRenderBundleRelease,
-        NativeRenderBundleEncoderDraw,
-        NativeRenderBundleEncoderDrawIndexed,
-        NativeRenderBundleEncoderDrawIndexedIndirect,
-        NativeRenderBundleEncoderDrawIndirect,
-        NativeRenderBundleEncoderFinish,
-        NativeRenderBundleEncoderInsertDebugMarker,
-        NativeRenderBundleEncoderPopDebugGroup,
-        NativeRenderBundleEncoderPushDebugGroup,
-        NativeRenderBundleEncoderSetBindGroup,
-        NativeRenderBundleEncoderSetIndexBuffer,
-        NativeRenderBundleEncoderSetLabel,
-        NativeRenderBundleEncoderSetPipeline,
-        NativeRenderBundleEncoderSetVertexBuffer,
-        NativeRenderBundleEncoderReference,
-        NativeRenderBundleEncoderRelease,
-        NativeRenderPassEncoderBeginOcclusionQuery,
-        NativeRenderPassEncoderDraw,
-        NativeRenderPassEncoderDrawIndexed,
-        NativeRenderPassEncoderDrawIndexedIndirect,
-        NativeRenderPassEncoderDrawIndirect,
-        NativeRenderPassEncoderEnd,
-        NativeRenderPassEncoderEndOcclusionQuery,
-        NativeRenderPassEncoderExecuteBundles,
-        NativeRenderPassEncoderInsertDebugMarker,
-        NativeRenderPassEncoderPopDebugGroup,
-        NativeRenderPassEncoderPushDebugGroup,
-        NativeRenderPassEncoderSetBindGroup,
-        NativeRenderPassEncoderSetBlendConstant,
-        NativeRenderPassEncoderSetIndexBuffer,
-        NativeRenderPassEncoderSetLabel,
-        NativeRenderPassEncoderSetPipeline,
-        NativeRenderPassEncoderSetScissorRect,
-        NativeRenderPassEncoderSetStencilReference,
-        NativeRenderPassEncoderSetVertexBuffer,
-        NativeRenderPassEncoderSetViewport,
-        NativeRenderPassEncoderWriteTimestamp,
-        NativeRenderPassEncoderReference,
-        NativeRenderPassEncoderRelease,
-        NativeRenderPipelineGetBindGroupLayout,
-        NativeRenderPipelineSetLabel,
-        NativeRenderPipelineReference,
-        NativeRenderPipelineRelease,
-        NativeSamplerSetLabel,
-        NativeSamplerReference,
-        NativeSamplerRelease,
-        NativeShaderModuleGetCompilationInfo,
-        NativeShaderModuleSetLabel,
-        NativeShaderModuleReference,
-        NativeShaderModuleRelease,
-        NativeSurfaceReference,
-        NativeSurfaceRelease,
-        NativeSwapChainGetCurrentTexture,
-        NativeSwapChainGetCurrentTextureView,
-        NativeSwapChainPresent,
-        NativeSwapChainReference,
-        NativeSwapChainRelease,
-        NativeTextureCreateView,
-        NativeTextureDestroy,
-        NativeTextureGetDepthOrArrayLayers,
-        NativeTextureGetDimension,
-        NativeTextureGetFormat,
-        NativeTextureGetHeight,
-        NativeTextureGetMipLevelCount,
-        NativeTextureGetSampleCount,
-        NativeTextureGetUsage,
-        NativeTextureGetWidth,
-        NativeTextureSetLabel,
-        NativeTextureReference,
-        NativeTextureRelease,
-        NativeTextureViewSetLabel,
-        NativeTextureViewReference,
-        NativeTextureViewRelease,
-    };
+
+    template <typename... MemberPtrPairs>
+    constexpr DawnProcTable MakeProcTable(int, MemberPtrPairs... pairs) {
+        DawnProcTable procs = {};
+        ([&](auto& pair){
+            procs.*(pair.first) = pair.second;
+        }(pairs), ...);
+        return procs;
+    }
+
+    static DawnProcTable gProcTable = MakeProcTable(
+        /* unused */ 0
+        , std::make_pair(&DawnProcTable::createInstance, NativeCreateInstance)
+        , std::make_pair(&DawnProcTable::getProcAddress, NativeGetProcAddress)
+        , std::make_pair(&DawnProcTable::adapterCreateDevice, NativeAdapterCreateDevice)
+        , std::make_pair(&DawnProcTable::adapterEnumerateFeatures, NativeAdapterEnumerateFeatures)
+        , std::make_pair(&DawnProcTable::adapterGetInstance, NativeAdapterGetInstance)
+        , std::make_pair(&DawnProcTable::adapterGetLimits, NativeAdapterGetLimits)
+        , std::make_pair(&DawnProcTable::adapterGetProperties, NativeAdapterGetProperties)
+        , std::make_pair(&DawnProcTable::adapterHasFeature, NativeAdapterHasFeature)
+        , std::make_pair(&DawnProcTable::adapterRequestDevice, NativeAdapterRequestDevice)
+        , std::make_pair(&DawnProcTable::adapterReference, NativeAdapterReference)
+        , std::make_pair(&DawnProcTable::adapterRelease, NativeAdapterRelease)
+        , std::make_pair(&DawnProcTable::bindGroupSetLabel, NativeBindGroupSetLabel)
+        , std::make_pair(&DawnProcTable::bindGroupReference, NativeBindGroupReference)
+        , std::make_pair(&DawnProcTable::bindGroupRelease, NativeBindGroupRelease)
+        , std::make_pair(&DawnProcTable::bindGroupLayoutSetLabel, NativeBindGroupLayoutSetLabel)
+        , std::make_pair(&DawnProcTable::bindGroupLayoutReference, NativeBindGroupLayoutReference)
+        , std::make_pair(&DawnProcTable::bindGroupLayoutRelease, NativeBindGroupLayoutRelease)
+        , std::make_pair(&DawnProcTable::bufferDestroy, NativeBufferDestroy)
+        , std::make_pair(&DawnProcTable::bufferGetConstMappedRange, NativeBufferGetConstMappedRange)
+        , std::make_pair(&DawnProcTable::bufferGetMapState, NativeBufferGetMapState)
+        , std::make_pair(&DawnProcTable::bufferGetMappedRange, NativeBufferGetMappedRange)
+        , std::make_pair(&DawnProcTable::bufferGetSize, NativeBufferGetSize)
+        , std::make_pair(&DawnProcTable::bufferGetUsage, NativeBufferGetUsage)
+        , std::make_pair(&DawnProcTable::bufferMapAsync, NativeBufferMapAsync)
+        , std::make_pair(&DawnProcTable::bufferSetLabel, NativeBufferSetLabel)
+        , std::make_pair(&DawnProcTable::bufferUnmap, NativeBufferUnmap)
+        , std::make_pair(&DawnProcTable::bufferReference, NativeBufferReference)
+        , std::make_pair(&DawnProcTable::bufferRelease, NativeBufferRelease)
+        , std::make_pair(&DawnProcTable::commandBufferSetLabel, NativeCommandBufferSetLabel)
+        , std::make_pair(&DawnProcTable::commandBufferReference, NativeCommandBufferReference)
+        , std::make_pair(&DawnProcTable::commandBufferRelease, NativeCommandBufferRelease)
+        , std::make_pair(&DawnProcTable::commandEncoderBeginComputePass, NativeCommandEncoderBeginComputePass)
+        , std::make_pair(&DawnProcTable::commandEncoderBeginRenderPass, NativeCommandEncoderBeginRenderPass)
+        , std::make_pair(&DawnProcTable::commandEncoderClearBuffer, NativeCommandEncoderClearBuffer)
+        , std::make_pair(&DawnProcTable::commandEncoderCopyBufferToBuffer, NativeCommandEncoderCopyBufferToBuffer)
+        , std::make_pair(&DawnProcTable::commandEncoderCopyBufferToTexture, NativeCommandEncoderCopyBufferToTexture)
+        , std::make_pair(&DawnProcTable::commandEncoderCopyTextureToBuffer, NativeCommandEncoderCopyTextureToBuffer)
+        , std::make_pair(&DawnProcTable::commandEncoderCopyTextureToTexture, NativeCommandEncoderCopyTextureToTexture)
+        , std::make_pair(&DawnProcTable::commandEncoderCopyTextureToTextureInternal, NativeCommandEncoderCopyTextureToTextureInternal)
+        , std::make_pair(&DawnProcTable::commandEncoderFinish, NativeCommandEncoderFinish)
+        , std::make_pair(&DawnProcTable::commandEncoderInjectValidationError, NativeCommandEncoderInjectValidationError)
+        , std::make_pair(&DawnProcTable::commandEncoderInsertDebugMarker, NativeCommandEncoderInsertDebugMarker)
+        , std::make_pair(&DawnProcTable::commandEncoderPopDebugGroup, NativeCommandEncoderPopDebugGroup)
+        , std::make_pair(&DawnProcTable::commandEncoderPushDebugGroup, NativeCommandEncoderPushDebugGroup)
+        , std::make_pair(&DawnProcTable::commandEncoderResolveQuerySet, NativeCommandEncoderResolveQuerySet)
+        , std::make_pair(&DawnProcTable::commandEncoderSetLabel, NativeCommandEncoderSetLabel)
+        , std::make_pair(&DawnProcTable::commandEncoderWriteBuffer, NativeCommandEncoderWriteBuffer)
+        , std::make_pair(&DawnProcTable::commandEncoderWriteTimestamp, NativeCommandEncoderWriteTimestamp)
+        , std::make_pair(&DawnProcTable::commandEncoderReference, NativeCommandEncoderReference)
+        , std::make_pair(&DawnProcTable::commandEncoderRelease, NativeCommandEncoderRelease)
+        , std::make_pair(&DawnProcTable::computePassEncoderDispatchWorkgroups, NativeComputePassEncoderDispatchWorkgroups)
+        , std::make_pair(&DawnProcTable::computePassEncoderDispatchWorkgroupsIndirect, NativeComputePassEncoderDispatchWorkgroupsIndirect)
+        , std::make_pair(&DawnProcTable::computePassEncoderEnd, NativeComputePassEncoderEnd)
+        , std::make_pair(&DawnProcTable::computePassEncoderInsertDebugMarker, NativeComputePassEncoderInsertDebugMarker)
+        , std::make_pair(&DawnProcTable::computePassEncoderPopDebugGroup, NativeComputePassEncoderPopDebugGroup)
+        , std::make_pair(&DawnProcTable::computePassEncoderPushDebugGroup, NativeComputePassEncoderPushDebugGroup)
+        , std::make_pair(&DawnProcTable::computePassEncoderSetBindGroup, NativeComputePassEncoderSetBindGroup)
+        , std::make_pair(&DawnProcTable::computePassEncoderSetLabel, NativeComputePassEncoderSetLabel)
+        , std::make_pair(&DawnProcTable::computePassEncoderSetPipeline, NativeComputePassEncoderSetPipeline)
+        , std::make_pair(&DawnProcTable::computePassEncoderWriteTimestamp, NativeComputePassEncoderWriteTimestamp)
+        , std::make_pair(&DawnProcTable::computePassEncoderReference, NativeComputePassEncoderReference)
+        , std::make_pair(&DawnProcTable::computePassEncoderRelease, NativeComputePassEncoderRelease)
+        , std::make_pair(&DawnProcTable::computePipelineGetBindGroupLayout, NativeComputePipelineGetBindGroupLayout)
+        , std::make_pair(&DawnProcTable::computePipelineSetLabel, NativeComputePipelineSetLabel)
+        , std::make_pair(&DawnProcTable::computePipelineReference, NativeComputePipelineReference)
+        , std::make_pair(&DawnProcTable::computePipelineRelease, NativeComputePipelineRelease)
+        , std::make_pair(&DawnProcTable::deviceCreateBindGroup, NativeDeviceCreateBindGroup)
+        , std::make_pair(&DawnProcTable::deviceCreateBindGroupLayout, NativeDeviceCreateBindGroupLayout)
+        , std::make_pair(&DawnProcTable::deviceCreateBuffer, NativeDeviceCreateBuffer)
+        , std::make_pair(&DawnProcTable::deviceCreateCommandEncoder, NativeDeviceCreateCommandEncoder)
+        , std::make_pair(&DawnProcTable::deviceCreateComputePipeline, NativeDeviceCreateComputePipeline)
+        , std::make_pair(&DawnProcTable::deviceCreateComputePipelineAsync, NativeDeviceCreateComputePipelineAsync)
+        , std::make_pair(&DawnProcTable::deviceCreateErrorBuffer, NativeDeviceCreateErrorBuffer)
+        , std::make_pair(&DawnProcTable::deviceCreateErrorExternalTexture, NativeDeviceCreateErrorExternalTexture)
+        , std::make_pair(&DawnProcTable::deviceCreateErrorShaderModule, NativeDeviceCreateErrorShaderModule)
+        , std::make_pair(&DawnProcTable::deviceCreateErrorTexture, NativeDeviceCreateErrorTexture)
+        , std::make_pair(&DawnProcTable::deviceCreateExternalTexture, NativeDeviceCreateExternalTexture)
+        , std::make_pair(&DawnProcTable::deviceCreatePipelineLayout, NativeDeviceCreatePipelineLayout)
+        , std::make_pair(&DawnProcTable::deviceCreateQuerySet, NativeDeviceCreateQuerySet)
+        , std::make_pair(&DawnProcTable::deviceCreateRenderBundleEncoder, NativeDeviceCreateRenderBundleEncoder)
+        , std::make_pair(&DawnProcTable::deviceCreateRenderPipeline, NativeDeviceCreateRenderPipeline)
+        , std::make_pair(&DawnProcTable::deviceCreateRenderPipelineAsync, NativeDeviceCreateRenderPipelineAsync)
+        , std::make_pair(&DawnProcTable::deviceCreateSampler, NativeDeviceCreateSampler)
+        , std::make_pair(&DawnProcTable::deviceCreateShaderModule, NativeDeviceCreateShaderModule)
+        , std::make_pair(&DawnProcTable::deviceCreateSwapChain, NativeDeviceCreateSwapChain)
+        , std::make_pair(&DawnProcTable::deviceCreateTexture, NativeDeviceCreateTexture)
+        , std::make_pair(&DawnProcTable::deviceDestroy, NativeDeviceDestroy)
+        , std::make_pair(&DawnProcTable::deviceEnumerateFeatures, NativeDeviceEnumerateFeatures)
+        , std::make_pair(&DawnProcTable::deviceForceLoss, NativeDeviceForceLoss)
+        , std::make_pair(&DawnProcTable::deviceGetAdapter, NativeDeviceGetAdapter)
+        , std::make_pair(&DawnProcTable::deviceGetLimits, NativeDeviceGetLimits)
+        , std::make_pair(&DawnProcTable::deviceGetQueue, NativeDeviceGetQueue)
+        , std::make_pair(&DawnProcTable::deviceGetSupportedSurfaceUsage, NativeDeviceGetSupportedSurfaceUsage)
+        , std::make_pair(&DawnProcTable::deviceHasFeature, NativeDeviceHasFeature)
+        , std::make_pair(&DawnProcTable::deviceInjectError, NativeDeviceInjectError)
+        , std::make_pair(&DawnProcTable::devicePopErrorScope, NativeDevicePopErrorScope)
+        , std::make_pair(&DawnProcTable::devicePushErrorScope, NativeDevicePushErrorScope)
+        , std::make_pair(&DawnProcTable::deviceSetDeviceLostCallback, NativeDeviceSetDeviceLostCallback)
+        , std::make_pair(&DawnProcTable::deviceSetLabel, NativeDeviceSetLabel)
+        , std::make_pair(&DawnProcTable::deviceSetLoggingCallback, NativeDeviceSetLoggingCallback)
+        , std::make_pair(&DawnProcTable::deviceSetUncapturedErrorCallback, NativeDeviceSetUncapturedErrorCallback)
+        , std::make_pair(&DawnProcTable::deviceTick, NativeDeviceTick)
+        , std::make_pair(&DawnProcTable::deviceValidateTextureDescriptor, NativeDeviceValidateTextureDescriptor)
+        , std::make_pair(&DawnProcTable::deviceReference, NativeDeviceReference)
+        , std::make_pair(&DawnProcTable::deviceRelease, NativeDeviceRelease)
+        , std::make_pair(&DawnProcTable::externalTextureDestroy, NativeExternalTextureDestroy)
+        , std::make_pair(&DawnProcTable::externalTextureExpire, NativeExternalTextureExpire)
+        , std::make_pair(&DawnProcTable::externalTextureRefresh, NativeExternalTextureRefresh)
+        , std::make_pair(&DawnProcTable::externalTextureSetLabel, NativeExternalTextureSetLabel)
+        , std::make_pair(&DawnProcTable::externalTextureReference, NativeExternalTextureReference)
+        , std::make_pair(&DawnProcTable::externalTextureRelease, NativeExternalTextureRelease)
+        , std::make_pair(&DawnProcTable::instanceCreateSurface, NativeInstanceCreateSurface)
+        , std::make_pair(&DawnProcTable::instanceProcessEvents, NativeInstanceProcessEvents)
+        , std::make_pair(&DawnProcTable::instanceRequestAdapter, NativeInstanceRequestAdapter)
+        , std::make_pair(&DawnProcTable::instanceReference, NativeInstanceReference)
+        , std::make_pair(&DawnProcTable::instanceRelease, NativeInstanceRelease)
+        , std::make_pair(&DawnProcTable::pipelineLayoutSetLabel, NativePipelineLayoutSetLabel)
+        , std::make_pair(&DawnProcTable::pipelineLayoutReference, NativePipelineLayoutReference)
+        , std::make_pair(&DawnProcTable::pipelineLayoutRelease, NativePipelineLayoutRelease)
+        , std::make_pair(&DawnProcTable::querySetDestroy, NativeQuerySetDestroy)
+        , std::make_pair(&DawnProcTable::querySetGetCount, NativeQuerySetGetCount)
+        , std::make_pair(&DawnProcTable::querySetGetType, NativeQuerySetGetType)
+        , std::make_pair(&DawnProcTable::querySetSetLabel, NativeQuerySetSetLabel)
+        , std::make_pair(&DawnProcTable::querySetReference, NativeQuerySetReference)
+        , std::make_pair(&DawnProcTable::querySetRelease, NativeQuerySetRelease)
+        , std::make_pair(&DawnProcTable::queueCopyExternalTextureForBrowser, NativeQueueCopyExternalTextureForBrowser)
+        , std::make_pair(&DawnProcTable::queueCopyTextureForBrowser, NativeQueueCopyTextureForBrowser)
+        , std::make_pair(&DawnProcTable::queueOnSubmittedWorkDone, NativeQueueOnSubmittedWorkDone)
+        , std::make_pair(&DawnProcTable::queueSetLabel, NativeQueueSetLabel)
+        , std::make_pair(&DawnProcTable::queueSubmit, NativeQueueSubmit)
+        , std::make_pair(&DawnProcTable::queueWriteBuffer, NativeQueueWriteBuffer)
+        , std::make_pair(&DawnProcTable::queueWriteTexture, NativeQueueWriteTexture)
+        , std::make_pair(&DawnProcTable::queueReference, NativeQueueReference)
+        , std::make_pair(&DawnProcTable::queueRelease, NativeQueueRelease)
+        , std::make_pair(&DawnProcTable::renderBundleSetLabel, NativeRenderBundleSetLabel)
+        , std::make_pair(&DawnProcTable::renderBundleReference, NativeRenderBundleReference)
+        , std::make_pair(&DawnProcTable::renderBundleRelease, NativeRenderBundleRelease)
+        , std::make_pair(&DawnProcTable::renderBundleEncoderDraw, NativeRenderBundleEncoderDraw)
+        , std::make_pair(&DawnProcTable::renderBundleEncoderDrawIndexed, NativeRenderBundleEncoderDrawIndexed)
+        , std::make_pair(&DawnProcTable::renderBundleEncoderDrawIndexedIndirect, NativeRenderBundleEncoderDrawIndexedIndirect)
+        , std::make_pair(&DawnProcTable::renderBundleEncoderDrawIndirect, NativeRenderBundleEncoderDrawIndirect)
+        , std::make_pair(&DawnProcTable::renderBundleEncoderFinish, NativeRenderBundleEncoderFinish)
+        , std::make_pair(&DawnProcTable::renderBundleEncoderInsertDebugMarker, NativeRenderBundleEncoderInsertDebugMarker)
+        , std::make_pair(&DawnProcTable::renderBundleEncoderPopDebugGroup, NativeRenderBundleEncoderPopDebugGroup)
+        , std::make_pair(&DawnProcTable::renderBundleEncoderPushDebugGroup, NativeRenderBundleEncoderPushDebugGroup)
+        , std::make_pair(&DawnProcTable::renderBundleEncoderSetBindGroup, NativeRenderBundleEncoderSetBindGroup)
+        , std::make_pair(&DawnProcTable::renderBundleEncoderSetIndexBuffer, NativeRenderBundleEncoderSetIndexBuffer)
+        , std::make_pair(&DawnProcTable::renderBundleEncoderSetLabel, NativeRenderBundleEncoderSetLabel)
+        , std::make_pair(&DawnProcTable::renderBundleEncoderSetPipeline, NativeRenderBundleEncoderSetPipeline)
+        , std::make_pair(&DawnProcTable::renderBundleEncoderSetVertexBuffer, NativeRenderBundleEncoderSetVertexBuffer)
+        , std::make_pair(&DawnProcTable::renderBundleEncoderReference, NativeRenderBundleEncoderReference)
+        , std::make_pair(&DawnProcTable::renderBundleEncoderRelease, NativeRenderBundleEncoderRelease)
+        , std::make_pair(&DawnProcTable::renderPassEncoderBeginOcclusionQuery, NativeRenderPassEncoderBeginOcclusionQuery)
+        , std::make_pair(&DawnProcTable::renderPassEncoderDraw, NativeRenderPassEncoderDraw)
+        , std::make_pair(&DawnProcTable::renderPassEncoderDrawIndexed, NativeRenderPassEncoderDrawIndexed)
+        , std::make_pair(&DawnProcTable::renderPassEncoderDrawIndexedIndirect, NativeRenderPassEncoderDrawIndexedIndirect)
+        , std::make_pair(&DawnProcTable::renderPassEncoderDrawIndirect, NativeRenderPassEncoderDrawIndirect)
+        , std::make_pair(&DawnProcTable::renderPassEncoderEnd, NativeRenderPassEncoderEnd)
+        , std::make_pair(&DawnProcTable::renderPassEncoderEndOcclusionQuery, NativeRenderPassEncoderEndOcclusionQuery)
+        , std::make_pair(&DawnProcTable::renderPassEncoderExecuteBundles, NativeRenderPassEncoderExecuteBundles)
+        , std::make_pair(&DawnProcTable::renderPassEncoderInsertDebugMarker, NativeRenderPassEncoderInsertDebugMarker)
+        , std::make_pair(&DawnProcTable::renderPassEncoderPopDebugGroup, NativeRenderPassEncoderPopDebugGroup)
+        , std::make_pair(&DawnProcTable::renderPassEncoderPushDebugGroup, NativeRenderPassEncoderPushDebugGroup)
+        , std::make_pair(&DawnProcTable::renderPassEncoderSetBindGroup, NativeRenderPassEncoderSetBindGroup)
+        , std::make_pair(&DawnProcTable::renderPassEncoderSetBlendConstant, NativeRenderPassEncoderSetBlendConstant)
+        , std::make_pair(&DawnProcTable::renderPassEncoderSetIndexBuffer, NativeRenderPassEncoderSetIndexBuffer)
+        , std::make_pair(&DawnProcTable::renderPassEncoderSetLabel, NativeRenderPassEncoderSetLabel)
+        , std::make_pair(&DawnProcTable::renderPassEncoderSetPipeline, NativeRenderPassEncoderSetPipeline)
+        , std::make_pair(&DawnProcTable::renderPassEncoderSetScissorRect, NativeRenderPassEncoderSetScissorRect)
+        , std::make_pair(&DawnProcTable::renderPassEncoderSetStencilReference, NativeRenderPassEncoderSetStencilReference)
+        , std::make_pair(&DawnProcTable::renderPassEncoderSetVertexBuffer, NativeRenderPassEncoderSetVertexBuffer)
+        , std::make_pair(&DawnProcTable::renderPassEncoderSetViewport, NativeRenderPassEncoderSetViewport)
+        , std::make_pair(&DawnProcTable::renderPassEncoderWriteTimestamp, NativeRenderPassEncoderWriteTimestamp)
+        , std::make_pair(&DawnProcTable::renderPassEncoderReference, NativeRenderPassEncoderReference)
+        , std::make_pair(&DawnProcTable::renderPassEncoderRelease, NativeRenderPassEncoderRelease)
+        , std::make_pair(&DawnProcTable::renderPipelineGetBindGroupLayout, NativeRenderPipelineGetBindGroupLayout)
+        , std::make_pair(&DawnProcTable::renderPipelineSetLabel, NativeRenderPipelineSetLabel)
+        , std::make_pair(&DawnProcTable::renderPipelineReference, NativeRenderPipelineReference)
+        , std::make_pair(&DawnProcTable::renderPipelineRelease, NativeRenderPipelineRelease)
+        , std::make_pair(&DawnProcTable::samplerSetLabel, NativeSamplerSetLabel)
+        , std::make_pair(&DawnProcTable::samplerReference, NativeSamplerReference)
+        , std::make_pair(&DawnProcTable::samplerRelease, NativeSamplerRelease)
+        , std::make_pair(&DawnProcTable::shaderModuleGetCompilationInfo, NativeShaderModuleGetCompilationInfo)
+        , std::make_pair(&DawnProcTable::shaderModuleSetLabel, NativeShaderModuleSetLabel)
+        , std::make_pair(&DawnProcTable::shaderModuleReference, NativeShaderModuleReference)
+        , std::make_pair(&DawnProcTable::shaderModuleRelease, NativeShaderModuleRelease)
+        , std::make_pair(&DawnProcTable::surfaceReference, NativeSurfaceReference)
+        , std::make_pair(&DawnProcTable::surfaceRelease, NativeSurfaceRelease)
+        , std::make_pair(&DawnProcTable::swapChainGetCurrentTexture, NativeSwapChainGetCurrentTexture)
+        , std::make_pair(&DawnProcTable::swapChainGetCurrentTextureView, NativeSwapChainGetCurrentTextureView)
+        , std::make_pair(&DawnProcTable::swapChainPresent, NativeSwapChainPresent)
+        , std::make_pair(&DawnProcTable::swapChainReference, NativeSwapChainReference)
+        , std::make_pair(&DawnProcTable::swapChainRelease, NativeSwapChainRelease)
+        , std::make_pair(&DawnProcTable::textureCreateView, NativeTextureCreateView)
+        , std::make_pair(&DawnProcTable::textureDestroy, NativeTextureDestroy)
+        , std::make_pair(&DawnProcTable::textureGetDepthOrArrayLayers, NativeTextureGetDepthOrArrayLayers)
+        , std::make_pair(&DawnProcTable::textureGetDimension, NativeTextureGetDimension)
+        , std::make_pair(&DawnProcTable::textureGetFormat, NativeTextureGetFormat)
+        , std::make_pair(&DawnProcTable::textureGetHeight, NativeTextureGetHeight)
+        , std::make_pair(&DawnProcTable::textureGetMipLevelCount, NativeTextureGetMipLevelCount)
+        , std::make_pair(&DawnProcTable::textureGetSampleCount, NativeTextureGetSampleCount)
+        , std::make_pair(&DawnProcTable::textureGetUsage, NativeTextureGetUsage)
+        , std::make_pair(&DawnProcTable::textureGetWidth, NativeTextureGetWidth)
+        , std::make_pair(&DawnProcTable::textureSetLabel, NativeTextureSetLabel)
+        , std::make_pair(&DawnProcTable::textureReference, NativeTextureReference)
+        , std::make_pair(&DawnProcTable::textureRelease, NativeTextureRelease)
+        , std::make_pair(&DawnProcTable::textureViewSetLabel, NativeTextureViewSetLabel)
+        , std::make_pair(&DawnProcTable::textureViewReference, NativeTextureViewReference)
+        , std::make_pair(&DawnProcTable::textureViewRelease, NativeTextureViewRelease)
+    );
 
     const DawnProcTable& GetProcsAutogen() {
         return gProcTable;
