@@ -184,8 +184,6 @@ namespace graphics
 		createInfo->SetAttributeDimensions(std::vector<int>({ 3 , 3 , 2, 4, 4 }));
 
 		return true;
-
-		return true;
 	}
 
 	bool CPresetPrimitive::CreatePoint(std::shared_ptr<renderer::CRendererCreateInfo>& createInfo)
@@ -219,8 +217,6 @@ namespace graphics
 		createInfo->SetVertices(Vertices);
 		createInfo->SetIndices(Indices);
 		createInfo->SetAttributeDimensions(std::vector<int>({ 3 , 3 , 2, 4, 4 }));
-
-		return true;
 
 		return true;
 	}

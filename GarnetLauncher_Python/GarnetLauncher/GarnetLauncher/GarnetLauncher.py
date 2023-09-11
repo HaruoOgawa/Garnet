@@ -47,6 +47,10 @@ def CopyData(inputDir, dstPath, isFirst):
     shutil.copy(RootPath + "Resources/Shaders/" + "depth.frag", dstPath + "Resources/Shaders/")
     shutil.copy(RootPath + "Resources/Shaders/" + "loadingbar.vert", dstPath + "Resources/Shaders/")
     shutil.copy(RootPath + "Resources/Shaders/" + "loadingbar.frag", dstPath + "Resources/Shaders/")
+    shutil.copy(RootPath + "Resources/Shaders/" + "pbr.vert", dstPath + "Resources/Shaders/")
+    shutil.copy(RootPath + "Resources/Shaders/" + "pbr.frag", dstPath + "Resources/Shaders/")
+    shutil.copy(RootPath + "Resources/Shaders/" + "blur.vert", dstPath + "Resources/Shaders/")
+    shutil.copy(RootPath + "Resources/Shaders/" + "blur.frag", dstPath + "Resources/Shaders/")
 
     if(isFirst):
         shutil.copytree(RootPath + "Commands", dstPath + "Commands", dirs_exist_ok=True)
