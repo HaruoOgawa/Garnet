@@ -76,6 +76,8 @@ namespace graphics
 	{
 		Buffer->RecalculateBindingLayoutOffset();
 
+		Buffer->ResizePowerOfTwo(); // バッファサイズを2のn乗にする
+
 		m_ShaderBufferList.push_back(std::make_shared<CShaderBuffer>(*Buffer));
 	}
 	

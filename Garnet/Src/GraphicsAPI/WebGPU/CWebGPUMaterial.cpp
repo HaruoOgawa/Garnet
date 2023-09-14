@@ -6,7 +6,6 @@
 #include "../../Debug/Message/Console.h"
 #include "../../Camera/CCamera.h"
 #include "../../Projection/CProjection.h"
-#include "../../Math/CMath.h"
 
 namespace api
 {
@@ -153,7 +152,7 @@ namespace api
 			const auto& Data = Buffer->GetData();
 
 			WGPUBuffer UniformBuffer;
-			const uint64_t ByteSize = static_cast<uint64_t>(math::GetNextPowerOfTwo(static_cast<unsigned int>(Data.size()))); // 2ÇÃnèÊÇ…Ç∑ÇÈ
+			const uint64_t ByteSize = static_cast<uint64_t>(Data.size());
 
 			if (Buffer->GetBufferType() == graphics::EBufferType::UNIFORM)
 			{

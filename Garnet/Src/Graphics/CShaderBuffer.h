@@ -47,6 +47,9 @@ namespace graphics
 
 		virtual void RecalculateBindingLayoutOffset() override;
 
+		// バッファサイズを2のn乗にする
+		virtual void ResizePowerOfTwo() override;
+
 		void SetSharedBufferParam(const SSharedBufferParam& Param);
 		const SSharedBufferParam& GetSharedBufferParam() const;
 	};

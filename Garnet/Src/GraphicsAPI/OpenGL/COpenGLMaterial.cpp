@@ -6,7 +6,6 @@
 #include "../../Camera/CCamera.h"
 #include "../../Projection/CProjection.h"
 #include "../../Math/CTransform.h"
-#include "../../Math/CMath.h"
 #include "COpenGLTexture.h"
 
 namespace api

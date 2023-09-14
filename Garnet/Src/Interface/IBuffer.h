@@ -27,5 +27,8 @@ namespace graphics
 		virtual EBufferType GetBufferType() const = 0;
 
 		virtual void RecalculateBindingLayoutOffset() = 0;
+
+		// バッファサイズを2のn乗にする
+		virtual void ResizePowerOfTwo() = 0;
 	};
 }
