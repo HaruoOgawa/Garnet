@@ -42,13 +42,23 @@ def CopyData(inputDir, dstPath, isFirst):
                 print("copy folder: %s" % (currentPath))
 
     # Copy File
-    shutil.copytree(RootPath + "Commands", dstPath + "Commands", dirs_exist_ok=True)
-    shutil.copytree(RootPath + "EmscriptenBuild", dstPath + "EmscriptenBuild", dirs_exist_ok=True)
-    os.makedirs(dstPath + "Resources", exist_ok=True)
-    shutil.copy(RootPath + "Garnet.sln", dstPath)
-    shutil.copy(RootPath + "Garnet.vcxproj", dstPath)
-    shutil.copy(RootPath + "Garnet.vcxproj.filters", dstPath)
-    shutil.copy(RootPath + "../" + ".gitignore", dstPath)
+    os.makedirs(dstPath + "Resources/Shaders/", exist_ok=True)
+    shutil.copy(RootPath + "Resources/Shaders/" + "depth.vert", dstPath + "Resources/Shaders/")
+    shutil.copy(RootPath + "Resources/Shaders/" + "depth.frag", dstPath + "Resources/Shaders/")
+    shutil.copy(RootPath + "Resources/Shaders/" + "loadingbar.vert", dstPath + "Resources/Shaders/")
+    shutil.copy(RootPath + "Resources/Shaders/" + "loadingbar.frag", dstPath + "Resources/Shaders/")
+    shutil.copy(RootPath + "Resources/Shaders/" + "pbr.vert", dstPath + "Resources/Shaders/")
+    shutil.copy(RootPath + "Resources/Shaders/" + "pbr.frag", dstPath + "Resources/Shaders/")
+    shutil.copy(RootPath + "Resources/Shaders/" + "blur.vert", dstPath + "Resources/Shaders/")
+    shutil.copy(RootPath + "Resources/Shaders/" + "blur.frag", dstPath + "Resources/Shaders/")
+
+    if(isFirst):
+        shutil.copytree(RootPath + "Commands", dstPath + "Commands", dirs_exist_ok=True)
+        shutil.copytree(RootPath + "EmscriptenBuild", dstPath + "EmscriptenBuild", dirs_exist_ok=True)
+        shutil.copy(RootPath + "Garnet.sln", dstPath)
+        shutil.copy(RootPath + "Garnet.vcxproj", dstPath)
+        shutil.copy(RootPath + "Garnet.vcxproj.filters", dstPath)
+        shutil.copy(RootPath + "../" + ".gitignore", dstPath)
 
 def Main():
     parser = argparse.ArgumentParser(

@@ -8,6 +8,8 @@ Garnet/CMakeBuild/build/
 Garnet/EmscriptenBuild/build/
 Garnet/DebugGL/
 Garnet/ReleaseGL/
+GarnetLauncher_Python/GarnetLauncher/GarnetLauncher/GarnetLauncher.spec
+GarnetLauncher_Python/GarnetLauncher/GarnetLauncher/build/
 
 # User-specific files
 *.rsuser

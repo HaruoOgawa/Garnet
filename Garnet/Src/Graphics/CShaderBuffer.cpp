@@ -1,7 +1,8 @@
 #include "CShaderBuffer.h"
 #include "CShaderBufferDescriptor.h"
-#include "../Debug/Message/Console.h"
 #include "CMaterial.h"
+#include "../Debug/Message/Console.h"
+#include "../../Math/CMath.h"
 
 namespace graphics
 {
@@ -97,6 +98,13 @@ namespace graphics
 		{
 			m_BindingLayoutList[i].ByteOffset = m_BindingLayoutList[i - 1].ByteSize;
 		}
+	}
+
+	// バッファサイズを2のn乗にする
+	void CShaderBuffer::ResizePowerOfTwo()
+	{
+		const uint64_t ByteSize = static_cast<uint64_t>(math::GetNextPowerOfTwo(static_cast<unsigned int>(m_Buffer.size()))); // 2のn乗にする
+		m_Buffer.resize(ByteSize, 0);
 	}
 
 	void CShaderBuffer::SetSharedBufferParam(const SSharedBufferParam& Param)

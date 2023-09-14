@@ -23,7 +23,7 @@ namespace graphics
 		createInfo->SetVertexShaderCode(DepthVertex->GetData());
 		createInfo->SetFragmentShaderCode(DepthFragment->GetData());
 
-		auto UniformBuffer = graphics::CMaterialCreateInfo::CreateUniformBuffer({ graphics::SBindingLayout("UniformBufferObject", 0) });
+		auto UniformBuffer = graphics::CMaterialCreateInfo::CreateUniformBuffer({ graphics::SBindingLayout("UniformBufferObject", 0, false) });
 		UniformBuffer->AddData("model", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
 		UniformBuffer->AddData("view", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
 		UniformBuffer->AddData("proj", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
@@ -75,6 +75,8 @@ namespace graphics
 	void CMaterial::AddShaderBuffer(const std::shared_ptr<CShaderBuffer>& Buffer)
 	{
 		Buffer->RecalculateBindingLayoutOffset();
+
+		Buffer->ResizePowerOfTwo(); // バッファサイズを2のn乗にする
 
 		m_ShaderBufferList.push_back(std::make_shared<CShaderBuffer>(*Buffer));
 	}

@@ -29,7 +29,7 @@ namespace resource
 		createInfo->SetFragmentShaderCode(m_FragmentShader->GetData());
 		auto Material = pGraphicsAPI->CreateMaterial(createInfo);
 
-		auto UniforBuffer = createInfo->CreateUniformBuffer({ graphics::SBindingLayout("UniformBufferObject", 0) });
+		auto UniforBuffer = createInfo->CreateUniformBuffer({ graphics::SBindingLayout("UniformBufferObject", 0, false) });
 		UniforBuffer->AddData("rate", &glm::vec1(0.0f)[0], sizeof(glm::vec1), 0);
 		UniforBuffer->AddData("time", &glm::vec1(0.0f)[0], sizeof(glm::vec1), 0);
 		UniforBuffer->AddData("alpha", &m_Alpha, sizeof(float), 0);

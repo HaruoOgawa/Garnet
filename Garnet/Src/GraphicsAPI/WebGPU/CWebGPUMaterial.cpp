@@ -6,7 +6,6 @@
 #include "../../Debug/Message/Console.h"
 #include "../../Camera/CCamera.h"
 #include "../../Projection/CProjection.h"
-#include "../../Math/CMath.h"
 
 namespace api
 {
@@ -153,7 +152,7 @@ namespace api
 			const auto& Data = Buffer->GetData();
 
 			WGPUBuffer UniformBuffer;
-			const uint64_t ByteSize = static_cast<uint64_t>(math::GetNextPowerOfTwo(static_cast<unsigned int>(Data.size()))); // 2のn乗にする
+			const uint64_t ByteSize = static_cast<uint64_t>(Data.size());
 
 			if (Buffer->GetBufferType() == graphics::EBufferType::UNIFORM)
 			{
@@ -197,7 +196,7 @@ namespace api
 				{
 					if (Layout.second.IsGPGPUWritable) // 読み書き可能なGPGPU用のバッファ
 					{
-						// WGPUBufferBindingType_StorageはWGPUShaderStage_Computeだけに割り当てることができｒｙ
+						// WGPUBufferBindingType_StorageはWGPUShaderStage_Computeだけに割り当てることができる
 						bindingLayout.visibility = WGPUShaderStage_Compute;
 						bindingLayout.buffer.type = WGPUBufferBindingType_Storage; 
 					}
