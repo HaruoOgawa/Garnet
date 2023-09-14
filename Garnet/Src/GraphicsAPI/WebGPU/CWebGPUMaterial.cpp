@@ -197,7 +197,7 @@ namespace api
 				{
 					if (Layout.second.IsGPGPUWritable) // 読み書き可能なGPGPU用のバッファ
 					{
-						// WGPUBufferBindingType_StorageはWGPUShaderStage_Computeだけに割り当てることができｒｙ
+						// WGPUBufferBindingType_StorageはWGPUShaderStage_Computeだけに割り当てることができる
 						bindingLayout.visibility = WGPUShaderStage_Compute;
 						bindingLayout.buffer.type = WGPUBufferBindingType_Storage; 
 					}

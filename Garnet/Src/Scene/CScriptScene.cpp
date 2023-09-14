@@ -76,7 +76,7 @@ namespace scene
 
 			auto ComputeMaterial = pGraphicsAPI->CreateMaterial(computeCreateInfo);
 
-			auto ParamUBO = graphics::CMaterialCreateInfo::CreateUniformBuffer({ graphics::SBindingLayout("ParamUBO", 0) });
+			auto ParamUBO = graphics::CMaterialCreateInfo::CreateUniformBuffer({ graphics::SBindingLayout("ParamUBO", 0, false) });
 			ParamUBO->AddData("time", &glm::vec1(0.0f)[0], sizeof(glm::vec1), 0);
 			ParamUBO->AddData("deltaTime", &glm::vec1(0.0f)[0], sizeof(glm::vec1), 0);
 			ParamUBO->AddData("pad0", &glm::vec1(0.0f)[0], sizeof(glm::vec1), 0);
@@ -84,7 +84,7 @@ namespace scene
 
 			ComputeMaterial->AddShaderBuffer(ParamUBO);
 
-			auto ReadSSBO = graphics::CMaterialCreateInfo::CreateShaderStorageBuffer({ graphics::SBindingLayout("ReadOnlyTestBufferObject", 1) });
+			auto ReadSSBO = graphics::CMaterialCreateInfo::CreateShaderStorageBuffer({ graphics::SBindingLayout("ReadOnlyTestBufferObject", 1, false) });
 			ReadSSBO->AddData("r_TBO", &InitData[0], sizeof(float) * static_cast<int>(InitData.size()), 1);
 
 			ComputeMaterial->AddShaderBuffer(ReadSSBO);
@@ -108,7 +108,7 @@ namespace scene
 				createInfo->SetFragmentShaderCode(m_FragmentShader->GetData());
 				auto Material0 = pGraphicsAPI->CreateMaterial(createInfo);
 
-				auto UniformBuffer = graphics::CMaterialCreateInfo::CreateUniformBuffer({ graphics::SBindingLayout("UniformBufferObject", 0) });
+				auto UniformBuffer = graphics::CMaterialCreateInfo::CreateUniformBuffer({ graphics::SBindingLayout("UniformBufferObject", 0, false) });
 
 				UniformBuffer->AddData("model", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
 				UniformBuffer->AddData("view", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
@@ -116,7 +116,7 @@ namespace scene
 				UniformBuffer->AddData("lightVPMat", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
 
 				Material0->AddShaderBuffer(UniformBuffer);
-				auto SSBO = graphics::CMaterialCreateInfo::CreateShaderStorageBuffer({ graphics::SBindingLayout("TestBufferObject", 1) });
+				auto SSBO = graphics::CMaterialCreateInfo::CreateShaderStorageBuffer({ graphics::SBindingLayout("TestBufferObject", 1, false) });
 				
 				SSBO->AddData("rw_TBO", &InitData[0], sizeof(float) * static_cast<int>(InitData.size()), 1);
 				SSBO->SetSharedBufferParam({ true, 2, m_GPGPUHandler->GetComputeMaterial() });
