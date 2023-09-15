@@ -123,6 +123,8 @@ namespace scene
 
 				Material0->AddShaderBuffer(SSBO);
 
+				Material0->SetBlendType(graphics::EBlendType::BLEND_TYPE_TRANSPARENT_ALPHA);
+
 				m_TestObject->AddMaterial(Material0);
 			}
 

@@ -55,10 +55,6 @@ namespace renderer
 			glDisable(GL_DEPTH_TEST);
 		}
 
-		// Alpha Test(ひとまず通常のアルファブレンドのみ)
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
 		// Culling
 		switch (pOpenGLMat->GetCullMode())
 		{
@@ -82,8 +78,30 @@ namespace renderer
 			break;
 		}
 
+		// Alpha Test(ひとまず通常のアルファブレンドのみ)
+		switch (pOpenGLMat->GetBlendType())
+		{
+		case graphics::EBlendType::BLEND_TYPE_ADDITIVE:
+			glEnable(GL_BLEND);
+			glBlendFunc(GL_ONE, GL_ZERO);
+
+			break;
+		case graphics::EBlendType::BLEND_TYPE_TRANSPARENT_ALPHA:
+			glEnable(GL_BLEND);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+			break;
+		default:
+			glEnable(GL_BLEND);
+			glBlendFunc(GL_ONE, GL_ZERO);
+
+			break;
+		}
+
+		
+
 		// 描画を実行
-		// あとで描画形式をカスタマイズできるようする
+		// あとで描画形式をカスタマイズできるようする(GL_TRIANGLEとかGL_LINEとかのやつ)
 		if (m_InstanceCount > 1) // インスタンス描画
 		{
 			glDrawElementsInstanced(GL_TRIANGLES, m_IndicesCount, GL_UNSIGNED_SHORT, nullptr, m_InstanceCount);

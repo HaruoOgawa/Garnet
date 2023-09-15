@@ -202,13 +202,40 @@ namespace renderer
 		// ブレンディング
 		// <計算式> rgba = srcFactor * rgba [operation] dstFactor * rgba
 		WGPUBlendState blendState{};
-		blendState.color.srcFactor = WGPUBlendFactor_One;
-		blendState.color.dstFactor = WGPUBlendFactor_Zero;
-		blendState.color.operation = WGPUBlendOperation_Add;
+		switch (pWebGPUMat->GetBlendType())
+		{
+			case graphics::EBlendType::BLEND_TYPE_ADDITIVE:
+				blendState.color.srcFactor = WGPUBlendFactor_One;
+				blendState.color.dstFactor = WGPUBlendFactor_Zero;
+				blendState.color.operation = WGPUBlendOperation_Add;
 
-		blendState.alpha.srcFactor = WGPUBlendFactor_One;
-		blendState.alpha.dstFactor = WGPUBlendFactor_Zero;
-		blendState.alpha.operation = WGPUBlendOperation_Add;
+				blendState.alpha.srcFactor = WGPUBlendFactor_One;
+				blendState.alpha.dstFactor = WGPUBlendFactor_Zero;
+				blendState.alpha.operation = WGPUBlendOperation_Add;
+
+				break;
+			case graphics::EBlendType::BLEND_TYPE_TRANSPARENT_ALPHA:
+				blendState.color.srcFactor = WGPUBlendFactor_SrcAlpha;
+				blendState.color.dstFactor = WGPUBlendFactor_OneMinusSrcAlpha;
+				blendState.color.operation = WGPUBlendOperation_Add;
+
+				blendState.alpha.srcFactor = WGPUBlendFactor_One;
+				blendState.alpha.dstFactor = WGPUBlendFactor_Zero;
+				blendState.alpha.operation = WGPUBlendOperation_Add;
+
+				break;
+			default:
+				blendState.color.srcFactor = WGPUBlendFactor_One;
+				blendState.color.dstFactor = WGPUBlendFactor_Zero;
+				blendState.color.operation = WGPUBlendOperation_Add;
+
+				blendState.alpha.srcFactor = WGPUBlendFactor_One;
+				blendState.alpha.dstFactor = WGPUBlendFactor_Zero;
+				blendState.alpha.operation = WGPUBlendOperation_Add;
+
+				break;
+		}
+		
 
 		WGPUColorTargetState colorTarget{};
 		colorTarget.nextInChain = nullptr;

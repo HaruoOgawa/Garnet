@@ -577,6 +577,8 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClInclude Include="Src\GraphicsAPI\OpenGL\COpenGLGPGPUHandler.h" />
     <ClInclude Include="Src\GraphicsAPI\WebGPU\CWebGPUGPGPUHandler.h" />
     <ClInclude Include="Src\GraphicsAPI\Vulkan\CVulkanGPGPUHandler.h" />
+    <ClInclude Include="Src\Graphics\EBlendType.h" />
+    <ClInclude Include="Src\Graphics\ECullMode.h" />
     <ClInclude Include="Src\Interface\IGPGPUHandler.h" />
     <ClInclude Include="Src\Object\CSimple3DObject.h" />
     <ClInclude Include="Src\Interface\IResource.h" />

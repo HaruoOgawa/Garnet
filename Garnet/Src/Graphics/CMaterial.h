@@ -11,6 +11,8 @@
 #include "STextureBindingLayout.h"
 #include "CTexture.h"
 #include "CDrawInfo.h"
+#include "ECullMode.h"
+#include "EBlendType.h"
 #include "../Camera/CCamera.h"
 
 namespace camera { class CCamera; }
@@ -21,13 +23,6 @@ namespace graphics
 {
 	class CMaterialCreateInfo;
 	class CShaderBuffer;
-
-	enum class ECullMode
-	{
-		CULL_NONE,
-		CULL_BACK,
-		CULL_FRONT,
-	};
 
 	class CMaterial
 	{
@@ -46,6 +41,7 @@ namespace graphics
 
 		bool m_EnabledZTest;
 		ECullMode m_CullMode;
+		EBlendType m_BlendType;
 	public:
 		CMaterial(const std::shared_ptr<CMaterialCreateInfo>& createInfo);
 		virtual ~CMaterial() = default;
@@ -60,6 +56,9 @@ namespace graphics
 
 		virtual void SetCullMode(ECullMode CullMode);
 		virtual ECullMode GetCullMode() const;
+		
+		virtual void SetBlendType(EBlendType BlendType);
+		virtual EBlendType GetBlendType() const;
 
 		virtual bool SetCommonUniform(const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo) = 0;
 		virtual bool BuildDrawBuffer(int DynamicOffsetNum) = 0;
