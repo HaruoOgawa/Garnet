@@ -9,7 +9,7 @@ fn main_1() {
     let _e11 = fragColor_1;
     col = _e11.xyz;
     let _e13 = col;
-    outColor = vec4<f32>(_e13.x, _e13.y, _e13.z, 1.0);
+    outColor = vec4<f32>(_e13.x, _e13.y, _e13.z, 0.5);
     return;
 }
 

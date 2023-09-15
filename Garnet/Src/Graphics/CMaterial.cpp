@@ -8,7 +8,8 @@ namespace graphics
 		m_UseDynamicBufferOffset(false),
 		m_DepthMaterial(nullptr),
 		m_EnabledZTest(true),
-		m_CullMode(ECullMode::CULL_BACK)
+		m_CullMode(ECullMode::CULL_BACK),
+		m_BlendType(EBlendType::BLEND_TYPE_ADDITIVE)
 	{
 	}
 
@@ -65,6 +66,16 @@ namespace graphics
 	ECullMode CMaterial::GetCullMode() const
 	{
 		return m_CullMode;
+	}
+
+	void CMaterial::SetBlendType(EBlendType BlendType)
+	{
+		m_BlendType = BlendType;
+	}
+
+	EBlendType CMaterial::GetBlendType() const
+	{
+		return m_BlendType;
 	}
 
 	bool CMaterial::SetCommonUniform(const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo)

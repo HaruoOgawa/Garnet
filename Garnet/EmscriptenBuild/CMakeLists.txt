@@ -47,6 +47,8 @@ add_executable(
 	../src/Graphics/CShaderBufferDescriptor.h
 	../src/Graphics/CTexture.cpp
 	../src/Graphics/CTexture.h
+	../src/Graphics/EBlendType.h
+	../src/Graphics/ECullMode.h
 	../src/Graphics/ETextureType.h
 	../src/Graphics/SBindingLayout.h
 	../src/Graphics/STextureBindingLayout.h
