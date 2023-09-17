@@ -28,8 +28,8 @@ struct UniformBufferObject {
     useEmissiveTexture: i32,
     useNormalTexture: i32,
     useOcclusionTexture: i32,
-    t_pad_0_: i32,
-    t_pad_1_: i32,
+    useCubeMap: i32,
+    useShadowMap: i32,
     t_pad_2_: i32,
 }
 

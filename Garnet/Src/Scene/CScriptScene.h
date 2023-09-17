@@ -12,7 +12,6 @@ namespace graphics {
 	class CDrawInfo; 
 	class CTexture;
 }
-namespace api { class IGPGPUHandler; }
 namespace resource { class CLoadWorker; }
 
 namespace scene
@@ -21,10 +20,6 @@ namespace scene
 	{
 		bool m_IsLoaded;
 
-		const int m_InstanceCount;
-
-		std::shared_ptr<api::IGPGPUHandler> m_GPGPUHandler;
-
 		// Tex of FrameBuffer
 		std::vector<std::shared_ptr<graphics::CTexture>> m_FrameTextureList;
 
@@ -32,12 +27,12 @@ namespace scene
 		std::shared_ptr<file::CFile> m_DepthVertex;
 		std::shared_ptr<file::CFile> m_DepthFragment;
 
-		// Test Obj
-		std::shared_ptr<object::C3DObject> m_TestObject;
+		// glTF
+		std::shared_ptr<file::CFile> m_glTFData;
+		std::shared_ptr<object::C3DObject> m_glTFObject;
 
 		std::shared_ptr<file::CFile> m_VertexShader;
 		std::shared_ptr<file::CFile> m_FragmentShader;
-		std::shared_ptr<file::CFile> m_ComputeShader;
 	private:
 		bool Load(api::IGraphicsAPI* pGraphicsAPI);
 

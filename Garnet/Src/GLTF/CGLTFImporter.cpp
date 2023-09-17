@@ -55,7 +55,7 @@ namespace gltf
 		if (!CreateTexture(pGraphicsAPI, model, TextureList)) return false;
 
 		// ひとまず末尾にShadowMapを追加しておく
-		TextureList.push_back(FrameTextureList[0]);
+		if (FrameTextureList.size() > 0) TextureList.push_back(FrameTextureList[0]);
 
 		// マテリアル
 		std::vector<std::shared_ptr<graphics::CMaterial>> MaterialList;
@@ -198,9 +198,20 @@ namespace gltf
 				UniformBuffer->AddData("roughnessFactor", &roughnessFactor, sizeof(float), 0);
 				UniformBuffer->AddData("normalMapScale", &normalMapScale, sizeof(float), 0);
 				UniformBuffer->AddData("occlusionStrength", &occlusionStrength, sizeof(float), 0);
-				UniformBuffer->AddData("mipCount", &glm::vec1(CubeTexList[0]->GetMipCount())[0], sizeof(float), 0);
-				UniformBuffer->AddData("ShadowMapX", &glm::vec1(static_cast<float>(FrameTextureList[0]->GetWidth()))[0], sizeof(float), 0);
-				UniformBuffer->AddData("ShadowMapY", &glm::vec1(static_cast<float>(FrameTextureList[0]->GetHeight()))[0], sizeof(float), 0);
+
+				float MipCount = 1.0f;
+				if (CubeTexList.size() > 0) MipCount = CubeTexList[0]->GetMipCount();
+				UniformBuffer->AddData("mipCount", &glm::vec1(MipCount)[0], sizeof(float), 0);
+
+				int ShadowMapX = 1, ShadowMapY = 1;
+				if (FrameTextureList.size() > 0)
+				{
+					ShadowMapX = FrameTextureList[0]->GetWidth();
+					ShadowMapY = FrameTextureList[0]->GetHeight();
+				}
+
+				UniformBuffer->AddData("ShadowMapX", &glm::vec1(static_cast<float>(ShadowMapX))[0], sizeof(float), 0);
+				UniformBuffer->AddData("ShadowMapY", &glm::vec1(static_cast<float>(ShadowMapY))[0], sizeof(float), 0);
 
 				// テクスチャを紐づける
 				{
@@ -265,20 +276,32 @@ namespace gltf
 					}
 
 					// CubeMap
+					if (CubeTexList.size() > 0)
 					{
 						material->AddTextureBindingLayout({ "cubemapTexture", 11, 12, 0, graphics::ETextureType::TEXTURE_CUBE});
+						UniformBuffer->AddData("useCubeMap", &glm::uvec1(1)[0], sizeof(int), 0);
+					}
+					else
+					{
+						material->AddTextureBindingLayout({ "cubemapTexture", 11, 12, -1, graphics::ETextureType::TEXTURE_CUBE });
+						UniformBuffer->AddData("useCubeMap", &glm::uvec1(0)[0], sizeof(int), 0);
 					}
 
 					// ShadowMap
+					if(FrameTextureList.size() > 0)
 					{
 						// ひとまず末尾から取得
 						material->AddTextureBindingLayout({ "shadowmapTexture", 13, 14, (static_cast<int>(TextureList.size()) - 1), graphics::ETextureType::TEXTURE_2D});
+						UniformBuffer->AddData("useShadowMap", &glm::uvec1(1)[0], sizeof(int), 0);
+					}
+					else
+					{
+						material->AddTextureBindingLayout({ "shadowmapTexture", 13, 14, -1, graphics::ETextureType::TEXTURE_2D });
+						UniformBuffer->AddData("useShadowMap", &glm::uvec1(0)[0], sizeof(int), 0);
 					}
 
 					{
 						int Flag = 0;
-						UniformBuffer->AddData("t_pad_0", &Flag, sizeof(int), 0);
-						UniformBuffer->AddData("t_pad_1", &Flag, sizeof(int), 0);
 						UniformBuffer->AddData("t_pad_2", &Flag, sizeof(int), 0);
 					}
 				}
