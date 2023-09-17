@@ -41,6 +41,11 @@ namespace graphics
 		return m_TextureType;
 	}
 
+	void CTexture::SetTextureType(ETextureType TextureType)
+	{
+		m_TextureType = TextureType;
+	}
+
 	api::ERenderPassFormat CTexture::GetRenderPassFormat()const
 	{
 		return m_RenderPassFormat;

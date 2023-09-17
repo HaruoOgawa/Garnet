@@ -34,6 +34,7 @@ namespace api
 
 		// Texture
 		std::shared_ptr<CWebGPUTexture> m_EmptyTexture;
+		std::shared_ptr<CWebGPUTexture> m_EmptyCubeTexture;
 	private:
 		// WebGPU Main Logic /////////////////////////////////////////////////////////////////////
 		bool CreateShaderStages(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo);

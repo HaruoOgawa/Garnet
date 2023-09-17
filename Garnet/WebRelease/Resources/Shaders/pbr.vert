@@ -35,8 +35,8 @@ layout(binding = 0) uniform UniformBufferObject{
     int   useNormalTexture;
     
     int   useOcclusionTexture;
-    int   t_pad_0;
-    int   t_pad_1;
+    int   useCubeMap;
+    int   useShadowMap;
     int   t_pad_2;
 } ubo;
 
