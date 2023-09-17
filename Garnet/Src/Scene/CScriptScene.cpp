@@ -14,6 +14,13 @@ namespace scene
 		m_glTFObject(std::make_shared<object::C3DObject>("", "ShadowPass")),
 		m_glTFData(std::make_shared<file::CFile>("Resources\\Models\\DamagedHelmet\\glTF-Binary\\DamagedHelmet.glb")),
 
+		m_Cube0(std::make_shared<file::CFile>("Resources\\Cubemaps\\environment\\environment_back_0.jpg")),
+		m_Cube1(std::make_shared<file::CFile>("Resources\\Cubemaps\\environment\\environment_bottom_0.jpg")),
+		m_Cube2(std::make_shared<file::CFile>("Resources\\Cubemaps\\environment\\environment_front_0.jpg")),
+		m_Cube3(std::make_shared<file::CFile>("Resources\\Cubemaps\\environment\\environment_left_0.jpg")),
+		m_Cube4(std::make_shared<file::CFile>("Resources\\Cubemaps\\environment\\environment_right_0.jpg")),
+		m_Cube5(std::make_shared<file::CFile>("Resources\\Cubemaps\\environment\\environment_top_0.jpg")),
+
 		m_DepthVertex(std::make_shared<file::CFile>("Resources\\Shaders\\depth" + pGraphicsAPI->GetVertexShaderExtension())),
 		m_DepthFragment(std::make_shared<file::CFile>("Resources\\Shaders\\depth" + pGraphicsAPI->GetFragmentShaderExtension())),
 
@@ -27,6 +34,12 @@ namespace scene
 		pLoadWorker->AddFirstLoadResource(m_glTFData);
 		pLoadWorker->AddFirstLoadResource(m_VertexShader);
 		pLoadWorker->AddFirstLoadResource(m_FragmentShader);
+		pLoadWorker->AddFirstLoadResource(m_Cube0);
+		pLoadWorker->AddFirstLoadResource(m_Cube1);
+		pLoadWorker->AddFirstLoadResource(m_Cube2);
+		pLoadWorker->AddFirstLoadResource(m_Cube3);
+		pLoadWorker->AddFirstLoadResource(m_Cube4);
+		pLoadWorker->AddFirstLoadResource(m_Cube5);
 	}
 
 	CScriptScene::~CScriptScene()
@@ -36,13 +49,30 @@ namespace scene
 
 	bool CScriptScene::Load(api::IGraphicsAPI* pGraphicsAPI)
 	{
+		// Cubemap
+		std::vector<std::shared_ptr<graphics::CTexture>> CubeTexList;
+		{
+			std::vector<std::vector<unsigned char>> CubeDataList;
+			CubeDataList.push_back(m_Cube0->GetData());
+			CubeDataList.push_back(m_Cube1->GetData());
+			CubeDataList.push_back(m_Cube2->GetData());
+			CubeDataList.push_back(m_Cube3->GetData());
+			CubeDataList.push_back(m_Cube4->GetData());
+			CubeDataList.push_back(m_Cube5->GetData());
+
+			auto CubeTex0 = pGraphicsAPI->CreateTexture(true);
+			if (!CubeTex0->Create(CubeDataList)) return false;
+
+			CubeTexList.push_back(CubeTex0);
+		}
+
 		// glTFObject
 		{
 			std::shared_ptr<graphics::CMaterialCreateInfo> createInfo = std::make_shared<graphics::CMaterialCreateInfo>();
 			createInfo->SetVertexShaderCode(m_VertexShader->GetData());
 			createInfo->SetFragmentShaderCode(m_FragmentShader->GetData());
 
-			if (!gltf::CGLTFImporter::Import(pGraphicsAPI, m_glTFData->GetData(), m_glTFObject, createInfo, std::vector<std::shared_ptr<graphics::CTexture>>(), std::vector<std::shared_ptr<graphics::CTexture>>(), m_DepthVertex, m_DepthFragment)) return false;
+			if (!gltf::CGLTFImporter::Import(pGraphicsAPI, m_glTFData->GetData(), m_glTFObject, createInfo, CubeTexList, std::vector<std::shared_ptr<graphics::CTexture>>(), m_DepthVertex, m_DepthFragment)) return false;
 		}
 
 		return true;

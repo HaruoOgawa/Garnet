@@ -33,6 +33,14 @@ namespace scene
 
 		std::shared_ptr<file::CFile> m_VertexShader;
 		std::shared_ptr<file::CFile> m_FragmentShader;
+
+		// Cubemap
+		std::shared_ptr<file::CFile> m_Cube0;
+		std::shared_ptr<file::CFile> m_Cube1;
+		std::shared_ptr<file::CFile> m_Cube2;
+		std::shared_ptr<file::CFile> m_Cube3;
+		std::shared_ptr<file::CFile> m_Cube4;
+		std::shared_ptr<file::CFile> m_Cube5;
 	private:
 		bool Load(api::IGraphicsAPI* pGraphicsAPI);
 
