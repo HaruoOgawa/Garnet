@@ -103,7 +103,7 @@ namespace graphics
 	// バッファサイズを2のn乗にする
 	void CShaderBuffer::ResizePowerOfTwo()
 	{
-		const uint64_t ByteSize = static_cast<uint64_t>(math::GetNextPowerOfTwo(static_cast<unsigned int>(m_Buffer.size()))); // 2のn乗にする
+		const uint64_t ByteSize = static_cast<uint64_t>(math::CMath::CalcNextPowerOfTwo(static_cast<unsigned int>(m_Buffer.size()))); // 2のn乗にする
 		m_Buffer.resize(ByteSize, 0);
 	}
 

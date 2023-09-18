@@ -3,7 +3,8 @@
 namespace renderer
 {
 	CRendererCreateInfo::CRendererCreateInfo():
-		m_InstanceCount(1)
+		m_InstanceCount(1),
+		m_IndiceType(EIndiceType::UNSIGNED_SHORT)
 	{
 	}
 
@@ -27,12 +28,31 @@ namespace renderer
 
 	void CRendererCreateInfo::SetIndices(const std::vector<unsigned short>& Indices)
 	{
+		m_IndiceType = EIndiceType::UNSIGNED_SHORT;
+
 		m_Indices = Indices;
 	}
 
 	const std::vector<unsigned short>& CRendererCreateInfo::GetIndices() const
 	{
 		return m_Indices;
+	}
+
+	void CRendererCreateInfo::SetUINTIndices(const std::vector<unsigned int>& Indices)
+	{
+		m_IndiceType = EIndiceType::UNSIGNED_INT;
+
+		m_UINTIndices = Indices;
+	}
+
+	const std::vector<unsigned int>& CRendererCreateInfo::GetUINTIndices() const
+	{
+		return m_UINTIndices;
+	}
+
+	EIndiceType CRendererCreateInfo::GetIndiceType() const
+	{
+		return m_IndiceType;
 	}
 
 	void CRendererCreateInfo::SetAttributeDimensions(const std::vector<int>& AttributeDimensions)

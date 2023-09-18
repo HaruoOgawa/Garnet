@@ -18,11 +18,22 @@ namespace api
 		m_BindGroupLayout(nullptr),
 		m_BindGroup(nullptr),
 
-		m_EmptyTexture(nullptr)
+		m_EmptyTexture(nullptr),
+		m_EmptyCubeTexture(nullptr)
 	{
-		m_EmptyTexture = std::make_shared<CWebGPUTexture>(pGraphicsAPI, false);
-		std::vector<unsigned char> emptyPixel = { 0, 0, 0, 0 };
-		m_EmptyTexture->Create(emptyPixel, static_cast<int>(emptyPixel.size() * sizeof(unsigned char)));
+		{
+			m_EmptyTexture = std::make_shared<CWebGPUTexture>(pGraphicsAPI, false);
+			std::vector<unsigned char> emptyPixel = { 0, 0, 0, 0 };
+			m_EmptyTexture->Create(emptyPixel, static_cast<int>(emptyPixel.size() * sizeof(unsigned char)));
+		}
+
+		{
+			m_EmptyCubeTexture = std::make_shared<CWebGPUTexture>(pGraphicsAPI, false);
+			m_EmptyCubeTexture->SetTextureType(graphics::ETextureType::TEXTURE_CUBE);
+			std::vector<unsigned char> emptyCubePixel;
+			for (int i = 0; i < 4 * 6; i++) { emptyCubePixel.push_back(0); }
+			m_EmptyCubeTexture->Create(emptyCubePixel, static_cast<int>(emptyCubePixel.size() * sizeof(unsigned char)));
+		}
 	}
 
 	CWebGPUMaterial::~CWebGPUMaterial()
@@ -226,7 +237,7 @@ namespace api
 			}
 			else if (TexLayout.TextureType == graphics::ETextureType::TEXTURE_CUBE)
 			{
-				Texture = (TextureIndex >= 0 && TextureIndex < CubeMapList.size()) ? static_cast<api::CWebGPUTexture*>(CubeMapList[TextureIndex].get()) : m_EmptyTexture.get();
+				Texture = (TextureIndex >= 0 && TextureIndex < CubeMapList.size()) ? static_cast<api::CWebGPUTexture*>(CubeMapList[TextureIndex].get()) : m_EmptyCubeTexture.get();
 			}
 
 			if (!Texture)
@@ -331,7 +342,7 @@ namespace api
 			}
 			else if (TexLayout.TextureType == graphics::ETextureType::TEXTURE_CUBE)
 			{
-				Texture = (TextureIndex >= 0 && TextureIndex < CubeMapList.size()) ? static_cast<api::CWebGPUTexture*>(CubeMapList[TextureIndex].get()) : m_EmptyTexture.get();
+				Texture = (TextureIndex >= 0 && TextureIndex < CubeMapList.size()) ? static_cast<api::CWebGPUTexture*>(CubeMapList[TextureIndex].get()) : m_EmptyCubeTexture.get();
 			}
 
 			if (!Texture)

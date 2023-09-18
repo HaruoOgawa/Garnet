@@ -38,8 +38,8 @@ layout(binding = 0) uniform UniformBufferObject{
     int   useNormalTexture;
     
     int   useOcclusionTexture;
-    int   t_pad_0;
-    int   t_pad_1;
+    int   useCubeMap;
+    int   useShadowMap;
     int   t_pad_2;
 } ubo;
 
@@ -232,7 +232,7 @@ vec2 ComputePCF(vec2 uv)
 {
 	vec2 moments = vec2(0.0);
 
-	vec2 texelSize = vec2(1.0 / ubo.ShadowMapX, 1.0 / ubo.ShadowMapY);
+	/*vec2 texelSize = vec2(1.0 / ubo.ShadowMapX, 1.0 / ubo.ShadowMapY);
 
 	for(float x = -1.0; x <= 1.0; x++)
 	{
@@ -246,7 +246,13 @@ vec2 ComputePCF(vec2 uv)
 		}
 	}
 
-	moments /= 9.0;
+	moments /= 9.0;*/
+
+	#ifdef USE_OPENGL
+	moments = texture(shadowmapTexture, uv).rg;
+	#else
+	moments = texture(sampler2D(shadowmapTexture, shadowmapTextureSampler), uv ).rg;
+	#endif
 
 	return moments;
 }
@@ -398,13 +404,17 @@ void main(){
 	vec3 diffuseBRDF = (1.0 - F) * CalcDiffuseBRDF(pbrParam);
 
 	// 反射カラーを計算
-	float mipCount = ubo.mipCount;
-	float lod = mipCount * perceptualRoughness;
-	#ifdef USE_OPENGL
-	vec3 reflectColor = LINEARtoSRGB(textureLod(cubemapTexture, reflect(v, n), lod)).rgb;
-	#else
-	vec3 reflectColor = LINEARtoSRGB(textureLod(samplerCube(cubemapTexture, cubemapTextureSampler), reflect(v, n), lod)).rgb;
-	#endif
+	vec3 reflectColor = vec3(1.0);
+	if(ubo.useCubeMap != 0)
+	{
+		float mipCount = ubo.mipCount;
+		float lod = mipCount * perceptualRoughness;
+		#ifdef USE_OPENGL
+		reflectColor = LINEARtoSRGB(textureLod(cubemapTexture, reflect(v, n), lod)).rgb;
+		#else
+		reflectColor = LINEARtoSRGB(textureLod(samplerCube(cubemapTexture, cubemapTextureSampler), reflect(v, n), lod)).rgb;
+		#endif
+	}
 	
 	// レンダリング方程式を構築
 	col.rgb = NdotL * ubo.lightColor.rgb * (specularBRDF + diffuseBRDF) + reflectColor * specularColor;
@@ -435,18 +445,21 @@ void main(){
 
 	// Shadow
 	// LightSpaceScreenPos
-	vec3 lsp = f_LightSpacePos.xyz / f_LightSpacePos.w;
-	lsp = lsp * 0.5 + 0.5;
-	float shadowCol = 1.0;
-
-	bool outSide = f_LightSpacePos.z <= 0.0f || (lsp.x < 0 || lsp.y < 0) || (lsp.x > 1 || lsp.y > 1);
-
-	if(!outSide)
+	if(ubo.useShadowMap != 0)
 	{
-		shadowCol = CalcShadow(lsp, n, l);
-	}
+		vec3 lsp = f_LightSpacePos.xyz / f_LightSpacePos.w;
+		lsp = lsp * 0.5 + 0.5;
+		float shadowCol = 1.0;
 
-	col.rgb *= shadowCol;
+		bool outSide = f_LightSpacePos.z <= 0.0f || (lsp.x < 0 || lsp.y < 0) || (lsp.x > 1 || lsp.y > 1);
+
+		if(!outSide)
+		{
+			shadowCol = CalcShadow(lsp, n, l);
+		}
+
+		col.rgb *= shadowCol;
+	}
 
 	// カラースペースをリニアにする
 	col.rgb = pow(col.rgb, vec3(1.0/2.2));

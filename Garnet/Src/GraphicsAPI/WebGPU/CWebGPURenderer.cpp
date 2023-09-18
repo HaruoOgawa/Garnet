@@ -13,8 +13,9 @@ namespace renderer
 		m_InstanceCount(1),
 		m_GraphicsPipeline(nullptr),
 		m_VertexCount(0),
+		m_IndiceType(EIndiceType::UNSIGNED_SHORT),
 		m_IndexBuffer(nullptr),
-		m_IndexCount(0)
+		m_IndicesCount(0)
 	{
 	}
 
@@ -65,7 +66,14 @@ namespace renderer
 		}
 		
 		// インデックスバッファを割り当てる
-		wgpuRenderPassEncoderSetIndexBuffer(m_pGraphicsAPI->GetCurrentRenderPass(), m_IndexBuffer, WGPUIndexFormat_Uint16, 0, m_IndexCount * sizeof(uint16_t));
+		if (m_IndiceType == EIndiceType::UNSIGNED_SHORT)
+		{
+			wgpuRenderPassEncoderSetIndexBuffer(m_pGraphicsAPI->GetCurrentRenderPass(), m_IndexBuffer, WGPUIndexFormat_Uint16, 0, m_IndicesCount * sizeof(uint16_t));
+		}
+		else if (m_IndiceType == EIndiceType::UNSIGNED_INT)
+		{
+			wgpuRenderPassEncoderSetIndexBuffer(m_pGraphicsAPI->GetCurrentRenderPass(), m_IndexBuffer, WGPUIndexFormat_Uint32, 0, m_IndicesCount * sizeof(uint32_t));
+		}
 
 		// バインドグループを割り当てる
 		if (pWebGPUMat->IsUseDynamicBufferOffset())
@@ -85,7 +93,7 @@ namespace renderer
 		}
 
 		// 描画を実行
-		wgpuRenderPassEncoderDrawIndexed(m_pGraphicsAPI->GetCurrentRenderPass(), static_cast<uint32_t>(m_IndexCount), m_InstanceCount, 0, 0, 0);
+		wgpuRenderPassEncoderDrawIndexed(m_pGraphicsAPI->GetCurrentRenderPass(), static_cast<uint32_t>(m_IndicesCount), m_InstanceCount, 0, 0, 0);
 
 		return true;
 	}
@@ -115,9 +123,21 @@ namespace renderer
 
 	bool CWebGPURenderer::CreateIndexBuffer(const std::shared_ptr<CRendererCreateInfo>& createInfo)
 	{
-		m_IndexCount = createInfo->GetIndices().size();
+		m_IndiceType = createInfo->GetIndiceType();
+		
+		if (m_IndiceType == renderer::EIndiceType::UNSIGNED_SHORT)
+		{
+			m_IndicesCount = createInfo->GetIndices().size();
 
-		if (!CreateBuffer(m_IndexBuffer, WGPUBufferUsage_CopyDst | WGPUBufferUsage_Index, &createInfo->GetIndices()[0], m_IndexCount * sizeof(uint16_t))) return false;
+			if (!CreateBuffer(m_IndexBuffer, WGPUBufferUsage_CopyDst | WGPUBufferUsage_Index, &createInfo->GetIndices()[0], m_IndicesCount * sizeof(uint16_t))) return false;
+		}
+		else if (m_IndiceType == renderer::EIndiceType::UNSIGNED_INT)
+		{
+			m_IndicesCount = createInfo->GetUINTIndices().size();
+
+			if (!CreateBuffer(m_IndexBuffer, WGPUBufferUsage_CopyDst | WGPUBufferUsage_Index, &createInfo->GetUINTIndices()[0], m_IndicesCount * sizeof(uint32_t))) return false;
+		}
+		
 
 		return true;
 	}

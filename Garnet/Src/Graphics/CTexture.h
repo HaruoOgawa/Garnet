@@ -29,6 +29,7 @@ namespace graphics
 		int GetHeight() const;
 
 		ETextureType GetTextureType() const;
+		void SetTextureType(ETextureType TextureType);
 		api::ERenderPassFormat GetRenderPassFormat()const;
 		float GetMipCount() const;
 
