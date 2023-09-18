@@ -12,6 +12,7 @@ namespace renderer
 		m_PassName(PassName),
 		m_DynamicOffsetNum(0),
 		m_InstanceCount(1),
+		m_IndiceType(EIndiceType::UNSIGNED_SHORT),
 		m_IndexBuffer(nullptr),
 		m_IndexBufferMemory(nullptr),
 		m_IndicesCount(0),
@@ -108,7 +109,15 @@ namespace renderer
 		}
 
 		// インデックスバッファをパイプラインにバインドする
-		vkCmdBindIndexBuffer(m_pGraphicsAPI->GetCurrentCommandBuffer(), m_IndexBuffer, 0, VK_INDEX_TYPE_UINT16);
+		if (m_IndiceType == renderer::EIndiceType::UNSIGNED_SHORT)
+		{
+			vkCmdBindIndexBuffer(m_pGraphicsAPI->GetCurrentCommandBuffer(), m_IndexBuffer, 0, VK_INDEX_TYPE_UINT16);
+		}
+		else if (m_IndiceType == renderer::EIndiceType::UNSIGNED_INT)
+		{
+			vkCmdBindIndexBuffer(m_pGraphicsAPI->GetCurrentCommandBuffer(), m_IndexBuffer, 0, VK_INDEX_TYPE_UINT32);
+		}
+		
 		
 		// UBOのセット
 		std::vector<uint32_t> dynamicOffsetList;
@@ -187,7 +196,22 @@ namespace renderer
 	}
 	bool CVulkanRenderer::CreateIndexBuffer(const std::shared_ptr<CRendererCreateInfo>& createInfo)
 	{
-		VkDeviceSize bufferSize = sizeof(createInfo->GetIndices()[0]) * createInfo->GetIndices().size();
+		m_IndiceType = createInfo->GetIndiceType();
+		
+		VkDeviceSize bufferSize = 0;
+
+		if (m_IndiceType == renderer::EIndiceType::UNSIGNED_SHORT)
+		{
+			m_IndicesCount = static_cast<uint32_t>(createInfo->GetIndices().size());
+
+			bufferSize = sizeof(createInfo->GetIndices()[0]) * createInfo->GetIndices().size();
+		}
+		else if (m_IndiceType == renderer::EIndiceType::UNSIGNED_INT)
+		{
+			m_IndicesCount = static_cast<uint32_t>(createInfo->GetUINTIndices().size());
+
+			bufferSize = sizeof(createInfo->GetUINTIndices()[0]) * createInfo->GetUINTIndices().size();
+		}
 
 		VkBuffer stagingBuffer;
 		VkDeviceMemory stagingBufferMemory;
@@ -195,7 +219,16 @@ namespace renderer
 
 		void* data;
 		vkMapMemory(m_pGraphicsAPI->GetLogicalDevice(), stagingBufferMemory, 0, bufferSize, 0, &data);
-		memcpy(data, createInfo->GetIndices().data(), (size_t)bufferSize);
+		
+		if (m_IndiceType == renderer::EIndiceType::UNSIGNED_SHORT)
+		{
+			memcpy(data, createInfo->GetIndices().data(), (size_t)bufferSize);
+		}
+		else if (m_IndiceType == renderer::EIndiceType::UNSIGNED_INT)
+		{
+			memcpy(data, createInfo->GetUINTIndices().data(), (size_t)bufferSize);
+		}
+		
 		vkUnmapMemory(m_pGraphicsAPI->GetLogicalDevice(), stagingBufferMemory);
 
 		m_pGraphicsAPI->CreateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
@@ -205,8 +238,6 @@ namespace renderer
 
 		vkDestroyBuffer(m_pGraphicsAPI->GetLogicalDevice(), stagingBuffer, nullptr);
 		vkFreeMemory(m_pGraphicsAPI->GetLogicalDevice(), stagingBufferMemory, nullptr);
-
-		m_IndicesCount = static_cast<uint32_t>(createInfo->GetIndices().size());
 
 		return true;
 	}

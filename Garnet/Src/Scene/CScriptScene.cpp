@@ -12,7 +12,7 @@ namespace scene
 {
 	CScriptScene::CScriptScene(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker):
 		m_glTFObject(std::make_shared<object::C3DObject>("", "ShadowPass")),
-		m_glTFData(std::make_shared<file::CFile>("Resources\\Models\\DamagedHelmet\\glTF-Binary\\DamagedHelmet.glb")),
+		m_glTFData(std::make_shared<file::CFile>("Resources\\Models\\Dragon_1\\Dragon_1.glb")),
 
 		m_Cube0(std::make_shared<file::CFile>("Resources\\Cubemaps\\environment\\environment_back_0.jpg")),
 		m_Cube1(std::make_shared<file::CFile>("Resources\\Cubemaps\\environment\\environment_bottom_0.jpg")),
@@ -71,7 +71,8 @@ namespace scene
 			std::shared_ptr<graphics::CMaterialCreateInfo> createInfo = std::make_shared<graphics::CMaterialCreateInfo>();
 			createInfo->SetVertexShaderCode(m_VertexShader->GetData());
 			createInfo->SetFragmentShaderCode(m_FragmentShader->GetData());
-
+			m_glTFObject->SetPos(glm::vec3(0.0f, -1.0f, 0.0f));
+			m_glTFObject->SetScale(glm::vec3(0.25f));
 			if (!gltf::CGLTFImporter::Import(pGraphicsAPI, m_glTFData->GetData(), m_glTFObject, createInfo, CubeTexList, std::vector<std::shared_ptr<graphics::CTexture>>(), m_DepthVertex, m_DepthFragment)) return false;
 		}
 

@@ -336,6 +336,7 @@ namespace gltf
 				std::vector<std::vector<float>> VertexDataList;
 				std::vector<int> DimentionList;
 				std::vector<unsigned short> Indices;
+				std::vector<unsigned int> UINTIndices;
 
 				// 頂点データの初期化用(例えばWeightとかNormalを持っていないならそれを0埋めするみたいな処理)
 				std::vector<std::string> NeedAttribNameList = {
@@ -442,7 +443,7 @@ namespace gltf
 					int BufferViewIndex = Accessor.bufferView;
 					size_t Count = Accessor.count;
 					int componentType = Accessor.componentType;
-					int Stride = (componentType == 5126) ? 4 : 2;
+					int Stride = (componentType == 5125) ? 4 : 2;
 					size_t Accessor_byteOffset = Accessor.byteOffset;
 					size_t byteLength = Stride * Count;
 
@@ -457,8 +458,22 @@ namespace gltf
 					int target = BufferView.target;
 
 					// データを取得
-					Indices.resize(byteLength / Stride);
-					std::memcpy(&Indices[0], &model.buffers[BufferIndex].data[byteOffset], byteLength);
+					if (componentType == 5123)
+					{
+						Indices.resize(byteLength / Stride);
+						std::memcpy(&Indices[0], &model.buffers[BufferIndex].data[byteOffset], byteLength);
+
+						// Indicesを登録
+						createInfo->SetIndices(Indices);
+					}
+					else if(componentType == 5125)
+					{
+						UINTIndices.resize(byteLength / Stride);
+						std::memcpy(&UINTIndices[0], &model.buffers[BufferIndex].data[byteOffset], byteLength);
+
+						// Indicesを登録
+						createInfo->SetUINTIndices(UINTIndices);
+					}
 				}
 
 				// タンジェントの再計算
@@ -478,7 +493,6 @@ namespace gltf
 
 				// メッシュ情報を渡す
 				createInfo->SetVertices(VertexDataList);
-				createInfo->SetIndices(Indices);
 				createInfo->SetAttributeDimensions(DimentionList);
 
 				// プリミティブを作成する

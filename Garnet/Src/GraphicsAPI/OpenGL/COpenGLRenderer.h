@@ -13,6 +13,7 @@ namespace api {
 namespace renderer
 {
 	class CRendererCreateInfo;
+
 	class COpenGLRenderer : public IRenderer
 	{
 		// API
@@ -24,6 +25,8 @@ namespace renderer
 
 		//
 		GLuint m_VertexArray;
+
+		GLenum m_IndiceType;
 		GLsizei m_IndicesCount;
 	private:
 		bool CreateVertexArray();

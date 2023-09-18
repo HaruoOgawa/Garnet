@@ -9,6 +9,7 @@ namespace renderer
 		m_pGraphicsAPI(pGraphicsAPI),
 		m_PassName(PassName),
 		m_DynamicOffsetNum(0),
+		m_IndiceType(GL_UNSIGNED_SHORT),
 		m_InstanceCount(1),
 		m_VertexArray(-1),
 		m_IndicesCount(0)
@@ -98,17 +99,15 @@ namespace renderer
 			break;
 		}
 
-		
-
 		// 描画を実行
 		// あとで描画形式をカスタマイズできるようする(GL_TRIANGLEとかGL_LINEとかのやつ)
 		if (m_InstanceCount > 1) // インスタンス描画
 		{
-			glDrawElementsInstanced(GL_TRIANGLES, m_IndicesCount, GL_UNSIGNED_SHORT, nullptr, m_InstanceCount);
+			glDrawElementsInstanced(GL_TRIANGLES, m_IndicesCount, m_IndiceType, nullptr, m_InstanceCount);
 		}
 		else // 通常描画
 		{
-			glDrawElements(GL_TRIANGLES, m_IndicesCount, GL_UNSIGNED_SHORT, nullptr);
+			glDrawElements(GL_TRIANGLES, m_IndicesCount, m_IndiceType, nullptr);
 		}
 		
 		return true;
@@ -158,11 +157,23 @@ namespace renderer
 
 		glGenBuffers(1, &indexBuffer);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, createInfo->GetIndices().size() * sizeof(unsigned short), createInfo->GetIndices().data(), GL_STATIC_DRAW);
+		
+		if (createInfo->GetIndiceType() == renderer::EIndiceType::UNSIGNED_SHORT)
+		{
+			m_IndiceType = GL_UNSIGNED_SHORT;
+			m_IndicesCount = static_cast<GLsizei>(createInfo->GetIndices().size());
+
+			glBufferData(GL_ELEMENT_ARRAY_BUFFER, createInfo->GetIndices().size() * sizeof(unsigned short), createInfo->GetIndices().data(), GL_STATIC_DRAW);
+		}
+		else if (createInfo->GetIndiceType() == renderer::EIndiceType::UNSIGNED_INT)
+		{
+			m_IndiceType = GL_UNSIGNED_INT;
+			m_IndicesCount = static_cast<GLsizei>(createInfo->GetUINTIndices().size());
+
+			glBufferData(GL_ELEMENT_ARRAY_BUFFER, createInfo->GetUINTIndices().size() * sizeof(unsigned int), createInfo->GetUINTIndices().data(), GL_STATIC_DRAW);
+		}
 
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-		m_IndicesCount = static_cast<GLsizei>(createInfo->GetIndices().size());
 
 		return true;
 	}

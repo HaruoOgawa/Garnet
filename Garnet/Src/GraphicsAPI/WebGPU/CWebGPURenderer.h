@@ -15,6 +15,7 @@ namespace api {
 namespace renderer
 {
 	class CRendererCreateInfo;
+	enum class EIndiceType;
 
 	class CWebGPURenderer : public IRenderer
 	{
@@ -34,8 +35,9 @@ namespace renderer
 		std::vector<size_t> m_VertexBufferSizeList;
 		
 		// Index
+		EIndiceType m_IndiceType;
 		WGPUBuffer m_IndexBuffer;
-		size_t     m_IndexCount;
+		size_t     m_IndicesCount;
 	private:
 		// WebGPU Main Logic /////////////////////////////////////////////////////////////////////
 		bool CreateVertexBuffer(const std::shared_ptr<CRendererCreateInfo>& createInfo);

@@ -25,6 +25,7 @@ namespace api {
 namespace renderer
 {
 	class CRendererCreateInfo;
+	enum class EIndiceType;
 
 	class CVulkanRenderer : public IRenderer
 	{
@@ -39,6 +40,8 @@ namespace renderer
 		// Vertices/Indices
 		std::vector<VkBuffer> m_VertexBufferList;
 		std::vector<VkDeviceMemory> m_VertexBufferMemoryList;
+
+		EIndiceType m_IndiceType;
 		VkBuffer m_IndexBuffer;
 		VkDeviceMemory m_IndexBufferMemory;
 		uint32_t m_IndicesCount;
