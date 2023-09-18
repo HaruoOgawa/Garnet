@@ -39,6 +39,7 @@ namespace gltf
 
 		// Helper Function
 		static bool RecalculateTangent(std::vector<float>& TangentData, std::vector<float>& BioTangentData, const std::vector<float>& PosotionData, const std::vector<float>& TexcoordData, const std::vector<unsigned short>& Indices);
+		static bool RecalculateTangentWithUINT(std::vector<float>& TangentData, std::vector<float>& BioTangentData, const std::vector<float>& PosotionData, const std::vector<float>& TexcoordData, const std::vector<unsigned int>& Indices);
 	public:
 		static bool Import(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& Data, std::shared_ptr<object::C3DObject>& Object, 
 			std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, const std::vector<std::shared_ptr<graphics::CTexture>>& CubeTexList, const std::vector<std::shared_ptr<graphics::CTexture>>& FrameTextureList,

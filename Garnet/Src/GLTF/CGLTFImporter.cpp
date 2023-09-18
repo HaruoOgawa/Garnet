@@ -23,6 +23,7 @@
 
 #include <tiny_gltf.h>
 #include "../Debug/Message/Console.h"
+#include "../Math/CMath.h"
 
 namespace gltf
 {
@@ -462,24 +463,25 @@ namespace gltf
 					{
 						Indices.resize(byteLength / Stride);
 						std::memcpy(&Indices[0], &model.buffers[BufferIndex].data[byteOffset], byteLength);
-
-						// Indicesを登録
-						createInfo->SetIndices(Indices);
 					}
 					else if(componentType == 5125)
 					{
 						UINTIndices.resize(byteLength / Stride);
 						std::memcpy(&UINTIndices[0], &model.buffers[BufferIndex].data[byteOffset], byteLength);
-
-						// Indicesを登録
-						createInfo->SetUINTIndices(UINTIndices);
 					}
 				}
 
 				// タンジェントの再計算
 				if (NeedRecalculateTangent)
 				{
-					if (!RecalculateTangent(ReservedVertexDataList["TANGENT"], ReservedVertexDataList["BIOTANGENT"], ReservedVertexDataList["POSITION"], ReservedVertexDataList["TEXCOORD_0"], Indices)) return false;
+					if (Indices.size() > 0)
+					{
+						if (!RecalculateTangent(ReservedVertexDataList["TANGENT"], ReservedVertexDataList["BIOTANGENT"], ReservedVertexDataList["POSITION"], ReservedVertexDataList["TEXCOORD_0"], Indices)) return false;
+					}
+					else if (UINTIndices.size() > 0)
+					{
+						if (!RecalculateTangentWithUINT(ReservedVertexDataList["TANGENT"], ReservedVertexDataList["BIOTANGENT"], ReservedVertexDataList["POSITION"], ReservedVertexDataList["TEXCOORD_0"], UINTIndices)) return false;
+					}
 				}
 
 				// 頂点バッファを構築
@@ -494,6 +496,25 @@ namespace gltf
 				// メッシュ情報を渡す
 				createInfo->SetVertices(VertexDataList);
 				createInfo->SetAttributeDimensions(DimentionList);
+
+				if (Indices.size() > 0)
+				{
+					unsigned int size = math::CMath::CalcClosestPowerOfFour(static_cast<unsigned int>(Indices.size()));
+
+					Indices.resize(size, 0);
+
+					// Indicesを登録
+					createInfo->SetIndices(Indices);
+				}
+				else if (UINTIndices.size() > 0)
+				{
+					unsigned int size = math::CMath::CalcClosestPowerOfFour(static_cast<unsigned int>(UINTIndices.size()));
+
+					UINTIndices.resize(size, 0);
+
+					// Indicesを登録
+					createInfo->SetUINTIndices(UINTIndices);
+				}
 
 				// プリミティブを作成する
 				std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(createInfo, MaterialIndex);
@@ -568,6 +589,54 @@ namespace gltf
 			glm::vec2 Texcoord0  = glm::vec2(TexcoordData[Index0 * 2 + 0], TexcoordData[Index0 * 2 + 1]);
 			glm::vec2 Texcoord1  = glm::vec2(TexcoordData[Index1 * 2 + 0], TexcoordData[Index1 * 2 + 1]);
 			glm::vec2 Texcoord2  = glm::vec2(TexcoordData[Index2 * 2 + 0], TexcoordData[Index2 * 2 + 1]);
+
+			// 計算に使用するデータの下準備
+			glm::vec3 E1 = Pos0 - Pos1;
+			glm::vec3 E2 = Pos2 - Pos1;
+			glm::vec2 dUV1 = Texcoord0 - Texcoord1;
+			glm::vec2 dUV2 = Texcoord2 - Texcoord1;
+
+			float f = 1.0f / (dUV1.x * dUV2.y - dUV2.x * dUV1.y);
+
+			glm::vec4 Tangent = glm::vec4(0.0f);
+			glm::vec4 BioTangent = glm::vec4(0.0f);
+
+			// 接線と複接線を計算
+			Tangent.x = f * (dUV2.y * E1.x - dUV1.y * E2.x);
+			Tangent.y = f * (dUV2.y * E1.y - dUV1.y * E2.y);
+			Tangent.z = f * (dUV2.y * E1.z - dUV1.y * E2.z);
+
+			BioTangent.x = f * (-dUV2.x * E1.x + dUV1.x * E2.x);
+			BioTangent.y = f * (-dUV2.x * E1.y + dUV1.x * E2.y);
+			BioTangent.z = f * (-dUV2.x * E1.z + dUV1.x * E2.z);
+
+			// データを書き込む
+			TangentData[Index0 * 4 + 0] = Tangent.x; TangentData[Index0 * 4 + 1] = Tangent.y; TangentData[Index0 * 4 + 2] = Tangent.z; TangentData[Index0 * 4 + 3] = Tangent.w;
+			TangentData[Index1 * 4 + 0] = Tangent.x; TangentData[Index1 * 4 + 1] = Tangent.y; TangentData[Index1 * 4 + 2] = Tangent.z; TangentData[Index1 * 4 + 3] = Tangent.w;
+			TangentData[Index2 * 4 + 0] = Tangent.x; TangentData[Index2 * 4 + 1] = Tangent.y; TangentData[Index2 * 4 + 2] = Tangent.z; TangentData[Index2 * 4 + 3] = Tangent.w;
+
+			BioTangentData[Index0 * 4 + 0] = BioTangent.x; BioTangentData[Index0 * 4 + 1] = BioTangent.y; BioTangentData[Index0 * 4 + 2] = BioTangent.z; BioTangentData[Index0 * 4 + 3] = BioTangent.w;
+			BioTangentData[Index1 * 4 + 0] = BioTangent.x; BioTangentData[Index1 * 4 + 1] = BioTangent.y; BioTangentData[Index1 * 4 + 2] = BioTangent.z; BioTangentData[Index1 * 4 + 3] = BioTangent.w;
+			BioTangentData[Index2 * 4 + 0] = BioTangent.x; BioTangentData[Index2 * 4 + 1] = BioTangent.y; BioTangentData[Index2 * 4 + 2] = BioTangent.z; BioTangentData[Index2 * 4 + 3] = BioTangent.w;
+		}
+
+		return true;
+	}
+
+	bool CGLTFImporter::RecalculateTangentWithUINT(std::vector<float>& TangentData, std::vector<float>& BioTangentData, const std::vector<float>& PosotionData, const std::vector<float>& TexcoordData, const std::vector<unsigned int>& Indices)
+	{
+		for (int i = 0; i < Indices.size(); i += 3)
+		{
+			// 頂点情報を取得
+			unsigned int Index0 = Indices[i + 0], Index1 = Indices[i + 1], Index2 = Indices[i + 2];
+
+			glm::vec3 Pos0 = glm::vec3(PosotionData[Index0 * 3 + 0], PosotionData[Index0 * 3 + 1], PosotionData[Index0 * 3 + 2]);
+			glm::vec3 Pos1 = glm::vec3(PosotionData[Index1 * 3 + 0], PosotionData[Index1 * 3 + 1], PosotionData[Index1 * 3 + 2]);
+			glm::vec3 Pos2 = glm::vec3(PosotionData[Index2 * 3 + 0], PosotionData[Index2 * 3 + 1], PosotionData[Index2 * 3 + 2]);
+
+			glm::vec2 Texcoord0 = glm::vec2(TexcoordData[Index0 * 2 + 0], TexcoordData[Index0 * 2 + 1]);
+			glm::vec2 Texcoord1 = glm::vec2(TexcoordData[Index1 * 2 + 0], TexcoordData[Index1 * 2 + 1]);
+			glm::vec2 Texcoord2 = glm::vec2(TexcoordData[Index2 * 2 + 0], TexcoordData[Index2 * 2 + 1]);
 
 			// 計算に使用するデータの下準備
 			glm::vec3 E1 = Pos0 - Pos1;
