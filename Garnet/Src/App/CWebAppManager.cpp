@@ -144,41 +144,49 @@ namespace webapp
 	// マウスイベント
 	void CWebAppManager::OnMouseDown(int buttonNum, int x, int y)
 	{
-		if (buttonNum == 0)
+		if (buttonNum == 0 && !m_InputState->IsDownMouseRight())
 		{
 			m_InputState->SetDownMouseLeft(true);
-
-			// 位置を正規化する
-			float rPosX = static_cast<float>(x) / static_cast<float>(m_Width);
-			float rPosY = static_cast<float>(y) / static_cast<float>(m_Height);
-
-			rPosX = rPosX * 2.0f - 1.0f;
-			rPosY = rPosY * 2.0f - 1.0f;
-
-			m_InputState->StartMousePos(glm::vec2(rPosX, rPosY));
 		}
+		else if (buttonNum == 2 && !m_InputState->IsDownMouseLeft())
+		{
+			m_InputState->SetDownMouseRight(true);
+		}
+
+		// 位置を正規化する
+		float rPosX = static_cast<float>(x) / static_cast<float>(m_Width);
+		float rPosY = static_cast<float>(y) / static_cast<float>(m_Height);
+
+		rPosX = rPosX * 2.0f - 1.0f;
+		rPosY = rPosY * 2.0f - 1.0f;
+
+		m_InputState->StartMousePos(glm::vec2(rPosX, rPosY));
 	}
 
 	void CWebAppManager::OnMouseUp(int buttonNum, int x, int y)
 	{
-		if (buttonNum == 0)
+		if (buttonNum == 0 && !m_InputState->IsDownMouseRight())
 		{
 			m_InputState->SetDownMouseLeft(false);
-
-			// 位置を正規化する
-			float rPosX = static_cast<float>(x) / static_cast<float>(m_Width);
-			float rPosY = static_cast<float>(y) / static_cast<float>(m_Height);
-
-			rPosX = rPosX * 2.0f - 1.0f;
-			rPosY = rPosY * 2.0f - 1.0f;
-
-			m_InputState->StartMousePos(glm::vec2(rPosX, rPosY));
 		}
+		else if (buttonNum == 2 && !m_InputState->IsDownMouseLeft())
+		{
+			m_InputState->SetDownMouseRight(false);
+		}
+
+		// 位置を正規化する
+		float rPosX = static_cast<float>(x) / static_cast<float>(m_Width);
+		float rPosY = static_cast<float>(y) / static_cast<float>(m_Height);
+
+		rPosX = rPosX * 2.0f - 1.0f;
+		rPosY = rPosY * 2.0f - 1.0f;
+
+		m_InputState->StartMousePos(glm::vec2(rPosX, rPosY));
 	}
 
 	void CWebAppManager::OnMouseMove(int x, int y)
 	{
-		if (m_InputState->IsDownMouseLeft())
+		if (m_InputState->IsDownMouseLeft() || m_InputState->IsDownMouseRight())
 		{
 			// 位置を正規化する
 			float rPosX = static_cast<float>(x) / static_cast<float>(m_Width);
@@ -189,6 +197,13 @@ namespace webapp
 
 			m_InputState->SetMousePos(glm::vec2(rPosX, rPosY));
 		}
+	}
+
+	void CWebAppManager::OnMouseWheel(int deltaY)
+	{
+		// ブラウザだとピクセルに基づくホイール量が -150 ~ 150の範囲で返ってくるのでひとまず -1.0 ~ 1.0fにしておく
+		float wheelRate = glm::sign(-1.0f * static_cast<float>(deltaY)) * 1.0f;
+		m_InputState->SetWheelScrollAmount(glm::vec2(0.0f, wheelRate));
 	}
 }
 
