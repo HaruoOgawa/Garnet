@@ -10,9 +10,10 @@ namespace input
 		glm::vec2 m_MousePos;
 		glm::vec2 m_PrevMousePos;
 
-		bool m_OnDownMouseLeft;
+		bool m_IsLocked;
 
-		const float m_MouseRotSpeed;
+		bool m_OnDownMouseLeft;
+		bool m_OnDownMouseRight;
 	public:
 		CInputState(float MouseRotSpeed);
 		virtual ~CInputState();
@@ -21,12 +22,16 @@ namespace input
 
 		void StartMousePos(const glm::vec2& MousePos);
 		void SetMousePos(const glm::vec2& MousePos);
+
+		void SetLock(bool State);
+		bool IsLocked()const;
+		
 		void SetDownMouseLeft(bool OnDownMouseLeft);
-
-		bool IsDownMouseLeft()const { return m_OnDownMouseLeft; }
+		bool IsDownMouseLeft()const;
+		
+		void SetDownMouseRight(bool OnDownMouseRight);
+		bool IsDownMouseRight()const;
 		glm::vec2 GetDragAmount();
-
-		float GetMouseRotSpeed() const;
 	};
 }
 #endif // #ifdef USE_INPUT_SYSTEM
