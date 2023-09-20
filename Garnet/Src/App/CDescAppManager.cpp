@@ -190,6 +190,14 @@ namespace descapp
 		}
 	}
 
+	void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
+	{
+		auto AppManager = reinterpret_cast<CDescAppManager*>(glfwGetWindowUserPointer(window));
+		auto InputState = AppManager->GetInputState();
+
+		InputState->SetWheelScrollAmount(glm::vec2(static_cast<float>(xoffset), static_cast<float>(yoffset)));
+	}
+
 	bool CDescAppManager::InitWindow()
 	{
 		glfwInit();
@@ -205,6 +213,7 @@ namespace descapp
 		glfwSetWindowCloseCallback(m_pWindow, Close_Callback);
 		glfwSetMouseButtonCallback(m_pWindow, MousebuttonCallback);
 		glfwSetCursorPosCallback(m_pWindow, CursorPosCallback);
+		glfwSetScrollCallback(m_pWindow, ScrollCallback);
 
 		return true;
 	}

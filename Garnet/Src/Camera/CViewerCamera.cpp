@@ -43,6 +43,17 @@ namespace camera
 			m_Center += Offset;
 			m_Pos += Offset;
 		}
+		else if (InputState->IsMouseWheeled())
+		{
+			float MoveRate = 60.0f; // 1•b‚ ‚½‚è‚Ç‚ê‚®‚ç‚¢ˆÚ“®‚·‚é‚©
+
+			const auto& ViewDir = GetViewDir();
+
+			glm::vec3 Offset = ViewDir * MoveRate * DeltaTime * InputState->GetWheelScrollAmount().y;
+
+			m_Center += Offset;
+			m_Pos += Offset;
+		}
 	}
 #endif // USE_INPUT_SYSTEM
 }

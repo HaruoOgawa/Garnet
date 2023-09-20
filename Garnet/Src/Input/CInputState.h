@@ -10,6 +10,8 @@ namespace input
 		glm::vec2 m_MousePos;
 		glm::vec2 m_PrevMousePos;
 
+		glm::vec2 m_WheelScrollAmount;
+
 		bool m_IsLocked;
 
 		bool m_OnDownMouseLeft;
@@ -22,6 +24,10 @@ namespace input
 
 		void StartMousePos(const glm::vec2& MousePos);
 		void SetMousePos(const glm::vec2& MousePos);
+
+		void SetWheelScrollAmount(const glm::vec2& ScrollAmount);
+		const glm::vec2& GetWheelScrollAmount() const;
+		bool IsMouseWheeled();
 
 		void SetLock(bool State);
 		bool IsLocked()const;
