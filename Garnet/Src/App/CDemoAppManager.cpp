@@ -98,14 +98,21 @@ namespace app
 	}*/
 
 #ifdef USE_INPUT_SYSTEM
-	void MousebuttonCallback(HWND window, UINT msg, WPARAM w_param, LPARAM l_param)
+	void MousebuttonCallback(HWND window, UINT msg, WPARAM w_param, LPARAM l_param, bool IsDown)
 	{
 		if (!g_AppManager) return;
 
 		auto AppManager = g_AppManager;
 		auto InputState = AppManager->GetInputState();
 
-		InputState->SetDownMouseLeft(true);
+		if ((msg == WM_LBUTTONDOWN || msg == WM_LBUTTONUP) && !InputState->IsDownMouseRight())
+		{
+			InputState->SetDownMouseLeft(IsDown);
+		}
+		else if ((msg == WM_RBUTTONDOWN || msg == WM_RBUTTONUP) && !InputState->IsDownMouseLeft())
+		{
+			InputState->SetDownMouseRight(IsDown);
+		}
 
 		POINT p;
 		GetCursorPos(&p);
@@ -134,7 +141,7 @@ namespace app
 		auto AppManager = g_AppManager;
 		auto InputState = AppManager->GetInputState();
 
-		if (InputState->IsDownMouseLeft())
+		if (InputState->IsDownMouseLeft() || InputState->IsDownMouseRight())
 		{
 			POINT p;
 			GetCursorPos(&p);
@@ -156,6 +163,20 @@ namespace app
 			InputState->SetMousePos(glm::vec2(rPosX, rPosY));
 		}
 	}
+
+	void ScrollCallback(HWND window, UINT msg, WPARAM w_param, LPARAM l_param)
+	{
+		if (!g_AppManager) return;
+
+		auto AppManager = g_AppManager;
+		auto InputState = AppManager->GetInputState();
+
+		auto Amount = GET_WHEEL_DELTA_WPARAM(w_param);
+
+		// winuser.hだとピクセルに基づくホイール量が -120 ~ 120の範囲で返ってくるのでひとまず -1.0 ~ 1.0fにしておく
+		float wheelRate = glm::sign(static_cast<float>(Amount)) * 1.0f;
+		InputState->SetWheelScrollAmount(glm::vec2(0.0f, wheelRate));
+	}
 #endif
 
 	// ウィンドウのコールバック関数
@@ -166,7 +187,7 @@ namespace app
 		// インプット
 		switch (msg)
 		{
-
+#ifdef USE_INPUT_SYSTEM
 			case WM_KEYDOWN : 
 			{
 				if (w_param < 256)
@@ -181,25 +202,28 @@ namespace app
 			}
 				break;
 
-#ifdef USE_INPUT_SYSTEM
 			case WM_LBUTTONDOWN:
-				MousebuttonCallback(window, msg, w_param, l_param);
+				MousebuttonCallback(window, msg, w_param, l_param, true);
+				break;
+
+			case WM_RBUTTONDOWN:
+				MousebuttonCallback(window, msg, w_param, l_param, true);
 				break;
 
 			case WM_LBUTTONUP:
-				{
-					if (g_AppManager)
-					{
-						auto AppManager = g_AppManager;
-						auto InputState = AppManager->GetInputState();
+				MousebuttonCallback(window, msg, w_param, l_param, false);
+				break;
 
-						InputState->SetDownMouseLeft(false);
-					}
-				}
+			case WM_RBUTTONUP:
+				MousebuttonCallback(window, msg, w_param, l_param, false);
 				break;
 
 			case WM_MOUSEMOVE:
 				CursorPosCallback(window, msg, w_param, l_param);
+				break;
+
+			case WM_MOUSEWHEEL:
+				ScrollCallback(window, msg, w_param, l_param);
 				break;
 #endif
 
@@ -229,6 +253,8 @@ namespace app
 			//
 			if (!Update()) return false;
 			if (!Draw()) return false;
+
+			m_InputState->Clear();
 		}
 
 		return true;

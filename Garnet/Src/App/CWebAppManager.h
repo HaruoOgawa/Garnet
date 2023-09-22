@@ -53,6 +53,7 @@ namespace webapp
 		void OnMouseDown(int buttonNum, int x, int y);
 		void OnMouseUp(int buttonNum, int x, int y);
 		void OnMouseMove(int x, int y);
+		void OnMouseWheel(int deltaY);
 	};
 }
 #endif

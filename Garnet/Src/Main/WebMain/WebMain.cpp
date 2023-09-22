@@ -82,5 +82,14 @@ extern "C"
 			g_WebApp->OnMouseMove(x, y);
 		}
 	}
+	
+	EMSCRIPTEN_KEEPALIVE
+	void OnMouseWheel(int deltaY)
+	{
+		if (g_WebApp)
+		{
+			g_WebApp->OnMouseWheel(deltaY);
+		}
+	}
 }
 #endif // __EMSCRIPTEN__

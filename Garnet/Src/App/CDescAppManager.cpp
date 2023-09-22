@@ -141,23 +141,30 @@ namespace descapp
 		auto AppManager = reinterpret_cast<CDescAppManager*>(glfwGetWindowUserPointer(window));
 		auto InputState = AppManager->GetInputState();
 
-		if (button == GLFW_MOUSE_BUTTON_LEFT)
+		if (button == GLFW_MOUSE_BUTTON_LEFT && !InputState->IsDownMouseRight())
 		{
-			InputState->SetDownMouseLeft((action != GLFW_RELEASE));
+			InputState->SetDownMouseLeft((action == GLFW_PRESS));
+		}
+		else if (button == GLFW_MOUSE_BUTTON_RIGHT && !InputState->IsDownMouseLeft())
+		{
+			InputState->SetDownMouseRight((action == GLFW_PRESS));
+		}
 
-			// à íuÇê≥ãKâªÇ∑ÇÈ
-			double PosX, PosY;
-			glfwGetCursorPos(window, &PosX, &PosY);
-			
-			int w, h;
-			glfwGetWindowSize(window, &w, &h);
+		// à íuÇê≥ãKâªÇ∑ÇÈ
+		double PosX, PosY;
+		glfwGetCursorPos(window, &PosX, &PosY);
 
-			float rPosX = static_cast<float>(PosX) / static_cast<float>(w);
-			float rPosY = static_cast<float>(PosY) / static_cast<float>(h);
+		int w, h;
+		glfwGetWindowSize(window, &w, &h);
 
-			rPosX = rPosX * 2.0f - 1.0f;
-			rPosY = rPosY * 2.0f - 1.0f;
+		float rPosX = static_cast<float>(PosX) / static_cast<float>(w);
+		float rPosY = static_cast<float>(PosY) / static_cast<float>(h);
 
+		rPosX = rPosX * 2.0f - 1.0f;
+		rPosY = rPosY * 2.0f - 1.0f;
+		
+		if (action == GLFW_PRESS)
+		{
 			InputState->StartMousePos(glm::vec2(rPosX, rPosY));
 		}
 	}
@@ -167,7 +174,7 @@ namespace descapp
 		auto AppManager = reinterpret_cast<CDescAppManager*>(glfwGetWindowUserPointer(window));
 		auto InputState = AppManager->GetInputState();
 
-		if (InputState->IsDownMouseLeft())
+		if (InputState->IsDownMouseLeft() || InputState->IsDownMouseRight())
 		{
 			// à íuÇê≥ãKâªÇ∑ÇÈ
 			int w, h;
@@ -181,6 +188,14 @@ namespace descapp
 
 			InputState->SetMousePos(glm::vec2(rPosX, rPosY));
 		}
+	}
+
+	void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
+	{
+		auto AppManager = reinterpret_cast<CDescAppManager*>(glfwGetWindowUserPointer(window));
+		auto InputState = AppManager->GetInputState();
+
+		InputState->SetWheelScrollAmount(glm::vec2(static_cast<float>(xoffset), static_cast<float>(yoffset)));
 	}
 
 	bool CDescAppManager::InitWindow()
@@ -198,6 +213,7 @@ namespace descapp
 		glfwSetWindowCloseCallback(m_pWindow, Close_Callback);
 		glfwSetMouseButtonCallback(m_pWindow, MousebuttonCallback);
 		glfwSetCursorPosCallback(m_pWindow, CursorPosCallback);
+		glfwSetScrollCallback(m_pWindow, ScrollCallback);
 
 		return true;
 	}

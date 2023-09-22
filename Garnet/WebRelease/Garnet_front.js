@@ -96,3 +96,12 @@ addEventListener("mousemove", (event) => {
         [event.clientX, event.clientY]
     );
 });
+
+addEventListener("wheel", (event) => {
+    Module.ccall(
+        "OnMouseWheel",
+        "null",
+        ["number"],
+        [event.deltaY]
+    );
+});

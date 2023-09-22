@@ -378,7 +378,7 @@ namespace api
 				// バッファをリストに追加
 				m_VKUniformBufferList[i].push_back(UniformBuffer);
 				m_VKUniformBufferMemoryList[i].push_back(BufferMemory);
-				m_VKUniformBufferSizeList[i].push_back(ByteSize);
+				m_VKUniformBufferSizeList[i].push_back(static_cast<uint32_t>(ByteSize));
 			}
 		}
 
