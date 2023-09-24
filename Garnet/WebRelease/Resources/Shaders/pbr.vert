@@ -4,7 +4,6 @@ layout(location = 0) in vec3 inPosition;
 layout(location = 1) in vec3 inNormal;
 layout(location = 2) in vec2 inTexcoord;
 layout(location = 3) in vec4 inTangent;
-layout(location = 4) in vec4 inBioTangent;
 
 layout(binding = 0) uniform UniformBufferObject{
 	mat4 model;
@@ -51,12 +50,13 @@ layout(location = 5) out vec4 f_LightSpacePos;
 
 void main(){
     vec4 pos = vec4(inPosition, 1.0);
+    vec3 BioTangent = cross(inNormal, inTangent.xyz);
 
     gl_Position = ubo.proj * ubo.view * ubo.model * pos;
     f_WorldNormal = normalize((ubo.model * vec4(inNormal, 0.0)).xyz);
     f_Texcoord = inTexcoord;
     f_WorldPos = ubo.model * vec4(inPosition, 1.0);
     f_WorldTangent = normalize((ubo.model * inTangent).xyz);
-    f_WorldBioTangent = normalize((ubo.model * inBioTangent).xyz);
+    f_WorldBioTangent = normalize((ubo.model * vec4(BioTangent, 0.0)).xyz);
     f_LightSpacePos = ubo.lightVPMat * ubo.model * pos;
 }

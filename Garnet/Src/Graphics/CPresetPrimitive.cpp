@@ -28,10 +28,9 @@ namespace graphics
 		};
 
 		std::vector<float> Tangent(16, 0.0f);
-		std::vector<float> BioTangent(16, 0.0f);
 
 		std::vector<std::vector<float>> Vertices = {
-			Pos, Normal, UV, Tangent, BioTangent
+			Pos, Normal, UV, Tangent
 		};
 
 		// Indices
@@ -42,7 +41,7 @@ namespace graphics
 		//
 		createInfo->SetVertices(Vertices);
 		createInfo->SetIndices(Indices);
-		createInfo->SetAttributeDimensions(std::vector<int>({ 3 , 3 , 2, 4, 4 }));
+		createInfo->SetAttributeDimensions(std::vector<int>({ 3 , 3 , 2, 4 }));
 
 		return true;
 	}
@@ -150,10 +149,9 @@ namespace graphics
 		};
 
 		std::vector<float> Tangent(96, 0.0f);
-		std::vector<float> BioTangent(96, 0.0f);
 
 		std::vector<std::vector<float>> Vertices = {
-			Pos, Normal, UV, Tangent, BioTangent
+			Pos, Normal, UV, Tangent
 		};
 
 		// Indices
@@ -181,7 +179,7 @@ namespace graphics
 		//
 		createInfo->SetVertices(Vertices);
 		createInfo->SetIndices(Indices);
-		createInfo->SetAttributeDimensions(std::vector<int>({ 3 , 3 , 2, 4, 4 }));
+		createInfo->SetAttributeDimensions(std::vector<int>({ 3 , 3 , 2, 4 }));
 
 		return true;
 	}
@@ -202,10 +200,9 @@ namespace graphics
 		};
 
 		std::vector<float> Tangent(4, 0.0f);
-		std::vector<float> BioTangent(4, 0.0f);
 
 		std::vector<std::vector<float>> Vertices = {
-			Pos, Normal, UV, Tangent, BioTangent
+			Pos, Normal, UV, Tangent
 		};
 
 		// Indices
@@ -216,7 +213,7 @@ namespace graphics
 		//
 		createInfo->SetVertices(Vertices);
 		createInfo->SetIndices(Indices);
-		createInfo->SetAttributeDimensions(std::vector<int>({ 3 , 3 , 2, 4, 4 }));
+		createInfo->SetAttributeDimensions(std::vector<int>({ 3 , 3 , 2, 4}));
 
 		return true;
 	}
