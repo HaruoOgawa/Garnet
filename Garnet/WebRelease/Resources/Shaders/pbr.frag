@@ -404,8 +404,7 @@ void main(){
 		vec3 F = CalcFrenelReflection(pbrParam); // フレネル項
 	
 		// スペキュラーBRDFを構築
-		//specular = D * G * F / (4.0 * NdotL * NdotV);
-		specular += D * G * F;
+		specular += D * G * F / (4.0 * NdotL * NdotV);
 
 		specular = max(specular, vec3(0.0));
 
@@ -428,7 +427,9 @@ void main(){
 		// レンダリング方程式を構築
 		col.rgb = NdotL * (specular + diffuse) + reflectColor * F;
 
-		//
+		// 疑似的な環境光(ライトの反対方向が暗くなりすぎないようにするための対策)
+		// 本来はGIやIBLで代用するところだが、ひとまずこのような簡易的な方法で代用
+		// GIやIBLを使用するときはプリプロセッサでここは実行されないようにする
 		vec3 gi_diffuse = clamp(specular, 0.04, 1.0);
 		col.rgb += gi_diffuse * diffuse;
 	}

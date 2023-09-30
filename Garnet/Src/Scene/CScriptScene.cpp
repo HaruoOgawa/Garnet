@@ -52,7 +52,7 @@ namespace scene
 	{
 		// Cubemap
 		std::vector<std::shared_ptr<graphics::CTexture>> CubeTexList;
-		/*{
+		{
 			std::vector<std::vector<unsigned char>> CubeDataList;
 			CubeDataList.push_back(m_Cube0->GetData());
 			CubeDataList.push_back(m_Cube1->GetData());
@@ -65,7 +65,7 @@ namespace scene
 			if (!CubeTex0->Create(CubeDataList)) return false;
 
 			CubeTexList.push_back(CubeTex0);
-		}*/
+		}
 
 		// glTFObject
 		{

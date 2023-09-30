@@ -31,7 +31,7 @@ namespace app
 		m_DrawInfo(std::make_shared<graphics::CDrawInfo>())
 	{
 		m_MainCamera->SetPos(glm::vec3(5.0f, 1.0f, 0.0f));
-		m_DrawInfo->GetLightCamera()->SetPos(glm::vec3(3.0f, -3.0f, -3.0f));
+		m_DrawInfo->GetLightCamera()->SetPos(glm::vec3(-3.0f, -3.0f, -3.0f));
 		m_DrawInfo->GetLightProjection()->SetNear(2.0f);
 		m_DrawInfo->GetLightProjection()->SetFar(100.0f);
 	}
