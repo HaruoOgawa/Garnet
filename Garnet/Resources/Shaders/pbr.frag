@@ -404,14 +404,16 @@ void main(){
 		vec3 F = CalcFrenelReflection(pbrParam); // フレネル項
 	
 		// スペキュラーBRDFを構築
-		//specular = NdotL * D * G * F / (4.0 * NdotL * NdotV);
-		specular += NdotL * D * G * F;
+		//specular = D * G * F / (4.0 * NdotL * NdotV);
+		specular += D * G * F;
+
+		specular = max(specular, vec3(0.0));
 
 		// ディフューズBRDFを計算
-		diffuse += NdotL * (1.0 - F) * CalcDiffuseBRDF(pbrParam);
+		diffuse += (1.0 - F) * CalcDiffuseBRDF(pbrParam);
 
 		// 反射カラーを計算
-		vec3 reflectColor = vec3(1.0);
+		vec3 reflectColor = vec3(0.0);
 		if(ubo.useCubeMap != 0)
 		{
 			float mipCount = ubo.mipCount;
@@ -424,7 +426,11 @@ void main(){
 		}
 	
 		// レンダリング方程式を構築
-		col.rgb = specular + diffuse + reflectColor * F;
+		col.rgb = NdotL * (specular + diffuse) + reflectColor * F;
+
+		//
+		vec3 gi_diffuse = clamp(specular, 0.04, 1.0);
+		col.rgb += gi_diffuse * diffuse;
 	}
 
 	// AO Mapの適応

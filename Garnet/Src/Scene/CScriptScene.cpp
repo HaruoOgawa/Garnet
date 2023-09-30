@@ -12,8 +12,8 @@ namespace scene
 {
 	CScriptScene::CScriptScene(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker):
 		m_glTFObject(std::make_shared<object::C3DObject>("", "ShadowPass")),
-		//m_glTFData(std::make_shared<file::CFile>("Resources\\Models\\Sponza\\glTF\\Sponza.glb")),
-		m_glTFData(std::make_shared<file::CFile>("Resources\\Models\\DamagedHelmet\\glTF-Binary\\DamagedHelmet.glb")),
+		m_glTFData(std::make_shared<file::CFile>("Resources\\Models\\Sponza\\glTF\\Sponza.glb")),
+		//m_glTFData(std::make_shared<file::CFile>("Resources\\Models\\DamagedHelmet\\glTF-Binary\\DamagedHelmet.glb")),
 
 		m_Cube0(std::make_shared<file::CFile>("Resources\\Cubemaps\\environment\\environment_back_0.jpg")),
 		m_Cube1(std::make_shared<file::CFile>("Resources\\Cubemaps\\environment\\environment_bottom_0.jpg")),
@@ -52,7 +52,7 @@ namespace scene
 	{
 		// Cubemap
 		std::vector<std::shared_ptr<graphics::CTexture>> CubeTexList;
-		{
+		/*{
 			std::vector<std::vector<unsigned char>> CubeDataList;
 			CubeDataList.push_back(m_Cube0->GetData());
 			CubeDataList.push_back(m_Cube1->GetData());
@@ -65,7 +65,7 @@ namespace scene
 			if (!CubeTex0->Create(CubeDataList)) return false;
 
 			CubeTexList.push_back(CubeTex0);
-		}
+		}*/
 
 		// glTFObject
 		{
