@@ -46,6 +46,15 @@ extern "C"
 			g_WebApp->OnKeyDown(std::string(key));
 		}
 	}
+	
+	EMSCRIPTEN_KEEPALIVE
+	void OnKeyUp(char* key)
+	{
+		if (g_WebApp)
+		{
+			g_WebApp->OnKeyUp(std::string(key));
+		}
+	}
 
 	EMSCRIPTEN_KEEPALIVE
 	void OnResize(int w, int h)

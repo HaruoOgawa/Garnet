@@ -9,7 +9,9 @@ namespace input
 		m_WheelScrollAmount(glm::vec2(0.0f)),
 		m_IsLocked(false),
 		m_OnDownMouseLeft(false),
-		m_OnDownMouseRight(false)
+		m_OnDownMouseRight(false),
+		m_OnKeyDown(false),
+		m_KeyType(EKeyType::KEY_TYPE_NONE)
 	{
 	}
 
@@ -20,7 +22,7 @@ namespace input
 
 	void CInputState::Clear()
 	{
-		if (!m_OnDownMouseLeft && !m_OnDownMouseRight)
+		if (!m_OnDownMouseLeft && !m_OnDownMouseRight && !m_OnKeyDown)
 		{
 			m_MousePos = glm::vec2(0.0f);
 			m_PrevMousePos = glm::vec2(0.0f);
@@ -92,6 +94,26 @@ namespace input
 		glm::vec2 result = m_MousePos - m_PrevMousePos;
 
 		return result;
+	}
+
+	void CInputState::SetKeyDown(bool KeyDown)
+	{
+		m_OnKeyDown = KeyDown;
+	}
+
+	bool CInputState::IsKeyDown()const
+	{
+		return m_OnKeyDown;
+	}
+
+	void CInputState::SetKeyType(EKeyType KeyType)
+	{
+		m_KeyType = KeyType;
+	}
+
+	EKeyType CInputState::GetKeyType()const
+	{
+		return m_KeyType;
 	}
 }
 #endif // #ifdef USE_INPUT_SYSTEM

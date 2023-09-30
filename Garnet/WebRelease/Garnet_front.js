@@ -57,6 +57,20 @@ addEventListener("keydown", (event) => {
     );
 });
 
+addEventListener("keyup", (event) => {
+    Module.ccall(
+        'OnKeyUp',
+        'null',
+        ['string'],
+        [event.key]
+    );
+});
+
+addEventListener("contextmenu", (event) => {
+    // 右クリック時にメニューが出ないようにする
+    event.preventDefault();
+});
+
 addEventListener("resize", (event) => {
     const canvas = document.getElementById('MainCanvas');
     const width = canvas.clientWidth;

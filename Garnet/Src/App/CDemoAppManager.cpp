@@ -98,6 +98,49 @@ namespace app
 	}*/
 
 #ifdef USE_INPUT_SYSTEM
+	void KetCallback(HWND window, UINT msg, WPARAM w_param, LPARAM l_param, bool IsDown)
+	{
+		if (w_param < 256)
+		{
+			// WPARAM Key Codes
+			// https://learn.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes
+			if (w_param == VK_ESCAPE)
+			{
+				g_IsRunLoop = false;
+			}
+
+			if (!g_AppManager) return;
+
+			auto AppManager = g_AppManager;
+			auto InputState = AppManager->GetInputState();
+
+			//
+			input::EKeyType KeyType = input::EKeyType::KEY_TYPE_NONE;
+
+			switch (w_param)
+			{
+			case 0x57:
+				KeyType = input::EKeyType::KEY_TYPE_W;
+				break;
+			case 0x41:
+				KeyType = input::EKeyType::KEY_TYPE_A;
+				break;
+			case 0x53:
+				KeyType = input::EKeyType::KEY_TYPE_S;
+				break;
+			case 0x44:
+				KeyType = input::EKeyType::KEY_TYPE_D;
+				break;
+			default:
+				break;
+			}
+
+			//
+			InputState->SetKeyDown(IsDown);
+			InputState->SetKeyType(KeyType);
+		}
+	}
+	
 	void MousebuttonCallback(HWND window, UINT msg, WPARAM w_param, LPARAM l_param, bool IsDown)
 	{
 		if (!g_AppManager) return;
@@ -189,17 +232,11 @@ namespace app
 		{
 #ifdef USE_INPUT_SYSTEM
 			case WM_KEYDOWN : 
-			{
-				if (w_param < 256)
-				{
-					// WPARAM Key Codes
-					// https://learn.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes
-					if (w_param == VK_ESCAPE)
-					{
-						g_IsRunLoop = false;
-					}
-				}
-			}
+				KetCallback(window, msg, w_param, l_param, true);
+				break;
+
+			case WM_KEYUP:
+				KetCallback(window, msg, w_param, l_param, false);
 				break;
 
 			case WM_LBUTTONDOWN:

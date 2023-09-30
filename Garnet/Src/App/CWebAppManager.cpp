@@ -128,7 +128,42 @@ namespace webapp
 	// インプットイベント
 	void CWebAppManager::OnKeyDown(std::string key)
 	{
-		if (key == "Escape")
+		KeyAction(key, true);
+	}
+	
+	void CWebAppManager::OnKeyUp(std::string key)
+	{
+		KeyAction(key, false);
+	}
+
+	void CWebAppManager::KeyAction(std::string key, bool IsDown)
+	{
+		//
+		input::EKeyType KeyType = input::EKeyType::KEY_TYPE_NONE;
+
+		if (key == "w")
+		{
+			KeyType = input::EKeyType::KEY_TYPE_W;
+		}
+		else if (key == "a")
+		{
+			KeyType = input::EKeyType::KEY_TYPE_A;
+		}
+		else if (key == "s")
+		{
+			KeyType = input::EKeyType::KEY_TYPE_S;
+		}
+		else if (key == "d")
+		{
+			KeyType = input::EKeyType::KEY_TYPE_D;
+		}
+
+		//
+		m_InputState->SetKeyDown(IsDown);
+		m_InputState->SetKeyType(KeyType);
+
+		//
+		if (key == "Escape" && IsDown)
 		{
 			m_IsRunLoop = false;
 		}
