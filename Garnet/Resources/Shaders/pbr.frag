@@ -361,13 +361,18 @@ void main(){
 
 	// PBRに使うベクトル系のパラメーターを計算する
 	vec3 n = getNormal();
-	vec3 v = normalize(ubo.cameraPos.xyz - f_WorldPos.xyz);
-	vec3 l = normalize(ubo.lightDir.xyz);
-	// ハーフベクトルはvとlの中間ベクトル
+	vec3 v = (-1.0f) * normalize(f_WorldPos.xyz - ubo.cameraPos.xyz);
+	
+	// 計算に使用するのでライト方向は反転させておく
+	// 図を書くとわかるがそのままのベクトルを使うと180度回転した分の結果になってしまう
+	// 法線方向を基準に考える
+	vec3 l = (-1.0f) * normalize(ubo.lightDir.xyz);
+	
+	// ハーフベクトルはvとlの中間に位置するベクトルのこと
 	// 光源の方向ベクトルはCGの慣例として光源方向に向けた方がいいのかも？
 	// https://qiita.com/emadurandal/items/76348ad118c36317ec5c#:~:text=%E3%81%97%E3%81%A6%E3%81%84%E3%81%BE%E3%81%99%E3%80%82-,h,%E3%81%AF%E3%83%8F%E3%83%BC%E3%83%95%E3%83%99%E3%82%AF%E3%83%88%E3%83%AB%E3%81%A8%E3%81%84%E3%81%84,-%E3%80%81%E3%83%A9%E3%82%A4%E3%83%88%E3%83%99%E3%82%AF%E3%83%88%E3%83%AB%E3%81%A8
 	vec3 h = normalize(v + l);
-	vec3 reflection = -normalize(reflect(v, n));
+	vec3 reflection = normalize(reflect(v, n));
 
 	// 考え方としては内積は二つのベクトルの角度がどれだけ水平・垂直に近いかを示す値としてみることができる
 	float NdotL = clamp(dot(n, l), 0.0, 1.0);

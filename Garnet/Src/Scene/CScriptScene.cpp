@@ -69,6 +69,8 @@ namespace scene
 
 		// glTFObject
 		{
+			m_glTFObject->SetRot(glm::vec3(0.0f, 3.1415f * -0.5f, 0.0f));
+
 			std::shared_ptr<graphics::CMaterialCreateInfo> createInfo = std::make_shared<graphics::CMaterialCreateInfo>();
 			createInfo->SetVertexShaderCode(m_VertexShader->GetData());
 			createInfo->SetFragmentShaderCode(m_FragmentShader->GetData());
