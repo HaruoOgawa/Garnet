@@ -158,9 +158,7 @@ namespace webapp
 			KeyType = input::EKeyType::KEY_TYPE_D;
 		}
 
-		//
-		m_InputState->SetKeyDown(IsDown);
-		m_InputState->SetKeyType(KeyType);
+		m_InputState->SetKeyState(KeyType, IsDown);
 
 		//
 		if (key == "Escape" && IsDown)

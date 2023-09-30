@@ -9,9 +9,7 @@ namespace input
 		m_WheelScrollAmount(glm::vec2(0.0f)),
 		m_IsLocked(false),
 		m_OnDownMouseLeft(false),
-		m_OnDownMouseRight(false),
-		m_OnKeyDown(false),
-		m_KeyType(EKeyType::KEY_TYPE_NONE)
+		m_OnDownMouseRight(false)
 	{
 	}
 
@@ -22,7 +20,7 @@ namespace input
 
 	void CInputState::Clear()
 	{
-		if (!m_OnDownMouseLeft && !m_OnDownMouseRight && !m_OnKeyDown)
+		if (!m_OnDownMouseLeft && !m_OnDownMouseRight)
 		{
 			m_MousePos = glm::vec2(0.0f);
 			m_PrevMousePos = glm::vec2(0.0f);
@@ -96,24 +94,28 @@ namespace input
 		return result;
 	}
 
-	void CInputState::SetKeyDown(bool KeyDown)
+	void CInputState::SetKeyState(EKeyType KeyType, bool KeyDown)
 	{
-		m_OnKeyDown = KeyDown;
+		auto key = m_KeyInputMap.find(KeyType);
+
+		if (key == m_KeyInputMap.end())
+		{
+			// êVãKí«â¡
+			m_KeyInputMap.insert({ KeyType , KeyDown });
+		}
+		else
+		{
+			// UpÇ»ÇÁçÌèúÇ∑ÇÈ
+			if(!KeyDown)
+			{
+				m_KeyInputMap.erase(key);
+			}
+		}
 	}
 
-	bool CInputState::IsKeyDown()const
+	const std::map<EKeyType, bool>& CInputState::GetKeyInputMap() const
 	{
-		return m_OnKeyDown;
-	}
-
-	void CInputState::SetKeyType(EKeyType KeyType)
-	{
-		m_KeyType = KeyType;
-	}
-
-	EKeyType CInputState::GetKeyType()const
-	{
-		return m_KeyType;
+		return m_KeyInputMap;
 	}
 }
 #endif // #ifdef USE_INPUT_SYSTEM

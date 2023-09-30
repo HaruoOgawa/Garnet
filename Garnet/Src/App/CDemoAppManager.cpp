@@ -135,9 +135,7 @@ namespace app
 				break;
 			}
 
-			//
-			InputState->SetKeyDown(IsDown);
-			InputState->SetKeyType(KeyType);
+			InputState->SetKeyState(KeyType, IsDown);
 		}
 	}
 	

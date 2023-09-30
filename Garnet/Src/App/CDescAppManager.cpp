@@ -144,9 +144,7 @@ namespace descapp
 				break;
 		}
 
-		//
-		InputState->SetKeyDown((action == GLFW_PRESS || action == GLFW_REPEAT));
-		InputState->SetKeyType(KeyType);
+		InputState->SetKeyState(KeyType, (action == GLFW_PRESS || action == GLFW_REPEAT));
 
 		// ÉãÅ[ÉvèIóπ
 		if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)

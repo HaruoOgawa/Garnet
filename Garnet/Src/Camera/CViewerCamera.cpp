@@ -78,42 +78,50 @@ namespace camera
 	void CViewerCamera::KeyAction(float DeltaTime, const std::shared_ptr<input::CInputState>& InputState)
 	{
 		// キーボード操作
-		if (InputState->IsKeyDown())
+		const auto& KeyInputMap = InputState->GetKeyInputMap();
+
+		if (KeyInputMap.size() > 0)
 		{
-			//
-			input::EKeyType KeyType = InputState->GetKeyType();
-
-			//
-			float MoveRate = 3.0f; // 1秒あたりどれぐらい移動するか
-
-			const auto& ViewDir = GetViewDir();
-			glm::vec3 AxisSide = glm::cross(ViewDir, glm::vec3(0.0f, 1.0f, 0.0f));
-			glm::vec3 AxisUp = glm::cross(ViewDir, AxisSide);
-
-			glm::vec3 Offset = glm::vec3(0.0f);
-
-			switch (KeyType)
+			for (const auto& KeyInput : KeyInputMap)
 			{
-			case input::EKeyType::KEY_TYPE_NONE:
-				break;
-			case input::EKeyType::KEY_TYPE_W:
-				Offset = ViewDir * MoveRate * DeltaTime * (1.0f);
-				break;
-			case input::EKeyType::KEY_TYPE_A:
-				Offset = AxisSide * MoveRate * DeltaTime * (-1.0f);
-				break;
-			case input::EKeyType::KEY_TYPE_S:
-				Offset = ViewDir * MoveRate * DeltaTime * (-1.0f);
-				break;
-			case input::EKeyType::KEY_TYPE_D:
-				Offset = AxisSide * MoveRate * DeltaTime * (1.0f);
-				break;
-			default:
-				break;
-			}
+				//
+				input::EKeyType KeyType = KeyInput.first;
+				bool IsDown = KeyInput.second;
 
-			m_Center += Offset;
-			m_Pos += Offset;
+				if (!IsDown) continue;
+
+				//
+				float MoveRate = 3.0f; // 1秒あたりどれぐらい移動するか
+
+				const auto& ViewDir = GetViewDir();
+				glm::vec3 AxisSide = glm::cross(ViewDir, glm::vec3(0.0f, 1.0f, 0.0f));
+				glm::vec3 AxisUp = glm::cross(ViewDir, AxisSide);
+
+				glm::vec3 Offset = glm::vec3(0.0f);
+
+				switch (KeyType)
+				{
+				case input::EKeyType::KEY_TYPE_NONE:
+					break;
+				case input::EKeyType::KEY_TYPE_W:
+					Offset = ViewDir * MoveRate * DeltaTime * (1.0f);
+					break;
+				case input::EKeyType::KEY_TYPE_A:
+					Offset = AxisSide * MoveRate * DeltaTime * (-1.0f);
+					break;
+				case input::EKeyType::KEY_TYPE_S:
+					Offset = ViewDir * MoveRate * DeltaTime * (-1.0f);
+					break;
+				case input::EKeyType::KEY_TYPE_D:
+					Offset = AxisSide * MoveRate * DeltaTime * (1.0f);
+					break;
+				default:
+					break;
+				}
+
+				m_Center += Offset;
+				m_Pos += Offset;
+			}
 		}
 	}
 #endif // USE_INPUT_SYSTEM
