@@ -74,7 +74,7 @@ namespace scene
 			std::shared_ptr<graphics::CMaterialCreateInfo> createInfo = std::make_shared<graphics::CMaterialCreateInfo>();
 			createInfo->SetVertexShaderCode(m_VertexShader->GetData());
 			createInfo->SetFragmentShaderCode(m_FragmentShader->GetData());
-			if (!gltf::CGLTFImporter::Import(pGraphicsAPI, m_glTFData->GetData(), m_glTFObject, createInfo, CubeTexList, std::vector<std::shared_ptr<graphics::CTexture>>(), m_DepthVertex, m_DepthFragment)) return false;
+			if (!gltf::CGLTFImporter::Import(pGraphicsAPI, m_glTFData->GetData(), m_glTFObject, createInfo, CubeTexList, m_FrameTextureList, m_DepthVertex, m_DepthFragment)) return false;
 		}
 
 		return true;

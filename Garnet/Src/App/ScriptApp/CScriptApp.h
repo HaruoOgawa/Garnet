@@ -19,6 +19,7 @@ namespace app
 		std::shared_ptr<camera::CCamera> m_MainCamera;
 		std::shared_ptr<projection::CProjection> m_Projection;
 		std::shared_ptr<graphics::CDrawInfo> m_DrawInfo;
+		std::shared_ptr<imageeffect::CBlurEffect> m_BlurEffect;
 	public:
 		CScriptApp();
 		virtual ~CScriptApp();

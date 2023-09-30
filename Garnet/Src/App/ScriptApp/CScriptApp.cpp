@@ -5,6 +5,7 @@
 #include "../../Camera/CCamera.h"
 #include "../../Projection/CProjection.h"
 #include "../../ImageEffect/CBlurEffect.h"
+#include "../../Debug/Message/Console.h"
 
 #ifdef USE_VIEWER_CAMERA
 #include "../../Camera/CViewerCamera.h"
@@ -28,10 +29,11 @@ namespace app
 		m_MainCamera(std::make_shared<camera::CCamera>()),
 #endif // USE_VIEWER_CAMERA
 		m_Projection(std::make_shared<projection::CProjection>()),
-		m_DrawInfo(std::make_shared<graphics::CDrawInfo>())
+		m_DrawInfo(std::make_shared<graphics::CDrawInfo>()),
+		m_BlurEffect(nullptr)
 	{
 		m_MainCamera->SetPos(glm::vec3(0.0f, 1.0f, 5.0f));
-		m_DrawInfo->GetLightCamera()->SetPos(glm::vec3(-3.0f, 3.0f, 3.0f));
+		m_DrawInfo->GetLightCamera()->SetPos(glm::vec3(3.15f, 16.5f, -1.4f));
 		m_DrawInfo->GetLightProjection()->SetNear(2.0f);
 		m_DrawInfo->GetLightProjection()->SetFar(100.0f);
 	}
@@ -49,6 +51,15 @@ namespace app
 	{
 		// Viewの初期化
 		m_ScriptScene = std::make_shared<scene::CScriptScene>(pGraphicsAPI, pLoadWorker);
+
+		// オフスクリーンレンダリング
+		if (!pGraphicsAPI->CreateRenderPass("ShadowPass", api::ERenderPassFormat::COLOR_RENDERPASS, glm::vec4(1.0f), 512, 512)) return false;
+
+		m_BlurEffect = std::make_shared<imageeffect::CBlurEffect>(pGraphicsAPI);
+		if (!m_BlurEffect->Create(pLoadWorker)) return false;
+
+		// FrameTextureを渡す
+		//m_ScriptScene->SetFrameTexture(m_BlurEffect->GetFrameTexture());
 
 		return true;
 	}
@@ -71,6 +82,9 @@ namespace app
 		if (!pLoadWorker->Update(pGraphicsAPI)) return false;
 
 		if (!m_ScriptScene->Update(pGraphicsAPI, pLoadWorker, m_MainCamera, m_Projection, m_DrawInfo)) return false;
+		if (!m_BlurEffect->Update(pLoadWorker)) return false;
+
+		//Console::Log("[CPP] m_MainCamera => x: %f, y: %f, z: %f\n", m_MainCamera->GetPos().x, m_MainCamera->GetPos().y, m_MainCamera->GetPos().z);
 
 		return true;
 	}
@@ -82,6 +96,14 @@ namespace app
 
 		// Dispatch GPGPU
 		if (!m_ScriptScene->Dispatch(pGraphicsAPI, pLoadWorker, m_MainCamera, m_Projection, m_DrawInfo)) return false;
+
+		// ShadowPass
+		if (!pGraphicsAPI->BeginRender("ShadowPass")) return false;
+		if (!m_ScriptScene->Draw(pGraphicsAPI, false, m_MainCamera, m_Projection, m_DrawInfo)) return false;
+		if (!pGraphicsAPI->EndRender()) return false;
+
+		// ShadowMapにブラーをかける
+		if (!m_BlurEffect->Draw(m_MainCamera, m_Projection, m_DrawInfo)) return false;
 
 		// DefaultPass(SwapChain)
 		if (!pGraphicsAPI->BeginRender()) return false;
