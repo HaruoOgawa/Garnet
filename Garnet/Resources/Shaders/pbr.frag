@@ -370,8 +370,8 @@ void main(){
 	vec3 reflection = -normalize(reflect(v, n));
 
 	// 考え方としては内積は二つのベクトルの角度がどれだけ水平・垂直に近いかを示す値としてみることができる
-	float NdotL = clamp(dot(n, l), 0.001, 1.0);
-	float NdotV = clamp(abs(dot(n, v)), 0.001, 1.0);
+	float NdotL = clamp(dot(n, l), 0.0, 1.0);
+	float NdotV = clamp(abs(dot(n, v)), 0.0, 1.0);
 	float NdotH = clamp(dot(n, h), 0.0, 1.0);
 	float LdotH = clamp(dot(l, h), 0.0, 1.0);
 	float VdotH = clamp(dot(v, h), 0.0, 1.0);
@@ -392,32 +392,40 @@ void main(){
 		specularColor
 	);
 
-	// クックトランスモデルによるスペキュラーのGGXを計算する
-	float D = CalcMicrofacet(pbrParam); // マイクロファセット(微小面法線分布関数)
-	float G = CalcGeometricOcculusion(pbrParam); // 幾何減衰項
-	vec3 F = CalcFrenelReflection(pbrParam); // フレネル項
-	
-	// スペキュラーBRDFを構築
-	vec3 specularBRDF = D * G * F / (4.0 * NdotL * NdotV);
+	//
+	vec3 specular = vec3(0.0);
+	vec3 diffuse = vec3(0.0);
 
-	// ディフューズBRDFを計算
-	vec3 diffuseBRDF = (1.0 - F) * CalcDiffuseBRDF(pbrParam);
-
-	// 反射カラーを計算
-	vec3 reflectColor = vec3(1.0);
-	if(ubo.useCubeMap != 0)
+	if(NdotL > 0.0 || NdotV > 0.0)
 	{
-		float mipCount = ubo.mipCount;
-		float lod = mipCount * perceptualRoughness;
-		#ifdef USE_OPENGL
-		reflectColor = LINEARtoSRGB(textureLod(cubemapTexture, reflect(v, n), lod)).rgb;
-		#else
-		reflectColor = LINEARtoSRGB(textureLod(samplerCube(cubemapTexture, cubemapTextureSampler), reflect(v, n), lod)).rgb;
-		#endif
-	}
+		// クックトランスモデルによるスペキュラーのGGXを計算する
+		float D = CalcMicrofacet(pbrParam); // マイクロファセット(微小面法線分布関数)
+		float G = CalcGeometricOcculusion(pbrParam); // 幾何減衰項
+		vec3 F = CalcFrenelReflection(pbrParam); // フレネル項
 	
-	// レンダリング方程式を構築
-	col.rgb = NdotL * ubo.lightColor.rgb * (specularBRDF + diffuseBRDF) + reflectColor * specularColor;
+		// スペキュラーBRDFを構築
+		//specular = NdotL * D * G * F / (4.0 * NdotL * NdotV);
+		specular += NdotL * D * G * F;
+
+		// ディフューズBRDFを計算
+		diffuse += NdotL * (1.0 - F) * CalcDiffuseBRDF(pbrParam);
+
+		// 反射カラーを計算
+		vec3 reflectColor = vec3(1.0);
+		if(ubo.useCubeMap != 0)
+		{
+			float mipCount = ubo.mipCount;
+			float lod = mipCount * perceptualRoughness;
+			#ifdef USE_OPENGL
+			reflectColor = LINEARtoSRGB(textureLod(cubemapTexture, reflect(v, n), lod)).rgb;
+			#else
+			reflectColor = LINEARtoSRGB(textureLod(samplerCube(cubemapTexture, cubemapTextureSampler), reflect(v, n), lod)).rgb;
+			#endif
+		}
+	
+		// レンダリング方程式を構築
+		col.rgb = specular + diffuse + reflectColor * F;
+	}
 
 	// AO Mapの適応
 	if(ubo.useOcclusionTexture != 0)
