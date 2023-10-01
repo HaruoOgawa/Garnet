@@ -232,7 +232,7 @@ vec2 ComputePCF(vec2 uv)
 
 	vec2 texelSize = vec2(1.0 / ubo.ShadowMapX, 1.0 / ubo.ShadowMapY);
 
-	for(float x = -1.0; x <= 1.0; x++)
+	/*for(float x = -1.0; x <= 1.0; x++)
 	{
 		for(float y = -1.0; y <= 1.0; y++)
 		{
@@ -242,7 +242,29 @@ vec2 ComputePCF(vec2 uv)
 			moments += texture(sampler2D(shadowmapTexture, shadowmapTextureSampler), uv + vec2(x, y) * texelSize).rg;
 			#endif
 		}
-	}
+	}*/
+
+	#ifdef USE_OPENGL
+	moments += texture(shadowmapTexture, uv + vec2(-1.0, -1.0) * texelSize).rg;
+	moments += texture(shadowmapTexture, uv + vec2(-1.0, 0.0) * texelSize).rg;
+	moments += texture(shadowmapTexture, uv + vec2(-1.0, 1.0) * texelSize).rg;
+	moments += texture(shadowmapTexture, uv + vec2(0.0, -1.0) * texelSize).rg;
+	moments += texture(shadowmapTexture, uv + vec2(0.0, 0.0) * texelSize).rg;
+	moments += texture(shadowmapTexture, uv + vec2(0.0, 1.0) * texelSize).rg;
+	moments += texture(shadowmapTexture, uv + vec2(1.0, -1.0) * texelSize).rg;
+	moments += texture(shadowmapTexture, uv + vec2(1.0, 0.0) * texelSize).rg;
+	moments += texture(shadowmapTexture, uv + vec2(1.0, 1.0) * texelSize).rg;
+	#else
+	moments += texture(sampler2D(shadowmapTexture, shadowmapTextureSampler), uv + vec2(-1.0, -1.0) * texelSize).rg;
+	moments += texture(sampler2D(shadowmapTexture, shadowmapTextureSampler), uv + vec2(-1.0, 0.0) * texelSize).rg;
+	moments += texture(sampler2D(shadowmapTexture, shadowmapTextureSampler), uv + vec2(-1.0, 1.0) * texelSize).rg;
+	moments += texture(sampler2D(shadowmapTexture, shadowmapTextureSampler), uv + vec2(0.0, -1.0) * texelSize).rg;
+	moments += texture(sampler2D(shadowmapTexture, shadowmapTextureSampler), uv + vec2(0.0, 0.0) * texelSize).rg;
+	moments += texture(sampler2D(shadowmapTexture, shadowmapTextureSampler), uv + vec2(0.0, 1.0) * texelSize).rg;
+	moments += texture(sampler2D(shadowmapTexture, shadowmapTextureSampler), uv + vec2(1.0, -1.0) * texelSize).rg;
+	moments += texture(sampler2D(shadowmapTexture, shadowmapTextureSampler), uv + vec2(1.0, 0.0) * texelSize).rg;
+	moments += texture(sampler2D(shadowmapTexture, shadowmapTextureSampler), uv + vec2(1.0, 1.0) * texelSize).rg;
+	#endif
 
 	moments /= 9.0;
 
