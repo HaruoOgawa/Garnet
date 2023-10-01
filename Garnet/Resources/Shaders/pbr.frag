@@ -230,7 +230,7 @@ vec2 ComputePCF(vec2 uv)
 {
 	vec2 moments = vec2(0.0);
 
-	/*vec2 texelSize = vec2(1.0 / ubo.ShadowMapX, 1.0 / ubo.ShadowMapY);
+	vec2 texelSize = vec2(1.0 / ubo.ShadowMapX, 1.0 / ubo.ShadowMapY);
 
 	for(float x = -1.0; x <= 1.0; x++)
 	{
@@ -244,12 +244,12 @@ vec2 ComputePCF(vec2 uv)
 		}
 	}
 
-	moments /= 9.0;*/
+	moments /= 9.0;
 
 	#ifdef USE_OPENGL
-	moments = texture(shadowmapTexture, uv).rg;
+	//moments = texture(shadowmapTexture, uv).rg;
 	#else
-	moments = texture(sampler2D(shadowmapTexture, shadowmapTextureSampler), uv ).rg;
+	//moments = texture(sampler2D(shadowmapTexture, shadowmapTextureSampler), uv ).rg;
 	#endif
 
 	return moments;
@@ -475,9 +475,9 @@ void main(){
 		lsp = lsp * 0.5 + 0.5;
 		float shadowCol = 1.0;
 
-		bool outSide = f_LightSpacePos.z <= 0.0f || (lsp.x < 0 || lsp.y < 0) || (lsp.x > 1 || lsp.y > 1);
+		//bool outSide = f_LightSpacePos.z <= 0.0f || (lsp.x < 0 || lsp.y < 0) || (lsp.x > 1 || lsp.y > 1);
 
-		if(!outSide)
+		//if(!outSide)
 		{
 			shadowCol = CalcShadow(lsp, n, l);
 		}
