@@ -95,14 +95,12 @@ struct PBRParam
 };
 
 // マイクロファセット(微小面法線分布関数)(Microfacet Distribution). Distributionは分布に意味
-// 分布関数なので統計学的に求められた関数(数式)
-// 物体表面の無数のミクロレベルの各微小平面の法線が確率分布としておおよそどの方向を向いているかの傾向を求める関数
-// この傾向から一つの法線を定める
+// 分布関数なので統計学的に求められた数式
+// マイクロファセットの面積を返す
+// 面積が小さいほどマイクロファセットが散らばっていて荒いということかな？ → 大きいほど凸凹のない一つの平面に近づく
 // https://learnopengl.com/PBR/Theory#:~:text=GGX%20for%20G.-,Normal%20distribution%20function,-The%20normal%20distribution
-// (統計学、あんまやってないので導出よくわからぬ・・・)
 float CalcMicrofacet(PBRParam param)
 {
-	// roughnessは面の粗さなので値が大きいほど微小平面が多くなるということを表す
 	float roughness2 = param.alphaRoughness * param.alphaRoughness; // グラフの勾配を高くする
 	
 	//
@@ -409,11 +407,15 @@ void main(){
 		vec3 F = CalcFrenelReflection(pbrParam); // フレネル項
 	
 		// スペキュラーBRDFを構築
+		// スペキュラーは鏡面反射: 鏡面反射とは入射角と出射角が等しい反射
+		// https://ja.wikipedia.org/wiki/%E9%8F%A1%E9%9D%A2%E5%8F%8D%E5%B0%84
 		specular += D * G * F / (4.0 * NdotL * NdotV);
 
 		specular = max(specular, vec3(0.0));
 
 		// ディフューズBRDFを計算
+		// Diffuseは拡散反射 : 拡散反射とは鏡面反射に比べて反射角に依存せず、多様な方向に同程度の光度を放つ反射のこと
+		// https://ja.wikipedia.org/wiki/%E6%8B%A1%E6%95%A3%E5%8F%8D%E5%B0%84
 		diffuse += (1.0 - F) * CalcDiffuseBRDF(pbrParam);
 
 		// 反射カラーを計算
@@ -435,6 +437,8 @@ void main(){
 		// 疑似的な環境光(ライトの反対方向が暗くなりすぎないようにするための対策)
 		// 本来はGIやIBLで代用するところだが、ひとまずこのような簡易的な方法で代用
 		// GIやIBLを使用するときはプリプロセッサでここは実行されないようにする
+		// (Cubemapを外したとき、これがないと真っ暗になる)
+		// https://cgworld.jp/terms/%E3%82%A2%E3%83%B3%E3%83%93%E3%82%A8%E3%83%B3%E3%83%88.html
 		vec3 gi_diffuse = clamp(specular, 0.04, 1.0);
 		col.rgb += gi_diffuse * diffuse;
 	}
