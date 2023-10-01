@@ -2,9 +2,20 @@
 
 #ifdef USE_INPUT_SYSTEM
 #include <glm/glm.hpp>
+#include <map>
 
 namespace input
 {
+	enum class EKeyType
+	{
+		KEY_TYPE_NONE,
+
+		KEY_TYPE_W,
+		KEY_TYPE_A,
+		KEY_TYPE_S,
+		KEY_TYPE_D,
+	};
+
 	class CInputState
 	{
 		glm::vec2 m_MousePos;
@@ -16,6 +27,8 @@ namespace input
 
 		bool m_OnDownMouseLeft;
 		bool m_OnDownMouseRight;
+
+		std::map<EKeyType, bool> m_KeyInputMap;
 	public:
 		CInputState(float MouseRotSpeed);
 		virtual ~CInputState();
@@ -38,6 +51,9 @@ namespace input
 		void SetDownMouseRight(bool OnDownMouseRight);
 		bool IsDownMouseRight()const;
 		glm::vec2 GetDragAmount();
+
+		void SetKeyState(EKeyType KeyType, bool KeyDown);
+		const std::map<EKeyType, bool>& GetKeyInputMap() const;
 	};
 }
 #endif // #ifdef USE_INPUT_SYSTEM

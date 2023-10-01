@@ -93,5 +93,29 @@ namespace input
 
 		return result;
 	}
+
+	void CInputState::SetKeyState(EKeyType KeyType, bool KeyDown)
+	{
+		auto key = m_KeyInputMap.find(KeyType);
+
+		if (key == m_KeyInputMap.end())
+		{
+			// V‹K’Ç‰Á
+			m_KeyInputMap.insert({ KeyType , KeyDown });
+		}
+		else
+		{
+			// Up‚È‚çíœ‚·‚é
+			if(!KeyDown)
+			{
+				m_KeyInputMap.erase(key);
+			}
+		}
+	}
+
+	const std::map<EKeyType, bool>& CInputState::GetKeyInputMap() const
+	{
+		return m_KeyInputMap;
+	}
 }
 #endif // #ifdef USE_INPUT_SYSTEM

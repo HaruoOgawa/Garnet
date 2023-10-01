@@ -235,15 +235,28 @@ namespace imageeffect
 		}
 
 		// Mesh
-		std::shared_ptr<graphics::CMesh> Mesh = std::make_shared<graphics::CMesh>();
+		{
+			std::shared_ptr<graphics::CMesh> Mesh = std::make_shared<graphics::CMesh>();
 
-		std::shared_ptr<renderer::CRendererCreateInfo> rendererCreateInfo = std::make_shared<renderer::CRendererCreateInfo>();
-		if (!graphics::CPresetPrimitive::CreateBoard(rendererCreateInfo)) return false;
+			std::shared_ptr<renderer::CRendererCreateInfo> rendererCreateInfo = std::make_shared<renderer::CRendererCreateInfo>();
+			if (!graphics::CPresetPrimitive::CreateBoard(rendererCreateInfo)) return false;
 
-		std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(rendererCreateInfo, 0);
-		Mesh->AddPrimitive(Primitive);
-		m_ScreenObjX->AddMesh(Mesh);
-		m_ScreenObjY->AddMesh(Mesh);
+			std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(rendererCreateInfo, 0);
+			Mesh->AddPrimitive(Primitive);
+			m_ScreenObjX->AddMesh(Mesh);
+		}
+
+		{
+			std::shared_ptr<graphics::CMesh> Mesh = std::make_shared<graphics::CMesh>();
+
+			std::shared_ptr<renderer::CRendererCreateInfo> rendererCreateInfo = std::make_shared<renderer::CRendererCreateInfo>();
+			if (!graphics::CPresetPrimitive::CreateBoard(rendererCreateInfo)) return false;
+
+			std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(rendererCreateInfo, 0);
+			Mesh->AddPrimitive(Primitive);
+
+			m_ScreenObjY->AddMesh(Mesh);
+		}
 
 		// Node
 		{

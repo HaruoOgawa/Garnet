@@ -32,6 +32,8 @@ namespace webapp
 
 		bool Update();
 		bool Draw();
+
+		void KeyAction(std::string key, bool IsDown);
 	public:
 		CWebAppManager(app::EAppType AppType, int Width, int Height);
 		virtual ~CWebAppManager();
@@ -45,6 +47,7 @@ namespace webapp
 
 		// インプットイベント
 		void OnKeyDown(std::string key);
+		void OnKeyUp(std::string key);
 
 		// リサイズイベント
 		void OnResize(int w, int h);

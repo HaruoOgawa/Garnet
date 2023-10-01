@@ -7,6 +7,11 @@ namespace camera
 {
 	class CViewerCamera : public CCamera
 	{
+	private:
+#ifdef USE_INPUT_SYSTEM
+		void MouseAction(float DeltaTime, const std::shared_ptr<input::CInputState>& InputState);
+		void KeyAction(float DeltaTime, const std::shared_ptr<input::CInputState>& InputState);
+#endif // USE_INPUT_SYSTEM
 	public:
 		CViewerCamera();
 		virtual ~CViewerCamera() = default;

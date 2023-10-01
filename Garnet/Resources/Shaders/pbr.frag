@@ -95,14 +95,12 @@ struct PBRParam
 };
 
 // マイクロファセット(微小面法線分布関数)(Microfacet Distribution). Distributionは分布に意味
-// 分布関数なので統計学的に求められた関数(数式)
-// 物体表面の無数のミクロレベルの各微小平面の法線が確率分布としておおよそどの方向を向いているかの傾向を求める関数
-// この傾向から一つの法線を定める
+// 分布関数なので統計学的に求められた数式
+// マイクロファセットの面積を返す
+// 面積が小さいほどマイクロファセットが散らばっていて荒いということかな？ → 大きいほど凸凹のない一つの平面に近づく
 // https://learnopengl.com/PBR/Theory#:~:text=GGX%20for%20G.-,Normal%20distribution%20function,-The%20normal%20distribution
-// (統計学、あんまやってないので導出よくわからぬ・・・)
 float CalcMicrofacet(PBRParam param)
 {
-	// roughnessは面の粗さなので値が大きいほど微小平面が多くなるということを表す
 	float roughness2 = param.alphaRoughness * param.alphaRoughness; // グラフの勾配を高くする
 	
 	//
@@ -232,9 +230,9 @@ vec2 ComputePCF(vec2 uv)
 {
 	vec2 moments = vec2(0.0);
 
-	/*vec2 texelSize = vec2(1.0 / ubo.ShadowMapX, 1.0 / ubo.ShadowMapY);
+	vec2 texelSize = vec2(1.0 / ubo.ShadowMapX, 1.0 / ubo.ShadowMapY);
 
-	for(float x = -1.0; x <= 1.0; x++)
+	/*for(float x = -1.0; x <= 1.0; x++)
 	{
 		for(float y = -1.0; y <= 1.0; y++)
 		{
@@ -244,14 +242,36 @@ vec2 ComputePCF(vec2 uv)
 			moments += texture(sampler2D(shadowmapTexture, shadowmapTextureSampler), uv + vec2(x, y) * texelSize).rg;
 			#endif
 		}
-	}
-
-	moments /= 9.0;*/
+	}*/
 
 	#ifdef USE_OPENGL
-	moments = texture(shadowmapTexture, uv).rg;
+	moments += texture(shadowmapTexture, uv + vec2(-1.0, -1.0) * texelSize).rg;
+	moments += texture(shadowmapTexture, uv + vec2(-1.0, 0.0) * texelSize).rg;
+	moments += texture(shadowmapTexture, uv + vec2(-1.0, 1.0) * texelSize).rg;
+	moments += texture(shadowmapTexture, uv + vec2(0.0, -1.0) * texelSize).rg;
+	moments += texture(shadowmapTexture, uv + vec2(0.0, 0.0) * texelSize).rg;
+	moments += texture(shadowmapTexture, uv + vec2(0.0, 1.0) * texelSize).rg;
+	moments += texture(shadowmapTexture, uv + vec2(1.0, -1.0) * texelSize).rg;
+	moments += texture(shadowmapTexture, uv + vec2(1.0, 0.0) * texelSize).rg;
+	moments += texture(shadowmapTexture, uv + vec2(1.0, 1.0) * texelSize).rg;
 	#else
-	moments = texture(sampler2D(shadowmapTexture, shadowmapTextureSampler), uv ).rg;
+	moments += texture(sampler2D(shadowmapTexture, shadowmapTextureSampler), uv + vec2(-1.0, -1.0) * texelSize).rg;
+	moments += texture(sampler2D(shadowmapTexture, shadowmapTextureSampler), uv + vec2(-1.0, 0.0) * texelSize).rg;
+	moments += texture(sampler2D(shadowmapTexture, shadowmapTextureSampler), uv + vec2(-1.0, 1.0) * texelSize).rg;
+	moments += texture(sampler2D(shadowmapTexture, shadowmapTextureSampler), uv + vec2(0.0, -1.0) * texelSize).rg;
+	moments += texture(sampler2D(shadowmapTexture, shadowmapTextureSampler), uv + vec2(0.0, 0.0) * texelSize).rg;
+	moments += texture(sampler2D(shadowmapTexture, shadowmapTextureSampler), uv + vec2(0.0, 1.0) * texelSize).rg;
+	moments += texture(sampler2D(shadowmapTexture, shadowmapTextureSampler), uv + vec2(1.0, -1.0) * texelSize).rg;
+	moments += texture(sampler2D(shadowmapTexture, shadowmapTextureSampler), uv + vec2(1.0, 0.0) * texelSize).rg;
+	moments += texture(sampler2D(shadowmapTexture, shadowmapTextureSampler), uv + vec2(1.0, 1.0) * texelSize).rg;
+	#endif
+
+	moments /= 9.0;
+
+	#ifdef USE_OPENGL
+	//moments = texture(shadowmapTexture, uv).rg;
+	#else
+	//moments = texture(sampler2D(shadowmapTexture, shadowmapTextureSampler), uv ).rg;
 	#endif
 
 	return moments;
@@ -361,17 +381,22 @@ void main(){
 
 	// PBRに使うベクトル系のパラメーターを計算する
 	vec3 n = getNormal();
-	vec3 v = normalize(ubo.cameraPos.xyz - f_WorldPos.xyz);
-	vec3 l = normalize(ubo.lightDir.xyz);
-	// ハーフベクトルはvとlの中間ベクトル
+	vec3 v = (-1.0f) * normalize(f_WorldPos.xyz - ubo.cameraPos.xyz);
+	
+	// 計算に使用するのでライト方向は反転させておく
+	// 図を書くとわかるがそのままのベクトルを使うと180度回転した分の結果になってしまう
+	// 法線方向を基準に考える
+	vec3 l = (-1.0f) * normalize(ubo.lightDir.xyz);
+	
+	// ハーフベクトルはvとlの中間に位置するベクトルのこと
 	// 光源の方向ベクトルはCGの慣例として光源方向に向けた方がいいのかも？
 	// https://qiita.com/emadurandal/items/76348ad118c36317ec5c#:~:text=%E3%81%97%E3%81%A6%E3%81%84%E3%81%BE%E3%81%99%E3%80%82-,h,%E3%81%AF%E3%83%8F%E3%83%BC%E3%83%95%E3%83%99%E3%82%AF%E3%83%88%E3%83%AB%E3%81%A8%E3%81%84%E3%81%84,-%E3%80%81%E3%83%A9%E3%82%A4%E3%83%88%E3%83%99%E3%82%AF%E3%83%88%E3%83%AB%E3%81%A8
 	vec3 h = normalize(v + l);
-	vec3 reflection = -normalize(reflect(v, n));
+	vec3 reflection = normalize(reflect(v, n));
 
 	// 考え方としては内積は二つのベクトルの角度がどれだけ水平・垂直に近いかを示す値としてみることができる
-	float NdotL = clamp(dot(n, l), 0.001, 1.0);
-	float NdotV = clamp(abs(dot(n, v)), 0.001, 1.0);
+	float NdotL = clamp(dot(n, l), 0.0, 1.0);
+	float NdotV = clamp(abs(dot(n, v)), 0.0, 1.0);
 	float NdotH = clamp(dot(n, h), 0.0, 1.0);
 	float LdotH = clamp(dot(l, h), 0.0, 1.0);
 	float VdotH = clamp(dot(v, h), 0.0, 1.0);
@@ -392,32 +417,53 @@ void main(){
 		specularColor
 	);
 
-	// クックトランスモデルによるスペキュラーのGGXを計算する
-	float D = CalcMicrofacet(pbrParam); // マイクロファセット(微小面法線分布関数)
-	float G = CalcGeometricOcculusion(pbrParam); // 幾何減衰項
-	vec3 F = CalcFrenelReflection(pbrParam); // フレネル項
-	
-	// スペキュラーBRDFを構築
-	vec3 specularBRDF = D * G * F / (4.0 * NdotL * NdotV);
+	//
+	vec3 specular = vec3(0.0);
+	vec3 diffuse = vec3(0.0);
 
-	// ディフューズBRDFを計算
-	vec3 diffuseBRDF = (1.0 - F) * CalcDiffuseBRDF(pbrParam);
-
-	// 反射カラーを計算
-	vec3 reflectColor = vec3(1.0);
-	if(ubo.useCubeMap != 0)
+	if(NdotL > 0.0 || NdotV > 0.0)
 	{
-		float mipCount = ubo.mipCount;
-		float lod = mipCount * perceptualRoughness;
-		#ifdef USE_OPENGL
-		reflectColor = LINEARtoSRGB(textureLod(cubemapTexture, reflect(v, n), lod)).rgb;
-		#else
-		reflectColor = LINEARtoSRGB(textureLod(samplerCube(cubemapTexture, cubemapTextureSampler), reflect(v, n), lod)).rgb;
-		#endif
-	}
+		// クックトランスモデルによるスペキュラーのGGXを計算する
+		float D = CalcMicrofacet(pbrParam); // マイクロファセット(微小面法線分布関数)
+		float G = CalcGeometricOcculusion(pbrParam); // 幾何減衰項
+		vec3 F = CalcFrenelReflection(pbrParam); // フレネル項
 	
-	// レンダリング方程式を構築
-	col.rgb = NdotL * ubo.lightColor.rgb * (specularBRDF + diffuseBRDF) + reflectColor * specularColor;
+		// スペキュラーBRDFを構築
+		// スペキュラーは鏡面反射: 鏡面反射とは入射角と出射角が等しい反射
+		// https://ja.wikipedia.org/wiki/%E9%8F%A1%E9%9D%A2%E5%8F%8D%E5%B0%84
+		specular += D * G * F / (4.0 * NdotL * NdotV);
+
+		specular = max(specular, vec3(0.0));
+
+		// ディフューズBRDFを計算
+		// Diffuseは拡散反射 : 拡散反射とは鏡面反射に比べて反射角に依存せず、多様な方向に同程度の光度を放つ反射のこと
+		// https://ja.wikipedia.org/wiki/%E6%8B%A1%E6%95%A3%E5%8F%8D%E5%B0%84
+		diffuse += (1.0 - F) * CalcDiffuseBRDF(pbrParam);
+
+		// 反射カラーを計算
+		vec3 reflectColor = vec3(0.0);
+		if(ubo.useCubeMap != 0)
+		{
+			float mipCount = ubo.mipCount;
+			float lod = mipCount * perceptualRoughness;
+			#ifdef USE_OPENGL
+			reflectColor = LINEARtoSRGB(textureLod(cubemapTexture, reflect(v, n), lod)).rgb;
+			#else
+			reflectColor = LINEARtoSRGB(textureLod(samplerCube(cubemapTexture, cubemapTextureSampler), reflect(v, n), lod)).rgb;
+			#endif
+		}
+	
+		// レンダリング方程式を構築
+		col.rgb = NdotL * (specular + diffuse) + reflectColor * F;
+
+		// 疑似的な環境光(ライトの反対方向が暗くなりすぎないようにするための対策)
+		// 本来はGIやIBLで代用するところだが、ひとまずこのような簡易的な方法で代用
+		// GIやIBLを使用するときはプリプロセッサでここは実行されないようにする
+		// (Cubemapを外したとき、これがないと真っ暗になる)
+		// https://cgworld.jp/terms/%E3%82%A2%E3%83%B3%E3%83%93%E3%82%A8%E3%83%B3%E3%83%88.html
+		vec3 gi_diffuse = clamp(specular, 0.04, 1.0);
+		col.rgb += gi_diffuse * diffuse;
+	}
 
 	// AO Mapの適応
 	if(ubo.useOcclusionTexture != 0)
@@ -451,9 +497,9 @@ void main(){
 		lsp = lsp * 0.5 + 0.5;
 		float shadowCol = 1.0;
 
-		bool outSide = f_LightSpacePos.z <= 0.0f || (lsp.x < 0 || lsp.y < 0) || (lsp.x > 1 || lsp.y > 1);
+		//bool outSide = f_LightSpacePos.z <= 0.0f || (lsp.x < 0 || lsp.y < 0) || (lsp.x > 1 || lsp.y > 1);
 
-		if(!outSide)
+		//if(!outSide)
 		{
 			shadowCol = CalcShadow(lsp, n, l);
 		}

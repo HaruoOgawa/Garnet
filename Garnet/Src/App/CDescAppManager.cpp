@@ -117,8 +117,36 @@ namespace descapp
 		return true;
 	}
 
-	void Key_Callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+	void KetCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
 	{
+		//
+		auto AppManager = reinterpret_cast<CDescAppManager*>(glfwGetWindowUserPointer(window));
+		auto InputState = AppManager->GetInputState();
+
+		//
+		input::EKeyType KeyType = input::EKeyType::KEY_TYPE_NONE;
+		
+		switch (key)
+		{
+			case GLFW_KEY_W:
+				KeyType = input::EKeyType::KEY_TYPE_W;
+				break;
+			case GLFW_KEY_A:
+				KeyType = input::EKeyType::KEY_TYPE_A;
+				break;
+			case GLFW_KEY_S:
+				KeyType = input::EKeyType::KEY_TYPE_S;
+				break;
+			case GLFW_KEY_D:
+				KeyType = input::EKeyType::KEY_TYPE_D;
+				break;
+			default:
+				break;
+		}
+
+		InputState->SetKeyState(KeyType, (action == GLFW_PRESS || action == GLFW_REPEAT));
+
+		// ÉãÅ[ÉvèIóπ
 		if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
 		{
 			g_IsRunLoop = false;
@@ -208,7 +236,7 @@ namespace descapp
 
 		glfwSetWindowUserPointer(m_pWindow, this);
 
-		glfwSetKeyCallback(m_pWindow, Key_Callback);
+		glfwSetKeyCallback(m_pWindow, KetCallback);
 		glfwSetFramebufferSizeCallback(m_pWindow, Resize_Callback);
 		glfwSetWindowCloseCallback(m_pWindow, Close_Callback);
 		glfwSetMouseButtonCallback(m_pWindow, MousebuttonCallback);
