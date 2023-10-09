@@ -303,7 +303,7 @@ namespace gltf
 
 					{
 						int Flag = 0;
-						UniformBuffer->AddData("t_pad_2", &Flag, sizeof(int), 0);
+						UniformBuffer->AddData("useIBL", &Flag, sizeof(int), 0);
 					}
 				}
 
