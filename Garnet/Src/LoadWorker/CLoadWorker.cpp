@@ -56,7 +56,7 @@ namespace resource
 		m_LoadingBar->AddNode(Node);
 
 		// CreateŠÖ”‚ðŽÀs
-		if (!m_LoadingBar->Create(pGraphicsAPI, nullptr, nullptr)) return false;
+		if (!m_LoadingBar->Create(pGraphicsAPI, nullptr, nullptr, nullptr)) return false;
 
 		return true;
 	}

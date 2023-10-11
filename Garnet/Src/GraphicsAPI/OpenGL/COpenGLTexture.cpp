@@ -114,23 +114,7 @@ namespace api
 			break;
 		}
 
-		if (m_TextureType == graphics::ETextureType::TEXTURE_2D)
-		{
-			glGenTextures(1, &m_TextureID);
-			glBindTexture(GL_TEXTURE_2D, m_TextureID);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-			glTexImage2D(GL_TEXTURE_2D, 0, internalformat, m_Width, m_Height, 0, format, type, &pixelData[0]);
-
-			glDisable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
-			glGenerateMipmap(GL_TEXTURE_2D); // ミップマップを生成
-
-			glBindTexture(GL_TEXTURE_2D, 0);
-		}
-		else if (m_TextureType == graphics::ETextureType::TEXTURE_CUBE)
+		if (m_TextureType == graphics::ETextureType::TEXTURE_CUBE)
 		{
 			glGenTextures(1, &m_TextureID);
 			glBindTexture(GL_TEXTURE_CUBE_MAP, m_TextureID);
@@ -156,6 +140,22 @@ namespace api
 			
 			glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 		}
+		else // 2DTexture
+		{
+			glGenTextures(1, &m_TextureID);
+			glBindTexture(GL_TEXTURE_2D, m_TextureID);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+			glTexImage2D(GL_TEXTURE_2D, 0, internalformat, m_Width, m_Height, 0, format, type, &pixelData[0]);
+
+			glDisable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+			glGenerateMipmap(GL_TEXTURE_2D); // ミップマップを生成
+
+			glBindTexture(GL_TEXTURE_2D, 0);
+		}
 
 		return true;
 	}
@@ -163,31 +163,31 @@ namespace api
 #endif
 	void COpenGLTexture::SetActive(GLenum texture)
 	{
-		if (m_TextureType == graphics::ETextureType::TEXTURE_2D)
-		{
-			glActiveTexture(texture);
-			glEnable(GL_TEXTURE_2D);
-			glBindTexture(GL_TEXTURE_2D, m_TextureID);
-		}
-		else if (m_TextureType == graphics::ETextureType::TEXTURE_CUBE)
+		if (m_TextureType == graphics::ETextureType::TEXTURE_CUBE)
 		{
 			glActiveTexture(texture);
 			glEnable(GL_TEXTURE_CUBE_MAP);
 			glBindTexture(GL_TEXTURE_CUBE_MAP, m_TextureID);
 		}
+		else // 2DTexture
+		{
+			glActiveTexture(texture);
+			glEnable(GL_TEXTURE_2D);
+			glBindTexture(GL_TEXTURE_2D, m_TextureID);
+		}
 	}
 
 	void COpenGLTexture::SetEactive(GLenum texture)
 	{
-		if (m_TextureType == graphics::ETextureType::TEXTURE_2D)
-		{
-			glActiveTexture(texture);
-			glDisable(GL_TEXTURE_2D);
-		}
-		else if (m_TextureType == graphics::ETextureType::TEXTURE_CUBE)
+		if (m_TextureType == graphics::ETextureType::TEXTURE_CUBE)
 		{
 			glActiveTexture(texture);
 			glDisable(GL_TEXTURE_CUBE_MAP);
+		}
+		else // 2DTexture
+		{
+			glActiveTexture(texture);
+			glDisable(GL_TEXTURE_2D);
 		}
 	}
 

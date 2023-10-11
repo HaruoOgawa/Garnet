@@ -28,7 +28,7 @@
 namespace gltf
 {
 	bool CGLTFImporter::Import(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& Data, std::shared_ptr<object::C3DObject>& Object,
-		std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, const std::vector<std::shared_ptr<graphics::CTexture>>& CubeTexList, const std::vector<std::shared_ptr<graphics::CTexture>>& FrameTextureList,
+		std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, const std::shared_ptr<graphics::CTextureSet>& TextureSet,
 		const std::shared_ptr<file::CFile>& DepthVertex, const std::shared_ptr<file::CFile>& DepthFragment)
 	{
 		tinygltf::Model model;
@@ -55,12 +55,14 @@ namespace gltf
 		std::vector<std::shared_ptr<graphics::CTexture>> TextureList;
 		if (!CreateTexture(pGraphicsAPI, model, TextureList)) return false;
 
-		// ひとまず末尾にShadowMapを追加しておく
-		if (FrameTextureList.size() > 0) TextureList.push_back(FrameTextureList[0]);
+		for (const auto& Texture : TextureList)
+		{
+			TextureSet->Add2DTexture(Texture);
+		}
 
 		// マテリアル
 		std::vector<std::shared_ptr<graphics::CMaterial>> MaterialList;
-		if (!CreateMaterial(pGraphicsAPI, model, MaterialList, TextureList, CubeTexList, FrameTextureList, createInfo)) return false;
+		if (!CreateMaterial(pGraphicsAPI, model, MaterialList, createInfo, TextureSet)) return false;
 
 		// メッシュ
 		std::vector<std::shared_ptr<graphics::CMesh>> MeshList;
@@ -72,16 +74,6 @@ namespace gltf
 		if (!CreateNode(model, NodeList, MeshList, MaterialList, RootNodeIndexList)) return false;
 
 		// オブジェクトにリソースを登録
-		for (const auto& Texture : TextureList)
-		{
-			Object->AddTexture(Texture);
-		}
-
-		for (const auto& Texture : CubeTexList)
-		{
-			Object->AddCubeMap(Texture);
-		}
-
 		for (const auto& Material : MaterialList)
 		{
 			Object->AddMaterial(Material);
@@ -100,7 +92,7 @@ namespace gltf
 		Object->SetRootNodeIndexList(RootNodeIndexList);
 
 		// オブジェクトを生成
-		if (!Object->Create(pGraphicsAPI, DepthVertex, DepthFragment)) return false;
+		if (!Object->Create(pGraphicsAPI, DepthVertex, DepthFragment, TextureSet)) return false;
 
 		return true;
 	}
@@ -152,9 +144,19 @@ namespace gltf
 	}
 
 	bool CGLTFImporter::CreateMaterial(api::IGraphicsAPI* pGraphicsAPI, const tinygltf::Model& model, std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList,
-		const std::vector<std::shared_ptr<graphics::CTexture>>& TextureList, const std::vector<std::shared_ptr<graphics::CTexture>>& CubeTexList,
-		const std::vector<std::shared_ptr<graphics::CTexture>>& FrameTextureList, std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo)
+		std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, const std::shared_ptr<graphics::CTextureSet>& TextureSet)
 	{
+		//
+		std::vector<std::shared_ptr<graphics::CTexture>> TextureList(0);
+		if (TextureSet) TextureList = TextureSet->Get2DTextureList();
+		
+		std::vector<std::shared_ptr<graphics::CTexture>> CubeTexList(0);
+		if (TextureSet) CubeTexList = TextureSet->GetCubeMapList();
+		
+		std::vector<std::shared_ptr<graphics::CTexture>> FrameTextureList(0);
+		if (TextureSet) FrameTextureList = TextureSet->GetFrameTextureList();
+
+		//
 		for (const auto& glTfMaterial : model.materials)
 		{
 			//
@@ -207,6 +209,10 @@ namespace gltf
 				int ShadowMapX = 1, ShadowMapY = 1;
 				if (FrameTextureList.size() > 0)
 				{
+					// glTF FrameTextureList
+					// [0] : ShadowMap
+					// [1] : ???
+					// [2] : ???
 					ShadowMapX = FrameTextureList[0]->GetWidth();
 					ShadowMapY = FrameTextureList[0]->GetHeight();
 				}
@@ -291,16 +297,22 @@ namespace gltf
 					// ShadowMap
 					if(FrameTextureList.size() > 0)
 					{
+						// glTF FrameTextureList
+						// [0] : ShadowMap
+						// [1] : ???
+						// [2] : ???
+
 						// ひとまず末尾から取得
-						material->AddTextureBindingLayout({ "shadowmapTexture", 13, 14, (static_cast<int>(TextureList.size()) - 1), graphics::ETextureType::TEXTURE_2D});
+						material->AddTextureBindingLayout({ "shadowmapTexture", 13, 14, 0, graphics::ETextureType::TEXTURE_FRAME});
 						UniformBuffer->AddData("useShadowMap", &glm::uvec1(1)[0], sizeof(int), 0);
 					}
 					else
 					{
-						material->AddTextureBindingLayout({ "shadowmapTexture", 13, 14, -1, graphics::ETextureType::TEXTURE_2D });
+						material->AddTextureBindingLayout({ "shadowmapTexture", 13, 14, -1, graphics::ETextureType::TEXTURE_FRAME });
 						UniformBuffer->AddData("useShadowMap", &glm::uvec1(0)[0], sizeof(int), 0);
 					}
 
+					// IBL(あとで実装)
 					{
 						int Flag = 0;
 						UniformBuffer->AddData("useIBL", &Flag, sizeof(int), 0);

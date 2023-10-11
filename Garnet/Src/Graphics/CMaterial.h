@@ -9,7 +9,7 @@
 #include "../File/CFile.h"
 #include "../../Interface/IGraphicsAPI.h"
 #include "STextureBindingLayout.h"
-#include "CTexture.h"
+#include "CTextureSet.h"
 #include "CDrawInfo.h"
 #include "ECullMode.h"
 #include "EBlendType.h"
@@ -46,7 +46,7 @@ namespace graphics
 		CMaterial(const std::shared_ptr<CMaterialCreateInfo>& createInfo);
 		virtual ~CMaterial() = default;
 
-		virtual bool Create(const std::vector<std::shared_ptr<graphics::CTexture>>& TextureList, const std::vector<std::shared_ptr<graphics::CTexture>>& CubeMapList) = 0;
+		virtual bool Create(const std::shared_ptr<graphics::CTextureSet>& TextureSet) = 0;
 		virtual bool CreateDepthMaterial(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<file::CFile>& DepthVertex, const std::shared_ptr<file::CFile>& DepthFragment);
 
 		virtual std::shared_ptr<graphics::CMaterial> GetDepthMaterial();

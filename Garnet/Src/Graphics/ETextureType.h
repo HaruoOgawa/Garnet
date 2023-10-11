@@ -6,5 +6,7 @@ namespace graphics
 	{
 		TEXTURE_2D,
 		TEXTURE_CUBE,
+		TEXTURE_FRAME,
+		TEXTURE_IBL,
 	};
 }

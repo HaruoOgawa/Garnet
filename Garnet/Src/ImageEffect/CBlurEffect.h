@@ -9,6 +9,7 @@ namespace file { class CFile; }
 namespace api { class IGraphicsAPI; }
 namespace object { class C3DObject; }
 namespace resource { class CLoadWorker; }
+namespace graphics { class CTextureSet; }
 
 namespace imageeffect
 {
@@ -26,6 +27,8 @@ namespace imageeffect
 
 		std::shared_ptr<object::C3DObject> m_ScreenObjX;
 		std::shared_ptr<object::C3DObject> m_ScreenObjY;
+
+		std::shared_ptr<graphics::CTextureSet> m_TextureSet;
 	private:
 		bool CalcGaussianKernel();
 		bool Load();

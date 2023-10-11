@@ -45,11 +45,11 @@ namespace api
 		m_WGPUUniformBufferList.clear();
 	}
 
-	bool CWebGPUMaterial::Create(const std::vector<std::shared_ptr<graphics::CTexture>>& TextureList, const std::vector<std::shared_ptr<graphics::CTexture>>& CubeMapList)
+	bool CWebGPUMaterial::Create(const std::shared_ptr<graphics::CTextureSet>& TextureSet)
 	{
 		if (!CreateShaderStages(m_CreateInfo)) return false;
 		if (!CreateShaderBuffers(m_CreateInfo)) return false; // ユニフォームバッファを生成
-		if (!CreateBindGroup(m_CreateInfo, TextureList, CubeMapList)) return false; // バインドグループを生成(レンダリングパイプラインで使用するすべてのリソースをどのようにバインドするかを指定するオブジェクト)
+		if (!CreateBindGroup(m_CreateInfo, TextureSet)) return false; // バインドグループを生成(レンダリングパイプラインで使用するすべてのリソースをどのようにバインドするかを指定するオブジェクト)
 
 		// 生成処理が終わったので不要なリソースを解放する
 		m_CreateInfo = nullptr;
@@ -181,9 +181,18 @@ namespace api
 		return true;
 	}
 
-	bool CWebGPUMaterial::CreateBindGroup(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, const std::vector<std::shared_ptr<graphics::CTexture>>& TextureList, 
-		const std::vector<std::shared_ptr<graphics::CTexture>>& CubeMapList)
+	bool CWebGPUMaterial::CreateBindGroup(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, const std::shared_ptr<graphics::CTextureSet>& TextureSet)
 	{
+		//
+		std::vector<std::shared_ptr<graphics::CTexture>> TextureList(0);
+		if (TextureSet) TextureList = TextureSet->Get2DTextureList();
+
+		std::vector<std::shared_ptr<graphics::CTexture>> CubeMapList(0);
+		if (TextureSet) CubeMapList = TextureSet->GetCubeMapList();
+
+		std::vector<std::shared_ptr<graphics::CTexture>> FrameTextureList(0);
+		if (TextureSet) FrameTextureList = TextureSet->GetFrameTextureList();
+
 		// バインドレイアウトを作成
 		// どのようにメモリに配置されるか, バインドインデックスや読み取り専用かなど
 		// -->これがWGSLでいう @binding(n)
@@ -239,10 +248,18 @@ namespace api
 			{
 				Texture = (TextureIndex >= 0 && TextureIndex < CubeMapList.size()) ? static_cast<api::CWebGPUTexture*>(CubeMapList[TextureIndex].get()) : m_EmptyCubeTexture.get();
 			}
+			else if (TexLayout.TextureType == graphics::ETextureType::TEXTURE_FRAME)
+			{
+				Texture = (TextureIndex >= 0 && TextureIndex < FrameTextureList.size()) ? static_cast<api::CWebGPUTexture*>(FrameTextureList[TextureIndex].get()) : m_EmptyTexture.get();
+			}
+			else if (TexLayout.TextureType == graphics::ETextureType::TEXTURE_IBL)
+			{
+				// あとで実装
+			}
 
 			if (!Texture)
 			{
-				Console::Log("[ERROR] Texture is nullpte\n");
+				Console::Log("[ERROR] Texture is nullptr\n");
 				return false;
 			}
 
@@ -344,10 +361,18 @@ namespace api
 			{
 				Texture = (TextureIndex >= 0 && TextureIndex < CubeMapList.size()) ? static_cast<api::CWebGPUTexture*>(CubeMapList[TextureIndex].get()) : m_EmptyCubeTexture.get();
 			}
+			else if (TexLayout.TextureType == graphics::ETextureType::TEXTURE_FRAME)
+			{
+				Texture = (TextureIndex >= 0 && TextureIndex < FrameTextureList.size()) ? static_cast<api::CWebGPUTexture*>(FrameTextureList[TextureIndex].get()) : m_EmptyTexture.get();
+			}
+			else if (TexLayout.TextureType == graphics::ETextureType::TEXTURE_IBL)
+			{
+				// あとで実装
+			}
 
 			if (!Texture)
 			{
-				Console::Log("[ERROR] Texture is nullpte\n");
+				Console::Log("[ERROR] Texture is nullptr\n");
 				return false;
 			}
 

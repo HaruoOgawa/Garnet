@@ -12,8 +12,13 @@ namespace scene
 {
 	CScriptScene::CScriptScene(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker):
 		m_glTFObject(std::make_shared<object::C3DObject>("", "ShadowPass")),
+		//m_glTFData(std::make_shared<file::CFile>("Resources\\Models\\MetalRoughSpheresNoTextures\\glTF-Binary\\MetalRoughSpheresNoTextures.glb")),
 		m_glTFData(std::make_shared<file::CFile>("Resources\\Models\\Sponza\\glTF\\Sponza.glb")),
 		//m_glTFData(std::make_shared<file::CFile>("Resources\\Models\\DamagedHelmet\\glTF-Binary\\DamagedHelmet.glb")),
+
+		m_IBL_DiffuseEnvMap(std::make_shared<file::CFile>("Resources\\IBL\\\output_iem.hdr")),
+		m_IBL_SpecularEnvMap(std::make_shared<file::CFile>("Resources\\IBL\\output_pmrem.hdr")),
+		m_IBL_GGX_LUT(std::make_shared<file::CFile>("Resources\\Textures\\ggx_lut.jpg")),
 
 		m_Cube0(std::make_shared<file::CFile>("Resources\\Cubemaps\\environment\\environment_back_0.jpg")),
 		m_Cube1(std::make_shared<file::CFile>("Resources\\Cubemaps\\environment\\environment_bottom_0.jpg")),
@@ -33,6 +38,9 @@ namespace scene
 		pLoadWorker->AddFirstLoadResource(m_DepthVertex);
 		pLoadWorker->AddFirstLoadResource(m_DepthFragment);
 		pLoadWorker->AddFirstLoadResource(m_glTFData);
+		pLoadWorker->AddFirstLoadResource(m_IBL_DiffuseEnvMap);
+		pLoadWorker->AddFirstLoadResource(m_IBL_SpecularEnvMap);
+		pLoadWorker->AddFirstLoadResource(m_IBL_GGX_LUT);
 		pLoadWorker->AddFirstLoadResource(m_VertexShader);
 		pLoadWorker->AddFirstLoadResource(m_FragmentShader);
 		pLoadWorker->AddFirstLoadResource(m_Cube0);
@@ -51,30 +59,46 @@ namespace scene
 	bool CScriptScene::Load(api::IGraphicsAPI* pGraphicsAPI)
 	{
 		// Cubemap
-		std::vector<std::shared_ptr<graphics::CTexture>> CubeTexList;
-		{
-			std::vector<std::vector<unsigned char>> CubeDataList;
-			CubeDataList.push_back(m_Cube0->GetData());
-			CubeDataList.push_back(m_Cube1->GetData());
-			CubeDataList.push_back(m_Cube2->GetData());
-			CubeDataList.push_back(m_Cube3->GetData());
-			CubeDataList.push_back(m_Cube4->GetData());
-			CubeDataList.push_back(m_Cube5->GetData());
+		std::vector<std::vector<unsigned char>> CubeDataList;
+		CubeDataList.push_back(m_Cube0->GetData());
+		CubeDataList.push_back(m_Cube1->GetData());
+		CubeDataList.push_back(m_Cube2->GetData());
+		CubeDataList.push_back(m_Cube3->GetData());
+		CubeDataList.push_back(m_Cube4->GetData());
+		CubeDataList.push_back(m_Cube5->GetData());
 
-			auto CubeTex0 = pGraphicsAPI->CreateTexture(true);
-			if (!CubeTex0->Create(CubeDataList)) return false;
+		auto CubeTex = pGraphicsAPI->CreateTexture(true);
+		if (!CubeTex->Create(CubeDataList)) return false;
 
-			CubeTexList.push_back(CubeTex0);
-		}
+		// IBL
+		auto IBL_Diffuse_Tex = pGraphicsAPI->CreateTexture(false);
+		if (!IBL_Diffuse_Tex->Create(m_IBL_DiffuseEnvMap->GetData())) return false;
+
+		auto IBL_Specular_Tex = pGraphicsAPI->CreateTexture(false);
+		if (!IBL_Specular_Tex->Create(m_IBL_SpecularEnvMap->GetData())) return false;
+
+		auto IBL_GGXLUT_Tex = pGraphicsAPI->CreateTexture(false);
+		if (!IBL_GGXLUT_Tex->Create(m_IBL_GGX_LUT->GetData())) return false;
 
 		// glTFObject
 		{
-			m_glTFObject->SetRot(glm::vec3(0.0f, 3.1415f * -0.5f, 0.0f));
+			// TRS
+			m_glTFObject->SetRot(glm::vec3(0.0f, 3.1415f * -0.5f, 0.0f)); // Sponza
+			//m_glTFObject->SetScale(glm::vec3(500.0f)); // Spheres
 
+			// MaterialInto
 			std::shared_ptr<graphics::CMaterialCreateInfo> createInfo = std::make_shared<graphics::CMaterialCreateInfo>();
 			createInfo->SetVertexShaderCode(m_VertexShader->GetData());
 			createInfo->SetFragmentShaderCode(m_FragmentShader->GetData());
-			if (!gltf::CGLTFImporter::Import(pGraphicsAPI, m_glTFData->GetData(), m_glTFObject, createInfo, CubeTexList, m_FrameTextureList, m_DepthVertex, m_DepthFragment)) return false;
+
+			// TextureSet
+			std::shared_ptr<graphics::CTextureSet> TextureSet = std::make_shared<graphics::CTextureSet>();
+			TextureSet->AddCubeMap(CubeTex);
+			for(const auto& FrameTexture : m_FrameTextureList) { TextureSet->AddFrameTexture(FrameTexture); }
+			TextureSet->AddIBLTexture(IBL_Diffuse_Tex, IBL_Specular_Tex, IBL_GGXLUT_Tex);
+
+			// Import
+			if (!gltf::CGLTFImporter::Import(pGraphicsAPI, m_glTFData->GetData(), m_glTFObject, createInfo, TextureSet, m_DepthVertex, m_DepthFragment)) return false;
 		}
 
 		return true;

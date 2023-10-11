@@ -14,7 +14,8 @@ namespace api
 		CMaterial(createInfo),
 		m_pGraphicsAPI(pGraphicsAPI),
 
-		m_ShaderPrg(-1)
+		m_ShaderPrg(-1),
+		m_TextureSet(nullptr)
 	{
 #ifdef USE_TEXTURE_LOADER
 		m_EmptyTexture = std::make_shared<COpenGLTexture>(pGraphicsAPI, false);
@@ -28,13 +29,12 @@ namespace api
 		glDeleteProgram(m_ShaderPrg);
 	}
 
-	bool COpenGLMaterial::Create(const std::vector<std::shared_ptr<graphics::CTexture>>& TextureList, const std::vector<std::shared_ptr<graphics::CTexture>>& CubeMapList)
+	bool COpenGLMaterial::Create(const std::shared_ptr<graphics::CTextureSet>& TextureSet)
 	{
 		if (!CreateShaderStages()) return false;
-		if (!CreateShaderBuffers(TextureList, CubeMapList)) return false;
+		if (!CreateShaderBuffers()) return false;
 
-		m_TextureList = TextureList;
-		m_CubeMapList = CubeMapList;
+		m_TextureSet = TextureSet;
 
 		return true;
 	}
@@ -90,6 +90,15 @@ namespace api
 		}
 
 		// テクスチャをShaderにバインドする
+		std::vector<std::shared_ptr<graphics::CTexture>> TextureList(0);
+		if (m_TextureSet) TextureList = m_TextureSet->Get2DTextureList();
+
+		std::vector<std::shared_ptr<graphics::CTexture>> CubeMapList(0);
+		if (m_TextureSet) CubeMapList = m_TextureSet->GetCubeMapList();
+
+		std::vector<std::shared_ptr<graphics::CTexture>> FrameTextureList(0);
+		if (m_TextureSet) FrameTextureList = m_TextureSet->GetFrameTextureList();
+
 		int TexOrderIndex = 0;
 		for (const auto& TexLayout : m_TextureBindingLayoutList)
 		{
@@ -99,20 +108,36 @@ namespace api
 #ifdef USE_TEXTURE_LOADER
 			if (TexLayout.TextureType == graphics::ETextureType::TEXTURE_2D)
 			{
-				Texture = (TextureIndex >= 0 && TextureIndex < m_TextureList.size()) ? static_cast<api::COpenGLTexture*>(m_TextureList[TextureIndex].get()) : m_EmptyTexture.get();
+				Texture = (TextureIndex >= 0 && TextureIndex < TextureList.size()) ? static_cast<api::COpenGLTexture*>(TextureList[TextureIndex].get()) : m_EmptyTexture.get();
 			}
 			else if (TexLayout.TextureType == graphics::ETextureType::TEXTURE_CUBE)
 			{
-				Texture = (TextureIndex >= 0 && TextureIndex < m_CubeMapList.size()) ? static_cast<api::COpenGLTexture*>(m_CubeMapList[TextureIndex].get()) : m_EmptyTexture.get();
+				Texture = (TextureIndex >= 0 && TextureIndex < CubeMapList.size()) ? static_cast<api::COpenGLTexture*>(CubeMapList[TextureIndex].get()) : m_EmptyTexture.get();
+			}
+			else if (TexLayout.TextureType == graphics::ETextureType::TEXTURE_FRAME)
+			{
+				Texture = (TextureIndex >= 0 && TextureIndex < FrameTextureList.size()) ? static_cast<api::COpenGLTexture*>(FrameTextureList[TextureIndex].get()) : m_EmptyTexture.get();
+			}
+			else if (TexLayout.TextureType == graphics::ETextureType::TEXTURE_IBL)
+			{
+				// あとで実装
 			}
 #else
 			if (TexLayout.TextureType == graphics::ETextureType::TEXTURE_2D)
 			{
-				Texture = (TextureIndex >= 0 && TextureIndex < m_TextureList.size()) ? static_cast<api::COpenGLTexture*>(m_TextureList[TextureIndex].get()) : nullptr;
+				Texture = (TextureIndex >= 0 && TextureIndex < TextureList.size()) ? static_cast<api::COpenGLTexture*>(TextureList[TextureIndex].get()) : nullptr;
 			}
 			else if (TexLayout.TextureType == graphics::ETextureType::TEXTURE_CUBE)
 			{
-				Texture = (TextureIndex >= 0 && TextureIndex < m_CubeMapList.size()) ? static_cast<api::COpenGLTexture*>(m_CubeMapList[TextureIndex].get()) : nullptr;
+				Texture = (TextureIndex >= 0 && TextureIndex < CubeMapList.size()) ? static_cast<api::COpenGLTexture*>(CubeMapList[TextureIndex].get()) : nullptr;
+			}
+			else if (TexLayout.TextureType == graphics::ETextureType::TEXTURE_FRAME)
+			{
+				Texture = (TextureIndex >= 0 && TextureIndex < FrameTextureList.size()) ? static_cast<api::COpenGLTexture*>(FrameTextureList[TextureIndex].get()) : nullptr;
+			}
+			else if (TexLayout.TextureType == graphics::ETextureType::TEXTURE_IBL)
+			{
+				// あとで実装
 			}
 #endif
 			
@@ -198,7 +223,7 @@ namespace api
 		return true;
 	}
 
-	bool COpenGLMaterial::CreateShaderBuffers(const std::vector<std::shared_ptr<graphics::CTexture>>& TextureList, const std::vector<std::shared_ptr<graphics::CTexture>>& CubeMapList)
+	bool COpenGLMaterial::CreateShaderBuffers()
 	{
 		SetActive();
 

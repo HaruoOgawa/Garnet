@@ -26,7 +26,7 @@ namespace api
 	{
 		if (!m_ComputeMaterial) return false;
 
-		if (!m_ComputeMaterial->Create(std::vector<std::shared_ptr<graphics::CTexture>>(), std::vector<std::shared_ptr<graphics::CTexture>>())) return false;
+		if (!m_ComputeMaterial->Create(nullptr)) return false;
 		if (!CreateComputePipeline()) return false; // Compute Pipeline‚ğì¬
 
 		return true;

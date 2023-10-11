@@ -2,7 +2,7 @@
 
 #include "CNode.h"
 #include "../Graphics/CMaterial.h"
-#include "../Graphics/CTexture.h"
+#include "../Graphics/CTextureSet.h"
 #include "../Math/CTransform.h"
 #include <vector>
 #include <memory>
@@ -21,9 +21,7 @@ namespace object
 		std::vector<std::shared_ptr<CNode>> m_NodeList;
 		std::vector<std::shared_ptr<graphics::CMesh>> m_MeshList;
 		std::vector<std::shared_ptr<graphics::CMaterial>> m_MaterialList;
-		std::vector<std::shared_ptr<graphics::CTexture>> m_TextureList;
-		std::vector<std::shared_ptr<graphics::CTexture>> m_CubeMapList;
-
+		
 		std::vector<std::vector<int>> m_RootNodeIndexList;
 	private:
 		void CalcWorldMatrix();
@@ -32,7 +30,7 @@ namespace object
 		C3DObject(const std::string& PassName, const std::string& DepthPassName);
 		virtual ~C3DObject();
 
-		bool		 Create(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<file::CFile>& DepthVertex, const std::shared_ptr<file::CFile>& DepthFragment);
+		bool		 Create(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<file::CFile>& DepthVertex, const std::shared_ptr<file::CFile>& DepthFragment, const std::shared_ptr<graphics::CTextureSet>& TextureSet);
 		virtual bool Update();
 		virtual bool Draw(bool IsDepthPass, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, 
 			const std::shared_ptr<graphics::CDrawInfo>& DrawInfo);
@@ -46,12 +44,6 @@ namespace object
 		void AddMaterial(const std::shared_ptr<graphics::CMaterial>& Material);
 		const std::vector<std::shared_ptr<graphics::CMaterial>>& GetMaterialList() const;
 		
-		void AddTexture(const std::shared_ptr<graphics::CTexture>& Texture);
-		const std::vector<std::shared_ptr<graphics::CTexture>>& GetTextureList() const;
-		
-		void AddCubeMap(const std::shared_ptr<graphics::CTexture>& CubeMap);
-		const std::vector<std::shared_ptr<graphics::CTexture>>& GetCubeMapList() const;
-
 		void SetRootNodeIndexList(const std::vector<std::vector<int>>& RootNodeIndexList);
 		const std::vector<std::vector<int>>& GetRootNodeIndexList() const;
 
