@@ -159,16 +159,16 @@ namespace api
 		// 元のデータがミップマップデータを持っていないなら動的生成する
 		if (!m_HasMipData && m_UseMipMap)
 		{
-			if (m_TextureType == graphics::ETextureType::TEXTURE_CUBE)
+			if (m_TextureType == graphics::ETextureType::TEXTURE_2D)
+			{
+				if (!GenerateMipMap(0)) return false;
+			}
+			else if (m_TextureType == graphics::ETextureType::TEXTURE_CUBE)
 			{
 				for (uint32_t layer = 0; layer < 6; layer++)
 				{
 					if (!GenerateMipMap(layer)) return false;
 				}
-			}
-			else // 2D Texture
-			{
-				if (!GenerateMipMap(0)) return false;
 			}
 		}
 

@@ -193,7 +193,7 @@ namespace imageeffect
 		{
 			const auto& RenderPass = m_pGraphicsAPI->GetOffScreenRenderPassMap().find("ShadowPass");
 			if (RenderPass != m_pGraphicsAPI->GetOffScreenRenderPassMap().end()) m_TextureSet->AddFrameTexture(RenderPass->second->GetFrameTexture());
-			MaterialX->AddTextureBindingLayout({ "SrcTex", 2, 3, 0, graphics::ETextureType::TEXTURE_FRAME});
+			MaterialX->AddTextureBindingLayout({ "SrcTex", 2, 3, 0, graphics::ETextureUsage::TEXTURE_USAGE_FRAME});
 
 			m_ScreenObjX->AddMaterial(MaterialX);
 		}
@@ -201,7 +201,7 @@ namespace imageeffect
 		{
 			const auto& RenderPass = m_pGraphicsAPI->GetOffScreenRenderPassMap().find("BlurX");
 			if (RenderPass != m_pGraphicsAPI->GetOffScreenRenderPassMap().end()) m_TextureSet->AddFrameTexture(RenderPass->second->GetFrameTexture());
-			MaterialY->AddTextureBindingLayout({ "SrcTex", 2, 3, 1, graphics::ETextureType::TEXTURE_FRAME });
+			MaterialY->AddTextureBindingLayout({ "SrcTex", 2, 3, 1, graphics::ETextureUsage::TEXTURE_USAGE_FRAME });
 
 			m_ScreenObjY->AddMaterial(MaterialY);
 		}

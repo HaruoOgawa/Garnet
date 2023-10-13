@@ -579,19 +579,19 @@ namespace api
 					api::CVulkanTexture* Texture = nullptr;
 					int TextureIndex = TexLayout.TextureIndex;
 
-					if (TexLayout.TextureType == graphics::ETextureType::TEXTURE_2D)
+					if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_2D)
 					{
 						Texture = (TextureIndex >= 0 && TextureIndex < TextureList.size()) ? static_cast<api::CVulkanTexture*>(TextureList[TextureIndex].get()) : m_EmptyTexture.get();
 					}
-					else if (TexLayout.TextureType == graphics::ETextureType::TEXTURE_CUBE)
+					else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_CUBE)
 					{
 						Texture = (TextureIndex >= 0 && TextureIndex < CubeMapList.size()) ? static_cast<api::CVulkanTexture*>(CubeMapList[TextureIndex].get()) : m_EmptyTexture.get();
 					}
-					else if (TexLayout.TextureType == graphics::ETextureType::TEXTURE_FRAME)
+					else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_FRAME)
 					{
 						Texture = (TextureIndex >= 0 && TextureIndex < FrameTextureList.size()) ? static_cast<api::CVulkanTexture*>(FrameTextureList[TextureIndex].get()) : m_EmptyTexture.get();
 					}
-					else if (TexLayout.TextureType == graphics::ETextureType::TEXTURE_IBL)
+					else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_IBL)
 					{
 						// ‚ ‚Æ‚ÅŽÀ‘•
 					}

@@ -225,72 +225,72 @@ namespace gltf
 					//
 					if (baseColorTextureIndex >= 0 && baseColorTextureIndex < TextureList.size())
 					{
-						material->AddTextureBindingLayout({ "baseColorTexture", 1, 2, baseColorTextureIndex, graphics::ETextureType::TEXTURE_2D});
+						material->AddTextureBindingLayout({ "baseColorTexture", 1, 2, baseColorTextureIndex, graphics::ETextureUsage::TEXTURE_USAGE_2D});
 						UniformBuffer->AddData("useBaseColorTexture", &glm::uvec1(1)[0], sizeof(int), 0);
 					}
 					else
 					{
-						material->AddTextureBindingLayout({ "baseColorTexture", 1, 2, -1, graphics::ETextureType::TEXTURE_2D }); // TextureIndex -1 ‚Í EmptyTexture‚Å‚ ‚é
+						material->AddTextureBindingLayout({ "baseColorTexture", 1, 2, -1, graphics::ETextureUsage::TEXTURE_USAGE_2D }); // TextureIndex -1 ‚Í EmptyTexture‚Å‚ ‚é
 						UniformBuffer->AddData("useBaseColorTexture", &glm::uvec1(0)[0], sizeof(int), 0);
 					}
 
 					//
 					if (metallicRoughnessTextureIndex >= 0 && metallicRoughnessTextureIndex < TextureList.size())
 					{
-						material->AddTextureBindingLayout({ "metallicRoughnessTexture", 3, 4, metallicRoughnessTextureIndex, graphics::ETextureType::TEXTURE_2D});
+						material->AddTextureBindingLayout({ "metallicRoughnessTexture", 3, 4, metallicRoughnessTextureIndex, graphics::ETextureUsage::TEXTURE_USAGE_2D});
 						UniformBuffer->AddData("useMetallicRoughnessTexture", &glm::uvec1(1)[0], sizeof(int), 0);
 					}
 					else
 					{
-						material->AddTextureBindingLayout({ "metallicRoughnessTexture", 3, 4, -1, graphics::ETextureType::TEXTURE_2D }); // TextureIndex -1 ‚Í EmptyTexture‚Å‚ ‚é
+						material->AddTextureBindingLayout({ "metallicRoughnessTexture", 3, 4, -1, graphics::ETextureUsage::TEXTURE_USAGE_2D }); // TextureIndex -1 ‚Í EmptyTexture‚Å‚ ‚é
 						UniformBuffer->AddData("useMetallicRoughnessTexture", &glm::uvec1(0)[0], sizeof(int), 0);
 					}
 
 					//
 					if (emissiveTextureIndex >= 0 && emissiveTextureIndex < TextureList.size())
 					{
-						material->AddTextureBindingLayout({ "emissiveTexture", 5, 6, emissiveTextureIndex, graphics::ETextureType::TEXTURE_2D});
+						material->AddTextureBindingLayout({ "emissiveTexture", 5, 6, emissiveTextureIndex, graphics::ETextureUsage::TEXTURE_USAGE_2D});
 						UniformBuffer->AddData("useEmissiveTexture", &glm::uvec1(1)[0], sizeof(int), 0);
 					}
 					else
 					{
-						material->AddTextureBindingLayout({ "emissiveTexture", 5, 6, -1, graphics::ETextureType::TEXTURE_2D }); // TextureIndex -1 ‚Í EmptyTexture‚Å‚ ‚é
+						material->AddTextureBindingLayout({ "emissiveTexture", 5, 6, -1, graphics::ETextureUsage::TEXTURE_USAGE_2D }); // TextureIndex -1 ‚Í EmptyTexture‚Å‚ ‚é
 						UniformBuffer->AddData("useEmissiveTexture", &glm::uvec1(0)[0], sizeof(int), 0);
 					}
 
 					//
 					if (normalTextureIndex >= 0 && normalTextureIndex < TextureList.size())
 					{
-						material->AddTextureBindingLayout({ "normalTexture", 7, 8, normalTextureIndex, graphics::ETextureType::TEXTURE_2D});
+						material->AddTextureBindingLayout({ "normalTexture", 7, 8, normalTextureIndex, graphics::ETextureUsage::TEXTURE_USAGE_2D});
 						UniformBuffer->AddData("useNormalTexture", &glm::uvec1(1)[0], sizeof(int), 0);
 					}
 					else
 					{
-						material->AddTextureBindingLayout({ "normalTexture", 7, 8, -1, graphics::ETextureType::TEXTURE_2D }); // TextureIndex -1 ‚Í EmptyTexture‚Å‚ ‚é
+						material->AddTextureBindingLayout({ "normalTexture", 7, 8, -1, graphics::ETextureUsage::TEXTURE_USAGE_2D }); // TextureIndex -1 ‚Í EmptyTexture‚Å‚ ‚é
 						UniformBuffer->AddData("useNormalTexture", &glm::uvec1(0)[0], sizeof(int), 0);
 					}
 
 					//
 					if (occlusionTextureIndex >= 0 && occlusionTextureIndex < TextureList.size())
 					{
-						material->AddTextureBindingLayout({ "occlusionTexture", 9, 10, occlusionTextureIndex, graphics::ETextureType::TEXTURE_2D});
+						material->AddTextureBindingLayout({ "occlusionTexture", 9, 10, occlusionTextureIndex, graphics::ETextureUsage::TEXTURE_USAGE_2D});
 						UniformBuffer->AddData("useOcclusionTexture", &glm::uvec1(1)[0], sizeof(int), 0);
 					}
 					else
 					{
-						material->AddTextureBindingLayout({ "occlusionTexture", 9, 10, -1, graphics::ETextureType::TEXTURE_2D }); // TextureIndex -1 ‚Í EmptyTexture‚Å‚ ‚é
+						material->AddTextureBindingLayout({ "occlusionTexture", 9, 10, -1, graphics::ETextureUsage::TEXTURE_USAGE_2D }); // TextureIndex -1 ‚Í EmptyTexture‚Å‚ ‚é
 						UniformBuffer->AddData("useOcclusionTexture", &glm::uvec1(0)[0], sizeof(int), 0);
 					}
 
 					// CubeMap
 					if (CubeTexList.size() > 0)
 					{
-						material->AddTextureBindingLayout({ "cubemapTexture", 11, 12, 0, graphics::ETextureType::TEXTURE_CUBE});
+						material->AddTextureBindingLayout({ "cubemapTexture", 11, 12, 0, graphics::ETextureUsage::TEXTURE_USAGE_CUBE});
 						UniformBuffer->AddData("useCubeMap", &glm::uvec1(1)[0], sizeof(int), 0);
 					}
 					else
 					{
-						material->AddTextureBindingLayout({ "cubemapTexture", 11, 12, -1, graphics::ETextureType::TEXTURE_CUBE });
+						material->AddTextureBindingLayout({ "cubemapTexture", 11, 12, -1, graphics::ETextureUsage::TEXTURE_USAGE_CUBE });
 						UniformBuffer->AddData("useCubeMap", &glm::uvec1(0)[0], sizeof(int), 0);
 					}
 
@@ -303,12 +303,12 @@ namespace gltf
 						// [2] : ???
 
 						// ‚Ð‚Æ‚Ü‚¸––”ö‚©‚çŽæ“¾
-						material->AddTextureBindingLayout({ "shadowmapTexture", 13, 14, 0, graphics::ETextureType::TEXTURE_FRAME});
+						material->AddTextureBindingLayout({ "shadowmapTexture", 13, 14, 0, graphics::ETextureUsage::TEXTURE_USAGE_FRAME});
 						UniformBuffer->AddData("useShadowMap", &glm::uvec1(1)[0], sizeof(int), 0);
 					}
 					else
 					{
-						material->AddTextureBindingLayout({ "shadowmapTexture", 13, 14, -1, graphics::ETextureType::TEXTURE_FRAME });
+						material->AddTextureBindingLayout({ "shadowmapTexture", 13, 14, -1, graphics::ETextureUsage::TEXTURE_USAGE_FRAME });
 						UniformBuffer->AddData("useShadowMap", &glm::uvec1(0)[0], sizeof(int), 0);
 					}
 

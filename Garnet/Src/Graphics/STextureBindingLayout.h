@@ -1,7 +1,7 @@
 #pragma once
 
 #include <string>
-#include "ETextureType.h"
+#include "ETextureUsage.h"
 
 namespace graphics
 {
@@ -11,6 +11,6 @@ namespace graphics
 		int ViewBindingIndex = -1;
 		int SamplerBindingIndex = -1;
 		int TextureIndex = -1;
-		ETextureType TextureType = ETextureType::TEXTURE_2D;
+		ETextureUsage TextureUsage = ETextureUsage::TEXTURE_USAGE_2D;
 	};
 }

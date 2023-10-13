@@ -17,13 +17,16 @@ namespace object
 
 	bool C3DObject::Create(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<file::CFile>& DepthVertex, const std::shared_ptr<file::CFile>& DepthFragment, const std::shared_ptr<graphics::CTextureSet>& TextureSet)
 	{
+		// GPU上のテクスチャリソースが解放されてしまうので保持しておく
+		m_TextureSet = TextureSet;
+
 		// ワールド行列の計算
 		CalcWorldMatrix();
 
 		// Material
 		for (auto& Material : m_MaterialList)
 		{
-			if (!Material->Create(TextureSet)) return false;
+			if (!Material->Create(m_TextureSet)) return false;
 			
 			if (DepthVertex && DepthFragment)
 			{

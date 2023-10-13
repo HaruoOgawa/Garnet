@@ -23,6 +23,8 @@ namespace object
 		std::vector<std::shared_ptr<graphics::CMaterial>> m_MaterialList;
 		
 		std::vector<std::vector<int>> m_RootNodeIndexList;
+
+		std::shared_ptr<graphics::CTextureSet> m_TextureSet;
 	private:
 		void CalcWorldMatrix();
 		void CalcWorldMatrix(std::shared_ptr<CNode>& Node, const glm::mat4& ParentWorldMatrix);

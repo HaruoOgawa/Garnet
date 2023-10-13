@@ -40,7 +40,7 @@ layout(binding = 0) uniform UniformBufferObject{
     int   useOcclusionTexture;
     int   useCubeMap;
     int   useShadowMap;
-    int   t_pad_2;
+    int   useIBL;
 } ubo;
 
 #ifdef USE_OPENGL
