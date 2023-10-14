@@ -44,9 +44,7 @@ const InitWG = async () => {
     }
 };
 
-addEventListener("load", (event) => {
-    InitWG();
-});
+Module['onRuntimeInitialized'] = InitWG;
 
 addEventListener("keydown", (event) => {
     Module.ccall(
