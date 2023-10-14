@@ -13,18 +13,20 @@ namespace object
 	{
 		m_NodeList.clear();
 		m_MaterialList.clear();
-		m_TextureList.clear();
 	}
 
-	bool C3DObject::Create(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<file::CFile>& DepthVertex, const std::shared_ptr<file::CFile>& DepthFragment)
+	bool C3DObject::Create(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<file::CFile>& DepthVertex, const std::shared_ptr<file::CFile>& DepthFragment, const std::shared_ptr<graphics::CTextureSet>& TextureSet)
 	{
+		// GPU上のテクスチャリソースが解放されてしまうので保持しておく
+		m_TextureSet = TextureSet;
+
 		// ワールド行列の計算
 		CalcWorldMatrix();
 
 		// Material
 		for (auto& Material : m_MaterialList)
 		{
-			if (!Material->Create(m_TextureList, m_CubeMapList)) return false;
+			if (!Material->Create(m_TextureSet)) return false;
 			
 			if (DepthVertex && DepthFragment)
 			{
@@ -213,26 +215,6 @@ namespace object
 	const std::vector<std::shared_ptr<graphics::CMaterial>>& C3DObject::GetMaterialList() const
 	{
 		return m_MaterialList;
-	}
-
-	void C3DObject::AddTexture(const std::shared_ptr<graphics::CTexture>& Texture)
-	{
-		m_TextureList.push_back(Texture);
-	}
-
-	void C3DObject::AddCubeMap(const std::shared_ptr<graphics::CTexture>& CubeMap)
-	{
-		m_CubeMapList.push_back(CubeMap);
-	}
-
-	const std::vector<std::shared_ptr<graphics::CTexture>>& C3DObject::GetCubeMapList() const
-	{
-		return m_CubeMapList;
-	}
-
-	const std::vector<std::shared_ptr<graphics::CTexture>>& C3DObject::GetTextureList() const
-	{
-		return m_TextureList;
 	}
 
 	void C3DObject::SetRootNodeIndexList(const std::vector<std::vector<int>>& RootNodeIndexList)

@@ -113,7 +113,7 @@ namespace webapp
 		if (MainCamera) MainCamera->Update(m_DeltaSecondsTime, m_InputState);
 #endif // USE_INPUT_SYSTEM
 
-		if (!m_App->Update(m_GraphicsAPI.get(), m_LoadWorker.get())) return false;
+		if (!m_App->Update(m_GraphicsAPI.get(), m_LoadWorker.get(), m_InputState)) return false;
 
 		return true;
 	}
@@ -156,6 +156,26 @@ namespace webapp
 		else if (key == "d")
 		{
 			KeyType = input::EKeyType::KEY_TYPE_D;
+		}
+		else if (key == "1")
+		{
+			KeyType = input::EKeyType::KEY_TYPE_1;
+		}
+		else if (key == "2")
+		{
+			KeyType = input::EKeyType::KEY_TYPE_2;
+		}
+		else if (key == "3")
+		{
+			KeyType = input::EKeyType::KEY_TYPE_3;
+		}
+		else if (key == "4")
+		{
+			KeyType = input::EKeyType::KEY_TYPE_4;
+		}
+		else if (key == "5")
+		{
+			KeyType = input::EKeyType::KEY_TYPE_5;
 		}
 
 		m_InputState->SetKeyState(KeyType, IsDown);

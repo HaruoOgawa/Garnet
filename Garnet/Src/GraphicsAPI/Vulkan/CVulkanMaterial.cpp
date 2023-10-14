@@ -33,7 +33,7 @@ namespace api
 		Release();
 	}
 
-	bool CVulkanMaterial::Create(const std::vector<std::shared_ptr<graphics::CTexture>>& TextureList, const std::vector<std::shared_ptr<graphics::CTexture>>& CubeMapList)
+	bool CVulkanMaterial::Create(const std::shared_ptr<graphics::CTextureSet>& TextureSet)
 	{
 		if (!CreateShaderStages(m_CreateInfo)) return false; // Shaderの作成
 
@@ -43,7 +43,7 @@ namespace api
 		// バインドグループ(UniformとTextureで共通項)
 		if (!CreateDescriptorSetLayout(m_CreateInfo)) return false; // DescriptorSetLayoutの作成(Uniformをどのようにバインドするか), WebGPUでいうバインドグループの生成
 		if (!CreateDescriptorPool(m_CreateInfo)) return false; // DescriptorPoolを作成する -> DescriptorSetsは直接生成できず、コマンドで生成する必要がある。記述子プールはそのコマンド群のことかな？
-		if (!CreateDescriptorSets(m_CreateInfo, TextureList, CubeMapList)) return false; // DescriptorSetsを作成 -> Uniformが使用するバッファをCPUからGPUに送信するための仕組みこと. https://vkguide.dev/docs/chapter-4/descriptors/
+		if (!CreateDescriptorSets(m_CreateInfo, TextureSet)) return false; // DescriptorSetsを作成 -> Uniformが使用するバッファをCPUからGPUに送信するための仕組みこと. https://vkguide.dev/docs/chapter-4/descriptors/
 
 		// 生成処理が終わったので不要なリソースを解放する
 		m_CreateInfo = nullptr;
@@ -457,9 +457,28 @@ namespace api
 
 		return true;
 	}
-	bool CVulkanMaterial::CreateDescriptorSets(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, const std::vector<std::shared_ptr<graphics::CTexture>>& TextureList, 
-		const std::vector<std::shared_ptr<graphics::CTexture>>& CubeMapList)
+	bool CVulkanMaterial::CreateDescriptorSets(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, const std::shared_ptr<graphics::CTextureSet>& TextureSet)
 	{
+		//
+		std::vector<std::shared_ptr<graphics::CTexture>> TextureList(0);
+		if (TextureSet) TextureList = TextureSet->Get2DTextureList();
+
+		std::vector<std::shared_ptr<graphics::CTexture>> CubeMapList(0);
+		if (TextureSet) CubeMapList = TextureSet->GetCubeMapList();
+
+		std::vector<std::shared_ptr<graphics::CTexture>> FrameTextureList(0);
+		if (TextureSet) FrameTextureList = TextureSet->GetFrameTextureList();
+
+		std::shared_ptr<graphics::CTexture> Diffuse_Tex = nullptr;
+		if (TextureSet) Diffuse_Tex = TextureSet->GetDiffuse_Tex();
+
+		std::shared_ptr<graphics::CTexture> Specular_Tex = nullptr;
+		if (TextureSet) Specular_Tex = TextureSet->GetSpecular_Tex();
+
+		std::shared_ptr<graphics::CTexture> GGXLUT_Tex = nullptr;
+		if (TextureSet) GGXLUT_Tex = TextureSet->GetGGXLUT_Tex();
+
+		//
 		std::vector<VkDescriptorSetLayout> layouts(m_pGraphicsAPI->GetMaxFramesInFlight(), m_DescriptorSetLayout);
 		VkDescriptorSetAllocateInfo allocInfo{};
 		allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
@@ -569,13 +588,29 @@ namespace api
 					api::CVulkanTexture* Texture = nullptr;
 					int TextureIndex = TexLayout.TextureIndex;
 
-					if (TexLayout.TextureType == graphics::ETextureType::TEXTURE_2D)
+					if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_2D)
 					{
 						Texture = (TextureIndex >= 0 && TextureIndex < TextureList.size()) ? static_cast<api::CVulkanTexture*>(TextureList[TextureIndex].get()) : m_EmptyTexture.get();
 					}
-					else if (TexLayout.TextureType == graphics::ETextureType::TEXTURE_CUBE)
+					else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_CUBE)
 					{
 						Texture = (TextureIndex >= 0 && TextureIndex < CubeMapList.size()) ? static_cast<api::CVulkanTexture*>(CubeMapList[TextureIndex].get()) : m_EmptyTexture.get();
+					}
+					else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_FRAME)
+					{
+						Texture = (TextureIndex >= 0 && TextureIndex < FrameTextureList.size()) ? static_cast<api::CVulkanTexture*>(FrameTextureList[TextureIndex].get()) : m_EmptyTexture.get();
+					}
+					else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_IBL_Diffuse)
+					{
+						Texture = (TextureIndex >= 0 && Diffuse_Tex) ? static_cast<api::CVulkanTexture*>(Diffuse_Tex.get()) : m_EmptyTexture.get();
+					}
+					else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_IBL_Specular)
+					{
+						Texture = (TextureIndex >= 0 && Specular_Tex) ? static_cast<api::CVulkanTexture*>(Specular_Tex.get()) : m_EmptyTexture.get();
+					}
+					else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_IBL_GGXLUT)
+					{
+						Texture = (TextureIndex >= 0 && GGXLUT_Tex) ? static_cast<api::CVulkanTexture*>(GGXLUT_Tex.get()) : m_EmptyTexture.get();
 					}
 
 					if (!Texture)

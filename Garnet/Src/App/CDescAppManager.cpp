@@ -140,6 +140,21 @@ namespace descapp
 			case GLFW_KEY_D:
 				KeyType = input::EKeyType::KEY_TYPE_D;
 				break;
+			case GLFW_KEY_1:
+				KeyType = input::EKeyType::KEY_TYPE_1;
+				break;
+			case GLFW_KEY_2:
+				KeyType = input::EKeyType::KEY_TYPE_2;
+				break;
+			case GLFW_KEY_3:
+				KeyType = input::EKeyType::KEY_TYPE_3;
+				break;
+			case GLFW_KEY_4:
+				KeyType = input::EKeyType::KEY_TYPE_4;
+				break;
+			case GLFW_KEY_5:
+				KeyType = input::EKeyType::KEY_TYPE_5;
+				break;
 			default:
 				break;
 		}
@@ -290,7 +305,7 @@ namespace descapp
 		if (MainCamera) MainCamera->Update(m_DeltaSecondsTime, m_InputState);
 #endif // USE_INPUT_SYSTEM
 
-		if (!m_App->Update(m_GraphicsAPI.get(), m_LoadWorker.get())) return false;
+		if (!m_App->Update(m_GraphicsAPI.get(), m_LoadWorker.get(), m_InputState)) return false;
 
 #ifdef _DEBUG
 		// FPS‚ÌŒv‘ª‚Æ•\¦(60FPS‚ğŠî€‚Æ‚·‚é)

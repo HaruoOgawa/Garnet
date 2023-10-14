@@ -30,7 +30,7 @@ struct UniformBufferObject {
     useOcclusionTexture: i32,
     useCubeMap: i32,
     useShadowMap: i32,
-    t_pad_2_: i32,
+    useIBL: i32,
 }
 
 struct VertexOutput {

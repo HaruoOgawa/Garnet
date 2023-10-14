@@ -52,11 +52,10 @@ namespace resource
 
 		// NODE
 		std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(0, m_LoadingBar->GetMeshList(), m_LoadingBar->GetMaterialList());
-		Node->SetMeshIndex(0);
 		m_LoadingBar->AddNode(Node);
 
 		// CreateŠÖ”‚ðŽÀs
-		if (!m_LoadingBar->Create(pGraphicsAPI, nullptr, nullptr)) return false;
+		if (!m_LoadingBar->Create(pGraphicsAPI, nullptr, nullptr, nullptr)) return false;
 
 		return true;
 	}

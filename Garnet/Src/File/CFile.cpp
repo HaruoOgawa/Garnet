@@ -14,10 +14,17 @@ namespace file
 		m_Filename(filename),
 		m_IsSync(false)
 	{
+		auto pos = m_Filename.find(".");
+		m_Extention = m_Filename.substr(pos + 1);
 	}
 
 	CFile::~CFile()
 	{
+	}
+
+	const std::string& CFile::GetExtention() const
+	{
+		return m_Extention;
 	}
 
 	void CFile::SetIsSync(bool IsSync)

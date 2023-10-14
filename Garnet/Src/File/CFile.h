@@ -9,6 +9,7 @@ namespace file
 	{
 		resource::ELoadStatus m_Status;
 		const std::string m_Filename;
+		std::string m_Extention;
 
 		bool m_IsSync; // 同期的にロードするかどうか. 基本的には非同期
 
@@ -17,6 +18,8 @@ namespace file
 	public:
 		CFile(const std::string& filename);
 		virtual ~CFile();
+
+		const std::string& GetExtention() const;
 
 		void SetIsSync(bool IsSync);
 

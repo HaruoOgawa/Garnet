@@ -13,12 +13,16 @@ namespace graphics {
 	class CTexture;
 }
 namespace resource { class CLoadWorker; }
+namespace input { class CInputState; }
 
 namespace scene
 {
 	class CScriptScene
 	{
 		bool m_IsLoaded;
+
+		bool m_IsDrawSponza;
+		float m_CoolTime;
 
 		// Tex of FrameBuffer
 		std::vector<std::shared_ptr<graphics::CTexture>> m_FrameTextureList;
@@ -27,12 +31,26 @@ namespace scene
 		std::shared_ptr<file::CFile> m_DepthVertex;
 		std::shared_ptr<file::CFile> m_DepthFragment;
 
+		// IBL
+		std::shared_ptr<file::CFile> m_IBL_Skybox;
+		std::shared_ptr<file::CFile> m_IBL_DiffuseEnvMap;
+		std::shared_ptr<file::CFile> m_IBL_SpecularEnvMap;
+		std::shared_ptr<file::CFile> m_IBL_GGX_LUT;
+
 		// glTF
 		std::shared_ptr<file::CFile> m_glTFData;
 		std::shared_ptr<object::C3DObject> m_glTFObject;
+		std::shared_ptr<file::CFile> m_SponzaData;
+		std::shared_ptr<object::C3DObject> m_SponzaObject;
 
+		// Object
+		std::shared_ptr<object::C3DObject> m_Background;
+
+		// Shader
 		std::shared_ptr<file::CFile> m_VertexShader;
 		std::shared_ptr<file::CFile> m_FragmentShader;
+		std::shared_ptr<file::CFile> m_MinimumVert;
+		std::shared_ptr<file::CFile> m_TextureFrag;
 
 		// Cubemap
 		std::shared_ptr<file::CFile> m_Cube0;
@@ -50,7 +68,7 @@ namespace scene
 		virtual ~CScriptScene();
 
 		bool Update(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
-			const std::shared_ptr<graphics::CDrawInfo>& DrawInfo);
+			const std::shared_ptr<graphics::CDrawInfo>& DrawInfo, const std::shared_ptr<input::CInputState>& InputState);
 		
 		bool Dispatch(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
 			const std::shared_ptr<graphics::CDrawInfo>& DrawInfo);

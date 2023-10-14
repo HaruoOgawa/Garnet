@@ -13,7 +13,7 @@ namespace graphics
 	{
 	}
 
-	bool CMaterial::Create(const std::vector<std::shared_ptr<graphics::CTexture>>& TextureList, const std::vector<std::shared_ptr<graphics::CTexture>>& CubeMapList)
+	bool CMaterial::Create(const std::shared_ptr<graphics::CTextureSet>& TextureSet)
 	{
 		return true;
 	}
@@ -38,7 +38,7 @@ namespace graphics
 
 		m_DepthMaterial->SetCullMode(graphics::ECullMode::CULL_FRONT);
 
-		if (!m_DepthMaterial->Create(std::vector<std::shared_ptr<graphics::CTexture>>(), std::vector<std::shared_ptr<graphics::CTexture>>())) return false;
+		if (!m_DepthMaterial->Create(nullptr)) return false;
 
 		return true;
 	}

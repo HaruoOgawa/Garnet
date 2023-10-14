@@ -3,6 +3,7 @@
 #include "../Debug/Message/Console.h"
 #include "../File/CFile.h"
 #include "../Interface/IGraphicsAPI.h"
+#include "../Graphics/CTextureSet.h"
 
 namespace imageeffect
 {
@@ -14,7 +15,9 @@ namespace imageeffect
 		m_BlurVertex(std::make_shared<file::CFile>("Resources\\Shaders\\blur" + m_pGraphicsAPI->GetVertexShaderExtension())),
 		m_BlurFrag(std::make_shared<file::CFile>("Resources\\Shaders\\blur" + m_pGraphicsAPI->GetFragmentShaderExtension())),
 		m_ScreenObjX(std::make_shared<object::C3DObject>("BlurX", "")),
-		m_ScreenObjY(std::make_shared<object::C3DObject>("BlurY", ""))
+		m_ScreenObjY(std::make_shared<object::C3DObject>("BlurY", "")),
+
+		m_TextureSet(std::make_shared<graphics::CTextureSet>())
 	{
 	}
 
@@ -65,16 +68,13 @@ namespace imageeffect
 	{
 		if (!m_IsLoaded) return true;
 
-		const auto& Tex = m_ScreenObjX->GetTextureList()[0];
+		if (!m_TextureSet) return true;
+
+		const auto& Tex = m_TextureSet->GetFrameTextureList()[0];
 		if (!Tex) return true;
 
 		float w = static_cast<float>(Tex->GetWidth());
 		float h = static_cast<float>(Tex->GetHeight());
-
-		/*{
-			m_ScreenObjX->GetMaterialList()[0]->SetUniformValue("UseBlur", (GetKeyState(VK_SPACE)? &glm::ivec1(0)[0] : &glm::ivec1(1)[0]));
-			m_ScreenObjY->GetMaterialList()[0]->SetUniformValue("UseBlur", (GetKeyState(VK_SPACE)? &glm::ivec1(0)[0] : &glm::ivec1(1)[0]));
-		}*/
 
 		{
 			if (!m_pGraphicsAPI->BeginRender("BlurX")) return false;
@@ -179,15 +179,6 @@ namespace imageeffect
 			MaterialX->AddShaderBuffer(UniformBuffer);
 		}
 		
-		/*{
-			auto UniformBuffer = graphics::CMaterialCreateInfo::CreateUniformBuffer({ 1 });
-			UniformBuffer->AddData("kernel", &m_GaussianKernel[0], sizeof(float) * static_cast<int>(m_GaussianKernel.size()), 1);
-
-			UniformBuffer->RecalculateBindingLayoutOffset();
-
-			MaterialX->AddShaderBuffer(UniformBuffer);
-		}*/
-		
 		{
 			auto UniformBuffer = graphics::CMaterialCreateInfo::CreateUniformBuffer({ graphics::SBindingLayout("UniformBufferObject", 0, false) });
 
@@ -198,38 +189,19 @@ namespace imageeffect
 			MaterialY->AddShaderBuffer(UniformBuffer);
 		}
 
-		/*{
-			auto UniformBuffer = graphics::CMaterialCreateInfo::CreateUniformBuffer({ 1 });
-			UniformBuffer->AddData("kernel", &m_GaussianKernel[0], sizeof(float) * static_cast<int>(m_GaussianKernel.size()), 1);
-
-			UniformBuffer->RecalculateBindingLayoutOffset();
-
-			MaterialY->AddShaderBuffer(UniformBuffer);
-		}*/
-		
-		// UBO1
-		/*{
-			auto UniformBuffer = graphics::CMaterialCreateInfo::CreateUniformBuffer({ 1 });
-			UniformBuffer->AddData("kernel", &m_GaussianKernel[0], sizeof(float) * static_cast<int>(m_GaussianKernel.size()), 1);
-
-			UniformBuffer->RecalculateBindingLayoutOffset();
-
-			Material->AddShaderBuffer(UniformBuffer);
-		}*/
-
 		// Bind Texture
 		{
 			const auto& RenderPass = m_pGraphicsAPI->GetOffScreenRenderPassMap().find("ShadowPass");
-			if (RenderPass != m_pGraphicsAPI->GetOffScreenRenderPassMap().end()) m_ScreenObjX->AddTexture(RenderPass->second->GetFrameTexture());
-			MaterialX->AddTextureBindingLayout({ "SrcTex", 2, 3, 0, graphics::ETextureType::TEXTURE_2D});
+			if (RenderPass != m_pGraphicsAPI->GetOffScreenRenderPassMap().end()) m_TextureSet->AddFrameTexture(RenderPass->second->GetFrameTexture());
+			MaterialX->AddTextureBindingLayout({ "SrcTex", 2, 3, 0, graphics::ETextureUsage::TEXTURE_USAGE_FRAME});
 
 			m_ScreenObjX->AddMaterial(MaterialX);
 		}
 
 		{
 			const auto& RenderPass = m_pGraphicsAPI->GetOffScreenRenderPassMap().find("BlurX");
-			if (RenderPass != m_pGraphicsAPI->GetOffScreenRenderPassMap().end()) m_ScreenObjY->AddTexture(RenderPass->second->GetFrameTexture());
-			MaterialY->AddTextureBindingLayout({ "SrcTex", 2, 3, 0, graphics::ETextureType::TEXTURE_2D });
+			if (RenderPass != m_pGraphicsAPI->GetOffScreenRenderPassMap().end()) m_TextureSet->AddFrameTexture(RenderPass->second->GetFrameTexture());
+			MaterialY->AddTextureBindingLayout({ "SrcTex", 2, 3, 1, graphics::ETextureUsage::TEXTURE_USAGE_FRAME });
 
 			m_ScreenObjY->AddMaterial(MaterialY);
 		}
@@ -261,19 +233,17 @@ namespace imageeffect
 		// Node
 		{
 			std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(0, m_ScreenObjX->GetMeshList(), m_ScreenObjX->GetMaterialList());
-			Node->SetMeshIndex(0);
 			m_ScreenObjX->AddNode(Node);
 		}
 
 		{
 			std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(0, m_ScreenObjY->GetMeshList(), m_ScreenObjY->GetMaterialList());
-			Node->SetMeshIndex(0);
 			m_ScreenObjY->AddNode(Node);
 		}
 
 		// Create
-		if (!m_ScreenObjX->Create(m_pGraphicsAPI, nullptr, nullptr)) return false;
-		if (!m_ScreenObjY->Create(m_pGraphicsAPI, nullptr, nullptr)) return false;
+		if (!m_ScreenObjX->Create(m_pGraphicsAPI, nullptr, nullptr, m_TextureSet)) return false;
+		if (!m_ScreenObjY->Create(m_pGraphicsAPI, nullptr, nullptr, m_TextureSet)) return false;
 
 		return true;
 	}
