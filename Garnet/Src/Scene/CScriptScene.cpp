@@ -12,9 +12,9 @@ namespace scene
 {
 	CScriptScene::CScriptScene(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker):
 		m_glTFObject(std::make_shared<object::C3DObject>("", "ShadowPass")),
-		m_glTFData(std::make_shared<file::CFile>("Resources\\Models\\MetalRoughSpheresNoTextures\\glTF-Binary\\MetalRoughSpheresNoTextures.glb")),
+		//m_glTFData(std::make_shared<file::CFile>("Resources\\Models\\MetalRoughSpheresNoTextures\\glTF-Binary\\MetalRoughSpheresNoTextures.glb")),
 		//m_glTFData(std::make_shared<file::CFile>("Resources\\Models\\Sponza\\glTF\\Sponza.glb")),
-		//m_glTFData(std::make_shared<file::CFile>("Resources\\Models\\DamagedHelmet\\glTF-Binary\\DamagedHelmet.glb")),
+		m_glTFData(std::make_shared<file::CFile>("Resources\\Models\\DamagedHelmet\\glTF-Binary\\DamagedHelmet.glb")),
 
 		m_TestPlane(std::make_shared<object::C3DObject>("", "ShadowPass")),
 
@@ -95,7 +95,7 @@ namespace scene
 		{
 			// TRS
 			//m_glTFObject->SetRot(glm::vec3(0.0f, 3.1415f * -0.5f, 0.0f)); // Sponza
-			m_glTFObject->SetScale(glm::vec3(500.0f)); // Spheres
+			//m_glTFObject->SetScale(glm::vec3(500.0f)); // Spheres
 
 			// MaterialInto
 			std::shared_ptr<graphics::CMaterialCreateInfo> createInfo = std::make_shared<graphics::CMaterialCreateInfo>();
@@ -178,7 +178,7 @@ namespace scene
 			}
 
 			// Node
-			{
+			/*{
 				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(0, m_TestPlane->GetMeshList(), m_TestPlane->GetMaterialList());
 				Node->SetPos(glm::vec3(0.0f, 0.0f, 1.0f));
 				m_TestPlane->AddNode(Node);
@@ -194,7 +194,7 @@ namespace scene
 				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(2, m_TestPlane->GetMeshList(), m_TestPlane->GetMaterialList());
 				Node->SetPos(glm::vec3(-2.5f, 0.0f, 1.0f));
 				m_TestPlane->AddNode(Node);
-			}
+			}*/
 			
 			{
 				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(3, m_TestPlane->GetMeshList(), m_TestPlane->GetMaterialList());

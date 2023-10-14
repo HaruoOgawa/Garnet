@@ -28,7 +28,8 @@ layout(binding = 0) uniform UniformBufferObject{
     float normalMapScale;
 
 	float occlusionStrength;
-    float mipCount;
+    // MipCountには反射キューブマップかIBLのSpecularMapの値が入っている(これらは必ずどちらか一方しか使用されないため)
+	float mipCount;
     float ShadowMapX;
     float ShadowMapY;
 
@@ -325,6 +326,59 @@ float CalcShadow(vec3 lsp, vec3 nomral, vec3 lightDir)
 	return p_max;
 }
 
+vec3 ComputeReflectionColor(PBRParam pbrParam, vec3 v, vec3 n)
+{
+	// 反射カラーを計算
+	vec3 reflectColor = vec3(0.0);
+	if(ubo.useCubeMap != 0)
+	{
+		float mipCount = ubo.mipCount;
+		float lod = mipCount * pbrParam.perceptualRoughness;
+		#ifdef USE_OPENGL
+		reflectColor = LINEARtoSRGB(textureLod(cubemapTexture, reflect(v, n), lod)).rgb;
+		#else
+		reflectColor = LINEARtoSRGB(textureLod(samplerCube(cubemapTexture, cubemapTextureSampler), reflect(v, n), lod)).rgb;
+		#endif
+	}
+
+	return reflectColor;
+}
+
+vec2 GetSphericalTexcoord(vec3 Dir)
+{
+	float pi = 3.1415;
+
+	float theta = acos(Dir.y);
+	float phi = atan(Dir.z, Dir.x);
+
+	vec2 st = vec2(phi / (2.0 * pi), theta / pi);
+
+	return st;
+}
+
+vec3 ComputeIBL(PBRParam pbrParam, vec3 v, vec3 n) 
+{
+	float mipCount = ubo.mipCount;
+	float lod = mipCount * pbrParam.perceptualRoughness;
+
+	// テクスチャ計算
+	#ifdef USE_OPENGL
+	vec3 brdf = SRGBtoLINEAR(texture(IBL_GGXLUT_Texture, vec2(pbrParam.NdotV, 1.0 - pbrParam.perceptualRoughness))).rgb;
+	vec3 diffuseLight = SRGBtoLINEAR(texture(IBL_Diffuse_Texture, GetSphericalTexcoord(n))).rgb;
+	vec3 specularLight = SRGBtoLINEAR(textureLod(IBL_Specular_Texture, GetSphericalTexcoord(reflect(v, n)), lod)).rgb;
+	#else
+	vec3 brdf = SRGBtoLINEAR(texture(sampler2D(IBL_GGXLUT_Texture, IBL_GGXLUT_TextureSampler), vec2(pbrParam.NdotV, 1.0 - pbrParam.perceptualRoughness))).rgb;
+	vec3 diffuseLight = SRGBtoLINEAR(texture(sampler2D(IBL_Diffuse_Texture, IBL_Diffuse_TextureSampler), GetSphericalTexcoord(n))).rgb;
+	vec3 specularLight = SRGBtoLINEAR(textureLod(sampler2D(IBL_Specular_Texture, IBL_Specular_TextureSampler), GetSphericalTexcoord(reflect(v, n)), lod)).rgb;
+	#endif
+
+	// 
+	vec3 diffuse = diffuseLight * pbrParam.diffuseColor;
+	vec3 specular = specularLight * (pbrParam.specularColor * brdf.x + brdf.y);
+
+	return diffuse + specular;
+}
+
 void main(){
 	vec4 col = vec4(1.0);
 
@@ -452,29 +506,27 @@ void main(){
 		// https://ja.wikipedia.org/wiki/%E6%8B%A1%E6%95%A3%E5%8F%8D%E5%B0%84
 		diffuse += (1.0 - F) * CalcDiffuseBRDF(pbrParam);
 
-		// 反射カラーを計算
-		vec3 reflectColor = vec3(0.0);
-		if(ubo.useCubeMap != 0)
-		{
-			float mipCount = ubo.mipCount;
-			float lod = mipCount * perceptualRoughness;
-			#ifdef USE_OPENGL
-			reflectColor = LINEARtoSRGB(textureLod(cubemapTexture, reflect(v, n), lod)).rgb;
-			#else
-			reflectColor = LINEARtoSRGB(textureLod(samplerCube(cubemapTexture, cubemapTextureSampler), reflect(v, n), lod)).rgb;
-			#endif
-		}
-	
 		// レンダリング方程式を構築
-		col.rgb = NdotL * (specular + diffuse) + reflectColor * F;
+		col.rgb = NdotL * (specular + diffuse);
 
-		// 疑似的な環境光(ライトの反対方向が暗くなりすぎないようにするための対策)
-		// 本来はGIやIBLで代用するところだが、ひとまずこのような簡易的な方法で代用
-		// GIやIBLを使用するときはプリプロセッサでここは実行されないようにする
-		// (Cubemapを外したとき、これがないと真っ暗になる)
-		// https://cgworld.jp/terms/%E3%82%A2%E3%83%B3%E3%83%93%E3%82%A8%E3%83%B3%E3%83%88.html
-		vec3 gi_diffuse = clamp(specular, 0.04, 1.0);
-		col.rgb += gi_diffuse * diffuse;
+		if(ubo.useIBL != 0)
+		{
+			// IBL
+			col.rgb += ComputeIBL(pbrParam, v, n);
+		}
+		else
+		{
+			// 反射カラーを計算
+			col.rgb += ComputeReflectionColor(pbrParam, v, n) * F;
+
+			// 疑似的な環境光(ライトの反対方向が暗くなりすぎないようにするための対策)
+			// 本来はGIやIBLで代用するところだが、ひとまずこのような簡易的な方法で代用
+			// GIやIBLを使用するときはプリプロセッサでここは実行されないようにする
+			// (Cubemapを外したとき、これがないと真っ暗になる)
+			// https://cgworld.jp/terms/%E3%82%A2%E3%83%B3%E3%83%93%E3%82%A8%E3%83%B3%E3%83%88.html
+			vec3 gi_diffuse = clamp(specular, 0.04, 1.0);
+			col.rgb += gi_diffuse * diffuse;
+		}
 	}
 
 	// AO Mapの適応

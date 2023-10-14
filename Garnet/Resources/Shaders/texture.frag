@@ -38,7 +38,6 @@ void main()
 
 		float theta = acos(fViewDir.y);
 		float phi = atan(fViewDir.z, fViewDir.x);
-		phi = (phi < 0.0)? (phi + 2.0 * pi) : phi;
 
 		st = vec2(phi / (2.0 * pi), theta / pi);
 	}

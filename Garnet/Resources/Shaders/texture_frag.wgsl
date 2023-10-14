@@ -27,41 +27,29 @@ fn main_1() {
     var pi: f32;
     var theta: f32;
     var phi: f32;
-    var local: f32;
 
     col = vec3<f32>(0.0, 0.0, 0.0);
-    let _e27 = fUV_1;
-    st = _e27;
-    let _e29 = ubo.useDirSampling;
-    if (_e29 != 0) {
+    let _e26 = fUV_1;
+    st = _e26;
+    let _e28 = ubo.useDirSampling;
+    if (_e28 != 0) {
         pi = 3.1414999961853027;
-        let _e32 = fViewDir_1[1u];
-        theta = acos(_e32);
-        let _e35 = fViewDir_1[2u];
-        let _e37 = fViewDir_1[0u];
-        phi = atan2(_e35, _e37);
-        let _e39 = phi;
-        if (_e39 < 0.0) {
-            let _e41 = phi;
-            let _e42 = pi;
-            local = (_e41 + (2.0 * _e42));
-        } else {
-            let _e45 = phi;
-            local = _e45;
-        }
-        let _e46 = local;
-        phi = _e46;
-        let _e47 = phi;
-        let _e48 = pi;
-        let _e51 = theta;
-        let _e52 = pi;
-        st = vec2<f32>((_e47 / (2.0 * _e48)), (_e51 / _e52));
+        let _e31 = fViewDir_1[1u];
+        theta = acos(_e31);
+        let _e34 = fViewDir_1[2u];
+        let _e36 = fViewDir_1[0u];
+        phi = atan2(_e34, _e36);
+        let _e38 = phi;
+        let _e39 = pi;
+        let _e42 = theta;
+        let _e43 = pi;
+        st = vec2<f32>((_e38 / (2.0 * _e39)), (_e42 / _e43));
     }
-    let _e55 = st;
-    let _e56 = textureSample(texImage, texSampler, _e55);
-    col = _e56.xyz;
-    let _e58 = col;
-    outColor = vec4<f32>(_e58.x, _e58.y, _e58.z, 1.0);
+    let _e46 = st;
+    let _e47 = textureSample(texImage, texSampler, _e46);
+    col = _e47.xyz;
+    let _e49 = col;
+    outColor = vec4<f32>(_e49.x, _e49.y, _e49.z, 1.0);
     return;
 }
 

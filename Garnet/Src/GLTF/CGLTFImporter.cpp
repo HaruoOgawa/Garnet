@@ -211,8 +211,17 @@ namespace gltf
 				UniformBuffer->AddData("normalMapScale", &normalMapScale, sizeof(float), 0);
 				UniformBuffer->AddData("occlusionStrength", &occlusionStrength, sizeof(float), 0);
 
+				// MipCountには反射キューブマップかIBLのSpecularMapの値が入っている(これらは必ずどちらか一方しか使用されないため)
 				float MipCount = 1.0f;
-				if (CubeTexList.size() > 0) MipCount = CubeTexList[0]->GetMipCount();
+				if (CubeTexList.size() > 0)
+				{
+					MipCount = CubeTexList[0]->GetMipCount();
+				}
+				else if(Specular_Tex)
+				{
+					MipCount = Specular_Tex->GetMipCount();
+				}
+
 				UniformBuffer->AddData("mipCount", &glm::vec1(MipCount)[0], sizeof(float), 0);
 
 				int ShadowMapX = 1, ShadowMapY = 1;
