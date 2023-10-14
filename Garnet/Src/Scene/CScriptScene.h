@@ -28,6 +28,7 @@ namespace scene
 		std::shared_ptr<file::CFile> m_DepthFragment;
 
 		// IBL
+		std::shared_ptr<file::CFile> m_IBL_Skybox;
 		std::shared_ptr<file::CFile> m_IBL_DiffuseEnvMap;
 		std::shared_ptr<file::CFile> m_IBL_SpecularEnvMap;
 		std::shared_ptr<file::CFile> m_IBL_GGX_LUT;

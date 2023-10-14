@@ -10,14 +10,23 @@ layout(binding = 0) uniform UniformBufferObject{
     mat4 view;
     mat4 proj;
 	mat4 lightVPMat;
+
+	vec4 cameraPos;
+
+	int useDirSampling;
+	float time;
+	int pad1;
+	int pad2;
 } ubo;
 
 layout(location = 0) out vec3 fWolrdNormal;
 layout(location = 1) out vec2 fUV;
+layout(location = 2) out vec3 fViewDir;
 
 void main()
 {
 	gl_Position = ubo.proj * ubo.view * ubo.model * vec4(inPosition, 1.0);
 	fWolrdNormal = (ubo.model * vec4(inNormal, 0.0)).xyz;
 	fUV = inTexcoord;
+	fViewDir = normalize((ubo.model * vec4(inPosition, 1.0)).xyz - ubo.cameraPos.xyz);
 }

@@ -1,5 +1,6 @@
 #include "CPresetPrimitive.h"
 #include "../GraphicsAPI/CRendererCreateInfo.h"
+#include <glm/glm.hpp>
 
 namespace graphics
 {
@@ -211,6 +212,65 @@ namespace graphics
 		};
 
 		//
+		createInfo->SetVertices(Vertices);
+		createInfo->SetIndices(Indices);
+		createInfo->SetAttributeDimensions(std::vector<int>({ 3 , 3 , 2, 4}));
+
+		return true;
+	}
+	
+	bool CPresetPrimitive::CreateSphere(std::shared_ptr<renderer::CRendererCreateInfo>& createInfo)
+	{
+		// Vertex Buffer
+		std::vector<float> Pos;
+		std::vector<float> Normal;
+		std::vector<float> UV;
+		std::vector<float> Tangent;
+
+		// Indices
+		std::vector<unsigned short> Indices;
+
+		//
+		float pi = 3.14159265f, row = 16.0f, column = 16.0f, rad = 1.0f;
+
+		for (auto i = 0; i <= row; i++) {
+			auto r = pi / row * i;
+			auto ry = glm::cos(r);
+			auto rr = glm::sin(r);
+			for (auto ii = 0; ii <= column; ii++) {
+				float tr = pi * 2 / column * ii;
+				float tx = rr * rad * glm::cos(tr);
+				float ty = ry * rad;
+				float tz = rr * rad * glm::sin(tr);
+				float rx = rr * glm::cos(tr);
+				float rz = rr * glm::sin(tr);
+
+				Pos.push_back(tx); Pos.push_back(ty); Pos.push_back(tz);
+				Normal.push_back(rx); Normal.push_back(ry); Normal.push_back(rz);
+				UV.push_back(static_cast<float>(1 - 1 / column * ii)); UV.push_back(static_cast<float>(1 / row * i));
+			}
+		}
+
+		for (int i = 0; i < row; i++) {
+			for (int ii = 0; ii < static_cast<int>(column); ii++) {
+				int r = (static_cast<int>(column) + 1) * i + ii;
+
+				Indices.push_back(static_cast<int>(r));
+				Indices.push_back(static_cast<int>(r + 1));
+				Indices.push_back(static_cast<int>(r + static_cast<int>(column) + 2));
+				Indices.push_back(static_cast<int>(r));
+				Indices.push_back(static_cast<int>(r + static_cast<int>(column) + 2));
+				Indices.push_back(static_cast<int>(r + static_cast<int>(column) + 1));
+			}
+		}
+
+		Tangent.resize(Pos.size() / 3 * 4, 0.0f);
+
+		//
+		std::vector<std::vector<float>> Vertices = {
+			Pos, Normal, UV, Tangent
+		};
+
 		createInfo->SetVertices(Vertices);
 		createInfo->SetIndices(Indices);
 		createInfo->SetAttributeDimensions(std::vector<int>({ 3 , 3 , 2, 4}));

@@ -18,6 +18,7 @@ namespace scene
 
 		m_TestPlane(std::make_shared<object::C3DObject>("", "ShadowPass")),
 
+		m_IBL_Skybox(std::make_shared<file::CFile>("Resources\\IBL\\output_skybox.hdr")),
 		m_IBL_DiffuseEnvMap(std::make_shared<file::CFile>("Resources\\IBL\\output_iem.hdr")),
 		m_IBL_SpecularEnvMap(std::make_shared<file::CFile>("Resources\\IBL\\output_pmrem.hdr")),
 		m_IBL_GGX_LUT(std::make_shared<file::CFile>("Resources\\Textures\\ggx_lut.jpg")),
@@ -42,6 +43,7 @@ namespace scene
 		pLoadWorker->AddFirstLoadResource(m_DepthVertex);
 		pLoadWorker->AddFirstLoadResource(m_DepthFragment);
 		pLoadWorker->AddFirstLoadResource(m_glTFData);
+		pLoadWorker->AddFirstLoadResource(m_IBL_Skybox);
 		pLoadWorker->AddFirstLoadResource(m_IBL_DiffuseEnvMap);
 		pLoadWorker->AddFirstLoadResource(m_IBL_SpecularEnvMap);
 		pLoadWorker->AddFirstLoadResource(m_IBL_GGX_LUT);
@@ -77,6 +79,9 @@ namespace scene
 		if (!CubeTex->Create(CubeDataList)) return false;
 
 		// IBL
+		auto IBL_Skybox_Tex = pGraphicsAPI->CreateTexture(false);
+		if (!IBL_Skybox_Tex->Create(m_IBL_Skybox->GetData())) return false;
+		
 		auto IBL_Diffuse_Tex = pGraphicsAPI->CreateTexture(false);
 		if (!IBL_Diffuse_Tex->Create(m_IBL_DiffuseEnvMap->GetData())) return false;
 
@@ -118,20 +123,32 @@ namespace scene
 				auto Mat_0 = pGraphicsAPI->CreateMaterial(createInfo);
 				auto Mat_1 = pGraphicsAPI->CreateMaterial(createInfo);
 				auto Mat_2 = pGraphicsAPI->CreateMaterial(createInfo);
+				auto Mat_3 = pGraphicsAPI->CreateMaterial(createInfo);
 
 				auto UBO = graphics::CMaterialCreateInfo::CreateUniformBuffer({ graphics::SBindingLayout("UniformBufferObject", 0, false) });
 				UBO->AddData("model", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
 				UBO->AddData("view", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
 				UBO->AddData("proj", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
 				UBO->AddData("lightVPMat", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
+				UBO->AddData("cameraPos", &glm::vec4(1.0f)[0], sizeof(glm::vec4), 0);
+				UBO->AddData("useDirSampling", &glm::ivec1(0)[0], sizeof(glm::ivec1), 0);
+				UBO->AddData("time", &glm::vec1(0.0f)[0], sizeof(glm::vec1), 0);
+				UBO->AddData("pad1", &glm::ivec1(0)[0], sizeof(glm::ivec1), 0);
+				UBO->AddData("pad2", &glm::ivec1(0)[0], sizeof(glm::ivec1), 0);
 
 				Mat_0->AddShaderBuffer(UBO); Mat_1->AddShaderBuffer(UBO); Mat_2->AddShaderBuffer(UBO);
+
+				UBO->SetData("useDirSampling", &glm::ivec1(1)[0], sizeof(glm::ivec1));
+				Mat_3->AddShaderBuffer(UBO);
 
 				Mat_0->AddTextureBindingLayout({ "texImage", 1, 2, 0, graphics::ETextureUsage::TEXTURE_USAGE_IBL_Diffuse });
 				Mat_1->AddTextureBindingLayout({ "texImage", 1, 2, 0, graphics::ETextureUsage::TEXTURE_USAGE_IBL_Specular });
 				Mat_2->AddTextureBindingLayout({ "texImage", 1, 2, 0, graphics::ETextureUsage::TEXTURE_USAGE_IBL_GGXLUT });
+				Mat_3->AddTextureBindingLayout({ "texImage", 1, 2, 0, graphics::ETextureUsage::TEXTURE_USAGE_2D });
 
-				m_TestPlane->AddMaterial(Mat_0); m_TestPlane->AddMaterial(Mat_1); m_TestPlane->AddMaterial(Mat_2);
+				Mat_3->SetCullMode(graphics::ECullMode::CULL_FRONT);
+
+				m_TestPlane->AddMaterial(Mat_0); m_TestPlane->AddMaterial(Mat_1); m_TestPlane->AddMaterial(Mat_2); m_TestPlane->AddMaterial(Mat_3);
 			}
 
 			// Mesh
@@ -143,6 +160,18 @@ namespace scene
 				graphics::CPresetPrimitive::CreateBoard(createInfo);
 
 				std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(createInfo, i);
+				Mesh->AddPrimitive(Primitive);
+
+				m_TestPlane->AddMesh(Mesh);
+			}
+
+			{
+				std::shared_ptr<graphics::CMesh> Mesh = std::make_shared<graphics::CMesh>();
+
+				std::shared_ptr<renderer::CRendererCreateInfo> createInfo = std::make_shared<renderer::CRendererCreateInfo>();
+				graphics::CPresetPrimitive::CreateSphere(createInfo);
+
+				std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(createInfo, 3);
 				Mesh->AddPrimitive(Primitive);
 
 				m_TestPlane->AddMesh(Mesh);
@@ -166,9 +195,16 @@ namespace scene
 				Node->SetPos(glm::vec3(-2.5f, 0.0f, 1.0f));
 				m_TestPlane->AddNode(Node);
 			}
+			
+			{
+				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(3, m_TestPlane->GetMeshList(), m_TestPlane->GetMaterialList());
+				Node->SetScale(glm::vec3(500.0f));
+				m_TestPlane->AddNode(Node);
+			}
 
 			// TextureSet
 			std::shared_ptr<graphics::CTextureSet> TextureSet = std::make_shared<graphics::CTextureSet>();
+			TextureSet->Add2DTexture(IBL_Skybox_Tex);
 			TextureSet->AddIBLTexture(IBL_Diffuse_Tex, IBL_Specular_Tex, IBL_GGXLUT_Tex);
 
 			// Create
