@@ -469,6 +469,15 @@ namespace api
 		std::vector<std::shared_ptr<graphics::CTexture>> FrameTextureList(0);
 		if (TextureSet) FrameTextureList = TextureSet->GetFrameTextureList();
 
+		std::shared_ptr<graphics::CTexture> Diffuse_Tex = nullptr;
+		if (TextureSet) Diffuse_Tex = TextureSet->GetDiffuse_Tex();
+
+		std::shared_ptr<graphics::CTexture> Specular_Tex = nullptr;
+		if (TextureSet) Specular_Tex = TextureSet->GetSpecular_Tex();
+
+		std::shared_ptr<graphics::CTexture> GGXLUT_Tex = nullptr;
+		if (TextureSet) GGXLUT_Tex = TextureSet->GetGGXLUT_Tex();
+
 		//
 		std::vector<VkDescriptorSetLayout> layouts(m_pGraphicsAPI->GetMaxFramesInFlight(), m_DescriptorSetLayout);
 		VkDescriptorSetAllocateInfo allocInfo{};
@@ -591,9 +600,17 @@ namespace api
 					{
 						Texture = (TextureIndex >= 0 && TextureIndex < FrameTextureList.size()) ? static_cast<api::CVulkanTexture*>(FrameTextureList[TextureIndex].get()) : m_EmptyTexture.get();
 					}
-					else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_IBL)
+					else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_IBL_Diffuse)
 					{
-						// ‚ ‚Æ‚ÅŽÀ‘•
+						Texture = (TextureIndex >= 0 && Diffuse_Tex) ? static_cast<api::CVulkanTexture*>(Diffuse_Tex.get()) : m_EmptyTexture.get();
+					}
+					else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_IBL_Specular)
+					{
+						Texture = (TextureIndex >= 0 && Specular_Tex) ? static_cast<api::CVulkanTexture*>(Specular_Tex.get()) : m_EmptyTexture.get();
+					}
+					else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_IBL_GGXLUT)
+					{
+						Texture = (TextureIndex >= 0 && GGXLUT_Tex) ? static_cast<api::CVulkanTexture*>(GGXLUT_Tex.get()) : m_EmptyTexture.get();
 					}
 
 					if (!Texture)

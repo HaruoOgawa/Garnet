@@ -36,8 +36,14 @@ namespace scene
 		std::shared_ptr<file::CFile> m_glTFData;
 		std::shared_ptr<object::C3DObject> m_glTFObject;
 
+		// Object
+		std::shared_ptr<object::C3DObject> m_TestPlane;
+
+		// Shader
 		std::shared_ptr<file::CFile> m_VertexShader;
 		std::shared_ptr<file::CFile> m_FragmentShader;
+		std::shared_ptr<file::CFile> m_MinimumVert;
+		std::shared_ptr<file::CFile> m_TextureFrag;
 
 		// Cubemap
 		std::shared_ptr<file::CFile> m_Cube0;

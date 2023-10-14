@@ -7,7 +7,7 @@ namespace object
 {
 	CNode::CNode(int MeshIndex, const std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, const std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList):
 		m_Name(""),
-		m_MeshIndex(-1),
+		m_MeshIndex(MeshIndex),
 		m_LocalTransform(std::make_shared<math::CTransform>()),
 		m_WorldMatrix(glm::mat4(1.0f))
 	{
@@ -43,11 +43,6 @@ namespace object
 	void CNode::SetName(const std::string& Name)
 	{
 		m_Name = Name;
-	}
-
-	void CNode::SetMeshIndex(int MeshIndex)
-	{
-		m_MeshIndex = MeshIndex;
 	}
 
 	int CNode::GetMeshIndex() const

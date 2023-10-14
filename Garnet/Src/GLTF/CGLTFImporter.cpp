@@ -156,6 +156,15 @@ namespace gltf
 		std::vector<std::shared_ptr<graphics::CTexture>> FrameTextureList(0);
 		if (TextureSet) FrameTextureList = TextureSet->GetFrameTextureList();
 
+		std::shared_ptr<graphics::CTexture> Diffuse_Tex = nullptr;
+		if (TextureSet) Diffuse_Tex = TextureSet->GetDiffuse_Tex();
+
+		std::shared_ptr<graphics::CTexture> Specular_Tex = nullptr;
+		if (TextureSet) Specular_Tex = TextureSet->GetSpecular_Tex();
+
+		std::shared_ptr<graphics::CTexture> GGXLUT_Tex = nullptr;
+		if (TextureSet) GGXLUT_Tex = TextureSet->GetGGXLUT_Tex();
+
 		//
 		for (const auto& glTfMaterial : model.materials)
 		{
@@ -312,10 +321,22 @@ namespace gltf
 						UniformBuffer->AddData("useShadowMap", &glm::uvec1(0)[0], sizeof(int), 0);
 					}
 
-					// IBL(‚ ‚Æ‚ÅŽÀ‘•)
+					// IBL
+					if(Diffuse_Tex && Specular_Tex && GGXLUT_Tex)
 					{
-						int Flag = 0;
-						UniformBuffer->AddData("useIBL", &Flag, sizeof(int), 0);
+						material->AddTextureBindingLayout({ "IBL_Diffuse_Texture", 15, 16, 0, graphics::ETextureUsage::TEXTURE_USAGE_IBL_Diffuse });
+						material->AddTextureBindingLayout({ "IBL_Specular_Texture", 17, 18, 0, graphics::ETextureUsage::TEXTURE_USAGE_IBL_Specular });
+						material->AddTextureBindingLayout({ "IBL_GGXLUT_Texture", 19, 20, 0, graphics::ETextureUsage::TEXTURE_USAGE_IBL_GGXLUT });
+
+						UniformBuffer->AddData("useIBL", &glm::ivec1(1)[0], sizeof(int), 0);
+					}
+					else
+					{
+						material->AddTextureBindingLayout({ "IBL_Diffuse_Texture", 15, 16, -1, graphics::ETextureUsage::TEXTURE_USAGE_IBL_Diffuse });
+						material->AddTextureBindingLayout({ "IBL_Specular_Texture", 17, 18, -1, graphics::ETextureUsage::TEXTURE_USAGE_IBL_Specular });
+						material->AddTextureBindingLayout({ "IBL_GGXLUT_Texture", 19, 20, -1, graphics::ETextureUsage::TEXTURE_USAGE_IBL_GGXLUT });
+
+						UniformBuffer->AddData("useIBL", &glm::ivec1(0)[0], sizeof(int), 0);
 					}
 				}
 
@@ -550,8 +571,6 @@ namespace gltf
 			std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(MeshIndex, MeshList, MaterialList);
 			
 			Node->SetName(glTFNode.name);
-			
-			Node->SetMeshIndex(MeshIndex);
 
 			const auto& scale = glTFNode.scale;
 			if (scale.size() >= 3)

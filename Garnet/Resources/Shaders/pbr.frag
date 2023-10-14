@@ -51,6 +51,9 @@ layout(binding = 7) uniform sampler2D normalTexture;
 layout(binding = 9) uniform sampler2D occlusionTexture;
 layout(binding = 11) uniform samplerCube cubemapTexture;
 layout(binding = 13) uniform sampler2D shadowmapTexture;
+layout(binding = 15) uniform sampler2D IBL_Diffuse_Texture;
+layout(binding = 17) uniform sampler2D IBL_Specular_Texture;
+layout(binding = 19) uniform sampler2D IBL_GGXLUT_Texture;
 #else
 layout(binding = 1) uniform texture2D baseColorTexture;
 layout(binding = 2) uniform sampler baseColorTextureSampler;
@@ -72,6 +75,15 @@ layout(binding = 12) uniform sampler cubemapTextureSampler;
 
 layout(binding = 13) uniform texture2D shadowmapTexture;
 layout(binding = 14) uniform sampler shadowmapTextureSampler;
+
+layout(binding = 15) uniform texture2D IBL_Diffuse_Texture;
+layout(binding = 16) uniform sampler IBL_Diffuse_TextureSampler;
+
+layout(binding = 17) uniform texture2D IBL_Specular_Texture;
+layout(binding = 18) uniform sampler IBL_Specular_TextureSampler;
+
+layout(binding = 19) uniform texture2D IBL_GGXLUT_Texture;
+layout(binding = 20) uniform sampler IBL_GGXLUT_TextureSampler;
 #endif
 
 // ‚È‚ñ‚©UnityPBR‚Å‚à‚Ý‚½’l‚¾‚È‚Ÿ

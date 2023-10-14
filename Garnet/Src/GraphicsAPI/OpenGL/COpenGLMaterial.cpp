@@ -99,6 +99,15 @@ namespace api
 		std::vector<std::shared_ptr<graphics::CTexture>> FrameTextureList(0);
 		if (m_TextureSet) FrameTextureList = m_TextureSet->GetFrameTextureList();
 
+		std::shared_ptr<graphics::CTexture> Diffuse_Tex = nullptr;
+		if (m_TextureSet) Diffuse_Tex = m_TextureSet->GetDiffuse_Tex();
+
+		std::shared_ptr<graphics::CTexture> Specular_Tex = nullptr;
+		if (m_TextureSet) Specular_Tex = m_TextureSet->GetSpecular_Tex();
+
+		std::shared_ptr<graphics::CTexture> GGXLUT_Tex = nullptr;
+		if (m_TextureSet) GGXLUT_Tex = m_TextureSet->GetGGXLUT_Tex();
+
 		int TexOrderIndex = 0;
 		for (const auto& TexLayout : m_TextureBindingLayoutList)
 		{
@@ -118,9 +127,17 @@ namespace api
 			{
 				Texture = (TextureIndex >= 0 && TextureIndex < FrameTextureList.size()) ? static_cast<api::COpenGLTexture*>(FrameTextureList[TextureIndex].get()) : m_EmptyTexture.get();
 			}
-			else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_IBL)
+			else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_IBL_Diffuse)
 			{
-				// ‚ ‚Æ‚ÅŽÀ‘•
+				Texture = (TextureIndex >= 0 && Diffuse_Tex) ? static_cast<api::COpenGLTexture*>(Diffuse_Tex.get()) : m_EmptyTexture.get();
+			}
+			else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_IBL_Specular)
+			{
+				Texture = (TextureIndex >= 0 && Specular_Tex) ? static_cast<api::COpenGLTexture*>(Specular_Tex.get()) : m_EmptyTexture.get();
+			}
+			else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_IBL_GGXLUT)
+			{
+				Texture = (TextureIndex >= 0 && GGXLUT_Tex) ? static_cast<api::COpenGLTexture*>(GGXLUT_Tex.get()) : m_EmptyTexture.get();
 			}
 #else
 			if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_2D)
@@ -135,9 +152,17 @@ namespace api
 			{
 				Texture = (TextureIndex >= 0 && TextureIndex < FrameTextureList.size()) ? static_cast<api::COpenGLTexture*>(FrameTextureList[TextureIndex].get()) : nullptr;
 			}
-			else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_IBL)
+			else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_IBL_Diffuse)
 			{
-				// ‚ ‚Æ‚ÅŽÀ‘•
+				Texture = (TextureIndex >= 0 && Diffuse_Tex) ? static_cast<api::COpenGLTexture*>(Diffuse_Tex.get()) : nullptr;
+			}
+			else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_IBL_Specular)
+			{
+				Texture = (TextureIndex >= 0 && Specular_Tex) ? static_cast<api::COpenGLTexture*>(Specular_Tex.get()) : nullptr;
+			}
+			else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_IBL_GGXLUT)
+			{
+				Texture = (TextureIndex >= 0 && GGXLUT_Tex) ? static_cast<api::COpenGLTexture*>(GGXLUT_Tex.get()) : nullptr;
 			}
 #endif
 			

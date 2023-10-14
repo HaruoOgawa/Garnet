@@ -233,13 +233,11 @@ namespace imageeffect
 		// Node
 		{
 			std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(0, m_ScreenObjX->GetMeshList(), m_ScreenObjX->GetMaterialList());
-			Node->SetMeshIndex(0);
 			m_ScreenObjX->AddNode(Node);
 		}
 
 		{
 			std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(0, m_ScreenObjY->GetMeshList(), m_ScreenObjY->GetMaterialList());
-			Node->SetMeshIndex(0);
 			m_ScreenObjY->AddNode(Node);
 		}
 

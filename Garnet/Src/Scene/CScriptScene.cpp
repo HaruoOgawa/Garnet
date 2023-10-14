@@ -12,9 +12,11 @@ namespace scene
 {
 	CScriptScene::CScriptScene(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker):
 		m_glTFObject(std::make_shared<object::C3DObject>("", "ShadowPass")),
-		//m_glTFData(std::make_shared<file::CFile>("Resources\\Models\\MetalRoughSpheresNoTextures\\glTF-Binary\\MetalRoughSpheresNoTextures.glb")),
-		m_glTFData(std::make_shared<file::CFile>("Resources\\Models\\Sponza\\glTF\\Sponza.glb")),
+		m_glTFData(std::make_shared<file::CFile>("Resources\\Models\\MetalRoughSpheresNoTextures\\glTF-Binary\\MetalRoughSpheresNoTextures.glb")),
+		//m_glTFData(std::make_shared<file::CFile>("Resources\\Models\\Sponza\\glTF\\Sponza.glb")),
 		//m_glTFData(std::make_shared<file::CFile>("Resources\\Models\\DamagedHelmet\\glTF-Binary\\DamagedHelmet.glb")),
+
+		m_TestPlane(std::make_shared<object::C3DObject>("", "ShadowPass")),
 
 		m_IBL_DiffuseEnvMap(std::make_shared<file::CFile>("Resources\\IBL\\output_iem.hdr")),
 		m_IBL_SpecularEnvMap(std::make_shared<file::CFile>("Resources\\IBL\\output_pmrem.hdr")),
@@ -32,6 +34,8 @@ namespace scene
 
 		m_VertexShader(std::make_shared<file::CFile>("Resources\\Shaders\\pbr" + pGraphicsAPI->GetVertexShaderExtension())),
 		m_FragmentShader(std::make_shared<file::CFile>("Resources\\Shaders\\pbr" + pGraphicsAPI->GetFragmentShaderExtension())),
+		m_MinimumVert(std::make_shared<file::CFile>("Resources\\Shaders\\minimum" + pGraphicsAPI->GetVertexShaderExtension())),
+		m_TextureFrag(std::make_shared<file::CFile>("Resources\\Shaders\\texture" + pGraphicsAPI->GetFragmentShaderExtension())),
 
 		m_IsLoaded(false)
 	{
@@ -43,6 +47,8 @@ namespace scene
 		pLoadWorker->AddFirstLoadResource(m_IBL_GGX_LUT);
 		pLoadWorker->AddFirstLoadResource(m_VertexShader);
 		pLoadWorker->AddFirstLoadResource(m_FragmentShader);
+		pLoadWorker->AddFirstLoadResource(m_MinimumVert);
+		pLoadWorker->AddFirstLoadResource(m_TextureFrag);
 		pLoadWorker->AddFirstLoadResource(m_Cube0);
 		pLoadWorker->AddFirstLoadResource(m_Cube1);
 		pLoadWorker->AddFirstLoadResource(m_Cube2);
@@ -83,8 +89,8 @@ namespace scene
 		// glTFObject
 		{
 			// TRS
-			m_glTFObject->SetRot(glm::vec3(0.0f, 3.1415f * -0.5f, 0.0f)); // Sponza
-			//m_glTFObject->SetScale(glm::vec3(500.0f)); // Spheres
+			//m_glTFObject->SetRot(glm::vec3(0.0f, 3.1415f * -0.5f, 0.0f)); // Sponza
+			m_glTFObject->SetScale(glm::vec3(500.0f)); // Spheres
 
 			// MaterialInto
 			std::shared_ptr<graphics::CMaterialCreateInfo> createInfo = std::make_shared<graphics::CMaterialCreateInfo>();
@@ -99,6 +105,74 @@ namespace scene
 
 			// Import
 			if (!gltf::CGLTFImporter::Import(pGraphicsAPI, m_glTFData->GetData(), m_glTFObject, createInfo, TextureSet, m_DepthVertex, m_DepthFragment)) return false;
+		}
+
+		//
+		{
+			// Material
+			{
+				std::shared_ptr<graphics::CMaterialCreateInfo> createInfo = std::make_shared<graphics::CMaterialCreateInfo>();
+				createInfo->SetVertexShaderCode(m_MinimumVert->GetData());
+				createInfo->SetFragmentShaderCode(m_TextureFrag->GetData());
+
+				auto Mat_0 = pGraphicsAPI->CreateMaterial(createInfo);
+				auto Mat_1 = pGraphicsAPI->CreateMaterial(createInfo);
+				auto Mat_2 = pGraphicsAPI->CreateMaterial(createInfo);
+
+				auto UBO = graphics::CMaterialCreateInfo::CreateUniformBuffer({ graphics::SBindingLayout("UniformBufferObject", 0, false) });
+				UBO->AddData("model", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
+				UBO->AddData("view", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
+				UBO->AddData("proj", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
+				UBO->AddData("lightVPMat", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
+
+				Mat_0->AddShaderBuffer(UBO); Mat_1->AddShaderBuffer(UBO); Mat_2->AddShaderBuffer(UBO);
+
+				Mat_0->AddTextureBindingLayout({ "texImage", 1, 2, 0, graphics::ETextureUsage::TEXTURE_USAGE_IBL_Diffuse });
+				Mat_1->AddTextureBindingLayout({ "texImage", 1, 2, 0, graphics::ETextureUsage::TEXTURE_USAGE_IBL_Specular });
+				Mat_2->AddTextureBindingLayout({ "texImage", 1, 2, 0, graphics::ETextureUsage::TEXTURE_USAGE_IBL_GGXLUT });
+
+				m_TestPlane->AddMaterial(Mat_0); m_TestPlane->AddMaterial(Mat_1); m_TestPlane->AddMaterial(Mat_2);
+			}
+
+			// Mesh
+			for(int i = 0; i < 3; i++)
+			{
+				std::shared_ptr<graphics::CMesh> Mesh = std::make_shared<graphics::CMesh>();
+
+				std::shared_ptr<renderer::CRendererCreateInfo> createInfo = std::make_shared<renderer::CRendererCreateInfo>();
+				graphics::CPresetPrimitive::CreateBoard(createInfo);
+
+				std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(createInfo, i);
+				Mesh->AddPrimitive(Primitive);
+
+				m_TestPlane->AddMesh(Mesh);
+			}
+
+			// Node
+			{
+				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(0, m_TestPlane->GetMeshList(), m_TestPlane->GetMaterialList());
+				Node->SetPos(glm::vec3(0.0f, 0.0f, 1.0f));
+				m_TestPlane->AddNode(Node);
+			}
+			
+			{
+				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(1, m_TestPlane->GetMeshList(), m_TestPlane->GetMaterialList());
+				Node->SetPos(glm::vec3(2.5f, 0.0f, 1.0f));
+				m_TestPlane->AddNode(Node);
+			}
+			
+			{
+				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(2, m_TestPlane->GetMeshList(), m_TestPlane->GetMaterialList());
+				Node->SetPos(glm::vec3(-2.5f, 0.0f, 1.0f));
+				m_TestPlane->AddNode(Node);
+			}
+
+			// TextureSet
+			std::shared_ptr<graphics::CTextureSet> TextureSet = std::make_shared<graphics::CTextureSet>();
+			TextureSet->AddIBLTexture(IBL_Diffuse_Tex, IBL_Specular_Tex, IBL_GGXLUT_Tex);
+
+			// Create
+			if (!m_TestPlane->Create(pGraphicsAPI, m_DepthVertex, m_DepthFragment, TextureSet)) return false;
 		}
 
 		return true;
@@ -119,6 +193,11 @@ namespace scene
 		{
 			if (!m_glTFObject->Update()) return false;
 		}
+		
+		if (m_TestPlane)
+		{
+			if (!m_TestPlane->Update()) return false;
+		}
 
 		return true;
 	}
@@ -137,6 +216,11 @@ namespace scene
 		if (m_glTFObject)
 		{
 			if (!m_glTFObject->Draw(IsDepthPass, Camera, Projection, DrawInfo)) return false;
+		}
+		
+		if (m_TestPlane)
+		{
+			if (!m_TestPlane->Draw(IsDepthPass, Camera, Projection, DrawInfo)) return false;
 		}
 
 		return true;

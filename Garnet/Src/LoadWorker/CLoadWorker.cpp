@@ -52,7 +52,6 @@ namespace resource
 
 		// NODE
 		std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(0, m_LoadingBar->GetMeshList(), m_LoadingBar->GetMaterialList());
-		Node->SetMeshIndex(0);
 		m_LoadingBar->AddNode(Node);
 
 		// CreateŠÖ”‚ğÀs

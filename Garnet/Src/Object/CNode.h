@@ -31,7 +31,6 @@ namespace object
 
 		void SetName(const std::string& Name);
 
-		void SetMeshIndex(int MeshIndex);
 		int GetMeshIndex() const;
 
 		void SetLocalTransform(std::shared_ptr<math::CTransform>& LocalTransform);
