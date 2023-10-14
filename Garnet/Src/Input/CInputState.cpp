@@ -117,5 +117,23 @@ namespace input
 	{
 		return m_KeyInputMap;
 	}
+
+	bool CInputState::IsKeyDown(EKeyType KeyType)
+	{
+		const auto& Key = m_KeyInputMap.find(KeyType);
+		
+		if (Key == m_KeyInputMap.end()) return false;
+
+		return Key->second;
+	}
+	
+	bool CInputState::IsKeyUp(EKeyType KeyType)
+	{
+		const auto& Key = m_KeyInputMap.find(KeyType);
+		
+		if (Key == m_KeyInputMap.end()) return false;
+
+		return (!Key->second);
+	}
 }
 #endif // #ifdef USE_INPUT_SYSTEM

@@ -10,6 +10,7 @@ namespace projection { class CProjection; }
 namespace graphics { class CDrawInfo; }
 namespace imageeffect { class CBlurEffect; }
 namespace resource { class CLoadWorker; }
+namespace input { class CInputState; }
 
 namespace app
 {
@@ -29,7 +30,7 @@ namespace app
 		bool Initialize(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker) override;
 		bool ProcessInput(api::IGraphicsAPI* pGraphicsAPI) override;
 		bool Resize(int Width, int Height) override;
-		bool Update(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker) override;
+		bool Update(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<input::CInputState>& InputState) override;
 		bool Draw(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker) override;
 
 		virtual const std::shared_ptr<camera::CCamera>& GetMainCamera() const override;

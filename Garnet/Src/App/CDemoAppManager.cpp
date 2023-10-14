@@ -131,6 +131,21 @@ namespace app
 			case 0x44:
 				KeyType = input::EKeyType::KEY_TYPE_D;
 				break;
+			case 0x31:
+				KeyType = input::EKeyType::KEY_TYPE_1;
+				break;
+			case 0x32:
+				KeyType = input::EKeyType::KEY_TYPE_2;
+				break;
+			case 0x33:
+				KeyType = input::EKeyType::KEY_TYPE_3;
+				break;
+			case 0x34:
+				KeyType = input::EKeyType::KEY_TYPE_4;
+				break;
+			case 0x35:
+				KeyType = input::EKeyType::KEY_TYPE_5;
+				break;
 			default:
 				break;
 			}
@@ -428,7 +443,7 @@ namespace app
 		if (MainCamera) MainCamera->Update(m_DeltaSecondsTime, m_InputState);
 #endif // USE_INPUT_SYSTEM
 
-		if (!m_App->Update(m_GraphicsAPI.get(), m_LoadWorker.get())) return false;
+		if (!m_App->Update(m_GraphicsAPI.get(), m_LoadWorker.get(), m_InputState)) return false;
 
 		return true;
 	}

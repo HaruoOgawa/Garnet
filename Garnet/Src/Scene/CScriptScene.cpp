@@ -11,12 +11,18 @@
 namespace scene
 {
 	CScriptScene::CScriptScene(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker):
+		m_IsDrawSponza(false),
+		m_CoolTime(0.0f),
+
 		m_glTFObject(std::make_shared<object::C3DObject>("", "ShadowPass")),
 		//m_glTFData(std::make_shared<file::CFile>("Resources\\Models\\MetalRoughSpheresNoTextures\\glTF-Binary\\MetalRoughSpheresNoTextures.glb")),
 		//m_glTFData(std::make_shared<file::CFile>("Resources\\Models\\Sponza\\glTF\\Sponza.glb")),
 		m_glTFData(std::make_shared<file::CFile>("Resources\\Models\\DamagedHelmet\\glTF-Binary\\DamagedHelmet.glb")),
+		
+		m_SponzaObject(std::make_shared<object::C3DObject>("", "ShadowPass")),
+		m_SponzaData(std::make_shared<file::CFile>("Resources\\Models\\Sponza\\glTF\\Sponza.glb")),
 
-		m_TestPlane(std::make_shared<object::C3DObject>("", "ShadowPass")),
+		m_Background(std::make_shared<object::C3DObject>("", "ShadowPass")),
 
 		m_IBL_Skybox(std::make_shared<file::CFile>("Resources\\IBL\\output_skybox.hdr")),
 		m_IBL_DiffuseEnvMap(std::make_shared<file::CFile>("Resources\\IBL\\output_iem.hdr")),
@@ -43,6 +49,7 @@ namespace scene
 		pLoadWorker->AddFirstLoadResource(m_DepthVertex);
 		pLoadWorker->AddFirstLoadResource(m_DepthFragment);
 		pLoadWorker->AddFirstLoadResource(m_glTFData);
+		pLoadWorker->AddFirstLoadResource(m_SponzaData);
 		pLoadWorker->AddFirstLoadResource(m_IBL_Skybox);
 		pLoadWorker->AddFirstLoadResource(m_IBL_DiffuseEnvMap);
 		pLoadWorker->AddFirstLoadResource(m_IBL_SpecularEnvMap);
@@ -91,10 +98,30 @@ namespace scene
 		auto IBL_GGXLUT_Tex = pGraphicsAPI->CreateTexture(false);
 		if (!IBL_GGXLUT_Tex->Create(m_IBL_GGX_LUT->GetData())) return false;
 
+		// m_SponzaObject
+		{
+			// TRS
+			m_SponzaObject->SetRot(glm::vec3(0.0f, 3.1415f * -0.5f, 0.0f)); // Sponza
+
+			// MaterialInto
+			std::shared_ptr<graphics::CMaterialCreateInfo> createInfo = std::make_shared<graphics::CMaterialCreateInfo>();
+			createInfo->SetVertexShaderCode(m_VertexShader->GetData());
+			createInfo->SetFragmentShaderCode(m_FragmentShader->GetData());
+
+			// TextureSet
+			std::shared_ptr<graphics::CTextureSet> TextureSet = std::make_shared<graphics::CTextureSet>();
+			TextureSet->AddCubeMap(CubeTex);
+			for (const auto& FrameTexture : m_FrameTextureList) { TextureSet->AddFrameTexture(FrameTexture); }
+			TextureSet->AddIBLTexture(IBL_Diffuse_Tex, IBL_Specular_Tex, IBL_GGXLUT_Tex);
+
+			// Import
+			if (!gltf::CGLTFImporter::Import(pGraphicsAPI, m_SponzaData->GetData(), m_SponzaObject, createInfo, TextureSet, m_DepthVertex, m_DepthFragment)) return false;
+		}
+
 		// glTFObject
 		{
 			// TRS
-			//m_glTFObject->SetRot(glm::vec3(0.0f, 3.1415f * -0.5f, 0.0f)); // Sponza
+			m_glTFObject->SetRot(glm::vec3(0.0f, 3.1415f * -1.0f, 0.0f)); // Sponza
 			//m_glTFObject->SetScale(glm::vec3(500.0f)); // Spheres
 
 			// MaterialInto
@@ -120,10 +147,7 @@ namespace scene
 				createInfo->SetVertexShaderCode(m_MinimumVert->GetData());
 				createInfo->SetFragmentShaderCode(m_TextureFrag->GetData());
 
-				auto Mat_0 = pGraphicsAPI->CreateMaterial(createInfo);
-				auto Mat_1 = pGraphicsAPI->CreateMaterial(createInfo);
-				auto Mat_2 = pGraphicsAPI->CreateMaterial(createInfo);
-				auto Mat_3 = pGraphicsAPI->CreateMaterial(createInfo);
+				auto Mat = pGraphicsAPI->CreateMaterial(createInfo);
 
 				auto UBO = graphics::CMaterialCreateInfo::CreateUniformBuffer({ graphics::SBindingLayout("UniformBufferObject", 0, false) });
 				UBO->AddData("model", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
@@ -131,75 +155,38 @@ namespace scene
 				UBO->AddData("proj", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
 				UBO->AddData("lightVPMat", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
 				UBO->AddData("cameraPos", &glm::vec4(1.0f)[0], sizeof(glm::vec4), 0);
-				UBO->AddData("useDirSampling", &glm::ivec1(0)[0], sizeof(glm::ivec1), 0);
+				UBO->AddData("useDirSampling", &glm::ivec1(1)[0], sizeof(glm::ivec1), 0);
 				UBO->AddData("time", &glm::vec1(0.0f)[0], sizeof(glm::vec1), 0);
 				UBO->AddData("pad1", &glm::ivec1(0)[0], sizeof(glm::ivec1), 0);
 				UBO->AddData("pad2", &glm::ivec1(0)[0], sizeof(glm::ivec1), 0);
 
-				Mat_0->AddShaderBuffer(UBO); Mat_1->AddShaderBuffer(UBO); Mat_2->AddShaderBuffer(UBO);
+				Mat->AddShaderBuffer(UBO);
 
-				UBO->SetData("useDirSampling", &glm::ivec1(1)[0], sizeof(glm::ivec1));
-				Mat_3->AddShaderBuffer(UBO);
+				Mat->AddTextureBindingLayout({ "texImage", 1, 2, 0, graphics::ETextureUsage::TEXTURE_USAGE_2D });
 
-				Mat_0->AddTextureBindingLayout({ "texImage", 1, 2, 0, graphics::ETextureUsage::TEXTURE_USAGE_IBL_Diffuse });
-				Mat_1->AddTextureBindingLayout({ "texImage", 1, 2, 0, graphics::ETextureUsage::TEXTURE_USAGE_IBL_Specular });
-				Mat_2->AddTextureBindingLayout({ "texImage", 1, 2, 0, graphics::ETextureUsage::TEXTURE_USAGE_IBL_GGXLUT });
-				Mat_3->AddTextureBindingLayout({ "texImage", 1, 2, 0, graphics::ETextureUsage::TEXTURE_USAGE_2D });
+				Mat->SetCullMode(graphics::ECullMode::CULL_FRONT);
 
-				Mat_3->SetCullMode(graphics::ECullMode::CULL_FRONT);
-
-				m_TestPlane->AddMaterial(Mat_0); m_TestPlane->AddMaterial(Mat_1); m_TestPlane->AddMaterial(Mat_2); m_TestPlane->AddMaterial(Mat_3);
+				m_Background->AddMaterial(Mat);
 			}
 
 			// Mesh
-			for(int i = 0; i < 3; i++)
-			{
-				std::shared_ptr<graphics::CMesh> Mesh = std::make_shared<graphics::CMesh>();
-
-				std::shared_ptr<renderer::CRendererCreateInfo> createInfo = std::make_shared<renderer::CRendererCreateInfo>();
-				graphics::CPresetPrimitive::CreateBoard(createInfo);
-
-				std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(createInfo, i);
-				Mesh->AddPrimitive(Primitive);
-
-				m_TestPlane->AddMesh(Mesh);
-			}
-
 			{
 				std::shared_ptr<graphics::CMesh> Mesh = std::make_shared<graphics::CMesh>();
 
 				std::shared_ptr<renderer::CRendererCreateInfo> createInfo = std::make_shared<renderer::CRendererCreateInfo>();
 				graphics::CPresetPrimitive::CreateSphere(createInfo);
 
-				std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(createInfo, 3);
+				std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(createInfo, 0);
 				Mesh->AddPrimitive(Primitive);
 
-				m_TestPlane->AddMesh(Mesh);
+				m_Background->AddMesh(Mesh);
 			}
 
 			// Node
-			/*{
-				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(0, m_TestPlane->GetMeshList(), m_TestPlane->GetMaterialList());
-				Node->SetPos(glm::vec3(0.0f, 0.0f, 1.0f));
-				m_TestPlane->AddNode(Node);
-			}
-			
 			{
-				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(1, m_TestPlane->GetMeshList(), m_TestPlane->GetMaterialList());
-				Node->SetPos(glm::vec3(2.5f, 0.0f, 1.0f));
-				m_TestPlane->AddNode(Node);
-			}
-			
-			{
-				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(2, m_TestPlane->GetMeshList(), m_TestPlane->GetMaterialList());
-				Node->SetPos(glm::vec3(-2.5f, 0.0f, 1.0f));
-				m_TestPlane->AddNode(Node);
-			}*/
-			
-			{
-				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(3, m_TestPlane->GetMeshList(), m_TestPlane->GetMaterialList());
+				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(0, m_Background->GetMeshList(), m_Background->GetMaterialList());
 				Node->SetScale(glm::vec3(500.0f));
-				m_TestPlane->AddNode(Node);
+				m_Background->AddNode(Node);
 			}
 
 			// TextureSet
@@ -208,14 +195,14 @@ namespace scene
 			TextureSet->AddIBLTexture(IBL_Diffuse_Tex, IBL_Specular_Tex, IBL_GGXLUT_Tex);
 
 			// Create
-			if (!m_TestPlane->Create(pGraphicsAPI, m_DepthVertex, m_DepthFragment, TextureSet)) return false;
+			if (!m_Background->Create(pGraphicsAPI, m_DepthVertex, m_DepthFragment, TextureSet)) return false;
 		}
 
 		return true;
 	}
 
 	bool CScriptScene::Update(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
-		const std::shared_ptr<graphics::CDrawInfo>& DrawInfo)
+		const std::shared_ptr<graphics::CDrawInfo>& DrawInfo, const std::shared_ptr<input::CInputState>& InputState)
 	{
 		if (!m_IsLoaded)
 		{
@@ -225,14 +212,33 @@ namespace scene
 			m_IsLoaded = true;
 		}
 
-		if (m_glTFObject)
+		if (InputState->IsKeyDown(input::EKeyType::KEY_TYPE_1) && m_CoolTime <= 0.0f)
+		{
+			m_IsDrawSponza = (!m_IsDrawSponza);
+			m_CoolTime = 0.5f;
+		}
+		else if (m_CoolTime > 0.0)
+		{
+			m_CoolTime -= DrawInfo->GetDeltaSecondsTime();
+		}
+		else
+		{
+			m_CoolTime = 0.0f;
+		}
+
+		if (m_IsDrawSponza && m_SponzaObject)
+		{
+			if (!m_SponzaObject->Update()) return false;
+		}
+
+		if (!m_IsDrawSponza && m_glTFObject)
 		{
 			if (!m_glTFObject->Update()) return false;
 		}
 		
-		if (m_TestPlane)
+		if (m_Background)
 		{
-			if (!m_TestPlane->Update()) return false;
+			if (!m_Background->Update()) return false;
 		}
 
 		return true;
@@ -249,14 +255,19 @@ namespace scene
 	{
 		if (!m_IsLoaded) return true;
 
-		if (m_glTFObject)
+		if (m_IsDrawSponza && m_SponzaObject)
+		{
+			if (!m_SponzaObject->Draw(IsDepthPass, Camera, Projection, DrawInfo)) return false;
+		}
+		
+		if (!m_IsDrawSponza && m_glTFObject)
 		{
 			if (!m_glTFObject->Draw(IsDepthPass, Camera, Projection, DrawInfo)) return false;
 		}
 		
-		if (m_TestPlane)
+		if (m_Background)
 		{
-			if (!m_TestPlane->Draw(IsDepthPass, Camera, Projection, DrawInfo)) return false;
+			if (!m_Background->Draw(IsDepthPass, Camera, Projection, DrawInfo)) return false;
 		}
 
 		return true;

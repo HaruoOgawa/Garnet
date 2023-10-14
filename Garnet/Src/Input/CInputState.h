@@ -14,6 +14,12 @@ namespace input
 		KEY_TYPE_A,
 		KEY_TYPE_S,
 		KEY_TYPE_D,
+		
+		KEY_TYPE_1,
+		KEY_TYPE_2,
+		KEY_TYPE_3,
+		KEY_TYPE_4,
+		KEY_TYPE_5,
 	};
 
 	class CInputState
@@ -54,6 +60,9 @@ namespace input
 
 		void SetKeyState(EKeyType KeyType, bool KeyDown);
 		const std::map<EKeyType, bool>& GetKeyInputMap() const;
+
+		bool IsKeyDown(EKeyType KeyType);
+		bool IsKeyUp(EKeyType KeyType);
 	};
 }
 #endif // #ifdef USE_INPUT_SYSTEM

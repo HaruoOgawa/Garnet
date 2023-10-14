@@ -32,8 +32,8 @@ namespace app
 		m_DrawInfo(std::make_shared<graphics::CDrawInfo>()),
 		m_BlurEffect(nullptr)
 	{
-		m_MainCamera->SetPos(glm::vec3(0.0f, 1.0f, 7.0f));
-		m_DrawInfo->GetLightCamera()->SetPos(glm::vec3(3.15f, 16.5f, -1.4f));
+		m_MainCamera->SetPos(glm::vec3(0.0f, 1.0f, -7.0f));
+		m_DrawInfo->GetLightCamera()->SetPos(glm::vec3(-2.358f, 15.6f, -0.59f));
 		m_DrawInfo->GetLightProjection()->SetNear(2.0f);
 		m_DrawInfo->GetLightProjection()->SetFar(100.0f);
 	}
@@ -77,11 +77,11 @@ namespace app
 		return true;
 	}
 
-	bool CScriptApp::Update(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker)
+	bool CScriptApp::Update(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<input::CInputState>& InputState)
 	{
 		if (!pLoadWorker->Update(pGraphicsAPI)) return false;
 
-		if (!m_ScriptScene->Update(pGraphicsAPI, pLoadWorker, m_MainCamera, m_Projection, m_DrawInfo)) return false;
+		if (!m_ScriptScene->Update(pGraphicsAPI, pLoadWorker, m_MainCamera, m_Projection, m_DrawInfo, InputState)) return false;
 		if (!m_BlurEffect->Update(pLoadWorker)) return false;
 
 		//Console::Log("[CPP] m_MainCamera => x: %f, y: %f, z: %f\n", m_MainCamera->GetPos().x, m_MainCamera->GetPos().y, m_MainCamera->GetPos().z);

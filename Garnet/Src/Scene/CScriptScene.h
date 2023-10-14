@@ -13,12 +13,16 @@ namespace graphics {
 	class CTexture;
 }
 namespace resource { class CLoadWorker; }
+namespace input { class CInputState; }
 
 namespace scene
 {
 	class CScriptScene
 	{
 		bool m_IsLoaded;
+
+		bool m_IsDrawSponza;
+		float m_CoolTime;
 
 		// Tex of FrameBuffer
 		std::vector<std::shared_ptr<graphics::CTexture>> m_FrameTextureList;
@@ -36,9 +40,11 @@ namespace scene
 		// glTF
 		std::shared_ptr<file::CFile> m_glTFData;
 		std::shared_ptr<object::C3DObject> m_glTFObject;
+		std::shared_ptr<file::CFile> m_SponzaData;
+		std::shared_ptr<object::C3DObject> m_SponzaObject;
 
 		// Object
-		std::shared_ptr<object::C3DObject> m_TestPlane;
+		std::shared_ptr<object::C3DObject> m_Background;
 
 		// Shader
 		std::shared_ptr<file::CFile> m_VertexShader;
@@ -62,7 +68,7 @@ namespace scene
 		virtual ~CScriptScene();
 
 		bool Update(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
-			const std::shared_ptr<graphics::CDrawInfo>& DrawInfo);
+			const std::shared_ptr<graphics::CDrawInfo>& DrawInfo, const std::shared_ptr<input::CInputState>& InputState);
 		
 		bool Dispatch(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
 			const std::shared_ptr<graphics::CDrawInfo>& DrawInfo);
