@@ -27,7 +27,7 @@
 
 namespace gltf
 {
-	bool CGLTFImporter::Import(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& Data, std::shared_ptr<object::C3DObject>& Object,
+	bool CGLTFImporter::ImportFromMemory(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& Data, std::shared_ptr<object::C3DObject>& Object,
 		std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, const std::shared_ptr<graphics::CTextureSet>& TextureSet,
 		const std::shared_ptr<file::CFile>& DepthVertex, const std::shared_ptr<file::CFile>& DepthFragment)
 	{
@@ -51,6 +51,44 @@ namespace gltf
 
 		if (!result) return false;
 
+		if (!Import(pGraphicsAPI, model, Object, createInfo, TextureSet, DepthVertex, DepthFragment)) return false;
+
+		return true;
+	}
+
+	bool CGLTFImporter::ImportFromString(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& Data, const std::string& BaseDir, std::shared_ptr<object::C3DObject>& Object,
+		std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, const std::shared_ptr<graphics::CTextureSet>& TextureSet,
+		const std::shared_ptr<file::CFile>& DepthVertex, const std::shared_ptr<file::CFile>& DepthFragment)
+	{
+		tinygltf::Model model;
+		tinygltf::TinyGLTF loader;
+		std::string err;
+		std::string warn;
+
+		// glTFのロード
+		bool result = loader.LoadASCIIFromString(&model, &err, &warn, reinterpret_cast<const char*>(&Data[0]), static_cast<unsigned int>(Data.size()), BaseDir);
+
+		if (!err.empty())
+		{
+			Console::Log("[glTF Error] %s\n", err.c_str());
+		}
+
+		if (!warn.empty())
+		{
+			Console::Log("[glTF Warning] %s\n", warn.c_str());
+		}
+
+		if (!result) return false;
+
+		if (!Import(pGraphicsAPI, model, Object, createInfo, TextureSet, DepthVertex, DepthFragment)) return false;
+
+		return true;
+	}
+
+	bool CGLTFImporter::Import(api::IGraphicsAPI* pGraphicsAPI, tinygltf::Model model, std::shared_ptr<object::C3DObject>& Object,
+		std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, const std::shared_ptr<graphics::CTextureSet>& TextureSet,
+		const std::shared_ptr<file::CFile>& DepthVertex, const std::shared_ptr<file::CFile>& DepthFragment)
+	{
 		// テクスチャ
 		std::vector<std::shared_ptr<graphics::CTexture>> TextureList;
 		if (!CreateTexture(pGraphicsAPI, model, TextureList)) return false;
@@ -67,11 +105,20 @@ namespace gltf
 		// メッシュ
 		std::vector<std::shared_ptr<graphics::CMesh>> MeshList;
 		if (!CreateMesh(model, MeshList)) return false;
-		
+
+		// マテリアルを持っていないのならダミーを渡す
+		if (MaterialList.size() <= 0)
+		{
+			if (!CreateDummyMaterial(pGraphicsAPI, MaterialList, createInfo, MeshList)) return false;
+		}
+
 		// ノード
 		std::vector<std::shared_ptr<object::CNode>> NodeList;
 		std::vector<std::vector<int>> RootNodeIndexList;
 		if (!CreateNode(model, NodeList, MeshList, MaterialList, RootNodeIndexList)) return false;
+
+		// アニメーション
+		if (!CreateAnimation(model)) return false;
 
 		// オブジェクトにリソースを登録
 		for (const auto& Material : MaterialList)
@@ -353,8 +400,6 @@ namespace gltf
 				material->AddShaderBuffer(UniformBuffer);
 			}
 
-			// テクスチャの割り当て
-			
 			// 登録
 			MaterialList.push_back(material);
 		}
@@ -569,6 +614,76 @@ namespace gltf
 		return true;
 	}
 	
+	bool CGLTFImporter::CreateDummyMaterial(api::IGraphicsAPI* pGraphicsAPI, std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList,
+		std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, std::vector<std::shared_ptr<graphics::CMesh>>& MeshList)
+	{
+		// マテリアルにシェーダーを設定
+		std::shared_ptr<graphics::CMaterial> material = pGraphicsAPI->CreateMaterial(createInfo);
+
+		// UBO
+		{
+			auto UniformBuffer = graphics::CMaterialCreateInfo::CreateUniformBuffer({ graphics::SBindingLayout("UniformBufferObject", 0, false) });
+
+			// UBOの初期値を設定する
+			UniformBuffer->AddData("model", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
+			UniformBuffer->AddData("view", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
+			UniformBuffer->AddData("proj", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
+			UniformBuffer->AddData("lightVPMat", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
+			UniformBuffer->AddData("lightDir", &glm::vec4(0.0f)[0], sizeof(float) * 4, 0);
+			UniformBuffer->AddData("lightColor", &glm::vec4(0.0f)[0], sizeof(float) * 4, 0);
+			UniformBuffer->AddData("cameraPos", &glm::vec4(0.0f)[0], sizeof(float) * 4, 0);
+			UniformBuffer->AddData("baseColorFactor", &glm::vec4(1.0f)[0], sizeof(float) * 4, 0);
+			UniformBuffer->AddData("emissiveFactor", &glm::vec4(0.0f)[0], sizeof(float) * 4, 0);
+			UniformBuffer->AddData("time", &glm::vec1(0.0f)[0], sizeof(float), 0);
+			UniformBuffer->AddData("metallicFactor", &glm::vec1(0.5f)[0], sizeof(float), 0);
+			UniformBuffer->AddData("roughnessFactor", &glm::vec1(0.5f)[0], sizeof(float), 0);
+			UniformBuffer->AddData("normalMapScale", &glm::vec1(1.0f)[0], sizeof(float), 0);
+			UniformBuffer->AddData("occlusionStrength", &glm::vec1(1.0f)[0], sizeof(float), 0);
+
+			float MipCount = 1.0f;
+			UniformBuffer->AddData("mipCount", &glm::vec1(MipCount)[0], sizeof(float), 0);
+
+			int ShadowMapX = 1, ShadowMapY = 1;
+			UniformBuffer->AddData("ShadowMapX", &glm::vec1(static_cast<float>(ShadowMapX))[0], sizeof(float), 0);
+			UniformBuffer->AddData("ShadowMapY", &glm::vec1(static_cast<float>(ShadowMapY))[0], sizeof(float), 0);
+
+			// テクスチャを紐づける
+			material->AddTextureBindingLayout({ "baseColorTexture", 1, 2, -1, graphics::ETextureUsage::TEXTURE_USAGE_2D }); // TextureIndex -1 は EmptyTextureである
+			UniformBuffer->AddData("useBaseColorTexture", &glm::uvec1(0)[0], sizeof(int), 0);
+			material->AddTextureBindingLayout({ "metallicRoughnessTexture", 3, 4, -1, graphics::ETextureUsage::TEXTURE_USAGE_2D }); // TextureIndex -1 は EmptyTextureである
+			UniformBuffer->AddData("useMetallicRoughnessTexture", &glm::uvec1(0)[0], sizeof(int), 0);
+			material->AddTextureBindingLayout({ "emissiveTexture", 5, 6, -1, graphics::ETextureUsage::TEXTURE_USAGE_2D }); // TextureIndex -1 は EmptyTextureである
+			UniformBuffer->AddData("useEmissiveTexture", &glm::uvec1(0)[0], sizeof(int), 0);
+			material->AddTextureBindingLayout({ "normalTexture", 7, 8, -1, graphics::ETextureUsage::TEXTURE_USAGE_2D }); // TextureIndex -1 は EmptyTextureである
+			UniformBuffer->AddData("useNormalTexture", &glm::uvec1(0)[0], sizeof(int), 0);
+			material->AddTextureBindingLayout({ "occlusionTexture", 9, 10, -1, graphics::ETextureUsage::TEXTURE_USAGE_2D }); // TextureIndex -1 は EmptyTextureである
+			UniformBuffer->AddData("useOcclusionTexture", &glm::uvec1(0)[0], sizeof(int), 0);
+			material->AddTextureBindingLayout({ "cubemapTexture", 11, 12, -1, graphics::ETextureUsage::TEXTURE_USAGE_CUBE });
+			UniformBuffer->AddData("useCubeMap", &glm::uvec1(0)[0], sizeof(int), 0);
+			material->AddTextureBindingLayout({ "shadowmapTexture", 13, 14, -1, graphics::ETextureUsage::TEXTURE_USAGE_FRAME });
+			UniformBuffer->AddData("useShadowMap", &glm::uvec1(0)[0], sizeof(int), 0);
+			material->AddTextureBindingLayout({ "IBL_Diffuse_Texture", 15, 16, -1, graphics::ETextureUsage::TEXTURE_USAGE_IBL_Diffuse });
+			material->AddTextureBindingLayout({ "IBL_Specular_Texture", 17, 18, -1, graphics::ETextureUsage::TEXTURE_USAGE_IBL_Specular });
+			material->AddTextureBindingLayout({ "IBL_GGXLUT_Texture", 19, 20, -1, graphics::ETextureUsage::TEXTURE_USAGE_IBL_GGXLUT });
+			UniformBuffer->AddData("useIBL", &glm::ivec1(0)[0], sizeof(int), 0);
+
+			// マテリアルにUBOを割り当てる
+			material->AddShaderBuffer(UniformBuffer);
+		}
+
+		MaterialList.push_back(material);
+
+		for (auto& Mesh : MeshList)
+		{
+			for (auto& Primirive : Mesh->GetPrimitiveList())
+			{
+				Primirive->SetMaterialIndex(0);
+			}
+		}
+
+		return true;
+	}
+
 	bool CGLTFImporter::CreateNode(const tinygltf::Model& model, std::vector<std::shared_ptr<object::CNode>>& NodeList, const std::vector<std::shared_ptr<graphics::CMesh>>& MeshList,
 		const std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList, std::vector<std::vector<int>>& RootNodeIndexList)
 	{
@@ -660,6 +775,11 @@ namespace gltf
 			BioTangentData[Index2 * 4 + 0] = BioTangent.x; BioTangentData[Index2 * 4 + 1] = BioTangent.y; BioTangentData[Index2 * 4 + 2] = BioTangent.z; BioTangentData[Index2 * 4 + 3] = BioTangent.w;*/
 		}
 
+		return true;
+	}
+
+	bool CGLTFImporter::CreateAnimation(const tinygltf::Model& model)
+	{
 		return true;
 	}
 

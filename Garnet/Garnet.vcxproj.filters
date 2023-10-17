@@ -1734,6 +1734,7 @@
     <None Include="Commands\GetLibAndPath.py" />
     <None Include="Resources\Shaders\minimum.vert" />
     <None Include="Resources\Shaders\texture.frag" />
+    <None Include="Resources\Models\SimpleAnimation\SimpleAnimation.gltf" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="EmscriptenBuild\CMakeLists.txt" />
