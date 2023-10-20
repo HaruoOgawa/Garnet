@@ -4,6 +4,7 @@
 #include "../Graphics/CMaterial.h"
 #include "../Graphics/CTextureSet.h"
 #include "../Math/CTransform.h"
+#include "../Animation/CAnimationClip.h"
 #include <vector>
 #include <memory>
 
@@ -25,6 +26,8 @@ namespace object
 		std::vector<std::vector<int>> m_RootNodeIndexList;
 
 		std::shared_ptr<graphics::CTextureSet> m_TextureSet;
+
+		std::vector<std::shared_ptr<animation::CAnimationClip>> m_AnimationClipList;
 	private:
 		void CalcWorldMatrix();
 		void CalcWorldMatrix(std::shared_ptr<CNode>& Node, const glm::mat4& ParentWorldMatrix);
@@ -46,6 +49,8 @@ namespace object
 		void AddMaterial(const std::shared_ptr<graphics::CMaterial>& Material);
 		const std::vector<std::shared_ptr<graphics::CMaterial>>& GetMaterialList() const;
 		
+		void AddAnimationClip(const std::shared_ptr<animation::CAnimationClip>& Clip);
+
 		void SetRootNodeIndexList(const std::vector<std::vector<int>>& RootNodeIndexList);
 		const std::vector<std::vector<int>>& GetRootNodeIndexList() const;
 

@@ -212,6 +212,11 @@ namespace object
 		m_MaterialList.push_back(Material);
 	}
 
+	void C3DObject::AddAnimationClip(const std::shared_ptr<animation::CAnimationClip>& Clip)
+	{
+		m_AnimationClipList.push_back(Clip);
+	}
+
 	const std::vector<std::shared_ptr<graphics::CMaterial>>& C3DObject::GetMaterialList() const
 	{
 		return m_MaterialList;

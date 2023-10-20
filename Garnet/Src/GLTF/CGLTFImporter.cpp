@@ -25,6 +25,8 @@
 #include "../Debug/Message/Console.h"
 #include "../Math/CMath.h"
 
+#include "../Animation/CAnimationClip.h"
+
 namespace gltf
 {
 	bool CGLTFImporter::ImportFromMemory(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& Data, std::shared_ptr<object::C3DObject>& Object,
@@ -118,7 +120,8 @@ namespace gltf
 		if (!CreateNode(model, NodeList, MeshList, MaterialList, RootNodeIndexList)) return false;
 
 		// アニメーション
-		if (!CreateAnimation(model)) return false;
+		std::vector<std::shared_ptr<animation::CAnimationClip>> AnimationClipList;
+		if (!CreateAnimation(model, AnimationClipList)) return false;
 
 		// オブジェクトにリソースを登録
 		for (const auto& Material : MaterialList)
@@ -134,6 +137,11 @@ namespace gltf
 		for (const auto& Node : NodeList)
 		{
 			Object->AddNode(Node);
+		}
+
+		for (const auto& Clip : AnimationClipList)
+		{
+			Object->AddAnimationClip(Clip);
 		}
 
 		Object->SetRootNodeIndexList(RootNodeIndexList);
@@ -460,7 +468,7 @@ namespace gltf
 						int Stride = (componentType == 5126) ? 4 : 2;
 
 						// SCALAR, VEC2, VEC3などがある 
-						int Dimension = Accessor.type;
+						int Dimension = tinygltf::GetNumComponentsInType(Accessor.type);
 
 						// byteLength: アクセサーのデータの長さ. (使用する型のバイト数, Stride) x (ディメンション) x (データ数)
 						size_t byteLength = Stride * Dimension * Count;
@@ -471,6 +479,7 @@ namespace gltf
 						const auto& BufferView = model.bufferViews[BufferViewIndex];
 
 						int BufferIndex = BufferView.buffer;
+						// アクセサー間でBufferViewを共有しつつもそのBufferViewをAccessorOffsetで分けて使用することもあるのでそれを考慮する
 						size_t byteOffset = BufferView.byteOffset + Accessor_byteOffset; // アクセサーのオフセットを考慮する
 						int target = BufferView.target;
 
@@ -540,6 +549,7 @@ namespace gltf
 					const auto& BufferView = model.bufferViews[BufferViewIndex];
 
 					int BufferIndex = BufferView.buffer;
+					// アクセサー間でBufferViewを共有しつつもそのBufferViewをAccessorOffsetで分けて使用することもあるのでそれを考慮する
 					size_t byteOffset = BufferView.byteOffset + Accessor_byteOffset;
 					
 					int target = BufferView.target;
@@ -728,7 +738,131 @@ namespace gltf
 		return true;
 	}
 
-	// Helper Function
+	bool CGLTFImporter::CreateAnimation(const tinygltf::Model& model, std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList)
+	{
+		for (const auto& glTFAnimation : model.animations)
+		{
+			std::shared_ptr<animation::CAnimationClip> AnimationClip = std::make_shared<animation::CAnimationClip>();
+
+			// samplers
+			for (const auto& glTFSampler : glTFAnimation.samplers)
+			{
+				std::shared_ptr<animation::CAnimationSampler> AnimationSampler = nullptr;
+				if (!CreateAnimationSampler(model, glTFSampler, AnimationSampler)) return false;
+
+				AnimationClip->AnimationSampler(AnimationSampler);
+			}
+
+			// channels
+			for (const auto& glTFChannel : glTFAnimation.channels)
+			{
+				int sampler = glTFChannel.sampler;
+				int target_node = glTFChannel.target_node;
+				const std::string& target_path = glTFChannel.target_path;
+			}
+
+			AnimationClipList.push_back(AnimationClip);
+		}
+
+		return true;
+	}
+
+	bool CGLTFImporter::CreateAnimationSampler(const tinygltf::Model& model, const tinygltf::AnimationSampler& glTFSampler, std::shared_ptr<animation::CAnimationSampler>& AnimationSampler)
+	{
+		std::vector<float> inputList;
+		std::vector<float> outputList;
+
+		int input = glTFSampler.input;
+		const std::string& interpolation = glTFSampler.interpolation;
+		int output = glTFSampler.output;
+
+		// SCALAR, VEC2, VEC3などがある 
+		int Accessor_type = -1;
+
+		// timeAccessor
+		{
+			const auto& Accessor = model.accessors[input];
+
+			std::vector<unsigned char> BufferData;
+			if (!CalculateBufferFromAccessor(model, Accessor, BufferData)) return false;
+
+			inputList.resize(BufferData.size() / 4);
+			std::memcpy(&inputList[0], &BufferData[0], BufferData.size());
+		}
+
+		// translationAccessor
+		{
+			const auto& Accessor = model.accessors[output];
+
+			Accessor_type = Accessor.type;
+
+			std::vector<unsigned char> BufferData;
+			if (!CalculateBufferFromAccessor(model, Accessor, BufferData)) return false;
+
+			outputList.resize(BufferData.size() / 4);
+			std::memcpy(&outputList[0], &BufferData[0], BufferData.size());
+		}
+
+		//
+		animation::EInterpolationType InterpolationType = animation::EInterpolationType::NONE;
+		if (interpolation == "STEP")
+		{
+			InterpolationType = animation::EInterpolationType::STEP;
+		}
+		else if (interpolation == "LINEAR")
+		{
+			InterpolationType = animation::EInterpolationType::LINEAR;
+		}
+		else if (interpolation == "CUBICSPLINE")
+		{
+			InterpolationType = animation::EInterpolationType::CUBICSPLINE;
+		}
+
+		// Make Sampler Object
+		AnimationSampler = std::make_shared<animation::CAnimationSampler>(InterpolationType);
+		if (!AnimationSampler->CreateKeyFrame(ConvertToEKeyFrameType(Accessor_type), inputList, outputList)) return false;
+
+		return true;
+	}
+
+	// Helper Function ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	bool CGLTFImporter::CalculateBufferFromAccessor(const tinygltf::Model& model, const tinygltf::Accessor& Accessor, std::vector<unsigned char>& BufferData)
+	{
+		int BufferViewIndex = Accessor.bufferView;
+		size_t Count = Accessor.count;
+
+		// Accessor_byteOffset: 複数のアクセサーがバッファビューを共有する場合に使用するそのバッファビュー内でのオフセットのこと
+		size_t Accessor_byteOffset = Accessor.byteOffset;
+
+		// 使用する型のバイト数. 5123のunsigned short か 5126のfloat
+		int componentType = Accessor.componentType;
+		int Stride = (componentType == 5126) ? 4 : 2;
+
+		// SCALAR, VEC2, VEC3などがある 
+		// Accessor.typeで返ってくるのはタイプのenum indexのようなものでDimentionを取得するには以下の様にGetNumComponentsInTypeを使用する必要がある
+		int Dimension = tinygltf::GetNumComponentsInType(Accessor.type);
+
+		// byteLength: アクセサーのデータの長さ. (使用する型のバイト数, Stride) x (ディメンション) x (データ数)
+		size_t byteLength = Stride * Dimension * Count;
+
+		// バッファビューを取得
+		if (BufferViewIndex < 0 || BufferViewIndex >= model.bufferViews.size()) return false;
+
+		const auto& BufferView = model.bufferViews[BufferViewIndex];
+
+		int BufferIndex = BufferView.buffer;
+
+		// アクセサー間でBufferViewを共有しつつもそのBufferViewをAccessorOffsetで分けて使用することもあるのでそれを考慮する
+		size_t byteOffset = BufferView.byteOffset + Accessor_byteOffset; // アクセサーのオフセットを考慮する
+		int target = BufferView.target;
+
+		//
+		BufferData.resize(byteLength);
+		std::memcpy(&BufferData[0], &model.buffers[BufferIndex].data[byteOffset], byteLength);
+
+		return true;
+	}
+
 	bool CGLTFImporter::RecalculateTangent(std::vector<float>& TangentData, const std::vector<float>& PosotionData, const std::vector<float>& TexcoordData, const std::vector<unsigned short>& Indices)
 	{
 		for (int i = 0; i < Indices.size(); i += 3)
@@ -775,11 +909,6 @@ namespace gltf
 			BioTangentData[Index2 * 4 + 0] = BioTangent.x; BioTangentData[Index2 * 4 + 1] = BioTangent.y; BioTangentData[Index2 * 4 + 2] = BioTangent.z; BioTangentData[Index2 * 4 + 3] = BioTangent.w;*/
 		}
 
-		return true;
-	}
-
-	bool CGLTFImporter::CreateAnimation(const tinygltf::Model& model)
-	{
 		return true;
 	}
 
@@ -830,6 +959,50 @@ namespace gltf
 		}
 
 		return true;
+	}
+
+	animation::EKeyFrameType CGLTFImporter::ConvertToEKeyFrameType(int Type)
+	{
+		if (Type == TINYGLTF_TYPE_SCALAR)
+		{
+			return animation::EKeyFrameType::KEYFRAME_TYPE_SCALAR;
+		}
+		else if (Type == TINYGLTF_TYPE_VEC2)
+		{
+			return animation::EKeyFrameType::KEYFRAME_TYPE_VEC2;
+		}
+		else if (Type == TINYGLTF_TYPE_VEC3)
+		{
+			return animation::EKeyFrameType::KEYFRAME_TYPE_VEC3;
+		}
+		else if (Type == TINYGLTF_TYPE_VEC4)
+		{
+			return animation::EKeyFrameType::KEYFRAME_TYPE_VEC4;
+		}
+		else if (Type == TINYGLTF_TYPE_MAT2)
+		{
+			return animation::EKeyFrameType::KEYFRAME_TYPE_MAT2;
+		}
+		else if (Type == TINYGLTF_TYPE_MAT3)
+		{
+			return animation::EKeyFrameType::KEYFRAME_TYPE_MAT3;
+		}
+		else if (Type == TINYGLTF_TYPE_MAT4)
+		{
+			return animation::EKeyFrameType::KEYFRAME_TYPE_MAT4;
+		}
+		else if (Type == TINYGLTF_TYPE_VECTOR)
+		{
+			return animation::EKeyFrameType::KEYFRAME_TYPE_VECTOR;
+		}
+		else if (Type == TINYGLTF_TYPE_MATRIX)
+		{
+			return animation::EKeyFrameType::KEYFRAME_TYPE_MATRIX;
+		}
+		else
+		{
+			return animation::EKeyFrameType::KEYFRAME_TYPE_NONE;
+		}
 	}
 }
 #endif // USE_GLTF

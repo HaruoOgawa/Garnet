@@ -18,12 +18,23 @@ namespace graphics
 	class CMaterialCreateInfo;
 }
 
+namespace animation
+{
+	class CAnimationClip;
+	class CAnimationSampler;
+	enum class EKeyFrameType;
+}
+
 namespace object { 
 	class C3DObject; 
 	class CNode;
 }
 
-namespace tinygltf { class Model; }
+namespace tinygltf { 
+	class Model; 
+	struct Accessor;
+	struct AnimationSampler;
+}
 
 namespace gltf
 {
@@ -47,11 +58,14 @@ namespace gltf
 		static bool CreateNode(const tinygltf::Model& model, std::vector<std::shared_ptr<object::CNode>>& NodeList, const std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, 
 			const std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList, std::vector<std::vector<int>>& RootNodeIndexList);
 
-		static bool CreateAnimation(const tinygltf::Model& model);
+		static bool CreateAnimation(const tinygltf::Model& model, std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList);
+		static bool CreateAnimationSampler(const tinygltf::Model& model, const tinygltf::AnimationSampler& glTFSampler, std::shared_ptr<animation::CAnimationSampler>& AnimationSampler);
 
 		// Helper Function
+		static bool CalculateBufferFromAccessor(const tinygltf::Model& model, const tinygltf::Accessor& Accessor, std::vector<unsigned char>& BufferData);
 		static bool RecalculateTangent(std::vector<float>& TangentDat, const std::vector<float>& PosotionData, const std::vector<float>& TexcoordData, const std::vector<unsigned short>& Indices);
 		static bool RecalculateTangentWithUINT(std::vector<float>& TangentData, const std::vector<float>& PosotionData, const std::vector<float>& TexcoordData, const std::vector<unsigned int>& Indices);
+		static animation::EKeyFrameType ConvertToEKeyFrameType(int Type);
 	public:
 		static bool ImportFromMemory(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& Data, std::shared_ptr<object::C3DObject>& Object,
 			std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, const std::shared_ptr<graphics::CTextureSet>& TextureSet,
