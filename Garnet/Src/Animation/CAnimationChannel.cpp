@@ -49,6 +49,10 @@ namespace animation
 
 	bool CAnimationChannel::UpdateTranslation(const std::vector<float>& Value)
 	{
+		if (Value.size() != 3) return true;
+
+		m_TargetNode->SetPos(glm::vec3(Value[0], Value[1], Value[2]));
+
 		return true;
 	}
 
@@ -66,6 +70,10 @@ namespace animation
 
 	bool CAnimationChannel::UpdateScale(const std::vector<float>& Value)
 	{
+		if (Value.size() != 3) return true;
+
+		m_TargetNode->SetScale(glm::vec3(Value[0], Value[1], Value[2]));
+
 		return true;
 	}
 
