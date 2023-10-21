@@ -121,7 +121,7 @@ namespace gltf
 
 		// アニメーション
 		std::vector<std::shared_ptr<animation::CAnimationClip>> AnimationClipList;
-		if (!CreateAnimation(model, AnimationClipList)) return false;
+		if (!CreateAnimation(model, AnimationClipList, NodeList)) return false;
 
 		// オブジェクトにリソースを登録
 		for (const auto& Material : MaterialList)
@@ -738,7 +738,7 @@ namespace gltf
 		return true;
 	}
 
-	bool CGLTFImporter::CreateAnimation(const tinygltf::Model& model, std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList)
+	bool CGLTFImporter::CreateAnimation(const tinygltf::Model& model, std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList, const std::vector<std::shared_ptr<object::CNode>>& NodeList)
 	{
 		for (const auto& glTFAnimation : model.animations)
 		{
@@ -750,7 +750,7 @@ namespace gltf
 				std::shared_ptr<animation::CAnimationSampler> AnimationSampler = nullptr;
 				if (!CreateAnimationSampler(model, glTFSampler, AnimationSampler)) return false;
 
-				AnimationClip->AnimationSampler(AnimationSampler);
+				AnimationClip->AddAnimationSampler(AnimationSampler);
 			}
 
 			// channels
@@ -759,6 +759,31 @@ namespace gltf
 				int sampler = glTFChannel.sampler;
 				int target_node = glTFChannel.target_node;
 				const std::string& target_path = glTFChannel.target_path;
+
+				const auto& Node = NodeList[target_node];
+
+				animation::EAnimationTarget AnimationTarget = animation::EAnimationTarget::NONE;
+
+				if (target_path == "translation")
+				{
+					AnimationTarget = animation::EAnimationTarget::TRANSLATION;
+				}
+				else if (target_path == "rotation")
+				{
+					AnimationTarget = animation::EAnimationTarget::ROTATION;
+				}
+				else if (target_path == "scale")
+				{
+					AnimationTarget = animation::EAnimationTarget::SCALE;
+				}
+				else if (target_path == "weights")
+				{
+					AnimationTarget = animation::EAnimationTarget::WEIGHTS;
+				}
+
+				std::shared_ptr<animation::CAnimationChannel> AnimationChannel = std::make_shared<animation::CAnimationChannel>(sampler, AnimationTarget, Node);
+
+				AnimationClip->AddAnimationChannel(AnimationChannel);
 			}
 
 			AnimationClipList.push_back(AnimationClip);
