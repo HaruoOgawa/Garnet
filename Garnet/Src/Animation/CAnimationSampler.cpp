@@ -110,7 +110,9 @@ namespace animation
 		case animation::EInterpolationType::LINEAR:
 			if (IsRot)
 			{
-				if(!DoSlerpInterpolation(CalcCurrentTime, Value, PrevKeyFrame, NextKeyFrame)) return false;
+				// 回転のLinearの場合、Slerp( Spherical Linear Interpolation)を使用する必要がある
+				// https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#appendix-c-interpolation
+				if(!DoSphericalLinearInterpolation(CalcCurrentTime, Value, PrevKeyFrame, NextKeyFrame)) return false;
 			}
 			else
 			{
@@ -118,7 +120,7 @@ namespace animation
 			}
 			break;
 		case animation::EInterpolationType::CUBICSPLINE:
-			if (!DoCubicSplineInterpolation(CalcCurrentTime, Value, PrevKeyFrame, NextKeyFrame)) return false;
+			if (!DoCubicSplineInterpolation(CalcCurrentTime, Value, IsRot, PrevKeyFrame, NextKeyFrame)) return false;
 			break;
 		default:
 			break;
@@ -185,7 +187,7 @@ namespace animation
 		return true;
 	}
 
-	bool CAnimationSampler::DoSlerpInterpolation(float CurrentTime, std::vector<float>& Value, const std::shared_ptr<animation::CKeyFrame>& PrevKeyFrame, const std::shared_ptr<animation::CKeyFrame>& NextKeyFrame)
+	bool CAnimationSampler::DoSphericalLinearInterpolation(float CurrentTime, std::vector<float>& Value, const std::shared_ptr<animation::CKeyFrame>& PrevKeyFrame, const std::shared_ptr<animation::CKeyFrame>& NextKeyFrame)
 	{
 		// 回転の場合は 0.0・90・-180・-90・0と指定されることもあるので通常の補完ではなくSlerpを使用する必要がある
 		float PrevTime = PrevKeyFrame->GetInput();
@@ -212,8 +214,18 @@ namespace animation
 		return true;
 	}
 
-	bool CAnimationSampler::DoCubicSplineInterpolation(float CurrentTime, std::vector<float>& Value, const std::shared_ptr<animation::CKeyFrame>& PrevKeyFrame, const std::shared_ptr<animation::CKeyFrame>& NextKeyFrame)
+	bool CAnimationSampler::DoCubicSplineInterpolation(float CurrentTime, std::vector<float>& Value, bool IsRot, const std::shared_ptr<animation::CKeyFrame>& PrevKeyFrame, const std::shared_ptr<animation::CKeyFrame>& NextKeyFrame)
 	{
+		// CubicSpline: 3次スプライン曲線
+
+		// rotationの場合、補完される四元数は正規化されている必要がある。
+		// また、エクスポートの際に全ての要素が0の四元数を書き出さないようにも注意が必要。
+		// https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#interpolation-cubic
+
+		// [メモ]
+		// BlenderでなかなかCubic Spline形式で書き出すことができないのとglTF Sampler Modelsも全てLINEAR形式で
+		// ネット上でも特にろくなサンプルが見当たらないので、CubicSplineInterpolationはそのようなモデルに出会ったときに実装対応する。
+
 		return true;
 	}
 }

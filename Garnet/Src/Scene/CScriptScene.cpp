@@ -16,7 +16,8 @@ namespace scene
 		//m_glTFData(std::make_shared<file::CFile>("Resources\\Models\\Sponza\\glTF\\Sponza.glb")),
 		//m_glTFData(std::make_shared<file::CFile>("Resources\\Models\\DamagedHelmet\\glTF-Binary\\DamagedHelmet.glb")),
 		//m_glTFData(std::make_shared<file::CFile>("Resources\\Models\\SimpleAnimation\\SimpleAnimation.gltf")),
-		m_glTFData(std::make_shared<file::CFile>("Resources\\Models\\SimpleAnimation\\Triangle_Linear_Anim_Test.gltf")),
+		//m_glTFData(std::make_shared<file::CFile>("Resources\\Models\\SimpleAnimation\\Triangle_Linear_Anim_Test.gltf")),
+		m_glTFData(std::make_shared<file::CFile>("Resources\\Models\\SimpleAnimation\\CubeiSplineTest.gltf")),
 
 		m_Background(std::make_shared<object::C3DObject>("", "ShadowPass")),
 
