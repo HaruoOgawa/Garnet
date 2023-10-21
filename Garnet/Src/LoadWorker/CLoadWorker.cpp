@@ -85,7 +85,7 @@ namespace resource
 		// ローディングバー
 		if (m_LoadingBar)
 		{
-			if (!m_LoadingBar->Update()) return false;
+			if (!m_LoadingBar->Update(0.0f)) return false;
 		}
 
 		// ローディング

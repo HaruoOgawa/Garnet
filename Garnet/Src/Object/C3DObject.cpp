@@ -5,7 +5,8 @@ namespace object
 	C3DObject::C3DObject(const std::string& PassName, const std::string& DepthPassName):
 		m_PassName(PassName),
 		m_DepthPassName(DepthPassName),
-		m_ObjectTransform(std::make_shared<math::CTransform>())
+		m_ObjectTransform(std::make_shared<math::CTransform>()),
+		m_CurrentClipIndex(-1)
 	{
 	}
 
@@ -116,8 +117,15 @@ namespace object
 		}
 	}
 
-	bool C3DObject::Update()
+	bool C3DObject::Update(float DeltaSecondsTime)
 	{
+		// アニメーションの計算
+		if (m_CurrentClipIndex >= 0 && m_CurrentClipIndex < m_AnimationClipList.size())
+		{
+			const auto& Clip = m_AnimationClipList[m_CurrentClipIndex];
+			if (!Clip->Update(DeltaSecondsTime)) return false;
+		}
+
 		// ワールド行列の更新
 		// 全ノードマイフレーム更新しているので、そのうちキャッシュを入れて更新は必要なものだけにする
 		CalcWorldMatrix();
@@ -260,5 +268,10 @@ namespace object
 	void C3DObject::SetScale(const glm::vec3& Scale)
 	{
 		m_ObjectTransform->SetScale(Scale);
+	}
+
+	void C3DObject::SetPlayClipIndex(int Index)
+	{
+		m_CurrentClipIndex = Index;
 	}
 }

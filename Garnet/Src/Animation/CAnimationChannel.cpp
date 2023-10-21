@@ -13,4 +13,64 @@ namespace animation
 	CAnimationChannel::~CAnimationChannel()
 	{
 	}
+
+	int CAnimationChannel::GetSamplerIndex() const
+	{
+		return m_SamplerIndex;
+	}
+
+	EAnimationTarget CAnimationChannel::GetAnimationTarget() const
+	{
+		return m_AnimationTarget;
+	}
+
+	bool CAnimationChannel::Update(const std::vector<float>& Value)
+	{
+		switch (m_AnimationTarget)
+		{
+		case EAnimationTarget::TRANSLATION:
+			if (!UpdateTranslation(Value)) return false;
+			break;
+		case EAnimationTarget::ROTATION:
+			if (!UpdateRotation(Value)) return false;
+			break;
+		case EAnimationTarget::SCALE:
+			if (!UpdateScale(Value)) return false;
+			break;
+		case EAnimationTarget::WEIGHTS:
+			if (!UpdateWeights(Value)) return false;
+			break;
+		default:
+			break;
+		}
+
+		return true;
+	}
+
+	bool CAnimationChannel::UpdateTranslation(const std::vector<float>& Value)
+	{
+		return true;
+	}
+
+	bool CAnimationChannel::UpdateRotation(const std::vector<float>& Value)
+	{
+		if (Value.size() != 4) return true;
+
+		glm::quat quat = glm::quat(Value[0], Value[1], Value[2], Value[3]);
+		glm::vec3 euler = glm::eulerAngles(quat);
+
+		m_TargetNode->SetRot(euler);
+
+		return true;
+	}
+
+	bool CAnimationChannel::UpdateScale(const std::vector<float>& Value)
+	{
+		return true;
+	}
+
+	bool CAnimationChannel::UpdateWeights(const std::vector<float>& Value)
+	{
+		return true;
+	}
 }

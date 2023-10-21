@@ -17,6 +17,14 @@ add_definitions(
 
 add_executable(
 	Garnet
+	../src/Animation/CAnimationChannel.cpp
+	../src/Animation/CAnimationChannel.h
+	../src/Animation/CAnimationClip.cpp
+	../src/Animation/CAnimationClip.h
+	../src/Animation/CAnimationSampler.cpp
+	../src/Animation/CAnimationSampler.h
+	../src/Animation/CKeyFrame.cpp
+	../src/Animation/CKeyFrame.h
 	../src/App/CWebAppManager.cpp
 	../src/App/CWebAppManager.h
 	../src/App/EAppType.h

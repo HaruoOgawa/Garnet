@@ -90,6 +90,11 @@ namespace object
 		m_LocalTransform->SetRot(Rot);
 	}
 
+	void CNode::AddRot(const glm::vec3& Rot)
+	{
+		m_LocalTransform->AddRot(Rot);
+	}
+
 	const glm::vec3& CNode::GetScale() const
 	{
 		return m_LocalTransform->GetScale();

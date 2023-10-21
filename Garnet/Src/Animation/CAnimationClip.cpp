@@ -2,7 +2,8 @@
 
 namespace animation
 {
-	CAnimationClip::CAnimationClip()
+	CAnimationClip::CAnimationClip():
+		m_CurrentTime(0.0f)
 	{
 	}
 
@@ -17,6 +18,28 @@ namespace animation
 
 	void CAnimationClip::AddAnimationChannel(const std::shared_ptr<animation::CAnimationChannel>& AnimationChannel)
 	{
-		m_AnimationChannelList.push_back(AnimationChannel);
+		m_ChannelList.push_back(AnimationChannel);
+	}
+
+	bool CAnimationClip::Update(float DeltaSecondsTime)
+	{
+		m_CurrentTime += DeltaSecondsTime;
+
+		for (const auto& Channel : m_ChannelList)
+		{
+			int SamplerIndex = Channel->GetSamplerIndex();
+			if (SamplerIndex < 0 || SamplerIndex >= m_SamplerList.size()) continue;
+
+			const auto& Sampler = m_SamplerList[SamplerIndex];
+			std::vector<float> Value;
+
+			bool IsRot = (Channel->GetAnimationTarget() == EAnimationTarget::ROTATION);
+
+			if (!Sampler->GetCurrentFrame(m_CurrentTime, Value, IsRot)) return false;
+
+			if (!Channel->Update(Value)) return false;
+		}
+
+		return true;
 	}
 }

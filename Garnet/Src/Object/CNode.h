@@ -44,6 +44,7 @@ namespace object
 
 		const glm::vec3& GetRot() const;
 		void SetRot(const glm::vec3& Rot);
+		void AddRot(const glm::vec3& Rot);
 
 		const glm::vec3& GetScale() const;
 		void SetScale(const glm::vec3& Scale);

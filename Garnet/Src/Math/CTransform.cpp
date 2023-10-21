@@ -40,6 +40,11 @@ namespace math
 		m_Rot = Rot;
 	}
 
+	void CTransform::AddRot(const glm::vec3& Rot)
+	{
+		m_Rot += Rot;
+	}
+
 	const glm::vec3& CTransform::GetScale() const
 	{
 		return m_Scale;
