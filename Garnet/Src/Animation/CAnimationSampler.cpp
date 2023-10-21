@@ -149,6 +149,16 @@ namespace animation
 
 	bool CAnimationSampler::DoStepInterpolation(float CurrentTime, std::vector<float>& Value, const std::shared_ptr<animation::CKeyFrame>& PrevKeyFrame, const std::shared_ptr<animation::CKeyFrame>& NextKeyFrame)
 	{
+		// Step: 補完機能はなく、常にPrevTimeのValueを参照するアニメーション
+		const auto& PrevValue = PrevKeyFrame->GetOutput();
+
+		for (int i = 0; i < PrevValue.size(); i++)
+		{
+			float val = PrevValue[i];
+
+			Value.push_back(val);
+		}
+
 		return true;
 	}
 
