@@ -1122,6 +1122,12 @@
     <ClInclude Include="Src\Animation\CKeyFrame.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Animation\CSkin.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Animation\CJoint.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\Main\DescMain\DescMain.cpp">
@@ -1287,6 +1293,12 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Src\Animation\CKeyFrame.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Animation\CSkin.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Animation\CJoint.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1759,6 +1771,8 @@
     <None Include="Resources\Shaders\minimum.vert" />
     <None Include="Resources\Shaders\texture.frag" />
     <None Include="Resources\Models\SimpleAnimation\SimpleAnimation.gltf" />
+    <None Include="Resources\Models\SimpleMorphTarget\SimpleMorphTarget.gltf" />
+    <None Include="Resources\Models\SimpleSkin\SimpleSkin.gltf" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="EmscriptenBuild\CMakeLists.txt" />

@@ -117,6 +117,17 @@ namespace object
 		}
 	}
 
+	bool C3DObject::CalcSkinMatrix()
+	{
+		for (const auto& Skin : m_AnimationSkinList)
+		{
+			std::vector<glm::mat4> SkinMatrixList;
+			if (!Skin->CalcSkinMatrixList(SkinMatrixList)) return false;
+		}
+
+		return true;
+	}
+
 	bool C3DObject::Update(float DeltaSecondsTime)
 	{
 		// アニメーションの計算
@@ -129,6 +140,9 @@ namespace object
 		// ワールド行列の更新
 		// 全ノードマイフレーム更新しているので、そのうちキャッシュを入れて更新は必要なものだけにする
 		CalcWorldMatrix();
+
+		// SkinMatrixを計算
+		if (!CalcSkinMatrix()) return false;
 
 		return true;
 	}
@@ -218,6 +232,11 @@ namespace object
 	void C3DObject::AddMaterial(const std::shared_ptr<graphics::CMaterial>& Material)
 	{
 		m_MaterialList.push_back(Material);
+	}
+
+	void C3DObject::AddAnimationSkin(const std::shared_ptr<animation::CSkin >& Skin)
+	{
+		m_AnimationSkinList.push_back(Skin);
 	}
 
 	void C3DObject::AddAnimationClip(const std::shared_ptr<animation::CAnimationClip>& Clip)

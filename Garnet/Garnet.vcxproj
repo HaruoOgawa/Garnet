@@ -574,6 +574,8 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Src\Animation\CJoint.h" />
+    <ClInclude Include="Src\Animation\CSkin.h" />
     <ClInclude Include="Src\Animation\CKeyFrame.h" />
     <ClInclude Include="Src\Animation\CAnimationChannel.h" />
     <ClInclude Include="Src\Animation\CAnimationSampler.h" />
@@ -945,6 +947,8 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClInclude Include="Src\Interface\IRenderer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\Animation\CJoint.cpp" />
+    <ClCompile Include="Src\Animation\CSkin.cpp" />
     <ClCompile Include="Src\Animation\CKeyFrame.cpp" />
     <ClCompile Include="Src\Animation\CAnimationChannel.cpp" />
     <ClCompile Include="Src\Animation\CAnimationSampler.cpp" />
@@ -1020,6 +1024,8 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <None Include="EmscriptenBuild\index.html" />
     <None Include="EmscriptenBuild\nmake.exe" />
     <None Include="Resources\Models\SimpleAnimation\SimpleAnimation.gltf" />
+    <None Include="Resources\Models\SimpleMorphTarget\SimpleMorphTarget.gltf" />
+    <None Include="Resources\Models\SimpleSkin\SimpleSkin.gltf" />
     <None Include="Resources\Shaders\blur.frag" />
     <None Include="Resources\Shaders\blur.vert" />
     <None Include="Resources\Shaders\depth.frag" />

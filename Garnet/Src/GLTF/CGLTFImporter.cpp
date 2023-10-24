@@ -26,6 +26,8 @@
 #include "../Math/CMath.h"
 
 #include "../Animation/CAnimationClip.h"
+#include "../Animation/CSkin.h"
+#include "../Animation/CJoint.h"
 
 namespace gltf
 {
@@ -91,6 +93,9 @@ namespace gltf
 		std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, const std::shared_ptr<graphics::CTextureSet>& TextureSet,
 		const std::shared_ptr<file::CFile>& DepthVertex, const std::shared_ptr<file::CFile>& DepthFragment)
 	{
+		// スキンアニメーションを使用するかどうかでShader等の処理を切り替える
+		bool UseSkinMeshAnimation = (model.skins.size() > 0);
+
 		// テクスチャ
 		std::vector<std::shared_ptr<graphics::CTexture>> TextureList;
 		if (!CreateTexture(pGraphicsAPI, model, TextureList)) return false;
@@ -119,6 +124,10 @@ namespace gltf
 		std::vector<std::vector<int>> RootNodeIndexList;
 		if (!CreateNode(model, NodeList, MeshList, MaterialList, RootNodeIndexList)) return false;
 
+		// スキン
+		std::vector<std::shared_ptr<animation::CSkin>> AnimationSkinList;
+		if (!CreateAnimationSkin(model, AnimationSkinList, NodeList)) return false;
+
 		// アニメーション
 		std::vector<std::shared_ptr<animation::CAnimationClip>> AnimationClipList;
 		if (!CreateAnimation(model, AnimationClipList, NodeList)) return false;
@@ -137,6 +146,11 @@ namespace gltf
 		for (const auto& Node : NodeList)
 		{
 			Object->AddNode(Node);
+		}
+
+		for (const auto& Skin : AnimationSkinList)
+		{
+			Object->AddAnimationSkin(Skin);
 		}
 
 		for (const auto& Clip : AnimationClipList)
@@ -440,6 +454,8 @@ namespace gltf
 					"NORMAL",
 					"TEXCOORD_0",
 					"TANGENT",
+					"JOINTS_0",
+					"WEIGHTS_0",
 				};
 				std::map<std::string, std::vector<float>> ReservedVertexDataList;
 
@@ -457,37 +473,17 @@ namespace gltf
 						if (AccessorIndex < 0 || AccessorIndex >= model.accessors.size()) continue;
 
 						const auto& Accessor = model.accessors[AccessorIndex];
-						int BufferViewIndex = Accessor.bufferView;
-						size_t Count = Accessor.count;
-						
-						// Accessor_byteOffset: 複数のアクセサーがバッファビューを共有する場合に使用するそのバッファビュー内でのオフセットのこと
-						size_t Accessor_byteOffset = Accessor.byteOffset;
-						
 						// 使用する型のバイト数. 5123のunsigned short か 5126のfloat
 						int componentType = Accessor.componentType;
 						int Stride = (componentType == 5126) ? 4 : 2;
 
-						// SCALAR, VEC2, VEC3などがある 
-						int Dimension = tinygltf::GetNumComponentsInType(Accessor.type);
-
-						// byteLength: アクセサーのデータの長さ. (使用する型のバイト数, Stride) x (ディメンション) x (データ数)
-						size_t byteLength = Stride * Dimension * Count;
-
-						// バッファビューを取得
-						if (BufferViewIndex < 0 || BufferViewIndex >= model.bufferViews.size()) continue;
-
-						const auto& BufferView = model.bufferViews[BufferViewIndex];
-
-						int BufferIndex = BufferView.buffer;
-						// アクセサー間でBufferViewを共有しつつもそのBufferViewをAccessorOffsetで分けて使用することもあるのでそれを考慮する
-						size_t byteOffset = BufferView.byteOffset + Accessor_byteOffset; // アクセサーのオフセットを考慮する
-						int target = BufferView.target;
-
 						// データを取得
-						std::vector<float> AttributeData;
-						AttributeData.resize(byteLength / Stride);
+						std::vector<unsigned char> BufferData;
+						if (!CalculateBufferFromAccessor(model, Accessor, BufferData)) return false;
 
-						std::memcpy(&AttributeData[0], &model.buffers[BufferIndex].data[byteOffset], byteLength);
+						std::vector<float> AttributeData;
+						AttributeData.resize(BufferData.size() / Stride);
+						std::memcpy(&AttributeData[0], &BufferData[0], BufferData.size());
 
 						// データを登録
 						ReservedVertexDataList.insert({ Name, AttributeData });
@@ -508,7 +504,7 @@ namespace gltf
 						{
 							Dimention = 2;
 						}
-						else if (AttribName == "TANGENT" )
+						else if (AttribName == "TANGENT" || AttribName == "JOINTS_0" || AttribName == "WEIGHTS_0")
 						{
 							Dimention = 4;
 						}
@@ -532,38 +528,25 @@ namespace gltf
 				// インデックスバッファを読む
 				{
 					int AccessorIndex = glTFPrimitive.indices;
-
 					if (AccessorIndex < 0 || AccessorIndex >= model.accessors.size()) continue;
 
 					const auto& Accessor = model.accessors[AccessorIndex];
-					int BufferViewIndex = Accessor.bufferView;
-					size_t Count = Accessor.count;
 					int componentType = Accessor.componentType;
 					int Stride = (componentType == 5125) ? 4 : 2;
-					size_t Accessor_byteOffset = Accessor.byteOffset;
-					size_t byteLength = Stride * Count;
-
-					// バッファビューを取得
-					if (BufferViewIndex < 0 || BufferViewIndex >= model.bufferViews.size()) continue;
-
-					const auto& BufferView = model.bufferViews[BufferViewIndex];
-
-					int BufferIndex = BufferView.buffer;
-					// アクセサー間でBufferViewを共有しつつもそのBufferViewをAccessorOffsetで分けて使用することもあるのでそれを考慮する
-					size_t byteOffset = BufferView.byteOffset + Accessor_byteOffset;
-					
-					int target = BufferView.target;
 
 					// データを取得
+					std::vector<unsigned char> BufferData;
+					if (!CalculateBufferFromAccessor(model, Accessor, BufferData)) return false;
+					
 					if (componentType == 5123)
 					{
-						Indices.resize(byteLength / Stride);
-						std::memcpy(&Indices[0], &model.buffers[BufferIndex].data[byteOffset], byteLength);
+						Indices.resize(BufferData.size() / Stride);
+						std::memcpy(&Indices[0], &BufferData[0], BufferData.size());
 					}
 					else if(componentType == 5125)
 					{
-						UINTIndices.resize(byteLength / Stride);
-						std::memcpy(&UINTIndices[0], &model.buffers[BufferIndex].data[byteOffset], byteLength);
+						UINTIndices.resize(BufferData.size() / Stride);
+						std::memcpy(&UINTIndices[0], &BufferData[0], BufferData.size());
 					}
 				}
 
@@ -612,10 +595,16 @@ namespace gltf
 					createInfo->SetUINTIndices(UINTIndices);
 				}
 
+				// モーフターゲット
+				//glTFPrimitive.targets
+
 				// プリミティブを作成する
 				std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(createInfo, MaterialIndex);
 				Mesh->AddPrimitive(Primitive);
 			}
+
+			//
+			//glTFMesh.weights
 
 			// メッシュを登録する
 			MeshList.push_back(Mesh);
@@ -738,6 +727,48 @@ namespace gltf
 		return true;
 	}
 
+	bool CGLTFImporter::CreateAnimationSkin(const tinygltf::Model& model, std::vector<std::shared_ptr<animation::CSkin>>& AnimationSkinList, const std::vector<std::shared_ptr<object::CNode>>& NodeList)
+	{
+		for (const auto& glTFSkin : model.skins)
+		{
+			std::shared_ptr<animation::CSkin> Skin = std::make_shared<animation::CSkin>();
+
+			// inverseBindMatrices
+			{
+				int Accessor_Index = glTFSkin.inverseBindMatrices;
+				if (Accessor_Index < 0 || Accessor_Index >= model.accessors.size()) continue;
+
+				const auto& Accessor = model.accessors[Accessor_Index];
+
+				std::vector<unsigned char> BufferData;
+				if (!CalculateBufferFromAccessor(model, Accessor, BufferData)) return false;
+
+				std::vector<glm::mat4> inverseBindMatrices;
+				inverseBindMatrices.resize(BufferData.size() / sizeof(glm::mat4));
+
+				std::memcpy(&inverseBindMatrices[0], &BufferData[0], BufferData.size());
+
+				Skin->AddInverseBindMatrices(inverseBindMatrices);
+			}
+
+			// joints
+			for (const auto& glTFJoint : glTFSkin.joints)
+			{
+				if (glTFJoint < 0 || glTFJoint >= NodeList.size()) continue;
+
+				const auto& JointNode = NodeList[glTFJoint];
+
+				std::shared_ptr<animation::CJoint> Joint = std::make_shared<animation::CJoint>(JointNode);
+
+				Skin->AddJoint(Joint);
+			}
+
+			AnimationSkinList.push_back(Skin);
+		}
+
+		return true;
+	}
+
 	bool CGLTFImporter::CreateAnimation(const tinygltf::Model& model, std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList, const std::vector<std::shared_ptr<object::CNode>>& NodeList)
 	{
 		for (const auto& glTFAnimation : model.animations)
@@ -804,7 +835,7 @@ namespace gltf
 		// SCALAR, VEC2, VEC3などがある 
 		int Accessor_type = -1;
 
-		// timeAccessor
+		// inputAccessor
 		{
 			const auto& Accessor = model.accessors[input];
 
@@ -815,7 +846,7 @@ namespace gltf
 			std::memcpy(&inputList[0], &BufferData[0], BufferData.size());
 		}
 
-		// translationAccessor
+		// outputAccessor
 		{
 			const auto& Accessor = model.accessors[output];
 

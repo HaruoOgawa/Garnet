@@ -4,6 +4,7 @@
 #include "../Graphics/CMaterial.h"
 #include "../Graphics/CTextureSet.h"
 #include "../Math/CTransform.h"
+#include "../Animation/CSkin.h"
 #include "../Animation/CAnimationClip.h"
 #include <vector>
 #include <memory>
@@ -27,11 +28,13 @@ namespace object
 
 		std::shared_ptr<graphics::CTextureSet> m_TextureSet;
 
+		std::vector<std::shared_ptr<animation::CSkin>> m_AnimationSkinList;
 		std::vector<std::shared_ptr<animation::CAnimationClip>> m_AnimationClipList;
 		int m_CurrentClipIndex;
 	private:
 		void CalcWorldMatrix();
 		void CalcWorldMatrix(std::shared_ptr<CNode>& Node, const glm::mat4& ParentWorldMatrix);
+		bool CalcSkinMatrix();
 	public:
 		C3DObject(const std::string& PassName, const std::string& DepthPassName);
 		virtual ~C3DObject();
@@ -50,6 +53,7 @@ namespace object
 		void AddMaterial(const std::shared_ptr<graphics::CMaterial>& Material);
 		const std::vector<std::shared_ptr<graphics::CMaterial>>& GetMaterialList() const;
 		
+		void AddAnimationSkin(const std::shared_ptr<animation::CSkin >& Skin);
 		void AddAnimationClip(const std::shared_ptr<animation::CAnimationClip>& Clip);
 
 		void SetRootNodeIndexList(const std::vector<std::vector<int>>& RootNodeIndexList);
