@@ -59,7 +59,7 @@ namespace app
 		if (!m_BlurEffect->Create(pLoadWorker)) return false;
 
 		// FrameTexture‚ğ“n‚·
-		m_ScriptScene->SetFrameTexture(m_BlurEffect->GetFrameTexture());
+		//m_ScriptScene->SetFrameTexture(m_BlurEffect->GetFrameTexture());
 
 		return true;
 	}
@@ -94,7 +94,7 @@ namespace app
 		// Prepare
 		if (!pGraphicsAPI->PrepareRender()) return false;
 
-		// Dispatch GPGPU
+		/*// Dispatch GPGPU
 		if (!m_ScriptScene->Dispatch(pGraphicsAPI, pLoadWorker, m_MainCamera, m_Projection, m_DrawInfo)) return false;
 
 		// ShadowPass
@@ -103,7 +103,7 @@ namespace app
 		if (!pGraphicsAPI->EndRender()) return false;
 
 		// ShadowMap‚Éƒuƒ‰[‚ğ‚©‚¯‚é
-		if (!m_BlurEffect->Draw(m_MainCamera, m_Projection, m_DrawInfo)) return false;
+		if (!m_BlurEffect->Draw(m_MainCamera, m_Projection, m_DrawInfo)) return false;*/
 
 		// DefaultPass(SwapChain)
 		if (!pGraphicsAPI->BeginRender()) return false;

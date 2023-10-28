@@ -4,6 +4,8 @@
 #include "../Graphics/CMaterial.h"
 #include "../Graphics/CTextureSet.h"
 #include "../Math/CTransform.h"
+#include "../Animation/CSkin.h"
+#include "../Animation/CAnimationClip.h"
 #include <vector>
 #include <memory>
 
@@ -25,6 +27,10 @@ namespace object
 		std::vector<std::vector<int>> m_RootNodeIndexList;
 
 		std::shared_ptr<graphics::CTextureSet> m_TextureSet;
+
+		std::vector<std::shared_ptr<animation::CSkin>> m_AnimationSkinList;
+		std::vector<std::shared_ptr<animation::CAnimationClip>> m_AnimationClipList;
+		int m_CurrentClipIndex;
 	private:
 		void CalcWorldMatrix();
 		void CalcWorldMatrix(std::shared_ptr<CNode>& Node, const glm::mat4& ParentWorldMatrix);
@@ -33,7 +39,7 @@ namespace object
 		virtual ~C3DObject();
 
 		bool		 Create(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<file::CFile>& DepthVertex, const std::shared_ptr<file::CFile>& DepthFragment, const std::shared_ptr<graphics::CTextureSet>& TextureSet);
-		virtual bool Update();
+		virtual bool Update(float DeltaSecondsTime);
 		virtual bool Draw(bool IsDepthPass, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, 
 			const std::shared_ptr<graphics::CDrawInfo>& DrawInfo);
 
@@ -46,6 +52,9 @@ namespace object
 		void AddMaterial(const std::shared_ptr<graphics::CMaterial>& Material);
 		const std::vector<std::shared_ptr<graphics::CMaterial>>& GetMaterialList() const;
 		
+		void AddAnimationSkin(const std::shared_ptr<animation::CSkin >& Skin);
+		void AddAnimationClip(const std::shared_ptr<animation::CAnimationClip>& Clip);
+
 		void SetRootNodeIndexList(const std::vector<std::vector<int>>& RootNodeIndexList);
 		const std::vector<std::vector<int>>& GetRootNodeIndexList() const;
 
@@ -57,5 +66,7 @@ namespace object
 
 		const glm::vec3& GetScale() const;
 		void SetScale(const glm::vec3& Scale);
+
+		void SetPlayClipIndex(int Index);
 	};
 }

@@ -64,6 +64,26 @@ namespace renderer
 		return m_AttributeDimensions;
 	}
 
+	void CRendererCreateInfo::SetAttribDataTypes(const std::vector<EDataType>& AttribDataTypes)
+	{
+		m_AttribDataTypes = AttribDataTypes;
+	}
+
+	const std::vector<EDataType>& CRendererCreateInfo::GetAttribDataTypes() const
+	{
+		return m_AttribDataTypes;
+	}
+
+	void CRendererCreateInfo::SetAttribByteStrides(const std::vector<int>& AttribByteStrides)
+	{
+		m_AttribByteStrides = AttribByteStrides;
+	}
+
+	const std::vector<int>& CRendererCreateInfo::GetAttribByteStrides()
+	{
+		return m_AttribByteStrides;
+	}
+
 #ifdef USE_GPGPU
 	void CRendererCreateInfo::SetInstanceDrawCount(int InstanceCount)
 	{

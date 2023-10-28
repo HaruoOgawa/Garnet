@@ -21,9 +21,6 @@ namespace scene
 	{
 		bool m_IsLoaded;
 
-		bool m_IsDrawSponza;
-		float m_CoolTime;
-
 		// Tex of FrameBuffer
 		std::vector<std::shared_ptr<graphics::CTexture>> m_FrameTextureList;
 
@@ -40,8 +37,6 @@ namespace scene
 		// glTF
 		std::shared_ptr<file::CFile> m_glTFData;
 		std::shared_ptr<object::C3DObject> m_glTFObject;
-		std::shared_ptr<file::CFile> m_SponzaData;
-		std::shared_ptr<object::C3DObject> m_SponzaObject;
 
 		// Object
 		std::shared_ptr<object::C3DObject> m_Background;

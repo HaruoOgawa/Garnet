@@ -265,16 +265,17 @@ namespace renderer
 		{
 			//
 			int Dimension = createInfo->GetAttributeDimensions()[i];
+			int ByteStride = createInfo->GetAttribByteStrides()[i];
 
 			// 頂点バッファのバインドに関する説明,設定(頂点バッファレイアウト)
 			bindingDescriptions[i].binding = i; // バインドする頂点バッファのインデックス(?)違う形式で頂点バッファを用意するときに使用する？
-			bindingDescriptions[i].stride = Dimension * sizeof(createInfo->GetVertices()[i][0]); // 頂点バッファ内の要素一つあたりのサイズ。次の要素までのバイト数
+			bindingDescriptions[i].stride = (ByteStride != 0)? ByteStride : (Dimension * sizeof(createInfo->GetVertices()[i][0])); // 頂点バッファ内の要素一つあたりのサイズ。次の要素までのバイト数
 			bindingDescriptions[i].inputRate = VK_VERTEX_INPUT_RATE_VERTEX; // よくわからぬ。各頂点の後、次のデータ エントリに移動します。らしい
 
 			// アトリビュート(頂点データ)の設定
 			attributeDescriptions[i].binding = i; // BindingDescriptionの内どのバインド設定を使用するかのインデックス
 			attributeDescriptions[i].location = i; // Shaderのlayout(location = 0)に設定すｒ数値
-			attributeDescriptions[i].format = GetVertexFormat(Dimension); // データ型. SFLOAT --> Signed Float
+			attributeDescriptions[i].format = GetVertexFormat(Dimension, createInfo->GetAttribDataTypes()[i]); // データ型. SFLOAT --> Signed Float
 			attributeDescriptions[i].offset = 0; // データオフセット
 		}
 
@@ -490,32 +491,124 @@ namespace renderer
 	}
 
 	// ヘルパー関数 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	VkFormat CVulkanRenderer::GetVertexFormat(int Dimention)
+	VkFormat CVulkanRenderer::GetVertexFormat(int Dimention, EDataType DataType)
 	{
-		VkFormat format = VK_FORMAT_UNDEFINED;
+		VkFormat result = VK_FORMAT_UNDEFINED;
 
-		switch (Dimention)
+		switch (DataType)
 		{
-		case 1:
-			format = VK_FORMAT_R32_SFLOAT;
+		case renderer::EDataType::TYPE_SIGNED_BYTE:
+			if (Dimention == 1)
+			{
+				result = VK_FORMAT_R8_SINT;
+			}
+			else if (Dimention == 2)
+			{
+				result = VK_FORMAT_R8G8_SINT;
+			}
+			else if (Dimention == 3)
+			{
+				result = VK_FORMAT_R8G8B8_SINT;
+			}
+			else if (Dimention == 4)
+			{
+				result = VK_FORMAT_R8G8B8A8_SINT;
+			}
 			break;
-
-		case 2:
-			format = VK_FORMAT_R32G32_SFLOAT;
+		case renderer::EDataType::TYPE_UNSIGNED_BYTE:
+			if (Dimention == 1)
+			{
+				result = VK_FORMAT_R8_UINT;
+			}
+			else if (Dimention == 2)
+			{
+				result = VK_FORMAT_R8G8_UINT;
+			}
+			else if (Dimention == 3)
+			{
+				result = VK_FORMAT_R8G8B8_UINT;
+			}
+			else if (Dimention == 4)
+			{
+				result = VK_FORMAT_R8G8B8A8_UINT;
+			}
 			break;
-
-		case 3:
-			format = VK_FORMAT_R32G32B32_SFLOAT;
+		case renderer::EDataType::TYPE_SIGNED_SHORT:
+			if (Dimention == 1)
+			{
+				result = VK_FORMAT_R16_SINT;
+			}
+			else if (Dimention == 2)
+			{
+				result = VK_FORMAT_R16G16_SINT;
+			}
+			else if (Dimention == 3)
+			{
+				result = VK_FORMAT_R16G16B16_SINT;
+			}
+			else if (Dimention == 4)
+			{
+				result = VK_FORMAT_R16G16B16A16_SINT;
+			}
 			break;
-
-		case 4:
-			format = VK_FORMAT_R32G32B32A32_SFLOAT;
+		case renderer::EDataType::TYPE_UNSIGNED_SHORT:
+			if (Dimention == 1)
+			{
+				result = VK_FORMAT_R16_UINT;
+			}
+			else if (Dimention == 2)
+			{
+				result = VK_FORMAT_R16G16_UINT;
+			}
+			else if (Dimention == 3)
+			{
+				result = VK_FORMAT_R16G16B16_UINT;
+			}
+			else if (Dimention == 4)
+			{
+				result = VK_FORMAT_R16G16B16A16_UINT;
+			}
 			break;
+		case renderer::EDataType::TYPE_UNSIGNED_INT:
+			if (Dimention == 1)
+			{
+				result = VK_FORMAT_R32_UINT;
+			}
+			else if (Dimention == 2)
+			{
+				result = VK_FORMAT_R32G32_UINT;
+			}
+			else if (Dimention == 3)
+			{
+				result = VK_FORMAT_R32G32B32_UINT;
+			}
+			else if (Dimention == 4)
+			{
+				result = VK_FORMAT_R32G32B32A32_UINT;
+			}
+			break;
+		case renderer::EDataType::TYPE_FLOAT:
 		default:
+			if (Dimention == 1)
+			{
+				result = VK_FORMAT_R32_SFLOAT;
+			}
+			else if (Dimention == 2)
+			{
+				result = VK_FORMAT_R32G32_SFLOAT;
+			}
+			else if (Dimention == 3)
+			{
+				result = VK_FORMAT_R32G32B32_SFLOAT;
+			}
+			else if (Dimention == 4)
+			{
+				result = VK_FORMAT_R32G32B32A32_SFLOAT;
+			}
 			break;
 		}
 
-		return format;
+		return result;
 	}
 }
 

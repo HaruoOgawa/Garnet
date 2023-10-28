@@ -55,6 +55,11 @@ namespace graphics
 		return true;
 	}
 
+	void CPrimitive::SetMaterialIndex(int Index)
+	{
+		m_MaterialIndex = Index;
+	}
+
 	int CPrimitive::GetMaterialIndex()const
 	{
 		return m_MaterialIndex;

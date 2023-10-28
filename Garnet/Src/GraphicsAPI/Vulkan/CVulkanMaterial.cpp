@@ -75,7 +75,7 @@ namespace api
 			// SharedBuffer‚Íˆ—‚µ‚È‚¢
 			if (m_ShaderBufferList[i]->GetSharedBufferParam().IsShared) continue;
 
-			if (m_ShaderBufferList[i]->GetBufferType() == graphics::EBufferType::SHADERSTORAGE) continue;
+			if (m_ShaderBufferList[i]->GetBufferUpdateType() != graphics::EBufferUpdateType::UPDATE_TYPE_CPU) continue;
 
 			auto ByteSize = m_VKUniformBufferSizeList[m_pGraphicsAPI->GetCurrentFrame()][i];
 			auto ByteOffset = ((m_UseDynamicBufferOffset)? (DynamicOffsetNum - 1) * ByteSize : 0);

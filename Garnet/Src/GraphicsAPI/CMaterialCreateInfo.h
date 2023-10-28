@@ -33,7 +33,7 @@ namespace graphics
 
 		// Uniform
 		static std::shared_ptr<graphics::CShaderBuffer> CreateUniformBuffer(const std::vector<SBindingLayout>& BindingLayoutList);
-		static std::shared_ptr<graphics::CShaderBuffer> CreateShaderStorageBuffer(const std::vector<SBindingLayout>& BindingLayoutList);
+		static std::shared_ptr<graphics::CShaderBuffer> CreateShaderStorageBuffer(const std::vector<SBindingLayout>& BindingLayoutList, EBufferUpdateType BufferUpdateType = EBufferUpdateType::UPDATE_TYPE_GPU);
 
 		// Shader
 		EShaderType GetShaderType() const;
@@ -55,8 +55,6 @@ namespace graphics
 		
 		void SetComputeShaderCode(const std::vector<unsigned char>& ComputeShaderCode);
 		const std::vector<unsigned char>& GetComputeShaderCode() const;
-
-		// Texture
 	};
 
 }

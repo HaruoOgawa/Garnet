@@ -159,16 +159,17 @@ namespace renderer
 		{
 			//
 			int Dimension = createInfo->GetAttributeDimensions()[i];
+			int ByteStride = createInfo->GetAttribByteStrides()[i];
 
 			//
 			attributes[i].shaderLocation = i; // Shaderでのアトリビュートインデックス
-			attributes[i].format = GetVertexFormat(Dimension);
+			attributes[i].format = GetVertexFormat(Dimension, createInfo->GetAttribDataTypes()[i]);
 			attributes[i].offset = 0;
 
 			//
 			vertexBufferLayouts[i].attributeCount = 1;
 			vertexBufferLayouts[i].attributes = &attributes[i];
-			vertexBufferLayouts[i].arrayStride = Dimension * sizeof(float); // ストライドとは連続する要素間のバイト数のこと
+			vertexBufferLayouts[i].arrayStride = (ByteStride != 0) ? ByteStride : (Dimension * sizeof(createInfo->GetVertices()[i][0])); // ストライドとは連続する要素間のバイト数のこと
 			vertexBufferLayouts[i].stepMode = WGPUVertexStepMode_Vertex; // ??? 頂点データが同じインスタンスなら共有されることを示す設定 ???
 		}
 
@@ -304,32 +305,124 @@ namespace renderer
 	}
 
 	// Helper Function ///////////////////////////////////////////////////////////////////////
-	WGPUVertexFormat CWebGPURenderer::GetVertexFormat(int Dimension)
+	WGPUVertexFormat CWebGPURenderer::GetVertexFormat(int Dimention, EDataType DataType)
 	{
-		WGPUVertexFormat format;
+		WGPUVertexFormat result;
 
-		switch (Dimension)
+		switch (DataType)
 		{
-		case 1:
-			format = WGPUVertexFormat_Float32;
+		case renderer::EDataType::TYPE_SIGNED_BYTE:
+			if (Dimention == 1)
+			{
+				//result = WGPUVertexFormat_Sint8;
+			}
+			else if (Dimention == 2)
+			{
+				result = WGPUVertexFormat_Sint8x2;
+			}
+			else if (Dimention == 3)
+			{
+				//result = WGPUVertexFormat_Sint8x3;
+			}
+			else if (Dimention == 4)
+			{
+				result = WGPUVertexFormat_Sint8x4;
+			}
 			break;
-
-		case 2:
-			format = WGPUVertexFormat_Float32x2;
+		case renderer::EDataType::TYPE_UNSIGNED_BYTE:
+			if (Dimention == 1)
+			{
+				//result = WGPUVertexFormat_Uint8;
+			}
+			else if (Dimention == 2)
+			{
+				result = WGPUVertexFormat_Uint8x2;
+			}
+			else if (Dimention == 3)
+			{
+				//result = WGPUVertexFormat_Uint8x3;
+			}
+			else if (Dimention == 4)
+			{
+				result = WGPUVertexFormat_Uint8x4;
+			}
 			break;
-
-		case 3:
-			format = WGPUVertexFormat_Float32x3;
+		case renderer::EDataType::TYPE_SIGNED_SHORT:
+			if (Dimention == 1)
+			{
+				//result = WGPUVertexFormat_Sint16;
+			}
+			else if (Dimention == 2)
+			{
+				result = WGPUVertexFormat_Sint16x2;
+			}
+			else if (Dimention == 3)
+			{
+				//result = WGPUVertexFormat_Sint16x3;
+			}
+			else if (Dimention == 4)
+			{
+				result = WGPUVertexFormat_Sint16x4;
+			}
 			break;
-
-		case 4:
-			format = WGPUVertexFormat_Float32x4;
+		case renderer::EDataType::TYPE_UNSIGNED_SHORT:
+			if (Dimention == 1)
+			{
+				//result = WGPUVertexFormat_Uint16;
+			}
+			else if (Dimention == 2)
+			{
+				result = WGPUVertexFormat_Uint16x2;
+			}
+			else if (Dimention == 3)
+			{
+				//result = WGPUVertexFormat_Uint16x3;
+			}
+			else if (Dimention == 4)
+			{
+				result = WGPUVertexFormat_Uint16x4;
+			}
 			break;
+		case renderer::EDataType::TYPE_UNSIGNED_INT:
+			if (Dimention == 1)
+			{
+				result = WGPUVertexFormat_Uint32;
+			}
+			else if (Dimention == 2)
+			{
+				result = WGPUVertexFormat_Uint32x2;
+			}
+			else if (Dimention == 3)
+			{
+				result = WGPUVertexFormat_Uint32x3;
+			}
+			else if (Dimention == 4)
+			{
+				result = WGPUVertexFormat_Uint32x4;
+			}
+			break;
+		case renderer::EDataType::TYPE_FLOAT:
 		default:
+			if (Dimention == 1)
+			{
+				result = WGPUVertexFormat_Float32;
+			}
+			else if (Dimention == 2)
+			{
+				result = WGPUVertexFormat_Float32x2;
+			}
+			else if (Dimention == 3)
+			{
+				result = WGPUVertexFormat_Float32x3;
+			}
+			else if (Dimention == 4)
+			{
+				result = WGPUVertexFormat_Float32x4;
+			}
 			break;
 		}
 
-		return format;
+		return result;
 	}
 
 	bool CWebGPURenderer::CreateBuffer(WGPUBuffer& Buffer, WGPUBufferUsageFlags Usage, void const* Data, uint64_t ByteSize)

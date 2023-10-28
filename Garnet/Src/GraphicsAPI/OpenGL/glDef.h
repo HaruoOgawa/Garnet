@@ -91,6 +91,7 @@ typedef ptrdiff_t GLsizeiptr;
 	GL_FUNC(void,   DeleteVertexArrays,   GLsizei n, const GLuint* arrays) \
 	GL_FUNC(void,   EnableVertexAttribArray, GLuint index) \
 	GL_FUNC(void,   VertexAttribPointer,  GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const void* pointer) \
+	GL_FUNC(void,   VertexAttribIPointer, GLuint index, GLint size, GLenum type, GLsizei stride, const void* pointer) \
 	GL_FUNC(void,   LinkProgram,		  GLuint program) \
 	GL_FUNC(void,   ActiveTexture,		  GLenum texture) \
 	GL_FUNC(void,   GenerateMipmap,		  GLenum target) \

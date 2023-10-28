@@ -137,13 +137,26 @@ namespace renderer
 
 			const auto& data = createInfo->GetVertices()[location];
 			int dimention = createInfo->GetAttributeDimensions()[location];
+			GLenum attribDataType = GetGLenumDataType(createInfo->GetAttribDataTypes()[location]);
+			// byteStrideとは「１つ分」のデータと、次の「1つ分」のデータとの間の、読み取り場所の移動バイト長
+			// http://muko.damember.org/gl4/html-ja/glVertexAttribPointer.xhtml
+			GLsizei byteStride = createInfo->GetAttribByteStrides()[location];
 
 			glGenBuffers(1, &vertexBuffer);
 			glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-			glBufferData(GL_ARRAY_BUFFER, data.size() * sizeof(float), &data[0], GL_STATIC_DRAW);
+			glBufferData(GL_ARRAY_BUFFER, data.size() * sizeof(data[0]), &data[0], GL_STATIC_DRAW);
 
 			glEnableVertexAttribArray(location);
-			glVertexAttribPointer(location, dimention, GL_FLOAT, GL_FALSE, dimention * sizeof(float), 0);
+			if (attribDataType == GL_FLOAT)
+			{
+				glVertexAttribPointer(location, dimention, attribDataType, GL_FALSE, byteStride, 0);
+			}
+			else
+			{
+				// Interger Valuesの時はglVertexAttrib"I"Pointerの方を使用する
+				// https://registry.khronos.org/OpenGL-Refpages/gl4/html/glVertexAttribPointer.xhtml
+				glVertexAttribIPointer(location, dimention, attribDataType, byteStride, 0);
+			}
 
 			glBindBuffer(GL_ARRAY_BUFFER, 0);
 		}
@@ -176,6 +189,39 @@ namespace renderer
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 		return true;
+	}
+
+	// Helper
+	GLenum COpenGLRenderer::GetGLenumDataType(EDataType DataType)
+	{
+		GLenum result = GL_FLOAT;
+
+		switch (DataType)
+		{
+		case renderer::EDataType::TYPE_SIGNED_BYTE:
+			result = GL_BYTE;
+			break;
+		case renderer::EDataType::TYPE_UNSIGNED_BYTE:
+			result = GL_UNSIGNED_BYTE;
+			break;
+		case renderer::EDataType::TYPE_SIGNED_SHORT:
+			result = GL_SHORT;
+			break;
+		case renderer::EDataType::TYPE_UNSIGNED_SHORT:
+			result = GL_UNSIGNED_SHORT;
+			break;
+		case renderer::EDataType::TYPE_UNSIGNED_INT:
+			result = GL_UNSIGNED_INT;
+			break;
+		case renderer::EDataType::TYPE_FLOAT:
+			result = GL_FLOAT;
+			break;
+		default:
+			result = GL_FLOAT;
+			break;
+		}
+
+		return result;
 	}
 }
 #endif

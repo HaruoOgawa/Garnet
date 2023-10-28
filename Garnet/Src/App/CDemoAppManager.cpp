@@ -9,6 +9,8 @@
 #include "../../Camera/CViewerCamera.h"
 #endif // USE_VIEWER_CAMERA
 
+#define WGL_IMPLEMENTATION
+
 namespace app
 {
 	// âºÇÃÉOÉçÅ[ÉoÉãïœêî
@@ -70,6 +72,7 @@ namespace app
 	bool CDemoAppManager::Initialize(HINSTANCE hInstance)
 	{
 		if (!InitWindow(hInstance)) return false;
+		//if (!InitWGL()) return false;
 		if (!InitGLContext()) return false;
 		if (!m_GraphicsAPI->Initialize()) return false;
 
@@ -422,6 +425,14 @@ namespace app
 		}
 
 		// RenderingContextÇçÏê¨
+		/*int attribs[] = {
+			WGL_CONTEXT_MAJOR_VERSION_ARB, 4,
+			WGL_CONTEXT_MINOR_VERSION_ARB, 1,
+			WGL_CONTEXT_FLAGS_ARB, WGL_CONTEXT_PROFILE_MASK_ARB,
+			0
+		};
+		m_Rendering_Context = wglCreateContextAttribsARB(m_Device_Context, 0, attribs);*/
+
 		m_Rendering_Context = wglCreateContext(m_Device_Context);
 		wglMakeCurrent(m_Device_Context, m_Rendering_Context);
 

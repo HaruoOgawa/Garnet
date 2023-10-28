@@ -20,6 +20,8 @@ namespace object
 
 		int								  m_MeshIndex;
 
+		int								  m_SkinIndex;
+
 		std::shared_ptr<math::CTransform> m_LocalTransform;
 		glm::mat4						  m_WorldMatrix;
 		std::vector<int>                  m_ChildrenNodeIndexList;
@@ -44,6 +46,7 @@ namespace object
 
 		const glm::vec3& GetRot() const;
 		void SetRot(const glm::vec3& Rot);
+		void AddRot(const glm::vec3& Rot);
 
 		const glm::vec3& GetScale() const;
 		void SetScale(const glm::vec3& Scale);
@@ -52,5 +55,8 @@ namespace object
 		void SetChildrenNodeIndexList(const std::vector<int>& NodeList);
 
 		const std::vector<int>& GetDynamicOffsetNumList() const;
+
+		void SetSkinIndex(int SkinIndex);
+		int GetSkinIndex() const;
 	};
 }

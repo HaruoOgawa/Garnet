@@ -43,6 +43,8 @@ namespace graphics
 		createInfo->SetVertices(Vertices);
 		createInfo->SetIndices(Indices);
 		createInfo->SetAttributeDimensions(std::vector<int>({ 3 , 3 , 2, 4 }));
+		createInfo->SetAttribDataTypes(std::vector<renderer::EDataType>({ renderer::EDataType::TYPE_FLOAT , renderer::EDataType::TYPE_FLOAT , renderer::EDataType::TYPE_FLOAT , renderer::EDataType::TYPE_FLOAT }));
+		createInfo->SetAttribByteStrides(std::vector<int>({ 0, 0, 0, 0 }));
 
 		return true;
 	}
@@ -181,6 +183,8 @@ namespace graphics
 		createInfo->SetVertices(Vertices);
 		createInfo->SetIndices(Indices);
 		createInfo->SetAttributeDimensions(std::vector<int>({ 3 , 3 , 2, 4 }));
+		createInfo->SetAttribDataTypes(std::vector<renderer::EDataType>({ renderer::EDataType::TYPE_FLOAT , renderer::EDataType::TYPE_FLOAT , renderer::EDataType::TYPE_FLOAT , renderer::EDataType::TYPE_FLOAT }));
+		createInfo->SetAttribByteStrides(std::vector<int>({ 0, 0, 0, 0 }));
 
 		return true;
 	}
@@ -215,6 +219,8 @@ namespace graphics
 		createInfo->SetVertices(Vertices);
 		createInfo->SetIndices(Indices);
 		createInfo->SetAttributeDimensions(std::vector<int>({ 3 , 3 , 2, 4}));
+		createInfo->SetAttribDataTypes(std::vector<renderer::EDataType>({ renderer::EDataType::TYPE_FLOAT , renderer::EDataType::TYPE_FLOAT , renderer::EDataType::TYPE_FLOAT , renderer::EDataType::TYPE_FLOAT }));
+		createInfo->SetAttribByteStrides(std::vector<int>({ 0, 0, 0, 0 }));
 
 		return true;
 	}
@@ -274,6 +280,8 @@ namespace graphics
 		createInfo->SetVertices(Vertices);
 		createInfo->SetIndices(Indices);
 		createInfo->SetAttributeDimensions(std::vector<int>({ 3 , 3 , 2, 4}));
+		createInfo->SetAttribDataTypes(std::vector<renderer::EDataType>({ renderer::EDataType::TYPE_FLOAT , renderer::EDataType::TYPE_FLOAT , renderer::EDataType::TYPE_FLOAT , renderer::EDataType::TYPE_FLOAT }));
+		createInfo->SetAttribByteStrides(std::vector<int>({ 0, 0, 0, 0 }));
 
 		return true;
 	}

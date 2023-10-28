@@ -574,6 +574,13 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Src\Animation\CJoint.h" />
+    <ClInclude Include="Src\Animation\CSkin.h" />
+    <ClInclude Include="Src\Animation\CKeyFrame.h" />
+    <ClInclude Include="Src\Animation\CAnimationChannel.h" />
+    <ClInclude Include="Src\Animation\CAnimationSampler.h" />
+    <ClInclude Include="Src\Animation\CAnimationClip.h" />
+    <ClInclude Include="Src\GraphicsAPI\OpenGL\wglDef.h" />
     <ClInclude Include="Src\Graphics\CTextureSet.h" />
     <ClInclude Include="Src\GraphicsAPI\OpenGL\COpenGLGPGPUHandler.h" />
     <ClInclude Include="Src\GraphicsAPI\WebGPU\CWebGPUGPGPUHandler.h" />
@@ -941,6 +948,12 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClInclude Include="Src\Interface\IRenderer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\Animation\CJoint.cpp" />
+    <ClCompile Include="Src\Animation\CSkin.cpp" />
+    <ClCompile Include="Src\Animation\CKeyFrame.cpp" />
+    <ClCompile Include="Src\Animation\CAnimationChannel.cpp" />
+    <ClCompile Include="Src\Animation\CAnimationSampler.cpp" />
+    <ClCompile Include="Src\Animation\CAnimationClip.cpp" />
     <ClCompile Include="Src\Graphics\CTextureSet.cpp" />
     <ClCompile Include="Src\GraphicsAPI\OpenGL\COpenGLGPGPUHandler.cpp" />
     <ClCompile Include="Src\GraphicsAPI\WebGPU\CWebGPUGPGPUHandler.cpp" />
@@ -1011,6 +1024,9 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <None Include="EmscriptenBuild\Garnet_front.js" />
     <None Include="EmscriptenBuild\index.html" />
     <None Include="EmscriptenBuild\nmake.exe" />
+    <None Include="Resources\Models\SimpleAnimation\SimpleAnimation.gltf" />
+    <None Include="Resources\Models\SimpleMorphTarget\SimpleMorphTarget.gltf" />
+    <None Include="Resources\Models\SimpleSkin\SimpleSkin.gltf" />
     <None Include="Resources\Shaders\blur.frag" />
     <None Include="Resources\Shaders\blur.vert" />
     <None Include="Resources\Shaders\depth.frag" />

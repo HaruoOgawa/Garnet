@@ -3,6 +3,7 @@
 #ifdef USE_OPENGL
 #include <memory>
 #include <Windows.h>
+//#include "../GraphicsAPI/OpenGL/wglDef.h"
 #include "EAppType.h"
 
 namespace api { class COpenGLAPI; }

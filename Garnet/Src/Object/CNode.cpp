@@ -8,6 +8,7 @@ namespace object
 	CNode::CNode(int MeshIndex, const std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, const std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList):
 		m_Name(""),
 		m_MeshIndex(MeshIndex),
+		m_SkinIndex(-1),
 		m_LocalTransform(std::make_shared<math::CTransform>()),
 		m_WorldMatrix(glm::mat4(1.0f))
 	{
@@ -90,6 +91,11 @@ namespace object
 		m_LocalTransform->SetRot(Rot);
 	}
 
+	void CNode::AddRot(const glm::vec3& Rot)
+	{
+		m_LocalTransform->AddRot(Rot);
+	}
+
 	const glm::vec3& CNode::GetScale() const
 	{
 		return m_LocalTransform->GetScale();
@@ -113,5 +119,15 @@ namespace object
 	const std::vector<int>& CNode::GetDynamicOffsetNumList() const
 	{
 		return m_DynamicOffsetNumList;
+	}
+
+	void CNode::SetSkinIndex(int SkinIndex)
+	{
+		m_SkinIndex = SkinIndex;
+	}
+
+	int CNode::GetSkinIndex() const
+	{
+		return m_SkinIndex;
 	}
 }

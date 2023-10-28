@@ -5,7 +5,8 @@ namespace object
 	C3DObject::C3DObject(const std::string& PassName, const std::string& DepthPassName):
 		m_PassName(PassName),
 		m_DepthPassName(DepthPassName),
-		m_ObjectTransform(std::make_shared<math::CTransform>())
+		m_ObjectTransform(std::make_shared<math::CTransform>()),
+		m_CurrentClipIndex(-1)
 	{
 	}
 
@@ -116,8 +117,15 @@ namespace object
 		}
 	}
 
-	bool C3DObject::Update()
+	bool C3DObject::Update(float DeltaSecondsTime)
 	{
+		// アニメーションの計算
+		if (m_CurrentClipIndex >= 0 && m_CurrentClipIndex < m_AnimationClipList.size())
+		{
+			const auto& Clip = m_AnimationClipList[m_CurrentClipIndex];
+			if (!Clip->Update(DeltaSecondsTime)) return false;
+		}
+
 		// ワールド行列の更新
 		// 全ノードマイフレーム更新しているので、そのうちキャッシュを入れて更新は必要なものだけにする
 		CalcWorldMatrix();
@@ -157,6 +165,17 @@ namespace object
 
 			if (DynamicOffsetList.size() != Mesh->GetPrimitiveList().size()) continue; // PrimitiveListとNodeのDynamicOffsetNumListは一致している
 
+			// SkinMatrixを計算
+			std::vector<glm::mat4> SkinMatrixList;
+			int SkinIndex = Node->GetSkinIndex();
+
+			if (SkinIndex >= 0 && SkinIndex < m_AnimationSkinList.size())
+			{
+				const auto& Skin = m_AnimationSkinList[SkinIndex];
+				
+				if (!Skin->CalcSkinMatrixList(SkinMatrixList)) return false;
+			}
+
 			for (int PrimitiveIndex = 0; PrimitiveIndex < Mesh->GetPrimitiveList().size(); PrimitiveIndex++)
 			{
 				const auto& Primitive = Mesh->GetPrimitiveList()[PrimitiveIndex];
@@ -179,6 +198,12 @@ namespace object
 				if (!Material) continue;
 				
 				Material->SetUniformValue("model", &WorldMatrix[0][0], DynamicOffsetNum);
+
+				// SkinMatrixをShaderに渡す
+				if (SkinIndex >= 0 && SkinIndex < m_AnimationSkinList.size())
+				{
+					Material->SetUniformValue("r_SkinMatrixBuffer", &SkinMatrixList[0], DynamicOffsetNum);
+				}
 
 				if (!Primitive->Draw(Material, DynamicOffsetNum, IsDepthPass)) return false;
 			}
@@ -210,6 +235,16 @@ namespace object
 	void C3DObject::AddMaterial(const std::shared_ptr<graphics::CMaterial>& Material)
 	{
 		m_MaterialList.push_back(Material);
+	}
+
+	void C3DObject::AddAnimationSkin(const std::shared_ptr<animation::CSkin >& Skin)
+	{
+		m_AnimationSkinList.push_back(Skin);
+	}
+
+	void C3DObject::AddAnimationClip(const std::shared_ptr<animation::CAnimationClip>& Clip)
+	{
+		m_AnimationClipList.push_back(Clip);
 	}
 
 	const std::vector<std::shared_ptr<graphics::CMaterial>>& C3DObject::GetMaterialList() const
@@ -255,5 +290,10 @@ namespace object
 	void C3DObject::SetScale(const glm::vec3& Scale)
 	{
 		m_ObjectTransform->SetScale(Scale);
+	}
+
+	void C3DObject::SetPlayClipIndex(int Index)
+	{
+		m_CurrentClipIndex = Index;
 	}
 }

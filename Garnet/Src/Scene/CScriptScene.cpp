@@ -11,16 +11,15 @@
 namespace scene
 {
 	CScriptScene::CScriptScene(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker):
-		m_IsDrawSponza(false),
-		m_CoolTime(0.0f),
-
 		m_glTFObject(std::make_shared<object::C3DObject>("", "ShadowPass")),
 		//m_glTFData(std::make_shared<file::CFile>("Resources\\Models\\MetalRoughSpheresNoTextures\\glTF-Binary\\MetalRoughSpheresNoTextures.glb")),
 		//m_glTFData(std::make_shared<file::CFile>("Resources\\Models\\Sponza\\glTF\\Sponza.glb")),
-		m_glTFData(std::make_shared<file::CFile>("Resources\\Models\\DamagedHelmet\\glTF-Binary\\DamagedHelmet.glb")),
-		
-		m_SponzaObject(std::make_shared<object::C3DObject>("", "ShadowPass")),
-		m_SponzaData(std::make_shared<file::CFile>("Resources\\Models\\Sponza\\glTF\\Sponza.glb")),
+		//m_glTFData(std::make_shared<file::CFile>("Resources\\Models\\DamagedHelmet\\glTF-Binary\\DamagedHelmet.glb")),
+		//m_glTFData(std::make_shared<file::CFile>("Resources\\Models\\SimpleAnimation\\SimpleAnimation.gltf")),
+		//m_glTFData(std::make_shared<file::CFile>("Resources\\Models\\SimpleAnimation\\Triangle_Linear_Anim_Test.gltf")),
+		//m_glTFData(std::make_shared<file::CFile>("Resources\\Models\\SimpleAnimation\\CubeiSplineTest.gltf")),
+		//m_glTFData(std::make_shared<file::CFile>("Resources\\Models\\SimpleMorphTarget\\SimpleMorphTarget.gltf")),
+		m_glTFData(std::make_shared<file::CFile>("Resources\\Models\\SimpleSkin\\SimpleSkin.gltf")),
 
 		m_Background(std::make_shared<object::C3DObject>("", "ShadowPass")),
 
@@ -49,7 +48,6 @@ namespace scene
 		pLoadWorker->AddFirstLoadResource(m_DepthVertex);
 		pLoadWorker->AddFirstLoadResource(m_DepthFragment);
 		pLoadWorker->AddFirstLoadResource(m_glTFData);
-		pLoadWorker->AddFirstLoadResource(m_SponzaData);
 		pLoadWorker->AddFirstLoadResource(m_IBL_Skybox);
 		pLoadWorker->AddFirstLoadResource(m_IBL_DiffuseEnvMap);
 		pLoadWorker->AddFirstLoadResource(m_IBL_SpecularEnvMap);
@@ -98,32 +96,8 @@ namespace scene
 		auto IBL_GGXLUT_Tex = pGraphicsAPI->CreateTexture(false);
 		if (!IBL_GGXLUT_Tex->Create(m_IBL_GGX_LUT->GetData())) return false;
 
-		// m_SponzaObject
-		{
-			// TRS
-			m_SponzaObject->SetRot(glm::vec3(0.0f, 3.1415f * -0.5f, 0.0f)); // Sponza
-
-			// MaterialInto
-			std::shared_ptr<graphics::CMaterialCreateInfo> createInfo = std::make_shared<graphics::CMaterialCreateInfo>();
-			createInfo->SetVertexShaderCode(m_VertexShader->GetData());
-			createInfo->SetFragmentShaderCode(m_FragmentShader->GetData());
-
-			// TextureSet
-			std::shared_ptr<graphics::CTextureSet> TextureSet = std::make_shared<graphics::CTextureSet>();
-			TextureSet->AddCubeMap(CubeTex);
-			for (const auto& FrameTexture : m_FrameTextureList) { TextureSet->AddFrameTexture(FrameTexture); }
-			TextureSet->AddIBLTexture(IBL_Diffuse_Tex, IBL_Specular_Tex, IBL_GGXLUT_Tex);
-
-			// Import
-			if (!gltf::CGLTFImporter::Import(pGraphicsAPI, m_SponzaData->GetData(), m_SponzaObject, createInfo, TextureSet, m_DepthVertex, m_DepthFragment)) return false;
-		}
-
 		// glTFObject
 		{
-			// TRS
-			m_glTFObject->SetRot(glm::vec3(0.0f, 3.1415f * -1.0f, 0.0f)); // Sponza
-			//m_glTFObject->SetScale(glm::vec3(500.0f)); // Spheres
-
 			// MaterialInto
 			std::shared_ptr<graphics::CMaterialCreateInfo> createInfo = std::make_shared<graphics::CMaterialCreateInfo>();
 			createInfo->SetVertexShaderCode(m_VertexShader->GetData());
@@ -135,8 +109,17 @@ namespace scene
 			for(const auto& FrameTexture : m_FrameTextureList) { TextureSet->AddFrameTexture(FrameTexture); }
 			TextureSet->AddIBLTexture(IBL_Diffuse_Tex, IBL_Specular_Tex, IBL_GGXLUT_Tex);
 
+			// 再生するアニメーションクリップを指定する
+			m_glTFObject->SetPlayClipIndex(0);
+
+			//
+			//m_glTFObject->SetRot(glm::vec3(0.0f, 3.1415f * -1.0f, 0.0f));
+
 			// Import
-			if (!gltf::CGLTFImporter::Import(pGraphicsAPI, m_glTFData->GetData(), m_glTFObject, createInfo, TextureSet, m_DepthVertex, m_DepthFragment)) return false;
+			if (!gltf::CGLTFImporter::ImportFromString(pGraphicsAPI, m_glTFData->GetData(), "Resources\\Models\\SimpleSkin\\", m_glTFObject, createInfo, TextureSet, m_DepthVertex, m_DepthFragment)) return false;
+			//if (!gltf::CGLTFImporter::ImportFromString(pGraphicsAPI, m_glTFData->GetData(), "Resources\\Models\\SimpleMorphTarget\\", m_glTFObject, createInfo, TextureSet, m_DepthVertex, m_DepthFragment)) return false;
+			//if (!gltf::CGLTFImporter::ImportFromString(pGraphicsAPI, m_glTFData->GetData(), "Resources\\Models\\SimpleAnimation\\", m_glTFObject, createInfo, TextureSet, m_DepthVertex, m_DepthFragment)) return false;
+			//if (!gltf::CGLTFImporter::ImportFromMemory(pGraphicsAPI, m_glTFData->GetData(), m_glTFObject, createInfo, TextureSet, m_DepthVertex, m_DepthFragment)) return false;
 		}
 
 		//
@@ -212,33 +195,14 @@ namespace scene
 			m_IsLoaded = true;
 		}
 
-		if (InputState->IsKeyDown(input::EKeyType::KEY_TYPE_1) && m_CoolTime <= 0.0f)
+		if (m_glTFObject)
 		{
-			m_IsDrawSponza = (!m_IsDrawSponza);
-			m_CoolTime = 0.5f;
-		}
-		else if (m_CoolTime > 0.0)
-		{
-			m_CoolTime -= DrawInfo->GetDeltaSecondsTime();
-		}
-		else
-		{
-			m_CoolTime = 0.0f;
-		}
-
-		if (m_IsDrawSponza && m_SponzaObject)
-		{
-			if (!m_SponzaObject->Update()) return false;
-		}
-
-		if (!m_IsDrawSponza && m_glTFObject)
-		{
-			if (!m_glTFObject->Update()) return false;
+			if (!m_glTFObject->Update(DrawInfo->GetDeltaSecondsTime())) return false;
 		}
 		
 		if (m_Background)
 		{
-			if (!m_Background->Update()) return false;
+			if (!m_Background->Update(DrawInfo->GetDeltaSecondsTime())) return false;
 		}
 
 		return true;
@@ -254,13 +218,8 @@ namespace scene
 		const std::shared_ptr<graphics::CDrawInfo>& DrawInfo)
 	{
 		if (!m_IsLoaded) return true;
-
-		if (m_IsDrawSponza && m_SponzaObject)
-		{
-			if (!m_SponzaObject->Draw(IsDepthPass, Camera, Projection, DrawInfo)) return false;
-		}
 		
-		if (!m_IsDrawSponza && m_glTFObject)
+		if (m_glTFObject)
 		{
 			if (!m_glTFObject->Draw(IsDepthPass, Camera, Projection, DrawInfo)) return false;
 		}

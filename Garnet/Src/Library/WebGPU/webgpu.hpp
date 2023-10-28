@@ -387,7 +387,7 @@ ENUM(TextureAspect)
 	ENUM_ENTRY(DepthOnly, 0x00000002)
 	ENUM_ENTRY(Force32, 0x7FFFFFFF)
 END
-ENUM(TextureComponentType)
+ENUM(TexturEDataType)
 	ENUM_ENTRY(Float, 0x00000000)
 	ENUM_ENTRY(Sint, 0x00000001)
 	ENUM_ENTRY(Uint, 0x00000002)
