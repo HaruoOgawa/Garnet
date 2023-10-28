@@ -113,7 +113,7 @@ namespace scene
 			m_glTFObject->SetPlayClipIndex(0);
 
 			//
-			m_glTFObject->SetRot(glm::vec3(0.0f, 3.1415f * -1.0f, 0.0f));
+			//m_glTFObject->SetRot(glm::vec3(0.0f, 3.1415f * -1.0f, 0.0f));
 
 			// Import
 			if (!gltf::CGLTFImporter::ImportFromString(pGraphicsAPI, m_glTFData->GetData(), "Resources\\Models\\SimpleSkin\\", m_glTFObject, createInfo, TextureSet, m_DepthVertex, m_DepthFragment)) return false;

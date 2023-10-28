@@ -403,13 +403,13 @@ typedef enum WGPUTextureAspect {
     WGPUTextureAspect_Force32 = 0x7FFFFFFF
 } WGPUTextureAspect;
 
-typedef enum WGPUTextureComponentType {
-    WGPUTextureComponentType_Float = 0x00000000,
-    WGPUTextureComponentType_Sint = 0x00000001,
-    WGPUTextureComponentType_Uint = 0x00000002,
-    WGPUTextureComponentType_DepthComparison = 0x00000003,
-    WGPUTextureComponentType_Force32 = 0x7FFFFFFF
-} WGPUTextureComponentType;
+typedef enum WGPUTexturEDataType {
+    WGPUTexturEDataType_Float = 0x00000000,
+    WGPUTexturEDataType_Sint = 0x00000001,
+    WGPUTexturEDataType_Uint = 0x00000002,
+    WGPUTexturEDataType_DepthComparison = 0x00000003,
+    WGPUTexturEDataType_Force32 = 0x7FFFFFFF
+} WGPUTexturEDataType;
 
 typedef enum WGPUTextureDimension {
     WGPUTextureDimension_1D = 0x00000000,

@@ -16,6 +16,7 @@ namespace renderer
 {
 	class CRendererCreateInfo;
 	enum class EIndiceType;
+	enum class EDataType;
 
 	class CWebGPURenderer : public IRenderer
 	{
@@ -45,7 +46,7 @@ namespace renderer
 		bool CreateGraphicsPipeline(const std::shared_ptr<CRendererCreateInfo>& createInfo, api::CWebGPUMaterial* pWebGPUMat);
 		
 		// Helper Function ///////////////////////////////////////////////////////////////////////
-		WGPUVertexFormat GetVertexFormat(int Dimension);
+		WGPUVertexFormat GetVertexFormat(int Dimention, EDataType DataType);
 		bool             CreateBuffer(WGPUBuffer& Buffer, WGPUBufferUsageFlags Usage, void const* Data, uint64_t ByteSize);
 		void			 SetDefaultDepthStencil(WGPUDepthStencilState& depthStencilState);
 	public:

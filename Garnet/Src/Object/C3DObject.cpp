@@ -123,6 +123,14 @@ namespace object
 		{
 			std::vector<glm::mat4> SkinMatrixList;
 			if (!Skin->CalcSkinMatrixList(SkinMatrixList)) return false;
+
+			// ‰¼‚ÅŒvŽZ
+			for (const auto& Material : m_MaterialList)
+			{
+				if (!Material) continue;
+
+				Material->SetUniformValue("r_SkinMatrixBuffer", &SkinMatrixList[0]);
+			}
 		}
 
 		return true;

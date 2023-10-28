@@ -6,6 +6,8 @@ layout(location = 2) in vec4 f_WorldPos;
 layout(location = 3) in vec3 f_WorldTangent;
 layout(location = 4) in vec3 f_WorldBioTangent;
 layout(location = 5) in vec4 f_LightSpacePos;
+layout(location = 6) in flat vec4 f_DebugColor;
+layout(location = 7) in flat ivec4 f_DebugJoint;
 
 layout(location = 0) out vec4 outColor;
 
@@ -42,49 +44,54 @@ layout(binding = 0) uniform UniformBufferObject{
     int   useCubeMap;
     int   useShadowMap;
     int   useIBL;
+
+	int   useSkinMeshAnimation;
+    int   pad0;
+    int   pad1;
+    int   pad2;
 } ubo;
 
 #ifdef USE_OPENGL
-layout(binding = 1) uniform sampler2D baseColorTexture;
-layout(binding = 3) uniform sampler2D metallicRoughnessTexture;
-layout(binding = 5) uniform sampler2D emissiveTexture;
-layout(binding = 7) uniform sampler2D normalTexture;
-layout(binding = 9) uniform sampler2D occlusionTexture;
-layout(binding = 11) uniform samplerCube cubemapTexture;
-layout(binding = 13) uniform sampler2D shadowmapTexture;
-layout(binding = 15) uniform sampler2D IBL_Diffuse_Texture;
-layout(binding = 17) uniform sampler2D IBL_Specular_Texture;
-layout(binding = 19) uniform sampler2D IBL_GGXLUT_Texture;
+layout(binding = 2) uniform sampler2D baseColorTexture;
+layout(binding = 4) uniform sampler2D metallicRoughnessTexture;
+layout(binding = 6) uniform sampler2D emissiveTexture;
+layout(binding = 8) uniform sampler2D normalTexture;
+layout(binding = 10) uniform sampler2D occlusionTexture;
+layout(binding = 12) uniform samplerCube cubemapTexture;
+layout(binding = 14) uniform sampler2D shadowmapTexture;
+layout(binding = 16) uniform sampler2D IBL_Diffuse_Texture;
+layout(binding = 18) uniform sampler2D IBL_Specular_Texture;
+layout(binding = 20) uniform sampler2D IBL_GGXLUT_Texture;
 #else
-layout(binding = 1) uniform texture2D baseColorTexture;
-layout(binding = 2) uniform sampler baseColorTextureSampler;
+layout(binding = 2) uniform texture2D baseColorTexture;
+layout(binding = 3) uniform sampler baseColorTextureSampler;
 
-layout(binding = 3) uniform texture2D metallicRoughnessTexture;
-layout(binding = 4) uniform sampler metallicRoughnessTextureSampler;
+layout(binding = 4) uniform texture2D metallicRoughnessTexture;
+layout(binding = 5) uniform sampler metallicRoughnessTextureSampler;
 
-layout(binding = 5) uniform texture2D emissiveTexture;
-layout(binding = 6) uniform sampler emissiveTextureSampler;
+layout(binding = 6) uniform texture2D emissiveTexture;
+layout(binding = 7) uniform sampler emissiveTextureSampler;
 
-layout(binding = 7) uniform texture2D normalTexture;
-layout(binding = 8) uniform sampler normalTextureSampler;
+layout(binding = 8) uniform texture2D normalTexture;
+layout(binding = 9) uniform sampler normalTextureSampler;
 
-layout(binding = 9) uniform texture2D occlusionTexture;
-layout(binding = 10) uniform sampler occlusionTextureSampler;
+layout(binding = 10) uniform texture2D occlusionTexture;
+layout(binding = 11) uniform sampler occlusionTextureSampler;
 
-layout(binding = 11) uniform textureCube cubemapTexture;
-layout(binding = 12) uniform sampler cubemapTextureSampler;
+layout(binding = 12) uniform textureCube cubemapTexture;
+layout(binding = 13) uniform sampler cubemapTextureSampler;
 
-layout(binding = 13) uniform texture2D shadowmapTexture;
-layout(binding = 14) uniform sampler shadowmapTextureSampler;
+layout(binding = 14) uniform texture2D shadowmapTexture;
+layout(binding = 15) uniform sampler shadowmapTextureSampler;
 
-layout(binding = 15) uniform texture2D IBL_Diffuse_Texture;
-layout(binding = 16) uniform sampler IBL_Diffuse_TextureSampler;
+layout(binding = 16) uniform texture2D IBL_Diffuse_Texture;
+layout(binding = 17) uniform sampler IBL_Diffuse_TextureSampler;
 
-layout(binding = 17) uniform texture2D IBL_Specular_Texture;
-layout(binding = 18) uniform sampler IBL_Specular_TextureSampler;
+layout(binding = 18) uniform texture2D IBL_Specular_Texture;
+layout(binding = 19) uniform sampler IBL_Specular_TextureSampler;
 
-layout(binding = 19) uniform texture2D IBL_GGXLUT_Texture;
-layout(binding = 20) uniform sampler IBL_GGXLUT_TextureSampler;
+layout(binding = 20) uniform texture2D IBL_GGXLUT_Texture;
+layout(binding = 21) uniform sampler IBL_GGXLUT_TextureSampler;
 #endif
 
 // なんかUnityPBRでもみた値だなぁ
@@ -576,6 +583,8 @@ void main(){
 
 	// アルファを指定
 	col.a = baseColor.a;
+
+	col = f_DebugColor;
 
 	outColor = col;
 }

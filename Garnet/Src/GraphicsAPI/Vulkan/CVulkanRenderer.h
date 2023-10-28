@@ -26,6 +26,7 @@ namespace renderer
 {
 	class CRendererCreateInfo;
 	enum class EIndiceType;
+	enum class EDataType;
 
 	class CVulkanRenderer : public IRenderer
 	{
@@ -56,7 +57,7 @@ namespace renderer
 		bool CreateGraphicsPipeline(const std::shared_ptr<CRendererCreateInfo>& createInfo, api::CVulkanMaterial* pVulkanMat);
 
 		// ƒwƒ‹ƒp[ŠÖ” ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		VkFormat GetVertexFormat(int Dimention);
+		VkFormat GetVertexFormat(int Dimention, EDataType DataType);
 	public:
 		CVulkanRenderer(api::CVulkanAPI* pGraphicsAPI, const std::string& PassName);
 		virtual ~CVulkanRenderer();

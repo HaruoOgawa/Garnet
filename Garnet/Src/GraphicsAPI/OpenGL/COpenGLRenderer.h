@@ -13,6 +13,7 @@ namespace api {
 namespace renderer
 {
 	class CRendererCreateInfo;
+	enum class EDataType;
 
 	class COpenGLRenderer : public IRenderer
 	{
@@ -32,6 +33,9 @@ namespace renderer
 		bool CreateVertexArray();
 		bool CreateVertexBuffer(const std::shared_ptr<CRendererCreateInfo>& createInfo);
 		bool CreateIndexBuffer(const std::shared_ptr<CRendererCreateInfo>& createInfo);
+
+		// Helper
+		GLenum GetGLenumDataType(EDataType DataType);
 	public:
 		COpenGLRenderer(api::COpenGLAPI* pGraphicsAPI, const std::string& PassName);
 		virtual ~COpenGLRenderer();
