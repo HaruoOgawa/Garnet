@@ -138,12 +138,17 @@ namespace animation
 		// Prev
 		size_t NextIndex = std::distance(m_KeyFrameList.begin(), val);
 
-		// NextIndex‚Í0‚æ‚è‚à‘å‚«‚¢•K—v‚ª‚ ‚é
-		if (NextIndex <= 0 || NextIndex >= m_KeyFrameList.size()) return false;
-
-		PrevKeyFrame = m_KeyFrameList[NextIndex - 1];
-
-		//
+		// CurrentTime‚ªKeyFrame‚ÌÅ‰‚æ‚è‚à¬‚³‚¢‚ÍPrev‚ÆNext‚É‚»‚ê‚¼‚ê0‚Æ1‚ÌKeyFrame‚ğŠ„‚è“–‚Ä‚é
+		if (NextIndex <= 0 || NextIndex >= m_KeyFrameList.size())
+		{
+			NextKeyFrame = m_KeyFrameList[1];
+			PrevKeyFrame = m_KeyFrameList[0];
+		}
+		else
+		{
+			PrevKeyFrame = m_KeyFrameList[NextIndex - 1];
+		}
+		
 		if (PrevKeyFrame == nullptr || NextKeyFrame == nullptr) return false;
 
 		return true;
