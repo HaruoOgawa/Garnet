@@ -19,7 +19,12 @@ namespace scene
 		//m_glTFData(std::make_shared<file::CFile>("Resources\\Models\\SimpleAnimation\\Triangle_Linear_Anim_Test.gltf")),
 		//m_glTFData(std::make_shared<file::CFile>("Resources\\Models\\SimpleAnimation\\CubeiSplineTest.gltf")),
 		//m_glTFData(std::make_shared<file::CFile>("Resources\\Models\\SimpleMorphTarget\\SimpleMorphTarget.gltf")),
-		m_glTFData(std::make_shared<file::CFile>("Resources\\Models\\SimpleSkin\\SimpleSkin.gltf")),
+		//m_glTFData(std::make_shared<file::CFile>("Resources\\Models\\SimpleSkin\\SimpleSkin.gltf")),
+		//m_glTFData(std::make_shared<file::CFile>("Resources\\Models\\RiggedSimple\\glTF-Binary\\RiggedSimple.glb")),
+		//m_glTFData(std::make_shared<file::CFile>("Resources\\Models\\RiggedFigure\\glTF-Binary\\RiggedFigure.glb")),
+		m_glTFData(std::make_shared<file::CFile>("Resources\\Models\\BrainStem\\glTF-Binary\\BrainStem.glb")),
+		//m_glTFData(std::make_shared<file::CFile>("Resources\\Models\\CesiumMan\\glTF-Binary\\CesiumMan.glb")),
+		//m_glTFData(std::make_shared<file::CFile>("Resources\\Models\\AnimatedCube\\glTF\\AnimatedCube.gltf")),
 
 		m_Background(std::make_shared<object::C3DObject>("", "ShadowPass")),
 
@@ -112,14 +117,14 @@ namespace scene
 			// 再生するアニメーションクリップを指定する
 			m_glTFObject->SetPlayClipIndex(0);
 
-			//
-			//m_glTFObject->SetRot(glm::vec3(0.0f, 3.1415f * -1.0f, 0.0f));
+			m_glTFObject->SetRot(glm::vec3(3.1415f * 0.5f, 0.0f, 0.0f));
 
 			// Import
-			if (!gltf::CGLTFImporter::ImportFromString(pGraphicsAPI, m_glTFData->GetData(), "Resources\\Models\\SimpleSkin\\", m_glTFObject, createInfo, TextureSet, m_DepthVertex, m_DepthFragment)) return false;
+			//if (!gltf::CGLTFImporter::ImportFromString(pGraphicsAPI, m_glTFData->GetData(), "Resources\\Models\\AnimatedCube\\glTF\\", m_glTFObject, createInfo, TextureSet, m_DepthVertex, m_DepthFragment)) return false;
+			//if (!gltf::CGLTFImporter::ImportFromString(pGraphicsAPI, m_glTFData->GetData(), "Resources\\Models\\SimpleSkin\\", m_glTFObject, createInfo, TextureSet, m_DepthVertex, m_DepthFragment)) return false;
 			//if (!gltf::CGLTFImporter::ImportFromString(pGraphicsAPI, m_glTFData->GetData(), "Resources\\Models\\SimpleMorphTarget\\", m_glTFObject, createInfo, TextureSet, m_DepthVertex, m_DepthFragment)) return false;
 			//if (!gltf::CGLTFImporter::ImportFromString(pGraphicsAPI, m_glTFData->GetData(), "Resources\\Models\\SimpleAnimation\\", m_glTFObject, createInfo, TextureSet, m_DepthVertex, m_DepthFragment)) return false;
-			//if (!gltf::CGLTFImporter::ImportFromMemory(pGraphicsAPI, m_glTFData->GetData(), m_glTFObject, createInfo, TextureSet, m_DepthVertex, m_DepthFragment)) return false;
+			if (!gltf::CGLTFImporter::ImportFromMemory(pGraphicsAPI, m_glTFData->GetData(), m_glTFObject, createInfo, TextureSet, m_DepthVertex, m_DepthFragment)) return false;
 		}
 
 		//
