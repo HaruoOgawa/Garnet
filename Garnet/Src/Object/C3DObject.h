@@ -34,7 +34,6 @@ namespace object
 	private:
 		void CalcWorldMatrix();
 		void CalcWorldMatrix(std::shared_ptr<CNode>& Node, const glm::mat4& ParentWorldMatrix);
-		bool CalcSkinMatrix();
 	public:
 		C3DObject(const std::string& PassName, const std::string& DepthPassName);
 		virtual ~C3DObject();

@@ -30,6 +30,10 @@ namespace animation
 			const auto& Joint = m_JointList[i];
 			const glm::mat4& JointWorldMatrix = Joint->GetJointNode()->GetWorldMatrix();
 
+			// InverseBindMatrixは対象のJointを原点に戻す方向にMeshを移動させるための逆行列
+			// その後、JointWorldMatrixをかけることでアニメーションで移動後のJointの位置にMeshを移動させることができる
+			// https://github.com/KhronosGroup/glTF-Tutorials/blob/master/gltfTutorial/images/skinJointMatrices.png
+			// https://github.com/KhronosGroup/glTF-Tutorials/blob/master/gltfTutorial/gltfTutorial_020_Skins.md#the-joint-matrices
 			const glm::mat4& InverseBindMatrix = m_InverseBindMatrixList[i];
 
 			glm::mat4 SkinMatrix = JointWorldMatrix * InverseBindMatrix;

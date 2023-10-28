@@ -1128,6 +1128,9 @@
     <ClInclude Include="Src\Animation\CJoint.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="Src\GraphicsAPI\OpenGL\wglDef.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\Main\DescMain\DescMain.cpp">

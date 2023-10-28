@@ -66,7 +66,7 @@ namespace api
 			// SharedBuffer‚Íˆ—‚µ‚È‚¢
 			if (Buffer->GetSharedBufferParam().IsShared) continue;
 
-			if (Buffer->GetBufferType() == graphics::EBufferType::SHADERSTORAGE) continue;
+			if (Buffer->GetBufferUpdateType() != graphics::EBufferUpdateType::UPDATE_TYPE_CPU) continue;
 
 			for (const auto& Layout : Buffer->GetBindingLayoutList())
 			{

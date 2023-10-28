@@ -117,25 +117,6 @@ namespace object
 		}
 	}
 
-	bool C3DObject::CalcSkinMatrix()
-	{
-		for (const auto& Skin : m_AnimationSkinList)
-		{
-			std::vector<glm::mat4> SkinMatrixList;
-			if (!Skin->CalcSkinMatrixList(SkinMatrixList)) return false;
-
-			// 仮で計算
-			for (const auto& Material : m_MaterialList)
-			{
-				if (!Material) continue;
-
-				Material->SetUniformValue("r_SkinMatrixBuffer", &SkinMatrixList[0]);
-			}
-		}
-
-		return true;
-	}
-
 	bool C3DObject::Update(float DeltaSecondsTime)
 	{
 		// アニメーションの計算
@@ -148,9 +129,6 @@ namespace object
 		// ワールド行列の更新
 		// 全ノードマイフレーム更新しているので、そのうちキャッシュを入れて更新は必要なものだけにする
 		CalcWorldMatrix();
-
-		// SkinMatrixを計算
-		if (!CalcSkinMatrix()) return false;
 
 		return true;
 	}
@@ -187,6 +165,17 @@ namespace object
 
 			if (DynamicOffsetList.size() != Mesh->GetPrimitiveList().size()) continue; // PrimitiveListとNodeのDynamicOffsetNumListは一致している
 
+			// SkinMatrixを計算
+			std::vector<glm::mat4> SkinMatrixList;
+			int SkinIndex = Node->GetSkinIndex();
+
+			if (SkinIndex >= 0 && SkinIndex < m_AnimationSkinList.size())
+			{
+				const auto& Skin = m_AnimationSkinList[SkinIndex];
+				
+				if (!Skin->CalcSkinMatrixList(SkinMatrixList)) return false;
+			}
+
 			for (int PrimitiveIndex = 0; PrimitiveIndex < Mesh->GetPrimitiveList().size(); PrimitiveIndex++)
 			{
 				const auto& Primitive = Mesh->GetPrimitiveList()[PrimitiveIndex];
@@ -209,6 +198,12 @@ namespace object
 				if (!Material) continue;
 				
 				Material->SetUniformValue("model", &WorldMatrix[0][0], DynamicOffsetNum);
+
+				// SkinMatrixをShaderに渡す
+				if (SkinIndex >= 0 && SkinIndex < m_AnimationSkinList.size())
+				{
+					Material->SetUniformValue("r_SkinMatrixBuffer", &SkinMatrixList[0], DynamicOffsetNum);
+				}
 
 				if (!Primitive->Draw(Material, DynamicOffsetNum, IsDepthPass)) return false;
 			}

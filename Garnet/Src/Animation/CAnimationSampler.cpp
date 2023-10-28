@@ -206,6 +206,9 @@ namespace animation
 
 		glm::quat dstQuat = glm::slerp(PrevQuat, NextQuat, L);
 
+		// YUp‰EèŒn‚É‡‚í‚¹‚é
+		dstQuat *= glm::angleAxis(3.1415f, glm::vec3(0.0f, 1.0f, 0.0f));
+
 		Value.push_back(dstQuat.x);
 		Value.push_back(dstQuat.y);
 		Value.push_back(dstQuat.z);

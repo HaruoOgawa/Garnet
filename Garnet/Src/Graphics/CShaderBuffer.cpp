@@ -6,9 +6,10 @@
 
 namespace graphics
 {
-	CShaderBuffer::CShaderBuffer(EBufferType BufferType, const std::vector<SBindingLayout>& BindingLayoutList) :
+	CShaderBuffer::CShaderBuffer(EBufferType BufferType, const std::vector<SBindingLayout>& BindingLayoutList, EBufferUpdateType BufferUpdateType) :
 		m_Descriptor(std::make_shared<CShaderBufferDescriptor>()),
-		m_BufferType(BufferType)
+		m_BufferType(BufferType),
+		m_BufferUpdateType(BufferUpdateType)
 	{
 		for (const auto& Layout : BindingLayoutList)
 		{
@@ -115,5 +116,10 @@ namespace graphics
 	const SSharedBufferParam& CShaderBuffer::GetSharedBufferParam() const
 	{
 		return m_SharedBufferParam;
+	}
+
+	EBufferUpdateType CShaderBuffer::GetBufferUpdateType() const
+	{
+		return m_BufferUpdateType;
 	}
 }

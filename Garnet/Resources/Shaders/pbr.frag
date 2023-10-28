@@ -6,8 +6,6 @@ layout(location = 2) in vec4 f_WorldPos;
 layout(location = 3) in vec3 f_WorldTangent;
 layout(location = 4) in vec3 f_WorldBioTangent;
 layout(location = 5) in vec4 f_LightSpacePos;
-layout(location = 6) in flat vec4 f_DebugColor;
-layout(location = 7) in flat ivec4 f_DebugJoint;
 
 layout(location = 0) out vec4 outColor;
 
@@ -583,8 +581,6 @@ void main(){
 
 	// アルファを指定
 	col.a = baseColor.a;
-
-	col = f_DebugColor;
 
 	outColor = col;
 }

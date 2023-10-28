@@ -57,8 +57,6 @@ layout(location = 2) out vec4 f_WorldPos;
 layout(location = 3) out vec3 f_WorldTangent;
 layout(location = 4) out vec3 f_WorldBioTangent;
 layout(location = 5) out vec4 f_LightSpacePos;
-layout(location = 6) out flat vec4 f_DebugColor;
-layout(location = 7) out flat ivec4 f_DebugJoint;
 
 #define rot(a) mat2(cos(a), -sin(a), sin(a), cos(a))
 
@@ -67,7 +65,6 @@ void main(){
     vec3 BioTangent = cross(inNormal, inTangent.xyz);
 
     // スキンメッシュアニメーション
-    ivec4 joint = ivec4(inJoint0);
     if(ubo.useSkinMeshAnimation != 0)
     {
         // あとでUniform実装. スキンが複数個になった時対応する必要がある
@@ -76,16 +73,15 @@ void main(){
         int StartSkinMatIndex = 0;
 
         mat4 SkinMat =
-            inWeights0.x * r_SkinMatrixBuffer.SkinMat[joint.x] +
-            inWeights0.y * r_SkinMatrixBuffer.SkinMat[joint.y] +
-            inWeights0.z * r_SkinMatrixBuffer.SkinMat[joint.z] +
-            inWeights0.w * r_SkinMatrixBuffer.SkinMat[joint.w] 
+            inWeights0.x * r_SkinMatrixBuffer.SkinMat[inJoint0.x] +
+            inWeights0.y * r_SkinMatrixBuffer.SkinMat[inJoint0.y] +
+            inWeights0.z * r_SkinMatrixBuffer.SkinMat[inJoint0.z] +
+            inWeights0.w * r_SkinMatrixBuffer.SkinMat[inJoint0.w] 
         ;
 
         pos = SkinMat * pos;
     }
 
-    //
     gl_Position = ubo.proj * ubo.view * ubo.model * pos;
     f_WorldNormal = normalize((ubo.model * vec4(inNormal, 0.0)).xyz);
     f_Texcoord = inTexcoord;
@@ -93,13 +89,4 @@ void main(){
     f_WorldTangent = normalize((ubo.model * inTangent).xyz);
     f_WorldBioTangent = normalize((ubo.model * vec4(BioTangent, 0.0)).xyz);
     f_LightSpacePos = ubo.lightVPMat * ubo.model * pos;
-
-    vec4 dcol = vec4(inWeights0.rgb, 1.0);
-    if(joint.x > 1 || joint.y > 1 || joint.z > 1 || joint.w > 1)
-    {
-        dcol = vec4(0.0, 0.0, 1.0, 1.0);
-    }
-
-    f_DebugColor = dcol;
-    f_DebugJoint = joint;
 }

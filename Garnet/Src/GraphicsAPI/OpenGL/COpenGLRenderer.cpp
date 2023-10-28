@@ -147,7 +147,16 @@ namespace renderer
 			glBufferData(GL_ARRAY_BUFFER, data.size() * sizeof(data[0]), &data[0], GL_STATIC_DRAW);
 
 			glEnableVertexAttribArray(location);
-			glVertexAttribPointer(location, dimention, attribDataType, GL_FALSE, byteStride, 0);
+			if (attribDataType == GL_FLOAT)
+			{
+				glVertexAttribPointer(location, dimention, attribDataType, GL_FALSE, byteStride, 0);
+			}
+			else
+			{
+				// Interger Values‚ÌŽž‚ÍglVertexAttrib"I"Pointer‚Ì•û‚ðŽg—p‚·‚é
+				// https://registry.khronos.org/OpenGL-Refpages/gl4/html/glVertexAttribPointer.xhtml
+				glVertexAttribIPointer(location, dimention, attribDataType, byteStride, 0);
+			}
 
 			glBindBuffer(GL_ARRAY_BUFFER, 0);
 		}

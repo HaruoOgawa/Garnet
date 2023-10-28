@@ -20,6 +20,13 @@ namespace graphics
 		std::shared_ptr<CMaterial> SharedBufferMaterial = nullptr;
 	};
 
+	// ShaderBufferにデータを書き込む役割を担っているのがCPUなのかGPUなのか
+	enum class EBufferUpdateType
+	{
+		UPDATE_TYPE_CPU,
+		UPDATE_TYPE_GPU,
+	};
+
 	class CShaderBuffer : public IBuffer
 	{
 		std::vector<unsigned char> m_Buffer;
@@ -27,11 +34,12 @@ namespace graphics
 		std::map<int, SBindingLayout> m_BindingLayoutList;
 
 		const EBufferType m_BufferType;
+		const EBufferUpdateType m_BufferUpdateType;
 
 		// バッファを共有するかどうか
 		SSharedBufferParam m_SharedBufferParam{};
 	public:
-		CShaderBuffer(EBufferType BufferType, const std::vector<SBindingLayout>& BindingLayoutList);
+		CShaderBuffer(EBufferType BufferType, const std::vector<SBindingLayout>& BindingLayoutList, EBufferUpdateType BufferUpdateType);
 		virtual ~CShaderBuffer();
 
 		virtual void AddData(const std::string& Name, const void* Data, int ByteSize, int BindingIndex) override;
@@ -52,5 +60,7 @@ namespace graphics
 
 		void SetSharedBufferParam(const SSharedBufferParam& Param);
 		const SSharedBufferParam& GetSharedBufferParam() const;
+
+		EBufferUpdateType GetBufferUpdateType() const;
 	};
 }

@@ -580,6 +580,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClInclude Include="Src\Animation\CAnimationChannel.h" />
     <ClInclude Include="Src\Animation\CAnimationSampler.h" />
     <ClInclude Include="Src\Animation\CAnimationClip.h" />
+    <ClInclude Include="Src\GraphicsAPI\OpenGL\wglDef.h" />
     <ClInclude Include="Src\Graphics\CTextureSet.h" />
     <ClInclude Include="Src\GraphicsAPI\OpenGL\COpenGLGPGPUHandler.h" />
     <ClInclude Include="Src\GraphicsAPI\WebGPU\CWebGPUGPGPUHandler.h" />

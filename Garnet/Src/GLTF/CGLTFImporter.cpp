@@ -432,10 +432,12 @@ namespace gltf
 
 			// SkinMatrix StorageBuffer
 			{
-				auto SSBO = graphics::CMaterialCreateInfo::CreateShaderStorageBuffer({ graphics::SBindingLayout("SkinMatrixBuffer", 1, false) });
+				auto SSBO = graphics::CMaterialCreateInfo::CreateShaderStorageBuffer({ graphics::SBindingLayout("SkinMatrixBuffer", 1, false) }, graphics::EBufferUpdateType::UPDATE_TYPE_CPU);
 
 				int SkinMatCount = 0;
 				for (const auto& glTFSkin : model.skins) { SkinMatCount += static_cast<int>(glTFSkin.joints.size()); }
+
+				if(SkinMatCount <= 0) SkinMatCount = 1;
 
 				std::vector<glm::mat4> SkinMatrixList;
 				SkinMatrixList.resize(SkinMatCount, glm::mat4(0.0f));
@@ -562,7 +564,12 @@ namespace gltf
 							}
 
 							// DataTypeとByteStrideの初期値をセット
-							ReservedDataTypeList.insert({ AttribName, renderer::EDataType::TYPE_FLOAT });
+							renderer::EDataType DataType = renderer::EDataType::TYPE_FLOAT;
+
+							// 『JOINTS_0』はunsigned shortである
+							if (AttribName == "JOINTS_0") DataType = renderer::EDataType::TYPE_UNSIGNED_SHORT;
+
+							ReservedDataTypeList.insert({ AttribName, DataType });
 							ReservedByteStrideList.insert({ AttribName, 0 });
 						}
 					}
@@ -733,10 +740,12 @@ namespace gltf
 
 		// SkinMatrix StorageBuffer
 		{
-			auto SSBO = graphics::CMaterialCreateInfo::CreateShaderStorageBuffer({ graphics::SBindingLayout("SkinMatrixBuffer", 1, false) });
+			auto SSBO = graphics::CMaterialCreateInfo::CreateShaderStorageBuffer({ graphics::SBindingLayout("SkinMatrixBuffer", 1, false) }, graphics::EBufferUpdateType::UPDATE_TYPE_CPU);
 
 			int SkinMatCount = 0;
 			for (const auto& glTFSkin : model.skins) { SkinMatCount += static_cast<int>(glTFSkin.joints.size()); }
+
+			if (SkinMatCount <= 0) SkinMatCount = 1;
 
 			std::vector<glm::mat4> SkinMatrixList;
 			SkinMatrixList.resize(SkinMatCount, glm::mat4(1.0f));
@@ -745,6 +754,8 @@ namespace gltf
 
 			material->AddShaderBuffer(SSBO);
 		}
+
+		material->SetCullMode(graphics::ECullMode::CULL_NONE);
 
 		MaterialList.push_back(material);
 
@@ -766,10 +777,12 @@ namespace gltf
 		{
 			// メッシュを持っていないノードもあることを考慮する必要がある
 			int MeshIndex = glTFNode.mesh;
+			int SkinIndex = glTFNode.skin;
 
 			std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(MeshIndex, MeshList, MaterialList);
 			
 			Node->SetName(glTFNode.name);
+			Node->SetSkinIndex(SkinIndex);
 
 			const auto& scale = glTFNode.scale;
 			if (scale.size() >= 3)
