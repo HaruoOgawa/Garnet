@@ -43,4 +43,9 @@ namespace animation
 
 		return true;
 	}
+
+	const std::vector<std::shared_ptr<CJoint>>& CSkin::GetJointList() const
+	{
+		return m_JointList;
+	}
 }

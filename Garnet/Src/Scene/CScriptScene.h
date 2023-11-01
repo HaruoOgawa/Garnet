@@ -40,6 +40,7 @@ namespace scene
 
 		// Object
 		std::shared_ptr<object::C3DObject> m_Background;
+		std::shared_ptr<object::C3DObject> m_DebugSphere;
 
 		// Shader
 		std::shared_ptr<file::CFile> m_VertexShader;

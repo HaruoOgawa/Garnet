@@ -46,6 +46,11 @@ namespace object
 		m_Name = Name;
 	}
 
+	const std::string& CNode::GetName() const
+	{
+		return m_Name;
+	}
+
 	int CNode::GetMeshIndex() const
 	{
 		return m_MeshIndex;
@@ -59,6 +64,16 @@ namespace object
 	const std::shared_ptr<math::CTransform>& CNode::GetLocalTransform() const
 	{
 		return m_LocalTransform;
+	}
+
+	void CNode::SetLocalMatrix(const glm::mat4& LocalMatrix)
+	{
+		m_LocalTransform->SetModelMatrix(LocalMatrix);
+	}
+
+	glm::mat4 CNode::GetLocalMatrix() const
+	{
+		return m_LocalTransform->GetModelMatrix();
 	}
 
 	void CNode::SetWorldMatrix(const glm::mat4& WorldMatrix)
@@ -81,19 +96,19 @@ namespace object
 		m_LocalTransform->SetPos(Pos);
 	}
 
-	const glm::vec3& CNode::GetRot() const
+	const glm::quat& CNode::GetRot() const
 	{
 		return m_LocalTransform->GetRot();
 	}
 
-	void CNode::SetRot(const glm::vec3& Rot)
+	void CNode::SetRot(const glm::quat& Rot)
 	{
 		m_LocalTransform->SetRot(Rot);
 	}
 
-	void CNode::AddRot(const glm::vec3& Rot)
+	void CNode::AddRotate(const glm::vec3& Axis, float Radians)
 	{
-		m_LocalTransform->AddRot(Rot);
+		m_LocalTransform->AddRotate(Axis, Radians);
 	}
 
 	const glm::vec3& CNode::GetScale() const

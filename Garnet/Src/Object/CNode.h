@@ -32,11 +32,15 @@ namespace object
 		virtual ~CNode();
 
 		void SetName(const std::string& Name);
+		const std::string& GetName() const;
 
 		int GetMeshIndex() const;
 
 		void SetLocalTransform(std::shared_ptr<math::CTransform>& LocalTransform);
 		const std::shared_ptr<math::CTransform>& GetLocalTransform() const;
+
+		void SetLocalMatrix(const glm::mat4& LocalMatrix);
+		glm::mat4 GetLocalMatrix() const;
 
 		void SetWorldMatrix(const glm::mat4& WorldMatrix);
 		const glm::mat4& GetWorldMatrix() const;
@@ -44,9 +48,9 @@ namespace object
 		const glm::vec3& GetPos() const;
 		void SetPos(const glm::vec3& Pos);
 
-		const glm::vec3& GetRot() const;
-		void SetRot(const glm::vec3& Rot);
-		void AddRot(const glm::vec3& Rot);
+		const glm::quat& GetRot() const;
+		void SetRot(const glm::quat& Rot);
+		void AddRotate(const glm::vec3& Axis, float Radians);
 
 		const glm::vec3& GetScale() const;
 		void SetScale(const glm::vec3& Scale);

@@ -27,6 +27,7 @@ namespace scene
 		//m_glTFData(std::make_shared<file::CFile>("Resources\\Models\\AnimatedCube\\glTF\\AnimatedCube.gltf")),
 
 		m_Background(std::make_shared<object::C3DObject>("", "ShadowPass")),
+		m_DebugSphere(std::make_shared<object::C3DObject>("", "ShadowPass")),
 
 		m_IBL_Skybox(std::make_shared<file::CFile>("Resources\\IBL\\output_skybox.hdr")),
 		m_IBL_DiffuseEnvMap(std::make_shared<file::CFile>("Resources\\IBL\\output_iem.hdr")),
@@ -46,7 +47,7 @@ namespace scene
 		m_VertexShader(std::make_shared<file::CFile>("Resources\\Shaders\\pbr" + pGraphicsAPI->GetVertexShaderExtension())),
 		m_FragmentShader(std::make_shared<file::CFile>("Resources\\Shaders\\pbr" + pGraphicsAPI->GetFragmentShaderExtension())),
 		m_MinimumVert(std::make_shared<file::CFile>("Resources\\Shaders\\minimum" + pGraphicsAPI->GetVertexShaderExtension())),
-		m_TextureFrag(std::make_shared<file::CFile>("Resources\\Shaders\\texture" + pGraphicsAPI->GetFragmentShaderExtension())),
+		m_TextureFrag(std::make_shared<file::CFile>("Resources\\Shaders\\unlit" + pGraphicsAPI->GetFragmentShaderExtension())),
 
 		m_IsLoaded(false)
 	{
@@ -117,7 +118,7 @@ namespace scene
 			// 再生するアニメーションクリップを指定する
 			m_glTFObject->SetPlayClipIndex(0);
 
-			m_glTFObject->SetRot(glm::vec3(3.1415f * 0.5f, 0.0f, 0.0f));
+			//m_glTFObject->SetRot(glm::vec3(3.1415f * 0.5f, 0.0f, 0.0f));
 
 			// Import
 			//if (!gltf::CGLTFImporter::ImportFromString(pGraphicsAPI, m_glTFData->GetData(), "Resources\\Models\\AnimatedCube\\glTF\\", m_glTFObject, createInfo, TextureSet, m_DepthVertex, m_DepthFragment)) return false;
@@ -127,7 +128,7 @@ namespace scene
 			if (!gltf::CGLTFImporter::ImportFromMemory(pGraphicsAPI, m_glTFData->GetData(), m_glTFObject, createInfo, TextureSet, m_DepthVertex, m_DepthFragment)) return false;
 		}
 
-		//
+		// m_Background
 		{
 			// Material
 			{
@@ -137,20 +138,31 @@ namespace scene
 
 				auto Mat = pGraphicsAPI->CreateMaterial(createInfo);
 
-				auto UBO = graphics::CMaterialCreateInfo::CreateUniformBuffer({ graphics::SBindingLayout("UniformBufferObject", 0, false) });
-				UBO->AddData("model", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
-				UBO->AddData("view", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
-				UBO->AddData("proj", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
-				UBO->AddData("lightVPMat", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
-				UBO->AddData("cameraPos", &glm::vec4(1.0f)[0], sizeof(glm::vec4), 0);
-				UBO->AddData("useDirSampling", &glm::ivec1(1)[0], sizeof(glm::ivec1), 0);
-				UBO->AddData("time", &glm::vec1(0.0f)[0], sizeof(glm::vec1), 0);
-				UBO->AddData("pad1", &glm::ivec1(0)[0], sizeof(glm::ivec1), 0);
-				UBO->AddData("pad2", &glm::ivec1(0)[0], sizeof(glm::ivec1), 0);
+				{
+					auto UBO = graphics::CMaterialCreateInfo::CreateUniformBuffer({ graphics::SBindingLayout("UniformBufferObject", 0, false) });
+					UBO->AddData("model", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
+					UBO->AddData("view", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
+					UBO->AddData("proj", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
+					UBO->AddData("lightVPMat", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
+					UBO->AddData("cameraPos", &glm::vec4(1.0f)[0], sizeof(glm::vec4), 0);
 
-				Mat->AddShaderBuffer(UBO);
+					Mat->AddShaderBuffer(UBO);
+				}
 
-				Mat->AddTextureBindingLayout({ "texImage", 1, 2, 0, graphics::ETextureUsage::TEXTURE_USAGE_2D });
+				{
+					auto UBO = graphics::CMaterialCreateInfo::CreateUniformBuffer({ graphics::SBindingLayout("FragBufferObject_0", 1, false) });
+					
+					UBO->AddData("useDirSampling", &glm::ivec1(1)[0], sizeof(glm::ivec1), 1);
+					UBO->AddData("time", &glm::vec1(0.0f)[0], sizeof(glm::vec1), 1);
+					UBO->AddData("useTexColor", &glm::ivec1(1)[0], sizeof(glm::ivec1), 1);
+					UBO->AddData("useColor", &glm::ivec1(0)[0], sizeof(glm::ivec1), 1);
+					
+					UBO->AddData("baseColor", &glm::vec4(1.0f)[0], sizeof(glm::vec4), 1);
+
+					Mat->AddShaderBuffer(UBO);
+				}
+
+				Mat->AddTextureBindingLayout({ "texImage", 2, 3, 0, graphics::ETextureUsage::TEXTURE_USAGE_2D });
 
 				Mat->SetCullMode(graphics::ECullMode::CULL_FRONT);
 
@@ -186,6 +198,74 @@ namespace scene
 			if (!m_Background->Create(pGraphicsAPI, m_DepthVertex, m_DepthFragment, TextureSet)) return false;
 		}
 
+		// m_DebugSphere
+		{
+			// Material
+			{
+				std::shared_ptr<graphics::CMaterialCreateInfo> createInfo = std::make_shared<graphics::CMaterialCreateInfo>();
+				createInfo->SetVertexShaderCode(m_MinimumVert->GetData());
+				createInfo->SetFragmentShaderCode(m_TextureFrag->GetData());
+
+				auto Mat = pGraphicsAPI->CreateMaterial(createInfo);
+
+				{
+					auto UBO = graphics::CMaterialCreateInfo::CreateUniformBuffer({ graphics::SBindingLayout("UniformBufferObject", 0, false) });
+					UBO->AddData("model", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
+					UBO->AddData("view", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
+					UBO->AddData("proj", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
+					UBO->AddData("lightVPMat", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
+					UBO->AddData("cameraPos", &glm::vec4(1.0f)[0], sizeof(glm::vec4), 0);
+
+					Mat->AddShaderBuffer(UBO);
+				}
+
+				{
+					auto UBO = graphics::CMaterialCreateInfo::CreateUniformBuffer({ graphics::SBindingLayout("FragBufferObject_0", 1, false) });
+
+					UBO->AddData("useDirSampling", &glm::ivec1(1)[0], sizeof(glm::ivec1), 1);
+					UBO->AddData("time", &glm::vec1(0.0f)[0], sizeof(glm::vec1), 1);
+					UBO->AddData("useTexColor", &glm::ivec1(0)[0], sizeof(glm::ivec1), 1);
+					UBO->AddData("useColor", &glm::ivec1(1)[0], sizeof(glm::ivec1), 1);
+
+					UBO->AddData("baseColor", &glm::vec4(0.0f, 0.0f, 1.0f, 1.0f)[0], sizeof(glm::vec4), 1);
+
+					Mat->AddShaderBuffer(UBO);
+				}
+
+				Mat->AddTextureBindingLayout({ "texImage", 2, 3, -1, graphics::ETextureUsage::TEXTURE_USAGE_2D });
+
+				Mat->SetEnabledZTest(false);
+
+				m_DebugSphere->AddMaterial(Mat);
+			}
+
+			// Mesh
+			{
+				std::shared_ptr<graphics::CMesh> Mesh = std::make_shared<graphics::CMesh>();
+
+				std::shared_ptr<renderer::CRendererCreateInfo> createInfo = std::make_shared<renderer::CRendererCreateInfo>();
+				graphics::CPresetPrimitive::CreateSphere(createInfo);
+
+				std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(createInfo, 0);
+				Mesh->AddPrimitive(Primitive);
+
+				m_DebugSphere->AddMesh(Mesh);
+			}
+
+			// Node
+			{
+				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(0, m_DebugSphere->GetMeshList(), m_DebugSphere->GetMaterialList());
+				Node->SetScale(glm::vec3(0.1f));
+				m_DebugSphere->AddNode(Node);
+			}
+
+			// TextureSet
+			std::shared_ptr<graphics::CTextureSet> TextureSet = std::make_shared<graphics::CTextureSet>();
+
+			// Create
+			if (!m_DebugSphere->Create(pGraphicsAPI, m_DepthVertex, m_DepthFragment, TextureSet)) return false;
+		}
+
 		return true;
 	}
 
@@ -209,6 +289,11 @@ namespace scene
 		{
 			if (!m_Background->Update(DrawInfo->GetDeltaSecondsTime())) return false;
 		}
+		
+		if (m_DebugSphere)
+		{
+			if (!m_DebugSphere->Update(DrawInfo->GetDeltaSecondsTime())) return false;
+		}
 
 		return true;
 	}
@@ -226,13 +311,18 @@ namespace scene
 		
 		if (m_glTFObject)
 		{
-			if (!m_glTFObject->Draw(IsDepthPass, Camera, Projection, DrawInfo)) return false;
+			if (!m_glTFObject->Draw(IsDepthPass, Camera, Projection, DrawInfo, m_DebugSphere)) return false;
 		}
 		
 		if (m_Background)
 		{
 			if (!m_Background->Draw(IsDepthPass, Camera, Projection, DrawInfo)) return false;
 		}
+		
+		/*if (m_DebugSphere)
+		{
+			if (!m_DebugSphere->Draw(IsDepthPass, Camera, Projection, DrawInfo)) return false;
+		}*/
 
 		return true;
 	}

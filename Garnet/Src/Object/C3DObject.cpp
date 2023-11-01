@@ -133,7 +133,8 @@ namespace object
 		return true;
 	}
 
-	bool C3DObject::Draw(bool IsDepthPass, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo)
+	bool C3DObject::Draw(bool IsDepthPass, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo, 
+		const std::shared_ptr<object::C3DObject>& DebugSphere)
 	{
 		// 共通ユニフォームの更新
 		for (auto& Material : m_MaterialList)
@@ -208,6 +209,24 @@ namespace object
 				if (!Primitive->Draw(Material, DynamicOffsetNum, IsDepthPass)) return false;
 			}
 		}
+		
+		for (const auto& Skin : m_AnimationSkinList)
+		{
+			
+			for (const auto& Joint : Skin->GetJointList())
+			{
+				// Debug用: Jointの描画
+				const auto& JointNode = Joint->GetJointNode();
+				DebugSphere->SetPos(JointNode->GetWorldMatrix() * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
+				DebugSphere->SetScale(glm::vec3(0.25f));
+
+				if (!DebugSphere->Draw(IsDepthPass, Camera, Projection, DrawInfo)) return false;
+
+				// Debug用: Boneの描画
+			}
+		}
+
+		
 
 		return true;
 	}
@@ -272,12 +291,12 @@ namespace object
 		m_ObjectTransform->SetPos(Pos);
 	}
 
-	const glm::vec3& C3DObject::GetRot() const
+	const glm::quat& C3DObject::GetRot() const
 	{
 		return m_ObjectTransform->GetRot();
 	}
 
-	void C3DObject::SetRot(const glm::vec3& Rot)
+	void C3DObject::SetRot(const glm::quat& Rot)
 	{
 		m_ObjectTransform->SetRot(Rot);
 	}

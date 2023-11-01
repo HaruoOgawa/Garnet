@@ -784,22 +784,44 @@ namespace gltf
 			Node->SetName(glTFNode.name);
 			Node->SetSkinIndex(SkinIndex);
 
-			const auto& scale = glTFNode.scale;
-			if (scale.size() >= 3)
-			{
-				Node->SetScale(glm::vec3(scale[0], scale[1], scale[2]));
-			}
+			const auto& glTFMatrix = glTFNode.matrix;
 
-			const auto& rotation = glTFNode.rotation;
-			if (rotation.size() >= 3)
+			if (glTFMatrix.size() == 16)
 			{
-				Node->SetRot(glm::vec3(rotation[0], rotation[1], rotation[2]));
-			}
+				// From Double Vector To Float Vector
+				std::vector<float> matrix(glTFMatrix.size());
+				std::transform(glTFMatrix.begin(), glTFMatrix.end(), matrix.begin(), [](double val) {return static_cast<float>(val); });
 
-			const auto& position = glTFNode.translation;
-			if (position.size() >= 3)
+				// matrix‚ª‘¶Ý‚·‚é‚Ì‚Å‚»‚ê‚©‚çTransform‚ð•œŒ³‚·‚é
+				glm::mat4 modelMatrix = glm::mat4(1.0f);
+				std::memcpy(&modelMatrix[0][0], &matrix[0], sizeof(float) * matrix.size());
+
+				// Žó‚¯Žæ‚Á‚½ƒf[ƒ^‚ªs—Dæ‚È‚Ì‚Åglm‚Ì—ñ—Dæ‚É•ÏŠ·
+				modelMatrix = glm::inverse(modelMatrix);
+
+				Node->SetLocalMatrix(modelMatrix);
+			}
+			else
 			{
-				Node->SetPos(glm::vec3(position[0], position[1], position[2]));
+				const auto& scale = glTFNode.scale;
+				if (scale.size() == 3)
+				{
+					Node->SetScale(glm::vec3(static_cast<float>(scale[0]), static_cast<float>(scale[1]), static_cast<float>(scale[2])));
+				}
+
+				const auto& rotation = glTFNode.rotation;
+				if (rotation.size() == 4)
+				{
+					glm::quat quat = glm::quat(static_cast<float>(rotation[0]), static_cast<float>(rotation[1]), static_cast<float>(rotation[2]), static_cast<float>(rotation[3]));
+
+					Node->SetRot(quat);
+				}
+
+				const auto& position = glTFNode.translation;
+				if (position.size() == 3)
+				{
+					Node->SetPos(glm::vec3(static_cast<float>(position[0]), static_cast<float>(position[1]), static_cast<float>(position[2])));
+				}
 			}
 
 			Node->SetChildrenNodeIndexList(glTFNode.children);

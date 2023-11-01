@@ -61,8 +61,12 @@ layout(location = 5) out vec4 f_LightSpacePos;
 #define rot(a) mat2(cos(a), -sin(a), sin(a), cos(a))
 
 void main(){
-    vec4 pos = vec4(inPosition, 1.0);
     vec3 BioTangent = cross(inNormal, inTangent.xyz);
+
+    vec4 WorldPos;
+    vec3 WorldNormal;
+    vec3 WorldTangent;
+    vec3 WorldBioTangent;
 
     // スキンメッシュアニメーション
     if(ubo.useSkinMeshAnimation != 0)
@@ -79,14 +83,26 @@ void main(){
             inWeights0.w * r_SkinMatrixBuffer.SkinMat[inJoint0.w] 
         ;
 
-        pos = SkinMat * pos;
+        // スキンメッシュアニメーションの時はubo.modelは乗算しないように注意
+        WorldPos = SkinMat * vec4(inPosition, 1.0);
+        WorldNormal = normalize((SkinMat * vec4(inNormal, 0.0)).xyz);
+        WorldTangent = normalize((SkinMat * inTangent).xyz);
+        WorldBioTangent = normalize((SkinMat * vec4(BioTangent, 0.0)).xyz);
+    }
+    else
+    {
+        // 通常の描画
+        WorldPos = ubo.model * vec4(inPosition, 1.0);
+        WorldNormal = normalize((ubo.model * vec4(inNormal, 0.0)).xyz);
+        WorldTangent = normalize((ubo.model * inTangent).xyz);
+        WorldBioTangent = normalize((ubo.model * vec4(BioTangent, 0.0)).xyz);
     }
 
-    gl_Position = ubo.proj * ubo.view * ubo.model * pos;
-    f_WorldNormal = normalize((ubo.model * vec4(inNormal, 0.0)).xyz);
+    gl_Position = ubo.proj * ubo.view * WorldPos;
+    f_WorldNormal = WorldNormal;
     f_Texcoord = inTexcoord;
-    f_WorldPos = ubo.model * vec4(inPosition, 1.0);
-    f_WorldTangent = normalize((ubo.model * inTangent).xyz);
-    f_WorldBioTangent = normalize((ubo.model * vec4(BioTangent, 0.0)).xyz);
-    f_LightSpacePos = ubo.lightVPMat * ubo.model * pos;
+    f_WorldPos = WorldPos;
+    f_WorldTangent = WorldTangent;
+    f_WorldBioTangent = WorldBioTangent;
+    f_LightSpacePos = ubo.lightVPMat * WorldPos;
 }

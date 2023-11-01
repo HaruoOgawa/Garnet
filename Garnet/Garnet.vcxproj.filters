@@ -1306,26 +1306,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="EmscriptenBuild\build.bat">
-      <Filter>ソース ファイル</Filter>
-    </None>
-    <None Include="Commands\RunLocalHost.bat">
-      <Filter>ソース ファイル</Filter>
-    </None>
-    <None Include="Commands\RemakeCmakeLists.py" />
-    <None Include="Commands\RemakeCmakeLists.bat">
-      <Filter>ソース ファイル</Filter>
-    </None>
-    <None Include="EmscriptenBuild\Garnet_front.js" />
-    <None Include="Commands\RemakeCmakeLists_DescApp.bat">
-      <Filter>ソース ファイル</Filter>
-    </None>
-    <None Include="Commands\RemakeCmakeLists_DescApp.py" />
-    <None Include="EmscriptenBuild\nmake.exe" />
-    <None Include="CMakeBuild\build.bat">
-      <Filter>ソース ファイル</Filter>
-    </None>
-    <None Include="EmscriptenBuild\index.html" />
     <None Include="CMakeBuild\Garnet_front.js" />
     <None Include="CMakeBuild\index.html" />
     <None Include="Src\Library\glm\glm\detail\func_common.inl">
@@ -1745,40 +1725,7 @@
     <None Include="Src\Library\glm\glm\gtx\wrap.inl">
       <Filter>ヘッダー ファイル</Filter>
     </None>
-    <None Include="Commands\UTF8Encorder.py" />
     <None Include="WebRelease\Resources\Shaders\frag.spv" />
     <None Include="WebRelease\Resources\Shaders\vert.spv" />
-    <None Include="Resources\Shaders\gpgpu_sample.frag" />
-    <None Include="Resources\Shaders\gpgpu_sample.vert" />
-    <None Include="Commands\glslc_ALL.bat">
-      <Filter>ソース ファイル</Filter>
-    </None>
-    <None Include="Commands\wgslc_ALL.bat">
-      <Filter>ソース ファイル</Filter>
-    </None>
-    <None Include="Resources\Shaders\pbr.vert" />
-    <None Include="Resources\Shaders\pbr.frag" />
-    <None Include="Resources\Shaders\shadow_debug.vert" />
-    <None Include="Resources\Shaders\shadow_debug.frag" />
-    <None Include="Resources\Shaders\depth.vert" />
-    <None Include="Resources\Shaders\depth.frag" />
-    <None Include="Resources\Shaders\blur.vert" />
-    <None Include="Resources\Shaders\blur.frag" />
-    <None Include="Resources\Shaders\loadingbar.frag" />
-    <None Include="Resources\Shaders\loadingbar.vert" />
-    <None Include="Resources\Shaders\gpgpu_sample.comp" />
-    <None Include="Commands\CopyDawnLib.bat">
-      <Filter>ソース ファイル</Filter>
-    </None>
-    <None Include="Commands\GetLibAndPath.py" />
-    <None Include="Resources\Shaders\minimum.vert" />
-    <None Include="Resources\Shaders\texture.frag" />
-    <None Include="Resources\Models\SimpleAnimation\SimpleAnimation.gltf" />
-    <None Include="Resources\Models\SimpleMorphTarget\SimpleMorphTarget.gltf" />
-    <None Include="Resources\Models\SimpleSkin\SimpleSkin.gltf" />
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="EmscriptenBuild\CMakeLists.txt" />
-    <Text Include="CMakeBuild\CMakeLists.txt" />
   </ItemGroup>
 </Project>
