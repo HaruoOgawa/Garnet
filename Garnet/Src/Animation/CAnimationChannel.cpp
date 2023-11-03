@@ -60,10 +60,10 @@ namespace animation
 	{
 		if (Value.size() != 4) return true;
 
-		glm::quat quat = glm::quat(Value[0], Value[1], Value[2], Value[3]);
-		glm::vec3 euler = glm::eulerAngles(quat);
+		// glmのクォータニオンは wxyzで指定する必要がある？
+		glm::quat quat = glm::quat(Value[3], Value[0], Value[1], Value[2]);
 
-		m_TargetNode->SetRot(euler);
+		m_TargetNode->SetRot(quat);
 
 		return true;
 	}

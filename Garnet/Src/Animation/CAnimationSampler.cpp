@@ -1,4 +1,5 @@
 #include "CAnimationSampler.h"
+#include "../Math/CTransform.h"
 
 namespace animation
 {
@@ -138,12 +139,17 @@ namespace animation
 		// Prev
 		size_t NextIndex = std::distance(m_KeyFrameList.begin(), val);
 
-		// NextIndexは0よりも大きい必要がある
-		if (NextIndex <= 0 || NextIndex >= m_KeyFrameList.size()) return false;
-
-		PrevKeyFrame = m_KeyFrameList[NextIndex - 1];
-
-		//
+		// CurrentTimeがKeyFrameの最初よりも小さい時はPrevとNextにそれぞれ0と1のKeyFrameを割り当てる
+		if (NextIndex <= 0 || NextIndex >= m_KeyFrameList.size())
+		{
+			NextKeyFrame = m_KeyFrameList[1];
+			PrevKeyFrame = m_KeyFrameList[0];
+		}
+		else
+		{
+			PrevKeyFrame = m_KeyFrameList[NextIndex - 1];
+		}
+		
 		if (PrevKeyFrame == nullptr || NextKeyFrame == nullptr) return false;
 
 		return true;
@@ -201,13 +207,11 @@ namespace animation
 		if (PrevValue.size() != NextValue.size()) return false;
 		if (PrevValue.size() != 4) return false;
 
-		glm::quat PrevQuat = glm::quat(PrevValue[0], PrevValue[1], PrevValue[2], PrevValue[3]);
-		glm::quat NextQuat = glm::quat(NextValue[0], NextValue[1], NextValue[2], NextValue[3]);
+		// glmのクォータニオンは wxyzで指定する必要がある？
+		glm::quat PrevQuat = glm::quat(PrevValue[3], PrevValue[0], PrevValue[1], PrevValue[2]);
+		glm::quat NextQuat = glm::quat(NextValue[3], NextValue[0], NextValue[1], NextValue[2]);
 
 		glm::quat dstQuat = glm::slerp(PrevQuat, NextQuat, L);
-
-		// YUp右手系に合わせる
-		dstQuat *= glm::angleAxis(3.1415f, glm::vec3(0.0f, 1.0f, 0.0f));
 
 		Value.push_back(dstQuat.x);
 		Value.push_back(dstQuat.y);

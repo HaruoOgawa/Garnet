@@ -21,6 +21,9 @@ namespace object
 		// GPU上のテクスチャリソースが解放されてしまうので保持しておく
 		m_TextureSet = TextureSet;
 
+		// 親ノードを設定
+		ApplyParentNode();
+
 		// ワールド行列の計算
 		CalcWorldMatrix();
 
@@ -58,6 +61,45 @@ namespace object
 		}
 
 		return true;
+	}
+
+	void C3DObject::ApplyParentNode()
+	{
+		if (!m_RootNodeIndexList.empty())
+		{
+			for (const auto& SceneRootNodeList : m_RootNodeIndexList)
+			{
+				for (const int RootNodeIndex : SceneRootNodeList)
+				{
+					if (RootNodeIndex < 0 || RootNodeIndex >= m_NodeList.size()) continue;
+
+					auto& RootNode = m_NodeList[RootNodeIndex];
+
+					// 子要素の走破をスタートする
+					for (const int ChildIndex : RootNode->GetChildrenNodeIndexList())
+					{
+						if (ChildIndex < 0 || ChildIndex >= m_NodeList.size()) continue;
+
+						auto& ChildNode = m_NodeList[ChildIndex];
+						ApplyParentNode(ChildNode, RootNode);
+					}
+				}
+			}
+		}
+	}
+
+	void C3DObject::ApplyParentNode(std::shared_ptr<CNode>& Node, const std::shared_ptr<CNode>& ParentNode)
+	{
+		Node->SetParentNode(ParentNode);
+
+		// 子要素の走破をスタートする
+		for (const int ChildIndex : Node->GetChildrenNodeIndexList())
+		{
+			if (ChildIndex < 0 || ChildIndex >= m_NodeList.size()) continue;
+
+			auto& ChildNode = m_NodeList[ChildIndex];
+			ApplyParentNode(ChildNode, Node);
+		}
 	}
 
 	// ワールド行列の初期値を計算(アニメーション等で後々更新される可能性がある)
@@ -133,7 +175,8 @@ namespace object
 		return true;
 	}
 
-	bool C3DObject::Draw(bool IsDepthPass, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo)
+	bool C3DObject::Draw(bool IsDepthPass, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo, 
+		const std::shared_ptr<object::C3DObject>& DebugSphere)
 	{
 		// 共通ユニフォームの更新
 		for (auto& Material : m_MaterialList)
@@ -173,7 +216,7 @@ namespace object
 			{
 				const auto& Skin = m_AnimationSkinList[SkinIndex];
 				
-				if (!Skin->CalcSkinMatrixList(SkinMatrixList)) return false;
+				if (!Skin->CalcSkinMatrixList(SkinMatrixList, m_ObjectTransform->GetModelMatrix())) return false;
 			}
 
 			for (int PrimitiveIndex = 0; PrimitiveIndex < Mesh->GetPrimitiveList().size(); PrimitiveIndex++)
@@ -208,6 +251,22 @@ namespace object
 				if (!Primitive->Draw(Material, DynamicOffsetNum, IsDepthPass)) return false;
 			}
 		}
+		
+		/*for (const auto& Skin : m_AnimationSkinList)
+		{
+			
+			for (const auto& Joint : Skin->GetJointList())
+			{
+				// Debug用: Jointの描画
+				const auto& JointNode = Joint->GetJointNode();
+				DebugSphere->SetPos(JointNode->GetWorldMatrix() * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
+				DebugSphere->SetScale(glm::vec3(0.25f));
+
+				if (!DebugSphere->Draw(IsDepthPass, Camera, Projection, DrawInfo)) return false;
+
+				// Debug用: Boneの描画
+			}
+		}*/
 
 		return true;
 	}
@@ -272,12 +331,12 @@ namespace object
 		m_ObjectTransform->SetPos(Pos);
 	}
 
-	const glm::vec3& C3DObject::GetRot() const
+	const glm::quat& C3DObject::GetRot() const
 	{
 		return m_ObjectTransform->GetRot();
 	}
 
-	void C3DObject::SetRot(const glm::vec3& Rot)
+	void C3DObject::SetRot(const glm::quat& Rot)
 	{
 		m_ObjectTransform->SetRot(Rot);
 	}

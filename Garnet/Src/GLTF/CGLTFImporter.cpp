@@ -784,22 +784,59 @@ namespace gltf
 			Node->SetName(glTFNode.name);
 			Node->SetSkinIndex(SkinIndex);
 
-			const auto& scale = glTFNode.scale;
-			if (scale.size() >= 3)
-			{
-				Node->SetScale(glm::vec3(scale[0], scale[1], scale[2]));
-			}
+			const auto& glTFMatrix = glTFNode.matrix;
 
-			const auto& rotation = glTFNode.rotation;
-			if (rotation.size() >= 3)
+			if (glTFMatrix.size() == 16)
 			{
-				Node->SetRot(glm::vec3(rotation[0], rotation[1], rotation[2]));
-			}
+				// From Double Vector To Float Vector
+				std::vector<float> matrix(glTFMatrix.size());
+				std::transform(glTFMatrix.begin(), glTFMatrix.end(), matrix.begin(), [](double val) {return static_cast<float>(val); });
 
-			const auto& position = glTFNode.translation;
-			if (position.size() >= 3)
+				// matrixが存在するのでそれからTransformを復元する
+				glm::mat4 modelMatrix = glm::mat4(1.0f);
+				std::memcpy(&modelMatrix[0][0], &matrix[0], sizeof(float) * matrix.size());
+
+				// 受け取ったデータが行優先なのでglmの列優先に変換
+				modelMatrix = glm::transpose(modelMatrix);
+
+				//
+				glm::vec3 Pos = glm::vec3(0.0f);
+				glm::quat Rotation = glm::quat();
+				glm::vec3 Scale = glm::vec3(0.0f);
+
+				math::CTransform::CastModelMatrixToTransform(modelMatrix, Pos, Rotation, Scale);
+
+				math::CTransform::ToYUpRightHandedCoordinate(Pos);
+				math::CTransform::ToYUpRightHandedCoordinate(Rotation);
+
+				Node->SetPos(Pos);
+				Node->SetRot(Rotation);
+				Node->SetScale(Scale);
+			}
+			else
 			{
-				Node->SetPos(glm::vec3(position[0], position[1], position[2]));
+				const auto& scale = glTFNode.scale;
+				if (scale.size() == 3)
+				{
+					Node->SetScale(glm::vec3(static_cast<float>(scale[0]), static_cast<float>(scale[1]), static_cast<float>(scale[2])));
+				}
+
+				const auto& rotation = glTFNode.rotation;
+				if (rotation.size() == 4)
+				{
+					// glmのクォータニオンは wxyzで指定する必要がある？
+					glm::quat quat = glm::quat(static_cast<float>(rotation[3]), static_cast<float>(rotation[0]), static_cast<float>(rotation[1]), static_cast<float>(rotation[2]));
+					math::CTransform::ToYUpRightHandedCoordinate(quat);
+					Node->SetRot(quat);
+				}
+
+				const auto& position = glTFNode.translation;
+				if (position.size() == 3)
+				{
+					glm::vec3 pos = glm::vec3(static_cast<float>(position[0]), static_cast<float>(position[1]), static_cast<float>(position[2]));
+					math::CTransform::ToYUpRightHandedCoordinate(pos);
+					Node->SetPos(pos);
+				}
 			}
 
 			Node->SetChildrenNodeIndexList(glTFNode.children);
@@ -823,6 +860,7 @@ namespace gltf
 			std::shared_ptr<animation::CSkin> Skin = std::make_shared<animation::CSkin>();
 
 			// inverseBindMatrices
+			std::vector<glm::mat4> inverseBindMatrices;
 			{
 				int Accessor_Index = glTFSkin.inverseBindMatrices;
 				if (Accessor_Index < 0 || Accessor_Index >= model.accessors.size()) continue;
@@ -832,12 +870,9 @@ namespace gltf
 				std::vector<unsigned char> BufferData;
 				if (!CalculateBufferFromAccessor(model, Accessor, BufferData)) return false;
 
-				std::vector<glm::mat4> inverseBindMatrices;
 				inverseBindMatrices.resize(BufferData.size() / sizeof(glm::mat4));
 
 				std::memcpy(&inverseBindMatrices[0], &BufferData[0], BufferData.size());
-
-				Skin->AddInverseBindMatrices(inverseBindMatrices);
 			}
 
 			// joints
@@ -850,6 +885,14 @@ namespace gltf
 				std::shared_ptr<animation::CJoint> Joint = std::make_shared<animation::CJoint>(JointNode);
 
 				Skin->AddJoint(Joint);
+			}
+
+			// Add InverseBindMatrix To Joint
+			for (int j = 0; j < Skin->GetJointList().size(); j++)
+			{
+				// Jointの順番とinverseBindMatrixの順番は同じ
+				const auto& Joint = Skin->GetJointList()[j];
+				Joint->GetJointNode()->SetInverseBindMatrix(inverseBindMatrices[j]);
 			}
 
 			AnimationSkinList.push_back(Skin);

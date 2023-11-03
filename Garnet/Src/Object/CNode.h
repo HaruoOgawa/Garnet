@@ -27,26 +27,34 @@ namespace object
 		std::vector<int>                  m_ChildrenNodeIndexList;
 		std::vector<int>                  m_DynamicOffsetNumList;
 
+		glm::mat4 m_InverseBindMatrix;
+
+		std::shared_ptr<CNode> m_ParentNode;
+
 	public:
 		CNode(int MeshIndex, const std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, const std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList);
 		virtual ~CNode();
 
 		void SetName(const std::string& Name);
+		const std::string& GetName() const;
 
 		int GetMeshIndex() const;
 
 		void SetLocalTransform(std::shared_ptr<math::CTransform>& LocalTransform);
 		const std::shared_ptr<math::CTransform>& GetLocalTransform() const;
 
+		glm::mat4 GetLocalMatrix() const;
+
 		void SetWorldMatrix(const glm::mat4& WorldMatrix);
 		const glm::mat4& GetWorldMatrix() const;
+		glm::mat4 GetInverseWorldMatrix() const;
 
 		const glm::vec3& GetPos() const;
 		void SetPos(const glm::vec3& Pos);
 
-		const glm::vec3& GetRot() const;
-		void SetRot(const glm::vec3& Rot);
-		void AddRot(const glm::vec3& Rot);
+		const glm::quat& GetRot() const;
+		void SetRot(const glm::quat& Rot);
+		void AddRotate(const glm::vec3& Axis, float Radians);
 
 		const glm::vec3& GetScale() const;
 		void SetScale(const glm::vec3& Scale);
@@ -58,5 +66,11 @@ namespace object
 
 		void SetSkinIndex(int SkinIndex);
 		int GetSkinIndex() const;
+
+		void SetInverseBindMatrix(const glm::mat4& Matrix);
+		const glm::mat4& GeInverseBindMatrix() const;
+
+		void SetParentNode(const std::shared_ptr<CNode>& ParentNode);
+		const std::shared_ptr<CNode>& GetParentNode() const;
 	};
 }

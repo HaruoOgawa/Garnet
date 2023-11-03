@@ -39,6 +39,10 @@ struct UniformBufferObject {
     useCubeMap: i32,
     useShadowMap: i32,
     useIBL: i32,
+    useSkinMeshAnimation: i32,
+    pad0_: i32,
+    pad1_: i32,
+    pad2_: i32,
 }
 
 @group(0) @binding(0) 
@@ -46,47 +50,47 @@ var<uniform> ubo: UniformBufferObject;
 var<private> f_WorldTangent_1: vec3<f32>;
 var<private> f_WorldBioTangent_1: vec3<f32>;
 var<private> f_WorldNormal_1: vec3<f32>;
-@group(0) @binding(7) 
-var normalTexture: texture_2d<f32>;
 @group(0) @binding(8) 
+var normalTexture: texture_2d<f32>;
+@group(0) @binding(9) 
 var normalTextureSampler: sampler;
 var<private> f_Texcoord_1: vec2<f32>;
-@group(0) @binding(13) 
-var shadowmapTexture: texture_2d<f32>;
 @group(0) @binding(14) 
-var shadowmapTextureSampler: sampler;
-@group(0) @binding(11) 
-var cubemapTexture: texture_cube<f32>;
-@group(0) @binding(12) 
-var cubemapTextureSampler: sampler;
-@group(0) @binding(19) 
-var IBL_GGXLUT_Texture: texture_2d<f32>;
-@group(0) @binding(20) 
-var IBL_GGXLUT_TextureSampler: sampler;
+var shadowmapTexture: texture_2d<f32>;
 @group(0) @binding(15) 
-var IBL_Diffuse_Texture: texture_2d<f32>;
+var shadowmapTextureSampler: sampler;
+@group(0) @binding(12) 
+var cubemapTexture: texture_cube<f32>;
+@group(0) @binding(13) 
+var cubemapTextureSampler: sampler;
+@group(0) @binding(20) 
+var IBL_GGXLUT_Texture: texture_2d<f32>;
+@group(0) @binding(21) 
+var IBL_GGXLUT_TextureSampler: sampler;
 @group(0) @binding(16) 
-var IBL_Diffuse_TextureSampler: sampler;
+var IBL_Diffuse_Texture: texture_2d<f32>;
 @group(0) @binding(17) 
-var IBL_Specular_Texture: texture_2d<f32>;
+var IBL_Diffuse_TextureSampler: sampler;
 @group(0) @binding(18) 
+var IBL_Specular_Texture: texture_2d<f32>;
+@group(0) @binding(19) 
 var IBL_Specular_TextureSampler: sampler;
-@group(0) @binding(3) 
-var metallicRoughnessTexture: texture_2d<f32>;
 @group(0) @binding(4) 
+var metallicRoughnessTexture: texture_2d<f32>;
+@group(0) @binding(5) 
 var metallicRoughnessTextureSampler: sampler;
-@group(0) @binding(1) 
-var baseColorTexture: texture_2d<f32>;
 @group(0) @binding(2) 
+var baseColorTexture: texture_2d<f32>;
+@group(0) @binding(3) 
 var baseColorTextureSampler: sampler;
 var<private> f_WorldPos_1: vec4<f32>;
-@group(0) @binding(9) 
-var occlusionTexture: texture_2d<f32>;
 @group(0) @binding(10) 
+var occlusionTexture: texture_2d<f32>;
+@group(0) @binding(11) 
 var occlusionTextureSampler: sampler;
-@group(0) @binding(5) 
-var emissiveTexture: texture_2d<f32>;
 @group(0) @binding(6) 
+var emissiveTexture: texture_2d<f32>;
+@group(0) @binding(7) 
 var emissiveTextureSampler: sampler;
 var<private> f_LightSpacePos_1: vec4<f32>;
 var<private> outColor: vec4<f32>;

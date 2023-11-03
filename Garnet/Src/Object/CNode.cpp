@@ -10,7 +10,9 @@ namespace object
 		m_MeshIndex(MeshIndex),
 		m_SkinIndex(-1),
 		m_LocalTransform(std::make_shared<math::CTransform>()),
-		m_WorldMatrix(glm::mat4(1.0f))
+		m_WorldMatrix(glm::mat4(1.0f)),
+		m_InverseBindMatrix(glm::mat4(1.0f)),
+		m_ParentNode(nullptr)
 	{
 		if (MeshIndex >= 0 && MeshIndex < MeshList.size())
 		{
@@ -46,6 +48,11 @@ namespace object
 		m_Name = Name;
 	}
 
+	const std::string& CNode::GetName() const
+	{
+		return m_Name;
+	}
+
 	int CNode::GetMeshIndex() const
 	{
 		return m_MeshIndex;
@@ -61,6 +68,11 @@ namespace object
 		return m_LocalTransform;
 	}
 
+	glm::mat4 CNode::GetLocalMatrix() const
+	{
+		return m_LocalTransform->GetModelMatrix();
+	}
+
 	void CNode::SetWorldMatrix(const glm::mat4& WorldMatrix)
 	{
 		m_WorldMatrix = WorldMatrix;
@@ -69,6 +81,11 @@ namespace object
 	const glm::mat4& CNode::GetWorldMatrix() const
 	{
 		return m_WorldMatrix;
+	}
+
+	glm::mat4 CNode::GetInverseWorldMatrix() const
+	{
+		return glm::inverse(m_WorldMatrix);
 	}
 
 	const glm::vec3& CNode::GetPos() const
@@ -81,19 +98,19 @@ namespace object
 		m_LocalTransform->SetPos(Pos);
 	}
 
-	const glm::vec3& CNode::GetRot() const
+	const glm::quat& CNode::GetRot() const
 	{
 		return m_LocalTransform->GetRot();
 	}
 
-	void CNode::SetRot(const glm::vec3& Rot)
+	void CNode::SetRot(const glm::quat& Rot)
 	{
 		m_LocalTransform->SetRot(Rot);
 	}
 
-	void CNode::AddRot(const glm::vec3& Rot)
+	void CNode::AddRotate(const glm::vec3& Axis, float Radians)
 	{
-		m_LocalTransform->AddRot(Rot);
+		m_LocalTransform->AddRotate(Axis, Radians);
 	}
 
 	const glm::vec3& CNode::GetScale() const
@@ -129,5 +146,25 @@ namespace object
 	int CNode::GetSkinIndex() const
 	{
 		return m_SkinIndex;
+	}
+
+	void CNode::SetInverseBindMatrix(const glm::mat4& Matrix)
+	{
+		m_InverseBindMatrix = Matrix;
+	}
+
+	const glm::mat4& CNode::GeInverseBindMatrix() const
+	{
+		return m_InverseBindMatrix;
+	}
+
+	void CNode::SetParentNode(const std::shared_ptr<CNode>& ParentNode)
+	{
+		m_ParentNode = ParentNode;
+	}
+
+	const std::shared_ptr<CNode>& CNode::GetParentNode() const
+	{
+		return m_ParentNode;
 	}
 }

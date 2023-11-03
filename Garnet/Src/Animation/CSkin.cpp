@@ -16,31 +16,34 @@ namespace animation
 		m_JointList.push_back(Joint);
 	}
 
-	void CSkin::AddInverseBindMatrices(const std::vector<glm::mat4>& Matrices)
+	bool CSkin::CalcSkinMatrixList(std::vector<glm::mat4>& MatrixList, const glm::mat4& ObjectModelMatrix)
 	{
-		m_InverseBindMatrixList = Matrices;
-	}
-
-	bool CSkin::CalcSkinMatrixList(std::vector<glm::mat4>& MatrixList)
-	{
-		if (m_JointList.size() != m_InverseBindMatrixList.size()) return false;
-
 		for (int i = 0; i < m_JointList.size(); i++)
 		{
 			const auto& Joint = m_JointList[i];
-			const glm::mat4& JointWorldMatrix = Joint->GetJointNode()->GetWorldMatrix();
+			const auto& JointNode = Joint->GetJointNode();
+
+			glm::mat4 JointWorldMatrix = JointNode->GetWorldMatrix();
 
 			// InverseBindMatrixは対象のJointを原点に戻す方向にMeshを移動させるための逆行列
 			// その後、JointWorldMatrixをかけることでアニメーションで移動後のJointの位置にMeshを移動させることができる
 			// https://github.com/KhronosGroup/glTF-Tutorials/blob/master/gltfTutorial/images/skinJointMatrices.png
 			// https://github.com/KhronosGroup/glTF-Tutorials/blob/master/gltfTutorial/gltfTutorial_020_Skins.md#the-joint-matrices
-			const glm::mat4& InverseBindMatrix = m_InverseBindMatrixList[i];
+			const glm::mat4& InverseBindMatrix = JointNode->GeInverseBindMatrix();
 
 			glm::mat4 SkinMatrix = JointWorldMatrix * InverseBindMatrix;
+
+			// Skinを持ってる3DObjectのModelMatrixを適応する
+			SkinMatrix = ObjectModelMatrix * SkinMatrix;
 
 			MatrixList.push_back(SkinMatrix);
 		}
 
 		return true;
+	}
+
+	const std::vector<std::shared_ptr<CJoint>>& CSkin::GetJointList() const
+	{
+		return m_JointList;
 	}
 }

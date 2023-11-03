@@ -11,10 +11,6 @@ struct UniformBufferObject {
     proj: mat4x4<f32>,
     lightVPMat: mat4x4<f32>,
     cameraPos: vec4<f32>,
-    useDirSampling: i32,
-    time: f32,
-    pad1_: i32,
-    pad2_: i32,
 }
 
 struct VertexOutput {
