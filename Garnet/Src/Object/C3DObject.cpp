@@ -21,6 +21,9 @@ namespace object
 		// GPU上のテクスチャリソースが解放されてしまうので保持しておく
 		m_TextureSet = TextureSet;
 
+		// 親ノードを設定
+		ApplyParentNode();
+
 		// ワールド行列の計算
 		CalcWorldMatrix();
 
@@ -58,6 +61,45 @@ namespace object
 		}
 
 		return true;
+	}
+
+	void C3DObject::ApplyParentNode()
+	{
+		if (!m_RootNodeIndexList.empty())
+		{
+			for (const auto& SceneRootNodeList : m_RootNodeIndexList)
+			{
+				for (const int RootNodeIndex : SceneRootNodeList)
+				{
+					if (RootNodeIndex < 0 || RootNodeIndex >= m_NodeList.size()) continue;
+
+					auto& RootNode = m_NodeList[RootNodeIndex];
+
+					// 子要素の走破をスタートする
+					for (const int ChildIndex : RootNode->GetChildrenNodeIndexList())
+					{
+						if (ChildIndex < 0 || ChildIndex >= m_NodeList.size()) continue;
+
+						auto& ChildNode = m_NodeList[ChildIndex];
+						ApplyParentNode(ChildNode, RootNode);
+					}
+				}
+			}
+		}
+	}
+
+	void C3DObject::ApplyParentNode(std::shared_ptr<CNode>& Node, const std::shared_ptr<CNode>& ParentNode)
+	{
+		Node->SetParentNode(ParentNode);
+
+		// 子要素の走破をスタートする
+		for (const int ChildIndex : Node->GetChildrenNodeIndexList())
+		{
+			if (ChildIndex < 0 || ChildIndex >= m_NodeList.size()) continue;
+
+			auto& ChildNode = m_NodeList[ChildIndex];
+			ApplyParentNode(ChildNode, Node);
+		}
 	}
 
 	// ワールド行列の初期値を計算(アニメーション等で後々更新される可能性がある)
@@ -210,7 +252,7 @@ namespace object
 			}
 		}
 		
-		for (const auto& Skin : m_AnimationSkinList)
+		/*for (const auto& Skin : m_AnimationSkinList)
 		{
 			
 			for (const auto& Joint : Skin->GetJointList())
@@ -224,9 +266,7 @@ namespace object
 
 				// Debug用: Boneの描画
 			}
-		}
-
-		
+		}*/
 
 		return true;
 	}

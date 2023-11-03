@@ -318,11 +318,6 @@ namespace scene
 		{
 			if (!m_Background->Draw(IsDepthPass, Camera, Projection, DrawInfo)) return false;
 		}
-		
-		/*if (m_DebugSphere)
-		{
-			if (!m_DebugSphere->Draw(IsDepthPass, Camera, Projection, DrawInfo)) return false;
-		}*/
 
 		return true;
 	}

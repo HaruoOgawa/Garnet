@@ -14,14 +14,12 @@ namespace animation
 	class CSkin
 	{
 		std::vector<std::shared_ptr<CJoint>> m_JointList;
-		std::vector<glm::mat4> m_InverseBindMatrixList;
 	public:
 		CSkin();
 		virtual ~CSkin();
 
 		void AddJoint(const std::shared_ptr<CJoint>& Joint);
-		void AddInverseBindMatrices(const std::vector<glm::mat4>& Matrices);
-
+		
 		bool CalcSkinMatrixList(std::vector<glm::mat4>& MatrixList);
 
 		const std::vector<std::shared_ptr<CJoint>>& GetJointList() const;

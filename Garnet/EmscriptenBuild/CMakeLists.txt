@@ -23,8 +23,12 @@ add_executable(
 	../src/Animation/CAnimationClip.h
 	../src/Animation/CAnimationSampler.cpp
 	../src/Animation/CAnimationSampler.h
+	../src/Animation/CJoint.cpp
+	../src/Animation/CJoint.h
 	../src/Animation/CKeyFrame.cpp
 	../src/Animation/CKeyFrame.h
+	../src/Animation/CSkin.cpp
+	../src/Animation/CSkin.h
 	../src/App/CWebAppManager.cpp
 	../src/App/CWebAppManager.h
 	../src/App/EAppType.h

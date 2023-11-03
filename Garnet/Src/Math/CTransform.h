@@ -15,7 +15,6 @@ namespace math
 		virtual ~CTransform() = default;
 
 		glm::mat4 GetModelMatrix();
-		void SetModelMatrix(const glm::mat4& ModelMatrix);
 
 		const glm::vec3& GetPos() const;
 		void SetPos(const glm::vec3& Pos);
@@ -26,5 +25,10 @@ namespace math
 
 		const glm::vec3& GetScale() const;
 		void SetScale(const glm::vec3& Scale);
+
+		static void CastModelMatrixToTransform(const glm::mat4& ModelMatrix, glm::vec3& Translation, glm::quat& Rotation, glm::vec3& Scale);
+
+		static void ToYUpRightHandedCoordinate(glm::vec3& Translation);
+		static void ToYUpRightHandedCoordinate(glm::quat& Rotation);
 	};
 }

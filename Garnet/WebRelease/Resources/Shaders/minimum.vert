@@ -12,11 +12,6 @@ layout(binding = 0) uniform UniformBufferObject{
 	mat4 lightVPMat;
 
 	vec4 cameraPos;
-
-	int useDirSampling;
-	float time;
-	int pad1;
-	int pad2;
 } ubo;
 
 layout(location = 0) out vec3 fWolrdNormal;

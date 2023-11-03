@@ -797,9 +797,21 @@ namespace gltf
 				std::memcpy(&modelMatrix[0][0], &matrix[0], sizeof(float) * matrix.size());
 
 				// 受け取ったデータが行優先なのでglmの列優先に変換
-				modelMatrix = glm::inverse(modelMatrix);
+				modelMatrix = glm::transpose(modelMatrix);
 
-				Node->SetLocalMatrix(modelMatrix);
+				//
+				glm::vec3 Pos = glm::vec3(0.0f);
+				glm::quat Rotation = glm::quat();
+				glm::vec3 Scale = glm::vec3(0.0f);
+
+				math::CTransform::CastModelMatrixToTransform(modelMatrix, Pos, Rotation, Scale);
+
+				math::CTransform::ToYUpRightHandedCoordinate(Pos);
+				math::CTransform::ToYUpRightHandedCoordinate(Rotation);
+
+				Node->SetPos(Pos);
+				Node->SetRot(Rotation);
+				Node->SetScale(Scale);
 			}
 			else
 			{
@@ -812,15 +824,18 @@ namespace gltf
 				const auto& rotation = glTFNode.rotation;
 				if (rotation.size() == 4)
 				{
-					glm::quat quat = glm::quat(static_cast<float>(rotation[0]), static_cast<float>(rotation[1]), static_cast<float>(rotation[2]), static_cast<float>(rotation[3]));
-
+					// glmのクォータニオンは wxyzで指定する必要がある？
+					glm::quat quat = glm::quat(static_cast<float>(rotation[3]), static_cast<float>(rotation[0]), static_cast<float>(rotation[1]), static_cast<float>(rotation[2]));
+					math::CTransform::ToYUpRightHandedCoordinate(quat);
 					Node->SetRot(quat);
 				}
 
 				const auto& position = glTFNode.translation;
 				if (position.size() == 3)
 				{
-					Node->SetPos(glm::vec3(static_cast<float>(position[0]), static_cast<float>(position[1]), static_cast<float>(position[2])));
+					glm::vec3 pos = glm::vec3(static_cast<float>(position[0]), static_cast<float>(position[1]), static_cast<float>(position[2]));
+					math::CTransform::ToYUpRightHandedCoordinate(pos);
+					Node->SetPos(pos);
 				}
 			}
 
@@ -845,6 +860,7 @@ namespace gltf
 			std::shared_ptr<animation::CSkin> Skin = std::make_shared<animation::CSkin>();
 
 			// inverseBindMatrices
+			std::vector<glm::mat4> inverseBindMatrices;
 			{
 				int Accessor_Index = glTFSkin.inverseBindMatrices;
 				if (Accessor_Index < 0 || Accessor_Index >= model.accessors.size()) continue;
@@ -854,12 +870,9 @@ namespace gltf
 				std::vector<unsigned char> BufferData;
 				if (!CalculateBufferFromAccessor(model, Accessor, BufferData)) return false;
 
-				std::vector<glm::mat4> inverseBindMatrices;
 				inverseBindMatrices.resize(BufferData.size() / sizeof(glm::mat4));
 
 				std::memcpy(&inverseBindMatrices[0], &BufferData[0], BufferData.size());
-
-				Skin->AddInverseBindMatrices(inverseBindMatrices);
 			}
 
 			// joints
@@ -872,6 +885,14 @@ namespace gltf
 				std::shared_ptr<animation::CJoint> Joint = std::make_shared<animation::CJoint>(JointNode);
 
 				Skin->AddJoint(Joint);
+			}
+
+			// Add InverseBindMatrix To Joint
+			for (int j = 0; j < Skin->GetJointList().size(); j++)
+			{
+				// Jointの順番とinverseBindMatrixの順番は同じ
+				const auto& Joint = Skin->GetJointList()[j];
+				Joint->GetJointNode()->SetInverseBindMatrix(inverseBindMatrices[j]);
 			}
 
 			AnimationSkinList.push_back(Skin);
