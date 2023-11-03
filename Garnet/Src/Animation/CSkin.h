@@ -20,7 +20,7 @@ namespace animation
 
 		void AddJoint(const std::shared_ptr<CJoint>& Joint);
 		
-		bool CalcSkinMatrixList(std::vector<glm::mat4>& MatrixList);
+		bool CalcSkinMatrixList(std::vector<glm::mat4>& MatrixList, const glm::mat4& ObjectModelMatrix);
 
 		const std::vector<std::shared_ptr<CJoint>>& GetJointList() const;
 	};

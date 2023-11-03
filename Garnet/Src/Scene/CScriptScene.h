@@ -37,6 +37,9 @@ namespace scene
 		// glTF
 		std::shared_ptr<file::CFile> m_glTFData;
 		std::shared_ptr<object::C3DObject> m_glTFObject;
+		
+		std::shared_ptr<file::CFile> m_BrainStemData;
+		std::shared_ptr<object::C3DObject> m_BrainStemDObject;
 
 		// Object
 		std::shared_ptr<object::C3DObject> m_Background;

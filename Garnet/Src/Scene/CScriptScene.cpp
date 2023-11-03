@@ -12,6 +12,7 @@ namespace scene
 {
 	CScriptScene::CScriptScene(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker):
 		m_glTFObject(std::make_shared<object::C3DObject>("", "ShadowPass")),
+		m_BrainStemDObject(std::make_shared<object::C3DObject>("", "ShadowPass")),
 		//m_glTFData(std::make_shared<file::CFile>("Resources\\Models\\MetalRoughSpheresNoTextures\\glTF-Binary\\MetalRoughSpheresNoTextures.glb")),
 		//m_glTFData(std::make_shared<file::CFile>("Resources\\Models\\Sponza\\glTF\\Sponza.glb")),
 		//m_glTFData(std::make_shared<file::CFile>("Resources\\Models\\DamagedHelmet\\glTF-Binary\\DamagedHelmet.glb")),
@@ -25,6 +26,8 @@ namespace scene
 		//m_glTFData(std::make_shared<file::CFile>("Resources\\Models\\BrainStem\\glTF-Binary\\BrainStem.glb")),
 		m_glTFData(std::make_shared<file::CFile>("Resources\\Models\\CesiumMan\\glTF-Binary\\CesiumMan.glb")),
 		//m_glTFData(std::make_shared<file::CFile>("Resources\\Models\\AnimatedCube\\glTF\\AnimatedCube.gltf")),
+
+		m_BrainStemData(std::make_shared<file::CFile>("Resources\\Models\\BrainStem\\glTF-Binary\\BrainStem.glb")),
 
 		m_Background(std::make_shared<object::C3DObject>("", "ShadowPass")),
 		m_DebugSphere(std::make_shared<object::C3DObject>("", "ShadowPass")),
@@ -54,6 +57,7 @@ namespace scene
 		pLoadWorker->AddFirstLoadResource(m_DepthVertex);
 		pLoadWorker->AddFirstLoadResource(m_DepthFragment);
 		pLoadWorker->AddFirstLoadResource(m_glTFData);
+		pLoadWorker->AddFirstLoadResource(m_BrainStemData);
 		pLoadWorker->AddFirstLoadResource(m_IBL_Skybox);
 		pLoadWorker->AddFirstLoadResource(m_IBL_DiffuseEnvMap);
 		pLoadWorker->AddFirstLoadResource(m_IBL_SpecularEnvMap);
@@ -126,6 +130,27 @@ namespace scene
 			//if (!gltf::CGLTFImporter::ImportFromString(pGraphicsAPI, m_glTFData->GetData(), "Resources\\Models\\SimpleMorphTarget\\", m_glTFObject, createInfo, TextureSet, m_DepthVertex, m_DepthFragment)) return false;
 			//if (!gltf::CGLTFImporter::ImportFromString(pGraphicsAPI, m_glTFData->GetData(), "Resources\\Models\\SimpleAnimation\\", m_glTFObject, createInfo, TextureSet, m_DepthVertex, m_DepthFragment)) return false;
 			if (!gltf::CGLTFImporter::ImportFromMemory(pGraphicsAPI, m_glTFData->GetData(), m_glTFObject, createInfo, TextureSet, m_DepthVertex, m_DepthFragment)) return false;
+		}
+		
+		{
+			// MaterialInto
+			std::shared_ptr<graphics::CMaterialCreateInfo> createInfo = std::make_shared<graphics::CMaterialCreateInfo>();
+			createInfo->SetVertexShaderCode(m_VertexShader->GetData());
+			createInfo->SetFragmentShaderCode(m_FragmentShader->GetData());
+
+			// TextureSet
+			std::shared_ptr<graphics::CTextureSet> TextureSet = std::make_shared<graphics::CTextureSet>();
+			TextureSet->AddCubeMap(CubeTex);
+			for(const auto& FrameTexture : m_FrameTextureList) { TextureSet->AddFrameTexture(FrameTexture); }
+			TextureSet->AddIBLTexture(IBL_Diffuse_Tex, IBL_Specular_Tex, IBL_GGXLUT_Tex);
+
+			// 再生するアニメーションクリップを指定する
+			m_BrainStemDObject->SetPlayClipIndex(0);
+
+			m_BrainStemDObject->SetPos(glm::vec3(-1.5f, 0.0f, 0.0f));
+			m_BrainStemDObject->SetRot(glm::angleAxis(3.1415f, glm::vec3(0.0f, 1.0f, 0.0f)));
+
+			if (!gltf::CGLTFImporter::ImportFromMemory(pGraphicsAPI, m_BrainStemData->GetData(), m_BrainStemDObject, createInfo, TextureSet, m_DepthVertex, m_DepthFragment)) return false;
 		}
 
 		// m_Background
@@ -285,6 +310,11 @@ namespace scene
 			if (!m_glTFObject->Update(DrawInfo->GetDeltaSecondsTime())) return false;
 		}
 		
+		if (m_BrainStemDObject)
+		{
+			if (!m_BrainStemDObject->Update(DrawInfo->GetDeltaSecondsTime())) return false;
+		}
+		
 		if (m_Background)
 		{
 			if (!m_Background->Update(DrawInfo->GetDeltaSecondsTime())) return false;
@@ -312,6 +342,11 @@ namespace scene
 		if (m_glTFObject)
 		{
 			if (!m_glTFObject->Draw(IsDepthPass, Camera, Projection, DrawInfo, m_DebugSphere)) return false;
+		}
+		
+		if (m_BrainStemDObject)
+		{
+			if (!m_BrainStemDObject->Draw(IsDepthPass, Camera, Projection, DrawInfo, m_DebugSphere)) return false;
 		}
 		
 		if (m_Background)

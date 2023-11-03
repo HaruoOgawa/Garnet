@@ -216,7 +216,7 @@ namespace object
 			{
 				const auto& Skin = m_AnimationSkinList[SkinIndex];
 				
-				if (!Skin->CalcSkinMatrixList(SkinMatrixList)) return false;
+				if (!Skin->CalcSkinMatrixList(SkinMatrixList, m_ObjectTransform->GetModelMatrix())) return false;
 			}
 
 			for (int PrimitiveIndex = 0; PrimitiveIndex < Mesh->GetPrimitiveList().size(); PrimitiveIndex++)

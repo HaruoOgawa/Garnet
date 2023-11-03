@@ -274,6 +274,10 @@ namespace api
 
 					case graphics::EBufferType::SHADERSTORAGE:
 						{
+							// メモ
+							// なんか今、同じShaderを使いまわしている時にSSBOのbinding Indexが同じだとデータが全て一番最後のDrawのものに上書きされるような動作をしてしまう
+							// OpenGLでアニメーションモデルを複数個使うことができなくなってしまうので、仕様をよく調べて将来的に修正する 
+
 							target = GL_SHADER_STORAGE_BUFFER;
 							usage = GL_DYNAMIC_DRAW;
 						}
