@@ -4,6 +4,7 @@
 #include "../File/CFile.h"
 #include "../Debug/Message/Console.h"
 #include "../GLTF/CGLTFImporter.h"
+#include "../FBX/CFBXImporter.h"
 #include <glm/glm.hpp>
 #include "../Graphics/CDrawInfo.h"
 #include "../Camera/CCamera.h"
@@ -108,6 +109,11 @@ namespace scene
 
 		auto IBL_GGXLUT_Tex = pGraphicsAPI->CreateTexture(false);
 		if (!IBL_GGXLUT_Tex->Create(m_IBL_GGX_LUT->GetData())) return false;
+
+		// FBX Humanoid Animation Clip
+		{
+			if (!fbx::CFBXImporter::ImportFBXAnimation()) return false;
+		}
 
 		// glTFObject
 		{
