@@ -30,7 +30,10 @@ namespace api
 
 		pSharedOpenGLMat->SetActive();
 
-		if (!pSharedOpenGLMat->SetCommonUniform(Camera, Projection, DrawInfo)) return false;
+		pSharedOpenGLMat->SetUniformValue("cameraPos", &Camera->GetPos()[0]);
+		pSharedOpenGLMat->SetUniformValue("time", &glm::vec1(DrawInfo->GetSecondsTime())[0]);
+		pSharedOpenGLMat->SetUniformValue("deltaTime", &glm::vec1(DrawInfo->GetDeltaSecondsTime())[0]);
+
 		if (!pSharedOpenGLMat->BuildDrawBuffer(0)) return false;
 
 		glDispatchCompute(GroupCount.x, GroupCount.y, GroupCount.z);

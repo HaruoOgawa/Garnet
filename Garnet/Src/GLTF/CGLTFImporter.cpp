@@ -415,13 +415,7 @@ namespace gltf
 					}
 				}
 
-				//
-				{
-					// スキンアニメーションを使用するかどうかでShader等の処理を切り替える
-					int Flag = (model.skins.size() > 0) ? 1 : 0;
-					UniformBuffer->AddData("useSkinMeshAnimation", &glm::ivec1(Flag)[0], sizeof(int), 0);
-				}
-
+				UniformBuffer->AddData("useSkinMeshAnimation", &glm::ivec1(0)[0], sizeof(int), 0);
 				UniformBuffer->AddData("pad0", &glm::ivec1(0)[0], sizeof(int), 0);
 				UniformBuffer->AddData("pad1", &glm::ivec1(0)[0], sizeof(int), 0);
 				UniformBuffer->AddData("pad2", &glm::ivec1(0)[0], sizeof(int), 0);
@@ -724,12 +718,8 @@ namespace gltf
 			material->AddTextureBindingLayout({ "IBL_Specular_Texture", 18, 19, -1, graphics::ETextureUsage::TEXTURE_USAGE_IBL_Specular });
 			material->AddTextureBindingLayout({ "IBL_GGXLUT_Texture", 20, 21, -1, graphics::ETextureUsage::TEXTURE_USAGE_IBL_GGXLUT });
 			UniformBuffer->AddData("useIBL", &glm::ivec1(0)[0], sizeof(int), 0);
-			{
-				// スキンアニメーションを使用するかどうかでShader等の処理を切り替える
-				int Flag = (model.skins.size() > 0) ? 1 : 0;
-				UniformBuffer->AddData("useSkinMeshAnimation", &glm::ivec1(Flag)[0], sizeof(int), 0);
-			}
-
+			
+			UniformBuffer->AddData("useSkinMeshAnimation", &glm::ivec1(0)[0], sizeof(int), 0);
 			UniformBuffer->AddData("pad0", &glm::ivec1(0)[0], sizeof(int), 0);
 			UniformBuffer->AddData("pad1", &glm::ivec1(0)[0], sizeof(int), 0);
 			UniformBuffer->AddData("pad2", &glm::ivec1(0)[0], sizeof(int), 0);

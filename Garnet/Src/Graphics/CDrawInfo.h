@@ -3,8 +3,8 @@
 #include <glm/glm.hpp>
 #include <memory>
 
-namespace camera { class CCamera; }
-namespace projection { class CProjection; }
+#include "../../Camera/CCamera.h"
+#include "../../Projection/CProjection.h"
 
 namespace graphics
 {

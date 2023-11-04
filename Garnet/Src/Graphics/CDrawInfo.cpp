@@ -1,6 +1,4 @@
 #include "CDrawInfo.h"
-#include "../../Camera/CCamera.h"
-#include "../../Projection/CProjection.h"
 
 namespace graphics
 {

@@ -162,7 +162,7 @@ namespace object
 	bool C3DObject::Update(float DeltaSecondsTime)
 	{
 		// アニメーションの計算
-		if (m_CurrentClipIndex >= 0 && m_CurrentClipIndex < m_AnimationClipList.size())
+		if (IsPlayingAnimation())
 		{
 			const auto& Clip = m_AnimationClipList[m_CurrentClipIndex];
 			if (!Clip->Update(DeltaSecondsTime)) return false;
@@ -182,7 +182,19 @@ namespace object
 		for (auto& Material : m_MaterialList)
 		{
 			if (!Material) continue;
-			if (!Material->SetCommonUniform(Camera, Projection, DrawInfo)) return false;
+			
+			// 共通のユニフォームバッファの更新
+			glm::mat4 lightVPMat = DrawInfo->GetLightProjection()->GetPrejectionMatrix() * DrawInfo->GetLightCamera()->GetViewMatrix();
+
+			Material->SetUniformValue("view", &Camera->GetViewMatrix()[0][0]);
+			Material->SetUniformValue("proj", &Projection->GetPrejectionMatrix()[0][0]);
+			Material->SetUniformValue("lightVPMat", &lightVPMat[0][0]);
+			Material->SetUniformValue("lightDir", &DrawInfo->GetLightCamera()->GetViewDir()[0]);
+			Material->SetUniformValue("lightColor", &DrawInfo->GetLightColor()[0]);
+			Material->SetUniformValue("cameraPos", &Camera->GetPos()[0]);
+			Material->SetUniformValue("time", &glm::vec1(DrawInfo->GetSecondsTime())[0]);
+			Material->SetUniformValue("deltaTime", &glm::vec1(DrawInfo->GetDeltaSecondsTime())[0]);
+			Material->SetUniformValue("useSkinMeshAnimation", &glm::ivec1( (IsPlayingAnimation()? 1 : 0) )[0]);
 		}
 
 		for (auto& Material : m_MaterialList)
@@ -193,7 +205,18 @@ namespace object
 
 			if (!DepthMaterial) continue;
 
-			if (!DepthMaterial->SetCommonUniform(Camera, Projection, DrawInfo)) return false;
+			// 共通のユニフォームバッファの更新
+			glm::mat4 lightVPMat = DrawInfo->GetLightProjection()->GetPrejectionMatrix() * DrawInfo->GetLightCamera()->GetViewMatrix();
+			
+			DepthMaterial->SetUniformValue("view", &Camera->GetViewMatrix()[0][0]);
+			DepthMaterial->SetUniformValue("proj", &Projection->GetPrejectionMatrix()[0][0]);
+			DepthMaterial->SetUniformValue("lightVPMat", &lightVPMat[0][0]);
+			DepthMaterial->SetUniformValue("lightDir", &DrawInfo->GetLightCamera()->GetViewDir()[0]);
+			DepthMaterial->SetUniformValue("lightColor", &DrawInfo->GetLightColor()[0]);
+			DepthMaterial->SetUniformValue("cameraPos", &Camera->GetPos()[0]);
+			DepthMaterial->SetUniformValue("time", &glm::vec1(DrawInfo->GetSecondsTime())[0]);
+			DepthMaterial->SetUniformValue("deltaTime", &glm::vec1(DrawInfo->GetDeltaSecondsTime())[0]);
+			DepthMaterial->SetUniformValue("useSkinMeshAnimation", &glm::ivec1((IsPlayingAnimation() ? 1 : 0))[0]);
 		}
 
 		// 描画
@@ -212,7 +235,7 @@ namespace object
 			std::vector<glm::mat4> SkinMatrixList;
 			int SkinIndex = Node->GetSkinIndex();
 
-			if (SkinIndex >= 0 && SkinIndex < m_AnimationSkinList.size())
+			if (SkinIndex >= 0 && SkinIndex < m_AnimationSkinList.size() && IsPlayingAnimation())
 			{
 				const auto& Skin = m_AnimationSkinList[SkinIndex];
 				
@@ -243,7 +266,7 @@ namespace object
 				Material->SetUniformValue("model", &WorldMatrix[0][0], DynamicOffsetNum);
 
 				// SkinMatrixをShaderに渡す
-				if (SkinIndex >= 0 && SkinIndex < m_AnimationSkinList.size())
+				if (SkinIndex >= 0 && SkinIndex < m_AnimationSkinList.size() && IsPlayingAnimation())
 				{
 					Material->SetUniformValue("r_SkinMatrixBuffer", &SkinMatrixList[0], DynamicOffsetNum);
 				}
@@ -354,5 +377,10 @@ namespace object
 	void C3DObject::SetPlayClipIndex(int Index)
 	{
 		m_CurrentClipIndex = Index;
+	}
+
+	bool  C3DObject::IsPlayingAnimation()
+	{
+		return (m_CurrentClipIndex >= 0 && m_CurrentClipIndex < m_AnimationClipList.size());
 	}
 }

@@ -37,6 +37,8 @@ namespace object
 
 		void ApplyParentNode();
 		void ApplyParentNode(std::shared_ptr<CNode>& Node, const std::shared_ptr<CNode>& ParentNode);
+
+		bool IsPlayingAnimation();
 	public:
 		C3DObject(const std::string& PassName, const std::string& DepthPassName);
 		virtual ~C3DObject();
