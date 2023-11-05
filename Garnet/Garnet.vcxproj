@@ -577,6 +577,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Src\Object\C3DObjectImporter.h" />
     <ClInclude Include="Src\FBX\CFBXImporter.h" />
     <ClInclude Include="Src\Animation\CJoint.h" />
     <ClInclude Include="Src\Animation\CSkin.h" />
@@ -593,7 +594,6 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClInclude Include="Src\Graphics\ECullMode.h" />
     <ClInclude Include="Src\Graphics\ETextureUsage.h" />
     <ClInclude Include="Src\Interface\IGPGPUHandler.h" />
-    <ClInclude Include="Src\Object\CSimple3DObject.h" />
     <ClInclude Include="Src\Interface\IResource.h" />
     <ClInclude Include="Src\LoadWorker\CLoadWorker.h" />
     <ClInclude Include="Src\GraphicsAPI\OpenGL\COpenGLRenderPass.h" />
@@ -952,6 +952,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClInclude Include="Src\Interface\IRenderer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\Object\C3DObjectImporter.cpp" />
     <ClCompile Include="Src\FBX\CFBXImporter.cpp" />
     <ClCompile Include="Src\Animation\CJoint.cpp" />
     <ClCompile Include="Src\Animation\CSkin.cpp" />
@@ -963,7 +964,6 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClCompile Include="Src\GraphicsAPI\OpenGL\COpenGLGPGPUHandler.cpp" />
     <ClCompile Include="Src\GraphicsAPI\WebGPU\CWebGPUGPGPUHandler.cpp" />
     <ClCompile Include="Src\GraphicsAPI\Vulkan\CVulkanGPGPUHandler.cpp" />
-    <ClCompile Include="Src\Object\CSimple3DObject.cpp" />
     <ClCompile Include="Src\LoadWorker\CLoadWorker.cpp" />
     <ClCompile Include="Src\GraphicsAPI\OpenGL\COpenGLRenderPass.cpp" />
     <ClCompile Include="Src\GraphicsAPI\OpenGL\COpenGLRenderer.cpp" />

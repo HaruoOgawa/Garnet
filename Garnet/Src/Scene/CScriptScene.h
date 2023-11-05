@@ -21,6 +21,11 @@ namespace scene
 	{
 		bool m_IsLoaded;
 
+		// Fbx
+		std::shared_ptr<file::CFile> m_FbxAnimationData;
+		std::shared_ptr<file::CFile> m_FbxData;
+		std::shared_ptr<object::C3DObject> m_FbxObject;
+
 		// Tex of FrameBuffer
 		std::vector<std::shared_ptr<graphics::CTexture>> m_FrameTextureList;
 

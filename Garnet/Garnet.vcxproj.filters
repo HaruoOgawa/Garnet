@@ -1083,9 +1083,6 @@
     <ClInclude Include="Src\LoadWorker\ELoadStatus.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Src\Object\CSimple3DObject.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="Src\Interface\IGPGPUHandler.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
@@ -1132,6 +1129,9 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Src\FBX\CFBXImporter.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Object\C3DObjectImporter.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
@@ -1274,9 +1274,6 @@
     <ClCompile Include="Src\LoadWorker\CLoadWorker.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Object\CSimple3DObject.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="Src\GraphicsAPI\Vulkan\CVulkanGPGPUHandler.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
@@ -1308,6 +1305,9 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Src\FBX\CFBXImporter.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Object\C3DObjectImporter.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
