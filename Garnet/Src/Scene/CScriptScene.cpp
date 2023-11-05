@@ -204,6 +204,7 @@ namespace scene
 
 			m_FbxObject->SetPos(glm::vec3(0.0f, 0.0f, 0.0f));
 			m_FbxObject->SetScale(glm::vec3(0.01f));
+			m_FbxObject->SetRot(glm::angleAxis(3.1415f, glm::vec3(0.0f, 1.0f, 0.0f)));
 
 			if (!fbx::CFBXImporter::ImportFBX(pGraphicsAPI, m_FbxAnimationData->GetData(), m_FbxObject, createInfo, TextureSet, m_DepthVertex, m_DepthFragment)) return false;
 		}

@@ -269,237 +269,238 @@ namespace fbx
 		return true;
 	}
 
-
 	bool CFBXImporter::CreateMesh(fbxsdk::FbxNode* pFBXNode, std::vector<FbxMesh*>& pFbxMeshList, std::vector<std::shared_ptr<graphics::CMesh>>& MeshList)
 	{
 		fbxsdk::FbxMesh* pFbxMesh = pFBXNode->GetMesh();
-		pFbxMeshList.push_back(pFbxMesh);
-
+		
 		if (pFbxMesh)
 		{
+			pFbxMeshList.push_back(pFbxMesh);
+
 			std::shared_ptr<graphics::CMesh> Mesh = std::make_shared<graphics::CMesh>();
 
-			//
-			std::shared_ptr<renderer::CRendererCreateInfo> createInfo = std::make_shared<renderer::CRendererCreateInfo>();
-
-			// 頂点バッファ本体
-			std::vector<std::vector<float>> VertexDataList;
-			std::vector<int> DimentionList;
-			std::vector<renderer::EDataType> DataTypeList;
-			std::vector<int> ByteStrideList;
-
-			std::vector<unsigned short> Indices;
-
-			// 頂点データの初期化用(例えばWeightとかNormalを持っていないならそれを0埋めするみたいな処理)
-			std::vector<std::string> NeedAttribNameList = {
-				"POSITION",
-				"NORMAL",
-				"TEXCOORD_0",
-				"TANGENT",
-				"JOINTS_0",
-				"WEIGHTS_0",
-			};
-			std::map<std::string, std::vector<float>> ReservedVertexDataList;
-			std::map<std::string, renderer::EDataType> ReservedDataTypeList;
-			std::map<std::string, int> ReservedByteStrideList;
-
-			// タンジェントの計算が必要
-			bool NeedRecalculateTangent = false;
-
-			// インデックスバッファを読む
 			{
-				for (int i = 0; i < pFbxMesh->GetPolygonCount(); i++)
-				{
-					// 1ポリゴン内の頂点数を取得
-					int lPolygonSize = pFbxMesh->GetPolygonSize(i);
+				std::shared_ptr<renderer::CRendererCreateInfo> createInfo = std::make_shared<renderer::CRendererCreateInfo>();
 
-					if (lPolygonSize == 3)
+				// 頂点バッファ本体
+				std::vector<std::vector<float>> VertexDataList;
+				std::vector<int> DimentionList;
+				std::vector<renderer::EDataType> DataTypeList;
+				std::vector<int> ByteStrideList;
+
+				std::vector<unsigned short> Indices;
+
+				// 頂点データの初期化用(例えばWeightとかNormalを持っていないならそれを0埋めするみたいな処理)
+				std::vector<std::string> NeedAttribNameList = {
+					"POSITION",
+					"NORMAL",
+					"TEXCOORD_0",
+					"TANGENT",
+					"JOINTS_0",
+					"WEIGHTS_0",
+				};
+				std::map<std::string, std::vector<float>> ReservedVertexDataList;
+				std::map<std::string, renderer::EDataType> ReservedDataTypeList;
+				std::map<std::string, int> ReservedByteStrideList;
+
+				// タンジェントの計算が必要
+				bool NeedRecalculateTangent = false;
+
+				// インデックスバッファを読む
+				{
+					for (int i = 0; i < pFbxMesh->GetPolygonCount(); i++)
 					{
-						for (int j = 0; j < 3; j++)
+						// 1ポリゴン内の頂点数を取得
+						int lPolygonSize = pFbxMesh->GetPolygonSize(i);
+
+						if (lPolygonSize == 3)
 						{
-							// インデックスバッファを読む
-							int IndexVal = pFbxMesh->GetPolygonVertex(i, j);
-							Indices.push_back(IndexVal);
+							for (int j = 0; j < 3; j++)
+							{
+								// インデックスバッファを読む
+								int IndexVal = pFbxMesh->GetPolygonVertex(i, j);
+								Indices.push_back(IndexVal);
+							}
+						}
+						else if (lPolygonSize == 4)
+						{
+							// 四角形ポリゴンを三角ポリゴンに変換する際に使用するインデックス
+							int IndexArray[6] = { 0, 1, 2, 0, 2, 3 };
+
+							for (int j = 0; j < 6; j++)
+							{
+								// インデックスバッファを読む
+								int IndexVal = pFbxMesh->GetPolygonVertex(i, IndexArray[j]);
+								Indices.push_back(IndexVal);
+							}
 						}
 					}
-					else if (lPolygonSize == 4)
-					{
-						// 四角形ポリゴンを三角ポリゴンに変換する際に使用するインデックス
-						int IndexArray[6] = { 0, 1, 2, 0, 2, 3 };
+				}
 
-						for (int j = 0; j < 6; j++)
+				// 頂点数
+				int VertexCount = pFbxMesh->GetPolygonVertexCount();
+
+				// 頂点バッファを読む
+				{
+					// 頂点座標
+					{
+						std::vector<float> AttributeData;
+
+						for (int i = 0; i < pFbxMesh->GetControlPointsCount(); i++)
 						{
-							// インデックスバッファを読む
-							int IndexVal = pFbxMesh->GetPolygonVertex(i, IndexArray[j]);
-							Indices.push_back(IndexVal);
+							fbxsdk::FbxVector4 pPosition = pFbxMesh->GetControlPointAt(i);
+
+							// 頂点座標リストから頂点を取得する
+							for (int j = 0; j < 3; j++)
+							{
+								AttributeData.push_back(static_cast<float>(pPosition[j]));
+							}
 						}
+
+						// データを登録
+						ReservedVertexDataList.insert({ "POSITION" ,AttributeData });
+
+						// コンポーネントタイプ(データ型)を取得
+						renderer::EDataType attribComponentType = renderer::EDataType::TYPE_FLOAT;
+						ReservedDataTypeList.insert({ "POSITION", attribComponentType });
+
+						// ByteStrideを取得
+						// byteStrideとは「１つ分」のデータと、次の「1つ分」のデータとの間の、読み取り場所の移動バイト長
+						// http://muko.damember.org/gl4/html-ja/glVertexAttribPointer.xhtml
+						int attibByteStride = 0;
+						ReservedByteStrideList.insert({ "POSITION", attibByteStride });
 					}
-				}
-			}
 
-			// 頂点数
-			int VertexCount = pFbxMesh->GetPolygonVertexCount();
-
-			// 頂点バッファを読む
-			{
-				// 頂点座標
-				{
-					std::vector<float> AttributeData;
-					
-					for (int i = 0; i < pFbxMesh->GetControlPointsCount(); i++)
+					// 法線
+					FbxArray<FbxVector4> pNormals;
+					if (pFbxMesh->GetPolygonVertexNormals(pNormals))
 					{
-						fbxsdk::FbxVector4 pPosition = pFbxMesh->GetControlPointAt(i);
+						int Len = static_cast<int>(pNormals.GetCount());
 
-						// 頂点座標リストから頂点を取得する
-						for (int j = 0; j < 3; j++)
-						{
-							AttributeData.push_back(static_cast<float>(pPosition[j]));
-						}
+						// Bufferを取得
+						std::vector<double> DoubleData(Len * 4);
+						std::memcpy(&DoubleData[0], &pNormals[0][0], sizeof(pNormals[0][0]) * Len * 4);
+
+						// Vector3のfloat Arrayに変換
+						std::vector<float> AttributeData;
+						for (int p = 0; p < DoubleData.size(); p++) { if ((p + 1) % 4 != 0) AttributeData.push_back(static_cast<float>(DoubleData[p])); }
+
+						// データを登録
+						ReservedVertexDataList.insert({ "NORMAL" ,AttributeData });
+
+						// コンポーネントタイプ(データ型)を取得
+						renderer::EDataType attribComponentType = renderer::EDataType::TYPE_FLOAT;
+						ReservedDataTypeList.insert({ "NORMAL", attribComponentType });
+
+						// ByteStrideを取得
+						// byteStrideとは「１つ分」のデータと、次の「1つ分」のデータとの間の、読み取り場所の移動バイト長
+						// http://muko.damember.org/gl4/html-ja/glVertexAttribPointer.xhtml
+						int attibByteStride = 0;
+						ReservedByteStrideList.insert({ "NORMAL", attibByteStride });
 					}
 
-					// データを登録
-					ReservedVertexDataList.insert({ "POSITION" ,AttributeData });
-
-					// コンポーネントタイプ(データ型)を取得
-					renderer::EDataType attribComponentType = renderer::EDataType::TYPE_FLOAT;
-					ReservedDataTypeList.insert({ "POSITION", attribComponentType });
-
-					// ByteStrideを取得
-					// byteStrideとは「１つ分」のデータと、次の「1つ分」のデータとの間の、読み取り場所の移動バイト長
-					// http://muko.damember.org/gl4/html-ja/glVertexAttribPointer.xhtml
-					int attibByteStride = 0;
-					ReservedByteStrideList.insert({ "POSITION", attibByteStride });
-				}
-				
-				// 法線
-				FbxArray<FbxVector4> pNormals;
-				if (pFbxMesh->GetPolygonVertexNormals(pNormals))
-				{
-					int Len = static_cast<int>(pNormals.GetCount());
-
-					// Bufferを取得
-					std::vector<double> DoubleData(Len * 4);
-					std::memcpy(&DoubleData[0], &pNormals[0][0], sizeof(pNormals[0][0]) * Len * 4);
-
-					// Vector3のfloat Arrayに変換
-					std::vector<float> AttributeData;
-					for (int p = 0; p < DoubleData.size(); p++) { if ((p + 1) % 4 != 0) AttributeData.push_back(static_cast<float>(DoubleData[p])); }
-
-					// データを登録
-					ReservedVertexDataList.insert({ "NORMAL" ,AttributeData });
-
-					// コンポーネントタイプ(データ型)を取得
-					renderer::EDataType attribComponentType = renderer::EDataType::TYPE_FLOAT;
-					ReservedDataTypeList.insert({ "NORMAL", attribComponentType });
-
-					// ByteStrideを取得
-					// byteStrideとは「１つ分」のデータと、次の「1つ分」のデータとの間の、読み取り場所の移動バイト長
-					// http://muko.damember.org/gl4/html-ja/glVertexAttribPointer.xhtml
-					int attibByteStride = 0;
-					ReservedByteStrideList.insert({ "NORMAL", attibByteStride });
-				}
-
-				// UV
-				FbxArray<FbxVector2> pUVs;
-				if (pFbxMesh->GetPolygonVertexUVs("", pUVs))
-				{
-					int Len = static_cast<int>(pUVs.GetCount());
-
-					// Bufferを取得
-					std::vector<double> DoubleData(Len * 2);
-					std::memcpy(&DoubleData[0], &pUVs[0][0], sizeof(pUVs[0][0]) * Len * 2);
-
-					// Vector3のfloat Arrayに変換
-					std::vector<float> AttributeData(Len * 2);
-					std::transform(DoubleData.begin(), DoubleData.end(), AttributeData.begin(), [](double val) {return static_cast<float>(val); });
-
-					// データを登録
-					ReservedVertexDataList.insert({ "TEXCOORD_0" ,AttributeData });
-
-					// コンポーネントタイプ(データ型)を取得
-					renderer::EDataType attribComponentType = renderer::EDataType::TYPE_FLOAT;
-					ReservedDataTypeList.insert({ "TEXCOORD_0", attribComponentType });
-
-					// ByteStrideを取得
-					// byteStrideとは「１つ分」のデータと、次の「1つ分」のデータとの間の、読み取り場所の移動バイト長
-					// http://muko.damember.org/gl4/html-ja/glVertexAttribPointer.xhtml
-					int attibByteStride = 0;
-					ReservedByteStrideList.insert({ "TEXCOORD_0", attibByteStride });
-				}
-
-				// アトリビュートがまだ登録されていなければここで0埋めの値を渡す
-				for (const auto& AttribName : NeedAttribNameList)
-				{
-					// ディメンションを登録
-					int Dimention = 1;
-
-					if (AttribName == "POSITION" || AttribName == "NORMAL")
+					// UV
+					FbxArray<FbxVector2> pUVs;
+					if (pFbxMesh->GetPolygonVertexUVs("", pUVs))
 					{
-						Dimention = 3;
-					}
-					else if (AttribName == "TEXCOORD_0")
-					{
-						Dimention = 2;
-					}
-					else if (AttribName == "TANGENT" || AttribName == "JOINTS_0" || AttribName == "WEIGHTS_0")
-					{
-						Dimention = 4;
-					}
+						int Len = static_cast<int>(pUVs.GetCount());
 
-					DimentionList.push_back(Dimention);
+						// Bufferを取得
+						std::vector<double> DoubleData(Len * 2);
+						std::memcpy(&DoubleData[0], &pUVs[0][0], sizeof(pUVs[0][0]) * Len * 2);
+
+						// Vector3のfloat Arrayに変換
+						std::vector<float> AttributeData(Len * 2);
+						std::transform(DoubleData.begin(), DoubleData.end(), AttributeData.begin(), [](double val) {return static_cast<float>(val); });
+
+						// データを登録
+						ReservedVertexDataList.insert({ "TEXCOORD_0" ,AttributeData });
+
+						// コンポーネントタイプ(データ型)を取得
+						renderer::EDataType attribComponentType = renderer::EDataType::TYPE_FLOAT;
+						ReservedDataTypeList.insert({ "TEXCOORD_0", attribComponentType });
+
+						// ByteStrideを取得
+						// byteStrideとは「１つ分」のデータと、次の「1つ分」のデータとの間の、読み取り場所の移動バイト長
+						// http://muko.damember.org/gl4/html-ja/glVertexAttribPointer.xhtml
+						int attibByteStride = 0;
+						ReservedByteStrideList.insert({ "TEXCOORD_0", attibByteStride });
+					}
 
 					// アトリビュートがまだ登録されていなければここで0埋めの値を渡す
-					if (ReservedVertexDataList.find(AttribName) == ReservedVertexDataList.end())
+					for (const auto& AttribName : NeedAttribNameList)
 					{
-						ReservedVertexDataList.insert({ AttribName, std::vector<float>(VertexCount * Dimention, 0.0f) });
+						// ディメンションを登録
+						int Dimention = 1;
 
-						// 接線もしく複接線の再計算が必要
-						if (AttribName == "TANGENT")
+						if (AttribName == "POSITION" || AttribName == "NORMAL")
 						{
-							NeedRecalculateTangent = true;
+							Dimention = 3;
+						}
+						else if (AttribName == "TEXCOORD_0")
+						{
+							Dimention = 2;
+						}
+						else if (AttribName == "TANGENT" || AttribName == "JOINTS_0" || AttribName == "WEIGHTS_0")
+						{
+							Dimention = 4;
 						}
 
-						// DataTypeとByteStrideの初期値をセット
-						renderer::EDataType DataType = renderer::EDataType::TYPE_FLOAT;
+						DimentionList.push_back(Dimention);
 
-						// 『JOINTS_0』はunsigned shortである
-						if (AttribName == "JOINTS_0") DataType = renderer::EDataType::TYPE_UNSIGNED_SHORT;
+						// アトリビュートがまだ登録されていなければここで0埋めの値を渡す
+						if (ReservedVertexDataList.find(AttribName) == ReservedVertexDataList.end())
+						{
+							ReservedVertexDataList.insert({ AttribName, std::vector<float>(VertexCount * Dimention, 0.0f) });
 
-						ReservedDataTypeList.insert({ AttribName, DataType });
-						ReservedByteStrideList.insert({ AttribName, 0 });
+							// 接線もしく複接線の再計算が必要
+							if (AttribName == "TANGENT")
+							{
+								NeedRecalculateTangent = true;
+							}
+
+							// DataTypeとByteStrideの初期値をセット
+							renderer::EDataType DataType = renderer::EDataType::TYPE_FLOAT;
+
+							// 『JOINTS_0』はunsigned shortである
+							if (AttribName == "JOINTS_0") DataType = renderer::EDataType::TYPE_UNSIGNED_SHORT;
+
+							ReservedDataTypeList.insert({ AttribName, DataType });
+							ReservedByteStrideList.insert({ AttribName, 0 });
+						}
 					}
 				}
-			}
 
-			// 頂点バッファを構築
-			{
-				for (const auto& AttribName : NeedAttribNameList)
+				// 頂点バッファを構築
 				{
-					// 頂点バッファにデータを渡す
-					VertexDataList.push_back(ReservedVertexDataList[AttribName]);
+					for (const auto& AttribName : NeedAttribNameList)
+					{
+						// 頂点バッファにデータを渡す
+						VertexDataList.push_back(ReservedVertexDataList[AttribName]);
 
-					// データタイプ
-					DataTypeList.push_back(ReservedDataTypeList[AttribName]);
+						// データタイプ
+						DataTypeList.push_back(ReservedDataTypeList[AttribName]);
 
-					// ByteStride
-					ByteStrideList.push_back(ReservedByteStrideList[AttribName]);
+						// ByteStride
+						ByteStrideList.push_back(ReservedByteStrideList[AttribName]);
 
+					}
 				}
+
+				// メッシュ情報を渡す
+				createInfo->SetVertices(VertexDataList);
+				createInfo->SetAttributeDimensions(DimentionList);
+				createInfo->SetAttribDataTypes(DataTypeList);
+				createInfo->SetAttribByteStrides(ByteStrideList);
+
+				// Indicesを登録
+				createInfo->SetIndices(Indices);
+
+				// プリミティブを作成する
+				int MaterialIndex = 0; // ひとまず0番目のダミーマテリアルを渡しておく
+				std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(createInfo, MaterialIndex);
+				Mesh->AddPrimitive(Primitive);
 			}
-
-			// メッシュ情報を渡す
-			createInfo->SetVertices(VertexDataList);
-			createInfo->SetAttributeDimensions(DimentionList);
-			createInfo->SetAttribDataTypes(DataTypeList);
-			createInfo->SetAttribByteStrides(ByteStrideList);
-
-			// Indicesを登録
-			createInfo->SetIndices(Indices);
-
-			// プリミティブを作成する
-			int MaterialIndex = 0; // ひとまず0番目のダミーマテリアルを渡しておく
-			std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(createInfo, MaterialIndex);
-			Mesh->AddPrimitive(Primitive);
 
 			MeshList.push_back(Mesh);
 		}
@@ -563,7 +564,8 @@ namespace fbx
 		int Loop = 0;
 		for (auto it = pFbxMeshList.begin(); it != pFbxMeshList.end(); it++)
 		{
-			if (*it == pFBXNode->GetMesh())
+			fbxsdk::FbxMesh* pTargetMesh = *it;
+			if (pTargetMesh && pTargetMesh == pFBXNode->GetMesh())
 			{
 				MeshIndex = Loop;
 
