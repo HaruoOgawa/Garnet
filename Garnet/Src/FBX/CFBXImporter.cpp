@@ -38,14 +38,14 @@ namespace fbx
 		const std::shared_ptr<file::CFile>& DepthVertex, const std::shared_ptr<file::CFile>& DepthFragment)
 	{
 		// 全体のメモリやObjectを管理するManagerを作成
-		fbxsdk::FbxManager* Manager = fbxsdk::FbxManager::Create();
+		FbxManager* Manager = FbxManager::Create();
 
 		// IO Object(Input/Output)を作成
-		fbxsdk::FbxIOSettings* ios = fbxsdk::FbxIOSettings::Create(Manager, IOSROOT);
+		FbxIOSettings* ios = FbxIOSettings::Create(Manager, IOSROOT);
 		Manager->SetIOSettings(ios);
 
 		// Importerを生成
-		fbxsdk::FbxImporter* Importer = fbxsdk::FbxImporter::Create(Manager, "");
+		FbxImporter* Importer = FbxImporter::Create(Manager, "");
 
 		// ひとまず適当にファイル名からImport(あとでfromMemoryにする)
 		//const char* fileName = "Resources\\Motions\\Walking.fbx";
@@ -62,7 +62,7 @@ namespace fbx
 		// シーンを作成
 		// Sceneの中にMesh・ライト・スケルトンなどが入っている.
 		// Blenderの画面と同じようなものかな
-		fbxsdk::FbxScene* Scene = fbxsdk::FbxScene::Create(Manager, "myScene");
+		FbxScene* Scene = FbxScene::Create(Manager, "myScene");
 
 		// Importを実行
 		Importer->Import(Scene);
@@ -76,7 +76,7 @@ namespace fbx
 		return true;
 	}
 
-	bool CFBXImporter::Analyse(api::IGraphicsAPI* pGraphicsAPI, fbxsdk::FbxScene* Scene, bool IsUseObject, std::shared_ptr<object::C3DObject>& Object,
+	bool CFBXImporter::Analyse(api::IGraphicsAPI* pGraphicsAPI, FbxScene* Scene, bool IsUseObject, std::shared_ptr<object::C3DObject>& Object,
 		const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, const std::shared_ptr<graphics::CTextureSet>& TextureSet,
 		const std::shared_ptr<file::CFile>& DepthVertex, const std::shared_ptr<file::CFile>& DepthFragment)
 	{
@@ -90,7 +90,7 @@ namespace fbx
 		
 		if (IsUseObject)
 		{
-			fbxsdk::FbxNode* RootNode = Scene->GetRootNode();
+			FbxNode* RootNode = Scene->GetRootNode();
 			if (RootNode)
 			{
 				if (!Analyse(pGraphicsAPI, pFbxMeshList, createInfo, RootNode, TextureList, MaterialList, MeshList)) return false;
@@ -148,7 +148,7 @@ namespace fbx
 	}
 
 	bool CFBXImporter::Analyse(api::IGraphicsAPI* pGraphicsAPI, std::vector<FbxMesh*>& pFbxMeshList, const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo,
-		fbxsdk::FbxNode* pFBXNode, std::vector<std::shared_ptr<graphics::CTexture>>& TextureList,
+		FbxNode* pFBXNode, std::vector<std::shared_ptr<graphics::CTexture>>& TextureList,
 		std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList, std::vector<std::shared_ptr<graphics::CMesh>>& MeshList)
 	{
 		// テクスチャ
@@ -175,7 +175,7 @@ namespace fbx
 		return true;
 	}
 
-	bool CFBXImporter::CreateDummyMaterial(api::IGraphicsAPI* pGraphicsAPI, fbxsdk::FbxNode* pFBXNode, std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList,
+	bool CFBXImporter::CreateDummyMaterial(api::IGraphicsAPI* pGraphicsAPI, FbxNode* pFBXNode, std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList,
 		const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, std::vector<std::shared_ptr<graphics::CMesh>>& MeshList)
 	{
 		// マテリアルにシェーダーを設定
@@ -269,9 +269,9 @@ namespace fbx
 		return true;
 	}
 
-	bool CFBXImporter::CreateMesh(fbxsdk::FbxNode* pFBXNode, std::vector<FbxMesh*>& pFbxMeshList, std::vector<std::shared_ptr<graphics::CMesh>>& MeshList)
+	bool CFBXImporter::CreateMesh(FbxNode* pFBXNode, std::vector<FbxMesh*>& pFbxMeshList, std::vector<std::shared_ptr<graphics::CMesh>>& MeshList)
 	{
-		fbxsdk::FbxMesh* pFbxMesh = pFBXNode->GetMesh();
+		FbxMesh* pFbxMesh = pFBXNode->GetMesh();
 		
 		if (pFbxMesh)
 		{
@@ -341,92 +341,122 @@ namespace fbx
 				int VertexCount = pFbxMesh->GetPolygonVertexCount();
 
 				// 頂点バッファを読む
+				// 参照: https://www.gamedev.net/tutorials/_/technical/graphics-programming-and-theory/how-to-work-with-fbx-sdk-r3582/
 				{
 					// 頂点座標
 					{
-						std::vector<float> AttributeData;
+						std::vector<float> AttributePosData;
+						std::vector<float> AttributeNormalData;
+						std::vector<float> AttributeUVData;
+						std::vector<float> AttributeTangentData;
 
-						for (int i = 0; i < pFbxMesh->GetControlPointsCount(); i++)
+						int VertexCounter = 0;
+
+						for (int CtrlPointIndex = 0; CtrlPointIndex < pFbxMesh->GetControlPointsCount(); CtrlPointIndex++)
 						{
-							fbxsdk::FbxVector4 pPosition = pFbxMesh->GetControlPointAt(i);
+							// 頂点座標
+							FbxVector4 pFbxPosition = pFbxMesh->GetControlPointAt(CtrlPointIndex);
 
-							// 頂点座標リストから頂点を取得する
-							for (int j = 0; j < 3; j++)
+							AttributePosData.push_back(static_cast<float>(pFbxPosition[0]));
+							AttributePosData.push_back(static_cast<float>(pFbxPosition[1]));
+							AttributePosData.push_back(static_cast<float>(pFbxPosition[2]));
+
+							// 法線
+							if (pFbxMesh->GetElementNormalCount() > 0)
 							{
-								AttributeData.push_back(static_cast<float>(pPosition[j]));
+								FbxGeometryElementNormal* pFbxNormal = pFbxMesh->GetElementNormal(0);
+								if (!ReadGeometryElement<fbxsdk::FbxGeometryElementNormal>(AttributeNormalData, 3, pFbxNormal, CtrlPointIndex, VertexCounter)) return false;
 							}
+
+							// UV
+							if (pFbxMesh->GetElementUVCount() > 0)
+							{
+								FbxGeometryElementUV* pFbxUV = pFbxMesh->GetElementUV(0);
+								if (!ReadGeometryElement<fbxsdk::FbxGeometryElementUV>(AttributeUVData, 2, pFbxUV, CtrlPointIndex, VertexCounter)) return false;
+							}
+
+							// 接線
+							if (pFbxMesh->GetElementTangentCount() > 0)
+							{
+								FbxGeometryElementTangent* pFbxTangent = pFbxMesh->GetElementTangent(0);
+								if (!ReadGeometryElement<fbxsdk::FbxGeometryElementTangent>(AttributeTangentData, 4, pFbxTangent, CtrlPointIndex, VertexCounter)) return false;
+							}
+
+							// 更新
+							VertexCounter++;
 						}
 
-						// データを登録
-						ReservedVertexDataList.insert({ "POSITION" ,AttributeData });
+						// 頂点座標
+						if(!AttributePosData.empty())
+						{
+							// データを登録
+							ReservedVertexDataList.insert({ "POSITION" ,AttributePosData });
 
-						// コンポーネントタイプ(データ型)を取得
-						renderer::EDataType attribComponentType = renderer::EDataType::TYPE_FLOAT;
-						ReservedDataTypeList.insert({ "POSITION", attribComponentType });
+							// コンポーネントタイプ(データ型)を取得
+							ReservedDataTypeList.insert({ "POSITION", renderer::EDataType::TYPE_FLOAT });
 
-						// ByteStrideを取得
-						// byteStrideとは「１つ分」のデータと、次の「1つ分」のデータとの間の、読み取り場所の移動バイト長
-						// http://muko.damember.org/gl4/html-ja/glVertexAttribPointer.xhtml
-						int attibByteStride = 0;
-						ReservedByteStrideList.insert({ "POSITION", attibByteStride });
+							// ByteStrideを取得
+							ReservedByteStrideList.insert({ "POSITION", 0 });
+						}
+
+						// 法線
+						if(!AttributeNormalData.empty())
+						{
+							// データを登録
+							ReservedVertexDataList.insert({ "NORMAL" ,AttributeNormalData });
+
+							// コンポーネントタイプ(データ型)を取得
+							ReservedDataTypeList.insert({ "NORMAL", renderer::EDataType::TYPE_FLOAT });
+
+							// ByteStrideを取得
+							ReservedByteStrideList.insert({ "NORMAL", 0 });
+						}
+
+						// UV
+						if (!AttributeUVData.empty())
+						{
+							// データを登録
+							ReservedVertexDataList.insert({ "TEXCOORD_0" ,AttributeUVData });
+
+							// コンポーネントタイプ(データ型)を取得
+							ReservedDataTypeList.insert({ "TEXCOORD_0", renderer::EDataType::TYPE_FLOAT });
+
+							// ByteStrideを取得
+							ReservedByteStrideList.insert({ "TEXCOORD_0", 0 });
+						}
+
+						// 接線
+						if (!AttributeTangentData.empty())
+						{
+							// データを登録
+							ReservedVertexDataList.insert({ "TANGENT" ,AttributeTangentData });
+
+							// コンポーネントタイプ(データ型)を取得
+							ReservedDataTypeList.insert({ "TANGENT", renderer::EDataType::TYPE_FLOAT });
+
+							// ByteStrideを取得
+							ReservedByteStrideList.insert({ "TANGENT", 0 });
+						}
+						else
+						{
+							// 接線の再計算が必要
+							NeedRecalculateTangent = true;
+						}
 					}
 
-					// 法線
-					FbxArray<FbxVector4> pNormals;
-					if (pFbxMesh->GetPolygonVertexNormals(pNormals))
+					// For Skin Mesh Animation
 					{
-						int Len = static_cast<int>(pNormals.GetCount());
+						FbxSkin* pSkinDeformer = (FbxSkin*)pFbxMesh->GetDeformer(0, FbxDeformer::eSkin);
 
-						// Bufferを取得
-						std::vector<double> DoubleData(Len * 4);
-						std::memcpy(&DoubleData[0], &pNormals[0][0], sizeof(pNormals[0][0]) * Len * 4);
+						if (pSkinDeformer)
+						{
 
-						// Vector3のfloat Arrayに変換
-						std::vector<float> AttributeData;
-						for (int p = 0; p < DoubleData.size(); p++) { if ((p + 1) % 4 != 0) AttributeData.push_back(static_cast<float>(DoubleData[p])); }
 
-						// データを登録
-						ReservedVertexDataList.insert({ "NORMAL" ,AttributeData });
+							// Joint
 
-						// コンポーネントタイプ(データ型)を取得
-						renderer::EDataType attribComponentType = renderer::EDataType::TYPE_FLOAT;
-						ReservedDataTypeList.insert({ "NORMAL", attribComponentType });
-
-						// ByteStrideを取得
-						// byteStrideとは「１つ分」のデータと、次の「1つ分」のデータとの間の、読み取り場所の移動バイト長
-						// http://muko.damember.org/gl4/html-ja/glVertexAttribPointer.xhtml
-						int attibByteStride = 0;
-						ReservedByteStrideList.insert({ "NORMAL", attibByteStride });
+							// Weights
+						}
 					}
-
-					// UV
-					FbxArray<FbxVector2> pUVs;
-					if (pFbxMesh->GetPolygonVertexUVs("", pUVs))
-					{
-						int Len = static_cast<int>(pUVs.GetCount());
-
-						// Bufferを取得
-						std::vector<double> DoubleData(Len * 2);
-						std::memcpy(&DoubleData[0], &pUVs[0][0], sizeof(pUVs[0][0]) * Len * 2);
-
-						// Vector3のfloat Arrayに変換
-						std::vector<float> AttributeData(Len * 2);
-						std::transform(DoubleData.begin(), DoubleData.end(), AttributeData.begin(), [](double val) {return static_cast<float>(val); });
-
-						// データを登録
-						ReservedVertexDataList.insert({ "TEXCOORD_0" ,AttributeData });
-
-						// コンポーネントタイプ(データ型)を取得
-						renderer::EDataType attribComponentType = renderer::EDataType::TYPE_FLOAT;
-						ReservedDataTypeList.insert({ "TEXCOORD_0", attribComponentType });
-
-						// ByteStrideを取得
-						// byteStrideとは「１つ分」のデータと、次の「1つ分」のデータとの間の、読み取り場所の移動バイト長
-						// http://muko.damember.org/gl4/html-ja/glVertexAttribPointer.xhtml
-						int attibByteStride = 0;
-						ReservedByteStrideList.insert({ "TEXCOORD_0", attibByteStride });
-					}
-
 					// アトリビュートがまだ登録されていなければここで0埋めの値を渡す
 					for (const auto& AttribName : NeedAttribNameList)
 					{
@@ -471,6 +501,15 @@ namespace fbx
 					}
 				}
 
+				// タンジェントの再計算
+				if (NeedRecalculateTangent)
+				{
+					if (Indices.size() > 0)
+					{
+						if (!RecalculateTangent(ReservedVertexDataList["TANGENT"], ReservedVertexDataList["POSITION"], ReservedVertexDataList["TEXCOORD_0"], Indices)) return false;
+					}
+				}
+
 				// 頂点バッファを構築
 				{
 					for (const auto& AttribName : NeedAttribNameList)
@@ -508,13 +547,13 @@ namespace fbx
 		return true;
 	}
 
-	bool CFBXImporter::CreateNodeList(fbxsdk::FbxScene* Scene, const std::vector<FbxMesh*>& pFbxMeshList, std::vector<std::shared_ptr<object::CNode>>& NodeList, const std::vector<std::shared_ptr<graphics::CMesh>>& MeshList,
+	bool CFBXImporter::CreateNodeList(FbxScene* Scene, const std::vector<FbxMesh*>& pFbxMeshList, std::vector<std::shared_ptr<object::CNode>>& NodeList, const std::vector<std::shared_ptr<graphics::CMesh>>& MeshList,
 		const std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList, std::vector<std::vector<int>>& RootNodeIndexList)
 	{
-		std::vector<fbxsdk::FbxNode*> pFbxNodeList;
+		std::vector<FbxNode*> pFbxNodeList;
 
 		// ルートノードを取得
-		fbxsdk::FbxNode* RootNode = Scene->GetRootNode();
+		FbxNode* RootNode = Scene->GetRootNode();
 		if (RootNode)
 		{
 			RootNodeIndexList.push_back(std::vector<int>(0));
@@ -527,14 +566,14 @@ namespace fbx
 
 		for (int n = 0; n < NodeList.size(); n++)
 		{
-			fbxsdk::FbxNode* pFBXNode = pFbxNodeList[n];
+			FbxNode* pFBXNode = pFbxNodeList[n];
 			const auto& Node = NodeList[n];
 			
 			std::vector<int> ChildNodeList;
 
 			for (int i = 0; i < pFBXNode->GetChildCount(); i++)
 			{
-				fbxsdk::FbxNode* pChildNode = pFBXNode->GetChild(i);
+				FbxNode* pChildNode = pFBXNode->GetChild(i);
 
 				if (pChildNode)
 				{
@@ -556,7 +595,7 @@ namespace fbx
 		return true;
 	}
 
-	bool CFBXImporter::CreateNode(fbxsdk::FbxNode* pFBXNode, const std::vector<FbxMesh*>& pFbxMeshList, std::vector<FbxNode*>& pFbxNodeList,
+	bool CFBXImporter::CreateNode(FbxNode* pFBXNode, const std::vector<FbxMesh*>& pFbxMeshList, std::vector<FbxNode*>& pFbxNodeList,
 		std::vector<std::shared_ptr<object::CNode>>& NodeList, const std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, const std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList)
 	{
 		// Listの要素のポインターとpFBXNodeが持ってる要素のポインターを比較してリスト内の順番をIndexとして渡す
@@ -564,7 +603,7 @@ namespace fbx
 		int Loop = 0;
 		for (auto it = pFbxMeshList.begin(); it != pFbxMeshList.end(); it++)
 		{
-			fbxsdk::FbxMesh* pTargetMesh = *it;
+			FbxMesh* pTargetMesh = *it;
 			if (pTargetMesh && pTargetMesh == pFBXNode->GetMesh())
 			{
 				MeshIndex = Loop;
@@ -585,9 +624,9 @@ namespace fbx
 
 		Node->SetSkinIndex(SkinIndex);
 
-		fbxsdk::FbxDouble3 fbxTranslation = pFBXNode->LclTranslation.Get();
-		fbxsdk::FbxDouble3 fbxRotation = pFBXNode->LclRotation.Get();
-		fbxsdk::FbxDouble3 fbxScale = pFBXNode->LclScaling.Get();
+		FbxDouble3 fbxTranslation = pFBXNode->LclTranslation.Get();
+		FbxDouble3 fbxRotation = pFBXNode->LclRotation.Get();
+		FbxDouble3 fbxScale = pFBXNode->LclScaling.Get();
 
 		glm::vec3 Pos = glm::vec3(static_cast<float>(fbxTranslation[0]), static_cast<float>(fbxTranslation[1]), static_cast<float>(fbxTranslation[2]));
 		glm::quat Rotation = 
@@ -609,6 +648,142 @@ namespace fbx
 		for (int i = 0; i < pFBXNode->GetChildCount(); i++)
 		{
 			if (!CreateNode(pFBXNode->GetChild(i), pFbxMeshList, pFbxNodeList, NodeList, MeshList, MaterialList)) return false;
+		}
+
+		return true;
+	}
+
+	// Helper Function //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	template<class T>
+	bool CFBXImporter::ReadGeometryElement(std::vector<float>& AttributeData, int Dimention, T* pFbxElement, int CtrlPointIndex, int VertexCounter)
+	{
+		// inCtrlPointIndex : コントロール ポイントのインデックス
+		// inVertexCounter  : 処理している現在の頂点のインデックス
+
+		// どこからバッファを受け取るのか
+		switch (pFbxElement->GetMappingMode())
+		{
+		case FbxGeometryElement::eByControlPoint:
+		{
+			// eByControlPoint : 制御点のインデックスによって制御点の法線を指定
+
+			// どのような形式でバッファを参照するのか
+			switch (pFbxElement->GetReferenceMode())
+			{
+			case FbxGeometryElement::eDirect:
+			{
+				// FbxGeometryElement::eDirect は、制御点のインデックスまたは面頂点のインデックスを直接使用してElementを参照できることを意味する
+				for (int i = 0; i < Dimention; i++)
+				{
+					AttributeData.push_back(static_cast<float>(pFbxElement->GetDirectArray().GetAt(CtrlPointIndex).mData[i]));
+				}
+			}
+			break;
+
+			case FbxGeometryElement::eIndexToDirect:
+			{
+				// FbxGeometryElement::eIndexToDirect は、制御点のインデックスまたは面頂点のインデックスを使用すると、必要なElementを指すインデックスのみが得られるため、
+				// 実際のElementを見つけるにはこのインデックスを使用する必要があることを意味
+				for (int i = 0; i < Dimention; i++)
+				{
+					int Index = pFbxElement->GetIndexArray().GetAt(CtrlPointIndex);
+					AttributeData.push_back(static_cast<float>(pFbxElement->GetDirectArray().GetAt(Index).mData[i]));
+				}
+			}
+			break;
+
+			default:
+				return false;
+			}
+		}
+		break;
+
+		case FbxGeometryElement::eByPolygonVertex:
+		{
+			// eByPolygonVertex : 頂点のインデックスによって面上の頂点のElementを指定
+
+			// どのような形式でバッファを参照するのか
+			switch (pFbxElement->GetReferenceMode())
+			{
+			case FbxGeometryElement::eDirect:
+			{
+				// FbxGeometryElement::eDirect は、制御点のインデックスまたは面頂点のインデックスを直接使用してElementを参照できることを意味する
+				for (int i = 0; i < Dimention; i++)
+				{
+					AttributeData.push_back(static_cast<float>(pFbxElement->GetDirectArray().GetAt(VertexCounter).mData[i]));
+				}
+			}
+			break;
+
+			case FbxGeometryElement::eIndexToDirect:
+			{
+				// FbxGeometryElement::eIndexToDirect は、制御点のインデックスまたは面頂点のインデックスを使用すると、必要なElementを指すインデックスのみが得られるため、
+				// 実際のElementを見つけるにはこのインデックスを使用する必要があることを意味
+				for (int i = 0; i < Dimention; i++)
+				{
+					int Index = pFbxElement->GetIndexArray().GetAt(VertexCounter);
+					AttributeData.push_back(static_cast<float>(pFbxElement->GetDirectArray().GetAt(Index).mData[i]));
+				}
+			}
+			break;
+
+			default:
+				return false;
+			}
+		}
+		break;
+
+		default:
+			return false;
+		}
+
+		return true;
+	}
+
+	bool CFBXImporter::RecalculateTangent(std::vector<float>& TangentData, const std::vector<float>& PosotionData, const std::vector<float>& TexcoordData, const std::vector<unsigned short>& Indices)
+	{
+		for (int i = 0; i < Indices.size(); i += 3)
+		{
+			// 頂点情報を取得
+			unsigned short Index0 = Indices[i + 0], Index1 = Indices[i + 1], Index2 = Indices[i + 2];
+
+			glm::vec3 Pos0 = glm::vec3(PosotionData[Index0 * 3 + 0], PosotionData[Index0 * 3 + 1], PosotionData[Index0 * 3 + 2]);
+			glm::vec3 Pos1 = glm::vec3(PosotionData[Index1 * 3 + 0], PosotionData[Index1 * 3 + 1], PosotionData[Index1 * 3 + 2]);
+			glm::vec3 Pos2 = glm::vec3(PosotionData[Index2 * 3 + 0], PosotionData[Index2 * 3 + 1], PosotionData[Index2 * 3 + 2]);
+
+			glm::vec2 Texcoord0 = glm::vec2(TexcoordData[Index0 * 2 + 0], TexcoordData[Index0 * 2 + 1]);
+			glm::vec2 Texcoord1 = glm::vec2(TexcoordData[Index1 * 2 + 0], TexcoordData[Index1 * 2 + 1]);
+			glm::vec2 Texcoord2 = glm::vec2(TexcoordData[Index2 * 2 + 0], TexcoordData[Index2 * 2 + 1]);
+
+			// 計算に使用するデータの下準備
+			glm::vec3 E1 = Pos0 - Pos1;
+			glm::vec3 E2 = Pos2 - Pos1;
+			glm::vec2 dUV1 = Texcoord0 - Texcoord1;
+			glm::vec2 dUV2 = Texcoord2 - Texcoord1;
+
+			float f = 1.0f / (dUV1.x * dUV2.y - dUV2.x * dUV1.y);
+
+			glm::vec4 Tangent = glm::vec4(0.0f);
+			glm::vec4 BioTangent = glm::vec4(0.0f);
+
+			// 接線と複接線を計算
+			Tangent.x = f * (dUV2.y * E1.x - dUV1.y * E2.x);
+			Tangent.y = f * (dUV2.y * E1.y - dUV1.y * E2.y);
+			Tangent.z = f * (dUV2.y * E1.z - dUV1.y * E2.z);
+
+			BioTangent.x = f * (-dUV2.x * E1.x + dUV1.x * E2.x);
+			BioTangent.y = f * (-dUV2.x * E1.y + dUV1.x * E2.y);
+			BioTangent.z = f * (-dUV2.x * E1.z + dUV1.x * E2.z);
+
+			// データを書き込む
+			TangentData[Index0 * 4 + 0] = Tangent.x; TangentData[Index0 * 4 + 1] = Tangent.y; TangentData[Index0 * 4 + 2] = Tangent.z; TangentData[Index0 * 4 + 3] = Tangent.w;
+			TangentData[Index1 * 4 + 0] = Tangent.x; TangentData[Index1 * 4 + 1] = Tangent.y; TangentData[Index1 * 4 + 2] = Tangent.z; TangentData[Index1 * 4 + 3] = Tangent.w;
+			TangentData[Index2 * 4 + 0] = Tangent.x; TangentData[Index2 * 4 + 1] = Tangent.y; TangentData[Index2 * 4 + 2] = Tangent.z; TangentData[Index2 * 4 + 3] = Tangent.w;
+
+			// BioTangentはShaderで計算する
+			/*BioTangentData[Index0 * 4 + 0] = BioTangent.x; BioTangentData[Index0 * 4 + 1] = BioTangent.y; BioTangentData[Index0 * 4 + 2] = BioTangent.z; BioTangentData[Index0 * 4 + 3] = BioTangent.w;
+			BioTangentData[Index1 * 4 + 0] = BioTangent.x; BioTangentData[Index1 * 4 + 1] = BioTangent.y; BioTangentData[Index1 * 4 + 2] = BioTangent.z; BioTangentData[Index1 * 4 + 3] = BioTangent.w;
+			BioTangentData[Index2 * 4 + 0] = BioTangent.x; BioTangentData[Index2 * 4 + 1] = BioTangent.y; BioTangentData[Index2 * 4 + 2] = BioTangent.z; BioTangentData[Index2 * 4 + 3] = BioTangent.w;*/
 		}
 
 		return true;
