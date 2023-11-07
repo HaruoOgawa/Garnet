@@ -68,7 +68,7 @@ namespace fbx
 		Importer->Import(Scene);
 
 		// FBXの解析開始
-		if (!Analyse(pGraphicsAPI, Scene, IsUseObject, Object, createInfo, TextureSet, DepthVertex, DepthFragment)) return false;
+		if (!Analyse(pGraphicsAPI, Scene, IsUseObject, Object, AnimationClipList, createInfo, TextureSet, DepthVertex, DepthFragment)) return false;
 
 		// FBX解析を終了
 		Manager->Destroy();
@@ -77,41 +77,69 @@ namespace fbx
 	}
 
 	bool CFBXImporter::Analyse(api::IGraphicsAPI* pGraphicsAPI, FbxScene* Scene, bool IsUseObject, std::shared_ptr<object::C3DObject>& Object,
+		std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList,
 		const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, const std::shared_ptr<graphics::CTextureSet>& TextureSet,
 		const std::shared_ptr<file::CFile>& DepthVertex, const std::shared_ptr<file::CFile>& DepthFragment)
 	{
-		// 描画情報の取得
-		std::vector<std::shared_ptr<graphics::CTexture>> TextureList;
-		std::vector<std::shared_ptr<graphics::CMaterial>> MaterialList;
-		std::vector<std::shared_ptr<graphics::CMesh>> MeshList;
-		std::vector<std::shared_ptr<animation::CSkin>> AnimationSkinList;
-
-		std::vector<FbxMesh*> pFbxMeshList;
-		
-		if (IsUseObject)
-		{
-			FbxNode* RootNode = Scene->GetRootNode();
-			if (RootNode)
-			{
-				if (!Analyse(pGraphicsAPI, pFbxMeshList, createInfo, RootNode, TextureList, MaterialList, MeshList)) return false;
-			}
-		}
-
 		// ノード
 		std::vector<std::shared_ptr<object::CNode>> NodeList;
 		std::vector<std::vector<int>> RootNodeIndexList;
+		std::vector<FbxNode*> pFbxNodeList;
 
-		// 重複を除く
-		std::unique(pFbxMeshList.begin(), pFbxMeshList.end());
-
-		if (!CreateNodeList(Scene, pFbxMeshList, NodeList, MeshList, MaterialList, RootNodeIndexList)) return false;
+		if (!CreateNodeList(Scene, pFbxNodeList, NodeList, RootNodeIndexList)) return false;
 
 		// アニメーション
-		std::vector<std::shared_ptr<animation::CAnimationClip>> AnimationClipList;
+		//if (!CreateAnimation(model, AnimationClipList, NodeList)) return false;
 
-		// オブジェクトを生成
 		if (IsUseObject)
 		{
+			FbxNode* RootNode = Scene->GetRootNode();
+
+			std::shared_ptr<animation::CSkin> Skin = std::make_shared<animation::CSkin>();
+
+			std::vector<std::shared_ptr<graphics::CTexture>> TextureList;
+			std::vector<std::shared_ptr<graphics::CMaterial>> MaterialList;
+			std::vector<std::shared_ptr<graphics::CMesh>> MeshList;
+
+			if (RootNode)
+			{
+				// Skin
+				if (!AnalyseAnimationSkin(RootNode, Skin, NodeList)) return false;
+
+				// SkinのInverseBindMatrixを作成
+				if (!MakeInverseBindMatrix(Skin)) return false;
+
+				// 描画情報の取得
+				std::vector<FbxMesh*> pFbxMeshList;
+				if (!AnalyseDrawInfo(pGraphicsAPI, pFbxMeshList, createInfo, RootNode, TextureList, MaterialList, MeshList, Skin)) return false;
+
+				// マテリアルを持っていないのならダミーを渡す
+				if (MaterialList.size() <= 0)
+				{
+					if (!CreateDummyMaterial(pGraphicsAPI, RootNode, MaterialList, createInfo, MeshList)) return false;
+				}
+
+				// 重複を除く
+				for (;;)
+				{
+					auto result = std::unique(pFbxMeshList.begin(), pFbxMeshList.end());
+
+					if (result != pFbxMeshList.end())
+					{
+						pFbxMeshList.erase(result);
+					}
+					else
+					{
+						break;
+					}
+				}
+
+				pFbxMeshList.shrink_to_fit();
+
+				// Nodeと各要素をIndexで繋ぐ
+				if (!ConnectNodeTo(NodeList, pFbxNodeList, pFbxMeshList, MeshList, MaterialList, Skin)) return false;
+			}
+
 			// オブジェクトにリソースを登録
 			for (const auto& Material : MaterialList)
 			{
@@ -128,10 +156,7 @@ namespace fbx
 				Object->AddNode(Node);
 			}
 
-			for (const auto& Skin : AnimationSkinList)
-			{
-				Object->AddAnimationSkin(Skin);
-			}
+			Object->AddAnimationSkin(Skin);
 
 			for (const auto& Clip : AnimationClipList)
 			{
@@ -147,29 +172,26 @@ namespace fbx
 		return true;
 	}
 
-	bool CFBXImporter::Analyse(api::IGraphicsAPI* pGraphicsAPI, std::vector<FbxMesh*>& pFbxMeshList, const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo,
+	bool CFBXImporter::AnalyseDrawInfo(api::IGraphicsAPI* pGraphicsAPI, std::vector<FbxMesh*>& pFbxMeshList, const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo,
 		FbxNode* pFBXNode, std::vector<std::shared_ptr<graphics::CTexture>>& TextureList,
-		std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList, std::vector<std::shared_ptr<graphics::CMesh>>& MeshList)
+		std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList, std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, const std::shared_ptr<animation::CSkin>& Skin)
 	{
-		// テクスチャ
-
-		// マテリアル
-
-		// メッシュ
-		if (!CreateMesh(pFBXNode, pFbxMeshList, MeshList)) return false;
-
-		// マテリアルを持っていないのならダミーを渡す
-		if (MaterialList.size() <= 0)
+		// 知りたいのは描画情報なのでここではeMeshのみ見る
+		if (pFBXNode->GetNodeAttribute() && pFBXNode->GetNodeAttribute()->GetAttributeType() && pFBXNode->GetNodeAttribute()->GetAttributeType() == FbxNodeAttribute::eMesh)
 		{
-			if (!CreateDummyMaterial(pGraphicsAPI, pFBXNode, MaterialList, createInfo, MeshList)) return false;
-		}
+			// テクスチャ
 
-		// スキン
+			// マテリアル
+
+			// メッシュ
+			if (!CreateMesh(pFBXNode, pFbxMeshList, MeshList, Skin)) return false;
+		}
+		
 
 		// 子要素のNodeを調べる
 		for (int i = 0; i < pFBXNode->GetChildCount(); i++)
 		{
-			if (!Analyse(pGraphicsAPI, pFbxMeshList, createInfo, pFBXNode->GetChild(i), TextureList, MaterialList, MeshList)) return false;
+			if (!AnalyseDrawInfo(pGraphicsAPI, pFbxMeshList, createInfo, pFBXNode->GetChild(i), TextureList, MaterialList, MeshList, Skin)) return false;
 		}
 
 		return true;
@@ -241,11 +263,8 @@ namespace fbx
 		{
 			auto SSBO = graphics::CMaterialCreateInfo::CreateShaderStorageBuffer({ graphics::SBindingLayout("SkinMatrixBuffer", 1, false) }, graphics::EBufferUpdateType::UPDATE_TYPE_CPU);
 
-			int SkinMatCount = 0;
-			//for (const auto& glTFSkin : model.skins) { SkinMatCount += static_cast<int>(glTFSkin.joints.size()); }
-
-			if (SkinMatCount <= 0) SkinMatCount = 1;
-
+			// FBXではひとまずSkinはあっても１つでどちらにせよ1つはダミーを作らないとShaderエラーとなってしまうので定数として１にしておく
+			const int SkinMatCount = 1;
 			std::vector<glm::mat4> SkinMatrixList;
 			SkinMatrixList.resize(SkinMatCount, glm::mat4(1.0f));
 
@@ -269,17 +288,69 @@ namespace fbx
 		return true;
 	}
 
-	bool CFBXImporter::CreateMesh(FbxNode* pFBXNode, std::vector<FbxMesh*>& pFbxMeshList, std::vector<std::shared_ptr<graphics::CMesh>>& MeshList)
+	bool CFBXImporter::CreateMesh(FbxNode* pFBXNode, std::vector<FbxMesh*>& pFbxMeshList, std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, const std::shared_ptr<animation::CSkin>& Skin)
 	{
 		FbxMesh* pFbxMesh = pFBXNode->GetMesh();
 		
 		if (pFbxMesh)
 		{
+			// MeshListに登録
 			pFbxMeshList.push_back(pFbxMesh);
 
+			// スキンの詳細を読む(この中でJoint・Weight・InverseBindMatrixを取得する)
+			// スキンの構築自体はCreateSkin(Skeleton)で行っている
+
+			//
 			std::shared_ptr<graphics::CMesh> Mesh = std::make_shared<graphics::CMesh>();
 
 			{
+				// 頂点データに使用するJoint・Weightsを取得する
+				// https://www.gamedev.net/tutorials/_/technical/graphics-programming-and-theory/how-to-work-with-fbx-sdk-r3582/
+				std::vector<std::vector<std::pair<unsigned int, double>>> JointWeightPairPerCtrlPoint(pFbxMesh->GetControlPointsCount());
+
+				{
+					// Deformerは頂点を変形させるのに使用するデータリストという意味
+					unsigned int numOfDeformers = pFbxMesh->GetDeformerCount();
+
+					// 処理中のMeshが関連しているSkinのJointデータを取得する
+					for (unsigned int deformerIndex = 0; deformerIndex < numOfDeformers; deformerIndex++)
+					{
+						// Skin Mesh Animationに使用するDeformerをFbxSkinにキャストして取得
+						FbxSkin* pFbxSkin = reinterpret_cast<FbxSkin*>(pFbxMesh->GetDeformer(deformerIndex, FbxDeformer::eSkin));
+
+						if (!pFbxSkin) continue;
+
+						// たしかFBXでのClusterはJointの意味だった気がする
+						// ってことはDeformerはSkinかな？
+						unsigned int numOfCluster = pFbxSkin->GetClusterCount();
+
+						for (unsigned int clusterIndex = 0; clusterIndex < numOfCluster; clusterIndex++)
+						{
+							fbxsdk::FbxCluster* pFbxCluster = pFbxSkin->GetCluster(clusterIndex);
+							if (!pFbxCluster) continue;
+
+							std::string jointName = pFbxCluster->GetLink()->GetName();
+							
+							unsigned int JointIndex = FindJointIndexUsingName(Skin, jointName);
+							double* Weights = pFbxCluster->GetControlPointWeights(); // このJointを参照している頂点のWeightリスト
+							int* VertArrayUsingJoint = pFbxCluster->GetControlPointIndices(); // このJointを参照している頂点のインデックスリスト
+
+							// コントロールポイント == 頂点
+							// このJointを参照している頂点の数
+							unsigned int VertNumUsingJoint = pFbxCluster->GetControlPointIndicesCount();
+
+							for (unsigned int i = 0; i < VertNumUsingJoint; i++)
+							{
+								int ControlPointIndex = VertArrayUsingJoint[i];
+
+								std::pair<unsigned int, double> JointWeightPair = { JointIndex , Weights[i] };
+
+								JointWeightPairPerCtrlPoint[ControlPointIndex].push_back(JointWeightPair);
+							}
+						}
+					}
+				}
+
 				std::shared_ptr<renderer::CRendererCreateInfo> createInfo = std::make_shared<renderer::CRendererCreateInfo>();
 
 				// 頂点バッファ本体
@@ -349,9 +420,12 @@ namespace fbx
 						std::vector<float> AttributeNormalData;
 						std::vector<float> AttributeUVData;
 						std::vector<float> AttributeTangentData;
+						std::vector<float> AttributeJointData;
+						std::vector<float> AttributeWeightsData;
 
 						int VertexCounter = 0;
 
+						// コントロールポイント == 頂点
 						for (int CtrlPointIndex = 0; CtrlPointIndex < pFbxMesh->GetControlPointsCount(); CtrlPointIndex++)
 						{
 							// 頂点座標
@@ -380,6 +454,33 @@ namespace fbx
 							{
 								FbxGeometryElementTangent* pFbxTangent = pFbxMesh->GetElementTangent(0);
 								if (!ReadGeometryElement<fbxsdk::FbxGeometryElementTangent>(AttributeTangentData, 4, pFbxTangent, CtrlPointIndex, VertexCounter)) return false;
+							}
+
+							
+							const auto& JointWeightPairList = JointWeightPairPerCtrlPoint[CtrlPointIndex];
+
+							for (int jw = 0; jw < 4; jw++)
+							{
+								if (jw < JointWeightPairList.size())
+								{
+									const auto& JointWeightPair = JointWeightPairList[jw];
+
+									// Joint
+									AttributeJointData.push_back(static_cast<float>(JointWeightPair.first));
+
+									// Weights
+									AttributeWeightsData.push_back(static_cast<float>(JointWeightPair.second));
+								}
+								else
+								{
+									// 数が4つより少ない時は0で埋める
+
+									// Joint
+									AttributeJointData.push_back(0);
+
+									// Weights
+									AttributeWeightsData.push_back(0.0f);
+								}
 							}
 
 							// 更新
@@ -442,21 +543,34 @@ namespace fbx
 							// 接線の再計算が必要
 							NeedRecalculateTangent = true;
 						}
-					}
 
-					// For Skin Mesh Animation
-					{
-						FbxSkin* pSkinDeformer = (FbxSkin*)pFbxMesh->GetDeformer(0, FbxDeformer::eSkin);
-
-						if (pSkinDeformer)
+						// Joint
+						if (!AttributeJointData.empty())
 						{
+							// データを登録
+							ReservedVertexDataList.insert({ "JOINTS_0" ,AttributeJointData });
 
+							// コンポーネントタイプ(データ型)を取得
+							ReservedDataTypeList.insert({ "JOINTS_0", renderer::EDataType::TYPE_UNSIGNED_SHORT });
 
-							// Joint
+							// ByteStrideを取得
+							ReservedByteStrideList.insert({ "JOINTS_0", 0 });
+						}
 
-							// Weights
+						// Weights
+						if (!AttributeWeightsData.empty())
+						{
+							// データを登録
+							ReservedVertexDataList.insert({ "WEIGHTS_0" ,AttributeWeightsData });
+
+							// コンポーネントタイプ(データ型)を取得
+							ReservedDataTypeList.insert({ "WEIGHTS_0", renderer::EDataType::TYPE_FLOAT });
+
+							// ByteStrideを取得
+							ReservedByteStrideList.insert({ "WEIGHTS_0", 0 });
 						}
 					}
+
 					// アトリビュートがまだ登録されていなければここで0埋めの値を渡す
 					for (const auto& AttribName : NeedAttribNameList)
 					{
@@ -547,18 +661,15 @@ namespace fbx
 		return true;
 	}
 
-	bool CFBXImporter::CreateNodeList(FbxScene* Scene, const std::vector<FbxMesh*>& pFbxMeshList, std::vector<std::shared_ptr<object::CNode>>& NodeList, const std::vector<std::shared_ptr<graphics::CMesh>>& MeshList,
-		const std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList, std::vector<std::vector<int>>& RootNodeIndexList)
+	bool CFBXImporter::CreateNodeList(FbxScene* Scene, std::vector<FbxNode*>& pFbxNodeList, std::vector<std::shared_ptr<object::CNode>>& NodeList, std::vector<std::vector<int>>& RootNodeIndexList)
 	{
-		std::vector<FbxNode*> pFbxNodeList;
-
 		// ルートノードを取得
 		FbxNode* RootNode = Scene->GetRootNode();
 		if (RootNode)
 		{
 			RootNodeIndexList.push_back(std::vector<int>(0));
 
-			if (!CreateNode(RootNode, pFbxMeshList, pFbxNodeList, NodeList, MeshList, MaterialList)) return false;
+			if (!CreateNode(RootNode, pFbxNodeList, NodeList)) return false;
 		}
 
 		// 子要素を登録する
@@ -595,34 +706,14 @@ namespace fbx
 		return true;
 	}
 
-	bool CFBXImporter::CreateNode(FbxNode* pFBXNode, const std::vector<FbxMesh*>& pFbxMeshList, std::vector<FbxNode*>& pFbxNodeList,
-		std::vector<std::shared_ptr<object::CNode>>& NodeList, const std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, const std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList)
+	bool CFBXImporter::CreateNode(FbxNode* pFBXNode, std::vector<FbxNode*>& pFbxNodeList, std::vector<std::shared_ptr<object::CNode>>& NodeList)
 	{
-		// Listの要素のポインターとpFBXNodeが持ってる要素のポインターを比較してリスト内の順番をIndexとして渡す
-		int MeshIndex = -1;
-		int Loop = 0;
-		for (auto it = pFbxMeshList.begin(); it != pFbxMeshList.end(); it++)
-		{
-			FbxMesh* pTargetMesh = *it;
-			if (pTargetMesh && pTargetMesh == pFBXNode->GetMesh())
-			{
-				MeshIndex = Loop;
-
-				break;
-			}
-
-			Loop++;
-		}
-
-		int SkinIndex = -1; // ひとまず無し
-
 		// Nodeを作成
-		std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(MeshIndex, MeshList, MaterialList);
+		// MeshとSkinは後ほどセットする
+		std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(-1, std::vector<std::shared_ptr<graphics::CMesh>>(), std::vector<std::shared_ptr<graphics::CMaterial>>());
 
 		std::string NodeName = std::string(pFBXNode->GetName());
 		Node->SetName(NodeName);
-
-		Node->SetSkinIndex(SkinIndex);
 
 		FbxDouble3 fbxTranslation = pFBXNode->LclTranslation.Get();
 		FbxDouble3 fbxRotation = pFBXNode->LclRotation.Get();
@@ -647,7 +738,77 @@ namespace fbx
 		// 子要素のNodeを調べる
 		for (int i = 0; i < pFBXNode->GetChildCount(); i++)
 		{
-			if (!CreateNode(pFBXNode->GetChild(i), pFbxMeshList, pFbxNodeList, NodeList, MeshList, MaterialList)) return false;
+			if (!CreateNode(pFBXNode->GetChild(i), pFbxNodeList, NodeList)) return false;
+		}
+
+		return true;
+	}
+
+	bool CFBXImporter::ConnectNodeTo(std::vector<std::shared_ptr<object::CNode>>& NodeList, const std::vector<FbxNode*>& pFbxNodeList, const std::vector<FbxMesh*>& pFbxMeshList,
+		const std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, const std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList, const std::shared_ptr<animation::CSkin>& Skin)
+	{
+		// NodeListとpFbxNodeListは同じ順番で同じ数
+		if (NodeList.size() != pFbxNodeList.size()) return false;
+
+		for (int i = 0; i < NodeList.size(); i++)
+		{
+			auto& Node = NodeList[i];
+			FbxNode* pFBXNode = pFbxNodeList[i];
+
+			// Listの要素のポインターとpFBXNodeが持ってる要素のポインターを比較してリスト内の順番をIndexとして渡す
+			int MeshIndex = -1;
+			int Loop = 0;
+			for (auto it = pFbxMeshList.begin(); it != pFbxMeshList.end(); it++)
+			{
+				FbxMesh* pTargetMesh = *it;
+				if (pTargetMesh && pTargetMesh == pFBXNode->GetMesh())
+				{
+					MeshIndex = Loop;
+
+					break;
+				}
+
+				Loop++;
+			}
+
+			// MeshIndexを設定
+			Node->SetMeshIndexWithDynamicOffset(MeshIndex, MeshList, MaterialList);
+
+			// JointがあるならSkinが1つあるとする
+			int SkinIndex = (Skin->GetJointList().size() > 0)? 0 : - 1;
+			Node->SetSkinIndex(SkinIndex);
+		}
+
+		return true;
+	}
+
+	bool CFBXImporter::AnalyseAnimationSkin(FbxNode* pFBXNode, std::shared_ptr<animation::CSkin>& Skin, const std::vector<std::shared_ptr<object::CNode>>& NodeList)
+	{
+		if (pFBXNode->GetNodeAttribute() && pFBXNode->GetNodeAttribute()->GetAttributeType() && pFBXNode->GetNodeAttribute()->GetAttributeType() == FbxNodeAttribute::eSkeleton)
+		{
+			auto JointNode = GetJointNode(pFBXNode->GetName(), NodeList);
+
+			std::shared_ptr<animation::CJoint> Joint = std::make_shared<animation::CJoint>(JointNode);
+
+			Skin->AddJoint(Joint);
+		}
+
+		// 子要素のNodeを調べる
+		for (int i = 0; i < pFBXNode->GetChildCount(); i++)
+		{
+			if (!AnalyseAnimationSkin(pFBXNode->GetChild(i), Skin, NodeList)) return false;
+		}
+
+		return true;
+	}
+
+	bool CFBXImporter::MakeInverseBindMatrix(std::shared_ptr<animation::CSkin>& Skin)
+	{
+		for (auto& Joint : Skin->GetJointList())
+		{
+			glm::mat4 InverseBindMatrix = glm::inverse(Joint->GetJointNode()->GetLocalMatrix());
+
+			Joint->GetJointNode()->SetInverseBindMatrix(InverseBindMatrix);
 		}
 
 		return true;
@@ -787,6 +948,42 @@ namespace fbx
 		}
 
 		return true;
+	}
+
+	std::shared_ptr<object::CNode> CFBXImporter::GetJointNode(const std::string& JointName, const std::vector<std::shared_ptr<object::CNode>>& NodeList)
+	{
+		std::shared_ptr<object::CNode> JointNode = nullptr;
+
+		for (const auto& Node : NodeList)
+		{
+			if (Node->GetName() == JointName)
+			{
+				JointNode = Node;
+
+				break;
+			}
+		}
+
+		return JointNode;
+	}
+
+	unsigned int CFBXImporter::FindJointIndexUsingName(const std::shared_ptr<animation::CSkin>& Skin, const std::string& JointName)
+	{
+		unsigned int JointIndex = 0;
+
+		for (int j = 0; j < Skin->GetJointList().size(); j++)
+		{
+			const auto& Joint = Skin->GetJointList()[j];
+
+			if (Joint->GetJointNode()->GetName() == JointName)
+			{
+				JointIndex = j;
+
+				break;
+			}
+		}
+
+		return JointIndex;
 	}
 }
 #endif // USE_FBX

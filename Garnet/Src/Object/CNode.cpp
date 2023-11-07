@@ -14,6 +14,29 @@ namespace object
 		m_InverseBindMatrix(glm::mat4(1.0f)),
 		m_ParentNode(nullptr)
 	{
+		SetMeshIndexWithDynamicOffset(MeshIndex, MeshList, MaterialList);
+	}
+
+	CNode::~CNode()
+	{
+	}
+
+	void CNode::SetName(const std::string& Name)
+	{
+		m_Name = Name;
+	}
+
+	const std::string& CNode::GetName() const
+	{
+		return m_Name;
+	}
+
+	void CNode::SetMeshIndexWithDynamicOffset(int MeshIndex, const std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, const std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList)
+	{
+		// MeshIndex‚ðÝ’è
+		m_MeshIndex = MeshIndex;
+
+		// DynamicOffset‚ðŒvŽZ
 		if (MeshIndex >= 0 && MeshIndex < MeshList.size())
 		{
 			const auto& Mesh = MeshList[MeshIndex];
@@ -37,20 +60,6 @@ namespace object
 				}
 			}
 		}
-	}
-
-	CNode::~CNode()
-	{
-	}
-
-	void CNode::SetName(const std::string& Name)
-	{
-		m_Name = Name;
-	}
-
-	const std::string& CNode::GetName() const
-	{
-		return m_Name;
 	}
 
 	int CNode::GetMeshIndex() const

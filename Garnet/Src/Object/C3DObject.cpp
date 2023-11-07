@@ -219,6 +219,16 @@ namespace object
 			DepthMaterial->SetUniformValue("useSkinMeshAnimation", &glm::ivec1((IsPlayingAnimation() ? 1 : 0))[0]);
 		}
 
+		// SSBOのサイズをDynamicOffset毎に変更できるかわからないのでひとまず全部まとめて渡す
+		std::vector<glm::mat4> SkinMatrixList;
+		if (IsPlayingAnimation())
+		{
+			for (const auto& Skin : m_AnimationSkinList)
+			{
+				if (!Skin->CalcSkinMatrixList(SkinMatrixList, m_ObjectTransform->GetModelMatrix())) return false;
+			}
+		}
+
 		// 描画
 		for (const auto& Node : m_NodeList)
 		{
@@ -232,15 +242,15 @@ namespace object
 			if (DynamicOffsetList.size() != Mesh->GetPrimitiveList().size()) continue; // PrimitiveListとNodeのDynamicOffsetNumListは一致している
 
 			// SkinMatrixを計算
-			std::vector<glm::mat4> SkinMatrixList;
 			int SkinIndex = Node->GetSkinIndex();
 
+			/*std::vector<glm::mat4> SkinMatrixList;
 			if (SkinIndex >= 0 && SkinIndex < m_AnimationSkinList.size() && IsPlayingAnimation())
 			{
 				const auto& Skin = m_AnimationSkinList[SkinIndex];
 				
 				if (!Skin->CalcSkinMatrixList(SkinMatrixList, m_ObjectTransform->GetModelMatrix())) return false;
-			}
+			}*/
 
 			for (int PrimitiveIndex = 0; PrimitiveIndex < Mesh->GetPrimitiveList().size(); PrimitiveIndex++)
 			{
