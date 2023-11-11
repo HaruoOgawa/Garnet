@@ -48,6 +48,16 @@ using namespace fbxsdk;
 
 namespace fbx
 {
+	struct SFBXJoint
+	{
+		FbxNode* pFbxNode;
+		FbxNode* pParentFBXNode;
+
+		SFBXJoint(FbxNode* node, FbxNode* parent):pFbxNode(node), pParentFBXNode(parent)
+		{
+		}
+	};
+
 	class CFBXImporter
 	{
 	private:
@@ -61,7 +71,7 @@ namespace fbx
 			const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, const std::shared_ptr<graphics::CTextureSet>& TextureSet,
 			const std::shared_ptr<file::CFile>& DepthVertex, const std::shared_ptr<file::CFile>& DepthFragment);
 
-		static bool AnalyseDrawInfo(api::IGraphicsAPI* pGraphicsAPI, std::vector<FbxMesh*>& pFbxMeshList, const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo,
+		static bool CreateDrawInfo(api::IGraphicsAPI* pGraphicsAPI, std::vector<FbxMesh*>& pFbxMeshList, const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo,
 			FbxNode* pFBXNode, std::vector<std::shared_ptr<graphics::CTexture>>& TextureList,
 			std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList, std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, const std::shared_ptr<animation::CSkin>& Skin);
 
@@ -77,9 +87,10 @@ namespace fbx
 		static bool ConnectNodeTo(std::vector<std::shared_ptr<object::CNode>>& NodeList, const std::vector<FbxNode*>& pFbxNodeList, const std::vector<FbxMesh*>& pFbxMeshList,
 			const std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, const std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList, const std::shared_ptr<animation::CSkin>& Skin);
 
-		static bool AnalyseAnimationSkin(FbxNode* pFBXNode, std::shared_ptr<animation::CSkin>& Skin, const std::vector<std::shared_ptr<object::CNode>>& NodeList);
-
-		static bool MakeInverseBindMatrix(std::shared_ptr<animation::CSkin>& Skin);
+		static bool CreateAnimationSkin(FbxNode* pFBXNode, FbxNode* pParentFBXNode, std::shared_ptr<animation::CSkin>& Skin, std::vector<std::shared_ptr<SFBXJoint>>& FbxJointList, const std::vector<std::shared_ptr<object::CNode>>& NodeList);
+		static bool CreateAnimation(FbxScene* Scene, std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList, const std::vector<std::shared_ptr<object::CNode>>& NodeList, 
+			const std::shared_ptr<animation::CSkin>& Skin, const std::vector<std::shared_ptr<SFBXJoint>>& FbxJointList);
+		//static bool CreateAnimationSampler(const tinygltf::Model& model, const tinygltf::AnimationSampler& glTFSampler, std::shared_ptr<animation::CAnimationSampler>& AnimationSampler);
 
 		// Helper Function //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		template<class T>

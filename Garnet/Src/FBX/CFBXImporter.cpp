@@ -10,6 +10,8 @@
 #include "../Animation/CSkin.h"
 #include "../Animation/CJoint.h"
 
+using namespace fbxsdk;
+
 namespace fbx
 {
 	bool CFBXImporter::ImportFBX(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& Data, std::shared_ptr<object::C3DObject>& Object,
@@ -81,6 +83,8 @@ namespace fbx
 		const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, const std::shared_ptr<graphics::CTextureSet>& TextureSet,
 		const std::shared_ptr<file::CFile>& DepthVertex, const std::shared_ptr<file::CFile>& DepthFragment)
 	{
+		FbxNode* RootNode = Scene->GetRootNode();
+
 		// ノード
 		std::vector<std::shared_ptr<object::CNode>> NodeList;
 		std::vector<std::vector<int>> RootNodeIndexList;
@@ -88,30 +92,28 @@ namespace fbx
 
 		if (!CreateNodeList(Scene, pFbxNodeList, NodeList, RootNodeIndexList)) return false;
 
+		// Skin
+		std::shared_ptr<animation::CSkin> Skin = std::make_shared<animation::CSkin>();
+		std::vector<std::shared_ptr<SFBXJoint>> FbxJointList;
+		if (RootNode)
+		{
+			if (!CreateAnimationSkin(RootNode, nullptr, Skin, FbxJointList, NodeList)) return false;
+		}
+
 		// アニメーション
-		//if (!CreateAnimation(model, AnimationClipList, NodeList)) return false;
+		if (!CreateAnimation(Scene, AnimationClipList, NodeList, Skin, FbxJointList)) return false;
 
 		if (IsUseObject)
 		{
-			FbxNode* RootNode = Scene->GetRootNode();
-
-			std::shared_ptr<animation::CSkin> Skin = std::make_shared<animation::CSkin>();
-
 			std::vector<std::shared_ptr<graphics::CTexture>> TextureList;
 			std::vector<std::shared_ptr<graphics::CMaterial>> MaterialList;
 			std::vector<std::shared_ptr<graphics::CMesh>> MeshList;
 
 			if (RootNode)
 			{
-				// Skin
-				if (!AnalyseAnimationSkin(RootNode, Skin, NodeList)) return false;
-
-				// SkinのInverseBindMatrixを作成
-				if (!MakeInverseBindMatrix(Skin)) return false;
-
 				// 描画情報の取得
 				std::vector<FbxMesh*> pFbxMeshList;
-				if (!AnalyseDrawInfo(pGraphicsAPI, pFbxMeshList, createInfo, RootNode, TextureList, MaterialList, MeshList, Skin)) return false;
+				if (!CreateDrawInfo(pGraphicsAPI, pFbxMeshList, createInfo, RootNode, TextureList, MaterialList, MeshList, Skin)) return false;
 
 				// マテリアルを持っていないのならダミーを渡す
 				if (MaterialList.size() <= 0)
@@ -172,7 +174,7 @@ namespace fbx
 		return true;
 	}
 
-	bool CFBXImporter::AnalyseDrawInfo(api::IGraphicsAPI* pGraphicsAPI, std::vector<FbxMesh*>& pFbxMeshList, const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo,
+	bool CFBXImporter::CreateDrawInfo(api::IGraphicsAPI* pGraphicsAPI, std::vector<FbxMesh*>& pFbxMeshList, const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo,
 		FbxNode* pFBXNode, std::vector<std::shared_ptr<graphics::CTexture>>& TextureList,
 		std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList, std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, const std::shared_ptr<animation::CSkin>& Skin)
 	{
@@ -191,7 +193,7 @@ namespace fbx
 		// 子要素のNodeを調べる
 		for (int i = 0; i < pFBXNode->GetChildCount(); i++)
 		{
-			if (!AnalyseDrawInfo(pGraphicsAPI, pFbxMeshList, createInfo, pFBXNode->GetChild(i), TextureList, MaterialList, MeshList, Skin)) return false;
+			if (!CreateDrawInfo(pGraphicsAPI, pFbxMeshList, createInfo, pFBXNode->GetChild(i), TextureList, MaterialList, MeshList, Skin)) return false;
 		}
 
 		return true;
@@ -326,7 +328,7 @@ namespace fbx
 
 						for (unsigned int clusterIndex = 0; clusterIndex < numOfCluster; clusterIndex++)
 						{
-							fbxsdk::FbxCluster* pFbxCluster = pFbxSkin->GetCluster(clusterIndex);
+							FbxCluster* pFbxCluster = pFbxSkin->GetCluster(clusterIndex);
 							if (!pFbxCluster) continue;
 
 							std::string jointName = pFbxCluster->GetLink()->GetName();
@@ -439,21 +441,21 @@ namespace fbx
 							if (pFbxMesh->GetElementNormalCount() > 0)
 							{
 								FbxGeometryElementNormal* pFbxNormal = pFbxMesh->GetElementNormal(0);
-								if (!ReadGeometryElement<fbxsdk::FbxGeometryElementNormal>(AttributeNormalData, 3, pFbxNormal, CtrlPointIndex, VertexCounter)) return false;
+								if (!ReadGeometryElement<FbxGeometryElementNormal>(AttributeNormalData, 3, pFbxNormal, CtrlPointIndex, VertexCounter)) return false;
 							}
 
 							// UV
 							if (pFbxMesh->GetElementUVCount() > 0)
 							{
 								FbxGeometryElementUV* pFbxUV = pFbxMesh->GetElementUV(0);
-								if (!ReadGeometryElement<fbxsdk::FbxGeometryElementUV>(AttributeUVData, 2, pFbxUV, CtrlPointIndex, VertexCounter)) return false;
+								if (!ReadGeometryElement<FbxGeometryElementUV>(AttributeUVData, 2, pFbxUV, CtrlPointIndex, VertexCounter)) return false;
 							}
 
 							// 接線
 							if (pFbxMesh->GetElementTangentCount() > 0)
 							{
 								FbxGeometryElementTangent* pFbxTangent = pFbxMesh->GetElementTangent(0);
-								if (!ReadGeometryElement<fbxsdk::FbxGeometryElementTangent>(AttributeTangentData, 4, pFbxTangent, CtrlPointIndex, VertexCounter)) return false;
+								if (!ReadGeometryElement<FbxGeometryElementTangent>(AttributeTangentData, 4, pFbxTangent, CtrlPointIndex, VertexCounter)) return false;
 							}
 
 							
@@ -782,7 +784,7 @@ namespace fbx
 		return true;
 	}
 
-	bool CFBXImporter::AnalyseAnimationSkin(FbxNode* pFBXNode, std::shared_ptr<animation::CSkin>& Skin, const std::vector<std::shared_ptr<object::CNode>>& NodeList)
+	bool CFBXImporter::CreateAnimationSkin(FbxNode* pFBXNode, FbxNode* pParentFBXNode, std::shared_ptr<animation::CSkin>& Skin, std::vector<std::shared_ptr<SFBXJoint>>& FbxJointList, const std::vector<std::shared_ptr<object::CNode>>& NodeList)
 	{
 		if (pFBXNode->GetNodeAttribute() && pFBXNode->GetNodeAttribute()->GetAttributeType() && pFBXNode->GetNodeAttribute()->GetAttributeType() == FbxNodeAttribute::eSkeleton)
 		{
@@ -790,25 +792,140 @@ namespace fbx
 
 			std::shared_ptr<animation::CJoint> Joint = std::make_shared<animation::CJoint>(JointNode);
 
+			// SkinのInverseBindMatrixを作成
+			glm::mat4 InverseBindMatrix = glm::inverse(Joint->GetJointNode()->GetLocalMatrix());
+			Joint->GetJointNode()->SetInverseBindMatrix(InverseBindMatrix);
+
 			Skin->AddJoint(Joint);
+
+			// FbxJointListを登録
+			FbxJointList.push_back(std::make_shared<SFBXJoint>(pFBXNode, pParentFBXNode));
 		}
 
 		// 子要素のNodeを調べる
 		for (int i = 0; i < pFBXNode->GetChildCount(); i++)
 		{
-			if (!AnalyseAnimationSkin(pFBXNode->GetChild(i), Skin, NodeList)) return false;
+			if (!CreateAnimationSkin(pFBXNode->GetChild(i), pFBXNode, Skin, FbxJointList, NodeList)) return false;
 		}
 
 		return true;
 	}
 
-	bool CFBXImporter::MakeInverseBindMatrix(std::shared_ptr<animation::CSkin>& Skin)
+	bool CFBXImporter::CreateAnimation(FbxScene* Scene, std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList, const std::vector<std::shared_ptr<object::CNode>>& NodeList,
+		const std::shared_ptr<animation::CSkin>& Skin, const std::vector<std::shared_ptr<SFBXJoint>>& FbxJointList)
 	{
-		for (auto& Joint : Skin->GetJointList())
-		{
-			glm::mat4 InverseBindMatrix = glm::inverse(Joint->GetJointNode()->GetLocalMatrix());
 
-			Joint->GetJointNode()->SetInverseBindMatrix(InverseBindMatrix);
+		for (int i = 0; i < Scene->GetSrcObjectCount<FbxAnimStack>(); i++)
+		{
+			std::shared_ptr<animation::CAnimationClip> AnimationClip = std::make_shared<animation::CAnimationClip>();
+
+			// AnimStackはアニメーションクリップのようなもの
+			FbxAnimStack* pAnimStack = Scene->GetSrcObject<FbxAnimStack>(i);
+			FbxString animStackName = pAnimStack->GetName();
+
+			// samplers
+			{
+				std::vector<std::shared_ptr<animation::CAnimationSampler>> AnimationSamplerList;
+
+				FbxTakeInfo* takeInfo = Scene->GetTakeInfo(animStackName);
+				fbxsdk::FbxTime startTime = takeInfo->mLocalTimeSpan.GetStart(); // キーフレームの最初の時間
+				fbxsdk::FbxTime endTime = takeInfo->mLocalTimeSpan.GetStop();    // キーフレームの終わりの時間
+
+				
+				for (const auto& pFbxJoint : FbxJointList) 
+				{ 
+					// ひとまず全部LINEARにしておく
+					std::shared_ptr<animation::CAnimationSampler> Sampler = std::make_shared<animation::CAnimationSampler>(animation::EInterpolationType::LINEAR);
+
+					// 始めの時間と終わりの時間を指定する
+					Sampler->SetStartTime((static_cast<float>(startTime.GetMilliSeconds()) / 1000.0f));
+					Sampler->SetEndTime((static_cast<float>(endTime.GetMilliSeconds()) / 1000.0f));
+
+					AnimationSamplerList.push_back(Sampler);
+				}
+
+				// 30 FPS換算のフレーム数を取得し、EndとStartとの差分から実際に使用されるフレーム数を計算
+				FbxLongLong AnimationLength = endTime.GetFrameCount(fbxsdk::FbxTime::eFrames30) - startTime.GetFrameCount(fbxsdk::FbxTime::eFrames30);
+
+				// FBXにはchannelといった概念はなく、Translation・Rotation・Scaleを全てまとめてModelMatrixで計算している
+				// なのでChannelTypeにFBX-SDK限定の値としてMODELMATRIXを作成することで対応する
+				for (FbxLongLong FrameIndex = startTime.GetFrameCount(FbxTime::eFrames30); FrameIndex < endTime.GetFrameCount(fbxsdk::FbxTime::eFrames30); FrameIndex++)
+				{
+					FbxTime currentTime;
+					currentTime.SetFrame(FrameIndex, FbxTime::eFrames30);
+
+					// pFbxJointListとCSkinからアニメーション情報を取得する
+					for (int JointIndex = 0; JointIndex < FbxJointList.size(); JointIndex++)
+					{
+						const auto& pFbxJoint = FbxJointList[JointIndex];
+
+						glm::mat4 ParentMatrix = glm::mat4(1.0f);
+						glm::mat4 CurrentMatrix = glm::mat4(1.0f);
+
+						if (pFbxJoint->pParentFBXNode)
+						{
+							FbxAMatrix mat = pFbxJoint->pParentFBXNode->EvaluateGlobalTransform(currentTime);
+							std::memcpy(&ParentMatrix[0][0], reinterpret_cast<const float*>(&mat.mData[0]), sizeof(glm::mat4));
+						}
+
+						if (pFbxJoint->pFbxNode)
+						{
+							FbxAMatrix mat = pFbxJoint->pFbxNode->EvaluateGlobalTransform(currentTime);
+							std::memcpy(&CurrentMatrix[0][0], reinterpret_cast<const float*>(&mat.mData[0]), sizeof(glm::mat4));
+						}
+						else
+						{
+							return false;
+						}
+
+						// Input
+						float InputData = static_cast<float>(currentTime.GetMilliSeconds()) / 1000.0f;
+						
+						// Output
+						glm::mat4 OutputMat = glm::inverse(ParentMatrix) * CurrentMatrix;
+						std::vector<float> OutputData(16);
+						std::memcpy(&OutputData[0], &OutputMat[0][0], sizeof(glm::mat4));
+
+						// Create KeyFrame
+						// FBX SDKでは全てKEYFRAME_TYPE_MATRIX
+						std::shared_ptr<animation::CKeyFrame> KeyFrame = std::make_shared<animation::CKeyFrame>(animation::EKeyFrameType::KEYFRAME_TYPE_MATRIX);
+
+						KeyFrame->SetInput(InputData);
+						KeyFrame->SetOutput(OutputData);
+
+						// Add KeyFrame To Sampler
+						AnimationSamplerList[JointIndex]->AddKeyFrame(KeyFrame);
+					}
+				}
+
+				// SamplerListを渡す
+				for (const auto& Sampler : AnimationSamplerList)
+				{
+					AnimationClip->AddAnimationSampler(Sampler);
+				}
+			}
+
+			// channels
+			for (int JointIndex = 0; JointIndex < FbxJointList.size(); JointIndex++)
+			{
+				const auto& pFbxJoint = FbxJointList[JointIndex];
+
+				// FBXにはchannelといった概念はなく、Translation・Rotation・Scaleを全てまとめてModelMatrixで計算している
+				// なのでChannelTypeにFBX-SDK限定の値としてMODELMATRIXを作成することで対応する
+				animation::EAnimationTarget AnimationTarget = animation::EAnimationTarget::MODELMATRIX;
+
+				// Jointの順番と参照するSamplerの順番は同じである
+				int TargetSamplerIndex = JointIndex;
+
+				// アニメーションのターゲットを取得する
+				const auto& TargetNode = GetJointNode(pFbxJoint->pFbxNode->GetName(), NodeList);
+
+				std::shared_ptr<animation::CAnimationChannel> AnimationChannel = std::make_shared<animation::CAnimationChannel>(TargetSamplerIndex, AnimationTarget, TargetNode);
+
+				AnimationClip->AddAnimationChannel(AnimationChannel);
+			}
+
+			AnimationClipList.push_back(AnimationClip);
 		}
 
 		return true;

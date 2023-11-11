@@ -17,6 +17,7 @@ namespace animation
 		ROTATION,
 		SCALE,
 		WEIGHTS,
+		MODELMATRIX, // FBX-SDKŒÀ’è
 	};
 
 	class CAnimationChannel
@@ -29,6 +30,7 @@ namespace animation
 		bool UpdateRotation(const std::vector<float>& Value);
 		bool UpdateScale(const std::vector<float>& Value);
 		bool UpdateWeights(const std::vector<float>& Value);
+		bool UpdateModelMatrix(const std::vector<float>& Value);
 	public:
 		CAnimationChannel(int SamplerIndex, EAnimationTarget AnimationTarget, const std::shared_ptr<object::CNode>& TargetNode);
 		virtual ~CAnimationChannel();

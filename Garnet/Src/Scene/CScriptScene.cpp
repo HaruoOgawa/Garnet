@@ -200,7 +200,7 @@ namespace scene
 			TextureSet->AddIBLTexture(IBL_Diffuse_Tex, IBL_Specular_Tex, IBL_GGXLUT_Tex);
 
 			// 再生するアニメーションクリップを指定する
-			//m_FbxObject->SetPlayClipIndex(0);
+			m_FbxObject->SetPlayClipIndex(0);
 
 			m_FbxObject->SetPos(glm::vec3(0.0f, 0.0f, 0.0f));
 			m_FbxObject->SetScale(glm::vec3(0.01f));

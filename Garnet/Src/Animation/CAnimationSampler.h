@@ -40,6 +40,10 @@ namespace animation
 		virtual ~CAnimationSampler();
 
 		bool CreateKeyFrame(EKeyFrameType Type, const std::vector<float>& inputList, const std::vector<float>& outputList);
+		void AddKeyFrame(const std::shared_ptr<animation::CKeyFrame>& KeyFrame);
+
+		void SetStartTime(float StartTime);
+		void SetEndTime(float EndTime);
 
 		bool GetCurrentFrame(float CurrentTime, std::vector<float>& Value, bool IsRot);
 	};

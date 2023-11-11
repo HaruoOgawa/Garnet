@@ -40,6 +40,9 @@ namespace animation
 		case EAnimationTarget::WEIGHTS:
 			if (!UpdateWeights(Value)) return false;
 			break;
+		case EAnimationTarget::MODELMATRIX:
+			if (!UpdateModelMatrix(Value)) return false;
+			break;
 		default:
 			break;
 		}
@@ -79,6 +82,16 @@ namespace animation
 
 	bool CAnimationChannel::UpdateWeights(const std::vector<float>& Value)
 	{
+		// –¢ŽÀ‘•
+
+		return true;
+	}
+
+	bool CAnimationChannel::UpdateModelMatrix(const std::vector<float>& Value)
+	{
+		// –¢ŽÀ‘•
+		if (Value.size() != 16) return true;
+
 		return true;
 	}
 }
