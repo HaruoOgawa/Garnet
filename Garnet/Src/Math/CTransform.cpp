@@ -55,6 +55,11 @@ namespace math
 		m_Scale = Scale;
 	}
 
+	void CTransform::CastModelMatrixToTransform(const glm::mat4& ModelMatrix)
+	{
+		math::CTransform::CastModelMatrixToTransform(ModelMatrix, m_Pos, m_Rot, m_Scale);
+	}
+
 	void CTransform::CastModelMatrixToTransform(const glm::mat4& ModelMatrix, glm::vec3& Translation, glm::quat& Rotation, glm::vec3& Scale)
 	{
 		// ìnÇ≥ÇÍÇΩModelMatrixÇ©ÇÁPosÅERotateÅEScaleÇïúå≥Ç∑ÇÈ
@@ -101,5 +106,12 @@ namespace math
 		// https://www.evl.uic.edu/ralph/508S98/coordinates.html
 		Rotation.x *= -1.0f;
 		Rotation.y *= -1.0f;
+	}
+
+	void CTransform::CastCentiMeter2Meter(glm::vec3& Val)
+	{
+		Val.x *= 0.01f;
+		Val.y *= 0.01f;
+		Val.z *= 0.01f;
 	}
 }

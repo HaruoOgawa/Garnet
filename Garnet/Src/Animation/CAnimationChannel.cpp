@@ -89,8 +89,12 @@ namespace animation
 
 	bool CAnimationChannel::UpdateModelMatrix(const std::vector<float>& Value)
 	{
-		// –¢ŽÀ‘•
 		if (Value.size() != 16) return true;
+
+		glm::mat4 ModelMat = glm::mat4(1.0f);
+		std::memcpy(&ModelMat[0][0], &Value[0], sizeof(Value[0]) * Value.size());
+
+		m_TargetNode->GetLocalTransform()->CastModelMatrixToTransform(ModelMat);
 
 		return true;
 	}

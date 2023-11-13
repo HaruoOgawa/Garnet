@@ -118,7 +118,7 @@ namespace fbx
 				// マテリアルを持っていないのならダミーを渡す
 				if (MaterialList.size() <= 0)
 				{
-					if (!CreateDummyMaterial(pGraphicsAPI, RootNode, MaterialList, createInfo, MeshList)) return false;
+					if (!CreateDummyMaterial(pGraphicsAPI, RootNode, MaterialList, createInfo, MeshList, Skin)) return false;
 				}
 
 				// 重複を除く
@@ -200,7 +200,7 @@ namespace fbx
 	}
 
 	bool CFBXImporter::CreateDummyMaterial(api::IGraphicsAPI* pGraphicsAPI, FbxNode* pFBXNode, std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList,
-		const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, std::vector<std::shared_ptr<graphics::CMesh>>& MeshList)
+		const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, const std::shared_ptr<animation::CSkin>& Skin)
 	{
 		// マテリアルにシェーダーを設定
 		std::shared_ptr<graphics::CMaterial> material = pGraphicsAPI->CreateMaterial(createInfo);
@@ -265,8 +265,10 @@ namespace fbx
 		{
 			auto SSBO = graphics::CMaterialCreateInfo::CreateShaderStorageBuffer({ graphics::SBindingLayout("SkinMatrixBuffer", 1, false) }, graphics::EBufferUpdateType::UPDATE_TYPE_CPU);
 
-			// FBXではひとまずSkinはあっても１つでどちらにせよ1つはダミーを作らないとShaderエラーとなってしまうので定数として１にしておく
-			const int SkinMatCount = 1;
+			// SkinMatは存在するJointの数だけ用意する必要がある
+			int SkinMatCount = 1;
+			if (Skin) SkinMatCount = static_cast<int>(Skin->GetJointList().size());
+			
 			std::vector<glm::mat4> SkinMatrixList;
 			SkinMatrixList.resize(SkinMatCount, glm::mat4(1.0f));
 
@@ -298,11 +300,7 @@ namespace fbx
 		{
 			// MeshListに登録
 			pFbxMeshList.push_back(pFbxMesh);
-
-			// スキンの詳細を読む(この中でJoint・Weight・InverseBindMatrixを取得する)
-			// スキンの構築自体はCreateSkin(Skeleton)で行っている
-
-			//
+			
 			std::shared_ptr<graphics::CMesh> Mesh = std::make_shared<graphics::CMesh>();
 
 			{
@@ -311,10 +309,10 @@ namespace fbx
 				std::vector<std::vector<std::pair<unsigned int, double>>> JointWeightPairPerCtrlPoint(pFbxMesh->GetControlPointsCount());
 
 				{
-					// Deformerは頂点を変形させるのに使用するデータリストという意味
-					unsigned int numOfDeformers = pFbxMesh->GetDeformerCount();
-
 					// 処理中のMeshが関連しているSkinのJointデータを取得する
+					unsigned int numOfDeformers = pFbxMesh->GetDeformerCount();
+					
+					// Deformer(Skin)を取得する
 					for (unsigned int deformerIndex = 0; deformerIndex < numOfDeformers; deformerIndex++)
 					{
 						// Skin Mesh Animationに使用するDeformerをFbxSkinにキャストして取得
@@ -322,8 +320,7 @@ namespace fbx
 
 						if (!pFbxSkin) continue;
 
-						// たしかFBXでのClusterはJointの意味だった気がする
-						// ってことはDeformerはSkinかな？
+						// Cluster(Joint)を取得
 						unsigned int numOfCluster = pFbxSkin->GetClusterCount();
 
 						for (unsigned int clusterIndex = 0; clusterIndex < numOfCluster; clusterIndex++)
@@ -410,9 +407,6 @@ namespace fbx
 					}
 				}
 
-				// 頂点数
-				int VertexCount = pFbxMesh->GetPolygonVertexCount();
-
 				// 頂点バッファを読む
 				// 参照: https://www.gamedev.net/tutorials/_/technical/graphics-programming-and-theory/how-to-work-with-fbx-sdk-r3582/
 				{
@@ -422,6 +416,7 @@ namespace fbx
 						std::vector<float> AttributeNormalData;
 						std::vector<float> AttributeUVData;
 						std::vector<float> AttributeTangentData;
+						std::vector<unsigned short> ushort_AttributeJointData;
 						std::vector<float> AttributeJointData;
 						std::vector<float> AttributeWeightsData;
 
@@ -432,10 +427,15 @@ namespace fbx
 						{
 							// 頂点座標
 							FbxVector4 pFbxPosition = pFbxMesh->GetControlPointAt(CtrlPointIndex);
+							glm::vec3 Pos = glm::vec3(static_cast<float>(pFbxPosition[0]), static_cast<float>(pFbxPosition[1]), static_cast<float>(pFbxPosition[2]));
 
-							AttributePosData.push_back(static_cast<float>(pFbxPosition[0]));
-							AttributePosData.push_back(static_cast<float>(pFbxPosition[1]));
-							AttributePosData.push_back(static_cast<float>(pFbxPosition[2]));
+							// FbxはTranslation・Posが100倍になっているので調整する
+							// たぶん単位がcmなので0.01倍することで計算に一般的に使用するmに直す
+							math::CTransform::CastCentiMeter2Meter(Pos);
+
+							AttributePosData.push_back(Pos.x);
+							AttributePosData.push_back(Pos.y);
+							AttributePosData.push_back(Pos.z);
 
 							// 法線
 							if (pFbxMesh->GetElementNormalCount() > 0)
@@ -468,7 +468,7 @@ namespace fbx
 									const auto& JointWeightPair = JointWeightPairList[jw];
 
 									// Joint
-									AttributeJointData.push_back(static_cast<float>(JointWeightPair.first));
+									ushort_AttributeJointData.push_back(static_cast<unsigned short>(JointWeightPair.first));
 
 									// Weights
 									AttributeWeightsData.push_back(static_cast<float>(JointWeightPair.second));
@@ -478,7 +478,7 @@ namespace fbx
 									// 数が4つより少ない時は0で埋める
 
 									// Joint
-									AttributeJointData.push_back(0);
+									ushort_AttributeJointData.push_back(0);
 
 									// Weights
 									AttributeWeightsData.push_back(0.0f);
@@ -547,8 +547,16 @@ namespace fbx
 						}
 
 						// Joint
-						if (!AttributeJointData.empty())
+
+						if (!ushort_AttributeJointData.empty())
 						{
+							size_t size = ushort_AttributeJointData.size() / (sizeof(float) / sizeof(unsigned short));
+							AttributeJointData.resize(size);
+							std::memcpy(&AttributeJointData[0], &ushort_AttributeJointData[0], sizeof(unsigned short) * ushort_AttributeJointData.size());
+							
+							//AttributeJointData.resize(ushort_AttributeJointData.size());
+							//std::transform(ushort_AttributeJointData.begin(), ushort_AttributeJointData.end(), AttributeJointData.begin(), [](unsigned short val) { return static_cast<float>(val); });
+
 							// データを登録
 							ReservedVertexDataList.insert({ "JOINTS_0" ,AttributeJointData });
 
@@ -597,6 +605,9 @@ namespace fbx
 						// アトリビュートがまだ登録されていなければここで0埋めの値を渡す
 						if (ReservedVertexDataList.find(AttribName) == ReservedVertexDataList.end())
 						{
+							// 頂点数
+							int VertexCount = pFbxMesh->GetControlPointsCount();
+
 							ReservedVertexDataList.insert({ AttribName, std::vector<float>(VertexCount * Dimention, 0.0f) });
 
 							// 接線もしく複接線の再計算が必要
@@ -669,7 +680,7 @@ namespace fbx
 		FbxNode* RootNode = Scene->GetRootNode();
 		if (RootNode)
 		{
-			RootNodeIndexList.push_back(std::vector<int>(0));
+			RootNodeIndexList.push_back(std::vector<int>(1, 0));
 
 			if (!CreateNode(RootNode, pFbxNodeList, NodeList)) return false;
 		}
@@ -727,6 +738,10 @@ namespace fbx
 			glm::angleAxis(static_cast<float>(fbxRotation[1]), glm::vec3(0.0f, 1.0f, 0.0f)) *
 			glm::angleAxis(static_cast<float>(fbxRotation[0]), glm::vec3(1.0f, 0.0f, 0.0f));
 		glm::vec3 Scale = glm::vec3(static_cast<float>(fbxScale[0]), static_cast<float>(fbxScale[1]), static_cast<float>(fbxScale[2]));
+
+		// FbxはTranslation・Posが100倍になっているので調整する
+		// たぶん単位がcmなので0.01倍することで計算に一般的に使用するmに直す
+		math::CTransform::CastCentiMeter2Meter(Pos);
 
 		Node->SetPos(Pos);
 		Node->SetRot(Rotation);
@@ -849,7 +864,7 @@ namespace fbx
 
 				// FBXにはchannelといった概念はなく、Translation・Rotation・Scaleを全てまとめてModelMatrixで計算している
 				// なのでChannelTypeにFBX-SDK限定の値としてMODELMATRIXを作成することで対応する
-				for (FbxLongLong FrameIndex = startTime.GetFrameCount(FbxTime::eFrames30); FrameIndex < endTime.GetFrameCount(fbxsdk::FbxTime::eFrames30); FrameIndex++)
+				for (FbxLongLong FrameIndex = startTime.GetFrameCount(FbxTime::eFrames30); FrameIndex <= endTime.GetFrameCount(fbxsdk::FbxTime::eFrames30); FrameIndex++)
 				{
 					FbxTime currentTime;
 					currentTime.SetFrame(FrameIndex, FbxTime::eFrames30);
@@ -865,13 +880,25 @@ namespace fbx
 						if (pFbxJoint->pParentFBXNode)
 						{
 							FbxAMatrix mat = pFbxJoint->pParentFBXNode->EvaluateGlobalTransform(currentTime);
-							std::memcpy(&ParentMatrix[0][0], reinterpret_cast<const float*>(&mat.mData[0]), sizeof(glm::mat4));
+							for (int row = 0; row < 4; row++)
+							{
+								for (int col = 0; col < 4; col++)
+								{
+									ParentMatrix[row][col] = static_cast<float>(mat[row][col]);
+								}
+							}
 						}
 
 						if (pFbxJoint->pFbxNode)
 						{
 							FbxAMatrix mat = pFbxJoint->pFbxNode->EvaluateGlobalTransform(currentTime);
-							std::memcpy(&CurrentMatrix[0][0], reinterpret_cast<const float*>(&mat.mData[0]), sizeof(glm::mat4));
+							for (int row = 0; row < 4; row++)
+							{
+								for (int col = 0; col < 4; col++)
+								{
+									CurrentMatrix[row][col] = static_cast<float>(mat[row][col]);
+								}
+							}
 						}
 						else
 						{

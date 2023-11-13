@@ -26,9 +26,13 @@ namespace math
 		const glm::vec3& GetScale() const;
 		void SetScale(const glm::vec3& Scale);
 
+		void CastModelMatrixToTransform(const glm::mat4& ModelMatrix);
+		
 		static void CastModelMatrixToTransform(const glm::mat4& ModelMatrix, glm::vec3& Translation, glm::quat& Rotation, glm::vec3& Scale);
 
 		static void ToYUpRightHandedCoordinate(glm::vec3& Translation);
 		static void ToYUpRightHandedCoordinate(glm::quat& Rotation);
+
+		static void CastCentiMeter2Meter(glm::vec3& Val);
 	};
 }

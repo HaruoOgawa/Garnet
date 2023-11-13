@@ -732,6 +732,7 @@ namespace gltf
 		{
 			auto SSBO = graphics::CMaterialCreateInfo::CreateShaderStorageBuffer({ graphics::SBindingLayout("SkinMatrixBuffer", 1, false) }, graphics::EBufferUpdateType::UPDATE_TYPE_CPU);
 
+			// SkinMat‚Í‘¶İ‚·‚éJoint‚Ì”‚¾‚¯—pˆÓ‚·‚é•K—v‚ª‚ ‚é
 			int SkinMatCount = 0;
 			for (const auto& glTFSkin : model.skins) { SkinMatCount += static_cast<int>(glTFSkin.joints.size()); }
 
