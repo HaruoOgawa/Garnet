@@ -577,6 +577,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Src\Animation\EAnimationTarget.h" />
     <ClInclude Include="Src\Object\C3DObjectImporter.h" />
     <ClInclude Include="Src\FBX\CFBXImporter.h" />
     <ClInclude Include="Src\Animation\CJoint.h" />

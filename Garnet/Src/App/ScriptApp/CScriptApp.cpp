@@ -33,6 +33,8 @@ namespace app
 		m_BlurEffect(nullptr)
 	{
 		m_MainCamera->SetPos(glm::vec3(0.0f, 1.0f, -7.0f));
+		//m_MainCamera->SetCenter(glm::vec3(0.0f, 50.0f, 349.0f));
+		//m_MainCamera->SetPos(glm::vec3(0.0f, 50.0f, 350.0f));
 		m_DrawInfo->GetLightCamera()->SetPos(glm::vec3(-2.358f, 15.6f, -0.59f));
 		m_DrawInfo->GetLightProjection()->SetNear(2.0f);
 		m_DrawInfo->GetLightProjection()->SetFar(100.0f);

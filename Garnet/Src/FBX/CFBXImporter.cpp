@@ -69,6 +69,11 @@ namespace fbx
 		// Importを実行
 		Importer->Import(Scene);
 
+		int UpDir;
+		Scene->GetGlobalSettings().GetAxisSystem().GetUpVector(UpDir);
+
+		int Coordinate = Scene->GetGlobalSettings().GetAxisSystem().GetCoorSystem();
+
 		// FBXの解析開始
 		if (!Analyse(pGraphicsAPI, Scene, IsUseObject, Object, AnimationClipList, createInfo, TextureSet, DepthVertex, DepthFragment)) return false;
 
@@ -728,16 +733,44 @@ namespace fbx
 		std::string NodeName = std::string(pFBXNode->GetName());
 		Node->SetName(NodeName);
 
-		FbxDouble3 fbxTranslation = pFBXNode->LclTranslation.Get();
-		FbxDouble3 fbxRotation = pFBXNode->LclRotation.Get();
-		FbxDouble3 fbxScale = pFBXNode->LclScaling.Get();
+		glm::vec3 Pos = glm::vec3(0.0f);
+		glm::quat Rotation = glm::quat(glm::vec4(1.0f, 0.0f, 0.0f, 0.0f));
+		glm::vec3 Scale = glm::vec3(1.0f);
 
-		glm::vec3 Pos = glm::vec3(static_cast<float>(fbxTranslation[0]), static_cast<float>(fbxTranslation[1]), static_cast<float>(fbxTranslation[2]));
-		glm::quat Rotation = 
-			glm::angleAxis(static_cast<float>(fbxRotation[2]), glm::vec3(0.0f, 0.0f, 1.0f)) *
-			glm::angleAxis(static_cast<float>(fbxRotation[1]), glm::vec3(0.0f, 1.0f, 0.0f)) *
-			glm::angleAxis(static_cast<float>(fbxRotation[0]), glm::vec3(1.0f, 0.0f, 0.0f));
-		glm::vec3 Scale = glm::vec3(static_cast<float>(fbxScale[0]), static_cast<float>(fbxScale[1]), static_cast<float>(fbxScale[2]));
+		if (pFBXNode->GetNodeAttribute() && pFBXNode->GetNodeAttribute()->GetAttributeType() && pFBXNode->GetNodeAttribute()->GetAttributeType() == FbxNodeAttribute::eSkeleton)
+		{
+			glm::mat4 LocalMatrix = glm::mat4(1.0f);
+
+			FbxAMatrix fbxMat = pFBXNode->EvaluateLocalTransform();
+			for (int row = 0; row < 4; row++)
+			{
+				for (int col = 0; col < 4; col++)
+				{
+					LocalMatrix[row][col] = static_cast<float>(fbxMat[row][col]);
+				}
+			}
+
+			math::CTransform::CastModelMatrixToTransform(LocalMatrix, Pos, Rotation, Scale);
+
+			// なぜかScaleに1.0よりも大きい値が返ってきてそれで端に行くほど大きくずれてしまうのでひとまず強制的に１にする
+			Scale = glm::vec3(1.0f, 1.0f, 1.0f);
+		}
+		else
+		{
+			FbxDouble3 fbxTranslation = pFBXNode->LclTranslation.Get();
+			FbxDouble3 fbxRotation = pFBXNode->LclRotation.Get();
+			FbxDouble3 fbxScale = pFBXNode->LclScaling.Get();
+
+			Pos = glm::vec3(static_cast<float>(fbxTranslation[0]), static_cast<float>(fbxTranslation[1]), static_cast<float>(fbxTranslation[2]));
+			Rotation =
+				glm::angleAxis(static_cast<float>(fbxRotation[2]), glm::vec3(0.0f, 0.0f, 1.0f)) *
+				glm::angleAxis(static_cast<float>(fbxRotation[1]), glm::vec3(0.0f, 1.0f, 0.0f)) *
+				glm::angleAxis(static_cast<float>(fbxRotation[0]), glm::vec3(1.0f, 0.0f, 0.0f));
+			Scale = glm::vec3(static_cast<float>(fbxScale[0]), static_cast<float>(fbxScale[1]), static_cast<float>(fbxScale[2]));
+		}
+
+		// 回転を正規化する
+		Rotation = glm::normalize(Rotation);
 
 		// FbxはTranslation・Posが100倍になっているので調整する
 		// たぶん単位がcmなので0.01倍することで計算に一般的に使用するmに直す
@@ -873,43 +906,24 @@ namespace fbx
 					for (int JointIndex = 0; JointIndex < FbxJointList.size(); JointIndex++)
 					{
 						const auto& pFbxJoint = FbxJointList[JointIndex];
+						if (!pFbxJoint->pFbxNode) return false;
 
-						glm::mat4 ParentMatrix = glm::mat4(1.0f);
 						glm::mat4 CurrentMatrix = glm::mat4(1.0f);
 
-						if (pFbxJoint->pParentFBXNode)
+						FbxAMatrix fbxMat = pFbxJoint->pFbxNode->EvaluateLocalTransform(currentTime);
+						for (int row = 0; row < 4; row++)
 						{
-							FbxAMatrix mat = pFbxJoint->pParentFBXNode->EvaluateGlobalTransform(currentTime);
-							for (int row = 0; row < 4; row++)
+							for (int col = 0; col < 4; col++)
 							{
-								for (int col = 0; col < 4; col++)
-								{
-									ParentMatrix[row][col] = static_cast<float>(mat[row][col]);
-								}
+								CurrentMatrix[row][col] = static_cast<float>(fbxMat[row][col]);
 							}
-						}
-
-						if (pFbxJoint->pFbxNode)
-						{
-							FbxAMatrix mat = pFbxJoint->pFbxNode->EvaluateGlobalTransform(currentTime);
-							for (int row = 0; row < 4; row++)
-							{
-								for (int col = 0; col < 4; col++)
-								{
-									CurrentMatrix[row][col] = static_cast<float>(mat[row][col]);
-								}
-							}
-						}
-						else
-						{
-							return false;
 						}
 
 						// Input
 						float InputData = static_cast<float>(currentTime.GetMilliSeconds()) / 1000.0f;
 						
 						// Output
-						glm::mat4 OutputMat = glm::inverse(ParentMatrix) * CurrentMatrix;
+						glm::mat4 OutputMat = CurrentMatrix;
 						std::vector<float> OutputData(16);
 						std::memcpy(&OutputData[0], &OutputMat[0][0], sizeof(glm::mat4));
 

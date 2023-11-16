@@ -4,22 +4,12 @@
 #include <memory>
 #include <vector>
 #include <glm/gtc/quaternion.hpp>
+#include "EAnimationTarget.h"
 
 namespace object { class CNode; }
 
 namespace animation
 {
-	enum class EAnimationTarget
-	{
-		NONE = -1,
-
-		TRANSLATION,
-		ROTATION,
-		SCALE,
-		WEIGHTS,
-		MODELMATRIX, // FBX-SDKŒÀ’è
-	};
-
 	class CAnimationChannel
 	{
 		const int m_SamplerIndex;

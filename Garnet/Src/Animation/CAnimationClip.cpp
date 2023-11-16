@@ -33,9 +33,7 @@ namespace animation
 			const auto& Sampler = m_SamplerList[SamplerIndex];
 			std::vector<float> Value;
 
-			bool IsRot = (Channel->GetAnimationTarget() == EAnimationTarget::ROTATION);
-
-			if (!Sampler->GetCurrentFrame(m_CurrentTime, Value, IsRot)) return false;
+			if (!Sampler->GetCurrentFrame(m_CurrentTime, Value, Channel->GetAnimationTarget())) return false;
 
 			if (!Channel->Update(Value)) return false;
 		}

@@ -5,6 +5,7 @@
 
 #include "CAnimationSampler.h"
 #include "CAnimationChannel.h"
+#include "EAnimationTarget.h"
 
 namespace animation
 {

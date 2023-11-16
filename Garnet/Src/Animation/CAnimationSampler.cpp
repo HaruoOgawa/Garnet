@@ -107,7 +107,7 @@ namespace animation
 		}
 	}
 
-	bool CAnimationSampler::GetCurrentFrame(float CurrentTime, std::vector<float>& Value, bool IsRot)
+	bool CAnimationSampler::GetCurrentFrame(float CurrentTime, std::vector<float>& Value, EAnimationTarget AnimationTarget)
 	{
 		float CalcCurrentTime = glm::mod(CurrentTime, m_EndTime);
 
@@ -124,19 +124,29 @@ namespace animation
 			if (!DoStepInterpolation(CalcCurrentTime, Value, PrevKeyFrame, NextKeyFrame)) return false;
 			break;
 		case animation::EInterpolationType::LINEAR:
-			if (IsRot)
 			{
-				// 回転のLinearの場合、Slerp( Spherical Linear Interpolation)を使用する必要がある
-				// https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#appendix-c-interpolation
-				if(!DoSphericalLinearInterpolation(CalcCurrentTime, Value, PrevKeyFrame, NextKeyFrame)) return false;
-			}
-			else
-			{
-				if (!DoLinearInterpolation(CalcCurrentTime, Value, PrevKeyFrame, NextKeyFrame)) return false;
+				switch (AnimationTarget)
+				{
+				case animation::EAnimationTarget::ROTATION:
+					// 回転のLinearの場合、Slerp( Spherical Linear Interpolation)を使用する必要がある
+					// https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#appendix-c-interpolation
+					if (!DoSphericalLinearInterpolation(CalcCurrentTime, Value, PrevKeyFrame, NextKeyFrame)) return false;
+					break;
+				case animation::EAnimationTarget::TRANSLATION:
+				case animation::EAnimationTarget::SCALE:
+				case animation::EAnimationTarget::WEIGHTS:
+					if (!DoLinearInterpolation(CalcCurrentTime, Value, PrevKeyFrame, NextKeyFrame)) return false;
+					break;
+				case animation::EAnimationTarget::MODELMATRIX:
+					if (!DoModelMatrixLinearInterpolation(CalcCurrentTime, Value, PrevKeyFrame, NextKeyFrame)) return false;
+					break;
+				default:
+					break;
+				}
 			}
 			break;
 		case animation::EInterpolationType::CUBICSPLINE:
-			if (!DoCubicSplineInterpolation(CalcCurrentTime, Value, IsRot, PrevKeyFrame, NextKeyFrame)) return false;
+			if (!DoCubicSplineInterpolation(CalcCurrentTime, Value, AnimationTarget, PrevKeyFrame, NextKeyFrame)) return false;
 			break;
 		default:
 			break;
@@ -236,7 +246,12 @@ namespace animation
 		return true;
 	}
 
-	bool CAnimationSampler::DoCubicSplineInterpolation(float CurrentTime, std::vector<float>& Value, bool IsRot, const std::shared_ptr<animation::CKeyFrame>& PrevKeyFrame, const std::shared_ptr<animation::CKeyFrame>& NextKeyFrame)
+	bool CAnimationSampler::DoModelMatrixLinearInterpolation(float CurrentTime, std::vector<float>& Value, const std::shared_ptr<animation::CKeyFrame>& PrevKeyFrame, const std::shared_ptr<animation::CKeyFrame>& NextKeyFrame)
+	{
+		return true;
+	}
+
+	bool CAnimationSampler::DoCubicSplineInterpolation(float CurrentTime, std::vector<float>& Value, EAnimationTarget AnimationTarget, const std::shared_ptr<animation::CKeyFrame>& PrevKeyFrame, const std::shared_ptr<animation::CKeyFrame>& NextKeyFrame)
 	{
 		// CubicSpline: 3次スプライン曲線
 
