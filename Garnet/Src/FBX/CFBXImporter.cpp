@@ -97,6 +97,16 @@ namespace fbx
 
 		if (!CreateNodeList(Scene, pFbxNodeList, NodeList, RootNodeIndexList)) return false;
 
+		for (const auto& Node : NodeList)
+		{
+			Object->AddNode(Node);
+		}
+
+		Object->SetRootNodeIndexList(RootNodeIndexList);
+
+		// WorldMatrixを計算
+		Object->CalcWorldMatrix();
+
 		// Skin
 		std::shared_ptr<animation::CSkin> Skin = std::make_shared<animation::CSkin>();
 		std::vector<std::shared_ptr<SFBXJoint>> FbxJointList;
@@ -158,19 +168,12 @@ namespace fbx
 				Object->AddMesh(Mesh);
 			}
 
-			for (const auto& Node : NodeList)
-			{
-				Object->AddNode(Node);
-			}
-
 			Object->AddAnimationSkin(Skin);
 
 			for (const auto& Clip : AnimationClipList)
 			{
 				Object->AddAnimationClip(Clip);
 			}
-
-			Object->SetRootNodeIndexList(RootNodeIndexList);
 
 			// オブジェクトを生成
 			if (!Object->Create(pGraphicsAPI, DepthVertex, DepthFragment, TextureSet)) return false;
@@ -848,7 +851,7 @@ namespace fbx
 			std::shared_ptr<animation::CJoint> Joint = std::make_shared<animation::CJoint>(JointNode);
 
 			// SkinのInverseBindMatrixを作成
-			glm::mat4 InverseBindMatrix = glm::inverse(Joint->GetJointNode()->GetLocalMatrix());
+			glm::mat4 InverseBindMatrix = glm::inverse(Joint->GetJointNode()->GetWorldMatrix());
 			Joint->GetJointNode()->SetInverseBindMatrix(InverseBindMatrix);
 
 			Skin->AddJoint(Joint);

@@ -295,6 +295,23 @@ namespace object
 				DebugSphere->SetPos(JointNode->GetWorldMatrix() * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
 				DebugSphere->SetScale(glm::vec3(0.25f));
 
+				if (JointNode->GetName() == "mixamorig:Hips")
+				{
+					DebugSphere->GetMaterialList()[0]->SetUniformValue("baseColor", &glm::vec4(1.0f, 0.0f, 0.0f, 1.0f)[0]);
+				}
+				else if (JointNode->GetName() == "mixamorig:RightUpLeg" || JointNode->GetName() == "mixamorig:LeftUpLeg" || JointNode->GetName() == "mixamorig:Spine")
+				{
+					DebugSphere->GetMaterialList()[0]->SetUniformValue("baseColor", &glm::vec4(0.0f, 1.0f, 0.0f, 1.0f)[0]);
+				}
+				else if (JointNode->GetName() == "mixamorig:LeftLeg" || JointNode->GetName() == "mixamorig:RightLeg" || JointNode->GetName() == "mixamorig:Spine1")
+				{
+					DebugSphere->GetMaterialList()[0]->SetUniformValue("baseColor", &glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)[0]);
+				}
+				else
+				{
+					DebugSphere->GetMaterialList()[0]->SetUniformValue("baseColor", &glm::vec4(0.0f, 0.0f, 1.0f, 1.0f)[0]);
+				}
+
 				if (!DebugSphere->Draw(IsDepthPass, Camera, Projection, DrawInfo)) return false;
 
 				// Debug—p: Bone‚Ì•`‰æ
