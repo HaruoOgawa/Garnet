@@ -311,7 +311,7 @@ namespace fbx
 			{
 				// 頂点データに使用するJoint・Weightsを取得する
 				// https://www.gamedev.net/tutorials/_/technical/graphics-programming-and-theory/how-to-work-with-fbx-sdk-r3582/
-				std::vector<std::vector<std::pair<unsigned int, double>>> JointWeightPairPerCtrlPoint(pFbxMesh->GetControlPointsCount());
+				std::vector<std::vector<std::pair<unsigned int, float>>> JointWeightPairPerCtrlPoint(pFbxMesh->GetControlPointsCount());
 
 				{
 					// 処理中のMeshが関連しているSkinのJointデータを取得する
@@ -347,7 +347,7 @@ namespace fbx
 							{
 								int ControlPointIndex = VertArrayUsingJoint[i];
 
-								std::pair<unsigned int, double> JointWeightPair = { JointIndex , Weights[i] };
+								std::pair<unsigned int, float> JointWeightPair = { JointIndex , static_cast<float>(Weights[i])};
 
 								JointWeightPairPerCtrlPoint[ControlPointIndex].push_back(JointWeightPair);
 							}
@@ -476,7 +476,7 @@ namespace fbx
 									ushort_AttributeJointData.push_back(static_cast<unsigned short>(JointWeightPair.first));
 
 									// Weights
-									AttributeWeightsData.push_back(static_cast<float>(JointWeightPair.second));
+									AttributeWeightsData.push_back(JointWeightPair.second);
 								}
 								else
 								{
@@ -555,12 +555,19 @@ namespace fbx
 
 						if (!ushort_AttributeJointData.empty())
 						{
-							size_t size = ushort_AttributeJointData.size() / (sizeof(float) / sizeof(unsigned short));
+							/*size_t size = ushort_AttributeJointData.size() / (sizeof(float) / sizeof(unsigned short));
 							AttributeJointData.resize(size);
-							std::memcpy(&AttributeJointData[0], &ushort_AttributeJointData[0], sizeof(unsigned short) * ushort_AttributeJointData.size());
+							std::memcpy(&AttributeJointData[0], &ushort_AttributeJointData[0], sizeof(unsigned short) * ushort_AttributeJointData.size());*/
 							
-							//AttributeJointData.resize(ushort_AttributeJointData.size());
-							//std::transform(ushort_AttributeJointData.begin(), ushort_AttributeJointData.end(), AttributeJointData.begin(), [](unsigned short val) { return static_cast<float>(val); });
+							/*AttributeJointData.resize(ushort_AttributeJointData.size());
+							std::transform(ushort_AttributeJointData.begin(), ushort_AttributeJointData.end(), AttributeJointData.begin(), [](unsigned short val) { return static_cast<float>(val); });*/
+
+							std::vector<unsigned char> BufferData;
+							BufferData.resize(sizeof(unsigned short) * ushort_AttributeJointData.size());
+							std::memcpy(&BufferData[0], &ushort_AttributeJointData[0], sizeof(unsigned short) * ushort_AttributeJointData.size());
+
+							AttributeJointData.resize(BufferData.size() / sizeof(unsigned short));
+							std::memcpy(&AttributeJointData[0], &BufferData[0], BufferData.size());
 
 							// データを登録
 							ReservedVertexDataList.insert({ "JOINTS_0" ,AttributeJointData });
@@ -569,7 +576,7 @@ namespace fbx
 							ReservedDataTypeList.insert({ "JOINTS_0", renderer::EDataType::TYPE_UNSIGNED_SHORT });
 
 							// ByteStrideを取得
-							ReservedByteStrideList.insert({ "JOINTS_0", 0 });
+							ReservedByteStrideList.insert({ "JOINTS_0", 8 });
 						}
 
 						// Weights
