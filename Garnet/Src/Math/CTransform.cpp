@@ -64,35 +64,33 @@ namespace math
 	{
 		// 渡されたModelMatrixからPos・Rotate・Scaleを復元する
 		// https://stackoverflow.com/questions/27655885/get-position-rotation-and-scale-from-matrix-in-opengl
+		// https://www.gamedev.net/forums/topic/657267-extract-position-scaling-and-rotation-from-world-matrix/
+		// https://math.stackexchange.com/questions/237369/given-this-transformation-matrix-how-do-i-decompose-it-into-translation-rotati
 
 		// Pos
 		Translation = glm::vec3(ModelMatrix[3][0], ModelMatrix[3][1], ModelMatrix[3][2]);
 		
-		// Rot
-		glm::mat3 RotScaleMat = glm::mat3(
-			ModelMatrix[0][0], ModelMatrix[0][1], ModelMatrix[0][2],
-			ModelMatrix[1][0], ModelMatrix[1][1], ModelMatrix[1][2],
-			ModelMatrix[2][0], ModelMatrix[2][1], ModelMatrix[2][2]
+		// Scale
+		Scale = glm::vec3(
+			glm::sqrt(glm::length2(glm::vec3(ModelMatrix[0][0], ModelMatrix[0][1], ModelMatrix[0][2]))),
+			glm::sqrt(glm::length2(glm::vec3(ModelMatrix[1][0], ModelMatrix[1][1], ModelMatrix[1][2]))),
+			glm::sqrt(glm::length2(glm::vec3(ModelMatrix[2][0], ModelMatrix[2][1], ModelMatrix[2][2])))
 		);
 
-		// 1よりも大きい時Scaleが存在する
-		float ScalingFactor = glm::sqrt(RotScaleMat[0][0] * RotScaleMat[0][0] + RotScaleMat[1][1] * RotScaleMat[1][1] + RotScaleMat[2][2] * RotScaleMat[2][2]);
-
-		glm::mat3 RotMat = (1.0f / ScalingFactor) * RotScaleMat;
-
-		Rotation = glm::quat_cast(glm::mat4(
-			RotMat[0][0], RotMat[0][1], RotMat[0][2], 0.0f,
-			RotMat[1][0], RotMat[1][1], RotMat[1][2], 0.0f,
-			RotMat[2][0], RotMat[2][1], RotMat[2][2], 0.0f,
+		// Rot
+		// 回転の取得は今後様子を見つついろいろと改善が必要かも
+		glm::mat4 RotMat = glm::mat4(
+			ModelMatrix[0][0], ModelMatrix[0][1], ModelMatrix[0][2], 0.0f,
+			ModelMatrix[1][0], ModelMatrix[1][1], ModelMatrix[1][2], 0.0f,
+			ModelMatrix[2][0], ModelMatrix[2][1], ModelMatrix[2][2], 0.0f,
 			0.0f, 0.0f, 0.0f, 1.0f
-		));
-		
-		// Scale
-		//glm::mat3 ScaleMat = glm::inverse(RotMat) * RotScaleMat;
-		//Scale = glm::vec3(ScaleMat[0][0], ScaleMat[1][1], ScaleMat[2][2]);
+		);
 
-		// なぜか1.7を返すのでひとまずしばらくは1.0を強制的に返す
-		Scale = glm::vec3(1.0f, 1.0f, 1.0f);
+		RotMat[0][0] /= Scale.x;
+		RotMat[1][1] /= Scale.y;
+		RotMat[2][2] /= Scale.z;
+
+		Rotation = glm::quat_cast(RotMat);
 	}
 
 	void CTransform::ToYUpRightHandedCoordinate(glm::vec3& Translation)

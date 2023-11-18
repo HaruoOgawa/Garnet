@@ -304,16 +304,13 @@ namespace animation
 		// Rotate
 		{
 			DstQuat = glm::slerp(PrevQuat, NextQuat, L);
-			DstQuat = glm::normalize(DstQuat);
 		}
 
 		// Scale
 		{
-			/*DstScale.x = (1.0f - L) * PrevScale.x + L * NextScale.x;
+			DstScale.x = (1.0f - L) * PrevScale.x + L * NextScale.x;
 			DstScale.y = (1.0f - L) * PrevScale.y + L * NextScale.y;
-			DstScale.z = (1.0f - L) * PrevScale.z + L * NextScale.z;*/
-
-			DstScale = glm::vec3(1.0f, 1.0f, 1.0f);
+			DstScale.z = (1.0f - L) * PrevScale.z + L * NextScale.z;
 		}
 
 		// ï‚äÆåãâ ÇÕMatrixÇ…ñﬂÇ≥Ç∏Ç…PosÅERotateÅEScaleÇÃèáî‘Ç≈ValueÇ…äiî[Ç∑ÇÈ

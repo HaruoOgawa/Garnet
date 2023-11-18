@@ -777,9 +777,6 @@ namespace fbx
 			}
 
 			math::CTransform::CastModelMatrixToTransform(LocalMatrix, Pos, Rotation, Scale);
-
-			// なぜかScaleに1.0よりも大きい値が返ってきてそれで端に行くほど大きくずれてしまうのでひとまず強制的に１にする
-			Scale = glm::vec3(1.0f, 1.0f, 1.0f);
 		}
 		else
 		{
@@ -794,9 +791,6 @@ namespace fbx
 				glm::angleAxis(static_cast<float>(fbxRotation[0]), glm::vec3(1.0f, 0.0f, 0.0f));
 			Scale = glm::vec3(static_cast<float>(fbxScale[0]), static_cast<float>(fbxScale[1]), static_cast<float>(fbxScale[2]));
 		}
-
-		// 回転を正規化する
-		Rotation = glm::normalize(Rotation);
 
 		// FbxはTranslation・Posが100倍になっているので調整する
 		// たぶん単位がcmなので0.01倍することで計算に一般的に使用するmに直す
@@ -954,12 +948,6 @@ namespace fbx
 							glm::vec3 Scale = glm::vec3(1.0f);
 
 							math::CTransform::CastModelMatrixToTransform(CurrentMatrix, Pos, Rotation, Scale);
-
-							// なぜかScaleに1.0よりも大きい値が返ってきてそれで端に行くほど大きくずれてしまうのでひとまず強制的に１にする
-							Scale = glm::vec3(1.0f, 1.0f, 1.0f);
-
-							// 回転を正規化する
-							Rotation = glm::normalize(Rotation);
 
 							// FbxはTranslation・Posが100倍になっているので調整する
 							// たぶん単位がcmなので0.01倍することで計算に一般的に使用するmに直す
