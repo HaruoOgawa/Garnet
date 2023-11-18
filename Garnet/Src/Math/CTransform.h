@@ -34,5 +34,7 @@ namespace math
 		static void ToYUpRightHandedCoordinate(glm::quat& Rotation);
 
 		static void CastCentiMeter2Meter(glm::vec3& Val);
+
+		static void CalcModelMatrix(glm::mat4& ModelMatrix, const glm::vec3& Translation, const glm::quat& Rotation, const glm::vec3& Scale);
 	};
 }

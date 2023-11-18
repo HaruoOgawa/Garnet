@@ -40,4 +40,16 @@ namespace animation
 
 		return true;
 	}
+
+	int CAnimationClip::GetFrameCount()
+	{
+		int Count = 0;
+
+		if (m_SamplerList.size() > 0)
+		{
+			Count = static_cast<int>(m_SamplerList[0]->GetKeyFrameList().size());
+		}
+
+		return Count;
+	}
 }

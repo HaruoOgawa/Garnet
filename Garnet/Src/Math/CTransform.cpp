@@ -88,8 +88,11 @@ namespace math
 		));
 		
 		// Scale
-		glm::mat3 ScaleMat = glm::inverse(RotMat) * RotScaleMat;
-		Scale = glm::vec3(ScaleMat[0][0], ScaleMat[1][1], ScaleMat[2][2]);
+		//glm::mat3 ScaleMat = glm::inverse(RotMat) * RotScaleMat;
+		//Scale = glm::vec3(ScaleMat[0][0], ScaleMat[1][1], ScaleMat[2][2]);
+
+		// Ç»Ç∫Ç©1.7Çï‘Ç∑ÇÃÇ≈Ç–Ç∆Ç‹Ç∏ÇµÇŒÇÁÇ≠ÇÕ1.0Çã≠êßìIÇ…ï‘Ç∑
+		Scale = glm::vec3(1.0f, 1.0f, 1.0f);
 	}
 
 	void CTransform::ToYUpRightHandedCoordinate(glm::vec3& Translation)
@@ -113,5 +116,14 @@ namespace math
 		Val.x *= 0.01f;
 		Val.y *= 0.01f;
 		Val.z *= 0.01f;
+	}
+
+	void CTransform::CalcModelMatrix(glm::mat4& ModelMatrix, const glm::vec3& Translation, const glm::quat& Rotation, const glm::vec3& Scale)
+	{
+		glm::mat4 trsMatrix = glm::translate(glm::mat4(1.0f), Translation);
+		glm::mat4 rotMatrix = glm::toMat4(Rotation);
+		glm::mat4 sclMatrix = glm::scale(glm::mat4(1.0f), Scale);
+
+		ModelMatrix = trsMatrix * rotMatrix * sclMatrix;
 	}
 }

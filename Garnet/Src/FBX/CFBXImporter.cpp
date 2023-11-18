@@ -18,24 +18,24 @@ namespace fbx
 		const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, const std::shared_ptr<graphics::CTextureSet>& TextureSet,
 		const std::shared_ptr<file::CFile>& DepthVertex, const std::shared_ptr<file::CFile>& DepthFragment)
 	{
-		std::vector<std::shared_ptr<animation::CAnimationClip>> DummyAnimationClipList;
+		std::shared_ptr<animation::CAnimationClip> DummyClip = nullptr;
 
-		if (!Import(pGraphicsAPI, Data, true, Object, DummyAnimationClipList, createInfo, TextureSet, DepthVertex, DepthFragment)) return false;
+		if (!Import(pGraphicsAPI, Data, true, Object, DummyClip, createInfo, TextureSet, DepthVertex, DepthFragment)) return false;
 
 		return true;
 	}
 
-	bool CFBXImporter::ImportFBXAnimation(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& Data, std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList)
+	bool CFBXImporter::ImportFBXAnimation(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& Data, std::shared_ptr<animation::CAnimationClip>& dstAnimationClip)
 	{
 		std::shared_ptr<object::C3DObject> DummyObject = std::make_shared<object::C3DObject>("", "");
 
-		if (!Import(pGraphicsAPI, Data, false, DummyObject, AnimationClipList, nullptr, nullptr, nullptr, nullptr)) return false;
+		if (!Import(pGraphicsAPI, Data, false, DummyObject, dstAnimationClip, nullptr, nullptr, nullptr, nullptr)) return false;
 
 		return true;
 	}
 
 	bool CFBXImporter::Import(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& Data, bool IsUseObject, std::shared_ptr<object::C3DObject>& Object,
-		std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList,
+		std::shared_ptr<animation::CAnimationClip>& dstAnimationClip,
 		const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, const std::shared_ptr<graphics::CTextureSet>& TextureSet,
 		const std::shared_ptr<file::CFile>& DepthVertex, const std::shared_ptr<file::CFile>& DepthFragment)
 	{
@@ -75,7 +75,7 @@ namespace fbx
 		int Coordinate = Scene->GetGlobalSettings().GetAxisSystem().GetCoorSystem();
 
 		// FBXの解析開始
-		if (!Analyse(pGraphicsAPI, Scene, IsUseObject, Object, AnimationClipList, createInfo, TextureSet, DepthVertex, DepthFragment)) return false;
+		if (!Analyse(pGraphicsAPI, Scene, IsUseObject, Object, dstAnimationClip, createInfo, TextureSet, DepthVertex, DepthFragment)) return false;
 
 		// FBX解析を終了
 		Manager->Destroy();
@@ -84,7 +84,7 @@ namespace fbx
 	}
 
 	bool CFBXImporter::Analyse(api::IGraphicsAPI* pGraphicsAPI, FbxScene* Scene, bool IsUseObject, std::shared_ptr<object::C3DObject>& Object,
-		std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList,
+		std::shared_ptr<animation::CAnimationClip>& dstAnimationClip,
 		const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, const std::shared_ptr<graphics::CTextureSet>& TextureSet,
 		const std::shared_ptr<file::CFile>& DepthVertex, const std::shared_ptr<file::CFile>& DepthFragment)
 	{
@@ -116,7 +116,23 @@ namespace fbx
 		}
 
 		// アニメーション
+		std::vector<std::shared_ptr<animation::CAnimationClip>> AnimationClipList;
 		if (!CreateAnimation(Scene, AnimationClipList, NodeList, Skin, FbxJointList)) return false;
+
+		// 使用するアニメーションクリップを精査する
+		// FBXのAnimationClipは複数個存在することがある
+		// FrameCountが多いものと少ないものがあり、綺麗にループアニメーションするには少ない方を使用する
+		int MinFrameCount = INT_MAX;
+
+		for (const auto& Clip : AnimationClipList)
+		{
+			if (Clip->GetFrameCount() < MinFrameCount)
+			{
+				MinFrameCount = Clip->GetFrameCount();
+
+				dstAnimationClip = Clip;
+			}
+		}
 
 		if (IsUseObject)
 		{
@@ -170,9 +186,9 @@ namespace fbx
 
 			Object->AddAnimationSkin(Skin);
 
-			for (const auto& Clip : AnimationClipList)
+			if(dstAnimationClip)
 			{
-				Object->AddAnimationClip(Clip);
+				Object->AddAnimationClip(dstAnimationClip);
 			}
 
 			// オブジェクトを生成
@@ -889,28 +905,30 @@ namespace fbx
 				fbxsdk::FbxTime startTime = takeInfo->mLocalTimeSpan.GetStart(); // キーフレームの最初の時間
 				fbxsdk::FbxTime endTime = takeInfo->mLocalTimeSpan.GetStop();    // キーフレームの終わりの時間
 
-				
+				fbxsdk::FbxGlobalSettings& GloabalSettions = Scene->GetGlobalSettings();
+				fbxsdk::FbxTime::EMode fileTimeMode = GloabalSettions.GetTimeMode();
+
 				for (const auto& pFbxJoint : FbxJointList) 
 				{ 
 					// ひとまず全部LINEARにしておく
 					std::shared_ptr<animation::CAnimationSampler> Sampler = std::make_shared<animation::CAnimationSampler>(animation::EInterpolationType::LINEAR);
 
 					// 始めの時間と終わりの時間を指定する
-					Sampler->SetStartTime((static_cast<float>(startTime.GetMilliSeconds()) / 1000.0f));
-					Sampler->SetEndTime((static_cast<float>(endTime.GetMilliSeconds()) / 1000.0f));
+					Sampler->SetStartTime(static_cast<float>(startTime.GetSecondDouble()));
+					Sampler->SetEndTime(static_cast<float>(endTime.GetSecondDouble()));
 
 					AnimationSamplerList.push_back(Sampler);
 				}
 
 				// 30 FPS換算のフレーム数を取得し、EndとStartとの差分から実際に使用されるフレーム数を計算
-				FbxLongLong AnimationLength = endTime.GetFrameCount(fbxsdk::FbxTime::eFrames30) - startTime.GetFrameCount(fbxsdk::FbxTime::eFrames30);
+				FbxLongLong AnimationLength = endTime.GetFrameCount(fileTimeMode) - startTime.GetFrameCount(fileTimeMode) + 1;
 
 				// FBXにはchannelといった概念はなく、Translation・Rotation・Scaleを全てまとめてModelMatrixで計算している
 				// なのでChannelTypeにFBX-SDK限定の値としてMODELMATRIXを作成することで対応する
-				for (FbxLongLong FrameIndex = startTime.GetFrameCount(FbxTime::eFrames30); FrameIndex <= endTime.GetFrameCount(fbxsdk::FbxTime::eFrames30); FrameIndex++)
+				for (FbxLongLong FrameIndex = startTime.GetFrameCount(fileTimeMode); FrameIndex <= endTime.GetFrameCount(fileTimeMode); FrameIndex++)
 				{
 					FbxTime currentTime;
-					currentTime.SetFrame(FrameIndex, FbxTime::eFrames30);
+					currentTime.SetFrame(FrameIndex, fileTimeMode);
 
 					// pFbxJointListとCSkinからアニメーション情報を取得する
 					for (int JointIndex = 0; JointIndex < FbxJointList.size(); JointIndex++)
@@ -929,8 +947,29 @@ namespace fbx
 							}
 						}
 
+						// FBXの値を整形する
+						{
+							glm::vec3 Pos = glm::vec3(0.0f);
+							glm::quat Rotation = glm::quat(glm::vec4(1.0f, 0.0f, 0.0f, 0.0f));
+							glm::vec3 Scale = glm::vec3(1.0f);
+
+							math::CTransform::CastModelMatrixToTransform(CurrentMatrix, Pos, Rotation, Scale);
+
+							// なぜかScaleに1.0よりも大きい値が返ってきてそれで端に行くほど大きくずれてしまうのでひとまず強制的に１にする
+							Scale = glm::vec3(1.0f, 1.0f, 1.0f);
+
+							// 回転を正規化する
+							Rotation = glm::normalize(Rotation);
+
+							// FbxはTranslation・Posが100倍になっているので調整する
+							// たぶん単位がcmなので0.01倍することで計算に一般的に使用するmに直す
+							math::CTransform::CastCentiMeter2Meter(Pos);
+
+							math::CTransform::CalcModelMatrix(CurrentMatrix, Pos, Rotation, Scale);
+						}
+						
 						// Input
-						float InputData = static_cast<float>(currentTime.GetMilliSeconds()) / 1000.0f;
+						float InputData = static_cast<float>(currentTime.GetSecondDouble());
 						
 						// Output
 						glm::mat4 OutputMat = CurrentMatrix;
@@ -945,13 +984,19 @@ namespace fbx
 						KeyFrame->SetOutput(OutputData);
 
 						// Add KeyFrame To Sampler
-						AnimationSamplerList[JointIndex]->AddKeyFrame(KeyFrame);
+						if (AnimationSamplerList[JointIndex]->GetKeyFrameList().size() < static_cast<size_t>(AnimationLength))
+						{
+							AnimationSamplerList[JointIndex]->AddKeyFrame(KeyFrame);
+						}
 					}
 				}
 
 				// SamplerListを渡す
 				for (const auto& Sampler : AnimationSamplerList)
 				{
+					// 一番最後のKeyFrameの時間をEndTimeにする
+					Sampler->SetEndTime(Sampler->GetKeyFrameList()[Sampler->GetKeyFrameList().size() - 1]->GetInput());
+
 					AnimationClip->AddAnimationSampler(Sampler);
 				}
 			}

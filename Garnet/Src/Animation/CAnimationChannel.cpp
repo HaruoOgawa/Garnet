@@ -63,7 +63,7 @@ namespace animation
 	{
 		if (Value.size() != 4) return true;
 
-		// glmのクォータニオンは wxyzで指定する必要がある？
+		// glmのクォータニオンは wxyzで指定する必要がある
 		glm::quat quat = glm::quat(Value[3], Value[0], Value[1], Value[2]);
 
 		m_TargetNode->SetRot(quat);
@@ -89,12 +89,16 @@ namespace animation
 
 	bool CAnimationChannel::UpdateModelMatrix(const std::vector<float>& Value)
 	{
-		if (Value.size() != 16) return true;
+		if (Value.size() != 10) return true;
 
-		glm::mat4 ModelMat = glm::mat4(1.0f);
-		std::memcpy(&ModelMat[0][0], &Value[0], sizeof(Value[0]) * Value.size());
+		m_TargetNode->SetPos(glm::vec3(Value[0], Value[1], Value[2]));
 
-		m_TargetNode->GetLocalTransform()->CastModelMatrixToTransform(ModelMat);
+		// glmのクォータニオンは wxyzで指定する必要がある
+		glm::quat quat = glm::quat(Value[6], Value[3], Value[4], Value[5]);
+
+		m_TargetNode->SetRot(quat);
+
+		m_TargetNode->SetScale(glm::vec3(Value[7], Value[8], Value[9]));
 
 		return true;
 	}

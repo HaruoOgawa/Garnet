@@ -50,6 +50,11 @@ namespace animation
 		m_KeyFrameList.push_back(KeyFrame);
 	}
 
+	const std::vector<std::shared_ptr<animation::CKeyFrame>>& CAnimationSampler::GetKeyFrameList() const
+	{
+		return m_KeyFrameList;
+	}
+
 	void CAnimationSampler::SetStartTime(float StartTime)
 	{
 		m_StartTime = StartTime;
@@ -248,6 +253,74 @@ namespace animation
 
 	bool CAnimationSampler::DoModelMatrixLinearInterpolation(float CurrentTime, std::vector<float>& Value, const std::shared_ptr<animation::CKeyFrame>& PrevKeyFrame, const std::shared_ptr<animation::CKeyFrame>& NextKeyFrame)
 	{
+		// 線形補完(Linear)
+		float PrevTime = PrevKeyFrame->GetInput();
+		float NextTime = NextKeyFrame->GetInput();
+
+		float L = (CurrentTime - PrevTime) / (NextTime - PrevTime);
+
+		const auto& PrevValue = PrevKeyFrame->GetOutput();
+		const auto& NextValue = NextKeyFrame->GetOutput();
+
+		if (PrevValue.size() != NextValue.size()) return false;
+
+		if (PrevValue.size() != 16 || NextValue.size() != 16) return false;
+
+		// それぞれのPos・Rotate・Scaleを取得
+		glm::vec3 PrevPos = glm::vec3(0.0f);
+		glm::quat PrevQuat = glm::quat();
+		glm::vec3 PrevScale = glm::vec3(1.0f);
+		
+		glm::vec3 NextPos = glm::vec3(0.0f);
+		glm::quat NextQuat = glm::quat();
+		glm::vec3 NextScale = glm::vec3(1.0f);
+		
+		glm::vec3 DstPos = glm::vec3(0.0f);
+		glm::quat DstQuat = glm::quat();
+		glm::vec3 DstScale = glm::vec3(1.0f);
+
+		{
+			glm::mat4 mat = glm::mat4(1.0f);
+			std::memcpy(&mat[0][0], &PrevValue[0], sizeof(float) * PrevValue.size());
+
+			math::CTransform::CastModelMatrixToTransform(mat, PrevPos, PrevQuat, PrevScale);
+		}
+		
+		{
+			glm::mat4 mat = glm::mat4(1.0f);
+			std::memcpy(&mat[0][0], &NextValue[0], sizeof(float) * NextValue.size());
+
+			math::CTransform::CastModelMatrixToTransform(mat, NextPos, NextQuat, NextScale);
+		}
+
+		// それぞれを線形補完する
+		// Pos
+		{
+			DstPos.x = (1.0f - L) * PrevPos.x + L * NextPos.x;
+			DstPos.y = (1.0f - L) * PrevPos.y + L * NextPos.y;
+			DstPos.z = (1.0f - L) * PrevPos.z + L * NextPos.z;
+		}
+
+		// Rotate
+		{
+			DstQuat = glm::slerp(PrevQuat, NextQuat, L);
+			DstQuat = glm::normalize(DstQuat);
+		}
+
+		// Scale
+		{
+			/*DstScale.x = (1.0f - L) * PrevScale.x + L * NextScale.x;
+			DstScale.y = (1.0f - L) * PrevScale.y + L * NextScale.y;
+			DstScale.z = (1.0f - L) * PrevScale.z + L * NextScale.z;*/
+
+			DstScale = glm::vec3(1.0f, 1.0f, 1.0f);
+		}
+
+		// 補完結果はMatrixに戻さずにPos・Rotate・Scaleの順番でValueに格納する
+		Value.push_back(DstPos.x); Value.push_back(DstPos.y); Value.push_back(DstPos.z);
+		Value.push_back(DstQuat.x); Value.push_back(DstQuat.y); Value.push_back(DstQuat.z); Value.push_back(DstQuat.w); 
+		Value.push_back(DstScale.x); Value.push_back(DstScale.y); Value.push_back(DstScale.z);
+
 		return true;
 	}
 

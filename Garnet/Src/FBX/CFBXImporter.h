@@ -62,12 +62,12 @@ namespace fbx
 	{
 	private:
 		static bool Import(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& Data, bool IsUseObject, std::shared_ptr<object::C3DObject>& Object, 
-			std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList,
+			std::shared_ptr<animation::CAnimationClip>& dstAnimationClip,
 			const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, const std::shared_ptr<graphics::CTextureSet>& TextureSet,
 			const std::shared_ptr<file::CFile>& DepthVertex, const std::shared_ptr<file::CFile>& DepthFragment);
 		
 		static bool Analyse(api::IGraphicsAPI* pGraphicsAPI, FbxScene* Scene, bool IsUseObject, std::shared_ptr<object::C3DObject>& Object,
-			std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList,
+			std::shared_ptr<animation::CAnimationClip>& dstAnimationClip,
 			const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, const std::shared_ptr<graphics::CTextureSet>& TextureSet,
 			const std::shared_ptr<file::CFile>& DepthVertex, const std::shared_ptr<file::CFile>& DepthFragment);
 
@@ -90,8 +90,7 @@ namespace fbx
 		static bool CreateAnimationSkin(FbxNode* pFBXNode, FbxNode* pParentFBXNode, std::shared_ptr<animation::CSkin>& Skin, std::vector<std::shared_ptr<SFBXJoint>>& FbxJointList, const std::vector<std::shared_ptr<object::CNode>>& NodeList);
 		static bool CreateAnimation(FbxScene* Scene, std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList, const std::vector<std::shared_ptr<object::CNode>>& NodeList, 
 			const std::shared_ptr<animation::CSkin>& Skin, const std::vector<std::shared_ptr<SFBXJoint>>& FbxJointList);
-		//static bool CreateAnimationSampler(const tinygltf::Model& model, const tinygltf::AnimationSampler& glTFSampler, std::shared_ptr<animation::CAnimationSampler>& AnimationSampler);
-
+		
 		// Helper Function //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		template<class T>
 		static bool ReadGeometryElement(std::vector<float>& AttributeData, int Dimention, T* pFbxElement, int CtrlPointIndex, int VertexCounter);
@@ -105,7 +104,7 @@ namespace fbx
 		static bool ImportFBX(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& Data, std::shared_ptr<object::C3DObject>& Object,
 			const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, const std::shared_ptr<graphics::CTextureSet>& TextureSet,
 			const std::shared_ptr<file::CFile>& DepthVertex, const std::shared_ptr<file::CFile>& DepthFragment);
-		static bool ImportFBXAnimation(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& Data, std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList);
+		static bool ImportFBXAnimation(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& Data, std::shared_ptr<animation::CAnimationClip>& dstAnimationClip);
 	};
 }
 #endif // USE_FBX

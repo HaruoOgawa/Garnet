@@ -23,5 +23,7 @@ namespace animation
 		void AddAnimationChannel(const std::shared_ptr<animation::CAnimationChannel>& AnimationChannel);
 
 		bool Update(float DeltaSecondsTime);
+
+		int GetFrameCount();
 	};
 }

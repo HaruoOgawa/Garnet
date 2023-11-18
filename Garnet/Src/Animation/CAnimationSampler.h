@@ -43,6 +43,7 @@ namespace animation
 
 		bool CreateKeyFrame(EKeyFrameType Type, const std::vector<float>& inputList, const std::vector<float>& outputList);
 		void AddKeyFrame(const std::shared_ptr<animation::CKeyFrame>& KeyFrame);
+		const std::vector<std::shared_ptr<animation::CKeyFrame>>& GetKeyFrameList() const;
 
 		void SetStartTime(float StartTime);
 		void SetEndTime(float EndTime);
