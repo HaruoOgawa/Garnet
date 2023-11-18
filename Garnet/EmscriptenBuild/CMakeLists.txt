@@ -13,6 +13,8 @@ add_definitions(
 	-DUSE_VIEWER_CAMERA
 	-DUSE_INPUT_SYSTEM
 	-DUSE_GPGPU
+	-DUSE_FBX
+	-DFBXSDK_SHARED
 )
 
 add_executable(
@@ -29,6 +31,7 @@ add_executable(
 	../src/Animation/CKeyFrame.h
 	../src/Animation/CSkin.cpp
 	../src/Animation/CSkin.h
+	../src/Animation/EAnimationTarget.h
 	../src/App/CWebAppManager.cpp
 	../src/App/CWebAppManager.h
 	../src/App/EAppType.h
@@ -39,6 +42,8 @@ add_executable(
 	../src/Camera/CViewerCamera.cpp
 	../src/Camera/CViewerCamera.h
 	../src/Debug/Message/Console.h
+	../src/FBX/CFBXImporter.cpp
+	../src/FBX/CFBXImporter.h
 	../src/File/CFile.cpp
 	../src/File/CFile.h
 	../src/GLTF/CGLTFImporter.cpp
@@ -105,10 +110,10 @@ add_executable(
 	../src/Math/CTransform.h
 	../src/Object/C3DObject.cpp
 	../src/Object/C3DObject.h
+	../src/Object/C3DObjectImporter.cpp
+	../src/Object/C3DObjectImporter.h
 	../src/Object/CNode.cpp
 	../src/Object/CNode.h
-	../src/Object/CSimple3DObject.cpp
-	../src/Object/CSimple3DObject.h
 	../src/Projection/CProjection.cpp
 	../src/Projection/CProjection.h
 	../src/Scene/CScriptScene.cpp
@@ -116,8 +121,8 @@ add_executable(
 
 )
 
-target_include_directories(Garnet PRIVATE ../src/Library/DawnLib/include ../src/Library/glm  ../src/Library/tinygltf)
-# target_include_directories(Garnet PRIVATE ../src/Library/WebGPU ../src/Library/glm  ../src/Library/tinygltf)
+target_include_directories(Garnet PRIVATE ../src/Library/DawnLib/include ../src/Library/glm  ../src/Library/tinygltf  ../src/Library/FBX-SDK/include)
+# target_include_directories(Garnet PRIVATE ../src/Library/WebGPU ../src/Library/glm  ../src/Library/tinygltf  ../src/Library/FBX-SDK/include)
 
 if(EMSCRIPTEN)
 	target_link_options(Garnet PRIVATE 

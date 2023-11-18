@@ -32,11 +32,12 @@ namespace object
 		std::vector<std::shared_ptr<animation::CAnimationClip>> m_AnimationClipList;
 		int m_CurrentClipIndex;
 	private:
-		void CalcWorldMatrix();
 		void CalcWorldMatrix(std::shared_ptr<CNode>& Node, const glm::mat4& ParentWorldMatrix);
 
 		void ApplyParentNode();
 		void ApplyParentNode(std::shared_ptr<CNode>& Node, const std::shared_ptr<CNode>& ParentNode);
+
+		bool IsPlayingAnimation();
 	public:
 		C3DObject(const std::string& PassName, const std::string& DepthPassName);
 		virtual ~C3DObject();
@@ -45,6 +46,8 @@ namespace object
 		virtual bool Update(float DeltaSecondsTime);
 		virtual bool Draw(bool IsDepthPass, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, 
 			const std::shared_ptr<graphics::CDrawInfo>& DrawInfo, const std::shared_ptr<object::C3DObject>& DebugSphere = nullptr);
+
+		void CalcWorldMatrix();
 
 		void AddNode(const std::shared_ptr<CNode>& Node);
 		const std::vector<std::shared_ptr<CNode>>& GetNodeList() const;

@@ -4,6 +4,7 @@
 #include "../File/CFile.h"
 #include "../Debug/Message/Console.h"
 #include "../GLTF/CGLTFImporter.h"
+#include "../FBX/CFBXImporter.h"
 #include <glm/glm.hpp>
 #include "../Graphics/CDrawInfo.h"
 #include "../Camera/CCamera.h"
@@ -13,6 +14,8 @@ namespace scene
 	CScriptScene::CScriptScene(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker):
 		m_glTFObject(std::make_shared<object::C3DObject>("", "ShadowPass")),
 		m_BrainStemDObject(std::make_shared<object::C3DObject>("", "ShadowPass")),
+		m_VRMObject(std::make_shared<object::C3DObject>("", "ShadowPass")),
+		m_FbxObject(std::make_shared<object::C3DObject>("", "ShadowPass")),
 		//m_glTFData(std::make_shared<file::CFile>("Resources\\Models\\MetalRoughSpheresNoTextures\\glTF-Binary\\MetalRoughSpheresNoTextures.glb")),
 		//m_glTFData(std::make_shared<file::CFile>("Resources\\Models\\Sponza\\glTF\\Sponza.glb")),
 		//m_glTFData(std::make_shared<file::CFile>("Resources\\Models\\DamagedHelmet\\glTF-Binary\\DamagedHelmet.glb")),
@@ -28,6 +31,11 @@ namespace scene
 		//m_glTFData(std::make_shared<file::CFile>("Resources\\Models\\AnimatedCube\\glTF\\AnimatedCube.gltf")),
 
 		m_BrainStemData(std::make_shared<file::CFile>("Resources\\Models\\BrainStem\\glTF-Binary\\BrainStem.glb")),
+		m_VRMData(std::make_shared<file::CFile>("Resources\\Models\\Alicia\\VRM\\AliciaSolid.vrm")),
+
+		//m_FbxAnimationData(std::make_shared<file::CFile>("Resources\\Motions\\Walking.fbx")),
+		m_FbxAnimationData(std::make_shared<file::CFile>("Resources\\Motions\\Walking_WithSkin.fbx")),
+		m_FbxData(std::make_shared<file::CFile>("Resources\\Motions\\Walking_WithSkin.fbx")),
 
 		m_Background(std::make_shared<object::C3DObject>("", "ShadowPass")),
 		m_DebugSphere(std::make_shared<object::C3DObject>("", "ShadowPass")),
@@ -58,6 +66,7 @@ namespace scene
 		pLoadWorker->AddFirstLoadResource(m_DepthFragment);
 		pLoadWorker->AddFirstLoadResource(m_glTFData);
 		pLoadWorker->AddFirstLoadResource(m_BrainStemData);
+		pLoadWorker->AddFirstLoadResource(m_VRMData);
 		pLoadWorker->AddFirstLoadResource(m_IBL_Skybox);
 		pLoadWorker->AddFirstLoadResource(m_IBL_DiffuseEnvMap);
 		pLoadWorker->AddFirstLoadResource(m_IBL_SpecularEnvMap);
@@ -106,6 +115,12 @@ namespace scene
 		auto IBL_GGXLUT_Tex = pGraphicsAPI->CreateTexture(false);
 		if (!IBL_GGXLUT_Tex->Create(m_IBL_GGX_LUT->GetData())) return false;
 
+		// FBX Humanoid Animation Clip
+		std::vector<std::shared_ptr<animation::CAnimationClip>> AnimationClipList;
+		{
+			//if (!fbx::CFBXImporter::ImportFBXAnimation(pGraphicsAPI, m_FbxAnimationData->GetData(), AnimationClipList)) return false;
+		}
+
 		// glTFObject
 		{
 			// MaterialInto
@@ -122,7 +137,7 @@ namespace scene
 			// 再生するアニメーションクリップを指定する
 			m_glTFObject->SetPlayClipIndex(0);
 
-			//m_glTFObject->SetRot(glm::vec3(3.1415f * 0.5f, 0.0f, 0.0f));
+			m_glTFObject->SetPos(glm::vec3(2.0f, 0.0f, 0.0f));
 
 			// Import
 			//if (!gltf::CGLTFImporter::ImportFromString(pGraphicsAPI, m_glTFData->GetData(), "Resources\\Models\\AnimatedCube\\glTF\\", m_glTFObject, createInfo, TextureSet, m_DepthVertex, m_DepthFragment)) return false;
@@ -147,10 +162,50 @@ namespace scene
 			// 再生するアニメーションクリップを指定する
 			m_BrainStemDObject->SetPlayClipIndex(0);
 
-			m_BrainStemDObject->SetPos(glm::vec3(-1.5f, 0.0f, 0.0f));
+			m_BrainStemDObject->SetPos(glm::vec3(-2.0f, 0.0f, 0.0f));
 			m_BrainStemDObject->SetRot(glm::angleAxis(3.1415f, glm::vec3(0.0f, 1.0f, 0.0f)));
 
 			if (!gltf::CGLTFImporter::ImportFromMemory(pGraphicsAPI, m_BrainStemData->GetData(), m_BrainStemDObject, createInfo, TextureSet, m_DepthVertex, m_DepthFragment)) return false;
+		}
+		
+		{
+			// MaterialInto
+			std::shared_ptr<graphics::CMaterialCreateInfo> createInfo = std::make_shared<graphics::CMaterialCreateInfo>();
+			createInfo->SetVertexShaderCode(m_VertexShader->GetData());
+			createInfo->SetFragmentShaderCode(m_FragmentShader->GetData());
+
+			// TextureSet
+			std::shared_ptr<graphics::CTextureSet> TextureSet = std::make_shared<graphics::CTextureSet>();
+			TextureSet->AddCubeMap(CubeTex);
+			for(const auto& FrameTexture : m_FrameTextureList) { TextureSet->AddFrameTexture(FrameTexture); }
+			TextureSet->AddIBLTexture(IBL_Diffuse_Tex, IBL_Specular_Tex, IBL_GGXLUT_Tex);
+
+			// 再生するアニメーションクリップを指定する
+			//m_VRMObject->SetPlayClipIndex(0);
+
+			m_VRMObject->SetPos(glm::vec3(0.0f, 0.0f, 3.0f));
+
+			if (!gltf::CGLTFImporter::ImportFromMemory(pGraphicsAPI, m_VRMData->GetData(), m_VRMObject, createInfo, TextureSet, m_DepthVertex, m_DepthFragment)) return false;
+		}
+		
+		{
+			// MaterialInto
+			std::shared_ptr<graphics::CMaterialCreateInfo> createInfo = std::make_shared<graphics::CMaterialCreateInfo>();
+			createInfo->SetVertexShaderCode(m_VertexShader->GetData());
+			createInfo->SetFragmentShaderCode(m_FragmentShader->GetData());
+
+			// TextureSet
+			std::shared_ptr<graphics::CTextureSet> TextureSet = std::make_shared<graphics::CTextureSet>();
+			TextureSet->AddCubeMap(CubeTex);
+			for(const auto& FrameTexture : m_FrameTextureList) { TextureSet->AddFrameTexture(FrameTexture); }
+			TextureSet->AddIBLTexture(IBL_Diffuse_Tex, IBL_Specular_Tex, IBL_GGXLUT_Tex);
+
+			// 再生するアニメーションクリップを指定する
+			m_FbxObject->SetPlayClipIndex(1);
+
+			m_FbxObject->SetRot(glm::angleAxis(3.1415f, glm::vec3(0.0f, 1.0f, 0.0f)));
+
+			if (!fbx::CFBXImporter::ImportFBX(pGraphicsAPI, m_FbxAnimationData->GetData(), m_FbxObject, createInfo, TextureSet, m_DepthVertex, m_DepthFragment)) return false;
 		}
 
 		// m_Background
@@ -315,6 +370,16 @@ namespace scene
 			if (!m_BrainStemDObject->Update(DrawInfo->GetDeltaSecondsTime())) return false;
 		}
 		
+		if (m_VRMObject)
+		{
+			if (!m_VRMObject->Update(DrawInfo->GetDeltaSecondsTime())) return false;
+		}
+		
+		if (m_FbxObject)
+		{
+			if (!m_FbxObject->Update(DrawInfo->GetDeltaSecondsTime())) return false;
+		}
+		
 		if (m_Background)
 		{
 			if (!m_Background->Update(DrawInfo->GetDeltaSecondsTime())) return false;
@@ -347,6 +412,16 @@ namespace scene
 		if (m_BrainStemDObject)
 		{
 			if (!m_BrainStemDObject->Draw(IsDepthPass, Camera, Projection, DrawInfo, m_DebugSphere)) return false;
+		}
+		
+		if (m_VRMObject)
+		{
+			if (!m_VRMObject->Draw(IsDepthPass, Camera, Projection, DrawInfo, m_DebugSphere)) return false;
+		}
+		
+		if (m_FbxObject)
+		{
+			if (!m_FbxObject->Draw(IsDepthPass, Camera, Projection, DrawInfo, m_DebugSphere)) return false;
 		}
 		
 		if (m_Background)

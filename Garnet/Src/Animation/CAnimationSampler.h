@@ -6,6 +6,7 @@
 #include <glm/gtc/quaternion.hpp>
 
 #include "CKeyFrame.h"
+#include "EAnimationTarget.h"
 
 namespace animation
 {
@@ -34,13 +35,19 @@ namespace animation
 		bool DoStepInterpolation(float CurrentTime, std::vector<float>& Value, const std::shared_ptr<animation::CKeyFrame>& PrevKeyFrame, const std::shared_ptr<animation::CKeyFrame>& NextKeyFrame);
 		bool DoLinearInterpolation(float CurrentTime, std::vector<float>& Value, const std::shared_ptr<animation::CKeyFrame>& PrevKeyFrame, const std::shared_ptr<animation::CKeyFrame>& NextKeyFrame);
 		bool DoSphericalLinearInterpolation(float CurrentTime, std::vector<float>& Value, const std::shared_ptr<animation::CKeyFrame>& PrevKeyFrame, const std::shared_ptr<animation::CKeyFrame>& NextKeyFrame);
-		bool DoCubicSplineInterpolation(float CurrentTime, std::vector<float>& Value, bool IsRot, const std::shared_ptr<animation::CKeyFrame>& PrevKeyFrame, const std::shared_ptr<animation::CKeyFrame>& NextKeyFrame);
+		bool DoModelMatrixLinearInterpolation(float CurrentTime, std::vector<float>& Value, const std::shared_ptr<animation::CKeyFrame>& PrevKeyFrame, const std::shared_ptr<animation::CKeyFrame>& NextKeyFrame);
+		bool DoCubicSplineInterpolation(float CurrentTime, std::vector<float>& Value, EAnimationTarget AnimationTarget, const std::shared_ptr<animation::CKeyFrame>& PrevKeyFrame, const std::shared_ptr<animation::CKeyFrame>& NextKeyFrame);
 	public:
 		CAnimationSampler(EInterpolationType InterpolationType);
 		virtual ~CAnimationSampler();
 
 		bool CreateKeyFrame(EKeyFrameType Type, const std::vector<float>& inputList, const std::vector<float>& outputList);
+		void AddKeyFrame(const std::shared_ptr<animation::CKeyFrame>& KeyFrame);
+		const std::vector<std::shared_ptr<animation::CKeyFrame>>& GetKeyFrameList() const;
 
-		bool GetCurrentFrame(float CurrentTime, std::vector<float>& Value, bool IsRot);
+		void SetStartTime(float StartTime);
+		void SetEndTime(float EndTime);
+
+		bool GetCurrentFrame(float CurrentTime, std::vector<float>& Value, EAnimationTarget AnimationTarget);
 	};
 }

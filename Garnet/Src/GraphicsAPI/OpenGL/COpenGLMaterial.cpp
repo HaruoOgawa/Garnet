@@ -39,23 +39,6 @@ namespace api
 		return true;
 	}
 
-	bool COpenGLMaterial::SetCommonUniform(const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo)
-	{
-		glm::mat4 lightVPMat = DrawInfo->GetLightProjection()->GetPrejectionMatrix() * DrawInfo->GetLightCamera()->GetViewMatrix();
-
-		// 共通のユニフォームバッファの更新
-		SetUniformValue("view", &Camera->GetViewMatrix()[0][0]);
-		SetUniformValue("proj", &Projection->GetPrejectionMatrix()[0][0]);
-		SetUniformValue("lightVPMat", &lightVPMat[0][0]);
-		SetUniformValue("lightDir", &DrawInfo->GetLightCamera()->GetViewDir()[0]);
-		SetUniformValue("lightColor", &DrawInfo->GetLightColor()[0]);
-		SetUniformValue("cameraPos", &Camera->GetPos()[0]);
-		SetUniformValue("time", &glm::vec1(DrawInfo->GetSecondsTime())[0]);
-		SetUniformValue("deltaTime", &glm::vec1(DrawInfo->GetDeltaSecondsTime())[0]);
-
-		return true;
-	}
-
 	bool COpenGLMaterial::BuildDrawBuffer(int DynamicOffsetNum)
 	{
 		SetActive();

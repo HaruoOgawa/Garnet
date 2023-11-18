@@ -50,10 +50,13 @@ namespace renderer
 		if (pOpenGLMat->IsEnabledZTest())
 		{
 			glEnable(GL_DEPTH_TEST);
+			glDepthFunc(GL_LESS);
 		}
 		else
 		{
-			glDisable(GL_DEPTH_TEST);
+			//glDisable(GL_DEPTH_TEST);
+			glEnable(GL_DEPTH_TEST);
+			glDepthFunc(GL_ALWAYS);
 		}
 
 		// Culling

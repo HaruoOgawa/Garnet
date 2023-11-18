@@ -21,6 +21,11 @@ namespace scene
 	{
 		bool m_IsLoaded;
 
+		// Fbx
+		std::shared_ptr<file::CFile> m_FbxAnimationData;
+		std::shared_ptr<file::CFile> m_FbxData;
+		std::shared_ptr<object::C3DObject> m_FbxObject;
+
 		// Tex of FrameBuffer
 		std::vector<std::shared_ptr<graphics::CTexture>> m_FrameTextureList;
 
@@ -40,6 +45,9 @@ namespace scene
 		
 		std::shared_ptr<file::CFile> m_BrainStemData;
 		std::shared_ptr<object::C3DObject> m_BrainStemDObject;
+		
+		std::shared_ptr<file::CFile> m_VRMData;
+		std::shared_ptr<object::C3DObject> m_VRMObject;
 
 		// Object
 		std::shared_ptr<object::C3DObject> m_Background;

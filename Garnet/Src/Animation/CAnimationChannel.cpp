@@ -40,6 +40,9 @@ namespace animation
 		case EAnimationTarget::WEIGHTS:
 			if (!UpdateWeights(Value)) return false;
 			break;
+		case EAnimationTarget::MODELMATRIX:
+			if (!UpdateModelMatrix(Value)) return false;
+			break;
 		default:
 			break;
 		}
@@ -60,7 +63,7 @@ namespace animation
 	{
 		if (Value.size() != 4) return true;
 
-		// glmのクォータニオンは wxyzで指定する必要がある？
+		// glmのクォータニオンは wxyzで指定する必要がある
 		glm::quat quat = glm::quat(Value[3], Value[0], Value[1], Value[2]);
 
 		m_TargetNode->SetRot(quat);
@@ -79,6 +82,24 @@ namespace animation
 
 	bool CAnimationChannel::UpdateWeights(const std::vector<float>& Value)
 	{
+		// 未実装
+
+		return true;
+	}
+
+	bool CAnimationChannel::UpdateModelMatrix(const std::vector<float>& Value)
+	{
+		if (Value.size() != 10) return true;
+
+		m_TargetNode->SetPos(glm::vec3(Value[0], Value[1], Value[2]));
+
+		// glmのクォータニオンは wxyzで指定する必要がある
+		glm::quat quat = glm::quat(Value[6], Value[3], Value[4], Value[5]);
+
+		m_TargetNode->SetRot(quat);
+
+		m_TargetNode->SetScale(glm::vec3(Value[7], Value[8], Value[9]));
+
 		return true;
 	}
 }

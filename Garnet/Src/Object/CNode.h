@@ -38,6 +38,7 @@ namespace object
 		void SetName(const std::string& Name);
 		const std::string& GetName() const;
 
+		void SetMeshIndexWithDynamicOffset(int MeshIndex, const std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, const std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList);
 		int GetMeshIndex() const;
 
 		void SetLocalTransform(std::shared_ptr<math::CTransform>& LocalTransform);

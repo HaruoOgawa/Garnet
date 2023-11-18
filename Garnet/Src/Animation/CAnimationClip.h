@@ -5,6 +5,7 @@
 
 #include "CAnimationSampler.h"
 #include "CAnimationChannel.h"
+#include "EAnimationTarget.h"
 
 namespace animation
 {
@@ -22,5 +23,7 @@ namespace animation
 		void AddAnimationChannel(const std::shared_ptr<animation::CAnimationChannel>& AnimationChannel);
 
 		bool Update(float DeltaSecondsTime);
+
+		int GetFrameCount();
 	};
 }

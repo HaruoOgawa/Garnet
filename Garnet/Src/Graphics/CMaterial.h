@@ -60,7 +60,6 @@ namespace graphics
 		virtual void SetBlendType(EBlendType BlendType);
 		virtual EBlendType GetBlendType() const;
 
-		virtual bool SetCommonUniform(const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo) = 0;
 		virtual bool BuildDrawBuffer(int DynamicOffsetNum) = 0;
 
 		virtual void AddShaderBuffer(const std::shared_ptr<CShaderBuffer>& Buffer);
