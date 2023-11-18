@@ -19,24 +19,24 @@ namespace fbx
 		const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, const std::shared_ptr<graphics::CTextureSet>& TextureSet,
 		const std::shared_ptr<file::CFile>& DepthVertex, const std::shared_ptr<file::CFile>& DepthFragment)
 	{
-		std::shared_ptr<animation::CAnimationClip> DummyClip = nullptr;
+		std::vector<std::shared_ptr<animation::CAnimationClip>> AnimationClipList;
 
-		if (!Import(pGraphicsAPI, Data, true, Object, DummyClip, createInfo, TextureSet, DepthVertex, DepthFragment)) return false;
+		if (!Import(pGraphicsAPI, Data, true, Object, AnimationClipList, createInfo, TextureSet, DepthVertex, DepthFragment)) return false;
 
 		return true;
 	}
 
-	bool CFBXImporter::ImportFBXAnimation(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& Data, std::shared_ptr<animation::CAnimationClip>& dstAnimationClip)
+	bool CFBXImporter::ImportFBXAnimation(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& Data, std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList)
 	{
-		std::shared_ptr<object::C3DObject> DummyObject = std::make_shared<object::C3DObject>("", "");
+		std::shared_ptr<object::C3DObject> Object = std::make_shared<object::C3DObject>("", "");
 
-		if (!Import(pGraphicsAPI, Data, false, DummyObject, dstAnimationClip, nullptr, nullptr, nullptr, nullptr)) return false;
+		if (!Import(pGraphicsAPI, Data, false, Object, AnimationClipList, nullptr, nullptr, nullptr, nullptr)) return false;
 
 		return true;
 	}
 
 	bool CFBXImporter::Import(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& Data, bool IsUseObject, std::shared_ptr<object::C3DObject>& Object,
-		std::shared_ptr<animation::CAnimationClip>& dstAnimationClip,
+		std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList,
 		const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, const std::shared_ptr<graphics::CTextureSet>& TextureSet,
 		const std::shared_ptr<file::CFile>& DepthVertex, const std::shared_ptr<file::CFile>& DepthFragment)
 	{
@@ -53,6 +53,7 @@ namespace fbx
 		// ひとまず適当にファイル名からImport(あとでfromMemoryにする)
 		//const char* fileName = "Resources\\Motions\\Walking.fbx";
 		const char* fileName = "Resources\\Motions\\Walking_WithSkin.fbx";
+		//const char* fileName = "Resources\\Motions\\Locking Hip Hop Dance.fbx";
 
 		// Streamを作成
 		//CFBXStream Stream(Manager, "rb");
@@ -83,7 +84,7 @@ namespace fbx
 		int Coordinate = Scene->GetGlobalSettings().GetAxisSystem().GetCoorSystem();
 
 		// FBXの解析開始
-		if (!Analyse(pGraphicsAPI, Scene, IsUseObject, Object, dstAnimationClip, createInfo, TextureSet, DepthVertex, DepthFragment)) return false;
+		if (!Analyse(pGraphicsAPI, Scene, IsUseObject, Object, AnimationClipList, createInfo, TextureSet, DepthVertex, DepthFragment)) return false;
 
 		// FBX解析を終了
 		Manager->Destroy();
@@ -92,7 +93,7 @@ namespace fbx
 	}
 
 	bool CFBXImporter::Analyse(api::IGraphicsAPI* pGraphicsAPI, FbxScene* Scene, bool IsUseObject, std::shared_ptr<object::C3DObject>& Object,
-		std::shared_ptr<animation::CAnimationClip>& dstAnimationClip,
+		std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList,
 		const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, const std::shared_ptr<graphics::CTextureSet>& TextureSet,
 		const std::shared_ptr<file::CFile>& DepthVertex, const std::shared_ptr<file::CFile>& DepthFragment)
 	{
@@ -124,23 +125,7 @@ namespace fbx
 		}
 
 		// アニメーション
-		std::vector<std::shared_ptr<animation::CAnimationClip>> AnimationClipList;
 		if (!CreateAnimation(Scene, AnimationClipList, NodeList, Skin, FbxJointList)) return false;
-
-		// 使用するアニメーションクリップを精査する
-		// FBXのAnimationClipは複数個存在することがある
-		// FrameCountが多いものと少ないものがあり、綺麗にループアニメーションするには少ない方を使用する
-		int MinFrameCount = INT_MAX;
-
-		for (const auto& Clip : AnimationClipList)
-		{
-			if (Clip->GetFrameCount() < MinFrameCount)
-			{
-				MinFrameCount = Clip->GetFrameCount();
-
-				dstAnimationClip = Clip;
-			}
-		}
 
 		if (IsUseObject)
 		{
@@ -194,9 +179,13 @@ namespace fbx
 
 			Object->AddAnimationSkin(Skin);
 
-			if(dstAnimationClip)
+			// FrameCountが多いものと少ないものといった感じでFBXのAnimationClipは複数個存在することがある
+			// どちらか一方がループ用の短いアニメーションだったり長いダンスモーションだったりするので
+			// どちらを使用するかはユーザーがモーションを見てユーザーが選ぶようにする
+			// 大抵は2つ目のクリップがどのモーションでも一番良いみたいだが、これがFBXの仕様なのかMixamoの仕様なのかわからないのでひとまずそういうことにしておく
+			for (const auto& Clip : AnimationClipList)
 			{
-				Object->AddAnimationClip(dstAnimationClip);
+				Object->AddAnimationClip(Clip);
 			}
 
 			// オブジェクトを生成

@@ -116,9 +116,9 @@ namespace scene
 		if (!IBL_GGXLUT_Tex->Create(m_IBL_GGX_LUT->GetData())) return false;
 
 		// FBX Humanoid Animation Clip
-		std::vector<std::shared_ptr<animation::CAnimationClip>> FbxAnimationClipList;
+		std::vector<std::shared_ptr<animation::CAnimationClip>> AnimationClipList;
 		{
-			//if (!fbx::CFBXImporter::ImportFBXAnimation(pGraphicsAPI, m_FbxAnimationData->GetData(), FbxAnimationClipList)) return false;
+			//if (!fbx::CFBXImporter::ImportFBXAnimation(pGraphicsAPI, m_FbxAnimationData->GetData(), AnimationClipList)) return false;
 		}
 
 		// glTFObject
@@ -201,7 +201,7 @@ namespace scene
 			TextureSet->AddIBLTexture(IBL_Diffuse_Tex, IBL_Specular_Tex, IBL_GGXLUT_Tex);
 
 			// 再生するアニメーションクリップを指定する
-			m_FbxObject->SetPlayClipIndex(0);
+			m_FbxObject->SetPlayClipIndex(1);
 
 			m_FbxObject->SetRot(glm::angleAxis(3.1415f, glm::vec3(0.0f, 1.0f, 0.0f)));
 
