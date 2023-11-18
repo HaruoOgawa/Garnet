@@ -1137,6 +1137,9 @@
     <ClInclude Include="Src\Animation\EAnimationTarget.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="Src\FBX\CFBXStream.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\Main\DescMain\DescMain.cpp">
@@ -1311,6 +1314,9 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Src\Object\C3DObjectImporter.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\FBX\CFBXStream.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>

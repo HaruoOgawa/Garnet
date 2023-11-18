@@ -33,7 +33,8 @@ namespace scene
 		m_BrainStemData(std::make_shared<file::CFile>("Resources\\Models\\BrainStem\\glTF-Binary\\BrainStem.glb")),
 		m_VRMData(std::make_shared<file::CFile>("Resources\\Models\\Alicia\\VRM\\AliciaSolid.vrm")),
 
-		m_FbxAnimationData(std::make_shared<file::CFile>("Resources\\Motions\\Walking.fbx")),
+		//m_FbxAnimationData(std::make_shared<file::CFile>("Resources\\Motions\\Walking.fbx")),
+		m_FbxAnimationData(std::make_shared<file::CFile>("Resources\\Motions\\Walking_WithSkin.fbx")),
 		m_FbxData(std::make_shared<file::CFile>("Resources\\Motions\\Walking_WithSkin.fbx")),
 
 		m_Background(std::make_shared<object::C3DObject>("", "ShadowPass")),

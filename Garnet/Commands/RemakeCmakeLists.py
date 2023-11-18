@@ -15,6 +15,8 @@ add_definitions(
 	-DUSE_VIEWER_CAMERA
 	-DUSE_INPUT_SYSTEM
 	-DUSE_GPGPU
+	-DUSE_FBX
+	-DFBXSDK_SHARED
 )
 
 add_executable(
@@ -27,8 +29,8 @@ add_executable(
 Shared_Post = """
 )
 
-target_include_directories(Garnet PRIVATE ../src/Library/DawnLib/include ../src/Library/glm  ../src/Library/tinygltf)
-# target_include_directories(Garnet PRIVATE ../src/Library/WebGPU ../src/Library/glm  ../src/Library/tinygltf)
+target_include_directories(Garnet PRIVATE ../src/Library/DawnLib/include ../src/Library/glm  ../src/Library/tinygltf  ../src/Library/FBX-SDK/include)
+# target_include_directories(Garnet PRIVATE ../src/Library/WebGPU ../src/Library/glm  ../src/Library/tinygltf  ../src/Library/FBX-SDK/include)
 
 if(EMSCRIPTEN)
 	target_link_options(Garnet PRIVATE 

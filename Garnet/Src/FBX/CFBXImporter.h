@@ -15,6 +15,7 @@
 #include <glm/gtx/quaternion.hpp>
 
 #include <fbxsdk.h>
+using namespace fbxsdk;
 
 namespace graphics
 {
@@ -43,8 +44,6 @@ namespace object {
 	class C3DObject;
 	class CNode;
 }
-
-using namespace fbxsdk;
 
 namespace fbx
 {
