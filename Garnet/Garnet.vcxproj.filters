@@ -1140,6 +1140,12 @@
     <ClInclude Include="Src\FBX\CFBXStream.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Animation\EHumanoidBones.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Animation\CBoneNameProvider.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\Main\DescMain\DescMain.cpp">
@@ -1317,6 +1323,9 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Src\FBX\CFBXStream.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Animation\CBoneNameProvider.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>

@@ -28,6 +28,7 @@
 #include "../Animation/CAnimationClip.h"
 #include "../Animation/CSkin.h"
 #include "../Animation/CJoint.h"
+#include "../Animation/CBoneNameProvider.h"
 
 namespace gltf
 {
@@ -889,6 +890,60 @@ namespace gltf
 			AnimationSkinList.push_back(Skin);
 		}
 
+		// Humanoid Bone‚ðŽ‚Á‚Ä‚¢‚ê‚ÎJoint‚ÉŠ„‚è“–‚Ä‚é
+		const auto& VRM = model.extensions.find("VRM");
+		if (VRM != model.extensions.end())
+		{
+			if (VRM->second.IsObject() && VRM->second.Has("humanoid"))
+			{
+				const auto& humanoid = VRM->second.Get("humanoid");
+
+				if (humanoid.IsObject() && humanoid.Has("humanBones"))
+				{
+					const auto& humanBones = humanoid.Get("humanBones");
+
+					if (humanBones.IsArray())
+					{
+						for (int BoneIndex = 0; BoneIndex < humanBones.ArrayLen(); BoneIndex++)
+						{
+							const auto& bone = humanBones.Get(BoneIndex);
+
+							if (bone.IsObject())
+							{
+								// Šg’£î•ñ‚ðŽæ“¾
+								std::string name = bone.Get("bone").Get<std::string>();
+								int nodeIndex = bone.Get("node").Get<int>();
+
+								// BoneName‚ðŽæ“¾
+								std::shared_ptr<animation::CBoneNameProvider> Provider = std::make_shared<animation::CBoneNameProvider>();
+								animation::EHumanoidBones BoneName = Provider->GetBoneName(name);
+
+								// Joint‚ÉBoneName‚ðŠ„‚è“–‚Ä‚é
+								if (nodeIndex >= 0 && nodeIndex < NodeList.size())
+								{
+									const auto& TargetNode = NodeList[nodeIndex];
+
+									for (const auto& Skin : AnimationSkinList)
+									{
+										for (const auto& Joint : Skin->GetJointList())
+										{
+											if (Joint->GetJointNode() == TargetNode)
+											{
+												Joint->SetBoneName(BoneName);
+
+												break;
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+				
+			}
+		}
+
 		return true;
 	}
 
@@ -935,7 +990,9 @@ namespace gltf
 					AnimationTarget = animation::EAnimationTarget::WEIGHTS;
 				}
 
-				std::shared_ptr<animation::CAnimationChannel> AnimationChannel = std::make_shared<animation::CAnimationChannel>(sampler, AnimationTarget, Node);
+				animation::EHumanoidBones BoneName = animation::EHumanoidBones::None;
+
+				std::shared_ptr<animation::CAnimationChannel> AnimationChannel = std::make_shared<animation::CAnimationChannel>(sampler, AnimationTarget, Node, BoneName);
 
 				AnimationClip->AddAnimationChannel(AnimationChannel);
 			}

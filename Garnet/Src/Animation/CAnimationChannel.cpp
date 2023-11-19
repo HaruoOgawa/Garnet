@@ -3,10 +3,11 @@
 
 namespace animation
 {
-	CAnimationChannel::CAnimationChannel(int SamplerIndex, EAnimationTarget AnimationTarget, const std::shared_ptr<object::CNode>& TargetNode):
+	CAnimationChannel::CAnimationChannel(int SamplerIndex, EAnimationTarget AnimationTarget, const std::shared_ptr<object::CNode>& TargetNode, EHumanoidBones BoneName):
 		m_SamplerIndex(SamplerIndex),
 		m_AnimationTarget(AnimationTarget),
-		m_TargetNode(TargetNode)
+		m_TargetNode(TargetNode),
+		m_BoneName(BoneName)
 	{
 	}
 
@@ -22,6 +23,16 @@ namespace animation
 	EAnimationTarget CAnimationChannel::GetAnimationTarget() const
 	{
 		return m_AnimationTarget;
+	}
+
+	void CAnimationChannel::SetTargetNode(const std::shared_ptr<object::CNode>& TargetNode)
+	{
+		m_TargetNode = TargetNode;
+	}
+
+	EHumanoidBones CAnimationChannel::GetBoneName() const
+	{
+		return m_BoneName;
 	}
 
 	bool CAnimationChannel::Update(const std::vector<float>& Value)
