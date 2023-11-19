@@ -21,6 +21,16 @@ namespace animation
 		m_ChannelList.push_back(AnimationChannel);
 	}
 
+	const std::vector<std::shared_ptr<animation::CAnimationSampler>>& CAnimationClip::GetSamplerList() const
+	{
+		return m_SamplerList;
+	}
+
+	const std::vector<std::shared_ptr<animation::CAnimationChannel>>& CAnimationClip::GetChannelList() const
+	{
+		return m_ChannelList;
+	}
+
 	bool CAnimationClip::Update(float DeltaSecondsTime)
 	{
 		m_CurrentTime += DeltaSecondsTime;

@@ -6,7 +6,8 @@ namespace object
 		m_PassName(PassName),
 		m_DepthPassName(DepthPassName),
 		m_ObjectTransform(std::make_shared<math::CTransform>()),
-		m_CurrentClipIndex(-1)
+		m_CurrentClipIndex(-1),
+		m_TotalJointIndexOffset(0)
 	{
 	}
 
@@ -279,6 +280,9 @@ namespace object
 				if (SkinIndex >= 0 && SkinIndex < m_AnimationSkinList.size() && IsPlayingAnimation())
 				{
 					Material->SetUniformValue("r_SkinMatrixBuffer", &SkinMatrixList[0], DynamicOffsetNum);
+
+					int JointIndexOffset = m_AnimationSkinList[SkinIndex]->GetJointIndexOffset();
+					Material->SetUniformValue("JointIndexOffset", &glm::ivec1(JointIndexOffset)[0], DynamicOffsetNum);
 				}
 
 				if (!Primitive->Draw(Material, DynamicOffsetNum, IsDepthPass)) return false;
@@ -348,12 +352,60 @@ namespace object
 
 	void C3DObject::AddAnimationSkin(const std::shared_ptr<animation::CSkin >& Skin)
 	{
+		int JointIndexOffset = m_TotalJointIndexOffset;
+
+		Skin->SetJointIndexOffset(JointIndexOffset);
+
 		m_AnimationSkinList.push_back(Skin);
+
+		m_TotalJointIndexOffset += static_cast<int>(Skin->GetJointList().size());
 	}
 
 	void C3DObject::AddAnimationClip(const std::shared_ptr<animation::CAnimationClip>& Clip)
 	{
 		m_AnimationClipList.push_back(Clip);
+	}
+
+	void C3DObject::AddHumanoidAnimationClip(const std::shared_ptr<animation::CAnimationClip>& SrcClip)
+	{
+		std::shared_ptr<animation::CAnimationClip> DstClip = std::make_shared<animation::CAnimationClip>();
+
+		// samplers
+		for (const auto& Sampler : SrcClip->GetSamplerList())
+		{
+			DstClip->AddAnimationSampler(Sampler);
+		}
+		
+		// channels
+		// 同じ名前のノードは一つしかない前提でchannelを作成する
+		for (const auto& SrcChannel : SrcClip->GetChannelList())
+		{
+			std::shared_ptr<object::CNode> TargetNode = nullptr;
+
+			for (const auto& Skin : m_AnimationSkinList)
+			{
+				for (const auto& Joint : Skin->GetJointList())
+				{
+					if (Joint->GetBoneName() == SrcChannel->GetBoneName())
+					{
+						TargetNode = Joint->GetJointNode();
+
+						break;
+					}
+				}
+
+				if (TargetNode)
+				{
+					break;
+				}
+			}
+
+			std::shared_ptr<animation::CAnimationChannel> DstChannel = std::make_shared<animation::CAnimationChannel>(SrcChannel->GetSamplerIndex(), SrcChannel->GetAnimationTarget(), TargetNode, SrcChannel->GetBoneName());
+
+			DstClip->AddAnimationChannel(DstChannel);
+		}
+		
+		m_AnimationClipList.push_back(DstClip);
 	}
 
 	const std::vector<std::shared_ptr<graphics::CMaterial>>& C3DObject::GetMaterialList() const

@@ -31,6 +31,7 @@ namespace object
 		std::vector<std::shared_ptr<animation::CSkin>> m_AnimationSkinList;
 		std::vector<std::shared_ptr<animation::CAnimationClip>> m_AnimationClipList;
 		int m_CurrentClipIndex;
+		int m_TotalJointIndexOffset;
 	private:
 		void CalcWorldMatrix(std::shared_ptr<CNode>& Node, const glm::mat4& ParentWorldMatrix);
 
@@ -60,6 +61,7 @@ namespace object
 		
 		void AddAnimationSkin(const std::shared_ptr<animation::CSkin >& Skin);
 		void AddAnimationClip(const std::shared_ptr<animation::CAnimationClip>& Clip);
+		void AddHumanoidAnimationClip(const std::shared_ptr<animation::CAnimationClip>& SrcClip);
 
 		void SetRootNodeIndexList(const std::vector<std::vector<int>>& RootNodeIndexList);
 		const std::vector<std::vector<int>>& GetRootNodeIndexList() const;

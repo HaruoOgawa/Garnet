@@ -52,4 +52,14 @@ namespace animation
 	{
 		return m_JointList;
 	}
+
+	void CSkin::SetJointIndexOffset(int JointIndexOffset)
+	{
+		m_JointIndexOffset = JointIndexOffset;
+	}
+
+	int CSkin::GetJointIndexOffset() const
+	{
+		return m_JointIndexOffset;
+	}
 }

@@ -30,8 +30,6 @@ namespace animation
 		int GetSamplerIndex() const;
 		EAnimationTarget GetAnimationTarget() const;
 
-		void SetTargetNode(const std::shared_ptr<object::CNode>& TargetNode);
-
 		EHumanoidBones GetBoneName() const;
 
 		bool Update(const std::vector<float>& Value);

@@ -417,7 +417,7 @@ namespace gltf
 				}
 
 				UniformBuffer->AddData("useSkinMeshAnimation", &glm::ivec1(0)[0], sizeof(int), 0);
-				UniformBuffer->AddData("pad0", &glm::ivec1(0)[0], sizeof(int), 0);
+				UniformBuffer->AddData("JointIndexOffset", &glm::ivec1(0)[0], sizeof(int), 0);
 				UniformBuffer->AddData("pad1", &glm::ivec1(0)[0], sizeof(int), 0);
 				UniformBuffer->AddData("pad2", &glm::ivec1(0)[0], sizeof(int), 0);
 
@@ -721,7 +721,7 @@ namespace gltf
 			UniformBuffer->AddData("useIBL", &glm::ivec1(0)[0], sizeof(int), 0);
 			
 			UniformBuffer->AddData("useSkinMeshAnimation", &glm::ivec1(0)[0], sizeof(int), 0);
-			UniformBuffer->AddData("pad0", &glm::ivec1(0)[0], sizeof(int), 0);
+			UniformBuffer->AddData("JointIndexOffset", &glm::ivec1(0)[0], sizeof(int), 0);
 			UniformBuffer->AddData("pad1", &glm::ivec1(0)[0], sizeof(int), 0);
 			UniformBuffer->AddData("pad2", &glm::ivec1(0)[0], sizeof(int), 0);
 

@@ -14,6 +14,7 @@ namespace animation
 	class CSkin
 	{
 		std::vector<std::shared_ptr<CJoint>> m_JointList;
+		int m_JointIndexOffset;
 	public:
 		CSkin();
 		virtual ~CSkin();
@@ -23,5 +24,8 @@ namespace animation
 		bool CalcSkinMatrixList(std::vector<glm::mat4>& MatrixList, const glm::mat4& ObjectModelMatrix);
 
 		const std::vector<std::shared_ptr<CJoint>>& GetJointList() const;
+
+		void SetJointIndexOffset(int JointIndexOffset);
+		int GetJointIndexOffset() const;
 	};
 }
