@@ -366,19 +366,37 @@ namespace object
 		m_AnimationClipList.push_back(Clip);
 	}
 
-	void C3DObject::AddHumanoidAnimationClip(const std::shared_ptr<animation::CAnimationClip>& SrcClip)
+	void C3DObject::AddHumanoidAnimationClip(const std::shared_ptr<animation::CAnimationClip>& SourceClip)
 	{
-		std::shared_ptr<animation::CAnimationClip> DstClip = std::make_shared<animation::CAnimationClip>();
+		// Clipの値をコピーする
+		std::shared_ptr<animation::CAnimationClip> TargetClip = std::make_shared<animation::CAnimationClip>();
 
 		// samplers
-		for (const auto& Sampler : SrcClip->GetSamplerList())
+		for (const auto& SourceSampler : SourceClip->GetSamplerList())
 		{
-			DstClip->AddAnimationSampler(Sampler);
+			std::shared_ptr<animation::CAnimationSampler> TargetSampler = std::make_shared<animation::CAnimationSampler>(SourceSampler->GetInterpolationType());
+
+			for (const auto& SourceKeyFrame : SourceSampler->GetKeyFrameList())
+			{
+				std::shared_ptr<animation::CKeyFrame> TargetKeyFrame = std::make_shared<animation::CKeyFrame>(SourceKeyFrame->GetType());
+
+				TargetKeyFrame->SetInput(SourceKeyFrame->GetInput());
+
+				std::vector<float> TargetOutput = SourceKeyFrame->GetOutput();
+				TargetKeyFrame->SetOutput(TargetOutput);
+
+				TargetSampler->AddKeyFrame(TargetKeyFrame);
+			}
+
+			TargetSampler->SetStartTime(SourceSampler->GetStartTime());
+			TargetSampler->SetEndTime(SourceSampler->GetEndTime());
+
+			TargetClip->AddAnimationSampler(TargetSampler);
 		}
 		
 		// channels
 		// 同じ名前のノードは一つしかない前提でchannelを作成する
-		for (const auto& SrcChannel : SrcClip->GetChannelList())
+		for (const auto& SourceChannel : SourceClip->GetChannelList())
 		{
 			std::shared_ptr<object::CNode> TargetNode = nullptr;
 
@@ -386,7 +404,7 @@ namespace object
 			{
 				for (const auto& Joint : Skin->GetJointList())
 				{
-					if (Joint->GetBoneName() == SrcChannel->GetBoneName())
+					if (Joint->GetBoneName() == SourceChannel->GetBoneName())
 					{
 						TargetNode = Joint->GetJointNode();
 
@@ -400,12 +418,86 @@ namespace object
 				}
 			}
 
-			std::shared_ptr<animation::CAnimationChannel> DstChannel = std::make_shared<animation::CAnimationChannel>(SrcChannel->GetSamplerIndex(), SrcChannel->GetAnimationTarget(), TargetNode, SrcChannel->GetBoneName());
+			std::shared_ptr<animation::CAnimationChannel> TargetChannel = std::make_shared<animation::CAnimationChannel>(SourceChannel->GetSamplerIndex(), SourceChannel->GetAnimationTarget(), TargetNode, SourceChannel->GetBoneName());
 
-			DstClip->AddAnimationChannel(DstChannel);
+			TargetClip->AddAnimationChannel(TargetChannel);
 		}
 		
-		m_AnimationClipList.push_back(DstClip);
+		// RigのReTargetingを行う
+		// リターゲティングとはリグの形が異なるアニメーションを自身のアニメーションに合うように調整すること
+		// 例えば身長が違うとアバターが伸びてしまうしリグが反対だとねじれてしまう
+		ReTargetingRig(SourceClip, TargetClip);
+
+		m_AnimationClipList.push_back(TargetClip);
+	}
+
+	void C3DObject::ReTargetingRig(const std::shared_ptr<animation::CAnimationClip>& SourceClip, const std::shared_ptr<animation::CAnimationClip>& TargetClip)
+	{
+		const auto& SourceSkin = SourceClip->GetDefaultSkin();
+		if (!SourceSkin) return;
+
+		for (const auto& TargetChannel : TargetClip->GetChannelList())
+		{
+			int TargetSamplerIndex = TargetChannel->GetSamplerIndex();
+			if (TargetSamplerIndex < 0 || TargetSamplerIndex >= TargetClip->GetSamplerList().size()) continue;
+
+			const auto& TargetSampler = TargetClip->GetSamplerList()[TargetSamplerIndex];
+
+			animation::EHumanoidBones BoneName = TargetChannel->GetBoneName();
+
+			// BoneTableに登録されていないものについては処理の対象外とする
+			if (BoneName == animation::EHumanoidBones::None) continue;
+
+			const auto& SourceBone = SourceSkin->GetBone(BoneName);
+			if (!SourceBone) continue;
+
+			for (const auto& TargetSkin : m_AnimationSkinList)
+			{
+				const auto& TargetBone = TargetSkin->GetBone(BoneName);
+				if (!TargetBone) continue;
+
+				// Targetはアニメーション情報の受け手側(例えばVRMとか). Sourceは送り手側
+				// なのでTargetBindMatrixは受け手側のT-Poseのワールドマトリックスを示す
+				// そしてここではJointのアニメーション位置を調整する
+				const glm::mat4 SourceInverseBindMatrix = glm::inverse(SourceBone->GetJointNode()->CalcWorldMatrix(SourceBone->GetJointNode()->GetLocalMatrix()));
+				const glm::mat4 TargetBindMatrix = TargetBone->GetJointNode()->CalcWorldMatrix(TargetBone->GetJointNode()->GetLocalMatrix());
+				const glm::mat4 InverseParentBindMatrix = glm::inverse(TargetBone->GetJointNode()->CalcParentWorldMatrix());
+
+				for (const auto& KeyFrame : TargetSampler->GetKeyFrameList())
+				{
+					std::vector<float> Value = KeyFrame->GetOutput();
+
+					switch (TargetChannel->GetAnimationTarget())
+					{
+					case animation::EAnimationTarget::MODELMATRIX:
+					{
+						// ひとまずMODELMATRIXだけ対応する
+						glm::mat4 CurrFrameLocalMatrix = glm::mat4(1.0f);
+						std::memcpy(&CurrFrameLocalMatrix[0][0], &Value[0], sizeof(float) * Value.size());
+
+						// ワールド座標でのT-Poseとソースアニメーションの差分を計算
+						// CalcWorldMatrix(CurrFrameLocalMatrix)で親要素のアニメーションは考慮していないのがポイント?
+						glm::mat4 LocalMatrix = SourceBone->GetJointNode()->CalcWorldMatrix(CurrFrameLocalMatrix) * SourceInverseBindMatrix;
+
+						// TargetBindMatrixを先ほど計算した差分だけ動かしてローカル座標に戻す
+						// TargetBindMatrixはワールド座標系なのでワールド座標系で少し動かしている
+						CurrFrameLocalMatrix = InverseParentBindMatrix * LocalMatrix * TargetBindMatrix;
+
+						std::memcpy(&Value[0], &CurrFrameLocalMatrix[0][0], sizeof(glm::mat4));
+					}
+						break;
+					default:
+						break;
+					}
+
+					// 値を再セットする
+					KeyFrame->SetOutput(Value);
+				}
+
+				// 対象のBoneについては一度しか計算しない
+				break;
+			}
+		}
 	}
 
 	const std::vector<std::shared_ptr<graphics::CMaterial>>& C3DObject::GetMaterialList() const

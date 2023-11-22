@@ -31,5 +31,7 @@ namespace animation
 		RightLowerLeg,
 		RightFoot,
 		RightToes,
+
+		Max,
 	};
 }

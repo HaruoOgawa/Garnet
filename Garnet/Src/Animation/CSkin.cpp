@@ -3,7 +3,8 @@
 
 namespace animation
 {
-	CSkin::CSkin()
+	CSkin::CSkin():
+		m_JointIndexOffset(0)
 	{
 	}
 
@@ -61,5 +62,28 @@ namespace animation
 	int CSkin::GetJointIndexOffset() const
 	{
 		return m_JointIndexOffset;
+	}
+
+	void CSkin::MakeBoneTable()
+	{
+		for (const auto& Joint : m_JointList)
+		{
+			EHumanoidBones CurrentBoneName = Joint->GetBoneName();
+
+			if (m_BoneTable.find(CurrentBoneName) == m_BoneTable.end())
+			{
+				m_BoneTable.emplace(CurrentBoneName, Joint);
+			}
+		}
+	}
+
+	std::shared_ptr<CJoint> CSkin::GetBone(EHumanoidBones BoneName)
+	{
+		std::shared_ptr<CJoint> Result = nullptr;
+
+		const auto it = m_BoneTable.find(BoneName);
+		if (it != m_BoneTable.end()) return it->second;
+
+		return Result;
 	}
 }

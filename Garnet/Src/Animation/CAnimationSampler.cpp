@@ -14,6 +14,11 @@ namespace animation
 	{
 	}
 
+	EInterpolationType CAnimationSampler::GetInterpolationType() const
+	{
+		return m_InterpolationType;
+	}
+
 	bool CAnimationSampler::CreateKeyFrame(EKeyFrameType Type, const std::vector<float>& inputList, const std::vector<float>& outputList)
 	{
 		const int NumComponent = GetNumComponentsInType(Type);
@@ -60,9 +65,19 @@ namespace animation
 		m_StartTime = StartTime;
 	}
 
+	float CAnimationSampler::GetStartTime() const
+	{
+		return m_StartTime;
+	}
+
 	void CAnimationSampler::SetEndTime(float EndTime)
 	{
 		m_EndTime = EndTime;
+	}
+
+	float CAnimationSampler::GetEndTime() const
+	{
+		return m_EndTime;
 	}
 
 	std::vector<float> CAnimationSampler::CopyFromNumComponent(int NumComponent, const std::vector<float>& Src, int Offset)

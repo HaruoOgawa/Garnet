@@ -7,6 +7,7 @@
 #include "CJoint.h"
 #include <memory>
 #include <vector>
+#include <unordered_map>
 #include <glm/glm.hpp>
 
 namespace animation
@@ -15,6 +16,8 @@ namespace animation
 	{
 		std::vector<std::shared_ptr<CJoint>> m_JointList;
 		int m_JointIndexOffset;
+
+		std::unordered_map<EHumanoidBones, std::shared_ptr<CJoint>> m_BoneTable;
 	public:
 		CSkin();
 		virtual ~CSkin();
@@ -27,5 +30,8 @@ namespace animation
 
 		void SetJointIndexOffset(int JointIndexOffset);
 		int GetJointIndexOffset() const;
+
+		void MakeBoneTable();
+		std::shared_ptr<CJoint> GetBone(EHumanoidBones BoneName);
 	};
 }

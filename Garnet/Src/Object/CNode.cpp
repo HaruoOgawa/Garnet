@@ -10,10 +10,12 @@ namespace object
 		m_MeshIndex(MeshIndex),
 		m_SkinIndex(-1),
 		m_LocalTransform(std::make_shared<math::CTransform>()),
+		m_DefaultLocalTransform(nullptr),
 		m_WorldMatrix(glm::mat4(1.0f)),
 		m_InverseBindMatrix(glm::mat4(1.0f)),
 		m_ParentNode(nullptr)
 	{
+		//m_DefaultLocalTransform = ;
 		SetMeshIndexWithDynamicOffset(MeshIndex, MeshList, MaterialList);
 	}
 
@@ -67,7 +69,7 @@ namespace object
 		return m_MeshIndex;
 	}
 
-	void CNode::SetLocalTransform(std::shared_ptr<math::CTransform>& LocalTransform)
+	void CNode::SetLocalTransform(const std::shared_ptr<math::CTransform>& LocalTransform)
 	{
 		m_LocalTransform = LocalTransform;
 	}
@@ -92,9 +94,44 @@ namespace object
 		return m_WorldMatrix;
 	}
 
-	glm::mat4 CNode::GetInverseWorldMatrix() const
+	glm::mat4 CNode::CalcWorldMatrix(const glm::mat4& LocalMatrix)
 	{
-		return glm::inverse(m_WorldMatrix);
+		glm::mat4 result = LocalMatrix;
+
+		std::shared_ptr<CNode> parentNode = m_ParentNode;
+		while (parentNode)
+		{
+			result = parentNode->GetLocalMatrix() * result;
+
+			parentNode = parentNode->GetParentNode();
+		}
+
+		return result;
+	}
+
+	void CNode::SetParentNode(const std::shared_ptr<CNode>& ParentNode)
+	{
+		m_ParentNode = ParentNode;
+	}
+
+	const std::shared_ptr<CNode>& CNode::GetParentNode() const
+	{
+		return m_ParentNode;
+	}
+
+	glm::mat4 CNode::CalcParentWorldMatrix()
+	{
+		glm::mat4 result = glm::mat4(1.0f);
+
+		std::shared_ptr<CNode> parentNode = m_ParentNode;
+		while (parentNode)
+		{
+			result = parentNode->GetLocalMatrix() * result;
+
+			parentNode = parentNode->GetParentNode();
+		}
+
+		return result;
 	}
 
 	const glm::vec3& CNode::GetPos() const
@@ -165,15 +202,5 @@ namespace object
 	const glm::mat4& CNode::GeInverseBindMatrix() const
 	{
 		return m_InverseBindMatrix;
-	}
-
-	void CNode::SetParentNode(const std::shared_ptr<CNode>& ParentNode)
-	{
-		m_ParentNode = ParentNode;
-	}
-
-	const std::shared_ptr<CNode>& CNode::GetParentNode() const
-	{
-		return m_ParentNode;
 	}
 }

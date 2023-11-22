@@ -39,6 +39,7 @@ namespace object
 		void ApplyParentNode(std::shared_ptr<CNode>& Node, const std::shared_ptr<CNode>& ParentNode);
 
 		bool IsPlayingAnimation();
+		void ReTargetingRig(const std::shared_ptr<animation::CAnimationClip>& SourceClip, const std::shared_ptr<animation::CAnimationClip>& DstClip);
 	public:
 		C3DObject(const std::string& PassName, const std::string& DepthPassName);
 		virtual ~C3DObject();
@@ -61,7 +62,7 @@ namespace object
 		
 		void AddAnimationSkin(const std::shared_ptr<animation::CSkin >& Skin);
 		void AddAnimationClip(const std::shared_ptr<animation::CAnimationClip>& Clip);
-		void AddHumanoidAnimationClip(const std::shared_ptr<animation::CAnimationClip>& SrcClip);
+		void AddHumanoidAnimationClip(const std::shared_ptr<animation::CAnimationClip>& SourceClip);
 
 		void SetRootNodeIndexList(const std::vector<std::vector<int>>& RootNodeIndexList);
 		const std::vector<std::vector<int>>& GetRootNodeIndexList() const;

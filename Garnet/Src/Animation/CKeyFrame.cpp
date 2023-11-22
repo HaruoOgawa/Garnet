@@ -8,6 +8,11 @@ namespace animation
 	{
 	}
 
+	EKeyFrameType CKeyFrame::GetType() const
+	{
+		return m_Type;
+	}
+
 	void CKeyFrame::SetInput(float val)
 	{
 		m_Input = val;

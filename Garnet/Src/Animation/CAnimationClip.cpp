@@ -3,7 +3,8 @@
 namespace animation
 {
 	CAnimationClip::CAnimationClip():
-		m_CurrentTime(0.0f)
+		m_CurrentTime(0.0f),
+		m_DefaultSkin(nullptr)
 	{
 	}
 
@@ -19,6 +20,16 @@ namespace animation
 	void CAnimationClip::AddAnimationChannel(const std::shared_ptr<animation::CAnimationChannel>& AnimationChannel)
 	{
 		m_ChannelList.push_back(AnimationChannel);
+	}
+
+	void CAnimationClip::SetDefaultSkin(const std::shared_ptr<animation::CSkin>& DefaultSkin)
+	{
+		m_DefaultSkin = DefaultSkin;
+	}
+
+	const std::shared_ptr<animation::CSkin>& CAnimationClip::GetDefaultSkin() const
+	{
+		return m_DefaultSkin;
 	}
 
 	const std::vector<std::shared_ptr<animation::CAnimationSampler>>& CAnimationClip::GetSamplerList() const

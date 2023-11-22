@@ -41,12 +41,16 @@ namespace animation
 		CAnimationSampler(EInterpolationType InterpolationType);
 		virtual ~CAnimationSampler();
 
+		EInterpolationType GetInterpolationType() const;
+
 		bool CreateKeyFrame(EKeyFrameType Type, const std::vector<float>& inputList, const std::vector<float>& outputList);
 		void AddKeyFrame(const std::shared_ptr<animation::CKeyFrame>& KeyFrame);
 		const std::vector<std::shared_ptr<animation::CKeyFrame>>& GetKeyFrameList() const;
 
 		void SetStartTime(float StartTime);
+		float GetStartTime() const;
 		void SetEndTime(float EndTime);
+		float GetEndTime() const;
 
 		bool GetCurrentFrame(float CurrentTime, std::vector<float>& Value, EAnimationTarget AnimationTarget);
 	};

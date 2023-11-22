@@ -125,6 +125,9 @@ namespace fbx
 			if (!CreateAnimationSkin(RootNode, Skin, FbxJointList, NodeList)) return false;
 		}
 
+		// BoneTableを作成
+		Skin->MakeBoneTable();
+
 		// アニメーション
 		if (!CreateAnimation(Scene, AnimationClipList, NodeList, Skin, FbxJointList)) return false;
 
@@ -862,6 +865,13 @@ namespace fbx
 			glm::mat4 InverseBindMatrix = glm::inverse(Joint->GetJointNode()->GetWorldMatrix());
 			Joint->GetJointNode()->SetInverseBindMatrix(InverseBindMatrix);
 
+			// BoneNameを取得
+			std::shared_ptr<animation::CBoneNameProvider> Provider = std::make_shared<animation::CBoneNameProvider>();
+			animation::EHumanoidBones BoneName = Provider->GetBoneName(pFBXNode->GetName());
+
+			// JointにBoneNameを割り当てる
+			Joint->SetBoneName(BoneName);
+
 			Skin->AddJoint(Joint);
 
 			// FbxJointListを登録
@@ -1012,6 +1022,9 @@ namespace fbx
 
 				AnimationClip->AddAnimationChannel(AnimationChannel);
 			}
+
+			//
+			AnimationClip->SetDefaultSkin(Skin);
 
 			AnimationClipList.push_back(AnimationClip);
 		}

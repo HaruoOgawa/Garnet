@@ -798,9 +798,6 @@ namespace gltf
 
 				math::CTransform::CastModelMatrixToTransform(modelMatrix, Pos, Rotation, Scale);
 
-				math::CTransform::ToYUpRightHandedCoordinate(Pos);
-				math::CTransform::ToYUpRightHandedCoordinate(Rotation);
-
 				Node->SetPos(Pos);
 				Node->SetRot(Rotation);
 				Node->SetScale(Scale);
@@ -818,7 +815,6 @@ namespace gltf
 				{
 					// glmのクォータニオンは wxyzで指定する必要がある？
 					glm::quat quat = glm::quat(static_cast<float>(rotation[3]), static_cast<float>(rotation[0]), static_cast<float>(rotation[1]), static_cast<float>(rotation[2]));
-					math::CTransform::ToYUpRightHandedCoordinate(quat);
 					Node->SetRot(quat);
 				}
 
@@ -826,7 +822,6 @@ namespace gltf
 				if (position.size() == 3)
 				{
 					glm::vec3 pos = glm::vec3(static_cast<float>(position[0]), static_cast<float>(position[1]), static_cast<float>(position[2]));
-					math::CTransform::ToYUpRightHandedCoordinate(pos);
 					Node->SetPos(pos);
 				}
 			}
@@ -942,6 +937,12 @@ namespace gltf
 				}
 				
 			}
+		}
+
+		// 拡張機能の結果を元にBoneTableを作成
+		for (const auto& Skin : AnimationSkinList)
+		{
+			Skin->MakeBoneTable();
 		}
 
 		return true;

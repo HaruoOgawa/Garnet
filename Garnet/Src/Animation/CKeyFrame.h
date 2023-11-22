@@ -31,6 +31,8 @@ namespace animation
 		CKeyFrame(EKeyFrameType Type);
 		virtual ~CKeyFrame() = default;
 
+		EKeyFrameType GetType() const;
+
 		void SetInput(float val);
 		float GetInput() const;
 
