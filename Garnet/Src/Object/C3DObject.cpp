@@ -296,7 +296,7 @@ namespace object
 			{
 				// Debug用: Jointの描画
 				const auto& JointNode = Joint->GetJointNode();
-				DebugSphere->SetPos(JointNode->GetWorldMatrix() * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
+				DebugSphere->SetPos(m_ObjectTransform->GetModelMatrix() * JointNode->GetWorldMatrix() * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
 				DebugSphere->SetScale(glm::vec3(0.25f));
 
 				if (JointNode->GetName() == "mixamorig:Hips")
@@ -404,6 +404,8 @@ namespace object
 			{
 				for (const auto& Joint : Skin->GetJointList())
 				{
+					if (Joint->GetBoneName() == animation::EHumanoidBones::None) continue;
+
 					if (Joint->GetBoneName() == SourceChannel->GetBoneName())
 					{
 						TargetNode = Joint->GetJointNode();
@@ -464,6 +466,7 @@ namespace object
 				
 				const glm::mat4 InverseParentBindMatrix = glm::inverse(TargetBone->GetJointNode()->CalcParentWorldMatrix());
 
+				// SourceとTargetのバインドマトリックスの差分を示す行列
 				const glm::mat4 ReTargetingMatrix = TargetBindMatrix * SourceInverseBindMatrix;
 
 				for (const auto& KeyFrame : TargetSampler->GetKeyFrameList())
@@ -472,22 +475,20 @@ namespace object
 
 					switch (TargetChannel->GetAnimationTarget())
 					{
+						// ひとまずMODELMATRIXだけ対応する
 					case animation::EAnimationTarget::MODELMATRIX:
 					{
-						// ひとまずMODELMATRIXだけ対応する
-						glm::mat4 CurrFrameLocalMatrix = glm::mat4(1.0f);
-						std::memcpy(&CurrFrameLocalMatrix[0][0], &Value[0], sizeof(float) * Value.size());
+						glm::mat4 TargetLocalFrameMatrix = glm::mat4(1.0f);
+						std::memcpy(&TargetLocalFrameMatrix[0][0], &Value[0], sizeof(float) * Value.size());
 
-						// ワールド座標でのT-Poseとソースアニメーションの差分を計算
-						// CalcWorldMatrix(CurrFrameLocalMatrix)で親要素のアニメーションは考慮していないのがポイント?
-						glm::mat4 LocalMatrix = SourceBone->GetJointNode()->CalcWorldMatrix(CurrFrameLocalMatrix);
-						//LocalMatrix = SourceBone->GetJointNode()->CalcWorldMatrix(SourceBone->GetJointNode()->GetLocalMatrix());
+						//
+						glm::mat4 SourceWorldFrameMatrix = SourceBone->GetJointNode()->CalcWorldMatrix(TargetLocalFrameMatrix);
+						//SourceWorldFrameMatrix = SourceBone->GetJointNode()->CalcWorldMatrix(SourceBone->GetJointNode()->GetLocalMatrix());
 
-						// TargetBindMatrixを先ほど計算した差分だけ動かしてローカル座標に戻す
-						// TargetBindMatrixはワールド座標系なのでワールド座標系で少し動かしている
-						CurrFrameLocalMatrix = InverseParentBindMatrix * ReTargetingMatrix * LocalMatrix;
+						// ワールド座標系でのアニメーション位置をReTargetingMatrixの分だけずらすことでTargetのSkinに合わせた後、ローカル座標系でのアニメーションに戻す
+						TargetLocalFrameMatrix = InverseParentBindMatrix * ReTargetingMatrix * SourceWorldFrameMatrix;
 
-						std::memcpy(&Value[0], &CurrFrameLocalMatrix[0][0], sizeof(glm::mat4));
+						std::memcpy(&Value[0], &TargetLocalFrameMatrix[0][0], sizeof(glm::mat4));
 					}
 						break;
 					default:
