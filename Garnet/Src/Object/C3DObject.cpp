@@ -461,7 +461,10 @@ namespace object
 				// そしてここではJointのアニメーション位置を調整する
 				const glm::mat4 SourceInverseBindMatrix = glm::inverse(SourceBone->GetJointNode()->CalcWorldMatrix(SourceBone->GetJointNode()->GetLocalMatrix()));
 				const glm::mat4 TargetBindMatrix = TargetBone->GetJointNode()->CalcWorldMatrix(TargetBone->GetJointNode()->GetLocalMatrix());
+				
 				const glm::mat4 InverseParentBindMatrix = glm::inverse(TargetBone->GetJointNode()->CalcParentWorldMatrix());
+
+				const glm::mat4 ReTargetingMatrix = TargetBindMatrix * SourceInverseBindMatrix;
 
 				for (const auto& KeyFrame : TargetSampler->GetKeyFrameList())
 				{
@@ -477,11 +480,12 @@ namespace object
 
 						// ワールド座標でのT-Poseとソースアニメーションの差分を計算
 						// CalcWorldMatrix(CurrFrameLocalMatrix)で親要素のアニメーションは考慮していないのがポイント?
-						glm::mat4 LocalMatrix = SourceBone->GetJointNode()->CalcWorldMatrix(CurrFrameLocalMatrix) * SourceInverseBindMatrix;
+						glm::mat4 LocalMatrix = SourceBone->GetJointNode()->CalcWorldMatrix(CurrFrameLocalMatrix);
+						//LocalMatrix = SourceBone->GetJointNode()->CalcWorldMatrix(SourceBone->GetJointNode()->GetLocalMatrix());
 
 						// TargetBindMatrixを先ほど計算した差分だけ動かしてローカル座標に戻す
 						// TargetBindMatrixはワールド座標系なのでワールド座標系で少し動かしている
-						CurrFrameLocalMatrix = InverseParentBindMatrix * LocalMatrix * TargetBindMatrix;
+						CurrFrameLocalMatrix = InverseParentBindMatrix * ReTargetingMatrix * LocalMatrix;
 
 						std::memcpy(&Value[0], &CurrFrameLocalMatrix[0][0], sizeof(glm::mat4));
 					}
