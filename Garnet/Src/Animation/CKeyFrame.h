@@ -38,5 +38,8 @@ namespace animation
 
 		void SetOutput(const std::vector<float>& val);
 		const std::vector<float>& GetOutput() const;
+
+		void SetOutput(const float* pData, int byteSize);
+		void GetOutput(float* pData);
 	};
 }

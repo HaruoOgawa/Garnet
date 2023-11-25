@@ -52,6 +52,6 @@ namespace animation
 		void SetEndTime(float EndTime);
 		float GetEndTime() const;
 
-		bool GetCurrentFrame(float CurrentTime, std::vector<float>& Value, EAnimationTarget AnimationTarget);
+		bool ComputeCurrentFrame(float CurrentTime, std::vector<float>& Value, EAnimationTarget AnimationTarget);
 	};
 }

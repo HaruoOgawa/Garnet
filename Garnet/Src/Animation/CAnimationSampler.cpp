@@ -127,7 +127,7 @@ namespace animation
 		}
 	}
 
-	bool CAnimationSampler::GetCurrentFrame(float CurrentTime, std::vector<float>& Value, EAnimationTarget AnimationTarget)
+	bool CAnimationSampler::ComputeCurrentFrame(float CurrentTime, std::vector<float>& Value, EAnimationTarget AnimationTarget)
 	{
 		float CalcCurrentTime = glm::mod(CurrentTime, m_EndTime);
 

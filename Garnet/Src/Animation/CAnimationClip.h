@@ -32,7 +32,11 @@ namespace animation
 		const std::vector<std::shared_ptr<animation::CAnimationChannel>>& GetChannelList() const;
 
 		bool Update(float DeltaSecondsTime);
+		bool UpdateFrame(float CurrentTime);
 
 		int GetFrameCount();
+
+		// ˆê”ÔƒtƒŒ[ƒ€”‚ª‘½‚¢Sampler‚ğæ“¾‚·‚é
+		std::shared_ptr<animation::CAnimationSampler> GetSamplerWithMostFrames();
 	};
 }

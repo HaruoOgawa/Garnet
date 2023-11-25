@@ -86,4 +86,22 @@ namespace animation
 
 		return Result;
 	}
+
+	void CSkin::CalcSkinWorldMatrix()
+	{
+		for (const auto& Joint : m_JointList)
+		{
+			const auto& LocalMatrix = Joint->GetJointNode()->GetLocalMatrix();
+
+			Joint->GetJointNode()->CalcWorldMatrix(LocalMatrix);
+		}
+	}
+
+	void CSkin::ResetToDefaultSkinLocal()
+	{
+		for (const auto& Joint : m_JointList)
+		{
+			Joint->GetJointNode()->ResetToDefaultLocalTransform();
+		}
+	}
 }

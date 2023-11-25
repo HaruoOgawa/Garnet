@@ -33,5 +33,8 @@ namespace animation
 
 		void MakeBoneTable();
 		std::shared_ptr<CJoint> GetBone(EHumanoidBones BoneName);
+
+		void CalcSkinWorldMatrix();
+		void ResetToDefaultSkinLocal();
 	};
 }

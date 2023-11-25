@@ -114,8 +114,14 @@ namespace fbx
 
 		Object->SetRootNodeIndexList(RootNodeIndexList);
 
+		// DefaultMatrix‚ð•Û‘¶
+		Object->ApplyDefaultLocalTransform();
+
 		// WorldMatrix‚ðŒvŽZ
 		Object->CalcWorldMatrix();
+
+		// ParentNode‚ðÝ’è‚·‚é
+		Object->ApplyParentNode();
 
 		// Skin
 		std::shared_ptr<animation::CSkin> Skin = std::make_shared<animation::CSkin>();

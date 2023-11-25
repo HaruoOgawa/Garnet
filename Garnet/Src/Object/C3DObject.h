@@ -35,11 +35,10 @@ namespace object
 	private:
 		void CalcWorldMatrix(std::shared_ptr<CNode>& Node, const glm::mat4& ParentWorldMatrix);
 
-		void ApplyParentNode();
 		void ApplyParentNode(std::shared_ptr<CNode>& Node, const std::shared_ptr<CNode>& ParentNode);
 
 		bool IsPlayingAnimation();
-		void ReTargetingRig(const std::shared_ptr<animation::CAnimationClip>& SourceClip, const std::shared_ptr<animation::CAnimationClip>& DstClip);
+		bool ReTargetingRig(const std::shared_ptr<animation::CAnimationClip>& SourceClip, const std::shared_ptr<animation::CAnimationClip>& DstClip);
 	public:
 		C3DObject(const std::string& PassName, const std::string& DepthPassName);
 		virtual ~C3DObject();
@@ -49,7 +48,11 @@ namespace object
 		virtual bool Draw(bool IsDepthPass, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, 
 			const std::shared_ptr<graphics::CDrawInfo>& DrawInfo, const std::shared_ptr<object::C3DObject>& DebugSphere = nullptr);
 
+		void ApplyDefaultLocalTransform();
+
 		void CalcWorldMatrix();
+
+		void ApplyParentNode();
 
 		void AddNode(const std::shared_ptr<CNode>& Node);
 		const std::vector<std::shared_ptr<CNode>>& GetNodeList() const;

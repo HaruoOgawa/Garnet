@@ -46,6 +46,13 @@ namespace animation
 	{
 		m_CurrentTime += DeltaSecondsTime;
 
+		if (!UpdateFrame(m_CurrentTime)) return false;
+
+		return true;
+	}
+
+	bool CAnimationClip::UpdateFrame(float CurrentTime)
+	{
 		for (const auto& Channel : m_ChannelList)
 		{
 			int SamplerIndex = Channel->GetSamplerIndex();
@@ -54,7 +61,7 @@ namespace animation
 			const auto& Sampler = m_SamplerList[SamplerIndex];
 			std::vector<float> Value;
 
-			if (!Sampler->GetCurrentFrame(m_CurrentTime, Value, Channel->GetAnimationTarget())) return false;
+			if (!Sampler->ComputeCurrentFrame(CurrentTime, Value, Channel->GetAnimationTarget())) return false;
 
 			if (!Channel->Update(Value)) return false;
 		}
@@ -72,5 +79,27 @@ namespace animation
 		}
 
 		return Count;
+	}
+
+	// ˆê”ÔƒtƒŒ[ƒ€”‚ª‘½‚¢Sampler‚ğæ“¾‚·‚é
+	std::shared_ptr<animation::CAnimationSampler> CAnimationClip::GetSamplerWithMostFrames()
+	{
+		std::shared_ptr<animation::CAnimationSampler> Result = nullptr;
+
+		size_t maxSize = 0;
+
+		for (const auto& Sampler : m_SamplerList)
+		{
+			size_t size = Sampler->GetKeyFrameList().size();
+
+			if (size > maxSize)
+			{
+				size = maxSize;
+
+				Result = Sampler;
+			}
+		}
+
+		return Result;
 	}
 }

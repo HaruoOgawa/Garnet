@@ -10,12 +10,11 @@ namespace object
 		m_MeshIndex(MeshIndex),
 		m_SkinIndex(-1),
 		m_LocalTransform(std::make_shared<math::CTransform>()),
-		m_DefaultLocalTransform(nullptr),
+		m_DefaultLocalTransform(std::make_shared<math::CTransform>()),
 		m_WorldMatrix(glm::mat4(1.0f)),
 		m_InverseBindMatrix(glm::mat4(1.0f)),
 		m_ParentNode(nullptr)
 	{
-		//m_DefaultLocalTransform = ;
 		SetMeshIndexWithDynamicOffset(MeshIndex, MeshList, MaterialList);
 	}
 
@@ -119,21 +118,6 @@ namespace object
 		return m_ParentNode;
 	}
 
-	glm::mat4 CNode::CalcParentWorldMatrix()
-	{
-		glm::mat4 result = glm::mat4(1.0f);
-
-		std::shared_ptr<CNode> parentNode = m_ParentNode;
-		while (parentNode)
-		{
-			result = parentNode->GetLocalMatrix() * result;
-
-			parentNode = parentNode->GetParentNode();
-		}
-
-		return result;
-	}
-
 	const glm::vec3& CNode::GetPos() const
 	{
 		return m_LocalTransform->GetPos();
@@ -167,6 +151,62 @@ namespace object
 	void CNode::SetScale(const glm::vec3& Scale)
 	{
 		m_LocalTransform->SetScale(Scale);
+	}
+
+	// 現在のTransformをデフォルトのTransformとして保存する
+	void CNode::SaveAsDefaultLocalTransform()
+	{
+		m_DefaultLocalTransform->SetPos(m_LocalTransform->GetPos());
+		m_DefaultLocalTransform->SetRot(m_LocalTransform->GetRot());
+		m_DefaultLocalTransform->SetScale(m_LocalTransform->GetScale());
+	}
+
+	const std::shared_ptr<math::CTransform>& CNode::GetDefaultLocalTransform() const
+	{
+		return m_DefaultLocalTransform;
+	}
+
+	glm::mat4 CNode::GetDefaultLocalMatrix() const
+	{
+		return m_DefaultLocalTransform->GetModelMatrix();
+	}
+
+	glm::mat4 CNode::CalcDefaultWorldMatrix(const glm::mat4& LocalMatrix)
+	{
+		glm::mat4 result = LocalMatrix;
+
+		std::shared_ptr<CNode> parentNode = m_ParentNode;
+		while (parentNode)
+		{
+			result = parentNode->GetDefaultLocalMatrix() * result;
+
+			parentNode = parentNode->GetParentNode();
+		}
+
+		return result;
+	}
+
+	glm::mat4 CNode::CalcDefaultParentWorldMatrix()
+	{
+		glm::mat4 result = glm::mat4(1.0f);
+
+		std::shared_ptr<CNode> parentNode = m_ParentNode;
+		while (parentNode)
+		{
+			result = parentNode->GetDefaultLocalMatrix() * result;
+
+			parentNode = parentNode->GetParentNode();
+		}
+
+		return result;
+	}
+
+	// Transformをデフォルトに戻す
+	void CNode::ResetToDefaultLocalTransform()
+	{
+		m_LocalTransform->SetPos(m_DefaultLocalTransform->GetPos());
+		m_LocalTransform->SetRot(m_DefaultLocalTransform->GetRot());
+		m_LocalTransform->SetScale(m_DefaultLocalTransform->GetScale());
 	}
 
 	const std::vector<int>& CNode::GetChildrenNodeIndexList() const
