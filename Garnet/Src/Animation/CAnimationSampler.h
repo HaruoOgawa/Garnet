@@ -1,12 +1,15 @@
 #pragma once
 
 #include <vector>
+#include <unordered_map>
+#include <map>
 #include <memory>
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 
 #include "CKeyFrame.h"
 #include "EAnimationTarget.h"
+#include "EHumanoidBones.h"
 
 namespace animation
 {
@@ -53,5 +56,8 @@ namespace animation
 		float GetEndTime() const;
 
 		bool ComputeCurrentFrame(float CurrentTime, std::vector<float>& Value, EAnimationTarget AnimationTarget);
+
+		// ボーンに基づく現在のフレームを取得
+		static std::shared_ptr<CKeyFrame> GetCurrentKeyFrameBasedBone(float CurrentTime, EHumanoidBones BoneName, const std::unordered_map<animation::EHumanoidBones, std::vector<std::shared_ptr<animation::CKeyFrame>>>& FrameMatrixMap);
 	};
 }

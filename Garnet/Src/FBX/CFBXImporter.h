@@ -77,6 +77,9 @@ namespace fbx
 			const std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, const std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList, const std::shared_ptr<animation::CSkin>& Skin);
 
 		static bool CreateAnimationSkin(FbxNode* pFBXNode, std::shared_ptr<animation::CSkin>& Skin, std::vector<FbxNode*>& FbxJointList, const std::vector<std::shared_ptr<object::CNode>>& NodeList);
+		
+		static void ApplyParentJointList(const std::shared_ptr<animation::CSkin>& Skin, const std::vector<std::shared_ptr<object::CNode>>& NodeList);
+		
 		static bool CreateAnimation(FbxScene* Scene, std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList, const std::vector<std::shared_ptr<object::CNode>>& NodeList, 
 			const std::shared_ptr<animation::CSkin>& Skin, const std::vector<FbxNode*>& FbxJointList);
 		

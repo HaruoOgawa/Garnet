@@ -16,6 +16,8 @@ namespace animation
 		std::shared_ptr<object::CNode> m_JointNode;
 
 		EHumanoidBones m_BoneName;
+
+		EHumanoidBones m_ParentBoneName;
 	public:
 		CJoint(const std::shared_ptr<object::CNode>& JointNode);
 		virtual ~CJoint();
@@ -24,5 +26,8 @@ namespace animation
 
 		EHumanoidBones GetBoneName() const;
 		void SetBoneName(EHumanoidBones BoneName);
+
+		EHumanoidBones GetParentBoneName() const;
+		void SetParentBoneName(EHumanoidBones BoneName);
 	};
 }

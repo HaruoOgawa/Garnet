@@ -126,6 +126,34 @@ namespace gltf
 		std::vector<std::shared_ptr<animation::CSkin>> AnimationSkinList;
 		if (!CreateAnimationSkin(model, AnimationSkinList, NodeList)) return false;
 
+		// NodeとSkinは先に追加しておく
+		for (const auto& Node : NodeList)
+		{
+			Object->AddNode(Node);
+		}
+
+		for (const auto& Skin : AnimationSkinList)
+		{
+			Object->AddAnimationSkin(Skin);
+		}
+
+		Object->SetRootNodeIndexList(RootNodeIndexList);
+
+		// DefaultLocalTransformを保存する
+		Object->ApplyDefaultLocalTransform();
+
+		// 親ノードを設定
+		Object->ApplyParentNode();
+
+		// ワールド行列の計算
+		Object->CalcWorldMatrix();
+
+		// 親のJointを追加
+		for (const auto& Skin : AnimationSkinList)
+		{
+			ApplyParentJointList(Skin, NodeList);
+		}
+
 		// アニメーション
 		std::vector<std::shared_ptr<animation::CAnimationClip>> AnimationClipList;
 		if (!CreateAnimation(model, AnimationClipList, NodeList)) return false;
@@ -141,22 +169,10 @@ namespace gltf
 			Object->AddMesh(Mesh);
 		}
 
-		for (const auto& Node : NodeList)
-		{
-			Object->AddNode(Node);
-		}
-
-		for (const auto& Skin : AnimationSkinList)
-		{
-			Object->AddAnimationSkin(Skin);
-		}
-
 		for (const auto& Clip : AnimationClipList)
 		{
 			Object->AddAnimationClip(Clip);
 		}
-
-		Object->SetRootNodeIndexList(RootNodeIndexList);
 
 		// オブジェクトを生成
 		if (!Object->Create(pGraphicsAPI, DepthVertex, DepthFragment, TextureSet)) return false;
@@ -946,6 +962,24 @@ namespace gltf
 		}
 
 		return true;
+	}
+
+
+	void CGLTFImporter::ApplyParentJointList(const std::shared_ptr<animation::CSkin>& Skin, const std::vector<std::shared_ptr<object::CNode>>& NodeList)
+	{
+		for (const auto& Joint : Skin->GetJointList())
+		{
+			const auto& ParentNode = Joint->GetJointNode()->GetParentNode();
+			if (!ParentNode) continue;
+
+			std::shared_ptr<animation::CBoneNameProvider> Provider = std::make_shared<animation::CBoneNameProvider>();
+			animation::EHumanoidBones ParentBoneName = Provider->GetBoneName(ParentNode->GetName());
+
+			const auto& ParentJoint = Skin->GetBone(ParentBoneName);
+			if (!ParentJoint) continue;
+
+			Joint->SetParentBoneName(ParentJoint->GetBoneName());
+		}
 	}
 
 	bool CGLTFImporter::CreateAnimation(const tinygltf::Model& model, std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList, const std::vector<std::shared_ptr<object::CNode>>& NodeList)

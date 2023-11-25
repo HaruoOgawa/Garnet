@@ -93,7 +93,8 @@ namespace animation
 		{
 			const auto& LocalMatrix = Joint->GetJointNode()->GetLocalMatrix();
 
-			Joint->GetJointNode()->CalcWorldMatrix(LocalMatrix);
+			const glm::mat4 WorldMatrix = Joint->GetJointNode()->CalcWorldMatrix(LocalMatrix);
+			Joint->GetJointNode()->SetWorldMatrix(WorldMatrix);
 		}
 	}
 

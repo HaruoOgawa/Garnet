@@ -38,5 +38,7 @@ namespace animation
 
 		// ˆê”ÔƒtƒŒ[ƒ€”‚ª‘½‚¢Sampler‚ğæ“¾‚·‚é
 		std::shared_ptr<animation::CAnimationSampler> GetSamplerWithMostFrames();
+
+		float GetCurrentTime() const;
 	};
 }

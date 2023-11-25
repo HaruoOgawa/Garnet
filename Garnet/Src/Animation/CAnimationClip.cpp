@@ -102,4 +102,9 @@ namespace animation
 
 		return Result;
 	}
+
+	float CAnimationClip::GetCurrentTime() const
+	{
+		return m_CurrentTime;
+	}
 }

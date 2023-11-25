@@ -131,8 +131,22 @@ namespace fbx
 			if (!CreateAnimationSkin(RootNode, Skin, FbxJointList, NodeList)) return false;
 		}
 
+		Object->AddAnimationSkin(Skin);
+
 		// BoneTableを作成
 		Skin->MakeBoneTable();
+
+		// DefaultLocalTransformを保存する
+		Object->ApplyDefaultLocalTransform();
+
+		// 親ノードを設定
+		Object->ApplyParentNode();
+
+		// ワールド行列の計算
+		Object->CalcWorldMatrix();
+
+		// 親のJointを追加
+		ApplyParentJointList(Skin, NodeList);
 
 		// アニメーション
 		if (!CreateAnimation(Scene, AnimationClipList, NodeList, Skin, FbxJointList)) return false;
@@ -186,8 +200,6 @@ namespace fbx
 			{
 				Object->AddMesh(Mesh);
 			}
-
-			Object->AddAnimationSkin(Skin);
 
 			// FrameCountが多いものと少ないものといった感じでFBXのAnimationClipは複数個存在することがある
 			// どちらか一方がループ用の短いアニメーションだったり長いダンスモーションだったりするので
@@ -891,6 +903,23 @@ namespace fbx
 		}
 
 		return true;
+	}
+
+	void CFBXImporter::ApplyParentJointList(const std::shared_ptr<animation::CSkin>& Skin, const std::vector<std::shared_ptr<object::CNode>>& NodeList)
+	{
+		for (const auto& Joint : Skin->GetJointList())
+		{
+			const auto& ParentNode = Joint->GetJointNode()->GetParentNode();
+			if (!ParentNode) continue;
+
+			std::shared_ptr<animation::CBoneNameProvider> Provider = std::make_shared<animation::CBoneNameProvider>();
+			animation::EHumanoidBones ParentBoneName = Provider->GetBoneName(ParentNode->GetName());
+
+			const auto& ParentJoint = Skin->GetBone(ParentBoneName);
+			if (!ParentJoint) continue;
+
+			Joint->SetParentBoneName(ParentJoint->GetBoneName());
+		}
 	}
 
 	bool CFBXImporter::CreateAnimation(FbxScene* Scene, std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList, const std::vector<std::shared_ptr<object::CNode>>& NodeList,
