@@ -28,7 +28,7 @@ namespace math
 
 		void CastModelMatrixToTransform(const glm::mat4& ModelMatrix);
 		
-		static void CastModelMatrixToTransform(const glm::mat4& ModelMatrix, glm::vec3& Translation, glm::quat& Rotation, glm::vec3& Scale);
+		static void CastModelMatrixToTransform(const glm::mat4& ModelMatrix, glm::vec3& Translation, glm::quat& Rotation, glm::vec3& Scale, bool UseScale = false);
 
 		static void ToYUpRightHandedCoordinate(glm::vec3& Translation);
 		static void ToYUpRightHandedCoordinate(glm::quat& Rotation);

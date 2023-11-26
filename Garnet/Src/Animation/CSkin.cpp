@@ -70,7 +70,7 @@ namespace animation
 		{
 			EHumanoidBones CurrentBoneName = Joint->GetBoneName();
 
-			if (m_BoneTable.find(CurrentBoneName) == m_BoneTable.end())
+			if (CurrentBoneName != animation::EHumanoidBones::None && m_BoneTable.find(CurrentBoneName) == m_BoneTable.end())
 			{
 				m_BoneTable.emplace(CurrentBoneName, Joint);
 			}
@@ -79,12 +79,10 @@ namespace animation
 
 	std::shared_ptr<CJoint> CSkin::GetBone(EHumanoidBones BoneName)
 	{
-		std::shared_ptr<CJoint> Result = nullptr;
-
 		const auto it = m_BoneTable.find(BoneName);
-		if (it != m_BoneTable.end()) return it->second;
+		if (BoneName != animation::EHumanoidBones::None && it != m_BoneTable.end()) return it->second;
 
-		return Result;
+		return nullptr;
 	}
 
 	void CSkin::CalcSkinWorldMatrix()
