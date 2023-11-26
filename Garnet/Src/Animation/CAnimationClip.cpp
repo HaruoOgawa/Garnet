@@ -46,6 +46,11 @@ namespace animation
 	{
 		m_CurrentTime += DeltaSecondsTime;
 
+		if (m_SamplerList.size() > 0)
+		{
+			m_CurrentTime = glm::mod(m_CurrentTime, m_SamplerList[0]->GetEndTime());
+		}
+
 		if (!UpdateFrame(m_CurrentTime)) return false;
 
 		return true;

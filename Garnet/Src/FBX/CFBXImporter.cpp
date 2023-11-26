@@ -815,6 +815,9 @@ namespace fbx
 		// たぶん単位がcmなので0.01倍することで計算に一般的に使用するmに直す
 		math::CTransform::CastCentiMeter2Meter(Pos);
 
+		math::CTransform::ToYUpRightHandedCoordinate(Pos);
+		math::CTransform::ToYUpRightHandedCoordinate(Rotation);
+
 		Node->SetPos(Pos);
 		Node->SetRot(Rotation);
 		Node->SetScale(Scale);
@@ -995,6 +998,9 @@ namespace fbx
 							// FbxはTranslation・Posが100倍になっているので調整する
 							// たぶん単位がcmなので0.01倍することで計算に一般的に使用するmに直す
 							math::CTransform::CastCentiMeter2Meter(Pos);
+
+							math::CTransform::ToYUpRightHandedCoordinate(Pos);
+							math::CTransform::ToYUpRightHandedCoordinate(Rotation);
 
 							math::CTransform::CalcModelMatrix(CurrentMatrix, Pos, Rotation, Scale);
 						}

@@ -310,17 +310,17 @@ namespace object
 				DebugSphere->SetPos(m_ObjectTransform->GetModelMatrix() * JointNode->GetWorldMatrix() * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
 				DebugSphere->SetScale(glm::vec3(0.25f));
 
-				if (JointNode->GetName() == "mixamorig:Hips")
+				if (Joint->GetBoneName() == animation::EHumanoidBones::Hips)
 				{
 					DebugSphere->GetMaterialList()[0]->SetUniformValue("baseColor", &glm::vec4(1.0f, 0.0f, 0.0f, 1.0f)[0]);
 				}
-				else if (JointNode->GetName() == "mixamorig:RightUpLeg" || JointNode->GetName() == "mixamorig:LeftUpLeg" || JointNode->GetName() == "mixamorig:Spine")
+				else if (Joint->GetBoneName() == animation::EHumanoidBones::LeftUpperArm || Joint->GetBoneName() == animation::EHumanoidBones::RightUpperArm)
 				{
 					DebugSphere->GetMaterialList()[0]->SetUniformValue("baseColor", &glm::vec4(0.0f, 1.0f, 0.0f, 1.0f)[0]);
 				}
-				else if (JointNode->GetName() == "mixamorig:LeftLeg" || JointNode->GetName() == "mixamorig:RightLeg" || JointNode->GetName() == "mixamorig:Spine1")
+				else if (Joint->GetBoneName() == animation::EHumanoidBones::LeftLowerArm || Joint->GetBoneName() == animation::EHumanoidBones::RightLowerArm)
 				{
-					DebugSphere->GetMaterialList()[0]->SetUniformValue("baseColor", &glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)[0]);
+					DebugSphere->GetMaterialList()[0]->SetUniformValue("baseColor", &glm::vec4(0.0f, 1.0f, 1.0f, 1.0f)[0]);
 				}
 				else
 				{
@@ -449,189 +449,57 @@ namespace object
 		const auto& SourceSkin = SourceClip->GetDefaultSkin();
 		if (!SourceSkin) return false;
 
-		// Sourceのアニメーションフレームワールドマトリックスリストを作成
-		std::unordered_map<animation::EHumanoidBones, std::vector<std::shared_ptr<animation::CKeyFrame>>> SourceWorldFrameMatrixMap;
+		// Rigのリターゲティングを実行する
+		for (const auto& TargetChannel : TargetClip->GetChannelList())
 		{
-			// 一番フレーム数が多いサンプラーをペースメーカーとする
-			auto PaceMaker = SourceClip->GetSamplerWithMostFrames();
-			if (!PaceMaker) return false;
+			int TargetSamplerIndex = TargetChannel->GetSamplerIndex();
+			if (TargetSamplerIndex < 0 || TargetSamplerIndex >= TargetClip->GetSamplerList().size()) continue;
 
-			for (const auto& KeyFrame : PaceMaker->GetKeyFrameList())
+			const auto& TargetSampler = TargetClip->GetSamplerList()[TargetSamplerIndex];
+
+			animation::EHumanoidBones BoneName = TargetChannel->GetBoneName();
+
+			// BoneTableに登録されていないものについては処理の対象外とする
+			if (BoneName == animation::EHumanoidBones::None) continue;
+
+			const auto& SourceBone = SourceSkin->GetBone(BoneName);
+			if (!SourceBone) continue;
+
+			const glm::mat4 SourceRest = SourceBone->GetJointNode()->GetDefaultLocalMatrix();
+			const glm::mat4 InverseSourceRest = glm::inverse(SourceRest);
+
+			const glm::mat4 SourcePGRest = SourceBone->GetJointNode()->CalcDefaultParentWorldMatrix();
+			const glm::mat4 InverseSourcePGRest = glm::inverse(SourcePGRest);
+
+			for (const auto& TargetSkin : m_AnimationSkinList)
 			{
-				const float CurrentTime = KeyFrame->GetInput();
+				const auto& TargetBone = TargetSkin->GetBone(BoneName);
+				if (!TargetBone) continue;
 
-				if (!SourceClip->UpdateFrame(CurrentTime)) return false;
+				const glm::mat4 TargetRest = TargetBone->GetJointNode()->GetDefaultLocalMatrix();
 
-				SourceSkin->CalcSkinWorldMatrix();
+				const glm::mat4 TargetPGRest = TargetBone->GetJointNode()->CalcDefaultParentWorldMatrix();
+				const glm::mat4 InverseTargetPGRest = glm::inverse(TargetPGRest);
 
-				for (const auto& Joint : SourceSkin->GetJointList())
+				for (const auto& TargetKeyFrame : TargetSampler->GetKeyFrameList())
 				{
-					animation::EHumanoidBones BoneName = Joint->GetBoneName();
+					const float CurrentTime = TargetKeyFrame->GetInput();
 
-					// BoneTableに登録されていないものについては処理の対象外とする
-					if (BoneName == animation::EHumanoidBones::None) continue;
+					glm::mat4 SourcePose = glm::mat4(1.0f);
+					TargetKeyFrame->GetOutput(&SourcePose[0][0]);
 
-					// フレームマトリックスを計算する
-					glm::mat4 FrameMatrix = Joint->GetJointNode()->GetWorldMatrix();
+					glm::mat4 SourceAnim = SourcePGRest * SourcePose * InverseSourceRest * InverseSourcePGRest;
 
-					// Mapに登録
-					auto it = SourceWorldFrameMatrixMap.find(BoneName);
-					if (it == SourceWorldFrameMatrixMap.end())
-					{
-						SourceWorldFrameMatrixMap.emplace(BoneName, std::vector<std::shared_ptr<animation::CKeyFrame>>());
-					}
+					glm::mat4 TargetPose = InverseTargetPGRest * SourceAnim * TargetPGRest * TargetRest;
 
-					std::shared_ptr<animation::CKeyFrame> dstKeyFrame = std::make_shared<animation::CKeyFrame>(animation::EKeyFrameType::KEYFRAME_TYPE_MATRIX);
-					dstKeyFrame->SetInput(CurrentTime);
-					dstKeyFrame->SetOutput(&FrameMatrix[0][0], sizeof(glm::mat4));
-
-					SourceWorldFrameMatrixMap[BoneName].push_back(dstKeyFrame);
+					TargetKeyFrame->SetOutput(&TargetPose[0][0], sizeof(glm::mat4));
 				}
-			}
 
-			// DefaultTransformに戻す
-			SourceSkin->ResetToDefaultSkinLocal();
-		}
-
-		// Targetのアニメーションフレームワールドマトリックスリストを作成(Rigのリターゲティングを実行する)
-		std::unordered_map<animation::EHumanoidBones, std::vector<std::shared_ptr<animation::CKeyFrame>>> TargetWorldFrameMatrixMap;
-		{
-			for (const auto& TargetChannel : TargetClip->GetChannelList())
-			{
-				int TargetSamplerIndex = TargetChannel->GetSamplerIndex();
-				if (TargetSamplerIndex < 0 || TargetSamplerIndex >= TargetClip->GetSamplerList().size()) continue;
-
-				const auto& TargetSampler = TargetClip->GetSamplerList()[TargetSamplerIndex];
-
-				animation::EHumanoidBones BoneName = TargetChannel->GetBoneName();
-
-				// BoneTableに登録されていないものについては処理の対象外とする
-				if (BoneName == animation::EHumanoidBones::None) continue;
-
-				const auto& SourceBone = SourceSkin->GetBone(BoneName);
-				if (!SourceBone) continue;
-
-				for (const auto& TargetSkin : m_AnimationSkinList)
-				{
-					const auto& TargetBone = TargetSkin->GetBone(BoneName);
-					if (!TargetBone) continue;
-
-					// Targetはアニメーション情報の受け手側(例えばVRMとか). Sourceは送り手側
-					// なのでTargetBindMatrixは受け手側のT-Poseのワールドマトリックスを示す
-					// そしてここではJointのアニメーション位置を調整する
-					const glm::mat4 SourceInverseBindMatrix = glm::inverse(SourceBone->GetJointNode()->CalcDefaultWorldMatrix(SourceBone->GetJointNode()->GetLocalMatrix()));
-					const glm::mat4 TargetBindMatrix = TargetBone->GetJointNode()->CalcDefaultWorldMatrix(TargetBone->GetJointNode()->GetLocalMatrix());
-
-					// SourceとTargetのバインドマトリックスの差分を示す行列
-					const glm::mat4 ReTargetingMatrix = TargetBindMatrix * SourceInverseBindMatrix;
-
-					for (const auto& TargetKeyFrame : TargetSampler->GetKeyFrameList())
-					{
-						const float CurrentTime = TargetKeyFrame->GetInput();
-
-						glm::mat4 SourceWorldFrameMatrix = glm::mat4(1.0f);
-
-						std::shared_ptr<animation::CKeyFrame> CurrentKeyFrame = animation::CAnimationSampler::GetCurrentKeyFrameBasedBone(CurrentTime, BoneName, SourceWorldFrameMatrixMap);
-						if (!CurrentKeyFrame) continue;
-
-						switch (TargetChannel->GetAnimationTarget())
-						{
-							// ひとまずMODELMATRIXだけ対応する
-						case animation::EAnimationTarget::MODELMATRIX:
-						{
-							CurrentKeyFrame->GetOutput(&SourceWorldFrameMatrix[0][0]);
-						}
-						break;
-						default:
-							break;
-						}
-
-						// ワールド座標系でのアニメーション位置をReTargetingMatrixの分だけずらすしてTargetのワールド座標上での位置を正しいものにする
-						// ローカル座標系への変換は後ほど行う
-						const glm::mat4 TargetWorldFrameMatrix = ReTargetingMatrix * SourceWorldFrameMatrix;
-
-						// Mapに登録
-						auto it = TargetWorldFrameMatrixMap.find(BoneName);
-						if (it == TargetWorldFrameMatrixMap.end())
-						{
-							TargetWorldFrameMatrixMap.emplace(BoneName, std::vector<std::shared_ptr<animation::CKeyFrame>>());
-						}
-
-						std::shared_ptr<animation::CKeyFrame> dstKeyFrame = std::make_shared<animation::CKeyFrame>(animation::EKeyFrameType::KEYFRAME_TYPE_MATRIX);
-						dstKeyFrame->SetInput(CurrentTime);
-						dstKeyFrame->SetOutput(&TargetWorldFrameMatrix[0][0], sizeof(glm::mat4));
-
-						TargetWorldFrameMatrixMap[BoneName].push_back(dstKeyFrame);
-					}
-
-					// 対象のBoneについては一度しか計算しない
-					break;
-				}
+				// 対象のBoneについては一度しか計算しない
+				break;
 			}
 		}
 		
-		// アニメーション中のTargetの親ワールド行列を乗算してローカル行列に戻す
-		{
-			for (const auto& TargetChannel : TargetClip->GetChannelList())
-			{
-				int TargetSamplerIndex = TargetChannel->GetSamplerIndex();
-				if (TargetSamplerIndex < 0 || TargetSamplerIndex >= TargetClip->GetSamplerList().size()) continue;
-
-				const auto& TargetSampler = TargetClip->GetSamplerList()[TargetSamplerIndex];
-
-				animation::EHumanoidBones BoneName = TargetChannel->GetBoneName();
-
-				// BoneTableに登録されていないものについては処理の対象外とする
-				if (BoneName == animation::EHumanoidBones::None) continue;
-
-				for (const auto& TargetSkin : m_AnimationSkinList)
-				{
-					// 自身のボーンを取得
-					const auto& TargetBone = TargetSkin->GetBone(BoneName);
-					if (!TargetBone) continue;
-
-					// 親
-					animation::EHumanoidBones ParentBoneName = TargetBone->GetParentBoneName();
-
-					for (const auto& TargetKeyFrame : TargetSampler->GetKeyFrameList())
-					{
-						const float CurrentTime = TargetKeyFrame->GetInput();
-
-						// ワールド行列を取得
-						std::shared_ptr<animation::CKeyFrame> CurrentKeyFrame = animation::CAnimationSampler::GetCurrentKeyFrameBasedBone(CurrentTime, BoneName, TargetWorldFrameMatrixMap);
-
-						if (!CurrentKeyFrame) continue;
-
-						glm::mat4 TargetWorldFrameMatrix = glm::mat4(1.0f);
-						CurrentKeyFrame->GetOutput(&TargetWorldFrameMatrix[0][0]);
-
-						// 親ボーンがNoneの時は自身のワールド行列をそのまま渡す(主にHips)
-						if (ParentBoneName == animation::EHumanoidBones::None)
-						{
-							// キーフレームの値を再設定する
-							TargetKeyFrame->SetOutput(&TargetWorldFrameMatrix[0][0], sizeof(glm::mat4));
-
-							continue;
-						}
-
-						// 親ボーンのワールド行列を取得
-						std::shared_ptr<animation::CKeyFrame> CurrentParentKeyFrame = animation::CAnimationSampler::GetCurrentKeyFrameBasedBone(CurrentTime, ParentBoneName, TargetWorldFrameMatrixMap);
-
-						if (!CurrentParentKeyFrame) continue;
-
-						glm::mat4 TargetParentWorldFrameMatrix = glm::mat4(1.0f);
-						CurrentParentKeyFrame->GetOutput(&TargetParentWorldFrameMatrix[0][0]);
-
-						// アニメーション付き親ボーンの逆行列をかけてローカル座標系に戻す
-						const glm::mat4 TargetLocalFrameMatrix = glm::inverse(TargetParentWorldFrameMatrix) * TargetWorldFrameMatrix;
-
-						// キーフレームの値を再設定する
-						TargetKeyFrame->SetOutput(&TargetLocalFrameMatrix[0][0], sizeof(glm::mat4));
-					}
-				}
-			}
-		}
-
 		return true;
 	}
 
