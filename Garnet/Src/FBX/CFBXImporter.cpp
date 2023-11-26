@@ -1,6 +1,7 @@
 #ifdef USE_FBX
 #include "CFBXImporter.h"
 #include "CFBXStream.h"
+#include "CFBXMomoryStream.h"
 #include "../Animation/CBoneNameProvider.h"
 
 #include "../Object/C3DObject.h"
@@ -57,14 +58,12 @@ namespace fbx
 		//const char* fileName = "Resources\\Motions\\Locking Hip Hop Dance.fbx";
 
 		// Stream‚ðì¬
-		//CFBXStream Stream(Manager, "rb");
-		//void* streamData = NULL;
-
-		//Stream.Read(&Data[0], Data.size());
+		CFBXMomoryStream Stream(Manager, Data);
+		void* streamData = NULL;
 
 		// Importer‚ð‰Šú‰»
-		if (!Importer->Initialize(fileName, -1, Manager->GetIOSettings()))
-		//if (!Importer->Initialize(&Stream, streamData, -1, Manager->GetIOSettings()))
+		//if (!Importer->Initialize(fileName, -1, Manager->GetIOSettings()))
+		if (!Importer->Initialize(&Stream, streamData, -1, Manager->GetIOSettings()))
 		{
 			Console::Log("Failed to Import FBX\n");
 

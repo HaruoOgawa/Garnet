@@ -16,7 +16,6 @@ add_definitions(
 	-DUSE_INPUT_SYSTEM
 	-DUSE_GPGPU
 	-DUSE_FBX
-	-DFBXSDK_SHARED
 )
 
 add_executable(
@@ -31,6 +30,9 @@ Shared_Post = """
 
 target_include_directories(Garnet PRIVATE ../src/Library/DawnLib/include ../src/Library/glm  ../src/Library/tinygltf  ../src/Library/FBX-SDK/include)
 # target_include_directories(Garnet PRIVATE ../src/Library/WebGPU ../src/Library/glm  ../src/Library/tinygltf  ../src/Library/FBX-SDK/include)
+
+target_link_libraries(Garnet PRIVATE E:/CppDev/Garnet/Garnet/Src/Library/FBX-SDK/lib/vs2022/x64/release/libfbxsdk-md.lib E:/CppDev/Garnet/Garnet/Src/Library/FBX-SDK/lib/vs2022/x64/release/libxml2-md.lib E:/CppDev/Garnet/Garnet/Src/Library/FBX-SDK/lib/vs2022/x64/release/zlib-md.lib)
+#target_link_libraries(Garnet PRIVATE ../Src/Library/FBX-SDK/lib/vs2022/x64/release/)
 
 if(EMSCRIPTEN)
 	target_link_options(Garnet PRIVATE 

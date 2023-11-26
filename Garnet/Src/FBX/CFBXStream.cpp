@@ -2,20 +2,21 @@
 
 namespace fbx
 {
-	CFBXStream::CFBXStream(FbxManager* pFbxManager, const char* mode):
+	CFBXStream::CFBXStream(FbxManager* pFbxManager, const std::string& mode, const std::string& FileName):
 		m_File(NULL),
-		m_Mode(NULL),
-		m_FileName(NULL),
 		m_ReaderID(-1),
-		m_WriteID(-1)
+		m_WriteID(-1),
+		m_FileName(FileName),
+		m_Mode(mode)
 	{
 		if (mode[0] == 'r')
 		{
-			//m_ReaderID = 
+			const char* format = "FBX (*.fbx)";
+			m_ReaderID = pFbxManager->GetIOPluginRegistry()->FindReaderIDByDescription(format);
+			m_WriteID = -1;
 		}
 		else
 		{
-
 		}
 	}
 
@@ -33,7 +34,7 @@ namespace fbx
 	{
 		if (m_File == NULL)
 		{
-			FBXSDK_fopen(m_File, m_FileName, m_Mode);
+			FBXSDK_fopen(m_File, m_FileName.c_str(), m_Mode.c_str());
 		}
 		else
 		{

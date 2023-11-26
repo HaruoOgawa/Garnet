@@ -62,6 +62,7 @@ namespace scene
 
 		m_IsLoaded(false)
 	{
+		pLoadWorker->AddFirstLoadResource(m_FbxAnimationData);
 		pLoadWorker->AddFirstLoadResource(m_DepthVertex);
 		pLoadWorker->AddFirstLoadResource(m_DepthFragment);
 		pLoadWorker->AddFirstLoadResource(m_glTFData);
