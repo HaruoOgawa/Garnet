@@ -6,7 +6,8 @@ namespace object
 		m_PassName(PassName),
 		m_DepthPassName(DepthPassName),
 		m_ObjectTransform(std::make_shared<math::CTransform>()),
-		m_CurrentClipIndex(-1)
+		m_CurrentClipIndex(-1),
+		m_TotalJointIndexOffset(0)
 	{
 	}
 
@@ -20,6 +21,9 @@ namespace object
 	{
 		// GPU上のテクスチャリソースが解放されてしまうので保持しておく
 		m_TextureSet = TextureSet;
+
+		// DefaultLocalTransformを保存する
+		ApplyDefaultLocalTransform();
 
 		// 親ノードを設定
 		ApplyParentNode();
@@ -61,6 +65,14 @@ namespace object
 		}
 
 		return true;
+	}
+
+	void C3DObject::ApplyDefaultLocalTransform()
+	{
+		for (const auto& Node : m_NodeList)
+		{
+			Node->SaveAsDefaultLocalTransform();
+		}
 	}
 
 	void C3DObject::ApplyParentNode()
@@ -279,33 +291,36 @@ namespace object
 				if (SkinIndex >= 0 && SkinIndex < m_AnimationSkinList.size() && IsPlayingAnimation())
 				{
 					Material->SetUniformValue("r_SkinMatrixBuffer", &SkinMatrixList[0], DynamicOffsetNum);
+
+					int JointIndexOffset = m_AnimationSkinList[SkinIndex]->GetJointIndexOffset();
+					Material->SetUniformValue("JointIndexOffset", &glm::ivec1(JointIndexOffset)[0], DynamicOffsetNum);
 				}
 
 				if (!Primitive->Draw(Material, DynamicOffsetNum, IsDepthPass)) return false;
 			}
 		}
 		
-		/*for (const auto& Skin : m_AnimationSkinList)
+		for (const auto& Skin : m_AnimationSkinList)
 		{
 			
 			for (const auto& Joint : Skin->GetJointList())
 			{
 				// Debug用: Jointの描画
 				const auto& JointNode = Joint->GetJointNode();
-				DebugSphere->SetPos(JointNode->GetWorldMatrix() * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
+				DebugSphere->SetPos(m_ObjectTransform->GetModelMatrix() * JointNode->GetWorldMatrix() * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
 				DebugSphere->SetScale(glm::vec3(0.25f));
 
-				if (JointNode->GetName() == "mixamorig:Hips")
+				if (Joint->GetBoneName() == animation::EHumanoidBones::Hips)
 				{
 					DebugSphere->GetMaterialList()[0]->SetUniformValue("baseColor", &glm::vec4(1.0f, 0.0f, 0.0f, 1.0f)[0]);
 				}
-				else if (JointNode->GetName() == "mixamorig:RightUpLeg" || JointNode->GetName() == "mixamorig:LeftUpLeg" || JointNode->GetName() == "mixamorig:Spine")
+				else if (Joint->GetBoneName() == animation::EHumanoidBones::LeftUpperArm || Joint->GetBoneName() == animation::EHumanoidBones::RightUpperArm)
 				{
 					DebugSphere->GetMaterialList()[0]->SetUniformValue("baseColor", &glm::vec4(0.0f, 1.0f, 0.0f, 1.0f)[0]);
 				}
-				else if (JointNode->GetName() == "mixamorig:LeftLeg" || JointNode->GetName() == "mixamorig:RightLeg" || JointNode->GetName() == "mixamorig:Spine1")
+				else if (Joint->GetBoneName() == animation::EHumanoidBones::LeftLowerArm || Joint->GetBoneName() == animation::EHumanoidBones::RightLowerArm)
 				{
-					DebugSphere->GetMaterialList()[0]->SetUniformValue("baseColor", &glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)[0]);
+					DebugSphere->GetMaterialList()[0]->SetUniformValue("baseColor", &glm::vec4(0.0f, 1.0f, 1.0f, 1.0f)[0]);
 				}
 				else
 				{
@@ -316,7 +331,7 @@ namespace object
 
 				// Debug用: Boneの描画
 			}
-		}*/
+		}
 
 		return true;
 	}
@@ -348,12 +363,144 @@ namespace object
 
 	void C3DObject::AddAnimationSkin(const std::shared_ptr<animation::CSkin >& Skin)
 	{
+		int JointIndexOffset = m_TotalJointIndexOffset;
+
+		Skin->SetJointIndexOffset(JointIndexOffset);
+
 		m_AnimationSkinList.push_back(Skin);
+
+		m_TotalJointIndexOffset += static_cast<int>(Skin->GetJointList().size());
 	}
 
 	void C3DObject::AddAnimationClip(const std::shared_ptr<animation::CAnimationClip>& Clip)
 	{
 		m_AnimationClipList.push_back(Clip);
+	}
+
+	void C3DObject::AddHumanoidAnimationClip(const std::shared_ptr<animation::CAnimationClip>& SourceClip)
+	{
+		// Clipの値をコピーする
+		std::shared_ptr<animation::CAnimationClip> TargetClip = std::make_shared<animation::CAnimationClip>();
+
+		// samplers
+		for (const auto& SourceSampler : SourceClip->GetSamplerList())
+		{
+			std::shared_ptr<animation::CAnimationSampler> TargetSampler = std::make_shared<animation::CAnimationSampler>(SourceSampler->GetInterpolationType());
+
+			for (const auto& SourceKeyFrame : SourceSampler->GetKeyFrameList())
+			{
+				std::shared_ptr<animation::CKeyFrame> TargetKeyFrame = std::make_shared<animation::CKeyFrame>(SourceKeyFrame->GetType());
+
+				TargetKeyFrame->SetInput(SourceKeyFrame->GetInput());
+
+				std::vector<float> TargetOutput = SourceKeyFrame->GetOutput();
+				TargetKeyFrame->SetOutput(TargetOutput);
+
+				TargetSampler->AddKeyFrame(TargetKeyFrame);
+			}
+
+			TargetSampler->SetStartTime(SourceSampler->GetStartTime());
+			TargetSampler->SetEndTime(SourceSampler->GetEndTime());
+
+			TargetClip->AddAnimationSampler(TargetSampler);
+		}
+		
+		// channels
+		// 同じ名前のノードは一つしかない前提でchannelを作成する
+		for (const auto& SourceChannel : SourceClip->GetChannelList())
+		{
+			std::shared_ptr<object::CNode> TargetNode = nullptr;
+
+			for (const auto& Skin : m_AnimationSkinList)
+			{
+				for (const auto& Joint : Skin->GetJointList())
+				{
+					if (Joint->GetBoneName() == animation::EHumanoidBones::None) continue;
+
+					if (Joint->GetBoneName() == SourceChannel->GetBoneName())
+					{
+						TargetNode = Joint->GetJointNode();
+
+						break;
+					}
+				}
+
+				if (TargetNode)
+				{
+					break;
+				}
+			}
+
+			std::shared_ptr<animation::CAnimationChannel> TargetChannel = std::make_shared<animation::CAnimationChannel>(SourceChannel->GetSamplerIndex(), SourceChannel->GetAnimationTarget(), TargetNode, SourceChannel->GetBoneName());
+
+			TargetClip->AddAnimationChannel(TargetChannel);
+		}
+		
+		// RigのReTargetingを行う
+		// リターゲティングとはリグの形が異なるアニメーションを自身のアニメーションに合うように調整すること
+		// 例えば身長が違うとアバターが伸びてしまうしリグが反対だとねじれてしまう
+		if (!ReTargetingRig(SourceClip, TargetClip)) return;
+
+		m_AnimationClipList.push_back(TargetClip);
+	}
+
+	bool C3DObject::ReTargetingRig(const std::shared_ptr<animation::CAnimationClip>& SourceClip, const std::shared_ptr<animation::CAnimationClip>& TargetClip)
+	{
+		const auto& SourceSkin = SourceClip->GetDefaultSkin();
+		if (!SourceSkin) return false;
+
+		// Rigのリターゲティングを実行する
+		for (const auto& TargetChannel : TargetClip->GetChannelList())
+		{
+			int TargetSamplerIndex = TargetChannel->GetSamplerIndex();
+			if (TargetSamplerIndex < 0 || TargetSamplerIndex >= TargetClip->GetSamplerList().size()) continue;
+
+			const auto& TargetSampler = TargetClip->GetSamplerList()[TargetSamplerIndex];
+
+			animation::EHumanoidBones BoneName = TargetChannel->GetBoneName();
+
+			// BoneTableに登録されていないものについては処理の対象外とする
+			if (BoneName == animation::EHumanoidBones::None) continue;
+
+			const auto& SourceBone = SourceSkin->GetBone(BoneName);
+			if (!SourceBone) continue;
+
+			const glm::mat4 SourceRest = SourceBone->GetJointNode()->GetDefaultLocalMatrix();
+			const glm::mat4 InverseSourceRest = glm::inverse(SourceRest);
+
+			const glm::mat4 SourcePGRest = SourceBone->GetJointNode()->CalcDefaultParentWorldMatrix();
+			const glm::mat4 InverseSourcePGRest = glm::inverse(SourcePGRest);
+
+			for (const auto& TargetSkin : m_AnimationSkinList)
+			{
+				const auto& TargetBone = TargetSkin->GetBone(BoneName);
+				if (!TargetBone) continue;
+
+				const glm::mat4 TargetRest = TargetBone->GetJointNode()->GetDefaultLocalMatrix();
+
+				const glm::mat4 TargetPGRest = TargetBone->GetJointNode()->CalcDefaultParentWorldMatrix();
+				const glm::mat4 InverseTargetPGRest = glm::inverse(TargetPGRest);
+
+				for (const auto& TargetKeyFrame : TargetSampler->GetKeyFrameList())
+				{
+					const float CurrentTime = TargetKeyFrame->GetInput();
+
+					glm::mat4 SourcePose = glm::mat4(1.0f);
+					TargetKeyFrame->GetOutput(&SourcePose[0][0]);
+
+					glm::mat4 SourceAnim = SourcePGRest * SourcePose * InverseSourceRest * InverseSourcePGRest;
+
+					glm::mat4 TargetPose = InverseTargetPGRest * SourceAnim * TargetPGRest * TargetRest;
+
+					TargetKeyFrame->SetOutput(&TargetPose[0][0], sizeof(glm::mat4));
+				}
+
+				// 対象のBoneについては一度しか計算しない
+				break;
+			}
+		}
+		
+		return true;
 	}
 
 	const std::vector<std::shared_ptr<graphics::CMaterial>>& C3DObject::GetMaterialList() const

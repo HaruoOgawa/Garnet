@@ -14,6 +14,11 @@ namespace animation
 	{
 	}
 
+	EInterpolationType CAnimationSampler::GetInterpolationType() const
+	{
+		return m_InterpolationType;
+	}
+
 	bool CAnimationSampler::CreateKeyFrame(EKeyFrameType Type, const std::vector<float>& inputList, const std::vector<float>& outputList)
 	{
 		const int NumComponent = GetNumComponentsInType(Type);
@@ -60,9 +65,19 @@ namespace animation
 		m_StartTime = StartTime;
 	}
 
+	float CAnimationSampler::GetStartTime() const
+	{
+		return m_StartTime;
+	}
+
 	void CAnimationSampler::SetEndTime(float EndTime)
 	{
 		m_EndTime = EndTime;
+	}
+
+	float CAnimationSampler::GetEndTime() const
+	{
+		return m_EndTime;
 	}
 
 	std::vector<float> CAnimationSampler::CopyFromNumComponent(int NumComponent, const std::vector<float>& Src, int Offset)
@@ -112,7 +127,7 @@ namespace animation
 		}
 	}
 
-	bool CAnimationSampler::GetCurrentFrame(float CurrentTime, std::vector<float>& Value, EAnimationTarget AnimationTarget)
+	bool CAnimationSampler::ComputeCurrentFrame(float CurrentTime, std::vector<float>& Value, EAnimationTarget AnimationTarget)
 	{
 		float CalcCurrentTime = glm::mod(CurrentTime, m_EndTime);
 
@@ -334,5 +349,51 @@ namespace animation
 		// ネット上でも特にろくなサンプルが見当たらないので、CubicSplineInterpolationはそのようなモデルに出会ったときに実装対応する。
 
 		return true;
+	}
+
+	// ボーンに基づく現在のフレームを取得
+	std::shared_ptr<CKeyFrame> CAnimationSampler::GetCurrentKeyFrameBasedBone(float CurrentTime, EHumanoidBones BoneName, const std::unordered_map<animation::EHumanoidBones, std::vector<std::shared_ptr<animation::CKeyFrame>>>& FrameMatrixMap)
+	{
+		std::shared_ptr<CKeyFrame> dstKeyFrame = nullptr;
+
+		auto FrameBonePair = FrameMatrixMap.find(BoneName);
+		if (FrameBonePair == FrameMatrixMap.end()) return nullptr;
+
+		std::shared_ptr<animation::CKeyFrame> PrevKeyFrame = nullptr;
+		std::shared_ptr<animation::CKeyFrame> NextKeyFrame = nullptr;
+
+		// Next
+		const auto& val = std::find_if(FrameBonePair->second.begin(), FrameBonePair->second.end(), [&](std::shared_ptr<animation::CKeyFrame> f) {  bool r = (CurrentTime <= f->GetInput()); if (r) { NextKeyFrame = f; } return r; });
+		if (val == FrameBonePair->second.end()) return nullptr;
+
+		// Prev
+		size_t NextIndex = std::distance(FrameBonePair->second.begin(), val);
+
+		// CurrentTimeがKeyFrameの最初よりも小さい時はPrevとNextにそれぞれ0と1のKeyFrameを割り当てる
+		if (NextIndex <= 0 || NextIndex >= FrameBonePair->second.size())
+		{
+			NextKeyFrame = FrameBonePair->second[1];
+			PrevKeyFrame = FrameBonePair->second[0];
+		}
+		else
+		{
+			PrevKeyFrame = FrameBonePair->second[NextIndex - 1];
+		}
+
+		if (PrevKeyFrame == nullptr || NextKeyFrame == nullptr) return nullptr;;
+
+		float NextOffset = glm::abs(NextKeyFrame->GetInput() - CurrentTime);
+		float PrevOffset = glm::abs(PrevKeyFrame->GetInput() - CurrentTime);
+
+		if (PrevOffset < NextOffset)
+		{
+			dstKeyFrame = PrevKeyFrame;
+		}
+		else
+		{
+			dstKeyFrame = NextKeyFrame;
+		}
+
+		return dstKeyFrame;
 	}
 }

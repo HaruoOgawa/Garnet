@@ -7,6 +7,7 @@
 #include "CJoint.h"
 #include <memory>
 #include <vector>
+#include <unordered_map>
 #include <glm/glm.hpp>
 
 namespace animation
@@ -14,6 +15,9 @@ namespace animation
 	class CSkin
 	{
 		std::vector<std::shared_ptr<CJoint>> m_JointList;
+		int m_JointIndexOffset;
+
+		std::unordered_map<EHumanoidBones, std::shared_ptr<CJoint>> m_BoneTable;
 	public:
 		CSkin();
 		virtual ~CSkin();
@@ -23,5 +27,14 @@ namespace animation
 		bool CalcSkinMatrixList(std::vector<glm::mat4>& MatrixList, const glm::mat4& ObjectModelMatrix);
 
 		const std::vector<std::shared_ptr<CJoint>>& GetJointList() const;
+
+		void SetJointIndexOffset(int JointIndexOffset);
+		int GetJointIndexOffset() const;
+
+		void MakeBoneTable();
+		std::shared_ptr<CJoint> GetBone(EHumanoidBones BoneName);
+
+		void CalcSkinWorldMatrix();
+		void ResetToDefaultSkinLocal();
 	};
 }

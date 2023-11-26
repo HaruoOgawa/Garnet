@@ -1,6 +1,7 @@
 #ifdef USE_FBX
 #include "CFBXImporter.h"
 #include "CFBXStream.h"
+#include "../Animation/CBoneNameProvider.h"
 
 #include "../Object/C3DObject.h"
 
@@ -113,16 +114,39 @@ namespace fbx
 
 		Object->SetRootNodeIndexList(RootNodeIndexList);
 
+		// DefaultMatrixを保存
+		Object->ApplyDefaultLocalTransform();
+
 		// WorldMatrixを計算
 		Object->CalcWorldMatrix();
 
+		// ParentNodeを設定する
+		Object->ApplyParentNode();
+
 		// Skin
 		std::shared_ptr<animation::CSkin> Skin = std::make_shared<animation::CSkin>();
-		std::vector<std::shared_ptr<SFBXJoint>> FbxJointList;
+		std::vector<FbxNode*> FbxJointList;
 		if (RootNode)
 		{
-			if (!CreateAnimationSkin(RootNode, nullptr, Skin, FbxJointList, NodeList)) return false;
+			if (!CreateAnimationSkin(RootNode, Skin, FbxJointList, NodeList)) return false;
 		}
+
+		Object->AddAnimationSkin(Skin);
+
+		// BoneTableを作成
+		Skin->MakeBoneTable();
+
+		// DefaultLocalTransformを保存する
+		Object->ApplyDefaultLocalTransform();
+
+		// 親ノードを設定
+		Object->ApplyParentNode();
+
+		// ワールド行列の計算
+		Object->CalcWorldMatrix();
+
+		// 親のJointを追加
+		ApplyParentJointList(Skin, NodeList);
 
 		// アニメーション
 		if (!CreateAnimation(Scene, AnimationClipList, NodeList, Skin, FbxJointList)) return false;
@@ -176,8 +200,6 @@ namespace fbx
 			{
 				Object->AddMesh(Mesh);
 			}
-
-			Object->AddAnimationSkin(Skin);
 
 			// FrameCountが多いものと少ないものといった感じでFBXのAnimationClipは複数個存在することがある
 			// どちらか一方がループ用の短いアニメーションだったり長いダンスモーションだったりするので
@@ -274,7 +296,7 @@ namespace fbx
 			UniformBuffer->AddData("useIBL", &glm::ivec1(0)[0], sizeof(int), 0);
 
 			UniformBuffer->AddData("useSkinMeshAnimation", &glm::ivec1(0)[0], sizeof(int), 0);
-			UniformBuffer->AddData("pad0", &glm::ivec1(0)[0], sizeof(int), 0);
+			UniformBuffer->AddData("JointIndexOffset", &glm::ivec1(0)[0], sizeof(int), 0);
 			UniformBuffer->AddData("pad1", &glm::ivec1(0)[0], sizeof(int), 0);
 			UniformBuffer->AddData("pad2", &glm::ivec1(0)[0], sizeof(int), 0);
 
@@ -793,6 +815,9 @@ namespace fbx
 		// たぶん単位がcmなので0.01倍することで計算に一般的に使用するmに直す
 		math::CTransform::CastCentiMeter2Meter(Pos);
 
+		math::CTransform::ToYUpRightHandedCoordinate(Pos);
+		math::CTransform::ToYUpRightHandedCoordinate(Rotation);
+
 		Node->SetPos(Pos);
 		Node->SetRot(Rotation);
 		Node->SetScale(Scale);
@@ -849,7 +874,7 @@ namespace fbx
 		return true;
 	}
 
-	bool CFBXImporter::CreateAnimationSkin(FbxNode* pFBXNode, FbxNode* pParentFBXNode, std::shared_ptr<animation::CSkin>& Skin, std::vector<std::shared_ptr<SFBXJoint>>& FbxJointList, const std::vector<std::shared_ptr<object::CNode>>& NodeList)
+	bool CFBXImporter::CreateAnimationSkin(FbxNode* pFBXNode, std::shared_ptr<animation::CSkin>& Skin, std::vector<FbxNode*>& FbxJointList, const std::vector<std::shared_ptr<object::CNode>>& NodeList)
 	{
 		if (pFBXNode->GetNodeAttribute() && pFBXNode->GetNodeAttribute()->GetAttributeType() && pFBXNode->GetNodeAttribute()->GetAttributeType() == FbxNodeAttribute::eSkeleton)
 		{
@@ -861,23 +886,47 @@ namespace fbx
 			glm::mat4 InverseBindMatrix = glm::inverse(Joint->GetJointNode()->GetWorldMatrix());
 			Joint->GetJointNode()->SetInverseBindMatrix(InverseBindMatrix);
 
+			// BoneNameを取得
+			std::shared_ptr<animation::CBoneNameProvider> Provider = std::make_shared<animation::CBoneNameProvider>();
+			animation::EHumanoidBones BoneName = Provider->GetBoneName(pFBXNode->GetName());
+
+			// JointにBoneNameを割り当てる
+			Joint->SetBoneName(BoneName);
+
 			Skin->AddJoint(Joint);
 
 			// FbxJointListを登録
-			FbxJointList.push_back(std::make_shared<SFBXJoint>(pFBXNode, pParentFBXNode));
+			FbxJointList.push_back(pFBXNode);
 		}
 
 		// 子要素のNodeを調べる
 		for (int i = 0; i < pFBXNode->GetChildCount(); i++)
 		{
-			if (!CreateAnimationSkin(pFBXNode->GetChild(i), pFBXNode, Skin, FbxJointList, NodeList)) return false;
+			if (!CreateAnimationSkin(pFBXNode->GetChild(i), Skin, FbxJointList, NodeList)) return false;
 		}
 
 		return true;
 	}
 
+	void CFBXImporter::ApplyParentJointList(const std::shared_ptr<animation::CSkin>& Skin, const std::vector<std::shared_ptr<object::CNode>>& NodeList)
+	{
+		for (const auto& Joint : Skin->GetJointList())
+		{
+			const auto& ParentNode = Joint->GetJointNode()->GetParentNode();
+			if (!ParentNode) continue;
+
+			std::shared_ptr<animation::CBoneNameProvider> Provider = std::make_shared<animation::CBoneNameProvider>();
+			animation::EHumanoidBones ParentBoneName = Provider->GetBoneName(ParentNode->GetName());
+
+			const auto& ParentJoint = Skin->GetBone(ParentBoneName);
+			if (!ParentJoint) continue;
+
+			Joint->SetParentBoneName(ParentJoint->GetBoneName());
+		}
+	}
+
 	bool CFBXImporter::CreateAnimation(FbxScene* Scene, std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList, const std::vector<std::shared_ptr<object::CNode>>& NodeList,
-		const std::shared_ptr<animation::CSkin>& Skin, const std::vector<std::shared_ptr<SFBXJoint>>& FbxJointList)
+		const std::shared_ptr<animation::CSkin>& Skin, const std::vector<FbxNode*>& FbxJointList)
 	{
 
 		for (int i = 0; i < Scene->GetSrcObjectCount<FbxAnimStack>(); i++)
@@ -925,11 +974,11 @@ namespace fbx
 					for (int JointIndex = 0; JointIndex < FbxJointList.size(); JointIndex++)
 					{
 						const auto& pFbxJoint = FbxJointList[JointIndex];
-						if (!pFbxJoint->pFbxNode) return false;
+						if (!pFbxJoint) return false;
 
 						glm::mat4 CurrentMatrix = glm::mat4(1.0f);
 
-						FbxAMatrix fbxMat = pFbxJoint->pFbxNode->EvaluateLocalTransform(currentTime);
+						FbxAMatrix fbxMat = pFbxJoint->EvaluateLocalTransform(currentTime);
 						for (int row = 0; row < 4; row++)
 						{
 							for (int col = 0; col < 4; col++)
@@ -949,6 +998,9 @@ namespace fbx
 							// FbxはTranslation・Posが100倍になっているので調整する
 							// たぶん単位がcmなので0.01倍することで計算に一般的に使用するmに直す
 							math::CTransform::CastCentiMeter2Meter(Pos);
+
+							math::CTransform::ToYUpRightHandedCoordinate(Pos);
+							math::CTransform::ToYUpRightHandedCoordinate(Rotation);
 
 							math::CTransform::CalcModelMatrix(CurrentMatrix, Pos, Rotation, Scale);
 						}
@@ -998,13 +1050,22 @@ namespace fbx
 				// Jointの順番と参照するSamplerの順番は同じである
 				int TargetSamplerIndex = JointIndex;
 
-				// アニメーションのターゲットを取得する
-				const auto& TargetNode = GetJointNode(pFbxJoint->pFbxNode->GetName(), NodeList);
+				std::string JointName = pFbxJoint->GetName();
 
-				std::shared_ptr<animation::CAnimationChannel> AnimationChannel = std::make_shared<animation::CAnimationChannel>(TargetSamplerIndex, AnimationTarget, TargetNode);
+				// アニメーションのターゲットを取得する
+				const auto& TargetNode = GetJointNode(JointName, NodeList);
+
+				// Bone Name を取得
+				std::shared_ptr<animation::CBoneNameProvider> Provider = std::make_shared<animation::CBoneNameProvider>();
+				animation::EHumanoidBones BoneName = Provider->GetBoneName(JointName);
+
+				std::shared_ptr<animation::CAnimationChannel> AnimationChannel = std::make_shared<animation::CAnimationChannel>(TargetSamplerIndex, AnimationTarget, TargetNode, BoneName);
 
 				AnimationClip->AddAnimationChannel(AnimationChannel);
 			}
+
+			//
+			AnimationClip->SetDefaultSkin(Skin);
 
 			AnimationClipList.push_back(AnimationClip);
 		}

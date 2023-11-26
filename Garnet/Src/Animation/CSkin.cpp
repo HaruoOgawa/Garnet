@@ -3,7 +3,8 @@
 
 namespace animation
 {
-	CSkin::CSkin()
+	CSkin::CSkin():
+		m_JointIndexOffset(0)
 	{
 	}
 
@@ -51,5 +52,55 @@ namespace animation
 	const std::vector<std::shared_ptr<CJoint>>& CSkin::GetJointList() const
 	{
 		return m_JointList;
+	}
+
+	void CSkin::SetJointIndexOffset(int JointIndexOffset)
+	{
+		m_JointIndexOffset = JointIndexOffset;
+	}
+
+	int CSkin::GetJointIndexOffset() const
+	{
+		return m_JointIndexOffset;
+	}
+
+	void CSkin::MakeBoneTable()
+	{
+		for (const auto& Joint : m_JointList)
+		{
+			EHumanoidBones CurrentBoneName = Joint->GetBoneName();
+
+			if (CurrentBoneName != animation::EHumanoidBones::None && m_BoneTable.find(CurrentBoneName) == m_BoneTable.end())
+			{
+				m_BoneTable.emplace(CurrentBoneName, Joint);
+			}
+		}
+	}
+
+	std::shared_ptr<CJoint> CSkin::GetBone(EHumanoidBones BoneName)
+	{
+		const auto it = m_BoneTable.find(BoneName);
+		if (BoneName != animation::EHumanoidBones::None && it != m_BoneTable.end()) return it->second;
+
+		return nullptr;
+	}
+
+	void CSkin::CalcSkinWorldMatrix()
+	{
+		for (const auto& Joint : m_JointList)
+		{
+			const auto& LocalMatrix = Joint->GetJointNode()->GetLocalMatrix();
+
+			const glm::mat4 WorldMatrix = Joint->GetJointNode()->CalcWorldMatrix(LocalMatrix);
+			Joint->GetJointNode()->SetWorldMatrix(WorldMatrix);
+		}
+	}
+
+	void CSkin::ResetToDefaultSkinLocal()
+	{
+		for (const auto& Joint : m_JointList)
+		{
+			Joint->GetJointNode()->ResetToDefaultLocalTransform();
+		}
 	}
 }

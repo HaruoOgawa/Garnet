@@ -3,10 +3,11 @@
 
 namespace animation
 {
-	CAnimationChannel::CAnimationChannel(int SamplerIndex, EAnimationTarget AnimationTarget, const std::shared_ptr<object::CNode>& TargetNode):
+	CAnimationChannel::CAnimationChannel(int SamplerIndex, EAnimationTarget AnimationTarget, const std::shared_ptr<object::CNode>& TargetNode, EHumanoidBones BoneName):
 		m_SamplerIndex(SamplerIndex),
 		m_AnimationTarget(AnimationTarget),
-		m_TargetNode(TargetNode)
+		m_TargetNode(TargetNode),
+		m_BoneName(BoneName)
 	{
 	}
 
@@ -22,6 +23,11 @@ namespace animation
 	EAnimationTarget CAnimationChannel::GetAnimationTarget() const
 	{
 		return m_AnimationTarget;
+	}
+
+	EHumanoidBones CAnimationChannel::GetBoneName() const
+	{
+		return m_BoneName;
 	}
 
 	bool CAnimationChannel::Update(const std::vector<float>& Value)
@@ -54,6 +60,8 @@ namespace animation
 	{
 		if (Value.size() != 3) return true;
 
+		if (!m_TargetNode) return true;
+
 		m_TargetNode->SetPos(glm::vec3(Value[0], Value[1], Value[2]));
 
 		return true;
@@ -62,6 +70,8 @@ namespace animation
 	bool CAnimationChannel::UpdateRotation(const std::vector<float>& Value)
 	{
 		if (Value.size() != 4) return true;
+
+		if (!m_TargetNode) return true;
 
 		// glmのクォータニオンは wxyzで指定する必要がある
 		glm::quat quat = glm::quat(Value[3], Value[0], Value[1], Value[2]);
@@ -75,6 +85,8 @@ namespace animation
 	{
 		if (Value.size() != 3) return true;
 
+		if (!m_TargetNode) return true;
+
 		m_TargetNode->SetScale(glm::vec3(Value[0], Value[1], Value[2]));
 
 		return true;
@@ -83,6 +95,7 @@ namespace animation
 	bool CAnimationChannel::UpdateWeights(const std::vector<float>& Value)
 	{
 		// 未実装
+		if (!m_TargetNode) return true;
 
 		return true;
 	}
@@ -90,6 +103,8 @@ namespace animation
 	bool CAnimationChannel::UpdateModelMatrix(const std::vector<float>& Value)
 	{
 		if (Value.size() != 10) return true;
+
+		if (!m_TargetNode) return true;
 
 		m_TargetNode->SetPos(glm::vec3(Value[0], Value[1], Value[2]));
 

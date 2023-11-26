@@ -28,6 +28,7 @@
 #include "../Animation/CAnimationClip.h"
 #include "../Animation/CSkin.h"
 #include "../Animation/CJoint.h"
+#include "../Animation/CBoneNameProvider.h"
 
 namespace gltf
 {
@@ -125,6 +126,34 @@ namespace gltf
 		std::vector<std::shared_ptr<animation::CSkin>> AnimationSkinList;
 		if (!CreateAnimationSkin(model, AnimationSkinList, NodeList)) return false;
 
+		// NodeとSkinは先に追加しておく
+		for (const auto& Node : NodeList)
+		{
+			Object->AddNode(Node);
+		}
+
+		for (const auto& Skin : AnimationSkinList)
+		{
+			Object->AddAnimationSkin(Skin);
+		}
+
+		Object->SetRootNodeIndexList(RootNodeIndexList);
+
+		// DefaultLocalTransformを保存する
+		Object->ApplyDefaultLocalTransform();
+
+		// 親ノードを設定
+		Object->ApplyParentNode();
+
+		// ワールド行列の計算
+		Object->CalcWorldMatrix();
+
+		// 親のJointを追加
+		for (const auto& Skin : AnimationSkinList)
+		{
+			ApplyParentJointList(Skin, NodeList);
+		}
+
 		// アニメーション
 		std::vector<std::shared_ptr<animation::CAnimationClip>> AnimationClipList;
 		if (!CreateAnimation(model, AnimationClipList, NodeList)) return false;
@@ -140,22 +169,10 @@ namespace gltf
 			Object->AddMesh(Mesh);
 		}
 
-		for (const auto& Node : NodeList)
-		{
-			Object->AddNode(Node);
-		}
-
-		for (const auto& Skin : AnimationSkinList)
-		{
-			Object->AddAnimationSkin(Skin);
-		}
-
 		for (const auto& Clip : AnimationClipList)
 		{
 			Object->AddAnimationClip(Clip);
 		}
-
-		Object->SetRootNodeIndexList(RootNodeIndexList);
 
 		// オブジェクトを生成
 		if (!Object->Create(pGraphicsAPI, DepthVertex, DepthFragment, TextureSet)) return false;
@@ -416,7 +433,7 @@ namespace gltf
 				}
 
 				UniformBuffer->AddData("useSkinMeshAnimation", &glm::ivec1(0)[0], sizeof(int), 0);
-				UniformBuffer->AddData("pad0", &glm::ivec1(0)[0], sizeof(int), 0);
+				UniformBuffer->AddData("JointIndexOffset", &glm::ivec1(0)[0], sizeof(int), 0);
 				UniformBuffer->AddData("pad1", &glm::ivec1(0)[0], sizeof(int), 0);
 				UniformBuffer->AddData("pad2", &glm::ivec1(0)[0], sizeof(int), 0);
 
@@ -720,7 +737,7 @@ namespace gltf
 			UniformBuffer->AddData("useIBL", &glm::ivec1(0)[0], sizeof(int), 0);
 			
 			UniformBuffer->AddData("useSkinMeshAnimation", &glm::ivec1(0)[0], sizeof(int), 0);
-			UniformBuffer->AddData("pad0", &glm::ivec1(0)[0], sizeof(int), 0);
+			UniformBuffer->AddData("JointIndexOffset", &glm::ivec1(0)[0], sizeof(int), 0);
 			UniformBuffer->AddData("pad1", &glm::ivec1(0)[0], sizeof(int), 0);
 			UniformBuffer->AddData("pad2", &glm::ivec1(0)[0], sizeof(int), 0);
 
@@ -797,9 +814,6 @@ namespace gltf
 
 				math::CTransform::CastModelMatrixToTransform(modelMatrix, Pos, Rotation, Scale);
 
-				math::CTransform::ToYUpRightHandedCoordinate(Pos);
-				math::CTransform::ToYUpRightHandedCoordinate(Rotation);
-
 				Node->SetPos(Pos);
 				Node->SetRot(Rotation);
 				Node->SetScale(Scale);
@@ -817,7 +831,6 @@ namespace gltf
 				{
 					// glmのクォータニオンは wxyzで指定する必要がある？
 					glm::quat quat = glm::quat(static_cast<float>(rotation[3]), static_cast<float>(rotation[0]), static_cast<float>(rotation[1]), static_cast<float>(rotation[2]));
-					math::CTransform::ToYUpRightHandedCoordinate(quat);
 					Node->SetRot(quat);
 				}
 
@@ -825,7 +838,6 @@ namespace gltf
 				if (position.size() == 3)
 				{
 					glm::vec3 pos = glm::vec3(static_cast<float>(position[0]), static_cast<float>(position[1]), static_cast<float>(position[2]));
-					math::CTransform::ToYUpRightHandedCoordinate(pos);
 					Node->SetPos(pos);
 				}
 			}
@@ -889,7 +901,85 @@ namespace gltf
 			AnimationSkinList.push_back(Skin);
 		}
 
+		// Humanoid Boneを持っていればJointに割り当てる
+		const auto& VRM = model.extensions.find("VRM");
+		if (VRM != model.extensions.end())
+		{
+			if (VRM->second.IsObject() && VRM->second.Has("humanoid"))
+			{
+				const auto& humanoid = VRM->second.Get("humanoid");
+
+				if (humanoid.IsObject() && humanoid.Has("humanBones"))
+				{
+					const auto& humanBones = humanoid.Get("humanBones");
+
+					if (humanBones.IsArray())
+					{
+						for (int BoneIndex = 0; BoneIndex < humanBones.ArrayLen(); BoneIndex++)
+						{
+							const auto& bone = humanBones.Get(BoneIndex);
+
+							if (bone.IsObject())
+							{
+								// 拡張情報を取得
+								std::string name = bone.Get("bone").Get<std::string>();
+								int nodeIndex = bone.Get("node").Get<int>();
+
+								// BoneNameを取得
+								std::shared_ptr<animation::CBoneNameProvider> Provider = std::make_shared<animation::CBoneNameProvider>();
+								animation::EHumanoidBones BoneName = Provider->GetBoneName(name);
+
+								// JointにBoneNameを割り当てる
+								if (nodeIndex >= 0 && nodeIndex < NodeList.size())
+								{
+									const auto& TargetNode = NodeList[nodeIndex];
+
+									for (const auto& Skin : AnimationSkinList)
+									{
+										for (const auto& Joint : Skin->GetJointList())
+										{
+											if (Joint->GetJointNode() == TargetNode)
+											{
+												Joint->SetBoneName(BoneName);
+
+												break;
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+				
+			}
+		}
+
+		// 拡張機能の結果を元にBoneTableを作成
+		for (const auto& Skin : AnimationSkinList)
+		{
+			Skin->MakeBoneTable();
+		}
+
 		return true;
+	}
+
+
+	void CGLTFImporter::ApplyParentJointList(const std::shared_ptr<animation::CSkin>& Skin, const std::vector<std::shared_ptr<object::CNode>>& NodeList)
+	{
+		for (const auto& Joint : Skin->GetJointList())
+		{
+			const auto& ParentNode = Joint->GetJointNode()->GetParentNode();
+			if (!ParentNode) continue;
+
+			std::shared_ptr<animation::CBoneNameProvider> Provider = std::make_shared<animation::CBoneNameProvider>();
+			animation::EHumanoidBones ParentBoneName = Provider->GetBoneName(ParentNode->GetName());
+
+			const auto& ParentJoint = Skin->GetBone(ParentBoneName);
+			if (!ParentJoint) continue;
+
+			Joint->SetParentBoneName(ParentJoint->GetBoneName());
+		}
 	}
 
 	bool CGLTFImporter::CreateAnimation(const tinygltf::Model& model, std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList, const std::vector<std::shared_ptr<object::CNode>>& NodeList)
@@ -935,7 +1025,9 @@ namespace gltf
 					AnimationTarget = animation::EAnimationTarget::WEIGHTS;
 				}
 
-				std::shared_ptr<animation::CAnimationChannel> AnimationChannel = std::make_shared<animation::CAnimationChannel>(sampler, AnimationTarget, Node);
+				animation::EHumanoidBones BoneName = animation::EHumanoidBones::None;
+
+				std::shared_ptr<animation::CAnimationChannel> AnimationChannel = std::make_shared<animation::CAnimationChannel>(sampler, AnimationTarget, Node, BoneName);
 
 				AnimationClip->AddAnimationChannel(AnimationChannel);
 			}

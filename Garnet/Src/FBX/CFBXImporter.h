@@ -47,16 +47,6 @@ namespace object {
 
 namespace fbx
 {
-	struct SFBXJoint
-	{
-		FbxNode* pFbxNode;
-		FbxNode* pParentFBXNode;
-
-		SFBXJoint(FbxNode* node, FbxNode* parent):pFbxNode(node), pParentFBXNode(parent)
-		{
-		}
-	};
-
 	class CFBXImporter
 	{
 	private:
@@ -86,9 +76,12 @@ namespace fbx
 		static bool ConnectNodeTo(std::vector<std::shared_ptr<object::CNode>>& NodeList, const std::vector<FbxNode*>& pFbxNodeList, const std::vector<FbxMesh*>& pFbxMeshList,
 			const std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, const std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList, const std::shared_ptr<animation::CSkin>& Skin);
 
-		static bool CreateAnimationSkin(FbxNode* pFBXNode, FbxNode* pParentFBXNode, std::shared_ptr<animation::CSkin>& Skin, std::vector<std::shared_ptr<SFBXJoint>>& FbxJointList, const std::vector<std::shared_ptr<object::CNode>>& NodeList);
+		static bool CreateAnimationSkin(FbxNode* pFBXNode, std::shared_ptr<animation::CSkin>& Skin, std::vector<FbxNode*>& FbxJointList, const std::vector<std::shared_ptr<object::CNode>>& NodeList);
+		
+		static void ApplyParentJointList(const std::shared_ptr<animation::CSkin>& Skin, const std::vector<std::shared_ptr<object::CNode>>& NodeList);
+		
 		static bool CreateAnimation(FbxScene* Scene, std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList, const std::vector<std::shared_ptr<object::CNode>>& NodeList, 
-			const std::shared_ptr<animation::CSkin>& Skin, const std::vector<std::shared_ptr<SFBXJoint>>& FbxJointList);
+			const std::shared_ptr<animation::CSkin>& Skin, const std::vector<FbxNode*>& FbxJointList);
 		
 		// Helper Function //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		template<class T>

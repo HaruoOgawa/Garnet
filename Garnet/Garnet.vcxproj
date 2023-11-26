@@ -577,6 +577,8 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Src\Animation\CBoneNameProvider.h" />
+    <ClInclude Include="Src\Animation\EHumanoidBones.h" />
     <ClInclude Include="Src\FBX\CFBXStream.h" />
     <ClInclude Include="Src\Animation\EAnimationTarget.h" />
     <ClInclude Include="Src\Object\C3DObjectImporter.h" />
@@ -954,6 +956,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClInclude Include="Src\Interface\IRenderer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\Animation\CBoneNameProvider.cpp" />
     <ClCompile Include="Src\FBX\CFBXStream.cpp" />
     <ClCompile Include="Src\Object\C3DObjectImporter.cpp" />
     <ClCompile Include="Src\FBX\CFBXImporter.cpp" />

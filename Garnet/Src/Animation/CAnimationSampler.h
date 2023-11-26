@@ -1,12 +1,15 @@
 #pragma once
 
 #include <vector>
+#include <unordered_map>
+#include <map>
 #include <memory>
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 
 #include "CKeyFrame.h"
 #include "EAnimationTarget.h"
+#include "EHumanoidBones.h"
 
 namespace animation
 {
@@ -41,13 +44,20 @@ namespace animation
 		CAnimationSampler(EInterpolationType InterpolationType);
 		virtual ~CAnimationSampler();
 
+		EInterpolationType GetInterpolationType() const;
+
 		bool CreateKeyFrame(EKeyFrameType Type, const std::vector<float>& inputList, const std::vector<float>& outputList);
 		void AddKeyFrame(const std::shared_ptr<animation::CKeyFrame>& KeyFrame);
 		const std::vector<std::shared_ptr<animation::CKeyFrame>>& GetKeyFrameList() const;
 
 		void SetStartTime(float StartTime);
+		float GetStartTime() const;
 		void SetEndTime(float EndTime);
+		float GetEndTime() const;
 
-		bool GetCurrentFrame(float CurrentTime, std::vector<float>& Value, EAnimationTarget AnimationTarget);
+		bool ComputeCurrentFrame(float CurrentTime, std::vector<float>& Value, EAnimationTarget AnimationTarget);
+
+		// ボーンに基づく現在のフレームを取得
+		static std::shared_ptr<CKeyFrame> GetCurrentKeyFrameBasedBone(float CurrentTime, EHumanoidBones BoneName, const std::unordered_map<animation::EHumanoidBones, std::vector<std::shared_ptr<animation::CKeyFrame>>>& FrameMatrixMap);
 	};
 }

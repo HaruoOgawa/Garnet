@@ -10,6 +10,7 @@ namespace object
 		m_MeshIndex(MeshIndex),
 		m_SkinIndex(-1),
 		m_LocalTransform(std::make_shared<math::CTransform>()),
+		m_DefaultLocalTransform(std::make_shared<math::CTransform>()),
 		m_WorldMatrix(glm::mat4(1.0f)),
 		m_InverseBindMatrix(glm::mat4(1.0f)),
 		m_ParentNode(nullptr)
@@ -67,7 +68,7 @@ namespace object
 		return m_MeshIndex;
 	}
 
-	void CNode::SetLocalTransform(std::shared_ptr<math::CTransform>& LocalTransform)
+	void CNode::SetLocalTransform(const std::shared_ptr<math::CTransform>& LocalTransform)
 	{
 		m_LocalTransform = LocalTransform;
 	}
@@ -92,9 +93,29 @@ namespace object
 		return m_WorldMatrix;
 	}
 
-	glm::mat4 CNode::GetInverseWorldMatrix() const
+	glm::mat4 CNode::CalcWorldMatrix(const glm::mat4& LocalMatrix)
 	{
-		return glm::inverse(m_WorldMatrix);
+		glm::mat4 result = LocalMatrix;
+
+		std::shared_ptr<CNode> parentNode = m_ParentNode;
+		while (parentNode)
+		{
+			result = parentNode->GetLocalMatrix() * result;
+
+			parentNode = parentNode->GetParentNode();
+		}
+
+		return result;
+	}
+
+	void CNode::SetParentNode(const std::shared_ptr<CNode>& ParentNode)
+	{
+		m_ParentNode = ParentNode;
+	}
+
+	const std::shared_ptr<CNode>& CNode::GetParentNode() const
+	{
+		return m_ParentNode;
 	}
 
 	const glm::vec3& CNode::GetPos() const
@@ -132,6 +153,62 @@ namespace object
 		m_LocalTransform->SetScale(Scale);
 	}
 
+	// 現在のTransformをデフォルトのTransformとして保存する
+	void CNode::SaveAsDefaultLocalTransform()
+	{
+		m_DefaultLocalTransform->SetPos(m_LocalTransform->GetPos());
+		m_DefaultLocalTransform->SetRot(m_LocalTransform->GetRot());
+		m_DefaultLocalTransform->SetScale(m_LocalTransform->GetScale());
+	}
+
+	const std::shared_ptr<math::CTransform>& CNode::GetDefaultLocalTransform() const
+	{
+		return m_DefaultLocalTransform;
+	}
+
+	glm::mat4 CNode::GetDefaultLocalMatrix() const
+	{
+		return m_DefaultLocalTransform->GetModelMatrix();
+	}
+
+	glm::mat4 CNode::CalcDefaultWorldMatrix(const glm::mat4& LocalMatrix)
+	{
+		glm::mat4 result = LocalMatrix;
+
+		std::shared_ptr<CNode> parentNode = m_ParentNode;
+		while (parentNode)
+		{
+			result = parentNode->GetDefaultLocalMatrix() * result;
+
+			parentNode = parentNode->GetParentNode();
+		}
+
+		return result;
+	}
+
+	glm::mat4 CNode::CalcDefaultParentWorldMatrix()
+	{
+		glm::mat4 result = glm::mat4(1.0f);
+
+		std::shared_ptr<CNode> parentNode = m_ParentNode;
+		while (parentNode)
+		{
+			result = parentNode->GetDefaultLocalMatrix() * result;
+
+			parentNode = parentNode->GetParentNode();
+		}
+
+		return result;
+	}
+
+	// Transformをデフォルトに戻す
+	void CNode::ResetToDefaultLocalTransform()
+	{
+		m_LocalTransform->SetPos(m_DefaultLocalTransform->GetPos());
+		m_LocalTransform->SetRot(m_DefaultLocalTransform->GetRot());
+		m_LocalTransform->SetScale(m_DefaultLocalTransform->GetScale());
+	}
+
 	const std::vector<int>& CNode::GetChildrenNodeIndexList() const
 	{
 		return m_ChildrenNodeIndexList;
@@ -165,15 +242,5 @@ namespace object
 	const glm::mat4& CNode::GeInverseBindMatrix() const
 	{
 		return m_InverseBindMatrix;
-	}
-
-	void CNode::SetParentNode(const std::shared_ptr<CNode>& ParentNode)
-	{
-		m_ParentNode = ParentNode;
-	}
-
-	const std::shared_ptr<CNode>& CNode::GetParentNode() const
-	{
-		return m_ParentNode;
 	}
 }

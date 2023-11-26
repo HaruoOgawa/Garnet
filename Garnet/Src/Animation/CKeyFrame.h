@@ -31,10 +31,15 @@ namespace animation
 		CKeyFrame(EKeyFrameType Type);
 		virtual ~CKeyFrame() = default;
 
+		EKeyFrameType GetType() const;
+
 		void SetInput(float val);
 		float GetInput() const;
 
 		void SetOutput(const std::vector<float>& val);
 		const std::vector<float>& GetOutput() const;
+
+		void SetOutput(const float* pData, int byteSize);
+		void GetOutput(float* pData);
 	};
 }

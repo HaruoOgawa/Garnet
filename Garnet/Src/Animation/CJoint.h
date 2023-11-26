@@ -5,6 +5,7 @@
 // しかしglTFのSkeletonプロパティはアニメーションのルートを示すもので、なくてもルートはわかるものなのであまり意味をなしていない
 
 #include <memory>
+#include "EHumanoidBones.h"
 
 namespace object { class CNode; }
 
@@ -14,10 +15,19 @@ namespace animation
 	{
 		std::shared_ptr<object::CNode> m_JointNode;
 
+		EHumanoidBones m_BoneName;
+
+		EHumanoidBones m_ParentBoneName;
 	public:
 		CJoint(const std::shared_ptr<object::CNode>& JointNode);
 		virtual ~CJoint();
 
 		const std::shared_ptr<object::CNode>& GetJointNode() const;
+
+		EHumanoidBones GetBoneName() const;
+		void SetBoneName(EHumanoidBones BoneName);
+
+		EHumanoidBones GetParentBoneName() const;
+		void SetParentBoneName(EHumanoidBones BoneName);
 	};
 }

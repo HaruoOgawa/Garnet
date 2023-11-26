@@ -23,6 +23,7 @@ namespace object
 		int								  m_SkinIndex;
 
 		std::shared_ptr<math::CTransform> m_LocalTransform;
+		std::shared_ptr<math::CTransform> m_DefaultLocalTransform;
 		glm::mat4						  m_WorldMatrix;
 		std::vector<int>                  m_ChildrenNodeIndexList;
 		std::vector<int>                  m_DynamicOffsetNumList;
@@ -41,14 +42,17 @@ namespace object
 		void SetMeshIndexWithDynamicOffset(int MeshIndex, const std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, const std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList);
 		int GetMeshIndex() const;
 
-		void SetLocalTransform(std::shared_ptr<math::CTransform>& LocalTransform);
+		void SetLocalTransform(const std::shared_ptr<math::CTransform>& LocalTransform);
 		const std::shared_ptr<math::CTransform>& GetLocalTransform() const;
 
 		glm::mat4 GetLocalMatrix() const;
 
 		void SetWorldMatrix(const glm::mat4& WorldMatrix);
 		const glm::mat4& GetWorldMatrix() const;
-		glm::mat4 GetInverseWorldMatrix() const;
+		glm::mat4 CalcWorldMatrix(const glm::mat4& LocalMatrix);
+
+		void SetParentNode(const std::shared_ptr<CNode>& ParentNode);
+		const std::shared_ptr<CNode>& GetParentNode() const;
 
 		const glm::vec3& GetPos() const;
 		void SetPos(const glm::vec3& Pos);
@@ -60,6 +64,17 @@ namespace object
 		const glm::vec3& GetScale() const;
 		void SetScale(const glm::vec3& Scale);
 
+		// 現在のTransformをデフォルトのTransformとして保存する
+		void SaveAsDefaultLocalTransform();
+		const std::shared_ptr<math::CTransform>& GetDefaultLocalTransform() const;
+		glm::mat4 GetDefaultLocalMatrix() const;
+
+		glm::mat4 CalcDefaultWorldMatrix(const glm::mat4& LocalMatrix);
+		glm::mat4 CalcDefaultParentWorldMatrix();
+
+		// Transformをデフォルトに戻す
+		void ResetToDefaultLocalTransform();
+
 		const std::vector<int>& GetChildrenNodeIndexList() const;
 		void SetChildrenNodeIndexList(const std::vector<int>& NodeList);
 
@@ -70,8 +85,5 @@ namespace object
 
 		void SetInverseBindMatrix(const glm::mat4& Matrix);
 		const glm::mat4& GeInverseBindMatrix() const;
-
-		void SetParentNode(const std::shared_ptr<CNode>& ParentNode);
-		const std::shared_ptr<CNode>& GetParentNode() const;
 	};
 }
