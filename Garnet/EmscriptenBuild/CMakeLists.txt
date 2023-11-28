@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.22.1)
 # declare using C and C++
 project(Garnet, C CXX)
 
-set(CMAKE_BUILD_TYPE Release)
+set(CMAKE_BUILD_TYPE debug)
 
 add_definitions(
 	-DUSE_WEBGPU
@@ -14,7 +14,6 @@ add_definitions(
 	-DUSE_INPUT_SYSTEM
 	-DUSE_GPGPU
 	-DUSE_FBX
-	-DFBXSDK_SHARED
 )
 
 add_executable(
@@ -25,6 +24,8 @@ add_executable(
 	../src/Animation/CAnimationClip.h
 	../src/Animation/CAnimationSampler.cpp
 	../src/Animation/CAnimationSampler.h
+	../src/Animation/CBoneNameProvider.cpp
+	../src/Animation/CBoneNameProvider.h
 	../src/Animation/CJoint.cpp
 	../src/Animation/CJoint.h
 	../src/Animation/CKeyFrame.cpp
@@ -32,6 +33,7 @@ add_executable(
 	../src/Animation/CSkin.cpp
 	../src/Animation/CSkin.h
 	../src/Animation/EAnimationTarget.h
+	../src/Animation/EHumanoidBones.h
 	../src/App/CWebAppManager.cpp
 	../src/App/CWebAppManager.h
 	../src/App/EAppType.h
@@ -44,6 +46,10 @@ add_executable(
 	../src/Debug/Message/Console.h
 	../src/FBX/CFBXImporter.cpp
 	../src/FBX/CFBXImporter.h
+	../src/FBX/CFBXMomoryStream.cpp
+	../src/FBX/CFBXMomoryStream.h
+	../src/FBX/CFBXStream.cpp
+	../src/FBX/CFBXStream.h
 	../src/File/CFile.cpp
 	../src/File/CFile.h
 	../src/GLTF/CGLTFImporter.cpp
@@ -124,6 +130,9 @@ add_executable(
 target_include_directories(Garnet PRIVATE ../src/Library/DawnLib/include ../src/Library/glm  ../src/Library/tinygltf  ../src/Library/FBX-SDK/include)
 # target_include_directories(Garnet PRIVATE ../src/Library/WebGPU ../src/Library/glm  ../src/Library/tinygltf  ../src/Library/FBX-SDK/include)
 
+target_link_libraries(Garnet PRIVATE E:/CppDev/Garnet/Garnet/Src/Library/FBX-SDK/lib/vs2022/x64/debug/libfbxsdk-md.lib E:/CppDev/Garnet/Garnet/Src/Library/FBX-SDK/lib/vs2022/x64/debug/libxml2-md.lib E:/CppDev/Garnet/Garnet/Src/Library/FBX-SDK/lib/vs2022/x64/debug/zlib-md.lib)
+#target_link_libraries(Garnet PRIVATE ../Src/Library/FBX-SDK/lib/vs2022/x64/debug/)
+
 if(EMSCRIPTEN)
 	target_link_options(Garnet PRIVATE 
 		-sEXPORTED_RUNTIME_METHODS=['ccall','UTF8ToString','malloc','free']
@@ -132,4 +141,5 @@ if(EMSCRIPTEN)
 		-sFETCH
 	)
 	set(CMAKE_EXECUTABLE_SUFFIX ".js")
+	set(CMAKE_CXX_FLAGS_RELEASE "/MD")
 endif()

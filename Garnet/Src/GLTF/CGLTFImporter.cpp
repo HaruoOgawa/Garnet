@@ -814,6 +814,9 @@ namespace gltf
 
 				math::CTransform::CastModelMatrixToTransform(modelMatrix, Pos, Rotation, Scale);
 
+				math::CTransform::ToYUpRightHandedCoordinate(Pos);
+				math::CTransform::ToYUpRightHandedCoordinate(Rotation);
+
 				Node->SetPos(Pos);
 				Node->SetRot(Rotation);
 				Node->SetScale(Scale);

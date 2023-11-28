@@ -1,6 +1,7 @@
 #ifdef USE_FBX
 #include "CFBXImporter.h"
 #include "CFBXStream.h"
+#include "CFBXMomoryStream.h"
 #include "../Animation/CBoneNameProvider.h"
 
 #include "../Object/C3DObject.h"
@@ -16,27 +17,27 @@ using namespace fbxsdk;
 
 namespace fbx
 {
-	bool CFBXImporter::ImportFBX(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& Data, std::shared_ptr<object::C3DObject>& Object,
+	bool CFBXImporter::ImportFBX(api::IGraphicsAPI* pGraphicsAPI, const std::string& FileName, std::shared_ptr<object::C3DObject>& Object,
 		const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, const std::shared_ptr<graphics::CTextureSet>& TextureSet,
 		const std::shared_ptr<file::CFile>& DepthVertex, const std::shared_ptr<file::CFile>& DepthFragment)
 	{
 		std::vector<std::shared_ptr<animation::CAnimationClip>> AnimationClipList;
 
-		if (!Import(pGraphicsAPI, Data, true, Object, AnimationClipList, createInfo, TextureSet, DepthVertex, DepthFragment)) return false;
+		if (!Import(pGraphicsAPI, FileName, true, Object, AnimationClipList, createInfo, TextureSet, DepthVertex, DepthFragment)) return false;
 
 		return true;
 	}
 
-	bool CFBXImporter::ImportFBXAnimation(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& Data, std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList)
+	bool CFBXImporter::ImportFBXAnimation(api::IGraphicsAPI* pGraphicsAPI, const std::string& FileName, std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList)
 	{
 		std::shared_ptr<object::C3DObject> Object = std::make_shared<object::C3DObject>("", "");
 
-		if (!Import(pGraphicsAPI, Data, false, Object, AnimationClipList, nullptr, nullptr, nullptr, nullptr)) return false;
+		if (!Import(pGraphicsAPI, FileName, false, Object, AnimationClipList, nullptr, nullptr, nullptr, nullptr)) return false;
 
 		return true;
 	}
 
-	bool CFBXImporter::Import(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& Data, bool IsUseObject, std::shared_ptr<object::C3DObject>& Object,
+	bool CFBXImporter::Import(api::IGraphicsAPI* pGraphicsAPI, const std::string& FileName, bool IsUseObject, std::shared_ptr<object::C3DObject>& Object,
 		std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList,
 		const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, const std::shared_ptr<graphics::CTextureSet>& TextureSet,
 		const std::shared_ptr<file::CFile>& DepthVertex, const std::shared_ptr<file::CFile>& DepthFragment)
@@ -51,19 +52,13 @@ namespace fbx
 		// Importerを生成
 		FbxImporter* Importer = FbxImporter::Create(Manager, "");
 
-		// ひとまず適当にファイル名からImport(あとでfromMemoryにする)
-		//const char* fileName = "Resources\\Motions\\Walking.fbx";
-		const char* fileName = "Resources\\Motions\\Walking_WithSkin.fbx";
-		//const char* fileName = "Resources\\Motions\\Locking Hip Hop Dance.fbx";
-
 		// Streamを作成
-		//CFBXStream Stream(Manager, "rb");
+		//CFBXStream Stream(Manager, "rb", "Resources\\Motions\\Walking_WithSkin.fbx");
+		//CFBXMomoryStream Stream(Manager, Data);
 		//void* streamData = NULL;
 
-		//Stream.Read(&Data[0], Data.size());
-
 		// Importerを初期化
-		if (!Importer->Initialize(fileName, -1, Manager->GetIOSettings()))
+		if (!Importer->Initialize(FileName.c_str(), -1, Manager->GetIOSettings()))
 		//if (!Importer->Initialize(&Stream, streamData, -1, Manager->GetIOSettings()))
 		{
 			Console::Log("Failed to Import FBX\n");
@@ -815,9 +810,6 @@ namespace fbx
 		// たぶん単位がcmなので0.01倍することで計算に一般的に使用するmに直す
 		math::CTransform::CastCentiMeter2Meter(Pos);
 
-		math::CTransform::ToYUpRightHandedCoordinate(Pos);
-		math::CTransform::ToYUpRightHandedCoordinate(Rotation);
-
 		Node->SetPos(Pos);
 		Node->SetRot(Rotation);
 		Node->SetScale(Scale);
@@ -999,10 +991,7 @@ namespace fbx
 							// たぶん単位がcmなので0.01倍することで計算に一般的に使用するmに直す
 							math::CTransform::CastCentiMeter2Meter(Pos);
 
-							math::CTransform::ToYUpRightHandedCoordinate(Pos);
-							math::CTransform::ToYUpRightHandedCoordinate(Rotation);
-
-							math::CTransform::CalcModelMatrix(CurrentMatrix, Pos, Rotation, Scale);
+							math::CTransform::CalcModelMatrix(CurrentMatrix, Pos, Rotation, false);
 						}
 						
 						// Input

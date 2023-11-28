@@ -62,6 +62,7 @@ namespace scene
 
 		m_IsLoaded(false)
 	{
+		pLoadWorker->AddFirstLoadResource(m_FbxAnimationData);
 		pLoadWorker->AddFirstLoadResource(m_DepthVertex);
 		pLoadWorker->AddFirstLoadResource(m_DepthFragment);
 		pLoadWorker->AddFirstLoadResource(m_glTFData);
@@ -118,7 +119,7 @@ namespace scene
 		// FBX Humanoid Animation Clip
 		std::vector<std::shared_ptr<animation::CAnimationClip>> AnimationClipList;
 		{
-			if (!fbx::CFBXImporter::ImportFBXAnimation(pGraphicsAPI, m_FbxAnimationData->GetData(), AnimationClipList)) return false;
+			if (!fbx::CFBXImporter::ImportFBXAnimation(pGraphicsAPI, "Resources\\Motions\\Walking.fbx", AnimationClipList)) return false;
 		}
 
 		// glTFObject
@@ -186,7 +187,7 @@ namespace scene
 
 			// 再生するアニメーションクリップを指定する
 			m_VRMObject->SetPlayClipIndex(0);
-			m_VRMObject->AddHumanoidAnimationClip(AnimationClipList[1]);
+			m_VRMObject->AddHumanoidAnimationClip(AnimationClipList[0]);
 		}
 		
 		{
@@ -206,7 +207,8 @@ namespace scene
 
 			m_FbxObject->SetRot(glm::angleAxis(3.1415f, glm::vec3(0.0f, 1.0f, 0.0f)));
 
-			if (!fbx::CFBXImporter::ImportFBX(pGraphicsAPI, m_FbxAnimationData->GetData(), m_FbxObject, createInfo, TextureSet, m_DepthVertex, m_DepthFragment)) return false;
+			if (!fbx::CFBXImporter::ImportFBX(pGraphicsAPI, "Resources\\Motions\\Walking_WithSkin.fbx", m_FbxObject, createInfo, TextureSet, m_DepthVertex, m_DepthFragment)) return false;
+			//if (!fbx::CFBXImporter::ImportFBX(pGraphicsAPI, "Resources\\Motions\\Locking Hip Hop Dance.fbx", m_FbxObject, createInfo, TextureSet, m_DepthVertex, m_DepthFragment)) return false;
 		}
 
 		// m_Background
