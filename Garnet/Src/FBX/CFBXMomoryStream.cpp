@@ -2,11 +2,15 @@
 
 namespace fbx
 {
+	unsigned int g_DataOffset = 0;
+
 	CFBXMomoryStream::CFBXMomoryStream(FbxManager* pFbxManager, const std::vector<unsigned char>& Data) :
 		m_Data(Data),
 		m_ReaderID(-1),
 		m_WriteID(-1)
 	{
+		g_DataOffset = 0;
+
 		const char* format = "FBX (*.fbx)";
 		m_ReaderID = pFbxManager->GetIOPluginRegistry()->FindReaderIDByDescription(format);
 		m_WriteID = -1;
@@ -47,7 +51,11 @@ namespace fbx
 	{
 		if (m_Data.size() == 0) return 0;
 
-		std::memcpy(pData, &m_Data[0], sizeof(unsigned char) * m_Data.size());
+		if (g_DataOffset >= m_Data.size()) return 0;
+
+		std::memcpy(pData, &m_Data[g_DataOffset], Size);
+		
+		g_DataOffset += static_cast<int>(Size);
 
 		return 1;
 	}

@@ -123,12 +123,19 @@ namespace math
 		Val.z *= 0.01f;
 	}
 
-	void CTransform::CalcModelMatrix(glm::mat4& ModelMatrix, const glm::vec3& Translation, const glm::quat& Rotation, const glm::vec3& Scale)
+	void CTransform::CalcModelMatrix(glm::mat4& ModelMatrix, const glm::vec3& Translation, const glm::quat& Rotation, bool UseScale, const glm::vec3& Scale)
 	{
 		glm::mat4 trsMatrix = glm::translate(glm::mat4(1.0f), Translation);
 		glm::mat4 rotMatrix = glm::toMat4(Rotation);
 		glm::mat4 sclMatrix = glm::scale(glm::mat4(1.0f), Scale);
 
-		ModelMatrix = trsMatrix * rotMatrix * sclMatrix;
+		if (UseScale)
+		{
+			ModelMatrix = trsMatrix * rotMatrix * sclMatrix;
+		}
+		else
+		{
+			ModelMatrix = trsMatrix * rotMatrix;
+		}
 	}
 }

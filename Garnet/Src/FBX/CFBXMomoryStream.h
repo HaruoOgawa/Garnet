@@ -13,7 +13,7 @@ namespace fbx
 	class CFBXMomoryStream : public FbxStream
 	{
 		std::vector<unsigned char> m_Data;
-
+		
 		int m_ReaderID;
 		int m_WriteID;
 	public:

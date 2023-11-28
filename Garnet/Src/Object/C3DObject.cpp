@@ -300,7 +300,7 @@ namespace object
 			}
 		}
 		
-		for (const auto& Skin : m_AnimationSkinList)
+		/*for (const auto& Skin : m_AnimationSkinList)
 		{
 			
 			for (const auto& Joint : Skin->GetJointList())
@@ -331,7 +331,7 @@ namespace object
 
 				// Debug—p: Bone‚Ì•`‰æ
 			}
-		}
+		}*/
 
 		return true;
 	}
