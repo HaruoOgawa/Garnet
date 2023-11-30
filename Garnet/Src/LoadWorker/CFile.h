@@ -3,7 +3,7 @@
 #include <string>
 #include "../Interface/IResource.h"
 
-namespace file
+namespace resource
 {
 	class CFile : public resource::IResource
 	{
@@ -30,6 +30,7 @@ namespace file
 		virtual bool IsLoaded() const override;
 
 		virtual bool Load() override;
+		virtual bool Update() override;
 
 		void SetData(const std::vector<unsigned char>& Data);
 		const std::vector<unsigned char>& GetData() const;

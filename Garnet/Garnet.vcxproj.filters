@@ -66,7 +66,7 @@
     <ClInclude Include="Src\Graphics\CMaterial.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Src\File\CFile.h">
+    <ClInclude Include="Src\LoadWorker\CFile.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Src\Scene\CScriptScene.h">
@@ -1149,6 +1149,12 @@
     <ClInclude Include="Src\FBX\CFBXMomoryStream.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Graphics\CMaterialFrame.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\LoadWorker\CMaterialFrameLoader.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\Main\DescMain\DescMain.cpp">
@@ -1193,7 +1199,7 @@
     <ClCompile Include="Src\Graphics\CMaterial.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Src\File\CFile.cpp">
+    <ClCompile Include="Src\LoadWorker\CFile.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Src\Scene\CScriptScene.cpp">
@@ -1332,6 +1338,12 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Src\FBX\CFBXMomoryStream.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Graphics\CMaterialFrame.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\LoadWorker\CMaterialFrameLoader.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1757,5 +1769,9 @@
     </None>
     <None Include="WebRelease\Resources\Shaders\frag.spv" />
     <None Include="WebRelease\Resources\Shaders\vert.spv" />
+    <None Include="Resources\MaterialFrame\PBR_MF.json" />
+    <None Include="Resources\MaterialFrame\Sample_MF.json" />
+    <None Include="Resources\Shaders\sample.vert" />
+    <None Include="Resources\Shaders\sample.frag" />
   </ItemGroup>
 </Project>

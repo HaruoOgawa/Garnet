@@ -18,8 +18,8 @@ namespace resource
 		float m_Alpha;
 
 		std::shared_ptr<object::C3DObject> m_LoadingBar;
-		std::shared_ptr<file::CFile> m_VertexShader; // ‚ ‚Æ‚ÅSimple3DObject‚ÉˆÚ“®‚·‚é
-		std::shared_ptr<file::CFile> m_FragmentShader;
+		std::shared_ptr<resource::CFile> m_VertexShader; // ‚ ‚Æ‚ÅSimple3DObject‚ÉˆÚ“®‚·‚é
+		std::shared_ptr<resource::CFile> m_FragmentShader;
 
 		std::vector<std::shared_ptr<resource::IResource>> m_FirstLoadResourceList;
 		std::vector<std::shared_ptr<resource::IResource>> m_RuntimeLoadResourceList;

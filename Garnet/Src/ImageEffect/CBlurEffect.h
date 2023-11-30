@@ -22,8 +22,8 @@ namespace imageeffect
 
 		bool m_IsLoaded;
 
-		std::shared_ptr<file::CFile> m_BlurVertex;
-		std::shared_ptr<file::CFile> m_BlurFrag;
+		std::shared_ptr<resource::CFile> m_BlurVertex;
+		std::shared_ptr<resource::CFile> m_BlurFrag;
 
 		std::shared_ptr<object::C3DObject> m_ScreenObjX;
 		std::shared_ptr<object::C3DObject> m_ScreenObjY;

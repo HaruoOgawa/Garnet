@@ -17,7 +17,7 @@ namespace object
 		m_MaterialList.clear();
 	}
 
-	bool C3DObject::Create(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<file::CFile>& DepthVertex, const std::shared_ptr<file::CFile>& DepthFragment, const std::shared_ptr<graphics::CTextureSet>& TextureSet)
+	bool C3DObject::Create(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<resource::CFile>& DepthVertex, const std::shared_ptr<resource::CFile>& DepthFragment, const std::shared_ptr<graphics::CTextureSet>& TextureSet)
 	{
 		// GPU上のテクスチャリソースが解放されてしまうので保持しておく
 		m_TextureSet = TextureSet;

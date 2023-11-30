@@ -6,7 +6,7 @@
 #include "CShaderBuffer.h"
 #include "CShaderBufferDescriptor.h"
 #include "../GraphicsAPI/CMaterialCreateInfo.h"
-#include "../File/CFile.h"
+#include "../LoadWorker/CFile.h"
 #include "../../Interface/IGraphicsAPI.h"
 #include "STextureBindingLayout.h"
 #include "CTextureSet.h"
@@ -47,7 +47,7 @@ namespace graphics
 		virtual ~CMaterial() = default;
 
 		virtual bool Create(const std::shared_ptr<graphics::CTextureSet>& TextureSet) = 0;
-		virtual bool CreateDepthMaterial(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<file::CFile>& DepthVertex, const std::shared_ptr<file::CFile>& DepthFragment);
+		virtual bool CreateDepthMaterial(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<resource::CFile>& DepthVertex, const std::shared_ptr<resource::CFile>& DepthFragment);
 
 		virtual std::shared_ptr<graphics::CMaterial> GetDepthMaterial();
 

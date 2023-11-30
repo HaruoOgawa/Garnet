@@ -1,7 +1,7 @@
 #include "CBlurEffect.h"
 #include "../../LoadWorker/CLoadWorker.h"
 #include "../Debug/Message/Console.h"
-#include "../File/CFile.h"
+#include "../LoadWorker/CFile.h"
 #include "../Interface/IGraphicsAPI.h"
 #include "../Graphics/CTextureSet.h"
 
@@ -12,8 +12,8 @@ namespace imageeffect
 
 		m_IsLoaded(false),
 		m_KernelSize(0),
-		m_BlurVertex(std::make_shared<file::CFile>("Resources\\Shaders\\blur" + m_pGraphicsAPI->GetVertexShaderExtension())),
-		m_BlurFrag(std::make_shared<file::CFile>("Resources\\Shaders\\blur" + m_pGraphicsAPI->GetFragmentShaderExtension())),
+		m_BlurVertex(std::make_shared<resource::CFile>("Resources\\Shaders\\blur" + m_pGraphicsAPI->GetVertexShaderExtension())),
+		m_BlurFrag(std::make_shared<resource::CFile>("Resources\\Shaders\\blur" + m_pGraphicsAPI->GetFragmentShaderExtension())),
 		m_ScreenObjX(std::make_shared<object::C3DObject>("BlurX", "")),
 		m_ScreenObjY(std::make_shared<object::C3DObject>("BlurY", "")),
 

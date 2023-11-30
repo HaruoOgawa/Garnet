@@ -1,67 +1,76 @@
 #include "CScriptScene.h"
+
 #include "../../LoadWorker/CLoadWorker.h"
-#include "../Object/C3DObject.h"
-#include "../File/CFile.h"
+#include "../LoadWorker/CFile.h"
+#include "../LoadWorker/CMaterialFrameLoader.h"
+
 #include "../Debug/Message/Console.h"
+
+#include "../Object/C3DObject.h"
 #include "../GLTF/CGLTFImporter.h"
 #include "../FBX/CFBXImporter.h"
-#include <glm/glm.hpp>
+
 #include "../Graphics/CDrawInfo.h"
+#include "../Graphics/CMaterialFrame.h"
+
 #include "../Camera/CCamera.h"
 
 namespace scene
 {
 	CScriptScene::CScriptScene(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker):
+		m_SampleMF(std::make_shared<graphics::CMaterialFrame>()),
+
 		m_glTFObject(std::make_shared<object::C3DObject>("", "ShadowPass")),
 		m_BrainStemDObject(std::make_shared<object::C3DObject>("", "ShadowPass")),
 		m_VRMObject(std::make_shared<object::C3DObject>("", "ShadowPass")),
 		m_FbxObject(std::make_shared<object::C3DObject>("", "ShadowPass")),
-		//m_glTFData(std::make_shared<file::CFile>("Resources\\Models\\MetalRoughSpheresNoTextures\\glTF-Binary\\MetalRoughSpheresNoTextures.glb")),
-		//m_glTFData(std::make_shared<file::CFile>("Resources\\Models\\Sponza\\glTF\\Sponza.glb")),
-		//m_glTFData(std::make_shared<file::CFile>("Resources\\Models\\DamagedHelmet\\glTF-Binary\\DamagedHelmet.glb")),
-		//m_glTFData(std::make_shared<file::CFile>("Resources\\Models\\SimpleAnimation\\SimpleAnimation.gltf")),
-		//m_glTFData(std::make_shared<file::CFile>("Resources\\Models\\SimpleAnimation\\Triangle_Linear_Anim_Test.gltf")),
-		//m_glTFData(std::make_shared<file::CFile>("Resources\\Models\\SimpleAnimation\\CubeiSplineTest.gltf")),
-		//m_glTFData(std::make_shared<file::CFile>("Resources\\Models\\SimpleMorphTarget\\SimpleMorphTarget.gltf")),
-		//m_glTFData(std::make_shared<file::CFile>("Resources\\Models\\SimpleSkin\\SimpleSkin.gltf")),
-		//m_glTFData(std::make_shared<file::CFile>("Resources\\Models\\RiggedSimple\\glTF-Binary\\RiggedSimple.glb")),
-		//m_glTFData(std::make_shared<file::CFile>("Resources\\Models\\RiggedFigure\\glTF-Binary\\RiggedFigure.glb")),
-		//m_glTFData(std::make_shared<file::CFile>("Resources\\Models\\BrainStem\\glTF-Binary\\BrainStem.glb")),
-		m_glTFData(std::make_shared<file::CFile>("Resources\\Models\\CesiumMan\\glTF-Binary\\CesiumMan.glb")),
-		//m_glTFData(std::make_shared<file::CFile>("Resources\\Models\\AnimatedCube\\glTF\\AnimatedCube.gltf")),
+		//m_glTFData(std::make_shared<resource::CFile>("Resources\\Models\\MetalRoughSpheresNoTextures\\glTF-Binary\\MetalRoughSpheresNoTextures.glb")),
+		//m_glTFData(std::make_shared<resource::CFile>("Resources\\Models\\Sponza\\glTF\\Sponza.glb")),
+		//m_glTFData(std::make_shared<resource::CFile>("Resources\\Models\\DamagedHelmet\\glTF-Binary\\DamagedHelmet.glb")),
+		//m_glTFData(std::make_shared<resource::CFile>("Resources\\Models\\SimpleAnimation\\SimpleAnimation.gltf")),
+		//m_glTFData(std::make_shared<resource::CFile>("Resources\\Models\\SimpleAnimation\\Triangle_Linear_Anim_Test.gltf")),
+		//m_glTFData(std::make_shared<resource::CFile>("Resources\\Models\\SimpleAnimation\\CubeiSplineTest.gltf")),
+		//m_glTFData(std::make_shared<resource::CFile>("Resources\\Models\\SimpleMorphTarget\\SimpleMorphTarget.gltf")),
+		//m_glTFData(std::make_shared<resource::CFile>("Resources\\Models\\SimpleSkin\\SimpleSkin.gltf")),
+		//m_glTFData(std::make_shared<resource::CFile>("Resources\\Models\\RiggedSimple\\glTF-Binary\\RiggedSimple.glb")),
+		//m_glTFData(std::make_shared<resource::CFile>("Resources\\Models\\RiggedFigure\\glTF-Binary\\RiggedFigure.glb")),
+		//m_glTFData(std::make_shared<resource::CFile>("Resources\\Models\\BrainStem\\glTF-Binary\\BrainStem.glb")),
+		m_glTFData(std::make_shared<resource::CFile>("Resources\\Models\\CesiumMan\\glTF-Binary\\CesiumMan.glb")),
+		//m_glTFData(std::make_shared<resource::CFile>("Resources\\Models\\AnimatedCube\\glTF\\AnimatedCube.gltf")),
 
-		m_BrainStemData(std::make_shared<file::CFile>("Resources\\Models\\BrainStem\\glTF-Binary\\BrainStem.glb")),
-		m_VRMData(std::make_shared<file::CFile>("Resources\\Models\\Alicia\\VRM\\AliciaSolid.vrm")),
+		m_BrainStemData(std::make_shared<resource::CFile>("Resources\\Models\\BrainStem\\glTF-Binary\\BrainStem.glb")),
+		m_VRMData(std::make_shared<resource::CFile>("Resources\\Models\\Alicia\\VRM\\AliciaSolid.vrm")),
 
-		//m_FbxAnimationData(std::make_shared<file::CFile>("Resources\\Motions\\Walking.fbx")),
-		m_FbxAnimationData(std::make_shared<file::CFile>("Resources\\Motions\\Walking_WithSkin.fbx")),
-		m_FbxData(std::make_shared<file::CFile>("Resources\\Motions\\Walking_WithSkin.fbx")),
+		//m_FbxAnimationData(std::make_shared<resource::CFile>("Resources\\Motions\\Walking.fbx")),
+		m_FbxAnimationData(std::make_shared<resource::CFile>("Resources\\Motions\\Walking_WithSkin.fbx")),
+		m_FbxData(std::make_shared<resource::CFile>("Resources\\Motions\\Walking_WithSkin.fbx")),
 
 		m_Background(std::make_shared<object::C3DObject>("", "ShadowPass")),
 		m_DebugSphere(std::make_shared<object::C3DObject>("", "ShadowPass")),
 
-		m_IBL_Skybox(std::make_shared<file::CFile>("Resources\\IBL\\output_skybox.hdr")),
-		m_IBL_DiffuseEnvMap(std::make_shared<file::CFile>("Resources\\IBL\\output_iem.hdr")),
-		m_IBL_SpecularEnvMap(std::make_shared<file::CFile>("Resources\\IBL\\output_pmrem.hdr")),
-		m_IBL_GGX_LUT(std::make_shared<file::CFile>("Resources\\Textures\\ggx_lut.jpg")),
+		m_IBL_Skybox(std::make_shared<resource::CFile>("Resources\\IBL\\output_skybox.hdr")),
+		m_IBL_DiffuseEnvMap(std::make_shared<resource::CFile>("Resources\\IBL\\output_iem.hdr")),
+		m_IBL_SpecularEnvMap(std::make_shared<resource::CFile>("Resources\\IBL\\output_pmrem.hdr")),
+		m_IBL_GGX_LUT(std::make_shared<resource::CFile>("Resources\\Textures\\ggx_lut.jpg")),
 
-		m_Cube0(std::make_shared<file::CFile>("Resources\\Cubemaps\\environment\\environment_back_0.jpg")),
-		m_Cube1(std::make_shared<file::CFile>("Resources\\Cubemaps\\environment\\environment_bottom_0.jpg")),
-		m_Cube2(std::make_shared<file::CFile>("Resources\\Cubemaps\\environment\\environment_front_0.jpg")),
-		m_Cube3(std::make_shared<file::CFile>("Resources\\Cubemaps\\environment\\environment_left_0.jpg")),
-		m_Cube4(std::make_shared<file::CFile>("Resources\\Cubemaps\\environment\\environment_right_0.jpg")),
-		m_Cube5(std::make_shared<file::CFile>("Resources\\Cubemaps\\environment\\environment_top_0.jpg")),
+		m_Cube0(std::make_shared<resource::CFile>("Resources\\Cubemaps\\environment\\environment_back_0.jpg")),
+		m_Cube1(std::make_shared<resource::CFile>("Resources\\Cubemaps\\environment\\environment_bottom_0.jpg")),
+		m_Cube2(std::make_shared<resource::CFile>("Resources\\Cubemaps\\environment\\environment_front_0.jpg")),
+		m_Cube3(std::make_shared<resource::CFile>("Resources\\Cubemaps\\environment\\environment_left_0.jpg")),
+		m_Cube4(std::make_shared<resource::CFile>("Resources\\Cubemaps\\environment\\environment_right_0.jpg")),
+		m_Cube5(std::make_shared<resource::CFile>("Resources\\Cubemaps\\environment\\environment_top_0.jpg")),
 
-		m_DepthVertex(std::make_shared<file::CFile>("Resources\\Shaders\\depth" + pGraphicsAPI->GetVertexShaderExtension())),
-		m_DepthFragment(std::make_shared<file::CFile>("Resources\\Shaders\\depth" + pGraphicsAPI->GetFragmentShaderExtension())),
+		m_DepthVertex(std::make_shared<resource::CFile>("Resources\\Shaders\\depth" + pGraphicsAPI->GetVertexShaderExtension())),
+		m_DepthFragment(std::make_shared<resource::CFile>("Resources\\Shaders\\depth" + pGraphicsAPI->GetFragmentShaderExtension())),
 
-		m_VertexShader(std::make_shared<file::CFile>("Resources\\Shaders\\pbr" + pGraphicsAPI->GetVertexShaderExtension())),
-		m_FragmentShader(std::make_shared<file::CFile>("Resources\\Shaders\\pbr" + pGraphicsAPI->GetFragmentShaderExtension())),
-		m_MinimumVert(std::make_shared<file::CFile>("Resources\\Shaders\\minimum" + pGraphicsAPI->GetVertexShaderExtension())),
-		m_TextureFrag(std::make_shared<file::CFile>("Resources\\Shaders\\unlit" + pGraphicsAPI->GetFragmentShaderExtension())),
+		m_VertexShader(std::make_shared<resource::CFile>("Resources\\Shaders\\pbr" + pGraphicsAPI->GetVertexShaderExtension())),
+		m_FragmentShader(std::make_shared<resource::CFile>("Resources\\Shaders\\pbr" + pGraphicsAPI->GetFragmentShaderExtension())),
+		m_MinimumVert(std::make_shared<resource::CFile>("Resources\\Shaders\\minimum" + pGraphicsAPI->GetVertexShaderExtension())),
+		m_TextureFrag(std::make_shared<resource::CFile>("Resources\\Shaders\\unlit" + pGraphicsAPI->GetFragmentShaderExtension())),
 
 		m_IsLoaded(false)
 	{
+		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CMaterialFrameLoader>("Resources\\MaterialFrame\\Sample_MF.json", m_SampleMF));
 		pLoadWorker->AddFirstLoadResource(m_FbxAnimationData);
 		pLoadWorker->AddFirstLoadResource(m_DepthVertex);
 		pLoadWorker->AddFirstLoadResource(m_DepthFragment);

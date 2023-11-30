@@ -574,6 +574,8 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Src\LoadWorker\CMaterialFrameLoader.h" />
+    <ClInclude Include="Src\Graphics\CMaterialFrame.h" />
     <ClInclude Include="Src\FBX\CFBXMomoryStream.h" />
     <ClInclude Include="Src\Animation\CBoneNameProvider.h" />
     <ClInclude Include="Src\Animation\EHumanoidBones.h" />
@@ -934,7 +936,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClInclude Include="src\Library\WebGPU\x86\webgpu.h" />
     <ClInclude Include="src\Library\WebGPU\x86\wgpu.h" />
     <ClInclude Include="Src\Scene\CScriptScene.h" />
-    <ClInclude Include="Src\File\CFile.h" />
+    <ClInclude Include="Src\LoadWorker\CFile.h" />
     <ClInclude Include="Src\Graphics\CMaterial.h" />
     <ClInclude Include="Src\Graphics\CPrimitive.h" />
     <ClInclude Include="Src\Graphics\CMesh.h" />
@@ -954,6 +956,8 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClInclude Include="Src\Interface\IRenderer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\LoadWorker\CMaterialFrameLoader.cpp" />
+    <ClCompile Include="Src\Graphics\CMaterialFrame.cpp" />
     <ClCompile Include="Src\FBX\CFBXMomoryStream.cpp" />
     <ClCompile Include="Src\Animation\CBoneNameProvider.cpp" />
     <ClCompile Include="Src\FBX\CFBXStream.cpp" />
@@ -1000,7 +1004,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClCompile Include="Src\Library\glfw3webgpu\glfw3webgpu.c" />
     <ClCompile Include="Src\Library\glm\glm\detail\glm.cpp" />
     <ClCompile Include="Src\Scene\CScriptScene.cpp" />
-    <ClCompile Include="Src\File\CFile.cpp" />
+    <ClCompile Include="Src\LoadWorker\CFile.cpp" />
     <ClCompile Include="Src\Graphics\CMaterial.cpp" />
     <ClCompile Include="Src\Graphics\CPrimitive.cpp" />
     <ClCompile Include="Src\Graphics\CMesh.cpp" />
@@ -1019,6 +1023,10 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
   <ItemGroup>
     <None Include="CMakeBuild\Garnet_front.js" />
     <None Include="CMakeBuild\index.html" />
+    <None Include="Resources\MaterialFrame\PBR_MF.json" />
+    <None Include="Resources\MaterialFrame\Sample_MF.json" />
+    <None Include="Resources\Shaders\sample.frag" />
+    <None Include="Resources\Shaders\sample.vert" />
     <None Include="Src\Library\glm\glm\detail\func_common.inl" />
     <None Include="Src\Library\glm\glm\detail\func_common_simd.inl" />
     <None Include="Src\Library\glm\glm\detail\func_exponential.inl" />

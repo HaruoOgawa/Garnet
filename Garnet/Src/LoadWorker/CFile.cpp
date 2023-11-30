@@ -7,7 +7,7 @@
 #include <emscripten/fetch.h>
 #endif
 
-namespace file
+namespace resource
 {
 	CFile::CFile(const std::string& filename):
 		m_Status(resource::ELoadStatus::None),
@@ -115,6 +115,11 @@ namespace file
 		m_Status = resource::ELoadStatus::Loaded;
 #endif
 
+		return true;
+	}
+
+	bool CFile::Update()
+	{
 		return true;
 	}
 
