@@ -118,7 +118,7 @@ namespace resource
 		return true;
 	}
 
-	bool CFile::Update()
+	bool CFile::Update(api::IGraphicsAPI* pGraphicsAPI)
 	{
 		return true;
 	}

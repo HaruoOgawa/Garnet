@@ -47,7 +47,7 @@ namespace graphics
 		void SetGeometryShaderCode(const std::vector<unsigned char>& GeometryShaderCode);
 		const std::vector<unsigned char>& GetGeometryShaderCode() const;
 
-		void HullShaderCode(const std::vector<unsigned char>& HullShaderCode);
+		void SetHullShaderCode(const std::vector<unsigned char>& HullShaderCode);
 		const std::vector<unsigned char>& GetHullShaderCode() const;
 
 		void SetDomainShaderCode(const std::vector<unsigned char>& DomainShaderCode);

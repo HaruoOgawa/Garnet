@@ -73,7 +73,7 @@ namespace graphics
 		return m_GeometryShaderCode;
 	}
 
-	void CMaterialCreateInfo::HullShaderCode(const std::vector<unsigned char>& HullShaderCode)
+	void CMaterialCreateInfo::SetHullShaderCode(const std::vector<unsigned char>& HullShaderCode)
 	{
 		m_HullShaderCode = HullShaderCode;
 	}

@@ -30,7 +30,7 @@ namespace resource
 		virtual bool IsLoaded() const override;
 
 		virtual bool Load() override;
-		virtual bool Update() override;
+		virtual bool Update(api::IGraphicsAPI* pGraphicsAPI) override;
 
 		void SetData(const std::vector<unsigned char>& Data);
 		const std::vector<unsigned char>& GetData() const;

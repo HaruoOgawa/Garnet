@@ -100,7 +100,7 @@ namespace resource
 					return true;
 
 				case resource::ELoadStatus::Loading:
-					if (!Resource->Update()) return false;
+					if (!Resource->Update(pGraphicsAPI)) return false;
 					return true;
 
 				case resource::ELoadStatus::Loaded:
@@ -128,7 +128,7 @@ namespace resource
 					return true;
 
 				case resource::ELoadStatus::Loading:
-					if (!Resource->Update()) return false;
+					if (!Resource->Update(pGraphicsAPI)) return false;
 					return true;
 
 				case resource::ELoadStatus::Loaded:
