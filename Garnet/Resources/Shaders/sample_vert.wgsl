@@ -11,6 +11,10 @@ struct UniformBufferObject {
     proj: mat4x4<f32>,
     lightVPMat: mat4x4<f32>,
     color: vec4<f32>,
+    useTexture: i32,
+    pad0_: i32,
+    pad1_: i32,
+    pad2_: i32,
 }
 
 struct SkinMatrixBuffer {

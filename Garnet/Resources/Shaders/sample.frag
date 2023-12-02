@@ -12,6 +12,13 @@ layout(binding = 0) uniform UniformBufferObject{
     mat4 view;
     mat4 proj;
 	mat4 lightVPMat;
+
+    vec4 color;
+
+    int useTexture;
+    int pad0;
+    int pad1;
+    int pad2;
 } ubo;
 
 #ifdef USE_OPENGL
@@ -23,6 +30,17 @@ layout(binding = 2) uniform sampler baseColorTextureSampler;
 
 void main(){
 	vec4 col = f_Color;
+
+    col.rg = f_Texcoord;
+
+    if(ubo.useTexture != 0)
+    {
+        #ifdef USE_OPENGL
+		col.rgb = texture(baseColorTexture, f_Texcoord).rgb;
+		#else
+		col.rgb = texture(sampler2D(baseColorTexture, baseColorTextureSampler), f_Texcoord).rgb;
+		#endif
+    }
 
 	outColor = col;
 }

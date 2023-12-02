@@ -292,8 +292,9 @@ namespace resource
 					ByteSize = sizeof(int);
 				}
 
+				// ひとまずfloatArrayにしておく. floatもintもバイトサイズは同じなので
 				std::vector<float> initValue;
-				GetFloatArray("initValue", initValue, val);
+				GetArray32("initValue", initValue, val);
 
 				std::shared_ptr<graphics::SBufferValueLayout> ValueLayout = std::make_shared<graphics::SBufferValueLayout>();
 				ValueLayout->Name = value_name;
@@ -467,14 +468,14 @@ namespace resource
 		}
 	}
 
-	void CMaterialFrameLoader::GetFloatArray(const std::string& Key, std::vector<float>& Value, const json::iterator& Object)
+	void CMaterialFrameLoader::GetArray32(const std::string& Key, std::vector<float>& Value, const json::iterator& Object)
 	{
 		const auto it = Object->find(Key);
 		if (it != Object->end() && it->is_array())
 		{
 			for (json::iterator it2 = it->begin(); it2 != it->end(); it2++)
 			{
-				if (it2->is_number_float())
+				if (it2->is_number())
 				{
 					float val = it2.value();
 

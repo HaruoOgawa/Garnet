@@ -12,6 +12,11 @@ layout(binding = 0) uniform UniformBufferObject{
 	mat4 lightVPMat;
 
     vec4 color;
+
+    int useTexture;
+    int pad0;
+    int pad1;
+    int pad2;
 } ubo;
 
 readonly layout(std430, binding = 3) buffer SkinMatrixBuffer

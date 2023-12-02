@@ -92,6 +92,18 @@ namespace graphics
 		m_TextureBindingLayoutList.push_back(Layout);
 	}
 
+	void CMaterial::ReplaceTextureIndex(const std::string& TextureName, int TextureIndex)
+	{
+		for (auto& Layout : m_TextureBindingLayoutList)
+		{
+			if (TextureName != Layout.TextureName) continue;
+
+			Layout.TextureIndex = TextureIndex;
+
+			break;
+		}
+	}
+
 	void CMaterial::ReplacePreloadUniformValue(const std::string& Name, const void* Data, int ByteSize, int BindingIndex)
 	{
 		for (const auto& Buffer : m_ShaderBufferList)

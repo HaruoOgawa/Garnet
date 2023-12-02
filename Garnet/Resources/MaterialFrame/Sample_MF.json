@@ -39,6 +39,26 @@
               "name": "color",
               "type": "vec4",
               "initValue": [1.0, 1.0, 1.0, 1.0]
+            },
+            {
+              "name": "useTexture",
+              "type": "int",
+              "initValue": [ 0 ]
+            },
+            {
+              "name": "pad0",
+              "type": "int",
+              "initValue": [ 0 ]
+            },
+            {
+              "name": "pad1",
+              "type": "int",
+              "initValue": [ 0 ]
+            },
+            {
+              "name": "pad2",
+              "type": "int",
+              "initValue": [ 0 ]
             }
           ]
         },

@@ -235,6 +235,9 @@ namespace scene
 			};
 			Mat->ReplacePreloadUniformValue("r_SkinMatrixBuffer", &TestMatrixSSBO[0], sizeof(float) * static_cast<int>(TestMatrixSSBO.size()), 3);
 
+			Mat->ReplacePreloadUniformValue("useTexture", &glm::ivec1(5)[0], sizeof(glm::ivec1), 0);
+			Mat->ReplaceTextureIndex("baseColorTexture", 0);
+
 			m_MfTestObject->AddMaterial(Mat);
 
 			// Mesh
@@ -259,6 +262,7 @@ namespace scene
 
 			// TextureSet
 			std::shared_ptr<graphics::CTextureSet> TextureSet = std::make_shared<graphics::CTextureSet>();
+			TextureSet->Add2DTexture(IBL_Skybox_Tex);
 
 			// Create
 			if (!m_MfTestObject->Create(pGraphicsAPI, m_DepthVertex, m_DepthFragment, TextureSet)) return false;

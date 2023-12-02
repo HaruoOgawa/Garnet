@@ -59,7 +59,7 @@ namespace resource
 		void GetBoolean(const std::string& Key, bool& Value, const json::iterator& Object);
 		void GetInt(const std::string& Key, int& Value, const json::iterator& Object);
 		void GetFloat(const std::string& Key, float& Value, const json::iterator& Object);
-		void GetFloatArray(const std::string& Key, std::vector<float>& Value, const json::iterator& Object);
+		void GetArray32(const std::string& Key, std::vector<float>& Value, const json::iterator& Object);
 	public:
 		CMaterialFrameLoader(const std::string& filename, std::shared_ptr<graphics::CMaterialFrame> TargetMaterialFrame);
 		virtual ~CMaterialFrameLoader();
