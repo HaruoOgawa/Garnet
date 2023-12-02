@@ -25,6 +25,8 @@ namespace scene
 
 		std::shared_ptr<graphics::CMaterialFrame> m_SampleMF;
 		std::shared_ptr<graphics::CMaterialFrame> m_PBRMF;
+		std::shared_ptr<graphics::CMaterialFrame> m_SimpleTextureMF;
+
 		std::shared_ptr<object::C3DObject> m_MfTestObject;
 
 		// Fbx

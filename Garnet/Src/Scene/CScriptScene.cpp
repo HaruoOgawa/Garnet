@@ -7,6 +7,8 @@
 #include "../Debug/Message/Console.h"
 
 #include "../Object/C3DObject.h"
+#include "../Object/C3DObjectImporter.h"
+
 #include "../GLTF/CGLTFImporter.h"
 #include "../FBX/CFBXImporter.h"
 
@@ -20,6 +22,8 @@ namespace scene
 	CScriptScene::CScriptScene(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker):
 		m_SampleMF(std::make_shared<graphics::CMaterialFrame>()),
 		m_PBRMF(std::make_shared<graphics::CMaterialFrame>()),
+		m_SimpleTextureMF(std::make_shared<graphics::CMaterialFrame>()),
+
 		m_MfTestObject(std::make_shared<object::C3DObject>("", "ShadowPass")),
 
 		m_glTFObject(std::make_shared<object::C3DObject>("", "ShadowPass")),
@@ -63,6 +67,7 @@ namespace scene
 	{
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CMaterialFrameLoader>("Resources\\MaterialFrame\\Sample_MF.json", m_SampleMF));
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CMaterialFrameLoader>("Resources\\MaterialFrame\\PBR_MF.json", m_PBRMF));
+		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CMaterialFrameLoader>("Resources\\MaterialFrame\\SimpleTexture_MF.json", m_SimpleTextureMF));
 		pLoadWorker->AddFirstLoadResource(m_FbxAnimationData);
 		pLoadWorker->AddFirstLoadResource(m_DepthVertex);
 		pLoadWorker->AddFirstLoadResource(m_DepthFragment);
@@ -169,11 +174,6 @@ namespace scene
 		}
 		
 		{
-			// MaterialInto
-			std::shared_ptr<graphics::CMaterialCreateInfo> createInfo = std::make_shared<graphics::CMaterialCreateInfo>();
-			createInfo->SetVertexShaderCode(m_VertexShader->GetData());
-			createInfo->SetFragmentShaderCode(m_FragmentShader->GetData());
-
 			// TextureSet
 			std::shared_ptr<graphics::CTextureSet> TextureSet = std::make_shared<graphics::CTextureSet>();
 			TextureSet->AddCubeMap(CubeTex);
@@ -186,194 +186,31 @@ namespace scene
 			m_FbxObject->SetRot(glm::angleAxis(3.1415f, glm::vec3(0.0f, 1.0f, 0.0f)));
 
 			if (!fbx::CFBXImporter::ImportFBX(pGraphicsAPI, "Resources\\Motions\\Walking_WithSkin.fbx", m_FbxObject, m_PBRMF, TextureSet, m_DepthVertex, m_DepthFragment)) return false;
-			//if (!fbx::CFBXImporter::ImportFBX(pGraphicsAPI, "Resources\\Motions\\Locking Hip Hop Dance.fbx", m_FbxObject, createInfo, TextureSet, m_DepthVertex, m_DepthFragment)) return false;
 		}
 
 		// m_MfTestObject
 		{
-			// Material
-			auto Mat = m_SampleMF->CreateMaterial(pGraphicsAPI);
-			
-			Mat->ReplacePreloadUniformValue("color", &glm::vec4(0.0f, 0.0f, 1.0f, 1.0f)[0], sizeof(glm::vec4), 0);
-
-			std::vector<float> TestMatrixSSBO = { 
-				10.0, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0, 0.0, 2.0, 0.0, 0.0, 0.0, 0.0, 1.0,
-				1.0, 2.0, 3.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0, 0.0, 2.0, 0.0, 0.0, 0.0, 0.0, 1.0,
-				7.0, 7.0, 5.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0, 0.0, 2.0, 0.0, 0.0, 0.0, 0.0, 1.0,
-			};
-			Mat->ReplacePreloadUniformValue("r_SkinMatrixBuffer", &TestMatrixSSBO[0], sizeof(float) * static_cast<int>(TestMatrixSSBO.size()), 3);
-
-			Mat->ReplacePreloadUniformValue("useTexture", &glm::ivec1(5)[0], sizeof(glm::ivec1), 0);
-			Mat->ReplaceTextureIndex("baseColorTexture", 0);
-
-			m_MfTestObject->AddMaterial(Mat);
-
-			// Mesh
-			{
-				std::shared_ptr<graphics::CMesh> Mesh = std::make_shared<graphics::CMesh>();
-
-				std::shared_ptr<renderer::CRendererCreateInfo> createInfo = std::make_shared<renderer::CRendererCreateInfo>();
-				graphics::CPresetPrimitive::CreateSphere(createInfo);
-
-				std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(createInfo, 0);
-				Mesh->AddPrimitive(Primitive);
-
-				m_MfTestObject->AddMesh(Mesh);
-			}
-
-			// Node
-			{
-				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(0, m_MfTestObject->GetMeshList(), m_MfTestObject->GetMaterialList());
-				Node->SetScale(glm::vec3(2.0f));
-				m_MfTestObject->AddNode(Node);
-			}
-
-			// TextureSet
-			std::shared_ptr<graphics::CTextureSet> TextureSet = std::make_shared<graphics::CTextureSet>();
-			TextureSet->Add2DTexture(IBL_Skybox_Tex);
-
-			m_MfTestObject->SetPos(glm::vec3(0.0f, -1.0f, 0.0f));
-
-			// Create
-			if (!m_MfTestObject->Create(pGraphicsAPI, m_DepthVertex, m_DepthFragment, TextureSet)) return false;
+			if (!object::C3DObjectImporter::ImportSimply(pGraphicsAPI, m_MfTestObject, graphics::CPresetPrimitive::CreateSphere(), m_SampleMF->CreateMaterial(pGraphicsAPI), std::make_shared<graphics::CTextureSet>(IBL_Skybox_Tex), m_DepthVertex, m_DepthFragment)) return false;
 		}
 
 		// m_Background
 		{
-			// Material
-			{
-				std::shared_ptr<graphics::CMaterialCreateInfo> createInfo = std::make_shared<graphics::CMaterialCreateInfo>();
-				createInfo->SetVertexShaderCode(m_MinimumVert->GetData());
-				createInfo->SetFragmentShaderCode(m_TextureFrag->GetData());
+			auto Mat = m_SimpleTextureMF->CreateMaterial(pGraphicsAPI);
+			Mat->ReplacePreloadUniformValue("useDirSampling", &glm::ivec1(1)[0], sizeof(glm::ivec1), 1);
+			Mat->ReplacePreloadUniformValue("useTexColor", &glm::ivec1(1)[0], sizeof(glm::ivec1), 1);
+			Mat->ReplaceTextureIndex("texImage", 0);
+			Mat->SetCullMode(graphics::ECullMode::CULL_FRONT);
 
-				auto Mat = pGraphicsAPI->CreateMaterial(createInfo);
-
-				{
-					auto UBO = graphics::CMaterialCreateInfo::CreateUniformBuffer({ graphics::SBindingLayout("UniformBufferObject", 0, false) });
-					UBO->AddData("model", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
-					UBO->AddData("view", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
-					UBO->AddData("proj", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
-					UBO->AddData("lightVPMat", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
-					UBO->AddData("cameraPos", &glm::vec4(1.0f)[0], sizeof(glm::vec4), 0);
-
-					Mat->AddShaderBuffer(UBO);
-				}
-
-				{
-					auto UBO = graphics::CMaterialCreateInfo::CreateUniformBuffer({ graphics::SBindingLayout("FragBufferObject_0", 1, false) });
-					
-					UBO->AddData("useDirSampling", &glm::ivec1(1)[0], sizeof(glm::ivec1), 1);
-					UBO->AddData("time", &glm::vec1(0.0f)[0], sizeof(glm::vec1), 1);
-					UBO->AddData("useTexColor", &glm::ivec1(1)[0], sizeof(glm::ivec1), 1);
-					UBO->AddData("useColor", &glm::ivec1(0)[0], sizeof(glm::ivec1), 1);
-					
-					UBO->AddData("baseColor", &glm::vec4(1.0f)[0], sizeof(glm::vec4), 1);
-
-					Mat->AddShaderBuffer(UBO);
-				}
-
-				Mat->AddTextureBindingLayout({ "texImage", 2, 3, 0, graphics::ETextureUsage::TEXTURE_USAGE_2D });
-
-				Mat->SetCullMode(graphics::ECullMode::CULL_FRONT);
-
-				m_Background->AddMaterial(Mat);
-			}
-
-			// Mesh
-			{
-				std::shared_ptr<graphics::CMesh> Mesh = std::make_shared<graphics::CMesh>();
-
-				std::shared_ptr<renderer::CRendererCreateInfo> createInfo = std::make_shared<renderer::CRendererCreateInfo>();
-				graphics::CPresetPrimitive::CreateSphere(createInfo);
-
-				std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(createInfo, 0);
-				Mesh->AddPrimitive(Primitive);
-
-				m_Background->AddMesh(Mesh);
-			}
-
-			// Node
-			{
-				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(0, m_Background->GetMeshList(), m_Background->GetMaterialList());
-				Node->SetScale(glm::vec3(500.0f));
-				m_Background->AddNode(Node);
-			}
-
-			// TextureSet
-			std::shared_ptr<graphics::CTextureSet> TextureSet = std::make_shared<graphics::CTextureSet>();
-			TextureSet->Add2DTexture(IBL_Skybox_Tex);
-			TextureSet->AddIBLTexture(IBL_Diffuse_Tex, IBL_Specular_Tex, IBL_GGXLUT_Tex);
-
-			// Create
-			if (!m_Background->Create(pGraphicsAPI, m_DepthVertex, m_DepthFragment, TextureSet)) return false;
+			m_Background->SetScale(glm::vec3(500.0f));
+			if (!object::C3DObjectImporter::ImportSimply(pGraphicsAPI, m_Background, graphics::CPresetPrimitive::CreateSphere(), Mat, std::make_shared<graphics::CTextureSet>(IBL_Skybox_Tex), m_DepthVertex, m_DepthFragment)) return false;
 		}
 
 		// m_DebugSphere
 		{
-			// Material
-			{
-				std::shared_ptr<graphics::CMaterialCreateInfo> createInfo = std::make_shared<graphics::CMaterialCreateInfo>();
-				createInfo->SetVertexShaderCode(m_MinimumVert->GetData());
-				createInfo->SetFragmentShaderCode(m_TextureFrag->GetData());
-
-				auto Mat = pGraphicsAPI->CreateMaterial(createInfo);
-
-				{
-					auto UBO = graphics::CMaterialCreateInfo::CreateUniformBuffer({ graphics::SBindingLayout("UniformBufferObject", 0, false) });
-					UBO->AddData("model", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
-					UBO->AddData("view", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
-					UBO->AddData("proj", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
-					UBO->AddData("lightVPMat", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
-					UBO->AddData("cameraPos", &glm::vec4(1.0f)[0], sizeof(glm::vec4), 0);
-
-					Mat->AddShaderBuffer(UBO);
-				}
-
-				{
-					auto UBO = graphics::CMaterialCreateInfo::CreateUniformBuffer({ graphics::SBindingLayout("FragBufferObject_0", 1, false) });
-
-					UBO->AddData("useDirSampling", &glm::ivec1(1)[0], sizeof(glm::ivec1), 1);
-					UBO->AddData("time", &glm::vec1(0.0f)[0], sizeof(glm::vec1), 1);
-					UBO->AddData("useTexColor", &glm::ivec1(0)[0], sizeof(glm::ivec1), 1);
-					UBO->AddData("useColor", &glm::ivec1(1)[0], sizeof(glm::ivec1), 1);
-
-					UBO->AddData("baseColor", &glm::vec4(0.0f, 0.0f, 1.0f, 1.0f)[0], sizeof(glm::vec4), 1);
-
-					Mat->AddShaderBuffer(UBO);
-				}
-
-				Mat->AddTextureBindingLayout({ "texImage", 2, 3, -1, graphics::ETextureUsage::TEXTURE_USAGE_2D });
-
-				Mat->SetEnabledZTest(false);
-
-				m_DebugSphere->AddMaterial(Mat);
-			}
-
-			// Mesh
-			{
-				std::shared_ptr<graphics::CMesh> Mesh = std::make_shared<graphics::CMesh>();
-
-				std::shared_ptr<renderer::CRendererCreateInfo> createInfo = std::make_shared<renderer::CRendererCreateInfo>();
-				graphics::CPresetPrimitive::CreateSphere(createInfo);
-
-				std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(createInfo, 0);
-				Mesh->AddPrimitive(Primitive);
-
-				m_DebugSphere->AddMesh(Mesh);
-			}
-
-			// Node
-			{
-				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(0, m_DebugSphere->GetMeshList(), m_DebugSphere->GetMaterialList());
-				Node->SetScale(glm::vec3(0.1f));
-				m_DebugSphere->AddNode(Node);
-			}
-
-			// TextureSet
-			std::shared_ptr<graphics::CTextureSet> TextureSet = std::make_shared<graphics::CTextureSet>();
-
-			// Create
-			if (!m_DebugSphere->Create(pGraphicsAPI, m_DepthVertex, m_DepthFragment, TextureSet)) return false;
+			auto Mat = m_SimpleTextureMF->CreateMaterial(pGraphicsAPI);
+			Mat->SetEnabledZTest(false);
+			m_DebugSphere->SetScale(glm::vec3(0.1f));
+			if (!object::C3DObjectImporter::ImportSimply(pGraphicsAPI, m_DebugSphere, graphics::CPresetPrimitive::CreateSphere(), Mat, nullptr, m_DepthVertex, m_DepthFragment)) return false;
 		}
 
 		return true;

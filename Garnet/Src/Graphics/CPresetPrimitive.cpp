@@ -4,8 +4,10 @@
 
 namespace graphics
 {
-	bool CPresetPrimitive::CreateBoard(std::shared_ptr<renderer::CRendererCreateInfo>& createInfo)
+	std::shared_ptr<renderer::CRendererCreateInfo> CPresetPrimitive::CreateBoard()
 	{
+		std::shared_ptr<renderer::CRendererCreateInfo> createInfo = std::make_shared<renderer::CRendererCreateInfo>();
+
 		// Vertex Buffer
 		std::vector<float> Pos = {
 			-1.0f, -1.0f, 0.0f,
@@ -46,11 +48,13 @@ namespace graphics
 		createInfo->SetAttribDataTypes(std::vector<renderer::EDataType>({ renderer::EDataType::TYPE_FLOAT , renderer::EDataType::TYPE_FLOAT , renderer::EDataType::TYPE_FLOAT , renderer::EDataType::TYPE_FLOAT }));
 		createInfo->SetAttribByteStrides(std::vector<int>({ 0, 0, 0, 0 }));
 
-		return true;
+		return createInfo;
 	}
 
-	bool CPresetPrimitive::CreateBox(std::shared_ptr<renderer::CRendererCreateInfo>& createInfo)
+	std::shared_ptr<renderer::CRendererCreateInfo> CPresetPrimitive::CreateBox()
 	{
+		std::shared_ptr<renderer::CRendererCreateInfo> createInfo = std::make_shared<renderer::CRendererCreateInfo>();
+
 		// Vertex Buffer
 		std::vector<float> Pos = {
 			//0 +Z
@@ -186,11 +190,13 @@ namespace graphics
 		createInfo->SetAttribDataTypes(std::vector<renderer::EDataType>({ renderer::EDataType::TYPE_FLOAT , renderer::EDataType::TYPE_FLOAT , renderer::EDataType::TYPE_FLOAT , renderer::EDataType::TYPE_FLOAT }));
 		createInfo->SetAttribByteStrides(std::vector<int>({ 0, 0, 0, 0 }));
 
-		return true;
+		return createInfo;
 	}
 
-	bool CPresetPrimitive::CreatePoint(std::shared_ptr<renderer::CRendererCreateInfo>& createInfo)
+	std::shared_ptr<renderer::CRendererCreateInfo> CPresetPrimitive::CreatePoint()
 	{
+		std::shared_ptr<renderer::CRendererCreateInfo> createInfo = std::make_shared<renderer::CRendererCreateInfo>();
+
 		// Vertex Buffer
 		std::vector<float> Pos = {
 			0.0f, 0.0f, 0.0f,
@@ -222,11 +228,13 @@ namespace graphics
 		createInfo->SetAttribDataTypes(std::vector<renderer::EDataType>({ renderer::EDataType::TYPE_FLOAT , renderer::EDataType::TYPE_FLOAT , renderer::EDataType::TYPE_FLOAT , renderer::EDataType::TYPE_FLOAT }));
 		createInfo->SetAttribByteStrides(std::vector<int>({ 0, 0, 0, 0 }));
 
-		return true;
+		return createInfo;
 	}
 	
-	bool CPresetPrimitive::CreateSphere(std::shared_ptr<renderer::CRendererCreateInfo>& createInfo)
+	std::shared_ptr<renderer::CRendererCreateInfo> CPresetPrimitive::CreateSphere()
 	{
+		std::shared_ptr<renderer::CRendererCreateInfo> createInfo = std::make_shared<renderer::CRendererCreateInfo>();
+
 		// Vertex Buffer
 		std::vector<float> Pos;
 		std::vector<float> Normal;
@@ -283,6 +291,6 @@ namespace graphics
 		createInfo->SetAttribDataTypes(std::vector<renderer::EDataType>({ renderer::EDataType::TYPE_FLOAT , renderer::EDataType::TYPE_FLOAT , renderer::EDataType::TYPE_FLOAT , renderer::EDataType::TYPE_FLOAT }));
 		createInfo->SetAttribByteStrides(std::vector<int>({ 0, 0, 0, 0 }));
 
-		return true;
+		return createInfo;
 	}
 }

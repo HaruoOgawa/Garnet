@@ -1027,6 +1027,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <None Include="CMakeBuild\index.html" />
     <None Include="Resources\MaterialFrame\PBR_MF.json" />
     <None Include="Resources\MaterialFrame\Sample_MF.json" />
+    <None Include="Resources\MaterialFrame\SimpleTexture_MF.json" />
     <None Include="Resources\Shaders\sample.frag" />
     <None Include="Resources\Shaders\sample.vert" />
     <None Include="Src\Library\glm\glm\detail\func_common.inl" />

@@ -1779,5 +1779,6 @@
     <None Include="Resources\MaterialFrame\Sample_MF.json" />
     <None Include="Resources\Shaders\sample.vert" />
     <None Include="Resources\Shaders\sample.frag" />
+    <None Include="Resources\MaterialFrame\SimpleTexture_MF.json" />
   </ItemGroup>
 </Project>
