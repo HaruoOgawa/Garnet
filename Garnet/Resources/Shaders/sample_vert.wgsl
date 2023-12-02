@@ -13,6 +13,10 @@ struct UniformBufferObject {
     color: vec4<f32>,
 }
 
+struct SkinMatrixBuffer {
+    SkinMat: array<mat4x4<f32>>,
+}
+
 struct VertexOutput {
     @builtin(position) gl_Position: vec4<f32>,
     @location(0) member: vec3<f32>,
@@ -24,6 +28,8 @@ struct VertexOutput {
 var<private> perVertexStruct: gl_PerVertex = gl_PerVertex(vec4<f32>(0.0, 0.0, 0.0, 1.0), 1.0, array<f32,1u>(0.0), array<f32,1u>(0.0));
 @group(0) @binding(0) 
 var<uniform> ubo: UniformBufferObject;
+@group(0) @binding(3) 
+var<storage> r_SkinMatrixBuffer: SkinMatrixBuffer;
 var<private> inPosition_1: vec3<f32>;
 var<private> f_WorldNormal: vec3<f32>;
 var<private> inNormal_1: vec3<f32>;
@@ -34,21 +40,22 @@ var<private> f_Color: vec4<f32>;
 var<private> inTangent_1: vec4<f32>;
 
 fn main_1() {
-    let _e22 = ubo.proj;
-    let _e24 = ubo.view;
-    let _e27 = ubo.model;
-    let _e29 = inPosition_1;
-    perVertexStruct.gl_Position = (((_e22 * _e24) * _e27) * vec4<f32>(_e29.x, _e29.y, _e29.z, 1.0));
-    let _e37 = ubo.model;
-    let _e38 = inNormal_1;
-    f_WorldNormal = (_e37 * vec4<f32>(_e38.x, _e38.y, _e38.z, 0.0)).xyz;
-    let _e45 = inTexcoord_1;
-    f_Texcoord = _e45;
-    let _e47 = ubo.model;
-    let _e48 = inPosition_1;
-    f_WorldPos = (_e47 * vec4<f32>(_e48.x, _e48.y, _e48.z, 1.0));
-    let _e55 = ubo.color;
-    f_Color = _e55;
+    let _e23 = ubo.proj;
+    let _e25 = ubo.view;
+    let _e28 = ubo.model;
+    let _e32 = r_SkinMatrixBuffer.SkinMat[0];
+    let _e34 = inPosition_1;
+    perVertexStruct.gl_Position = ((((_e23 * _e25) * _e28) * _e32) * vec4<f32>(_e34.x, _e34.y, _e34.z, 1.0));
+    let _e42 = ubo.model;
+    let _e43 = inNormal_1;
+    f_WorldNormal = (_e42 * vec4<f32>(_e43.x, _e43.y, _e43.z, 0.0)).xyz;
+    let _e50 = inTexcoord_1;
+    f_Texcoord = _e50;
+    let _e52 = ubo.model;
+    let _e53 = inPosition_1;
+    f_WorldPos = (_e52 * vec4<f32>(_e53.x, _e53.y, _e53.z, 1.0));
+    let _e60 = ubo.color;
+    f_Color = _e60;
     return;
 }
 

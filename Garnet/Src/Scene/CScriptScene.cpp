@@ -228,6 +228,13 @@ namespace scene
 			
 			Mat->ReplacePreloadUniformValue("color", &glm::vec4(0.0f, 0.0f, 1.0f, 1.0f)[0], sizeof(glm::vec4), 0);
 
+			std::vector<float> TestMatrixSSBO = { 
+				10.0, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0, 0.0, 2.0, 0.0, 0.0, 0.0, 0.0, 1.0,
+				1.0, 2.0, 3.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0, 0.0, 2.0, 0.0, 0.0, 0.0, 0.0, 1.0,
+				7.0, 7.0, 5.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0, 0.0, 2.0, 0.0, 0.0, 0.0, 0.0, 1.0,
+			};
+			Mat->ReplacePreloadUniformValue("r_SkinMatrixBuffer", &TestMatrixSSBO[0], sizeof(float) * static_cast<int>(TestMatrixSSBO.size()), 3);
+
 			m_MfTestObject->AddMaterial(Mat);
 
 			// Mesh
