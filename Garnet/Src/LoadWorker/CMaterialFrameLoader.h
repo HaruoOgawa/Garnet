@@ -11,6 +11,9 @@
 #include "CFile.h"
 
 #include "../Graphics/CMaterialFrame.h"
+#include "../Graphics/SBindingLayout.h"
+#include "../Graphics/SBufferValueLayout.h"
+#include "../Graphics/STextureBindingLayout.h"
 #include "../GraphicsAPI/CMaterialCreateInfo.h"
 
 namespace graphics { 
@@ -39,15 +42,28 @@ namespace resource
 		std::unordered_map <std::string, std::shared_ptr<CFile>> m_ShaderFileList;
 		std::unordered_map <std::string, std::shared_ptr<CFile>> m_TextureFileList;
 
+		std::vector<std::pair<graphics::SBindingLayout, std::vector<std::shared_ptr<graphics::SBufferValueLayout>>>> m_UniformBufferList;
+		std::vector<std::pair<graphics::SBindingLayout, std::vector<std::shared_ptr<graphics::SBufferValueLayout>>>> m_StorageBufferList;
+		std::vector<graphics::STextureBindingLayout> m_TextureBufferList;
+
 		//
 		std::shared_ptr<graphics::CMaterialFrame> m_TargetMaterialFrame;
 		std::shared_ptr<graphics::CMaterialCreateInfo> m_CreateInfo;
 	private:
 		bool AnalyseResourceList(api::IGraphicsAPI* pGraphicsAPI);
 		bool AnalyseShaderList(api::IGraphicsAPI* pGraphicsAPI, const json::iterator& shaderList);
+		bool AnalyseShaderBuffer(const json::iterator& uniform, const std::string& uniform_type);
+		bool AnalyseTextureBuffer(const json::iterator& uniform);
+
 		bool AnalyseTextureList(api::IGraphicsAPI* pGraphicsAPI, const json::iterator& textureList);
 
 		bool CreateMaterialFrame(api::IGraphicsAPI* pGraphicsAPI);
+
+		void GetString(const std::string& Key, std::string& Value, const json::iterator& Object);
+		void GetBoolean(const std::string& Key, bool& Value, const json::iterator& Object);
+		void GetInt(const std::string& Key, int& Value, const json::iterator& Object);
+		void GetFloat(const std::string& Key, float& Value, const json::iterator& Object);
+		void GetFloatArray(const std::string& Key, std::vector<float>& Value, const json::iterator& Object);
 	public:
 		CMaterialFrameLoader(const std::string& filename, std::shared_ptr<graphics::CMaterialFrame> TargetMaterialFrame);
 		virtual ~CMaterialFrameLoader();

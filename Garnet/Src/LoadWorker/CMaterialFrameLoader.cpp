@@ -119,53 +119,23 @@ namespace resource
 			{
 				// name
 				std::string shaderName = "";
-				{
-					const auto it = shader->find("name");
-					if (it != shader->end() && it->is_string())
-					{
-						shaderName = it.value();
-					}
-				}
+				GetString("name", shaderName, shader);
 
 				// shaderFile
 				std::string shaderFile = "";
-				{
-					const auto it = shader->find("shaderFile");
-					if (it != shader->end() && it->is_string())
-					{
-						shaderFile = it.value();
-					}
-				}
+				GetString("shaderFile", shaderFile, shader);
 
 				// autoShaderExtension
 				bool autoShaderExtension = true;
-				{
-					const auto it = shader->find("autoShaderExtension");
-					if (it != shader->end() && it->is_boolean())
-					{
-						autoShaderExtension = it.value();
-					}
-				}
+				GetBoolean("autoShaderExtension", autoShaderExtension, shader);
 
 				// shadercode
 				std::string shadercode = "";
-				{
-					const auto it = shader->find("shadercode");
-					if (it != shader->end() && it->is_string())
-					{
-						shadercode = it.value();
-					}
-				}
+				GetString("shadercode", shadercode, shader);
 
 				// shaderType
 				std::string shaderType = "";
-				{
-					const auto it = shader->find("shaderType");
-					if (it != shader->end() && it->is_string())
-					{
-						shaderType = it.value();
-					}
-				}
+				GetString("shaderType", shaderType, shader);
 
 				if (!shadercode.empty())
 				{
@@ -241,8 +211,167 @@ namespace resource
 					m_ShaderFileList.emplace(shaderType, LoadShaderFile);
 				}
 
+				// uniformBlockList
+				const auto uniformBlockList = shader->find("uniformBlockList");
+				for (json::iterator uniform = uniformBlockList->begin(); uniform != uniformBlockList->end(); uniform++)
+				{
+					std::string uniform_type = "";
+					GetString("type", uniform_type, uniform);
+
+					if (uniform_type == "ubo" || uniform_type == "ssbo")
+					{
+						if (!AnalyseShaderBuffer(uniform, uniform_type)) return false;
+					}
+					else if (uniform_type == "texture")
+					{
+						if (!AnalyseTextureBuffer(uniform)) return false;
+					}
+				}
 			}
 		}
+
+		return true;
+	}
+
+	bool CMaterialFrameLoader::AnalyseShaderBuffer(const json::iterator& uniform, const std::string& uniform_type)
+	{
+		// éÊìæ
+		std::string name = "";
+		GetString("name", name, uniform);
+
+		int binding = -1;
+		GetInt("binding", binding, uniform);
+
+		bool isWritable = false;
+		GetBoolean("isWritable", isWritable, uniform);
+
+		// BindingLayoutÇçÏê¨
+		graphics::SBindingLayout BindingLayout = { name , binding, isWritable };
+
+		// BufferValueÇéÊìæ
+		std::vector<std::shared_ptr<graphics::SBufferValueLayout>> ValueLayoutList;
+
+		const auto values = uniform->find("values");
+		if (values != uniform->end() && values->is_array())
+		{
+			for (json::iterator val = values->begin(); val != values->end(); val++)
+			{
+				std::string value_name = "";
+				GetString("name", value_name, val);
+
+				std::string value_type = "";
+				GetString("type", value_type, val);
+
+				int ByteSize = 0;
+				if (value_type == "mat4")
+				{
+					ByteSize = sizeof(glm::mat4);
+				}
+				else if (value_type == "vec4")
+				{
+					ByteSize = sizeof(glm::vec4);
+				}
+				else if (value_type == "float")
+				{
+					ByteSize = sizeof(float);
+				}
+				else if (value_type == "int")
+				{
+					ByteSize = sizeof(int);
+				}
+
+				std::string bufferUpdateType = "";
+				GetString("bufferUpdateType", bufferUpdateType, val);
+
+				std::vector<float> initValue;
+				GetFloatArray("initValue", initValue, val);
+
+				std::shared_ptr<graphics::SBufferValueLayout> ValueLayout = std::make_shared<graphics::SBufferValueLayout>();
+				ValueLayout->Name = value_name;
+				ValueLayout->Data = initValue;
+				ValueLayout->ByteSize = ByteSize;
+				ValueLayout->BindingIndex = binding;
+
+				if (bufferUpdateType.empty() || bufferUpdateType == "cpu")
+				{
+					ValueLayout->BufferUpdateType = graphics::EBufferUpdateType::UPDATE_TYPE_CPU;
+				}
+				else if (bufferUpdateType == "gpu")
+				{
+					ValueLayout->BufferUpdateType = graphics::EBufferUpdateType::UPDATE_TYPE_GPU;
+				}
+
+				ValueLayoutList.push_back(ValueLayout);
+			}
+		}
+
+		if (uniform_type == "ubo")
+		{
+			// UniformBufferListÇ…ìoò^
+			m_UniformBufferList.push_back(std::make_pair(BindingLayout, ValueLayoutList));
+		}
+		else if (uniform_type == "ssbo")
+		{
+			// StorageBufferListÇ…ìoò^
+			m_StorageBufferList.push_back(std::make_pair(BindingLayout, ValueLayoutList));
+		}
+		
+
+		return true;
+	}
+
+	bool CMaterialFrameLoader::AnalyseTextureBuffer(const json::iterator& uniform)
+	{
+		std::string name = "";
+		GetString("name", name, uniform);
+
+		int viewBinding = -1;
+		GetInt("viewBinding", viewBinding, uniform);
+
+		int samplerBinding = -1;
+		GetInt("samplerBinding", samplerBinding, uniform);
+
+		int textureIndex = -1;
+		GetInt("textureIndex", textureIndex, uniform);
+
+		std::string type = "";
+		GetString("type", type, uniform);
+
+		std::string textureUsage_str = "";
+		GetString("textureUsage", textureUsage_str, uniform);
+
+		graphics::ETextureUsage TextureUsage = graphics::ETextureUsage::TEXTURE_USAGE_2D;
+		
+		if (textureUsage_str == "2d")
+		{
+			TextureUsage = graphics::ETextureUsage::TEXTURE_USAGE_2D;
+		}
+		else if (textureUsage_str == "cube")
+		{
+			TextureUsage = graphics::ETextureUsage::TEXTURE_USAGE_CUBE;
+		}
+		else if (textureUsage_str == "frame")
+		{
+			TextureUsage = graphics::ETextureUsage::TEXTURE_USAGE_FRAME;
+		}
+		else if (textureUsage_str == "diffuse")
+		{
+			TextureUsage = graphics::ETextureUsage::TEXTURE_USAGE_IBL_Diffuse;
+		}
+		else if (textureUsage_str == "specular")
+		{
+			TextureUsage = graphics::ETextureUsage::TEXTURE_USAGE_IBL_Specular;
+		}
+		else if (textureUsage_str == "ggx")
+		{
+			TextureUsage = graphics::ETextureUsage::TEXTURE_USAGE_IBL_GGXLUT;
+		}
+
+		// TextureBindingLayoutÇçÏê¨
+		graphics::STextureBindingLayout BindingLayout = { name , viewBinding, samplerBinding, textureIndex,TextureUsage };
+
+		// îzóÒÇ…ìoò^
+		m_TextureBufferList.push_back(BindingLayout);
 
 		return true;
 	}
@@ -254,6 +383,98 @@ namespace resource
 
 	bool CMaterialFrameLoader::CreateMaterialFrame(api::IGraphicsAPI* pGraphicsAPI)
 	{
+		// ÉçÅ[ÉhÇ™ïKóvÇæÇ¡ÇΩShaderÉäÉXÉgÇìoò^Ç∑ÇÈ
+		for (const auto& ShaderFile : m_ShaderFileList)
+		{
+			const auto& shaderType = ShaderFile.first;
+
+			std::vector<unsigned char> ShaderCodeArray = ShaderFile.second->GetData();
+
+			// ShaderCodeÇ™íºê⁄èëÇ©ÇÍÇƒÇ¢ÇÈÇÃÇ≈ÇªÇÃÇ‹Ç‹CreateInfoÇ…ìnÇ∑
+			if (shaderType == "vertex")
+			{
+				m_CreateInfo->SetVertexShaderCode(ShaderCodeArray);
+			}
+			else if (shaderType == "fragment")
+			{
+				m_CreateInfo->SetFragmentShaderCode(ShaderCodeArray);
+			}
+			else if (shaderType == "compute")
+			{
+				m_CreateInfo->SetComputeShaderCode(ShaderCodeArray);
+			}
+			else if (shaderType == "geometry")
+			{
+				m_CreateInfo->SetGeometryShaderCode(ShaderCodeArray);
+			}
+			else if (shaderType == "hull")
+			{
+				m_CreateInfo->SetHullShaderCode(ShaderCodeArray);
+			}
+			else if (shaderType == "domain")
+			{
+				m_CreateInfo->SetDomainShaderCode(ShaderCodeArray);
+			}
+		}
+
+		// ÉçÅ[ÉhÇ™ïKóvÇæÇ¡ÇΩÉeÉNÉXÉ`ÉÉÉäÉXÉgÇìoò^Ç∑ÇÈ
+
+		//
+
+
 		return true;
+	}
+
+	void CMaterialFrameLoader::GetString(const std::string& Key, std::string& Value, const json::iterator& Object)
+	{
+		const auto it = Object->find(Key);
+		if (it != Object->end() && it->is_string())
+		{
+			Value = it.value();
+		}
+	}
+
+	void CMaterialFrameLoader::GetBoolean(const std::string& Key, bool& Value, const json::iterator& Object)
+	{
+		const auto it = Object->find(Key);
+		if (it != Object->end() && it->is_boolean())
+		{
+			Value = it.value();
+		}
+	}
+
+	void CMaterialFrameLoader::GetInt(const std::string& Key, int& Value, const json::iterator& Object)
+	{
+		const auto it = Object->find(Key);
+		if (it != Object->end() && it->is_number_integer())
+		{
+			Value = it.value();
+		}
+	}
+
+	void CMaterialFrameLoader::GetFloat(const std::string& Key, float& Value, const json::iterator& Object)
+	{
+		const auto it = Object->find(Key);
+		if (it != Object->end() && it->is_number_float())
+		{
+			Value = it.value();
+		}
+	}
+
+	void CMaterialFrameLoader::GetFloatArray(const std::string& Key, std::vector<float>& Value, const json::iterator& Object)
+	{
+		const auto it = Object->find(Key);
+		if (it != Object->end() && it->is_array())
+		{
+			for (json::iterator it2 = it->begin(); it2 != it->end(); it2++)
+			{
+				if (it2->is_number_float())
+				{
+					float val = it2.value();
+
+					Value.push_back(val);
+				}
+			}
+		}
 	}
 }

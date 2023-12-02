@@ -574,6 +574,8 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Src\Graphics\EBufferUpdateTypeh.h" />
+    <ClInclude Include="Src\Graphics\SBufferValueLayout.h" />
     <ClInclude Include="Src\LoadWorker\CMaterialFrameLoader.h" />
     <ClInclude Include="Src\Graphics\CMaterialFrame.h" />
     <ClInclude Include="Src\FBX\CFBXMomoryStream.h" />

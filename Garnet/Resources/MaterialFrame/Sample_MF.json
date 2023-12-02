@@ -13,6 +13,7 @@
           "binding": 0,
           "isWritable": false,
           "type": "ubo",
+          "bufferUpdateType": "cpu",
           "values": [
             {
               "name": "model",
