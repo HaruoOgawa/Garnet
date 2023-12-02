@@ -26,7 +26,6 @@ namespace object
 	public:
 		static bool ImportSimply(api::IGraphicsAPI* pGraphicsAPI, std::shared_ptr<object::C3DObject>& Object,
 			const std::shared_ptr<renderer::CRendererCreateInfo>& createInfo,
-			const std::shared_ptr<graphics::CMaterial>& Material, const std::shared_ptr<graphics::CTextureSet>& TextureSet,
-			const std::shared_ptr<resource::CFile>& DepthVertex, const std::shared_ptr<resource::CFile>& DepthFragment);
+			const std::shared_ptr<graphics::CMaterial>& Material, const std::shared_ptr<graphics::CTextureSet>& TextureSet, const std::shared_ptr<graphics::CMaterialFrame>& DepthMF);
 	};
 }

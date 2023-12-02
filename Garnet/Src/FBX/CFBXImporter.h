@@ -53,13 +53,11 @@ namespace fbx
 	private:
 		static bool Import(api::IGraphicsAPI* pGraphicsAPI, const std::string& FileName, bool IsUseObject, std::shared_ptr<object::C3DObject>& Object, 
 			std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList,
-			const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, const std::shared_ptr<graphics::CTextureSet>& TextureSet,
-			const std::shared_ptr<resource::CFile>& DepthVertex, const std::shared_ptr<resource::CFile>& DepthFragment);
+			const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, const std::shared_ptr<graphics::CTextureSet>& TextureSet, const std::shared_ptr<graphics::CMaterialFrame>& DepthMF);
 		
 		static bool Analyse(api::IGraphicsAPI* pGraphicsAPI, FbxScene* Scene, bool IsUseObject, std::shared_ptr<object::C3DObject>& Object,
 			std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList,
-			const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, const std::shared_ptr<graphics::CTextureSet>& TextureSet,
-			const std::shared_ptr<resource::CFile>& DepthVertex, const std::shared_ptr<resource::CFile>& DepthFragment);
+			const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, const std::shared_ptr<graphics::CTextureSet>& TextureSet, const std::shared_ptr<graphics::CMaterialFrame>& DepthMF);
 
 		static bool CreateDrawInfo(api::IGraphicsAPI* pGraphicsAPI, std::vector<FbxMesh*>& pFbxMeshList, const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame,
 			FbxNode* pFBXNode, std::vector<std::shared_ptr<graphics::CTexture>>& TextureList,
@@ -95,8 +93,7 @@ namespace fbx
 		static unsigned int FindJointIndexUsingName(const std::shared_ptr<animation::CSkin>& Skin, const std::string& JointName);
 	public:
 		static bool ImportFBX(api::IGraphicsAPI* pGraphicsAPI, const std::string& FileName, std::shared_ptr<object::C3DObject>& Object,
-			const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, const std::shared_ptr<graphics::CTextureSet>& TextureSet,
-			const std::shared_ptr<resource::CFile>& DepthVertex, const std::shared_ptr<resource::CFile>& DepthFragment);
+			const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, const std::shared_ptr<graphics::CTextureSet>& TextureSet, const std::shared_ptr<graphics::CMaterialFrame>& DepthMF);
 		static bool ImportFBXAnimation(api::IGraphicsAPI* pGraphicsAPI, const std::string& FileName, std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList);
 	};
 }

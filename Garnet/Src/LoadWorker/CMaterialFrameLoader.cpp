@@ -2,13 +2,15 @@
 
 namespace resource
 {
-	CMaterialFrameLoader::CMaterialFrameLoader(const std::string& filename, std::shared_ptr<graphics::CMaterialFrame> TargetMaterialFrame):
+	CMaterialFrameLoader::CMaterialFrameLoader(const std::string& filename, std::shared_ptr<graphics::CMaterialFrame>& TargetMaterialFrame):
 		m_Status(ELoadStatus::None),
 		m_MfFile(std::make_shared<CFile>(filename)),
-		m_TargetMaterialFrame(TargetMaterialFrame),
 		m_AnalyseDone(false),
 		m_CreateInfo(std::make_shared<graphics::CMaterialCreateInfo>())
 	{
+		TargetMaterialFrame = std::make_shared<graphics::CMaterialFrame>();
+
+		m_TargetMaterialFrame = TargetMaterialFrame;
 	}
 
 	CMaterialFrameLoader::~CMaterialFrameLoader()

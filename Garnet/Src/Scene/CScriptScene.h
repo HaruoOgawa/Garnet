@@ -26,6 +26,7 @@ namespace scene
 		std::shared_ptr<graphics::CMaterialFrame> m_SampleMF;
 		std::shared_ptr<graphics::CMaterialFrame> m_PBRMF;
 		std::shared_ptr<graphics::CMaterialFrame> m_SimpleTextureMF;
+		std::shared_ptr<graphics::CMaterialFrame> m_DepthMF;
 
 		std::shared_ptr<object::C3DObject> m_MfTestObject;
 
@@ -37,15 +38,12 @@ namespace scene
 		// Tex of FrameBuffer
 		std::vector<std::shared_ptr<graphics::CTexture>> m_FrameTextureList;
 
-		// DepthMaterial(LoadWorker‚ÆMaterialFrameÀ‘•‚Ü‚Å‚Í‚Ğ‚Æ‚Ü‚¸Scene‚É‘‚¢‚Ä‚¨‚­ ¨ ŒãXC3DObject‚ÉˆÚs‚·‚é)
-		std::shared_ptr<resource::CFile> m_DepthVertex;
-		std::shared_ptr<resource::CFile> m_DepthFragment;
-
 		// IBL
-		std::shared_ptr<resource::CFile> m_IBL_Skybox;
-		std::shared_ptr<resource::CFile> m_IBL_DiffuseEnvMap;
-		std::shared_ptr<resource::CFile> m_IBL_SpecularEnvMap;
-		std::shared_ptr<resource::CFile> m_IBL_GGX_LUT;
+		std::shared_ptr<graphics::CTexture> m_IBL_Skybox_Texture;
+		std::shared_ptr<graphics::CTexture> m_IBL_DiffuseEnvMap_Texture;
+		std::shared_ptr<graphics::CTexture> m_IBL_SpecularEnvMap_Texture;
+		std::shared_ptr<graphics::CTexture> m_IBL_GGX_LUT_Texture;
+		std::shared_ptr<graphics::CTexture> m_Cube_Texture;
 
 		// glTF
 		std::shared_ptr<resource::CFile> m_glTFData;
@@ -60,20 +58,6 @@ namespace scene
 		// Object
 		std::shared_ptr<object::C3DObject> m_Background;
 		std::shared_ptr<object::C3DObject> m_DebugSphere;
-
-		// Shader
-		std::shared_ptr<resource::CFile> m_VertexShader;
-		std::shared_ptr<resource::CFile> m_FragmentShader;
-		std::shared_ptr<resource::CFile> m_MinimumVert;
-		std::shared_ptr<resource::CFile> m_TextureFrag;
-
-		// Cubemap
-		std::shared_ptr<resource::CFile> m_Cube0;
-		std::shared_ptr<resource::CFile> m_Cube1;
-		std::shared_ptr<resource::CFile> m_Cube2;
-		std::shared_ptr<resource::CFile> m_Cube3;
-		std::shared_ptr<resource::CFile> m_Cube4;
-		std::shared_ptr<resource::CFile> m_Cube5;
 	private:
 		bool Load(api::IGraphicsAPI* pGraphicsAPI);
 

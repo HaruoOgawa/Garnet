@@ -574,6 +574,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Src\LoadWorker\CTextureLoader.h" />
     <ClInclude Include="Src\Graphics\EBufferUpdateTypeh.h" />
     <ClInclude Include="Src\Graphics\SBufferValueLayout.h" />
     <ClInclude Include="Src\LoadWorker\CMaterialFrameLoader.h" />
@@ -958,6 +959,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClInclude Include="Src\Interface\IRenderer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\LoadWorker\CTextureLoader.cpp" />
     <ClCompile Include="Src\LoadWorker\CMaterialFrameLoader.cpp" />
     <ClCompile Include="Src\Graphics\CMaterialFrame.cpp" />
     <ClCompile Include="Src\FBX\CFBXMomoryStream.cpp" />
@@ -1025,6 +1027,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
   <ItemGroup>
     <None Include="CMakeBuild\Garnet_front.js" />
     <None Include="CMakeBuild\index.html" />
+    <None Include="Resources\MaterialFrame\Depth_MF.json" />
     <None Include="Resources\MaterialFrame\PBR_MF.json" />
     <None Include="Resources\MaterialFrame\Sample_MF.json" />
     <None Include="Resources\MaterialFrame\SimpleTexture_MF.json" />

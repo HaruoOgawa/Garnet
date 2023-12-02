@@ -35,8 +35,7 @@
 namespace gltf
 {
 	bool CGLTFImporter::ImportFromMemory(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& Data, std::shared_ptr<object::C3DObject>& Object,
-		const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, const std::shared_ptr<graphics::CTextureSet>& TextureSet,
-		const std::shared_ptr<resource::CFile>& DepthVertex, const std::shared_ptr<resource::CFile>& DepthFragment)
+		const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, const std::shared_ptr<graphics::CTextureSet>& TextureSet, const std::shared_ptr<graphics::CMaterialFrame>& DepthMF)
 	{
 		tinygltf::Model model;
 		tinygltf::TinyGLTF loader;
@@ -58,14 +57,13 @@ namespace gltf
 
 		if (!result) return false;
 
-		if (!Import(pGraphicsAPI, model, Object, MaterialFrame, TextureSet, DepthVertex, DepthFragment)) return false;
+		if (!Import(pGraphicsAPI, model, Object, MaterialFrame, TextureSet, DepthMF)) return false;
 
 		return true;
 	}
 
 	bool CGLTFImporter::ImportFromString(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& Data, const std::string& BaseDir, std::shared_ptr<object::C3DObject>& Object,
-		const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, const std::shared_ptr<graphics::CTextureSet>& TextureSet,
-		const std::shared_ptr<resource::CFile>& DepthVertex, const std::shared_ptr<resource::CFile>& DepthFragment)
+		const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, const std::shared_ptr<graphics::CTextureSet>& TextureSet, const std::shared_ptr<graphics::CMaterialFrame>& DepthMF)
 	{
 		tinygltf::Model model;
 		tinygltf::TinyGLTF loader;
@@ -87,14 +85,13 @@ namespace gltf
 
 		if (!result) return false;
 
-		if (!Import(pGraphicsAPI, model, Object, MaterialFrame, TextureSet, DepthVertex, DepthFragment)) return false;
+		if (!Import(pGraphicsAPI, model, Object, MaterialFrame, TextureSet, DepthMF)) return false;
 
 		return true;
 	}
 
 	bool CGLTFImporter::Import(api::IGraphicsAPI* pGraphicsAPI, tinygltf::Model model, std::shared_ptr<object::C3DObject>& Object,
-		const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, const std::shared_ptr<graphics::CTextureSet>& TextureSet,
-		const std::shared_ptr<resource::CFile>& DepthVertex, const std::shared_ptr<resource::CFile>& DepthFragment)
+		const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, const std::shared_ptr<graphics::CTextureSet>& TextureSet, const std::shared_ptr<graphics::CMaterialFrame>& DepthMF)
 	{
 		// テクスチャ
 		std::vector<std::shared_ptr<graphics::CTexture>> TextureList;
@@ -177,7 +174,7 @@ namespace gltf
 		}
 
 		// オブジェクトを生成
-		if (!Object->Create(pGraphicsAPI, DepthVertex, DepthFragment, TextureSet)) return false;
+		if (!Object->Create(pGraphicsAPI, DepthMF, TextureSet)) return false;
 
 		return true;
 	}

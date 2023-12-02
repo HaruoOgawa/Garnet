@@ -240,8 +240,8 @@ namespace imageeffect
 		}
 
 		// Create
-		if (!m_ScreenObjX->Create(m_pGraphicsAPI, nullptr, nullptr, m_TextureSet)) return false;
-		if (!m_ScreenObjY->Create(m_pGraphicsAPI, nullptr, nullptr, m_TextureSet)) return false;
+		if (!m_ScreenObjX->Create(m_pGraphicsAPI, nullptr, m_TextureSet)) return false;
+		if (!m_ScreenObjY->Create(m_pGraphicsAPI, nullptr, m_TextureSet)) return false;
 
 		return true;
 	}

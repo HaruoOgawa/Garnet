@@ -3,6 +3,7 @@
 #include "../../LoadWorker/CLoadWorker.h"
 #include "../LoadWorker/CFile.h"
 #include "../LoadWorker/CMaterialFrameLoader.h"
+#include "../LoadWorker/CTextureLoader.h"
 
 #include "../Debug/Message/Console.h"
 
@@ -20,9 +21,10 @@
 namespace scene
 {
 	CScriptScene::CScriptScene(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker):
-		m_SampleMF(std::make_shared<graphics::CMaterialFrame>()),
-		m_PBRMF(std::make_shared<graphics::CMaterialFrame>()),
-		m_SimpleTextureMF(std::make_shared<graphics::CMaterialFrame>()),
+		m_SampleMF(nullptr),
+		m_PBRMF(nullptr),
+		m_SimpleTextureMF(nullptr),
+		m_DepthMF(nullptr),
 
 		m_MfTestObject(std::make_shared<object::C3DObject>("", "ShadowPass")),
 
@@ -43,51 +45,28 @@ namespace scene
 		m_Background(std::make_shared<object::C3DObject>("", "ShadowPass")),
 		m_DebugSphere(std::make_shared<object::C3DObject>("", "ShadowPass")),
 
-		m_IBL_Skybox(std::make_shared<resource::CFile>("Resources\\IBL\\output_skybox.hdr")),
-		m_IBL_DiffuseEnvMap(std::make_shared<resource::CFile>("Resources\\IBL\\output_iem.hdr")),
-		m_IBL_SpecularEnvMap(std::make_shared<resource::CFile>("Resources\\IBL\\output_pmrem.hdr")),
-		m_IBL_GGX_LUT(std::make_shared<resource::CFile>("Resources\\Textures\\ggx_lut.jpg")),
-
-		m_Cube0(std::make_shared<resource::CFile>("Resources\\Cubemaps\\environment\\environment_back_0.jpg")),
-		m_Cube1(std::make_shared<resource::CFile>("Resources\\Cubemaps\\environment\\environment_bottom_0.jpg")),
-		m_Cube2(std::make_shared<resource::CFile>("Resources\\Cubemaps\\environment\\environment_front_0.jpg")),
-		m_Cube3(std::make_shared<resource::CFile>("Resources\\Cubemaps\\environment\\environment_left_0.jpg")),
-		m_Cube4(std::make_shared<resource::CFile>("Resources\\Cubemaps\\environment\\environment_right_0.jpg")),
-		m_Cube5(std::make_shared<resource::CFile>("Resources\\Cubemaps\\environment\\environment_top_0.jpg")),
-
-		m_DepthVertex(std::make_shared<resource::CFile>("Resources\\Shaders\\depth" + pGraphicsAPI->GetVertexShaderExtension())),
-		m_DepthFragment(std::make_shared<resource::CFile>("Resources\\Shaders\\depth" + pGraphicsAPI->GetFragmentShaderExtension())),
-
-		m_VertexShader(std::make_shared<resource::CFile>("Resources\\Shaders\\pbr" + pGraphicsAPI->GetVertexShaderExtension())),
-		m_FragmentShader(std::make_shared<resource::CFile>("Resources\\Shaders\\pbr" + pGraphicsAPI->GetFragmentShaderExtension())),
-		m_MinimumVert(std::make_shared<resource::CFile>("Resources\\Shaders\\minimum" + pGraphicsAPI->GetVertexShaderExtension())),
-		m_TextureFrag(std::make_shared<resource::CFile>("Resources\\Shaders\\unlit" + pGraphicsAPI->GetFragmentShaderExtension())),
+		m_IBL_Skybox_Texture(nullptr),
+		m_IBL_DiffuseEnvMap_Texture(nullptr),
+		m_IBL_SpecularEnvMap_Texture(nullptr),
+		m_IBL_GGX_LUT_Texture(nullptr),
+		m_Cube_Texture(nullptr),
 
 		m_IsLoaded(false)
 	{
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CMaterialFrameLoader>("Resources\\MaterialFrame\\Sample_MF.json", m_SampleMF));
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CMaterialFrameLoader>("Resources\\MaterialFrame\\PBR_MF.json", m_PBRMF));
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CMaterialFrameLoader>("Resources\\MaterialFrame\\SimpleTexture_MF.json", m_SimpleTextureMF));
+		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CMaterialFrameLoader>("Resources\\MaterialFrame\\Depth_MF.json", m_DepthMF));
 		pLoadWorker->AddFirstLoadResource(m_FbxAnimationData);
-		pLoadWorker->AddFirstLoadResource(m_DepthVertex);
-		pLoadWorker->AddFirstLoadResource(m_DepthFragment);
 		pLoadWorker->AddFirstLoadResource(m_glTFData);
 		pLoadWorker->AddFirstLoadResource(m_BrainStemData);
 		pLoadWorker->AddFirstLoadResource(m_VRMData);
-		pLoadWorker->AddFirstLoadResource(m_IBL_Skybox);
-		pLoadWorker->AddFirstLoadResource(m_IBL_DiffuseEnvMap);
-		pLoadWorker->AddFirstLoadResource(m_IBL_SpecularEnvMap);
-		pLoadWorker->AddFirstLoadResource(m_IBL_GGX_LUT);
-		pLoadWorker->AddFirstLoadResource(m_VertexShader);
-		pLoadWorker->AddFirstLoadResource(m_FragmentShader);
-		pLoadWorker->AddFirstLoadResource(m_MinimumVert);
-		pLoadWorker->AddFirstLoadResource(m_TextureFrag);
-		pLoadWorker->AddFirstLoadResource(m_Cube0);
-		pLoadWorker->AddFirstLoadResource(m_Cube1);
-		pLoadWorker->AddFirstLoadResource(m_Cube2);
-		pLoadWorker->AddFirstLoadResource(m_Cube3);
-		pLoadWorker->AddFirstLoadResource(m_Cube4);
-		pLoadWorker->AddFirstLoadResource(m_Cube5);
+
+		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CTextureLoader>(pGraphicsAPI, std::vector<std::string>({ "Resources\\IBL\\output_skybox.hdr" }), false, m_IBL_Skybox_Texture));
+		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CTextureLoader>(pGraphicsAPI, std::vector<std::string>({ "Resources\\IBL\\output_iem.hdr" }), false, m_IBL_DiffuseEnvMap_Texture));
+		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CTextureLoader>(pGraphicsAPI, std::vector<std::string>({ "Resources\\IBL\\output_pmrem.hdr" }), false, m_IBL_SpecularEnvMap_Texture));
+		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CTextureLoader>(pGraphicsAPI, std::vector<std::string>({ "Resources\\Textures\\ggx_lut.jpg" }), false, m_IBL_GGX_LUT_Texture));
+		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CTextureLoader>(pGraphicsAPI, std::vector<std::string>({ "Resources\\Cubemaps\\environment\\environment_back_0.jpg", "Resources\\Cubemaps\\environment\\environment_bottom_0.jpg", "Resources\\Cubemaps\\environment\\environment_front_0.jpg", "Resources\\Cubemaps\\environment\\environment_left_0.jpg", "Resources\\Cubemaps\\environment\\environment_right_0.jpg", "Resources\\Cubemaps\\environment\\environment_top_0.jpg" }), false, m_Cube_Texture));
 	}
 
 	CScriptScene::~CScriptScene()
@@ -97,31 +76,6 @@ namespace scene
 
 	bool CScriptScene::Load(api::IGraphicsAPI* pGraphicsAPI)
 	{
-		// Cubemap
-		std::vector<std::vector<unsigned char>> CubeDataList;
-		CubeDataList.push_back(m_Cube0->GetData());
-		CubeDataList.push_back(m_Cube1->GetData());
-		CubeDataList.push_back(m_Cube2->GetData());
-		CubeDataList.push_back(m_Cube3->GetData());
-		CubeDataList.push_back(m_Cube4->GetData());
-		CubeDataList.push_back(m_Cube5->GetData());
-
-		auto CubeTex = pGraphicsAPI->CreateTexture(true);
-		if (!CubeTex->Create(CubeDataList)) return false;
-
-		// IBL
-		auto IBL_Skybox_Tex = pGraphicsAPI->CreateTexture(false);
-		if (!IBL_Skybox_Tex->Create(m_IBL_Skybox->GetData())) return false;
-		
-		auto IBL_Diffuse_Tex = pGraphicsAPI->CreateTexture(false);
-		if (!IBL_Diffuse_Tex->Create(m_IBL_DiffuseEnvMap->GetData())) return false;
-
-		auto IBL_Specular_Tex = pGraphicsAPI->CreateTexture(false);
-		if (!IBL_Specular_Tex->Create(m_IBL_SpecularEnvMap->GetData())) return false;
-
-		auto IBL_GGXLUT_Tex = pGraphicsAPI->CreateTexture(false);
-		if (!IBL_GGXLUT_Tex->Create(m_IBL_GGX_LUT->GetData())) return false;
-
 		// FBX Humanoid Animation Clip
 		std::vector<std::shared_ptr<animation::CAnimationClip>> AnimationClipList;
 		{
@@ -131,22 +85,22 @@ namespace scene
 		// glTFObject
 		{
 			std::shared_ptr<graphics::CTextureSet> TextureSet = std::make_shared<graphics::CTextureSet>();
-			TextureSet->AddCubeMap(CubeTex);
+			TextureSet->AddCubeMap(m_Cube_Texture);
 			for(const auto& FrameTexture : m_FrameTextureList) { TextureSet->AddFrameTexture(FrameTexture); }
-			TextureSet->AddIBLTexture(IBL_Diffuse_Tex, IBL_Specular_Tex, IBL_GGXLUT_Tex);
+			TextureSet->AddIBLTexture(m_IBL_DiffuseEnvMap_Texture, m_IBL_SpecularEnvMap_Texture, m_IBL_GGX_LUT_Texture);
 
 			m_glTFObject->SetPlayClipIndex(0);
 			m_glTFObject->SetPos(glm::vec3(2.0f, 0.0f, 0.0f));
 
-			if (!gltf::CGLTFImporter::ImportFromMemory(pGraphicsAPI, m_glTFData->GetData(), m_glTFObject, m_PBRMF, TextureSet, m_DepthVertex, m_DepthFragment)) return false;
+			if (!gltf::CGLTFImporter::ImportFromMemory(pGraphicsAPI, m_glTFData->GetData(), m_glTFObject, m_PBRMF, TextureSet, m_DepthMF)) return false;
 		}
 		
 		{
 			// TextureSet
 			std::shared_ptr<graphics::CTextureSet> TextureSet = std::make_shared<graphics::CTextureSet>();
-			TextureSet->AddCubeMap(CubeTex);
+			TextureSet->AddCubeMap(m_Cube_Texture);
 			for(const auto& FrameTexture : m_FrameTextureList) { TextureSet->AddFrameTexture(FrameTexture); }
-			TextureSet->AddIBLTexture(IBL_Diffuse_Tex, IBL_Specular_Tex, IBL_GGXLUT_Tex);
+			TextureSet->AddIBLTexture(m_IBL_DiffuseEnvMap_Texture, m_IBL_SpecularEnvMap_Texture, m_IBL_GGX_LUT_Texture);
 
 			// 再生するアニメーションクリップを指定する
 			m_BrainStemDObject->SetPlayClipIndex(0);
@@ -154,19 +108,19 @@ namespace scene
 			m_BrainStemDObject->SetPos(glm::vec3(-2.0f, 0.0f, 0.0f));
 			m_BrainStemDObject->SetRot(glm::angleAxis(3.1415f, glm::vec3(0.0f, 1.0f, 0.0f)));
 
-			if (!gltf::CGLTFImporter::ImportFromMemory(pGraphicsAPI, m_BrainStemData->GetData(), m_BrainStemDObject, m_PBRMF, TextureSet, m_DepthVertex, m_DepthFragment)) return false;
+			if (!gltf::CGLTFImporter::ImportFromMemory(pGraphicsAPI, m_BrainStemData->GetData(), m_BrainStemDObject, m_PBRMF, TextureSet, m_DepthMF)) return false;
 		}
 		
 		{
 			// TextureSet
 			std::shared_ptr<graphics::CTextureSet> TextureSet = std::make_shared<graphics::CTextureSet>();
-			TextureSet->AddCubeMap(CubeTex);
+			TextureSet->AddCubeMap(m_Cube_Texture);
 			for(const auto& FrameTexture : m_FrameTextureList) { TextureSet->AddFrameTexture(FrameTexture); }
-			TextureSet->AddIBLTexture(IBL_Diffuse_Tex, IBL_Specular_Tex, IBL_GGXLUT_Tex);
+			TextureSet->AddIBLTexture(m_IBL_DiffuseEnvMap_Texture, m_IBL_SpecularEnvMap_Texture, m_IBL_GGX_LUT_Texture);
 
 			m_VRMObject->SetPos(glm::vec3(0.0f, 0.0f, 3.0f));
 
-			if (!gltf::CGLTFImporter::ImportFromMemory(pGraphicsAPI, m_VRMData->GetData(), m_VRMObject, m_PBRMF, TextureSet, m_DepthVertex, m_DepthFragment)) return false;
+			if (!gltf::CGLTFImporter::ImportFromMemory(pGraphicsAPI, m_VRMData->GetData(), m_VRMObject, m_PBRMF, TextureSet, m_DepthMF)) return false;
 
 			// 再生するアニメーションクリップを指定する
 			m_VRMObject->SetPlayClipIndex(0);
@@ -176,21 +130,21 @@ namespace scene
 		{
 			// TextureSet
 			std::shared_ptr<graphics::CTextureSet> TextureSet = std::make_shared<graphics::CTextureSet>();
-			TextureSet->AddCubeMap(CubeTex);
+			TextureSet->AddCubeMap(m_Cube_Texture);
 			for(const auto& FrameTexture : m_FrameTextureList) { TextureSet->AddFrameTexture(FrameTexture); }
-			TextureSet->AddIBLTexture(IBL_Diffuse_Tex, IBL_Specular_Tex, IBL_GGXLUT_Tex);
+			TextureSet->AddIBLTexture(m_IBL_DiffuseEnvMap_Texture, m_IBL_SpecularEnvMap_Texture, m_IBL_GGX_LUT_Texture);
 
 			// 再生するアニメーションクリップを指定する
 			m_FbxObject->SetPlayClipIndex(1);
 
 			m_FbxObject->SetRot(glm::angleAxis(3.1415f, glm::vec3(0.0f, 1.0f, 0.0f)));
 
-			if (!fbx::CFBXImporter::ImportFBX(pGraphicsAPI, "Resources\\Motions\\Walking_WithSkin.fbx", m_FbxObject, m_PBRMF, TextureSet, m_DepthVertex, m_DepthFragment)) return false;
+			if (!fbx::CFBXImporter::ImportFBX(pGraphicsAPI, "Resources\\Motions\\Walking_WithSkin.fbx", m_FbxObject, m_PBRMF, TextureSet, m_DepthMF)) return false;
 		}
 
 		// m_MfTestObject
 		{
-			if (!object::C3DObjectImporter::ImportSimply(pGraphicsAPI, m_MfTestObject, graphics::CPresetPrimitive::CreateSphere(), m_SampleMF->CreateMaterial(pGraphicsAPI), std::make_shared<graphics::CTextureSet>(IBL_Skybox_Tex), m_DepthVertex, m_DepthFragment)) return false;
+			if (!object::C3DObjectImporter::ImportSimply(pGraphicsAPI, m_MfTestObject, graphics::CPresetPrimitive::CreateSphere(), m_SampleMF->CreateMaterial(pGraphicsAPI), std::make_shared<graphics::CTextureSet>(m_IBL_Skybox_Texture), m_DepthMF)) return false;
 		}
 
 		// m_Background
@@ -202,7 +156,7 @@ namespace scene
 			Mat->SetCullMode(graphics::ECullMode::CULL_FRONT);
 
 			m_Background->SetScale(glm::vec3(500.0f));
-			if (!object::C3DObjectImporter::ImportSimply(pGraphicsAPI, m_Background, graphics::CPresetPrimitive::CreateSphere(), Mat, std::make_shared<graphics::CTextureSet>(IBL_Skybox_Tex), m_DepthVertex, m_DepthFragment)) return false;
+			if (!object::C3DObjectImporter::ImportSimply(pGraphicsAPI, m_Background, graphics::CPresetPrimitive::CreateSphere(), Mat, std::make_shared<graphics::CTextureSet>(m_IBL_Skybox_Texture), m_DepthMF)) return false;
 		}
 
 		// m_DebugSphere
@@ -210,7 +164,7 @@ namespace scene
 			auto Mat = m_SimpleTextureMF->CreateMaterial(pGraphicsAPI);
 			Mat->SetEnabledZTest(false);
 			m_DebugSphere->SetScale(glm::vec3(0.1f));
-			if (!object::C3DObjectImporter::ImportSimply(pGraphicsAPI, m_DebugSphere, graphics::CPresetPrimitive::CreateSphere(), Mat, nullptr, m_DepthVertex, m_DepthFragment)) return false;
+			if (!object::C3DObjectImporter::ImportSimply(pGraphicsAPI, m_DebugSphere, graphics::CPresetPrimitive::CreateSphere(), Mat, nullptr, m_DepthMF)) return false;
 		}
 
 		return true;

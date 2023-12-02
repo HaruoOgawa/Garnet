@@ -13,17 +13,18 @@
 #include "CDrawInfo.h"
 #include "ECullMode.h"
 #include "EBlendType.h"
+
 #include "../Camera/CCamera.h"
 
 namespace camera { class CCamera; }
 namespace projection { class CProjection; }
-namespace graphics { class CDrawInfo; }
 
 namespace graphics
 {
 	class CMaterialCreateInfo;
 	class CShaderBuffer;
-
+	class CMaterialFrame;
+	class CDrawInfo;
 	class CMaterial
 	{
 	protected:
@@ -47,7 +48,7 @@ namespace graphics
 		virtual ~CMaterial() = default;
 
 		virtual bool Create(const std::shared_ptr<graphics::CTextureSet>& TextureSet) = 0;
-		virtual bool CreateDepthMaterial(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<resource::CFile>& DepthVertex, const std::shared_ptr<resource::CFile>& DepthFragment);
+		virtual bool CreateDepthMaterial(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<graphics::CMaterialFrame>& DepthMF);
 
 		virtual std::shared_ptr<graphics::CMaterial> GetDepthMaterial();
 
