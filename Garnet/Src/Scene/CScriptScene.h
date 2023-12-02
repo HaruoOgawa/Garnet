@@ -24,6 +24,7 @@ namespace scene
 		bool m_IsLoaded;
 
 		std::shared_ptr<graphics::CMaterialFrame> m_SampleMF;
+		std::shared_ptr<object::C3DObject> m_MfTestObject;
 
 		// Fbx
 		std::shared_ptr<resource::CFile> m_FbxAnimationData;

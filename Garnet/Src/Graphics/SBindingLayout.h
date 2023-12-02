@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include "EBufferUpdateTypeh.h"
 
 namespace graphics
 {
@@ -10,6 +11,7 @@ namespace graphics
 		int ByteSize = 0;
 		int ByteOffset = 0;
 		bool IsGPGPUWritable = false;
+		EBufferUpdateType BufferUpdateType = EBufferUpdateType::UPDATE_TYPE_CPU;
 
 		SBindingLayout() :
 			BindingName(""), BindingIndex(-1), ByteSize(0), ByteOffset(0), IsGPGPUWritable(false)

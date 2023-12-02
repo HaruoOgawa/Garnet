@@ -19,6 +19,7 @@ namespace scene
 {
 	CScriptScene::CScriptScene(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker):
 		m_SampleMF(std::make_shared<graphics::CMaterialFrame>()),
+		m_MfTestObject(std::make_shared<object::C3DObject>("", "ShadowPass")),
 
 		m_glTFObject(std::make_shared<object::C3DObject>("", "ShadowPass")),
 		m_BrainStemDObject(std::make_shared<object::C3DObject>("", "ShadowPass")),
@@ -220,6 +221,42 @@ namespace scene
 			//if (!fbx::CFBXImporter::ImportFBX(pGraphicsAPI, "Resources\\Motions\\Locking Hip Hop Dance.fbx", m_FbxObject, createInfo, TextureSet, m_DepthVertex, m_DepthFragment)) return false;
 		}
 
+		// m_MfTestObject
+		{
+			// Material
+			auto Mat = m_SampleMF->CreateMaterial(pGraphicsAPI);
+			
+			Mat->ReplacePreloadUniformValue("color", &glm::vec4(0.0f, 0.0f, 1.0f, 1.0f)[0], sizeof(glm::vec4), 0);
+
+			m_MfTestObject->AddMaterial(Mat);
+
+			// Mesh
+			{
+				std::shared_ptr<graphics::CMesh> Mesh = std::make_shared<graphics::CMesh>();
+
+				std::shared_ptr<renderer::CRendererCreateInfo> createInfo = std::make_shared<renderer::CRendererCreateInfo>();
+				graphics::CPresetPrimitive::CreateSphere(createInfo);
+
+				std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(createInfo, 0);
+				Mesh->AddPrimitive(Primitive);
+
+				m_MfTestObject->AddMesh(Mesh);
+			}
+
+			// Node
+			{
+				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(0, m_MfTestObject->GetMeshList(), m_MfTestObject->GetMaterialList());
+				Node->SetScale(glm::vec3(2.0f));
+				m_MfTestObject->AddNode(Node);
+			}
+
+			// TextureSet
+			std::shared_ptr<graphics::CTextureSet> TextureSet = std::make_shared<graphics::CTextureSet>();
+
+			// Create
+			if (!m_MfTestObject->Create(pGraphicsAPI, m_DepthVertex, m_DepthFragment, TextureSet)) return false;
+		}
+
 		// m_Background
 		{
 			// Material
@@ -392,6 +429,11 @@ namespace scene
 			if (!m_FbxObject->Update(DrawInfo->GetDeltaSecondsTime())) return false;
 		}
 		
+		if (m_MfTestObject)
+		{
+			if (!m_MfTestObject->Update(DrawInfo->GetDeltaSecondsTime())) return false;
+		}
+		
 		if (m_Background)
 		{
 			if (!m_Background->Update(DrawInfo->GetDeltaSecondsTime())) return false;
@@ -434,6 +476,11 @@ namespace scene
 		if (m_FbxObject)
 		{
 			if (!m_FbxObject->Draw(IsDepthPass, Camera, Projection, DrawInfo, m_DebugSphere)) return false;
+		}
+		
+		if (m_MfTestObject)
+		{
+			if (!m_MfTestObject->Draw(IsDepthPass, Camera, Projection, DrawInfo)) return false;
 		}
 		
 		if (m_Background)

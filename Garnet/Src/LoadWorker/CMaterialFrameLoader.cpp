@@ -248,6 +248,18 @@ namespace resource
 		// BindingLayoutを作成
 		graphics::SBindingLayout BindingLayout = { name , binding, isWritable };
 
+		std::string bufferUpdateType = "";
+		GetString("bufferUpdateType", bufferUpdateType, uniform);
+
+		if (bufferUpdateType.empty() || bufferUpdateType == "cpu")
+		{
+			BindingLayout.BufferUpdateType = graphics::EBufferUpdateType::UPDATE_TYPE_CPU;
+		}
+		else if (bufferUpdateType == "gpu")
+		{
+			BindingLayout.BufferUpdateType = graphics::EBufferUpdateType::UPDATE_TYPE_GPU;
+		}
+
 		// BufferValueを取得
 		std::vector<std::shared_ptr<graphics::SBufferValueLayout>> ValueLayoutList;
 
@@ -280,9 +292,6 @@ namespace resource
 					ByteSize = sizeof(int);
 				}
 
-				std::string bufferUpdateType = "";
-				GetString("bufferUpdateType", bufferUpdateType, val);
-
 				std::vector<float> initValue;
 				GetFloatArray("initValue", initValue, val);
 
@@ -291,15 +300,6 @@ namespace resource
 				ValueLayout->Data = initValue;
 				ValueLayout->ByteSize = ByteSize;
 				ValueLayout->BindingIndex = binding;
-
-				if (bufferUpdateType.empty() || bufferUpdateType == "cpu")
-				{
-					ValueLayout->BufferUpdateType = graphics::EBufferUpdateType::UPDATE_TYPE_CPU;
-				}
-				else if (bufferUpdateType == "gpu")
-				{
-					ValueLayout->BufferUpdateType = graphics::EBufferUpdateType::UPDATE_TYPE_GPU;
-				}
 
 				ValueLayoutList.push_back(ValueLayout);
 			}
@@ -419,8 +419,14 @@ namespace resource
 
 		// ロードが必要だったテクスチャリストを登録する
 
-		//
-
+		// MaterialFrameを生成
+		if (m_TargetMaterialFrame)
+		{
+			m_TargetMaterialFrame->SetCreateInfo(m_CreateInfo);
+			m_TargetMaterialFrame->SetUniformBufferList(m_UniformBufferList);
+			m_TargetMaterialFrame->SetStorageBufferList(m_StorageBufferList);
+			m_TargetMaterialFrame->SetTextureBufferList(m_TextureBufferList);
+		}
 
 		return true;
 	}

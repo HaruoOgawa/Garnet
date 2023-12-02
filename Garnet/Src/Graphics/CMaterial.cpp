@@ -92,6 +92,14 @@ namespace graphics
 		m_TextureBindingLayoutList.push_back(Layout);
 	}
 
+	void CMaterial::ReplacePreloadUniformValue(const std::string& Name, const void* Data, int ByteSize, int BindingIndex)
+	{
+		for (const auto& Buffer : m_ShaderBufferList)
+		{
+			Buffer->ReplaceData(Name, Data, ByteSize, BindingIndex);
+		}
+	}
+
 	void CMaterial::SetUniformValue(const std::string Name, const void* Value, int DynamicOffsetNum)
 	{
 	}

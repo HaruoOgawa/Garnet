@@ -65,6 +65,8 @@ namespace graphics
 		virtual void AddShaderBuffer(const std::shared_ptr<CShaderBuffer>& Buffer);
 		virtual void AddTextureBindingLayout(const STextureBindingLayout& Layout);
 
+		virtual void ReplacePreloadUniformValue(const std::string& Name, const void* Data, int ByteSize, int BindingIndex);
+
 		virtual void SetUniformValue(const std::string Name, const void* Value, int DynamicOffsetNum = -1) = 0;
 
 		virtual void IncreaseRefCount();

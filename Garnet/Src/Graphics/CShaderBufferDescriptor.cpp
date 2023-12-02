@@ -16,6 +16,13 @@ namespace graphics
 		m_DataList.insert({ Name, Data });
 	}
 
+	void CShaderBufferDescriptor::SetData(const std::string& Name, const SUniformBufferValue& Data)
+	{
+		if (m_DataList.find(Name) == m_DataList.end()) return;
+
+		m_DataList[Name] = Data;
+	}
+
 	const std::map<std::string, SUniformBufferValue>& CShaderBufferDescriptor::GetDataList() const
 	{
 		return m_DataList;

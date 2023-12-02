@@ -10,6 +10,7 @@ struct UniformBufferObject {
     view: mat4x4<f32>,
     proj: mat4x4<f32>,
     lightVPMat: mat4x4<f32>,
+    color: vec4<f32>,
 }
 
 struct VertexOutput {
@@ -17,6 +18,7 @@ struct VertexOutput {
     @location(0) member: vec3<f32>,
     @location(1) member_1: vec2<f32>,
     @location(2) member_2: vec4<f32>,
+    @location(3) member_3: vec4<f32>,
 }
 
 var<private> perVertexStruct: gl_PerVertex = gl_PerVertex(vec4<f32>(0.0, 0.0, 0.0, 1.0), 1.0, array<f32,1u>(0.0), array<f32,1u>(0.0));
@@ -28,9 +30,8 @@ var<private> inNormal_1: vec3<f32>;
 var<private> f_Texcoord: vec2<f32>;
 var<private> inTexcoord_1: vec2<f32>;
 var<private> f_WorldPos: vec4<f32>;
+var<private> f_Color: vec4<f32>;
 var<private> inTangent_1: vec4<f32>;
-var<private> inJoint0_1: vec4<u32>;
-var<private> inWeights0_1: vec4<f32>;
 
 fn main_1() {
     let _e22 = ubo.proj;
@@ -46,23 +47,24 @@ fn main_1() {
     let _e47 = ubo.model;
     let _e48 = inPosition_1;
     f_WorldPos = (_e47 * vec4<f32>(_e48.x, _e48.y, _e48.z, 1.0));
+    let _e55 = ubo.color;
+    f_Color = _e55;
     return;
 }
 
 @vertex 
-fn main(@location(0) inPosition: vec3<f32>, @location(1) inNormal: vec3<f32>, @location(2) inTexcoord: vec2<f32>, @location(3) inTangent: vec4<f32>, @location(4) inJoint0_: vec4<u32>, @location(5) inWeights0_: vec4<f32>) -> VertexOutput {
+fn main(@location(0) inPosition: vec3<f32>, @location(1) inNormal: vec3<f32>, @location(2) inTexcoord: vec2<f32>, @location(3) inTangent: vec4<f32>) -> VertexOutput {
     inPosition_1 = inPosition;
     inNormal_1 = inNormal;
     inTexcoord_1 = inTexcoord;
     inTangent_1 = inTangent;
-    inJoint0_1 = inJoint0_;
-    inWeights0_1 = inWeights0_;
     main_1();
-    let _e18 = perVertexStruct.gl_Position.y;
-    perVertexStruct.gl_Position.y = -(_e18);
-    let _e20 = perVertexStruct.gl_Position;
-    let _e21 = f_WorldNormal;
-    let _e22 = f_Texcoord;
-    let _e23 = f_WorldPos;
-    return VertexOutput(_e20, _e21, _e22, _e23);
+    let _e15 = perVertexStruct.gl_Position.y;
+    perVertexStruct.gl_Position.y = -(_e15);
+    let _e17 = perVertexStruct.gl_Position;
+    let _e18 = f_WorldNormal;
+    let _e19 = f_Texcoord;
+    let _e20 = f_WorldPos;
+    let _e21 = f_Color;
+    return VertexOutput(_e17, _e18, _e19, _e20, _e21);
 }

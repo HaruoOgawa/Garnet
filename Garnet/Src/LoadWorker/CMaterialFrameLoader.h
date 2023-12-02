@@ -16,11 +16,6 @@
 #include "../Graphics/STextureBindingLayout.h"
 #include "../GraphicsAPI/CMaterialCreateInfo.h"
 
-namespace graphics { 
-	class CMaterialFrame; 
-	class CMaterialCreateInfo;
-}
-
 using namespace nlohmann;
 
 namespace resource
@@ -29,26 +24,27 @@ namespace resource
 
 	class CMaterialFrameLoader : public resource::IResource
 	{
-		//
+		// MfStatus
 		resource::ELoadStatus m_Status;
 
 		std::shared_ptr<CFile> m_MfFile;
 		json m_MfJson;
 
-		//
+		// MfResource
 		bool m_AnalyseDone;
 		std::vector<std::shared_ptr<CFile>> m_MfResourceList;
 
 		std::unordered_map <std::string, std::shared_ptr<CFile>> m_ShaderFileList;
 		std::unordered_map <std::string, std::shared_ptr<CFile>> m_TextureFileList;
 
+		// MfData
 		std::vector<std::pair<graphics::SBindingLayout, std::vector<std::shared_ptr<graphics::SBufferValueLayout>>>> m_UniformBufferList;
 		std::vector<std::pair<graphics::SBindingLayout, std::vector<std::shared_ptr<graphics::SBufferValueLayout>>>> m_StorageBufferList;
 		std::vector<graphics::STextureBindingLayout> m_TextureBufferList;
 
-		//
-		std::shared_ptr<graphics::CMaterialFrame> m_TargetMaterialFrame;
 		std::shared_ptr<graphics::CMaterialCreateInfo> m_CreateInfo;
+
+		std::shared_ptr<graphics::CMaterialFrame> m_TargetMaterialFrame;
 	private:
 		bool AnalyseResourceList(api::IGraphicsAPI* pGraphicsAPI);
 		bool AnalyseShaderList(api::IGraphicsAPI* pGraphicsAPI, const json::iterator& shaderList);

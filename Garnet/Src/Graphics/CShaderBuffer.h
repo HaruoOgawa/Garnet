@@ -37,6 +37,8 @@ namespace graphics
 		virtual ~CShaderBuffer();
 
 		virtual void AddData(const std::string& Name, const void* Data, int ByteSize, int BindingIndex) override;
+		virtual void ReplaceData(const std::string& SrcName, const void* SrcData, int SrcByteSize, int BindingIndex);
+
 		virtual void SetData(const std::string& Name, const void* Data, int ByteSize) override;
 		virtual const std::vector<unsigned char>& GetData() const override;
 
