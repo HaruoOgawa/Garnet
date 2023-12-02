@@ -63,14 +63,6 @@
           ]
         },
         {
-          "name": "baseColorTexture",
-          "viewBinding": 1,
-          "samplerBinding": 2,
-          "textureIndex": -1,
-          "type": "texture",
-          "textureUsage": "2d"
-        },
-        {
           "name": "SkinMatrixBuffer",
           "binding": 3,
           "isWritable": false,
@@ -93,14 +85,15 @@
       "shadercode": "",
       "shaderType": "fragment",
       "uniformBlockList": [
-
+        {
+          "name": "baseColorTexture",
+          "viewBinding": 1,
+          "samplerBinding": 2,
+          "textureIndex": -1,
+          "type": "texture",
+          "textureUsage": "2d"
+        }
       ]
-    }
-  ],
-  "textureList": [
-    {
-      "filename": "",
-      "textureUsage": "2d"
     }
   ]
 }

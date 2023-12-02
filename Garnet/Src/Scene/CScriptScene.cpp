@@ -19,25 +19,15 @@ namespace scene
 {
 	CScriptScene::CScriptScene(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker):
 		m_SampleMF(std::make_shared<graphics::CMaterialFrame>()),
+		m_PBRMF(std::make_shared<graphics::CMaterialFrame>()),
 		m_MfTestObject(std::make_shared<object::C3DObject>("", "ShadowPass")),
 
 		m_glTFObject(std::make_shared<object::C3DObject>("", "ShadowPass")),
 		m_BrainStemDObject(std::make_shared<object::C3DObject>("", "ShadowPass")),
 		m_VRMObject(std::make_shared<object::C3DObject>("", "ShadowPass")),
 		m_FbxObject(std::make_shared<object::C3DObject>("", "ShadowPass")),
-		//m_glTFData(std::make_shared<resource::CFile>("Resources\\Models\\MetalRoughSpheresNoTextures\\glTF-Binary\\MetalRoughSpheresNoTextures.glb")),
 		//m_glTFData(std::make_shared<resource::CFile>("Resources\\Models\\Sponza\\glTF\\Sponza.glb")),
-		//m_glTFData(std::make_shared<resource::CFile>("Resources\\Models\\DamagedHelmet\\glTF-Binary\\DamagedHelmet.glb")),
-		//m_glTFData(std::make_shared<resource::CFile>("Resources\\Models\\SimpleAnimation\\SimpleAnimation.gltf")),
-		//m_glTFData(std::make_shared<resource::CFile>("Resources\\Models\\SimpleAnimation\\Triangle_Linear_Anim_Test.gltf")),
-		//m_glTFData(std::make_shared<resource::CFile>("Resources\\Models\\SimpleAnimation\\CubeiSplineTest.gltf")),
-		//m_glTFData(std::make_shared<resource::CFile>("Resources\\Models\\SimpleMorphTarget\\SimpleMorphTarget.gltf")),
-		//m_glTFData(std::make_shared<resource::CFile>("Resources\\Models\\SimpleSkin\\SimpleSkin.gltf")),
-		//m_glTFData(std::make_shared<resource::CFile>("Resources\\Models\\RiggedSimple\\glTF-Binary\\RiggedSimple.glb")),
-		//m_glTFData(std::make_shared<resource::CFile>("Resources\\Models\\RiggedFigure\\glTF-Binary\\RiggedFigure.glb")),
-		//m_glTFData(std::make_shared<resource::CFile>("Resources\\Models\\BrainStem\\glTF-Binary\\BrainStem.glb")),
 		m_glTFData(std::make_shared<resource::CFile>("Resources\\Models\\CesiumMan\\glTF-Binary\\CesiumMan.glb")),
-		//m_glTFData(std::make_shared<resource::CFile>("Resources\\Models\\AnimatedCube\\glTF\\AnimatedCube.gltf")),
 
 		m_BrainStemData(std::make_shared<resource::CFile>("Resources\\Models\\BrainStem\\glTF-Binary\\BrainStem.glb")),
 		m_VRMData(std::make_shared<resource::CFile>("Resources\\Models\\Alicia\\VRM\\AliciaSolid.vrm")),
@@ -72,6 +62,7 @@ namespace scene
 		m_IsLoaded(false)
 	{
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CMaterialFrameLoader>("Resources\\MaterialFrame\\Sample_MF.json", m_SampleMF));
+		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CMaterialFrameLoader>("Resources\\MaterialFrame\\PBR_MF.json", m_PBRMF));
 		pLoadWorker->AddFirstLoadResource(m_FbxAnimationData);
 		pLoadWorker->AddFirstLoadResource(m_DepthVertex);
 		pLoadWorker->AddFirstLoadResource(m_DepthFragment);
@@ -134,36 +125,18 @@ namespace scene
 
 		// glTFObject
 		{
-			// MaterialInto
-			std::shared_ptr<graphics::CMaterialCreateInfo> createInfo = std::make_shared<graphics::CMaterialCreateInfo>();
-			createInfo->SetVertexShaderCode(m_VertexShader->GetData());
-			createInfo->SetFragmentShaderCode(m_FragmentShader->GetData());
-
-			// TextureSet
 			std::shared_ptr<graphics::CTextureSet> TextureSet = std::make_shared<graphics::CTextureSet>();
 			TextureSet->AddCubeMap(CubeTex);
 			for(const auto& FrameTexture : m_FrameTextureList) { TextureSet->AddFrameTexture(FrameTexture); }
 			TextureSet->AddIBLTexture(IBL_Diffuse_Tex, IBL_Specular_Tex, IBL_GGXLUT_Tex);
 
-			// 再生するアニメーションクリップを指定する
 			m_glTFObject->SetPlayClipIndex(0);
-
 			m_glTFObject->SetPos(glm::vec3(2.0f, 0.0f, 0.0f));
 
-			// Import
-			//if (!gltf::CGLTFImporter::ImportFromString(pGraphicsAPI, m_glTFData->GetData(), "Resources\\Models\\AnimatedCube\\glTF\\", m_glTFObject, createInfo, TextureSet, m_DepthVertex, m_DepthFragment)) return false;
-			//if (!gltf::CGLTFImporter::ImportFromString(pGraphicsAPI, m_glTFData->GetData(), "Resources\\Models\\SimpleSkin\\", m_glTFObject, createInfo, TextureSet, m_DepthVertex, m_DepthFragment)) return false;
-			//if (!gltf::CGLTFImporter::ImportFromString(pGraphicsAPI, m_glTFData->GetData(), "Resources\\Models\\SimpleMorphTarget\\", m_glTFObject, createInfo, TextureSet, m_DepthVertex, m_DepthFragment)) return false;
-			//if (!gltf::CGLTFImporter::ImportFromString(pGraphicsAPI, m_glTFData->GetData(), "Resources\\Models\\SimpleAnimation\\", m_glTFObject, createInfo, TextureSet, m_DepthVertex, m_DepthFragment)) return false;
-			if (!gltf::CGLTFImporter::ImportFromMemory(pGraphicsAPI, m_glTFData->GetData(), m_glTFObject, createInfo, TextureSet, m_DepthVertex, m_DepthFragment)) return false;
+			if (!gltf::CGLTFImporter::ImportFromMemory(pGraphicsAPI, m_glTFData->GetData(), m_glTFObject, m_PBRMF, TextureSet, m_DepthVertex, m_DepthFragment)) return false;
 		}
 		
 		{
-			// MaterialInto
-			std::shared_ptr<graphics::CMaterialCreateInfo> createInfo = std::make_shared<graphics::CMaterialCreateInfo>();
-			createInfo->SetVertexShaderCode(m_VertexShader->GetData());
-			createInfo->SetFragmentShaderCode(m_FragmentShader->GetData());
-
 			// TextureSet
 			std::shared_ptr<graphics::CTextureSet> TextureSet = std::make_shared<graphics::CTextureSet>();
 			TextureSet->AddCubeMap(CubeTex);
@@ -176,15 +149,10 @@ namespace scene
 			m_BrainStemDObject->SetPos(glm::vec3(-2.0f, 0.0f, 0.0f));
 			m_BrainStemDObject->SetRot(glm::angleAxis(3.1415f, glm::vec3(0.0f, 1.0f, 0.0f)));
 
-			if (!gltf::CGLTFImporter::ImportFromMemory(pGraphicsAPI, m_BrainStemData->GetData(), m_BrainStemDObject, createInfo, TextureSet, m_DepthVertex, m_DepthFragment)) return false;
+			if (!gltf::CGLTFImporter::ImportFromMemory(pGraphicsAPI, m_BrainStemData->GetData(), m_BrainStemDObject, m_PBRMF, TextureSet, m_DepthVertex, m_DepthFragment)) return false;
 		}
 		
 		{
-			// MaterialInto
-			std::shared_ptr<graphics::CMaterialCreateInfo> createInfo = std::make_shared<graphics::CMaterialCreateInfo>();
-			createInfo->SetVertexShaderCode(m_VertexShader->GetData());
-			createInfo->SetFragmentShaderCode(m_FragmentShader->GetData());
-
 			// TextureSet
 			std::shared_ptr<graphics::CTextureSet> TextureSet = std::make_shared<graphics::CTextureSet>();
 			TextureSet->AddCubeMap(CubeTex);
@@ -193,7 +161,7 @@ namespace scene
 
 			m_VRMObject->SetPos(glm::vec3(0.0f, 0.0f, 3.0f));
 
-			if (!gltf::CGLTFImporter::ImportFromMemory(pGraphicsAPI, m_VRMData->GetData(), m_VRMObject, createInfo, TextureSet, m_DepthVertex, m_DepthFragment)) return false;
+			if (!gltf::CGLTFImporter::ImportFromMemory(pGraphicsAPI, m_VRMData->GetData(), m_VRMObject, m_PBRMF, TextureSet, m_DepthVertex, m_DepthFragment)) return false;
 
 			// 再生するアニメーションクリップを指定する
 			m_VRMObject->SetPlayClipIndex(0);
@@ -217,7 +185,7 @@ namespace scene
 
 			m_FbxObject->SetRot(glm::angleAxis(3.1415f, glm::vec3(0.0f, 1.0f, 0.0f)));
 
-			if (!fbx::CFBXImporter::ImportFBX(pGraphicsAPI, "Resources\\Motions\\Walking_WithSkin.fbx", m_FbxObject, createInfo, TextureSet, m_DepthVertex, m_DepthFragment)) return false;
+			if (!fbx::CFBXImporter::ImportFBX(pGraphicsAPI, "Resources\\Motions\\Walking_WithSkin.fbx", m_FbxObject, m_PBRMF, TextureSet, m_DepthVertex, m_DepthFragment)) return false;
 			//if (!fbx::CFBXImporter::ImportFBX(pGraphicsAPI, "Resources\\Motions\\Locking Hip Hop Dance.fbx", m_FbxObject, createInfo, TextureSet, m_DepthVertex, m_DepthFragment)) return false;
 		}
 
@@ -263,6 +231,8 @@ namespace scene
 			// TextureSet
 			std::shared_ptr<graphics::CTextureSet> TextureSet = std::make_shared<graphics::CTextureSet>();
 			TextureSet->Add2DTexture(IBL_Skybox_Tex);
+
+			m_MfTestObject->SetPos(glm::vec3(0.0f, -1.0f, 0.0f));
 
 			// Create
 			if (!m_MfTestObject->Create(pGraphicsAPI, m_DepthVertex, m_DepthFragment, TextureSet)) return false;

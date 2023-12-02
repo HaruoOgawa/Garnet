@@ -13,17 +13,19 @@
 #include "../Animation/CSkin.h"
 #include "../Animation/CJoint.h"
 
+#include "../Graphics/CMaterialFrame.h"
+
 using namespace fbxsdk;
 
 namespace fbx
 {
 	bool CFBXImporter::ImportFBX(api::IGraphicsAPI* pGraphicsAPI, const std::string& FileName, std::shared_ptr<object::C3DObject>& Object,
-		const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, const std::shared_ptr<graphics::CTextureSet>& TextureSet,
+		const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, const std::shared_ptr<graphics::CTextureSet>& TextureSet,
 		const std::shared_ptr<resource::CFile>& DepthVertex, const std::shared_ptr<resource::CFile>& DepthFragment)
 	{
 		std::vector<std::shared_ptr<animation::CAnimationClip>> AnimationClipList;
 
-		if (!Import(pGraphicsAPI, FileName, true, Object, AnimationClipList, createInfo, TextureSet, DepthVertex, DepthFragment)) return false;
+		if (!Import(pGraphicsAPI, FileName, true, Object, AnimationClipList, MaterialFrame, TextureSet, DepthVertex, DepthFragment)) return false;
 
 		return true;
 	}
@@ -39,7 +41,7 @@ namespace fbx
 
 	bool CFBXImporter::Import(api::IGraphicsAPI* pGraphicsAPI, const std::string& FileName, bool IsUseObject, std::shared_ptr<object::C3DObject>& Object,
 		std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList,
-		const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, const std::shared_ptr<graphics::CTextureSet>& TextureSet,
+		const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, const std::shared_ptr<graphics::CTextureSet>& TextureSet,
 		const std::shared_ptr<resource::CFile>& DepthVertex, const std::shared_ptr<resource::CFile>& DepthFragment)
 	{
 		// 全体のメモリやObjectを管理するManagerを作成
@@ -80,7 +82,7 @@ namespace fbx
 		int Coordinate = Scene->GetGlobalSettings().GetAxisSystem().GetCoorSystem();
 
 		// FBXの解析開始
-		if (!Analyse(pGraphicsAPI, Scene, IsUseObject, Object, AnimationClipList, createInfo, TextureSet, DepthVertex, DepthFragment)) return false;
+		if (!Analyse(pGraphicsAPI, Scene, IsUseObject, Object, AnimationClipList, MaterialFrame, TextureSet, DepthVertex, DepthFragment)) return false;
 
 		// FBX解析を終了
 		Manager->Destroy();
@@ -90,7 +92,7 @@ namespace fbx
 
 	bool CFBXImporter::Analyse(api::IGraphicsAPI* pGraphicsAPI, FbxScene* Scene, bool IsUseObject, std::shared_ptr<object::C3DObject>& Object,
 		std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList,
-		const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, const std::shared_ptr<graphics::CTextureSet>& TextureSet,
+		const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, const std::shared_ptr<graphics::CTextureSet>& TextureSet,
 		const std::shared_ptr<resource::CFile>& DepthVertex, const std::shared_ptr<resource::CFile>& DepthFragment)
 	{
 		FbxNode* RootNode = Scene->GetRootNode();
@@ -156,12 +158,12 @@ namespace fbx
 			{
 				// 描画情報の取得
 				std::vector<FbxMesh*> pFbxMeshList;
-				if (!CreateDrawInfo(pGraphicsAPI, pFbxMeshList, createInfo, RootNode, TextureList, MaterialList, MeshList, Skin)) return false;
+				if (!CreateDrawInfo(pGraphicsAPI, pFbxMeshList, MaterialFrame, RootNode, TextureList, MaterialList, MeshList, Skin)) return false;
 
 				// マテリアルを持っていないのならダミーを渡す
 				if (MaterialList.size() <= 0)
 				{
-					if (!CreateDummyMaterial(pGraphicsAPI, RootNode, MaterialList, createInfo, MeshList, Skin)) return false;
+					if (!CreateDummyMaterial(pGraphicsAPI, RootNode, MaterialList, MaterialFrame, MeshList, Skin)) return false;
 				}
 
 				// 重複を除く
@@ -212,7 +214,7 @@ namespace fbx
 		return true;
 	}
 
-	bool CFBXImporter::CreateDrawInfo(api::IGraphicsAPI* pGraphicsAPI, std::vector<FbxMesh*>& pFbxMeshList, const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo,
+	bool CFBXImporter::CreateDrawInfo(api::IGraphicsAPI* pGraphicsAPI, std::vector<FbxMesh*>& pFbxMeshList, const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame,
 		FbxNode* pFBXNode, std::vector<std::shared_ptr<graphics::CTexture>>& TextureList,
 		std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList, std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, const std::shared_ptr<animation::CSkin>& Skin)
 	{
@@ -231,78 +233,20 @@ namespace fbx
 		// 子要素のNodeを調べる
 		for (int i = 0; i < pFBXNode->GetChildCount(); i++)
 		{
-			if (!CreateDrawInfo(pGraphicsAPI, pFbxMeshList, createInfo, pFBXNode->GetChild(i), TextureList, MaterialList, MeshList, Skin)) return false;
+			if (!CreateDrawInfo(pGraphicsAPI, pFbxMeshList, MaterialFrame, pFBXNode->GetChild(i), TextureList, MaterialList, MeshList, Skin)) return false;
 		}
 
 		return true;
 	}
 
 	bool CFBXImporter::CreateDummyMaterial(api::IGraphicsAPI* pGraphicsAPI, FbxNode* pFBXNode, std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList,
-		const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, const std::shared_ptr<animation::CSkin>& Skin)
+		const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, const std::shared_ptr<animation::CSkin>& Skin)
 	{
 		// マテリアルにシェーダーを設定
-		std::shared_ptr<graphics::CMaterial> material = pGraphicsAPI->CreateMaterial(createInfo);
-
-		// UBO
-		{
-			auto UniformBuffer = graphics::CMaterialCreateInfo::CreateUniformBuffer({ graphics::SBindingLayout("UniformBufferObject", 0, false) });
-
-			// UBOの初期値を設定する
-			UniformBuffer->AddData("model", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
-			UniformBuffer->AddData("view", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
-			UniformBuffer->AddData("proj", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
-			UniformBuffer->AddData("lightVPMat", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
-			UniformBuffer->AddData("lightDir", &glm::vec4(0.0f)[0], sizeof(float) * 4, 0);
-			UniformBuffer->AddData("lightColor", &glm::vec4(0.0f)[0], sizeof(float) * 4, 0);
-			UniformBuffer->AddData("cameraPos", &glm::vec4(0.0f)[0], sizeof(float) * 4, 0);
-			UniformBuffer->AddData("baseColorFactor", &glm::vec4(1.0f)[0], sizeof(float) * 4, 0);
-			UniformBuffer->AddData("emissiveFactor", &glm::vec4(0.0f)[0], sizeof(float) * 4, 0);
-			UniformBuffer->AddData("time", &glm::vec1(0.0f)[0], sizeof(float), 0);
-			UniformBuffer->AddData("metallicFactor", &glm::vec1(0.5f)[0], sizeof(float), 0);
-			UniformBuffer->AddData("roughnessFactor", &glm::vec1(0.5f)[0], sizeof(float), 0);
-			UniformBuffer->AddData("normalMapScale", &glm::vec1(1.0f)[0], sizeof(float), 0);
-			UniformBuffer->AddData("occlusionStrength", &glm::vec1(1.0f)[0], sizeof(float), 0);
-
-			float MipCount = 1.0f;
-			UniformBuffer->AddData("mipCount", &glm::vec1(MipCount)[0], sizeof(float), 0);
-
-			int ShadowMapX = 1, ShadowMapY = 1;
-			UniformBuffer->AddData("ShadowMapX", &glm::vec1(static_cast<float>(ShadowMapX))[0], sizeof(float), 0);
-			UniformBuffer->AddData("ShadowMapY", &glm::vec1(static_cast<float>(ShadowMapY))[0], sizeof(float), 0);
-
-			// テクスチャを紐づける
-			material->AddTextureBindingLayout({ "baseColorTexture", 2, 3, -1, graphics::ETextureUsage::TEXTURE_USAGE_2D }); // TextureIndex -1 は EmptyTextureである
-			UniformBuffer->AddData("useBaseColorTexture", &glm::uvec1(0)[0], sizeof(int), 0);
-			material->AddTextureBindingLayout({ "metallicRoughnessTexture", 4, 5, -1, graphics::ETextureUsage::TEXTURE_USAGE_2D }); // TextureIndex -1 は EmptyTextureである
-			UniformBuffer->AddData("useMetallicRoughnessTexture", &glm::uvec1(0)[0], sizeof(int), 0);
-			material->AddTextureBindingLayout({ "emissiveTexture", 6, 7, -1, graphics::ETextureUsage::TEXTURE_USAGE_2D }); // TextureIndex -1 は EmptyTextureである
-			UniformBuffer->AddData("useEmissiveTexture", &glm::uvec1(0)[0], sizeof(int), 0);
-			material->AddTextureBindingLayout({ "normalTexture", 8, 9, -1, graphics::ETextureUsage::TEXTURE_USAGE_2D }); // TextureIndex -1 は EmptyTextureである
-			UniformBuffer->AddData("useNormalTexture", &glm::uvec1(0)[0], sizeof(int), 0);
-			material->AddTextureBindingLayout({ "occlusionTexture", 10, 11, -1, graphics::ETextureUsage::TEXTURE_USAGE_2D }); // TextureIndex -1 は EmptyTextureである
-			UniformBuffer->AddData("useOcclusionTexture", &glm::uvec1(0)[0], sizeof(int), 0);
-			material->AddTextureBindingLayout({ "cubemapTexture", 12, 13, -1, graphics::ETextureUsage::TEXTURE_USAGE_CUBE });
-			UniformBuffer->AddData("useCubeMap", &glm::uvec1(0)[0], sizeof(int), 0);
-			material->AddTextureBindingLayout({ "shadowmapTexture", 14, 15, -1, graphics::ETextureUsage::TEXTURE_USAGE_FRAME });
-			UniformBuffer->AddData("useShadowMap", &glm::uvec1(0)[0], sizeof(int), 0);
-			material->AddTextureBindingLayout({ "IBL_Diffuse_Texture", 16, 17, -1, graphics::ETextureUsage::TEXTURE_USAGE_IBL_Diffuse });
-			material->AddTextureBindingLayout({ "IBL_Specular_Texture", 18, 19, -1, graphics::ETextureUsage::TEXTURE_USAGE_IBL_Specular });
-			material->AddTextureBindingLayout({ "IBL_GGXLUT_Texture", 20, 21, -1, graphics::ETextureUsage::TEXTURE_USAGE_IBL_GGXLUT });
-			UniformBuffer->AddData("useIBL", &glm::ivec1(0)[0], sizeof(int), 0);
-
-			UniformBuffer->AddData("useSkinMeshAnimation", &glm::ivec1(0)[0], sizeof(int), 0);
-			UniformBuffer->AddData("JointIndexOffset", &glm::ivec1(0)[0], sizeof(int), 0);
-			UniformBuffer->AddData("pad1", &glm::ivec1(0)[0], sizeof(int), 0);
-			UniformBuffer->AddData("pad2", &glm::ivec1(0)[0], sizeof(int), 0);
-
-			// マテリアルにUBOを割り当てる
-			material->AddShaderBuffer(UniformBuffer);
-		}
+		std::shared_ptr<graphics::CMaterial> material = MaterialFrame->CreateMaterial(pGraphicsAPI);
 
 		// SkinMatrix StorageBuffer
 		{
-			auto SSBO = graphics::CMaterialCreateInfo::CreateShaderStorageBuffer({ graphics::SBindingLayout("SkinMatrixBuffer", 1, false) }, graphics::EBufferUpdateType::UPDATE_TYPE_CPU);
-
 			// SkinMatは存在するJointの数だけ用意する必要がある
 			int SkinMatCount = 1;
 			if (Skin) SkinMatCount = static_cast<int>(Skin->GetJointList().size());
@@ -310,9 +254,7 @@ namespace fbx
 			std::vector<glm::mat4> SkinMatrixList;
 			SkinMatrixList.resize(SkinMatCount, glm::mat4(1.0f));
 
-			SSBO->AddData("r_SkinMatrixBuffer", &SkinMatrixList[0], static_cast<int>(SkinMatrixList.size()) * sizeof(glm::mat4), 1);
-
-			material->AddShaderBuffer(SSBO);
+			material->ReplacePreloadUniformValue("r_SkinMatrixBuffer", &SkinMatrixList[0], static_cast<int>(SkinMatrixList.size()) * sizeof(glm::mat4), 1);
 		}
 
 		material->SetCullMode(graphics::ECullMode::CULL_NONE);

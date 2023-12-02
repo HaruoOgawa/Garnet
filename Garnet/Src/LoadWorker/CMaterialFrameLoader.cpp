@@ -379,6 +379,9 @@ namespace resource
 
 	bool CMaterialFrameLoader::AnalyseTextureList(api::IGraphicsAPI* pGraphicsAPI, const json::iterator& textureList)
 	{
+		// あまりメリットがないので未実装
+		// C3DObjectのTetureListは他のマテリアルでも共有しており、結局ReplaceTextureIndexでインデックスを調整することになるので無駄である
+
 		return true;
 	}
 
