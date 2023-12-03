@@ -1,4 +1,5 @@
 #include "CMaterial.h"
+#include "CMaterialFrame.h"
 
 namespace graphics
 {
@@ -18,21 +19,9 @@ namespace graphics
 		return true;
 	}
 
-	bool CMaterial::CreateDepthMaterial(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<file::CFile>& DepthVertex, const std::shared_ptr<file::CFile>& DepthFragment)
+	bool CMaterial::CreateDepthMaterial(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<graphics::CMaterialFrame>& DepthMF)
 	{
-		std::shared_ptr<graphics::CMaterialCreateInfo> createInfo = std::make_shared<graphics::CMaterialCreateInfo>();
-		createInfo->SetVertexShaderCode(DepthVertex->GetData());
-		createInfo->SetFragmentShaderCode(DepthFragment->GetData());
-
-		auto UniformBuffer = graphics::CMaterialCreateInfo::CreateUniformBuffer({ graphics::SBindingLayout("UniformBufferObject", 0, false) });
-		UniformBuffer->AddData("model", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
-		UniformBuffer->AddData("view", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
-		UniformBuffer->AddData("proj", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
-		UniformBuffer->AddData("lightVPMat", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
-
-		m_DepthMaterial = pGraphicsAPI->CreateMaterial(createInfo);
-
-		m_DepthMaterial->AddShaderBuffer(UniformBuffer);
+		m_DepthMaterial = DepthMF->CreateMaterial(pGraphicsAPI);
 
 		m_DepthMaterial->SetRefStatus(m_RefCount, m_UseDynamicBufferOffset);
 
@@ -90,6 +79,26 @@ namespace graphics
 	void CMaterial::AddTextureBindingLayout(const STextureBindingLayout& Layout)
 	{
 		m_TextureBindingLayoutList.push_back(Layout);
+	}
+
+	void CMaterial::ReplaceTextureIndex(const std::string& TextureName, int TextureIndex)
+	{
+		for (auto& Layout : m_TextureBindingLayoutList)
+		{
+			if (TextureName != Layout.TextureName) continue;
+
+			Layout.TextureIndex = TextureIndex;
+
+			break;
+		}
+	}
+
+	void CMaterial::ReplacePreloadUniformValue(const std::string& Name, const void* Data, int ByteSize, int BindingIndex)
+	{
+		for (const auto& Buffer : m_ShaderBufferList)
+		{
+			Buffer->ReplaceData(Name, Data, ByteSize, BindingIndex);
+		}
 	}
 
 	void CMaterial::SetUniformValue(const std::string Name, const void* Value, int DynamicOffsetNum)

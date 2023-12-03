@@ -30,11 +30,12 @@
 #include "../Animation/CJoint.h"
 #include "../Animation/CBoneNameProvider.h"
 
+#include "../Graphics/CMaterialFrame.h"
+
 namespace gltf
 {
-	bool CGLTFImporter::ImportFromMemory(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& Data, std::shared_ptr<object::C3DObject>& Object,
-		std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, const std::shared_ptr<graphics::CTextureSet>& TextureSet,
-		const std::shared_ptr<file::CFile>& DepthVertex, const std::shared_ptr<file::CFile>& DepthFragment)
+	bool CGLTFImporter::ImportFromMemory(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& Data, object::C3DObject* Object,
+		const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame)
 	{
 		tinygltf::Model model;
 		tinygltf::TinyGLTF loader;
@@ -56,14 +57,13 @@ namespace gltf
 
 		if (!result) return false;
 
-		if (!Import(pGraphicsAPI, model, Object, createInfo, TextureSet, DepthVertex, DepthFragment)) return false;
+		if (!Import(pGraphicsAPI, model, Object, MaterialFrame)) return false;
 
 		return true;
 	}
 
-	bool CGLTFImporter::ImportFromString(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& Data, const std::string& BaseDir, std::shared_ptr<object::C3DObject>& Object,
-		std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, const std::shared_ptr<graphics::CTextureSet>& TextureSet,
-		const std::shared_ptr<file::CFile>& DepthVertex, const std::shared_ptr<file::CFile>& DepthFragment)
+	bool CGLTFImporter::ImportFromString(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& Data, const std::string& BaseDir, object::C3DObject* Object,
+		const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame)
 	{
 		tinygltf::Model model;
 		tinygltf::TinyGLTF loader;
@@ -85,14 +85,13 @@ namespace gltf
 
 		if (!result) return false;
 
-		if (!Import(pGraphicsAPI, model, Object, createInfo, TextureSet, DepthVertex, DepthFragment)) return false;
+		if (!Import(pGraphicsAPI, model, Object, MaterialFrame)) return false;
 
 		return true;
 	}
 
-	bool CGLTFImporter::Import(api::IGraphicsAPI* pGraphicsAPI, tinygltf::Model model, std::shared_ptr<object::C3DObject>& Object,
-		std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, const std::shared_ptr<graphics::CTextureSet>& TextureSet,
-		const std::shared_ptr<file::CFile>& DepthVertex, const std::shared_ptr<file::CFile>& DepthFragment)
+	bool CGLTFImporter::Import(api::IGraphicsAPI* pGraphicsAPI, tinygltf::Model model, object::C3DObject* Object,
+		const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame)
 	{
 		// テクスチャ
 		std::vector<std::shared_ptr<graphics::CTexture>> TextureList;
@@ -100,12 +99,12 @@ namespace gltf
 
 		for (const auto& Texture : TextureList)
 		{
-			TextureSet->Add2DTexture(Texture);
+			Object->GetTextureSet()->Add2DTexture(Texture);
 		}
 
 		// マテリアル
 		std::vector<std::shared_ptr<graphics::CMaterial>> MaterialList;
-		if (!CreateMaterial(pGraphicsAPI, model, MaterialList, createInfo, TextureSet)) return false;
+		if (!CreateMaterial(pGraphicsAPI, model, MaterialList, MaterialFrame, Object->GetTextureSet())) return false;
 
 		// メッシュ
 		std::vector<std::shared_ptr<graphics::CMesh>> MeshList;
@@ -114,7 +113,7 @@ namespace gltf
 		// マテリアルを持っていないのならダミーを渡す
 		if (MaterialList.size() <= 0)
 		{
-			if (!CreateDummyMaterial(pGraphicsAPI, model, MaterialList, createInfo, MeshList)) return false;
+			if (!CreateDummyMaterial(pGraphicsAPI, model, MaterialList, MaterialFrame, MeshList)) return false;
 		}
 
 		// ノード
@@ -174,9 +173,6 @@ namespace gltf
 			Object->AddAnimationClip(Clip);
 		}
 
-		// オブジェクトを生成
-		if (!Object->Create(pGraphicsAPI, DepthVertex, DepthFragment, TextureSet)) return false;
-
 		return true;
 	}
 
@@ -227,7 +223,7 @@ namespace gltf
 	}
 
 	bool CGLTFImporter::CreateMaterial(api::IGraphicsAPI* pGraphicsAPI, const tinygltf::Model& model, std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList,
-		std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, const std::shared_ptr<graphics::CTextureSet>& TextureSet)
+		const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, const std::shared_ptr<graphics::CTextureSet>& TextureSet)
 	{
 		//
 		std::vector<std::shared_ptr<graphics::CTexture>> TextureList(0);
@@ -272,27 +268,17 @@ namespace gltf
 			int occlusionTextureIndex = glTfMaterial.occlusionTexture.index;
 			
 			// マテリアルにシェーダーを設定
-			std::shared_ptr<graphics::CMaterial> material = pGraphicsAPI->CreateMaterial(createInfo);
+			std::shared_ptr<graphics::CMaterial> material = MaterialFrame->CreateMaterial(pGraphicsAPI);
 
 			// UBO
 			{
-				auto UniformBuffer = graphics::CMaterialCreateInfo::CreateUniformBuffer({ graphics::SBindingLayout("UniformBufferObject", 0, false) });
-
 				// UBOの初期値を設定する
-				UniformBuffer->AddData("model", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
-				UniformBuffer->AddData("view", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
-				UniformBuffer->AddData("proj", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
-				UniformBuffer->AddData("lightVPMat", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
-				UniformBuffer->AddData("lightDir", &glm::vec4(0.0f)[0], sizeof(float) * 4, 0);
-				UniformBuffer->AddData("lightColor", &glm::vec4(0.0f)[0], sizeof(float) * 4, 0);
-				UniformBuffer->AddData("cameraPos", &glm::vec4(0.0f)[0], sizeof(float) * 4, 0);
-				UniformBuffer->AddData("baseColorFactor", &glm::vec4(baseColorFactor[0], baseColorFactor[1], baseColorFactor[2], baseColorFactor[3])[0], sizeof(float) * 4, 0);
-				UniformBuffer->AddData("emissiveFactor", &glm::vec4(emissiveFactor[0], emissiveFactor[1], emissiveFactor[2], 0.0f)[0], sizeof(float) * 4, 0);
-				UniformBuffer->AddData("time", &glm::vec1(0.0f)[0], sizeof(float), 0);
-				UniformBuffer->AddData("metallicFactor", &metallicFactor, sizeof(float), 0);
-				UniformBuffer->AddData("roughnessFactor", &roughnessFactor, sizeof(float), 0);
-				UniformBuffer->AddData("normalMapScale", &normalMapScale, sizeof(float), 0);
-				UniformBuffer->AddData("occlusionStrength", &occlusionStrength, sizeof(float), 0);
+				material->ReplacePreloadUniformValue("baseColorFactor", &glm::vec4(baseColorFactor[0], baseColorFactor[1], baseColorFactor[2], baseColorFactor[3])[0], sizeof(float) * 4, 0);
+				material->ReplacePreloadUniformValue("emissiveFactor", &glm::vec4(emissiveFactor[0], emissiveFactor[1], emissiveFactor[2], 0.0f)[0], sizeof(float) * 4, 0);
+				material->ReplacePreloadUniformValue("metallicFactor", &metallicFactor, sizeof(float), 0);
+				material->ReplacePreloadUniformValue("roughnessFactor", &roughnessFactor, sizeof(float), 0);
+				material->ReplacePreloadUniformValue("normalMapScale", &normalMapScale, sizeof(float), 0);
+				material->ReplacePreloadUniformValue("occlusionStrength", &occlusionStrength, sizeof(float), 0);
 
 				// MipCountには反射キューブマップかIBLのSpecularMapの値が入っている(これらは必ずどちらか一方しか使用されないため)
 				float MipCount = 1.0f;
@@ -305,7 +291,7 @@ namespace gltf
 					MipCount = Specular_Tex->GetMipCount();
 				}
 
-				UniformBuffer->AddData("mipCount", &glm::vec1(MipCount)[0], sizeof(float), 0);
+				material->ReplacePreloadUniformValue("mipCount", &glm::vec1(MipCount)[0], sizeof(float), 0);
 
 				int ShadowMapX = 1, ShadowMapY = 1;
 				if (FrameTextureList.size() > 0)
@@ -318,81 +304,46 @@ namespace gltf
 					ShadowMapY = FrameTextureList[0]->GetHeight();
 				}
 
-				UniformBuffer->AddData("ShadowMapX", &glm::vec1(static_cast<float>(ShadowMapX))[0], sizeof(float), 0);
-				UniformBuffer->AddData("ShadowMapY", &glm::vec1(static_cast<float>(ShadowMapY))[0], sizeof(float), 0);
+				material->ReplacePreloadUniformValue("ShadowMapX", &glm::vec1(static_cast<float>(ShadowMapX))[0], sizeof(float), 0);
+				material->ReplacePreloadUniformValue("ShadowMapY", &glm::vec1(static_cast<float>(ShadowMapY))[0], sizeof(float), 0);
 
 				// テクスチャを紐づける
 				{
-					//
 					if (baseColorTextureIndex >= 0 && baseColorTextureIndex < TextureList.size())
 					{
-						material->AddTextureBindingLayout({ "baseColorTexture", 2, 3, baseColorTextureIndex, graphics::ETextureUsage::TEXTURE_USAGE_2D});
-						UniformBuffer->AddData("useBaseColorTexture", &glm::uvec1(1)[0], sizeof(int), 0);
-					}
-					else
-					{
-						material->AddTextureBindingLayout({ "baseColorTexture", 2, 3, -1, graphics::ETextureUsage::TEXTURE_USAGE_2D }); // TextureIndex -1 は EmptyTextureである
-						UniformBuffer->AddData("useBaseColorTexture", &glm::uvec1(0)[0], sizeof(int), 0);
+						material->ReplaceTextureIndex("baseColorTexture", baseColorTextureIndex);
+						material->ReplacePreloadUniformValue("useBaseColorTexture", &glm::uvec1(1)[0], sizeof(int), 0);
 					}
 
-					//
 					if (metallicRoughnessTextureIndex >= 0 && metallicRoughnessTextureIndex < TextureList.size())
 					{
-						material->AddTextureBindingLayout({ "metallicRoughnessTexture", 4, 5, metallicRoughnessTextureIndex, graphics::ETextureUsage::TEXTURE_USAGE_2D });
-						UniformBuffer->AddData("useMetallicRoughnessTexture", &glm::uvec1(1)[0], sizeof(int), 0);
-					}
-					else
-					{
-						material->AddTextureBindingLayout({ "metallicRoughnessTexture", 4, 5, -1, graphics::ETextureUsage::TEXTURE_USAGE_2D }); // TextureIndex -1 は EmptyTextureである
-						UniformBuffer->AddData("useMetallicRoughnessTexture", &glm::uvec1(0)[0], sizeof(int), 0);
+						material->ReplaceTextureIndex("metallicRoughnessTexture", metallicRoughnessTextureIndex);
+						material->ReplacePreloadUniformValue("useMetallicRoughnessTexture", &glm::uvec1(1)[0], sizeof(int), 0);
 					}
 
-					//
 					if (emissiveTextureIndex >= 0 && emissiveTextureIndex < TextureList.size())
 					{
-						material->AddTextureBindingLayout({ "emissiveTexture", 6, 7, emissiveTextureIndex, graphics::ETextureUsage::TEXTURE_USAGE_2D });
-						UniformBuffer->AddData("useEmissiveTexture", &glm::uvec1(1)[0], sizeof(int), 0);
+						material->ReplaceTextureIndex("emissiveTexture", emissiveTextureIndex);
+						material->ReplacePreloadUniformValue("useEmissiveTexture", &glm::uvec1(1)[0], sizeof(int), 0);
 					}
-					else
-					{
-						material->AddTextureBindingLayout({ "emissiveTexture", 6, 7, -1, graphics::ETextureUsage::TEXTURE_USAGE_2D }); // TextureIndex -1 は EmptyTextureである
-						UniformBuffer->AddData("useEmissiveTexture", &glm::uvec1(0)[0], sizeof(int), 0);
-					}
-
-					//
+					
 					if (normalTextureIndex >= 0 && normalTextureIndex < TextureList.size())
 					{
-						material->AddTextureBindingLayout({ "normalTexture", 8, 9, normalTextureIndex, graphics::ETextureUsage::TEXTURE_USAGE_2D });
-						UniformBuffer->AddData("useNormalTexture", &glm::uvec1(1)[0], sizeof(int), 0);
-					}
-					else
-					{
-						material->AddTextureBindingLayout({ "normalTexture", 8, 9, -1, graphics::ETextureUsage::TEXTURE_USAGE_2D }); // TextureIndex -1 は EmptyTextureである
-						UniformBuffer->AddData("useNormalTexture", &glm::uvec1(0)[0], sizeof(int), 0);
+						material->ReplaceTextureIndex("normalTexture", normalTextureIndex);
+						material->ReplacePreloadUniformValue("useNormalTexture", &glm::uvec1(1)[0], sizeof(int), 0);
 					}
 
-					//
 					if (occlusionTextureIndex >= 0 && occlusionTextureIndex < TextureList.size())
 					{
-						material->AddTextureBindingLayout({ "occlusionTexture", 10, 11, occlusionTextureIndex, graphics::ETextureUsage::TEXTURE_USAGE_2D });
-						UniformBuffer->AddData("useOcclusionTexture", &glm::uvec1(1)[0], sizeof(int), 0);
-					}
-					else
-					{
-						material->AddTextureBindingLayout({ "occlusionTexture", 10, 11, -1, graphics::ETextureUsage::TEXTURE_USAGE_2D }); // TextureIndex -1 は EmptyTextureである
-						UniformBuffer->AddData("useOcclusionTexture", &glm::uvec1(0)[0], sizeof(int), 0);
+						material->ReplaceTextureIndex("occlusionTexture", occlusionTextureIndex);
+						material->ReplacePreloadUniformValue("useOcclusionTexture", &glm::uvec1(1)[0], sizeof(int), 0);
 					}
 
 					// CubeMap
 					if (CubeTexList.size() > 0)
 					{
-						material->AddTextureBindingLayout({ "cubemapTexture", 12, 13, 0, graphics::ETextureUsage::TEXTURE_USAGE_CUBE });
-						UniformBuffer->AddData("useCubeMap", &glm::uvec1(1)[0], sizeof(int), 0);
-					}
-					else
-					{
-						material->AddTextureBindingLayout({ "cubemapTexture", 12, 13, -1, graphics::ETextureUsage::TEXTURE_USAGE_CUBE });
-						UniformBuffer->AddData("useCubeMap", &glm::uvec1(0)[0], sizeof(int), 0);
+						material->ReplaceTextureIndex("cubemapTexture", 0);
+						material->ReplacePreloadUniformValue("useCubeMap", &glm::uvec1(1)[0], sizeof(int), 0);
 					}
 
 					// ShadowMap
@@ -404,47 +355,29 @@ namespace gltf
 						// [2] : ???
 
 						// ひとまず末尾から取得
-						material->AddTextureBindingLayout({ "shadowmapTexture", 14, 15, 0, graphics::ETextureUsage::TEXTURE_USAGE_FRAME });
-						UniformBuffer->AddData("useShadowMap", &glm::uvec1(1)[0], sizeof(int), 0);
-					}
-					else
-					{
-						material->AddTextureBindingLayout({ "shadowmapTexture", 14, 15, -1, graphics::ETextureUsage::TEXTURE_USAGE_FRAME });
-						UniformBuffer->AddData("useShadowMap", &glm::uvec1(0)[0], sizeof(int), 0);
+						material->ReplaceTextureIndex("shadowmapTexture", 0);
+						material->ReplacePreloadUniformValue("useShadowMap", &glm::uvec1(1)[0], sizeof(int), 0);
 					}
 
 					// IBL
 					if (Diffuse_Tex && Specular_Tex && GGXLUT_Tex)
 					{
-						material->AddTextureBindingLayout({ "IBL_Diffuse_Texture", 16, 17, 0, graphics::ETextureUsage::TEXTURE_USAGE_IBL_Diffuse });
-						material->AddTextureBindingLayout({ "IBL_Specular_Texture", 18, 19, 0, graphics::ETextureUsage::TEXTURE_USAGE_IBL_Specular });
-						material->AddTextureBindingLayout({ "IBL_GGXLUT_Texture", 20, 21, 0, graphics::ETextureUsage::TEXTURE_USAGE_IBL_GGXLUT });
+						material->ReplaceTextureIndex("IBL_Diffuse_Texture", 0);
+						material->ReplaceTextureIndex("IBL_Specular_Texture", 0);
+						material->ReplaceTextureIndex("IBL_GGXLUT_Texture", 0);
 
-						UniformBuffer->AddData("useIBL", &glm::ivec1(1)[0], sizeof(int), 0);
-					}
-					else
-					{
-						material->AddTextureBindingLayout({ "IBL_Diffuse_Texture", 16, 17, -1, graphics::ETextureUsage::TEXTURE_USAGE_IBL_Diffuse });
-						material->AddTextureBindingLayout({ "IBL_Specular_Texture", 18, 19, -1, graphics::ETextureUsage::TEXTURE_USAGE_IBL_Specular });
-						material->AddTextureBindingLayout({ "IBL_GGXLUT_Texture", 20, 21, -1, graphics::ETextureUsage::TEXTURE_USAGE_IBL_GGXLUT });
-
-						UniformBuffer->AddData("useIBL", &glm::ivec1(0)[0], sizeof(int), 0);
+						material->ReplacePreloadUniformValue("useIBL", &glm::ivec1(1)[0], sizeof(int), 0);
 					}
 				}
 
-				UniformBuffer->AddData("useSkinMeshAnimation", &glm::ivec1(0)[0], sizeof(int), 0);
-				UniformBuffer->AddData("JointIndexOffset", &glm::ivec1(0)[0], sizeof(int), 0);
-				UniformBuffer->AddData("pad1", &glm::ivec1(0)[0], sizeof(int), 0);
-				UniformBuffer->AddData("pad2", &glm::ivec1(0)[0], sizeof(int), 0);
-
-				// マテリアルにUBOを割り当てる
-				material->AddShaderBuffer(UniformBuffer);
+				material->ReplacePreloadUniformValue("useSkinMeshAnimation", &glm::ivec1(0)[0], sizeof(int), 0);
+				material->ReplacePreloadUniformValue("JointIndexOffset", &glm::ivec1(0)[0], sizeof(int), 0);
+				material->ReplacePreloadUniformValue("pad1", &glm::ivec1(0)[0], sizeof(int), 0);
+				material->ReplacePreloadUniformValue("pad2", &glm::ivec1(0)[0], sizeof(int), 0);
 			}
 
 			// SkinMatrix StorageBuffer
 			{
-				auto SSBO = graphics::CMaterialCreateInfo::CreateShaderStorageBuffer({ graphics::SBindingLayout("SkinMatrixBuffer", 1, false) }, graphics::EBufferUpdateType::UPDATE_TYPE_CPU);
-
 				int SkinMatCount = 0;
 				for (const auto& glTFSkin : model.skins) { SkinMatCount += static_cast<int>(glTFSkin.joints.size()); }
 
@@ -453,9 +386,7 @@ namespace gltf
 				std::vector<glm::mat4> SkinMatrixList;
 				SkinMatrixList.resize(SkinMatCount, glm::mat4(0.0f));
 
-				SSBO->AddData("r_SkinMatrixBuffer", &SkinMatrixList[0], static_cast<int>(SkinMatrixList.size()) * sizeof(glm::mat4), 1);
-
-				material->AddShaderBuffer(SSBO);
+				material->ReplacePreloadUniformValue("r_SkinMatrixBuffer", &SkinMatrixList[0], static_cast<int>(SkinMatrixList.size()) * sizeof(glm::mat4), 1);
 			}
 
 			// 登録
@@ -684,85 +615,11 @@ namespace gltf
 	}
 	
 	bool CGLTFImporter::CreateDummyMaterial(api::IGraphicsAPI* pGraphicsAPI, const tinygltf::Model& model, std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList,
-		std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, std::vector<std::shared_ptr<graphics::CMesh>>& MeshList)
+		const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, std::vector<std::shared_ptr<graphics::CMesh>>& MeshList)
 	{
 		// マテリアルにシェーダーを設定
-		std::shared_ptr<graphics::CMaterial> material = pGraphicsAPI->CreateMaterial(createInfo);
-
-		// UBO
-		{
-			auto UniformBuffer = graphics::CMaterialCreateInfo::CreateUniformBuffer({ graphics::SBindingLayout("UniformBufferObject", 0, false) });
-
-			// UBOの初期値を設定する
-			UniformBuffer->AddData("model", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
-			UniformBuffer->AddData("view", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
-			UniformBuffer->AddData("proj", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
-			UniformBuffer->AddData("lightVPMat", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
-			UniformBuffer->AddData("lightDir", &glm::vec4(0.0f)[0], sizeof(float) * 4, 0);
-			UniformBuffer->AddData("lightColor", &glm::vec4(0.0f)[0], sizeof(float) * 4, 0);
-			UniformBuffer->AddData("cameraPos", &glm::vec4(0.0f)[0], sizeof(float) * 4, 0);
-			UniformBuffer->AddData("baseColorFactor", &glm::vec4(1.0f)[0], sizeof(float) * 4, 0);
-			UniformBuffer->AddData("emissiveFactor", &glm::vec4(0.0f)[0], sizeof(float) * 4, 0);
-			UniformBuffer->AddData("time", &glm::vec1(0.0f)[0], sizeof(float), 0);
-			UniformBuffer->AddData("metallicFactor", &glm::vec1(0.5f)[0], sizeof(float), 0);
-			UniformBuffer->AddData("roughnessFactor", &glm::vec1(0.5f)[0], sizeof(float), 0);
-			UniformBuffer->AddData("normalMapScale", &glm::vec1(1.0f)[0], sizeof(float), 0);
-			UniformBuffer->AddData("occlusionStrength", &glm::vec1(1.0f)[0], sizeof(float), 0);
-
-			float MipCount = 1.0f;
-			UniformBuffer->AddData("mipCount", &glm::vec1(MipCount)[0], sizeof(float), 0);
-
-			int ShadowMapX = 1, ShadowMapY = 1;
-			UniformBuffer->AddData("ShadowMapX", &glm::vec1(static_cast<float>(ShadowMapX))[0], sizeof(float), 0);
-			UniformBuffer->AddData("ShadowMapY", &glm::vec1(static_cast<float>(ShadowMapY))[0], sizeof(float), 0);
-
-			// テクスチャを紐づける
-			material->AddTextureBindingLayout({ "baseColorTexture", 2, 3, -1, graphics::ETextureUsage::TEXTURE_USAGE_2D }); // TextureIndex -1 は EmptyTextureである
-			UniformBuffer->AddData("useBaseColorTexture", &glm::uvec1(0)[0], sizeof(int), 0);
-			material->AddTextureBindingLayout({ "metallicRoughnessTexture", 4, 5, -1, graphics::ETextureUsage::TEXTURE_USAGE_2D }); // TextureIndex -1 は EmptyTextureである
-			UniformBuffer->AddData("useMetallicRoughnessTexture", &glm::uvec1(0)[0], sizeof(int), 0);
-			material->AddTextureBindingLayout({ "emissiveTexture", 6, 7, -1, graphics::ETextureUsage::TEXTURE_USAGE_2D }); // TextureIndex -1 は EmptyTextureである
-			UniformBuffer->AddData("useEmissiveTexture", &glm::uvec1(0)[0], sizeof(int), 0);
-			material->AddTextureBindingLayout({ "normalTexture", 8, 9, -1, graphics::ETextureUsage::TEXTURE_USAGE_2D }); // TextureIndex -1 は EmptyTextureである
-			UniformBuffer->AddData("useNormalTexture", &glm::uvec1(0)[0], sizeof(int), 0);
-			material->AddTextureBindingLayout({ "occlusionTexture", 10, 11, -1, graphics::ETextureUsage::TEXTURE_USAGE_2D }); // TextureIndex -1 は EmptyTextureである
-			UniformBuffer->AddData("useOcclusionTexture", &glm::uvec1(0)[0], sizeof(int), 0);
-			material->AddTextureBindingLayout({ "cubemapTexture", 12, 13, -1, graphics::ETextureUsage::TEXTURE_USAGE_CUBE });
-			UniformBuffer->AddData("useCubeMap", &glm::uvec1(0)[0], sizeof(int), 0);
-			material->AddTextureBindingLayout({ "shadowmapTexture", 14, 15, -1, graphics::ETextureUsage::TEXTURE_USAGE_FRAME });
-			UniformBuffer->AddData("useShadowMap", &glm::uvec1(0)[0], sizeof(int), 0);
-			material->AddTextureBindingLayout({ "IBL_Diffuse_Texture", 16, 17, -1, graphics::ETextureUsage::TEXTURE_USAGE_IBL_Diffuse });
-			material->AddTextureBindingLayout({ "IBL_Specular_Texture", 18, 19, -1, graphics::ETextureUsage::TEXTURE_USAGE_IBL_Specular });
-			material->AddTextureBindingLayout({ "IBL_GGXLUT_Texture", 20, 21, -1, graphics::ETextureUsage::TEXTURE_USAGE_IBL_GGXLUT });
-			UniformBuffer->AddData("useIBL", &glm::ivec1(0)[0], sizeof(int), 0);
-			
-			UniformBuffer->AddData("useSkinMeshAnimation", &glm::ivec1(0)[0], sizeof(int), 0);
-			UniformBuffer->AddData("JointIndexOffset", &glm::ivec1(0)[0], sizeof(int), 0);
-			UniformBuffer->AddData("pad1", &glm::ivec1(0)[0], sizeof(int), 0);
-			UniformBuffer->AddData("pad2", &glm::ivec1(0)[0], sizeof(int), 0);
-
-			// マテリアルにUBOを割り当てる
-			material->AddShaderBuffer(UniformBuffer);
-		}
-
-		// SkinMatrix StorageBuffer
-		{
-			auto SSBO = graphics::CMaterialCreateInfo::CreateShaderStorageBuffer({ graphics::SBindingLayout("SkinMatrixBuffer", 1, false) }, graphics::EBufferUpdateType::UPDATE_TYPE_CPU);
-
-			// SkinMatは存在するJointの数だけ用意する必要がある
-			int SkinMatCount = 0;
-			for (const auto& glTFSkin : model.skins) { SkinMatCount += static_cast<int>(glTFSkin.joints.size()); }
-
-			if (SkinMatCount <= 0) SkinMatCount = 1;
-
-			std::vector<glm::mat4> SkinMatrixList;
-			SkinMatrixList.resize(SkinMatCount, glm::mat4(1.0f));
-
-			SSBO->AddData("r_SkinMatrixBuffer", &SkinMatrixList[0], static_cast<int>(SkinMatrixList.size()) * sizeof(glm::mat4), 1);
-
-			material->AddShaderBuffer(SSBO);
-		}
-
+		std::shared_ptr<graphics::CMaterial> material = MaterialFrame->CreateMaterial(pGraphicsAPI);
+		
 		material->SetCullMode(graphics::ECullMode::CULL_NONE);
 
 		MaterialList.push_back(material);

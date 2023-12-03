@@ -6,7 +6,26 @@ namespace graphics
 	CTextureSet::CTextureSet():
 		m_IBL_Diffuse_Tex(nullptr),
 		m_IBL_Specular_Tex(nullptr),
-		m_BL_GGXLUT_Tex(nullptr)
+		m_IBL_GGXLUT_Tex(nullptr)
+	{
+	}
+
+	CTextureSet::CTextureSet(const std::shared_ptr<graphics::CTexture>& Texture) :
+		m_IBL_Diffuse_Tex(nullptr),
+		m_IBL_Specular_Tex(nullptr),
+		m_IBL_GGXLUT_Tex(nullptr)
+	{
+		m_2DTextureList.push_back(Texture);
+	}
+
+	CTextureSet::CTextureSet(const std::vector<std::shared_ptr<graphics::CTexture>>& TextureList, const std::vector<std::shared_ptr<graphics::CTexture>>& CubeMapList, const std::vector<std::shared_ptr<graphics::CTexture>>& FrameTextureList,
+		const std::shared_ptr<graphics::CTexture>& IBL_Diffuse_Tex, const std::shared_ptr<graphics::CTexture>& IBL_Specular_Tex, const std::shared_ptr<graphics::CTexture>& IBL_GGXLUT_Tex):
+		m_2DTextureList(TextureList),
+		m_CubeMapList(CubeMapList),
+		m_FrameTextureList(FrameTextureList),
+		m_IBL_Diffuse_Tex(IBL_Diffuse_Tex),
+		m_IBL_Specular_Tex(IBL_Specular_Tex),
+		m_IBL_GGXLUT_Tex(IBL_GGXLUT_Tex)
 	{
 	}
 
@@ -48,7 +67,7 @@ namespace graphics
 	{
 		m_IBL_Diffuse_Tex = IBL_Diffuse_Tex;
 		m_IBL_Specular_Tex = IBL_Specular_Tex;
-		m_BL_GGXLUT_Tex = IBL_GGXLUT_Tex;
+		m_IBL_GGXLUT_Tex = IBL_GGXLUT_Tex;
 	}
 
 	const std::shared_ptr<graphics::CTexture>& CTextureSet::GetDiffuse_Tex() const
@@ -63,6 +82,6 @@ namespace graphics
 
 	const std::shared_ptr<graphics::CTexture>& CTextureSet::GetGGXLUT_Tex() const
 	{
-		return m_BL_GGXLUT_Tex;
+		return m_IBL_GGXLUT_Tex;
 	}
 }

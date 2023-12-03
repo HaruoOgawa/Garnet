@@ -102,7 +102,6 @@ namespace api
 		return true;
 	}
 
-#ifdef USE_TEXTURE_LOADER
 	bool CVulkanTexture::Create(const std::vector<unsigned char>& pixelData, int pixelSize)
 	{
 		VkFormat ImageFormat = VK_FORMAT_R8G8B8A8_SRGB;
@@ -115,7 +114,7 @@ namespace api
 
 		return true;
 	}
-#endif
+
 	// Vulkanメインロジック /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	bool CVulkanTexture::CreateFrameTextureImage(VkFormat ImageFormat, VkImageUsageFlags Usage)
 	{

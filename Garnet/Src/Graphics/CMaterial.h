@@ -6,24 +6,25 @@
 #include "CShaderBuffer.h"
 #include "CShaderBufferDescriptor.h"
 #include "../GraphicsAPI/CMaterialCreateInfo.h"
-#include "../File/CFile.h"
+#include "../LoadWorker/CFile.h"
 #include "../../Interface/IGraphicsAPI.h"
 #include "STextureBindingLayout.h"
 #include "CTextureSet.h"
 #include "CDrawInfo.h"
 #include "ECullMode.h"
 #include "EBlendType.h"
+
 #include "../Camera/CCamera.h"
 
 namespace camera { class CCamera; }
 namespace projection { class CProjection; }
-namespace graphics { class CDrawInfo; }
 
 namespace graphics
 {
 	class CMaterialCreateInfo;
 	class CShaderBuffer;
-
+	class CMaterialFrame;
+	class CDrawInfo;
 	class CMaterial
 	{
 	protected:
@@ -47,7 +48,7 @@ namespace graphics
 		virtual ~CMaterial() = default;
 
 		virtual bool Create(const std::shared_ptr<graphics::CTextureSet>& TextureSet) = 0;
-		virtual bool CreateDepthMaterial(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<file::CFile>& DepthVertex, const std::shared_ptr<file::CFile>& DepthFragment);
+		virtual bool CreateDepthMaterial(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<graphics::CMaterialFrame>& DepthMF);
 
 		virtual std::shared_ptr<graphics::CMaterial> GetDepthMaterial();
 
@@ -64,6 +65,9 @@ namespace graphics
 
 		virtual void AddShaderBuffer(const std::shared_ptr<CShaderBuffer>& Buffer);
 		virtual void AddTextureBindingLayout(const STextureBindingLayout& Layout);
+		virtual void ReplaceTextureIndex(const std::string& TextureName, int TextureIndex);
+
+		virtual void ReplacePreloadUniformValue(const std::string& Name, const void* Data, int ByteSize, int BindingIndex);
 
 		virtual void SetUniformValue(const std::string Name, const void* Value, int DynamicOffsetNum = -1) = 0;
 

@@ -1,9 +1,11 @@
 #include "CBlurEffect.h"
 #include "../../LoadWorker/CLoadWorker.h"
+#include "../../LoadWorker/CMaterialFrameLoader.h"
+#include "../LoadWorker/CFile.h"
 #include "../Debug/Message/Console.h"
-#include "../File/CFile.h"
 #include "../Interface/IGraphicsAPI.h"
 #include "../Graphics/CTextureSet.h"
+#include "../Graphics/CMaterialFrame.h"
 
 namespace imageeffect
 {
@@ -12,12 +14,9 @@ namespace imageeffect
 
 		m_IsLoaded(false),
 		m_KernelSize(0),
-		m_BlurVertex(std::make_shared<file::CFile>("Resources\\Shaders\\blur" + m_pGraphicsAPI->GetVertexShaderExtension())),
-		m_BlurFrag(std::make_shared<file::CFile>("Resources\\Shaders\\blur" + m_pGraphicsAPI->GetFragmentShaderExtension())),
+		m_BlurMF(std::make_shared<graphics::CMaterialFrame>()),
 		m_ScreenObjX(std::make_shared<object::C3DObject>("BlurX", "")),
-		m_ScreenObjY(std::make_shared<object::C3DObject>("BlurY", "")),
-
-		m_TextureSet(std::make_shared<graphics::CTextureSet>())
+		m_ScreenObjY(std::make_shared<object::C3DObject>("BlurY", ""))
 	{
 	}
 
@@ -40,8 +39,7 @@ namespace imageeffect
 	{
 		if (!CalcGaussianKernel()) return false;
 
-		pLoadWorker->AddFirstLoadResource(m_BlurVertex);
-		pLoadWorker->AddFirstLoadResource(m_BlurFrag);
+		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CMaterialFrameLoader>("Resources\\MaterialFrame\\Blur_MF.json", m_BlurMF));
 
 		if (!m_pGraphicsAPI->CreateRenderPass("BlurX", api::ERenderPassFormat::COLOR_RENDERPASS, glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), 512, 512)) return false;
 		if (!m_pGraphicsAPI->CreateRenderPass("BlurY", api::ERenderPassFormat::COLOR_RENDERPASS, glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), 512, 512)) return false;
@@ -68,9 +66,7 @@ namespace imageeffect
 	{
 		if (!m_IsLoaded) return true;
 
-		if (!m_TextureSet) return true;
-
-		const auto& Tex = m_TextureSet->GetFrameTextureList()[0];
+		const auto& Tex = m_ScreenObjX->GetTextureSet()->GetFrameTextureList()[0];
 		if (!Tex) return true;
 
 		float w = static_cast<float>(Tex->GetWidth());
@@ -155,95 +151,38 @@ namespace imageeffect
 
 	bool CBlurEffect::Load()
 	{
-		// Material
-		std::shared_ptr<graphics::CMaterialCreateInfo> createInfo = std::make_shared<graphics::CMaterialCreateInfo>();
-		createInfo->SetVertexShaderCode(m_BlurVertex->GetData());
-		createInfo->SetFragmentShaderCode(m_BlurFrag->GetData());
-
-		auto MaterialX = m_pGraphicsAPI->CreateMaterial(createInfo);
+		// MaterialX
+		auto MaterialX = m_BlurMF->CreateMaterial(m_pGraphicsAPI);
 		MaterialX->SetEnabledZTest(false);
 		MaterialX->SetCullMode(graphics::ECullMode::CULL_NONE);
 		
-		auto MaterialY = m_pGraphicsAPI->CreateMaterial(createInfo);
+		MaterialX->ReplacePreloadUniformValue("UseBlur", &glm::ivec1(1)[0], sizeof(glm::ivec1), 0);
+		MaterialX->ReplacePreloadUniformValue("KernelSize", &glm::ivec1(m_KernelSize)[0], sizeof(glm::ivec1), 0);
+		MaterialX->ReplacePreloadUniformValue("Direction", &glm::vec2(0.0f)[0], sizeof(glm::vec2), 0);
+
+		{
+			const auto& RenderPass = m_pGraphicsAPI->GetOffScreenRenderPassMap().find("ShadowPass");
+			if (RenderPass != m_pGraphicsAPI->GetOffScreenRenderPassMap().end()) m_ScreenObjX->GetTextureSet()->AddFrameTexture(RenderPass->second->GetFrameTexture());
+			MaterialX->ReplaceTextureIndex("SrcTex", 0);
+		}
+
+		// MaterialX
+		auto MaterialY = m_BlurMF->CreateMaterial(m_pGraphicsAPI);
 		MaterialY->SetEnabledZTest(false);
 		MaterialY->SetCullMode(graphics::ECullMode::CULL_NONE);
 
-		// UBO0
-		{
-			auto UniformBuffer = graphics::CMaterialCreateInfo::CreateUniformBuffer({ graphics::SBindingLayout("UniformBufferObject", 0, false) });
-			
-			UniformBuffer->AddData("UseBlur", &glm::ivec1(1)[0], sizeof(glm::ivec1), 0);
-			UniformBuffer->AddData("KernelSize", &glm::ivec1(m_KernelSize)[0], sizeof(glm::ivec1), 0);
-			UniformBuffer->AddData("Direction", &glm::vec2(0.0f)[0], sizeof(glm::vec2), 0);
-
-			MaterialX->AddShaderBuffer(UniformBuffer);
-		}
-		
-		{
-			auto UniformBuffer = graphics::CMaterialCreateInfo::CreateUniformBuffer({ graphics::SBindingLayout("UniformBufferObject", 0, false) });
-
-			UniformBuffer->AddData("UseBlur", &glm::ivec1(1)[0], sizeof(glm::ivec1), 0);
-			UniformBuffer->AddData("KernelSize", &glm::ivec1(m_KernelSize)[0], sizeof(glm::ivec1), 0);
-			UniformBuffer->AddData("Direction", &glm::vec2(0.0f)[0], sizeof(glm::vec2), 0);
-
-			MaterialY->AddShaderBuffer(UniformBuffer);
-		}
-
-		// Bind Texture
-		{
-			const auto& RenderPass = m_pGraphicsAPI->GetOffScreenRenderPassMap().find("ShadowPass");
-			if (RenderPass != m_pGraphicsAPI->GetOffScreenRenderPassMap().end()) m_TextureSet->AddFrameTexture(RenderPass->second->GetFrameTexture());
-			MaterialX->AddTextureBindingLayout({ "SrcTex", 2, 3, 0, graphics::ETextureUsage::TEXTURE_USAGE_FRAME});
-
-			m_ScreenObjX->AddMaterial(MaterialX);
-		}
+		MaterialY->ReplacePreloadUniformValue("UseBlur", &glm::ivec1(1)[0], sizeof(glm::ivec1), 0);
+		MaterialY->ReplacePreloadUniformValue("KernelSize", &glm::ivec1(m_KernelSize)[0], sizeof(glm::ivec1), 0);
+		MaterialY->ReplacePreloadUniformValue("Direction", &glm::vec2(0.0f)[0], sizeof(glm::vec2), 0);
 
 		{
 			const auto& RenderPass = m_pGraphicsAPI->GetOffScreenRenderPassMap().find("BlurX");
-			if (RenderPass != m_pGraphicsAPI->GetOffScreenRenderPassMap().end()) m_TextureSet->AddFrameTexture(RenderPass->second->GetFrameTexture());
-			MaterialY->AddTextureBindingLayout({ "SrcTex", 2, 3, 1, graphics::ETextureUsage::TEXTURE_USAGE_FRAME });
-
-			m_ScreenObjY->AddMaterial(MaterialY);
+			if (RenderPass != m_pGraphicsAPI->GetOffScreenRenderPassMap().end()) m_ScreenObjY->GetTextureSet()->AddFrameTexture(RenderPass->second->GetFrameTexture());
+			MaterialY->ReplaceTextureIndex("SrcTex", 1);
 		}
 
-		// Mesh
-		{
-			std::shared_ptr<graphics::CMesh> Mesh = std::make_shared<graphics::CMesh>();
-
-			std::shared_ptr<renderer::CRendererCreateInfo> rendererCreateInfo = std::make_shared<renderer::CRendererCreateInfo>();
-			if (!graphics::CPresetPrimitive::CreateBoard(rendererCreateInfo)) return false;
-
-			std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(rendererCreateInfo, 0);
-			Mesh->AddPrimitive(Primitive);
-			m_ScreenObjX->AddMesh(Mesh);
-		}
-
-		{
-			std::shared_ptr<graphics::CMesh> Mesh = std::make_shared<graphics::CMesh>();
-
-			std::shared_ptr<renderer::CRendererCreateInfo> rendererCreateInfo = std::make_shared<renderer::CRendererCreateInfo>();
-			if (!graphics::CPresetPrimitive::CreateBoard(rendererCreateInfo)) return false;
-
-			std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(rendererCreateInfo, 0);
-			Mesh->AddPrimitive(Primitive);
-
-			m_ScreenObjY->AddMesh(Mesh);
-		}
-
-		// Node
-		{
-			std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(0, m_ScreenObjX->GetMeshList(), m_ScreenObjX->GetMaterialList());
-			m_ScreenObjX->AddNode(Node);
-		}
-
-		{
-			std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(0, m_ScreenObjY->GetMeshList(), m_ScreenObjY->GetMaterialList());
-			m_ScreenObjY->AddNode(Node);
-		}
-
-		// Create
-		if (!m_ScreenObjX->Create(m_pGraphicsAPI, nullptr, nullptr, m_TextureSet)) return false;
-		if (!m_ScreenObjY->Create(m_pGraphicsAPI, nullptr, nullptr, m_TextureSet)) return false;
+		if (!object::C3DObject::CreateSimply(m_pGraphicsAPI, m_ScreenObjX, graphics::CPresetPrimitive::CreateBoard(), MaterialX, nullptr)) return false;
+		if (!object::C3DObject::CreateSimply(m_pGraphicsAPI, m_ScreenObjY, graphics::CPresetPrimitive::CreateBoard(), MaterialY, nullptr)) return false;
 
 		return true;
 	}

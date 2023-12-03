@@ -28,10 +28,8 @@ namespace api
 		// Uniform Buffer Object
 		std::vector<GLuint> m_UBOList;
 
-#ifdef USE_TEXTURE_LOADER
 		// Texture
 		std::shared_ptr<COpenGLTexture> m_EmptyTexture;
-#endif
 		std::shared_ptr<graphics::CTextureSet> m_TextureSet;
 	private:
 		// Main Logics

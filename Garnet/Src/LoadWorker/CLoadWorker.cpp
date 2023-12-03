@@ -1,5 +1,5 @@
 #include "CLoadWorker.h"
-#include "../File/CFile.h"
+#include "CFile.h"
 
 namespace resource
 {
@@ -8,8 +8,8 @@ namespace resource
 		m_FirstResourceCount(0),
 		m_Alpha(1.0f),
 		m_LoadingBar(std::make_shared<object::C3DObject>("", "ShadowPass")),
-		m_VertexShader(std::make_shared<file::CFile>("Resources\\Shaders\\loadingbar" + pGraphicsAPI->GetVertexShaderExtension())),
-		m_FragmentShader(std::make_shared<file::CFile>("Resources\\Shaders\\loadingbar" + pGraphicsAPI->GetFragmentShaderExtension()))
+		m_VertexShader(std::make_shared<resource::CFile>("Resources\\Shaders\\loadingbar" + pGraphicsAPI->GetVertexShaderExtension())),
+		m_FragmentShader(std::make_shared<resource::CFile>("Resources\\Shaders\\loadingbar" + pGraphicsAPI->GetFragmentShaderExtension()))
 	{
 		m_VertexShader->Load();
 		m_FragmentShader->Load();
@@ -44,8 +44,8 @@ namespace resource
 
 		// MESH
 		std::shared_ptr<graphics::CMesh> Mesh = std::make_shared<graphics::CMesh>();
-		std::shared_ptr<renderer::CRendererCreateInfo> rendererCreateInfo = std::make_shared<renderer::CRendererCreateInfo>();
-		if (!graphics::CPresetPrimitive::CreateBoard(rendererCreateInfo)) return false;
+		std::shared_ptr<renderer::CRendererCreateInfo> rendererCreateInfo = graphics::CPresetPrimitive::CreateBoard();
+
 		std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(rendererCreateInfo, 0);
 		Mesh->AddPrimitive(Primitive);
 		m_LoadingBar->AddMesh(Mesh);
@@ -55,7 +55,7 @@ namespace resource
 		m_LoadingBar->AddNode(Node);
 
 		// CreateŠÖ”‚ðŽÀs
-		if (!m_LoadingBar->Create(pGraphicsAPI, nullptr, nullptr, nullptr)) return false;
+		if (!m_LoadingBar->Create(pGraphicsAPI, nullptr)) return false;
 
 		return true;
 	}
@@ -93,6 +93,8 @@ namespace resource
 		{
 			for (auto& Resource : m_FirstLoadResourceList)
 			{
+				if (!Resource->Update(pGraphicsAPI)) return false;
+
 				switch (Resource->GetStatus())
 				{
 				case resource::ELoadStatus::None:
@@ -127,6 +129,7 @@ namespace resource
 					return true;
 
 				case resource::ELoadStatus::Loading:
+					if (!Resource->Update(pGraphicsAPI)) return false;
 					return true;
 
 				case resource::ELoadStatus::Loaded:

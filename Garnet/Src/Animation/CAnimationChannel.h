@@ -1,4 +1,5 @@
 #pragma once
+#ifdef USE_ANIMATION
 
 #include <string>
 #include <memory>
@@ -35,3 +36,5 @@ namespace animation
 		bool Update(const std::vector<float>& Value);
 	};
 }
+
+#endif // USE_ANIMATION

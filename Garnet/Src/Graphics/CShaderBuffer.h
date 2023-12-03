@@ -7,6 +7,7 @@
 #include <map>
 #include <memory>
 #include "SBindingLayout.h"
+#include "EBufferUpdateTypeh.h"
 
 namespace graphics
 {
@@ -18,13 +19,6 @@ namespace graphics
 		bool IsShared = false;
 		int BufferIndex = -1;
 		std::shared_ptr<CMaterial> SharedBufferMaterial = nullptr;
-	};
-
-	// ShaderBuffer‚Éƒf[ƒ^‚ğ‘‚«‚Ş–ğŠ„‚ğ’S‚Á‚Ä‚¢‚é‚Ì‚ªCPU‚È‚Ì‚©GPU‚È‚Ì‚©
-	enum class EBufferUpdateType
-	{
-		UPDATE_TYPE_CPU,
-		UPDATE_TYPE_GPU,
 	};
 
 	class CShaderBuffer : public IBuffer
@@ -43,6 +37,8 @@ namespace graphics
 		virtual ~CShaderBuffer();
 
 		virtual void AddData(const std::string& Name, const void* Data, int ByteSize, int BindingIndex) override;
+		virtual void ReplaceData(const std::string& SrcName, const void* SrcData, int SrcByteSize, int BindingIndex);
+
 		virtual void SetData(const std::string& Name, const void* Data, int ByteSize) override;
 		virtual const std::vector<unsigned char>& GetData() const override;
 

@@ -1,3 +1,5 @@
+#ifdef USE_ANIMATION
+
 #include "CJoint.h"
 
 namespace animation
@@ -38,3 +40,5 @@ namespace animation
 		m_ParentBoneName = BoneName;
 	}
 }
+
+#endif // USE_ANIMATION

@@ -1,5 +1,7 @@
 #pragma once
 
+#ifdef USE_FBX
+
 #include <vector>
 #include <string>
 #include <stdio.h>
@@ -42,3 +44,5 @@ namespace fbx
 
 	};
 }
+
+#endif

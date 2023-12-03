@@ -1,3 +1,5 @@
+#ifdef USE_ANIMATION
+
 #include "CAnimationClip.h"
 
 namespace animation
@@ -113,3 +115,5 @@ namespace animation
 		return m_CurrentTime;
 	}
 }
+
+#endif // USE_ANIMATION

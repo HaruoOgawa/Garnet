@@ -147,7 +147,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='CompGL|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -390,9 +390,9 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;USE_VULKAN;USE_TEXTURE_LOADER;USE_GLTF;USE_VIEWER_CAMERA;USE_INPUT_SYSTEM;USE_GPGPU;USE_FBX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;USE_VULKAN;USE_TEXTURE_LOADER;USE_GLTF;USE_VIEWER_CAMERA;USE_INPUT_SYSTEM;USE_GPGPU;USE_FBX;USE_ANIMATION;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)src\Library\glm;$(ProjectDir)src\Library\GLFW\include;$(ProjectDir)src\Library\Vulkan\include;$(ProjectDir)src\Library\tinygltf\;$(ProjectDir)Src\Library\FBX-SDK\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src\Library\glm;$(ProjectDir)Src\Library\json;$(ProjectDir)src\Library\GLFW\include;$(ProjectDir)src\Library\Vulkan\include;$(ProjectDir)src\Library\tinygltf\;$(ProjectDir)Src\Library\FBX-SDK\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
@@ -415,9 +415,9 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;USE_OPENGL;USE_TEXTURE_LOADER;USE_GLTF;USE_VIEWER_CAMERA;USE_INPUT_SYSTEM;USE_GPGPU;USE_FBX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;USE_OPENGL;USE_TEXTURE_LOADER;USE_GLTF;USE_VIEWER_CAMERA;USE_INPUT_SYSTEM;USE_GPGPU;USE_FBX;USE_ANIMATION;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)src\Library\glm;$(ProjectDir)src\Library\tinygltf\;$(ProjectDir)Src\Library\FBX-SDK\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src\Library\glm;$(ProjectDir)Src\Library\json;$(ProjectDir)src\Library\tinygltf\;$(ProjectDir)Src\Library\FBX-SDK\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
@@ -438,9 +438,9 @@ xcopy Resources $(OutDir)Resources /y /s /i</Command>
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;USE_WEBGPU;USE_WebGPUNative;USE_TEXTURE_LOADER;USE_GLTF;USE_VIEWER_CAMERA;USE_INPUT_SYSTEM;USE_GPGPU;USE_FBX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;USE_WEBGPU;USE_WebGPUNative;USE_TEXTURE_LOADER;USE_GLTF;USE_VIEWER_CAMERA;USE_INPUT_SYSTEM;USE_GPGPU;USE_FBX;USE_ANIMATION;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)src\Library\glm;$(ProjectDir)src\Library\GLFW\include;$(ProjectDir)src\Library\tinygltf\;$(ProjectDir)src\Library\glfw3webgpu;//$(ProjectDir)Src\Library\DawnLib\include;//$(ProjectDir)Src\Library\DawnLib\src;$(ProjectDir)Src\Library\WebGPU;$(ProjectDir)Src\Library\FBX-SDK\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src\Library\glm;$(ProjectDir)Src\Library\json;$(ProjectDir)src\Library\GLFW\include;$(ProjectDir)src\Library\tinygltf\;$(ProjectDir)src\Library\glfw3webgpu;//$(ProjectDir)Src\Library\DawnLib\include;//$(ProjectDir)Src\Library\DawnLib\src;$(ProjectDir)Src\Library\WebGPU;$(ProjectDir)Src\Library\FBX-SDK\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
@@ -467,7 +467,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions);USE_VULKAN;USE_TEXTURE_LOADER;USE_GLTF;USE_VIEWER_CAMERA;USE_INPUT_SYSTEM;USE_GPGPU</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)src\Library\glm;$(ProjectDir)src\Library\GLFW\include;$(ProjectDir)src\Library\Vulkan\include;$(ProjectDir)src\Library\tinygltf\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src\Library\glm;$(ProjectDir)Src\Library\json;$(ProjectDir)src\Library\GLFW\include;$(ProjectDir)src\Library\Vulkan\include;$(ProjectDir)src\Library\tinygltf\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -493,9 +493,9 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;USE_OPENGL;USE_GPGPU</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;USE_OPENGL</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)src\Library\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src\Library\glm;$(ProjectDir)Src\Library\json;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -520,9 +520,9 @@ del $(OutDir)Garnet.pdb</Command>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;USE_OPENGL;USE_GPGPU</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;USE_OPENGL</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)src\Library\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src\Library\glm;$(ProjectDir)Src\Library\json;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -551,7 +551,7 @@ call $(ProjectDir)compress_tools\squishy-x64 -i "$(OutDir)Garnet.exe" -o "$(OutD
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;USE_WEBGPU;%(PreprocessorDefinitions);USE_TEXTURE_LOADER;USE_GLTF;USE_VIEWER_CAMERA;USE_INPUT_SYSTEM;USE_GPGPU</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)src\Library\glm;$(ProjectDir)src\Library\GLFW\include;$(ProjectDir)src\Library\glfw3webgpu;$(ProjectDir)src\Library\DawnLib\include;$(ProjectDir)Src\Library\dawn\include;$(ProjectDir)src\Library\tinygltf\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src\Library\glm;$(ProjectDir)Src\Library\json;$(ProjectDir)src\Library\GLFW\include;$(ProjectDir)src\Library\glfw3webgpu;$(ProjectDir)src\Library\DawnLib\include;$(ProjectDir)Src\Library\dawn\include;$(ProjectDir)src\Library\tinygltf\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -574,12 +574,17 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Src\LoadWorker\C3DObjectLoader.h" />
+    <ClInclude Include="Src\LoadWorker\CTextureLoader.h" />
+    <ClInclude Include="Src\Graphics\EBufferUpdateTypeh.h" />
+    <ClInclude Include="Src\Graphics\SBufferValueLayout.h" />
+    <ClInclude Include="Src\LoadWorker\CMaterialFrameLoader.h" />
+    <ClInclude Include="Src\Graphics\CMaterialFrame.h" />
     <ClInclude Include="Src\FBX\CFBXMomoryStream.h" />
     <ClInclude Include="Src\Animation\CBoneNameProvider.h" />
     <ClInclude Include="Src\Animation\EHumanoidBones.h" />
     <ClInclude Include="Src\FBX\CFBXStream.h" />
     <ClInclude Include="Src\Animation\EAnimationTarget.h" />
-    <ClInclude Include="Src\Object\C3DObjectImporter.h" />
     <ClInclude Include="Src\FBX\CFBXImporter.h" />
     <ClInclude Include="Src\Animation\CJoint.h" />
     <ClInclude Include="Src\Animation\CSkin.h" />
@@ -624,6 +629,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClInclude Include="Src\Library\tinygltf\tiny_gltf.h" />
     <ClInclude Include="Src\LoadWorker\ELoadStatus.h" />
     <ClInclude Include="Src\Math\CMath.h" />
+    <ClInclude Include="Src\Object\E3DObjectType.h" />
     <ClInclude Include="Src\Projection\CProjection.h" />
     <ClInclude Include="Src\Camera\CCamera.h" />
     <ClInclude Include="Src\GraphicsAPI\WebGPU\CWebGPUMaterial.h" />
@@ -934,7 +940,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClInclude Include="src\Library\WebGPU\x86\webgpu.h" />
     <ClInclude Include="src\Library\WebGPU\x86\wgpu.h" />
     <ClInclude Include="Src\Scene\CScriptScene.h" />
-    <ClInclude Include="Src\File\CFile.h" />
+    <ClInclude Include="Src\LoadWorker\CFile.h" />
     <ClInclude Include="Src\Graphics\CMaterial.h" />
     <ClInclude Include="Src\Graphics\CPrimitive.h" />
     <ClInclude Include="Src\Graphics\CMesh.h" />
@@ -954,10 +960,13 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClInclude Include="Src\Interface\IRenderer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\LoadWorker\C3DObjectLoader.cpp" />
+    <ClCompile Include="Src\LoadWorker\CTextureLoader.cpp" />
+    <ClCompile Include="Src\LoadWorker\CMaterialFrameLoader.cpp" />
+    <ClCompile Include="Src\Graphics\CMaterialFrame.cpp" />
     <ClCompile Include="Src\FBX\CFBXMomoryStream.cpp" />
     <ClCompile Include="Src\Animation\CBoneNameProvider.cpp" />
     <ClCompile Include="Src\FBX\CFBXStream.cpp" />
-    <ClCompile Include="Src\Object\C3DObjectImporter.cpp" />
     <ClCompile Include="Src\FBX\CFBXImporter.cpp" />
     <ClCompile Include="Src\Animation\CJoint.cpp" />
     <ClCompile Include="Src\Animation\CSkin.cpp" />
@@ -1000,7 +1009,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClCompile Include="Src\Library\glfw3webgpu\glfw3webgpu.c" />
     <ClCompile Include="Src\Library\glm\glm\detail\glm.cpp" />
     <ClCompile Include="Src\Scene\CScriptScene.cpp" />
-    <ClCompile Include="Src\File\CFile.cpp" />
+    <ClCompile Include="Src\LoadWorker\CFile.cpp" />
     <ClCompile Include="Src\Graphics\CMaterial.cpp" />
     <ClCompile Include="Src\Graphics\CPrimitive.cpp" />
     <ClCompile Include="Src\Graphics\CMesh.cpp" />
@@ -1019,6 +1028,13 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
   <ItemGroup>
     <None Include="CMakeBuild\Garnet_front.js" />
     <None Include="CMakeBuild\index.html" />
+    <None Include="Resources\MaterialFrame\Blur_MF.json" />
+    <None Include="Resources\MaterialFrame\Depth_MF.json" />
+    <None Include="Resources\MaterialFrame\PBR_MF.json" />
+    <None Include="Resources\MaterialFrame\Sample_MF.json" />
+    <None Include="Resources\MaterialFrame\SimpleTexture_MF.json" />
+    <None Include="Resources\Shaders\sample.frag" />
+    <None Include="Resources\Shaders\sample.vert" />
     <None Include="Src\Library\glm\glm\detail\func_common.inl" />
     <None Include="Src\Library\glm\glm\detail\func_common_simd.inl" />
     <None Include="Src\Library\glm\glm\detail\func_exponential.inl" />

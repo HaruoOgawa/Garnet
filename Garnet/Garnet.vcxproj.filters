@@ -66,7 +66,7 @@
     <ClInclude Include="Src\Graphics\CMaterial.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Src\File\CFile.h">
+    <ClInclude Include="Src\LoadWorker\CFile.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Src\Scene\CScriptScene.h">
@@ -1131,9 +1131,6 @@
     <ClInclude Include="Src\FBX\CFBXImporter.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Src\Object\C3DObjectImporter.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="Src\Animation\EAnimationTarget.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
@@ -1147,6 +1144,27 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Src\FBX\CFBXMomoryStream.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Graphics\CMaterialFrame.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\LoadWorker\CMaterialFrameLoader.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Graphics\SBufferValueLayout.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Graphics\EBufferUpdateTypeh.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\LoadWorker\CTextureLoader.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\LoadWorker\C3DObjectLoader.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Object\E3DObjectType.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
@@ -1193,7 +1211,7 @@
     <ClCompile Include="Src\Graphics\CMaterial.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Src\File\CFile.cpp">
+    <ClCompile Include="Src\LoadWorker\CFile.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Src\Scene\CScriptScene.cpp">
@@ -1322,9 +1340,6 @@
     <ClCompile Include="Src\FBX\CFBXImporter.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Object\C3DObjectImporter.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="Src\FBX\CFBXStream.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
@@ -1332,6 +1347,18 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Src\FBX\CFBXMomoryStream.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Graphics\CMaterialFrame.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\LoadWorker\CMaterialFrameLoader.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\LoadWorker\CTextureLoader.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\LoadWorker\C3DObjectLoader.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1757,5 +1784,12 @@
     </None>
     <None Include="WebRelease\Resources\Shaders\frag.spv" />
     <None Include="WebRelease\Resources\Shaders\vert.spv" />
+    <None Include="Resources\MaterialFrame\PBR_MF.json" />
+    <None Include="Resources\MaterialFrame\Sample_MF.json" />
+    <None Include="Resources\Shaders\sample.vert" />
+    <None Include="Resources\Shaders\sample.frag" />
+    <None Include="Resources\MaterialFrame\SimpleTexture_MF.json" />
+    <None Include="Resources\MaterialFrame\Depth_MF.json" />
+    <None Include="Resources\MaterialFrame\Blur_MF.json" />
   </ItemGroup>
 </Project>

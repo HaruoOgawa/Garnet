@@ -1,87 +1,61 @@
 #include "CScriptScene.h"
-#include "../../LoadWorker/CLoadWorker.h"
-#include "../Object/C3DObject.h"
-#include "../File/CFile.h"
+
+#include "../LoadWorker/CLoadWorker.h"
+#include "../LoadWorker/CFile.h"
+#include "../LoadWorker/CMaterialFrameLoader.h"
+#include "../LoadWorker/CTextureLoader.h"
+#include "../LoadWorker/C3DObjectLoader.h"
+
 #include "../Debug/Message/Console.h"
-#include "../GLTF/CGLTFImporter.h"
-#include "../FBX/CFBXImporter.h"
-#include <glm/glm.hpp>
-#include "../Graphics/CDrawInfo.h"
-#include "../Camera/CCamera.h"
+
+#include "../Object/C3DObject.h"
+
+#include "../Graphics/CMaterialFrame.h"
 
 namespace scene
 {
 	CScriptScene::CScriptScene(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker):
+		m_SampleMF(std::make_shared<graphics::CMaterialFrame>()),
+		m_PBRMF(std::make_shared<graphics::CMaterialFrame>()),
+		m_SimpleTextureMF(std::make_shared<graphics::CMaterialFrame>()),
+		m_DepthMF(std::make_shared<graphics::CMaterialFrame>()),
+
+		m_MfTestObject(std::make_shared<object::C3DObject>("", "ShadowPass")),
+
 		m_glTFObject(std::make_shared<object::C3DObject>("", "ShadowPass")),
 		m_BrainStemDObject(std::make_shared<object::C3DObject>("", "ShadowPass")),
 		m_VRMObject(std::make_shared<object::C3DObject>("", "ShadowPass")),
+
+		m_FbxAnimation(std::make_shared<object::C3DObject>("", "ShadowPass")),
 		m_FbxObject(std::make_shared<object::C3DObject>("", "ShadowPass")),
-		//m_glTFData(std::make_shared<file::CFile>("Resources\\Models\\MetalRoughSpheresNoTextures\\glTF-Binary\\MetalRoughSpheresNoTextures.glb")),
-		//m_glTFData(std::make_shared<file::CFile>("Resources\\Models\\Sponza\\glTF\\Sponza.glb")),
-		//m_glTFData(std::make_shared<file::CFile>("Resources\\Models\\DamagedHelmet\\glTF-Binary\\DamagedHelmet.glb")),
-		//m_glTFData(std::make_shared<file::CFile>("Resources\\Models\\SimpleAnimation\\SimpleAnimation.gltf")),
-		//m_glTFData(std::make_shared<file::CFile>("Resources\\Models\\SimpleAnimation\\Triangle_Linear_Anim_Test.gltf")),
-		//m_glTFData(std::make_shared<file::CFile>("Resources\\Models\\SimpleAnimation\\CubeiSplineTest.gltf")),
-		//m_glTFData(std::make_shared<file::CFile>("Resources\\Models\\SimpleMorphTarget\\SimpleMorphTarget.gltf")),
-		//m_glTFData(std::make_shared<file::CFile>("Resources\\Models\\SimpleSkin\\SimpleSkin.gltf")),
-		//m_glTFData(std::make_shared<file::CFile>("Resources\\Models\\RiggedSimple\\glTF-Binary\\RiggedSimple.glb")),
-		//m_glTFData(std::make_shared<file::CFile>("Resources\\Models\\RiggedFigure\\glTF-Binary\\RiggedFigure.glb")),
-		//m_glTFData(std::make_shared<file::CFile>("Resources\\Models\\BrainStem\\glTF-Binary\\BrainStem.glb")),
-		m_glTFData(std::make_shared<file::CFile>("Resources\\Models\\CesiumMan\\glTF-Binary\\CesiumMan.glb")),
-		//m_glTFData(std::make_shared<file::CFile>("Resources\\Models\\AnimatedCube\\glTF\\AnimatedCube.gltf")),
-
-		m_BrainStemData(std::make_shared<file::CFile>("Resources\\Models\\BrainStem\\glTF-Binary\\BrainStem.glb")),
-		m_VRMData(std::make_shared<file::CFile>("Resources\\Models\\Alicia\\VRM\\AliciaSolid.vrm")),
-
-		//m_FbxAnimationData(std::make_shared<file::CFile>("Resources\\Motions\\Walking.fbx")),
-		m_FbxAnimationData(std::make_shared<file::CFile>("Resources\\Motions\\Walking_WithSkin.fbx")),
-		m_FbxData(std::make_shared<file::CFile>("Resources\\Motions\\Walking_WithSkin.fbx")),
 
 		m_Background(std::make_shared<object::C3DObject>("", "ShadowPass")),
 		m_DebugSphere(std::make_shared<object::C3DObject>("", "ShadowPass")),
 
-		m_IBL_Skybox(std::make_shared<file::CFile>("Resources\\IBL\\output_skybox.hdr")),
-		m_IBL_DiffuseEnvMap(std::make_shared<file::CFile>("Resources\\IBL\\output_iem.hdr")),
-		m_IBL_SpecularEnvMap(std::make_shared<file::CFile>("Resources\\IBL\\output_pmrem.hdr")),
-		m_IBL_GGX_LUT(std::make_shared<file::CFile>("Resources\\Textures\\ggx_lut.jpg")),
-
-		m_Cube0(std::make_shared<file::CFile>("Resources\\Cubemaps\\environment\\environment_back_0.jpg")),
-		m_Cube1(std::make_shared<file::CFile>("Resources\\Cubemaps\\environment\\environment_bottom_0.jpg")),
-		m_Cube2(std::make_shared<file::CFile>("Resources\\Cubemaps\\environment\\environment_front_0.jpg")),
-		m_Cube3(std::make_shared<file::CFile>("Resources\\Cubemaps\\environment\\environment_left_0.jpg")),
-		m_Cube4(std::make_shared<file::CFile>("Resources\\Cubemaps\\environment\\environment_right_0.jpg")),
-		m_Cube5(std::make_shared<file::CFile>("Resources\\Cubemaps\\environment\\environment_top_0.jpg")),
-
-		m_DepthVertex(std::make_shared<file::CFile>("Resources\\Shaders\\depth" + pGraphicsAPI->GetVertexShaderExtension())),
-		m_DepthFragment(std::make_shared<file::CFile>("Resources\\Shaders\\depth" + pGraphicsAPI->GetFragmentShaderExtension())),
-
-		m_VertexShader(std::make_shared<file::CFile>("Resources\\Shaders\\pbr" + pGraphicsAPI->GetVertexShaderExtension())),
-		m_FragmentShader(std::make_shared<file::CFile>("Resources\\Shaders\\pbr" + pGraphicsAPI->GetFragmentShaderExtension())),
-		m_MinimumVert(std::make_shared<file::CFile>("Resources\\Shaders\\minimum" + pGraphicsAPI->GetVertexShaderExtension())),
-		m_TextureFrag(std::make_shared<file::CFile>("Resources\\Shaders\\unlit" + pGraphicsAPI->GetFragmentShaderExtension())),
+		m_IBL_Skybox_Texture(pGraphicsAPI->CreateTexture(false)),
+		m_IBL_DiffuseEnvMap_Texture(pGraphicsAPI->CreateTexture(false)),
+		m_IBL_SpecularEnvMap_Texture(pGraphicsAPI->CreateTexture(false)),
+		m_IBL_GGX_LUT_Texture(pGraphicsAPI->CreateTexture(false)),
+		m_Cube_Texture(pGraphicsAPI->CreateTexture(false)),
 
 		m_IsLoaded(false)
 	{
-		pLoadWorker->AddFirstLoadResource(m_FbxAnimationData);
-		pLoadWorker->AddFirstLoadResource(m_DepthVertex);
-		pLoadWorker->AddFirstLoadResource(m_DepthFragment);
-		pLoadWorker->AddFirstLoadResource(m_glTFData);
-		pLoadWorker->AddFirstLoadResource(m_BrainStemData);
-		pLoadWorker->AddFirstLoadResource(m_VRMData);
-		pLoadWorker->AddFirstLoadResource(m_IBL_Skybox);
-		pLoadWorker->AddFirstLoadResource(m_IBL_DiffuseEnvMap);
-		pLoadWorker->AddFirstLoadResource(m_IBL_SpecularEnvMap);
-		pLoadWorker->AddFirstLoadResource(m_IBL_GGX_LUT);
-		pLoadWorker->AddFirstLoadResource(m_VertexShader);
-		pLoadWorker->AddFirstLoadResource(m_FragmentShader);
-		pLoadWorker->AddFirstLoadResource(m_MinimumVert);
-		pLoadWorker->AddFirstLoadResource(m_TextureFrag);
-		pLoadWorker->AddFirstLoadResource(m_Cube0);
-		pLoadWorker->AddFirstLoadResource(m_Cube1);
-		pLoadWorker->AddFirstLoadResource(m_Cube2);
-		pLoadWorker->AddFirstLoadResource(m_Cube3);
-		pLoadWorker->AddFirstLoadResource(m_Cube4);
-		pLoadWorker->AddFirstLoadResource(m_Cube5);
+		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CMaterialFrameLoader>("Resources\\MaterialFrame\\Sample_MF.json", m_SampleMF));
+		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CMaterialFrameLoader>("Resources\\MaterialFrame\\PBR_MF.json", m_PBRMF));
+		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CMaterialFrameLoader>("Resources\\MaterialFrame\\SimpleTexture_MF.json", m_SimpleTextureMF));
+		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CMaterialFrameLoader>("Resources\\MaterialFrame\\Depth_MF.json", m_DepthMF));
+		
+		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Motions\\Walking_WithSkin.fbx", m_FbxObject, "", "ShadowPass"));
+		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Motions\\Walking.fbx", m_FbxAnimation, "", "ShadowPass"));
+		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Models\\CesiumMan\\glTF-Binary\\CesiumMan.glb", m_glTFObject, "", "ShadowPass"));
+		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Models\\BrainStem\\glTF-Binary\\BrainStem.glb", m_BrainStemDObject, "", "ShadowPass"));
+		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Models\\Alicia\\VRM\\AliciaSolid.vrm", m_VRMObject, "", "ShadowPass"));
+		
+		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CTextureLoader>(pGraphicsAPI, std::vector<std::string>({ "Resources\\IBL\\output_skybox.hdr" }), m_IBL_Skybox_Texture));
+		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CTextureLoader>(pGraphicsAPI, std::vector<std::string>({ "Resources\\IBL\\output_iem.hdr" }), m_IBL_DiffuseEnvMap_Texture));
+		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CTextureLoader>(pGraphicsAPI, std::vector<std::string>({ "Resources\\IBL\\output_pmrem.hdr" }), m_IBL_SpecularEnvMap_Texture));
+		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CTextureLoader>(pGraphicsAPI, std::vector<std::string>({ "Resources\\Textures\\ggx_lut.jpg" }), m_IBL_GGX_LUT_Texture));
+		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CTextureLoader>(pGraphicsAPI, std::vector<std::string>({ "Resources\\Cubemaps\\environment\\environment_back_0.jpg", "Resources\\Cubemaps\\environment\\environment_bottom_0.jpg", "Resources\\Cubemaps\\environment\\environment_front_0.jpg", "Resources\\Cubemaps\\environment\\environment_left_0.jpg", "Resources\\Cubemaps\\environment\\environment_right_0.jpg", "Resources\\Cubemaps\\environment\\environment_top_0.jpg" }), m_Cube_Texture));
 	}
 
 	CScriptScene::~CScriptScene()
@@ -91,269 +65,102 @@ namespace scene
 
 	bool CScriptScene::Load(api::IGraphicsAPI* pGraphicsAPI)
 	{
-		// Cubemap
-		std::vector<std::vector<unsigned char>> CubeDataList;
-		CubeDataList.push_back(m_Cube0->GetData());
-		CubeDataList.push_back(m_Cube1->GetData());
-		CubeDataList.push_back(m_Cube2->GetData());
-		CubeDataList.push_back(m_Cube3->GetData());
-		CubeDataList.push_back(m_Cube4->GetData());
-		CubeDataList.push_back(m_Cube5->GetData());
-
-		auto CubeTex = pGraphicsAPI->CreateTexture(true);
-		if (!CubeTex->Create(CubeDataList)) return false;
-
-		// IBL
-		auto IBL_Skybox_Tex = pGraphicsAPI->CreateTexture(false);
-		if (!IBL_Skybox_Tex->Create(m_IBL_Skybox->GetData())) return false;
-		
-		auto IBL_Diffuse_Tex = pGraphicsAPI->CreateTexture(false);
-		if (!IBL_Diffuse_Tex->Create(m_IBL_DiffuseEnvMap->GetData())) return false;
-
-		auto IBL_Specular_Tex = pGraphicsAPI->CreateTexture(false);
-		if (!IBL_Specular_Tex->Create(m_IBL_SpecularEnvMap->GetData())) return false;
-
-		auto IBL_GGXLUT_Tex = pGraphicsAPI->CreateTexture(false);
-		if (!IBL_GGXLUT_Tex->Create(m_IBL_GGX_LUT->GetData())) return false;
-
 		// FBX Humanoid Animation Clip
 		std::vector<std::shared_ptr<animation::CAnimationClip>> AnimationClipList;
 		{
-			if (!fbx::CFBXImporter::ImportFBXAnimation(pGraphicsAPI, "Resources\\Motions\\Walking.fbx", AnimationClipList)) return false;
+			if (!m_FbxAnimation->CreateFromMemory(pGraphicsAPI, nullptr, nullptr, object::E3DObjectType::Fbx)) return false;
+			AnimationClipList = m_FbxAnimation->GetAnimationClipList();
 		}
 
 		// glTFObject
 		{
-			// MaterialInto
-			std::shared_ptr<graphics::CMaterialCreateInfo> createInfo = std::make_shared<graphics::CMaterialCreateInfo>();
-			createInfo->SetVertexShaderCode(m_VertexShader->GetData());
-			createInfo->SetFragmentShaderCode(m_FragmentShader->GetData());
+			m_glTFObject->GetTextureSet()->AddCubeMap(m_Cube_Texture);
+			for(const auto& FrameTexture : m_FrameTextureList) { m_glTFObject->GetTextureSet()->AddFrameTexture(FrameTexture); }
+			m_glTFObject->GetTextureSet()->AddIBLTexture(m_IBL_DiffuseEnvMap_Texture, m_IBL_SpecularEnvMap_Texture, m_IBL_GGX_LUT_Texture);
 
-			// TextureSet
-			std::shared_ptr<graphics::CTextureSet> TextureSet = std::make_shared<graphics::CTextureSet>();
-			TextureSet->AddCubeMap(CubeTex);
-			for(const auto& FrameTexture : m_FrameTextureList) { TextureSet->AddFrameTexture(FrameTexture); }
-			TextureSet->AddIBLTexture(IBL_Diffuse_Tex, IBL_Specular_Tex, IBL_GGXLUT_Tex);
+			if (!m_glTFObject->CreateFromMemory(pGraphicsAPI, m_PBRMF, m_DepthMF, object::E3DObjectType::glTF)) return false;
 
-			// 再生するアニメーションクリップを指定する
 			m_glTFObject->SetPlayClipIndex(0);
-
 			m_glTFObject->SetPos(glm::vec3(2.0f, 0.0f, 0.0f));
-
-			// Import
-			//if (!gltf::CGLTFImporter::ImportFromString(pGraphicsAPI, m_glTFData->GetData(), "Resources\\Models\\AnimatedCube\\glTF\\", m_glTFObject, createInfo, TextureSet, m_DepthVertex, m_DepthFragment)) return false;
-			//if (!gltf::CGLTFImporter::ImportFromString(pGraphicsAPI, m_glTFData->GetData(), "Resources\\Models\\SimpleSkin\\", m_glTFObject, createInfo, TextureSet, m_DepthVertex, m_DepthFragment)) return false;
-			//if (!gltf::CGLTFImporter::ImportFromString(pGraphicsAPI, m_glTFData->GetData(), "Resources\\Models\\SimpleMorphTarget\\", m_glTFObject, createInfo, TextureSet, m_DepthVertex, m_DepthFragment)) return false;
-			//if (!gltf::CGLTFImporter::ImportFromString(pGraphicsAPI, m_glTFData->GetData(), "Resources\\Models\\SimpleAnimation\\", m_glTFObject, createInfo, TextureSet, m_DepthVertex, m_DepthFragment)) return false;
-			if (!gltf::CGLTFImporter::ImportFromMemory(pGraphicsAPI, m_glTFData->GetData(), m_glTFObject, createInfo, TextureSet, m_DepthVertex, m_DepthFragment)) return false;
 		}
 		
 		{
-			// MaterialInto
-			std::shared_ptr<graphics::CMaterialCreateInfo> createInfo = std::make_shared<graphics::CMaterialCreateInfo>();
-			createInfo->SetVertexShaderCode(m_VertexShader->GetData());
-			createInfo->SetFragmentShaderCode(m_FragmentShader->GetData());
+			m_BrainStemDObject->GetTextureSet()->AddCubeMap(m_Cube_Texture);
+			for(const auto& FrameTexture : m_FrameTextureList) { m_BrainStemDObject->GetTextureSet()->AddFrameTexture(FrameTexture); }
+			m_BrainStemDObject->GetTextureSet()->AddIBLTexture(m_IBL_DiffuseEnvMap_Texture, m_IBL_SpecularEnvMap_Texture, m_IBL_GGX_LUT_Texture);
 
-			// TextureSet
-			std::shared_ptr<graphics::CTextureSet> TextureSet = std::make_shared<graphics::CTextureSet>();
-			TextureSet->AddCubeMap(CubeTex);
-			for(const auto& FrameTexture : m_FrameTextureList) { TextureSet->AddFrameTexture(FrameTexture); }
-			TextureSet->AddIBLTexture(IBL_Diffuse_Tex, IBL_Specular_Tex, IBL_GGXLUT_Tex);
+			if (!m_BrainStemDObject->CreateFromMemory(pGraphicsAPI, m_PBRMF, m_DepthMF, object::E3DObjectType::glTF)) return false;
 
 			// 再生するアニメーションクリップを指定する
 			m_BrainStemDObject->SetPlayClipIndex(0);
 
 			m_BrainStemDObject->SetPos(glm::vec3(-2.0f, 0.0f, 0.0f));
 			m_BrainStemDObject->SetRot(glm::angleAxis(3.1415f, glm::vec3(0.0f, 1.0f, 0.0f)));
-
-			if (!gltf::CGLTFImporter::ImportFromMemory(pGraphicsAPI, m_BrainStemData->GetData(), m_BrainStemDObject, createInfo, TextureSet, m_DepthVertex, m_DepthFragment)) return false;
 		}
 		
 		{
-			// MaterialInto
-			std::shared_ptr<graphics::CMaterialCreateInfo> createInfo = std::make_shared<graphics::CMaterialCreateInfo>();
-			createInfo->SetVertexShaderCode(m_VertexShader->GetData());
-			createInfo->SetFragmentShaderCode(m_FragmentShader->GetData());
+			m_VRMObject->GetTextureSet()->AddCubeMap(m_Cube_Texture);
+			for(const auto& FrameTexture : m_FrameTextureList) { m_VRMObject->GetTextureSet()->AddFrameTexture(FrameTexture); }
+			m_VRMObject->GetTextureSet()->AddIBLTexture(m_IBL_DiffuseEnvMap_Texture, m_IBL_SpecularEnvMap_Texture, m_IBL_GGX_LUT_Texture);
 
-			// TextureSet
-			std::shared_ptr<graphics::CTextureSet> TextureSet = std::make_shared<graphics::CTextureSet>();
-			TextureSet->AddCubeMap(CubeTex);
-			for(const auto& FrameTexture : m_FrameTextureList) { TextureSet->AddFrameTexture(FrameTexture); }
-			TextureSet->AddIBLTexture(IBL_Diffuse_Tex, IBL_Specular_Tex, IBL_GGXLUT_Tex);
+			if (!m_VRMObject->CreateFromMemory(pGraphicsAPI, m_PBRMF, m_DepthMF, object::E3DObjectType::glTF)) return false;
 
 			m_VRMObject->SetPos(glm::vec3(0.0f, 0.0f, 3.0f));
-
-			if (!gltf::CGLTFImporter::ImportFromMemory(pGraphicsAPI, m_VRMData->GetData(), m_VRMObject, createInfo, TextureSet, m_DepthVertex, m_DepthFragment)) return false;
-
 			// 再生するアニメーションクリップを指定する
 			m_VRMObject->SetPlayClipIndex(0);
-			m_VRMObject->AddHumanoidAnimationClip(AnimationClipList[0]);
+			m_VRMObject->AddHumanoidAnimationClip(AnimationClipList[1]);
 		}
 		
 		{
-			// MaterialInto
-			std::shared_ptr<graphics::CMaterialCreateInfo> createInfo = std::make_shared<graphics::CMaterialCreateInfo>();
-			createInfo->SetVertexShaderCode(m_VertexShader->GetData());
-			createInfo->SetFragmentShaderCode(m_FragmentShader->GetData());
+			m_FbxObject->GetTextureSet()->AddCubeMap(m_Cube_Texture);
+			for(const auto& FrameTexture : m_FrameTextureList) { m_FbxObject->GetTextureSet()->AddFrameTexture(FrameTexture); }
+			m_FbxObject->GetTextureSet()->AddIBLTexture(m_IBL_DiffuseEnvMap_Texture, m_IBL_SpecularEnvMap_Texture, m_IBL_GGX_LUT_Texture);
 
-			// TextureSet
-			std::shared_ptr<graphics::CTextureSet> TextureSet = std::make_shared<graphics::CTextureSet>();
-			TextureSet->AddCubeMap(CubeTex);
-			for(const auto& FrameTexture : m_FrameTextureList) { TextureSet->AddFrameTexture(FrameTexture); }
-			TextureSet->AddIBLTexture(IBL_Diffuse_Tex, IBL_Specular_Tex, IBL_GGXLUT_Tex);
+			if (!m_FbxObject->CreateFromMemory(pGraphicsAPI, m_PBRMF, m_DepthMF, object::E3DObjectType::Fbx)) return false;
 
 			// 再生するアニメーションクリップを指定する
 			m_FbxObject->SetPlayClipIndex(1);
 
 			m_FbxObject->SetRot(glm::angleAxis(3.1415f, glm::vec3(0.0f, 1.0f, 0.0f)));
+		}
 
-			if (!fbx::CFBXImporter::ImportFBX(pGraphicsAPI, "Resources\\Motions\\Walking_WithSkin.fbx", m_FbxObject, createInfo, TextureSet, m_DepthVertex, m_DepthFragment)) return false;
-			//if (!fbx::CFBXImporter::ImportFBX(pGraphicsAPI, "Resources\\Motions\\Locking Hip Hop Dance.fbx", m_FbxObject, createInfo, TextureSet, m_DepthVertex, m_DepthFragment)) return false;
+		// m_MfTestObject
+		{
+			m_MfTestObject->GetTextureSet()->Add2DTexture(m_IBL_Skybox_Texture);
+			if (!object::C3DObject::CreateSimply(pGraphicsAPI, m_MfTestObject, graphics::CPresetPrimitive::CreateSphere(), m_SampleMF->CreateMaterial(pGraphicsAPI), m_DepthMF)) return false;
 		}
 
 		// m_Background
 		{
-			// Material
-			{
-				std::shared_ptr<graphics::CMaterialCreateInfo> createInfo = std::make_shared<graphics::CMaterialCreateInfo>();
-				createInfo->SetVertexShaderCode(m_MinimumVert->GetData());
-				createInfo->SetFragmentShaderCode(m_TextureFrag->GetData());
+			auto Mat = m_SimpleTextureMF->CreateMaterial(pGraphicsAPI);
+			Mat->ReplacePreloadUniformValue("useDirSampling", &glm::ivec1(1)[0], sizeof(glm::ivec1), 1);
+			Mat->ReplacePreloadUniformValue("useTexColor", &glm::ivec1(1)[0], sizeof(glm::ivec1), 1);
+			Mat->ReplaceTextureIndex("texImage", 0);
+			Mat->SetCullMode(graphics::ECullMode::CULL_FRONT);
 
-				auto Mat = pGraphicsAPI->CreateMaterial(createInfo);
+			m_Background->GetTextureSet()->Add2DTexture(m_IBL_Skybox_Texture);
 
-				{
-					auto UBO = graphics::CMaterialCreateInfo::CreateUniformBuffer({ graphics::SBindingLayout("UniformBufferObject", 0, false) });
-					UBO->AddData("model", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
-					UBO->AddData("view", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
-					UBO->AddData("proj", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
-					UBO->AddData("lightVPMat", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
-					UBO->AddData("cameraPos", &glm::vec4(1.0f)[0], sizeof(glm::vec4), 0);
-
-					Mat->AddShaderBuffer(UBO);
-				}
-
-				{
-					auto UBO = graphics::CMaterialCreateInfo::CreateUniformBuffer({ graphics::SBindingLayout("FragBufferObject_0", 1, false) });
-					
-					UBO->AddData("useDirSampling", &glm::ivec1(1)[0], sizeof(glm::ivec1), 1);
-					UBO->AddData("time", &glm::vec1(0.0f)[0], sizeof(glm::vec1), 1);
-					UBO->AddData("useTexColor", &glm::ivec1(1)[0], sizeof(glm::ivec1), 1);
-					UBO->AddData("useColor", &glm::ivec1(0)[0], sizeof(glm::ivec1), 1);
-					
-					UBO->AddData("baseColor", &glm::vec4(1.0f)[0], sizeof(glm::vec4), 1);
-
-					Mat->AddShaderBuffer(UBO);
-				}
-
-				Mat->AddTextureBindingLayout({ "texImage", 2, 3, 0, graphics::ETextureUsage::TEXTURE_USAGE_2D });
-
-				Mat->SetCullMode(graphics::ECullMode::CULL_FRONT);
-
-				m_Background->AddMaterial(Mat);
-			}
-
-			// Mesh
-			{
-				std::shared_ptr<graphics::CMesh> Mesh = std::make_shared<graphics::CMesh>();
-
-				std::shared_ptr<renderer::CRendererCreateInfo> createInfo = std::make_shared<renderer::CRendererCreateInfo>();
-				graphics::CPresetPrimitive::CreateSphere(createInfo);
-
-				std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(createInfo, 0);
-				Mesh->AddPrimitive(Primitive);
-
-				m_Background->AddMesh(Mesh);
-			}
-
-			// Node
-			{
-				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(0, m_Background->GetMeshList(), m_Background->GetMaterialList());
-				Node->SetScale(glm::vec3(500.0f));
-				m_Background->AddNode(Node);
-			}
-
-			// TextureSet
-			std::shared_ptr<graphics::CTextureSet> TextureSet = std::make_shared<graphics::CTextureSet>();
-			TextureSet->Add2DTexture(IBL_Skybox_Tex);
-			TextureSet->AddIBLTexture(IBL_Diffuse_Tex, IBL_Specular_Tex, IBL_GGXLUT_Tex);
-
-			// Create
-			if (!m_Background->Create(pGraphicsAPI, m_DepthVertex, m_DepthFragment, TextureSet)) return false;
+			m_Background->SetScale(glm::vec3(500.0f));
+			if (!object::C3DObject::CreateSimply(pGraphicsAPI, m_Background, graphics::CPresetPrimitive::CreateSphere(), Mat , m_DepthMF)) return false;
 		}
 
 		// m_DebugSphere
 		{
-			// Material
-			{
-				std::shared_ptr<graphics::CMaterialCreateInfo> createInfo = std::make_shared<graphics::CMaterialCreateInfo>();
-				createInfo->SetVertexShaderCode(m_MinimumVert->GetData());
-				createInfo->SetFragmentShaderCode(m_TextureFrag->GetData());
-
-				auto Mat = pGraphicsAPI->CreateMaterial(createInfo);
-
-				{
-					auto UBO = graphics::CMaterialCreateInfo::CreateUniformBuffer({ graphics::SBindingLayout("UniformBufferObject", 0, false) });
-					UBO->AddData("model", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
-					UBO->AddData("view", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
-					UBO->AddData("proj", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
-					UBO->AddData("lightVPMat", &glm::mat4(1.0f)[0][0], sizeof(glm::mat4), 0);
-					UBO->AddData("cameraPos", &glm::vec4(1.0f)[0], sizeof(glm::vec4), 0);
-
-					Mat->AddShaderBuffer(UBO);
-				}
-
-				{
-					auto UBO = graphics::CMaterialCreateInfo::CreateUniformBuffer({ graphics::SBindingLayout("FragBufferObject_0", 1, false) });
-
-					UBO->AddData("useDirSampling", &glm::ivec1(1)[0], sizeof(glm::ivec1), 1);
-					UBO->AddData("time", &glm::vec1(0.0f)[0], sizeof(glm::vec1), 1);
-					UBO->AddData("useTexColor", &glm::ivec1(0)[0], sizeof(glm::ivec1), 1);
-					UBO->AddData("useColor", &glm::ivec1(1)[0], sizeof(glm::ivec1), 1);
-
-					UBO->AddData("baseColor", &glm::vec4(0.0f, 0.0f, 1.0f, 1.0f)[0], sizeof(glm::vec4), 1);
-
-					Mat->AddShaderBuffer(UBO);
-				}
-
-				Mat->AddTextureBindingLayout({ "texImage", 2, 3, -1, graphics::ETextureUsage::TEXTURE_USAGE_2D });
-
-				Mat->SetEnabledZTest(false);
-
-				m_DebugSphere->AddMaterial(Mat);
-			}
-
-			// Mesh
-			{
-				std::shared_ptr<graphics::CMesh> Mesh = std::make_shared<graphics::CMesh>();
-
-				std::shared_ptr<renderer::CRendererCreateInfo> createInfo = std::make_shared<renderer::CRendererCreateInfo>();
-				graphics::CPresetPrimitive::CreateSphere(createInfo);
-
-				std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(createInfo, 0);
-				Mesh->AddPrimitive(Primitive);
-
-				m_DebugSphere->AddMesh(Mesh);
-			}
-
-			// Node
-			{
-				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(0, m_DebugSphere->GetMeshList(), m_DebugSphere->GetMaterialList());
-				Node->SetScale(glm::vec3(0.1f));
-				m_DebugSphere->AddNode(Node);
-			}
-
-			// TextureSet
-			std::shared_ptr<graphics::CTextureSet> TextureSet = std::make_shared<graphics::CTextureSet>();
-
-			// Create
-			if (!m_DebugSphere->Create(pGraphicsAPI, m_DepthVertex, m_DepthFragment, TextureSet)) return false;
+			auto Mat = m_SimpleTextureMF->CreateMaterial(pGraphicsAPI);
+			Mat->SetEnabledZTest(false);
+			m_DebugSphere->SetScale(glm::vec3(0.1f));
+			if (!object::C3DObject::CreateSimply(pGraphicsAPI, m_DebugSphere, graphics::CPresetPrimitive::CreateSphere(), Mat, m_DepthMF)) return false;
 		}
 
 		return true;
 	}
 
+#ifdef USE_INPUT_SYSTEM
 	bool CScriptScene::Update(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
 		const std::shared_ptr<graphics::CDrawInfo>& DrawInfo, const std::shared_ptr<input::CInputState>& InputState)
+#else
+	bool CScriptScene::Update(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo)
+#endif
 	{
 		if (!m_IsLoaded)
 		{
@@ -381,6 +188,11 @@ namespace scene
 		if (m_FbxObject)
 		{
 			if (!m_FbxObject->Update(DrawInfo->GetDeltaSecondsTime())) return false;
+		}
+		
+		if (m_MfTestObject)
+		{
+			if (!m_MfTestObject->Update(DrawInfo->GetDeltaSecondsTime())) return false;
 		}
 		
 		if (m_Background)
@@ -425,6 +237,11 @@ namespace scene
 		if (m_FbxObject)
 		{
 			if (!m_FbxObject->Draw(IsDepthPass, Camera, Projection, DrawInfo, m_DebugSphere)) return false;
+		}
+		
+		if (m_MfTestObject)
+		{
+			if (!m_MfTestObject->Draw(IsDepthPass, Camera, Projection, DrawInfo)) return false;
 		}
 		
 		if (m_Background)

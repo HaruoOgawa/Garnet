@@ -100,7 +100,6 @@ namespace app
 		AppManager->ResizeWindow(width, height);
 	}*/
 
-#ifdef USE_INPUT_SYSTEM
 	void KetCallback(HWND window, UINT msg, WPARAM w_param, LPARAM l_param, bool IsDown)
 	{
 		if (w_param < 256)
@@ -115,6 +114,8 @@ namespace app
 			if (!g_AppManager) return;
 
 			auto AppManager = g_AppManager;
+
+#ifdef USE_INPUT_SYSTEM
 			auto InputState = AppManager->GetInputState();
 
 			//
@@ -154,9 +155,11 @@ namespace app
 			}
 
 			InputState->SetKeyState(KeyType, IsDown);
+#endif
 		}
 	}
 	
+#ifdef USE_INPUT_SYSTEM
 	void MousebuttonCallback(HWND window, UINT msg, WPARAM w_param, LPARAM l_param, bool IsDown)
 	{
 		if (!g_AppManager) return;
@@ -243,10 +246,11 @@ namespace app
 	{
 		LRESULT result = 0;
 
+
 		// インプット
 		switch (msg)
 		{
-#ifdef USE_INPUT_SYSTEM
+
 			case WM_KEYDOWN : 
 				KetCallback(window, msg, w_param, l_param, true);
 				break;
@@ -254,7 +258,7 @@ namespace app
 			case WM_KEYUP:
 				KetCallback(window, msg, w_param, l_param, false);
 				break;
-
+#ifdef USE_INPUT_SYSTEM
 			case WM_LBUTTONDOWN:
 				MousebuttonCallback(window, msg, w_param, l_param, true);
 				break;
@@ -279,7 +283,6 @@ namespace app
 				ScrollCallback(window, msg, w_param, l_param);
 				break;
 #endif
-
 			default:
 				break;
 		}
@@ -307,7 +310,9 @@ namespace app
 			if (!Update()) return false;
 			if (!Draw()) return false;
 
+#ifdef USE_INPUT_SYSTEM
 			m_InputState->Clear();
+#endif
 		}
 
 		return true;
@@ -452,9 +457,11 @@ namespace app
 #ifdef USE_INPUT_SYSTEM
 		const auto& MainCamera = m_App->GetMainCamera();
 		if (MainCamera) MainCamera->Update(m_DeltaSecondsTime, m_InputState);
-#endif // USE_INPUT_SYSTEM
 
 		if (!m_App->Update(m_GraphicsAPI.get(), m_LoadWorker.get(), m_InputState)) return false;
+#else
+		if (!m_App->Update(m_GraphicsAPI.get(), m_LoadWorker.get())) return false;
+#endif // USE_INPUT_SYSTEM
 
 		return true;
 	}

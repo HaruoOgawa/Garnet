@@ -1,4 +1,5 @@
 #pragma once
+#ifdef USE_ANIMATION
 
 #include <vector>
 #include <unordered_map>
@@ -61,3 +62,5 @@ namespace animation
 		static std::shared_ptr<CKeyFrame> GetCurrentKeyFrameBasedBone(float CurrentTime, EHumanoidBones BoneName, const std::unordered_map<animation::EHumanoidBones, std::vector<std::shared_ptr<animation::CKeyFrame>>>& FrameMatrixMap);
 	};
 }
+
+#endif // USE_ANIMATION

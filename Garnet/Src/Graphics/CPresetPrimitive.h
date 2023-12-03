@@ -20,9 +20,9 @@ namespace graphics
 	class CPresetPrimitive
 	{
 	public:
-		static bool CreateBoard(std::shared_ptr<renderer::CRendererCreateInfo>& createInfo);
-		static bool CreateBox(std::shared_ptr<renderer::CRendererCreateInfo>& createInfo);
-		static bool CreatePoint(std::shared_ptr<renderer::CRendererCreateInfo>& createInfo);
-		static bool CreateSphere(std::shared_ptr<renderer::CRendererCreateInfo>& createInfo);
+		static std::shared_ptr<renderer::CRendererCreateInfo> CreateBoard();
+		static std::shared_ptr<renderer::CRendererCreateInfo> CreateBox();
+		static std::shared_ptr<renderer::CRendererCreateInfo> CreatePoint();
+		static std::shared_ptr<renderer::CRendererCreateInfo> CreateSphere();
 	};
 }

@@ -9,7 +9,7 @@
 #include <algorithm>
 
 #include "../Interface/IGraphicsAPI.h"
-#include "../File/CFile.h"
+#include "../LoadWorker/CFile.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtx/quaternion.hpp>
@@ -24,6 +24,7 @@ namespace graphics
 	class CMaterial;
 	class CMesh;
 	class CMaterialCreateInfo;
+	class CMaterialFrame;
 }
 
 namespace renderer
@@ -50,22 +51,20 @@ namespace fbx
 	class CFBXImporter
 	{
 	private:
-		static bool Import(api::IGraphicsAPI* pGraphicsAPI, const std::string& FileName, bool IsUseObject, std::shared_ptr<object::C3DObject>& Object, 
+		static bool Import(api::IGraphicsAPI* pGraphicsAPI, const std::string& FileName, bool IsUseObject, object::C3DObject* Object,
 			std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList,
-			const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, const std::shared_ptr<graphics::CTextureSet>& TextureSet,
-			const std::shared_ptr<file::CFile>& DepthVertex, const std::shared_ptr<file::CFile>& DepthFragment);
+			const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame);
 		
-		static bool Analyse(api::IGraphicsAPI* pGraphicsAPI, FbxScene* Scene, bool IsUseObject, std::shared_ptr<object::C3DObject>& Object,
+		static bool Analyse(api::IGraphicsAPI* pGraphicsAPI, FbxScene* Scene, bool IsUseObject, object::C3DObject* Object,
 			std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList,
-			const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, const std::shared_ptr<graphics::CTextureSet>& TextureSet,
-			const std::shared_ptr<file::CFile>& DepthVertex, const std::shared_ptr<file::CFile>& DepthFragment);
+			const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame);
 
-		static bool CreateDrawInfo(api::IGraphicsAPI* pGraphicsAPI, std::vector<FbxMesh*>& pFbxMeshList, const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo,
+		static bool CreateDrawInfo(api::IGraphicsAPI* pGraphicsAPI, std::vector<FbxMesh*>& pFbxMeshList, const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame,
 			FbxNode* pFBXNode, std::vector<std::shared_ptr<graphics::CTexture>>& TextureList,
 			std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList, std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, const std::shared_ptr<animation::CSkin>& Skin);
 
 		static bool CreateDummyMaterial(api::IGraphicsAPI* pGraphicsAPI, FbxNode* pFBXNode, std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList,
-			const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, const std::shared_ptr<animation::CSkin>& Skin);
+			const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, const std::shared_ptr<animation::CSkin>& Skin);
 
 		static bool CreateMesh(FbxNode* pFBXNode, std::vector<FbxMesh*>& pFbxMeshList, std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, const std::shared_ptr<animation::CSkin>& Skin);
 
@@ -93,9 +92,8 @@ namespace fbx
 
 		static unsigned int FindJointIndexUsingName(const std::shared_ptr<animation::CSkin>& Skin, const std::string& JointName);
 	public:
-		static bool ImportFBX(api::IGraphicsAPI* pGraphicsAPI, const std::string& FileName, std::shared_ptr<object::C3DObject>& Object,
-			const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, const std::shared_ptr<graphics::CTextureSet>& TextureSet,
-			const std::shared_ptr<file::CFile>& DepthVertex, const std::shared_ptr<file::CFile>& DepthFragment);
+		static bool ImportFBX(api::IGraphicsAPI* pGraphicsAPI, const std::string& FileName, object::C3DObject* Object,
+			const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame);
 		static bool ImportFBXAnimation(api::IGraphicsAPI* pGraphicsAPI, const std::string& FileName, std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList);
 	};
 }

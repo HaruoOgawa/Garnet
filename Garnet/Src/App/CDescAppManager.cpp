@@ -35,11 +35,13 @@ namespace descapp
 		m_IsRunLoop(g_IsRunLoop),
 		m_SecondsTime(0.0f), 
 		m_LoadWorker(nullptr),
+#ifdef USE_INPUT_SYSTEM
 #ifdef USE_WEBGPU
 		m_InputState(std::make_shared<input::CInputState>(1.0f)),
 #else
 		m_InputState(std::make_shared<input::CInputState>(1.0f)),
 #endif // USE_WEBGPU
+#endif
 		m_DeltaSecondsTime(0.0f)
 	{
 		//
@@ -121,6 +123,8 @@ namespace descapp
 	{
 		//
 		auto AppManager = reinterpret_cast<CDescAppManager*>(glfwGetWindowUserPointer(window));
+
+#ifdef USE_INPUT_SYSTEM
 		auto InputState = AppManager->GetInputState();
 
 		//
@@ -160,6 +164,7 @@ namespace descapp
 		}
 
 		InputState->SetKeyState(KeyType, (action == GLFW_PRESS || action == GLFW_REPEAT));
+#endif
 
 		// ループ終了
 		if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
@@ -182,6 +187,8 @@ namespace descapp
 	void MousebuttonCallback(GLFWwindow* window, int button, int action, int mods)
 	{
 		auto AppManager = reinterpret_cast<CDescAppManager*>(glfwGetWindowUserPointer(window));
+		
+#ifdef USE_INPUT_SYSTEM
 		auto InputState = AppManager->GetInputState();
 
 		if (button == GLFW_MOUSE_BUTTON_LEFT && !InputState->IsDownMouseRight())
@@ -210,11 +217,14 @@ namespace descapp
 		{
 			InputState->StartMousePos(glm::vec2(rPosX, rPosY));
 		}
+#endif
 	}
 
 	void CursorPosCallback(GLFWwindow* window, double PosX, double PosY)
 	{
 		auto AppManager = reinterpret_cast<CDescAppManager*>(glfwGetWindowUserPointer(window));
+
+#ifdef USE_INPUT_SYSTEM
 		auto InputState = AppManager->GetInputState();
 
 		if (InputState->IsDownMouseLeft() || InputState->IsDownMouseRight())
@@ -231,14 +241,18 @@ namespace descapp
 
 			InputState->SetMousePos(glm::vec2(rPosX, rPosY));
 		}
+#endif
 	}
 
 	void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
 	{
 		auto AppManager = reinterpret_cast<CDescAppManager*>(glfwGetWindowUserPointer(window));
+
+#ifdef USE_INPUT_SYSTEM
 		auto InputState = AppManager->GetInputState();
 
 		InputState->SetWheelScrollAmount(glm::vec2(static_cast<float>(xoffset), static_cast<float>(yoffset)));
+#endif
 	}
 
 	bool CDescAppManager::InitWindow()
@@ -278,7 +292,9 @@ namespace descapp
 			if (!Update()) return false;
 			if (!Draw()) return false;
 
+#ifdef USE_INPUT_SYSTEM
 			m_InputState->Clear();
+#endif
 		}
 		else
 		{
@@ -303,9 +319,11 @@ namespace descapp
 #ifdef USE_INPUT_SYSTEM
 		const auto& MainCamera = m_App->GetMainCamera();
 		if (MainCamera) MainCamera->Update(m_DeltaSecondsTime, m_InputState);
-#endif // USE_INPUT_SYSTEM
 
 		if (!m_App->Update(m_GraphicsAPI.get(), m_LoadWorker.get(), m_InputState)) return false;
+#else
+		if (!m_App->Update(m_GraphicsAPI.get(), m_LoadWorker.get())) return false;
+#endif // USE_INPUT_SYSTEM
 
 #ifdef _DEBUG
 		// FPSの計測と表示(60FPSを基準とする)

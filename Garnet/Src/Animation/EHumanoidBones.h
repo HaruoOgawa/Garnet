@@ -1,4 +1,5 @@
 #pragma once
+#ifdef USE_ANIMATION
 
 namespace animation
 {
@@ -35,3 +36,5 @@ namespace animation
 		Max,
 	};
 }
+
+#endif // USE_ANIMATION

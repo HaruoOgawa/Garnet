@@ -20,9 +20,12 @@ namespace graphics
 		// TEXTURE_IBL
 		std::shared_ptr<graphics::CTexture> m_IBL_Diffuse_Tex;
 		std::shared_ptr<graphics::CTexture> m_IBL_Specular_Tex;
-		std::shared_ptr<graphics::CTexture> m_BL_GGXLUT_Tex;
+		std::shared_ptr<graphics::CTexture> m_IBL_GGXLUT_Tex;
 	public:
 		CTextureSet();
+		CTextureSet(const std::shared_ptr<graphics::CTexture>& Texture);
+		CTextureSet(const std::vector<std::shared_ptr<graphics::CTexture>>& TextureList, const std::vector<std::shared_ptr<graphics::CTexture>>& CubeMapList, const std::vector<std::shared_ptr<graphics::CTexture>>& FrameTextureList, 
+			const std::shared_ptr<graphics::CTexture>& IBL_Diffuse_Tex, const std::shared_ptr<graphics::CTexture>& IBL_Specular_Tex, const std::shared_ptr<graphics::CTexture>& IBL_GGXLUT_Tex);
 		virtual ~CTextureSet();
 
 		void Add2DTexture(const std::shared_ptr<graphics::CTexture>& Texture);

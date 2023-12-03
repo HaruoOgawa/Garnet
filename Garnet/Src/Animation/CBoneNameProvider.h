@@ -1,4 +1,5 @@
 #pragma once
+#ifdef USE_ANIMATION
 
 #include <unordered_map>
 #include <vector>
@@ -23,3 +24,5 @@ namespace animation
 		EHumanoidBones GetBoneName(const std::string& SrcNodeName);
 	};
 }
+
+#endif // USE_ANIMATION

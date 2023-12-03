@@ -16,6 +16,7 @@ add_definitions(
 	-DUSE_INPUT_SYSTEM
 	-DUSE_GPGPU
 	-DUSE_FBX
+	-DUSE_ANIMATION
 )
 
 add_executable(

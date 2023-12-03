@@ -20,6 +20,7 @@ namespace graphics
 		virtual ~CShaderBufferDescriptor();
 
 		void AddData(const std::string& Name, const SUniformBufferValue& Data);
+		void SetData(const std::string& Name, const SUniformBufferValue& Data);
 		const std::map<std::string, SUniformBufferValue>& GetDataList() const;
 	};
 }

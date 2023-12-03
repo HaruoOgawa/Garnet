@@ -1,5 +1,6 @@
 #pragma once
 #include "../LoadWorker/ELoadStatus.h"
+#include "../Interface/IGraphicsAPI.h"
 
 namespace resource
 {
@@ -7,6 +8,7 @@ namespace resource
 	{
 	public:
 		virtual bool Load() = 0;
+		virtual bool Update(api::IGraphicsAPI* pGraphicsAPI) = 0;
 
 		virtual void SetLoadStatus(resource::ELoadStatus Status) = 0;
 		virtual resource::ELoadStatus GetStatus() const = 0;

@@ -52,6 +52,49 @@ namespace graphics
 		m_BindingLayoutList[BindingIndex].ByteSize += ByteSize;
 	}
 
+	void CShaderBuffer::ReplaceData(const std::string& SrcName, const void* SrcData, int SrcByteSize, int BindingIndex)
+	{
+		// BindingIndexが登録されていないものなら処理しない
+		if (BindingIndex < 0 || m_BindingLayoutList.find(BindingIndex) == m_BindingLayoutList.end())
+		{
+			return;
+		}
+
+		// 既にBufferに追加済みのデータを更新する
+		const auto it = m_Descriptor->GetDataList().find(SrcName);
+		if (it == m_Descriptor->GetDataList().end()) return;
+
+		// バイトサイズの更新が許されるのはSSBOのみである
+		int ByteOffset = it->second.ByteOffset;
+		int ByteSize = it->second.ByteSize;
+
+		if (m_BufferType != EBufferType::SHADERSTORAGE && SrcByteSize != ByteSize)
+		{
+			return;
+		}
+
+		// SSBOなのでバッファ・バイトサイズ・オフセットをリセットする
+		if (m_BufferType == EBufferType::SHADERSTORAGE)
+		{
+			m_Buffer.clear();
+			m_Buffer.resize(SrcByteSize);
+
+			// DESCRIPTOR
+			SUniformBufferValue value = {
+				SrcByteSize,
+				0
+			};
+
+			m_Descriptor->SetData(SrcName, value);
+
+			// BINDING LAYOUT
+			m_BindingLayoutList[BindingIndex].ByteSize = SrcByteSize;
+		}
+
+		// Bufferに値を再セット
+		std::memcpy(&m_Buffer[ByteOffset], SrcData, SrcByteSize);
+	}
+
 	void CShaderBuffer::SetData(const std::string& Name, const void* Data, int ByteSize)
 	{
 		if (m_Descriptor)

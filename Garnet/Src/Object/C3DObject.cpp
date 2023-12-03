@@ -1,27 +1,87 @@
 #include "C3DObject.h"
+#include "../GLTF/CGLTFImporter.h"
+#include "../FBX/CFBXImporter.h"
 
 namespace object
 {
 	C3DObject::C3DObject(const std::string& PassName, const std::string& DepthPassName):
+		m_IsCreated(false),
 		m_PassName(PassName),
 		m_DepthPassName(DepthPassName),
 		m_ObjectTransform(std::make_shared<math::CTransform>()),
 		m_CurrentClipIndex(-1),
-		m_TotalJointIndexOffset(0)
+		m_TotalJointIndexOffset(0),
+		m_TextureSet(std::make_shared<graphics::CTextureSet>())
 	{
 	}
 
 	C3DObject::~C3DObject()
 	{
+		m_IsCreated = false;
 		m_NodeList.clear();
 		m_MaterialList.clear();
 	}
 
-	bool C3DObject::Create(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<file::CFile>& DepthVertex, const std::shared_ptr<file::CFile>& DepthFragment, const std::shared_ptr<graphics::CTextureSet>& TextureSet)
+	void C3DObject::SetBinaryData(const std::vector<unsigned char>& Data)
 	{
-		// GPU上のテクスチャリソースが解放されてしまうので保持しておく
-		m_TextureSet = TextureSet;
+		m_BinaryData = Data;
+	}
 
+	bool C3DObject::CreateSimply(api::IGraphicsAPI* pGraphicsAPI, std::shared_ptr<object::C3DObject>& Object,
+		const std::shared_ptr<renderer::CRendererCreateInfo>& createInfo,
+		const std::shared_ptr<graphics::CMaterial>& Material, const std::shared_ptr<graphics::CMaterialFrame>& DepthMF)
+	{
+		// Material
+		Object->AddMaterial(Material);
+
+		// Mesh
+		std::shared_ptr<graphics::CMesh> Mesh = std::make_shared<graphics::CMesh>();
+		std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(createInfo, 0);
+		Mesh->AddPrimitive(Primitive);
+
+		Object->AddMesh(Mesh);
+
+		// Node
+		std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(0, Object->GetMeshList(), Object->GetMaterialList());
+		Object->AddNode(Node);
+
+		// Create
+		if (!Object->Create(pGraphicsAPI, DepthMF)) return false;
+
+		return true;
+	}
+
+	bool C3DObject::CreateFromMemory(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<graphics::CMaterialFrame>& BaseMF, const std::shared_ptr<graphics::CMaterialFrame>& DepthMF, E3DObjectType ObjectType)
+	{
+		if (m_BinaryData.empty()) return false;
+
+		switch (ObjectType)
+		{
+		case object::E3DObjectType::Custom:
+			break;
+#ifdef USE_GLTF
+		case object::E3DObjectType::glTF:
+			if (!gltf::CGLTFImporter::ImportFromMemory(pGraphicsAPI, m_BinaryData, this, BaseMF)) return false;
+			break;
+#endif
+#ifdef USE_FBX
+		case object::E3DObjectType::Fbx:
+			if (!fbx::CFBXImporter::ImportFBX(pGraphicsAPI, "Resources\\Motions\\Walking_WithSkin.fbx", this, BaseMF)) return false;
+			break;
+#endif
+		default:
+			break;
+		}
+
+		m_BinaryData.clear();
+
+		if (!Create(pGraphicsAPI, DepthMF)) return false;
+
+		return true;
+	}
+
+	bool C3DObject::Create(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<graphics::CMaterialFrame>& DepthMF)
+	{
 		// DefaultLocalTransformを保存する
 		ApplyDefaultLocalTransform();
 
@@ -36,9 +96,9 @@ namespace object
 		{
 			if (!Material->Create(m_TextureSet)) return false;
 			
-			if (DepthVertex && DepthFragment)
+			if (DepthMF)
 			{
-				if (!Material->CreateDepthMaterial(pGraphicsAPI, DepthVertex, DepthFragment)) return false;
+				if (!Material->CreateDepthMaterial(pGraphicsAPI, DepthMF)) return false;
 			}
 		}
 
@@ -63,6 +123,8 @@ namespace object
 				Primitive->Release();
 			}
 		}
+
+		m_IsCreated = true;
 
 		return true;
 	}
@@ -173,12 +235,16 @@ namespace object
 
 	bool C3DObject::Update(float DeltaSecondsTime)
 	{
+		if (!m_IsCreated) return true;
+
+#ifdef USE_ANIMATION
 		// アニメーションの計算
 		if (IsPlayingAnimation())
 		{
 			const auto& Clip = m_AnimationClipList[m_CurrentClipIndex];
 			if (!Clip->Update(DeltaSecondsTime)) return false;
 		}
+#endif
 
 		// ワールド行列の更新
 		// 全ノードマイフレーム更新しているので、そのうちキャッシュを入れて更新は必要なものだけにする
@@ -190,6 +256,8 @@ namespace object
 	bool C3DObject::Draw(bool IsDepthPass, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo, 
 		const std::shared_ptr<object::C3DObject>& DebugSphere)
 	{
+		if (!m_IsCreated) return true;
+
 		// 共通ユニフォームの更新
 		for (auto& Material : m_MaterialList)
 		{
@@ -206,7 +274,9 @@ namespace object
 			Material->SetUniformValue("cameraPos", &Camera->GetPos()[0]);
 			Material->SetUniformValue("time", &glm::vec1(DrawInfo->GetSecondsTime())[0]);
 			Material->SetUniformValue("deltaTime", &glm::vec1(DrawInfo->GetDeltaSecondsTime())[0]);
+#ifdef USE_ANIMATION
 			Material->SetUniformValue("useSkinMeshAnimation", &glm::ivec1( (IsPlayingAnimation()? 1 : 0) )[0]);
+#endif
 		}
 
 		for (auto& Material : m_MaterialList)
@@ -228,9 +298,12 @@ namespace object
 			DepthMaterial->SetUniformValue("cameraPos", &Camera->GetPos()[0]);
 			DepthMaterial->SetUniformValue("time", &glm::vec1(DrawInfo->GetSecondsTime())[0]);
 			DepthMaterial->SetUniformValue("deltaTime", &glm::vec1(DrawInfo->GetDeltaSecondsTime())[0]);
+#ifdef USE_ANIMATION
 			DepthMaterial->SetUniformValue("useSkinMeshAnimation", &glm::ivec1((IsPlayingAnimation() ? 1 : 0))[0]);
+#endif
 		}
 
+#ifdef USE_ANIMATION
 		// SSBOのサイズをDynamicOffset毎に変更できるかわからないのでひとまず全部まとめて渡す
 		std::vector<glm::mat4> SkinMatrixList;
 		if (IsPlayingAnimation())
@@ -240,6 +313,7 @@ namespace object
 				if (!Skin->CalcSkinMatrixList(SkinMatrixList, m_ObjectTransform->GetModelMatrix())) return false;
 			}
 		}
+#endif
 
 		// 描画
 		for (const auto& Node : m_NodeList)
@@ -256,6 +330,7 @@ namespace object
 			// SkinMatrixを計算
 			int SkinIndex = Node->GetSkinIndex();
 
+#ifdef USE_ANIMATION
 			/*std::vector<glm::mat4> SkinMatrixList;
 			if (SkinIndex >= 0 && SkinIndex < m_AnimationSkinList.size() && IsPlayingAnimation())
 			{
@@ -263,6 +338,7 @@ namespace object
 				
 				if (!Skin->CalcSkinMatrixList(SkinMatrixList, m_ObjectTransform->GetModelMatrix())) return false;
 			}*/
+#endif
 
 			for (int PrimitiveIndex = 0; PrimitiveIndex < Mesh->GetPrimitiveList().size(); PrimitiveIndex++)
 			{
@@ -287,6 +363,7 @@ namespace object
 				
 				Material->SetUniformValue("model", &WorldMatrix[0][0], DynamicOffsetNum);
 
+#ifdef USE_ANIMATION
 				// SkinMatrixをShaderに渡す
 				if (SkinIndex >= 0 && SkinIndex < m_AnimationSkinList.size() && IsPlayingAnimation())
 				{
@@ -295,11 +372,13 @@ namespace object
 					int JointIndexOffset = m_AnimationSkinList[SkinIndex]->GetJointIndexOffset();
 					Material->SetUniformValue("JointIndexOffset", &glm::ivec1(JointIndexOffset)[0], DynamicOffsetNum);
 				}
+#endif
 
 				if (!Primitive->Draw(Material, DynamicOffsetNum, IsDepthPass)) return false;
 			}
 		}
 		
+#ifdef USE_ANIMATION
 		/*for (const auto& Skin : m_AnimationSkinList)
 		{
 			
@@ -332,6 +411,7 @@ namespace object
 				// Debug用: Boneの描画
 			}
 		}*/
+#endif
 
 		return true;
 	}
@@ -361,6 +441,7 @@ namespace object
 		m_MaterialList.push_back(Material);
 	}
 
+#ifdef USE_ANIMATION
 	void C3DObject::AddAnimationSkin(const std::shared_ptr<animation::CSkin >& Skin)
 	{
 		int JointIndexOffset = m_TotalJointIndexOffset;
@@ -503,6 +584,12 @@ namespace object
 		return true;
 	}
 
+	const std::vector<std::shared_ptr<animation::CAnimationClip>>& C3DObject::GetAnimationClipList() const
+	{
+		return m_AnimationClipList;
+	}
+#endif
+
 	const std::vector<std::shared_ptr<graphics::CMaterial>>& C3DObject::GetMaterialList() const
 	{
 		return m_MaterialList;
@@ -553,8 +640,15 @@ namespace object
 		m_CurrentClipIndex = Index;
 	}
 
+#ifdef USE_ANIMATION
 	bool  C3DObject::IsPlayingAnimation()
 	{
 		return (m_CurrentClipIndex >= 0 && m_CurrentClipIndex < m_AnimationClipList.size());
+	}
+#endif
+
+	const std::shared_ptr<graphics::CTextureSet>& C3DObject::GetTextureSet() const
+	{
+		return m_TextureSet;
 	}
 }

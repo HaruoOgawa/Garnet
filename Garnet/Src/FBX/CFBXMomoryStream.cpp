@@ -1,3 +1,5 @@
+#ifdef USE_FBX
+
 #include "CFBXMomoryStream.h"
 
 namespace fbx
@@ -92,3 +94,5 @@ namespace fbx
 	{
 	}
 }
+
+#endif

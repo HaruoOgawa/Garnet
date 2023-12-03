@@ -1,4 +1,5 @@
 #pragma once
+#ifdef USE_ANIMATION
 
 #include <vector>
 #include <memory>
@@ -43,3 +44,5 @@ namespace animation
 		void GetOutput(float* pData);
 	};
 }
+
+#endif // USE_ANIMATION
