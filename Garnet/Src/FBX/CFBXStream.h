@@ -1,5 +1,7 @@
 #pragma once
 
+#ifdef USE_FBX
+
 #include <string>
 #include <stdio.h>
 #include <fbxsdk.h>
@@ -43,3 +45,5 @@ namespace fbx
 
 	};
 }
+
+#endif

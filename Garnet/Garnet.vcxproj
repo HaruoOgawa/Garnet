@@ -147,7 +147,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='CompGL|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -493,7 +493,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;USE_OPENGL;USE_GPGPU</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;USE_OPENGL</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(ProjectDir)src\Library\glm;$(ProjectDir)Src\Library\json;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -520,7 +520,7 @@ del $(OutDir)Garnet.pdb</Command>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;USE_OPENGL;USE_GPGPU</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;USE_OPENGL</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(ProjectDir)src\Library\glm;$(ProjectDir)Src\Library\json;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>

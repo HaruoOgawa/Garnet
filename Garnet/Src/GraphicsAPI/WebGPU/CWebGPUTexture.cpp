@@ -27,7 +27,6 @@ namespace api
 		return true;
 	}
 
-#ifdef USE_TEXTURE_LOADER
 	bool CWebGPUTexture::Create(const std::vector<unsigned char>& OriginalPixels, int pixelSize)
 	{
 		m_RenderPassFormat = api::ERenderPassFormat::COLOR_RENDERPASS;
@@ -37,7 +36,6 @@ namespace api
 
 		return true;
 	}
-#endif
 
 	const WGPUTextureView& CWebGPUTexture::GetTextureImageView() const
 	{

@@ -1,3 +1,5 @@
+#ifdef USE_FBX
+
 #include "CFBXStream.h"
 
 namespace fbx
@@ -133,3 +135,5 @@ namespace fbx
 		}
 	}
 }
+
+#endif

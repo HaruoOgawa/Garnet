@@ -6,8 +6,10 @@
 #include "../Graphics/CTextureSet.h"
 #include "../Graphics/CMaterialFrame.h"
 #include "../Math/CTransform.h"
+#ifdef USE_ANIMATION
 #include "../Animation/CSkin.h"
 #include "../Animation/CAnimationClip.h"
+#endif
 #include <vector>
 #include <memory>
 
@@ -33,9 +35,11 @@ namespace object
 		std::vector<std::vector<int>> m_RootNodeIndexList;
 
 		std::shared_ptr<graphics::CTextureSet> m_TextureSet;
-
+#ifdef USE_ANIMATION
 		std::vector<std::shared_ptr<animation::CSkin>> m_AnimationSkinList;
 		std::vector<std::shared_ptr<animation::CAnimationClip>> m_AnimationClipList;
+#endif
+
 		int m_CurrentClipIndex;
 		int m_TotalJointIndexOffset;
 	private:
@@ -43,8 +47,10 @@ namespace object
 
 		void ApplyParentNode(std::shared_ptr<CNode>& Node, const std::shared_ptr<CNode>& ParentNode);
 
+#ifdef USE_ANIMATION
 		bool IsPlayingAnimation();
 		bool ReTargetingRig(const std::shared_ptr<animation::CAnimationClip>& SourceClip, const std::shared_ptr<animation::CAnimationClip>& DstClip);
+#endif
 	public:
 		C3DObject(const std::string& PassName, const std::string& DepthPassName);
 		virtual ~C3DObject();
@@ -76,11 +82,13 @@ namespace object
 		void AddMaterial(const std::shared_ptr<graphics::CMaterial>& Material);
 		const std::vector<std::shared_ptr<graphics::CMaterial>>& GetMaterialList() const;
 		
+#ifdef USE_ANIMATION
 		void AddAnimationSkin(const std::shared_ptr<animation::CSkin >& Skin);
 		void AddAnimationClip(const std::shared_ptr<animation::CAnimationClip>& Clip);
 		void AddHumanoidAnimationClip(const std::shared_ptr<animation::CAnimationClip>& SourceClip);
 
 		const std::vector<std::shared_ptr<animation::CAnimationClip>>& GetAnimationClipList() const;
+#endif
 
 		void SetRootNodeIndexList(const std::vector<std::vector<int>>& RootNodeIndexList);
 		const std::vector<std::vector<int>>& GetRootNodeIndexList() const;

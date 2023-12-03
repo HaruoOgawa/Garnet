@@ -17,11 +17,9 @@ namespace api
 		m_ShaderPrg(-1),
 		m_TextureSet(nullptr)
 	{
-#ifdef USE_TEXTURE_LOADER
 		m_EmptyTexture = std::make_shared<COpenGLTexture>(pGraphicsAPI, false);
 		std::vector<unsigned char> emptyPixel = { 0, 0, 0, 0 };
 		m_EmptyTexture->Create(emptyPixel, static_cast<int>(emptyPixel.size() * sizeof(unsigned char)));
-#endif
 	}
 
 	COpenGLMaterial::~COpenGLMaterial()
@@ -97,7 +95,6 @@ namespace api
 			COpenGLTexture* Texture = nullptr;
 			int TextureIndex = TexLayout.TextureIndex;
 
-#ifdef USE_TEXTURE_LOADER
 			if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_2D)
 			{
 				Texture = (TextureIndex >= 0 && TextureIndex < TextureList.size()) ? static_cast<api::COpenGLTexture*>(TextureList[TextureIndex].get()) : m_EmptyTexture.get();
@@ -122,32 +119,6 @@ namespace api
 			{
 				Texture = (TextureIndex >= 0 && GGXLUT_Tex) ? static_cast<api::COpenGLTexture*>(GGXLUT_Tex.get()) : m_EmptyTexture.get();
 			}
-#else
-			if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_2D)
-			{
-				Texture = (TextureIndex >= 0 && TextureIndex < TextureList.size()) ? static_cast<api::COpenGLTexture*>(TextureList[TextureIndex].get()) : nullptr;
-			}
-			else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_CUBE)
-			{
-				Texture = (TextureIndex >= 0 && TextureIndex < CubeMapList.size()) ? static_cast<api::COpenGLTexture*>(CubeMapList[TextureIndex].get()) : nullptr;
-			}
-			else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_FRAME)
-			{
-				Texture = (TextureIndex >= 0 && TextureIndex < FrameTextureList.size()) ? static_cast<api::COpenGLTexture*>(FrameTextureList[TextureIndex].get()) : nullptr;
-			}
-			else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_IBL_Diffuse)
-			{
-				Texture = (TextureIndex >= 0 && Diffuse_Tex) ? static_cast<api::COpenGLTexture*>(Diffuse_Tex.get()) : nullptr;
-			}
-			else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_IBL_Specular)
-			{
-				Texture = (TextureIndex >= 0 && Specular_Tex) ? static_cast<api::COpenGLTexture*>(Specular_Tex.get()) : nullptr;
-			}
-			else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_IBL_GGXLUT)
-			{
-				Texture = (TextureIndex >= 0 && GGXLUT_Tex) ? static_cast<api::COpenGLTexture*>(GGXLUT_Tex.get()) : nullptr;
-			}
-#endif
 			
 			if (!Texture)
 			{

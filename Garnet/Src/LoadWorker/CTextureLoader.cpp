@@ -1,3 +1,5 @@
+#ifdef USE_TEXTURE_LOADER
+
 #include "CTextureLoader.h"
 
 namespace resource
@@ -93,3 +95,5 @@ namespace resource
 		return true;
 	}
 }
+
+#endif

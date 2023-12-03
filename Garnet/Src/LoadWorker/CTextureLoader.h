@@ -1,4 +1,5 @@
 #pragma once
+#ifdef USE_TEXTURE_LOADER
 
 #include <vector>
 #include <string>
@@ -35,3 +36,5 @@ namespace resource
 		virtual bool Update(api::IGraphicsAPI* pGraphicsAPI) override;
 	};
 }
+
+#endif

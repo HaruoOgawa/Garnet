@@ -74,7 +74,6 @@ namespace api
 		return true;
 	}
 
-#ifdef USE_TEXTURE_LOADER
 	bool COpenGLTexture::Create(const std::vector<unsigned char>& pixelData, int pixelSize)
 	{
 		GLuint internalformat;
@@ -160,7 +159,6 @@ namespace api
 		return true;
 	}
 
-#endif
 	void COpenGLTexture::SetActive(GLenum texture)
 	{
 		if (m_TextureType == graphics::ETextureType::TEXTURE_2D)

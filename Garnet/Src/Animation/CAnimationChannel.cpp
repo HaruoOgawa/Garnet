@@ -1,3 +1,5 @@
+#ifdef USE_ANIMATION
+
 #include "CAnimationChannel.h"
 #include "../Object/CNode.h"
 
@@ -118,3 +120,5 @@ namespace animation
 		return true;
 	}
 }
+
+#endif // USE_ANIMATION

@@ -10,7 +10,9 @@ namespace projection { class CProjection; }
 namespace graphics { class CDrawInfo; }
 namespace imageeffect { class CBlurEffect; }
 namespace resource { class CLoadWorker; }
+#ifdef USE_INPUT_SYSTEM
 namespace input { class CInputState; }
+#endif
 
 namespace app
 {
@@ -30,7 +32,11 @@ namespace app
 		bool Initialize(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker) override;
 		bool ProcessInput(api::IGraphicsAPI* pGraphicsAPI) override;
 		bool Resize(int Width, int Height) override;
+#ifdef USE_INPUT_SYSTEM
 		bool Update(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<input::CInputState>& InputState) override;
+#else
+		bool Update(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker) override;
+#endif
 		bool Draw(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker) override;
 
 		virtual const std::shared_ptr<camera::CCamera>& GetMainCamera() const override;
