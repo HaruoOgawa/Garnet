@@ -27,8 +27,6 @@ namespace imageeffect
 
 		std::shared_ptr<object::C3DObject> m_ScreenObjX;
 		std::shared_ptr<object::C3DObject> m_ScreenObjY;
-
-		std::shared_ptr<graphics::CTextureSet> m_TextureSet;
 	private:
 		bool CalcGaussianKernel();
 		bool Load();

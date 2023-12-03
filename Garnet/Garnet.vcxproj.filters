@@ -1131,9 +1131,6 @@
     <ClInclude Include="Src\FBX\CFBXImporter.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Src\Object\C3DObjectImporter.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="Src\Animation\EAnimationTarget.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
@@ -1162,6 +1159,12 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Src\LoadWorker\CTextureLoader.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\LoadWorker\C3DObjectLoader.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Object\E3DObjectType.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
@@ -1337,9 +1340,6 @@
     <ClCompile Include="Src\FBX\CFBXImporter.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Object\C3DObjectImporter.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="Src\FBX\CFBXStream.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
@@ -1356,6 +1356,9 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Src\LoadWorker\CTextureLoader.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\LoadWorker\C3DObjectLoader.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>

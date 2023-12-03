@@ -55,7 +55,7 @@ namespace resource
 		m_LoadingBar->AddNode(Node);
 
 		// CreateŠÖ”‚ðŽÀs
-		if (!m_LoadingBar->Create(pGraphicsAPI, nullptr, nullptr)) return false;
+		if (!m_LoadingBar->Create(pGraphicsAPI, nullptr)) return false;
 
 		return true;
 	}
@@ -93,6 +93,8 @@ namespace resource
 		{
 			for (auto& Resource : m_FirstLoadResourceList)
 			{
+				if (!Resource->Update(pGraphicsAPI)) return false;
+
 				switch (Resource->GetStatus())
 				{
 				case resource::ELoadStatus::None:
@@ -100,7 +102,6 @@ namespace resource
 					return true;
 
 				case resource::ELoadStatus::Loading:
-					if (!Resource->Update(pGraphicsAPI)) return false;
 					return true;
 
 				case resource::ELoadStatus::Loaded:

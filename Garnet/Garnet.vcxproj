@@ -574,6 +574,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Src\LoadWorker\C3DObjectLoader.h" />
     <ClInclude Include="Src\LoadWorker\CTextureLoader.h" />
     <ClInclude Include="Src\Graphics\EBufferUpdateTypeh.h" />
     <ClInclude Include="Src\Graphics\SBufferValueLayout.h" />
@@ -584,7 +585,6 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClInclude Include="Src\Animation\EHumanoidBones.h" />
     <ClInclude Include="Src\FBX\CFBXStream.h" />
     <ClInclude Include="Src\Animation\EAnimationTarget.h" />
-    <ClInclude Include="Src\Object\C3DObjectImporter.h" />
     <ClInclude Include="Src\FBX\CFBXImporter.h" />
     <ClInclude Include="Src\Animation\CJoint.h" />
     <ClInclude Include="Src\Animation\CSkin.h" />
@@ -629,6 +629,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClInclude Include="Src\Library\tinygltf\tiny_gltf.h" />
     <ClInclude Include="Src\LoadWorker\ELoadStatus.h" />
     <ClInclude Include="Src\Math\CMath.h" />
+    <ClInclude Include="Src\Object\E3DObjectType.h" />
     <ClInclude Include="Src\Projection\CProjection.h" />
     <ClInclude Include="Src\Camera\CCamera.h" />
     <ClInclude Include="Src\GraphicsAPI\WebGPU\CWebGPUMaterial.h" />
@@ -959,13 +960,13 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClInclude Include="Src\Interface\IRenderer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\LoadWorker\C3DObjectLoader.cpp" />
     <ClCompile Include="Src\LoadWorker\CTextureLoader.cpp" />
     <ClCompile Include="Src\LoadWorker\CMaterialFrameLoader.cpp" />
     <ClCompile Include="Src\Graphics\CMaterialFrame.cpp" />
     <ClCompile Include="Src\FBX\CFBXMomoryStream.cpp" />
     <ClCompile Include="Src\Animation\CBoneNameProvider.cpp" />
     <ClCompile Include="Src\FBX\CFBXStream.cpp" />
-    <ClCompile Include="Src\Object\C3DObjectImporter.cpp" />
     <ClCompile Include="Src\FBX\CFBXImporter.cpp" />
     <ClCompile Include="Src\Animation\CJoint.cpp" />
     <ClCompile Include="Src\Animation\CSkin.cpp" />

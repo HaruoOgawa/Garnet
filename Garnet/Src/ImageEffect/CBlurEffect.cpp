@@ -15,9 +15,7 @@ namespace imageeffect
 		m_BlurVertex(std::make_shared<resource::CFile>("Resources\\Shaders\\blur" + m_pGraphicsAPI->GetVertexShaderExtension())),
 		m_BlurFrag(std::make_shared<resource::CFile>("Resources\\Shaders\\blur" + m_pGraphicsAPI->GetFragmentShaderExtension())),
 		m_ScreenObjX(std::make_shared<object::C3DObject>("BlurX", "")),
-		m_ScreenObjY(std::make_shared<object::C3DObject>("BlurY", "")),
-
-		m_TextureSet(std::make_shared<graphics::CTextureSet>())
+		m_ScreenObjY(std::make_shared<object::C3DObject>("BlurY", ""))
 	{
 	}
 
@@ -68,9 +66,7 @@ namespace imageeffect
 	{
 		if (!m_IsLoaded) return true;
 
-		if (!m_TextureSet) return true;
-
-		const auto& Tex = m_TextureSet->GetFrameTextureList()[0];
+		const auto& Tex = m_ScreenObjX->GetTextureSet()->GetFrameTextureList()[0];
 		if (!Tex) return true;
 
 		float w = static_cast<float>(Tex->GetWidth());
@@ -192,7 +188,7 @@ namespace imageeffect
 		// Bind Texture
 		{
 			const auto& RenderPass = m_pGraphicsAPI->GetOffScreenRenderPassMap().find("ShadowPass");
-			if (RenderPass != m_pGraphicsAPI->GetOffScreenRenderPassMap().end()) m_TextureSet->AddFrameTexture(RenderPass->second->GetFrameTexture());
+			if (RenderPass != m_pGraphicsAPI->GetOffScreenRenderPassMap().end()) m_ScreenObjX->GetTextureSet()->AddFrameTexture(RenderPass->second->GetFrameTexture());
 			MaterialX->AddTextureBindingLayout({ "SrcTex", 2, 3, 0, graphics::ETextureUsage::TEXTURE_USAGE_FRAME});
 
 			m_ScreenObjX->AddMaterial(MaterialX);
@@ -200,7 +196,7 @@ namespace imageeffect
 
 		{
 			const auto& RenderPass = m_pGraphicsAPI->GetOffScreenRenderPassMap().find("BlurX");
-			if (RenderPass != m_pGraphicsAPI->GetOffScreenRenderPassMap().end()) m_TextureSet->AddFrameTexture(RenderPass->second->GetFrameTexture());
+			if (RenderPass != m_pGraphicsAPI->GetOffScreenRenderPassMap().end()) m_ScreenObjY->GetTextureSet()->AddFrameTexture(RenderPass->second->GetFrameTexture());
 			MaterialY->AddTextureBindingLayout({ "SrcTex", 2, 3, 1, graphics::ETextureUsage::TEXTURE_USAGE_FRAME });
 
 			m_ScreenObjY->AddMaterial(MaterialY);
@@ -240,8 +236,8 @@ namespace imageeffect
 		}
 
 		// Create
-		if (!m_ScreenObjX->Create(m_pGraphicsAPI, nullptr, m_TextureSet)) return false;
-		if (!m_ScreenObjY->Create(m_pGraphicsAPI, nullptr, m_TextureSet)) return false;
+		if (!m_ScreenObjX->Create(m_pGraphicsAPI, nullptr)) return false;
+		if (!m_ScreenObjY->Create(m_pGraphicsAPI, nullptr)) return false;
 
 		return true;
 	}

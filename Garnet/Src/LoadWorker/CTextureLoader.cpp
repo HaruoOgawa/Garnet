@@ -2,14 +2,11 @@
 
 namespace resource
 {
-	CTextureLoader::CTextureLoader(api::IGraphicsAPI* pGraphicsAPI, const std::vector<std::string>& FileNameList, bool UseMipmap, std::shared_ptr<graphics::CTexture>& Texture):
+	CTextureLoader::CTextureLoader(api::IGraphicsAPI* pGraphicsAPI, const std::vector<std::string>& FileNameList, const std::shared_ptr<graphics::CTexture>& Texture):
 		m_Status(ELoadStatus::None),
 		m_UseCube(false),
-		m_TargetTexture(nullptr)
+		m_TargetTexture(Texture)
 	{
-		Texture = pGraphicsAPI->CreateTexture(UseMipmap);
-		m_TargetTexture = Texture;
-
 		if (FileNameList.size() == 6) m_UseCube = true;
 
 		for (const auto& filename : FileNameList)

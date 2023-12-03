@@ -34,8 +34,8 @@
 
 namespace gltf
 {
-	bool CGLTFImporter::ImportFromMemory(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& Data, std::shared_ptr<object::C3DObject>& Object,
-		const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, const std::shared_ptr<graphics::CTextureSet>& TextureSet, const std::shared_ptr<graphics::CMaterialFrame>& DepthMF)
+	bool CGLTFImporter::ImportFromMemory(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& Data, object::C3DObject* Object,
+		const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame)
 	{
 		tinygltf::Model model;
 		tinygltf::TinyGLTF loader;
@@ -57,13 +57,13 @@ namespace gltf
 
 		if (!result) return false;
 
-		if (!Import(pGraphicsAPI, model, Object, MaterialFrame, TextureSet, DepthMF)) return false;
+		if (!Import(pGraphicsAPI, model, Object, MaterialFrame)) return false;
 
 		return true;
 	}
 
-	bool CGLTFImporter::ImportFromString(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& Data, const std::string& BaseDir, std::shared_ptr<object::C3DObject>& Object,
-		const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, const std::shared_ptr<graphics::CTextureSet>& TextureSet, const std::shared_ptr<graphics::CMaterialFrame>& DepthMF)
+	bool CGLTFImporter::ImportFromString(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& Data, const std::string& BaseDir, object::C3DObject* Object,
+		const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame)
 	{
 		tinygltf::Model model;
 		tinygltf::TinyGLTF loader;
@@ -85,13 +85,13 @@ namespace gltf
 
 		if (!result) return false;
 
-		if (!Import(pGraphicsAPI, model, Object, MaterialFrame, TextureSet, DepthMF)) return false;
+		if (!Import(pGraphicsAPI, model, Object, MaterialFrame)) return false;
 
 		return true;
 	}
 
-	bool CGLTFImporter::Import(api::IGraphicsAPI* pGraphicsAPI, tinygltf::Model model, std::shared_ptr<object::C3DObject>& Object,
-		const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, const std::shared_ptr<graphics::CTextureSet>& TextureSet, const std::shared_ptr<graphics::CMaterialFrame>& DepthMF)
+	bool CGLTFImporter::Import(api::IGraphicsAPI* pGraphicsAPI, tinygltf::Model model, object::C3DObject* Object,
+		const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame)
 	{
 		// テクスチャ
 		std::vector<std::shared_ptr<graphics::CTexture>> TextureList;
@@ -99,12 +99,12 @@ namespace gltf
 
 		for (const auto& Texture : TextureList)
 		{
-			TextureSet->Add2DTexture(Texture);
+			Object->GetTextureSet()->Add2DTexture(Texture);
 		}
 
 		// マテリアル
 		std::vector<std::shared_ptr<graphics::CMaterial>> MaterialList;
-		if (!CreateMaterial(pGraphicsAPI, model, MaterialList, MaterialFrame, TextureSet)) return false;
+		if (!CreateMaterial(pGraphicsAPI, model, MaterialList, MaterialFrame, Object->GetTextureSet())) return false;
 
 		// メッシュ
 		std::vector<std::shared_ptr<graphics::CMesh>> MeshList;
@@ -172,9 +172,6 @@ namespace gltf
 		{
 			Object->AddAnimationClip(Clip);
 		}
-
-		// オブジェクトを生成
-		if (!Object->Create(pGraphicsAPI, DepthMF, TextureSet)) return false;
 
 		return true;
 	}

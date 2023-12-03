@@ -19,12 +19,12 @@ using namespace fbxsdk;
 
 namespace fbx
 {
-	bool CFBXImporter::ImportFBX(api::IGraphicsAPI* pGraphicsAPI, const std::string& FileName, std::shared_ptr<object::C3DObject>& Object,
-		const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, const std::shared_ptr<graphics::CTextureSet>& TextureSet, const std::shared_ptr<graphics::CMaterialFrame>& DepthMF)
+	bool CFBXImporter::ImportFBX(api::IGraphicsAPI* pGraphicsAPI, const std::string& FileName, object::C3DObject* Object,
+		const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame)
 	{
 		std::vector<std::shared_ptr<animation::CAnimationClip>> AnimationClipList;
 
-		if (!Import(pGraphicsAPI, FileName, true, Object, AnimationClipList, MaterialFrame, TextureSet, DepthMF)) return false;
+		if (!Import(pGraphicsAPI, FileName, true, Object, AnimationClipList, MaterialFrame)) return false;
 
 		return true;
 	}
@@ -33,14 +33,14 @@ namespace fbx
 	{
 		std::shared_ptr<object::C3DObject> Object = std::make_shared<object::C3DObject>("", "");
 
-		if (!Import(pGraphicsAPI, FileName, false, Object, AnimationClipList, nullptr, nullptr, nullptr)) return false;
+		if (!Import(pGraphicsAPI, FileName, false, Object.get(), AnimationClipList, nullptr)) return false;
 
 		return true;
 	}
 
-	bool CFBXImporter::Import(api::IGraphicsAPI* pGraphicsAPI, const std::string& FileName, bool IsUseObject, std::shared_ptr<object::C3DObject>& Object,
+	bool CFBXImporter::Import(api::IGraphicsAPI* pGraphicsAPI, const std::string& FileName, bool IsUseObject, object::C3DObject* Object,
 		std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList,
-		const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, const std::shared_ptr<graphics::CTextureSet>& TextureSet, const std::shared_ptr<graphics::CMaterialFrame>& DepthMF)
+		const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame)
 	{
 		// 全体のメモリやObjectを管理するManagerを作成
 		FbxManager* Manager = FbxManager::Create();
@@ -80,7 +80,7 @@ namespace fbx
 		int Coordinate = Scene->GetGlobalSettings().GetAxisSystem().GetCoorSystem();
 
 		// FBXの解析開始
-		if (!Analyse(pGraphicsAPI, Scene, IsUseObject, Object, AnimationClipList, MaterialFrame, TextureSet, DepthMF)) return false;
+		if (!Analyse(pGraphicsAPI, Scene, IsUseObject, Object, AnimationClipList, MaterialFrame)) return false;
 
 		// FBX解析を終了
 		Manager->Destroy();
@@ -88,9 +88,9 @@ namespace fbx
 		return true;
 	}
 
-	bool CFBXImporter::Analyse(api::IGraphicsAPI* pGraphicsAPI, FbxScene* Scene, bool IsUseObject, std::shared_ptr<object::C3DObject>& Object,
+	bool CFBXImporter::Analyse(api::IGraphicsAPI* pGraphicsAPI, FbxScene* Scene, bool IsUseObject, object::C3DObject* Object,
 		std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList,
-		const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, const std::shared_ptr<graphics::CTextureSet>& TextureSet, const std::shared_ptr<graphics::CMaterialFrame>& DepthMF)
+		const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame)
 	{
 		FbxNode* RootNode = Scene->GetRootNode();
 
@@ -203,9 +203,6 @@ namespace fbx
 			{
 				Object->AddAnimationClip(Clip);
 			}
-
-			// オブジェクトを生成
-			if (!Object->Create(pGraphicsAPI, DepthMF, TextureSet)) return false;
 		}
 
 		return true;
@@ -239,6 +236,8 @@ namespace fbx
 	bool CFBXImporter::CreateDummyMaterial(api::IGraphicsAPI* pGraphicsAPI, FbxNode* pFBXNode, std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList,
 		const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, const std::shared_ptr<animation::CSkin>& Skin)
 	{
+		if (!MaterialFrame) return true;
+
 		// マテリアルにシェーダーを設定
 		std::shared_ptr<graphics::CMaterial> material = MaterialFrame->CreateMaterial(pGraphicsAPI);
 

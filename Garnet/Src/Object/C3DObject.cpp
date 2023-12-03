@@ -1,27 +1,83 @@
 #include "C3DObject.h"
+#include "../GLTF/CGLTFImporter.h"
+#include "../FBX/CFBXImporter.h"
 
 namespace object
 {
 	C3DObject::C3DObject(const std::string& PassName, const std::string& DepthPassName):
+		m_IsCreated(false),
 		m_PassName(PassName),
 		m_DepthPassName(DepthPassName),
 		m_ObjectTransform(std::make_shared<math::CTransform>()),
 		m_CurrentClipIndex(-1),
-		m_TotalJointIndexOffset(0)
+		m_TotalJointIndexOffset(0),
+		m_TextureSet(std::make_shared<graphics::CTextureSet>())
 	{
 	}
 
 	C3DObject::~C3DObject()
 	{
+		m_IsCreated = false;
 		m_NodeList.clear();
 		m_MaterialList.clear();
 	}
 
-	bool C3DObject::Create(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<graphics::CMaterialFrame>& DepthMF, const std::shared_ptr<graphics::CTextureSet>& TextureSet)
+	void C3DObject::SetBinaryData(const std::vector<unsigned char>& Data)
 	{
-		// GPU上のテクスチャリソースが解放されてしまうので保持しておく
-		m_TextureSet = TextureSet;
+		m_BinaryData = Data;
+	}
 
+	bool C3DObject::CreateSimply(api::IGraphicsAPI* pGraphicsAPI, std::shared_ptr<object::C3DObject>& Object,
+		const std::shared_ptr<renderer::CRendererCreateInfo>& createInfo,
+		const std::shared_ptr<graphics::CMaterial>& Material, const std::shared_ptr<graphics::CMaterialFrame>& DepthMF)
+	{
+		// Material
+		Object->AddMaterial(Material);
+
+		// Mesh
+		std::shared_ptr<graphics::CMesh> Mesh = std::make_shared<graphics::CMesh>();
+		std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(createInfo, 0);
+		Mesh->AddPrimitive(Primitive);
+
+		Object->AddMesh(Mesh);
+
+		// Node
+		std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(0, Object->GetMeshList(), Object->GetMaterialList());
+		Object->AddNode(Node);
+
+		// Create
+		if (!Object->Create(pGraphicsAPI, DepthMF)) return false;
+
+		return true;
+	}
+
+	bool C3DObject::CreateFromMemory(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<graphics::CMaterialFrame>& BaseMF, const std::shared_ptr<graphics::CMaterialFrame>& DepthMF, E3DObjectType ObjectType)
+	{
+		if (m_BinaryData.empty()) return false;
+
+		switch (ObjectType)
+		{
+		case object::E3DObjectType::Custom:
+			break;
+		case object::E3DObjectType::glTF:
+			if (!gltf::CGLTFImporter::ImportFromMemory(pGraphicsAPI, m_BinaryData, this, BaseMF)) return false;
+			break;
+		case object::E3DObjectType::Fbx:
+			if (!fbx::CFBXImporter::ImportFBX(pGraphicsAPI, "Resources\\Motions\\Walking_WithSkin.fbx", this, BaseMF)) return false;
+			break;
+		default:
+			break;
+		}
+
+		m_BinaryData.clear();
+
+		if (!Create(pGraphicsAPI, DepthMF)) return false;
+
+		return true;
+	}
+
+	bool C3DObject::Create(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<graphics::CMaterialFrame>& DepthMF)
+	{
 		// DefaultLocalTransformを保存する
 		ApplyDefaultLocalTransform();
 
@@ -63,6 +119,8 @@ namespace object
 				Primitive->Release();
 			}
 		}
+
+		m_IsCreated = true;
 
 		return true;
 	}
@@ -173,6 +231,8 @@ namespace object
 
 	bool C3DObject::Update(float DeltaSecondsTime)
 	{
+		if (!m_IsCreated) return true;
+
 		// アニメーションの計算
 		if (IsPlayingAnimation())
 		{
@@ -190,6 +250,8 @@ namespace object
 	bool C3DObject::Draw(bool IsDepthPass, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo, 
 		const std::shared_ptr<object::C3DObject>& DebugSphere)
 	{
+		if (!m_IsCreated) return true;
+
 		// 共通ユニフォームの更新
 		for (auto& Material : m_MaterialList)
 		{
@@ -503,6 +565,11 @@ namespace object
 		return true;
 	}
 
+	const std::vector<std::shared_ptr<animation::CAnimationClip>>& C3DObject::GetAnimationClipList() const
+	{
+		return m_AnimationClipList;
+	}
+
 	const std::vector<std::shared_ptr<graphics::CMaterial>>& C3DObject::GetMaterialList() const
 	{
 		return m_MaterialList;
@@ -556,5 +623,10 @@ namespace object
 	bool  C3DObject::IsPlayingAnimation()
 	{
 		return (m_CurrentClipIndex >= 0 && m_CurrentClipIndex < m_AnimationClipList.size());
+	}
+
+	const std::shared_ptr<graphics::CTextureSet>& C3DObject::GetTextureSet() const
+	{
+		return m_TextureSet;
 	}
 }

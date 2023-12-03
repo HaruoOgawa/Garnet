@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CNode.h"
+#include "E3DObjectType.h"
 #include "../Graphics/CMaterial.h"
 #include "../Graphics/CTextureSet.h"
 #include "../Graphics/CMaterialFrame.h"
@@ -16,6 +17,10 @@ namespace object
 
 	class C3DObject
 	{
+		bool m_IsCreated;
+
+		std::vector<unsigned char> m_BinaryData;
+
 		const std::string m_PassName;
 		const std::string m_DepthPassName;
 		
@@ -44,7 +49,14 @@ namespace object
 		C3DObject(const std::string& PassName, const std::string& DepthPassName);
 		virtual ~C3DObject();
 
-		bool		 Create(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<graphics::CMaterialFrame>& DepthMF, const std::shared_ptr<graphics::CTextureSet>& TextureSet);
+		void SetBinaryData(const std::vector<unsigned char>& Data);
+
+		static bool CreateSimply(api::IGraphicsAPI* pGraphicsAPI, std::shared_ptr<object::C3DObject>& Object,
+			const std::shared_ptr<renderer::CRendererCreateInfo>& createInfo,
+			const std::shared_ptr<graphics::CMaterial>& Material, const std::shared_ptr<graphics::CMaterialFrame>& DepthMF);
+
+		bool		 CreateFromMemory(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<graphics::CMaterialFrame>& BaseMF, const std::shared_ptr<graphics::CMaterialFrame>& DepthMF, E3DObjectType ObjectType);
+		bool		 Create(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<graphics::CMaterialFrame>& DepthMF);
 		virtual bool Update(float DeltaSecondsTime);
 		virtual bool Draw(bool IsDepthPass, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, 
 			const std::shared_ptr<graphics::CDrawInfo>& DrawInfo, const std::shared_ptr<object::C3DObject>& DebugSphere = nullptr);
@@ -68,6 +80,8 @@ namespace object
 		void AddAnimationClip(const std::shared_ptr<animation::CAnimationClip>& Clip);
 		void AddHumanoidAnimationClip(const std::shared_ptr<animation::CAnimationClip>& SourceClip);
 
+		const std::vector<std::shared_ptr<animation::CAnimationClip>>& GetAnimationClipList() const;
+
 		void SetRootNodeIndexList(const std::vector<std::vector<int>>& RootNodeIndexList);
 		const std::vector<std::vector<int>>& GetRootNodeIndexList() const;
 
@@ -81,5 +95,7 @@ namespace object
 		void SetScale(const glm::vec3& Scale);
 
 		void SetPlayClipIndex(int Index);
+		
+		const std::shared_ptr<graphics::CTextureSet>& GetTextureSet() const;
 	};
 }

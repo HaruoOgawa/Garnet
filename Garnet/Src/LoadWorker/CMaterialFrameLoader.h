@@ -61,7 +61,7 @@ namespace resource
 		void GetFloat(const std::string& Key, float& Value, const json::iterator& Object);
 		void GetArray32(const std::string& Key, std::vector<float>& Value, const json::iterator& Object);
 	public:
-		CMaterialFrameLoader(const std::string& filename, std::shared_ptr<graphics::CMaterialFrame>& TargetMaterialFrame);
+		CMaterialFrameLoader(const std::string& filename, const std::shared_ptr<graphics::CMaterialFrame>& TargetMaterialFrame);
 		virtual ~CMaterialFrameLoader();
 
 		virtual void SetLoadStatus(resource::ELoadStatus Status) override;

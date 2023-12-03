@@ -5,7 +5,6 @@
 
 #include "../Interface/IGraphicsAPI.h"
 
-namespace resource { class CFile; }
 namespace object { class C3DObject; }
 namespace camera { class CCamera; }
 namespace projection { class CProjection; }
@@ -31,8 +30,7 @@ namespace scene
 		std::shared_ptr<object::C3DObject> m_MfTestObject;
 
 		// Fbx
-		std::shared_ptr<resource::CFile> m_FbxAnimationData;
-		std::shared_ptr<resource::CFile> m_FbxData;
+		std::shared_ptr<object::C3DObject> m_FbxAnimation;
 		std::shared_ptr<object::C3DObject> m_FbxObject;
 
 		// Tex of FrameBuffer
@@ -46,13 +44,10 @@ namespace scene
 		std::shared_ptr<graphics::CTexture> m_Cube_Texture;
 
 		// glTF
-		std::shared_ptr<resource::CFile> m_glTFData;
 		std::shared_ptr<object::C3DObject> m_glTFObject;
 		
-		std::shared_ptr<resource::CFile> m_BrainStemData;
 		std::shared_ptr<object::C3DObject> m_BrainStemDObject;
 		
-		std::shared_ptr<resource::CFile> m_VRMData;
 		std::shared_ptr<object::C3DObject> m_VRMObject;
 
 		// Object
