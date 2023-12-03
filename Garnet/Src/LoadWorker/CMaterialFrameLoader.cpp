@@ -279,9 +279,25 @@ namespace resource
 				{
 					ByteSize = sizeof(glm::mat4);
 				}
+				else if (value_type == "mat3")
+				{
+					ByteSize = sizeof(glm::mat3);
+				}
+				else if (value_type == "mat2")
+				{
+					ByteSize = sizeof(glm::mat2);
+				}
 				else if (value_type == "vec4")
 				{
 					ByteSize = sizeof(glm::vec4);
+				}
+				else if (value_type == "vec3")
+				{
+					ByteSize = sizeof(glm::vec3);
+				}
+				else if (value_type == "vec2")
+				{
+					ByteSize = sizeof(glm::vec2);
 				}
 				else if (value_type == "float")
 				{

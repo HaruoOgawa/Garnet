@@ -1790,5 +1790,6 @@
     <None Include="Resources\Shaders\sample.frag" />
     <None Include="Resources\MaterialFrame\SimpleTexture_MF.json" />
     <None Include="Resources\MaterialFrame\Depth_MF.json" />
+    <None Include="Resources\MaterialFrame\Blur_MF.json" />
   </ItemGroup>
 </Project>

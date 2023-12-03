@@ -9,7 +9,10 @@ namespace file { class CFile; }
 namespace api { class IGraphicsAPI; }
 namespace object { class C3DObject; }
 namespace resource { class CLoadWorker; }
-namespace graphics { class CTextureSet; }
+namespace graphics { 
+	class CTextureSet; 
+	class CMaterialFrame;
+}
 
 namespace imageeffect
 {
@@ -22,8 +25,7 @@ namespace imageeffect
 
 		bool m_IsLoaded;
 
-		std::shared_ptr<resource::CFile> m_BlurVertex;
-		std::shared_ptr<resource::CFile> m_BlurFrag;
+		std::shared_ptr<graphics::CMaterialFrame> m_BlurMF;
 
 		std::shared_ptr<object::C3DObject> m_ScreenObjX;
 		std::shared_ptr<object::C3DObject> m_ScreenObjY;
