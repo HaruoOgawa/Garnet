@@ -14,6 +14,7 @@ add_definitions(
 	-DUSE_INPUT_SYSTEM
 	-DUSE_GPGPU
 	-DUSE_FBX
+	-DUSE_ANIMATION
 )
 
 add_executable(
@@ -50,14 +51,14 @@ add_executable(
 	../src/FBX/CFBXMomoryStream.h
 	../src/FBX/CFBXStream.cpp
 	../src/FBX/CFBXStream.h
-	../src/File/CFile.cpp
-	../src/File/CFile.h
 	../src/GLTF/CGLTFImporter.cpp
 	../src/GLTF/CGLTFImporter.h
 	../src/Graphics/CDrawInfo.cpp
 	../src/Graphics/CDrawInfo.h
 	../src/Graphics/CMaterial.cpp
 	../src/Graphics/CMaterial.h
+	../src/Graphics/CMaterialFrame.cpp
+	../src/Graphics/CMaterialFrame.h
 	../src/Graphics/CMesh.cpp
 	../src/Graphics/CMesh.h
 	../src/Graphics/CPresetPrimitive.cpp
@@ -73,10 +74,12 @@ add_executable(
 	../src/Graphics/CTextureSet.cpp
 	../src/Graphics/CTextureSet.h
 	../src/Graphics/EBlendType.h
+	../src/Graphics/EBufferUpdateTypeh.h
 	../src/Graphics/ECullMode.h
 	../src/Graphics/ETextureType.h
 	../src/Graphics/ETextureUsage.h
 	../src/Graphics/SBindingLayout.h
+	../src/Graphics/SBufferValueLayout.h
 	../src/Graphics/STextureBindingLayout.h
 	../src/GraphicsAPI/CMaterialCreateInfo.cpp
 	../src/GraphicsAPI/CMaterialCreateInfo.h
@@ -107,8 +110,16 @@ add_executable(
 	../src/Interface/IRenderer.h
 	../src/Interface/IRenderPass.h
 	../src/Interface/IResource.h
+	../src/LoadWorker/C3DObjectLoader.cpp
+	../src/LoadWorker/C3DObjectLoader.h
+	../src/LoadWorker/CFile.cpp
+	../src/LoadWorker/CFile.h
 	../src/LoadWorker/CLoadWorker.cpp
 	../src/LoadWorker/CLoadWorker.h
+	../src/LoadWorker/CMaterialFrameLoader.cpp
+	../src/LoadWorker/CMaterialFrameLoader.h
+	../src/LoadWorker/CTextureLoader.cpp
+	../src/LoadWorker/CTextureLoader.h
 	../src/LoadWorker/ELoadStatus.h
 	../src/Main/WebMain/WebMain.cpp
 	../src/Math/CMath.h
@@ -116,10 +127,9 @@ add_executable(
 	../src/Math/CTransform.h
 	../src/Object/C3DObject.cpp
 	../src/Object/C3DObject.h
-	../src/Object/C3DObjectImporter.cpp
-	../src/Object/C3DObjectImporter.h
 	../src/Object/CNode.cpp
 	../src/Object/CNode.h
+	../src/Object/E3DObjectType.h
 	../src/Projection/CProjection.cpp
 	../src/Projection/CProjection.h
 	../src/Scene/CScriptScene.cpp

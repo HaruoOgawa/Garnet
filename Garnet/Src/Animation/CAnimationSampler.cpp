@@ -1,3 +1,5 @@
+#ifdef USE_ANIMATION
+
 #include "CAnimationSampler.h"
 #include "../Math/CTransform.h"
 
@@ -397,3 +399,5 @@ namespace animation
 		return dstKeyFrame;
 	}
 }
+
+#endif // USE_ANIMATION

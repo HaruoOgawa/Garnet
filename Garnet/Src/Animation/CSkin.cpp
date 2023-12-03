@@ -1,3 +1,5 @@
+#ifdef USE_ANIMATION
+
 #include "CSkin.h"
 #include "../Object/CNode.h"
 
@@ -104,3 +106,5 @@ namespace animation
 		}
 	}
 }
+
+#endif // USE_ANIMATION

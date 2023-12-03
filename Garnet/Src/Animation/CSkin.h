@@ -1,4 +1,5 @@
 #pragma once
+#ifdef USE_ANIMATION
 
 // 用語を整理すると、Jointは関節(点)でjointとJointの繋がりがBone(線)
 // Boneを組み合わせた全体構造がSkeleton もしくは Skin
@@ -38,3 +39,5 @@ namespace animation
 		void ResetToDefaultSkinLocal();
 	};
 }
+
+#endif // USE_ANIMATION

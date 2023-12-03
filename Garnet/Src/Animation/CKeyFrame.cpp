@@ -1,3 +1,5 @@
+#ifdef USE_ANIMATION
+
 #include "CKeyFrame.h"
 
 namespace animation
@@ -46,3 +48,5 @@ namespace animation
 		std::memcpy(pData, &m_Output[0], sizeof(float) * m_Output.size());
 	}
 }
+
+#endif // USE_ANIMATION

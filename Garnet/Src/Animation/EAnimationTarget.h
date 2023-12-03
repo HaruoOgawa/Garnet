@@ -1,4 +1,5 @@
 #pragma once
+#ifdef USE_ANIMATION
 
 namespace animation
 {
@@ -13,3 +14,5 @@ namespace animation
 		MODELMATRIX, // FBX-SDKŒÀ’è
 	};
 }
+
+#endif // USE_ANIMATION

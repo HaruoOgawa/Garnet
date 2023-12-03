@@ -1,7 +1,7 @@
 #pragma once
+#ifdef USE_ANIMATION
 
 #include <vector>
-#
 
 #include "CAnimationSampler.h"
 #include "CAnimationChannel.h"
@@ -42,3 +42,5 @@ namespace animation
 		float GetCurrentTime() const;
 	};
 }
+
+#endif // USE_ANIMATION

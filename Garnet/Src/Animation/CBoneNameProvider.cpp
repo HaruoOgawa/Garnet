@@ -1,3 +1,5 @@
+#ifdef USE_ANIMATION
+
 #include "CBoneNameProvider.h"
 
 namespace animation
@@ -54,3 +56,5 @@ namespace animation
 		m_BoneNameTable.emplace(animation::EHumanoidBones::RightToes, std::vector<std::string>{"RightToes", "mixamorig:RightToeBase", "rightToes"});
 	}
 }
+
+#endif // USE_ANIMATION
