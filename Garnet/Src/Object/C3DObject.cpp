@@ -1,7 +1,16 @@
 #include "C3DObject.h"
 #include "../GLTF/CGLTFImporter.h"
+
+#if defined(USE_FBX)
+
+#ifdef USE_SMALL_FBX
+#include "../FBX/CSmallFBXImporter.h"
+#else
 #include "../FBX/CFBXImporter.h"
 
+#endif // USE_SMALL_FBX
+
+#endif
 namespace object
 {
 	C3DObject::C3DObject(const std::string& PassName, const std::string& DepthPassName):
@@ -64,9 +73,14 @@ namespace object
 			if (!gltf::CGLTFImporter::ImportFromMemory(pGraphicsAPI, m_BinaryData, this, BaseMF)) return false;
 			break;
 #endif
-#ifdef USE_FBX
+#if defined(USE_FBX)
 		case object::E3DObjectType::Fbx:
+#ifdef USE_SMALL_FBX
+
+#else
 			if (!fbx::CFBXImporter::ImportFBX(pGraphicsAPI, "Resources\\Motions\\Walking_WithSkin.fbx", this, BaseMF)) return false;
+			
+#endif // USE_SMALL_FBX
 			break;
 #endif
 		default:

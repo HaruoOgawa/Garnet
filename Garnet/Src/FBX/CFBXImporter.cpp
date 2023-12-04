@@ -1,4 +1,4 @@
-#ifdef USE_FBX
+#if defined(USE_FBX) && !defined(USE_SMALL_FBX)
 #include "CFBXImporter.h"
 #include "CFBXStream.h"
 #include "CFBXMomoryStream.h"
