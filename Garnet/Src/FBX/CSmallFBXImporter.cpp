@@ -40,6 +40,7 @@ namespace fbx
 		const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame)
 	{
 		sfbx::DocumentPtr doc = sfbx::MakeDocument(FileName);
+		sfbx::Model* model = doc->getRootModel();
 
 		return true;
 	}
