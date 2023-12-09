@@ -44,7 +44,15 @@ namespace fbx
 		sfbx::DocumentPtr doc = sfbx::MakeDocument();
 		doc->readBinary(stream);
 
-		sfbx::Model* model = doc->getRootModel();
+		for (const auto& RootNode : doc->getRootNodes())
+		{
+			Console::Log("[CPP] RootNode->getName(): %s\n", RootNode->getName().data());
+
+			for (const auto& Child : RootNode->getChildren())
+			{
+				Console::Log("[CPP] Child->getName(): %s\n", Child->getName().data());
+			}
+		}
 
 		return true;
 	}

@@ -31,8 +31,8 @@ Shared_Post = """
 )
 
 target_include_directories(Garnet PRIVATE ../src/Library/DawnLib/include ../src/Library/glm  ../src/Library/tinygltf  ../src/Library/SmallFBX/include)
-
-#target_link_libraries(Garnet PRIVATE ../Src/Library/FBX-SDK/lib/vs2022/x64/debug/)
+target_link_directories(Garnet PRIVATE E:/CppDev/Garnet/Garnet/Src/Library/SmallFBX/lib/debug)
+target_link_libraries(Garnet SmallFBX.lib zlib.lib)
 
 if(EMSCRIPTEN)
 	target_link_options(Garnet PRIVATE 
