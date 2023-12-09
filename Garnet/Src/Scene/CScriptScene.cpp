@@ -107,8 +107,8 @@ namespace scene
 
 			m_VRMObject->SetPos(glm::vec3(0.0f, 0.0f, 3.0f));
 			// 再生するアニメーションクリップを指定する
-			m_VRMObject->SetPlayClipIndex(0);
-			m_VRMObject->AddHumanoidAnimationClip(AnimationClipList[1]);
+			/*m_VRMObject->SetPlayClipIndex(0);
+			m_VRMObject->AddHumanoidAnimationClip(AnimationClipList[1]);*/
 		}
 		
 		{

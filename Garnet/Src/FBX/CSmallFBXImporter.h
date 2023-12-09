@@ -17,6 +17,9 @@
 #include <iostream>
 #include <chrono>
 
+#include <sstream>
+#include <iostream>
+
 #ifdef __cpp_lib_span
 #include <span>
 #endif
@@ -68,13 +71,13 @@ namespace fbx
 	class CSmallFBXImporter
 	{
 	private:
-		static bool Import(api::IGraphicsAPI* pGraphicsAPI, const std::string& FileName, bool IsUseObject, object::C3DObject* Object,
+		static bool Import(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& Data, bool IsUseObject, object::C3DObject* Object,
 			std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList,
 			const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame);
 	public:
-		static bool ImportFBX(api::IGraphicsAPI* pGraphicsAPI, const std::string& FileName, object::C3DObject* Object,
+		static bool ImportFBX(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& Data, object::C3DObject* Object,
 			const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame);
-		static bool ImportFBXAnimation(api::IGraphicsAPI* pGraphicsAPI, const std::string& FileName, std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList);
+		static bool ImportFBXAnimation(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& Data, std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList);
 	};
 }
 #endif

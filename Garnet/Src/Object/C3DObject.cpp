@@ -76,7 +76,7 @@ namespace object
 #if defined(USE_FBX)
 		case object::E3DObjectType::Fbx:
 #ifdef USE_SMALL_FBX
-
+			if (!fbx::CSmallFBXImporter::ImportFBX(pGraphicsAPI, m_BinaryData, this, BaseMF)) return false;
 #else
 			if (!fbx::CFBXImporter::ImportFBX(pGraphicsAPI, "Resources\\Motions\\Walking_WithSkin.fbx", this, BaseMF)) return false;
 			

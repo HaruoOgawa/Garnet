@@ -16,30 +16,34 @@
 
 namespace fbx
 {
-	bool CSmallFBXImporter::ImportFBX(api::IGraphicsAPI* pGraphicsAPI, const std::string& FileName, object::C3DObject* Object,
+	bool CSmallFBXImporter::ImportFBX(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& Data, object::C3DObject* Object,
 		const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame)
 	{
 		std::vector<std::shared_ptr<animation::CAnimationClip>> AnimationClipList;
 
-		if (!Import(pGraphicsAPI, FileName, true, Object, AnimationClipList, MaterialFrame)) return false;
+		if (!Import(pGraphicsAPI, Data, true, Object, AnimationClipList, MaterialFrame)) return false;
 
 		return true;
 	}
 
-	bool CSmallFBXImporter::ImportFBXAnimation(api::IGraphicsAPI* pGraphicsAPI, const std::string& FileName, std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList)
+	bool CSmallFBXImporter::ImportFBXAnimation(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& Data, std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList)
 	{
 		std::shared_ptr<object::C3DObject> Object = std::make_shared<object::C3DObject>("", "");
 
-		if (!Import(pGraphicsAPI, FileName, false, Object.get(), AnimationClipList, nullptr)) return false;
+		if (!Import(pGraphicsAPI, Data, false, Object.get(), AnimationClipList, nullptr)) return false;
 
 		return true;
 	}
 
-	bool CSmallFBXImporter::Import(api::IGraphicsAPI* pGraphicsAPI, const std::string& FileName, bool IsUseObject, object::C3DObject* Object,
+	bool CSmallFBXImporter::Import(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& Data, bool IsUseObject, object::C3DObject* Object,
 		std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList,
 		const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame)
 	{
-		sfbx::DocumentPtr doc = sfbx::MakeDocument(FileName);
+		std::istringstream stream(std::string(Data.begin(), Data.end()));
+
+		sfbx::DocumentPtr doc = sfbx::MakeDocument();
+		doc->readBinary(stream);
+
 		sfbx::Model* model = doc->getRootModel();
 
 		return true;
