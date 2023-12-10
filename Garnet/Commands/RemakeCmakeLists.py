@@ -30,9 +30,16 @@ add_executable(
 Shared_Post = """
 )
 
+message(STATUS "Library directory: ${CMAKE_CURRENT_SOURCE_DIR}/../src/Library/SmallFBX/lib/debug")
+
 target_include_directories(Garnet PRIVATE ../src/Library/DawnLib/include ../src/Library/glm  ../src/Library/tinygltf  ../src/Library/SmallFBX/include)
-target_link_directories(Garnet PRIVATE E:/CppDev/Garnet/Garnet/Src/Library/SmallFBX/lib/debug)
-target_link_libraries(Garnet SmallFBX.lib zlib.lib)
+link_directories(${CMAKE_CURRENT_SOURCE_DIR}/../src/Library/SmallFBX/lib/debug)
+target_link_libraries(Garnet PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../src/Library/SmallFBX/lib/debug/libSmallFBX.a ${CMAKE_CURRENT_SOURCE_DIR}/../src/Library/SmallFBX/lib/debug/zlib.a)
+
+# target_link_libraries(Garnet PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../src/Library/SmallFBX/lib/debug/SmallFBX.a ${CMAKE_CURRENT_SOURCE_DIR}/../src/Library/SmallFBX/lib/debug/zlib.a)
+# target_link_libraries(Garnet PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../src/Library/SmallFBX/lib/debug/sfbxLibList.a)
+
+set_property(TARGET Garnet PROPERTY CXX_STANDARD 17)
 
 if(EMSCRIPTEN)
 	target_link_options(Garnet PRIVATE 

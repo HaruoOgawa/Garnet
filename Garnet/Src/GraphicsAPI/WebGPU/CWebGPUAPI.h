@@ -33,9 +33,8 @@ namespace api
 		int m_Height;
 
 		// Instance
-#ifndef __EMSCRIPTEN__
 		WGPUInstance m_Instance;
-#endif
+
 		// WIndow Surface
 		WGPUSurface m_Surface;
 

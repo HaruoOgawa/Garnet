@@ -6453,6 +6453,10 @@ function dbg(text) {
       pass["setPipeline"](pipeline);
     }
 
+  function _wgpuCreateInstance() {
+      return 1;
+    }
+
   
   
   function _wgpuDeviceCreateBindGroup(deviceId, descriptor) {
@@ -7165,11 +7169,6 @@ function dbg(text) {
       return WebGPU.mgrTextureView.create(context["getCurrentTexture"]()["createView"]());
     }
 
-  function _wgpuSwapChainPresent() {
-      // TODO: This could probably be emulated with ASYNCIFY.
-      abort('wgpuSwapChainPresent is unsupported (use requestAnimationFrame via html5.h instead)');
-    }
-
   
   function _wgpuTextureCreateView(textureId, descriptor) {
       var desc;
@@ -7492,6 +7491,7 @@ var wasmImports = {
   wgpuComputePassEncoderEnd: _wgpuComputePassEncoderEnd,
   wgpuComputePassEncoderSetBindGroup: _wgpuComputePassEncoderSetBindGroup,
   wgpuComputePassEncoderSetPipeline: _wgpuComputePassEncoderSetPipeline,
+  wgpuCreateInstance: _wgpuCreateInstance,
   wgpuDeviceCreateBindGroup: _wgpuDeviceCreateBindGroup,
   wgpuDeviceCreateBindGroupLayout: _wgpuDeviceCreateBindGroupLayout,
   wgpuDeviceCreateBuffer: _wgpuDeviceCreateBuffer,
@@ -7515,7 +7515,6 @@ var wasmImports = {
   wgpuRenderPassEncoderSetPipeline: _wgpuRenderPassEncoderSetPipeline,
   wgpuRenderPassEncoderSetVertexBuffer: _wgpuRenderPassEncoderSetVertexBuffer,
   wgpuSwapChainGetCurrentTextureView: _wgpuSwapChainGetCurrentTextureView,
-  wgpuSwapChainPresent: _wgpuSwapChainPresent,
   wgpuTextureCreateView: _wgpuTextureCreateView,
   wgpuTextureDestroy: _wgpuTextureDestroy
 };
