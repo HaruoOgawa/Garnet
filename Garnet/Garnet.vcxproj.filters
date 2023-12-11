@@ -1797,5 +1797,9 @@
     <None Include="Resources\MaterialFrame\SimpleTexture_MF.json" />
     <None Include="Resources\MaterialFrame\Depth_MF.json" />
     <None Include="Resources\MaterialFrame\Blur_MF.json" />
+    <None Include="Commands\MakeEmccBuild.py" />
+    <None Include="Commands\MakeEmccBuild.bat">
+      <Filter>ソース ファイル</Filter>
+    </None>
   </ItemGroup>
 </Project>

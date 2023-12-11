@@ -7533,6 +7533,7 @@ var _OnMouseMove = Module['_OnMouseMove'] = createExportWrapper('OnMouseMove');
 var _OnMouseWheel = Module['_OnMouseWheel'] = createExportWrapper('OnMouseWheel');
 var _main = Module['_main'] = createExportWrapper('main');
 var _fflush = Module['_fflush'] = createExportWrapper('fflush');
+var setTempRet0 = createExportWrapper('setTempRet0');
 var _emscripten_stack_init = () => (_emscripten_stack_init = wasmExports['emscripten_stack_init'])();
 var _emscripten_stack_get_free = () => (_emscripten_stack_get_free = wasmExports['emscripten_stack_get_free'])();
 var _emscripten_stack_get_base = () => (_emscripten_stack_get_base = wasmExports['emscripten_stack_get_base'])();

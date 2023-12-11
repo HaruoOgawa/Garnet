@@ -6,6 +6,9 @@ ExcludedFolderList = ["Library", "Vulkan", "OpenGL", "DescMain", "CDescAppManage
 IncludeDirectoryList = ["../src/Library/DawnLib/include", "../src/Library/glm", "../src/Library/tinygltf", "../src/Library/SmallFBX/include"]
 PreprocessorList = ["USE_WEBGPU", "USE_TEXTURE_LOADER", "USE_GLTF", "USE_VIEWER_CAMERA", "USE_INPUT_SYSTEM", "USE_GPGPU", "USE_FBX", "USE_ANIMATION", "USE_SMALL_FBX"]
 
+# It's not something that changes that often, so every time there are more libs to link, I'll add my own.
+LibObjDirList = ["/SmallFBX_lib"];
+
 # 
 def FindDir(subfolders, pathList, parentPath):
 	for folder in subfolders:
@@ -18,10 +21,12 @@ def FindDir(subfolders, pathList, parentPath):
 		if(os.path.isdir(currentPath)):
 			FindDir(os.listdir(currentPath), pathList, currentPath)
 		else:
-			if(currentPath.rfind(".cpp") == -1 and currentPath.rfind(".c") == -1):
+			fileName, extension = os.path.splitext(currentPath)
+
+			if(extension == ".cpp" or extension == ".c" or extension == ".o"):
+				pathList.append(currentPath)
+			else:
 				continue
-			
-			pathList.append(currentPath)
 
 #
 def Make():
@@ -33,10 +38,19 @@ def Make():
 
 	dstPath = "./obj/"
 
-	#
+	# Find Cpp or C
 	pathList = []
 	FindDir(os.listdir(srcPath), pathList, srcPath)
 	
+	# Find obj
+	RootLibObjDir = "../EmscriptenBuild/obj_lib"
+	zlib_o_list = []
+	FindDir(os.listdir(RootLibObjDir), zlib_o_list, RootLibObjDir)
+
+	# Find SmallFBX
+	SmallFBXDir = "../Src/Library/SmallFBX/include"
+	FindDir(os.listdir(SmallFBXDir), pathList, SmallFBXDir)
+
 	# emsdk_env.bat
 	exportText += "call C:\\emsdk\\emsdk_env.bat\n"
 
@@ -44,17 +58,18 @@ def Make():
 	exportText += "call mkdir obj > nul\n"
 	exportText += "call del /s /q obj\\*  > nul\n"
 	
-	#
+	# 
 	counter = 0
 
+	# Compile to o
 	for path in pathList:
 		print("[RESULT] %s" %(path))
 		
 	    #
-		exportText += "call echo [%d/%d]" % (counter + 1, len(pathList)) + "\n"
+		exportText += "call echo [%d/%d] %s" % (counter + 1, len(pathList), path) + "\n"
 		
 		#
-		exportText += "call emcc -c " + path + " -o " + dstPath + str(counter) + ".o "
+		exportText += "call emcc -o2 -c " + path + " -o " + dstPath + str(counter) + ".o "
 		
 		# Include Dir
 		for inc in IncludeDirectoryList:
@@ -69,13 +84,17 @@ def Make():
 		counter += 1
 
 	# All Link
-	exportText += "call emcc "
+	exportText += "call emcc -o2 "
 
 	for i in range(0, counter):
 		exportText += dstPath + str(i) + ".o" + " "
+	
+	for o in zlib_o_list:
+		print("[RESULT] %s" %(o))
+		exportText += o + " "
 
 	# Compile Options
-	exportText += "-s EXPORTED_RUNTIME_METHODS=['ccall','UTF8ToString'] "
+	exportText += "-s EXPORTED_RUNTIME_METHODS='ccall','UTF8ToString','_malloc','_free' "
 	exportText += "-s USE_WEBGPU=1 "
 	exportText += "-s ALLOW_MEMORY_GROWTH "
 	exportText += "-s FETCH "
@@ -86,7 +105,7 @@ def Make():
 	exportText += "call mkdir ..\\WebRelease\n > nul"
 	exportText += "call del /s /q ..\\WebRelease\\*\n > nul"
 	exportText += "call xcopy Garnet_front.js ..\\WebRelease\\ /y /s /i\n"
-	exportText += "call xcopy Garnet*.* ..\\WebRelease\\ /y /s /i > nul\n"
+	exportText += "call xcopy Garnet*.* ..\\WebRelease\\ /y /s /i\n"
 	exportText += "call xcopy ..\\Resources ..\\WebRelease\\Resources /y /s /i > nul\n"
 	exportText += "call xcopy index.html ..\\WebRelease\\ /y /s /i > nul\n"
 	

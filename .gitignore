@@ -6,6 +6,7 @@
 # Custom
 Garnet/CMakeBuild/build/
 Garnet/EmscriptenBuild/build/
+Garnet/EmscriptenBuild/nulcall
 Garnet/DebugGL/
 Garnet/ReleaseGL/
 GarnetLauncher_Python/GarnetLauncher/GarnetLauncher/GarnetLauncher.spec
