@@ -46,7 +46,7 @@ namespace scene
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CMaterialFrameLoader>("Resources\\MaterialFrame\\Depth_MF.json", m_DepthMF));
 		
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Motions\\Walking_WithSkin.fbx", m_FbxObject, "", "ShadowPass"));
-		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Motions\\Walking.fbx", m_FbxAnimation, "", "ShadowPass"));
+		//pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Motions\\Walking.fbx", m_FbxAnimation, "", "ShadowPass"));
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Models\\CesiumMan\\glTF-Binary\\CesiumMan.glb", m_glTFObject, "", "ShadowPass"));
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Models\\BrainStem\\glTF-Binary\\BrainStem.glb", m_BrainStemDObject, "", "ShadowPass"));
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Models\\Alicia\\VRM\\AliciaSolid.vrm", m_VRMObject, "", "ShadowPass"));
@@ -68,8 +68,8 @@ namespace scene
 		// FBX Humanoid Animation Clip
 		std::vector<std::shared_ptr<animation::CAnimationClip>> AnimationClipList;
 		{
-			if (!m_FbxAnimation->CreateFromMemory(pGraphicsAPI, nullptr, nullptr, object::E3DObjectType::Fbx)) return false;
-			AnimationClipList = m_FbxAnimation->GetAnimationClipList();
+			//if (!m_FbxAnimation->CreateFromMemory(pGraphicsAPI, nullptr, nullptr, object::E3DObjectType::Fbx)) return false;
+			//AnimationClipList = m_FbxAnimation->GetAnimationClipList();
 		}
 
 		// glTFObject
