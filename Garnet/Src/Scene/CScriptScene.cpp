@@ -119,7 +119,7 @@ namespace scene
 			if (!m_FbxObject->CreateFromMemory(pGraphicsAPI, m_PBRMF, m_DepthMF, object::E3DObjectType::Fbx)) return false;
 
 			// 再生するアニメーションクリップを指定する
-			m_FbxObject->SetPlayClipIndex(1);
+			m_FbxObject->SetPlayClipIndex(0);
 
 			m_FbxObject->SetRot(glm::angleAxis(3.1415f, glm::vec3(0.0f, 1.0f, 0.0f)));
 		}
@@ -241,7 +241,7 @@ namespace scene
 		
 		if (m_MfTestObject)
 		{
-			if (!m_MfTestObject->Draw(IsDepthPass, Camera, Projection, DrawInfo)) return false;
+			//if (!m_MfTestObject->Draw(IsDepthPass, Camera, Projection, DrawInfo)) return false;
 		}
 		
 		if (m_Background)
