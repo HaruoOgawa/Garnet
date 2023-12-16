@@ -492,13 +492,13 @@ void main(){
 	vec3 specular = vec3(0.0);
 	vec3 diffuse = vec3(0.0);
 
+	// クックトランスモデルによるスペキュラーのGGXを計算する
+	float D = CalcMicrofacet(pbrParam); // マイクロファセット(微小面法線分布関数)
+	float G = CalcGeometricOcculusion(pbrParam); // 幾何減衰項
+	vec3 F = CalcFrenelReflection(pbrParam); // フレネル項
+
 	if(NdotL > 0.0 || NdotV > 0.0)
 	{
-		// クックトランスモデルによるスペキュラーのGGXを計算する
-		float D = CalcMicrofacet(pbrParam); // マイクロファセット(微小面法線分布関数)
-		float G = CalcGeometricOcculusion(pbrParam); // 幾何減衰項
-		vec3 F = CalcFrenelReflection(pbrParam); // フレネル項
-	
 		// スペキュラーBRDFを構築
 		// スペキュラーは鏡面反射: 鏡面反射とは入射角と出射角が等しい反射
 		// https://ja.wikipedia.org/wiki/%E9%8F%A1%E9%9D%A2%E5%8F%8D%E5%B0%84

@@ -885,6 +885,26 @@ namespace fbx
 				{
 					const auto& pFbxCurveNode = pFbxAnimationLayer->getAnimationCurveNodes()[SamplerIndex];
 
+					sfbx::AnimationKind AnimationKind = pFbxCurveNode->getAnimationKind();
+					animation::EAnimationTarget AnimationTarget = animation::EAnimationTarget::NONE;
+
+					if (AnimationKind == sfbx::AnimationKind::Position)
+					{
+						AnimationTarget = animation::EAnimationTarget::TRANSLATION;
+					}
+					else if (AnimationKind == sfbx::AnimationKind::Rotation)
+					{
+						AnimationTarget = animation::EAnimationTarget::ROTATION;
+					}
+					else if (AnimationKind == sfbx::AnimationKind::Scale)
+					{
+						AnimationTarget = animation::EAnimationTarget::SCALE;
+					}
+					else if (AnimationKind == sfbx::AnimationKind::DeformWeight)
+					{
+						AnimationTarget = animation::EAnimationTarget::WEIGHTS;
+					}
+
 					// samplers
 					{
 						std::vector<float> inputList;
@@ -892,8 +912,14 @@ namespace fbx
 
 						animation::EInterpolationType InterpolationType = animation::EInterpolationType::LINEAR;
 
-						const int NumComponent = static_cast<int>(pFbxCurveNode->getAnimationCurves().size());
+						int NumComponent = static_cast<int>(pFbxCurveNode->getAnimationCurves().size());
 						animation::EKeyFrameType KeyFrameType = animation::EKeyFrameType::KEYFRAME_TYPE_NONE;
+
+						// ROTATIONÇÃéûÇÕQuaternionÇ…ïœä∑Ç∑ÇÈ
+						if (AnimationTarget == animation::EAnimationTarget::ROTATION)
+						{
+							NumComponent = 4;
+						}
 
 						// SmallFbxÇÕVec3Ç©ScalerÇµÇ©ë∂ç›ÇµÇ»Ç¢
 						if (NumComponent == 3)
@@ -903,6 +929,10 @@ namespace fbx
 						else if (NumComponent == 1)
 						{
 							KeyFrameType = animation::EKeyFrameType::KEYFRAME_TYPE_SCALAR;
+						}
+						else if (NumComponent == 4)
+						{
+							KeyFrameType = animation::EKeyFrameType::KEYFRAME_TYPE_VEC4;
 						}
 						else if (NumComponent == 0)
 						{
@@ -936,11 +966,32 @@ namespace fbx
 							if (size != Values.size()) return false;
 						}
 
-						for (int v = 0; v < ValuesList[0].size(); v++)
+						// ROTATIONÇÃéûÇÕQuaternionÇ…ïœä∑Ç∑ÇÈ
+						if (AnimationTarget == animation::EAnimationTarget::ROTATION)
 						{
-							for (const auto& Values : ValuesList)
+							if (ValuesList.size() != 3) return false;
+
+							for (int v = 0; v < ValuesList[0].size(); v++)
 							{
-								outputList.push_back(Values[v]);
+								glm::quat quat = 
+									glm::angleAxis(ValuesList[2][v], glm::vec3(0.0f, 0.0f, 1.0f)) * 
+									glm::angleAxis(ValuesList[1][v], glm::vec3(0.0f, 1.0f, 0.0f)) * 
+									glm::angleAxis(ValuesList[0][v], glm::vec3(1.0f, 0.0f, 0.0f));
+
+								outputList.push_back(quat.x);
+								outputList.push_back(quat.y);
+								outputList.push_back(quat.z);
+								outputList.push_back(quat.w);
+							}
+						}
+						else
+						{
+							for (int v = 0; v < ValuesList[0].size(); v++)
+							{
+								for (const auto& Values : ValuesList)
+								{
+									outputList.push_back(Values[v]);
+								}
 							}
 						}
 
@@ -954,26 +1005,6 @@ namespace fbx
 					{
 						const auto& pFbxAnimTarget = pFbxCurveNode->getAnimationTarget();
 						
-						sfbx::AnimationKind AnimationKind = pFbxCurveNode->getAnimationKind();
-						animation::EAnimationTarget AnimationTarget = animation::EAnimationTarget::NONE;
-
-						if (AnimationKind == sfbx::AnimationKind::Position)
-						{
-							AnimationTarget = animation::EAnimationTarget::TRANSLATION;
-						}
-						else if (AnimationKind == sfbx::AnimationKind::Rotation)
-						{
-							AnimationTarget = animation::EAnimationTarget::ROTATION;
-						}
-						else if (AnimationKind == sfbx::AnimationKind::Scale)
-						{
-							AnimationTarget = animation::EAnimationTarget::SCALE;
-						}
-						else if (AnimationKind == sfbx::AnimationKind::DeformWeight)
-						{
-							AnimationTarget = animation::EAnimationTarget::WEIGHTS;
-						}
-
 						// SamplerÇClipÇ…í«â¡Ç∑ÇÈèáî‘Ç∆ChannelÇí«â¡Ç∑ÇÈèáî‘ÇÕìØÇ∂Ç≈Ç†ÇÈ
 						int TargetSamplerIndex = SamplerIndex;
 

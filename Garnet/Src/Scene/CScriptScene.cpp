@@ -104,14 +104,9 @@ namespace scene
 			m_VRMObject->GetTextureSet()->AddIBLTexture(m_IBL_DiffuseEnvMap_Texture, m_IBL_SpecularEnvMap_Texture, m_IBL_GGX_LUT_Texture);
 
 			if (!m_VRMObject->CreateFromMemory(pGraphicsAPI, m_PBRMF, m_DepthMF, object::E3DObjectType::glTF)) return false;
-
-			m_VRMObject->SetPos(glm::vec3(0.0f, 0.0f, 3.0f));
-			// 再生するアニメーションクリップを指定する
-			/*m_VRMObject->SetPlayClipIndex(0);
-			m_VRMObject->AddHumanoidAnimationClip(AnimationClipList[1]);*/
 		}
 		
-		{
+		/*{
 			m_FbxObject->GetTextureSet()->AddCubeMap(m_Cube_Texture);
 			for(const auto& FrameTexture : m_FrameTextureList) { m_FbxObject->GetTextureSet()->AddFrameTexture(FrameTexture); }
 			m_FbxObject->GetTextureSet()->AddIBLTexture(m_IBL_DiffuseEnvMap_Texture, m_IBL_SpecularEnvMap_Texture, m_IBL_GGX_LUT_Texture);
@@ -122,7 +117,7 @@ namespace scene
 			m_FbxObject->SetPlayClipIndex(0);
 
 			m_FbxObject->SetRot(glm::angleAxis(3.1415f, glm::vec3(0.0f, 1.0f, 0.0f)));
-		}
+		}*/
 
 		// m_MfTestObject
 		{
@@ -187,7 +182,7 @@ namespace scene
 		
 		if (m_FbxObject)
 		{
-			if (!m_FbxObject->Update(DrawInfo->GetDeltaSecondsTime())) return false;
+			//if (!m_FbxObject->Update(DrawInfo->GetDeltaSecondsTime())) return false;
 		}
 		
 		if (m_MfTestObject)
@@ -236,7 +231,7 @@ namespace scene
 		
 		if (m_FbxObject)
 		{
-			if (!m_FbxObject->Draw(IsDepthPass, Camera, Projection, DrawInfo, m_DebugSphere)) return false;
+			//if (!m_FbxObject->Draw(IsDepthPass, Camera, Projection, DrawInfo, m_DebugSphere)) return false;
 		}
 		
 		if (m_MfTestObject)
