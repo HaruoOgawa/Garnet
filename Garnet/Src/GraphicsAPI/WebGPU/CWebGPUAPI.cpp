@@ -218,8 +218,10 @@ namespace api
 		// コマンドの実行
 		wgpuQueueSubmit(m_Queue, 1, &m_CommandBuffer);
 
+#ifndef __EMSCRIPTEN__
 		// スワップチェーンに描画結果を送る
 		wgpuSwapChainPresent(m_SwapChain);
+#endif
 
 		return true;
 	}
@@ -298,7 +300,6 @@ namespace api
 		desc.nextInChain = nullptr; // 拡張機を設定用のフィールド
 
 		// Emscriptenの場合はInstanceを必要としない
-#ifndef __EMSCRIPTEN__
 		// インスタンスを生成
 		m_Instance = wgpuCreateInstance(&desc);
 
@@ -307,7 +308,7 @@ namespace api
 			Console::Log("[Error] Failed to create Instance\n");
 			return false;
 		}
-#endif
+
 		return true;
 	}
 
@@ -328,7 +329,7 @@ namespace api
 		surfDesc.nextInChain = reinterpret_cast<WGPUChainedStruct*>(&canvDesc); // 拡張機
 
 		//
-		m_Surface = wgpuInstanceCreateSurface(nullptr, &surfDesc); // Emscriptenの場合はInstanceを必要としない
+		m_Surface = wgpuInstanceCreateSurface(m_Instance, &surfDesc); // Emscriptenの場合はInstanceを必要としない
 #else
 		m_Surface = glfwGetWGPUSurface(m_Instance, pWindow);
 #endif // __EMSCRIPTEN__

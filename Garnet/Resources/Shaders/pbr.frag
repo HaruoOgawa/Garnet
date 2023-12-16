@@ -492,13 +492,13 @@ void main(){
 	vec3 specular = vec3(0.0);
 	vec3 diffuse = vec3(0.0);
 
+	// クックトランスモデルによるスペキュラーのGGXを計算する
+	float D = CalcMicrofacet(pbrParam); // マイクロファセット(微小面法線分布関数)
+	float G = CalcGeometricOcculusion(pbrParam); // 幾何減衰項
+	vec3 F = CalcFrenelReflection(pbrParam); // フレネル項
+
 	if(NdotL > 0.0 || NdotV > 0.0)
 	{
-		// クックトランスモデルによるスペキュラーのGGXを計算する
-		float D = CalcMicrofacet(pbrParam); // マイクロファセット(微小面法線分布関数)
-		float G = CalcGeometricOcculusion(pbrParam); // 幾何減衰項
-		vec3 F = CalcFrenelReflection(pbrParam); // フレネル項
-	
 		// スペキュラーBRDFを構築
 		// スペキュラーは鏡面反射: 鏡面反射とは入射角と出射角が等しい反射
 		// https://ja.wikipedia.org/wiki/%E9%8F%A1%E9%9D%A2%E5%8F%8D%E5%B0%84
@@ -513,25 +513,26 @@ void main(){
 
 		// レンダリング方程式を構築
 		col.rgb = NdotL * (specular + diffuse);
+	}
 
-		if(ubo.useIBL != 0)
-		{
-			// IBL
-			col.rgb += ComputeIBL(pbrParam, v, n);
-		}
-		else
-		{
-			// 反射カラーを計算
-			col.rgb += ComputeReflectionColor(pbrParam, v, n) * F;
+	// よくわからんが、if文が2回ネストになっているとComputeIBLが動かないのでひとまずif文の外に置いておく
+	if(ubo.useIBL != 0)
+	{
+		// IBL
+		col.rgb += ComputeIBL(pbrParam, v, n);
+	}
+	else
+	{
+		// 反射カラーを計算
+		col.rgb += ComputeReflectionColor(pbrParam, v, n) * F;
 
-			// 疑似的な環境光(ライトの反対方向が暗くなりすぎないようにするための対策)
-			// 本来はGIやIBLで代用するところだが、ひとまずこのような簡易的な方法で代用
-			// GIやIBLを使用するときはプリプロセッサでここは実行されないようにする
-			// (Cubemapを外したとき、これがないと真っ暗になる)
-			// https://cgworld.jp/terms/%E3%82%A2%E3%83%B3%E3%83%93%E3%82%A8%E3%83%B3%E3%83%88.html
-			vec3 gi_diffuse = clamp(specular, 0.04, 1.0);
-			col.rgb += gi_diffuse * diffuse;
-		}
+		// 疑似的な環境光(ライトの反対方向が暗くなりすぎないようにするための対策)
+		// 本来はGIやIBLで代用するところだが、ひとまずこのような簡易的な方法で代用
+		// GIやIBLを使用するときはプリプロセッサでここは実行されないようにする
+		// (Cubemapを外したとき、これがないと真っ暗になる)
+		// https://cgworld.jp/terms/%E3%82%A2%E3%83%B3%E3%83%93%E3%82%A8%E3%83%B3%E3%83%88.html
+		vec3 gi_diffuse = clamp(specular, 0.04, 1.0);
+		col.rgb += gi_diffuse * diffuse;
 	}
 
 	// AO Mapの適応

@@ -8,7 +8,19 @@ project(Garnet, C CXX)
 
 set(CMAKE_BUILD_TYPE Release)
 
-add_definitions(-DUSE_WEBGPU -D__CMAKE__)
+add_definitions(
+	-D__CMAKE__
+	-DUSE_WEBGPU
+	-DUSE_WebGPUNative
+	-DUSE_TEXTURE_LOADER
+	-DUSE_GLTF
+	-DUSE_VIEWER_CAMERA
+	-DUSE_INPUT_SYSTEM
+	-DUSE_GPGPU
+	-DUSE_FBX
+	-DUSE_ANIMATION
+	-DUSE_SMALL_FBX
+)
 
 add_executable(
 	Garnet
@@ -27,9 +39,9 @@ if(NOT EMSCRIPTEN)
 		LINK_FLAGS /SUBSYSTEM:CONSOLE
 	)
 
-	target_include_directories(Garnet PRIVATE ../src/Library/GLFW/include ../src/Library/WebGPU ../src/Library/glfw3webgpu ../src/Library/glm)
-	target_link_directories(Garnet PRIVATE ../src/Library/GLFW/lib ../src/Library/WebGPU/windows-x86_64)
-	target_link_libraries(Garnet glfw3.lib wgpu_native.lib)
+	target_include_directories(Garnet PRIVATE ../src/Library/GLFW/include ../src/Library/WebGPU ../src/Library/glfw3webgpu ../src/Library/glm  ../src/Library/tinygltf  ../src/Library/SmallFBX/include)
+	target_link_directories(Garnet PRIVATE ../src/Library/GLFW/lib ../src/Library/WebGPU/windows-x86_64 E:/CppDev/Garnet/Garnet/Src/Library/SmallFBX/lib/debug)
+	target_link_libraries(Garnet glfw3.lib wgpu_native.lib SmallFBX.lib zlib.lib)
 else()
 	set_target_properties(
 		Garnet PROPERTIES

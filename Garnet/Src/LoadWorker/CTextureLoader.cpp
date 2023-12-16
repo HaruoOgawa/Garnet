@@ -75,7 +75,7 @@ namespace resource
 			return true;
 
 			default:
-				return true;
+				break;
 			}
 		}
 

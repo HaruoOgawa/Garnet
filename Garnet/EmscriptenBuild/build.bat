@@ -10,7 +10,8 @@ cmake .
 
 call C:\emsdk\emsdk_env.bat
 call emcmake cmake .. -G "MinGW Makefiles"
-call ..\nmake.exe
+call emcmake make
+@rem call ..\nmake.exe
 
 cd ..\
 

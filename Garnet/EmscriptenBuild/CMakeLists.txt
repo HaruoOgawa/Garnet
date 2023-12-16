@@ -15,6 +15,7 @@ add_definitions(
 	-DUSE_GPGPU
 	-DUSE_FBX
 	-DUSE_ANIMATION
+	-DUSE_SMALL_FBX
 )
 
 add_executable(
@@ -51,6 +52,8 @@ add_executable(
 	../src/FBX/CFBXMomoryStream.h
 	../src/FBX/CFBXStream.cpp
 	../src/FBX/CFBXStream.h
+	../src/FBX/CSmallFBXImporter.cpp
+	../src/FBX/CSmallFBXImporter.h
 	../src/GLTF/CGLTFImporter.cpp
 	../src/GLTF/CGLTFImporter.h
 	../src/Graphics/CDrawInfo.cpp
@@ -137,11 +140,16 @@ add_executable(
 
 )
 
-target_include_directories(Garnet PRIVATE ../src/Library/DawnLib/include ../src/Library/glm  ../src/Library/tinygltf  ../src/Library/FBX-SDK/include)
-# target_include_directories(Garnet PRIVATE ../src/Library/WebGPU ../src/Library/glm  ../src/Library/tinygltf  ../src/Library/FBX-SDK/include)
+message(STATUS "Library directory: ${CMAKE_CURRENT_SOURCE_DIR}/../src/Library/SmallFBX/lib/debug")
 
-target_link_libraries(Garnet PRIVATE E:/CppDev/Garnet/Garnet/Src/Library/FBX-SDK/lib/vs2022/x64/debug/libfbxsdk-md.lib E:/CppDev/Garnet/Garnet/Src/Library/FBX-SDK/lib/vs2022/x64/debug/libxml2-md.lib E:/CppDev/Garnet/Garnet/Src/Library/FBX-SDK/lib/vs2022/x64/debug/zlib-md.lib)
-#target_link_libraries(Garnet PRIVATE ../Src/Library/FBX-SDK/lib/vs2022/x64/debug/)
+target_include_directories(Garnet PRIVATE ../src/Library/DawnLib/include ../src/Library/glm  ../src/Library/tinygltf  ../src/Library/SmallFBX/include)
+link_directories(${CMAKE_CURRENT_SOURCE_DIR}/../src/Library/SmallFBX/lib/debug)
+target_link_libraries(Garnet PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../src/Library/SmallFBX/lib/debug/libSmallFBX.a ${CMAKE_CURRENT_SOURCE_DIR}/../src/Library/SmallFBX/lib/debug/zlib.a)
+
+# target_link_libraries(Garnet PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../src/Library/SmallFBX/lib/debug/SmallFBX.a ${CMAKE_CURRENT_SOURCE_DIR}/../src/Library/SmallFBX/lib/debug/zlib.a)
+# target_link_libraries(Garnet PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../src/Library/SmallFBX/lib/debug/sfbxLibList.a)
+
+set_property(TARGET Garnet PROPERTY CXX_STANDARD 17)
 
 if(EMSCRIPTEN)
 	target_link_options(Garnet PRIVATE 
@@ -151,5 +159,4 @@ if(EMSCRIPTEN)
 		-sFETCH
 	)
 	set(CMAKE_EXECUTABLE_SUFFIX ".js")
-	set(CMAKE_CXX_FLAGS_RELEASE "/MD")
 endif()

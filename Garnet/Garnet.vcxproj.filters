@@ -1167,6 +1167,9 @@
     <ClInclude Include="Src\Object\E3DObjectType.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="Src\FBX\CSmallFBXImporter.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\Main\DescMain\DescMain.cpp">
@@ -1359,6 +1362,9 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Src\LoadWorker\C3DObjectLoader.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\FBX\CSmallFBXImporter.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1791,5 +1797,9 @@
     <None Include="Resources\MaterialFrame\SimpleTexture_MF.json" />
     <None Include="Resources\MaterialFrame\Depth_MF.json" />
     <None Include="Resources\MaterialFrame\Blur_MF.json" />
+    <None Include="Commands\MakeEmccBuild.py" />
+    <None Include="Commands\MakeEmccBuild.bat">
+      <Filter>ソース ファイル</Filter>
+    </None>
   </ItemGroup>
 </Project>
