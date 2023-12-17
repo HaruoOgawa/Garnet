@@ -24,6 +24,7 @@ namespace object
 
 		std::shared_ptr<math::CTransform> m_LocalTransform;
 		std::shared_ptr<math::CTransform> m_DefaultLocalTransform;
+		std::shared_ptr<math::CTransform> m_PrevLocalTransform;
 		glm::mat4						  m_WorldMatrix;
 		std::vector<int>                  m_ChildrenNodeIndexList;
 		std::vector<int>                  m_DynamicOffsetNumList;
@@ -74,6 +75,10 @@ namespace object
 
 		// Transformをデフォルトに戻す
 		void ResetToDefaultLocalTransform();
+
+		// 現在の姿勢を保存する
+		void SavePrevLocalTransform();
+		const std::shared_ptr<math::CTransform>& GetPrevLocalTransform() const;
 
 		const std::vector<int>& GetChildrenNodeIndexList() const;
 		void SetChildrenNodeIndexList(const std::vector<int>& NodeList);

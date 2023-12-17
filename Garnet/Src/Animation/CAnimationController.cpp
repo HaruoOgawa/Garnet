@@ -1,13 +1,13 @@
 #ifdef USE_ANIMATION
 
 #include "CAnimationController.h"
-#include "../Object/CNode.h"
 
 namespace animation
 {
 	CAnimationController::CAnimationController():
 		m_MaxBlendingTime(0.5f),
 		m_CurrBlendingTime(0.0f),
+		m_SavedPrevTrs(false),
 		m_CurrentClipIndex(-1),
 		m_CurrentClipName(""),
 		m_TotalJointIndexOffset(0)
@@ -22,6 +22,7 @@ namespace animation
 	void CAnimationController::Reset()
 	{
 		m_CurrBlendingTime = 0.0f;
+		m_SavedPrevTrs = false;
 		m_CurrentClipIndex = -1;
 		m_CurrentClipName = "";
 	}
@@ -31,6 +32,9 @@ namespace animation
 		// アニメーションの計算
 		if (m_CurrentClipIndex >= 0 && m_CurrentClipIndex < m_ClipList.size())
 		{
+			// モーションブレンド
+			if (!BlendMotion(DeltaSecondsTime)) return false;
+
 			const auto& Clip = m_ClipList[m_CurrentClipIndex];
 			if (!Clip->Update(DeltaSecondsTime)) return false;
 		}
@@ -55,6 +59,10 @@ namespace animation
 				}
 				else
 				{
+
+					// モーションブレンド
+					if (!BlendMotion(DeltaSecondsTime)) return false;
+
 					if (!Clip->Update(DeltaSecondsTime)) return false;
 				}
 			}
@@ -234,7 +242,74 @@ namespace animation
 
 	bool CAnimationController::BlendMotion(float DeltaSecondsTime)
 	{
+		if (m_CurrBlendingTime < m_MaxBlendingTime)
+		{
+			// 時間更新
+			m_CurrBlendingTime += DeltaSecondsTime;
+
+			m_CurrBlendingTime = fmaxf(m_CurrBlendingTime, 0.0f);
+			m_CurrBlendingTime = fminf(m_CurrBlendingTime, m_MaxBlendingTime);
+
+			// 現在の姿勢を保存する
+			if (!m_SavedPrevTrs)
+			{
+				for (const auto& Skin : m_SkinList)
+				{
+					for (const auto& Joint : Skin->GetJointList())
+					{
+						Joint->GetJointNode()->SavePrevLocalTransform();
+					}
+				}
+
+				m_SavedPrevTrs = true;
+			}
+
+			// 現在の姿勢と遷移前の姿勢を補完する
+			std::vector<std::shared_ptr<object::CNode>> ComputedNodeList;
+			float L = 1.0f - (m_MaxBlendingTime - m_CurrBlendingTime) / m_MaxBlendingTime;
+
+			for (const auto& Skin : m_SkinList)
+			{
+				for (const auto& Joint : Skin->GetJointList())
+				{
+					const auto& Node = Joint->GetJointNode();
+
+					/*const auto& it = std::find(ComputedNodeList.begin(), ComputedNodeList.end(), Node);
+					if (it == ComputedNodeList.end()) continue;
+
+					ComputedNodeList.push_back(Node);*/
+
+					BlendTranslation(Node, L);
+					BlendRotation(Node, L);
+				}
+			}
+		}
+
 		return true;
+	}
+
+	void CAnimationController::BlendTranslation(const std::shared_ptr<object::CNode>& Node, float L)
+	{
+		const glm::vec3& PrevPos = Node->GetPrevLocalTransform()->GetPos();
+		const glm::vec3& NextPos = Node->GetLocalTransform()->GetPos();
+		
+		glm::vec3 CurrPos = glm::vec3(0.0f);
+
+		CurrPos.x = (1.0f - L) * PrevPos.x + L * NextPos.x;
+		CurrPos.y = (1.0f - L) * PrevPos.y + L * NextPos.y;
+		CurrPos.z = (1.0f - L) * PrevPos.z + L * NextPos.z;
+
+		Node->GetLocalTransform()->SetPos(CurrPos);
+	}
+
+	void CAnimationController::BlendRotation(const std::shared_ptr<object::CNode>& Node, float L)
+	{
+		const glm::quat& PrevRot = Node->GetPrevLocalTransform()->GetRot();
+		const glm::quat& NextRot = Node->GetLocalTransform()->GetRot();
+
+		glm::quat CurrRot = glm::slerp(PrevRot, NextRot, L);
+
+		Node->GetLocalTransform()->SetRot(CurrRot);
 	}
 
 	bool CAnimationController::ReTargetingRig(const std::shared_ptr<animation::CAnimationClip>& SourceClip, const std::shared_ptr<animation::CAnimationClip>& TargetClip)

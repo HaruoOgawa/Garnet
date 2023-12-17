@@ -9,12 +9,15 @@
 #include "CSkin.h"
 #include "CAnimationClip.h"
 
+#include "../Object/CNode.h"
+
 namespace animation
 {
 	class CAnimationController
 	{
 		const float m_MaxBlendingTime;
 		float m_CurrBlendingTime;
+		bool m_SavedPrevTrs;
 
 		std::vector<std::shared_ptr<animation::CAnimationClip>> m_ClipList;
 		std::unordered_map<std::string, SAnimationLayout> m_ClipMap;
@@ -31,6 +34,9 @@ namespace animation
 		bool ReTargetingRig(const std::shared_ptr<animation::CAnimationClip>& SourceClip, const std::shared_ptr<CAnimationClip>& DstClip);
 
 		bool BlendMotion(float DeltaSecondsTime);
+
+		void BlendTranslation(const std::shared_ptr<object::CNode>& Node, float L);
+		void BlendRotation(const std::shared_ptr<object::CNode>& Node, float L);
 	public:
 		CAnimationController();
 		virtual ~CAnimationController();
