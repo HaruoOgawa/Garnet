@@ -26,7 +26,9 @@ namespace scene
 		m_BrainStemDObject(std::make_shared<object::C3DObject>("", "ShadowPass")),
 		m_VRMObject(std::make_shared<object::C3DObject>("", "ShadowPass")),
 
-		m_FbxAnimation(std::make_shared<object::C3DObject>("", "ShadowPass")),
+		m_Walk_Animation(std::make_shared<object::C3DObject>("", "ShadowPass")),
+		m_Jump_Animation(std::make_shared<object::C3DObject>("", "ShadowPass")),
+		m_Punch_Animation(std::make_shared<object::C3DObject>("", "ShadowPass")),
 		m_FbxObject(std::make_shared<object::C3DObject>("", "ShadowPass")),
 
 		m_Background(std::make_shared<object::C3DObject>("", "ShadowPass")),
@@ -45,8 +47,10 @@ namespace scene
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CMaterialFrameLoader>("Resources\\MaterialFrame\\SimpleTexture_MF.json", m_SimpleTextureMF));
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CMaterialFrameLoader>("Resources\\MaterialFrame\\Depth_MF.json", m_DepthMF));
 		
-		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Motions\\Walking_WithSkin.fbx", m_FbxObject, "", "ShadowPass"));
-		//pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Motions\\Walking.fbx", m_FbxAnimation, "", "ShadowPass"));
+		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Avatar\\X_Bot.fbx", m_FbxObject, "", "ShadowPass"));
+		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Motions\\Walking.fbx", m_Walk_Animation, "", "ShadowPass"));
+		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Motions\\Jumping.fbx", m_Jump_Animation, "", "ShadowPass"));
+		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Motions\\Punch Combo.fbx", m_Punch_Animation, "", "ShadowPass"));
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Models\\CesiumMan\\glTF-Binary\\CesiumMan.glb", m_glTFObject, "", "ShadowPass"));
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Models\\BrainStem\\glTF-Binary\\BrainStem.glb", m_BrainStemDObject, "", "ShadowPass"));
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Models\\Alicia\\VRM\\AliciaSolid.vrm", m_VRMObject, "", "ShadowPass"));
@@ -68,8 +72,13 @@ namespace scene
 		// FBX Humanoid Animation Clip
 		std::vector<std::shared_ptr<animation::CAnimationClip>> AnimationClipList;
 		{
-			//if (!m_FbxAnimation->CreateFromMemory(pGraphicsAPI, nullptr, nullptr, object::E3DObjectType::Fbx)) return false;
-			//AnimationClipList = m_FbxAnimation->GetAnimationClipList();
+			if (!m_Walk_Animation->CreateFromMemory(pGraphicsAPI, nullptr, nullptr, object::E3DObjectType::Fbx)) return false;
+			if (!m_Jump_Animation->CreateFromMemory(pGraphicsAPI, nullptr, nullptr, object::E3DObjectType::Fbx)) return false;
+			if (!m_Punch_Animation->CreateFromMemory(pGraphicsAPI, nullptr, nullptr, object::E3DObjectType::Fbx)) return false;
+
+			AnimationClipList.push_back(m_Walk_Animation->GetAnimationClipList()[0]);
+			AnimationClipList.push_back(m_Jump_Animation->GetAnimationClipList()[0]);
+			AnimationClipList.push_back(m_Punch_Animation->GetAnimationClipList()[0]);
 		}
 
 		// glTFObject
@@ -98,26 +107,30 @@ namespace scene
 			m_BrainStemDObject->SetRot(glm::angleAxis(3.1415f, glm::vec3(0.0f, 1.0f, 0.0f)));
 		}
 		
-		{
+		/*{
 			m_VRMObject->GetTextureSet()->AddCubeMap(m_Cube_Texture);
 			for(const auto& FrameTexture : m_FrameTextureList) { m_VRMObject->GetTextureSet()->AddFrameTexture(FrameTexture); }
 			m_VRMObject->GetTextureSet()->AddIBLTexture(m_IBL_DiffuseEnvMap_Texture, m_IBL_SpecularEnvMap_Texture, m_IBL_GGX_LUT_Texture);
 
 			if (!m_VRMObject->CreateFromMemory(pGraphicsAPI, m_PBRMF, m_DepthMF, object::E3DObjectType::glTF)) return false;
-		}
+		}*/
 		
-		/*{
+		{
 			m_FbxObject->GetTextureSet()->AddCubeMap(m_Cube_Texture);
 			for(const auto& FrameTexture : m_FrameTextureList) { m_FbxObject->GetTextureSet()->AddFrameTexture(FrameTexture); }
 			m_FbxObject->GetTextureSet()->AddIBLTexture(m_IBL_DiffuseEnvMap_Texture, m_IBL_SpecularEnvMap_Texture, m_IBL_GGX_LUT_Texture);
 
 			if (!m_FbxObject->CreateFromMemory(pGraphicsAPI, m_PBRMF, m_DepthMF, object::E3DObjectType::Fbx)) return false;
 
+			m_FbxObject->AddHumanoidAnimationClip(AnimationClipList[0]);
+			m_FbxObject->AddHumanoidAnimationClip(AnimationClipList[1]);
+			m_FbxObject->AddHumanoidAnimationClip(AnimationClipList[2]);
+			
 			// 再生するアニメーションクリップを指定する
-			m_FbxObject->SetPlayClipIndex(0);
+			m_FbxObject->SetPlayClipIndex(2);
 
 			m_FbxObject->SetRot(glm::angleAxis(3.1415f, glm::vec3(0.0f, 1.0f, 0.0f)));
-		}*/
+		}
 
 		// m_MfTestObject
 		{
@@ -177,12 +190,12 @@ namespace scene
 		
 		if (m_VRMObject)
 		{
-			if (!m_VRMObject->Update(DrawInfo->GetDeltaSecondsTime())) return false;
+			//if (!m_VRMObject->Update(DrawInfo->GetDeltaSecondsTime())) return false;
 		}
 		
 		if (m_FbxObject)
 		{
-			//if (!m_FbxObject->Update(DrawInfo->GetDeltaSecondsTime())) return false;
+			if (!m_FbxObject->Update(DrawInfo->GetDeltaSecondsTime())) return false;
 		}
 		
 		if (m_MfTestObject)
@@ -226,12 +239,12 @@ namespace scene
 		
 		if (m_VRMObject)
 		{
-			if (!m_VRMObject->Draw(IsDepthPass, Camera, Projection, DrawInfo, m_DebugSphere)) return false;
+			//if (!m_VRMObject->Draw(IsDepthPass, Camera, Projection, DrawInfo, m_DebugSphere)) return false;
 		}
 		
 		if (m_FbxObject)
 		{
-			//if (!m_FbxObject->Draw(IsDepthPass, Camera, Projection, DrawInfo, m_DebugSphere)) return false;
+			if (!m_FbxObject->Draw(IsDepthPass, Camera, Projection, DrawInfo, m_DebugSphere)) return false;
 		}
 		
 		if (m_MfTestObject)

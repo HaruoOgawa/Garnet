@@ -20,7 +20,8 @@ namespace object
 		m_ObjectTransform(std::make_shared<math::CTransform>()),
 		m_CurrentClipIndex(-1),
 		m_TotalJointIndexOffset(0),
-		m_TextureSet(std::make_shared<graphics::CTextureSet>())
+		m_TextureSet(std::make_shared<graphics::CTextureSet>()),
+		m_FileName("")
 	{
 	}
 
@@ -31,9 +32,10 @@ namespace object
 		m_MaterialList.clear();
 	}
 
-	void C3DObject::SetBinaryData(const std::vector<unsigned char>& Data)
+	void C3DObject::SetBinaryData(const std::vector<unsigned char>& Data, const std::string& FileName)
 	{
 		m_BinaryData = Data;
+		m_FileName = FileName;
 	}
 
 	bool C3DObject::CreateSimply(api::IGraphicsAPI* pGraphicsAPI, std::shared_ptr<object::C3DObject>& Object,
@@ -78,7 +80,7 @@ namespace object
 #ifdef USE_SMALL_FBX
 			if (!fbx::CSmallFBXImporter::ImportFBX(pGraphicsAPI, m_BinaryData, this, BaseMF)) return false;
 #else
-			if (!fbx::CFBXImporter::ImportFBX(pGraphicsAPI, "Resources\\Motions\\Walking_WithSkin.fbx", this, BaseMF)) return false;
+			if (!fbx::CFBXImporter::ImportFBX(pGraphicsAPI, m_FileName, this, BaseMF)) return false;
 			
 #endif // USE_SMALL_FBX
 			break;
@@ -534,7 +536,7 @@ namespace object
 		// RigのReTargetingを行う
 		// リターゲティングとはリグの形が異なるアニメーションを自身のアニメーションに合うように調整すること
 		// 例えば身長が違うとアバターが伸びてしまうしリグが反対だとねじれてしまう
-		if (!ReTargetingRig(SourceClip, TargetClip)) return;
+		//if (!ReTargetingRig(SourceClip, TargetClip)) return;
 
 		m_AnimationClipList.push_back(TargetClip);
 	}

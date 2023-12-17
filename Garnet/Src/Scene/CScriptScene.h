@@ -30,7 +30,9 @@ namespace scene
 		std::shared_ptr<object::C3DObject> m_MfTestObject;
 
 		// Fbx
-		std::shared_ptr<object::C3DObject> m_FbxAnimation;
+		std::shared_ptr<object::C3DObject> m_Walk_Animation;
+		std::shared_ptr<object::C3DObject> m_Jump_Animation;
+		std::shared_ptr<object::C3DObject> m_Punch_Animation;
 		std::shared_ptr<object::C3DObject> m_FbxObject;
 
 		// Tex of FrameBuffer

@@ -16,6 +16,7 @@ namespace resource
 		resource::ELoadStatus m_Status;
 
 		std::shared_ptr<CFile> m_File;
+		std::string m_FileName;
 
 		std::shared_ptr<object::C3DObject> m_TargetObject;
 

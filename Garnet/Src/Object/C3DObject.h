@@ -22,6 +22,7 @@ namespace object
 		bool m_IsCreated;
 
 		std::vector<unsigned char> m_BinaryData;
+		std::string m_FileName;
 
 		const std::string m_PassName;
 		const std::string m_DepthPassName;
@@ -55,7 +56,7 @@ namespace object
 		C3DObject(const std::string& PassName, const std::string& DepthPassName);
 		virtual ~C3DObject();
 
-		void SetBinaryData(const std::vector<unsigned char>& Data);
+		void SetBinaryData(const std::vector<unsigned char>& Data, const std::string& FileName);
 
 		static bool CreateSimply(api::IGraphicsAPI* pGraphicsAPI, std::shared_ptr<object::C3DObject>& Object,
 			const std::shared_ptr<renderer::CRendererCreateInfo>& createInfo,
