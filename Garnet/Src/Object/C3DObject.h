@@ -1,5 +1,8 @@
 #pragma once
 
+#include <vector>
+#include <memory>
+
 #include "CNode.h"
 #include "E3DObjectType.h"
 #include "../Graphics/CMaterial.h"
@@ -7,11 +10,8 @@
 #include "../Graphics/CMaterialFrame.h"
 #include "../Math/CTransform.h"
 #ifdef USE_ANIMATION
-#include "../Animation/CSkin.h"
-#include "../Animation/CAnimationClip.h"
+#include "../Animation/CAnimationController.h"
 #endif
-#include <vector>
-#include <memory>
 
 namespace object
 {
@@ -37,21 +37,12 @@ namespace object
 
 		std::shared_ptr<graphics::CTextureSet> m_TextureSet;
 #ifdef USE_ANIMATION
-		std::vector<std::shared_ptr<animation::CSkin>> m_AnimationSkinList;
-		std::vector<std::shared_ptr<animation::CAnimationClip>> m_AnimationClipList;
+		std::shared_ptr<animation::CAnimationController> m_AnimationController;
 #endif
-
-		int m_CurrentClipIndex;
-		int m_TotalJointIndexOffset;
 	private:
 		void CalcWorldMatrix(std::shared_ptr<CNode>& Node, const glm::mat4& ParentWorldMatrix);
 
 		void ApplyParentNode(std::shared_ptr<CNode>& Node, const std::shared_ptr<CNode>& ParentNode);
-
-#ifdef USE_ANIMATION
-		bool IsPlayingAnimation();
-		bool ReTargetingRig(const std::shared_ptr<animation::CAnimationClip>& SourceClip, const std::shared_ptr<animation::CAnimationClip>& DstClip);
-#endif
 	public:
 		C3DObject(const std::string& PassName, const std::string& DepthPassName);
 		virtual ~C3DObject();
@@ -84,9 +75,9 @@ namespace object
 		const std::vector<std::shared_ptr<graphics::CMaterial>>& GetMaterialList() const;
 		
 #ifdef USE_ANIMATION
-		void AddAnimationSkin(const std::shared_ptr<animation::CSkin >& Skin);
+		void AddAnimationSkin(const std::shared_ptr<animation::CSkin>& Skin);
 		void AddAnimationClip(const std::shared_ptr<animation::CAnimationClip>& Clip);
-		void AddHumanoidAnimationClip(const std::shared_ptr<animation::CAnimationClip>& SourceClip);
+		void AddHumanoidAnimationClip(const std::shared_ptr<animation::CAnimationClip>& SourceClip, const std::string& MotionName, animation::SAnimationLayout Layout);
 
 		const std::vector<std::shared_ptr<animation::CAnimationClip>>& GetAnimationClipList() const;
 #endif
@@ -103,7 +94,8 @@ namespace object
 		const glm::vec3& GetScale() const;
 		void SetScale(const glm::vec3& Scale);
 
-		void SetPlayClipIndex(int Index);
+		void ChangeMotion(int Index); // インデックス指定でモーションを変更
+		void ChangeMotion(const std::string& MotionName); // 名前指定でモーションを変更
 		
 		const std::shared_ptr<graphics::CTextureSet>& GetTextureSet() const;
 	};

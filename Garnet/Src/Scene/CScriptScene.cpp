@@ -89,7 +89,7 @@ namespace scene
 
 			if (!m_glTFObject->CreateFromMemory(pGraphicsAPI, m_PBRMF, m_DepthMF, object::E3DObjectType::glTF)) return false;
 
-			m_glTFObject->SetPlayClipIndex(0);
+			m_glTFObject->ChangeMotion(0);
 			m_glTFObject->SetPos(glm::vec3(2.0f, 0.0f, 0.0f));
 		}
 		
@@ -101,7 +101,7 @@ namespace scene
 			if (!m_BrainStemDObject->CreateFromMemory(pGraphicsAPI, m_PBRMF, m_DepthMF, object::E3DObjectType::glTF)) return false;
 
 			// 再生するアニメーションクリップを指定する
-			m_BrainStemDObject->SetPlayClipIndex(0);
+			m_BrainStemDObject->ChangeMotion(0);
 
 			m_BrainStemDObject->SetPos(glm::vec3(-2.0f, 0.0f, 0.0f));
 			m_BrainStemDObject->SetRot(glm::angleAxis(3.1415f, glm::vec3(0.0f, 1.0f, 0.0f)));
@@ -122,12 +122,12 @@ namespace scene
 
 			if (!m_FbxObject->CreateFromMemory(pGraphicsAPI, m_PBRMF, m_DepthMF, object::E3DObjectType::Fbx)) return false;
 
-			m_FbxObject->AddHumanoidAnimationClip(AnimationClipList[0]);
-			m_FbxObject->AddHumanoidAnimationClip(AnimationClipList[1]);
-			m_FbxObject->AddHumanoidAnimationClip(AnimationClipList[2]);
+			m_FbxObject->AddHumanoidAnimationClip(AnimationClipList[0], "Walk", { nullptr, true, "" });
+			m_FbxObject->AddHumanoidAnimationClip(AnimationClipList[1], "Jump", { nullptr, true, "" });
+			m_FbxObject->AddHumanoidAnimationClip(AnimationClipList[2], "Punch", { nullptr, true, "" });
 			
 			// 再生するアニメーションクリップを指定する
-			m_FbxObject->SetPlayClipIndex(2);
+			m_FbxObject->ChangeMotion("Walk");
 
 			m_FbxObject->SetRot(glm::angleAxis(3.1415f, glm::vec3(0.0f, 1.0f, 0.0f)));
 		}

@@ -1170,7 +1170,10 @@
     <ClInclude Include="Src\FBX\CSmallFBXImporter.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="CAnimationController.h">
+    <ClInclude Include="Src\Animation\CAnimationController.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Animation\SAnimationLayout.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
@@ -1370,7 +1373,7 @@
     <ClCompile Include="Src\FBX\CSmallFBXImporter.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="CAnimationController.cpp">
+    <ClCompile Include="Src\Animation\CAnimationController.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>

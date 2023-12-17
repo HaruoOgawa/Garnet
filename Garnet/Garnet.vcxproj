@@ -575,7 +575,8 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="CAnimationController.h" />
+    <ClInclude Include="Src\Animation\CAnimationController.h" />
+    <ClInclude Include="Src\Animation\SAnimationLayout.h" />
     <ClInclude Include="Src\FBX\CSmallFBXImporter.h" />
     <ClInclude Include="Src\LoadWorker\C3DObjectLoader.h" />
     <ClInclude Include="Src\LoadWorker\CTextureLoader.h" />
@@ -963,7 +964,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClInclude Include="Src\Interface\IRenderer.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="CAnimationController.cpp" />
+    <ClCompile Include="Src\Animation\CAnimationController.cpp" />
     <ClCompile Include="Src\FBX\CSmallFBXImporter.cpp" />
     <ClCompile Include="Src\LoadWorker\C3DObjectLoader.cpp" />
     <ClCompile Include="Src\LoadWorker\CTextureLoader.cpp" />

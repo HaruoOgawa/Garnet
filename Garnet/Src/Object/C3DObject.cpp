@@ -18,8 +18,9 @@ namespace object
 		m_PassName(PassName),
 		m_DepthPassName(DepthPassName),
 		m_ObjectTransform(std::make_shared<math::CTransform>()),
-		m_CurrentClipIndex(-1),
-		m_TotalJointIndexOffset(0),
+#ifdef USE_ANIMATION
+		m_AnimationController(std::make_shared<animation::CAnimationController>()),
+#endif
 		m_TextureSet(std::make_shared<graphics::CTextureSet>()),
 		m_FileName("")
 	{
@@ -254,14 +255,8 @@ namespace object
 		if (!m_IsCreated) return true;
 
 #ifdef USE_ANIMATION
-		// アニメーションの計算
-		if (IsPlayingAnimation())
-		{
-			const auto& Clip = m_AnimationClipList[m_CurrentClipIndex];
-			if (!Clip->Update(DeltaSecondsTime)) return false;
-		}
+		if (!m_AnimationController->Update(DeltaSecondsTime)) return false;
 #endif
-
 		// ワールド行列の更新
 		// 全ノードマイフレーム更新しているので、そのうちキャッシュを入れて更新は必要なものだけにする
 		CalcWorldMatrix();
@@ -291,7 +286,7 @@ namespace object
 			Material->SetUniformValue("time", &glm::vec1(DrawInfo->GetSecondsTime())[0]);
 			Material->SetUniformValue("deltaTime", &glm::vec1(DrawInfo->GetDeltaSecondsTime())[0]);
 #ifdef USE_ANIMATION
-			Material->SetUniformValue("useSkinMeshAnimation", &glm::ivec1( (IsPlayingAnimation()? 1 : 0) )[0]);
+			Material->SetUniformValue("useSkinMeshAnimation", &glm::ivec1( (m_AnimationController->IsPlayingAnimation()? 1 : 0) )[0]);
 #endif
 		}
 
@@ -315,20 +310,14 @@ namespace object
 			DepthMaterial->SetUniformValue("time", &glm::vec1(DrawInfo->GetSecondsTime())[0]);
 			DepthMaterial->SetUniformValue("deltaTime", &glm::vec1(DrawInfo->GetDeltaSecondsTime())[0]);
 #ifdef USE_ANIMATION
-			DepthMaterial->SetUniformValue("useSkinMeshAnimation", &glm::ivec1((IsPlayingAnimation() ? 1 : 0))[0]);
+			DepthMaterial->SetUniformValue("useSkinMeshAnimation", &glm::ivec1((m_AnimationController->IsPlayingAnimation() ? 1 : 0))[0]);
 #endif
 		}
 
 #ifdef USE_ANIMATION
 		// SSBOのサイズをDynamicOffset毎に変更できるかわからないのでひとまず全部まとめて渡す
 		std::vector<glm::mat4> SkinMatrixList;
-		if (IsPlayingAnimation())
-		{
-			for (const auto& Skin : m_AnimationSkinList)
-			{
-				if (!Skin->CalcSkinMatrixList(SkinMatrixList, m_ObjectTransform->GetModelMatrix())) return false;
-			}
-		}
+		if (!m_AnimationController->CalcSkinMatrixList(SkinMatrixList, m_ObjectTransform->GetModelMatrix())) return false;
 #endif
 
 		// 描画
@@ -345,16 +334,6 @@ namespace object
 
 			// SkinMatrixを計算
 			int SkinIndex = Node->GetSkinIndex();
-
-#ifdef USE_ANIMATION
-			/*std::vector<glm::mat4> SkinMatrixList;
-			if (SkinIndex >= 0 && SkinIndex < m_AnimationSkinList.size() && IsPlayingAnimation())
-			{
-				const auto& Skin = m_AnimationSkinList[SkinIndex];
-				
-				if (!Skin->CalcSkinMatrixList(SkinMatrixList, m_ObjectTransform->GetModelMatrix())) return false;
-			}*/
-#endif
 
 			for (int PrimitiveIndex = 0; PrimitiveIndex < Mesh->GetPrimitiveList().size(); PrimitiveIndex++)
 			{
@@ -381,11 +360,12 @@ namespace object
 
 #ifdef USE_ANIMATION
 				// SkinMatrixをShaderに渡す
-				if (SkinIndex >= 0 && SkinIndex < m_AnimationSkinList.size() && IsPlayingAnimation())
+				const auto& SkinList = m_AnimationController->GetSkinList();
+				if (SkinIndex >= 0 && SkinIndex < SkinList.size() && m_AnimationController->IsPlayingAnimation())
 				{
 					Material->SetUniformValue("r_SkinMatrixBuffer", &SkinMatrixList[0], DynamicOffsetNum);
 
-					int JointIndexOffset = m_AnimationSkinList[SkinIndex]->GetJointIndexOffset();
+					int JointIndexOffset = SkinList[SkinIndex]->GetJointIndexOffset();
 					Material->SetUniformValue("JointIndexOffset", &glm::ivec1(JointIndexOffset)[0], DynamicOffsetNum);
 				}
 #endif
@@ -460,149 +440,22 @@ namespace object
 #ifdef USE_ANIMATION
 	void C3DObject::AddAnimationSkin(const std::shared_ptr<animation::CSkin >& Skin)
 	{
-		int JointIndexOffset = m_TotalJointIndexOffset;
-
-		Skin->SetJointIndexOffset(JointIndexOffset);
-
-		m_AnimationSkinList.push_back(Skin);
-
-		m_TotalJointIndexOffset += static_cast<int>(Skin->GetJointList().size());
+		m_AnimationController->AddAnimationSkin(Skin);
 	}
 
 	void C3DObject::AddAnimationClip(const std::shared_ptr<animation::CAnimationClip>& Clip)
 	{
-		m_AnimationClipList.push_back(Clip);
+		m_AnimationController->AddAnimationClip(Clip);
 	}
 
-	void C3DObject::AddHumanoidAnimationClip(const std::shared_ptr<animation::CAnimationClip>& SourceClip)
+	void C3DObject::AddHumanoidAnimationClip(const std::shared_ptr<animation::CAnimationClip>& SourceClip, const std::string& MotionName, animation::SAnimationLayout Layout)
 	{
-		// Clipの値をコピーする
-		std::shared_ptr<animation::CAnimationClip> TargetClip = std::make_shared<animation::CAnimationClip>();
-
-		// samplers
-		for (const auto& SourceSampler : SourceClip->GetSamplerList())
-		{
-			std::shared_ptr<animation::CAnimationSampler> TargetSampler = std::make_shared<animation::CAnimationSampler>(SourceSampler->GetInterpolationType());
-
-			for (const auto& SourceKeyFrame : SourceSampler->GetKeyFrameList())
-			{
-				std::shared_ptr<animation::CKeyFrame> TargetKeyFrame = std::make_shared<animation::CKeyFrame>(SourceKeyFrame->GetType());
-
-				TargetKeyFrame->SetInput(SourceKeyFrame->GetInput());
-
-				std::vector<float> TargetOutput = SourceKeyFrame->GetOutput();
-				TargetKeyFrame->SetOutput(TargetOutput);
-
-				TargetSampler->AddKeyFrame(TargetKeyFrame);
-			}
-
-			TargetSampler->SetStartTime(SourceSampler->GetStartTime());
-			TargetSampler->SetEndTime(SourceSampler->GetEndTime());
-
-			TargetClip->AddAnimationSampler(TargetSampler);
-		}
-		
-		// channels
-		// 同じ名前のノードは一つしかない前提でchannelを作成する
-		for (const auto& SourceChannel : SourceClip->GetChannelList())
-		{
-			std::shared_ptr<object::CNode> TargetNode = nullptr;
-
-			for (const auto& Skin : m_AnimationSkinList)
-			{
-				for (const auto& Joint : Skin->GetJointList())
-				{
-					if (Joint->GetBoneName() == animation::EHumanoidBones::None) continue;
-
-					if (Joint->GetBoneName() == SourceChannel->GetBoneName())
-					{
-						TargetNode = Joint->GetJointNode();
-
-						break;
-					}
-				}
-
-				if (TargetNode)
-				{
-					break;
-				}
-			}
-
-			std::shared_ptr<animation::CAnimationChannel> TargetChannel = std::make_shared<animation::CAnimationChannel>(SourceChannel->GetSamplerIndex(), SourceChannel->GetAnimationTarget(), TargetNode, SourceChannel->GetBoneName());
-
-			TargetClip->AddAnimationChannel(TargetChannel);
-		}
-		
-		// RigのReTargetingを行う
-		// リターゲティングとはリグの形が異なるアニメーションを自身のアニメーションに合うように調整すること
-		// 例えば身長が違うとアバターが伸びてしまうしリグが反対だとねじれてしまう
-		//if (!ReTargetingRig(SourceClip, TargetClip)) return;
-
-		m_AnimationClipList.push_back(TargetClip);
-	}
-
-	bool C3DObject::ReTargetingRig(const std::shared_ptr<animation::CAnimationClip>& SourceClip, const std::shared_ptr<animation::CAnimationClip>& TargetClip)
-	{
-		const auto& SourceSkin = SourceClip->GetDefaultSkin();
-		if (!SourceSkin) return false;
-
-		// Rigのリターゲティングを実行する
-		for (const auto& TargetChannel : TargetClip->GetChannelList())
-		{
-			int TargetSamplerIndex = TargetChannel->GetSamplerIndex();
-			if (TargetSamplerIndex < 0 || TargetSamplerIndex >= TargetClip->GetSamplerList().size()) continue;
-
-			const auto& TargetSampler = TargetClip->GetSamplerList()[TargetSamplerIndex];
-
-			animation::EHumanoidBones BoneName = TargetChannel->GetBoneName();
-
-			// BoneTableに登録されていないものについては処理の対象外とする
-			if (BoneName == animation::EHumanoidBones::None) continue;
-
-			const auto& SourceBone = SourceSkin->GetBone(BoneName);
-			if (!SourceBone) continue;
-
-			const glm::mat4 SourceRest = SourceBone->GetJointNode()->GetDefaultLocalMatrix();
-			const glm::mat4 InverseSourceRest = glm::inverse(SourceRest);
-
-			const glm::mat4 SourcePGRest = SourceBone->GetJointNode()->CalcDefaultParentWorldMatrix();
-			const glm::mat4 InverseSourcePGRest = glm::inverse(SourcePGRest);
-
-			for (const auto& TargetSkin : m_AnimationSkinList)
-			{
-				const auto& TargetBone = TargetSkin->GetBone(BoneName);
-				if (!TargetBone) continue;
-
-				const glm::mat4 TargetRest = TargetBone->GetJointNode()->GetDefaultLocalMatrix();
-
-				const glm::mat4 TargetPGRest = TargetBone->GetJointNode()->CalcDefaultParentWorldMatrix();
-				const glm::mat4 InverseTargetPGRest = glm::inverse(TargetPGRest);
-
-				for (const auto& TargetKeyFrame : TargetSampler->GetKeyFrameList())
-				{
-					const float CurrentTime = TargetKeyFrame->GetInput();
-
-					glm::mat4 SourcePose = glm::mat4(1.0f);
-					TargetKeyFrame->GetOutput(&SourcePose[0][0]);
-
-					glm::mat4 SourceAnim = SourcePGRest * SourcePose * InverseSourceRest * InverseSourcePGRest;
-
-					glm::mat4 TargetPose = InverseTargetPGRest * SourceAnim * TargetPGRest * TargetRest;
-
-					TargetKeyFrame->SetOutput(&TargetPose[0][0], sizeof(glm::mat4));
-				}
-
-				// 対象のBoneについては一度しか計算しない
-				break;
-			}
-		}
-		
-		return true;
+		m_AnimationController->AddHumanoidAnimationClip(SourceClip, MotionName, Layout);
 	}
 
 	const std::vector<std::shared_ptr<animation::CAnimationClip>>& C3DObject::GetAnimationClipList() const
 	{
-		return m_AnimationClipList;
+		return m_AnimationController->GetAnimationClipList();
 	}
 #endif
 
@@ -651,17 +504,15 @@ namespace object
 		m_ObjectTransform->SetScale(Scale);
 	}
 
-	void C3DObject::SetPlayClipIndex(int Index)
+	void C3DObject::ChangeMotion(int Index)
 	{
-		m_CurrentClipIndex = Index;
+		m_AnimationController->ChangeMotion(Index);
 	}
 
-#ifdef USE_ANIMATION
-	bool  C3DObject::IsPlayingAnimation()
+	void C3DObject::ChangeMotion(const std::string& MotionName)
 	{
-		return (m_CurrentClipIndex >= 0 && m_CurrentClipIndex < m_AnimationClipList.size());
+		m_AnimationController->ChangeMotion(MotionName);
 	}
-#endif
 
 	const std::shared_ptr<graphics::CTextureSet>& C3DObject::GetTextureSet() const
 	{
