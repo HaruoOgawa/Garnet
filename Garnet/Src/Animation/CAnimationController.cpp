@@ -36,10 +36,27 @@ namespace animation
 		}
 		else if (m_ClipMap.find(m_CurrentClipName) != m_ClipMap.end())
 		{
-			const auto& Clip = m_ClipMap.find(m_CurrentClipName);
-			if (Clip != m_ClipMap.end())
+			const auto& Layout = m_ClipMap.find(m_CurrentClipName);
+			if (Layout != m_ClipMap.end())
 			{
-				if (!Clip->second.Clip->Update(DeltaSecondsTime)) return false;
+				const auto& Clip = Layout->second.Clip;
+
+				if (Clip->IsEnd() && !Clip->IsLoop())
+				{
+					// アニメーションが終了しているので次のアニメーションに遷移する
+					const std::string& NextClipName = Layout->second.NextClipName;
+
+					if (!NextClipName.empty())
+					{
+						ChangeMotion(NextClipName);
+
+						return true;
+					}
+				}
+				else
+				{
+					if (!Clip->Update(DeltaSecondsTime)) return false;
+				}
 			}
 		}
 
@@ -52,6 +69,13 @@ namespace animation
 		Reset();
 
 		m_CurrentClipIndex = Index;
+
+		// 初期化
+		if (m_CurrentClipIndex >= 0 && m_CurrentClipIndex < m_ClipList.size())
+		{
+			const auto& Clip = m_ClipList[m_CurrentClipIndex];
+			Clip->Initialize();
+		}
 	}
 
 	// 名前指定でモーションを変更
@@ -60,6 +84,16 @@ namespace animation
 		Reset();
 
 		m_CurrentClipName = MotionName;
+
+		// 初期化
+		if (m_ClipMap.find(m_CurrentClipName) != m_ClipMap.end())
+		{
+			const auto& Clip = m_ClipMap.find(m_CurrentClipName);
+			if (Clip != m_ClipMap.end())
+			{
+				Clip->second.Clip->Initialize();
+			}
+		}
 	}
 
 	bool CAnimationController::CalcSkinMatrixList(std::vector<glm::mat4>& MatrixList, const glm::mat4& ObjectModelMatrix)
@@ -118,7 +152,7 @@ namespace animation
 		m_ClipList.push_back(Clip);
 	}
 
-	void CAnimationController::AddHumanoidAnimationClip(const std::shared_ptr<animation::CAnimationClip>& SourceClip, const std::string& MotionName, animation::SAnimationLayout Layout)
+	void CAnimationController::AddHumanoidAnimationClip(const std::shared_ptr<animation::CAnimationClip>& SourceClip, const std::string& MotionName, animation::SAnimationLayout Layout, bool IsLoop)
 	{
 		// Clipの値をコピーする
 		std::shared_ptr<animation::CAnimationClip> TargetClip = std::make_shared<animation::CAnimationClip>();
@@ -181,6 +215,8 @@ namespace animation
 		// リターゲティングとはリグの形が異なるアニメーションを自身のアニメーションに合うように調整すること
 		// 例えば身長が違うとアバターが伸びてしまうしリグが反対だとねじれてしまう
 		//if (!ReTargetingRig(SourceClip, TargetClip)) return;
+
+		TargetClip->SetIsLoop(IsLoop);
 
 		Layout.Clip = TargetClip;
 		AddMotion(MotionName, Layout);

@@ -448,9 +448,9 @@ namespace object
 		m_AnimationController->AddAnimationClip(Clip);
 	}
 
-	void C3DObject::AddHumanoidAnimationClip(const std::shared_ptr<animation::CAnimationClip>& SourceClip, const std::string& MotionName, animation::SAnimationLayout Layout)
+	void C3DObject::AddHumanoidAnimationClip(const std::shared_ptr<animation::CAnimationClip>& SourceClip, const std::string& MotionName, animation::SAnimationLayout Layout, bool IsLoop)
 	{
-		m_AnimationController->AddHumanoidAnimationClip(SourceClip, MotionName, Layout);
+		m_AnimationController->AddHumanoidAnimationClip(SourceClip, MotionName, Layout, IsLoop);
 	}
 
 	const std::vector<std::shared_ptr<animation::CAnimationClip>>& C3DObject::GetAnimationClipList() const

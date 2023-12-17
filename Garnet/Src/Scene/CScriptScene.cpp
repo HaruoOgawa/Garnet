@@ -122,9 +122,9 @@ namespace scene
 
 			if (!m_FbxObject->CreateFromMemory(pGraphicsAPI, m_PBRMF, m_DepthMF, object::E3DObjectType::Fbx)) return false;
 
-			m_FbxObject->AddHumanoidAnimationClip(AnimationClipList[0], "Walk", { nullptr, true, "" });
-			m_FbxObject->AddHumanoidAnimationClip(AnimationClipList[1], "Jump", { nullptr, true, "" });
-			m_FbxObject->AddHumanoidAnimationClip(AnimationClipList[2], "Punch", { nullptr, true, "" });
+			m_FbxObject->AddHumanoidAnimationClip(AnimationClipList[0], "Walk", { nullptr, "" }, true);
+			m_FbxObject->AddHumanoidAnimationClip(AnimationClipList[1], "Jump", { nullptr, "Walk" }, false);
+			m_FbxObject->AddHumanoidAnimationClip(AnimationClipList[2], "Punch", { nullptr, "Walk" }, false);
 			
 			// 再生するアニメーションクリップを指定する
 			m_FbxObject->ChangeMotion("Walk");
@@ -176,6 +176,15 @@ namespace scene
 
 			if (!Load(pGraphicsAPI)) return false;
 			m_IsLoaded = true;
+		}
+
+		if (InputState->IsKeyUp(input::EKeyType::KEY_TYPE_1))
+		{
+			m_FbxObject->ChangeMotion("Jump");
+		}
+		else if (InputState->IsKeyUp(input::EKeyType::KEY_TYPE_2))
+		{
+			m_FbxObject->ChangeMotion("Punch");
 		}
 
 		if (m_glTFObject)

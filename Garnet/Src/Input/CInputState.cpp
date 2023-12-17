@@ -28,6 +28,9 @@ namespace input
 
 		// マウスホイール量は毎回リセットする
 		m_WheelScrollAmount = glm::vec2(0.0f);
+
+		// Up状態のキーを全て削除する
+		m_UpKeyMap.clear();
 	}
 
 	void CInputState::StartMousePos(const glm::vec2& MousePos)
@@ -105,10 +108,12 @@ namespace input
 		}
 		else
 		{
-			// Upなら削除する
+			// UpならUpKeyListに入れてフレームの最後に削除する
 			if(!KeyDown)
 			{
 				m_KeyInputMap.erase(key);
+
+				m_UpKeyMap.insert({ KeyType , KeyDown });
 			}
 		}
 	}
@@ -129,11 +134,7 @@ namespace input
 	
 	bool CInputState::IsKeyUp(EKeyType KeyType)
 	{
-		const auto& Key = m_KeyInputMap.find(KeyType);
-		
-		if (Key == m_KeyInputMap.end()) return false;
-
-		return (!Key->second);
+		return (m_UpKeyMap.find(KeyType) != m_UpKeyMap.end());
 	}
 }
 #endif // #ifdef USE_INPUT_SYSTEM

@@ -3,6 +3,7 @@
 #ifdef USE_INPUT_SYSTEM
 #include <glm/glm.hpp>
 #include <map>
+#include <vector>
 
 namespace input
 {
@@ -35,6 +36,7 @@ namespace input
 		bool m_OnDownMouseRight;
 
 		std::map<EKeyType, bool> m_KeyInputMap;
+		std::map<EKeyType, bool> m_UpKeyMap;
 	public:
 		CInputState(float MouseRotSpeed);
 		virtual ~CInputState();

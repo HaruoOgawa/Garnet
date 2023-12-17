@@ -13,6 +13,7 @@ namespace animation
 	class CAnimationClip
 	{
 		float m_CurrentTime;
+		bool m_IsLoop;
 
 		std::vector<std::shared_ptr<animation::CAnimationSampler>> m_SamplerList;
 		std::vector<std::shared_ptr<animation::CAnimationChannel>> m_ChannelList;
@@ -21,6 +22,11 @@ namespace animation
 	public:
 		CAnimationClip();
 		virtual ~CAnimationClip();
+
+		void SetIsLoop(bool val);
+		bool IsLoop() const;
+
+		void Initialize();
 
 		void AddAnimationSampler(const std::shared_ptr<animation::CAnimationSampler>& Sampler);
 		void AddAnimationChannel(const std::shared_ptr<animation::CAnimationChannel>& AnimationChannel);
@@ -40,6 +46,7 @@ namespace animation
 		std::shared_ptr<animation::CAnimationSampler> GetSamplerWithMostFrames();
 
 		float GetCurrentTime() const;
+		bool IsEnd();
 	};
 }
 

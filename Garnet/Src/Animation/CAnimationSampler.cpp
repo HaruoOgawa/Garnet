@@ -82,6 +82,11 @@ namespace animation
 		return m_EndTime;
 	}
 
+	bool CAnimationSampler::IsEnd(float CurrentTime)
+	{
+		return (CurrentTime > m_EndTime);
+	}
+
 	std::vector<float> CAnimationSampler::CopyFromNumComponent(int NumComponent, const std::vector<float>& Src, int Offset)
 	{
 		std::vector<float> Dst;
@@ -129,9 +134,18 @@ namespace animation
 		}
 	}
 
-	bool CAnimationSampler::ComputeCurrentFrame(float CurrentTime, std::vector<float>& Value, EAnimationTarget AnimationTarget)
+	bool CAnimationSampler::ComputeCurrentFrame(float CurrentTime, bool IsLoop, std::vector<float>& Value, EAnimationTarget AnimationTarget)
 	{
-		float CalcCurrentTime = glm::mod(CurrentTime, m_EndTime);
+		float CalcCurrentTime = 0.0f;
+
+		if (IsLoop)
+		{
+			CalcCurrentTime = glm::mod(CurrentTime, m_EndTime);
+		}
+		else
+		{
+			CalcCurrentTime = fminf(CurrentTime, m_EndTime);
+		}
 
 		// 処理対処のキーフレームを取得
 		std::shared_ptr<animation::CKeyFrame> PrevKeyFrame = nullptr;
@@ -180,7 +194,7 @@ namespace animation
 	bool CAnimationSampler::GetNeedKeyFrame(float CurrentTime, std::shared_ptr<animation::CKeyFrame>& PrevKeyFrame, std::shared_ptr<animation::CKeyFrame>& NextKeyFrame)
 	{
 		// Next
-		const auto& val = std::find_if(m_KeyFrameList.begin(), m_KeyFrameList.end(), [&](std::shared_ptr<CKeyFrame>& f) {  bool r = (CurrentTime < f->GetInput()); if (r) { NextKeyFrame = f; } return r; });
+		const auto& val = std::find_if(m_KeyFrameList.begin(), m_KeyFrameList.end(), [&](std::shared_ptr<CKeyFrame>& f) {  bool r = (CurrentTime <= f->GetInput()); if (r) { NextKeyFrame = f; } return r; });
 		if (val == m_KeyFrameList.end()) return false;
 
 		// Prev

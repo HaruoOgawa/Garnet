@@ -56,7 +56,9 @@ namespace animation
 		void SetEndTime(float EndTime);
 		float GetEndTime() const;
 
-		bool ComputeCurrentFrame(float CurrentTime, std::vector<float>& Value, EAnimationTarget AnimationTarget);
+		bool IsEnd(float CurrentTime);
+
+		bool ComputeCurrentFrame(float CurrentTime, bool IsLoop, std::vector<float>& Value, EAnimationTarget AnimationTarget);
 
 		// ボーンに基づく現在のフレームを取得
 		static std::shared_ptr<CKeyFrame> GetCurrentKeyFrameBasedBone(float CurrentTime, EHumanoidBones BoneName, const std::unordered_map<animation::EHumanoidBones, std::vector<std::shared_ptr<animation::CKeyFrame>>>& FrameMatrixMap);
