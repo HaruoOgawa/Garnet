@@ -11,6 +11,7 @@ namespace object
 		m_SkinIndex(-1),
 		m_LocalTransform(std::make_shared<math::CTransform>()),
 		m_DefaultLocalTransform(std::make_shared<math::CTransform>()),
+		m_PrevLocalTransform(std::make_shared<math::CTransform>()),
 		m_WorldMatrix(glm::mat4(1.0f)),
 		m_InverseBindMatrix(glm::mat4(1.0f)),
 		m_ParentNode(nullptr)
@@ -207,6 +208,19 @@ namespace object
 		m_LocalTransform->SetPos(m_DefaultLocalTransform->GetPos());
 		m_LocalTransform->SetRot(m_DefaultLocalTransform->GetRot());
 		m_LocalTransform->SetScale(m_DefaultLocalTransform->GetScale());
+	}
+
+	// Œ»Ý‚ÌŽp¨‚ð•Û‘¶‚·‚é
+	void CNode::SavePrevLocalTransform()
+	{
+		m_PrevLocalTransform->SetPos(m_LocalTransform->GetPos());
+		m_PrevLocalTransform->SetRot(m_LocalTransform->GetRot());
+		m_PrevLocalTransform->SetScale(m_LocalTransform->GetScale());
+	}
+
+	const std::shared_ptr<math::CTransform>& CNode::GetPrevLocalTransform() const
+	{
+		return m_PrevLocalTransform;
 	}
 
 	const std::vector<int>& CNode::GetChildrenNodeIndexList() const

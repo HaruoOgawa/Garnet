@@ -892,6 +892,8 @@ namespace gltf
 				AnimationClip->AddAnimationChannel(AnimationChannel);
 			}
 
+			AnimationClip->SetIsLoop(true);
+
 			AnimationClipList.push_back(AnimationClip);
 		}
 

@@ -6,12 +6,28 @@ namespace animation
 {
 	CAnimationClip::CAnimationClip():
 		m_CurrentTime(0.0f),
+		m_IsLoop(false),
 		m_DefaultSkin(nullptr)
 	{
 	}
 
 	CAnimationClip::~CAnimationClip()
 	{
+	}
+
+	void CAnimationClip::SetIsLoop(bool val)
+	{
+		m_IsLoop = val;
+	}
+
+	bool CAnimationClip::IsLoop() const
+	{
+		return m_IsLoop;
+	}
+
+	void CAnimationClip::Initialize()
+	{
+		m_CurrentTime = 0.0f;
 	}
 
 	void CAnimationClip::AddAnimationSampler(const std::shared_ptr<animation::CAnimationSampler>& Sampler)
@@ -48,11 +64,6 @@ namespace animation
 	{
 		m_CurrentTime += DeltaSecondsTime;
 
-		if (m_SamplerList.size() > 0)
-		{
-			m_CurrentTime = glm::mod(m_CurrentTime, m_SamplerList[0]->GetEndTime());
-		}
-
 		if (!UpdateFrame(m_CurrentTime)) return false;
 
 		return true;
@@ -68,7 +79,7 @@ namespace animation
 			const auto& Sampler = m_SamplerList[SamplerIndex];
 			std::vector<float> Value;
 
-			if (!Sampler->ComputeCurrentFrame(CurrentTime, Value, Channel->GetAnimationTarget())) return false;
+			if (!Sampler->ComputeCurrentFrame(CurrentTime, m_IsLoop, Value, Channel->GetAnimationTarget())) return false;
 
 			if (!Channel->Update(Value)) return false;
 		}
@@ -113,6 +124,16 @@ namespace animation
 	float CAnimationClip::GetCurrentTime() const
 	{
 		return m_CurrentTime;
+	}
+
+	bool CAnimationClip::IsEnd()
+	{
+		if (m_SamplerList.size() > 0)
+		{
+			return m_SamplerList[0]->IsEnd(m_CurrentTime);
+		}
+
+		return true;
 	}
 }
 
