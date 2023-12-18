@@ -172,6 +172,14 @@ namespace object
 		return m_DefaultLocalTransform->GetModelMatrix();
 	}
 
+	glm::mat4 CNode::GetDefaultLocalMoveMatrix() const
+	{
+		const glm::vec3 Pos = m_DefaultLocalTransform->GetPos();
+		const glm::mat4 Mat = glm::translate(glm::mat4(1.0f), Pos);
+
+		return Mat;
+	}
+
 	glm::mat4 CNode::CalcDefaultWorldMatrix(const glm::mat4& LocalMatrix)
 	{
 		glm::mat4 result = LocalMatrix;
@@ -195,6 +203,36 @@ namespace object
 		while (parentNode)
 		{
 			result = parentNode->GetDefaultLocalMatrix() * result;
+
+			parentNode = parentNode->GetParentNode();
+		}
+
+		return result;
+	}
+
+	glm::mat4 CNode::CalcDefaultWorldMoveMatrix(const glm::mat4& MoveMatrix)
+	{
+		glm::mat4 result = MoveMatrix;
+
+		std::shared_ptr<CNode> parentNode = m_ParentNode;
+		while (parentNode)
+		{
+			result = parentNode->GetDefaultLocalMoveMatrix() * result;
+
+			parentNode = parentNode->GetParentNode();
+		}
+
+		return result;
+	}
+
+	glm::mat4 CNode::CalcDefaultParentWorldMoveMatrix()
+	{
+		glm::mat4 result = glm::mat4(1.0f);
+
+		std::shared_ptr<CNode> parentNode = m_ParentNode;
+		while (parentNode)
+		{
+			result = parentNode->GetDefaultLocalMoveMatrix() * result;
 
 			parentNode = parentNode->GetParentNode();
 		}

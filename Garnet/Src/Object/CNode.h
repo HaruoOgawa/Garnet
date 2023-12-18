@@ -69,9 +69,13 @@ namespace object
 		void SaveAsDefaultLocalTransform();
 		const std::shared_ptr<math::CTransform>& GetDefaultLocalTransform() const;
 		glm::mat4 GetDefaultLocalMatrix() const;
+		glm::mat4 GetDefaultLocalMoveMatrix() const;
 
 		glm::mat4 CalcDefaultWorldMatrix(const glm::mat4& LocalMatrix);
 		glm::mat4 CalcDefaultParentWorldMatrix();
+		
+		glm::mat4 CalcDefaultWorldMoveMatrix(const glm::mat4& MoveMatrix);
+		glm::mat4 CalcDefaultParentWorldMoveMatrix();
 
 		// Transformをデフォルトに戻す
 		void ResetToDefaultLocalTransform();
