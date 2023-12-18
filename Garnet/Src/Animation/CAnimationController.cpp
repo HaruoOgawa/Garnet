@@ -32,11 +32,11 @@ namespace animation
 		// アニメーションの計算
 		if (m_CurrentClipIndex >= 0 && m_CurrentClipIndex < m_ClipList.size())
 		{
-			// モーションブレンド
-			if (!BlendMotion(DeltaSecondsTime)) return false;
-
 			const auto& Clip = m_ClipList[m_CurrentClipIndex];
 			if (!Clip->Update(DeltaSecondsTime)) return false;
+
+			// モーションブレンド
+			if (!BlendMotion(DeltaSecondsTime)) return false;
 		}
 		else if (m_ClipMap.find(m_CurrentClipName) != m_ClipMap.end())
 		{
@@ -59,11 +59,10 @@ namespace animation
 				}
 				else
 				{
+					if (!Clip->Update(DeltaSecondsTime)) return false;
 
 					// モーションブレンド
 					if (!BlendMotion(DeltaSecondsTime)) return false;
-
-					if (!Clip->Update(DeltaSecondsTime)) return false;
 				}
 			}
 		}
@@ -101,6 +100,20 @@ namespace animation
 			{
 				Clip->second.Clip->Initialize();
 			}
+		}
+
+		// 現在の姿勢を保存する
+		if (!m_SavedPrevTrs)
+		{
+			for (const auto& Skin : m_SkinList)
+			{
+				for (const auto& Joint : Skin->GetJointList())
+				{
+					Joint->GetJointNode()->SavePrevLocalTransform();
+				}
+			}
+
+			m_SavedPrevTrs = true;
 		}
 	}
 
@@ -250,20 +263,6 @@ namespace animation
 			m_CurrBlendingTime = fmaxf(m_CurrBlendingTime, 0.0f);
 			m_CurrBlendingTime = fminf(m_CurrBlendingTime, m_MaxBlendingTime);
 
-			// 現在の姿勢を保存する
-			if (!m_SavedPrevTrs)
-			{
-				for (const auto& Skin : m_SkinList)
-				{
-					for (const auto& Joint : Skin->GetJointList())
-					{
-						Joint->GetJointNode()->SavePrevLocalTransform();
-					}
-				}
-
-				m_SavedPrevTrs = true;
-			}
-
 			// 現在の姿勢と遷移前の姿勢を補完する
 			std::vector<std::shared_ptr<object::CNode>> ComputedNodeList;
 			float L = 1.0f - (m_MaxBlendingTime - m_CurrBlendingTime) / m_MaxBlendingTime;
@@ -273,11 +272,6 @@ namespace animation
 				for (const auto& Joint : Skin->GetJointList())
 				{
 					const auto& Node = Joint->GetJointNode();
-
-					/*const auto& it = std::find(ComputedNodeList.begin(), ComputedNodeList.end(), Node);
-					if (it == ComputedNodeList.end()) continue;
-
-					ComputedNodeList.push_back(Node);*/
 
 					BlendTranslation(Node, L);
 					BlendRotation(Node, L);
