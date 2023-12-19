@@ -81,6 +81,8 @@ namespace fbx
 
 		for (const auto& RootNode : Doc->getRootObjects())
 		{
+			//if (RootNode->getClass() != sfbx::ObjectClass::Model) continue;
+
 			if (RootNode)
 			{
 				if (!CreateAnimationSkin(RootNode, Skin, FbxJointList, NodeList)) return false;
@@ -119,6 +121,8 @@ namespace fbx
 				std::vector<sfbx::Mesh*> pFbxMeshList;
 				for (const auto& RootNode : Doc->getRootObjects())
 				{
+					if (RootNode->getClass() != sfbx::ObjectClass::Model) continue;
+
 					if (!CreateDrawInfo(pGraphicsAPI, pFbxMeshList, MaterialFrame, RootNode, TextureList, MaterialList, MeshList, Skin)) return false;
 				}
 
@@ -175,23 +179,13 @@ namespace fbx
 
 	bool CSmallFBXImporter::CreateNodeList(const sfbx::DocumentPtr& Doc, std::vector<sfbx::Object*>& pFbxNodeList, std::vector<std::shared_ptr<object::CNode>>& NodeList, std::vector<std::vector<int>>& RootNodeIndexList)
 	{
+		int RootIndex = 0;
+
 		for (const auto& RootObj : Doc->getRootObjects())
 		{
+			if (RootObj->getClass() != sfbx::ObjectClass::Model) continue;
+
 			if (!RootObj) continue;
-
-			int RootIndex = -1;
-
-			for (int i = 0; i < Doc->getAllObjects().size(); i++)
-			{
-				const auto& Obj = Doc->getAllObjects()[i];
-
-				if (RootObj->getName() == Obj->getName())
-				{
-					RootIndex = i;
-
-					break;
-				}
-			}
 
 			RootNodeIndexList.push_back(std::vector<int>(1, RootIndex));
 
@@ -227,6 +221,9 @@ namespace fbx
 
 				Node->SetChildrenNodeIndexList(ChildNodeList);
 			}
+
+			//
+			RootIndex++;
 		}
 
 		return true;
@@ -247,11 +244,11 @@ namespace fbx
 		glm::quat Rotation = glm::quat(glm::vec4(1.0f, 0.0f, 0.0f, 0.0f));
 		glm::vec3 Scale = glm::vec3(1.0f);
 
-		/*if (pFBXNode->GetNodeAttribute() && pFBXNode->GetNodeAttribute()->GetAttributeType() && pFBXNode->GetNodeAttribute()->GetAttributeType() == FbxNodeAttribute::eSkeleton)
+		if (auto limbNode = sfbx::as<sfbx::LimbNode>(pFBXNode))
 		{
 			glm::mat4 LocalMatrix = glm::mat4(1.0f);
 
-			FbxAMatrix fbxMat = pFBXNode->EvaluateLocalTransform();
+			auto fbxMat = limbNode->getLocalMatrix();
 			for (int row = 0; row < 4; row++)
 			{
 				for (int col = 0; col < 4; col++)
@@ -262,7 +259,12 @@ namespace fbx
 
 			math::CTransform::CastModelMatrixToTransform(LocalMatrix, Pos, Rotation, Scale);
 		}
-		else*/
+		else if (auto limbNodeAttrib = sfbx::as<sfbx::LimbNodeAttribute>(pFBXNode))
+		{
+			// LimbNodeAttributeは無視する
+			return true;
+		}
+		else
 		{
 			// 構文は公式サンプルを参照
 			// https://github.com/i-saint/WebAlembicViewer/blob/master/src/SceneFBX.cpp#L72
@@ -940,6 +942,8 @@ namespace fbx
 							return false;
 						}
 							
+						if (pFbxCurveNode->getAnimationCurves().size() == 0) continue;
+
 						const auto& Times = pFbxCurveNode->getAnimationCurves()[0]->getTimes();
 						inputList.resize(Times.size());
 						std::memcpy(&inputList[0], &Times[0], sizeof(float) * Times.size());
