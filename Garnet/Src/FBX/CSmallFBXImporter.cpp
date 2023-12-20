@@ -81,7 +81,7 @@ namespace fbx
 
 		for (const auto& RootNode : Doc->getRootObjects())
 		{
-			if (RootNode->getClass() != sfbx::ObjectClass::Model) continue;
+			if (RootNode->getName() != "Scene") continue;
 
 			if (RootNode)
 			{
@@ -121,7 +121,7 @@ namespace fbx
 				std::vector<sfbx::Mesh*> pFbxMeshList;
 				for (const auto& RootNode : Doc->getRootObjects())
 				{
-					if (RootNode->getClass() != sfbx::ObjectClass::Model) continue;
+					if (RootNode->getName() != "Scene") continue;
 
 					if (!CreateDrawInfo(pGraphicsAPI, pFbxMeshList, MaterialFrame, RootNode, TextureList, MaterialList, MeshList, Skin)) return false;
 				}
@@ -183,7 +183,7 @@ namespace fbx
 
 		for (const auto& RootObj : Doc->getRootObjects())
 		{
-			if (RootObj->getClass() != sfbx::ObjectClass::Model) continue;
+			if (RootObj->getName() != "Scene") continue;
 
 			if (!RootObj) continue;
 
@@ -231,7 +231,7 @@ namespace fbx
 
 	bool CSmallFBXImporter::CreateNode(sfbx::Object* pFBXNode, std::vector<sfbx::Object*>& pFbxNodeList, std::vector<std::shared_ptr<object::CNode>>& NodeList)
 	{
-		if (pFBXNode->getClass() != sfbx::ObjectClass::NodeAttribute && pFBXNode->getClass() != sfbx::ObjectClass::Model && pFBXNode->getClass() != sfbx::ObjectClass::Geometry) return true;
+		if (pFBXNode->getClass() != sfbx::ObjectClass::Model) return true;
 
 		// NodeÇçÏê¨
 		// MeshÇ∆SkinÇÕå„ÇŸÇ«ÉZÉbÉgÇ∑ÇÈ
@@ -814,6 +814,8 @@ namespace fbx
 
 	bool CSmallFBXImporter::CreateAnimationSkin(sfbx::Object* pFBXNode, std::shared_ptr<animation::CSkin>& Skin, std::vector<sfbx::Object*>& FbxJointList, const std::vector<std::shared_ptr<object::CNode>>& NodeList)
 	{
+		if (pFBXNode->getClass() != sfbx::ObjectClass::Model) return true;
+
 		if (auto limbNode = sfbx::as<sfbx::LimbNode>(pFBXNode))
 		{
 			std::string Name = std::string(limbNode->getName().begin(), limbNode->getName().end());
