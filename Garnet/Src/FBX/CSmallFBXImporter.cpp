@@ -386,12 +386,15 @@ namespace fbx
 		// SkinMatrix StorageBuffer
 		{
 			// SkinMatは存在するJointの数だけ用意する必要がある
-			int SkinMatCount = 1;
-			if (Skin && Skin->GetJointList().size() > 0) SkinMatCount = static_cast<int>(Skin->GetJointList().size());
+			unsigned int SkinMatCount = 1;
+			if (Skin && Skin->GetJointList().size() > 0) SkinMatCount = static_cast<unsigned int>(Skin->GetJointList().size());
+
+			// SSBOのサイズは2のn乗である必要がある
+			SkinMatCount = math::CMath::CalcNextPowerOfTwo(SkinMatCount);
 
 			std::vector<glm::mat4> SkinMatrixList;
 			SkinMatrixList.resize(SkinMatCount, glm::mat4(1.0f));
-
+			
 			material->ReplacePreloadUniformValue("r_SkinMatrixBuffer", &SkinMatrixList[0], static_cast<int>(SkinMatrixList.size()) * sizeof(glm::mat4), 1);
 		}
 

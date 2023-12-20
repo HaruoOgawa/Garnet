@@ -94,7 +94,7 @@ def Make():
 		exportText += o + " "
 
 	# Compile Options
-	exportText += "-s EXPORTED_RUNTIME_METHODS='ccall','UTF8ToString','_malloc','_free' "
+	exportText += "-s EXPORTED_RUNTIME_METHODS='ccall','UTF8ToString' "
 	exportText += "-s USE_WEBGPU=1 "
 	exportText += "-s ALLOW_MEMORY_GROWTH "
 	exportText += "-s FETCH "

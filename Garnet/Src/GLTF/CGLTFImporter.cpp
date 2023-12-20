@@ -383,6 +383,9 @@ namespace gltf
 
 				if(SkinMatCount <= 0) SkinMatCount = 1;
 
+				// SSBOのサイズは2のn乗である必要がある
+				SkinMatCount = math::CMath::CalcNextPowerOfTwo(SkinMatCount);
+
 				std::vector<glm::mat4> SkinMatrixList;
 				SkinMatrixList.resize(SkinMatCount, glm::mat4(0.0f));
 

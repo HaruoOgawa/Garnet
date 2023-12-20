@@ -247,6 +247,9 @@ namespace fbx
 			int SkinMatCount = 1;
 			if (Skin) SkinMatCount = static_cast<int>(Skin->GetJointList().size());
 			
+			// SSBOのサイズは2のn乗である必要がある
+			SkinMatCount = math::CMath::CalcNextPowerOfTwo(SkinMatCount);
+
 			std::vector<glm::mat4> SkinMatrixList;
 			SkinMatrixList.resize(SkinMatCount, glm::mat4(1.0f));
 

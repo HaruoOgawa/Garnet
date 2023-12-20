@@ -375,15 +375,14 @@ namespace object
 		}
 		
 #ifdef USE_ANIMATION
-		/*for (const auto& Skin : m_AnimationSkinList)
+		/*for (const auto& Skin : m_AnimationController->GetSkinList())
 		{
-			
 			for (const auto& Joint : Skin->GetJointList())
 			{
 				// Debug—p: Joint‚Ì•`‰æ
 				const auto& JointNode = Joint->GetJointNode();
 				DebugSphere->SetPos(m_ObjectTransform->GetModelMatrix() * JointNode->GetWorldMatrix() * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
-				DebugSphere->SetScale(glm::vec3(0.25f));
+				DebugSphere->SetScale(glm::vec3(0.025f));
 
 				if (Joint->GetBoneName() == animation::EHumanoidBones::Hips)
 				{
