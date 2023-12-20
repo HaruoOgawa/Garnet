@@ -81,7 +81,7 @@ namespace fbx
 
 		for (const auto& RootNode : Doc->getRootObjects())
 		{
-			//if (RootNode->getClass() != sfbx::ObjectClass::Model) continue;
+			if (RootNode->getClass() != sfbx::ObjectClass::Model) continue;
 
 			if (RootNode)
 			{
@@ -814,12 +814,9 @@ namespace fbx
 
 	bool CSmallFBXImporter::CreateAnimationSkin(sfbx::Object* pFBXNode, std::shared_ptr<animation::CSkin>& Skin, std::vector<sfbx::Object*>& FbxJointList, const std::vector<std::shared_ptr<object::CNode>>& NodeList)
 	{
-		if (auto fbxSkin = sfbx::as<sfbx::Cluster>(pFBXNode))
+		if (auto limbNode = sfbx::as<sfbx::LimbNode>(pFBXNode))
 		{
-			std::string Name = std::string(fbxSkin->getName().begin(), fbxSkin->getName().end());
-			
-			// —]•ª‚È•¶Žš‚ª“ü‚Á‚Ä‚¢‚½‚ç”rœ‚·‚é
-			if(Name.find("Cluster ") != -1) Name = Name.substr(8);
+			std::string Name = std::string(limbNode->getName().begin(), limbNode->getName().end());
 
 			auto JointNode = GetJointNode(Name, NodeList);
 			if (JointNode)
@@ -988,7 +985,23 @@ namespace fbx
 								outputList.push_back(quat.w);
 							}
 						}
-						else
+						else if(AnimationTarget == animation::EAnimationTarget::TRANSLATION)
+						{
+							if (ValuesList.size() != 3) return false;
+
+							for (int v = 0; v < ValuesList[0].size(); v++)
+							{
+								// Fbx‚ÍTranslationEPos‚ª100”{‚É‚È‚Á‚Ä‚¢‚é‚Ì‚Å’²®‚·‚é
+								// ‚½‚Ô‚ñ’PˆÊ‚ªcm‚È‚Ì‚Å0.01”{‚·‚é‚±‚Æ‚ÅŒvŽZ‚Éˆê”Ê“I‚ÉŽg—p‚·‚ém‚É’¼‚·
+								glm::vec3 Pos = glm::vec3(ValuesList[0][v], ValuesList[1][v], ValuesList[2][v]);
+								math::CTransform::CastCentiMeter2Meter(Pos);
+
+								outputList.push_back(Pos.x);
+								outputList.push_back(Pos.y);
+								outputList.push_back(Pos.z);
+							}
+						}
+						else 
 						{
 							for (int v = 0; v < ValuesList[0].size(); v++)
 							{
