@@ -183,7 +183,10 @@ namespace fbx
 
 		for (const auto& RootObj : Doc->getRootObjects())
 		{
-			if (RootObj->getName() != "Scene") continue;
+			if (RootObj->getName() != "Scene" || RootObj->getClass() != sfbx::ObjectClass::Model) continue;
+
+			// RootNode‚Í‚P‚Â‚¾‚¯‚Å‚æ‚¢
+			if (RootIndex != 0) return true;
 
 			if (!RootObj) continue;
 
@@ -980,9 +983,11 @@ namespace fbx
 							for (int v = 0; v < ValuesList[0].size(); v++)
 							{
 								glm::quat quat = 
-									glm::angleAxis(ValuesList[2][v], glm::vec3(0.0f, 0.0f, 1.0f)) * 
-									glm::angleAxis(ValuesList[1][v], glm::vec3(0.0f, 1.0f, 0.0f)) * 
-									glm::angleAxis(ValuesList[0][v], glm::vec3(1.0f, 0.0f, 0.0f));
+									glm::angleAxis(glm::radians(ValuesList[2][v]), glm::vec3(0.0f, 0.0f, 1.0f)) * 
+									glm::angleAxis(glm::radians(ValuesList[1][v]), glm::vec3(0.0f, 1.0f, 0.0f)) *
+									glm::angleAxis(glm::radians(ValuesList[0][v]), glm::vec3(1.0f, 0.0f, 0.0f));
+
+								math::CTransform::CastZUpToYUp(quat);
 
 								outputList.push_back(quat.x);
 								outputList.push_back(quat.y);
@@ -1000,6 +1005,8 @@ namespace fbx
 								// ‚½‚Ô‚ñ’PˆÊ‚ªcm‚È‚Ì‚Å0.01”{‚·‚é‚±‚Æ‚ÅŒvŽZ‚Éˆê”Ê“I‚ÉŽg—p‚·‚ém‚É’¼‚·
 								glm::vec3 Pos = glm::vec3(ValuesList[0][v], ValuesList[1][v], ValuesList[2][v]);
 								math::CTransform::CastCentiMeter2Meter(Pos);
+
+								math::CTransform::CastZUpToYUp(Pos);
 
 								outputList.push_back(Pos.x);
 								outputList.push_back(Pos.y);
