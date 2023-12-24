@@ -987,8 +987,6 @@ namespace fbx
 									glm::angleAxis(glm::radians(ValuesList[1][v]), glm::vec3(0.0f, 1.0f, 0.0f)) *
 									glm::angleAxis(glm::radians(ValuesList[0][v]), glm::vec3(1.0f, 0.0f, 0.0f));
 
-								math::CTransform::CastZUpToYUp(quat);
-
 								outputList.push_back(quat.x);
 								outputList.push_back(quat.y);
 								outputList.push_back(quat.z);
@@ -1005,8 +1003,6 @@ namespace fbx
 								// たぶん単位がcmなので0.01倍することで計算に一般的に使用するmに直す
 								glm::vec3 Pos = glm::vec3(ValuesList[0][v], ValuesList[1][v], ValuesList[2][v]);
 								math::CTransform::CastCentiMeter2Meter(Pos);
-
-								math::CTransform::CastZUpToYUp(Pos);
 
 								outputList.push_back(Pos.x);
 								outputList.push_back(Pos.y);
