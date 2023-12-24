@@ -235,7 +235,7 @@ namespace animation
 		// RigのReTargetingを行う
 		// リターゲティングとはリグの形が異なるアニメーションを自身のアニメーションに合うように調整すること
 		// 例えば身長が違うとアバターが伸びてしまうしリグが反対だとねじれてしまう
-		//if (!ReTargetingRig(SourceClip, TargetClip)) return;
+		if (!ReTargetRig(SourceClip, TargetClip)) return;
 
 		TargetClip->SetIsLoop(IsLoop);
 
@@ -306,7 +306,7 @@ namespace animation
 		Node->GetLocalTransform()->SetRot(CurrRot);
 	}
 
-	bool CAnimationController::ReTargetingRig(const std::shared_ptr<animation::CAnimationClip>& SourceClip, const std::shared_ptr<animation::CAnimationClip>& TargetClip)
+	bool CAnimationController::ReTargetRig(const std::shared_ptr<animation::CAnimationClip>& SourceClip, const std::shared_ptr<animation::CAnimationClip>& TargetClip)
 	{
 		const auto& SourceSkin = SourceClip->GetDefaultSkin();
 		if (!SourceSkin) return false;
@@ -327,21 +327,18 @@ namespace animation
 			const auto& SourceBone = SourceSkin->GetBone(BoneName);
 			if (!SourceBone) continue;
 
-			const glm::mat4 SourceRest = SourceBone->GetJointNode()->GetDefaultLocalMatrix();
-			const glm::mat4 InverseSourceRest = glm::inverse(SourceRest);
-
-			const glm::mat4 SourcePGRest = SourceBone->GetJointNode()->CalcDefaultParentWorldMatrix();
-			const glm::mat4 InverseSourcePGRest = glm::inverse(SourcePGRest);
+			const glm::mat4 SourceRestMove = SourceBone->GetJointNode()->GetDefaultLocalMoveMatrix();
+			const glm::mat4 InverseSourceRestMove = glm::inverse(SourceRestMove);
 
 			for (const auto& TargetSkin : m_SkinList)
 			{
 				const auto& TargetBone = TargetSkin->GetBone(BoneName);
 				if (!TargetBone) continue;
 
-				const glm::mat4 TargetRest = TargetBone->GetJointNode()->GetDefaultLocalMatrix();
+				const glm::mat4 TargetRestMove = TargetBone->GetJointNode()->GetDefaultLocalMoveMatrix();
 
-				const glm::mat4 TargetPGRest = TargetBone->GetJointNode()->CalcDefaultParentWorldMatrix();
-				const glm::mat4 InverseTargetPGRest = glm::inverse(TargetPGRest);
+				// SourceとTargetのバインドマトリックスのTranslationの差分を示す行列
+				const glm::mat4 ReTargetTranslationMatrix = TargetRestMove * InverseSourceRestMove;
 
 				for (const auto& TargetKeyFrame : TargetSampler->GetKeyFrameList())
 				{
@@ -349,10 +346,8 @@ namespace animation
 
 					glm::mat4 SourcePose = glm::mat4(1.0f);
 					TargetKeyFrame->GetOutput(&SourcePose[0][0]);
-
-					glm::mat4 SourceAnim = SourcePGRest * SourcePose * InverseSourceRest * InverseSourcePGRest;
-
-					glm::mat4 TargetPose = InverseTargetPGRest * SourceAnim * TargetPGRest * TargetRest;
+					
+					glm::mat4 TargetPose = ReTargetTranslationMatrix * SourcePose;
 
 					TargetKeyFrame->SetOutput(&TargetPose[0][0], sizeof(glm::mat4));
 				}
