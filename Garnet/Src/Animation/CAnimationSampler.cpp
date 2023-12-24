@@ -27,6 +27,9 @@ namespace animation
 
 		if (NumComponent == -1) return false;
 
+		// 1つ以下の時はエラーにはしないが、何も処理しない
+		if (inputList.size() <= 1) return true;
+
 		if (inputList.size() != outputList.size() / NumComponent) return false;
 
 		for (int i = 0; i < inputList.size(); i++)
@@ -134,8 +137,54 @@ namespace animation
 		}
 	}
 
+	std::vector<float> CAnimationSampler::GetDefaultValueFromAnimationTarget(EAnimationTarget AnimationTarget)
+	{
+		std::vector<float> Value;
+
+		switch (AnimationTarget)
+		{
+		case animation::EAnimationTarget::NONE:
+			break;
+		case animation::EAnimationTarget::TRANSLATION:
+			Value = std::vector<float>({ 0.0f, 0.0f, 0.0f });
+			break;
+		case animation::EAnimationTarget::ROTATION:
+			Value = std::vector<float>({ 0.0f, 0.0f, 0.0f, 1.0f });
+			break;
+		case animation::EAnimationTarget::SCALE:
+			Value = std::vector<float>({ 1.0f, 1.0f, 1.0f });
+			break;
+		case animation::EAnimationTarget::WEIGHTS:
+			Value = std::vector<float>({ 0.0f, 0.0f, 0.0f, 0.0f });
+			break;
+		case animation::EAnimationTarget::MODELMATRIX:
+		{
+			Value = std::vector<float>({
+				1.0f, 0.0f, 0.0f, 0.0f,
+				0.0f, 1.0f, 0.0f, 0.0f,
+				0.0f, 0.0f, 1.0f, 0.0f,
+				0.0f, 0.0f, 0.0f, 1.0f
+			});
+		}
+			break;
+		default:
+			break;
+		}
+
+		return Value;
+	}
+
 	bool CAnimationSampler::ComputeCurrentFrame(float CurrentTime, bool IsLoop, std::vector<float>& Value, EAnimationTarget AnimationTarget)
 	{
+		// 1つ以下の時はエラーにはしないが、何も処理しない
+		// AnimationやSDKに使っていないボーンのアニメーションでもなぜか一つだけInput・Outputが入っていることがあるため
+		if (m_KeyFrameList.size() <= 1)
+		{
+			Value = GetDefaultValueFromAnimationTarget(AnimationTarget);
+
+			return true;
+		}
+
 		float CalcCurrentTime = 0.0f;
 
 		if (IsLoop)

@@ -33,6 +33,7 @@ namespace animation
 	private:
 		std::vector<float> CopyFromNumComponent(int NumComponent, const std::vector<float>& Src, int Offset);
 		int GetNumComponentsInType(EKeyFrameType Type);
+		std::vector<float> GetDefaultValueFromAnimationTarget(EAnimationTarget AnimationTarget);
 
 		bool GetNeedKeyFrame(float CurrentTime, std::shared_ptr<animation::CKeyFrame>& PrevKeyFrame, std::shared_ptr<animation::CKeyFrame>& NextKeyFrame);
 

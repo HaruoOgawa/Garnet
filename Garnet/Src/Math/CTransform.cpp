@@ -100,20 +100,32 @@ namespace math
 		Rotation = glm::quat_cast(RotMat);
 	}
 
-	void CTransform::ToYUpRightHandedCoordinate(glm::vec3& Translation)
+	void CTransform::CastLeftHandToRightHand(glm::vec3& Translation)
 	{
 		// Translation‚ğYUp‰EèŒn‚É•ÏŠ·
 		// –¾¦“I‚È‚±‚Æ‚¾‚ªAÀ•W‚É‚Â‚¢‚Ä‚ÍZ‚ÌŒü‚«‚ª”½‘Î
 		Translation.z *= -1.0f;
 	}
 
-	void CTransform::ToYUpRightHandedCoordinate(glm::quat& Rotation)
+	void CTransform::CastLeftHandToRightHand(glm::quat& Rotation)
 	{
 		// Rotation‚ğYUp‰EèŒn‚É•ÏŠ·
 		// X²‰ñ“]‚ÆY²‰ñ“]‚Ì•ûŒü‚ª‹t(Z²‰ñ“]‚Í“¯‚¶)
 		// https://www.evl.uic.edu/ralph/508S98/coordinates.html
 		Rotation.x *= -1.0f;
 		Rotation.y *= -1.0f;
+	}
+
+	void CTransform::CastZUpToYUp(glm::vec3& Translation)
+	{
+		// ’Pƒ‚ÉY‚ÆZ‚ğ“ü‚ê‘Ö‚¦‚Ä‰EèŒn‚É’¼‚·
+		// Z²‚ÌŒü‚«‚ª”½“]‚·‚é‚±‚Æ‚É’ˆÓ
+		Translation = glm::vec3(Translation.x, Translation.z, -Translation.y);
+	}
+
+	void CTransform::CastZUpToYUp(glm::quat& Rotation)
+	{
+		Rotation = glm::quat(0.0f, 0.0f, 1.0f, 0.0f) * Rotation * glm::quat(0.0f, 0.0f, -1.0f, 0.0f);
 	}
 
 	void CTransform::CastCentiMeter2Meter(glm::vec3& Val)

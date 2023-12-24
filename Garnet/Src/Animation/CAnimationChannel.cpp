@@ -5,7 +5,8 @@
 
 namespace animation
 {
-	CAnimationChannel::CAnimationChannel(int SamplerIndex, EAnimationTarget AnimationTarget, const std::shared_ptr<object::CNode>& TargetNode, EHumanoidBones BoneName):
+	CAnimationChannel::CAnimationChannel(bool UseAnimLocalAxis, int SamplerIndex, EAnimationTarget AnimationTarget, const std::shared_ptr<object::CNode>& TargetNode, EHumanoidBones BoneName):
+		m_UseAnimLocalAxis(UseAnimLocalAxis),
 		m_SamplerIndex(SamplerIndex),
 		m_AnimationTarget(AnimationTarget),
 		m_TargetNode(TargetNode),
@@ -15,6 +16,11 @@ namespace animation
 
 	CAnimationChannel::~CAnimationChannel()
 	{
+	}
+
+	bool CAnimationChannel::IsUseAnimLocalAxis() const
+	{
+		return m_UseAnimLocalAxis;
 	}
 
 	int CAnimationChannel::GetSamplerIndex() const
@@ -78,7 +84,23 @@ namespace animation
 		// glmのクォータニオンは wxyzで指定する必要がある
 		glm::quat quat = glm::quat(Value[3], Value[0], Value[1], Value[2]);
 
-		m_TargetNode->SetRot(quat);
+		// ファイルフォーマットによるが、回転は『デフォルトトランスフォームの回転』に『アニメーションデータの回転』を乗算して作られるものである!!!!!!!
+		// これが噂によく聞くアニメーションの回転のローカル軸の話である!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		// FBXアニメーションにはこれが必要でglTF/VRMアニメーションでは不要である
+		// たぶんVRM 1.0からはこのローカル軸がデータに含まれるようになるのかな？
+		if (m_UseAnimLocalAxis)
+		{
+			glm::quat dstQuat = m_TargetNode->GetDefaultLocalTransform()->GetRot() * quat;
+
+			m_TargetNode->SetRot(dstQuat);
+		}
+		else
+		{
+			glm::quat dstQuat = quat;
+
+			m_TargetNode->SetRot(dstQuat);
+		}
+		
 
 		return true;
 	}

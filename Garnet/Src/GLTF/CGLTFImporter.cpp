@@ -383,6 +383,9 @@ namespace gltf
 
 				if(SkinMatCount <= 0) SkinMatCount = 1;
 
+				// SSBOのサイズは2のn乗である必要がある
+				SkinMatCount = math::CMath::CalcNextPowerOfTwo(SkinMatCount);
+
 				std::vector<glm::mat4> SkinMatrixList;
 				SkinMatrixList.resize(SkinMatCount, glm::mat4(0.0f));
 
@@ -671,8 +674,8 @@ namespace gltf
 
 				math::CTransform::CastModelMatrixToTransform(modelMatrix, Pos, Rotation, Scale);
 
-				math::CTransform::ToYUpRightHandedCoordinate(Pos);
-				math::CTransform::ToYUpRightHandedCoordinate(Rotation);
+				math::CTransform::CastLeftHandToRightHand(Pos);
+				math::CTransform::CastLeftHandToRightHand(Rotation);
 
 				Node->SetPos(Pos);
 				Node->SetRot(Rotation);
@@ -860,6 +863,11 @@ namespace gltf
 			// channels
 			for (const auto& glTFChannel : glTFAnimation.channels)
 			{
+				// アニメーションのローカル軸を使用するか
+				// FBXでは必須でglTF/VRMでは不要
+				// 詳しくはCAnimationChannel::UpdateRotationを参照
+				const bool UseAnimLocalAxis = false;
+
 				int sampler = glTFChannel.sampler;
 				int target_node = glTFChannel.target_node;
 				const std::string& target_path = glTFChannel.target_path;
@@ -887,7 +895,7 @@ namespace gltf
 
 				animation::EHumanoidBones BoneName = animation::EHumanoidBones::None;
 
-				std::shared_ptr<animation::CAnimationChannel> AnimationChannel = std::make_shared<animation::CAnimationChannel>(sampler, AnimationTarget, Node, BoneName);
+				std::shared_ptr<animation::CAnimationChannel> AnimationChannel = std::make_shared<animation::CAnimationChannel>(UseAnimLocalAxis, sampler, AnimationTarget, Node, BoneName);
 
 				AnimationClip->AddAnimationChannel(AnimationChannel);
 			}

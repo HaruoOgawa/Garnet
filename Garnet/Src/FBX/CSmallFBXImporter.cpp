@@ -81,6 +81,8 @@ namespace fbx
 
 		for (const auto& RootNode : Doc->getRootObjects())
 		{
+			if (RootNode->getName() != "Scene") continue;
+
 			if (RootNode)
 			{
 				if (!CreateAnimationSkin(RootNode, Skin, FbxJointList, NodeList)) return false;
@@ -119,6 +121,8 @@ namespace fbx
 				std::vector<sfbx::Mesh*> pFbxMeshList;
 				for (const auto& RootNode : Doc->getRootObjects())
 				{
+					if (RootNode->getName() != "Scene") continue;
+
 					if (!CreateDrawInfo(pGraphicsAPI, pFbxMeshList, MaterialFrame, RootNode, TextureList, MaterialList, MeshList, Skin)) return false;
 				}
 
@@ -175,23 +179,16 @@ namespace fbx
 
 	bool CSmallFBXImporter::CreateNodeList(const sfbx::DocumentPtr& Doc, std::vector<sfbx::Object*>& pFbxNodeList, std::vector<std::shared_ptr<object::CNode>>& NodeList, std::vector<std::vector<int>>& RootNodeIndexList)
 	{
+		int RootIndex = 0;
+
 		for (const auto& RootObj : Doc->getRootObjects())
 		{
+			if (RootObj->getName() != "Scene" || RootObj->getClass() != sfbx::ObjectClass::Model) continue;
+
+			// RootNodeは１つだけでよい
+			if (RootIndex != 0) return true;
+
 			if (!RootObj) continue;
-
-			int RootIndex = -1;
-
-			for (int i = 0; i < Doc->getAllObjects().size(); i++)
-			{
-				const auto& Obj = Doc->getAllObjects()[i];
-
-				if (RootObj->getName() == Obj->getName())
-				{
-					RootIndex = i;
-
-					break;
-				}
-			}
 
 			RootNodeIndexList.push_back(std::vector<int>(1, RootIndex));
 
@@ -227,6 +224,9 @@ namespace fbx
 
 				Node->SetChildrenNodeIndexList(ChildNodeList);
 			}
+
+			//
+			RootIndex++;
 		}
 
 		return true;
@@ -234,7 +234,7 @@ namespace fbx
 
 	bool CSmallFBXImporter::CreateNode(sfbx::Object* pFBXNode, std::vector<sfbx::Object*>& pFbxNodeList, std::vector<std::shared_ptr<object::CNode>>& NodeList)
 	{
-		if (pFBXNode->getClass() != sfbx::ObjectClass::NodeAttribute && pFBXNode->getClass() != sfbx::ObjectClass::Model && pFBXNode->getClass() != sfbx::ObjectClass::Geometry) return true;
+		if (pFBXNode->getClass() != sfbx::ObjectClass::Model) return true;
 
 		// Nodeを作成
 		// MeshとSkinは後ほどセットする
@@ -247,11 +247,11 @@ namespace fbx
 		glm::quat Rotation = glm::quat(glm::vec4(1.0f, 0.0f, 0.0f, 0.0f));
 		glm::vec3 Scale = glm::vec3(1.0f);
 
-		/*if (pFBXNode->GetNodeAttribute() && pFBXNode->GetNodeAttribute()->GetAttributeType() && pFBXNode->GetNodeAttribute()->GetAttributeType() == FbxNodeAttribute::eSkeleton)
+		if (auto limbNode = sfbx::as<sfbx::LimbNode>(pFBXNode))
 		{
 			glm::mat4 LocalMatrix = glm::mat4(1.0f);
 
-			FbxAMatrix fbxMat = pFBXNode->EvaluateLocalTransform();
+			auto fbxMat = limbNode->getLocalMatrix();
 			for (int row = 0; row < 4; row++)
 			{
 				for (int col = 0; col < 4; col++)
@@ -262,7 +262,12 @@ namespace fbx
 
 			math::CTransform::CastModelMatrixToTransform(LocalMatrix, Pos, Rotation, Scale);
 		}
-		else*/
+		else if (auto limbNodeAttrib = sfbx::as<sfbx::LimbNodeAttribute>(pFBXNode))
+		{
+			// LimbNodeAttributeは無視する
+			return true;
+		}
+		else
 		{
 			// 構文は公式サンプルを参照
 			// https://github.com/i-saint/WebAlembicViewer/blob/master/src/SceneFBX.cpp#L72
@@ -384,12 +389,15 @@ namespace fbx
 		// SkinMatrix StorageBuffer
 		{
 			// SkinMatは存在するJointの数だけ用意する必要がある
-			int SkinMatCount = 1;
-			if (Skin && Skin->GetJointList().size() > 0) SkinMatCount = static_cast<int>(Skin->GetJointList().size());
+			unsigned int SkinMatCount = 1;
+			if (Skin && Skin->GetJointList().size() > 0) SkinMatCount = static_cast<unsigned int>(Skin->GetJointList().size());
+
+			// SSBOのサイズは2のn乗である必要がある
+			SkinMatCount = math::CMath::CalcNextPowerOfTwo(SkinMatCount);
 
 			std::vector<glm::mat4> SkinMatrixList;
 			SkinMatrixList.resize(SkinMatCount, glm::mat4(1.0f));
-
+			
 			material->ReplacePreloadUniformValue("r_SkinMatrixBuffer", &SkinMatrixList[0], static_cast<int>(SkinMatrixList.size()) * sizeof(glm::mat4), 1);
 		}
 
@@ -812,12 +820,11 @@ namespace fbx
 
 	bool CSmallFBXImporter::CreateAnimationSkin(sfbx::Object* pFBXNode, std::shared_ptr<animation::CSkin>& Skin, std::vector<sfbx::Object*>& FbxJointList, const std::vector<std::shared_ptr<object::CNode>>& NodeList)
 	{
-		if (auto fbxSkin = sfbx::as<sfbx::Cluster>(pFBXNode))
+		if (pFBXNode->getClass() != sfbx::ObjectClass::Model) return true;
+
+		if (auto limbNode = sfbx::as<sfbx::LimbNode>(pFBXNode))
 		{
-			std::string Name = std::string(fbxSkin->getName().begin(), fbxSkin->getName().end());
-			
-			// 余分な文字が入っていたら排除する
-			if(Name.find("Cluster ") != -1) Name = Name.substr(8);
+			std::string Name = std::string(limbNode->getName().begin(), limbNode->getName().end());
 
 			auto JointNode = GetJointNode(Name, NodeList);
 			if (JointNode)
@@ -940,6 +947,8 @@ namespace fbx
 							return false;
 						}
 							
+						if (pFbxCurveNode->getAnimationCurves().size() == 0) continue;
+
 						const auto& Times = pFbxCurveNode->getAnimationCurves()[0]->getTimes();
 						inputList.resize(Times.size());
 						std::memcpy(&inputList[0], &Times[0], sizeof(float) * Times.size());
@@ -974,9 +983,9 @@ namespace fbx
 							for (int v = 0; v < ValuesList[0].size(); v++)
 							{
 								glm::quat quat = 
-									glm::angleAxis(ValuesList[2][v], glm::vec3(0.0f, 0.0f, 1.0f)) * 
-									glm::angleAxis(ValuesList[1][v], glm::vec3(0.0f, 1.0f, 0.0f)) * 
-									glm::angleAxis(ValuesList[0][v], glm::vec3(1.0f, 0.0f, 0.0f));
+									glm::angleAxis(glm::radians(ValuesList[2][v]), glm::vec3(0.0f, 0.0f, 1.0f)) * 
+									glm::angleAxis(glm::radians(ValuesList[1][v]), glm::vec3(0.0f, 1.0f, 0.0f)) *
+									glm::angleAxis(glm::radians(ValuesList[0][v]), glm::vec3(1.0f, 0.0f, 0.0f));
 
 								outputList.push_back(quat.x);
 								outputList.push_back(quat.y);
@@ -984,7 +993,23 @@ namespace fbx
 								outputList.push_back(quat.w);
 							}
 						}
-						else
+						else if(AnimationTarget == animation::EAnimationTarget::TRANSLATION)
+						{
+							if (ValuesList.size() != 3) return false;
+
+							for (int v = 0; v < ValuesList[0].size(); v++)
+							{
+								// FbxはTranslation・Posが100倍になっているので調整する
+								// たぶん単位がcmなので0.01倍することで計算に一般的に使用するmに直す
+								glm::vec3 Pos = glm::vec3(ValuesList[0][v], ValuesList[1][v], ValuesList[2][v]);
+								math::CTransform::CastCentiMeter2Meter(Pos);
+
+								outputList.push_back(Pos.x);
+								outputList.push_back(Pos.y);
+								outputList.push_back(Pos.z);
+							}
+						}
+						else 
 						{
 							for (int v = 0; v < ValuesList[0].size(); v++)
 							{
@@ -1005,6 +1030,11 @@ namespace fbx
 					{
 						const auto& pFbxAnimTarget = pFbxCurveNode->getAnimationTarget();
 						
+						// アニメーションのローカル軸を使用するか
+						// FBXでは必須でglTF/VRMでは不要
+						// 詳しくはCAnimationChannel::UpdateRotationを参照
+						const bool UseAnimLocalAxis = true;
+
 						// SamplerをClipに追加する順番とChannelを追加する順番は同じである
 						int TargetSamplerIndex = SamplerIndex;
 
@@ -1017,7 +1047,7 @@ namespace fbx
 						std::shared_ptr<animation::CBoneNameProvider> Provider = std::make_shared<animation::CBoneNameProvider>();
 						animation::EHumanoidBones BoneName = Provider->GetBoneName(JointName);
 
-						std::shared_ptr<animation::CAnimationChannel> AnimationChannel = std::make_shared<animation::CAnimationChannel>(TargetSamplerIndex, AnimationTarget, TargetNode, BoneName);
+						std::shared_ptr<animation::CAnimationChannel> AnimationChannel = std::make_shared<animation::CAnimationChannel>(UseAnimLocalAxis, TargetSamplerIndex, AnimationTarget, TargetNode, BoneName);
 
 						AnimationClip->AddAnimationChannel(AnimationChannel);
 					}

@@ -247,6 +247,9 @@ namespace fbx
 			int SkinMatCount = 1;
 			if (Skin) SkinMatCount = static_cast<int>(Skin->GetJointList().size());
 			
+			// SSBOのサイズは2のn乗である必要がある
+			SkinMatCount = math::CMath::CalcNextPowerOfTwo(SkinMatCount);
+
 			std::vector<glm::mat4> SkinMatrixList;
 			SkinMatrixList.resize(SkinMatCount, glm::mat4(1.0f));
 
@@ -970,6 +973,11 @@ namespace fbx
 			{
 				const auto& pFbxJoint = FbxJointList[JointIndex];
 
+				// アニメーションのローカル軸を使用するか
+				// FBXでは必須でglTF/VRMでは不要
+				// 詳しくはCAnimationChannel::UpdateRotationを参照
+				const bool UseAnimLocalAxis = true;
+
 				// FBXにはchannelといった概念はなく、Translation・Rotation・Scaleを全てまとめてModelMatrixで計算している
 				// なのでChannelTypeにFBX-SDK限定の値としてMODELMATRIXを作成することで対応する
 				animation::EAnimationTarget AnimationTarget = animation::EAnimationTarget::MODELMATRIX;
@@ -986,7 +994,7 @@ namespace fbx
 				std::shared_ptr<animation::CBoneNameProvider> Provider = std::make_shared<animation::CBoneNameProvider>();
 				animation::EHumanoidBones BoneName = Provider->GetBoneName(JointName);
 
-				std::shared_ptr<animation::CAnimationChannel> AnimationChannel = std::make_shared<animation::CAnimationChannel>(TargetSamplerIndex, AnimationTarget, TargetNode, BoneName);
+				std::shared_ptr<animation::CAnimationChannel> AnimationChannel = std::make_shared<animation::CAnimationChannel>(UseAnimLocalAxis, TargetSamplerIndex, AnimationTarget, TargetNode, BoneName);
 
 				AnimationClip->AddAnimationChannel(AnimationChannel);
 			}
