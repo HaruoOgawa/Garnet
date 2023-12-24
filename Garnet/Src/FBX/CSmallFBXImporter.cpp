@@ -1030,6 +1030,11 @@ namespace fbx
 					{
 						const auto& pFbxAnimTarget = pFbxCurveNode->getAnimationTarget();
 						
+						// アニメーションのローカル軸を使用するか
+						// FBXでは必須でglTF/VRMでは不要
+						// 詳しくはCAnimationChannel::UpdateRotationを参照
+						const bool UseAnimLocalAxis = true;
+
 						// SamplerをClipに追加する順番とChannelを追加する順番は同じである
 						int TargetSamplerIndex = SamplerIndex;
 
@@ -1042,7 +1047,7 @@ namespace fbx
 						std::shared_ptr<animation::CBoneNameProvider> Provider = std::make_shared<animation::CBoneNameProvider>();
 						animation::EHumanoidBones BoneName = Provider->GetBoneName(JointName);
 
-						std::shared_ptr<animation::CAnimationChannel> AnimationChannel = std::make_shared<animation::CAnimationChannel>(TargetSamplerIndex, AnimationTarget, TargetNode, BoneName);
+						std::shared_ptr<animation::CAnimationChannel> AnimationChannel = std::make_shared<animation::CAnimationChannel>(UseAnimLocalAxis, TargetSamplerIndex, AnimationTarget, TargetNode, BoneName);
 
 						AnimationClip->AddAnimationChannel(AnimationChannel);
 					}

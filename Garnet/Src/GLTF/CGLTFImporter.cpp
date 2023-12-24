@@ -863,6 +863,11 @@ namespace gltf
 			// channels
 			for (const auto& glTFChannel : glTFAnimation.channels)
 			{
+				// アニメーションのローカル軸を使用するか
+				// FBXでは必須でglTF/VRMでは不要
+				// 詳しくはCAnimationChannel::UpdateRotationを参照
+				const bool UseAnimLocalAxis = false;
+
 				int sampler = glTFChannel.sampler;
 				int target_node = glTFChannel.target_node;
 				const std::string& target_path = glTFChannel.target_path;
@@ -890,7 +895,7 @@ namespace gltf
 
 				animation::EHumanoidBones BoneName = animation::EHumanoidBones::None;
 
-				std::shared_ptr<animation::CAnimationChannel> AnimationChannel = std::make_shared<animation::CAnimationChannel>(sampler, AnimationTarget, Node, BoneName);
+				std::shared_ptr<animation::CAnimationChannel> AnimationChannel = std::make_shared<animation::CAnimationChannel>(UseAnimLocalAxis, sampler, AnimationTarget, Node, BoneName);
 
 				AnimationClip->AddAnimationChannel(AnimationChannel);
 			}
