@@ -20,8 +20,6 @@ namespace scene
 		m_SimpleTextureMF(std::make_shared<graphics::CMaterialFrame>()),
 		m_DepthMF(std::make_shared<graphics::CMaterialFrame>()),
 
-		m_MfTestObject(std::make_shared<object::C3DObject>("", "ShadowPass")),
-
 		m_glTFObject(std::make_shared<object::C3DObject>("", "ShadowPass")),
 		m_BrainStemDObject(std::make_shared<object::C3DObject>("", "ShadowPass")),
 		m_VRMObject(std::make_shared<object::C3DObject>("", "ShadowPass")),
@@ -30,6 +28,7 @@ namespace scene
 		m_Jump_Animation(std::make_shared<object::C3DObject>("", "ShadowPass")),
 		m_Punch_Animation(std::make_shared<object::C3DObject>("", "ShadowPass")),
 		m_FbxObject(std::make_shared<object::C3DObject>("", "ShadowPass")),
+		m_MouseyObject(std::make_shared<object::C3DObject>("", "ShadowPass")),
 
 		m_Background(std::make_shared<object::C3DObject>("", "ShadowPass")),
 		m_DebugSphere(std::make_shared<object::C3DObject>("", "ShadowPass")),
@@ -48,6 +47,7 @@ namespace scene
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CMaterialFrameLoader>("Resources\\MaterialFrame\\Depth_MF.json", m_DepthMF));
 		
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Avatar\\X_Bot.fbx", m_FbxObject, "", "ShadowPass"));
+		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Avatar\\Mousey.fbx", m_MouseyObject, "", "ShadowPass"));
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Motions\\Walking.fbx", m_Walk_Animation, "", "ShadowPass"));
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Motions\\Jumping.fbx", m_Jump_Animation, "", "ShadowPass"));
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Motions\\Punch Combo.fbx", m_Punch_Animation, "", "ShadowPass"));
@@ -90,7 +90,7 @@ namespace scene
 			if (!m_glTFObject->CreateFromMemory(pGraphicsAPI, m_PBRMF, m_DepthMF, object::E3DObjectType::glTF)) return false;
 
 			m_glTFObject->ChangeMotion(0);
-			m_glTFObject->SetPos(glm::vec3(2.0f, 0.0f, 0.0f));
+			m_glTFObject->SetPos(glm::vec3(4.0f, 0.0f, 0.0f));
 		}
 		
 		{
@@ -103,17 +103,24 @@ namespace scene
 			// 再生するアニメーションクリップを指定する
 			m_BrainStemDObject->ChangeMotion(0);
 
-			m_BrainStemDObject->SetPos(glm::vec3(-2.0f, 0.0f, 0.0f));
+			m_BrainStemDObject->SetPos(glm::vec3(2.0f, 0.0f, 0.0f));
 			m_BrainStemDObject->SetRot(glm::angleAxis(3.1415f, glm::vec3(0.0f, 1.0f, 0.0f)));
 		}
 		
-		/*{
+		{
 			m_VRMObject->GetTextureSet()->AddCubeMap(m_Cube_Texture);
 			for(const auto& FrameTexture : m_FrameTextureList) { m_VRMObject->GetTextureSet()->AddFrameTexture(FrameTexture); }
 			m_VRMObject->GetTextureSet()->AddIBLTexture(m_IBL_DiffuseEnvMap_Texture, m_IBL_SpecularEnvMap_Texture, m_IBL_GGX_LUT_Texture);
 
 			if (!m_VRMObject->CreateFromMemory(pGraphicsAPI, m_PBRMF, m_DepthMF, object::E3DObjectType::glTF)) return false;
-		}*/
+
+			m_VRMObject->AddHumanoidAnimationClip(AnimationClipList[0], "Walk", { nullptr, "" }, true);
+			m_VRMObject->AddHumanoidAnimationClip(AnimationClipList[1], "Jump", { nullptr, "Walk" }, false);
+			m_VRMObject->AddHumanoidAnimationClip(AnimationClipList[2], "Punch", { nullptr, "Walk" }, false);
+
+			// 再生するアニメーションクリップを指定する
+			m_VRMObject->ChangeMotion("Walk");
+		}
 		
 		{
 			m_FbxObject->GetTextureSet()->AddCubeMap(m_Cube_Texture);
@@ -129,13 +136,26 @@ namespace scene
 			// 再生するアニメーションクリップを指定する
 			m_FbxObject->ChangeMotion("Walk");
 
+			m_FbxObject->SetPos(glm::vec3(-2.0f, 0.0f, 0.0f));
 			m_FbxObject->SetRot(glm::angleAxis(3.1415f, glm::vec3(0.0f, 1.0f, 0.0f)));
 		}
-
-		// m_MfTestObject
+		
 		{
-			m_MfTestObject->GetTextureSet()->Add2DTexture(m_IBL_Skybox_Texture);
-			if (!object::C3DObject::CreateSimply(pGraphicsAPI, m_MfTestObject, graphics::CPresetPrimitive::CreateSphere(), m_SampleMF->CreateMaterial(pGraphicsAPI), m_DepthMF)) return false;
+			m_MouseyObject->GetTextureSet()->AddCubeMap(m_Cube_Texture);
+			for(const auto& FrameTexture : m_FrameTextureList) { m_MouseyObject->GetTextureSet()->AddFrameTexture(FrameTexture); }
+			m_MouseyObject->GetTextureSet()->AddIBLTexture(m_IBL_DiffuseEnvMap_Texture, m_IBL_SpecularEnvMap_Texture, m_IBL_GGX_LUT_Texture);
+
+			if (!m_MouseyObject->CreateFromMemory(pGraphicsAPI, m_PBRMF, m_DepthMF, object::E3DObjectType::Fbx)) return false;
+
+			m_MouseyObject->AddHumanoidAnimationClip(AnimationClipList[0], "Walk", { nullptr, "" }, true);
+			m_MouseyObject->AddHumanoidAnimationClip(AnimationClipList[1], "Jump", { nullptr, "Walk" }, false);
+			m_MouseyObject->AddHumanoidAnimationClip(AnimationClipList[2], "Punch", { nullptr, "Walk" }, false);
+			
+			// 再生するアニメーションクリップを指定する
+			m_MouseyObject->ChangeMotion("Walk");
+
+			m_MouseyObject->SetPos(glm::vec3(-4.0f, 0.0f, 0.0f));
+			m_MouseyObject->SetRot(glm::angleAxis(3.1415f, glm::vec3(0.0f, 1.0f, 0.0f)));
 		}
 
 		// m_Background
@@ -181,10 +201,14 @@ namespace scene
 		if (InputState->IsKeyUp(input::EKeyType::KEY_TYPE_1))
 		{
 			m_FbxObject->ChangeMotion("Jump");
+			m_MouseyObject->ChangeMotion("Jump");
+			m_VRMObject->ChangeMotion("Jump");
 		}
 		else if (InputState->IsKeyUp(input::EKeyType::KEY_TYPE_2))
 		{
 			m_FbxObject->ChangeMotion("Punch");
+			m_MouseyObject->ChangeMotion("Punch");
+			m_VRMObject->ChangeMotion("Punch");
 		}
 
 		if (m_glTFObject)
@@ -199,7 +223,7 @@ namespace scene
 		
 		if (m_VRMObject)
 		{
-			//if (!m_VRMObject->Update(DrawInfo->GetDeltaSecondsTime())) return false;
+			if (!m_VRMObject->Update(DrawInfo->GetDeltaSecondsTime())) return false;
 		}
 		
 		if (m_FbxObject)
@@ -207,9 +231,9 @@ namespace scene
 			if (!m_FbxObject->Update(DrawInfo->GetDeltaSecondsTime())) return false;
 		}
 		
-		if (m_MfTestObject)
+		if (m_MouseyObject)
 		{
-			if (!m_MfTestObject->Update(DrawInfo->GetDeltaSecondsTime())) return false;
+			if (!m_MouseyObject->Update(DrawInfo->GetDeltaSecondsTime())) return false;
 		}
 		
 		if (m_Background)
@@ -248,7 +272,7 @@ namespace scene
 		
 		if (m_VRMObject)
 		{
-			//if (!m_VRMObject->Draw(IsDepthPass, Camera, Projection, DrawInfo, m_DebugSphere)) return false;
+			if (!m_VRMObject->Draw(IsDepthPass, Camera, Projection, DrawInfo, m_DebugSphere)) return false;
 		}
 		
 		if (m_FbxObject)
@@ -256,9 +280,9 @@ namespace scene
 			if (!m_FbxObject->Draw(IsDepthPass, Camera, Projection, DrawInfo, m_DebugSphere)) return false;
 		}
 		
-		if (m_MfTestObject)
+		if (m_MouseyObject)
 		{
-			//if (!m_MfTestObject->Draw(IsDepthPass, Camera, Projection, DrawInfo)) return false;
+			if (!m_MouseyObject->Draw(IsDepthPass, Camera, Projection, DrawInfo, m_DebugSphere)) return false;
 		}
 		
 		if (m_Background)

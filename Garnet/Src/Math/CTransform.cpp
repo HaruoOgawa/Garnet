@@ -135,6 +135,11 @@ namespace math
 		Val.z *= 0.01f;
 	}
 
+	void CTransform::FlipAroundYAxis(glm::quat& Rotation)
+	{
+		Rotation *= glm::angleAxis(glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+	}
+
 	void CTransform::CalcModelMatrix(glm::mat4& ModelMatrix, const glm::vec3& Translation, const glm::quat& Rotation, bool UseScale, const glm::vec3& Scale)
 	{
 		glm::mat4 trsMatrix = glm::translate(glm::mat4(1.0f), Translation);
