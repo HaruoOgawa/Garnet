@@ -57,6 +57,7 @@
 #define GL_RENDERBUFFER                   0x8D41
 #define GL_DEPTH_ATTACHMENT               0x8D00
 #define GL_SHADER_STORAGE_BUFFER          0x90D2
+#define GL_SHADER_STORAGE_BLOCK           0x92E6
 
 typedef char GLchar;
 typedef ptrdiff_t GLintptr;
@@ -83,7 +84,9 @@ typedef ptrdiff_t GLsizeiptr;
 	GL_FUNC(void,   BufferData, 		  GLenum target, GLsizeiptr size, const void* data, GLenum usage) \
 	GL_FUNC(void,   BufferSubData, 		  GLenum target, GLintptr offset, GLsizeiptr size, const void* data) \
 	GL_FUNC(GLuint, GetUniformBlockIndex, GLuint program, const GLchar* uniformBlockName) \
+	GL_FUNC(GLuint, GetProgramResourceIndex, GLuint program, GLenum programInterface, const char* name) \
 	GL_FUNC(void,   UniformBlockBinding,  GLuint program, GLuint uniformBlockIndex, GLuint uniformBlockBinding) \
+	GL_FUNC(void,   ShaderStorageBlockBinding,  GLuint program, GLuint storageBlockIndex, GLuint storageBlockBinding) \
 	GL_FUNC(void,   BindBufferBase, 	  GLenum target, GLuint index, GLuint buffer) \
 	GL_FUNC(void,   BindBufferRange, 	  GLenum target, GLuint index, GLuint buffer, GLintptr offset, GLsizeiptr size) \
 	GL_FUNC(void,   GenVertexArrays, 	  GLsizei n, GLuint* arrays) \
