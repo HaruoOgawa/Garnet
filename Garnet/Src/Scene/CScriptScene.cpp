@@ -137,7 +137,7 @@ namespace scene
 			m_FbxObject->ChangeMotion("Walk");
 
 			m_FbxObject->SetPos(glm::vec3(-2.0f, 0.0f, 0.0f));
-			m_FbxObject->SetRot(glm::angleAxis(3.1415f, glm::vec3(0.0f, 1.0f, 0.0f)));
+			//m_FbxObject->SetRot(glm::angleAxis(3.1415f, glm::vec3(0.0f, 1.0f, 0.0f)));
 		}
 		
 		{
@@ -155,7 +155,7 @@ namespace scene
 			m_MouseyObject->ChangeMotion("Walk");
 
 			m_MouseyObject->SetPos(glm::vec3(-4.0f, 0.0f, 0.0f));
-			m_MouseyObject->SetRot(glm::angleAxis(3.1415f, glm::vec3(0.0f, 1.0f, 0.0f)));
+			//m_MouseyObject->SetRot(glm::angleAxis(3.1415f, glm::vec3(0.0f, 1.0f, 0.0f)));
 		}
 
 		// m_Background
