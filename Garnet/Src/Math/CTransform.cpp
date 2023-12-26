@@ -128,11 +128,22 @@ namespace math
 		Rotation = glm::quat(0.0f, 0.0f, 1.0f, 0.0f) * Rotation * glm::quat(0.0f, 0.0f, -1.0f, 0.0f);
 	}
 
-	void CTransform::CastCentiMeter2Meter(glm::vec3& Val)
+	void CTransform::CastCentiMeter2Meter(glm::vec3& Translation)
 	{
-		Val.x *= 0.01f;
-		Val.y *= 0.01f;
-		Val.z *= 0.01f;
+		Translation.x *= 0.01f;
+		Translation.y *= 0.01f;
+		Translation.z *= 0.01f;
+	}
+
+	void CTransform::FlipAroundYAxis(glm::vec3& Translation)
+	{
+		glm::quat Rot = glm::angleAxis(glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+
+		// âÒì]ÇæÇØÇ»ÇÃÇ≈wê¨ï™ÇÕä÷åWÇ»Ç¢
+		glm::vec4 DstData = glm::vec4(Translation.x, Translation.y, Translation.z, 0.0f);
+		DstData = glm::mat4_cast(Rot) * DstData;
+
+		Translation = glm::vec3(DstData.x, DstData.y, DstData.z);
 	}
 
 	void CTransform::FlipAroundYAxis(glm::quat& Rotation)
