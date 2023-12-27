@@ -114,12 +114,13 @@ namespace scene
 
 			if (!m_VRMObject->CreateFromMemory(pGraphicsAPI, m_PBRMF, m_DepthMF, object::E3DObjectType::glTF)) return false;
 
-			m_VRMObject->AddHumanoidAnimationClip(AnimationClipList[0], "Walk", { nullptr, "" }, true);
+			// なんかSkinMatrixの受け渡しでたまにエラーになるのでいったんコメントアウト. もしかするとここがヒントかも
+			/*m_VRMObject->AddHumanoidAnimationClip(AnimationClipList[0], "Walk", { nullptr, "" }, true);
 			m_VRMObject->AddHumanoidAnimationClip(AnimationClipList[1], "Jump", { nullptr, "Walk" }, false);
 			m_VRMObject->AddHumanoidAnimationClip(AnimationClipList[2], "Punch", { nullptr, "Walk" }, false);
 
 			// 再生するアニメーションクリップを指定する
-			m_VRMObject->ChangeMotion("Walk");
+			m_VRMObject->ChangeMotion("Walk");*/
 		}
 		
 		{
@@ -137,7 +138,6 @@ namespace scene
 			m_FbxObject->ChangeMotion("Walk");
 
 			m_FbxObject->SetPos(glm::vec3(-2.0f, 0.0f, 0.0f));
-			//m_FbxObject->SetRot(glm::angleAxis(3.1415f, glm::vec3(0.0f, 1.0f, 0.0f)));
 		}
 		
 		{
@@ -155,7 +155,6 @@ namespace scene
 			m_MouseyObject->ChangeMotion("Walk");
 
 			m_MouseyObject->SetPos(glm::vec3(-4.0f, 0.0f, 0.0f));
-			//m_MouseyObject->SetRot(glm::angleAxis(3.1415f, glm::vec3(0.0f, 1.0f, 0.0f)));
 		}
 
 		// m_Background

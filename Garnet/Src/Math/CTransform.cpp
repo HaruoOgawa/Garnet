@@ -68,16 +68,12 @@ namespace math
 		// https://math.stackexchange.com/questions/237369/given-this-transformation-matrix-how-do-i-decompose-it-into-translation-rotati
 
 		// Pos
-		Translation = glm::vec3(ModelMatrix[3][0], ModelMatrix[3][1], ModelMatrix[3][2]);
+		CastModelMatrixToTranslation(ModelMatrix, Translation);
 		
 		// Scale
 		if (UseScale)
 		{
-			Scale = glm::vec3(
-				glm::sqrt(glm::length2(glm::vec3(ModelMatrix[0][0], ModelMatrix[0][1], ModelMatrix[0][2]))),
-				glm::sqrt(glm::length2(glm::vec3(ModelMatrix[1][0], ModelMatrix[1][1], ModelMatrix[1][2]))),
-				glm::sqrt(glm::length2(glm::vec3(ModelMatrix[2][0], ModelMatrix[2][1], ModelMatrix[2][2])))
-			);
+			CastModelMatrixToScale(ModelMatrix, Scale);
 		}
 		else
 		{
@@ -85,6 +81,16 @@ namespace math
 		}
 
 		// Rot
+		CastModelMatrixToRotation(ModelMatrix, Rotation, Scale);
+	}
+
+	void CTransform::CastModelMatrixToTranslation(const glm::mat4& ModelMatrix, glm::vec3& Translation)
+	{
+		Translation = glm::vec3(ModelMatrix[3][0], ModelMatrix[3][1], ModelMatrix[3][2]);
+	}
+
+	void CTransform::CastModelMatrixToRotation(const glm::mat4& ModelMatrix, glm::quat& Rotation, glm::vec3& Scale)
+	{
 		// 回転の取得は今後様子を見つついろいろと改善が必要かも
 		glm::mat4 RotMat = glm::mat4(
 			ModelMatrix[0][0], ModelMatrix[0][1], ModelMatrix[0][2], 0.0f,
@@ -98,6 +104,15 @@ namespace math
 		RotMat[2][2] /= Scale.z;
 
 		Rotation = glm::quat_cast(RotMat);
+	}
+
+	void CTransform::CastModelMatrixToScale(const glm::mat4& ModelMatrix, glm::vec3& Scale)
+	{
+		Scale = glm::vec3(
+			glm::sqrt(glm::length2(glm::vec3(ModelMatrix[0][0], ModelMatrix[0][1], ModelMatrix[0][2]))),
+			glm::sqrt(glm::length2(glm::vec3(ModelMatrix[1][0], ModelMatrix[1][1], ModelMatrix[1][2]))),
+			glm::sqrt(glm::length2(glm::vec3(ModelMatrix[2][0], ModelMatrix[2][1], ModelMatrix[2][2])))
+		);
 	}
 
 	void CTransform::CastLeftHandToRightHand(glm::vec3& Translation)

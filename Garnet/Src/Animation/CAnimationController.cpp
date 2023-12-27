@@ -321,6 +321,8 @@ namespace animation
 
 			animation::EHumanoidBones BoneName = TargetChannel->GetBoneName();
 
+			animation::EAnimationTarget AnimationTarget = TargetChannel->GetAnimationTarget();
+
 			// BoneTableに登録されていないものについては処理の対象外とする
 			if (BoneName == animation::EHumanoidBones::None) continue;
 
@@ -344,12 +346,34 @@ namespace animation
 				{
 					const float CurrentTime = TargetKeyFrame->GetInput();
 
-					glm::mat4 SourcePose = glm::mat4(1.0f);
-					TargetKeyFrame->GetOutput(&SourcePose[0][0]);
-					
-					glm::mat4 TargetPose = ReTargetTranslationMatrix * SourcePose;
+					if (AnimationTarget == animation::EAnimationTarget::MODELMATRIX)
+					{
+						glm::mat4 SourcePose = glm::mat4(1.0f);
+						TargetKeyFrame->GetOutput(&SourcePose[0][0]);
 
-					TargetKeyFrame->SetOutput(&TargetPose[0][0], sizeof(glm::mat4));
+						glm::mat4 TargetPose = ReTargetTranslationMatrix * SourcePose;
+
+						TargetKeyFrame->SetOutput(&TargetPose[0][0], sizeof(glm::mat4));
+					}
+					else if (AnimationTarget == animation::EAnimationTarget::TRANSLATION)
+					{
+						glm::vec3 SourceTranslation = glm::vec3(1.0f);
+						TargetKeyFrame->GetOutput(&SourceTranslation[0]);
+
+						glm::mat4 SourcePose = glm::translate(glm::mat4(1.0f), SourceTranslation);
+
+						glm::mat4 TargetPose = ReTargetTranslationMatrix * SourcePose;
+
+						glm::vec3 TargetTranslation = glm::vec3(1.0f);
+						math::CTransform::CastModelMatrixToTranslation(TargetPose, TargetTranslation);
+
+						TargetKeyFrame->SetOutput(&TargetTranslation[0], sizeof(glm::vec3));
+					}
+					else
+					{
+						// リターゲットはリグの長さの違いを補正するためのものなのでMODELMATRIXとTRANSLATIONに対してのみ行う
+						continue;
+					}
 				}
 
 				// 対象のBoneについては一度しか計算しない

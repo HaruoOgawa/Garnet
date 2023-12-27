@@ -457,7 +457,17 @@ namespace fbx
 							// 余分な文字が入っていたら排除する
 							if (jointName.find("Cluster ") != -1) jointName = jointName.substr(8);
 
-							unsigned int JointIndex = FindJointIndexUsingName(Skin, jointName);
+							unsigned int JointIndex = -1;
+
+							if (jointName.empty())
+							{
+								JointIndex = clusterIndex;
+							}
+							else
+							{
+								JointIndex = FindJointIndexUsingName(Skin, jointName);
+							}
+
 							if (JointIndex == -1) continue;
 
 							const auto& Weights = pFbxCluster->getWeights(); // このJointを参照している頂点のWeightリスト
@@ -944,7 +954,7 @@ namespace fbx
 						else if (NumComponent == 0)
 						{
 							// 0個は無効な値
-							return false;
+							continue;
 						}
 							
 						if (pFbxCurveNode->getAnimationCurves().size() == 0) continue;
