@@ -91,6 +91,8 @@ namespace fbx
 		static std::shared_ptr<object::CNode> GetJointNode(const std::string& JointName, const std::vector<std::shared_ptr<object::CNode>>& NodeList);
 
 		static unsigned int FindJointIndexUsingName(const std::shared_ptr<animation::CSkin>& Skin, const std::string& JointName);
+
+		static bool CheckIsMixamo(FbxNode* pFBXNode);
 	public:
 		static bool ImportFBX(api::IGraphicsAPI* pGraphicsAPI, const std::string& FileName, object::C3DObject* Object,
 			const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame);

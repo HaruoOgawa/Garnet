@@ -95,7 +95,7 @@ namespace fbx
 		FbxNode* RootNode = Scene->GetRootNode();
 
 		// MixamoのFbxかどうか. MixamoのデータはPosの単位やRoationが特殊なので内部的に色々と補正する必要がある
-		const bool IsMixamoFbx = true;
+		const bool IsMixamoFbx = CheckIsMixamo(RootNode);
 
 		// ノード
 		std::vector<std::shared_ptr<object::CNode>> NodeList;
@@ -1193,6 +1193,20 @@ namespace fbx
 		}
 
 		return JointIndex;
+	}
+
+	bool CFBXImporter::CheckIsMixamo(FbxNode* pFBXNode)
+	{
+		if (std::string(pFBXNode->GetName()).find("mixamo") != -1) return true;
+
+		for (int i = 0; i < pFBXNode->GetChildCount(); i++)
+		{
+			FbxNode* pChildFBXNode = pFBXNode->GetChild(i);
+
+			if (CheckIsMixamo(pChildFBXNode)) return true;
+		}
+
+		return false;
 	}
 }
 #endif // USE_FBX

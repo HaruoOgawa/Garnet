@@ -52,12 +52,29 @@ namespace fbx
 	bool CSmallFBXImporter::Analyse(api::IGraphicsAPI* pGraphicsAPI, const sfbx::DocumentPtr& Doc, bool IsUseObject, object::C3DObject* Object,
 		std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList, const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame)
 	{
+		// MixamoのFbxかどうか. MixamoのデータはPosの単位やRoationが特殊なので内部的に色々と補正する必要がある
+		bool MixamoResult = false;
+		for (const auto& RootNode : Doc->getRootObjects())
+		{
+			if (RootNode->getName() != "Scene") continue;
+
+			if (RootNode)
+			{
+				if (CheckIsMixamo(RootNode))
+				{
+					MixamoResult = true;
+					break;
+				}
+			}
+		}
+		const bool IsMixamoFbx = MixamoResult;
+
 		// ノード
 		std::vector<std::shared_ptr<object::CNode>> NodeList;
 		std::vector<std::vector<int>> RootNodeIndexList;
 		std::vector<sfbx::Object*> pFbxNodeList;
 
-		if (!CreateNodeList(Doc, pFbxNodeList, NodeList, RootNodeIndexList)) return false;
+		if (!CreateNodeList(Doc, pFbxNodeList, NodeList, RootNodeIndexList, IsMixamoFbx)) return false;
 
 		for (const auto& Node : NodeList)
 		{
@@ -107,7 +124,7 @@ namespace fbx
 		ApplyParentJointList(Skin, NodeList);
 
 		// アニメーション
-		if (!CreateAnimation(Doc, AnimationClipList, NodeList, Skin, FbxJointList)) return false;
+		if (!CreateAnimation(Doc, AnimationClipList, NodeList, Skin, FbxJointList, IsMixamoFbx)) return false;
 
 		if (IsUseObject)
 		{
@@ -123,7 +140,7 @@ namespace fbx
 				{
 					if (RootNode->getName() != "Scene") continue;
 
-					if (!CreateDrawInfo(pGraphicsAPI, pFbxMeshList, MaterialFrame, RootNode, TextureList, MaterialList, MeshList, Skin)) return false;
+					if (!CreateDrawInfo(pGraphicsAPI, pFbxMeshList, MaterialFrame, RootNode, TextureList, MaterialList, MeshList, Skin, IsMixamoFbx)) return false;
 				}
 
 				// マテリアルを持っていないのならダミーを渡す
@@ -177,7 +194,7 @@ namespace fbx
 		return true;
 	}
 
-	bool CSmallFBXImporter::CreateNodeList(const sfbx::DocumentPtr& Doc, std::vector<sfbx::Object*>& pFbxNodeList, std::vector<std::shared_ptr<object::CNode>>& NodeList, std::vector<std::vector<int>>& RootNodeIndexList)
+	bool CSmallFBXImporter::CreateNodeList(const sfbx::DocumentPtr& Doc, std::vector<sfbx::Object*>& pFbxNodeList, std::vector<std::shared_ptr<object::CNode>>& NodeList, std::vector<std::vector<int>>& RootNodeIndexList, const bool IsMixamoFbx)
 	{
 		int RootIndex = 0;
 
@@ -192,7 +209,7 @@ namespace fbx
 
 			RootNodeIndexList.push_back(std::vector<int>(1, RootIndex));
 
-			if (!CreateNode(RootObj, pFbxNodeList, NodeList)) return false;
+			if (!CreateNode(RootObj, pFbxNodeList, NodeList, IsMixamoFbx)) return false;
 
 			// 子要素を登録する
 			if (pFbxNodeList.size() != NodeList.size()) return false;
@@ -232,7 +249,7 @@ namespace fbx
 		return true;
 	}
 
-	bool CSmallFBXImporter::CreateNode(sfbx::Object* pFBXNode, std::vector<sfbx::Object*>& pFbxNodeList, std::vector<std::shared_ptr<object::CNode>>& NodeList)
+	bool CSmallFBXImporter::CreateNode(sfbx::Object* pFBXNode, std::vector<sfbx::Object*>& pFbxNodeList, std::vector<std::shared_ptr<object::CNode>>& NodeList, const bool IsMixamoFbx)
 	{
 		if (pFBXNode->getClass() != sfbx::ObjectClass::Model) return true;
 
@@ -286,9 +303,13 @@ namespace fbx
 			}
 		}
 
-		// FbxはTranslation・Posが100倍になっているので調整する
-		// たぶん単位がcmなので0.01倍することで計算に一般的に使用するmに直す
-		math::CTransform::CastCentiMeter2Meter(Pos);
+		// Mixamo固有の変換
+		if (IsMixamoFbx)
+		{
+			// FbxはTranslation・Posが100倍になっているので調整する
+			// たぶん単位がcmなので0.01倍することで計算に一般的に使用するmに直す
+			math::CTransform::CastCentiMeter2Meter(Pos);
+		}
 
 		Node->SetPos(Pos);
 		Node->SetRot(Rotation);
@@ -302,7 +323,7 @@ namespace fbx
 		// 子要素のNodeを調べる
 		for (int i = 0; i < pFBXNode->getChildren().size(); i++)
 		{
-			if (!CreateNode(pFBXNode->getChild(i), pFbxNodeList, NodeList)) return false;
+			if (!CreateNode(pFBXNode->getChild(i), pFbxNodeList, NodeList, IsMixamoFbx)) return false;
 		}
 
 		return true;
@@ -354,7 +375,7 @@ namespace fbx
 
 	bool CSmallFBXImporter::CreateDrawInfo(api::IGraphicsAPI* pGraphicsAPI, std::vector<sfbx::Mesh*>& pFbxMeshList, const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame,
 		sfbx::Object* pFBXNode, std::vector<std::shared_ptr<graphics::CTexture>>& TextureList,
-		std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList, std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, const std::shared_ptr<animation::CSkin>& Skin)
+		std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList, std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, const std::shared_ptr<animation::CSkin>& Skin, const bool IsMixamoFbx)
 	{
 
 		// 知りたいのは描画情報なのでここではeMeshのみ見る
@@ -366,13 +387,13 @@ namespace fbx
 			// マテリアル
 
 			// メッシュ
-			if (!CreateMesh(pFBXNode, pFbxMeshList, MeshList, Skin)) return false;
+			if (!CreateMesh(pFBXNode, pFbxMeshList, MeshList, Skin, IsMixamoFbx)) return false;
 		}
 
 		// 子要素のNodeを調べる
 		for (int i = 0; i < pFBXNode->getChildren().size(); i++)
 		{
-			if (!CreateDrawInfo(pGraphicsAPI, pFbxMeshList, MaterialFrame, pFBXNode->getChild(i), TextureList, MaterialList, MeshList, Skin)) return false;
+			if (!CreateDrawInfo(pGraphicsAPI, pFbxMeshList, MaterialFrame, pFBXNode->getChild(i), TextureList, MaterialList, MeshList, Skin, IsMixamoFbx)) return false;
 		}
 
 		return true;
@@ -416,7 +437,7 @@ namespace fbx
 		return true;
 	}
 
-	bool CSmallFBXImporter::CreateMesh(sfbx::Object* pFBXNode, std::vector<sfbx::Mesh*>& pFbxMeshList, std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, const std::shared_ptr<animation::CSkin>& Skin)
+	bool CSmallFBXImporter::CreateMesh(sfbx::Object* pFBXNode, std::vector<sfbx::Mesh*>& pFbxMeshList, std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, const std::shared_ptr<animation::CSkin>& Skin, const bool IsMixamoFbx)
 	{
 		if (auto pFbxMesh = sfbx::as<sfbx::Mesh>(pFBXNode))
 		{
@@ -565,9 +586,13 @@ namespace fbx
 							{
 								glm::vec3 Pos = glm::vec3(static_cast<float>(pFbxPosition[0]), static_cast<float>(pFbxPosition[1]), static_cast<float>(pFbxPosition[2]));
 
-								// FbxはTranslation・Posが100倍になっているので調整する
-								// たぶん単位がcmなので0.01倍することで計算に一般的に使用するmに直す
-								math::CTransform::CastCentiMeter2Meter(Pos);
+								// Mixamo固有の変換
+								if (IsMixamoFbx)
+								{
+									// FbxはTranslation・Posが100倍になっているので調整する
+									// たぶん単位がcmなので0.01倍することで計算に一般的に使用するmに直す
+									math::CTransform::CastCentiMeter2Meter(Pos);
+								}
 
 								AttributePosData.push_back(Pos.x);
 								AttributePosData.push_back(Pos.y);
@@ -886,7 +911,7 @@ namespace fbx
 	}
 
 	bool CSmallFBXImporter::CreateAnimation(const sfbx::DocumentPtr& Doc, std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList, const std::vector<std::shared_ptr<object::CNode>>& NodeList,
-		const std::shared_ptr<animation::CSkin>& Skin, const std::vector<sfbx::Object*>& FbxJointList)
+		const std::shared_ptr<animation::CSkin>& Skin, const std::vector<sfbx::Object*>& FbxJointList, const bool IsMixamoFbx)
 	{
 		for (int i = 0; i < Doc->getAnimationStacks().size(); i++)
 		{
@@ -1009,10 +1034,15 @@ namespace fbx
 
 							for (int v = 0; v < ValuesList[0].size(); v++)
 							{
-								// FbxはTranslation・Posが100倍になっているので調整する
-								// たぶん単位がcmなので0.01倍することで計算に一般的に使用するmに直す
 								glm::vec3 Pos = glm::vec3(ValuesList[0][v], ValuesList[1][v], ValuesList[2][v]);
-								math::CTransform::CastCentiMeter2Meter(Pos);
+
+								// Mixamo固有の変換
+								if (IsMixamoFbx)
+								{
+									// FbxはTranslation・Posが100倍になっているので調整する
+									// たぶん単位がcmなので0.01倍することで計算に一般的に使用するmに直す
+									math::CTransform::CastCentiMeter2Meter(Pos);
+								}
 
 								outputList.push_back(Pos.x);
 								outputList.push_back(Pos.y);
@@ -1156,6 +1186,20 @@ namespace fbx
 		}
 
 		return JointIndex;
+	}
+
+	bool CSmallFBXImporter::CheckIsMixamo(sfbx::Object* pFBXNode)
+	{
+		if (std::string(pFBXNode->getName()).find("mixamo") != -1) return true;
+
+		for (int i = 0; i < pFBXNode->getChildren().size(); i++)
+		{
+			sfbx::Object* pChildFBXNode = pFBXNode->getChild(i);
+
+			if (CheckIsMixamo(pChildFBXNode)) return true;
+		}
+
+		return false;
 	}
 }
 #endif
