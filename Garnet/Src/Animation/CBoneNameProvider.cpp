@@ -54,38 +54,6 @@ namespace animation
 		m_BoneNameTable.emplace(animation::EHumanoidBones::RightLowerLeg, std::vector<std::string>{"RightLowerLeg", "mixamorig:RightLeg", "rightLowerLeg"});
 		m_BoneNameTable.emplace(animation::EHumanoidBones::RightFoot, std::vector<std::string>{"RightFoot", "mixamorig:RightFoot", "rightFoot"});
 		m_BoneNameTable.emplace(animation::EHumanoidBones::RightToes, std::vector<std::string>{"RightToes", "mixamorig:RightToeBase", "rightToes"});
-
-		// éwÇÃÉ{Å[Éì
-		/*m_BoneNameTable.emplace(animation::EHumanoidBones::LeftThumbProximal, std::vector<std::string>{"LeftThumbProximal", "mixamorig:RightToeBase", "leftThumbProximal"});
-		m_BoneNameTable.emplace(animation::EHumanoidBones::LeftThumbIntermediate, std::vector<std::string>{"LeftThumbIntermediate", "mixamorig:RightToeBase", "leftThumbIntermediate"});
-		m_BoneNameTable.emplace(animation::EHumanoidBones::LeftThumbDistal, std::vector<std::string>{"LeftThumbDistal", "mixamorig:RightToeBase", "leftThumbDistal"});
-		m_BoneNameTable.emplace(animation::EHumanoidBones::RightToes, std::vector<std::string>{"RightToes", "mixamorig:RightToeBase", "rightToes"});
-		m_BoneNameTable.emplace(animation::EHumanoidBones::RightToes, std::vector<std::string>{"RightToes", "mixamorig:RightToeBase", "rightToes"});
-		m_BoneNameTable.emplace(animation::EHumanoidBones::RightToes, std::vector<std::string>{"RightToes", "mixamorig:RightToeBase", "rightToes"});
-		m_BoneNameTable.emplace(animation::EHumanoidBones::RightToes, std::vector<std::string>{"RightToes", "mixamorig:RightToeBase", "rightToes"});
-		m_BoneNameTable.emplace(animation::EHumanoidBones::RightToes, std::vector<std::string>{"RightToes", "mixamorig:RightToeBase", "rightToes"});
-		m_BoneNameTable.emplace(animation::EHumanoidBones::RightToes, std::vector<std::string>{"RightToes", "mixamorig:RightToeBase", "rightToes"});
-		m_BoneNameTable.emplace(animation::EHumanoidBones::RightToes, std::vector<std::string>{"RightToes", "mixamorig:RightToeBase", "rightToes"});
-		m_BoneNameTable.emplace(animation::EHumanoidBones::RightToes, std::vector<std::string>{"RightToes", "mixamorig:RightToeBase", "rightToes"});
-		m_BoneNameTable.emplace(animation::EHumanoidBones::RightToes, std::vector<std::string>{"RightToes", "mixamorig:RightToeBase", "rightToes"});
-		m_BoneNameTable.emplace(animation::EHumanoidBones::RightToes, std::vector<std::string>{"RightToes", "mixamorig:RightToeBase", "rightToes"});
-		m_BoneNameTable.emplace(animation::EHumanoidBones::RightToes, std::vector<std::string>{"RightToes", "mixamorig:RightToeBase", "rightToes"});
-		m_BoneNameTable.emplace(animation::EHumanoidBones::RightToes, std::vector<std::string>{"RightToes", "mixamorig:RightToeBase", "rightToes"});
-		m_BoneNameTable.emplace(animation::EHumanoidBones::RightToes, std::vector<std::string>{"RightToes", "mixamorig:RightToeBase", "rightToes"});
-		m_BoneNameTable.emplace(animation::EHumanoidBones::RightToes, std::vector<std::string>{"RightToes", "mixamorig:RightToeBase", "rightToes"});
-		m_BoneNameTable.emplace(animation::EHumanoidBones::RightToes, std::vector<std::string>{"RightToes", "mixamorig:RightToeBase", "rightToes"});
-		m_BoneNameTable.emplace(animation::EHumanoidBones::RightToes, std::vector<std::string>{"RightToes", "mixamorig:RightToeBase", "rightToes"});
-		m_BoneNameTable.emplace(animation::EHumanoidBones::RightToes, std::vector<std::string>{"RightToes", "mixamorig:RightToeBase", "rightToes"});
-		m_BoneNameTable.emplace(animation::EHumanoidBones::RightToes, std::vector<std::string>{"RightToes", "mixamorig:RightToeBase", "rightToes"});
-		m_BoneNameTable.emplace(animation::EHumanoidBones::RightToes, std::vector<std::string>{"RightToes", "mixamorig:RightToeBase", "rightToes"});
-		m_BoneNameTable.emplace(animation::EHumanoidBones::RightToes, std::vector<std::string>{"RightToes", "mixamorig:RightToeBase", "rightToes"});
-		m_BoneNameTable.emplace(animation::EHumanoidBones::RightToes, std::vector<std::string>{"RightToes", "mixamorig:RightToeBase", "rightToes"});
-		m_BoneNameTable.emplace(animation::EHumanoidBones::RightToes, std::vector<std::string>{"RightToes", "mixamorig:RightToeBase", "rightToes"});
-		m_BoneNameTable.emplace(animation::EHumanoidBones::RightToes, std::vector<std::string>{"RightToes", "mixamorig:RightToeBase", "rightToes"});
-		m_BoneNameTable.emplace(animation::EHumanoidBones::RightToes, std::vector<std::string>{"RightToes", "mixamorig:RightToeBase", "rightToes"});
-		m_BoneNameTable.emplace(animation::EHumanoidBones::RightToes, std::vector<std::string>{"RightToes", "mixamorig:RightToeBase", "rightToes"});
-		m_BoneNameTable.emplace(animation::EHumanoidBones::RightToes, std::vector<std::string>{"RightToes", "mixamorig:RightToeBase", "rightToes"});
-		m_BoneNameTable.emplace(animation::EHumanoidBones::RightToes, std::vector<std::string>{"RightToes", "mixamorig:RightToeBase", "rightToes"});*/
 	}
 }
 
