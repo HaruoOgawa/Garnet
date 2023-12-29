@@ -536,7 +536,7 @@ namespace fbx
 				std::vector<renderer::EDataType> DataTypeList;
 				std::vector<int> ByteStrideList;
 
-				std::vector<unsigned short> Indices;
+				std::vector<unsigned int> Indices;
 
 				// 頂点データの初期化用(例えばWeightとかNormalを持っていないならそれを0埋めするみたいな処理)
 				std::vector<std::string> NeedAttribNameList = {
@@ -557,26 +557,29 @@ namespace fbx
 				// インデックスバッファを読む
 				{
 					const auto& fbxIndices = pFbxGeom->getIndices();
-					// 4の倍数であり3の倍数ではない時
-					if (fbxIndices.size() % 4 == 0 && fbxIndices.size() % 3 != 0)
-					{
-						// 四角形ポリゴンを三角ポリゴンに変換する際に使用するインデックス
-						int IndexArray[6] = { 0, 1, 2, 0, 2, 3 };
+					
+					const auto& PolygonShapes = pFbxGeom->getCounts();
 
-						for (int i = 0; i < fbxIndices.size(); i += 4)
+					for (int PolygonIndex = 0; PolygonIndex < PolygonShapes.size(); PolygonIndex++)
+					{
+						int PolyShape = PolygonShapes[PolygonIndex];
+
+						if (PolyShape == 3) // 三角形ポリゴン
 						{
-							for (int s : IndexArray)
+							for (int j = 0; j < 3; j++)
 							{
-								Indices.push_back(static_cast<unsigned short>(fbxIndices[i + s]));
+								Indices.push_back(static_cast<unsigned int>(fbxIndices[PolygonIndex * PolyShape + j]));
 							}
 						}
-					}
-					else
-					{
-						// 三角形ポリゴン
-						for (int Index : fbxIndices)
+						else if (PolyShape == 4) // 四角形ポリゴン
 						{
-							Indices.push_back(static_cast<unsigned short>(Index));
+							// 四角形ポリゴンを三角ポリゴンに変換する際に使用するインデックス
+							int IndexArray[6] = { 0, 1, 2, 0, 2, 3 };
+
+							for (int j : IndexArray)
+							{
+								Indices.push_back(static_cast<unsigned int>(fbxIndices[PolygonIndex * PolyShape + j]));
+							}
 						}
 					}
 				}
@@ -858,7 +861,7 @@ namespace fbx
 				createInfo->SetAttribByteStrides(ByteStrideList);
 
 				// Indicesを登録
-				createInfo->SetIndices(Indices);
+				createInfo->SetUINTIndices(Indices);
 
 				// プリミティブを作成する
 				int MaterialIndex = 0; // ひとまず0番目のダミーマテリアルを渡しておく
