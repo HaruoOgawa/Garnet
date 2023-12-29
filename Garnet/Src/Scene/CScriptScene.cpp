@@ -53,7 +53,8 @@ namespace scene
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Motions\\Punch Combo.fbx", m_Punch_Animation, "", "ShadowPass"));
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Models\\CesiumMan\\glTF-Binary\\CesiumMan.glb", m_glTFObject, "", "ShadowPass"));
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Models\\BrainStem\\glTF-Binary\\BrainStem.glb", m_BrainStemDObject, "", "ShadowPass"));
-		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Models\\Alicia\\VRM\\AliciaSolid.vrm", m_VRMObject, "", "ShadowPass"));
+		//pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Models\\Alicia\\VRM\\AliciaSolid.vrm", m_VRMObject, "", "ShadowPass"));
+		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Avatar\\Warrok_W_Kurniawan.fbx", m_VRMObject, "", "ShadowPass"));
 		
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CTextureLoader>(pGraphicsAPI, std::vector<std::string>({ "Resources\\IBL\\output_skybox.hdr" }), m_IBL_Skybox_Texture));
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CTextureLoader>(pGraphicsAPI, std::vector<std::string>({ "Resources\\IBL\\output_iem.hdr" }), m_IBL_DiffuseEnvMap_Texture));
@@ -112,11 +113,15 @@ namespace scene
 			for(const auto& FrameTexture : m_FrameTextureList) { m_VRMObject->GetTextureSet()->AddFrameTexture(FrameTexture); }
 			m_VRMObject->GetTextureSet()->AddIBLTexture(m_IBL_DiffuseEnvMap_Texture, m_IBL_SpecularEnvMap_Texture, m_IBL_GGX_LUT_Texture);
 
-			if (!m_VRMObject->CreateFromMemory(pGraphicsAPI, m_PBRMF, m_DepthMF, object::E3DObjectType::glTF)) return false;
+			//if (!m_VRMObject->CreateFromMemory(pGraphicsAPI, m_PBRMF, m_DepthMF, object::E3DObjectType::glTF)) return false;
+			if (!m_VRMObject->CreateFromMemory(pGraphicsAPI, m_PBRMF, m_DepthMF, object::E3DObjectType::Fbx)) return false;
 
 			m_VRMObject->AddHumanoidAnimationClip(AnimationClipList[0], "Walk", { nullptr, "" }, true);
 			m_VRMObject->AddHumanoidAnimationClip(AnimationClipList[1], "Jump", { nullptr, "Walk" }, false);
 			m_VRMObject->AddHumanoidAnimationClip(AnimationClipList[2], "Punch", { nullptr, "Walk" }, false);
+
+			m_VRMObject->SetPos(glm::vec3(-4.0f, 0.0f, 0.0f));
+			m_VRMObject->SetRot(glm::angleAxis(3.1515f, glm::vec3(0.0f, 1.0f, 0.0f)));
 
 			// 再生するアニメーションクリップを指定する
 			m_VRMObject->ChangeMotion("Walk");
@@ -135,8 +140,7 @@ namespace scene
 			
 			// 再生するアニメーションクリップを指定する
 			m_FbxObject->ChangeMotion("Walk");
-
-			m_FbxObject->SetPos(glm::vec3(-2.0f, 0.0f, 0.0f));
+			m_FbxObject->SetRot(glm::angleAxis(3.1515f, glm::vec3(0.0f, 1.0f, 0.0f)));
 		}
 		
 		{
@@ -153,7 +157,8 @@ namespace scene
 			// 再生するアニメーションクリップを指定する
 			m_MouseyObject->ChangeMotion("Walk");
 
-			m_MouseyObject->SetPos(glm::vec3(-4.0f, 0.0f, 0.0f));
+			m_MouseyObject->SetPos(glm::vec3(-2.0f, 0.0f, 0.0f));
+			m_MouseyObject->SetRot(glm::angleAxis(3.1515f, glm::vec3(0.0f, 1.0f, 0.0f)));
 		}
 
 		// m_Background
