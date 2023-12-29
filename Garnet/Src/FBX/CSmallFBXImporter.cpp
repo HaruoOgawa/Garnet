@@ -557,7 +557,8 @@ namespace fbx
 				// インデックスバッファを読む
 				{
 					const auto& fbxIndices = pFbxGeom->getIndices();
-					if (fbxIndices.size() % 4 == 0)
+					// 4の倍数であり3の倍数ではない時
+					if (fbxIndices.size() % 4 == 0 && fbxIndices.size() % 3 != 0)
 					{
 						// 四角形ポリゴンを三角ポリゴンに変換する際に使用するインデックス
 						int IndexArray[6] = { 0, 1, 2, 0, 2, 3 };
@@ -1074,6 +1075,34 @@ namespace fbx
 								for (const auto& Values : ValuesList)
 								{
 									outputList.push_back(Values[v]);
+								}
+							}
+						}
+
+						// キーフレームが１つしかない時はEndTimeの位置にもう1つだけ追加する
+						if (inputList.size() == 1)
+						{
+							inputList.push_back(pAnimStack->getLocalStop());
+
+							if (AnimationTarget == animation::EAnimationTarget::ROTATION)
+							{
+								outputList.push_back(outputList[0]);
+								outputList.push_back(outputList[1]);
+								outputList.push_back(outputList[2]);
+								outputList.push_back(outputList[3]);
+							}
+							else if (AnimationTarget == animation::EAnimationTarget::TRANSLATION)
+							{
+								outputList.push_back(outputList[0]);
+								outputList.push_back(outputList[1]);
+								outputList.push_back(outputList[2]);
+							}
+							else
+							{
+								const auto& Data = outputList;
+								for (float d : Data)
+								{
+									outputList.push_back(d);
 								}
 							}
 						}
