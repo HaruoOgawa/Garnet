@@ -218,12 +218,15 @@ namespace fbx
 		// 知りたいのは描画情報なのでここではeMeshのみ見る
 		if (pFBXNode->GetNodeAttribute() && pFBXNode->GetNodeAttribute()->GetAttributeType() && pFBXNode->GetNodeAttribute()->GetAttributeType() == FbxNodeAttribute::eMesh)
 		{
+			std::vector<FbxSurfaceMaterial*> pFbxMaterialList;
+
 			// テクスチャ
 
 			// マテリアル
+			if (!CreateMaterial(pGraphicsAPI, pFBXNode, pFbxMaterialList, MaterialList, MaterialFrame, Skin)) return false;
 
 			// メッシュ
-			if (!CreateMesh(pFBXNode, pFbxMeshList, MeshList, Skin, IsMixamoFbx)) return false;
+			if (!CreateMesh(pFBXNode, pFbxMeshList, pFbxMaterialList, MeshList, MaterialList, Skin, IsMixamoFbx)) return false;
 		}
 		
 
@@ -231,6 +234,48 @@ namespace fbx
 		for (int i = 0; i < pFBXNode->GetChildCount(); i++)
 		{
 			if (!CreateDrawInfo(pGraphicsAPI, pFbxMeshList, MaterialFrame, pFBXNode->GetChild(i), TextureList, MaterialList, MeshList, Skin, IsMixamoFbx)) return false;
+		}
+
+		return true;
+	}
+
+	bool CFBXImporter::CreateMaterial(api::IGraphicsAPI* pGraphicsAPI, FbxNode* pFBXNode, std::vector<FbxSurfaceMaterial*>& pFbxMaterialList, std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList,
+		const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, const std::shared_ptr<animation::CSkin>& Skin)
+	{
+		for (int m = 0; m < pFBXNode->GetMaterialCount(); m++)
+		{
+			fbxsdk::FbxSurfaceMaterial* pFbxMaterial = pFBXNode->GetMaterial(m);
+			if (!pFbxMaterial) continue;
+
+			pFbxMaterialList.push_back(pFbxMaterial);
+
+			std::shared_ptr<graphics::CMaterial> material = MaterialFrame->CreateMaterial(pGraphicsAPI);
+
+			{
+				const auto& prop = pFbxMaterial->FindProperty(fbxsdk::FbxSurfaceMaterial::sDiffuse);
+				if (prop.IsValid())
+				{
+					const auto& val = prop.Get<fbxsdk::FbxDouble3>();
+					material->ReplacePreloadUniformValue("baseColorFactor", &glm::vec4(static_cast<float>(val[0]), static_cast<float>(val[1]), static_cast<float>(val[2]), 1.0f)[0], sizeof(glm::vec4), 0);
+				}
+			}
+
+			// SkinMatrix StorageBuffer
+			{
+				// SkinMatは存在するJointの数だけ用意する必要がある
+				int SkinMatCount = 1;
+				if (Skin) SkinMatCount = static_cast<int>(Skin->GetJointList().size());
+
+				// SSBOのサイズは2のn乗である必要がある
+				SkinMatCount = math::CMath::CalcNextPowerOfTwo(SkinMatCount);
+
+				std::vector<glm::mat4> SkinMatrixList;
+				SkinMatrixList.resize(SkinMatCount, glm::mat4(1.0f));
+
+				material->ReplacePreloadUniformValue("r_SkinMatrixBuffer", &SkinMatrixList[0], static_cast<int>(SkinMatrixList.size()) * sizeof(glm::mat4), 1);
+			}
+
+			MaterialList.push_back(material);
 		}
 
 		return true;
@@ -274,12 +319,37 @@ namespace fbx
 		return true;
 	}
 
-	bool CFBXImporter::CreateMesh(FbxNode* pFBXNode, std::vector<FbxMesh*>& pFbxMeshList, std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, const std::shared_ptr<animation::CSkin>& Skin, const bool IsMixamoFbx)
+	bool CFBXImporter::CreateMesh(FbxNode* pFBXNode, std::vector<FbxMesh*>& pFbxMeshList, const std::vector<FbxSurfaceMaterial*>& pFbxMaterialList,
+		std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, const std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList, const std::shared_ptr<animation::CSkin>& Skin, const bool IsMixamoFbx)
 	{
 		FbxMesh* pFbxMesh = pFBXNode->GetMesh();
 		
 		if (pFbxMesh)
 		{
+			// MaterialIndexを取得
+			int MaterialIndex = -1;
+			{
+				int MatCount = pFbxMesh->GetElementMaterialCount();
+
+				if (MatCount != 0)
+				{
+					fbxsdk::FbxLayerElementMaterial* pFbxElementMaterial = pFbxMesh->GetElementMaterial(0);
+					
+					int Index = pFbxElementMaterial->GetIndexArray().GetAt(0);
+					FbxSurfaceMaterial* pFbxSurfaceMaterial = pFbxMesh->GetNode()->GetSrcObject<FbxSurfaceMaterial>(Index);
+
+					for (size_t i = 0; i < pFbxMaterialList.size(); i++)
+					{
+						if (pFbxSurfaceMaterial == pFbxMaterialList[i])
+						{
+							MaterialIndex = static_cast<int>(MaterialList.size() - pFbxMaterialList.size() + i);
+
+							break;
+						}
+					}
+				}
+			}
+
 			// MeshListに登録
 			pFbxMeshList.push_back(pFbxMesh);
 			
@@ -656,7 +726,6 @@ namespace fbx
 				createInfo->SetIndices(Indices);
 
 				// プリミティブを作成する
-				int MaterialIndex = 0; // ひとまず0番目のダミーマテリアルを渡しておく
 				std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(createInfo, MaterialIndex);
 				Mesh->AddPrimitive(Primitive);
 			}

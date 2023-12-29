@@ -382,18 +382,65 @@ namespace fbx
 		//if (pFBXNode->GetNodeAttribute() && pFBXNode->GetNodeAttribute()->GetAttributeType() && pFBXNode->GetNodeAttribute()->GetAttributeType() == FbxNodeAttribute::eMesh)
 		if(auto fbxMesh = sfbx::as<sfbx::Mesh>(pFBXNode))
 		{
+			std::vector<sfbx::Material*> pFbxMaterialList;
+
 			// テクスチャ
 
 			// マテリアル
+			if (!CreateMaterial(pGraphicsAPI, fbxMesh, pFbxMaterialList, MaterialList, MaterialFrame, Skin)) return false;
 
 			// メッシュ
-			if (!CreateMesh(pFBXNode, pFbxMeshList, FbxJointList, MeshList, Skin, IsMixamoFbx)) return false;
+			if (!CreateMesh(pFBXNode, pFbxMeshList, pFbxMaterialList, FbxJointList, MeshList, MaterialList, Skin, IsMixamoFbx)) return false;
 		}
 
 		// 子要素のNodeを調べる
 		for (int i = 0; i < pFBXNode->getChildren().size(); i++)
 		{
 			if (!CreateDrawInfo(pGraphicsAPI, pFbxMeshList, FbxJointList, MaterialFrame, pFBXNode->getChild(i), TextureList, MaterialList, MeshList, Skin, IsMixamoFbx)) return false;
+		}
+
+		return true;
+	}
+
+	bool CSmallFBXImporter::CreateMaterial(api::IGraphicsAPI* pGraphicsAPI, sfbx::Mesh* pFbxMesh, std::vector<sfbx::Material*>& pFbxMaterialList, std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList,
+		const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, const std::shared_ptr<animation::CSkin>& Skin)
+	{
+		for (int i = 0; i < pFbxMesh->getMaterials().size(); i++)
+		{
+			sfbx::Material* pFbxMaterial = pFbxMesh->getMaterials()[i];
+			if (!pFbxMaterial) continue;
+
+			pFbxMaterialList.push_back(pFbxMaterial);
+
+			std::shared_ptr<graphics::CMaterial> material = MaterialFrame->CreateMaterial(pGraphicsAPI);
+
+			material->ReplacePreloadUniformValue("baseColorFactor", &glm::vec4(1.0f)[0], sizeof(glm::vec4), 0);
+
+			/*{
+				const auto& prop = pFbxMaterial->FindProperty(fbxsdk::FbxSurfaceMaterial::sDiffuse);
+				if (prop.IsValid())
+				{
+					const auto& val = prop.Get<fbxsdk::FbxDouble3>();
+					material->ReplacePreloadUniformValue("baseColorFactor", &glm::vec4(static_cast<float>(val[0]), static_cast<float>(val[1]), static_cast<float>(val[2]), 1.0f)[0], sizeof(glm::vec4), 0);
+				}
+			}*/
+
+			// SkinMatrix StorageBuffer
+			{
+				// SkinMatは存在するJointの数だけ用意する必要がある
+				int SkinMatCount = 1;
+				if (Skin) SkinMatCount = static_cast<int>(Skin->GetJointList().size());
+
+				// SSBOのサイズは2のn乗である必要がある
+				SkinMatCount = math::CMath::CalcNextPowerOfTwo(SkinMatCount);
+
+				std::vector<glm::mat4> SkinMatrixList;
+				SkinMatrixList.resize(SkinMatCount, glm::mat4(1.0f));
+
+				material->ReplacePreloadUniformValue("r_SkinMatrixBuffer", &SkinMatrixList[0], static_cast<int>(SkinMatrixList.size()) * sizeof(glm::mat4), 1);
+			}
+
+			MaterialList.push_back(material);
 		}
 
 		return true;
@@ -437,12 +484,32 @@ namespace fbx
 		return true;
 	}
 
-	bool CSmallFBXImporter::CreateMesh(sfbx::Object* pFBXNode, std::vector<sfbx::Mesh*>& pFbxMeshList, const std::vector<sfbx::Object*>& FbxJointList, std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, const std::shared_ptr<animation::CSkin>& Skin, const bool IsMixamoFbx)
+	bool CSmallFBXImporter::CreateMesh(sfbx::Object* pFBXNode, std::vector<sfbx::Mesh*>& pFbxMeshList, const std::vector<sfbx::Material*>& pFbxMaterialList, const std::vector<sfbx::Object*>& FbxJointList,
+		std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, const std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList, const std::shared_ptr<animation::CSkin>& Skin, const bool IsMixamoFbx)
 	{
 		if (auto pFbxMesh = sfbx::as<sfbx::Mesh>(pFBXNode))
 		{
 			auto pFbxGeom = pFbxMesh->getGeometry();
 			if (!pFbxGeom) return true;
+
+			// MaterialIndexを取得
+			int MaterialIndex = -1;
+			{
+				if (pFbxMesh->getMaterials().size() != 0)
+				{
+					sfbx::Material* pFbxSurfaceMaterial = pFbxMesh->getMaterials()[0];
+
+					for (size_t i = 0; i < pFbxMaterialList.size(); i++)
+					{
+						if (pFbxSurfaceMaterial == pFbxMaterialList[i])
+						{
+							MaterialIndex = static_cast<int>(MaterialList.size() - pFbxMaterialList.size() + i);
+
+							break;
+						}
+					}
+				}
+			}
 
 			// MeshListに登録
 			pFbxMeshList.push_back(pFbxMesh);
@@ -864,7 +931,6 @@ namespace fbx
 				createInfo->SetUINTIndices(Indices);
 
 				// プリミティブを作成する
-				int MaterialIndex = 0; // ひとまず0番目のダミーマテリアルを渡しておく
 				std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(createInfo, MaterialIndex);
 				Mesh->AddPrimitive(Primitive);
 			}
