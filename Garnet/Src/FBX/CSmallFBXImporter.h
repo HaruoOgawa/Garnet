@@ -84,14 +84,14 @@ namespace fbx
 		static bool ConnectNodeTo(std::vector<std::shared_ptr<object::CNode>>& NodeList, const std::vector<sfbx::Object*>& pFbxNodeList, const std::vector<sfbx::Mesh*>& pFbxMeshList,
 			const std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, const std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList, const std::shared_ptr<animation::CSkin>& Skin);
 
-		static bool CreateDrawInfo(api::IGraphicsAPI* pGraphicsAPI, std::vector<sfbx::Mesh*>& pFbxMeshList, const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame,
+		static bool CreateDrawInfo(api::IGraphicsAPI* pGraphicsAPI, std::vector<sfbx::Mesh*>& pFbxMeshList, const std::vector<sfbx::Object*>& FbxJointList, const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame,
 			sfbx::Object* pFBXNode, std::vector<std::shared_ptr<graphics::CTexture>>& TextureList,
 			std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList, std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, const std::shared_ptr<animation::CSkin>& Skin, const bool IsMixamoFbx);
 
 		static bool CreateDummyMaterial(api::IGraphicsAPI* pGraphicsAPI, std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList,
 			const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, const std::shared_ptr<animation::CSkin>& Skin);
 
-		static bool CreateMesh(sfbx::Object* pFBXNode, std::vector<sfbx::Mesh*>& pFbxMeshList, std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, const std::shared_ptr<animation::CSkin>& Skin, const bool IsMixamoFbx);
+		static bool CreateMesh(sfbx::Object* pFBXNode, std::vector<sfbx::Mesh*>& pFbxMeshList, const std::vector<sfbx::Object*>& FbxJointList, std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, const std::shared_ptr<animation::CSkin>& Skin, const bool IsMixamoFbx);
 
 		static bool CreateAnimationSkin(sfbx::Object* pFBXNode, std::shared_ptr<animation::CSkin>& Skin, std::vector<sfbx::Object*>& FbxJointList, const std::vector<std::shared_ptr<object::CNode>>& NodeList);
 

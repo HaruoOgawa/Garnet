@@ -140,7 +140,7 @@ namespace fbx
 				{
 					if (RootNode->getName() != "Scene") continue;
 
-					if (!CreateDrawInfo(pGraphicsAPI, pFbxMeshList, MaterialFrame, RootNode, TextureList, MaterialList, MeshList, Skin, IsMixamoFbx)) return false;
+					if (!CreateDrawInfo(pGraphicsAPI, pFbxMeshList, FbxJointList, MaterialFrame, RootNode, TextureList, MaterialList, MeshList, Skin, IsMixamoFbx)) return false;
 				}
 
 				// マテリアルを持っていないのならダミーを渡す
@@ -373,7 +373,7 @@ namespace fbx
 		return true;
 	}
 
-	bool CSmallFBXImporter::CreateDrawInfo(api::IGraphicsAPI* pGraphicsAPI, std::vector<sfbx::Mesh*>& pFbxMeshList, const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame,
+	bool CSmallFBXImporter::CreateDrawInfo(api::IGraphicsAPI* pGraphicsAPI, std::vector<sfbx::Mesh*>& pFbxMeshList, const std::vector<sfbx::Object*>& FbxJointList, const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame,
 		sfbx::Object* pFBXNode, std::vector<std::shared_ptr<graphics::CTexture>>& TextureList,
 		std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList, std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, const std::shared_ptr<animation::CSkin>& Skin, const bool IsMixamoFbx)
 	{
@@ -387,13 +387,13 @@ namespace fbx
 			// マテリアル
 
 			// メッシュ
-			if (!CreateMesh(pFBXNode, pFbxMeshList, MeshList, Skin, IsMixamoFbx)) return false;
+			if (!CreateMesh(pFBXNode, pFbxMeshList, FbxJointList, MeshList, Skin, IsMixamoFbx)) return false;
 		}
 
 		// 子要素のNodeを調べる
 		for (int i = 0; i < pFBXNode->getChildren().size(); i++)
 		{
-			if (!CreateDrawInfo(pGraphicsAPI, pFbxMeshList, MaterialFrame, pFBXNode->getChild(i), TextureList, MaterialList, MeshList, Skin, IsMixamoFbx)) return false;
+			if (!CreateDrawInfo(pGraphicsAPI, pFbxMeshList, FbxJointList, MaterialFrame, pFBXNode->getChild(i), TextureList, MaterialList, MeshList, Skin, IsMixamoFbx)) return false;
 		}
 
 		return true;
@@ -437,7 +437,7 @@ namespace fbx
 		return true;
 	}
 
-	bool CSmallFBXImporter::CreateMesh(sfbx::Object* pFBXNode, std::vector<sfbx::Mesh*>& pFbxMeshList, std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, const std::shared_ptr<animation::CSkin>& Skin, const bool IsMixamoFbx)
+	bool CSmallFBXImporter::CreateMesh(sfbx::Object* pFBXNode, std::vector<sfbx::Mesh*>& pFbxMeshList, const std::vector<sfbx::Object*>& FbxJointList, std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, const std::shared_ptr<animation::CSkin>& Skin, const bool IsMixamoFbx)
 	{
 		if (auto pFbxMesh = sfbx::as<sfbx::Mesh>(pFBXNode))
 		{
@@ -466,6 +466,8 @@ namespace fbx
 
 						if (!pFbxSkin) continue;
 
+						const auto& JointMatrices = pFbxSkin->getJointMatrices();
+
 						// Cluster(Joint)を取得
 						unsigned int numOfCluster = static_cast<unsigned int>(pFbxSkin->getClusters().size());
 
@@ -482,7 +484,23 @@ namespace fbx
 
 							if (jointName.empty())
 							{
-								JointIndex = clusterIndex;
+								// jointNameが空の時は行列を比較して力技で解決する必要がある
+								const auto& JointMatrix = JointMatrices.global_transform[clusterIndex];
+
+								for (int jindex = 0; jindex < FbxJointList.size(); jindex++)
+								{
+									const auto& pJoint = FbxJointList[jindex];
+									const auto& LimbNode = sfbx::as<sfbx::LimbNode>(pJoint);
+									
+									const auto& LimbTransform = LimbNode->getGlobalMatrix();
+
+									if (JointMatrix == LimbTransform)
+									{
+										JointIndex = jindex;
+
+										break;
+									}
+								}
 							}
 							else
 							{
