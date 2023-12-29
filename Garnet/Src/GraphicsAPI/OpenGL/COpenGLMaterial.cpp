@@ -139,7 +139,7 @@ namespace api
 		return true;
 	}
 
-	void COpenGLMaterial::SetUniformValue(const std::string Name, const void* Value, int DynamicOffsetNum)
+	void COpenGLMaterial::SetUniformValue(const std::string Name, const void* Data, int ByteSize, int DynamicOffsetNum)
 	{
 		for (int i = 0; i < m_ShaderBufferList.size(); i++)
 		{
@@ -154,9 +154,8 @@ namespace api
 			if (UniformData != DataList.end())
 			{
 				const int ByteOffset = UniformData->second.ByteOffset;
-				const int ByteSize = UniformData->second.ByteSize;
 
-				UniformBuffer->SetValue(Value, ByteOffset, ByteSize);
+				UniformBuffer->SetValue(Data, ByteOffset, ByteSize);
 			}
 		}
 	}

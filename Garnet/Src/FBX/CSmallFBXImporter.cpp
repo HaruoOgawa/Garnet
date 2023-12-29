@@ -304,7 +304,7 @@ namespace fbx
 		}
 
 		// Mixamo固有の変換
-		if (IsMixamoFbx)
+		//if (IsMixamoFbx)
 		{
 			// FbxはTranslation・Posが100倍になっているので調整する
 			// たぶん単位がcmなので0.01倍することで計算に一般的に使用するmに直す
@@ -587,7 +587,7 @@ namespace fbx
 								glm::vec3 Pos = glm::vec3(static_cast<float>(pFbxPosition[0]), static_cast<float>(pFbxPosition[1]), static_cast<float>(pFbxPosition[2]));
 
 								// Mixamo固有の変換
-								if (IsMixamoFbx)
+								//if (IsMixamoFbx)
 								{
 									// FbxはTranslation・Posが100倍になっているので調整する
 									// たぶん単位がcmなので0.01倍することで計算に一般的に使用するmに直す
@@ -1037,7 +1037,7 @@ namespace fbx
 								glm::vec3 Pos = glm::vec3(ValuesList[0][v], ValuesList[1][v], ValuesList[2][v]);
 
 								// Mixamo固有の変換
-								if (IsMixamoFbx)
+								//if (IsMixamoFbx)
 								{
 									// FbxはTranslation・Posが100倍になっているので調整する
 									// たぶん単位がcmなので0.01倍することで計算に一般的に使用するmに直す

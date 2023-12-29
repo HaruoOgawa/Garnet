@@ -114,13 +114,12 @@ namespace scene
 
 			if (!m_VRMObject->CreateFromMemory(pGraphicsAPI, m_PBRMF, m_DepthMF, object::E3DObjectType::glTF)) return false;
 
-			// なんかSkinMatrixの受け渡しでたまにエラーになるのでいったんコメントアウト. もしかするとここがヒントかも
-			/*m_VRMObject->AddHumanoidAnimationClip(AnimationClipList[0], "Walk", { nullptr, "" }, true);
+			m_VRMObject->AddHumanoidAnimationClip(AnimationClipList[0], "Walk", { nullptr, "" }, true);
 			m_VRMObject->AddHumanoidAnimationClip(AnimationClipList[1], "Jump", { nullptr, "Walk" }, false);
 			m_VRMObject->AddHumanoidAnimationClip(AnimationClipList[2], "Punch", { nullptr, "Walk" }, false);
 
 			// 再生するアニメーションクリップを指定する
-			m_VRMObject->ChangeMotion("Walk");*/
+			m_VRMObject->ChangeMotion("Walk");
 		}
 		
 		{

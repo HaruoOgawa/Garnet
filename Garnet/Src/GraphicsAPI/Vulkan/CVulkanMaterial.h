@@ -66,7 +66,7 @@ namespace api
 		virtual bool Create(const std::shared_ptr<graphics::CTextureSet>& TextureSet) override;
 		virtual bool BuildDrawBuffer(int DynamicOffsetNum) override;
 
-		virtual void SetUniformValue(const std::string Name, const void* Value, int DynamicOffsetNum = -1) override;
+		virtual void SetUniformValue(const std::string Name, const void* Data, int ByteSize, int DynamicOffsetNum = -1) override;
 
 		const std::vector<VkPipelineShaderStageCreateInfo>& GetShaderStages()const { return m_ShaderStages; }
 		const VkDescriptorSetLayout& GetDescriptorSetLayout() const { return m_DescriptorSetLayout; }

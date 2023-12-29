@@ -101,7 +101,7 @@ namespace graphics
 		}
 	}
 
-	void CMaterial::SetUniformValue(const std::string Name, const void* Value, int DynamicOffsetNum)
+	void CMaterial::SetUniformValue(const std::string Name, const void* Data, int ByteSize, int DynamicOffsetNum)
 	{
 	}
 

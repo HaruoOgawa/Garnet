@@ -62,7 +62,7 @@ namespace api
 		return true;
 	}
 
-	void CWebGPUMaterial::SetUniformValue(const std::string Name, const void* Value, int DynamicOffsetNum)
+	void CWebGPUMaterial::SetUniformValue(const std::string Name, const void* Data, int ByteSize, int DynamicOffsetNum)
 	{
 		for (int i = 0; i < m_ShaderBufferList.size(); i++)
 		{
@@ -78,7 +78,6 @@ namespace api
 			if (UniformData != DataList.end())
 			{
 				const int ByteOffset = UniformData->second.ByteOffset;
-				const int ByteSize = UniformData->second.ByteSize;
 
 				if (m_UseDynamicBufferOffset)
 				{
@@ -86,17 +85,17 @@ namespace api
 					{
 						for (int r = 0; r < m_RefCount; r++)
 						{
-							wgpuQueueWriteBuffer(m_pGraphicsAPI->GetQueue(), m_WGPUUniformBufferList[i], ByteOffset + UniformBufferByteSize * r, Value, ByteSize);
+							wgpuQueueWriteBuffer(m_pGraphicsAPI->GetQueue(), m_WGPUUniformBufferList[i], ByteOffset + UniformBufferByteSize * r, Data, ByteSize);
 						}
 					}
 					else
 					{
-						wgpuQueueWriteBuffer(m_pGraphicsAPI->GetQueue(), m_WGPUUniformBufferList[i], ByteOffset + UniformBufferByteSize * (DynamicOffsetNum - 1), Value, ByteSize);
+						wgpuQueueWriteBuffer(m_pGraphicsAPI->GetQueue(), m_WGPUUniformBufferList[i], ByteOffset + UniformBufferByteSize * (DynamicOffsetNum - 1), Data, ByteSize);
 					}
 				}
 				else
 				{
-					wgpuQueueWriteBuffer(m_pGraphicsAPI->GetQueue(), m_WGPUUniformBufferList[i], ByteOffset, Value, ByteSize);
+					wgpuQueueWriteBuffer(m_pGraphicsAPI->GetQueue(), m_WGPUUniformBufferList[i], ByteOffset, Data, ByteSize);
 				}
 			}
 		}

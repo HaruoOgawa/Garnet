@@ -30,9 +30,9 @@ namespace api
 
 		pSharedOpenGLMat->SetActive();
 
-		pSharedOpenGLMat->SetUniformValue("cameraPos", &Camera->GetPos()[0]);
-		pSharedOpenGLMat->SetUniformValue("time", &glm::vec1(DrawInfo->GetSecondsTime())[0]);
-		pSharedOpenGLMat->SetUniformValue("deltaTime", &glm::vec1(DrawInfo->GetDeltaSecondsTime())[0]);
+		pSharedOpenGLMat->SetUniformValue("cameraPos", &Camera->GetPos()[0], sizeof(glm::vec3));
+		pSharedOpenGLMat->SetUniformValue("time", &glm::vec1(DrawInfo->GetSecondsTime())[0], sizeof(glm::vec1));
+		pSharedOpenGLMat->SetUniformValue("deltaTime", &glm::vec1(DrawInfo->GetDeltaSecondsTime())[0], sizeof(glm::vec1));
 
 		if (!pSharedOpenGLMat->BuildDrawBuffer(0)) return false;
 
