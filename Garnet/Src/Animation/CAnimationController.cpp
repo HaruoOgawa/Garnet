@@ -235,7 +235,7 @@ namespace animation
 		// RigのReTargetingを行う
 		// リターゲティングとはリグの形が異なるアニメーションを自身のアニメーションに合うように調整すること
 		// 例えば身長が違うとアバターが伸びてしまうしリグが反対だとねじれてしまう
-		//if (!ReTargetingRig(SourceClip, TargetClip)) return;
+		if (!ReTargetRig(SourceClip, TargetClip)) return;
 
 		TargetClip->SetIsLoop(IsLoop);
 
@@ -306,7 +306,7 @@ namespace animation
 		Node->GetLocalTransform()->SetRot(CurrRot);
 	}
 
-	bool CAnimationController::ReTargetingRig(const std::shared_ptr<animation::CAnimationClip>& SourceClip, const std::shared_ptr<animation::CAnimationClip>& TargetClip)
+	bool CAnimationController::ReTargetRig(const std::shared_ptr<animation::CAnimationClip>& SourceClip, const std::shared_ptr<animation::CAnimationClip>& TargetClip)
 	{
 		const auto& SourceSkin = SourceClip->GetDefaultSkin();
 		if (!SourceSkin) return false;
@@ -321,40 +321,59 @@ namespace animation
 
 			animation::EHumanoidBones BoneName = TargetChannel->GetBoneName();
 
+			animation::EAnimationTarget AnimationTarget = TargetChannel->GetAnimationTarget();
+
 			// BoneTableに登録されていないものについては処理の対象外とする
 			if (BoneName == animation::EHumanoidBones::None) continue;
 
 			const auto& SourceBone = SourceSkin->GetBone(BoneName);
 			if (!SourceBone) continue;
 
-			const glm::mat4 SourceRest = SourceBone->GetJointNode()->GetDefaultLocalMatrix();
-			const glm::mat4 InverseSourceRest = glm::inverse(SourceRest);
-
-			const glm::mat4 SourcePGRest = SourceBone->GetJointNode()->CalcDefaultParentWorldMatrix();
-			const glm::mat4 InverseSourcePGRest = glm::inverse(SourcePGRest);
+			const glm::mat4 SourceRestMove = SourceBone->GetJointNode()->GetDefaultLocalMoveMatrix();
+			const glm::mat4 InverseSourceRestMove = glm::inverse(SourceRestMove);
 
 			for (const auto& TargetSkin : m_SkinList)
 			{
 				const auto& TargetBone = TargetSkin->GetBone(BoneName);
 				if (!TargetBone) continue;
 
-				const glm::mat4 TargetRest = TargetBone->GetJointNode()->GetDefaultLocalMatrix();
+				const glm::mat4 TargetRestMove = TargetBone->GetJointNode()->GetDefaultLocalMoveMatrix();
 
-				const glm::mat4 TargetPGRest = TargetBone->GetJointNode()->CalcDefaultParentWorldMatrix();
-				const glm::mat4 InverseTargetPGRest = glm::inverse(TargetPGRest);
+				// SourceとTargetのバインドマトリックスのTranslationの差分を示す行列
+				const glm::mat4 ReTargetTranslationMatrix = TargetRestMove * InverseSourceRestMove;
 
 				for (const auto& TargetKeyFrame : TargetSampler->GetKeyFrameList())
 				{
 					const float CurrentTime = TargetKeyFrame->GetInput();
 
-					glm::mat4 SourcePose = glm::mat4(1.0f);
-					TargetKeyFrame->GetOutput(&SourcePose[0][0]);
+					if (AnimationTarget == animation::EAnimationTarget::MODELMATRIX)
+					{
+						glm::mat4 SourcePose = glm::mat4(1.0f);
+						TargetKeyFrame->GetOutput(&SourcePose[0][0]);
 
-					glm::mat4 SourceAnim = SourcePGRest * SourcePose * InverseSourceRest * InverseSourcePGRest;
+						glm::mat4 TargetPose = ReTargetTranslationMatrix * SourcePose;
 
-					glm::mat4 TargetPose = InverseTargetPGRest * SourceAnim * TargetPGRest * TargetRest;
+						TargetKeyFrame->SetOutput(&TargetPose[0][0], sizeof(glm::mat4));
+					}
+					else if (AnimationTarget == animation::EAnimationTarget::TRANSLATION)
+					{
+						glm::vec3 SourceTranslation = glm::vec3(1.0f);
+						TargetKeyFrame->GetOutput(&SourceTranslation[0]);
 
-					TargetKeyFrame->SetOutput(&TargetPose[0][0], sizeof(glm::mat4));
+						glm::mat4 SourcePose = glm::translate(glm::mat4(1.0f), SourceTranslation);
+
+						glm::mat4 TargetPose = ReTargetTranslationMatrix * SourcePose;
+
+						glm::vec3 TargetTranslation = glm::vec3(1.0f);
+						math::CTransform::CastModelMatrixToTranslation(TargetPose, TargetTranslation);
+
+						TargetKeyFrame->SetOutput(&TargetTranslation[0], sizeof(glm::vec3));
+					}
+					else
+					{
+						// リターゲットはリグの長さの違いを補正するためのものなのでMODELMATRIXとTRANSLATIONに対してのみ行う
+						continue;
+					}
 				}
 
 				// 対象のBoneについては一度しか計算しない

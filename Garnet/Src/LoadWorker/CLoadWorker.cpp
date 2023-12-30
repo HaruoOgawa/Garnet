@@ -156,8 +156,8 @@ namespace resource
 		if (m_Status == ELoadStatus::Loading && m_LoadingBar)
 		{
 			float rate = 1.0f - (static_cast<float>(m_FirstLoadResourceList.size()) / m_FirstResourceCount);
-			m_LoadingBar->GetMaterialList()[0]->SetUniformValue("rate", &glm::vec1(rate)[0]);
-			m_LoadingBar->GetMaterialList()[0]->SetUniformValue("alpha", &m_Alpha);
+			m_LoadingBar->GetMaterialList()[0]->SetUniformValue("rate", &glm::vec1(rate)[0], sizeof(float));
+			m_LoadingBar->GetMaterialList()[0]->SetUniformValue("alpha", &m_Alpha, sizeof(float));
 
 			if (!m_LoadingBar->Draw(IsDepthPass, Camera, Projection, DrawInfo)) return false;
 		}

@@ -69,7 +69,7 @@ namespace graphics
 
 		virtual void ReplacePreloadUniformValue(const std::string& Name, const void* Data, int ByteSize, int BindingIndex);
 
-		virtual void SetUniformValue(const std::string Name, const void* Value, int DynamicOffsetNum = -1) = 0;
+		virtual void SetUniformValue(const std::string Name, const void* Data, int ByteSize, int DynamicOffsetNum = -1) = 0;
 
 		virtual void IncreaseRefCount();
 		virtual int GetRefCount() const;

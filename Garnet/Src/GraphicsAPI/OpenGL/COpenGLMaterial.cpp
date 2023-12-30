@@ -139,7 +139,7 @@ namespace api
 		return true;
 	}
 
-	void COpenGLMaterial::SetUniformValue(const std::string Name, const void* Value, int DynamicOffsetNum)
+	void COpenGLMaterial::SetUniformValue(const std::string Name, const void* Data, int ByteSize, int DynamicOffsetNum)
 	{
 		for (int i = 0; i < m_ShaderBufferList.size(); i++)
 		{
@@ -154,9 +154,8 @@ namespace api
 			if (UniformData != DataList.end())
 			{
 				const int ByteOffset = UniformData->second.ByteOffset;
-				const int ByteSize = UniformData->second.ByteSize;
 
-				UniformBuffer->SetValue(Value, ByteOffset, ByteSize);
+				UniformBuffer->SetValue(Data, ByteOffset, ByteSize);
 			}
 		}
 	}
@@ -216,6 +215,7 @@ namespace api
 			{
 				GLenum target;
 				GLenum usage;
+				GLuint blockIndex = 0;
 
 				switch (Buffer->GetBufferType())
 				{
@@ -223,6 +223,10 @@ namespace api
 						{
 							target = GL_UNIFORM_BUFFER;
 							usage = GL_STATIC_DRAW;
+
+							// Uniform‚Ìbinding index‚ğŠ„‚è“–‚Ä‚é
+							blockIndex = glGetUniformBlockIndex(m_ShaderPrg, Layout.second.BindingName.c_str());
+							glUniformBlockBinding(m_ShaderPrg, blockIndex, Layout.second.BindingIndex); // ShaderPrg‚ÆBinding Block‚ğ•R‚Ã‚¯‚é
 						}
 						break;
 
@@ -234,6 +238,10 @@ namespace api
 
 							target = GL_SHADER_STORAGE_BUFFER;
 							usage = GL_DYNAMIC_DRAW;
+
+							// binding index‚ğæ“¾
+							blockIndex = glGetProgramResourceIndex(m_ShaderPrg, GL_SHADER_STORAGE_BLOCK, Layout.second.BindingName.c_str());
+							glShaderStorageBlockBinding(m_ShaderPrg, blockIndex, Layout.second.BindingIndex); // ShaderPrg‚ÆBinding Block‚ğ•R‚Ã‚¯‚é
 						}
 						break;
 
@@ -250,10 +258,8 @@ namespace api
 					COpenGLMaterial* pSharedOpenGLMat = static_cast<COpenGLMaterial*>(SharedBufferParam.SharedBufferMaterial.get());
 					GLuint sharedUboIndex = pSharedOpenGLMat->GetUBOList()[SharedBufferParam.BufferIndex];
 
-					// Uniform‚Ìbinding index‚ğŠ„‚è“–‚Ä‚é
-					GLuint blockIndex = glGetUniformBlockIndex(m_ShaderPrg, Layout.second.BindingName.c_str());
-					glUniformBlockBinding(m_ShaderPrg, blockIndex, Layout.second.BindingIndex); // ShaderPrg‚ÆBinding Block‚ğ•R‚Ã‚¯‚é
-					glBindBufferRange(target, Layout.second.BindingIndex, sharedUboIndex, 0, Layout.second.ByteSize); // UBO‚ÆBinding Block‚ğ•R‚Ã‚¯‚é
+					// UBO‚ÆBinding Block‚ğ•R‚Ã‚¯‚é
+					glBindBufferRange(target, Layout.second.BindingIndex, sharedUboIndex, 0, Layout.second.ByteSize); 
 
 					m_UBOList.push_back(sharedUboIndex);
 				}
@@ -263,10 +269,8 @@ namespace api
 					GLuint uboIndex;
 					glGenBuffers(1, &uboIndex);
 
-					// Uniform‚Ìbinding index‚ğŠ„‚è“–‚Ä‚é
-					GLuint blockIndex = glGetUniformBlockIndex(m_ShaderPrg, Layout.second.BindingName.c_str());
-					glUniformBlockBinding(m_ShaderPrg, blockIndex, Layout.second.BindingIndex); // ShaderPrg‚ÆBinding Block‚ğ•R‚Ã‚¯‚é
-					glBindBufferRange(target, Layout.second.BindingIndex, uboIndex, 0, Layout.second.ByteSize); // UBO‚ÆBinding Block‚ğ•R‚Ã‚¯‚é
+					// UBO‚ÆBinding Block‚ğ•R‚Ã‚¯‚é
+					glBindBufferRange(target, Layout.second.BindingIndex, uboIndex, 0, Layout.second.ByteSize); 
 
 					// ƒf[ƒ^‚Ìó‚¯“n‚µ
 					glBindBuffer(target, uboIndex);

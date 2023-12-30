@@ -27,8 +27,8 @@ namespace animation
 
 		if (NumComponent == -1) return false;
 
-		// 1つ以下の時はエラーにはしないが、何も処理しない
-		if (inputList.size() <= 1) return true;
+		// 0の時はエラーにはしないが、何も処理しない
+		if (inputList.size() == 0) return true;
 
 		if (inputList.size() != outputList.size() / NumComponent) return false;
 
@@ -176,9 +176,9 @@ namespace animation
 
 	bool CAnimationSampler::ComputeCurrentFrame(float CurrentTime, bool IsLoop, std::vector<float>& Value, EAnimationTarget AnimationTarget)
 	{
-		// 1つ以下の時はエラーにはしないが、何も処理しない
+		// 0の時はエラーにはしないが、何も処理しない
 		// AnimationやSDKに使っていないボーンのアニメーションでもなぜか一つだけInput・Outputが入っていることがあるため
-		if (m_KeyFrameList.size() <= 1)
+		if (m_KeyFrameList.size() == 0)
 		{
 			Value = GetDefaultValueFromAnimationTarget(AnimationTarget);
 

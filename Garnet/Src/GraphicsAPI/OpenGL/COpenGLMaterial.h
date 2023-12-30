@@ -46,7 +46,7 @@ namespace api
 		virtual bool Create(const std::shared_ptr<graphics::CTextureSet>& TextureSet) override;
 		virtual bool BuildDrawBuffer(int DynamicOffsetNum) override;
 
-		virtual void SetUniformValue(const std::string Name, const void* Value, int DynamicOffsetNum = -1) override;
+		virtual void SetUniformValue(const std::string Name, const void* Data, int ByteSize, int DynamicOffsetNum = -1) override;
 
 		void SetActive();
 

@@ -75,9 +75,9 @@ namespace api
 		CWebGPUMaterial* pWebGPUMat = static_cast<CWebGPUMaterial*>(m_ComputeMaterial.get());
 
 		// データの更新
-		pWebGPUMat->SetUniformValue("cameraPos", &Camera->GetPos()[0]);
-		pWebGPUMat->SetUniformValue("time", &glm::vec1(DrawInfo->GetSecondsTime())[0]);
-		pWebGPUMat->SetUniformValue("deltaTime", &glm::vec1(DrawInfo->GetDeltaSecondsTime())[0]);
+		pWebGPUMat->SetUniformValue("cameraPos", &Camera->GetPos()[0], sizeof(glm::vec3));
+		pWebGPUMat->SetUniformValue("time", &glm::vec1(DrawInfo->GetSecondsTime())[0], sizeof(glm::vec1));
+		pWebGPUMat->SetUniformValue("deltaTime", &glm::vec1(DrawInfo->GetDeltaSecondsTime())[0], sizeof(glm::vec1));
 
 		if (!pWebGPUMat->BuildDrawBuffer(0)) return false;
 

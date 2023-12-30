@@ -31,7 +31,7 @@ namespace animation
 	private:
 		void Reset();
 
-		bool ReTargetingRig(const std::shared_ptr<animation::CAnimationClip>& SourceClip, const std::shared_ptr<CAnimationClip>& DstClip);
+		bool ReTargetRig(const std::shared_ptr<animation::CAnimationClip>& SourceClip, const std::shared_ptr<CAnimationClip>& DstClip);
 
 		bool BlendMotion(float DeltaSecondsTime);
 

@@ -68,16 +68,12 @@ namespace math
 		// https://math.stackexchange.com/questions/237369/given-this-transformation-matrix-how-do-i-decompose-it-into-translation-rotati
 
 		// Pos
-		Translation = glm::vec3(ModelMatrix[3][0], ModelMatrix[3][1], ModelMatrix[3][2]);
+		CastModelMatrixToTranslation(ModelMatrix, Translation);
 		
 		// Scale
 		if (UseScale)
 		{
-			Scale = glm::vec3(
-				glm::sqrt(glm::length2(glm::vec3(ModelMatrix[0][0], ModelMatrix[0][1], ModelMatrix[0][2]))),
-				glm::sqrt(glm::length2(glm::vec3(ModelMatrix[1][0], ModelMatrix[1][1], ModelMatrix[1][2]))),
-				glm::sqrt(glm::length2(glm::vec3(ModelMatrix[2][0], ModelMatrix[2][1], ModelMatrix[2][2])))
-			);
+			CastModelMatrixToScale(ModelMatrix, Scale);
 		}
 		else
 		{
@@ -85,6 +81,16 @@ namespace math
 		}
 
 		// Rot
+		CastModelMatrixToRotation(ModelMatrix, Rotation, Scale);
+	}
+
+	void CTransform::CastModelMatrixToTranslation(const glm::mat4& ModelMatrix, glm::vec3& Translation)
+	{
+		Translation = glm::vec3(ModelMatrix[3][0], ModelMatrix[3][1], ModelMatrix[3][2]);
+	}
+
+	void CTransform::CastModelMatrixToRotation(const glm::mat4& ModelMatrix, glm::quat& Rotation, glm::vec3& Scale)
+	{
 		// âÒì]ÇÃéÊìæÇÕç°å„óléqÇå©Ç¬Ç¬Ç¢ÇÎÇ¢ÇÎÇ∆â¸ëPÇ™ïKóvÇ©Ç‡
 		glm::mat4 RotMat = glm::mat4(
 			ModelMatrix[0][0], ModelMatrix[0][1], ModelMatrix[0][2], 0.0f,
@@ -98,6 +104,15 @@ namespace math
 		RotMat[2][2] /= Scale.z;
 
 		Rotation = glm::quat_cast(RotMat);
+	}
+
+	void CTransform::CastModelMatrixToScale(const glm::mat4& ModelMatrix, glm::vec3& Scale)
+	{
+		Scale = glm::vec3(
+			glm::sqrt(glm::length2(glm::vec3(ModelMatrix[0][0], ModelMatrix[0][1], ModelMatrix[0][2]))),
+			glm::sqrt(glm::length2(glm::vec3(ModelMatrix[1][0], ModelMatrix[1][1], ModelMatrix[1][2]))),
+			glm::sqrt(glm::length2(glm::vec3(ModelMatrix[2][0], ModelMatrix[2][1], ModelMatrix[2][2])))
+		);
 	}
 
 	void CTransform::CastLeftHandToRightHand(glm::vec3& Translation)
@@ -128,11 +143,27 @@ namespace math
 		Rotation = glm::quat(0.0f, 0.0f, 1.0f, 0.0f) * Rotation * glm::quat(0.0f, 0.0f, -1.0f, 0.0f);
 	}
 
-	void CTransform::CastCentiMeter2Meter(glm::vec3& Val)
+	void CTransform::CastCentiMeter2Meter(glm::vec3& Translation)
 	{
-		Val.x *= 0.01f;
-		Val.y *= 0.01f;
-		Val.z *= 0.01f;
+		Translation.x *= 0.01f;
+		Translation.y *= 0.01f;
+		Translation.z *= 0.01f;
+	}
+
+	void CTransform::FlipAroundYAxis(glm::vec3& Translation)
+	{
+		glm::quat Rot = glm::angleAxis(glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+
+		// âÒì]ÇæÇØÇ»ÇÃÇ≈wê¨ï™ÇÕä÷åWÇ»Ç¢
+		glm::vec4 DstData = glm::vec4(Translation.x, Translation.y, Translation.z, 0.0f);
+		DstData = glm::mat4_cast(Rot) * DstData;
+
+		Translation = glm::vec3(DstData.x, DstData.y, DstData.z);
+	}
+
+	void CTransform::FlipAroundYAxis(glm::quat& Rotation)
+	{
+		Rotation *= glm::angleAxis(glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 	}
 
 	void CTransform::CalcModelMatrix(glm::mat4& ModelMatrix, const glm::vec3& Translation, const glm::quat& Rotation, bool UseScale, const glm::vec3& Scale)

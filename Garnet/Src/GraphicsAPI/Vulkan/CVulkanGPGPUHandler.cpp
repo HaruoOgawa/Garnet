@@ -94,9 +94,9 @@ namespace api
 		m_MinDeltaSecondsTime = glm::max(0.001000f, glm::min(CurrentDeltaSecondsTime, m_MinDeltaSecondsTime));
 		DrawInfo->SetDeltaSecondsTime(m_MinDeltaSecondsTime);
 
-		pVulkanMat->SetUniformValue("cameraPos", &Camera->GetPos()[0]);
-		pVulkanMat->SetUniformValue("time", &glm::vec1(DrawInfo->GetSecondsTime())[0]);
-		pVulkanMat->SetUniformValue("deltaTime", &glm::vec1(DrawInfo->GetDeltaSecondsTime())[0]);
+		pVulkanMat->SetUniformValue("cameraPos", &Camera->GetPos()[0], sizeof(glm::vec3));
+		pVulkanMat->SetUniformValue("time", &glm::vec1(DrawInfo->GetSecondsTime())[0], sizeof(float));
+		pVulkanMat->SetUniformValue("deltaTime", &glm::vec1(DrawInfo->GetDeltaSecondsTime())[0], sizeof(float));
 
 		if (!pVulkanMat->BuildDrawBuffer(0)) return false;
 

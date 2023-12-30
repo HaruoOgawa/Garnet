@@ -29,6 +29,9 @@ namespace math
 		void CastModelMatrixToTransform(const glm::mat4& ModelMatrix);
 		
 		static void CastModelMatrixToTransform(const glm::mat4& ModelMatrix, glm::vec3& Translation, glm::quat& Rotation, glm::vec3& Scale, bool UseScale = false);
+		static void CastModelMatrixToTranslation(const glm::mat4& ModelMatrix, glm::vec3& Translation);
+		static void CastModelMatrixToRotation(const glm::mat4& ModelMatrix, glm::quat& Rotation, glm::vec3& Scale);
+		static void CastModelMatrixToScale(const glm::mat4& ModelMatrix, glm::vec3& Scale);
 
 		static void CastLeftHandToRightHand(glm::vec3& Translation);
 		static void CastLeftHandToRightHand(glm::quat& Rotation);
@@ -36,7 +39,10 @@ namespace math
 		static void CastZUpToYUp(glm::vec3& Translation);
 		static void CastZUpToYUp(glm::quat& Rotation);
 
-		static void CastCentiMeter2Meter(glm::vec3& Val);
+		static void CastCentiMeter2Meter(glm::vec3& Translation);
+
+		static void FlipAroundYAxis(glm::vec3& Translation);
+		static void FlipAroundYAxis(glm::quat& Rotation);
 
 		static void CalcModelMatrix(glm::mat4& ModelMatrix, const glm::vec3& Translation, const glm::quat& Rotation, bool UseScale, const glm::vec3& Scale = glm::vec3(1.0f));
 	};

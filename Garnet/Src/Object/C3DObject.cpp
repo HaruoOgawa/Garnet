@@ -277,16 +277,16 @@ namespace object
 			// 共通のユニフォームバッファの更新
 			glm::mat4 lightVPMat = DrawInfo->GetLightProjection()->GetPrejectionMatrix() * DrawInfo->GetLightCamera()->GetViewMatrix();
 
-			Material->SetUniformValue("view", &Camera->GetViewMatrix()[0][0]);
-			Material->SetUniformValue("proj", &Projection->GetPrejectionMatrix()[0][0]);
-			Material->SetUniformValue("lightVPMat", &lightVPMat[0][0]);
-			Material->SetUniformValue("lightDir", &DrawInfo->GetLightCamera()->GetViewDir()[0]);
-			Material->SetUniformValue("lightColor", &DrawInfo->GetLightColor()[0]);
-			Material->SetUniformValue("cameraPos", &Camera->GetPos()[0]);
-			Material->SetUniformValue("time", &glm::vec1(DrawInfo->GetSecondsTime())[0]);
-			Material->SetUniformValue("deltaTime", &glm::vec1(DrawInfo->GetDeltaSecondsTime())[0]);
+			Material->SetUniformValue("view", &Camera->GetViewMatrix()[0][0], sizeof(glm::mat4));
+			Material->SetUniformValue("proj", &Projection->GetPrejectionMatrix()[0][0], sizeof(glm::mat4));
+			Material->SetUniformValue("lightVPMat", &lightVPMat[0][0], sizeof(glm::mat4));
+			Material->SetUniformValue("lightDir", &DrawInfo->GetLightCamera()->GetViewDir()[0], sizeof(glm::vec3));
+			Material->SetUniformValue("lightColor", &DrawInfo->GetLightColor()[0], sizeof(glm::vec4));
+			Material->SetUniformValue("cameraPos", &Camera->GetPos()[0], sizeof(glm::vec3));
+			Material->SetUniformValue("time", &glm::vec1(DrawInfo->GetSecondsTime())[0], sizeof(float));
+			Material->SetUniformValue("deltaTime", &glm::vec1(DrawInfo->GetDeltaSecondsTime())[0], sizeof(float));
 #ifdef USE_ANIMATION
-			Material->SetUniformValue("useSkinMeshAnimation", &glm::ivec1( (m_AnimationController->IsPlayingAnimation()? 1 : 0) )[0]);
+			Material->SetUniformValue("useSkinMeshAnimation", &glm::ivec1( (m_AnimationController->IsPlayingAnimation()? 1 : 0) )[0], sizeof(glm::ivec1));
 #endif
 		}
 
@@ -301,16 +301,16 @@ namespace object
 			// 共通のユニフォームバッファの更新
 			glm::mat4 lightVPMat = DrawInfo->GetLightProjection()->GetPrejectionMatrix() * DrawInfo->GetLightCamera()->GetViewMatrix();
 			
-			DepthMaterial->SetUniformValue("view", &Camera->GetViewMatrix()[0][0]);
-			DepthMaterial->SetUniformValue("proj", &Projection->GetPrejectionMatrix()[0][0]);
-			DepthMaterial->SetUniformValue("lightVPMat", &lightVPMat[0][0]);
-			DepthMaterial->SetUniformValue("lightDir", &DrawInfo->GetLightCamera()->GetViewDir()[0]);
-			DepthMaterial->SetUniformValue("lightColor", &DrawInfo->GetLightColor()[0]);
-			DepthMaterial->SetUniformValue("cameraPos", &Camera->GetPos()[0]);
-			DepthMaterial->SetUniformValue("time", &glm::vec1(DrawInfo->GetSecondsTime())[0]);
-			DepthMaterial->SetUniformValue("deltaTime", &glm::vec1(DrawInfo->GetDeltaSecondsTime())[0]);
+			DepthMaterial->SetUniformValue("view", &Camera->GetViewMatrix()[0][0], sizeof(glm::mat4));
+			DepthMaterial->SetUniformValue("proj", &Projection->GetPrejectionMatrix()[0][0], sizeof(glm::mat4));
+			DepthMaterial->SetUniformValue("lightVPMat", &lightVPMat[0][0], sizeof(glm::mat4));
+			DepthMaterial->SetUniformValue("lightDir", &DrawInfo->GetLightCamera()->GetViewDir()[0], sizeof(glm::vec3));
+			DepthMaterial->SetUniformValue("lightColor", &DrawInfo->GetLightColor()[0], sizeof(glm::vec4));
+			DepthMaterial->SetUniformValue("cameraPos", &Camera->GetPos()[0], sizeof(glm::vec3));
+			DepthMaterial->SetUniformValue("time", &glm::vec1(DrawInfo->GetSecondsTime())[0], sizeof(float));
+			DepthMaterial->SetUniformValue("deltaTime", &glm::vec1(DrawInfo->GetDeltaSecondsTime())[0], sizeof(float));
 #ifdef USE_ANIMATION
-			DepthMaterial->SetUniformValue("useSkinMeshAnimation", &glm::ivec1((m_AnimationController->IsPlayingAnimation() ? 1 : 0))[0]);
+			DepthMaterial->SetUniformValue("useSkinMeshAnimation", &glm::ivec1((m_AnimationController->IsPlayingAnimation() ? 1 : 0))[0], sizeof(glm::ivec1));
 #endif
 		}
 
@@ -356,17 +356,17 @@ namespace object
 
 				if (!Material) continue;
 				
-				Material->SetUniformValue("model", &WorldMatrix[0][0], DynamicOffsetNum);
+				Material->SetUniformValue("model", &WorldMatrix[0][0], sizeof(glm::mat4), DynamicOffsetNum);
 
 #ifdef USE_ANIMATION
 				// SkinMatrixをShaderに渡す
 				const auto& SkinList = m_AnimationController->GetSkinList();
 				if (SkinIndex >= 0 && SkinIndex < SkinList.size() && m_AnimationController->IsPlayingAnimation())
 				{
-					Material->SetUniformValue("r_SkinMatrixBuffer", &SkinMatrixList[0], DynamicOffsetNum);
+					Material->SetUniformValue("r_SkinMatrixBuffer", &SkinMatrixList[0], sizeof(glm::mat4) * static_cast<int>(SkinMatrixList.size()), DynamicOffsetNum);
 
 					int JointIndexOffset = SkinList[SkinIndex]->GetJointIndexOffset();
-					Material->SetUniformValue("JointIndexOffset", &glm::ivec1(JointIndexOffset)[0], DynamicOffsetNum);
+					Material->SetUniformValue("JointIndexOffset", &glm::ivec1(JointIndexOffset)[0], sizeof(glm::ivec1), DynamicOffsetNum);
 				}
 #endif
 
@@ -386,19 +386,19 @@ namespace object
 
 				if (Joint->GetBoneName() == animation::EHumanoidBones::Hips)
 				{
-					DebugSphere->GetMaterialList()[0]->SetUniformValue("baseColor", &glm::vec4(1.0f, 0.0f, 0.0f, 1.0f)[0]);
+					DebugSphere->GetMaterialList()[0]->SetUniformValue("baseColor", &glm::vec4(1.0f, 0.0f, 0.0f, 1.0f)[0], sizeof(glm::vec4));
 				}
 				else if (Joint->GetBoneName() == animation::EHumanoidBones::LeftUpperArm || Joint->GetBoneName() == animation::EHumanoidBones::RightUpperArm)
 				{
-					DebugSphere->GetMaterialList()[0]->SetUniformValue("baseColor", &glm::vec4(0.0f, 1.0f, 0.0f, 1.0f)[0]);
+					DebugSphere->GetMaterialList()[0]->SetUniformValue("baseColor", &glm::vec4(0.0f, 1.0f, 0.0f, 1.0f)[0], sizeof(glm::vec4));
 				}
 				else if (Joint->GetBoneName() == animation::EHumanoidBones::LeftLowerArm || Joint->GetBoneName() == animation::EHumanoidBones::RightLowerArm)
 				{
-					DebugSphere->GetMaterialList()[0]->SetUniformValue("baseColor", &glm::vec4(0.0f, 1.0f, 1.0f, 1.0f)[0]);
+					DebugSphere->GetMaterialList()[0]->SetUniformValue("baseColor", &glm::vec4(0.0f, 1.0f, 1.0f, 1.0f)[0], sizeof(glm::vec4));
 				}
 				else
 				{
-					DebugSphere->GetMaterialList()[0]->SetUniformValue("baseColor", &glm::vec4(0.0f, 0.0f, 1.0f, 1.0f)[0]);
+					DebugSphere->GetMaterialList()[0]->SetUniformValue("baseColor", &glm::vec4(0.0f, 0.0f, 1.0f, 1.0f)[0], sizeof(glm::vec4));
 				}
 
 				if (!DebugSphere->Draw(IsDepthPass, Camera, Projection, DrawInfo)) return false;
