@@ -627,6 +627,8 @@ namespace fbx
 					
 					const auto& PolygonShapes = pFbxGeom->getCounts();
 
+					int IndiceOffset = 0;
+
 					for (int PolygonIndex = 0; PolygonIndex < PolygonShapes.size(); PolygonIndex++)
 					{
 						int PolyShape = PolygonShapes[PolygonIndex];
@@ -635,7 +637,7 @@ namespace fbx
 						{
 							for (int j = 0; j < 3; j++)
 							{
-								Indices.push_back(static_cast<unsigned int>(fbxIndices[PolygonIndex * PolyShape + j]));
+								Indices.push_back(static_cast<int>(fbxIndices[IndiceOffset + j]));
 							}
 						}
 						else if (PolyShape == 4) // éläpå`É|ÉäÉSÉì
@@ -645,9 +647,11 @@ namespace fbx
 
 							for (int j : IndexArray)
 							{
-								Indices.push_back(static_cast<unsigned int>(fbxIndices[PolygonIndex * PolyShape + j]));
+								Indices.push_back(static_cast<int>(fbxIndices[IndiceOffset + j]));
 							}
 						}
+
+						IndiceOffset += PolyShape;
 					}
 				}
 
