@@ -414,7 +414,7 @@ namespace fbx
 
 			std::shared_ptr<graphics::CMaterial> material = MaterialFrame->CreateMaterial(pGraphicsAPI);
 
-			material->ReplacePreloadUniformValue("baseColorFactor", &glm::vec4(1.0f)[0], sizeof(glm::vec4), 0);
+			//material->ReplacePreloadUniformValue("baseColorFactor", &glm::vec4(1.0f)[0], sizeof(glm::vec4), 0);
 
 			/*{
 				const auto& prop = pFbxMaterial->FindProperty(fbxsdk::FbxSurfaceMaterial::sDiffuse);

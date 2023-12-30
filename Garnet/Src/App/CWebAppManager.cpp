@@ -183,7 +183,8 @@ namespace webapp
 		//
 		if (key == "Escape" && IsDown)
 		{
-			m_IsRunLoop = false;
+			// Webアプリでは止める必要がない
+			//m_IsRunLoop = false;
 		}
 	}
 

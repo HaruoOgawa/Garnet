@@ -256,7 +256,7 @@ namespace fbx
 				if (prop.IsValid())
 				{
 					const auto& val = prop.Get<fbxsdk::FbxDouble3>();
-					material->ReplacePreloadUniformValue("baseColorFactor", &glm::vec4(static_cast<float>(val[0]), static_cast<float>(val[1]), static_cast<float>(val[2]), 1.0f)[0], sizeof(glm::vec4), 0);
+					//material->ReplacePreloadUniformValue("baseColorFactor", &glm::vec4(static_cast<float>(val[0]), static_cast<float>(val[1]), static_cast<float>(val[2]), 1.0f)[0], sizeof(glm::vec4), 0);
 				}
 			}
 
