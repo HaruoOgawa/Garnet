@@ -414,7 +414,7 @@ namespace fbx
 
 			std::shared_ptr<graphics::CMaterial> material = MaterialFrame->CreateMaterial(pGraphicsAPI);
 
-			//material->ReplacePreloadUniformValue("baseColorFactor", &glm::vec4(1.0f)[0], sizeof(glm::vec4), 0);
+			material->ReplacePreloadUniformValue("baseColorFactor", &glm::vec4(1.0f)[0], sizeof(glm::vec4), 0);
 
 			/*{
 				const auto& prop = pFbxMaterial->FindProperty(fbxsdk::FbxSurfaceMaterial::sDiffuse);
@@ -661,8 +661,14 @@ namespace fbx
 					// 頂点座標
 					{
 						std::vector<float> AttributePosData;
+						AttributePosData.resize(pFbxGeom->getIndices().size() * 3);
+
 						std::vector<float> AttributeNormalData;
+						AttributeNormalData.resize(pFbxGeom->getIndices().size() * 3);
+
 						std::vector<float> AttributeUVData;
+						AttributeUVData.resize(pFbxGeom->getIndices().size() * 2);
+
 						std::vector<float> AttributeTangentData;
 						std::vector<unsigned short> ushort_AttributeJointData;
 						std::vector<float> AttributeJointData;
@@ -673,32 +679,136 @@ namespace fbx
 						const auto& UVLayers = pFbxGeom->getUVLayers();
 
 						// 頂点座標
-						if(Points.size() > 0)
+						if (Points.size() > 0)
 						{
-							for (const auto& pFbxPosition : Points)
-							{
-								glm::vec3 Pos = glm::vec3(static_cast<float>(pFbxPosition[0]), static_cast<float>(pFbxPosition[1]), static_cast<float>(pFbxPosition[2]));
+							const auto& fbxIndices = pFbxGeom->getIndices();
 
-								// Mixamo固有の変換
-								//if (IsMixamoFbx)
+							const auto& PolygonShapes = pFbxGeom->getCounts();
+
+							int IndiceOffset = 0;
+
+							for (int PolygonIndex = 0; PolygonIndex < PolygonShapes.size(); PolygonIndex++)
+							{
+								int PolyShape = PolygonShapes[PolygonIndex];
+
+								if (PolyShape == 3) // 三角形ポリゴン
 								{
-									// FbxはTranslation・Posが100倍になっているので調整する
-									// たぶん単位がcmなので0.01倍することで計算に一般的に使用するmに直す
-									math::CTransform::CastCentiMeter2Meter(Pos);
+									for (int j = 0; j < 3; j++)
+									{
+										int ControlPoint = static_cast<int>(fbxIndices[IndiceOffset + j]);
+
+										// Pos
+										{
+											const auto& pFbxPosition = Points[ControlPoint];
+
+											glm::vec3 Pos = glm::vec3(static_cast<float>(pFbxPosition[0]), static_cast<float>(pFbxPosition[1]), static_cast<float>(pFbxPosition[2]));
+
+											// Mixamo固有の変換
+											//if (IsMixamoFbx)
+											{
+												// FbxはTranslation・Posが100倍になっているので調整する
+												// たぶん単位がcmなので0.01倍することで計算に一般的に使用するmに直す
+												math::CTransform::CastCentiMeter2Meter(Pos);
+											}
+
+											AttributePosData[ControlPoint * 3 + 0] = Pos.x;
+											AttributePosData[ControlPoint * 3 + 1] = Pos.y;
+											AttributePosData[ControlPoint * 3 + 2] = Pos.z;
+										}
+
+										// UV
+										if (UVLayers.size() > 0)
+										{
+											const auto& pFbxUV = UVLayers[0].data[ControlPoint];
+
+											glm::vec2 UV = glm::vec2(static_cast<float>(pFbxUV[0]), static_cast<float>(pFbxUV[1]));
+
+											AttributeUVData[ControlPoint * 2 + 0] = UV.x;
+											AttributeUVData[ControlPoint * 2 + 1] = UV.y;
+										}
+
+										// Normal
+										if (NormalLayers.size() > 0)
+										{
+											const auto& pFbxNormal = NormalLayers[0].data[ControlPoint];
+
+											glm::vec3 Normal = glm::vec3(static_cast<float>(pFbxNormal[0]), static_cast<float>(pFbxNormal[1]), static_cast<float>(pFbxNormal[2]));
+
+											AttributeNormalData[ControlPoint * 3 + 0] = Normal.x;
+											AttributeNormalData[ControlPoint * 3 + 1] = Normal.y;
+											AttributeNormalData[ControlPoint * 3 + 2] = Normal.z;
+										}
+									}
+								}
+								else if (PolyShape == 4) // 四角形ポリゴン
+								{
+									// 四角形ポリゴンを三角ポリゴンに変換する際に使用するインデックス
+									int IndexArray[6] = { 0, 1, 2, 0, 2, 3 };
+
+									std::vector<glm::vec3> PosList;
+
+									for (int j : IndexArray)
+									{
+										int ControlPoint = static_cast<int>(fbxIndices[IndiceOffset + j]);
+
+										// Pos
+										{
+											const auto& pFbxPosition = Points[ControlPoint];
+
+											glm::vec3 Pos = glm::vec3(static_cast<float>(pFbxPosition[0]), static_cast<float>(pFbxPosition[1]), static_cast<float>(pFbxPosition[2]));
+
+											// Mixamo固有の変換
+											//if (IsMixamoFbx)
+											{
+												// FbxはTranslation・Posが100倍になっているので調整する
+												// たぶん単位がcmなので0.01倍することで計算に一般的に使用するmに直す
+												math::CTransform::CastCentiMeter2Meter(Pos);
+											}
+
+											PosList.push_back(Pos);
+
+											AttributePosData[ControlPoint * 3 + 0] = Pos.x;
+											AttributePosData[ControlPoint * 3 + 1] = Pos.y;
+											AttributePosData[ControlPoint * 3 + 2] = Pos.z;
+										}
+
+										// UV
+										if (UVLayers.size() > 0)
+										{
+											const auto& pFbxUV = UVLayers[0].data[ControlPoint];
+
+											glm::vec2 UV = glm::vec2(static_cast<float>(pFbxUV[0]), static_cast<float>(pFbxUV[1]));
+
+											AttributeUVData[ControlPoint * 2 + 0] = UV.x;
+											AttributeUVData[ControlPoint * 2 + 1] = UV.y;
+										}
+									}
+
+									// Normal
+									// 今回の実装ポイントはアニメーションシステムなのでひとまずここは脳筋で計算しておく
+									{
+										glm::vec3 v0 = glm::normalize(PosList[1] - PosList[0]);
+										glm::vec3 v1 = glm::normalize(PosList[2] - PosList[0]);
+
+										glm::vec3 Normal = glm::cross(v0, v1);
+
+										for (int j : IndexArray)
+										{
+											int ControlPoint = static_cast<int>(fbxIndices[IndiceOffset + j]);
+
+											AttributeNormalData[ControlPoint * 3 + 0] = Normal.x;
+											AttributeNormalData[ControlPoint * 3 + 1] = Normal.y;
+											AttributeNormalData[ControlPoint * 3 + 2] = Normal.z;
+										}
+									}
 								}
 
-								AttributePosData.push_back(Pos.x);
-								AttributePosData.push_back(Pos.y);
-								AttributePosData.push_back(Pos.z);
+								IndiceOffset += PolyShape;
 							}
 						}
-						else
-						{
-							return false;
-						}
-
+						
 						// 法線
-						if (NormalLayers.size() > 0)
+						/*if (NormalLayers.size() > 0)
 						{
 							
 							for (const auto& Normals : NormalLayers)
@@ -710,10 +820,10 @@ namespace fbx
 									AttributeNormalData.push_back(static_cast<float>((*Normal).z));
 								}
 							}
-						}
+						}*/
 
 						// UV
-						if(UVLayers.size() > 0)
+						/*if(UVLayers.size() > 0)
 						{
 							for (const auto& UVs : UVLayers)
 							{
@@ -723,7 +833,7 @@ namespace fbx
 									AttributeUVData.push_back(static_cast<float>((*UV).y));
 								}
 							}
-						}
+						}*/
 
 						// 接線
 						{
