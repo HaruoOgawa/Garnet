@@ -27,6 +27,9 @@ namespace scene
 		std::shared_ptr<graphics::CMaterialFrame> m_SimpleTextureMF;
 		std::shared_ptr<graphics::CMaterialFrame> m_DepthMF;
 
+		// MMD
+		std::shared_ptr<object::C3DObject> m_TdaMiku_Model;
+
 		// Fbx
 		std::shared_ptr<object::C3DObject> m_Walk_Animation;
 		std::shared_ptr<object::C3DObject> m_Jump_Animation;

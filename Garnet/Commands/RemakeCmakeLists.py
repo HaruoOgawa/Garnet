@@ -18,6 +18,7 @@ add_definitions(
 	-DUSE_FBX
 	-DUSE_ANIMATION
 	-DUSE_SMALL_FBX
+	-DUSE_MMD
 )
 
 add_executable(

@@ -20,6 +20,8 @@ namespace scene
 		m_SimpleTextureMF(std::make_shared<graphics::CMaterialFrame>()),
 		m_DepthMF(std::make_shared<graphics::CMaterialFrame>()),
 
+		m_TdaMiku_Model(std::make_shared<object::C3DObject>("", "ShadowPass")),
+
 		m_glTFObject(std::make_shared<object::C3DObject>("", "ShadowPass")),
 		m_BrainStemDObject(std::make_shared<object::C3DObject>("", "ShadowPass")),
 		m_VRMObject(std::make_shared<object::C3DObject>("", "ShadowPass")),
@@ -46,6 +48,8 @@ namespace scene
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CMaterialFrameLoader>("Resources\\MaterialFrame\\SimpleTexture_MF.json", m_SimpleTextureMF));
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CMaterialFrameLoader>("Resources\\MaterialFrame\\Depth_MF.json", m_DepthMF));
 		
+		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Avatar\\Tda_Miku\\Tda_Miku.pmx", m_TdaMiku_Model, "", "ShadowPass"));
+
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Avatar\\X_Bot.fbx", m_FbxObject, "", "ShadowPass"));
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Avatar\\Mousey.fbx", m_MouseyObject, "", "ShadowPass"));
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Motions\\Walking.fbx", m_Walk_Animation, "", "ShadowPass"));
@@ -82,7 +86,14 @@ namespace scene
 			AnimationClipList.push_back(m_Punch_Animation->GetAnimationClipList()[0]);
 		}
 
-		// glTFObject
+		// m_TdaMiku_Model
+		{
+			if (!m_TdaMiku_Model->CreateFromMemory(pGraphicsAPI, m_PBRMF, m_DepthMF, object::E3DObjectType::Pmx)) return false;
+
+			m_TdaMiku_Model->SetPos(glm::vec3(0.0f, 0.0f, 0.0f));
+		}
+
+		/*// glTFObject
 		{
 			m_glTFObject->GetTextureSet()->AddCubeMap(m_Cube_Texture);
 			for(const auto& FrameTexture : m_FrameTextureList) { m_glTFObject->GetTextureSet()->AddFrameTexture(FrameTexture); }
@@ -159,7 +170,7 @@ namespace scene
 
 			m_MouseyObject->SetPos(glm::vec3(-2.0f, 0.0f, 0.0f));
 			m_MouseyObject->SetRot(glm::angleAxis(3.1515f, glm::vec3(0.0f, 1.0f, 0.0f)));
-		}
+		}*/
 
 		// m_Background
 		{
@@ -201,7 +212,7 @@ namespace scene
 			m_IsLoaded = true;
 		}
 
-		if (InputState->IsKeyUp(input::EKeyType::KEY_TYPE_1))
+		/*if (InputState->IsKeyUp(input::EKeyType::KEY_TYPE_1))
 		{
 			m_FbxObject->ChangeMotion("Jump");
 			m_MouseyObject->ChangeMotion("Jump");
@@ -212,9 +223,14 @@ namespace scene
 			m_FbxObject->ChangeMotion("Punch");
 			m_MouseyObject->ChangeMotion("Punch");
 			m_VRMObject->ChangeMotion("Punch");
-		}
+		}*/
 
-		if (m_glTFObject)
+		if (m_TdaMiku_Model)
+		{
+			if (!m_TdaMiku_Model->Update(DrawInfo->GetDeltaSecondsTime())) return false;
+		}
+		
+		/*if (m_glTFObject)
 		{
 			if (!m_glTFObject->Update(DrawInfo->GetDeltaSecondsTime())) return false;
 		}
@@ -237,7 +253,7 @@ namespace scene
 		if (m_MouseyObject)
 		{
 			if (!m_MouseyObject->Update(DrawInfo->GetDeltaSecondsTime())) return false;
-		}
+		}*/
 		
 		if (m_Background)
 		{
@@ -263,7 +279,12 @@ namespace scene
 	{
 		if (!m_IsLoaded) return true;
 		
-		if (m_glTFObject)
+		if (m_TdaMiku_Model)
+		{
+			if (!m_TdaMiku_Model->Draw(IsDepthPass, Camera, Projection, DrawInfo, m_DebugSphere)) return false;
+		}
+		
+		/*if (m_glTFObject)
 		{
 			if (!m_glTFObject->Draw(IsDepthPass, Camera, Projection, DrawInfo, m_DebugSphere)) return false;
 		}
@@ -286,7 +307,7 @@ namespace scene
 		if (m_MouseyObject)
 		{
 			if (!m_MouseyObject->Draw(IsDepthPass, Camera, Projection, DrawInfo, m_DebugSphere)) return false;
-		}
+		}*/
 		
 		if (m_Background)
 		{

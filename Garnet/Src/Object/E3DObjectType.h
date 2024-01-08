@@ -7,5 +7,6 @@ namespace object
 		Custom,
 		glTF,
 		Fbx,
+		Pmx,
 	};
 }

@@ -4,13 +4,18 @@
 #if defined(USE_FBX)
 
 #ifdef USE_SMALL_FBX
+
 #include "../FBX/CSmallFBXImporter.h"
 #else
 #include "../FBX/CFBXImporter.h"
-
 #endif // USE_SMALL_FBX
 
 #endif
+
+#ifdef USE_MMD
+#include "../MMD/PMX/CPmxImporter.h"
+#endif
+
 namespace object
 {
 	C3DObject::C3DObject(const std::string& PassName, const std::string& DepthPassName):
@@ -86,6 +91,11 @@ namespace object
 #endif // USE_SMALL_FBX
 			break;
 #endif
+		case object::E3DObjectType::Pmx:
+#ifdef USE_MMD
+			if (!mmd::CPmxImporter::ImportPmx(pGraphicsAPI, m_BinaryData, this, BaseMF)) return false;
+#endif
+			break;
 		default:
 			break;
 		}
