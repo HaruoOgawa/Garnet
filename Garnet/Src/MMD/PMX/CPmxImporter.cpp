@@ -1,11 +1,22 @@
-#include "CPmxImporter.h"
-
 #ifdef USE_MMD
+#include "CPmxImporter.h"
+#include "../../Debug/Message/Console.h"
+
 namespace mmd
 {
 	bool CPmxImporter::ImportPmx(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& Data, object::C3DObject* Object,
 		const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame)
 	{
+		CPmxModel model;
+
+		// ÉoÉCÉiÉäÇÃâêÕ
+		if (!model.Analyse(Data))
+		{
+			Console::Log("[Cpp Log] Error - Failed to Analyse Pmx Binary.\n");
+
+			return false;
+		}
+
 		return true;
 	}
 }

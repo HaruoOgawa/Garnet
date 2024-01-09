@@ -575,6 +575,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Src\Binary\CBinaryAnalyser.h" />
     <ClInclude Include="Src\MMD\PMX\CPmxModel.h" />
     <ClInclude Include="Src\Object\CObjectBuilder.h" />
     <ClInclude Include="Src\MMD\PMX\CPmxImporter.h" />
@@ -967,6 +968,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClInclude Include="Src\Interface\IRenderer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\Binary\CBinaryAnalyser.cpp" />
     <ClCompile Include="Src\MMD\PMX\CPmxModel.cpp" />
     <ClCompile Include="Src\Object\CObjectBuilder.cpp" />
     <ClCompile Include="Src\MMD\PMX\CPmxImporter.cpp" />
