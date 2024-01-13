@@ -37,5 +37,8 @@ namespace binary
 
 		bool GetByte(unsigned char& Dst);
 		unsigned char GetByte();
+
+		bool GetUShort(unsigned short& Dst);
+		unsigned short GetUShort();
 	};
 }

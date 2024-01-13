@@ -105,7 +105,7 @@ namespace binary
 
 	float CBinaryAnalyser::GetFloat()
 	{
-		auto val = (m_Pointer[0] << 24) | (m_Pointer[1] << 16) | (m_Pointer[2] << 8) | (m_Pointer[3]);
+		auto val = (m_Pointer[3] << 24) | (m_Pointer[2] << 16) | (m_Pointer[1] << 8) | (m_Pointer[0]);
 
 		float Dst = *reinterpret_cast<const float*>(&val);
 
@@ -127,6 +127,26 @@ namespace binary
 		unsigned char Dst = m_Pointer[0];
 
 		UpdatePointer(sizeof(unsigned char));
+
+		return Dst;
+	}
+
+	bool CBinaryAnalyser::GetUShort(unsigned short& Dst)
+	{
+		if (!IsValid(sizeof(unsigned short))) return false;
+
+		Dst = GetUShort();
+
+		return true;
+	}
+
+	unsigned short CBinaryAnalyser::GetUShort()
+	{
+		auto val = ((m_Pointer[1] << 8) | (m_Pointer[0]));
+
+		unsigned short Dst = *reinterpret_cast<const unsigned short*>(&val);
+
+		UpdatePointer(sizeof(unsigned short));
 
 		return Dst;
 	}

@@ -14,6 +14,17 @@ namespace mmd
 		UTF8 = 1,
 	};
 
+	// Joints, Weghts‚ÌŠi”[•û–@
+	enum class EWeightDeformFormat
+	{
+		None = -1,
+
+		BDEF1 = 0,
+		BDEF2 = 1,
+		BDEF4 = 2,
+		SDEF = 3,
+	};
+
 	struct SMetaData
 	{
 		EEncodeType EncodeType = EEncodeType::UTF16;
@@ -37,7 +48,11 @@ namespace mmd
 	private:
 		static bool AnalyseMetaData(binary::CBinaryAnalyser& Analyser, SMetaData& MetaData);
 
-		static bool AnalyseMesh(binary::CBinaryAnalyser& Analyser);
+		static bool AnalyseMesh(binary::CBinaryAnalyser& Analyser, const SMetaData& MetaData);
+
+		// Helper Functions ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		static bool GetJointIndex(binary::CBinaryAnalyser& Analyser, const SMetaData& MetaData, std::vector<int>& IntJointAttribute, std::vector<unsigned char>& ByteJointAttribute, std::vector<unsigned short>& UShortJointAttribute);
+		static bool AddEmptyJointIndex(const SMetaData& MetaData, std::vector<int>& IntJointAttribute, std::vector<unsigned char>& ByteJointAttribute, std::vector<unsigned short>& UShortJointAttribute);
 	public:
 		static bool Analyse(const std::vector<unsigned char>& Data);
 	};
