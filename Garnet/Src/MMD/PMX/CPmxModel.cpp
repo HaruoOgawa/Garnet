@@ -41,6 +41,14 @@ namespace mmd
 			return false;
 		}
 
+		// Texture
+		if (!AnalyseTexture(Analyser, MetaData))
+		{
+			Console::Log("[Error] Pmx AnalyseTexture Error\n");
+
+			return false;
+		}
+
 		return true;
 	}
 
@@ -381,6 +389,37 @@ namespace mmd
 			{
 				if (!GetMultiTypeValue(Analyser, MetaData.VertexIndexSize, IntIndices, ByteIndices, UShortIndices)) return false;
 			}
+		}
+
+		return true;
+	}
+
+	bool CPmxModel::AnalyseTexture(binary::CBinaryAnalyser& Analyser, const SMetaData& MetaData)
+	{
+		int NumOfTexture = 0;
+		if (!Analyser.GetInt(NumOfTexture)) return false;
+
+		std::vector<std::string> TextureNameList;
+
+		for (int TextureIndex = 0; TextureIndex < NumOfTexture; TextureIndex++)
+		{
+			int ByteLength = 0;
+			if (!Analyser.GetInt(ByteLength)) return false;
+
+			std::string TextureName;
+			if (MetaData.EncodeType == EEncodeType::UTF16)
+			{
+				//if (!Analyser.GetUTF16String(Comment_EN, ByteLength)) return false;
+
+				// ‚Ð‚Æ‚Ü‚¸UTF8‚Å“Ç‚ñ‚Å‚¨‚­
+				if (!Analyser.GetString(TextureName, ByteLength)) return false;
+			}
+			else if (MetaData.EncodeType == EEncodeType::UTF8)
+			{
+				if (!Analyser.GetString(TextureName, ByteLength)) return false;
+			}
+
+			TextureNameList.push_back(TextureName);
 		}
 
 		return true;

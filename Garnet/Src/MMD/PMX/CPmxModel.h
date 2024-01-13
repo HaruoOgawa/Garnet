@@ -50,6 +50,8 @@ namespace mmd
 
 		static bool AnalyseMesh(binary::CBinaryAnalyser& Analyser, const SMetaData& MetaData);
 
+		static bool AnalyseTexture(binary::CBinaryAnalyser& Analyser, const SMetaData& MetaData);
+
 		// Helper Functions ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		static bool GetMultiTypeValue(binary::CBinaryAnalyser& Analyser, int ByteSize, std::vector<int>& IntValueList, std::vector<unsigned char>& ByteValueList, std::vector<unsigned short>& UShortValueList);
 		static bool AddEmptyMultiTypeValue(int ByteSize, std::vector<int>& IntValueList, std::vector<unsigned char>& ByteValueList, std::vector<unsigned short>& UShortValueList);
