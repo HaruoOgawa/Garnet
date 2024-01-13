@@ -51,8 +51,8 @@ namespace mmd
 		static bool AnalyseMesh(binary::CBinaryAnalyser& Analyser, const SMetaData& MetaData);
 
 		// Helper Functions ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		static bool GetJointIndex(binary::CBinaryAnalyser& Analyser, const SMetaData& MetaData, std::vector<int>& IntJointAttribute, std::vector<unsigned char>& ByteJointAttribute, std::vector<unsigned short>& UShortJointAttribute);
-		static bool AddEmptyJointIndex(const SMetaData& MetaData, std::vector<int>& IntJointAttribute, std::vector<unsigned char>& ByteJointAttribute, std::vector<unsigned short>& UShortJointAttribute);
+		static bool GetMultiTypeValue(binary::CBinaryAnalyser& Analyser, int ByteSize, std::vector<int>& IntValueList, std::vector<unsigned char>& ByteValueList, std::vector<unsigned short>& UShortValueList);
+		static bool AddEmptyMultiTypeValue(int ByteSize, std::vector<int>& IntValueList, std::vector<unsigned char>& ByteValueList, std::vector<unsigned short>& UShortValueList);
 	public:
 		static bool Analyse(const std::vector<unsigned char>& Data);
 	};

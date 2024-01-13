@@ -241,14 +241,14 @@ namespace mmd
 						/*
 						n : ボーンIndexサイズ  | ウェイト1.0の単一ボーン(参照Index)
 						*/
-						if (!GetJointIndex(Analyser, MetaData, IntJointAttribute, ByteJointAttribute, UShortJointAttribute)) return false;
+						if (!GetMultiTypeValue(Analyser, MetaData.BoneIndexSize, IntJointAttribute, ByteJointAttribute, UShortJointAttribute)) return false;
 
 						WeightAttribute.push_back(1.0f);
 
 						// あまりは0埋めする
-						if (!AddEmptyJointIndex(MetaData, IntJointAttribute, ByteJointAttribute, UShortJointAttribute)) return false;
-						if (!AddEmptyJointIndex(MetaData, IntJointAttribute, ByteJointAttribute, UShortJointAttribute)) return false;
-						if (!AddEmptyJointIndex(MetaData, IntJointAttribute, ByteJointAttribute, UShortJointAttribute)) return false;
+						if (!AddEmptyMultiTypeValue(MetaData.BoneIndexSize, IntJointAttribute, ByteJointAttribute, UShortJointAttribute)) return false;
+						if (!AddEmptyMultiTypeValue(MetaData.BoneIndexSize, IntJointAttribute, ByteJointAttribute, UShortJointAttribute)) return false;
+						if (!AddEmptyMultiTypeValue(MetaData.BoneIndexSize, IntJointAttribute, ByteJointAttribute, UShortJointAttribute)) return false;
 						
 						WeightAttribute.push_back(0.0f);
 						WeightAttribute.push_back(0.0f);
@@ -262,8 +262,8 @@ namespace mmd
 						  n : ボーンIndexサイズ  | ボーン2の参照Index
 						  4 : float              | ボーン1のウェイト値(0～1.0), ボーン2のウェイト値は 1.0-ボーン1ウェイト
 						*/
-						if (!GetJointIndex(Analyser, MetaData, IntJointAttribute, ByteJointAttribute, UShortJointAttribute)) return false;
-						if (!GetJointIndex(Analyser, MetaData, IntJointAttribute, ByteJointAttribute, UShortJointAttribute)) return false;
+						if (!GetMultiTypeValue(Analyser, MetaData.BoneIndexSize, IntJointAttribute, ByteJointAttribute, UShortJointAttribute)) return false;
+						if (!GetMultiTypeValue(Analyser, MetaData.BoneIndexSize, IntJointAttribute, ByteJointAttribute, UShortJointAttribute)) return false;
 
 						if (!Analyser.IsValid(4 * 1)) return false;
 
@@ -274,8 +274,8 @@ namespace mmd
 						WeightAttribute.push_back(WeightY);
 
 						// あまりは0埋めする
-						if (!AddEmptyJointIndex(MetaData, IntJointAttribute, ByteJointAttribute, UShortJointAttribute)) return false;
-						if (!AddEmptyJointIndex(MetaData, IntJointAttribute, ByteJointAttribute, UShortJointAttribute)) return false;
+						if (!AddEmptyMultiTypeValue(MetaData.BoneIndexSize, IntJointAttribute, ByteJointAttribute, UShortJointAttribute)) return false;
+						if (!AddEmptyMultiTypeValue(MetaData.BoneIndexSize, IntJointAttribute, ByteJointAttribute, UShortJointAttribute)) return false;
 
 						WeightAttribute.push_back(0.0f);
 						WeightAttribute.push_back(0.0f);
@@ -293,10 +293,10 @@ namespace mmd
 						  4 : float              | ボーン3のウェイト値
 						  4 : float              | ボーン4のウェイト値 (ウェイト計1.0の保障はない)
 						*/
-						if (!GetJointIndex(Analyser, MetaData, IntJointAttribute, ByteJointAttribute, UShortJointAttribute)) return false;
-						if (!GetJointIndex(Analyser, MetaData, IntJointAttribute, ByteJointAttribute, UShortJointAttribute)) return false;
-						if (!GetJointIndex(Analyser, MetaData, IntJointAttribute, ByteJointAttribute, UShortJointAttribute)) return false;
-						if (!GetJointIndex(Analyser, MetaData, IntJointAttribute, ByteJointAttribute, UShortJointAttribute)) return false;
+						if (!GetMultiTypeValue(Analyser, MetaData.BoneIndexSize, IntJointAttribute, ByteJointAttribute, UShortJointAttribute)) return false;
+						if (!GetMultiTypeValue(Analyser, MetaData.BoneIndexSize, IntJointAttribute, ByteJointAttribute, UShortJointAttribute)) return false;
+						if (!GetMultiTypeValue(Analyser, MetaData.BoneIndexSize, IntJointAttribute, ByteJointAttribute, UShortJointAttribute)) return false;
+						if (!GetMultiTypeValue(Analyser, MetaData.BoneIndexSize, IntJointAttribute, ByteJointAttribute, UShortJointAttribute)) return false;
 
 						if (!Analyser.IsValid(4 * 4)) return false;
 
@@ -323,8 +323,8 @@ namespace mmd
 						 12 : float3             | SDEF-R1値(x,y,z) ※修正値を要計算
 						*/
 						
-						if (!GetJointIndex(Analyser, MetaData, IntJointAttribute, ByteJointAttribute, UShortJointAttribute)) return false;
-						if (!GetJointIndex(Analyser, MetaData, IntJointAttribute, ByteJointAttribute, UShortJointAttribute)) return false;
+						if (!GetMultiTypeValue(Analyser, MetaData.BoneIndexSize, IntJointAttribute, ByteJointAttribute, UShortJointAttribute)) return false;
+						if (!GetMultiTypeValue(Analyser, MetaData.BoneIndexSize, IntJointAttribute, ByteJointAttribute, UShortJointAttribute)) return false;
 
 						if (!Analyser.IsValid(4 * 10)) return false;
 
@@ -335,8 +335,8 @@ namespace mmd
 						WeightAttribute.push_back(WeightY);
 
 						// あまりは0埋めする
-						if (!AddEmptyJointIndex(MetaData, IntJointAttribute, ByteJointAttribute, UShortJointAttribute)) return false;
-						if (!AddEmptyJointIndex(MetaData, IntJointAttribute, ByteJointAttribute, UShortJointAttribute)) return false;
+						if (!AddEmptyMultiTypeValue(MetaData.BoneIndexSize, IntJointAttribute, ByteJointAttribute, UShortJointAttribute)) return false;
+						if (!AddEmptyMultiTypeValue(MetaData.BoneIndexSize, IntJointAttribute, ByteJointAttribute, UShortJointAttribute)) return false;
 
 						WeightAttribute.push_back(0.0f);
 						WeightAttribute.push_back(0.0f);
@@ -368,35 +368,47 @@ namespace mmd
 
 		// インデックスバッファの読み込み
 		{
+			std::vector<int> IntIndices;
+			std::vector<unsigned char> ByteIndices;
+			std::vector<unsigned short> UShortIndices;
 
+			int NumOfIndices = 0;
+			if (!Analyser.GetInt(NumOfIndices)) return false;
+			
+			const int VertexIndexSize = MetaData.VertexIndexSize;
+
+			for (int i = 0; i < NumOfIndices; i++)
+			{
+				if (!GetMultiTypeValue(Analyser, MetaData.VertexIndexSize, IntIndices, ByteIndices, UShortIndices)) return false;
+			}
 		}
 
 		return true;
 	}
 
 	// Helper Functions ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	bool CPmxModel::GetJointIndex(binary::CBinaryAnalyser& Analyser, const SMetaData& MetaData, std::vector<int>& IntJointAttribute, std::vector<unsigned char>& ByteJointAttribute, std::vector<unsigned short>& UShortJointAttribute)
+	bool CPmxModel::GetMultiTypeValue(binary::CBinaryAnalyser& Analyser, int ByteSize, std::vector<int>& IntValueList, std::vector<unsigned char>& ByteValueList, std::vector<unsigned short>& UShortValueList)
 	{
-		if (MetaData.BoneIndexSize == 1)
+		if (ByteSize == 1)
 		{
 			unsigned char JointIndex = 0;
 			if (!Analyser.GetByte(JointIndex)) return false;
 
-			ByteJointAttribute.push_back(JointIndex);
+			ByteValueList.push_back(JointIndex);
 		}
-		else if (MetaData.BoneIndexSize == 2)
+		else if (ByteSize == 2)
 		{
 			unsigned short JointIndex = 0;
 			if (!Analyser.GetUShort(JointIndex)) return false;
 
-			UShortJointAttribute.push_back(JointIndex);
+			UShortValueList.push_back(JointIndex);
 		}
-		else if (MetaData.BoneIndexSize == 4)
+		else if (ByteSize == 4)
 		{
 			int JointIndex = 0;
 			if (!Analyser.GetInt(JointIndex)) return false;
 
-			IntJointAttribute.push_back(JointIndex);
+			IntValueList.push_back(JointIndex);
 		}
 		else
 		{
@@ -406,25 +418,25 @@ namespace mmd
 		return true;
 	}
 
-	bool CPmxModel::AddEmptyJointIndex(const SMetaData& MetaData, std::vector<int>& IntJointAttribute, std::vector<unsigned char>& ByteJointAttribute, std::vector<unsigned short>& UShortJointAttribute)
+	bool CPmxModel::AddEmptyMultiTypeValue(int ByteSize, std::vector<int>& IntValueList, std::vector<unsigned char>& ByteValueList, std::vector<unsigned short>& UShortValueList)
 	{
-		if (MetaData.BoneIndexSize == 1)
+		if (ByteSize == 1)
 		{
 			unsigned char JointIndex = 0;
 
-			ByteJointAttribute.push_back(JointIndex);
+			ByteValueList.push_back(JointIndex);
 		}
-		else if (MetaData.BoneIndexSize == 2)
+		else if (ByteSize == 2)
 		{
 			unsigned short JointIndex = 0;
 
-			UShortJointAttribute.push_back(JointIndex);
+			UShortValueList.push_back(JointIndex);
 		}
-		else if (MetaData.BoneIndexSize == 4)
+		else if (ByteSize == 4)
 		{
 			int JointIndex = 0;
 
-			IntJointAttribute.push_back(JointIndex);
+			IntValueList.push_back(JointIndex);
 		}
 		else
 		{
