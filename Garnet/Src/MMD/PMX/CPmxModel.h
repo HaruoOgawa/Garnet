@@ -37,10 +37,10 @@ namespace mmd
 		int MorphIndexSize = 0;
 		int RigidIndexSize = 0;
 
-		std::string ModelName = "";
-		std::string ModelName_EN = "";
-		std::string Comment = "";
-		std::string Comment_EN = "";
+		std::pair<std::string, std::wstring> ModelName = std::make_pair(std::string(), std::wstring());
+		std::pair<std::string, std::wstring> ModelName_EN = std::make_pair(std::string(), std::wstring());
+		std::pair<std::string, std::wstring> Comment = std::make_pair(std::string(), std::wstring());
+		std::pair<std::string, std::wstring> Comment_EN = std::make_pair(std::string(), std::wstring());
 	};
 
 	class CPmxModel

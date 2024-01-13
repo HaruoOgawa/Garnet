@@ -53,26 +53,18 @@ namespace binary
 		return true;
 	}
 
-	/*bool CBinaryAnalyser::GetUTF16String(std::string& Dst, size_t ByteSize)
+	bool CBinaryAnalyser::GetUTF16String(std::wstring& Dst, size_t ByteSize)
 	{
 		if (!IsValid(ByteSize)) return false;
 
 		// wstringÇÕUTF16ÅAstringÇÕUTF8
-		std::wstring u16;
-		u16.resize(ByteSize);
-		std::memcpy(&u16[0], m_Pointer, ByteSize);
-
-		// UTF16Ç©ÇÁUTF8Ç…ïœä∑
-		// https://stackoverflow.com/questions/215963/how-do-you-properly-use-widechartomultibyte/3999597#3999597
-		int size_needed = WideCharToMultiByte(CP_UTF8, 0, &u16[0], (int)u16.size(), NULL, 0, NULL, NULL);
-		Dst.resize(size_needed, 0);
-
-		WideCharToMultiByte(CP_UTF8, 0, &u16[0], (int)u16.size(), &Dst[0], size_needed, NULL, NULL);
+		Dst.resize(ByteSize);
+		std::memcpy(&Dst[0], m_Pointer, ByteSize);
 
 		UpdatePointer(ByteSize);
 
 		return true;
-	}*/
+	}
 
 	bool CBinaryAnalyser::GetInt(int& Dst)
 	{

@@ -27,7 +27,7 @@ namespace binary
 
 		bool GetString(std::string& Dst, size_t ByteSize);
 
-		//bool GetUTF16String(std::string& Dst, size_t ByteSize);
+		bool GetUTF16String(std::wstring& Dst, size_t ByteSize);
 
 		bool GetInt(int& Dst);
 		int GetInt();

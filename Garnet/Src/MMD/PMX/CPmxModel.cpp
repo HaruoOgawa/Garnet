@@ -75,20 +75,14 @@ namespace mmd
 			int ByteLength = 0;
 			if (!Analyser.GetInt(ByteLength)) return false;
 
-			std::string ModelName;
 			if (MetaData.EncodeType == EEncodeType::UTF16)
 			{
-				//if (!Analyser.GetUTF16String(ModelName, ByteLength)) return false;
-
-				// ひとまずUTF8で読んでおく
-				if (!Analyser.GetString(ModelName, ByteLength)) return false;
+				if (!Analyser.GetUTF16String(MetaData.ModelName.second, ByteLength)) return false;
 			}
 			else if (MetaData.EncodeType == EEncodeType::UTF8)
 			{
-				if (!Analyser.GetString(ModelName, ByteLength)) return false;
+				if (!Analyser.GetString(MetaData.ModelName.first, ByteLength)) return false;
 			}
-
-			MetaData.ModelName = ModelName;
 		}
 
 		// モデル名英
@@ -96,20 +90,14 @@ namespace mmd
 			int ByteLength = 0;
 			if (!Analyser.GetInt(ByteLength)) return false;
 
-			std::string ModelName;
 			if (MetaData.EncodeType == EEncodeType::UTF16)
 			{
-				//if (!Analyser.GetUTF16String(ModelName, ByteLength)) return false;
-
-				// ひとまずUTF8で読んでおく
-				if (!Analyser.GetString(ModelName, ByteLength)) return false;
+				if (!Analyser.GetUTF16String(MetaData.ModelName_EN.second, ByteLength)) return false;
 			}
 			else if (MetaData.EncodeType == EEncodeType::UTF8)
 			{
-				if (!Analyser.GetString(ModelName, ByteLength)) return false;
+				if (!Analyser.GetString(MetaData.ModelName_EN.first, ByteLength)) return false;
 			}
-
-			MetaData.ModelName_EN = ModelName;
 		}
 
 		// コメント
@@ -117,20 +105,14 @@ namespace mmd
 			int ByteLength = 0;
 			if (!Analyser.GetInt(ByteLength)) return false;
 
-			std::string Comment;
 			if (MetaData.EncodeType == EEncodeType::UTF16)
 			{
-				//if (!Analyser.GetUTF16String(Comment, ByteLength)) return false;
-
-				// ひとまずUTF8で読んでおく
-				if (!Analyser.GetString(Comment, ByteLength)) return false;
+				if (!Analyser.GetUTF16String(MetaData.Comment.second, ByteLength)) return false;
 			}
 			else if (MetaData.EncodeType == EEncodeType::UTF8)
 			{
-				if (!Analyser.GetString(Comment, ByteLength)) return false;
+				if (!Analyser.GetString(MetaData.Comment.first, ByteLength)) return false;
 			}
-
-			MetaData.Comment = Comment;
 		}
 
 		// コメント英
@@ -138,20 +120,14 @@ namespace mmd
 			int ByteLength = 0;
 			if (!Analyser.GetInt(ByteLength)) return false;
 
-			std::string Comment_EN;
 			if (MetaData.EncodeType == EEncodeType::UTF16)
 			{
-				//if (!Analyser.GetUTF16String(Comment_EN, ByteLength)) return false;
-
-				// ひとまずUTF8で読んでおく
-				if (!Analyser.GetString(Comment_EN, ByteLength)) return false;
+				if (!Analyser.GetUTF16String(MetaData.Comment_EN.second, ByteLength)) return false;
 			}
 			else if (MetaData.EncodeType == EEncodeType::UTF8)
 			{
-				if (!Analyser.GetString(Comment_EN, ByteLength)) return false;
+				if (!Analyser.GetString(MetaData.Comment_EN.first, ByteLength)) return false;
 			}
-
-			MetaData.Comment_EN = Comment_EN;
 		}
 
 		return true;
@@ -399,27 +375,27 @@ namespace mmd
 		int NumOfTexture = 0;
 		if (!Analyser.GetInt(NumOfTexture)) return false;
 
-		std::vector<std::string> TextureNameList;
+		std::vector<std::pair<std::string, std::wstring>> TextureNameList;
 
 		for (int TextureIndex = 0; TextureIndex < NumOfTexture; TextureIndex++)
 		{
+			std::pair<std::string, std::wstring> TextureName = std::make_pair(std::string(), std::wstring());
+
 			int ByteLength = 0;
 			if (!Analyser.GetInt(ByteLength)) return false;
 
-			std::string TextureName;
 			if (MetaData.EncodeType == EEncodeType::UTF16)
 			{
-				//if (!Analyser.GetUTF16String(Comment_EN, ByteLength)) return false;
-
-				// ひとまずUTF8で読んでおく
-				if (!Analyser.GetString(TextureName, ByteLength)) return false;
+				if (!Analyser.GetUTF16String(TextureName.second, ByteLength)) return false;
 			}
 			else if (MetaData.EncodeType == EEncodeType::UTF8)
 			{
-				if (!Analyser.GetString(TextureName, ByteLength)) return false;
+				if (!Analyser.GetString(TextureName.first, ByteLength)) return false;
 			}
 
 			TextureNameList.push_back(TextureName);
+
+			Console::Log("TextureName: %ls\n", TextureName.second.c_str());
 		}
 
 		return true;
