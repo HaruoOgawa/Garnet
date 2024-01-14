@@ -14,6 +14,21 @@ namespace mmd
 	{
 	}
 
+	const SPmxMetaData& CPmxModel::GetMetaData() const
+	{
+		return m_MetaData;
+	}
+
+	const std::shared_ptr<CPmxMesh>& CPmxModel::GetPmxMesh() const
+	{
+		return m_PmxMesh;
+	}
+
+	const std::vector<std::shared_ptr<CPmxTexture>>& CPmxModel::GetPmxTextureList() const
+	{
+		return m_PmxTextureList;
+	}
+
 	bool CPmxModel::Analyse(const std::vector<unsigned char>& Data)
 	{
 		// Analyserを生成
@@ -34,8 +49,7 @@ namespace mmd
 		if (!Analyser.Skip(4)) return false;
 
 		// メタデータ
-		SPmxMetaData MetaData;
-		if (!AnalyseMetaData(Analyser, MetaData))
+		if (!AnalyseMetaData(Analyser, m_MetaData))
 		{
 			Console::Log("[Error] Pmx AnalyseMetaData Error\n");
 
@@ -43,7 +57,7 @@ namespace mmd
 		}
 
 		// Mesh
-		if (!AnalyseMesh(Analyser, MetaData))
+		if (!AnalyseMesh(Analyser, m_MetaData))
 		{
 			Console::Log("[Error] Pmx AnalyseMesh Error\n");
 
@@ -51,7 +65,7 @@ namespace mmd
 		}
 
 		// Texture
-		if (!AnalyseTexture(Analyser, MetaData))
+		if (!AnalyseTexture(Analyser, m_MetaData))
 		{
 			Console::Log("[Error] Pmx AnalyseTexture Error\n");
 
@@ -151,7 +165,7 @@ namespace mmd
 		std::vector<float> TangentAttribute;
 
 		// MetaData.BoneIndexSizeに応じてバイト数が変わる
-		std::vector<int> IntJointAttribute;
+		std::vector<unsigned int> UIntJointAttribute;
 		std::vector<unsigned char> ByteJointAttribute;
 		std::vector<unsigned short> UShortJointAttribute;
 
@@ -234,14 +248,14 @@ namespace mmd
 						/*
 						n : ボーンIndexサイズ  | ウェイト1.0の単一ボーン(参照Index)
 						*/
-						if (!GetMultiTypeValue(Analyser, MetaData.BoneIndexSize, IntJointAttribute, ByteJointAttribute, UShortJointAttribute)) return false;
+						if (!GetMultiTypeValue(Analyser, MetaData.BoneIndexSize, UIntJointAttribute, ByteJointAttribute, UShortJointAttribute)) return false;
 
 						WeightAttribute.push_back(1.0f);
 
 						// あまりは0埋めする
-						if (!AddEmptyMultiTypeValue(MetaData.BoneIndexSize, IntJointAttribute, ByteJointAttribute, UShortJointAttribute)) return false;
-						if (!AddEmptyMultiTypeValue(MetaData.BoneIndexSize, IntJointAttribute, ByteJointAttribute, UShortJointAttribute)) return false;
-						if (!AddEmptyMultiTypeValue(MetaData.BoneIndexSize, IntJointAttribute, ByteJointAttribute, UShortJointAttribute)) return false;
+						if (!AddEmptyMultiTypeValue(MetaData.BoneIndexSize, UIntJointAttribute, ByteJointAttribute, UShortJointAttribute)) return false;
+						if (!AddEmptyMultiTypeValue(MetaData.BoneIndexSize, UIntJointAttribute, ByteJointAttribute, UShortJointAttribute)) return false;
+						if (!AddEmptyMultiTypeValue(MetaData.BoneIndexSize, UIntJointAttribute, ByteJointAttribute, UShortJointAttribute)) return false;
 						
 						WeightAttribute.push_back(0.0f);
 						WeightAttribute.push_back(0.0f);
@@ -255,8 +269,8 @@ namespace mmd
 						  n : ボーンIndexサイズ  | ボーン2の参照Index
 						  4 : float              | ボーン1のウェイト値(0～1.0), ボーン2のウェイト値は 1.0-ボーン1ウェイト
 						*/
-						if (!GetMultiTypeValue(Analyser, MetaData.BoneIndexSize, IntJointAttribute, ByteJointAttribute, UShortJointAttribute)) return false;
-						if (!GetMultiTypeValue(Analyser, MetaData.BoneIndexSize, IntJointAttribute, ByteJointAttribute, UShortJointAttribute)) return false;
+						if (!GetMultiTypeValue(Analyser, MetaData.BoneIndexSize, UIntJointAttribute, ByteJointAttribute, UShortJointAttribute)) return false;
+						if (!GetMultiTypeValue(Analyser, MetaData.BoneIndexSize, UIntJointAttribute, ByteJointAttribute, UShortJointAttribute)) return false;
 
 						if (!Analyser.IsValid(4 * 1)) return false;
 
@@ -267,8 +281,8 @@ namespace mmd
 						WeightAttribute.push_back(WeightY);
 
 						// あまりは0埋めする
-						if (!AddEmptyMultiTypeValue(MetaData.BoneIndexSize, IntJointAttribute, ByteJointAttribute, UShortJointAttribute)) return false;
-						if (!AddEmptyMultiTypeValue(MetaData.BoneIndexSize, IntJointAttribute, ByteJointAttribute, UShortJointAttribute)) return false;
+						if (!AddEmptyMultiTypeValue(MetaData.BoneIndexSize, UIntJointAttribute, ByteJointAttribute, UShortJointAttribute)) return false;
+						if (!AddEmptyMultiTypeValue(MetaData.BoneIndexSize, UIntJointAttribute, ByteJointAttribute, UShortJointAttribute)) return false;
 
 						WeightAttribute.push_back(0.0f);
 						WeightAttribute.push_back(0.0f);
@@ -286,10 +300,10 @@ namespace mmd
 						  4 : float              | ボーン3のウェイト値
 						  4 : float              | ボーン4のウェイト値 (ウェイト計1.0の保障はない)
 						*/
-						if (!GetMultiTypeValue(Analyser, MetaData.BoneIndexSize, IntJointAttribute, ByteJointAttribute, UShortJointAttribute)) return false;
-						if (!GetMultiTypeValue(Analyser, MetaData.BoneIndexSize, IntJointAttribute, ByteJointAttribute, UShortJointAttribute)) return false;
-						if (!GetMultiTypeValue(Analyser, MetaData.BoneIndexSize, IntJointAttribute, ByteJointAttribute, UShortJointAttribute)) return false;
-						if (!GetMultiTypeValue(Analyser, MetaData.BoneIndexSize, IntJointAttribute, ByteJointAttribute, UShortJointAttribute)) return false;
+						if (!GetMultiTypeValue(Analyser, MetaData.BoneIndexSize, UIntJointAttribute, ByteJointAttribute, UShortJointAttribute)) return false;
+						if (!GetMultiTypeValue(Analyser, MetaData.BoneIndexSize, UIntJointAttribute, ByteJointAttribute, UShortJointAttribute)) return false;
+						if (!GetMultiTypeValue(Analyser, MetaData.BoneIndexSize, UIntJointAttribute, ByteJointAttribute, UShortJointAttribute)) return false;
+						if (!GetMultiTypeValue(Analyser, MetaData.BoneIndexSize, UIntJointAttribute, ByteJointAttribute, UShortJointAttribute)) return false;
 
 						if (!Analyser.IsValid(4 * 4)) return false;
 
@@ -316,8 +330,8 @@ namespace mmd
 						 12 : float3             | SDEF-R1値(x,y,z) ※修正値を要計算
 						*/
 						
-						if (!GetMultiTypeValue(Analyser, MetaData.BoneIndexSize, IntJointAttribute, ByteJointAttribute, UShortJointAttribute)) return false;
-						if (!GetMultiTypeValue(Analyser, MetaData.BoneIndexSize, IntJointAttribute, ByteJointAttribute, UShortJointAttribute)) return false;
+						if (!GetMultiTypeValue(Analyser, MetaData.BoneIndexSize, UIntJointAttribute, ByteJointAttribute, UShortJointAttribute)) return false;
+						if (!GetMultiTypeValue(Analyser, MetaData.BoneIndexSize, UIntJointAttribute, ByteJointAttribute, UShortJointAttribute)) return false;
 
 						if (!Analyser.IsValid(4 * 10)) return false;
 
@@ -328,8 +342,8 @@ namespace mmd
 						WeightAttribute.push_back(WeightY);
 
 						// あまりは0埋めする
-						if (!AddEmptyMultiTypeValue(MetaData.BoneIndexSize, IntJointAttribute, ByteJointAttribute, UShortJointAttribute)) return false;
-						if (!AddEmptyMultiTypeValue(MetaData.BoneIndexSize, IntJointAttribute, ByteJointAttribute, UShortJointAttribute)) return false;
+						if (!AddEmptyMultiTypeValue(MetaData.BoneIndexSize, UIntJointAttribute, ByteJointAttribute, UShortJointAttribute)) return false;
+						if (!AddEmptyMultiTypeValue(MetaData.BoneIndexSize, UIntJointAttribute, ByteJointAttribute, UShortJointAttribute)) return false;
 
 						WeightAttribute.push_back(0.0f);
 						WeightAttribute.push_back(0.0f);
@@ -360,7 +374,7 @@ namespace mmd
 		}
 
 		// インデックスバッファの読み込み
-		std::vector<int> IntIndices;
+		std::vector<unsigned int> UIntIndices;
 		std::vector<unsigned char> ByteIndices;
 		std::vector<unsigned short> UShortIndices;
 
@@ -372,11 +386,11 @@ namespace mmd
 
 			for (int i = 0; i < NumOfIndices; i++)
 			{
-				if (!GetMultiTypeValue(Analyser, MetaData.VertexIndexSize, IntIndices, ByteIndices, UShortIndices)) return false;
+				if (!GetMultiTypeValue(Analyser, MetaData.VertexIndexSize, UIntIndices, ByteIndices, UShortIndices)) return false;
 			}
 		}
 
-		m_PmxMesh = std::make_shared<CPmxMesh>(PositionAttribute, NormalAttribute, UVAttribute, TangentAttribute, IntJointAttribute, ByteJointAttribute, UShortIndices, WeightAttribute, AdditionalUVAttribute, IntIndices, ByteIndices, UShortIndices);
+		m_PmxMesh = std::make_shared<CPmxMesh>(PositionAttribute, NormalAttribute, UVAttribute, TangentAttribute, UIntJointAttribute, ByteJointAttribute, UShortIndices, WeightAttribute, AdditionalUVAttribute, UIntIndices, ByteIndices, UShortIndices);
 
 		return true;
 	}
@@ -415,7 +429,7 @@ namespace mmd
 	}
 
 	// Helper Functions ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	bool CPmxModel::GetMultiTypeValue(binary::CBinaryAnalyser& Analyser, int ByteSize, std::vector<int>& IntValueList, std::vector<unsigned char>& ByteValueList, std::vector<unsigned short>& UShortValueList)
+	bool CPmxModel::GetMultiTypeValue(binary::CBinaryAnalyser& Analyser, int ByteSize, std::vector<unsigned int>& UIntValueList, std::vector<unsigned char>& ByteValueList, std::vector<unsigned short>& UShortValueList)
 	{
 		if (ByteSize == 1)
 		{
@@ -436,7 +450,7 @@ namespace mmd
 			int JointIndex = 0;
 			if (!Analyser.GetInt(JointIndex)) return false;
 
-			IntValueList.push_back(JointIndex);
+			UIntValueList.push_back(static_cast<unsigned int>(JointIndex));
 		}
 		else
 		{
@@ -446,7 +460,7 @@ namespace mmd
 		return true;
 	}
 
-	bool CPmxModel::AddEmptyMultiTypeValue(int ByteSize, std::vector<int>& IntValueList, std::vector<unsigned char>& ByteValueList, std::vector<unsigned short>& UShortValueList)
+	bool CPmxModel::AddEmptyMultiTypeValue(int ByteSize, std::vector<unsigned int>& UIntValueList, std::vector<unsigned char>& ByteValueList, std::vector<unsigned short>& UShortValueList)
 	{
 		if (ByteSize == 1)
 		{
@@ -462,9 +476,9 @@ namespace mmd
 		}
 		else if (ByteSize == 4)
 		{
-			int JointIndex = 0;
+			unsigned int JointIndex = 0;
 
-			IntValueList.push_back(JointIndex);
+			UIntValueList.push_back(JointIndex);
 		}
 		else
 		{

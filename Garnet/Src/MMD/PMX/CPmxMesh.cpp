@@ -3,19 +3,19 @@
 
 namespace mmd
 {
-	CPmxMesh::CPmxMesh(const std::vector<float>& PositionAttribute, const std::vector<float>& NormalAttribute, const std::vector<float>& UVAttribute, const std::vector<float>& TangentAttribute, const std::vector<int>& IntJointAttribute,
+	CPmxMesh::CPmxMesh(const std::vector<float>& PositionAttribute, const std::vector<float>& NormalAttribute, const std::vector<float>& UVAttribute, const std::vector<float>& TangentAttribute, const std::vector<unsigned int>& UIntJointAttribute,
 		const std::vector<unsigned char>& ByteJointAttribute, const std::vector<unsigned short>& UShortJointAttribute, const std::vector<float>& WeightAttribute, const std::vector<std::vector<float>>& AdditionalUVAttribute,
-		const std::vector<int>& IntIndices, const std::vector<unsigned char>& ByteIndices, const std::vector<unsigned short>& UShortIndices) :
+		const std::vector<unsigned int>& UIntIndices, const std::vector<unsigned char>& ByteIndices, const std::vector<unsigned short>& UShortIndices) :
 		m_PositionAttribute(PositionAttribute),
 		m_NormalAttribute(NormalAttribute),
 		m_UVAttribute(UVAttribute),
 		m_TangentAttribute(TangentAttribute),
-		m_IntJointAttribute(IntJointAttribute),
+		m_UIntJointAttribute(UIntJointAttribute),
 		m_ByteJointAttribute(ByteJointAttribute),
 		m_UShortJointAttribute(UShortJointAttribute),
 		m_WeightAttribute(WeightAttribute),
 		m_AdditionalUVAttribute(AdditionalUVAttribute),
-		m_IntIndices(IntIndices),
+		m_UIntIndices(UIntIndices),
 		m_ByteIndices(ByteIndices),
 		m_UShortIndices(UShortIndices)
 	{
@@ -42,9 +42,9 @@ namespace mmd
 	}
 
 	// MetaData.BoneIndexSizeに応じてバイト数が変わる
-	const std::vector<int>& CPmxMesh::GetIntJointAttribute() const
+	const std::vector<unsigned int>& CPmxMesh::GetUIntJointAttribute() const
 	{
-		return m_IntJointAttribute;
+		return m_UIntJointAttribute;
 	}
 
 	const std::vector<unsigned char>& CPmxMesh::GetByteJointAttribute() const
@@ -69,9 +69,9 @@ namespace mmd
 
 	// インデックスバッファ
 	// MetaData.VertexIndexSizeに応じてバイト数が変わる
-	const std::vector<int>& CPmxMesh::GetIntIndices() const
+	const std::vector<unsigned int>& CPmxMesh::GetUIntIndices() const
 	{
-		return m_IntIndices;
+		return m_UIntIndices;
 	}
 
 	const std::vector<unsigned char>& CPmxMesh::GetByteIndices() const
