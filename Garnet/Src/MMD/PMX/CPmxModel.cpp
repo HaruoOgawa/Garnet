@@ -5,6 +5,15 @@
 
 namespace mmd
 {
+	CPmxModel::CPmxModel():
+		m_PmxMesh(nullptr)
+	{
+	}
+
+	CPmxModel::~CPmxModel()
+	{
+	}
+
 	bool CPmxModel::Analyse(const std::vector<unsigned char>& Data)
 	{
 		// Analyserを生成
@@ -25,7 +34,7 @@ namespace mmd
 		if (!Analyser.Skip(4)) return false;
 
 		// メタデータ
-		SMetaData MetaData;
+		SPmxMetaData MetaData;
 		if (!AnalyseMetaData(Analyser, MetaData))
 		{
 			Console::Log("[Error] Pmx AnalyseMetaData Error\n");
@@ -52,7 +61,7 @@ namespace mmd
 		return true;
 	}
 
-	bool CPmxModel::AnalyseMetaData(binary::CBinaryAnalyser& Analyser, SMetaData& MetaData)
+	bool CPmxModel::AnalyseMetaData(binary::CBinaryAnalyser& Analyser, SPmxMetaData& MetaData)
 	{
 		// 後続のメタデータの長さ(PMX 2.0では8に固定)
 		unsigned char MetaSize = 0;
@@ -61,7 +70,7 @@ namespace mmd
 		if (!Analyser.IsValid(static_cast<size_t>(MetaSize))) return false;
 
 		// メタデータを読む
-		MetaData.EncodeType = static_cast<EEncodeType>(static_cast<int>(Analyser.GetByte())); // エンコード方式
+		MetaData.EncodeType = static_cast<EPmxEncodeType>(static_cast<int>(Analyser.GetByte())); // エンコード方式
 		MetaData.AdditionalUVCount = static_cast<int>(Analyser.GetByte()); // 追加UV数
 		MetaData.VertexIndexSize = static_cast<int>(Analyser.GetByte()); // 頂点インデックスサイズ
 		MetaData.TextureIndexSize = static_cast<int>(Analyser.GetByte()); // テクスチャインデックスサイズ
@@ -75,11 +84,11 @@ namespace mmd
 			int ByteLength = 0;
 			if (!Analyser.GetInt(ByteLength)) return false;
 
-			if (MetaData.EncodeType == EEncodeType::UTF16)
+			if (MetaData.EncodeType == EPmxEncodeType::UTF16)
 			{
 				if (!Analyser.GetUTF16String(MetaData.ModelName.second, ByteLength)) return false;
 			}
-			else if (MetaData.EncodeType == EEncodeType::UTF8)
+			else if (MetaData.EncodeType == EPmxEncodeType::UTF8)
 			{
 				if (!Analyser.GetString(MetaData.ModelName.first, ByteLength)) return false;
 			}
@@ -90,11 +99,11 @@ namespace mmd
 			int ByteLength = 0;
 			if (!Analyser.GetInt(ByteLength)) return false;
 
-			if (MetaData.EncodeType == EEncodeType::UTF16)
+			if (MetaData.EncodeType == EPmxEncodeType::UTF16)
 			{
 				if (!Analyser.GetUTF16String(MetaData.ModelName_EN.second, ByteLength)) return false;
 			}
-			else if (MetaData.EncodeType == EEncodeType::UTF8)
+			else if (MetaData.EncodeType == EPmxEncodeType::UTF8)
 			{
 				if (!Analyser.GetString(MetaData.ModelName_EN.first, ByteLength)) return false;
 			}
@@ -105,11 +114,11 @@ namespace mmd
 			int ByteLength = 0;
 			if (!Analyser.GetInt(ByteLength)) return false;
 
-			if (MetaData.EncodeType == EEncodeType::UTF16)
+			if (MetaData.EncodeType == EPmxEncodeType::UTF16)
 			{
 				if (!Analyser.GetUTF16String(MetaData.Comment.second, ByteLength)) return false;
 			}
-			else if (MetaData.EncodeType == EEncodeType::UTF8)
+			else if (MetaData.EncodeType == EPmxEncodeType::UTF8)
 			{
 				if (!Analyser.GetString(MetaData.Comment.first, ByteLength)) return false;
 			}
@@ -120,11 +129,11 @@ namespace mmd
 			int ByteLength = 0;
 			if (!Analyser.GetInt(ByteLength)) return false;
 
-			if (MetaData.EncodeType == EEncodeType::UTF16)
+			if (MetaData.EncodeType == EPmxEncodeType::UTF16)
 			{
 				if (!Analyser.GetUTF16String(MetaData.Comment_EN.second, ByteLength)) return false;
 			}
-			else if (MetaData.EncodeType == EEncodeType::UTF8)
+			else if (MetaData.EncodeType == EPmxEncodeType::UTF8)
 			{
 				if (!Analyser.GetString(MetaData.Comment_EN.first, ByteLength)) return false;
 			}
@@ -133,27 +142,27 @@ namespace mmd
 		return true;
 	}
 
-	bool CPmxModel::AnalyseMesh(binary::CBinaryAnalyser& Analyser, const SMetaData& MetaData)
+	bool CPmxModel::AnalyseMesh(binary::CBinaryAnalyser& Analyser, const SPmxMetaData& MetaData)
 	{
 		// 頂点バッファの読み込み
+		std::vector<float> PositionAttribute;
+		std::vector<float> NormalAttribute;
+		std::vector<float> UVAttribute;
+		std::vector<float> TangentAttribute;
+
+		// MetaData.BoneIndexSizeに応じてバイト数が変わる
+		std::vector<int> IntJointAttribute;
+		std::vector<unsigned char> ByteJointAttribute;
+		std::vector<unsigned short> UShortJointAttribute;
+
+		std::vector<float> WeightAttribute;
+
+		std::vector<std::vector<float>> AdditionalUVAttribute;
+		AdditionalUVAttribute.resize(MetaData.AdditionalUVCount);
+
 		{
 			int NumOfVertex = 0;
 			if (!Analyser.GetInt(NumOfVertex)) return false;
-
-			std::vector<float> PositionAttribute;
-			std::vector<float> NormalAttribute;
-			std::vector<float> UVAttribute;
-			std::vector<float> TangentAttribute;
-			
-			// MetaData.BoneIndexSizeに応じてバイト数が変わる
-			std::vector<int> IntJointAttribute;
-			std::vector<unsigned char> ByteJointAttribute;
-			std::vector<unsigned short> UShortJointAttribute;
-			
-			std::vector<float> WeightAttribute;
-
-			std::vector<std::vector<float>> AdditionalUVAttribute;
-			AdditionalUVAttribute.resize(MetaData.AdditionalUVCount);
 
 			for (int VertexIndex = 0; VertexIndex < NumOfVertex; VertexIndex++)
 			{
@@ -217,9 +226,9 @@ namespace mmd
 					if (!Analyser.GetByte(WeightFormatIndex)) return false;
 
 					// Joints, Weghtsの格納方法
-					EWeightDeformFormat WeightDeformFormat = static_cast<EWeightDeformFormat>(static_cast<int>(WeightFormatIndex));
+					EPmxWeightDeformFormat WeightDeformFormat = static_cast<EPmxWeightDeformFormat>(static_cast<int>(WeightFormatIndex));
 
-					if (WeightDeformFormat == EWeightDeformFormat::BDEF1)
+					if (WeightDeformFormat == EPmxWeightDeformFormat::BDEF1)
 					{
 						// BDEF1 : int 		| 4   | ボーンのみ
 						/*
@@ -238,7 +247,7 @@ namespace mmd
 						WeightAttribute.push_back(0.0f);
 						WeightAttribute.push_back(0.0f);
 					}
-					else if (WeightDeformFormat == EWeightDeformFormat::BDEF2)
+					else if (WeightDeformFormat == EPmxWeightDeformFormat::BDEF2)
 					{
 						// BDEF2 : int,int,float 	| 4*3 | ボーン2つと、ボーン1のウェイト値(PMD方式)
 						/*
@@ -264,7 +273,7 @@ namespace mmd
 						WeightAttribute.push_back(0.0f);
 						WeightAttribute.push_back(0.0f);
 					}
-					else if (WeightDeformFormat == EWeightDeformFormat::BDEF4)
+					else if (WeightDeformFormat == EPmxWeightDeformFormat::BDEF4)
 					{
 						// BDEF4 : int*4, float*4	| 4*8 | ボーン4つと、それぞれのウェイト値。ウェイト合計が1.0である保障はしない
 						/*
@@ -294,7 +303,7 @@ namespace mmd
 						WeightAttribute.push_back(WeightZ);
 						WeightAttribute.push_back(WeightW);
 					}
-					else if (WeightDeformFormat == EWeightDeformFormat::SDEF)
+					else if (WeightDeformFormat == EPmxWeightDeformFormat::SDEF)
 					{
 						// SDEF  : int,int,float, float3*3 
 						//			| 4*12 | BDEF2に加え、SDEF用のfloat3(Vector3)が3つ。実際の計算ではさらに補正値の算出が必要(一応そのままBDEF2としても使用可能)
@@ -351,11 +360,11 @@ namespace mmd
 		}
 
 		// インデックスバッファの読み込み
-		{
-			std::vector<int> IntIndices;
-			std::vector<unsigned char> ByteIndices;
-			std::vector<unsigned short> UShortIndices;
+		std::vector<int> IntIndices;
+		std::vector<unsigned char> ByteIndices;
+		std::vector<unsigned short> UShortIndices;
 
+		{
 			int NumOfIndices = 0;
 			if (!Analyser.GetInt(NumOfIndices)) return false;
 			
@@ -367,33 +376,37 @@ namespace mmd
 			}
 		}
 
+		m_PmxMesh = std::make_shared<CPmxMesh>(PositionAttribute, NormalAttribute, UVAttribute, TangentAttribute, IntJointAttribute, ByteJointAttribute, UShortIndices, WeightAttribute, AdditionalUVAttribute, IntIndices, ByteIndices, UShortIndices);
+
 		return true;
 	}
 
-	bool CPmxModel::AnalyseTexture(binary::CBinaryAnalyser& Analyser, const SMetaData& MetaData)
+	bool CPmxModel::AnalyseTexture(binary::CBinaryAnalyser& Analyser, const SPmxMetaData& MetaData)
 	{
 		int NumOfTexture = 0;
 		if (!Analyser.GetInt(NumOfTexture)) return false;
 
-		std::vector<std::pair<std::string, std::wstring>> TextureNameList;
-
 		for (int TextureIndex = 0; TextureIndex < NumOfTexture; TextureIndex++)
 		{
+			std::shared_ptr<CPmxTexture> PmxTexture = std::make_shared<CPmxTexture>();
+
 			std::pair<std::string, std::wstring> TextureName = std::make_pair(std::string(), std::wstring());
 
 			int ByteLength = 0;
 			if (!Analyser.GetInt(ByteLength)) return false;
 
-			if (MetaData.EncodeType == EEncodeType::UTF16)
+			if (MetaData.EncodeType == EPmxEncodeType::UTF16)
 			{
 				if (!Analyser.GetUTF16String(TextureName.second, ByteLength)) return false;
 			}
-			else if (MetaData.EncodeType == EEncodeType::UTF8)
+			else if (MetaData.EncodeType == EPmxEncodeType::UTF8)
 			{
 				if (!Analyser.GetString(TextureName.first, ByteLength)) return false;
 			}
 
-			TextureNameList.push_back(TextureName);
+			PmxTexture->SetFilePath(TextureName);
+
+			m_PmxTextureList.push_back(PmxTexture);
 
 			Console::Log("TextureName: %ls\n", TextureName.second.c_str());
 		}

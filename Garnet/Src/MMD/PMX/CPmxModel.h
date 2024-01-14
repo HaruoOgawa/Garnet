@@ -3,60 +3,38 @@
 #ifdef USE_MMD
 #include <vector>
 #include <string>
+#include <memory>
+
+#include "EPmxEncodeType.h"
+#include "EPmxWeightDeformFormat.h"
+#include "SPmxMetaData.h"
+
+#include "CPmxMesh.h"
+#include "CPmxTexture.h"
 
 namespace binary { class CBinaryAnalyser; }
 
 namespace mmd
 {
-	enum class EEncodeType
-	{
-		UTF16 = 0,
-		UTF8 = 1,
-	};
-
-	// Joints, Weghts‚ÌŠi”[•û–@
-	enum class EWeightDeformFormat
-	{
-		None = -1,
-
-		BDEF1 = 0,
-		BDEF2 = 1,
-		BDEF4 = 2,
-		SDEF = 3,
-	};
-
-	struct SMetaData
-	{
-		EEncodeType EncodeType = EEncodeType::UTF16;
-		
-		int AdditionalUVCount = 0;
-		int VertexIndexSize = 0;
-		int TextureIndexSize = 0;
-		int MaterialIndexSize = 0;
-		int BoneIndexSize = 0;
-		int MorphIndexSize = 0;
-		int RigidIndexSize = 0;
-
-		std::pair<std::string, std::wstring> ModelName = std::make_pair(std::string(), std::wstring());
-		std::pair<std::string, std::wstring> ModelName_EN = std::make_pair(std::string(), std::wstring());
-		std::pair<std::string, std::wstring> Comment = std::make_pair(std::string(), std::wstring());
-		std::pair<std::string, std::wstring> Comment_EN = std::make_pair(std::string(), std::wstring());
-	};
-
 	class CPmxModel
 	{
+		std::shared_ptr<CPmxMesh> m_PmxMesh;
+		std::vector<std::shared_ptr<CPmxTexture>> m_PmxTextureList;
 	private:
-		static bool AnalyseMetaData(binary::CBinaryAnalyser& Analyser, SMetaData& MetaData);
+		bool AnalyseMetaData(binary::CBinaryAnalyser& Analyser, SPmxMetaData& MetaData);
 
-		static bool AnalyseMesh(binary::CBinaryAnalyser& Analyser, const SMetaData& MetaData);
+		bool AnalyseMesh(binary::CBinaryAnalyser& Analyser, const SPmxMetaData& MetaData);
 
-		static bool AnalyseTexture(binary::CBinaryAnalyser& Analyser, const SMetaData& MetaData);
+		bool AnalyseTexture(binary::CBinaryAnalyser& Analyser, const SPmxMetaData& MetaData);
 
 		// Helper Functions ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		static bool GetMultiTypeValue(binary::CBinaryAnalyser& Analyser, int ByteSize, std::vector<int>& IntValueList, std::vector<unsigned char>& ByteValueList, std::vector<unsigned short>& UShortValueList);
 		static bool AddEmptyMultiTypeValue(int ByteSize, std::vector<int>& IntValueList, std::vector<unsigned char>& ByteValueList, std::vector<unsigned short>& UShortValueList);
 	public:
-		static bool Analyse(const std::vector<unsigned char>& Data);
+		CPmxModel();
+		virtual ~CPmxModel();
+
+		bool Analyse(const std::vector<unsigned char>& Data);
 	};
 }
 #endif
