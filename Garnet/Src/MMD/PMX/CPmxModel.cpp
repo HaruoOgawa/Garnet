@@ -29,6 +29,11 @@ namespace mmd
 		return m_PmxTextureList;
 	}
 
+	const std::vector<std::shared_ptr<CPmxMaterial>>& CPmxModel::GetPmxMaterialList() const
+	{
+		return m_PmxMaterialList;
+	}
+
 	bool CPmxModel::Analyse(const std::vector<unsigned char>& Data)
 	{
 		// Analyserを生成
@@ -71,6 +76,17 @@ namespace mmd
 
 			return false;
 		}
+
+		// Material
+		if (!AnalyseMaterial(Analyser, m_MetaData))
+		{
+			Console::Log("[Error] Pmx AnalyseMaterial Error\n");
+
+			return false;
+		}
+
+		// Material
+		// Materialの仕様に合わせてメッシュを分割する必要があるかも？(Materialを実装しながら確認する)
 
 		return true;
 	}
@@ -428,6 +444,180 @@ namespace mmd
 		return true;
 	}
 
+	bool CPmxModel::AnalyseMaterial(binary::CBinaryAnalyser& Analyser, const SPmxMetaData& MetaData)
+	{
+		int NumOfMaterial = 0;
+		if (!Analyser.GetInt(NumOfMaterial)) return false;
+
+		for (int MaterialIndex = 0; MaterialIndex < NumOfMaterial; MaterialIndex++)
+		{
+			// MaterialName
+			std::pair<std::string, std::wstring> MaterialName = std::make_pair(std::string(""), std::wstring(L""));
+			{
+				int ByteLength = 0;
+				if (!Analyser.GetInt(ByteLength)) return false;
+
+				if (MetaData.EncodeType == EPmxEncodeType::UTF8)
+				{
+					if (!Analyser.GetString(MaterialName.first, ByteLength)) return false;
+				}
+				else if (MetaData.EncodeType == EPmxEncodeType::UTF16)
+				{
+					if (!Analyser.GetUTF16String(MaterialName.second, ByteLength)) return false;
+				}
+			}
+
+			// MaterialName_EN
+			std::pair<std::string, std::wstring> MaterialName_EN = std::make_pair(std::string(""), std::wstring(L""));
+			{
+				int ByteLength = 0;
+				if (!Analyser.GetInt(ByteLength)) return false;
+
+				if (MetaData.EncodeType == EPmxEncodeType::UTF8)
+				{
+					if (!Analyser.GetString(MaterialName_EN.first, ByteLength)) return false;
+				}
+				else if (MetaData.EncodeType == EPmxEncodeType::UTF16)
+				{
+					if (!Analyser.GetUTF16String(MaterialName_EN.second, ByteLength)) return false;
+				}
+			}
+
+			// Diffuse
+			glm::vec4 Diffuse = glm::vec4(1.0f);
+			{
+				if (!Analyser.IsValid(4 * 4)) return false;
+
+				float R = Analyser.GetFloat();
+				float G = Analyser.GetFloat();
+				float B = Analyser.GetFloat();
+				float A = Analyser.GetFloat();
+
+				Diffuse = glm::vec4(R, G, B, A);
+			}
+
+			// Specular
+			glm::vec3 Specular = glm::vec3(1.0f);
+			{
+				if (!Analyser.IsValid(4 * 3)) return false;
+
+				float R = Analyser.GetFloat();
+				float G = Analyser.GetFloat();
+				float B = Analyser.GetFloat();
+
+				Specular = glm::vec3(R, G, B);
+			}
+
+			// Specular係数
+			float SpecularCoef = 1.0f;
+			if (!Analyser.GetFloat(SpecularCoef)) return false;
+
+			// Ambient
+			glm::vec3 Ambient = glm::vec3(0.0f);
+			{
+				if (!Analyser.IsValid(4 * 3)) return false;
+
+				float R = Analyser.GetFloat();
+				float G = Analyser.GetFloat();
+				float B = Analyser.GetFloat();
+
+				Ambient = glm::vec3(R, G, B);
+			}
+
+			/*
+			bitFlag  	| 描画フラグ(8bit) - 各bit 0:OFF 1:ON
+                   0x01:両面描画, 0x02:地面影, 0x04:セルフシャドウマップへの描画, 0x08:セルフシャドウの描画, 
+                   0x10:エッジ描画
+			// CPmaxMaterial内で解析する
+			*/
+			unsigned char DrawBitFlag = 0;
+			if (!Analyser.GetByte(DrawBitFlag)) return false;
+
+			// エッジカラー
+			glm::vec4 EdgeColor = glm::vec4(0.0f);
+			{
+				if (!Analyser.IsValid(4 * 4)) return false;
+
+				float R = Analyser.GetFloat();
+				float G = Analyser.GetFloat();
+				float B = Analyser.GetFloat();
+				float A = Analyser.GetFloat();
+
+				EdgeColor = glm::vec4(R, G, B, A);
+			}
+
+			// エッジサイズ
+			float EdgeSize = 1.0f;
+			if (!Analyser.GetFloat(EdgeSize)) return false;
+
+			// メインテクスチャの参照インデックス
+			int MainTexIndex = GetMultiTypeValueAsInterger(Analyser, MetaData.TextureIndexSize);
+
+			// スフィアテクスチャの参照インデックス
+			int SphereTexIndex = GetMultiTypeValueAsInterger(Analyser, MetaData.TextureIndexSize);
+
+			// スフィアモード 0:無効 1:乗算(sph) 2:加算(spa) 3:サブテクスチャ(追加UV1のx,yをUV参照して通常テクスチャ描画を行う)
+			unsigned char SphereModeByte = 0;
+			if (!Analyser.GetByte(SphereModeByte)) return false;
+
+			EPmxSphereMode SphereMode = static_cast<EPmxSphereMode>(static_cast<int>(SphereModeByte));
+
+			// 共有Toonフラグ 0:継続値は個別Toon 1:継続値は共有Toon
+			unsigned char SharedToonFlag = 0;
+			if (!Analyser.GetByte(SharedToonFlag)) return false;
+
+			// トゥーンテクスチャ
+			int ToonTexIndex = -1;
+			int SharedToonTexIndex = -1;
+
+			if (SharedToonFlag == 0)
+			{
+				// Toonテクスチャ, テクスチャテーブルの参照Index
+				ToonTexIndex = GetMultiTypeValueAsInterger(Analyser, MetaData.TextureIndexSize);
+			}
+			else if (SharedToonFlag == 1)
+			{
+				// 共有Toonテクスチャ[0～9] -> それぞれ toon01.bmp～toon10.bmp に対応
+				unsigned char SharedToonTexByte = 0;
+				if (!Analyser.GetByte(SharedToonTexByte)) return false;
+
+				SharedToonTexIndex = static_cast<int>(SharedToonTexByte);
+			}
+			else
+			{
+				return false;
+			}
+
+			// メモ : 自由欄／スクリプト記述／エフェクトへのパラメータ配置など
+			std::pair<std::string, std::wstring> MaterialDescription = std::make_pair(std::string(""), std::wstring(L""));
+			{
+				int ByteLength = 0;
+				if (!Analyser.GetInt(ByteLength)) return false;
+
+				if (MetaData.EncodeType == EPmxEncodeType::UTF8)
+				{
+					if (!Analyser.GetString(MaterialDescription.first, ByteLength)) return false;
+				}
+				else if (MetaData.EncodeType == EPmxEncodeType::UTF16)
+				{
+					if (!Analyser.GetUTF16String(MaterialDescription.second, ByteLength)) return false;
+				}
+			}
+
+			// 材質に対応する面(頂点)数 (必ず3の倍数になる)
+			int MatRefIndiceOffset = 0;
+			if (!Analyser.GetInt(MatRefIndiceOffset)) return false;
+
+			// マテリアルを登録
+			std::shared_ptr<CPmxMaterial> PmxMaterial = std::make_shared<CPmxMaterial>(MaterialName, MaterialName_EN, Diffuse, Specular, SpecularCoef, Ambient, DrawBitFlag, EdgeColor, EdgeSize, 
+				MainTexIndex, SphereTexIndex, SphereMode, ToonTexIndex, SharedToonTexIndex, MaterialDescription, MatRefIndiceOffset);
+
+			m_PmxMaterialList.push_back(PmxMaterial);
+		}
+
+		return true;
+	}
+
 	// Helper Functions ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	bool CPmxModel::GetMultiTypeValue(binary::CBinaryAnalyser& Analyser, int ByteSize, std::vector<unsigned int>& UIntValueList, std::vector<unsigned char>& ByteValueList, std::vector<unsigned short>& UShortValueList)
 	{
@@ -486,6 +676,39 @@ namespace mmd
 		}
 
 		return true;
+	}
+
+	int CPmxModel::GetMultiTypeValueAsInterger(binary::CBinaryAnalyser& Analyser, int ByteSize)
+	{
+		int Result = -1;
+
+		if (ByteSize == 1)
+		{
+			unsigned char Index = 0;
+			if (!Analyser.GetByte(Index)) return false;
+
+			Result = static_cast<int>(Index);
+		}
+		else if (ByteSize == 2)
+		{
+			unsigned short Index = 0;
+			if (!Analyser.GetUShort(Index)) return false;
+
+			Result = static_cast<int>(Index);
+		}
+		else if (ByteSize == 4)
+		{
+			int Index = 0;
+			if (!Analyser.GetInt(Index)) return false;
+
+			Result = Index;
+		}
+		else
+		{
+			Result = -1;
+		}
+
+		return Result;
 	}
 }
 #endif
