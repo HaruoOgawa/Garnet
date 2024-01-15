@@ -605,12 +605,12 @@ namespace mmd
 			}
 
 			// 材質に対応する面(頂点)数 (必ず3の倍数になる)
-			int MatRefIndiceOffset = 0;
-			if (!Analyser.GetInt(MatRefIndiceOffset)) return false;
+			int MatRefIndiceCount = 0;
+			if (!Analyser.GetInt(MatRefIndiceCount)) return false;
 
 			// マテリアルを登録
 			std::shared_ptr<CPmxMaterial> PmxMaterial = std::make_shared<CPmxMaterial>(MaterialName, MaterialName_EN, Diffuse, Specular, SpecularCoef, Ambient, DrawBitFlag, EdgeColor, EdgeSize, 
-				MainTexIndex, SphereTexIndex, SphereMode, ToonTexIndex, SharedToonTexIndex, MaterialDescription, MatRefIndiceOffset);
+				MainTexIndex, SphereTexIndex, SphereMode, ToonTexIndex, SharedToonTexIndex, MaterialDescription, MatRefIndiceCount);
 
 			m_PmxMaterialList.push_back(PmxMaterial);
 		}

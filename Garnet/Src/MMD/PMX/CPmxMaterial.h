@@ -58,15 +58,57 @@ namespace mmd
 		std::pair<std::string, std::wstring> m_MaterialDescription;
 
 		// 材質に対応する面(頂点)数 (必ず3の倍数になる)
-		int m_MatRefIndiceOffset;
+		int m_MatRefIndiceCount;
 
 	private:
 		void AnalyseDrawBitFlag(unsigned char DrawBitFlag);
 	public:
 		CPmxMaterial(std::pair<std::string, std::wstring> MaterialName, std::pair<std::string, std::wstring> MaterialName_EN, glm::vec4 Diffuse, glm::vec3 Specular, float SpecularCoef, glm::vec3 Ambient, 
 			unsigned char DrawBitFlag, glm::vec4 EdgeColor, float EdgeSize, int MainTexIndex, int SphereTexIndex, EPmxSphereMode SphereMode, int ToonTexIndex, int SharedToonTexIndex, 
-			std::pair<std::string, std::wstring> MaterialDescription, int MatRefIndiceOffset);
+			std::pair<std::string, std::wstring> MaterialDescription, int MatRefIndiceCount);
 		virtual ~CPmxMaterial() = default;
+
+		const std::pair<std::string, std::wstring>& GetMaterialName() const;
+		const std::pair<std::string, std::wstring>& GetMaterialName_EN() const;
+
+		const glm::vec4& GetDiffuse() const;
+
+		const glm::vec3& GetSpecular() const;
+		float GetSpecularCoef() const;
+
+		const glm::vec3& GetAmbient() const;
+
+		// 描画フラグ(DrawBitFlag)
+		bool IsDrawDoubleSlided() const;
+		bool IsDrawGroundShadow() const;
+		bool IsDrawSelfShadowMap() const;
+		bool IsDrawSelfShadow() const;
+		bool IsDrawEdge() const;
+
+		// エッジカラー
+		const glm::vec4& GetEdgeColor() const;
+
+		// エッジサイズ
+		float GetEdgeSize() const;
+
+		// メインテクスチャの参照インデックス
+		int GetMainTexIndex() const;
+
+		// スフィアテクスチャの参照インデックス
+		int GetSphereTexIndex() const;
+
+		// スフィアモード
+		EPmxSphereMode GetSphereMode() const;
+
+		// トゥーンテクスチャ
+		int GetToonTexIndex() const;
+		int GetSharedToonTexIndex() const;
+
+		// メモ : 自由欄／スクリプト記述／エフェクトへのパラメータ配置など
+		const std::pair<std::string, std::wstring>& GetMaterialDescription() const;
+
+		// 材質に対応する面(頂点)数 (必ず3の倍数になる)
+		int GetMatRefIndiceCount() const;
 	};
 }
 #endif

@@ -40,12 +40,7 @@ namespace mmd
 
 		// マテリアルリスト
 		std::vector<std::shared_ptr<graphics::CMaterial>> MaterialList;
-
-		// マテリアルを持っていないのならダミーを渡す
-		if (MaterialList.size() <= 0)
-		{
-			if (!CreateDummyMaterial(pGraphicsAPI, MaterialList, MaterialFrame, Skin)) return false;
-		}
+		if (!CreateMaterial(pGraphicsAPI, model, MaterialList, MaterialFrame, Skin)) return false;
 
 		// メッシュ
 		std::vector<std::shared_ptr<graphics::CMesh>> MeshList;
@@ -72,32 +67,44 @@ namespace mmd
 		return true;
 	}
 
-	bool CPmxImporter::CreateDummyMaterial(api::IGraphicsAPI* pGraphicsAPI, std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList,
+	bool CPmxImporter::CreateMaterial(api::IGraphicsAPI* pGraphicsAPI, const CPmxModel& model, std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList,
 		const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, const std::shared_ptr<animation::CSkin>& Skin)
 	{
 		if (!MaterialFrame) return false;
 
-		// マテリアルにシェーダーを設定
-		std::shared_ptr<graphics::CMaterial> material = MaterialFrame->CreateMaterial(pGraphicsAPI);
+		const auto& PmxMaterilList = model.GetPmxMaterialList();
 
-		// SkinMatrix StorageBuffer
+		for (const auto& PmxMaterial : PmxMaterilList)
 		{
-			// SkinMatは存在するJointの数だけ用意する必要がある
-			unsigned int SkinMatCount = 1;
-			if (Skin && Skin->GetJointList().size() > 0) SkinMatCount = static_cast<unsigned int>(Skin->GetJointList().size());
+			// マテリアルにシェーダーを設定
+			std::shared_ptr<graphics::CMaterial> material = MaterialFrame->CreateMaterial(pGraphicsAPI);
 
-			// SSBOのサイズは2のn乗である必要がある
-			SkinMatCount = math::CMath::CalcNextPowerOfTwo(SkinMatCount);
+			material->ReplacePreloadUniformValue("baseColorFactor", &PmxMaterial->GetDiffuse()[0], sizeof(glm::vec4), 0);
 
-			std::vector<glm::mat4> SkinMatrixList;
-			SkinMatrixList.resize(SkinMatCount, glm::mat4(1.0f));
+			//material->ReplaceTextureIndex("baseColorTexture", PmxMaterial->GetMainTexIndex());
 
-			material->ReplacePreloadUniformValue("r_SkinMatrixBuffer", &SkinMatrixList[0], static_cast<int>(SkinMatrixList.size()) * sizeof(glm::mat4), 1);
+			if (PmxMaterial->IsDrawDoubleSlided())
+			{
+				material->SetCullMode(graphics::ECullMode::CULL_NONE);
+			}
+
+			// SkinMatrix StorageBuffer
+			{
+				// SkinMatは存在するJointの数だけ用意する必要がある
+				unsigned int SkinMatCount = 1;
+				if (Skin && Skin->GetJointList().size() > 0) SkinMatCount = static_cast<unsigned int>(Skin->GetJointList().size());
+
+				// SSBOのサイズは2のn乗である必要がある
+				SkinMatCount = math::CMath::CalcNextPowerOfTwo(SkinMatCount);
+
+				std::vector<glm::mat4> SkinMatrixList;
+				SkinMatrixList.resize(SkinMatCount, glm::mat4(1.0f));
+
+				material->ReplacePreloadUniformValue("r_SkinMatrixBuffer", &SkinMatrixList[0], static_cast<int>(SkinMatrixList.size()) * sizeof(glm::mat4), 1);
+			}
+
+			MaterialList.push_back(material);
 		}
-
-		//material->SetCullMode(graphics::ECullMode::CULL_NONE);
-
-		MaterialList.push_back(material);
 
 		return true;
 	}
@@ -109,20 +116,11 @@ namespace mmd
 			std::shared_ptr<graphics::CMesh> Mesh = std::make_shared<graphics::CMesh>();
 
 			{
-				// 仮で0とする
-				int MaterialIndex = 0;
-
-				//
-				std::shared_ptr<renderer::CRendererCreateInfo> createInfo = std::make_shared<renderer::CRendererCreateInfo>();
-
 				// 頂点バッファ本体
 					std::vector<std::vector<float>> VertexDataList;
 				std::vector<int> DimentionList;
 				std::vector<renderer::EDataType> DataTypeList;
 				std::vector<int> ByteStrideList;
-
-				std::vector<unsigned short> Indices;
-				std::vector<unsigned int> UINTIndices;
 
 				// 頂点データの初期化用(例えばWeightとかNormalを持っていないならそれを0埋めするみたいな処理)
 				std::vector<std::string> NeedAttribNameList = {
@@ -249,39 +247,76 @@ namespace mmd
 						// ByteStride
 						ByteStrideList.push_back(ReservedByteStrideList[AttribName]);
 					}
-
-					// メッシュ情報を渡す
-					createInfo->SetVertices(VertexDataList);
-					createInfo->SetAttributeDimensions(DimentionList);
-					createInfo->SetAttribDataTypes(DataTypeList);
-					createInfo->SetAttribByteStrides(ByteStrideList);
-				}
-
-				// インデックスバッフを読む
-				{
-					if (MetaData.VertexIndexSize == 1)
-					{
-						// 未対応
-						Console::Log("[Error] InValid Indices Type - Byte\n");
-
-						return false;
-					}
-					else if (MetaData.VertexIndexSize == 2)
-					{
-						// Indicesを登録
-						createInfo->SetIndices(PmxMesh->GetUShortIndices());
-					}
-					else if (MetaData.VertexIndexSize == 4)
-					{
-						createInfo->SetUINTIndices(PmxMesh->GetUIntIndices());
-					}
 				}
 
 				// プリミティブを作成する
-				std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(createInfo, MaterialIndex);
-				Mesh->AddPrimitive(Primitive);
+				{
+					const auto& PmxMaterialList = model.GetPmxMaterialList();
+
+					int MatRefOffset = 0;
+
+					for (int MaterialIndex = 0; MaterialIndex < PmxMaterialList.size(); MaterialIndex++)
+					{
+						const auto& PmxMaterial = PmxMaterialList[MaterialIndex];
+
+						std::shared_ptr<renderer::CRendererCreateInfo> createInfo = std::make_shared<renderer::CRendererCreateInfo>();
+
+						// メッシュ情報を渡す
+						createInfo->SetVertices(VertexDataList);
+						createInfo->SetAttributeDimensions(DimentionList);
+						createInfo->SetAttribDataTypes(DataTypeList);
+						createInfo->SetAttribByteStrides(ByteStrideList);
+
+						// インデックスバッフを読む
+						{
+							if (MetaData.VertexIndexSize == 1)
+							{
+								// 未対応
+								Console::Log("[Error] InValid Indices Type - Byte\n");
+
+								return false;
+							}
+							else if (MetaData.VertexIndexSize == 2)
+							{
+								// Indicesを取得
+								const auto& PmxIndices = PmxMesh->GetUShortIndices();
+
+								// 参照オフセット分ずらして参照カウントの分だけ取得する
+								std::vector<unsigned short> Indices;
+								Indices.resize(PmxMaterial->GetMatRefIndiceCount());
+
+								std::memcpy(&Indices[0], &PmxIndices[MatRefOffset], sizeof(unsigned short) * PmxMaterial->GetMatRefIndiceCount());
+
+								// Indicesを登録
+								createInfo->SetIndices(Indices);
+							}
+							else if (MetaData.VertexIndexSize == 4)
+							{
+								// Indicesを取得
+								const auto& PmxIndices = PmxMesh->GetUIntIndices();
+
+								// 参照オフセット分ずらして参照カウントの分だけ取得する
+								std::vector<unsigned int> UINTIndices;
+								UINTIndices.resize(PmxMaterial->GetMatRefIndiceCount());
+
+								std::memcpy(&UINTIndices[0], &PmxIndices[MatRefOffset], sizeof(unsigned int) * PmxMaterial->GetMatRefIndiceCount());
+
+								// Indicesを登録
+								createInfo->SetUINTIndices(UINTIndices);
+							}
+
+							// 参照オフセットを更新する
+							MatRefOffset += PmxMaterial->GetMatRefIndiceCount();
+						}
+
+						// プリミティブを作成する
+						std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(createInfo, MaterialIndex);
+						Mesh->AddPrimitive(Primitive);
+					}
+				}
 			}
 
+			// メッシュを登録
 			MeshList.push_back(Mesh);
 
 			// PMXにはノードの概念がないのでこちらで明示的に作成する
