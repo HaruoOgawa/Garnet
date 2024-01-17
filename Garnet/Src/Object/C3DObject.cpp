@@ -1,5 +1,6 @@
 #include "C3DObject.h"
 #include "../GLTF/CGLTFImporter.h"
+#include "../LoadWorker/CLoadWorker.h"
 
 #if defined(USE_FBX)
 
@@ -20,6 +21,7 @@ namespace object
 {
 	C3DObject::C3DObject(const std::string& PassName, const std::string& DepthPassName):
 		m_IsCreated(false),
+		m_ExistFirstDelayResource(false),
 		m_PassName(PassName),
 		m_DepthPassName(DepthPassName),
 		m_ObjectTransform(std::make_shared<math::CTransform>()),
@@ -27,7 +29,8 @@ namespace object
 		m_AnimationController(std::make_shared<animation::CAnimationController>()),
 #endif
 		m_TextureSet(std::make_shared<graphics::CTextureSet>()),
-		m_FileName("")
+		m_FileName(""),
+		m_DepthMF(nullptr)
 	{
 	}
 
@@ -68,8 +71,10 @@ namespace object
 		return true;
 	}
 
-	bool C3DObject::CreateFromMemory(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<graphics::CMaterialFrame>& BaseMF, const std::shared_ptr<graphics::CMaterialFrame>& DepthMF, E3DObjectType ObjectType)
+	bool C3DObject::CreateFromMemory(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<graphics::CMaterialFrame>& BaseMF, const std::shared_ptr<graphics::CMaterialFrame>& DepthMF, E3DObjectType ObjectType)
 	{
+		m_DepthMF = DepthMF;
+
 		if (m_BinaryData.empty()) return false;
 
 		switch (ObjectType)
@@ -93,7 +98,7 @@ namespace object
 #endif
 		case object::E3DObjectType::Pmx:
 #ifdef USE_MMD
-			if (!mmd::CPmxImporter::ImportPmx(pGraphicsAPI, m_BinaryData, this, BaseMF)) return false;
+			if (!mmd::CPmxImporter::ImportPmx(pGraphicsAPI, pLoadWorker, m_FileName, m_BinaryData, this, BaseMF)) return false;
 #endif
 			break;
 		default:
@@ -101,6 +106,14 @@ namespace object
 		}
 
 		m_BinaryData.clear();
+
+		// インポートの結果、遅延ロードリソースが見つかった時はCreateを後回しにする
+		if (m_RuntimeLoadResourceList.size() != 0)
+		{
+			m_ExistFirstDelayResource = true;
+
+			return true;
+		}
 
 		if (!Create(pGraphicsAPI, DepthMF)) return false;
 
@@ -260,8 +273,34 @@ namespace object
 		}
 	}
 
-	bool C3DObject::Update(float DeltaSecondsTime)
+	bool C3DObject::Update(api::IGraphicsAPI* pGraphicsAPI, float DeltaSecondsTime)
 	{
+		for (auto& Resource : m_RuntimeLoadResourceList)
+		{
+			switch (Resource->GetStatus())
+			{
+			case resource::ELoadStatus::Loaded:
+			{
+				m_RuntimeLoadResourceList.erase(m_RuntimeLoadResourceList.begin());
+				m_RuntimeLoadResourceList.shrink_to_fit();
+
+				return true;
+			}
+
+			case resource::ELoadStatus::None:
+			case resource::ELoadStatus::Loading:
+			default:
+				break;
+			}
+		}
+
+		if (m_ExistFirstDelayResource && m_RuntimeLoadResourceList.size() == 0)
+		{
+			if (!Create(pGraphicsAPI, m_DepthMF)) return false;
+
+			m_ExistFirstDelayResource = false;
+		}
+
 		if (!m_IsCreated) return true;
 
 #ifdef USE_ANIMATION
@@ -526,5 +565,10 @@ namespace object
 	const std::shared_ptr<graphics::CTextureSet>& C3DObject::GetTextureSet() const
 	{
 		return m_TextureSet;
+	}
+
+	void C3DObject::AddRuntimeLoadResource(const std::shared_ptr <resource::IResource>& Resource)
+	{
+		m_RuntimeLoadResourceList.push_back(Resource);
 	}
 }

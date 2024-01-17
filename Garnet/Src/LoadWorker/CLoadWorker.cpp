@@ -85,7 +85,7 @@ namespace resource
 		// ローディングバー
 		if (m_LoadingBar)
 		{
-			if (!m_LoadingBar->Update(0.0f)) return false;
+			if (!m_LoadingBar->Update(pGraphicsAPI, 0.0f)) return false;
 		}
 
 		// ローディング
@@ -136,8 +136,9 @@ namespace resource
 				{
 					m_RuntimeLoadResourceList.erase(m_RuntimeLoadResourceList.begin());
 					m_RuntimeLoadResourceList.shrink_to_fit();
+
+					return true;
 				}
-				return true;
 
 				default:
 					break;

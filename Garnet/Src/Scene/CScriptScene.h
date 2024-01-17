@@ -58,7 +58,7 @@ namespace scene
 		std::shared_ptr<object::C3DObject> m_Background;
 		std::shared_ptr<object::C3DObject> m_DebugSphere;
 	private:
-		bool Load(api::IGraphicsAPI* pGraphicsAPI);
+		bool Load(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker);
 
 		float rand(const glm::vec2& st) { return static_cast<float>(glm::fract(glm::sin(glm::dot(st, glm::vec2(12.9898, 78.233))) * 43758.5453123)); }
 	public:

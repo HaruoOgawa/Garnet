@@ -72,14 +72,14 @@ namespace scene
 		m_IsLoaded = false;
 	}
 
-	bool CScriptScene::Load(api::IGraphicsAPI* pGraphicsAPI)
+	bool CScriptScene::Load(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker)
 	{
 		// FBX Humanoid Animation Clip
 		std::vector<std::shared_ptr<animation::CAnimationClip>> AnimationClipList;
 		{
-			if (!m_Walk_Animation->CreateFromMemory(pGraphicsAPI, nullptr, nullptr, object::E3DObjectType::Fbx)) return false;
-			if (!m_Jump_Animation->CreateFromMemory(pGraphicsAPI, nullptr, nullptr, object::E3DObjectType::Fbx)) return false;
-			if (!m_Punch_Animation->CreateFromMemory(pGraphicsAPI, nullptr, nullptr, object::E3DObjectType::Fbx)) return false;
+			if (!m_Walk_Animation->CreateFromMemory(pGraphicsAPI, pLoadWorker, nullptr, nullptr, object::E3DObjectType::Fbx)) return false;
+			if (!m_Jump_Animation->CreateFromMemory(pGraphicsAPI, pLoadWorker, nullptr, nullptr, object::E3DObjectType::Fbx)) return false;
+			if (!m_Punch_Animation->CreateFromMemory(pGraphicsAPI, pLoadWorker, nullptr, nullptr, object::E3DObjectType::Fbx)) return false;
 
 			AnimationClipList.push_back(m_Walk_Animation->GetAnimationClipList()[0]);
 			AnimationClipList.push_back(m_Jump_Animation->GetAnimationClipList()[0]);
@@ -88,7 +88,7 @@ namespace scene
 
 		// m_TdaMiku_Model
 		{
-			if (!m_TdaMiku_Model->CreateFromMemory(pGraphicsAPI, m_PBRMF, m_DepthMF, object::E3DObjectType::Pmx)) return false;
+			if (!m_TdaMiku_Model->CreateFromMemory(pGraphicsAPI, pLoadWorker, m_PBRMF, m_DepthMF, object::E3DObjectType::Pmx)) return false;
 
 			m_TdaMiku_Model->SetPos(glm::vec3(0.0f, 0.0f, 0.0f));
 		}
@@ -99,7 +99,7 @@ namespace scene
 			for(const auto& FrameTexture : m_FrameTextureList) { m_glTFObject->GetTextureSet()->AddFrameTexture(FrameTexture); }
 			m_glTFObject->GetTextureSet()->AddIBLTexture(m_IBL_DiffuseEnvMap_Texture, m_IBL_SpecularEnvMap_Texture, m_IBL_GGX_LUT_Texture);
 
-			if (!m_glTFObject->CreateFromMemory(pGraphicsAPI, m_PBRMF, m_DepthMF, object::E3DObjectType::glTF)) return false;
+			if (!m_glTFObject->CreateFromMemory(pGraphicsAPI, pLoadWorker, m_PBRMF, m_DepthMF, object::E3DObjectType::glTF)) return false;
 
 			m_glTFObject->ChangeMotion(0);
 			m_glTFObject->SetPos(glm::vec3(4.0f, 0.0f, 0.0f));
@@ -110,7 +110,7 @@ namespace scene
 			for(const auto& FrameTexture : m_FrameTextureList) { m_BrainStemDObject->GetTextureSet()->AddFrameTexture(FrameTexture); }
 			m_BrainStemDObject->GetTextureSet()->AddIBLTexture(m_IBL_DiffuseEnvMap_Texture, m_IBL_SpecularEnvMap_Texture, m_IBL_GGX_LUT_Texture);
 
-			if (!m_BrainStemDObject->CreateFromMemory(pGraphicsAPI, m_PBRMF, m_DepthMF, object::E3DObjectType::glTF)) return false;
+			if (!m_BrainStemDObject->CreateFromMemory(pGraphicsAPI, pLoadWorker, m_PBRMF, m_DepthMF, object::E3DObjectType::glTF)) return false;
 
 			// 再生するアニメーションクリップを指定する
 			m_BrainStemDObject->ChangeMotion(0);
@@ -124,8 +124,8 @@ namespace scene
 			for(const auto& FrameTexture : m_FrameTextureList) { m_VRMObject->GetTextureSet()->AddFrameTexture(FrameTexture); }
 			m_VRMObject->GetTextureSet()->AddIBLTexture(m_IBL_DiffuseEnvMap_Texture, m_IBL_SpecularEnvMap_Texture, m_IBL_GGX_LUT_Texture);
 
-			//if (!m_VRMObject->CreateFromMemory(pGraphicsAPI, m_PBRMF, m_DepthMF, object::E3DObjectType::glTF)) return false;
-			if (!m_VRMObject->CreateFromMemory(pGraphicsAPI, m_PBRMF, m_DepthMF, object::E3DObjectType::Fbx)) return false;
+			//if (!m_VRMObject->CreateFromMemory(pGraphicsAPI, pLoadWorker, m_PBRMF, m_DepthMF, object::E3DObjectType::glTF)) return false;
+			if (!m_VRMObject->CreateFromMemory(pGraphicsAPI, pLoadWorker, m_PBRMF, m_DepthMF, object::E3DObjectType::Fbx)) return false;
 
 			m_VRMObject->AddHumanoidAnimationClip(AnimationClipList[0], "Walk", { nullptr, "" }, true);
 			m_VRMObject->AddHumanoidAnimationClip(AnimationClipList[1], "Jump", { nullptr, "Walk" }, false);
@@ -143,7 +143,7 @@ namespace scene
 			for(const auto& FrameTexture : m_FrameTextureList) { m_FbxObject->GetTextureSet()->AddFrameTexture(FrameTexture); }
 			m_FbxObject->GetTextureSet()->AddIBLTexture(m_IBL_DiffuseEnvMap_Texture, m_IBL_SpecularEnvMap_Texture, m_IBL_GGX_LUT_Texture);
 
-			if (!m_FbxObject->CreateFromMemory(pGraphicsAPI, m_PBRMF, m_DepthMF, object::E3DObjectType::Fbx)) return false;
+			if (!m_FbxObject->CreateFromMemory(pGraphicsAPI, pLoadWorker, m_PBRMF, m_DepthMF, object::E3DObjectType::Fbx)) return false;
 
 			m_FbxObject->AddHumanoidAnimationClip(AnimationClipList[0], "Walk", { nullptr, "" }, true);
 			m_FbxObject->AddHumanoidAnimationClip(AnimationClipList[1], "Jump", { nullptr, "Walk" }, false);
@@ -159,7 +159,7 @@ namespace scene
 			for(const auto& FrameTexture : m_FrameTextureList) { m_MouseyObject->GetTextureSet()->AddFrameTexture(FrameTexture); }
 			m_MouseyObject->GetTextureSet()->AddIBLTexture(m_IBL_DiffuseEnvMap_Texture, m_IBL_SpecularEnvMap_Texture, m_IBL_GGX_LUT_Texture);
 
-			if (!m_MouseyObject->CreateFromMemory(pGraphicsAPI, m_PBRMF, m_DepthMF, object::E3DObjectType::Fbx)) return false;
+			if (!m_MouseyObject->CreateFromMemory(pGraphicsAPI, pLoadWorker, m_PBRMF, m_DepthMF, object::E3DObjectType::Fbx)) return false;
 
 			m_MouseyObject->AddHumanoidAnimationClip(AnimationClipList[0], "Walk", { nullptr, "" }, true);
 			m_MouseyObject->AddHumanoidAnimationClip(AnimationClipList[1], "Jump", { nullptr, "Walk" }, false);
@@ -208,7 +208,7 @@ namespace scene
 		{
 			if (!pLoadWorker->IsLoaded()) return true;
 
-			if (!Load(pGraphicsAPI)) return false;
+			if (!Load(pGraphicsAPI, pLoadWorker)) return false;
 			m_IsLoaded = true;
 		}
 
@@ -227,42 +227,42 @@ namespace scene
 
 		if (m_TdaMiku_Model)
 		{
-			if (!m_TdaMiku_Model->Update(DrawInfo->GetDeltaSecondsTime())) return false;
+			if (!m_TdaMiku_Model->Update(pGraphicsAPI, DrawInfo->GetDeltaSecondsTime())) return false;
 		}
 		
 		/*if (m_glTFObject)
 		{
-			if (!m_glTFObject->Update(DrawInfo->GetDeltaSecondsTime())) return false;
+			if (!m_glTFObject->Update(pGraphicsAPI, DrawInfo->GetDeltaSecondsTime())) return false;
 		}
 		
 		if (m_BrainStemDObject)
 		{
-			if (!m_BrainStemDObject->Update(DrawInfo->GetDeltaSecondsTime())) return false;
+			if (!m_BrainStemDObject->Update(pGraphicsAPI, DrawInfo->GetDeltaSecondsTime())) return false;
 		}
 		
 		if (m_VRMObject)
 		{
-			if (!m_VRMObject->Update(DrawInfo->GetDeltaSecondsTime())) return false;
+			if (!m_VRMObject->Update(pGraphicsAPI, DrawInfo->GetDeltaSecondsTime())) return false;
 		}
 		
 		if (m_FbxObject)
 		{
-			if (!m_FbxObject->Update(DrawInfo->GetDeltaSecondsTime())) return false;
+			if (!m_FbxObject->Update(pGraphicsAPI, DrawInfo->GetDeltaSecondsTime())) return false;
 		}
 		
 		if (m_MouseyObject)
 		{
-			if (!m_MouseyObject->Update(DrawInfo->GetDeltaSecondsTime())) return false;
+			if (!m_MouseyObject->Update(pGraphicsAPI, DrawInfo->GetDeltaSecondsTime())) return false;
 		}*/
 		
 		if (m_Background)
 		{
-			if (!m_Background->Update(DrawInfo->GetDeltaSecondsTime())) return false;
+			if (!m_Background->Update(pGraphicsAPI, DrawInfo->GetDeltaSecondsTime())) return false;
 		}
 		
 		if (m_DebugSphere)
 		{
-			if (!m_DebugSphere->Update(DrawInfo->GetDeltaSecondsTime())) return false;
+			if (!m_DebugSphere->Update(pGraphicsAPI, DrawInfo->GetDeltaSecondsTime())) return false;
 		}
 
 		return true;

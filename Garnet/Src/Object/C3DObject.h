@@ -12,6 +12,9 @@
 #ifdef USE_ANIMATION
 #include "../Animation/CAnimationController.h"
 #endif
+#include "../Interface/IResource.h"
+
+namespace resource { class CLoadWorker; }
 
 namespace object
 {
@@ -19,11 +22,15 @@ namespace object
 
 	class C3DObject
 	{
+		//
 		bool m_IsCreated;
+		bool m_ExistFirstDelayResource;
 
 		std::vector<unsigned char> m_BinaryData;
 		std::string m_FileName;
+		std::vector<std::shared_ptr<resource::IResource>> m_RuntimeLoadResourceList;
 
+		//
 		const std::string m_PassName;
 		const std::string m_DepthPassName;
 		
@@ -36,6 +43,8 @@ namespace object
 		std::vector<std::vector<int>> m_RootNodeIndexList;
 
 		std::shared_ptr<graphics::CTextureSet> m_TextureSet;
+
+		std::shared_ptr<graphics::CMaterialFrame> m_DepthMF;
 #ifdef USE_ANIMATION
 		std::shared_ptr<animation::CAnimationController> m_AnimationController;
 #endif
@@ -53,9 +62,9 @@ namespace object
 			const std::shared_ptr<renderer::CRendererCreateInfo>& createInfo,
 			const std::shared_ptr<graphics::CMaterial>& Material, const std::shared_ptr<graphics::CMaterialFrame>& DepthMF);
 
-		bool		 CreateFromMemory(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<graphics::CMaterialFrame>& BaseMF, const std::shared_ptr<graphics::CMaterialFrame>& DepthMF, E3DObjectType ObjectType);
+		bool		 CreateFromMemory(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<graphics::CMaterialFrame>& BaseMF, const std::shared_ptr<graphics::CMaterialFrame>& DepthMF, E3DObjectType ObjectType);
 		bool		 Create(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<graphics::CMaterialFrame>& DepthMF);
-		virtual bool Update(float DeltaSecondsTime);
+		virtual bool Update(api::IGraphicsAPI* pGraphicsAPI, float DeltaSecondsTime);
 		virtual bool Draw(bool IsDepthPass, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, 
 			const std::shared_ptr<graphics::CDrawInfo>& DrawInfo, const std::shared_ptr<object::C3DObject>& DebugSphere = nullptr);
 
@@ -98,5 +107,7 @@ namespace object
 		void ChangeMotion(const std::string& MotionName); // 名前指定でモーションを変更
 		
 		const std::shared_ptr<graphics::CTextureSet>& GetTextureSet() const;
+
+		void AddRuntimeLoadResource(const std::shared_ptr <resource::IResource>& Resource);
 	};
 }

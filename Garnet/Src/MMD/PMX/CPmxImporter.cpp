@@ -10,9 +10,12 @@
 
 #include "../../Graphics/CMaterialFrame.h"
 
+#include "../../LoadWorker/CLoadWorker.h"
+#include "../../LoadWorker/CTextureLoader.h"
+
 namespace mmd
 {
-	bool CPmxImporter::ImportPmx(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& Data, object::C3DObject* Object,
+	bool CPmxImporter::ImportPmx(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, const std::string& ModelFileName, const std::vector<unsigned char>& Data, object::C3DObject* Object,
 		const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame)
 	{
 		CPmxModel model;
@@ -40,11 +43,17 @@ namespace mmd
 
 		// マテリアルリスト
 		std::vector<std::shared_ptr<graphics::CMaterial>> MaterialList;
-		if (!CreateMaterial(pGraphicsAPI, model, MaterialList, MaterialFrame, Skin)) return false;
+		if (!CreateMaterialList(pGraphicsAPI, model, MaterialList, MaterialFrame, Skin)) return false;
+
+		// テクスチャリスト
+		std::vector<std::shared_ptr<graphics::CTexture>> TextureList;
+		std::vector<std::shared_ptr<resource::IResource>> RuntimeLoadResourceList;
+
+		if (!CreateTextureList(pGraphicsAPI, pLoadWorker, ModelFileName, model, TextureList, RuntimeLoadResourceList)) return false;
 
 		// メッシュ
 		std::vector<std::shared_ptr<graphics::CMesh>> MeshList;
-		if (!CreateMesh(model, MeshList, RootNode, NodeList, MaterialList)) return false;
+		if (!CreateMeshList(model, MeshList, RootNode, NodeList, MaterialList)) return false;
 
 		// リソースを登録
 		for (const auto& Node : NodeList)
@@ -59,6 +68,16 @@ namespace mmd
 			Object->AddMaterial(Material);
 		}
 
+		for (const auto& Texture : TextureList)
+		{
+			Object->GetTextureSet()->Add2DTexture(Texture);
+		}
+
+		for (const auto& Resource : RuntimeLoadResourceList)
+		{
+			Object->AddRuntimeLoadResource(Resource);
+		}
+
 		for (const auto& Mesh : MeshList)
 		{
 			Object->AddMesh(Mesh);
@@ -67,7 +86,7 @@ namespace mmd
 		return true;
 	}
 
-	bool CPmxImporter::CreateMaterial(api::IGraphicsAPI* pGraphicsAPI, const CPmxModel& model, std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList,
+	bool CPmxImporter::CreateMaterialList(api::IGraphicsAPI* pGraphicsAPI, const CPmxModel& model, std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList,
 		const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, const std::shared_ptr<animation::CSkin>& Skin)
 	{
 		if (!MaterialFrame) return false;
@@ -81,7 +100,16 @@ namespace mmd
 
 			material->ReplacePreloadUniformValue("baseColorFactor", &PmxMaterial->GetDiffuse()[0], sizeof(glm::vec4), 0);
 
-			//material->ReplaceTextureIndex("baseColorTexture", PmxMaterial->GetMainTexIndex());
+			// MainTexture
+			{
+				int TextureIndex = PmxMaterial->GetMainTexIndex();
+
+				if (TextureIndex != -1)
+				{
+					material->ReplacePreloadUniformValue("useBaseColorTexture", &glm::uvec1(1)[0], sizeof(int), 0);
+					material->ReplaceTextureIndex("baseColorTexture", TextureIndex);
+				}
+			}
 
 			if (PmxMaterial->IsDrawDoubleSlided())
 			{
@@ -109,7 +137,7 @@ namespace mmd
 		return true;
 	}
 
-	bool CPmxImporter::CreateMesh(const CPmxModel& model, std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, const std::shared_ptr<object::CNode>& RootNode, std::vector<std::shared_ptr<object::CNode>>& NodeList,
+	bool CPmxImporter::CreateMeshList(const CPmxModel& model, std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, const std::shared_ptr<object::CNode>& RootNode, std::vector<std::shared_ptr<object::CNode>>& NodeList,
 		const std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList)
 	{
 		{
@@ -329,6 +357,45 @@ namespace mmd
 			ChildrenNodeIndexList.push_back(static_cast<int>(NodeList.size()) - 1);
 
 			RootNode->SetChildrenNodeIndexList(ChildrenNodeIndexList);
+		}
+
+		return true;
+	}
+
+	bool CPmxImporter::CreateTextureList(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, const std::string& ModelFileName, const CPmxModel& model, std::vector<std::shared_ptr<graphics::CTexture>>& TextureList,
+		std::vector<std::shared_ptr<resource::IResource>>& RuntimeLoadResourceList)
+	{
+		for (const auto& PmxTexture : model.GetPmxTextureList())
+		{
+			//
+			const auto& FilePath = PmxTexture->GetFilePath();
+			const auto& MetaData = model.GetMetaData();
+			std::string ParentDir = resource::CFile::AddPunct(resource::CFile::GetParentDir(ModelFileName));
+
+			//
+			std::shared_ptr<graphics::CTexture> Texture = pGraphicsAPI->CreateTexture();
+
+			//
+			std::shared_ptr<resource::CTextureLoader> TexLoader = nullptr;
+
+			if (MetaData.EncodeType == EPmxEncodeType::UTF8)
+			{
+				std::string FullPath = ParentDir + FilePath.first;
+
+				TexLoader = std::make_shared<resource::CTextureLoader>(pGraphicsAPI, FullPath, Texture);
+			}
+			else if (MetaData.EncodeType == EPmxEncodeType::UTF16)
+			{
+				std::wstring FullPath = resource::CFile::CastU8ToU16Str(ParentDir) + FilePath.second;
+
+				TexLoader = std::make_shared<resource::CTextureLoader>(pGraphicsAPI, FullPath, Texture);
+			}
+
+			//
+			TextureList.push_back(Texture);
+			RuntimeLoadResourceList.push_back(TexLoader);
+			//pLoadWorker->AddFirstLoadResource(TexLoader);
+			pLoadWorker->AddRuntimeLoadResource(TexLoader);
 		}
 
 		return true;
