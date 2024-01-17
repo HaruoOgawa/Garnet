@@ -294,7 +294,8 @@ namespace object
 			}
 		}
 
-		if (m_ExistFirstDelayResource && m_RuntimeLoadResourceList.size() == 0)
+		// CreateŠÖ”‚ğ”º‚¤‰‰ñ“®“Iƒ[ƒh
+		if (m_ExistFirstDelayResource && m_RuntimeLoadResourceList.size() == 0 && !m_IsCreated)
 		{
 			if (!Create(pGraphicsAPI, m_DepthMF)) return false;
 

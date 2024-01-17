@@ -17,6 +17,7 @@ namespace scene
 	CScriptScene::CScriptScene(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker):
 		m_SampleMF(std::make_shared<graphics::CMaterialFrame>()),
 		m_PBRMF(std::make_shared<graphics::CMaterialFrame>()),
+		m_BasicToonMF(std::make_shared<graphics::CMaterialFrame>()),
 		m_SimpleTextureMF(std::make_shared<graphics::CMaterialFrame>()),
 		m_DepthMF(std::make_shared<graphics::CMaterialFrame>()),
 
@@ -45,6 +46,7 @@ namespace scene
 	{
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CMaterialFrameLoader>("Resources\\MaterialFrame\\Sample_MF.json", m_SampleMF));
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CMaterialFrameLoader>("Resources\\MaterialFrame\\PBR_MF.json", m_PBRMF));
+		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CMaterialFrameLoader>("Resources\\MaterialFrame\\basic_toon_mf.json", m_BasicToonMF));
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CMaterialFrameLoader>("Resources\\MaterialFrame\\SimpleTexture_MF.json", m_SimpleTextureMF));
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CMaterialFrameLoader>("Resources\\MaterialFrame\\Depth_MF.json", m_DepthMF));
 		
@@ -88,9 +90,10 @@ namespace scene
 
 		// m_TdaMiku_Model
 		{
-			if (!m_TdaMiku_Model->CreateFromMemory(pGraphicsAPI, pLoadWorker, m_PBRMF, m_DepthMF, object::E3DObjectType::Pmx)) return false;
+			if (!m_TdaMiku_Model->CreateFromMemory(pGraphicsAPI, pLoadWorker, m_BasicToonMF, m_DepthMF, object::E3DObjectType::Pmx)) return false;
 
 			m_TdaMiku_Model->SetPos(glm::vec3(0.0f, 0.0f, 0.0f));
+			m_TdaMiku_Model->SetScale(glm::vec3(0.1f));
 		}
 
 		/*// glTFObject

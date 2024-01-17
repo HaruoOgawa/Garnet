@@ -1861,5 +1861,8 @@
     <None Include="Commands\MakeEmccBuild.bat">
       <Filter>ソース ファイル</Filter>
     </None>
+    <None Include="Resources\Shaders\basic_toon.vert" />
+    <None Include="Resources\Shaders\basic_toon.frag" />
+    <None Include="Resources\MaterialFrame\basic_toon_mf.json" />
   </ItemGroup>
 </Project>

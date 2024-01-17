@@ -106,8 +106,25 @@ namespace mmd
 
 				if (TextureIndex != -1)
 				{
-					material->ReplacePreloadUniformValue("useBaseColorTexture", &glm::uvec1(1)[0], sizeof(int), 0);
-					material->ReplaceTextureIndex("baseColorTexture", TextureIndex);
+					material->ReplacePreloadUniformValue("UseMainTexture", &glm::uvec1(1)[0], sizeof(int), 0);
+					material->ReplaceTextureIndex("MainTexture", TextureIndex);
+				}
+			}
+
+			// ToonTexture
+			{
+				int ToonTexIndex = PmxMaterial->GetToonTexIndex();
+				int SharedToonTexIndex = PmxMaterial->GetSharedToonTexIndex();
+
+				if (ToonTexIndex >= 0 && ToonTexIndex < model.GetPmxTextureList().size())
+				{
+					material->ReplacePreloadUniformValue("UseToonTexture", &glm::uvec1(1)[0], sizeof(int), 0);
+					material->ReplaceTextureIndex("ToonTexture", ToonTexIndex);
+				}
+				else if (SharedToonTexIndex >= 0 && SharedToonTexIndex < model.GetPmxTextureList().size())
+				{
+					material->ReplacePreloadUniformValue("UseToonTexture", &glm::uvec1(1)[0], sizeof(int), 0);
+					material->ReplaceTextureIndex("ToonTexture", SharedToonTexIndex);
 				}
 			}
 
@@ -206,9 +223,12 @@ namespace mmd
 						{
 							const auto& ByteJointAttribute = PmxMesh->GetByteJointAttribute();
 
-							AttributeData.resize(ByteJointAttribute.size() / 4);
-							std::memcpy(&AttributeData[0], &ByteJointAttribute[0], sizeof(unsigned char) * ByteJointAttribute.size());
-
+							if (!ByteJointAttribute.empty())
+							{
+								AttributeData.resize(ByteJointAttribute.size() / 4);
+								std::memcpy(&AttributeData[0], &ByteJointAttribute[0], sizeof(unsigned char) * ByteJointAttribute.size());
+							}
+							
 							ReservedDataTypeList.emplace("JOINTS_0", renderer::EDataType::TYPE_UNSIGNED_BYTE);
 							ReservedByteStrideList.emplace("JOINTS_0", 1 * 4);
 						}
@@ -216,8 +236,11 @@ namespace mmd
 						{
 							const auto& UShortJointAttribute = PmxMesh->GetUShortJointAttribute();
 
-							AttributeData.resize(UShortJointAttribute.size() / 2);
-							std::memcpy(&AttributeData[0], &UShortJointAttribute[0], sizeof(unsigned short) * UShortJointAttribute.size());
+							if (!UShortJointAttribute.empty())
+							{
+								AttributeData.resize(UShortJointAttribute.size() / 2);
+								std::memcpy(&AttributeData[0], &UShortJointAttribute[0], sizeof(unsigned short) * UShortJointAttribute.size());
+							}
 
 							ReservedDataTypeList.emplace("JOINTS_0", renderer::EDataType::TYPE_UNSIGNED_SHORT);
 							ReservedByteStrideList.emplace("JOINTS_0", 2 * 4);
@@ -226,11 +249,20 @@ namespace mmd
 						{
 							const auto& IntJointAttribute = PmxMesh->GetUIntJointAttribute();
 
-							AttributeData.resize(IntJointAttribute.size());
-							std::memcpy(&AttributeData[0], &IntJointAttribute[0], sizeof(unsigned int) * IntJointAttribute.size());
+							if (!IntJointAttribute.empty())
+							{
+								AttributeData.resize(IntJointAttribute.size());
+								std::memcpy(&AttributeData[0], &IntJointAttribute[0], sizeof(unsigned int) * IntJointAttribute.size());
+							}
 
 							ReservedDataTypeList.emplace("JOINTS_0", renderer::EDataType::TYPE_UNSIGNED_INT);
 							ReservedByteStrideList.emplace("JOINTS_0", 4 * 4);
+						}
+
+						// ‹ó‚ÌŽž‚Í0–„‚ß‚·‚é
+						if (AttributeData.empty())
+						{
+							AttributeData.resize(static_cast<int>(PmxMesh->GetPositionAttribute().size()) / 3 * 4);
 						}
 
 						ReservedVertexDataList.emplace("JOINTS_0", AttributeData);

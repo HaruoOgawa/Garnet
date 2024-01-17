@@ -24,6 +24,7 @@ namespace scene
 
 		std::shared_ptr<graphics::CMaterialFrame> m_SampleMF;
 		std::shared_ptr<graphics::CMaterialFrame> m_PBRMF;
+		std::shared_ptr<graphics::CMaterialFrame> m_BasicToonMF;
 		std::shared_ptr<graphics::CMaterialFrame> m_SimpleTextureMF;
 		std::shared_ptr<graphics::CMaterialFrame> m_DepthMF;
 
