@@ -218,19 +218,19 @@ namespace mmd
 				{
 					ReservedVertexDataList.emplace("POSITION", PmxMesh->GetPositionAttribute());
 					ReservedDataTypeList.emplace("POSITION", renderer::EDataType::TYPE_FLOAT);
-					ReservedByteStrideList.emplace("POSITION", 4 * 3);
+					ReservedByteStrideList.emplace("POSITION", 0);
 				}
 
 				{
 					ReservedVertexDataList.emplace("NORMAL", PmxMesh->GetNormalAttribute());
 					ReservedDataTypeList.emplace("NORMAL", renderer::EDataType::TYPE_FLOAT);
-					ReservedByteStrideList.emplace("NORMAL", 4 * 3);
+					ReservedByteStrideList.emplace("NORMAL", 0);
 				}
 
 				{
 					ReservedVertexDataList.emplace("TEXCOORD_0", PmxMesh->GetUVAttribute());
 					ReservedDataTypeList.emplace("TEXCOORD_0", renderer::EDataType::TYPE_FLOAT);
-					ReservedByteStrideList.emplace("TEXCOORD_0", 4 * 2);
+					ReservedByteStrideList.emplace("TEXCOORD_0", 0);
 				}
 
 				{
@@ -239,7 +239,7 @@ namespace mmd
 
 					ReservedVertexDataList.emplace("TANGENT", AttributeData);
 					ReservedDataTypeList.emplace("TANGENT", renderer::EDataType::TYPE_FLOAT);
-					ReservedByteStrideList.emplace("TANGENT", 4 * 2);
+					ReservedByteStrideList.emplace("TANGENT", 0);
 				}
 
 				{
@@ -298,7 +298,7 @@ namespace mmd
 				{
 					ReservedVertexDataList.emplace("WEIGHTS_0", PmxMesh->GetWeightAttribute());
 					ReservedDataTypeList.emplace("WEIGHTS_0", renderer::EDataType::TYPE_FLOAT);
-					ReservedByteStrideList.emplace("WEIGHTS_0", 4 * 4);
+					ReservedByteStrideList.emplace("WEIGHTS_0", 0);
 				}
 			}
 
@@ -374,6 +374,19 @@ namespace mmd
 
 						std::memcpy(&Indices[0], &PmxIndices[MatRefOffset], sizeof(unsigned short) * PmxMaterial->GetMatRefIndiceCount());
 
+						// Index数が奇数の時はWebGPUでエラーが出るので最後の三角形をもう一度繰り返す
+						int IndiceSize = static_cast<int>(Indices.size());
+						if (IndiceSize % 2 != 0)
+						{
+							int Index0 = Indices[IndiceSize - 3];
+							int Index1 = Indices[IndiceSize - 2];
+							int Index2 = Indices[IndiceSize - 1];
+
+							Indices.push_back(Index0);
+							Indices.push_back(Index1);
+							Indices.push_back(Index2);
+						}
+
 						// Indicesを登録
 						createInfo->SetIndices(Indices);
 					}
@@ -387,6 +400,19 @@ namespace mmd
 						UINTIndices.resize(PmxMaterial->GetMatRefIndiceCount());
 
 						std::memcpy(&UINTIndices[0], &PmxIndices[MatRefOffset], sizeof(unsigned int) * PmxMaterial->GetMatRefIndiceCount());
+
+						// Index数が奇数の時はWebGPUでエラーが出るので最後の三角形をもう一度繰り返す
+						int IndiceSize = static_cast<int>(UINTIndices.size());
+						if (IndiceSize % 2 != 0)
+						{
+							int Index0 = UINTIndices[IndiceSize - 3];
+							int Index1 = UINTIndices[IndiceSize - 2];
+							int Index2 = UINTIndices[IndiceSize - 1];
+
+							UINTIndices.push_back(Index0);
+							UINTIndices.push_back(Index1);
+							UINTIndices.push_back(Index2);
+						}
 
 						// Indicesを登録
 						createInfo->SetUINTIndices(UINTIndices);
