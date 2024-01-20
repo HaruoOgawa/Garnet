@@ -3,14 +3,10 @@ struct UniformBufferObject {
     view: mat4x4<f32>,
     proj: mat4x4<f32>,
     lightVPMat: mat4x4<f32>,
-    lightDir: vec4<f32>,
-    lightColor: vec4<f32>,
-    cameraPos: vec4<f32>,
-    diffuseFactor: vec4<f32>,
     useSkinMeshAnimation: i32,
     JointIndexOffset: i32,
-    UseMainTexture: i32,
-    UseToonTexture: i32,
+    pad0_: i32,
+    pad1_: i32,
 }
 
 struct SkinMatrixBuffer {
@@ -32,6 +28,7 @@ struct VertexOutput {
     @location(3) member_3: vec3<f32>,
     @location(4) member_4: vec3<f32>,
     @location(5) member_5: vec4<f32>,
+    @location(6) member_6: vec2<f32>,
 }
 
 var<private> inNormal_1: vec3<f32>;
@@ -51,6 +48,7 @@ var<private> f_WorldPos: vec4<f32>;
 var<private> f_WorldTangent: vec3<f32>;
 var<private> f_WorldBioTangent: vec3<f32>;
 var<private> f_LightSpacePos: vec4<f32>;
+var<private> f_SphereUV: vec2<f32>;
 
 fn main_1() {
     var BioTangent: vec3<f32>;
@@ -60,79 +58,97 @@ fn main_1() {
     var WorldNormal: vec3<f32>;
     var WorldTangent: vec3<f32>;
     var WorldBioTangent: vec3<f32>;
+    var SphereUV: vec2<f32>;
+    var pi: f32;
+    var theta: f32;
+    var phi: f32;
 
-    let _e38 = inNormal_1;
-    let _e39 = inTangent_1;
-    BioTangent = cross(_e38, _e39.xyz);
-    let _e43 = ubo.useSkinMeshAnimation;
-    if (_e43 != 0) {
+    let _e46 = inNormal_1;
+    let _e47 = inTangent_1;
+    BioTangent = cross(_e46, _e47.xyz);
+    let _e51 = ubo.useSkinMeshAnimation;
+    if (_e51 != 0) {
         StartSkinMatIndex = 0;
-        let _e46 = inWeights0_1[0u];
-        let _e48 = inJoint0_1[0u];
-        let _e50 = ubo.JointIndexOffset;
-        let _e55 = r_SkinMatrixBuffer.SkinMat[(_e48 + bitcast<u32>(_e50))];
-        let _e56 = (_e55 * _e46);
-        let _e58 = inWeights0_1[1u];
-        let _e60 = inJoint0_1[1u];
-        let _e62 = ubo.JointIndexOffset;
-        let _e67 = r_SkinMatrixBuffer.SkinMat[(_e60 + bitcast<u32>(_e62))];
-        let _e68 = (_e67 * _e58);
-        let _e81 = mat4x4<f32>((_e56[0] + _e68[0]), (_e56[1] + _e68[1]), (_e56[2] + _e68[2]), (_e56[3] + _e68[3]));
-        let _e83 = inWeights0_1[2u];
-        let _e85 = inJoint0_1[2u];
-        let _e87 = ubo.JointIndexOffset;
-        let _e92 = r_SkinMatrixBuffer.SkinMat[(_e85 + bitcast<u32>(_e87))];
-        let _e93 = (_e92 * _e83);
-        let _e106 = mat4x4<f32>((_e81[0] + _e93[0]), (_e81[1] + _e93[1]), (_e81[2] + _e93[2]), (_e81[3] + _e93[3]));
-        let _e108 = inWeights0_1[3u];
-        let _e110 = inJoint0_1[3u];
-        let _e112 = ubo.JointIndexOffset;
-        let _e117 = r_SkinMatrixBuffer.SkinMat[(_e110 + bitcast<u32>(_e112))];
-        let _e118 = (_e117 * _e108);
-        SkinMat = mat4x4<f32>((_e106[0] + _e118[0]), (_e106[1] + _e118[1]), (_e106[2] + _e118[2]), (_e106[3] + _e118[3]));
-        let _e132 = SkinMat;
-        let _e133 = inPosition_1;
-        WorldPos = (_e132 * vec4<f32>(_e133.x, _e133.y, _e133.z, 1.0));
-        let _e139 = SkinMat;
-        let _e140 = inNormal_1;
-        WorldNormal = normalize((_e139 * vec4<f32>(_e140.x, _e140.y, _e140.z, 0.0)).xyz);
-        let _e148 = SkinMat;
-        let _e149 = inTangent_1;
-        WorldTangent = normalize((_e148 * _e149).xyz);
-        let _e153 = SkinMat;
-        let _e154 = BioTangent;
-        WorldBioTangent = normalize((_e153 * vec4<f32>(_e154.x, _e154.y, _e154.z, 0.0)).xyz);
+        let _e54 = inWeights0_1[0u];
+        let _e56 = inJoint0_1[0u];
+        let _e58 = ubo.JointIndexOffset;
+        let _e63 = r_SkinMatrixBuffer.SkinMat[(_e56 + bitcast<u32>(_e58))];
+        let _e64 = (_e63 * _e54);
+        let _e66 = inWeights0_1[1u];
+        let _e68 = inJoint0_1[1u];
+        let _e70 = ubo.JointIndexOffset;
+        let _e75 = r_SkinMatrixBuffer.SkinMat[(_e68 + bitcast<u32>(_e70))];
+        let _e76 = (_e75 * _e66);
+        let _e89 = mat4x4<f32>((_e64[0] + _e76[0]), (_e64[1] + _e76[1]), (_e64[2] + _e76[2]), (_e64[3] + _e76[3]));
+        let _e91 = inWeights0_1[2u];
+        let _e93 = inJoint0_1[2u];
+        let _e95 = ubo.JointIndexOffset;
+        let _e100 = r_SkinMatrixBuffer.SkinMat[(_e93 + bitcast<u32>(_e95))];
+        let _e101 = (_e100 * _e91);
+        let _e114 = mat4x4<f32>((_e89[0] + _e101[0]), (_e89[1] + _e101[1]), (_e89[2] + _e101[2]), (_e89[3] + _e101[3]));
+        let _e116 = inWeights0_1[3u];
+        let _e118 = inJoint0_1[3u];
+        let _e120 = ubo.JointIndexOffset;
+        let _e125 = r_SkinMatrixBuffer.SkinMat[(_e118 + bitcast<u32>(_e120))];
+        let _e126 = (_e125 * _e116);
+        SkinMat = mat4x4<f32>((_e114[0] + _e126[0]), (_e114[1] + _e126[1]), (_e114[2] + _e126[2]), (_e114[3] + _e126[3]));
+        let _e140 = SkinMat;
+        let _e141 = inPosition_1;
+        WorldPos = (_e140 * vec4<f32>(_e141.x, _e141.y, _e141.z, 1.0));
+        let _e147 = SkinMat;
+        let _e148 = inNormal_1;
+        WorldNormal = normalize((_e147 * vec4<f32>(_e148.x, _e148.y, _e148.z, 0.0)).xyz);
+        let _e156 = SkinMat;
+        let _e157 = inTangent_1;
+        WorldTangent = normalize((_e156 * _e157).xyz);
+        let _e161 = SkinMat;
+        let _e162 = BioTangent;
+        WorldBioTangent = normalize((_e161 * vec4<f32>(_e162.x, _e162.y, _e162.z, 0.0)).xyz);
     } else {
-        let _e163 = ubo.model;
-        let _e164 = inPosition_1;
-        WorldPos = (_e163 * vec4<f32>(_e164.x, _e164.y, _e164.z, 1.0));
         let _e171 = ubo.model;
-        let _e172 = inNormal_1;
-        WorldNormal = normalize((_e171 * vec4<f32>(_e172.x, _e172.y, _e172.z, 0.0)).xyz);
-        let _e181 = ubo.model;
-        let _e182 = inTangent_1;
-        WorldTangent = normalize((_e181 * _e182).xyz);
-        let _e187 = ubo.model;
-        let _e188 = BioTangent;
-        WorldBioTangent = normalize((_e187 * vec4<f32>(_e188.x, _e188.y, _e188.z, 0.0)).xyz);
+        let _e172 = inPosition_1;
+        WorldPos = (_e171 * vec4<f32>(_e172.x, _e172.y, _e172.z, 1.0));
+        let _e179 = ubo.model;
+        let _e180 = inNormal_1;
+        WorldNormal = normalize((_e179 * vec4<f32>(_e180.x, _e180.y, _e180.z, 0.0)).xyz);
+        let _e189 = ubo.model;
+        let _e190 = inTangent_1;
+        WorldTangent = normalize((_e189 * _e190).xyz);
+        let _e195 = ubo.model;
+        let _e196 = BioTangent;
+        WorldBioTangent = normalize((_e195 * vec4<f32>(_e196.x, _e196.y, _e196.z, 0.0)).xyz);
     }
-    let _e197 = ubo.proj;
-    let _e199 = ubo.view;
-    let _e201 = WorldPos;
-    perVertexStruct.gl_Position = ((_e197 * _e199) * _e201);
-    let _e204 = WorldNormal;
-    f_WorldNormal = _e204;
-    let _e205 = inTexcoord_1;
-    f_Texcoord = _e205;
-    let _e206 = WorldPos;
-    f_WorldPos = _e206;
-    let _e207 = WorldTangent;
-    f_WorldTangent = _e207;
-    let _e208 = WorldBioTangent;
-    f_WorldBioTangent = _e208;
-    let _e210 = ubo.lightVPMat;
-    let _e211 = WorldPos;
-    f_LightSpacePos = (_e210 * _e211);
+    SphereUV = vec2<f32>(0.0, 0.0);
+    pi = 3.1415927410125732;
+    let _e205 = inNormal_1[1u];
+    theta = acos(_e205);
+    let _e208 = inNormal_1[2u];
+    let _e210 = inNormal_1[0u];
+    phi = atan2(_e208, _e210);
+    let _e212 = phi;
+    let _e213 = pi;
+    let _e216 = theta;
+    let _e217 = pi;
+    SphereUV = vec2<f32>((_e212 / (2.0 * _e213)), (_e216 / _e217));
+    let _e221 = ubo.proj;
+    let _e223 = ubo.view;
+    let _e225 = WorldPos;
+    perVertexStruct.gl_Position = ((_e221 * _e223) * _e225);
+    let _e228 = WorldNormal;
+    f_WorldNormal = _e228;
+    let _e229 = inTexcoord_1;
+    f_Texcoord = _e229;
+    let _e230 = WorldPos;
+    f_WorldPos = _e230;
+    let _e231 = WorldTangent;
+    f_WorldTangent = _e231;
+    let _e232 = WorldBioTangent;
+    f_WorldBioTangent = _e232;
+    let _e234 = ubo.lightVPMat;
+    let _e235 = WorldPos;
+    f_LightSpacePos = (_e234 * _e235);
+    let _e237 = SphereUV;
+    f_SphereUV = _e237;
     return;
 }
 
@@ -145,14 +161,15 @@ fn main(@location(1) inNormal: vec3<f32>, @location(3) inTangent: vec4<f32>, @lo
     inPosition_1 = inPosition;
     inTexcoord_1 = inTexcoord;
     main_1();
-    let _e21 = perVertexStruct.gl_Position.y;
-    perVertexStruct.gl_Position.y = -(_e21);
-    let _e23 = perVertexStruct.gl_Position;
-    let _e24 = f_WorldNormal;
-    let _e25 = f_Texcoord;
-    let _e26 = f_WorldPos;
-    let _e27 = f_WorldTangent;
-    let _e28 = f_WorldBioTangent;
-    let _e29 = f_LightSpacePos;
-    return VertexOutput(_e23, _e24, _e25, _e26, _e27, _e28, _e29);
+    let _e22 = perVertexStruct.gl_Position.y;
+    perVertexStruct.gl_Position.y = -(_e22);
+    let _e24 = perVertexStruct.gl_Position;
+    let _e25 = f_WorldNormal;
+    let _e26 = f_Texcoord;
+    let _e27 = f_WorldPos;
+    let _e28 = f_WorldTangent;
+    let _e29 = f_WorldBioTangent;
+    let _e30 = f_LightSpacePos;
+    let _e31 = f_SphereUV;
+    return VertexOutput(_e24, _e25, _e26, _e27, _e28, _e29, _e30, _e31);
 }

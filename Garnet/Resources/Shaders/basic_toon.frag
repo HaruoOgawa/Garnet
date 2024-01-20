@@ -6,44 +6,61 @@ layout(location = 2) in vec4 f_WorldPos;
 layout(location = 3) in vec3 f_WorldTangent;
 layout(location = 4) in vec3 f_WorldBioTangent;
 layout(location = 5) in vec4 f_LightSpacePos;
+layout(location = 6) in vec2 f_SphereUV;
 
 layout(location = 0) out vec4 outColor;
 
-layout(binding = 0) uniform UniformBufferObject{
-	mat4 model;
-    mat4 view;
-    mat4 proj;
-	mat4 lightVPMat;
-
+layout(binding = 2) uniform FragUniformBufferObject{
 	vec4 lightDir;
 	vec4 lightColor;
 	vec4 cameraPos;
 	vec4 diffuseFactor;
 
-    int useSkinMeshAnimation;
-    int JointIndexOffset;
+	vec4 ambientFactor;
+	vec4 specularFactor;
+	float specularIntensity;
+
     int UseMainTexture;
     int UseToonTexture;
-} ubo;
+	int UseSphereTexture;
+	int SphereMode;
+} fragUbo;
 
 #ifdef USE_OPENGL
-layout(binding = 2) uniform sampler2D MainTexture;
-layout(binding = 4) uniform sampler2D ToonTexture;
+layout(binding = 3) uniform sampler2D MainTexture;
+layout(binding = 5) uniform sampler2D ToonTexture;
+layout(binding = 7) uniform sampler2D SphereTexture;
 #else
-layout(binding = 2) uniform texture2D MainTexture;
-layout(binding = 3) uniform sampler MainTextureSampler;
-layout(binding = 4) uniform texture2D ToonTexture;
-layout(binding = 5) uniform sampler ToonTextureSampler;
+layout(binding = 3) uniform texture2D MainTexture;
+layout(binding = 4) uniform sampler MainTextureSampler;
+layout(binding = 5) uniform texture2D ToonTexture;
+layout(binding = 6) uniform sampler ToonTextureSampler;
+layout(binding = 7) uniform texture2D SphereTexture;
+layout(binding = 8) uniform sampler SphereTextureSampler;
 #endif
 
 void main(){
 	vec3 col = vec3(1.0);
 	float alpha = 1.0;
 
-	// Diffuse
-	vec4 diffuseColor = ubo.diffuseFactor;
+	// Lighting Param
+	float NdotL = max(0.0, dot(f_WorldNormal, -fragUbo.lightDir.xyz));
 
-	if(ubo.UseMainTexture != 0)
+	vec3 v = normalize(fragUbo.cameraPos.xyz - f_WorldPos.xyz);
+	vec3 l = (-1.0) * fragUbo.lightDir.xyz;
+	vec3 HalfVector = normalize(v + l);
+
+	// Diffuse
+	vec4 diffuseColor = fragUbo.diffuseFactor;
+
+	// Ambient
+	if(fragUbo.UseToonTexture == 0)
+	{
+		diffuseColor.rgb +=  fragUbo.ambientFactor.rgb * max(dot(-fragUbo.lightDir.xyz, f_WorldNormal), 0.0);
+	}
+
+	// MainTexture
+	if(fragUbo.UseMainTexture != 0)
 	{
 		#ifdef USE_OPENGL
 		vec4 MainColor = texture(MainTexture, f_Texcoord);
@@ -54,23 +71,43 @@ void main(){
 		diffuseColor.rgb *= MainColor.rgb;
 	}
 
-	// Lighting Param
-	float NdotL = max(0.0, dot(f_WorldNormal, ubo.lightDir.xyz));
+	col = diffuseColor.rgb;
+	alpha = diffuseColor.a;
 
-	// Toon
-	if(ubo.UseToonTexture != 0)
+	// SphereMap
+	if(fragUbo.UseSphereTexture != 0)
 	{
 		#ifdef USE_OPENGL
-		float ToonFactor = texture(ToonTexture, f_Texcoord).r;
+		vec3 SphereColor = texture(SphereTexture, f_SphereUV).rgb;
 		#else
-		float ToonFactor = texture(sampler2D(ToonTexture, ToonTextureSampler), f_Texcoord).r;
-		#endif 
+		vec3 SphereColor = texture(sampler2D(SphereTexture, SphereTextureSampler), f_SphereUV).rgb;
+		#endif
 
-		//diffuseColor.rgb *= ToonFactor;
+		if(fragUbo.SphereMode == 1) // èÊéZ
+		{
+			col *= SphereColor;		
+		}
+		else if(fragUbo.SphereMode == 2) // â¡éZ
+		{
+			col += SphereColor;
+		}
 	}
 
-	// Combine Color
-	col = diffuseColor.rgb;
+	// Toon
+	if(fragUbo.UseToonTexture != 0)
+	{
+		#ifdef USE_OPENGL
+		vec3 ToonColor = texture(ToonTexture, vec2(0.0, NdotL)).rgb;
+		#else
+		vec3 ToonColor = texture(sampler2D(ToonTexture, ToonTextureSampler), vec2(0.0, NdotL)).rgb;
+		#endif 
+
+		col *= mix(ToonColor, vec3(1.0), clamp(NdotL * 16.0 + 0.5, 0.0, 1.0));
+	}
+
+	// Specular
+	vec3 specularColor = fragUbo.specularFactor.xyz * max(0.0, pow(dot(HalfVector, f_WorldNormal), fragUbo.specularIntensity));
+	col += specularColor;
 
 	outColor = vec4(col, alpha);
 }

@@ -3,7 +3,7 @@
 
 namespace mmd
 {
-	CPmxMaterial::CPmxMaterial(std::pair<std::string, std::wstring> MaterialName, std::pair<std::string, std::wstring> MaterialName_EN, glm::vec4 Diffuse, glm::vec3 Specular, float SpecularCoef, glm::vec3 Ambient,
+	CPmxMaterial::CPmxMaterial(std::pair<std::string, std::wstring> MaterialName, std::pair<std::string, std::wstring> MaterialName_EN, glm::vec4 Diffuse, glm::vec4 Specular, float SpecularCoef, glm::vec4 Ambient,
 		unsigned char DrawBitFlag, glm::vec4 EdgeColor, float EdgeSize, int MainTexIndex, int SphereTexIndex, EPmxSphereMode SphereMode, int ToonTexIndex, int SharedToonTexIndex,
 		std::pair<std::string, std::wstring> MaterialDescription, int MatRefIndiceCount) :
 		m_MaterialName(MaterialName),
@@ -54,7 +54,7 @@ namespace mmd
 		return m_Diffuse;
 	}
 
-	const glm::vec3& CPmxMaterial::GetSpecular() const
+	const glm::vec4& CPmxMaterial::GetSpecular() const
 	{
 		return m_Specular;
 	}
@@ -64,7 +64,7 @@ namespace mmd
 		return m_SpecularCoef;
 	}
 
-	const glm::vec3& CPmxMaterial::GetAmbient() const
+	const glm::vec4& CPmxMaterial::GetAmbient() const
 	{
 		return m_Ambient;
 	}

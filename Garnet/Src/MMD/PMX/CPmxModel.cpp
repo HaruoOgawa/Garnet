@@ -497,7 +497,7 @@ namespace mmd
 			}
 
 			// Specular
-			glm::vec3 Specular = glm::vec3(1.0f);
+			glm::vec4 Specular = glm::vec4(0.0f);
 			{
 				if (!Analyser.IsValid(4 * 3)) return false;
 
@@ -505,7 +505,7 @@ namespace mmd
 				float G = Analyser.GetFloat();
 				float B = Analyser.GetFloat();
 
-				Specular = glm::vec3(R, G, B);
+				Specular = glm::vec4(R, G, B, 1.0f);
 			}
 
 			// SpecularåWêî
@@ -513,7 +513,7 @@ namespace mmd
 			if (!Analyser.GetFloat(SpecularCoef)) return false;
 
 			// Ambient
-			glm::vec3 Ambient = glm::vec3(0.0f);
+			glm::vec4 Ambient = glm::vec4(0.0f);
 			{
 				if (!Analyser.IsValid(4 * 3)) return false;
 
@@ -521,7 +521,7 @@ namespace mmd
 				float G = Analyser.GetFloat();
 				float B = Analyser.GetFloat();
 
-				Ambient = glm::vec3(R, G, B);
+				Ambient = glm::vec4(R, G, B, 1.0f);
 			}
 
 			/*

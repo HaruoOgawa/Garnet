@@ -23,10 +23,10 @@ namespace mmd
 
 		glm::vec4 m_Diffuse;
 
-		glm::vec3 m_Specular;
+		glm::vec4 m_Specular;
 		float m_SpecularCoef;
 
-		glm::vec3 m_Ambient;
+		glm::vec4 m_Ambient;
 
 		// •`‰æƒtƒ‰ƒO(DrawBitFlag)
 		bool m_DrawDoubleSlided;
@@ -63,7 +63,7 @@ namespace mmd
 	private:
 		void AnalyseDrawBitFlag(unsigned char DrawBitFlag);
 	public:
-		CPmxMaterial(std::pair<std::string, std::wstring> MaterialName, std::pair<std::string, std::wstring> MaterialName_EN, glm::vec4 Diffuse, glm::vec3 Specular, float SpecularCoef, glm::vec3 Ambient, 
+		CPmxMaterial(std::pair<std::string, std::wstring> MaterialName, std::pair<std::string, std::wstring> MaterialName_EN, glm::vec4 Diffuse, glm::vec4 Specular, float SpecularCoef, glm::vec4 Ambient,
 			unsigned char DrawBitFlag, glm::vec4 EdgeColor, float EdgeSize, int MainTexIndex, int SphereTexIndex, EPmxSphereMode SphereMode, int ToonTexIndex, int SharedToonTexIndex, 
 			std::pair<std::string, std::wstring> MaterialDescription, int MatRefIndiceCount);
 		virtual ~CPmxMaterial() = default;
@@ -73,10 +73,10 @@ namespace mmd
 
 		const glm::vec4& GetDiffuse() const;
 
-		const glm::vec3& GetSpecular() const;
+		const glm::vec4& GetSpecular() const;
 		float GetSpecularCoef() const;
 
-		const glm::vec3& GetAmbient() const;
+		const glm::vec4& GetAmbient() const;
 
 		// •`‰æƒtƒ‰ƒO(DrawBitFlag)
 		bool IsDrawDoubleSlided() const;

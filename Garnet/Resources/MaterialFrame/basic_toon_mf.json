@@ -36,26 +36,6 @@
               "initValue": [ 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0 ]
             },
             {
-              "name": "lightDir",
-              "type": "vec4",
-              "initValue": [ 0.0, 0.0, 0.0, 0.0 ]
-            },
-            {
-              "name": "lightColor",
-              "type": "vec4",
-              "initValue": [ 0.0, 0.0, 0.0, 0.0 ]
-            },
-            {
-              "name": "cameraPos",
-              "type": "vec4",
-              "initValue": [ 0.0, 0.0, 0.0, 0.0 ]
-            },
-            {
-              "name": "diffuseFactor",
-              "type": "vec4",
-              "initValue": [ 1.0, 1.0, 1.0, 1.0 ]
-            },
-            {
               "name": "useSkinMeshAnimation",
               "type": "int",
               "initValue": [ 0 ]
@@ -66,12 +46,12 @@
               "initValue": [ 0 ]
             },
             {
-              "name": "UseMainTexture",
+              "name": "pad0",
               "type": "int",
               "initValue": [ 0 ]
             },
             {
-              "name": "UseToonTexture",
+              "name": "pad1",
               "type": "int",
               "initValue": [ 0 ]
             }
@@ -166,17 +146,89 @@
       "shaderType": "fragment",
       "uniformBlockList": [
         {
+          "name": "FragUniformBufferObject",
+          "binding": 2,
+          "isWritable": false,
+          "type": "ubo",
+          "bufferUpdateType": "cpu",
+          "values": [
+            {
+              "name": "lightDir",
+              "type": "vec4",
+              "initValue": [ 0.0, 0.0, 0.0, 0.0 ]
+            },
+            {
+              "name": "lightColor",
+              "type": "vec4",
+              "initValue": [ 0.0, 0.0, 0.0, 0.0 ]
+            },
+            {
+              "name": "cameraPos",
+              "type": "vec4",
+              "initValue": [ 0.0, 0.0, 0.0, 0.0 ]
+            },
+            {
+              "name": "diffuseFactor",
+              "type": "vec4",
+              "initValue": [ 1.0, 1.0, 1.0, 1.0 ]
+            },
+            {
+              "name": "ambientFactor",
+              "type": "vec4",
+              "initValue": [ 1.0, 1.0, 1.0, 1.0 ]
+            },
+            {
+              "name": "specularFactor",
+              "type": "vec4",
+              "initValue": [ 1.0, 1.0, 1.0, 1.0 ]
+            },
+            {
+              "name": "specularIntensity",
+              "type": "float",
+              "initValue": [ 1.0 ]
+            },
+            {
+              "name": "UseMainTexture",
+              "type": "int",
+              "initValue": [ 0 ]
+            },
+            {
+              "name": "UseToonTexture",
+              "type": "int",
+              "initValue": [ 0 ]
+            },
+            {
+              "name": "UseSphereTexture",
+              "type": "int",
+              "initValue": [ 0 ]
+            },
+            {
+              "name": "SphereMode",
+              "type": "int",
+              "initValue": [ 0 ]
+            }
+          ]
+        },
+        {
           "name": "MainTexture",
-          "viewBinding": 2,
-          "samplerBinding": 3,
+          "viewBinding": 3,
+          "samplerBinding": 4,
           "textureIndex": -1,
           "type": "texture",
           "textureUsage": "2d"
         },
         {
-          "name": "UseToonTexture",
-          "viewBinding": 4,
-          "samplerBinding": 5,
+          "name": "ToonTexture",
+          "viewBinding": 5,
+          "samplerBinding": 6,
+          "textureIndex": -1,
+          "type": "texture",
+          "textureUsage": "2d"
+        },
+        {
+          "name": "SphereTexture",
+          "viewBinding": 7,
+          "samplerBinding": 8,
           "textureIndex": -1,
           "type": "texture",
           "textureUsage": "2d"

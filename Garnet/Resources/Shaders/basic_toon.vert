@@ -13,15 +13,10 @@ layout(binding = 0) uniform UniformBufferObject{
     mat4 proj;
 	mat4 lightVPMat;
 
-	vec4 lightDir;
-	vec4 lightColor;
-	vec4 cameraPos;
-	vec4 diffuseFactor;
-
     int useSkinMeshAnimation;
     int JointIndexOffset;
-    int UseMainTexture;
-    int UseToonTexture;
+    int pad0;
+    int pad1;
 } ubo;
 
 readonly layout(std430, binding = 1) buffer SkinMatrixBuffer
@@ -35,6 +30,7 @@ layout(location = 2) out vec4 f_WorldPos;
 layout(location = 3) out vec3 f_WorldTangent;
 layout(location = 4) out vec3 f_WorldBioTangent;
 layout(location = 5) out vec4 f_LightSpacePos;
+layout(location = 6) out vec2 f_SphereUV;
 
 #define rot(a) mat2(cos(a), -sin(a), sin(a), cos(a))
 
@@ -76,6 +72,18 @@ void main(){
         WorldBioTangent = normalize((ubo.model * vec4(BioTangent, 0.0)).xyz);
     }
 
+    // SphereUV
+    vec2 SphereUV = vec2(0.0);
+    {
+        float pi = 3.14159265;
+
+        float theta = acos(inNormal.y);
+        float phi = atan(inNormal.z, inNormal.x);
+
+        SphereUV = vec2(phi / (2.0 * pi), theta / pi);
+    }
+
+    //
     gl_Position = ubo.proj * ubo.view * WorldPos;
     f_WorldNormal = WorldNormal;
     f_Texcoord = inTexcoord;
@@ -83,4 +91,5 @@ void main(){
     f_WorldTangent = WorldTangent;
     f_WorldBioTangent = WorldBioTangent;
     f_LightSpacePos = ubo.lightVPMat * WorldPos;
+    f_SphereUV = SphereUV;
 }

@@ -98,7 +98,10 @@ namespace mmd
 			// マテリアルにシェーダーを設定
 			std::shared_ptr<graphics::CMaterial> material = MaterialFrame->CreateMaterial(pGraphicsAPI);
 
-			material->ReplacePreloadUniformValue("baseColorFactor", &PmxMaterial->GetDiffuse()[0], sizeof(glm::vec4), 0);
+			material->ReplacePreloadUniformValue("baseColorFactor", &PmxMaterial->GetDiffuse()[0], sizeof(glm::vec4), 2);
+			material->ReplacePreloadUniformValue("ambientFactor", &PmxMaterial->GetAmbient()[0], sizeof(glm::vec4), 2);
+			material->ReplacePreloadUniformValue("specularFactor", &PmxMaterial->GetSpecular()[0], sizeof(glm::vec4), 2);
+			material->ReplacePreloadUniformValue("specularIntensity", &glm::vec1(PmxMaterial->GetSpecularCoef())[0], sizeof(float), 2);
 
 			// MainTexture
 			{
@@ -106,7 +109,7 @@ namespace mmd
 
 				if (TextureIndex != -1)
 				{
-					material->ReplacePreloadUniformValue("UseMainTexture", &glm::uvec1(1)[0], sizeof(int), 0);
+					material->ReplacePreloadUniformValue("UseMainTexture", &glm::ivec1(1)[0], sizeof(int), 2);
 					material->ReplaceTextureIndex("MainTexture", TextureIndex);
 				}
 			}
@@ -118,13 +121,27 @@ namespace mmd
 
 				if (ToonTexIndex >= 0 && ToonTexIndex < model.GetPmxTextureList().size())
 				{
-					material->ReplacePreloadUniformValue("UseToonTexture", &glm::uvec1(1)[0], sizeof(int), 0);
+					material->ReplacePreloadUniformValue("UseToonTexture", &glm::ivec1(1)[0], sizeof(int), 2);
 					material->ReplaceTextureIndex("ToonTexture", ToonTexIndex);
 				}
 				else if (SharedToonTexIndex >= 0 && SharedToonTexIndex < model.GetPmxTextureList().size())
 				{
-					material->ReplacePreloadUniformValue("UseToonTexture", &glm::uvec1(1)[0], sizeof(int), 0);
+					material->ReplacePreloadUniformValue("UseToonTexture", &glm::ivec1(1)[0], sizeof(int), 2);
 					material->ReplaceTextureIndex("ToonTexture", SharedToonTexIndex);
+				}
+			}
+
+			// SphereTexture
+			{
+				int SphereTexIndex = PmxMaterial->GetSphereTexIndex();
+				EPmxSphereMode SphereMode = PmxMaterial->GetSphereMode();
+
+				if (SphereTexIndex >= 0 && SphereTexIndex < model.GetPmxTextureList().size())
+				{
+					material->ReplacePreloadUniformValue("UseSphereTexture", &glm::ivec1(1)[0], sizeof(int), 2);
+					material->ReplacePreloadUniformValue("SphereMode", &glm::ivec1(static_cast<int>(SphereMode))[0], sizeof(int), 2);
+
+					material->ReplaceTextureIndex("SphereTexture", SphereTexIndex);
 				}
 			}
 
