@@ -34,6 +34,7 @@ namespace mmd
 		std::vector<std::vector<int>> RootNodeIndexList;
 
 		std::shared_ptr<object::CNode> RootNode = std::make_shared<object::CNode>(-1, std::vector<std::shared_ptr<graphics::CMesh>>(), std::vector<std::shared_ptr<graphics::CMaterial>>());
+		RootNode->SetName("RootNode");
 		NodeList.push_back(RootNode);
 
 		RootNodeIndexList.push_back(std::vector<int>(0));
@@ -174,238 +175,245 @@ namespace mmd
 	bool CPmxImporter::CreateMeshList(const CPmxModel& model, std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, const std::shared_ptr<object::CNode>& RootNode, std::vector<std::shared_ptr<object::CNode>>& NodeList,
 		const std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList)
 	{
+		// 明示的にMeshNodeを作成
+		std::shared_ptr<object::CNode> MeshNode = std::make_shared<object::CNode>(-1, MeshList, MaterialList);
+		MeshNode->SetName("BaseMeshNode");
+		NodeList.push_back(MeshNode);
+
+		// RootNodeにMeshNodeを子要素として登録する
+		std::vector<int> ChildrenNodeIndexList = RootNode->GetChildrenNodeIndexList();
+		ChildrenNodeIndexList.push_back(static_cast<int>(NodeList.size()) - 1);
+
+		RootNode->SetChildrenNodeIndexList(ChildrenNodeIndexList);
+
 		{
-			std::shared_ptr<graphics::CMesh> Mesh = std::make_shared<graphics::CMesh>();
+			// 頂点バッファ本体
+			std::vector<std::vector<float>> VertexDataList;
+			std::vector<int> DimentionList;
+			std::vector<renderer::EDataType> DataTypeList;
+			std::vector<int> ByteStrideList;
 
+			// 頂点データの初期化用(例えばWeightとかNormalを持っていないならそれを0埋めするみたいな処理)
+			std::vector<std::string> NeedAttribNameList = {
+				"POSITION",
+				"NORMAL",
+				"TEXCOORD_0",
+				"TANGENT",
+				"JOINTS_0",
+				"WEIGHTS_0",
+			};
+			std::map<std::string, std::vector<float>> ReservedVertexDataList;
+			std::map<std::string, renderer::EDataType> ReservedDataTypeList;
+			std::map<std::string, int> ReservedByteStrideList;
+
+			// タンジェントの計算が必要
+			bool NeedRecalculateTangent = false;
+
+			// メタデータ
+			const auto& MetaData = model.GetMetaData();
+			const auto& PmxMesh = model.GetPmxMesh();
+
+			// 頂点バッファを読む
 			{
-				// 頂点バッファ本体
-					std::vector<std::vector<float>> VertexDataList;
-				std::vector<int> DimentionList;
-				std::vector<renderer::EDataType> DataTypeList;
-				std::vector<int> ByteStrideList;
-
-				// 頂点データの初期化用(例えばWeightとかNormalを持っていないならそれを0埋めするみたいな処理)
-				std::vector<std::string> NeedAttribNameList = {
-					"POSITION",
-					"NORMAL",
-					"TEXCOORD_0",
-					"TANGENT",
-					"JOINTS_0",
-					"WEIGHTS_0",
-				};
-				std::map<std::string, std::vector<float>> ReservedVertexDataList;
-				std::map<std::string, renderer::EDataType> ReservedDataTypeList;
-				std::map<std::string, int> ReservedByteStrideList;
-
-				// タンジェントの計算が必要
-				bool NeedRecalculateTangent = false;
-
-				// メタデータ
-				const auto& MetaData = model.GetMetaData();
-				const auto& PmxMesh = model.GetPmxMesh();
-
-				// 頂点バッファを読む
 				{
-					{
-						ReservedVertexDataList.emplace("POSITION", PmxMesh->GetPositionAttribute());
-						ReservedDataTypeList.emplace("POSITION", renderer::EDataType::TYPE_FLOAT);
-						ReservedByteStrideList.emplace("POSITION", 4 * 3);
-					}
-
-					{
-						ReservedVertexDataList.emplace("NORMAL", PmxMesh->GetNormalAttribute());
-						ReservedDataTypeList.emplace("NORMAL", renderer::EDataType::TYPE_FLOAT);
-						ReservedByteStrideList.emplace("NORMAL", 4 * 3);
-					}
-
-					{
-						ReservedVertexDataList.emplace("TEXCOORD_0", PmxMesh->GetUVAttribute());
-						ReservedDataTypeList.emplace("TEXCOORD_0", renderer::EDataType::TYPE_FLOAT);
-						ReservedByteStrideList.emplace("TEXCOORD_0", 4 * 2);
-					}
-
-					{
-						std::vector<float> AttributeData;
-						AttributeData.resize(4 * (PmxMesh->GetPositionAttribute().size() / 3), 0.0f);
-
-						ReservedVertexDataList.emplace("TANGENT", AttributeData);
-						ReservedDataTypeList.emplace("TANGENT", renderer::EDataType::TYPE_FLOAT);
-						ReservedByteStrideList.emplace("TANGENT", 4 * 2);
-					}
-
-					{
-						std::vector<float> AttributeData;
-
-						if (MetaData.BoneIndexSize == 1)
-						{
-							const auto& ByteJointAttribute = PmxMesh->GetByteJointAttribute();
-
-							if (!ByteJointAttribute.empty())
-							{
-								AttributeData.resize(ByteJointAttribute.size() / 4);
-								std::memcpy(&AttributeData[0], &ByteJointAttribute[0], sizeof(unsigned char) * ByteJointAttribute.size());
-							}
-							
-							ReservedDataTypeList.emplace("JOINTS_0", renderer::EDataType::TYPE_UNSIGNED_BYTE);
-							ReservedByteStrideList.emplace("JOINTS_0", 1 * 4);
-						}
-						else if (MetaData.BoneIndexSize == 2)
-						{
-							const auto& UShortJointAttribute = PmxMesh->GetUShortJointAttribute();
-
-							if (!UShortJointAttribute.empty())
-							{
-								AttributeData.resize(UShortJointAttribute.size() / 2);
-								std::memcpy(&AttributeData[0], &UShortJointAttribute[0], sizeof(unsigned short) * UShortJointAttribute.size());
-							}
-
-							ReservedDataTypeList.emplace("JOINTS_0", renderer::EDataType::TYPE_UNSIGNED_SHORT);
-							ReservedByteStrideList.emplace("JOINTS_0", 2 * 4);
-						}
-						else if (MetaData.BoneIndexSize == 4)
-						{
-							const auto& IntJointAttribute = PmxMesh->GetUIntJointAttribute();
-
-							if (!IntJointAttribute.empty())
-							{
-								AttributeData.resize(IntJointAttribute.size());
-								std::memcpy(&AttributeData[0], &IntJointAttribute[0], sizeof(unsigned int) * IntJointAttribute.size());
-							}
-
-							ReservedDataTypeList.emplace("JOINTS_0", renderer::EDataType::TYPE_UNSIGNED_INT);
-							ReservedByteStrideList.emplace("JOINTS_0", 4 * 4);
-						}
-
-						// 空の時は0埋めする
-						if (AttributeData.empty())
-						{
-							AttributeData.resize(static_cast<int>(PmxMesh->GetPositionAttribute().size()) / 3 * 4);
-						}
-
-						ReservedVertexDataList.emplace("JOINTS_0", AttributeData);
-						
-					}
-
-					{
-						ReservedVertexDataList.emplace("WEIGHTS_0", PmxMesh->GetWeightAttribute());
-						ReservedDataTypeList.emplace("WEIGHTS_0", renderer::EDataType::TYPE_FLOAT);
-						ReservedByteStrideList.emplace("WEIGHTS_0", 4 * 4);
-					}
+					ReservedVertexDataList.emplace("POSITION", PmxMesh->GetPositionAttribute());
+					ReservedDataTypeList.emplace("POSITION", renderer::EDataType::TYPE_FLOAT);
+					ReservedByteStrideList.emplace("POSITION", 4 * 3);
 				}
 
-				// 頂点バッファを構築
 				{
-					for (const auto& AttribName : NeedAttribNameList)
-					{
-						// ディメンションを登録
-						int Dimention = 1;
-
-						if (AttribName == "POSITION" || AttribName == "NORMAL")
-						{
-							Dimention = 3;
-						}
-						else if (AttribName == "TEXCOORD_0")
-						{
-							Dimention = 2;
-						}
-						else if (AttribName == "TANGENT" || AttribName == "JOINTS_0" || AttribName == "WEIGHTS_0")
-						{
-							Dimention = 4;
-						}
-
-						DimentionList.push_back(Dimention);
-
-						// 頂点バッファにデータを渡す
-						VertexDataList.push_back(ReservedVertexDataList[AttribName]);
-
-						// データタイプ
-						DataTypeList.push_back(ReservedDataTypeList[AttribName]);
-
-						// ByteStride
-						ByteStrideList.push_back(ReservedByteStrideList[AttribName]);
-					}
+					ReservedVertexDataList.emplace("NORMAL", PmxMesh->GetNormalAttribute());
+					ReservedDataTypeList.emplace("NORMAL", renderer::EDataType::TYPE_FLOAT);
+					ReservedByteStrideList.emplace("NORMAL", 4 * 3);
 				}
 
-				// プリミティブを作成する
 				{
-					const auto& PmxMaterialList = model.GetPmxMaterialList();
+					ReservedVertexDataList.emplace("TEXCOORD_0", PmxMesh->GetUVAttribute());
+					ReservedDataTypeList.emplace("TEXCOORD_0", renderer::EDataType::TYPE_FLOAT);
+					ReservedByteStrideList.emplace("TEXCOORD_0", 4 * 2);
+				}
 
-					int MatRefOffset = 0;
+				{
+					std::vector<float> AttributeData;
+					AttributeData.resize(4 * (PmxMesh->GetPositionAttribute().size() / 3), 0.0f);
 
-					for (int MaterialIndex = 0; MaterialIndex < PmxMaterialList.size(); MaterialIndex++)
+					ReservedVertexDataList.emplace("TANGENT", AttributeData);
+					ReservedDataTypeList.emplace("TANGENT", renderer::EDataType::TYPE_FLOAT);
+					ReservedByteStrideList.emplace("TANGENT", 4 * 2);
+				}
+
+				{
+					std::vector<float> AttributeData;
+
+					if (MetaData.BoneIndexSize == 1)
 					{
-						const auto& PmxMaterial = PmxMaterialList[MaterialIndex];
+						const auto& ByteJointAttribute = PmxMesh->GetByteJointAttribute();
 
-						std::shared_ptr<renderer::CRendererCreateInfo> createInfo = std::make_shared<renderer::CRendererCreateInfo>();
-
-						// メッシュ情報を渡す
-						createInfo->SetVertices(VertexDataList);
-						createInfo->SetAttributeDimensions(DimentionList);
-						createInfo->SetAttribDataTypes(DataTypeList);
-						createInfo->SetAttribByteStrides(ByteStrideList);
-
-						// インデックスバッフを読む
+						if (!ByteJointAttribute.empty())
 						{
-							if (MetaData.VertexIndexSize == 1)
-							{
-								// 未対応
-								Console::Log("[Error] InValid Indices Type - Byte\n");
-
-								return false;
-							}
-							else if (MetaData.VertexIndexSize == 2)
-							{
-								// Indicesを取得
-								const auto& PmxIndices = PmxMesh->GetUShortIndices();
-
-								// 参照オフセット分ずらして参照カウントの分だけ取得する
-								std::vector<unsigned short> Indices;
-								Indices.resize(PmxMaterial->GetMatRefIndiceCount());
-
-								std::memcpy(&Indices[0], &PmxIndices[MatRefOffset], sizeof(unsigned short) * PmxMaterial->GetMatRefIndiceCount());
-
-								// Indicesを登録
-								createInfo->SetIndices(Indices);
-							}
-							else if (MetaData.VertexIndexSize == 4)
-							{
-								// Indicesを取得
-								const auto& PmxIndices = PmxMesh->GetUIntIndices();
-
-								// 参照オフセット分ずらして参照カウントの分だけ取得する
-								std::vector<unsigned int> UINTIndices;
-								UINTIndices.resize(PmxMaterial->GetMatRefIndiceCount());
-
-								std::memcpy(&UINTIndices[0], &PmxIndices[MatRefOffset], sizeof(unsigned int) * PmxMaterial->GetMatRefIndiceCount());
-
-								// Indicesを登録
-								createInfo->SetUINTIndices(UINTIndices);
-							}
-
-							// 参照オフセットを更新する
-							MatRefOffset += PmxMaterial->GetMatRefIndiceCount();
+							AttributeData.resize(ByteJointAttribute.size() / 4);
+							std::memcpy(&AttributeData[0], &ByteJointAttribute[0], sizeof(unsigned char) * ByteJointAttribute.size());
 						}
 
-						// プリミティブを作成する
-						std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(createInfo, MaterialIndex);
-						Mesh->AddPrimitive(Primitive);
+						ReservedDataTypeList.emplace("JOINTS_0", renderer::EDataType::TYPE_UNSIGNED_BYTE);
+						ReservedByteStrideList.emplace("JOINTS_0", 1 * 4);
 					}
+					else if (MetaData.BoneIndexSize == 2)
+					{
+						const auto& UShortJointAttribute = PmxMesh->GetUShortJointAttribute();
+
+						if (!UShortJointAttribute.empty())
+						{
+							AttributeData.resize(UShortJointAttribute.size() / 2);
+							std::memcpy(&AttributeData[0], &UShortJointAttribute[0], sizeof(unsigned short) * UShortJointAttribute.size());
+						}
+
+						ReservedDataTypeList.emplace("JOINTS_0", renderer::EDataType::TYPE_UNSIGNED_SHORT);
+						ReservedByteStrideList.emplace("JOINTS_0", 2 * 4);
+					}
+					else if (MetaData.BoneIndexSize == 4)
+					{
+						const auto& IntJointAttribute = PmxMesh->GetUIntJointAttribute();
+
+						if (!IntJointAttribute.empty())
+						{
+							AttributeData.resize(IntJointAttribute.size());
+							std::memcpy(&AttributeData[0], &IntJointAttribute[0], sizeof(unsigned int) * IntJointAttribute.size());
+						}
+
+						ReservedDataTypeList.emplace("JOINTS_0", renderer::EDataType::TYPE_UNSIGNED_INT);
+						ReservedByteStrideList.emplace("JOINTS_0", 4 * 4);
+					}
+
+					// 空の時は0埋めする
+					if (AttributeData.empty())
+					{
+						AttributeData.resize(static_cast<int>(PmxMesh->GetPositionAttribute().size()) / 3 * 4);
+					}
+
+					ReservedVertexDataList.emplace("JOINTS_0", AttributeData);
+
+				}
+
+				{
+					ReservedVertexDataList.emplace("WEIGHTS_0", PmxMesh->GetWeightAttribute());
+					ReservedDataTypeList.emplace("WEIGHTS_0", renderer::EDataType::TYPE_FLOAT);
+					ReservedByteStrideList.emplace("WEIGHTS_0", 4 * 4);
 				}
 			}
 
-			// メッシュを登録
-			MeshList.push_back(Mesh);
+			// 頂点バッファを構築
+			{
+				for (const auto& AttribName : NeedAttribNameList)
+				{
+					// ディメンションを登録
+					int Dimention = 1;
 
-			// PMXにはノードの概念がないのでこちらで明示的に作成する
-			std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(static_cast<int>(MeshList.size()) - 1, MeshList, MaterialList);
+					if (AttribName == "POSITION" || AttribName == "NORMAL")
+					{
+						Dimention = 3;
+					}
+					else if (AttribName == "TEXCOORD_0")
+					{
+						Dimention = 2;
+					}
+					else if (AttribName == "TANGENT" || AttribName == "JOINTS_0" || AttribName == "WEIGHTS_0")
+					{
+						Dimention = 4;
+					}
 
-			NodeList.push_back(Node);
+					DimentionList.push_back(Dimention);
 
-			// RootNodeに子要素を登録する
-			std::vector<int> ChildrenNodeIndexList = RootNode->GetChildrenNodeIndexList();
-			ChildrenNodeIndexList.push_back(static_cast<int>(NodeList.size()) - 1);
+					// 頂点バッファにデータを渡す
+					VertexDataList.push_back(ReservedVertexDataList[AttribName]);
 
-			RootNode->SetChildrenNodeIndexList(ChildrenNodeIndexList);
+					// データタイプ
+					DataTypeList.push_back(ReservedDataTypeList[AttribName]);
+
+					// ByteStride
+					ByteStrideList.push_back(ReservedByteStrideList[AttribName]);
+				}
+			}
+
+			const auto& PmxMaterialList = model.GetPmxMaterialList();
+
+			int MatRefOffset = 0;
+
+			for (int MaterialIndex = 0; MaterialIndex < PmxMaterialList.size(); MaterialIndex++)
+			{
+				const auto& PmxMaterial = PmxMaterialList[MaterialIndex];
+
+				std::shared_ptr<renderer::CRendererCreateInfo> createInfo = std::make_shared<renderer::CRendererCreateInfo>();
+
+				// メッシュを作成する
+				std::shared_ptr<graphics::CMesh> Mesh = std::make_shared<graphics::CMesh>();
+
+				// メッシュ情報を渡す
+				createInfo->SetVertices(VertexDataList);
+				createInfo->SetAttributeDimensions(DimentionList);
+				createInfo->SetAttribDataTypes(DataTypeList);
+				createInfo->SetAttribByteStrides(ByteStrideList);
+
+				// インデックスバッフを読む
+				{
+					if (MetaData.VertexIndexSize == 1)
+					{
+						// 未対応
+						Console::Log("[Error] InValid Indices Type - Byte\n");
+
+						return false;
+					}
+					else if (MetaData.VertexIndexSize == 2)
+					{
+						// Indicesを取得
+						const auto& PmxIndices = PmxMesh->GetUShortIndices();
+
+						// 参照オフセット分ずらして参照カウントの分だけ取得する
+						std::vector<unsigned short> Indices;
+						Indices.resize(PmxMaterial->GetMatRefIndiceCount());
+
+						std::memcpy(&Indices[0], &PmxIndices[MatRefOffset], sizeof(unsigned short) * PmxMaterial->GetMatRefIndiceCount());
+
+						// Indicesを登録
+						createInfo->SetIndices(Indices);
+					}
+					else if (MetaData.VertexIndexSize == 4)
+					{
+						// Indicesを取得
+						const auto& PmxIndices = PmxMesh->GetUIntIndices();
+
+						// 参照オフセット分ずらして参照カウントの分だけ取得する
+						std::vector<unsigned int> UINTIndices;
+						UINTIndices.resize(PmxMaterial->GetMatRefIndiceCount());
+
+						std::memcpy(&UINTIndices[0], &PmxIndices[MatRefOffset], sizeof(unsigned int) * PmxMaterial->GetMatRefIndiceCount());
+
+						// Indicesを登録
+						createInfo->SetUINTIndices(UINTIndices);
+					}
+
+					// 参照オフセットを更新する
+					MatRefOffset += PmxMaterial->GetMatRefIndiceCount();
+				}
+
+				// プリミティブを作成する
+				std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(createInfo, MaterialIndex);
+				Mesh->AddPrimitive(Primitive);
+
+				// メッシュを登録
+				MeshList.push_back(Mesh);
+
+				// PMXにはノードの概念がないのでこちらで明示的に作成する
+				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(static_cast<int>(MeshList.size()) - 1, MeshList, MaterialList);
+
+				NodeList.push_back(Node);
+
+				// MeshNodeに子要素を登録する
+				std::vector<int> ChildrenNodeIndexList = MeshNode->GetChildrenNodeIndexList();
+				ChildrenNodeIndexList.push_back(static_cast<int>(NodeList.size()) - 1);
+
+				MeshNode->SetChildrenNodeIndexList(ChildrenNodeIndexList);
+			}
 		}
 
 		return true;
