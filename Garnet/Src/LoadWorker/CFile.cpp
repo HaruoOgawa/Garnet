@@ -12,23 +12,10 @@ namespace resource
 	CFile::CFile(const std::string& filename):
 		m_Status(resource::ELoadStatus::None),
 		m_Filename(filename),
-		m_U16Filename(L""),
-		m_U16Extention(L""),
 		m_IsSync(false)
 	{
 		auto pos = m_Filename.find(".");
 		m_Extention = m_Filename.substr(pos + 1);
-	}
-	
-	CFile::CFile(const std::wstring& filename):
-		m_Status(resource::ELoadStatus::None),
-		m_Filename(""),
-		m_Extention(""),
-		m_U16Filename(filename),
-		m_IsSync(false)
-	{
-		auto pos = m_U16Filename.find(L".");
-		m_U16Extention = m_U16Filename.substr(pos + 1);
 	}
 
 	CFile::~CFile()
@@ -102,32 +89,14 @@ namespace resource
 		attr.onsuccess = downloadSucceded;
 		attr.onerror = downloadFailed;
 		attr.userData = this;
+
 		emscripten_fetch(&attr, m_Filename.c_str());
-
 #else
-		std::ifstream file;
+		std::ifstream file = std::ifstream(m_Filename, std::ios::ate | std::ios::binary);
 
-		if (!m_Filename.empty())
+		if (!file.is_open())
 		{
-			file = std::ifstream(m_Filename, std::ios::ate | std::ios::binary);
-
-			if (!file.is_open())
-			{
-				Console::Log("failed to open file! / m_Filename: %s\n", m_Filename.c_str());
-			}
-		}
-		else if (!m_U16Filename.empty())
-		{
-			file = std::ifstream(m_U16Filename, std::ios::ate | std::ios::binary);
-
-			if (!file.is_open())
-			{
-				Console::Log("failed to open file! / m_U16Filename: %ls\n", m_U16Filename.c_str());
-			}
-		}
-		else
-		{
-			return false;
+			Console::Log("failed to open file! / m_Filename: %s\n", m_Filename.c_str());
 		}
 
 		size_t fileSize = (size_t)file.tellg();
@@ -199,9 +168,34 @@ namespace resource
 
 		for (auto c_u8 = U8Str.begin(); c_u8 != U8Str.end(); c_u8++)
 		{
-			DstU16Str.push_back(static_cast<WCHAR>(*c_u8));
+			DstU16Str.push_back(static_cast<wchar_t>(*c_u8));
 		}
 
 		return DstU16Str;
+	}
+
+	std::string CFile::CastU16ToU8Str(const std::wstring& U16Str)
+	{
+		std::string DstU8Str = std::string();
+
+		for(int i = 0; i < U16Str.length(); i++)
+		{
+			auto c_u16 = U16Str.data()[i];
+
+#ifdef __EMSCRIPTEN__
+			// Web上だとwstringのwchar_tは4バイト・4文字で構成されて偶数番目に実際に使用したい文字が入っているので以下の様に変換する
+			std::vector<char> Data;
+			Data.resize(4);
+
+			std::memcpy(&Data[0], &c_u16, 4);
+			
+			DstU8Str.push_back(Data[0]);
+			DstU8Str.push_back(Data[2]);
+#else
+			DstU8Str.push_back(static_cast<char>(c_u16));
+#endif
+		}
+
+		return DstU8Str;
 	}
 }

@@ -469,7 +469,7 @@ namespace mmd
 			}
 			else if (MetaData.EncodeType == EPmxEncodeType::UTF16)
 			{
-				std::wstring FullPath = resource::CFile::CastU8ToU16Str(ParentDir) + FilePath.second;
+				std::string FullPath = ParentDir + resource::CFile::CastU16ToU8Str(FilePath.second);
 
 				TexLoader = std::make_shared<resource::CTextureLoader>(pGraphicsAPI, FullPath, Texture);
 			}

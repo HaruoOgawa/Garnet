@@ -27,7 +27,6 @@ namespace resource
 	public:
 		CTextureLoader(api::IGraphicsAPI* pGraphicsAPI, const std::vector<std::string>& FileNameList, const std::shared_ptr<graphics::CTexture>& Texture);
 		CTextureLoader(api::IGraphicsAPI* pGraphicsAPI, const std::string& FileName, const std::shared_ptr<graphics::CTexture>& Texture);
-		CTextureLoader(api::IGraphicsAPI* pGraphicsAPI, const std::wstring& FileName, const std::shared_ptr<graphics::CTexture>& Texture);
 		virtual ~CTextureLoader();
 
 		virtual void SetLoadStatus(resource::ELoadStatus Status) override;

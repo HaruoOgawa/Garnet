@@ -52,21 +52,20 @@ namespace scene
 		
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Avatar\\Tda_Miku\\Tda_Miku.pmx", m_TdaMiku_Model, "", "ShadowPass"));
 
-		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Avatar\\X_Bot.fbx", m_FbxObject, "", "ShadowPass"));
+		/*pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Avatar\\X_Bot.fbx", m_FbxObject, "", "ShadowPass"));
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Avatar\\Mousey.fbx", m_MouseyObject, "", "ShadowPass"));
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Motions\\Walking.fbx", m_Walk_Animation, "", "ShadowPass"));
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Motions\\Jumping.fbx", m_Jump_Animation, "", "ShadowPass"));
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Motions\\Combo_Punch_hand.fbx", m_Punch_Animation, "", "ShadowPass"));
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Models\\CesiumMan\\glTF-Binary\\CesiumMan.glb", m_glTFObject, "", "ShadowPass"));
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Models\\BrainStem\\glTF-Binary\\BrainStem.glb", m_BrainStemDObject, "", "ShadowPass"));
-		//pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Models\\Alicia\\VRM\\AliciaSolid.vrm", m_VRMObject, "", "ShadowPass"));
-		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Avatar\\Warrok_W_Kurniawan.fbx", m_VRMObject, "", "ShadowPass"));
+		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Avatar\\Warrok_W_Kurniawan.fbx", m_VRMObject, "", "ShadowPass"));*/
 		
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CTextureLoader>(pGraphicsAPI, std::vector<std::string>({ "Resources\\IBL\\output_skybox.hdr" }), m_IBL_Skybox_Texture));
-		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CTextureLoader>(pGraphicsAPI, std::vector<std::string>({ "Resources\\IBL\\output_iem.hdr" }), m_IBL_DiffuseEnvMap_Texture));
+		/*pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CTextureLoader>(pGraphicsAPI, std::vector<std::string>({ "Resources\\IBL\\output_iem.hdr" }), m_IBL_DiffuseEnvMap_Texture));
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CTextureLoader>(pGraphicsAPI, std::vector<std::string>({ "Resources\\IBL\\output_pmrem.hdr" }), m_IBL_SpecularEnvMap_Texture));
-		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CTextureLoader>(pGraphicsAPI, std::vector<std::string>({ "Resources\\Textures\\ggx_lut.jpg" }), m_IBL_GGX_LUT_Texture));
-		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CTextureLoader>(pGraphicsAPI, std::vector<std::string>({ "Resources\\Cubemaps\\environment\\environment_back_0.jpg", "Resources\\Cubemaps\\environment\\environment_bottom_0.jpg", "Resources\\Cubemaps\\environment\\environment_front_0.jpg", "Resources\\Cubemaps\\environment\\environment_left_0.jpg", "Resources\\Cubemaps\\environment\\environment_right_0.jpg", "Resources\\Cubemaps\\environment\\environment_top_0.jpg" }), m_Cube_Texture));
+		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CTextureLoader>(pGraphicsAPI, std::vector<std::string>({ "Resources\\Textures\\ggx_lut.jpg" }), m_IBL_GGX_LUT_Texture));*/
+		//pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CTextureLoader>(pGraphicsAPI, std::vector<std::string>({ "Resources\\Cubemaps\\environment\\environment_back_0.jpg", "Resources\\Cubemaps\\environment\\environment_bottom_0.jpg", "Resources\\Cubemaps\\environment\\environment_front_0.jpg", "Resources\\Cubemaps\\environment\\environment_left_0.jpg", "Resources\\Cubemaps\\environment\\environment_right_0.jpg", "Resources\\Cubemaps\\environment\\environment_top_0.jpg" }), m_Cube_Texture));
 	}
 
 	CScriptScene::~CScriptScene()
@@ -77,7 +76,7 @@ namespace scene
 	bool CScriptScene::Load(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker)
 	{
 		// FBX Humanoid Animation Clip
-		std::vector<std::shared_ptr<animation::CAnimationClip>> AnimationClipList;
+		/*std::vector<std::shared_ptr<animation::CAnimationClip>> AnimationClipList;
 		{
 			if (!m_Walk_Animation->CreateFromMemory(pGraphicsAPI, pLoadWorker, nullptr, nullptr, object::E3DObjectType::Fbx)) return false;
 			if (!m_Jump_Animation->CreateFromMemory(pGraphicsAPI, pLoadWorker, nullptr, nullptr, object::E3DObjectType::Fbx)) return false;
@@ -86,7 +85,7 @@ namespace scene
 			AnimationClipList.push_back(m_Walk_Animation->GetAnimationClipList()[0]);
 			AnimationClipList.push_back(m_Jump_Animation->GetAnimationClipList()[0]);
 			AnimationClipList.push_back(m_Punch_Animation->GetAnimationClipList()[0]);
-		}
+		}*/
 
 		// m_TdaMiku_Model
 		{

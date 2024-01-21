@@ -12,16 +12,12 @@ namespace resource
 		const std::string m_Filename;
 		std::string m_Extention;
 
-		const std::wstring m_U16Filename;
-		std::wstring m_U16Extention;
-
 		bool m_IsSync; // 同期的にロードするかどうか. 基本的には非同期
 
 		std::vector<unsigned char> m_Data;
 
 	public:
 		CFile(const std::string& filename);
-		CFile(const std::wstring& filename);
 		virtual ~CFile();
 
 		const std::string& GetExtention() const;
@@ -44,5 +40,6 @@ namespace resource
 		static std::string AddPunct(const std::string& Path);
 
 		static std::wstring CastU8ToU16Str(const std::string& U8Str);
+		static std::string CastU16ToU8Str(const std::wstring& U16Str);
 	};
 }
