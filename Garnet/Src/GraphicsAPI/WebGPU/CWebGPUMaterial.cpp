@@ -79,7 +79,7 @@ namespace api
 			{
 				const int ByteOffset = UniformData->second.ByteOffset;
 
-				if (m_UseDynamicBufferOffset)
+				if (DynamicOffsetNum > 0)
 				{
 					if (DynamicOffsetNum == -1)
 					{
@@ -219,7 +219,8 @@ namespace api
 				}
 
 				bindingLayout.buffer.minBindingSize = Layout.second.ByteSize; // データ一つ当たりのサイズかな???
-				bindingLayout.buffer.hasDynamicOffset = m_UseDynamicBufferOffset; // ダイナミックユニフォーム
+				//bindingLayout.buffer.hasDynamicOffset = m_UseDynamicBufferOffset; // ダイナミックユニフォーム
+				bindingLayout.buffer.hasDynamicOffset = true; // ダイナミックユニフォーム
 
 				bindingLayoutList.push_back(bindingLayout);
 			}
@@ -467,12 +468,12 @@ namespace api
 		bufferDesc.label = "Buffer";
 		bufferDesc.usage = Usage; // バッファの用途
 		bufferDesc.mappedAtCreation = false; // ???
-		bufferDesc.size = ByteSize * ((m_UseDynamicBufferOffset) ? m_RefCount : 1);
+		bufferDesc.size = ByteSize * ((m_RefCount > 0) ? m_RefCount : 1);
 
 		Buffer = wgpuDeviceCreateBuffer(m_pGraphicsAPI->GetLogicalDevice(), &bufferDesc);
 
 		// バッファにデータを書き込む
-		if (m_UseDynamicBufferOffset)
+		if (m_RefCount > 0)
 		{
 			for (int i = 0; i < m_RefCount; i++)
 			{

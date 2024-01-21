@@ -6,7 +6,6 @@ namespace graphics
 	CMaterial::CMaterial(const std::shared_ptr<CMaterialCreateInfo>& createInfo):
 		m_CreateInfo(createInfo),
 		m_RefCount(0),
-		m_UseDynamicBufferOffset(false),
 		m_DepthMaterial(nullptr),
 		m_EnabledZTest(true),
 		m_CullMode(ECullMode::CULL_BACK),
@@ -23,7 +22,7 @@ namespace graphics
 	{
 		m_DepthMaterial = DepthMF->CreateMaterial(pGraphicsAPI);
 
-		m_DepthMaterial->SetRefStatus(m_RefCount, m_UseDynamicBufferOffset);
+		m_DepthMaterial->SetRefCount(m_RefCount);
 
 		m_DepthMaterial->SetCullMode(graphics::ECullMode::CULL_FRONT);
 
@@ -108,11 +107,6 @@ namespace graphics
 	void CMaterial::IncreaseRefCount()
 	{
 		m_RefCount++;
-
-		if (m_RefCount > 1)
-		{
-			m_UseDynamicBufferOffset = true;
-		}
 	}
 
 	int CMaterial::GetRefCount() const
@@ -120,19 +114,13 @@ namespace graphics
 		return m_RefCount;
 	}
 
-	void CMaterial::SetRefStatus(int RefCount, bool UseDynamicBufferOffset)
+	void CMaterial::SetRefCount(int RefCount)
 	{
 		m_RefCount = RefCount;
-		m_UseDynamicBufferOffset = UseDynamicBufferOffset;
 	}
 
 	const std::vector<uint32_t>& CMaterial::GetBindingRefSizeList() const
 	{
 		return m_BindingRefSizeList;
-	}
-
-	bool CMaterial::IsUseDynamicBufferOffset() const
-	{
-		return m_UseDynamicBufferOffset;
 	}
 }

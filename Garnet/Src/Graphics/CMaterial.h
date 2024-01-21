@@ -34,7 +34,6 @@ namespace graphics
 		std::vector<STextureBindingLayout> m_TextureBindingLayoutList;
 
 		int											 m_RefCount;
-		bool									     m_UseDynamicBufferOffset;
 
 		std::vector<uint32_t> m_BindingRefSizeList; // GLSLの各bindingが参照しているバッファのサイズ
 
@@ -73,10 +72,8 @@ namespace graphics
 
 		virtual void IncreaseRefCount();
 		virtual int GetRefCount() const;
-		virtual void SetRefStatus(int RefCount, bool UseDynamicBufferOffset);
+		virtual void SetRefCount(int RefCount);
 
 		virtual const std::vector<uint32_t>& GetBindingRefSizeList() const;
-
-		virtual bool IsUseDynamicBufferOffset() const;
 	};
 }

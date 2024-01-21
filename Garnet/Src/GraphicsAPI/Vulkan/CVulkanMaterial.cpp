@@ -58,7 +58,7 @@ namespace api
 			if (m_ShaderBufferList[i]->GetBufferUpdateType() != graphics::EBufferUpdateType::UPDATE_TYPE_CPU) continue;
 
 			auto ByteSize = m_VKUniformBufferSizeList[m_pGraphicsAPI->GetCurrentFrame()][i];
-			auto ByteOffset = ((m_UseDynamicBufferOffset)? (DynamicOffsetNum - 1) * ByteSize : 0);
+			auto ByteOffset = ((DynamicOffsetNum > 0)? (DynamicOffsetNum - 1) * ByteSize : 0);
 
 			// バッファデータの更新
 			void* BuffersMappedList;
@@ -230,25 +230,25 @@ namespace api
 				
 				if (Buffer->GetBufferType() == graphics::EBufferType::UNIFORM)
 				{
-					if (m_UseDynamicBufferOffset)
+					//if (m_UseDynamicBufferOffset)
 					{
 						LayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC; // バッファタイプ
 					}
-					else
-					{
-						LayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER; // バッファタイプ
-					}
+					//else
+					//{
+					//	LayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER; // バッファタイプ
+					//}
 				}
 				else if (Buffer->GetBufferType() == graphics::EBufferType::SHADERSTORAGE)
 				{
-					if (m_UseDynamicBufferOffset)
+					//if (m_UseDynamicBufferOffset)
 					{
 						LayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC; // バッファタイプ
 					}
-					else
-					{
-						LayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER; // バッファタイプ
-					}
+					//else
+					//{
+					//	LayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER; // バッファタイプ
+					//}
 				}
 
 				LayoutBinding.descriptorCount = 1; // 
@@ -322,25 +322,25 @@ namespace api
 				// バッファの作成
 				if (Buffer->GetBufferType() == graphics::EBufferType::UNIFORM)
 				{
-					if (m_UseDynamicBufferOffset)
+					//if (m_UseDynamicBufferOffset)
 					{
 						m_pGraphicsAPI->CreateBuffer(ByteSize * m_RefCount, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, UniformBuffer, BufferMemory);
 					}
-					else
+					/*else
 					{
 						m_pGraphicsAPI->CreateBuffer(ByteSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, UniformBuffer, BufferMemory);
-					}
+					}*/
 				}
 				else if (Buffer->GetBufferType() == graphics::EBufferType::SHADERSTORAGE)
 				{
-					if (m_UseDynamicBufferOffset)
+					//if (m_UseDynamicBufferOffset)
 					{
 						m_pGraphicsAPI->CreateBuffer(ByteSize * m_RefCount, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, UniformBuffer, BufferMemory);
 					}
-					else
+					/*else
 					{
 						m_pGraphicsAPI->CreateBuffer(ByteSize, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, UniformBuffer, BufferMemory);
-					}
+					}*/
 				}
 
 				// バッファの初期化
@@ -377,25 +377,25 @@ namespace api
 
 			if (Buffer->GetBufferType() == graphics::EBufferType::UNIFORM)
 			{
-				if (m_UseDynamicBufferOffset)
+				//if (m_UseDynamicBufferOffset)
 				{
 					poolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
 				}
-				else
+				/*else
 				{
 					poolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-				}
+				}*/
 			}
 			else if (Buffer->GetBufferType() == graphics::EBufferType::SHADERSTORAGE)
 			{
-				if (m_UseDynamicBufferOffset)
+				//if (m_UseDynamicBufferOffset)
 				{
 					poolSize.type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC;
 				}
-				else
+				/*else
 				{
 					poolSize.type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-				}
+				}*/
 			}
 
 			poolSize.descriptorCount = static_cast<uint32_t>(m_pGraphicsAPI->GetMaxFramesInFlight());
@@ -516,25 +516,25 @@ namespace api
 
 					if (Buffer->GetBufferType() == graphics::EBufferType::UNIFORM)
 					{
-						if (m_UseDynamicBufferOffset)
+						//if (m_UseDynamicBufferOffset)
 						{
 							descriptorWrites[LayoutIndex].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC; // どのタイプのコマンドを発行してもらうのか
 						}
-						else
-						{
-							descriptorWrites[LayoutIndex].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER; // どのタイプのコマンドを発行してもらうのか
-						}
+						//else
+						//{
+						//	descriptorWrites[LayoutIndex].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER; // どのタイプのコマンドを発行してもらうのか
+						//}
 					}
 					else if (Buffer->GetBufferType() == graphics::EBufferType::SHADERSTORAGE)
 					{
-						if (m_UseDynamicBufferOffset)
+						//if (m_UseDynamicBufferOffset)
 						{
 							descriptorWrites[LayoutIndex].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC; // どのタイプのコマンドを発行してもらうのか
 						}
-						else
-						{
-							descriptorWrites[LayoutIndex].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER; // どのタイプのコマンドを発行してもらうのか
-						}
+						//else
+						//{
+						//	descriptorWrites[LayoutIndex].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER; // どのタイプのコマンドを発行してもらうのか
+						//}
 					}
 
 					descriptorWrites[LayoutIndex].descriptorCount = 1;
