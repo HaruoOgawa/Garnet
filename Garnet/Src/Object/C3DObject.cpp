@@ -304,12 +304,33 @@ namespace object
 
 		if (!m_IsCreated) return true;
 
+		// マテリアルの参照カウントをリセット
+		for (auto& Material : m_MaterialList)
+		{
+			//
+			if (!Material) continue;
+			Material->ResetRefCount();
+
+			//
+			auto DepthMaterial = Material->GetDepthMaterial();
+
+			if (!DepthMaterial) continue;
+			DepthMaterial->ResetRefCount();
+		}
+
 #ifdef USE_ANIMATION
 		if (!m_AnimationController->Update(DeltaSecondsTime)) return false;
 #endif
 		// ワールド行列の更新
 		// 全ノードマイフレーム更新しているので、そのうちキャッシュを入れて更新は必要なものだけにする
 		CalcWorldMatrix();
+
+#ifdef USE_ANIMATION
+		// Drawは何度も呼ぶことがあるのでUpdateでマイフレーム一回だけ計算する
+		// SSBOのサイズをDynamicOffset毎に変更できるかわからないのでひとまず全部まとめて渡す
+		m_CurrentSkinMatrixList.clear();
+		if (!m_AnimationController->CalcSkinMatrixList(m_CurrentSkinMatrixList, m_ObjectTransform->GetModelMatrix())) return false;
+#endif
 
 		return true;
 	}
@@ -318,57 +339,6 @@ namespace object
 		const std::shared_ptr<object::C3DObject>& DebugSphere)
 	{
 		if (!m_IsCreated) return true;
-
-		// 共通ユニフォームの更新
-		for (auto& Material : m_MaterialList)
-		{
-			if (!Material) continue;
-			
-			// 共通のユニフォームバッファの更新
-			glm::mat4 lightVPMat = DrawInfo->GetLightProjection()->GetPrejectionMatrix() * DrawInfo->GetLightCamera()->GetViewMatrix();
-
-			Material->SetUniformValue("view", &Camera->GetViewMatrix()[0][0], sizeof(glm::mat4));
-			Material->SetUniformValue("proj", &Projection->GetPrejectionMatrix()[0][0], sizeof(glm::mat4));
-			Material->SetUniformValue("lightVPMat", &lightVPMat[0][0], sizeof(glm::mat4));
-			Material->SetUniformValue("lightDir", &DrawInfo->GetLightCamera()->GetViewDir()[0], sizeof(glm::vec3));
-			Material->SetUniformValue("lightColor", &DrawInfo->GetLightColor()[0], sizeof(glm::vec4));
-			Material->SetUniformValue("cameraPos", &Camera->GetPos()[0], sizeof(glm::vec3));
-			Material->SetUniformValue("time", &glm::vec1(DrawInfo->GetSecondsTime())[0], sizeof(float));
-			Material->SetUniformValue("deltaTime", &glm::vec1(DrawInfo->GetDeltaSecondsTime())[0], sizeof(float));
-#ifdef USE_ANIMATION
-			Material->SetUniformValue("useSkinMeshAnimation", &glm::ivec1( (m_AnimationController->IsPlayingAnimation()? 1 : 0) )[0], sizeof(glm::ivec1));
-#endif
-		}
-
-		for (auto& Material : m_MaterialList)
-		{
-			if (!Material) continue;
-
-			auto DepthMaterial = Material->GetDepthMaterial();
-
-			if (!DepthMaterial) continue;
-
-			// 共通のユニフォームバッファの更新
-			glm::mat4 lightVPMat = DrawInfo->GetLightProjection()->GetPrejectionMatrix() * DrawInfo->GetLightCamera()->GetViewMatrix();
-			
-			DepthMaterial->SetUniformValue("view", &Camera->GetViewMatrix()[0][0], sizeof(glm::mat4));
-			DepthMaterial->SetUniformValue("proj", &Projection->GetPrejectionMatrix()[0][0], sizeof(glm::mat4));
-			DepthMaterial->SetUniformValue("lightVPMat", &lightVPMat[0][0], sizeof(glm::mat4));
-			DepthMaterial->SetUniformValue("lightDir", &DrawInfo->GetLightCamera()->GetViewDir()[0], sizeof(glm::vec3));
-			DepthMaterial->SetUniformValue("lightColor", &DrawInfo->GetLightColor()[0], sizeof(glm::vec4));
-			DepthMaterial->SetUniformValue("cameraPos", &Camera->GetPos()[0], sizeof(glm::vec3));
-			DepthMaterial->SetUniformValue("time", &glm::vec1(DrawInfo->GetSecondsTime())[0], sizeof(float));
-			DepthMaterial->SetUniformValue("deltaTime", &glm::vec1(DrawInfo->GetDeltaSecondsTime())[0], sizeof(float));
-#ifdef USE_ANIMATION
-			DepthMaterial->SetUniformValue("useSkinMeshAnimation", &glm::ivec1((m_AnimationController->IsPlayingAnimation() ? 1 : 0))[0], sizeof(glm::ivec1));
-#endif
-		}
-
-#ifdef USE_ANIMATION
-		// SSBOのサイズをDynamicOffset毎に変更できるかわからないのでひとまず全部まとめて渡す
-		std::vector<glm::mat4> SkinMatrixList;
-		if (!m_AnimationController->CalcSkinMatrixList(SkinMatrixList, m_ObjectTransform->GetModelMatrix())) return false;
-#endif
 
 		// 描画
 		for (const auto& Node : m_NodeList)
@@ -382,7 +352,6 @@ namespace object
 
 			if (DynamicOffsetList.size() != Mesh->GetPrimitiveList().size()) continue; // PrimitiveListとNodeのDynamicOffsetNumListは一致している
 
-			// SkinMatrixを計算
 			int SkinIndex = Node->GetSkinIndex();
 
 			for (int PrimitiveIndex = 0; PrimitiveIndex < Mesh->GetPrimitiveList().size(); PrimitiveIndex++)
@@ -390,7 +359,6 @@ namespace object
 				const auto& Primitive = Mesh->GetPrimitiveList()[PrimitiveIndex];
 
 				int MaterialIndex = Primitive->GetMaterialIndex();
-				int DynamicOffsetNum = DynamicOffsetList[PrimitiveIndex];
 				if (MaterialIndex < 0 || MaterialIndex >= m_MaterialList.size()) continue;
 
 				std::shared_ptr<graphics::CMaterial> Material = nullptr;
@@ -406,14 +374,30 @@ namespace object
 
 				if (!Material) continue;
 				
-				Material->SetUniformValue("model", &WorldMatrix[0][0], sizeof(glm::mat4), DynamicOffsetNum);
+				//int DynamicOffsetNum = DynamicOffsetList[PrimitiveIndex];
+				// マテリアルの参照カウントをダイナミックオフセットとして使用する
+				int DynamicOffsetNum = Material->GetRefCount();
 
+				// 共通のユニフォームバッファの更新
+				glm::mat4 lightVPMat = DrawInfo->GetLightProjection()->GetPrejectionMatrix() * DrawInfo->GetLightCamera()->GetViewMatrix();
+
+				Material->SetUniformValue("model", &WorldMatrix[0][0], sizeof(glm::mat4), DynamicOffsetNum);
+				Material->SetUniformValue("view", &Camera->GetViewMatrix()[0][0], sizeof(glm::mat4), DynamicOffsetNum);
+				Material->SetUniformValue("proj", &Projection->GetPrejectionMatrix()[0][0], sizeof(glm::mat4), DynamicOffsetNum);
+				Material->SetUniformValue("lightVPMat", &lightVPMat[0][0], sizeof(glm::mat4), DynamicOffsetNum);
+				Material->SetUniformValue("lightDir", &DrawInfo->GetLightCamera()->GetViewDir()[0], sizeof(glm::vec3), DynamicOffsetNum);
+				Material->SetUniformValue("lightColor", &DrawInfo->GetLightColor()[0], sizeof(glm::vec4), DynamicOffsetNum);
+				Material->SetUniformValue("cameraPos", &Camera->GetPos()[0], sizeof(glm::vec3), DynamicOffsetNum);
+				Material->SetUniformValue("time", &glm::vec1(DrawInfo->GetSecondsTime())[0], sizeof(float), DynamicOffsetNum);
+				Material->SetUniformValue("deltaTime", &glm::vec1(DrawInfo->GetDeltaSecondsTime())[0], sizeof(float), DynamicOffsetNum);
 #ifdef USE_ANIMATION
+				Material->SetUniformValue("useSkinMeshAnimation", &glm::ivec1((m_AnimationController->IsPlayingAnimation() ? 1 : 0))[0], sizeof(glm::ivec1), DynamicOffsetNum);
+
 				// SkinMatrixをShaderに渡す
 				const auto& SkinList = m_AnimationController->GetSkinList();
 				if (SkinIndex >= 0 && SkinIndex < SkinList.size() && m_AnimationController->IsPlayingAnimation())
 				{
-					Material->SetUniformValue("r_SkinMatrixBuffer", &SkinMatrixList[0], sizeof(glm::mat4) * static_cast<int>(SkinMatrixList.size()), DynamicOffsetNum);
+					Material->SetUniformValue("r_SkinMatrixBuffer", &m_CurrentSkinMatrixList[0], sizeof(glm::mat4) * static_cast<int>(m_CurrentSkinMatrixList.size()), DynamicOffsetNum);
 
 					int JointIndexOffset = SkinList[SkinIndex]->GetJointIndexOffset();
 					Material->SetUniformValue("JointIndexOffset", &glm::ivec1(JointIndexOffset)[0], sizeof(glm::ivec1), DynamicOffsetNum);
@@ -421,6 +405,9 @@ namespace object
 #endif
 
 				if (!Primitive->Draw(Material, DynamicOffsetNum, IsDepthPass)) return false;
+
+				// マテリアルの参照カウントをインクリメントする
+				Material->IncreaseRefCount();
 			}
 		}
 		

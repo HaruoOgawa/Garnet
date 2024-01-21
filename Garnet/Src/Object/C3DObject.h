@@ -47,6 +47,7 @@ namespace object
 		std::shared_ptr<graphics::CMaterialFrame> m_DepthMF;
 #ifdef USE_ANIMATION
 		std::shared_ptr<animation::CAnimationController> m_AnimationController;
+		std::vector<glm::mat4> m_CurrentSkinMatrixList;
 #endif
 	private:
 		void CalcWorldMatrix(std::shared_ptr<CNode>& Node, const glm::mat4& ParentWorldMatrix);

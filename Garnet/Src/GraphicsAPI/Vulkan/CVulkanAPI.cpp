@@ -190,6 +190,8 @@ namespace api
 		// コマンドバッファの記録を終了
 		if (vkEndCommandBuffer(m_CommandBuffers[m_CurrentFrame]) != VK_SUCCESS)
 		{
+			Console::Log("[Error] Failed to vkEndCommandBuffer\n");
+
 			return false;
 		}
 
@@ -908,6 +910,8 @@ namespace api
 		// そしてそのキューには格納できるコマンドの種類が決まっていて、描画系だとGraphicsQueue、プレゼント系だとPresentQueueといった感じで分かれている
 		if (vkQueueSubmit(m_GraphicsQueue, 1, &submitInfo, m_InFlightFences[m_CurrentFrame]) != VK_SUCCESS)
 		{
+			Console::Log("[Error] Failed to vkQueueSubmit\n");
+
 			return false;
 		}
 

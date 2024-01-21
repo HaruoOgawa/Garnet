@@ -11,6 +11,7 @@ namespace graphics
 		m_CullMode(ECullMode::CULL_BACK),
 		m_BlendType(EBlendType::BLEND_TYPE_ADDITIVE)
 	{
+		ResetRefCount();
 	}
 
 	bool CMaterial::Create(const std::shared_ptr<graphics::CTextureSet>& TextureSet)
@@ -117,6 +118,12 @@ namespace graphics
 	void CMaterial::SetRefCount(int RefCount)
 	{
 		m_RefCount = RefCount;
+	}
+
+	void CMaterial::ResetRefCount()
+	{
+		// ダイナミックオフセットは１から使用できるので初期値も１にする
+		m_RefCount = 1;
 	}
 
 	const std::vector<uint32_t>& CMaterial::GetBindingRefSizeList() const

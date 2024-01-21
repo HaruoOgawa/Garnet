@@ -95,7 +95,8 @@ namespace api
 				}
 				else
 				{
-					wgpuQueueWriteBuffer(m_pGraphicsAPI->GetQueue(), m_WGPUUniformBufferList[i], ByteOffset, Data, ByteSize);
+					wgpuQueueWriteBuffer(m_pGraphicsAPI->GetQueue(), m_WGPUUniformBufferList[i], 0, Data, ByteSize);
+					//wgpuQueueWriteBuffer(m_pGraphicsAPI->GetQueue(), m_WGPUUniformBufferList[i], ByteOffset, Data, ByteSize);
 				}
 			}
 		}

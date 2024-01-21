@@ -73,6 +73,7 @@ namespace graphics
 		virtual void IncreaseRefCount();
 		virtual int GetRefCount() const;
 		virtual void SetRefCount(int RefCount);
+		virtual void ResetRefCount();
 
 		virtual const std::vector<uint32_t>& GetBindingRefSizeList() const;
 	};
