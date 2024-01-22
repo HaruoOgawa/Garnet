@@ -10,8 +10,8 @@
 
 namespace api
 {
-	COpenGLMaterial::COpenGLMaterial(api::COpenGLAPI* pGraphicsAPI, const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo):
-		CMaterial(createInfo),
+	COpenGLMaterial::COpenGLMaterial(api::COpenGLAPI* pGraphicsAPI, const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, int RefCount):
+		CMaterial(createInfo, RefCount),
 		m_pGraphicsAPI(pGraphicsAPI),
 
 		m_ShaderPrg(-1),

@@ -33,7 +33,9 @@ namespace graphics
 		std::vector<std::shared_ptr<CShaderBuffer>> m_ShaderBufferList;
 		std::vector<STextureBindingLayout> m_TextureBindingLayoutList;
 
-		int											 m_RefCount;
+		// VulkanやWebGPUはOpenGLの様に何も考えずにマテリアルを使いまわすことができないのでその数をあらかじめ設定しておく必要がある
+		const int m_RefCount;
+		int m_CurrentDynamicOffset;
 
 		std::vector<uint32_t> m_BindingRefSizeList; // GLSLの各bindingが参照しているバッファのサイズ
 
@@ -43,7 +45,7 @@ namespace graphics
 		ECullMode m_CullMode;
 		EBlendType m_BlendType;
 	public:
-		CMaterial(const std::shared_ptr<CMaterialCreateInfo>& createInfo);
+		CMaterial(const std::shared_ptr<CMaterialCreateInfo>& createInfo, int RefCount);
 		virtual ~CMaterial() = default;
 
 		virtual bool Create(const std::shared_ptr<graphics::CTextureSet>& TextureSet) = 0;
@@ -70,10 +72,9 @@ namespace graphics
 
 		virtual void SetUniformValue(const std::string Name, const void* Data, int ByteSize, int DynamicOffsetNum = -1) = 0;
 
-		virtual void IncreaseRefCount();
-		virtual int GetRefCount() const;
-		virtual void SetRefCount(int RefCount);
-		virtual void ResetRefCount();
+		virtual void IncreaseDynamicOffset();
+		virtual int GetDynamicOffset() const;
+		virtual void ResetDynamicOffset();
 
 		virtual const std::vector<uint32_t>& GetBindingRefSizeList() const;
 	};

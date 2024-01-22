@@ -3,15 +3,16 @@
 
 namespace graphics
 {
-	CMaterial::CMaterial(const std::shared_ptr<CMaterialCreateInfo>& createInfo):
+	CMaterial::CMaterial(const std::shared_ptr<CMaterialCreateInfo>& createInfo, int RefCount):
 		m_CreateInfo(createInfo),
-		m_RefCount(0),
+		m_RefCount(RefCount),
+		m_CurrentDynamicOffset(0),
 		m_DepthMaterial(nullptr),
 		m_EnabledZTest(true),
 		m_CullMode(ECullMode::CULL_BACK),
 		m_BlendType(EBlendType::BLEND_TYPE_ADDITIVE)
 	{
-		ResetRefCount();
+		ResetDynamicOffset();
 	}
 
 	bool CMaterial::Create(const std::shared_ptr<graphics::CTextureSet>& TextureSet)
@@ -21,9 +22,7 @@ namespace graphics
 
 	bool CMaterial::CreateDepthMaterial(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<graphics::CMaterialFrame>& DepthMF)
 	{
-		m_DepthMaterial = DepthMF->CreateMaterial(pGraphicsAPI);
-
-		m_DepthMaterial->SetRefCount(m_RefCount);
+		m_DepthMaterial = DepthMF->CreateMaterial(pGraphicsAPI, m_RefCount);
 
 		m_DepthMaterial->SetCullMode(graphics::ECullMode::CULL_FRONT);
 
@@ -105,25 +104,20 @@ namespace graphics
 	{
 	}
 
-	void CMaterial::IncreaseRefCount()
+	void CMaterial::IncreaseDynamicOffset()
 	{
-		m_RefCount++;
+		m_CurrentDynamicOffset++;
 	}
 
-	int CMaterial::GetRefCount() const
+	int CMaterial::GetDynamicOffset() const
 	{
-		return m_RefCount;
+		return m_CurrentDynamicOffset;
 	}
 
-	void CMaterial::SetRefCount(int RefCount)
-	{
-		m_RefCount = RefCount;
-	}
-
-	void CMaterial::ResetRefCount()
+	void CMaterial::ResetDynamicOffset()
 	{
 		// ダイナミックオフセットは１から使用できるので初期値も１にする
-		m_RefCount = 1;
+		m_CurrentDynamicOffset = 1;
 	}
 
 	const std::vector<uint32_t>& CMaterial::GetBindingRefSizeList() const

@@ -96,8 +96,11 @@ namespace mmd
 
 		for (const auto& PmxMaterial : PmxMaterilList)
 		{
+			// アウトラインにも使用するので2つ参照する
+			int MatRefCount = 2;
+
 			// マテリアルにシェーダーを設定
-			std::shared_ptr<graphics::CMaterial> material = MaterialFrame->CreateMaterial(pGraphicsAPI);
+			std::shared_ptr<graphics::CMaterial> material = MaterialFrame->CreateMaterial(pGraphicsAPI, MatRefCount);
 
 			material->ReplacePreloadUniformValue("baseColorFactor", &PmxMaterial->GetDiffuse()[0], sizeof(glm::vec4), 2);
 			material->ReplacePreloadUniformValue("ambientFactor", &PmxMaterial->GetAmbient()[0], sizeof(glm::vec4), 2);

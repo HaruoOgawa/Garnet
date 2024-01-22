@@ -309,13 +309,13 @@ namespace object
 		{
 			//
 			if (!Material) continue;
-			Material->ResetRefCount();
+			Material->ResetDynamicOffset();
 
 			//
 			auto DepthMaterial = Material->GetDepthMaterial();
 
 			if (!DepthMaterial) continue;
-			DepthMaterial->ResetRefCount();
+			DepthMaterial->ResetDynamicOffset();
 		}
 
 #ifdef USE_ANIMATION
@@ -376,7 +376,7 @@ namespace object
 				
 				//int DynamicOffsetNum = DynamicOffsetList[PrimitiveIndex];
 				// マテリアルの参照カウントをダイナミックオフセットとして使用する
-				int DynamicOffsetNum = Material->GetRefCount();
+				int DynamicOffsetNum = Material->GetDynamicOffset();
 
 				// 共通のユニフォームバッファの更新
 				glm::mat4 lightVPMat = DrawInfo->GetLightProjection()->GetPrejectionMatrix() * DrawInfo->GetLightCamera()->GetViewMatrix();
@@ -407,7 +407,7 @@ namespace object
 				if (!Primitive->Draw(Material, DynamicOffsetNum, IsDepthPass)) return false;
 
 				// マテリアルの参照カウントをインクリメントする
-				Material->IncreaseRefCount();
+				Material->IncreaseDynamicOffset();
 			}
 		}
 		

@@ -9,8 +9,8 @@
 
 namespace api
 {
-	CWebGPUMaterial::CWebGPUMaterial(api::CWebGPUAPI* pGraphicsAPI, const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo):
-		CMaterial(createInfo),
+	CWebGPUMaterial::CWebGPUMaterial(api::CWebGPUAPI* pGraphicsAPI, const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, int RefCount):
+		CMaterial(createInfo, RefCount),
 		m_pGraphicsAPI(pGraphicsAPI),
 		m_VertexShaderModele(nullptr),
 		m_FragmentShaderModele(nullptr),
@@ -79,7 +79,7 @@ namespace api
 			{
 				const int ByteOffset = UniformData->second.ByteOffset;
 
-				if (DynamicOffsetNum > 0)
+				if (m_RefCount > 1)
 				{
 					if (DynamicOffsetNum == -1)
 					{
@@ -220,9 +220,8 @@ namespace api
 				}
 
 				bindingLayout.buffer.minBindingSize = Layout.second.ByteSize; // データ一つ当たりのサイズかな???
-				//bindingLayout.buffer.hasDynamicOffset = m_UseDynamicBufferOffset; // ダイナミックユニフォーム
-				bindingLayout.buffer.hasDynamicOffset = true; // ダイナミックユニフォーム
-
+				bindingLayout.buffer.hasDynamicOffset = (m_RefCount > 1); // ダイナミックユニフォーム
+				
 				bindingLayoutList.push_back(bindingLayout);
 			}
 		}
@@ -469,12 +468,12 @@ namespace api
 		bufferDesc.label = "Buffer";
 		bufferDesc.usage = Usage; // バッファの用途
 		bufferDesc.mappedAtCreation = false; // ???
-		bufferDesc.size = ByteSize * ((m_RefCount > 0) ? m_RefCount : 1);
+		bufferDesc.size = ByteSize * m_RefCount;
 
 		Buffer = wgpuDeviceCreateBuffer(m_pGraphicsAPI->GetLogicalDevice(), &bufferDesc);
 
 		// バッファにデータを書き込む
-		if (m_RefCount > 0)
+		if (m_RefCount > 1)
 		{
 			for (int i = 0; i < m_RefCount; i++)
 			{

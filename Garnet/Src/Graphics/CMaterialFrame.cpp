@@ -30,11 +30,11 @@ namespace graphics
 		m_TextureBufferList = TextureBufferList;
 	}
 
-	std::shared_ptr<CMaterial> CMaterialFrame::CreateMaterial(api::IGraphicsAPI* pGraphicsAPI)
+	std::shared_ptr<CMaterial> CMaterialFrame::CreateMaterial(api::IGraphicsAPI* pGraphicsAPI, int RefCount)
 	{
 		if (!m_CreateInfo) return nullptr;
 
-		std::shared_ptr<CMaterial> Material = pGraphicsAPI->CreateMaterial(m_CreateInfo);
+		std::shared_ptr<CMaterial> Material = pGraphicsAPI->CreateMaterial(m_CreateInfo, RefCount);
 
 		// UniformBuffer
 		for (const auto& UniformBuffer : m_UniformBufferList)

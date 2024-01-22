@@ -39,7 +39,7 @@ namespace object
 		m_MeshIndex = MeshIndex;
 
 		// DynamicOffset‚ðŒvŽZ
-		if (MeshIndex >= 0 && MeshIndex < MeshList.size())
+		/*if (MeshIndex >= 0 && MeshIndex < MeshList.size())
 		{
 			const auto& Mesh = MeshList[MeshIndex];
 
@@ -61,7 +61,7 @@ namespace object
 					m_DynamicOffsetNumList.push_back(DynamicOffsetNum);
 				}
 			}
-		}
+		}*/
 	}
 
 	int CNode::GetMeshIndex() const

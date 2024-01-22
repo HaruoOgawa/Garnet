@@ -268,7 +268,7 @@ namespace gltf
 			int occlusionTextureIndex = glTfMaterial.occlusionTexture.index;
 			
 			// マテリアルにシェーダーを設定
-			std::shared_ptr<graphics::CMaterial> material = MaterialFrame->CreateMaterial(pGraphicsAPI);
+			std::shared_ptr<graphics::CMaterial> material = MaterialFrame->CreateMaterial(pGraphicsAPI, 1);
 
 			// UBO
 			{
@@ -620,20 +620,23 @@ namespace gltf
 	bool CGLTFImporter::CreateDummyMaterial(api::IGraphicsAPI* pGraphicsAPI, const tinygltf::Model& model, std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList,
 		const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, std::vector<std::shared_ptr<graphics::CMesh>>& MeshList)
 	{
-		// マテリアルにシェーダーを設定
-		std::shared_ptr<graphics::CMaterial> material = MaterialFrame->CreateMaterial(pGraphicsAPI);
-		
-		material->SetCullMode(graphics::ECullMode::CULL_NONE);
-
-		MaterialList.push_back(material);
-
+		// マテリアル参照数とマテリアルインデックスの設定
+		int MatRefCount = 0;
 		for (auto& Mesh : MeshList)
 		{
 			for (auto& Primirive : Mesh->GetPrimitiveList())
 			{
 				Primirive->SetMaterialIndex(0);
+				MatRefCount++;
 			}
 		}
+
+		// マテリアルにシェーダーを設定
+		std::shared_ptr<graphics::CMaterial> material = MaterialFrame->CreateMaterial(pGraphicsAPI, MatRefCount);
+		
+		material->SetCullMode(graphics::ECullMode::CULL_NONE);
+
+		MaterialList.push_back(material);
 
 		return true;
 	}

@@ -152,7 +152,7 @@ namespace imageeffect
 	bool CBlurEffect::Load()
 	{
 		// MaterialX
-		auto MaterialX = m_BlurMF->CreateMaterial(m_pGraphicsAPI);
+		auto MaterialX = m_BlurMF->CreateMaterial(m_pGraphicsAPI, 1);
 		MaterialX->SetEnabledZTest(false);
 		MaterialX->SetCullMode(graphics::ECullMode::CULL_NONE);
 		
@@ -167,7 +167,7 @@ namespace imageeffect
 		}
 
 		// MaterialX
-		auto MaterialY = m_BlurMF->CreateMaterial(m_pGraphicsAPI);
+		auto MaterialY = m_BlurMF->CreateMaterial(m_pGraphicsAPI, 1);
 		MaterialY->SetEnabledZTest(false);
 		MaterialY->SetCullMode(graphics::ECullMode::CULL_NONE);
 

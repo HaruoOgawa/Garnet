@@ -412,7 +412,7 @@ namespace fbx
 
 			pFbxMaterialList.push_back(pFbxMaterial);
 
-			std::shared_ptr<graphics::CMaterial> material = MaterialFrame->CreateMaterial(pGraphicsAPI);
+			std::shared_ptr<graphics::CMaterial> material = MaterialFrame->CreateMaterial(pGraphicsAPI, 1);
 
 			material->ReplacePreloadUniformValue("baseColorFactor", &glm::vec4(1.0f)[0], sizeof(glm::vec4), 0);
 
@@ -451,8 +451,19 @@ namespace fbx
 	{
 		if (!MaterialFrame) return true;
 
+		// マテリアル参照数とマテリアルインデックスの設定
+		int MatRefCount = 0;
+		for (auto& Mesh : MeshList)
+		{
+			for (auto& Primirive : Mesh->GetPrimitiveList())
+			{
+				Primirive->SetMaterialIndex(0);
+				MatRefCount++;
+			}
+		}
+
 		// マテリアルにシェーダーを設定
-		std::shared_ptr<graphics::CMaterial> material = MaterialFrame->CreateMaterial(pGraphicsAPI);
+		std::shared_ptr<graphics::CMaterial> material = MaterialFrame->CreateMaterial(pGraphicsAPI, MatRefCount);
 
 		// SkinMatrix StorageBuffer
 		{
@@ -472,14 +483,6 @@ namespace fbx
 		material->SetCullMode(graphics::ECullMode::CULL_NONE);
 
 		MaterialList.push_back(material);
-
-		for (auto& Mesh : MeshList)
-		{
-			for (auto& Primirive : Mesh->GetPrimitiveList())
-			{
-				Primirive->SetMaterialIndex(0);
-			}
-		}
 
 		return true;
 	}
