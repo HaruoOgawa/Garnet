@@ -62,7 +62,7 @@ namespace object
 		Object->AddMesh(Mesh);
 
 		// Node
-		std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(0, Object->GetMeshList(), Object->GetMaterialList());
+		std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(0);
 		Object->AddNode(Node);
 
 		// Create
@@ -348,9 +348,6 @@ namespace object
 
 			const auto& WorldMatrix = m_ObjectTransform->GetModelMatrix() * Node->GetWorldMatrix();
 			const auto& Mesh = m_MeshList[MeshIndex];
-			const auto& DynamicOffsetList = Node->GetDynamicOffsetNumList();
-
-			if (DynamicOffsetList.size() != Mesh->GetPrimitiveList().size()) continue; // PrimitiveListとNodeのDynamicOffsetNumListは一致している
 
 			int SkinIndex = Node->GetSkinIndex();
 
@@ -374,7 +371,6 @@ namespace object
 
 				if (!Material) continue;
 				
-				//int DynamicOffsetNum = DynamicOffsetList[PrimitiveIndex];
 				// マテリアルの参照カウントをダイナミックオフセットとして使用する
 				int DynamicOffsetNum = Material->GetDynamicOffset();
 

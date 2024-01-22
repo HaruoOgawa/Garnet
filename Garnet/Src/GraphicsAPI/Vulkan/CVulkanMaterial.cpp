@@ -58,7 +58,7 @@ namespace api
 			if (m_ShaderBufferList[i]->GetBufferUpdateType() != graphics::EBufferUpdateType::UPDATE_TYPE_CPU) continue;
 
 			auto ByteSize = m_VKUniformBufferSizeList[m_pGraphicsAPI->GetCurrentFrame()][i];
-			auto ByteOffset = ((m_RefCount > 1)? (DynamicOffsetNum - 1) * ByteSize : 0);
+			auto ByteOffset = ((IsUseDynamicOffset())? (DynamicOffsetNum - 1) * ByteSize : 0);
 
 			// バッファデータの更新
 			void* BuffersMappedList;
@@ -230,7 +230,7 @@ namespace api
 				
 				if (Buffer->GetBufferType() == graphics::EBufferType::UNIFORM)
 				{
-					if (m_RefCount > 1)
+					if (IsUseDynamicOffset())
 					{
 						LayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC; // バッファタイプ
 					}
@@ -241,7 +241,7 @@ namespace api
 				}
 				else if (Buffer->GetBufferType() == graphics::EBufferType::SHADERSTORAGE)
 				{
-					if (m_RefCount > 1)
+					if (IsUseDynamicOffset())
 					{
 						LayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC; // バッファタイプ
 					}
@@ -322,7 +322,7 @@ namespace api
 				// バッファの作成
 				if (Buffer->GetBufferType() == graphics::EBufferType::UNIFORM)
 				{
-					if (m_RefCount > 1)
+					if (IsUseDynamicOffset())
 					{
 						m_pGraphicsAPI->CreateBuffer(ByteSize * m_RefCount, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, UniformBuffer, BufferMemory);
 					}
@@ -333,7 +333,7 @@ namespace api
 				}
 				else if (Buffer->GetBufferType() == graphics::EBufferType::SHADERSTORAGE)
 				{
-					if (m_RefCount > 1)
+					if (IsUseDynamicOffset())
 					{
 						m_pGraphicsAPI->CreateBuffer(ByteSize * m_RefCount, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, UniformBuffer, BufferMemory);
 					}
@@ -377,7 +377,7 @@ namespace api
 
 			if (Buffer->GetBufferType() == graphics::EBufferType::UNIFORM)
 			{
-				if (m_RefCount > 1)
+				if (IsUseDynamicOffset())
 				{
 					poolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
 				}
@@ -388,7 +388,7 @@ namespace api
 			}
 			else if (Buffer->GetBufferType() == graphics::EBufferType::SHADERSTORAGE)
 			{
-				if (m_RefCount > 1)
+				if (IsUseDynamicOffset())
 				{
 					poolSize.type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC;
 				}
@@ -516,7 +516,7 @@ namespace api
 
 					if (Buffer->GetBufferType() == graphics::EBufferType::UNIFORM)
 					{
-						if (m_RefCount > 1)
+						if (IsUseDynamicOffset())
 						{
 							descriptorWrites[LayoutIndex].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC; // どのタイプのコマンドを発行してもらうのか
 						}
@@ -527,7 +527,7 @@ namespace api
 					}
 					else if (Buffer->GetBufferType() == graphics::EBufferType::SHADERSTORAGE)
 					{
-						if (m_RefCount > 1)
+						if (IsUseDynamicOffset())
 						{
 							descriptorWrites[LayoutIndex].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC; // どのタイプのコマンドを発行してもらうのか
 						}

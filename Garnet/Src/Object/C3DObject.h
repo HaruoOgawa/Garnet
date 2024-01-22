@@ -3,8 +3,9 @@
 #include <vector>
 #include <memory>
 
-#include "CNode.h"
 #include "E3DObjectType.h"
+#include "CNode.h"
+#include "../Graphics/CMesh.h"
 #include "../Graphics/CMaterial.h"
 #include "../Graphics/CTextureSet.h"
 #include "../Graphics/CMaterialFrame.h"

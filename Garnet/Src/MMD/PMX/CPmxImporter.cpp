@@ -33,7 +33,7 @@ namespace mmd
 		std::vector<std::shared_ptr<object::CNode>> NodeList;
 		std::vector<std::vector<int>> RootNodeIndexList;
 
-		std::shared_ptr<object::CNode> RootNode = std::make_shared<object::CNode>(-1, std::vector<std::shared_ptr<graphics::CMesh>>(), std::vector<std::shared_ptr<graphics::CMaterial>>());
+		std::shared_ptr<object::CNode> RootNode = std::make_shared<object::CNode>(-1);
 		RootNode->SetName("RootNode");
 		NodeList.push_back(RootNode);
 
@@ -179,7 +179,7 @@ namespace mmd
 		const std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList)
 	{
 		// –¾¦“I‚ÉMeshNode‚ğì¬
-		std::shared_ptr<object::CNode> MeshNode = std::make_shared<object::CNode>(-1, MeshList, MaterialList);
+		std::shared_ptr<object::CNode> MeshNode = std::make_shared<object::CNode>(-1);
 		MeshNode->SetName("BaseMeshNode");
 		NodeList.push_back(MeshNode);
 
@@ -433,7 +433,8 @@ namespace mmd
 				MeshList.push_back(Mesh);
 
 				// PMX‚É‚Íƒm[ƒh‚ÌŠT”O‚ª‚È‚¢‚Ì‚Å‚±‚¿‚ç‚Å–¾¦“I‚Éì¬‚·‚é
-				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(static_cast<int>(MeshList.size()) - 1, MeshList, MaterialList);
+				int MeshIndex = static_cast<int>(MeshList.size()) - 1;
+				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(MeshIndex);
 
 				NodeList.push_back(Node);
 

@@ -104,6 +104,11 @@ namespace graphics
 	{
 	}
 
+	bool CMaterial::IsUseDynamicOffset()
+	{
+		return (m_RefCount > 1);
+	}
+
 	void CMaterial::IncreaseDynamicOffset()
 	{
 		m_CurrentDynamicOffset++;

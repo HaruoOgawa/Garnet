@@ -83,7 +83,7 @@ namespace renderer
 			dynamicOffsetList.push_back(dynamicOffset);
 		}
 
-		if (dynamicOffsetList.size() > 0)
+		if (pWebGPUMat->IsUseDynamicOffset())
 		{
 			wgpuRenderPassEncoderSetBindGroup(m_pGraphicsAPI->GetCurrentRenderPass(), 0, pWebGPUMat->GetBindGroup(), static_cast<uint32_t>(dynamicOffsetList.size()), &dynamicOffsetList[0]);
 		}

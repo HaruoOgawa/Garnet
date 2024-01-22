@@ -184,7 +184,7 @@ namespace fbx
 				pFbxMeshList.shrink_to_fit();
 
 				// Nodeと各要素をIndexで繋ぐ
-				if (!ConnectNodeTo(NodeList, pFbxNodeList, pFbxMeshList, MeshList, MaterialList, Skin)) return false;
+				if (!ConnectNodeTo(NodeList, pFbxNodeList, pFbxMeshList, Skin)) return false;
 			}
 
 			// オブジェクトにリソースを登録
@@ -788,7 +788,7 @@ namespace fbx
 	{
 		// Nodeを作成
 		// MeshとSkinは後ほどセットする
-		std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(-1, std::vector<std::shared_ptr<graphics::CMesh>>(), std::vector<std::shared_ptr<graphics::CMaterial>>());
+		std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(-1);
 
 		std::string NodeName = std::string(pFBXNode->GetName());
 		Node->SetName(NodeName);
@@ -852,8 +852,7 @@ namespace fbx
 		return true;
 	}
 
-	bool CFBXImporter::ConnectNodeTo(std::vector<std::shared_ptr<object::CNode>>& NodeList, const std::vector<FbxNode*>& pFbxNodeList, const std::vector<FbxMesh*>& pFbxMeshList,
-		const std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, const std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList, const std::shared_ptr<animation::CSkin>& Skin)
+	bool CFBXImporter::ConnectNodeTo(std::vector<std::shared_ptr<object::CNode>>& NodeList, const std::vector<FbxNode*>& pFbxNodeList, const std::vector<FbxMesh*>& pFbxMeshList, const std::shared_ptr<animation::CSkin>& Skin)
 	{
 		// NodeListとpFbxNodeListは同じ順番で同じ数
 		if (NodeList.size() != pFbxNodeList.size()) return false;
@@ -880,7 +879,7 @@ namespace fbx
 			}
 
 			// MeshIndexを設定
-			Node->SetMeshIndexWithDynamicOffset(MeshIndex, MeshList, MaterialList);
+			Node->SetMeshIndex(MeshIndex);
 
 			// JointがあるならSkinが1つあるとする
 			int SkinIndex = (Skin->GetJointList().size() > 0)? 0 : - 1;

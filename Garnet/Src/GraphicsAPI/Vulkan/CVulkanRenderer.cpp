@@ -127,7 +127,7 @@ namespace renderer
 			dynamicOffsetList.push_back(dynamicOffset);
 		}
 
-		if (dynamicOffsetList.size() > 0)
+		if (pVulkanMat->IsUseDynamicOffset())
 		{
 			vkCmdBindDescriptorSets(m_pGraphicsAPI->GetCurrentCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS,
 				m_PipelineLayout, 0, 1, &pVulkanMat->GetDescriptorSets()[m_pGraphicsAPI->GetCurrentFrame()], static_cast<uint32_t>(dynamicOffsetList.size()), &dynamicOffsetList[0]);

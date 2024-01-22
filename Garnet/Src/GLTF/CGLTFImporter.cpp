@@ -119,7 +119,7 @@ namespace gltf
 		// ノード
 		std::vector<std::shared_ptr<object::CNode>> NodeList;
 		std::vector<std::vector<int>> RootNodeIndexList;
-		if (!CreateNode(model, NodeList, MeshList, MaterialList, RootNodeIndexList)) return false;
+		if (!CreateNode(model, NodeList, RootNodeIndexList)) return false;
 
 		// スキン
 		std::vector<std::shared_ptr<animation::CSkin>> AnimationSkinList;
@@ -641,8 +641,7 @@ namespace gltf
 		return true;
 	}
 
-	bool CGLTFImporter::CreateNode(const tinygltf::Model& model, std::vector<std::shared_ptr<object::CNode>>& NodeList, const std::vector<std::shared_ptr<graphics::CMesh>>& MeshList,
-		const std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList, std::vector<std::vector<int>>& RootNodeIndexList)
+	bool CGLTFImporter::CreateNode(const tinygltf::Model& model, std::vector<std::shared_ptr<object::CNode>>& NodeList, std::vector<std::vector<int>>& RootNodeIndexList)
 	{
 		for (const auto& glTFNode : model.nodes)
 		{
@@ -650,7 +649,7 @@ namespace gltf
 			int MeshIndex = glTFNode.mesh;
 			int SkinIndex = glTFNode.skin;
 
-			std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(MeshIndex, MeshList, MaterialList);
+			std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(MeshIndex);
 			
 			Node->SetName(glTFNode.name);
 			Node->SetSkinIndex(SkinIndex);
