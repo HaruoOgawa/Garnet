@@ -14,12 +14,18 @@
 
 namespace graphics
 {
+	struct SShaderBufferSet
+	{
+		graphics::EBufferType BufferType;
+		graphics::SBindingLayout BindingLayout;
+		std::vector<std::shared_ptr<graphics::SBufferValueLayout>> ValueLayoutList;
+	};
+
 	class CMaterialFrame
 	{
 		std::shared_ptr<graphics::CMaterialCreateInfo> m_CreateInfo;
 
-		std::vector<std::pair<graphics::SBindingLayout, std::vector<std::shared_ptr<graphics::SBufferValueLayout>>>> m_UniformBufferList;
-		std::vector<std::pair<graphics::SBindingLayout, std::vector<std::shared_ptr<graphics::SBufferValueLayout>>>> m_StorageBufferList;
+		std::vector<SShaderBufferSet> m_ShaderBufferList;
 		std::vector<graphics::STextureBindingLayout> m_TextureBufferList;
 	public:
 		CMaterialFrame();
@@ -27,8 +33,7 @@ namespace graphics
 
 		void SetCreateInfo(const std::shared_ptr<graphics::CMaterialCreateInfo>& CreateInfo);
 
-		void SetUniformBufferList(const std::vector<std::pair<graphics::SBindingLayout, std::vector<std::shared_ptr<graphics::SBufferValueLayout>>>>& UniformBufferList);
-		void SetStorageBufferList(const std::vector<std::pair<graphics::SBindingLayout, std::vector<std::shared_ptr<graphics::SBufferValueLayout>>>>& StorageBufferList);
+		void SetShaderBufferList(const std::vector<SShaderBufferSet>& ShaderBufferList);
 		void SetTextureBufferList(const std::vector<graphics::STextureBindingLayout>& TextureBufferList);
 
 		std::shared_ptr<CMaterial> CreateMaterial(api::IGraphicsAPI* pGraphicsAPI, int RefCount);

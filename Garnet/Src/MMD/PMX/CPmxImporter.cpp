@@ -157,8 +157,12 @@ namespace mmd
 			// SkinMatrix StorageBuffer
 			{
 				// SkinMatは存在するJointの数だけ用意する必要がある
-				unsigned int SkinMatCount = 1;
+				// DynamicOffsetが256バイトからしか使えない都合上SkinMatCountの最小値は4とする(4 * 16 * 4 = 256)
+				unsigned int SkinMatCount = 0;
 				if (Skin && Skin->GetJointList().size() > 0) SkinMatCount = static_cast<unsigned int>(Skin->GetJointList().size());
+
+				// DynamicOffsetが256バイトからしか使えない都合上SkinMatCountの最小値は4とする(4 * 16 * 4 = 256)
+				if (SkinMatCount < 4) SkinMatCount = 4;
 
 				// SSBOのサイズは2のn乗である必要がある
 				SkinMatCount = math::CMath::CalcNextPowerOfTwo(SkinMatCount);

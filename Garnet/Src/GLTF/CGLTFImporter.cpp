@@ -381,7 +381,8 @@ namespace gltf
 				int SkinMatCount = 0;
 				for (const auto& glTFSkin : model.skins) { SkinMatCount += static_cast<int>(glTFSkin.joints.size()); }
 
-				if(SkinMatCount <= 0) SkinMatCount = 1;
+				// DynamicOffsetが256バイトからしか使えない都合上SkinMatCountの最小値は4とする(4 * 16 * 4 = 256)
+				if(SkinMatCount < 4) SkinMatCount = 4;
 
 				// SSBOのサイズは2のn乗である必要がある
 				SkinMatCount = math::CMath::CalcNextPowerOfTwo(SkinMatCount);

@@ -28,6 +28,11 @@ layout(binding = 2) uniform FragUniformBufferObject{
     int UseToonTexture;
 	int UseSphereTexture;
 	int SphereMode;
+
+	mat4 mPad0;
+	mat4 mPad1;
+	mat4 mPad2;
+	mat4 mPad3;
 } fragUbo;
 
 #ifdef USE_OPENGL

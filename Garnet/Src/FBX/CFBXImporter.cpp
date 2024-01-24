@@ -266,6 +266,9 @@ namespace fbx
 				int SkinMatCount = 1;
 				if (Skin) SkinMatCount = static_cast<int>(Skin->GetJointList().size());
 
+				// DynamicOffsetが256バイトからしか使えない都合上SkinMatCountの最小値は4とする(4 * 16 * 4 = 256)
+				if (SkinMatCount < 4) SkinMatCount = 4;
+
 				// SSBOのサイズは2のn乗である必要がある
 				SkinMatCount = math::CMath::CalcNextPowerOfTwo(SkinMatCount);
 

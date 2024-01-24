@@ -316,6 +316,14 @@ namespace api
 				const auto& Data = Buffer->GetData();
 				const uint64_t ByteSize = static_cast<uint64_t>(Data.size());
 
+				// DynamicOffsetはバッファサイズが256バイト以上でないと使用できないので使用する設定になっていてそれよりも小さい時はエラーとする
+				if (IsUseDynamicOffset() && ByteSize < 256)
+				{
+					Console::Log("[API Error] ByteSize must be rather than 256 byte if use DynamicOffset.\n");
+
+					return false;
+				}
+
 				VkBuffer UniformBuffer = nullptr;
 				VkDeviceMemory BufferMemory = nullptr;
 

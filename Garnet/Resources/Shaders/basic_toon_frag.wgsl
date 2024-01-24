@@ -13,6 +13,10 @@ struct FragUniformBufferObject {
     UseToonTexture: i32,
     UseSphereTexture: i32,
     SphereMode: i32,
+    mPad0_: mat4x4<f32>,
+    mPad1_: mat4x4<f32>,
+    mPad2_: mat4x4<f32>,
+    mPad3_: mat4x4<f32>,
 }
 
 var<private> f_WorldNormal_1: vec3<f32>;

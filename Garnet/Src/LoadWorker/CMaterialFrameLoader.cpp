@@ -324,15 +324,12 @@ namespace resource
 
 		if (uniform_type == "ubo")
 		{
-			// UniformBufferList‚É“o˜^
-			m_UniformBufferList.push_back(std::make_pair(BindingLayout, ValueLayoutList));
+			m_ShaderBufferList.push_back({ graphics::EBufferType::UNIFORM, BindingLayout, ValueLayoutList });
 		}
 		else if (uniform_type == "ssbo")
 		{
-			// StorageBufferList‚É“o˜^
-			m_StorageBufferList.push_back(std::make_pair(BindingLayout, ValueLayoutList));
+			m_ShaderBufferList.push_back({ graphics::EBufferType::SHADERSTORAGE, BindingLayout, ValueLayoutList });
 		}
-		
 
 		return true;
 	}
@@ -443,8 +440,7 @@ namespace resource
 		if (m_TargetMaterialFrame)
 		{
 			m_TargetMaterialFrame->SetCreateInfo(m_CreateInfo);
-			m_TargetMaterialFrame->SetUniformBufferList(m_UniformBufferList);
-			m_TargetMaterialFrame->SetStorageBufferList(m_StorageBufferList);
+			m_TargetMaterialFrame->SetShaderBufferList(m_ShaderBufferList);
 			m_TargetMaterialFrame->SetTextureBufferList(m_TextureBufferList);
 		}
 
