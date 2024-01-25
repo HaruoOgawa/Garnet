@@ -105,9 +105,9 @@ namespace api
 		return Renderer;
 	}
 
-	std::shared_ptr<graphics::CMaterial> CWebGPUAPI::CreateMaterial(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, int RefCount)
+	std::shared_ptr<graphics::CMaterial> CWebGPUAPI::CreateMaterial(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, int RefCount, graphics::ECullMode CullMode)
 	{
-		auto Material = std::make_shared<api::CWebGPUMaterial>(this, createInfo, RefCount);
+		auto Material = std::make_shared<api::CWebGPUMaterial>(this, createInfo, RefCount, CullMode);
 
 		return Material;
 	}

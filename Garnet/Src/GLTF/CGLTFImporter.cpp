@@ -268,7 +268,7 @@ namespace gltf
 			int occlusionTextureIndex = glTfMaterial.occlusionTexture.index;
 			
 			// マテリアルにシェーダーを設定
-			std::shared_ptr<graphics::CMaterial> material = MaterialFrame->CreateMaterial(pGraphicsAPI, 1);
+			std::shared_ptr<graphics::CMaterial> material = MaterialFrame->CreateMaterial(pGraphicsAPI, 1, graphics::ECullMode::CULL_BACK);
 
 			// UBO
 			{
@@ -633,10 +633,8 @@ namespace gltf
 		}
 
 		// マテリアルにシェーダーを設定
-		std::shared_ptr<graphics::CMaterial> material = MaterialFrame->CreateMaterial(pGraphicsAPI, MatRefCount);
+		std::shared_ptr<graphics::CMaterial> material = MaterialFrame->CreateMaterial(pGraphicsAPI, MatRefCount, graphics::ECullMode::CULL_NONE);
 		
-		material->SetCullMode(graphics::ECullMode::CULL_NONE);
-
 		MaterialList.push_back(material);
 
 		return true;

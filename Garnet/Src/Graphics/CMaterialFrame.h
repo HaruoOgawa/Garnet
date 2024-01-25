@@ -36,6 +36,6 @@ namespace graphics
 		void SetShaderBufferList(const std::vector<SShaderBufferSet>& ShaderBufferList);
 		void SetTextureBufferList(const std::vector<graphics::STextureBindingLayout>& TextureBufferList);
 
-		std::shared_ptr<CMaterial> CreateMaterial(api::IGraphicsAPI* pGraphicsAPI, int RefCount);
+		std::shared_ptr<CMaterial> CreateMaterial(api::IGraphicsAPI* pGraphicsAPI, int RefCount, graphics::ECullMode CullMode);
 	};
 }

@@ -42,10 +42,15 @@ namespace graphics
 		std::shared_ptr<graphics::CMaterial> m_DepthMaterial;
 
 		bool m_EnabledZTest;
+
+		const ECullMode m_DefaultCullMode;
 		ECullMode m_CullMode;
+		
 		EBlendType m_BlendType;
+
+		bool m_IsDrawOutline;
 	public:
-		CMaterial(const std::shared_ptr<CMaterialCreateInfo>& createInfo, int RefCount);
+		CMaterial(const std::shared_ptr<CMaterialCreateInfo>& createInfo, int RefCount, ECullMode CullMode);
 		virtual ~CMaterial() = default;
 
 		virtual bool Create(const std::shared_ptr<graphics::CTextureSet>& TextureSet) = 0;
@@ -58,6 +63,7 @@ namespace graphics
 
 		virtual void SetCullMode(ECullMode CullMode);
 		virtual ECullMode GetCullMode() const;
+		virtual void ResetToDefaultCullMode();
 		
 		virtual void SetBlendType(EBlendType BlendType);
 		virtual EBlendType GetBlendType() const;
@@ -81,5 +87,8 @@ namespace graphics
 		virtual void ResetDynamicOffset();
 
 		virtual const std::vector<uint32_t>& GetBindingRefSizeList() const;
+
+		virtual void SetIsDrawOutline(bool Frag);
+		virtual bool IsDrawOutline() const;
 	};
 }

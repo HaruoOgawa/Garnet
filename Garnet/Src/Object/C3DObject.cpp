@@ -335,7 +335,7 @@ namespace object
 		return true;
 	}
 
-	bool C3DObject::Draw(bool IsDepthPass, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo, 
+	bool C3DObject::Draw(bool IsDepthPass, bool DrawOutline, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo,
 		const std::shared_ptr<object::C3DObject>& DebugSphere)
 	{
 		if (!m_IsCreated) return true;
@@ -377,6 +377,14 @@ namespace object
 				// ダイナミックオフセットがマテリアル参照数よりも大きい時は終了する
 				if (DynamicOffsetNum > Material->GetRefCount()) continue;
 
+				// アウトライン
+				if (DrawOutline)
+				{
+					if (DrawOutline != Material->IsDrawOutline()) continue;
+
+					Material->SetCullMode(graphics::ECullMode::CULL_FRONT);
+				}
+
 				// 共通のユニフォームバッファの更新
 				glm::mat4 lightVPMat = DrawInfo->GetLightProjection()->GetPrejectionMatrix() * DrawInfo->GetLightCamera()->GetViewMatrix();
 
@@ -404,10 +412,14 @@ namespace object
 				}
 #endif
 
+				// 描画実行
 				if (!Primitive->Draw(Material, DynamicOffsetNum, IsDepthPass)) return false;
 
 				// マテリアルの参照カウントをインクリメントする
 				Material->IncreaseDynamicOffset();
+
+				// 描画準備のために変更した設定を元に戻す
+				Material->ResetToDefaultCullMode();
 			}
 		}
 		

@@ -25,11 +25,11 @@ namespace graphics
 		m_TextureBufferList = TextureBufferList;
 	}
 
-	std::shared_ptr<CMaterial> CMaterialFrame::CreateMaterial(api::IGraphicsAPI* pGraphicsAPI, int RefCount)
+	std::shared_ptr<CMaterial> CMaterialFrame::CreateMaterial(api::IGraphicsAPI* pGraphicsAPI, int RefCount, graphics::ECullMode CullMode)
 	{
 		if (!m_CreateInfo) return nullptr;
 
-		std::shared_ptr<CMaterial> Material = pGraphicsAPI->CreateMaterial(m_CreateInfo, RefCount);
+		std::shared_ptr<CMaterial> Material = pGraphicsAPI->CreateMaterial(m_CreateInfo, RefCount, CullMode);
 
 		// ShaderBuffer
 		for (const auto& ShaderBuffer : m_ShaderBufferList)

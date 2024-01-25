@@ -177,11 +177,10 @@ namespace scene
 
 		// m_Background
 		{
-			auto Mat = m_SimpleTextureMF->CreateMaterial(pGraphicsAPI, 1);
+			auto Mat = m_SimpleTextureMF->CreateMaterial(pGraphicsAPI, 1, graphics::ECullMode::CULL_FRONT);
 			Mat->ReplacePreloadUniformValue("useDirSampling", &glm::ivec1(1)[0], sizeof(glm::ivec1), 1);
 			Mat->ReplacePreloadUniformValue("useTexColor", &glm::ivec1(1)[0], sizeof(glm::ivec1), 1);
 			Mat->ReplaceTextureIndex("texImage", 0);
-			Mat->SetCullMode(graphics::ECullMode::CULL_FRONT);
 
 			m_Background->GetTextureSet()->Add2DTexture(m_IBL_Skybox_Texture);
 
@@ -191,7 +190,7 @@ namespace scene
 
 		// m_DebugSphere
 		{
-			auto Mat = m_SimpleTextureMF->CreateMaterial(pGraphicsAPI, 1);
+			auto Mat = m_SimpleTextureMF->CreateMaterial(pGraphicsAPI, 1, graphics::ECullMode::CULL_BACK);
 			Mat->SetEnabledZTest(false);
 			m_DebugSphere->SetScale(glm::vec3(0.1f));
 			if (!object::C3DObject::CreateSimply(pGraphicsAPI, m_DebugSphere, graphics::CPresetPrimitive::CreateSphere(), Mat, m_DepthMF)) return false;
@@ -284,11 +283,8 @@ namespace scene
 		
 		if (m_TdaMiku_Model)
 		{
-			m_TdaMiku_Model->SetPos(glm::vec3(0.0f, 0.0f, 0.0f));
-			if (!m_TdaMiku_Model->Draw(IsDepthPass, Camera, Projection, DrawInfo, m_DebugSphere)) return false;
-			
-			m_TdaMiku_Model->SetPos(glm::vec3(1.0f, 0.0f, 0.0f));
-			if (!m_TdaMiku_Model->Draw(IsDepthPass, Camera, Projection, DrawInfo, m_DebugSphere)) return false;
+			if (!m_TdaMiku_Model->Draw(IsDepthPass, false, Camera, Projection, DrawInfo, m_DebugSphere)) return false;
+			if (!m_TdaMiku_Model->Draw(IsDepthPass, true, Camera, Projection, DrawInfo, m_DebugSphere)) return false;
 			
 			/*m_TdaMiku_Model->SetPos(glm::vec3(-1.0f, 0.0f, 0.0f));
 			if (!m_TdaMiku_Model->Draw(IsDepthPass, Camera, Projection, DrawInfo, m_DebugSphere)) return false;
@@ -302,7 +298,7 @@ namespace scene
 		
 		if (m_glTFObject)
 		{
-			if (!m_glTFObject->Draw(IsDepthPass, Camera, Projection, DrawInfo, m_DebugSphere)) return false;
+			if (!m_glTFObject->Draw(IsDepthPass, false, Camera, Projection, DrawInfo, m_DebugSphere)) return false;
 		}
 		
 		/*if (m_BrainStemDObject)
@@ -327,7 +323,7 @@ namespace scene
 		
 		if (m_Background)
 		{
-			if (!m_Background->Draw(IsDepthPass, Camera, Projection, DrawInfo)) return false;
+			if (!m_Background->Draw(IsDepthPass, false, Camera, Projection, DrawInfo)) return false;
 		}
 
 		return true;

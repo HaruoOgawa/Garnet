@@ -78,7 +78,7 @@ namespace imageeffect
 			glm::vec2 OffsetV = glm::vec2(1.0f / w, 0.0f);
 			m_ScreenObjX->GetMaterialList()[0]->SetUniformValue("Direction", &OffsetV[0], sizeof(glm::vec2));
 
-			if (!m_ScreenObjX->Draw(false, Camera, Projection, DrawInfo)) return false;
+			if (!m_ScreenObjX->Draw(false, false, Camera, Projection, DrawInfo)) return false;
 			if (!m_pGraphicsAPI->EndRender()) return false;
 		}
 		
@@ -88,7 +88,7 @@ namespace imageeffect
 			glm::vec2 OffsetV = glm::vec2(0.0f, 1.0f / h);
 			m_ScreenObjY->GetMaterialList()[0]->SetUniformValue("Direction", &OffsetV[0], sizeof(glm::vec2));
 
-			if (!m_ScreenObjY->Draw(false, Camera, Projection, DrawInfo)) return false;
+			if (!m_ScreenObjY->Draw(false, false, Camera, Projection, DrawInfo)) return false;
 			if (!m_pGraphicsAPI->EndRender()) return false;
 		}
 
@@ -152,7 +152,7 @@ namespace imageeffect
 	bool CBlurEffect::Load()
 	{
 		// MaterialX
-		auto MaterialX = m_BlurMF->CreateMaterial(m_pGraphicsAPI, 1);
+		auto MaterialX = m_BlurMF->CreateMaterial(m_pGraphicsAPI, 1, graphics::ECullMode::CULL_BACK);
 		MaterialX->SetEnabledZTest(false);
 		MaterialX->SetCullMode(graphics::ECullMode::CULL_NONE);
 		
@@ -166,8 +166,8 @@ namespace imageeffect
 			MaterialX->ReplaceTextureIndex("SrcTex", 0);
 		}
 
-		// MaterialX
-		auto MaterialY = m_BlurMF->CreateMaterial(m_pGraphicsAPI, 1);
+		// MaterialY
+		auto MaterialY = m_BlurMF->CreateMaterial(m_pGraphicsAPI, 1, graphics::ECullMode::CULL_BACK);
 		MaterialY->SetEnabledZTest(false);
 		MaterialY->SetCullMode(graphics::ECullMode::CULL_NONE);
 

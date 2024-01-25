@@ -10,8 +10,8 @@
 
 namespace api
 {
-	CVulkanMaterial::CVulkanMaterial(api::CVulkanAPI* pGraphicsAPI, const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, int RefCount):
-		CMaterial(createInfo, RefCount),
+	CVulkanMaterial::CVulkanMaterial(api::CVulkanAPI* pGraphicsAPI, const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, int RefCount, graphics::ECullMode CullMode):
+		CMaterial(createInfo, RefCount, CullMode),
 		m_pGraphicsAPI(pGraphicsAPI),
 
 		m_VertShaderModule(nullptr),

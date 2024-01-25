@@ -3,14 +3,16 @@
 
 namespace graphics
 {
-	CMaterial::CMaterial(const std::shared_ptr<CMaterialCreateInfo>& createInfo, int RefCount):
+	CMaterial::CMaterial(const std::shared_ptr<CMaterialCreateInfo>& createInfo, int RefCount, ECullMode CullMode):
 		m_CreateInfo(createInfo),
 		m_RefCount(RefCount),
 		m_CurrentDynamicOffset(0),
 		m_DepthMaterial(nullptr),
 		m_EnabledZTest(true),
-		m_CullMode(ECullMode::CULL_BACK),
-		m_BlendType(EBlendType::BLEND_TYPE_ADDITIVE)
+		m_DefaultCullMode(CullMode),
+		m_CullMode(CullMode),
+		m_BlendType(EBlendType::BLEND_TYPE_ADDITIVE),
+		m_IsDrawOutline(false)
 	{
 		ResetDynamicOffset();
 	}
@@ -22,7 +24,7 @@ namespace graphics
 
 	bool CMaterial::CreateDepthMaterial(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<graphics::CMaterialFrame>& DepthMF)
 	{
-		m_DepthMaterial = DepthMF->CreateMaterial(pGraphicsAPI, m_RefCount);
+		m_DepthMaterial = DepthMF->CreateMaterial(pGraphicsAPI, m_RefCount, m_CullMode);
 
 		m_DepthMaterial->SetCullMode(graphics::ECullMode::CULL_FRONT);
 
@@ -49,6 +51,11 @@ namespace graphics
 	void CMaterial::SetCullMode(ECullMode CullMode)
 	{
 		m_CullMode = CullMode;
+	}
+
+	void CMaterial::ResetToDefaultCullMode()
+	{
+		m_CullMode = m_DefaultCullMode;
 	}
 
 	ECullMode CMaterial::GetCullMode() const
@@ -133,5 +140,15 @@ namespace graphics
 	const std::vector<uint32_t>& CMaterial::GetBindingRefSizeList() const
 	{
 		return m_BindingRefSizeList;
+	}
+
+	void CMaterial::SetIsDrawOutline(bool Frag)
+	{
+		m_IsDrawOutline = Frag;
+	}
+
+	bool CMaterial::IsDrawOutline() const
+	{
+		return m_IsDrawOutline;
 	}
 }

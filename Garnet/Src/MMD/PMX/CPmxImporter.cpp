@@ -99,8 +99,10 @@ namespace mmd
 			// アウトラインにも使用するので2つ参照する
 			int MatRefCount = 2;
 
+			graphics::ECullMode CullMode = (PmxMaterial->IsDrawDoubleSlided()) ? graphics::ECullMode::CULL_NONE : graphics::ECullMode::CULL_BACK;
+
 			// マテリアルにシェーダーを設定
-			std::shared_ptr<graphics::CMaterial> material = MaterialFrame->CreateMaterial(pGraphicsAPI, MatRefCount);
+			std::shared_ptr<graphics::CMaterial> material = MaterialFrame->CreateMaterial(pGraphicsAPI, MatRefCount, CullMode);
 
 			material->ReplacePreloadUniformValue("edgeSize", &glm::vec1(PmxMaterial->GetEdgeSize())[0], sizeof(float), 0);
 
@@ -109,6 +111,9 @@ namespace mmd
 			material->ReplacePreloadUniformValue("specularFactor", &PmxMaterial->GetSpecular()[0], sizeof(glm::vec4), 2);
 			material->ReplacePreloadUniformValue("edgeColor", &PmxMaterial->GetEdgeColor()[0], sizeof(glm::vec4), 2);
 			material->ReplacePreloadUniformValue("specularIntensity", &glm::vec1(PmxMaterial->GetSpecularCoef())[0], sizeof(float), 2);
+
+			// アウトライン
+			material->SetIsDrawOutline(PmxMaterial->IsDrawEdge());
 
 			// MainTexture
 			{
@@ -150,11 +155,6 @@ namespace mmd
 
 					material->ReplaceTextureIndex("SphereTexture", SphereTexIndex);
 				}
-			}
-
-			if (PmxMaterial->IsDrawDoubleSlided())
-			{
-				material->SetCullMode(graphics::ECullMode::CULL_NONE);
 			}
 
 			// SkinMatrix StorageBuffer

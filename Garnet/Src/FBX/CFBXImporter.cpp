@@ -249,7 +249,7 @@ namespace fbx
 
 			pFbxMaterialList.push_back(pFbxMaterial);
 
-			std::shared_ptr<graphics::CMaterial> material = MaterialFrame->CreateMaterial(pGraphicsAPI, 1);
+			std::shared_ptr<graphics::CMaterial> material = MaterialFrame->CreateMaterial(pGraphicsAPI, 1, graphics::ECullMode::CULL_BACK);
 
 			{
 				const auto& prop = pFbxMaterial->FindProperty(fbxsdk::FbxSurfaceMaterial::sDiffuse);
@@ -301,7 +301,7 @@ namespace fbx
 		}
 
 		// マテリアルにシェーダーを設定
-		std::shared_ptr<graphics::CMaterial> material = MaterialFrame->CreateMaterial(pGraphicsAPI, MatRefCount);
+		std::shared_ptr<graphics::CMaterial> material = MaterialFrame->CreateMaterial(pGraphicsAPI, MatRefCount, graphics::ECullMode::CULL_NONE);
 
 		// SkinMatrix StorageBuffer
 		{
@@ -317,8 +317,6 @@ namespace fbx
 
 			material->ReplacePreloadUniformValue("r_SkinMatrixBuffer", &SkinMatrixList[0], static_cast<int>(SkinMatrixList.size()) * sizeof(glm::mat4), 1);
 		}
-
-		material->SetCullMode(graphics::ECullMode::CULL_NONE);
 
 		MaterialList.push_back(material);
 

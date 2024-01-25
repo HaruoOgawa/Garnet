@@ -27,7 +27,7 @@ namespace resource
 		std::shared_ptr<graphics::CMaterialCreateInfo> createInfo = std::make_shared<graphics::CMaterialCreateInfo>();
 		createInfo->SetVertexShaderCode(m_VertexShader->GetData());
 		createInfo->SetFragmentShaderCode(m_FragmentShader->GetData());
-		auto Material = pGraphicsAPI->CreateMaterial(createInfo, 1);
+		auto Material = pGraphicsAPI->CreateMaterial(createInfo, 1, graphics::ECullMode::CULL_BACK);
 
 		auto UniforBuffer = createInfo->CreateUniformBuffer({ graphics::SBindingLayout("UniformBufferObject", 0, false) });
 		UniforBuffer->AddData("rate", &glm::vec1(0.0f)[0], sizeof(glm::vec1), 0);
@@ -160,7 +160,7 @@ namespace resource
 			m_LoadingBar->GetMaterialList()[0]->SetUniformValue("rate", &glm::vec1(rate)[0], sizeof(float));
 			m_LoadingBar->GetMaterialList()[0]->SetUniformValue("alpha", &m_Alpha, sizeof(float));
 
-			if (!m_LoadingBar->Draw(IsDepthPass, Camera, Projection, DrawInfo)) return false;
+			if (!m_LoadingBar->Draw(IsDepthPass, false, Camera, Projection, DrawInfo)) return false;
 		}
 
 		return true;
