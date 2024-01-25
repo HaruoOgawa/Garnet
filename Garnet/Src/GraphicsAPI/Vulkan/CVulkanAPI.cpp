@@ -520,6 +520,14 @@ namespace api
 		{
 			deviceCreateInfo.enabledLayerCount = 0;
 		}
+		
+		// 物理デバイス生成の拡張を設定する
+		VkPhysicalDeviceExtendedDynamicStateFeaturesEXT extentedDynamicState{};
+		extentedDynamicState.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTENDED_DYNAMIC_STATE_FEATURES_EXT;
+		extentedDynamicState.pNext = nullptr;
+		extentedDynamicState.extendedDynamicState = true;
+
+		deviceCreateInfo.pNext = &extentedDynamicState;
 
 		// 論理デバイスを作成
 		VkResult result = vkCreateDevice(m_PhysicalDevice, &deviceCreateInfo, nullptr, &m_LogicalDevice);

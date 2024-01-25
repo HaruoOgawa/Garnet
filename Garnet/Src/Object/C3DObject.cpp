@@ -374,9 +374,13 @@ namespace object
 				// マテリアルの参照カウントをダイナミックオフセットとして使用する
 				int DynamicOffsetNum = Material->GetDynamicOffset();
 
+				// ダイナミックオフセットがマテリアル参照数よりも大きい時は終了する
+				if (DynamicOffsetNum > Material->GetRefCount()) continue;
+
 				// 共通のユニフォームバッファの更新
 				glm::mat4 lightVPMat = DrawInfo->GetLightProjection()->GetPrejectionMatrix() * DrawInfo->GetLightCamera()->GetViewMatrix();
 
+				Material->SetUniformValue("drawPathIndex", &DynamicOffsetNum, sizeof(int), DynamicOffsetNum);
 				Material->SetUniformValue("model", &WorldMatrix[0][0], sizeof(glm::mat4), DynamicOffsetNum);
 				Material->SetUniformValue("view", &Camera->GetViewMatrix()[0][0], sizeof(glm::mat4), DynamicOffsetNum);
 				Material->SetUniformValue("proj", &Projection->GetPrejectionMatrix()[0][0], sizeof(glm::mat4), DynamicOffsetNum);

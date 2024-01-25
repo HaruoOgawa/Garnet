@@ -72,6 +72,8 @@ namespace graphics
 
 		virtual void SetUniformValue(const std::string Name, const void* Data, int ByteSize, int DynamicOffsetNum = -1) = 0;
 
+		virtual int GetRefCount() const;
+
 		virtual bool IsUseDynamicOffset();
 
 		virtual void IncreaseDynamicOffset();

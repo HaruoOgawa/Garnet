@@ -18,6 +18,7 @@ layout(binding = 2) uniform FragUniformBufferObject{
 
 	vec4 ambientFactor;
 	vec4 specularFactor;
+	vec4 edgeColor;
 
 	float specularIntensity;
 	float f_pad0;
@@ -28,6 +29,11 @@ layout(binding = 2) uniform FragUniformBufferObject{
     int UseToonTexture;
 	int UseSphereTexture;
 	int SphereMode;
+
+	int drawPathIndex;
+	int iPad0;
+	int iPad1;
+	int iPad2;
 
 	mat4 mPad0;
 	mat4 mPad1;
@@ -52,71 +58,78 @@ void main(){
 	vec3 col = vec3(1.0);
 	float alpha = 1.0;
 
-	// Lighting Param
-	float NdotL = max(0.0, dot(f_WorldNormal, -fragUbo.lightDir.xyz));
-
-	vec3 v = normalize(fragUbo.cameraPos.xyz - f_WorldPos.xyz);
-	vec3 l = (-1.0) * fragUbo.lightDir.xyz;
-	vec3 HalfVector = normalize(v + l);
-
-	// Diffuse
-	vec4 diffuseColor = fragUbo.diffuseFactor;
-
-	// Ambient
-	if(fragUbo.UseToonTexture == 0)
+	if(fragUbo.drawPathIndex == 1) // í èÌï`âÊÉpÉX
 	{
-		diffuseColor.rgb +=  fragUbo.ambientFactor.rgb * max(dot(-fragUbo.lightDir.xyz, f_WorldNormal), 0.0);
-	}
+		// Lighting Param
+		float NdotL = max(0.0, dot(f_WorldNormal, -fragUbo.lightDir.xyz));
 
-	// MainTexture
-	if(fragUbo.UseMainTexture != 0)
-	{
-		#ifdef USE_OPENGL
-		vec4 MainColor = texture(MainTexture, f_Texcoord);
-		#else
-		vec4 MainColor = texture(sampler2D(MainTexture, MainTextureSampler), f_Texcoord);
-		#endif
+		vec3 v = normalize(fragUbo.cameraPos.xyz - f_WorldPos.xyz);
+		vec3 l = (-1.0) * fragUbo.lightDir.xyz;
+		vec3 HalfVector = normalize(v + l);
+
+		// Diffuse
+		vec4 diffuseColor = fragUbo.diffuseFactor;
+
+		// Ambient
+		if(fragUbo.UseToonTexture == 0)
+		{
+			diffuseColor.rgb +=  fragUbo.ambientFactor.rgb * max(dot(-fragUbo.lightDir.xyz, f_WorldNormal), 0.0);
+		}
+
+		// MainTexture
+		if(fragUbo.UseMainTexture != 0)
+		{
+			#ifdef USE_OPENGL
+			vec4 MainColor = texture(MainTexture, f_Texcoord);
+			#else
+			vec4 MainColor = texture(sampler2D(MainTexture, MainTextureSampler), f_Texcoord);
+			#endif
 	
-		diffuseColor.rgb *= MainColor.rgb;
-	}
-
-	col = diffuseColor.rgb;
-	alpha = diffuseColor.a;
-
-	// SphereMap
-	if(fragUbo.UseSphereTexture != 0)
-	{
-		#ifdef USE_OPENGL
-		vec3 SphereColor = texture(SphereTexture, f_SphereUV).rgb;
-		#else
-		vec3 SphereColor = texture(sampler2D(SphereTexture, SphereTextureSampler), f_SphereUV).rgb;
-		#endif
-
-		if(fragUbo.SphereMode == 1) // èÊéZ
-		{
-			col *= SphereColor;		
+			diffuseColor.rgb *= MainColor.rgb;
 		}
-		else if(fragUbo.SphereMode == 2) // â¡éZ
+
+		col = diffuseColor.rgb;
+		alpha = diffuseColor.a;
+
+		// SphereMap
+		if(fragUbo.UseSphereTexture != 0)
 		{
-			col += SphereColor;
+			#ifdef USE_OPENGL
+			vec3 SphereColor = texture(SphereTexture, f_SphereUV).rgb;
+			#else
+			vec3 SphereColor = texture(sampler2D(SphereTexture, SphereTextureSampler), f_SphereUV).rgb;
+			#endif
+
+			if(fragUbo.SphereMode == 1) // èÊéZ
+			{
+				col *= SphereColor;		
+			}
+			else if(fragUbo.SphereMode == 2) // â¡éZ
+			{
+				col += SphereColor;
+			}
 		}
-	}
 
-	// Toon
-	if(fragUbo.UseToonTexture != 0)
+		// Toon
+		if(fragUbo.UseToonTexture != 0)
+		{
+			#ifdef USE_OPENGL
+			vec3 ToonColor = texture(ToonTexture, vec2(0.0, NdotL)).rgb;
+			#else
+			vec3 ToonColor = texture(sampler2D(ToonTexture, ToonTextureSampler), vec2(0.0, NdotL)).rgb;
+			#endif 
+
+			col *= mix(ToonColor, vec3(1.0), clamp(NdotL * 16.0 + 0.5, 0.0, 1.0));
+		}
+
+		// Specular
+		vec3 specularColor = fragUbo.specularFactor.xyz * max(0.0, pow(dot(HalfVector, f_WorldNormal), fragUbo.specularIntensity));
+		col += specularColor;
+	}
+	else if(fragUbo.drawPathIndex == 2) // ÉAÉEÉgÉâÉCÉìï`âÊÉpÉX
 	{
-		#ifdef USE_OPENGL
-		vec3 ToonColor = texture(ToonTexture, vec2(0.0, NdotL)).rgb;
-		#else
-		vec3 ToonColor = texture(sampler2D(ToonTexture, ToonTextureSampler), vec2(0.0, NdotL)).rgb;
-		#endif 
-
-		col *= mix(ToonColor, vec3(1.0), clamp(NdotL * 16.0 + 0.5, 0.0, 1.0));
+		col.rgb = fragUbo.edgeColor.rgb;
 	}
-
-	// Specular
-	vec3 specularColor = fragUbo.specularFactor.xyz * max(0.0, pow(dot(HalfVector, f_WorldNormal), fragUbo.specularIntensity));
-	col += specularColor;
-
+	
 	outColor = vec4(col, alpha);
 }
