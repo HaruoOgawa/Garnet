@@ -33,18 +33,24 @@ namespace graphics
 		std::vector<std::shared_ptr<CShaderBuffer>> m_ShaderBufferList;
 		std::vector<STextureBindingLayout> m_TextureBindingLayoutList;
 
-		int											 m_RefCount;
-		bool									     m_UseDynamicBufferOffset;
+		// VulkanやWebGPUはOpenGLの様に何も考えずにマテリアルを使いまわすことができないのでその数をあらかじめ設定しておく必要がある
+		const int m_RefCount;
+		int m_CurrentDynamicOffset;
 
 		std::vector<uint32_t> m_BindingRefSizeList; // GLSLの各bindingが参照しているバッファのサイズ
 
 		std::shared_ptr<graphics::CMaterial> m_DepthMaterial;
 
 		bool m_EnabledZTest;
+
+		const ECullMode m_DefaultCullMode;
 		ECullMode m_CullMode;
+		
 		EBlendType m_BlendType;
+
+		bool m_IsDrawOutline;
 	public:
-		CMaterial(const std::shared_ptr<CMaterialCreateInfo>& createInfo);
+		CMaterial(const std::shared_ptr<CMaterialCreateInfo>& createInfo, int RefCount, ECullMode CullMode);
 		virtual ~CMaterial() = default;
 
 		virtual bool Create(const std::shared_ptr<graphics::CTextureSet>& TextureSet) = 0;
@@ -57,6 +63,7 @@ namespace graphics
 
 		virtual void SetCullMode(ECullMode CullMode);
 		virtual ECullMode GetCullMode() const;
+		virtual void ResetToDefaultCullMode();
 		
 		virtual void SetBlendType(EBlendType BlendType);
 		virtual EBlendType GetBlendType() const;
@@ -71,12 +78,17 @@ namespace graphics
 
 		virtual void SetUniformValue(const std::string Name, const void* Data, int ByteSize, int DynamicOffsetNum = -1) = 0;
 
-		virtual void IncreaseRefCount();
 		virtual int GetRefCount() const;
-		virtual void SetRefStatus(int RefCount, bool UseDynamicBufferOffset);
+
+		virtual bool IsUseDynamicOffset();
+
+		virtual void IncreaseDynamicOffset();
+		virtual int GetDynamicOffset() const;
+		virtual void ResetDynamicOffset();
 
 		virtual const std::vector<uint32_t>& GetBindingRefSizeList() const;
 
-		virtual bool IsUseDynamicBufferOffset() const;
+		virtual void SetIsDrawOutline(bool Frag);
+		virtual bool IsDrawOutline() const;
 	};
 }

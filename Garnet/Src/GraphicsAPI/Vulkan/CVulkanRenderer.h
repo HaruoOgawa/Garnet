@@ -13,6 +13,7 @@
 #include <string>
 
 #include "../../Interface/IRenderer.h"
+#include "../../Graphics/ECullMode.h"
 
 // はぇー時間を管理するstd標準ライブラリ
 #include <chrono>
@@ -55,6 +56,8 @@ namespace renderer
 		bool CreateVertexBuffer(const std::shared_ptr<CRendererCreateInfo>& createInfo);
 		bool CreateIndexBuffer(const std::shared_ptr<CRendererCreateInfo>& createInfo);
 		bool CreateGraphicsPipeline(const std::shared_ptr<CRendererCreateInfo>& createInfo, api::CVulkanMaterial* pVulkanMat);
+
+		void SetCullMode(graphics::ECullMode CullMode);
 
 		// ヘルパー関数 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		VkFormat GetVertexFormat(int Dimention, EDataType DataType);

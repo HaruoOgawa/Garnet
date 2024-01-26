@@ -129,9 +129,9 @@ namespace api
 		return Renderer;
 	}
 
-	std::shared_ptr<graphics::CMaterial> CVulkanAPI::CreateMaterial(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo)
+	std::shared_ptr<graphics::CMaterial> CVulkanAPI::CreateMaterial(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, int RefCount, graphics::ECullMode CullMode)
 	{
-		auto Material = std::make_shared<api::CVulkanMaterial>(this, createInfo);
+		auto Material = std::make_shared<api::CVulkanMaterial>(this, createInfo, RefCount, CullMode);
 
 		return Material;
 	}
@@ -190,6 +190,8 @@ namespace api
 		// コマンドバッファの記録を終了
 		if (vkEndCommandBuffer(m_CommandBuffers[m_CurrentFrame]) != VK_SUCCESS)
 		{
+			Console::Log("[Error] Failed to vkEndCommandBuffer\n");
+
 			return false;
 		}
 
@@ -364,7 +366,9 @@ namespace api
 		AppInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
 		AppInfo.pEngineName = "Garnet";
 		AppInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
-		AppInfo.apiVersion = VK_API_VERSION_1_0;
+		// VK_DYNAMIC_STATE_CULL_MODEを使用するには1.3以上である必要がある
+		// https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/vkCmdSetCullModeEXT.html#VUID-vkCmdSetCullMode-None-08971
+		AppInfo.apiVersion = VK_API_VERSION_1_3;
 
 		// インスタンス情報 
 		VkInstanceCreateInfo InstanceInfo{};
@@ -518,6 +522,16 @@ namespace api
 		{
 			deviceCreateInfo.enabledLayerCount = 0;
 		}
+		
+		// 物理デバイス生成の拡張を設定する
+		// VK_DYNAMIC_STATE_CULL_MODEを使用するために必要な設定
+		// https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/vkCmdSetCullModeEXT.html#VUID-vkCmdSetCullMode-None-08971
+		VkPhysicalDeviceExtendedDynamicStateFeaturesEXT extentedDynamicState{};
+		extentedDynamicState.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTENDED_DYNAMIC_STATE_FEATURES_EXT;
+		extentedDynamicState.pNext = nullptr;
+		extentedDynamicState.extendedDynamicState = true;
+
+		deviceCreateInfo.pNext = &extentedDynamicState;
 
 		// 論理デバイスを作成
 		VkResult result = vkCreateDevice(m_PhysicalDevice, &deviceCreateInfo, nullptr, &m_LogicalDevice);
@@ -908,6 +922,8 @@ namespace api
 		// そしてそのキューには格納できるコマンドの種類が決まっていて、描画系だとGraphicsQueue、プレゼント系だとPresentQueueといった感じで分かれている
 		if (vkQueueSubmit(m_GraphicsQueue, 1, &submitInfo, m_InFlightFences[m_CurrentFrame]) != VK_SUCCESS)
 		{
+			Console::Log("[Error] Failed to vkQueueSubmit\n");
+
 			return false;
 		}
 

@@ -101,6 +101,9 @@ namespace renderer
 		// グラフィックパイプラインをコマンドにバインド
 		vkCmdBindPipeline(m_pGraphicsAPI->GetCurrentCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, m_GraphicsPipeline);
 
+		// カリングモードを設定
+		SetCullMode(pVulkanMat->GetCullMode());
+		
 		// 頂点バッファをパイプラインにバインドする
 		VkDeviceSize offsets[] = { 0 };
 		for (int i = 0; i < static_cast<int>(m_VertexBufferList.size()); i++)
@@ -127,7 +130,7 @@ namespace renderer
 			dynamicOffsetList.push_back(dynamicOffset);
 		}
 
-		if (pVulkanMat->IsUseDynamicBufferOffset())
+		if (pVulkanMat->IsUseDynamicOffset())
 		{
 			vkCmdBindDescriptorSets(m_pGraphicsAPI->GetCurrentCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS,
 				m_PipelineLayout, 0, 1, &pVulkanMat->GetDescriptorSets()[m_pGraphicsAPI->GetCurrentFrame()], static_cast<uint32_t>(dynamicOffsetList.size()), &dynamicOffsetList[0]);
@@ -248,7 +251,8 @@ namespace renderer
 		// 動的状態(ダイナミックステート)の設定(パイプラインにベイクせずにマイフレームの描画時に設定できるようにするパラメーターの設定)
 		std::vector<VkDynamicState> dynamicStates = {
 			VK_DYNAMIC_STATE_VIEWPORT,
-			VK_DYNAMIC_STATE_SCISSOR
+			VK_DYNAMIC_STATE_SCISSOR,
+			VK_DYNAMIC_STATE_CULL_MODE
 		};
 
 		VkPipelineDynamicStateCreateInfo dynamicStateCreateInfo{};
@@ -488,6 +492,28 @@ namespace renderer
 		if (vkCreateGraphicsPipelines(m_pGraphicsAPI->GetLogicalDevice(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_GraphicsPipeline) != VK_SUCCESS) return false;
 
 		return true;
+	}
+
+	void CVulkanRenderer::SetCullMode(graphics::ECullMode CullMode)
+	{
+		switch (CullMode)
+		{
+		case graphics::ECullMode::CULL_BACK:
+			vkCmdSetCullMode(m_pGraphicsAPI->GetCurrentCommandBuffer(), VK_CULL_MODE_BACK_BIT);
+			break;
+
+		case graphics::ECullMode::CULL_FRONT:
+			vkCmdSetCullMode(m_pGraphicsAPI->GetCurrentCommandBuffer(), VK_CULL_MODE_FRONT_BIT);
+			break;
+
+		case graphics::ECullMode::CULL_NONE:
+			vkCmdSetCullMode(m_pGraphicsAPI->GetCurrentCommandBuffer(), VK_CULL_MODE_NONE);
+			break;
+
+		default:
+			vkCmdSetCullMode(m_pGraphicsAPI->GetCurrentCommandBuffer(), VK_CULL_MODE_BACK_BIT);
+			break;
+		}
 	}
 
 	// ヘルパー関数 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////

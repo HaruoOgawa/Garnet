@@ -8,6 +8,7 @@ namespace resource
 	class CFile : public resource::IResource
 	{
 		resource::ELoadStatus m_Status;
+		
 		const std::string m_Filename;
 		std::string m_Extention;
 
@@ -34,5 +35,11 @@ namespace resource
 
 		void SetData(const std::vector<unsigned char>& Data);
 		const std::vector<unsigned char>& GetData() const;
+
+		static std::string GetParentDir(const std::string& Path);
+		static std::string AddPunct(const std::string& Path);
+
+		static std::wstring CastU8ToU16Str(const std::string& U8Str);
+		static std::string CastU16ToU8Str(const std::wstring& U16Str);
 	};
 }

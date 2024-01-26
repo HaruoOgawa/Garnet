@@ -68,12 +68,12 @@
             {
               "name": "metallicFactor",
               "type": "float",
-              "initValue": [ 0.5 ]
+              "initValue": [ 0.0 ]
             },
             {
               "name": "roughnessFactor",
               "type": "float",
-              "initValue": [ 0.5 ]
+              "initValue": [ 0.0 ]
             },
             {
               "name": "normalMapScale",

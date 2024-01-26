@@ -184,7 +184,7 @@ namespace fbx
 				pFbxMeshList.shrink_to_fit();
 
 				// Nodeと各要素をIndexで繋ぐ
-				if (!ConnectNodeTo(NodeList, pFbxNodeList, pFbxMeshList, MeshList, MaterialList, Skin)) return false;
+				if (!ConnectNodeTo(NodeList, pFbxNodeList, pFbxMeshList, Skin)) return false;
 			}
 
 			// オブジェクトにリソースを登録
@@ -249,7 +249,7 @@ namespace fbx
 
 			pFbxMaterialList.push_back(pFbxMaterial);
 
-			std::shared_ptr<graphics::CMaterial> material = MaterialFrame->CreateMaterial(pGraphicsAPI);
+			std::shared_ptr<graphics::CMaterial> material = MaterialFrame->CreateMaterial(pGraphicsAPI, 1, graphics::ECullMode::CULL_BACK);
 
 			{
 				const auto& prop = pFbxMaterial->FindProperty(fbxsdk::FbxSurfaceMaterial::sDiffuse);
@@ -265,6 +265,9 @@ namespace fbx
 				// SkinMatは存在するJointの数だけ用意する必要がある
 				int SkinMatCount = 1;
 				if (Skin) SkinMatCount = static_cast<int>(Skin->GetJointList().size());
+
+				// DynamicOffsetが256バイトからしか使えない都合上SkinMatCountの最小値は4とする(4 * 16 * 4 = 256)
+				if (SkinMatCount < 4) SkinMatCount = 4;
 
 				// SSBOのサイズは2のn乗である必要がある
 				SkinMatCount = math::CMath::CalcNextPowerOfTwo(SkinMatCount);
@@ -286,8 +289,19 @@ namespace fbx
 	{
 		if (!MaterialFrame) return true;
 
+		// マテリアル参照数とマテリアルインデックスの設定
+		int MatRefCount = 0;
+		for (auto& Mesh : MeshList)
+		{
+			for (auto& Primirive : Mesh->GetPrimitiveList())
+			{
+				Primirive->SetMaterialIndex(0);
+				MatRefCount++;
+			}
+		}
+
 		// マテリアルにシェーダーを設定
-		std::shared_ptr<graphics::CMaterial> material = MaterialFrame->CreateMaterial(pGraphicsAPI);
+		std::shared_ptr<graphics::CMaterial> material = MaterialFrame->CreateMaterial(pGraphicsAPI, MatRefCount, graphics::ECullMode::CULL_NONE);
 
 		// SkinMatrix StorageBuffer
 		{
@@ -304,17 +318,7 @@ namespace fbx
 			material->ReplacePreloadUniformValue("r_SkinMatrixBuffer", &SkinMatrixList[0], static_cast<int>(SkinMatrixList.size()) * sizeof(glm::mat4), 1);
 		}
 
-		material->SetCullMode(graphics::ECullMode::CULL_NONE);
-
 		MaterialList.push_back(material);
-
-		for (auto& Mesh : MeshList)
-		{
-			for (auto& Primirive : Mesh->GetPrimitiveList())
-			{
-				Primirive->SetMaterialIndex(0);
-			}
-		}
 
 		return true;
 	}
@@ -785,7 +789,7 @@ namespace fbx
 	{
 		// Nodeを作成
 		// MeshとSkinは後ほどセットする
-		std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(-1, std::vector<std::shared_ptr<graphics::CMesh>>(), std::vector<std::shared_ptr<graphics::CMaterial>>());
+		std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(-1);
 
 		std::string NodeName = std::string(pFBXNode->GetName());
 		Node->SetName(NodeName);
@@ -849,8 +853,7 @@ namespace fbx
 		return true;
 	}
 
-	bool CFBXImporter::ConnectNodeTo(std::vector<std::shared_ptr<object::CNode>>& NodeList, const std::vector<FbxNode*>& pFbxNodeList, const std::vector<FbxMesh*>& pFbxMeshList,
-		const std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, const std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList, const std::shared_ptr<animation::CSkin>& Skin)
+	bool CFBXImporter::ConnectNodeTo(std::vector<std::shared_ptr<object::CNode>>& NodeList, const std::vector<FbxNode*>& pFbxNodeList, const std::vector<FbxMesh*>& pFbxMeshList, const std::shared_ptr<animation::CSkin>& Skin)
 	{
 		// NodeListとpFbxNodeListは同じ順番で同じ数
 		if (NodeList.size() != pFbxNodeList.size()) return false;
@@ -877,7 +880,7 @@ namespace fbx
 			}
 
 			// MeshIndexを設定
-			Node->SetMeshIndexWithDynamicOffset(MeshIndex, MeshList, MaterialList);
+			Node->SetMeshIndex(MeshIndex);
 
 			// JointがあるならSkinが1つあるとする
 			int SkinIndex = (Skin->GetJointList().size() > 0)? 0 : - 1;

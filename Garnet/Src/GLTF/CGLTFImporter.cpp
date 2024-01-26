@@ -119,7 +119,7 @@ namespace gltf
 		// ノード
 		std::vector<std::shared_ptr<object::CNode>> NodeList;
 		std::vector<std::vector<int>> RootNodeIndexList;
-		if (!CreateNode(model, NodeList, MeshList, MaterialList, RootNodeIndexList)) return false;
+		if (!CreateNode(model, NodeList, RootNodeIndexList)) return false;
 
 		// スキン
 		std::vector<std::shared_ptr<animation::CSkin>> AnimationSkinList;
@@ -268,7 +268,7 @@ namespace gltf
 			int occlusionTextureIndex = glTfMaterial.occlusionTexture.index;
 			
 			// マテリアルにシェーダーを設定
-			std::shared_ptr<graphics::CMaterial> material = MaterialFrame->CreateMaterial(pGraphicsAPI);
+			std::shared_ptr<graphics::CMaterial> material = MaterialFrame->CreateMaterial(pGraphicsAPI, 1, graphics::ECullMode::CULL_BACK);
 
 			// UBO
 			{
@@ -381,7 +381,8 @@ namespace gltf
 				int SkinMatCount = 0;
 				for (const auto& glTFSkin : model.skins) { SkinMatCount += static_cast<int>(glTFSkin.joints.size()); }
 
-				if(SkinMatCount <= 0) SkinMatCount = 1;
+				// DynamicOffsetが256バイトからしか使えない都合上SkinMatCountの最小値は4とする(4 * 16 * 4 = 256)
+				if(SkinMatCount < 4) SkinMatCount = 4;
 
 				// SSBOのサイズは2のn乗である必要がある
 				SkinMatCount = math::CMath::CalcNextPowerOfTwo(SkinMatCount);
@@ -620,26 +621,26 @@ namespace gltf
 	bool CGLTFImporter::CreateDummyMaterial(api::IGraphicsAPI* pGraphicsAPI, const tinygltf::Model& model, std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList,
 		const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, std::vector<std::shared_ptr<graphics::CMesh>>& MeshList)
 	{
-		// マテリアルにシェーダーを設定
-		std::shared_ptr<graphics::CMaterial> material = MaterialFrame->CreateMaterial(pGraphicsAPI);
-		
-		material->SetCullMode(graphics::ECullMode::CULL_NONE);
-
-		MaterialList.push_back(material);
-
+		// マテリアル参照数とマテリアルインデックスの設定
+		int MatRefCount = 0;
 		for (auto& Mesh : MeshList)
 		{
 			for (auto& Primirive : Mesh->GetPrimitiveList())
 			{
 				Primirive->SetMaterialIndex(0);
+				MatRefCount++;
 			}
 		}
+
+		// マテリアルにシェーダーを設定
+		std::shared_ptr<graphics::CMaterial> material = MaterialFrame->CreateMaterial(pGraphicsAPI, MatRefCount, graphics::ECullMode::CULL_NONE);
+		
+		MaterialList.push_back(material);
 
 		return true;
 	}
 
-	bool CGLTFImporter::CreateNode(const tinygltf::Model& model, std::vector<std::shared_ptr<object::CNode>>& NodeList, const std::vector<std::shared_ptr<graphics::CMesh>>& MeshList,
-		const std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList, std::vector<std::vector<int>>& RootNodeIndexList)
+	bool CGLTFImporter::CreateNode(const tinygltf::Model& model, std::vector<std::shared_ptr<object::CNode>>& NodeList, std::vector<std::vector<int>>& RootNodeIndexList)
 	{
 		for (const auto& glTFNode : model.nodes)
 		{
@@ -647,7 +648,7 @@ namespace gltf
 			int MeshIndex = glTFNode.mesh;
 			int SkinIndex = glTFNode.skin;
 
-			std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(MeshIndex, MeshList, MaterialList);
+			std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(MeshIndex);
 			
 			Node->SetName(glTFNode.name);
 			Node->SetSkinIndex(SkinIndex);

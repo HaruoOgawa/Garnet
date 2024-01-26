@@ -27,7 +27,7 @@ namespace resource
 		std::shared_ptr<graphics::CMaterialCreateInfo> createInfo = std::make_shared<graphics::CMaterialCreateInfo>();
 		createInfo->SetVertexShaderCode(m_VertexShader->GetData());
 		createInfo->SetFragmentShaderCode(m_FragmentShader->GetData());
-		auto Material = pGraphicsAPI->CreateMaterial(createInfo);
+		auto Material = pGraphicsAPI->CreateMaterial(createInfo, 1, graphics::ECullMode::CULL_BACK);
 
 		auto UniforBuffer = createInfo->CreateUniformBuffer({ graphics::SBindingLayout("UniformBufferObject", 0, false) });
 		UniforBuffer->AddData("rate", &glm::vec1(0.0f)[0], sizeof(glm::vec1), 0);
@@ -51,7 +51,7 @@ namespace resource
 		m_LoadingBar->AddMesh(Mesh);
 
 		// NODE
-		std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(0, m_LoadingBar->GetMeshList(), m_LoadingBar->GetMaterialList());
+		std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(0);
 		m_LoadingBar->AddNode(Node);
 
 		// Create関数を実行
@@ -85,7 +85,7 @@ namespace resource
 		// ローディングバー
 		if (m_LoadingBar)
 		{
-			if (!m_LoadingBar->Update(0.0f)) return false;
+			if (!m_LoadingBar->Update(pGraphicsAPI, 0.0f)) return false;
 		}
 
 		// ローディング
@@ -136,8 +136,9 @@ namespace resource
 				{
 					m_RuntimeLoadResourceList.erase(m_RuntimeLoadResourceList.begin());
 					m_RuntimeLoadResourceList.shrink_to_fit();
+
+					return true;
 				}
-				return true;
 
 				default:
 					break;
@@ -159,7 +160,7 @@ namespace resource
 			m_LoadingBar->GetMaterialList()[0]->SetUniformValue("rate", &glm::vec1(rate)[0], sizeof(float));
 			m_LoadingBar->GetMaterialList()[0]->SetUniformValue("alpha", &m_Alpha, sizeof(float));
 
-			if (!m_LoadingBar->Draw(IsDepthPass, Camera, Projection, DrawInfo)) return false;
+			if (!m_LoadingBar->Draw(IsDepthPass, false, Camera, Projection, DrawInfo)) return false;
 		}
 
 		return true;

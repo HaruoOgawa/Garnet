@@ -3,15 +3,18 @@
 
 namespace graphics
 {
-	CMaterial::CMaterial(const std::shared_ptr<CMaterialCreateInfo>& createInfo):
+	CMaterial::CMaterial(const std::shared_ptr<CMaterialCreateInfo>& createInfo, int RefCount, ECullMode CullMode):
 		m_CreateInfo(createInfo),
-		m_RefCount(0),
-		m_UseDynamicBufferOffset(false),
+		m_RefCount(RefCount),
+		m_CurrentDynamicOffset(0),
 		m_DepthMaterial(nullptr),
 		m_EnabledZTest(true),
-		m_CullMode(ECullMode::CULL_BACK),
-		m_BlendType(EBlendType::BLEND_TYPE_ADDITIVE)
+		m_DefaultCullMode(CullMode),
+		m_CullMode(CullMode),
+		m_BlendType(EBlendType::BLEND_TYPE_ADDITIVE),
+		m_IsDrawOutline(false)
 	{
+		ResetDynamicOffset();
 	}
 
 	bool CMaterial::Create(const std::shared_ptr<graphics::CTextureSet>& TextureSet)
@@ -21,9 +24,7 @@ namespace graphics
 
 	bool CMaterial::CreateDepthMaterial(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<graphics::CMaterialFrame>& DepthMF)
 	{
-		m_DepthMaterial = DepthMF->CreateMaterial(pGraphicsAPI);
-
-		m_DepthMaterial->SetRefStatus(m_RefCount, m_UseDynamicBufferOffset);
+		m_DepthMaterial = DepthMF->CreateMaterial(pGraphicsAPI, m_RefCount, m_CullMode);
 
 		m_DepthMaterial->SetCullMode(graphics::ECullMode::CULL_FRONT);
 
@@ -50,6 +51,11 @@ namespace graphics
 	void CMaterial::SetCullMode(ECullMode CullMode)
 	{
 		m_CullMode = CullMode;
+	}
+
+	void CMaterial::ResetToDefaultCullMode()
+	{
+		m_CullMode = m_DefaultCullMode;
 	}
 
 	ECullMode CMaterial::GetCullMode() const
@@ -105,25 +111,30 @@ namespace graphics
 	{
 	}
 
-	void CMaterial::IncreaseRefCount()
-	{
-		m_RefCount++;
-
-		if (m_RefCount > 1)
-		{
-			m_UseDynamicBufferOffset = true;
-		}
-	}
-
 	int CMaterial::GetRefCount() const
 	{
 		return m_RefCount;
 	}
 
-	void CMaterial::SetRefStatus(int RefCount, bool UseDynamicBufferOffset)
+	bool CMaterial::IsUseDynamicOffset()
 	{
-		m_RefCount = RefCount;
-		m_UseDynamicBufferOffset = UseDynamicBufferOffset;
+		return (m_RefCount > 1);
+	}
+
+	void CMaterial::IncreaseDynamicOffset()
+	{
+		m_CurrentDynamicOffset++;
+	}
+
+	int CMaterial::GetDynamicOffset() const
+	{
+		return m_CurrentDynamicOffset;
+	}
+
+	void CMaterial::ResetDynamicOffset()
+	{
+		// ダイナミックオフセットは１から使用できるので初期値も１にする
+		m_CurrentDynamicOffset = 1;
 	}
 
 	const std::vector<uint32_t>& CMaterial::GetBindingRefSizeList() const
@@ -131,8 +142,13 @@ namespace graphics
 		return m_BindingRefSizeList;
 	}
 
-	bool CMaterial::IsUseDynamicBufferOffset() const
+	void CMaterial::SetIsDrawOutline(bool Frag)
 	{
-		return m_UseDynamicBufferOffset;
+		m_IsDrawOutline = Frag;
+	}
+
+	bool CMaterial::IsDrawOutline() const
+	{
+		return m_IsDrawOutline;
 	}
 }

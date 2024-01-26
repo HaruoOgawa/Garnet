@@ -1,0 +1,274 @@
+{
+  "name": "basic_toon_mat",
+  "shaderList": [
+    {
+      "name": "basic_toon_vert",
+      "shaderFile": "Resources\\Shaders\\basic_toon",
+      "autoShaderExtension": true,
+      "shadercode": "",
+      "shaderType": "vertex",
+      "uniformBlockList": [
+        {
+          "name": "UniformBufferObject",
+          "binding": 0,
+          "isWritable": false,
+          "type": "ubo",
+          "bufferUpdateType": "cpu",
+          "values": [
+            {
+              "name": "model",
+              "type": "mat4",
+              "initValue": [ 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0 ]
+            },
+            {
+              "name": "view",
+              "type": "mat4",
+              "initValue": [ 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0 ]
+            },
+            {
+              "name": "proj",
+              "type": "mat4",
+              "initValue": [ 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0 ]
+            },
+            {
+              "name": "lightVPMat",
+              "type": "mat4",
+              "initValue": [ 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0 ]
+            },
+            {
+              "name": "useSkinMeshAnimation",
+              "type": "int",
+              "initValue": [ 0 ]
+            },
+            {
+              "name": "JointIndexOffset",
+              "type": "int",
+              "initValue": [ 0 ]
+            },
+            {
+              "name": "pad0",
+              "type": "int",
+              "initValue": [ 0 ]
+            },
+            {
+              "name": "pad1",
+              "type": "int",
+              "initValue": [ 0 ]
+            }
+          ]
+        },
+        {
+          "name": "SkinMatrixBuffer",
+          "binding": 1,
+          "isWritable": false,
+          "type": "ssbo",
+          "bufferUpdateType": "cpu",
+          "values": [
+            {
+              "name": "r_SkinMatrixBuffer",
+              "type": "mat4",
+              "initValue": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "basic_toon_frag",
+      "shaderFile": "Resources\\Shaders\\basic_toon",
+      "autoShaderExtension": true,
+      "shadercode": "",
+      "shaderType": "fragment",
+      "uniformBlockList": [
+        {
+          "name": "FragUniformBufferObject",
+          "binding": 2,
+          "isWritable": false,
+          "type": "ubo",
+          "bufferUpdateType": "cpu",
+          "values": [
+            {
+              "name": "lightDir",
+              "type": "vec4",
+              "initValue": [ 0.0, 0.0, 0.0, 0.0 ]
+            },
+            {
+              "name": "lightColor",
+              "type": "vec4",
+              "initValue": [ 0.0, 0.0, 0.0, 0.0 ]
+            },
+            {
+              "name": "cameraPos",
+              "type": "vec4",
+              "initValue": [ 0.0, 0.0, 0.0, 0.0 ]
+            },
+            {
+              "name": "diffuseFactor",
+              "type": "vec4",
+              "initValue": [ 1.0, 1.0, 1.0, 1.0 ]
+            },
+            {
+              "name": "ambientFactor",
+              "type": "vec4",
+              "initValue": [ 1.0, 1.0, 1.0, 1.0 ]
+            },
+            {
+              "name": "specularFactor",
+              "type": "vec4",
+              "initValue": [ 1.0, 1.0, 1.0, 1.0 ]
+            },
+            {
+              "name": "specularIntensity",
+              "type": "float",
+              "initValue": [ 1.0 ]
+            },
+            {
+              "name": "f_pad0",
+              "type": "float",
+              "initValue": [ 1.0 ]
+            },
+            {
+              "name": "f_pad1",
+              "type": "float",
+              "initValue": [ 1.0 ]
+            },
+            {
+              "name": "f_pad2",
+              "type": "float",
+              "initValue": [ 1.0 ]
+            },
+            {
+              "name": "UseMainTexture",
+              "type": "int",
+              "initValue": [ 0 ]
+            },
+            {
+              "name": "UseToonTexture",
+              "type": "int",
+              "initValue": [ 0 ]
+            },
+            {
+              "name": "UseSphereTexture",
+              "type": "int",
+              "initValue": [ 0 ]
+            },
+            {
+              "name": "SphereMode",
+              "type": "int",
+              "initValue": [ 0 ]
+            },
+            {
+              "name": "mPad0",
+              "type": "mat4",
+              "initValue": [ 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0 ]
+            },
+            {
+              "name": "mPad1",
+              "type": "mat4",
+              "initValue": [ 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0 ]
+            },
+            {
+              "name": "mPad2",
+              "type": "mat4",
+              "initValue": [ 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0 ]
+            },
+            {
+              "name": "mPad3",
+              "type": "mat4",
+              "initValue": [ 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0 ]
+            }
+          ]
+        },
+        {
+          "name": "MainTexture",
+          "viewBinding": 3,
+          "samplerBinding": 4,
+          "textureIndex": -1,
+          "type": "texture",
+          "textureUsage": "2d"
+        },
+        {
+          "name": "ToonTexture",
+          "viewBinding": 5,
+          "samplerBinding": 6,
+          "textureIndex": -1,
+          "type": "texture",
+          "textureUsage": "2d"
+        },
+        {
+          "name": "SphereTexture",
+          "viewBinding": 7,
+          "samplerBinding": 8,
+          "textureIndex": -1,
+          "type": "texture",
+          "textureUsage": "2d"
+        }
+      ]
+    }
+  ]
+}

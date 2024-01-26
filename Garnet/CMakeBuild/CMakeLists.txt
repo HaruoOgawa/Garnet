@@ -26,6 +26,8 @@ add_executable(
 	../src/Animation/CAnimationChannel.h
 	../src/Animation/CAnimationClip.cpp
 	../src/Animation/CAnimationClip.h
+	../src/Animation/CAnimationController.cpp
+	../src/Animation/CAnimationController.h
 	../src/Animation/CAnimationSampler.cpp
 	../src/Animation/CAnimationSampler.h
 	../src/Animation/CBoneNameProvider.cpp
@@ -38,6 +40,7 @@ add_executable(
 	../src/Animation/CSkin.h
 	../src/Animation/EAnimationTarget.h
 	../src/Animation/EHumanoidBones.h
+	../src/Animation/SAnimationLayout.h
 	../src/App/CDemoAppManager.cpp
 	../src/App/CDemoAppManager.h
 	../src/App/CDescAppManager.cpp
@@ -45,6 +48,8 @@ add_executable(
 	../src/App/EAppType.h
 	../src/App/ScriptApp/CScriptApp.cpp
 	../src/App/ScriptApp/CScriptApp.h
+	../src/Binary/CBinaryAnalyser.cpp
+	../src/Binary/CBinaryAnalyser.h
 	../src/Camera/CCamera.cpp
 	../src/Camera/CCamera.h
 	../src/Camera/CViewerCamera.cpp
@@ -155,10 +160,26 @@ add_executable(
 	../src/Math/CMath.h
 	../src/Math/CTransform.cpp
 	../src/Math/CTransform.h
+	../src/MMD/PMX/CPmxImporter.cpp
+	../src/MMD/PMX/CPmxImporter.h
+	../src/MMD/PMX/CPmxMaterial.cpp
+	../src/MMD/PMX/CPmxMaterial.h
+	../src/MMD/PMX/CPmxMesh.cpp
+	../src/MMD/PMX/CPmxMesh.h
+	../src/MMD/PMX/CPmxModel.cpp
+	../src/MMD/PMX/CPmxModel.h
+	../src/MMD/PMX/CPmxTexture.cpp
+	../src/MMD/PMX/CPmxTexture.h
+	../src/MMD/PMX/EPmxEncodeType.h
+	../src/MMD/PMX/EPmxWeightDeformFormat.h
+	../src/MMD/PMX/PMXŽd—l.txt
+	../src/MMD/PMX/SPmxMetaData.h
 	../src/Object/C3DObject.cpp
 	../src/Object/C3DObject.h
 	../src/Object/CNode.cpp
 	../src/Object/CNode.h
+	../src/Object/CObjectBuilder.cpp
+	../src/Object/CObjectBuilder.h
 	../src/Object/E3DObjectType.h
 	../src/Projection/CProjection.cpp
 	../src/Projection/CProjection.h

@@ -1,20 +1,27 @@
 #include "C3DObject.h"
 #include "../GLTF/CGLTFImporter.h"
+#include "../LoadWorker/CLoadWorker.h"
 
 #if defined(USE_FBX)
 
 #ifdef USE_SMALL_FBX
+
 #include "../FBX/CSmallFBXImporter.h"
 #else
 #include "../FBX/CFBXImporter.h"
-
 #endif // USE_SMALL_FBX
 
 #endif
+
+#ifdef USE_MMD
+#include "../MMD/PMX/CPmxImporter.h"
+#endif
+
 namespace object
 {
 	C3DObject::C3DObject(const std::string& PassName, const std::string& DepthPassName):
 		m_IsCreated(false),
+		m_ExistFirstDelayResource(false),
 		m_PassName(PassName),
 		m_DepthPassName(DepthPassName),
 		m_ObjectTransform(std::make_shared<math::CTransform>()),
@@ -22,7 +29,8 @@ namespace object
 		m_AnimationController(std::make_shared<animation::CAnimationController>()),
 #endif
 		m_TextureSet(std::make_shared<graphics::CTextureSet>()),
-		m_FileName("")
+		m_FileName(""),
+		m_DepthMF(nullptr)
 	{
 	}
 
@@ -54,7 +62,7 @@ namespace object
 		Object->AddMesh(Mesh);
 
 		// Node
-		std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(0, Object->GetMeshList(), Object->GetMaterialList());
+		std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(0);
 		Object->AddNode(Node);
 
 		// Create
@@ -63,8 +71,10 @@ namespace object
 		return true;
 	}
 
-	bool C3DObject::CreateFromMemory(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<graphics::CMaterialFrame>& BaseMF, const std::shared_ptr<graphics::CMaterialFrame>& DepthMF, E3DObjectType ObjectType)
+	bool C3DObject::CreateFromMemory(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<graphics::CMaterialFrame>& BaseMF, const std::shared_ptr<graphics::CMaterialFrame>& DepthMF, E3DObjectType ObjectType)
 	{
+		m_DepthMF = DepthMF;
+
 		if (m_BinaryData.empty()) return false;
 
 		switch (ObjectType)
@@ -86,11 +96,24 @@ namespace object
 #endif // USE_SMALL_FBX
 			break;
 #endif
+		case object::E3DObjectType::Pmx:
+#ifdef USE_MMD
+			if (!mmd::CPmxImporter::ImportPmx(pGraphicsAPI, pLoadWorker, m_FileName, m_BinaryData, this, BaseMF)) return false;
+#endif
+			break;
 		default:
 			break;
 		}
 
 		m_BinaryData.clear();
+
+		// インポートの結果、遅延ロードリソースが見つかった時はCreateを後回しにする
+		if (m_RuntimeLoadResourceList.size() != 0)
+		{
+			m_ExistFirstDelayResource = true;
+
+			return true;
+		}
 
 		if (!Create(pGraphicsAPI, DepthMF)) return false;
 
@@ -250,9 +273,50 @@ namespace object
 		}
 	}
 
-	bool C3DObject::Update(float DeltaSecondsTime)
+	bool C3DObject::Update(api::IGraphicsAPI* pGraphicsAPI, float DeltaSecondsTime)
 	{
+		for (auto& Resource : m_RuntimeLoadResourceList)
+		{
+			switch (Resource->GetStatus())
+			{
+			case resource::ELoadStatus::Loaded:
+			{
+				m_RuntimeLoadResourceList.erase(m_RuntimeLoadResourceList.begin());
+				m_RuntimeLoadResourceList.shrink_to_fit();
+
+				return true;
+			}
+
+			case resource::ELoadStatus::None:
+			case resource::ELoadStatus::Loading:
+			default:
+				break;
+			}
+		}
+
+		// Create関数を伴う初回動的ロード
+		if (m_ExistFirstDelayResource && m_RuntimeLoadResourceList.size() == 0 && !m_IsCreated)
+		{
+			if (!Create(pGraphicsAPI, m_DepthMF)) return false;
+
+			m_ExistFirstDelayResource = false;
+		}
+
 		if (!m_IsCreated) return true;
+
+		// マテリアルの参照カウントをリセット
+		for (auto& Material : m_MaterialList)
+		{
+			//
+			if (!Material) continue;
+			Material->ResetDynamicOffset();
+
+			//
+			auto DepthMaterial = Material->GetDepthMaterial();
+
+			if (!DepthMaterial) continue;
+			DepthMaterial->ResetDynamicOffset();
+		}
 
 #ifdef USE_ANIMATION
 		if (!m_AnimationController->Update(DeltaSecondsTime)) return false;
@@ -261,64 +325,20 @@ namespace object
 		// 全ノードマイフレーム更新しているので、そのうちキャッシュを入れて更新は必要なものだけにする
 		CalcWorldMatrix();
 
+#ifdef USE_ANIMATION
+		// Drawは何度も呼ぶことがあるのでUpdateでマイフレーム一回だけ計算する
+		// SSBOのサイズをDynamicOffset毎に変更できるかわからないのでひとまず全部まとめて渡す
+		m_CurrentSkinMatrixList.clear();
+		if (!m_AnimationController->CalcSkinMatrixList(m_CurrentSkinMatrixList, m_ObjectTransform->GetModelMatrix())) return false;
+#endif
+
 		return true;
 	}
 
-	bool C3DObject::Draw(bool IsDepthPass, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo, 
+	bool C3DObject::Draw(bool IsDepthPass, bool DrawOutline, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo,
 		const std::shared_ptr<object::C3DObject>& DebugSphere)
 	{
 		if (!m_IsCreated) return true;
-
-		// 共通ユニフォームの更新
-		for (auto& Material : m_MaterialList)
-		{
-			if (!Material) continue;
-			
-			// 共通のユニフォームバッファの更新
-			glm::mat4 lightVPMat = DrawInfo->GetLightProjection()->GetPrejectionMatrix() * DrawInfo->GetLightCamera()->GetViewMatrix();
-
-			Material->SetUniformValue("view", &Camera->GetViewMatrix()[0][0], sizeof(glm::mat4));
-			Material->SetUniformValue("proj", &Projection->GetPrejectionMatrix()[0][0], sizeof(glm::mat4));
-			Material->SetUniformValue("lightVPMat", &lightVPMat[0][0], sizeof(glm::mat4));
-			Material->SetUniformValue("lightDir", &DrawInfo->GetLightCamera()->GetViewDir()[0], sizeof(glm::vec3));
-			Material->SetUniformValue("lightColor", &DrawInfo->GetLightColor()[0], sizeof(glm::vec4));
-			Material->SetUniformValue("cameraPos", &Camera->GetPos()[0], sizeof(glm::vec3));
-			Material->SetUniformValue("time", &glm::vec1(DrawInfo->GetSecondsTime())[0], sizeof(float));
-			Material->SetUniformValue("deltaTime", &glm::vec1(DrawInfo->GetDeltaSecondsTime())[0], sizeof(float));
-#ifdef USE_ANIMATION
-			Material->SetUniformValue("useSkinMeshAnimation", &glm::ivec1( (m_AnimationController->IsPlayingAnimation()? 1 : 0) )[0], sizeof(glm::ivec1));
-#endif
-		}
-
-		for (auto& Material : m_MaterialList)
-		{
-			if (!Material) continue;
-
-			auto DepthMaterial = Material->GetDepthMaterial();
-
-			if (!DepthMaterial) continue;
-
-			// 共通のユニフォームバッファの更新
-			glm::mat4 lightVPMat = DrawInfo->GetLightProjection()->GetPrejectionMatrix() * DrawInfo->GetLightCamera()->GetViewMatrix();
-			
-			DepthMaterial->SetUniformValue("view", &Camera->GetViewMatrix()[0][0], sizeof(glm::mat4));
-			DepthMaterial->SetUniformValue("proj", &Projection->GetPrejectionMatrix()[0][0], sizeof(glm::mat4));
-			DepthMaterial->SetUniformValue("lightVPMat", &lightVPMat[0][0], sizeof(glm::mat4));
-			DepthMaterial->SetUniformValue("lightDir", &DrawInfo->GetLightCamera()->GetViewDir()[0], sizeof(glm::vec3));
-			DepthMaterial->SetUniformValue("lightColor", &DrawInfo->GetLightColor()[0], sizeof(glm::vec4));
-			DepthMaterial->SetUniformValue("cameraPos", &Camera->GetPos()[0], sizeof(glm::vec3));
-			DepthMaterial->SetUniformValue("time", &glm::vec1(DrawInfo->GetSecondsTime())[0], sizeof(float));
-			DepthMaterial->SetUniformValue("deltaTime", &glm::vec1(DrawInfo->GetDeltaSecondsTime())[0], sizeof(float));
-#ifdef USE_ANIMATION
-			DepthMaterial->SetUniformValue("useSkinMeshAnimation", &glm::ivec1((m_AnimationController->IsPlayingAnimation() ? 1 : 0))[0], sizeof(glm::ivec1));
-#endif
-		}
-
-#ifdef USE_ANIMATION
-		// SSBOのサイズをDynamicOffset毎に変更できるかわからないのでひとまず全部まとめて渡す
-		std::vector<glm::mat4> SkinMatrixList;
-		if (!m_AnimationController->CalcSkinMatrixList(SkinMatrixList, m_ObjectTransform->GetModelMatrix())) return false;
-#endif
 
 		// 描画
 		for (const auto& Node : m_NodeList)
@@ -328,11 +348,7 @@ namespace object
 
 			const auto& WorldMatrix = m_ObjectTransform->GetModelMatrix() * Node->GetWorldMatrix();
 			const auto& Mesh = m_MeshList[MeshIndex];
-			const auto& DynamicOffsetList = Node->GetDynamicOffsetNumList();
 
-			if (DynamicOffsetList.size() != Mesh->GetPrimitiveList().size()) continue; // PrimitiveListとNodeのDynamicOffsetNumListは一致している
-
-			// SkinMatrixを計算
 			int SkinIndex = Node->GetSkinIndex();
 
 			for (int PrimitiveIndex = 0; PrimitiveIndex < Mesh->GetPrimitiveList().size(); PrimitiveIndex++)
@@ -340,7 +356,6 @@ namespace object
 				const auto& Primitive = Mesh->GetPrimitiveList()[PrimitiveIndex];
 
 				int MaterialIndex = Primitive->GetMaterialIndex();
-				int DynamicOffsetNum = DynamicOffsetList[PrimitiveIndex];
 				if (MaterialIndex < 0 || MaterialIndex >= m_MaterialList.size()) continue;
 
 				std::shared_ptr<graphics::CMaterial> Material = nullptr;
@@ -356,21 +371,55 @@ namespace object
 
 				if (!Material) continue;
 				
-				Material->SetUniformValue("model", &WorldMatrix[0][0], sizeof(glm::mat4), DynamicOffsetNum);
+				// マテリアルの参照カウントをダイナミックオフセットとして使用する
+				int DynamicOffsetNum = Material->GetDynamicOffset();
 
+				// ダイナミックオフセットがマテリアル参照数よりも大きい時は終了する
+				if (DynamicOffsetNum > Material->GetRefCount()) continue;
+
+				// アウトライン
+				if (DrawOutline)
+				{
+					if (DrawOutline != Material->IsDrawOutline()) continue;
+
+					Material->SetCullMode(graphics::ECullMode::CULL_FRONT);
+				}
+
+				// 共通のユニフォームバッファの更新
+				glm::mat4 lightVPMat = DrawInfo->GetLightProjection()->GetPrejectionMatrix() * DrawInfo->GetLightCamera()->GetViewMatrix();
+
+				Material->SetUniformValue("drawPathIndex", &DynamicOffsetNum, sizeof(int), DynamicOffsetNum);
+				Material->SetUniformValue("model", &WorldMatrix[0][0], sizeof(glm::mat4), DynamicOffsetNum);
+				Material->SetUniformValue("view", &Camera->GetViewMatrix()[0][0], sizeof(glm::mat4), DynamicOffsetNum);
+				Material->SetUniformValue("proj", &Projection->GetPrejectionMatrix()[0][0], sizeof(glm::mat4), DynamicOffsetNum);
+				Material->SetUniformValue("lightVPMat", &lightVPMat[0][0], sizeof(glm::mat4), DynamicOffsetNum);
+				Material->SetUniformValue("lightDir", &DrawInfo->GetLightCamera()->GetViewDir()[0], sizeof(glm::vec3), DynamicOffsetNum);
+				Material->SetUniformValue("lightColor", &DrawInfo->GetLightColor()[0], sizeof(glm::vec4), DynamicOffsetNum);
+				Material->SetUniformValue("cameraPos", &Camera->GetPos()[0], sizeof(glm::vec3), DynamicOffsetNum);
+				Material->SetUniformValue("time", &glm::vec1(DrawInfo->GetSecondsTime())[0], sizeof(float), DynamicOffsetNum);
+				Material->SetUniformValue("deltaTime", &glm::vec1(DrawInfo->GetDeltaSecondsTime())[0], sizeof(float), DynamicOffsetNum);
 #ifdef USE_ANIMATION
+				Material->SetUniformValue("useSkinMeshAnimation", &glm::ivec1((m_AnimationController->IsPlayingAnimation() ? 1 : 0))[0], sizeof(glm::ivec1), DynamicOffsetNum);
+
 				// SkinMatrixをShaderに渡す
 				const auto& SkinList = m_AnimationController->GetSkinList();
 				if (SkinIndex >= 0 && SkinIndex < SkinList.size() && m_AnimationController->IsPlayingAnimation())
 				{
-					Material->SetUniformValue("r_SkinMatrixBuffer", &SkinMatrixList[0], sizeof(glm::mat4) * static_cast<int>(SkinMatrixList.size()), DynamicOffsetNum);
+					Material->SetUniformValue("r_SkinMatrixBuffer", &m_CurrentSkinMatrixList[0], sizeof(glm::mat4) * static_cast<int>(m_CurrentSkinMatrixList.size()), DynamicOffsetNum);
 
 					int JointIndexOffset = SkinList[SkinIndex]->GetJointIndexOffset();
 					Material->SetUniformValue("JointIndexOffset", &glm::ivec1(JointIndexOffset)[0], sizeof(glm::ivec1), DynamicOffsetNum);
 				}
 #endif
 
+				// 描画実行
 				if (!Primitive->Draw(Material, DynamicOffsetNum, IsDepthPass)) return false;
+
+				// マテリアルの参照カウントをインクリメントする
+				Material->IncreaseDynamicOffset();
+
+				// 描画準備のために変更した設定を元に戻す
+				Material->ResetToDefaultCullMode();
 			}
 		}
 		
@@ -516,5 +565,10 @@ namespace object
 	const std::shared_ptr<graphics::CTextureSet>& C3DObject::GetTextureSet() const
 	{
 		return m_TextureSet;
+	}
+
+	void C3DObject::AddRuntimeLoadResource(const std::shared_ptr <resource::IResource>& Resource)
+	{
+		m_RuntimeLoadResourceList.push_back(Resource);
 	}
 }

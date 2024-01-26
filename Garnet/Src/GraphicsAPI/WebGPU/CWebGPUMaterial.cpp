@@ -9,8 +9,8 @@
 
 namespace api
 {
-	CWebGPUMaterial::CWebGPUMaterial(api::CWebGPUAPI* pGraphicsAPI, const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo):
-		CMaterial(createInfo),
+	CWebGPUMaterial::CWebGPUMaterial(api::CWebGPUAPI* pGraphicsAPI, const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, int RefCount, graphics::ECullMode CullMode):
+		CMaterial(createInfo, RefCount, CullMode),
 		m_pGraphicsAPI(pGraphicsAPI),
 		m_VertexShaderModele(nullptr),
 		m_FragmentShaderModele(nullptr),
@@ -79,7 +79,7 @@ namespace api
 			{
 				const int ByteOffset = UniformData->second.ByteOffset;
 
-				if (m_UseDynamicBufferOffset)
+				if (IsUseDynamicOffset())
 				{
 					if (DynamicOffsetNum == -1)
 					{
@@ -146,6 +146,14 @@ namespace api
 
 			WGPUBuffer UniformBuffer;
 			const uint64_t ByteSize = static_cast<uint64_t>(Data.size());
+
+			// DynamicOffsetはバッファサイズが256バイト以上でないと使用できないので使用する設定になっていてそれよりも小さい時はエラーとする
+			if (IsUseDynamicOffset() && ByteSize < 256)
+			{
+				Console::Log("[API Error] ByteSize must be rather than 256 byte if use DynamicOffset.\n");
+
+				return false;
+			}
 
 			if (Buffer->GetBufferType() == graphics::EBufferType::UNIFORM)
 			{
@@ -219,8 +227,8 @@ namespace api
 				}
 
 				bindingLayout.buffer.minBindingSize = Layout.second.ByteSize; // データ一つ当たりのサイズかな???
-				bindingLayout.buffer.hasDynamicOffset = m_UseDynamicBufferOffset; // ダイナミックユニフォーム
-
+				bindingLayout.buffer.hasDynamicOffset = (IsUseDynamicOffset()); // ダイナミックユニフォーム
+				
 				bindingLayoutList.push_back(bindingLayout);
 			}
 		}
@@ -467,12 +475,12 @@ namespace api
 		bufferDesc.label = "Buffer";
 		bufferDesc.usage = Usage; // バッファの用途
 		bufferDesc.mappedAtCreation = false; // ???
-		bufferDesc.size = ByteSize * ((m_UseDynamicBufferOffset) ? m_RefCount : 1);
+		bufferDesc.size = ByteSize * m_RefCount;
 
 		Buffer = wgpuDeviceCreateBuffer(m_pGraphicsAPI->GetLogicalDevice(), &bufferDesc);
 
 		// バッファにデータを書き込む
-		if (m_UseDynamicBufferOffset)
+		if (IsUseDynamicOffset())
 		{
 			for (int i = 0; i < m_RefCount; i++)
 			{

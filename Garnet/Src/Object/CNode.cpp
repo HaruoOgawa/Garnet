@@ -1,11 +1,8 @@
 #include "CNode.h"
-#include "../Graphics/CMaterial.h"
-#include "../Interface/IGraphicsAPI.h"
-#include "../Interface/IRenderer.h"
 
 namespace object
 {
-	CNode::CNode(int MeshIndex, const std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, const std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList):
+	CNode::CNode(int MeshIndex):
 		m_Name(""),
 		m_MeshIndex(MeshIndex),
 		m_SkinIndex(-1),
@@ -16,7 +13,6 @@ namespace object
 		m_InverseBindMatrix(glm::mat4(1.0f)),
 		m_ParentNode(nullptr)
 	{
-		SetMeshIndexWithDynamicOffset(MeshIndex, MeshList, MaterialList);
 	}
 
 	CNode::~CNode()
@@ -33,35 +29,9 @@ namespace object
 		return m_Name;
 	}
 
-	void CNode::SetMeshIndexWithDynamicOffset(int MeshIndex, const std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, const std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList)
+	void CNode::SetMeshIndex(int MeshIndex)
 	{
-		// MeshIndexを設定
 		m_MeshIndex = MeshIndex;
-
-		// DynamicOffsetを計算
-		if (MeshIndex >= 0 && MeshIndex < MeshList.size())
-		{
-			const auto& Mesh = MeshList[MeshIndex];
-
-			for (const auto& Primitive : Mesh->GetPrimitiveList())
-			{
-				int MaterialIndex = Primitive->GetMaterialIndex();
-				if (MaterialIndex < 0 || MaterialIndex >= MaterialList.size())
-				{
-					// PrimitiveListとDynamicOffsetNumListの順番と数は一致している必要があるのでマテリアルインデックスが無効ならひとまず0を入れておく
-					m_DynamicOffsetNumList.push_back(0);
-					continue;
-				}
-				else
-				{
-					const auto& Material = MaterialList[MaterialIndex];
-					Material->IncreaseRefCount();
-
-					int DynamicOffsetNum = Material->GetRefCount();
-					m_DynamicOffsetNumList.push_back(DynamicOffsetNum);
-				}
-			}
-		}
 	}
 
 	int CNode::GetMeshIndex() const
@@ -269,11 +239,6 @@ namespace object
 	void CNode::SetChildrenNodeIndexList(const std::vector<int>& NodeList)
 	{
 		m_ChildrenNodeIndexList = NodeList;
-	}
-
-	const std::vector<int>& CNode::GetDynamicOffsetNumList() const
-	{
-		return m_DynamicOffsetNumList;
 	}
 
 	void CNode::SetSkinIndex(int SkinIndex)

@@ -89,10 +89,10 @@ namespace resource
 		attr.onsuccess = downloadSucceded;
 		attr.onerror = downloadFailed;
 		attr.userData = this;
-		emscripten_fetch(&attr, m_Filename.c_str());
 
+		emscripten_fetch(&attr, m_Filename.c_str());
 #else
-		std::ifstream file(m_Filename, std::ios::ate | std::ios::binary);
+		std::ifstream file = std::ifstream(m_Filename, std::ios::ate | std::ios::binary);
 
 		if (!file.is_open())
 		{
@@ -131,5 +131,71 @@ namespace resource
 	const std::vector<unsigned char>& CFile::GetData() const
 	{
 		return m_Data;
+	}
+
+	std::string CFile::GetParentDir(const std::string& Path)
+	{
+		if (Path.rfind("\\") != -1)
+		{
+			return Path.substr(0, Path.rfind("\\"));
+		}
+		else if (Path.rfind("/") != -1)
+		{
+			return Path.substr(0, Path.rfind("/"));
+		}
+		else
+		{
+			// カレントディレクトリを返す
+			return "";
+		}
+	}
+
+	std::string CFile::AddPunct(const std::string& Path)
+	{
+		if (Path[Path.length() - 1] == '\\' || Path[Path.length() - 1] == '/')
+		{
+			return Path;
+		}
+		else
+		{
+			return Path + "\\";
+		}
+	}
+
+	std::wstring CFile::CastU8ToU16Str(const std::string& U8Str)
+	{
+		std::wstring DstU16Str = std::wstring();
+
+		for (auto c_u8 = U8Str.begin(); c_u8 != U8Str.end(); c_u8++)
+		{
+			DstU16Str.push_back(static_cast<wchar_t>(*c_u8));
+		}
+
+		return DstU16Str;
+	}
+
+	std::string CFile::CastU16ToU8Str(const std::wstring& U16Str)
+	{
+		std::string DstU8Str = std::string();
+
+		for(int i = 0; i < U16Str.length(); i++)
+		{
+			auto c_u16 = U16Str.data()[i];
+
+#ifdef __EMSCRIPTEN__
+			// Web上だとwstringのwchar_tは4バイト・4文字で構成されて偶数番目に実際に使用したい文字が入っているので以下の様に変換する
+			std::vector<char> Data;
+			Data.resize(4);
+
+			std::memcpy(&Data[0], &c_u16, 4);
+			
+			DstU8Str.push_back(Data[0]);
+			DstU8Str.push_back(Data[2]);
+#else
+			DstU8Str.push_back(static_cast<char>(c_u16));
+#endif
+		}
+
+		return DstU8Str;
 	}
 }

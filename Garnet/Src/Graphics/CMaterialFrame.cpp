@@ -15,14 +15,9 @@ namespace graphics
 		m_CreateInfo = CreateInfo;
 	}
 
-	void CMaterialFrame::SetUniformBufferList(const std::vector<std::pair<graphics::SBindingLayout, std::vector<std::shared_ptr<graphics::SBufferValueLayout>>>>& UniformBufferList)
+	void CMaterialFrame::SetShaderBufferList(const std::vector<SShaderBufferSet>& ShaderBufferList)
 	{
-		m_UniformBufferList = UniformBufferList;
-	}
-
-	void CMaterialFrame::SetStorageBufferList(const std::vector<std::pair<graphics::SBindingLayout, std::vector<std::shared_ptr<graphics::SBufferValueLayout>>>>& StorageBufferList)
-	{
-		m_StorageBufferList = StorageBufferList;
+		m_ShaderBufferList = ShaderBufferList;
 	}
 
 	void CMaterialFrame::SetTextureBufferList(const std::vector<graphics::STextureBindingLayout>& TextureBufferList)
@@ -30,42 +25,45 @@ namespace graphics
 		m_TextureBufferList = TextureBufferList;
 	}
 
-	std::shared_ptr<CMaterial> CMaterialFrame::CreateMaterial(api::IGraphicsAPI* pGraphicsAPI)
+	std::shared_ptr<CMaterial> CMaterialFrame::CreateMaterial(api::IGraphicsAPI* pGraphicsAPI, int RefCount, graphics::ECullMode CullMode)
 	{
 		if (!m_CreateInfo) return nullptr;
 
-		std::shared_ptr<CMaterial> Material = pGraphicsAPI->CreateMaterial(m_CreateInfo);
+		std::shared_ptr<CMaterial> Material = pGraphicsAPI->CreateMaterial(m_CreateInfo, RefCount, CullMode);
 
-		// UniformBuffer
-		for (const auto& UniformBuffer : m_UniformBufferList)
+		// ShaderBuffer
+		for (const auto& ShaderBuffer : m_ShaderBufferList)
 		{
-			auto BindingLayout = UniformBuffer.first;
-			const auto& ValueList = UniformBuffer.second;
-
-			auto Buffer = graphics::CMaterialCreateInfo::CreateUniformBuffer({ BindingLayout });
-
-			for (const auto& Value : ValueList)
+			if (ShaderBuffer.BufferType == graphics::EBufferType::UNIFORM)
 			{
-				Buffer->AddData(Value->Name, &Value->Data[0], Value->ByteSize, Value->BindingIndex);
+				// UniformBuffer
+				auto BindingLayout = ShaderBuffer.BindingLayout;
+				const auto& ValueList = ShaderBuffer.ValueLayoutList;
+
+				auto Buffer = graphics::CMaterialCreateInfo::CreateUniformBuffer({ BindingLayout });
+
+				for (const auto& Value : ValueList)
+				{
+					Buffer->AddData(Value->Name, &Value->Data[0], Value->ByteSize, Value->BindingIndex);
+				}
+
+				Material->AddShaderBuffer(Buffer);
 			}
-
-			Material->AddShaderBuffer(Buffer);
-		}
-
-		// StorageBuffer
-		for (const auto& StorageBuffer : m_StorageBufferList)
-		{
-			const auto& BindingLayout = StorageBuffer.first;
-			const auto& ValueList = StorageBuffer.second;
-
-			auto Buffer = graphics::CMaterialCreateInfo::CreateShaderStorageBuffer({ BindingLayout }, BindingLayout.BufferUpdateType);
-
-			for (const auto& Value : ValueList)
+			else if (ShaderBuffer.BufferType == graphics::EBufferType::SHADERSTORAGE)
 			{
-				Buffer->AddData(Value->Name, &Value->Data[0], Value->ByteSize, Value->BindingIndex);
-			}
+				// StorageBuffer
+				auto BindingLayout = ShaderBuffer.BindingLayout;
+				const auto& ValueList = ShaderBuffer.ValueLayoutList;
 
-			Material->AddShaderBuffer(Buffer);
+				auto Buffer = graphics::CMaterialCreateInfo::CreateShaderStorageBuffer({ BindingLayout }, BindingLayout.BufferUpdateType);
+
+				for (const auto& Value : ValueList)
+				{
+					Buffer->AddData(Value->Name, &Value->Data[0], Value->ByteSize, Value->BindingIndex);
+				}
+
+				Material->AddShaderBuffer(Buffer);
+			}
 		}
 
 		// TextureBuffer

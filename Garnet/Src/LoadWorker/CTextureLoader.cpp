@@ -17,6 +17,14 @@ namespace resource
 		}
 	}
 
+	CTextureLoader::CTextureLoader(api::IGraphicsAPI* pGraphicsAPI, const std::string& FileName, const std::shared_ptr<graphics::CTexture>& Texture) :
+		m_Status(ELoadStatus::None),
+		m_UseCube(false),
+		m_TargetTexture(Texture)
+	{
+		m_FileList.push_back(std::make_shared<CFile>(FileName));
+	}
+
 	CTextureLoader::~CTextureLoader()
 	{
 	}

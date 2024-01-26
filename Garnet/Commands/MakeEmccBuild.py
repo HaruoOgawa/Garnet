@@ -4,7 +4,7 @@ import os
 
 ExcludedFolderList = ["Library", "Vulkan", "OpenGL", "DescMain", "CDescAppManager.cpp", "CDescAppManager.h", "DemoMain", "CDemoAppManager.cpp", "CDemoAppManager.h"]
 IncludeDirectoryList = ["../src/Library/DawnLib/include", "../src/Library/glm", "../src/Library/tinygltf", "../src/Library/SmallFBX/include"]
-PreprocessorList = ["USE_WEBGPU", "USE_TEXTURE_LOADER", "USE_GLTF", "USE_VIEWER_CAMERA", "USE_INPUT_SYSTEM", "USE_GPGPU", "USE_FBX", "USE_ANIMATION", "USE_SMALL_FBX"]
+PreprocessorList = ["USE_WEBGPU", "USE_TEXTURE_LOADER", "USE_GLTF", "USE_VIEWER_CAMERA", "USE_INPUT_SYSTEM", "USE_GPGPU", "USE_FBX", "USE_ANIMATION", "USE_SMALL_FBX", "USE_MMD"]
 
 # It's not something that changes that often, so every time there are more libs to link, I'll add my own.
 LibObjDirList = ["/SmallFBX_lib"];

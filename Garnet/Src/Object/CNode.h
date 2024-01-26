@@ -3,14 +3,7 @@
 #include <memory>
 #include <vector>
 #include <string>
-#include "../Graphics/CMesh.h"
 #include "../Math/CTransform.h"
-
-namespace graphics{ 
-	class CMesh; 
-	class CMaterial;
-}
-namespace math { class CTransform; }
 
 namespace object
 {
@@ -27,20 +20,19 @@ namespace object
 		std::shared_ptr<math::CTransform> m_PrevLocalTransform;
 		glm::mat4						  m_WorldMatrix;
 		std::vector<int>                  m_ChildrenNodeIndexList;
-		std::vector<int>                  m_DynamicOffsetNumList;
 
 		glm::mat4 m_InverseBindMatrix;
 
 		std::shared_ptr<CNode> m_ParentNode;
 
 	public:
-		CNode(int MeshIndex, const std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, const std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList);
+		CNode(int MeshIndex);
 		virtual ~CNode();
 
 		void SetName(const std::string& Name);
 		const std::string& GetName() const;
 
-		void SetMeshIndexWithDynamicOffset(int MeshIndex, const std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, const std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList);
+		void SetMeshIndex(int MeshIndex);
 		int GetMeshIndex() const;
 
 		void SetLocalTransform(const std::shared_ptr<math::CTransform>& LocalTransform);
@@ -86,8 +78,6 @@ namespace object
 
 		const std::vector<int>& GetChildrenNodeIndexList() const;
 		void SetChildrenNodeIndexList(const std::vector<int>& NodeList);
-
-		const std::vector<int>& GetDynamicOffsetNumList() const;
 
 		void SetSkinIndex(int SkinIndex);
 		int GetSkinIndex() const;

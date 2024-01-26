@@ -76,15 +76,15 @@ namespace renderer
 		}
 
 		// バインドグループを割り当てる
-		if (pWebGPUMat->IsUseDynamicBufferOffset())
+		std::vector<uint32_t> dynamicOffsetList;
+		for (const auto& Size : pWebGPUMat->GetBindingRefSizeList())
 		{
-			std::vector<uint32_t> dynamicOffsetList;
-			for (const auto& Size : pWebGPUMat->GetBindingRefSizeList())
-			{
-				uint32_t dynamicOffset = (DynamicOffsetNum - 1) * Size;
-				dynamicOffsetList.push_back(dynamicOffset);
-			}
+			uint32_t dynamicOffset = (DynamicOffsetNum - 1) * Size;
+			dynamicOffsetList.push_back(dynamicOffset);
+		}
 
+		if (pWebGPUMat->IsUseDynamicOffset())
+		{
 			wgpuRenderPassEncoderSetBindGroup(m_pGraphicsAPI->GetCurrentRenderPass(), 0, pWebGPUMat->GetBindGroup(), static_cast<uint32_t>(dynamicOffsetList.size()), &dynamicOffsetList[0]);
 		}
 		else
