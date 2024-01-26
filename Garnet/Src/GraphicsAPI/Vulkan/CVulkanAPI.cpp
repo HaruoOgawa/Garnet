@@ -366,7 +366,9 @@ namespace api
 		AppInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
 		AppInfo.pEngineName = "Garnet";
 		AppInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
-		AppInfo.apiVersion = VK_API_VERSION_1_0;
+		// VK_DYNAMIC_STATE_CULL_MODEを使用するには1.3以上である必要がある
+		// https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/vkCmdSetCullModeEXT.html#VUID-vkCmdSetCullMode-None-08971
+		AppInfo.apiVersion = VK_API_VERSION_1_3;
 
 		// インスタンス情報 
 		VkInstanceCreateInfo InstanceInfo{};
@@ -522,6 +524,8 @@ namespace api
 		}
 		
 		// 物理デバイス生成の拡張を設定する
+		// VK_DYNAMIC_STATE_CULL_MODEを使用するために必要な設定
+		// https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/vkCmdSetCullModeEXT.html#VUID-vkCmdSetCullMode-None-08971
 		VkPhysicalDeviceExtendedDynamicStateFeaturesEXT extentedDynamicState{};
 		extentedDynamicState.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTENDED_DYNAMIC_STATE_FEATURES_EXT;
 		extentedDynamicState.pNext = nullptr;
