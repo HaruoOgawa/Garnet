@@ -85,7 +85,7 @@ void main(){
 			vec4 MainColor = texture(sampler2D(MainTexture, MainTextureSampler), f_Texcoord);
 			#endif
 	
-			diffuseColor.rgb *= MainColor.rgb;
+			diffuseColor *= MainColor;
 		}
 
 		col = diffuseColor.rgb;
@@ -123,7 +123,7 @@ void main(){
 		}
 
 		// Specular
-		vec3 specularColor = fragUbo.specularFactor.xyz * max(0.0, pow(dot(HalfVector, f_WorldNormal), fragUbo.specularIntensity));
+		vec3 specularColor = fragUbo.specularFactor.xyz * pow(max(0.0, dot(HalfVector, f_WorldNormal)), fragUbo.specularIntensity);
 		col += specularColor;
 	}
 	else if(fragUbo.drawPathIndex == 2) // アウトライン描画パス

@@ -91,13 +91,13 @@ void main(){
             vec4 CameraPos = ubo.view * WorldPos;
             vec3 CameraNormal = (ubo.view * vec4(WorldNormal, 0.0)).xyz;
 
-            CameraPos.xy += normalize(CameraNormal).xy * ubo.edgeSize * 0.01;
+            CameraPos.xy += normalize(CameraNormal).xy * ubo.edgeSize * 0.001;
 
             gl_Position = ubo.proj * CameraPos;
         }
         else
         {
-            WorldPos.xyz += normalize(WorldNormal) * ubo.edgeSize * 0.005;
+            WorldPos.xyz += normalize(WorldNormal) * ubo.edgeSize * 0.001;
 
             gl_Position = ubo.proj * ubo.view * WorldPos;
         }

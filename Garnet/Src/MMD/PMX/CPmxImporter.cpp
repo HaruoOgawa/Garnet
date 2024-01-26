@@ -115,6 +115,9 @@ namespace mmd
 			// アウトライン
 			material->SetIsDrawOutline(PmxMaterial->IsDrawEdge());
 
+			// アルファブレンド(ひとまず全部で有効にする
+			material->SetBlendType(graphics::EBlendType::BLEND_TYPE_TRANSPARENT_ALPHA);
+
 			// MainTexture
 			{
 				int TextureIndex = PmxMaterial->GetMainTexIndex();
