@@ -11,6 +11,11 @@ layout(binding = 1) uniform FragBufferObject_0{
 	int useColor;
 
 	vec4 baseColor;
+
+	mat4 mPad0;
+	mat4 mPad1;
+	mat4 mPad2;
+	mat4 mPad3;
 } fbo_0;
 
 #ifdef USE_OPENGL

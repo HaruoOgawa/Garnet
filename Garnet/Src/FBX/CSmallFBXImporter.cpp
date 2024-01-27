@@ -255,7 +255,7 @@ namespace fbx
 
 		// Node‚ğì¬
 		// Mesh‚ÆSkin‚ÍŒã‚Ù‚ÇƒZƒbƒg‚·‚é
-		std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(-1);
+		std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(-1, static_cast<int>(NodeList.size()));
 
 		std::string NodeName = std::string(pFBXNode->getName());
 		Node->SetName(NodeName);

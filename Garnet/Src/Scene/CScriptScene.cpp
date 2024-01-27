@@ -196,7 +196,7 @@ namespace scene
 
 		// m_DebugSphere
 		{
-			auto Mat = m_SimpleTextureMF->CreateMaterial(pGraphicsAPI, 1, graphics::ECullMode::CULL_BACK);
+			auto Mat = m_SimpleTextureMF->CreateMaterial(pGraphicsAPI, 512, graphics::ECullMode::CULL_BACK);
 			Mat->SetEnabledZTest(false);
 			m_DebugSphere->SetScale(glm::vec3(0.1f));
 			if (!object::C3DObject::CreateSimply(pGraphicsAPI, m_DebugSphere, graphics::CPresetPrimitive::CreateSphere(), Mat, m_DepthMF)) return false;
@@ -290,41 +290,41 @@ namespace scene
 		if (m_TdaMiku_Model)
 		{
 			if (!m_TdaMiku_Model->Draw(IsDepthPass, false, Camera, Projection, DrawInfo, m_DebugSphere)) return false;
-			if (!m_TdaMiku_Model->Draw(IsDepthPass, true, Camera, Projection, DrawInfo, m_DebugSphere)) return false;
+			if (!m_TdaMiku_Model->Draw(IsDepthPass, true, Camera, Projection, DrawInfo, nullptr)) return false;
 			
 			/*m_TdaMiku_Model->SetPos(glm::vec3(-1.0f, 0.0f, 0.0f));
-			if (!m_TdaMiku_Model->Draw(IsDepthPass, Camera, Projection, DrawInfo, m_DebugSphere)) return false;
+			if (!m_TdaMiku_Model->Draw(IsDepthPass, Camera, Projection, DrawInfo, nullptr)) return false;
 			
 			m_TdaMiku_Model->SetPos(glm::vec3(0.0f, 0.0f, 1.0f));
-			if (!m_TdaMiku_Model->Draw(IsDepthPass, Camera, Projection, DrawInfo, m_DebugSphere)) return false;
+			if (!m_TdaMiku_Model->Draw(IsDepthPass, Camera, Projection, DrawInfo, nullptr)) return false;
 			
 			m_TdaMiku_Model->SetPos(glm::vec3(0.0f, 0.0f, -1.0f));
-			if (!m_TdaMiku_Model->Draw(IsDepthPass, Camera, Projection, DrawInfo, m_DebugSphere)) return false;*/
+			if (!m_TdaMiku_Model->Draw(IsDepthPass, Camera, Projection, DrawInfo, nullptr)) return false;*/
 		}
 		
 		/*if (m_glTFObject)
 		{
-			if (!m_glTFObject->Draw(IsDepthPass, false, Camera, Projection, DrawInfo, m_DebugSphere)) return false;
+			if (!m_glTFObject->Draw(IsDepthPass, false, Camera, Projection, DrawInfo, nullptr)) return false;
 		}*/
 		
 		/*if (m_BrainStemDObject)
 		{
-			if (!m_BrainStemDObject->Draw(IsDepthPass, Camera, Projection, DrawInfo, m_DebugSphere)) return false;
+			if (!m_BrainStemDObject->Draw(IsDepthPass, Camera, Projection, DrawInfo, nullptr)) return false;
 		}
 		
 		if (m_VRMObject)
 		{
-			if (!m_VRMObject->Draw(IsDepthPass, Camera, Projection, DrawInfo, m_DebugSphere)) return false;
+			if (!m_VRMObject->Draw(IsDepthPass, Camera, Projection, DrawInfo, nullptr)) return false;
 		}
 		
 		if (m_FbxObject)
 		{
-			if (!m_FbxObject->Draw(IsDepthPass, Camera, Projection, DrawInfo, m_DebugSphere)) return false;
+			if (!m_FbxObject->Draw(IsDepthPass, Camera, Projection, DrawInfo, nullptr)) return false;
 		}
 		
 		if (m_MouseyObject)
 		{
-			if (!m_MouseyObject->Draw(IsDepthPass, Camera, Projection, DrawInfo, m_DebugSphere)) return false;
+			if (!m_MouseyObject->Draw(IsDepthPass, Camera, Projection, DrawInfo, nullptr)) return false;
 		}*/
 		
 		if (m_Background)

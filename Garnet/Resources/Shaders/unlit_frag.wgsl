@@ -4,6 +4,10 @@ struct FragBufferObject_0_ {
     useTexColor: i32,
     useColor: i32,
     baseColor: vec4<f32>,
+    mPad0_: mat4x4<f32>,
+    mPad1_: mat4x4<f32>,
+    mPad2_: mat4x4<f32>,
+    mPad3_: mat4x4<f32>,
 }
 
 var<private> fUV_1: vec2<f32>;

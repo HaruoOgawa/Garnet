@@ -51,7 +51,7 @@ namespace resource
 		m_LoadingBar->AddMesh(Mesh);
 
 		// NODE
-		std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(0);
+		std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(0, 0);
 		m_LoadingBar->AddNode(Node);
 
 		// CreateŠÖ”‚ğÀs

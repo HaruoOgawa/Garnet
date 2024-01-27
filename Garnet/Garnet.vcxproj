@@ -575,6 +575,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Src\MMD\PMX\CPmxBone.h" />
     <ClInclude Include="Src\MMD\VMD\CVMDData.h" />
     <ClInclude Include="Src\MMD\VMD\CVMDImporter.h" />
     <ClInclude Include="Src\Animation\CAnimationClipSet.h" />
@@ -978,6 +979,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClInclude Include="Src\Interface\IRenderer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\MMD\PMX\CPmxBone.cpp" />
     <ClCompile Include="Src\MMD\VMD\CVMDData.cpp" />
     <ClCompile Include="Src\MMD\VMD\CVMDImporter.cpp" />
     <ClCompile Include="Src\Animation\CAnimationClipSet.cpp" />

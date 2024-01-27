@@ -648,7 +648,7 @@ namespace gltf
 			int MeshIndex = glTFNode.mesh;
 			int SkinIndex = glTFNode.skin;
 
-			std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(MeshIndex);
+			std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(MeshIndex, static_cast<int>(NodeList.size()));
 			
 			Node->SetName(glTFNode.name);
 			Node->SetSkinIndex(SkinIndex);

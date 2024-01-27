@@ -34,6 +34,11 @@ namespace mmd
 		return m_PmxMaterialList;
 	}
 
+	const std::vector<std::shared_ptr<CPmxBone>>& CPmxModel::GetPmxBoneList() const
+	{
+		return m_PmxBoneList;
+	}
+
 	bool CPmxModel::Analyse(const std::vector<unsigned char>& Data)
 	{
 		// Analyserを生成
@@ -683,120 +688,137 @@ namespace mmd
 			unsigned short BoneFlag = 0;
 			if (!Analyser.GetUShort(BoneFlag)) return false;
 
+			// PmxBoneを作成
+			std::shared_ptr<CPmxBone> PmxBone = std::make_shared<CPmxBone>(BoneName, BoneName_EN, Pos, ParentBoneIndex, DeformLayer, BoneFlag);
+
 			// ボーンフラグを見て処理を分ける
-			// 接続先
-			if (BoneFlag & 0x0001)
 			{
-				// 接続先: 1
-				// 接続先ボーンのボーンIndex
-				int ConnectBoneIndex = GetMultiTypeValueAsInterger(Analyser, MetaData.BoneIndexSize);
-			}
-			else
-			{
-				// 接続先: 0
-				// 座標オフセット, ボーン位置からの相対分
-				if (!Analyser.IsValid(4 * 3)) return false;
-
-				glm::vec3 Offset = glm::vec3(0.0f);
-
-				Offset.x = Analyser.GetFloat();
-				Offset.y = Analyser.GetFloat();
-				Offset.z = Analyser.GetFloat();
-			}
-
-			// 回転付与 または 移動付与 が 1
-			if (BoneFlag & 0x0100 || BoneFlag & 0x0200)
-			{
-				// 付与親ボーンのボーンIndex
-				int GrantParentBoneIndex = GetMultiTypeValueAsInterger(Analyser, MetaData.BoneIndexSize);
-
-				// 付与率
-				float GrantRate = 0.0f;
-				if (!Analyser.GetFloat(GrantRate)) return false;
-			}
-
-			// 軸固定:1 の場合
-			if (BoneFlag & 0x0400)
-			{
-				if (!Analyser.IsValid(4 * 3)) return false;
-
-				glm::vec3 FixedAxisVector = glm::vec3(0.0f);
-
-				FixedAxisVector.x = Analyser.GetFloat();
-				FixedAxisVector.y = Analyser.GetFloat();
-				FixedAxisVector.z = Analyser.GetFloat();
-			}
-
-			// ローカル軸:1 の場合
-			if (BoneFlag & 0x0800)
-			{
-				if (!Analyser.IsValid(4 * 3 * 2)) return false;
-
-				glm::vec3 XAxisVector = glm::vec3(0.0f);
-
-				XAxisVector.x = Analyser.GetFloat();
-				XAxisVector.y = Analyser.GetFloat();
-				XAxisVector.z = Analyser.GetFloat();
-				
-				glm::vec3 ZAxisVector = glm::vec3(0.0f);
-
-				ZAxisVector.x = Analyser.GetFloat();
-				ZAxisVector.y = Analyser.GetFloat();
-				ZAxisVector.z = Analyser.GetFloat();
-			}
-
-			// 外部親変形:1 の場合
-			if (BoneFlag & 0x2000)
-			{
-				int KeyIndex = -1;
-				if (!Analyser.GetInt(KeyIndex)) return false;
-			}
-
-			// IK:1 の場合 IKデータを格納
-			if (BoneFlag & 0x0020)
-			{
-				// IKターゲットボーンのボーンIndex
-				int IKTargetBoneIndex = GetMultiTypeValueAsInterger(Analyser, MetaData.BoneIndexSize);
-
-				// IKループ回数 (PMD及びMMD環境では255回が最大になるようです)
-				int IKLoopCount = 0;
-				if (!Analyser.GetInt(IKLoopCount)) return false;
-
-				// IKループ計算時の1回あたりの制限角度 -> ラジアン角 | PMDのIK値とは4倍異なるので注意
-				float LimitedAngle = 0.0f;
-				if (!Analyser.GetFloat(LimitedAngle)) return false;
-
-				// IKリンク数 : 後続の要素数
-				int IKLinkCount = 0;
-				if (!Analyser.GetInt(IKLinkCount)) return false;
-
-				for (int IKLinkIndex = 0; IKLinkIndex < IKLinkCount; IKLinkIndex++)
+				// 接続先
+				if (BoneFlag & 0x0001)
 				{
-					// リンクボーンのボーンIndex
-					int IKLinkBoneIndex = GetMultiTypeValueAsInterger(Analyser, MetaData.BoneIndexSize);
+					// 接続先: 1
+					// 接続先ボーンのボーンIndex
+					int ConnectBoneIndex = GetMultiTypeValueAsInterger(Analyser, MetaData.BoneIndexSize);
+				}
+				else
+				{
+					// 接続先: 0
+					// 座標オフセット, ボーン位置からの相対分
+					if (!Analyser.IsValid(4 * 3)) return false;
 
-					// 角度制限 0:OFF 1:ON
-					unsigned char IsLimitAngle = 0;
-					if (!Analyser.GetByte(IsLimitAngle)) return false;
+					glm::vec3 Offset = glm::vec3(0.0f);
 
-					if (IsLimitAngle & 0x01)
+					Offset.x = Analyser.GetFloat();
+					Offset.y = Analyser.GetFloat();
+					Offset.z = Analyser.GetFloat();
+				}
+
+				// 回転付与 または 移動付与 が 1
+				if (BoneFlag & 0x0100 || BoneFlag & 0x0200)
+				{
+					// 付与親ボーンのボーンIndex
+					int GrantParentBoneIndex = GetMultiTypeValueAsInterger(Analyser, MetaData.BoneIndexSize);
+
+					// 付与率
+					float GrantRate = 0.0f;
+					if (!Analyser.GetFloat(GrantRate)) return false;
+				}
+
+				// 軸固定:1 の場合
+				if (BoneFlag & 0x0400)
+				{
+					if (!Analyser.IsValid(4 * 3)) return false;
+
+					glm::vec3 FixedAxisVector = glm::vec3(0.0f);
+
+					FixedAxisVector.x = Analyser.GetFloat();
+					FixedAxisVector.y = Analyser.GetFloat();
+					FixedAxisVector.z = Analyser.GetFloat();
+				}
+
+				// ローカル軸:1 の場合
+				if (BoneFlag & 0x0800)
+				{
+					if (!Analyser.IsValid(4 * 3 * 2)) return false;
+
+					//
+					glm::vec3 XAxisVector = glm::vec3(0.0f);
+
+					XAxisVector.x = Analyser.GetFloat();
+					XAxisVector.y = Analyser.GetFloat();
+					XAxisVector.z = Analyser.GetFloat();
+
+					XAxisVector = glm::normalize(XAxisVector);
+
+					//
+					glm::vec3 ZAxisVector = glm::vec3(0.0f);
+
+					ZAxisVector.x = Analyser.GetFloat();
+					ZAxisVector.y = Analyser.GetFloat();
+					ZAxisVector.z = Analyser.GetFloat();
+
+					ZAxisVector = glm::normalize(ZAxisVector);
+
+					//
+					PmxBone->SetLocalAxis(XAxisVector, ZAxisVector);
+				}
+
+				// 外部親変形:1 の場合
+				if (BoneFlag & 0x2000)
+				{
+					int KeyIndex = -1;
+					if (!Analyser.GetInt(KeyIndex)) return false;
+				}
+
+				// IK:1 の場合 IKデータを格納
+				if (BoneFlag & 0x0020)
+				{
+					// IKターゲットボーンのボーンIndex
+					int IKTargetBoneIndex = GetMultiTypeValueAsInterger(Analyser, MetaData.BoneIndexSize);
+
+					// IKループ回数 (PMD及びMMD環境では255回が最大になるようです)
+					int IKLoopCount = 0;
+					if (!Analyser.GetInt(IKLoopCount)) return false;
+
+					// IKループ計算時の1回あたりの制限角度 -> ラジアン角 | PMDのIK値とは4倍異なるので注意
+					float LimitedAngle = 0.0f;
+					if (!Analyser.GetFloat(LimitedAngle)) return false;
+
+					// IKリンク数 : 後続の要素数
+					int IKLinkCount = 0;
+					if (!Analyser.GetInt(IKLinkCount)) return false;
+
+					for (int IKLinkIndex = 0; IKLinkIndex < IKLinkCount; IKLinkIndex++)
 					{
-						if (!Analyser.IsValid(4 * 3 * 2)) return false;
+						// リンクボーンのボーンIndex
+						int IKLinkBoneIndex = GetMultiTypeValueAsInterger(Analyser, MetaData.BoneIndexSize);
 
-						glm::vec3 UnderAngle = glm::vec3(0.0f);
+						// 角度制限 0:OFF 1:ON
+						unsigned char IsLimitAngle = 0;
+						if (!Analyser.GetByte(IsLimitAngle)) return false;
 
-						UnderAngle.x = Analyser.GetFloat();
-						UnderAngle.y = Analyser.GetFloat();
-						UnderAngle.z = Analyser.GetFloat();
+						if (IsLimitAngle & 0x01)
+						{
+							if (!Analyser.IsValid(4 * 3 * 2)) return false;
 
-						glm::vec3 UpperAngle = glm::vec3(0.0f);
+							glm::vec3 UnderAngle = glm::vec3(0.0f);
 
-						UpperAngle.x = Analyser.GetFloat();
-						UpperAngle.y = Analyser.GetFloat();
-						UpperAngle.z = Analyser.GetFloat();
+							UnderAngle.x = Analyser.GetFloat();
+							UnderAngle.y = Analyser.GetFloat();
+							UnderAngle.z = Analyser.GetFloat();
+
+							glm::vec3 UpperAngle = glm::vec3(0.0f);
+
+							UpperAngle.x = Analyser.GetFloat();
+							UpperAngle.y = Analyser.GetFloat();
+							UpperAngle.z = Analyser.GetFloat();
+						}
 					}
 				}
 			}
+
+			// PmxBoneを登録
+			m_PmxBoneList.push_back(PmxBone);
 		}
 
 		return true;

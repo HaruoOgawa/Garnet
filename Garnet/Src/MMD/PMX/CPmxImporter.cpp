@@ -33,14 +33,16 @@ namespace mmd
 		std::vector<std::shared_ptr<object::CNode>> NodeList;
 		std::vector<std::vector<int>> RootNodeIndexList;
 
-		std::shared_ptr<object::CNode> RootNode = std::make_shared<object::CNode>(-1);
+		std::shared_ptr<object::CNode> RootNode = std::make_shared<object::CNode>(-1, static_cast<int>(NodeList.size()));
 		RootNode->SetName("RootNode");
+		RootNode->SetU16Name(L"RootNode");
 		NodeList.push_back(RootNode);
 
-		RootNodeIndexList.push_back(std::vector<int>(0));
+		RootNodeIndexList.push_back(std::vector<int>({ 0 }));
 
 		// Skin
 		std::shared_ptr<animation::CSkin> Skin = std::make_shared<animation::CSkin>();
+		if (!CreateAnimationSkin(model, Skin, NodeList, RootNode)) return false;
 
 		// マテリアルリスト
 		std::vector<std::shared_ptr<graphics::CMaterial>> MaterialList;
@@ -55,6 +57,17 @@ namespace mmd
 		// メッシュ
 		std::vector<std::shared_ptr<graphics::CMesh>> MeshList;
 		if (!CreateMeshList(model, MeshList, RootNode, NodeList, MaterialList)) return false;
+
+		Object->SetRootNodeIndexList(RootNodeIndexList);
+
+		// DefaultMatrixを保存
+		Object->ApplyDefaultLocalTransform();
+
+		// WorldMatrixを計算
+		Object->CalcWorldMatrix();
+
+		// ParentNodeを設定する
+		Object->ApplyParentNode();
 
 		// リソースを登録
 		for (const auto& Node : NodeList)
@@ -82,6 +95,65 @@ namespace mmd
 		for (const auto& Mesh : MeshList)
 		{
 			Object->AddMesh(Mesh);
+		}
+
+		return true;
+	}
+
+	bool CPmxImporter::CreateAnimationSkin(const CPmxModel& model, std::shared_ptr<animation::CSkin>& Skin, std::vector<std::shared_ptr<object::CNode>>& NodeList, const std::shared_ptr<object::CNode>& RootNode)
+	{
+		const auto& PmxBoneList = model.GetPmxBoneList();
+
+		for (const auto& PmxBone : PmxBoneList)
+		{
+			// JointNodeの作成
+			std::shared_ptr<object::CNode> JointNode = std::make_shared<object::CNode>(-1, static_cast<int>(NodeList.size()));
+
+			JointNode->SetU16Name(PmxBone->GetBoneName().second);
+
+			JointNode->SetPos(PmxBone->GetPos());
+
+			// ローカル軸を使用するかどうか
+			if (PmxBone->IsUseLoacalAxis())
+			{
+				JointNode->SetRot(PmxBone->GetLocalAxis());
+			}
+
+			JointNode->SaveAsDefaultLocalTransform();
+
+			NodeList.push_back(JointNode);
+
+			// Jointを作成
+			std::shared_ptr<animation::CJoint> Joint = std::make_shared<animation::CJoint>(JointNode);
+
+			// JointにBoneNameを割り当てる
+			//Joint->SetBoneName
+
+			Skin->AddJoint(Joint);
+		}
+
+		// BoneNodeに子要素を設定する
+		{
+			const auto& JointList = Skin->GetJointList();
+
+			for (int JointIndex = 0; JointIndex < PmxBoneList.size(); JointIndex++)
+			{
+				const auto& PmxBone = PmxBoneList[JointIndex];
+				const auto& Joint = JointList[JointIndex];
+
+				int ParentBoneIndex = PmxBone->GetParentBoneIndex();
+				int SelfNodeIndex = Joint->GetJointNode()->GetSelfNodeIndex();
+
+				if (ParentBoneIndex < 0 || ParentBoneIndex >= JointList.size())
+				{
+					// ParentBoneIndexが65535と大きく範囲外な値を示すことがあるがこれはノードの親要素がルートノードであることを示している
+					RootNode->AddChildrenNodeIndex(SelfNodeIndex);
+				}
+				else
+				{
+					JointList[ParentBoneIndex]->GetJointNode()->AddChildrenNodeIndex(SelfNodeIndex);
+				}
+			}
 		}
 
 		return true;
@@ -189,7 +261,7 @@ namespace mmd
 		const std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList)
 	{
 		// 明示的にMeshNodeを作成
-		std::shared_ptr<object::CNode> MeshNode = std::make_shared<object::CNode>(-1);
+		std::shared_ptr<object::CNode> MeshNode = std::make_shared<object::CNode>(-1, static_cast<int>(NodeList.size()));
 		MeshNode->SetName("BaseMeshNode");
 		NodeList.push_back(MeshNode);
 
@@ -444,7 +516,9 @@ namespace mmd
 
 				// PMXにはノードの概念がないのでこちらで明示的に作成する
 				int MeshIndex = static_cast<int>(MeshList.size()) - 1;
-				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(MeshIndex);
+				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(MeshIndex, static_cast<int>(NodeList.size()));
+
+				Node->SetU16Name(PmxMaterial->GetMaterialName().second);
 
 				NodeList.push_back(Node);
 

@@ -44,6 +44,8 @@ namespace mmd
 	class CPmxImporter
 	{
 	private:
+		static bool CreateAnimationSkin(const CPmxModel& model, std::shared_ptr<animation::CSkin>& Skin, std::vector<std::shared_ptr<object::CNode>>& NodeList, const std::shared_ptr<object::CNode>& RootNode);
+
 		static bool CreateMaterialList(api::IGraphicsAPI* pGraphicsAPI, const CPmxModel& model, std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList,
 			const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, const std::shared_ptr<animation::CSkin>& Skin);
 

@@ -1,6 +1,8 @@
 #pragma once
 #ifdef USE_MMD
 #include <vector>
+#include <glm/glm.hpp>
+#include <glm/gtx/quaternion.hpp>
 
 namespace mmd
 {

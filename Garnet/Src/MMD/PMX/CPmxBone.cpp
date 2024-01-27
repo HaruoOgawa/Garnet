@@ -1,0 +1,65 @@
+#ifdef USE_MMD
+#include "CPmxBone.h"
+
+namespace mmd
+{
+	CPmxBone::CPmxBone(const std::pair<std::string, std::wstring>& BoneName, const std::pair<std::string, std::wstring>& BoneName_EN, const glm::vec3& Pos, int ParentBoneIndex, int DeformLayer, unsigned short BoneFlag):
+		m_BoneName(BoneName),
+		m_BoneName_EN(BoneName_EN),
+		m_Pos(Pos),
+		m_ParentBoneIndex(ParentBoneIndex),
+		m_DeformLayer(DeformLayer),
+		m_UseLoacalAxis(false),
+		m_LocalAxis(glm::quat(1.0f, 0.0f, 0.0f, 0.0f))
+	{
+		// ïKóvÇ…âûÇ∂Çƒêèéûé¿ëï
+		ReadBoneFlag(BoneFlag);
+	}
+
+	void CPmxBone::ReadBoneFlag(int BoneFlag)
+	{
+	}
+
+	const std::pair<std::string, std::wstring>& CPmxBone::GetBoneName() const
+	{
+		return m_BoneName;
+	}
+
+	const std::pair<std::string, std::wstring>& CPmxBone::GetBoneName_EN() const
+	{
+		return m_BoneName_EN;
+	}
+
+	const glm::vec3& CPmxBone::GetPos() const
+	{
+		return m_Pos;
+	}
+
+	int CPmxBone::GetParentBoneIndex() const
+	{
+		return m_ParentBoneIndex;
+	}
+
+	int CPmxBone::GetDeformLayer() const
+	{
+		return m_DeformLayer;
+	}
+
+	bool CPmxBone::IsUseLoacalAxis() const
+	{
+		return m_UseLoacalAxis;
+	}
+
+	void CPmxBone::SetLocalAxis(const glm::vec3& XAxisVector, const glm::vec3& ZAxisVector)
+	{
+		m_UseLoacalAxis = true;
+
+		glm::quat YAxisVector = glm::cross(XAxisVector, ZAxisVector);
+		m_LocalAxis = glm::cross(XAxisVector, YAxisVector);
+	}
+	const glm::quat& CPmxBone::GetLocalAxis() const
+	{
+		return m_LocalAxis;
+	}
+}
+#endif
