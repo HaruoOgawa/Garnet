@@ -407,7 +407,7 @@
       <Command>mkdir $(OutDir)Resources
 del /s /q $(OutDir)Resources\*
 
-xcopy Resources $(OutDir)Resources /y /s /i
+@rem xcopy Resources $(OutDir)Resources /y /s /i
 
 xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     </PostBuildEvent>
@@ -432,7 +432,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
       <Command>mkdir $(OutDir)Resources
 del /s /q $(OutDir)Resources\*
 
-xcopy Resources $(OutDir)Resources /y /s /i</Command>
+@rem xcopy Resources $(OutDir)Resources /y /s /i</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugWG|x64'">
@@ -455,7 +455,7 @@ xcopy Resources $(OutDir)Resources /y /s /i</Command>
       <Command>mkdir $(OutDir)Resources
 del /s /q $(OutDir)Resources\*
 
-xcopy Resources $(OutDir)Resources /y /s /i
+@rem xcopy Resources $(OutDir)Resources /y /s /i
 xcopy $(ProjectDir)src\Library\WebGPU\windows-x86_64\wgpu_native.dll $(OutDir) /y /s /i
 xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     </PostBuildEvent>
