@@ -18,6 +18,8 @@ namespace animation
 		virtual ~CAnimationClipSet() = default;
 
 		bool Import(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& Data, const std::string& FileName, const std::string& Extension);
+
+		std::shared_ptr<animation::CAnimationClip> GetAnimationClip(int Index);
 	};
 }
 #endif

@@ -45,5 +45,12 @@ namespace animation
 
 		return true;
 	}
+
+	std::shared_ptr<animation::CAnimationClip> CAnimationClipSet::GetAnimationClip(int Index)
+	{
+		if (Index < 0 || Index >= m_AnimationClipList.size()) return nullptr;
+
+		return m_AnimationClipList[Index];
+	}
 }
 #endif

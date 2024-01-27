@@ -10,5 +10,10 @@ namespace mmd
 	CVMDData::~CVMDData()
 	{
 	}
+
+	bool CVMDData::Analyse(const std::vector<unsigned char>& Data)
+	{
+		return true;
+	}
 }
 #endif

@@ -98,6 +98,8 @@ namespace scene
 
 			m_TdaMiku_Model->SetPos(glm::vec3(0.0f, 0.0f, 0.0f));
 			m_TdaMiku_Model->SetScale(glm::vec3(0.1f));
+
+			auto Clip = m_VMDAnimationSet->GetAnimationClip(0);
 		}
 
 		// glTFObject
