@@ -33,7 +33,6 @@ namespace resource
 
 	bool C3DObjectLoader::Load()
 	{
-		// マテリアルフレームファイルのロード
 		m_Status = resource::ELoadStatus::Loading;
 
 		if (!m_File->Load()) return false;

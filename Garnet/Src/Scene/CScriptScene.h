@@ -8,13 +8,16 @@
 namespace object { class C3DObject; }
 namespace camera { class CCamera; }
 namespace projection { class CProjection; }
-namespace graphics { 
+namespace resource { class CLoadWorker; }
+namespace input { class CInputState; }
+namespace animation { class CAnimationClipSet; }
+namespace graphics 
+{ 
 	class CDrawInfo; 
 	class CTexture;
 	class CMaterialFrame;
 }
-namespace resource { class CLoadWorker; }
-namespace input { class CInputState; }
+
 
 namespace scene
 {
@@ -30,6 +33,7 @@ namespace scene
 
 		// MMD
 		std::shared_ptr<object::C3DObject> m_TdaMiku_Model;
+		std::shared_ptr<animation::CAnimationClipSet> m_VMDAnimationSet;
 
 		// Fbx
 		std::shared_ptr<object::C3DObject> m_Walk_Animation;

@@ -5,10 +5,12 @@
 #include "../LoadWorker/CMaterialFrameLoader.h"
 #include "../LoadWorker/CTextureLoader.h"
 #include "../LoadWorker/C3DObjectLoader.h"
+#include "../LoadWorker/CAnimationLoader.h"
 
 #include "../Debug/Message/Console.h"
 
 #include "../Object/C3DObject.h"
+#include "../Animation/CAnimationClipSet.h"
 
 #include "../Graphics/CMaterialFrame.h"
 
@@ -22,6 +24,7 @@ namespace scene
 		m_DepthMF(std::make_shared<graphics::CMaterialFrame>()),
 
 		m_TdaMiku_Model(std::make_shared<object::C3DObject>("", "ShadowPass")),
+		m_VMDAnimationSet(std::make_shared<animation::CAnimationClipSet>()),
 
 		m_glTFObject(std::make_shared<object::C3DObject>("", "ShadowPass")),
 		m_BrainStemDObject(std::make_shared<object::C3DObject>("", "ShadowPass")),
@@ -51,6 +54,7 @@ namespace scene
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CMaterialFrameLoader>("Resources\\MaterialFrame\\Depth_MF.json", m_DepthMF));
 		
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Avatar\\Tda_Miku\\Tda_Miku.pmx", m_TdaMiku_Model, "", "ShadowPass"));
+		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CAnimationLoader>("Resources\\Motions\\mmd_running.vmd", m_VMDAnimationSet));
 
 		//pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Models\\CesiumMan\\glTF-Binary\\CesiumMan.glb", m_glTFObject, "", "ShadowPass"));
 		/*pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Avatar\\X_Bot.fbx", m_FbxObject, "", "ShadowPass"));
