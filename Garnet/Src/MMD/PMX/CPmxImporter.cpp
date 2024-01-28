@@ -111,13 +111,18 @@ namespace mmd
 
 			JointNode->SetU16Name(PmxBone->GetBoneName().second);
 
-			JointNode->SetPos(PmxBone->GetPos());
+			glm::vec3 Pos = PmxBone->GetPos();
+			glm::quat Rot = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
 
-			// ローカル軸を使用するかどうか
+			// ローカル軸を使用するかどうか(もしかすると要らないかも)
 			if (PmxBone->IsUseLoacalAxis())
 			{
-				JointNode->SetRot(PmxBone->GetLocalAxis());
+				Rot = PmxBone->GetLocalAxis();
 			}
+
+			//
+			JointNode->SetPos(Pos);
+			JointNode->SetRot(Rot);
 
 			JointNode->SaveAsDefaultLocalTransform();
 
@@ -144,7 +149,7 @@ namespace mmd
 				int ParentBoneIndex = PmxBone->GetParentBoneIndex();
 				int SelfNodeIndex = Joint->GetJointNode()->GetSelfNodeIndex();
 
-				if (ParentBoneIndex < 0 || ParentBoneIndex >= JointList.size())
+				/*if (ParentBoneIndex < 0 || ParentBoneIndex >= JointList.size())
 				{
 					// ParentBoneIndexが65535と大きく範囲外な値を示すことがあるがこれはノードの親要素がルートノードであることを示している
 					RootNode->AddChildrenNodeIndex(SelfNodeIndex);
@@ -152,7 +157,10 @@ namespace mmd
 				else
 				{
 					JointList[ParentBoneIndex]->GetJointNode()->AddChildrenNodeIndex(SelfNodeIndex);
-				}
+				}*/
+
+				// PMXのバイナリから取得したボーンの位置はワールド座標系での位置である(ひとまず仮でこのように書く)
+				RootNode->AddChildrenNodeIndex(SelfNodeIndex);
 			}
 		}
 

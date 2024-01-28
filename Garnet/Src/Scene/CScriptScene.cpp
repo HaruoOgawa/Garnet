@@ -289,8 +289,8 @@ namespace scene
 		
 		if (m_TdaMiku_Model)
 		{
-			if (!m_TdaMiku_Model->Draw(IsDepthPass, false, Camera, Projection, DrawInfo, m_DebugSphere)) return false;
-			if (!m_TdaMiku_Model->Draw(IsDepthPass, true, Camera, Projection, DrawInfo, nullptr)) return false;
+			if (!m_TdaMiku_Model->Draw(IsDepthPass, false, Camera, Projection, DrawInfo, nullptr)) return false;
+			if (!m_TdaMiku_Model->Draw(IsDepthPass, true, Camera, Projection, DrawInfo, m_DebugSphere)) return false;
 			
 			/*m_TdaMiku_Model->SetPos(glm::vec3(-1.0f, 0.0f, 0.0f));
 			if (!m_TdaMiku_Model->Draw(IsDepthPass, Camera, Projection, DrawInfo, nullptr)) return false;

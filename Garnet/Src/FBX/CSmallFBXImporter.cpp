@@ -303,14 +303,6 @@ namespace fbx
 			}
 		}
 
-		// Mixamo固有の変換
-		//if (IsMixamoFbx)
-		{
-			// FbxはTranslation・Posが100倍になっているので調整する
-			// たぶん単位がcmなので0.01倍することで計算に一般的に使用するmに直す
-			math::CTransform::CastCentiMeter2Meter(Pos);
-		}
-
 		Node->SetPos(Pos);
 		Node->SetRot(Rotation);
 		Node->SetScale(Scale);
@@ -706,14 +698,6 @@ namespace fbx
 
 											glm::vec3 Pos = glm::vec3(static_cast<float>(pFbxPosition[0]), static_cast<float>(pFbxPosition[1]), static_cast<float>(pFbxPosition[2]));
 
-											// Mixamo固有の変換
-											//if (IsMixamoFbx)
-											{
-												// FbxはTranslation・Posが100倍になっているので調整する
-												// たぶん単位がcmなので0.01倍することで計算に一般的に使用するmに直す
-												math::CTransform::CastCentiMeter2Meter(Pos);
-											}
-
 											AttributePosData[ControlPoint * 3 + 0] = Pos.x;
 											AttributePosData[ControlPoint * 3 + 1] = Pos.y;
 											AttributePosData[ControlPoint * 3 + 2] = Pos.z;
@@ -759,14 +743,6 @@ namespace fbx
 											const auto& pFbxPosition = Points[ControlPoint];
 
 											glm::vec3 Pos = glm::vec3(static_cast<float>(pFbxPosition[0]), static_cast<float>(pFbxPosition[1]), static_cast<float>(pFbxPosition[2]));
-
-											// Mixamo固有の変換
-											//if (IsMixamoFbx)
-											{
-												// FbxはTranslation・Posが100倍になっているので調整する
-												// たぶん単位がcmなので0.01倍することで計算に一般的に使用するmに直す
-												math::CTransform::CastCentiMeter2Meter(Pos);
-											}
 
 											PosList.push_back(Pos);
 
@@ -1240,14 +1216,6 @@ namespace fbx
 							for (int v = 0; v < ValuesList[0].size(); v++)
 							{
 								glm::vec3 Pos = glm::vec3(ValuesList[0][v], ValuesList[1][v], ValuesList[2][v]);
-
-								// Mixamo固有の変換
-								//if (IsMixamoFbx)
-								{
-									// FbxはTranslation・Posが100倍になっているので調整する
-									// たぶん単位がcmなので0.01倍することで計算に一般的に使用するmに直す
-									math::CTransform::CastCentiMeter2Meter(Pos);
-								}
 
 								outputList.push_back(Pos.x);
 								outputList.push_back(Pos.y);

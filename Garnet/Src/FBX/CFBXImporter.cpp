@@ -485,14 +485,6 @@ namespace fbx
 							FbxVector4 pFbxPosition = pFbxMesh->GetControlPointAt(CtrlPointIndex);
 							glm::vec3 Pos = glm::vec3(static_cast<float>(pFbxPosition[0]), static_cast<float>(pFbxPosition[1]), static_cast<float>(pFbxPosition[2]));
 
-							// Mixamo固有の変換
-							//if (IsMixamoFbx)
-							{
-								// FbxはTranslation・Posが100倍になっているので調整する
-								// たぶん単位がcmなので0.01倍することで計算に一般的に使用するmに直す
-								math::CTransform::CastCentiMeter2Meter(Pos);
-							}
-
 							AttributePosData.push_back(Pos.x);
 							AttributePosData.push_back(Pos.y);
 							AttributePosData.push_back(Pos.z);
@@ -827,14 +819,6 @@ namespace fbx
 			Scale = glm::vec3(static_cast<float>(fbxScale[0]), static_cast<float>(fbxScale[1]), static_cast<float>(fbxScale[2]));
 		}
 
-		// Mixamo固有の変換
-		//if (IsMixamoFbx)
-		{
-			// FbxはTranslation・Posが100倍になっているので調整する
-			// たぶん単位がcmなので0.01倍することで計算に一般的に使用するmに直す
-			math::CTransform::CastCentiMeter2Meter(Pos);
-		}
-
 		Node->SetPos(Pos);
 		Node->SetRot(Rotation);
 		Node->SetScale(Scale);
@@ -1010,14 +994,6 @@ namespace fbx
 							glm::vec3 Scale = glm::vec3(1.0f);
 
 							math::CTransform::CastModelMatrixToTransform(CurrentMatrix, Pos, Rotation, Scale);
-
-							// Mixamo固有の変換
-							//if (IsMixamoFbx)
-							{
-								// FbxはTranslation・Posが100倍になっているので調整する
-								// たぶん単位がcmなので0.01倍することで計算に一般的に使用するmに直す
-								math::CTransform::CastCentiMeter2Meter(Pos);
-							}
 
 							math::CTransform::CalcModelMatrix(CurrentMatrix, Pos, Rotation, false);
 						}

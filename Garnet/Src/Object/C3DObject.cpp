@@ -425,7 +425,7 @@ namespace object
 		
 #ifdef USE_ANIMATION
 		/*
-		if(DebugSphere && !DrawOutline)
+		if(DebugSphere)
 		{
 			for (const auto& Skin : m_AnimationController->GetSkinList())
 			{
