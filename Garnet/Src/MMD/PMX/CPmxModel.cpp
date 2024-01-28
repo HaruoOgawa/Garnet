@@ -416,7 +416,7 @@ namespace mmd
 			}
 		}
 
-		m_PmxMesh = std::make_shared<CPmxMesh>(PositionAttribute, NormalAttribute, UVAttribute, TangentAttribute, UIntJointAttribute, ByteJointAttribute, UShortIndices, WeightAttribute, AdditionalUVAttribute, UIntIndices, ByteIndices, UShortIndices);
+		m_PmxMesh = std::make_shared<CPmxMesh>(PositionAttribute, NormalAttribute, UVAttribute, TangentAttribute, UIntJointAttribute, ByteJointAttribute, UShortJointAttribute, WeightAttribute, AdditionalUVAttribute, UIntIndices, ByteIndices, UShortIndices);
 
 		return true;
 	}
