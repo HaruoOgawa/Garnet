@@ -29,7 +29,7 @@ namespace animation
 #if defined(USE_FBX) ///////////////////////////////////////////////////
 
 #ifdef USE_SMALL_FBX
-			if (!fbx::CSmallFBXImporter::ImportFBX(pGraphicsAPI, m_BinaryData, nullptr, nullptr)) return false;
+			if (!fbx::CSmallFBXImporter::ImportFBX(pGraphicsAPI, Data, nullptr, nullptr)) return false;
 #else
 			if (!fbx::CFBXImporter::ImportFBX(pGraphicsAPI, FileName, nullptr, nullptr)) return false;
 #endif // USE_SMALL_FBX
