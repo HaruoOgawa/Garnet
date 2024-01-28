@@ -61,18 +61,9 @@ namespace mmd
 		std::vector<std::shared_ptr<graphics::CMesh>> MeshList;
 		if (!CreateMeshList(model, MeshList, RootNode, NodeList, MaterialList)) return false;
 
+		// リソースを登録
 		Object->SetRootNodeIndexList(RootNodeIndexList);
 
-		// DefaultMatrixを保存
-		Object->ApplyDefaultLocalTransform();
-
-		// WorldMatrixを計算
-		Object->CalcWorldMatrix();
-
-		// ParentNodeを設定する
-		Object->ApplyParentNode();
-
-		// リソースを登録
 		for (const auto& Node : NodeList)
 		{
 			Object->AddNode(Node);
@@ -99,6 +90,18 @@ namespace mmd
 		{
 			Object->AddMesh(Mesh);
 		}
+
+		// DefaultMatrixを保存
+		Object->ApplyDefaultLocalTransform();
+
+		// WorldMatrixを計算
+		Object->CalcWorldMatrix();
+
+		// ParentNodeを設定する
+		Object->ApplyParentNode();
+
+		// 逆バインドポーズを計算する
+		if (!CalcInverseBindPose(Skin)) return false;
 
 		return true;
 	}
@@ -187,6 +190,18 @@ namespace mmd
 					BoneList[RootBoneIndex]->GetJointNode()->AddChildrenNodeIndex(SelfNodeIndex);
 				}
 			}
+		}
+
+		return true;
+	}
+
+	bool CPmxImporter::CalcInverseBindPose(std::shared_ptr<animation::CSkin>& Skin)
+	{
+		for (const auto& Bone : Skin->GetJointList())
+		{
+			// MMDのBoneはローカル座標系ではなくワールド座標系なのでセンターとかの親ボーンを考慮するかは迷うところ
+			glm::mat4 InverseBindMatrix = glm::inverse(Bone->GetJointNode()->GetWorldMatrix());
+			Bone->GetJointNode()->SetInverseBindMatrix(InverseBindMatrix);
 		}
 
 		return true;
