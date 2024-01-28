@@ -44,6 +44,9 @@ namespace mmd
 		std::shared_ptr<animation::CSkin> Skin = std::make_shared<animation::CSkin>();
 		if (!CreateAnimationSkin(model, Skin, NodeList, RootNode)) return false;
 
+		// BoneTableを作成
+		Skin->MakeBoneTable();
+
 		// マテリアルリスト
 		std::vector<std::shared_ptr<graphics::CMaterial>> MaterialList;
 		if (!CreateMaterialList(pGraphicsAPI, model, MaterialList, MaterialFrame, Skin)) return false;
@@ -102,14 +105,30 @@ namespace mmd
 
 	bool CPmxImporter::CreateAnimationSkin(const CPmxModel& model, std::shared_ptr<animation::CSkin>& Skin, std::vector<std::shared_ptr<object::CNode>>& NodeList, const std::shared_ptr<object::CNode>& RootNode)
 	{
+		// PmxではBoneとJointは全くの別物でそれぞれ違う役割を持っているので厳格に名前分けする必要がある!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 		const auto& PmxBoneList = model.GetPmxBoneList();
 
-		for (const auto& PmxBone : PmxBoneList)
-		{
-			// JointNodeの作成
-			std::shared_ptr<object::CNode> JointNode = std::make_shared<object::CNode>(-1, static_cast<int>(NodeList.size()));
+		int RootBoneIndex = -1;
 
-			JointNode->SetU16Name(PmxBone->GetBoneName().second);
+		std::wstring RootBoneName = L"全ての親";
+		RootBoneName.resize(8);
+
+		for (int BoneIndex = 0; BoneIndex < PmxBoneList.size(); BoneIndex++)
+		{
+			const auto& PmxBone = PmxBoneList[BoneIndex];
+
+			// BoneNodeの作成
+			std::shared_ptr<object::CNode> BoneNode = std::make_shared<object::CNode>(-1, static_cast<int>(NodeList.size()));
+
+			const auto& Name = PmxBone->GetBoneName().second;
+			BoneNode->SetU16Name(Name);
+
+			// ルートボーンの取得(『全ての親』)
+			if (Name == RootBoneName)
+			{
+				RootBoneIndex = BoneIndex;
+			}
 
 			glm::vec3 Pos = PmxBone->GetPos();
 			glm::quat Rot = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
@@ -121,46 +140,52 @@ namespace mmd
 			}
 
 			//
-			JointNode->SetPos(Pos);
-			JointNode->SetRot(Rot);
+			BoneNode->SetPos(Pos);
+			BoneNode->SetRot(Rot);
 
-			JointNode->SaveAsDefaultLocalTransform();
+			BoneNode->SaveAsDefaultLocalTransform();
 
-			NodeList.push_back(JointNode);
+			NodeList.push_back(BoneNode);
 
-			// Jointを作成
-			std::shared_ptr<animation::CJoint> Joint = std::make_shared<animation::CJoint>(JointNode);
+			// Boneを作成
+			std::shared_ptr<animation::CJoint> Bone = std::make_shared<animation::CJoint>(BoneNode);
 
-			// JointにBoneNameを割り当てる
-			//Joint->SetBoneName
+			// BoneにBoneNameを割り当てる
+			animation::CBoneNameProvider Provider;
+			animation::EHumanoidBones BoneName = Provider.GetBoneNameU16(Name);
+			Bone->SetBoneName(BoneName);
 
-			Skin->AddJoint(Joint);
+			Skin->AddJoint(Bone);
+		}
+
+		// 『全ての親』がない時はエラーとする
+		if (RootBoneIndex == -1)
+		{
+			Console::Log("[Pmx Import Error] Could not find All Parent Node\n");
+
+			return false;
 		}
 
 		// BoneNodeに子要素を設定する
 		{
-			const auto& JointList = Skin->GetJointList();
+			const auto& BoneList = Skin->GetJointList();
 
-			for (int JointIndex = 0; JointIndex < PmxBoneList.size(); JointIndex++)
+			for (int BoneIndex = 0; BoneIndex < PmxBoneList.size(); BoneIndex++)
 			{
-				const auto& PmxBone = PmxBoneList[JointIndex];
-				const auto& Joint = JointList[JointIndex];
+				const auto& Bone = BoneList[BoneIndex];
+				int SelfNodeIndex = Bone->GetJointNode()->GetSelfNodeIndex();
 
-				int ParentBoneIndex = PmxBone->GetParentBoneIndex();
-				int SelfNodeIndex = Joint->GetJointNode()->GetSelfNodeIndex();
-
-				/*if (ParentBoneIndex < 0 || ParentBoneIndex >= JointList.size())
+				// ルートボーン(全ての親)の時はPmx全体のRootNodeに追加する
+				if (RootBoneIndex == BoneIndex)
 				{
-					// ParentBoneIndexが65535と大きく範囲外な値を示すことがあるがこれはノードの親要素がルートノードであることを示している
 					RootNode->AddChildrenNodeIndex(SelfNodeIndex);
 				}
 				else
 				{
-					JointList[ParentBoneIndex]->GetJointNode()->AddChildrenNodeIndex(SelfNodeIndex);
-				}*/
-
-				// PMXのバイナリから取得したボーンの位置はワールド座標系での位置である(ひとまず仮でこのように書く)
-				RootNode->AddChildrenNodeIndex(SelfNodeIndex);
+					// PMXのバイナリから取得したボーンの位置はワールド座標系なので親子関係は構築しない
+					// その代わりにルートボーン(全ての親)を親として持つ
+					BoneList[RootBoneIndex]->GetJointNode()->AddChildrenNodeIndex(SelfNodeIndex);
+				}
 			}
 		}
 

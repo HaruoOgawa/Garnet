@@ -7,6 +7,7 @@ namespace animation
 	CBoneNameProvider::CBoneNameProvider()
 	{
 		InitTable();
+		InitTableU16();
 	}
 
 	EHumanoidBones CBoneNameProvider::GetBoneName(const std::string& SrcNodeName)
@@ -31,6 +32,64 @@ namespace animation
 			for (const std::string& BoneName : BoneNameList)
 			{
 				if (SearchName == BoneName)
+				{
+					return Table.first;
+				}
+			}
+		}
+
+		return EHumanoidBones::None;
+	}
+
+	EHumanoidBones CBoneNameProvider::GetBoneNameU16(const std::wstring& SrcNodeName)
+	{
+		// Bone名前の余分な文字列を切り取る
+		size_t SIndex = 0;
+		if (SrcNodeName.find(L":") != -1)
+		{
+			SIndex = SrcNodeName.find(L":") + 1;
+		}
+		else if (SrcNodeName.find(L"_") != -1)
+		{
+			SIndex = SrcNodeName.find(L"_") + 1;
+		}
+
+		const std::wstring SearchName = SrcNodeName.substr(SIndex);
+
+		for (const auto& Table : m_BoneNameTableU16)
+		{
+			const auto& BoneNameList = Table.second;
+
+			for (const std::wstring& BoneName : BoneNameList)
+			{
+				// ボーン名のバイトの末尾に0がついていたりとデータの長さが不定なので、BoneNameの長さだけSearchNameを調べて一致していればオッケーということにする
+				int Loop = 0;
+				bool Result = true;
+				for (auto wchr = BoneName.begin(); wchr != BoneName.end(); wchr++)
+				{
+					if ((*wchr) != SearchName[Loop])
+					{
+						Result = false;
+
+						break;
+					}
+
+					Loop++;
+				}
+
+				// 調べたいボーン名の1つ後ろにSpace・Empty以外があったら違うボーンとして判定する
+				if (SearchName.size() > BoneName.size())
+				{
+					auto wchr = SearchName[Loop];
+					std::wstring Empty = std::wstring(L""), Space = std::wstring(L" ");
+					Empty.resize(1);
+					if (wchr != Empty[0] && wchr != Space[0])
+					{
+						Result = false;
+					}
+				}
+
+				if (Result)
 				{
 					return Table.first;
 				}
@@ -99,6 +158,67 @@ namespace animation
 		m_BoneNameTable.emplace(animation::EHumanoidBones::RightLittleProximal, std::vector<std::string>{"RightLittleProximal", "RightHandPinky1", "rightLittleProximal"});
 		m_BoneNameTable.emplace(animation::EHumanoidBones::RightLittleIntermediate, std::vector<std::string>{"RightLittleIntermediate", "RightHandPinky2", "rightLittleIntermediate"});
 		m_BoneNameTable.emplace(animation::EHumanoidBones::RightLittleDistal, std::vector<std::string>{"RightLittleDistal", "RightHandPinky3", "rightLittleDistal"});
+	}
+
+	void CBoneNameProvider::InitTableU16()
+	{
+		m_BoneNameTableU16.emplace(animation::EHumanoidBones::Hips, std::vector<std::wstring>{ L"下半身" }); // もしかしたらセンターか腰かも?
+		m_BoneNameTableU16.emplace(animation::EHumanoidBones::Spine, std::vector<std::wstring>{ L"上半身" });
+		m_BoneNameTableU16.emplace(animation::EHumanoidBones::Chest, std::vector<std::wstring>{ L"上半身2" });
+		//m_BoneNameTableU16.emplace(animation::EHumanoidBones::UpperChest, std::vector<std::wstring>{ L"" });
+		m_BoneNameTableU16.emplace(animation::EHumanoidBones::Neck, std::vector<std::wstring>{ L"首" });
+		m_BoneNameTableU16.emplace(animation::EHumanoidBones::Head, std::vector<std::wstring>{ L"頭" });
+		m_BoneNameTableU16.emplace(animation::EHumanoidBones::LeftEye, std::vector<std::wstring>{ L"左目" });
+		m_BoneNameTableU16.emplace(animation::EHumanoidBones::RightEye, std::vector<std::wstring>{ L"右目" });
+		//m_BoneNameTableU16.emplace(animation::EHumanoidBones::Jaw, std::vector<std::wstring>{ L"" });
+		m_BoneNameTableU16.emplace(animation::EHumanoidBones::LeftShoulder, std::vector<std::wstring>{ L"左肩" });
+		m_BoneNameTableU16.emplace(animation::EHumanoidBones::LeftUpperArm, std::vector<std::wstring>{ L"左腕" });
+		m_BoneNameTableU16.emplace(animation::EHumanoidBones::LeftLowerArm, std::vector<std::wstring>{ L"左ひじ" });
+		m_BoneNameTableU16.emplace(animation::EHumanoidBones::LeftHand, std::vector<std::wstring>{ L"左手首" });
+		m_BoneNameTableU16.emplace(animation::EHumanoidBones::RightShoulder, std::vector<std::wstring>{ L"右肩" });
+		m_BoneNameTableU16.emplace(animation::EHumanoidBones::RightUpperArm, std::vector<std::wstring>{ L"右腕" });
+		m_BoneNameTableU16.emplace(animation::EHumanoidBones::RightLowerArm, std::vector<std::wstring>{ L"右ひじ" });
+		m_BoneNameTableU16.emplace(animation::EHumanoidBones::RightHand, std::vector<std::wstring>{ L"右手首" });
+		m_BoneNameTableU16.emplace(animation::EHumanoidBones::LeftUpperLeg, std::vector<std::wstring>{ L"左足" });
+		m_BoneNameTableU16.emplace(animation::EHumanoidBones::LeftLowerLeg, std::vector<std::wstring>{ L"左ひざ" });
+		m_BoneNameTableU16.emplace(animation::EHumanoidBones::LeftFoot, std::vector<std::wstring>{ L"左足首" });
+		m_BoneNameTableU16.emplace(animation::EHumanoidBones::LeftToes, std::vector<std::wstring>{ L"左つま先" });
+		m_BoneNameTableU16.emplace(animation::EHumanoidBones::RightUpperLeg, std::vector<std::wstring>{ L"右足" });
+		m_BoneNameTableU16.emplace(animation::EHumanoidBones::RightLowerLeg, std::vector<std::wstring>{ L"右ひざ" });
+		m_BoneNameTableU16.emplace(animation::EHumanoidBones::RightFoot, std::vector<std::wstring>{ L"右足首" });
+		m_BoneNameTableU16.emplace(animation::EHumanoidBones::RightToes, std::vector<std::wstring>{ L"右つま先" });
+
+		// 手の指のボーン。足のボーンは一般的にはないらしい(まぁ使う場面限られてるよね)
+		m_BoneNameTableU16.emplace(animation::EHumanoidBones::LeftThumbProximal, std::vector<std::wstring>{ L"左親指０" });
+		m_BoneNameTableU16.emplace(animation::EHumanoidBones::LeftThumbIntermediate, std::vector<std::wstring>{ L"左親指１" });
+		m_BoneNameTableU16.emplace(animation::EHumanoidBones::LeftThumbDistal, std::vector<std::wstring>{ L"左親指２" });
+		m_BoneNameTableU16.emplace(animation::EHumanoidBones::LeftIndexProximal, std::vector<std::wstring>{ L"左人指１" });
+		m_BoneNameTableU16.emplace(animation::EHumanoidBones::LeftIndexIntermediate, std::vector<std::wstring>{ L"左人指２" });
+		m_BoneNameTableU16.emplace(animation::EHumanoidBones::LeftIndexDistal, std::vector<std::wstring>{ L"左人指３" });
+		m_BoneNameTableU16.emplace(animation::EHumanoidBones::LeftMiddleProximal, std::vector<std::wstring>{ L"左中指１" });
+		m_BoneNameTableU16.emplace(animation::EHumanoidBones::LeftMiddleIntermediate, std::vector<std::wstring>{ L"左中指２" });
+		m_BoneNameTableU16.emplace(animation::EHumanoidBones::LeftMiddleDistal, std::vector<std::wstring>{ L"左中指３" });
+		m_BoneNameTableU16.emplace(animation::EHumanoidBones::LeftRingProximal, std::vector<std::wstring>{ L"左薬指１" });
+		m_BoneNameTableU16.emplace(animation::EHumanoidBones::LeftRingIntermediate, std::vector<std::wstring>{ L"左薬指２" });
+		m_BoneNameTableU16.emplace(animation::EHumanoidBones::LeftRingDistal, std::vector<std::wstring>{ L"左薬指３" });
+		m_BoneNameTableU16.emplace(animation::EHumanoidBones::LeftLittleProximal, std::vector<std::wstring>{ L"左小指１" });
+		m_BoneNameTableU16.emplace(animation::EHumanoidBones::LeftLittleIntermediate, std::vector<std::wstring>{ L"左小指２" });
+		m_BoneNameTableU16.emplace(animation::EHumanoidBones::LeftLittleDistal, std::vector<std::wstring>{ L"左小指３" });
+		m_BoneNameTableU16.emplace(animation::EHumanoidBones::RightThumbProximal, std::vector<std::wstring>{ L"右親指0" });
+		m_BoneNameTableU16.emplace(animation::EHumanoidBones::RightThumbIntermediate, std::vector<std::wstring>{ L"右親指１" });
+		m_BoneNameTableU16.emplace(animation::EHumanoidBones::RightThumbDistal, std::vector<std::wstring>{ L"右親指２" });
+		m_BoneNameTableU16.emplace(animation::EHumanoidBones::RightIndexProximal, std::vector<std::wstring>{ L"右人指１" });
+		m_BoneNameTableU16.emplace(animation::EHumanoidBones::RightIndexIntermediate, std::vector<std::wstring>{ L"右人指２" });
+		m_BoneNameTableU16.emplace(animation::EHumanoidBones::RightIndexDistal, std::vector<std::wstring>{ L"右人指３" });
+		m_BoneNameTableU16.emplace(animation::EHumanoidBones::RightMiddleProximal, std::vector<std::wstring>{ L"右中指１" });
+		m_BoneNameTableU16.emplace(animation::EHumanoidBones::RightMiddleIntermediate, std::vector<std::wstring>{ L"右中指２" });
+		m_BoneNameTableU16.emplace(animation::EHumanoidBones::RightMiddleDistal, std::vector<std::wstring>{ L"右中指３" });
+		m_BoneNameTableU16.emplace(animation::EHumanoidBones::RightRingProximal, std::vector<std::wstring>{ L"右薬指１" });
+		m_BoneNameTableU16.emplace(animation::EHumanoidBones::RightRingIntermediate, std::vector<std::wstring>{ L"右薬指２" });
+		m_BoneNameTableU16.emplace(animation::EHumanoidBones::RightRingDistal, std::vector<std::wstring>{ L"右薬指３" });
+		m_BoneNameTableU16.emplace(animation::EHumanoidBones::RightLittleProximal, std::vector<std::wstring>{ L"右小指１" });
+		m_BoneNameTableU16.emplace(animation::EHumanoidBones::RightLittleIntermediate, std::vector<std::wstring>{ L"右小指２" });
+		m_BoneNameTableU16.emplace(animation::EHumanoidBones::RightLittleDistal, std::vector<std::wstring>{ L"右小指３" });
 	}
 }
 
