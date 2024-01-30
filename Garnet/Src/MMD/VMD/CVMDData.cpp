@@ -2,6 +2,7 @@
 #include "CVMDData.h"
 #include "../../Binary/CBinaryAnalyser.h"
 #include "../../Debug/Message/Console.h"
+#include "../../Animation/CBoneNameProvider.h"
 
 namespace mmd
 {
@@ -15,7 +16,7 @@ namespace mmd
 	{
 	}
 
-	const std::map<std::wstring, std::vector<SVMDFrame>>& CVMDData::GetFrameMap() const
+	const std::map<animation::EHumanoidBones, std::vector<SVMDFrame>>& CVMDData::GetFrameMap() const
 	{
 		return m_FrameMap;
 	}
@@ -40,7 +41,7 @@ namespace mmd
 		if (!Analyser.GetString(header, 30)) return false;
 
 		std::wstring modelName = L"";
-		if (!Analyser.GetUTF16String(modelName, 20)) return false;
+		if (!Analyser.GetUTF16ReverseString(modelName, 20)) return false;
 
 		// フレームデータ
 		if (!AnalyseFrameData(Analyser)) return false;
@@ -57,8 +58,8 @@ namespace mmd
 		for (int i = 0; i < FrameDataCount; i++)
 		{
 			// ボーン名
-			std::wstring BoneName = L"";
-			if (!Analyser.GetUTF16String(BoneName, 15)) return false;
+			std::wstring Name = L"";
+			if (!Analyser.GetUTF16ReverseString(Name, 15)) return false;
 
 			// フレームインデックス
 			int FrameIndex = -1;
@@ -97,6 +98,13 @@ namespace mmd
 			glm::vec2 Z_Interpolation_B = glm::vec2(Analyser.GetFloat(), Analyser.GetFloat());
 			glm::vec2 R_Interpolation_A = glm::vec2(Analyser.GetFloat(), Analyser.GetFloat());
 			glm::vec2 R_Interpolation_B = glm::vec2(Analyser.GetFloat(), Analyser.GetFloat());
+
+			// ボーン名を取得
+			animation::CBoneNameProvider Provider;
+			animation::EHumanoidBones BoneName = Provider.GetBoneNameU16(Name);
+
+			// Noneはどのボーンに割り当てればいいかわからないのでスキップする
+			if (BoneName == animation::EHumanoidBones::None) continue;
 
 			// MapにPairが無ければ新規作成
 			if (m_FrameMap.find(BoneName) == m_FrameMap.end())

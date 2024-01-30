@@ -6,6 +6,7 @@
 #include <glm/gtx/quaternion.hpp>
 
 #include "SVMDFrame.h"
+#include "../../Animation/EHumanoidBones.h"
 
 namespace binary { class CBinaryAnalyser; }
 
@@ -13,7 +14,7 @@ namespace mmd
 {
 	class CVMDData
 	{
-		std::map<std::wstring, std::vector<SVMDFrame>> m_FrameMap;
+		std::map<animation::EHumanoidBones, std::vector<SVMDFrame>> m_FrameMap;
 		int m_MinFrameIndex;
 		int m_MaxFrameIndex;
 	private:
@@ -23,7 +24,7 @@ namespace mmd
 		CVMDData();
 		virtual ~CVMDData();
 
-		const std::map<std::wstring, std::vector<SVMDFrame>>& GetFrameMap() const;
+		const std::map<animation::EHumanoidBones, std::vector<SVMDFrame>>& GetFrameMap() const;
 		int GetMinFrameIndex() const;
 		int GetMaxFrameIndex() const;
 

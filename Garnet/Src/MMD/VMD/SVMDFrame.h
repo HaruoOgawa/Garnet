@@ -4,12 +4,13 @@
 #include <string>
 #include <glm/glm.hpp>
 #include <glm/gtx/quaternion.hpp>
+#include "../../Animation/EHumanoidBones.h"
 
 namespace mmd
 {
 	struct SVMDFrame
 	{
-		std::wstring BoneName;
+		animation::EHumanoidBones BoneName;
 
 		int FrameIndex;
 
