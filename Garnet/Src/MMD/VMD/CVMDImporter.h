@@ -7,10 +7,15 @@
 #include "../../Animation/CAnimationClip.h"
 #include "../../Interface/IGraphicsAPI.h"
 
+#include "CVMDData.h"
+#include "SVMDFrame.h"
+
 namespace mmd
 {
 	class CVMDImporter
 	{
+	private:
+		static bool CreateAnimationClip(const CVMDData& VMDData, std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList);
 	public:
 		static bool Import(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& Data, std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList);
 	};

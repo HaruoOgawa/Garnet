@@ -17,12 +17,15 @@ namespace animation
 	private:
 		void InitTable();
 		void InitTableU16();
+
 	public:
 		CBoneNameProvider();
 		virtual ~CBoneNameProvider() = default;
 
 		EHumanoidBones GetBoneName(const std::string& SrcNodeName);
 		EHumanoidBones GetBoneNameU16(const std::wstring& SrcNodeName);
+
+		static std::wstring HexToWstr(std::vector<int> byteArray);
 	};
 }
 

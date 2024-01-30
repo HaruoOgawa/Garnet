@@ -586,6 +586,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClInclude Include="Src\MMD\PMX\EPmxEncodeType.h" />
     <ClInclude Include="Src\MMD\PMX\EPmxWeightDeformFormat.h" />
     <ClInclude Include="Src\MMD\PMX\SPmxMetaData.h" />
+    <ClInclude Include="Src\MMD\VMD\SVMDFrame.h" />
     <ClInclude Include="Src\Object\CObjectBuilder.h" />
     <ClInclude Include="Src\MMD\PMX\CPmxImporter.h" />
     <ClInclude Include="Src\Animation\CAnimationController.h" />

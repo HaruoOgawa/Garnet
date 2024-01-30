@@ -5,12 +5,29 @@
 
 namespace mmd
 {
-	CVMDData::CVMDData()
+	CVMDData::CVMDData():
+		m_MinFrameIndex(INT_MAX),
+		m_MaxFrameIndex(INT_MIN)
 	{
 	}
 
 	CVMDData::~CVMDData()
 	{
+	}
+
+	const std::map<std::wstring, std::vector<SVMDFrame>>& CVMDData::GetFrameMap() const
+	{
+		return m_FrameMap;
+	}
+
+	int CVMDData::GetMinFrameIndex() const
+	{
+		return m_MinFrameIndex;
+	}
+
+	int CVMDData::GetMaxFrameIndex() const
+	{
+		return m_MaxFrameIndex;
 	}
 
 	bool CVMDData::Analyse(const std::vector<unsigned char>& Data)
@@ -25,6 +42,14 @@ namespace mmd
 		std::wstring modelName = L"";
 		if (!Analyser.GetUTF16String(modelName, 20)) return false;
 
+		// フレームデータ
+		if (!AnalyseFrameData(Analyser)) return false;
+
+		return true;
+	}
+
+	bool CVMDData::AnalyseFrameData(binary::CBinaryAnalyser& Analyser)
+	{
 		// フレームデータ数
 		int FrameDataCount = 0;
 		if (!Analyser.GetInt(FrameDataCount)) return false;
@@ -38,6 +63,9 @@ namespace mmd
 			// フレームインデックス
 			int FrameIndex = -1;
 			if (!Analyser.GetInt(FrameIndex)) return false;
+
+			m_MinFrameIndex = std::min(FrameIndex, m_MinFrameIndex);
+			m_MaxFrameIndex = std::max(FrameIndex, m_MaxFrameIndex);
 
 			// ボーンの位置
 			if (!Analyser.IsValid(4 * 3)) return false;
@@ -69,6 +97,17 @@ namespace mmd
 			glm::vec2 Z_Interpolation_B = glm::vec2(Analyser.GetFloat(), Analyser.GetFloat());
 			glm::vec2 R_Interpolation_A = glm::vec2(Analyser.GetFloat(), Analyser.GetFloat());
 			glm::vec2 R_Interpolation_B = glm::vec2(Analyser.GetFloat(), Analyser.GetFloat());
+
+			// MapにPairが無ければ新規作成
+			if (m_FrameMap.find(BoneName) == m_FrameMap.end())
+			{
+				m_FrameMap.emplace(BoneName, std::vector<SVMDFrame>());
+			}
+
+			// Mapにデータを登録する
+			SVMDFrame Frame = { BoneName, FrameIndex, Pos, Rot, X_Interpolation_A , X_Interpolation_B, Y_Interpolation_A , Y_Interpolation_B, Z_Interpolation_A , Z_Interpolation_B, R_Interpolation_A , R_Interpolation_B };
+
+			m_FrameMap[BoneName].push_back(Frame);
 		}
 
 		return true;

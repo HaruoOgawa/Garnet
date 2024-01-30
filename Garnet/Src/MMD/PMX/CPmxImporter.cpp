@@ -114,7 +114,7 @@ namespace mmd
 
 		int RootBoneIndex = -1;
 
-		std::wstring RootBoneName = L"全ての親";
+		std::wstring RootBoneName = animation::CBoneNameProvider::HexToWstr({ 0x5168, 0x3066, 0x306e, 0x89aa }); // 全ての親
 		RootBoneName.resize(8);
 
 		for (int BoneIndex = 0; BoneIndex < PmxBoneList.size(); BoneIndex++)

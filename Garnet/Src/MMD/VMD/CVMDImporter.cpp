@@ -1,6 +1,5 @@
 #ifdef USE_MMD
 #include "CVMDImporter.h"
-#include "CVMDData.h"
 #include "../../Debug/Message/Console.h"
 
 namespace mmd
@@ -19,6 +18,14 @@ namespace mmd
 			return false;
 		}
 
+		// アニメーションクリップの作成
+		if (!CreateAnimationClip(vmd, AnimationClipList)) return false;
+
+		return true;
+	}
+
+	bool CVMDImporter::CreateAnimationClip(const CVMDData& VMDData, std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList)
+	{
 		return true;
 	}
 }
