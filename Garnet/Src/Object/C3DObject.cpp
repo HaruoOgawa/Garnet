@@ -501,9 +501,10 @@ namespace object
 		m_AnimationController->AddAnimationClip(Clip);
 	}
 
-	void C3DObject::AddHumanoidAnimationClip(const std::shared_ptr<animation::CAnimationClip>& SourceClip, const std::string& MotionName, animation::SAnimationLayout Layout, bool IsLoop)
+	void C3DObject::AddHumanoidAnimationClip(const std::shared_ptr<animation::CAnimationClip>& SourceClip, const std::string& MotionName, animation::SAnimationLayout Layout, bool IsLoop, bool IsWorldAnim)
 	{
-		m_AnimationController->AddHumanoidAnimationClip(SourceClip, MotionName, Layout, IsLoop);
+		// IsWorldAnim: アニメーションがワールド座標系のデータを示すかどうか
+		m_AnimationController->AddHumanoidAnimationClip(SourceClip, MotionName, Layout, IsLoop, IsWorldAnim);
 	}
 
 	const std::vector<std::shared_ptr<animation::CAnimationClip>>& C3DObject::GetAnimationClipList() const

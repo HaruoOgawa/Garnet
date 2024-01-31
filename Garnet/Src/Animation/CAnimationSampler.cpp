@@ -244,7 +244,15 @@ namespace animation
 	{
 		// Next
 		const auto& val = std::find_if(m_KeyFrameList.begin(), m_KeyFrameList.end(), [&](std::shared_ptr<CKeyFrame>& f) {  bool r = (CurrentTime <= f->GetInput()); if (r) { NextKeyFrame = f; } return r; });
-		if (val == m_KeyFrameList.end()) return false;
+		
+		// Ÿ‚ÌƒtƒŒ[ƒ€‚ª‚È‚¢‚ÍÅŒã‚Æ‚»‚Ì‘O‚ğ•Ô‚·
+		if (val == m_KeyFrameList.end())
+		{
+			NextKeyFrame = m_KeyFrameList[m_KeyFrameList.size() - 1];
+			PrevKeyFrame = m_KeyFrameList[m_KeyFrameList.size() - 2];
+
+			return true;
+		}
 
 		// Prev
 		size_t NextIndex = std::distance(m_KeyFrameList.begin(), val);

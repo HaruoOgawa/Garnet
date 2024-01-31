@@ -100,6 +100,9 @@ namespace scene
 			m_TdaMiku_Model->SetScale(glm::vec3(0.1f));
 
 			auto Clip = m_VMDAnimationSet->GetAnimationClip(0);
+			if (Clip) m_TdaMiku_Model->AddHumanoidAnimationClip(Clip, "Walk", { nullptr, "" }, true, true);
+
+			m_TdaMiku_Model->ChangeMotion("Walk");
 		}
 
 		// glTFObject
