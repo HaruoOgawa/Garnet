@@ -51,7 +51,7 @@ namespace mmd
 			const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, const std::shared_ptr<animation::CSkin>& Skin);
 
 		static bool CreateMeshList(const CPmxModel& model, std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, const std::shared_ptr<object::CNode>& RootNode, std::vector<std::shared_ptr<object::CNode>>& NodeList,
-			const std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList);
+			const std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList, bool ExistSkin);
 
 		static bool CreateTextureList(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, const std::string& ModelFileName, const CPmxModel& model, std::vector<std::shared_ptr<graphics::CTexture>>& TextureList,
 			std::vector<std::shared_ptr<resource::IResource>>& RuntimeLoadResourceList);

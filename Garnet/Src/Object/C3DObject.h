@@ -88,7 +88,7 @@ namespace object
 #ifdef USE_ANIMATION
 		void AddAnimationSkin(const std::shared_ptr<animation::CSkin>& Skin);
 		void AddAnimationClip(const std::shared_ptr<animation::CAnimationClip>& Clip);
-		void AddHumanoidAnimationClip(const std::shared_ptr<animation::CAnimationClip>& SourceClip, const std::string& MotionName, animation::SAnimationLayout Layout, bool IsLoop, bool IsWorldAnim);
+		void AddHumanoidAnimationClip(const std::shared_ptr<animation::CAnimationClip>& SourceClip, const std::string& MotionName, animation::SAnimationLayout Layout, bool IsLoop);
 
 		const std::vector<std::shared_ptr<animation::CAnimationClip>>& GetAnimationClipList() const;
 #endif

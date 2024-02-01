@@ -173,7 +173,7 @@ namespace animation
 		m_ClipList.push_back(Clip);
 	}
 
-	void CAnimationController::AddHumanoidAnimationClip(const std::shared_ptr<animation::CAnimationClip>& SourceClip, const std::string& MotionName, animation::SAnimationLayout Layout, bool IsLoop, bool IsWorldAnim)
+	void CAnimationController::AddHumanoidAnimationClip(const std::shared_ptr<animation::CAnimationClip>& SourceClip, const std::string& MotionName, animation::SAnimationLayout Layout, bool IsLoop)
 	{
 		// IsWorldAnim: アニメーションがワールド座標系のデータを示すかどうか
 
@@ -229,7 +229,7 @@ namespace animation
 				}
 			}
 
-			std::shared_ptr<animation::CAnimationChannel> TargetChannel = std::make_shared<animation::CAnimationChannel>(SourceChannel->IsUseAnimLocalAxis(), SourceChannel->GetSamplerIndex(), SourceChannel->GetAnimationTarget(), TargetNode, SourceChannel->GetBoneName());
+			std::shared_ptr<animation::CAnimationChannel> TargetChannel = std::make_shared<animation::CAnimationChannel>(SourceChannel->IsUseAnimLocalAxis(), SourceChannel->IsTransOffset(), SourceChannel->GetSamplerIndex(), SourceChannel->GetAnimationTarget(), TargetNode, SourceChannel->GetBoneName());
 
 			TargetClip->AddAnimationChannel(TargetChannel);
 		}
@@ -241,16 +241,7 @@ namespace animation
 			// RigのReTargetingを行う
 			// リターゲティングとはリグの形が異なるアニメーションを自身のアニメーションに合うように調整すること
 			// 例えば身長が違うとアバターが伸びてしまう
-			if (IsWorldAnim)
-			{
-				// ワールド座標系のアニメーションに対するリターゲット
-				// 実装保留. たぶんSkinの座標系がワールドであれば問題ないはず
-				if (!ReTargetRigWorld(SourceClip, TargetClip)) return;
-			}
-			else
-			{
-				if (!ReTargetRig(SourceClip, TargetClip)) return;
-			}
+			if (!ReTargetRig(SourceClip, TargetClip)) return;
 		}
 
 		TargetClip->SetIsLoop(IsLoop);
@@ -323,84 +314,6 @@ namespace animation
 	}
 
 	bool CAnimationController::ReTargetRig(const std::shared_ptr<animation::CAnimationClip>& SourceClip, const std::shared_ptr<animation::CAnimationClip>& TargetClip)
-	{
-		const auto& SourceSkin = SourceClip->GetDefaultSkin();
-		if (!SourceSkin) return false;
-
-		// Rigのリターゲティングを実行する
-		for (const auto& TargetChannel : TargetClip->GetChannelList())
-		{
-			int TargetSamplerIndex = TargetChannel->GetSamplerIndex();
-			if (TargetSamplerIndex < 0 || TargetSamplerIndex >= TargetClip->GetSamplerList().size()) continue;
-
-			const auto& TargetSampler = TargetClip->GetSamplerList()[TargetSamplerIndex];
-
-			animation::EHumanoidBones BoneName = TargetChannel->GetBoneName();
-
-			animation::EAnimationTarget AnimationTarget = TargetChannel->GetAnimationTarget();
-
-			// BoneTableに登録されていないものについては処理の対象外とする
-			if (BoneName == animation::EHumanoidBones::None) continue;
-
-			const auto& SourceBone = SourceSkin->GetBone(BoneName);
-			if (!SourceBone) continue;
-
-			const glm::mat4 SourceRestMove = SourceBone->GetJointNode()->GetDefaultLocalMoveMatrix();
-			const glm::mat4 InverseSourceRestMove = glm::inverse(SourceRestMove);
-
-			for (const auto& TargetSkin : m_SkinList)
-			{
-				const auto& TargetBone = TargetSkin->GetBone(BoneName);
-				if (!TargetBone) continue;
-
-				const glm::mat4 TargetRestMove = TargetBone->GetJointNode()->GetDefaultLocalMoveMatrix();
-
-				// SourceとTargetのバインドマトリックスのTranslationの差分を示す行列
-				const glm::mat4 ReTargetTranslationMatrix = TargetRestMove * InverseSourceRestMove;
-
-				for (const auto& TargetKeyFrame : TargetSampler->GetKeyFrameList())
-				{
-					const float CurrentTime = TargetKeyFrame->GetInput();
-
-					if (AnimationTarget == animation::EAnimationTarget::MODELMATRIX)
-					{
-						glm::mat4 SourcePose = glm::mat4(1.0f);
-						TargetKeyFrame->GetOutput(&SourcePose[0][0]);
-
-						glm::mat4 TargetPose = ReTargetTranslationMatrix * SourcePose;
-
-						TargetKeyFrame->SetOutput(&TargetPose[0][0], sizeof(glm::mat4));
-					}
-					else if (AnimationTarget == animation::EAnimationTarget::TRANSLATION)
-					{
-						glm::vec3 SourceTranslation = glm::vec3(1.0f);
-						TargetKeyFrame->GetOutput(&SourceTranslation[0]);
-
-						glm::mat4 SourcePose = glm::translate(glm::mat4(1.0f), SourceTranslation);
-
-						glm::mat4 TargetPose = ReTargetTranslationMatrix * SourcePose;
-
-						glm::vec3 TargetTranslation = glm::vec3(1.0f);
-						math::CTransform::CastModelMatrixToTranslation(TargetPose, TargetTranslation);
-
-						TargetKeyFrame->SetOutput(&TargetTranslation[0], sizeof(glm::vec3));
-					}
-					else
-					{
-						// リターゲットはリグの長さの違いを補正するためのものなのでMODELMATRIXとTRANSLATIONに対してのみ行う
-						continue;
-					}
-				}
-
-				// 対象のBoneについては一度しか計算しない
-				break;
-			}
-		}
-
-		return true;
-	}
-
-	bool CAnimationController::ReTargetRigWorld(const std::shared_ptr<animation::CAnimationClip>& SourceClip, const std::shared_ptr<CAnimationClip>& TargetClip)
 	{
 		const auto& SourceSkin = SourceClip->GetDefaultSkin();
 		if (!SourceSkin) return false;

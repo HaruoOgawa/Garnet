@@ -21,6 +21,9 @@ namespace mmd
 
 		// BoneFlag
 
+		// ê⁄ë±(âeãøÇéÛÇØÇÈ)É{Å[Éì
+		int m_ConnectBoneIndex;
+
 		//
 		bool m_UseLoacalAxis;
 		glm::quat m_LocalAxis;
@@ -43,6 +46,8 @@ namespace mmd
 		bool IsUseLoacalAxis() const;
 		void SetLocalAxis(const glm::vec3& XAxisVector, const glm::vec3& ZAxisVector);
 		const glm::quat& GetLocalAxis() const;
+
+		glm::mat4 GetWorldMatrix();
 	};
 }
 #endif

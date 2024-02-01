@@ -1,5 +1,6 @@
 #ifdef USE_MMD
 #include "CPmxBone.h"
+#include "../../Math/CTransform.h"
 
 namespace mmd
 {
@@ -57,9 +58,22 @@ namespace mmd
 		glm::quat YAxisVector = glm::cross(XAxisVector, ZAxisVector);
 		m_LocalAxis = glm::cross(XAxisVector, YAxisVector);
 	}
+
 	const glm::quat& CPmxBone::GetLocalAxis() const
 	{
 		return m_LocalAxis;
+	}
+
+	glm::mat4 CPmxBone::GetWorldMatrix()
+	{
+		glm::mat4 WorldMatrix = glm::mat4(1.0f);
+
+		glm::quat rot = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
+		if (IsUseLoacalAxis()) rot = GetLocalAxis();
+
+		math::CTransform::CalcModelMatrix(WorldMatrix, m_Pos, rot, false);
+
+		return WorldMatrix;
 	}
 }
 #endif

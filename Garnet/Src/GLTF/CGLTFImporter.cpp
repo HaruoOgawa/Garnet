@@ -896,7 +896,7 @@ namespace gltf
 
 				animation::EHumanoidBones BoneName = animation::EHumanoidBones::None;
 
-				std::shared_ptr<animation::CAnimationChannel> AnimationChannel = std::make_shared<animation::CAnimationChannel>(UseAnimLocalAxis, sampler, AnimationTarget, Node, BoneName);
+				std::shared_ptr<animation::CAnimationChannel> AnimationChannel = std::make_shared<animation::CAnimationChannel>(UseAnimLocalAxis, false, sampler, AnimationTarget, Node, BoneName);
 
 				AnimationClip->AddAnimationChannel(AnimationChannel);
 			}

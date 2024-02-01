@@ -698,6 +698,7 @@ namespace mmd
 				{
 					// 接続先: 1
 					// 接続先ボーンのボーンIndex
+					// Nodeの座標がワールド座標として扱われ、親子関係を構築しないのでたしかに接続先(影響を受ける)ボーンの概念というのは大切かも？
 					int ConnectBoneIndex = GetMultiTypeValueAsInterger(Analyser, MetaData.BoneIndexSize);
 				}
 				else

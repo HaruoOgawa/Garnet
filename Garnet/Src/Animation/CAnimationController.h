@@ -32,7 +32,6 @@ namespace animation
 		void Reset();
 
 		bool ReTargetRig(const std::shared_ptr<animation::CAnimationClip>& SourceClip, const std::shared_ptr<CAnimationClip>& TargetClip);
-		bool ReTargetRigWorld(const std::shared_ptr<animation::CAnimationClip>& SourceClip, const std::shared_ptr<CAnimationClip>& TargetClip);
 
 		bool BlendMotion(float DeltaSecondsTime);
 
@@ -57,7 +56,7 @@ namespace animation
 		const std::vector<std::shared_ptr<animation::CSkin>>& GetSkinList() const;
 
 		void AddAnimationClip(const std::shared_ptr<animation::CAnimationClip>& Clip);
-		void AddHumanoidAnimationClip(const std::shared_ptr<animation::CAnimationClip>& SourceClip, const std::string& MotionName, animation::SAnimationLayout Layout, bool IsLoop, bool IsWorldAnim);
+		void AddHumanoidAnimationClip(const std::shared_ptr<animation::CAnimationClip>& SourceClip, const std::string& MotionName, animation::SAnimationLayout Layout, bool IsLoop);
 
 		const std::vector<std::shared_ptr<animation::CAnimationClip>>& GetAnimationClipList() const;
 		const std::unordered_map<std::string, SAnimationLayout>& GetAnimationClipMap() const;

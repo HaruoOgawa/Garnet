@@ -1288,7 +1288,7 @@ namespace fbx
 						std::shared_ptr<animation::CBoneNameProvider> Provider = std::make_shared<animation::CBoneNameProvider>();
 						animation::EHumanoidBones BoneName = Provider->GetBoneName(JointName);
 
-						std::shared_ptr<animation::CAnimationChannel> AnimationChannel = std::make_shared<animation::CAnimationChannel>(UseAnimLocalAxis, TargetSamplerIndex, AnimationTarget, TargetNode, BoneName);
+						std::shared_ptr<animation::CAnimationChannel> AnimationChannel = std::make_shared<animation::CAnimationChannel>(UseAnimLocalAxis, false, TargetSamplerIndex, AnimationTarget, TargetNode, BoneName);
 
 						AnimationClip->AddAnimationChannel(AnimationChannel);
 					}

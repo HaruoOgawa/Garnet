@@ -87,8 +87,11 @@ namespace mmd
 
 			// Channelを作成
 			{
-				// どうするか保留
-				const bool UseAnimLocalAxis = false;
+				// VMDはオフセットなので必要
+				const bool UseAnimLocalAxis = true;
+
+				// Translate成分がオフセットかどうか
+				const bool IsTransOffset = true;
 
 				// MMDでは全てKEYFRAME_TYPE_MATRIX
 				animation::EAnimationTarget AnimationTarget = animation::EAnimationTarget::MODELMATRIX;
@@ -97,7 +100,7 @@ namespace mmd
 
 				animation::EHumanoidBones BoneName = Frame.first;
 
-				std::shared_ptr<animation::CAnimationChannel> Channel = std::make_shared<animation::CAnimationChannel>(UseAnimLocalAxis, TargetSamplerIndex, AnimationTarget, nullptr, BoneName);
+				std::shared_ptr<animation::CAnimationChannel> Channel = std::make_shared<animation::CAnimationChannel>(UseAnimLocalAxis, IsTransOffset, TargetSamplerIndex, AnimationTarget, nullptr, BoneName);
 
 				// ChannelをClipに登録
 				AnimationClip->AddAnimationChannel(Channel);

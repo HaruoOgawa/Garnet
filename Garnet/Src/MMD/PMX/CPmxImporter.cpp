@@ -2,6 +2,7 @@
 #include "CPmxImporter.h"
 #include "../../Debug/Message/Console.h"
 #include "../../Math/CMath.h"
+#include "../../Math/CTransform.h"
 #include "../../Object/C3DObject.h"
 #include "../../Animation/CAnimationClip.h"
 #include "../../Animation/CSkin.h"
@@ -59,7 +60,7 @@ namespace mmd
 
 		// メッシュ
 		std::vector<std::shared_ptr<graphics::CMesh>> MeshList;
-		if (!CreateMeshList(model, MeshList, RootNode, NodeList, MaterialList)) return false;
+		if (!CreateMeshList(model, MeshList, RootNode, NodeList, MaterialList, (Skin->GetJointList().size() > 0))) return false;
 
 		// リソースを登録
 		Object->SetRootNodeIndexList(RootNodeIndexList);
@@ -112,11 +113,6 @@ namespace mmd
 
 		const auto& PmxBoneList = model.GetPmxBoneList();
 
-		int RootBoneIndex = -1;
-
-		std::wstring RootBoneName = animation::CBoneNameProvider::HexToWstr({ 0x5168, 0x3066, 0x306e, 0x89aa }); // 全ての親
-		RootBoneName.resize(8);
-
 		for (int BoneIndex = 0; BoneIndex < PmxBoneList.size(); BoneIndex++)
 		{
 			const auto& PmxBone = PmxBoneList[BoneIndex];
@@ -127,19 +123,19 @@ namespace mmd
 			const auto& Name = PmxBone->GetBoneName().second;
 			BoneNode->SetU16Name(Name);
 
-			// ルートボーンの取得(『全ての親』)
-			if (Name == RootBoneName)
-			{
-				RootBoneIndex = BoneIndex;
-			}
-
 			glm::vec3 Pos = PmxBone->GetPos();
+
+			// PMXはRotateは持っていないのでひとまず0にする
 			glm::quat Rot = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
 
-			// ローカル軸を使用するかどうか(もしかすると要らないかも)
-			if (PmxBone->IsUseLoacalAxis())
+			// PMXのPos・Rotateはワールド座標系での値なので親ノードのワールドマトリックスを乗算してローカル座標系に戻す必要がある
+			int ParentBoneIndex = PmxBone->GetParentBoneIndex();
+			if(ParentBoneIndex >= 0 && ParentBoneIndex < PmxBoneList.size())
 			{
-				Rot = PmxBone->GetLocalAxis();
+				const auto& ParentPmxBone = PmxBoneList[ParentBoneIndex];
+				
+				// 親ノードの分だけ移動させる 
+				Pos -= ParentPmxBone->GetPos();
 			}
 
 			//
@@ -161,33 +157,28 @@ namespace mmd
 			Skin->AddJoint(Bone);
 		}
 
-		// 『全ての親』がない時はエラーとする
-		if (RootBoneIndex == -1)
-		{
-			Console::Log("[Pmx Import Error] Could not find All Parent Node\n");
-
-			return false;
-		}
-
 		// BoneNodeに子要素を設定する
 		{
 			const auto& BoneList = Skin->GetJointList();
 
 			for (int BoneIndex = 0; BoneIndex < PmxBoneList.size(); BoneIndex++)
 			{
+				const auto& PmxBone = PmxBoneList[BoneIndex];
+
 				const auto& Bone = BoneList[BoneIndex];
 				int SelfNodeIndex = Bone->GetJointNode()->GetSelfNodeIndex();
 
-				// ルートボーン(全ての親)の時はPmx全体のRootNodeに追加する
-				if (RootBoneIndex == BoneIndex)
+				int ParentBoneIndex = PmxBone->GetParentBoneIndex();
+
+				/// 範囲外を示すときはRootNodeを親に持つ
+				if (ParentBoneIndex < 0 || ParentBoneIndex >= BoneList.size())
 				{
 					RootNode->AddChildrenNodeIndex(SelfNodeIndex);
 				}
 				else
 				{
-					// PMXのバイナリから取得したボーンの位置はワールド座標系なので親子関係は構築しない
-					// その代わりにルートボーン(全ての親)を親として持つ
-					BoneList[RootBoneIndex]->GetJointNode()->AddChildrenNodeIndex(SelfNodeIndex);
+					// 自身を親ノードの子要素リストに追加する
+					BoneList[ParentBoneIndex]->GetJointNode()->AddChildrenNodeIndex(SelfNodeIndex);
 				}
 			}
 		}
@@ -306,7 +297,7 @@ namespace mmd
 	}
 
 	bool CPmxImporter::CreateMeshList(const CPmxModel& model, std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, const std::shared_ptr<object::CNode>& RootNode, std::vector<std::shared_ptr<object::CNode>>& NodeList,
-		const std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList)
+		const std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList, bool ExistSkin)
 	{
 		// 明示的にMeshNodeを作成
 		std::shared_ptr<object::CNode> MeshNode = std::make_shared<object::CNode>(-1, static_cast<int>(NodeList.size()));
@@ -567,6 +558,10 @@ namespace mmd
 				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(MeshIndex, static_cast<int>(NodeList.size()));
 
 				Node->SetU16Name(PmxMaterial->GetMaterialName().second);
+
+				// ひとまずPMXはSkinを1つしか持っていない
+				int SkinIndex = (ExistSkin) ? 0 : -1;
+				Node->SetSkinIndex(SkinIndex);
 
 				NodeList.push_back(Node);
 
