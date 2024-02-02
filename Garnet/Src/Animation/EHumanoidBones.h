@@ -227,10 +227,32 @@ namespace animation
         // 概要:
         //     This is the right little 3rd phalange.
         RightLittleDistal = 53,
-        //
+        
+        // 54 is UpperChest,
+        // 
+       
+        // センター(MMD用)
+        Center = 55,
+
+        // 下半身(MMD用)
+        LowerBody = 56,
+
+        // 右足ＩＫ(MMD用)
+        RightLegIK = 57,
+
+        // 右つま先ＩＫ(MMD用)
+        RightToesIK = 58,
+
+        // 左足ＩＫ(MMD用)
+        LeftLegIK = 59,
+
+        // 左つま先ＩＫ(MMD用)
+        LeftToesIK = 60,
+
+        // 
         // 概要:
         //     This is the Last bone index delimiter.
-        Max = 55
+        Max = 61
 	};
 }
 
