@@ -53,6 +53,7 @@ namespace mmd
 
 	void CPmxBone::SetLocalAxis(const glm::vec3& XAxisVector, const glm::vec3& ZAxisVector)
 	{
+		// 用途不明. 計算も見直しが必要
 		m_UseLoacalAxis = true;
 
 		glm::vec3 YAxisVector = glm::cross(XAxisVector, ZAxisVector);
@@ -60,7 +61,8 @@ namespace mmd
 		glm::vec3 LocalAxisVector = glm::normalize(XAxisVector + YAxisVector + ZAxisVector);
 		glm::vec3 DefaultAxisVector = glm::normalize(glm::vec3(1.0f, 0.0f, 0.0f) + glm::vec3(0.0f, 1.0f, 0.0f) + glm::vec3(0.0f, 0.0f, 1.0f));
 
-		m_LocalAxis = math::CTransform::CalcTwoVectorRotate(DefaultAxisVector, LocalAxisVector);
+		m_LocalAxis = glm::normalize(math::CTransform::CalcTwoVectorRotate(DefaultAxisVector, LocalAxisVector));
+		//m_LocalAxis = math::CTransform::CalcTwoVectorRotate(glm::vec3(1.0f, 0.0f, 0.0f), XAxisVector) * math::CTransform::CalcTwoVectorRotate(glm::vec3(0.0f, 0.0f, 1.0f), ZAxisVector);
 	}
 
 	const glm::quat& CPmxBone::GetLocalAxis() const
@@ -72,10 +74,7 @@ namespace mmd
 	{
 		glm::mat4 WorldMatrix = glm::mat4(1.0f);
 
-		glm::quat rot = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
-		if (IsUseLoacalAxis()) rot = GetLocalAxis();
-
-		math::CTransform::CalcModelMatrix(WorldMatrix, m_Pos, rot, false);
+		math::CTransform::CalcModelMatrix(WorldMatrix, m_Pos, m_LocalAxis, false);
 
 		return WorldMatrix;
 	}

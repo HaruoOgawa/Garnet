@@ -2,6 +2,7 @@
 #include "CVMDImporter.h"
 #include "../../Math/CTransform.h"
 #include "../../Debug/Message/Console.h"
+#include <algorithm>
 
 namespace mmd
 {
@@ -51,8 +52,15 @@ namespace mmd
 				Sampler->SetStartTime(StartTime);
 				Sampler->SetEndTime(EndTime);
 
+				std::vector<SVMDFrame> FrameDataList = Frame.second;
+				
+				// FrameIndexèáÇ…ï¿Ç—ë÷Ç¶ÇÈ
+				std::sort(FrameDataList.begin(), FrameDataList.end(), [](SVMDFrame a, SVMDFrame b) {
+					return a.FrameIndex < b.FrameIndex;
+				});
+
 				// KetFrame
-				for (const auto& FrameData : Frame.second)
+				for (const auto& FrameData : FrameDataList)
 				{
 					int FrameIndex = FrameData.FrameIndex;
 					float CurrentTime = static_cast<float>(FrameIndex) * (1.0f / FrameRate);
