@@ -124,9 +124,7 @@ namespace mmd
 			BoneNode->SetU16Name(Name);
 
 			glm::vec3 Pos = PmxBone->GetPos();
-
-			// PMXはRotateは持っていないのでひとまず0にする
-			glm::quat Rot = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
+			glm::quat Rot = PmxBone->GetLocalAxis();
 
 			// PMXのPos・Rotateはワールド座標系での値なので親ノードのワールドマトリックスを乗算してローカル座標系に戻す必要がある
 			int ParentBoneIndex = PmxBone->GetParentBoneIndex();
@@ -134,7 +132,8 @@ namespace mmd
 			{
 				const auto& ParentPmxBone = PmxBoneList[ParentBoneIndex];
 				
-				// 親ノードの分だけ移動させる 
+				// Posはワールド座標系なのでローカル座標系に戻す必要がある
+				// ただしRotは(存在すれば)ローカル軸から取得するので既にローカル座標系である
 				Pos -= ParentPmxBone->GetPos();
 			}
 

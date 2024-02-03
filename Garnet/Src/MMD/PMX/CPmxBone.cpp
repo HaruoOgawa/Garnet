@@ -55,8 +55,12 @@ namespace mmd
 	{
 		m_UseLoacalAxis = true;
 
-		glm::quat YAxisVector = glm::cross(XAxisVector, ZAxisVector);
-		m_LocalAxis = glm::cross(XAxisVector, YAxisVector);
+		glm::vec3 YAxisVector = glm::cross(XAxisVector, ZAxisVector);
+
+		glm::vec3 LocalAxisVector = glm::normalize(XAxisVector + YAxisVector + ZAxisVector);
+		glm::vec3 DefaultAxisVector = glm::normalize(glm::vec3(1.0f, 0.0f, 0.0f) + glm::vec3(0.0f, 1.0f, 0.0f) + glm::vec3(0.0f, 0.0f, 1.0f));
+
+		m_LocalAxis = math::CTransform::CalcTwoVectorRotate(DefaultAxisVector, LocalAxisVector);
 	}
 
 	const glm::quat& CPmxBone::GetLocalAxis() const

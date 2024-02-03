@@ -60,7 +60,7 @@ namespace math
 		math::CTransform::CastModelMatrixToTransform(ModelMatrix, m_Pos, m_Rot, m_Scale);
 	}
 
-	void CTransform::CastModelMatrixToTransform(const glm::mat4& ModelMatrix, glm::vec3& Translation, glm::quat& Rotation, glm::vec3& Scale, bool UseScale)
+	void CTransform::CastModelMatrixToTransform(const glm::mat4& ModelMatrix, glm::vec3& Translation, glm::quat& Rotation, glm::vec3& Scale)
 	{
 		// 渡されたModelMatrixからPos・Rotate・Scaleを復元する
 		// https://stackoverflow.com/questions/27655885/get-position-rotation-and-scale-from-matrix-in-opengl
@@ -71,17 +71,17 @@ namespace math
 		CastModelMatrixToTranslation(ModelMatrix, Translation);
 		
 		// Scale
-		if (UseScale)
-		{
-			CastModelMatrixToScale(ModelMatrix, Scale);
-		}
-		else
-		{
-			Scale = glm::vec3(1.0f, 1.0f, 1.0f);
-		}
+		CastModelMatrixToScale(ModelMatrix, Scale);
 
 		// Rot
 		CastModelMatrixToRotation(ModelMatrix, Rotation, Scale);
+	}
+
+	void CTransform::CastModelMatrixToTransform(const glm::mat4& ModelMatrix, glm::vec3& Translation, glm::quat& Rotation)
+	{
+		glm::vec3 Scale = glm::vec3(1.0f, 1.0f, 1.0f);
+
+		CastModelMatrixToTransform(ModelMatrix, Translation, Rotation, Scale);
 	}
 
 	void CTransform::CastModelMatrixToTranslation(const glm::mat4& ModelMatrix, glm::vec3& Translation)
@@ -180,5 +180,46 @@ namespace math
 		{
 			ModelMatrix = trsMatrix * rotMatrix;
 		}
+	}
+
+	glm::quat CTransform::CalcTwoVectorRotate(const glm::vec3& FromVector, const glm::vec3& ToVector)
+	{
+		// https://www.opengl-tutorial.org/jp/intermediate-tutorials/tutorial-17-quaternions/
+		glm::quat Result = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
+
+		float cosTheta = glm::dot(FromVector, ToVector);
+
+		if (cosTheta < -1.0f + 0.001f)
+		{
+			// 2つのベクトルが逆を向いている特殊ケース
+			// まず平行ではない任意のベクトルを決める
+			glm::vec3 SubVector = glm::vec3(0.0f);
+			for (int i = 0; i < 3; i++)
+			{
+				glm::vec3 CheckVector = glm::vec3((i == 0) ? 1.0f : 0.0f, (i == 1) ? 1.0f : 0.0f, (i == 2) ? 1.0f : 0.0f);
+
+				if (glm::abs(glm::dot(FromVector, CheckVector)) < 1.0f - 0.001f)
+				{
+					SubVector = CheckVector;
+
+					break;
+				}
+			}
+
+			// 求まったベクトルを元に回転する
+			glm::vec3 RotateAxis = glm::cross(FromVector, SubVector);
+			float Angle = glm::acos(cosTheta);
+
+			Result = glm::angleAxis(Angle, RotateAxis);
+		}
+		else
+		{
+			glm::vec3 RotateAxis = glm::cross(FromVector, ToVector);
+			float Angle = glm::acos(cosTheta);
+
+			Result = glm::angleAxis(Angle, RotateAxis);
+		}
+
+		return Result;
 	}
 }

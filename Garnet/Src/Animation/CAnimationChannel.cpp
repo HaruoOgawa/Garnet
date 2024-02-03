@@ -116,7 +116,6 @@ namespace animation
 
 			m_TargetNode->SetRot(dstQuat);
 		}
-		
 
 		return true;
 	}
@@ -160,7 +159,22 @@ namespace animation
 		// glmのクォータニオンは wxyzで指定する必要がある
 		glm::quat quat = glm::quat(Value[6], Value[3], Value[4], Value[5]);
 
-		m_TargetNode->SetRot(quat);
+		// ファイルフォーマットによるが、回転は『デフォルトトランスフォームの回転』に『アニメーションデータの回転』を乗算して作られるものである!!!!!!!
+		// これが噂によく聞くアニメーションの回転のローカル軸の話である!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		// FBXアニメーションにはこれが必要でglTF/VRMアニメーションでは不要である
+		// たぶんVRM 1.0からはこのローカル軸がデータに含まれるようになるのかな？
+		if (m_UseAnimLocalAxis)
+		{
+			glm::quat dstQuat = m_TargetNode->GetDefaultLocalTransform()->GetRot() * quat;
+
+			m_TargetNode->SetRot(dstQuat);
+		}
+		else
+		{
+			glm::quat dstQuat = quat;
+
+			m_TargetNode->SetRot(dstQuat);
+		}
 
 		m_TargetNode->SetScale(glm::vec3(Value[7], Value[8], Value[9]));
 

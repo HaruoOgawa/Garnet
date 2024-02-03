@@ -72,13 +72,27 @@ namespace mmd
 
 					// KeyFrameを作成
 					// MMDでは全てKEYFRAME_TYPE_MATRIX
-					std::shared_ptr<animation::CKeyFrame> KeyFrame = std::make_shared<animation::CKeyFrame>(animation::EKeyFrameType::KEYFRAME_TYPE_MATRIX);
+					{
+						std::shared_ptr<animation::CKeyFrame> KeyFrame = std::make_shared<animation::CKeyFrame>(animation::EKeyFrameType::KEYFRAME_TYPE_MATRIX);
 
-					KeyFrame->SetInput(InputData);
-					KeyFrame->SetOutput(OutputData);
+						KeyFrame->SetInput(InputData);
+						KeyFrame->SetOutput(OutputData);
 
-					// Add KeyFrame To Sampler
-					Sampler->AddKeyFrame(KeyFrame);
+						// Add KeyFrame To Sampler
+						Sampler->AddKeyFrame(KeyFrame);
+					}
+
+					// キーフレームが１つしかない時はEndTimeの位置にもう1つだけ追加する
+					if (Frame.second.size() == 1)
+					{
+						std::shared_ptr<animation::CKeyFrame> KeyFrame = std::make_shared<animation::CKeyFrame>(animation::EKeyFrameType::KEYFRAME_TYPE_MATRIX);
+
+						KeyFrame->SetInput(EndTime);
+						KeyFrame->SetOutput(OutputData);
+
+						// Add KeyFrame To Sampler
+						Sampler->AddKeyFrame(KeyFrame);
+					}
 				}
 
 				// SamplerをClipに登録する
