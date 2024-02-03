@@ -20,6 +20,10 @@ namespace mmd
 	private:
 		// ‘¼‚É‚àExpression, Camera, Light‚È‚Ç‚ª‚ ‚é‚ç‚µ‚¢‚ª‚Ð‚Æ‚Ü‚¸Frame‚¾‚¯“Ç‚Þ
 		bool AnalyseFrameData(binary::CBinaryAnalyser& Analyser);
+		bool AnalyseFacialExpressionData(binary::CBinaryAnalyser& Analyser);
+		bool AnalyseCameraData(binary::CBinaryAnalyser& Analyser);
+		bool AnalyseLightData(binary::CBinaryAnalyser& Analyser);
+		bool AnalyseSelfShadowData(binary::CBinaryAnalyser& Analyser);
 	public:
 		CVMDData();
 		virtual ~CVMDData();
