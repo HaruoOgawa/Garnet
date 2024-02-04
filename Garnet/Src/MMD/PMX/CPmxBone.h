@@ -2,9 +2,12 @@
 
 #ifdef USE_MMD
 #include <string>
+#include <vector>
+#include <memory>
 #include <glm/glm.hpp>
 #include <glm/gtx/quaternion.hpp>
-#include <vector>
+
+#include "../../Animation/SIKParam.h"
 
 namespace mmd
 {
@@ -24,9 +27,12 @@ namespace mmd
 		// 接続(影響を受ける)ボーン
 		int m_ConnectBoneIndex;
 
-		//
+		// ローカル軸
 		bool m_UseLoacalAxis;
 		glm::quat m_LocalAxis;
+
+		// IK
+		std::shared_ptr<animation::SIKParam> m_IKParam;
 	private:
 		void ReadBoneFlag(int BoneFlag);
 	public:
@@ -42,10 +48,14 @@ namespace mmd
 
 		int GetDeformLayer() const;
 
-		//
+		// ローカル軸
 		bool IsUseLoacalAxis() const;
 		void SetLocalAxis(const glm::vec3& XAxisVector, const glm::vec3& ZAxisVector);
 		const glm::quat& GetLocalAxis() const;
+
+		// IK
+		const std::shared_ptr<animation::SIKParam>& GetIKParam() const;
+		void SetIKParam(const std::shared_ptr<animation::SIKParam>& Param);
 
 		glm::mat4 GetWorldMatrix();
 	};

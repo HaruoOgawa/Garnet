@@ -1224,6 +1224,9 @@
     <ClInclude Include="Src\MMD\VMD\SVMDFrame.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Animation\SIKParam.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\Main\DescMain\DescMain.cpp">

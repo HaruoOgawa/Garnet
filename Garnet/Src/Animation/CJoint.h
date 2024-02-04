@@ -7,6 +7,7 @@
 
 #include <memory>
 #include "EHumanoidBones.h"
+#include "SIKParam.h"
 
 namespace object { class CNode; }
 
@@ -19,6 +20,9 @@ namespace animation
 		EHumanoidBones m_BoneName;
 
 		EHumanoidBones m_ParentBoneName;
+
+		// IK
+		std::shared_ptr<animation::SIKParam> m_IKParam;
 	public:
 		CJoint(const std::shared_ptr<object::CNode>& JointNode);
 		virtual ~CJoint();
@@ -30,6 +34,10 @@ namespace animation
 
 		EHumanoidBones GetParentBoneName() const;
 		void SetParentBoneName(EHumanoidBones BoneName);
+
+		// IK
+		const std::shared_ptr<animation::SIKParam>& GetIKParam() const;
+		void SetIKParam(const std::shared_ptr<animation::SIKParam>& Param);
 	};
 }
 

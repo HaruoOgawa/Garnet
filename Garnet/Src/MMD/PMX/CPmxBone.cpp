@@ -11,7 +11,8 @@ namespace mmd
 		m_ParentBoneIndex(ParentBoneIndex),
 		m_DeformLayer(DeformLayer),
 		m_UseLoacalAxis(false),
-		m_LocalAxis(glm::quat(1.0f, 0.0f, 0.0f, 0.0f))
+		m_LocalAxis(glm::quat(1.0f, 0.0f, 0.0f, 0.0f)),
+		m_IKParam(nullptr)
 	{
 		// 必要に応じて随時実装
 		ReadBoneFlag(BoneFlag);
@@ -46,6 +47,7 @@ namespace mmd
 		return m_DeformLayer;
 	}
 
+	// // ローカル軸
 	bool CPmxBone::IsUseLoacalAxis() const
 	{
 		return m_UseLoacalAxis;
@@ -68,6 +70,17 @@ namespace mmd
 	const glm::quat& CPmxBone::GetLocalAxis() const
 	{
 		return m_LocalAxis;
+	}
+
+	// IK
+	const std::shared_ptr<animation::SIKParam>& CPmxBone::GetIKParam() const
+	{
+		return m_IKParam;
+	}
+
+	void CPmxBone::SetIKParam(const std::shared_ptr<animation::SIKParam>& Param)
+	{
+		m_IKParam = Param;
 	}
 
 	glm::mat4 CPmxBone::GetWorldMatrix()

@@ -153,6 +153,9 @@ namespace mmd
 			animation::EHumanoidBones BoneName = Provider.GetBoneNameU16(Name);
 			Bone->SetBoneName(BoneName);
 
+			// IK
+			Bone->SetIKParam(PmxBone->GetIKParam());
+
 			Skin->AddJoint(Bone);
 		}
 

@@ -7,7 +7,8 @@ namespace animation
 	CJoint::CJoint(const std::shared_ptr<object::CNode>& JointNode):
 		m_JointNode(JointNode),
 		m_BoneName(EHumanoidBones::None),
-		m_ParentBoneName(EHumanoidBones::None)
+		m_ParentBoneName(EHumanoidBones::None),
+		m_IKParam(nullptr)
 	{
 	}
 
@@ -38,6 +39,17 @@ namespace animation
 	void CJoint::SetParentBoneName(EHumanoidBones BoneName)
 	{
 		m_ParentBoneName = BoneName;
+	}
+
+	// IK
+	const std::shared_ptr<animation::SIKParam>& CJoint::GetIKParam() const
+	{
+		return m_IKParam;
+	}
+
+	void CJoint::SetIKParam(const std::shared_ptr<animation::SIKParam>& Param)
+	{
+		m_IKParam = Param;
 	}
 }
 

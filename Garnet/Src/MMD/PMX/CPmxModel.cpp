@@ -791,6 +791,8 @@ namespace mmd
 					int IKLinkCount = 0;
 					if (!Analyser.GetInt(IKLinkCount)) return false;
 
+					std::vector<animation::SIKLink> IKLinkList;
+
 					for (int IKLinkIndex = 0; IKLinkIndex < IKLinkCount; IKLinkIndex++)
 					{
 						// ƒŠƒ“ƒNƒ{[ƒ“‚Ìƒ{[ƒ“Index
@@ -800,23 +802,33 @@ namespace mmd
 						unsigned char IsLimitAngle = 0;
 						if (!Analyser.GetByte(IsLimitAngle)) return false;
 
+						bool UseLimitAngle = false;
+						glm::vec3 LowerAngle = glm::vec3(0.0f);
+						glm::vec3 UpperAngle = glm::vec3(0.0f);
+
 						if (IsLimitAngle & 0x01)
 						{
 							if (!Analyser.IsValid(4 * 3 * 2)) return false;
 
-							glm::vec3 UnderAngle = glm::vec3(0.0f);
+							UseLimitAngle = true;
 
-							UnderAngle.x = Analyser.GetFloat();
-							UnderAngle.y = Analyser.GetFloat();
-							UnderAngle.z = Analyser.GetFloat();
-
-							glm::vec3 UpperAngle = glm::vec3(0.0f);
+							LowerAngle.x = Analyser.GetFloat();
+							LowerAngle.y = Analyser.GetFloat();
+							LowerAngle.z = Analyser.GetFloat();
 
 							UpperAngle.x = Analyser.GetFloat();
 							UpperAngle.y = Analyser.GetFloat();
 							UpperAngle.z = Analyser.GetFloat();
 						}
+
+						// IKLink‚ð“o˜^
+						IKLinkList.push_back(animation::SIKLink{ IKLinkBoneIndex , UseLimitAngle ,LowerAngle, UpperAngle });
 					}
+
+					// IKParam‚ð“o˜^
+					std::shared_ptr<animation::SIKParam> IKParam = std::make_shared<animation::SIKParam>(IKTargetBoneIndex, IKLoopCount, LimitedAngle, IKLinkList);
+
+					PmxBone->SetIKParam(IKParam);
 				}
 			}
 
