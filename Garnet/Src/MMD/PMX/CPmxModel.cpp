@@ -725,6 +725,18 @@ namespace mmd
 					// •t—^—¦
 					float GrantRate = 0.0f;
 					if (!Analyser.GetFloat(GrantRate)) return false;
+
+					if (BoneFlag & 0x0100)
+					{
+						// ‰ñ“]•t—^
+						PmxBone->SetRotateGrant(GrantParentBoneIndex, GrantRate);
+
+					}
+					else if (BoneFlag & 0x0200)
+					{
+						// ˆÚ“®•t—^
+						PmxBone->SetMoveGrant(GrantParentBoneIndex, GrantRate);
+					}
 				}
 
 				// ²ŒÅ’è:1 ‚Ìê‡

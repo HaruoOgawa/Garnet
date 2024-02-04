@@ -51,6 +51,9 @@ namespace mmd
 		// IKBoneListを作成
 		Skin->MakeIKBoneList();
 
+		// 付与ボーンリストを作成
+		Skin->MakeGrantBoneList();
+
 		// マテリアルリスト
 		std::vector<std::shared_ptr<graphics::CMaterial>> MaterialList;
 		if (!CreateMaterialList(pGraphicsAPI, model, MaterialList, MaterialFrame, Skin)) return false;
@@ -155,6 +158,18 @@ namespace mmd
 			animation::CBoneNameProvider Provider;
 			animation::EHumanoidBones BoneName = Provider.GetBoneNameU16(Name);
 			Bone->SetBoneName(BoneName);
+
+			// ボーンの付与
+			if (PmxBone->IsRotateGrant())
+			{
+				// 回転付与
+				Bone->SetRotateGrant(PmxBone->GetGrantParentBoneIndex(), PmxBone->GetGrantRate());
+			}
+			else if (PmxBone->IsMoveGrant())
+			{
+				// 移動付与
+				Bone->SetMoveGrant(PmxBone->GetGrantParentBoneIndex(), PmxBone->GetGrantRate());
+			}
 
 			// IK
 			Bone->SetIKParam(PmxBone->GetIKParam());

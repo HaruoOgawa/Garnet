@@ -8,6 +8,10 @@ namespace animation
 		m_JointNode(JointNode),
 		m_BoneName(EHumanoidBones::None),
 		m_ParentBoneName(EHumanoidBones::None),
+		m_GrantParentBoneIndex(-1),
+		m_GrantRate(0.0f),
+		m_RotateGrant(false),
+		m_MoveGrant(false),
 		m_IKParam(nullptr)
 	{
 	}
@@ -39,6 +43,46 @@ namespace animation
 	void CJoint::SetParentBoneName(EHumanoidBones BoneName)
 	{
 		m_ParentBoneName = BoneName;
+	}
+
+	// 付与親ボーンのボーンIndex
+	int CJoint::GetGrantParentBoneIndex() const
+	{
+		return m_GrantParentBoneIndex;
+	}
+
+	// 付与率
+	float CJoint::GetGrantRate() const
+	{
+		return m_GrantRate;
+	}
+
+	// 回転付与
+	void CJoint::SetRotateGrant(int GrantParentBoneIndex, float GrantRate)
+	{
+		m_RotateGrant = true;
+
+		m_GrantParentBoneIndex = GrantParentBoneIndex;
+		m_GrantRate = GrantRate;
+	}
+
+	bool CJoint::IsRotateGrant() const
+	{
+		return m_RotateGrant;
+	}
+
+	// 移動付与
+	void CJoint::SetMoveGrant(int GrantParentBoneIndex, float GrantRate)
+	{
+		m_MoveGrant = true;
+
+		m_GrantParentBoneIndex = GrantParentBoneIndex;
+		m_GrantRate = GrantRate;
+	}
+
+	bool CJoint::IsMoveGrant() const
+	{
+		return m_MoveGrant;
 	}
 
 	// IK

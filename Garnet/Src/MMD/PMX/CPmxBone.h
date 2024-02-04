@@ -22,10 +22,22 @@ namespace mmd
 
 		int m_DeformLayer;
 
-		// BoneFlag
-
 		// 接続(影響を受ける)ボーン
 		int m_ConnectBoneIndex;
+
+		// 回転付与・移動付与
+		// 付与とは他のボーンに付いて行くということ
+		// 付与親ボーンのボーンIndex
+		int m_GrantParentBoneIndex;
+
+		// 付与率
+		float m_GrantRate;
+
+		// 回転付与
+		bool m_RotateGrant;
+
+		// 移動付与
+		bool m_MoveGrant;
 
 		// ローカル軸
 		bool m_UseLoacalAxis;
@@ -47,6 +59,20 @@ namespace mmd
 		int GetParentBoneIndex() const;
 
 		int GetDeformLayer() const;
+
+		// 付与親ボーンのボーンIndex
+		int GetGrantParentBoneIndex() const;
+
+		// 付与率
+		float GetGrantRate() const;
+
+		// 回転付与
+		void SetRotateGrant(int GrantParentBoneIndex, float GrantRate);
+		bool IsRotateGrant() const;
+
+		// 移動付与
+		void SetMoveGrant(int GrantParentBoneIndex, float GrantRate);
+		bool IsMoveGrant() const;
 
 		// ローカル軸
 		bool IsUseLoacalAxis() const;

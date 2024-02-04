@@ -79,6 +79,11 @@ namespace animation
 		}
 	}
 
+	const std::unordered_map<EHumanoidBones, std::shared_ptr<CJoint>>& CSkin::GetBoneTable() const
+	{
+		return m_BoneTable;
+	}
+
 	std::shared_ptr<CJoint> CSkin::GetBone(EHumanoidBones BoneName)
 	{
 		const auto it = m_BoneTable.find(BoneName);
@@ -103,6 +108,23 @@ namespace animation
 	const std::vector<std::shared_ptr<CJoint>>& CSkin::GetIKBoneList() const
 	{
 		return m_IKBoneList;
+	}
+
+	// •t—^ƒ{[ƒ“
+	void CSkin::MakeGrantBoneList()
+	{
+		for (const auto& Bone : m_JointList)
+		{
+			if (Bone->IsRotateGrant() || Bone->IsMoveGrant())
+			{
+				m_GrantBoneList.push_back(Bone);
+			}
+		}
+	}
+
+	const std::vector<std::shared_ptr<CJoint>>& CSkin::GetGrantBoneList() const
+	{
+		return m_GrantBoneList;
 	}
 
 	void CSkin::CalcSkinWorldMatrix()

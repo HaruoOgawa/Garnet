@@ -10,6 +10,11 @@ namespace mmd
 		m_Pos(Pos),
 		m_ParentBoneIndex(ParentBoneIndex),
 		m_DeformLayer(DeformLayer),
+		m_ConnectBoneIndex(-1),
+		m_GrantParentBoneIndex(-1),
+		m_GrantRate(0.0f),
+		m_RotateGrant(false),
+		m_MoveGrant(false),
 		m_UseLoacalAxis(false),
 		m_LocalAxis(glm::quat(1.0f, 0.0f, 0.0f, 0.0f)),
 		m_IKParam(nullptr)
@@ -47,7 +52,47 @@ namespace mmd
 		return m_DeformLayer;
 	}
 
-	// // ローカル軸
+	// 付与親ボーンのボーンIndex
+	int CPmxBone::GetGrantParentBoneIndex() const
+	{
+		return m_GrantParentBoneIndex;
+	}
+
+	// 付与率
+	float CPmxBone::GetGrantRate() const
+	{
+		return m_GrantRate;
+	}
+
+	// 回転付与
+	void CPmxBone::SetRotateGrant(int GrantParentBoneIndex, float GrantRate)
+	{
+		m_RotateGrant = true;
+
+		m_GrantParentBoneIndex = GrantParentBoneIndex;
+		m_GrantRate = GrantRate;
+	}
+
+	bool CPmxBone::IsRotateGrant() const
+	{
+		return m_RotateGrant;
+	}
+
+	// 移動付与
+	void CPmxBone::SetMoveGrant(int GrantParentBoneIndex, float GrantRate)
+	{
+		m_MoveGrant = true;
+
+		m_GrantParentBoneIndex = GrantParentBoneIndex;
+		m_GrantRate = GrantRate;
+	}
+
+	bool CPmxBone::IsMoveGrant() const
+	{
+		return m_MoveGrant;
+	}
+
+	// ローカル軸
 	bool CPmxBone::IsUseLoacalAxis() const
 	{
 		return m_UseLoacalAxis;

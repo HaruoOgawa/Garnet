@@ -22,6 +22,9 @@ namespace animation
 
 		// IK
 		std::vector<std::shared_ptr<CJoint>> m_IKBoneList;
+
+		// 付与ボーンリスト
+		std::vector<std::shared_ptr<CJoint>> m_GrantBoneList;
 	public:
 		CSkin();
 		virtual ~CSkin();
@@ -36,12 +39,18 @@ namespace animation
 		int GetJointIndexOffset() const;
 
 		void MakeBoneTable();
+		const std::unordered_map<EHumanoidBones, std::shared_ptr<CJoint>>& GetBoneTable() const;
 		std::shared_ptr<CJoint> GetBone(EHumanoidBones BoneName);
 
 		// IK
 		void MakeIKBoneList();
 		const std::vector<std::shared_ptr<CJoint>>& GetIKBoneList() const;
 
+		// 付与ボーン
+		void MakeGrantBoneList();
+		const std::vector<std::shared_ptr<CJoint>>& GetGrantBoneList() const;
+
+		//
 		void CalcSkinWorldMatrix();
 		void ResetToDefaultSkinLocal();
 	};

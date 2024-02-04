@@ -48,6 +48,9 @@ namespace animation
 		// IKの計算
 		bool CalculateIK();
 
+		// 付与ボーンの再計算
+		bool ReCalculateGrantBone();
+
 		void ChangeMotion(int Index); // インデックス指定でモーションを変更
 		void ChangeMotion(const std::string& MotionName); // 名前指定でモーションを変更
 

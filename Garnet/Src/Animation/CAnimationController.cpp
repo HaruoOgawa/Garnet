@@ -199,6 +199,60 @@ namespace animation
 		return true;
 	}
 
+	// 付与ボーンの再計算
+	bool CAnimationController::ReCalculateGrantBone()
+	{
+		for (const auto& Skin : m_SkinList)
+		{
+			const auto& BoneList = Skin->GetJointList();
+
+			for (const auto& GrantBone : Skin->GetGrantBoneList())
+			{
+				// ParentGrantBoneを取得
+				int GrantParentBoneIndex = GrantBone->GetGrantParentBoneIndex();
+				if (GrantParentBoneIndex < 0 || GrantParentBoneIndex >= BoneList.size()) continue;
+
+				const auto& ParentGrantBone = BoneList[GrantParentBoneIndex];
+
+				// 付与率
+				const float GrantRate = GrantBone->GetGrantRate();
+
+				// 自身のPosとRot
+				glm::vec3 GrantPos = glm::vec3(0.0f);
+				glm::quat GrantRot = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
+				math::CTransform::CastModelMatrixToTransform(GrantBone->GetJointNode()->GetWorldMatrix(), GrantPos, GrantRot);
+
+				// 親ボーンのPosとRot
+				glm::vec3 ParentGrantPos = glm::vec3(0.0f);
+				glm::quat ParentGrantRot = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
+				math::CTransform::CastModelMatrixToTransform(ParentGrantBone->GetJointNode()->GetWorldMatrix(), ParentGrantPos, ParentGrantRot);
+
+				// 付与を実行
+				glm::vec3 ResultPos = GrantPos;
+				glm::quat ResultRot = GrantRot;
+
+				if (GrantBone->IsRotateGrant())
+				{
+					// 回転付与
+					ResultRot = glm::slerp(GrantRot, ParentGrantRot, GrantRate);
+				}
+				else if (GrantBone->IsMoveGrant())
+				{
+					// 移動付与
+					ResultPos = (1.0f - GrantRate) * GrantPos + GrantRate * ParentGrantPos;
+				}
+
+				// 付与結果をボーンに再割り当て
+				glm::mat4 ResultMatrix = glm::mat4(1.0f);
+				math::CTransform::CalcModelMatrix(ResultMatrix, ResultPos, ResultRot, false);
+
+				GrantBone->GetJointNode()->SetWorldMatrix(ResultMatrix);
+			}
+		}
+
+		return true;
+	}
+
 	// インデックス指定でモーションを変更
 	void CAnimationController::ChangeMotion(int Index)
 	{

@@ -329,6 +329,9 @@ namespace object
 		// IKの計算を行う
 		if (!m_AnimationController->CalculateIK()) return false;
 
+		// 付与ボーンの位置を再計算
+		if (!m_AnimationController->ReCalculateGrantBone()) return false;
+
 		// Drawは何度も呼ぶことがあるのでUpdateでマイフレーム一回だけ計算する
 		// SSBOのサイズをDynamicOffset毎に変更できるかわからないのでひとまず全部まとめて渡す
 		m_CurrentSkinMatrixList.clear();
