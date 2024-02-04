@@ -45,6 +45,9 @@ namespace animation
 
 		bool Update(float DeltaSecondsTime);
 
+		// IKの計算
+		bool CalculateIK();
+
 		void ChangeMotion(int Index); // インデックス指定でモーションを変更
 		void ChangeMotion(const std::string& MotionName); // 名前指定でモーションを変更
 

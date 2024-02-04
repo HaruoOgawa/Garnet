@@ -19,6 +19,9 @@ namespace animation
 		int m_JointIndexOffset;
 
 		std::unordered_map<EHumanoidBones, std::shared_ptr<CJoint>> m_BoneTable;
+
+		// IK
+		std::vector<std::shared_ptr<CJoint>> m_IKBoneList;
 	public:
 		CSkin();
 		virtual ~CSkin();
@@ -34,6 +37,10 @@ namespace animation
 
 		void MakeBoneTable();
 		std::shared_ptr<CJoint> GetBone(EHumanoidBones BoneName);
+
+		// IK
+		void MakeIKBoneList();
+		const std::vector<std::shared_ptr<CJoint>>& GetIKBoneList() const;
 
 		void CalcSkinWorldMatrix();
 		void ResetToDefaultSkinLocal();

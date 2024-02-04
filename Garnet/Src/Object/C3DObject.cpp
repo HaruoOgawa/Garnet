@@ -326,6 +326,9 @@ namespace object
 		CalcWorldMatrix();
 
 #ifdef USE_ANIMATION
+		// IKの計算を行う
+		if (!m_AnimationController->CalculateIK()) return false;
+
 		// Drawは何度も呼ぶことがあるのでUpdateでマイフレーム一回だけ計算する
 		// SSBOのサイズをDynamicOffset毎に変更できるかわからないのでひとまず全部まとめて渡す
 		m_CurrentSkinMatrixList.clear();

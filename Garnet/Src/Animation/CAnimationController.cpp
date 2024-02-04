@@ -70,6 +70,134 @@ namespace animation
 		return true;
 	}
 
+	// IKの計算
+	bool CAnimationController::CalculateIK()
+	{
+		for (const auto& Skin : m_SkinList)
+		{
+			const auto& BoneList = Skin->GetJointList();
+
+			for (const auto& IKBone : Skin->GetIKBoneList())
+			{
+				const auto& IKParam = IKBone->GetIKParam();
+
+				// Linkが一つもなければスキップ
+				if (IKParam->IKLinkList.size() == 0) continue;
+
+				// IKターゲットボーン
+				if (IKParam->IKTargetBoneIndex < 0 || IKParam->IKTargetBoneIndex >= BoneList.size()) continue;
+				const auto& IKTargetBone = BoneList[IKParam->IKTargetBoneIndex];
+
+				glm::vec3 IKTargetPos = glm::vec3(0.0f);
+				math::CTransform::CastModelMatrixToTranslation(IKTargetBone->GetJointNode()->GetWorldMatrix(), IKTargetPos);
+
+				// CCD-IKを採用
+				// CCD-IKに使用するサイクリックボーンリスト
+				std::vector<std::shared_ptr<CJoint>> CyclicBoneList;
+
+				// ワールドマトリックスリスト(これを更新していって最後にボーンに渡す)
+				std::vector<glm::mat4> CyclicWorldMatrixList;
+
+				for (const auto& Link : IKParam->IKLinkList)
+				{
+					if (Link.IKLinkBoneIndex == -1) continue;
+
+					const auto& CyclicBone = BoneList[Link.IKLinkBoneIndex];
+
+					CyclicBoneList.push_back(CyclicBone);
+					CyclicWorldMatrixList.push_back(CyclicBone->GetJointNode()->GetWorldMatrix());
+				}
+
+				// CycleBoneListの末尾に自身を追加(自身がサイクルのスタート)
+				CyclicBoneList.push_back(IKBone);
+				CyclicWorldMatrixList.push_back(IKBone->GetJointNode()->GetWorldMatrix());
+
+				// サイクルスタート
+				if (CyclicWorldMatrixList.size() == 1)
+				{
+					// CyclicWorldMatrixListが1つしかない時は計算のしようがないのでスキップ
+					continue;
+				}
+				else if (CyclicWorldMatrixList.size() == 2)
+				{
+					// 2つしかない時は初めの一回以降は何回計算しても同じなので1回だけ計算する
+					glm::vec3 FirstLinkPos = glm::vec3(0.0f);
+					math::CTransform::CastModelMatrixToTranslation(CyclicWorldMatrixList[1], FirstLinkPos);
+
+					glm::vec3 SecondLinkPos = glm::vec3(0.0f);
+					math::CTransform::CastModelMatrixToTranslation(CyclicWorldMatrixList[0], SecondLinkPos);
+
+					// 回転行列を計算
+					glm::vec3 ToFistVector = glm::normalize(FirstLinkPos - SecondLinkPos);
+					glm::vec3 ToTargetVector = glm::normalize(IKTargetPos - SecondLinkPos);
+
+					glm::quat Rot = math::CTransform::CalcTwoVectorRotate(ToFistVector, ToTargetVector);
+
+					CyclicWorldMatrixList[1] *= glm::mat4_cast(Rot);
+				}
+				else if (CyclicWorldMatrixList.size() > 2)
+				{
+					// どれくらい近づいたらターゲットに届いたと判定するかの閾値
+					const float CyclicThreshold = 0.01f;
+
+					// ターゲットに届くかサイクルの最大値に達するまで計算を繰り返す
+					int CurrentLoopNum = 0;
+					while (CurrentLoopNum < IKParam->IKLoopCount)
+					{
+						bool Result = false;
+
+						for (int i = static_cast<int>(CyclicWorldMatrixList.size()) - 1; i >= 1; i--)
+						{
+							//
+							glm::vec3 FirstLinkPos = glm::vec3(0.0f);
+							math::CTransform::CastModelMatrixToTranslation(CyclicWorldMatrixList[i], FirstLinkPos);
+
+							glm::vec3 SecondLinkPos = glm::vec3(0.0f);
+							math::CTransform::CastModelMatrixToTranslation(CyclicWorldMatrixList[i - 1], SecondLinkPos);
+
+							// 回転行列を計算
+							glm::vec3 ToFistVector = glm::normalize(FirstLinkPos - SecondLinkPos);
+							glm::vec3 ToTargetVector = glm::normalize(IKTargetPos - SecondLinkPos);
+
+							glm::quat Rot = math::CTransform::CalcTwoVectorRotate(ToFistVector, ToTargetVector);
+
+							CyclicWorldMatrixList[i] *= glm::mat4_cast(Rot);
+
+							// 計算結果を見てIKTargetBoneにどれくらい近づいたか見る
+							glm::vec3 CyclicResultPos = glm::vec3(0.0f);
+							math::CTransform::CastModelMatrixToTranslation(CyclicWorldMatrixList[i], CyclicResultPos);
+
+							if (glm::distance(IKTargetPos, CyclicResultPos) < CyclicThreshold)
+							{
+								Result = true;
+
+								break;
+							}
+						}
+
+						// ターゲットIKに届いたらループを終了する
+						if (Result) break;
+
+						// ループ回数を更新
+						CurrentLoopNum++;
+					}
+				}
+				else
+				{
+					return false;
+				}
+
+				// 計算結果をボーンに戻す
+				for (int i = 0; i < CyclicWorldMatrixList.size(); i++)
+				{
+					CyclicBoneList[i]->GetJointNode()->SetWorldMatrix(CyclicWorldMatrixList[i]);
+				}
+			}
+		}
+
+		return true;
+	}
+
 	// インデックス指定でモーションを変更
 	void CAnimationController::ChangeMotion(int Index)
 	{

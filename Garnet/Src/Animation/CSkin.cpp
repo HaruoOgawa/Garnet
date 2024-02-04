@@ -87,6 +87,24 @@ namespace animation
 		return nullptr;
 	}
 
+	// IK
+	void CSkin::MakeIKBoneList()
+	{
+		for (const auto& Bone : m_JointList)
+		{
+			// IKParam‚ðŽ‚Á‚Ä‚¢‚ê‚ÎƒŠƒXƒg‚É’Ç‰Á‚·‚é
+			if (Bone->GetIKParam())
+			{
+				m_IKBoneList.push_back(Bone);
+			}
+		}
+	}
+
+	const std::vector<std::shared_ptr<CJoint>>& CSkin::GetIKBoneList() const
+	{
+		return m_IKBoneList;
+	}
+
 	void CSkin::CalcSkinWorldMatrix()
 	{
 		for (const auto& Joint : m_JointList)

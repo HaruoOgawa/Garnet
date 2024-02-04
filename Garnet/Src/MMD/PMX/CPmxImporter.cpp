@@ -48,6 +48,9 @@ namespace mmd
 		// BoneTableを作成
 		Skin->MakeBoneTable();
 
+		// IKBoneListを作成
+		Skin->MakeIKBoneList();
+
 		// マテリアルリスト
 		std::vector<std::shared_ptr<graphics::CMaterial>> MaterialList;
 		if (!CreateMaterialList(pGraphicsAPI, model, MaterialList, MaterialFrame, Skin)) return false;
