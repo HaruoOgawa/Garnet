@@ -79,6 +79,10 @@ namespace animation
 
 			for (const auto& IKBone : Skin->GetIKBoneList())
 			{
+				// TargetBoneとそのLinkが目指すボーンの位置
+				glm::vec3 IKPos = glm::vec3(0.0f);
+				math::CTransform::CastModelMatrixToTranslation(IKBone->GetJointNode()->GetWorldMatrix(), IKPos);
+
 				const auto& IKParam = IKBone->GetIKParam();
 
 				// Linkが一つもなければスキップ
@@ -88,15 +92,16 @@ namespace animation
 				if (IKParam->IKTargetBoneIndex < 0 || IKParam->IKTargetBoneIndex >= BoneList.size()) continue;
 				const auto& IKTargetBone = BoneList[IKParam->IKTargetBoneIndex];
 
-				glm::vec3 IKTargetPos = glm::vec3(0.0f);
-				math::CTransform::CastModelMatrixToTranslation(IKTargetBone->GetJointNode()->GetWorldMatrix(), IKTargetPos);
-
 				// CCD-IKを採用
 				// CCD-IKに使用するサイクリックボーンリスト
 				std::vector<std::shared_ptr<CJoint>> CyclicBoneList;
 
 				// ワールドマトリックスリスト(これを更新していって最後にボーンに渡す)
 				std::vector<glm::mat4> CyclicWorldMatrixList;
+
+				// 先頭にIKTargetBoneを追加(IKTargetBoneがサイクルのスタート)
+				CyclicBoneList.push_back(IKTargetBone);
+				CyclicWorldMatrixList.push_back(IKTargetBone->GetJointNode()->GetWorldMatrix());
 
 				for (const auto& Link : IKParam->IKLinkList)
 				{
@@ -108,10 +113,6 @@ namespace animation
 					CyclicWorldMatrixList.push_back(CyclicBone->GetJointNode()->GetWorldMatrix());
 				}
 
-				// CycleBoneListの末尾に自身を追加(自身がサイクルのスタート)
-				CyclicBoneList.push_back(IKBone);
-				CyclicWorldMatrixList.push_back(IKBone->GetJointNode()->GetWorldMatrix());
-
 				// サイクルスタート
 				if (CyclicWorldMatrixList.size() == 1)
 				{
@@ -122,18 +123,18 @@ namespace animation
 				{
 					// 2つしかない時は初めの一回以降は何回計算しても同じなので1回だけ計算する
 					glm::vec3 FirstLinkPos = glm::vec3(0.0f);
-					math::CTransform::CastModelMatrixToTranslation(CyclicWorldMatrixList[1], FirstLinkPos);
+					math::CTransform::CastModelMatrixToTranslation(CyclicWorldMatrixList[0], FirstLinkPos);
 
 					glm::vec3 SecondLinkPos = glm::vec3(0.0f);
-					math::CTransform::CastModelMatrixToTranslation(CyclicWorldMatrixList[0], SecondLinkPos);
+					math::CTransform::CastModelMatrixToTranslation(CyclicWorldMatrixList[1], SecondLinkPos);
 
 					// 回転行列を計算
 					glm::vec3 ToFistVector = glm::normalize(FirstLinkPos - SecondLinkPos);
-					glm::vec3 ToTargetVector = glm::normalize(IKTargetPos - SecondLinkPos);
+					glm::vec3 ToTargetVector = glm::normalize(IKPos - SecondLinkPos);
 
 					glm::quat Rot = math::CTransform::CalcTwoVectorRotate(ToFistVector, ToTargetVector);
 
-					CyclicWorldMatrixList[1] *= glm::mat4_cast(Rot);
+					CyclicWorldMatrixList[0] *= glm::mat4_cast(Rot);
 				}
 				else if (CyclicWorldMatrixList.size() > 2)
 				{
@@ -146,18 +147,18 @@ namespace animation
 					{
 						bool Result = false;
 
-						for (int i = static_cast<int>(CyclicWorldMatrixList.size()) - 1; i >= 1; i--)
+						for (int i = 0; i < static_cast<int>(CyclicWorldMatrixList.size()) - 1; i++)
 						{
 							//
 							glm::vec3 FirstLinkPos = glm::vec3(0.0f);
 							math::CTransform::CastModelMatrixToTranslation(CyclicWorldMatrixList[i], FirstLinkPos);
 
 							glm::vec3 SecondLinkPos = glm::vec3(0.0f);
-							math::CTransform::CastModelMatrixToTranslation(CyclicWorldMatrixList[i - 1], SecondLinkPos);
+							math::CTransform::CastModelMatrixToTranslation(CyclicWorldMatrixList[i + 1], SecondLinkPos);
 
 							// 回転行列を計算
 							glm::vec3 ToFistVector = glm::normalize(FirstLinkPos - SecondLinkPos);
-							glm::vec3 ToTargetVector = glm::normalize(IKTargetPos - SecondLinkPos);
+							glm::vec3 ToTargetVector = glm::normalize(IKPos - SecondLinkPos);
 
 							glm::quat Rot = math::CTransform::CalcTwoVectorRotate(ToFistVector, ToTargetVector);
 
@@ -167,7 +168,7 @@ namespace animation
 							glm::vec3 CyclicResultPos = glm::vec3(0.0f);
 							math::CTransform::CastModelMatrixToTranslation(CyclicWorldMatrixList[i], CyclicResultPos);
 
-							if (glm::distance(IKTargetPos, CyclicResultPos) < CyclicThreshold)
+							if (glm::distance(IKPos, CyclicResultPos) < CyclicThreshold)
 							{
 								Result = true;
 
