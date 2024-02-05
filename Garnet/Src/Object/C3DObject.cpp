@@ -439,10 +439,20 @@ namespace object
 				{
 					//if (Joint->GetBoneName() == animation::EHumanoidBones::None) continue;
 
-					// Debug—p: Joint‚Ì•`‰æ
 					const auto& JointNode = Joint->GetJointNode();
-					DebugSphere->SetPos(m_ObjectTransform->GetModelMatrix() * JointNode->GetWorldMatrix() * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
-					DebugSphere->SetScale(glm::vec3(0.025f));
+
+					// Debug—p: Joint‚Ì•`‰æ
+					{
+						//DebugSphere->SetPos(m_ObjectTransform->GetModelMatrix() * JointNode->GetWorldMatrix() * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
+						//DebugSphere->SetScale(glm::vec3(0.025f));
+					}
+					
+					// Debug—p: ƒ[ƒJƒ‹Ž²‚Ì•`‰æ(Sphere‚ðBox‚É•ÏX‚·‚é)
+					{
+						DebugSphere->SetScale(glm::vec3(0.025f, 0.025f, 0.025f * 4.0f));
+						DebugSphere->SetRot(JointNode->GetDefaultLocalTransform()->GetRot());
+						DebugSphere->SetPos(m_ObjectTransform->GetModelMatrix()* JointNode->GetWorldMatrix()* glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
+					}
 
 					DebugSphere->GetMaterialList()[0]->SetUniformValue("useColor", &glm::ivec1(1)[0], sizeof(glm::ivec1));
 					
