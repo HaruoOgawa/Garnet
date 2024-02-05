@@ -182,7 +182,7 @@ namespace math
 		}
 	}
 
-	glm::quat CTransform::CalcTwoVectorRotate(const glm::vec3& FromVector, const glm::vec3& ToVector)
+	glm::quat CTransform::CalcTwoVectorRotate(const glm::vec3& FromVector, const glm::vec3& ToVector, float MaxAngle)
 	{
 		// https://www.opengl-tutorial.org/jp/intermediate-tutorials/tutorial-17-quaternions/
 		glm::quat Result = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
@@ -209,6 +209,7 @@ namespace math
 			// 求まったベクトルを元に回転する
 			glm::vec3 RotateAxis = glm::cross(FromVector, SubVector);
 			float Angle = glm::acos(cosTheta);
+			Angle = fminf(MaxAngle, Angle);
 
 			Result = glm::angleAxis(Angle, RotateAxis);
 		}
@@ -216,10 +217,37 @@ namespace math
 		{
 			glm::vec3 RotateAxis = glm::cross(FromVector, ToVector);
 			float Angle = glm::acos(cosTheta);
+			Angle = fminf(MaxAngle, Angle);
 
 			Result = glm::angleAxis(Angle, RotateAxis);
 		}
 
 		return Result;
+	}
+
+	void CTransform::ClampRotate(glm::quat& Rotation, const glm::vec3& LowerAngle, const glm::vec3& UpperAngle)
+	{
+		// 回転の角度制限をクランプで行う
+		glm::vec3 SrcEuler = glm::eulerAngles(Rotation);
+
+		glm::vec3 DstEuler = glm::vec3(
+			glm::clamp(SrcEuler.x, LowerAngle.x, UpperAngle.x),
+			glm::clamp(SrcEuler.y, LowerAngle.y, UpperAngle.y),
+			glm::clamp(SrcEuler.z, LowerAngle.z, UpperAngle.z)
+		);
+
+		Rotation = glm::angleAxis(DstEuler.x, glm::vec3(1.0f, 0.0f, 0.0f)) * glm::angleAxis(DstEuler.y, glm::vec3(0.0f, 1.0f, 0.0f)) * glm::angleAxis(DstEuler.z, glm::vec3(0.0f, 0.0f, 1.0f));
+	}
+
+	void CTransform::ClampRotate(glm::mat4& ModelMatrix, const glm::vec3& LowerAngle, const glm::vec3& UpperAngle)
+	{
+		glm::vec3 Pos = glm::vec3(0.0f);
+		glm::quat Rot = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
+
+		CTransform::CastModelMatrixToTransform(ModelMatrix, Pos, Rot);
+
+		CTransform::ClampRotate(Rot, LowerAngle, UpperAngle);
+
+		CTransform::CalcModelMatrix(ModelMatrix, Pos, Rot, false);
 	}
 }

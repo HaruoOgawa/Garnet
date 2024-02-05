@@ -132,9 +132,10 @@ namespace animation
 					glm::vec3 ToFistVector = glm::normalize(FirstLinkPos - SecondLinkPos);
 					glm::vec3 ToTargetVector = glm::normalize(IKPos - SecondLinkPos);
 
-					glm::quat Rot = math::CTransform::CalcTwoVectorRotate(ToFistVector, ToTargetVector);
+					glm::quat Rot = math::CTransform::CalcTwoVectorRotate(ToFistVector, ToTargetVector, IKParam->LimitedAngle);
 
 					CyclicWorldMatrixList[0] *= glm::mat4_cast(Rot);
+					math::CTransform::ClampRotate(CyclicWorldMatrixList[0], IKParam->IKLinkList[0].LowerAngle, IKParam->IKLinkList[0].UpperAngle);
 				}
 				else if (CyclicWorldMatrixList.size() > 2)
 				{
@@ -160,9 +161,10 @@ namespace animation
 							glm::vec3 ToFistVector = glm::normalize(FirstLinkPos - SecondLinkPos);
 							glm::vec3 ToTargetVector = glm::normalize(IKPos - SecondLinkPos);
 
-							glm::quat Rot = math::CTransform::CalcTwoVectorRotate(ToFistVector, ToTargetVector);
+							glm::quat Rot = math::CTransform::CalcTwoVectorRotate(ToFistVector, ToTargetVector, IKParam->LimitedAngle);
 
 							CyclicWorldMatrixList[i] *= glm::mat4_cast(Rot);
+							math::CTransform::ClampRotate(CyclicWorldMatrixList[i], IKParam->IKLinkList[i].LowerAngle, IKParam->IKLinkList[i].UpperAngle);
 
 							// ŒvŽZŒ‹‰Ê‚ðŒ©‚ÄIKTargetBone‚É‚Ç‚ê‚­‚ç‚¢‹ß‚Ã‚¢‚½‚©Œ©‚é
 							glm::vec3 CyclicResultPos = glm::vec3(0.0f);
