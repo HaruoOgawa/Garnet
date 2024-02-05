@@ -436,7 +436,8 @@ namespace renderer
 		// レンダリングパイプラインでデプスとステンシルを有効にする
 		VkPipelineDepthStencilStateCreateInfo depthStencil{};
 		depthStencil.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
-		depthStencil.depthTestEnable = (pVulkanMat->IsEnabledZTest()) ? VK_TRUE : VK_FALSE;
+		//depthStencil.depthTestEnable = (pVulkanMat->IsEnabledZTest()) ? VK_TRUE : VK_FALSE;
+		depthStencil.depthTestEnable = VK_TRUE;
 		//depthStencil.depthWriteEnable = (pVulkanMat->IsEnabledZTest()) ? VK_TRUE : VK_FALSE;
 		depthStencil.depthWriteEnable = VK_TRUE;
 		depthStencil.depthCompareOp = (pVulkanMat->IsEnabledZTest()) ? VK_COMPARE_OP_LESS : VK_COMPARE_OP_ALWAYS;

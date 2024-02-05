@@ -200,7 +200,7 @@ namespace animation
 	}
 
 	// 付与ボーンの再計算
-	bool CAnimationController::ReCalculateGrantBone()
+	bool CAnimationController::ReCalculateGrantBone(const std::vector<std::shared_ptr<object::CNode>>& NodeList)
 	{
 		for (const auto& Skin : m_SkinList)
 		{
@@ -247,10 +247,35 @@ namespace animation
 				math::CTransform::CalcModelMatrix(ResultMatrix, ResultPos, ResultRot, false);
 
 				GrantBone->GetJointNode()->SetWorldMatrix(ResultMatrix);
+
+				// 子要素にも回転付与・移動付与の計算結果を適応する
+				for (int ChildIndex : GrantBone->GetJointNode()->GetChildrenNodeIndexList())
+				{
+					if (ChildIndex < 0 || ChildIndex >= NodeList.size()) continue;
+
+					const auto& ChildNode = NodeList[ChildIndex];
+
+					ApplyGrantToChildNode(ResultMatrix, ChildNode, NodeList);
+				}
 			}
 		}
 
 		return true;
+	}
+
+	void CAnimationController::ApplyGrantToChildNode(const glm::mat4& ParentWorldMatrix, const std::shared_ptr<object::CNode>& Node, const std::vector<std::shared_ptr<object::CNode>>& NodeList)
+	{
+		glm::mat4 WorldMatrix = ParentWorldMatrix * Node->GetLocalMatrix();
+		Node->SetWorldMatrix(WorldMatrix);
+
+		for (int ChildIndex : Node->GetChildrenNodeIndexList())
+		{
+			if (ChildIndex < 0 || ChildIndex >= NodeList.size()) continue;
+
+			const auto& ChildNode = NodeList[ChildIndex];
+
+			ApplyGrantToChildNode(WorldMatrix, ChildNode, NodeList);
+		}
 	}
 
 	// インデックス指定でモーションを変更

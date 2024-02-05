@@ -330,7 +330,7 @@ namespace object
 		if (!m_AnimationController->CalculateIK()) return false;
 
 		// 付与ボーンの位置を再計算
-		if (!m_AnimationController->ReCalculateGrantBone()) return false;
+		if (!m_AnimationController->ReCalculateGrantBone(m_NodeList)) return false;
 
 		// Drawは何度も呼ぶことがあるのでUpdateでマイフレーム一回だけ計算する
 		// SSBOのサイズをDynamicOffset毎に変更できるかわからないのでひとまず全部まとめて渡す
@@ -437,31 +437,25 @@ namespace object
 			{
 				for (const auto& Joint : Skin->GetJointList())
 				{
+					//if (Joint->GetBoneName() == animation::EHumanoidBones::None) continue;
+
 					// Debug用: Jointの描画
 					const auto& JointNode = Joint->GetJointNode();
 					DebugSphere->SetPos(m_ObjectTransform->GetModelMatrix() * JointNode->GetWorldMatrix() * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
 					DebugSphere->SetScale(glm::vec3(0.025f));
 
-					if (Joint->GetBoneName() == animation::EHumanoidBones::Hips)
+					DebugSphere->GetMaterialList()[0]->SetUniformValue("useColor", &glm::ivec1(1)[0], sizeof(glm::ivec1));
+					
+					if(Joint->IsRotateGrant() || Joint->IsMoveGrant())
 					{
 						DebugSphere->GetMaterialList()[0]->SetUniformValue("baseColor", &glm::vec4(1.0f, 0.0f, 0.0f, 1.0f)[0], sizeof(glm::vec4));
 					}
-					else if (Joint->GetBoneName() == animation::EHumanoidBones::LeftUpperArm || Joint->GetBoneName() == animation::EHumanoidBones::RightUpperArm)
-					{
-						DebugSphere->GetMaterialList()[0]->SetUniformValue("baseColor", &glm::vec4(0.0f, 1.0f, 0.0f, 1.0f)[0], sizeof(glm::vec4));
-					}
-					else if (Joint->GetBoneName() == animation::EHumanoidBones::LeftLowerArm || Joint->GetBoneName() == animation::EHumanoidBones::RightLowerArm)
-					{
-						DebugSphere->GetMaterialList()[0]->SetUniformValue("baseColor", &glm::vec4(0.0f, 1.0f, 1.0f, 1.0f)[0], sizeof(glm::vec4));
-					}
 					else
 					{
-						DebugSphere->GetMaterialList()[0]->SetUniformValue("baseColor", &glm::vec4(0.0f, 0.0f, 1.0f, 1.0f)[0], sizeof(glm::vec4));
+						DebugSphere->GetMaterialList()[0]->SetUniformValue("baseColor", &glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)[0], sizeof(glm::vec4));
 					}
 
 					if (!DebugSphere->Draw(IsDepthPass, false, Camera, Projection, DrawInfo)) return false;
-
-					// Debug用: Boneの描画
 				}
 			}
 		}
