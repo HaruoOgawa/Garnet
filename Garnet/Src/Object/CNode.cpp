@@ -125,6 +125,11 @@ namespace object
 		m_LocalTransform->SetRot(Rot);
 	}
 
+	void CNode::MulRot(const glm::quat& Rot)
+	{
+		m_LocalTransform->MulRot(Rot);
+	}
+
 	void CNode::AddRotate(const glm::vec3& Axis, float Radians)
 	{
 		m_LocalTransform->AddRotate(Axis, Radians);

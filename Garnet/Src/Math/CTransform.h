@@ -21,6 +21,7 @@ namespace math
 
 		const glm::quat& GetRot() const;
 		void SetRot(const glm::quat& Rot);
+		void MulRot(const glm::quat& Rot);
 		void AddRotate(const glm::vec3& Axis, float Radians);
 
 		const glm::vec3& GetScale() const;
@@ -33,6 +34,9 @@ namespace math
 		static void CastModelMatrixToTranslation(const glm::mat4& ModelMatrix, glm::vec3& Translation);
 		static void CastModelMatrixToRotation(const glm::mat4& ModelMatrix, glm::quat& Rotation, glm::vec3& Scale);
 		static void CastModelMatrixToScale(const glm::mat4& ModelMatrix, glm::vec3& Scale);
+
+		// Œ´“_‚É‚ ‚é“_‚ª‚Ç‚±‚ÉˆÚ“®‚·‚é‚©
+		static void GetMoveFromModelMatrix(const glm::mat4& ModelMatrix, glm::vec3& Move);
 
 		static void CastLeftHandToRightHand(glm::vec3& Translation);
 		static void CastLeftHandToRightHand(glm::quat& Rotation);
@@ -51,5 +55,7 @@ namespace math
 
 		static void ClampRotate(glm::quat& Rotation, const glm::vec3& LowerAngle, const glm::vec3& UpperAngle);
 		static void ClampRotate(glm::mat4& ModelMatrix, const glm::vec3& LowerAngle, const glm::vec3& UpperAngle);
+
+		static void RotateModelMatrix(glm::mat4& ModelMatrix, const glm::quat& SrcRot);
 	};
 }

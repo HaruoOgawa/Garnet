@@ -327,7 +327,7 @@ namespace object
 
 #ifdef USE_ANIMATION
 		// IKの計算を行う
-		if (!m_AnimationController->CalculateIK()) return false;
+		if (!m_AnimationController->CalculateIK(m_NodeList)) return false;
 
 		// 付与ボーンの位置を再計算
 		if (!m_AnimationController->ReCalculateGrantBone(m_NodeList)) return false;
@@ -443,15 +443,15 @@ namespace object
 
 					// Debug用: Jointの描画
 					{
-						//DebugSphere->SetPos(m_ObjectTransform->GetModelMatrix() * JointNode->GetWorldMatrix() * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
-						//DebugSphere->SetScale(glm::vec3(0.025f));
+						DebugSphere->SetPos(m_ObjectTransform->GetModelMatrix() * JointNode->GetWorldMatrix() * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
+						DebugSphere->SetScale(glm::vec3(0.025f));
 					}
 					
 					// Debug用: ローカル軸の描画(SphereをBoxに変更する)
 					{
-						DebugSphere->SetScale(glm::vec3(0.025f, 0.025f, 0.025f * 4.0f));
-						DebugSphere->SetRot(JointNode->GetDefaultLocalTransform()->GetRot());
-						DebugSphere->SetPos(m_ObjectTransform->GetModelMatrix()* JointNode->GetWorldMatrix()* glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
+						//DebugSphere->SetScale(glm::vec3(0.025f, 0.025f, 0.025f * 4.0f));
+						//DebugSphere->SetRot(JointNode->GetDefaultLocalTransform()->GetRot());
+						//DebugSphere->SetPos(m_ObjectTransform->GetModelMatrix()* JointNode->GetWorldMatrix()* glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
 					}
 
 					DebugSphere->GetMaterialList()[0]->SetUniformValue("useColor", &glm::ivec1(1)[0], sizeof(glm::ivec1));

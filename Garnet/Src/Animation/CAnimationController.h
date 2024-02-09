@@ -38,7 +38,7 @@ namespace animation
 		void BlendTranslation(const std::shared_ptr<object::CNode>& Node, float L);
 		void BlendRotation(const std::shared_ptr<object::CNode>& Node, float L);
 
-		void ApplyGrantToChildNode(const glm::mat4& ParentWorldMatrix, const std::shared_ptr<object::CNode>& Node, const std::vector<std::shared_ptr<object::CNode>>& NodeList);
+		void CalcWorldMatrix(const glm::mat4& ParentWorldMatrix, const std::shared_ptr<object::CNode>& Node, const std::vector<std::shared_ptr<object::CNode>>& NodeList);
 	public:
 		CAnimationController();
 		virtual ~CAnimationController();
@@ -48,7 +48,7 @@ namespace animation
 		bool Update(float DeltaSecondsTime);
 
 		// IKÇÃåvéZ
-		bool CalculateIK();
+		bool CalculateIK(const std::vector<std::shared_ptr<object::CNode>>& NodeList);
 
 		// ïtó^É{Å[ÉìÇÃçƒåvéZ
 		bool ReCalculateGrantBone(const std::vector<std::shared_ptr<object::CNode>>& NodeList);

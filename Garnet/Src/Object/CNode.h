@@ -60,6 +60,7 @@ namespace object
 
 		const glm::quat& GetRot() const;
 		void SetRot(const glm::quat& Rot);
+		void MulRot(const glm::quat& Rot);
 		void AddRotate(const glm::vec3& Axis, float Radians);
 
 		const glm::vec3& GetScale() const;

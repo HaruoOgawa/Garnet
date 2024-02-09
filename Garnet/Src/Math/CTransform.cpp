@@ -40,6 +40,11 @@ namespace math
 		m_Rot = Rot;
 	}
 
+	void CTransform::MulRot(const glm::quat& Rot)
+	{
+		m_Rot *= Rot;
+	}
+
 	void CTransform::AddRotate(const glm::vec3& Axis, float Radians)
 	{
 		m_Rot *= glm::angleAxis(glm::degrees(Radians), Axis);
@@ -113,6 +118,14 @@ namespace math
 			glm::sqrt(glm::length2(glm::vec3(ModelMatrix[1][0], ModelMatrix[1][1], ModelMatrix[1][2]))),
 			glm::sqrt(glm::length2(glm::vec3(ModelMatrix[2][0], ModelMatrix[2][1], ModelMatrix[2][2])))
 		);
+	}
+
+	// Œ´“_‚É‚ ‚é“_‚ª‚Ç‚±‚ÉˆÚ“®‚·‚é‚©
+	void CTransform::GetMoveFromModelMatrix(const glm::mat4& ModelMatrix, glm::vec3& Move)
+	{
+		glm::vec4 result = ModelMatrix * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+
+		Move = glm::vec3(result.x, result.y, result.z);
 	}
 
 	void CTransform::CastLeftHandToRightHand(glm::vec3& Translation)
@@ -249,5 +262,15 @@ namespace math
 		CTransform::ClampRotate(Rot, LowerAngle, UpperAngle);
 
 		CTransform::CalcModelMatrix(ModelMatrix, Pos, Rot, false);
+	}
+
+	void CTransform::RotateModelMatrix(glm::mat4& ModelMatrix, const glm::quat& SrcRot)
+	{
+		glm::vec3 Pos = glm::vec3(0.0f);
+		glm::quat Rot = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
+
+		CTransform::CastModelMatrixToTransform(ModelMatrix, Pos, Rot);
+
+		CTransform::CalcModelMatrix(ModelMatrix, Pos, SrcRot, false);
 	}
 }
