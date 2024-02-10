@@ -2,6 +2,10 @@
 
 #include "CBoneNameProvider.h"
 
+#ifdef __EMSCRIPTEN__
+#include <emscripten/emscripten.h>
+#endif
+
 namespace animation
 {
 	CBoneNameProvider::CBoneNameProvider()
@@ -63,8 +67,31 @@ namespace animation
 			for (const std::wstring& BoneName : BoneNameList)
 			{
 				// ボーン名のバイトの末尾に0がついていたりとデータの長さが不定なので、BoneNameの長さだけSearchNameを調べて一致していればオッケーということにする
-				int Loop = 0;
+				
 				bool Result = true;
+#ifdef __EMSCRIPTEN__
+				for (int windex = 0; windex < BoneName.size(); windex++)
+				{
+					wchar_t wchr = BoneName[windex];
+
+					int Flag = EM_ASM_INT({
+						const w0 = Module.UTF16ToString($0);
+						const w1 = Module.UTF16ToString($1);
+						const windex = $2;
+
+						return (w0 == w1[windex]) ? 1 : 0;
+					}, &BoneName[windex], &SearchName[0], windex);
+
+					if (Flag == 0)
+					{
+						Result = false;
+
+						break;
+					}
+				}
+#else
+				int Loop = 0;
+
 				for (auto wchr = BoneName.begin(); wchr != BoneName.end(); wchr++)
 				{
 					if ((*wchr) != SearchName[Loop])
@@ -76,10 +103,23 @@ namespace animation
 
 					Loop++;
 				}
+#endif
 
 				// 調べたいボーン名の1つ後ろにSpace・Empty以外があったら違うボーンとして判定する
 				if (SearchName.size() > BoneName.size())
 				{
+#ifdef __EMSCRIPTEN__
+					int Flag = EM_ASM_INT({
+						const w0 = Module.UTF16ToString($0);
+
+						return (w0 != "" && w0 != " ") ? 1 : 0;
+					}, &SearchName[0]);
+
+					if (Flag == 0)
+					{
+						Result = false;
+					}
+#else
 					auto wchr = SearchName[Loop];
 					std::wstring Empty = std::wstring(L""), Space = std::wstring(L" ");
 					Empty.resize(1);
@@ -87,6 +127,7 @@ namespace animation
 					{
 						Result = false;
 					}
+#endif
 				}
 
 				if (Result)
