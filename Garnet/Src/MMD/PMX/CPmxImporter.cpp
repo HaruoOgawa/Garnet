@@ -115,6 +115,8 @@ namespace mmd
 
 	bool CPmxImporter::CreateAnimationSkin(const CPmxModel& model, std::shared_ptr<animation::CSkin>& Skin, std::vector<std::shared_ptr<object::CNode>>& NodeList, const std::shared_ptr<object::CNode>& RootNode)
 	{
+		animation::CBoneNameProvider Provider;
+
 		// PmxではBoneとJointは全くの別物でそれぞれ違う役割を持っているので厳格に名前分けする必要がある!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 		const auto& PmxBoneList = model.GetPmxBoneList();
@@ -155,7 +157,6 @@ namespace mmd
 			std::shared_ptr<animation::CJoint> Bone = std::make_shared<animation::CJoint>(BoneNode);
 
 			// BoneにBoneNameを割り当てる
-			animation::CBoneNameProvider Provider;
 			animation::EHumanoidBones BoneName = Provider.GetBoneNameU16(Name);
 			Bone->SetBoneName(BoneName);
 

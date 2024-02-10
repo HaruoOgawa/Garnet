@@ -26,6 +26,8 @@ add_executable(
 	../src/Animation/CAnimationChannel.h
 	../src/Animation/CAnimationClip.cpp
 	../src/Animation/CAnimationClip.h
+	../src/Animation/CAnimationClipSet.cpp
+	../src/Animation/CAnimationClipSet.h
 	../src/Animation/CAnimationController.cpp
 	../src/Animation/CAnimationController.h
 	../src/Animation/CAnimationSampler.cpp
@@ -41,6 +43,7 @@ add_executable(
 	../src/Animation/EAnimationTarget.h
 	../src/Animation/EHumanoidBones.h
 	../src/Animation/SAnimationLayout.h
+	../src/Animation/SIKParam.h
 	../src/App/CDemoAppManager.cpp
 	../src/App/CDemoAppManager.h
 	../src/App/CDescAppManager.cpp
@@ -146,6 +149,8 @@ add_executable(
 	../src/Interface/IResource.h
 	../src/LoadWorker/C3DObjectLoader.cpp
 	../src/LoadWorker/C3DObjectLoader.h
+	../src/LoadWorker/CAnimationLoader.cpp
+	../src/LoadWorker/CAnimationLoader.h
 	../src/LoadWorker/CFile.cpp
 	../src/LoadWorker/CFile.h
 	../src/LoadWorker/CLoadWorker.cpp
@@ -160,6 +165,8 @@ add_executable(
 	../src/Math/CMath.h
 	../src/Math/CTransform.cpp
 	../src/Math/CTransform.h
+	../src/MMD/PMX/CPmxBone.cpp
+	../src/MMD/PMX/CPmxBone.h
 	../src/MMD/PMX/CPmxImporter.cpp
 	../src/MMD/PMX/CPmxImporter.h
 	../src/MMD/PMX/CPmxMaterial.cpp
@@ -174,6 +181,11 @@ add_executable(
 	../src/MMD/PMX/EPmxWeightDeformFormat.h
 	../src/MMD/PMX/PMXŽd—l.txt
 	../src/MMD/PMX/SPmxMetaData.h
+	../src/MMD/VMD/CVMDData.cpp
+	../src/MMD/VMD/CVMDData.h
+	../src/MMD/VMD/CVMDImporter.cpp
+	../src/MMD/VMD/CVMDImporter.h
+	../src/MMD/VMD/SVMDFrame.h
 	../src/Object/C3DObject.cpp
 	../src/Object/C3DObject.h
 	../src/Object/CNode.cpp

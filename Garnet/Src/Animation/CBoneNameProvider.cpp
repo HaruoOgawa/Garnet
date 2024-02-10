@@ -78,9 +78,10 @@ namespace animation
 						const w0 = Module.UTF16ToString($0);
 						const w1 = Module.UTF16ToString($1);
 						const windex = $2;
+						const nameCount = $3;
 
-						return (w0 == w1[windex]) ? 1 : 0;
-					}, &BoneName[windex], &SearchName[0], windex);
+						return (w0 == w1[windex] && w1.length == nameCount) ? 1 : 0;
+					}, &BoneName[windex], & SearchName[0], windex, static_cast<int>(BoneName.size()));
 
 					if (Flag == 0)
 					{
@@ -109,7 +110,7 @@ namespace animation
 				if (SearchName.size() > BoneName.size())
 				{
 #ifdef __EMSCRIPTEN__
-					int Flag = EM_ASM_INT({
+					/*int Flag = EM_ASM_INT({
 						const w0 = Module.UTF16ToString($0);
 
 						return (w0 != "" && w0 != " ") ? 1 : 0;
@@ -118,7 +119,7 @@ namespace animation
 					if (Flag == 0)
 					{
 						Result = false;
-					}
+					}*/
 #else
 					auto wchr = SearchName[Loop];
 					std::wstring Empty = std::wstring(L""), Space = std::wstring(L" ");
