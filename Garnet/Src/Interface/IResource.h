@@ -8,6 +8,7 @@ namespace resource
 	{
 	public:
 		virtual bool Load() = 0;
+		virtual bool LoadImmediate() = 0;
 		virtual bool Update(api::IGraphicsAPI* pGraphicsAPI) = 0;
 
 		virtual void SetLoadStatus(resource::ELoadStatus Status) = 0;

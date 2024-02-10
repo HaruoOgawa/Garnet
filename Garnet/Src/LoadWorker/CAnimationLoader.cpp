@@ -39,9 +39,18 @@ namespace resource
 		return true;
 	}
 
+	bool CAnimationLoader::LoadImmediate()
+	{
+		return true;
+	}
+
 	bool CAnimationLoader::Update(api::IGraphicsAPI* pGraphicsAPI)
 	{
-		if (!m_File->IsLoaded()) return true;
+		if (!m_File->IsLoaded())
+		{
+			if (!m_File->Update(pGraphicsAPI)) return false;
+			return true;
+		}
 
 		if (!m_Target->Import(pGraphicsAPI, m_File->GetData(), m_FileName, m_File->GetExtention())) return false;
 

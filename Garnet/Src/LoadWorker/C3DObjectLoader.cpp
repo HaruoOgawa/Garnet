@@ -40,9 +40,18 @@ namespace resource
 		return true;
 	}
 
+	bool C3DObjectLoader::LoadImmediate()
+	{
+		return true;
+	}
+
 	bool C3DObjectLoader::Update(api::IGraphicsAPI* pGraphicsAPI)
 	{
-		if (!m_File->IsLoaded()) return true;
+		if (!m_File->IsLoaded())
+		{
+			if (!m_File->Update(pGraphicsAPI)) return false;
+			return true;
+		}
 
 		// バイナリデータを渡しておく. その解析は後で行う
 		m_TargetObject->SetBinaryData(m_File->GetData(), m_FileName);

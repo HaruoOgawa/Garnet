@@ -28,6 +28,7 @@ namespace resource
 		virtual bool IsLoaded() const override;
 
 		virtual bool Load() override;
+		virtual bool LoadImmediate() override;
 		virtual bool Update(api::IGraphicsAPI* pGraphicsAPI) override;
 	};
 }
