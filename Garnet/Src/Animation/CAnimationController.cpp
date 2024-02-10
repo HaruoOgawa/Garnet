@@ -79,9 +79,9 @@ namespace animation
 
 			for (const auto& IKBone : Skin->GetIKBoneList())
 			{
-				// TargetBoneとそのLinkが目指すボーンの位置
-				glm::vec3 IKPos = glm::vec3(0.0f);
-				math::CTransform::CastModelMatrixToTranslation(IKBone->GetJointNode()->GetWorldMatrix(), IKPos);
+				// TargetBoneが目指すボーンの位置
+				glm::vec3 IKGoalPos = glm::vec3(0.0f);
+				math::CTransform::CastModelMatrixToTranslation(IKBone->GetJointNode()->GetWorldMatrix(), IKGoalPos);
 
 				const auto& IKParam = IKBone->GetIKParam();
 
@@ -94,10 +94,7 @@ namespace animation
 
 				// CCD-IKを採用
 				// CCD-IKに使用するサイクリックボーンリスト
-				std::vector<std::shared_ptr<CJoint>> CyclicBoneList;
-
-				// 先頭にIKTargetBoneを追加(IKTargetBoneがサイクルのスタート)
-				CyclicBoneList.push_back(IKTargetBone);
+				std::vector<std::shared_ptr<CJoint>> LinkBoneList;
 
 				for (const auto& Link : IKParam->IKLinkList)
 				{
@@ -105,11 +102,11 @@ namespace animation
 
 					const auto& CyclicBone = BoneList[Link.IKLinkBoneIndex];
 
-					CyclicBoneList.push_back(CyclicBone);
+					LinkBoneList.push_back(CyclicBone);
 				}
 
 				// サイクルスタート
-				if (CyclicBoneList.size() >= 2)
+				if (LinkBoneList.size() > 0)
 				{
 					// どれくらい近づいたらターゲットに届いたと判定するかの閾値
 					const float CyclicThreshold = 0.01f;
@@ -120,35 +117,42 @@ namespace animation
 					{
 						bool Result = false;
 
-						for (int LinkIndex = 0; LinkIndex < static_cast<int>(CyclicBoneList.size()) - 1; LinkIndex++)
+						for (int LinkIndex = 0; LinkIndex < LinkBoneList.size(); LinkIndex++)
 						{
+							const auto& LinkBone = LinkBoneList[LinkIndex];
+
 							//
 							glm::vec3 FirstLinkPos = glm::vec3(0.0f);
-							math::CTransform::CastModelMatrixToTranslation(CyclicBoneList[0]->GetJointNode()->GetWorldMatrix(), FirstLinkPos);
+							math::CTransform::CastModelMatrixToTranslation(IKTargetBone->GetJointNode()->GetWorldMatrix(), FirstLinkPos);
 
 							glm::vec3 SecondLinkPos = glm::vec3(0.0f);
-							math::CTransform::CastModelMatrixToTranslation(CyclicBoneList[LinkIndex + 1]->GetJointNode()->GetWorldMatrix(), SecondLinkPos);
+							math::CTransform::CastModelMatrixToTranslation(LinkBone->GetJointNode()->GetWorldMatrix(), SecondLinkPos);
 
 							// 回転行列を計算
 							glm::vec3 ToFistVector = glm::normalize(FirstLinkPos - SecondLinkPos);
-							glm::vec3 ToTargetVector = glm::normalize(IKPos - SecondLinkPos);
+							glm::vec3 ToTargetVector = glm::normalize(IKGoalPos - SecondLinkPos);
 
-							glm::quat Rot = math::CTransform::CalcTwoVectorRotate(ToFistVector, ToTargetVector);
-							//glm::quat Rot = math::CTransform::CalcTwoVectorRotate(ToFistVector, ToTargetVector, IKParam->LimitedAngle);
-							//math::CTransform::ClampRotate(Rot, IKParam->IKLinkList[LinkIndex].LowerAngle, IKParam->IKLinkList[LinkIndex].UpperAngle);
+							glm::quat Rot = math::CTransform::CalcTwoVectorRotate(ToFistVector, ToTargetVector, IKParam->LimitedAngle);
 							
 							{
-								const auto& CyclicBone = CyclicBoneList[LinkIndex + 1]->GetJointNode();
-
 								// SecondLinkPosの位置のボーンの回転を更新する(自動的に子要素も回転するので便利)
-								CyclicBone->MulRot(Rot);
+								glm::quat LinkRot = LinkBone->GetJointNode()->GetRot();
+								LinkRot *= Rot;
+
+								// 角度制限を行うかどうか
+								if (IKParam->IKLinkList[LinkIndex].IsLimitAngle)
+								{
+									math::CTransform::ClampRotate(LinkRot, IKParam->IKLinkList[LinkIndex].LowerAngle, IKParam->IKLinkList[LinkIndex].UpperAngle);
+								}
+								
+								LinkBone->GetJointNode()->SetRot(LinkRot);
 
 								// CyclicBoneのワールド行列を更新
-								glm::mat4 WorldMatrix = CyclicBone->GetParentNode()->GetWorldMatrix() * CyclicBone->GetLocalMatrix();
-								CyclicBone->SetWorldMatrix(WorldMatrix);
+								glm::mat4 WorldMatrix = LinkBone->GetJointNode()->GetParentNode()->GetWorldMatrix() * LinkBone->GetJointNode()->GetLocalMatrix();
+								LinkBone->GetJointNode()->SetWorldMatrix(WorldMatrix);
 
 								// 子要素の行列を再計算
-								for (int ChildIndex : CyclicBone->GetChildrenNodeIndexList())
+								for (int ChildIndex : LinkBone->GetJointNode()->GetChildrenNodeIndexList())
 								{
 									if (ChildIndex < 0 || ChildIndex >= NodeList.size()) continue;
 
@@ -160,9 +164,9 @@ namespace animation
 
 							// 計算結果を見て末端のボーンがIKBoneにどれくらい近づいたか見る
 							glm::vec3 CyclicResultPos = glm::vec3(0.0f);
-							math::CTransform::CastModelMatrixToTranslation(CyclicBoneList[0]->GetJointNode()->GetWorldMatrix(), CyclicResultPos);
+							math::CTransform::CastModelMatrixToTranslation(IKTargetBone->GetJointNode()->GetWorldMatrix(), CyclicResultPos);
 
-							if (glm::distance(IKPos, CyclicResultPos) < CyclicThreshold)
+							if (glm::distance(IKGoalPos, CyclicResultPos) < CyclicThreshold)
 							{
 								Result = true;
 
@@ -176,11 +180,6 @@ namespace animation
 						// ループ回数を更新
 						CurrentLoopNum++;
 					}
-				}
-				else
-				{
-					// CyclicBoneListが1つ以下の時は計算のしようがないのでスキップ
-					continue;
 				}
 			}
 		}
