@@ -109,36 +109,7 @@ namespace animation
 				}
 
 				// サイクルスタート
-				if (CyclicBoneList.size() == 1)
-				{
-					// CyclicBoneListが1つしかない時は計算のしようがないのでスキップ
-					continue;
-				}
-				else if (CyclicBoneList.size() == 2)
-				{
-					// 2つしかない時は初めの一回以降は何回計算しても同じなので1回だけ計算する
-					glm::vec3 FirstLinkPos = glm::vec3(0.0f);
-					math::CTransform::CastModelMatrixToTranslation(CyclicBoneList[0]->GetJointNode()->GetWorldMatrix(), FirstLinkPos);
-
-					glm::vec3 SecondLinkPos = glm::vec3(0.0f);
-					math::CTransform::CastModelMatrixToTranslation(CyclicBoneList[1]->GetJointNode()->GetWorldMatrix(), SecondLinkPos);
-
-					// 回転行列を計算
-					glm::vec3 ToFistVector = glm::normalize(FirstLinkPos - SecondLinkPos);
-					glm::vec3 ToTargetVector = glm::normalize(IKPos - SecondLinkPos);
-
-					glm::quat Rot = math::CTransform::CalcTwoVectorRotate(ToFistVector, ToTargetVector, IKParam->LimitedAngle);
-					math::CTransform::ClampRotate(Rot, IKParam->IKLinkList[0].LowerAngle, IKParam->IKLinkList[0].UpperAngle);
-
-					CyclicBoneList[1]->GetJointNode()->SetRot(Rot);
-					//CyclicBoneList[0]->GetJointNode()->SetRot(Rot);
-
-					//
-					const auto& CyclicBone = CyclicBoneList[0]->GetJointNode();
-					glm::mat4 WorldMatrix = CyclicBone->GetParentNode()->GetWorldMatrix() * CyclicBone->GetLocalMatrix();
-					CyclicBone->SetWorldMatrix(WorldMatrix);
-				}
-				else if (CyclicBoneList.size() > 2)
+				if (CyclicBoneList.size() >= 2)
 				{
 					// どれくらい近づいたらターゲットに届いたと判定するかの閾値
 					const float CyclicThreshold = 0.01f;
@@ -151,6 +122,42 @@ namespace animation
 
 						for (int LinkIndex = 0; LinkIndex < static_cast<int>(CyclicBoneList.size()) - 1; LinkIndex++)
 						{
+							//
+							glm::vec3 FirstLinkPos = glm::vec3(0.0f);
+							math::CTransform::CastModelMatrixToTranslation(CyclicBoneList[0]->GetJointNode()->GetWorldMatrix(), FirstLinkPos);
+
+							glm::vec3 SecondLinkPos = glm::vec3(0.0f);
+							math::CTransform::CastModelMatrixToTranslation(CyclicBoneList[LinkIndex + 1]->GetJointNode()->GetWorldMatrix(), SecondLinkPos);
+
+							// 回転行列を計算
+							glm::vec3 ToFistVector = glm::normalize(FirstLinkPos - SecondLinkPos);
+							glm::vec3 ToTargetVector = glm::normalize(IKPos - SecondLinkPos);
+
+							glm::quat Rot = math::CTransform::CalcTwoVectorRotate(ToFistVector, ToTargetVector);
+							//glm::quat Rot = math::CTransform::CalcTwoVectorRotate(ToFistVector, ToTargetVector, IKParam->LimitedAngle);
+							//math::CTransform::ClampRotate(Rot, IKParam->IKLinkList[LinkIndex].LowerAngle, IKParam->IKLinkList[LinkIndex].UpperAngle);
+							
+							{
+								const auto& CyclicBone = CyclicBoneList[LinkIndex + 1]->GetJointNode();
+
+								// SecondLinkPosの位置のボーンの回転を更新する(自動的に子要素も回転するので便利)
+								CyclicBone->MulRot(Rot);
+
+								// CyclicBoneのワールド行列を更新
+								glm::mat4 WorldMatrix = CyclicBone->GetParentNode()->GetWorldMatrix() * CyclicBone->GetLocalMatrix();
+								CyclicBone->SetWorldMatrix(WorldMatrix);
+
+								// 子要素の行列を再計算
+								for (int ChildIndex : CyclicBone->GetChildrenNodeIndexList())
+								{
+									if (ChildIndex < 0 || ChildIndex >= NodeList.size()) continue;
+
+									const auto& ChildNode = NodeList[ChildIndex];
+
+									CalcWorldMatrix(WorldMatrix, ChildNode, NodeList);
+								}
+							}
+
 							// 計算結果を見て末端のボーンがIKBoneにどれくらい近づいたか見る
 							glm::vec3 CyclicResultPos = glm::vec3(0.0f);
 							math::CTransform::CastModelMatrixToTranslation(CyclicBoneList[0]->GetJointNode()->GetWorldMatrix(), CyclicResultPos);
@@ -161,23 +168,6 @@ namespace animation
 
 								break;
 							}
-
-							//
-							glm::vec3 FirstLinkPos = glm::vec3(0.0f);
-							math::CTransform::CastModelMatrixToTranslation(CyclicBoneList[LinkIndex]->GetJointNode()->GetWorldMatrix(), FirstLinkPos);
-
-							glm::vec3 SecondLinkPos = glm::vec3(0.0f);
-							math::CTransform::CastModelMatrixToTranslation(CyclicBoneList[LinkIndex + 1]->GetJointNode()->GetWorldMatrix(), SecondLinkPos);
-
-							// 回転行列を計算
-							glm::vec3 ToFistVector = glm::normalize(FirstLinkPos - SecondLinkPos);
-							glm::vec3 ToTargetVector = glm::normalize(IKPos - SecondLinkPos);
-
-							glm::quat Rot = math::CTransform::CalcTwoVectorRotate(ToFistVector, ToTargetVector, IKParam->LimitedAngle);
-							math::CTransform::ClampRotate(Rot, IKParam->IKLinkList[LinkIndex].LowerAngle, IKParam->IKLinkList[LinkIndex].UpperAngle);
-							
-							CyclicBoneList[LinkIndex + 1]->GetJointNode()->SetRot(Rot);
-							//CyclicBoneList[LinkIndex]->GetJointNode()->SetRot(Rot);
 						}
 
 						// ターゲットIKに届いたらループを終了する
@@ -185,29 +175,12 @@ namespace animation
 
 						// ループ回数を更新
 						CurrentLoopNum++;
-
-						// CyclicBoneのワールド行列を更新
-						{
-							// まずCyclicBoneListの中でも一番親なボーンを計算する
-							const auto& CyclicBone = CyclicBoneList[CyclicBoneList.size() - 1]->GetJointNode();
-							glm::mat4 WorldMatrix = CyclicBone->GetParentNode()->GetWorldMatrix() * CyclicBone->GetLocalMatrix();
-							CyclicBone->SetWorldMatrix(WorldMatrix);
-
-							// 子要素の行列を再計算
-							for (int ChildIndex : CyclicBone->GetChildrenNodeIndexList())
-							{
-								if (ChildIndex < 0 || ChildIndex >= NodeList.size()) continue;
-
-								const auto& ChildNode = NodeList[ChildIndex];
-
-								CalcWorldMatrix(WorldMatrix, ChildNode, NodeList);
-							}
-						}
 					}
 				}
 				else
 				{
-					return false;
+					// CyclicBoneListが1つ以下の時は計算のしようがないのでスキップ
+					continue;
 				}
 			}
 		}
