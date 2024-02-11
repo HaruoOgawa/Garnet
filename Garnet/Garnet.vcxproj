@@ -605,7 +605,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClInclude Include="Src\FBX\CFBXStream.h" />
     <ClInclude Include="Src\Animation\EAnimationTarget.h" />
     <ClInclude Include="Src\FBX\CFBXImporter.h" />
-    <ClInclude Include="Src\Animation\CJoint.h" />
+    <ClInclude Include="Src\Animation\CBone.h" />
     <ClInclude Include="Src\Animation\CSkin.h" />
     <ClInclude Include="Src\Animation\CKeyFrame.h" />
     <ClInclude Include="Src\Animation\CAnimationChannel.h" />
@@ -1001,7 +1001,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClCompile Include="Src\Animation\CBoneNameProvider.cpp" />
     <ClCompile Include="Src\FBX\CFBXStream.cpp" />
     <ClCompile Include="Src\FBX\CFBXImporter.cpp" />
-    <ClCompile Include="Src\Animation\CJoint.cpp" />
+    <ClCompile Include="Src\Animation\CBone.cpp" />
     <ClCompile Include="Src\Animation\CSkin.cpp" />
     <ClCompile Include="Src\Animation\CKeyFrame.cpp" />
     <ClCompile Include="Src\Animation\CAnimationChannel.cpp" />

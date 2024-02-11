@@ -1,11 +1,11 @@
 #pragma once
 #ifdef USE_ANIMATION
 
-// 用語を整理すると、Jointは関節(点)でjointとJointの繋がりがBone(線)
+// 用語を整理すると、Boneは関節(点)でBoneとBoneの繋がりがBone(線)
 // Boneを組み合わせた全体構造がSkeleton もしくは Skin
 // しかしglTFのSkeletonプロパティはアニメーションのルートを示すもので、なくてもルートはわかるものなので
 
-#include "CJoint.h"
+#include "CBone.h"
 #include <memory>
 #include <vector>
 #include <unordered_map>
@@ -15,40 +15,40 @@ namespace animation
 {
 	class CSkin
 	{
-		std::vector<std::shared_ptr<CJoint>> m_JointList;
-		int m_JointIndexOffset;
+		std::vector<std::shared_ptr<CBone>> m_BoneList;
+		int m_BoneIndexOffset;
 
-		std::unordered_map<EHumanoidBones, std::shared_ptr<CJoint>> m_BoneTable;
+		std::unordered_map<EHumanoidBones, std::shared_ptr<CBone>> m_BoneTable;
 
 		// IK
-		std::vector<std::shared_ptr<CJoint>> m_IKBoneList;
+		std::vector<std::shared_ptr<CBone>> m_IKBoneList;
 
 		// 付与ボーンリスト
-		std::vector<std::shared_ptr<CJoint>> m_GrantBoneList;
+		std::vector<std::shared_ptr<CBone>> m_GrantBoneList;
 	public:
 		CSkin();
 		virtual ~CSkin();
 
-		void AddJoint(const std::shared_ptr<CJoint>& Joint);
+		void AddBone(const std::shared_ptr<CBone>& Bone);
 		
 		bool CalcSkinMatrixList(std::vector<glm::mat4>& MatrixList, const glm::mat4& ObjectModelMatrix);
 
-		const std::vector<std::shared_ptr<CJoint>>& GetJointList() const;
+		const std::vector<std::shared_ptr<CBone>>& GetBoneList() const;
 
-		void SetJointIndexOffset(int JointIndexOffset);
-		int GetJointIndexOffset() const;
+		void SetBoneIndexOffset(int BoneIndexOffset);
+		int GetBoneIndexOffset() const;
 
 		void MakeBoneTable();
-		const std::unordered_map<EHumanoidBones, std::shared_ptr<CJoint>>& GetBoneTable() const;
-		std::shared_ptr<CJoint> GetBone(EHumanoidBones BoneName);
+		const std::unordered_map<EHumanoidBones, std::shared_ptr<CBone>>& GetBoneTable() const;
+		std::shared_ptr<CBone> GetBone(EHumanoidBones BoneName);
 
 		// IK
 		void MakeIKBoneList();
-		const std::vector<std::shared_ptr<CJoint>>& GetIKBoneList() const;
+		const std::vector<std::shared_ptr<CBone>>& GetIKBoneList() const;
 
 		// 付与ボーン
 		void MakeGrantBoneList();
-		const std::vector<std::shared_ptr<CJoint>>& GetGrantBoneList() const;
+		const std::vector<std::shared_ptr<CBone>>& GetGrantBoneList() const;
 
 		//
 		void CalcSkinWorldMatrix();

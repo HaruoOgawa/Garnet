@@ -413,8 +413,8 @@ namespace object
 				{
 					Material->SetUniformValue("r_SkinMatrixBuffer", &m_CurrentSkinMatrixList[0], sizeof(glm::mat4) * static_cast<int>(m_CurrentSkinMatrixList.size()), DynamicOffsetNum);
 
-					int JointIndexOffset = SkinList[SkinIndex]->GetJointIndexOffset();
-					Material->SetUniformValue("JointIndexOffset", &glm::ivec1(JointIndexOffset)[0], sizeof(glm::ivec1), DynamicOffsetNum);
+					int BoneIndexOffset = SkinList[SkinIndex]->GetBoneIndexOffset();
+					Material->SetUniformValue("BoneIndexOffset", &glm::ivec1(BoneIndexOffset)[0], sizeof(glm::ivec1), DynamicOffsetNum);
 				}
 #endif
 
@@ -435,28 +435,28 @@ namespace object
 		{
 			for (const auto& Skin : m_AnimationController->GetSkinList())
 			{
-				for (const auto& Joint : Skin->GetJointList())
+				for (const auto& Bone : Skin->GetBoneList())
 				{
-					//if (Joint->GetBoneName() == animation::EHumanoidBones::None) continue;
+					//if (Bone->GetBoneName() == animation::EHumanoidBones::None) continue;
 
-					const auto& JointNode = Joint->GetJointNode();
+					const auto& BoneNode = Bone->GetBoneNode();
 
-					// Debug—p: Joint‚Ì•`‰æ
+					// Debug—p: Bone‚Ì•`‰æ
 					{
-						DebugSphere->SetPos(m_ObjectTransform->GetModelMatrix() * JointNode->GetWorldMatrix() * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
+						DebugSphere->SetPos(m_ObjectTransform->GetModelMatrix() * BoneNode->GetWorldMatrix() * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
 						DebugSphere->SetScale(glm::vec3(0.025f));
 					}
 					
 					// Debug—p: ƒ[ƒJƒ‹Ž²‚Ì•`‰æ(Sphere‚ðBox‚É•ÏX‚·‚é)
 					{
 						//DebugSphere->SetScale(glm::vec3(0.025f, 0.025f, 0.025f * 4.0f));
-						//DebugSphere->SetRot(JointNode->GetDefaultLocalTransform()->GetRot());
-						//DebugSphere->SetPos(m_ObjectTransform->GetModelMatrix()* JointNode->GetWorldMatrix()* glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
+						//DebugSphere->SetRot(BoneNode->GetDefaultLocalTransform()->GetRot());
+						//DebugSphere->SetPos(m_ObjectTransform->GetModelMatrix()* BoneNode->GetWorldMatrix()* glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
 					}
 
 					DebugSphere->GetMaterialList()[0]->SetUniformValue("useColor", &glm::ivec1(1)[0], sizeof(glm::ivec1));
 					
-					if(Joint->IsRotateGrant() || Joint->IsMoveGrant())
+					if(Bone->IsRotateGrant() || Bone->IsMoveGrant())
 					{
 						DebugSphere->GetMaterialList()[0]->SetUniformValue("baseColor", &glm::vec4(1.0f, 0.0f, 0.0f, 1.0f)[0], sizeof(glm::vec4));
 					}

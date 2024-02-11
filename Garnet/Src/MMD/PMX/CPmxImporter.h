@@ -26,7 +26,7 @@ namespace renderer
 namespace animation
 {
 	class CSkin;
-	class CJoint;
+	class CBone;
 	class CAnimationClip;
 	class CAnimationSampler;
 	enum class EKeyFrameType;

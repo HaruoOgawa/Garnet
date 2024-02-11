@@ -4,7 +4,7 @@ layout(location = 0) in vec3 inPosition;
 layout(location = 1) in vec3 inNormal;
 layout(location = 2) in vec2 inTexcoord;
 layout(location = 3) in vec4 inTangent;
-layout(location = 4) in uvec4 inJoint0;
+layout(location = 4) in uvec4 inBone0;
 layout(location = 5) in vec4 inWeights0;
 
 layout(binding = 0) uniform UniformBufferObject{
@@ -19,7 +19,7 @@ layout(binding = 0) uniform UniformBufferObject{
     float fPad2;
 
     int useSkinMeshAnimation;
-    int JointIndexOffset;
+    int BoneIndexOffset;
     int drawPathIndex;
     int pad1;
 } ubo;
@@ -56,10 +56,10 @@ void main(){
         int StartSkinMatIndex = 0;
 
         mat4 SkinMat =
-            inWeights0.x * r_SkinMatrixBuffer.SkinMat[inJoint0.x + ubo.JointIndexOffset] +
-            inWeights0.y * r_SkinMatrixBuffer.SkinMat[inJoint0.y + ubo.JointIndexOffset] +
-            inWeights0.z * r_SkinMatrixBuffer.SkinMat[inJoint0.z + ubo.JointIndexOffset] +
-            inWeights0.w * r_SkinMatrixBuffer.SkinMat[inJoint0.w + ubo.JointIndexOffset] 
+            inWeights0.x * r_SkinMatrixBuffer.SkinMat[inBone0.x + ubo.BoneIndexOffset] +
+            inWeights0.y * r_SkinMatrixBuffer.SkinMat[inBone0.y + ubo.BoneIndexOffset] +
+            inWeights0.z * r_SkinMatrixBuffer.SkinMat[inBone0.z + ubo.BoneIndexOffset] +
+            inWeights0.w * r_SkinMatrixBuffer.SkinMat[inBone0.w + ubo.BoneIndexOffset] 
         ;
 
         // スキンメッシュアニメーションの時はubo.modelは乗算しないように注意

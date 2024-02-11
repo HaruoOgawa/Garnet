@@ -27,7 +27,7 @@
 
 #include "../Animation/CAnimationClip.h"
 #include "../Animation/CSkin.h"
-#include "../Animation/CJoint.h"
+#include "../Animation/CBone.h"
 #include "../Animation/CBoneNameProvider.h"
 
 #include "../Graphics/CMaterialFrame.h"
@@ -147,10 +147,10 @@ namespace gltf
 		// ワールド行列の計算
 		Object->CalcWorldMatrix();
 
-		// 親のJointを追加
+		// 親のBoneを追加
 		for (const auto& Skin : AnimationSkinList)
 		{
-			ApplyParentJointList(Skin, NodeList);
+			ApplyParentBoneList(Skin, NodeList);
 		}
 
 		// アニメーション
@@ -371,7 +371,7 @@ namespace gltf
 				}
 
 				material->ReplacePreloadUniformValue("useSkinMeshAnimation", &glm::ivec1(0)[0], sizeof(int), 0);
-				material->ReplacePreloadUniformValue("JointIndexOffset", &glm::ivec1(0)[0], sizeof(int), 0);
+				material->ReplacePreloadUniformValue("BoneIndexOffset", &glm::ivec1(0)[0], sizeof(int), 0);
 				material->ReplacePreloadUniformValue("pad1", &glm::ivec1(0)[0], sizeof(int), 0);
 				material->ReplacePreloadUniformValue("pad2", &glm::ivec1(0)[0], sizeof(int), 0);
 			}
@@ -428,7 +428,7 @@ namespace gltf
 					"NORMAL",
 					"TEXCOORD_0",
 					"TANGENT",
-					"JOINTS_0",
+					"BoneS_0",
 					"WEIGHTS_0",
 				};
 				std::map<std::string, std::vector<float>> ReservedVertexDataList;
@@ -491,7 +491,7 @@ namespace gltf
 						{
 							Dimention = 2;
 						}
-						else if (AttribName == "TANGENT" || AttribName == "JOINTS_0" || AttribName == "WEIGHTS_0")
+						else if (AttribName == "TANGENT" || AttribName == "BoneS_0" || AttribName == "WEIGHTS_0")
 						{
 							Dimention = 4;
 						}
@@ -512,8 +512,8 @@ namespace gltf
 							// DataTypeとByteStrideの初期値をセット
 							renderer::EDataType DataType = renderer::EDataType::TYPE_FLOAT;
 
-							// 『JOINTS_0』はunsigned shortである
-							if (AttribName == "JOINTS_0") DataType = renderer::EDataType::TYPE_UNSIGNED_SHORT;
+							// 『BoneS_0』はunsigned shortである
+							if (AttribName == "BoneS_0") DataType = renderer::EDataType::TYPE_UNSIGNED_SHORT;
 
 							ReservedDataTypeList.insert({ AttribName, DataType });
 							ReservedByteStrideList.insert({ AttribName, 0 });
@@ -742,30 +742,30 @@ namespace gltf
 				std::memcpy(&inverseBindMatrices[0], &BufferData[0], BufferData.size());
 			}
 
-			// joints
-			for (const auto& glTFJoint : glTFSkin.joints)
+			// Bones
+			for (const auto& glTFBone : glTFSkin.joints)
 			{
-				if (glTFJoint < 0 || glTFJoint >= NodeList.size()) continue;
+				if (glTFBone < 0 || glTFBone >= NodeList.size()) continue;
 
-				const auto& JointNode = NodeList[glTFJoint];
+				const auto& BoneNode = NodeList[glTFBone];
 
-				std::shared_ptr<animation::CJoint> Joint = std::make_shared<animation::CJoint>(JointNode);
+				std::shared_ptr<animation::CBone> Bone = std::make_shared<animation::CBone>(BoneNode);
 
-				Skin->AddJoint(Joint);
+				Skin->AddBone(Bone);
 			}
 
-			// Add InverseBindMatrix To Joint
-			for (int j = 0; j < Skin->GetJointList().size(); j++)
+			// Add InverseBindMatrix To Bone
+			for (int j = 0; j < Skin->GetBoneList().size(); j++)
 			{
-				// Jointの順番とinverseBindMatrixの順番は同じ
-				const auto& Joint = Skin->GetJointList()[j];
-				Joint->GetJointNode()->SetInverseBindMatrix(inverseBindMatrices[j]);
+				// Boneの順番とinverseBindMatrixの順番は同じ
+				const auto& Bone = Skin->GetBoneList()[j];
+				Bone->GetBoneNode()->SetInverseBindMatrix(inverseBindMatrices[j]);
 			}
 
 			AnimationSkinList.push_back(Skin);
 		}
 
-		// Humanoid Boneを持っていればJointに割り当てる
+		// Humanoid Boneを持っていればBoneに割り当てる
 		const auto& VRM = model.extensions.find("VRM");
 		if (VRM != model.extensions.end())
 		{
@@ -793,18 +793,18 @@ namespace gltf
 								std::shared_ptr<animation::CBoneNameProvider> Provider = std::make_shared<animation::CBoneNameProvider>();
 								animation::EHumanoidBones BoneName = Provider->GetBoneName(name);
 
-								// JointにBoneNameを割り当てる
+								// BoneにBoneNameを割り当てる
 								if (nodeIndex >= 0 && nodeIndex < NodeList.size())
 								{
 									const auto& TargetNode = NodeList[nodeIndex];
 
 									for (const auto& Skin : AnimationSkinList)
 									{
-										for (const auto& Joint : Skin->GetJointList())
+										for (const auto& Bone : Skin->GetBoneList())
 										{
-											if (Joint->GetJointNode() == TargetNode)
+											if (Bone->GetBoneNode() == TargetNode)
 											{
-												Joint->SetBoneName(BoneName);
+												Bone->SetBoneName(BoneName);
 
 												break;
 											}
@@ -829,20 +829,20 @@ namespace gltf
 	}
 
 
-	void CGLTFImporter::ApplyParentJointList(const std::shared_ptr<animation::CSkin>& Skin, const std::vector<std::shared_ptr<object::CNode>>& NodeList)
+	void CGLTFImporter::ApplyParentBoneList(const std::shared_ptr<animation::CSkin>& Skin, const std::vector<std::shared_ptr<object::CNode>>& NodeList)
 	{
-		for (const auto& Joint : Skin->GetJointList())
+		for (const auto& Bone : Skin->GetBoneList())
 		{
-			const auto& ParentNode = Joint->GetJointNode()->GetParentNode();
+			const auto& ParentNode = Bone->GetBoneNode()->GetParentNode();
 			if (!ParentNode) continue;
 
 			std::shared_ptr<animation::CBoneNameProvider> Provider = std::make_shared<animation::CBoneNameProvider>();
 			animation::EHumanoidBones ParentBoneName = Provider->GetBoneName(ParentNode->GetName());
 
-			const auto& ParentJoint = Skin->GetBone(ParentBoneName);
-			if (!ParentJoint) continue;
+			const auto& ParentBone = Skin->GetBone(ParentBoneName);
+			if (!ParentBone) continue;
 
-			Joint->SetParentBoneName(ParentJoint->GetBoneName());
+			Bone->SetParentBoneName(ParentBone->GetBoneName());
 		}
 	}
 

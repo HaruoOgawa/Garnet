@@ -3,16 +3,16 @@
 
 namespace mmd
 {
-	CPmxMesh::CPmxMesh(const std::vector<float>& PositionAttribute, const std::vector<float>& NormalAttribute, const std::vector<float>& UVAttribute, const std::vector<float>& TangentAttribute, const std::vector<unsigned int>& UIntJointAttribute,
-		const std::vector<unsigned char>& ByteJointAttribute, const std::vector<unsigned short>& UShortJointAttribute, const std::vector<float>& WeightAttribute, const std::vector<std::vector<float>>& AdditionalUVAttribute,
+	CPmxMesh::CPmxMesh(const std::vector<float>& PositionAttribute, const std::vector<float>& NormalAttribute, const std::vector<float>& UVAttribute, const std::vector<float>& TangentAttribute, const std::vector<unsigned int>& UIntBoneAttribute,
+		const std::vector<unsigned char>& ByteBoneAttribute, const std::vector<unsigned short>& UShortBoneAttribute, const std::vector<float>& WeightAttribute, const std::vector<std::vector<float>>& AdditionalUVAttribute,
 		const std::vector<unsigned int>& UIntIndices, const std::vector<unsigned char>& ByteIndices, const std::vector<unsigned short>& UShortIndices) :
 		m_PositionAttribute(PositionAttribute),
 		m_NormalAttribute(NormalAttribute),
 		m_UVAttribute(UVAttribute),
 		m_TangentAttribute(TangentAttribute),
-		m_UIntJointAttribute(UIntJointAttribute),
-		m_ByteJointAttribute(ByteJointAttribute),
-		m_UShortJointAttribute(UShortJointAttribute),
+		m_UIntBoneAttribute(UIntBoneAttribute),
+		m_ByteBoneAttribute(ByteBoneAttribute),
+		m_UShortBoneAttribute(UShortBoneAttribute),
 		m_WeightAttribute(WeightAttribute),
 		m_AdditionalUVAttribute(AdditionalUVAttribute),
 		m_UIntIndices(UIntIndices),
@@ -42,19 +42,19 @@ namespace mmd
 	}
 
 	// MetaData.BoneIndexSizeÇ…âûÇ∂ÇƒÉoÉCÉgêîÇ™ïœÇÌÇÈ
-	const std::vector<unsigned int>& CPmxMesh::GetUIntJointAttribute() const
+	const std::vector<unsigned int>& CPmxMesh::GetUIntBoneAttribute() const
 	{
-		return m_UIntJointAttribute;
+		return m_UIntBoneAttribute;
 	}
 
-	const std::vector<unsigned char>& CPmxMesh::GetByteJointAttribute() const
+	const std::vector<unsigned char>& CPmxMesh::GetByteBoneAttribute() const
 	{
-		return m_ByteJointAttribute;
+		return m_ByteBoneAttribute;
 	}
 
-	const std::vector<unsigned short>& CPmxMesh::GetUShortJointAttribute() const
+	const std::vector<unsigned short>& CPmxMesh::GetUShortBoneAttribute() const
 	{
-		return m_UShortJointAttribute;
+		return m_UShortBoneAttribute;
 	}
 
 	const std::vector<float>& CPmxMesh::GetWeightAttribute() const

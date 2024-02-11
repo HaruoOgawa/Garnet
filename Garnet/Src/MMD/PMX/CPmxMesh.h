@@ -13,9 +13,9 @@ namespace mmd
 		std::vector<float> m_TangentAttribute;
 
 		// MetaData.BoneIndexSizeに応じてバイト数が変わる
-		std::vector<unsigned int> m_UIntJointAttribute;
-		std::vector<unsigned char> m_ByteJointAttribute;
-		std::vector<unsigned short> m_UShortJointAttribute;
+		std::vector<unsigned int> m_UIntBoneAttribute;
+		std::vector<unsigned char> m_ByteBoneAttribute;
+		std::vector<unsigned short> m_UShortBoneAttribute;
 
 		std::vector<float> m_WeightAttribute;
 
@@ -28,8 +28,8 @@ namespace mmd
 		std::vector<unsigned short> m_UShortIndices;
 
 	public:
-		CPmxMesh(const std::vector<float>& PositionAttribute, const std::vector<float>& NormalAttribute, const std::vector<float>& UVAttribute, const std::vector<float>& TangentAttribute, const std::vector<unsigned int>& UIntJointAttribute, 
-			const std::vector<unsigned char>& ByteJointAttribute, const std::vector<unsigned short>& UShortJointAttribute, const std::vector<float>& WeightAttribute, const std::vector<std::vector<float>>& AdditionalUVAttribute,
+		CPmxMesh(const std::vector<float>& PositionAttribute, const std::vector<float>& NormalAttribute, const std::vector<float>& UVAttribute, const std::vector<float>& TangentAttribute, const std::vector<unsigned int>& UIntBoneAttribute, 
+			const std::vector<unsigned char>& ByteBoneAttribute, const std::vector<unsigned short>& UShortBoneAttribute, const std::vector<float>& WeightAttribute, const std::vector<std::vector<float>>& AdditionalUVAttribute,
 			const std::vector<unsigned int>& UIntIndices, const std::vector<unsigned char>& ByteIndices, const std::vector<unsigned short>& UShortIndices);
 
 		const std::vector<float>& GetPositionAttribute() const;
@@ -38,9 +38,9 @@ namespace mmd
 		const std::vector<float>& GetTangentAttribute() const;
 
 		// MetaData.BoneIndexSizeに応じてバイト数が変わる
-		const std::vector<unsigned int>& GetUIntJointAttribute() const;
-		const std::vector<unsigned char>& GetByteJointAttribute() const;
-		const std::vector<unsigned short>& GetUShortJointAttribute() const;
+		const std::vector<unsigned int>& GetUIntBoneAttribute() const;
+		const std::vector<unsigned char>& GetByteBoneAttribute() const;
+		const std::vector<unsigned short>& GetUShortBoneAttribute() const;
 
 		const std::vector<float>& GetWeightAttribute() const;
 

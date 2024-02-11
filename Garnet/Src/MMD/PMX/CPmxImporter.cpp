@@ -6,7 +6,7 @@
 #include "../../Object/C3DObject.h"
 #include "../../Animation/CAnimationClip.h"
 #include "../../Animation/CSkin.h"
-#include "../../Animation/CJoint.h"
+#include "../../Animation/CBone.h"
 #include "../../Animation/CBoneNameProvider.h"
 
 #include "../../Graphics/CMaterialFrame.h"
@@ -66,7 +66,7 @@ namespace mmd
 
 		// メッシュ
 		std::vector<std::shared_ptr<graphics::CMesh>> MeshList;
-		if (!CreateMeshList(model, MeshList, RootNode, NodeList, MaterialList, (Skin->GetJointList().size() > 0))) return false;
+		if (!CreateMeshList(model, MeshList, RootNode, NodeList, MaterialList, (Skin->GetBoneList().size() > 0))) return false;
 
 		// リソースを登録
 		Object->SetRootNodeIndexList(RootNodeIndexList);
@@ -117,7 +117,7 @@ namespace mmd
 	{
 		animation::CBoneNameProvider Provider;
 
-		// PmxではBoneとJointは全くの別物でそれぞれ違う役割を持っているので厳格に名前分けする必要がある!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		// PmxではBoneとBoneは全くの別物でそれぞれ違う役割を持っているので厳格に名前分けする必要がある!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 		const auto& PmxBoneList = model.GetPmxBoneList();
 
@@ -154,7 +154,7 @@ namespace mmd
 			NodeList.push_back(BoneNode);
 
 			// Boneを作成
-			std::shared_ptr<animation::CJoint> Bone = std::make_shared<animation::CJoint>(BoneNode);
+			std::shared_ptr<animation::CBone> Bone = std::make_shared<animation::CBone>(BoneNode);
 
 			// BoneにBoneNameを割り当てる
 			animation::EHumanoidBones BoneName = Provider.GetBoneNameU16(Name);
@@ -175,19 +175,19 @@ namespace mmd
 			// IK
 			Bone->SetIKParam(PmxBone->GetIKParam());
 
-			Skin->AddJoint(Bone);
+			Skin->AddBone(Bone);
 		}
 
 		// BoneNodeに子要素を設定する
 		{
-			const auto& BoneList = Skin->GetJointList();
+			const auto& BoneList = Skin->GetBoneList();
 
 			for (int BoneIndex = 0; BoneIndex < PmxBoneList.size(); BoneIndex++)
 			{
 				const auto& PmxBone = PmxBoneList[BoneIndex];
 
 				const auto& Bone = BoneList[BoneIndex];
-				int SelfNodeIndex = Bone->GetJointNode()->GetSelfNodeIndex();
+				int SelfNodeIndex = Bone->GetBoneNode()->GetSelfNodeIndex();
 
 				int ParentBoneIndex = PmxBone->GetParentBoneIndex();
 
@@ -199,7 +199,7 @@ namespace mmd
 				else
 				{
 					// 自身を親ノードの子要素リストに追加する
-					BoneList[ParentBoneIndex]->GetJointNode()->AddChildrenNodeIndex(SelfNodeIndex);
+					BoneList[ParentBoneIndex]->GetBoneNode()->AddChildrenNodeIndex(SelfNodeIndex);
 				}
 			}
 		}
@@ -209,11 +209,11 @@ namespace mmd
 
 	bool CPmxImporter::CalcInverseBindPose(std::shared_ptr<animation::CSkin>& Skin)
 	{
-		for (const auto& Bone : Skin->GetJointList())
+		for (const auto& Bone : Skin->GetBoneList())
 		{
 			// MMDのBoneはローカル座標系ではなくワールド座標系なのでセンターとかの親ボーンを考慮するかは迷うところ
-			glm::mat4 InverseBindMatrix = glm::inverse(Bone->GetJointNode()->GetWorldMatrix());
-			Bone->GetJointNode()->SetInverseBindMatrix(InverseBindMatrix);
+			glm::mat4 InverseBindMatrix = glm::inverse(Bone->GetBoneNode()->GetWorldMatrix());
+			Bone->GetBoneNode()->SetInverseBindMatrix(InverseBindMatrix);
 		}
 
 		return true;
@@ -301,10 +301,10 @@ namespace mmd
 
 			// SkinMatrix StorageBuffer
 			{
-				// SkinMatは存在するJointの数だけ用意する必要がある
+				// SkinMatは存在するBoneの数だけ用意する必要がある
 				// DynamicOffsetが256バイトからしか使えない都合上SkinMatCountの最小値は4とする(4 * 16 * 4 = 256)
 				unsigned int SkinMatCount = 0;
-				if (Skin && Skin->GetJointList().size() > 0) SkinMatCount = static_cast<unsigned int>(Skin->GetJointList().size());
+				if (Skin && Skin->GetBoneList().size() > 0) SkinMatCount = static_cast<unsigned int>(Skin->GetBoneList().size());
 
 				// DynamicOffsetが256バイトからしか使えない都合上SkinMatCountの最小値は4とする(4 * 16 * 4 = 256)
 				if (SkinMatCount < 4) SkinMatCount = 4;
@@ -351,7 +351,7 @@ namespace mmd
 				"NORMAL",
 				"TEXCOORD_0",
 				"TANGENT",
-				"JOINTS_0",
+				"BoneS_0",
 				"WEIGHTS_0",
 			};
 			std::map<std::string, std::vector<float>> ReservedVertexDataList;
@@ -399,42 +399,42 @@ namespace mmd
 
 					if (MetaData.BoneIndexSize == 1)
 					{
-						const auto& ByteJointAttribute = PmxMesh->GetByteJointAttribute();
+						const auto& ByteBoneAttribute = PmxMesh->GetByteBoneAttribute();
 
-						if (!ByteJointAttribute.empty())
+						if (!ByteBoneAttribute.empty())
 						{
-							AttributeData.resize(ByteJointAttribute.size() / 4);
-							std::memcpy(&AttributeData[0], &ByteJointAttribute[0], sizeof(unsigned char) * ByteJointAttribute.size());
+							AttributeData.resize(ByteBoneAttribute.size() / 4);
+							std::memcpy(&AttributeData[0], &ByteBoneAttribute[0], sizeof(unsigned char) * ByteBoneAttribute.size());
 						}
 
-						ReservedDataTypeList.emplace("JOINTS_0", renderer::EDataType::TYPE_UNSIGNED_BYTE);
-						ReservedByteStrideList.emplace("JOINTS_0", 1 * 4);
+						ReservedDataTypeList.emplace("BoneS_0", renderer::EDataType::TYPE_UNSIGNED_BYTE);
+						ReservedByteStrideList.emplace("BoneS_0", 1 * 4);
 					}
 					else if (MetaData.BoneIndexSize == 2)
 					{
-						const auto& UShortJointAttribute = PmxMesh->GetUShortJointAttribute();
+						const auto& UShortBoneAttribute = PmxMesh->GetUShortBoneAttribute();
 
-						if (!UShortJointAttribute.empty())
+						if (!UShortBoneAttribute.empty())
 						{
-							AttributeData.resize(UShortJointAttribute.size() / 2);
-							std::memcpy(&AttributeData[0], &UShortJointAttribute[0], sizeof(unsigned short) * UShortJointAttribute.size());
+							AttributeData.resize(UShortBoneAttribute.size() / 2);
+							std::memcpy(&AttributeData[0], &UShortBoneAttribute[0], sizeof(unsigned short) * UShortBoneAttribute.size());
 						}
 
-						ReservedDataTypeList.emplace("JOINTS_0", renderer::EDataType::TYPE_UNSIGNED_SHORT);
-						ReservedByteStrideList.emplace("JOINTS_0", 2 * 4);
+						ReservedDataTypeList.emplace("BoneS_0", renderer::EDataType::TYPE_UNSIGNED_SHORT);
+						ReservedByteStrideList.emplace("BoneS_0", 2 * 4);
 					}
 					else if (MetaData.BoneIndexSize == 4)
 					{
-						const auto& IntJointAttribute = PmxMesh->GetUIntJointAttribute();
+						const auto& IntBoneAttribute = PmxMesh->GetUIntBoneAttribute();
 
-						if (!IntJointAttribute.empty())
+						if (!IntBoneAttribute.empty())
 						{
-							AttributeData.resize(IntJointAttribute.size());
-							std::memcpy(&AttributeData[0], &IntJointAttribute[0], sizeof(unsigned int) * IntJointAttribute.size());
+							AttributeData.resize(IntBoneAttribute.size());
+							std::memcpy(&AttributeData[0], &IntBoneAttribute[0], sizeof(unsigned int) * IntBoneAttribute.size());
 						}
 
-						ReservedDataTypeList.emplace("JOINTS_0", renderer::EDataType::TYPE_UNSIGNED_INT);
-						ReservedByteStrideList.emplace("JOINTS_0", 4 * 4);
+						ReservedDataTypeList.emplace("BoneS_0", renderer::EDataType::TYPE_UNSIGNED_INT);
+						ReservedByteStrideList.emplace("BoneS_0", 4 * 4);
 					}
 
 					// 空の時は0埋めする
@@ -443,7 +443,7 @@ namespace mmd
 						AttributeData.resize(static_cast<int>(PmxMesh->GetPositionAttribute().size()) / 3 * 4);
 					}
 
-					ReservedVertexDataList.emplace("JOINTS_0", AttributeData);
+					ReservedVertexDataList.emplace("BoneS_0", AttributeData);
 
 				}
 
@@ -469,7 +469,7 @@ namespace mmd
 					{
 						Dimention = 2;
 					}
-					else if (AttribName == "TANGENT" || AttribName == "JOINTS_0" || AttribName == "WEIGHTS_0")
+					else if (AttribName == "TANGENT" || AttribName == "BoneS_0" || AttribName == "WEIGHTS_0")
 					{
 						Dimention = 4;
 					}

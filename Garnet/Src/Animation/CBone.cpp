@@ -1,11 +1,11 @@
 #ifdef USE_ANIMATION
 
-#include "CJoint.h"
+#include "CBone.h"
 
 namespace animation
 {
-	CJoint::CJoint(const std::shared_ptr<object::CNode>& JointNode):
-		m_JointNode(JointNode),
+	CBone::CBone(const std::shared_ptr<object::CNode>& BoneNode):
+		m_BoneNode(BoneNode),
 		m_BoneName(EHumanoidBones::None),
 		m_ParentBoneName(EHumanoidBones::None),
 		m_GrantParentBoneIndex(-1),
@@ -16,49 +16,49 @@ namespace animation
 	{
 	}
 
-	CJoint::~CJoint()
+	CBone::~CBone()
 	{
 	}
 
-	const std::shared_ptr<object::CNode>& CJoint::GetJointNode() const
+	const std::shared_ptr<object::CNode>& CBone::GetBoneNode() const
 	{
-		return m_JointNode;
+		return m_BoneNode;
 	}
 
-	EHumanoidBones CJoint::GetBoneName() const
+	EHumanoidBones CBone::GetBoneName() const
 	{
 		return m_BoneName;
 	}
 
-	void CJoint::SetBoneName(EHumanoidBones BoneName)
+	void CBone::SetBoneName(EHumanoidBones BoneName)
 	{
 		m_BoneName = BoneName;
 	}
 
-	EHumanoidBones CJoint::GetParentBoneName() const
+	EHumanoidBones CBone::GetParentBoneName() const
 	{
 		return m_ParentBoneName;
 	}
 
-	void CJoint::SetParentBoneName(EHumanoidBones BoneName)
+	void CBone::SetParentBoneName(EHumanoidBones BoneName)
 	{
 		m_ParentBoneName = BoneName;
 	}
 
 	// ïtó^êeÉ{Å[ÉìÇÃÉ{Å[ÉìIndex
-	int CJoint::GetGrantParentBoneIndex() const
+	int CBone::GetGrantParentBoneIndex() const
 	{
 		return m_GrantParentBoneIndex;
 	}
 
 	// ïtó^ó¶
-	float CJoint::GetGrantRate() const
+	float CBone::GetGrantRate() const
 	{
 		return m_GrantRate;
 	}
 
 	// âÒì]ïtó^
-	void CJoint::SetRotateGrant(int GrantParentBoneIndex, float GrantRate)
+	void CBone::SetRotateGrant(int GrantParentBoneIndex, float GrantRate)
 	{
 		m_RotateGrant = true;
 
@@ -66,13 +66,13 @@ namespace animation
 		m_GrantRate = GrantRate;
 	}
 
-	bool CJoint::IsRotateGrant() const
+	bool CBone::IsRotateGrant() const
 	{
 		return m_RotateGrant;
 	}
 
 	// à⁄ìÆïtó^
-	void CJoint::SetMoveGrant(int GrantParentBoneIndex, float GrantRate)
+	void CBone::SetMoveGrant(int GrantParentBoneIndex, float GrantRate)
 	{
 		m_MoveGrant = true;
 
@@ -80,18 +80,18 @@ namespace animation
 		m_GrantRate = GrantRate;
 	}
 
-	bool CJoint::IsMoveGrant() const
+	bool CBone::IsMoveGrant() const
 	{
 		return m_MoveGrant;
 	}
 
 	// IK
-	const std::shared_ptr<animation::SIKParam>& CJoint::GetIKParam() const
+	const std::shared_ptr<animation::SIKParam>& CBone::GetIKParam() const
 	{
 		return m_IKParam;
 	}
 
-	void CJoint::SetIKParam(const std::shared_ptr<animation::SIKParam>& Param)
+	void CBone::SetIKParam(const std::shared_ptr<animation::SIKParam>& Param)
 	{
 		m_IKParam = Param;
 	}

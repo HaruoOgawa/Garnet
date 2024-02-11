@@ -35,7 +35,7 @@ namespace renderer
 namespace animation
 {
 	class CSkin;
-	class CJoint;
+	class CBone;
 	class CAnimationClip;
 	class CAnimationSampler;
 	enum class EKeyFrameType;
@@ -78,12 +78,12 @@ namespace fbx
 
 		static bool ConnectNodeTo(std::vector<std::shared_ptr<object::CNode>>& NodeList, const std::vector<FbxNode*>& pFbxNodeList, const std::vector<FbxMesh*>& pFbxMeshList, const std::shared_ptr<animation::CSkin>& Skin);
 
-		static bool CreateAnimationSkin(FbxNode* pFBXNode, std::shared_ptr<animation::CSkin>& Skin, std::vector<FbxNode*>& FbxJointList, const std::vector<std::shared_ptr<object::CNode>>& NodeList, const bool IsMixamoFbx);
+		static bool CreateAnimationSkin(FbxNode* pFBXNode, std::shared_ptr<animation::CSkin>& Skin, std::vector<FbxNode*>& FbxBoneList, const std::vector<std::shared_ptr<object::CNode>>& NodeList, const bool IsMixamoFbx);
 		
-		static void ApplyParentJointList(const std::shared_ptr<animation::CSkin>& Skin, const std::vector<std::shared_ptr<object::CNode>>& NodeList);
+		static void ApplyParentBoneList(const std::shared_ptr<animation::CSkin>& Skin, const std::vector<std::shared_ptr<object::CNode>>& NodeList);
 		
 		static bool CreateAnimation(FbxScene* Scene, std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList, const std::vector<std::shared_ptr<object::CNode>>& NodeList, 
-			const std::shared_ptr<animation::CSkin>& Skin, const std::vector<FbxNode*>& FbxJointList, const bool IsMixamoFbx);
+			const std::shared_ptr<animation::CSkin>& Skin, const std::vector<FbxNode*>& FbxBoneList, const bool IsMixamoFbx);
 		
 		// Helper Function //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		template<class T>
@@ -91,9 +91,9 @@ namespace fbx
 
 		static bool RecalculateTangent(std::vector<float>& TangentDat, const std::vector<float>& PosotionData, const std::vector<float>& TexcoordData, const std::vector<unsigned short>& Indices);
 
-		static std::shared_ptr<object::CNode> GetJointNode(const std::string& JointName, const std::vector<std::shared_ptr<object::CNode>>& NodeList);
+		static std::shared_ptr<object::CNode> GetBoneNode(const std::string& BoneName, const std::vector<std::shared_ptr<object::CNode>>& NodeList);
 
-		static unsigned int FindJointIndexUsingName(const std::shared_ptr<animation::CSkin>& Skin, const std::string& JointName);
+		static unsigned int FindBoneIndexUsingName(const std::shared_ptr<animation::CSkin>& Skin, const std::string& BoneName);
 
 		static bool CheckIsMixamo(FbxNode* pFBXNode);
 	public:
