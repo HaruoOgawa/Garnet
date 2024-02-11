@@ -1039,7 +1039,9 @@ namespace fbx
 				// アニメーションのローカル軸を使用するか
 				// FBXでは必須でglTF/VRMでは不要
 				// 詳しくはCAnimationChannel::UpdateRotationを参照
-				const bool UseAnimLocalAxis = true;
+
+				// SmallFBXはtrueでFBX SDKはfalse ???(様子を見る)
+				const bool UseAnimLocalAxis = false;
 
 				// FBXにはchannelといった概念はなく、Translation・Rotation・Scaleを全てまとめてModelMatrixで計算している
 				// なのでChannelTypeにFBX-SDK限定の値としてMODELMATRIXを作成することで対応する
