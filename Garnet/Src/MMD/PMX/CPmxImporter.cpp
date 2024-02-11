@@ -273,8 +273,15 @@ namespace mmd
 				}
 				else if (SharedToonTexIndex >= 0 && SharedToonTexIndex < model.GetPmxTextureList().size())
 				{
-					material->ReplacePreloadUniformValue("UseToonTexture", &glm::ivec1(1)[0], sizeof(int), 2);
-					material->ReplaceTextureIndex("ToonTexture", SharedToonTexIndex);
+					// 未対応
+					// 滅多に必要なPMXに出会わないので出てきたときに対応する
+					// それまではエラーにする
+					Console::Log("[Error - Pmx Material] Please implement Shared Toon Texture.\n");
+
+					return false;
+
+					//material->ReplacePreloadUniformValue("UseToonTexture", &glm::ivec1(1)[0], sizeof(int), 2);
+					//material->ReplaceTextureIndex("ToonTexture", SharedToonTexIndex);
 				}
 			}
 
