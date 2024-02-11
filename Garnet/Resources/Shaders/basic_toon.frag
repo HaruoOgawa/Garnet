@@ -73,7 +73,7 @@ void main(){
 		// Ambient
 		if(fragUbo.UseToonTexture == 0)
 		{
-			diffuseColor.rgb +=  fragUbo.ambientFactor.rgb * max(dot(-fragUbo.lightDir.xyz, f_WorldNormal), 0.0);
+			//diffuseColor.rgb +=  fragUbo.ambientFactor.rgb * max(dot(-fragUbo.lightDir.xyz, f_WorldNormal), 0.0);
 		}
 
 		// MainTexture
