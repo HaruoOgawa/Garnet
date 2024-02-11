@@ -58,21 +58,20 @@ namespace scene
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CAnimationLoader>("Resources\\Motions\\Run_m4th_Loop.vmd", m_VMDAnimationSet));
 		//pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CAnimationLoader>("Resources\\Motions\\BackFlip.vmd", m_VMDAnimationSet));
 
-		//pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Models\\CesiumMan\\glTF-Binary\\CesiumMan.glb", m_glTFObject, "", "ShadowPass"));
-		/*pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Avatar\\X_Bot.fbx", m_FbxObject, "", "ShadowPass"));
+		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Avatar\\X_Bot.fbx", m_FbxObject, "", "ShadowPass"));
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Avatar\\Mousey.fbx", m_MouseyObject, "", "ShadowPass"));
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Motions\\Walking.fbx", m_Walk_Animation, "", "ShadowPass"));
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Motions\\Jumping.fbx", m_Jump_Animation, "", "ShadowPass"));
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Motions\\Combo_Punch_hand.fbx", m_Punch_Animation, "", "ShadowPass"));
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Models\\CesiumMan\\glTF-Binary\\CesiumMan.glb", m_glTFObject, "", "ShadowPass"));
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Models\\BrainStem\\glTF-Binary\\BrainStem.glb", m_BrainStemDObject, "", "ShadowPass"));
-		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Avatar\\Warrok_W_Kurniawan.fbx", m_VRMObject, "", "ShadowPass"));*/
+		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Avatar\\Warrok_W_Kurniawan.fbx", m_VRMObject, "", "ShadowPass"));
 		
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CTextureLoader>(pGraphicsAPI, std::vector<std::string>({ "Resources\\IBL\\output_skybox.hdr" }), m_IBL_Skybox_Texture));
-		/*pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CTextureLoader>(pGraphicsAPI, std::vector<std::string>({ "Resources\\IBL\\output_iem.hdr" }), m_IBL_DiffuseEnvMap_Texture));
+		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CTextureLoader>(pGraphicsAPI, std::vector<std::string>({ "Resources\\IBL\\output_iem.hdr" }), m_IBL_DiffuseEnvMap_Texture));
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CTextureLoader>(pGraphicsAPI, std::vector<std::string>({ "Resources\\IBL\\output_pmrem.hdr" }), m_IBL_SpecularEnvMap_Texture));
-		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CTextureLoader>(pGraphicsAPI, std::vector<std::string>({ "Resources\\Textures\\ggx_lut.jpg" }), m_IBL_GGX_LUT_Texture));*/
-		//pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CTextureLoader>(pGraphicsAPI, std::vector<std::string>({ "Resources\\Cubemaps\\environment\\environment_back_0.jpg", "Resources\\Cubemaps\\environment\\environment_bottom_0.jpg", "Resources\\Cubemaps\\environment\\environment_front_0.jpg", "Resources\\Cubemaps\\environment\\environment_left_0.jpg", "Resources\\Cubemaps\\environment\\environment_right_0.jpg", "Resources\\Cubemaps\\environment\\environment_top_0.jpg" }), m_Cube_Texture));
+		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CTextureLoader>(pGraphicsAPI, std::vector<std::string>({ "Resources\\Textures\\ggx_lut.jpg" }), m_IBL_GGX_LUT_Texture));
+		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CTextureLoader>(pGraphicsAPI, std::vector<std::string>({ "Resources\\Cubemaps\\environment\\environment_back_0.jpg", "Resources\\Cubemaps\\environment\\environment_bottom_0.jpg", "Resources\\Cubemaps\\environment\\environment_front_0.jpg", "Resources\\Cubemaps\\environment\\environment_left_0.jpg", "Resources\\Cubemaps\\environment\\environment_right_0.jpg", "Resources\\Cubemaps\\environment\\environment_top_0.jpg" }), m_Cube_Texture));
 	}
 
 	CScriptScene::~CScriptScene()
@@ -83,7 +82,7 @@ namespace scene
 	bool CScriptScene::Load(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker)
 	{
 		// FBX Humanoid Animation Clip
-		/*std::vector<std::shared_ptr<animation::CAnimationClip>> AnimationClipList;
+		std::vector<std::shared_ptr<animation::CAnimationClip>> AnimationClipList;
 		{
 			if (!m_Walk_Animation->CreateFromMemory(pGraphicsAPI, pLoadWorker, nullptr, nullptr, object::E3DObjectType::Fbx)) return false;
 			if (!m_Jump_Animation->CreateFromMemory(pGraphicsAPI, pLoadWorker, nullptr, nullptr, object::E3DObjectType::Fbx)) return false;
@@ -92,7 +91,7 @@ namespace scene
 			AnimationClipList.push_back(m_Walk_Animation->GetAnimationClipList()[0]);
 			AnimationClipList.push_back(m_Jump_Animation->GetAnimationClipList()[0]);
 			AnimationClipList.push_back(m_Punch_Animation->GetAnimationClipList()[0]);
-		}*/
+		}
 
 		// m_TdaMiku_Model
 		{
@@ -108,7 +107,7 @@ namespace scene
 		}
 
 		// glTFObject
-		/*{
+		{
 			m_glTFObject->GetTextureSet()->AddCubeMap(m_Cube_Texture);
 			for(const auto& FrameTexture : m_FrameTextureList) { m_glTFObject->GetTextureSet()->AddFrameTexture(FrameTexture); }
 			m_glTFObject->GetTextureSet()->AddIBLTexture(m_IBL_DiffuseEnvMap_Texture, m_IBL_SpecularEnvMap_Texture, m_IBL_GGX_LUT_Texture);
@@ -117,9 +116,9 @@ namespace scene
 
 			m_glTFObject->ChangeMotion(0);
 			m_glTFObject->SetPos(glm::vec3(4.0f, 0.0f, 0.0f));
-		}*/
+		}
 		
-		/*{
+		{
 			m_BrainStemDObject->GetTextureSet()->AddCubeMap(m_Cube_Texture);
 			for(const auto& FrameTexture : m_FrameTextureList) { m_BrainStemDObject->GetTextureSet()->AddFrameTexture(FrameTexture); }
 			m_BrainStemDObject->GetTextureSet()->AddIBLTexture(m_IBL_DiffuseEnvMap_Texture, m_IBL_SpecularEnvMap_Texture, m_IBL_GGX_LUT_Texture);
@@ -147,6 +146,7 @@ namespace scene
 
 			m_VRMObject->SetPos(glm::vec3(-4.0f, 0.0f, 0.0f));
 			m_VRMObject->SetRot(glm::angleAxis(3.1515f, glm::vec3(0.0f, 1.0f, 0.0f)));
+			m_VRMObject->SetScale(glm::vec3(0.01f));
 
 			// 再生するアニメーションクリップを指定する
 			m_VRMObject->ChangeMotion("Walk");
@@ -165,7 +165,9 @@ namespace scene
 			
 			// 再生するアニメーションクリップを指定する
 			m_FbxObject->ChangeMotion("Walk");
+			m_FbxObject->SetPos(glm::vec3(0.0f, 0.0f, 1.0f));
 			m_FbxObject->SetRot(glm::angleAxis(3.1515f, glm::vec3(0.0f, 1.0f, 0.0f)));
+			m_FbxObject->SetScale(glm::vec3(0.01f));
 		}
 		
 		{
@@ -184,7 +186,8 @@ namespace scene
 
 			m_MouseyObject->SetPos(glm::vec3(-2.0f, 0.0f, 0.0f));
 			m_MouseyObject->SetRot(glm::angleAxis(3.1515f, glm::vec3(0.0f, 1.0f, 0.0f)));
-		}*/
+			m_MouseyObject->SetScale(glm::vec3(0.01f));
+		}
 
 		// m_Background
 		{
@@ -225,7 +228,7 @@ namespace scene
 			m_IsLoaded = true;
 		}
 
-		/*if (InputState->IsKeyUp(input::EKeyType::KEY_TYPE_1))
+		if (InputState->IsKeyUp(input::EKeyType::KEY_TYPE_1))
 		{
 			m_FbxObject->ChangeMotion("Jump");
 			m_MouseyObject->ChangeMotion("Jump");
@@ -236,19 +239,19 @@ namespace scene
 			m_FbxObject->ChangeMotion("Punch");
 			m_MouseyObject->ChangeMotion("Punch");
 			m_VRMObject->ChangeMotion("Punch");
-		}*/
+		}
 
 		if (m_TdaMiku_Model)
 		{
 			if (!m_TdaMiku_Model->Update(pGraphicsAPI, DrawInfo->GetDeltaSecondsTime())) return false;
 		}
 		
-		/*if (m_glTFObject)
+		if (m_glTFObject)
 		{
 			if (!m_glTFObject->Update(pGraphicsAPI, DrawInfo->GetDeltaSecondsTime())) return false;
-		}*/
+		}
 		
-		/*if (m_BrainStemDObject)
+		if (m_BrainStemDObject)
 		{
 			if (!m_BrainStemDObject->Update(pGraphicsAPI, DrawInfo->GetDeltaSecondsTime())) return false;
 		}
@@ -266,7 +269,7 @@ namespace scene
 		if (m_MouseyObject)
 		{
 			if (!m_MouseyObject->Update(pGraphicsAPI, DrawInfo->GetDeltaSecondsTime())) return false;
-		}*/
+		}
 		
 		if (m_Background)
 		{
@@ -296,41 +299,32 @@ namespace scene
 		{
 			if (!m_TdaMiku_Model->Draw(IsDepthPass, false, Camera, Projection, DrawInfo, nullptr)) return false;
 			//if (!m_TdaMiku_Model->Draw(IsDepthPass, true, Camera, Projection, DrawInfo, m_DebugSphere)) return false;
-			
-			/*m_TdaMiku_Model->SetPos(glm::vec3(-1.0f, 0.0f, 0.0f));
-			if (!m_TdaMiku_Model->Draw(IsDepthPass, Camera, Projection, DrawInfo, nullptr)) return false;
-			
-			m_TdaMiku_Model->SetPos(glm::vec3(0.0f, 0.0f, 1.0f));
-			if (!m_TdaMiku_Model->Draw(IsDepthPass, Camera, Projection, DrawInfo, nullptr)) return false;
-			
-			m_TdaMiku_Model->SetPos(glm::vec3(0.0f, 0.0f, -1.0f));
-			if (!m_TdaMiku_Model->Draw(IsDepthPass, Camera, Projection, DrawInfo, nullptr)) return false;*/
 		}
 		
-		/*if (m_glTFObject)
+		if (m_glTFObject)
 		{
 			if (!m_glTFObject->Draw(IsDepthPass, false, Camera, Projection, DrawInfo, nullptr)) return false;
-		}*/
+		}
 		
-		/*if (m_BrainStemDObject)
+		if (m_BrainStemDObject)
 		{
-			if (!m_BrainStemDObject->Draw(IsDepthPass, Camera, Projection, DrawInfo, nullptr)) return false;
+			if (!m_BrainStemDObject->Draw(IsDepthPass, false, Camera, Projection, DrawInfo, nullptr)) return false;
 		}
 		
 		if (m_VRMObject)
 		{
-			if (!m_VRMObject->Draw(IsDepthPass, Camera, Projection, DrawInfo, nullptr)) return false;
+			if (!m_VRMObject->Draw(IsDepthPass, false, Camera, Projection, DrawInfo, nullptr)) return false;
 		}
 		
 		if (m_FbxObject)
 		{
-			if (!m_FbxObject->Draw(IsDepthPass, Camera, Projection, DrawInfo, nullptr)) return false;
+			if (!m_FbxObject->Draw(IsDepthPass, false, Camera, Projection, DrawInfo, nullptr)) return false;
 		}
 		
 		if (m_MouseyObject)
 		{
-			if (!m_MouseyObject->Draw(IsDepthPass, Camera, Projection, DrawInfo, nullptr)) return false;
-		}*/
+			if (!m_MouseyObject->Draw(IsDepthPass, false, Camera, Projection, DrawInfo, nullptr)) return false;
+		}
 		
 		if (m_Background)
 		{

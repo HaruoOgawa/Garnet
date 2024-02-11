@@ -447,8 +447,6 @@ namespace mmd
 			PmxTexture->SetFilePath(TextureName);
 
 			m_PmxTextureList.push_back(PmxTexture);
-
-			Console::Log("TextureName: %ls\n", TextureName.second.c_str());
 		}
 
 		return true;
