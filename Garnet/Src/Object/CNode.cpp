@@ -7,7 +7,7 @@ namespace object
 		m_Name(""),
 		m_U16Name(L""),
 		m_MeshIndex(MeshIndex),
-		m_SkinIndex(-1),
+		m_SkeletonIndex(-1),
 		m_LocalTransform(std::make_shared<math::CTransform>()),
 		m_DefaultLocalTransform(std::make_shared<math::CTransform>()),
 		m_PrevLocalTransform(std::make_shared<math::CTransform>()),
@@ -267,14 +267,14 @@ namespace object
 		m_ChildrenNodeIndexList.push_back(Index);
 	}
 
-	void CNode::SetSkinIndex(int SkinIndex)
+	void CNode::SetSkeletonIndex(int SkeletonIndex)
 	{
-		m_SkinIndex = SkinIndex;
+		m_SkeletonIndex = SkeletonIndex;
 	}
 
-	int CNode::GetSkinIndex() const
+	int CNode::GetSkeletonIndex() const
 	{
-		return m_SkinIndex;
+		return m_SkeletonIndex;
 	}
 
 	void CNode::SetInverseBindMatrix(const glm::mat4& Matrix)

@@ -2,7 +2,7 @@
 #ifdef USE_ANIMATION
 
 // 用語を整理すると、Boneは関節(点)でBoneとBoneの繋がりがBone(線)
-// Boneを組み合わせた全体構造がSkeleton もしくは Skin
+// Boneを組み合わせた全体構造がSkeleton もしくは Skeleton
 // しかしglTFのSkeletonプロパティはアニメーションのルートを示すもので、なくてもルートはわかるものなので
 
 #include "CBone.h"
@@ -13,7 +13,7 @@
 
 namespace animation
 {
-	class CSkin
+	class CSkeleton
 	{
 		std::vector<std::shared_ptr<CBone>> m_BoneList;
 		int m_JointIndexOffset;
@@ -26,12 +26,12 @@ namespace animation
 		// 付与ボーンリスト
 		std::vector<std::shared_ptr<CBone>> m_GrantBoneList;
 	public:
-		CSkin();
-		virtual ~CSkin();
+		CSkeleton();
+		virtual ~CSkeleton();
 
 		void AddBone(const std::shared_ptr<CBone>& Bone);
 		
-		bool CalcSkinMatrixList(std::vector<glm::mat4>& MatrixList, const glm::mat4& ObjectModelMatrix);
+		bool CalCSkinMatrixList(std::vector<glm::mat4>& MatrixList, const glm::mat4& ObjectModelMatrix);
 
 		const std::vector<std::shared_ptr<CBone>>& GetBoneList() const;
 
@@ -51,8 +51,8 @@ namespace animation
 		const std::vector<std::shared_ptr<CBone>>& GetGrantBoneList() const;
 
 		//
-		void CalcSkinWorldMatrix();
-		void ResetToDefaultSkinLocal();
+		void CalCSkeletonWorldMatrix();
+		void ResetToDefaultSkeletonLocal();
 	};
 }
 

@@ -73,11 +73,11 @@ namespace animation
 	// IKの計算
 	bool CAnimationController::CalculateIK(const std::vector<std::shared_ptr<object::CNode>>& NodeList)
 	{
-		for (const auto& Skin : m_SkinList)
+		for (const auto& Skeleton : m_SkeletonList)
 		{
-			const auto& BoneList = Skin->GetBoneList();
+			const auto& BoneList = Skeleton->GetBoneList();
 
-			for (const auto& IKBone : Skin->GetIKBoneList())
+			for (const auto& IKBone : Skeleton->GetIKBoneList())
 			{
 				// TargetBoneが目指すボーンの位置
 				glm::vec3 IKGoalPos = glm::vec3(0.0f);
@@ -193,11 +193,11 @@ namespace animation
 	// 付与ボーンの再計算
 	bool CAnimationController::ReCalculateGrantBone(const std::vector<std::shared_ptr<object::CNode>>& NodeList)
 	{
-		for (const auto& Skin : m_SkinList)
+		for (const auto& Skeleton : m_SkeletonList)
 		{
-			const auto& BoneList = Skin->GetBoneList();
+			const auto& BoneList = Skeleton->GetBoneList();
 
-			for (const auto& GrantBone : Skin->GetGrantBoneList())
+			for (const auto& GrantBone : Skeleton->GetGrantBoneList())
 			{
 				// ParentGrantBoneを取得
 				int GrantParentBoneIndex = GrantBone->GetGrantParentBoneIndex();
@@ -304,9 +304,9 @@ namespace animation
 		// 現在の姿勢を保存する
 		if (!m_SavedPrevTrs)
 		{
-			for (const auto& Skin : m_SkinList)
+			for (const auto& Skeleton : m_SkeletonList)
 			{
-				for (const auto& Bone : Skin->GetBoneList())
+				for (const auto& Bone : Skeleton->GetBoneList())
 				{
 					Bone->GetBoneNode()->SavePrevLocalTransform();
 				}
@@ -316,13 +316,13 @@ namespace animation
 		}
 	}
 
-	bool CAnimationController::CalcSkinMatrixList(std::vector<glm::mat4>& MatrixList, const glm::mat4& ObjectModelMatrix)
+	bool CAnimationController::CalCSkinMatrixList(std::vector<glm::mat4>& MatrixList, const glm::mat4& ObjectModelMatrix)
 	{
 		if (IsPlayingAnimation())
 		{
-			for (const auto& Skin : m_SkinList)
+			for (const auto& Skeleton : m_SkeletonList)
 			{
-				if (!Skin->CalcSkinMatrixList(MatrixList, ObjectModelMatrix)) return false;
+				if (!Skeleton->CalCSkinMatrixList(MatrixList, ObjectModelMatrix)) return false;
 			}
 		}
 
@@ -351,20 +351,20 @@ namespace animation
 		m_ClipList.push_back(Layout.Clip);
 	}
 
-	void CAnimationController::AddAnimationSkin(const std::shared_ptr<animation::CSkin>& Skin)
+	void CAnimationController::AddAnimationSkeleton(const std::shared_ptr<animation::CSkeleton>& Skeleton)
 	{
 		int JointIndexOffset = m_TotalJointIndexOffset;
 
-		Skin->SetJointIndexOffset(JointIndexOffset);
+		Skeleton->SetJointIndexOffset(JointIndexOffset);
 
-		m_SkinList.push_back(Skin);
+		m_SkeletonList.push_back(Skeleton);
 
-		m_TotalJointIndexOffset += static_cast<int>(Skin->GetBoneList().size());
+		m_TotalJointIndexOffset += static_cast<int>(Skeleton->GetBoneList().size());
 	}
 
-	const std::vector<std::shared_ptr<animation::CSkin>>& CAnimationController::GetSkinList() const
+	const std::vector<std::shared_ptr<animation::CSkeleton>>& CAnimationController::GetSkeletonList() const
 	{
-		return m_SkinList;
+		return m_SkeletonList;
 	}
 
 	void CAnimationController::AddAnimationClip(const std::shared_ptr<animation::CAnimationClip>& Clip)
@@ -413,9 +413,9 @@ namespace animation
 		{
 			std::shared_ptr<object::CNode> TargetNode = nullptr;
 
-			for (const auto& Skin : m_SkinList)
+			for (const auto& Skeleton : m_SkeletonList)
 			{
-				for (const auto& Bone : Skin->GetBoneList())
+				for (const auto& Bone : Skeleton->GetBoneList())
 				{
 					if (Bone->GetBoneName() == animation::EHumanoidBones::None) continue;
 
@@ -438,9 +438,9 @@ namespace animation
 			TargetClip->AddAnimationChannel(TargetChannel);
 		}
 
-		// DefaultSkinを持っている時のみリターゲットを行う
+		// DefaultSkeletonを持っている時のみリターゲットを行う
 		// リターゲットは平行移動成分(Pos)に対して行うものなので、回転だけのアニメーションには必要ない
-		if (SourceClip->GetDefaultSkin())
+		if (SourceClip->GetDefaultSkeleton())
 		{
 			// RigのReTargetingを行う
 			// リターゲティングとはリグの形が異なるアニメーションを自身のアニメーションに合うように調整すること
@@ -478,9 +478,9 @@ namespace animation
 			std::vector<std::shared_ptr<object::CNode>> ComputedNodeList;
 			float L = 1.0f - (m_MaxBlendingTime - m_CurrBlendingTime) / m_MaxBlendingTime;
 
-			for (const auto& Skin : m_SkinList)
+			for (const auto& Skeleton : m_SkeletonList)
 			{
-				for (const auto& Bone : Skin->GetBoneList())
+				for (const auto& Bone : Skeleton->GetBoneList())
 				{
 					const auto& Node = Bone->GetBoneNode();
 
@@ -519,8 +519,8 @@ namespace animation
 
 	bool CAnimationController::ReTargetRig(const std::shared_ptr<animation::CAnimationClip>& SourceClip, const std::shared_ptr<animation::CAnimationClip>& TargetClip)
 	{
-		const auto& SourceSkin = SourceClip->GetDefaultSkin();
-		if (!SourceSkin) return false;
+		const auto& SourceSkeleton = SourceClip->GetDefaultSkeleton();
+		if (!SourceSkeleton) return false;
 
 		// Rigのリターゲティングを実行する
 		for (const auto& TargetChannel : TargetClip->GetChannelList())
@@ -537,15 +537,15 @@ namespace animation
 			// BoneTableに登録されていないものについては処理の対象外とする
 			if (BoneName == animation::EHumanoidBones::None) continue;
 
-			const auto& SourceBone = SourceSkin->GetBone(BoneName);
+			const auto& SourceBone = SourceSkeleton->GetBone(BoneName);
 			if (!SourceBone) continue;
 
 			const glm::mat4 SourceRestMove = SourceBone->GetBoneNode()->GetDefaultLocalMoveMatrix();
 			const glm::mat4 InverseSourceRestMove = glm::inverse(SourceRestMove);
 
-			for (const auto& TargetSkin : m_SkinList)
+			for (const auto& TargetSkeleton : m_SkeletonList)
 			{
-				const auto& TargetBone = TargetSkin->GetBone(BoneName);
+				const auto& TargetBone = TargetSkeleton->GetBone(BoneName);
 				if (!TargetBone) continue;
 
 				const glm::mat4 TargetRestMove = TargetBone->GetBoneNode()->GetDefaultLocalMoveMatrix();

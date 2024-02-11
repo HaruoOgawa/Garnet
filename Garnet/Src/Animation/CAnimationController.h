@@ -6,7 +6,7 @@
 #include <unordered_map>
 
 #include "SAnimationLayout.h"
-#include "CSkin.h"
+#include "CSkeleton.h"
 #include "CAnimationClip.h"
 
 #include "../Object/CNode.h"
@@ -22,7 +22,7 @@ namespace animation
 		std::vector<std::shared_ptr<animation::CAnimationClip>> m_ClipList;
 		std::unordered_map<std::string, SAnimationLayout> m_ClipMap;
 
-		std::vector<std::shared_ptr<animation::CSkin>> m_SkinList;
+		std::vector<std::shared_ptr<animation::CSkeleton>> m_SkeletonList;
 
 		int m_CurrentClipIndex; // インデックスで使用するアニメーションを選択
 		std::string m_CurrentClipName; // Clip名でアニメーションを選択
@@ -56,12 +56,12 @@ namespace animation
 		void ChangeMotion(int Index); // インデックス指定でモーションを変更
 		void ChangeMotion(const std::string& MotionName); // 名前指定でモーションを変更
 
-		bool CalcSkinMatrixList(std::vector<glm::mat4>& MatrixList, const glm::mat4& ObjectModelMatrix);
+		bool CalCSkinMatrixList(std::vector<glm::mat4>& MatrixList, const glm::mat4& ObjectModelMatrix);
 
 		void AddMotion(const std::string& MotionName, animation::SAnimationLayout Layout);
 
-		void AddAnimationSkin(const std::shared_ptr<animation::CSkin>& Skin);
-		const std::vector<std::shared_ptr<animation::CSkin>>& GetSkinList() const;
+		void AddAnimationSkeleton(const std::shared_ptr<animation::CSkeleton>& Skeleton);
+		const std::vector<std::shared_ptr<animation::CSkeleton>>& GetSkeletonList() const;
 
 		void AddAnimationClip(const std::shared_ptr<animation::CAnimationClip>& Clip);
 		void AddHumanoidAnimationClip(const std::shared_ptr<animation::CAnimationClip>& SourceClip, const std::string& MotionName, animation::SAnimationLayout Layout, bool IsLoop);

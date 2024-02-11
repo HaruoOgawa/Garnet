@@ -7,7 +7,7 @@ namespace animation
 	CAnimationClip::CAnimationClip():
 		m_CurrentTime(0.0f),
 		m_IsLoop(false),
-		m_DefaultSkin(nullptr)
+		m_DefaultSkeleton(nullptr)
 	{
 	}
 
@@ -40,14 +40,14 @@ namespace animation
 		m_ChannelList.push_back(AnimationChannel);
 	}
 
-	void CAnimationClip::SetDefaultSkin(const std::shared_ptr<animation::CSkin>& DefaultSkin)
+	void CAnimationClip::SetDefaultSkeleton(const std::shared_ptr<animation::CSkeleton>& DefaultSkeleton)
 	{
-		m_DefaultSkin = DefaultSkin;
+		m_DefaultSkeleton = DefaultSkeleton;
 	}
 
-	const std::shared_ptr<animation::CSkin>& CAnimationClip::GetDefaultSkin() const
+	const std::shared_ptr<animation::CSkeleton>& CAnimationClip::GetDefaultSkeleton() const
 	{
-		return m_DefaultSkin;
+		return m_DefaultSkeleton;
 	}
 
 	const std::vector<std::shared_ptr<animation::CAnimationSampler>>& CAnimationClip::GetSamplerList() const

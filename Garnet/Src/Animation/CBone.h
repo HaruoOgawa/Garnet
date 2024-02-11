@@ -2,7 +2,7 @@
 #ifdef USE_ANIMATION
 
 // 用語を整理すると、Boneは関節(点)でBoneとBoneの繋がりがBone(線)
-// Boneを組み合わせた全体構造がSkeleton もしくは Skin
+// Boneを組み合わせた全体構造がSkeleton もしくは Skeleton
 // しかしglTFのSkeletonプロパティはアニメーションのルートを示すもので、なくてもルートはわかるものなのであまり意味をなしていない
 
 #include <memory>

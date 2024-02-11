@@ -335,7 +335,7 @@ namespace object
 		// Drawは何度も呼ぶことがあるのでUpdateでマイフレーム一回だけ計算する
 		// SSBOのサイズをDynamicOffset毎に変更できるかわからないのでひとまず全部まとめて渡す
 		m_CurrentSkinMatrixList.clear();
-		if (!m_AnimationController->CalcSkinMatrixList(m_CurrentSkinMatrixList, m_ObjectTransform->GetModelMatrix())) return false;
+		if (!m_AnimationController->CalCSkinMatrixList(m_CurrentSkinMatrixList, m_ObjectTransform->GetModelMatrix())) return false;
 #endif
 
 		return true;
@@ -355,7 +355,7 @@ namespace object
 			const auto& WorldMatrix = m_ObjectTransform->GetModelMatrix() * Node->GetWorldMatrix();
 			const auto& Mesh = m_MeshList[MeshIndex];
 
-			int SkinIndex = Node->GetSkinIndex();
+			int SkeletonIndex = Node->GetSkeletonIndex();
 
 			for (int PrimitiveIndex = 0; PrimitiveIndex < Mesh->GetPrimitiveList().size(); PrimitiveIndex++)
 			{
@@ -408,12 +408,12 @@ namespace object
 				Material->SetUniformValue("useSkinMeshAnimation", &glm::ivec1((m_AnimationController->IsPlayingAnimation() ? 1 : 0))[0], sizeof(glm::ivec1), DynamicOffsetNum);
 
 				// SkinMatrixをShaderに渡す
-				const auto& SkinList = m_AnimationController->GetSkinList();
-				if (SkinIndex >= 0 && SkinIndex < SkinList.size() && m_AnimationController->IsPlayingAnimation())
+				const auto& SkeletonList = m_AnimationController->GetSkeletonList();
+				if (SkeletonIndex >= 0 && SkeletonIndex < SkeletonList.size() && m_AnimationController->IsPlayingAnimation())
 				{
 					Material->SetUniformValue("r_SkinMatrixBuffer", &m_CurrentSkinMatrixList[0], sizeof(glm::mat4) * static_cast<int>(m_CurrentSkinMatrixList.size()), DynamicOffsetNum);
 
-					int JointIndexOffset = SkinList[SkinIndex]->GetJointIndexOffset();
+					int JointIndexOffset = SkeletonList[SkeletonIndex]->GetJointIndexOffset();
 					Material->SetUniformValue("JointIndexOffset", &glm::ivec1(JointIndexOffset)[0], sizeof(glm::ivec1), DynamicOffsetNum);
 				}
 #endif
@@ -433,9 +433,9 @@ namespace object
 		/*
 		if(DebugSphere)
 		{
-			for (const auto& Skin : m_AnimationController->GetSkinList())
+			for (const auto& Skeleton : m_AnimationController->GetSkeletonList())
 			{
-				for (const auto& Bone : Skin->GetBoneList())
+				for (const auto& Bone : Skeleton->GetBoneList())
 				{
 					//if (Bone->GetBoneName() == animation::EHumanoidBones::None) continue;
 
@@ -501,9 +501,9 @@ namespace object
 	}
 
 #ifdef USE_ANIMATION
-	void C3DObject::AddAnimationSkin(const std::shared_ptr<animation::CSkin >& Skin)
+	void C3DObject::AddAnimationSkeleton(const std::shared_ptr<animation::CSkeleton >& Skeleton)
 	{
-		m_AnimationController->AddAnimationSkin(Skin);
+		m_AnimationController->AddAnimationSkeleton(Skeleton);
 	}
 
 	void C3DObject::AddAnimationClip(const std::shared_ptr<animation::CAnimationClip>& Clip)
