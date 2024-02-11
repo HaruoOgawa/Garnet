@@ -16,7 +16,7 @@ namespace animation
 	class CSkin
 	{
 		std::vector<std::shared_ptr<CBone>> m_BoneList;
-		int m_BoneIndexOffset;
+		int m_JointIndexOffset;
 
 		std::unordered_map<EHumanoidBones, std::shared_ptr<CBone>> m_BoneTable;
 
@@ -35,8 +35,8 @@ namespace animation
 
 		const std::vector<std::shared_ptr<CBone>>& GetBoneList() const;
 
-		void SetBoneIndexOffset(int BoneIndexOffset);
-		int GetBoneIndexOffset() const;
+		void SetJointIndexOffset(int JointIndexOffset);
+		int GetJointIndexOffset() const;
 
 		void MakeBoneTable();
 		const std::unordered_map<EHumanoidBones, std::shared_ptr<CBone>>& GetBoneTable() const;

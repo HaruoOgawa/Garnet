@@ -10,7 +10,7 @@ namespace animation
 		m_SavedPrevTrs(false),
 		m_CurrentClipIndex(-1),
 		m_CurrentClipName(""),
-		m_TotalBoneIndexOffset(0)
+		m_TotalJointIndexOffset(0)
 	{
 	}
 
@@ -353,13 +353,13 @@ namespace animation
 
 	void CAnimationController::AddAnimationSkin(const std::shared_ptr<animation::CSkin>& Skin)
 	{
-		int BoneIndexOffset = m_TotalBoneIndexOffset;
+		int JointIndexOffset = m_TotalJointIndexOffset;
 
-		Skin->SetBoneIndexOffset(BoneIndexOffset);
+		Skin->SetJointIndexOffset(JointIndexOffset);
 
 		m_SkinList.push_back(Skin);
 
-		m_TotalBoneIndexOffset += static_cast<int>(Skin->GetBoneList().size());
+		m_TotalJointIndexOffset += static_cast<int>(Skin->GetBoneList().size());
 	}
 
 	const std::vector<std::shared_ptr<animation::CSkin>>& CAnimationController::GetSkinList() const

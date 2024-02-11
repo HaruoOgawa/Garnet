@@ -61,7 +61,7 @@
               "initValue": [ 0 ]
             },
             {
-              "name": "BoneIndexOffset",
+              "name": "JointIndexOffset",
               "type": "int",
               "initValue": [ 0 ]
             },

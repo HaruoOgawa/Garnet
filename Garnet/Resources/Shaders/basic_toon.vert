@@ -19,7 +19,7 @@ layout(binding = 0) uniform UniformBufferObject{
     float fPad2;
 
     int useSkinMeshAnimation;
-    int BoneIndexOffset;
+    int JointIndexOffset;
     int drawPathIndex;
     int pad1;
 } ubo;
@@ -56,10 +56,10 @@ void main(){
         int StartSkinMatIndex = 0;
 
         mat4 SkinMat =
-            inWeights0.x * r_SkinMatrixBuffer.SkinMat[inBone0.x + ubo.BoneIndexOffset] +
-            inWeights0.y * r_SkinMatrixBuffer.SkinMat[inBone0.y + ubo.BoneIndexOffset] +
-            inWeights0.z * r_SkinMatrixBuffer.SkinMat[inBone0.z + ubo.BoneIndexOffset] +
-            inWeights0.w * r_SkinMatrixBuffer.SkinMat[inBone0.w + ubo.BoneIndexOffset] 
+            inWeights0.x * r_SkinMatrixBuffer.SkinMat[inBone0.x + ubo.JointIndexOffset] +
+            inWeights0.y * r_SkinMatrixBuffer.SkinMat[inBone0.y + ubo.JointIndexOffset] +
+            inWeights0.z * r_SkinMatrixBuffer.SkinMat[inBone0.z + ubo.JointIndexOffset] +
+            inWeights0.w * r_SkinMatrixBuffer.SkinMat[inBone0.w + ubo.JointIndexOffset] 
         ;
 
         // スキンメッシュアニメーションの時はubo.modelは乗算しないように注意

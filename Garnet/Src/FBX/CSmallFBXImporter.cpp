@@ -606,7 +606,7 @@ namespace fbx
 					"NORMAL",
 					"TEXCOORD_0",
 					"TANGENT",
-					"BoneS_0",
+					"JOINTS_0",
 					"WEIGHTS_0",
 				};
 				std::map<std::string, std::vector<float>> ReservedVertexDataList;
@@ -919,13 +919,13 @@ namespace fbx
 							std::memcpy(&AttributeBoneData[0], &BufferData[0], BufferData.size());
 
 							// データを登録
-							ReservedVertexDataList.insert({ "BoneS_0" ,AttributeBoneData });
+							ReservedVertexDataList.insert({ "JOINTS_0" ,AttributeBoneData });
 
 							// コンポーネントタイプ(データ型)を取得
-							ReservedDataTypeList.insert({ "BoneS_0", renderer::EDataType::TYPE_UNSIGNED_SHORT });
+							ReservedDataTypeList.insert({ "JOINTS_0", renderer::EDataType::TYPE_UNSIGNED_SHORT });
 
 							// ByteStrideを取得
-							ReservedByteStrideList.insert({ "BoneS_0", 8 });
+							ReservedByteStrideList.insert({ "JOINTS_0", 8 });
 						}
 
 						// Weights
@@ -956,7 +956,7 @@ namespace fbx
 						{
 							Dimention = 2;
 						}
-						else if (AttribName == "TANGENT" || AttribName == "BoneS_0" || AttribName == "WEIGHTS_0")
+						else if (AttribName == "TANGENT" || AttribName == "JOINTS_0" || AttribName == "WEIGHTS_0")
 						{
 							Dimention = 4;
 						}
@@ -980,8 +980,8 @@ namespace fbx
 							// DataTypeとByteStrideの初期値をセット
 							renderer::EDataType DataType = renderer::EDataType::TYPE_FLOAT;
 
-							// 『BoneS_0』はunsigned shortである
-							if (AttribName == "BoneS_0") DataType = renderer::EDataType::TYPE_UNSIGNED_SHORT;
+							// 『JOINTS_0』はunsigned shortである
+							if (AttribName == "JOINTS_0") DataType = renderer::EDataType::TYPE_UNSIGNED_SHORT;
 
 							ReservedDataTypeList.insert({ AttribName, DataType });
 							ReservedByteStrideList.insert({ AttribName, 0 });

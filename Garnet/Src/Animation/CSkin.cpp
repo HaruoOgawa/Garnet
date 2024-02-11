@@ -6,7 +6,7 @@
 namespace animation
 {
 	CSkin::CSkin():
-		m_BoneIndexOffset(0)
+		m_JointIndexOffset(0)
 	{
 	}
 
@@ -56,14 +56,14 @@ namespace animation
 		return m_BoneList;
 	}
 
-	void CSkin::SetBoneIndexOffset(int BoneIndexOffset)
+	void CSkin::SetJointIndexOffset(int JointIndexOffset)
 	{
-		m_BoneIndexOffset = BoneIndexOffset;
+		m_JointIndexOffset = JointIndexOffset;
 	}
 
-	int CSkin::GetBoneIndexOffset() const
+	int CSkin::GetJointIndexOffset() const
 	{
-		return m_BoneIndexOffset;
+		return m_JointIndexOffset;
 	}
 
 	void CSkin::MakeBoneTable()

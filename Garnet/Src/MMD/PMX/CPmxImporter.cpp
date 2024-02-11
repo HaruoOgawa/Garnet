@@ -351,7 +351,7 @@ namespace mmd
 				"NORMAL",
 				"TEXCOORD_0",
 				"TANGENT",
-				"BoneS_0",
+				"JOINTS_0",
 				"WEIGHTS_0",
 			};
 			std::map<std::string, std::vector<float>> ReservedVertexDataList;
@@ -407,8 +407,8 @@ namespace mmd
 							std::memcpy(&AttributeData[0], &ByteBoneAttribute[0], sizeof(unsigned char) * ByteBoneAttribute.size());
 						}
 
-						ReservedDataTypeList.emplace("BoneS_0", renderer::EDataType::TYPE_UNSIGNED_BYTE);
-						ReservedByteStrideList.emplace("BoneS_0", 1 * 4);
+						ReservedDataTypeList.emplace("JOINTS_0", renderer::EDataType::TYPE_UNSIGNED_BYTE);
+						ReservedByteStrideList.emplace("JOINTS_0", 1 * 4);
 					}
 					else if (MetaData.BoneIndexSize == 2)
 					{
@@ -420,8 +420,8 @@ namespace mmd
 							std::memcpy(&AttributeData[0], &UShortBoneAttribute[0], sizeof(unsigned short) * UShortBoneAttribute.size());
 						}
 
-						ReservedDataTypeList.emplace("BoneS_0", renderer::EDataType::TYPE_UNSIGNED_SHORT);
-						ReservedByteStrideList.emplace("BoneS_0", 2 * 4);
+						ReservedDataTypeList.emplace("JOINTS_0", renderer::EDataType::TYPE_UNSIGNED_SHORT);
+						ReservedByteStrideList.emplace("JOINTS_0", 2 * 4);
 					}
 					else if (MetaData.BoneIndexSize == 4)
 					{
@@ -433,8 +433,8 @@ namespace mmd
 							std::memcpy(&AttributeData[0], &IntBoneAttribute[0], sizeof(unsigned int) * IntBoneAttribute.size());
 						}
 
-						ReservedDataTypeList.emplace("BoneS_0", renderer::EDataType::TYPE_UNSIGNED_INT);
-						ReservedByteStrideList.emplace("BoneS_0", 4 * 4);
+						ReservedDataTypeList.emplace("JOINTS_0", renderer::EDataType::TYPE_UNSIGNED_INT);
+						ReservedByteStrideList.emplace("JOINTS_0", 4 * 4);
 					}
 
 					// ‹ó‚ÌŽž‚Í0–„‚ß‚·‚é
@@ -443,7 +443,7 @@ namespace mmd
 						AttributeData.resize(static_cast<int>(PmxMesh->GetPositionAttribute().size()) / 3 * 4);
 					}
 
-					ReservedVertexDataList.emplace("BoneS_0", AttributeData);
+					ReservedVertexDataList.emplace("JOINTS_0", AttributeData);
 
 				}
 
@@ -469,7 +469,7 @@ namespace mmd
 					{
 						Dimention = 2;
 					}
-					else if (AttribName == "TANGENT" || AttribName == "BoneS_0" || AttribName == "WEIGHTS_0")
+					else if (AttribName == "TANGENT" || AttribName == "JOINTS_0" || AttribName == "WEIGHTS_0")
 					{
 						Dimention = 4;
 					}

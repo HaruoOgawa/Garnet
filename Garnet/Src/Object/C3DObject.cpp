@@ -413,8 +413,8 @@ namespace object
 				{
 					Material->SetUniformValue("r_SkinMatrixBuffer", &m_CurrentSkinMatrixList[0], sizeof(glm::mat4) * static_cast<int>(m_CurrentSkinMatrixList.size()), DynamicOffsetNum);
 
-					int BoneIndexOffset = SkinList[SkinIndex]->GetBoneIndexOffset();
-					Material->SetUniformValue("BoneIndexOffset", &glm::ivec1(BoneIndexOffset)[0], sizeof(glm::ivec1), DynamicOffsetNum);
+					int JointIndexOffset = SkinList[SkinIndex]->GetJointIndexOffset();
+					Material->SetUniformValue("JointIndexOffset", &glm::ivec1(JointIndexOffset)[0], sizeof(glm::ivec1), DynamicOffsetNum);
 				}
 #endif
 

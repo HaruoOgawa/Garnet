@@ -27,7 +27,7 @@ namespace animation
 		int m_CurrentClipIndex; // インデックスで使用するアニメーションを選択
 		std::string m_CurrentClipName; // Clip名でアニメーションを選択
 
-		int m_TotalBoneIndexOffset;
+		int m_TotalJointIndexOffset;
 	private:
 		void Reset();
 

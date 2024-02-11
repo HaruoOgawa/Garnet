@@ -371,7 +371,7 @@ namespace gltf
 				}
 
 				material->ReplacePreloadUniformValue("useSkinMeshAnimation", &glm::ivec1(0)[0], sizeof(int), 0);
-				material->ReplacePreloadUniformValue("BoneIndexOffset", &glm::ivec1(0)[0], sizeof(int), 0);
+				material->ReplacePreloadUniformValue("JointIndexOffset", &glm::ivec1(0)[0], sizeof(int), 0);
 				material->ReplacePreloadUniformValue("pad1", &glm::ivec1(0)[0], sizeof(int), 0);
 				material->ReplacePreloadUniformValue("pad2", &glm::ivec1(0)[0], sizeof(int), 0);
 			}
@@ -428,7 +428,7 @@ namespace gltf
 					"NORMAL",
 					"TEXCOORD_0",
 					"TANGENT",
-					"BoneS_0",
+					"JOINTS_0",
 					"WEIGHTS_0",
 				};
 				std::map<std::string, std::vector<float>> ReservedVertexDataList;
@@ -491,7 +491,7 @@ namespace gltf
 						{
 							Dimention = 2;
 						}
-						else if (AttribName == "TANGENT" || AttribName == "BoneS_0" || AttribName == "WEIGHTS_0")
+						else if (AttribName == "TANGENT" || AttribName == "JOINTS_0" || AttribName == "WEIGHTS_0")
 						{
 							Dimention = 4;
 						}
@@ -512,8 +512,8 @@ namespace gltf
 							// DataTypeとByteStrideの初期値をセット
 							renderer::EDataType DataType = renderer::EDataType::TYPE_FLOAT;
 
-							// 『BoneS_0』はunsigned shortである
-							if (AttribName == "BoneS_0") DataType = renderer::EDataType::TYPE_UNSIGNED_SHORT;
+							// 『JOINTS_0』はunsigned shortである
+							if (AttribName == "JOINTS_0") DataType = renderer::EDataType::TYPE_UNSIGNED_SHORT;
 
 							ReservedDataTypeList.insert({ AttribName, DataType });
 							ReservedByteStrideList.insert({ AttribName, 0 });
