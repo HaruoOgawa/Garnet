@@ -128,7 +128,7 @@ namespace fbx
 			if (!CreateAnimationSkeleton(RootNode, Skeleton, FbxBoneList, NodeList, IsMixamoFbx)) return false;
 		}
 
-		Object->AddAnimationSkeleton(Skeleton);
+		Object->SetAnimationSkeleton(Skeleton);
 
 		// BoneTable‚ðì¬
 		Skeleton->MakeBoneTable();

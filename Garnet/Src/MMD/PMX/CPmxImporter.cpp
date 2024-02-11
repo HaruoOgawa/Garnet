@@ -76,7 +76,7 @@ namespace mmd
 			Object->AddNode(Node);
 		}
 
-		Object->AddAnimationSkeleton(Skeleton);
+		Object->SetAnimationSkeleton(Skeleton);
 
 		for (const auto& Material : MaterialList)
 		{

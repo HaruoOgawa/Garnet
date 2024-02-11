@@ -40,7 +40,7 @@ struct UniformBufferObject {
     useShadowMap: i32,
     useIBL: i32,
     useSkinMeshAnimation: i32,
-    JointIndexOffset: i32,
+    pad0_: i32,
     pad1_: i32,
     pad2_: i32,
 }

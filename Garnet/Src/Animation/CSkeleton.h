@@ -16,8 +16,7 @@ namespace animation
 	class CSkeleton
 	{
 		std::vector<std::shared_ptr<CBone>> m_BoneList;
-		int m_JointIndexOffset;
-
+		
 		std::unordered_map<EHumanoidBones, std::shared_ptr<CBone>> m_BoneTable;
 
 		// IK
@@ -34,9 +33,6 @@ namespace animation
 		bool CalCSkinMatrixList(std::vector<glm::mat4>& MatrixList, const glm::mat4& ObjectModelMatrix);
 
 		const std::vector<std::shared_ptr<CBone>>& GetBoneList() const;
-
-		void SetJointIndexOffset(int JointIndexOffset);
-		int GetJointIndexOffset() const;
 
 		void MakeBoneTable();
 		const std::unordered_map<EHumanoidBones, std::shared_ptr<CBone>>& GetBoneTable() const;

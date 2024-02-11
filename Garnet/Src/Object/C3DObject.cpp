@@ -408,13 +408,9 @@ namespace object
 				Material->SetUniformValue("useSkinMeshAnimation", &glm::ivec1((m_AnimationController->IsPlayingAnimation() ? 1 : 0))[0], sizeof(glm::ivec1), DynamicOffsetNum);
 
 				// SkinMatrix‚ðShader‚É“n‚·
-				const auto& SkeletonList = m_AnimationController->GetSkeletonList();
-				if (SkeletonIndex >= 0 && SkeletonIndex < SkeletonList.size() && m_AnimationController->IsPlayingAnimation())
+				if (m_CurrentSkinMatrixList.size() > 0)
 				{
 					Material->SetUniformValue("r_SkinMatrixBuffer", &m_CurrentSkinMatrixList[0], sizeof(glm::mat4) * static_cast<int>(m_CurrentSkinMatrixList.size()), DynamicOffsetNum);
-
-					int JointIndexOffset = SkeletonList[SkeletonIndex]->GetJointIndexOffset();
-					Material->SetUniformValue("JointIndexOffset", &glm::ivec1(JointIndexOffset)[0], sizeof(glm::ivec1), DynamicOffsetNum);
 				}
 #endif
 
@@ -501,9 +497,9 @@ namespace object
 	}
 
 #ifdef USE_ANIMATION
-	void C3DObject::AddAnimationSkeleton(const std::shared_ptr<animation::CSkeleton >& Skeleton)
+	void C3DObject::SetAnimationSkeleton(const std::shared_ptr<animation::CSkeleton >& Skeleton)
 	{
-		m_AnimationController->AddAnimationSkeleton(Skeleton);
+		m_AnimationController->SetAnimationSkeleton(Skeleton);
 	}
 
 	void C3DObject::AddAnimationClip(const std::shared_ptr<animation::CAnimationClip>& Clip)

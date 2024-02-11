@@ -122,8 +122,8 @@ namespace gltf
 		if (!CreateNode(model, NodeList, RootNodeIndexList)) return false;
 
 		// スキン
-		std::vector<std::shared_ptr<animation::CSkeleton>> AnimationSkeletonList;
-		if (!CreateAnimationSkeleton(model, AnimationSkeletonList, NodeList)) return false;
+		std::shared_ptr<animation::CSkeleton> Skeleton = std::make_shared<animation::CSkeleton>();
+		if (!CreateAnimationSkeleton(model, Skeleton, NodeList)) return false;
 
 		// NodeとSkeletonは先に追加しておく
 		for (const auto& Node : NodeList)
@@ -131,10 +131,7 @@ namespace gltf
 			Object->AddNode(Node);
 		}
 
-		for (const auto& Skeleton : AnimationSkeletonList)
-		{
-			Object->AddAnimationSkeleton(Skeleton);
-		}
+		Object->SetAnimationSkeleton(Skeleton);
 
 		Object->SetRootNodeIndexList(RootNodeIndexList);
 
@@ -148,7 +145,7 @@ namespace gltf
 		Object->CalcWorldMatrix();
 
 		// 親のBoneを追加
-		for (const auto& Skeleton : AnimationSkeletonList)
+		if(Skeleton)
 		{
 			ApplyParentBoneList(Skeleton, NodeList);
 		}
@@ -371,7 +368,7 @@ namespace gltf
 				}
 
 				material->ReplacePreloadUniformValue("useSkinMeshAnimation", &glm::ivec1(0)[0], sizeof(int), 0);
-				material->ReplacePreloadUniformValue("JointIndexOffset", &glm::ivec1(0)[0], sizeof(int), 0);
+				material->ReplacePreloadUniformValue("pad0", &glm::ivec1(0)[0], sizeof(int), 0);
 				material->ReplacePreloadUniformValue("pad1", &glm::ivec1(0)[0], sizeof(int), 0);
 				material->ReplacePreloadUniformValue("pad2", &glm::ivec1(0)[0], sizeof(int), 0);
 			}
@@ -720,12 +717,10 @@ namespace gltf
 		return true;
 	}
 
-	bool CGLTFImporter::CreateAnimationSkeleton(const tinygltf::Model& model, std::vector<std::shared_ptr<animation::CSkeleton>>& AnimationSkeletonList, const std::vector<std::shared_ptr<object::CNode>>& NodeList)
+	bool CGLTFImporter::CreateAnimationSkeleton(const tinygltf::Model& model, std::shared_ptr<animation::CSkeleton>& Skeleton, const std::vector<std::shared_ptr<object::CNode>>& NodeList)
 	{
 		for (const auto& glTFSkeleton : model.skins)
 		{
-			std::shared_ptr<animation::CSkeleton> Skeleton = std::make_shared<animation::CSkeleton>();
-
 			// inverseBindMatrices
 			std::vector<glm::mat4> inverseBindMatrices;
 			{
@@ -749,6 +744,24 @@ namespace gltf
 
 				const auto& BoneNode = NodeList[glTFBone];
 
+				// 同じ名前のボーンでもリストに追加する必要がある
+				// JointIndexの順番がそれも込みで設定されているため
+				// BrainStemがそのことを示している
+				/*// 既に存在するボーンかチェックする
+				bool Exist = false;
+				for (const auto& Bone : Skeleton->GetBoneList())
+				{
+					if (Bone->GetBoneNode()->GetName() == BoneNode->GetName())
+					{
+						// 存在する
+						Exist = true;
+
+						break;
+					}
+				}
+
+				if (Exist) continue;*/
+
 				std::shared_ptr<animation::CBone> Bone = std::make_shared<animation::CBone>(BoneNode);
 
 				Skeleton->AddBone(Bone);
@@ -761,8 +774,6 @@ namespace gltf
 				const auto& Bone = Skeleton->GetBoneList()[j];
 				Bone->GetBoneNode()->SetInverseBindMatrix(inverseBindMatrices[j]);
 			}
-
-			AnimationSkeletonList.push_back(Skeleton);
 		}
 
 		// Humanoid Boneを持っていればBoneに割り当てる
@@ -798,7 +809,7 @@ namespace gltf
 								{
 									const auto& TargetNode = NodeList[nodeIndex];
 
-									for (const auto& Skeleton : AnimationSkeletonList)
+									if(Skeleton)
 									{
 										for (const auto& Bone : Skeleton->GetBoneList())
 										{
@@ -820,7 +831,7 @@ namespace gltf
 		}
 
 		// 拡張機能の結果を元にBoneTableを作成
-		for (const auto& Skeleton : AnimationSkeletonList)
+		if(Skeleton)
 		{
 			Skeleton->MakeBoneTable();
 		}

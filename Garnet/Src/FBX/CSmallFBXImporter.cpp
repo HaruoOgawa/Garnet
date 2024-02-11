@@ -106,7 +106,7 @@ namespace fbx
 			}
 		}
 
-		Object->AddAnimationSkeleton(Skeleton);
+		Object->SetAnimationSkeleton(Skeleton);
 
 		// BoneTable‚ðì¬
 		Skeleton->MakeBoneTable();

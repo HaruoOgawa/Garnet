@@ -86,7 +86,7 @@ namespace object
 		const std::vector<std::shared_ptr<graphics::CMaterial>>& GetMaterialList() const;
 		
 #ifdef USE_ANIMATION
-		void AddAnimationSkeleton(const std::shared_ptr<animation::CSkeleton>& Skeleton);
+		void SetAnimationSkeleton(const std::shared_ptr<animation::CSkeleton>& Skeleton);
 		void AddAnimationClip(const std::shared_ptr<animation::CAnimationClip>& Clip);
 		void AddHumanoidAnimationClip(const std::shared_ptr<animation::CAnimationClip>& SourceClip, const std::string& MotionName, animation::SAnimationLayout Layout, bool IsLoop);
 

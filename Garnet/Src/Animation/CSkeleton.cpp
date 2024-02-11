@@ -5,8 +5,7 @@
 
 namespace animation
 {
-	CSkeleton::CSkeleton():
-		m_JointIndexOffset(0)
+	CSkeleton::CSkeleton()
 	{
 	}
 
@@ -54,16 +53,6 @@ namespace animation
 	const std::vector<std::shared_ptr<CBone>>& CSkeleton::GetBoneList() const
 	{
 		return m_BoneList;
-	}
-
-	void CSkeleton::SetJointIndexOffset(int JointIndexOffset)
-	{
-		m_JointIndexOffset = JointIndexOffset;
-	}
-
-	int CSkeleton::GetJointIndexOffset() const
-	{
-		return m_JointIndexOffset;
 	}
 
 	void CSkeleton::MakeBoneTable()

@@ -44,7 +44,7 @@ layout(binding = 0) uniform UniformBufferObject{
     int   useIBL;
 
 	int   useSkinMeshAnimation;
-    int   JointIndexOffset;
+    int   pad0;
     int   pad1;
     int   pad2;
 } ubo;
