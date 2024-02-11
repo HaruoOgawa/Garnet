@@ -9,7 +9,10 @@ namespace object
 {
 	class CNode
 	{
+		const int						  m_SelfNodeIndex;
+
 		std::string						  m_Name;
+		std::wstring					  m_U16Name;
 
 		int								  m_MeshIndex;
 
@@ -26,11 +29,16 @@ namespace object
 		std::shared_ptr<CNode> m_ParentNode;
 
 	public:
-		CNode(int MeshIndex);
+		CNode(int MeshIndex, int SelfNodeIndex);
 		virtual ~CNode();
+
+		int GetSelfNodeIndex() const;
 
 		void SetName(const std::string& Name);
 		const std::string& GetName() const;
+		
+		void SetU16Name(const std::wstring& U16Name);
+		const std::wstring& GetU16Name() const;
 
 		void SetMeshIndex(int MeshIndex);
 		int GetMeshIndex() const;
@@ -52,6 +60,7 @@ namespace object
 
 		const glm::quat& GetRot() const;
 		void SetRot(const glm::quat& Rot);
+		void MulRot(const glm::quat& Rot);
 		void AddRotate(const glm::vec3& Axis, float Radians);
 
 		const glm::vec3& GetScale() const;
@@ -78,6 +87,7 @@ namespace object
 
 		const std::vector<int>& GetChildrenNodeIndexList() const;
 		void SetChildrenNodeIndexList(const std::vector<int>& NodeList);
+		void AddChildrenNodeIndex(int Index);
 
 		void SetSkinIndex(int SkinIndex);
 		int GetSkinIndex() const;

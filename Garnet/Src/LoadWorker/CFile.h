@@ -3,10 +3,23 @@
 #include <string>
 #include "../Interface/IResource.h"
 
+#ifdef __EMSCRIPTEN__
+#include <emscripten/emscripten.h>
+#include <emscripten/fetch.h>
+#else
+#include <fstream>
+#include <iostream>
+#endif
+
 namespace resource
 {
 	class CFile : public resource::IResource
 	{
+#ifndef __EMSCRIPTEN__
+		std::ifstream m_Stream;
+		int m_ByteOffset;
+#endif // !__EMSCRIPTEN__
+
 		resource::ELoadStatus m_Status;
 		
 		const std::string m_Filename;
@@ -31,6 +44,7 @@ namespace resource
 		virtual bool IsLoaded() const override;
 
 		virtual bool Load() override;
+		virtual bool LoadImmediate() override;
 		virtual bool Update(api::IGraphicsAPI* pGraphicsAPI) override;
 
 		void SetData(const std::vector<unsigned char>& Data);

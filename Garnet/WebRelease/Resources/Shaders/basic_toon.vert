@@ -13,9 +13,14 @@ layout(binding = 0) uniform UniformBufferObject{
     mat4 proj;
 	mat4 lightVPMat;
 
+    float edgeSize;
+    float fPad0;
+    float fPad1;
+    float fPad2;
+
     int useSkinMeshAnimation;
     int JointIndexOffset;
-    int pad0;
+    int drawPathIndex;
     int pad1;
 } ubo;
 
@@ -76,8 +81,33 @@ void main(){
     vec4 VNormal = ubo.view * vec4(WorldNormal, 0.0);
     vec2 SphereUV = VNormal.xy * 0.5 + 0.5;
 
+    // Pos
+    if(ubo.drawPathIndex == 2) // アウトライン描画パス
+    {
+        bool ViewSpaceOutline = false;
+
+        if(ViewSpaceOutline)
+        {
+            vec4 CameraPos = ubo.view * WorldPos;
+            vec3 CameraNormal = (ubo.view * vec4(WorldNormal, 0.0)).xyz;
+
+            CameraPos.xy += normalize(CameraNormal).xy * ubo.edgeSize * 0.001;
+
+            gl_Position = ubo.proj * CameraPos;
+        }
+        else
+        {
+            WorldPos.xyz += normalize(WorldNormal) * ubo.edgeSize * 0.001;
+
+            gl_Position = ubo.proj * ubo.view * WorldPos;
+        }
+    }
+    else
+    {
+        gl_Position = ubo.proj * ubo.view * WorldPos;
+    }
+
     //
-    gl_Position = ubo.proj * ubo.view * WorldPos;
     f_WorldNormal = WorldNormal;
     f_Texcoord = inTexcoord;
     f_WorldPos = WorldPos;

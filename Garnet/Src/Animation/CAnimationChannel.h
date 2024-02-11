@@ -18,6 +18,10 @@ namespace animation
 		// FBXでは必須でglTF/VRMでは不要
 		const bool m_UseAnimLocalAxis;
 
+		// Translate成分はオフセットなのか座標なのか
+		// MMDはオフセットとして扱う
+		const bool m_IsTransOffset;
+
 		const int m_SamplerIndex;
 		const EAnimationTarget m_AnimationTarget;
 		std::shared_ptr<object::CNode> m_TargetNode;
@@ -29,10 +33,11 @@ namespace animation
 		bool UpdateWeights(const std::vector<float>& Value);
 		bool UpdateModelMatrix(const std::vector<float>& Value);
 	public:
-		CAnimationChannel(bool UseAnimLocalAxis, int SamplerIndex, EAnimationTarget AnimationTarget, const std::shared_ptr<object::CNode>& TargetNode, EHumanoidBones BoneName);
+		CAnimationChannel(bool UseAnimLocalAxis, bool TransOffset, int SamplerIndex, EAnimationTarget AnimationTarget, const std::shared_ptr<object::CNode>& TargetNode, EHumanoidBones BoneName);
 		virtual ~CAnimationChannel();
 
 		bool IsUseAnimLocalAxis() const;
+		bool IsTransOffset() const;
 
 		int GetSamplerIndex() const;
 		EAnimationTarget GetAnimationTarget() const;

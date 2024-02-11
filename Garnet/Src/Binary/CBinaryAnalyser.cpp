@@ -65,6 +65,31 @@ namespace binary
 
 		return true;
 	}
+	
+	bool CBinaryAnalyser::GetUTF16ReverseString(std::wstring& Dst, size_t ByteSize)
+	{
+		if (!IsValid(ByteSize)) return false;
+
+		std::vector<unsigned char> Data;
+		for (int i = 0; i < ByteSize; i += 2)
+		{
+			Data.push_back(m_Pointer[i + 1]);
+			Data.push_back(m_Pointer[i]);
+		}
+
+		if (ByteSize % 2 != 0)
+		{
+			Data.push_back(m_Pointer[ByteSize - 1]);
+		}
+
+		// wstring‚ÍUTF16Astring‚ÍUTF8
+		Dst.resize(ByteSize);
+		std::memcpy(&Dst[0], &Data[0], ByteSize);
+
+		UpdatePointer(ByteSize);
+
+		return true;
+	}
 
 	bool CBinaryAnalyser::GetInt(int& Dst)
 	{

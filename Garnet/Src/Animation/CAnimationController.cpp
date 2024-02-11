@@ -70,6 +70,205 @@ namespace animation
 		return true;
 	}
 
+	// IKの計算
+	bool CAnimationController::CalculateIK(const std::vector<std::shared_ptr<object::CNode>>& NodeList)
+	{
+		for (const auto& Skin : m_SkinList)
+		{
+			const auto& BoneList = Skin->GetJointList();
+
+			for (const auto& IKBone : Skin->GetIKBoneList())
+			{
+				// TargetBoneが目指すボーンの位置
+				glm::vec3 IKGoalPos = glm::vec3(0.0f);
+				math::CTransform::CastModelMatrixToTranslation(IKBone->GetJointNode()->GetWorldMatrix(), IKGoalPos);
+
+				const auto& IKParam = IKBone->GetIKParam();
+
+				// Linkが一つもなければスキップ
+				if (IKParam->IKLinkList.size() == 0) continue;
+
+				// 足首がおかしくなるのでひとまずLinkBoneが1つの時も計算しない(必要になったら対応する)
+				if (IKParam->IKLinkList.size() == 1) continue;
+
+				// IKターゲットボーン
+				if (IKParam->IKTargetBoneIndex < 0 || IKParam->IKTargetBoneIndex >= BoneList.size()) continue;
+				const auto& IKTargetBone = BoneList[IKParam->IKTargetBoneIndex];
+
+				// CCD-IKを採用
+				// CCD-IKに使用するサイクリックボーンリスト
+				std::vector<std::shared_ptr<CJoint>> LinkBoneList;
+
+				for (const auto& Link : IKParam->IKLinkList)
+				{
+					if (Link.IKLinkBoneIndex == -1) continue;
+
+					const auto& CyclicBone = BoneList[Link.IKLinkBoneIndex];
+
+					LinkBoneList.push_back(CyclicBone);
+				}
+
+				// サイクルスタート
+				if (LinkBoneList.size() > 0)
+				{
+					// どれくらい近づいたらターゲットに届いたと判定するかの閾値
+					const float CyclicThreshold = 0.01f;
+
+					// ターゲットに届くかサイクルの最大値に達するまで計算を繰り返す
+					int CurrentLoopNum = 0;
+					while (CurrentLoopNum < IKParam->IKLoopCount)
+					{
+						bool Result = false;
+
+						for (int LinkIndex = 0; LinkIndex < LinkBoneList.size(); LinkIndex++)
+						{
+							const auto& LinkBone = LinkBoneList[LinkIndex];
+
+							//
+							glm::vec3 FirstLinkPos = glm::vec3(0.0f);
+							math::CTransform::CastModelMatrixToTranslation(IKTargetBone->GetJointNode()->GetWorldMatrix(), FirstLinkPos);
+
+							glm::vec3 SecondLinkPos = glm::vec3(0.0f);
+							math::CTransform::CastModelMatrixToTranslation(LinkBone->GetJointNode()->GetWorldMatrix(), SecondLinkPos);
+
+							// 回転行列を計算
+							glm::vec3 ToFistVector = glm::normalize(FirstLinkPos - SecondLinkPos);
+							glm::vec3 ToTargetVector = glm::normalize(IKGoalPos - SecondLinkPos);
+
+							glm::quat Rot = math::CTransform::CalcTwoVectorRotate(ToFistVector, ToTargetVector, IKParam->LimitedAngle);
+							
+							{
+								// SecondLinkPosの位置のボーンの回転を更新する(自動的に子要素も回転するので便利)
+								glm::quat LinkRot = LinkBone->GetJointNode()->GetRot();
+								LinkRot *= Rot;
+
+								// 角度制限を行うかどうか
+								if (IKParam->IKLinkList[LinkIndex].IsLimitAngle)
+								{
+									math::CTransform::ClampRotate(LinkRot, IKParam->IKLinkList[LinkIndex].LowerAngle, IKParam->IKLinkList[LinkIndex].UpperAngle);
+								}
+								
+								LinkBone->GetJointNode()->SetRot(LinkRot);
+
+								// CyclicBoneのワールド行列を更新
+								glm::mat4 WorldMatrix = LinkBone->GetJointNode()->GetParentNode()->GetWorldMatrix() * LinkBone->GetJointNode()->GetLocalMatrix();
+								LinkBone->GetJointNode()->SetWorldMatrix(WorldMatrix);
+
+								// 子要素の行列を再計算
+								for (int ChildIndex : LinkBone->GetJointNode()->GetChildrenNodeIndexList())
+								{
+									if (ChildIndex < 0 || ChildIndex >= NodeList.size()) continue;
+
+									const auto& ChildNode = NodeList[ChildIndex];
+
+									CalcWorldMatrix(WorldMatrix, ChildNode, NodeList);
+								}
+							}
+
+							// 計算結果を見て末端のボーンがIKBoneにどれくらい近づいたか見る
+							glm::vec3 CyclicResultPos = glm::vec3(0.0f);
+							math::CTransform::CastModelMatrixToTranslation(IKTargetBone->GetJointNode()->GetWorldMatrix(), CyclicResultPos);
+
+							if (glm::distance(IKGoalPos, CyclicResultPos) < CyclicThreshold)
+							{
+								Result = true;
+
+								break;
+							}
+						}
+
+						// ターゲットIKに届いたらループを終了する
+						if (Result) break;
+
+						// ループ回数を更新
+						CurrentLoopNum++;
+					}
+				}
+			}
+		}
+
+		return true;
+	}
+
+	// 付与ボーンの再計算
+	bool CAnimationController::ReCalculateGrantBone(const std::vector<std::shared_ptr<object::CNode>>& NodeList)
+	{
+		for (const auto& Skin : m_SkinList)
+		{
+			const auto& BoneList = Skin->GetJointList();
+
+			for (const auto& GrantBone : Skin->GetGrantBoneList())
+			{
+				// ParentGrantBoneを取得
+				int GrantParentBoneIndex = GrantBone->GetGrantParentBoneIndex();
+				if (GrantParentBoneIndex < 0 || GrantParentBoneIndex >= BoneList.size()) continue;
+
+				const auto& ParentGrantBone = BoneList[GrantParentBoneIndex];
+
+				// 付与率
+				const float GrantRate = GrantBone->GetGrantRate();
+
+				// 自身のPosとRot
+				glm::vec3 GrantPos = glm::vec3(0.0f);
+				glm::quat GrantRot = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
+				math::CTransform::CastModelMatrixToTransform(GrantBone->GetJointNode()->GetWorldMatrix(), GrantPos, GrantRot);
+
+				// 親ボーンのPosとRot
+				glm::vec3 ParentGrantPos = glm::vec3(0.0f);
+				glm::quat ParentGrantRot = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
+				math::CTransform::CastModelMatrixToTransform(ParentGrantBone->GetJointNode()->GetWorldMatrix(), ParentGrantPos, ParentGrantRot);
+
+				// 付与を実行
+				glm::vec3 ResultPos = GrantPos;
+				glm::quat ResultRot = GrantRot;
+
+				if (GrantBone->IsRotateGrant())
+				{
+					// 回転付与
+					ResultRot = glm::slerp(GrantRot, ParentGrantRot, GrantRate);
+				}
+				else if (GrantBone->IsMoveGrant())
+				{
+					// 移動付与
+					ResultPos = (1.0f - GrantRate) * GrantPos + GrantRate * ParentGrantPos;
+				}
+
+				// 付与結果をボーンに再割り当て
+				glm::mat4 ResultMatrix = glm::mat4(1.0f);
+				math::CTransform::CalcModelMatrix(ResultMatrix, ResultPos, ResultRot, false);
+
+				GrantBone->GetJointNode()->SetWorldMatrix(ResultMatrix);
+
+				// 子要素にも回転付与・移動付与の計算結果を適応する
+				for (int ChildIndex : GrantBone->GetJointNode()->GetChildrenNodeIndexList())
+				{
+					if (ChildIndex < 0 || ChildIndex >= NodeList.size()) continue;
+
+					const auto& ChildNode = NodeList[ChildIndex];
+
+					CalcWorldMatrix(ResultMatrix, ChildNode, NodeList);
+				}
+			}
+		}
+
+		return true;
+	}
+
+	void CAnimationController::CalcWorldMatrix(const glm::mat4& ParentWorldMatrix, const std::shared_ptr<object::CNode>& Node, const std::vector<std::shared_ptr<object::CNode>>& NodeList)
+	{
+		glm::mat4 WorldMatrix = ParentWorldMatrix * Node->GetLocalMatrix();
+		Node->SetWorldMatrix(WorldMatrix);
+
+		for (int ChildIndex : Node->GetChildrenNodeIndexList())
+		{
+			if (ChildIndex < 0 || ChildIndex >= NodeList.size()) continue;
+
+			const auto& ChildNode = NodeList[ChildIndex];
+
+			CalcWorldMatrix(WorldMatrix, ChildNode, NodeList);
+		}
+	}
+
 	// インデックス指定でモーションを変更
 	void CAnimationController::ChangeMotion(int Index)
 	{
@@ -175,6 +374,8 @@ namespace animation
 
 	void CAnimationController::AddHumanoidAnimationClip(const std::shared_ptr<animation::CAnimationClip>& SourceClip, const std::string& MotionName, animation::SAnimationLayout Layout, bool IsLoop)
 	{
+		// IsWorldAnim: アニメーションがワールド座標系のデータを示すかどうか
+
 		// Clipの値をコピーする
 		std::shared_ptr<animation::CAnimationClip> TargetClip = std::make_shared<animation::CAnimationClip>();
 
@@ -191,6 +392,11 @@ namespace animation
 
 				std::vector<float> TargetOutput = SourceKeyFrame->GetOutput();
 				TargetKeyFrame->SetOutput(TargetOutput);
+
+				TargetKeyFrame->SetXPointList(SourceKeyFrame->GetXPointList());
+				TargetKeyFrame->SetYPointList(SourceKeyFrame->GetYPointList());
+				TargetKeyFrame->SetZPointList(SourceKeyFrame->GetZPointList());
+				TargetKeyFrame->SetRPointList(SourceKeyFrame->GetRPointList());
 
 				TargetSampler->AddKeyFrame(TargetKeyFrame);
 			}
@@ -227,15 +433,20 @@ namespace animation
 				}
 			}
 
-			std::shared_ptr<animation::CAnimationChannel> TargetChannel = std::make_shared<animation::CAnimationChannel>(SourceChannel->IsUseAnimLocalAxis(), SourceChannel->GetSamplerIndex(), SourceChannel->GetAnimationTarget(), TargetNode, SourceChannel->GetBoneName());
+			std::shared_ptr<animation::CAnimationChannel> TargetChannel = std::make_shared<animation::CAnimationChannel>(SourceChannel->IsUseAnimLocalAxis(), SourceChannel->IsTransOffset(), SourceChannel->GetSamplerIndex(), SourceChannel->GetAnimationTarget(), TargetNode, SourceChannel->GetBoneName());
 
 			TargetClip->AddAnimationChannel(TargetChannel);
 		}
 
-		// RigのReTargetingを行う
-		// リターゲティングとはリグの形が異なるアニメーションを自身のアニメーションに合うように調整すること
-		// 例えば身長が違うとアバターが伸びてしまうしリグが反対だとねじれてしまう
-		if (!ReTargetRig(SourceClip, TargetClip)) return;
+		// DefaultSkinを持っている時のみリターゲットを行う
+		// リターゲットは平行移動成分(Pos)に対して行うものなので、回転だけのアニメーションには必要ない
+		if (SourceClip->GetDefaultSkin())
+		{
+			// RigのReTargetingを行う
+			// リターゲティングとはリグの形が異なるアニメーションを自身のアニメーションに合うように調整すること
+			// 例えば身長が違うとアバターが伸びてしまう
+			if (!ReTargetRig(SourceClip, TargetClip)) return;
+		}
 
 		TargetClip->SetIsLoop(IsLoop);
 

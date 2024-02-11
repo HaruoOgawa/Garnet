@@ -40,6 +40,11 @@ namespace math
 		m_Rot = Rot;
 	}
 
+	void CTransform::MulRot(const glm::quat& Rot)
+	{
+		m_Rot *= Rot;
+	}
+
 	void CTransform::AddRotate(const glm::vec3& Axis, float Radians)
 	{
 		m_Rot *= glm::angleAxis(glm::degrees(Radians), Axis);
@@ -60,7 +65,7 @@ namespace math
 		math::CTransform::CastModelMatrixToTransform(ModelMatrix, m_Pos, m_Rot, m_Scale);
 	}
 
-	void CTransform::CastModelMatrixToTransform(const glm::mat4& ModelMatrix, glm::vec3& Translation, glm::quat& Rotation, glm::vec3& Scale, bool UseScale)
+	void CTransform::CastModelMatrixToTransform(const glm::mat4& ModelMatrix, glm::vec3& Translation, glm::quat& Rotation, glm::vec3& Scale)
 	{
 		// 渡されたModelMatrixからPos・Rotate・Scaleを復元する
 		// https://stackoverflow.com/questions/27655885/get-position-rotation-and-scale-from-matrix-in-opengl
@@ -71,17 +76,17 @@ namespace math
 		CastModelMatrixToTranslation(ModelMatrix, Translation);
 		
 		// Scale
-		if (UseScale)
-		{
-			CastModelMatrixToScale(ModelMatrix, Scale);
-		}
-		else
-		{
-			Scale = glm::vec3(1.0f, 1.0f, 1.0f);
-		}
+		CastModelMatrixToScale(ModelMatrix, Scale);
 
 		// Rot
 		CastModelMatrixToRotation(ModelMatrix, Rotation, Scale);
+	}
+
+	void CTransform::CastModelMatrixToTransform(const glm::mat4& ModelMatrix, glm::vec3& Translation, glm::quat& Rotation)
+	{
+		glm::vec3 Scale = glm::vec3(1.0f, 1.0f, 1.0f);
+
+		CastModelMatrixToTransform(ModelMatrix, Translation, Rotation, Scale);
 	}
 
 	void CTransform::CastModelMatrixToTranslation(const glm::mat4& ModelMatrix, glm::vec3& Translation)
@@ -113,6 +118,14 @@ namespace math
 			glm::sqrt(glm::length2(glm::vec3(ModelMatrix[1][0], ModelMatrix[1][1], ModelMatrix[1][2]))),
 			glm::sqrt(glm::length2(glm::vec3(ModelMatrix[2][0], ModelMatrix[2][1], ModelMatrix[2][2])))
 		);
+	}
+
+	// 原点にある点がどこに移動するか
+	void CTransform::GetMoveFromModelMatrix(const glm::mat4& ModelMatrix, glm::vec3& Move)
+	{
+		glm::vec4 result = ModelMatrix * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+
+		Move = glm::vec3(result.x, result.y, result.z);
 	}
 
 	void CTransform::CastLeftHandToRightHand(glm::vec3& Translation)
@@ -180,5 +193,84 @@ namespace math
 		{
 			ModelMatrix = trsMatrix * rotMatrix;
 		}
+	}
+
+	glm::quat CTransform::CalcTwoVectorRotate(const glm::vec3& FromVector, const glm::vec3& ToVector, float MaxAngle)
+	{
+		// https://www.opengl-tutorial.org/jp/intermediate-tutorials/tutorial-17-quaternions/
+		glm::quat Result = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
+
+		float cosTheta = glm::dot(FromVector, ToVector);
+
+		if (cosTheta < -1.0f + 0.001f)
+		{
+			// 2つのベクトルが逆を向いている特殊ケース
+			// まず平行ではない任意のベクトルを決める
+			glm::vec3 SubVector = glm::vec3(0.0f);
+			for (int i = 0; i < 3; i++)
+			{
+				glm::vec3 CheckVector = glm::vec3((i == 0) ? 1.0f : 0.0f, (i == 1) ? 1.0f : 0.0f, (i == 2) ? 1.0f : 0.0f);
+
+				if (glm::abs(glm::dot(FromVector, CheckVector)) < 1.0f - 0.001f)
+				{
+					SubVector = CheckVector;
+
+					break;
+				}
+			}
+
+			// 求まったベクトルを元に回転する
+			glm::vec3 RotateAxis = glm::cross(FromVector, SubVector);
+			float Angle = glm::acos(cosTheta);
+			Angle = fminf(MaxAngle, Angle);
+
+			Result = glm::angleAxis(Angle, RotateAxis);
+		}
+		else
+		{
+			glm::vec3 RotateAxis = glm::cross(FromVector, ToVector);
+			float Angle = glm::acos(cosTheta);
+			Angle = fminf(MaxAngle, Angle);
+
+			Result = glm::angleAxis(Angle, RotateAxis);
+		}
+
+		return Result;
+	}
+
+	void CTransform::ClampRotate(glm::quat& Rotation, const glm::vec3& LowerAngle, const glm::vec3& UpperAngle)
+	{
+		// 回転の角度制限をクランプで行う
+		glm::vec3 SrcEuler = glm::eulerAngles(Rotation);
+
+		glm::vec3 DstEuler = glm::vec3(
+			glm::clamp(SrcEuler.x, LowerAngle.x, UpperAngle.x),
+			glm::clamp(SrcEuler.y, LowerAngle.y, UpperAngle.y),
+			glm::clamp(SrcEuler.z, LowerAngle.z, UpperAngle.z)
+		);
+
+		Rotation = glm::angleAxis(DstEuler.x, glm::vec3(1.0f, 0.0f, 0.0f)) * glm::angleAxis(DstEuler.y, glm::vec3(0.0f, 1.0f, 0.0f)) * glm::angleAxis(DstEuler.z, glm::vec3(0.0f, 0.0f, 1.0f));
+	}
+
+	void CTransform::ClampRotate(glm::mat4& ModelMatrix, const glm::vec3& LowerAngle, const glm::vec3& UpperAngle)
+	{
+		glm::vec3 Pos = glm::vec3(0.0f);
+		glm::quat Rot = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
+
+		CTransform::CastModelMatrixToTransform(ModelMatrix, Pos, Rot);
+
+		CTransform::ClampRotate(Rot, LowerAngle, UpperAngle);
+
+		CTransform::CalcModelMatrix(ModelMatrix, Pos, Rot, false);
+	}
+
+	void CTransform::RotateModelMatrix(glm::mat4& ModelMatrix, const glm::quat& SrcRot)
+	{
+		glm::vec3 Pos = glm::vec3(0.0f);
+		glm::quat Rot = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
+
+		CTransform::CastModelMatrixToTransform(ModelMatrix, Pos, Rot);
+
+		CTransform::CalcModelMatrix(ModelMatrix, Pos, SrcRot, false);
 	}
 }

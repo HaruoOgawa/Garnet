@@ -11,8 +11,8 @@ namespace resource
 		m_VertexShader(std::make_shared<resource::CFile>("Resources\\Shaders\\loadingbar" + pGraphicsAPI->GetVertexShaderExtension())),
 		m_FragmentShader(std::make_shared<resource::CFile>("Resources\\Shaders\\loadingbar" + pGraphicsAPI->GetFragmentShaderExtension()))
 	{
-		m_VertexShader->Load();
-		m_FragmentShader->Load();
+		m_VertexShader->LoadImmediate();
+		m_FragmentShader->LoadImmediate();
 	}
 
 	CLoadWorker::~CLoadWorker()
@@ -51,7 +51,7 @@ namespace resource
 		m_LoadingBar->AddMesh(Mesh);
 
 		// NODE
-		std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(0);
+		std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(0, 0);
 		m_LoadingBar->AddNode(Node);
 
 		// CreateŠÖ”‚ðŽÀs
@@ -93,8 +93,6 @@ namespace resource
 		{
 			for (auto& Resource : m_FirstLoadResourceList)
 			{
-				if (!Resource->Update(pGraphicsAPI)) return false;
-
 				switch (Resource->GetStatus())
 				{
 				case resource::ELoadStatus::None:
@@ -102,6 +100,7 @@ namespace resource
 					return true;
 
 				case resource::ELoadStatus::Loading:
+					if (!Resource->Update(pGraphicsAPI)) return false;
 					return true;
 
 				case resource::ELoadStatus::Loaded:

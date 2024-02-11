@@ -2,6 +2,7 @@
 #include "CPmxImporter.h"
 #include "../../Debug/Message/Console.h"
 #include "../../Math/CMath.h"
+#include "../../Math/CTransform.h"
 #include "../../Object/C3DObject.h"
 #include "../../Animation/CAnimationClip.h"
 #include "../../Animation/CSkin.h"
@@ -33,14 +34,25 @@ namespace mmd
 		std::vector<std::shared_ptr<object::CNode>> NodeList;
 		std::vector<std::vector<int>> RootNodeIndexList;
 
-		std::shared_ptr<object::CNode> RootNode = std::make_shared<object::CNode>(-1);
+		std::shared_ptr<object::CNode> RootNode = std::make_shared<object::CNode>(-1, static_cast<int>(NodeList.size()));
 		RootNode->SetName("RootNode");
+		RootNode->SetU16Name(L"RootNode");
 		NodeList.push_back(RootNode);
 
-		RootNodeIndexList.push_back(std::vector<int>(0));
+		RootNodeIndexList.push_back(std::vector<int>({ 0 }));
 
 		// Skin
 		std::shared_ptr<animation::CSkin> Skin = std::make_shared<animation::CSkin>();
+		if (!CreateAnimationSkin(model, Skin, NodeList, RootNode)) return false;
+
+		// BoneTableを作成
+		Skin->MakeBoneTable();
+
+		// IKBoneListを作成
+		Skin->MakeIKBoneList();
+
+		// 付与ボーンリストを作成
+		Skin->MakeGrantBoneList();
 
 		// マテリアルリスト
 		std::vector<std::shared_ptr<graphics::CMaterial>> MaterialList;
@@ -54,9 +66,11 @@ namespace mmd
 
 		// メッシュ
 		std::vector<std::shared_ptr<graphics::CMesh>> MeshList;
-		if (!CreateMeshList(model, MeshList, RootNode, NodeList, MaterialList)) return false;
+		if (!CreateMeshList(model, MeshList, RootNode, NodeList, MaterialList, (Skin->GetJointList().size() > 0))) return false;
 
 		// リソースを登録
+		Object->SetRootNodeIndexList(RootNodeIndexList);
+
 		for (const auto& Node : NodeList)
 		{
 			Object->AddNode(Node);
@@ -82,6 +96,124 @@ namespace mmd
 		for (const auto& Mesh : MeshList)
 		{
 			Object->AddMesh(Mesh);
+		}
+
+		// DefaultMatrixを保存
+		Object->ApplyDefaultLocalTransform();
+
+		// WorldMatrixを計算
+		Object->CalcWorldMatrix();
+
+		// ParentNodeを設定する
+		Object->ApplyParentNode();
+
+		// 逆バインドポーズを計算する
+		if (!CalcInverseBindPose(Skin)) return false;
+
+		return true;
+	}
+
+	bool CPmxImporter::CreateAnimationSkin(const CPmxModel& model, std::shared_ptr<animation::CSkin>& Skin, std::vector<std::shared_ptr<object::CNode>>& NodeList, const std::shared_ptr<object::CNode>& RootNode)
+	{
+		animation::CBoneNameProvider Provider;
+
+		// PmxではBoneとJointは全くの別物でそれぞれ違う役割を持っているので厳格に名前分けする必要がある!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+		const auto& PmxBoneList = model.GetPmxBoneList();
+
+		for (int BoneIndex = 0; BoneIndex < PmxBoneList.size(); BoneIndex++)
+		{
+			const auto& PmxBone = PmxBoneList[BoneIndex];
+
+			// BoneNodeの作成
+			std::shared_ptr<object::CNode> BoneNode = std::make_shared<object::CNode>(-1, static_cast<int>(NodeList.size()));
+
+			const auto& Name = PmxBone->GetBoneName().second;
+			BoneNode->SetU16Name(Name);
+
+			glm::vec3 Pos = PmxBone->GetPos();
+			glm::quat Rot = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
+
+			// PMXのPos・Rotateはワールド座標系での値なので親ノードのワールドマトリックスを乗算してローカル座標系に戻す必要がある
+			int ParentBoneIndex = PmxBone->GetParentBoneIndex();
+			if(ParentBoneIndex >= 0 && ParentBoneIndex < PmxBoneList.size())
+			{
+				const auto& ParentPmxBone = PmxBoneList[ParentBoneIndex];
+				
+				// Posはワールド座標系なのでローカル座標系に戻す必要がある
+				// ただしRotは(存在すれば)ローカル軸から取得するので既にローカル座標系である
+				Pos -= ParentPmxBone->GetPos();
+			}
+
+			//
+			BoneNode->SetPos(Pos);
+			BoneNode->SetRot(Rot);
+
+			BoneNode->SaveAsDefaultLocalTransform();
+
+			NodeList.push_back(BoneNode);
+
+			// Boneを作成
+			std::shared_ptr<animation::CJoint> Bone = std::make_shared<animation::CJoint>(BoneNode);
+
+			// BoneにBoneNameを割り当てる
+			animation::EHumanoidBones BoneName = Provider.GetBoneNameU16(Name);
+			Bone->SetBoneName(BoneName);
+
+			// ボーンの付与
+			if (PmxBone->IsRotateGrant())
+			{
+				// 回転付与
+				Bone->SetRotateGrant(PmxBone->GetGrantParentBoneIndex(), PmxBone->GetGrantRate());
+			}
+			else if (PmxBone->IsMoveGrant())
+			{
+				// 移動付与
+				Bone->SetMoveGrant(PmxBone->GetGrantParentBoneIndex(), PmxBone->GetGrantRate());
+			}
+
+			// IK
+			Bone->SetIKParam(PmxBone->GetIKParam());
+
+			Skin->AddJoint(Bone);
+		}
+
+		// BoneNodeに子要素を設定する
+		{
+			const auto& BoneList = Skin->GetJointList();
+
+			for (int BoneIndex = 0; BoneIndex < PmxBoneList.size(); BoneIndex++)
+			{
+				const auto& PmxBone = PmxBoneList[BoneIndex];
+
+				const auto& Bone = BoneList[BoneIndex];
+				int SelfNodeIndex = Bone->GetJointNode()->GetSelfNodeIndex();
+
+				int ParentBoneIndex = PmxBone->GetParentBoneIndex();
+
+				/// 範囲外を示すときはRootNodeを親に持つ
+				if (ParentBoneIndex < 0 || ParentBoneIndex >= BoneList.size())
+				{
+					RootNode->AddChildrenNodeIndex(SelfNodeIndex);
+				}
+				else
+				{
+					// 自身を親ノードの子要素リストに追加する
+					BoneList[ParentBoneIndex]->GetJointNode()->AddChildrenNodeIndex(SelfNodeIndex);
+				}
+			}
+		}
+
+		return true;
+	}
+
+	bool CPmxImporter::CalcInverseBindPose(std::shared_ptr<animation::CSkin>& Skin)
+	{
+		for (const auto& Bone : Skin->GetJointList())
+		{
+			// MMDのBoneはローカル座標系ではなくワールド座標系なのでセンターとかの親ボーンを考慮するかは迷うところ
+			glm::mat4 InverseBindMatrix = glm::inverse(Bone->GetJointNode()->GetWorldMatrix());
+			Bone->GetJointNode()->SetInverseBindMatrix(InverseBindMatrix);
 		}
 
 		return true;
@@ -186,10 +318,10 @@ namespace mmd
 	}
 
 	bool CPmxImporter::CreateMeshList(const CPmxModel& model, std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, const std::shared_ptr<object::CNode>& RootNode, std::vector<std::shared_ptr<object::CNode>>& NodeList,
-		const std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList)
+		const std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList, bool ExistSkin)
 	{
 		// 明示的にMeshNodeを作成
-		std::shared_ptr<object::CNode> MeshNode = std::make_shared<object::CNode>(-1);
+		std::shared_ptr<object::CNode> MeshNode = std::make_shared<object::CNode>(-1, static_cast<int>(NodeList.size()));
 		MeshNode->SetName("BaseMeshNode");
 		NodeList.push_back(MeshNode);
 
@@ -444,7 +576,13 @@ namespace mmd
 
 				// PMXにはノードの概念がないのでこちらで明示的に作成する
 				int MeshIndex = static_cast<int>(MeshList.size()) - 1;
-				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(MeshIndex);
+				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(MeshIndex, static_cast<int>(NodeList.size()));
+
+				Node->SetU16Name(PmxMaterial->GetMaterialName().second);
+
+				// ひとまずPMXはSkinを1つしか持っていない
+				int SkinIndex = (ExistSkin) ? 0 : -1;
+				Node->SetSkinIndex(SkinIndex);
 
 				NodeList.push_back(Node);
 

@@ -255,7 +255,7 @@ namespace fbx
 
 		// Nodeを作成
 		// MeshとSkinは後ほどセットする
-		std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(-1);
+		std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(-1, static_cast<int>(NodeList.size()));
 
 		std::string NodeName = std::string(pFBXNode->getName());
 		Node->SetName(NodeName);
@@ -301,14 +301,6 @@ namespace fbx
 					glm::angleAxis(static_cast<float>(fbxRotation[0]), glm::vec3(1.0f, 0.0f, 0.0f));
 				Scale = glm::vec3(static_cast<float>(fbxScale[0]), static_cast<float>(fbxScale[1]), static_cast<float>(fbxScale[2]));
 			}
-		}
-
-		// Mixamo固有の変換
-		//if (IsMixamoFbx)
-		{
-			// FbxはTranslation・Posが100倍になっているので調整する
-			// たぶん単位がcmなので0.01倍することで計算に一般的に使用するmに直す
-			math::CTransform::CastCentiMeter2Meter(Pos);
 		}
 
 		Node->SetPos(Pos);
@@ -706,14 +698,6 @@ namespace fbx
 
 											glm::vec3 Pos = glm::vec3(static_cast<float>(pFbxPosition[0]), static_cast<float>(pFbxPosition[1]), static_cast<float>(pFbxPosition[2]));
 
-											// Mixamo固有の変換
-											//if (IsMixamoFbx)
-											{
-												// FbxはTranslation・Posが100倍になっているので調整する
-												// たぶん単位がcmなので0.01倍することで計算に一般的に使用するmに直す
-												math::CTransform::CastCentiMeter2Meter(Pos);
-											}
-
 											AttributePosData[ControlPoint * 3 + 0] = Pos.x;
 											AttributePosData[ControlPoint * 3 + 1] = Pos.y;
 											AttributePosData[ControlPoint * 3 + 2] = Pos.z;
@@ -759,14 +743,6 @@ namespace fbx
 											const auto& pFbxPosition = Points[ControlPoint];
 
 											glm::vec3 Pos = glm::vec3(static_cast<float>(pFbxPosition[0]), static_cast<float>(pFbxPosition[1]), static_cast<float>(pFbxPosition[2]));
-
-											// Mixamo固有の変換
-											//if (IsMixamoFbx)
-											{
-												// FbxはTranslation・Posが100倍になっているので調整する
-												// たぶん単位がcmなので0.01倍することで計算に一般的に使用するmに直す
-												math::CTransform::CastCentiMeter2Meter(Pos);
-											}
 
 											PosList.push_back(Pos);
 
@@ -1241,14 +1217,6 @@ namespace fbx
 							{
 								glm::vec3 Pos = glm::vec3(ValuesList[0][v], ValuesList[1][v], ValuesList[2][v]);
 
-								// Mixamo固有の変換
-								//if (IsMixamoFbx)
-								{
-									// FbxはTranslation・Posが100倍になっているので調整する
-									// たぶん単位がcmなので0.01倍することで計算に一般的に使用するmに直す
-									math::CTransform::CastCentiMeter2Meter(Pos);
-								}
-
 								outputList.push_back(Pos.x);
 								outputList.push_back(Pos.y);
 								outputList.push_back(Pos.z);
@@ -1320,7 +1288,7 @@ namespace fbx
 						std::shared_ptr<animation::CBoneNameProvider> Provider = std::make_shared<animation::CBoneNameProvider>();
 						animation::EHumanoidBones BoneName = Provider->GetBoneName(JointName);
 
-						std::shared_ptr<animation::CAnimationChannel> AnimationChannel = std::make_shared<animation::CAnimationChannel>(UseAnimLocalAxis, TargetSamplerIndex, AnimationTarget, TargetNode, BoneName);
+						std::shared_ptr<animation::CAnimationChannel> AnimationChannel = std::make_shared<animation::CAnimationChannel>(UseAnimLocalAxis, false, TargetSamplerIndex, AnimationTarget, TargetNode, BoneName);
 
 						AnimationClip->AddAnimationChannel(AnimationChannel);
 					}

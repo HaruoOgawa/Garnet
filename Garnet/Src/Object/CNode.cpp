@@ -2,8 +2,10 @@
 
 namespace object
 {
-	CNode::CNode(int MeshIndex):
+	CNode::CNode(int MeshIndex, int SelfNodeIndex):
+		m_SelfNodeIndex(SelfNodeIndex),
 		m_Name(""),
+		m_U16Name(L""),
 		m_MeshIndex(MeshIndex),
 		m_SkinIndex(-1),
 		m_LocalTransform(std::make_shared<math::CTransform>()),
@@ -27,6 +29,20 @@ namespace object
 	const std::string& CNode::GetName() const
 	{
 		return m_Name;
+	}
+
+	void CNode::SetU16Name(const std::wstring& U16Name)
+	{
+		m_U16Name = U16Name;
+	}
+	const std::wstring& CNode::GetU16Name() const
+	{
+		return m_U16Name;
+	}
+
+	int CNode::GetSelfNodeIndex() const
+	{
+		return m_SelfNodeIndex;
 	}
 
 	void CNode::SetMeshIndex(int MeshIndex)
@@ -107,6 +123,11 @@ namespace object
 	void CNode::SetRot(const glm::quat& Rot)
 	{
 		m_LocalTransform->SetRot(Rot);
+	}
+
+	void CNode::MulRot(const glm::quat& Rot)
+	{
+		m_LocalTransform->MulRot(Rot);
 	}
 
 	void CNode::AddRotate(const glm::vec3& Axis, float Radians)
@@ -239,6 +260,11 @@ namespace object
 	void CNode::SetChildrenNodeIndexList(const std::vector<int>& NodeList)
 	{
 		m_ChildrenNodeIndexList = NodeList;
+	}
+
+	void CNode::AddChildrenNodeIndex(int Index)
+	{
+		m_ChildrenNodeIndexList.push_back(Index);
 	}
 
 	void CNode::SetSkinIndex(int SkinIndex)

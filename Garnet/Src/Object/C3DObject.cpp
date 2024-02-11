@@ -62,7 +62,7 @@ namespace object
 		Object->AddMesh(Mesh);
 
 		// Node
-		std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(0);
+		std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(0, 0);
 		Object->AddNode(Node);
 
 		// Create
@@ -326,6 +326,12 @@ namespace object
 		CalcWorldMatrix();
 
 #ifdef USE_ANIMATION
+		// IKの計算を行う
+		if (!m_AnimationController->CalculateIK(m_NodeList)) return false;
+
+		// 付与ボーンの位置を再計算
+		if (!m_AnimationController->ReCalculateGrantBone(m_NodeList)) return false;
+
 		// Drawは何度も呼ぶことがあるのでUpdateでマイフレーム一回だけ計算する
 		// SSBOのサイズをDynamicOffset毎に変更できるかわからないのでひとまず全部まとめて渡す
 		m_CurrentSkinMatrixList.clear();
@@ -424,37 +430,46 @@ namespace object
 		}
 		
 #ifdef USE_ANIMATION
-		/*for (const auto& Skin : m_AnimationController->GetSkinList())
+		/*
+		if(DebugSphere)
 		{
-			for (const auto& Joint : Skin->GetJointList())
+			for (const auto& Skin : m_AnimationController->GetSkinList())
 			{
-				// Debug用: Jointの描画
-				const auto& JointNode = Joint->GetJointNode();
-				DebugSphere->SetPos(m_ObjectTransform->GetModelMatrix() * JointNode->GetWorldMatrix() * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
-				DebugSphere->SetScale(glm::vec3(0.025f));
+				for (const auto& Joint : Skin->GetJointList())
+				{
+					//if (Joint->GetBoneName() == animation::EHumanoidBones::None) continue;
 
-				if (Joint->GetBoneName() == animation::EHumanoidBones::Hips)
-				{
-					DebugSphere->GetMaterialList()[0]->SetUniformValue("baseColor", &glm::vec4(1.0f, 0.0f, 0.0f, 1.0f)[0], sizeof(glm::vec4));
-				}
-				else if (Joint->GetBoneName() == animation::EHumanoidBones::LeftUpperArm || Joint->GetBoneName() == animation::EHumanoidBones::RightUpperArm)
-				{
-					DebugSphere->GetMaterialList()[0]->SetUniformValue("baseColor", &glm::vec4(0.0f, 1.0f, 0.0f, 1.0f)[0], sizeof(glm::vec4));
-				}
-				else if (Joint->GetBoneName() == animation::EHumanoidBones::LeftLowerArm || Joint->GetBoneName() == animation::EHumanoidBones::RightLowerArm)
-				{
-					DebugSphere->GetMaterialList()[0]->SetUniformValue("baseColor", &glm::vec4(0.0f, 1.0f, 1.0f, 1.0f)[0], sizeof(glm::vec4));
-				}
-				else
-				{
-					DebugSphere->GetMaterialList()[0]->SetUniformValue("baseColor", &glm::vec4(0.0f, 0.0f, 1.0f, 1.0f)[0], sizeof(glm::vec4));
-				}
+					const auto& JointNode = Joint->GetJointNode();
 
-				if (!DebugSphere->Draw(IsDepthPass, Camera, Projection, DrawInfo)) return false;
+					// Debug用: Jointの描画
+					{
+						DebugSphere->SetPos(m_ObjectTransform->GetModelMatrix() * JointNode->GetWorldMatrix() * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
+						DebugSphere->SetScale(glm::vec3(0.025f));
+					}
+					
+					// Debug用: ローカル軸の描画(SphereをBoxに変更する)
+					{
+						//DebugSphere->SetScale(glm::vec3(0.025f, 0.025f, 0.025f * 4.0f));
+						//DebugSphere->SetRot(JointNode->GetDefaultLocalTransform()->GetRot());
+						//DebugSphere->SetPos(m_ObjectTransform->GetModelMatrix()* JointNode->GetWorldMatrix()* glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
+					}
 
-				// Debug用: Boneの描画
+					DebugSphere->GetMaterialList()[0]->SetUniformValue("useColor", &glm::ivec1(1)[0], sizeof(glm::ivec1));
+					
+					if(Joint->IsRotateGrant() || Joint->IsMoveGrant())
+					{
+						DebugSphere->GetMaterialList()[0]->SetUniformValue("baseColor", &glm::vec4(1.0f, 0.0f, 0.0f, 1.0f)[0], sizeof(glm::vec4));
+					}
+					else
+					{
+						DebugSphere->GetMaterialList()[0]->SetUniformValue("baseColor", &glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)[0], sizeof(glm::vec4));
+					}
+
+					if (!DebugSphere->Draw(IsDepthPass, false, Camera, Projection, DrawInfo)) return false;
+				}
 			}
-		}*/
+		}
+		*/
 #endif
 
 		return true;
@@ -498,6 +513,7 @@ namespace object
 
 	void C3DObject::AddHumanoidAnimationClip(const std::shared_ptr<animation::CAnimationClip>& SourceClip, const std::string& MotionName, animation::SAnimationLayout Layout, bool IsLoop)
 	{
+		// IsWorldAnim: アニメーションがワールド座標系のデータを示すかどうか
 		m_AnimationController->AddHumanoidAnimationClip(SourceClip, MotionName, Layout, IsLoop);
 	}
 

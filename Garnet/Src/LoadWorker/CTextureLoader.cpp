@@ -53,6 +53,12 @@ namespace resource
 
 		return true;
 	}
+
+	bool CTextureLoader::LoadImmediate()
+	{
+		return true;
+	}
+
 	bool CTextureLoader::Update(api::IGraphicsAPI* pGraphicsAPI)
 	{
 		for (const auto& File : m_FileList)

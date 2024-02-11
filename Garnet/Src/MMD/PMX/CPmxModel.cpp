@@ -34,6 +34,11 @@ namespace mmd
 		return m_PmxMaterialList;
 	}
 
+	const std::vector<std::shared_ptr<CPmxBone>>& CPmxModel::GetPmxBoneList() const
+	{
+		return m_PmxBoneList;
+	}
+
 	bool CPmxModel::Analyse(const std::vector<unsigned char>& Data)
 	{
 		// Analyserを生成
@@ -85,8 +90,13 @@ namespace mmd
 			return false;
 		}
 
-		// Material
-		// Materialの仕様に合わせてメッシュを分割する必要があるかも？(Materialを実装しながら確認する)
+		// Bone
+		if (!AnalyseBone(Analyser, m_MetaData))
+		{
+			Console::Log("[Error] Pmx AnalyseBone Error\n");
+
+			return false;
+		}
 
 		return true;
 	}
@@ -406,7 +416,7 @@ namespace mmd
 			}
 		}
 
-		m_PmxMesh = std::make_shared<CPmxMesh>(PositionAttribute, NormalAttribute, UVAttribute, TangentAttribute, UIntJointAttribute, ByteJointAttribute, UShortIndices, WeightAttribute, AdditionalUVAttribute, UIntIndices, ByteIndices, UShortIndices);
+		m_PmxMesh = std::make_shared<CPmxMesh>(PositionAttribute, NormalAttribute, UVAttribute, TangentAttribute, UIntJointAttribute, ByteJointAttribute, UShortJointAttribute, WeightAttribute, AdditionalUVAttribute, UIntIndices, ByteIndices, UShortIndices);
 
 		return true;
 	}
@@ -618,6 +628,229 @@ namespace mmd
 		return true;
 	}
 
+	bool CPmxModel::AnalyseBone(binary::CBinaryAnalyser& Analyser, const SPmxMetaData& MetaData)
+	{
+		int NumOfBone = 0;
+		if (!Analyser.GetInt(NumOfBone)) return false;
+
+		for (int BoneIndex = 0; BoneIndex < NumOfBone; BoneIndex++)
+		{
+			// BoneName
+			std::pair<std::string, std::wstring> BoneName = std::make_pair(std::string(""), std::wstring(L""));
+			{
+				int ByteLength = 0;
+				if (!Analyser.GetInt(ByteLength)) return false;
+
+				if (MetaData.EncodeType == EPmxEncodeType::UTF8)
+				{
+					if (!Analyser.GetString(BoneName.first, ByteLength)) return false;
+				}
+				else if (MetaData.EncodeType == EPmxEncodeType::UTF16)
+				{
+					if (!Analyser.GetUTF16String(BoneName.second, ByteLength)) return false;
+				}
+			}
+
+			// BoneName_EN
+			std::pair<std::string, std::wstring> BoneName_EN = std::make_pair(std::string(""), std::wstring(L""));
+			{
+				int ByteLength = 0;
+				if (!Analyser.GetInt(ByteLength)) return false;
+
+				if (MetaData.EncodeType == EPmxEncodeType::UTF8)
+				{
+					if (!Analyser.GetString(BoneName_EN.first, ByteLength)) return false;
+				}
+				else if (MetaData.EncodeType == EPmxEncodeType::UTF16)
+				{
+					if (!Analyser.GetUTF16String(BoneName_EN.second, ByteLength)) return false;
+				}
+			}
+
+			// 位置
+			glm::vec3 Pos = glm::vec3(0.0f);
+			{
+				if (!Analyser.IsValid(4 * 3)) return false;
+
+				Pos.x = Analyser.GetFloat();
+				Pos.y = Analyser.GetFloat();
+				Pos.z = Analyser.GetFloat();
+			}
+
+			// 親ボーンのインデックス
+			int ParentBoneIndex = GetMultiTypeValueAsInterger(Analyser, MetaData.BoneIndexSize);
+
+			// 変形階層
+			int DeformLayer = -1;
+			if (!Analyser.GetInt(DeformLayer)) return false;
+
+			// ボーンフラグ(16bit)
+			unsigned short BoneFlag = 0;
+			if (!Analyser.GetUShort(BoneFlag)) return false;
+
+			// PmxBoneを作成
+			std::shared_ptr<CPmxBone> PmxBone = std::make_shared<CPmxBone>(BoneName, BoneName_EN, Pos, ParentBoneIndex, DeformLayer, BoneFlag);
+
+			// ボーンフラグを見て処理を分ける
+			{
+				// 接続先
+				if (BoneFlag & 0x0001)
+				{
+					// 接続先: 1
+					// 接続先ボーンのボーンIndex(ネットで調べるときは『表示先』と出る)
+					int ConnectBoneIndex = GetMultiTypeValueAsInterger(Analyser, MetaData.BoneIndexSize);
+				}
+				else
+				{
+					// 接続先: 0
+					// 座標オフセット, ボーン位置からの相対分
+					if (!Analyser.IsValid(4 * 3)) return false;
+
+					glm::vec3 Offset = glm::vec3(0.0f);
+
+					Offset.x = Analyser.GetFloat();
+					Offset.y = Analyser.GetFloat();
+					Offset.z = Analyser.GetFloat();
+
+					// Posにオフセットを追加する
+					Pos += Offset;
+				}
+
+				// 回転付与 または 移動付与 が 1
+				if (BoneFlag & 0x0100 || BoneFlag & 0x0200)
+				{
+					// 付与親ボーンのボーンIndex
+					int GrantParentBoneIndex = GetMultiTypeValueAsInterger(Analyser, MetaData.BoneIndexSize);
+
+					// 付与率
+					float GrantRate = 0.0f;
+					if (!Analyser.GetFloat(GrantRate)) return false;
+
+					if (BoneFlag & 0x0100)
+					{
+						// 回転付与
+						PmxBone->SetRotateGrant(GrantParentBoneIndex, GrantRate);
+
+					}
+					else if (BoneFlag & 0x0200)
+					{
+						// 移動付与
+						PmxBone->SetMoveGrant(GrantParentBoneIndex, GrantRate);
+					}
+				}
+
+				// 軸固定:1 の場合
+				if (BoneFlag & 0x0400)
+				{
+					if (!Analyser.IsValid(4 * 3)) return false;
+
+					glm::vec3 FixedAxisVector = glm::vec3(0.0f);
+
+					FixedAxisVector.x = Analyser.GetFloat();
+					FixedAxisVector.y = Analyser.GetFloat();
+					FixedAxisVector.z = Analyser.GetFloat();
+				}
+
+				// ローカル軸:1 の場合
+				if (BoneFlag & 0x0800)
+				{
+					if (!Analyser.IsValid(4 * 3 * 2)) return false;
+
+					//
+					glm::vec3 XAxisVector = glm::vec3(0.0f);
+
+					XAxisVector.x = Analyser.GetFloat();
+					XAxisVector.y = Analyser.GetFloat();
+					XAxisVector.z = Analyser.GetFloat();
+
+					XAxisVector = glm::normalize(XAxisVector);
+
+					//
+					glm::vec3 ZAxisVector = glm::vec3(0.0f);
+
+					ZAxisVector.x = Analyser.GetFloat();
+					ZAxisVector.y = Analyser.GetFloat();
+					ZAxisVector.z = Analyser.GetFloat();
+
+					ZAxisVector = glm::normalize(ZAxisVector);
+
+					//
+					PmxBone->SetLocalAxis(XAxisVector, ZAxisVector);
+				}
+
+				// 外部親変形:1 の場合
+				if (BoneFlag & 0x2000)
+				{
+					int KeyIndex = -1;
+					if (!Analyser.GetInt(KeyIndex)) return false;
+				}
+
+				// IK:1 の場合 IKデータを格納
+				if (BoneFlag & 0x0020)
+				{
+					// IKターゲットボーンのボーンIndex
+					int IKTargetBoneIndex = GetMultiTypeValueAsInterger(Analyser, MetaData.BoneIndexSize);
+
+					// IKループ回数 (PMD及びMMD環境では255回が最大になるようです)
+					int IKLoopCount = 0;
+					if (!Analyser.GetInt(IKLoopCount)) return false;
+
+					// IKループ計算時の1回あたりの制限角度 -> ラジアン角 | PMDのIK値とは4倍異なるので注意
+					float LimitedAngle = 0.0f;
+					if (!Analyser.GetFloat(LimitedAngle)) return false;
+
+					// IKリンク数 : 後続の要素数
+					int IKLinkCount = 0;
+					if (!Analyser.GetInt(IKLinkCount)) return false;
+
+					std::vector<animation::SIKLink> IKLinkList;
+
+					for (int IKLinkIndex = 0; IKLinkIndex < IKLinkCount; IKLinkIndex++)
+					{
+						// リンクボーンのボーンIndex
+						int IKLinkBoneIndex = GetMultiTypeValueAsInterger(Analyser, MetaData.BoneIndexSize);
+
+						// 角度制限 0:OFF 1:ON
+						unsigned char IsLimitAngle = 0;
+						if (!Analyser.GetByte(IsLimitAngle)) return false;
+
+						bool UseLimitAngle = false;
+						glm::vec3 LowerAngle = glm::vec3(0.0f);
+						glm::vec3 UpperAngle = glm::vec3(0.0f);
+
+						if (IsLimitAngle & 0x01)
+						{
+							if (!Analyser.IsValid(4 * 3 * 2)) return false;
+
+							UseLimitAngle = true;
+
+							LowerAngle.x = Analyser.GetFloat();
+							LowerAngle.y = Analyser.GetFloat();
+							LowerAngle.z = Analyser.GetFloat();
+
+							UpperAngle.x = Analyser.GetFloat();
+							UpperAngle.y = Analyser.GetFloat();
+							UpperAngle.z = Analyser.GetFloat();
+						}
+
+						// IKLinkを登録
+						IKLinkList.push_back(animation::SIKLink{ IKLinkBoneIndex , UseLimitAngle ,LowerAngle, UpperAngle });
+					}
+
+					// IKParamを登録
+					std::shared_ptr<animation::SIKParam> IKParam = std::make_shared<animation::SIKParam>(IKTargetBoneIndex, IKLoopCount, LimitedAngle, IKLinkList);
+
+					PmxBone->SetIKParam(IKParam);
+				}
+			}
+
+			// PmxBoneを登録
+			m_PmxBoneList.push_back(PmxBone);
+		}
+
+		return true;
+	}
+
 	// Helper Functions ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	bool CPmxModel::GetMultiTypeValue(binary::CBinaryAnalyser& Analyser, int ByteSize, std::vector<unsigned int>& UIntValueList, std::vector<unsigned char>& ByteValueList, std::vector<unsigned short>& UShortValueList)
 	{
@@ -685,21 +918,21 @@ namespace mmd
 		if (ByteSize == 1)
 		{
 			unsigned char Index = 0;
-			if (!Analyser.GetByte(Index)) return false;
+			if (!Analyser.GetByte(Index)) return -1;
 
 			Result = static_cast<int>(Index);
 		}
 		else if (ByteSize == 2)
 		{
 			unsigned short Index = 0;
-			if (!Analyser.GetUShort(Index)) return false;
+			if (!Analyser.GetUShort(Index)) return -1;
 
 			Result = static_cast<int>(Index);
 		}
 		else if (ByteSize == 4)
 		{
 			int Index = 0;
-			if (!Analyser.GetInt(Index)) return false;
+			if (!Analyser.GetInt(Index)) return -1;
 
 			Result = Index;
 		}

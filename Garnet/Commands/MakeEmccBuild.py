@@ -94,10 +94,10 @@ def Make():
 		exportText += o + " "
 
 	# Compile Options
-	exportText += "-s EXPORTED_RUNTIME_METHODS='ccall','UTF8ToString' "
-	exportText += "-s USE_WEBGPU=1 "
-	exportText += "-s ALLOW_MEMORY_GROWTH "
-	exportText += "-s FETCH "
+	exportText += "-sEXPORTED_RUNTIME_METHODS=ccall,UTF8ToString,UTF16ToString "
+	exportText += "-sUSE_WEBGPU=1 "
+	exportText += "-sALLOW_MEMORY_GROWTH "
+	exportText += "-sFETCH "
 
 	exportText += "-o Garnet.js\n"
 

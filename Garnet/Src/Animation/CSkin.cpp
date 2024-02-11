@@ -79,12 +79,52 @@ namespace animation
 		}
 	}
 
+	const std::unordered_map<EHumanoidBones, std::shared_ptr<CJoint>>& CSkin::GetBoneTable() const
+	{
+		return m_BoneTable;
+	}
+
 	std::shared_ptr<CJoint> CSkin::GetBone(EHumanoidBones BoneName)
 	{
 		const auto it = m_BoneTable.find(BoneName);
 		if (BoneName != animation::EHumanoidBones::None && it != m_BoneTable.end()) return it->second;
 
 		return nullptr;
+	}
+
+	// IK
+	void CSkin::MakeIKBoneList()
+	{
+		for (const auto& Bone : m_JointList)
+		{
+			// IKParamを持っていればリストに追加する
+			if (Bone->GetIKParam())
+			{
+				m_IKBoneList.push_back(Bone);
+			}
+		}
+	}
+
+	const std::vector<std::shared_ptr<CJoint>>& CSkin::GetIKBoneList() const
+	{
+		return m_IKBoneList;
+	}
+
+	// 付与ボーン
+	void CSkin::MakeGrantBoneList()
+	{
+		for (const auto& Bone : m_JointList)
+		{
+			if (Bone->IsRotateGrant() || Bone->IsMoveGrant())
+			{
+				m_GrantBoneList.push_back(Bone);
+			}
+		}
+	}
+
+	const std::vector<std::shared_ptr<CJoint>>& CSkin::GetGrantBoneList() const
+	{
+		return m_GrantBoneList;
 	}
 
 	void CSkin::CalcSkinWorldMatrix()

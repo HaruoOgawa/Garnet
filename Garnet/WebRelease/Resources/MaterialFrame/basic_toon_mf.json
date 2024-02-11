@@ -36,6 +36,26 @@
               "initValue": [ 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0 ]
             },
             {
+              "name": "edgeSize",
+              "type": "float",
+              "initValue": [ 0.0 ]
+            },
+            {
+              "name": "fPad0",
+              "type": "float",
+              "initValue": [ 0.0 ]
+            },
+            {
+              "name": "fPad1",
+              "type": "float",
+              "initValue": [ 0.0 ]
+            },
+            {
+              "name": "fPad2",
+              "type": "float",
+              "initValue": [ 0.0 ]
+            },
+            {
               "name": "useSkinMeshAnimation",
               "type": "int",
               "initValue": [ 0 ]
@@ -46,9 +66,9 @@
               "initValue": [ 0 ]
             },
             {
-              "name": "pad0",
+              "name": "drawPathIndex",
               "type": "int",
-              "initValue": [ 0 ]
+              "initValue": [ -1 ]
             },
             {
               "name": "pad1",
@@ -183,6 +203,11 @@
               "initValue": [ 1.0, 1.0, 1.0, 1.0 ]
             },
             {
+              "name": "edgeColor",
+              "type": "vec4",
+              "initValue": [ 1.0, 1.0, 1.0, 1.0 ]
+            },
+            {
               "name": "specularIntensity",
               "type": "float",
               "initValue": [ 1.0 ]
@@ -219,6 +244,26 @@
             },
             {
               "name": "SphereMode",
+              "type": "int",
+              "initValue": [ 0 ]
+            },
+            {
+              "name": "drawPathIndex",
+              "type": "int",
+              "initValue": [ -1 ]
+            },
+            {
+              "name": "iPad0",
+              "type": "int",
+              "initValue": [ 0 ]
+            },
+            {
+              "name": "iPad1",
+              "type": "int",
+              "initValue": [ 0 ]
+            },
+            {
+              "name": "iPad2",
               "type": "int",
               "initValue": [ 0 ]
             },

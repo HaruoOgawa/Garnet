@@ -1,15 +1,12 @@
 #include "CFile.h"
-#include <fstream>
 #include "../Debug/Message/Console.h"
-
-#ifdef __EMSCRIPTEN__
-#include <emscripten/emscripten.h>
-#include <emscripten/fetch.h>
-#endif
 
 namespace resource
 {
 	CFile::CFile(const std::string& filename):
+#ifndef __EMSCRIPTEN__
+		m_ByteOffset(0),
+#endif // !__EMSCRIPTEN__
 		m_Status(resource::ELoadStatus::None),
 		m_Filename(filename),
 		m_IsSync(false)
@@ -77,6 +74,44 @@ namespace resource
 
 	bool CFile::Load()
 	{
+		// 大容量ファイルのロード準備だけ. LoadShaderにもアニメーションを付けて止まっていないようにしたい
+		if (!LoadImmediate()) return false;
+		return true;
+
+		/*m_Status = resource::ELoadStatus::Loading;
+
+		std::string result = "";
+#ifdef __EMSCRIPTEN__
+		emscripten_fetch_attr_t attr;
+		emscripten_fetch_attr_init(&attr);
+		std::strcpy(attr.requestMethod, "GET");
+		attr.attributes = EMSCRIPTEN_FETCH_LOAD_TO_MEMORY;
+		if (m_IsSync) attr.attributes |= EMSCRIPTEN_FETCH_SYNCHRONOUS;
+		attr.onsuccess = downloadSucceded;
+		attr.onerror = downloadFailed;
+		attr.userData = this;
+
+		emscripten_fetch(&attr, m_Filename.c_str());
+#else
+		m_Stream = std::ifstream(m_Filename, std::ios::ate | std::ios::binary);
+
+		if (!m_Stream.is_open())
+		{
+			Console::Log("failed to open file! / m_Filename: %s\n", m_Filename.c_str());
+			return false;
+		}
+
+		size_t fileSize = (size_t)m_Stream.tellg();
+		m_Data.resize(fileSize);
+
+		m_Stream.seekg(0);
+#endif
+
+		return true;*/
+	}
+
+	bool CFile::LoadImmediate()
+	{
 		m_Status = resource::ELoadStatus::Loading;
 
 		std::string result = "";
@@ -97,6 +132,7 @@ namespace resource
 		if (!file.is_open())
 		{
 			Console::Log("failed to open file! / m_Filename: %s\n", m_Filename.c_str());
+			return false;
 		}
 
 		size_t fileSize = (size_t)file.tellg();
@@ -120,6 +156,44 @@ namespace resource
 
 	bool CFile::Update(api::IGraphicsAPI* pGraphicsAPI)
 	{
+#ifndef __EMSCRIPTEN__
+		if (m_Status == resource::ELoadStatus::Loading)
+		{
+			// ファイルを一行ずつ読む
+			std::string line;
+			
+			if (m_Stream.fail())
+			{
+				Console::Log("[Error] Failed to read line\n");
+
+				return false;
+			}
+
+			int Loop = 0;
+			while (Loop < 128)
+			{
+				if (getline(m_Stream, line))
+				{
+					int ByteSize = sizeof(char) * static_cast<int>(line.size());
+					std::memcpy(&m_Data[m_ByteOffset], reinterpret_cast<const unsigned char*>(line.data()), ByteSize);
+
+					m_ByteOffset += ByteSize;
+				}
+				else
+				{
+					// ロード終了
+					m_Stream.close();
+					m_Status = resource::ELoadStatus::Loaded;
+
+					break;
+				}
+
+				Loop++;
+			}
+			
+		}
+#endif // !__EMSCRIPTEN__
+
 		return true;
 	}
 

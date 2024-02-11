@@ -39,9 +39,18 @@ namespace resource
 		return true;
 	}
 
+	bool CMaterialFrameLoader::LoadImmediate()
+	{
+		return true;
+	}
+
 	bool CMaterialFrameLoader::Update(api::IGraphicsAPI* pGraphicsAPI)
 	{
-		if (!m_MfFile->IsLoaded()) return true;
+		if (!m_MfFile->IsLoaded())
+		{
+			if (!m_MfFile->Update(pGraphicsAPI)) return false;
+			return true;
+		}
 
 		// マテリアルフレームが持っているリソース一覧を取得する
 		if (!m_AnalyseDone)

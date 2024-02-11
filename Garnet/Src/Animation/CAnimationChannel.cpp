@@ -5,8 +5,9 @@
 
 namespace animation
 {
-	CAnimationChannel::CAnimationChannel(bool UseAnimLocalAxis, int SamplerIndex, EAnimationTarget AnimationTarget, const std::shared_ptr<object::CNode>& TargetNode, EHumanoidBones BoneName):
+	CAnimationChannel::CAnimationChannel(bool UseAnimLocalAxis, bool TransOffset, int SamplerIndex, EAnimationTarget AnimationTarget, const std::shared_ptr<object::CNode>& TargetNode, EHumanoidBones BoneName):
 		m_UseAnimLocalAxis(UseAnimLocalAxis),
+		m_IsTransOffset(TransOffset),
 		m_SamplerIndex(SamplerIndex),
 		m_AnimationTarget(AnimationTarget),
 		m_TargetNode(TargetNode),
@@ -21,6 +22,11 @@ namespace animation
 	bool CAnimationChannel::IsUseAnimLocalAxis() const
 	{
 		return m_UseAnimLocalAxis;
+	}
+
+	bool CAnimationChannel::IsTransOffset() const
+	{
+		return m_IsTransOffset;
 	}
 
 	int CAnimationChannel::GetSamplerIndex() const
@@ -70,7 +76,17 @@ namespace animation
 
 		if (!m_TargetNode) return true;
 
-		m_TargetNode->SetPos(glm::vec3(Value[0], Value[1], Value[2]));
+		if (m_IsTransOffset)
+		{
+			// オフセットなので元の座標に加算する
+			m_TargetNode->SetPos(m_TargetNode->GetDefaultLocalTransform()->GetPos() + glm::vec3(Value[0], Value[1], Value[2]));
+		}
+		else
+		{
+			// 座標なので元の座標を置き換える
+			m_TargetNode->SetPos(glm::vec3(Value[0], Value[1], Value[2]));
+		}
+		
 
 		return true;
 	}
@@ -100,7 +116,6 @@ namespace animation
 
 			m_TargetNode->SetRot(dstQuat);
 		}
-		
 
 		return true;
 	}
@@ -130,12 +145,36 @@ namespace animation
 
 		if (!m_TargetNode) return true;
 
-		m_TargetNode->SetPos(glm::vec3(Value[0], Value[1], Value[2]));
+		if (m_IsTransOffset)
+		{
+			// オフセットなので元の座標に加算する
+			m_TargetNode->SetPos(m_TargetNode->GetDefaultLocalTransform()->GetPos() + glm::vec3(Value[0], Value[1], Value[2]));
+		}
+		else
+		{
+			// 座標なので元の座標を置き換える
+			m_TargetNode->SetPos(glm::vec3(Value[0], Value[1], Value[2]));
+		}
 
 		// glmのクォータニオンは wxyzで指定する必要がある
 		glm::quat quat = glm::quat(Value[6], Value[3], Value[4], Value[5]);
 
-		m_TargetNode->SetRot(quat);
+		// ファイルフォーマットによるが、回転は『デフォルトトランスフォームの回転』に『アニメーションデータの回転』を乗算して作られるものである!!!!!!!
+		// これが噂によく聞くアニメーションの回転のローカル軸の話である!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		// FBXアニメーションにはこれが必要でglTF/VRMアニメーションでは不要である
+		// たぶんVRM 1.0からはこのローカル軸がデータに含まれるようになるのかな？
+		if (m_UseAnimLocalAxis)
+		{
+			glm::quat dstQuat = m_TargetNode->GetDefaultLocalTransform()->GetRot() * quat;
+
+			m_TargetNode->SetRot(dstQuat);
+		}
+		else
+		{
+			glm::quat dstQuat = quat;
+
+			m_TargetNode->SetRot(dstQuat);
+		}
 
 		m_TargetNode->SetScale(glm::vec3(Value[7], Value[8], Value[9]));
 
