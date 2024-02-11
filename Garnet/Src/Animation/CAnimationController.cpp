@@ -8,9 +8,9 @@ namespace animation
 		m_MaxBlendingTime(0.5f),
 		m_CurrBlendingTime(0.0f),
 		m_SavedPrevTrs(false),
+		m_Skeleton(nullptr),
 		m_CurrentClipIndex(-1),
-		m_CurrentClipName(""),
-		m_TotalJointIndexOffset(0)
+		m_CurrentClipName("")
 	{
 	}
 
@@ -73,15 +73,15 @@ namespace animation
 	// IKの計算
 	bool CAnimationController::CalculateIK(const std::vector<std::shared_ptr<object::CNode>>& NodeList)
 	{
-		for (const auto& Skin : m_SkinList)
+		if(m_Skeleton)
 		{
-			const auto& BoneList = Skin->GetJointList();
+			const auto& BoneList = m_Skeleton->GetBoneList();
 
-			for (const auto& IKBone : Skin->GetIKBoneList())
+			for (const auto& IKBone : m_Skeleton->GetIKBoneList())
 			{
 				// TargetBoneが目指すボーンの位置
 				glm::vec3 IKGoalPos = glm::vec3(0.0f);
-				math::CTransform::CastModelMatrixToTranslation(IKBone->GetJointNode()->GetWorldMatrix(), IKGoalPos);
+				math::CTransform::CastModelMatrixToTranslation(IKBone->GetBoneNode()->GetWorldMatrix(), IKGoalPos);
 
 				const auto& IKParam = IKBone->GetIKParam();
 
@@ -97,7 +97,7 @@ namespace animation
 
 				// CCD-IKを採用
 				// CCD-IKに使用するサイクリックボーンリスト
-				std::vector<std::shared_ptr<CJoint>> LinkBoneList;
+				std::vector<std::shared_ptr<CBone>> LinkBoneList;
 
 				for (const auto& Link : IKParam->IKLinkList)
 				{
@@ -126,10 +126,10 @@ namespace animation
 
 							//
 							glm::vec3 FirstLinkPos = glm::vec3(0.0f);
-							math::CTransform::CastModelMatrixToTranslation(IKTargetBone->GetJointNode()->GetWorldMatrix(), FirstLinkPos);
+							math::CTransform::CastModelMatrixToTranslation(IKTargetBone->GetBoneNode()->GetWorldMatrix(), FirstLinkPos);
 
 							glm::vec3 SecondLinkPos = glm::vec3(0.0f);
-							math::CTransform::CastModelMatrixToTranslation(LinkBone->GetJointNode()->GetWorldMatrix(), SecondLinkPos);
+							math::CTransform::CastModelMatrixToTranslation(LinkBone->GetBoneNode()->GetWorldMatrix(), SecondLinkPos);
 
 							// 回転行列を計算
 							glm::vec3 ToFistVector = glm::normalize(FirstLinkPos - SecondLinkPos);
@@ -139,7 +139,7 @@ namespace animation
 							
 							{
 								// SecondLinkPosの位置のボーンの回転を更新する(自動的に子要素も回転するので便利)
-								glm::quat LinkRot = LinkBone->GetJointNode()->GetRot();
+								glm::quat LinkRot = LinkBone->GetBoneNode()->GetRot();
 								LinkRot *= Rot;
 
 								// 角度制限を行うかどうか
@@ -148,14 +148,14 @@ namespace animation
 									math::CTransform::ClampRotate(LinkRot, IKParam->IKLinkList[LinkIndex].LowerAngle, IKParam->IKLinkList[LinkIndex].UpperAngle);
 								}
 								
-								LinkBone->GetJointNode()->SetRot(LinkRot);
+								LinkBone->GetBoneNode()->SetRot(LinkRot);
 
 								// CyclicBoneのワールド行列を更新
-								glm::mat4 WorldMatrix = LinkBone->GetJointNode()->GetParentNode()->GetWorldMatrix() * LinkBone->GetJointNode()->GetLocalMatrix();
-								LinkBone->GetJointNode()->SetWorldMatrix(WorldMatrix);
+								glm::mat4 WorldMatrix = LinkBone->GetBoneNode()->GetParentNode()->GetWorldMatrix() * LinkBone->GetBoneNode()->GetLocalMatrix();
+								LinkBone->GetBoneNode()->SetWorldMatrix(WorldMatrix);
 
 								// 子要素の行列を再計算
-								for (int ChildIndex : LinkBone->GetJointNode()->GetChildrenNodeIndexList())
+								for (int ChildIndex : LinkBone->GetBoneNode()->GetChildrenNodeIndexList())
 								{
 									if (ChildIndex < 0 || ChildIndex >= NodeList.size()) continue;
 
@@ -167,7 +167,7 @@ namespace animation
 
 							// 計算結果を見て末端のボーンがIKBoneにどれくらい近づいたか見る
 							glm::vec3 CyclicResultPos = glm::vec3(0.0f);
-							math::CTransform::CastModelMatrixToTranslation(IKTargetBone->GetJointNode()->GetWorldMatrix(), CyclicResultPos);
+							math::CTransform::CastModelMatrixToTranslation(IKTargetBone->GetBoneNode()->GetWorldMatrix(), CyclicResultPos);
 
 							if (glm::distance(IKGoalPos, CyclicResultPos) < CyclicThreshold)
 							{
@@ -193,11 +193,11 @@ namespace animation
 	// 付与ボーンの再計算
 	bool CAnimationController::ReCalculateGrantBone(const std::vector<std::shared_ptr<object::CNode>>& NodeList)
 	{
-		for (const auto& Skin : m_SkinList)
+		if(m_Skeleton)
 		{
-			const auto& BoneList = Skin->GetJointList();
+			const auto& BoneList = m_Skeleton->GetBoneList();
 
-			for (const auto& GrantBone : Skin->GetGrantBoneList())
+			for (const auto& GrantBone : m_Skeleton->GetGrantBoneList())
 			{
 				// ParentGrantBoneを取得
 				int GrantParentBoneIndex = GrantBone->GetGrantParentBoneIndex();
@@ -211,12 +211,12 @@ namespace animation
 				// 自身のPosとRot
 				glm::vec3 GrantPos = glm::vec3(0.0f);
 				glm::quat GrantRot = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
-				math::CTransform::CastModelMatrixToTransform(GrantBone->GetJointNode()->GetWorldMatrix(), GrantPos, GrantRot);
+				math::CTransform::CastModelMatrixToTransform(GrantBone->GetBoneNode()->GetWorldMatrix(), GrantPos, GrantRot);
 
 				// 親ボーンのPosとRot
 				glm::vec3 ParentGrantPos = glm::vec3(0.0f);
 				glm::quat ParentGrantRot = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
-				math::CTransform::CastModelMatrixToTransform(ParentGrantBone->GetJointNode()->GetWorldMatrix(), ParentGrantPos, ParentGrantRot);
+				math::CTransform::CastModelMatrixToTransform(ParentGrantBone->GetBoneNode()->GetWorldMatrix(), ParentGrantPos, ParentGrantRot);
 
 				// 付与を実行
 				glm::vec3 ResultPos = GrantPos;
@@ -237,10 +237,10 @@ namespace animation
 				glm::mat4 ResultMatrix = glm::mat4(1.0f);
 				math::CTransform::CalcModelMatrix(ResultMatrix, ResultPos, ResultRot, false);
 
-				GrantBone->GetJointNode()->SetWorldMatrix(ResultMatrix);
+				GrantBone->GetBoneNode()->SetWorldMatrix(ResultMatrix);
 
 				// 子要素にも回転付与・移動付与の計算結果を適応する
-				for (int ChildIndex : GrantBone->GetJointNode()->GetChildrenNodeIndexList())
+				for (int ChildIndex : GrantBone->GetBoneNode()->GetChildrenNodeIndexList())
 				{
 					if (ChildIndex < 0 || ChildIndex >= NodeList.size()) continue;
 
@@ -304,11 +304,11 @@ namespace animation
 		// 現在の姿勢を保存する
 		if (!m_SavedPrevTrs)
 		{
-			for (const auto& Skin : m_SkinList)
+			if(m_Skeleton)
 			{
-				for (const auto& Joint : Skin->GetJointList())
+				for (const auto& Bone : m_Skeleton->GetBoneList())
 				{
-					Joint->GetJointNode()->SavePrevLocalTransform();
+					Bone->GetBoneNode()->SavePrevLocalTransform();
 				}
 			}
 
@@ -316,13 +316,13 @@ namespace animation
 		}
 	}
 
-	bool CAnimationController::CalcSkinMatrixList(std::vector<glm::mat4>& MatrixList, const glm::mat4& ObjectModelMatrix)
+	bool CAnimationController::CalCSkinMatrixList(std::vector<glm::mat4>& MatrixList, const glm::mat4& ObjectModelMatrix)
 	{
 		if (IsPlayingAnimation())
 		{
-			for (const auto& Skin : m_SkinList)
+			if(m_Skeleton)
 			{
-				if (!Skin->CalcSkinMatrixList(MatrixList, ObjectModelMatrix)) return false;
+				if (!m_Skeleton->CalCSkinMatrixList(MatrixList, ObjectModelMatrix)) return false;
 			}
 		}
 
@@ -351,20 +351,14 @@ namespace animation
 		m_ClipList.push_back(Layout.Clip);
 	}
 
-	void CAnimationController::AddAnimationSkin(const std::shared_ptr<animation::CSkin>& Skin)
+	void CAnimationController::SetAnimationSkeleton(const std::shared_ptr<animation::CSkeleton>& Skeleton)
 	{
-		int JointIndexOffset = m_TotalJointIndexOffset;
-
-		Skin->SetJointIndexOffset(JointIndexOffset);
-
-		m_SkinList.push_back(Skin);
-
-		m_TotalJointIndexOffset += static_cast<int>(Skin->GetJointList().size());
+		m_Skeleton = Skeleton;
 	}
 
-	const std::vector<std::shared_ptr<animation::CSkin>>& CAnimationController::GetSkinList() const
+	const std::shared_ptr<animation::CSkeleton>& CAnimationController::GetSkeleton() const
 	{
-		return m_SkinList;
+		return m_Skeleton;
 	}
 
 	void CAnimationController::AddAnimationClip(const std::shared_ptr<animation::CAnimationClip>& Clip)
@@ -374,7 +368,7 @@ namespace animation
 
 	void CAnimationController::AddHumanoidAnimationClip(const std::shared_ptr<animation::CAnimationClip>& SourceClip, const std::string& MotionName, animation::SAnimationLayout Layout, bool IsLoop)
 	{
-		// IsWorldAnim: アニメーションがワールド座標系のデータを示すかどうか
+		if (!m_Skeleton) return;
 
 		// Clipの値をコピーする
 		std::shared_ptr<animation::CAnimationClip> TargetClip = std::make_shared<animation::CAnimationClip>();
@@ -413,22 +407,14 @@ namespace animation
 		{
 			std::shared_ptr<object::CNode> TargetNode = nullptr;
 
-			for (const auto& Skin : m_SkinList)
+			for (const auto& Bone : m_Skeleton->GetBoneList())
 			{
-				for (const auto& Joint : Skin->GetJointList())
+				if (Bone->GetBoneName() == animation::EHumanoidBones::None) continue;
+
+				if (Bone->GetBoneName() == SourceChannel->GetBoneName())
 				{
-					if (Joint->GetBoneName() == animation::EHumanoidBones::None) continue;
+					TargetNode = Bone->GetBoneNode();
 
-					if (Joint->GetBoneName() == SourceChannel->GetBoneName())
-					{
-						TargetNode = Joint->GetJointNode();
-
-						break;
-					}
-				}
-
-				if (TargetNode)
-				{
 					break;
 				}
 			}
@@ -438,9 +424,9 @@ namespace animation
 			TargetClip->AddAnimationChannel(TargetChannel);
 		}
 
-		// DefaultSkinを持っている時のみリターゲットを行う
+		// DefaultSkeletonを持っている時のみリターゲットを行う
 		// リターゲットは平行移動成分(Pos)に対して行うものなので、回転だけのアニメーションには必要ない
-		if (SourceClip->GetDefaultSkin())
+		if (SourceClip->GetDefaultSkeleton())
 		{
 			// RigのReTargetingを行う
 			// リターゲティングとはリグの形が異なるアニメーションを自身のアニメーションに合うように調整すること
@@ -478,11 +464,11 @@ namespace animation
 			std::vector<std::shared_ptr<object::CNode>> ComputedNodeList;
 			float L = 1.0f - (m_MaxBlendingTime - m_CurrBlendingTime) / m_MaxBlendingTime;
 
-			for (const auto& Skin : m_SkinList)
+			if(m_Skeleton)
 			{
-				for (const auto& Joint : Skin->GetJointList())
+				for (const auto& Bone : m_Skeleton->GetBoneList())
 				{
-					const auto& Node = Joint->GetJointNode();
+					const auto& Node = Bone->GetBoneNode();
 
 					BlendTranslation(Node, L);
 					BlendRotation(Node, L);
@@ -519,8 +505,8 @@ namespace animation
 
 	bool CAnimationController::ReTargetRig(const std::shared_ptr<animation::CAnimationClip>& SourceClip, const std::shared_ptr<animation::CAnimationClip>& TargetClip)
 	{
-		const auto& SourceSkin = SourceClip->GetDefaultSkin();
-		if (!SourceSkin) return false;
+		const auto& SourceSkeleton = SourceClip->GetDefaultSkeleton();
+		if (!SourceSkeleton) return false;
 
 		// Rigのリターゲティングを実行する
 		for (const auto& TargetChannel : TargetClip->GetChannelList())
@@ -537,58 +523,52 @@ namespace animation
 			// BoneTableに登録されていないものについては処理の対象外とする
 			if (BoneName == animation::EHumanoidBones::None) continue;
 
-			const auto& SourceBone = SourceSkin->GetBone(BoneName);
+			const auto& SourceBone = SourceSkeleton->GetBone(BoneName);
 			if (!SourceBone) continue;
 
-			const glm::mat4 SourceRestMove = SourceBone->GetJointNode()->GetDefaultLocalMoveMatrix();
+			const glm::mat4 SourceRestMove = SourceBone->GetBoneNode()->GetDefaultLocalMoveMatrix();
 			const glm::mat4 InverseSourceRestMove = glm::inverse(SourceRestMove);
 
-			for (const auto& TargetSkin : m_SkinList)
+			const auto& TargetBone = m_Skeleton->GetBone(BoneName);
+			if (!TargetBone) continue;
+
+			const glm::mat4 TargetRestMove = TargetBone->GetBoneNode()->GetDefaultLocalMoveMatrix();
+
+			// SourceとTargetのバインドマトリックスのTranslationの差分を示す行列
+			const glm::mat4 ReTargetTranslationMatrix = TargetRestMove * InverseSourceRestMove;
+
+			for (const auto& TargetKeyFrame : TargetSampler->GetKeyFrameList())
 			{
-				const auto& TargetBone = TargetSkin->GetBone(BoneName);
-				if (!TargetBone) continue;
+				const float CurrentTime = TargetKeyFrame->GetInput();
 
-				const glm::mat4 TargetRestMove = TargetBone->GetJointNode()->GetDefaultLocalMoveMatrix();
-
-				// SourceとTargetのバインドマトリックスのTranslationの差分を示す行列
-				const glm::mat4 ReTargetTranslationMatrix = TargetRestMove * InverseSourceRestMove;
-
-				for (const auto& TargetKeyFrame : TargetSampler->GetKeyFrameList())
+				if (AnimationTarget == animation::EAnimationTarget::MODELMATRIX)
 				{
-					const float CurrentTime = TargetKeyFrame->GetInput();
+					glm::mat4 SourcePose = glm::mat4(1.0f);
+					TargetKeyFrame->GetOutput(&SourcePose[0][0]);
 
-					if (AnimationTarget == animation::EAnimationTarget::MODELMATRIX)
-					{
-						glm::mat4 SourcePose = glm::mat4(1.0f);
-						TargetKeyFrame->GetOutput(&SourcePose[0][0]);
+					glm::mat4 TargetPose = ReTargetTranslationMatrix * SourcePose;
 
-						glm::mat4 TargetPose = ReTargetTranslationMatrix * SourcePose;
-
-						TargetKeyFrame->SetOutput(&TargetPose[0][0], sizeof(glm::mat4));
-					}
-					else if (AnimationTarget == animation::EAnimationTarget::TRANSLATION)
-					{
-						glm::vec3 SourceTranslation = glm::vec3(1.0f);
-						TargetKeyFrame->GetOutput(&SourceTranslation[0]);
-
-						glm::mat4 SourcePose = glm::translate(glm::mat4(1.0f), SourceTranslation);
-
-						glm::mat4 TargetPose = ReTargetTranslationMatrix * SourcePose;
-
-						glm::vec3 TargetTranslation = glm::vec3(1.0f);
-						math::CTransform::CastModelMatrixToTranslation(TargetPose, TargetTranslation);
-
-						TargetKeyFrame->SetOutput(&TargetTranslation[0], sizeof(glm::vec3));
-					}
-					else
-					{
-						// リターゲットはリグの長さの違いを補正するためのものなのでMODELMATRIXとTRANSLATIONに対してのみ行う
-						continue;
-					}
+					TargetKeyFrame->SetOutput(&TargetPose[0][0], sizeof(glm::mat4));
 				}
+				else if (AnimationTarget == animation::EAnimationTarget::TRANSLATION)
+				{
+					glm::vec3 SourceTranslation = glm::vec3(1.0f);
+					TargetKeyFrame->GetOutput(&SourceTranslation[0]);
 
-				// 対象のBoneについては一度しか計算しない
-				break;
+					glm::mat4 SourcePose = glm::translate(glm::mat4(1.0f), SourceTranslation);
+
+					glm::mat4 TargetPose = ReTargetTranslationMatrix * SourcePose;
+
+					glm::vec3 TargetTranslation = glm::vec3(1.0f);
+					math::CTransform::CastModelMatrixToTranslation(TargetPose, TargetTranslation);
+
+					TargetKeyFrame->SetOutput(&TargetTranslation[0], sizeof(glm::vec3));
+				}
+				else
+				{
+					// リターゲットはリグの長さの違いを補正するためのものなのでMODELMATRIXとTRANSLATIONに対してのみ行う
+					continue;
+				}
 			}
 		}
 

@@ -41,7 +41,7 @@ layout(binding = 0) uniform UniformBufferObject{
     int   useIBL;
 
     int   useSkinMeshAnimation;
-    int   JointIndexOffset;
+    int   pad0;
     int   pad1;
     int   pad2;
 } ubo;
@@ -71,16 +71,11 @@ void main(){
     // スキンメッシュアニメーション
     if(ubo.useSkinMeshAnimation != 0)
     {
-        // あとでUniform実装. スキンが複数個になった時対応する必要がある
-        // 使用するスキンのSkinMatの開始インデックスが入っており、これをもとにSkinMatrixBufferをオフセットさせる
-        // でも複数スキン対応はあとでその他いろいろとよく検討すべき
-        int StartSkinMatIndex = 0;
-
         mat4 SkinMat =
-            inWeights0.x * r_SkinMatrixBuffer.SkinMat[inJoint0.x + ubo.JointIndexOffset] +
-            inWeights0.y * r_SkinMatrixBuffer.SkinMat[inJoint0.y + ubo.JointIndexOffset] +
-            inWeights0.z * r_SkinMatrixBuffer.SkinMat[inJoint0.z + ubo.JointIndexOffset] +
-            inWeights0.w * r_SkinMatrixBuffer.SkinMat[inJoint0.w + ubo.JointIndexOffset] 
+            inWeights0.x * r_SkinMatrixBuffer.SkinMat[inJoint0.x] +
+            inWeights0.y * r_SkinMatrixBuffer.SkinMat[inJoint0.y] +
+            inWeights0.z * r_SkinMatrixBuffer.SkinMat[inJoint0.z] +
+            inWeights0.w * r_SkinMatrixBuffer.SkinMat[inJoint0.w ] 
         ;
 
         // スキンメッシュアニメーションの時はubo.modelは乗算しないように注意

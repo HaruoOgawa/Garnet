@@ -16,7 +16,7 @@ namespace object
 
 		int								  m_MeshIndex;
 
-		int								  m_SkinIndex;
+		int								  m_SkeletonIndex;
 
 		std::shared_ptr<math::CTransform> m_LocalTransform;
 		std::shared_ptr<math::CTransform> m_DefaultLocalTransform;
@@ -89,8 +89,8 @@ namespace object
 		void SetChildrenNodeIndexList(const std::vector<int>& NodeList);
 		void AddChildrenNodeIndex(int Index);
 
-		void SetSkinIndex(int SkinIndex);
-		int GetSkinIndex() const;
+		void SetSkeletonIndex(int SkeletonIndex);
+		int GetSkeletonIndex() const;
 
 		void SetInverseBindMatrix(const glm::mat4& Matrix);
 		const glm::mat4& GeInverseBindMatrix() const;

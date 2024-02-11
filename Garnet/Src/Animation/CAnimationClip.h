@@ -6,7 +6,7 @@
 #include "CAnimationSampler.h"
 #include "CAnimationChannel.h"
 #include "EAnimationTarget.h"
-#include "CSkin.h"
+#include "CSkeleton.h"
 
 namespace animation
 {
@@ -18,7 +18,7 @@ namespace animation
 		std::vector<std::shared_ptr<animation::CAnimationSampler>> m_SamplerList;
 		std::vector<std::shared_ptr<animation::CAnimationChannel>> m_ChannelList;
 
-		std::shared_ptr<animation::CSkin> m_DefaultSkin;
+		std::shared_ptr<animation::CSkeleton> m_DefaultSkeleton;
 	public:
 		CAnimationClip();
 		virtual ~CAnimationClip();
@@ -31,8 +31,8 @@ namespace animation
 		void AddAnimationSampler(const std::shared_ptr<animation::CAnimationSampler>& Sampler);
 		void AddAnimationChannel(const std::shared_ptr<animation::CAnimationChannel>& AnimationChannel);
 
-		void SetDefaultSkin(const std::shared_ptr<animation::CSkin>& DefaultSkin);
-		const std::shared_ptr<animation::CSkin>& GetDefaultSkin() const;
+		void SetDefaultSkeleton(const std::shared_ptr<animation::CSkeleton>& DefaultSkeleton);
+		const std::shared_ptr<animation::CSkeleton>& GetDefaultSkeleton() const;
 
 		const std::vector<std::shared_ptr<animation::CAnimationSampler>>& GetSamplerList() const;
 		const std::vector<std::shared_ptr<animation::CAnimationChannel>>& GetChannelList() const;

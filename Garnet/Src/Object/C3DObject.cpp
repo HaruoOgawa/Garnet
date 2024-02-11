@@ -335,7 +335,7 @@ namespace object
 		// Drawは何度も呼ぶことがあるのでUpdateでマイフレーム一回だけ計算する
 		// SSBOのサイズをDynamicOffset毎に変更できるかわからないのでひとまず全部まとめて渡す
 		m_CurrentSkinMatrixList.clear();
-		if (!m_AnimationController->CalcSkinMatrixList(m_CurrentSkinMatrixList, m_ObjectTransform->GetModelMatrix())) return false;
+		if (!m_AnimationController->CalCSkinMatrixList(m_CurrentSkinMatrixList, m_ObjectTransform->GetModelMatrix())) return false;
 #endif
 
 		return true;
@@ -355,7 +355,7 @@ namespace object
 			const auto& WorldMatrix = m_ObjectTransform->GetModelMatrix() * Node->GetWorldMatrix();
 			const auto& Mesh = m_MeshList[MeshIndex];
 
-			int SkinIndex = Node->GetSkinIndex();
+			int SkeletonIndex = Node->GetSkeletonIndex();
 
 			for (int PrimitiveIndex = 0; PrimitiveIndex < Mesh->GetPrimitiveList().size(); PrimitiveIndex++)
 			{
@@ -408,13 +408,9 @@ namespace object
 				Material->SetUniformValue("useSkinMeshAnimation", &glm::ivec1((m_AnimationController->IsPlayingAnimation() ? 1 : 0))[0], sizeof(glm::ivec1), DynamicOffsetNum);
 
 				// SkinMatrixをShaderに渡す
-				const auto& SkinList = m_AnimationController->GetSkinList();
-				if (SkinIndex >= 0 && SkinIndex < SkinList.size() && m_AnimationController->IsPlayingAnimation())
+				if (m_CurrentSkinMatrixList.size() > 0)
 				{
 					Material->SetUniformValue("r_SkinMatrixBuffer", &m_CurrentSkinMatrixList[0], sizeof(glm::mat4) * static_cast<int>(m_CurrentSkinMatrixList.size()), DynamicOffsetNum);
-
-					int JointIndexOffset = SkinList[SkinIndex]->GetJointIndexOffset();
-					Material->SetUniformValue("JointIndexOffset", &glm::ivec1(JointIndexOffset)[0], sizeof(glm::ivec1), DynamicOffsetNum);
 				}
 #endif
 
@@ -433,30 +429,30 @@ namespace object
 		/*
 		if(DebugSphere)
 		{
-			for (const auto& Skin : m_AnimationController->GetSkinList())
+			for (const auto& Skeleton : m_AnimationController->GetSkeletonList())
 			{
-				for (const auto& Joint : Skin->GetJointList())
+				for (const auto& Bone : Skeleton->GetBoneList())
 				{
-					//if (Joint->GetBoneName() == animation::EHumanoidBones::None) continue;
+					//if (Bone->GetBoneName() == animation::EHumanoidBones::None) continue;
 
-					const auto& JointNode = Joint->GetJointNode();
+					const auto& BoneNode = Bone->GetBoneNode();
 
-					// Debug用: Jointの描画
+					// Debug用: Boneの描画
 					{
-						DebugSphere->SetPos(m_ObjectTransform->GetModelMatrix() * JointNode->GetWorldMatrix() * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
+						DebugSphere->SetPos(m_ObjectTransform->GetModelMatrix() * BoneNode->GetWorldMatrix() * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
 						DebugSphere->SetScale(glm::vec3(0.025f));
 					}
 					
 					// Debug用: ローカル軸の描画(SphereをBoxに変更する)
 					{
 						//DebugSphere->SetScale(glm::vec3(0.025f, 0.025f, 0.025f * 4.0f));
-						//DebugSphere->SetRot(JointNode->GetDefaultLocalTransform()->GetRot());
-						//DebugSphere->SetPos(m_ObjectTransform->GetModelMatrix()* JointNode->GetWorldMatrix()* glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
+						//DebugSphere->SetRot(BoneNode->GetDefaultLocalTransform()->GetRot());
+						//DebugSphere->SetPos(m_ObjectTransform->GetModelMatrix()* BoneNode->GetWorldMatrix()* glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
 					}
 
 					DebugSphere->GetMaterialList()[0]->SetUniformValue("useColor", &glm::ivec1(1)[0], sizeof(glm::ivec1));
 					
-					if(Joint->IsRotateGrant() || Joint->IsMoveGrant())
+					if(Bone->IsRotateGrant() || Bone->IsMoveGrant())
 					{
 						DebugSphere->GetMaterialList()[0]->SetUniformValue("baseColor", &glm::vec4(1.0f, 0.0f, 0.0f, 1.0f)[0], sizeof(glm::vec4));
 					}
@@ -501,9 +497,9 @@ namespace object
 	}
 
 #ifdef USE_ANIMATION
-	void C3DObject::AddAnimationSkin(const std::shared_ptr<animation::CSkin >& Skin)
+	void C3DObject::SetAnimationSkeleton(const std::shared_ptr<animation::CSkeleton >& Skeleton)
 	{
-		m_AnimationController->AddAnimationSkin(Skin);
+		m_AnimationController->SetAnimationSkeleton(Skeleton);
 	}
 
 	void C3DObject::AddAnimationClip(const std::shared_ptr<animation::CAnimationClip>& Clip)

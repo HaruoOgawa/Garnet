@@ -236,16 +236,16 @@ namespace mmd
 	{
 		/*
 		// 表情データ数
-		struct VMD_SKIN_COUNT {
+		struct VMD_Skeleton_COUNT {
 		DWORD Count; // 表情データ数
-		} vmd_skin_count;
+		} vmd_Skeleton_count;
 
 		// 表情データ
-		struct VMD_SKIN { // 23 Bytes // 表情
-		char SkinName[15]; // 表情名
+		struct VMD_Skeleton { // 23 Bytes // 表情
+		char SkeletonName[15]; // 表情名
 		DWORD FlameNo; // フレーム番号
 		float Weight; // 表情の設定値(表情スライダーの値)
-		} vmd_skin;
+		} vmd_Skeleton;
 		*/
 
 		return true;

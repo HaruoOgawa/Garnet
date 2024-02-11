@@ -1,8 +1,8 @@
 #pragma once
 #ifdef USE_ANIMATION
 
-// 用語を整理すると、Jointは関節(点)でjointとJointの繋がりがBone(線)
-// Boneを組み合わせた全体構造がSkeleton もしくは Skin
+// 用語を整理すると、Boneは関節(点)でBoneとBoneの繋がりがBone(線)
+// Boneを組み合わせた全体構造がSkeleton もしくは Skeleton
 // しかしglTFのSkeletonプロパティはアニメーションのルートを示すもので、なくてもルートはわかるものなのであまり意味をなしていない
 
 #include <memory>
@@ -13,9 +13,9 @@ namespace object { class CNode; }
 
 namespace animation
 {
-	class CJoint
+	class CBone
 	{
-		std::shared_ptr<object::CNode> m_JointNode;
+		std::shared_ptr<object::CNode> m_BoneNode;
 
 		EHumanoidBones m_BoneName;
 
@@ -38,10 +38,10 @@ namespace animation
 		// IK
 		std::shared_ptr<animation::SIKParam> m_IKParam;
 	public:
-		CJoint(const std::shared_ptr<object::CNode>& JointNode);
-		virtual ~CJoint();
+		CBone(const std::shared_ptr<object::CNode>& BoneNode);
+		virtual ~CBone();
 
-		const std::shared_ptr<object::CNode>& GetJointNode() const;
+		const std::shared_ptr<object::CNode>& GetBoneNode() const;
 
 		EHumanoidBones GetBoneName() const;
 		void SetBoneName(EHumanoidBones BoneName);

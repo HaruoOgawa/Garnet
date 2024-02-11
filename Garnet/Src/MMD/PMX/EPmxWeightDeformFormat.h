@@ -3,7 +3,7 @@
 #ifdef USE_MMD
 namespace mmd
 {
-	// Joints, Weghts‚ÌŠi”[•û–@
+	// Bones, Weghts‚ÌŠi”[•û–@
 	enum class EPmxWeightDeformFormat
 	{
 		None = -1,

@@ -61,7 +61,7 @@
               "initValue": [ 0 ]
             },
             {
-              "name": "JointIndexOffset",
+              "name": "pad0",
               "type": "int",
               "initValue": [ 0 ]
             },

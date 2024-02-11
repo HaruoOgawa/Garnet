@@ -10,8 +10,8 @@
 #include "../Math/CMath.h"
 
 #include "../Animation/CAnimationClip.h"
-#include "../Animation/CSkin.h"
-#include "../Animation/CJoint.h"
+#include "../Animation/CSkeleton.h"
+#include "../Animation/CBone.h"
 
 #include "../Graphics/CMaterialFrame.h"
 
@@ -53,7 +53,7 @@ namespace fbx
 		FbxImporter* Importer = FbxImporter::Create(Manager, "");
 
 		// Streamを作成
-		//CFBXStream Stream(Manager, "rb", "Resources\\Motions\\Walking_WithSkin.fbx");
+		//CFBXStream Stream(Manager, "rb", "Resources\\Motions\\Walking_WithSkeleton.fbx");
 		//CFBXMomoryStream Stream(Manager, Data);
 		//void* streamData = NULL;
 
@@ -120,18 +120,18 @@ namespace fbx
 		// ParentNodeを設定する
 		Object->ApplyParentNode();
 
-		// Skin
-		std::shared_ptr<animation::CSkin> Skin = std::make_shared<animation::CSkin>();
-		std::vector<FbxNode*> FbxJointList;
+		// Skeleton
+		std::shared_ptr<animation::CSkeleton> Skeleton = std::make_shared<animation::CSkeleton>();
+		std::vector<FbxNode*> FbxBoneList;
 		if (RootNode)
 		{
-			if (!CreateAnimationSkin(RootNode, Skin, FbxJointList, NodeList, IsMixamoFbx)) return false;
+			if (!CreateAnimationSkeleton(RootNode, Skeleton, FbxBoneList, NodeList, IsMixamoFbx)) return false;
 		}
 
-		Object->AddAnimationSkin(Skin);
+		Object->SetAnimationSkeleton(Skeleton);
 
 		// BoneTableを作成
-		Skin->MakeBoneTable();
+		Skeleton->MakeBoneTable();
 
 		// DefaultLocalTransformを保存する
 		Object->ApplyDefaultLocalTransform();
@@ -142,11 +142,11 @@ namespace fbx
 		// ワールド行列の計算
 		Object->CalcWorldMatrix();
 
-		// 親のJointを追加
-		ApplyParentJointList(Skin, NodeList);
+		// 親のBoneを追加
+		ApplyParentBoneList(Skeleton, NodeList);
 
 		// アニメーション
-		if (!CreateAnimation(Scene, AnimationClipList, NodeList, Skin, FbxJointList, IsMixamoFbx)) return false;
+		if (!CreateAnimation(Scene, AnimationClipList, NodeList, Skeleton, FbxBoneList, IsMixamoFbx)) return false;
 
 		if (IsUseObject)
 		{
@@ -158,12 +158,12 @@ namespace fbx
 			{
 				// 描画情報の取得
 				std::vector<FbxMesh*> pFbxMeshList;
-				if (!CreateDrawInfo(pGraphicsAPI, pFbxMeshList, MaterialFrame, RootNode, TextureList, MaterialList, MeshList, Skin, IsMixamoFbx)) return false;
+				if (!CreateDrawInfo(pGraphicsAPI, pFbxMeshList, MaterialFrame, RootNode, TextureList, MaterialList, MeshList, Skeleton, IsMixamoFbx)) return false;
 
 				// マテリアルを持っていないのならダミーを渡す
 				if (MaterialList.size() <= 0)
 				{
-					if (!CreateDummyMaterial(pGraphicsAPI, RootNode, MaterialList, MaterialFrame, MeshList, Skin)) return false;
+					if (!CreateDummyMaterial(pGraphicsAPI, RootNode, MaterialList, MaterialFrame, MeshList, Skeleton)) return false;
 				}
 
 				// 重複を除く
@@ -184,7 +184,7 @@ namespace fbx
 				pFbxMeshList.shrink_to_fit();
 
 				// Nodeと各要素をIndexで繋ぐ
-				if (!ConnectNodeTo(NodeList, pFbxNodeList, pFbxMeshList, Skin)) return false;
+				if (!ConnectNodeTo(NodeList, pFbxNodeList, pFbxMeshList, Skeleton)) return false;
 			}
 
 			// オブジェクトにリソースを登録
@@ -213,7 +213,7 @@ namespace fbx
 
 	bool CFBXImporter::CreateDrawInfo(api::IGraphicsAPI* pGraphicsAPI, std::vector<FbxMesh*>& pFbxMeshList, const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame,
 		FbxNode* pFBXNode, std::vector<std::shared_ptr<graphics::CTexture>>& TextureList,
-		std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList, std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, const std::shared_ptr<animation::CSkin>& Skin, const bool IsMixamoFbx)
+		std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList, std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, const std::shared_ptr<animation::CSkeleton>& Skeleton, const bool IsMixamoFbx)
 	{
 		// 知りたいのは描画情報なのでここではeMeshのみ見る
 		if (pFBXNode->GetNodeAttribute() && pFBXNode->GetNodeAttribute()->GetAttributeType() && pFBXNode->GetNodeAttribute()->GetAttributeType() == FbxNodeAttribute::eMesh)
@@ -223,24 +223,24 @@ namespace fbx
 			// テクスチャ
 
 			// マテリアル
-			if (!CreateMaterial(pGraphicsAPI, pFBXNode, pFbxMaterialList, MaterialList, MaterialFrame, Skin)) return false;
+			if (!CreateMaterial(pGraphicsAPI, pFBXNode, pFbxMaterialList, MaterialList, MaterialFrame, Skeleton)) return false;
 
 			// メッシュ
-			if (!CreateMesh(pFBXNode, pFbxMeshList, pFbxMaterialList, MeshList, MaterialList, Skin, IsMixamoFbx)) return false;
+			if (!CreateMesh(pFBXNode, pFbxMeshList, pFbxMaterialList, MeshList, MaterialList, Skeleton, IsMixamoFbx)) return false;
 		}
 		
 
 		// 子要素のNodeを調べる
 		for (int i = 0; i < pFBXNode->GetChildCount(); i++)
 		{
-			if (!CreateDrawInfo(pGraphicsAPI, pFbxMeshList, MaterialFrame, pFBXNode->GetChild(i), TextureList, MaterialList, MeshList, Skin, IsMixamoFbx)) return false;
+			if (!CreateDrawInfo(pGraphicsAPI, pFbxMeshList, MaterialFrame, pFBXNode->GetChild(i), TextureList, MaterialList, MeshList, Skeleton, IsMixamoFbx)) return false;
 		}
 
 		return true;
 	}
 
 	bool CFBXImporter::CreateMaterial(api::IGraphicsAPI* pGraphicsAPI, FbxNode* pFBXNode, std::vector<FbxSurfaceMaterial*>& pFbxMaterialList, std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList,
-		const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, const std::shared_ptr<animation::CSkin>& Skin)
+		const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, const std::shared_ptr<animation::CSkeleton>& Skeleton)
 	{
 		for (int m = 0; m < pFBXNode->GetMaterialCount(); m++)
 		{
@@ -262,9 +262,9 @@ namespace fbx
 
 			// SkinMatrix StorageBuffer
 			{
-				// SkinMatは存在するJointの数だけ用意する必要がある
+				// SkinMatは存在するBoneの数だけ用意する必要がある
 				int SkinMatCount = 1;
-				if (Skin) SkinMatCount = static_cast<int>(Skin->GetJointList().size());
+				if (Skeleton) SkinMatCount = static_cast<int>(Skeleton->GetBoneList().size());
 
 				// DynamicOffsetが256バイトからしか使えない都合上SkinMatCountの最小値は4とする(4 * 16 * 4 = 256)
 				if (SkinMatCount < 4) SkinMatCount = 4;
@@ -285,7 +285,7 @@ namespace fbx
 	}
 
 	bool CFBXImporter::CreateDummyMaterial(api::IGraphicsAPI* pGraphicsAPI, FbxNode* pFBXNode, std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList,
-		const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, const std::shared_ptr<animation::CSkin>& Skin)
+		const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, const std::shared_ptr<animation::CSkeleton>& Skeleton)
 	{
 		if (!MaterialFrame) return true;
 
@@ -305,9 +305,9 @@ namespace fbx
 
 		// SkinMatrix StorageBuffer
 		{
-			// SkinMatは存在するJointの数だけ用意する必要がある
+			// SkinMatは存在するBoneの数だけ用意する必要がある
 			int SkinMatCount = 1;
-			if (Skin) SkinMatCount = static_cast<int>(Skin->GetJointList().size());
+			if (Skeleton) SkinMatCount = static_cast<int>(Skeleton->GetBoneList().size());
 			
 			// SSBOのサイズは2のn乗である必要がある
 			SkinMatCount = math::CMath::CalcNextPowerOfTwo(SkinMatCount);
@@ -324,7 +324,7 @@ namespace fbx
 	}
 
 	bool CFBXImporter::CreateMesh(FbxNode* pFBXNode, std::vector<FbxMesh*>& pFbxMeshList, const std::vector<FbxSurfaceMaterial*>& pFbxMaterialList,
-		std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, const std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList, const std::shared_ptr<animation::CSkin>& Skin, const bool IsMixamoFbx)
+		std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, const std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList, const std::shared_ptr<animation::CSkeleton>& Skeleton, const bool IsMixamoFbx)
 	{
 		FbxMesh* pFbxMesh = pFBXNode->GetMesh();
 		
@@ -360,23 +360,23 @@ namespace fbx
 			std::shared_ptr<graphics::CMesh> Mesh = std::make_shared<graphics::CMesh>();
 
 			{
-				// 頂点データに使用するJoint・Weightsを取得する
+				// 頂点データに使用するBone・Weightsを取得する
 				// https://www.gamedev.net/tutorials/_/technical/graphics-programming-and-theory/how-to-work-with-fbx-sdk-r3582/
-				std::vector<std::vector<std::pair<unsigned int, float>>> JointWeightPairPerCtrlPoint(pFbxMesh->GetControlPointsCount());
+				std::vector<std::vector<std::pair<unsigned int, float>>> BoneWeightPairPerCtrlPoint(pFbxMesh->GetControlPointsCount());
 
 				{
-					// 処理中のMeshが関連しているSkinのJointデータを取得する
+					// 処理中のMeshが関連しているSkeletonのBoneデータを取得する
 					unsigned int numOfDeformers = pFbxMesh->GetDeformerCount();
 					
-					// Deformer(Skin)を取得する
+					// Deformer(Skeleton)を取得する
 					for (unsigned int deformerIndex = 0; deformerIndex < numOfDeformers; deformerIndex++)
 					{
-						// Skin Mesh Animationに使用するDeformerをFbxSkinにキャストして取得
+						// Skeleton Mesh Animationに使用するDeformerをFbxSkinにキャストして取得
 						FbxSkin* pFbxSkin = reinterpret_cast<FbxSkin*>(pFbxMesh->GetDeformer(deformerIndex, FbxDeformer::eSkin));
 
 						if (!pFbxSkin) continue;
 
-						// Cluster(Joint)を取得
+						// Cluster(Bone)を取得
 						unsigned int numOfCluster = pFbxSkin->GetClusterCount();
 
 						for (unsigned int clusterIndex = 0; clusterIndex < numOfCluster; clusterIndex++)
@@ -384,23 +384,23 @@ namespace fbx
 							FbxCluster* pFbxCluster = pFbxSkin->GetCluster(clusterIndex);
 							if (!pFbxCluster) continue;
 
-							std::string jointName = pFbxCluster->GetLink()->GetName();
+							std::string BoneName = pFbxCluster->GetLink()->GetName();
 							
-							unsigned int JointIndex = FindJointIndexUsingName(Skin, jointName);
-							double* Weights = pFbxCluster->GetControlPointWeights(); // このJointを参照している頂点のWeightリスト
-							int* VertArrayUsingJoint = pFbxCluster->GetControlPointIndices(); // このJointを参照している頂点のインデックスリスト
+							unsigned int BoneIndex = FindBoneIndexUsingName(Skeleton, BoneName);
+							double* Weights = pFbxCluster->GetControlPointWeights(); // このBoneを参照している頂点のWeightリスト
+							int* VertArrayUsingBone = pFbxCluster->GetControlPointIndices(); // このBoneを参照している頂点のインデックスリスト
 
 							// コントロールポイント == 頂点
-							// このJointを参照している頂点の数
-							unsigned int VertNumUsingJoint = pFbxCluster->GetControlPointIndicesCount();
+							// このBoneを参照している頂点の数
+							unsigned int VertNumUsingBone = pFbxCluster->GetControlPointIndicesCount();
 
-							for (unsigned int i = 0; i < VertNumUsingJoint; i++)
+							for (unsigned int i = 0; i < VertNumUsingBone; i++)
 							{
-								int ControlPointIndex = VertArrayUsingJoint[i];
+								int ControlPointIndex = VertArrayUsingBone[i];
 
-								std::pair<unsigned int, float> JointWeightPair = { JointIndex , static_cast<float>(Weights[i])};
+								std::pair<unsigned int, float> BoneWeightPair = { BoneIndex , static_cast<float>(Weights[i])};
 
-								JointWeightPairPerCtrlPoint[ControlPointIndex].push_back(JointWeightPair);
+								BoneWeightPairPerCtrlPoint[ControlPointIndex].push_back(BoneWeightPair);
 							}
 						}
 					}
@@ -472,8 +472,8 @@ namespace fbx
 						std::vector<float> AttributeNormalData;
 						std::vector<float> AttributeUVData;
 						std::vector<float> AttributeTangentData;
-						std::vector<unsigned short> ushort_AttributeJointData;
-						std::vector<float> AttributeJointData;
+						std::vector<unsigned short> ushort_AttributeBoneData;
+						std::vector<float> AttributeBoneData;
 						std::vector<float> AttributeWeightsData;
 
 						int VertexCounter = 0;
@@ -511,26 +511,26 @@ namespace fbx
 							}
 
 							
-							const auto& JointWeightPairList = JointWeightPairPerCtrlPoint[CtrlPointIndex];
+							const auto& BoneWeightPairList = BoneWeightPairPerCtrlPoint[CtrlPointIndex];
 
 							for (int jw = 0; jw < 4; jw++)
 							{
-								if (jw < JointWeightPairList.size())
+								if (jw < BoneWeightPairList.size())
 								{
-									const auto& JointWeightPair = JointWeightPairList[jw];
+									const auto& BoneWeightPair = BoneWeightPairList[jw];
 
-									// Joint
-									ushort_AttributeJointData.push_back(static_cast<unsigned short>(JointWeightPair.first));
+									// Bone
+									ushort_AttributeBoneData.push_back(static_cast<unsigned short>(BoneWeightPair.first));
 
 									// Weights
-									AttributeWeightsData.push_back(JointWeightPair.second);
+									AttributeWeightsData.push_back(BoneWeightPair.second);
 								}
 								else
 								{
 									// 数が4つより少ない時は0で埋める
 
-									// Joint
-									ushort_AttributeJointData.push_back(0);
+									// Bone
+									ushort_AttributeBoneData.push_back(0);
 
 									// Weights
 									AttributeWeightsData.push_back(0.0f);
@@ -598,26 +598,26 @@ namespace fbx
 							NeedRecalculateTangent = true;
 						}
 
-						// Joint
+						// Bone
 
-						if (!ushort_AttributeJointData.empty())
+						if (!ushort_AttributeBoneData.empty())
 						{
-							/*size_t size = ushort_AttributeJointData.size() / (sizeof(float) / sizeof(unsigned short));
-							AttributeJointData.resize(size);
-							std::memcpy(&AttributeJointData[0], &ushort_AttributeJointData[0], sizeof(unsigned short) * ushort_AttributeJointData.size());*/
+							/*size_t size = ushort_AttributeBoneData.size() / (sizeof(float) / sizeof(unsigned short));
+							AttributeBoneData.resize(size);
+							std::memcpy(&AttributeBoneData[0], &ushort_AttributeBoneData[0], sizeof(unsigned short) * ushort_AttributeBoneData.size());*/
 							
-							/*AttributeJointData.resize(ushort_AttributeJointData.size());
-							std::transform(ushort_AttributeJointData.begin(), ushort_AttributeJointData.end(), AttributeJointData.begin(), [](unsigned short val) { return static_cast<float>(val); });*/
+							/*AttributeBoneData.resize(ushort_AttributeBoneData.size());
+							std::transform(ushort_AttributeBoneData.begin(), ushort_AttributeBoneData.end(), AttributeBoneData.begin(), [](unsigned short val) { return static_cast<float>(val); });*/
 
 							std::vector<unsigned char> BufferData;
-							BufferData.resize(sizeof(unsigned short) * ushort_AttributeJointData.size());
-							std::memcpy(&BufferData[0], &ushort_AttributeJointData[0], sizeof(unsigned short) * ushort_AttributeJointData.size());
+							BufferData.resize(sizeof(unsigned short) * ushort_AttributeBoneData.size());
+							std::memcpy(&BufferData[0], &ushort_AttributeBoneData[0], sizeof(unsigned short) * ushort_AttributeBoneData.size());
 
-							AttributeJointData.resize(BufferData.size() / sizeof(unsigned short));
-							std::memcpy(&AttributeJointData[0], &BufferData[0], BufferData.size());
+							AttributeBoneData.resize(BufferData.size() / sizeof(unsigned short));
+							std::memcpy(&AttributeBoneData[0], &BufferData[0], BufferData.size());
 
 							// データを登録
-							ReservedVertexDataList.insert({ "JOINTS_0" ,AttributeJointData });
+							ReservedVertexDataList.insert({ "JOINTS_0" ,AttributeBoneData });
 
 							// コンポーネントタイプ(データ型)を取得
 							ReservedDataTypeList.insert({ "JOINTS_0", renderer::EDataType::TYPE_UNSIGNED_SHORT });
@@ -780,7 +780,7 @@ namespace fbx
 	bool CFBXImporter::CreateNode(FbxNode* pFBXNode, std::vector<FbxNode*>& pFbxNodeList, std::vector<std::shared_ptr<object::CNode>>& NodeList, const bool IsMixamoFbx)
 	{
 		// Nodeを作成
-		// MeshとSkinは後ほどセットする
+		// MeshとSkeletonは後ほどセットする
 		std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(-1, static_cast<int>(NodeList.size()));
 
 		std::string NodeName = std::string(pFBXNode->GetName());
@@ -837,7 +837,7 @@ namespace fbx
 		return true;
 	}
 
-	bool CFBXImporter::ConnectNodeTo(std::vector<std::shared_ptr<object::CNode>>& NodeList, const std::vector<FbxNode*>& pFbxNodeList, const std::vector<FbxMesh*>& pFbxMeshList, const std::shared_ptr<animation::CSkin>& Skin)
+	bool CFBXImporter::ConnectNodeTo(std::vector<std::shared_ptr<object::CNode>>& NodeList, const std::vector<FbxNode*>& pFbxNodeList, const std::vector<FbxMesh*>& pFbxMeshList, const std::shared_ptr<animation::CSkeleton>& Skeleton)
 	{
 		// NodeListとpFbxNodeListは同じ順番で同じ数
 		if (NodeList.size() != pFbxNodeList.size()) return false;
@@ -866,67 +866,67 @@ namespace fbx
 			// MeshIndexを設定
 			Node->SetMeshIndex(MeshIndex);
 
-			// JointがあるならSkinが1つあるとする
-			int SkinIndex = (Skin->GetJointList().size() > 0)? 0 : - 1;
-			Node->SetSkinIndex(SkinIndex);
+			// BoneがあるならSkeletonが1つあるとする
+			int SkeletonIndex = (Skeleton->GetBoneList().size() > 0)? 0 : - 1;
+			Node->SetSkeletonIndex(SkeletonIndex);
 		}
 
 		return true;
 	}
 
-	bool CFBXImporter::CreateAnimationSkin(FbxNode* pFBXNode, std::shared_ptr<animation::CSkin>& Skin, std::vector<FbxNode*>& FbxJointList, const std::vector<std::shared_ptr<object::CNode>>& NodeList, const bool IsMixamoFbx)
+	bool CFBXImporter::CreateAnimationSkeleton(FbxNode* pFBXNode, std::shared_ptr<animation::CSkeleton>& Skeleton, std::vector<FbxNode*>& FbxBoneList, const std::vector<std::shared_ptr<object::CNode>>& NodeList, const bool IsMixamoFbx)
 	{
 		if (pFBXNode->GetNodeAttribute() && pFBXNode->GetNodeAttribute()->GetAttributeType() && pFBXNode->GetNodeAttribute()->GetAttributeType() == FbxNodeAttribute::eSkeleton)
 		{
-			auto JointNode = GetJointNode(pFBXNode->GetName(), NodeList);
+			auto BoneNode = GetBoneNode(pFBXNode->GetName(), NodeList);
 
-			std::shared_ptr<animation::CJoint> Joint = std::make_shared<animation::CJoint>(JointNode);
+			std::shared_ptr<animation::CBone> Bone = std::make_shared<animation::CBone>(BoneNode);
 
-			// SkinのInverseBindMatrixを作成
-			glm::mat4 InverseBindMatrix = glm::inverse(Joint->GetJointNode()->GetWorldMatrix());
-			Joint->GetJointNode()->SetInverseBindMatrix(InverseBindMatrix);
+			// SkeletonのInverseBindMatrixを作成
+			glm::mat4 InverseBindMatrix = glm::inverse(Bone->GetBoneNode()->GetWorldMatrix());
+			Bone->GetBoneNode()->SetInverseBindMatrix(InverseBindMatrix);
 
 			// BoneNameを取得
 			std::shared_ptr<animation::CBoneNameProvider> Provider = std::make_shared<animation::CBoneNameProvider>();
 			animation::EHumanoidBones BoneName = Provider->GetBoneName(pFBXNode->GetName());
 
-			// JointにBoneNameを割り当てる
-			Joint->SetBoneName(BoneName);
+			// BoneにBoneNameを割り当てる
+			Bone->SetBoneName(BoneName);
 
-			Skin->AddJoint(Joint);
+			Skeleton->AddBone(Bone);
 
-			// FbxJointListを登録
-			FbxJointList.push_back(pFBXNode);
+			// FbxBoneListを登録
+			FbxBoneList.push_back(pFBXNode);
 		}
 
 		// 子要素のNodeを調べる
 		for (int i = 0; i < pFBXNode->GetChildCount(); i++)
 		{
-			if (!CreateAnimationSkin(pFBXNode->GetChild(i), Skin, FbxJointList, NodeList, IsMixamoFbx)) return false;
+			if (!CreateAnimationSkeleton(pFBXNode->GetChild(i), Skeleton, FbxBoneList, NodeList, IsMixamoFbx)) return false;
 		}
 
 		return true;
 	}
 
-	void CFBXImporter::ApplyParentJointList(const std::shared_ptr<animation::CSkin>& Skin, const std::vector<std::shared_ptr<object::CNode>>& NodeList)
+	void CFBXImporter::ApplyParentBoneList(const std::shared_ptr<animation::CSkeleton>& Skeleton, const std::vector<std::shared_ptr<object::CNode>>& NodeList)
 	{
-		for (const auto& Joint : Skin->GetJointList())
+		for (const auto& Bone : Skeleton->GetBoneList())
 		{
-			const auto& ParentNode = Joint->GetJointNode()->GetParentNode();
+			const auto& ParentNode = Bone->GetBoneNode()->GetParentNode();
 			if (!ParentNode) continue;
 
 			std::shared_ptr<animation::CBoneNameProvider> Provider = std::make_shared<animation::CBoneNameProvider>();
 			animation::EHumanoidBones ParentBoneName = Provider->GetBoneName(ParentNode->GetName());
 
-			const auto& ParentJoint = Skin->GetBone(ParentBoneName);
-			if (!ParentJoint) continue;
+			const auto& ParentBone = Skeleton->GetBone(ParentBoneName);
+			if (!ParentBone) continue;
 
-			Joint->SetParentBoneName(ParentJoint->GetBoneName());
+			Bone->SetParentBoneName(ParentBone->GetBoneName());
 		}
 	}
 
 	bool CFBXImporter::CreateAnimation(FbxScene* Scene, std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList, const std::vector<std::shared_ptr<object::CNode>>& NodeList,
-		const std::shared_ptr<animation::CSkin>& Skin, const std::vector<FbxNode*>& FbxJointList, const bool IsMixamoFbx)
+		const std::shared_ptr<animation::CSkeleton>& Skeleton, const std::vector<FbxNode*>& FbxBoneList, const bool IsMixamoFbx)
 	{
 
 		for (int i = 0; i < Scene->GetSrcObjectCount<FbxAnimStack>(); i++)
@@ -948,7 +948,7 @@ namespace fbx
 				fbxsdk::FbxGlobalSettings& GloabalSettions = Scene->GetGlobalSettings();
 				fbxsdk::FbxTime::EMode fileTimeMode = GloabalSettions.GetTimeMode();
 
-				for (const auto& pFbxJoint : FbxJointList) 
+				for (const auto& pFbxBone : FbxBoneList) 
 				{ 
 					// ひとまず全部LINEARにしておく
 					std::shared_ptr<animation::CAnimationSampler> Sampler = std::make_shared<animation::CAnimationSampler>(animation::EInterpolationType::LINEAR);
@@ -970,15 +970,15 @@ namespace fbx
 					FbxTime currentTime;
 					currentTime.SetFrame(FrameIndex, fileTimeMode);
 
-					// pFbxJointListとCSkinからアニメーション情報を取得する
-					for (int JointIndex = 0; JointIndex < FbxJointList.size(); JointIndex++)
+					// pFbxBoneListとCSkeletonからアニメーション情報を取得する
+					for (int BoneIndex = 0; BoneIndex < FbxBoneList.size(); BoneIndex++)
 					{
-						const auto& pFbxJoint = FbxJointList[JointIndex];
-						if (!pFbxJoint) return false;
+						const auto& pFbxBone = FbxBoneList[BoneIndex];
+						if (!pFbxBone) return false;
 
 						glm::mat4 CurrentMatrix = glm::mat4(1.0f);
 
-						FbxAMatrix fbxMat = pFbxJoint->EvaluateLocalTransform(currentTime);
+						FbxAMatrix fbxMat = pFbxBone->EvaluateLocalTransform(currentTime);
 						for (int row = 0; row < 4; row++)
 						{
 							for (int col = 0; col < 4; col++)
@@ -1014,9 +1014,9 @@ namespace fbx
 						KeyFrame->SetOutput(OutputData);
 
 						// Add KeyFrame To Sampler
-						if (AnimationSamplerList[JointIndex]->GetKeyFrameList().size() < static_cast<size_t>(AnimationLength))
+						if (AnimationSamplerList[BoneIndex]->GetKeyFrameList().size() < static_cast<size_t>(AnimationLength))
 						{
-							AnimationSamplerList[JointIndex]->AddKeyFrame(KeyFrame);
+							AnimationSamplerList[BoneIndex]->AddKeyFrame(KeyFrame);
 						}
 					}
 				}
@@ -1032,30 +1032,32 @@ namespace fbx
 			}
 
 			// channels
-			for (int JointIndex = 0; JointIndex < FbxJointList.size(); JointIndex++)
+			for (int BoneIndex = 0; BoneIndex < FbxBoneList.size(); BoneIndex++)
 			{
-				const auto& pFbxJoint = FbxJointList[JointIndex];
+				const auto& pFbxBone = FbxBoneList[BoneIndex];
 
 				// アニメーションのローカル軸を使用するか
 				// FBXでは必須でglTF/VRMでは不要
 				// 詳しくはCAnimationChannel::UpdateRotationを参照
-				const bool UseAnimLocalAxis = true;
+
+				// SmallFBXはtrueでFBX SDKはfalse ???(様子を見る)
+				const bool UseAnimLocalAxis = false;
 
 				// FBXにはchannelといった概念はなく、Translation・Rotation・Scaleを全てまとめてModelMatrixで計算している
 				// なのでChannelTypeにFBX-SDK限定の値としてMODELMATRIXを作成することで対応する
 				animation::EAnimationTarget AnimationTarget = animation::EAnimationTarget::MODELMATRIX;
 
-				// Jointの順番と参照するSamplerの順番は同じである
-				int TargetSamplerIndex = JointIndex;
+				// Boneの順番と参照するSamplerの順番は同じである
+				int TargetSamplerIndex = BoneIndex;
 
-				std::string JointName = pFbxJoint->GetName();
+				std::string Name = pFbxBone->GetName();
 
 				// アニメーションのターゲットを取得する
-				const auto& TargetNode = GetJointNode(JointName, NodeList);
+				const auto& TargetNode = GetBoneNode(Name, NodeList);
 
 				// Bone Name を取得
 				std::shared_ptr<animation::CBoneNameProvider> Provider = std::make_shared<animation::CBoneNameProvider>();
-				animation::EHumanoidBones BoneName = Provider->GetBoneName(JointName);
+				animation::EHumanoidBones BoneName = Provider->GetBoneName(Name);
 
 				std::shared_ptr<animation::CAnimationChannel> AnimationChannel = std::make_shared<animation::CAnimationChannel>(UseAnimLocalAxis, false, TargetSamplerIndex, AnimationTarget, TargetNode, BoneName);
 
@@ -1063,7 +1065,7 @@ namespace fbx
 			}
 
 			//
-			AnimationClip->SetDefaultSkin(Skin);
+			AnimationClip->SetDefaultSkeleton(Skeleton);
 
 			AnimationClipList.push_back(AnimationClip);
 		}
@@ -1207,40 +1209,40 @@ namespace fbx
 		return true;
 	}
 
-	std::shared_ptr<object::CNode> CFBXImporter::GetJointNode(const std::string& JointName, const std::vector<std::shared_ptr<object::CNode>>& NodeList)
+	std::shared_ptr<object::CNode> CFBXImporter::GetBoneNode(const std::string& BoneName, const std::vector<std::shared_ptr<object::CNode>>& NodeList)
 	{
-		std::shared_ptr<object::CNode> JointNode = nullptr;
+		std::shared_ptr<object::CNode> BoneNode = nullptr;
 
 		for (const auto& Node : NodeList)
 		{
-			if (Node->GetName() == JointName)
+			if (Node->GetName() == BoneName)
 			{
-				JointNode = Node;
+				BoneNode = Node;
 
 				break;
 			}
 		}
 
-		return JointNode;
+		return BoneNode;
 	}
 
-	unsigned int CFBXImporter::FindJointIndexUsingName(const std::shared_ptr<animation::CSkin>& Skin, const std::string& JointName)
+	unsigned int CFBXImporter::FindBoneIndexUsingName(const std::shared_ptr<animation::CSkeleton>& Skeleton, const std::string& BoneName)
 	{
-		unsigned int JointIndex = 0;
+		unsigned int BoneIndex = 0;
 
-		for (int j = 0; j < Skin->GetJointList().size(); j++)
+		for (int j = 0; j < Skeleton->GetBoneList().size(); j++)
 		{
-			const auto& Joint = Skin->GetJointList()[j];
+			const auto& Bone = Skeleton->GetBoneList()[j];
 
-			if (Joint->GetJointNode()->GetName() == JointName)
+			if (Bone->GetBoneNode()->GetName() == BoneName)
 			{
-				JointIndex = j;
+				BoneIndex = j;
 
 				break;
 			}
 		}
 
-		return JointIndex;
+		return BoneIndex;
 	}
 
 	bool CFBXImporter::CheckIsMixamo(FbxNode* pFBXNode)

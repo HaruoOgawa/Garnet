@@ -11,14 +11,14 @@ call echo [4/71] ../src/Animation/CAnimationController.cpp
 call emcc -o2 -c ../src/Animation/CAnimationController.cpp -o ./obj/3.o -I../src/Library/DawnLib/include -I../src/Library/glm -I../src/Library/tinygltf -I../src/Library/SmallFBX/include -DUSE_WEBGPU -DUSE_TEXTURE_LOADER -DUSE_GLTF -DUSE_VIEWER_CAMERA -DUSE_INPUT_SYSTEM -DUSE_GPGPU -DUSE_FBX -DUSE_ANIMATION -DUSE_SMALL_FBX -DUSE_MMD 
 call echo [5/71] ../src/Animation/CAnimationSampler.cpp
 call emcc -o2 -c ../src/Animation/CAnimationSampler.cpp -o ./obj/4.o -I../src/Library/DawnLib/include -I../src/Library/glm -I../src/Library/tinygltf -I../src/Library/SmallFBX/include -DUSE_WEBGPU -DUSE_TEXTURE_LOADER -DUSE_GLTF -DUSE_VIEWER_CAMERA -DUSE_INPUT_SYSTEM -DUSE_GPGPU -DUSE_FBX -DUSE_ANIMATION -DUSE_SMALL_FBX -DUSE_MMD 
-call echo [6/71] ../src/Animation/CBoneNameProvider.cpp
-call emcc -o2 -c ../src/Animation/CBoneNameProvider.cpp -o ./obj/5.o -I../src/Library/DawnLib/include -I../src/Library/glm -I../src/Library/tinygltf -I../src/Library/SmallFBX/include -DUSE_WEBGPU -DUSE_TEXTURE_LOADER -DUSE_GLTF -DUSE_VIEWER_CAMERA -DUSE_INPUT_SYSTEM -DUSE_GPGPU -DUSE_FBX -DUSE_ANIMATION -DUSE_SMALL_FBX -DUSE_MMD 
-call echo [7/71] ../src/Animation/CJoint.cpp
-call emcc -o2 -c ../src/Animation/CJoint.cpp -o ./obj/6.o -I../src/Library/DawnLib/include -I../src/Library/glm -I../src/Library/tinygltf -I../src/Library/SmallFBX/include -DUSE_WEBGPU -DUSE_TEXTURE_LOADER -DUSE_GLTF -DUSE_VIEWER_CAMERA -DUSE_INPUT_SYSTEM -DUSE_GPGPU -DUSE_FBX -DUSE_ANIMATION -DUSE_SMALL_FBX -DUSE_MMD 
+call echo [6/71] ../src/Animation/CBone.cpp
+call emcc -o2 -c ../src/Animation/CBone.cpp -o ./obj/5.o -I../src/Library/DawnLib/include -I../src/Library/glm -I../src/Library/tinygltf -I../src/Library/SmallFBX/include -DUSE_WEBGPU -DUSE_TEXTURE_LOADER -DUSE_GLTF -DUSE_VIEWER_CAMERA -DUSE_INPUT_SYSTEM -DUSE_GPGPU -DUSE_FBX -DUSE_ANIMATION -DUSE_SMALL_FBX -DUSE_MMD 
+call echo [7/71] ../src/Animation/CBoneNameProvider.cpp
+call emcc -o2 -c ../src/Animation/CBoneNameProvider.cpp -o ./obj/6.o -I../src/Library/DawnLib/include -I../src/Library/glm -I../src/Library/tinygltf -I../src/Library/SmallFBX/include -DUSE_WEBGPU -DUSE_TEXTURE_LOADER -DUSE_GLTF -DUSE_VIEWER_CAMERA -DUSE_INPUT_SYSTEM -DUSE_GPGPU -DUSE_FBX -DUSE_ANIMATION -DUSE_SMALL_FBX -DUSE_MMD 
 call echo [8/71] ../src/Animation/CKeyFrame.cpp
 call emcc -o2 -c ../src/Animation/CKeyFrame.cpp -o ./obj/7.o -I../src/Library/DawnLib/include -I../src/Library/glm -I../src/Library/tinygltf -I../src/Library/SmallFBX/include -DUSE_WEBGPU -DUSE_TEXTURE_LOADER -DUSE_GLTF -DUSE_VIEWER_CAMERA -DUSE_INPUT_SYSTEM -DUSE_GPGPU -DUSE_FBX -DUSE_ANIMATION -DUSE_SMALL_FBX -DUSE_MMD 
-call echo [9/71] ../src/Animation/CSkin.cpp
-call emcc -o2 -c ../src/Animation/CSkin.cpp -o ./obj/8.o -I../src/Library/DawnLib/include -I../src/Library/glm -I../src/Library/tinygltf -I../src/Library/SmallFBX/include -DUSE_WEBGPU -DUSE_TEXTURE_LOADER -DUSE_GLTF -DUSE_VIEWER_CAMERA -DUSE_INPUT_SYSTEM -DUSE_GPGPU -DUSE_FBX -DUSE_ANIMATION -DUSE_SMALL_FBX -DUSE_MMD 
+call echo [9/71] ../src/Animation/CSkeleton.cpp
+call emcc -o2 -c ../src/Animation/CSkeleton.cpp -o ./obj/8.o -I../src/Library/DawnLib/include -I../src/Library/glm -I../src/Library/tinygltf -I../src/Library/SmallFBX/include -DUSE_WEBGPU -DUSE_TEXTURE_LOADER -DUSE_GLTF -DUSE_VIEWER_CAMERA -DUSE_INPUT_SYSTEM -DUSE_GPGPU -DUSE_FBX -DUSE_ANIMATION -DUSE_SMALL_FBX -DUSE_MMD 
 call echo [10/71] ../src/App/CWebAppManager.cpp
 call emcc -o2 -c ../src/App/CWebAppManager.cpp -o ./obj/9.o -I../src/Library/DawnLib/include -I../src/Library/glm -I../src/Library/tinygltf -I../src/Library/SmallFBX/include -DUSE_WEBGPU -DUSE_TEXTURE_LOADER -DUSE_GLTF -DUSE_VIEWER_CAMERA -DUSE_INPUT_SYSTEM -DUSE_GPGPU -DUSE_FBX -DUSE_ANIMATION -DUSE_SMALL_FBX -DUSE_MMD 
 call echo [11/71] ../src/App/ScriptApp/CScriptApp.cpp

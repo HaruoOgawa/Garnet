@@ -5,8 +5,8 @@
 #include "../../Math/CTransform.h"
 #include "../../Object/C3DObject.h"
 #include "../../Animation/CAnimationClip.h"
-#include "../../Animation/CSkin.h"
-#include "../../Animation/CJoint.h"
+#include "../../Animation/CSkeleton.h"
+#include "../../Animation/CBone.h"
 #include "../../Animation/CBoneNameProvider.h"
 
 #include "../../Graphics/CMaterialFrame.h"
@@ -41,22 +41,22 @@ namespace mmd
 
 		RootNodeIndexList.push_back(std::vector<int>({ 0 }));
 
-		// Skin
-		std::shared_ptr<animation::CSkin> Skin = std::make_shared<animation::CSkin>();
-		if (!CreateAnimationSkin(model, Skin, NodeList, RootNode)) return false;
+		// Skeleton
+		std::shared_ptr<animation::CSkeleton> Skeleton = std::make_shared<animation::CSkeleton>();
+		if (!CreateAnimationSkeleton(model, Skeleton, NodeList, RootNode)) return false;
 
 		// BoneTableを作成
-		Skin->MakeBoneTable();
+		Skeleton->MakeBoneTable();
 
 		// IKBoneListを作成
-		Skin->MakeIKBoneList();
+		Skeleton->MakeIKBoneList();
 
 		// 付与ボーンリストを作成
-		Skin->MakeGrantBoneList();
+		Skeleton->MakeGrantBoneList();
 
 		// マテリアルリスト
 		std::vector<std::shared_ptr<graphics::CMaterial>> MaterialList;
-		if (!CreateMaterialList(pGraphicsAPI, model, MaterialList, MaterialFrame, Skin)) return false;
+		if (!CreateMaterialList(pGraphicsAPI, model, MaterialList, MaterialFrame, Skeleton)) return false;
 
 		// テクスチャリスト
 		std::vector<std::shared_ptr<graphics::CTexture>> TextureList;
@@ -66,7 +66,7 @@ namespace mmd
 
 		// メッシュ
 		std::vector<std::shared_ptr<graphics::CMesh>> MeshList;
-		if (!CreateMeshList(model, MeshList, RootNode, NodeList, MaterialList, (Skin->GetJointList().size() > 0))) return false;
+		if (!CreateMeshList(model, MeshList, RootNode, NodeList, MaterialList, (Skeleton->GetBoneList().size() > 0))) return false;
 
 		// リソースを登録
 		Object->SetRootNodeIndexList(RootNodeIndexList);
@@ -76,7 +76,7 @@ namespace mmd
 			Object->AddNode(Node);
 		}
 
-		Object->AddAnimationSkin(Skin);
+		Object->SetAnimationSkeleton(Skeleton);
 
 		for (const auto& Material : MaterialList)
 		{
@@ -108,16 +108,16 @@ namespace mmd
 		Object->ApplyParentNode();
 
 		// 逆バインドポーズを計算する
-		if (!CalcInverseBindPose(Skin)) return false;
+		if (!CalcInverseBindPose(Skeleton)) return false;
 
 		return true;
 	}
 
-	bool CPmxImporter::CreateAnimationSkin(const CPmxModel& model, std::shared_ptr<animation::CSkin>& Skin, std::vector<std::shared_ptr<object::CNode>>& NodeList, const std::shared_ptr<object::CNode>& RootNode)
+	bool CPmxImporter::CreateAnimationSkeleton(const CPmxModel& model, std::shared_ptr<animation::CSkeleton>& Skeleton, std::vector<std::shared_ptr<object::CNode>>& NodeList, const std::shared_ptr<object::CNode>& RootNode)
 	{
 		animation::CBoneNameProvider Provider;
 
-		// PmxではBoneとJointは全くの別物でそれぞれ違う役割を持っているので厳格に名前分けする必要がある!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		// PmxではBoneとBoneは全くの別物でそれぞれ違う役割を持っているので厳格に名前分けする必要がある!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 		const auto& PmxBoneList = model.GetPmxBoneList();
 
@@ -154,7 +154,7 @@ namespace mmd
 			NodeList.push_back(BoneNode);
 
 			// Boneを作成
-			std::shared_ptr<animation::CJoint> Bone = std::make_shared<animation::CJoint>(BoneNode);
+			std::shared_ptr<animation::CBone> Bone = std::make_shared<animation::CBone>(BoneNode);
 
 			// BoneにBoneNameを割り当てる
 			animation::EHumanoidBones BoneName = Provider.GetBoneNameU16(Name);
@@ -175,19 +175,19 @@ namespace mmd
 			// IK
 			Bone->SetIKParam(PmxBone->GetIKParam());
 
-			Skin->AddJoint(Bone);
+			Skeleton->AddBone(Bone);
 		}
 
 		// BoneNodeに子要素を設定する
 		{
-			const auto& BoneList = Skin->GetJointList();
+			const auto& BoneList = Skeleton->GetBoneList();
 
 			for (int BoneIndex = 0; BoneIndex < PmxBoneList.size(); BoneIndex++)
 			{
 				const auto& PmxBone = PmxBoneList[BoneIndex];
 
 				const auto& Bone = BoneList[BoneIndex];
-				int SelfNodeIndex = Bone->GetJointNode()->GetSelfNodeIndex();
+				int SelfNodeIndex = Bone->GetBoneNode()->GetSelfNodeIndex();
 
 				int ParentBoneIndex = PmxBone->GetParentBoneIndex();
 
@@ -199,7 +199,7 @@ namespace mmd
 				else
 				{
 					// 自身を親ノードの子要素リストに追加する
-					BoneList[ParentBoneIndex]->GetJointNode()->AddChildrenNodeIndex(SelfNodeIndex);
+					BoneList[ParentBoneIndex]->GetBoneNode()->AddChildrenNodeIndex(SelfNodeIndex);
 				}
 			}
 		}
@@ -207,20 +207,20 @@ namespace mmd
 		return true;
 	}
 
-	bool CPmxImporter::CalcInverseBindPose(std::shared_ptr<animation::CSkin>& Skin)
+	bool CPmxImporter::CalcInverseBindPose(std::shared_ptr<animation::CSkeleton>& Skeleton)
 	{
-		for (const auto& Bone : Skin->GetJointList())
+		for (const auto& Bone : Skeleton->GetBoneList())
 		{
 			// MMDのBoneはローカル座標系ではなくワールド座標系なのでセンターとかの親ボーンを考慮するかは迷うところ
-			glm::mat4 InverseBindMatrix = glm::inverse(Bone->GetJointNode()->GetWorldMatrix());
-			Bone->GetJointNode()->SetInverseBindMatrix(InverseBindMatrix);
+			glm::mat4 InverseBindMatrix = glm::inverse(Bone->GetBoneNode()->GetWorldMatrix());
+			Bone->GetBoneNode()->SetInverseBindMatrix(InverseBindMatrix);
 		}
 
 		return true;
 	}
 
 	bool CPmxImporter::CreateMaterialList(api::IGraphicsAPI* pGraphicsAPI, const CPmxModel& model, std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList,
-		const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, const std::shared_ptr<animation::CSkin>& Skin)
+		const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, const std::shared_ptr<animation::CSkeleton>& Skeleton)
 	{
 		if (!MaterialFrame) return false;
 
@@ -301,10 +301,10 @@ namespace mmd
 
 			// SkinMatrix StorageBuffer
 			{
-				// SkinMatは存在するJointの数だけ用意する必要がある
+				// SkinMatは存在するBoneの数だけ用意する必要がある
 				// DynamicOffsetが256バイトからしか使えない都合上SkinMatCountの最小値は4とする(4 * 16 * 4 = 256)
 				unsigned int SkinMatCount = 0;
-				if (Skin && Skin->GetJointList().size() > 0) SkinMatCount = static_cast<unsigned int>(Skin->GetJointList().size());
+				if (Skeleton && Skeleton->GetBoneList().size() > 0) SkinMatCount = static_cast<unsigned int>(Skeleton->GetBoneList().size());
 
 				// DynamicOffsetが256バイトからしか使えない都合上SkinMatCountの最小値は4とする(4 * 16 * 4 = 256)
 				if (SkinMatCount < 4) SkinMatCount = 4;
@@ -325,7 +325,7 @@ namespace mmd
 	}
 
 	bool CPmxImporter::CreateMeshList(const CPmxModel& model, std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, const std::shared_ptr<object::CNode>& RootNode, std::vector<std::shared_ptr<object::CNode>>& NodeList,
-		const std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList, bool ExistSkin)
+		const std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList, bool ExistSkeleton)
 	{
 		// 明示的にMeshNodeを作成
 		std::shared_ptr<object::CNode> MeshNode = std::make_shared<object::CNode>(-1, static_cast<int>(NodeList.size()));
@@ -399,12 +399,12 @@ namespace mmd
 
 					if (MetaData.BoneIndexSize == 1)
 					{
-						const auto& ByteJointAttribute = PmxMesh->GetByteJointAttribute();
+						const auto& ByteBoneAttribute = PmxMesh->GetByteBoneAttribute();
 
-						if (!ByteJointAttribute.empty())
+						if (!ByteBoneAttribute.empty())
 						{
-							AttributeData.resize(ByteJointAttribute.size() / 4);
-							std::memcpy(&AttributeData[0], &ByteJointAttribute[0], sizeof(unsigned char) * ByteJointAttribute.size());
+							AttributeData.resize(ByteBoneAttribute.size() / 4);
+							std::memcpy(&AttributeData[0], &ByteBoneAttribute[0], sizeof(unsigned char) * ByteBoneAttribute.size());
 						}
 
 						ReservedDataTypeList.emplace("JOINTS_0", renderer::EDataType::TYPE_UNSIGNED_BYTE);
@@ -412,12 +412,12 @@ namespace mmd
 					}
 					else if (MetaData.BoneIndexSize == 2)
 					{
-						const auto& UShortJointAttribute = PmxMesh->GetUShortJointAttribute();
+						const auto& UShortBoneAttribute = PmxMesh->GetUShortBoneAttribute();
 
-						if (!UShortJointAttribute.empty())
+						if (!UShortBoneAttribute.empty())
 						{
-							AttributeData.resize(UShortJointAttribute.size() / 2);
-							std::memcpy(&AttributeData[0], &UShortJointAttribute[0], sizeof(unsigned short) * UShortJointAttribute.size());
+							AttributeData.resize(UShortBoneAttribute.size() / 2);
+							std::memcpy(&AttributeData[0], &UShortBoneAttribute[0], sizeof(unsigned short) * UShortBoneAttribute.size());
 						}
 
 						ReservedDataTypeList.emplace("JOINTS_0", renderer::EDataType::TYPE_UNSIGNED_SHORT);
@@ -425,12 +425,12 @@ namespace mmd
 					}
 					else if (MetaData.BoneIndexSize == 4)
 					{
-						const auto& IntJointAttribute = PmxMesh->GetUIntJointAttribute();
+						const auto& IntBoneAttribute = PmxMesh->GetUIntBoneAttribute();
 
-						if (!IntJointAttribute.empty())
+						if (!IntBoneAttribute.empty())
 						{
-							AttributeData.resize(IntJointAttribute.size());
-							std::memcpy(&AttributeData[0], &IntJointAttribute[0], sizeof(unsigned int) * IntJointAttribute.size());
+							AttributeData.resize(IntBoneAttribute.size());
+							std::memcpy(&AttributeData[0], &IntBoneAttribute[0], sizeof(unsigned int) * IntBoneAttribute.size());
 						}
 
 						ReservedDataTypeList.emplace("JOINTS_0", renderer::EDataType::TYPE_UNSIGNED_INT);
@@ -587,9 +587,9 @@ namespace mmd
 
 				Node->SetU16Name(PmxMaterial->GetMaterialName().second);
 
-				// ひとまずPMXはSkinを1つしか持っていない
-				int SkinIndex = (ExistSkin) ? 0 : -1;
-				Node->SetSkinIndex(SkinIndex);
+				// ひとまずPMXはSkeletonを1つしか持っていない
+				int SkeletonIndex = (ExistSkeleton) ? 0 : -1;
+				Node->SetSkeletonIndex(SkeletonIndex);
 
 				NodeList.push_back(Node);
 
