@@ -46,7 +46,7 @@ namespace mmd
 		{
 			// Samplerを作成
 			{
-				// MMDにはCubicSplineしかないがひとまずLINEARで試しに作ってみる
+				// PMXにはスプライン補間しか存在しない
 				std::shared_ptr<animation::CAnimationSampler> Sampler = std::make_shared<animation::CAnimationSampler>(animation::EInterpolationType::LINEAR);
 
 				Sampler->SetStartTime(StartTime);
@@ -86,6 +86,12 @@ namespace mmd
 						KeyFrame->SetInput(InputData);
 						KeyFrame->SetOutput(OutputData);
 
+						// スプライン補間用のポイントを渡す
+						KeyFrame->SetXPointList(FrameData.XPointList);
+						KeyFrame->SetYPointList(FrameData.YPointList);
+						KeyFrame->SetZPointList(FrameData.ZPointList);
+						KeyFrame->SetRPointList(FrameData.RPointList);
+
 						// Add KeyFrame To Sampler
 						Sampler->AddKeyFrame(KeyFrame);
 					}
@@ -97,6 +103,12 @@ namespace mmd
 
 						KeyFrame->SetInput(EndTime);
 						KeyFrame->SetOutput(OutputData);
+
+						// スプライン補間用のポイントを渡す
+						KeyFrame->SetXPointList(FrameData.XPointList);
+						KeyFrame->SetYPointList(FrameData.YPointList);
+						KeyFrame->SetZPointList(FrameData.ZPointList);
+						KeyFrame->SetRPointList(FrameData.RPointList);
 
 						// Add KeyFrame To Sampler
 						Sampler->AddKeyFrame(KeyFrame);

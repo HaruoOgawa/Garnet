@@ -17,14 +17,10 @@ namespace mmd
 		glm::vec3 Pos;
 		glm::quat Rot;
 
-		glm::vec2 X_Interpolation_A;
-		glm::vec2 X_Interpolation_B;
-		glm::vec2 Y_Interpolation_A;
-		glm::vec2 Y_Interpolation_B;
-		glm::vec2 Z_Interpolation_A;
-		glm::vec2 Z_Interpolation_B;
-		glm::vec2 R_Interpolation_A;
-		glm::vec2 R_Interpolation_B;
+		std::vector<glm::vec2> XPointList;
+		std::vector<glm::vec2> YPointList;
+		std::vector<glm::vec2> ZPointList;
+		std::vector<glm::vec2> RPointList;
 	};
 }
 #endif

@@ -47,6 +47,46 @@ namespace animation
 	{
 		std::memcpy(pData, &m_Output[0], sizeof(float) * m_Output.size());
 	}
+
+	void CKeyFrame::SetXPointList(const std::vector<glm::vec2>& Points)
+	{
+		m_XPointList = Points;
+	}
+
+	const std::vector<glm::vec2>& CKeyFrame::GetXPointList() const
+	{
+		return m_XPointList;
+	}
+
+	void CKeyFrame::SetYPointList(const std::vector<glm::vec2>& Points)
+	{
+		m_YPointList = Points;
+	}
+
+	const std::vector<glm::vec2>& CKeyFrame::GetYPointList() const
+	{
+		return m_YPointList;
+	}
+
+	void CKeyFrame::SetZPointList(const std::vector<glm::vec2>& Points)
+	{
+		m_ZPointList = Points;
+	}
+
+	const std::vector<glm::vec2>& CKeyFrame::GetZPointList() const
+	{
+		return m_ZPointList;
+	}
+
+	void CKeyFrame::SetRPointList(const std::vector<glm::vec2>& Points)
+	{
+		m_RPointList = Points;
+	}
+
+	const std::vector<glm::vec2>& CKeyFrame::GetRPointList() const
+	{
+		return m_RPointList;
+	}
 }
 
 #endif // USE_ANIMATION

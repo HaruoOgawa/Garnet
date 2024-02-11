@@ -132,14 +132,83 @@ namespace mmd
 			// 補完パラメーター(ベジュ曲線に使用する) - Interpolation Params
 			if (!Analyser.IsValid(4 * 4 * 4)) return false;
 
-			glm::vec2 X_Interpolation_A = glm::vec2(Analyser.GetFloat(), Analyser.GetFloat());
-			glm::vec2 X_Interpolation_B = glm::vec2(Analyser.GetFloat(), Analyser.GetFloat());
-			glm::vec2 Y_Interpolation_A = glm::vec2(Analyser.GetFloat(), Analyser.GetFloat());
-			glm::vec2 Y_Interpolation_B = glm::vec2(Analyser.GetFloat(), Analyser.GetFloat());
-			glm::vec2 Z_Interpolation_A = glm::vec2(Analyser.GetFloat(), Analyser.GetFloat());
-			glm::vec2 Z_Interpolation_B = glm::vec2(Analyser.GetFloat(), Analyser.GetFloat());
-			glm::vec2 R_Interpolation_A = glm::vec2(Analyser.GetFloat(), Analyser.GetFloat());
-			glm::vec2 R_Interpolation_B = glm::vec2(Analyser.GetFloat(), Analyser.GetFloat());
+			//
+			glm::vec2 X_Interpolation_A = glm::vec2(0.0f);
+			glm::vec2 X_Interpolation_B = glm::vec2(0.0f);
+			glm::vec2 Y_Interpolation_A = glm::vec2(0.0f);
+			glm::vec2 Y_Interpolation_B = glm::vec2(0.0f);
+			glm::vec2 Z_Interpolation_A = glm::vec2(0.0f);
+			glm::vec2 Z_Interpolation_B = glm::vec2(0.0f);
+			glm::vec2 R_Interpolation_A = glm::vec2(0.0f);
+			glm::vec2 R_Interpolation_B = glm::vec2(0.0f);
+
+			// ax
+			{
+				X_Interpolation_A.x = static_cast<float>(Analyser.GetByte());
+				Y_Interpolation_A.x = static_cast<float>(Analyser.GetByte());
+				Z_Interpolation_A.x = static_cast<float>(Analyser.GetByte());
+				R_Interpolation_A.x = static_cast<float>(Analyser.GetByte());
+			}
+
+			// ay
+			{
+				X_Interpolation_A.y = static_cast<float>(Analyser.GetByte());
+				Y_Interpolation_A.y = static_cast<float>(Analyser.GetByte());
+				Z_Interpolation_A.y = static_cast<float>(Analyser.GetByte());
+				R_Interpolation_A.y = static_cast<float>(Analyser.GetByte());
+			}
+
+			// bx
+			{
+				X_Interpolation_B.x = static_cast<float>(Analyser.GetByte());
+				Y_Interpolation_B.x = static_cast<float>(Analyser.GetByte());
+				Z_Interpolation_B.x = static_cast<float>(Analyser.GetByte());
+				R_Interpolation_B.x = static_cast<float>(Analyser.GetByte());
+			}
+
+			// by
+			{
+				X_Interpolation_B.y = static_cast<float>(Analyser.GetByte());
+				Y_Interpolation_B.y = static_cast<float>(Analyser.GetByte());
+				Z_Interpolation_B.y = static_cast<float>(Analyser.GetByte());
+				R_Interpolation_B.y = static_cast<float>(Analyser.GetByte());
+			}
+
+			//
+			std::vector<glm::vec2> XPointList;
+			{
+				XPointList.push_back(glm::vec2(0.0f, 0.0f));
+				XPointList.push_back(X_Interpolation_A / 127.0f);
+				XPointList.push_back(X_Interpolation_B / 127.0f);
+				XPointList.push_back(glm::vec2(1.0f, 1.0f));
+			}
+
+			std::vector<glm::vec2> YPointList;
+			{
+				YPointList.push_back(glm::vec2(0.0f, 0.0f));
+				YPointList.push_back(Y_Interpolation_A / 127.0f);
+				YPointList.push_back(Y_Interpolation_B / 127.0f);
+				YPointList.push_back(glm::vec2(1.0f, 1.0f));
+			}
+
+			std::vector<glm::vec2> ZPointList;
+			{
+				ZPointList.push_back(glm::vec2(0.0f, 0.0f));
+				ZPointList.push_back(Z_Interpolation_A / 127.0f);
+				ZPointList.push_back(Z_Interpolation_B / 127.0f);
+				ZPointList.push_back(glm::vec2(1.0f, 1.0f));
+			}
+
+			std::vector<glm::vec2> RPointList;
+			{
+				RPointList.push_back(glm::vec2(0.0f, 0.0f));
+				RPointList.push_back(R_Interpolation_A / 127.0f);
+				RPointList.push_back(R_Interpolation_B / 127.0f);
+				RPointList.push_back(glm::vec2(1.0f, 1.0f));
+			}
+
+			// 残りの48バイトはひとまずスキップ
+			if (!Analyser.Skip(16 * 3)) return false;
 
 			// ボーン名を取得
 			animation::CBoneNameProvider Provider;
@@ -155,7 +224,7 @@ namespace mmd
 			}
 
 			// Mapにデータを登録する
-			SVMDFrame Frame = { BoneName, FrameIndex, Pos, Rot, X_Interpolation_A , X_Interpolation_B, Y_Interpolation_A , Y_Interpolation_B, Z_Interpolation_A , Z_Interpolation_B, R_Interpolation_A , R_Interpolation_B };
+			SVMDFrame Frame = { BoneName, FrameIndex, Pos, Rot, XPointList, YPointList, ZPointList, RPointList };
 
 			m_FrameMap[BoneName].push_back(Frame);
 		}

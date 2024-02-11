@@ -88,6 +88,9 @@ namespace animation
 				// Linkが一つもなければスキップ
 				if (IKParam->IKLinkList.size() == 0) continue;
 
+				// 足首がおかしくなるのでひとまずLinkBoneが1つの時も計算しない(必要になったら対応する)
+				if (IKParam->IKLinkList.size() == 1) continue;
+
 				// IKターゲットボーン
 				if (IKParam->IKTargetBoneIndex < 0 || IKParam->IKTargetBoneIndex >= BoneList.size()) continue;
 				const auto& IKTargetBone = BoneList[IKParam->IKTargetBoneIndex];
@@ -389,6 +392,11 @@ namespace animation
 
 				std::vector<float> TargetOutput = SourceKeyFrame->GetOutput();
 				TargetKeyFrame->SetOutput(TargetOutput);
+
+				TargetKeyFrame->SetXPointList(SourceKeyFrame->GetXPointList());
+				TargetKeyFrame->SetYPointList(SourceKeyFrame->GetYPointList());
+				TargetKeyFrame->SetZPointList(SourceKeyFrame->GetZPointList());
+				TargetKeyFrame->SetRPointList(SourceKeyFrame->GetRPointList());
 
 				TargetSampler->AddKeyFrame(TargetKeyFrame);
 			}

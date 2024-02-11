@@ -231,7 +231,17 @@ namespace animation
 			}
 			break;
 		case animation::EInterpolationType::CUBICSPLINE:
-			if (!DoCubicSplineInterpolation(CalcCurrentTime, Value, AnimationTarget, PrevKeyFrame, NextKeyFrame)) return false;
+		{
+			if (AnimationTarget == animation::EAnimationTarget::MODELMATRIX)
+			{
+				if (!DoModelMatrixSplineInterpolation(CalcCurrentTime, Value, AnimationTarget, PrevKeyFrame, NextKeyFrame)) return false;
+			}
+			else
+			{
+				if (!DoCubicSplineInterpolation(CalcCurrentTime, Value, AnimationTarget, PrevKeyFrame, NextKeyFrame)) return false;
+			}
+		}
+			
 			break;
 		default:
 			break;
@@ -422,6 +432,128 @@ namespace animation
 		// ネット上でも特にろくなサンプルが見当たらないので、CubicSplineInterpolationはそのようなモデルに出会ったときに実装対応する。
 
 		return true;
+	}
+
+	bool CAnimationSampler::DoModelMatrixSplineInterpolation(float CurrentTime, std::vector<float>& Value, EAnimationTarget AnimationTarget, 
+		const std::shared_ptr<animation::CKeyFrame>& PrevKeyFrame, const std::shared_ptr<animation::CKeyFrame>& NextKeyFrame)
+	{
+		// ModelMatrix
+		// CubicSpline: 3次スプライン曲線
+
+		float PrevTime = PrevKeyFrame->GetInput();
+		float NextTime = NextKeyFrame->GetInput();
+
+		float L = (CurrentTime - PrevTime) / (NextTime - PrevTime);
+
+		const auto& PrevValue = PrevKeyFrame->GetOutput();
+		const auto& NextValue = NextKeyFrame->GetOutput();
+
+		if (PrevValue.size() != NextValue.size()) return false;
+
+		if (PrevValue.size() != 16 || NextValue.size() != 16) return false;
+
+		// それぞれのPos・Rotate・Scaleを取得
+		glm::vec3 PrevPos = glm::vec3(0.0f);
+		glm::quat PrevQuat = glm::quat();
+		glm::vec3 PrevScale = glm::vec3(1.0f);
+
+		glm::vec3 NextPos = glm::vec3(0.0f);
+		glm::quat NextQuat = glm::quat();
+		glm::vec3 NextScale = glm::vec3(1.0f);
+
+		glm::vec3 DstPos = glm::vec3(0.0f);
+		glm::quat DstQuat = glm::quat();
+		glm::vec3 DstScale = glm::vec3(1.0f);
+
+		{
+			glm::mat4 mat = glm::mat4(1.0f);
+			std::memcpy(&mat[0][0], &PrevValue[0], sizeof(float) * PrevValue.size());
+
+			math::CTransform::CastModelMatrixToTransform(mat, PrevPos, PrevQuat, PrevScale);
+		}
+
+		{
+			glm::mat4 mat = glm::mat4(1.0f);
+			std::memcpy(&mat[0][0], &NextValue[0], sizeof(float) * NextValue.size());
+
+			math::CTransform::CastModelMatrixToTransform(mat, NextPos, NextQuat, NextScale);
+		}
+
+		// それぞれでスプライン補間する
+		// Pos
+		{
+			// X
+			{
+				const auto& Points = PrevKeyFrame->GetXPointList();
+				if (Points.size() != 4) return false;
+
+				glm::vec2 SplinePoint = CalculateSplinePont(L, Points[0], Points[1], Points[2], Points[3]);
+
+				DstPos.x = (1.0f - SplinePoint.x) * PrevPos.x + SplinePoint.x * NextPos.x;
+			}
+
+			// Y
+			{
+				const auto& Points = PrevKeyFrame->GetYPointList();
+				if (Points.size() != 4) return false;
+
+				glm::vec2 SplinePoint = CalculateSplinePont(L, Points[0], Points[1], Points[2], Points[3]);
+
+				DstPos.y = (1.0f - SplinePoint.x) * PrevPos.y + SplinePoint.x * NextPos.y;
+			}
+			
+			// Z
+			{
+				const auto& Points = PrevKeyFrame->GetZPointList();
+				if (Points.size() != 4) return false;
+
+				glm::vec2 SplinePoint = CalculateSplinePont(L, Points[0], Points[1], Points[2], Points[3]);
+
+				DstPos.z = (1.0f - SplinePoint.x) * PrevPos.z + SplinePoint.x * NextPos.z;
+			}
+		}
+
+		// Rotate
+		{
+			const auto& Points = PrevKeyFrame->GetRPointList();
+			if (Points.size() != 4) return false;
+
+			glm::vec2 SplinePoint = CalculateSplinePont(L, Points[0], Points[1], Points[2], Points[3]);
+
+			DstQuat = glm::slerp(PrevQuat, NextQuat, SplinePoint.x);
+		}
+
+		// Scale
+		{
+			DstScale.x = (1.0f - L) * PrevScale.x + L * NextScale.x;
+			DstScale.y = (1.0f - L) * PrevScale.y + L * NextScale.y;
+			DstScale.z = (1.0f - L) * PrevScale.z + L * NextScale.z;
+		}
+
+		// 補完結果はMatrixに戻さずにPos・Rotate・Scaleの順番でValueに格納する
+		Value.push_back(DstPos.x); Value.push_back(DstPos.y); Value.push_back(DstPos.z);
+		Value.push_back(DstQuat.x); Value.push_back(DstQuat.y); Value.push_back(DstQuat.z); Value.push_back(DstQuat.w);
+		Value.push_back(DstScale.x); Value.push_back(DstScale.y); Value.push_back(DstScale.z);
+
+		return true;
+	}
+
+	glm::vec2 CAnimationSampler::CalculateSplinePont(float t, const glm::vec2& p0, const glm::vec2& p1, const glm::vec2& p2, const glm::vec2& p3)
+	{
+		float t2 = t * t;
+		float t3 = t2 * t;
+
+		float b0 = (1.0f - t) * (1.0f - t) * (1.0f - t) / 6.0f;
+		float b1 = (3.0f * t3 - 6.0f * t2 + 4.0f) / 6.0f;
+		float b2 = (-3.0f * t3 + 3.0f * t2 + 3.0f * t + 1.0f) / 6.0f;
+		float b3 = t3 / 6.0f;
+
+		glm::vec2 result = glm::vec2(0.0f);
+
+		result.x = b0 * p0.x + b1 * p1.x + b2 * p2.x + b3 * p3.x;
+		result.y = b0 * p0.y + b1 * p1.y + b2 * p2.y + b3 * p3.y;
+
+		return result;
 	}
 
 	// ボーンに基づく現在のフレームを取得
