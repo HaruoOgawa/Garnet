@@ -122,24 +122,27 @@ fn main_1() {
             let _e123 = col;
             col = (_e123 * mix(_e116, vec3<f32>(1.0, 1.0, 1.0), vec3<f32>(clamp(((_e117 * 16.0) + 0.5), 0.0, 1.0))));
         }
-        let _e126 = fragUbo.specularFactor;
-        let _e128 = HalfVector;
-        let _e129 = f_WorldNormal_1;
-        let _e133 = fragUbo.specularIntensity;
-        specularColor = (_e126.xyz * pow(max(0.0, dot(_e128, _e129)), _e133));
-        let _e136 = specularColor;
-        let _e137 = col;
-        col = (_e137 + _e136);
+        let _e126 = fragUbo.specularIntensity;
+        if (_e126 > 0.0) {
+            let _e129 = fragUbo.specularFactor;
+            let _e131 = HalfVector;
+            let _e132 = f_WorldNormal_1;
+            let _e136 = fragUbo.specularIntensity;
+            specularColor = (_e129.xyz * pow(max(0.0, dot(_e131, _e132)), _e136));
+            let _e139 = specularColor;
+            let _e140 = col;
+            col = (_e140 + _e139);
+        }
     } else {
-        let _e140 = fragUbo.drawPathIndex;
-        if (_e140 == 2) {
-            let _e143 = fragUbo.edgeColor;
-            col = _e143.xyz;
+        let _e143 = fragUbo.drawPathIndex;
+        if (_e143 == 2) {
+            let _e146 = fragUbo.edgeColor;
+            col = _e146.xyz;
         }
     }
-    let _e145 = col;
-    let _e146 = alpha;
-    outColor = vec4<f32>(_e145.x, _e145.y, _e145.z, _e146);
+    let _e148 = col;
+    let _e149 = alpha;
+    outColor = vec4<f32>(_e148.x, _e148.y, _e148.z, _e149);
     return;
 }
 

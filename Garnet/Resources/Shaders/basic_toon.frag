@@ -123,8 +123,11 @@ void main(){
 		}
 
 		// Specular
-		vec3 specularColor = fragUbo.specularFactor.xyz * pow(max(0.0, dot(HalfVector, f_WorldNormal)), fragUbo.specularIntensity);
-		col += specularColor;
+		if(fragUbo.specularIntensity > 0.0)
+		{
+			vec3 specularColor = fragUbo.specularFactor.xyz * pow(max(0.0, dot(HalfVector, f_WorldNormal)), fragUbo.specularIntensity);
+			col += specularColor;
+		}
 	}
 	else if(fragUbo.drawPathIndex == 2) // アウトライン描画パス
 	{
