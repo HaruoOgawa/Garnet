@@ -2,12 +2,16 @@ from math import e
 import os
 
 
-ExcludedFolderList = ["Library", "Vulkan", "OpenGL", "DescMain", "CDescAppManager.cpp", "CDescAppManager.h", "DemoMain", "CDemoAppManager.cpp", "CDemoAppManager.h"]
-IncludeDirectoryList = ["../src/Library/DawnLib/include", "../src/Library/glm", "../src/Library/tinygltf", "../src/Library/SmallFBX/include"]
-PreprocessorList = ["USE_WEBGPU", "USE_TEXTURE_LOADER", "USE_GLTF", "USE_VIEWER_CAMERA", "USE_INPUT_SYSTEM", "USE_GPGPU", "USE_FBX", "USE_ANIMATION", "USE_SMALL_FBX", "USE_MMD"]
+ExcludedFolderList = ["Library", "Vulkan", "OpenGL", "DescMain", "CDescAppManager.cpp", "CDescAppManager.h", "DemoMain", "CDemoAppManager.cpp", "CDemoAppManager.h", "Bullet3Serialize", "btBulletCollisionAll.cpp", "btBulletDynamicsAll.cpp", "btLinearMathAll.cpp"]
+
+IncludeDirectoryList = ["../src/Library/DawnLib/include", "../src/Library/glm", "../src/Library/tinygltf", "../src/Library/SmallFBX/include", "../src/Library/bullet3/src"]
+PreprocessorList = ["USE_WEBGPU", "USE_TEXTURE_LOADER", "USE_GLTF", "USE_VIEWER_CAMERA", "USE_INPUT_SYSTEM", "USE_GPGPU", "USE_FBX", "USE_ANIMATION", "USE_SMALL_FBX", "USE_MMD", "B3_USE_CLEW"]
 
 # It's not something that changes that often, so every time there are more libs to link, I'll add my own.
 LibObjDirList = ["/SmallFBX_lib"];
+
+#
+EmccCompileDirList = ["../src", "../Src/Library/SmallFBX/include", "../Src/Library/bullet3/src"]
 
 # 
 def FindDir(subfolders, pathList, parentPath):
@@ -33,23 +37,19 @@ def Make():
 	print("[START] Remake CMakeLists\n")
 
 	#
-	srcPath = "../src"
 	exportText = ""
 
 	dstPath = "./obj/"
 
 	# Find Cpp or C
 	pathList = []
-	FindDir(os.listdir(srcPath), pathList, srcPath)
+	for srcPath in EmccCompileDirList:
+		FindDir(os.listdir(srcPath), pathList, srcPath)
 	
 	# Find obj
 	RootLibObjDir = "../EmscriptenBuild/obj_lib"
 	zlib_o_list = []
 	FindDir(os.listdir(RootLibObjDir), zlib_o_list, RootLibObjDir)
-
-	# Find SmallFBX
-	SmallFBXDir = "../Src/Library/SmallFBX/include"
-	FindDir(os.listdir(SmallFBXDir), pathList, SmallFBXDir)
 
 	# emsdk_env.bat
 	exportText += "call C:\\emsdk\\emsdk_env.bat\n"
