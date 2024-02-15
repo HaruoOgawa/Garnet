@@ -219,7 +219,7 @@ public:
 		btScalar s = btScalar(2.0) / d;
 
 #if defined BT_USE_SIMD_VECTOR3 && defined(BT_USE_SSE_IN_API) && defined(BT_USE_SSE)
-		__m128 vs, Q = q.get128();
+		/*__m128 vs, Q = q.get128();
 		__m128i Qi = btCastfTo128i(Q);
 		__m128 Y, Z;
 		__m128 V1, V2, V3;
@@ -268,7 +268,7 @@ public:
 
 		m_el[0] = V1;
 		m_el[1] = V2;
-		m_el[2] = V3;
+		m_el[2] = V3;*/
 #else
 		btScalar xs = q.x() * s, ys = q.y() * s, zs = q.z() * s;
 		btScalar wx = q.w() * xs, wy = q.w() * ys, wz = q.w() * zs;
@@ -323,9 +323,9 @@ public:
 	void setIdentity()
 	{
 #if (defined(BT_USE_SSE_IN_API) && defined(BT_USE_SSE)) || defined(BT_USE_NEON)
-		m_el[0] = v1000;
+		/*m_el[0] = v1000;
 		m_el[1] = v0100;
-		m_el[2] = v0010;
+		m_el[2] = v0010;*/
 #else
 		setValue(btScalar(1.0), btScalar(0.0), btScalar(0.0),
 				 btScalar(0.0), btScalar(1.0), btScalar(0.0),
@@ -337,9 +337,9 @@ public:
     void setZero()
     {
 #if (defined(BT_USE_SSE_IN_API) && defined(BT_USE_SSE)) || defined(BT_USE_NEON)
-        m_el[0] = v0000;
+        /*m_el[0] = v0000;
         m_el[1] = v0000;
-        m_el[2] = v0000;
+        m_el[2] = v0000;*/
 #else
         setValue(btScalar(0.0), btScalar(0.0), btScalar(0.0),
                  btScalar(0.0), btScalar(0.0), btScalar(0.0),
@@ -1224,7 +1224,8 @@ operator*(const btMatrix3x3& m, const btVector3& v)
 SIMD_FORCE_INLINE btVector3
 operator*(const btVector3& v, const btMatrix3x3& m)
 {
-#if defined BT_USE_SIMD_VECTOR3 && (defined(BT_USE_SSE_IN_API) && defined(BT_USE_SSE))
+	return btVector3(m.tdotx(v), m.tdoty(v), m.tdotz(v));
+/*#if defined BT_USE_SIMD_VECTOR3 && (defined(BT_USE_SSE_IN_API) && defined(BT_USE_SSE))
 
 	const __m128 vv = v.mVec128;
 
@@ -1258,7 +1259,7 @@ operator*(const btVector3& v, const btMatrix3x3& m)
 	return btVector3(c0);
 #else
 	return btVector3(m.tdotx(v), m.tdoty(v), m.tdotz(v));
-#endif
+#endif*/
 }
 
 SIMD_FORCE_INLINE btMatrix3x3

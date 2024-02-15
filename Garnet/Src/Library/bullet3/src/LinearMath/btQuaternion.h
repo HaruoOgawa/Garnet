@@ -928,9 +928,9 @@ quatRotate(const btQuaternion& rotation, const btVector3& v)
 	btQuaternion q = rotation * v;
 	q *= rotation.inverse();
 #if defined BT_USE_SIMD_VECTOR3 && defined(BT_USE_SSE_IN_API) && defined(BT_USE_SSE)
-	return btVector3(_mm_and_ps(q.get128(), btvFFF0fMask));
+	//return btVector3(_mm_and_ps(q.get128(), btvFFF0fMask));
 #elif defined(BT_USE_NEON)
-	return btVector3((float32x4_t)vandq_s32((int32x4_t)q.get128(), btvFFF0Mask));
+	//return btVector3((float32x4_t)vandq_s32((int32x4_t)q.get128(), btvFFF0Mask));
 #else
 	return btVector3(q.getX(), q.getY(), q.getZ());
 #endif
