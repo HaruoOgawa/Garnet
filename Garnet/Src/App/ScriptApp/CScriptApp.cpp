@@ -11,6 +11,8 @@
 #include "../../Camera/CViewerCamera.h"
 #endif // USE_VIEWER_CAMERA
 
+#include "../../Physics/Bullet/CBulletPhysics.h"
+
 // CScriptApp は旧エンジンでもやっていたof風にCppでエンジンコードを直接シーンを構築していくアプリ
 
 // MVVMで設計する
@@ -30,7 +32,8 @@ namespace app
 #endif // USE_VIEWER_CAMERA
 		m_Projection(std::make_shared<projection::CProjection>()),
 		m_DrawInfo(std::make_shared<graphics::CDrawInfo>()),
-		m_BlurEffect(nullptr)
+		m_BlurEffect(nullptr),
+		m_PhysicsEngine(std::make_shared<physics::CBulletPhysics>())
 	{
 		m_MainCamera->SetPos(glm::vec3(0.0f, 1.0f, -7.0f));
 		//m_MainCamera->SetCenter(glm::vec3(0.0f, 50.0f, 349.0f));
@@ -53,6 +56,9 @@ namespace app
 	{
 		// Viewの初期化
 		m_ScriptScene = std::make_shared<scene::CScriptScene>(pGraphicsAPI, pLoadWorker);
+
+		// 物理エンジン
+		if (!m_PhysicsEngine->Initialize()) return false;
 
 		// オフスクリーンレンダリング
 		if (!pGraphicsAPI->CreateRenderPass("ShadowPass", api::ERenderPassFormat::COLOR_RENDERPASS, glm::vec4(1.0f), 512, 512)) return false;

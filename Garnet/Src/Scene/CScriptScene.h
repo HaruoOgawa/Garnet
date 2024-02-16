@@ -25,8 +25,6 @@ namespace scene
 	{
 		bool m_IsLoaded;
 
-		std::shared_ptr<graphics::CMaterialFrame> m_SampleMF;
-		std::shared_ptr<graphics::CMaterialFrame> m_PBRMF;
 		std::shared_ptr<graphics::CMaterialFrame> m_BasicToonMF;
 		std::shared_ptr<graphics::CMaterialFrame> m_SimpleTextureMF;
 		std::shared_ptr<graphics::CMaterialFrame> m_DepthMF;
@@ -35,33 +33,9 @@ namespace scene
 		std::shared_ptr<object::C3DObject> m_TdaMiku_Model;
 		std::shared_ptr<animation::CAnimationClipSet> m_VMDAnimationSet;
 
-		// Fbx
-		std::shared_ptr<object::C3DObject> m_Walk_Animation;
-		std::shared_ptr<object::C3DObject> m_Jump_Animation;
-		std::shared_ptr<object::C3DObject> m_Punch_Animation;
-		std::shared_ptr<object::C3DObject> m_FbxObject;
-		std::shared_ptr<object::C3DObject> m_MouseyObject;
-
-		// Tex of FrameBuffer
-		std::vector<std::shared_ptr<graphics::CTexture>> m_FrameTextureList;
-
-		// IBL
+		// Background
 		std::shared_ptr<graphics::CTexture> m_IBL_Skybox_Texture;
-		std::shared_ptr<graphics::CTexture> m_IBL_DiffuseEnvMap_Texture;
-		std::shared_ptr<graphics::CTexture> m_IBL_SpecularEnvMap_Texture;
-		std::shared_ptr<graphics::CTexture> m_IBL_GGX_LUT_Texture;
-		std::shared_ptr<graphics::CTexture> m_Cube_Texture;
-
-		// glTF
-		std::shared_ptr<object::C3DObject> m_glTFObject;
-		
-		std::shared_ptr<object::C3DObject> m_BrainStemDObject;
-		
-		std::shared_ptr<object::C3DObject> m_VRMObject;
-
-		// Object
 		std::shared_ptr<object::C3DObject> m_Background;
-		std::shared_ptr<object::C3DObject> m_DebugSphere;
 	private:
 		bool Load(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker);
 

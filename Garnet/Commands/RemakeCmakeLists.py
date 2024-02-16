@@ -19,6 +19,8 @@ add_definitions(
 	-DUSE_ANIMATION
 	-DUSE_SMALL_FBX
 	-DUSE_MMD
+	-DUSE_PHYSICS
+	-DB3_USE_CLEW
 )
 
 add_executable(
