@@ -61,5 +61,21 @@ namespace physics
 
 		return true;
 	}
+
+	btTransform CBulletRigidBody::GetCurrentWorldTransform()
+	{
+		btTransform trans;
+
+		if (m_MotionState)
+		{
+			m_MotionState->getWorldTransform(trans);
+		}
+		else
+		{
+			trans = m_Rigidbody->getWorldTransform();
+		}
+
+		return trans;
+	}
 }
 #endif

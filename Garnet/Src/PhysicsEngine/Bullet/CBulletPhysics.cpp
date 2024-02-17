@@ -88,6 +88,16 @@ namespace physics
 		return Sphere;
 	}
 
+	bool CBulletPhysics::Update(float DeltaTime)
+	{
+		if (m_DynamicsWorld)
+		{
+			m_DynamicsWorld->stepSimulation(DeltaTime, 10);
+		}
+
+		return true;
+	}
+
 	bool CBulletPhysics::HelloWorldTestCode()
 	{
 		Console::Log("[CPP] Bullet Init Start\n");

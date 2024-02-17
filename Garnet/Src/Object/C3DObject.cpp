@@ -229,7 +229,7 @@ namespace object
 					if (RootNodeIndex < 0 || RootNodeIndex >= m_NodeList.size()) continue;
 
 					auto& RootNode = m_NodeList[RootNodeIndex];
-					const auto& WorldMatrix = RootNode->GetLocalTransform()->GetModelMatrix();
+					const auto& WorldMatrix = RootNode->CalcWorldMatrix(glm::mat4(1.0f));
 
 					// ルートなので自身のローカルトランスフォームをワールド行列にする
 					RootNode->SetWorldMatrix(WorldMatrix);
@@ -251,7 +251,7 @@ namespace object
 			// ノードの親子関係を構築するにはルートノードと子要素のインデックスの指定が必要である
 			for (auto& Node : m_NodeList)
 			{
-				const auto& WorldMatrix = Node->GetLocalTransform()->GetModelMatrix();
+				const auto& WorldMatrix = Node->CalcWorldMatrix(glm::mat4(1.0f));
 				Node->SetWorldMatrix(WorldMatrix);
 			}
 		}
@@ -260,7 +260,7 @@ namespace object
 	void C3DObject::CalcWorldMatrix(std::shared_ptr<CNode>& Node, const glm::mat4& ParentWorldMatrix)
 	{
 		// 親要素のワールド行列と自身のローカル行列を乗算して自身のワールド行列を求める
-		glm::mat4 WorldMatrix = ParentWorldMatrix * Node->GetLocalTransform()->GetModelMatrix();
+		glm::mat4 WorldMatrix = Node->CalcWorldMatrix(ParentWorldMatrix);
 		Node->SetWorldMatrix(WorldMatrix);
 
 		// 子要素の走破をスタートする

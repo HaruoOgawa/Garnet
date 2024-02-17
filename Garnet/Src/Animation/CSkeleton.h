@@ -47,7 +47,6 @@ namespace animation
 		const std::vector<std::shared_ptr<CBone>>& GetGrantBoneList() const;
 
 		//
-		void CalCSkeletonWorldMatrix();
 		void ResetToDefaultSkeletonLocal();
 	};
 }

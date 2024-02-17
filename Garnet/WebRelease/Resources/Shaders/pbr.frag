@@ -44,7 +44,7 @@ layout(binding = 0) uniform UniformBufferObject{
     int   useIBL;
 
 	int   useSkinMeshAnimation;
-    int   pad0;
+    int   useDirCubemap;
     int   pad1;
     int   pad2;
 } ubo;
@@ -60,6 +60,7 @@ layout(binding = 14) uniform sampler2D shadowmapTexture;
 layout(binding = 16) uniform sampler2D IBL_Diffuse_Texture;
 layout(binding = 18) uniform sampler2D IBL_Specular_Texture;
 layout(binding = 20) uniform sampler2D IBL_GGXLUT_Texture;
+layout(binding = 22) uniform sampler2D cubeMap2DTexture;
 #else
 layout(binding = 2) uniform texture2D baseColorTexture;
 layout(binding = 3) uniform sampler baseColorTextureSampler;
@@ -90,6 +91,9 @@ layout(binding = 19) uniform sampler IBL_Specular_TextureSampler;
 
 layout(binding = 20) uniform texture2D IBL_GGXLUT_Texture;
 layout(binding = 21) uniform sampler IBL_GGXLUT_TextureSampler;
+
+layout(binding = 22) uniform texture2D cubeMap2DTexture;
+layout(binding = 23) uniform sampler cubeMap2DTextureSampler;
 #endif
 
 // なんかUnityPBRでもみた値だなぁ
@@ -331,6 +335,18 @@ float CalcShadow(vec3 lsp, vec3 nomral, vec3 lightDir)
 	return p_max;
 }
 
+vec2 CastDirToSt(vec3 Dir)
+{
+	float pi = 3.1415;
+
+	float theta = acos(Dir.y);
+	float phi = atan(Dir.z, Dir.x);
+
+	vec2 st = vec2(phi / (2.0 * pi), theta / pi);
+
+	return st;
+}
+
 vec3 ComputeReflectionColor(PBRParam pbrParam, vec3 v, vec3 n)
 {
 	// 反射カラーを計算
@@ -343,6 +359,18 @@ vec3 ComputeReflectionColor(PBRParam pbrParam, vec3 v, vec3 n)
 		reflectColor = LINEARtoSRGB(textureLod(cubemapTexture, reflect(v, n), lod)).rgb;
 		#else
 		reflectColor = LINEARtoSRGB(textureLod(samplerCube(cubemapTexture, cubemapTextureSampler), reflect(v, n), lod)).rgb;
+		#endif
+	}
+	else if(ubo.useDirCubemap != 0)
+	{
+		vec2 st = CastDirToSt(reflect(v, n));
+		
+		float mipCount = ubo.mipCount;
+		float lod = mipCount * pbrParam.perceptualRoughness;
+		#ifdef USE_OPENGL
+		reflectColor = LINEARtoSRGB(textureLod(cubeMap2DTexture, st, lod)).rgb;
+		#else
+		reflectColor = LINEARtoSRGB(textureLod(sampler2D(cubeMap2DTexture, cubeMap2DTextureSampler), st, lod)).rgb;
 		#endif
 	}
 

@@ -1,5 +1,6 @@
 #ifdef USE_PHYSICS
 #include "CBulletBox.h"
+#include "../../Math/CTransform.h"
 
 namespace physics
 {
@@ -30,6 +31,31 @@ namespace physics
 		m_RigidBody = std::make_shared<CBulletRigidBody>(pDynamicsWorld, m_CollisionShape.get(), Origin, IsStatic, Mass);
 
 		return true;
+	}
+
+	glm::mat4 CBulletBox::GetCurrentPhysicsWorldMatrix(const glm::vec3& Scale)
+	{
+		glm::vec3 Pos = GetCurrentWorldPos();
+		glm::quat Rot = GetCurrentWorldRotate();
+
+		glm::mat4 WorldMatrix = glm::mat4(1.0f);
+		math::CTransform::CalcModelMatrix(WorldMatrix, Pos, Rot, true, Scale);
+
+		return WorldMatrix;
+	}
+
+	glm::vec3 CBulletBox::GetCurrentWorldPos()
+	{
+		btTransform trans = m_RigidBody->GetCurrentWorldTransform();
+
+		return glm::vec3(static_cast<float>(trans.getOrigin().getX()), static_cast<float>(trans.getOrigin().getY()), static_cast<float>(trans.getOrigin().getZ()));
+	}
+
+	glm::quat CBulletBox::GetCurrentWorldRotate()
+	{
+		auto trans = m_RigidBody->GetCurrentWorldTransform();
+
+		return glm::quat(trans.getRotation().getW(), trans.getRotation().getX(), trans.getRotation().getY(), trans.getRotation().getZ());
 	}
 }
 #endif

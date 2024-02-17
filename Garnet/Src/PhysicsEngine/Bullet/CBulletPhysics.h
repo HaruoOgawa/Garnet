@@ -24,6 +24,8 @@ namespace physics
 
 		virtual std::shared_ptr<IPhysicsObject> CreatePhysicsBox(const glm::vec3& Origin, const glm::vec3& BoxHalfSize, bool IsStatic, float Mass) override;
 		virtual std::shared_ptr<IPhysicsObject> CreatePhysicsSphere(const glm::vec3& Origin, float Radius, bool IsStatic, float Mass) override;
+
+		virtual bool Update(float DeltaTime) override;
 	};
 }
 #endif // USE_PHYSICS

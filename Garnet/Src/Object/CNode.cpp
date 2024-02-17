@@ -1,4 +1,5 @@
 #include "CNode.h"
+#include "../Debug/Message/Console.h"
 
 namespace object
 {
@@ -13,7 +14,8 @@ namespace object
 		m_PrevLocalTransform(std::make_shared<math::CTransform>()),
 		m_WorldMatrix(glm::mat4(1.0f)),
 		m_InverseBindMatrix(glm::mat4(1.0f)),
-		m_ParentNode(nullptr)
+		m_ParentNode(nullptr),
+		m_PhysicsObject(nullptr)
 	{
 	}
 
@@ -55,6 +57,17 @@ namespace object
 		return m_MeshIndex;
 	}
 
+	// 物理
+	void CNode::SetPhysicsObject(const std::shared_ptr<physics::IPhysicsObject>& PhysicsObject)
+	{
+		m_PhysicsObject = PhysicsObject;
+	}
+
+	const std::shared_ptr<physics::IPhysicsObject>& CNode::GetPhysicsObject() const
+	{
+		return m_PhysicsObject;
+	}
+
 	void CNode::SetLocalTransform(const std::shared_ptr<math::CTransform>& LocalTransform)
 	{
 		m_LocalTransform = LocalTransform;
@@ -80,19 +93,26 @@ namespace object
 		return m_WorldMatrix;
 	}
 
-	glm::mat4 CNode::CalcWorldMatrix(const glm::mat4& LocalMatrix)
+	glm::mat4 CNode::CalcWorldMatrix(const glm::mat4& ParentWorldMatrix)
 	{
-		glm::mat4 result = LocalMatrix;
-
-		std::shared_ptr<CNode> parentNode = m_ParentNode;
-		while (parentNode)
+		glm::mat4 WorldMatrix = glm::mat4(1.0f);
+		
+		if (m_PhysicsObject)
 		{
-			result = parentNode->GetLocalMatrix() * result;
+			// ひとまず物理オブジェクトが存在するときはそのワールド座標を優先する
+			// あとで様子を見て改選する
+			// 親ノードのワールド行列の逆行列を現在の物理ワールド座標にかけて、ローカルにするといいかも？
+			//auto WorldPos = m_PhysicsObject->GetCurrentWorldPos();
+			//Console::Log("[CPP] Physics WorldPos => x: %f, y: %f, z: %f\n", WorldPos.x, WorldPos.y, WorldPos.z);
 
-			parentNode = parentNode->GetParentNode();
+			WorldMatrix = m_PhysicsObject->GetCurrentPhysicsWorldMatrix(m_LocalTransform->GetScale());
+		}
+		else
+		{
+			WorldMatrix = ParentWorldMatrix * m_LocalTransform->GetModelMatrix();
 		}
 
-		return result;
+		return WorldMatrix;
 	}
 
 	void CNode::SetParentNode(const std::shared_ptr<CNode>& ParentNode)

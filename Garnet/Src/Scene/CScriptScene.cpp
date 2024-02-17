@@ -53,6 +53,11 @@ namespace scene
 		m_IsLoaded = false;
 	}
 
+	bool CScriptScene::IsLoaded() const
+	{
+		return m_IsLoaded;
+	}
+
 	bool CScriptScene::Load(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker)
 	{
 		// m_PhysicsGround
@@ -70,6 +75,7 @@ namespace scene
 			m_PhysicsGround->GetNodeList()[0]->SetScale(glm::vec3(5.0f, 0.1f, 5.0f));
 
 			auto PhysicsBox = pPhysicsEngine->CreatePhysicsBox(glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(5.0f, 0.1f, 5.0f), true, 0.0f);
+			m_PhysicsGround->GetNodeList()[0]->SetPhysicsObject(PhysicsBox);
 		}
 
 		// m_PhysicsSphere
@@ -87,6 +93,7 @@ namespace scene
 			m_PhysicsSphere->GetNodeList()[0]->SetScale(glm::vec3(0.25f));
 
 			auto PhysicsSphere = pPhysicsEngine->CreatePhysicsSphere(glm::vec3(0.0f, 2.5f, 0.0f), 0.25f, false, 1.0f);
+			m_PhysicsSphere->GetNodeList()[0]->SetPhysicsObject(PhysicsSphere);
 		}
 
 		// m_TdaMiku_Model

@@ -18,6 +18,8 @@ namespace physics
 	public:
 		CBulletRigidBody(btDiscreteDynamicsWorld* pDynamicWorld, btCollisionShape* pCollisionShape, const glm::vec3& Origin, bool IsStatic, float Mass);
 		virtual ~CBulletRigidBody();
+
+		btTransform GetCurrentWorldTransform();
 	};
 }
 #endif
