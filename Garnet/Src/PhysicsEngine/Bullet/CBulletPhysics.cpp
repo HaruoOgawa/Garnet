@@ -1,22 +1,91 @@
 #ifdef USE_PHYSICS
 #include "CBulletPhysics.h"
 #include "../../Debug/Message/Console.h"
+#include "CBulletBox.h"
+#include "CBulletSphere.h"
 
 namespace physics
 {
-	CBulletPhysics::CBulletPhysics()
+	CBulletPhysics::CBulletPhysics():
+		m_CollisionConfigration(nullptr),
+		m_Dispathcer(nullptr),
+		m_OverlappingPairCache(nullptr),
+		m_Solver(nullptr),
+		m_DynamicsWorld(nullptr)
 	{
 	}
 
 	CBulletPhysics::~CBulletPhysics()
 	{
+		if (m_DynamicsWorld)
+		{
+			m_DynamicsWorld.reset();
+			m_DynamicsWorld = nullptr;
+		}
+
+		if (m_Solver)
+		{
+			m_Solver.reset();
+			m_Solver = nullptr;
+		}
+
+		if (m_OverlappingPairCache)
+		{
+			m_OverlappingPairCache.reset();
+			m_OverlappingPairCache = nullptr;
+		}
+
+		if (m_Dispathcer)
+		{
+			m_Dispathcer.reset();
+			m_Dispathcer = nullptr;
+		}
+
+		if (m_CollisionConfigration)
+		{
+			m_CollisionConfigration.reset();
+			m_CollisionConfigration = nullptr;
+		}
 	}
 
 	bool CBulletPhysics::Initialize()
 	{
-		if (!HelloWorldTestCode()) return false;
+		//if (!HelloWorldTestCode()) return false;
+
+		// 物理エンジンの設定オブジェクトを初期化
+		m_CollisionConfigration = std::make_unique<btDefaultCollisionConfiguration>();
+
+		// dispatherを初期化. 物理計算を実行するオブジェクトのこと
+		m_Dispathcer = std::make_unique<btCollisionDispatcher>(m_CollisionConfigration.get());
+
+		// 物理演算のキャッシュ用？
+		m_OverlappingPairCache = std::make_unique<btDbvtBroadphase>();
+
+		// Constraint Solver. つまり衝突によるめり込み解決する責務を担っているオブジェクト
+		m_Solver = std::make_unique<btSequentialImpulseConstraintSolver>();
+
+		// dynamics world. 物理演算を行う仮想世界
+		m_DynamicsWorld = std::make_unique<btDiscreteDynamicsWorld>(m_Dispathcer.get(), m_OverlappingPairCache.get(), m_Solver.get(), m_CollisionConfigration.get());
+
+		// 重力を設定
+		m_DynamicsWorld->setGravity(btVector3(0, -10, 0));
 
 		return true;
+	}
+
+	std::shared_ptr<IPhysicsObject> CBulletPhysics::CreatePhysicsBox(const glm::vec3& Origin, const glm::vec3& BoxHalfSize, bool IsStatic, float Mass)
+	{
+		std::shared_ptr<CBulletBox> Box = std::make_shared<CBulletBox>();
+		Box->Create(m_DynamicsWorld.get(), Origin, BoxHalfSize, IsStatic, Mass);
+
+		return Box;
+	}
+	std::shared_ptr<IPhysicsObject> CBulletPhysics::CreatePhysicsSphere(const glm::vec3& Origin, float Radius, bool IsStatic, float Mass)
+	{
+		std::shared_ptr<CBulletSphere> Sphere = std::make_shared<CBulletSphere>();
+		Sphere->Create(m_DynamicsWorld.get(), Origin, Radius, IsStatic, Mass);
+
+		return Sphere;
 	}
 
 	bool CBulletPhysics::HelloWorldTestCode()

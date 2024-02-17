@@ -11,7 +11,7 @@
 #include "../../Camera/CViewerCamera.h"
 #endif // USE_VIEWER_CAMERA
 
-#include "../../Physics/Bullet/CBulletPhysics.h"
+#include "../../PhysicsEngine/Bullet/CBulletPhysics.h"
 
 // CScriptApp は旧エンジンでもやっていたof風にCppでエンジンコードを直接シーンを構築していくアプリ
 
@@ -45,6 +45,17 @@ namespace app
 
 	CScriptApp::~CScriptApp()
 	{
+		if (m_ScriptScene)
+		{
+			m_ScriptScene.reset();
+			m_ScriptScene = nullptr;
+		}
+
+		if (m_PhysicsEngine)
+		{
+			m_PhysicsEngine.reset();
+			m_PhysicsEngine = nullptr;
+		}
 	}
 
 	bool CScriptApp::Release(api::IGraphicsAPI* pGraphicsAPI)
@@ -94,9 +105,9 @@ namespace app
 		if (!pLoadWorker->Update(pGraphicsAPI)) return false;
 
 #ifdef USE_INPUT_SYSTEM
-		if (!m_ScriptScene->Update(pGraphicsAPI, pLoadWorker, m_MainCamera, m_Projection, m_DrawInfo, InputState)) return false;
+		if (!m_ScriptScene->Update(pGraphicsAPI, m_PhysicsEngine.get(), pLoadWorker, m_MainCamera, m_Projection, m_DrawInfo, InputState)) return false;
 #else
-		if (!m_ScriptScene->Update(pGraphicsAPI, pLoadWorker, m_MainCamera, m_Projection, m_DrawInfo)) return false;
+		if (!m_ScriptScene->Update(pGraphicsAPI, m_PhysicsEngine.get(), pLoadWorker, m_MainCamera, m_Projection, m_DrawInfo)) return false;
 #endif
 
 		if (!m_BlurEffect->Update(pLoadWorker)) return false;

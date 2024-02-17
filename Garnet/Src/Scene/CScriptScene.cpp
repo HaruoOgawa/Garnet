@@ -53,13 +53,10 @@ namespace scene
 		m_IsLoaded = false;
 	}
 
-	bool CScriptScene::Load(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker)
+	bool CScriptScene::Load(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker)
 	{
 		// m_PhysicsGround
 		{
-			m_PhysicsGround->SetPos(glm::vec3(0.0f, -1.0f, 0.0f));
-			m_PhysicsGround->SetScale(glm::vec3(5.0f, 0.1f, 5.0f));
-
 			auto Material = m_PBRMF->CreateMaterial(pGraphicsAPI, 1, graphics::ECullMode::CULL_BACK);
 
 			m_PhysicsGround->GetTextureSet()->AddCubeMap(m_Cube_Texture);
@@ -68,13 +65,15 @@ namespace scene
 			Material->ReplacePreloadUniformValue("roughnessFactor", &glm::vec1(1.0f)[0], sizeof(float), 0);
 
 			if (!m_PhysicsGround->CreateSimply(pGraphicsAPI, graphics::CPresetPrimitive::CreateBox(), Material, m_DepthMF)) return false;
+
+			m_PhysicsGround->GetNodeList()[0]->SetPos(glm::vec3(0.0f, -1.0f, 0.0f));
+			m_PhysicsGround->GetNodeList()[0]->SetScale(glm::vec3(5.0f, 0.1f, 5.0f));
+
+			auto PhysicsBox = pPhysicsEngine->CreatePhysicsBox(glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(5.0f, 0.1f, 5.0f), true, 0.0f);
 		}
 
 		// m_PhysicsSphere
 		{
-			m_PhysicsSphere->SetPos(glm::vec3(0.0f, 2.5f, 0.0f));
-			m_PhysicsSphere->SetScale(glm::vec3(0.25f));
-
 			auto Material = m_PBRMF->CreateMaterial(pGraphicsAPI, 1, graphics::ECullMode::CULL_BACK);
 
 			m_PhysicsSphere->GetTextureSet()->AddCubeMap(m_Cube_Texture);
@@ -83,6 +82,11 @@ namespace scene
 			Material->ReplacePreloadUniformValue("roughnessFactor", &glm::vec1(1.0f)[0], sizeof(float), 0);
 
 			if (!m_PhysicsSphere->CreateSimply(pGraphicsAPI, graphics::CPresetPrimitive::CreateSphere(), Material, m_DepthMF)) return false;
+
+			m_PhysicsSphere->GetNodeList()[0]->SetPos(glm::vec3(0.0f, 2.5f, 0.0f));
+			m_PhysicsSphere->GetNodeList()[0]->SetScale(glm::vec3(0.25f));
+
+			auto PhysicsSphere = pPhysicsEngine->CreatePhysicsSphere(glm::vec3(0.0f, 2.5f, 0.0f), 0.25f, false, 1.0f);
 		}
 
 		// m_TdaMiku_Model
@@ -115,17 +119,17 @@ namespace scene
 	}
 
 #ifdef USE_INPUT_SYSTEM
-	bool CScriptScene::Update(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
+	bool CScriptScene::Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
 		const std::shared_ptr<graphics::CDrawInfo>& DrawInfo, const std::shared_ptr<input::CInputState>& InputState)
 #else
-	bool CScriptScene::Update(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo)
+	bool CScriptScene::Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo)
 #endif
 	{
 		if (!m_IsLoaded)
 		{
 			if (!pLoadWorker->IsLoaded()) return true;
 
-			if (!Load(pGraphicsAPI, pLoadWorker)) return false;
+			if (!Load(pGraphicsAPI, pPhysicsEngine, pLoadWorker)) return false;
 			m_IsLoaded = true;
 		}
 

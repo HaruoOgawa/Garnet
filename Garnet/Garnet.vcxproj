@@ -573,7 +573,14 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Src\Physics\Bullet\CBulletPhysics.h" />
+    <ClInclude Include="Src\Interface\IPhysicsObject.h" />
+    <ClInclude Include="Src\PhysicsEngine\Bullet\CBulletJoint.h" />
+    <ClInclude Include="Src\PhysicsEngine\Bullet\CBulletSoftBody.h" />
+    <ClInclude Include="Src\PhysicsEngine\Bullet\CBulletRigidBody.h" />
+    <ClInclude Include="Src\PhysicsEngine\Bullet\CBulletCollisionShape.h" />
+    <ClInclude Include="Src\PhysicsEngine\Bullet\CBulletBox.h" />
+    <ClInclude Include="Src\PhysicsEngine\Bullet\CBulletSphere.h" />
+    <ClInclude Include="Src\PhysicsEngine\Bullet\CBulletPhysics.h" />
     <ClInclude Include="Src\Animation\SIKParam.h" />
     <ClInclude Include="Src\Interface\IPhysicsEngine.h" />
     <ClInclude Include="Src\Library\bullet3\src\btBulletCollisionCommon.h" />
@@ -1411,7 +1418,13 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClInclude Include="Src\Interface\IRenderer.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Src\Physics\Bullet\CBulletPhysics.cpp" />
+    <ClCompile Include="Src\PhysicsEngine\Bullet\CBulletJoint.cpp" />
+    <ClCompile Include="Src\PhysicsEngine\Bullet\CBulletSoftBody.cpp" />
+    <ClCompile Include="Src\PhysicsEngine\Bullet\CBulletRigidBody.cpp" />
+    <ClCompile Include="Src\PhysicsEngine\Bullet\CBulletCollisionShape.cpp" />
+    <ClCompile Include="Src\PhysicsEngine\Bullet\CBulletBox.cpp" />
+    <ClCompile Include="Src\PhysicsEngine\Bullet\CBulletSphere.cpp" />
+    <ClCompile Include="Src\PhysicsEngine\Bullet\CBulletPhysics.cpp" />
     <ClCompile Include="Src\Library\bullet3\src\btBulletCollisionAll.cpp" />
     <ClCompile Include="Src\Library\bullet3\src\btBulletDynamicsAll.cpp" />
     <ClCompile Include="Src\Library\bullet3\src\btLinearMathAll.cpp" />
