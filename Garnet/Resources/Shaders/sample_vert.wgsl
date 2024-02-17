@@ -42,40 +42,44 @@ var<private> inTexcoord_1: vec2<f32>;
 var<private> f_WorldPos: vec4<f32>;
 var<private> f_Color: vec4<f32>;
 var<private> inTangent_1: vec4<f32>;
+var<private> inJoint0_1: vec4<u32>;
+var<private> inWeights0_1: vec4<f32>;
 
 fn main_1() {
-    let _e23 = ubo.proj;
-    let _e25 = ubo.view;
-    let _e28 = ubo.model;
-    let _e32 = r_SkinMatrixBuffer.SkinMat[0];
-    let _e34 = inPosition_1;
-    perVertexStruct.gl_Position = ((((_e23 * _e25) * _e28) * _e32) * vec4<f32>(_e34.x, _e34.y, _e34.z, 1.0));
-    let _e42 = ubo.model;
-    let _e43 = inNormal_1;
-    f_WorldNormal = (_e42 * vec4<f32>(_e43.x, _e43.y, _e43.z, 0.0)).xyz;
-    let _e50 = inTexcoord_1;
-    f_Texcoord = _e50;
-    let _e52 = ubo.model;
-    let _e53 = inPosition_1;
-    f_WorldPos = (_e52 * vec4<f32>(_e53.x, _e53.y, _e53.z, 1.0));
-    let _e60 = ubo.color;
-    f_Color = _e60;
+    let _e25 = ubo.proj;
+    let _e27 = ubo.view;
+    let _e30 = ubo.model;
+    let _e34 = r_SkinMatrixBuffer.SkinMat[0];
+    let _e36 = inPosition_1;
+    perVertexStruct.gl_Position = ((((_e25 * _e27) * _e30) * _e34) * vec4<f32>(_e36.x, _e36.y, _e36.z, 1.0));
+    let _e44 = ubo.model;
+    let _e45 = inNormal_1;
+    f_WorldNormal = (_e44 * vec4<f32>(_e45.x, _e45.y, _e45.z, 0.0)).xyz;
+    let _e52 = inTexcoord_1;
+    f_Texcoord = _e52;
+    let _e54 = ubo.model;
+    let _e55 = inPosition_1;
+    f_WorldPos = (_e54 * vec4<f32>(_e55.x, _e55.y, _e55.z, 1.0));
+    let _e62 = ubo.color;
+    f_Color = _e62;
     return;
 }
 
 @vertex 
-fn main(@location(0) inPosition: vec3<f32>, @location(1) inNormal: vec3<f32>, @location(2) inTexcoord: vec2<f32>, @location(3) inTangent: vec4<f32>) -> VertexOutput {
+fn main(@location(0) inPosition: vec3<f32>, @location(1) inNormal: vec3<f32>, @location(2) inTexcoord: vec2<f32>, @location(3) inTangent: vec4<f32>, @location(4) inJoint0_: vec4<u32>, @location(5) inWeights0_: vec4<f32>) -> VertexOutput {
     inPosition_1 = inPosition;
     inNormal_1 = inNormal;
     inTexcoord_1 = inTexcoord;
     inTangent_1 = inTangent;
+    inJoint0_1 = inJoint0_;
+    inWeights0_1 = inWeights0_;
     main_1();
-    let _e15 = perVertexStruct.gl_Position.y;
-    perVertexStruct.gl_Position.y = -(_e15);
-    let _e17 = perVertexStruct.gl_Position;
-    let _e18 = f_WorldNormal;
-    let _e19 = f_Texcoord;
-    let _e20 = f_WorldPos;
-    let _e21 = f_Color;
-    return VertexOutput(_e17, _e18, _e19, _e20, _e21);
+    let _e19 = perVertexStruct.gl_Position.y;
+    perVertexStruct.gl_Position.y = -(_e19);
+    let _e21 = perVertexStruct.gl_Position;
+    let _e22 = f_WorldNormal;
+    let _e23 = f_Texcoord;
+    let _e24 = f_WorldPos;
+    let _e25 = f_Color;
+    return VertexOutput(_e21, _e22, _e23, _e24, _e25);
 }

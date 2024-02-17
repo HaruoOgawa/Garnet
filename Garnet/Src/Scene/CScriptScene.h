@@ -28,6 +28,14 @@ namespace scene
 		std::shared_ptr<graphics::CMaterialFrame> m_BasicToonMF;
 		std::shared_ptr<graphics::CMaterialFrame> m_SimpleTextureMF;
 		std::shared_ptr<graphics::CMaterialFrame> m_DepthMF;
+		std::shared_ptr<graphics::CMaterialFrame> m_PBRMF;
+
+		//
+		std::shared_ptr<graphics::CTexture> m_Cube_Texture;
+
+		// PhysicsObj
+		std::shared_ptr<object::C3DObject> m_PhysicsGround;
+		std::shared_ptr<object::C3DObject> m_PhysicsSphere;
 
 		// MMD
 		std::shared_ptr<object::C3DObject> m_TdaMiku_Model;

@@ -47,26 +47,26 @@ namespace object
 		m_FileName = FileName;
 	}
 
-	bool C3DObject::CreateSimply(api::IGraphicsAPI* pGraphicsAPI, std::shared_ptr<object::C3DObject>& Object,
+	bool C3DObject::CreateSimply(api::IGraphicsAPI* pGraphicsAPI,
 		const std::shared_ptr<renderer::CRendererCreateInfo>& createInfo,
 		const std::shared_ptr<graphics::CMaterial>& Material, const std::shared_ptr<graphics::CMaterialFrame>& DepthMF)
 	{
 		// Material
-		Object->AddMaterial(Material);
+		AddMaterial(Material);
 
 		// Mesh
 		std::shared_ptr<graphics::CMesh> Mesh = std::make_shared<graphics::CMesh>();
 		std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(createInfo, 0);
 		Mesh->AddPrimitive(Primitive);
 
-		Object->AddMesh(Mesh);
+		AddMesh(Mesh);
 
 		// Node
 		std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(0, 0);
-		Object->AddNode(Node);
+		AddNode(Node);
 
 		// Create
-		if (!Object->Create(pGraphicsAPI, DepthMF)) return false;
+		if (!Create(pGraphicsAPI, DepthMF)) return false;
 
 		return true;
 	}

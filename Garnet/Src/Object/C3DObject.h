@@ -60,7 +60,7 @@ namespace object
 
 		void SetBinaryData(const std::vector<unsigned char>& Data, const std::string& FileName);
 
-		static bool CreateSimply(api::IGraphicsAPI* pGraphicsAPI, std::shared_ptr<object::C3DObject>& Object,
+		bool CreateSimply(api::IGraphicsAPI* pGraphicsAPI,
 			const std::shared_ptr<renderer::CRendererCreateInfo>& createInfo,
 			const std::shared_ptr<graphics::CMaterial>& Material, const std::shared_ptr<graphics::CMaterialFrame>& DepthMF);
 
