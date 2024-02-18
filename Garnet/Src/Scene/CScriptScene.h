@@ -4,6 +4,7 @@
 #include <glm/glm.hpp>
 
 #include "../Interface/IGraphicsAPI.h"
+#include "../Interface/IPhysicsEngine.h"
 
 namespace object { class C3DObject; }
 namespace camera { class CCamera; }
@@ -25,56 +26,41 @@ namespace scene
 	{
 		bool m_IsLoaded;
 
-		std::shared_ptr<graphics::CMaterialFrame> m_SampleMF;
-		std::shared_ptr<graphics::CMaterialFrame> m_PBRMF;
 		std::shared_ptr<graphics::CMaterialFrame> m_BasicToonMF;
 		std::shared_ptr<graphics::CMaterialFrame> m_SimpleTextureMF;
 		std::shared_ptr<graphics::CMaterialFrame> m_DepthMF;
+		std::shared_ptr<graphics::CMaterialFrame> m_PBRMF;
+
+		//
+		std::shared_ptr<graphics::CTexture> m_Cube_Texture;
+
+		// PhysicsObj
+		std::shared_ptr<object::C3DObject> m_PhysicsGround;
+		std::shared_ptr<object::C3DObject> m_PhysicsSphere;
+		std::shared_ptr<object::C3DObject> m_PhysicsCubeList;
 
 		// MMD
 		std::shared_ptr<object::C3DObject> m_TdaMiku_Model;
 		std::shared_ptr<animation::CAnimationClipSet> m_VMDAnimationSet;
 
-		// Fbx
-		std::shared_ptr<object::C3DObject> m_Walk_Animation;
-		std::shared_ptr<object::C3DObject> m_Jump_Animation;
-		std::shared_ptr<object::C3DObject> m_Punch_Animation;
-		std::shared_ptr<object::C3DObject> m_FbxObject;
-		std::shared_ptr<object::C3DObject> m_MouseyObject;
-
-		// Tex of FrameBuffer
-		std::vector<std::shared_ptr<graphics::CTexture>> m_FrameTextureList;
-
-		// IBL
+		// Background
 		std::shared_ptr<graphics::CTexture> m_IBL_Skybox_Texture;
-		std::shared_ptr<graphics::CTexture> m_IBL_DiffuseEnvMap_Texture;
-		std::shared_ptr<graphics::CTexture> m_IBL_SpecularEnvMap_Texture;
-		std::shared_ptr<graphics::CTexture> m_IBL_GGX_LUT_Texture;
-		std::shared_ptr<graphics::CTexture> m_Cube_Texture;
-
-		// glTF
-		std::shared_ptr<object::C3DObject> m_glTFObject;
-		
-		std::shared_ptr<object::C3DObject> m_BrainStemDObject;
-		
-		std::shared_ptr<object::C3DObject> m_VRMObject;
-
-		// Object
 		std::shared_ptr<object::C3DObject> m_Background;
-		std::shared_ptr<object::C3DObject> m_DebugSphere;
 	private:
-		bool Load(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker);
+		bool Load(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker);
 
 		float rand(const glm::vec2& st) { return static_cast<float>(glm::fract(glm::sin(glm::dot(st, glm::vec2(12.9898, 78.233))) * 43758.5453123)); }
 	public:
 		CScriptScene(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker);
 		virtual ~CScriptScene();
 
+		bool IsLoaded() const;
+
 #ifdef USE_INPUT_SYSTEM
-		bool Update(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
+		bool Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
 			const std::shared_ptr<graphics::CDrawInfo>& DrawInfo, const std::shared_ptr<input::CInputState>& InputState);
 #else
-		bool Update(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo);
+		bool Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo);
 #endif
 
 		bool Dispatch(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,

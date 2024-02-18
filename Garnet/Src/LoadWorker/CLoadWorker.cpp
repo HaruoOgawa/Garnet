@@ -29,7 +29,7 @@ namespace resource
 		createInfo->SetFragmentShaderCode(m_FragmentShader->GetData());
 		auto Material = pGraphicsAPI->CreateMaterial(createInfo, 1, graphics::ECullMode::CULL_BACK);
 
-		auto UniforBuffer = createInfo->CreateUniformBuffer({ graphics::SBindingLayout("UniformBufferObject", 0, false) });
+		auto UniforBuffer = createInfo->CreateUniformBuffer("UniformBufferObject", {graphics::SBindingLayout("UniformBufferObject", 0, false)});
 		UniforBuffer->AddData("rate", &glm::vec1(0.0f)[0], sizeof(glm::vec1), 0);
 		UniforBuffer->AddData("time", &glm::vec1(0.0f)[0], sizeof(glm::vec1), 0);
 		UniforBuffer->AddData("alpha", &m_Alpha, sizeof(float), 0);
@@ -55,7 +55,7 @@ namespace resource
 		m_LoadingBar->AddNode(Node);
 
 		// Create関数を実行
-		if (!m_LoadingBar->Create(pGraphicsAPI, nullptr)) return false;
+		if (!m_LoadingBar->Create(pGraphicsAPI, nullptr, nullptr)) return false;
 
 		return true;
 	}
@@ -85,7 +85,7 @@ namespace resource
 		// ローディングバー
 		if (m_LoadingBar)
 		{
-			if (!m_LoadingBar->Update(pGraphicsAPI, 0.0f)) return false;
+			if (!m_LoadingBar->Update(pGraphicsAPI, nullptr, 0.0f)) return false;
 		}
 
 		// ローディング

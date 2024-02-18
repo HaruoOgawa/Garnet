@@ -1,0 +1,32 @@
+#ifdef USE_PHYSICS
+#include "CBulletSphere.h"
+#include "CBulletPhysicsEngine.h"
+#include "../../Math/CTransform.h"
+
+namespace physics
+{
+	CBulletSphere::CBulletSphere(float Radius, bool IsStaticFlag, float Mass) :
+		CBulletPhysicsObject(IsStaticFlag, Mass),
+		m_Radius(Radius)
+	{
+	}
+
+	CBulletSphere::~CBulletSphere()
+	{
+	}
+
+	bool CBulletSphere::Create(IPhysicsEngine* pPhysicsEngine, const glm::vec3& WorldPos, const glm::quat& WorldRotate, const glm::vec3& WorldScale)
+	{
+		m_WorldScale = WorldScale;
+
+		CBulletPhysicsEngine* pBulletPhysics = static_cast<CBulletPhysicsEngine*>(pPhysicsEngine);
+
+		float MaxScale = fmaxf(WorldScale.x, fmaxf(WorldScale.y, WorldScale.z));
+
+		m_CollisionShape = std::make_shared<btSphereShape>(btScalar(m_Radius * MaxScale));
+		m_RigidBody = std::make_shared<CBulletRigidBody>(pBulletPhysics->GetDynamicsWorld(), m_CollisionShape.get(), WorldPos, WorldRotate, m_IsStatic, m_Mass);
+
+		return true;
+	}
+}
+#endif

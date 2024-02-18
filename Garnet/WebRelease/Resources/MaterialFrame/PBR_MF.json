@@ -53,7 +53,7 @@
             {
               "name": "baseColorFactor",
               "type": "vec4",
-              "initValue": [ 0.0, 0.0, 0.0, 0.0 ]
+              "initValue": [ 1.0, 1.0, 1.0, 1.0 ]
             },
             {
               "name": "emissiveFactor",
@@ -146,7 +146,7 @@
               "initValue": [ 0 ]
             },
             {
-              "name": "pad0",
+              "name": "useDirCubemap",
               "type": "int",
               "initValue": [ 0 ]
             },
@@ -171,7 +171,7 @@
           "values": [
             {
               "name": "r_SkinMatrixBuffer",
-              "type": "mat4",
+              "type": "float_array",
               "initValue": [ 
                 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0 ,
                 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0 ,
@@ -269,6 +269,14 @@
           "textureIndex": -1,
           "type": "texture",
           "textureUsage": "ggx"
+        },
+        {
+          "name": "cubeMap2DTexture",
+          "viewBinding": 22,
+          "samplerBinding": 23,
+          "textureIndex": -1,
+          "type": "texture",
+          "textureUsage": "2d"
         }
       ]
     }

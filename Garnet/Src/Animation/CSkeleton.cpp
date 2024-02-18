@@ -116,17 +116,6 @@ namespace animation
 		return m_GrantBoneList;
 	}
 
-	void CSkeleton::CalCSkeletonWorldMatrix()
-	{
-		for (const auto& Bone : m_BoneList)
-		{
-			const auto& LocalMatrix = Bone->GetBoneNode()->GetLocalMatrix();
-
-			const glm::mat4 WorldMatrix = Bone->GetBoneNode()->CalcWorldMatrix(LocalMatrix);
-			Bone->GetBoneNode()->SetWorldMatrix(WorldMatrix);
-		}
-	}
-
 	void CSkeleton::ResetToDefaultSkeletonLocal()
 	{
 		for (const auto& Bone : m_BoneList)

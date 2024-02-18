@@ -23,6 +23,8 @@ namespace graphics
 
 	class CShaderBuffer : public IBuffer
 	{
+		std::string m_BufferName;
+
 		std::vector<unsigned char> m_Buffer;
 		std::shared_ptr<CShaderBufferDescriptor> m_Descriptor;
 		std::map<int, SBindingLayout> m_BindingLayoutList;
@@ -33,8 +35,10 @@ namespace graphics
 		// バッファを共有するかどうか
 		SSharedBufferParam m_SharedBufferParam{};
 	public:
-		CShaderBuffer(EBufferType BufferType, const std::vector<SBindingLayout>& BindingLayoutList, EBufferUpdateType BufferUpdateType);
+		CShaderBuffer(const std::string& BufferName, EBufferType BufferType, const std::vector<SBindingLayout>& BindingLayoutList, EBufferUpdateType BufferUpdateType);
 		virtual ~CShaderBuffer();
+
+		const std::string& GetBufferName() const;
 
 		virtual void AddData(const std::string& Name, const void* Data, int ByteSize, int BindingIndex) override;
 		virtual void ReplaceData(const std::string& SrcName, const void* SrcData, int SrcByteSize, int BindingIndex);

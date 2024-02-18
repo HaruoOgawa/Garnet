@@ -19,4 +19,10 @@ namespace graphics
 	{
 		return m_PrimitiveList;
 	}
+
+	void CMesh::CreateSimpleMesh(const std::shared_ptr<renderer::CRendererCreateInfo>& createInfo, int MaterialIndex)
+	{
+		std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(createInfo, MaterialIndex);
+		AddPrimitive(Primitive);
+	}
 }

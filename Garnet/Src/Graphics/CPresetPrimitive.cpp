@@ -31,9 +31,11 @@ namespace graphics
 		};
 
 		std::vector<float> Tangent(16, 0.0f);
+		std::vector<float> Joints(16, 0.0f);
+		std::vector<float> Weights(16, 0.0f);
 
 		std::vector<std::vector<float>> Vertices = {
-			Pos, Normal, UV, Tangent
+			Pos, Normal, UV, Tangent, Joints, Weights
 		};
 
 		// Indices
@@ -44,9 +46,9 @@ namespace graphics
 		//
 		createInfo->SetVertices(Vertices);
 		createInfo->SetIndices(Indices);
-		createInfo->SetAttributeDimensions(std::vector<int>({ 3 , 3 , 2, 4 }));
-		createInfo->SetAttribDataTypes(std::vector<renderer::EDataType>({ renderer::EDataType::TYPE_FLOAT , renderer::EDataType::TYPE_FLOAT , renderer::EDataType::TYPE_FLOAT , renderer::EDataType::TYPE_FLOAT }));
-		createInfo->SetAttribByteStrides(std::vector<int>({ 0, 0, 0, 0 }));
+		createInfo->SetAttributeDimensions(std::vector<int>({ 3 , 3 , 2, 4, 4, 4 }));
+		createInfo->SetAttribDataTypes(std::vector<renderer::EDataType>({ renderer::EDataType::TYPE_FLOAT , renderer::EDataType::TYPE_FLOAT , renderer::EDataType::TYPE_FLOAT , renderer::EDataType::TYPE_FLOAT, renderer::EDataType::TYPE_UNSIGNED_INT, renderer::EDataType::TYPE_FLOAT }));
+		createInfo->SetAttribByteStrides(std::vector<int>({ 0, 0, 0, 0, 0, 0 }));
 
 		return createInfo;
 	}
@@ -156,9 +158,11 @@ namespace graphics
 		};
 
 		std::vector<float> Tangent(96, 0.0f);
+		std::vector<float> Joints(96, 0.0f);
+		std::vector<float> Weights(96, 0.0f);
 
 		std::vector<std::vector<float>> Vertices = {
-			Pos, Normal, UV, Tangent
+			Pos, Normal, UV, Tangent, Joints, Weights
 		};
 
 		// Indices
@@ -186,9 +190,9 @@ namespace graphics
 		//
 		createInfo->SetVertices(Vertices);
 		createInfo->SetIndices(Indices);
-		createInfo->SetAttributeDimensions(std::vector<int>({ 3 , 3 , 2, 4 }));
-		createInfo->SetAttribDataTypes(std::vector<renderer::EDataType>({ renderer::EDataType::TYPE_FLOAT , renderer::EDataType::TYPE_FLOAT , renderer::EDataType::TYPE_FLOAT , renderer::EDataType::TYPE_FLOAT }));
-		createInfo->SetAttribByteStrides(std::vector<int>({ 0, 0, 0, 0 }));
+		createInfo->SetAttributeDimensions(std::vector<int>({ 3 , 3 , 2, 4, 4, 4 }));
+		createInfo->SetAttribDataTypes(std::vector<renderer::EDataType>({ renderer::EDataType::TYPE_FLOAT , renderer::EDataType::TYPE_FLOAT , renderer::EDataType::TYPE_FLOAT , renderer::EDataType::TYPE_FLOAT, renderer::EDataType::TYPE_UNSIGNED_INT, renderer::EDataType::TYPE_FLOAT }));
+		createInfo->SetAttribByteStrides(std::vector<int>({ 0, 0, 0, 0, 0, 0 }));
 
 		return createInfo;
 	}
@@ -211,9 +215,11 @@ namespace graphics
 		};
 
 		std::vector<float> Tangent(4, 0.0f);
+		std::vector<float> Joints(4, 0.0f);
+		std::vector<float> Weights(4, 0.0f);
 
 		std::vector<std::vector<float>> Vertices = {
-			Pos, Normal, UV, Tangent
+			Pos, Normal, UV, Tangent, Joints, Weights
 		};
 
 		// Indices
@@ -224,9 +230,9 @@ namespace graphics
 		//
 		createInfo->SetVertices(Vertices);
 		createInfo->SetIndices(Indices);
-		createInfo->SetAttributeDimensions(std::vector<int>({ 3 , 3 , 2, 4}));
-		createInfo->SetAttribDataTypes(std::vector<renderer::EDataType>({ renderer::EDataType::TYPE_FLOAT , renderer::EDataType::TYPE_FLOAT , renderer::EDataType::TYPE_FLOAT , renderer::EDataType::TYPE_FLOAT }));
-		createInfo->SetAttribByteStrides(std::vector<int>({ 0, 0, 0, 0 }));
+		createInfo->SetAttributeDimensions(std::vector<int>({ 3 , 3 , 2, 4, 4, 4 }));
+		createInfo->SetAttribDataTypes(std::vector<renderer::EDataType>({ renderer::EDataType::TYPE_FLOAT , renderer::EDataType::TYPE_FLOAT , renderer::EDataType::TYPE_FLOAT , renderer::EDataType::TYPE_FLOAT, renderer::EDataType::TYPE_UNSIGNED_INT, renderer::EDataType::TYPE_FLOAT }));
+		createInfo->SetAttribByteStrides(std::vector<int>({ 0, 0, 0, 0, 0, 0 }));
 
 		return createInfo;
 	}
@@ -240,6 +246,8 @@ namespace graphics
 		std::vector<float> Normal;
 		std::vector<float> UV;
 		std::vector<float> Tangent;
+		std::vector<float> Joints;
+		std::vector<float> Weights;
 
 		// Indices
 		std::vector<unsigned short> Indices;
@@ -279,17 +287,19 @@ namespace graphics
 		}
 
 		Tangent.resize(Pos.size() / 3 * 4, 0.0f);
+		Joints.resize(Pos.size() / 3 * 4, 0.0f);
+		Weights.resize(Pos.size() / 3 * 4, 0.0f);
 
 		//
 		std::vector<std::vector<float>> Vertices = {
-			Pos, Normal, UV, Tangent
+			Pos, Normal, UV, Tangent, Joints, Weights
 		};
 
 		createInfo->SetVertices(Vertices);
 		createInfo->SetIndices(Indices);
-		createInfo->SetAttributeDimensions(std::vector<int>({ 3 , 3 , 2, 4}));
-		createInfo->SetAttribDataTypes(std::vector<renderer::EDataType>({ renderer::EDataType::TYPE_FLOAT , renderer::EDataType::TYPE_FLOAT , renderer::EDataType::TYPE_FLOAT , renderer::EDataType::TYPE_FLOAT }));
-		createInfo->SetAttribByteStrides(std::vector<int>({ 0, 0, 0, 0 }));
+		createInfo->SetAttributeDimensions(std::vector<int>({ 3 , 3 , 2, 4, 4, 4}));
+		createInfo->SetAttribDataTypes(std::vector<renderer::EDataType>({ renderer::EDataType::TYPE_FLOAT , renderer::EDataType::TYPE_FLOAT , renderer::EDataType::TYPE_FLOAT , renderer::EDataType::TYPE_FLOAT, renderer::EDataType::TYPE_UNSIGNED_INT, renderer::EDataType::TYPE_FLOAT }));
+		createInfo->SetAttribByteStrides(std::vector<int>({ 0, 0, 0, 0, 0, 0 }));
 
 		return createInfo;
 	}

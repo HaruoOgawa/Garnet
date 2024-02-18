@@ -104,9 +104,10 @@ namespace math
 			0.0f, 0.0f, 0.0f, 1.0f
 		);
 
-		RotMat[0][0] /= Scale.x;
+		// ScaleÇÃèúéZÇÕïsóvÇ©Ç‡
+		/*RotMat[0][0] /= Scale.x;
 		RotMat[1][1] /= Scale.y;
-		RotMat[2][2] /= Scale.z;
+		RotMat[2][2] /= Scale.z;*/
 
 		Rotation = glm::quat_cast(RotMat);
 	}

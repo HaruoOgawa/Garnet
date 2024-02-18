@@ -283,6 +283,10 @@ namespace resource
 				std::string value_type = "";
 				GetString("type", value_type, val);
 
+				// ひとまずfloatArrayにしておく. floatもintもバイトサイズは同じなので
+				std::vector<float> initValue;
+				GetArray32("initValue", initValue, val);
+
 				int ByteSize = 0;
 				if (value_type == "mat4")
 				{
@@ -316,10 +320,10 @@ namespace resource
 				{
 					ByteSize = sizeof(int);
 				}
-
-				// ひとまずfloatArrayにしておく. floatもintもバイトサイズは同じなので
-				std::vector<float> initValue;
-				GetArray32("initValue", initValue, val);
+				else if (value_type == "float_array")
+				{
+					ByteSize = sizeof(float) * static_cast<int>(initValue.size());
+				}
 
 				std::shared_ptr<graphics::SBufferValueLayout> ValueLayout = std::make_shared<graphics::SBufferValueLayout>();
 				ValueLayout->Name = value_name;

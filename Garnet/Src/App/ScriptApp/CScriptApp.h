@@ -14,10 +14,14 @@ namespace resource { class CLoadWorker; }
 namespace input { class CInputState; }
 #endif
 
+namespace physics { class IPhysicsEngine; }
+
 namespace app
 {
 	class CScriptApp : public IApp
 	{
+		std::shared_ptr<physics::IPhysicsEngine> m_PhysicsEngine;
+
 		std::shared_ptr<scene::CScriptScene> m_ScriptScene;
 		std::shared_ptr<camera::CCamera> m_MainCamera;
 		std::shared_ptr<projection::CProjection> m_Projection;

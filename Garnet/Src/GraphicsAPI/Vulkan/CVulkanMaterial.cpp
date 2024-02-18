@@ -319,7 +319,7 @@ namespace api
 				// DynamicOffsetはバッファサイズが256バイト以上でないと使用できないので使用する設定になっていてそれよりも小さい時はエラーとする
 				if (IsUseDynamicOffset() && ByteSize < 256)
 				{
-					Console::Log("[API Error] ByteSize must be rather than 256 byte if use DynamicOffset.\n");
+					Console::Log("[API Error] ByteSize must be rather than 256 byte if use DynamicOffset. / BufferName: %s / ByteSize: %d\n", Buffer->GetBufferName().c_str(), static_cast<int>(ByteSize));
 
 					return false;
 				}

@@ -1,0 +1,119 @@
+#ifdef USE_PHYSICS
+#include "CBulletRigidBody.h"
+
+namespace physics
+{
+	CBulletRigidBody::CBulletRigidBody(btDiscreteDynamicsWorld* pDynamicWorld, btCollisionShape* pCollisionShape, const glm::vec3& WorldPos, const glm::quat& WorldRotate, bool IsStatic, float Mass):
+		m_pDynamicWorld(pDynamicWorld),
+		m_MotionState(nullptr),
+		m_Rigidbody(nullptr)
+	{
+		Create(pDynamicWorld, pCollisionShape, WorldPos, WorldRotate, IsStatic, Mass);
+	}
+
+	CBulletRigidBody::~CBulletRigidBody()
+	{
+		if (m_MotionState)
+		{
+			m_MotionState.reset();
+			m_MotionState = nullptr;
+		}
+
+		if (m_Rigidbody)
+		{
+			m_pDynamicWorld->removeCollisionObject(m_Rigidbody.get());
+
+			m_Rigidbody.reset();
+			m_Rigidbody = nullptr;
+		}
+	}
+
+	bool CBulletRigidBody::Create(btDiscreteDynamicsWorld* pDynamicWorld, btCollisionShape* pCollisionShape, const glm::vec3& WorldPos, const glm::quat& WorldRotate, bool IsStatic, float Mass)
+	{
+		// Transform
+		btTransform transform;
+		transform.setIdentity();
+		transform.setOrigin(btVector3(WorldPos.x, WorldPos.y, WorldPos.z));
+		transform.setRotation(btQuaternion(WorldRotate.x, WorldRotate.y, WorldRotate.z, WorldRotate.w));
+
+		// 質量
+		btScalar bodyMass(Mass);
+
+		// Bulletは質量が0のものはStatic(固定されている)、そうでないものはDynamic(物理演算で動く)として扱われる
+		bool IsDynamic = (!IsStatic && bodyMass != 0.0f);
+
+		// Inertiaは慣性の意味
+		btVector3 localInertia(0, 0, 0);
+		// 慣性力の計算でここではそれを0に初期化している
+		if (IsDynamic)
+		{
+			pCollisionShape->calculateLocalInertia(bodyMass, localInertia);
+		}
+
+		// MotoinState. 補間だったり他のアクティブオブジェクトとの同期に使用される
+		m_MotionState = std::make_shared<btDefaultMotionState>(transform);
+
+		// RigidBodyの設定. 物理演算に使用するオブジェクト.物理演算に関するパラメーターを持っている
+		btRigidBody::btRigidBodyConstructionInfo rbInfo(bodyMass, m_MotionState.get(), pCollisionShape, localInertia);
+		m_Rigidbody = std::make_shared<btRigidBody>(rbInfo);
+
+		// RigidBodyを物理演算ワールドに追加
+		pDynamicWorld->addRigidBody(m_Rigidbody.get());
+
+		return true;
+	}
+
+	void CBulletRigidBody::AddSpringConstraint(btDiscreteDynamicsWorld* pDynamicWorld, const std::shared_ptr<CBulletRigidBody>& FixedRigidbody, const glm::vec3& ConnectPoint)
+	{
+		btVector3 pivot(ConnectPoint.x, ConnectPoint.y, ConnectPoint.z);
+		
+		// Constraintsを追加
+		// btGeneric6DofSpring2Constraint(*d6body0,*fixedBody1,frameInA,frameInB);
+		// frameInAとframeInBはバネに例えるとバネの端点・剛体との接合点を表す. 二つの剛体にバネを挟むことをイメージするとわかりやすい. それは必ず２つの接合点があるはずである
+		// frameInA => d6body0の接合点
+		// frameInB => fixedBody1の接合点
+		btGeneric6DofSpring2Constraint* spring = new btGeneric6DofSpring2Constraint(
+			*m_Rigidbody.get(), 
+			*FixedRigidbody->GetbtRigidBody().get(),
+			btTransform(btQuaternion::getIdentity(), {0.0f, -1.0f, 0.0f}), 
+			btTransform(btQuaternion::getIdentity(), { 0.0f, 0.0f, 0.0f })
+		);
+
+		// 関数名の通り移動できる範囲・回転できる範囲
+		spring->setLinearLowerLimit(btVector3(0.0f, 0.0f, 0.0f));
+		spring->setLinearUpperLimit(btVector3(0.0f, 1.0f, 0.0f));
+		//spring->setAngularLowerLimit(btVector3(0.0f, 0.0f, 0.0f));
+		//spring->setAngularUpperLimit(btVector3(3.1415f * 2.0f, 3.1415f * 2.0f, 3.1415f * 2.0f));
+
+		spring->enableSpring(1, true);
+		spring->setStiffness(1, 35.0f); // Stiffness: 硬さ
+		spring->setDamping(1, 0.5f); // Damping: 減衰力
+
+		pDynamicWorld->addConstraint(spring, false);
+	}
+
+	btTransform CBulletRigidBody::GetCurrentWorldTransform()
+	{
+		btTransform trans;
+
+		if (m_Rigidbody)
+		{
+			if (m_MotionState)
+			{
+				m_MotionState->getWorldTransform(trans);
+			}
+			else
+			{
+				trans = m_Rigidbody->getWorldTransform();
+			}
+		}
+
+		return trans;
+	}
+
+	const std::shared_ptr<btRigidBody>& CBulletRigidBody::GetbtRigidBody() const
+	{
+		return m_Rigidbody;
+	}
+}
+#endif

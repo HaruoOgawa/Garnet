@@ -11,6 +11,8 @@
 #include "../../Camera/CViewerCamera.h"
 #endif // USE_VIEWER_CAMERA
 
+#include "../../PhysicsEngine/Bullet/CBulletPhysicsEngine.h"
+
 // CScriptApp は旧エンジンでもやっていたof風にCppでエンジンコードを直接シーンを構築していくアプリ
 
 // MVVMで設計する
@@ -30,7 +32,8 @@ namespace app
 #endif // USE_VIEWER_CAMERA
 		m_Projection(std::make_shared<projection::CProjection>()),
 		m_DrawInfo(std::make_shared<graphics::CDrawInfo>()),
-		m_BlurEffect(nullptr)
+		m_BlurEffect(nullptr),
+		m_PhysicsEngine(std::make_shared<physics::CBulletPhysicsEngine>())
 	{
 		m_MainCamera->SetPos(glm::vec3(0.0f, 1.0f, -7.0f));
 		//m_MainCamera->SetCenter(glm::vec3(0.0f, 50.0f, 349.0f));
@@ -42,6 +45,17 @@ namespace app
 
 	CScriptApp::~CScriptApp()
 	{
+		if (m_ScriptScene)
+		{
+			m_ScriptScene.reset();
+			m_ScriptScene = nullptr;
+		}
+
+		if (m_PhysicsEngine)
+		{
+			m_PhysicsEngine.reset();
+			m_PhysicsEngine = nullptr;
+		}
 	}
 
 	bool CScriptApp::Release(api::IGraphicsAPI* pGraphicsAPI)
@@ -53,6 +67,9 @@ namespace app
 	{
 		// Viewの初期化
 		m_ScriptScene = std::make_shared<scene::CScriptScene>(pGraphicsAPI, pLoadWorker);
+
+		// 物理エンジン
+		if (!m_PhysicsEngine->Initialize()) return false;
 
 		// オフスクリーンレンダリング
 		if (!pGraphicsAPI->CreateRenderPass("ShadowPass", api::ERenderPassFormat::COLOR_RENDERPASS, glm::vec4(1.0f), 512, 512)) return false;
@@ -87,10 +104,12 @@ namespace app
 	{
 		if (!pLoadWorker->Update(pGraphicsAPI)) return false;
 
+		if (!m_PhysicsEngine->Update(m_DrawInfo->GetDeltaSecondsTime())) return false;
+
 #ifdef USE_INPUT_SYSTEM
-		if (!m_ScriptScene->Update(pGraphicsAPI, pLoadWorker, m_MainCamera, m_Projection, m_DrawInfo, InputState)) return false;
+		if (!m_ScriptScene->Update(pGraphicsAPI, m_PhysicsEngine.get(), pLoadWorker, m_MainCamera, m_Projection, m_DrawInfo, InputState)) return false;
 #else
-		if (!m_ScriptScene->Update(pGraphicsAPI, pLoadWorker, m_MainCamera, m_Projection, m_DrawInfo)) return false;
+		if (!m_ScriptScene->Update(pGraphicsAPI, m_PhysicsEngine.get(), pLoadWorker, m_MainCamera, m_Projection, m_DrawInfo)) return false;
 #endif
 
 		if (!m_BlurEffect->Update(pLoadWorker)) return false;

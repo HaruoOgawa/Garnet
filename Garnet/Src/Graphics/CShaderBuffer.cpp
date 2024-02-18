@@ -6,7 +6,8 @@
 
 namespace graphics
 {
-	CShaderBuffer::CShaderBuffer(EBufferType BufferType, const std::vector<SBindingLayout>& BindingLayoutList, EBufferUpdateType BufferUpdateType) :
+	CShaderBuffer::CShaderBuffer(const std::string& BufferName, EBufferType BufferType, const std::vector<SBindingLayout>& BindingLayoutList, EBufferUpdateType BufferUpdateType) :
+		m_BufferName(BufferName),
 		m_Descriptor(std::make_shared<CShaderBufferDescriptor>()),
 		m_BufferType(BufferType),
 		m_BufferUpdateType(BufferUpdateType)
@@ -19,6 +20,11 @@ namespace graphics
 
 	CShaderBuffer::~CShaderBuffer()
 	{
+	}
+
+	const std::string& CShaderBuffer::GetBufferName() const
+	{
+		return m_BufferName;
 	}
 
 	void CShaderBuffer::AddData(const std::string& Name, const void* Data, int ByteSize, int BindingIndex)

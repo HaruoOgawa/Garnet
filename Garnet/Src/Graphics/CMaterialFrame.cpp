@@ -40,7 +40,7 @@ namespace graphics
 				auto BindingLayout = ShaderBuffer.BindingLayout;
 				const auto& ValueList = ShaderBuffer.ValueLayoutList;
 
-				auto Buffer = graphics::CMaterialCreateInfo::CreateUniformBuffer({ BindingLayout });
+				auto Buffer = graphics::CMaterialCreateInfo::CreateUniformBuffer(ShaderBuffer.BindingLayout.BindingName, { BindingLayout });
 
 				for (const auto& Value : ValueList)
 				{
@@ -55,7 +55,7 @@ namespace graphics
 				auto BindingLayout = ShaderBuffer.BindingLayout;
 				const auto& ValueList = ShaderBuffer.ValueLayoutList;
 
-				auto Buffer = graphics::CMaterialCreateInfo::CreateShaderStorageBuffer({ BindingLayout }, BindingLayout.BufferUpdateType);
+				auto Buffer = graphics::CMaterialCreateInfo::CreateShaderStorageBuffer(ShaderBuffer.BindingLayout.BindingName, { BindingLayout }, BindingLayout.BufferUpdateType);
 
 				for (const auto& Value : ValueList)
 				{

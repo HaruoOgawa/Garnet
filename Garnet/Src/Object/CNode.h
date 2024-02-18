@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 #include "../Math/CTransform.h"
+#include "../Interface/IPhysicsObject.h"
 
 namespace object
 {
@@ -28,6 +29,9 @@ namespace object
 
 		std::shared_ptr<CNode> m_ParentNode;
 
+		// ï®óù
+		std::shared_ptr<physics::IPhysicsObject> m_PhysicsObject;
+
 	public:
 		CNode(int MeshIndex, int SelfNodeIndex);
 		virtual ~CNode();
@@ -43,6 +47,13 @@ namespace object
 		void SetMeshIndex(int MeshIndex);
 		int GetMeshIndex() const;
 
+		// ï®óù
+		void SetPhysicsObject(const std::shared_ptr<physics::IPhysicsObject>& PhysicsObject);
+		const std::shared_ptr<physics::IPhysicsObject>& GetPhysicsObject() const;
+		void CreatePhysicsObject(physics::IPhysicsEngine* pPhysicsEngine);
+		void ApplyPhysicsWorldMatrix();
+
+		//
 		void SetLocalTransform(const std::shared_ptr<math::CTransform>& LocalTransform);
 		const std::shared_ptr<math::CTransform>& GetLocalTransform() const;
 
@@ -50,7 +61,6 @@ namespace object
 
 		void SetWorldMatrix(const glm::mat4& WorldMatrix);
 		const glm::mat4& GetWorldMatrix() const;
-		glm::mat4 CalcWorldMatrix(const glm::mat4& LocalMatrix);
 
 		void SetParentNode(const std::shared_ptr<CNode>& ParentNode);
 		const std::shared_ptr<CNode>& GetParentNode() const;

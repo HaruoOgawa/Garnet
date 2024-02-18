@@ -181,8 +181,8 @@ namespace imageeffect
 			MaterialY->ReplaceTextureIndex("SrcTex", 1);
 		}
 
-		if (!object::C3DObject::CreateSimply(m_pGraphicsAPI, m_ScreenObjX, graphics::CPresetPrimitive::CreateBoard(), MaterialX, nullptr)) return false;
-		if (!object::C3DObject::CreateSimply(m_pGraphicsAPI, m_ScreenObjY, graphics::CPresetPrimitive::CreateBoard(), MaterialY, nullptr)) return false;
+		if (!m_ScreenObjX->CreateSimply(m_pGraphicsAPI, nullptr, graphics::CPresetPrimitive::CreateBoard(), MaterialX, nullptr)) return false;
+		if (!m_ScreenObjY->CreateSimply(m_pGraphicsAPI, nullptr, graphics::CPresetPrimitive::CreateBoard(), MaterialY, nullptr)) return false;
 
 		return true;
 	}

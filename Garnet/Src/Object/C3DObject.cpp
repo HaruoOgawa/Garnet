@@ -47,31 +47,33 @@ namespace object
 		m_FileName = FileName;
 	}
 
-	bool C3DObject::CreateSimply(api::IGraphicsAPI* pGraphicsAPI, std::shared_ptr<object::C3DObject>& Object,
+	bool C3DObject::CreateSimply(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine,
 		const std::shared_ptr<renderer::CRendererCreateInfo>& createInfo,
-		const std::shared_ptr<graphics::CMaterial>& Material, const std::shared_ptr<graphics::CMaterialFrame>& DepthMF)
+		const std::shared_ptr<graphics::CMaterial>& Material, const std::shared_ptr<graphics::CMaterialFrame>& DepthMF, 
+		const std::shared_ptr<math::CTransform> NodeTransform, const std::shared_ptr<physics::IPhysicsObject>& PhysicsObject)
 	{
 		// Material
-		Object->AddMaterial(Material);
+		AddMaterial(Material);
 
 		// Mesh
 		std::shared_ptr<graphics::CMesh> Mesh = std::make_shared<graphics::CMesh>();
-		std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(createInfo, 0);
-		Mesh->AddPrimitive(Primitive);
+		Mesh->CreateSimpleMesh(createInfo, 0);
 
-		Object->AddMesh(Mesh);
+		AddMesh(Mesh);
 
 		// Node
 		std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(0, 0);
-		Object->AddNode(Node);
+		Node->SetLocalTransform(NodeTransform);
+		Node->SetPhysicsObject(PhysicsObject);
+		AddNode(Node);
 
 		// Create
-		if (!Object->Create(pGraphicsAPI, DepthMF)) return false;
+		if (!Create(pGraphicsAPI, pPhysicsEngine, DepthMF)) return false;
 
 		return true;
 	}
 
-	bool C3DObject::CreateFromMemory(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<graphics::CMaterialFrame>& BaseMF, const std::shared_ptr<graphics::CMaterialFrame>& DepthMF, E3DObjectType ObjectType)
+	bool C3DObject::CreateFromMemory(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<graphics::CMaterialFrame>& BaseMF, const std::shared_ptr<graphics::CMaterialFrame>& DepthMF, E3DObjectType ObjectType)
 	{
 		m_DepthMF = DepthMF;
 
@@ -115,12 +117,12 @@ namespace object
 			return true;
 		}
 
-		if (!Create(pGraphicsAPI, DepthMF)) return false;
+		if (!Create(pGraphicsAPI, pPhysicsEngine, DepthMF)) return false;
 
 		return true;
 	}
 
-	bool C3DObject::Create(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<graphics::CMaterialFrame>& DepthMF)
+	bool C3DObject::Create(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, const std::shared_ptr<graphics::CMaterialFrame>& DepthMF)
 	{
 		// DefaultLocalTransformを保存する
 		ApplyDefaultLocalTransform();
@@ -130,6 +132,9 @@ namespace object
 
 		// ワールド行列の計算
 		CalcWorldMatrix();
+
+		// 物理
+		CreatePhysics(pPhysicsEngine);
 
 		// Material
 		for (auto& Material : m_MaterialList)
@@ -216,6 +221,23 @@ namespace object
 		}
 	}
 
+	// 物理
+	void C3DObject::CreatePhysics(physics::IPhysicsEngine* pPhysicsEngine)
+	{
+		for (const auto& Node : m_NodeList)
+		{
+			Node->CreatePhysicsObject(pPhysicsEngine);
+		}
+	}
+
+	void C3DObject::ApplyPhysicsWorldMatrix()
+	{
+		for (const auto& Node : m_NodeList)
+		{
+			Node->ApplyPhysicsWorldMatrix();
+		}
+	}
+
 	// ワールド行列の初期値を計算(アニメーション等で後々更新される可能性がある)
 	void C3DObject::CalcWorldMatrix()
 	{
@@ -273,7 +295,7 @@ namespace object
 		}
 	}
 
-	bool C3DObject::Update(api::IGraphicsAPI* pGraphicsAPI, float DeltaSecondsTime)
+	bool C3DObject::Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, float DeltaSecondsTime)
 	{
 		for (auto& Resource : m_RuntimeLoadResourceList)
 		{
@@ -297,7 +319,7 @@ namespace object
 		// Create関数を伴う初回動的ロード
 		if (m_ExistFirstDelayResource && m_RuntimeLoadResourceList.size() == 0 && !m_IsCreated)
 		{
-			if (!Create(pGraphicsAPI, m_DepthMF)) return false;
+			if (!Create(pGraphicsAPI, pPhysicsEngine, m_DepthMF)) return false;
 
 			m_ExistFirstDelayResource = false;
 		}
@@ -337,6 +359,9 @@ namespace object
 		m_CurrentSkinMatrixList.clear();
 		if (!m_AnimationController->CalCSkinMatrixList(m_CurrentSkinMatrixList, m_ObjectTransform->GetModelMatrix())) return false;
 #endif
+
+		// 物理演算の結果を反映する
+		ApplyPhysicsWorldMatrix();
 
 		return true;
 	}

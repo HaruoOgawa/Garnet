@@ -1,4 +1,5 @@
 #include "CNode.h"
+#include "../Debug/Message/Console.h"
 
 namespace object
 {
@@ -13,7 +14,8 @@ namespace object
 		m_PrevLocalTransform(std::make_shared<math::CTransform>()),
 		m_WorldMatrix(glm::mat4(1.0f)),
 		m_InverseBindMatrix(glm::mat4(1.0f)),
-		m_ParentNode(nullptr)
+		m_ParentNode(nullptr),
+		m_PhysicsObject(nullptr)
 	{
 	}
 
@@ -55,6 +57,44 @@ namespace object
 		return m_MeshIndex;
 	}
 
+	// 物理
+	void CNode::SetPhysicsObject(const std::shared_ptr<physics::IPhysicsObject>& PhysicsObject)
+	{
+		m_PhysicsObject = PhysicsObject;
+	}
+
+	const std::shared_ptr<physics::IPhysicsObject>& CNode::GetPhysicsObject() const
+	{
+		return m_PhysicsObject;
+	}
+
+	void CNode::CreatePhysicsObject(physics::IPhysicsEngine* pPhysicsEngine)
+	{
+		// 物理オブジェクトを生成
+		if (pPhysicsEngine && m_PhysicsObject)
+		{
+			glm::vec3 WorldPos = glm::vec3(0.0f);
+			glm::quat WorldRotate = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
+			glm::vec3 WorldScale = glm::vec3(1.0f);
+
+			math::CTransform::CastModelMatrixToTransform(m_WorldMatrix, WorldPos, WorldRotate, WorldScale);
+
+			m_PhysicsObject->Create(pPhysicsEngine, WorldPos, WorldRotate, WorldScale);
+		}
+	}
+
+	void CNode::ApplyPhysicsWorldMatrix()
+	{
+		// 物理演算の結果を反映する
+		if (m_PhysicsObject && !m_PhysicsObject->IsStatic())
+		{
+			// 物理オブジェクトのワールド座標を渡す
+			// 物理オブジェクトに親子関係を持たせるのはConstraints(Joint)を形成するとき(PMXの髪とか服)で、一度物理エンジンにオブジェクトを登録するとConstraints(Joint)の効果で子要素は親要素に自動で引っ張られるようになる
+			// なので一度ワールド行列を計算したうえで物理オブジェクトを生成した後は、位置計算を全て物理エンジンに任せる
+			m_WorldMatrix = m_PhysicsObject->GetCurrentPhysicsWorldMatrix();
+		}
+	}
+
 	void CNode::SetLocalTransform(const std::shared_ptr<math::CTransform>& LocalTransform)
 	{
 		m_LocalTransform = LocalTransform;
@@ -78,21 +118,6 @@ namespace object
 	const glm::mat4& CNode::GetWorldMatrix() const
 	{
 		return m_WorldMatrix;
-	}
-
-	glm::mat4 CNode::CalcWorldMatrix(const glm::mat4& LocalMatrix)
-	{
-		glm::mat4 result = LocalMatrix;
-
-		std::shared_ptr<CNode> parentNode = m_ParentNode;
-		while (parentNode)
-		{
-			result = parentNode->GetLocalMatrix() * result;
-
-			parentNode = parentNode->GetParentNode();
-		}
-
-		return result;
 	}
 
 	void CNode::SetParentNode(const std::shared_ptr<CNode>& ParentNode)

@@ -22,17 +22,17 @@ namespace graphics
 	}
 
 	// Uniform
-	std::shared_ptr<graphics::CShaderBuffer> CMaterialCreateInfo::CreateUniformBuffer(const std::vector<SBindingLayout>& BindingLayoutList)
+	std::shared_ptr<graphics::CShaderBuffer> CMaterialCreateInfo::CreateUniformBuffer(const std::string& BufferName, const std::vector<SBindingLayout>& BindingLayoutList)
 	{
 		// UniformBufferÇ÷ÇÃèëÇ´çûÇ›ÇÕCPUÇÃÇ›
-		auto Buffer = std::make_shared<graphics::CShaderBuffer>(EBufferType::UNIFORM, BindingLayoutList, EBufferUpdateType::UPDATE_TYPE_CPU);
+		auto Buffer = std::make_shared<graphics::CShaderBuffer>(BufferName, EBufferType::UNIFORM, BindingLayoutList, EBufferUpdateType::UPDATE_TYPE_CPU);
 		
 		return Buffer;
 	}
 	
-	std::shared_ptr<graphics::CShaderBuffer> CMaterialCreateInfo::CreateShaderStorageBuffer(const std::vector<SBindingLayout>& BindingLayoutList, EBufferUpdateType BufferUpdateType)
+	std::shared_ptr<graphics::CShaderBuffer> CMaterialCreateInfo::CreateShaderStorageBuffer(const std::string& BufferName, const std::vector<SBindingLayout>& BindingLayoutList, EBufferUpdateType BufferUpdateType)
 	{
-		auto Buffer = std::make_shared<graphics::CShaderBuffer>(EBufferType::SHADERSTORAGE, BindingLayoutList, BufferUpdateType);
+		auto Buffer = std::make_shared<graphics::CShaderBuffer>(BufferName, EBufferType::SHADERSTORAGE, BindingLayoutList, BufferUpdateType);
 		
 		return Buffer;
 	}
