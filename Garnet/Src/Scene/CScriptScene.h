@@ -37,6 +37,7 @@ namespace scene
 		// PhysicsObj
 		std::shared_ptr<object::C3DObject> m_PhysicsGround;
 		std::shared_ptr<object::C3DObject> m_PhysicsSphere;
+		std::shared_ptr<object::C3DObject> m_PhysicsCubeList;
 
 		// MMD
 		std::shared_ptr<object::C3DObject> m_TdaMiku_Model;

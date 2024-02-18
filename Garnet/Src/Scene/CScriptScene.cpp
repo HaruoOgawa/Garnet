@@ -24,6 +24,7 @@ namespace scene
 
 		m_PhysicsGround(std::make_shared<object::C3DObject>("", "ShadowPass")),
 		m_PhysicsSphere(std::make_shared<object::C3DObject>("", "ShadowPass")),
+		m_PhysicsCubeList(std::make_shared<object::C3DObject>("", "ShadowPass")),
 
 		m_TdaMiku_Model(std::make_shared<object::C3DObject>("", "ShadowPass")),
 		m_VMDAnimationSet(std::make_shared<animation::CAnimationClipSet>()),
@@ -88,12 +89,67 @@ namespace scene
 			Material->ReplacePreloadUniformValue("roughnessFactor", &glm::vec1(1.0f)[0], sizeof(float), 0);
 
 			std::shared_ptr<math::CTransform> LocalTransform = std::make_shared<math::CTransform>();
-			LocalTransform->SetPos(glm::vec3(0.0f, 2.5f, 0.0f));
-			LocalTransform->SetScale(glm::vec3(0.25f));
+			LocalTransform->SetPos(glm::vec3(0.0f, 10.5f, 0.0f));
+			LocalTransform->SetScale(glm::vec3(0.5f));
 
-			auto PhysicsSphere = pPhysicsEngine->CreatePhysicsSphere(1.0f, false, 1.0f);
+			auto PhysicsSphere = pPhysicsEngine->CreatePhysicsSphere(1.0f, false, 10.0f);
 
 			if (!m_PhysicsSphere->CreateSimply(pGraphicsAPI, pPhysicsEngine, graphics::CPresetPrimitive::CreateSphere(), Material, m_DepthMF, LocalTransform, PhysicsSphere)) return false;
+		}
+
+		// m_PhysicsCubeList
+		{
+			// 
+			const float XMax = 4.0f;
+			const float YMax = 4.0f;
+			const float ZMax = 4.0f;
+			const float NumOfBox = XMax * YMax * ZMax;
+			const float size = 0.25f;
+
+			// Material
+			auto Material = m_PBRMF->CreateMaterial(pGraphicsAPI, static_cast<int>(NumOfBox), graphics::ECullMode::CULL_BACK);
+
+			m_PhysicsCubeList->GetTextureSet()->AddCubeMap(m_Cube_Texture);
+			Material->ReplacePreloadUniformValue("useCubeMap", &glm::ivec1(1)[0], sizeof(glm::ivec1), 0);
+			Material->ReplaceTextureIndex("cubemapTexture", 0);
+			Material->ReplacePreloadUniformValue("roughnessFactor", &glm::vec1(1.0f)[0], sizeof(float), 0);
+
+			m_PhysicsCubeList->AddMaterial(Material);
+
+			// Mesh
+			std::shared_ptr<graphics::CMesh> Mesh = std::make_shared<graphics::CMesh>();
+			Mesh->CreateSimpleMesh(graphics::CPresetPrimitive::CreateBox(), 0);
+
+			m_PhysicsCubeList->AddMesh(Mesh);
+
+			// Node
+			for (float z = 0.0f; z < ZMax; z++)
+			{
+				for (float y = 0.0f; y < YMax; y++)
+				{
+					for (float x = 0.0f; x < XMax; x++)
+					{
+						float xpos = x * 2.0f - XMax;
+						float ypos = y + size;
+						float zpos = z * 2.0f - ZMax;
+
+						std::shared_ptr<math::CTransform> LocalTransform = std::make_shared<math::CTransform>();
+						LocalTransform->SetPos(glm::vec3(xpos * size * 0.5f, ypos * size * 0.5f, zpos * size * 0.5f));
+						LocalTransform->SetScale(glm::vec3(size));
+
+						auto PhysicsBox = pPhysicsEngine->CreatePhysicsBox(glm::vec3(0.5f), false, 1.0f);
+
+						std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(0, -1);
+						Node->SetLocalTransform(LocalTransform);
+						Node->SetPhysicsObject(PhysicsBox);
+
+						m_PhysicsCubeList->AddNode(Node);
+					}
+				}
+			}
+
+			// Create
+			if (!m_PhysicsCubeList->Create(pGraphicsAPI, pPhysicsEngine, m_DepthMF)) return false;
 		}
 
 		// m_TdaMiku_Model
@@ -149,6 +205,11 @@ namespace scene
 		{
 			if (!m_PhysicsSphere->Update(pGraphicsAPI, pPhysicsEngine, DrawInfo->GetDeltaSecondsTime())) return false;
 		}
+		
+		if (m_PhysicsCubeList)
+		{
+			if (!m_PhysicsCubeList->Update(pGraphicsAPI, pPhysicsEngine, DrawInfo->GetDeltaSecondsTime())) return false;
+		}
 
 		/*if (m_TdaMiku_Model)
 		{
@@ -182,6 +243,11 @@ namespace scene
 		if (m_PhysicsSphere)
 		{
 			if (!m_PhysicsSphere->Draw(IsDepthPass, false, Camera, Projection, DrawInfo, nullptr)) return false;
+		}
+		
+		if (m_PhysicsCubeList)
+		{
+			if (!m_PhysicsCubeList->Draw(IsDepthPass, false, Camera, Projection, DrawInfo, nullptr)) return false;
 		}
 
 		/*if (m_TdaMiku_Model)

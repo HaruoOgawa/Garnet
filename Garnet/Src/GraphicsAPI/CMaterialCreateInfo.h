@@ -32,8 +32,8 @@ namespace graphics
 		virtual ~CMaterialCreateInfo();
 
 		// Uniform
-		static std::shared_ptr<graphics::CShaderBuffer> CreateUniformBuffer(const std::vector<SBindingLayout>& BindingLayoutList);
-		static std::shared_ptr<graphics::CShaderBuffer> CreateShaderStorageBuffer(const std::vector<SBindingLayout>& BindingLayoutList, EBufferUpdateType BufferUpdateType = EBufferUpdateType::UPDATE_TYPE_GPU);
+		static std::shared_ptr<graphics::CShaderBuffer> CreateUniformBuffer(const std::string& BufferName, const std::vector<SBindingLayout>& BindingLayoutList);
+		static std::shared_ptr<graphics::CShaderBuffer> CreateShaderStorageBuffer(const std::string& BufferName, const std::vector<SBindingLayout>& BindingLayoutList, EBufferUpdateType BufferUpdateType = EBufferUpdateType::UPDATE_TYPE_GPU);
 
 		// Shader
 		EShaderType GetShaderType() const;
