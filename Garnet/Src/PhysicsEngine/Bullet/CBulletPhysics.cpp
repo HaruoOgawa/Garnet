@@ -73,17 +73,15 @@ namespace physics
 		return true;
 	}
 
-	std::shared_ptr<IPhysicsObject> CBulletPhysics::CreatePhysicsBox(const glm::vec3& Origin, const glm::vec3& BoxHalfSize, bool IsStatic, float Mass)
+	std::shared_ptr<IPhysicsObject> CBulletPhysics::CreatePhysicsBox(const glm::vec3& BoxHalfSize, bool IsStatic, float Mass)
 	{
-		std::shared_ptr<CBulletBox> Box = std::make_shared<CBulletBox>();
-		Box->Create(m_DynamicsWorld.get(), Origin, BoxHalfSize, IsStatic, Mass);
+		std::shared_ptr<CBulletBox> Box = std::make_shared<CBulletBox>(BoxHalfSize, IsStatic, Mass);
 
 		return Box;
 	}
-	std::shared_ptr<IPhysicsObject> CBulletPhysics::CreatePhysicsSphere(const glm::vec3& Origin, float Radius, bool IsStatic, float Mass)
+	std::shared_ptr<IPhysicsObject> CBulletPhysics::CreatePhysicsSphere(float Radius, bool IsStatic, float Mass)
 	{
-		std::shared_ptr<CBulletSphere> Sphere = std::make_shared<CBulletSphere>();
-		Sphere->Create(m_DynamicsWorld.get(), Origin, Radius, IsStatic, Mass);
+		std::shared_ptr<CBulletSphere> Sphere = std::make_shared<CBulletSphere>(Radius, IsStatic, Mass);
 
 		return Sphere;
 	}
@@ -96,6 +94,11 @@ namespace physics
 		}
 
 		return true;
+	}
+
+	btDiscreteDynamicsWorld* CBulletPhysics::GetDynamicsWorld()
+	{
+		return m_DynamicsWorld.get();
 	}
 
 	bool CBulletPhysics::HelloWorldTestCode()

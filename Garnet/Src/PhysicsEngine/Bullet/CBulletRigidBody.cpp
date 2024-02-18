@@ -3,12 +3,12 @@
 
 namespace physics
 {
-	CBulletRigidBody::CBulletRigidBody(btDiscreteDynamicsWorld* pDynamicWorld, btCollisionShape* pCollisionShape, const glm::vec3& Origin, bool IsStatic, float Mass):
+	CBulletRigidBody::CBulletRigidBody(btDiscreteDynamicsWorld* pDynamicWorld, btCollisionShape* pCollisionShape, const glm::vec3& WorldPos, const glm::quat& WorldRotate, bool IsStatic, float Mass):
 		m_pDynamicWorld(pDynamicWorld),
 		m_MotionState(nullptr),
 		m_Rigidbody(nullptr)
 	{
-		Create(pDynamicWorld, pCollisionShape, Origin, IsStatic, Mass);
+		Create(pDynamicWorld, pCollisionShape, WorldPos, WorldRotate, IsStatic, Mass);
 	}
 
 	CBulletRigidBody::~CBulletRigidBody()
@@ -28,12 +28,13 @@ namespace physics
 		}
 	}
 
-	bool CBulletRigidBody::Create(btDiscreteDynamicsWorld* pDynamicWorld, btCollisionShape* pCollisionShape, const glm::vec3& Origin, bool IsStatic, float Mass)
+	bool CBulletRigidBody::Create(btDiscreteDynamicsWorld* pDynamicWorld, btCollisionShape* pCollisionShape, const glm::vec3& WorldPos, const glm::quat& WorldRotate, bool IsStatic, float Mass)
 	{
 		// Transform
 		btTransform transform;
 		transform.setIdentity();
-		transform.setOrigin(btVector3(Origin.x, Origin.y, Origin.z));
+		transform.setOrigin(btVector3(WorldPos.x, WorldPos.y, WorldPos.z));
+		transform.setRotation(btQuaternion(WorldRotate.x, WorldRotate.y, WorldRotate.z, WorldRotate.w));
 
 		// Ž¿—Ê
 		btScalar bodyMass(Mass);
@@ -66,13 +67,16 @@ namespace physics
 	{
 		btTransform trans;
 
-		if (m_MotionState)
+		if (m_Rigidbody)
 		{
-			m_MotionState->getWorldTransform(trans);
-		}
-		else
-		{
-			trans = m_Rigidbody->getWorldTransform();
+			if (m_MotionState)
+			{
+				m_MotionState->getWorldTransform(trans);
+			}
+			else
+			{
+				trans = m_Rigidbody->getWorldTransform();
+			}
 		}
 
 		return trans;

@@ -6,10 +6,16 @@
 
 namespace physics
 {
+	class IPhysicsEngine;
+
 	class IPhysicsObject
 	{
 	public:
-		virtual glm::mat4 GetCurrentPhysicsWorldMatrix(const glm::vec3& Scale) = 0;
+		virtual bool Create(IPhysicsEngine* pPhysicsEngine, const glm::vec3& WorldPos, const glm::quat& WorldRotate, const glm::vec3& WorldScale) = 0;
+
+		virtual bool IsStatic() = 0;
+
+		virtual glm::mat4 GetCurrentPhysicsWorldMatrix() = 0;
 		virtual glm::vec3 GetCurrentWorldPos() = 0;
 		virtual glm::quat GetCurrentWorldRotate() = 0;
 	};

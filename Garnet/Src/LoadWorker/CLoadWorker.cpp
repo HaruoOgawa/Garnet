@@ -55,7 +55,7 @@ namespace resource
 		m_LoadingBar->AddNode(Node);
 
 		// Create関数を実行
-		if (!m_LoadingBar->Create(pGraphicsAPI, nullptr)) return false;
+		if (!m_LoadingBar->Create(pGraphicsAPI, nullptr, nullptr)) return false;
 
 		return true;
 	}
@@ -85,7 +85,7 @@ namespace resource
 		// ローディングバー
 		if (m_LoadingBar)
 		{
-			if (!m_LoadingBar->Update(pGraphicsAPI, 0.0f)) return false;
+			if (!m_LoadingBar->Update(pGraphicsAPI, nullptr, 0.0f)) return false;
 		}
 
 		// ローディング

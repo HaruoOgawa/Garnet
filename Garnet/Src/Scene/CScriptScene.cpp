@@ -69,13 +69,13 @@ namespace scene
 			Material->ReplaceTextureIndex("cubemapTexture", 0);
 			Material->ReplacePreloadUniformValue("roughnessFactor", &glm::vec1(1.0f)[0], sizeof(float), 0);
 
-			if (!m_PhysicsGround->CreateSimply(pGraphicsAPI, graphics::CPresetPrimitive::CreateBox(), Material, m_DepthMF)) return false;
+			std::shared_ptr<math::CTransform> LocalTransform = std::make_shared<math::CTransform>();
+			LocalTransform->SetPos(glm::vec3(0.0f, -1.0f, 0.0f));
+			LocalTransform->SetScale(glm::vec3(5.0f, 0.1f, 5.0f));
 
-			m_PhysicsGround->GetNodeList()[0]->SetPos(glm::vec3(0.0f, -1.0f, 0.0f));
-			m_PhysicsGround->GetNodeList()[0]->SetScale(glm::vec3(5.0f, 0.1f, 5.0f));
+			auto PhysicsBox = pPhysicsEngine->CreatePhysicsBox(glm::vec3(0.5f), true, 0.0f);
 
-			auto PhysicsBox = pPhysicsEngine->CreatePhysicsBox(glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(5.0f, 0.1f, 5.0f), true, 0.0f);
-			m_PhysicsGround->GetNodeList()[0]->SetPhysicsObject(PhysicsBox);
+			if (!m_PhysicsGround->CreateSimply(pGraphicsAPI, pPhysicsEngine, graphics::CPresetPrimitive::CreateBox(), Material, m_DepthMF, LocalTransform, PhysicsBox)) return false;
 		}
 
 		// m_PhysicsSphere
@@ -87,18 +87,18 @@ namespace scene
 			Material->ReplaceTextureIndex("cubemapTexture", 0);
 			Material->ReplacePreloadUniformValue("roughnessFactor", &glm::vec1(1.0f)[0], sizeof(float), 0);
 
-			if (!m_PhysicsSphere->CreateSimply(pGraphicsAPI, graphics::CPresetPrimitive::CreateSphere(), Material, m_DepthMF)) return false;
+			std::shared_ptr<math::CTransform> LocalTransform = std::make_shared<math::CTransform>();
+			LocalTransform->SetPos(glm::vec3(0.0f, 2.5f, 0.0f));
+			LocalTransform->SetScale(glm::vec3(0.25f));
 
-			m_PhysicsSphere->GetNodeList()[0]->SetPos(glm::vec3(0.0f, 2.5f, 0.0f));
-			m_PhysicsSphere->GetNodeList()[0]->SetScale(glm::vec3(0.25f));
+			auto PhysicsSphere = pPhysicsEngine->CreatePhysicsSphere(1.0f, false, 1.0f);
 
-			auto PhysicsSphere = pPhysicsEngine->CreatePhysicsSphere(glm::vec3(0.0f, 2.5f, 0.0f), 0.25f, false, 1.0f);
-			m_PhysicsSphere->GetNodeList()[0]->SetPhysicsObject(PhysicsSphere);
+			if (!m_PhysicsSphere->CreateSimply(pGraphicsAPI, pPhysicsEngine, graphics::CPresetPrimitive::CreateSphere(), Material, m_DepthMF, LocalTransform, PhysicsSphere)) return false;
 		}
 
 		// m_TdaMiku_Model
 		/*{
-			if (!m_TdaMiku_Model->CreateFromMemory(pGraphicsAPI, pLoadWorker, m_BasicToonMF, m_DepthMF, object::E3DObjectType::Pmx)) return false;
+			if (!m_TdaMiku_Model->CreateFromMemory(pGraphicsAPI, pPhysicsEngine, pLoadWorker, m_BasicToonMF, m_DepthMF, object::E3DObjectType::Pmx)) return false;
 
 			m_TdaMiku_Model->SetPos(glm::vec3(0.0f, 0.0f, 0.0f));
 			m_TdaMiku_Model->SetScale(glm::vec3(0.1f));
@@ -119,7 +119,7 @@ namespace scene
 			m_Background->GetTextureSet()->Add2DTexture(m_IBL_Skybox_Texture);
 
 			m_Background->SetScale(glm::vec3(500.0f));
-			if (!m_Background->CreateSimply(pGraphicsAPI, graphics::CPresetPrimitive::CreateSphere(), Mat , m_DepthMF)) return false;
+			if (!m_Background->CreateSimply(pGraphicsAPI, pPhysicsEngine, graphics::CPresetPrimitive::CreateSphere(), Mat , m_DepthMF)) return false;
 		}
 
 		return true;
@@ -142,22 +142,22 @@ namespace scene
 
 		if (m_PhysicsGround)
 		{
-			if (!m_PhysicsGround->Update(pGraphicsAPI, DrawInfo->GetDeltaSecondsTime())) return false;
+			if (!m_PhysicsGround->Update(pGraphicsAPI, pPhysicsEngine, DrawInfo->GetDeltaSecondsTime())) return false;
 		}
 		
 		if (m_PhysicsSphere)
 		{
-			if (!m_PhysicsSphere->Update(pGraphicsAPI, DrawInfo->GetDeltaSecondsTime())) return false;
+			if (!m_PhysicsSphere->Update(pGraphicsAPI, pPhysicsEngine, DrawInfo->GetDeltaSecondsTime())) return false;
 		}
 
 		/*if (m_TdaMiku_Model)
 		{
-			if (!m_TdaMiku_Model->Update(pGraphicsAPI, DrawInfo->GetDeltaSecondsTime())) return false;
+			if (!m_TdaMiku_Model->Update(pGraphicsAPI, pPhysicsEngine, DrawInfo->GetDeltaSecondsTime())) return false;
 		}*/
 		
 		if (m_Background)
 		{
-			if (!m_Background->Update(pGraphicsAPI, DrawInfo->GetDeltaSecondsTime())) return false;
+			if (!m_Background->Update(pGraphicsAPI, pPhysicsEngine, DrawInfo->GetDeltaSecondsTime())) return false;
 		}
 
 		return true;

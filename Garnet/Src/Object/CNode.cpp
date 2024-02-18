@@ -68,6 +68,41 @@ namespace object
 		return m_PhysicsObject;
 	}
 
+	void CNode::CreatePhysicsObject(physics::IPhysicsEngine* pPhysicsEngine)
+	{
+		// 物理オブジェクトを生成
+		if (pPhysicsEngine && m_PhysicsObject)
+		{
+			glm::vec3 WorldPos = glm::vec3(0.0f);
+			glm::quat WorldRotate = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
+			glm::vec3 WorldScale = glm::vec3(1.0f);
+
+			math::CTransform::CastModelMatrixToTransform(m_WorldMatrix, WorldPos, WorldRotate, WorldScale);
+
+			m_PhysicsObject->Create(pPhysicsEngine, WorldPos, WorldRotate, WorldScale);
+		}
+	}
+
+	void CNode::ApplyPhysicsWorldMatrix()
+	{
+		// 物理演算の結果を反映する
+		if (m_PhysicsObject && !m_PhysicsObject->IsStatic())
+		{
+			// ひとまず物理オブジェクトが存在するときはそのワールド座標を優先する
+			// あとで様子を見て改選する
+			// 親ノードのワールド行列の逆行列を現在の物理ワールド座標にかけて、ローカルにするといいかも？
+			//auto WorldPos = m_PhysicsObject->GetCurrentWorldPos();
+			//Console::Log("[CPP] Physics WorldPos => x: %f, y: %f, z: %f\n", WorldPos.x, WorldPos.y, WorldPos.z);
+
+			// → よくよく考えると物理オブジェクトに親子関係を持たせるのはConstraints(Joint)を形成するとき(PMXの髪とか服)で、一度物理エンジンにオブジェクトを登録すると
+			// Constraints(Joint)の効果で子要素は親要素に自動で引っ張られるようになるはずなので上記で述べているような逆行列は必要なく、既に実装されているワールド物理座標をそのまま反映する形式で問題ないと思う
+
+			// → たぶんSpringBoneによる伸び縮みもこのConstraints(Joint)で表現されそう
+
+			m_WorldMatrix = m_PhysicsObject->GetCurrentPhysicsWorldMatrix();
+		}
+	}
+
 	void CNode::SetLocalTransform(const std::shared_ptr<math::CTransform>& LocalTransform)
 	{
 		m_LocalTransform = LocalTransform;
@@ -91,28 +126,6 @@ namespace object
 	const glm::mat4& CNode::GetWorldMatrix() const
 	{
 		return m_WorldMatrix;
-	}
-
-	glm::mat4 CNode::CalcWorldMatrix(const glm::mat4& ParentWorldMatrix)
-	{
-		glm::mat4 WorldMatrix = glm::mat4(1.0f);
-		
-		if (m_PhysicsObject)
-		{
-			// ひとまず物理オブジェクトが存在するときはそのワールド座標を優先する
-			// あとで様子を見て改選する
-			// 親ノードのワールド行列の逆行列を現在の物理ワールド座標にかけて、ローカルにするといいかも？
-			//auto WorldPos = m_PhysicsObject->GetCurrentWorldPos();
-			//Console::Log("[CPP] Physics WorldPos => x: %f, y: %f, z: %f\n", WorldPos.x, WorldPos.y, WorldPos.z);
-
-			WorldMatrix = m_PhysicsObject->GetCurrentPhysicsWorldMatrix(m_LocalTransform->GetScale());
-		}
-		else
-		{
-			WorldMatrix = ParentWorldMatrix * m_LocalTransform->GetModelMatrix();
-		}
-
-		return WorldMatrix;
 	}
 
 	void CNode::SetParentNode(const std::shared_ptr<CNode>& ParentNode)

@@ -50,7 +50,10 @@ namespace object
 		// ï®óù
 		void SetPhysicsObject(const std::shared_ptr<physics::IPhysicsObject>& PhysicsObject);
 		const std::shared_ptr<physics::IPhysicsObject>& GetPhysicsObject() const;
+		void CreatePhysicsObject(physics::IPhysicsEngine* pPhysicsEngine);
+		void ApplyPhysicsWorldMatrix();
 
+		//
 		void SetLocalTransform(const std::shared_ptr<math::CTransform>& LocalTransform);
 		const std::shared_ptr<math::CTransform>& GetLocalTransform() const;
 
@@ -58,7 +61,6 @@ namespace object
 
 		void SetWorldMatrix(const glm::mat4& WorldMatrix);
 		const glm::mat4& GetWorldMatrix() const;
-		glm::mat4 CalcWorldMatrix(const glm::mat4& ParentWorldMatrix);
 
 		void SetParentNode(const std::shared_ptr<CNode>& ParentNode);
 		const std::shared_ptr<CNode>& GetParentNode() const;

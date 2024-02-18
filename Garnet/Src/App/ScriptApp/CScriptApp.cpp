@@ -104,11 +104,7 @@ namespace app
 	{
 		if (!pLoadWorker->Update(pGraphicsAPI)) return false;
 
-		// ひとまず3DObjectよりも先に更新する. PMXの仕様をみてまた調整
-		if (m_ScriptScene->IsLoaded())
-		{
-			if (!m_PhysicsEngine->Update(m_DrawInfo->GetDeltaSecondsTime())) return false;
-		}
+		if (!m_PhysicsEngine->Update(m_DrawInfo->GetDeltaSecondsTime())) return false;
 
 #ifdef USE_INPUT_SYSTEM
 		if (!m_ScriptScene->Update(pGraphicsAPI, m_PhysicsEngine.get(), pLoadWorker, m_MainCamera, m_Projection, m_DrawInfo, InputState)) return false;
