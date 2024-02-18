@@ -104,7 +104,7 @@ namespace api
 
 	bool CVulkanTexture::Create(const std::vector<unsigned char>& pixelData, int pixelSize)
 	{
-		VkFormat ImageFormat = VK_FORMAT_R8G8B8A8_SRGB;
+		VkFormat ImageFormat = VK_FORMAT_R8G8B8A8_UNORM;
 		m_RenderPassFormat = api::ERenderPassFormat::COLOR_RENDERPASS;
 
 		// Texture Buffer
