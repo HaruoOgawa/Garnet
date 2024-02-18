@@ -1,5 +1,6 @@
 #ifdef USE_PHYSICS
 #include "CBulletPhysicsObject.h"
+#include "CBulletPhysicsEngine.h"
 #include "../../Math/CTransform.h"
 
 namespace physics
@@ -26,6 +27,11 @@ namespace physics
 			m_CollisionShape.reset();
 			m_CollisionShape = nullptr;
 		}
+	}
+
+	const std::shared_ptr<CBulletRigidBody>& CBulletPhysicsObject::GetRigidBody() const
+	{
+		return m_RigidBody;
 	}
 
 	bool CBulletPhysicsObject::Create(IPhysicsEngine* pPhysicsEngine, const glm::vec3& WorldPos, const glm::quat& WorldRotate, const glm::vec3& WorldScale)
@@ -73,6 +79,22 @@ namespace physics
 		}
 
 		return glm::quat(trans.getRotation().getW(), trans.getRotation().getX(), trans.getRotation().getY(), trans.getRotation().getZ());
+	}
+
+	void CBulletPhysicsObject::AddSpringConstraint(IPhysicsEngine* pPhysicsEngine, const std::shared_ptr<IPhysicsObject>& FixedObject)
+	{
+		CBulletPhysicsEngine* pBulletPhysics = static_cast<CBulletPhysicsEngine*>(pPhysicsEngine);
+
+		// ピボットを計算
+		// ひとまず２つのRigidBodyの中点とする
+		glm::vec3 pointA = GetCurrentWorldPos();
+		glm::vec3 pointB = FixedObject->GetCurrentWorldPos();
+
+		glm::vec3 ConnectPoint = (pointA + pointB) * 0.5f;
+
+		// Constraintsを追加する
+		const auto& TargetRigidBody = static_cast<CBulletPhysicsObject*>(FixedObject.get())->GetRigidBody();
+		m_RigidBody->AddSpringConstraint(pBulletPhysics->GetDynamicsWorld(), TargetRigidBody, ConnectPoint);
 	}
 }
 #endif

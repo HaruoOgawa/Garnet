@@ -63,6 +63,35 @@ namespace physics
 		return true;
 	}
 
+	void CBulletRigidBody::AddSpringConstraint(btDiscreteDynamicsWorld* pDynamicWorld, const std::shared_ptr<CBulletRigidBody>& FixedRigidbody, const glm::vec3& ConnectPoint)
+	{
+		btVector3 pivot(ConnectPoint.x, ConnectPoint.y, ConnectPoint.z);
+		
+		// Constraintsを追加
+		// btGeneric6DofSpring2Constraint(*d6body0,*fixedBody1,frameInA,frameInB);
+		// frameInAとframeInBはバネに例えるとバネの端点・剛体との接合点を表す. 二つの剛体にバネを挟むことをイメージするとわかりやすい. それは必ず２つの接合点があるはずである
+		// frameInA => d6body0の接合点
+		// frameInB => fixedBody1の接合点
+		btGeneric6DofSpring2Constraint* spring = new btGeneric6DofSpring2Constraint(
+			*m_Rigidbody.get(), 
+			*FixedRigidbody->GetbtRigidBody().get(),
+			btTransform(btQuaternion::getIdentity(), {0.0f, -1.0f, 0.0f}), 
+			btTransform(btQuaternion::getIdentity(), { 0.0f, 0.0f, 0.0f })
+		);
+
+		// 関数名の通り移動できる範囲・回転できる範囲
+		spring->setLinearLowerLimit(btVector3(0.0f, 0.0f, 0.0f));
+		spring->setLinearUpperLimit(btVector3(0.0f, 1.0f, 0.0f));
+		//spring->setAngularLowerLimit(btVector3(0.0f, 0.0f, 0.0f));
+		//spring->setAngularUpperLimit(btVector3(3.1415f * 2.0f, 3.1415f * 2.0f, 3.1415f * 2.0f));
+
+		spring->enableSpring(1, true);
+		spring->setStiffness(1, 35.0f); // Stiffness: 硬さ
+		spring->setDamping(1, 0.5f); // Damping: 減衰力
+
+		pDynamicWorld->addConstraint(spring, false);
+	}
+
 	btTransform CBulletRigidBody::GetCurrentWorldTransform()
 	{
 		btTransform trans;
@@ -80,6 +109,11 @@ namespace physics
 		}
 
 		return trans;
+	}
+
+	const std::shared_ptr<btRigidBody>& CBulletRigidBody::GetbtRigidBody() const
+	{
+		return m_Rigidbody;
 	}
 }
 #endif

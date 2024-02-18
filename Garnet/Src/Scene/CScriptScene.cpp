@@ -97,17 +97,20 @@ namespace scene
 
 			m_PhysicsSphere->AddMesh(Mesh);
 
+			// Physics
+			auto PhysicsSphere0 = pPhysicsEngine->CreatePhysicsSphere(1.0f, true, 0.0f);
+			auto PhysicsSphere1 = pPhysicsEngine->CreatePhysicsSphere(1.0f, false, 50.0f);
+			auto PhysicsSphere2 = pPhysicsEngine->CreatePhysicsSphere(1.0f, false, 100.0f);
+
 			// Node
 			{
 				std::shared_ptr<math::CTransform> LocalTransform = std::make_shared<math::CTransform>();
 				LocalTransform->SetPos(glm::vec3(0.0f, 1.5f, 0.0f));
-				LocalTransform->SetScale(glm::vec3(0.1f));
-
-				auto PhysicsSphere = pPhysicsEngine->CreatePhysicsSphere(1.0f, true, 0.0f);
+				LocalTransform->SetScale(glm::vec3(0.25f));
 
 				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(0, -1);
 				Node->SetLocalTransform(LocalTransform);
-				Node->SetPhysicsObject(PhysicsSphere);
+				Node->SetPhysicsObject(PhysicsSphere0);
 
 				m_PhysicsSphere->AddNode(Node);
 			}
@@ -115,13 +118,11 @@ namespace scene
 			{
 				std::shared_ptr<math::CTransform> LocalTransform = std::make_shared<math::CTransform>();
 				LocalTransform->SetPos(glm::vec3(1.0f, 1.5f, 0.0f));
-				LocalTransform->SetScale(glm::vec3(0.1f));
-
-				auto PhysicsSphere = pPhysicsEngine->CreatePhysicsSphere(1.0f, true, 0.0f);
+				LocalTransform->SetScale(glm::vec3(0.25f));
 
 				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(0, -1);
 				Node->SetLocalTransform(LocalTransform);
-				Node->SetPhysicsObject(PhysicsSphere);
+				Node->SetPhysicsObject(PhysicsSphere1);
 
 				m_PhysicsSphere->AddNode(Node);
 			}
@@ -129,19 +130,21 @@ namespace scene
 			{
 				std::shared_ptr<math::CTransform> LocalTransform = std::make_shared<math::CTransform>();
 				LocalTransform->SetPos(glm::vec3(2.0f, 1.5f, 0.0f));
-				LocalTransform->SetScale(glm::vec3(0.1f));
-
-				auto PhysicsSphere = pPhysicsEngine->CreatePhysicsSphere(1.0f, true, 0.0f);
+				LocalTransform->SetScale(glm::vec3(0.5f));
 
 				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(0, -1);
 				Node->SetLocalTransform(LocalTransform);
-				Node->SetPhysicsObject(PhysicsSphere);
+				Node->SetPhysicsObject(PhysicsSphere2);
 
 				m_PhysicsSphere->AddNode(Node);
 			}
 			
 			// Create
 			if (!m_PhysicsSphere->Create(pGraphicsAPI, pPhysicsEngine, m_DepthMF)) return false;
+
+			// Constraints‚ð’Ç‰Á‚·‚é
+			PhysicsSphere1->AddSpringConstraint(pPhysicsEngine, PhysicsSphere0);
+			PhysicsSphere2->AddSpringConstraint(pPhysicsEngine, PhysicsSphere1);
 		}
 
 		// m_PhysicsCubeList

@@ -1,6 +1,7 @@
 #pragma once
 
 #ifdef USE_PHYSICS
+#include <memory>
 #include <glm/glm.hpp>
 #include <glm/gtx/quaternion.hpp>
 
@@ -18,6 +19,8 @@ namespace physics
 		virtual glm::mat4 GetCurrentPhysicsWorldMatrix() = 0;
 		virtual glm::vec3 GetCurrentWorldPos() = 0;
 		virtual glm::quat GetCurrentWorldRotate() = 0;
+
+		virtual void AddSpringConstraint(IPhysicsEngine* pPhysicsEngine, const std::shared_ptr<IPhysicsObject>& FixedObject) = 0;
 	};
 }
 #endif

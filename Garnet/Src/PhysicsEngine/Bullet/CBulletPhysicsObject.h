@@ -24,6 +24,8 @@ namespace physics
 		CBulletPhysicsObject(bool IsStaticFlag, float Mass);
 		virtual ~CBulletPhysicsObject();
 
+		const std::shared_ptr<CBulletRigidBody>& GetRigidBody() const;
+
 		virtual bool Create(IPhysicsEngine* pPhysicsEngine, const glm::vec3& WorldPos, const glm::quat& WorldRotate, const glm::vec3& WorldScale) override;
 
 		virtual bool IsStatic() override;
@@ -31,6 +33,8 @@ namespace physics
 		virtual glm::mat4 GetCurrentPhysicsWorldMatrix() override;
 		virtual glm::vec3 GetCurrentWorldPos() override;
 		virtual glm::quat GetCurrentWorldRotate() override;
+
+		virtual void AddSpringConstraint(IPhysicsEngine* pPhysicsEngine, const std::shared_ptr<IPhysicsObject>& FixedObject) override;
 	};
 }
 #endif
