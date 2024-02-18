@@ -88,17 +88,9 @@ namespace object
 		// 物理演算の結果を反映する
 		if (m_PhysicsObject && !m_PhysicsObject->IsStatic())
 		{
-			// ひとまず物理オブジェクトが存在するときはそのワールド座標を優先する
-			// あとで様子を見て改選する
-			// 親ノードのワールド行列の逆行列を現在の物理ワールド座標にかけて、ローカルにするといいかも？
-			//auto WorldPos = m_PhysicsObject->GetCurrentWorldPos();
-			//Console::Log("[CPP] Physics WorldPos => x: %f, y: %f, z: %f\n", WorldPos.x, WorldPos.y, WorldPos.z);
-
-			// → よくよく考えると物理オブジェクトに親子関係を持たせるのはConstraints(Joint)を形成するとき(PMXの髪とか服)で、一度物理エンジンにオブジェクトを登録すると
-			// Constraints(Joint)の効果で子要素は親要素に自動で引っ張られるようになるはずなので上記で述べているような逆行列は必要なく、既に実装されているワールド物理座標をそのまま反映する形式で問題ないと思う
-
-			// → たぶんSpringBoneによる伸び縮みもこのConstraints(Joint)で表現されそう
-
+			// 物理オブジェクトのワールド座標を渡す
+			// 物理オブジェクトに親子関係を持たせるのはConstraints(Joint)を形成するとき(PMXの髪とか服)で、一度物理エンジンにオブジェクトを登録するとConstraints(Joint)の効果で子要素は親要素に自動で引っ張られるようになる
+			// なので一度ワールド行列を計算したうえで物理オブジェクトを生成した後は、位置計算を全て物理エンジンに任せる
 			m_WorldMatrix = m_PhysicsObject->GetCurrentPhysicsWorldMatrix();
 		}
 	}

@@ -7,7 +7,7 @@
 
 namespace physics
 {
-	class CBulletPhysics : public IPhysicsEngine
+	class CBulletPhysicsEngine : public IPhysicsEngine
 	{
 		std::unique_ptr<btDefaultCollisionConfiguration> m_CollisionConfigration;
 		std::unique_ptr<btCollisionDispatcher> m_Dispathcer;
@@ -17,8 +17,8 @@ namespace physics
 	private:
 		bool HelloWorldTestCode();
 	public:
-		CBulletPhysics();
-		virtual ~CBulletPhysics();
+		CBulletPhysicsEngine();
+		virtual ~CBulletPhysicsEngine();
 
 		virtual bool Initialize() override;
 

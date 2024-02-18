@@ -81,20 +81,67 @@ namespace scene
 
 		// m_PhysicsSphere
 		{
-			auto Material = m_PBRMF->CreateMaterial(pGraphicsAPI, 1, graphics::ECullMode::CULL_BACK);
+			// Material
+			auto Material = m_PBRMF->CreateMaterial(pGraphicsAPI, 3, graphics::ECullMode::CULL_BACK);
 
 			m_PhysicsSphere->GetTextureSet()->AddCubeMap(m_Cube_Texture);
 			Material->ReplacePreloadUniformValue("useCubeMap", &glm::ivec1(1)[0], sizeof(glm::ivec1), 0);
 			Material->ReplaceTextureIndex("cubemapTexture", 0);
 			Material->ReplacePreloadUniformValue("roughnessFactor", &glm::vec1(1.0f)[0], sizeof(float), 0);
 
-			std::shared_ptr<math::CTransform> LocalTransform = std::make_shared<math::CTransform>();
-			LocalTransform->SetPos(glm::vec3(0.0f, 10.5f, 0.0f));
-			LocalTransform->SetScale(glm::vec3(0.5f));
+			m_PhysicsSphere->AddMaterial(Material);
 
-			auto PhysicsSphere = pPhysicsEngine->CreatePhysicsSphere(1.0f, false, 10.0f);
+			// Mesh
+			std::shared_ptr<graphics::CMesh> Mesh = std::make_shared<graphics::CMesh>();
+			Mesh->CreateSimpleMesh(graphics::CPresetPrimitive::CreateSphere(), 0);
 
-			if (!m_PhysicsSphere->CreateSimply(pGraphicsAPI, pPhysicsEngine, graphics::CPresetPrimitive::CreateSphere(), Material, m_DepthMF, LocalTransform, PhysicsSphere)) return false;
+			m_PhysicsSphere->AddMesh(Mesh);
+
+			// Node
+			{
+				std::shared_ptr<math::CTransform> LocalTransform = std::make_shared<math::CTransform>();
+				LocalTransform->SetPos(glm::vec3(0.0f, 1.5f, 0.0f));
+				LocalTransform->SetScale(glm::vec3(0.1f));
+
+				auto PhysicsSphere = pPhysicsEngine->CreatePhysicsSphere(1.0f, true, 0.0f);
+
+				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(0, -1);
+				Node->SetLocalTransform(LocalTransform);
+				Node->SetPhysicsObject(PhysicsSphere);
+
+				m_PhysicsSphere->AddNode(Node);
+			}
+
+			{
+				std::shared_ptr<math::CTransform> LocalTransform = std::make_shared<math::CTransform>();
+				LocalTransform->SetPos(glm::vec3(1.0f, 1.5f, 0.0f));
+				LocalTransform->SetScale(glm::vec3(0.1f));
+
+				auto PhysicsSphere = pPhysicsEngine->CreatePhysicsSphere(1.0f, true, 0.0f);
+
+				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(0, -1);
+				Node->SetLocalTransform(LocalTransform);
+				Node->SetPhysicsObject(PhysicsSphere);
+
+				m_PhysicsSphere->AddNode(Node);
+			}
+
+			{
+				std::shared_ptr<math::CTransform> LocalTransform = std::make_shared<math::CTransform>();
+				LocalTransform->SetPos(glm::vec3(2.0f, 1.5f, 0.0f));
+				LocalTransform->SetScale(glm::vec3(0.1f));
+
+				auto PhysicsSphere = pPhysicsEngine->CreatePhysicsSphere(1.0f, true, 0.0f);
+
+				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(0, -1);
+				Node->SetLocalTransform(LocalTransform);
+				Node->SetPhysicsObject(PhysicsSphere);
+
+				m_PhysicsSphere->AddNode(Node);
+			}
+			
+			// Create
+			if (!m_PhysicsSphere->Create(pGraphicsAPI, pPhysicsEngine, m_DepthMF)) return false;
 		}
 
 		// m_PhysicsCubeList

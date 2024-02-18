@@ -11,7 +11,7 @@
 #include "../../Camera/CViewerCamera.h"
 #endif // USE_VIEWER_CAMERA
 
-#include "../../PhysicsEngine/Bullet/CBulletPhysics.h"
+#include "../../PhysicsEngine/Bullet/CBulletPhysicsEngine.h"
 
 // CScriptApp は旧エンジンでもやっていたof風にCppでエンジンコードを直接シーンを構築していくアプリ
 
@@ -33,7 +33,7 @@ namespace app
 		m_Projection(std::make_shared<projection::CProjection>()),
 		m_DrawInfo(std::make_shared<graphics::CDrawInfo>()),
 		m_BlurEffect(nullptr),
-		m_PhysicsEngine(std::make_shared<physics::CBulletPhysics>())
+		m_PhysicsEngine(std::make_shared<physics::CBulletPhysicsEngine>())
 	{
 		m_MainCamera->SetPos(glm::vec3(0.0f, 1.0f, -7.0f));
 		//m_MainCamera->SetCenter(glm::vec3(0.0f, 50.0f, 349.0f));

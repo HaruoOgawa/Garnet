@@ -2520,7 +2520,7 @@
     <ClInclude Include="Src\Interface\IPhysicsEngine.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Src\PhysicsEngine\Bullet\CBulletPhysics.h">
+    <ClInclude Include="Src\PhysicsEngine\Bullet\CBulletPhysicsEngine.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Src\PhysicsEngine\Bullet\CBulletBox.h">
@@ -2542,6 +2542,9 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Src\Interface\IPhysicsObject.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\PhysicsEngine\Bullet\CBulletPhysicsObject.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
@@ -3470,7 +3473,7 @@
     <ClCompile Include="Src\Library\bullet3\src\btLinearMathAll.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Src\PhysicsEngine\Bullet\CBulletPhysics.cpp">
+    <ClCompile Include="Src\PhysicsEngine\Bullet\CBulletPhysicsEngine.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Src\PhysicsEngine\Bullet\CBulletBox.cpp">
@@ -3489,6 +3492,9 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Src\PhysicsEngine\Bullet\CBulletJoint.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\PhysicsEngine\Bullet\CBulletPhysicsObject.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>

@@ -1,12 +1,12 @@
 #ifdef USE_PHYSICS
-#include "CBulletPhysics.h"
+#include "CBulletPhysicsEngine.h"
 #include "../../Debug/Message/Console.h"
 #include "CBulletBox.h"
 #include "CBulletSphere.h"
 
 namespace physics
 {
-	CBulletPhysics::CBulletPhysics():
+	CBulletPhysicsEngine::CBulletPhysicsEngine():
 		m_CollisionConfigration(nullptr),
 		m_Dispathcer(nullptr),
 		m_OverlappingPairCache(nullptr),
@@ -15,7 +15,7 @@ namespace physics
 	{
 	}
 
-	CBulletPhysics::~CBulletPhysics()
+	CBulletPhysicsEngine::~CBulletPhysicsEngine()
 	{
 		if (m_DynamicsWorld)
 		{
@@ -48,7 +48,7 @@ namespace physics
 		}
 	}
 
-	bool CBulletPhysics::Initialize()
+	bool CBulletPhysicsEngine::Initialize()
 	{
 		//if (!HelloWorldTestCode()) return false;
 
@@ -73,20 +73,20 @@ namespace physics
 		return true;
 	}
 
-	std::shared_ptr<IPhysicsObject> CBulletPhysics::CreatePhysicsBox(const glm::vec3& BoxHalfSize, bool IsStatic, float Mass)
+	std::shared_ptr<IPhysicsObject> CBulletPhysicsEngine::CreatePhysicsBox(const glm::vec3& BoxHalfSize, bool IsStatic, float Mass)
 	{
 		std::shared_ptr<CBulletBox> Box = std::make_shared<CBulletBox>(BoxHalfSize, IsStatic, Mass);
 
 		return Box;
 	}
-	std::shared_ptr<IPhysicsObject> CBulletPhysics::CreatePhysicsSphere(float Radius, bool IsStatic, float Mass)
+	std::shared_ptr<IPhysicsObject> CBulletPhysicsEngine::CreatePhysicsSphere(float Radius, bool IsStatic, float Mass)
 	{
 		std::shared_ptr<CBulletSphere> Sphere = std::make_shared<CBulletSphere>(Radius, IsStatic, Mass);
 
 		return Sphere;
 	}
 
-	bool CBulletPhysics::Update(float DeltaTime)
+	bool CBulletPhysicsEngine::Update(float DeltaTime)
 	{
 		if (m_DynamicsWorld)
 		{
@@ -96,12 +96,12 @@ namespace physics
 		return true;
 	}
 
-	btDiscreteDynamicsWorld* CBulletPhysics::GetDynamicsWorld()
+	btDiscreteDynamicsWorld* CBulletPhysicsEngine::GetDynamicsWorld()
 	{
 		return m_DynamicsWorld.get();
 	}
 
-	bool CBulletPhysics::HelloWorldTestCode()
+	bool CBulletPhysicsEngine::HelloWorldTestCode()
 	{
 		Console::Log("[CPP] Bullet Init Start\n");
 
