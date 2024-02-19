@@ -37,6 +37,14 @@ namespace mmd
 		
 		bool AnalyseBone(binary::CBinaryAnalyser& Analyser, const SPmxMetaData& MetaData);
 
+		bool AnalyseMorph(binary::CBinaryAnalyser& Analyser, const SPmxMetaData& MetaData);
+
+		bool AnalyseDisplayFrame(binary::CBinaryAnalyser& Analyser, const SPmxMetaData& MetaData);
+
+		bool AnalyseRigidbody(binary::CBinaryAnalyser& Analyser, const SPmxMetaData& MetaData);
+
+		bool AnalyseJoint(binary::CBinaryAnalyser& Analyser, const SPmxMetaData& MetaData);
+
 		// Helper Functions ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		static bool GetMultiTypeValue(binary::CBinaryAnalyser& Analyser, int ByteSize, std::vector<unsigned int>& UIntValueList, std::vector<unsigned char>& ByteValueList, std::vector<unsigned short>& UShortValueList);
 		static bool AddEmptyMultiTypeValue(int ByteSize, std::vector<unsigned int>& UIntValueList, std::vector<unsigned char>& ByteValueList, std::vector<unsigned short>& UShortValueList);

@@ -97,6 +97,38 @@ namespace mmd
 
 			return false;
 		}
+		
+		// Morph
+		if (!AnalyseMorph(Analyser, m_MetaData))
+		{
+			Console::Log("[Error] Pmx AnalyseMorph Error\n");
+
+			return false;
+		}
+
+		// DisplayFrame
+		if (!AnalyseDisplayFrame(Analyser, m_MetaData))
+		{
+			Console::Log("[Error] Pmx AnalyseDisplayFrame Error\n");
+
+			return false;
+		}
+
+		// Rigidbody
+		if (!AnalyseRigidbody(Analyser, m_MetaData))
+		{
+			Console::Log("[Error] Pmx AnalyseRigidbody Error\n");
+
+			return false;
+		}
+
+		// Joint
+		if (!AnalyseJoint(Analyser, m_MetaData))
+		{
+			Console::Log("[Error] Pmx AnalyseJoint Error\n");
+
+			return false;
+		}
 
 		return true;
 	}
@@ -846,6 +878,337 @@ namespace mmd
 			m_PmxBoneList.push_back(PmxBone);
 		}
 
+		return true;
+	}
+
+	bool CPmxModel::AnalyseMorph(binary::CBinaryAnalyser& Analyser, const SPmxMetaData& MetaData)
+	{
+		int NumOfMorph = 0;
+		if (!Analyser.GetInt(NumOfMorph)) return false;
+
+		for (int i = 0; i < NumOfMorph; i++)
+		{
+			// モーフ名
+			std::pair<std::string, std::wstring> MorphName = std::make_pair(std::string(""), std::wstring(L""));
+			{
+				int ByteLength = 0;
+				if (!Analyser.GetInt(ByteLength)) return false;
+
+				if (MetaData.EncodeType == EPmxEncodeType::UTF8)
+				{
+					if (!Analyser.GetString(MorphName.first, ByteLength)) return false;
+				}
+				else if (MetaData.EncodeType == EPmxEncodeType::UTF16)
+				{
+					if (!Analyser.GetUTF16String(MorphName.second, ByteLength)) return false;
+				}
+			}
+
+			// モーフ名英
+			std::pair<std::string, std::wstring> MorphName_EN = std::make_pair(std::string(""), std::wstring(L""));
+			{
+				int ByteLength = 0;
+				if (!Analyser.GetInt(ByteLength)) return false;
+
+				if (MetaData.EncodeType == EPmxEncodeType::UTF8)
+				{
+					if (!Analyser.GetString(MorphName_EN.first, ByteLength)) return false;
+				}
+				else if (MetaData.EncodeType == EPmxEncodeType::UTF16)
+				{
+					if (!Analyser.GetUTF16String(MorphName_EN.second, ByteLength)) return false;
+				}
+			}
+
+			// 操作パネル (PMD:カテゴリ) 1:眉(左下) 2:目(左上) 3:口(右上) 4:その他(右下)  | 0:システム予約
+			unsigned char OperatePanel = 0;
+			if (!Analyser.GetByte(OperatePanel)) return false;
+
+			// モーフ種類 - 0:グループ, 1:頂点, 2:ボーン, 3:UV, 4:追加UV1, 5:追加UV2, 6:追加UV3, 7:追加UV4, 8:材質
+			unsigned char MorphType = 0;
+			if (!Analyser.GetByte(MorphType)) return false;
+
+			// モーフのオフセット数 : 後続の要素数
+			int NumofMorphOffset = 0;
+			if (!Analyser.GetInt(NumofMorphOffset)) return false;
+
+			// モーフ種類に従ってオフセットデータを格納 ※異なる種類の混合は不可
+			if (MorphType == 0)
+			{
+				// グループ
+				for (int m = 0; m < NumofMorphOffset; m++)
+				{
+					// モーフIndex
+					int MorphIndex = GetMultiTypeValueAsInterger(Analyser, MetaData.MorphIndexSize);
+
+					// モーフ率 : グループモーフのモーフ値 * モーフ率 = 対象モーフのモーフ値
+					float MorphRate = 0.0f;
+					if (!Analyser.GetFloat(MorphRate)) return false;
+				}
+			}
+			else if (MorphType == 1)
+			{
+				// 頂点
+				for (int m = 0; m < NumofMorphOffset; m++)
+				{
+					// 頂点Index
+					int VertexIndex = GetMultiTypeValueAsInterger(Analyser, MetaData.VertexIndexSize);
+
+					// 座標オフセット量(x,y,z)
+					if (!Analyser.IsValid(4 * 3)) return false;
+
+					glm::vec3 Offset = glm::vec3(0.0f);
+
+					Offset.x = Analyser.GetFloat();
+					Offset.y = Analyser.GetFloat();
+					Offset.z = Analyser.GetFloat();
+				}
+			}
+			else if (MorphType == 2)
+			{
+				// ボーン
+				for (int m = 0; m < NumofMorphOffset; m++)
+				{
+					// ボーンIndex
+					int BoneIndex = GetMultiTypeValueAsInterger(Analyser, MetaData.BoneIndexSize);
+
+					// 移動量
+					if (!Analyser.IsValid(4 * 3)) return false;
+
+					glm::vec3 Translate = glm::vec3(0.0f);
+
+					Translate.x = Analyser.GetFloat();
+					Translate.y = Analyser.GetFloat();
+					Translate.z = Analyser.GetFloat();
+
+					// 回転量(クォータニオン)
+					if (!Analyser.IsValid(4 * 4)) return false;
+
+					glm::quat Rotate = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
+
+					Rotate.x = Analyser.GetFloat();
+					Rotate.y = Analyser.GetFloat();
+					Rotate.z = Analyser.GetFloat();
+					Rotate.w = Analyser.GetFloat();
+				}
+			}
+			else if (MorphType == 3)
+			{
+				// UV
+				for (int m = 0; m < NumofMorphOffset; m++)
+				{
+					// 頂点Index
+					int VertexIndex = GetMultiTypeValueAsInterger(Analyser, MetaData.VertexIndexSize);
+
+					// UVオフセット量(x,y,z,w) ※通常UVはz,wが不要項目になるがモーフとしてのデータ値は記録しておく
+					if (!Analyser.IsValid(4 * 4)) return false;
+
+					glm::vec4 UV = glm::vec4(0.0f);
+
+					UV.x = Analyser.GetFloat();
+					UV.y = Analyser.GetFloat();
+					UV.z = Analyser.GetFloat();
+					UV.w = Analyser.GetFloat();
+				}
+			}
+			else if (MorphType == 4)
+			{
+				// 追加UV1
+				for (int m = 0; m < NumofMorphOffset; m++)
+				{
+					// 頂点Index
+					int VertexIndex = GetMultiTypeValueAsInterger(Analyser, MetaData.VertexIndexSize);
+
+					// UVオフセット量(x,y,z,w) ※通常UVはz,wが不要項目になるがモーフとしてのデータ値は記録しておく
+					if (!Analyser.IsValid(4 * 4)) return false;
+
+					glm::vec4 UV = glm::vec4(0.0f);
+
+					UV.x = Analyser.GetFloat();
+					UV.y = Analyser.GetFloat();
+					UV.z = Analyser.GetFloat();
+					UV.w = Analyser.GetFloat();
+				}
+			}
+			else if (MorphType == 5)
+			{
+				// 追加UV2
+				for (int m = 0; m < NumofMorphOffset; m++)
+				{
+					// 頂点Index
+					int VertexIndex = GetMultiTypeValueAsInterger(Analyser, MetaData.VertexIndexSize);
+
+					// UVオフセット量(x,y,z,w) ※通常UVはz,wが不要項目になるがモーフとしてのデータ値は記録しておく
+					if (!Analyser.IsValid(4 * 4)) return false;
+
+					glm::vec4 UV = glm::vec4(0.0f);
+
+					UV.x = Analyser.GetFloat();
+					UV.y = Analyser.GetFloat();
+					UV.z = Analyser.GetFloat();
+					UV.w = Analyser.GetFloat();
+				}
+			}
+			else if (MorphType == 6)
+			{
+				// 追加UV3
+				for (int m = 0; m < NumofMorphOffset; m++)
+				{
+					// 頂点Index
+					int VertexIndex = GetMultiTypeValueAsInterger(Analyser, MetaData.VertexIndexSize);
+
+					// UVオフセット量(x,y,z,w) ※通常UVはz,wが不要項目になるがモーフとしてのデータ値は記録しておく
+					if (!Analyser.IsValid(4 * 4)) return false;
+
+					glm::vec4 UV = glm::vec4(0.0f);
+
+					UV.x = Analyser.GetFloat();
+					UV.y = Analyser.GetFloat();
+					UV.z = Analyser.GetFloat();
+					UV.w = Analyser.GetFloat();
+				}
+			}
+			else if (MorphType == 7)
+			{
+				// 追加UV4
+				for (int m = 0; m < NumofMorphOffset; m++)
+				{
+					// 頂点Index
+					int VertexIndex = GetMultiTypeValueAsInterger(Analyser, MetaData.VertexIndexSize);
+
+					// UVオフセット量(x,y,z,w) ※通常UVはz,wが不要項目になるがモーフとしてのデータ値は記録しておく
+					if (!Analyser.IsValid(4 * 4)) return false;
+
+					glm::vec4 UV = glm::vec4(0.0f);
+
+					UV.x = Analyser.GetFloat();
+					UV.y = Analyser.GetFloat();
+					UV.z = Analyser.GetFloat();
+					UV.w = Analyser.GetFloat();
+				}
+			}
+			else if (MorphType == 8)
+			{
+				// 材質
+				for (int m = 0; m < NumofMorphOffset; m++)
+				{
+					// 材質Index
+					int MaterialIndex = GetMultiTypeValueAsInterger(Analyser, MetaData.MaterialIndexSize);
+
+					// オフセット演算形式 | 0:乗算, 1:加算
+					unsigned char OffsetCalcFormat = 0;
+					if (!Analyser.GetByte(OffsetCalcFormat)) return false;
+
+					// Diffuse
+					glm::vec4 Diffuse = glm::vec4(1.0f);
+					{
+						if (!Analyser.IsValid(4 * 4)) return false;
+
+						float R = Analyser.GetFloat();
+						float G = Analyser.GetFloat();
+						float B = Analyser.GetFloat();
+						float A = Analyser.GetFloat();
+
+						Diffuse = glm::vec4(R, G, B, A);
+					}
+
+					// Specular
+					glm::vec4 Specular = glm::vec4(0.0f);
+					{
+						if (!Analyser.IsValid(4 * 3)) return false;
+
+						float R = Analyser.GetFloat();
+						float G = Analyser.GetFloat();
+						float B = Analyser.GetFloat();
+
+						Specular = glm::vec4(R, G, B, 1.0f);
+					}
+
+					// Specular係数
+					float SpecularCoef = 1.0f;
+					if (!Analyser.GetFloat(SpecularCoef)) return false;
+
+					// Ambient
+					glm::vec4 Ambient = glm::vec4(0.0f);
+					{
+						if (!Analyser.IsValid(4 * 3)) return false;
+
+						float R = Analyser.GetFloat();
+						float G = Analyser.GetFloat();
+						float B = Analyser.GetFloat();
+
+						Ambient = glm::vec4(R, G, B, 1.0f);
+					}
+
+					// エッジカラー
+					glm::vec4 EdgeColor = glm::vec4(0.0f);
+					{
+						if (!Analyser.IsValid(4 * 4)) return false;
+
+						float R = Analyser.GetFloat();
+						float G = Analyser.GetFloat();
+						float B = Analyser.GetFloat();
+						float A = Analyser.GetFloat();
+
+						EdgeColor = glm::vec4(R, G, B, A);
+					}
+
+					// エッジサイズ
+					float EdgeSize = 1.0f;
+					if (!Analyser.GetFloat(EdgeSize)) return false;
+
+					// テクスチャ係数
+					glm::vec4 TextureFactor = glm::vec4(0.0f);
+					
+					if (!Analyser.IsValid(4 * 4)) return false;
+
+					TextureFactor.x = Analyser.GetFloat();
+					TextureFactor.x = Analyser.GetFloat();
+					TextureFactor.x = Analyser.GetFloat();
+					TextureFactor.x = Analyser.GetFloat();
+
+					// スフィアテクスチャ係数
+					glm::vec4 SphereTextureFactor = glm::vec4(0.0f);
+
+					if (!Analyser.IsValid(4 * 4)) return false;
+
+					SphereTextureFactor.x = Analyser.GetFloat();
+					SphereTextureFactor.x = Analyser.GetFloat();
+					SphereTextureFactor.x = Analyser.GetFloat();
+					SphereTextureFactor.x = Analyser.GetFloat();
+
+					// Toonテクスチャ係数
+					glm::vec4 ToonTextureFactor = glm::vec4(0.0f);
+
+					if (!Analyser.IsValid(4 * 4)) return false;
+
+					ToonTextureFactor.x = Analyser.GetFloat();
+					ToonTextureFactor.x = Analyser.GetFloat();
+					ToonTextureFactor.x = Analyser.GetFloat();
+					ToonTextureFactor.x = Analyser.GetFloat();
+				}
+			}
+			else
+			{
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	bool CPmxModel::AnalyseDisplayFrame(binary::CBinaryAnalyser& Analyser, const SPmxMetaData& MetaData)
+	{
+		return true;
+	}
+
+	bool CPmxModel::AnalyseRigidbody(binary::CBinaryAnalyser& Analyser, const SPmxMetaData& MetaData)
+	{
+		return true;
+	}
+
+	bool CPmxModel::AnalyseJoint(binary::CBinaryAnalyser& Analyser, const SPmxMetaData& MetaData)
+	{
 		return true;
 	}
 
