@@ -86,7 +86,7 @@ namespace object
 	void CNode::ApplyPhysicsWorldMatrix()
 	{
 		// 物理演算の結果を反映する
-		if (m_PhysicsObject && !m_PhysicsObject->IsStatic())
+		if (m_PhysicsObject)
 		{
 			// 物理オブジェクトのワールド座標を渡す
 			// 物理オブジェクトに親子関係を持たせるのはConstraints(Joint)を形成するとき(PMXの髪とか服)で、一度物理エンジンにオブジェクトを登録するとConstraints(Joint)の効果で子要素は親要素に自動で引っ張られるようになる
@@ -113,6 +113,18 @@ namespace object
 	void CNode::SetWorldMatrix(const glm::mat4& WorldMatrix)
 	{
 		m_WorldMatrix = WorldMatrix;
+
+		// Staticな物理オブジェクトを持っている時はそれにも位置変更を反映する
+		/*if (m_PhysicsObject && m_PhysicsObject->IsStatic())
+		{
+			glm::vec3 WorldPos = glm::vec3(0.0f);
+			glm::quat WorldRotate = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
+			glm::vec3 WorldScale = glm::vec3(1.0f);
+
+			math::CTransform::CastModelMatrixToTransform(m_WorldMatrix, WorldPos, WorldRotate, WorldScale);
+
+			m_PhysicsObject->SetPhysicsWorldTransform(WorldPos, WorldRotate, WorldScale);
+		}*/
 	}
 
 	const glm::mat4& CNode::GetWorldMatrix() const

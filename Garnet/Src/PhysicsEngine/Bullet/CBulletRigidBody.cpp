@@ -3,12 +3,12 @@
 
 namespace physics
 {
-	CBulletRigidBody::CBulletRigidBody(btDiscreteDynamicsWorld* pDynamicWorld, btCollisionShape* pCollisionShape, const glm::vec3& WorldPos, const glm::quat& WorldRotate, bool IsStatic, float Mass):
+	CBulletRigidBody::CBulletRigidBody(btDiscreteDynamicsWorld* pDynamicWorld, btCollisionShape* pCollisionShape, const glm::vec3& WorldPos, const glm::quat& WorldRotate, float Mass):
 		m_pDynamicWorld(pDynamicWorld),
 		m_MotionState(nullptr),
 		m_Rigidbody(nullptr)
 	{
-		Create(pDynamicWorld, pCollisionShape, WorldPos, WorldRotate, IsStatic, Mass);
+		Create(pDynamicWorld, pCollisionShape, WorldPos, WorldRotate, Mass);
 	}
 
 	CBulletRigidBody::~CBulletRigidBody()
@@ -28,7 +28,7 @@ namespace physics
 		}
 	}
 
-	bool CBulletRigidBody::Create(btDiscreteDynamicsWorld* pDynamicWorld, btCollisionShape* pCollisionShape, const glm::vec3& WorldPos, const glm::quat& WorldRotate, bool IsStatic, float Mass)
+	bool CBulletRigidBody::Create(btDiscreteDynamicsWorld* pDynamicWorld, btCollisionShape* pCollisionShape, const glm::vec3& WorldPos, const glm::quat& WorldRotate, float Mass)
 	{
 		// Transform
 		btTransform transform;
@@ -40,7 +40,7 @@ namespace physics
 		btScalar bodyMass(Mass);
 
 		// Bullet‚ÍŽ¿—Ê‚ª0‚Ì‚à‚Ì‚ÍStatic(ŒÅ’è‚³‚ê‚Ä‚¢‚é)A‚»‚¤‚Å‚È‚¢‚à‚Ì‚ÍDynamic(•¨—‰‰ŽZ‚Å“®‚­)‚Æ‚µ‚Äˆµ‚í‚ê‚é
-		bool IsDynamic = (!IsStatic && bodyMass != 0.0f);
+		bool IsDynamic = (bodyMass != 0.0f);
 
 		// Inertia‚ÍŠµ«‚ÌˆÓ–¡
 		btVector3 localInertia(0, 0, 0);
@@ -109,6 +109,21 @@ namespace physics
 		}
 
 		return trans;
+	}
+
+	void CBulletRigidBody::SetWorldTransform(const btTransform& trans)
+	{
+		if (m_Rigidbody)
+		{
+			if (m_MotionState)
+			{
+				m_MotionState->setWorldTransform(trans);
+			}
+			else
+			{
+				m_Rigidbody->setWorldTransform(trans);
+			}
+		}
 	}
 
 	const std::shared_ptr<btRigidBody>& CBulletRigidBody::GetbtRigidBody() const

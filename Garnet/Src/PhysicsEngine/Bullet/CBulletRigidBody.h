@@ -15,14 +15,15 @@ namespace physics
 		std::shared_ptr<btDefaultMotionState> m_MotionState;
 		std::shared_ptr<btRigidBody> m_Rigidbody;
 	private:
-		bool Create(btDiscreteDynamicsWorld* pDynamicWorld, btCollisionShape* pCollisionShape, const glm::vec3& WorldPos, const glm::quat& WorldRotate, bool IsStatic, float Mass);
+		bool Create(btDiscreteDynamicsWorld* pDynamicWorld, btCollisionShape* pCollisionShape, const glm::vec3& WorldPos, const glm::quat& WorldRotate, float Mass);
 	public:
-		CBulletRigidBody(btDiscreteDynamicsWorld* pDynamicWorld, btCollisionShape* pCollisionShape, const glm::vec3& WorldPos, const glm::quat& WorldRotate, bool IsStatic, float Mass);
+		CBulletRigidBody(btDiscreteDynamicsWorld* pDynamicWorld, btCollisionShape* pCollisionShape, const glm::vec3& WorldPos, const glm::quat& WorldRotate, float Mass);
 		virtual ~CBulletRigidBody();
 
 		void AddSpringConstraint(btDiscreteDynamicsWorld* pDynamicWorld, const std::shared_ptr<CBulletRigidBody>& FixedRigidbody, const glm::vec3& ConnectPoint);
 
 		btTransform GetCurrentWorldTransform();
+		void SetWorldTransform(const btTransform& trans);
 
 		const std::shared_ptr<btRigidBody>& GetbtRigidBody() const;
 	};

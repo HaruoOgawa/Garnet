@@ -34,6 +34,8 @@ namespace physics
 		virtual glm::vec3 GetCurrentWorldPos() override;
 		virtual glm::quat GetCurrentWorldRotate() override;
 
+		virtual void SetPhysicsWorldTransform(const glm::vec3& WorldPos, const glm::quat& WorldRotate, const glm::vec3& WorldScale) override;
+
 		virtual void AddSpringConstraint(IPhysicsEngine* pPhysicsEngine, const std::shared_ptr<IPhysicsObject>& FixedObject) override;
 	};
 }

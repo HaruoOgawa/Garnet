@@ -81,6 +81,19 @@ namespace physics
 		return glm::quat(trans.getRotation().getW(), trans.getRotation().getX(), trans.getRotation().getY(), trans.getRotation().getZ());
 	}
 
+	void CBulletPhysicsObject::SetPhysicsWorldTransform(const glm::vec3& WorldPos, const glm::quat& WorldRotate, const glm::vec3& WorldScale)
+	{
+		btTransform trans;
+		trans.setIdentity();
+		trans.setOrigin(btVector3(WorldPos.x, WorldPos.y, WorldPos.z));
+		trans.setRotation(btQuaternion(WorldRotate.x, WorldRotate.y, WorldRotate.z, WorldRotate.w));
+
+		if (m_RigidBody)
+		{
+			m_RigidBody->SetWorldTransform(trans);
+		}
+	}
+
 	void CBulletPhysicsObject::AddSpringConstraint(IPhysicsEngine* pPhysicsEngine, const std::shared_ptr<IPhysicsObject>& FixedObject)
 	{
 		CBulletPhysicsEngine* pBulletPhysics = static_cast<CBulletPhysicsEngine*>(pPhysicsEngine);
