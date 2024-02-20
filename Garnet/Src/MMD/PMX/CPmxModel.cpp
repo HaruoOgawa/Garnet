@@ -1271,6 +1271,96 @@ namespace mmd
 
 	bool CPmxModel::AnalyseRigidbody(binary::CBinaryAnalyser& Analyser, const SPmxMetaData& MetaData)
 	{
+		// 剛体数
+		int NumOfRigidbody = 0;
+		if (!Analyser.GetInt(NumOfRigidbody)) return false;
+
+		for (int i = 0; i < NumOfRigidbody; i++)
+		{
+			// 剛体名
+			std::pair<std::string, std::wstring> RigidbodyName = std::make_pair(std::string(""), std::wstring(L""));
+			{
+				int ByteLength = 0;
+				if (!Analyser.GetInt(ByteLength)) return false;
+
+				if (MetaData.EncodeType == EPmxEncodeType::UTF8)
+				{
+					if (!Analyser.GetString(RigidbodyName.first, ByteLength)) return false;
+				}
+				else if (MetaData.EncodeType == EPmxEncodeType::UTF16)
+				{
+					if (!Analyser.GetUTF16String(RigidbodyName.second, ByteLength)) return false;
+				}
+			}
+
+			// 剛体名EN
+			std::pair<std::string, std::wstring> RigidbodyNameEN = std::make_pair(std::string(""), std::wstring(L""));
+			{
+				int ByteLength = 0;
+				if (!Analyser.GetInt(ByteLength)) return false;
+
+				if (MetaData.EncodeType == EPmxEncodeType::UTF8)
+				{
+					if (!Analyser.GetString(RigidbodyNameEN.first, ByteLength)) return false;
+				}
+				else if (MetaData.EncodeType == EPmxEncodeType::UTF16)
+				{
+					if (!Analyser.GetUTF16String(RigidbodyNameEN.second, ByteLength)) return false;
+				}
+			}
+
+			// 関連ボーンIndex - 関連なしの場合は-1
+			int RelationBoneIndex = GetMultiTypeValueAsInterger(Analyser, MetaData.BoneIndexSize);
+
+			// グループ
+			unsigned char group = 0;
+			if (!Analyser.GetByte(group)) return false;
+
+			// 非衝突グループフラグ
+			unsigned short NoneCollideGroupFlag = 0;
+			if (!Analyser.GetUShort(NoneCollideGroupFlag)) return false;
+
+			// 形状 - 0:球 1:箱 2:カプセル
+			unsigned char Shape = 0;
+			if (!Analyser.GetByte(Shape)) return false;
+
+			// サイズ(x,y,z)
+			if (!Analyser.IsValid(4 * 3)) return false;
+			glm::vec3 Size = glm::vec3(Analyser.GetFloat(), Analyser.GetFloat(), Analyser.GetFloat());
+
+			// 位置(x,y,z)
+			if (!Analyser.IsValid(4 * 3)) return false;
+			glm::vec3 Pos = glm::vec3(Analyser.GetFloat(), Analyser.GetFloat(), Analyser.GetFloat());
+
+			// 回転(x,y,z) -> ラジアン角
+			if (!Analyser.IsValid(4 * 3)) return false;
+			glm::vec3 Enler = glm::vec3(Analyser.GetFloat(), Analyser.GetFloat(), Analyser.GetFloat());
+
+			// 質量
+			float Mass = 0.0f;
+			if (!Analyser.GetFloat(Mass)) return false;
+
+			// 移動減衰
+			float TransDamping = 0.0f;
+			if (!Analyser.GetFloat(TransDamping)) return false;
+
+			// 回転減衰
+			float RotateDamping = 0.0f;
+			if (!Analyser.GetFloat(RotateDamping)) return false;
+
+			// 反発力
+			float Repulsion = 0.0f;
+			if (!Analyser.GetFloat(Repulsion)) return false;
+
+			// 摩擦力
+			float Friction = 0.0f;
+			if (!Analyser.GetFloat(Friction)) return false;
+
+			// 剛体の物理演算 - 0:ボーン追従(static) 1:物理演算(dynamic) 2:物理演算 + Bone位置合わせ
+			unsigned char PhysicsType = 0;
+			if (!Analyser.GetByte(PhysicsType)) return false;
+		}
+
 		return true;
 	}
 
