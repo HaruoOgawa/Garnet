@@ -1199,6 +1199,73 @@ namespace mmd
 
 	bool CPmxModel::AnalyseDisplayFrame(binary::CBinaryAnalyser& Analyser, const SPmxMetaData& MetaData)
 	{
+		// ï\é¶ògêî
+		int NumOfDisplayFrame = 0;
+		if (!Analyser.GetInt(NumOfDisplayFrame)) return false;
+
+		for (int i = 0; i < NumOfDisplayFrame; i++)
+		{
+			// ògñº
+			std::pair<std::string, std::wstring> FrameName = std::make_pair(std::string(""), std::wstring(L""));
+			{
+				int ByteLength = 0;
+				if (!Analyser.GetInt(ByteLength)) return false;
+
+				if (MetaData.EncodeType == EPmxEncodeType::UTF8)
+				{
+					if (!Analyser.GetString(FrameName.first, ByteLength)) return false;
+				}
+				else if (MetaData.EncodeType == EPmxEncodeType::UTF16)
+				{
+					if (!Analyser.GetUTF16String(FrameName.second, ByteLength)) return false;
+				}
+			}
+
+			// ògñºEN
+			std::pair<std::string, std::wstring> FrameNameEN = std::make_pair(std::string(""), std::wstring(L""));
+			{
+				int ByteLength = 0;
+				if (!Analyser.GetInt(ByteLength)) return false;
+
+				if (MetaData.EncodeType == EPmxEncodeType::UTF8)
+				{
+					if (!Analyser.GetString(FrameName.first, ByteLength)) return false;
+				}
+				else if (MetaData.EncodeType == EPmxEncodeType::UTF16)
+				{
+					if (!Analyser.GetUTF16String(FrameName.second, ByteLength)) return false;
+				}
+			}
+
+			// ì¡éÍògÉtÉâÉO - 0:í èÌòg 1:ì¡éÍòg
+			unsigned char SpetialFrame = 0;
+			if (!Analyser.GetByte(SpetialFrame)) return false;
+
+			// ògì‡óvëfêî
+			int NumOfInnerFrameElem = 0;
+			if (!Analyser.GetInt(NumOfInnerFrameElem)) return false;
+
+			for (int e = 0; e < NumOfInnerFrameElem; e++)
+			{
+				// óvëfëŒè€ 0:É{Å[Éì 1:ÉÇÅ[Ét
+				unsigned char ElementTarget = 0;
+				if (!Analyser.GetByte(ElementTarget)) return false;
+
+				if (ElementTarget == 0)
+				{
+					int BoneIndex = GetMultiTypeValueAsInterger(Analyser, MetaData.BoneIndexSize);
+				}
+				else if (ElementTarget == 1)
+				{
+					int MorphIndex = GetMultiTypeValueAsInterger(Analyser, MetaData.MorphIndexSize);
+				}
+				else
+				{
+					return false;
+				}
+			}
+		}
+
 		return true;
 	}
 
