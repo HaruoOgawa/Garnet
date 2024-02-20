@@ -23,6 +23,8 @@ namespace binary
 
 		bool IsValid(size_t ByteSize);
 
+		bool IsEnd();
+
 		bool Skip(size_t ByteSize);
 
 		bool GetString(std::string& Dst, size_t ByteSize);

@@ -1366,6 +1366,100 @@ namespace mmd
 
 	bool CPmxModel::AnalyseJoint(binary::CBinaryAnalyser& Analyser, const SPmxMetaData& MetaData)
 	{
+		// Joint数
+		int NumOfJoint = 0;
+		if (!Analyser.GetInt(NumOfJoint)) return false;
+
+		for (int i = 0; i < NumOfJoint; i++)
+		{
+			// Joint名
+			std::pair<std::string, std::wstring> JointName = std::make_pair(std::string(""), std::wstring(L""));
+			{
+				int ByteLength = 0;
+				if (!Analyser.GetInt(ByteLength)) return false;
+
+				if (MetaData.EncodeType == EPmxEncodeType::UTF8)
+				{
+					if (!Analyser.GetString(JointName.first, ByteLength)) return false;
+				}
+				else if (MetaData.EncodeType == EPmxEncodeType::UTF16)
+				{
+					if (!Analyser.GetUTF16String(JointName.second, ByteLength)) return false;
+				}
+			}
+
+			// Joint名EN
+			std::pair<std::string, std::wstring> JointNameEN = std::make_pair(std::string(""), std::wstring(L""));
+			{
+				int ByteLength = 0;
+				if (!Analyser.GetInt(ByteLength)) return false;
+
+				if (MetaData.EncodeType == EPmxEncodeType::UTF8)
+				{
+					if (!Analyser.GetString(JointNameEN.first, ByteLength)) return false;
+				}
+				else if (MetaData.EncodeType == EPmxEncodeType::UTF16)
+				{
+					if (!Analyser.GetUTF16String(JointNameEN.second, ByteLength)) return false;
+				}
+			}
+
+			// Joint種類 - 0:スプリング6DOF   | PMX2.0では 0 のみ(拡張用)
+			// 2.1以降で6Dof以外の時はいったんエラーを出して伝える → その後実装する？
+			unsigned char JointType = 0;
+			if (!Analyser.GetByte(JointType)) return false;
+
+			// 0: ﾊﾞﾈ付6DOF: btGeneric6DofSpringConstraint
+			// 1: 6DOF: btGeneric6DofConstraint
+			// 2: P2P: btPoint2PointConstraint
+			// 3: ConeTwist: btConeTwistConstraint
+			// 5: Slider: btSliderConstraint
+
+			// 関連剛体AのIndex - 関連なしの場合は-1
+			int BodyAIndex = GetMultiTypeValueAsInterger(Analyser, MetaData.RigidIndexSize);
+
+			// 関連剛体BのIndex - 関連なしの場合は-1
+			int BodyBIndex = GetMultiTypeValueAsInterger(Analyser, MetaData.RigidIndexSize);
+
+			// 位置(x,y,z)
+			if (!Analyser.IsValid(4 * 3)) return false;
+			glm::vec3 Pos = glm::vec3(Analyser.GetFloat(), Analyser.GetFloat(), Analyser.GetFloat());
+
+			// 回転(x,y,z) -> ラジアン角
+			if (!Analyser.IsValid(4 * 3)) return false;
+			glm::vec3 Rotate = glm::vec3(Analyser.GetFloat(), Analyser.GetFloat(), Analyser.GetFloat());
+
+			if (JointType != 2)
+			{
+				// 移動制限-下限(x,y,z)
+				if (!Analyser.IsValid(4 * 3)) return false;
+				glm::vec3 LowwerTransLimit = glm::vec3(Analyser.GetFloat(), Analyser.GetFloat(), Analyser.GetFloat());
+
+				// 移動制限-上限(x,y,z)
+				if (!Analyser.IsValid(4 * 3)) return false;
+				glm::vec3 UpperTransLimit = glm::vec3(Analyser.GetFloat(), Analyser.GetFloat(), Analyser.GetFloat());
+
+				// 回転制限-下限(x,y,z) -> ラジアン角
+				if (!Analyser.IsValid(4 * 3)) return false;
+				glm::vec3 LowwerRotateLimit = glm::vec3(Analyser.GetFloat(), Analyser.GetFloat(), Analyser.GetFloat());
+
+				// 回転制限-上限(x,y,z) -> ラジアン角
+				if (!Analyser.IsValid(4 * 3)) return false;
+				glm::vec3 UpperRotateLimit = glm::vec3(Analyser.GetFloat(), Analyser.GetFloat(), Analyser.GetFloat());
+
+				if (JointType != 1)
+				{
+					// バネ定数-移動(x,y,z)
+					if (!Analyser.IsValid(4 * 3)) return false;
+					glm::vec3 TransSpring = glm::vec3(Analyser.GetFloat(), Analyser.GetFloat(), Analyser.GetFloat());
+
+					// バネ定数-回転(x,y,z)
+					if (!Analyser.IsValid(4 * 3)) return false;
+					glm::vec3 RotateSpring = glm::vec3(Analyser.GetFloat(), Analyser.GetFloat(), Analyser.GetFloat());
+				}
+			}
+		}
+
 		return true;
 	}
 
