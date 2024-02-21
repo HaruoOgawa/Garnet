@@ -79,6 +79,12 @@ namespace object
 
 			math::CTransform::CastModelMatrixToTransform(m_WorldMatrix, WorldPos, WorldRotate, WorldScale);
 
+			// Meshを持っていない物理オブジェクトはボーンなのでサイズは1.0にする
+			if (m_MeshIndex == -1)
+			{
+				WorldScale = glm::vec3(1.0f);
+			}
+
 			m_PhysicsObject->Create(pPhysicsEngine, WorldPos, WorldRotate, WorldScale);
 		}
 	}
@@ -122,6 +128,12 @@ namespace object
 			glm::vec3 WorldScale = glm::vec3(1.0f);
 
 			math::CTransform::CastModelMatrixToTransform(m_WorldMatrix, WorldPos, WorldRotate, WorldScale);
+
+			// Meshを持っていない物理オブジェクトはボーンなのでサイズは1.0にする
+			if (m_MeshIndex == -1)
+			{
+				WorldScale = glm::vec3(1.0f);
+			}
 
 			m_PhysicsObject->SetPhysicsWorldTransform(WorldPos, WorldRotate, WorldScale);
 		}

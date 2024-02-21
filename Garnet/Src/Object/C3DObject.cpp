@@ -100,7 +100,7 @@ namespace object
 #endif
 		case object::E3DObjectType::Pmx:
 #ifdef USE_MMD
-			if (!mmd::CPmxImporter::ImportPmx(pGraphicsAPI, pLoadWorker, m_FileName, m_BinaryData, this, BaseMF)) return false;
+			if (!mmd::CPmxImporter::ImportPmx(pGraphicsAPI, pPhysicsEngine, pLoadWorker, m_FileName, m_BinaryData, this, BaseMF)) return false;
 #endif
 			break;
 		default:

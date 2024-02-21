@@ -6,6 +6,7 @@
 
 #include "../../Interface/IGraphicsAPI.h"
 #include "../../Interface/IResource.h"
+#include "../../Interface/IPhysicsEngine.h"
 #include "CPmxModel.h"
 
 namespace graphics
@@ -55,8 +56,11 @@ namespace mmd
 
 		static bool CreateTextureList(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, const std::string& ModelFileName, const CPmxModel& model, std::vector<std::shared_ptr<graphics::CTexture>>& TextureList,
 			std::vector<std::shared_ptr<resource::IResource>>& RuntimeLoadResourceList);
+	
+		static bool CreateRigidbody(physics::IPhysicsEngine* pPhysicsEngine, const CPmxModel& model, std::shared_ptr<animation::CSkeleton>& Skeleton);
+		static bool CreateJoint(physics::IPhysicsEngine* pPhysicsEngine, const CPmxModel& model, std::shared_ptr<animation::CSkeleton>& Skeleton);
 	public:
-		static bool ImportPmx(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, const std::string& ModelFileName, const std::vector<unsigned char>& Data, object::C3DObject* Object,
+		static bool ImportPmx(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, const std::string& ModelFileName, const std::vector<unsigned char>& Data, object::C3DObject* Object,
 			const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame);
 	};
 }

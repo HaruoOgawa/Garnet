@@ -16,7 +16,7 @@
 
 namespace mmd
 {
-	bool CPmxImporter::ImportPmx(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, const std::string& ModelFileName, const std::vector<unsigned char>& Data, object::C3DObject* Object,
+	bool CPmxImporter::ImportPmx(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, const std::string& ModelFileName, const std::vector<unsigned char>& Data, object::C3DObject* Object,
 		const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame)
 	{
 		CPmxModel model;
@@ -67,6 +67,12 @@ namespace mmd
 		// メッシュ
 		std::vector<std::shared_ptr<graphics::CMesh>> MeshList;
 		if (!CreateMeshList(model, MeshList, RootNode, NodeList, MaterialList, (Skeleton->GetBoneList().size() > 0))) return false;
+
+		// 剛体
+		if (!CreateRigidbody(pPhysicsEngine, model, Skeleton)) return false;
+
+		// ジョイント
+		if (!CreateJoint(pPhysicsEngine, model, Skeleton)) return false;
 
 		// リソースを登録
 		Object->SetRootNodeIndexList(RootNodeIndexList);
@@ -640,6 +646,16 @@ namespace mmd
 			pLoadWorker->AddRuntimeLoadResource(TexLoader);
 		}
 
+		return true;
+	}
+
+	bool CPmxImporter::CreateRigidbody(physics::IPhysicsEngine* pPhysicsEngine, const CPmxModel& model, std::shared_ptr<animation::CSkeleton>& Skeleton)
+	{
+		return true;
+	}
+
+	bool CPmxImporter::CreateJoint(physics::IPhysicsEngine* pPhysicsEngine, const CPmxModel& model, std::shared_ptr<animation::CSkeleton>& Skeleton)
+	{
 		return true;
 	}
 }

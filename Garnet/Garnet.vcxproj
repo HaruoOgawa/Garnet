@@ -573,6 +573,8 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Src\MMD\PMX\SPmxJoint.h" />
+    <ClInclude Include="Src\MMD\PMX\SPmxRigidbody.h" />
     <ClInclude Include="Src\PhysicsEngine\Bullet\CBulletPhysicsObject.h" />
     <ClInclude Include="Src\Interface\IPhysicsObject.h" />
     <ClInclude Include="Src\PhysicsEngine\Bullet\CBulletJoint.h" />

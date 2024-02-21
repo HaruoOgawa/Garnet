@@ -61,6 +61,8 @@ namespace scene
 
 	bool CScriptScene::Load(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker)
 	{
+		const float ZOffset = 3.0f;
+
 		// m_PhysicsGround
 		{
 			auto Material = m_PBRMF->CreateMaterial(pGraphicsAPI, 1, graphics::ECullMode::CULL_BACK);
@@ -71,7 +73,7 @@ namespace scene
 			Material->ReplacePreloadUniformValue("roughnessFactor", &glm::vec1(1.0f)[0], sizeof(float), 0);
 
 			std::shared_ptr<math::CTransform> LocalTransform = std::make_shared<math::CTransform>();
-			LocalTransform->SetPos(glm::vec3(0.0f, -1.0f, 0.0f));
+			LocalTransform->SetPos(glm::vec3(0.0f, -1.0f, 0.0f + ZOffset));
 			LocalTransform->SetScale(glm::vec3(5.0f, 0.1f, 5.0f));
 
 			auto PhysicsBox = pPhysicsEngine->CreatePhysicsBox(glm::vec3(0.5f), true, 0.0f);
@@ -105,7 +107,7 @@ namespace scene
 			// Node
 			{
 				std::shared_ptr<math::CTransform> LocalTransform = std::make_shared<math::CTransform>();
-				LocalTransform->SetPos(glm::vec3(0.0f, 1.5f, 0.0f));
+				LocalTransform->SetPos(glm::vec3(0.0f, 1.5f, 0.0f + ZOffset));
 				LocalTransform->SetScale(glm::vec3(0.25f));
 
 				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(0, -1);
@@ -117,7 +119,7 @@ namespace scene
 
 			{
 				std::shared_ptr<math::CTransform> LocalTransform = std::make_shared<math::CTransform>();
-				LocalTransform->SetPos(glm::vec3(1.0f, 1.5f, 0.0f));
+				LocalTransform->SetPos(glm::vec3(1.0f, 1.5f, 0.0f + ZOffset));
 				LocalTransform->SetScale(glm::vec3(0.25f));
 
 				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(0, -1);
@@ -129,7 +131,7 @@ namespace scene
 
 			{
 				std::shared_ptr<math::CTransform> LocalTransform = std::make_shared<math::CTransform>();
-				LocalTransform->SetPos(glm::vec3(2.0f, 1.5f, 0.0f));
+				LocalTransform->SetPos(glm::vec3(2.0f, 1.5f, 0.0f + ZOffset));
 				LocalTransform->SetScale(glm::vec3(0.5f));
 
 				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(0, -1);
@@ -184,7 +186,7 @@ namespace scene
 						float zpos = z * 2.0f - ZMax;
 
 						std::shared_ptr<math::CTransform> LocalTransform = std::make_shared<math::CTransform>();
-						LocalTransform->SetPos(glm::vec3(xpos * size * 0.5f, ypos * size * 0.5f, zpos * size * 0.5f));
+						LocalTransform->SetPos(glm::vec3(xpos * size * 0.5f, ypos * size * 0.5f, zpos * size * 0.5f + ZOffset));
 						LocalTransform->SetScale(glm::vec3(size));
 
 						auto PhysicsBox = pPhysicsEngine->CreatePhysicsBox(glm::vec3(0.5f), false, 1.0f);
@@ -204,10 +206,10 @@ namespace scene
 
 		// m_TdaMiku_Model
 		{
-			if (!m_TdaMiku_Model->CreateFromMemory(pGraphicsAPI, pPhysicsEngine, pLoadWorker, m_BasicToonMF, m_DepthMF, object::E3DObjectType::Pmx)) return false;
-
 			m_TdaMiku_Model->SetPos(glm::vec3(0.0f, 0.0f, 0.0f));
 			m_TdaMiku_Model->SetScale(glm::vec3(0.1f));
+
+			if (!m_TdaMiku_Model->CreateFromMemory(pGraphicsAPI, pPhysicsEngine, pLoadWorker, m_BasicToonMF, m_DepthMF, object::E3DObjectType::Pmx)) return false;
 
 			auto Clip = m_VMDAnimationSet->GetAnimationClip(0);
 			if (Clip) m_TdaMiku_Model->AddHumanoidAnimationClip(Clip, "Walk", { nullptr, "" }, true);
@@ -253,7 +255,8 @@ namespace scene
 		
 		if (m_PhysicsSphere)
 		{
-			m_PhysicsSphere->GetNodeList()[0]->SetPos(glm::vec3(glm::sin(DrawInfo->GetSecondsTime()), 1.5f, 0.0f));
+			const float ZOffset = 3.0f;
+			m_PhysicsSphere->GetNodeList()[0]->SetPos(glm::vec3(glm::sin(DrawInfo->GetSecondsTime()), 1.5f, 0.0f + ZOffset));
 
 			if (!m_PhysicsSphere->Update(pGraphicsAPI, pPhysicsEngine, DrawInfo->GetDeltaSecondsTime())) return false;
 		}

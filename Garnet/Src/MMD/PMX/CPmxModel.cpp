@@ -39,6 +39,16 @@ namespace mmd
 		return m_PmxBoneList;
 	}
 
+	const std::vector<SPmxRigidbody>& CPmxModel::GetPmxRigidbodyList() const
+	{
+		return m_PmxRigidbodyList;
+	}
+
+	const std::vector<SPmxJoint>& CPmxModel::GetPmxJointList() const
+	{
+		return m_PmxJointList;
+	}
+
 	bool CPmxModel::Analyse(const std::vector<unsigned char>& Data)
 	{
 		// Analyserを生成
@@ -1324,6 +1334,8 @@ namespace mmd
 			unsigned char Shape = 0;
 			if (!Analyser.GetByte(Shape)) return false;
 
+			EPmxPhysicsShape PhysicsShape = static_cast<EPmxPhysicsShape>(static_cast<int>(Shape));
+
 			// サイズ(x,y,z)
 			if (!Analyser.IsValid(4 * 3)) return false;
 			glm::vec3 Size = glm::vec3(Analyser.GetFloat(), Analyser.GetFloat(), Analyser.GetFloat());
@@ -1334,7 +1346,7 @@ namespace mmd
 
 			// 回転(x,y,z) -> ラジアン角
 			if (!Analyser.IsValid(4 * 3)) return false;
-			glm::vec3 Enler = glm::vec3(Analyser.GetFloat(), Analyser.GetFloat(), Analyser.GetFloat());
+			glm::vec3 Rotate = glm::vec3(Analyser.GetFloat(), Analyser.GetFloat(), Analyser.GetFloat());
 
 			// 質量
 			float Mass = 0.0f;
@@ -1359,6 +1371,26 @@ namespace mmd
 			// 剛体の物理演算 - 0:ボーン追従(static) 1:物理演算(dynamic) 2:物理演算 + Bone位置合わせ
 			unsigned char PhysicsType = 0;
 			if (!Analyser.GetByte(PhysicsType)) return false;
+
+			// 剛体を登録
+			SPmxRigidbody PmxRigidbody = {};
+			PmxRigidbody.RigidbodyName = RigidbodyName;
+			PmxRigidbody.RigidbodyNameEN = RigidbodyNameEN;
+			PmxRigidbody.RelationBoneIndex = RelationBoneIndex;
+			PmxRigidbody.group = group;
+			PmxRigidbody.NoneCollideGroupFlag = NoneCollideGroupFlag;
+			PmxRigidbody.PhysicsShape = PhysicsShape;
+			PmxRigidbody.Size = Size;
+			PmxRigidbody.Pos = Pos;
+			PmxRigidbody.Rotate = Rotate;
+			PmxRigidbody.Mass = Mass;
+			PmxRigidbody.TransDamping = TransDamping;
+			PmxRigidbody.RotateDamping = RotateDamping;
+			PmxRigidbody.Repulsion = Repulsion;
+			PmxRigidbody.Friction = Friction;
+			PmxRigidbody.PhysicsType = PhysicsType;
+
+			m_PmxRigidbodyList.push_back(PmxRigidbody);
 		}
 
 		return true;
@@ -1372,6 +1404,8 @@ namespace mmd
 
 		for (int i = 0; i < NumOfJoint; i++)
 		{
+			SPmxJoint PmxJoint = {};
+
 			// Joint名
 			std::pair<std::string, std::wstring> JointName = std::make_pair(std::string(""), std::wstring(L""));
 			{
@@ -1387,6 +1421,8 @@ namespace mmd
 					if (!Analyser.GetUTF16String(JointName.second, ByteLength)) return false;
 				}
 			}
+
+			PmxJoint.JointName = JointName;
 
 			// Joint名EN
 			std::pair<std::string, std::wstring> JointNameEN = std::make_pair(std::string(""), std::wstring(L""));
@@ -1404,10 +1440,14 @@ namespace mmd
 				}
 			}
 
+			PmxJoint.JointNameEN = JointNameEN;
+
 			// Joint種類 - 0:スプリング6DOF   | PMX2.0では 0 のみ(拡張用)
 			// 2.1以降で6Dof以外の時はいったんエラーを出して伝える → その後実装する？
 			unsigned char JointType = 0;
 			if (!Analyser.GetByte(JointType)) return false;
+
+			PmxJoint.PmxJointType = static_cast<EPmxJointType>(static_cast<int>(JointType));
 
 			// 0: ﾊﾞﾈ付6DOF: btGeneric6DofSpringConstraint
 			// 1: 6DOF: btGeneric6DofConstraint
@@ -1416,48 +1456,51 @@ namespace mmd
 			// 5: Slider: btSliderConstraint
 
 			// 関連剛体AのIndex - 関連なしの場合は-1
-			int BodyAIndex = GetMultiTypeValueAsInterger(Analyser, MetaData.RigidIndexSize);
+			PmxJoint.BodyAIndex = GetMultiTypeValueAsInterger(Analyser, MetaData.RigidIndexSize);
 
 			// 関連剛体BのIndex - 関連なしの場合は-1
-			int BodyBIndex = GetMultiTypeValueAsInterger(Analyser, MetaData.RigidIndexSize);
+			PmxJoint.BodyBIndex = GetMultiTypeValueAsInterger(Analyser, MetaData.RigidIndexSize);
 
 			// 位置(x,y,z)
 			if (!Analyser.IsValid(4 * 3)) return false;
-			glm::vec3 Pos = glm::vec3(Analyser.GetFloat(), Analyser.GetFloat(), Analyser.GetFloat());
+			PmxJoint.Pos = glm::vec3(Analyser.GetFloat(), Analyser.GetFloat(), Analyser.GetFloat());
 
 			// 回転(x,y,z) -> ラジアン角
 			if (!Analyser.IsValid(4 * 3)) return false;
-			glm::vec3 Rotate = glm::vec3(Analyser.GetFloat(), Analyser.GetFloat(), Analyser.GetFloat());
+			PmxJoint.Rotate = glm::vec3(Analyser.GetFloat(), Analyser.GetFloat(), Analyser.GetFloat());
 
 			if (JointType != 2)
 			{
 				// 移動制限-下限(x,y,z)
 				if (!Analyser.IsValid(4 * 3)) return false;
-				glm::vec3 LowwerTransLimit = glm::vec3(Analyser.GetFloat(), Analyser.GetFloat(), Analyser.GetFloat());
+				PmxJoint.LowwerTransLimit = glm::vec3(Analyser.GetFloat(), Analyser.GetFloat(), Analyser.GetFloat());
 
 				// 移動制限-上限(x,y,z)
 				if (!Analyser.IsValid(4 * 3)) return false;
-				glm::vec3 UpperTransLimit = glm::vec3(Analyser.GetFloat(), Analyser.GetFloat(), Analyser.GetFloat());
+				PmxJoint.UpperTransLimit = glm::vec3(Analyser.GetFloat(), Analyser.GetFloat(), Analyser.GetFloat());
 
 				// 回転制限-下限(x,y,z) -> ラジアン角
 				if (!Analyser.IsValid(4 * 3)) return false;
-				glm::vec3 LowwerRotateLimit = glm::vec3(Analyser.GetFloat(), Analyser.GetFloat(), Analyser.GetFloat());
+				PmxJoint.LowwerRotateLimit = glm::vec3(Analyser.GetFloat(), Analyser.GetFloat(), Analyser.GetFloat());
 
 				// 回転制限-上限(x,y,z) -> ラジアン角
 				if (!Analyser.IsValid(4 * 3)) return false;
-				glm::vec3 UpperRotateLimit = glm::vec3(Analyser.GetFloat(), Analyser.GetFloat(), Analyser.GetFloat());
+				PmxJoint.UpperRotateLimit = glm::vec3(Analyser.GetFloat(), Analyser.GetFloat(), Analyser.GetFloat());
 
 				if (JointType != 1)
 				{
 					// バネ定数-移動(x,y,z)
 					if (!Analyser.IsValid(4 * 3)) return false;
-					glm::vec3 TransSpring = glm::vec3(Analyser.GetFloat(), Analyser.GetFloat(), Analyser.GetFloat());
+					PmxJoint.TransSpring = glm::vec3(Analyser.GetFloat(), Analyser.GetFloat(), Analyser.GetFloat());
 
 					// バネ定数-回転(x,y,z)
 					if (!Analyser.IsValid(4 * 3)) return false;
-					glm::vec3 RotateSpring = glm::vec3(Analyser.GetFloat(), Analyser.GetFloat(), Analyser.GetFloat());
+					PmxJoint.RotateSpring = glm::vec3(Analyser.GetFloat(), Analyser.GetFloat(), Analyser.GetFloat());
 				}
 			}
+
+			// Jointを登録
+			m_PmxJointList.push_back(PmxJoint);
 		}
 
 		return true;

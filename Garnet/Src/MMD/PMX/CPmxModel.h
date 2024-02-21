@@ -13,6 +13,8 @@
 #include "CPmxTexture.h"
 #include "CPmxMaterial.h"
 #include "CPmxBone.h"
+#include "SPmxRigidbody.h"
+#include "SPmxJoint.h"
 
 namespace binary { class CBinaryAnalyser; }
 
@@ -26,6 +28,8 @@ namespace mmd
 		std::vector<std::shared_ptr<CPmxTexture>> m_PmxTextureList;
 		std::vector<std::shared_ptr<CPmxMaterial>> m_PmxMaterialList;
 		std::vector<std::shared_ptr<CPmxBone>> m_PmxBoneList;
+		std::vector<SPmxRigidbody> m_PmxRigidbodyList;
+		std::vector<SPmxJoint> m_PmxJointList;
 	private:
 		bool AnalyseMetaData(binary::CBinaryAnalyser& Analyser, SPmxMetaData& MetaData);
 
@@ -63,6 +67,10 @@ namespace mmd
 		const std::vector<std::shared_ptr<CPmxMaterial>>& GetPmxMaterialList() const;
 
 		const std::vector<std::shared_ptr<CPmxBone>>& GetPmxBoneList() const;
+
+		const std::vector<SPmxRigidbody>& GetPmxRigidbodyList() const;
+
+		const std::vector<SPmxJoint>& GetPmxJointList() const;
 
 		bool Analyse(const std::vector<unsigned char>& Data);
 	};
