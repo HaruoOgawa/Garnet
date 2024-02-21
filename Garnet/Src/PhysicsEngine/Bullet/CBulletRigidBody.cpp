@@ -3,12 +3,12 @@
 
 namespace physics
 {
-	CBulletRigidBody::CBulletRigidBody(btDiscreteDynamicsWorld* pDynamicWorld, btCollisionShape* pCollisionShape, const glm::vec3& WorldPos, const glm::quat& WorldRotate, float Mass):
+	CBulletRigidBody::CBulletRigidBody(btDiscreteDynamicsWorld* pDynamicWorld, btCollisionShape* pCollisionShape, const glm::vec3& WorldPos, const glm::quat& WorldRotate, bool IsStatic, float Mass):
 		m_pDynamicWorld(pDynamicWorld),
 		m_MotionState(nullptr),
 		m_Rigidbody(nullptr)
 	{
-		Create(pDynamicWorld, pCollisionShape, WorldPos, WorldRotate, Mass);
+		Create(pDynamicWorld, pCollisionShape, WorldPos, WorldRotate, IsStatic, Mass);
 	}
 
 	CBulletRigidBody::~CBulletRigidBody()
@@ -28,7 +28,7 @@ namespace physics
 		}
 	}
 
-	bool CBulletRigidBody::Create(btDiscreteDynamicsWorld* pDynamicWorld, btCollisionShape* pCollisionShape, const glm::vec3& WorldPos, const glm::quat& WorldRotate, float Mass)
+	bool CBulletRigidBody::Create(btDiscreteDynamicsWorld* pDynamicWorld, btCollisionShape* pCollisionShape, const glm::vec3& WorldPos, const glm::quat& WorldRotate, bool IsStatic, float Mass)
 	{
 		// Transform
 		btTransform transform;
@@ -37,7 +37,7 @@ namespace physics
 		transform.setRotation(btQuaternion(WorldRotate.x, WorldRotate.y, WorldRotate.z, WorldRotate.w));
 
 		// 質量
-		btScalar bodyMass(Mass);
+		btScalar bodyMass(((IsStatic)? 0.0f : Mass));
 
 		// Bulletは質量が0のものはStatic(固定されている)、そうでないものはDynamic(物理演算で動く)として扱われる
 		bool IsDynamic = (bodyMass != 0.0f);
@@ -51,10 +51,18 @@ namespace physics
 		}
 
 		// MotoinState. 補間だったり他のアクティブオブジェクトとの同期に使用される
-		m_MotionState = std::make_shared<btDefaultMotionState>(transform);
+		// staticオブジェクトだとMotioStateのTransformは更新されないのでnullptrにしておく必要がある(代わりにRigidBodyの方が更新される)
+		// https://pybullet.org/Bullet/phpBB3/viewtopic.php?t=12634
+		btDefaultMotionState* pMotionState = nullptr;
+		if (IsDynamic)
+		{
+			m_MotionState = std::make_shared<btDefaultMotionState>(transform);
+
+			pMotionState = m_MotionState.get();
+		}
 
 		// RigidBodyの設定. 物理演算に使用するオブジェクト.物理演算に関するパラメーターを持っている
-		btRigidBody::btRigidBodyConstructionInfo rbInfo(bodyMass, m_MotionState.get(), pCollisionShape, localInertia);
+		btRigidBody::btRigidBodyConstructionInfo rbInfo(bodyMass, pMotionState, pCollisionShape, localInertia);
 		m_Rigidbody = std::make_shared<btRigidBody>(rbInfo);
 
 		// RigidBodyを物理演算ワールドに追加

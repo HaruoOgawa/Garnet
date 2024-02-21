@@ -98,7 +98,6 @@ namespace scene
 			m_PhysicsSphere->AddMesh(Mesh);
 
 			// Physics
-			//auto PhysicsSphere0 = pPhysicsEngine->CreatePhysicsSphere(1.0f, true, 1.0f);
 			auto PhysicsSphere0 = pPhysicsEngine->CreatePhysicsSphere(1.0f, true, 0.0f);
 			auto PhysicsSphere1 = pPhysicsEngine->CreatePhysicsSphere(1.0f, false, 50.0f);
 			auto PhysicsSphere2 = pPhysicsEngine->CreatePhysicsSphere(1.0f, false, 100.0f);
@@ -254,7 +253,7 @@ namespace scene
 		
 		if (m_PhysicsSphere)
 		{
-			//m_PhysicsSphere->GetNodeList()[0]->SetPos(glm::vec3(glm::sin(DrawInfo->GetSecondsTime()), 1.5f, 0.0f));
+			m_PhysicsSphere->GetNodeList()[0]->SetPos(glm::vec3(glm::sin(DrawInfo->GetSecondsTime()), 1.5f, 0.0f));
 
 			if (!m_PhysicsSphere->Update(pGraphicsAPI, pPhysicsEngine, DrawInfo->GetDeltaSecondsTime())) return false;
 		}
