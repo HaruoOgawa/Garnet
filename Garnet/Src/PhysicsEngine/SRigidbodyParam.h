@@ -1,10 +1,13 @@
 #pragma once
 
 #ifdef USE_PHYSICS
+#include "EPhysicsType.h"
+
 namespace physics
 {
 	struct SRigidbodyParam
 	{
+		EPhysicsType PhysicsType = EPhysicsType::STATIC;
 		unsigned char group = 0;
 		unsigned short NoneCollideGroupFlag = 0;
 		float TransDamping = 0.0f;

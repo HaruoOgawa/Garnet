@@ -130,7 +130,7 @@ namespace object
 		m_WorldMatrix = WorldMatrix;
 
 		// Staticな物理オブジェクトを持っている時はそれにも位置変更を反映する
-		if (m_PhysicsObject && m_PhysicsObject->IsStatic())
+		if (m_PhysicsObject && (m_PhysicsObject->IsStatic() || m_PhysicsObject->IsDynamicJoint()))
 		{
 			glm::vec3 WorldPos = glm::vec3(0.0f);
 			glm::quat WorldRotate = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
@@ -144,7 +144,14 @@ namespace object
 				WorldScale = glm::vec3(1.0f);
 			}
 
-			m_PhysicsObject->SetPhysicsWorldTransform(WorldPos, WorldRotate, WorldScale);
+			if (m_PhysicsObject->IsStatic())
+			{
+				m_PhysicsObject->SetPhysicsWorldTransform(WorldPos, WorldRotate, WorldScale);
+			}
+			else if (m_PhysicsObject->IsDynamicJoint())
+			{
+				m_PhysicsObject->UpdateJointWorldTransform(WorldPos, WorldRotate, WorldScale);
+			}
 		}
 	}
 

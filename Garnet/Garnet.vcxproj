@@ -1093,6 +1093,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClInclude Include="Src\Math\CMath.h" />
     <ClInclude Include="Src\Object\E3DObjectType.h" />
     <ClInclude Include="Src\PhysicsEngine\EJointType.h" />
+    <ClInclude Include="Src\PhysicsEngine\EPhysicsType.h" />
     <ClInclude Include="Src\PhysicsEngine\SJointParam.h" />
     <ClInclude Include="Src\PhysicsEngine\SRigidbodyParam.h" />
     <ClInclude Include="Src\Projection\CProjection.h" />

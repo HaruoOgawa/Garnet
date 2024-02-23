@@ -47,6 +47,7 @@ namespace physics
 		virtual bool Create(IPhysicsEngine* pPhysicsEngine, const glm::vec3& WorldPos, const glm::quat& WorldRotate, const glm::vec3& WorldScale) override;
 
 		virtual bool IsStatic() override;
+		virtual bool IsDynamicJoint() override;
 
 		virtual glm::mat4 GetCurrentPhysicsWorldMatrix() override;
 		virtual glm::vec3 GetCurrentWorldPos() override;
@@ -55,8 +56,8 @@ namespace physics
 		virtual void SetPhysicsWorldTransform(const glm::vec3& WorldPos, const glm::quat& WorldRotate, const glm::vec3& WorldScale) override;
 
 		virtual void ReserveConstraint(const std::shared_ptr<IPhysicsObject>& FixedObject, EJointType JointType, const SJointParam& JParam) override;
-
 		virtual void ApplyConstraint(IPhysicsEngine* pPhysicsEngine) override;
+		virtual void UpdateJointWorldTransform(const glm::vec3& WorldPos, const glm::quat& WorldRotate, const glm::vec3& WorldScale) override;
 	};
 }
 #endif

@@ -7,7 +7,7 @@ namespace physics
 {
 	struct SJointParam
 	{
-		glm::vec3 Pos = glm::vec3(0.0f, -1.0f, 0.0f);
+		glm::vec3 Pos = glm::vec3(0.0f);
 		glm::vec3 Rotate = glm::vec3(0.0f);
 		glm::vec3 LowerTransLimit = glm::vec3(0.0f);
 		glm::vec3 UpperTransLimit = glm::vec3(0.0f, 1.0f, 0.0f);

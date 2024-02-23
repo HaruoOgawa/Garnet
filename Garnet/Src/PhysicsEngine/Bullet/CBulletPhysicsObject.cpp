@@ -46,6 +46,11 @@ namespace physics
 		return m_IsStatic;
 	}
 
+	bool CBulletPhysicsObject::IsDynamicJoint()
+	{
+		return (m_RBParam.PhysicsType == EPhysicsType::DYNAMIC_JOINT);
+	}
+
 	glm::mat4 CBulletPhysicsObject::GetCurrentPhysicsWorldMatrix()
 	{
 		glm::vec3 Pos = GetCurrentWorldPos();
@@ -110,13 +115,6 @@ namespace physics
 
 		if (m_ReservedConstraint->JointType == EJointType::SPRING_6DOF)
 		{
-			// ピボットを計算
-			// ひとまず２つのRigidBodyの中点とする
-			glm::vec3 pointA = GetCurrentWorldPos();
-			glm::vec3 pointB = m_ReservedConstraint->FixedObject->GetCurrentWorldPos();
-
-			glm::vec3 ConnectPoint = (pointA + pointB) * 0.5f;
-
 			// Constraintsを追加する
 			const auto& TargetRigidBody = static_cast<CBulletPhysicsObject*>(m_ReservedConstraint->FixedObject.get())->GetRigidBody();
 			m_RigidBody->Add6DofSpringConstraint(pBulletPhysics->GetDynamicsWorld(), TargetRigidBody, m_ReservedConstraint->JParam);
@@ -141,6 +139,18 @@ namespace physics
 		// 追加が終わったのでリリースする
 		m_ReservedConstraint.reset();
 		m_ReservedConstraint = nullptr;
+	}
+
+	void CBulletPhysicsObject::UpdateJointWorldTransform(const glm::vec3& WorldPos, const glm::quat& WorldRotate, const glm::vec3& WorldScale)
+	{
+		if (!m_RigidBody) return;
+
+		btTransform transform;
+		transform.setIdentity();
+		transform.setOrigin(btVector3(WorldPos.x, WorldPos.y, WorldPos.z));
+		transform.setRotation(btQuaternion(WorldRotate.x, WorldRotate.y, WorldRotate.z, WorldRotate.w));
+
+		m_RigidBody->UpdateJointWorldTransform(transform);
 	}
 }
 #endif
