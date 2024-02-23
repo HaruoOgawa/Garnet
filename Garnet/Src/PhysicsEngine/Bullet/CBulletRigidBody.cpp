@@ -82,18 +82,22 @@ namespace physics
 		// frameInAとframeInBはバネに例えるとバネの端点・剛体との接合点を表す. 二つの剛体にバネを挟むことをイメージするとわかりやすい. それは必ず２つの接合点があるはずである
 		// frameInA => d6body0の接合点
 		// frameInB => fixedBody1の接合点
+
+		btQuaternion RotateA = btQuaternion::getIdentity();
+		RotateA.setEuler(JParam.Rotate.x, JParam.Rotate.y, JParam.Rotate.z);
+
 		btGeneric6DofSpring2Constraint* spring = new btGeneric6DofSpring2Constraint(
 			*m_Rigidbody.get(), 
 			*FixedRigidbody->GetbtRigidBody().get(),
-			btTransform(btQuaternion::getIdentity(), { JParam.Pos.x, JParam.Pos.y, JParam.Pos.z }),
-			btTransform(btQuaternion::getIdentity(), { JParam.Rotate.x, JParam.Rotate.y, JParam.Rotate.z })
+			btTransform(RotateA, { JParam.Pos.x, JParam.Pos.y, JParam.Pos.z }),
+			btTransform(btQuaternion::getIdentity(), { 0.0f, 0.0f, 0.0f })
 		);
 
 		// 関数名の通り移動できる範囲・回転できる範囲
 		spring->setLinearLowerLimit(btVector3(JParam.LowerTransLimit.x, JParam.LowerTransLimit.y, JParam.LowerTransLimit.z));
 		spring->setLinearUpperLimit(btVector3(JParam.UpperTransLimit.x, JParam.UpperTransLimit.y, JParam.UpperTransLimit.z));
 		spring->setAngularLowerLimit(btVector3(JParam.LowerRotateLimit.x, JParam.LowerRotateLimit.y, JParam.LowerRotateLimit.z));
-		spring->setAngularUpperLimit(btVector3(JParam.UpperRotateLimit.x, JParam.UpperRotateLimit.y, JParam.UpperRotateLimit.z));
+		//spring->setAngularUpperLimit(btVector3(JParam.UpperRotateLimit.x, JParam.UpperRotateLimit.y, JParam.UpperRotateLimit.z));
 
 		spring->enableSpring(1, true);
 		spring->setStiffness(1, JParam.TransSpring.x); // Stiffness: 硬さ

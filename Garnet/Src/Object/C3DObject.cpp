@@ -362,15 +362,16 @@ namespace object
 
 		// 付与ボーンの位置を再計算
 		if (!m_AnimationController->ReCalculateGrantBone(m_NodeList)) return false;
-
-		// Drawは何度も呼ぶことがあるのでUpdateでマイフレーム一回だけ計算する
-		// SSBOのサイズをDynamicOffset毎に変更できるかわからないのでひとまず全部まとめて渡す
-		m_CurrentSkinMatrixList.clear();
-		if (!m_AnimationController->CalCSkinMatrixList(m_CurrentSkinMatrixList, m_ObjectTransform->GetModelMatrix())) return false;
 #endif
 
 		// 物理演算の結果を反映する
 		ApplyPhysicsWorldMatrix();
+
+#ifdef USE_ANIMATION
+		// IKや物理演算が終わって最終的なWorldMatrixが確定した段階でSkinMatrixを計算する
+		m_CurrentSkinMatrixList.clear();
+		if (!m_AnimationController->CalCSkinMatrixList(m_CurrentSkinMatrixList, m_ObjectTransform->GetModelMatrix())) return false;
+#endif
 
 		return true;
 	}
@@ -460,7 +461,7 @@ namespace object
 		}
 		
 #ifdef USE_ANIMATION
-		
+		/*
 		if(DebugSphere)
 		{
 			const auto& Skeleton = m_AnimationController->GetSkeleton();
@@ -487,7 +488,7 @@ namespace object
 
 					DebugSphere->GetMaterialList()[0]->SetUniformValue("useColor", &glm::ivec1(1)[0], sizeof(glm::ivec1));
 					
-					if(Bone->IsRotateGrant() || Bone->IsMoveGrant())
+					if(BoneNode->GetPhysicsObject() && BoneNode->GetPhysicsObject()->IsStatic())
 					{
 						DebugSphere->GetMaterialList()[0]->SetUniformValue("baseColor", &glm::vec4(1.0f, 0.0f, 0.0f, 1.0f)[0], sizeof(glm::vec4));
 					}
@@ -500,7 +501,7 @@ namespace object
 				}
 			}
 		}
-		
+		*/
 #endif
 
 		return true;

@@ -687,22 +687,35 @@ namespace mmd
 	bool CPmxImporter::CreateJoint(physics::IPhysicsEngine* pPhysicsEngine, const CPmxModel& model, std::shared_ptr<animation::CSkeleton>& Skeleton)
 	{
 		const auto& BoneList = Skeleton->GetBoneList();
+		const auto& PmxRigidbodyList = model.GetPmxRigidbodyList();
 
 		for (const auto& PmxJoint : model.GetPmxJointList())
 		{
 			// PhysicsObject‚ðŽæ“¾
+			// BodyA
 			int BodyAIndex = PmxJoint.BodyAIndex;
-			if (BodyAIndex < 0 || BodyAIndex >= BoneList.size()) continue;
-			const auto& PhysicsObjA = BoneList[BodyAIndex]->GetBoneNode()->GetPhysicsObject();
+			if (BodyAIndex < 0 || BodyAIndex >= PmxRigidbodyList.size()) continue;
 
+			const auto& RigidbodyA = PmxRigidbodyList[BodyAIndex];
+			int BoneAIndex = RigidbodyA.RelationBoneIndex;
+			if (BoneAIndex < 0 || BoneAIndex >= BoneList.size()) continue;
+			
+			const auto& PhysicsObjA = BoneList[BoneAIndex]->GetBoneNode()->GetPhysicsObject();
+
+			// BodyB
 			int BodyBIndex = PmxJoint.BodyBIndex;
-			if (BodyBIndex < 0 || BodyBIndex >= BoneList.size()) continue;
-			const auto& PhysicsObjB = BoneList[BodyBIndex]->GetBoneNode()->GetPhysicsObject();
+			if (BodyBIndex < 0 || BodyBIndex >= PmxRigidbodyList.size()) continue;
+
+			const auto RigidbodyB = PmxRigidbodyList[BodyBIndex];
+			int BoneBIndex = RigidbodyB.RelationBoneIndex;
+			if (BoneBIndex < 0 || BoneBIndex >= BoneList.size()) continue;
+
+			const auto& PhysicsObjB = BoneList[BoneBIndex]->GetBoneNode()->GetPhysicsObject();
 
 			if (!PhysicsObjA || !PhysicsObjB) continue;
 
 			// Constraint‚ð—\–ñ‚·‚é
-			PhysicsObjA->ReserveConstraint(PhysicsObjB, static_cast<physics::EJointType>(PmxJoint.PmxJointType), { PmxJoint.Pos, PmxJoint.Rotate, PmxJoint.LowerTransLimit, PmxJoint.UpperTransLimit, PmxJoint.LowerRotateLimit, PmxJoint.UpperRotateLimit, PmxJoint.TransSpring, PmxJoint.RotateSpring });
+			PhysicsObjB->ReserveConstraint(PhysicsObjA, static_cast<physics::EJointType>(PmxJoint.PmxJointType), { PmxJoint.Pos, PmxJoint.Rotate, PmxJoint.LowerTransLimit, PmxJoint.UpperTransLimit, PmxJoint.LowerRotateLimit, PmxJoint.UpperRotateLimit, PmxJoint.TransSpring, PmxJoint.RotateSpring });
 		}
 
 		return true;
