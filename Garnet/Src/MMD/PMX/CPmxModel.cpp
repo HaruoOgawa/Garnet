@@ -1473,7 +1473,7 @@ namespace mmd
 			{
 				// ˆÚ“®§ŒÀ-‰ºŒÀ(x,y,z)
 				if (!Analyser.IsValid(4 * 3)) return false;
-				PmxJoint.LowwerTransLimit = glm::vec3(Analyser.GetFloat(), Analyser.GetFloat(), Analyser.GetFloat());
+				PmxJoint.LowerTransLimit = glm::vec3(Analyser.GetFloat(), Analyser.GetFloat(), Analyser.GetFloat());
 
 				// ˆÚ“®§ŒÀ-ãŒÀ(x,y,z)
 				if (!Analyser.IsValid(4 * 3)) return false;
@@ -1481,7 +1481,7 @@ namespace mmd
 
 				// ‰ñ“]§ŒÀ-‰ºŒÀ(x,y,z) -> ƒ‰ƒWƒAƒ“Šp
 				if (!Analyser.IsValid(4 * 3)) return false;
-				PmxJoint.LowwerRotateLimit = glm::vec3(Analyser.GetFloat(), Analyser.GetFloat(), Analyser.GetFloat());
+				PmxJoint.LowerRotateLimit = glm::vec3(Analyser.GetFloat(), Analyser.GetFloat(), Analyser.GetFloat());
 
 				// ‰ñ“]§ŒÀ-ãŒÀ(x,y,z) -> ƒ‰ƒWƒAƒ“Šp
 				if (!Analyser.IsValid(4 * 3)) return false;

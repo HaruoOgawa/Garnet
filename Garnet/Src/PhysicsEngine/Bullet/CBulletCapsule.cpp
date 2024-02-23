@@ -4,8 +4,8 @@
 
 namespace physics
 {
-	CBulletCapsule::CBulletCapsule(float Radius, float Height, bool IsStaticFlag, float Mass) :
-		CBulletPhysicsObject(IsStaticFlag, Mass),
+	CBulletCapsule::CBulletCapsule(float Radius, float Height, bool IsStaticFlag, float Mass, const SRigidbodyParam& RBParam) :
+		CBulletPhysicsObject(IsStaticFlag, Mass, RBParam),
 		m_Radius(Radius),
 		m_Height(Height)
 	{
@@ -22,7 +22,7 @@ namespace physics
 		CBulletPhysicsEngine* pBulletPhysics = static_cast<CBulletPhysicsEngine*>(pPhysicsEngine);
 
 		m_CollisionShape = std::make_shared<btCapsuleShape>(m_Radius, m_Height);
-		m_RigidBody = std::make_shared<CBulletRigidBody>(pBulletPhysics->GetDynamicsWorld(), m_CollisionShape.get(), WorldPos, WorldRotate, m_IsStatic, m_Mass);
+		m_RigidBody = std::make_shared<CBulletRigidBody>(pBulletPhysics->GetDynamicsWorld(), m_CollisionShape.get(), WorldPos, WorldRotate, m_IsStatic, m_Mass, m_RBParam);
 
 		return true;
 	}

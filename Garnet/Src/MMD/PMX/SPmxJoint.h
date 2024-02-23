@@ -23,9 +23,9 @@ namespace mmd
 		int BodyBIndex = -1;
 		glm::vec3 Pos = glm::vec3(0.0f);
 		glm::vec3 Rotate = glm::vec3(0.0f);
-		glm::vec3 LowwerTransLimit = glm::vec3(0.0f);
+		glm::vec3 LowerTransLimit = glm::vec3(0.0f);
 		glm::vec3 UpperTransLimit = glm::vec3(0.0f);
-		glm::vec3 LowwerRotateLimit = glm::vec3(0.0f);
+		glm::vec3 LowerRotateLimit = glm::vec3(0.0f);
 		glm::vec3 UpperRotateLimit = glm::vec3(0.0f);
 		glm::vec3 TransSpring = glm::vec3(0.0f);
 		glm::vec3 RotateSpring = glm::vec3(0.0f);

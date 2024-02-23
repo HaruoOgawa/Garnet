@@ -3,12 +3,12 @@
 
 namespace physics
 {
-	CBulletRigidBody::CBulletRigidBody(btDiscreteDynamicsWorld* pDynamicWorld, btCollisionShape* pCollisionShape, const glm::vec3& WorldPos, const glm::quat& WorldRotate, bool IsStatic, float Mass):
+	CBulletRigidBody::CBulletRigidBody(btDiscreteDynamicsWorld* pDynamicWorld, btCollisionShape* pCollisionShape, const glm::vec3& WorldPos, const glm::quat& WorldRotate, bool IsStatic, float Mass, const SRigidbodyParam& RBParam):
 		m_pDynamicWorld(pDynamicWorld),
 		m_MotionState(nullptr),
 		m_Rigidbody(nullptr)
 	{
-		Create(pDynamicWorld, pCollisionShape, WorldPos, WorldRotate, IsStatic, Mass);
+		Create(pDynamicWorld, pCollisionShape, WorldPos, WorldRotate, IsStatic, Mass, RBParam);
 	}
 
 	CBulletRigidBody::~CBulletRigidBody()
@@ -28,7 +28,7 @@ namespace physics
 		}
 	}
 
-	bool CBulletRigidBody::Create(btDiscreteDynamicsWorld* pDynamicWorld, btCollisionShape* pCollisionShape, const glm::vec3& WorldPos, const glm::quat& WorldRotate, bool IsStatic, float Mass)
+	bool CBulletRigidBody::Create(btDiscreteDynamicsWorld* pDynamicWorld, btCollisionShape* pCollisionShape, const glm::vec3& WorldPos, const glm::quat& WorldRotate, bool IsStatic, float Mass, const SRigidbodyParam& RBParam)
 	{
 		// Transform
 		btTransform transform;
@@ -65,16 +65,18 @@ namespace physics
 		btRigidBody::btRigidBodyConstructionInfo rbInfo(bodyMass, pMotionState, pCollisionShape, localInertia);
 		m_Rigidbody = std::make_shared<btRigidBody>(rbInfo);
 
+		m_Rigidbody->setDamping(RBParam.TransDamping, RBParam.RotateDamping);
+		m_Rigidbody->setRestitution(RBParam.Repulsion); // 反発係数の設定
+		m_Rigidbody->setFriction(RBParam.Friction); // 摩擦係数の設定
+
 		// RigidBodyを物理演算ワールドに追加
 		pDynamicWorld->addRigidBody(m_Rigidbody.get());
 
 		return true;
 	}
 
-	void CBulletRigidBody::Add6DofSpringConstraint(btDiscreteDynamicsWorld* pDynamicWorld, const std::shared_ptr<CBulletRigidBody>& FixedRigidbody, const glm::vec3& ConnectPoint)
+	void CBulletRigidBody::Add6DofSpringConstraint(btDiscreteDynamicsWorld* pDynamicWorld, const std::shared_ptr<CBulletRigidBody>& FixedRigidbody, SJointParam JParam)
 	{
-		btVector3 pivot(ConnectPoint.x, ConnectPoint.y, ConnectPoint.z);
-		
 		// Constraintsを追加
 		// btGeneric6DofSpring2Constraint(*d6body0,*fixedBody1,frameInA,frameInB);
 		// frameInAとframeInBはバネに例えるとバネの端点・剛体との接合点を表す. 二つの剛体にバネを挟むことをイメージするとわかりやすい. それは必ず２つの接合点があるはずである
@@ -83,18 +85,18 @@ namespace physics
 		btGeneric6DofSpring2Constraint* spring = new btGeneric6DofSpring2Constraint(
 			*m_Rigidbody.get(), 
 			*FixedRigidbody->GetbtRigidBody().get(),
-			btTransform(btQuaternion::getIdentity(), {0.0f, -1.0f, 0.0f}), 
-			btTransform(btQuaternion::getIdentity(), { 0.0f, 0.0f, 0.0f })
+			btTransform(btQuaternion::getIdentity(), { JParam.Pos.x, JParam.Pos.y, JParam.Pos.z }),
+			btTransform(btQuaternion::getIdentity(), { JParam.Rotate.x, JParam.Rotate.y, JParam.Rotate.z })
 		);
 
 		// 関数名の通り移動できる範囲・回転できる範囲
-		spring->setLinearLowerLimit(btVector3(0.0f, 0.0f, 0.0f));
-		spring->setLinearUpperLimit(btVector3(0.0f, 1.0f, 0.0f));
-		//spring->setAngularLowerLimit(btVector3(0.0f, 0.0f, 0.0f));
-		//spring->setAngularUpperLimit(btVector3(3.1415f * 2.0f, 3.1415f * 2.0f, 3.1415f * 2.0f));
+		spring->setLinearLowerLimit(btVector3(JParam.LowerTransLimit.x, JParam.LowerTransLimit.y, JParam.LowerTransLimit.z));
+		spring->setLinearUpperLimit(btVector3(JParam.UpperTransLimit.x, JParam.UpperTransLimit.y, JParam.UpperTransLimit.z));
+		spring->setAngularLowerLimit(btVector3(JParam.LowerRotateLimit.x, JParam.LowerRotateLimit.y, JParam.LowerRotateLimit.z));
+		spring->setAngularUpperLimit(btVector3(JParam.UpperRotateLimit.x, JParam.UpperRotateLimit.y, JParam.UpperRotateLimit.z));
 
 		spring->enableSpring(1, true);
-		spring->setStiffness(1, 35.0f); // Stiffness: 硬さ
+		spring->setStiffness(1, JParam.TransSpring.x); // Stiffness: 硬さ
 		spring->setDamping(1, 0.5f); // Damping: 減衰力
 
 		pDynamicWorld->addConstraint(spring, false);

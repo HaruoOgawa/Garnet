@@ -660,15 +660,15 @@ namespace mmd
 
 			if (PmxRigidbody.PhysicsShape == EPmxPhysicsShape::SPHERE)
 			{
-				PhysicsObject = pPhysicsEngine->CreatePhysicsSphere(PmxRigidbody.Size.x, (PmxRigidbody.PhysicsType == EPmxPhysicsType::STATIC), PmxRigidbody.Mass);
+				PhysicsObject = pPhysicsEngine->CreatePhysicsSphere(PmxRigidbody.Size.x, (PmxRigidbody.PhysicsType == EPmxPhysicsType::STATIC), PmxRigidbody.Mass, { PmxRigidbody.group, PmxRigidbody.NoneCollideGroupFlag, PmxRigidbody.TransDamping, PmxRigidbody.RotateDamping, PmxRigidbody.Repulsion, PmxRigidbody.Friction });
 			}
 			else if (PmxRigidbody.PhysicsShape == EPmxPhysicsShape::BOX)
 			{
-				PhysicsObject = pPhysicsEngine->CreatePhysicsBox(PmxRigidbody.Size, (PmxRigidbody.PhysicsType == EPmxPhysicsType::STATIC), PmxRigidbody.Mass);
+				PhysicsObject = pPhysicsEngine->CreatePhysicsBox(PmxRigidbody.Size, (PmxRigidbody.PhysicsType == EPmxPhysicsType::STATIC), PmxRigidbody.Mass, { PmxRigidbody.group, PmxRigidbody.NoneCollideGroupFlag, PmxRigidbody.TransDamping, PmxRigidbody.RotateDamping, PmxRigidbody.Repulsion, PmxRigidbody.Friction });
 			}
 			else if (PmxRigidbody.PhysicsShape == EPmxPhysicsShape::CAPSULE)
 			{
-				PhysicsObject = pPhysicsEngine->CreatePhysicsCapsule(PmxRigidbody.Size.x, PmxRigidbody.Size.y, (PmxRigidbody.PhysicsType == EPmxPhysicsType::STATIC), PmxRigidbody.Mass);
+				PhysicsObject = pPhysicsEngine->CreatePhysicsCapsule(PmxRigidbody.Size.x, PmxRigidbody.Size.y, (PmxRigidbody.PhysicsType == EPmxPhysicsType::STATIC), PmxRigidbody.Mass, { PmxRigidbody.group, PmxRigidbody.NoneCollideGroupFlag, PmxRigidbody.TransDamping, PmxRigidbody.RotateDamping, PmxRigidbody.Repulsion, PmxRigidbody.Friction });
 			}
 			else
 			{
@@ -701,35 +701,8 @@ namespace mmd
 
 			if (!PhysicsObjA || !PhysicsObjB) continue;
 
-			if (PmxJoint.PmxJointType == EPmxJointType::SPRING_6DOF)
-			{
-				// Constraint‚ð—\–ñ‚·‚é
-				PhysicsObjA->Reserve6DofSpringConstraint(PhysicsObjB);
-			}
-			else if (PmxJoint.PmxJointType == EPmxJointType::Generic_6DOF)
-			{
-				// –¢ŽÀ‘•
-				return false;
-			}
-			else if (PmxJoint.PmxJointType == EPmxJointType::P2P)
-			{
-				// –¢ŽÀ‘•
-				return false;
-			}
-			else if (PmxJoint.PmxJointType == EPmxJointType::ConeTwist)
-			{
-				// –¢ŽÀ‘•
-				return false;
-			}
-			else if (PmxJoint.PmxJointType == EPmxJointType::Slider)
-			{
-				// –¢ŽÀ‘•
-				return false;
-			}
-			else
-			{
-				return false;
-			}
+			// Constraint‚ð—\–ñ‚·‚é
+			PhysicsObjA->ReserveConstraint(PhysicsObjB, static_cast<physics::EJointType>(PmxJoint.PmxJointType), { PmxJoint.Pos, PmxJoint.Rotate, PmxJoint.LowerTransLimit, PmxJoint.UpperTransLimit, PmxJoint.LowerRotateLimit, PmxJoint.UpperRotateLimit, PmxJoint.TransSpring, PmxJoint.RotateSpring });
 		}
 
 		return true;

@@ -9,7 +9,7 @@ namespace physics
 	{
 		const float m_Radius;
 	public:
-		CBulletSphere(float Radius, bool IsStaticFlag, float Mass);
+		CBulletSphere(float Radius, bool IsStaticFlag, float Mass, const SRigidbodyParam& RBParam);
 		virtual ~CBulletSphere();
 
 		virtual bool Create(IPhysicsEngine* pPhysicsEngine, const glm::vec3& WorldPos, const glm::quat& WorldRotate, const glm::vec3& WorldScale) override;

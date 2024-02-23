@@ -5,13 +5,14 @@
 
 namespace physics
 {
-	CBulletPhysicsObject::CBulletPhysicsObject(bool IsStaticFlag, float Mass):
+	CBulletPhysicsObject::CBulletPhysicsObject(bool IsStaticFlag, float Mass, const SRigidbodyParam& RBParam):
 		m_IsStatic(IsStaticFlag),
 		m_Mass(Mass),
+		m_RBParam(RBParam),
 		m_WorldScale(glm::vec3(1.0f)),
 		m_CollisionShape(nullptr),
 		m_RigidBody(nullptr),
-		m_6DofSpringConstraint(nullptr)
+		m_ReservedConstraint(nullptr)
 	{
 	}
 
@@ -95,32 +96,51 @@ namespace physics
 		}
 	}
 
-	void CBulletPhysicsObject::Reserve6DofSpringConstraint(const std::shared_ptr<IPhysicsObject>& FixedObject)
+	void CBulletPhysicsObject::ReserveConstraint(const std::shared_ptr<IPhysicsObject>& FixedObject, EJointType JointType, const SJointParam& JParam)
 	{
 		// Constraintを予約しておく
-		m_6DofSpringConstraint = std::make_shared<SReservedConstraintData>(FixedObject);
+		m_ReservedConstraint = std::make_shared<SReservedConstraintData>(FixedObject, JointType, JParam);
 	}
 
-	void CBulletPhysicsObject::Apply6DofSpringConstraint(IPhysicsEngine* pPhysicsEngine)
+	void CBulletPhysicsObject::ApplyConstraint(IPhysicsEngine* pPhysicsEngine)
 	{
-		if (!m_6DofSpringConstraint) return;
+		if (!m_ReservedConstraint) return;
 
 		CBulletPhysicsEngine* pBulletPhysics = static_cast<CBulletPhysicsEngine*>(pPhysicsEngine);
 
-		// ピボットを計算
-		// ひとまず２つのRigidBodyの中点とする
-		glm::vec3 pointA = GetCurrentWorldPos();
-		glm::vec3 pointB = m_6DofSpringConstraint->FixedObject->GetCurrentWorldPos();
+		if (m_ReservedConstraint->JointType == EJointType::SPRING_6DOF)
+		{
+			// ピボットを計算
+			// ひとまず２つのRigidBodyの中点とする
+			glm::vec3 pointA = GetCurrentWorldPos();
+			glm::vec3 pointB = m_ReservedConstraint->FixedObject->GetCurrentWorldPos();
 
-		glm::vec3 ConnectPoint = (pointA + pointB) * 0.5f;
+			glm::vec3 ConnectPoint = (pointA + pointB) * 0.5f;
 
-		// Constraintsを追加する
-		const auto& TargetRigidBody = static_cast<CBulletPhysicsObject*>(m_6DofSpringConstraint->FixedObject.get())->GetRigidBody();
-		m_RigidBody->Add6DofSpringConstraint(pBulletPhysics->GetDynamicsWorld(), TargetRigidBody, ConnectPoint);
-
+			// Constraintsを追加する
+			const auto& TargetRigidBody = static_cast<CBulletPhysicsObject*>(m_ReservedConstraint->FixedObject.get())->GetRigidBody();
+			m_RigidBody->Add6DofSpringConstraint(pBulletPhysics->GetDynamicsWorld(), TargetRigidBody, m_ReservedConstraint->JParam);
+		}
+		else if (m_ReservedConstraint->JointType == EJointType::Generic_6DOF)
+		{
+			// 未実装
+		}
+		else if (m_ReservedConstraint->JointType == EJointType::P2P)
+		{
+			// 未実装
+		}
+		else if (m_ReservedConstraint->JointType == EJointType::ConeTwist)
+		{
+			// 未実装
+		}
+		else if (m_ReservedConstraint->JointType == EJointType::Slider)
+		{
+			// 未実装
+		}
+		
 		// 追加が終わったのでリリースする
-		m_6DofSpringConstraint.reset();
-		m_6DofSpringConstraint = nullptr;
+		m_ReservedConstraint.reset();
+		m_ReservedConstraint = nullptr;
 	}
 }
 #endif

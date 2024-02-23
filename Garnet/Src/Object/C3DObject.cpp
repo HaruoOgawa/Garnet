@@ -460,7 +460,7 @@ namespace object
 		}
 		
 #ifdef USE_ANIMATION
-		/*
+		
 		if(DebugSphere)
 		{
 			const auto& Skeleton = m_AnimationController->GetSkeleton();
@@ -500,7 +500,7 @@ namespace object
 				}
 			}
 		}
-		*/
+		
 #endif
 
 		return true;

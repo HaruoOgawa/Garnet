@@ -77,7 +77,7 @@ namespace scene
 			LocalTransform->SetPos(glm::vec3(0.0f, -1.0f, 0.0f));
 			LocalTransform->SetScale(glm::vec3(10.0f, 0.1f, 10.0f));
 
-			auto PhysicsBox = pPhysicsEngine->CreatePhysicsBox(glm::vec3(0.5f), true, 0.0f);
+			auto PhysicsBox = pPhysicsEngine->CreatePhysicsBox(glm::vec3(0.5f), true, 0.0f, {});
 
 			if (!m_PhysicsGround->CreateSimply(pGraphicsAPI, pPhysicsEngine, graphics::CPresetPrimitive::CreateBox(), Material, m_DepthMF, LocalTransform, PhysicsBox)) return false;
 		}
@@ -101,9 +101,9 @@ namespace scene
 			m_PhysicsSphere->AddMesh(Mesh);
 
 			// Physics
-			auto PhysicsSphere0 = pPhysicsEngine->CreatePhysicsSphere(1.0f, true, 0.0f);
-			auto PhysicsSphere1 = pPhysicsEngine->CreatePhysicsSphere(1.0f, false, 50.0f);
-			auto PhysicsSphere2 = pPhysicsEngine->CreatePhysicsSphere(1.0f, false, 100.0f);
+			auto PhysicsSphere0 = pPhysicsEngine->CreatePhysicsSphere(1.0f, true, 0.0f, {});
+			auto PhysicsSphere1 = pPhysicsEngine->CreatePhysicsSphere(1.0f, false, 50.0f, {});
+			auto PhysicsSphere2 = pPhysicsEngine->CreatePhysicsSphere(1.0f, false, 100.0f, {});
 
 			// Node
 			{
@@ -143,8 +143,8 @@ namespace scene
 			}
 			
 			// Constraint‚ð—\–ñ‚·‚é
-			PhysicsSphere1->Reserve6DofSpringConstraint(PhysicsSphere0);
-			PhysicsSphere2->Reserve6DofSpringConstraint(PhysicsSphere1);
+			PhysicsSphere1->ReserveConstraint(PhysicsSphere0, physics::EJointType::SPRING_6DOF, {});
+			PhysicsSphere2->ReserveConstraint(PhysicsSphere1, physics::EJointType::SPRING_6DOF, {});
 
 			// Create
 			if (!m_PhysicsSphere->Create(pGraphicsAPI, pPhysicsEngine, m_DepthMF)) return false;
@@ -190,7 +190,7 @@ namespace scene
 						LocalTransform->SetPos(glm::vec3(xpos * size * 0.5f, ypos * size * 0.5f, zpos * size * 0.5f + ZOffset));
 						LocalTransform->SetScale(glm::vec3(size));
 
-						auto PhysicsBox = pPhysicsEngine->CreatePhysicsBox(glm::vec3(0.5f), false, 1.0f);
+						auto PhysicsBox = pPhysicsEngine->CreatePhysicsBox(glm::vec3(0.5f), false, 1.0f, {});
 
 						std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(0, -1);
 						Node->SetLocalTransform(LocalTransform);

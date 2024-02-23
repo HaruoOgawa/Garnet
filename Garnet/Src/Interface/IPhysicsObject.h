@@ -5,6 +5,9 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/quaternion.hpp>
 
+#include "../PhysicsEngine/EJointType.h"
+#include "../PhysicsEngine/SJointParam.h"
+
 namespace physics
 {
 	class IPhysicsEngine;
@@ -22,9 +25,9 @@ namespace physics
 
 		virtual void SetPhysicsWorldTransform(const glm::vec3& WorldPos, const glm::quat& WorldRotate, const glm::vec3& WorldScale) = 0;
 
-		virtual void Reserve6DofSpringConstraint(const std::shared_ptr<IPhysicsObject>& FixedObject) = 0;
+		virtual void ReserveConstraint(const std::shared_ptr<IPhysicsObject>& FixedObject, EJointType JointType, const SJointParam& JParam) = 0;
 
-		virtual void Apply6DofSpringConstraint(IPhysicsEngine* pPhysicsEngine) = 0;
+		virtual void ApplyConstraint(IPhysicsEngine* pPhysicsEngine) = 0;
 	};
 }
 #endif
