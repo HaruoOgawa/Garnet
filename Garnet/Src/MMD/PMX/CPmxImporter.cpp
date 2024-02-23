@@ -715,7 +715,13 @@ namespace mmd
 			if (!PhysicsObjA || !PhysicsObjB) continue;
 
 			// Constraintを予約する
-			PhysicsObjB->ReserveConstraint(PhysicsObjA, static_cast<physics::EJointType>(PmxJoint.PmxJointType), { PmxJoint.Pos, PmxJoint.Rotate, PmxJoint.LowerTransLimit, PmxJoint.UpperTransLimit, PmxJoint.LowerRotateLimit, PmxJoint.UpperRotateLimit, PmxJoint.TransSpring, PmxJoint.RotateSpring });
+			// PmxJointのPos・Rotateは6Dof側(自由移動できる方の)ワールド座標系が入っているのでそのノードのローカル座標を渡すようにする
+			PhysicsObjB->ReserveConstraint(PhysicsObjA, static_cast<physics::EJointType>(PmxJoint.PmxJointType), 
+				{ 
+					BoneList[BoneBIndex]->GetBoneNode()->GetPos(), BoneList[BoneBIndex]->GetBoneNode()->GetRot(), 
+					PmxJoint.LowerTransLimit, PmxJoint.UpperTransLimit, PmxJoint.LowerRotateLimit, PmxJoint.UpperRotateLimit, PmxJoint.TransSpring, PmxJoint.RotateSpring
+				}
+			);
 		}
 
 		return true;

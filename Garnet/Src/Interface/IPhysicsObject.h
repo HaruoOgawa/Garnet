@@ -28,7 +28,7 @@ namespace physics
 
 		virtual void ReserveConstraint(const std::shared_ptr<IPhysicsObject>& FixedObject, EJointType JointType, const SJointParam& JParam) = 0;
 		virtual void ApplyConstraint(IPhysicsEngine* pPhysicsEngine) = 0;
-		virtual void UpdateJointWorldTransform(const glm::vec3& WorldPos, const glm::quat& WorldRotate, const glm::vec3& WorldScale) = 0;
+		virtual void UpdateJointWorldTransform(const glm::vec3& Pos, const glm::quat& Rotate, const glm::vec3& Scale) = 0;
 	};
 }
 #endif

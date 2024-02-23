@@ -150,7 +150,7 @@ namespace object
 			}
 			else if (m_PhysicsObject->IsDynamicJoint())
 			{
-				m_PhysicsObject->UpdateJointWorldTransform(WorldPos, WorldRotate, WorldScale);
+				m_PhysicsObject->UpdateJointWorldTransform(GetPos(), GetRot(), glm::vec3(1.0f));
 			}
 		}
 	}

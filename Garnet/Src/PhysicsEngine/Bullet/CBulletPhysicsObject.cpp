@@ -141,14 +141,14 @@ namespace physics
 		m_ReservedConstraint = nullptr;
 	}
 
-	void CBulletPhysicsObject::UpdateJointWorldTransform(const glm::vec3& WorldPos, const glm::quat& WorldRotate, const glm::vec3& WorldScale)
+	void CBulletPhysicsObject::UpdateJointWorldTransform(const glm::vec3& Pos, const glm::quat& Rotate, const glm::vec3& Scale)
 	{
 		if (!m_RigidBody) return;
 
 		btTransform transform;
 		transform.setIdentity();
-		transform.setOrigin(btVector3(WorldPos.x, WorldPos.y, WorldPos.z));
-		transform.setRotation(btQuaternion(WorldRotate.x, WorldRotate.y, WorldRotate.z, WorldRotate.w));
+		transform.setOrigin(btVector3(Pos.x, Pos.y, Pos.z));
+		transform.setRotation(btQuaternion(Rotate.x, Rotate.y, Rotate.z, Rotate.w));
 
 		m_RigidBody->UpdateJointWorldTransform(transform);
 	}

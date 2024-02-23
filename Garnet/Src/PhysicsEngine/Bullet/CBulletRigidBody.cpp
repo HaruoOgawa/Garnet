@@ -92,8 +92,8 @@ namespace physics
 		// Constraintsを追加
 		// btGeneric6DofSpring2Constraint(*d6body0,*fixedBody1,frameInA,frameInB);
 		// frameInAとframeInBはバネに例えるとバネの端点・剛体との接合点を表す. 二つの剛体にバネを挟むことをイメージするとわかりやすい. それは必ず２つの接合点があるはずである
-		// frameInA => d6body0の接合点
-		// frameInB => fixedBody1の接合点
+		// frameInAはd6body0の接合点、frameInBのfixedBody1の接合点
+		// そしてその座標はframeInA・frameInBともに『『fixedBody1』』の座標を中心とした移動・回転で表される
 		m_6DofSpringConstraint = std::make_shared<btGeneric6DofSpring2Constraint>(
 			*m_Rigidbody.get(), 
 			*FixedRigidbody->GetbtRigidBody().get(),
@@ -101,10 +101,9 @@ namespace physics
 			btTransform(btQuaternion::getIdentity(), { 0.0f, 0.0f, 0.0f })
 		);
 
-		// Frames(位置?)を計算
+		// Frameの座標を計算
 		{
-			btQuaternion RotateA = btQuaternion::getIdentity();
-			RotateA.setEuler(JParam.Rotate.x, JParam.Rotate.y, JParam.Rotate.z);
+			btQuaternion RotateA = btQuaternion(JParam.Rotate.x, JParam.Rotate.y, JParam.Rotate.z, JParam.Rotate.w);
 
 			m_6DofSpringConstraint->setFrames(
 				btTransform(RotateA, { JParam.Pos.x, JParam.Pos.y, JParam.Pos.z }),
@@ -123,7 +122,7 @@ namespace physics
 		// 細かいパラメーターを設定
 		{
 			m_6DofSpringConstraint->enableSpring(1, true);
-			m_6DofSpringConstraint->setStiffness(1, JParam.TransSpring.x); // Stiffness: 硬さ
+			m_6DofSpringConstraint->setStiffness(1, 35.0f); // Stiffness: 硬さ
 			m_6DofSpringConstraint->setDamping(1, 0.5f); // Damping: 減衰力
 		}
 
