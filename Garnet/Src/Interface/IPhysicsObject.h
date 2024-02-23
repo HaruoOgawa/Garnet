@@ -22,7 +22,9 @@ namespace physics
 
 		virtual void SetPhysicsWorldTransform(const glm::vec3& WorldPos, const glm::quat& WorldRotate, const glm::vec3& WorldScale) = 0;
 
-		virtual void AddSpringConstraint(IPhysicsEngine* pPhysicsEngine, const std::shared_ptr<IPhysicsObject>& FixedObject) = 0;
+		virtual void Reserve6DofSpringConstraint(const std::shared_ptr<IPhysicsObject>& FixedObject) = 0;
+
+		virtual void Apply6DofSpringConstraint(IPhysicsEngine* pPhysicsEngine) = 0;
 	};
 }
 #endif

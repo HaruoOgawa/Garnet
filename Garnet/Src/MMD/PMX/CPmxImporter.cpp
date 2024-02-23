@@ -651,11 +651,87 @@ namespace mmd
 
 	bool CPmxImporter::CreateRigidbody(physics::IPhysicsEngine* pPhysicsEngine, const CPmxModel& model, std::shared_ptr<animation::CSkeleton>& Skeleton)
 	{
+		const auto& BoneList = Skeleton->GetBoneList();
+
+		for (const auto& PmxRigidbody : model.GetPmxRigidbodyList())
+		{
+			// 物理オブジェクトを作成
+			std::shared_ptr<physics::IPhysicsObject> PhysicsObject = nullptr;
+
+			if (PmxRigidbody.PhysicsShape == EPmxPhysicsShape::SPHERE)
+			{
+				PhysicsObject = pPhysicsEngine->CreatePhysicsSphere(PmxRigidbody.Size.x, (PmxRigidbody.PhysicsType == EPmxPhysicsType::STATIC), PmxRigidbody.Mass);
+			}
+			else if (PmxRigidbody.PhysicsShape == EPmxPhysicsShape::BOX)
+			{
+				PhysicsObject = pPhysicsEngine->CreatePhysicsBox(PmxRigidbody.Size, (PmxRigidbody.PhysicsType == EPmxPhysicsType::STATIC), PmxRigidbody.Mass);
+			}
+			else if (PmxRigidbody.PhysicsShape == EPmxPhysicsShape::CAPSULE)
+			{
+				PhysicsObject = pPhysicsEngine->CreatePhysicsCapsule(PmxRigidbody.Size.x, PmxRigidbody.Size.y, (PmxRigidbody.PhysicsType == EPmxPhysicsType::STATIC), PmxRigidbody.Mass);
+			}
+			else
+			{
+				continue;
+			}
+
+			// 物理オブジェクトを割り当てる
+			if (PmxRigidbody.RelationBoneIndex < 0 || PmxRigidbody.RelationBoneIndex >= BoneList.size()) continue;
+
+			BoneList[PmxRigidbody.RelationBoneIndex]->GetBoneNode()->SetPhysicsObject(PhysicsObject);
+		}
+
 		return true;
 	}
 
 	bool CPmxImporter::CreateJoint(physics::IPhysicsEngine* pPhysicsEngine, const CPmxModel& model, std::shared_ptr<animation::CSkeleton>& Skeleton)
 	{
+		const auto& BoneList = Skeleton->GetBoneList();
+
+		for (const auto& PmxJoint : model.GetPmxJointList())
+		{
+			// PhysicsObjectを取得
+			int BodyAIndex = PmxJoint.BodyAIndex;
+			if (BodyAIndex < 0 || BodyAIndex >= BoneList.size()) continue;
+			const auto& PhysicsObjA = BoneList[BodyAIndex]->GetBoneNode()->GetPhysicsObject();
+
+			int BodyBIndex = PmxJoint.BodyBIndex;
+			if (BodyBIndex < 0 || BodyBIndex >= BoneList.size()) continue;
+			const auto& PhysicsObjB = BoneList[BodyBIndex]->GetBoneNode()->GetPhysicsObject();
+
+			if (!PhysicsObjA || !PhysicsObjB) continue;
+
+			if (PmxJoint.PmxJointType == EPmxJointType::SPRING_6DOF)
+			{
+				// Constraintを予約する
+				PhysicsObjA->Reserve6DofSpringConstraint(PhysicsObjB);
+			}
+			else if (PmxJoint.PmxJointType == EPmxJointType::Generic_6DOF)
+			{
+				// 未実装
+				return false;
+			}
+			else if (PmxJoint.PmxJointType == EPmxJointType::P2P)
+			{
+				// 未実装
+				return false;
+			}
+			else if (PmxJoint.PmxJointType == EPmxJointType::ConeTwist)
+			{
+				// 未実装
+				return false;
+			}
+			else if (PmxJoint.PmxJointType == EPmxJointType::Slider)
+			{
+				// 未実装
+				return false;
+			}
+			else
+			{
+				return false;
+			}
+		}
+
 		return true;
 	}
 }

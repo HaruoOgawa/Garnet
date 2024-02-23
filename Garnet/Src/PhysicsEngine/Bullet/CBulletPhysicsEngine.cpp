@@ -3,6 +3,7 @@
 #include "../../Debug/Message/Console.h"
 #include "CBulletBox.h"
 #include "CBulletSphere.h"
+#include "CBulletCapsule.h"
 
 namespace physics
 {
@@ -84,6 +85,13 @@ namespace physics
 		std::shared_ptr<CBulletSphere> Sphere = std::make_shared<CBulletSphere>(Radius, IsStatic, Mass);
 
 		return Sphere;
+	}
+
+	std::shared_ptr<IPhysicsObject> CBulletPhysicsEngine::CreatePhysicsCapsule(float Radius, float Height, bool IsStatic, float Mass)
+	{
+		std::shared_ptr<CBulletCapsule> capsule = std::make_shared<CBulletCapsule>(Radius, Height, IsStatic, Mass);
+
+		return capsule;
 	}
 
 	bool CBulletPhysicsEngine::Update(float DeltaTime)

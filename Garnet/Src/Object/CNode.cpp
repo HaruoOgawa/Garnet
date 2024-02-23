@@ -89,6 +89,16 @@ namespace object
 		}
 	}
 
+	void CNode::ApplyPhysicsConstraint(physics::IPhysicsEngine* pPhysicsEngine)
+	{
+		// Constraintを反映する
+		if (pPhysicsEngine && m_PhysicsObject)
+		{
+			// ToDo: Constraintも種類がたくさんあるので後ほどインターフェース化してこの関数呼び出しも抽象化する
+			m_PhysicsObject->Apply6DofSpringConstraint(pPhysicsEngine);
+		}
+	}
+
 	void CNode::ApplyPhysicsWorldMatrix()
 	{
 		// 物理演算の結果を反映する(DynamicObjectのみ)

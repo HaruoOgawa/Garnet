@@ -71,7 +71,7 @@ namespace physics
 		return true;
 	}
 
-	void CBulletRigidBody::AddSpringConstraint(btDiscreteDynamicsWorld* pDynamicWorld, const std::shared_ptr<CBulletRigidBody>& FixedRigidbody, const glm::vec3& ConnectPoint)
+	void CBulletRigidBody::Add6DofSpringConstraint(btDiscreteDynamicsWorld* pDynamicWorld, const std::shared_ptr<CBulletRigidBody>& FixedRigidbody, const glm::vec3& ConnectPoint)
 	{
 		btVector3 pivot(ConnectPoint.x, ConnectPoint.y, ConnectPoint.z);
 		

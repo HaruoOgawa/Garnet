@@ -57,6 +57,8 @@ namespace object
 
 		// ï®óù
 		void CreatePhysics(physics::IPhysicsEngine* pPhysicsEngine);
+		void ApplyPhysicsConstraint(physics::IPhysicsEngine* pPhysicsEngine);
+
 		void ApplyPhysicsWorldMatrix();
 	public:
 		C3DObject(const std::string& PassName, const std::string& DepthPassName);

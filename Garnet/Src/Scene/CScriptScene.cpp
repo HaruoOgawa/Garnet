@@ -32,6 +32,7 @@ namespace scene
 		m_Background(std::make_shared<object::C3DObject>("", "ShadowPass")),
 		m_IBL_Skybox_Texture(pGraphicsAPI->CreateTexture(false)),
 		m_Cube_Texture(pGraphicsAPI->CreateTexture(false)),
+		m_DebugSphere(std::make_shared<object::C3DObject>("", "ShadowPass")),
 
 		m_IsLoaded(false)
 	{
@@ -73,8 +74,8 @@ namespace scene
 			Material->ReplacePreloadUniformValue("roughnessFactor", &glm::vec1(1.0f)[0], sizeof(float), 0);
 
 			std::shared_ptr<math::CTransform> LocalTransform = std::make_shared<math::CTransform>();
-			LocalTransform->SetPos(glm::vec3(0.0f, -1.0f, 0.0f + ZOffset));
-			LocalTransform->SetScale(glm::vec3(5.0f, 0.1f, 5.0f));
+			LocalTransform->SetPos(glm::vec3(0.0f, -1.0f, 0.0f));
+			LocalTransform->SetScale(glm::vec3(10.0f, 0.1f, 10.0f));
 
 			auto PhysicsBox = pPhysicsEngine->CreatePhysicsBox(glm::vec3(0.5f), true, 0.0f);
 
@@ -141,12 +142,12 @@ namespace scene
 				m_PhysicsSphere->AddNode(Node);
 			}
 			
+			// Constraint‚ð—\–ñ‚·‚é
+			PhysicsSphere1->Reserve6DofSpringConstraint(PhysicsSphere0);
+			PhysicsSphere2->Reserve6DofSpringConstraint(PhysicsSphere1);
+
 			// Create
 			if (!m_PhysicsSphere->Create(pGraphicsAPI, pPhysicsEngine, m_DepthMF)) return false;
-
-			// Constraints‚ð’Ç‰Á‚·‚é
-			PhysicsSphere1->AddSpringConstraint(pPhysicsEngine, PhysicsSphere0);
-			PhysicsSphere2->AddSpringConstraint(pPhysicsEngine, PhysicsSphere1);
 		}
 
 		// m_PhysicsCubeList
@@ -230,6 +231,14 @@ namespace scene
 			if (!m_Background->CreateSimply(pGraphicsAPI, pPhysicsEngine, graphics::CPresetPrimitive::CreateSphere(), Mat , m_DepthMF)) return false;
 		}
 
+		// m_DebugSphere
+		{
+			auto Mat = m_SimpleTextureMF->CreateMaterial(pGraphicsAPI, 512, graphics::ECullMode::CULL_BACK);
+			//Mat->SetEnabledZTest(false);
+			m_DebugSphere->SetScale(glm::vec3(0.1f));
+			if (!m_DebugSphere->CreateSimply(pGraphicsAPI, pPhysicsEngine, graphics::CPresetPrimitive::CreateSphere(), Mat, m_DepthMF)) return false;
+		}
+
 		return true;
 	}
 
@@ -276,6 +285,11 @@ namespace scene
 			if (!m_Background->Update(pGraphicsAPI, pPhysicsEngine, DrawInfo->GetDeltaSecondsTime())) return false;
 		}
 
+		if (m_DebugSphere)
+		{
+			if (!m_DebugSphere->Update(pGraphicsAPI, pPhysicsEngine, DrawInfo->GetDeltaSecondsTime())) return false;
+		}
+
 		return true;
 	}
 
@@ -307,7 +321,7 @@ namespace scene
 
 		if (m_TdaMiku_Model)
 		{
-			if (!m_TdaMiku_Model->Draw(IsDepthPass, false, Camera, Projection, DrawInfo, nullptr)) return false;
+			if (!m_TdaMiku_Model->Draw(IsDepthPass, false, Camera, Projection, DrawInfo, m_DebugSphere)) return false;
 			//if (!m_TdaMiku_Model->Draw(IsDepthPass, true, Camera, Projection, DrawInfo, nullptr)) return false;
 		}
 		

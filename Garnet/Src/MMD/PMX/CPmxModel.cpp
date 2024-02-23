@@ -1388,7 +1388,7 @@ namespace mmd
 			PmxRigidbody.RotateDamping = RotateDamping;
 			PmxRigidbody.Repulsion = Repulsion;
 			PmxRigidbody.Friction = Friction;
-			PmxRigidbody.PhysicsType = PhysicsType;
+			PmxRigidbody.PhysicsType = static_cast<EPmxPhysicsType>(static_cast<int>(PhysicsType));
 
 			m_PmxRigidbodyList.push_back(PmxRigidbody);
 		}

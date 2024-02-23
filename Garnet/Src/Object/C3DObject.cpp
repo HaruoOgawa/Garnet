@@ -135,6 +135,7 @@ namespace object
 
 		// •¨—
 		CreatePhysics(pPhysicsEngine);
+		ApplyPhysicsConstraint(pPhysicsEngine);
 
 		// Material
 		for (auto& Material : m_MaterialList)
@@ -227,6 +228,14 @@ namespace object
 		for (const auto& Node : m_NodeList)
 		{
 			Node->CreatePhysicsObject(pPhysicsEngine);
+		}
+	}
+
+	void C3DObject::ApplyPhysicsConstraint(physics::IPhysicsEngine* pPhysicsEngine)
+	{
+		for (const auto& Node : m_NodeList)
+		{
+			Node->ApplyPhysicsConstraint(pPhysicsEngine);
 		}
 	}
 
@@ -454,7 +463,8 @@ namespace object
 		/*
 		if(DebugSphere)
 		{
-			for (const auto& Skeleton : m_AnimationController->GetSkeletonList())
+			const auto& Skeleton = m_AnimationController->GetSkeleton();
+			if(Skeleton)
 			{
 				for (const auto& Bone : Skeleton->GetBoneList())
 				{

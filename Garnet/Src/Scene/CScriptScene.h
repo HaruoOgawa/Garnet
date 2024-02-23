@@ -46,6 +46,7 @@ namespace scene
 		// Background
 		std::shared_ptr<graphics::CTexture> m_IBL_Skybox_Texture;
 		std::shared_ptr<object::C3DObject> m_Background;
+		std::shared_ptr<object::C3DObject> m_DebugSphere;
 	private:
 		bool Load(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker);
 

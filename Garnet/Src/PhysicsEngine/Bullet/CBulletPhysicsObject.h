@@ -10,6 +10,16 @@
 
 namespace physics
 {
+	struct SReservedConstraintData
+	{
+		std::shared_ptr<IPhysicsObject> FixedObject = nullptr;
+
+		SReservedConstraintData(const std::shared_ptr<IPhysicsObject>& object) :
+			FixedObject(object)
+		{
+		}
+	};
+
 	class CBulletPhysicsObject : public IPhysicsObject
 	{
 	protected:
@@ -20,6 +30,9 @@ namespace physics
 
 		std::shared_ptr<btCollisionShape> m_CollisionShape;
 		std::shared_ptr<CBulletRigidBody> m_RigidBody;
+
+		// Constraint
+		std::shared_ptr<SReservedConstraintData> m_6DofSpringConstraint;
 	public:
 		CBulletPhysicsObject(bool IsStaticFlag, float Mass);
 		virtual ~CBulletPhysicsObject();
@@ -36,7 +49,9 @@ namespace physics
 
 		virtual void SetPhysicsWorldTransform(const glm::vec3& WorldPos, const glm::quat& WorldRotate, const glm::vec3& WorldScale) override;
 
-		virtual void AddSpringConstraint(IPhysicsEngine* pPhysicsEngine, const std::shared_ptr<IPhysicsObject>& FixedObject) override;
+		virtual void Reserve6DofSpringConstraint(const std::shared_ptr<IPhysicsObject>& FixedObject) override;
+
+		virtual void Apply6DofSpringConstraint(IPhysicsEngine* pPhysicsEngine) override;
 	};
 }
 #endif

@@ -15,6 +15,13 @@ namespace mmd
 		CAPSULE = 2,
 	};
 
+	enum class EPmxPhysicsType
+	{
+		STATIC = 0,
+		DYNAMIC = 1,
+		DYNAMIC_JOINT = 2,
+	};
+
 	struct SPmxRigidbody
 	{
 		std::pair<std::string, std::wstring> RigidbodyName = {"", L""};
@@ -31,7 +38,7 @@ namespace mmd
 		float RotateDamping = 0.0f;
 		float Repulsion = 0.0f;
 		float Friction = 0.0f;
-		unsigned char PhysicsType = 0;
+		EPmxPhysicsType PhysicsType = EPmxPhysicsType::STATIC;
 	};
 }
 #endif
