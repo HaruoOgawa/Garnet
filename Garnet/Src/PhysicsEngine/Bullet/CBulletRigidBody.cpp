@@ -82,9 +82,7 @@ namespace physics
 
 		// RigidBodyを物理演算ワールドに追加
 		// 非衝突グループの設定のビットマスクもここで設定する
-		int group = *reinterpret_cast<const int*>(&RBParam.group);
-		int collodeMask = *reinterpret_cast<const int*>(&RBParam.NoneCollideGroupFlag);
-		pDynamicWorld->addRigidBody(m_Rigidbody.get(), group, collodeMask);
+		pDynamicWorld->addRigidBody(m_Rigidbody.get(), RBParam.group, ~RBParam.NoneCollideGroupFlag);
 
 		return true;
 	}

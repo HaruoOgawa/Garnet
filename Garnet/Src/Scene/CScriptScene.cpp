@@ -101,9 +101,12 @@ namespace scene
 			m_PhysicsSphere->AddMesh(Mesh);
 
 			// Physics
-			auto PhysicsSphere0 = pPhysicsEngine->CreatePhysicsSphere(1.0f, true, 0.0f, {});
-			auto PhysicsSphere1 = pPhysicsEngine->CreatePhysicsSphere(1.0f, false, 50.0f, {});
-			auto PhysicsSphere2 = pPhysicsEngine->CreatePhysicsSphere(1.0f, false, 100.0f, {});
+			physics::SRigidbodyParam RbParam = {};
+			RbParam.group = 32;
+			RbParam.NoneCollideGroupFlag = 129; // 1‚Æ8‚É“–‚½‚ç‚È‚¢‚æ‚¤‚É‚·‚é => 10000001b
+			auto PhysicsSphere0 = pPhysicsEngine->CreatePhysicsSphere(1.0f, true, 0.0f, RbParam);
+			auto PhysicsSphere1 = pPhysicsEngine->CreatePhysicsSphere(1.0f, false, 50.0f, RbParam);
+			auto PhysicsSphere2 = pPhysicsEngine->CreatePhysicsSphere(1.0f, false, 100.0f, RbParam);
 
 			// Node
 			{
@@ -190,7 +193,11 @@ namespace scene
 						LocalTransform->SetPos(glm::vec3(xpos * size * 0.5f, ypos * size * 0.5f, zpos * size * 0.5f + ZOffset));
 						LocalTransform->SetScale(glm::vec3(size));
 
-						auto PhysicsBox = pPhysicsEngine->CreatePhysicsBox(glm::vec3(0.5f), false, 1.0f, {});
+						physics::SRigidbodyParam RbParam = {};
+						RbParam.group = 128;
+						//RbParam.NoneCollideGroupFlag = 32; // 6ŒÂ–Ú‚Ìƒrƒbƒg‚ð—§‚Ä‚é ¨ 6‚Æ“–‚½‚ç‚È‚¢‚æ‚¤‚É‚·‚é => 00100000b
+
+						auto PhysicsBox = pPhysicsEngine->CreatePhysicsBox(glm::vec3(0.5f), false, 1.0f, RbParam);
 
 						std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(0, -1);
 						Node->SetLocalTransform(LocalTransform);
@@ -206,7 +213,7 @@ namespace scene
 		}
 
 		// m_TdaMiku_Model
-		{
+		/*{
 			m_TdaMiku_Model->SetPos(glm::vec3(0.0f, 0.0f, 0.0f));
 			m_TdaMiku_Model->SetScale(glm::vec3(0.1f));
 
@@ -216,7 +223,7 @@ namespace scene
 			if (Clip) m_TdaMiku_Model->AddHumanoidAnimationClip(Clip, "Walk", { nullptr, "" }, true);
 
 			m_TdaMiku_Model->ChangeMotion("Walk");
-		}
+		}*/
 
 		// m_Background
 		{
