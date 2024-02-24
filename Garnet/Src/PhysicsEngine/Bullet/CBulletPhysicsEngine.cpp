@@ -96,7 +96,8 @@ namespace physics
 	{
 		if (m_DynamicsWorld)
 		{
-			m_DynamicsWorld->stepSimulation(DeltaTime, 5);
+			// timeStep‚Í’è”‚Ì•û‚ªŒy‚¢‚Ì‚Å‚Ð‚Æ‚Ü‚¸’è”‚É‚µ‚Ä‚¨‚­
+			m_DynamicsWorld->stepSimulation(1.0f / 60.0f, 10);
 		}
 
 		return true;

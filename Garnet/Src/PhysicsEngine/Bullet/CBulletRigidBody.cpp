@@ -81,7 +81,10 @@ namespace physics
 		m_Rigidbody->setFriction(RBParam.Friction); // 摩擦係数の設定
 
 		// RigidBodyを物理演算ワールドに追加
-		pDynamicWorld->addRigidBody(m_Rigidbody.get());
+		// 非衝突グループの設定のビットマスクもここで設定する
+		int group = *reinterpret_cast<const int*>(&RBParam.group);
+		int collodeMask = *reinterpret_cast<const int*>(&RBParam.NoneCollideGroupFlag);
+		pDynamicWorld->addRigidBody(m_Rigidbody.get(), group, collodeMask);
 
 		return true;
 	}

@@ -9,7 +9,7 @@ namespace physics
 {
 	class CBulletPhysicsEngine : public IPhysicsEngine
 	{
-		std::unique_ptr<btDefaultCollisionConfiguration> m_CollisionConfigration;
+		std::unique_ptr<btCollisionConfiguration> m_CollisionConfigration;
 		std::unique_ptr<btCollisionDispatcher> m_Dispathcer;
 		std::unique_ptr<btBroadphaseInterface> m_OverlappingPairCache;
 		std::unique_ptr<btSequentialImpulseConstraintSolver> m_Solver;
