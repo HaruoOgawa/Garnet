@@ -25,5 +25,10 @@ namespace physics
 
 		return true;
 	}
+
+	glm::vec3 CBulletBox::GetSize()
+	{
+		return m_BoxHalfSize * 2.0f;
+	}
 }
 #endif

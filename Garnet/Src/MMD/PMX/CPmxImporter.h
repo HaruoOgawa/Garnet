@@ -59,6 +59,9 @@ namespace mmd
 	
 		static bool CreateRigidbody(physics::IPhysicsEngine* pPhysicsEngine, const CPmxModel& model, std::shared_ptr<animation::CSkeleton>& Skeleton);
 		static bool CreateJoint(physics::IPhysicsEngine* pPhysicsEngine, const CPmxModel& model, std::shared_ptr<animation::CSkeleton>& Skeleton);
+
+		// Helper Functions ///////////////////////////////////////////////////////////
+		static glm::vec3 CastToZYX(const glm::vec3& val);
 	public:
 		static bool ImportPmx(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, const std::string& ModelFileName, const std::vector<unsigned char>& Data, object::C3DObject* Object,
 			const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame);

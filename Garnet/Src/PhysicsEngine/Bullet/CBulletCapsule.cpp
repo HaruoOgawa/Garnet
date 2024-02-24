@@ -26,5 +26,10 @@ namespace physics
 
 		return true;
 	}
+
+	glm::vec3 CBulletCapsule::GetSize()
+	{
+		return glm::vec3(m_Radius, m_Height, m_Radius) * 2.0f;
+	}
 }
 #endif

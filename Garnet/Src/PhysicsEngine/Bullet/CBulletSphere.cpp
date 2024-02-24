@@ -28,5 +28,10 @@ namespace physics
 
 		return true;
 	}
+
+	glm::vec3 CBulletSphere::GetSize()
+	{
+		return glm::vec3(m_Radius) * 2.0f;
+	}
 }
 #endif

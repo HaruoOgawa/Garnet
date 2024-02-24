@@ -50,6 +50,11 @@ namespace physics
 		return (m_RBParam.PhysicsType == EPhysicsType::DYNAMIC_JOINT);
 	}
 
+	glm::vec3 CBulletPhysicsObject::GetSize()
+	{
+		return glm::vec3(1.0f);
+	}
+
 	glm::mat4 CBulletPhysicsObject::GetCurrentPhysicsWorldMatrix()
 	{
 		glm::vec3 Pos = GetCurrentWorldPos();

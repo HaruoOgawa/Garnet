@@ -15,7 +15,6 @@ namespace physics
 		std::unique_ptr<btSequentialImpulseConstraintSolver> m_Solver;
 		std::unique_ptr<btDiscreteDynamicsWorld> m_DynamicsWorld;
 	private:
-		bool HelloWorldTestCode();
 	public:
 		CBulletPhysicsEngine();
 		virtual ~CBulletPhysicsEngine();

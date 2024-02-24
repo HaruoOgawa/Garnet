@@ -20,6 +20,8 @@ namespace physics
 		virtual bool IsStatic() = 0;
 		virtual bool IsDynamicJoint() = 0;
 
+		virtual glm::vec3 GetSize() = 0;
+
 		virtual glm::mat4 GetCurrentPhysicsWorldMatrix() = 0;
 		virtual glm::vec3 GetCurrentWorldPos() = 0;
 		virtual glm::quat GetCurrentWorldRotate() = 0;

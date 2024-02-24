@@ -117,14 +117,15 @@ namespace physics
 			Constraint->setLinearLowerLimit(btVector3(JParam.LowerTransLimit.x, JParam.LowerTransLimit.y, JParam.LowerTransLimit.z));
 			Constraint->setLinearUpperLimit(btVector3(JParam.UpperTransLimit.x, JParam.UpperTransLimit.y, JParam.UpperTransLimit.z));
 			Constraint->setAngularLowerLimit(btVector3(JParam.LowerRotateLimit.x, JParam.LowerRotateLimit.y, JParam.LowerRotateLimit.z));
-			//Constraint->setAngularUpperLimit(btVector3(JParam.UpperRotateLimit.x, JParam.UpperRotateLimit.y, JParam.UpperRotateLimit.z));
+			Constraint->setAngularUpperLimit(btVector3(JParam.UpperRotateLimit.x, JParam.UpperRotateLimit.y, JParam.UpperRotateLimit.z));
 		}
 
 		// 細かいパラメーターを設定
+		for(int a = 0; a < 3; a++)
 		{
-			Constraint->enableSpring(1, true);
-			Constraint->setStiffness(1, 35.0f); // Stiffness: 硬さ
-			Constraint->setDamping(1, 0.5f); // Damping: 減衰力
+			Constraint->enableSpring(a, true);
+			Constraint->setStiffness(a, JParam.TransSpring[a]); // Stiffness: 硬さ
+			Constraint->setDamping(a, JParam.RotateSpring[a]); // Damping: 減衰力
 		}
 
 		// 物理ワールドに追加

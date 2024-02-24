@@ -658,17 +658,20 @@ namespace mmd
 			// 物理オブジェクトを作成
 			std::shared_ptr<physics::IPhysicsObject> PhysicsObject = nullptr;
 
+			// 剛体とジョイントでなぜかXとZが逆になっているのでその補正を入れる必要がある
+			glm::vec3 Size = CastToZYX(PmxRigidbody.Size);
+
 			if (PmxRigidbody.PhysicsShape == EPmxPhysicsShape::SPHERE)
 			{
-				PhysicsObject = pPhysicsEngine->CreatePhysicsSphere(PmxRigidbody.Size.x, (PmxRigidbody.PhysicsType == EPmxPhysicsType::STATIC), PmxRigidbody.Mass, { PmxRigidbody.RigidbodyName, static_cast<physics::EPhysicsType>(PmxRigidbody.PhysicsType), PmxRigidbody.group, PmxRigidbody.NoneCollideGroupFlag, PmxRigidbody.TransDamping, PmxRigidbody.RotateDamping, PmxRigidbody.Repulsion, PmxRigidbody.Friction});
+				PhysicsObject = pPhysicsEngine->CreatePhysicsSphere(Size.x, (PmxRigidbody.PhysicsType == EPmxPhysicsType::STATIC), PmxRigidbody.Mass, { PmxRigidbody.RigidbodyName, static_cast<physics::EPhysicsType>(PmxRigidbody.PhysicsType), PmxRigidbody.group, PmxRigidbody.NoneCollideGroupFlag, PmxRigidbody.TransDamping, PmxRigidbody.RotateDamping, PmxRigidbody.Repulsion, PmxRigidbody.Friction});
 			}
 			else if (PmxRigidbody.PhysicsShape == EPmxPhysicsShape::BOX)
 			{
-				PhysicsObject = pPhysicsEngine->CreatePhysicsBox(PmxRigidbody.Size, (PmxRigidbody.PhysicsType == EPmxPhysicsType::STATIC), PmxRigidbody.Mass, { PmxRigidbody.RigidbodyName, static_cast<physics::EPhysicsType>(PmxRigidbody.PhysicsType), PmxRigidbody.group, PmxRigidbody.NoneCollideGroupFlag, PmxRigidbody.TransDamping, PmxRigidbody.RotateDamping, PmxRigidbody.Repulsion, PmxRigidbody.Friction });
+				PhysicsObject = pPhysicsEngine->CreatePhysicsBox(Size, (PmxRigidbody.PhysicsType == EPmxPhysicsType::STATIC), PmxRigidbody.Mass, {PmxRigidbody.RigidbodyName, static_cast<physics::EPhysicsType>(PmxRigidbody.PhysicsType), PmxRigidbody.group, PmxRigidbody.NoneCollideGroupFlag, PmxRigidbody.TransDamping, PmxRigidbody.RotateDamping, PmxRigidbody.Repulsion, PmxRigidbody.Friction});
 			}
 			else if (PmxRigidbody.PhysicsShape == EPmxPhysicsShape::CAPSULE)
 			{
-				PhysicsObject = pPhysicsEngine->CreatePhysicsCapsule(PmxRigidbody.Size.x, PmxRigidbody.Size.y, (PmxRigidbody.PhysicsType == EPmxPhysicsType::STATIC), PmxRigidbody.Mass, { PmxRigidbody.RigidbodyName, static_cast<physics::EPhysicsType>(PmxRigidbody.PhysicsType), PmxRigidbody.group, PmxRigidbody.NoneCollideGroupFlag, PmxRigidbody.TransDamping, PmxRigidbody.RotateDamping, PmxRigidbody.Repulsion, PmxRigidbody.Friction });
+				PhysicsObject = pPhysicsEngine->CreatePhysicsCapsule(Size.x, Size.y, (PmxRigidbody.PhysicsType == EPmxPhysicsType::STATIC), PmxRigidbody.Mass, { PmxRigidbody.RigidbodyName, static_cast<physics::EPhysicsType>(PmxRigidbody.PhysicsType), PmxRigidbody.group, PmxRigidbody.NoneCollideGroupFlag, PmxRigidbody.TransDamping, PmxRigidbody.RotateDamping, PmxRigidbody.Repulsion, PmxRigidbody.Friction });
 			}
 			else
 			{
@@ -716,15 +719,24 @@ namespace mmd
 
 			// Constraintを予約する
 			// PmxJointのPos・Rotateは6Dof側(自由移動できる方の)ワールド座標系が入っているのでそのノードのローカル座標を渡すようにする
+			
+			// 剛体とジョイントでなぜかXとZが逆になっているのでその補正を入れる必要がある
 			PhysicsObjB->ReserveConstraint(PhysicsObjA, static_cast<physics::EJointType>(PmxJoint.PmxJointType), 
 				{ 
-					BoneList[BoneBIndex]->GetBoneNode()->GetPos(), BoneList[BoneBIndex]->GetBoneNode()->GetRot(), 
-					PmxJoint.LowerTransLimit, PmxJoint.UpperTransLimit, PmxJoint.LowerRotateLimit, PmxJoint.UpperRotateLimit, PmxJoint.TransSpring, PmxJoint.RotateSpring
+					BoneList[BoneBIndex]->GetBoneNode()->GetPos(), BoneList[BoneBIndex]->GetBoneNode()->GetRot(),
+					CastToZYX(PmxJoint.LowerTransLimit), CastToZYX(PmxJoint.UpperTransLimit), CastToZYX(PmxJoint.LowerRotateLimit), CastToZYX(PmxJoint.UpperRotateLimit), CastToZYX(PmxJoint.TransSpring),
+					CastToZYX(PmxJoint.RotateSpring)
 				}
 			);
 		}
 
 		return true;
+	}
+
+	// Helper Functions ///////////////////////////////////////////////////////////
+	glm::vec3 CPmxImporter::CastToZYX(const glm::vec3& val)
+	{
+		return glm::vec3(val.z, val.y, val.x);
 	}
 }
 #endif // USE_MMD

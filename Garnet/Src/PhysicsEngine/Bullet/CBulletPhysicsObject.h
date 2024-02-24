@@ -50,6 +50,8 @@ namespace physics
 		virtual bool IsStatic() override;
 		virtual bool IsDynamicJoint() override;
 
+		virtual glm::vec3 GetSize() override;
+
 		virtual glm::mat4 GetCurrentPhysicsWorldMatrix() override;
 		virtual glm::vec3 GetCurrentWorldPos() override;
 		virtual glm::quat GetCurrentWorldRotate() override;
