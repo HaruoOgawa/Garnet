@@ -3,6 +3,7 @@
 #ifdef USE_PHYSICS
 #include "../../Interface/IPhysicsObject.h"
 #include <memory>
+#include <vector>
 #include <btBulletDynamicsCommon.h>
 #include <glm/glm.hpp>
 
@@ -37,7 +38,7 @@ namespace physics
 		std::shared_ptr<CBulletRigidBody> m_RigidBody;
 
 		// Constraint
-		std::shared_ptr<SReservedConstraintData> m_ReservedConstraint;
+		std::vector<std::shared_ptr<SReservedConstraintData>> m_ReservedConstraintList;
 	public:
 		CBulletPhysicsObject(bool IsStaticFlag, float Mass, const SRigidbodyParam& RBParam);
 		virtual ~CBulletPhysicsObject();

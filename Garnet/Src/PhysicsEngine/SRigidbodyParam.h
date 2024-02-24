@@ -2,11 +2,13 @@
 
 #ifdef USE_PHYSICS
 #include "EPhysicsType.h"
+#include <string>
 
 namespace physics
 {
 	struct SRigidbodyParam
 	{
+		std::pair<std::string, std::wstring> RigidbodyName = { "", L"" };
 		EPhysicsType PhysicsType = EPhysicsType::STATIC;
 		unsigned char group = 0;
 		unsigned short NoneCollideGroupFlag = 0;

@@ -2,6 +2,7 @@
 
 #ifdef USE_PHYSICS
 #include <memory>
+#include <vector>
 #include <glm/glm.hpp>
 #include <glm/gtx/quaternion.hpp>
 #include <btBulletDynamicsCommon.h>
@@ -20,7 +21,7 @@ namespace physics
 		std::shared_ptr<btRigidBody> m_Rigidbody;
 
 		EJointType m_JointType;
-		std::shared_ptr<btGeneric6DofSpring2Constraint> m_6DofSpringConstraint;
+		std::vector<std::shared_ptr<btGeneric6DofSpring2Constraint>> m_6DofSpringConstraintList;
 	private:
 		bool Create(btDiscreteDynamicsWorld* pDynamicWorld, btCollisionShape* pCollisionShape, const glm::vec3& WorldPos, const glm::quat& WorldRotate, bool IsStatic, float Mass, const SRigidbodyParam& RBParam);
 	public:

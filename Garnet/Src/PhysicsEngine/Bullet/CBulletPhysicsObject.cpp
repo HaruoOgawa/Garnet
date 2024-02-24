@@ -11,8 +11,7 @@ namespace physics
 		m_RBParam(RBParam),
 		m_WorldScale(glm::vec3(1.0f)),
 		m_CollisionShape(nullptr),
-		m_RigidBody(nullptr),
-		m_ReservedConstraint(nullptr)
+		m_RigidBody(nullptr)
 	{
 	}
 
@@ -104,41 +103,41 @@ namespace physics
 	void CBulletPhysicsObject::ReserveConstraint(const std::shared_ptr<IPhysicsObject>& FixedObject, EJointType JointType, const SJointParam& JParam)
 	{
 		// Constraint‚ğ—\–ñ‚µ‚Ä‚¨‚­
-		m_ReservedConstraint = std::make_shared<SReservedConstraintData>(FixedObject, JointType, JParam);
+		m_ReservedConstraintList.push_back(std::make_shared<SReservedConstraintData>(FixedObject, JointType, JParam));
 	}
 
 	void CBulletPhysicsObject::ApplyConstraint(IPhysicsEngine* pPhysicsEngine)
 	{
-		if (!m_ReservedConstraint) return;
-
 		CBulletPhysicsEngine* pBulletPhysics = static_cast<CBulletPhysicsEngine*>(pPhysicsEngine);
 
-		if (m_ReservedConstraint->JointType == EJointType::SPRING_6DOF)
+		for (const auto& ReservedConstraint : m_ReservedConstraintList)
 		{
-			// Constraints‚ğ’Ç‰Á‚·‚é
-			const auto& TargetRigidBody = static_cast<CBulletPhysicsObject*>(m_ReservedConstraint->FixedObject.get())->GetRigidBody();
-			m_RigidBody->Add6DofSpringConstraint(pBulletPhysics->GetDynamicsWorld(), TargetRigidBody, m_ReservedConstraint->JParam);
+			if (ReservedConstraint->JointType == EJointType::SPRING_6DOF)
+			{
+				// Constraints‚ğ’Ç‰Á‚·‚é
+				const auto& TargetRigidBody = static_cast<CBulletPhysicsObject*>(ReservedConstraint->FixedObject.get())->GetRigidBody();
+				m_RigidBody->Add6DofSpringConstraint(pBulletPhysics->GetDynamicsWorld(), TargetRigidBody, ReservedConstraint->JParam);
+			}
+			else if (ReservedConstraint->JointType == EJointType::Generic_6DOF)
+			{
+				// –¢À‘•
+			}
+			else if (ReservedConstraint->JointType == EJointType::P2P)
+			{
+				// –¢À‘•
+			}
+			else if (ReservedConstraint->JointType == EJointType::ConeTwist)
+			{
+				// –¢À‘•
+			}
+			else if (ReservedConstraint->JointType == EJointType::Slider)
+			{
+				// –¢À‘•
+			}
 		}
-		else if (m_ReservedConstraint->JointType == EJointType::Generic_6DOF)
-		{
-			// –¢À‘•
-		}
-		else if (m_ReservedConstraint->JointType == EJointType::P2P)
-		{
-			// –¢À‘•
-		}
-		else if (m_ReservedConstraint->JointType == EJointType::ConeTwist)
-		{
-			// –¢À‘•
-		}
-		else if (m_ReservedConstraint->JointType == EJointType::Slider)
-		{
-			// –¢À‘•
-		}
-		
+
 		// ’Ç‰Á‚ªI‚í‚Á‚½‚Ì‚ÅƒŠƒŠ[ƒX‚·‚é
-		m_ReservedConstraint.reset();
-		m_ReservedConstraint = nullptr;
+		m_ReservedConstraintList.clear();
 	}
 
 	void CBulletPhysicsObject::UpdateJointWorldTransform(const glm::vec3& Pos, const glm::quat& Rotate, const glm::vec3& Scale)

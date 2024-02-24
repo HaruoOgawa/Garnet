@@ -7,21 +7,22 @@ namespace physics
 		m_pDynamicWorld(pDynamicWorld),
 		m_MotionState(nullptr),
 		m_Rigidbody(nullptr),
-		m_JointType(EJointType::NONE),
-		m_6DofSpringConstraint(nullptr)
+		m_JointType(EJointType::NONE)
 	{
 		Create(pDynamicWorld, pCollisionShape, WorldPos, WorldRotate, IsStatic, Mass, RBParam);
 	}
 
 	CBulletRigidBody::~CBulletRigidBody()
 	{
-		if (m_6DofSpringConstraint)
+		for (const auto& Constraint : m_6DofSpringConstraintList)
 		{
-			m_pDynamicWorld->removeConstraint(m_6DofSpringConstraint.get());
-
-			m_6DofSpringConstraint.reset();
-			m_6DofSpringConstraint = nullptr;
+			if (Constraint)
+			{
+				m_pDynamicWorld->removeConstraint(Constraint.get());
+			}
 		}
+		
+		m_6DofSpringConstraintList.clear();
 
 		if (m_MotionState)
 		{
@@ -94,7 +95,7 @@ namespace physics
 		// frameInAとframeInBはバネに例えるとバネの端点・剛体との接合点を表す. 二つの剛体にバネを挟むことをイメージするとわかりやすい. それは必ず２つの接合点があるはずである
 		// frameInAはd6body0の接合点、frameInBのfixedBody1の接合点
 		// そしてその座標はframeInA・frameInBともに『『fixedBody1』』の座標を中心とした移動・回転で表される
-		m_6DofSpringConstraint = std::make_shared<btGeneric6DofSpring2Constraint>(
+		std::shared_ptr< btGeneric6DofSpring2Constraint> Constraint = std::make_shared<btGeneric6DofSpring2Constraint>(
 			*m_Rigidbody.get(), 
 			*FixedRigidbody->GetbtRigidBody().get(),
 			btTransform(btQuaternion::getIdentity(), { 0.0f, -1.0f, 0.0f }),
@@ -103,41 +104,50 @@ namespace physics
 
 		// Frameの座標を計算
 		{
-			btQuaternion RotateA = btQuaternion(JParam.Rotate.x, JParam.Rotate.y, JParam.Rotate.z, JParam.Rotate.w);
+			btQuaternion RotateA = btQuaternion(JParam.Rotate6DofBody.x, JParam.Rotate6DofBody.y, JParam.Rotate6DofBody.z, JParam.Rotate6DofBody.w);
 
-			m_6DofSpringConstraint->setFrames(
-				btTransform(RotateA, { JParam.Pos.x, JParam.Pos.y, JParam.Pos.z }),
+			Constraint->setFrames(
+				btTransform(RotateA, { JParam.Pos6DofBody.x, JParam.Pos6DofBody.y, JParam.Pos6DofBody.z }),
 				btTransform(btQuaternion::getIdentity(), { 0.0f, 0.0f, 0.0f })
 			);
 		}
 
 		// 関数名の通り移動できる範囲・回転できる範囲を設定
 		{
-			m_6DofSpringConstraint->setLinearLowerLimit(btVector3(JParam.LowerTransLimit.x, JParam.LowerTransLimit.y, JParam.LowerTransLimit.z));
-			m_6DofSpringConstraint->setLinearUpperLimit(btVector3(JParam.UpperTransLimit.x, JParam.UpperTransLimit.y, JParam.UpperTransLimit.z));
-			m_6DofSpringConstraint->setAngularLowerLimit(btVector3(JParam.LowerRotateLimit.x, JParam.LowerRotateLimit.y, JParam.LowerRotateLimit.z));
-			//spring->setAngularUpperLimit(btVector3(JParam.UpperRotateLimit.x, JParam.UpperRotateLimit.y, JParam.UpperRotateLimit.z));
+			Constraint->setLinearLowerLimit(btVector3(JParam.LowerTransLimit.x, JParam.LowerTransLimit.y, JParam.LowerTransLimit.z));
+			Constraint->setLinearUpperLimit(btVector3(JParam.UpperTransLimit.x, JParam.UpperTransLimit.y, JParam.UpperTransLimit.z));
+			Constraint->setAngularLowerLimit(btVector3(JParam.LowerRotateLimit.x, JParam.LowerRotateLimit.y, JParam.LowerRotateLimit.z));
+			//Constraint->setAngularUpperLimit(btVector3(JParam.UpperRotateLimit.x, JParam.UpperRotateLimit.y, JParam.UpperRotateLimit.z));
 		}
 
 		// 細かいパラメーターを設定
 		{
-			m_6DofSpringConstraint->enableSpring(1, true);
-			m_6DofSpringConstraint->setStiffness(1, 35.0f); // Stiffness: 硬さ
-			m_6DofSpringConstraint->setDamping(1, 0.5f); // Damping: 減衰力
+			Constraint->enableSpring(1, true);
+			Constraint->setStiffness(1, 35.0f); // Stiffness: 硬さ
+			Constraint->setDamping(1, 0.5f); // Damping: 減衰力
 		}
 
 		// 物理ワールドに追加
-		pDynamicWorld->addConstraint(m_6DofSpringConstraint.get(), false);
+		pDynamicWorld->addConstraint(Constraint.get(), false);
+
+		//
+		m_6DofSpringConstraintList.push_back(Constraint);
 	}
 
 	void CBulletRigidBody::UpdateJointWorldTransform(const btTransform& transform)
 	{
 		if (m_JointType == EJointType::SPRING_6DOF)
 		{
-			m_6DofSpringConstraint->setFrames(
-				transform,
-				btTransform(btQuaternion::getIdentity(), { 0.0f, 0.0f, 0.0f })
-			);
+			for (const auto& Constraint : m_6DofSpringConstraintList)
+			{
+				if (Constraint)
+				{
+					Constraint->setFrames(
+						transform,
+						btTransform(btQuaternion::getIdentity(), { 0.0f, 0.0f, 0.0f })
+					);
+				}
+			}
 		}
 		else if (m_JointType == EJointType::Generic_6DOF)
 		{
