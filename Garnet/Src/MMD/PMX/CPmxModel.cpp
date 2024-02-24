@@ -1323,12 +1323,18 @@ namespace mmd
 			int RelationBoneIndex = GetMultiTypeValueAsInterger(Analyser, MetaData.BoneIndexSize);
 
 			// グループ
-			unsigned char group = 0;
-			if (!Analyser.GetByte(group)) return false;
+			// ここのバイナリに入っているのは左シフト数
+			unsigned char shiftCount = 0;
+			if (!Analyser.GetByte(shiftCount)) return false;
+			// シフト演算を実行してグループを取得する
+			unsigned char group = 0x01 << shiftCount;
 
 			// 非衝突グループフラグ
 			unsigned short NoneCollideGroupFlag = 0;
 			if (!Analyser.GetUShort(NoneCollideGroupFlag)) return false;
+
+			// フラグが立っていると当たらないということにする
+			NoneCollideGroupFlag = ~NoneCollideGroupFlag;
 
 			// 形状 - 0:球 1:箱 2:カプセル
 			unsigned char Shape = 0;
