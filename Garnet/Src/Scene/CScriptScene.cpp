@@ -65,7 +65,7 @@ namespace scene
 		const float ZOffset = 3.0f;
 
 		// m_PhysicsGround
-		{
+		/* {
 			auto Material = m_PBRMF->CreateMaterial(pGraphicsAPI, 1, graphics::ECullMode::CULL_BACK);
 
 			m_PhysicsGround->GetTextureSet()->AddCubeMap(m_Cube_Texture);
@@ -85,7 +85,7 @@ namespace scene
 		// m_PhysicsSphere
 		{
 			// Material
-			auto Material = m_PBRMF->CreateMaterial(pGraphicsAPI, 3, graphics::ECullMode::CULL_BACK);
+			auto Material = m_PBRMF->CreateMaterial(pGraphicsAPI, 5, graphics::ECullMode::CULL_BACK);
 
 			m_PhysicsSphere->GetTextureSet()->AddCubeMap(m_Cube_Texture);
 			Material->ReplacePreloadUniformValue("useCubeMap", &glm::ivec1(1)[0], sizeof(glm::ivec1), 0);
@@ -96,23 +96,26 @@ namespace scene
 
 			// Mesh
 			std::shared_ptr<graphics::CMesh> Mesh = std::make_shared<graphics::CMesh>();
-			Mesh->CreateSimpleMesh(graphics::CPresetPrimitive::CreateSphere(), 0);
+			//Mesh->CreateSimpleMesh(graphics::CPresetPrimitive::CreateSphere(), 0);
+			Mesh->CreateSimpleMesh(graphics::CPresetPrimitive::CreateBox(), 0);
 
 			m_PhysicsSphere->AddMesh(Mesh);
 
 			// Physics
 			physics::SRigidbodyParam RbParam = {};
 			RbParam.group = 32;
-			RbParam.NoneCollideGroupFlag = 129; // 1と8に当たらないようにする => 10000001b
+			RbParam.NoneCollideGroupFlag = 161; // 1,6,8に当たらないようにする。6は自分たちのグループなのでお互いがぶつからないようにする => 10100001b
 			auto PhysicsSphere0 = pPhysicsEngine->CreatePhysicsSphere(1.0f, true, 0.0f, RbParam);
 			auto PhysicsSphere1 = pPhysicsEngine->CreatePhysicsSphere(1.0f, false, 50.0f, RbParam);
-			auto PhysicsSphere2 = pPhysicsEngine->CreatePhysicsSphere(1.0f, false, 100.0f, RbParam);
+			auto PhysicsSphere2 = pPhysicsEngine->CreatePhysicsSphere(1.0f, false, 50.0f, RbParam);
+			auto PhysicsSphere3 = pPhysicsEngine->CreatePhysicsSphere(1.0f, false, 50.0f, RbParam);
+			auto PhysicsSphere4 = pPhysicsEngine->CreatePhysicsSphere(1.0f, false, 50.0f, RbParam);
 
 			// Node
 			{
 				std::shared_ptr<math::CTransform> LocalTransform = std::make_shared<math::CTransform>();
 				LocalTransform->SetPos(glm::vec3(0.0f, 1.5f, 0.0f + ZOffset));
-				LocalTransform->SetScale(glm::vec3(0.25f));
+				LocalTransform->SetScale(glm::vec3(0.5f));
 
 				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(0, -1);
 				Node->SetLocalTransform(LocalTransform);
@@ -123,12 +126,36 @@ namespace scene
 
 			{
 				std::shared_ptr<math::CTransform> LocalTransform = std::make_shared<math::CTransform>();
-				LocalTransform->SetPos(glm::vec3(1.0f, 1.5f, 0.0f + ZOffset));
-				LocalTransform->SetScale(glm::vec3(0.25f));
+				LocalTransform->SetPos(glm::vec3(0.5, 1.5f, 0.0f + ZOffset));
+				LocalTransform->SetScale(glm::vec3(0.5f));
 
 				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(0, -1);
 				Node->SetLocalTransform(LocalTransform);
 				Node->SetPhysicsObject(PhysicsSphere1);
+
+				m_PhysicsSphere->AddNode(Node);
+			}
+
+			{
+				std::shared_ptr<math::CTransform> LocalTransform = std::make_shared<math::CTransform>();
+				LocalTransform->SetPos(glm::vec3(1.0f, 1.5f, 0.0f + ZOffset));
+				LocalTransform->SetScale(glm::vec3(0.5f));
+
+				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(0, -1);
+				Node->SetLocalTransform(LocalTransform);
+				Node->SetPhysicsObject(PhysicsSphere2);
+
+				m_PhysicsSphere->AddNode(Node);
+			}
+
+			{
+				std::shared_ptr<math::CTransform> LocalTransform = std::make_shared<math::CTransform>();
+				LocalTransform->SetPos(glm::vec3(1.5f, 1.5f, 0.0f + ZOffset));
+				LocalTransform->SetScale(glm::vec3(0.5f));
+
+				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(0, -1);
+				Node->SetLocalTransform(LocalTransform);
+				Node->SetPhysicsObject(PhysicsSphere3);
 
 				m_PhysicsSphere->AddNode(Node);
 			}
@@ -140,14 +167,29 @@ namespace scene
 
 				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(0, -1);
 				Node->SetLocalTransform(LocalTransform);
-				Node->SetPhysicsObject(PhysicsSphere2);
+				Node->SetPhysicsObject(PhysicsSphere4);
 
 				m_PhysicsSphere->AddNode(Node);
 			}
 			
 			// Constraintを予約する
-			PhysicsSphere1->ReserveConstraint(PhysicsSphere0, physics::EJointType::SPRING_6DOF, {});
-			PhysicsSphere2->ReserveConstraint(PhysicsSphere1, physics::EJointType::SPRING_6DOF, {});
+			physics::SJointParam JParam = {};
+			JParam.Pos6DofBody = glm::vec3(0.0f, -0.5f, 0.0f);
+
+			// JParam.LowerTransLimit = glm::vec3(-0.5f);
+			// JParam.UpperTransLimit = glm::vec3(0.5f);
+			JParam.LowerTransLimit = glm::vec3(0.0f);
+			JParam.UpperTransLimit = glm::vec3(0.0f);
+
+			// JParam.LowerRotateLimit = glm::vec3(-3.1415f / 6.0f);
+			// JParam.UpperRotateLimit = glm::vec3(3.1415f / 6.0f);
+			JParam.LowerRotateLimit = glm::vec3(0.0f);
+			JParam.UpperRotateLimit = glm::vec3(0.0f);
+
+			PhysicsSphere1->ReserveConstraint(PhysicsSphere0, physics::EJointType::SPRING_6DOF, JParam);
+			PhysicsSphere2->ReserveConstraint(PhysicsSphere1, physics::EJointType::SPRING_6DOF, JParam);
+			PhysicsSphere3->ReserveConstraint(PhysicsSphere2, physics::EJointType::SPRING_6DOF, JParam);
+			PhysicsSphere4->ReserveConstraint(PhysicsSphere3, physics::EJointType::SPRING_6DOF, JParam);
 
 			// Create
 			if (!m_PhysicsSphere->Create(pGraphicsAPI, pPhysicsEngine, m_DepthMF)) return false;
@@ -210,7 +252,7 @@ namespace scene
 
 			// Create
 			if (!m_PhysicsCubeList->Create(pGraphicsAPI, pPhysicsEngine, m_DepthMF)) return false;
-		}
+		}*/
 
 		// m_TdaMiku_Model
 		{
@@ -272,7 +314,8 @@ namespace scene
 		if (m_PhysicsSphere)
 		{
 			const float ZOffset = 3.0f;
-			m_PhysicsSphere->GetNodeList()[0]->SetPos(glm::vec3(glm::sin(DrawInfo->GetSecondsTime()), 1.5f, 0.0f + ZOffset));
+			//m_PhysicsSphere->GetNodeList()[0]->SetPos(glm::vec3(glm::sin(DrawInfo->GetSecondsTime()), 1.5f, 0.0f + ZOffset));
+			//m_PhysicsSphere->GetNodeList()[0]->SetRot(glm::angleAxis(glm::sin(DrawInfo->GetSecondsTime()) * 3.1415f + 3.1415f, glm::vec3(0.0f, 0.0f, 1.0f)));
 
 			if (!m_PhysicsSphere->Update(pGraphicsAPI, pPhysicsEngine, DrawInfo->GetDeltaSecondsTime())) return false;
 		}
@@ -285,6 +328,11 @@ namespace scene
 		if (m_TdaMiku_Model)
 		{
 			if (!m_TdaMiku_Model->Update(pGraphicsAPI, pPhysicsEngine, DrawInfo->GetDeltaSecondsTime())) return false;
+
+			if (m_TdaMiku_Model->GetNodeList().size() > 0)
+			{
+				//m_PhysicsSphere->GetNodeList()[0]->SetWorldMatrix(m_TdaMiku_Model->GetNodeList()[110]->GetWorldMatrix());
+			}
 		}
 		
 		if (m_Background)

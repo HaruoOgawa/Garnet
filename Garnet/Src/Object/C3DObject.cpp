@@ -497,6 +497,20 @@ namespace object
 						DebugSphere->GetMaterialList()[0]->SetUniformValue("baseColor", &glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)[0], sizeof(glm::vec4));
 					}
 
+					{
+						glm::mat4 Matrix = m_ObjectTransform->GetModelMatrix() * BoneNode->GetWorldMatrix();
+
+						glm::vec3 WorldPos = glm::vec3(0.0f);
+						glm::quat WorldRotate = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
+						glm::vec3 WorldScale = glm::vec3(1.0f);
+
+						math::CTransform::CastModelMatrixToTransform(Matrix, WorldPos, WorldRotate, WorldScale);
+
+						DebugSphere->SetPos(WorldPos);
+						DebugSphere->SetRot(WorldRotate);
+						DebugSphere->SetScale(WorldScale);
+					}
+
 					if (!DebugSphere->Draw(IsDepthPass, false, Camera, Projection, DrawInfo)) return false;
 				}
 			}

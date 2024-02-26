@@ -27,7 +27,7 @@ namespace mmd
 		std::pair<std::string, std::wstring> RigidbodyName = {"", L""};
 		std::pair<std::string, std::wstring> RigidbodyNameEN = { "", L"" };
 		int RelationBoneIndex = -1;
-		unsigned char group = 0;
+		unsigned short group = 0;
 		unsigned short NoneCollideGroupFlag = 0;
 		EPmxPhysicsShape PhysicsShape = EPmxPhysicsShape::NONE;
 		glm::vec3 Size = glm::vec3(0.0f);

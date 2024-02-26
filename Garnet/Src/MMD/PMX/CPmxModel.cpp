@@ -1327,7 +1327,7 @@ namespace mmd
 			unsigned char shiftCount = 0;
 			if (!Analyser.GetByte(shiftCount)) return false;
 			// シフト演算を実行してグループを取得する
-			unsigned char group = 0x01 << shiftCount;
+			unsigned short group = 0x01 << shiftCount;
 
 			// 非衝突グループフラグ
 			unsigned short NoneCollideGroupFlag = 0;

@@ -21,7 +21,7 @@ namespace physics
 
 		CBulletPhysicsEngine* pBulletPhysics = static_cast<CBulletPhysicsEngine*>(pPhysicsEngine);
 
-		m_CollisionShape = std::make_shared<btCapsuleShape>(m_Radius, m_Height);
+		m_CollisionShape = std::make_shared<btCapsuleShape>(m_Radius * WorldScale.x, m_Height * WorldScale.y);
 		m_RigidBody = std::make_shared<CBulletRigidBody>(pBulletPhysics->GetDynamicsWorld(), m_CollisionShape.get(), WorldPos, WorldRotate, m_IsStatic, m_Mass, m_RBParam);
 
 		return true;
@@ -29,7 +29,7 @@ namespace physics
 
 	glm::vec3 CBulletCapsule::GetSize()
 	{
-		return glm::vec3(m_Radius, m_Height, m_Radius) * 2.0f;
+		return glm::vec3(m_Radius, m_Height, m_Radius);
 	}
 }
 #endif
