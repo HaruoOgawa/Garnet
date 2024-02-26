@@ -9,7 +9,6 @@ namespace physics
 		m_IsStatic(IsStaticFlag),
 		m_Mass(Mass),
 		m_RBParam(RBParam),
-		m_WorldScale(glm::vec3(1.0f)),
 		m_CollisionShape(nullptr),
 		m_RigidBody(nullptr)
 	{
@@ -61,7 +60,7 @@ namespace physics
 		glm::quat Rot = GetCurrentWorldRotate();
 
 		glm::mat4 WorldMatrix = glm::mat4(1.0f);
-		math::CTransform::CalcModelMatrix(WorldMatrix, Pos, Rot, true, m_WorldScale);
+		math::CTransform::CalcModelMatrix(WorldMatrix, Pos, Rot, false);
 
 		return WorldMatrix;
 	}
@@ -111,7 +110,7 @@ namespace physics
 		m_ReservedConstraintList.push_back(std::make_shared<SReservedConstraintData>(FixedObject, JointType, JParam));
 	}
 
-	void CBulletPhysicsObject::ApplyConstraint(IPhysicsEngine* pPhysicsEngine)
+	void CBulletPhysicsObject::ApplyConstraint(IPhysicsEngine* pPhysicsEngine, const glm::quat& FixedWorldRotate)
 	{
 		CBulletPhysicsEngine* pBulletPhysics = static_cast<CBulletPhysicsEngine*>(pPhysicsEngine);
 
@@ -121,7 +120,7 @@ namespace physics
 			{
 				// Constraints‚ð’Ç‰Á‚·‚é
 				const auto& TargetRigidBody = static_cast<CBulletPhysicsObject*>(ReservedConstraint->FixedObject.get())->GetRigidBody();
-				m_RigidBody->Add6DofSpringConstraint(pBulletPhysics->GetDynamicsWorld(), TargetRigidBody, ReservedConstraint->JParam);
+				m_RigidBody->Add6DofSpringConstraint(pBulletPhysics->GetDynamicsWorld(), TargetRigidBody, ReservedConstraint->JParam, FixedWorldRotate);
 			}
 			else if (ReservedConstraint->JointType == EJointType::Generic_6DOF)
 			{

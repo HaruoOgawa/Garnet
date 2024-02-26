@@ -94,7 +94,11 @@ namespace object
 		// Constraintを反映する
 		if (pPhysicsEngine && m_PhysicsObject)
 		{
-			m_PhysicsObject->ApplyConstraint(pPhysicsEngine);
+			// もしかするとローカルでいいかも？
+			glm::quat WorldRotate = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
+			math::CTransform::CastModelMatrixToRotation(m_WorldMatrix, WorldRotate);
+
+			m_PhysicsObject->ApplyConstraint(pPhysicsEngine, WorldRotate);
 		}
 	}
 
@@ -103,10 +107,16 @@ namespace object
 		// 物理演算の結果を反映する(DynamicObjectのみ)
 		if (m_PhysicsObject && !m_PhysicsObject->IsStatic())
 		{
+			// サイズを取得
+			glm::vec3 WorldScale = glm::vec3(1.0f);
+			math::CTransform::CastModelMatrixToScale(m_WorldMatrix, WorldScale);
+
+			glm::mat4 sclMatrix = glm::scale(glm::mat4(1.0f), WorldScale);
+
 			// 物理オブジェクトのワールド座標を渡す
 			// 物理オブジェクトに親子関係を持たせるのはConstraints(Joint)を形成するとき(PMXの髪とか服)で、一度物理エンジンにオブジェクトを登録するとConstraints(Joint)の効果で子要素は親要素に自動で引っ張られるようになる
 			// なので一度ワールド行列を計算したうえで物理オブジェクトを生成した後は、位置計算を全て物理エンジンに任せる
-			m_WorldMatrix = m_PhysicsObject->GetCurrentPhysicsWorldMatrix();
+			m_WorldMatrix = m_PhysicsObject->GetCurrentPhysicsWorldMatrix() * sclMatrix;
 		}
 	}
 
@@ -150,7 +160,7 @@ namespace object
 			}
 			else if (m_PhysicsObject->IsDynamicJoint())
 			{
-				m_PhysicsObject->UpdateJointWorldTransform(GetPos(), GetRot(), glm::vec3(1.0f));
+				//m_PhysicsObject->UpdateJointWorldTransform(GetPos(), GetRot(), glm::vec3(1.0f));
 			}
 		}
 	}

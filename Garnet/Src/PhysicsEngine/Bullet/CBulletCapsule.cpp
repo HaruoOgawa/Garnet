@@ -17,8 +17,6 @@ namespace physics
 
 	bool CBulletCapsule::Create(IPhysicsEngine* pPhysicsEngine, const glm::vec3& WorldPos, const glm::quat& WorldRotate, const glm::vec3& WorldScale)
 	{
-		m_WorldScale = WorldScale;
-
 		CBulletPhysicsEngine* pBulletPhysics = static_cast<CBulletPhysicsEngine*>(pPhysicsEngine);
 
 		m_CollisionShape = std::make_shared<btCapsuleShape>(m_Radius * WorldScale.x, m_Height * WorldScale.y);

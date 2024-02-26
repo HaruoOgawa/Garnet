@@ -87,7 +87,7 @@ namespace physics
 		return true;
 	}
 
-	void CBulletRigidBody::Add6DofSpringConstraint(btDiscreteDynamicsWorld* pDynamicWorld, const std::shared_ptr<CBulletRigidBody>& FixedRigidbody, SJointParam JParam)
+	void CBulletRigidBody::Add6DofSpringConstraint(btDiscreteDynamicsWorld* pDynamicWorld, const std::shared_ptr<CBulletRigidBody>& FixedRigidbody, SJointParam JParam, const glm::quat& FixedWorldRotate)
 	{
 		m_JointType = EJointType::SPRING_6DOF;
 
@@ -106,10 +106,11 @@ namespace physics
 		// Frame‚ÌÀ•W‚ðŒvŽZ
 		{
 			btQuaternion RotateA = btQuaternion(JParam.Rotate6DofBody.x, JParam.Rotate6DofBody.y, JParam.Rotate6DofBody.z, JParam.Rotate6DofBody.w);
+			btQuaternion FixedRotateB = btQuaternion(FixedWorldRotate.x, FixedWorldRotate.y, FixedWorldRotate.z, FixedWorldRotate.w);
 
 			Constraint->setFrames(
 				btTransform(RotateA, { JParam.Pos6DofBody.x, JParam.Pos6DofBody.y, JParam.Pos6DofBody.z }),
-				btTransform(btQuaternion::getIdentity(), { 0.0f, 0.0f, 0.0f })
+				btTransform(FixedRotateB, { 0.0f, 0.0f, 0.0f })
 			);
 		}
 

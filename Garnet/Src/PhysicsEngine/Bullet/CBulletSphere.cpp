@@ -17,8 +17,6 @@ namespace physics
 
 	bool CBulletSphere::Create(IPhysicsEngine* pPhysicsEngine, const glm::vec3& WorldPos, const glm::quat& WorldRotate, const glm::vec3& WorldScale)
 	{
-		m_WorldScale = WorldScale;
-
 		CBulletPhysicsEngine* pBulletPhysics = static_cast<CBulletPhysicsEngine*>(pPhysicsEngine);
 
 		float MaxScale = fmaxf(WorldScale.x, fmaxf(WorldScale.y, WorldScale.z));

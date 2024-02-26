@@ -32,8 +32,6 @@ namespace physics
 		const float m_Mass;
 		const SRigidbodyParam m_RBParam;
 
-		glm::vec3 m_WorldScale;
-
 		std::shared_ptr<btCollisionShape> m_CollisionShape;
 		std::shared_ptr<CBulletRigidBody> m_RigidBody;
 
@@ -59,7 +57,7 @@ namespace physics
 		virtual void SetPhysicsWorldTransform(const glm::vec3& WorldPos, const glm::quat& WorldRotate, const glm::vec3& WorldScale) override;
 
 		virtual void ReserveConstraint(const std::shared_ptr<IPhysicsObject>& FixedObject, EJointType JointType, const SJointParam& JParam) override;
-		virtual void ApplyConstraint(IPhysicsEngine* pPhysicsEngine) override;
+		virtual void ApplyConstraint(IPhysicsEngine* pPhysicsEngine, const glm::quat& FixedWorldRotate) override;
 		virtual void UpdateJointWorldTransform(const glm::vec3& Pos, const glm::quat& Rotate, const glm::vec3& Scale) override;
 	};
 }
