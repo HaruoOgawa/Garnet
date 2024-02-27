@@ -18,8 +18,16 @@ namespace physics
 	{
 		CBulletPhysicsEngine* pBulletPhysics = static_cast<CBulletPhysicsEngine*>(pPhysicsEngine);
 
-		m_CollisionShape = std::make_shared<btBoxShape>(btVector3(m_BoxHalfSize.x * WorldScale.x, m_BoxHalfSize.y * WorldScale.y, m_BoxHalfSize.z * WorldScale.z));
-		m_RigidBody = std::make_shared<CBulletRigidBody>(pBulletPhysics->GetDynamicsWorld(), m_CollisionShape.get(), WorldPos, WorldRotate, m_IsStatic, m_Mass, m_RBParam);
+		if (m_RBParam.UseSelfInitialTransform)
+		{
+			m_CollisionShape = std::make_shared<btBoxShape>(btVector3(m_BoxHalfSize.x, m_BoxHalfSize.y, m_BoxHalfSize.z));
+			m_RigidBody = std::make_shared<CBulletRigidBody>(pBulletPhysics->GetDynamicsWorld(), m_CollisionShape.get(), m_RBParam.InitWorldPos, m_RBParam.InitWorldRotate, m_IsStatic, m_Mass, m_RBParam);
+		}
+		else
+		{
+			m_CollisionShape = std::make_shared<btBoxShape>(btVector3(m_BoxHalfSize.x * WorldScale.x, m_BoxHalfSize.y * WorldScale.y, m_BoxHalfSize.z * WorldScale.z));
+			m_RigidBody = std::make_shared<CBulletRigidBody>(pBulletPhysics->GetDynamicsWorld(), m_CollisionShape.get(), WorldPos, WorldRotate, m_IsStatic, m_Mass, m_RBParam);
+		}
 
 		return true;
 	}

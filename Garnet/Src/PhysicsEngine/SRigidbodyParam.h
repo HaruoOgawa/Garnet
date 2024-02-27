@@ -3,6 +3,8 @@
 #ifdef USE_PHYSICS
 #include "EPhysicsType.h"
 #include <string>
+#include <glm/glm.hpp>
+#include <glm/gtx/quaternion.hpp>
 
 namespace physics
 {
@@ -10,6 +12,11 @@ namespace physics
 	{
 		std::pair<std::string, std::wstring> RigidbodyName = { "", L"" };
 		EPhysicsType PhysicsType = EPhysicsType::STATIC;
+
+		// 自身の初期ワールドトランスフォームを使用するかどうか
+		bool UseSelfInitialTransform = false;
+		glm::vec3 InitWorldPos = glm::vec3(0.0f);
+		glm::quat InitWorldRotate = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
 
 		// CollideMaskは0以外である必要がある
 		// 0は何にも衝突しない判定になる(?)

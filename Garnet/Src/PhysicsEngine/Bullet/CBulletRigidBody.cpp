@@ -96,23 +96,16 @@ namespace physics
 		// frameInAとframeInBはバネに例えるとバネの端点・剛体との接合点を表す. 二つの剛体にバネを挟むことをイメージするとわかりやすい. それは必ず２つの接合点があるはずである
 		// frameInAはd6body0の接合点、frameInBのfixedBody1の接合点
 		// そしてその座標はframeInA・frameInBともに『『fixedBody1』』の座標を中心とした移動・回転で表される
+
+		btQuaternion RotateA = btQuaternion(JParam.Rotate6DofBody.x, JParam.Rotate6DofBody.y, JParam.Rotate6DofBody.z, JParam.Rotate6DofBody.w);
+		btQuaternion FixedRotateB = btQuaternion(FixedWorldRotate.x, FixedWorldRotate.y, FixedWorldRotate.z, FixedWorldRotate.w);
+
 		std::shared_ptr< btGeneric6DofSpring2Constraint> Constraint = std::make_shared<btGeneric6DofSpring2Constraint>(
 			*m_Rigidbody.get(), 
 			*FixedRigidbody->GetbtRigidBody().get(),
-			btTransform(btQuaternion::getIdentity(), { 0.0f, -1.0f, 0.0f }),
-			btTransform(btQuaternion::getIdentity(), { 0.0f, 0.0f, 0.0f })
+			btTransform(RotateA, { JParam.Pos6DofBody.x, JParam.Pos6DofBody.y, JParam.Pos6DofBody.z }),
+			btTransform(FixedRotateB, { 0.0f, 0.0f, 0.0f })
 		);
-
-		// Frameの座標を計算
-		{
-			btQuaternion RotateA = btQuaternion(JParam.Rotate6DofBody.x, JParam.Rotate6DofBody.y, JParam.Rotate6DofBody.z, JParam.Rotate6DofBody.w);
-			btQuaternion FixedRotateB = btQuaternion(FixedWorldRotate.x, FixedWorldRotate.y, FixedWorldRotate.z, FixedWorldRotate.w);
-
-			Constraint->setFrames(
-				btTransform(RotateA, { JParam.Pos6DofBody.x, JParam.Pos6DofBody.y, JParam.Pos6DofBody.z }),
-				btTransform(FixedRotateB, { 0.0f, 0.0f, 0.0f })
-			);
-		}
 
 		// 関数名の通り移動できる範囲・回転できる範囲を設定
 		{
@@ -122,13 +115,16 @@ namespace physics
 			Constraint->setAngularUpperLimit(btVector3(JParam.UpperRotateLimit.x, JParam.UpperRotateLimit.y, JParam.UpperRotateLimit.z));
 		}
 
-		// 細かいパラメーターを設定
+		// 軸単位のパラメーターを設定
 		for(int a = 0; a < 3; a++)
 		{
 			Constraint->enableSpring(a, true);
-			Constraint->setStiffness(a, JParam.TransSpring[a]); // Stiffness: 硬さ
-			Constraint->setDamping(a, JParam.RotateSpring[a]); // Damping: 減衰力
+			Constraint->setStiffness(a, 1.0f); // Stiffness: 硬さ
+			Constraint->setDamping(a, 1.0f); // Damping: 減衰力
 		}
+
+		// 現在の位置をバネの釣り合いの位置(自然長)にする
+		Constraint->setEquilibriumPoint();
 
 		// 物理ワールドに追加
 		pDynamicWorld->addConstraint(Constraint.get(), false);
