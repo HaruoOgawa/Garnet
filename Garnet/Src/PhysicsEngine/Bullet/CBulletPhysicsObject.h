@@ -50,6 +50,8 @@ namespace physics
 
 		virtual glm::vec3 GetSize() override;
 
+		virtual const SRigidbodyParam& GetRbParam() const override;
+
 		virtual glm::mat4 GetCurrentPhysicsWorldMatrix() override;
 		virtual glm::vec3 GetCurrentWorldPos() override;
 		virtual glm::quat GetCurrentWorldRotate() override;

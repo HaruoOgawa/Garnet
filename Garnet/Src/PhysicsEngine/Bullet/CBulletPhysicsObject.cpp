@@ -54,6 +54,11 @@ namespace physics
 		return glm::vec3(1.0f);
 	}
 
+	const SRigidbodyParam& CBulletPhysicsObject::GetRbParam() const
+	{
+		return m_RBParam;
+	}
+
 	glm::mat4 CBulletPhysicsObject::GetCurrentPhysicsWorldMatrix()
 	{
 		glm::vec3 Pos = GetCurrentWorldPos();

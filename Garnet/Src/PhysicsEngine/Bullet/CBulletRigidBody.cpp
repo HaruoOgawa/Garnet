@@ -80,6 +80,9 @@ namespace physics
 		m_Rigidbody->setRestitution(RBParam.Repulsion); // 反発係数の設定
 		m_Rigidbody->setFriction(RBParam.Friction); // 摩擦係数の設定
 
+		// ワールド座標をセットする
+		SetWorldTransform(transform);
+
 		// RigidBodyを物理演算ワールドに追加
 		// 非衝突グループの設定のビットマスクもここで設定する
 		pDynamicWorld->addRigidBody(m_Rigidbody.get(), RBParam.group, ~RBParam.NoneCollideGroupFlag);

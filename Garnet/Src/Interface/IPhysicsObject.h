@@ -7,6 +7,7 @@
 
 #include "../PhysicsEngine/EJointType.h"
 #include "../PhysicsEngine/SJointParam.h"
+#include "../PhysicsEngine/SRigidbodyParam.h"
 
 namespace physics
 {
@@ -21,6 +22,8 @@ namespace physics
 		virtual bool IsDynamicJoint() = 0;
 
 		virtual glm::vec3 GetSize() = 0;
+
+		virtual const SRigidbodyParam& GetRbParam() const = 0;
 
 		virtual glm::mat4 GetCurrentPhysicsWorldMatrix() = 0;
 		virtual glm::vec3 GetCurrentWorldPos() = 0;

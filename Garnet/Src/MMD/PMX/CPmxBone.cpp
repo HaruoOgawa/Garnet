@@ -105,10 +105,37 @@ namespace mmd
 
 		glm::vec3 YAxisVector = glm::cross(XAxisVector, ZAxisVector);
 
-		glm::vec3 LocalAxisVector = glm::normalize(XAxisVector + YAxisVector + ZAxisVector);
+		glm::mat4 rotMat = glm::mat4(1.0f);
+		/*rotMat[0][0] = XAxisVector.x;
+		rotMat[0][1] = XAxisVector.y;
+		rotMat[0][2] = XAxisVector.z;
+
+		rotMat[1][0] = YAxisVector.x;
+		rotMat[1][1] = YAxisVector.y;
+		rotMat[1][2] = YAxisVector.z;
+
+		rotMat[2][0] = ZAxisVector.x;
+		rotMat[2][1] = ZAxisVector.y;
+		rotMat[2][2] = ZAxisVector.z;*/
+
+		rotMat[0][0] = XAxisVector.x;
+		rotMat[1][0] = XAxisVector.y;
+		rotMat[2][0] = XAxisVector.z;
+
+		rotMat[0][1] = YAxisVector.x;
+		rotMat[1][1] = YAxisVector.y;
+		rotMat[2][1] = YAxisVector.z;
+
+		rotMat[0][2] = ZAxisVector.x;
+		rotMat[1][2] = ZAxisVector.y;
+		rotMat[2][2] = ZAxisVector.z;
+
+		m_LocalAxis = glm::quat_cast(rotMat);
+
+		/*glm::vec3 LocalAxisVector = glm::normalize(XAxisVector + YAxisVector + ZAxisVector);
 		glm::vec3 DefaultAxisVector = glm::normalize(glm::vec3(1.0f, 0.0f, 0.0f) + glm::vec3(0.0f, 1.0f, 0.0f) + glm::vec3(0.0f, 0.0f, 1.0f));
 
-		m_LocalAxis = glm::normalize(math::CTransform::CalcTwoVectorRotate(DefaultAxisVector, LocalAxisVector));
+		m_LocalAxis = glm::normalize(math::CTransform::CalcTwoVectorRotate(DefaultAxisVector, LocalAxisVector));*/
 		//m_LocalAxis = math::CTransform::CalcTwoVectorRotate(glm::vec3(1.0f, 0.0f, 0.0f), XAxisVector) * math::CTransform::CalcTwoVectorRotate(glm::vec3(0.0f, 0.0f, 1.0f), ZAxisVector);
 	}
 
