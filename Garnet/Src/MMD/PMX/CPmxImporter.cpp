@@ -69,10 +69,10 @@ namespace mmd
 		if (!CreateMeshList(model, MeshList, RootNode, NodeList, MaterialList, (Skeleton->GetBoneList().size() > 0))) return false;
 
 		// 剛体
-		if (!CreateRigidbody(pPhysicsEngine, model, Skeleton)) return false;
+		//if (!CreateRigidbody(pPhysicsEngine, model, Skeleton)) return false;
 
 		// ジョイント
-		if (!CreateJoint(pPhysicsEngine, model, Skeleton)) return false;
+		//if (!CreateJoint(pPhysicsEngine, model, Skeleton)) return false;
 
 		// リソースを登録
 		Object->SetRootNodeIndexList(RootNodeIndexList);
@@ -723,10 +723,17 @@ namespace mmd
 			// Constraintを予約する
 			// PmxJointのPos・Rotateは6Dof側(自由移動できる方の)ワールド座標系が入っているのでそのノードのローカル座標を渡すようにする
 			
+			/*glm::vec3 Pos = CastToZYX(PmxJoint.Pos);
+			Pos -= PhysicsObjA->GetRbParam().InitWorldPos;*/
+
+			glm::vec3 Euler = CastToZYX(PmxJoint.Rotate);
+			glm::quat Rotate = glm::angleAxis(Euler.z, glm::vec3(0.0f, 0.0f, 1.0f)) * glm::angleAxis(Euler.y, glm::vec3(0.0f, 1.0f, 0.0f)) * glm::angleAxis(Euler.x, glm::vec3(1.0f, 0.0f, 0.0f));
+			Rotate *= glm::inverse(PhysicsObjA->GetRbParam().InitWorldRotate);
+
 			// 剛体とジョイントでなぜかXとZが逆になっているのでその補正を入れる必要がある
 			PhysicsObjB->ReserveConstraint(PhysicsObjA, static_cast<physics::EJointType>(PmxJoint.PmxJointType), 
 				{ 
-					BoneList[BoneBIndex]->GetBoneNode()->GetPos(), BoneList[BoneBIndex]->GetBoneNode()->GetRot(),
+					BoneList[BoneBIndex]->GetBoneNode()->GetPos(), Rotate,
 					CastToZYX(PmxJoint.LowerTransLimit), CastToZYX(PmxJoint.UpperTransLimit), CastToZYX(PmxJoint.LowerRotateLimit), CastToZYX(PmxJoint.UpperRotateLimit), CastToZYX(PmxJoint.TransSpring),
 					CastToZYX(PmxJoint.RotateSpring)
 				}

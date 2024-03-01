@@ -34,6 +34,11 @@ namespace physics
 		return m_RigidBody;
 	}
 
+	const std::vector<std::shared_ptr<SReservedConstraintData>>& CBulletPhysicsObject::GetReservedConstraintList() const
+	{
+		return m_ReservedConstraintList;
+	}
+
 	bool CBulletPhysicsObject::Create(IPhysicsEngine* pPhysicsEngine, const glm::vec3& WorldPos, const glm::quat& WorldRotate, const glm::vec3& WorldScale)
 	{
 		return true;
@@ -119,13 +124,27 @@ namespace physics
 	{
 		CBulletPhysicsEngine* pBulletPhysics = static_cast<CBulletPhysicsEngine*>(pPhysicsEngine);
 
-		for (const auto& ReservedConstraint : m_ReservedConstraintList)
+		for (int i = 0; i < m_ReservedConstraintList.size(); i++)
 		{
+			const auto& ReservedConstraint = m_ReservedConstraintList[i];
+
 			if (ReservedConstraint->JointType == EJointType::SPRING_6DOF)
 			{
 				// Constraints‚ð’Ç‰Á‚·‚é
-				const auto& TargetRigidBody = static_cast<CBulletPhysicsObject*>(ReservedConstraint->FixedObject.get())->GetRigidBody();
-				m_RigidBody->Add6DofSpringConstraint(pBulletPhysics->GetDynamicsWorld(), TargetRigidBody, ReservedConstraint->JParam, FixedWorldRotate);
+				const auto* FixedObject = static_cast<CBulletPhysicsObject*>(ReservedConstraint->FixedObject.get());
+				const auto& FixedReservedList = FixedObject->GetReservedConstraintList();
+
+				// FixedRotate‚ª‚ ‚ê‚ÎŽæ“¾
+				glm::quat FixedRotate = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
+
+				if (i < FixedReservedList.size())
+				{
+					FixedRotate = FixedReservedList[i]->JParam.Rotate6DofBody;
+				}
+
+				const auto& TargetRigidBody = FixedObject->GetRigidBody();
+
+				m_RigidBody->Add6DofSpringConstraint(pBulletPhysics->GetDynamicsWorld(), TargetRigidBody, ReservedConstraint->JParam, FixedRotate);
 			}
 			else if (ReservedConstraint->JointType == EJointType::Generic_6DOF)
 			{

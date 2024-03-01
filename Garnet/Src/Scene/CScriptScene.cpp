@@ -65,7 +65,7 @@ namespace scene
 		const float ZOffset = 3.0f;
 
 		// m_PhysicsGround
-		/* {
+		{
 			auto Material = m_PBRMF->CreateMaterial(pGraphicsAPI, 1, graphics::ECullMode::CULL_BACK);
 
 			m_PhysicsGround->GetTextureSet()->AddCubeMap(m_Cube_Texture);
@@ -79,7 +79,7 @@ namespace scene
 
 			auto PhysicsBox = pPhysicsEngine->CreatePhysicsBox(glm::vec3(0.5f), true, 0.0f, {});
 
-			if (!m_PhysicsGround->CreateSimply(pGraphicsAPI, pPhysicsEngine, graphics::CPresetPrimitive::CreateBox(), Material, m_DepthMF, LocalTransform, PhysicsBox)) return false;
+			//if (!m_PhysicsGround->CreateSimply(pGraphicsAPI, pPhysicsEngine, graphics::CPresetPrimitive::CreateBox(), Material, m_DepthMF, LocalTransform, PhysicsBox)) return false;
 		}
 
 		// m_PhysicsSphere
@@ -104,7 +104,8 @@ namespace scene
 			// Physics
 			physics::SRigidbodyParam RbParam = {};
 			RbParam.group = 32;
-			RbParam.NoneCollideGroupFlag = 161; // 1,6,8に当たらないようにする。6は自分たちのグループなのでお互いがぶつからないようにする => 10100001b
+			//RbParam.NoneCollideGroupFlag = 161; // 1,6,8に当たらないようにする。6は自分たちのグループなのでお互いがぶつからないようにする => 10100001b
+			RbParam.NoneCollideGroupFlag = 32; 
 			auto PhysicsSphere0 = pPhysicsEngine->CreatePhysicsSphere(1.0f, true, 0.0f, RbParam);
 			auto PhysicsSphere1 = pPhysicsEngine->CreatePhysicsSphere(1.0f, false, 50.0f, RbParam);
 			auto PhysicsSphere2 = pPhysicsEngine->CreatePhysicsSphere(1.0f, false, 50.0f, RbParam);
@@ -181,10 +182,10 @@ namespace scene
 			JParam.LowerTransLimit = glm::vec3(0.0f);
 			JParam.UpperTransLimit = glm::vec3(0.0f);
 
-			// JParam.LowerRotateLimit = glm::vec3(-3.1415f / 6.0f);
-			// JParam.UpperRotateLimit = glm::vec3(3.1415f / 6.0f);
-			JParam.LowerRotateLimit = glm::vec3(0.0f);
-			JParam.UpperRotateLimit = glm::vec3(0.0f);
+			 JParam.LowerRotateLimit = glm::vec3(-1.39626348f, -0.0872664675f, -1.39626348f);
+			 JParam.UpperRotateLimit = glm::vec3(1.39626348f, 0.174532935f, 1.39626348f);
+			//JParam.LowerRotateLimit = glm::vec3(0.0f);
+			//JParam.UpperRotateLimit = glm::vec3(0.0f);
 
 			PhysicsSphere1->ReserveConstraint(PhysicsSphere0, physics::EJointType::SPRING_6DOF, JParam);
 			PhysicsSphere2->ReserveConstraint(PhysicsSphere1, physics::EJointType::SPRING_6DOF, JParam);
@@ -192,11 +193,11 @@ namespace scene
 			PhysicsSphere4->ReserveConstraint(PhysicsSphere3, physics::EJointType::SPRING_6DOF, JParam);
 
 			// Create
-			if (!m_PhysicsSphere->Create(pGraphicsAPI, pPhysicsEngine, m_DepthMF)) return false;
+			//if (!m_PhysicsSphere->Create(pGraphicsAPI, pPhysicsEngine, m_DepthMF)) return false;
 		}
 
 		// m_PhysicsCubeList
-		{
+		/*{
 			// 
 			const float XMax = 4.0f;
 			const float YMax = 4.0f;
@@ -283,7 +284,7 @@ namespace scene
 		// m_DebugSphere
 		{
 			auto Mat = m_SimpleTextureMF->CreateMaterial(pGraphicsAPI, 512, graphics::ECullMode::CULL_BACK);
-			//Mat->SetEnabledZTest(false);
+			Mat->SetEnabledZTest(false);
 			m_DebugSphere->SetScale(glm::vec3(0.1f));
 			if (!m_DebugSphere->CreateSimply(pGraphicsAPI, pPhysicsEngine, graphics::CPresetPrimitive::CreateSphere(), Mat, m_DepthMF)) return false;
 		}

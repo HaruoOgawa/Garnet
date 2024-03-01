@@ -43,6 +43,8 @@ namespace physics
 
 		const std::shared_ptr<CBulletRigidBody>& GetRigidBody() const;
 
+		const std::vector<std::shared_ptr<SReservedConstraintData>>& GetReservedConstraintList() const;
+
 		virtual bool Create(IPhysicsEngine* pPhysicsEngine, const glm::vec3& WorldPos, const glm::quat& WorldRotate, const glm::vec3& WorldScale) override;
 
 		virtual bool IsStatic() override;
