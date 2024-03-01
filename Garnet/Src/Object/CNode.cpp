@@ -79,19 +79,44 @@ namespace object
 
 			math::CTransform::CastModelMatrixToTransform(m_WorldMatrix, WorldPos, WorldRotate, WorldScale);
 
+			// Meshを持っていない物理オブジェクトはボーンなのでサイズは1.0にする
+			if (m_MeshIndex == -1)
+			{
+				WorldScale = glm::vec3(1.0f);
+			}
+
 			m_PhysicsObject->Create(pPhysicsEngine, WorldPos, WorldRotate, WorldScale);
+		}
+	}
+
+	void CNode::ApplyPhysicsConstraint(physics::IPhysicsEngine* pPhysicsEngine)
+	{
+		// Constraintを反映する
+		if (pPhysicsEngine && m_PhysicsObject)
+		{
+			// もしかするとローカルでいいかも？
+			glm::quat WorldRotate = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
+			math::CTransform::CastModelMatrixToRotation(m_WorldMatrix, WorldRotate);
+
+			m_PhysicsObject->ApplyConstraint(pPhysicsEngine, WorldRotate);
 		}
 	}
 
 	void CNode::ApplyPhysicsWorldMatrix()
 	{
-		// 物理演算の結果を反映する
+		// 物理演算の結果を反映する(DynamicObjectのみ)
 		if (m_PhysicsObject && !m_PhysicsObject->IsStatic())
 		{
+			// サイズを取得
+			glm::vec3 WorldScale = glm::vec3(1.0f);
+			math::CTransform::CastModelMatrixToScale(m_WorldMatrix, WorldScale);
+
+			glm::mat4 sclMatrix = glm::scale(glm::mat4(1.0f), WorldScale);
+
 			// 物理オブジェクトのワールド座標を渡す
 			// 物理オブジェクトに親子関係を持たせるのはConstraints(Joint)を形成するとき(PMXの髪とか服)で、一度物理エンジンにオブジェクトを登録するとConstraints(Joint)の効果で子要素は親要素に自動で引っ張られるようになる
 			// なので一度ワールド行列を計算したうえで物理オブジェクトを生成した後は、位置計算を全て物理エンジンに任せる
-			m_WorldMatrix = m_PhysicsObject->GetCurrentPhysicsWorldMatrix();
+			m_WorldMatrix = m_PhysicsObject->GetCurrentPhysicsWorldMatrix() * sclMatrix;
 		}
 	}
 
@@ -113,6 +138,31 @@ namespace object
 	void CNode::SetWorldMatrix(const glm::mat4& WorldMatrix)
 	{
 		m_WorldMatrix = WorldMatrix;
+
+		// Staticな物理オブジェクトを持っている時はそれにも位置変更を反映する
+		if (m_PhysicsObject && (m_PhysicsObject->IsStatic() || m_PhysicsObject->IsDynamicJoint()))
+		{
+			glm::vec3 WorldPos = glm::vec3(0.0f);
+			glm::quat WorldRotate = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
+			glm::vec3 WorldScale = glm::vec3(1.0f);
+
+			math::CTransform::CastModelMatrixToTransform(m_WorldMatrix, WorldPos, WorldRotate, WorldScale);
+
+			// Meshを持っていない物理オブジェクトはボーンなのでサイズは1.0にする
+			if (m_MeshIndex == -1)
+			{
+				WorldScale = glm::vec3(1.0f);
+			}
+
+			if (m_PhysicsObject->IsStatic())
+			{
+				m_PhysicsObject->SetPhysicsWorldTransform(WorldPos, WorldRotate, WorldScale);
+			}
+			else if (m_PhysicsObject->IsDynamicJoint())
+			{
+				//m_PhysicsObject->UpdateJointWorldTransform(GetPos(), GetRot(), glm::vec3(1.0f));
+			}
+		}
 	}
 
 	const glm::mat4& CNode::GetWorldMatrix() const

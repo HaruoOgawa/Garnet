@@ -5,10 +5,10 @@
 
 namespace physics
 {
-	CBulletPhysicsObject::CBulletPhysicsObject(bool IsStaticFlag, float Mass):
+	CBulletPhysicsObject::CBulletPhysicsObject(bool IsStaticFlag, float Mass, const SRigidbodyParam& RBParam):
 		m_IsStatic(IsStaticFlag),
 		m_Mass(Mass),
-		m_WorldScale(glm::vec3(1.0f)),
+		m_RBParam(RBParam),
 		m_CollisionShape(nullptr),
 		m_RigidBody(nullptr)
 	{
@@ -34,6 +34,11 @@ namespace physics
 		return m_RigidBody;
 	}
 
+	const std::vector<std::shared_ptr<SReservedConstraintData>>& CBulletPhysicsObject::GetReservedConstraintList() const
+	{
+		return m_ReservedConstraintList;
+	}
+
 	bool CBulletPhysicsObject::Create(IPhysicsEngine* pPhysicsEngine, const glm::vec3& WorldPos, const glm::quat& WorldRotate, const glm::vec3& WorldScale)
 	{
 		return true;
@@ -44,13 +49,28 @@ namespace physics
 		return m_IsStatic;
 	}
 
+	bool CBulletPhysicsObject::IsDynamicJoint()
+	{
+		return (m_RBParam.PhysicsType == EPhysicsType::DYNAMIC_JOINT);
+	}
+
+	glm::vec3 CBulletPhysicsObject::GetSize()
+	{
+		return glm::vec3(1.0f);
+	}
+
+	const SRigidbodyParam& CBulletPhysicsObject::GetRbParam() const
+	{
+		return m_RBParam;
+	}
+
 	glm::mat4 CBulletPhysicsObject::GetCurrentPhysicsWorldMatrix()
 	{
 		glm::vec3 Pos = GetCurrentWorldPos();
 		glm::quat Rot = GetCurrentWorldRotate();
 
 		glm::mat4 WorldMatrix = glm::mat4(1.0f);
-		math::CTransform::CalcModelMatrix(WorldMatrix, Pos, Rot, true, m_WorldScale);
+		math::CTransform::CalcModelMatrix(WorldMatrix, Pos, Rot, false);
 
 		return WorldMatrix;
 	}
@@ -81,20 +101,83 @@ namespace physics
 		return glm::quat(trans.getRotation().getW(), trans.getRotation().getX(), trans.getRotation().getY(), trans.getRotation().getZ());
 	}
 
-	void CBulletPhysicsObject::AddSpringConstraint(IPhysicsEngine* pPhysicsEngine, const std::shared_ptr<IPhysicsObject>& FixedObject)
+	void CBulletPhysicsObject::SetPhysicsWorldTransform(const glm::vec3& WorldPos, const glm::quat& WorldRotate, const glm::vec3& WorldScale)
+	{
+		btTransform trans;
+		trans.setIdentity();
+		trans.setOrigin(btVector3(WorldPos.x, WorldPos.y, WorldPos.z));
+		trans.setRotation(btQuaternion(WorldRotate.x, WorldRotate.y, WorldRotate.z, WorldRotate.w));
+
+		if (m_RigidBody)
+		{
+			m_RigidBody->SetWorldTransform(trans);
+		}
+	}
+
+	void CBulletPhysicsObject::ReserveConstraint(const std::shared_ptr<IPhysicsObject>& FixedObject, EJointType JointType, const SJointParam& JParam)
+	{
+		// Constraintを予約しておく
+		m_ReservedConstraintList.push_back(std::make_shared<SReservedConstraintData>(FixedObject, JointType, JParam));
+	}
+
+	void CBulletPhysicsObject::ApplyConstraint(IPhysicsEngine* pPhysicsEngine, const glm::quat& FixedWorldRotate)
 	{
 		CBulletPhysicsEngine* pBulletPhysics = static_cast<CBulletPhysicsEngine*>(pPhysicsEngine);
 
-		// ピボットを計算
-		// ひとまず２つのRigidBodyの中点とする
-		glm::vec3 pointA = GetCurrentWorldPos();
-		glm::vec3 pointB = FixedObject->GetCurrentWorldPos();
+		for (int i = 0; i < m_ReservedConstraintList.size(); i++)
+		{
+			const auto& ReservedConstraint = m_ReservedConstraintList[i];
 
-		glm::vec3 ConnectPoint = (pointA + pointB) * 0.5f;
+			if (ReservedConstraint->JointType == EJointType::SPRING_6DOF)
+			{
+				// Constraintsを追加する
+				const auto* FixedObject = static_cast<CBulletPhysicsObject*>(ReservedConstraint->FixedObject.get());
+				const auto& FixedReservedList = FixedObject->GetReservedConstraintList();
 
-		// Constraintsを追加する
-		const auto& TargetRigidBody = static_cast<CBulletPhysicsObject*>(FixedObject.get())->GetRigidBody();
-		m_RigidBody->AddSpringConstraint(pBulletPhysics->GetDynamicsWorld(), TargetRigidBody, ConnectPoint);
+				// FixedRotateがあれば取得
+				glm::quat FixedRotate = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
+
+				if (i < FixedReservedList.size())
+				{
+					FixedRotate = FixedReservedList[i]->JParam.Rotate6DofBody;
+				}
+
+				const auto& TargetRigidBody = FixedObject->GetRigidBody();
+
+				m_RigidBody->Add6DofSpringConstraint(pBulletPhysics->GetDynamicsWorld(), TargetRigidBody, ReservedConstraint->JParam, FixedRotate);
+			}
+			else if (ReservedConstraint->JointType == EJointType::Generic_6DOF)
+			{
+				// 未実装
+			}
+			else if (ReservedConstraint->JointType == EJointType::P2P)
+			{
+				// 未実装
+			}
+			else if (ReservedConstraint->JointType == EJointType::ConeTwist)
+			{
+				// 未実装
+			}
+			else if (ReservedConstraint->JointType == EJointType::Slider)
+			{
+				// 未実装
+			}
+		}
+
+		// 追加が終わったのでリリースする
+		m_ReservedConstraintList.clear();
+	}
+
+	void CBulletPhysicsObject::UpdateJointWorldTransform(const glm::vec3& Pos, const glm::quat& Rotate, const glm::vec3& Scale)
+	{
+		if (!m_RigidBody) return;
+
+		btTransform transform;
+		transform.setIdentity();
+		transform.setOrigin(btVector3(Pos.x, Pos.y, Pos.z));
+		transform.setRotation(btQuaternion(Rotate.x, Rotate.y, Rotate.z, Rotate.w));
+
+		m_RigidBody->UpdateJointWorldTransform(transform);
 	}
 }
 #endif

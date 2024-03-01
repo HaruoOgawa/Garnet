@@ -79,7 +79,7 @@ namespace math
 		CastModelMatrixToScale(ModelMatrix, Scale);
 
 		// Rot
-		CastModelMatrixToRotation(ModelMatrix, Rotation, Scale);
+		CastModelMatrixToRotation(ModelMatrix, Rotation);
 	}
 
 	void CTransform::CastModelMatrixToTransform(const glm::mat4& ModelMatrix, glm::vec3& Translation, glm::quat& Rotation)
@@ -94,7 +94,7 @@ namespace math
 		Translation = glm::vec3(ModelMatrix[3][0], ModelMatrix[3][1], ModelMatrix[3][2]);
 	}
 
-	void CTransform::CastModelMatrixToRotation(const glm::mat4& ModelMatrix, glm::quat& Rotation, glm::vec3& Scale)
+	void CTransform::CastModelMatrixToRotation(const glm::mat4& ModelMatrix, glm::quat& Rotation)
 	{
 		// 回転の取得は今後様子を見つついろいろと改善が必要かも
 		glm::mat4 RotMat = glm::mat4(

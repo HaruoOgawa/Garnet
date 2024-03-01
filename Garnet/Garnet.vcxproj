@@ -573,6 +573,9 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Src\PhysicsEngine\Bullet\CBulletCapsule.h" />
+    <ClInclude Include="Src\MMD\PMX\SPmxJoint.h" />
+    <ClInclude Include="Src\MMD\PMX\SPmxRigidbody.h" />
     <ClInclude Include="Src\PhysicsEngine\Bullet\CBulletPhysicsObject.h" />
     <ClInclude Include="Src\Interface\IPhysicsObject.h" />
     <ClInclude Include="Src\PhysicsEngine\Bullet\CBulletJoint.h" />
@@ -1089,6 +1092,10 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClInclude Include="Src\LoadWorker\ELoadStatus.h" />
     <ClInclude Include="Src\Math\CMath.h" />
     <ClInclude Include="Src\Object\E3DObjectType.h" />
+    <ClInclude Include="Src\PhysicsEngine\EJointType.h" />
+    <ClInclude Include="Src\PhysicsEngine\EPhysicsType.h" />
+    <ClInclude Include="Src\PhysicsEngine\SJointParam.h" />
+    <ClInclude Include="Src\PhysicsEngine\SRigidbodyParam.h" />
     <ClInclude Include="Src\Projection\CProjection.h" />
     <ClInclude Include="Src\Camera\CCamera.h" />
     <ClInclude Include="Src\GraphicsAPI\WebGPU\CWebGPUMaterial.h" />
@@ -1419,6 +1426,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClInclude Include="Src\Interface\IRenderer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\PhysicsEngine\Bullet\CBulletCapsule.cpp" />
     <ClCompile Include="Src\PhysicsEngine\Bullet\CBulletPhysicsObject.cpp" />
     <ClCompile Include="Src\PhysicsEngine\Bullet\CBulletJoint.cpp" />
     <ClCompile Include="Src\PhysicsEngine\Bullet\CBulletSoftBody.cpp" />

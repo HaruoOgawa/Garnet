@@ -16,7 +16,7 @@
 
 namespace mmd
 {
-	bool CPmxImporter::ImportPmx(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, const std::string& ModelFileName, const std::vector<unsigned char>& Data, object::C3DObject* Object,
+	bool CPmxImporter::ImportPmx(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, const std::string& ModelFileName, const std::vector<unsigned char>& Data, object::C3DObject* Object,
 		const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame)
 	{
 		CPmxModel model;
@@ -67,6 +67,12 @@ namespace mmd
 		// メッシュ
 		std::vector<std::shared_ptr<graphics::CMesh>> MeshList;
 		if (!CreateMeshList(model, MeshList, RootNode, NodeList, MaterialList, (Skeleton->GetBoneList().size() > 0))) return false;
+
+		// 剛体
+		//if (!CreateRigidbody(pPhysicsEngine, model, Skeleton)) return false;
+
+		// ジョイント
+		//if (!CreateJoint(pPhysicsEngine, model, Skeleton)) return false;
 
 		// リソースを登録
 		Object->SetRootNodeIndexList(RootNodeIndexList);
@@ -641,6 +647,106 @@ namespace mmd
 		}
 
 		return true;
+	}
+
+	bool CPmxImporter::CreateRigidbody(physics::IPhysicsEngine* pPhysicsEngine, const CPmxModel& model, std::shared_ptr<animation::CSkeleton>& Skeleton)
+	{
+		const auto& BoneList = Skeleton->GetBoneList();
+
+		for (const auto& PmxRigidbody : model.GetPmxRigidbodyList())
+		{
+			// 物理オブジェクトを作成
+			std::shared_ptr<physics::IPhysicsObject> PhysicsObject = nullptr;
+
+			// 剛体とジョイントでなぜかXとZが逆になっているのでその補正を入れる必要がある
+			glm::vec3 Pos = CastToZYX(PmxRigidbody.Pos);
+			glm::vec3 Euler = CastToZYX(PmxRigidbody.Rotate);
+			glm::quat Rotate = glm::angleAxis(Euler.z, glm::vec3(0.0f, 0.0f, 1.0f)) * glm::angleAxis(Euler.y, glm::vec3(0.0f, 1.0f, 0.0f)) * glm::angleAxis(Euler.x, glm::vec3(1.0f, 0.0f, 0.0f));
+			glm::vec3 Size = CastToZYX(PmxRigidbody.Size);
+
+			if (PmxRigidbody.PhysicsShape == EPmxPhysicsShape::SPHERE)
+			{
+				PhysicsObject = pPhysicsEngine->CreatePhysicsSphere(Size.x, (PmxRigidbody.PhysicsType == EPmxPhysicsType::STATIC), PmxRigidbody.Mass, { PmxRigidbody.RigidbodyName, static_cast<physics::EPhysicsType>(PmxRigidbody.PhysicsType), true, Pos, Rotate, PmxRigidbody.group, PmxRigidbody.NoneCollideGroupFlag, PmxRigidbody.TransDamping, PmxRigidbody.RotateDamping, PmxRigidbody.Repulsion, PmxRigidbody.Friction});
+			}
+			else if (PmxRigidbody.PhysicsShape == EPmxPhysicsShape::BOX)
+			{
+				PhysicsObject = pPhysicsEngine->CreatePhysicsBox(Size, (PmxRigidbody.PhysicsType == EPmxPhysicsType::STATIC), PmxRigidbody.Mass, {PmxRigidbody.RigidbodyName, static_cast<physics::EPhysicsType>(PmxRigidbody.PhysicsType), true, Pos, Rotate, PmxRigidbody.group, PmxRigidbody.NoneCollideGroupFlag, PmxRigidbody.TransDamping, PmxRigidbody.RotateDamping, PmxRigidbody.Repulsion, PmxRigidbody.Friction});
+			}
+			else if (PmxRigidbody.PhysicsShape == EPmxPhysicsShape::CAPSULE)
+			{
+				PhysicsObject = pPhysicsEngine->CreatePhysicsCapsule(Size.x, Size.y, (PmxRigidbody.PhysicsType == EPmxPhysicsType::STATIC), PmxRigidbody.Mass, { PmxRigidbody.RigidbodyName, static_cast<physics::EPhysicsType>(PmxRigidbody.PhysicsType), true, Pos, Rotate, PmxRigidbody.group, PmxRigidbody.NoneCollideGroupFlag, PmxRigidbody.TransDamping, PmxRigidbody.RotateDamping, PmxRigidbody.Repulsion, PmxRigidbody.Friction });
+			}
+			else
+			{
+				continue;
+			}
+
+			// 物理オブジェクトを割り当てる
+			if (PmxRigidbody.RelationBoneIndex < 0 || PmxRigidbody.RelationBoneIndex >= BoneList.size()) continue;
+
+			BoneList[PmxRigidbody.RelationBoneIndex]->GetBoneNode()->SetPhysicsObject(PhysicsObject);
+		}
+
+		return true;
+	}
+
+	bool CPmxImporter::CreateJoint(physics::IPhysicsEngine* pPhysicsEngine, const CPmxModel& model, std::shared_ptr<animation::CSkeleton>& Skeleton)
+	{
+		const auto& BoneList = Skeleton->GetBoneList();
+		const auto& PmxRigidbodyList = model.GetPmxRigidbodyList();
+
+		for (const auto& PmxJoint : model.GetPmxJointList())
+		{
+			// PhysicsObjectを取得
+			// BodyA
+			int BodyAIndex = PmxJoint.BodyAIndex;
+			if (BodyAIndex < 0 || BodyAIndex >= PmxRigidbodyList.size()) continue;
+
+			const auto& RigidbodyA = PmxRigidbodyList[BodyAIndex];
+			int BoneAIndex = RigidbodyA.RelationBoneIndex;
+			if (BoneAIndex < 0 || BoneAIndex >= BoneList.size()) continue;
+			
+			const auto& PhysicsObjA = BoneList[BoneAIndex]->GetBoneNode()->GetPhysicsObject();
+
+			// BodyB
+			int BodyBIndex = PmxJoint.BodyBIndex;
+			if (BodyBIndex < 0 || BodyBIndex >= PmxRigidbodyList.size()) continue;
+
+			const auto RigidbodyB = PmxRigidbodyList[BodyBIndex];
+			int BoneBIndex = RigidbodyB.RelationBoneIndex;
+			if (BoneBIndex < 0 || BoneBIndex >= BoneList.size()) continue;
+
+			const auto& PhysicsObjB = BoneList[BoneBIndex]->GetBoneNode()->GetPhysicsObject();
+
+			if (!PhysicsObjA || !PhysicsObjB) continue;
+
+			// Constraintを予約する
+			// PmxJointのPos・Rotateは6Dof側(自由移動できる方の)ワールド座標系が入っているのでそのノードのローカル座標を渡すようにする
+			
+			/*glm::vec3 Pos = CastToZYX(PmxJoint.Pos);
+			Pos -= PhysicsObjA->GetRbParam().InitWorldPos;*/
+
+			glm::vec3 Euler = CastToZYX(PmxJoint.Rotate);
+			glm::quat Rotate = glm::angleAxis(Euler.z, glm::vec3(0.0f, 0.0f, 1.0f)) * glm::angleAxis(Euler.y, glm::vec3(0.0f, 1.0f, 0.0f)) * glm::angleAxis(Euler.x, glm::vec3(1.0f, 0.0f, 0.0f));
+			Rotate *= glm::inverse(PhysicsObjA->GetRbParam().InitWorldRotate);
+
+			// 剛体とジョイントでなぜかXとZが逆になっているのでその補正を入れる必要がある
+			PhysicsObjB->ReserveConstraint(PhysicsObjA, static_cast<physics::EJointType>(PmxJoint.PmxJointType), 
+				{ 
+					BoneList[BoneBIndex]->GetBoneNode()->GetPos(), Rotate,
+					CastToZYX(PmxJoint.LowerTransLimit), CastToZYX(PmxJoint.UpperTransLimit), CastToZYX(PmxJoint.LowerRotateLimit), CastToZYX(PmxJoint.UpperRotateLimit), CastToZYX(PmxJoint.TransSpring),
+					CastToZYX(PmxJoint.RotateSpring)
+				}
+			);
+		}
+
+		return true;
+	}
+
+	// Helper Functions ///////////////////////////////////////////////////////////
+	glm::vec3 CPmxImporter::CastToZYX(const glm::vec3& val)
+	{
+		return glm::vec3(val.z, val.y, val.x);
 	}
 }
 #endif // USE_MMD

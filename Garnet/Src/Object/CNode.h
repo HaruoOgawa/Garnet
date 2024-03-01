@@ -51,6 +51,8 @@ namespace object
 		void SetPhysicsObject(const std::shared_ptr<physics::IPhysicsObject>& PhysicsObject);
 		const std::shared_ptr<physics::IPhysicsObject>& GetPhysicsObject() const;
 		void CreatePhysicsObject(physics::IPhysicsEngine* pPhysicsEngine);
+		void ApplyPhysicsConstraint(physics::IPhysicsEngine* pPhysicsEngine);
+
 		void ApplyPhysicsWorldMatrix();
 
 		//

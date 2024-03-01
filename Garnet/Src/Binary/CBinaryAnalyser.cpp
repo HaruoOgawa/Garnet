@@ -20,14 +20,22 @@ namespace binary
 
 	bool CBinaryAnalyser::IsValid(size_t ByteSize)
 	{
-		if (m_Offset + ByteSize >= m_Data.size()) return false;
+		if (m_Offset + ByteSize > m_Data.size()) return false;
 
 		return true;
+	}
+
+	bool CBinaryAnalyser::IsEnd()
+	{
+		return (m_Data.size() == m_Offset);
 	}
 
 	void CBinaryAnalyser::UpdatePointer(size_t ByteSize)
 	{
 		m_Offset += ByteSize;
+
+		// ÅŒã‚Ü‚Å“Ç‚İæ‚Á‚Ä‚¢‚½‚ç‚±‚êˆÈã‚ÍXV‚µ‚È‚¢
+		if (IsEnd()) return;
 
 		m_Pointer = &m_Data[m_Offset];
 	}

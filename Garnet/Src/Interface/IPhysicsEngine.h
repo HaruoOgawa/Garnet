@@ -3,6 +3,8 @@
 #include <memory>
 #include <glm/glm.hpp>
 
+#include "../PhysicsEngine/SRigidbodyParam.h"
+
 namespace physics
 {
 	class IPhysicsObject;
@@ -12,8 +14,9 @@ namespace physics
 	public:
 		virtual bool Initialize() = 0;
 
-		virtual std::shared_ptr<IPhysicsObject> CreatePhysicsBox(const glm::vec3& BoxHalfSize, bool IsStatic, float Mass) = 0;
-		virtual std::shared_ptr<IPhysicsObject> CreatePhysicsSphere(float Radius, bool IsStatic, float Mass) = 0;
+		virtual std::shared_ptr<IPhysicsObject> CreatePhysicsBox(const glm::vec3& BoxHalfSize, bool IsStatic, float Mass, const SRigidbodyParam& RBParam) = 0;
+		virtual std::shared_ptr<IPhysicsObject> CreatePhysicsSphere(float Radius, bool IsStatic, float Mass, const SRigidbodyParam& RBParam) = 0;
+		virtual std::shared_ptr<IPhysicsObject> CreatePhysicsCapsule(float Radius, float Height, bool IsStatic, float Mass, const SRigidbodyParam& RBParam) = 0;
 
 		virtual bool Update(float DeltaTime) = 0;
 	};

@@ -9,21 +9,21 @@ namespace physics
 {
 	class CBulletPhysicsEngine : public IPhysicsEngine
 	{
-		std::unique_ptr<btDefaultCollisionConfiguration> m_CollisionConfigration;
+		std::unique_ptr<btCollisionConfiguration> m_CollisionConfigration;
 		std::unique_ptr<btCollisionDispatcher> m_Dispathcer;
 		std::unique_ptr<btBroadphaseInterface> m_OverlappingPairCache;
 		std::unique_ptr<btSequentialImpulseConstraintSolver> m_Solver;
 		std::unique_ptr<btDiscreteDynamicsWorld> m_DynamicsWorld;
 	private:
-		bool HelloWorldTestCode();
 	public:
 		CBulletPhysicsEngine();
 		virtual ~CBulletPhysicsEngine();
 
 		virtual bool Initialize() override;
 
-		virtual std::shared_ptr<IPhysicsObject> CreatePhysicsBox(const glm::vec3& BoxHalfSize, bool IsStatic, float Mass) override;
-		virtual std::shared_ptr<IPhysicsObject> CreatePhysicsSphere(float Radius, bool IsStatic, float Mass) override;
+		virtual std::shared_ptr<IPhysicsObject> CreatePhysicsBox(const glm::vec3& BoxHalfSize, bool IsStatic, float Mass, const SRigidbodyParam& RBParam) override;
+		virtual std::shared_ptr<IPhysicsObject> CreatePhysicsSphere(float Radius, bool IsStatic, float Mass, const SRigidbodyParam& RBParam) override;
+		virtual std::shared_ptr<IPhysicsObject> CreatePhysicsCapsule(float Radius, float Height, bool IsStatic, float Mass, const SRigidbodyParam& RBParam) override;
 
 		virtual bool Update(float DeltaTime) override;
 

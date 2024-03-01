@@ -100,7 +100,7 @@ namespace object
 #endif
 		case object::E3DObjectType::Pmx:
 #ifdef USE_MMD
-			if (!mmd::CPmxImporter::ImportPmx(pGraphicsAPI, pLoadWorker, m_FileName, m_BinaryData, this, BaseMF)) return false;
+			if (!mmd::CPmxImporter::ImportPmx(pGraphicsAPI, pPhysicsEngine, pLoadWorker, m_FileName, m_BinaryData, this, BaseMF)) return false;
 #endif
 			break;
 		default:
@@ -135,6 +135,7 @@ namespace object
 
 		// 物理
 		CreatePhysics(pPhysicsEngine);
+		ApplyPhysicsConstraint(pPhysicsEngine);
 
 		// Material
 		for (auto& Material : m_MaterialList)
@@ -227,6 +228,14 @@ namespace object
 		for (const auto& Node : m_NodeList)
 		{
 			Node->CreatePhysicsObject(pPhysicsEngine);
+		}
+	}
+
+	void C3DObject::ApplyPhysicsConstraint(physics::IPhysicsEngine* pPhysicsEngine)
+	{
+		for (const auto& Node : m_NodeList)
+		{
+			Node->ApplyPhysicsConstraint(pPhysicsEngine);
 		}
 	}
 
@@ -353,15 +362,16 @@ namespace object
 
 		// 付与ボーンの位置を再計算
 		if (!m_AnimationController->ReCalculateGrantBone(m_NodeList)) return false;
-
-		// Drawは何度も呼ぶことがあるのでUpdateでマイフレーム一回だけ計算する
-		// SSBOのサイズをDynamicOffset毎に変更できるかわからないのでひとまず全部まとめて渡す
-		m_CurrentSkinMatrixList.clear();
-		if (!m_AnimationController->CalCSkinMatrixList(m_CurrentSkinMatrixList, m_ObjectTransform->GetModelMatrix())) return false;
 #endif
 
 		// 物理演算の結果を反映する
 		ApplyPhysicsWorldMatrix();
+
+#ifdef USE_ANIMATION
+		// IKや物理演算が終わって最終的なWorldMatrixが確定した段階でSkinMatrixを計算する
+		m_CurrentSkinMatrixList.clear();
+		if (!m_AnimationController->CalCSkinMatrixList(m_CurrentSkinMatrixList, m_ObjectTransform->GetModelMatrix())) return false;
+#endif
 
 		return true;
 	}
@@ -454,7 +464,8 @@ namespace object
 		/*
 		if(DebugSphere)
 		{
-			for (const auto& Skeleton : m_AnimationController->GetSkeletonList())
+			const auto& Skeleton = m_AnimationController->GetSkeleton();
+			if(Skeleton)
 			{
 				for (const auto& Bone : Skeleton->GetBoneList())
 				{
@@ -477,13 +488,27 @@ namespace object
 
 					DebugSphere->GetMaterialList()[0]->SetUniformValue("useColor", &glm::ivec1(1)[0], sizeof(glm::ivec1));
 					
-					if(Bone->IsRotateGrant() || Bone->IsMoveGrant())
+					if(BoneNode->GetPhysicsObject() && BoneNode->GetPhysicsObject()->IsStatic())
 					{
 						DebugSphere->GetMaterialList()[0]->SetUniformValue("baseColor", &glm::vec4(1.0f, 0.0f, 0.0f, 1.0f)[0], sizeof(glm::vec4));
 					}
 					else
 					{
 						DebugSphere->GetMaterialList()[0]->SetUniformValue("baseColor", &glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)[0], sizeof(glm::vec4));
+					}
+
+					{
+						glm::mat4 Matrix = m_ObjectTransform->GetModelMatrix() * BoneNode->GetWorldMatrix();
+
+						glm::vec3 WorldPos = glm::vec3(0.0f);
+						glm::quat WorldRotate = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
+						glm::vec3 WorldScale = glm::vec3(1.0f);
+
+						math::CTransform::CastModelMatrixToTransform(Matrix, WorldPos, WorldRotate, WorldScale);
+
+						DebugSphere->SetPos(WorldPos);
+						DebugSphere->SetRot(WorldRotate);
+						DebugSphere->SetScale(WorldScale);
 					}
 
 					if (!DebugSphere->Draw(IsDepthPass, false, Camera, Projection, DrawInfo)) return false;

@@ -2547,6 +2547,27 @@
     <ClInclude Include="Src\PhysicsEngine\Bullet\CBulletPhysicsObject.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="Src\MMD\PMX\SPmxRigidbody.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\MMD\PMX\SPmxJoint.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\PhysicsEngine\Bullet\CBulletCapsule.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\PhysicsEngine\SRigidbodyParam.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\PhysicsEngine\SJointParam.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\PhysicsEngine\EJointType.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\PhysicsEngine\EPhysicsType.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\Main\DescMain\DescMain.cpp">
@@ -3495,6 +3516,9 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Src\PhysicsEngine\Bullet\CBulletPhysicsObject.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\PhysicsEngine\Bullet\CBulletCapsule.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>

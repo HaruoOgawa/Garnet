@@ -1,40 +1,41 @@
 #ifdef USE_PHYSICS
-#include "CBulletBox.h"
+#include "CBulletCapsule.h"
 #include "CBulletPhysicsEngine.h"
 
 namespace physics
 {
-	CBulletBox::CBulletBox(const glm::vec3& BoxHalfSize, bool IsStaticFlag, float Mass, const SRigidbodyParam& RBParam):
+	CBulletCapsule::CBulletCapsule(float Radius, float Height, bool IsStaticFlag, float Mass, const SRigidbodyParam& RBParam) :
 		CBulletPhysicsObject(IsStaticFlag, Mass, RBParam),
-		m_BoxHalfSize(BoxHalfSize)
+		m_Radius(Radius),
+		m_Height(Height)
 	{
 	}
 
-	CBulletBox::~CBulletBox()
+	CBulletCapsule::~CBulletCapsule()
 	{
 	}
 
-	bool CBulletBox::Create(IPhysicsEngine* pPhysicsEngine, const glm::vec3& WorldPos, const glm::quat& WorldRotate, const glm::vec3& WorldScale)
+	bool CBulletCapsule::Create(IPhysicsEngine* pPhysicsEngine, const glm::vec3& WorldPos, const glm::quat& WorldRotate, const glm::vec3& WorldScale)
 	{
 		CBulletPhysicsEngine* pBulletPhysics = static_cast<CBulletPhysicsEngine*>(pPhysicsEngine);
 
 		if (m_RBParam.UseSelfInitialTransform)
 		{
-			m_CollisionShape = std::make_shared<btBoxShape>(btVector3(m_BoxHalfSize.x, m_BoxHalfSize.y, m_BoxHalfSize.z));
+			m_CollisionShape = std::make_shared<btCapsuleShape>(m_Radius, m_Height);
 			m_RigidBody = std::make_shared<CBulletRigidBody>(pBulletPhysics->GetDynamicsWorld(), m_CollisionShape.get(), m_RBParam.InitWorldPos, m_RBParam.InitWorldRotate, m_IsStatic, m_Mass, m_RBParam);
 		}
 		else
 		{
-			m_CollisionShape = std::make_shared<btBoxShape>(btVector3(m_BoxHalfSize.x * WorldScale.x, m_BoxHalfSize.y * WorldScale.y, m_BoxHalfSize.z * WorldScale.z));
+			m_CollisionShape = std::make_shared<btCapsuleShape>(m_Radius * WorldScale.x, m_Height * WorldScale.y);
 			m_RigidBody = std::make_shared<CBulletRigidBody>(pBulletPhysics->GetDynamicsWorld(), m_CollisionShape.get(), WorldPos, WorldRotate, m_IsStatic, m_Mass, m_RBParam);
 		}
 
 		return true;
 	}
 
-	glm::vec3 CBulletBox::GetSize()
+	glm::vec3 CBulletCapsule::GetSize()
 	{
-		return m_BoxHalfSize;
+		return glm::vec3(m_Radius, m_Height, m_Radius);
 	}
 }
 #endif

@@ -5,12 +5,13 @@
 
 namespace physics
 {
-	class CBulletBox : public CBulletPhysicsObject
+	class CBulletCapsule : public CBulletPhysicsObject
 	{
-		const glm::vec3 m_BoxHalfSize;
+		const float m_Radius;
+		const float m_Height;
 	public:
-		CBulletBox(const glm::vec3& BoxHalfSize, bool IsStaticFlag, float Mass, const SRigidbodyParam& RBParam);
-		virtual ~CBulletBox();
+		CBulletCapsule(float Radius, float Height, bool IsStaticFlag, float Mass, const SRigidbodyParam& RBParam);
+		virtual ~CBulletCapsule();
 
 		virtual bool Create(IPhysicsEngine* pPhysicsEngine, const glm::vec3& WorldPos, const glm::quat& WorldRotate, const glm::vec3& WorldScale) override;
 
