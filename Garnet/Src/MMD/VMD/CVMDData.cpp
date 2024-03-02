@@ -247,6 +247,34 @@ namespace mmd
 		float Weight; // 表情の設定値(表情スライダーの値)
 		} vmd_Skeleton;
 		*/
+		
+		// 表情データ数
+		int ExpressionCount = 0;
+		if (!Analyser.GetInt(ExpressionCount)) return false;
+
+		for (int i = 0; i < ExpressionCount; i++)
+		{
+			// 表情名
+			std::wstring Name = std::wstring(L"");
+			if (!Analyser.GetUTF16String(Name, 15)) return false;
+
+			// フレームインデックス
+			int FrameIndex = -1;
+			if (!Analyser.GetInt(FrameIndex)) return false;
+
+			// ウェイト
+			float Weight = 0.0f;
+			if (!Analyser.GetFloat(Weight)) return false;
+
+			// 登録
+			if (m_SkinFrameMap.find(Name) == m_SkinFrameMap.end())
+			{
+				m_SkinFrameMap.emplace(Name, std::vector<SVMDSkinFrame>());
+			}
+
+			SVMDSkinFrame SkinFrame = { FrameIndex ,Weight };
+			m_SkinFrameMap[Name].push_back(SkinFrame);
+		}
 
 		return true;
 	}

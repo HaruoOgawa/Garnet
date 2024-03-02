@@ -23,6 +23,9 @@ namespace mmd
 		// アニメーションクリップの作成
 		if (!CreateAnimationClip(vmd, AnimationClipList)) return false;
 
+		// 表情アニメーションクリップの作成
+
+
 		return true;
 	}
 

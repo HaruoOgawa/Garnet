@@ -4,7 +4,7 @@ layout(location = 0) in vec3 inPosition;
 layout(location = 1) in vec3 inNormal;
 layout(location = 2) in vec2 inTexcoord;
 layout(location = 3) in vec4 inTangent;
-layout(location = 4) in uvec4 inBone0;
+layout(location = 4) in uvec4 inJoint0;
 layout(location = 5) in vec4 inWeights0;
 layout(location = 6) in vec3 inMorphVec0;
 layout(location = 7) in vec3 inMorphVec1;
@@ -15,16 +15,28 @@ layout(location = 11) in vec3 inMorphVec5;
 layout(location = 12) in vec3 inMorphVec6;
 layout(location = 13) in vec3 inMorphVec7;
 
-layout(binding = 0) uniform UniformBufferObject{
+layout(binding = 0) uniform MorphUniformBufferObject{
 	mat4 model;
     mat4 view;
     mat4 proj;
 	mat4 lightVPMat;
 
-    float edgeSize;
-    float fPad0;
-    float fPad1;
-    float fPad2;
+	vec4 lightDir;
+	vec4 lightColor;
+	vec4 cameraPos;
+
+	vec4 baseColorFactor;
+	vec4 emissiveFactor;
+
+    float time;
+    float metallicFactor;
+    float roughnessFactor;
+    float normalMapScale;
+
+	float occlusionStrength;
+    float mipCount;
+    float ShadowMapX;
+    float ShadowMapY;
 
     float MorphWeight_0;
     float MorphWeight_1;
@@ -35,10 +47,20 @@ layout(binding = 0) uniform UniformBufferObject{
     float MorphWeight_6;
     float MorphWeight_7;
 
-    int useSkinMeshAnimation;
-    int useMorph;
-    int drawPathIndex;
-    int pad1;
+    int   useBaseColorTexture;
+    int   useMetallicRoughnessTexture;
+    int   useEmissiveTexture;
+    int   useNormalTexture;
+    
+    int   useOcclusionTexture;
+    int   useCubeMap;
+    int   useShadowMap;
+    int   useIBL;
+
+    int   useSkinMeshAnimation;
+    int   useDirCubemap;
+    int   useMorph;
+    int   pad2;
 } ubo;
 
 readonly layout(std430, binding = 1) buffer SkinMatrixBuffer
@@ -52,7 +74,6 @@ layout(location = 2) out vec4 f_WorldPos;
 layout(location = 3) out vec3 f_WorldTangent;
 layout(location = 4) out vec3 f_WorldBioTangent;
 layout(location = 5) out vec4 f_LightSpacePos;
-layout(location = 6) out vec2 f_SphereUV;
 
 #define rot(a) mat2(cos(a), -sin(a), sin(a), cos(a))
 
@@ -84,10 +105,10 @@ void main(){
     if(ubo.useSkinMeshAnimation != 0)
     {
         mat4 SkinMat =
-            inWeights0.x * r_SkinMatrixBuffer.SkinMat[inBone0.x] +
-            inWeights0.y * r_SkinMatrixBuffer.SkinMat[inBone0.y] +
-            inWeights0.z * r_SkinMatrixBuffer.SkinMat[inBone0.z] +
-            inWeights0.w * r_SkinMatrixBuffer.SkinMat[inBone0.w] 
+            inWeights0.x * r_SkinMatrixBuffer.SkinMat[inJoint0.x] +
+            inWeights0.y * r_SkinMatrixBuffer.SkinMat[inJoint0.y] +
+            inWeights0.z * r_SkinMatrixBuffer.SkinMat[inJoint0.z] +
+            inWeights0.w * r_SkinMatrixBuffer.SkinMat[inJoint0.w ] 
         ;
 
         // スキンメッシュアニメーションの時はubo.modelは乗算しないように注意
@@ -105,42 +126,11 @@ void main(){
         WorldBioTangent = normalize((ubo.model * vec4(BioTangent, 0.0)).xyz);
     }
 
-    // SphereUV
-    vec4 VNormal = ubo.view * vec4(WorldNormal, 0.0);
-    vec2 SphereUV = VNormal.xy * 0.5 + 0.5;
-
-    // Pos
-    if(ubo.drawPathIndex == 2) // アウトライン描画パス
-    {
-        bool ViewSpaceOutline = false;
-
-        if(ViewSpaceOutline)
-        {
-            vec4 CameraPos = ubo.view * WorldPos;
-            vec3 CameraNormal = (ubo.view * vec4(WorldNormal, 0.0)).xyz;
-
-            CameraPos.xy += normalize(CameraNormal).xy * ubo.edgeSize * 0.001;
-
-            gl_Position = ubo.proj * CameraPos;
-        }
-        else
-        {
-            WorldPos.xyz += normalize(WorldNormal) * ubo.edgeSize * 0.001;
-
-            gl_Position = ubo.proj * ubo.view * WorldPos;
-        }
-    }
-    else
-    {
-        gl_Position = ubo.proj * ubo.view * WorldPos;
-    }
-
-    //
+    gl_Position = ubo.proj * ubo.view * WorldPos;
     f_WorldNormal = WorldNormal;
     f_Texcoord = inTexcoord;
     f_WorldPos = WorldPos;
     f_WorldTangent = WorldTangent;
     f_WorldBioTangent = WorldBioTangent;
     f_LightSpacePos = ubo.lightVPMat * WorldPos;
-    f_SphereUV = SphereUV;
 }

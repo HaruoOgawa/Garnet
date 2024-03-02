@@ -17,6 +17,9 @@ namespace mmd
 		std::map<animation::EHumanoidBones, std::vector<SVMDFrame>> m_FrameMap;
 		int m_MinFrameIndex;
 		int m_MaxFrameIndex;
+
+		// •\î
+		std::map<std::wstring, std::vector<SVMDSkinFrame>> m_SkinFrameMap;
 	private:
 		// ‘¼‚É‚àExpression, Camera, Light‚È‚Ç‚ª‚ ‚é‚ç‚µ‚¢‚ª‚Ğ‚Æ‚Ü‚¸Frame‚¾‚¯“Ç‚Ş
 		bool AnalyseFrameData(binary::CBinaryAnalyser& Analyser);
