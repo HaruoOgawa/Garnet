@@ -8,11 +8,16 @@ namespace graphics
 
 	void CMorphTarget::AddMorphData(const std::string& AttributeName, const SMorphData& Data)
 	{
-		if (m_MorphDataList.find(AttributeName) == m_MorphDataList.end())
+		if (m_MorphDataMap.find(AttributeName) == m_MorphDataMap.end())
 		{
-			m_MorphDataList.emplace(AttributeName, std::vector<SMorphData>());
+			m_MorphDataMap.emplace(AttributeName, std::vector<SMorphData>());
 		}
 
-		m_MorphDataList[AttributeName].push_back(Data);
+		m_MorphDataMap[AttributeName].push_back(Data);
+	}
+
+	const std::map<std::string, std::vector<SMorphData>>& CMorphTarget::GetMorphDataMap() const
+	{
+		return m_MorphDataMap;
 	}
 }

@@ -52,6 +52,7 @@ namespace mmd
 
 		// í∏ì_ÉÇÅ[Ét
 		void AddVertexMorph(const SPmxVertexMorph& VertexMorph);
+		const std::vector<SPmxVertexMorph>& GetVertexMorphList() const;
 	};
 }
 #endif

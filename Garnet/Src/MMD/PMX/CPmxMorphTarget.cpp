@@ -14,5 +14,10 @@ namespace mmd
 	{
 		m_VertexMorphList.push_back(VertexMorph);
 	}
+
+	const std::vector<SPmxVertexMorph>& CPmxMorphTarget::GetVertexMorphList() const
+	{
+		return m_VertexMorphList;
+	}
 }
 #endif

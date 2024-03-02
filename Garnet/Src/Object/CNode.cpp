@@ -120,6 +120,22 @@ namespace object
 		}
 	}
 
+	// ÉÇÅ[Ét
+	void CNode::ClearMorphWeights()
+	{
+		m_CurrentMorphWeights.clear();
+	}
+
+	void CNode::AddMorphWeight(float Weight)
+	{
+		m_CurrentMorphWeights.push_back(Weight);
+	}
+
+	const std::vector<float>& CNode::GetCurrentMorphWeights() const
+	{
+		return m_CurrentMorphWeights;
+	}
+
 	void CNode::SetLocalTransform(const std::shared_ptr<math::CTransform>& LocalTransform)
 	{
 		m_LocalTransform = LocalTransform;

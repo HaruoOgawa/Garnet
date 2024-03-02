@@ -8,18 +8,20 @@ namespace graphics
 {
 	struct SMorphData
 	{
-		int m_VertexIndex;
-		std::vector<float> m_OffsetVector;
-		float m_Weight;
+		int VertexIndex;
+		std::vector<float> OffsetVector;
+		float InitialWeight;
 	};
 
 	class CMorphTarget
 	{
-		std::map<std::string, std::vector<SMorphData>> m_MorphDataList;
+		std::map<std::string, std::vector<SMorphData>> m_MorphDataMap;
 	public:
 		CMorphTarget();
 		virtual ~CMorphTarget() = default;
 
 		void AddMorphData(const std::string& AttributeName, const SMorphData& Data);
+
+		const std::map<std::string, std::vector<SMorphData>>& GetMorphDataMap() const;
 	};
 }
