@@ -4,8 +4,9 @@ namespace object
 {
 	enum class E3DObjectType
 	{
-		Custom,
+		None,
 		glTF,
+		glb,
 		Fbx,
 		Pmx,
 	};

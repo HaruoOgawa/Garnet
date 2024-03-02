@@ -6,6 +6,14 @@ layout(location = 2) in vec2 inTexcoord;
 layout(location = 3) in vec4 inTangent;
 layout(location = 4) in uvec4 inBone0;
 layout(location = 5) in vec4 inWeights0;
+layout(location = 6) in vec3 inMorphVec0;
+layout(location = 7) in vec3 inMorphVec1;
+layout(location = 8) in vec3 inMorphVec2;
+layout(location = 9) in vec3 inMorphVec3;
+layout(location = 10) in vec3 inMorphVec4;
+layout(location = 11) in vec3 inMorphVec5;
+layout(location = 12) in vec3 inMorphVec6;
+layout(location = 13) in vec3 inMorphVec7;
 
 layout(binding = 0) uniform UniformBufferObject{
 	mat4 model;
@@ -18,8 +26,17 @@ layout(binding = 0) uniform UniformBufferObject{
     float fPad1;
     float fPad2;
 
+    float MorphWeight_0;
+    float MorphWeight_1;
+    float MorphWeight_2;
+    float MorphWeight_3;
+    float MorphWeight_4;
+    float MorphWeight_5;
+    float MorphWeight_6;
+    float MorphWeight_7;
+
     int useSkinMeshAnimation;
-    int pad0;
+    int useMorph;
     int drawPathIndex;
     int pad1;
 } ubo;
@@ -47,6 +64,22 @@ void main(){
     vec3 WorldTangent;
     vec3 WorldBioTangent;
 
+    vec3 LocalPos = inPosition;
+
+    // モーフ
+    if(ubo.useMorph != 0)
+    {
+        LocalPos +=
+            inMorphVec0 * ubo.MorphWeight_0 +
+            inMorphVec1 * ubo.MorphWeight_1 +
+            inMorphVec2 * ubo.MorphWeight_2 +
+            inMorphVec3 * ubo.MorphWeight_3 +
+            inMorphVec4 * ubo.MorphWeight_4 +
+            inMorphVec5 * ubo.MorphWeight_5 +
+            inMorphVec6 * ubo.MorphWeight_6 +
+            inMorphVec7 * ubo.MorphWeight_7;
+    }
+
     // スキンメッシュアニメーション
     if(ubo.useSkinMeshAnimation != 0)
     {
@@ -58,7 +91,7 @@ void main(){
         ;
 
         // スキンメッシュアニメーションの時はubo.modelは乗算しないように注意
-        WorldPos = SkinMat * vec4(inPosition, 1.0);
+        WorldPos = SkinMat * vec4(LocalPos, 1.0);
         WorldNormal = normalize((SkinMat * vec4(inNormal, 0.0)).xyz);
         WorldTangent = normalize((SkinMat * inTangent).xyz);
         WorldBioTangent = normalize((SkinMat * vec4(BioTangent, 0.0)).xyz);
@@ -66,7 +99,7 @@ void main(){
     else
     {
         // 通常の描画
-        WorldPos = ubo.model * vec4(inPosition, 1.0);
+        WorldPos = ubo.model * vec4(LocalPos, 1.0);
         WorldNormal = normalize((ubo.model * vec4(inNormal, 0.0)).xyz);
         WorldTangent = normalize((ubo.model * inTangent).xyz);
         WorldBioTangent = normalize((ubo.model * vec4(BioTangent, 0.0)).xyz);

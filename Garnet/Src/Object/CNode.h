@@ -32,6 +32,9 @@ namespace object
 		// 物理
 		std::shared_ptr<physics::IPhysicsObject> m_PhysicsObject;
 
+		// モーフ
+		std::vector<float> m_CurrentMorphWeights;
+
 	public:
 		CNode(int MeshIndex, int SelfNodeIndex);
 		virtual ~CNode();
@@ -54,6 +57,11 @@ namespace object
 		void ApplyPhysicsConstraint(physics::IPhysicsEngine* pPhysicsEngine);
 
 		void ApplyPhysicsWorldMatrix();
+
+		// モーフ
+		void ClearMorphWeights();
+		void AddMorphWeight(float Weight);
+		const std::vector<float>& GetCurrentMorphWeights() const;
 
 		//
 		void SetLocalTransform(const std::shared_ptr<math::CTransform>& LocalTransform);

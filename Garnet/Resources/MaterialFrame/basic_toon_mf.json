@@ -56,12 +56,52 @@
               "initValue": [ 0.0 ]
             },
             {
+              "name": "MorphWeight_0",
+              "type": "float",
+              "initValue": [ 0.0 ]
+            },
+            {
+              "name": "MorphWeight_1",
+              "type": "float",
+              "initValue": [ 0.0 ]
+            },
+            {
+              "name": "MorphWeight_2",
+              "type": "float",
+              "initValue": [ 0.0 ]
+            },
+            {
+              "name": "MorphWeight_3",
+              "type": "float",
+              "initValue": [ 0.0 ]
+            },
+            {
+              "name": "MorphWeight_4",
+              "type": "float",
+              "initValue": [ 0.0 ]
+            },
+            {
+              "name": "MorphWeight_5",
+              "type": "float",
+              "initValue": [ 0.0 ]
+            },
+            {
+              "name": "MorphWeight_6",
+              "type": "float",
+              "initValue": [ 0.0 ]
+            },
+            {
+              "name": "MorphWeight_7",
+              "type": "float",
+              "initValue": [ 0.0 ]
+            },
+            {
               "name": "useSkinMeshAnimation",
               "type": "int",
               "initValue": [ 0 ]
             },
             {
-              "name": "pad0",
+              "name": "useMorph",
               "type": "int",
               "initValue": [ 0 ]
             },

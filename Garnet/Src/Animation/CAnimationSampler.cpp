@@ -23,14 +23,15 @@ namespace animation
 
 	bool CAnimationSampler::CreateKeyFrame(EKeyFrameType Type, const std::vector<float>& inputList, const std::vector<float>& outputList)
 	{
-		const int NumComponent = GetNumComponentsInType(Type);
-
-		if (NumComponent == -1) return false;
+		//const int NumComponent = GetNumComponentsInType(Type);
+		//if (NumComponent == -1) return false;
 
 		// 0‚Ì‚ÍƒGƒ‰[‚É‚Í‚µ‚È‚¢‚ªA‰½‚àˆ—‚µ‚È‚¢
 		if (inputList.size() == 0) return true;
 
-		if (inputList.size() != outputList.size() / NumComponent) return false;
+		//if (inputList.size() != outputList.size() / NumComponent) return false;
+
+		int NumComponent = static_cast<int>(outputList.size() / inputList.size());
 
 		for (int i = 0; i < inputList.size(); i++)
 		{

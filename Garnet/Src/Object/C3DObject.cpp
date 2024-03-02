@@ -1,4 +1,5 @@
 #include "C3DObject.h"
+#include "../Format/CPathFormatter.h"
 #include "../GLTF/CGLTFImporter.h"
 #include "../LoadWorker/CLoadWorker.h"
 
@@ -30,6 +31,7 @@ namespace object
 #endif
 		m_TextureSet(std::make_shared<graphics::CTextureSet>()),
 		m_FileName(""),
+		m_ObjectType(E3DObjectType::None),
 		m_DepthMF(nullptr)
 	{
 	}
@@ -41,10 +43,11 @@ namespace object
 		m_MaterialList.clear();
 	}
 
-	void C3DObject::SetBinaryData(const std::vector<unsigned char>& Data, const std::string& FileName)
+	void C3DObject::SetBinaryData(const std::vector<unsigned char>& Data, const std::string& FileName, E3DObjectType ObjectType)
 	{
 		m_BinaryData = Data;
 		m_FileName = FileName;
+		m_ObjectType = ObjectType;
 	}
 
 	bool C3DObject::CreateSimply(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine,
@@ -73,18 +76,23 @@ namespace object
 		return true;
 	}
 
-	bool C3DObject::CreateFromMemory(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<graphics::CMaterialFrame>& BaseMF, const std::shared_ptr<graphics::CMaterialFrame>& DepthMF, E3DObjectType ObjectType)
+	bool C3DObject::CreateFromMemory(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<graphics::CMaterialFrame>& BaseMF, const std::shared_ptr<graphics::CMaterialFrame>& DepthMF)
 	{
 		m_DepthMF = DepthMF;
 
 		if (m_BinaryData.empty()) return false;
 
-		switch (ObjectType)
+		switch (m_ObjectType)
 		{
-		case object::E3DObjectType::Custom:
-			break;
 #ifdef USE_GLTF
 		case object::E3DObjectType::glTF:
+			{
+				std::string BaseDir = format::CPathFormatter::GetParentDir(m_FileName);
+				if (!gltf::CGLTFImporter::ImportFromString(pGraphicsAPI, m_BinaryData, BaseDir, this, BaseMF)) return false;
+			}
+			break;
+			
+		case object::E3DObjectType::glb:
 			if (!gltf::CGLTFImporter::ImportFromMemory(pGraphicsAPI, m_BinaryData, this, BaseMF)) return false;
 			break;
 #endif
@@ -94,7 +102,6 @@ namespace object
 			if (!fbx::CSmallFBXImporter::ImportFBX(pGraphicsAPI, m_BinaryData, this, BaseMF)) return false;
 #else
 			if (!fbx::CFBXImporter::ImportFBX(pGraphicsAPI, m_FileName, this, BaseMF)) return false;
-			
 #endif // USE_SMALL_FBX
 			break;
 #endif
@@ -392,6 +399,9 @@ namespace object
 
 			int SkeletonIndex = Node->GetSkeletonIndex();
 
+			// モーフウェイト
+			const auto& MorphWeights = Node->GetCurrentMorphWeights();
+
 			for (int PrimitiveIndex = 0; PrimitiveIndex < Mesh->GetPrimitiveList().size(); PrimitiveIndex++)
 			{
 				const auto& Primitive = Mesh->GetPrimitiveList()[PrimitiveIndex];
@@ -440,7 +450,7 @@ namespace object
 				Material->SetUniformValue("time", &glm::vec1(DrawInfo->GetSecondsTime())[0], sizeof(float), DynamicOffsetNum);
 				Material->SetUniformValue("deltaTime", &glm::vec1(DrawInfo->GetDeltaSecondsTime())[0], sizeof(float), DynamicOffsetNum);
 #ifdef USE_ANIMATION
-				Material->SetUniformValue("useSkinMeshAnimation", &glm::ivec1((m_AnimationController->IsPlayingAnimation() ? 1 : 0))[0], sizeof(glm::ivec1), DynamicOffsetNum);
+				Material->SetUniformValue("useSkinMeshAnimation", &glm::ivec1((m_AnimationController->IsEnabledSkeleton() ? 1 : 0))[0], sizeof(glm::ivec1), DynamicOffsetNum);
 
 				// SkinMatrixをShaderに渡す
 				if (m_CurrentSkinMatrixList.size() > 0)
@@ -448,6 +458,14 @@ namespace object
 					Material->SetUniformValue("r_SkinMatrixBuffer", &m_CurrentSkinMatrixList[0], sizeof(glm::mat4) * static_cast<int>(m_CurrentSkinMatrixList.size()), DynamicOffsetNum);
 				}
 #endif
+				// モーフ
+				for (int MorphIndex = 0; MorphIndex < MorphWeights.size(); MorphIndex++)
+				{
+					std::string MorphUniformName = "MorphWeight_" + std::to_string(MorphIndex);
+					float Weight = MorphWeights[MorphIndex];
+
+					Material->SetUniformValue(MorphUniformName, &glm::vec1(Weight)[0], sizeof(float), DynamicOffsetNum);
+				}
 
 				// 描画実行
 				if (!Primitive->Draw(Material, DynamicOffsetNum, IsDepthPass)) return false;

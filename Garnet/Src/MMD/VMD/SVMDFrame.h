@@ -22,5 +22,11 @@ namespace mmd
 		std::vector<glm::vec2> ZPointList;
 		std::vector<glm::vec2> RPointList;
 	};
+
+	struct SVMDSkinFrame
+	{
+		int FrameIndex = -1;
+		float Weight = 0.0f;
+	};
 }
 #endif

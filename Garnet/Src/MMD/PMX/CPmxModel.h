@@ -13,6 +13,7 @@
 #include "CPmxTexture.h"
 #include "CPmxMaterial.h"
 #include "CPmxBone.h"
+#include "CPmxMorphTarget.h"
 #include "SPmxRigidbody.h"
 #include "SPmxJoint.h"
 
@@ -28,6 +29,7 @@ namespace mmd
 		std::vector<std::shared_ptr<CPmxTexture>> m_PmxTextureList;
 		std::vector<std::shared_ptr<CPmxMaterial>> m_PmxMaterialList;
 		std::vector<std::shared_ptr<CPmxBone>> m_PmxBoneList;
+		std::vector<std::shared_ptr<CPmxMorphTarget>> m_PmxMorphList;
 		std::vector<SPmxRigidbody> m_PmxRigidbodyList;
 		std::vector<SPmxJoint> m_PmxJointList;
 	private:
@@ -67,6 +69,8 @@ namespace mmd
 		const std::vector<std::shared_ptr<CPmxMaterial>>& GetPmxMaterialList() const;
 
 		const std::vector<std::shared_ptr<CPmxBone>>& GetPmxBoneList() const;
+
+		const std::vector<std::shared_ptr<CPmxMorphTarget>>& GetPmxMorphList() const;
 
 		const std::vector<SPmxRigidbody>& GetPmxRigidbodyList() const;
 

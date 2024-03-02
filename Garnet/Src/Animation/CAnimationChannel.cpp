@@ -133,8 +133,14 @@ namespace animation
 
 	bool CAnimationChannel::UpdateWeights(const std::vector<float>& Value)
 	{
-		// –¢ŽÀ‘•
 		if (!m_TargetNode) return true;
+
+		m_TargetNode->ClearMorphWeights();
+
+		for (float Weight : Value)
+		{
+			m_TargetNode->AddMorphWeight(Weight);
+		}
 
 		return true;
 	}

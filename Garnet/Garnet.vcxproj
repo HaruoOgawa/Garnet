@@ -573,6 +573,8 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Src\MMD\PMX\CPmxMorphTarget.h" />
+    <ClInclude Include="Src\Format\CPathFormatter.h" />
     <ClInclude Include="Src\PhysicsEngine\Bullet\CBulletCapsule.h" />
     <ClInclude Include="Src\MMD\PMX\SPmxJoint.h" />
     <ClInclude Include="Src\MMD\PMX\SPmxRigidbody.h" />
@@ -1426,6 +1428,8 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClInclude Include="Src\Interface\IRenderer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\MMD\PMX\CPmxMorphTarget.cpp" />
+    <ClCompile Include="Src\Format\CPathFormatter.cpp" />
     <ClCompile Include="Src\PhysicsEngine\Bullet\CBulletCapsule.cpp" />
     <ClCompile Include="Src\PhysicsEngine\Bullet\CBulletPhysicsObject.cpp" />
     <ClCompile Include="Src\PhysicsEngine\Bullet\CBulletJoint.cpp" />
@@ -1752,6 +1756,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <None Include="Resources\MaterialFrame\basic_toon_mf.json" />
     <None Include="Resources\MaterialFrame\Blur_MF.json" />
     <None Include="Resources\MaterialFrame\Depth_MF.json" />
+    <None Include="Resources\MaterialFrame\PBRMorph_MF.json" />
     <None Include="Resources\MaterialFrame\PBR_MF.json" />
     <None Include="Resources\MaterialFrame\Sample_MF.json" />
     <None Include="Resources\MaterialFrame\SimpleTexture_MF.json" />
@@ -1793,6 +1798,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <None Include="Resources\Shaders\minimum_vert.wgsl" />
     <None Include="Resources\Shaders\pbr.frag" />
     <None Include="Resources\Shaders\pbr.vert" />
+    <None Include="Resources\Shaders\pbrmorph.vert" />
     <None Include="Resources\Shaders\pbr_frag.spv" />
     <None Include="Resources\Shaders\pbr_frag.wgsl" />
     <None Include="Resources\Shaders\pbr_NativeSafe_frag.wgsl" />

@@ -318,7 +318,8 @@ namespace animation
 
 	bool CAnimationController::CalCSkinMatrixList(std::vector<glm::mat4>& MatrixList, const glm::mat4& ObjectModelMatrix)
 	{
-		if (IsPlayingAnimation())
+		//if (IsPlayingAnimation())
+		if (IsEnabledSkeleton())
 		{
 			if(m_Skeleton)
 			{
@@ -327,6 +328,11 @@ namespace animation
 		}
 
 		return true;
+	}
+
+	bool CAnimationController::IsEnabledSkeleton()
+	{
+		return (m_Skeleton != nullptr && m_Skeleton->GetBoneList().size() > 0);
 	}
 
 	bool CAnimationController::IsPlayingAnimation()

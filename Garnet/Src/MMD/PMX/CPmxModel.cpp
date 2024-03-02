@@ -39,6 +39,11 @@ namespace mmd
 		return m_PmxBoneList;
 	}
 
+	const std::vector<std::shared_ptr<CPmxMorphTarget>>& CPmxModel::GetPmxMorphList() const
+	{
+		return m_PmxMorphList;
+	}
+
 	const std::vector<SPmxRigidbody>& CPmxModel::GetPmxRigidbodyList() const
 	{
 		return m_PmxRigidbodyList;
@@ -930,6 +935,9 @@ namespace mmd
 				}
 			}
 
+			// モーフオブジェクト
+			std::shared_ptr<CPmxMorphTarget> PmxMorph = std::make_shared<CPmxMorphTarget>(MorphName, MorphName_EN);
+
 			// 操作パネル (PMD:カテゴリ) 1:眉(左下) 2:目(左上) 3:口(右上) 4:その他(右下)  | 0:システム予約
 			unsigned char OperatePanel = 0;
 			if (!Analyser.GetByte(OperatePanel)) return false;
@@ -972,6 +980,9 @@ namespace mmd
 					Offset.x = Analyser.GetFloat();
 					Offset.y = Analyser.GetFloat();
 					Offset.z = Analyser.GetFloat();
+
+					// 登録
+					PmxMorph->AddVertexMorph(VertexIndex, Offset);
 				}
 			}
 			else if (MorphType == 2)
@@ -1202,6 +1213,8 @@ namespace mmd
 			{
 				return false;
 			}
+		
+			m_PmxMorphList.push_back(PmxMorph);
 		}
 
 		return true;

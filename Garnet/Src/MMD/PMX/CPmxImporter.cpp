@@ -324,6 +324,9 @@ namespace mmd
 				material->ReplacePreloadUniformValue("r_SkinMatrixBuffer", &SkinMatrixList[0], static_cast<int>(SkinMatrixList.size()) * sizeof(glm::mat4), 1);
 			}
 
+			// モーフ
+			material->ReplacePreloadUniformValue("useMorph", &glm::ivec1(1)[0], sizeof(int), 0);
+
 			MaterialList.push_back(material);
 		}
 
@@ -333,6 +336,9 @@ namespace mmd
 	bool CPmxImporter::CreateMeshList(const CPmxModel& model, std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, const std::shared_ptr<object::CNode>& RootNode, std::vector<std::shared_ptr<object::CNode>>& NodeList,
 		const std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList, bool ExistSkeleton)
 	{
+		// 後ほどリファクタリングするがひとまずここで使用する頂点モーフ(ブレンドシェイプ)のインデックスを8個選んでおく
+		std::vector<int> UseVertexMorphList = std::vector<int>({ 0, 1, 2, 3, 4, 5, 6, 7 });
+
 		// 明示的にMeshNodeを作成
 		std::shared_ptr<object::CNode> MeshNode = std::make_shared<object::CNode>(-1, static_cast<int>(NodeList.size()));
 		MeshNode->SetName("BaseMeshNode");
@@ -359,6 +365,14 @@ namespace mmd
 				"TANGENT",
 				"JOINTS_0",
 				"WEIGHTS_0",
+				"MORPHVEC_0",
+				"MORPHVEC_1",
+				"MORPHVEC_2",
+				"MORPHVEC_3",
+				"MORPHVEC_4",
+				"MORPHVEC_5",
+				"MORPHVEC_6",
+				"MORPHVEC_7",
 			};
 			std::map<std::string, std::vector<float>> ReservedVertexDataList;
 			std::map<std::string, renderer::EDataType> ReservedDataTypeList;
@@ -458,6 +472,44 @@ namespace mmd
 					ReservedDataTypeList.emplace("WEIGHTS_0", renderer::EDataType::TYPE_FLOAT);
 					ReservedByteStrideList.emplace("WEIGHTS_0", 0);
 				}
+
+				// モーフ
+				{
+					const auto& PmxMorphList = model.GetPmxMorphList();
+
+					for (int mrpIndex = 0; mrpIndex < 8; mrpIndex++)
+					{
+						std::string Name = "MORPHVEC_" + std::to_string(mrpIndex);
+
+						// まず全て0埋めする
+						std::vector<float> AttributeData = std::vector<float>(PmxMesh->GetPositionAttribute().size(), 0.0f);
+
+						// 指定された頂点モーフのデータを取得する
+						if (mrpIndex < UseVertexMorphList.size())
+						{
+							int UseMorphIndex = UseVertexMorphList[mrpIndex];
+
+							if (UseMorphIndex < PmxMorphList.size())
+							{
+								const auto& PmxMorph = PmxMorphList[UseMorphIndex];
+
+								for (const auto& VertexMorph : PmxMorph->GetVertexMorphList())
+								{
+									int VertexIndex = VertexMorph.first;
+									const auto& Offset = VertexMorph.second;
+
+									AttributeData[VertexIndex * 3 + 0] = Offset.x;
+									AttributeData[VertexIndex * 3 + 1] = Offset.y;
+									AttributeData[VertexIndex * 3 + 2] = Offset.z;
+								}
+							}
+						}
+
+						ReservedVertexDataList.emplace(Name, AttributeData);
+						ReservedDataTypeList.emplace(Name, renderer::EDataType::TYPE_FLOAT);
+						ReservedByteStrideList.emplace(Name, 0);
+					}
+				}
 			}
 
 			// 頂点バッファを構築
@@ -467,7 +519,16 @@ namespace mmd
 					// ディメンションを登録
 					int Dimention = 1;
 
-					if (AttribName == "POSITION" || AttribName == "NORMAL")
+					if (AttribName == "POSITION" || AttribName == "NORMAL" ||
+						AttribName == "MORPHVEC_0" ||
+						AttribName == "MORPHVEC_1" ||
+						AttribName == "MORPHVEC_2" ||
+						AttribName == "MORPHVEC_3" ||
+						AttribName == "MORPHVEC_4" ||
+						AttribName == "MORPHVEC_5" ||
+						AttribName == "MORPHVEC_6" ||
+						AttribName == "MORPHVEC_7"
+						)
 					{
 						Dimention = 3;
 					}
@@ -512,7 +573,7 @@ namespace mmd
 				createInfo->SetAttribDataTypes(DataTypeList);
 				createInfo->SetAttribByteStrides(ByteStrideList);
 
-				// インデックスバッフを読む
+				// インデックスバッファを読む
 				{
 					if (MetaData.VertexIndexSize == 1)
 					{
