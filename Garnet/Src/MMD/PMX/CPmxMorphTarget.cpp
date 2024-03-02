@@ -10,12 +10,12 @@ namespace mmd
 	}
 
 	// í∏ì_ÉÇÅ[Ét
-	void CPmxMorphTarget::AddVertexMorph(const SPmxVertexMorph& VertexMorph)
+	void CPmxMorphTarget::AddVertexMorph(int VertexIndex, const glm::vec3& Offset)
 	{
-		m_VertexMorphList.push_back(VertexMorph);
+		m_VertexMorphList.emplace(VertexIndex, Offset);
 	}
 
-	const std::vector<SPmxVertexMorph>& CPmxMorphTarget::GetVertexMorphList() const
+	const std::map<int, glm::vec3>& CPmxMorphTarget::GetVertexMorphList() const
 	{
 		return m_VertexMorphList;
 	}

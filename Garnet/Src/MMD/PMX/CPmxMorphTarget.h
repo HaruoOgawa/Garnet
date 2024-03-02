@@ -4,16 +4,11 @@
 
 #include <string>
 #include <vector>
+#include <map>
 #include <glm/glm.hpp>
 
 namespace mmd
 {
-	struct SPmxVertexMorph
-	{
-		int VertexIndex = -1;
-		glm::vec3 Offset = glm::vec3(0.0f);
-	};
-
 	class CPmxMorphTarget
 	{
 		// モーフ名
@@ -24,7 +19,7 @@ namespace mmd
 		// 未実装
 
 		// 頂点モーフ
-		std::vector<SPmxVertexMorph> m_VertexMorphList;
+		std::map<int, glm::vec3> m_VertexMorphList;
 
 		// ボーンモーフ
 		// 未実装
@@ -51,8 +46,8 @@ namespace mmd
 		virtual ~CPmxMorphTarget() = default;
 
 		// 頂点モーフ
-		void AddVertexMorph(const SPmxVertexMorph& VertexMorph);
-		const std::vector<SPmxVertexMorph>& GetVertexMorphList() const;
+		void AddVertexMorph(int VertexIndex, const glm::vec3& Offset);
+		const std::map<int, glm::vec3>& GetVertexMorphList() const;
 	};
 }
 #endif

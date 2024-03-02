@@ -982,8 +982,7 @@ namespace mmd
 					Offset.z = Analyser.GetFloat();
 
 					// “o˜^
-					SPmxVertexMorph VeretxMorphData = { VertexIndex, Offset };
-					PmxMorph->AddVertexMorph(VeretxMorphData);
+					PmxMorph->AddVertexMorph(VertexIndex, Offset);
 				}
 			}
 			else if (MorphType == 2)
