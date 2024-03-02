@@ -408,9 +408,9 @@ namespace gltf
 				}
 
 				material->ReplacePreloadUniformValue("useSkinMeshAnimation", &glm::ivec1(0)[0], sizeof(int), 0);
-				material->ReplacePreloadUniformValue("pad0", &glm::ivec1(0)[0], sizeof(int), 0);
-				material->ReplacePreloadUniformValue("pad1", &glm::ivec1(0)[0], sizeof(int), 0);
-				material->ReplacePreloadUniformValue("pad2", &glm::ivec1(0)[0], sizeof(int), 0);
+				
+				// モーフ
+				material->ReplacePreloadUniformValue("useMorph", &glm::ivec1(1)[0], sizeof(int), 0);
 			}
 
 			// SkinMatrix StorageBuffer
@@ -467,6 +467,14 @@ namespace gltf
 					"TANGENT",
 					"JOINTS_0",
 					"WEIGHTS_0",
+					"MORPHVEC_0",
+					"MORPHVEC_1",
+					"MORPHVEC_2",
+					"MORPHVEC_3",
+					"MORPHVEC_4",
+					"MORPHVEC_5",
+					"MORPHVEC_6",
+					"MORPHVEC_7",
 				};
 				std::map<std::string, std::vector<float>> ReservedVertexDataList;
 				std::map<std::string, renderer::EDataType> ReservedDataTypeList;
@@ -513,6 +521,53 @@ namespace gltf
 						ReservedByteStrideList.insert({ Name, attibByteStride });
 					}
 
+					// モーフターゲット
+					for (int MorphIndex = 0; MorphIndex < static_cast<int>(glTFPrimitive.targets.size()); MorphIndex++)
+					{
+						const auto& glTFMorph = glTFPrimitive.targets[MorphIndex];
+
+						// POSITIONのモーフのみに対応する
+						{
+							auto it = glTFMorph.find("POSITION");
+							if (it != glTFMorph.end())
+							{
+								int AccessorIndex = (*it).second;
+
+								if (AccessorIndex < 0 || AccessorIndex >= model.accessors.size()) continue;
+
+								const auto& Accessor = model.accessors[AccessorIndex];
+
+								// 使用する型のバイト数. 5123のunsigned short、5126のfloat など
+								// https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#accessor-data-types
+								int Stride = CalcStrideFromAccessor(model, Accessor);
+
+								// データを取得
+								std::vector<unsigned char> BufferData;
+								if (!CalculateBufferFromAccessor(model, Accessor, BufferData)) return false;
+
+								std::vector<float> AttributeData;
+								AttributeData.resize(BufferData.size() / Stride);
+								std::memcpy(&AttributeData[0], &BufferData[0], BufferData.size());
+
+								// 名前
+								std::string Name = "MORPHVEC_" + std::to_string(MorphIndex);
+
+								// データを登録
+								ReservedVertexDataList.insert({ Name, AttributeData });
+
+								// コンポーネントタイプ(データ型)を取得
+								renderer::EDataType attribComponentType = GetComponentTypeFromAccessor(Accessor);
+								ReservedDataTypeList.insert({ Name, attribComponentType });
+
+								// ByteStrideを取得
+								// byteStrideとは「１つ分」のデータと、次の「1つ分」のデータとの間の、読み取り場所の移動バイト長
+								// http://muko.damember.org/gl4/html-ja/glVertexAttribPointer.xhtml
+								int attibByteStride = GetByteStride(model, Accessor);
+								ReservedByteStrideList.insert({ Name, attibByteStride });
+							}
+						}
+					}
+
 					// アトリビュートがまだ登録されていなければここで0埋めの値を渡す
 					int VertexDataSize = static_cast<int>(ReservedVertexDataList["POSITION"].size()) / 3;
 					for (const auto& AttribName : NeedAttribNameList)
@@ -520,7 +575,16 @@ namespace gltf
 						// ディメンションを登録
 						int Dimention = 1;
 
-						if (AttribName == "POSITION" || AttribName == "NORMAL")
+						if (AttribName == "POSITION" || AttribName == "NORMAL" || 
+							AttribName == "MORPHVEC_0" || 
+							AttribName == "MORPHVEC_1" ||
+							AttribName == "MORPHVEC_2" ||
+							AttribName == "MORPHVEC_3" ||
+							AttribName == "MORPHVEC_4" ||
+							AttribName == "MORPHVEC_5" ||
+							AttribName == "MORPHVEC_6" ||
+							AttribName == "MORPHVEC_7"
+						)
 						{
 							Dimention = 3;
 						}
@@ -637,73 +701,8 @@ namespace gltf
 					createInfo->SetUINTIndices(UINTIndices);
 				}
 
-				// モーフターゲット
-				std::vector<std::shared_ptr<graphics::CMorphTarget>> MorphTargetList;
-
-				for (int MorphIndex = 0; MorphIndex < static_cast<int>(glTFPrimitive.targets.size()); MorphIndex++)
-				{
-					std::shared_ptr<graphics::CMorphTarget> MorphTarget = std::make_shared<graphics::CMorphTarget>();
-
-					const auto& glTFMorph = glTFPrimitive.targets[MorphIndex];
-
-					for (const auto& MorphAttribute : glTFMorph)
-					{
-						const std::string& AttributeName = MorphAttribute.first;
-						int AccessorIndex = MorphAttribute.second;
-
-						if (AccessorIndex < 0 || AccessorIndex >= model.accessors.size()) continue;
-
-						const auto& Accessor = model.accessors[AccessorIndex];
-
-						// 使用する型のバイト数. 5123のunsigned short、5126のfloat など
-						// https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#accessor-data-types
-						int Stride = CalcStrideFromAccessor(model, Accessor);
-
-						// データを取得
-						std::vector<unsigned char> BufferData;
-						if (!CalculateBufferFromAccessor(model, Accessor, BufferData)) return false;
-
-						std::vector<float> AttributeData;
-						AttributeData.resize(BufferData.size() / Stride);
-						std::memcpy(&AttributeData[0], &BufferData[0], BufferData.size());
-
-						// コンポーネントタイプ(データ型)を取得
-						renderer::EDataType attribComponentType = GetComponentTypeFromAccessor(Accessor);
-
-						int VertexIndex = 0;
-						int Dimension = tinygltf::GetNumComponentsInType(Accessor.type);
-
-						for (int DataIndex = 0; DataIndex < static_cast<int>(AttributeData.size()) / Dimension; DataIndex++)
-						{
-							// オフセット
-							std::vector<float> OffsetVector;
-							OffsetVector.resize(Dimension);
-
-							std::memcpy(&OffsetVector[0], &AttributeData[DataIndex * Dimension], Dimension * sizeof(float));
-
-							// 初期モーフウェイト(存在しないこともある)
-							float InitialWeight = 0.0f;
-
-							if (MorphIndex >= 0 && MorphIndex < glTFMesh.weights.size())
-							{
-								InitialWeight = static_cast<float>(glTFMesh.weights[MorphIndex]);
-							}
-
-							// 登録
-							graphics::SMorphData MorphData = { VertexIndex, OffsetVector, InitialWeight };
-							MorphTarget->AddMorphData(AttributeName, MorphData);
-
-							VertexIndex++;
-						}
-					}
-				
-					MorphTargetList.push_back(MorphTarget);
-				}
-
 				// プリミティブを作成する
 				std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(createInfo, MaterialIndex);
-				Primitive->SetMorphList(MorphTargetList);
-
 				Mesh->AddPrimitive(Primitive);
 			}
 
@@ -731,6 +730,9 @@ namespace gltf
 		// マテリアルにシェーダーを設定
 		std::shared_ptr<graphics::CMaterial> material = MaterialFrame->CreateMaterial(pGraphicsAPI, MatRefCount, graphics::ECullMode::CULL_NONE);
 		
+		// モーフ
+		material->ReplacePreloadUniformValue("useMorph", &glm::ivec1(1)[0], sizeof(int), 0);
+
 		MaterialList.push_back(material);
 
 		return true;

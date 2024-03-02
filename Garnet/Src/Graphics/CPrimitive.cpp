@@ -64,14 +64,4 @@ namespace graphics
 	{
 		return m_MaterialIndex;
 	}
-
-	void CPrimitive::SetMorphList(const std::vector<std::shared_ptr<graphics::CMorphTarget>>& MorphList)
-	{
-		m_MorphList = MorphList;
-	}
-
-	const std::vector<std::shared_ptr<graphics::CMorphTarget>>& CPrimitive::GetMorphList() const
-	{
-		return m_MorphList;
-	}
 }

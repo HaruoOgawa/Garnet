@@ -21,6 +21,7 @@ namespace scene
 		m_SimpleTextureMF(std::make_shared<graphics::CMaterialFrame>()),
 		m_DepthMF(std::make_shared<graphics::CMaterialFrame>()),
 		m_PBRMF(std::make_shared<graphics::CMaterialFrame>()),
+		m_PBRMorph_MF(std::make_shared<graphics::CMaterialFrame>()),
 
 		m_SimpleMorphObj(std::make_shared<object::C3DObject>("", "ShadowPass")),
 		m_BrainStemObj(std::make_shared<object::C3DObject>("", "ShadowPass")),
@@ -50,8 +51,11 @@ namespace scene
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CMaterialFrameLoader>("Resources\\MaterialFrame\\SimpleTexture_MF.json", m_SimpleTextureMF));
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CMaterialFrameLoader>("Resources\\MaterialFrame\\Depth_MF.json", m_DepthMF));
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CMaterialFrameLoader>("Resources\\MaterialFrame\\PBR_MF.json", m_PBRMF));
+		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CMaterialFrameLoader>("Resources\\MaterialFrame\\PBRMorph_MF.json", m_PBRMorph_MF));
 		
-		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Models\\SimpleMorphTarget\\SimpleMorphTarget.gltf", m_SimpleMorphObj, "", "ShadowPass"));
+		//pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Models\\SimpleMorphTarget\\SimpleMorphTarget.gltf", m_SimpleMorphObj, "", "ShadowPass"));
+		//pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Models\\MorphPrimitivesTest\\glTF-Binary\\MorphPrimitivesTest.glb", m_SimpleMorphObj, "", "ShadowPass"));
+		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Models\\MorphStressTest\\glTF-Binary\\MorphStressTest.glb", m_SimpleMorphObj, "", "ShadowPass"));
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Models\\BrainStem\\glTF-Binary\\BrainStem.glb", m_BrainStemObj, "", "ShadowPass"));
 
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Avatar\\X_Bot.fbx", m_XBotObject, "", "ShadowPass"));
@@ -84,7 +88,7 @@ namespace scene
 	{
 		// m_SimpleMorphObj
 		{
-			if (!m_SimpleMorphObj->CreateFromMemory(pGraphicsAPI, pPhysicsEngine, pLoadWorker, m_PBRMF, m_DepthMF)) return false;
+			if (!m_SimpleMorphObj->CreateFromMemory(pGraphicsAPI, pPhysicsEngine, pLoadWorker, m_PBRMorph_MF, m_DepthMF)) return false;
 			m_SimpleMorphObj->ChangeMotion(0);
 		}
 		

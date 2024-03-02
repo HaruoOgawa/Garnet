@@ -2571,9 +2571,6 @@
     <ClInclude Include="Src\Format\CPathFormatter.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Src\Graphics\CMorphTarget.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="Src\MMD\PMX\CPmxMorphTarget.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
@@ -3533,9 +3530,6 @@
     <ClCompile Include="Src\Format\CPathFormatter.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Graphics\CMorphTarget.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="Src\MMD\PMX\CPmxMorphTarget.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
@@ -4030,5 +4024,7 @@
     <None Include="Resources\Shaders\unlit.frag" />
     <None Include="Resources\Shaders\unlit_frag.spv" />
     <None Include="Resources\Shaders\unlit_frag.wgsl" />
+    <None Include="Resources\Shaders\pbrmorph.vert" />
+    <None Include="Resources\MaterialFrame\PBRMorph_MF.json" />
   </ItemGroup>
 </Project>
