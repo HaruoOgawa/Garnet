@@ -68,6 +68,9 @@ namespace mmd
 		std::vector<std::shared_ptr<graphics::CMesh>> MeshList;
 		if (!CreateMeshList(model, MeshList, RootNode, NodeList, MaterialList, (Skeleton->GetBoneList().size() > 0))) return false;
 
+		// ƒ‚[ƒt
+		if (!CreateMorphTarget(model, MeshList)) return false;
+
 		// „‘Ì
 		//if (!CreateRigidbody(pPhysicsEngine, model, Skeleton)) return false;
 
@@ -646,6 +649,11 @@ namespace mmd
 			pLoadWorker->AddRuntimeLoadResource(TexLoader);
 		}
 
+		return true;
+	}
+
+	bool CPmxImporter::CreateMorphTarget(const CPmxModel& model, std::vector<std::shared_ptr<graphics::CMesh>>& MeshList)
+	{
 		return true;
 	}
 

@@ -344,7 +344,7 @@ namespace scene
 		}*/
 
 		// m_TdaMiku_Model
-		/*{
+		{
 			m_TdaMiku_Model->SetPos(glm::vec3(0.0f, 0.0f, 0.0f));
 			m_TdaMiku_Model->SetScale(glm::vec3(0.1f));
 
@@ -354,7 +354,7 @@ namespace scene
 			if (Clip) m_TdaMiku_Model->AddHumanoidAnimationClip(Clip, "Walk", { nullptr, "" }, true);
 
 			m_TdaMiku_Model->ChangeMotion("Walk");
-		}*/
+		}
 
 		// m_Background
 		{
