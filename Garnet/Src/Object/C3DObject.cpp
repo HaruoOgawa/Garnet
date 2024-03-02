@@ -447,7 +447,7 @@ namespace object
 				Material->SetUniformValue("time", &glm::vec1(DrawInfo->GetSecondsTime())[0], sizeof(float), DynamicOffsetNum);
 				Material->SetUniformValue("deltaTime", &glm::vec1(DrawInfo->GetDeltaSecondsTime())[0], sizeof(float), DynamicOffsetNum);
 #ifdef USE_ANIMATION
-				Material->SetUniformValue("useSkinMeshAnimation", &glm::ivec1((m_AnimationController->IsPlayingAnimation() ? 1 : 0))[0], sizeof(glm::ivec1), DynamicOffsetNum);
+				Material->SetUniformValue("useSkinMeshAnimation", &glm::ivec1((m_AnimationController->IsEnabledSkeleton() ? 1 : 0))[0], sizeof(glm::ivec1), DynamicOffsetNum);
 
 				// SkinMatrix‚ðShader‚É“n‚·
 				if (m_CurrentSkinMatrixList.size() > 0)

@@ -41,6 +41,7 @@ namespace animation
 		CAnimationController();
 		virtual ~CAnimationController();
 
+		bool IsEnabledSkeleton();
 		bool IsPlayingAnimation();
 
 		bool Update(float DeltaSecondsTime);

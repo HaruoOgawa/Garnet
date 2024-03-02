@@ -38,6 +38,14 @@ namespace scene
 		std::shared_ptr<object::C3DObject> m_SimpleMorphObj;
 		std::shared_ptr<object::C3DObject> m_BrainStemObj;
 
+		// Fbx
+		std::shared_ptr<object::C3DObject> m_Walk_Animation;
+		std::shared_ptr<object::C3DObject> m_Jump_Animation;
+		std::shared_ptr<object::C3DObject> m_Punch_Animation;
+		std::shared_ptr<object::C3DObject> m_XBotObject;
+		std::shared_ptr<object::C3DObject> m_MouseyObject;
+		std::shared_ptr<object::C3DObject> m_WarrokObject;
+
 		// PhysicsObj
 		std::shared_ptr<object::C3DObject> m_PhysicsGround;
 		std::shared_ptr<object::C3DObject> m_PhysicsSphere;
