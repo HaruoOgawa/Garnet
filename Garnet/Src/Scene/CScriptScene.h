@@ -34,6 +34,9 @@ namespace scene
 		//
 		std::shared_ptr<graphics::CTexture> m_Cube_Texture;
 
+		// glTF
+		std::shared_ptr<object::C3DObject> m_SimpleMorphObj;
+
 		// PhysicsObj
 		std::shared_ptr<object::C3DObject> m_PhysicsGround;
 		std::shared_ptr<object::C3DObject> m_PhysicsSphere;

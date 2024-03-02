@@ -1,5 +1,6 @@
 #include "CFile.h"
 #include "../Debug/Message/Console.h"
+#include "../Format/CPathFormatter.h"
 
 namespace resource
 {
@@ -11,8 +12,7 @@ namespace resource
 		m_Filename(filename),
 		m_IsSync(false)
 	{
-		auto pos = m_Filename.find(".");
-		m_Extention = m_Filename.substr(pos + 1);
+		m_Extention = format::CPathFormatter::GetExtention(filename);
 	}
 
 	CFile::~CFile()

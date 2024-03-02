@@ -85,7 +85,12 @@ namespace gltf
 
 		if (!result) return false;
 
-		if (!Import(pGraphicsAPI, model, Object, MaterialFrame)) return false;
+		if (!Import(pGraphicsAPI, model, Object, MaterialFrame))
+		{
+			Console::Log("[Error GLTFImporter] Failed to Import\n");
+
+			return false;
+		}
 
 		return true;
 	}
@@ -95,7 +100,12 @@ namespace gltf
 	{
 		// テクスチャ
 		std::vector<std::shared_ptr<graphics::CTexture>> TextureList;
-		if (!CreateTexture(pGraphicsAPI, model, TextureList)) return false;
+		if (!CreateTexture(pGraphicsAPI, model, TextureList))
+		{
+			Console::Log("[Error GLTFImporter] Failed to CreateTexture\n");
+
+			return false;
+		}
 
 		for (const auto& Texture : TextureList)
 		{
@@ -104,26 +114,51 @@ namespace gltf
 
 		// マテリアル
 		std::vector<std::shared_ptr<graphics::CMaterial>> MaterialList;
-		if (!CreateMaterial(pGraphicsAPI, model, MaterialList, MaterialFrame, Object->GetTextureSet())) return false;
+		if (!CreateMaterial(pGraphicsAPI, model, MaterialList, MaterialFrame, Object->GetTextureSet()))
+		{
+			Console::Log("[Error GLTFImporter] Failed to CreateMaterial\n");
+
+			return false;
+		}
 
 		// メッシュ
 		std::vector<std::shared_ptr<graphics::CMesh>> MeshList;
-		if (!CreateMesh(model, MeshList)) return false;
+		if (!CreateMesh(model, MeshList))
+		{
+			Console::Log("[Error GLTFImporter] Failed to CreateMesh\n");
+
+			return false;
+		}
 
 		// マテリアルを持っていないのならダミーを渡す
 		if (MaterialList.size() <= 0)
 		{
-			if (!CreateDummyMaterial(pGraphicsAPI, model, MaterialList, MaterialFrame, MeshList)) return false;
+			if (!CreateDummyMaterial(pGraphicsAPI, model, MaterialList, MaterialFrame, MeshList))
+			{
+				Console::Log("[Error GLTFImporter] Failed to CreateDummyMaterial\n");
+
+				return false;
+			}
 		}
 
 		// ノード
 		std::vector<std::shared_ptr<object::CNode>> NodeList;
 		std::vector<std::vector<int>> RootNodeIndexList;
-		if (!CreateNode(model, NodeList, RootNodeIndexList)) return false;
+		if (!CreateNode(model, NodeList, RootNodeIndexList))
+		{
+			Console::Log("[Error GLTFImporter] Failed to CreateNode\n");
+
+			return false;
+		}
 
 		// スキン
 		std::shared_ptr<animation::CSkeleton> Skeleton = std::make_shared<animation::CSkeleton>();
-		if (!CreateAnimationSkeleton(model, Skeleton, NodeList)) return false;
+		if (!CreateAnimationSkeleton(model, Skeleton, NodeList))
+		{
+			Console::Log("[Error GLTFImporter] Failed to CreateAnimationSkeleton\n");
+
+			return false;
+		}
 
 		// NodeとSkeletonは先に追加しておく
 		for (const auto& Node : NodeList)
@@ -152,7 +187,12 @@ namespace gltf
 
 		// アニメーション
 		std::vector<std::shared_ptr<animation::CAnimationClip>> AnimationClipList;
-		if (!CreateAnimation(model, AnimationClipList, NodeList)) return false;
+		if (!CreateAnimation(model, AnimationClipList, NodeList))
+		{
+			Console::Log("[Error GLTFImporter] Failed to CreateAnimation\n");
+
+			return false;
+		}
 
 		// オブジェクトにリソースを登録
 		for (const auto& Material : MaterialList)

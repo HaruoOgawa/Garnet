@@ -573,6 +573,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Src\Format\CPathFormatter.h" />
     <ClInclude Include="Src\PhysicsEngine\Bullet\CBulletCapsule.h" />
     <ClInclude Include="Src\MMD\PMX\SPmxJoint.h" />
     <ClInclude Include="Src\MMD\PMX\SPmxRigidbody.h" />
@@ -1426,6 +1427,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClInclude Include="Src\Interface\IRenderer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\Format\CPathFormatter.cpp" />
     <ClCompile Include="Src\PhysicsEngine\Bullet\CBulletCapsule.cpp" />
     <ClCompile Include="Src\PhysicsEngine\Bullet\CBulletPhysicsObject.cpp" />
     <ClCompile Include="Src\PhysicsEngine\Bullet\CBulletJoint.cpp" />

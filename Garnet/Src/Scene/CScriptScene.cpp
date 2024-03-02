@@ -22,6 +22,8 @@ namespace scene
 		m_DepthMF(std::make_shared<graphics::CMaterialFrame>()),
 		m_PBRMF(std::make_shared<graphics::CMaterialFrame>()),
 
+		m_SimpleMorphObj(std::make_shared<object::C3DObject>("", "ShadowPass")),
+
 		m_PhysicsGround(std::make_shared<object::C3DObject>("", "ShadowPass")),
 		m_PhysicsSphere(std::make_shared<object::C3DObject>("", "ShadowPass")),
 		m_PhysicsCubeList(std::make_shared<object::C3DObject>("", "ShadowPass")),
@@ -41,6 +43,7 @@ namespace scene
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CMaterialFrameLoader>("Resources\\MaterialFrame\\Depth_MF.json", m_DepthMF));
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CMaterialFrameLoader>("Resources\\MaterialFrame\\PBR_MF.json", m_PBRMF));
 		
+		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Models\\SimpleMorphTarget\\SimpleMorphTarget.gltf", m_SimpleMorphObj, "", "ShadowPass"));
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Avatar\\Tda_Miku\\Tda_Miku.pmx", m_TdaMiku_Model, "", "ShadowPass"));
 		//pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CAnimationLoader>("Resources\\Motions\\mmd_running.vmd", m_VMDAnimationSet));
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CAnimationLoader>("Resources\\Motions\\Run_m4th_Loop.vmd", m_VMDAnimationSet));
@@ -62,6 +65,11 @@ namespace scene
 
 	bool CScriptScene::Load(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker)
 	{
+		// m_SimpleMorphObj
+		{
+			if (!m_SimpleMorphObj->CreateFromMemory(pGraphicsAPI, pPhysicsEngine, pLoadWorker, m_PBRMF, m_DepthMF)) return false;
+		}
+
 		const float ZOffset = 3.0f;
 
 		// m_PhysicsGround
@@ -256,17 +264,17 @@ namespace scene
 		}*/
 
 		// m_TdaMiku_Model
-		{
+		/*{
 			m_TdaMiku_Model->SetPos(glm::vec3(0.0f, 0.0f, 0.0f));
 			m_TdaMiku_Model->SetScale(glm::vec3(0.1f));
 
-			if (!m_TdaMiku_Model->CreateFromMemory(pGraphicsAPI, pPhysicsEngine, pLoadWorker, m_BasicToonMF, m_DepthMF, object::E3DObjectType::Pmx)) return false;
+			if (!m_TdaMiku_Model->CreateFromMemory(pGraphicsAPI, pPhysicsEngine, pLoadWorker, m_BasicToonMF, m_DepthMF)) return false;
 
 			auto Clip = m_VMDAnimationSet->GetAnimationClip(0);
 			if (Clip) m_TdaMiku_Model->AddHumanoidAnimationClip(Clip, "Walk", { nullptr, "" }, true);
 
 			m_TdaMiku_Model->ChangeMotion("Walk");
-		}
+		}*/
 
 		// m_Background
 		{
@@ -307,6 +315,11 @@ namespace scene
 			m_IsLoaded = true;
 		}
 
+		if (m_SimpleMorphObj)
+		{
+			if (!m_SimpleMorphObj->Update(pGraphicsAPI, pPhysicsEngine, DrawInfo->GetDeltaSecondsTime())) return false;
+		}
+		
 		if (m_PhysicsGround)
 		{
 			if (!m_PhysicsGround->Update(pGraphicsAPI, pPhysicsEngine, DrawInfo->GetDeltaSecondsTime())) return false;
@@ -359,6 +372,11 @@ namespace scene
 		const std::shared_ptr<graphics::CDrawInfo>& DrawInfo)
 	{
 		if (!m_IsLoaded) return true;
+		
+		if (m_SimpleMorphObj)
+		{
+			if (!m_SimpleMorphObj->Draw(IsDepthPass, false, Camera, Projection, DrawInfo, nullptr)) return false;
+		}
 		
 		if (m_PhysicsGround)
 		{

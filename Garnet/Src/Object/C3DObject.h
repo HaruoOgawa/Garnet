@@ -29,6 +29,7 @@ namespace object
 
 		std::vector<unsigned char> m_BinaryData;
 		std::string m_FileName;
+		E3DObjectType m_ObjectType;
 		std::vector<std::shared_ptr<resource::IResource>> m_RuntimeLoadResourceList;
 
 		//
@@ -64,7 +65,7 @@ namespace object
 		C3DObject(const std::string& PassName, const std::string& DepthPassName);
 		virtual ~C3DObject();
 
-		void SetBinaryData(const std::vector<unsigned char>& Data, const std::string& FileName);
+		void SetBinaryData(const std::vector<unsigned char>& Data, const std::string& FileName, E3DObjectType ObjectType);
 
 		bool CreateSimply(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine,
 			const std::shared_ptr<renderer::CRendererCreateInfo>& createInfo,
@@ -72,7 +73,7 @@ namespace object
 			const std::shared_ptr<math::CTransform> NodeTransform = std::make_shared<math::CTransform>(), const std::shared_ptr<physics::IPhysicsObject>& PhysicsObject = nullptr);
 
 		bool		 CreateFromMemory(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<graphics::CMaterialFrame>& BaseMF, 
-			const std::shared_ptr<graphics::CMaterialFrame>& DepthMF, E3DObjectType ObjectType);
+			const std::shared_ptr<graphics::CMaterialFrame>& DepthMF);
 		bool		 Create(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, const std::shared_ptr<graphics::CMaterialFrame>& DepthMF);
 		virtual bool Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, float DeltaSecondsTime);
 		virtual bool Draw(bool IsDepthPass, bool DrawOutline, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,

@@ -1,4 +1,5 @@
 #include "C3DObject.h"
+#include "../Format/CPathFormatter.h"
 #include "../GLTF/CGLTFImporter.h"
 #include "../LoadWorker/CLoadWorker.h"
 
@@ -30,6 +31,7 @@ namespace object
 #endif
 		m_TextureSet(std::make_shared<graphics::CTextureSet>()),
 		m_FileName(""),
+		m_ObjectType(E3DObjectType::None),
 		m_DepthMF(nullptr)
 	{
 	}
@@ -41,10 +43,11 @@ namespace object
 		m_MaterialList.clear();
 	}
 
-	void C3DObject::SetBinaryData(const std::vector<unsigned char>& Data, const std::string& FileName)
+	void C3DObject::SetBinaryData(const std::vector<unsigned char>& Data, const std::string& FileName, E3DObjectType ObjectType)
 	{
 		m_BinaryData = Data;
 		m_FileName = FileName;
+		m_ObjectType = ObjectType;
 	}
 
 	bool C3DObject::CreateSimply(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine,
@@ -73,18 +76,23 @@ namespace object
 		return true;
 	}
 
-	bool C3DObject::CreateFromMemory(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<graphics::CMaterialFrame>& BaseMF, const std::shared_ptr<graphics::CMaterialFrame>& DepthMF, E3DObjectType ObjectType)
+	bool C3DObject::CreateFromMemory(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<graphics::CMaterialFrame>& BaseMF, const std::shared_ptr<graphics::CMaterialFrame>& DepthMF)
 	{
 		m_DepthMF = DepthMF;
 
 		if (m_BinaryData.empty()) return false;
 
-		switch (ObjectType)
+		switch (m_ObjectType)
 		{
-		case object::E3DObjectType::Custom:
-			break;
 #ifdef USE_GLTF
 		case object::E3DObjectType::glTF:
+			{
+				std::string BaseDir = format::CPathFormatter::GetParentDir(m_FileName);
+				if (!gltf::CGLTFImporter::ImportFromString(pGraphicsAPI, m_BinaryData, BaseDir, this, BaseMF)) return false;
+			}
+			break;
+			
+		case object::E3DObjectType::glb:
 			if (!gltf::CGLTFImporter::ImportFromMemory(pGraphicsAPI, m_BinaryData, this, BaseMF)) return false;
 			break;
 #endif
@@ -94,7 +102,6 @@ namespace object
 			if (!fbx::CSmallFBXImporter::ImportFBX(pGraphicsAPI, m_BinaryData, this, BaseMF)) return false;
 #else
 			if (!fbx::CFBXImporter::ImportFBX(pGraphicsAPI, m_FileName, this, BaseMF)) return false;
-			
 #endif // USE_SMALL_FBX
 			break;
 #endif
