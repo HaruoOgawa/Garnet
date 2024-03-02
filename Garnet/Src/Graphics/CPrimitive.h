@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include "CPresetPrimitive.h"
+#include "CMorphTarget.h"
 #include "../GraphicsAPI/CRendererCreateInfo.h"
 
 namespace renderer {
@@ -23,6 +24,8 @@ namespace graphics
 		std::shared_ptr<renderer::CRendererCreateInfo>		 m_CreateInfo;
 
 		int													 m_MaterialIndex;
+
+		std::vector<std::shared_ptr<graphics::CMorphTarget>> m_MorphList;
 	public:
 		CPrimitive(const std::shared_ptr<renderer::CRendererCreateInfo>& createInfo, int MaterialIndex);
 		virtual ~CPrimitive();
@@ -35,5 +38,8 @@ namespace graphics
 
 		void SetMaterialIndex(int Index);
 		int GetMaterialIndex() const;
+
+		void SetMorphList(const std::vector<std::shared_ptr<graphics::CMorphTarget>>& MorphList);
+		const std::vector<std::shared_ptr<graphics::CMorphTarget>>& GetMorphList() const;
 	};
 }

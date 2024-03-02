@@ -23,6 +23,7 @@ namespace scene
 		m_PBRMF(std::make_shared<graphics::CMaterialFrame>()),
 
 		m_SimpleMorphObj(std::make_shared<object::C3DObject>("", "ShadowPass")),
+		m_BrainStemObj(std::make_shared<object::C3DObject>("", "ShadowPass")),
 
 		m_PhysicsGround(std::make_shared<object::C3DObject>("", "ShadowPass")),
 		m_PhysicsSphere(std::make_shared<object::C3DObject>("", "ShadowPass")),
@@ -44,6 +45,7 @@ namespace scene
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CMaterialFrameLoader>("Resources\\MaterialFrame\\PBR_MF.json", m_PBRMF));
 		
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Models\\SimpleMorphTarget\\SimpleMorphTarget.gltf", m_SimpleMorphObj, "", "ShadowPass"));
+		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Models\\BrainStem\\glTF-Binary\\BrainStem.glb", m_BrainStemObj, "", "ShadowPass"));
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Avatar\\Tda_Miku\\Tda_Miku.pmx", m_TdaMiku_Model, "", "ShadowPass"));
 		//pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CAnimationLoader>("Resources\\Motions\\mmd_running.vmd", m_VMDAnimationSet));
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CAnimationLoader>("Resources\\Motions\\Run_m4th_Loop.vmd", m_VMDAnimationSet));
@@ -68,6 +70,14 @@ namespace scene
 		// m_SimpleMorphObj
 		{
 			if (!m_SimpleMorphObj->CreateFromMemory(pGraphicsAPI, pPhysicsEngine, pLoadWorker, m_PBRMF, m_DepthMF)) return false;
+
+			//m_SimpleMorphObj->ChangeMotion(0);
+		}
+		
+		// m_BrainStemObj
+		{
+			if (!m_BrainStemObj->CreateFromMemory(pGraphicsAPI, pPhysicsEngine, pLoadWorker, m_PBRMF, m_DepthMF)) return false;
+			m_BrainStemObj->ChangeMotion(0);
 		}
 
 		const float ZOffset = 3.0f;
@@ -320,6 +330,11 @@ namespace scene
 			if (!m_SimpleMorphObj->Update(pGraphicsAPI, pPhysicsEngine, DrawInfo->GetDeltaSecondsTime())) return false;
 		}
 		
+		if (m_BrainStemObj)
+		{
+			if (!m_BrainStemObj->Update(pGraphicsAPI, pPhysicsEngine, DrawInfo->GetDeltaSecondsTime())) return false;
+		}
+		
 		if (m_PhysicsGround)
 		{
 			if (!m_PhysicsGround->Update(pGraphicsAPI, pPhysicsEngine, DrawInfo->GetDeltaSecondsTime())) return false;
@@ -376,6 +391,11 @@ namespace scene
 		if (m_SimpleMorphObj)
 		{
 			if (!m_SimpleMorphObj->Draw(IsDepthPass, false, Camera, Projection, DrawInfo, nullptr)) return false;
+		}
+		
+		if (m_BrainStemObj)
+		{
+			if (!m_BrainStemObj->Draw(IsDepthPass, false, Camera, Projection, DrawInfo, nullptr)) return false;
 		}
 		
 		if (m_PhysicsGround)

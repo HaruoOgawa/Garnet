@@ -638,15 +638,74 @@ namespace gltf
 				}
 
 				// モーフターゲット
-				//glTFPrimitive.targets
+				std::vector<std::shared_ptr<graphics::CMorphTarget>> MorphTargetList;
+
+				for (int MorphIndex = 0; MorphIndex < static_cast<int>(glTFPrimitive.targets.size()); MorphIndex++)
+				{
+					std::shared_ptr<graphics::CMorphTarget> MorphTarget = std::make_shared<graphics::CMorphTarget>();
+
+					const auto& glTFMorph = glTFPrimitive.targets[MorphIndex];
+
+					for (const auto& MorphAttribute : glTFMorph)
+					{
+						const std::string& AttributeName = MorphAttribute.first;
+						int AccessorIndex = MorphAttribute.second;
+
+						if (AccessorIndex < 0 || AccessorIndex >= model.accessors.size()) continue;
+
+						const auto& Accessor = model.accessors[AccessorIndex];
+
+						// 使用する型のバイト数. 5123のunsigned short、5126のfloat など
+						// https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#accessor-data-types
+						int Stride = CalcStrideFromAccessor(model, Accessor);
+
+						// データを取得
+						std::vector<unsigned char> BufferData;
+						if (!CalculateBufferFromAccessor(model, Accessor, BufferData)) return false;
+
+						std::vector<float> AttributeData;
+						AttributeData.resize(BufferData.size() / Stride);
+						std::memcpy(&AttributeData[0], &BufferData[0], BufferData.size());
+
+						// コンポーネントタイプ(データ型)を取得
+						renderer::EDataType attribComponentType = GetComponentTypeFromAccessor(Accessor);
+
+						int VertexIndex = 0;
+						int Dimension = tinygltf::GetNumComponentsInType(Accessor.type);
+
+						for (int DataIndex = 0; DataIndex < static_cast<int>(AttributeData.size()) / Dimension; DataIndex++)
+						{
+							// オフセット
+							std::vector<float> OffsetVector;
+							OffsetVector.resize(Dimension);
+
+							std::memcpy(&OffsetVector[0], &AttributeData[DataIndex * Dimension], Dimension * sizeof(float));
+
+							// 初期モーフウェイト(存在しないこともある)
+							float InitialWeight = 0.0f;
+
+							if (MorphIndex >= 0 && MorphIndex < glTFMesh.weights.size())
+							{
+								InitialWeight = static_cast<float>(glTFMesh.weights[MorphIndex]);
+							}
+
+							// 登録
+							graphics::SMorphData MorphData = { VertexIndex, OffsetVector, InitialWeight };
+							MorphTarget->AddMorphData(AttributeName, MorphData);
+
+							VertexIndex++;
+						}
+					}
+				
+					MorphTargetList.push_back(MorphTarget);
+				}
 
 				// プリミティブを作成する
 				std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(createInfo, MaterialIndex);
+				Primitive->SetMorphList(MorphTargetList);
+
 				Mesh->AddPrimitive(Primitive);
 			}
-
-			//
-			//glTFMesh.weights
 
 			// メッシュを登録する
 			MeshList.push_back(Mesh);
