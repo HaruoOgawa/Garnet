@@ -3,6 +3,7 @@
 #include "../../Binary/CBinaryAnalyser.h"
 #include "../../Debug/Message/Console.h"
 #include "../../Animation/CBoneNameProvider.h"
+#include "../../Animation/CBlendShapeNameProvider.h"
 
 namespace mmd
 {

@@ -7,6 +7,7 @@
 
 #include "SVMDFrame.h"
 #include "../../Animation/EHumanoidBones.h"
+#include "../../Animation/EBlendShapeName.h"
 
 namespace binary { class CBinaryAnalyser; }
 

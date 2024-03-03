@@ -66,6 +66,8 @@ namespace api
 	{
 		for (int i = 0; i < m_ShaderBufferList.size(); i++)
 		{
+			if (i >= m_WGPUUniformBufferByteSizeList.size()) continue;
+
 			// SharedBuffer‚Íˆ—‚µ‚È‚¢
 			if (m_ShaderBufferList[i]->GetSharedBufferParam().IsShared) continue;
 
