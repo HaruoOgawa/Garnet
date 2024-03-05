@@ -3,6 +3,8 @@
 
 #include <vector>
 #include <memory>
+#include <map>
+#include <unordered_map>
 
 #include "../../Animation/CAnimationClip.h"
 #include "../../Interface/IGraphicsAPI.h"
@@ -16,6 +18,7 @@ namespace mmd
 	{
 	private:
 		static bool CreateAnimationClip(const CVMDData& VMDData, std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList);
+		static bool CreateBlendShapeAnimationClip(const CVMDData& VMDData, std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList);
 	public:
 		static bool Import(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& Data, std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList);
 	};

@@ -539,7 +539,7 @@ namespace scene
 			float Weight = fabsf(sinf(DrawInfo->GetSecondsTime()));
 			for (const auto& Material : m_TdaMiku_Model->GetMaterialList())
 			{
-				std::string MorphUniformName = "MorphWeight_" + std::to_string(0);
+				std::string MorphUniformName = "MorphWeight_" + std::to_string(1);
 
 				Material->SetUniformValue(MorphUniformName, &glm::vec1(Weight)[0], sizeof(float), 1);
 			}
