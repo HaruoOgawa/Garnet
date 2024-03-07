@@ -39,7 +39,7 @@ namespace animation
 		else if (Extension == "vmd")
 		{
 #ifdef USE_MMD
-			if (!mmd::CVMDImporter::Import(pGraphicsAPI, Data, m_AnimationClipList)) return false;
+			if (!mmd::CVMDImporter::Import(pGraphicsAPI, Data, m_AnimationClipList, m_BlendShapeClipList)) return false;
 #endif
 		}
 
@@ -51,6 +51,13 @@ namespace animation
 		if (Index < 0 || Index >= m_AnimationClipList.size()) return nullptr;
 
 		return m_AnimationClipList[Index];
+	}
+
+	std::shared_ptr<animation::CBlendShapeClip> CAnimationClipSet::GetBlendShapeClip(int Index)
+	{
+		if (Index < 0 || Index >= m_BlendShapeClipList.size()) return nullptr;
+
+		return m_BlendShapeClipList[Index];
 	}
 }
 #endif

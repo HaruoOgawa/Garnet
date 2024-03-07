@@ -28,6 +28,7 @@ namespace object
 		m_ObjectTransform(std::make_shared<math::CTransform>()),
 #ifdef USE_ANIMATION
 		m_AnimationController(std::make_shared<animation::CAnimationController>()),
+		m_BlendShapeController(std::make_shared<animation::CBlendShapeController>()),
 #endif
 		m_TextureSet(std::make_shared<graphics::CTextureSet>()),
 		m_FileName(""),
@@ -358,6 +359,7 @@ namespace object
 
 #ifdef USE_ANIMATION
 		if (!m_AnimationController->Update(DeltaSecondsTime)) return false;
+		if (!m_BlendShapeController->Update(DeltaSecondsTime, m_NodeList)) return false;
 #endif
 		// ワールド行列の更新
 		// 全ノードマイフレーム更新しているので、そのうちキャッシュを入れて更新は必要なものだけにする
@@ -577,8 +579,12 @@ namespace object
 
 	void C3DObject::AddHumanoidAnimationClip(const std::shared_ptr<animation::CAnimationClip>& SourceClip, const std::string& MotionName, animation::SAnimationLayout Layout, bool IsLoop)
 	{
-		// IsWorldAnim: アニメーションがワールド座標系のデータを示すかどうか
 		m_AnimationController->AddHumanoidAnimationClip(SourceClip, MotionName, Layout, IsLoop);
+	}
+
+	void C3DObject::AddBlendShapeClip(const std::shared_ptr<animation::CBlendShapeClip>& Clip)
+	{
+		m_BlendShapeController->AddBlendShapeClip(Clip);
 	}
 
 	const std::vector<std::shared_ptr<animation::CAnimationClip>>& C3DObject::GetAnimationClipList() const
@@ -640,6 +646,11 @@ namespace object
 	void C3DObject::ChangeMotion(const std::string& MotionName)
 	{
 		m_AnimationController->ChangeMotion(MotionName);
+	}
+
+	void C3DObject::ChangeBlendShape(int Index)
+	{
+		m_BlendShapeController->ChangeBlendShape(Index, m_NodeList);
 	}
 
 	const std::shared_ptr<graphics::CTextureSet>& C3DObject::GetTextureSet() const

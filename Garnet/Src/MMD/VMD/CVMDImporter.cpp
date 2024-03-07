@@ -7,7 +7,8 @@
 
 namespace mmd
 {
-	bool CVMDImporter::Import(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& Data, std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList)
+	bool CVMDImporter::Import(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& Data, std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList,
+		std::vector<std::shared_ptr<animation::CBlendShapeClip>>& BlendShapeClipList)
 	{
 		// (注意) MMDのボーンやキーフレームはワールド座標系を示すのでMMD以外のファイルフォーマットで使いまわすことはできない
 
@@ -25,7 +26,7 @@ namespace mmd
 		if (!CreateAnimationClip(vmd, AnimationClipList)) return false;
 
 		// 表情アニメーションクリップの作成
-		if (!CreateBlendShapeAnimationClip(vmd, AnimationClipList)) return false;
+		if (!CreateBlendShapeClip(vmd, BlendShapeClipList)) return false;
 
 		return true;
 	}
@@ -153,13 +154,11 @@ namespace mmd
 		return true;
 	}
 
-	bool CVMDImporter::CreateBlendShapeAnimationClip(const CVMDData& VMDData, std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList)
+	bool CVMDImporter::CreateBlendShapeClip(const CVMDData& VMDData, std::vector<std::shared_ptr<animation::CBlendShapeClip>>& BlendShapeClipList)
 	{
 		// 頂点アトリビュート数の制約上、使用可能な頂点モーフは8個までなので使用頻度が高い(フレーム数が多い)上位8個に絞る
 		std::map<animation::EBlendShapeName, std::vector<SVMDSkinFrame>> SkinFrameMap;
 		{
-			
-
 			std::vector<std::pair<animation::EBlendShapeName, std::vector<SVMDSkinFrame>>> TempFrameList;
 
 			for (const auto& SkinFrame : VMDData.GetSkinFrameMap())
@@ -199,7 +198,7 @@ namespace mmd
 
 			// CAnimationClipを継承したCBlendShapeAnimationClipがあってもいいかも？
 			// CBlendShapeAnimationClip.UpdateでNodeのClearMorphWeightsを呼んであげる
-			std::shared_ptr<animation::CAnimationClip> AnimationClip = std::make_shared<animation::CAnimationClip>();
+			std::shared_ptr<animation::CBlendShapeClip> BlendShapeClip = std::make_shared<animation::CBlendShapeClip>();
 
 			int Index = 0;
 
@@ -260,37 +259,27 @@ namespace mmd
 					}
 
 					// SamplerをClipに登録する
-					AnimationClip->AddAnimationSampler(Sampler);
+					BlendShapeClip->AddAnimationSampler(Sampler);
 				}
 
 				// Channelを作成
 				{
-					// VMDはオフセットなので必要
-					const bool UseAnimLocalAxis = true;
-
-					// Translate成分がオフセットかどうか
-					const bool IsTransOffset = true;
-
-					// MMDでは全てKEYFRAME_TYPE_MATRIX
-					animation::EAnimationTarget AnimationTarget = animation::EAnimationTarget::MODELMATRIX;
+					// モーフなのでWEIGHTS
+					animation::EAnimationTarget AnimationTarget = animation::EAnimationTarget::WEIGHTS;
 
 					const int TargetSamplerIndex = Index;
 
-					// もしかしたらFaceとかにした方がいいかも？
-					// Nodeには順番に入れてあげるみたいな
-					animation::EHumanoidBones BoneName = animation::EHumanoidBones::None;
-
-					std::shared_ptr<animation::CAnimationChannel> Channel = std::make_shared<animation::CAnimationChannel>(UseAnimLocalAxis, IsTransOffset, TargetSamplerIndex, AnimationTarget, nullptr, BoneName);
+					std::shared_ptr<animation::CAnimationChannel> Channel = std::make_shared<animation::CAnimationChannel>(false, false, TargetSamplerIndex, AnimationTarget, nullptr, animation::EHumanoidBones::None);
 
 					// ChannelをClipに登録
-					AnimationClip->AddAnimationChannel(Channel);
+					BlendShapeClip->AddAnimationChannel(Frame.first, Channel);
 				}
 
 				Index++;
 			}
 
 			// クリップを登録
-			AnimationClipList.push_back(AnimationClip);
+			BlendShapeClipList.push_back(BlendShapeClip);
 		}
 
 		return true;

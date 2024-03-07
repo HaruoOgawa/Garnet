@@ -106,7 +106,7 @@ namespace mmd
 		glm::vec3 YAxisVector = glm::cross(XAxisVector, ZAxisVector);
 
 		glm::mat4 rotMat = glm::mat4(1.0f);
-		/*rotMat[0][0] = XAxisVector.x;
+		rotMat[0][0] = XAxisVector.x;
 		rotMat[0][1] = XAxisVector.y;
 		rotMat[0][2] = XAxisVector.z;
 
@@ -116,9 +116,9 @@ namespace mmd
 
 		rotMat[2][0] = ZAxisVector.x;
 		rotMat[2][1] = ZAxisVector.y;
-		rotMat[2][2] = ZAxisVector.z;*/
+		rotMat[2][2] = ZAxisVector.z;
 
-		rotMat[0][0] = XAxisVector.x;
+		/*rotMat[0][0] = XAxisVector.x;
 		rotMat[1][0] = XAxisVector.y;
 		rotMat[2][0] = XAxisVector.z;
 
@@ -128,7 +128,7 @@ namespace mmd
 
 		rotMat[0][2] = ZAxisVector.x;
 		rotMat[1][2] = ZAxisVector.y;
-		rotMat[2][2] = ZAxisVector.z;
+		rotMat[2][2] = ZAxisVector.z;*/
 
 		m_LocalAxis = glm::quat_cast(rotMat);
 

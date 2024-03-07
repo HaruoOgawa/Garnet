@@ -359,9 +359,11 @@ namespace scene
 			auto Clip = m_VMDAnimationSet->GetAnimationClip(0);
 			if (Clip) m_TdaMiku_Model->AddHumanoidAnimationClip(Clip, "Walk", { nullptr, "" }, true);
 
-			auto ExpressionClip = m_ExpressionVMD->GetAnimationClip(0);
+			auto ExpressionClip = m_ExpressionVMD->GetBlendShapeClip(0);
+			if (ExpressionClip) m_TdaMiku_Model->AddBlendShapeClip(ExpressionClip);
 
 			m_TdaMiku_Model->ChangeMotion("Walk");
+			m_TdaMiku_Model->ChangeBlendShape(0);
 		}
 
 		// m_Background
@@ -537,10 +539,16 @@ namespace scene
 		if (m_TdaMiku_Model)
 		{
 			float Weight = fabsf(sinf(DrawInfo->GetSecondsTime()));
-			for (const auto& Material : m_TdaMiku_Model->GetMaterialList())
-			{
-				std::string MorphUniformName = "MorphWeight_" + std::to_string(1);
 
+			{
+				const auto& Material = m_TdaMiku_Model->GetMaterialList()[7];
+				std::string MorphUniformName = "MorphWeight_" + std::to_string(1);
+				Material->SetUniformValue(MorphUniformName, &glm::vec1(Weight)[0], sizeof(float), 1);
+			}
+
+			{
+				const auto& Material = m_TdaMiku_Model->GetMaterialList()[8];
+				std::string MorphUniformName = "MorphWeight_" + std::to_string(1);
 				Material->SetUniformValue(MorphUniformName, &glm::vec1(Weight)[0], sizeof(float), 1);
 			}
 
