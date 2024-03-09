@@ -631,8 +631,32 @@ namespace mmd
 					MatRefOffset += PmxMaterial->GetMatRefIndiceCount();
 				}
 
+				// プリミティブに渡すモーフデータを準備
+				std::vector<std::map<int, glm::vec3>> MorphDataList;
+				{
+					const auto& PmxMorphList = model.GetPmxVertexMorphList();
+					
+					for (int MorphIndex = 0; MorphIndex < static_cast<int>(animation::EBlendShapeName::Max); MorphIndex++)
+					{
+						animation::EBlendShapeName CurrentShapeName = static_cast<animation::EBlendShapeName>(MorphIndex);
+						auto PmxMorph = PmxMorphList.find(CurrentShapeName);
+
+						// 頂点モーフのデータを取得する
+						if (PmxMorph != PmxMorphList.end())
+						{
+							MorphDataList.push_back((*PmxMorph).second->GetVertexMorphList());
+						}
+						else
+						{
+							MorphDataList.push_back(std::map<int, glm::vec3>());
+						}
+					}
+				}
+
 				// プリミティブを作成する
 				std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(createInfo, MaterialIndex);
+				Primitive->SetMorphDataList(MorphDataList);
+
 				Mesh->AddPrimitive(Primitive);
 
 				// メッシュを登録
