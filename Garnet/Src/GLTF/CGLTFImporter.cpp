@@ -467,15 +467,16 @@ namespace gltf
 					"TANGENT",
 					"JOINTS_0",
 					"WEIGHTS_0",
-					"MORPHVEC_0",
-					"MORPHVEC_1",
-					"MORPHVEC_2",
-					"MORPHVEC_3",
-					"MORPHVEC_4",
-					"MORPHVEC_5",
-					"MORPHVEC_6",
-					"MORPHVEC_7",
 				};
+
+				// 頂点アトリビュート数の制約上、モーフは2個が限界
+				// もっとたくさん扱いたい場合はCPUMorphExecutorやGPGPUMorphExecutorを使用する(この2つが便利だったら頂点アトリビュートのモーフは消すかも)
+				for (int MorphIndex = 0; MorphIndex < 2; MorphIndex++)
+				{
+					std::string Name = "MORPHVEC_" + std::to_string(MorphIndex);
+					NeedAttribNameList.push_back(Name);
+				}
+
 				std::map<std::string, std::vector<float>> ReservedVertexDataList;
 				std::map<std::string, renderer::EDataType> ReservedDataTypeList;
 				std::map<std::string, int> ReservedByteStrideList;
@@ -524,6 +525,10 @@ namespace gltf
 					// モーフターゲット
 					for (int MorphIndex = 0; MorphIndex < static_cast<int>(glTFPrimitive.targets.size()); MorphIndex++)
 					{
+						// 頂点アトリビュート数の制約上、モーフは2個が限界
+						// もっとたくさん扱いたい場合はCPUMorphExecutorやGPGPUMorphExecutorを使用する(この2つが便利だったら頂点アトリビュートのモーフは消すかも)
+						if (MorphIndex >= 2) break;
+
 						const auto& glTFMorph = glTFPrimitive.targets[MorphIndex];
 
 						// POSITIONのモーフのみに対応する
@@ -575,16 +580,7 @@ namespace gltf
 						// ディメンションを登録
 						int Dimention = 1;
 
-						if (AttribName == "POSITION" || AttribName == "NORMAL" || 
-							AttribName == "MORPHVEC_0" || 
-							AttribName == "MORPHVEC_1" ||
-							AttribName == "MORPHVEC_2" ||
-							AttribName == "MORPHVEC_3" ||
-							AttribName == "MORPHVEC_4" ||
-							AttribName == "MORPHVEC_5" ||
-							AttribName == "MORPHVEC_6" ||
-							AttribName == "MORPHVEC_7"
-						)
+						if (AttribName == "POSITION" || AttribName == "NORMAL" || AttribName.find("MORPHVEC_") != -1)
 						{
 							Dimention = 3;
 						}

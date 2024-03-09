@@ -36,7 +36,7 @@ namespace animation
 			if (!Clip->Update(DeltaSecondsTime)) return false;
 
 			// ウェイトを反映
-			ApplyNodeWeights(Clip->GetCurrentMorphWeights(), NodeList);
+			//ApplyNodeWeights(Clip->GetCurrentMorphWeights(), NodeList);
 		}
 
 		return true;

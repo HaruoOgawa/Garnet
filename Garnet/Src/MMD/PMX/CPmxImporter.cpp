@@ -367,9 +367,9 @@ namespace mmd
 				"WEIGHTS_0",
 			};
 
-			// 頂点アトリビュート数の制約上、モーフは8個が限界
-			// アニメーションごとにモーフベクターを差し替えて対応する
-			for (int MorphIndex = 0; MorphIndex < 8; MorphIndex++)
+			// 頂点アトリビュート数の制約上、モーフは2個が限界
+			// もっとたくさん扱いたい場合はCPUMorphExecutorやGPGPUMorphExecutorを使用する(この2つが便利だったら頂点アトリビュートのモーフは消すかも)
+			for (int MorphIndex = 0; MorphIndex < 2; MorphIndex++)
 			{
 				std::string Name = "MORPHVEC_" + std::to_string(MorphIndex);
 				NeedAttribNameList.push_back(Name);
@@ -478,9 +478,9 @@ namespace mmd
 				{
 					const auto& PmxMorphList = model.GetPmxVertexMorphList();
 
-					// 頂点アトリビュート数の制約上、モーフは8個が限界
-					// アニメーションごとにモーフベクターを差し替えて対応する
-					for (int MorphIndex = 0; MorphIndex < 8; MorphIndex++)
+					// 頂点アトリビュート数の制約上、モーフは2個が限界
+					// もっとたくさん扱いたい場合はCPUMorphExecutorやGPGPUMorphExecutorを使用する(この2つが便利だったら頂点アトリビュートのモーフは消すかも)
+					for (int MorphIndex = 0; MorphIndex < 2; MorphIndex++)
 					{
 						std::string Name = "MORPHVEC_" + std::to_string(MorphIndex);
 

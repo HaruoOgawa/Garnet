@@ -156,31 +156,7 @@ namespace mmd
 
 	bool CVMDImporter::CreateBlendShapeClip(const CVMDData& VMDData, std::vector<std::shared_ptr<animation::CBlendShapeClip>>& BlendShapeClipList)
 	{
-		// 頂点アトリビュート数の制約上、使用可能な頂点モーフは8個までなので使用頻度が高い(フレーム数が多い)上位8個に絞る
-		std::map<animation::EBlendShapeName, std::vector<SVMDSkinFrame>> SkinFrameMap;
-		{
-			std::vector<std::pair<animation::EBlendShapeName, std::vector<SVMDSkinFrame>>> TempFrameList;
-
-			for (const auto& SkinFrame : VMDData.GetSkinFrameMap())
-			{
-				if (SkinFrame.first == animation::EBlendShapeName::None) continue;
-
-				TempFrameList.push_back(std::make_pair(SkinFrame.first, SkinFrame.second));
-			}
-
-			std::sort(TempFrameList.begin(), TempFrameList.end(), [](std::pair<animation::EBlendShapeName, std::vector<SVMDSkinFrame>> a, std::pair<animation::EBlendShapeName, std::vector<SVMDSkinFrame>> b) {
-				return a.second.size() > b.second.size();
-			});
-
-			for (int i = 0; i < 8; i++)
-			{
-				if (i >= TempFrameList.size()) break;
-
-				const auto& SkinFrame = TempFrameList[i];
-
-				SkinFrameMap.emplace(SkinFrame.first, SkinFrame.second);
-			}
-		}
+		const auto& SkinFrameMap = VMDData.GetSkinFrameMap();
 
 		// 0個の時は作成しない
 		if (SkinFrameMap.size() == 0) return true;

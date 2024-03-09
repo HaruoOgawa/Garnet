@@ -35,7 +35,13 @@ namespace animation
 
 			for (float v : Value)
 			{
-				m_CurrentMorphWeights.push_back(v);
+				// Weightは0から1の値で小数点2位までにする
+				// あまり細かいと頻繁にモーフを更新することになるため
+				float Weight = fmaxf(0.0f, fminf(1.0f, v));
+
+				Weight = floorf(Weight * 100.0f) / 100.0f;
+
+				m_CurrentMorphWeights.push_back(Weight);
 			}
 		}
 
