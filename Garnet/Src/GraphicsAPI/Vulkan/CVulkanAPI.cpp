@@ -1,5 +1,7 @@
 #ifdef USE_VULKAN
 #include "CVulkanAPI.h"
+#include "CVulkanVertexBuffer.h"
+#include "CVulkanIndexBuffer.h"
 #include "CVulkanRenderer.h"
 #include "CVulkanRenderPass.h"
 #include "CVulkanMaterial.h"
@@ -122,9 +124,23 @@ namespace api
 		return true;
 	}
 
-	std::shared_ptr<renderer::IRenderer> CVulkanAPI::CreateRenderer(const std::string& PassName)
+	std::shared_ptr<graphics::CVertexBuffer> CVulkanAPI::CreateVertexBuffer()
 	{
-		auto Renderer = std::make_shared<renderer::CVulkanRenderer>(this, PassName);
+		auto VertexBuffer = std::make_shared<api::CVulkanVertexBuffer>(this);
+
+		return VertexBuffer;
+	}
+
+	std::shared_ptr<graphics::CIndexBuffer> CVulkanAPI::CreateIndexBuffer()
+	{
+		auto IndexBuffer = std::make_shared<api::CVulkanIndexBuffer>(this);
+
+		return IndexBuffer;
+	}
+
+	std::shared_ptr<graphics::IRenderer> CVulkanAPI::CreateRenderer(const std::string& PassName)
+	{
+		auto Renderer = std::make_shared<api::CVulkanRenderer>(this, PassName);
 
 		return Renderer;
 	}

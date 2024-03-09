@@ -2,55 +2,39 @@
 #include "CWebGPURenderer.h"
 #include "CWebGPUAPI.h"
 #include "CWebGPUMaterial.h"
-#include "../CRendererCreateInfo.h"
+#include "CWebGPUVertexBuffer.h"
+#include "CWebGPUIndexBuffer.h"
 #include "../../Debug/Message/Console.h"
 
-namespace renderer
+namespace api
 {
 	CWebGPURenderer::CWebGPURenderer(api::CWebGPUAPI* pGraphicsAPI, const std::string& PassName):
 		m_pGraphicsAPI(pGraphicsAPI),
 		m_PassName(PassName),
 		m_InstanceCount(1),
-		m_GraphicsPipeline(nullptr),
-		m_VertexCount(0),
-		m_IndiceType(EIndiceType::UNSIGNED_SHORT),
-		m_IndexBuffer(nullptr),
-		m_IndicesCount(0)
+		m_GraphicsPipeline(nullptr)
 	{
 	}
 
 	CWebGPURenderer::~CWebGPURenderer()
 	{
-		if (m_IndexBuffer)
-		{
-			wgpuBufferDestroy(m_IndexBuffer);
-			m_IndexBuffer = nullptr;
-		}
-
-		for (auto& Buffer : m_VertexBufferList)
-		{
-			if (Buffer)
-			{
-				wgpuBufferDestroy(Buffer);
-			}
-		}
 	}
 
-	bool CWebGPURenderer::Create(const std::shared_ptr<CRendererCreateInfo>& createInfo, const std::shared_ptr<graphics::CMaterial>& Material)
+	bool CWebGPURenderer::Create(const std::shared_ptr<graphics::CVertexBuffer>& VertexBuffer, const std::shared_ptr<graphics::CIndexBuffer>& IndexBuffer, const std::shared_ptr<graphics::CMaterial>& Material)
 	{
 		api::CWebGPUMaterial* pWebGPUMat = static_cast<api::CWebGPUMaterial*>(Material.get());
 
-		m_InstanceCount = createInfo->GetInstanceCount();
+		m_InstanceCount = VertexBuffer->GetInstanceCount();
 
-		if (!CreateVertexBuffer(createInfo)) return false; // 頂点バッファを生成
-		if (!CreateIndexBuffer(createInfo)) return false; //インデックスバッファを生成
-		if (!CreateGraphicsPipeline(createInfo, pWebGPUMat)) return false; // グラフィックスパイプラインを生成
+		if (!CreateGraphicsPipeline(VertexBuffer, IndexBuffer, pWebGPUMat)) return false; // グラフィックスパイプラインを生成
 		
 		return true;
 	}
 
-	bool CWebGPURenderer::Draw(const std::shared_ptr<graphics::CMaterial>& Material, int DynamicOffsetNum)
+	bool CWebGPURenderer::Draw(const std::shared_ptr<graphics::CVertexBuffer>& VertexBuffer, const std::shared_ptr<graphics::CIndexBuffer>& IndexBuffer, const std::shared_ptr<graphics::CMaterial>& Material, int DynamicOffsetNum)
 	{
+		const CWebGPUVertexBuffer* pWebGPUVertexBuffer = static_cast<const CWebGPUVertexBuffer*>(VertexBuffer.get());
+		const CWebGPUIndexBuffer* pWebGPUIndexBuffer = static_cast<const CWebGPUIndexBuffer*>(IndexBuffer.get());
 		api::CWebGPUMaterial* pWebGPUMat = static_cast<api::CWebGPUMaterial*>(Material.get());
 
 		// ユニフォームバッファの準備
@@ -60,19 +44,19 @@ namespace renderer
 		wgpuRenderPassEncoderSetPipeline(m_pGraphicsAPI->GetCurrentRenderPass(), m_GraphicsPipeline); 
 
 		// 頂点バッファを割り当てる
-		for (int i = 0; i < static_cast<int>(m_VertexBufferList.size()); i++)
+		for (int i = 0; i < static_cast<int>(pWebGPUVertexBuffer->GetVertexBufferList().size()); i++)
 		{
-			wgpuRenderPassEncoderSetVertexBuffer(m_pGraphicsAPI->GetCurrentRenderPass(), i, m_VertexBufferList[i], 0, m_VertexBufferSizeList[i] * sizeof(float));
+			wgpuRenderPassEncoderSetVertexBuffer(m_pGraphicsAPI->GetCurrentRenderPass(), i, pWebGPUVertexBuffer->GetVertexBufferList()[i], 0, pWebGPUVertexBuffer->GetVertexBufferSizeList()[i] * sizeof(float));
 		}
 		
 		// インデックスバッファを割り当てる
-		if (m_IndiceType == EIndiceType::UNSIGNED_SHORT)
+		if (pWebGPUIndexBuffer->GetIndiceType() == graphics::EIndiceType::UNSIGNED_SHORT)
 		{
-			wgpuRenderPassEncoderSetIndexBuffer(m_pGraphicsAPI->GetCurrentRenderPass(), m_IndexBuffer, WGPUIndexFormat_Uint16, 0, m_IndicesCount * sizeof(uint16_t));
+			wgpuRenderPassEncoderSetIndexBuffer(m_pGraphicsAPI->GetCurrentRenderPass(), pWebGPUIndexBuffer->GetIndexBuffer(), WGPUIndexFormat_Uint16, 0, pWebGPUIndexBuffer->GetIndicesCount() * sizeof(uint16_t));
 		}
-		else if (m_IndiceType == EIndiceType::UNSIGNED_INT)
+		else if (pWebGPUIndexBuffer->GetIndiceType() == graphics::EIndiceType::UNSIGNED_INT)
 		{
-			wgpuRenderPassEncoderSetIndexBuffer(m_pGraphicsAPI->GetCurrentRenderPass(), m_IndexBuffer, WGPUIndexFormat_Uint32, 0, m_IndicesCount * sizeof(uint32_t));
+			wgpuRenderPassEncoderSetIndexBuffer(m_pGraphicsAPI->GetCurrentRenderPass(), pWebGPUIndexBuffer->GetIndexBuffer(), WGPUIndexFormat_Uint32, 0, pWebGPUIndexBuffer->GetIndicesCount() * sizeof(uint32_t));
 		}
 
 		// バインドグループを割り当てる
@@ -93,83 +77,43 @@ namespace renderer
 		}
 
 		// 描画を実行
-		wgpuRenderPassEncoderDrawIndexed(m_pGraphicsAPI->GetCurrentRenderPass(), static_cast<uint32_t>(m_IndicesCount), m_InstanceCount, 0, 0, 0);
+		wgpuRenderPassEncoderDrawIndexed(m_pGraphicsAPI->GetCurrentRenderPass(), static_cast<uint32_t>(pWebGPUIndexBuffer->GetIndicesCount()), m_InstanceCount, 0, 0, 0);
 
 		return true;
 	}
 
 	// WebGPU Main Logic /////////////////////////////////////////////////////////////////////
-	bool CWebGPURenderer::CreateVertexBuffer(const std::shared_ptr<CRendererCreateInfo>& createInfo)
+	bool CWebGPURenderer::CreateGraphicsPipeline(const std::shared_ptr<graphics::CVertexBuffer>& VertexBuffer, const std::shared_ptr<graphics::CIndexBuffer>& IndexBuffer, api::CWebGPUMaterial* pWebGPUMat)
 	{
-		// 頂点バッファオブジェクトの生成
-		for (const auto& Data : createInfo->GetVertices())
-		{
-			// WGPUBufferUsage_CopyDst はCPUからGPUへメモリをコピーすることを指定する
-			// 反対にGPUからCPUへ読み戻したい場合はWGPUBufferUsage_CopySrcも指定する
+		const CWebGPUVertexBuffer* pWebGPUVertexBuffer = static_cast<const CWebGPUVertexBuffer*>(VertexBuffer.get());
+		const CWebGPUIndexBuffer* pWebGPUIndexBuffer = static_cast<const CWebGPUIndexBuffer*>(IndexBuffer.get());
 
-			WGPUBuffer Buffer;
-			if (!CreateBuffer(Buffer, WGPUBufferUsage_CopyDst | WGPUBufferUsage_Vertex, &Data[0], Data.size() * sizeof(float))) return false;
-
-			// バッファを保存
-			m_VertexBufferList.push_back(Buffer);
-			m_VertexBufferSizeList.push_back(Data.size());
-		}
-
-		// 頂点数
-		m_VertexCount = static_cast<int>(createInfo->GetVertices()[0].size() / createInfo->GetAttributeDimensions()[0]);
-
-		return true;
-	}
-
-	bool CWebGPURenderer::CreateIndexBuffer(const std::shared_ptr<CRendererCreateInfo>& createInfo)
-	{
-		m_IndiceType = createInfo->GetIndiceType();
-		
-		if (m_IndiceType == renderer::EIndiceType::UNSIGNED_SHORT)
-		{
-			m_IndicesCount = createInfo->GetIndices().size();
-
-			if (!CreateBuffer(m_IndexBuffer, WGPUBufferUsage_CopyDst | WGPUBufferUsage_Index, &createInfo->GetIndices()[0], m_IndicesCount * sizeof(uint16_t))) return false;
-		}
-		else if (m_IndiceType == renderer::EIndiceType::UNSIGNED_INT)
-		{
-			m_IndicesCount = createInfo->GetUINTIndices().size();
-
-			if (!CreateBuffer(m_IndexBuffer, WGPUBufferUsage_CopyDst | WGPUBufferUsage_Index, &createInfo->GetUINTIndices()[0], m_IndicesCount * sizeof(uint32_t))) return false;
-		}
-		
-
-		return true;
-	}
-
-	bool CWebGPURenderer::CreateGraphicsPipeline(const std::shared_ptr<CRendererCreateInfo>& createInfo, api::CWebGPUMaterial* pWebGPUMat)
-	{
 		// パイプラインの設定 //////////////////////////////////////////////////////////////////////////
 		WGPURenderPipelineDescriptor pipelineDesc{};
 		pipelineDesc.nextInChain = nullptr; // 拡張機
-
+		
 		// 頂点バッファレイアウト
-		std::vector<WGPUVertexBufferLayout> vertexBufferLayouts(m_VertexBufferList.size());
-		std::vector<WGPUVertexAttribute> attributes(m_VertexBufferList.size()); // ここベクターにしないとなんかvertexBufferLayoutsに入れておいてもメモリが解放されててなんか数値がおかしなことに・・・
+		std::vector<WGPUVertexBufferLayout> vertexBufferLayouts(pWebGPUVertexBuffer->GetVertexBufferList().size());
+		std::vector<WGPUVertexAttribute> attributes(pWebGPUVertexBuffer->GetVertexBufferList().size()); // ここベクターにしないとなんかvertexBufferLayoutsに入れておいてもメモリが解放されててなんか数値がおかしなことに・・・
 		// ↑↑↑ 確かにスタックメモリに格納する変数はスコープを抜けたら解放されるよね・・・
 		// そしてその解放されたものを使用していると当然おかしくなる
 		// メモリの解放タイミングと使用タイミングには留意しよう！
 
-		for (int i = 0; i < static_cast<int>(m_VertexBufferList.size()); i++)
+		for (int i = 0; i < static_cast<int>(pWebGPUVertexBuffer->GetVertexBufferList().size()); i++)
 		{
 			//
-			int Dimension = createInfo->GetAttributeDimensions()[i];
-			int ByteStride = createInfo->GetAttribByteStrides()[i];
+			int Dimension = pWebGPUVertexBuffer->GetAttributeDimensions()[i];
+			int ByteStride = pWebGPUVertexBuffer->GetAttribByteStrides()[i];
 
 			//
 			attributes[i].shaderLocation = i; // Shaderでのアトリビュートインデックス
-			attributes[i].format = GetVertexFormat(Dimension, createInfo->GetAttribDataTypes()[i]);
+			attributes[i].format = GetVertexFormat(Dimension, pWebGPUVertexBuffer->GetAttribDataTypes()[i]);
 			attributes[i].offset = 0;
 
 			//
 			vertexBufferLayouts[i].attributeCount = 1;
 			vertexBufferLayouts[i].attributes = &attributes[i];
-			vertexBufferLayouts[i].arrayStride = (ByteStride != 0) ? ByteStride : (Dimension * sizeof(createInfo->GetVertices()[i][0])); // ストライドとは連続する要素間のバイト数のこと
+			vertexBufferLayouts[i].arrayStride = (ByteStride != 0) ? ByteStride : (Dimension * sizeof(pWebGPUVertexBuffer->GetVertices()[i][0])); // ストライドとは連続する要素間のバイト数のこと
 			vertexBufferLayouts[i].stepMode = WGPUVertexStepMode_Vertex; // ??? 頂点データが同じインスタンスなら共有されることを示す設定 ???
 		}
 
@@ -305,13 +249,13 @@ namespace renderer
 	}
 
 	// Helper Function ///////////////////////////////////////////////////////////////////////
-	WGPUVertexFormat CWebGPURenderer::GetVertexFormat(int Dimention, EDataType DataType)
+	WGPUVertexFormat CWebGPURenderer::GetVertexFormat(int Dimention, graphics::EDataType DataType)
 	{
 		WGPUVertexFormat result;
 
 		switch (DataType)
 		{
-		case renderer::EDataType::TYPE_SIGNED_BYTE:
+		case graphics::EDataType::TYPE_SIGNED_BYTE:
 			if (Dimention == 1)
 			{
 				//result = WGPUVertexFormat_Sint8;
@@ -329,7 +273,7 @@ namespace renderer
 				result = WGPUVertexFormat_Sint8x4;
 			}
 			break;
-		case renderer::EDataType::TYPE_UNSIGNED_BYTE:
+		case graphics::EDataType::TYPE_UNSIGNED_BYTE:
 			if (Dimention == 1)
 			{
 				//result = WGPUVertexFormat_Uint8;
@@ -347,7 +291,7 @@ namespace renderer
 				result = WGPUVertexFormat_Uint8x4;
 			}
 			break;
-		case renderer::EDataType::TYPE_SIGNED_SHORT:
+		case graphics::EDataType::TYPE_SIGNED_SHORT:
 			if (Dimention == 1)
 			{
 				//result = WGPUVertexFormat_Sint16;
@@ -365,7 +309,7 @@ namespace renderer
 				result = WGPUVertexFormat_Sint16x4;
 			}
 			break;
-		case renderer::EDataType::TYPE_UNSIGNED_SHORT:
+		case graphics::EDataType::TYPE_UNSIGNED_SHORT:
 			if (Dimention == 1)
 			{
 				//result = WGPUVertexFormat_Uint16;
@@ -383,7 +327,7 @@ namespace renderer
 				result = WGPUVertexFormat_Uint16x4;
 			}
 			break;
-		case renderer::EDataType::TYPE_UNSIGNED_INT:
+		case graphics::EDataType::TYPE_UNSIGNED_INT:
 			if (Dimention == 1)
 			{
 				result = WGPUVertexFormat_Uint32;
@@ -401,7 +345,7 @@ namespace renderer
 				result = WGPUVertexFormat_Uint32x4;
 			}
 			break;
-		case renderer::EDataType::TYPE_FLOAT:
+		case graphics::EDataType::TYPE_FLOAT:
 		default:
 			if (Dimention == 1)
 			{
@@ -423,25 +367,6 @@ namespace renderer
 		}
 
 		return result;
-	}
-
-	bool CWebGPURenderer::CreateBuffer(WGPUBuffer& Buffer, WGPUBufferUsageFlags Usage, void const* Data, uint64_t ByteSize)
-	{
-		// たぶんWebGPU, Vulkanでもvec3は16バイトオフセットと換算されるっぽいからvec3分(12バイト分)のパディングを入れたい場合はvec3ではなくfloatの変数を3つ定義するべき
-
-		WGPUBufferDescriptor bufferDesc{};
-		bufferDesc.nextInChain = nullptr; // 拡張機
-		bufferDesc.label = "Buffer";
-		bufferDesc.usage = Usage; // バッファの用途
-		bufferDesc.mappedAtCreation = false; // ???
-		bufferDesc.size = ByteSize;
-
-		Buffer = wgpuDeviceCreateBuffer(m_pGraphicsAPI->GetLogicalDevice(), &bufferDesc);
-
-		// バッファにデータを書き込む
-		wgpuQueueWriteBuffer(m_pGraphicsAPI->GetQueue(), Buffer, 0, Data, bufferDesc.size);
-
-		return true;
 	}
 
 	void CWebGPURenderer::SetDefaultDepthStencil(WGPUDepthStencilState& depthStencilState)

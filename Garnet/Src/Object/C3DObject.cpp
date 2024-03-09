@@ -52,7 +52,7 @@ namespace object
 	}
 
 	bool C3DObject::CreateSimply(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine,
-		const std::shared_ptr<renderer::CRendererCreateInfo>& createInfo,
+		const std::pair<std::shared_ptr<graphics::CVertexBuffer>, std::shared_ptr<graphics::CIndexBuffer>>& createInfo,
 		const std::shared_ptr<graphics::CMaterial>& Material, const std::shared_ptr<graphics::CMaterialFrame>& DepthMF, 
 		const std::shared_ptr<math::CTransform> NodeTransform, const std::shared_ptr<physics::IPhysicsObject>& PhysicsObject)
 	{
@@ -61,7 +61,7 @@ namespace object
 
 		// Mesh
 		std::shared_ptr<graphics::CMesh> Mesh = std::make_shared<graphics::CMesh>();
-		Mesh->CreateSimpleMesh(createInfo, 0);
+		Mesh->CreateSimpleMesh(createInfo.first, createInfo.second, 0);
 
 		AddMesh(Mesh);
 
@@ -159,6 +159,8 @@ namespace object
 		// Primitive
 		for (const auto& Mesh : m_MeshList)
 		{
+			if (!Mesh->CreateBuffer()) return false;
+
 			for (const auto& Primitive : Mesh->GetPrimitiveList())
 			{
 				int MaterialIndex = Primitive->GetMaterialIndex();

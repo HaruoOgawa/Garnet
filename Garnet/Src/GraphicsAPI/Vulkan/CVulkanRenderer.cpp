@@ -3,19 +3,16 @@
 #include "CVulkanAPI.h"
 #include "CVulkanRenderPass.h"
 #include "CVulkanMaterial.h"
-#include "../CRendererCreateInfo.h"
+#include "CVulkanVertexBuffer.h"
+#include "CVulkanIndexBuffer.h"
 
-namespace renderer
+namespace api
 {
 	CVulkanRenderer::CVulkanRenderer(api::CVulkanAPI* pGraphicsAPI, const std::string& PassName):
 		m_pGraphicsAPI(pGraphicsAPI),
 		m_PassName(PassName),
 		m_DynamicOffsetNum(0),
 		m_InstanceCount(1),
-		m_IndiceType(EIndiceType::UNSIGNED_SHORT),
-		m_IndexBuffer(nullptr),
-		m_IndexBufferMemory(nullptr),
-		m_IndicesCount(0),
 		m_PipelineLayout(nullptr),
 		m_GraphicsPipeline(nullptr)
 	{
@@ -28,40 +25,6 @@ namespace renderer
 
 	void CVulkanRenderer::Release()
 	{
-		// インデックスバッファの破棄
-		if (m_IndexBuffer)
-		{
-			vkDestroyBuffer(m_pGraphicsAPI->GetLogicalDevice(), m_IndexBuffer, nullptr);
-			m_IndexBuffer = nullptr;
-		}
-
-		// インデックスバッファ用に確保したメモリ領域を破棄
-		if (m_IndexBufferMemory)
-		{
-			vkFreeMemory(m_pGraphicsAPI->GetLogicalDevice(), m_IndexBufferMemory, nullptr);
-			m_IndexBufferMemory = nullptr;
-		}
-
-		// 頂点バッファの破棄
-		for (auto& Buffer : m_VertexBufferList)
-		{
-			if (Buffer)
-			{
-				vkDestroyBuffer(m_pGraphicsAPI->GetLogicalDevice(), Buffer, nullptr);
-			}
-		}
-		m_VertexBufferList.clear();
-
-		// 頂点バッファ用に確保したメモリ領域を破棄
-		for (auto& Memory : m_VertexBufferMemoryList)
-		{
-			if (Memory)
-			{
-				vkFreeMemory(m_pGraphicsAPI->GetLogicalDevice(), Memory, nullptr);
-			}
-		}
-		m_VertexBufferMemoryList.clear();
-
 		// グラフィックパイプラインの破棄
 		if (m_GraphicsPipeline)
 		{
@@ -77,22 +40,21 @@ namespace renderer
 		}
 	}
 
-	bool CVulkanRenderer::Create(const std::shared_ptr<CRendererCreateInfo>& createInfo, const std::shared_ptr<graphics::CMaterial>& Material)
+	bool CVulkanRenderer::Create(const std::shared_ptr<graphics::CVertexBuffer>& VertexBuffer, const std::shared_ptr<graphics::CIndexBuffer>& IndexBuffer, const std::shared_ptr<graphics::CMaterial>& Material)
 	{
 		api::CVulkanMaterial* pVulkanMat = static_cast<api::CVulkanMaterial*>(Material.get());
 
-		m_InstanceCount = createInfo->GetInstanceCount();
+		m_InstanceCount = VertexBuffer->GetInstanceCount();
 
-		if (!CreateVertexBuffer(createInfo)) return false; // 頂点バッファを作成
-		if (!CreateIndexBuffer(createInfo)) return false; // インデックスバッファを作成
-
-		if (!CreateGraphicsPipeline(createInfo, pVulkanMat)) return false; // グラフィックパイプラインを作成
+		if (!CreateGraphicsPipeline(VertexBuffer, IndexBuffer, pVulkanMat)) return false; // グラフィックパイプラインを作成
 
 		return true;
 	}
 
-	bool CVulkanRenderer::Draw(const std::shared_ptr<graphics::CMaterial>& Material, int DynamicOffsetNum)
+	bool CVulkanRenderer::Draw(const std::shared_ptr<graphics::CVertexBuffer>& VertexBuffer, const std::shared_ptr<graphics::CIndexBuffer>& IndexBuffer, const std::shared_ptr<graphics::CMaterial>& Material, int DynamicOffsetNum)
 	{
+		const CVulkanVertexBuffer* pVulkanVertexBuffer = static_cast<const CVulkanVertexBuffer*>(VertexBuffer.get());
+		const CVulkanIndexBuffer* pVulkanIndexBuffer = static_cast<const CVulkanIndexBuffer*>(IndexBuffer.get());
 		api::CVulkanMaterial* pVulkanMat = static_cast<api::CVulkanMaterial*>(Material.get());
 
 		// ユニフォームバッファの準備
@@ -106,21 +68,20 @@ namespace renderer
 		
 		// 頂点バッファをパイプラインにバインドする
 		VkDeviceSize offsets[] = { 0 };
-		for (int i = 0; i < static_cast<int>(m_VertexBufferList.size()); i++)
+		for (int i = 0; i < static_cast<int>(pVulkanVertexBuffer->GetVertexBufferList().size()); i++)
 		{
-			vkCmdBindVertexBuffers(m_pGraphicsAPI->GetCurrentCommandBuffer(), i, 1, &m_VertexBufferList[i], offsets);
+			vkCmdBindVertexBuffers(m_pGraphicsAPI->GetCurrentCommandBuffer(), i, 1, &pVulkanVertexBuffer->GetVertexBufferList()[i], offsets);
 		}
 
 		// インデックスバッファをパイプラインにバインドする
-		if (m_IndiceType == renderer::EIndiceType::UNSIGNED_SHORT)
+		if (pVulkanIndexBuffer->GetIndiceType() == graphics::EIndiceType::UNSIGNED_SHORT)
 		{
-			vkCmdBindIndexBuffer(m_pGraphicsAPI->GetCurrentCommandBuffer(), m_IndexBuffer, 0, VK_INDEX_TYPE_UINT16);
+			vkCmdBindIndexBuffer(m_pGraphicsAPI->GetCurrentCommandBuffer(), pVulkanIndexBuffer->GetIndexBuffer(), 0, VK_INDEX_TYPE_UINT16);
 		}
-		else if (m_IndiceType == renderer::EIndiceType::UNSIGNED_INT)
+		else if (pVulkanIndexBuffer->GetIndiceType() == graphics::EIndiceType::UNSIGNED_INT)
 		{
-			vkCmdBindIndexBuffer(m_pGraphicsAPI->GetCurrentCommandBuffer(), m_IndexBuffer, 0, VK_INDEX_TYPE_UINT32);
+			vkCmdBindIndexBuffer(m_pGraphicsAPI->GetCurrentCommandBuffer(), pVulkanIndexBuffer->GetIndexBuffer(), 0, VK_INDEX_TYPE_UINT32);
 		}
-		
 		
 		// UBOのセット
 		std::vector<uint32_t> dynamicOffsetList;
@@ -144,109 +105,17 @@ namespace renderer
 		// 描画コマンドを発行
 		//vkCmdDraw(m_CommandBuffers[m_CurrentFrame], 3, 1, 0, 0); // パラメーター: vertexCount, instanceCount, firstVertex, firstInstance
 		// インデックス付のドローコマンドはこちら
-		vkCmdDrawIndexed(m_pGraphicsAPI->GetCurrentCommandBuffer(), m_IndicesCount, m_InstanceCount, 0, 0, 0);
+		vkCmdDrawIndexed(m_pGraphicsAPI->GetCurrentCommandBuffer(), pVulkanIndexBuffer->GetIndicesCount(), m_InstanceCount, 0, 0, 0);
 
 		return true;
 	}
 
 	// Vulkanメインロジック /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	bool CVulkanRenderer::CreateVertexBuffer(const std::shared_ptr<CRendererCreateInfo>& createInfo)
+	bool CVulkanRenderer::CreateGraphicsPipeline(const std::shared_ptr<graphics::CVertexBuffer>& VertexBuffer, const std::shared_ptr<graphics::CIndexBuffer>& IndexBuffer, api::CVulkanMaterial* pVulkanMat)
 	{
-		// 頂点バッファオブジェクトの生成
-		for (const auto& VertexData : createInfo->GetVertices())
-		{
-			//
-			VkDeviceSize bufferSize = sizeof(VertexData[0]) * VertexData.size();
+		const CVulkanVertexBuffer* pVulkanVertexBuffer = static_cast<const CVulkanVertexBuffer*>(VertexBuffer.get());
+		const CVulkanIndexBuffer* pVulkanIndexBuffer = static_cast<const CVulkanIndexBuffer*>(IndexBuffer.get());
 
-			// ステージングバッファの作成
-			// ステージングバッファは頂点データ配列からデータをアップロードするのに使用するCPUアクセス可なバッファ
-			VkBuffer stagingBuffer;
-			VkDeviceMemory stagingBufferMemory;
-			m_pGraphicsAPI->CreateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-				stagingBuffer, stagingBufferMemory);
-
-			// 頂点データを渡すためのメモリのポインターを取得
-			void* data;
-			vkMapMemory(m_pGraphicsAPI->GetLogicalDevice(), stagingBufferMemory, 0, bufferSize, 0, &data);
-
-			// 取得したポインタにデータをコピーする
-			std::memcpy(data, VertexData.data(), (size_t)bufferSize);
-
-			// マップを解除する。たぶんマップというのはCPUからGPUへデータを渡すために一時的に確保される入口みたいなものかな？
-			// 渡し終わったのでポインタという名の通路・入口を破棄したみたいな
-			vkUnmapMemory(m_pGraphicsAPI->GetLogicalDevice(), stagingBufferMemory);
-
-			// 最終的に頂点バッファを保持するのに使用するバッファを作成
-			VkBuffer Buffer;
-			VkDeviceMemory BufferMemory;
-
-			m_pGraphicsAPI->CreateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-				Buffer, BufferMemory);
-
-			// バッファをコピー
-			m_pGraphicsAPI->CopyBuffer(stagingBuffer, Buffer, bufferSize);
-
-			// 不要なリソースを破棄
-			vkDestroyBuffer(m_pGraphicsAPI->GetLogicalDevice(), stagingBuffer, nullptr);
-			vkFreeMemory(m_pGraphicsAPI->GetLogicalDevice(), stagingBufferMemory, nullptr);
-
-			// バッファを保存
-			m_VertexBufferList.push_back(Buffer);
-			m_VertexBufferMemoryList.push_back(BufferMemory);
-		}
-
-		return true;
-	}
-	bool CVulkanRenderer::CreateIndexBuffer(const std::shared_ptr<CRendererCreateInfo>& createInfo)
-	{
-		m_IndiceType = createInfo->GetIndiceType();
-		
-		VkDeviceSize bufferSize = 0;
-
-		if (m_IndiceType == renderer::EIndiceType::UNSIGNED_SHORT)
-		{
-			m_IndicesCount = static_cast<uint32_t>(createInfo->GetIndices().size());
-
-			bufferSize = sizeof(createInfo->GetIndices()[0]) * createInfo->GetIndices().size();
-		}
-		else if (m_IndiceType == renderer::EIndiceType::UNSIGNED_INT)
-		{
-			m_IndicesCount = static_cast<uint32_t>(createInfo->GetUINTIndices().size());
-
-			bufferSize = sizeof(createInfo->GetUINTIndices()[0]) * createInfo->GetUINTIndices().size();
-		}
-
-		VkBuffer stagingBuffer;
-		VkDeviceMemory stagingBufferMemory;
-		m_pGraphicsAPI->CreateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
-
-		void* data;
-		vkMapMemory(m_pGraphicsAPI->GetLogicalDevice(), stagingBufferMemory, 0, bufferSize, 0, &data);
-		
-		if (m_IndiceType == renderer::EIndiceType::UNSIGNED_SHORT)
-		{
-			memcpy(data, createInfo->GetIndices().data(), (size_t)bufferSize);
-		}
-		else if (m_IndiceType == renderer::EIndiceType::UNSIGNED_INT)
-		{
-			memcpy(data, createInfo->GetUINTIndices().data(), (size_t)bufferSize);
-		}
-		
-		vkUnmapMemory(m_pGraphicsAPI->GetLogicalDevice(), stagingBufferMemory);
-
-		m_pGraphicsAPI->CreateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-			m_IndexBuffer, m_IndexBufferMemory);
-
-		m_pGraphicsAPI->CopyBuffer(stagingBuffer, m_IndexBuffer, bufferSize);
-
-		vkDestroyBuffer(m_pGraphicsAPI->GetLogicalDevice(), stagingBuffer, nullptr);
-		vkFreeMemory(m_pGraphicsAPI->GetLogicalDevice(), stagingBufferMemory, nullptr);
-
-		return true;
-	}
-
-	bool CVulkanRenderer::CreateGraphicsPipeline(const std::shared_ptr<CRendererCreateInfo>& createInfo, api::CVulkanMaterial* pVulkanMat)
-	{
 		// グラフィックパイプラインの固定機の設定 ///////////////////////////////////////////////////////////////////////////////////////
 		// 動的状態(ダイナミックステート)の設定(パイプラインにベイクせずにマイフレームの描画時に設定できるようにするパラメーターの設定)
 		std::vector<VkDynamicState> dynamicStates = {
@@ -261,25 +130,25 @@ namespace renderer
 		dynamicStateCreateInfo.pDynamicStates = dynamicStates.data();
 
 		// 頂点バッファ入力(Vertex Shaderに渡すデータ形式について設定する)
-		int Size = static_cast<int>(m_VertexBufferList.size());
+		int Size = static_cast<int>(pVulkanVertexBuffer->GetVertexBufferList().size());
 		std::vector<VkVertexInputBindingDescription> bindingDescriptions(Size);
 		std::vector<VkVertexInputAttributeDescription> attributeDescriptions(Size);
 
 		for (int i = 0; i < Size; i++)
 		{
 			//
-			int Dimension = createInfo->GetAttributeDimensions()[i];
-			int ByteStride = createInfo->GetAttribByteStrides()[i];
+			int Dimension = pVulkanVertexBuffer->GetAttributeDimensions()[i];
+			int ByteStride = pVulkanVertexBuffer->GetAttribByteStrides()[i];
 
 			// 頂点バッファのバインドに関する説明,設定(頂点バッファレイアウト)
 			bindingDescriptions[i].binding = i; // バインドする頂点バッファのインデックス(?)違う形式で頂点バッファを用意するときに使用する？
-			bindingDescriptions[i].stride = (ByteStride != 0)? ByteStride : (Dimension * sizeof(createInfo->GetVertices()[i][0])); // 頂点バッファ内の要素一つあたりのサイズ。次の要素までのバイト数
+			bindingDescriptions[i].stride = (ByteStride != 0)? ByteStride : (Dimension * sizeof(pVulkanVertexBuffer->GetVertices()[i][0])); // 頂点バッファ内の要素一つあたりのサイズ。次の要素までのバイト数
 			bindingDescriptions[i].inputRate = VK_VERTEX_INPUT_RATE_VERTEX; // よくわからぬ。各頂点の後、次のデータ エントリに移動します。らしい
 
 			// アトリビュート(頂点データ)の設定
 			attributeDescriptions[i].binding = i; // BindingDescriptionの内どのバインド設定を使用するかのインデックス
 			attributeDescriptions[i].location = i; // Shaderのlayout(location = 0)に設定すｒ数値
-			attributeDescriptions[i].format = GetVertexFormat(Dimension, createInfo->GetAttribDataTypes()[i]); // データ型. SFLOAT --> Signed Float
+			attributeDescriptions[i].format = GetVertexFormat(Dimension, pVulkanVertexBuffer->GetAttribDataTypes()[i]); // データ型. SFLOAT --> Signed Float
 			attributeDescriptions[i].offset = 0; // データオフセット
 		}
 
@@ -519,13 +388,13 @@ namespace renderer
 	}
 
 	// ヘルパー関数 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	VkFormat CVulkanRenderer::GetVertexFormat(int Dimention, EDataType DataType)
+	VkFormat CVulkanRenderer::GetVertexFormat(int Dimention, graphics::EDataType DataType)
 	{
 		VkFormat result = VK_FORMAT_UNDEFINED;
 
 		switch (DataType)
 		{
-		case renderer::EDataType::TYPE_SIGNED_BYTE:
+		case graphics::EDataType::TYPE_SIGNED_BYTE:
 			if (Dimention == 1)
 			{
 				result = VK_FORMAT_R8_SINT;
@@ -543,7 +412,7 @@ namespace renderer
 				result = VK_FORMAT_R8G8B8A8_SINT;
 			}
 			break;
-		case renderer::EDataType::TYPE_UNSIGNED_BYTE:
+		case graphics::EDataType::TYPE_UNSIGNED_BYTE:
 			if (Dimention == 1)
 			{
 				result = VK_FORMAT_R8_UINT;
@@ -561,7 +430,7 @@ namespace renderer
 				result = VK_FORMAT_R8G8B8A8_UINT;
 			}
 			break;
-		case renderer::EDataType::TYPE_SIGNED_SHORT:
+		case graphics::EDataType::TYPE_SIGNED_SHORT:
 			if (Dimention == 1)
 			{
 				result = VK_FORMAT_R16_SINT;
@@ -579,7 +448,7 @@ namespace renderer
 				result = VK_FORMAT_R16G16B16A16_SINT;
 			}
 			break;
-		case renderer::EDataType::TYPE_UNSIGNED_SHORT:
+		case graphics::EDataType::TYPE_UNSIGNED_SHORT:
 			if (Dimention == 1)
 			{
 				result = VK_FORMAT_R16_UINT;
@@ -597,7 +466,7 @@ namespace renderer
 				result = VK_FORMAT_R16G16B16A16_UINT;
 			}
 			break;
-		case renderer::EDataType::TYPE_UNSIGNED_INT:
+		case graphics::EDataType::TYPE_UNSIGNED_INT:
 			if (Dimention == 1)
 			{
 				result = VK_FORMAT_R32_UINT;
@@ -615,7 +484,7 @@ namespace renderer
 				result = VK_FORMAT_R32G32B32A32_UINT;
 			}
 			break;
-		case renderer::EDataType::TYPE_FLOAT:
+		case graphics::EDataType::TYPE_FLOAT:
 		default:
 			if (Dimention == 1)
 			{
