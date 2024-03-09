@@ -69,14 +69,4 @@ namespace graphics
 	{
 		return m_MaterialIndex;
 	}
-
-	void CPrimitive::SetMorphDataList(const std::vector<std::map<int, glm::vec3>>& MorphDataList)
-	{
-		m_MorphDataList = MorphDataList;
-	}
-
-	const std::vector<std::map<int, glm::vec3>>& CPrimitive::GetMorphDataList() const
-	{
-		return m_MorphDataList;
-	}
 }

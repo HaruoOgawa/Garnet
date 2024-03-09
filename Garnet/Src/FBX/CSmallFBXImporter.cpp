@@ -383,7 +383,7 @@ namespace fbx
 			if (!CreateMaterial(pGraphicsAPI, fbxMesh, pFbxMaterialList, MaterialList, MaterialFrame, Skeleton)) return false;
 
 			// メッシュ
-			if (!CreateMesh(pFBXNode, pFbxMeshList, pFbxMaterialList, FbxBoneList, MeshList, MaterialList, Skeleton, IsMixamoFbx)) return false;
+			if (!CreateMesh(pGraphicsAPI, pFBXNode, pFbxMeshList, pFbxMaterialList, FbxBoneList, MeshList, MaterialList, Skeleton, IsMixamoFbx)) return false;
 		}
 
 		// 子要素のNodeを調べる
@@ -481,7 +481,7 @@ namespace fbx
 		return true;
 	}
 
-	bool CSmallFBXImporter::CreateMesh(sfbx::Object* pFBXNode, std::vector<sfbx::Mesh*>& pFbxMeshList, const std::vector<sfbx::Material*>& pFbxMaterialList, const std::vector<sfbx::Object*>& FbxBoneList,
+	bool CSmallFBXImporter::CreateMesh(api::IGraphicsAPI* pGraphicsAPI, sfbx::Object* pFBXNode, std::vector<sfbx::Mesh*>& pFbxMeshList, const std::vector<sfbx::Material*>& pFbxMaterialList, const std::vector<sfbx::Object*>& FbxBoneList,
 		std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, const std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList, const std::shared_ptr<animation::CSkeleton>& Skeleton, const bool IsMixamoFbx)
 	{
 		if (auto pFbxMesh = sfbx::as<sfbx::Mesh>(pFBXNode))
@@ -1014,17 +1014,27 @@ namespace fbx
 					}
 				}
 
+				// 頂点バッファを作成する
+				auto VertexBuffer = pGraphicsAPI->CreateVertexBuffer();
+
 				// メッシュ情報を渡す
-				createInfo->SetVertices(VertexDataList);
-				createInfo->SetAttributeDimensions(DimentionList);
-				createInfo->SetAttribDataTypes(DataTypeList);
-				createInfo->SetAttribByteStrides(ByteStrideList);
+				VertexBuffer->SetVertices(VertexDataList);
+				VertexBuffer->SetAttributeDimensions(DimentionList);
+				VertexBuffer->SetAttribDataTypes(DataTypeList);
+				VertexBuffer->SetAttribByteStrides(ByteStrideList);
+
+				Mesh->AddVertexBuffer(VertexBuffer);
+
+				//
+				auto IndexBuffer = pGraphicsAPI->CreateIndexBuffer();
 
 				// Indicesを登録
-				createInfo->SetUINTIndices(Indices);
+				IndexBuffer->SetUINTIndices(Indices);
+
+				Mesh->AddIndexBuffer(IndexBuffer);
 
 				// プリミティブを作成する
-				std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(createInfo, MaterialIndex);
+				std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(VertexBuffer, IndexBuffer, MaterialIndex);
 				Mesh->AddPrimitive(Primitive);
 			}
 

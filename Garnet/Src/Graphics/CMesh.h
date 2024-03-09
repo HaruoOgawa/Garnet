@@ -1,7 +1,10 @@
 #pragma once
 #include <vector>
 #include <memory>
+#include <vector>
+#include <map>
 #include "CPrimitive.h"
+#include <glm/glm.hpp>
 
 namespace graphics
 {
@@ -15,6 +18,9 @@ namespace graphics
 
 		std::vector<std::shared_ptr<CVertexBuffer>> m_VertexBufferList;
 		std::vector<std::shared_ptr<CIndexBuffer>> m_IndexBufferList;
+
+		// モーフデータ
+		std::map<int, std::vector<std::map<int, glm::vec3>>> m_MorphDataList;
 	public:
 		CMesh();
 		virtual ~CMesh();
@@ -28,5 +34,8 @@ namespace graphics
 		const std::vector<std::shared_ptr<CPrimitive>>& GetPrimitiveList() const;
 
 		void CreateSimpleMesh(const std::shared_ptr<CVertexBuffer>& VertexBuffer, const std::shared_ptr<CIndexBuffer>& IndexBuffer, int MaterialIndex);
+
+		void SetMorphDataList(int PrimitiveIndex, const std::vector<std::map<int, glm::vec3>>& MorphDataList);
+		const std::map<int, std::vector<std::map<int, glm::vec3>>>& GetMorphDataList() const;
 	};
 }

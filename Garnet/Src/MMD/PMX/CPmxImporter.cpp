@@ -639,11 +639,20 @@ namespace mmd
 					MatRefOffset += PmxMaterial->GetMatRefIndiceCount();
 				}
 
-				// プリミティブに渡すモーフデータを準備
+				// プリミティブを作成する
+				std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(VertexBuffer, IndexBuffer, MaterialIndex);
+				
+				Mesh->AddPrimitive(Primitive);
+			}
+
+			// プリミティブが存在するならメッシュインデックスやモーフなどを登録する
+			if (Mesh->GetPrimitiveList().size() > 0)
+			{
+				// メッシュに渡すモーフデータを準備
 				std::vector<std::map<int, glm::vec3>> MorphDataList;
 				{
 					const auto& PmxMorphList = model.GetPmxVertexMorphList();
-					
+
 					for (int MorphIndex = 0; MorphIndex < static_cast<int>(animation::EBlendShapeName::Max); MorphIndex++)
 					{
 						animation::EBlendShapeName CurrentShapeName = static_cast<animation::EBlendShapeName>(MorphIndex);
@@ -661,19 +670,14 @@ namespace mmd
 					}
 				}
 
-				// プリミティブを作成する
-				std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(VertexBuffer, IndexBuffer, MaterialIndex);
-				Primitive->SetMorphDataList(MorphDataList);
+				// Pmxでは頂点バッファは１つでインデックスバッファが複数個あり、頂点バッファは全体で共有なので最初のプリミティブを指定する
+				// 共有頂点バッファを更新すれば全体のメッシュにモーフが適応できるため
+				Mesh->SetMorphDataList(0, MorphDataList);
 
-				Mesh->AddPrimitive(Primitive);
-			}
-
-			// プリミティブが存在するならメッシュインデックスなどを登録する
-			if (Mesh->GetPrimitiveList().size() > 0)
-			{
 				// メッシュを登録
 				MeshList.push_back(Mesh);
 
+				// ノードに情報を登録
 				int SkeletonIndex = (ExistSkeleton) ? 0 : -1;
 				MeshNode->SetSkeletonIndex(SkeletonIndex);
 				MeshNode->SetMeshIndex(0);

@@ -55,4 +55,14 @@ namespace graphics
 		std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(VertexBuffer, IndexBuffer, MaterialIndex);
 		AddPrimitive(Primitive);
 	}
+
+	void CMesh::SetMorphDataList(int PrimitiveIndex, const std::vector<std::map<int, glm::vec3>>& MorphDataList)
+	{
+		m_MorphDataList.emplace(PrimitiveIndex, MorphDataList);
+	}
+
+	const std::map<int, std::vector<std::map<int, glm::vec3>>>& CMesh::GetMorphDataList() const
+	{
+		return m_MorphDataList;
+	}
 }

@@ -1,9 +1,7 @@
 #pragma once
 #include <memory>
-#include <vector>
-#include <map>
 #include <string>
-#include <glm/glm.hpp>
+
 #include "CPresetPrimitive.h"
 
 namespace graphics {
@@ -27,9 +25,6 @@ namespace graphics
 		std::shared_ptr<graphics::IRenderer>				 m_DepthRenderer;
 		
 		int													 m_MaterialIndex;
-
-		// モーフデータ
-		std::vector<std::map<int, glm::vec3>> m_MorphDataList;
 	public:
 		CPrimitive(const std::shared_ptr<CVertexBuffer>& VertexBuffer, const std::shared_ptr<CIndexBuffer>& IndexBuffer, int MaterialIndex);
 		virtual ~CPrimitive();
@@ -42,8 +37,5 @@ namespace graphics
 
 		void SetMaterialIndex(int Index);
 		int GetMaterialIndex() const;
-
-		void SetMorphDataList(const std::vector<std::map<int, glm::vec3>>& MorphDataList);
-		const std::vector<std::map<int, glm::vec3>>& GetMorphDataList() const;
 	};
 }
