@@ -5,7 +5,6 @@ namespace api
 {
 	COpenGLIndexBuffer::COpenGLIndexBuffer(api::COpenGLAPI* pGraphicsAPI):
 		m_pGraphicsAPI(pGraphicsAPI),
-		m_IndexBuffer(0),
 		m_GLIndiceType(GL_UNSIGNED_SHORT),
 		m_IndicesCount(0)
 	{
@@ -13,11 +12,6 @@ namespace api
 
 	COpenGLIndexBuffer::~COpenGLIndexBuffer()
 	{
-	}
-
-	GLuint COpenGLIndexBuffer::GetIndexBuffer() const
-	{
-		return m_IndexBuffer;
 	}
 
 	GLenum COpenGLIndexBuffer::GetGLIndiceType() const
@@ -32,8 +26,15 @@ namespace api
 
 	bool COpenGLIndexBuffer::Create()
 	{
-		glGenBuffers(1, &m_IndexBuffer);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_IndexBuffer);
+		return true;
+	}
+
+	bool COpenGLIndexBuffer::CreateIndexBuffer()
+	{
+		GLuint indexBuffer;
+
+		glGenBuffers(1, &indexBuffer);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
 
 		if (GetIndiceType() == graphics::EIndiceType::UNSIGNED_SHORT)
 		{
@@ -50,7 +51,8 @@ namespace api
 			glBufferData(GL_ELEMENT_ARRAY_BUFFER, GetUINTIndices().size() * sizeof(unsigned int), GetUINTIndices().data(), GL_STATIC_DRAW);
 		}
 
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		//glBindBuffer(GL_ARRAY_BUFFER, 0);
+		//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
 		return true;
 	}

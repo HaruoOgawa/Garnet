@@ -27,9 +27,15 @@ namespace api
 		const std::string m_PassName;
 		int	m_DynamicOffsetNum;
 		int m_InstanceCount;
+
+		GLuint m_VertexArray;
+	private:
+		bool CreateVertexArray();
 	public:
 		COpenGLRenderer(api::COpenGLAPI* pGraphicsAPI, const std::string& PassName);
 		virtual ~COpenGLRenderer();
+
+		void SetActive() const;
 
 		bool Create(const std::shared_ptr<graphics::CVertexBuffer>& VertexBuffer, const std::shared_ptr<graphics::CIndexBuffer>& IndexBuffer, const std::shared_ptr<graphics::CMaterial>& Material) override;
 		bool Draw(const std::shared_ptr<graphics::CVertexBuffer>& VertexBuffer, const std::shared_ptr<graphics::CIndexBuffer>& IndexBuffer, const std::shared_ptr<graphics::CMaterial>& Material, int DynamicOffsetNum) override;

@@ -11,17 +11,48 @@ namespace api
 		m_pGraphicsAPI(pGraphicsAPI),
 		m_PassName(PassName),
 		m_DynamicOffsetNum(0),
-		m_InstanceCount(1)
+		m_InstanceCount(1),
+		m_VertexArray(-1)
 	{
 	}
 
 	COpenGLRenderer::~COpenGLRenderer()
 	{
+		glDeleteVertexArrays(1, &m_VertexArray);
+	}
+
+	void COpenGLRenderer::SetActive() const
+	{
+		if (m_VertexArray != -1)
+		{
+			glBindVertexArray(m_VertexArray);
+		}
+	}
+
+	bool COpenGLRenderer::CreateVertexArray()
+	{
+		glGenVertexArrays(1, &m_VertexArray);
+		glBindVertexArray(m_VertexArray);
+
+		//glBindVertexArray(0);
+
+		return true;
 	}
 
 	bool COpenGLRenderer::Create(const std::shared_ptr<graphics::CVertexBuffer>& VertexBuffer, const std::shared_ptr<graphics::CIndexBuffer>& IndexBuffer, const std::shared_ptr<graphics::CMaterial>& Material)
 	{
 		m_InstanceCount = VertexBuffer->GetInstanceCount();
+
+		// VertexArray
+		CreateVertexArray();
+
+		// VertexBuffer
+		COpenGLVertexBuffer* pOpenGLVertexBuffer = static_cast<COpenGLVertexBuffer*>(VertexBuffer.get());
+		if (!pOpenGLVertexBuffer->CreateVertexBuffer()) return false;
+		
+		// IndexBuffer
+		COpenGLIndexBuffer* pOpenGLIndexBuffer = static_cast<COpenGLIndexBuffer*>(IndexBuffer.get());
+		if (!pOpenGLIndexBuffer->CreateIndexBuffer()) return false;
 
 		return true;
 	}
@@ -39,7 +70,7 @@ namespace api
 		pOpenGLMat->SetActive();
 
 		// レンダラーをバインド
-		pOpenGLVertexBuffer->SetActive();
+		SetActive();
 
 		// 描画方法の設定
 		// ZTest
@@ -108,8 +139,6 @@ namespace api
 		{
 			glDrawElements(GL_TRIANGLES, pOpenGLIndexBuffer->GetIndicesCount(), pOpenGLIndexBuffer->GetGLIndiceType(), nullptr);
 		}
-
-		pOpenGLVertexBuffer->SetEnactive();
 		
 		return true;
 	}

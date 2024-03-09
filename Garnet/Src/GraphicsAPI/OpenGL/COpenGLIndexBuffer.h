@@ -10,18 +10,18 @@ namespace api
 	{
 		api::COpenGLAPI* m_pGraphicsAPI;
 
-		GLuint m_IndexBuffer;
 		GLenum m_GLIndiceType;
 		GLsizei m_IndicesCount;
 	public:
 		COpenGLIndexBuffer(api::COpenGLAPI* pGraphicsAPI);
 		virtual ~COpenGLIndexBuffer();
 
-		GLuint GetIndexBuffer() const;
 		GLenum GetGLIndiceType() const;
 		GLsizei GetIndicesCount() const;
 
 		virtual bool Create() override;
+
+		bool CreateIndexBuffer();
 	};
 }
 #endif
