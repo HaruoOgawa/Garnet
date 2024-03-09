@@ -31,6 +31,8 @@
 #include "../Animation/CBoneNameProvider.h"
 
 #include "../Graphics/CMaterialFrame.h"
+#include "../../Graphics/CVertexBuffer.h"
+#include "../../Graphics/CIndexBuffer.h"
 
 namespace gltf
 {
@@ -123,7 +125,7 @@ namespace gltf
 
 		// メッシュ
 		std::vector<std::shared_ptr<graphics::CMesh>> MeshList;
-		if (!CreateMesh(model, MeshList))
+		if (!CreateMesh(pGraphicsAPI, model, MeshList))
 		{
 			Console::Log("[Error GLTFImporter] Failed to CreateMesh\n");
 
@@ -437,7 +439,7 @@ namespace gltf
 		return true;
 	}
 
-	bool CGLTFImporter::CreateMesh(const tinygltf::Model& model, std::vector<std::shared_ptr<graphics::CMesh>>& MeshList)
+	bool CGLTFImporter::CreateMesh(api::IGraphicsAPI* pGraphicsAPI, const tinygltf::Model& model, std::vector<std::shared_ptr<graphics::CMesh>>& MeshList)
 	{
 		for (const auto& glTFMesh : model.meshes)
 		{
@@ -447,13 +449,10 @@ namespace gltf
 			{
 				int MaterialIndex = glTFPrimitive.material;
 
-				//
-				std::shared_ptr<renderer::CRendererCreateInfo> createInfo = std::make_shared<renderer::CRendererCreateInfo>();
-
 				// 頂点バッファ本体
 				std::vector<std::vector<float>> VertexDataList;
 				std::vector<int> DimentionList;
-				std::vector<renderer::EDataType> DataTypeList;
+				std::vector<graphics::EDataType> DataTypeList;
 				std::vector<int> ByteStrideList;
 
 				std::vector<unsigned short> Indices;
@@ -478,7 +477,7 @@ namespace gltf
 				}
 
 				std::map<std::string, std::vector<float>> ReservedVertexDataList;
-				std::map<std::string, renderer::EDataType> ReservedDataTypeList;
+				std::map<std::string, graphics::EDataType> ReservedDataTypeList;
 				std::map<std::string, int> ReservedByteStrideList;
 
 				// タンジェントの計算が必要
@@ -515,7 +514,7 @@ namespace gltf
 						ReservedVertexDataList.insert({ Name, AttributeData });
 
 						// コンポーネントタイプ(データ型)を取得
-						renderer::EDataType attribComponentType = GetComponentTypeFromAccessor(Accessor);
+						graphics::EDataType attribComponentType = GetComponentTypeFromAccessor(Accessor);
 						ReservedDataTypeList.insert({ Name, attribComponentType });
 
 						// ByteStrideを取得
@@ -564,7 +563,7 @@ namespace gltf
 									ReservedVertexDataList.insert({ Name, AttributeData });
 
 									// コンポーネントタイプ(データ型)を取得
-									renderer::EDataType attribComponentType = GetComponentTypeFromAccessor(Accessor);
+									graphics::EDataType attribComponentType = GetComponentTypeFromAccessor(Accessor);
 									ReservedDataTypeList.insert({ Name, attribComponentType });
 
 									// ByteStrideを取得
@@ -628,10 +627,10 @@ namespace gltf
 							}
 
 							// DataTypeとByteStrideの初期値をセット
-							renderer::EDataType DataType = renderer::EDataType::TYPE_FLOAT;
+							graphics::EDataType DataType = graphics::EDataType::TYPE_FLOAT;
 
 							// 『JOINTS_0』はunsigned shortである
-							if (AttribName == "JOINTS_0") DataType = renderer::EDataType::TYPE_UNSIGNED_SHORT;
+							if (AttribName == "JOINTS_0") DataType = graphics::EDataType::TYPE_UNSIGNED_SHORT;
 
 							ReservedDataTypeList.insert({ AttribName, DataType });
 							ReservedByteStrideList.insert({ AttribName, 0 });
@@ -693,11 +692,19 @@ namespace gltf
 					}
 				}
 
+				// 頂点バッファを作成する
+				auto VertexBuffer = pGraphicsAPI->CreateVertexBuffer();
+
 				// メッシュ情報を渡す
-				createInfo->SetVertices(VertexDataList);
-				createInfo->SetAttributeDimensions(DimentionList);
-				createInfo->SetAttribDataTypes(DataTypeList);
-				createInfo->SetAttribByteStrides(ByteStrideList);
+				VertexBuffer->SetVertices(VertexDataList);
+				VertexBuffer->SetAttributeDimensions(DimentionList);
+				VertexBuffer->SetAttribDataTypes(DataTypeList);
+				VertexBuffer->SetAttribByteStrides(ByteStrideList);
+
+				Mesh->AddVertexBuffer(VertexBuffer);
+
+				//
+				auto IndexBuffer = pGraphicsAPI->CreateIndexBuffer();
 
 				if (Indices.size() > 0)
 				{
@@ -706,7 +713,7 @@ namespace gltf
 					Indices.resize(size, 0);
 
 					// Indicesを登録
-					createInfo->SetIndices(Indices);
+					IndexBuffer->SetIndices(Indices);
 				}
 				else if (UINTIndices.size() > 0)
 				{
@@ -715,13 +722,14 @@ namespace gltf
 					UINTIndices.resize(size, 0);
 
 					// Indicesを登録
-					createInfo->SetUINTIndices(UINTIndices);
+					IndexBuffer->SetUINTIndices(UINTIndices);
 				}
 
-				// プリミティブを作成する
-				std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(createInfo, MaterialIndex);
-				Primitive->SetMorphDataList(MorphDataList);
+				Mesh->AddIndexBuffer(IndexBuffer);
 
+				// プリミティブを作成する
+				std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(VertexBuffer, IndexBuffer, MaterialIndex);
+				Mesh->SetMorphDataList(static_cast<int>(Mesh->GetPrimitiveList().size()), MorphDataList);
 				Mesh->AddPrimitive(Primitive);
 			}
 
@@ -1335,44 +1343,44 @@ namespace gltf
 		}
 	}
 
-	renderer::EDataType CGLTFImporter::GetComponentTypeFromAccessor(const tinygltf::Accessor& Accessor)
+	graphics::EDataType CGLTFImporter::GetComponentTypeFromAccessor(const tinygltf::Accessor& Accessor)
 	{
 		int componentType = Accessor.componentType;
 
 		if (componentType == 5120)
 		{
 			// signed byte
-			return renderer::EDataType::TYPE_SIGNED_BYTE;
+			return graphics::EDataType::TYPE_SIGNED_BYTE;
 		}
 		else if (componentType == 5121)
 		{
 			// unsigned byte
-			return renderer::EDataType::TYPE_UNSIGNED_BYTE;
+			return graphics::EDataType::TYPE_UNSIGNED_BYTE;
 		}
 		else if (componentType == 5122)
 		{
 			// signed short
-			return renderer::EDataType::TYPE_SIGNED_SHORT;
+			return graphics::EDataType::TYPE_SIGNED_SHORT;
 		}
 		else if (componentType == 5123)
 		{
 			// unsigned short
-			return renderer::EDataType::TYPE_UNSIGNED_SHORT;
+			return graphics::EDataType::TYPE_UNSIGNED_SHORT;
 		}
 		else if (componentType == 5125)
 		{
 			// unsigned int
-			return renderer::EDataType::TYPE_UNSIGNED_INT;
+			return graphics::EDataType::TYPE_UNSIGNED_INT;
 		}
 		else if (componentType == 5126)
 		{
 			// float
-			return renderer::EDataType::TYPE_FLOAT;
+			return graphics::EDataType::TYPE_FLOAT;
 		}
 		else
 		{
 			// Unknown
-			return renderer::EDataType::TYPE_FLOAT;
+			return graphics::EDataType::TYPE_FLOAT;
 		}
 	}
 

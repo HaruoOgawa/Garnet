@@ -573,6 +573,14 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Src\GraphicsAPI\OpenGL\COpenGLIndexBuffer.h" />
+    <ClInclude Include="Src\GraphicsAPI\WebGPU\CWebGPUIndexBuffer.h" />
+    <ClInclude Include="Src\GraphicsAPI\OpenGL\COpenGLVertexBuffer.h" />
+    <ClInclude Include="Src\GraphicsAPI\WebGPU\CWebGPUVertexBuffer.h" />
+    <ClInclude Include="Src\GraphicsAPI\Vulkan\CVulkanIndexBuffer.h" />
+    <ClInclude Include="Src\GraphicsAPI\Vulkan\CVulkanVertexBuffer.h" />
+    <ClInclude Include="Src\Graphics\CIndexBuffer.h" />
+    <ClInclude Include="Src\Graphics\CVertexBuffer.h" />
     <ClInclude Include="Src\Graphics\CCPUMorphExecutor.h" />
     <ClInclude Include="Src\Graphics\CGPGPUMorphExecutor.h" />
     <ClInclude Include="Src\Animation\CBlendShapeController.h" />
@@ -1419,7 +1427,6 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClInclude Include="Src\Graphics\CPrimitive.h" />
     <ClInclude Include="Src\Graphics\CMesh.h" />
     <ClInclude Include="Src\Object\CNode.h" />
-    <ClInclude Include="Src\GraphicsAPI\CRendererCreateInfo.h" />
     <ClInclude Include="Src\GraphicsAPI\WebGPU\CWebGPURenderer.h" />
     <ClInclude Include="Src\GraphicsAPI\Vulkan\CVulkanRenderer.h" />
     <ClInclude Include="Src\App\EAppType.h" />
@@ -1434,6 +1441,14 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClInclude Include="Src\Interface\IRenderer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\GraphicsAPI\OpenGL\COpenGLIndexBuffer.cpp" />
+    <ClCompile Include="Src\GraphicsAPI\WebGPU\CWebGPUIndexBuffer.cpp" />
+    <ClCompile Include="Src\GraphicsAPI\OpenGL\COpenGLVertexBuffer.cpp" />
+    <ClCompile Include="Src\GraphicsAPI\WebGPU\CWebGPUVertexBuffer.cpp" />
+    <ClCompile Include="Src\GraphicsAPI\Vulkan\CVulkanIndexBuffer.cpp" />
+    <ClCompile Include="Src\GraphicsAPI\Vulkan\CVulkanVertexBuffer.cpp" />
+    <ClCompile Include="Src\Graphics\CIndexBuffer.cpp" />
+    <ClCompile Include="Src\Graphics\CVertexBuffer.cpp" />
     <ClCompile Include="Src\Graphics\CCPUMorphExecutor.cpp" />
     <ClCompile Include="Src\Graphics\CGPGPUMorphExecutor.cpp" />
     <ClCompile Include="Src\Animation\CBlendShapeController.cpp" />
@@ -1748,7 +1763,6 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClCompile Include="Src\Graphics\CPrimitive.cpp" />
     <ClCompile Include="Src\Graphics\CMesh.cpp" />
     <ClCompile Include="Src\Object\CNode.cpp" />
-    <ClCompile Include="Src\GraphicsAPI\CRendererCreateInfo.cpp" />
     <ClCompile Include="Src\GraphicsAPI\WebGPU\CWebGPURenderer.cpp" />
     <ClCompile Include="Src\GraphicsAPI\Vulkan\CVulkanRenderer.cpp" />
     <ClCompile Include="Src\GraphicsAPI\WebGPU\CWebGPUAPI.cpp" />

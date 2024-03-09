@@ -1,12 +1,14 @@
 #include "CPresetPrimitive.h"
-#include "../GraphicsAPI/CRendererCreateInfo.h"
+#include "CVertexBuffer.h"
+#include "CIndexBuffer.h"
 #include <glm/glm.hpp>
+#include "../Interface/IGraphicsAPI.h"
 
 namespace graphics
 {
-	std::shared_ptr<renderer::CRendererCreateInfo> CPresetPrimitive::CreateBoard()
+	std::pair<std::shared_ptr<graphics::CVertexBuffer>, std::shared_ptr<graphics::CIndexBuffer>> CPresetPrimitive::CreateBoard(api::IGraphicsAPI* pGraphicsAPI)
 	{
-		std::shared_ptr<renderer::CRendererCreateInfo> createInfo = std::make_shared<renderer::CRendererCreateInfo>();
+		std::pair<std::shared_ptr<graphics::CVertexBuffer>, std::shared_ptr<graphics::CIndexBuffer>> createInfo = std::make_pair(pGraphicsAPI->CreateVertexBuffer(), pGraphicsAPI->CreateIndexBuffer());
 
 		// Vertex Buffer
 		std::vector<float> Pos = {
@@ -44,18 +46,18 @@ namespace graphics
 		};
 
 		//
-		createInfo->SetVertices(Vertices);
-		createInfo->SetIndices(Indices);
-		createInfo->SetAttributeDimensions(std::vector<int>({ 3 , 3 , 2, 4, 4, 4 }));
-		createInfo->SetAttribDataTypes(std::vector<renderer::EDataType>({ renderer::EDataType::TYPE_FLOAT , renderer::EDataType::TYPE_FLOAT , renderer::EDataType::TYPE_FLOAT , renderer::EDataType::TYPE_FLOAT, renderer::EDataType::TYPE_UNSIGNED_INT, renderer::EDataType::TYPE_FLOAT }));
-		createInfo->SetAttribByteStrides(std::vector<int>({ 0, 0, 0, 0, 0, 0 }));
+		createInfo.first->SetVertices(Vertices);
+		createInfo.second->SetIndices(Indices);
+		createInfo.first->SetAttributeDimensions(std::vector<int>({ 3 , 3 , 2, 4, 4, 4 }));
+		createInfo.first->SetAttribDataTypes(std::vector<graphics::EDataType>({ graphics::EDataType::TYPE_FLOAT , graphics::EDataType::TYPE_FLOAT , graphics::EDataType::TYPE_FLOAT , graphics::EDataType::TYPE_FLOAT, graphics::EDataType::TYPE_UNSIGNED_INT, graphics::EDataType::TYPE_FLOAT }));
+		createInfo.first->SetAttribByteStrides(std::vector<int>({ 0, 0, 0, 0, 0, 0 }));
 
 		return createInfo;
 	}
 
-	std::shared_ptr<renderer::CRendererCreateInfo> CPresetPrimitive::CreateBox()
+	std::pair<std::shared_ptr<graphics::CVertexBuffer>, std::shared_ptr<graphics::CIndexBuffer>> CPresetPrimitive::CreateBox(api::IGraphicsAPI* pGraphicsAPI)
 	{
-		std::shared_ptr<renderer::CRendererCreateInfo> createInfo = std::make_shared<renderer::CRendererCreateInfo>();
+		std::pair<std::shared_ptr<graphics::CVertexBuffer>, std::shared_ptr<graphics::CIndexBuffer>> createInfo = std::make_pair(pGraphicsAPI->CreateVertexBuffer(), pGraphicsAPI->CreateIndexBuffer());
 
 		// Vertex Buffer
 		std::vector<float> Pos = {
@@ -188,18 +190,18 @@ namespace graphics
 		};
 
 		//
-		createInfo->SetVertices(Vertices);
-		createInfo->SetIndices(Indices);
-		createInfo->SetAttributeDimensions(std::vector<int>({ 3 , 3 , 2, 4, 4, 4 }));
-		createInfo->SetAttribDataTypes(std::vector<renderer::EDataType>({ renderer::EDataType::TYPE_FLOAT , renderer::EDataType::TYPE_FLOAT , renderer::EDataType::TYPE_FLOAT , renderer::EDataType::TYPE_FLOAT, renderer::EDataType::TYPE_UNSIGNED_INT, renderer::EDataType::TYPE_FLOAT }));
-		createInfo->SetAttribByteStrides(std::vector<int>({ 0, 0, 0, 0, 0, 0 }));
+		createInfo.first->SetVertices(Vertices);
+		createInfo.second->SetIndices(Indices);
+		createInfo.first->SetAttributeDimensions(std::vector<int>({ 3 , 3 , 2, 4, 4, 4 }));
+		createInfo.first->SetAttribDataTypes(std::vector<graphics::EDataType>({ graphics::EDataType::TYPE_FLOAT , graphics::EDataType::TYPE_FLOAT , graphics::EDataType::TYPE_FLOAT , graphics::EDataType::TYPE_FLOAT, graphics::EDataType::TYPE_UNSIGNED_INT, graphics::EDataType::TYPE_FLOAT }));
+		createInfo.first->SetAttribByteStrides(std::vector<int>({ 0, 0, 0, 0, 0, 0 }));
 
 		return createInfo;
 	}
 
-	std::shared_ptr<renderer::CRendererCreateInfo> CPresetPrimitive::CreatePoint()
+	std::pair<std::shared_ptr<graphics::CVertexBuffer>, std::shared_ptr<graphics::CIndexBuffer>> CPresetPrimitive::CreatePoint(api::IGraphicsAPI* pGraphicsAPI)
 	{
-		std::shared_ptr<renderer::CRendererCreateInfo> createInfo = std::make_shared<renderer::CRendererCreateInfo>();
+		std::pair<std::shared_ptr<graphics::CVertexBuffer>, std::shared_ptr<graphics::CIndexBuffer>> createInfo = std::make_pair(pGraphicsAPI->CreateVertexBuffer(), pGraphicsAPI->CreateIndexBuffer());
 
 		// Vertex Buffer
 		std::vector<float> Pos = {
@@ -228,18 +230,18 @@ namespace graphics
 		};
 
 		//
-		createInfo->SetVertices(Vertices);
-		createInfo->SetIndices(Indices);
-		createInfo->SetAttributeDimensions(std::vector<int>({ 3 , 3 , 2, 4, 4, 4 }));
-		createInfo->SetAttribDataTypes(std::vector<renderer::EDataType>({ renderer::EDataType::TYPE_FLOAT , renderer::EDataType::TYPE_FLOAT , renderer::EDataType::TYPE_FLOAT , renderer::EDataType::TYPE_FLOAT, renderer::EDataType::TYPE_UNSIGNED_INT, renderer::EDataType::TYPE_FLOAT }));
-		createInfo->SetAttribByteStrides(std::vector<int>({ 0, 0, 0, 0, 0, 0 }));
+		createInfo.first->SetVertices(Vertices);
+		createInfo.second->SetIndices(Indices);
+		createInfo.first->SetAttributeDimensions(std::vector<int>({ 3 , 3 , 2, 4, 4, 4 }));
+		createInfo.first->SetAttribDataTypes(std::vector<graphics::EDataType>({ graphics::EDataType::TYPE_FLOAT , graphics::EDataType::TYPE_FLOAT , graphics::EDataType::TYPE_FLOAT , graphics::EDataType::TYPE_FLOAT, graphics::EDataType::TYPE_UNSIGNED_INT, graphics::EDataType::TYPE_FLOAT }));
+		createInfo.first->SetAttribByteStrides(std::vector<int>({ 0, 0, 0, 0, 0, 0 }));
 
 		return createInfo;
 	}
 	
-	std::shared_ptr<renderer::CRendererCreateInfo> CPresetPrimitive::CreateSphere()
+	std::pair<std::shared_ptr<graphics::CVertexBuffer>, std::shared_ptr<graphics::CIndexBuffer>> CPresetPrimitive::CreateSphere(api::IGraphicsAPI* pGraphicsAPI)
 	{
-		std::shared_ptr<renderer::CRendererCreateInfo> createInfo = std::make_shared<renderer::CRendererCreateInfo>();
+		std::pair<std::shared_ptr<graphics::CVertexBuffer>, std::shared_ptr<graphics::CIndexBuffer>> createInfo = std::make_pair(pGraphicsAPI->CreateVertexBuffer(), pGraphicsAPI->CreateIndexBuffer());
 
 		// Vertex Buffer
 		std::vector<float> Pos;
@@ -295,11 +297,11 @@ namespace graphics
 			Pos, Normal, UV, Tangent, Joints, Weights
 		};
 
-		createInfo->SetVertices(Vertices);
-		createInfo->SetIndices(Indices);
-		createInfo->SetAttributeDimensions(std::vector<int>({ 3 , 3 , 2, 4, 4, 4}));
-		createInfo->SetAttribDataTypes(std::vector<renderer::EDataType>({ renderer::EDataType::TYPE_FLOAT , renderer::EDataType::TYPE_FLOAT , renderer::EDataType::TYPE_FLOAT , renderer::EDataType::TYPE_FLOAT, renderer::EDataType::TYPE_UNSIGNED_INT, renderer::EDataType::TYPE_FLOAT }));
-		createInfo->SetAttribByteStrides(std::vector<int>({ 0, 0, 0, 0, 0, 0 }));
+		createInfo.first->SetVertices(Vertices);
+		createInfo.second->SetIndices(Indices);
+		createInfo.first->SetAttributeDimensions(std::vector<int>({ 3 , 3 , 2, 4, 4, 4}));
+		createInfo.first->SetAttribDataTypes(std::vector<graphics::EDataType>({ graphics::EDataType::TYPE_FLOAT , graphics::EDataType::TYPE_FLOAT , graphics::EDataType::TYPE_FLOAT , graphics::EDataType::TYPE_FLOAT, graphics::EDataType::TYPE_UNSIGNED_INT, graphics::EDataType::TYPE_FLOAT }));
+		createInfo.first->SetAttribByteStrides(std::vector<int>({ 0, 0, 0, 0, 0, 0 }));
 
 		return createInfo;
 	}

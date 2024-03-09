@@ -95,13 +95,13 @@ namespace scene
 		}
 		
 		// m_BrainStemObj
-		/*{
+		{
 			if (!m_BrainStemObj->CreateFromMemory(pGraphicsAPI, pPhysicsEngine, pLoadWorker, m_PBRMF, m_DepthMF)) return false;
 			m_BrainStemObj->ChangeMotion(0);
-		}*/
+		}
 
 		// FBX Humanoid Animation Clip
-		/*std::vector<std::shared_ptr<animation::CAnimationClip>> AnimationClipList;
+		std::vector<std::shared_ptr<animation::CAnimationClip>> AnimationClipList;
 		{
 			if (!m_Walk_Animation->CreateFromMemory(pGraphicsAPI, pPhysicsEngine, pLoadWorker, nullptr, nullptr)) return false;
 			if (!m_Jump_Animation->CreateFromMemory(pGraphicsAPI, pPhysicsEngine, pLoadWorker, nullptr, nullptr)) return false;
@@ -110,9 +110,9 @@ namespace scene
 			AnimationClipList.push_back(m_Walk_Animation->GetAnimationClipList()[0]);
 			AnimationClipList.push_back(m_Jump_Animation->GetAnimationClipList()[0]);
 			AnimationClipList.push_back(m_Punch_Animation->GetAnimationClipList()[0]);
-		}*/
+		}
 
-		/*{
+		{
 			if (!m_XBotObject->CreateFromMemory(pGraphicsAPI, pPhysicsEngine, pLoadWorker, m_PBRMF, m_DepthMF)) return false;
 
 			m_XBotObject->AddHumanoidAnimationClip(AnimationClipList[0], "Walk", { nullptr, "" }, true);
@@ -139,9 +139,9 @@ namespace scene
 			m_MouseyObject->SetPos(glm::vec3(-2.0f, 0.0f, 0.0f));
 			m_MouseyObject->SetRot(glm::angleAxis(3.1515f, glm::vec3(0.0f, 1.0f, 0.0f)));
 			m_MouseyObject->SetScale(glm::vec3(0.01f));
-		}*/
+		}
 
-		/*{
+		{
 			if (!m_WarrokObject->CreateFromMemory(pGraphicsAPI, pPhysicsEngine, pLoadWorker, m_PBRMF, m_DepthMF)) return false;
 
 			m_WarrokObject->AddHumanoidAnimationClip(AnimationClipList[0], "Walk", { nullptr, "" }, true);
@@ -154,7 +154,7 @@ namespace scene
 
 			// 再生するアニメーションクリップを指定する
 			m_WarrokObject->ChangeMotion("Walk");
-		}*/
+		}
 
 		const float ZOffset = 3.0f;
 
@@ -173,7 +173,7 @@ namespace scene
 
 			auto PhysicsBox = pPhysicsEngine->CreatePhysicsBox(glm::vec3(0.5f), true, 0.0f, {});
 
-			//if (!m_PhysicsGround->CreateSimply(pGraphicsAPI, pPhysicsEngine, graphics::CPresetPrimitive::CreateBox(), Material, m_DepthMF, LocalTransform, PhysicsBox)) return false;
+			//if (!m_PhysicsGround->CreateSimply(pGraphicsAPI, pPhysicsEngine, graphics::CPresetPrimitive::CreateBox(pGraphicsAPI), Material, m_DepthMF, LocalTransform, PhysicsBox)) return false;
 		}
 
 		// m_PhysicsSphere
@@ -190,8 +190,9 @@ namespace scene
 
 			// Mesh
 			std::shared_ptr<graphics::CMesh> Mesh = std::make_shared<graphics::CMesh>();
-			//Mesh->CreateSimpleMesh(graphics::CPresetPrimitive::CreateSphere(), 0);
-			Mesh->CreateSimpleMesh(graphics::CPresetPrimitive::CreateBox(), 0);
+			//Mesh->CreateSimpleMesh(graphics::CPresetPrimitive::CreateSphere(pGraphicsAPI), 0);
+			auto VertexIndexPair = graphics::CPresetPrimitive::CreateBox(pGraphicsAPI);
+			Mesh->CreateSimpleMesh(VertexIndexPair.first, VertexIndexPair.second, 0);
 
 			m_PhysicsSphere->AddMesh(Mesh);
 
@@ -311,7 +312,7 @@ namespace scene
 
 			// Mesh
 			std::shared_ptr<graphics::CMesh> Mesh = std::make_shared<graphics::CMesh>();
-			Mesh->CreateSimpleMesh(graphics::CPresetPrimitive::CreateBox(), 0);
+			Mesh->CreateSimpleMesh(graphics::CPresetPrimitive::CreateBox(pGraphicsAPI), 0);
 
 			m_PhysicsCubeList->AddMesh(Mesh);
 
@@ -376,7 +377,7 @@ namespace scene
 			m_Background->GetTextureSet()->Add2DTexture(m_IBL_Skybox_Texture);
 
 			m_Background->SetScale(glm::vec3(500.0f));
-			if (!m_Background->CreateSimply(pGraphicsAPI, pPhysicsEngine, graphics::CPresetPrimitive::CreateSphere(), Mat , m_DepthMF)) return false;
+			if (!m_Background->CreateSimply(pGraphicsAPI, pPhysicsEngine, graphics::CPresetPrimitive::CreateSphere(pGraphicsAPI), Mat , m_DepthMF)) return false;
 		}
 
 		// m_DebugSphere
@@ -384,7 +385,7 @@ namespace scene
 			auto Mat = m_SimpleTextureMF->CreateMaterial(pGraphicsAPI, 512, graphics::ECullMode::CULL_BACK);
 			Mat->SetEnabledZTest(false);
 			m_DebugSphere->SetScale(glm::vec3(0.1f));
-			if (!m_DebugSphere->CreateSimply(pGraphicsAPI, pPhysicsEngine, graphics::CPresetPrimitive::CreateSphere(), Mat, m_DepthMF)) return false;
+			if (!m_DebugSphere->CreateSimply(pGraphicsAPI, pPhysicsEngine, graphics::CPresetPrimitive::CreateSphere(pGraphicsAPI), Mat, m_DepthMF)) return false;
 		}
 
 		return true;

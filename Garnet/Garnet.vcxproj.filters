@@ -51,9 +51,6 @@
     <ClInclude Include="Src\GraphicsAPI\WebGPU\CWebGPURenderer.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Src\GraphicsAPI\CRendererCreateInfo.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="Src\Object\CNode.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
@@ -2592,6 +2589,30 @@
     <ClInclude Include="Src\Graphics\CGPGPUMorphExecutor.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Graphics\CVertexBuffer.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Graphics\CIndexBuffer.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\GraphicsAPI\Vulkan\CVulkanVertexBuffer.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\GraphicsAPI\Vulkan\CVulkanIndexBuffer.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\GraphicsAPI\WebGPU\CWebGPUVertexBuffer.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\GraphicsAPI\OpenGL\COpenGLVertexBuffer.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\GraphicsAPI\WebGPU\CWebGPUIndexBuffer.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\GraphicsAPI\OpenGL\COpenGLIndexBuffer.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\Main\DescMain\DescMain.cpp">
@@ -2619,9 +2640,6 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Src\GraphicsAPI\WebGPU\CWebGPURenderer.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\GraphicsAPI\CRendererCreateInfo.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Src\Object\CNode.cpp">
@@ -3564,6 +3582,30 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Src\Graphics\CGPGPUMorphExecutor.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Graphics\CVertexBuffer.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Graphics\CIndexBuffer.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\GraphicsAPI\Vulkan\CVulkanVertexBuffer.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\GraphicsAPI\Vulkan\CVulkanIndexBuffer.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\GraphicsAPI\WebGPU\CWebGPUVertexBuffer.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\GraphicsAPI\OpenGL\COpenGLVertexBuffer.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\GraphicsAPI\WebGPU\CWebGPUIndexBuffer.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\GraphicsAPI\OpenGL\COpenGLIndexBuffer.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>

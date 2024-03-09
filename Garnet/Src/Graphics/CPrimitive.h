@@ -1,15 +1,11 @@
 #pragma once
 #include <memory>
-#include <vector>
-#include <map>
 #include <string>
-#include <glm/glm.hpp>
-#include "CPresetPrimitive.h"
-#include "../GraphicsAPI/CRendererCreateInfo.h"
 
-namespace renderer {
+#include "CPresetPrimitive.h"
+
+namespace graphics {
 	class IRenderer;
-	class CRendererCreateInfo;
 }
 
 namespace api { class IGraphicsAPI; }
@@ -17,19 +13,20 @@ namespace api { class IGraphicsAPI; }
 namespace graphics
 {
 	class CMaterial;
+	class CVertexBuffer;
+	class CIndexBuffer;
 
 	class CPrimitive
 	{
-		std::shared_ptr<renderer::IRenderer>				 m_Renderer;
-		std::shared_ptr<renderer::IRenderer>				 m_DepthRenderer;
-		std::shared_ptr<renderer::CRendererCreateInfo>		 m_CreateInfo;
+		std::shared_ptr<CVertexBuffer> m_VertexBuffer;
+		std::shared_ptr<CIndexBuffer> m_IndexBuffer;
 
+		std::shared_ptr<graphics::IRenderer>				 m_Renderer;
+		std::shared_ptr<graphics::IRenderer>				 m_DepthRenderer;
+		
 		int													 m_MaterialIndex;
-
-		// モーフデータ
-		std::vector<std::map<int, glm::vec3>> m_MorphDataList;
 	public:
-		CPrimitive(const std::shared_ptr<renderer::CRendererCreateInfo>& createInfo, int MaterialIndex);
+		CPrimitive(const std::shared_ptr<CVertexBuffer>& VertexBuffer, const std::shared_ptr<CIndexBuffer>& IndexBuffer, int MaterialIndex);
 		virtual ~CPrimitive();
 
 		void Release();
@@ -40,8 +37,5 @@ namespace graphics
 
 		void SetMaterialIndex(int Index);
 		int GetMaterialIndex() const;
-
-		void SetMorphDataList(const std::vector<std::map<int, glm::vec3>>& MorphDataList);
-		const std::vector<std::map<int, glm::vec3>>& GetMorphDataList() const;
 	};
 }

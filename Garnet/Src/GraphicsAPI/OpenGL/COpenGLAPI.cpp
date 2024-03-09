@@ -7,6 +7,8 @@
 
 #include "COpenGLMaterial.h"
 #include "COpenGLTexture.h"
+#include "COpenGLVertexBuffer.h"
+#include "COpenGLIndexBuffer.h"
 #include "COpenGLRenderer.h"
 #include "COpenGLRenderPass.h"
 #include "COpenGLGPGPUHandler.h"
@@ -58,9 +60,23 @@ namespace api
 		return true;
 	}
 
-	std::shared_ptr<renderer::IRenderer> COpenGLAPI::CreateRenderer(const std::string& PassName)
+	std::shared_ptr<graphics::CVertexBuffer> COpenGLAPI::CreateVertexBuffer()
 	{
-		auto Renderer = std::make_shared<renderer::COpenGLRenderer>(this, PassName);
+		auto VertexBuffer = std::make_shared<api::COpenGLVertexBuffer>(this);
+
+		return VertexBuffer;
+	}
+
+	std::shared_ptr<graphics::CIndexBuffer> COpenGLAPI::CreateIndexBuffer()
+	{
+		auto IndexBuffer = std::make_shared<api::COpenGLIndexBuffer>(this);
+
+		return IndexBuffer;
+	}
+
+	std::shared_ptr<graphics::IRenderer> COpenGLAPI::CreateRenderer(const std::string& PassName)
+	{
+		auto Renderer = std::make_shared<api::COpenGLRenderer>(this, PassName);
 
 		return Renderer;
 	}
