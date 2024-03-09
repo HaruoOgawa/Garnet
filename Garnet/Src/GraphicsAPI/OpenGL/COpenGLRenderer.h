@@ -6,16 +6,20 @@
 #include "../../Interface/IRenderer.h"
 #include "COpenGLAPI.h"
 
-namespace api {
-	class COpenGLAPI;
-	class COpenGLMaterial;
-}
 namespace graphics
 {
-	class CRendererCreateInfo;
+	class CVertexBuffer;
+	class CIndexBuffer;
 	enum class EDataType;
+	enum class EIndiceType;
+}
 
-	class COpenGLRenderer : public IRenderer
+namespace api
+{
+	class COpenGLAPI;
+	class COpenGLMaterial;
+
+	class COpenGLRenderer : public graphics::IRenderer
 	{
 		// API
 		api::COpenGLAPI* m_pGraphicsAPI;
@@ -23,27 +27,12 @@ namespace graphics
 		const std::string m_PassName;
 		int	m_DynamicOffsetNum;
 		int m_InstanceCount;
-
-		//
-		GLuint m_VertexArray;
-
-		GLenum m_IndiceType;
-		GLsizei m_IndicesCount;
-	private:
-		bool CreateVertexArray();
-		bool CreateVertexBuffer(const std::shared_ptr<CRendererCreateInfo>& createInfo);
-		bool CreateIndexBuffer(const std::shared_ptr<CRendererCreateInfo>& createInfo);
-
-		// Helper
-		GLenum GetGLenumDataType(EDataType DataType);
 	public:
 		COpenGLRenderer(api::COpenGLAPI* pGraphicsAPI, const std::string& PassName);
 		virtual ~COpenGLRenderer();
 
-		bool Create(const std::shared_ptr<CRendererCreateInfo>& createInfo, const std::shared_ptr<graphics::CMaterial>& Material) override;
-		bool Draw(const std::shared_ptr<graphics::CMaterial>& Material, int DynamicOffsetNum) override;
-
-		void SetActive();
+		bool Create(const std::shared_ptr<graphics::CVertexBuffer>& VertexBuffer, const std::shared_ptr<graphics::CIndexBuffer>& IndexBuffer, const std::shared_ptr<graphics::CMaterial>& Material) override;
+		bool Draw(const std::shared_ptr<graphics::CVertexBuffer>& VertexBuffer, const std::shared_ptr<graphics::CIndexBuffer>& IndexBuffer, const std::shared_ptr<graphics::CMaterial>& Material, int DynamicOffsetNum) override;
 	};
 }
 
