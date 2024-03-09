@@ -8,12 +8,6 @@ layout(location = 4) in uvec4 inBone0;
 layout(location = 5) in vec4 inWeights0;
 layout(location = 6) in vec3 inMorphVec0;
 layout(location = 7) in vec3 inMorphVec1;
-layout(location = 8) in vec3 inMorphVec2;
-layout(location = 9) in vec3 inMorphVec3;
-layout(location = 10) in vec3 inMorphVec4;
-layout(location = 11) in vec3 inMorphVec5;
-layout(location = 12) in vec3 inMorphVec6;
-layout(location = 13) in vec3 inMorphVec7;
 
 layout(binding = 0) uniform UniformBufferObject{
 	mat4 model;
@@ -22,18 +16,9 @@ layout(binding = 0) uniform UniformBufferObject{
 	mat4 lightVPMat;
 
     float edgeSize;
-    float fPad0;
-    float fPad1;
-    float fPad2;
-
     float MorphWeight_0;
     float MorphWeight_1;
-    float MorphWeight_2;
-    float MorphWeight_3;
-    float MorphWeight_4;
-    float MorphWeight_5;
-    float MorphWeight_6;
-    float MorphWeight_7;
+    float fPad0;
 
     int useSkinMeshAnimation;
     int useMorph;
@@ -71,13 +56,7 @@ void main(){
     {
         LocalPos +=
             inMorphVec0 * ubo.MorphWeight_0 +
-            inMorphVec1 * ubo.MorphWeight_1 +
-            inMorphVec2 * ubo.MorphWeight_2 +
-            inMorphVec3 * ubo.MorphWeight_3 +
-            inMorphVec4 * ubo.MorphWeight_4 +
-            inMorphVec5 * ubo.MorphWeight_5 +
-            inMorphVec6 * ubo.MorphWeight_6 +
-            inMorphVec7 * ubo.MorphWeight_7;
+            inMorphVec1 * ubo.MorphWeight_1;
     }
 
     // スキンメッシュアニメーション

@@ -61,6 +61,7 @@ namespace object
 		// ÉÇÅ[Ét
 		void ClearMorphWeights();
 		void AddMorphWeight(float Weight);
+		void SetMorphWeight(const std::vector<float>& MorphWeights);
 		const std::vector<float>& GetCurrentMorphWeights() const;
 
 		//

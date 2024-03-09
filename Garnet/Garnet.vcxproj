@@ -573,6 +573,12 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Src\Graphics\CCPUMorphExecutor.h" />
+    <ClInclude Include="Src\Graphics\CGPGPUMorphExecutor.h" />
+    <ClInclude Include="Src\Animation\CBlendShapeController.h" />
+    <ClInclude Include="Src\Animation\CBlendShapeClip.h" />
+    <ClInclude Include="Src\Animation\CBlendShapeNameProvider.h" />
+    <ClInclude Include="Src\Animation\EBlendShapeName.h" />
     <ClInclude Include="Src\MMD\PMX\CPmxMorphTarget.h" />
     <ClInclude Include="Src\Format\CPathFormatter.h" />
     <ClInclude Include="Src\PhysicsEngine\Bullet\CBulletCapsule.h" />
@@ -1428,6 +1434,11 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClInclude Include="Src\Interface\IRenderer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\Graphics\CCPUMorphExecutor.cpp" />
+    <ClCompile Include="Src\Graphics\CGPGPUMorphExecutor.cpp" />
+    <ClCompile Include="Src\Animation\CBlendShapeController.cpp" />
+    <ClCompile Include="Src\Animation\CBlendShapeClip.cpp" />
+    <ClCompile Include="Src\Animation\CBlendShapeNameProvider.cpp" />
     <ClCompile Include="Src\MMD\PMX\CPmxMorphTarget.cpp" />
     <ClCompile Include="Src\Format\CPathFormatter.cpp" />
     <ClCompile Include="Src\PhysicsEngine\Bullet\CBulletCapsule.cpp" />

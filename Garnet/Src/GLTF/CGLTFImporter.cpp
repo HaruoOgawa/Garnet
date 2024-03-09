@@ -467,21 +467,25 @@ namespace gltf
 					"TANGENT",
 					"JOINTS_0",
 					"WEIGHTS_0",
-					"MORPHVEC_0",
-					"MORPHVEC_1",
-					"MORPHVEC_2",
-					"MORPHVEC_3",
-					"MORPHVEC_4",
-					"MORPHVEC_5",
-					"MORPHVEC_6",
-					"MORPHVEC_7",
 				};
+
+				// 頂点アトリビュート数の制約上、モーフは2個が限界
+				// もっとたくさん扱いたい場合はCPUMorphExecutorやGPGPUMorphExecutorを使用する(この2つが便利だったら頂点アトリビュートのモーフは消すかも)
+				for (int MorphIndex = 0; MorphIndex < 2; MorphIndex++)
+				{
+					std::string Name = "MORPHVEC_" + std::to_string(MorphIndex);
+					NeedAttribNameList.push_back(Name);
+				}
+
 				std::map<std::string, std::vector<float>> ReservedVertexDataList;
 				std::map<std::string, renderer::EDataType> ReservedDataTypeList;
 				std::map<std::string, int> ReservedByteStrideList;
 
 				// タンジェントの計算が必要
 				bool NeedRecalculateTangent = false;
+
+				// モーフデータ
+				std::vector<std::map<int, glm::vec3>> MorphDataList;
 
 				// 頂点バッファを読む
 				{
@@ -549,21 +553,43 @@ namespace gltf
 								AttributeData.resize(BufferData.size() / Stride);
 								std::memcpy(&AttributeData[0], &BufferData[0], BufferData.size());
 
-								// 名前
-								std::string Name = "MORPHVEC_" + std::to_string(MorphIndex);
+								// 頂点アトリビュート数の制約上、モーフは2個が限界
+								// もっとたくさん扱いたい場合はCPUMorphExecutorやGPGPUMorphExecutorを使用する(この2つが便利だったら頂点アトリビュートのモーフは消すかも)
+								if (MorphIndex < 2)
+								{
+									// 名前
+									std::string Name = "MORPHVEC_" + std::to_string(MorphIndex);
 
-								// データを登録
-								ReservedVertexDataList.insert({ Name, AttributeData });
+									// データを登録
+									ReservedVertexDataList.insert({ Name, AttributeData });
 
-								// コンポーネントタイプ(データ型)を取得
-								renderer::EDataType attribComponentType = GetComponentTypeFromAccessor(Accessor);
-								ReservedDataTypeList.insert({ Name, attribComponentType });
+									// コンポーネントタイプ(データ型)を取得
+									renderer::EDataType attribComponentType = GetComponentTypeFromAccessor(Accessor);
+									ReservedDataTypeList.insert({ Name, attribComponentType });
 
-								// ByteStrideを取得
-								// byteStrideとは「１つ分」のデータと、次の「1つ分」のデータとの間の、読み取り場所の移動バイト長
-								// http://muko.damember.org/gl4/html-ja/glVertexAttribPointer.xhtml
-								int attibByteStride = GetByteStride(model, Accessor);
-								ReservedByteStrideList.insert({ Name, attibByteStride });
+									// ByteStrideを取得
+									// byteStrideとは「１つ分」のデータと、次の「1つ分」のデータとの間の、読み取り場所の移動バイト長
+									// http://muko.damember.org/gl4/html-ja/glVertexAttribPointer.xhtml
+									int attibByteStride = GetByteStride(model, Accessor);
+									ReservedByteStrideList.insert({ Name, attibByteStride });
+								}
+
+								//
+								{
+									std::map<int, glm::vec3> MorphData;
+									int MorphVertexIndex = 0;
+
+									for (int MorphAttibIndex = 0; MorphAttibIndex < AttributeData.size(); MorphAttibIndex += 3)
+									{
+										glm::vec3 Offset = glm::vec3(AttributeData[MorphAttibIndex + 0], AttributeData[MorphAttibIndex + 1], AttributeData[MorphAttibIndex + 2]);
+
+										MorphData.emplace(MorphVertexIndex, Offset);
+
+										MorphVertexIndex++;
+									}
+
+									MorphDataList.push_back(MorphData);
+								}
 							}
 						}
 					}
@@ -575,16 +601,7 @@ namespace gltf
 						// ディメンションを登録
 						int Dimention = 1;
 
-						if (AttribName == "POSITION" || AttribName == "NORMAL" || 
-							AttribName == "MORPHVEC_0" || 
-							AttribName == "MORPHVEC_1" ||
-							AttribName == "MORPHVEC_2" ||
-							AttribName == "MORPHVEC_3" ||
-							AttribName == "MORPHVEC_4" ||
-							AttribName == "MORPHVEC_5" ||
-							AttribName == "MORPHVEC_6" ||
-							AttribName == "MORPHVEC_7"
-						)
+						if (AttribName == "POSITION" || AttribName == "NORMAL" || AttribName.find("MORPHVEC_") != -1)
 						{
 							Dimention = 3;
 						}
@@ -703,6 +720,8 @@ namespace gltf
 
 				// プリミティブを作成する
 				std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(createInfo, MaterialIndex);
+				Primitive->SetMorphDataList(MorphDataList);
+
 				Mesh->AddPrimitive(Primitive);
 			}
 

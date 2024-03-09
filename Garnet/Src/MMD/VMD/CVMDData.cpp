@@ -3,12 +3,15 @@
 #include "../../Binary/CBinaryAnalyser.h"
 #include "../../Debug/Message/Console.h"
 #include "../../Animation/CBoneNameProvider.h"
+#include "../../Animation/CBlendShapeNameProvider.h"
 
 namespace mmd
 {
 	CVMDData::CVMDData():
 		m_MinFrameIndex(INT_MAX),
-		m_MaxFrameIndex(INT_MIN)
+		m_MaxFrameIndex(INT_MIN),
+		m_MinSkinFrameIndex(INT_MAX),
+		m_MaxSkinFrameIndex(INT_MIN)
 	{
 	}
 
@@ -16,6 +19,7 @@ namespace mmd
 	{
 	}
 
+	// ボーンアニメーション
 	const std::map<animation::EHumanoidBones, std::vector<SVMDFrame>>& CVMDData::GetFrameMap() const
 	{
 		return m_FrameMap;
@@ -29,6 +33,22 @@ namespace mmd
 	int CVMDData::GetMaxFrameIndex() const
 	{
 		return m_MaxFrameIndex;
+	}
+
+	// 表情アニメーション
+	const std::map<animation::EBlendShapeName, std::vector<SVMDSkinFrame>>& CVMDData::GetSkinFrameMap() const
+	{
+		return m_SkinFrameMap;
+	}
+
+	int CVMDData::GetMinSkinFrameIndex() const
+	{
+		return m_MinSkinFrameIndex;
+	}
+
+	int CVMDData::GetMaxSkinFrameIndex() const
+	{
+		return m_MaxSkinFrameIndex;
 	}
 
 	bool CVMDData::Analyse(const std::vector<unsigned char>& Data)
@@ -248,6 +268,8 @@ namespace mmd
 		} vmd_Skeleton;
 		*/
 		
+		animation::CBlendShapeNameProvider Provider;
+
 		// 表情データ数
 		int ExpressionCount = 0;
 		if (!Analyser.GetInt(ExpressionCount)) return false;
@@ -256,24 +278,35 @@ namespace mmd
 		{
 			// 表情名
 			std::wstring Name = std::wstring(L"");
-			if (!Analyser.GetUTF16String(Name, 15)) return false;
+			if (!Analyser.GetUTF16ReverseString(Name, 15)) return false;
+
+			// 同じ『まばたき』の文字列でもなぜかwstringのバイナリ上では途中にDとか)が入ってmapとしては別のものとして扱われてしまうようなのでVmdのパース段階で分ける必要がある
+			// (本当はBlendName数 * ExpressionCountだけロードに時間がかかってしまうのであまりやりたくはないが・・・)
+			// Boneの方も同じ理屈でVmdパース時にHumanoidBoneNameを見ている
+			animation::EBlendShapeName BlendShapeName = Provider.GetBlendShapeNameU16(Name);
+			
+			// なぜかNoneチェックをしているとNoneではないものも飛ばされてしまうのでひとまずコメントアウトしている(Blinkが16個あるはずなのになぜか4つとかになっていた)
+			//if (BlendShapeName == animation::EBlendShapeName::None) continue;
 
 			// フレームインデックス
 			int FrameIndex = -1;
 			if (!Analyser.GetInt(FrameIndex)) return false;
+
+			m_MinSkinFrameIndex = std::min(FrameIndex, m_MinSkinFrameIndex);
+			m_MaxSkinFrameIndex = std::max(FrameIndex, m_MaxSkinFrameIndex);
 
 			// ウェイト
 			float Weight = 0.0f;
 			if (!Analyser.GetFloat(Weight)) return false;
 
 			// 登録
-			if (m_SkinFrameMap.find(Name) == m_SkinFrameMap.end())
+			if (m_SkinFrameMap.find(BlendShapeName) == m_SkinFrameMap.end())
 			{
-				m_SkinFrameMap.emplace(Name, std::vector<SVMDSkinFrame>());
+				m_SkinFrameMap.emplace(BlendShapeName, std::vector<SVMDSkinFrame>());
 			}
 
 			SVMDSkinFrame SkinFrame = { FrameIndex ,Weight };
-			m_SkinFrameMap[Name].push_back(SkinFrame);
+			m_SkinFrameMap[BlendShapeName].push_back(SkinFrame);
 		}
 
 		return true;

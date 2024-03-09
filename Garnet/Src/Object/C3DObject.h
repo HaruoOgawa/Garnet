@@ -12,6 +12,7 @@
 #include "../Math/CTransform.h"
 #ifdef USE_ANIMATION
 #include "../Animation/CAnimationController.h"
+#include "../Animation/CBlendShapeController.h"
 #endif
 #include "../Interface/IResource.h"
 
@@ -49,6 +50,7 @@ namespace object
 		std::shared_ptr<graphics::CMaterialFrame> m_DepthMF;
 #ifdef USE_ANIMATION
 		std::shared_ptr<animation::CAnimationController> m_AnimationController;
+		std::shared_ptr<animation::CBlendShapeController> m_BlendShapeController;
 		std::vector<glm::mat4> m_CurrentSkinMatrixList;
 #endif
 	private:
@@ -98,6 +100,7 @@ namespace object
 		void SetAnimationSkeleton(const std::shared_ptr<animation::CSkeleton>& Skeleton);
 		void AddAnimationClip(const std::shared_ptr<animation::CAnimationClip>& Clip);
 		void AddHumanoidAnimationClip(const std::shared_ptr<animation::CAnimationClip>& SourceClip, const std::string& MotionName, animation::SAnimationLayout Layout, bool IsLoop);
+		void AddBlendShapeClip(const std::shared_ptr<animation::CBlendShapeClip>& Clip);
 
 		const std::vector<std::shared_ptr<animation::CAnimationClip>>& GetAnimationClipList() const;
 #endif
@@ -116,6 +119,7 @@ namespace object
 
 		void ChangeMotion(int Index); // インデックス指定でモーションを変更
 		void ChangeMotion(const std::string& MotionName); // 名前指定でモーションを変更
+		void ChangeBlendShape(int Index); // インデックス指定でモーションを変更
 		
 		const std::shared_ptr<graphics::CTextureSet>& GetTextureSet() const;
 

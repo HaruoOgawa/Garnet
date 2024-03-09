@@ -111,32 +111,12 @@
               "initValue": [ 0.0 ]
             },
             {
-              "name": "MorphWeight_2",
+              "name": "fPad0",
               "type": "float",
               "initValue": [ 0.0 ]
             },
             {
-              "name": "MorphWeight_3",
-              "type": "float",
-              "initValue": [ 0.0 ]
-            },
-            {
-              "name": "MorphWeight_4",
-              "type": "float",
-              "initValue": [ 0.0 ]
-            },
-            {
-              "name": "MorphWeight_5",
-              "type": "float",
-              "initValue": [ 0.0 ]
-            },
-            {
-              "name": "MorphWeight_6",
-              "type": "float",
-              "initValue": [ 0.0 ]
-            },
-            {
-              "name": "MorphWeight_7",
+              "name": "fPad1",
               "type": "float",
               "initValue": [ 0.0 ]
             },

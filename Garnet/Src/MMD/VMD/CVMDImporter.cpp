@@ -2,11 +2,13 @@
 #include "CVMDImporter.h"
 #include "../../Math/CTransform.h"
 #include "../../Debug/Message/Console.h"
+#include "../../Animation/CBlendShapeNameProvider.h"
 #include <algorithm>
 
 namespace mmd
 {
-	bool CVMDImporter::Import(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& Data, std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList)
+	bool CVMDImporter::Import(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& Data, std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList,
+		std::vector<std::shared_ptr<animation::CBlendShapeClip>>& BlendShapeClipList)
 	{
 		// (注意) MMDのボーンやキーフレームはワールド座標系を示すのでMMD以外のファイルフォーマットで使いまわすことはできない
 
@@ -24,7 +26,7 @@ namespace mmd
 		if (!CreateAnimationClip(vmd, AnimationClipList)) return false;
 
 		// 表情アニメーションクリップの作成
-
+		if (!CreateBlendShapeClip(vmd, BlendShapeClipList)) return false;
 
 		return true;
 	}
@@ -148,6 +150,113 @@ namespace mmd
 
 		// クリップを登録
 		AnimationClipList.push_back(AnimationClip);
+
+		return true;
+	}
+
+	bool CVMDImporter::CreateBlendShapeClip(const CVMDData& VMDData, std::vector<std::shared_ptr<animation::CBlendShapeClip>>& BlendShapeClipList)
+	{
+		const auto& SkinFrameMap = VMDData.GetSkinFrameMap();
+
+		// 0個の時は作成しない
+		if (SkinFrameMap.size() == 0) return true;
+
+		// アニメーションクリップを作成
+		{
+			// MMDのアニメーションは30FPSで固定
+			const float FrameRate = 30.0f;
+
+			int MinFrameIndex = VMDData.GetMinSkinFrameIndex();
+			int MaxFrameIndex = VMDData.GetMaxSkinFrameIndex();
+
+			const float StartTime = static_cast<float>(MinFrameIndex) * (1.0f / FrameRate);
+			const float EndTime = static_cast<float>(MaxFrameIndex) * (1.0f / FrameRate);
+
+			// CAnimationClipを継承したCBlendShapeAnimationClipがあってもいいかも？
+			// CBlendShapeAnimationClip.UpdateでNodeのClearMorphWeightsを呼んであげる
+			std::shared_ptr<animation::CBlendShapeClip> BlendShapeClip = std::make_shared<animation::CBlendShapeClip>();
+
+			int Index = 0;
+
+			for (const auto& Frame : SkinFrameMap)
+			{
+				// Samplerを作成
+				{
+					// PMXにはスプライン補間しか存在しない
+					std::shared_ptr<animation::CAnimationSampler> Sampler = std::make_shared<animation::CAnimationSampler>(animation::EInterpolationType::LINEAR);
+
+					Sampler->SetStartTime(StartTime);
+					Sampler->SetEndTime(EndTime);
+
+					std::vector<SVMDSkinFrame> FrameDataList = Frame.second;
+
+					// FrameIndex順に並び替える
+					std::sort(FrameDataList.begin(), FrameDataList.end(), [](SVMDSkinFrame a, SVMDSkinFrame b) {
+						return a.FrameIndex < b.FrameIndex;
+						});
+
+					// KetFrame
+					for (const auto& FrameData : FrameDataList)
+					{
+						int FrameIndex = FrameData.FrameIndex;
+						float CurrentTime = static_cast<float>(FrameIndex) * (1.0f / FrameRate);
+
+						float Weight = FrameData.Weight;
+
+						// input
+						float InputData = CurrentTime;
+
+						// Output
+						std::vector<float> OutputData;
+						OutputData.push_back(Weight);
+
+						// KeyFrameを作成
+						{
+							std::shared_ptr<animation::CKeyFrame> KeyFrame = std::make_shared<animation::CKeyFrame>(animation::EKeyFrameType::KEYFRAME_TYPE_SCALAR);
+
+							KeyFrame->SetInput(InputData);
+							KeyFrame->SetOutput(OutputData);
+
+							// Add KeyFrame To Sampler
+							Sampler->AddKeyFrame(KeyFrame);
+						}
+
+						// キーフレームが１つしかない時はEndTimeの位置にもう1つだけ追加する
+						if (Frame.second.size() == 1)
+						{
+							std::shared_ptr<animation::CKeyFrame> KeyFrame = std::make_shared<animation::CKeyFrame>(animation::EKeyFrameType::KEYFRAME_TYPE_SCALAR);
+
+							KeyFrame->SetInput(EndTime);
+							KeyFrame->SetOutput(OutputData);
+
+							// Add KeyFrame To Sampler
+							Sampler->AddKeyFrame(KeyFrame);
+						}
+					}
+
+					// SamplerをClipに登録する
+					BlendShapeClip->AddAnimationSampler(Sampler);
+				}
+
+				// Channelを作成
+				{
+					// モーフなのでWEIGHTS
+					animation::EAnimationTarget AnimationTarget = animation::EAnimationTarget::WEIGHTS;
+
+					const int TargetSamplerIndex = Index;
+
+					std::shared_ptr<animation::CAnimationChannel> Channel = std::make_shared<animation::CAnimationChannel>(false, false, TargetSamplerIndex, AnimationTarget, nullptr, animation::EHumanoidBones::None);
+
+					// ChannelをClipに登録
+					BlendShapeClip->AddAnimationChannel(Frame.first, Channel);
+				}
+
+				Index++;
+			}
+
+			// クリップを登録
+			BlendShapeClipList.push_back(BlendShapeClip);
+		}
 
 		return true;
 	}

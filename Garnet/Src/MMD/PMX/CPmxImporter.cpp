@@ -139,6 +139,7 @@ namespace mmd
 
 			glm::vec3 Pos = PmxBone->GetPos();
 			glm::quat Rot = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
+			//glm::quat Rot = PmxBone->GetLocalAxis();
 
 			// PMXのPos・Rotateはワールド座標系での値なので親ノードのワールドマトリックスを乗算してローカル座標系に戻す必要がある
 			int ParentBoneIndex = PmxBone->GetParentBoneIndex();
@@ -149,6 +150,8 @@ namespace mmd
 				// Posはワールド座標系なのでローカル座標系に戻す必要がある
 				// ただしRotは(存在すれば)ローカル軸から取得するので既にローカル座標系である
 				Pos -= ParentPmxBone->GetPos();
+
+				//Rot *= glm::inverse(ParentPmxBone->GetLocalAxis());
 			}
 
 			//
@@ -336,9 +339,6 @@ namespace mmd
 	bool CPmxImporter::CreateMeshList(const CPmxModel& model, std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, const std::shared_ptr<object::CNode>& RootNode, std::vector<std::shared_ptr<object::CNode>>& NodeList,
 		const std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList, bool ExistSkeleton)
 	{
-		// 後ほどリファクタリングするがひとまずここで使用する頂点モーフ(ブレンドシェイプ)のインデックスを8個選んでおく
-		std::vector<int> UseVertexMorphList = std::vector<int>({ 0, 1, 2, 3, 4, 5, 6, 7 });
-
 		// 明示的にMeshNodeを作成
 		std::shared_ptr<object::CNode> MeshNode = std::make_shared<object::CNode>(-1, static_cast<int>(NodeList.size()));
 		MeshNode->SetName("BaseMeshNode");
@@ -365,15 +365,16 @@ namespace mmd
 				"TANGENT",
 				"JOINTS_0",
 				"WEIGHTS_0",
-				"MORPHVEC_0",
-				"MORPHVEC_1",
-				"MORPHVEC_2",
-				"MORPHVEC_3",
-				"MORPHVEC_4",
-				"MORPHVEC_5",
-				"MORPHVEC_6",
-				"MORPHVEC_7",
 			};
+
+			// 頂点アトリビュート数の制約上、モーフは2個が限界
+			// もっとたくさん扱いたい場合はCPUMorphExecutorやGPGPUMorphExecutorを使用する(この2つが便利だったら頂点アトリビュートのモーフは消すかも)
+			for (int MorphIndex = 0; MorphIndex < 2; MorphIndex++)
+			{
+				std::string Name = "MORPHVEC_" + std::to_string(MorphIndex);
+				NeedAttribNameList.push_back(Name);
+			}
+
 			std::map<std::string, std::vector<float>> ReservedVertexDataList;
 			std::map<std::string, renderer::EDataType> ReservedDataTypeList;
 			std::map<std::string, int> ReservedByteStrideList;
@@ -475,33 +476,31 @@ namespace mmd
 
 				// モーフ
 				{
-					const auto& PmxMorphList = model.GetPmxMorphList();
+					const auto& PmxMorphList = model.GetPmxVertexMorphList();
 
-					for (int mrpIndex = 0; mrpIndex < 8; mrpIndex++)
+					// 頂点アトリビュート数の制約上、モーフは2個が限界
+					// もっとたくさん扱いたい場合はCPUMorphExecutorやGPGPUMorphExecutorを使用する(この2つが便利だったら頂点アトリビュートのモーフは消すかも)
+					for (int MorphIndex = 0; MorphIndex < 2; MorphIndex++)
 					{
-						std::string Name = "MORPHVEC_" + std::to_string(mrpIndex);
+						std::string Name = "MORPHVEC_" + std::to_string(MorphIndex);
 
 						// まず全て0埋めする
 						std::vector<float> AttributeData = std::vector<float>(PmxMesh->GetPositionAttribute().size(), 0.0f);
 
-						// 指定された頂点モーフのデータを取得する
-						if (mrpIndex < UseVertexMorphList.size())
+						animation::EBlendShapeName CurrentShapeName = static_cast<animation::EBlendShapeName>(MorphIndex);
+						auto PmxMorph = PmxMorphList.find(CurrentShapeName);
+
+						// 頂点モーフのデータを取得する
+						if (PmxMorph != PmxMorphList.end())
 						{
-							int UseMorphIndex = UseVertexMorphList[mrpIndex];
-
-							if (UseMorphIndex < PmxMorphList.size())
+							for (const auto& VertexMorph : (*PmxMorph).second->GetVertexMorphList())
 							{
-								const auto& PmxMorph = PmxMorphList[UseMorphIndex];
+								int VertexIndex = VertexMorph.first;
+								const auto& Offset = VertexMorph.second;
 
-								for (const auto& VertexMorph : PmxMorph->GetVertexMorphList())
-								{
-									int VertexIndex = VertexMorph.first;
-									const auto& Offset = VertexMorph.second;
-
-									AttributeData[VertexIndex * 3 + 0] = Offset.x;
-									AttributeData[VertexIndex * 3 + 1] = Offset.y;
-									AttributeData[VertexIndex * 3 + 2] = Offset.z;
-								}
+								AttributeData[VertexIndex * 3 + 0] = Offset.x;
+								AttributeData[VertexIndex * 3 + 1] = Offset.y;
+								AttributeData[VertexIndex * 3 + 2] = Offset.z;
 							}
 						}
 
@@ -519,16 +518,7 @@ namespace mmd
 					// ディメンションを登録
 					int Dimention = 1;
 
-					if (AttribName == "POSITION" || AttribName == "NORMAL" ||
-						AttribName == "MORPHVEC_0" ||
-						AttribName == "MORPHVEC_1" ||
-						AttribName == "MORPHVEC_2" ||
-						AttribName == "MORPHVEC_3" ||
-						AttribName == "MORPHVEC_4" ||
-						AttribName == "MORPHVEC_5" ||
-						AttribName == "MORPHVEC_6" ||
-						AttribName == "MORPHVEC_7"
-						)
+					if (AttribName == "POSITION" || AttribName == "NORMAL" || AttribName.find("MORPHVEC_") != -1)
 					{
 						Dimention = 3;
 					}
@@ -641,8 +631,32 @@ namespace mmd
 					MatRefOffset += PmxMaterial->GetMatRefIndiceCount();
 				}
 
+				// プリミティブに渡すモーフデータを準備
+				std::vector<std::map<int, glm::vec3>> MorphDataList;
+				{
+					const auto& PmxMorphList = model.GetPmxVertexMorphList();
+					
+					for (int MorphIndex = 0; MorphIndex < static_cast<int>(animation::EBlendShapeName::Max); MorphIndex++)
+					{
+						animation::EBlendShapeName CurrentShapeName = static_cast<animation::EBlendShapeName>(MorphIndex);
+						auto PmxMorph = PmxMorphList.find(CurrentShapeName);
+
+						// 頂点モーフのデータを取得する
+						if (PmxMorph != PmxMorphList.end())
+						{
+							MorphDataList.push_back((*PmxMorph).second->GetVertexMorphList());
+						}
+						else
+						{
+							MorphDataList.push_back(std::map<int, glm::vec3>());
+						}
+					}
+				}
+
 				// プリミティブを作成する
 				std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(createInfo, MaterialIndex);
+				Primitive->SetMorphDataList(MorphDataList);
+
 				Mesh->AddPrimitive(Primitive);
 
 				// メッシュを登録

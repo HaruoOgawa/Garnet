@@ -131,6 +131,11 @@ namespace object
 		m_CurrentMorphWeights.push_back(Weight);
 	}
 
+	void CNode::SetMorphWeight(const std::vector<float>& MorphWeights)
+	{
+		m_CurrentMorphWeights = MorphWeights;
+	}
+
 	const std::vector<float>& CNode::GetCurrentMorphWeights() const
 	{
 		return m_CurrentMorphWeights;

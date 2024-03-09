@@ -2,6 +2,7 @@
 
 #ifdef USE_MMD
 #include <vector>
+#include <map>
 #include <string>
 #include <memory>
 
@@ -17,6 +18,8 @@
 #include "SPmxRigidbody.h"
 #include "SPmxJoint.h"
 
+#include "../../Animation/EBlendShapeName.h"
+
 namespace binary { class CBinaryAnalyser; }
 
 namespace mmd
@@ -29,7 +32,31 @@ namespace mmd
 		std::vector<std::shared_ptr<CPmxTexture>> m_PmxTextureList;
 		std::vector<std::shared_ptr<CPmxMaterial>> m_PmxMaterialList;
 		std::vector<std::shared_ptr<CPmxBone>> m_PmxBoneList;
-		std::vector<std::shared_ptr<CPmxMorphTarget>> m_PmxMorphList;
+
+		// 頂点モーフリスト
+		std::map<animation::EBlendShapeName, std::shared_ptr<CPmxMorphTarget>> m_PmxVertexMorphList; 
+
+		// ボーンモーフリスト
+		// 未実装
+
+		// UVモーフリスト
+		// 未実装
+
+		// 追加UV1モーフリスト
+		// 未実装
+
+		// 追加UV2モーフリスト
+		// 未実装
+
+		// 追加UV3モーフリスト
+		// 未実装
+
+		// 追加UV4モーフリスト
+		// 未実装
+
+		// 材質モーフリスト
+		// 未実装
+		
 		std::vector<SPmxRigidbody> m_PmxRigidbodyList;
 		std::vector<SPmxJoint> m_PmxJointList;
 	private:
@@ -70,7 +97,7 @@ namespace mmd
 
 		const std::vector<std::shared_ptr<CPmxBone>>& GetPmxBoneList() const;
 
-		const std::vector<std::shared_ptr<CPmxMorphTarget>>& GetPmxMorphList() const;
+		const std::map<animation::EBlendShapeName, std::shared_ptr<CPmxMorphTarget>>& GetPmxVertexMorphList() const;
 
 		const std::vector<SPmxRigidbody>& GetPmxRigidbodyList() const;
 

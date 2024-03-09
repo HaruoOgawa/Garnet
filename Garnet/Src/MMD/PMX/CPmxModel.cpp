@@ -1,6 +1,7 @@
 #ifdef USE_MMD
 #include "CPmxModel.h"
 #include "../../Binary/CBinaryAnalyser.h"
+#include "../../Animation/CBlendShapeNameProvider.h"
 #include "../../Debug/Message/Console.h"
 
 namespace mmd
@@ -39,9 +40,9 @@ namespace mmd
 		return m_PmxBoneList;
 	}
 
-	const std::vector<std::shared_ptr<CPmxMorphTarget>>& CPmxModel::GetPmxMorphList() const
+	const std::map<animation::EBlendShapeName, std::shared_ptr<CPmxMorphTarget>>& CPmxModel::GetPmxVertexMorphList() const
 	{
-		return m_PmxMorphList;
+		return m_PmxVertexMorphList;
 	}
 
 	const std::vector<SPmxRigidbody>& CPmxModel::GetPmxRigidbodyList() const
@@ -901,6 +902,8 @@ namespace mmd
 		int NumOfMorph = 0;
 		if (!Analyser.GetInt(NumOfMorph)) return false;
 
+		animation::CBlendShapeNameProvider Provider;
+
 		for (int i = 0; i < NumOfMorph; i++)
 		{
 			// ƒ‚[ƒt–¼
@@ -984,6 +987,10 @@ namespace mmd
 					// “o˜^
 					PmxMorph->AddVertexMorph(VertexIndex, Offset);
 				}
+
+				animation::EBlendShapeName BlendShapeName = Provider.GetBlendShapeNameU16(MorphName.second);
+
+				m_PmxVertexMorphList.emplace(BlendShapeName, PmxMorph);
 			}
 			else if (MorphType == 2)
 			{
@@ -1213,8 +1220,6 @@ namespace mmd
 			{
 				return false;
 			}
-		
-			m_PmxMorphList.push_back(PmxMorph);
 		}
 
 		return true;
