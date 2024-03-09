@@ -13,6 +13,8 @@
 #include "../Animation/CBone.h"
 
 #include "../Graphics/CMaterialFrame.h"
+#include "../../Graphics/CVertexBuffer.h"
+#include "../../Graphics/CIndexBuffer.h"
 
 namespace fbx
 {
@@ -589,13 +591,11 @@ namespace fbx
 						}
 					}
 				}
-				
-				std::shared_ptr<renderer::CRendererCreateInfo> createInfo = std::make_shared<renderer::CRendererCreateInfo>();
 
 				// 頂点バッファ本体
 				std::vector<std::vector<float>> VertexDataList;
 				std::vector<int> DimentionList;
-				std::vector<renderer::EDataType> DataTypeList;
+				std::vector<graphics::EDataType> DataTypeList;
 				std::vector<int> ByteStrideList;
 
 				std::vector<unsigned int> Indices;
@@ -610,7 +610,7 @@ namespace fbx
 					"WEIGHTS_0",
 				};
 				std::map<std::string, std::vector<float>> ReservedVertexDataList;
-				std::map<std::string, renderer::EDataType> ReservedDataTypeList;
+				std::map<std::string, graphics::EDataType> ReservedDataTypeList;
 				std::map<std::string, int> ReservedByteStrideList;
 
 				// タンジェントの計算が必要
@@ -857,7 +857,7 @@ namespace fbx
 							ReservedVertexDataList.insert({ "POSITION" ,AttributePosData });
 
 							// コンポーネントタイプ(データ型)を取得
-							ReservedDataTypeList.insert({ "POSITION", renderer::EDataType::TYPE_FLOAT });
+							ReservedDataTypeList.insert({ "POSITION", graphics::EDataType::TYPE_FLOAT });
 
 							// ByteStrideを取得
 							ReservedByteStrideList.insert({ "POSITION", 0 });
@@ -870,7 +870,7 @@ namespace fbx
 							ReservedVertexDataList.insert({ "NORMAL" ,AttributeNormalData });
 
 							// コンポーネントタイプ(データ型)を取得
-							ReservedDataTypeList.insert({ "NORMAL", renderer::EDataType::TYPE_FLOAT });
+							ReservedDataTypeList.insert({ "NORMAL", graphics::EDataType::TYPE_FLOAT });
 
 							// ByteStrideを取得
 							ReservedByteStrideList.insert({ "NORMAL", 0 });
@@ -883,7 +883,7 @@ namespace fbx
 							ReservedVertexDataList.insert({ "TEXCOORD_0" ,AttributeUVData });
 
 							// コンポーネントタイプ(データ型)を取得
-							ReservedDataTypeList.insert({ "TEXCOORD_0", renderer::EDataType::TYPE_FLOAT });
+							ReservedDataTypeList.insert({ "TEXCOORD_0", graphics::EDataType::TYPE_FLOAT });
 
 							// ByteStrideを取得
 							ReservedByteStrideList.insert({ "TEXCOORD_0", 0 });
@@ -896,7 +896,7 @@ namespace fbx
 							ReservedVertexDataList.insert({ "TANGENT" ,AttributeTangentData });
 
 							// コンポーネントタイプ(データ型)を取得
-							ReservedDataTypeList.insert({ "TANGENT", renderer::EDataType::TYPE_FLOAT });
+							ReservedDataTypeList.insert({ "TANGENT", graphics::EDataType::TYPE_FLOAT });
 
 							// ByteStrideを取得
 							ReservedByteStrideList.insert({ "TANGENT", 0 });
@@ -922,7 +922,7 @@ namespace fbx
 							ReservedVertexDataList.insert({ "JOINTS_0" ,AttributeBoneData });
 
 							// コンポーネントタイプ(データ型)を取得
-							ReservedDataTypeList.insert({ "JOINTS_0", renderer::EDataType::TYPE_UNSIGNED_SHORT });
+							ReservedDataTypeList.insert({ "JOINTS_0", graphics::EDataType::TYPE_UNSIGNED_SHORT });
 
 							// ByteStrideを取得
 							ReservedByteStrideList.insert({ "JOINTS_0", 8 });
@@ -935,7 +935,7 @@ namespace fbx
 							ReservedVertexDataList.insert({ "WEIGHTS_0" ,AttributeWeightsData });
 
 							// コンポーネントタイプ(データ型)を取得
-							ReservedDataTypeList.insert({ "WEIGHTS_0", renderer::EDataType::TYPE_FLOAT });
+							ReservedDataTypeList.insert({ "WEIGHTS_0", graphics::EDataType::TYPE_FLOAT });
 
 							// ByteStrideを取得
 							ReservedByteStrideList.insert({ "WEIGHTS_0", 0 });
@@ -978,10 +978,10 @@ namespace fbx
 							}
 
 							// DataTypeとByteStrideの初期値をセット
-							renderer::EDataType DataType = renderer::EDataType::TYPE_FLOAT;
+							graphics::EDataType DataType = graphics::EDataType::TYPE_FLOAT;
 
 							// 『JOINTS_0』はunsigned shortである
-							if (AttribName == "JOINTS_0") DataType = renderer::EDataType::TYPE_UNSIGNED_SHORT;
+							if (AttribName == "JOINTS_0") DataType = graphics::EDataType::TYPE_UNSIGNED_SHORT;
 
 							ReservedDataTypeList.insert({ AttribName, DataType });
 							ReservedByteStrideList.insert({ AttribName, 0 });

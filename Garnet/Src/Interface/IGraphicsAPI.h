@@ -31,6 +31,8 @@ namespace graphics
 	enum class ETextureType;
 	class CMaterialCreateInfo;
 	enum class ECullMode;
+	class CVertexBuffer;
+	class CIndexBuffer;
 }
 
 namespace api
@@ -47,7 +49,9 @@ namespace api
 #endif // __EMSCRIPTEN__
 		
 		virtual bool CreateRenderPass(const std::string& PassName, ERenderPassFormat RenderPassFormat, const glm::vec4& InitColor, int Width = -1, int Height = -1) = 0;
-		virtual std::shared_ptr<renderer::IRenderer> CreateRenderer(const std::string& PassName) = 0;
+		virtual std::shared_ptr<graphics::CVertexBuffer> CreateVertexBuffer() = 0;
+		virtual std::shared_ptr<graphics::CIndexBuffer> CreateIndexBuffer() = 0;
+		virtual std::shared_ptr<graphics::IRenderer> CreateRenderer(const std::string& PassName) = 0;
 		virtual std::shared_ptr<graphics::CMaterial> CreateMaterial(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, int RefCount, graphics::ECullMode CullMode) = 0;
 		virtual std::shared_ptr<graphics::CTexture> CreateTexture(bool UseMipMap = false) = 0;
 #ifdef USE_GPGPU

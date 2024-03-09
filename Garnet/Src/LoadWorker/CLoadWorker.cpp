@@ -40,22 +40,8 @@ namespace resource
 		Material->SetEnabledZTest(false);
 		Material->SetCullMode(graphics::ECullMode::CULL_NONE);
 
-		m_LoadingBar->AddMaterial(Material);
-
-		// MESH
-		std::shared_ptr<graphics::CMesh> Mesh = std::make_shared<graphics::CMesh>();
-		std::shared_ptr<renderer::CRendererCreateInfo> rendererCreateInfo = graphics::CPresetPrimitive::CreateBoard();
-
-		std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(rendererCreateInfo, 0);
-		Mesh->AddPrimitive(Primitive);
-		m_LoadingBar->AddMesh(Mesh);
-
-		// NODE
-		std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(0, 0);
-		m_LoadingBar->AddNode(Node);
-
 		// CreateŠÖ”‚ðŽÀs
-		if (!m_LoadingBar->Create(pGraphicsAPI, nullptr, nullptr)) return false;
+		if (!m_LoadingBar->CreateSimply(pGraphicsAPI, nullptr, graphics::CPresetPrimitive::CreateBoard(pGraphicsAPI), Material, nullptr)) return false;
 
 		return true;
 	}

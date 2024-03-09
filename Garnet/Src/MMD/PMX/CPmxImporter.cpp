@@ -10,6 +10,8 @@
 #include "../../Animation/CBoneNameProvider.h"
 
 #include "../../Graphics/CMaterialFrame.h"
+#include "../../Graphics/CVertexBuffer.h"
+#include "../../Graphics/CIndexBuffer.h"
 
 #include "../../LoadWorker/CLoadWorker.h"
 #include "../../LoadWorker/CTextureLoader.h"
@@ -66,7 +68,7 @@ namespace mmd
 
 		// メッシュ
 		std::vector<std::shared_ptr<graphics::CMesh>> MeshList;
-		if (!CreateMeshList(model, MeshList, RootNode, NodeList, MaterialList, (Skeleton->GetBoneList().size() > 0))) return false;
+		if (!CreateMeshList(pGraphicsAPI, model, MeshList, RootNode, NodeList, MaterialList, (Skeleton->GetBoneList().size() > 0))) return false;
 
 		// 剛体
 		//if (!CreateRigidbody(pPhysicsEngine, model, Skeleton)) return false;
@@ -336,7 +338,7 @@ namespace mmd
 		return true;
 	}
 
-	bool CPmxImporter::CreateMeshList(const CPmxModel& model, std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, const std::shared_ptr<object::CNode>& RootNode, std::vector<std::shared_ptr<object::CNode>>& NodeList,
+	bool CPmxImporter::CreateMeshList(api::IGraphicsAPI* pGraphicsAPI, const CPmxModel& model, std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, const std::shared_ptr<object::CNode>& RootNode, std::vector<std::shared_ptr<object::CNode>>& NodeList,
 		const std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList, bool ExistSkeleton)
 	{
 		// 明示的にMeshNodeを作成
@@ -351,10 +353,16 @@ namespace mmd
 		RootNode->SetChildrenNodeIndexList(ChildrenNodeIndexList);
 
 		{
+			// メッシュを作成する
+			std::shared_ptr<graphics::CMesh> Mesh = std::make_shared<graphics::CMesh>();
+
+			// 頂点バッファを作成する
+			auto VertexBuffer = pGraphicsAPI->CreateVertexBuffer();
+
 			// 頂点バッファ本体
 			std::vector<std::vector<float>> VertexDataList;
 			std::vector<int> DimentionList;
-			std::vector<renderer::EDataType> DataTypeList;
+			std::vector<graphics::EDataType> DataTypeList;
 			std::vector<int> ByteStrideList;
 
 			// 頂点データの初期化用(例えばWeightとかNormalを持っていないならそれを0埋めするみたいな処理)
@@ -376,7 +384,7 @@ namespace mmd
 			}
 
 			std::map<std::string, std::vector<float>> ReservedVertexDataList;
-			std::map<std::string, renderer::EDataType> ReservedDataTypeList;
+			std::map<std::string, graphics::EDataType> ReservedDataTypeList;
 			std::map<std::string, int> ReservedByteStrideList;
 
 			// タンジェントの計算が必要
@@ -390,19 +398,19 @@ namespace mmd
 			{
 				{
 					ReservedVertexDataList.emplace("POSITION", PmxMesh->GetPositionAttribute());
-					ReservedDataTypeList.emplace("POSITION", renderer::EDataType::TYPE_FLOAT);
+					ReservedDataTypeList.emplace("POSITION", graphics::EDataType::TYPE_FLOAT);
 					ReservedByteStrideList.emplace("POSITION", 0);
 				}
 
 				{
 					ReservedVertexDataList.emplace("NORMAL", PmxMesh->GetNormalAttribute());
-					ReservedDataTypeList.emplace("NORMAL", renderer::EDataType::TYPE_FLOAT);
+					ReservedDataTypeList.emplace("NORMAL", graphics::EDataType::TYPE_FLOAT);
 					ReservedByteStrideList.emplace("NORMAL", 0);
 				}
 
 				{
 					ReservedVertexDataList.emplace("TEXCOORD_0", PmxMesh->GetUVAttribute());
-					ReservedDataTypeList.emplace("TEXCOORD_0", renderer::EDataType::TYPE_FLOAT);
+					ReservedDataTypeList.emplace("TEXCOORD_0", graphics::EDataType::TYPE_FLOAT);
 					ReservedByteStrideList.emplace("TEXCOORD_0", 0);
 				}
 
@@ -411,7 +419,7 @@ namespace mmd
 					AttributeData.resize(4 * (PmxMesh->GetPositionAttribute().size() / 3), 0.0f);
 
 					ReservedVertexDataList.emplace("TANGENT", AttributeData);
-					ReservedDataTypeList.emplace("TANGENT", renderer::EDataType::TYPE_FLOAT);
+					ReservedDataTypeList.emplace("TANGENT", graphics::EDataType::TYPE_FLOAT);
 					ReservedByteStrideList.emplace("TANGENT", 0);
 				}
 
@@ -428,7 +436,7 @@ namespace mmd
 							std::memcpy(&AttributeData[0], &ByteBoneAttribute[0], sizeof(unsigned char) * ByteBoneAttribute.size());
 						}
 
-						ReservedDataTypeList.emplace("JOINTS_0", renderer::EDataType::TYPE_UNSIGNED_BYTE);
+						ReservedDataTypeList.emplace("JOINTS_0", graphics::EDataType::TYPE_UNSIGNED_BYTE);
 						ReservedByteStrideList.emplace("JOINTS_0", 1 * 4);
 					}
 					else if (MetaData.BoneIndexSize == 2)
@@ -441,7 +449,7 @@ namespace mmd
 							std::memcpy(&AttributeData[0], &UShortBoneAttribute[0], sizeof(unsigned short) * UShortBoneAttribute.size());
 						}
 
-						ReservedDataTypeList.emplace("JOINTS_0", renderer::EDataType::TYPE_UNSIGNED_SHORT);
+						ReservedDataTypeList.emplace("JOINTS_0", graphics::EDataType::TYPE_UNSIGNED_SHORT);
 						ReservedByteStrideList.emplace("JOINTS_0", 2 * 4);
 					}
 					else if (MetaData.BoneIndexSize == 4)
@@ -454,7 +462,7 @@ namespace mmd
 							std::memcpy(&AttributeData[0], &IntBoneAttribute[0], sizeof(unsigned int) * IntBoneAttribute.size());
 						}
 
-						ReservedDataTypeList.emplace("JOINTS_0", renderer::EDataType::TYPE_UNSIGNED_INT);
+						ReservedDataTypeList.emplace("JOINTS_0", graphics::EDataType::TYPE_UNSIGNED_INT);
 						ReservedByteStrideList.emplace("JOINTS_0", 4 * 4);
 					}
 
@@ -470,7 +478,7 @@ namespace mmd
 
 				{
 					ReservedVertexDataList.emplace("WEIGHTS_0", PmxMesh->GetWeightAttribute());
-					ReservedDataTypeList.emplace("WEIGHTS_0", renderer::EDataType::TYPE_FLOAT);
+					ReservedDataTypeList.emplace("WEIGHTS_0", graphics::EDataType::TYPE_FLOAT);
 					ReservedByteStrideList.emplace("WEIGHTS_0", 0);
 				}
 
@@ -505,7 +513,7 @@ namespace mmd
 						}
 
 						ReservedVertexDataList.emplace(Name, AttributeData);
-						ReservedDataTypeList.emplace(Name, renderer::EDataType::TYPE_FLOAT);
+						ReservedDataTypeList.emplace(Name, graphics::EDataType::TYPE_FLOAT);
 						ReservedByteStrideList.emplace(Name, 0);
 					}
 				}
@@ -544,25 +552,23 @@ namespace mmd
 				}
 			}
 
+			// メッシュ情報を渡す
+			VertexBuffer->SetVertices(VertexDataList);
+			VertexBuffer->SetAttributeDimensions(DimentionList);
+			VertexBuffer->SetAttribDataTypes(DataTypeList);
+			VertexBuffer->SetAttribByteStrides(ByteStrideList);
+
+			Mesh->AddVertexBuffer(VertexBuffer);
+
 			const auto& PmxMaterialList = model.GetPmxMaterialList();
 
 			int MatRefOffset = 0;
 
 			for (int MaterialIndex = 0; MaterialIndex < PmxMaterialList.size(); MaterialIndex++)
 			{
+				auto IndexBuffer = pGraphicsAPI->CreateIndexBuffer();
+
 				const auto& PmxMaterial = PmxMaterialList[MaterialIndex];
-
-				std::shared_ptr<renderer::CRendererCreateInfo> createInfo = std::make_shared<renderer::CRendererCreateInfo>();
-
-				// メッシュを作成する
-				std::shared_ptr<graphics::CMesh> Mesh = std::make_shared<graphics::CMesh>();
-
-				// メッシュ情報を渡す
-				createInfo->SetVertices(VertexDataList);
-				createInfo->SetAttributeDimensions(DimentionList);
-				createInfo->SetAttribDataTypes(DataTypeList);
-				createInfo->SetAttribByteStrides(ByteStrideList);
-
 				// インデックスバッファを読む
 				{
 					if (MetaData.VertexIndexSize == 1)
@@ -597,7 +603,7 @@ namespace mmd
 						}
 
 						// Indicesを登録
-						createInfo->SetIndices(Indices);
+						IndexBuffer->SetIndices(Indices);
 					}
 					else if (MetaData.VertexIndexSize == 4)
 					{
@@ -624,8 +630,10 @@ namespace mmd
 						}
 
 						// Indicesを登録
-						createInfo->SetUINTIndices(UINTIndices);
+						IndexBuffer->SetUINTIndices(UINTIndices);
 					}
+
+					Mesh->AddIndexBuffer(IndexBuffer);
 
 					// 参照オフセットを更新する
 					MatRefOffset += PmxMaterial->GetMatRefIndiceCount();
@@ -654,31 +662,21 @@ namespace mmd
 				}
 
 				// プリミティブを作成する
-				std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(createInfo, MaterialIndex);
+				std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(VertexBuffer, IndexBuffer, MaterialIndex);
 				Primitive->SetMorphDataList(MorphDataList);
 
 				Mesh->AddPrimitive(Primitive);
+			}
 
+			// プリミティブが存在するならメッシュインデックスなどを登録する
+			if (Mesh->GetPrimitiveList().size() > 0)
+			{
 				// メッシュを登録
 				MeshList.push_back(Mesh);
 
-				// PMXにはノードの概念がないのでこちらで明示的に作成する
-				int MeshIndex = static_cast<int>(MeshList.size()) - 1;
-				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(MeshIndex, static_cast<int>(NodeList.size()));
-
-				Node->SetU16Name(PmxMaterial->GetMaterialName().second);
-
-				// ひとまずPMXはSkeletonを1つしか持っていない
 				int SkeletonIndex = (ExistSkeleton) ? 0 : -1;
-				Node->SetSkeletonIndex(SkeletonIndex);
-
-				NodeList.push_back(Node);
-
-				// MeshNodeに子要素を登録する
-				std::vector<int> ChildrenNodeIndexList = MeshNode->GetChildrenNodeIndexList();
-				ChildrenNodeIndexList.push_back(static_cast<int>(NodeList.size()) - 1);
-
-				MeshNode->SetChildrenNodeIndexList(ChildrenNodeIndexList);
+				MeshNode->SetSkeletonIndex(SkeletonIndex);
+				MeshNode->SetMeshIndex(0);
 			}
 		}
 

@@ -12,7 +12,7 @@ namespace api {
 	class CWebGPUMaterial;
 }
 
-namespace renderer
+namespace graphics
 {
 	class CRendererCreateInfo;
 	enum class EIndiceType;

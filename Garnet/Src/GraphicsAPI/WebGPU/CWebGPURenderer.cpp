@@ -5,7 +5,7 @@
 #include "../CRendererCreateInfo.h"
 #include "../../Debug/Message/Console.h"
 
-namespace renderer
+namespace graphics
 {
 	CWebGPURenderer::CWebGPURenderer(api::CWebGPUAPI* pGraphicsAPI, const std::string& PassName):
 		m_pGraphicsAPI(pGraphicsAPI),
@@ -125,13 +125,13 @@ namespace renderer
 	{
 		m_IndiceType = createInfo->GetIndiceType();
 		
-		if (m_IndiceType == renderer::EIndiceType::UNSIGNED_SHORT)
+		if (m_IndiceType == graphics::EIndiceType::UNSIGNED_SHORT)
 		{
 			m_IndicesCount = createInfo->GetIndices().size();
 
 			if (!CreateBuffer(m_IndexBuffer, WGPUBufferUsage_CopyDst | WGPUBufferUsage_Index, &createInfo->GetIndices()[0], m_IndicesCount * sizeof(uint16_t))) return false;
 		}
-		else if (m_IndiceType == renderer::EIndiceType::UNSIGNED_INT)
+		else if (m_IndiceType == graphics::EIndiceType::UNSIGNED_INT)
 		{
 			m_IndicesCount = createInfo->GetUINTIndices().size();
 
@@ -311,7 +311,7 @@ namespace renderer
 
 		switch (DataType)
 		{
-		case renderer::EDataType::TYPE_SIGNED_BYTE:
+		case graphics::EDataType::TYPE_SIGNED_BYTE:
 			if (Dimention == 1)
 			{
 				//result = WGPUVertexFormat_Sint8;
@@ -329,7 +329,7 @@ namespace renderer
 				result = WGPUVertexFormat_Sint8x4;
 			}
 			break;
-		case renderer::EDataType::TYPE_UNSIGNED_BYTE:
+		case graphics::EDataType::TYPE_UNSIGNED_BYTE:
 			if (Dimention == 1)
 			{
 				//result = WGPUVertexFormat_Uint8;
@@ -347,7 +347,7 @@ namespace renderer
 				result = WGPUVertexFormat_Uint8x4;
 			}
 			break;
-		case renderer::EDataType::TYPE_SIGNED_SHORT:
+		case graphics::EDataType::TYPE_SIGNED_SHORT:
 			if (Dimention == 1)
 			{
 				//result = WGPUVertexFormat_Sint16;
@@ -365,7 +365,7 @@ namespace renderer
 				result = WGPUVertexFormat_Sint16x4;
 			}
 			break;
-		case renderer::EDataType::TYPE_UNSIGNED_SHORT:
+		case graphics::EDataType::TYPE_UNSIGNED_SHORT:
 			if (Dimention == 1)
 			{
 				//result = WGPUVertexFormat_Uint16;
@@ -383,7 +383,7 @@ namespace renderer
 				result = WGPUVertexFormat_Uint16x4;
 			}
 			break;
-		case renderer::EDataType::TYPE_UNSIGNED_INT:
+		case graphics::EDataType::TYPE_UNSIGNED_INT:
 			if (Dimention == 1)
 			{
 				result = WGPUVertexFormat_Uint32;
@@ -401,7 +401,7 @@ namespace renderer
 				result = WGPUVertexFormat_Uint32x4;
 			}
 			break;
-		case renderer::EDataType::TYPE_FLOAT:
+		case graphics::EDataType::TYPE_FLOAT:
 		default:
 			if (Dimention == 1)
 			{

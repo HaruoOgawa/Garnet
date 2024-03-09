@@ -18,18 +18,22 @@
 // はぇー時間を管理するstd標準ライブラリ
 #include <chrono>
 
-namespace api { 
-	class CVulkanAPI; 
-	class CVulkanMaterial;
+namespace graphics
+{
+	class CVertexBuffer;
+	class CIndexBuffer;
+	enum class EDataType;
 }
 
-namespace renderer
+namespace api
 {
-	class CRendererCreateInfo;
+	class CVulkanAPI;
+	class CVulkanMaterial;
+
 	enum class EIndiceType;
 	enum class EDataType;
 
-	class CVulkanRenderer : public IRenderer
+	class CVulkanRenderer : public graphics::IRenderer
 	{
 		// API
 		api::CVulkanAPI* m_pGraphicsAPI;
@@ -39,36 +43,25 @@ namespace renderer
 		int	m_DynamicOffsetNum;
 		int m_InstanceCount;
 
-		// Vertices/Indices
-		std::vector<VkBuffer> m_VertexBufferList;
-		std::vector<VkDeviceMemory> m_VertexBufferMemoryList;
-
-		EIndiceType m_IndiceType;
-		VkBuffer m_IndexBuffer;
-		VkDeviceMemory m_IndexBufferMemory;
-		uint32_t m_IndicesCount;
-
 		// Pipeline
 		VkPipelineLayout m_PipelineLayout;
 		VkPipeline m_GraphicsPipeline;
 	private:
 		// Vulkanメインロジック /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		bool CreateVertexBuffer(const std::shared_ptr<CRendererCreateInfo>& createInfo);
-		bool CreateIndexBuffer(const std::shared_ptr<CRendererCreateInfo>& createInfo);
-		bool CreateGraphicsPipeline(const std::shared_ptr<CRendererCreateInfo>& createInfo, api::CVulkanMaterial* pVulkanMat);
+		bool CreateGraphicsPipeline(const std::shared_ptr<graphics::CVertexBuffer>& VertexBuffer, const std::shared_ptr<graphics::CIndexBuffer>& IndexBuffer, api::CVulkanMaterial* pVulkanMat);
 
 		void SetCullMode(graphics::ECullMode CullMode);
 
 		// ヘルパー関数 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		VkFormat GetVertexFormat(int Dimention, EDataType DataType);
+		VkFormat GetVertexFormat(int Dimention, graphics::EDataType DataType);
 	public:
 		CVulkanRenderer(api::CVulkanAPI* pGraphicsAPI, const std::string& PassName);
 		virtual ~CVulkanRenderer();
 
 		void Release();
 
-		bool Create(const std::shared_ptr<CRendererCreateInfo>& createInfo, const std::shared_ptr<graphics::CMaterial>& Material) override;
-		bool Draw(const std::shared_ptr<graphics::CMaterial>& Material, int DynamicOffsetNum) override;
+		bool Create(const std::shared_ptr<graphics::CVertexBuffer>& VertexBuffer, const std::shared_ptr<graphics::CIndexBuffer>& IndexBuffer, const std::shared_ptr<graphics::CMaterial>& Material) override;
+		bool Draw(const std::shared_ptr<graphics::CVertexBuffer>& VertexBuffer, const std::shared_ptr<graphics::CIndexBuffer>& IndexBuffer, const std::shared_ptr<graphics::CMaterial>& Material, int DynamicOffsetNum) override;
 	};
 }
 #endif

@@ -98,9 +98,9 @@ namespace api
 		return true;
 	}
 
-	std::shared_ptr<renderer::IRenderer> CWebGPUAPI::CreateRenderer(const std::string& PassName)
+	std::shared_ptr<graphics::IRenderer> CWebGPUAPI::CreateRenderer(const std::string& PassName)
 	{
-		auto Renderer = std::make_shared<renderer::CWebGPURenderer>(this, PassName);
+		auto Renderer = std::make_shared<graphics::CWebGPURenderer>(this, PassName);
 
 		return Renderer;
 	}

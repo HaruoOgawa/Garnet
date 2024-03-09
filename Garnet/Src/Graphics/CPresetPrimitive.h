@@ -1,12 +1,14 @@
 #pragma once
 #include <memory>
+#include <map>
 
-namespace renderer {
-	class CRendererCreateInfo;
-}
+namespace api { class IGraphicsAPI; }
 
 namespace graphics
 {
+	class CVertexBuffer;
+	class CIndexBuffer;
+
 	enum class EPresetPrimitiveType
 	{
 		None = -1,
@@ -20,9 +22,9 @@ namespace graphics
 	class CPresetPrimitive
 	{
 	public:
-		static std::shared_ptr<renderer::CRendererCreateInfo> CreateBoard();
-		static std::shared_ptr<renderer::CRendererCreateInfo> CreateBox();
-		static std::shared_ptr<renderer::CRendererCreateInfo> CreatePoint();
-		static std::shared_ptr<renderer::CRendererCreateInfo> CreateSphere();
+		static std::pair<std::shared_ptr<graphics::CVertexBuffer>, std::shared_ptr<graphics::CIndexBuffer>> CreateBoard(api::IGraphicsAPI* pGraphicsAPI);
+		static std::pair<std::shared_ptr<graphics::CVertexBuffer>, std::shared_ptr<graphics::CIndexBuffer>> CreateBox(api::IGraphicsAPI* pGraphicsAPI);
+		static std::pair<std::shared_ptr<graphics::CVertexBuffer>, std::shared_ptr<graphics::CIndexBuffer>> CreatePoint(api::IGraphicsAPI* pGraphicsAPI);
+		static std::pair<std::shared_ptr<graphics::CVertexBuffer>, std::shared_ptr<graphics::CIndexBuffer>> CreateSphere(api::IGraphicsAPI* pGraphicsAPI);
 	};
 }

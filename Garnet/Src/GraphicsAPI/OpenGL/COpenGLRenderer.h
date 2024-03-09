@@ -10,7 +10,7 @@ namespace api {
 	class COpenGLAPI;
 	class COpenGLMaterial;
 }
-namespace renderer
+namespace graphics
 {
 	class CRendererCreateInfo;
 	enum class EDataType;

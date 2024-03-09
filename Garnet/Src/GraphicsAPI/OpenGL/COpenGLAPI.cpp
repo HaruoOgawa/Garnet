@@ -58,9 +58,9 @@ namespace api
 		return true;
 	}
 
-	std::shared_ptr<renderer::IRenderer> COpenGLAPI::CreateRenderer(const std::string& PassName)
+	std::shared_ptr<graphics::IRenderer> COpenGLAPI::CreateRenderer(const std::string& PassName)
 	{
-		auto Renderer = std::make_shared<renderer::COpenGLRenderer>(this, PassName);
+		auto Renderer = std::make_shared<graphics::COpenGLRenderer>(this, PassName);
 
 		return Renderer;
 	}

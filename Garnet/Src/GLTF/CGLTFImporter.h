@@ -19,7 +19,7 @@ namespace graphics
 	class CMaterialFrame;
 }
 
-namespace renderer
+namespace graphics
 {
 	enum class EDataType;
 }
@@ -60,7 +60,7 @@ namespace gltf
 		static bool CreateDummyMaterial(api::IGraphicsAPI* pGraphicsAPI, const tinygltf::Model& model, std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList,
 			const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, std::vector<std::shared_ptr<graphics::CMesh>>& MeshList);
 
-		static bool CreateMesh(const tinygltf::Model& model, std::vector<std::shared_ptr<graphics::CMesh>>& MeshList);
+		static bool CreateMesh(api::IGraphicsAPI* pGraphicsAPI, const tinygltf::Model& model, std::vector<std::shared_ptr<graphics::CMesh>>& MeshList);
 
 		static bool CreateNode(const tinygltf::Model& model, std::vector<std::shared_ptr<object::CNode>>& NodeList, std::vector<std::vector<int>>& RootNodeIndexList);
 
@@ -76,7 +76,7 @@ namespace gltf
 		static bool RecalculateTangentWithUINT(std::vector<float>& TangentData, const std::vector<float>& PosotionData, const std::vector<float>& TexcoordData, const std::vector<unsigned int>& Indices);
 		static animation::EKeyFrameType ConvertToEKeyFrameType(int Type);
 		static int CalcStrideFromAccessor(const tinygltf::Model& model, const tinygltf::Accessor& Accessor);
-		static renderer::EDataType GetComponentTypeFromAccessor(const tinygltf::Accessor& Accessor);
+		static graphics::EDataType GetComponentTypeFromAccessor(const tinygltf::Accessor& Accessor);
 		static int GetByteStride(const tinygltf::Model& model, const tinygltf::Accessor& Accessor);
 	public:
 		static bool ImportFromMemory(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& Data, object::C3DObject* Object,

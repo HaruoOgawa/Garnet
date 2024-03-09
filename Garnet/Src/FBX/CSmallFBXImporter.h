@@ -47,7 +47,7 @@ namespace graphics
 	class CMaterialFrame;
 }
 
-namespace renderer
+namespace graphics
 {
 	enum class EDataType;
 }

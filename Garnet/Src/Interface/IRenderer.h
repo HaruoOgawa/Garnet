@@ -2,16 +2,16 @@
 
 #include <memory>
 
-namespace graphics { class CMaterial; }
-
-namespace renderer
+namespace graphics
 {
-	class CRendererCreateInfo;
+	class CMaterial;
+	class CVertexBuffer;
+	class CIndexBuffer;
 
 	class IRenderer
 	{
 	public:
-		virtual bool Create(const std::shared_ptr<CRendererCreateInfo>& createInfo, const std::shared_ptr<graphics::CMaterial>& Material) = 0;
-		virtual bool Draw(const std::shared_ptr<graphics::CMaterial>& Material, int DynamicOffsetNum) = 0;
+		virtual bool Create(const std::shared_ptr<CVertexBuffer>& VertexBuffer, const std::shared_ptr<CIndexBuffer>& IndexBuffer, const std::shared_ptr<graphics::CMaterial>& Material) = 0;
+		virtual bool Draw(const std::shared_ptr<graphics::CVertexBuffer>& VertexBuffer, const std::shared_ptr<graphics::CIndexBuffer>& IndexBuffer, const std::shared_ptr<graphics::CMaterial>& Material, int DynamicOffsetNum) = 0;
 	};
 }

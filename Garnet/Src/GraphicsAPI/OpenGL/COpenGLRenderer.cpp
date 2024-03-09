@@ -3,7 +3,7 @@
 #include "COpenGLRenderPass.h"
 #include "COpenGLMaterial.h"
 #include "../CRendererCreateInfo.h"
-namespace renderer
+namespace graphics
 {
 	COpenGLRenderer::COpenGLRenderer(api::COpenGLAPI* pGraphicsAPI, const std::string& PassName):
 		m_pGraphicsAPI(pGraphicsAPI),
@@ -174,14 +174,14 @@ namespace renderer
 		glGenBuffers(1, &indexBuffer);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
 		
-		if (createInfo->GetIndiceType() == renderer::EIndiceType::UNSIGNED_SHORT)
+		if (createInfo->GetIndiceType() == graphics::EIndiceType::UNSIGNED_SHORT)
 		{
 			m_IndiceType = GL_UNSIGNED_SHORT;
 			m_IndicesCount = static_cast<GLsizei>(createInfo->GetIndices().size());
 
 			glBufferData(GL_ELEMENT_ARRAY_BUFFER, createInfo->GetIndices().size() * sizeof(unsigned short), createInfo->GetIndices().data(), GL_STATIC_DRAW);
 		}
-		else if (createInfo->GetIndiceType() == renderer::EIndiceType::UNSIGNED_INT)
+		else if (createInfo->GetIndiceType() == graphics::EIndiceType::UNSIGNED_INT)
 		{
 			m_IndiceType = GL_UNSIGNED_INT;
 			m_IndicesCount = static_cast<GLsizei>(createInfo->GetUINTIndices().size());
@@ -201,22 +201,22 @@ namespace renderer
 
 		switch (DataType)
 		{
-		case renderer::EDataType::TYPE_SIGNED_BYTE:
+		case graphics::EDataType::TYPE_SIGNED_BYTE:
 			result = GL_BYTE;
 			break;
-		case renderer::EDataType::TYPE_UNSIGNED_BYTE:
+		case graphics::EDataType::TYPE_UNSIGNED_BYTE:
 			result = GL_UNSIGNED_BYTE;
 			break;
-		case renderer::EDataType::TYPE_SIGNED_SHORT:
+		case graphics::EDataType::TYPE_SIGNED_SHORT:
 			result = GL_SHORT;
 			break;
-		case renderer::EDataType::TYPE_UNSIGNED_SHORT:
+		case graphics::EDataType::TYPE_UNSIGNED_SHORT:
 			result = GL_UNSIGNED_SHORT;
 			break;
-		case renderer::EDataType::TYPE_UNSIGNED_INT:
+		case graphics::EDataType::TYPE_UNSIGNED_INT:
 			result = GL_UNSIGNED_INT;
 			break;
-		case renderer::EDataType::TYPE_FLOAT:
+		case graphics::EDataType::TYPE_FLOAT:
 			result = GL_FLOAT;
 			break;
 		default:
