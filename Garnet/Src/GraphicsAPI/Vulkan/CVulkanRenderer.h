@@ -23,15 +23,13 @@ namespace graphics
 	class CVertexBuffer;
 	class CIndexBuffer;
 	enum class EDataType;
+	enum class EIndiceType;
 }
 
 namespace api
 {
 	class CVulkanAPI;
 	class CVulkanMaterial;
-
-	enum class EIndiceType;
-	enum class EDataType;
 
 	class CVulkanRenderer : public graphics::IRenderer
 	{

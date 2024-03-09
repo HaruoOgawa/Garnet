@@ -7,18 +7,20 @@
 #include <glm/gtx/quaternion.hpp>
 #include "CWebGPUAPI.h"
 
-namespace api { 
-	class CWebGPUAPI; 
-	class CWebGPUMaterial;
-}
-
 namespace graphics
 {
-	class CRendererCreateInfo;
-	enum class EIndiceType;
+	class CVertexBuffer;
+	class CIndexBuffer;
 	enum class EDataType;
+	enum class EIndiceType;
+}
 
-	class CWebGPURenderer : public IRenderer
+namespace api
+{
+	class CWebGPUAPI;
+	class CWebGPUMaterial;
+
+	class CWebGPURenderer : public graphics::IRenderer
 	{
 		// API
 		api::CWebGPUAPI* m_pGraphicsAPI;
@@ -29,32 +31,19 @@ namespace graphics
 
 		// Pipeline
 		WGPURenderPipeline m_GraphicsPipeline;
-
-		// Vertex
-		int m_VertexCount;
-		std::vector<WGPUBuffer> m_VertexBufferList;
-		std::vector<size_t> m_VertexBufferSizeList;
-		
-		// Index
-		EIndiceType m_IndiceType;
-		WGPUBuffer m_IndexBuffer;
-		size_t     m_IndicesCount;
 	private:
 		// WebGPU Main Logic /////////////////////////////////////////////////////////////////////
-		bool CreateVertexBuffer(const std::shared_ptr<CRendererCreateInfo>& createInfo);
-		bool CreateIndexBuffer(const std::shared_ptr<CRendererCreateInfo>& createInfo);
-		bool CreateGraphicsPipeline(const std::shared_ptr<CRendererCreateInfo>& createInfo, api::CWebGPUMaterial* pWebGPUMat);
+		bool CreateGraphicsPipeline(const std::shared_ptr<graphics::CVertexBuffer>& VertexBuffer, const std::shared_ptr<graphics::CIndexBuffer>& IndexBuffer, api::CWebGPUMaterial* pWebGPUMat);
 		
 		// Helper Function ///////////////////////////////////////////////////////////////////////
-		WGPUVertexFormat GetVertexFormat(int Dimention, EDataType DataType);
-		bool             CreateBuffer(WGPUBuffer& Buffer, WGPUBufferUsageFlags Usage, void const* Data, uint64_t ByteSize);
+		WGPUVertexFormat GetVertexFormat(int Dimention, graphics::EDataType DataType);
 		void			 SetDefaultDepthStencil(WGPUDepthStencilState& depthStencilState);
 	public:
 		CWebGPURenderer(api::CWebGPUAPI* pGraphicsAPI, const std::string& PassName);
 		virtual ~CWebGPURenderer();
 
-		bool Create(const std::shared_ptr<CRendererCreateInfo>& createInfo, const std::shared_ptr<graphics::CMaterial>& Material) override;
-		bool Draw(const std::shared_ptr<graphics::CMaterial>& Material, int DynamicOffsetNum) override;
+		bool Create(const std::shared_ptr<graphics::CVertexBuffer>& VertexBuffer, const std::shared_ptr<graphics::CIndexBuffer>& IndexBuffer, const std::shared_ptr<graphics::CMaterial>& Material) override;
+		bool Draw(const std::shared_ptr<graphics::CVertexBuffer>& VertexBuffer, const std::shared_ptr<graphics::CIndexBuffer>& IndexBuffer, const std::shared_ptr<graphics::CMaterial>& Material, int DynamicOffsetNum) override;
 	};
 }
 #endif

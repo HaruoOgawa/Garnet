@@ -1,6 +1,8 @@
 #ifdef USE_WEBGPU
 #include "CWebGPUAPI.h"
 #include "CWebGPURenderPass.h"
+#include "CWebGPUVertexBuffer.h"
+#include "CWebGPUIndexBuffer.h"
 #include "CWebGPURenderer.h"
 #include "CWebGPUMaterial.h"
 #include "CWebGPUTexture.h"
@@ -98,9 +100,22 @@ namespace api
 		return true;
 	}
 
+	std::shared_ptr<graphics::CVertexBuffer> CWebGPUAPI::CreateVertexBuffer()
+	{
+		auto VertexBuffer = std::make_shared<api::CWebGPUVertexBuffer>(this);
+
+		return VertexBuffer;
+	}
+	std::shared_ptr<graphics::CIndexBuffer> CWebGPUAPI::CreateIndexBuffer()
+	{
+		auto IndexBuffer = std::make_shared<api::CWebGPUIndexBuffer>(this);
+
+		return IndexBuffer;
+	}
+
 	std::shared_ptr<graphics::IRenderer> CWebGPUAPI::CreateRenderer(const std::string& PassName)
 	{
-		auto Renderer = std::make_shared<graphics::CWebGPURenderer>(this, PassName);
+		auto Renderer = std::make_shared<api::CWebGPURenderer>(this, PassName);
 
 		return Renderer;
 	}
@@ -290,6 +305,26 @@ namespace api
 	WGPURenderPassEncoder CWebGPUAPI::GetCurrentRenderPass() const
 	{
 		return m_CurrentRenderPass;
+	}
+
+	// Buffer
+	bool CWebGPUAPI::CreateBuffer(WGPUBuffer& Buffer, WGPUBufferUsageFlags Usage, void const* Data, uint64_t ByteSize)
+	{
+		// たぶんWebGPU, Vulkanでもvec3は16バイトオフセットと換算されるっぽいからvec3分(12バイト分)のパディングを入れたい場合はvec3ではなくfloatの変数を3つ定義するべき
+
+		WGPUBufferDescriptor bufferDesc{};
+		bufferDesc.nextInChain = nullptr; // 拡張機
+		bufferDesc.label = "Buffer";
+		bufferDesc.usage = Usage; // バッファの用途
+		bufferDesc.mappedAtCreation = false; // ???
+		bufferDesc.size = ByteSize;
+
+		Buffer = wgpuDeviceCreateBuffer(GetLogicalDevice(), &bufferDesc);
+
+		// バッファにデータを書き込む
+		wgpuQueueWriteBuffer(GetQueue(), Buffer, 0, Data, bufferDesc.size);
+
+		return true;
 	}
 
 	// WebGPU メインロジック ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
