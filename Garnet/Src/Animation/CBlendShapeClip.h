@@ -2,6 +2,7 @@
 
 #ifdef USE_ANIMATION
 #include <vector>
+#include <map>
 #include "CAnimationClip.h"
 #include "EBlendShapeName.h"
 
@@ -11,7 +12,7 @@ namespace animation
 	{
 		std::vector<EBlendShapeName> m_BlendShapeNameList;
 
-		std::vector<float> m_CurrentMorphWeights;
+		std::map<EBlendShapeName, float> m_CurrentMorphWeightMap;
 	public:
 		CBlendShapeClip() = default;
 		virtual ~CBlendShapeClip() = default;
@@ -20,7 +21,7 @@ namespace animation
 
 		const std::vector<EBlendShapeName>& GetBlendShapeNameList() const;
 
-		const std::vector<float>& GetCurrentMorphWeights() const;
+		const std::map<EBlendShapeName, float>& GetCurrentMorphWeightMap() const;
 
 		virtual bool UpdateFrame(float CurrentTime) override;
 	};

@@ -361,7 +361,7 @@ namespace object
 
 #ifdef USE_ANIMATION
 		if (!m_AnimationController->Update(DeltaSecondsTime)) return false;
-		if (!m_BlendShapeController->Update(DeltaSecondsTime, m_NodeList)) return false;
+		if (!m_BlendShapeController->Update(DeltaSecondsTime)) return false;
 #endif
 		// ワールド行列の更新
 		// 全ノードマイフレーム更新しているので、そのうちキャッシュを入れて更新は必要なものだけにする
@@ -568,7 +568,19 @@ namespace object
 		m_MaterialList.push_back(Material);
 	}
 
+	void C3DObject::AddMorphNode(const std::shared_ptr<CNode>& Node)
+	{
+
+	}
+
 #ifdef USE_ANIMATION
+	void C3DObject::AddBlendShapeNode(const std::shared_ptr<CNode>& Node)
+	{
+		AddMorphNode(Node);
+
+		m_BlendShapeController->AddBlendShapeNode(Node);
+	}
+
 	void C3DObject::SetAnimationSkeleton(const std::shared_ptr<animation::CSkeleton >& Skeleton)
 	{
 		m_AnimationController->SetAnimationSkeleton(Skeleton);
@@ -584,9 +596,9 @@ namespace object
 		m_AnimationController->AddHumanoidAnimationClip(SourceClip, MotionName, Layout, IsLoop);
 	}
 
-	void C3DObject::AddBlendShapeClip(const std::shared_ptr<animation::CBlendShapeClip>& Clip)
+	void C3DObject::AddBlendShapeClip(const std::shared_ptr<animation::CBlendShapeClip>& Clip, const std::string& MotionName)
 	{
-		m_BlendShapeController->AddBlendShapeClip(Clip);
+		m_BlendShapeController->AddBlendShapeClip(Clip, MotionName);
 	}
 
 	const std::vector<std::shared_ptr<animation::CAnimationClip>>& C3DObject::GetAnimationClipList() const
@@ -652,7 +664,7 @@ namespace object
 
 	void C3DObject::ChangeBlendShape(int Index)
 	{
-		m_BlendShapeController->ChangeBlendShape(Index, m_NodeList);
+		m_BlendShapeController->ChangeBlendShape(Index);
 	}
 
 	const std::shared_ptr<graphics::CTextureSet>& C3DObject::GetTextureSet() const

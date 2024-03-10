@@ -18,8 +18,8 @@
 
 namespace mmd
 {
-	bool CPmxImporter::ImportPmx(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, const std::string& ModelFileName, const std::vector<unsigned char>& Data, object::C3DObject* Object,
-		const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame)
+	bool CPmxImporter::ImportPmx(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, const std::string& ModelFileName, 
+		const std::vector<unsigned char>& Data, object::C3DObject* Object, const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame)
 	{
 		CPmxModel model;
 
@@ -68,7 +68,7 @@ namespace mmd
 
 		// メッシュ
 		std::vector<std::shared_ptr<graphics::CMesh>> MeshList;
-		if (!CreateMeshList(pGraphicsAPI, model, MeshList, RootNode, NodeList, MaterialList, (Skeleton->GetBoneList().size() > 0))) return false;
+		if (!CreateMeshList(pGraphicsAPI, Object, model, MeshList, RootNode, NodeList, MaterialList, (Skeleton->GetBoneList().size() > 0))) return false;
 
 		// 剛体
 		//if (!CreateRigidbody(pPhysicsEngine, model, Skeleton)) return false;
@@ -338,7 +338,8 @@ namespace mmd
 		return true;
 	}
 
-	bool CPmxImporter::CreateMeshList(api::IGraphicsAPI* pGraphicsAPI, const CPmxModel& model, std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, const std::shared_ptr<object::CNode>& RootNode, std::vector<std::shared_ptr<object::CNode>>& NodeList,
+	bool CPmxImporter::CreateMeshList(api::IGraphicsAPI* pGraphicsAPI, object::C3DObject* Object, const CPmxModel& model, std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, 
+		const std::shared_ptr<object::CNode>& RootNode, std::vector<std::shared_ptr<object::CNode>>& NodeList,
 		const std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList, bool ExistSkeleton)
 	{
 		// 明示的にMeshNodeを作成
@@ -681,6 +682,9 @@ namespace mmd
 				int SkeletonIndex = (ExistSkeleton) ? 0 : -1;
 				MeshNode->SetSkeletonIndex(SkeletonIndex);
 				MeshNode->SetMeshIndex(0);
+
+				// モーフノード(ブレンドシェイプノード)として登録
+				Object->AddBlendShapeNode(MeshNode);
 			}
 		}
 

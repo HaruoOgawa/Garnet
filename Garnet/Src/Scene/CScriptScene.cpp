@@ -57,14 +57,14 @@ namespace scene
 		//pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Models\\SimpleMorphTarget\\SimpleMorphTarget.gltf", m_SimpleMorphObj, "", "ShadowPass"));
 		//pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Models\\MorphPrimitivesTest\\glTF-Binary\\MorphPrimitivesTest.glb", m_SimpleMorphObj, "", "ShadowPass"));
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Models\\MorphStressTest\\glTF-Binary\\MorphStressTest.glb", m_SimpleMorphObj, "", "ShadowPass"));
-		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Models\\BrainStem\\glTF-Binary\\BrainStem.glb", m_BrainStemObj, "", "ShadowPass"));
+		/*pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Models\\BrainStem\\glTF-Binary\\BrainStem.glb", m_BrainStemObj, "", "ShadowPass"));
 
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Avatar\\X_Bot.fbx", m_XBotObject, "", "ShadowPass"));
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Avatar\\Mousey.fbx", m_MouseyObject, "", "ShadowPass"));
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Avatar\\Warrok_W_Kurniawan.fbx", m_WarrokObject, "", "ShadowPass"));
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Motions\\Walking.fbx", m_Walk_Animation, "", "ShadowPass"));
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Motions\\Jumping.fbx", m_Jump_Animation, "", "ShadowPass"));
-		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Motions\\Combo_Punch_hand.fbx", m_Punch_Animation, "", "ShadowPass"));
+		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Motions\\Combo_Punch_hand.fbx", m_Punch_Animation, "", "ShadowPass"));*/
 
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Avatar\\Tda_Miku\\Tda_Miku.pmx", m_TdaMiku_Model, "", "ShadowPass"));
 		//pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CAnimationLoader>("Resources\\Motions\\mmd_running.vmd", m_VMDAnimationSet));
@@ -73,7 +73,7 @@ namespace scene
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CAnimationLoader>("Resources\\Motions\\biglove_expression.vmd", m_ExpressionVMD));
 		
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CTextureLoader>(pGraphicsAPI, std::vector<std::string>({ "Resources\\IBL\\output_skybox.hdr" }), m_IBL_Skybox_Texture));
-		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CTextureLoader>(pGraphicsAPI, std::vector<std::string>({ "Resources\\Cubemaps\\environment\\environment_back_0.jpg", "Resources\\Cubemaps\\environment\\environment_bottom_0.jpg", "Resources\\Cubemaps\\environment\\environment_front_0.jpg", "Resources\\Cubemaps\\environment\\environment_left_0.jpg", "Resources\\Cubemaps\\environment\\environment_right_0.jpg", "Resources\\Cubemaps\\environment\\environment_top_0.jpg" }), m_Cube_Texture));
+		//pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CTextureLoader>(pGraphicsAPI, std::vector<std::string>({ "Resources\\Cubemaps\\environment\\environment_back_0.jpg", "Resources\\Cubemaps\\environment\\environment_bottom_0.jpg", "Resources\\Cubemaps\\environment\\environment_front_0.jpg", "Resources\\Cubemaps\\environment\\environment_left_0.jpg", "Resources\\Cubemaps\\environment\\environment_right_0.jpg", "Resources\\Cubemaps\\environment\\environment_top_0.jpg" }), m_Cube_Texture));
 	}
 
 	CScriptScene::~CScriptScene()
@@ -95,7 +95,7 @@ namespace scene
 		}
 		
 		// m_BrainStemObj
-		{
+		/*{
 			if (!m_BrainStemObj->CreateFromMemory(pGraphicsAPI, pPhysicsEngine, pLoadWorker, m_PBRMF, m_DepthMF)) return false;
 			m_BrainStemObj->ChangeMotion(0);
 		}
@@ -173,7 +173,7 @@ namespace scene
 
 			auto PhysicsBox = pPhysicsEngine->CreatePhysicsBox(glm::vec3(0.5f), true, 0.0f, {});
 
-			//if (!m_PhysicsGround->CreateSimply(pGraphicsAPI, pPhysicsEngine, graphics::CPresetPrimitive::CreateBox(pGraphicsAPI), Material, m_DepthMF, LocalTransform, PhysicsBox)) return false;
+			if (!m_PhysicsGround->CreateSimply(pGraphicsAPI, pPhysicsEngine, graphics::CPresetPrimitive::CreateBox(pGraphicsAPI), Material, m_DepthMF, LocalTransform, PhysicsBox)) return false;
 		}
 
 		// m_PhysicsSphere
@@ -288,8 +288,8 @@ namespace scene
 			PhysicsSphere4->ReserveConstraint(PhysicsSphere3, physics::EJointType::SPRING_6DOF, JParam);
 
 			// Create
-			//if (!m_PhysicsSphere->Create(pGraphicsAPI, pPhysicsEngine, m_DepthMF)) return false;
-		}
+			if (!m_PhysicsSphere->Create(pGraphicsAPI, pPhysicsEngine, m_DepthMF)) return false;
+		}*/
 
 		// m_PhysicsCubeList
 		/*{
@@ -361,7 +361,9 @@ namespace scene
 			if (Clip) m_TdaMiku_Model->AddHumanoidAnimationClip(Clip, "Walk", { nullptr, "" }, true);
 
 			auto ExpressionClip = m_ExpressionVMD->GetBlendShapeClip(0);
-			if (ExpressionClip) m_TdaMiku_Model->AddBlendShapeClip(ExpressionClip);
+			if (ExpressionClip) m_TdaMiku_Model->AddBlendShapeClip(ExpressionClip, "Face");
+
+			//auto RipSyncClip = m_Rip
 
 			m_TdaMiku_Model->ChangeMotion("Walk");
 			m_TdaMiku_Model->ChangeBlendShape(0);

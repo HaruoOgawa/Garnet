@@ -15,20 +15,24 @@ namespace animation
 		int m_CurrentClipIndex; // インデックスで使用するアニメーションを選択
 
 		std::vector<std::shared_ptr<animation::CBlendShapeClip>> m_BlendShapeClip;
-	private:
-		void Reset(const std::vector<std::shared_ptr<object::CNode>>& NodeList);
 
-		void ResetNodeWeights(const std::vector<std::shared_ptr<object::CNode>>& NodeList);
-		void ApplyNodeWeights(const std::vector<float>& MorphWeights, const std::vector<std::shared_ptr<object::CNode>>& NodeList);
+		std::vector<std::shared_ptr<object::CNode>> m_MorphNodeList;
+	private:
+		void Reset();
+
+		void ResetNodeWeights();
+		void ApplyNodeWeights(const std::map<EBlendShapeName, float>& CurrentMorphWeightMap);
 	public:
 		CBlendShapeController();
 		virtual ~CBlendShapeController();
 
-		void AddBlendShapeClip(const std::shared_ptr<animation::CBlendShapeClip>& Clip);
+		void AddBlendShapeClip(const std::shared_ptr<animation::CBlendShapeClip>& Clip, const std::string& MotionName);
 
-		bool Update(float DeltaSecondsTime, const std::vector<std::shared_ptr<object::CNode>>& NodeList);
+		void AddBlendShapeNode(const std::shared_ptr<object::CNode>& Node);
 
-		void ChangeBlendShape(int Index, const std::vector<std::shared_ptr<object::CNode>>& NodeList); // インデックス指定でモーションを変更
+		bool Update(float DeltaSecondsTime);
+
+		void ChangeBlendShape(int Index); // インデックス指定でモーションを変更
 	};
 }
 #endif

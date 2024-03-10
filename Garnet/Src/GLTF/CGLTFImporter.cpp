@@ -212,6 +212,20 @@ namespace gltf
 			Object->AddAnimationClip(Clip);
 		}
 
+		// モーフノードを追加
+		for (const auto& Node : NodeList)
+		{
+			int MeshIndex = Node->GetMeshIndex();
+			if (MeshIndex < 0 || MeshIndex >= MeshList.size()) continue;
+
+			const auto& Mesh = MeshList[MeshIndex];
+
+			if (Mesh->GetMorphDataList().size() > 0)
+			{
+				Object->AddMorphNode(Node);
+			}
+		}
+
 		return true;
 	}
 

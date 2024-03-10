@@ -96,11 +96,15 @@ namespace object
 		void AddMaterial(const std::shared_ptr<graphics::CMaterial>& Material);
 		const std::vector<std::shared_ptr<graphics::CMaterial>>& GetMaterialList() const;
 		
+		void AddMorphNode(const std::shared_ptr<CNode>& Node);
+
 #ifdef USE_ANIMATION
+		void AddBlendShapeNode(const std::shared_ptr<CNode>& Node);
+
 		void SetAnimationSkeleton(const std::shared_ptr<animation::CSkeleton>& Skeleton);
 		void AddAnimationClip(const std::shared_ptr<animation::CAnimationClip>& Clip);
 		void AddHumanoidAnimationClip(const std::shared_ptr<animation::CAnimationClip>& SourceClip, const std::string& MotionName, animation::SAnimationLayout Layout, bool IsLoop);
-		void AddBlendShapeClip(const std::shared_ptr<animation::CBlendShapeClip>& Clip);
+		void AddBlendShapeClip(const std::shared_ptr<animation::CBlendShapeClip>& Clip, const std::string& MotionName);
 
 		const std::vector<std::shared_ptr<animation::CAnimationClip>>& GetAnimationClipList() const;
 #endif
