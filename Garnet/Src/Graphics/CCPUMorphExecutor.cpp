@@ -19,11 +19,6 @@ namespace graphics
 
 	bool CCPUMorphExecutor::Create(const std::vector<std::shared_ptr<object::CNode>>& NodeList, const std::vector<std::shared_ptr<graphics::CMesh>>& MeshList)
 	{
-		for (int NodeIndex = 0; NodeIndex < NodeList.size(); NodeIndex++)
-		{
-			m_NodeState.emplace(NodeIndex, std::make_shared<SNodeState>());
-		}
-
 		return true;
 	}
 
@@ -42,11 +37,10 @@ namespace graphics
 		for (int NodeIndex = 0; NodeIndex < NodeList.size(); NodeIndex++)
 		{
 			const auto& MorphNode = NodeList[NodeIndex];
-
-			auto& NodeState = m_NodeState[NodeIndex];
 			
 			// MorphWeights
 			const auto& MorphWeightList = MorphNode->GetCurrentMorphWeights();
+			if (MorphWeightList.size() == 0) continue;
 
 			// Meshを取得
 			int MeshIndex = MorphNode->GetMeshIndex();
@@ -67,14 +61,10 @@ namespace graphics
 				const auto& VertexBuffer = Primitive->GetVertexBuffer();
 
 				const auto& MorphVectorList = MorphData.second;
+				if (MorphVectorList.size() == 0) continue;
 
-				// 一致していなければエラーとする
-				if (MorphVectorList.size() != MorphWeightList.size())
-				{
-					Console::Log("[Error - CPUMorphExecutor] MorphVector size don't match MorphWeight size.\n");
-
-					return false;
-				}
+				// 一致していないもしくはサイズが0ならモーフを実行せずに正常系としてリターンする
+				if (MorphVectorList.size() != MorphWeightList.size()) continue;
 
 				// 頂点アトリビュートの初期位置を取得
 				std::vector<float> PosAttribute;
@@ -92,26 +82,6 @@ namespace graphics
 					// 0の時は更新しない
 					constexpr float Epsilon = std::numeric_limits<float>::epsilon();
 					if (Weight <= Epsilon) continue;
-
-					//
-					auto morphIt = NodeState->PrevWeightMap.find(MorphIndex);
-					if (morphIt == NodeState->PrevWeightMap.end())
-					{
-						NodeState->PrevWeightMap.emplace(MorphIndex, Weight);
-					}
-					else
-					{
-						// 前とウェイトの値が同じならスキップする
-						if (morphIt->second == Weight)
-						{
-							continue;
-						}
-						else
-						{
-							// 違うので値を更新する
-							NodeState->PrevWeightMap[MorphIndex] = Weight;
-						}
-					}
 
 					const auto& MorphVectorMap = MorphVectorList[MorphIndex];
 

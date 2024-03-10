@@ -70,6 +70,8 @@ namespace animation
 
 	void CBlendShapeController::ApplyNodeWeights()
 	{
+		if (m_MorphWeightsList.empty()) return;
+
 		// mapÇ©ÇÁÉfÅ[É^ÇéÊìæÇ∑ÇÈ(map)
 		std::vector<float> MorphWeights;
 
@@ -113,11 +115,15 @@ namespace animation
 	void CBlendShapeController::PlayBlendShape(const std::string& MotionName)
 	{
 		m_PlayingBlendShapeSet.emplace(MotionName);
+
+		ResetNodeWeights();
 	}
 
 	void CBlendShapeController::StopBlendShape(const std::string& MotionName)
 	{
 		m_PlayingBlendShapeSet.erase(MotionName);
+
+		ResetNodeWeights();
 	}
 }
 #endif

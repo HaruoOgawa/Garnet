@@ -712,7 +712,7 @@ namespace gltf
 
 				// プリミティブを作成する
 				std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(VertexBuffer, IndexBuffer, MaterialIndex);
-				Mesh->SetMorphDataList(static_cast<int>(Mesh->GetPrimitiveList().size()), MorphDataList);
+				Mesh->SetMorphDataList(Primitive, static_cast<int>(Mesh->GetPrimitiveList().size()), MorphDataList);
 				Mesh->AddPrimitive(Primitive);
 			}
 

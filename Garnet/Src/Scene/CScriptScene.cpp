@@ -543,20 +543,6 @@ namespace scene
 
 		if (m_TdaMiku_Model)
 		{
-			float Weight = fabsf(sinf(DrawInfo->GetSecondsTime()));
-
-			{
-				const auto& Material = m_TdaMiku_Model->GetMaterialList()[7];
-				std::string MorphUniformName = "MorphWeight_" + std::to_string(1);
-				Material->SetUniformValue(MorphUniformName, &glm::vec1(Weight)[0], sizeof(float), 1);
-			}
-
-			{
-				const auto& Material = m_TdaMiku_Model->GetMaterialList()[8];
-				std::string MorphUniformName = "MorphWeight_" + std::to_string(1);
-				Material->SetUniformValue(MorphUniformName, &glm::vec1(Weight)[0], sizeof(float), 1);
-			}
-
 			if (!m_TdaMiku_Model->Draw(IsDepthPass, false, Camera, Projection, DrawInfo, m_DebugSphere)) return false;
 			//if (!m_TdaMiku_Model->Draw(IsDepthPass, true, Camera, Projection, DrawInfo, nullptr)) return false;
 		}

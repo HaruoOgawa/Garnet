@@ -22,6 +22,8 @@ namespace graphics
 
 		virtual bool Create() = 0;
 
+		virtual void Release();
+
 		virtual void SetIndices(const std::vector<unsigned short>& Indices);
 		virtual const std::vector<unsigned short>& GetIndices() const;
 

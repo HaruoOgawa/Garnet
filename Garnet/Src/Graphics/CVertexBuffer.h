@@ -30,6 +30,8 @@ namespace graphics
 
 		virtual bool Create() = 0;
 
+		virtual void Release();
+
 		virtual void SetVertices(const std::vector<std::vector<float>>& Vertices);
 		virtual const std::vector<std::vector<float>>& GetVertices() const;
 
