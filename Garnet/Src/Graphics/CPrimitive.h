@@ -37,5 +37,7 @@ namespace graphics
 
 		void SetMaterialIndex(int Index);
 		int GetMaterialIndex() const;
+
+		const std::shared_ptr<CVertexBuffer>& GetVertexBuffer() const;
 	};
 }

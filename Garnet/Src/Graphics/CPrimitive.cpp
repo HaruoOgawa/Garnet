@@ -69,4 +69,9 @@ namespace graphics
 	{
 		return m_MaterialIndex;
 	}
+
+	const std::shared_ptr<CVertexBuffer>& CPrimitive::GetVertexBuffer() const
+	{
+		return m_VertexBuffer;
+	}
 }
