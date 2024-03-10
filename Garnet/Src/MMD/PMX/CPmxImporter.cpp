@@ -329,9 +329,6 @@ namespace mmd
 				material->ReplacePreloadUniformValue("r_SkinMatrixBuffer", &SkinMatrixList[0], static_cast<int>(SkinMatrixList.size()) * sizeof(glm::mat4), 1);
 			}
 
-			// モーフ
-			material->ReplacePreloadUniformValue("useMorph", &glm::ivec1(1)[0], sizeof(int), 0);
-
 			MaterialList.push_back(material);
 		}
 
@@ -375,14 +372,6 @@ namespace mmd
 				"JOINTS_0",
 				"WEIGHTS_0",
 			};
-
-			// 頂点アトリビュート数の制約上、モーフは2個が限界
-			// もっとたくさん扱いたい場合はCPUMorphExecutorやGPGPUMorphExecutorを使用する(この2つが便利だったら頂点アトリビュートのモーフは消すかも)
-			for (int MorphIndex = 0; MorphIndex < 2; MorphIndex++)
-			{
-				std::string Name = "MORPHVEC_" + std::to_string(MorphIndex);
-				NeedAttribNameList.push_back(Name);
-			}
 
 			std::map<std::string, std::vector<float>> ReservedVertexDataList;
 			std::map<std::string, graphics::EDataType> ReservedDataTypeList;
@@ -482,42 +471,6 @@ namespace mmd
 					ReservedDataTypeList.emplace("WEIGHTS_0", graphics::EDataType::TYPE_FLOAT);
 					ReservedByteStrideList.emplace("WEIGHTS_0", 0);
 				}
-
-				// モーフ
-				{
-					const auto& PmxMorphList = model.GetPmxVertexMorphList();
-
-					// 頂点アトリビュート数の制約上、モーフは2個が限界
-					// もっとたくさん扱いたい場合はCPUMorphExecutorやGPGPUMorphExecutorを使用する(この2つが便利だったら頂点アトリビュートのモーフは消すかも)
-					for (int MorphIndex = 0; MorphIndex < 2; MorphIndex++)
-					{
-						std::string Name = "MORPHVEC_" + std::to_string(MorphIndex);
-
-						// まず全て0埋めする
-						std::vector<float> AttributeData = std::vector<float>(PmxMesh->GetPositionAttribute().size(), 0.0f);
-
-						animation::EBlendShapeName CurrentShapeName = static_cast<animation::EBlendShapeName>(MorphIndex);
-						auto PmxMorph = PmxMorphList.find(CurrentShapeName);
-
-						// 頂点モーフのデータを取得する
-						if (PmxMorph != PmxMorphList.end())
-						{
-							for (const auto& VertexMorph : (*PmxMorph).second->GetVertexMorphList())
-							{
-								int VertexIndex = VertexMorph.first;
-								const auto& Offset = VertexMorph.second;
-
-								AttributeData[VertexIndex * 3 + 0] = Offset.x;
-								AttributeData[VertexIndex * 3 + 1] = Offset.y;
-								AttributeData[VertexIndex * 3 + 2] = Offset.z;
-							}
-						}
-
-						ReservedVertexDataList.emplace(Name, AttributeData);
-						ReservedDataTypeList.emplace(Name, graphics::EDataType::TYPE_FLOAT);
-						ReservedByteStrideList.emplace(Name, 0);
-					}
-				}
 			}
 
 			// 頂点バッファを構築
@@ -527,7 +480,7 @@ namespace mmd
 					// ディメンションを登録
 					int Dimention = 1;
 
-					if (AttribName == "POSITION" || AttribName == "NORMAL" || AttribName.find("MORPHVEC_") != -1)
+					if (AttribName == "POSITION" || AttribName == "NORMAL")
 					{
 						Dimention = 3;
 					}

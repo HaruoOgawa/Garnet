@@ -30,7 +30,6 @@ namespace scene
 		std::shared_ptr<graphics::CMaterialFrame> m_SimpleTextureMF;
 		std::shared_ptr<graphics::CMaterialFrame> m_DepthMF;
 		std::shared_ptr<graphics::CMaterialFrame> m_PBRMF;
-		std::shared_ptr<graphics::CMaterialFrame> m_PBRMorph_MF;
 
 		//
 		std::shared_ptr<graphics::CTexture> m_Cube_Texture;

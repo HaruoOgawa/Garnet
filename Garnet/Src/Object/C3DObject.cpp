@@ -421,9 +421,6 @@ namespace object
 
 			int SkeletonIndex = Node->GetSkeletonIndex();
 
-			// モーフウェイト
-			const auto& MorphWeights = Node->GetCurrentMorphWeights();
-
 			for (int PrimitiveIndex = 0; PrimitiveIndex < Mesh->GetPrimitiveList().size(); PrimitiveIndex++)
 			{
 				const auto& Primitive = Mesh->GetPrimitiveList()[PrimitiveIndex];
@@ -480,15 +477,6 @@ namespace object
 					Material->SetUniformValue("r_SkinMatrixBuffer", &m_CurrentSkinMatrixList[0], sizeof(glm::mat4) * static_cast<int>(m_CurrentSkinMatrixList.size()), DynamicOffsetNum);
 				}
 #endif
-				// モーフ
-				for (int MorphIndex = 0; MorphIndex < MorphWeights.size(); MorphIndex++)
-				{
-					std::string MorphUniformName = "MorphWeight_" + std::to_string(MorphIndex);
-					float Weight = MorphWeights[MorphIndex];
-
-					Material->SetUniformValue(MorphUniformName, &glm::vec1(Weight)[0], sizeof(float), DynamicOffsetNum);
-				}
-
 				// 描画実行
 				if (!Primitive->Draw(Material, DynamicOffsetNum, IsDepthPass)) return false;
 
