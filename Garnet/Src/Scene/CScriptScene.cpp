@@ -40,6 +40,7 @@ namespace scene
 		m_TdaMiku_Model(std::make_shared<object::C3DObject>("", "ShadowPass")),
 		m_VMDAnimationSet(std::make_shared<animation::CAnimationClipSet>()),
 		m_ExpressionVMD(std::make_shared<animation::CAnimationClipSet>()),
+		m_RipSyncVMD(std::make_shared<animation::CAnimationClipSet>()),
 
 		m_Background(std::make_shared<object::C3DObject>("", "ShadowPass")),
 		m_IBL_Skybox_Texture(pGraphicsAPI->CreateTexture(false)),
@@ -71,6 +72,7 @@ namespace scene
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CAnimationLoader>("Resources\\Motions\\Run_m4th_Loop.vmd", m_VMDAnimationSet));
 		//pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CAnimationLoader>("Resources\\Motions\\BackFlip.vmd", m_VMDAnimationSet));
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CAnimationLoader>("Resources\\Motions\\biglove_expression.vmd", m_ExpressionVMD));
+		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CAnimationLoader>("Resources\\Motions\\biglove_Ripsync.vmd", m_RipSyncVMD));
 		
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CTextureLoader>(pGraphicsAPI, std::vector<std::string>({ "Resources\\IBL\\output_skybox.hdr" }), m_IBL_Skybox_Texture));
 		//pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CTextureLoader>(pGraphicsAPI, std::vector<std::string>({ "Resources\\Cubemaps\\environment\\environment_back_0.jpg", "Resources\\Cubemaps\\environment\\environment_bottom_0.jpg", "Resources\\Cubemaps\\environment\\environment_front_0.jpg", "Resources\\Cubemaps\\environment\\environment_left_0.jpg", "Resources\\Cubemaps\\environment\\environment_right_0.jpg", "Resources\\Cubemaps\\environment\\environment_top_0.jpg" }), m_Cube_Texture));
@@ -361,12 +363,14 @@ namespace scene
 			if (Clip) m_TdaMiku_Model->AddHumanoidAnimationClip(Clip, "Walk", { nullptr, "" }, true);
 
 			auto ExpressionClip = m_ExpressionVMD->GetBlendShapeClip(0);
-			if (ExpressionClip) m_TdaMiku_Model->AddBlendShapeClip(ExpressionClip, "Face");
+			if (ExpressionClip) m_TdaMiku_Model->AddBlendShapeClip(ExpressionClip, "Face", true);
 
-			//auto RipSyncClip = m_Rip
+			auto RipSyncClip = m_RipSyncVMD->GetBlendShapeClip(0);
+			if (RipSyncClip) m_TdaMiku_Model->AddBlendShapeClip(RipSyncClip, "RipSync", true);
 
 			m_TdaMiku_Model->ChangeMotion("Walk");
-			m_TdaMiku_Model->ChangeBlendShape(0);
+			m_TdaMiku_Model->PlayBlendShape("Face");
+			m_TdaMiku_Model->PlayBlendShape("RipSync");
 		}
 
 		// m_Background

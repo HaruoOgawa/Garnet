@@ -5,8 +5,7 @@
 
 namespace animation
 {
-	CBlendShapeController::CBlendShapeController():
-		m_CurrentClipIndex(-1)
+	CBlendShapeController::CBlendShapeController()
 	{
 	}
 
@@ -18,13 +17,13 @@ namespace animation
 	{
 		// ウェイトをリセット
 		ResetNodeWeights();
-
-		m_CurrentClipIndex = -1;
 	}
 
-	void CBlendShapeController::AddBlendShapeClip(const std::shared_ptr<animation::CBlendShapeClip>& Clip, const std::string& MotionName)
+	void CBlendShapeController::AddBlendShapeClip(const std::shared_ptr<animation::CBlendShapeClip>& Clip, const std::string& MotionName, bool IsLoop)
 	{
-		m_BlendShapeClip.push_back(Clip);
+		Clip->SetIsLoop(IsLoop);
+
+		m_BlendShapeClipMap.emplace(MotionName, Clip);
 	}
 
 	void CBlendShapeController::AddBlendShapeNode(const std::shared_ptr<object::CNode>& Node)
@@ -34,15 +33,27 @@ namespace animation
 
 	bool CBlendShapeController::Update(float DeltaSecondsTime)
 	{
-		// アニメーションの計算
-		if (m_CurrentClipIndex >= 0 && m_CurrentClipIndex < m_BlendShapeClip.size())
-		{
-			const auto& Clip = m_BlendShapeClip[m_CurrentClipIndex];
-			if (!Clip->Update(DeltaSecondsTime)) return false;
+		if (m_PlayingBlendShapeSet.size() == 0) return true;
 
-			// ウェイトを反映
-			ApplyNodeWeights(Clip->GetCurrentMorphWeightMap());
+		// 初期化
+		m_MorphWeightsList.clear();
+
+		// アニメーションの計算
+		for (const auto& ClipName : m_PlayingBlendShapeSet)
+		{
+			auto it = m_BlendShapeClipMap.find(ClipName);
+
+			if (it != m_BlendShapeClipMap.end())
+			{
+				auto& Clip = it->second;
+				if (!Clip->Update(DeltaSecondsTime)) return false;
+
+				m_MorphWeightsList.push_back(Clip->GetCurrentMorphWeightMap());
+			}
 		}
+
+		// ウェイトを反映
+		ApplyNodeWeights();
 
 		return true;
 	}
@@ -57,10 +68,8 @@ namespace animation
 		}
 	}
 
-	void CBlendShapeController::ApplyNodeWeights(const std::map<EBlendShapeName, float>& CurrentMorphWeightMap)
+	void CBlendShapeController::ApplyNodeWeights()
 	{
-		// 複数BlendShapeClipに対応するときはCurrentMorphWeightMapをメンバ変数にすると良さそう？
-
 		// mapからデータを取得する(map)
 		std::vector<float> MorphWeights;
 
@@ -69,13 +78,24 @@ namespace animation
 		{
 			EBlendShapeName BlendShapeName = static_cast<EBlendShapeName>(i);
 
-			auto it = CurrentMorphWeightMap.find(BlendShapeName);
+			bool FindResult = false;
 
-			if (it != CurrentMorphWeightMap.end())
+			for (const auto& CurrentMorphWeightMap : m_MorphWeightsList)
 			{
-				MorphWeights.push_back(it->second);
+				auto it = CurrentMorphWeightMap.find(BlendShapeName);
+
+				if (it != CurrentMorphWeightMap.end())
+				{
+					MorphWeights.push_back(it->second);
+
+					FindResult = true;
+
+					break;
+				}
 			}
-			else
+
+			// 見つからなければ初期値を入れる
+			if (!FindResult)
 			{
 				MorphWeights.push_back(0.0f);
 			}
@@ -90,12 +110,14 @@ namespace animation
 		}
 	}
 
-	// インデックス指定でモーションを変更
-	void CBlendShapeController::ChangeBlendShape(int Index)
+	void CBlendShapeController::PlayBlendShape(const std::string& MotionName)
 	{
-		Reset();
+		m_PlayingBlendShapeSet.emplace(MotionName);
+	}
 
-		m_CurrentClipIndex = Index;
+	void CBlendShapeController::StopBlendShape(const std::string& MotionName)
+	{
+		m_PlayingBlendShapeSet.erase(MotionName);
 	}
 }
 #endif

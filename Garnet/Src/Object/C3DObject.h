@@ -104,7 +104,7 @@ namespace object
 		void SetAnimationSkeleton(const std::shared_ptr<animation::CSkeleton>& Skeleton);
 		void AddAnimationClip(const std::shared_ptr<animation::CAnimationClip>& Clip);
 		void AddHumanoidAnimationClip(const std::shared_ptr<animation::CAnimationClip>& SourceClip, const std::string& MotionName, animation::SAnimationLayout Layout, bool IsLoop);
-		void AddBlendShapeClip(const std::shared_ptr<animation::CBlendShapeClip>& Clip, const std::string& MotionName);
+		void AddBlendShapeClip(const std::shared_ptr<animation::CBlendShapeClip>& Clip, const std::string& MotionName, bool IsLoop);
 
 		const std::vector<std::shared_ptr<animation::CAnimationClip>>& GetAnimationClipList() const;
 #endif
@@ -123,7 +123,8 @@ namespace object
 
 		void ChangeMotion(int Index); // インデックス指定でモーションを変更
 		void ChangeMotion(const std::string& MotionName); // 名前指定でモーションを変更
-		void ChangeBlendShape(int Index); // インデックス指定でモーションを変更
+		void PlayBlendShape(const std::string& MotionName);
+		void StopBlendShape(const std::string& MotionName);
 		
 		const std::shared_ptr<graphics::CTextureSet>& GetTextureSet() const;
 

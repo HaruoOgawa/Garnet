@@ -596,9 +596,9 @@ namespace object
 		m_AnimationController->AddHumanoidAnimationClip(SourceClip, MotionName, Layout, IsLoop);
 	}
 
-	void C3DObject::AddBlendShapeClip(const std::shared_ptr<animation::CBlendShapeClip>& Clip, const std::string& MotionName)
+	void C3DObject::AddBlendShapeClip(const std::shared_ptr<animation::CBlendShapeClip>& Clip, const std::string& MotionName, bool IsLoop)
 	{
-		m_BlendShapeController->AddBlendShapeClip(Clip, MotionName);
+		m_BlendShapeController->AddBlendShapeClip(Clip, MotionName, IsLoop);
 	}
 
 	const std::vector<std::shared_ptr<animation::CAnimationClip>>& C3DObject::GetAnimationClipList() const
@@ -662,9 +662,14 @@ namespace object
 		m_AnimationController->ChangeMotion(MotionName);
 	}
 
-	void C3DObject::ChangeBlendShape(int Index)
+	void C3DObject::PlayBlendShape(const std::string& MotionName)
 	{
-		m_BlendShapeController->ChangeBlendShape(Index);
+		m_BlendShapeController->PlayBlendShape(MotionName);
+	}
+
+	void C3DObject::StopBlendShape(const std::string& MotionName)
+	{
+		m_BlendShapeController->StopBlendShape(MotionName);
 	}
 
 	const std::shared_ptr<graphics::CTextureSet>& C3DObject::GetTextureSet() const
