@@ -9,8 +9,15 @@ namespace graphics
 
 	CVertexBuffer::~CVertexBuffer()
 	{
+		Release();
+	}
+
+	void CVertexBuffer::Release()
+	{
 		m_Vertices.clear();
 		m_AttributeDimensions.clear();
+		m_AttribDataTypes.clear();
+		m_AttribByteStrides.clear();
 	}
 
 	void CVertexBuffer::SetVertices(const std::vector<std::vector<float>>& Vertices)

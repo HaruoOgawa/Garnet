@@ -9,7 +9,13 @@ namespace graphics
 
 	CIndexBuffer::~CIndexBuffer()
 	{
+		Release();
+	}
+
+	void CIndexBuffer::Release()
+	{
 		m_Indices.clear();
+		m_UINTIndices.clear();
 	}
 
 	void CIndexBuffer::SetIndices(const std::vector<unsigned short>& Indices)

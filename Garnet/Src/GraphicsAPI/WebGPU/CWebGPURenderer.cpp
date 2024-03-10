@@ -82,6 +82,22 @@ namespace api
 		return true;
 	}
 
+	bool CWebGPURenderer::UpdateVertexBuffer(const std::vector<float>& PosAttribute, const std::shared_ptr<graphics::CVertexBuffer>& VertexBuffer)
+	{
+		const CWebGPUVertexBuffer* pWebGPUVertexBuffer = static_cast<const CWebGPUVertexBuffer*>(VertexBuffer.get());
+
+		const auto& BufferList = pWebGPUVertexBuffer->GetVertexBufferList();
+
+		// ひとまず0番目に頂点位置が入っている前提でコピーを行う
+		// 後ほど頂点バッファの列挙型を導入する
+		if (BufferList.size() > 0)
+		{
+			wgpuQueueWriteBuffer(m_pGraphicsAPI->GetQueue(), BufferList[0], 0, &PosAttribute[0], sizeof(float) * PosAttribute.size());
+		}
+
+		return true;
+	}
+
 	// WebGPU Main Logic /////////////////////////////////////////////////////////////////////
 	bool CWebGPURenderer::CreateGraphicsPipeline(const std::shared_ptr<graphics::CVertexBuffer>& VertexBuffer, const std::shared_ptr<graphics::CIndexBuffer>& IndexBuffer, api::CWebGPUMaterial* pWebGPUMat)
 	{

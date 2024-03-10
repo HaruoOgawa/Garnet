@@ -37,6 +37,7 @@ namespace api
 		virtual ~CVulkanVertexBuffer();
 
 		const std::vector<VkBuffer>& GetVertexBufferList() const;
+		const std::vector<VkDeviceMemory> GetVertexBufferMemoryList() const;
 
 		virtual bool Create() override;
 	};

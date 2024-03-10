@@ -7,6 +7,7 @@
 #include "CNode.h"
 #include "../Graphics/CMesh.h"
 #include "../Graphics/CMaterial.h"
+#include "../Graphics/CMorphController.h"
 #include "../Graphics/CTextureSet.h"
 #include "../Graphics/CMaterialFrame.h"
 #include "../Math/CTransform.h"
@@ -42,6 +43,8 @@ namespace object
 		std::vector<std::shared_ptr<CNode>> m_NodeList;
 		std::vector<std::shared_ptr<graphics::CMesh>> m_MeshList;
 		std::vector<std::shared_ptr<graphics::CMaterial>> m_MaterialList;
+
+		std::shared_ptr<graphics::CMorphController> m_MorphController;
 		
 		std::vector<std::vector<int>> m_RootNodeIndexList;
 
@@ -96,11 +99,15 @@ namespace object
 		void AddMaterial(const std::shared_ptr<graphics::CMaterial>& Material);
 		const std::vector<std::shared_ptr<graphics::CMaterial>>& GetMaterialList() const;
 		
+		void AddMorphNode(const std::shared_ptr<CNode>& Node);
+
 #ifdef USE_ANIMATION
+		void AddBlendShapeNode(const std::shared_ptr<CNode>& Node);
+
 		void SetAnimationSkeleton(const std::shared_ptr<animation::CSkeleton>& Skeleton);
 		void AddAnimationClip(const std::shared_ptr<animation::CAnimationClip>& Clip);
 		void AddHumanoidAnimationClip(const std::shared_ptr<animation::CAnimationClip>& SourceClip, const std::string& MotionName, animation::SAnimationLayout Layout, bool IsLoop);
-		void AddBlendShapeClip(const std::shared_ptr<animation::CBlendShapeClip>& Clip);
+		void AddBlendShapeClip(const std::shared_ptr<animation::CBlendShapeClip>& Clip, const std::string& MotionName, bool IsLoop);
 
 		const std::vector<std::shared_ptr<animation::CAnimationClip>>& GetAnimationClipList() const;
 #endif
@@ -119,7 +126,8 @@ namespace object
 
 		void ChangeMotion(int Index); // インデックス指定でモーションを変更
 		void ChangeMotion(const std::string& MotionName); // 名前指定でモーションを変更
-		void ChangeBlendShape(int Index); // インデックス指定でモーションを変更
+		void PlayBlendShape(const std::string& MotionName);
+		void StopBlendShape(const std::string& MotionName);
 		
 		const std::shared_ptr<graphics::CTextureSet>& GetTextureSet() const;
 

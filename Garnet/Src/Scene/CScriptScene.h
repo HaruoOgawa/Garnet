@@ -30,7 +30,6 @@ namespace scene
 		std::shared_ptr<graphics::CMaterialFrame> m_SimpleTextureMF;
 		std::shared_ptr<graphics::CMaterialFrame> m_DepthMF;
 		std::shared_ptr<graphics::CMaterialFrame> m_PBRMF;
-		std::shared_ptr<graphics::CMaterialFrame> m_PBRMorph_MF;
 
 		//
 		std::shared_ptr<graphics::CTexture> m_Cube_Texture;
@@ -56,6 +55,7 @@ namespace scene
 		std::shared_ptr<object::C3DObject> m_TdaMiku_Model;
 		std::shared_ptr<animation::CAnimationClipSet> m_VMDAnimationSet;
 		std::shared_ptr<animation::CAnimationClipSet> m_ExpressionVMD;
+		std::shared_ptr<animation::CAnimationClipSet> m_RipSyncVMD;
 
 		// Background
 		std::shared_ptr<graphics::CTexture> m_IBL_Skybox_Texture;

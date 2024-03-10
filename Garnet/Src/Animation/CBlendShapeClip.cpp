@@ -14,17 +14,20 @@ namespace animation
 		return m_BlendShapeNameList;
 	}
 
-	const std::vector<float>& CBlendShapeClip::GetCurrentMorphWeights() const
+	const std::map<EBlendShapeName, float>& CBlendShapeClip::GetCurrentMorphWeightMap() const
 	{
-		return m_CurrentMorphWeights;
+		return m_CurrentMorphWeightMap;
 	}
 
 	bool CBlendShapeClip::UpdateFrame(float CurrentTime)
 	{
-		m_CurrentMorphWeights.clear();
+		m_CurrentMorphWeightMap.clear();
 
-		for (const auto& Channel : m_ChannelList)
+		for (int i = 0; i < m_ChannelList.size(); i++)
 		{
+			const auto& Channel = m_ChannelList[i];
+			EBlendShapeName BlendShapeName = m_BlendShapeNameList[i];
+
 			int SamplerIndex = Channel->GetSamplerIndex();
 			if (SamplerIndex < 0 || SamplerIndex >= m_SamplerList.size()) continue;
 
@@ -41,7 +44,7 @@ namespace animation
 
 				Weight = floorf(Weight * 100.0f) / 100.0f;
 
-				m_CurrentMorphWeights.push_back(Weight);
+				m_CurrentMorphWeightMap.emplace(BlendShapeName, Weight);
 			}
 		}
 

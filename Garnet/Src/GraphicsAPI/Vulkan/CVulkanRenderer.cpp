@@ -110,6 +110,36 @@ namespace api
 		return true;
 	}
 
+	bool CVulkanRenderer::UpdateVertexBuffer(const std::vector<float>& PosAttribute, const std::shared_ptr<graphics::CVertexBuffer>& VertexBuffer)
+	{
+		const CVulkanVertexBuffer* pVulkanVertexBuffer = static_cast<const CVulkanVertexBuffer*>(VertexBuffer.get());
+
+		const auto& MemoryList = pVulkanVertexBuffer->GetVertexBufferMemoryList();
+
+		// ひとまず0番目に頂点位置が入っている前提でコピーを行う
+		// 後ほど頂点バッファの列挙型を導入する
+		if (MemoryList.size() > 0)
+		{
+			size_t bufferSize = sizeof(float) * PosAttribute.size();
+
+			// 
+			VkBuffer stagingBuffer;
+			VkDeviceMemory statingBufferMemory;
+			m_pGraphicsAPI->CreateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, statingBufferMemory);
+
+			void* data;
+
+			vkMapMemory(m_pGraphicsAPI->GetLogicalDevice(), statingBufferMemory, 0, bufferSize, 0, &data);
+			std::memcpy(data, &PosAttribute[0], bufferSize);
+			vkUnmapMemory(m_pGraphicsAPI->GetLogicalDevice(), statingBufferMemory);
+
+			//
+			m_pGraphicsAPI->CopyBuffer(stagingBuffer, pVulkanVertexBuffer->GetVertexBufferList()[0], bufferSize);
+		}
+
+		return true;
+	}
+
 	// Vulkanメインロジック /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	bool CVulkanRenderer::CreateGraphicsPipeline(const std::shared_ptr<graphics::CVertexBuffer>& VertexBuffer, const std::shared_ptr<graphics::CIndexBuffer>& IndexBuffer, api::CVulkanMaterial* pVulkanMat)
 	{

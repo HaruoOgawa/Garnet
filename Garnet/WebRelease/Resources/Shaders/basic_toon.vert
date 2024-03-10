@@ -6,8 +6,6 @@ layout(location = 2) in vec2 inTexcoord;
 layout(location = 3) in vec4 inTangent;
 layout(location = 4) in uvec4 inBone0;
 layout(location = 5) in vec4 inWeights0;
-layout(location = 6) in vec3 inMorphVec0;
-layout(location = 7) in vec3 inMorphVec1;
 
 layout(binding = 0) uniform UniformBufferObject{
 	mat4 model;
@@ -16,12 +14,12 @@ layout(binding = 0) uniform UniformBufferObject{
 	mat4 lightVPMat;
 
     float edgeSize;
-    float MorphWeight_0;
-    float MorphWeight_1;
     float fPad0;
+    float fPad1;
+    float fPad2;
 
     int useSkinMeshAnimation;
-    int useMorph;
+    int pad0;
     int drawPathIndex;
     int pad1;
 } ubo;
@@ -50,14 +48,6 @@ void main(){
     vec3 WorldBioTangent;
 
     vec3 LocalPos = inPosition;
-
-    // モーフ
-    if(ubo.useMorph != 0)
-    {
-        LocalPos +=
-            inMorphVec0 * ubo.MorphWeight_0 +
-            inMorphVec1 * ubo.MorphWeight_1;
-    }
 
     // スキンメッシュアニメーション
     if(ubo.useSkinMeshAnimation != 0)

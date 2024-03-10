@@ -30,6 +30,7 @@ namespace object
 		m_AnimationController(std::make_shared<animation::CAnimationController>()),
 		m_BlendShapeController(std::make_shared<animation::CBlendShapeController>()),
 #endif
+		m_MorphController(std::make_shared<graphics::CMorphController>()),
 		m_TextureSet(std::make_shared<graphics::CTextureSet>()),
 		m_FileName(""),
 		m_ObjectType(E3DObjectType::None),
@@ -157,9 +158,17 @@ namespace object
 		}
 
 		// Primitive
+		bool ExistMorph = false;
+
 		for (const auto& Mesh : m_MeshList)
 		{
 			if (!Mesh->CreateBuffer()) return false;
+
+			// モーフ処理が必要かどうか
+			if (Mesh->GetMorphDataList().size() > 0)
+			{
+				ExistMorph = true;
+			}
 
 			for (const auto& Primitive : Mesh->GetPrimitiveList())
 			{
@@ -178,6 +187,12 @@ namespace object
 				// 生成処理が終わったので不要なリソースを解放する
 				Primitive->Release();
 			}
+		}
+
+		// モーフ
+		if (ExistMorph)
+		{
+			if (!m_MorphController->Create(m_MeshList)) return false;
 		}
 
 		m_IsCreated = true;
@@ -361,7 +376,7 @@ namespace object
 
 #ifdef USE_ANIMATION
 		if (!m_AnimationController->Update(DeltaSecondsTime)) return false;
-		if (!m_BlendShapeController->Update(DeltaSecondsTime, m_NodeList)) return false;
+		if (!m_BlendShapeController->Update(DeltaSecondsTime)) return false;
 #endif
 		// ワールド行列の更新
 		// 全ノードマイフレーム更新しているので、そのうちキャッシュを入れて更新は必要なものだけにする
@@ -384,6 +399,9 @@ namespace object
 		if (!m_AnimationController->CalCSkinMatrixList(m_CurrentSkinMatrixList, m_ObjectTransform->GetModelMatrix())) return false;
 #endif
 
+		// モーフ
+		if (!m_MorphController->Update(DeltaSecondsTime, m_MeshList)) return false;
+
 		return true;
 	}
 
@@ -402,9 +420,6 @@ namespace object
 			const auto& Mesh = m_MeshList[MeshIndex];
 
 			int SkeletonIndex = Node->GetSkeletonIndex();
-
-			// モーフウェイト
-			const auto& MorphWeights = Node->GetCurrentMorphWeights();
 
 			for (int PrimitiveIndex = 0; PrimitiveIndex < Mesh->GetPrimitiveList().size(); PrimitiveIndex++)
 			{
@@ -462,15 +477,6 @@ namespace object
 					Material->SetUniformValue("r_SkinMatrixBuffer", &m_CurrentSkinMatrixList[0], sizeof(glm::mat4) * static_cast<int>(m_CurrentSkinMatrixList.size()), DynamicOffsetNum);
 				}
 #endif
-				// モーフ
-				for (int MorphIndex = 0; MorphIndex < MorphWeights.size(); MorphIndex++)
-				{
-					std::string MorphUniformName = "MorphWeight_" + std::to_string(MorphIndex);
-					float Weight = MorphWeights[MorphIndex];
-
-					Material->SetUniformValue(MorphUniformName, &glm::vec1(Weight)[0], sizeof(float), DynamicOffsetNum);
-				}
-
 				// 描画実行
 				if (!Primitive->Draw(Material, DynamicOffsetNum, IsDepthPass)) return false;
 
@@ -568,7 +574,19 @@ namespace object
 		m_MaterialList.push_back(Material);
 	}
 
+	void C3DObject::AddMorphNode(const std::shared_ptr<CNode>& Node)
+	{
+		m_MorphController->AddMorphNode(Node);
+	}
+
 #ifdef USE_ANIMATION
+	void C3DObject::AddBlendShapeNode(const std::shared_ptr<CNode>& Node)
+	{
+		AddMorphNode(Node);
+
+		m_BlendShapeController->AddBlendShapeNode(Node);
+	}
+
 	void C3DObject::SetAnimationSkeleton(const std::shared_ptr<animation::CSkeleton >& Skeleton)
 	{
 		m_AnimationController->SetAnimationSkeleton(Skeleton);
@@ -584,9 +602,9 @@ namespace object
 		m_AnimationController->AddHumanoidAnimationClip(SourceClip, MotionName, Layout, IsLoop);
 	}
 
-	void C3DObject::AddBlendShapeClip(const std::shared_ptr<animation::CBlendShapeClip>& Clip)
+	void C3DObject::AddBlendShapeClip(const std::shared_ptr<animation::CBlendShapeClip>& Clip, const std::string& MotionName, bool IsLoop)
 	{
-		m_BlendShapeController->AddBlendShapeClip(Clip);
+		m_BlendShapeController->AddBlendShapeClip(Clip, MotionName, IsLoop);
 	}
 
 	const std::vector<std::shared_ptr<animation::CAnimationClip>>& C3DObject::GetAnimationClipList() const
@@ -650,9 +668,14 @@ namespace object
 		m_AnimationController->ChangeMotion(MotionName);
 	}
 
-	void C3DObject::ChangeBlendShape(int Index)
+	void C3DObject::PlayBlendShape(const std::string& MotionName)
 	{
-		m_BlendShapeController->ChangeBlendShape(Index, m_NodeList);
+		m_BlendShapeController->PlayBlendShape(MotionName);
+	}
+
+	void C3DObject::StopBlendShape(const std::string& MotionName)
+	{
+		m_BlendShapeController->StopBlendShape(MotionName);
 	}
 
 	const std::shared_ptr<graphics::CTextureSet>& C3DObject::GetTextureSet() const

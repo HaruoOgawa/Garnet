@@ -21,7 +21,6 @@ namespace scene
 		m_SimpleTextureMF(std::make_shared<graphics::CMaterialFrame>()),
 		m_DepthMF(std::make_shared<graphics::CMaterialFrame>()),
 		m_PBRMF(std::make_shared<graphics::CMaterialFrame>()),
-		m_PBRMorph_MF(std::make_shared<graphics::CMaterialFrame>()),
 
 		m_SimpleMorphObj(std::make_shared<object::C3DObject>("", "ShadowPass")),
 		m_BrainStemObj(std::make_shared<object::C3DObject>("", "ShadowPass")),
@@ -40,6 +39,7 @@ namespace scene
 		m_TdaMiku_Model(std::make_shared<object::C3DObject>("", "ShadowPass")),
 		m_VMDAnimationSet(std::make_shared<animation::CAnimationClipSet>()),
 		m_ExpressionVMD(std::make_shared<animation::CAnimationClipSet>()),
+		m_RipSyncVMD(std::make_shared<animation::CAnimationClipSet>()),
 
 		m_Background(std::make_shared<object::C3DObject>("", "ShadowPass")),
 		m_IBL_Skybox_Texture(pGraphicsAPI->CreateTexture(false)),
@@ -52,28 +52,28 @@ namespace scene
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CMaterialFrameLoader>("Resources\\MaterialFrame\\SimpleTexture_MF.json", m_SimpleTextureMF));
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CMaterialFrameLoader>("Resources\\MaterialFrame\\Depth_MF.json", m_DepthMF));
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CMaterialFrameLoader>("Resources\\MaterialFrame\\PBR_MF.json", m_PBRMF));
-		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CMaterialFrameLoader>("Resources\\MaterialFrame\\PBRMorph_MF.json", m_PBRMorph_MF));
 		
 		//pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Models\\SimpleMorphTarget\\SimpleMorphTarget.gltf", m_SimpleMorphObj, "", "ShadowPass"));
 		//pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Models\\MorphPrimitivesTest\\glTF-Binary\\MorphPrimitivesTest.glb", m_SimpleMorphObj, "", "ShadowPass"));
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Models\\MorphStressTest\\glTF-Binary\\MorphStressTest.glb", m_SimpleMorphObj, "", "ShadowPass"));
-		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Models\\BrainStem\\glTF-Binary\\BrainStem.glb", m_BrainStemObj, "", "ShadowPass"));
+		/*pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Models\\BrainStem\\glTF-Binary\\BrainStem.glb", m_BrainStemObj, "", "ShadowPass"));
 
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Avatar\\X_Bot.fbx", m_XBotObject, "", "ShadowPass"));
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Avatar\\Mousey.fbx", m_MouseyObject, "", "ShadowPass"));
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Avatar\\Warrok_W_Kurniawan.fbx", m_WarrokObject, "", "ShadowPass"));
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Motions\\Walking.fbx", m_Walk_Animation, "", "ShadowPass"));
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Motions\\Jumping.fbx", m_Jump_Animation, "", "ShadowPass"));
-		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Motions\\Combo_Punch_hand.fbx", m_Punch_Animation, "", "ShadowPass"));
+		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Motions\\Combo_Punch_hand.fbx", m_Punch_Animation, "", "ShadowPass"));*/
 
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Avatar\\Tda_Miku\\Tda_Miku.pmx", m_TdaMiku_Model, "", "ShadowPass"));
 		//pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CAnimationLoader>("Resources\\Motions\\mmd_running.vmd", m_VMDAnimationSet));
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CAnimationLoader>("Resources\\Motions\\Run_m4th_Loop.vmd", m_VMDAnimationSet));
 		//pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CAnimationLoader>("Resources\\Motions\\BackFlip.vmd", m_VMDAnimationSet));
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CAnimationLoader>("Resources\\Motions\\biglove_expression.vmd", m_ExpressionVMD));
+		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CAnimationLoader>("Resources\\Motions\\biglove_Ripsync.vmd", m_RipSyncVMD));
 		
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CTextureLoader>(pGraphicsAPI, std::vector<std::string>({ "Resources\\IBL\\output_skybox.hdr" }), m_IBL_Skybox_Texture));
-		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CTextureLoader>(pGraphicsAPI, std::vector<std::string>({ "Resources\\Cubemaps\\environment\\environment_back_0.jpg", "Resources\\Cubemaps\\environment\\environment_bottom_0.jpg", "Resources\\Cubemaps\\environment\\environment_front_0.jpg", "Resources\\Cubemaps\\environment\\environment_left_0.jpg", "Resources\\Cubemaps\\environment\\environment_right_0.jpg", "Resources\\Cubemaps\\environment\\environment_top_0.jpg" }), m_Cube_Texture));
+		//pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CTextureLoader>(pGraphicsAPI, std::vector<std::string>({ "Resources\\Cubemaps\\environment\\environment_back_0.jpg", "Resources\\Cubemaps\\environment\\environment_bottom_0.jpg", "Resources\\Cubemaps\\environment\\environment_front_0.jpg", "Resources\\Cubemaps\\environment\\environment_left_0.jpg", "Resources\\Cubemaps\\environment\\environment_right_0.jpg", "Resources\\Cubemaps\\environment\\environment_top_0.jpg" }), m_Cube_Texture));
 	}
 
 	CScriptScene::~CScriptScene()
@@ -90,12 +90,12 @@ namespace scene
 	{
 		// m_SimpleMorphObj
 		{
-			if (!m_SimpleMorphObj->CreateFromMemory(pGraphicsAPI, pPhysicsEngine, pLoadWorker, m_PBRMorph_MF, m_DepthMF)) return false;
+			if (!m_SimpleMorphObj->CreateFromMemory(pGraphicsAPI, pPhysicsEngine, pLoadWorker, m_PBRMF, m_DepthMF)) return false;
 			m_SimpleMorphObj->ChangeMotion(0);
 		}
 		
 		// m_BrainStemObj
-		{
+		/*{
 			if (!m_BrainStemObj->CreateFromMemory(pGraphicsAPI, pPhysicsEngine, pLoadWorker, m_PBRMF, m_DepthMF)) return false;
 			m_BrainStemObj->ChangeMotion(0);
 		}
@@ -173,7 +173,7 @@ namespace scene
 
 			auto PhysicsBox = pPhysicsEngine->CreatePhysicsBox(glm::vec3(0.5f), true, 0.0f, {});
 
-			//if (!m_PhysicsGround->CreateSimply(pGraphicsAPI, pPhysicsEngine, graphics::CPresetPrimitive::CreateBox(pGraphicsAPI), Material, m_DepthMF, LocalTransform, PhysicsBox)) return false;
+			if (!m_PhysicsGround->CreateSimply(pGraphicsAPI, pPhysicsEngine, graphics::CPresetPrimitive::CreateBox(pGraphicsAPI), Material, m_DepthMF, LocalTransform, PhysicsBox)) return false;
 		}
 
 		// m_PhysicsSphere
@@ -288,8 +288,8 @@ namespace scene
 			PhysicsSphere4->ReserveConstraint(PhysicsSphere3, physics::EJointType::SPRING_6DOF, JParam);
 
 			// Create
-			//if (!m_PhysicsSphere->Create(pGraphicsAPI, pPhysicsEngine, m_DepthMF)) return false;
-		}
+			if (!m_PhysicsSphere->Create(pGraphicsAPI, pPhysicsEngine, m_DepthMF)) return false;
+		}*/
 
 		// m_PhysicsCubeList
 		/*{
@@ -361,10 +361,14 @@ namespace scene
 			if (Clip) m_TdaMiku_Model->AddHumanoidAnimationClip(Clip, "Walk", { nullptr, "" }, true);
 
 			auto ExpressionClip = m_ExpressionVMD->GetBlendShapeClip(0);
-			if (ExpressionClip) m_TdaMiku_Model->AddBlendShapeClip(ExpressionClip);
+			if (ExpressionClip) m_TdaMiku_Model->AddBlendShapeClip(ExpressionClip, "Face", true);
+
+			auto RipSyncClip = m_RipSyncVMD->GetBlendShapeClip(0);
+			if (RipSyncClip) m_TdaMiku_Model->AddBlendShapeClip(RipSyncClip, "RipSync", true);
 
 			m_TdaMiku_Model->ChangeMotion("Walk");
-			m_TdaMiku_Model->ChangeBlendShape(0);
+			m_TdaMiku_Model->PlayBlendShape("Face");
+			m_TdaMiku_Model->PlayBlendShape("RipSync");
 		}
 
 		// m_Background
@@ -539,20 +543,6 @@ namespace scene
 
 		if (m_TdaMiku_Model)
 		{
-			float Weight = fabsf(sinf(DrawInfo->GetSecondsTime()));
-
-			{
-				const auto& Material = m_TdaMiku_Model->GetMaterialList()[7];
-				std::string MorphUniformName = "MorphWeight_" + std::to_string(1);
-				Material->SetUniformValue(MorphUniformName, &glm::vec1(Weight)[0], sizeof(float), 1);
-			}
-
-			{
-				const auto& Material = m_TdaMiku_Model->GetMaterialList()[8];
-				std::string MorphUniformName = "MorphWeight_" + std::to_string(1);
-				Material->SetUniformValue(MorphUniformName, &glm::vec1(Weight)[0], sizeof(float), 1);
-			}
-
 			if (!m_TdaMiku_Model->Draw(IsDepthPass, false, Camera, Projection, DrawInfo, m_DebugSphere)) return false;
 			//if (!m_TdaMiku_Model->Draw(IsDepthPass, true, Camera, Projection, DrawInfo, nullptr)) return false;
 		}

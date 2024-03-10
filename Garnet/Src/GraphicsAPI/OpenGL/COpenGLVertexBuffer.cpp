@@ -4,12 +4,18 @@
 namespace api
 {
 	COpenGLVertexBuffer::COpenGLVertexBuffer(api::COpenGLAPI* pGraphicsAPI):
-		m_pGraphicsAPI(pGraphicsAPI)
+		m_pGraphicsAPI(pGraphicsAPI),
+		m_VertexBuffer(-1)
 	{
 	}
 
 	COpenGLVertexBuffer::~COpenGLVertexBuffer()
 	{
+	}
+
+	GLuint COpenGLVertexBuffer::GetVertexBufferIndex() const
+	{
+		return m_VertexBuffer;
 	}
 
 	bool COpenGLVertexBuffer::Create()
@@ -21,8 +27,6 @@ namespace api
 	{
 		for (int location = 0; location < GetVertices().size(); location++)
 		{
-			GLuint vertexBuffer;
-
 			const auto& data = GetVertices()[location];
 			int dimention = GetAttributeDimensions()[location];
 			GLenum attribDataType = GetGLenumDataType(GetAttribDataTypes()[location]);
@@ -30,9 +34,10 @@ namespace api
 			// http://muko.damember.org/gl4/html-ja/glVertexAttribPointer.xhtml
 			GLsizei byteStride = GetAttribByteStrides()[location];
 
-			glGenBuffers(1, &vertexBuffer);
-			glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-			glBufferData(GL_ARRAY_BUFFER, data.size() * sizeof(data[0]), &data[0], GL_STATIC_DRAW);
+			glGenBuffers(1, &m_VertexBuffer);
+			glBindBuffer(GL_ARRAY_BUFFER, m_VertexBuffer);
+			//glBufferData(GL_ARRAY_BUFFER, data.size() * sizeof(data[0]), &data[0], GL_STATIC_DRAW);
+			glBufferData(GL_ARRAY_BUFFER, data.size() * sizeof(data[0]), &data[0], GL_DYNAMIC_DRAW);
 
 			glEnableVertexAttribArray(location);
 			if (attribDataType == GL_FLOAT)
@@ -52,7 +57,7 @@ namespace api
 		return true;
 	}
 
-	GLenum COpenGLVertexBuffer::GetGLenumDataType(graphics::EDataType DataType)
+	GLenum COpenGLVertexBuffer::GetGLenumDataType(graphics::EDataType DataType) const
 	{
 		GLenum result = GL_FLOAT;
 
@@ -82,6 +87,16 @@ namespace api
 		}
 
 		return result;
+	}
+
+	void COpenGLVertexBuffer::AddRefRenderer(COpenGLRenderer* Renderder)
+	{
+		m_RefRendererList.push_back(Renderder);
+	}
+
+	const std::vector<COpenGLRenderer*>& COpenGLVertexBuffer::GetRefRendererList() const
+	{
+		return m_RefRendererList;
 	}
 }
 #endif

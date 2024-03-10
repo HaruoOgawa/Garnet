@@ -38,6 +38,11 @@ namespace api
 		return m_VertexBufferList;
 	}
 
+	const std::vector<VkDeviceMemory> CVulkanVertexBuffer::GetVertexBufferMemoryList() const
+	{
+		return m_VertexBufferMemoryList;
+	}
+
 	bool CVulkanVertexBuffer::Create()
 	{
 		// 頂点バッファオブジェクトの生成

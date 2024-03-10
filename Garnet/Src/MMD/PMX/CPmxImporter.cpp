@@ -18,8 +18,8 @@
 
 namespace mmd
 {
-	bool CPmxImporter::ImportPmx(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, const std::string& ModelFileName, const std::vector<unsigned char>& Data, object::C3DObject* Object,
-		const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame)
+	bool CPmxImporter::ImportPmx(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, const std::string& ModelFileName, 
+		const std::vector<unsigned char>& Data, object::C3DObject* Object, const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame)
 	{
 		CPmxModel model;
 
@@ -68,7 +68,7 @@ namespace mmd
 
 		// メッシュ
 		std::vector<std::shared_ptr<graphics::CMesh>> MeshList;
-		if (!CreateMeshList(pGraphicsAPI, model, MeshList, RootNode, NodeList, MaterialList, (Skeleton->GetBoneList().size() > 0))) return false;
+		if (!CreateMeshList(pGraphicsAPI, Object, model, MeshList, RootNode, NodeList, MaterialList, (Skeleton->GetBoneList().size() > 0))) return false;
 
 		// 剛体
 		//if (!CreateRigidbody(pPhysicsEngine, model, Skeleton)) return false;
@@ -329,16 +329,14 @@ namespace mmd
 				material->ReplacePreloadUniformValue("r_SkinMatrixBuffer", &SkinMatrixList[0], static_cast<int>(SkinMatrixList.size()) * sizeof(glm::mat4), 1);
 			}
 
-			// モーフ
-			material->ReplacePreloadUniformValue("useMorph", &glm::ivec1(1)[0], sizeof(int), 0);
-
 			MaterialList.push_back(material);
 		}
 
 		return true;
 	}
 
-	bool CPmxImporter::CreateMeshList(api::IGraphicsAPI* pGraphicsAPI, const CPmxModel& model, std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, const std::shared_ptr<object::CNode>& RootNode, std::vector<std::shared_ptr<object::CNode>>& NodeList,
+	bool CPmxImporter::CreateMeshList(api::IGraphicsAPI* pGraphicsAPI, object::C3DObject* Object, const CPmxModel& model, std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, 
+		const std::shared_ptr<object::CNode>& RootNode, std::vector<std::shared_ptr<object::CNode>>& NodeList,
 		const std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList, bool ExistSkeleton)
 	{
 		// 明示的にMeshNodeを作成
@@ -374,14 +372,6 @@ namespace mmd
 				"JOINTS_0",
 				"WEIGHTS_0",
 			};
-
-			// 頂点アトリビュート数の制約上、モーフは2個が限界
-			// もっとたくさん扱いたい場合はCPUMorphExecutorやGPGPUMorphExecutorを使用する(この2つが便利だったら頂点アトリビュートのモーフは消すかも)
-			for (int MorphIndex = 0; MorphIndex < 2; MorphIndex++)
-			{
-				std::string Name = "MORPHVEC_" + std::to_string(MorphIndex);
-				NeedAttribNameList.push_back(Name);
-			}
 
 			std::map<std::string, std::vector<float>> ReservedVertexDataList;
 			std::map<std::string, graphics::EDataType> ReservedDataTypeList;
@@ -481,42 +471,6 @@ namespace mmd
 					ReservedDataTypeList.emplace("WEIGHTS_0", graphics::EDataType::TYPE_FLOAT);
 					ReservedByteStrideList.emplace("WEIGHTS_0", 0);
 				}
-
-				// モーフ
-				{
-					const auto& PmxMorphList = model.GetPmxVertexMorphList();
-
-					// 頂点アトリビュート数の制約上、モーフは2個が限界
-					// もっとたくさん扱いたい場合はCPUMorphExecutorやGPGPUMorphExecutorを使用する(この2つが便利だったら頂点アトリビュートのモーフは消すかも)
-					for (int MorphIndex = 0; MorphIndex < 2; MorphIndex++)
-					{
-						std::string Name = "MORPHVEC_" + std::to_string(MorphIndex);
-
-						// まず全て0埋めする
-						std::vector<float> AttributeData = std::vector<float>(PmxMesh->GetPositionAttribute().size(), 0.0f);
-
-						animation::EBlendShapeName CurrentShapeName = static_cast<animation::EBlendShapeName>(MorphIndex);
-						auto PmxMorph = PmxMorphList.find(CurrentShapeName);
-
-						// 頂点モーフのデータを取得する
-						if (PmxMorph != PmxMorphList.end())
-						{
-							for (const auto& VertexMorph : (*PmxMorph).second->GetVertexMorphList())
-							{
-								int VertexIndex = VertexMorph.first;
-								const auto& Offset = VertexMorph.second;
-
-								AttributeData[VertexIndex * 3 + 0] = Offset.x;
-								AttributeData[VertexIndex * 3 + 1] = Offset.y;
-								AttributeData[VertexIndex * 3 + 2] = Offset.z;
-							}
-						}
-
-						ReservedVertexDataList.emplace(Name, AttributeData);
-						ReservedDataTypeList.emplace(Name, graphics::EDataType::TYPE_FLOAT);
-						ReservedByteStrideList.emplace(Name, 0);
-					}
-				}
 			}
 
 			// 頂点バッファを構築
@@ -526,7 +480,7 @@ namespace mmd
 					// ディメンションを登録
 					int Dimention = 1;
 
-					if (AttribName == "POSITION" || AttribName == "NORMAL" || AttribName.find("MORPHVEC_") != -1)
+					if (AttribName == "POSITION" || AttribName == "NORMAL")
 					{
 						Dimention = 3;
 					}
@@ -672,7 +626,13 @@ namespace mmd
 
 				// Pmxでは頂点バッファは１つでインデックスバッファが複数個あり、頂点バッファは全体で共有なので最初のプリミティブを指定する
 				// 共有頂点バッファを更新すれば全体のメッシュにモーフが適応できるため
-				Mesh->SetMorphDataList(0, MorphDataList);
+				Mesh->SetMorphDataList(Mesh->GetPrimitiveList()[0], 0, MorphDataList);
+
+				// Pmxは特殊なので他のプリミティブは明示的にモーフを持っているということにする
+				for (const auto& Primitive : Mesh->GetPrimitiveList())
+				{
+					Primitive->SetUseMorph(true);
+				}
 
 				// メッシュを登録
 				MeshList.push_back(Mesh);
@@ -681,6 +641,9 @@ namespace mmd
 				int SkeletonIndex = (ExistSkeleton) ? 0 : -1;
 				MeshNode->SetSkeletonIndex(SkeletonIndex);
 				MeshNode->SetMeshIndex(0);
+
+				// モーフノード(ブレンドシェイプノード)として登録
+				Object->AddBlendShapeNode(MeshNode);
 			}
 		}
 

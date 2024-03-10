@@ -12,7 +12,8 @@ namespace graphics
 		m_IndexBuffer(IndexBuffer),
 		m_Renderer(nullptr),
 		m_DepthRenderer(nullptr),
-		m_MaterialIndex(MaterialIndex)
+		m_MaterialIndex(MaterialIndex),
+		m_UseMorph(false)
 	{
 	}
 	
@@ -23,9 +24,12 @@ namespace graphics
 	void CPrimitive::Release()
 	{
 		// 生成処理が終わったので不要なリソースを解放する
-		// やっぱりBufferのRelease用関数を作った方がいいかも(GPUのデータはあとで使うから)
-		/*m_IndexBuffer = nullptr;
-		m_VertexBuffer = nullptr;*/
+		// (モーフが使っていなければ)
+		if (!m_UseMorph)
+		{
+			m_VertexBuffer->Release();
+			m_IndexBuffer->Release();
+		}
 	}
 
 	bool CPrimitive::Create(api::IGraphicsAPI* pGraphicsAPI, const std::string& PassName, const std::shared_ptr<graphics::CMaterial>& Material, bool IsDepth)
@@ -60,6 +64,11 @@ namespace graphics
 		return true;
 	}
 
+	const std::shared_ptr<graphics::IRenderer>& CPrimitive::GetRenderer() const
+	{
+		return m_Renderer;
+	}
+
 	void CPrimitive::SetMaterialIndex(int Index)
 	{
 		m_MaterialIndex = Index;
@@ -68,5 +77,16 @@ namespace graphics
 	int CPrimitive::GetMaterialIndex()const
 	{
 		return m_MaterialIndex;
+	}
+
+	const std::shared_ptr<CVertexBuffer>& CPrimitive::GetVertexBuffer() const
+	{
+		return m_VertexBuffer;
+	}
+
+	// モーフ
+	void CPrimitive::SetUseMorph(bool Flag)
+	{
+		m_UseMorph = Flag;
 	}
 }

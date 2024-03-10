@@ -25,6 +25,9 @@ namespace graphics
 		std::shared_ptr<graphics::IRenderer>				 m_DepthRenderer;
 		
 		int													 m_MaterialIndex;
+
+		// モーフ
+		bool m_UseMorph;
 	public:
 		CPrimitive(const std::shared_ptr<CVertexBuffer>& VertexBuffer, const std::shared_ptr<CIndexBuffer>& IndexBuffer, int MaterialIndex);
 		virtual ~CPrimitive();
@@ -35,7 +38,14 @@ namespace graphics
 
 		bool Draw(const std::shared_ptr<CMaterial>& Material, int DynamicOffsetNum, bool IsDepth);
 
+		const std::shared_ptr<graphics::IRenderer>& GetRenderer() const;
+
 		void SetMaterialIndex(int Index);
 		int GetMaterialIndex() const;
+
+		const std::shared_ptr<CVertexBuffer>& GetVertexBuffer() const;
+
+		// モーフ
+		void SetUseMorph(bool Flag);
 	};
 }
