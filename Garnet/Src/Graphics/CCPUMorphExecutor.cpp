@@ -138,9 +138,9 @@ namespace graphics
 			int VertexIndex = MorphVector.first;
 			const auto& Offset = MorphVector.second;
 
-			PosAttribute[VertexIndex * 3 + 0] = Offset.x * MorphWeight;
-			PosAttribute[VertexIndex * 3 + 1] = Offset.y * MorphWeight;
-			PosAttribute[VertexIndex * 3 + 2] = Offset.z * MorphWeight;
+			PosAttribute[VertexIndex * 3 + 0] += Offset.x * MorphWeight;
+			PosAttribute[VertexIndex * 3 + 1] += Offset.y * MorphWeight;
+			PosAttribute[VertexIndex * 3 + 2] += Offset.z * MorphWeight;
 		}
 
 		return true;
