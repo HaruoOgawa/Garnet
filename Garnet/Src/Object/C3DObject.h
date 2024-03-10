@@ -7,6 +7,7 @@
 #include "CNode.h"
 #include "../Graphics/CMesh.h"
 #include "../Graphics/CMaterial.h"
+#include "../Graphics/CMorphController.h"
 #include "../Graphics/CTextureSet.h"
 #include "../Graphics/CMaterialFrame.h"
 #include "../Math/CTransform.h"
@@ -42,6 +43,8 @@ namespace object
 		std::vector<std::shared_ptr<CNode>> m_NodeList;
 		std::vector<std::shared_ptr<graphics::CMesh>> m_MeshList;
 		std::vector<std::shared_ptr<graphics::CMaterial>> m_MaterialList;
+
+		std::shared_ptr<graphics::CMorphController> m_MorphController;
 		
 		std::vector<std::vector<int>> m_RootNodeIndexList;
 

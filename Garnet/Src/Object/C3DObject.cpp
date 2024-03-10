@@ -30,6 +30,7 @@ namespace object
 		m_AnimationController(std::make_shared<animation::CAnimationController>()),
 		m_BlendShapeController(std::make_shared<animation::CBlendShapeController>()),
 #endif
+		m_MorphController(std::make_shared<graphics::CMorphController>()),
 		m_TextureSet(std::make_shared<graphics::CTextureSet>()),
 		m_FileName(""),
 		m_ObjectType(E3DObjectType::None),
@@ -157,9 +158,17 @@ namespace object
 		}
 
 		// Primitive
+		bool ExistMorph = false;
+
 		for (const auto& Mesh : m_MeshList)
 		{
 			if (!Mesh->CreateBuffer()) return false;
+
+			// モーフ処理が必要かどうか
+			if (Mesh->GetMorphDataList().size() > 0)
+			{
+				ExistMorph = true;
+			}
 
 			for (const auto& Primitive : Mesh->GetPrimitiveList())
 			{
@@ -178,6 +187,12 @@ namespace object
 				// 生成処理が終わったので不要なリソースを解放する
 				Primitive->Release();
 			}
+		}
+
+		// モーフ
+		if (ExistMorph)
+		{
+			if (!m_MorphController->Create(m_MeshList)) return false;
 		}
 
 		m_IsCreated = true;
@@ -384,6 +399,9 @@ namespace object
 		if (!m_AnimationController->CalCSkinMatrixList(m_CurrentSkinMatrixList, m_ObjectTransform->GetModelMatrix())) return false;
 #endif
 
+		// モーフ
+		if (!m_MorphController->Update(DeltaSecondsTime, m_MeshList)) return false;
+
 		return true;
 	}
 
@@ -570,7 +588,7 @@ namespace object
 
 	void C3DObject::AddMorphNode(const std::shared_ptr<CNode>& Node)
 	{
-
+		m_MorphController->AddMorphNode(Node);
 	}
 
 #ifdef USE_ANIMATION
