@@ -12,7 +12,8 @@ namespace api
 		m_PassName(PassName),
 		m_DynamicOffsetNum(0),
 		m_InstanceCount(1),
-		m_VertexArray(-1)
+		m_VertexArray(-1),
+		m_VertexBuffer(nullptr)
 	{
 	}
 
@@ -27,6 +28,11 @@ namespace api
 		{
 			glBindVertexArray(m_VertexArray);
 		}
+	}
+
+	const std::shared_ptr<graphics::CVertexBuffer>& COpenGLRenderer::GetVertexBuffer() const
+	{
+		return m_VertexBuffer;
 	}
 
 	bool COpenGLRenderer::CreateVertexArray()
@@ -53,6 +59,11 @@ namespace api
 		// IndexBuffer
 		COpenGLIndexBuffer* pOpenGLIndexBuffer = static_cast<COpenGLIndexBuffer*>(IndexBuffer.get());
 		if (!pOpenGLIndexBuffer->CreateIndexBuffer()) return false;
+
+		m_VertexBuffer = VertexBuffer;
+
+		// レンダラーの参照を追加
+		pOpenGLVertexBuffer->AddRefRenderer(this);
 
 		return true;
 	}
@@ -140,6 +151,46 @@ namespace api
 			glDrawElements(GL_TRIANGLES, pOpenGLIndexBuffer->GetIndicesCount(), pOpenGLIndexBuffer->GetGLIndiceType(), nullptr);
 		}
 		
+		return true;
+	}
+
+	bool COpenGLRenderer::UpdateVertexBuffer(const std::vector<float>& PosAttribute, const std::shared_ptr<graphics::CVertexBuffer>& VertexBuffer)
+	{
+		const COpenGLVertexBuffer* pOpenGLVertexBuffer = static_cast<const COpenGLVertexBuffer*>(VertexBuffer.get());
+
+		// 参照レンダラー全てを更新する
+		const auto& RefRendererList = pOpenGLVertexBuffer->GetRefRendererList();
+		for (const auto* Renderer : RefRendererList)
+		{
+			const COpenGLVertexBuffer* pRefRendererVertexBuffer = static_cast<const COpenGLVertexBuffer*>(Renderer->GetVertexBuffer().get());
+
+			// ひとまず0番目に頂点位置が入っている前提でコピーを行う
+			// 後ほど頂点バッファの列挙型を導入する
+			int location = 0;
+
+			int dimention = pRefRendererVertexBuffer->GetAttributeDimensions()[location];
+			GLenum attributeDataType = pRefRendererVertexBuffer->GetGLenumDataType(pRefRendererVertexBuffer->GetAttribDataTypes()[location]);
+			GLsizei byteStride = pRefRendererVertexBuffer->GetAttribByteStrides()[location];
+
+			//
+			Renderer->SetActive();
+
+			glBindBuffer(GL_ARRAY_BUFFER, pRefRendererVertexBuffer->GetVertexBufferIndex());
+			glBufferData(GL_ARRAY_BUFFER, sizeof(PosAttribute[0]) * PosAttribute.size(), &PosAttribute[0], GL_DYNAMIC_DRAW);
+
+			glEnableVertexAttribArray(location);
+			if (attributeDataType == GL_FLOAT)
+			{
+				glVertexAttribPointer(location, dimention, attributeDataType, GL_FALSE, byteStride, 0);
+			}
+			else
+			{
+				glVertexAttribIPointer(location, dimention, attributeDataType, byteStride, 0);
+			}
+
+			glBindBuffer(GL_ARRAY_BUFFER, 0);
+		}
+
 		return true;
 	}
 }

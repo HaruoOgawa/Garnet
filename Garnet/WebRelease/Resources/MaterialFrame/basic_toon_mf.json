@@ -41,17 +41,17 @@
               "initValue": [ 0.0 ]
             },
             {
-              "name": "MorphWeight_0",
-              "type": "float",
-              "initValue": [ 0.0 ]
-            },
-            {
-              "name": "MorphWeight_1",
-              "type": "float",
-              "initValue": [ 0.0 ]
-            },
-            {
               "name": "fPad0",
+              "type": "float",
+              "initValue": [ 0.0 ]
+            },
+            {
+              "name": "fPad1",
+              "type": "float",
+              "initValue": [ 0.0 ]
+            },
+            {
+              "name": "fPad2",
               "type": "float",
               "initValue": [ 0.0 ]
             },
@@ -61,7 +61,7 @@
               "initValue": [ 0 ]
             },
             {
-              "name": "useMorph",
+              "name": "pad0",
               "type": "int",
               "initValue": [ 0 ]
             },

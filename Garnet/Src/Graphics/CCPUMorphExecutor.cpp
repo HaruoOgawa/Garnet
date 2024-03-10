@@ -3,6 +3,7 @@
 #include "CVertexBuffer.h"
 #include "../Object/CNode.h"
 #include "../Debug/Message/Console.h"
+#include "../Interface/IRenderer.h"
 
 namespace graphics
 {
@@ -78,6 +79,8 @@ namespace graphics
 				// 頂点アトリビュートの初期位置を取得
 				std::vector<float> PosAttribute;
 
+				bool NeedUpdate = false;
+
 				// ToDo: ひとまず0番目に入っている前提で取得するが、頂点アトリビュート名のベクターも用意するといいかもしれない
 				PosAttribute = VertexBuffer->GetVertices()[0];
 
@@ -113,10 +116,15 @@ namespace graphics
 					const auto& MorphVectorMap = MorphVectorList[MorphIndex];
 
 					if (!ExecuteMorph(PosAttribute, MorphVectorMap, Weight)) return false;
+
+					NeedUpdate = true;
 				}
 				
 				// モーフ結果を頂点バッファに反映する
-				if (!ApplyAttribute(PosAttribute, Primitive)) return false;
+				if (NeedUpdate)
+				{
+					if (!ApplyAttribute(PosAttribute, Primitive)) return false;
+				}
 			}
 		}
 
@@ -140,12 +148,11 @@ namespace graphics
 
 	bool CCPUMorphExecutor::ApplyAttribute(const std::vector<float>& PosAttribute, const std::shared_ptr<CPrimitive>& Primitive)
 	{
-#ifdef USE_OPENGL
-		// OpenGLは1つの頂点バッファを複数のインデックスバッファで使いまわす機能がないので頂点バッファ全てを更新する
-		// つまりPrimitiveのRenderer単位で更新する
-#else
-		const auto& VertexBuffer = Primitive->GetVertexBuffer();
-#endif
+		const auto& Renderer = Primitive->GetRenderer();
+		if (Renderer)
+		{
+			if (!Renderer->UpdateVertexBuffer(PosAttribute, Primitive->GetVertexBuffer())) return false;
+		}
 
 		return true;
 	}

@@ -35,6 +35,8 @@ namespace graphics
 
 		bool Draw(const std::shared_ptr<CMaterial>& Material, int DynamicOffsetNum, bool IsDepth);
 
+		const std::shared_ptr<graphics::IRenderer>& GetRenderer() const;
+
 		void SetMaterialIndex(int Index);
 		int GetMaterialIndex() const;
 

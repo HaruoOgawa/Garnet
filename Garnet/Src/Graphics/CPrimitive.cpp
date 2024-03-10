@@ -60,6 +60,11 @@ namespace graphics
 		return true;
 	}
 
+	const std::shared_ptr<graphics::IRenderer>& CPrimitive::GetRenderer() const
+	{
+		return m_Renderer;
+	}
+
 	void CPrimitive::SetMaterialIndex(int Index)
 	{
 		m_MaterialIndex = Index;
