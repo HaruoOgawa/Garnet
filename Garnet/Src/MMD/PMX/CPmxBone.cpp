@@ -110,13 +110,13 @@ namespace mmd
 		rotMat[0][1] = XAxisVector.y;
 		rotMat[0][2] = XAxisVector.z;
 
-		rotMat[1][0] = YAxisVector.x;
-		rotMat[1][1] = YAxisVector.y;
-		rotMat[1][2] = YAxisVector.z;
+		rotMat[2][0] = YAxisVector.x;
+		rotMat[2][1] = YAxisVector.y;
+		rotMat[2][2] = YAxisVector.z;
 
-		rotMat[2][0] = ZAxisVector.x;
-		rotMat[2][1] = ZAxisVector.y;
-		rotMat[2][2] = ZAxisVector.z;
+		rotMat[1][0] = ZAxisVector.x;
+		rotMat[1][1] = ZAxisVector.y;
+		rotMat[1][2] = ZAxisVector.z;
 
 		/*rotMat[0][0] = XAxisVector.x;
 		rotMat[1][0] = XAxisVector.y;

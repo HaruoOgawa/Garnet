@@ -152,8 +152,6 @@ namespace mmd
 				// Posはワールド座標系なのでローカル座標系に戻す必要がある
 				// ただしRotは(存在すれば)ローカル軸から取得するので既にローカル座標系である
 				Pos -= ParentPmxBone->GetPos();
-
-				//Rot *= glm::inverse(ParentPmxBone->GetLocalAxis());
 			}
 
 			//
