@@ -4,6 +4,7 @@
 namespace physics
 {
 	CBulletRigidBody::CBulletRigidBody(btDiscreteDynamicsWorld* pDynamicWorld, btCollisionShape* pCollisionShape, const glm::vec3& WorldPos, const glm::quat& WorldRotate, bool IsStatic, float Mass, const SRigidbodyParam& RBParam):
+		m_RBParam(RBParam),
 		m_pDynamicWorld(pDynamicWorld),
 		m_MotionState(nullptr),
 		m_Rigidbody(nullptr),
@@ -37,6 +38,11 @@ namespace physics
 			m_Rigidbody.reset();
 			m_Rigidbody = nullptr;
 		}
+	}
+
+	const SRigidbodyParam& CBulletRigidBody::GetRbParam() const
+	{
+		return m_RBParam;
 	}
 
 	bool CBulletRigidBody::Create(btDiscreteDynamicsWorld* pDynamicWorld, btCollisionShape* pCollisionShape, const glm::vec3& WorldPos, const glm::quat& WorldRotate, bool IsStatic, float Mass, const SRigidbodyParam& RBParam)
@@ -90,7 +96,7 @@ namespace physics
 		return true;
 	}
 
-	void CBulletRigidBody::Add6DofSpringConstraint(btDiscreteDynamicsWorld* pDynamicWorld, const std::shared_ptr<CBulletRigidBody>& FixedRigidbody, SJointParam JParam, const glm::quat& FixedWorldRotate)
+	void CBulletRigidBody::Add6DofSpringConstraint(btDiscreteDynamicsWorld* pDynamicWorld, const std::shared_ptr<CBulletRigidBody>& FixedRigidbody, SJointParam JParam)
 	{
 		m_JointType = EJointType::SPRING_6DOF;
 
@@ -100,14 +106,32 @@ namespace physics
 		// frameInAはd6body0の接合点、frameInBのfixedBody1の接合点
 		// そしてその座標はframeInA・frameInBともに『『fixedBody1』』の座標を中心とした移動・回転で表される
 
-		btQuaternion RotateA = btQuaternion(JParam.Rotate6DofBody.x, JParam.Rotate6DofBody.y, JParam.Rotate6DofBody.z, JParam.Rotate6DofBody.w);
-		btQuaternion FixedRotateB = btQuaternion(FixedWorldRotate.x, FixedWorldRotate.y, FixedWorldRotate.z, FixedWorldRotate.w);
+		btTransform JointWorldTransform;
+		{
+			btMatrix3x3 rotMat;
+			rotMat.setEulerZYX(JParam.JointRotate.x, JParam.JointRotate.y, JParam.JointRotate.z);
 
-		std::shared_ptr< btGeneric6DofSpring2Constraint> Constraint = std::make_shared<btGeneric6DofSpring2Constraint>(
+			JointWorldTransform.setIdentity();
+			JointWorldTransform.setOrigin(btVector3(JParam.JointPos.x, JParam.JointPos.y, JParam.JointPos.z));
+			JointWorldTransform.setBasis(rotMat);
+		}
+
+		btTransform localA;
+		{
+			localA = GetCurrentWorldTransform().inverse() * JointWorldTransform;
+		}
+
+		btTransform localB;
+		{
+			localB = FixedRigidbody->GetCurrentWorldTransform().inverse() * JointWorldTransform;
+		}
+
+		std::shared_ptr<btGeneric6DofSpringConstraint> Constraint = std::make_shared<btGeneric6DofSpringConstraint>(
 			*m_Rigidbody.get(), 
 			*FixedRigidbody->GetbtRigidBody().get(),
-			btTransform(RotateA, { JParam.Pos6DofBody.x, JParam.Pos6DofBody.y, JParam.Pos6DofBody.z }),
-			btTransform(FixedRotateB, { 0.0f, 0.0f, 0.0f })
+			localA,
+			localB,
+			true
 		);
 
 		// 関数名の通り移動できる範囲・回転できる範囲を設定
@@ -118,13 +142,33 @@ namespace physics
 			Constraint->setAngularUpperLimit(btVector3(JParam.UpperRotateLimit.x, JParam.UpperRotateLimit.y, JParam.UpperRotateLimit.z));
 		}
 
-		// 軸単位のパラメーターを設定
+		// パラメーターを設定
 		for(int a = 0; a < 3; a++)
 		{
-			Constraint->enableSpring(a, true);
-			Constraint->setStiffness(a, 1.0f); // Stiffness: 硬さ
-			Constraint->setDamping(a, 1.0f); // Damping: 減衰力
+			if (JParam.TransSpring[a] != 0.0f)
+			{
+				Constraint->enableSpring(a, true);
+
+				if (a == 2)
+				{
+					Constraint->setStiffness(a, -JParam.TransSpring[a]); // Stiffness: 硬さ
+				}
+				else
+				{
+					Constraint->setStiffness(a, JParam.TransSpring[a]); // Stiffness: 硬さ
+				}
+				
+			}
 		}
+
+		/*for (int b = 0; b < 3; b++)
+		{
+			if (JParam.RotateSpring[b] != 0.0f)
+			{
+				Constraint->enableSpring(b + 3, true);
+				Constraint->setStiffness(b + 3, JParam.RotateSpring[b]); // Stiffness: 硬さ
+			}
+		}*/
 
 		// 現在の位置をバネの釣り合いの位置(自然長)にする
 		Constraint->setEquilibriumPoint();

@@ -132,19 +132,10 @@ namespace physics
 			{
 				// Constraints‚ð’Ç‰Á‚·‚é
 				const auto* FixedObject = static_cast<CBulletPhysicsObject*>(ReservedConstraint->FixedObject.get());
-				const auto& FixedReservedList = FixedObject->GetReservedConstraintList();
-
-				// FixedRotate‚ª‚ ‚ê‚ÎŽæ“¾
-				glm::quat FixedRotate = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
-
-				if (i < FixedReservedList.size())
-				{
-					FixedRotate = FixedReservedList[i]->JParam.Rotate6DofBody;
-				}
 
 				const auto& TargetRigidBody = FixedObject->GetRigidBody();
 
-				m_RigidBody->Add6DofSpringConstraint(pBulletPhysics->GetDynamicsWorld(), TargetRigidBody, ReservedConstraint->JParam, FixedRotate);
+				m_RigidBody->Add6DofSpringConstraint(pBulletPhysics->GetDynamicsWorld(), TargetRigidBody, ReservedConstraint->JParam);
 			}
 			else if (ReservedConstraint->JointType == EJointType::Generic_6DOF)
 			{

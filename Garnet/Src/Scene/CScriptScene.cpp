@@ -89,10 +89,10 @@ namespace scene
 	bool CScriptScene::Load(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker)
 	{
 		// m_SimpleMorphObj
-		{
+		/*{
 			if (!m_SimpleMorphObj->CreateFromMemory(pGraphicsAPI, pPhysicsEngine, pLoadWorker, m_PBRMF, m_DepthMF)) return false;
 			m_SimpleMorphObj->ChangeMotion(0);
-		}
+		}*/
 		
 		// m_BrainStemObj
 		/*{
@@ -366,9 +366,9 @@ namespace scene
 			auto RipSyncClip = m_RipSyncVMD->GetBlendShapeClip(0);
 			if (RipSyncClip) m_TdaMiku_Model->AddBlendShapeClip(RipSyncClip, "RipSync", true);
 
-			m_TdaMiku_Model->ChangeMotion("Walk");
+			/*m_TdaMiku_Model->ChangeMotion("Walk");
 			m_TdaMiku_Model->PlayBlendShape("Face");
-			m_TdaMiku_Model->PlayBlendShape("RipSync");
+			m_TdaMiku_Model->PlayBlendShape("RipSync");*/
 		}
 
 		// m_Background
