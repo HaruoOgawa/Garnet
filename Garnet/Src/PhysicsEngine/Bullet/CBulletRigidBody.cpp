@@ -86,6 +86,9 @@ namespace physics
 		m_Rigidbody->setRestitution(RBParam.Repulsion); // 反発係数の設定
 		m_Rigidbody->setFriction(RBParam.Friction); // 摩擦係数の設定
 
+		m_Rigidbody->setSleepingThresholds(0.01f, glm::radians(0.1f)); // 最適化用。物理演算を行わなくなるまでの閾値
+		m_Rigidbody->setActivationState(DISABLE_DEACTIVATION);
+
 		// ワールド座標をセットする
 		SetWorldTransform(transform);
 
@@ -112,7 +115,7 @@ namespace physics
 			rotMat.setEulerZYX(JParam.JointRotate.x, JParam.JointRotate.y, JParam.JointRotate.z);
 
 			JointWorldTransform.setIdentity();
-			JointWorldTransform.setOrigin(btVector3(JParam.JointPos.x, JParam.JointPos.y, JParam.JointPos.z));
+			JointWorldTransform.setOrigin(btVector3(JParam.JointPos.z, JParam.JointPos.y, JParam.JointPos.x));
 			JointWorldTransform.setBasis(rotMat);
 		}
 
