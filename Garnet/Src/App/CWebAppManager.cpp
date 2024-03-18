@@ -90,6 +90,8 @@ namespace webapp
 		else
 		{
 			if (!Update()) return false;
+			if (!LateUpdate()) return false;
+			if (!FixedUpdate()) return false;
 			if (!Draw()) return false;
 
 			m_InputState->Clear();
@@ -114,6 +116,20 @@ namespace webapp
 #endif // USE_INPUT_SYSTEM
 
 		if (!m_App->Update(m_GraphicsAPI.get(), m_LoadWorker.get(), m_InputState)) return false;
+
+		return true;
+	}
+
+	bool CWebAppManager::LateUpdate()
+	{
+		if (!m_App->LateUpdate(m_GraphicsAPI.get(), m_LoadWorker.get())) return false;
+
+		return true;
+	}
+
+	bool CWebAppManager::FixedUpdate()
+	{
+		if (!m_App->FixedUpdate(m_GraphicsAPI.get(), m_LoadWorker.get())) return false;
 
 		return true;
 	}

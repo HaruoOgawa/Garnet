@@ -366,9 +366,9 @@ namespace scene
 			auto RipSyncClip = m_RipSyncVMD->GetBlendShapeClip(0);
 			if (RipSyncClip) m_TdaMiku_Model->AddBlendShapeClip(RipSyncClip, "RipSync", true);
 
-			/*m_TdaMiku_Model->ChangeMotion("Walk");
+			m_TdaMiku_Model->ChangeMotion("Walk");
 			m_TdaMiku_Model->PlayBlendShape("Face");
-			m_TdaMiku_Model->PlayBlendShape("RipSync");*/
+			m_TdaMiku_Model->PlayBlendShape("RipSync");
 		}
 
 		// m_Background
@@ -386,7 +386,7 @@ namespace scene
 
 		// m_DebugSphere
 		{
-			auto Mat = m_SimpleTextureMF->CreateMaterial(pGraphicsAPI, 512, graphics::ECullMode::CULL_BACK);
+			auto Mat = m_PBRMF->CreateMaterial(pGraphicsAPI, 512, graphics::ECullMode::CULL_BACK);
 			Mat->SetEnabledZTest(false);
 			m_DebugSphere->SetScale(glm::vec3(0.1f));
 			if (!m_DebugSphere->CreateSimply(pGraphicsAPI, pPhysicsEngine, graphics::CPresetPrimitive::CreateSphere(pGraphicsAPI), Mat, m_DepthMF)) return false;
@@ -490,9 +490,45 @@ namespace scene
 		return true;
 	}
 
+	bool CScriptScene::LateUpdate(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo)
+	{
+		if (!m_IsLoaded) return true;
+
+		return true;
+	}
+
+	bool CScriptScene::FixedUpdate(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo)
+	{
+		if (!m_IsLoaded) return true;
+
+		if (m_PhysicsGround)
+		{
+			if (!m_PhysicsGround->FixedUpdate(pGraphicsAPI, pPhysicsEngine, DrawInfo->GetDeltaSecondsTime())) return false;
+		}
+
+		if (m_PhysicsSphere)
+		{
+			if (!m_PhysicsSphere->FixedUpdate(pGraphicsAPI, pPhysicsEngine, DrawInfo->GetDeltaSecondsTime())) return false;
+		}
+
+		if (m_PhysicsCubeList)
+		{
+			if (!m_PhysicsCubeList->FixedUpdate(pGraphicsAPI, pPhysicsEngine, DrawInfo->GetDeltaSecondsTime())) return false;
+		}
+
+		if (m_TdaMiku_Model)
+		{
+			if (!m_TdaMiku_Model->FixedUpdate(pGraphicsAPI, pPhysicsEngine, DrawInfo->GetDeltaSecondsTime())) return false;
+		}
+
+		return true;
+	}
+
 	bool CScriptScene::Dispatch(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
 		const std::shared_ptr<graphics::CDrawInfo>& DrawInfo)
 	{
+		if (!m_IsLoaded) return true;
+
 		return true;
 	}
 

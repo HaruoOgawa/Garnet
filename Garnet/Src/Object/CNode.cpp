@@ -100,11 +100,7 @@ namespace object
 		{
 			for (auto& PhysicsObject : m_PhysicsObjectList)
 			{
-				// ‚à‚µ‚©‚·‚é‚Æƒ[ƒJƒ‹‚Å‚¢‚¢‚©‚àH
-				glm::quat WorldRotate = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
-				math::CTransform::CastModelMatrixToRotation(m_WorldMatrix, WorldRotate);
-
-				PhysicsObject->ApplyConstraint(pPhysicsEngine, WorldRotate);
+				PhysicsObject->ApplyConstraint(pPhysicsEngine);
 			}
 		}
 	}
@@ -187,13 +183,11 @@ namespace object
 					WorldScale = glm::vec3(1.0f);
 				}
 
-				if (PhysicsObject->IsStatic())
+				PhysicsObject->SetPhysicsWorldTransform(WorldPos, WorldRotate, WorldScale);
+
+				if (PhysicsObject->IsDynamicJoint())
 				{
-					PhysicsObject->SetPhysicsWorldTransform(WorldPos, WorldRotate, WorldScale);
-				}
-				else if (PhysicsObject->IsDynamicJoint())
-				{
-					//PhysicsObject->UpdateJointWorldTransform(GetPos(), GetRot(), glm::vec3(1.0f));
+					PhysicsObject->ResetConstraintTransform();
 				}
 			}
 		}

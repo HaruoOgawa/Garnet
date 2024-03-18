@@ -290,6 +290,8 @@ namespace descapp
 			glfwPollEvents();
 
 			if (!Update()) return false;
+			if (!LateUpdate()) return false;
+			if (!FixedUpdate()) return false;
 			if (!Draw()) return false;
 
 #ifdef USE_INPUT_SYSTEM
@@ -330,6 +332,20 @@ namespace descapp
 		float FPS = 60.0f / (m_DeltaSecondsTime * 60.0f);
 		//Console::Log("[FPS] %f fps / [CurrentTime] %f s\n", FPS, m_SecondsTime);
 #endif // _DEBUG
+
+		return true;
+	}
+
+	bool CDescAppManager::LateUpdate()
+	{
+		if (!m_App->LateUpdate(m_GraphicsAPI.get(), m_LoadWorker.get())) return false;
+
+		return true;
+	}
+
+	bool CDescAppManager::FixedUpdate()
+	{
+		if (!m_App->FixedUpdate(m_GraphicsAPI.get(), m_LoadWorker.get())) return false;
 
 		return true;
 	}

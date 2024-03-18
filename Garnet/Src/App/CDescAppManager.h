@@ -55,6 +55,8 @@ namespace descapp
 		bool Release();
 
 		bool Update();
+		bool LateUpdate();
+		bool FixedUpdate();
 		bool Draw();
 	public:
 		CDescAppManager(app::EAppType AppType);

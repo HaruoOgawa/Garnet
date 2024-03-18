@@ -33,7 +33,7 @@ namespace physics
 		const SRigidbodyParam& GetRbParam() const;
 
 		void Add6DofSpringConstraint(btDiscreteDynamicsWorld* pDynamicWorld, const std::shared_ptr<CBulletRigidBody>& FixedRigidbody, SJointParam JParam);
-		void UpdateJointWorldTransform(const btTransform& transform);
+		void ResetConstraintTransform(const std::shared_ptr<CBulletRigidBody>& FixedRigidbody, SJointParam JParam);
 
 		btTransform GetCurrentWorldTransform();
 		void SetWorldTransform(const btTransform& trans);

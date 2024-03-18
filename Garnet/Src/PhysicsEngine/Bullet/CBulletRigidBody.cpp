@@ -183,19 +183,33 @@ namespace physics
 		m_6DofSpringConstraintList.push_back(Constraint);
 	}
 
-	void CBulletRigidBody::UpdateJointWorldTransform(const btTransform& transform)
+	void CBulletRigidBody::ResetConstraintTransform(const std::shared_ptr<CBulletRigidBody>& FixedRigidbody, SJointParam JParam)
 	{
 		if (m_JointType == EJointType::SPRING_6DOF)
 		{
 			for (const auto& Constraint : m_6DofSpringConstraintList)
 			{
-				if (Constraint)
+				btTransform JointWorldTransform;
 				{
-					Constraint->setFrames(
-						transform,
-						btTransform(btQuaternion::getIdentity(), { 0.0f, 0.0f, 0.0f })
-					);
+					btMatrix3x3 rotMat;
+					rotMat.setEulerZYX(JParam.JointRotate.x, JParam.JointRotate.y, JParam.JointRotate.z);
+
+					JointWorldTransform.setIdentity();
+					JointWorldTransform.setOrigin(btVector3(JParam.JointPos.z, JParam.JointPos.y, JParam.JointPos.x));
+					JointWorldTransform.setBasis(rotMat);
 				}
+
+				btTransform localA;
+				{
+					localA = GetCurrentWorldTransform().inverse() * JointWorldTransform;
+				}
+
+				btTransform localB;
+				{
+					localB = FixedRigidbody->GetCurrentWorldTransform().inverse() * JointWorldTransform;
+				}
+
+				Constraint->setFrames(localA, localB);
 			}
 		}
 		else if (m_JointType == EJointType::Generic_6DOF)

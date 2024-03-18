@@ -11,13 +11,13 @@
 
 namespace physics
 {
-	struct SReservedConstraintData
+	struct SConstraintData
 	{
 		std::shared_ptr<IPhysicsObject> FixedObject = nullptr;
 		EJointType JointType = EJointType::NONE;
 		SJointParam JParam = {};
 
-		SReservedConstraintData(const std::shared_ptr<IPhysicsObject>& object, EJointType t, const SJointParam& param) :
+		SConstraintData(const std::shared_ptr<IPhysicsObject>& object, EJointType t, const SJointParam& param) :
 			FixedObject(object),
 			JointType(t),
 			JParam(param)
@@ -36,14 +36,14 @@ namespace physics
 		std::shared_ptr<CBulletRigidBody> m_RigidBody;
 
 		// Constraint
-		std::vector<std::shared_ptr<SReservedConstraintData>> m_ReservedConstraintList;
+		std::vector<std::shared_ptr<SConstraintData>> m_ConstraintList;
 	public:
 		CBulletPhysicsObject(bool IsStaticFlag, float Mass, const SRigidbodyParam& RBParam);
 		virtual ~CBulletPhysicsObject();
 
 		const std::shared_ptr<CBulletRigidBody>& GetRigidBody() const;
 
-		const std::vector<std::shared_ptr<SReservedConstraintData>>& GetReservedConstraintList() const;
+		const std::vector<std::shared_ptr<SConstraintData>>& GetConstraintList() const;
 
 		virtual bool Create(IPhysicsEngine* pPhysicsEngine, const glm::vec3& WorldPos, const glm::quat& WorldRotate, const glm::vec3& WorldScale) override;
 
@@ -61,8 +61,8 @@ namespace physics
 		virtual void SetPhysicsWorldTransform(const glm::vec3& WorldPos, const glm::quat& WorldRotate, const glm::vec3& WorldScale) override;
 
 		virtual void ReserveConstraint(const std::shared_ptr<IPhysicsObject>& FixedObject, EJointType JointType, const SJointParam& JParam) override;
-		virtual void ApplyConstraint(IPhysicsEngine* pPhysicsEngine, const glm::quat& FixedWorldRotate) override;
-		virtual void UpdateJointWorldTransform(const glm::vec3& Pos, const glm::quat& Rotate, const glm::vec3& Scale) override;
+		virtual void ApplyConstraint(IPhysicsEngine* pPhysicsEngine) override;
+		virtual void ResetConstraintTransform() override;
 	};
 }
 #endif
