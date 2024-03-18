@@ -14,8 +14,7 @@ namespace object
 		m_PrevLocalTransform(std::make_shared<math::CTransform>()),
 		m_WorldMatrix(glm::mat4(1.0f)),
 		m_InverseBindMatrix(glm::mat4(1.0f)),
-		m_ParentNode(nullptr),
-		m_PhysicsObject(nullptr)
+		m_ParentNode(nullptr)
 	{
 	}
 
@@ -58,65 +57,76 @@ namespace object
 	}
 
 	// 物理
-	void CNode::SetPhysicsObject(const std::shared_ptr<physics::IPhysicsObject>& PhysicsObject)
+	void CNode::AddPhysicsObject(const std::shared_ptr<physics::IPhysicsObject>& PhysicsObject)
 	{
-		m_PhysicsObject = PhysicsObject;
+		if (!PhysicsObject) return;
+
+		m_PhysicsObjectList.push_back(PhysicsObject);
 	}
 
-	const std::shared_ptr<physics::IPhysicsObject>& CNode::GetPhysicsObject() const
+	const std::vector<std::shared_ptr<physics::IPhysicsObject>>& CNode::GetPhysicsObjectList() const
 	{
-		return m_PhysicsObject;
+		return m_PhysicsObjectList;
 	}
 
 	void CNode::CreatePhysicsObject(physics::IPhysicsEngine* pPhysicsEngine)
 	{
 		// 物理オブジェクトを生成
-		if (pPhysicsEngine && m_PhysicsObject)
+		if (pPhysicsEngine)
 		{
-			glm::vec3 WorldPos = glm::vec3(0.0f);
-			glm::quat WorldRotate = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
-			glm::vec3 WorldScale = glm::vec3(1.0f);
-
-			math::CTransform::CastModelMatrixToTransform(m_WorldMatrix, WorldPos, WorldRotate, WorldScale);
-
-			// Meshを持っていない物理オブジェクトはボーンなのでサイズは1.0にする
-			if (m_MeshIndex == -1)
+			for (auto& PhysicsObject : m_PhysicsObjectList)
 			{
-				WorldScale = glm::vec3(1.0f);
-			}
+				glm::vec3 WorldPos = glm::vec3(0.0f);
+				glm::quat WorldRotate = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
+				glm::vec3 WorldScale = glm::vec3(1.0f);
 
-			m_PhysicsObject->Create(pPhysicsEngine, WorldPos, WorldRotate, WorldScale);
+				math::CTransform::CastModelMatrixToTransform(m_WorldMatrix, WorldPos, WorldRotate, WorldScale);
+
+				// Meshを持っていない物理オブジェクトはボーンなのでサイズは1.0にする
+				if (m_MeshIndex == -1)
+				{
+					WorldScale = glm::vec3(1.0f);
+				}
+
+				PhysicsObject->Create(pPhysicsEngine, WorldPos, WorldRotate, WorldScale);
+			}
 		}
 	}
 
 	void CNode::ApplyPhysicsConstraint(physics::IPhysicsEngine* pPhysicsEngine)
 	{
 		// Constraintを反映する
-		if (pPhysicsEngine && m_PhysicsObject)
+		if (pPhysicsEngine)
 		{
-			// もしかするとローカルでいいかも？
-			glm::quat WorldRotate = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
-			math::CTransform::CastModelMatrixToRotation(m_WorldMatrix, WorldRotate);
+			for (auto& PhysicsObject : m_PhysicsObjectList)
+			{
+				// もしかするとローカルでいいかも？
+				glm::quat WorldRotate = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
+				math::CTransform::CastModelMatrixToRotation(m_WorldMatrix, WorldRotate);
 
-			m_PhysicsObject->ApplyConstraint(pPhysicsEngine, WorldRotate);
+				PhysicsObject->ApplyConstraint(pPhysicsEngine, WorldRotate);
+			}
 		}
 	}
 
 	void CNode::ApplyPhysicsWorldMatrix()
 	{
 		// 物理演算の結果を反映する(DynamicObjectのみ)
-		if (m_PhysicsObject && !m_PhysicsObject->IsStatic())
+		for (auto& PhysicsObject : m_PhysicsObjectList)
 		{
-			// サイズを取得
-			glm::vec3 WorldScale = glm::vec3(1.0f);
-			math::CTransform::CastModelMatrixToScale(m_WorldMatrix, WorldScale);
+			if (!PhysicsObject->IsStatic())
+			{
+				// サイズを取得
+				glm::vec3 WorldScale = glm::vec3(1.0f);
+				math::CTransform::CastModelMatrixToScale(m_WorldMatrix, WorldScale);
 
-			glm::mat4 sclMatrix = glm::scale(glm::mat4(1.0f), WorldScale);
+				glm::mat4 sclMatrix = glm::scale(glm::mat4(1.0f), WorldScale);
 
-			// 物理オブジェクトのワールド座標を渡す
-			// 物理オブジェクトに親子関係を持たせるのはConstraints(Joint)を形成するとき(PMXの髪とか服)で、一度物理エンジンにオブジェクトを登録するとConstraints(Joint)の効果で子要素は親要素に自動で引っ張られるようになる
-			// なので一度ワールド行列を計算したうえで物理オブジェクトを生成した後は、位置計算を全て物理エンジンに任せる
-			m_WorldMatrix = m_PhysicsObject->GetCurrentPhysicsWorldMatrix() * sclMatrix;
+				// 物理オブジェクトのワールド座標を渡す
+				// 物理オブジェクトに親子関係を持たせるのはConstraints(Joint)を形成するとき(PMXの髪とか服)で、一度物理エンジンにオブジェクトを登録するとConstraints(Joint)の効果で子要素は親要素に自動で引っ張られるようになる
+				// なので一度ワールド行列を計算したうえで物理オブジェクトを生成した後は、位置計算を全て物理エンジンに任せる
+				m_WorldMatrix = PhysicsObject->GetCurrentPhysicsWorldMatrix() * sclMatrix;
+			}
 		}
 	}
 
@@ -161,27 +171,30 @@ namespace object
 		m_WorldMatrix = WorldMatrix;
 
 		// Staticな物理オブジェクトを持っている時はそれにも位置変更を反映する
-		if (m_PhysicsObject && (m_PhysicsObject->IsStatic() || m_PhysicsObject->IsDynamicJoint()))
+		for (auto& PhysicsObject : m_PhysicsObjectList)
 		{
-			glm::vec3 WorldPos = glm::vec3(0.0f);
-			glm::quat WorldRotate = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
-			glm::vec3 WorldScale = glm::vec3(1.0f);
-
-			math::CTransform::CastModelMatrixToTransform(m_WorldMatrix, WorldPos, WorldRotate, WorldScale);
-
-			// Meshを持っていない物理オブジェクトはボーンなのでサイズは1.0にする
-			if (m_MeshIndex == -1)
+			if (PhysicsObject && (PhysicsObject->IsStatic() || PhysicsObject->IsDynamicJoint()))
 			{
-				WorldScale = glm::vec3(1.0f);
-			}
+				glm::vec3 WorldPos = glm::vec3(0.0f);
+				glm::quat WorldRotate = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
+				glm::vec3 WorldScale = glm::vec3(1.0f);
 
-			if (m_PhysicsObject->IsStatic())
-			{
-				m_PhysicsObject->SetPhysicsWorldTransform(WorldPos, WorldRotate, WorldScale);
-			}
-			else if (m_PhysicsObject->IsDynamicJoint())
-			{
-				//m_PhysicsObject->UpdateJointWorldTransform(GetPos(), GetRot(), glm::vec3(1.0f));
+				math::CTransform::CastModelMatrixToTransform(m_WorldMatrix, WorldPos, WorldRotate, WorldScale);
+
+				// Meshを持っていない物理オブジェクトはボーンなのでサイズは1.0にする
+				if (m_MeshIndex == -1)
+				{
+					WorldScale = glm::vec3(1.0f);
+				}
+
+				if (PhysicsObject->IsStatic())
+				{
+					PhysicsObject->SetPhysicsWorldTransform(WorldPos, WorldRotate, WorldScale);
+				}
+				else if (PhysicsObject->IsDynamicJoint())
+				{
+					//PhysicsObject->UpdateJointWorldTransform(GetPos(), GetRot(), glm::vec3(1.0f));
+				}
 			}
 		}
 	}
