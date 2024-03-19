@@ -183,11 +183,14 @@ namespace object
 					WorldScale = glm::vec3(1.0f);
 				}
 
-				PhysicsObject->SetPhysicsWorldTransform(WorldPos, WorldRotate, WorldScale);
+				if (PhysicsObject->IsStatic())
+				{
+					PhysicsObject->SetPhysicsWorldTransform(WorldPos, WorldRotate, WorldScale);
+				}
 
 				if (PhysicsObject->IsDynamicJoint())
 				{
-					PhysicsObject->ResetConstraintTransform();
+					//PhysicsObject->ResetConstraintTransform();
 				}
 			}
 		}

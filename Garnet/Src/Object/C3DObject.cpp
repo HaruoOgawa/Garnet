@@ -382,6 +382,13 @@ namespace object
 		// 全ノードマイフレーム更新しているので、そのうちキャッシュを入れて更新は必要なものだけにする
 		CalcWorldMatrix();
 
+#ifdef USE_ANIMATION
+		// IKの計算を行う
+		if (!m_AnimationController->CalculateIK(m_NodeList)) return false;
+
+		// 付与ボーンの位置を再計算
+		if (!m_AnimationController->ReCalculateGrantBone(m_NodeList)) return false;
+#endif
 		// モーフ
 		if (!m_MorphController->Update(DeltaSecondsTime, m_MeshList)) return false;
 
@@ -399,12 +406,6 @@ namespace object
 		ApplyPhysicsWorldMatrix();
 
 #ifdef USE_ANIMATION
-		// IKの計算を行う
-		if (!m_AnimationController->CalculateIK(m_NodeList)) return false;
-
-		// 付与ボーンの位置を再計算
-		if (!m_AnimationController->ReCalculateGrantBone(m_NodeList)) return false;
-
 		// IKや物理演算が終わって最終的なWorldMatrixが確定した段階でSkinMatrixを計算する
 		m_CurrentSkinMatrixList.clear();
 		if (!m_AnimationController->CalCSkinMatrixList(m_CurrentSkinMatrixList, m_ObjectTransform->GetModelMatrix())) return false;
