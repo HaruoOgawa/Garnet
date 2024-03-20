@@ -94,7 +94,14 @@ namespace physics
 
 		// RigidBodyを物理演算ワールドに追加
 		// 非衝突グループの設定のビットマスクもここで設定する
-		pDynamicWorld->addRigidBody(m_Rigidbody.get(), RBParam.group, ~RBParam.NoneCollideGroupFlag);
+		if (RBParam.UseCollideMask)
+		{
+			pDynamicWorld->addRigidBody(m_Rigidbody.get(), RBParam.group, ~RBParam.NoneCollideGroupFlag);
+		}
+		else
+		{
+			pDynamicWorld->addRigidBody(m_Rigidbody.get());
+		}
 
 		return true;
 	}
@@ -174,22 +181,12 @@ namespace physics
 		m_6DofSpringConstraintList.push_back(Constraint);
 	}
 
-	void CBulletRigidBody::ResetConstraintTransform(const std::shared_ptr<CBulletRigidBody>& FixedRigidbody, SJointParam JParam)
+	void CBulletRigidBody::AlignConstraint(const std::shared_ptr<CBulletRigidBody>& FixedRigidbody, SJointParam JParam, const btTransform& JointWorldTransform)
 	{
 		if (m_JointType == EJointType::SPRING_6DOF)
 		{
 			for (const auto& Constraint : m_6DofSpringConstraintList)
 			{
-				btTransform JointWorldTransform;
-				{
-					btMatrix3x3 rotMat;
-					rotMat.setEulerZYX(JParam.JointRotate.x, JParam.JointRotate.y, JParam.JointRotate.z);
-
-					JointWorldTransform.setIdentity();
-					JointWorldTransform.setOrigin(btVector3(JParam.JointPos.z, JParam.JointPos.y, JParam.JointPos.x));
-					JointWorldTransform.setBasis(rotMat);
-				}
-
 				btTransform localA;
 				{
 					localA = GetCurrentWorldTransform().inverse() * JointWorldTransform;

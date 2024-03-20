@@ -62,7 +62,7 @@ namespace physics
 
 		virtual void ReserveConstraint(const std::shared_ptr<IPhysicsObject>& FixedObject, EJointType JointType, const SJointParam& JParam) override;
 		virtual void ApplyConstraint(IPhysicsEngine* pPhysicsEngine) override;
-		virtual void ResetConstraintTransform() override;
+		virtual void AlignConstraint(const glm::vec3& WorldPos, const glm::quat& WorldRotate) override;
 	};
 }
 #endif

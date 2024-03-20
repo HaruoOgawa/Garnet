@@ -16,6 +16,8 @@ namespace physics
 		glm::vec3 InitWorldPos = glm::vec3(0.0f);
 		glm::vec3 InitWorldRotate = glm::vec3(0.0f);
 
+		bool UseCollideMask = false;
+
 		// CollideMaskは0以外である必要がある
 		// 0は何にも衝突しない判定になる(?)
 		//  32768, 16384, 8192, 4096, 2048, 1024, 512, 256, 128, 64, 32, 16, 8, 4, 2, 1の16パターン

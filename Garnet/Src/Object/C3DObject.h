@@ -66,6 +66,7 @@ namespace object
 		void ApplyPhysicsConstraint(physics::IPhysicsEngine* pPhysicsEngine);
 
 		void ApplyPhysicsWorldMatrix();
+		void AlignPhysicsJoint();
 	public:
 		C3DObject(const std::string& PassName, const std::string& DepthPassName);
 		virtual ~C3DObject();

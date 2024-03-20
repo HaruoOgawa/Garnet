@@ -272,6 +272,14 @@ namespace object
 		}
 	}
 
+	void C3DObject::AlignPhysicsJoint()
+	{
+		for (const auto& Node : m_NodeList)
+		{
+			Node->AlignPhysicsJoint();
+		}
+	}
+
 	// ワールド行列の初期値を計算(アニメーション等で後々更新される可能性がある)
 	void C3DObject::CalcWorldMatrix()
 	{
@@ -391,6 +399,9 @@ namespace object
 #endif
 		// モーフ
 		if (!m_MorphController->Update(DeltaSecondsTime, m_MeshList)) return false;
+
+		// 物理ジョイントの位置をボーン位置に合わせる
+		//AlignPhysicsJoint();
 
 		return true;
 	}
@@ -553,6 +564,8 @@ namespace object
 			{
 				for (const auto& Bone : Skeleton->GetBoneList())
 				{
+					if (Bone->GetBoneName() == animation::EHumanoidBones::Center) continue;
+
 					const auto& BoneNode = Bone->GetBoneNode();
 
 					DebugSphere->GetMaterialList()[0]->SetUniformValue("useColor", &glm::ivec1(1)[0], sizeof(glm::ivec1));
@@ -569,13 +582,15 @@ namespace object
 						}
 
 						{
-							glm::mat4 Matrix = m_ObjectTransform->GetModelMatrix() * BoneNode->GetWorldMatrix();
+							glm::mat4 Matrix = m_ObjectTransform->GetModelMatrix() * PhysicsObject->GetCurrentPhysicsWorldMatrix();
 
 							glm::vec3 WorldPos = glm::vec3(0.0f);
 							glm::quat WorldRotate = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
 							glm::vec3 WorldScale = glm::vec3(1.0f);
 
 							math::CTransform::CastModelMatrixToTransform(Matrix, WorldPos, WorldRotate, WorldScale);
+
+							WorldScale = m_ObjectTransform->GetScale() * PhysicsObject->GetSize();
 
 							DebugSphere->SetPos(WorldPos);
 							DebugSphere->SetRot(WorldRotate);

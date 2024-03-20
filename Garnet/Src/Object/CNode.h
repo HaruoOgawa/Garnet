@@ -57,6 +57,7 @@ namespace object
 		void ApplyPhysicsConstraint(physics::IPhysicsEngine* pPhysicsEngine);
 
 		void ApplyPhysicsWorldMatrix();
+		void AlignPhysicsJoint();
 
 		// ÉÇÅ[Ét
 		void ClearMorphWeights();

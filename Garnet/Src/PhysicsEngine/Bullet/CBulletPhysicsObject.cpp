@@ -158,9 +158,14 @@ namespace physics
 		}
 	}
 
-	void CBulletPhysicsObject::ResetConstraintTransform()
+	void CBulletPhysicsObject::AlignConstraint(const glm::vec3& WorldPos, const glm::quat& WorldRotate)
 	{
 		if (!m_RigidBody) return;
+
+		btTransform trans;
+		trans.setIdentity();
+		trans.setOrigin(btVector3(WorldPos.x, WorldPos.y, WorldPos.z));
+		trans.setRotation(btQuaternion(WorldRotate.x, WorldRotate.y, WorldRotate.z, WorldRotate.w));
 
 		for (int i = 0; i < m_ConstraintList.size(); i++)
 		{
@@ -168,12 +173,11 @@ namespace physics
 
 			if (Constraint->JointType == EJointType::SPRING_6DOF)
 			{
-				// Constraints‚ð’Ç‰Á‚·‚é
 				const auto* FixedObject = static_cast<CBulletPhysicsObject*>(Constraint->FixedObject.get());
 
 				const auto& TargetRigidBody = FixedObject->GetRigidBody();
 
-				m_RigidBody->ResetConstraintTransform(TargetRigidBody, Constraint->JParam);
+				m_RigidBody->AlignConstraint(TargetRigidBody, Constraint->JParam, trans);
 			}
 			else if (Constraint->JointType == EJointType::Generic_6DOF)
 			{
