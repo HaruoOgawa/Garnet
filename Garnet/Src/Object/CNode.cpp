@@ -106,10 +106,16 @@ namespace object
 		{
 			if (!PhysicsObject->IsStatic())
 			{
+				// サイズを取得
+				glm::vec3 WorldScale = glm::vec3(1.0f);
+				math::CTransform::CastModelMatrixToScale(m_WorldMatrix, WorldScale);
+
+				glm::mat4 sclMatrix = glm::scale(glm::mat4(1.0f), WorldScale);
+
 				// 物理オブジェクトのワールド座標を渡す
 				// 物理オブジェクトに親子関係を持たせるのはConstraints(Joint)を形成するとき(PMXの髪とか服)で、一度物理エンジンにオブジェクトを登録するとConstraints(Joint)の効果で子要素は親要素に自動で引っ張られるようになる
 				// なので一度ワールド行列を計算したうえで物理オブジェクトを生成した後は、位置計算を全て物理エンジンに任せる
-				m_WorldMatrix = PhysicsObject->GetCurrentPhysicsWorldMatrix();
+				m_WorldMatrix = PhysicsObject->GetCurrentPhysicsWorldMatrix() * sclMatrix;
 			}
 		}
 	}
@@ -125,7 +131,9 @@ namespace object
 
 				math::CTransform::CastModelMatrixToTransform(m_WorldMatrix, WorldPos, WorldRotate);
 
-				PhysicsObject->AlignConstraint(WorldPos, WorldRotate);
+				//PhysicsObject->AlignConstraint(WorldPos, WorldRotate);
+
+				PhysicsObject->SetPhysicsWorldTransform(WorldPos, WorldRotate);
 			}
 		}
 	}

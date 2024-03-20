@@ -751,10 +751,12 @@ namespace mmd
 
 			if (!PhysicsObjA || !PhysicsObjB) continue;
 
+			glm::vec3 Pos = glm::vec3(PmxJoint.Pos.z, PmxJoint.Pos.y, PmxJoint.Pos.x);
+
 			// Constraint‚ð—\–ñ‚·‚é
 			PhysicsObjB->ReserveConstraint(PhysicsObjA, static_cast<physics::EJointType>(PmxJoint.PmxJointType), 
 				{ 
-					PmxJoint.JointName, PmxJoint.Pos, PmxJoint.Rotate, PmxJoint.LowerTransLimit, PmxJoint.UpperTransLimit, PmxJoint.LowerRotateLimit, PmxJoint.UpperRotateLimit, PmxJoint.TransSpring, PmxJoint.RotateSpring
+					PmxJoint.JointName, Pos, PmxJoint.Rotate, PmxJoint.LowerTransLimit, PmxJoint.UpperTransLimit, PmxJoint.LowerRotateLimit, PmxJoint.UpperRotateLimit, PmxJoint.TransSpring, PmxJoint.RotateSpring
 				}
 			);
 		}

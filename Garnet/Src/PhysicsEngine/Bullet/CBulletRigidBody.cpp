@@ -133,7 +133,7 @@ namespace physics
 			rotMat.setEulerZYX(JParam.JointRotate.x, JParam.JointRotate.y, JParam.JointRotate.z);
 
 			JointWorldTransform.setIdentity();
-			JointWorldTransform.setOrigin(btVector3(JParam.JointPos.z, JParam.JointPos.y, JParam.JointPos.x));
+			JointWorldTransform.setOrigin(btVector3(JParam.JointPos.x, JParam.JointPos.y, JParam.JointPos.z));
 			JointWorldTransform.setBasis(rotMat);
 		}
 
