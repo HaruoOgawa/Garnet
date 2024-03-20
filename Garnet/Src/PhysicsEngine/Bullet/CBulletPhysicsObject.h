@@ -28,7 +28,7 @@ namespace physics
 	class CBulletPhysicsObject : public IPhysicsObject
 	{
 	protected:
-		const bool m_IsStatic;
+		const bool m_Kinematic;
 		const float m_Mass;
 		const SRigidbodyParam m_RBParam;
 
@@ -38,7 +38,7 @@ namespace physics
 		// Constraint
 		std::vector<std::shared_ptr<SConstraintData>> m_ConstraintList;
 	public:
-		CBulletPhysicsObject(bool IsStaticFlag, float Mass, const SRigidbodyParam& RBParam);
+		CBulletPhysicsObject(bool Kinematic, float Mass, const SRigidbodyParam& RBParam);
 		virtual ~CBulletPhysicsObject();
 
 		const std::shared_ptr<CBulletRigidBody>& GetRigidBody() const;
@@ -48,6 +48,7 @@ namespace physics
 		virtual bool Create(IPhysicsEngine* pPhysicsEngine, const glm::vec3& WorldPos, const glm::quat& WorldRotate, const glm::vec3& WorldScale) override;
 
 		virtual bool IsStatic() override;
+		virtual bool IsKinematic() override;
 		virtual bool IsDynamicJoint() override;
 
 		virtual glm::vec3 GetSize() override;

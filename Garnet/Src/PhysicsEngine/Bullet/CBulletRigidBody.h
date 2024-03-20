@@ -25,9 +25,9 @@ namespace physics
 		EJointType m_JointType;
 		std::vector<std::shared_ptr<btGeneric6DofSpringConstraint>> m_6DofSpringConstraintList;
 	private:
-		bool Create(btDiscreteDynamicsWorld* pDynamicWorld, btCollisionShape* pCollisionShape, const glm::vec3& WorldPos, const glm::quat& WorldRotate, bool IsStatic, float Mass, const SRigidbodyParam& RBParam);
+		bool Create(btDiscreteDynamicsWorld* pDynamicWorld, btCollisionShape* pCollisionShape, const glm::vec3& WorldPos, const glm::quat& WorldRotate, bool IsKinematic, float Mass, const SRigidbodyParam& RBParam);
 	public:
-		CBulletRigidBody(btDiscreteDynamicsWorld* pDynamicWorld, btCollisionShape* pCollisionShape, const glm::vec3& WorldPos, const glm::quat& WorldRotate, bool IsStatic, float Mass, const SRigidbodyParam& RBParam);
+		CBulletRigidBody(btDiscreteDynamicsWorld* pDynamicWorld, btCollisionShape* pCollisionShape, const glm::vec3& WorldPos, const glm::quat& WorldRotate, bool IsKinematic, float Mass, const SRigidbodyParam& RBParam);
 		virtual ~CBulletRigidBody();
 
 		const SRigidbodyParam& GetRbParam() const;

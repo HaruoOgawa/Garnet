@@ -23,9 +23,9 @@ namespace physics
 
 		virtual bool Initialize() override;
 
-		virtual std::shared_ptr<IPhysicsObject> CreatePhysicsBox(const glm::vec3& BoxHalfSize, bool IsStatic, float Mass, const SRigidbodyParam& RBParam) override;
-		virtual std::shared_ptr<IPhysicsObject> CreatePhysicsSphere(float Radius, bool IsStatic, float Mass, const SRigidbodyParam& RBParam) override;
-		virtual std::shared_ptr<IPhysicsObject> CreatePhysicsCapsule(float Radius, float Height, bool IsStatic, float Mass, const SRigidbodyParam& RBParam) override;
+		virtual std::shared_ptr<IPhysicsObject> CreatePhysicsBox(const glm::vec3& BoxHalfSize, bool Kinematic, float Mass, const SRigidbodyParam& RBParam) override;
+		virtual std::shared_ptr<IPhysicsObject> CreatePhysicsSphere(float Radius, bool Kinematic, float Mass, const SRigidbodyParam& RBParam) override;
+		virtual std::shared_ptr<IPhysicsObject> CreatePhysicsCapsule(float Radius, float Height, bool Kinematic, float Mass, const SRigidbodyParam& RBParam) override;
 
 		virtual bool Update(float DeltaTime) override;
 

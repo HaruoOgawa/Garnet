@@ -171,7 +171,7 @@ namespace scene
 			LocalTransform->SetPos(glm::vec3(0.0f, 0.1f, 0.0f));
 			LocalTransform->SetScale(glm::vec3(10.0f, 0.1f, 10.0f));
 
-			auto PhysicsBox = pPhysicsEngine->CreatePhysicsBox(glm::vec3(0.5f), true, 0.0f, {});
+			auto PhysicsBox = pPhysicsEngine->CreatePhysicsBox(glm::vec3(0.5f), false, 0.0f, {});
 
 			if (!m_PhysicsGround->CreateSimply(pGraphicsAPI, pPhysicsEngine, graphics::CPresetPrimitive::CreateBox(pGraphicsAPI), Material, m_DepthMF, LocalTransform, PhysicsBox)) return false;
 		}
@@ -202,6 +202,8 @@ namespace scene
 			//RbParam.NoneCollideGroupFlag = 161; // 1,6,8に当たらないようにする。6は自分たちのグループなのでお互いがぶつからないようにする => 10100001b
 			RbParam.NoneCollideGroupFlag = 32; 
 			auto PhysicsSphere0 = pPhysicsEngine->CreatePhysicsSphere(1.0f, true, 0.0f, RbParam);
+
+			RbParam.PhysicsType = EPhysicsType::DYNAMIC;
 			auto PhysicsSphere1 = pPhysicsEngine->CreatePhysicsSphere(1.0f, false, 50.0f, RbParam);
 			auto PhysicsSphere2 = pPhysicsEngine->CreatePhysicsSphere(1.0f, false, 50.0f, RbParam);
 			auto PhysicsSphere3 = pPhysicsEngine->CreatePhysicsSphere(1.0f, false, 50.0f, RbParam);

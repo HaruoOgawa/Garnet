@@ -19,6 +19,7 @@ namespace physics
 		virtual bool Create(IPhysicsEngine* pPhysicsEngine, const glm::vec3& WorldPos, const glm::quat& WorldRotate, const glm::vec3& WorldScale) = 0;
 
 		virtual bool IsStatic() = 0;
+		virtual bool IsKinematic() = 0;
 		virtual bool IsDynamicJoint() = 0;
 
 		virtual glm::vec3 GetSize() = 0;

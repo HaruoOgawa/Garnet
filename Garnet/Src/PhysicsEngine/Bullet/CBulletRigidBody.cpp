@@ -3,14 +3,14 @@
 
 namespace physics
 {
-	CBulletRigidBody::CBulletRigidBody(btDiscreteDynamicsWorld* pDynamicWorld, btCollisionShape* pCollisionShape, const glm::vec3& WorldPos, const glm::quat& WorldRotate, bool IsStatic, float Mass, const SRigidbodyParam& RBParam):
+	CBulletRigidBody::CBulletRigidBody(btDiscreteDynamicsWorld* pDynamicWorld, btCollisionShape* pCollisionShape, const glm::vec3& WorldPos, const glm::quat& WorldRotate, bool IsKinematic, float Mass, const SRigidbodyParam& RBParam):
 		m_RBParam(RBParam),
 		m_pDynamicWorld(pDynamicWorld),
 		m_MotionState(nullptr),
 		m_Rigidbody(nullptr),
 		m_JointType(EJointType::NONE)
 	{
-		Create(pDynamicWorld, pCollisionShape, WorldPos, WorldRotate, IsStatic, Mass, RBParam);
+		Create(pDynamicWorld, pCollisionShape, WorldPos, WorldRotate, IsKinematic, Mass, RBParam);
 	}
 
 	CBulletRigidBody::~CBulletRigidBody()
@@ -45,7 +45,7 @@ namespace physics
 		return m_RBParam;
 	}
 
-	bool CBulletRigidBody::Create(btDiscreteDynamicsWorld* pDynamicWorld, btCollisionShape* pCollisionShape, const glm::vec3& WorldPos, const glm::quat& WorldRotate, bool IsStatic, float Mass, const SRigidbodyParam& RBParam)
+	bool CBulletRigidBody::Create(btDiscreteDynamicsWorld* pDynamicWorld, btCollisionShape* pCollisionShape, const glm::vec3& WorldPos, const glm::quat& WorldRotate, bool IsKinematic, float Mass, const SRigidbodyParam& RBParam)
 	{
 		// Transform
 		btTransform transform;
@@ -54,25 +54,27 @@ namespace physics
 		transform.setRotation(btQuaternion(WorldRotate.x, WorldRotate.y, WorldRotate.z, WorldRotate.w));
 
 		// 質量
-		btScalar bodyMass(((IsStatic)? 0.0f : Mass));
+		btScalar bodyMass(0.0f);
 
-		// Bulletは質量が0のものはStatic(固定されている)、そうでないものはDynamic(物理演算で動く)として扱われる
-		bool IsDynamic = (bodyMass != 0.0f);
+		if (RBParam.PhysicsType != EPhysicsType::STATIC)
+		{
+			bodyMass = Mass;
+		}
 
 		// Inertiaは慣性の意味
 		btVector3 localInertia(0, 0, 0);
-		// 慣性力の計算でここではそれを0に初期化している
-		if (IsDynamic)
-		{
-			pCollisionShape->calculateLocalInertia(bodyMass, localInertia);
-		}
-
-		// MotoinState. 補間だったり他のアクティブオブジェクトとの同期に使用される
-		// staticオブジェクトだとMotioStateのTransformは更新されないのでnullptrにしておく必要がある(代わりにRigidBodyの方が更新される)
-		// https://pybullet.org/Bullet/phpBB3/viewtopic.php?t=12634
+		
 		btDefaultMotionState* pMotionState = nullptr;
-		if (IsDynamic)
+
+		// Bulletは質量が0のものはStatic(固定されている)、そうでないものはDynamic(物理演算で動く)として扱われる
+		if (bodyMass != 0.0f)
 		{
+			// 慣性力の計算でここではそれを0に初期化している
+			pCollisionShape->calculateLocalInertia(bodyMass, localInertia);
+
+			// MotoinState. 補間だったり他のアクティブオブジェクトとの同期に使用される
+			// staticオブジェクトだとMotioStateのTransformは更新されないのでnullptrにしておく必要がある(代わりにRigidBodyの方が更新される)
+			// https://pybullet.org/Bullet/phpBB3/viewtopic.php?t=12634
 			m_MotionState = std::make_shared<btDefaultMotionState>(transform);
 
 			pMotionState = m_MotionState.get();
@@ -87,7 +89,16 @@ namespace physics
 		m_Rigidbody->setFriction(RBParam.Friction); // 摩擦係数の設定
 
 		m_Rigidbody->setSleepingThresholds(0.01f, glm::radians(0.1f)); // 最適化用。物理演算を行わなくなるまでの閾値
-		m_Rigidbody->setActivationState(DISABLE_DEACTIVATION);
+		
+		if (IsKinematic && RBParam.PhysicsType == EPhysicsType::STATIC)
+		{
+			// KinematicObjectとは動かすことのできるStaticObject
+			// 言い換えるとユーザーが動かすことができる。動的オブジェクトを押したりすることはできるが、オブジェクトからは影響を受けない。つまり一方通行
+			// http://bulletjpn.web.fc2.com/07_RigidBodyDynamics.html
+			m_Rigidbody->setCollisionFlags(m_Rigidbody->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT);
+
+			m_Rigidbody->setActivationState(DISABLE_DEACTIVATION);
+		}
 
 		// ワールド座標をセットする
 		SetWorldTransform(transform);

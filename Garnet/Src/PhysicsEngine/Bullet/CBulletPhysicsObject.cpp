@@ -5,8 +5,8 @@
 
 namespace physics
 {
-	CBulletPhysicsObject::CBulletPhysicsObject(bool IsStaticFlag, float Mass, const SRigidbodyParam& RBParam):
-		m_IsStatic(IsStaticFlag),
+	CBulletPhysicsObject::CBulletPhysicsObject(bool Kinematic, float Mass, const SRigidbodyParam& RBParam):
+		m_Kinematic(Kinematic),
 		m_Mass(Mass),
 		m_RBParam(RBParam),
 		m_CollisionShape(nullptr),
@@ -46,7 +46,12 @@ namespace physics
 
 	bool CBulletPhysicsObject::IsStatic()
 	{
-		return m_IsStatic;
+		return (m_RBParam.PhysicsType == EPhysicsType::STATIC);
+	}
+
+	bool CBulletPhysicsObject::IsKinematic()
+	{
+		return m_Kinematic;
 	}
 
 	bool CBulletPhysicsObject::IsDynamicJoint()

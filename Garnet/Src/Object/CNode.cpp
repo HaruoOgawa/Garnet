@@ -173,17 +173,14 @@ namespace object
 		// Staticな物理オブジェクトを持っている時はそれにも位置変更を反映する
 		for (auto& PhysicsObject : m_PhysicsObjectList)
 		{
-			if (PhysicsObject && PhysicsObject->IsStatic())
+			if (PhysicsObject && PhysicsObject->IsKinematic())
 			{
 				glm::vec3 WorldPos = glm::vec3(0.0f);
 				glm::quat WorldRotate = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
 
 				math::CTransform::CastModelMatrixToTransform(m_WorldMatrix, WorldPos, WorldRotate);
 
-				if (PhysicsObject->IsStatic())
-				{
-					PhysicsObject->SetPhysicsWorldTransform(WorldPos, WorldRotate);
-				}
+				PhysicsObject->SetPhysicsWorldTransform(WorldPos, WorldRotate);
 			}
 		}
 	}
