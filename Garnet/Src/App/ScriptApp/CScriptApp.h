@@ -31,17 +31,21 @@ namespace app
 		CScriptApp();
 		virtual ~CScriptApp();
 
-		bool Release(api::IGraphicsAPI* pGraphicsAPI) override;
+		virtual bool Release(api::IGraphicsAPI* pGraphicsAPI) override;
 
-		bool Initialize(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker) override;
-		bool ProcessInput(api::IGraphicsAPI* pGraphicsAPI) override;
-		bool Resize(int Width, int Height) override;
+		virtual bool Initialize(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker) override;
+		virtual bool ProcessInput(api::IGraphicsAPI* pGraphicsAPI) override;
+		virtual bool Resize(int Width, int Height) override;
+
 #ifdef USE_INPUT_SYSTEM
-		bool Update(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<input::CInputState>& InputState) override;
+		virtual bool Update(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<input::CInputState>& InputState) override;
 #else
-		bool Update(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker) override;
+		virtual bool Update(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker) override;
 #endif
-		bool Draw(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker) override;
+		virtual bool LateUpdate(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker) override;
+		virtual bool FixedUpdate(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker) override;
+
+		virtual bool Draw(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker) override;
 
 		virtual const std::shared_ptr<camera::CCamera>& GetMainCamera() const override;
 		virtual const std::shared_ptr<graphics::CDrawInfo>& GetDrawInfo() const override;

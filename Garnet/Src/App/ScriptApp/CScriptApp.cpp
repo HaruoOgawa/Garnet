@@ -104,8 +104,6 @@ namespace app
 	{
 		if (!pLoadWorker->Update(pGraphicsAPI)) return false;
 
-		if (!m_PhysicsEngine->Update(m_DrawInfo->GetDeltaSecondsTime())) return false;
-
 #ifdef USE_INPUT_SYSTEM
 		if (!m_ScriptScene->Update(pGraphicsAPI, m_PhysicsEngine.get(), pLoadWorker, m_MainCamera, m_Projection, m_DrawInfo, InputState)) return false;
 #else
@@ -115,6 +113,22 @@ namespace app
 		if (!m_BlurEffect->Update(pLoadWorker)) return false;
 
 		//Console::Log("[CPP] m_MainCamera => x: %f, y: %f, z: %f\n", m_MainCamera->GetPos().x, m_MainCamera->GetPos().y, m_MainCamera->GetPos().z);
+
+		return true;
+	}
+
+	bool CScriptApp::LateUpdate(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker)
+	{
+		if (!m_PhysicsEngine->Update(m_DrawInfo->GetDeltaSecondsTime())) return false;
+
+		if (!m_ScriptScene->LateUpdate(pGraphicsAPI, m_PhysicsEngine.get(), pLoadWorker, m_DrawInfo)) return false;
+
+		return true;
+	}
+
+	bool CScriptApp::FixedUpdate(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker)
+	{
+		if (!m_ScriptScene->FixedUpdate(pGraphicsAPI, m_PhysicsEngine.get(), pLoadWorker, m_DrawInfo)) return false;
 
 		return true;
 	}

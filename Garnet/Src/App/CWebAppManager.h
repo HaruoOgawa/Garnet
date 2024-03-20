@@ -31,6 +31,8 @@ namespace webapp
 		bool Release();
 
 		bool Update();
+		bool LateUpdate();
+		bool FixedUpdate();
 		bool Draw();
 
 		void KeyAction(std::string key, bool IsDown);

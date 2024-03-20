@@ -30,7 +30,7 @@ namespace object
 		std::shared_ptr<CNode> m_ParentNode;
 
 		// ï®óù
-		std::shared_ptr<physics::IPhysicsObject> m_PhysicsObject;
+		std::vector<std::shared_ptr<physics::IPhysicsObject>> m_PhysicsObjectList;
 
 		// ÉÇÅ[Ét
 		std::vector<float> m_CurrentMorphWeights;
@@ -51,8 +51,8 @@ namespace object
 		int GetMeshIndex() const;
 
 		// ï®óù
-		void SetPhysicsObject(const std::shared_ptr<physics::IPhysicsObject>& PhysicsObject);
-		const std::shared_ptr<physics::IPhysicsObject>& GetPhysicsObject() const;
+		void AddPhysicsObject(const std::shared_ptr<physics::IPhysicsObject>& PhysicsObject);
+		const std::vector<std::shared_ptr<physics::IPhysicsObject>>& GetPhysicsObjectList() const;
 		void CreatePhysicsObject(physics::IPhysicsEngine* pPhysicsEngine);
 		void ApplyPhysicsConstraint(physics::IPhysicsEngine* pPhysicsEngine);
 

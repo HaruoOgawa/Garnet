@@ -2,13 +2,15 @@
 
 #ifdef USE_PHYSICS
 #include <glm/glm.hpp>
+#include <string>
 
 namespace physics
 {
 	struct SJointParam
 	{
-		glm::vec3 Pos6DofBody = glm::vec3(0.0f, -1.0f, 0.0f);
-		glm::quat Rotate6DofBody = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
+		std::pair<std::string, std::wstring> JointName = { "", L"" };
+		glm::vec3 JointPos = glm::vec3(0.0f, -1.0f, 0.0f);
+		glm::vec3 JointRotate = glm::vec3(0.0f, -1.0f, 0.0f);
 		glm::vec3 LowerTransLimit = glm::vec3(0.0f);
 		glm::vec3 UpperTransLimit = glm::vec3(0.0f, 1.0f, 0.0f);
 		glm::vec3 LowerRotateLimit = glm::vec3(0.0f);

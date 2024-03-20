@@ -15,21 +15,25 @@ namespace physics
 {
 	class CBulletRigidBody
 	{
+		const SRigidbodyParam m_RBParam;
+
 		btDiscreteDynamicsWorld* m_pDynamicWorld;
 
 		std::shared_ptr<btDefaultMotionState> m_MotionState;
 		std::shared_ptr<btRigidBody> m_Rigidbody;
 
 		EJointType m_JointType;
-		std::vector<std::shared_ptr<btGeneric6DofSpring2Constraint>> m_6DofSpringConstraintList;
+		std::vector<std::shared_ptr<btGeneric6DofSpringConstraint>> m_6DofSpringConstraintList;
 	private:
 		bool Create(btDiscreteDynamicsWorld* pDynamicWorld, btCollisionShape* pCollisionShape, const glm::vec3& WorldPos, const glm::quat& WorldRotate, bool IsStatic, float Mass, const SRigidbodyParam& RBParam);
 	public:
 		CBulletRigidBody(btDiscreteDynamicsWorld* pDynamicWorld, btCollisionShape* pCollisionShape, const glm::vec3& WorldPos, const glm::quat& WorldRotate, bool IsStatic, float Mass, const SRigidbodyParam& RBParam);
 		virtual ~CBulletRigidBody();
 
-		void Add6DofSpringConstraint(btDiscreteDynamicsWorld* pDynamicWorld, const std::shared_ptr<CBulletRigidBody>& FixedRigidbody, SJointParam JParam, const glm::quat& FixedWorldRotate);
-		void UpdateJointWorldTransform(const btTransform& transform);
+		const SRigidbodyParam& GetRbParam() const;
+
+		void Add6DofSpringConstraint(btDiscreteDynamicsWorld* pDynamicWorld, const std::shared_ptr<CBulletRigidBody>& FixedRigidbody, SJointParam JParam);
+		void ResetConstraintTransform(const std::shared_ptr<CBulletRigidBody>& FixedRigidbody, SJointParam JParam);
 
 		btTransform GetCurrentWorldTransform();
 		void SetWorldTransform(const btTransform& trans);

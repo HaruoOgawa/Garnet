@@ -308,6 +308,8 @@ namespace app
 
 			//
 			if (!Update()) return false;
+			if (!LateUpdate()) return false;
+			if (!FixedUpdate()) return false;
 			if (!Draw()) return false;
 
 #ifdef USE_INPUT_SYSTEM
@@ -462,6 +464,20 @@ namespace app
 #else
 		if (!m_App->Update(m_GraphicsAPI.get(), m_LoadWorker.get())) return false;
 #endif // USE_INPUT_SYSTEM
+
+		return true;
+	}
+
+	bool CDemoAppManager::LateUpdate()
+	{
+		if (!m_App->LateUpdate(m_GraphicsAPI.get(), m_LoadWorker.get())) return false;
+
+		return true;
+	}
+
+	bool CDemoAppManager::FixedUpdate()
+	{
+		if (!m_App->FixedUpdate(m_GraphicsAPI.get(), m_LoadWorker.get())) return false;
 
 		return true;
 	}

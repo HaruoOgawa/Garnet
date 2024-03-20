@@ -69,7 +69,7 @@ namespace object
 		// Node
 		std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(0, 0);
 		Node->SetLocalTransform(NodeTransform);
-		Node->SetPhysicsObject(PhysicsObject);
+		Node->AddPhysicsObject(PhysicsObject);
 		AddNode(Node);
 
 		// Create
@@ -389,7 +389,19 @@ namespace object
 		// 付与ボーンの位置を再計算
 		if (!m_AnimationController->ReCalculateGrantBone(m_NodeList)) return false;
 #endif
+		// モーフ
+		if (!m_MorphController->Update(DeltaSecondsTime, m_MeshList)) return false;
 
+		return true;
+	}
+
+	bool C3DObject::LateUpdate(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, float DeltaSecondsTime)
+	{
+		return true;
+	}
+
+	bool C3DObject::FixedUpdate(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, float DeltaSecondsTime)
+	{
 		// 物理演算の結果を反映する
 		ApplyPhysicsWorldMatrix();
 
@@ -398,9 +410,6 @@ namespace object
 		m_CurrentSkinMatrixList.clear();
 		if (!m_AnimationController->CalCSkinMatrixList(m_CurrentSkinMatrixList, m_ObjectTransform->GetModelMatrix())) return false;
 #endif
-
-		// モーフ
-		if (!m_MorphController->Update(DeltaSecondsTime, m_MeshList)) return false;
 
 		return true;
 	}
@@ -487,9 +496,17 @@ namespace object
 				Material->ResetToDefaultCullMode();
 			}
 		}
-		
+
+		//if (!DrawDebugBone(IsDepthPass, DrawOutline, Camera, Projection, DrawInfo, DebugSphere)) return false;
+		//if (!DrawDebugPhysics(IsDepthPass, DrawOutline, Camera, Projection, DrawInfo, DebugSphere)) return false;
+
+		return true;
+	}
+
+	bool C3DObject::DrawDebugBone(bool IsDepthPass, bool DrawOutline, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
+		const std::shared_ptr<graphics::CDrawInfo>& DrawInfo, const std::shared_ptr<object::C3DObject>& DebugSphere)
+	{
 #ifdef USE_ANIMATION
-		/*
 		if(DebugSphere)
 		{
 			const auto& Skeleton = m_AnimationController->GetSkeleton();
@@ -506,7 +523,7 @@ namespace object
 						DebugSphere->SetPos(m_ObjectTransform->GetModelMatrix() * BoneNode->GetWorldMatrix() * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
 						DebugSphere->SetScale(glm::vec3(0.025f));
 					}
-					
+
 					// Debug用: ローカル軸の描画(SphereをBoxに変更する)
 					{
 						//DebugSphere->SetScale(glm::vec3(0.025f, 0.025f, 0.025f * 4.0f));
@@ -515,37 +532,62 @@ namespace object
 					}
 
 					DebugSphere->GetMaterialList()[0]->SetUniformValue("useColor", &glm::ivec1(1)[0], sizeof(glm::ivec1));
-					
-					if(BoneNode->GetPhysicsObject() && BoneNode->GetPhysicsObject()->IsStatic())
-					{
-						DebugSphere->GetMaterialList()[0]->SetUniformValue("baseColor", &glm::vec4(1.0f, 0.0f, 0.0f, 1.0f)[0], sizeof(glm::vec4));
-					}
-					else
-					{
-						DebugSphere->GetMaterialList()[0]->SetUniformValue("baseColor", &glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)[0], sizeof(glm::vec4));
-					}
-
-					{
-						glm::mat4 Matrix = m_ObjectTransform->GetModelMatrix() * BoneNode->GetWorldMatrix();
-
-						glm::vec3 WorldPos = glm::vec3(0.0f);
-						glm::quat WorldRotate = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
-						glm::vec3 WorldScale = glm::vec3(1.0f);
-
-						math::CTransform::CastModelMatrixToTransform(Matrix, WorldPos, WorldRotate, WorldScale);
-
-						DebugSphere->SetPos(WorldPos);
-						DebugSphere->SetRot(WorldRotate);
-						DebugSphere->SetScale(WorldScale);
-					}
+					DebugSphere->GetMaterialList()[0]->SetUniformValue("baseColor", &glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)[0], sizeof(glm::vec4));
 
 					if (!DebugSphere->Draw(IsDepthPass, false, Camera, Projection, DrawInfo)) return false;
 				}
 			}
 		}
-		*/
 #endif
+		return true;
+	}
 
+	bool C3DObject::DrawDebugPhysics(bool IsDepthPass, bool DrawOutline, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
+		const std::shared_ptr<graphics::CDrawInfo>& DrawInfo, const std::shared_ptr<object::C3DObject>& DebugSphere)
+	{
+#ifdef USE_ANIMATION
+		if(DebugSphere)
+		{
+			const auto& Skeleton = m_AnimationController->GetSkeleton();
+			if(Skeleton)
+			{
+				for (const auto& Bone : Skeleton->GetBoneList())
+				{
+					const auto& BoneNode = Bone->GetBoneNode();
+
+					DebugSphere->GetMaterialList()[0]->SetUniformValue("useColor", &glm::ivec1(1)[0], sizeof(glm::ivec1));
+
+					for (const auto& PhysicsObject : BoneNode->GetPhysicsObjectList())
+					{
+						if (PhysicsObject->IsStatic())
+						{
+							DebugSphere->GetMaterialList()[0]->SetUniformValue("baseColor", &glm::vec4(1.0f, 0.0f, 0.0f, 1.0f)[0], sizeof(glm::vec4));
+						}
+						else
+						{
+							DebugSphere->GetMaterialList()[0]->SetUniformValue("baseColor", &glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)[0], sizeof(glm::vec4));
+						}
+
+						{
+							glm::mat4 Matrix = m_ObjectTransform->GetModelMatrix() * BoneNode->GetWorldMatrix();
+
+							glm::vec3 WorldPos = glm::vec3(0.0f);
+							glm::quat WorldRotate = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
+							glm::vec3 WorldScale = glm::vec3(1.0f);
+
+							math::CTransform::CastModelMatrixToTransform(Matrix, WorldPos, WorldRotate, WorldScale);
+
+							DebugSphere->SetPos(WorldPos);
+							DebugSphere->SetRot(WorldRotate);
+							DebugSphere->SetScale(WorldScale);
+						}
+
+						if (!DebugSphere->Draw(IsDepthPass, false, Camera, Projection, DrawInfo)) return false;
+					}
+				}
+			}
+		}
+#endif
 		return true;
 	}
 

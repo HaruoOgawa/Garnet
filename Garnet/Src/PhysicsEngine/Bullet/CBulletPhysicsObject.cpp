@@ -34,9 +34,9 @@ namespace physics
 		return m_RigidBody;
 	}
 
-	const std::vector<std::shared_ptr<SReservedConstraintData>>& CBulletPhysicsObject::GetReservedConstraintList() const
+	const std::vector<std::shared_ptr<SConstraintData>>& CBulletPhysicsObject::GetConstraintList() const
 	{
-		return m_ReservedConstraintList;
+		return m_ConstraintList;
 	}
 
 	bool CBulletPhysicsObject::Create(IPhysicsEngine* pPhysicsEngine, const glm::vec3& WorldPos, const glm::quat& WorldRotate, const glm::vec3& WorldScale)
@@ -101,7 +101,7 @@ namespace physics
 		return glm::quat(trans.getRotation().getW(), trans.getRotation().getX(), trans.getRotation().getY(), trans.getRotation().getZ());
 	}
 
-	void CBulletPhysicsObject::SetPhysicsWorldTransform(const glm::vec3& WorldPos, const glm::quat& WorldRotate, const glm::vec3& WorldScale)
+	void CBulletPhysicsObject::SetPhysicsWorldTransform(const glm::vec3& WorldPos, const glm::quat& WorldRotate)
 	{
 		btTransform trans;
 		trans.setIdentity();
@@ -117,67 +117,81 @@ namespace physics
 	void CBulletPhysicsObject::ReserveConstraint(const std::shared_ptr<IPhysicsObject>& FixedObject, EJointType JointType, const SJointParam& JParam)
 	{
 		// ConstraintÇó\ñÒÇµÇƒÇ®Ç≠
-		m_ReservedConstraintList.push_back(std::make_shared<SReservedConstraintData>(FixedObject, JointType, JParam));
+		m_ConstraintList.push_back(std::make_shared<SConstraintData>(FixedObject, JointType, JParam));
 	}
 
-	void CBulletPhysicsObject::ApplyConstraint(IPhysicsEngine* pPhysicsEngine, const glm::quat& FixedWorldRotate)
+	void CBulletPhysicsObject::ApplyConstraint(IPhysicsEngine* pPhysicsEngine)
 	{
+		if (!m_RigidBody) return;
+
 		CBulletPhysicsEngine* pBulletPhysics = static_cast<CBulletPhysicsEngine*>(pPhysicsEngine);
 
-		for (int i = 0; i < m_ReservedConstraintList.size(); i++)
+		for (int i = 0; i < m_ConstraintList.size(); i++)
 		{
-			const auto& ReservedConstraint = m_ReservedConstraintList[i];
+			const auto& Constraint = m_ConstraintList[i];
 
-			if (ReservedConstraint->JointType == EJointType::SPRING_6DOF)
+			if (Constraint->JointType == EJointType::SPRING_6DOF)
 			{
 				// ConstraintsÇí«â¡Ç∑ÇÈ
-				const auto* FixedObject = static_cast<CBulletPhysicsObject*>(ReservedConstraint->FixedObject.get());
-				const auto& FixedReservedList = FixedObject->GetReservedConstraintList();
-
-				// FixedRotateÇ™Ç†ÇÍÇŒéÊìæ
-				glm::quat FixedRotate = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
-
-				if (i < FixedReservedList.size())
-				{
-					FixedRotate = FixedReservedList[i]->JParam.Rotate6DofBody;
-				}
+				const auto* FixedObject = static_cast<CBulletPhysicsObject*>(Constraint->FixedObject.get());
 
 				const auto& TargetRigidBody = FixedObject->GetRigidBody();
 
-				m_RigidBody->Add6DofSpringConstraint(pBulletPhysics->GetDynamicsWorld(), TargetRigidBody, ReservedConstraint->JParam, FixedRotate);
+				m_RigidBody->Add6DofSpringConstraint(pBulletPhysics->GetDynamicsWorld(), TargetRigidBody, Constraint->JParam);
 			}
-			else if (ReservedConstraint->JointType == EJointType::Generic_6DOF)
+			else if (Constraint->JointType == EJointType::Generic_6DOF)
 			{
 				// ñ¢é¿ëï
 			}
-			else if (ReservedConstraint->JointType == EJointType::P2P)
+			else if (Constraint->JointType == EJointType::P2P)
 			{
 				// ñ¢é¿ëï
 			}
-			else if (ReservedConstraint->JointType == EJointType::ConeTwist)
+			else if (Constraint->JointType == EJointType::ConeTwist)
 			{
 				// ñ¢é¿ëï
 			}
-			else if (ReservedConstraint->JointType == EJointType::Slider)
+			else if (Constraint->JointType == EJointType::Slider)
 			{
 				// ñ¢é¿ëï
 			}
 		}
-
-		// í«â¡Ç™èIÇÌÇ¡ÇΩÇÃÇ≈ÉäÉäÅ[ÉXÇ∑ÇÈ
-		m_ReservedConstraintList.clear();
 	}
 
-	void CBulletPhysicsObject::UpdateJointWorldTransform(const glm::vec3& Pos, const glm::quat& Rotate, const glm::vec3& Scale)
+	void CBulletPhysicsObject::ResetConstraintTransform()
 	{
 		if (!m_RigidBody) return;
 
-		btTransform transform;
-		transform.setIdentity();
-		transform.setOrigin(btVector3(Pos.x, Pos.y, Pos.z));
-		transform.setRotation(btQuaternion(Rotate.x, Rotate.y, Rotate.z, Rotate.w));
+		for (int i = 0; i < m_ConstraintList.size(); i++)
+		{
+			const auto& Constraint = m_ConstraintList[i];
 
-		m_RigidBody->UpdateJointWorldTransform(transform);
+			if (Constraint->JointType == EJointType::SPRING_6DOF)
+			{
+				// ConstraintsÇí«â¡Ç∑ÇÈ
+				const auto* FixedObject = static_cast<CBulletPhysicsObject*>(Constraint->FixedObject.get());
+
+				const auto& TargetRigidBody = FixedObject->GetRigidBody();
+
+				m_RigidBody->ResetConstraintTransform(TargetRigidBody, Constraint->JParam);
+			}
+			else if (Constraint->JointType == EJointType::Generic_6DOF)
+			{
+				// ñ¢é¿ëï
+			}
+			else if (Constraint->JointType == EJointType::P2P)
+			{
+				// ñ¢é¿ëï
+			}
+			else if (Constraint->JointType == EJointType::ConeTwist)
+			{
+				// ñ¢é¿ëï
+			}
+			else if (Constraint->JointType == EJointType::Slider)
+			{
+				// ñ¢é¿ëï
+			}
+		}
 	}
 }
 #endif

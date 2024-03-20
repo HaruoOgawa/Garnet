@@ -41,6 +41,8 @@ namespace app
 		bool InitGLContext();
 
 		bool Update();
+		bool LateUpdate();
+		bool FixedUpdate();
 		bool Draw();
 	public:
 		CDemoAppManager(app::EAppType AppType);

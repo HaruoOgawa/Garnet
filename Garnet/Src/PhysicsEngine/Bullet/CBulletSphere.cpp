@@ -19,18 +19,10 @@ namespace physics
 	{
 		CBulletPhysicsEngine* pBulletPhysics = static_cast<CBulletPhysicsEngine*>(pPhysicsEngine);
 
-		if (m_RBParam.UseSelfInitialTransform)
-		{
-			m_CollisionShape = std::make_shared<btSphereShape>(btScalar(m_Radius));
-			m_RigidBody = std::make_shared<CBulletRigidBody>(pBulletPhysics->GetDynamicsWorld(), m_CollisionShape.get(), m_RBParam.InitWorldPos, m_RBParam.InitWorldRotate, m_IsStatic, m_Mass, m_RBParam);
-		}
-		else
-		{
-			float MaxScale = fmaxf(WorldScale.x, fmaxf(WorldScale.y, WorldScale.z));
+		float MaxScale = fmaxf(WorldScale.x, fmaxf(WorldScale.y, WorldScale.z));
 
-			m_CollisionShape = std::make_shared<btSphereShape>(btScalar(m_Radius * MaxScale));
-			m_RigidBody = std::make_shared<CBulletRigidBody>(pBulletPhysics->GetDynamicsWorld(), m_CollisionShape.get(), WorldPos, WorldRotate, m_IsStatic, m_Mass, m_RBParam);
-		}
+		m_CollisionShape = std::make_shared<btSphereShape>(btScalar(m_Radius * MaxScale));
+		m_RigidBody = std::make_shared<CBulletRigidBody>(pBulletPhysics->GetDynamicsWorld(), m_CollisionShape.get(), WorldPos, WorldRotate, m_IsStatic, m_Mass, m_RBParam);
 
 		return true;
 	}
