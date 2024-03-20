@@ -151,27 +151,18 @@ namespace physics
 			if (JParam.TransSpring[a] != 0.0f)
 			{
 				Constraint->enableSpring(a, true);
-
-				if (a == 2)
-				{
-					Constraint->setStiffness(a, -JParam.TransSpring[a]); // Stiffness: çdÇ≥
-				}
-				else
-				{
-					Constraint->setStiffness(a, JParam.TransSpring[a]); // Stiffness: çdÇ≥
-				}
-				
+				Constraint->setStiffness(a, JParam.TransSpring[a]); // Stiffness: çdÇ≥
 			}
 		}
 
-		/*for (int b = 0; b < 3; b++)
+		for (int b = 0; b < 3; b++)
 		{
 			if (JParam.RotateSpring[b] != 0.0f)
 			{
 				Constraint->enableSpring(b + 3, true);
 				Constraint->setStiffness(b + 3, JParam.RotateSpring[b]); // Stiffness: çdÇ≥
 			}
-		}*/
+		}
 
 		// åªç›ÇÃà íuÇÉoÉlÇÃíﬁÇËçáÇ¢ÇÃà íu(é©ëRí∑)Ç…Ç∑ÇÈ
 		Constraint->setEquilibriumPoint();
