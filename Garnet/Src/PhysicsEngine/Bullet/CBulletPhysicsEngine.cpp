@@ -8,6 +8,7 @@
 namespace physics
 {
 	CBulletPhysicsEngine::CBulletPhysicsEngine():
+		m_PhysicsTime(0.0f),
 		m_CollisionConfigration(nullptr),
 		m_Dispathcer(nullptr),
 		m_OverlappingPairCache(nullptr),
@@ -67,7 +68,7 @@ namespace physics
 		m_DynamicsWorld = std::make_unique<btDiscreteDynamicsWorld>(m_Dispathcer.get(), m_OverlappingPairCache.get(), m_Solver.get(), m_CollisionConfigration.get());
 
 		// d—Í‚ðÝ’è
-		m_DynamicsWorld->setGravity(btVector3(0.0, -9.8, 0.0));
+		m_DynamicsWorld->setGravity(btVector3(0.0f, -9.8f * 10.0f, 0.0f));
 
 		return true;
 	}
@@ -94,11 +95,17 @@ namespace physics
 
 	bool CBulletPhysicsEngine::Update(float DeltaTime)
 	{
+		m_PhysicsTime += DeltaTime;
+
+		if (m_PhysicsTime < (1.0f / 30.0f)) return true;
+
+		m_PhysicsTime = 0.0f;
+
 		if (m_DynamicsWorld)
 		{
 			// timeStep‚Í’è”‚Ì•û‚ªŒy‚¢‚Ì‚Å‚Ð‚Æ‚Ü‚¸’è”‚É‚µ‚Ä‚¨‚­
-			//m_DynamicsWorld->stepSimulation(1.0f / 60.0f, 10);
-			m_DynamicsWorld->stepSimulation(DeltaTime, 10);
+			m_DynamicsWorld->stepSimulation(1.0f / 30.0f, 10);
+			//m_DynamicsWorld->stepSimulation(DeltaTime, 10);
 		}
 
 		return true;

@@ -758,8 +758,8 @@ namespace mmd
 					Offset.y = Analyser.GetFloat();
 					Offset.z = Analyser.GetFloat();
 
-					// Posにオフセットを追加する
-					Pos += Offset;
+					// Posにオフセットを追加する(いらないかも)
+					//Pos += Offset;
 				}
 
 				// 回転付与 または 移動付与 が 1
