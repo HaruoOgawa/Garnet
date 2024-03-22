@@ -73,7 +73,14 @@ namespace animation
 	// IKの計算
 	bool CAnimationController::CalculateIK(const std::vector<std::shared_ptr<object::CNode>>& NodeList)
 	{
-		if(m_Skeleton)
+		if (!DoCCDIK(NodeList)) return false;
+
+		return true;
+	}
+
+	bool CAnimationController::DoCCDIK(const std::vector<std::shared_ptr<object::CNode>>& NodeList)
+	{
+		if (m_Skeleton)
 		{
 			const auto& BoneList = m_Skeleton->GetBoneList();
 
@@ -136,7 +143,7 @@ namespace animation
 							glm::vec3 ToTargetVector = glm::normalize(IKGoalPos - SecondLinkPos);
 
 							glm::quat Rot = math::CTransform::CalcTwoVectorRotate(ToFistVector, ToTargetVector, IKParam->LimitedAngle);
-							
+
 							{
 								// SecondLinkPosの位置のボーンの回転を更新する(自動的に子要素も回転するので便利)
 								glm::quat LinkRot = LinkBone->GetBoneNode()->GetRot();
@@ -147,7 +154,7 @@ namespace animation
 								{
 									math::CTransform::ClampRotate(LinkRot, IKParam->IKLinkList[LinkIndex].LowerAngle, IKParam->IKLinkList[LinkIndex].UpperAngle);
 								}
-								
+
 								LinkBone->GetBoneNode()->SetRot(LinkRot);
 
 								// CyclicBoneのワールド行列を更新

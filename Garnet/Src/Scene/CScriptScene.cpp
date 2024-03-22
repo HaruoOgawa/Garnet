@@ -170,7 +170,7 @@ namespace scene
 			//Material->ReplacePreloadUniformValue("roughnessFactor", &glm::vec1(1.0f)[0], sizeof(float), 0);
 
 			std::shared_ptr<math::CTransform> LocalTransform = std::make_shared<math::CTransform>();
-			LocalTransform->SetPos(glm::vec3(0.0f, -1.0f, 0.0f));
+			LocalTransform->SetPos(glm::vec3(0.0f, 0.1f, 0.0f));
 			LocalTransform->SetScale(glm::vec3(10.0f, 0.1f, 10.0f));
 
 			auto PhysicsBox = pPhysicsEngine->CreatePhysicsBox(glm::vec3(0.5f), false, 0.0f, {});
@@ -179,7 +179,7 @@ namespace scene
 		}
 
 		// m_PhysicsSphere
-		{
+		/*{
 			// Material
 			auto Material = m_PBRMF->CreateMaterial(pGraphicsAPI, 5, graphics::ECullMode::CULL_BACK);
 
@@ -363,7 +363,7 @@ namespace scene
 
 			// Create
 			if (!m_PhysicsCubeList->Create(pGraphicsAPI, pPhysicsEngine, m_DepthMF)) return false;
-		}
+		}*/
 
 		// m_TdaMiku_Model
 		{

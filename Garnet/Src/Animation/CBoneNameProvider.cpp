@@ -210,7 +210,11 @@ namespace animation
 		m_BoneNameTableU16.emplace(animation::EHumanoidBones::Hips, std::vector<std::wstring>{ HexToWstr({ 0x8170 }), HexToWstr({ 0x8d98 }) }); // 腰
 		m_BoneNameTableU16.emplace(animation::EHumanoidBones::LowerBody, std::vector<std::wstring>{ HexToWstr({ 0x4e0b, 0x534a, 0x8eab }), HexToWstr({ 0x89ba, 0x94bc, 0x9067 }) }); // 下半身
 		m_BoneNameTableU16.emplace(animation::EHumanoidBones::Spine, std::vector<std::wstring>{ HexToWstr({ 0x4e0a, 0x534a, 0x8eab }), HexToWstr({ 0x8fe3, 0x94bc, 0x9067 }) }); // 上半身
-		m_BoneNameTableU16.emplace(animation::EHumanoidBones::Chest, std::vector<std::wstring>{ HexToWstr({ 0x4e0a, 0x534a, 0x8eab, 0x0032 }), HexToWstr({ 0x8fe3, 0x94bc, 0x9067, 0x32 }) }); // 上半身2
+		// 数値のバイナリはちゃんと空きにも0を入れないとおかしくなるので注意(特にShift_JIS)
+		// 例えば0x32ではなく0x3200にする必要があった
+		// たぶん4桁じゃないバイナリは全部0埋めで4桁にする必要があるかも
+		// なぜなら別のバイト列とみなされるから(0x32だと本当は0x3200なのに0x0032になったり)
+		m_BoneNameTableU16.emplace(animation::EHumanoidBones::Chest, std::vector<std::wstring>{ HexToWstr({ 0x4e0a, 0x534a, 0x8eab, 0x0032 }), HexToWstr({ 0x8fe3, 0x94bc, 0x9067, 0x3200 }) }); // 上半身2
 		//m_BoneNameTableU16.emplace(animation::EHumanoidBones::UpperChest, std::vector<std::wstring>{ HexToWstr({}), HexToWstr({}) });
 		m_BoneNameTableU16.emplace(animation::EHumanoidBones::Neck, std::vector<std::wstring>{ HexToWstr({ 0x9996 }), HexToWstr({ 0x8ef1 }) }); // 首
 		m_BoneNameTableU16.emplace(animation::EHumanoidBones::Head, std::vector<std::wstring>{ HexToWstr({ 0x982d }), HexToWstr({ 0x93aa }) }); // 頭
@@ -250,7 +254,7 @@ namespace animation
 		m_BoneNameTableU16.emplace(animation::EHumanoidBones::LeftLittleProximal, std::vector<std::wstring>{ HexToWstr({ 0x5de6, 0x5c0f, 0x6307, 0xff11 }), HexToWstr({ 0x8db6, 0x8fac, 0x8e77, 0x8250 }) }); // 左小指１
 		m_BoneNameTableU16.emplace(animation::EHumanoidBones::LeftLittleIntermediate, std::vector<std::wstring>{ HexToWstr({ 0x5de6, 0x5c0f, 0x6307, 0xff12 }), HexToWstr({ 0x8db6, 0x8fac, 0x8e77, 0x8251 }) }); // 左小指２
 		m_BoneNameTableU16.emplace(animation::EHumanoidBones::LeftLittleDistal, std::vector<std::wstring>{ HexToWstr({ 0x5de6, 0x5c0f, 0x6307, 0xff13 }), HexToWstr({ 0x8db6, 0x8fac, 0x8e77, 0x8252 }) }); // 左小指３
-		m_BoneNameTableU16.emplace(animation::EHumanoidBones::RightThumbProximal, std::vector<std::wstring>{ HexToWstr({ 0x53f3, 0x89aa, 0x6307, 0x0030 }), HexToWstr({ 0x8945, 0x9065, 0x8e77, 0x30 }) }); // 右親指0
+		m_BoneNameTableU16.emplace(animation::EHumanoidBones::RightThumbProximal, std::vector<std::wstring>{ HexToWstr({ 0x53f3, 0x89aa, 0x6307, 0x0030 }), HexToWstr({ 0x8945, 0x9065, 0x8e77, 0x3000 }) }); // 右親指0
 		m_BoneNameTableU16.emplace(animation::EHumanoidBones::RightThumbIntermediate, std::vector<std::wstring>{ HexToWstr({ 0x53f3, 0x89aa, 0x6307, 0xff11 }), HexToWstr({ 0x8945, 0x9065, 0x8e77, 0x8250 }) }); // 右親指１
 		m_BoneNameTableU16.emplace(animation::EHumanoidBones::RightThumbDistal, std::vector<std::wstring>{ HexToWstr({ 0x53f3, 0x89aa, 0x6307, 0xff12 }), HexToWstr({ 0x8945, 0x9065, 0x8e77, 0x8251 }) }); // 右親指２
 		m_BoneNameTableU16.emplace(animation::EHumanoidBones::RightIndexProximal, std::vector<std::wstring>{ HexToWstr({ 0x53f3, 0x4eba, 0x6307, 0xff11 }), HexToWstr({ 0x8945, 0x906c, 0x8e77, 0x8250 }) }); // 右人指１

@@ -401,7 +401,7 @@ namespace object
 		if (!m_MorphController->Update(DeltaSecondsTime, m_MeshList)) return false;
 
 		// 物理ジョイントの位置をボーン位置に合わせる
-		//AlignPhysicsJoint();
+		AlignPhysicsJoint();
 
 		return true;
 	}

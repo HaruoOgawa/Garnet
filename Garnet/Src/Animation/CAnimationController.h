@@ -37,6 +37,9 @@ namespace animation
 		void BlendRotation(const std::shared_ptr<object::CNode>& Node, float L);
 
 		void CalcWorldMatrix(const glm::mat4& ParentWorldMatrix, const std::shared_ptr<object::CNode>& Node, const std::vector<std::shared_ptr<object::CNode>>& NodeList);
+
+		// IK‚ÌŒvŽZ
+		bool DoCCDIK(const std::vector<std::shared_ptr<object::CNode>>& NodeList);
 	public:
 		CAnimationController();
 		virtual ~CAnimationController();
