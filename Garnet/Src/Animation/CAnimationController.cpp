@@ -1,6 +1,7 @@
 #ifdef USE_ANIMATION
 
 #include "CAnimationController.h"
+#include "../../Debug/Message/Console.h"
 
 namespace animation
 {
@@ -90,6 +91,8 @@ namespace animation
 				glm::vec3 IKGoalPos = glm::vec3(0.0f);
 				math::CTransform::CastModelMatrixToTranslation(IKBone->GetBoneNode()->GetWorldMatrix(), IKGoalPos);
 
+				glm::vec4 TestIKPos = IKBone->GetBoneNode()->GetWorldMatrix() * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+
 				const auto& IKParam = IKBone->GetIKParam();
 
 				// Linkが一つもなければスキップ
@@ -101,10 +104,14 @@ namespace animation
 				// IKターゲットボーン
 				if (IKParam->IKTargetBoneIndex < 0 || IKParam->IKTargetBoneIndex >= BoneList.size()) continue;
 				const auto& EndEffectorBone = BoneList[IKParam->IKTargetBoneIndex];
+				
+				glm::vec3 EndEffectorPos = glm::vec3(0.0f);
+				math::CTransform::CastModelMatrixToTranslation(EndEffectorBone->GetBoneNode()->GetWorldMatrix(), EndEffectorPos);
 
 				// CCD-IKを採用
 				// CCD-IKに使用するサイクリックボーンリスト
 				std::vector<std::shared_ptr<CBone>> LinkBoneList;
+				std::vector<glm::vec3> LinkPosList;
 
 				for (const auto& Link : IKParam->IKLinkList)
 				{
@@ -113,6 +120,11 @@ namespace animation
 					const auto& CyclicBone = BoneList[Link.IKLinkBoneIndex];
 
 					LinkBoneList.push_back(CyclicBone);
+
+					glm::vec3 CyclicPos = glm::vec3(0.0f);
+					math::CTransform::CastModelMatrixToTranslation(CyclicBone->GetBoneNode()->GetWorldMatrix(), CyclicPos);
+
+					LinkPosList.push_back(CyclicPos);
 				}
 
 				// サイクルスタート
@@ -120,6 +132,24 @@ namespace animation
 				{
 					// どれくらい近づいたらターゲットに届いたと判定するかの閾値
 					const float CyclicThreshold = 0.01f;
+
+					if (IKBone->GetBoneName() == animation::EHumanoidBones::LeftLegIK)
+					{
+						Console::Log("___________________________________________________________________________________________________________________________________________\n");
+					}
+
+					{
+						glm::mat4 TestMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(5.0f, 5.0f, 0.0f));
+
+						glm::vec4 TestPosA = TestMatrix * glm::vec4(1.0f, 1.0f, 0.0f, 1.0f);
+
+						//TestMatrix = TestMatrix * glm::mat4_cast(glm::angleAxis(3.1415f, glm::vec3(0.0f, 0.0f, 1.0f)));
+						TestMatrix = TestMatrix * glm::mat4_cast(glm::angleAxis(3.1415f * 0.5f, glm::vec3(0.0f, 0.0f, 1.0f)));
+
+						glm::vec4 TestPosB = TestMatrix * glm::vec4(1.0f, 1.0f, 0.0f, 1.0f);
+
+						float x = 0.0f;
+					}
 
 					// ターゲットに届くかサイクルの最大値に達するまで計算を繰り返す
 					int CurrentLoopNum = 0;
@@ -132,51 +162,72 @@ namespace animation
 							const auto& LinkBone = LinkBoneList[LinkIndex];
 							const auto& LinkNode = LinkBone->GetBoneNode();
 
-							//
-							glm::vec3 EndEffectorPos = glm::vec3(0.0f);
-							math::CTransform::CastModelMatrixToTranslation(EndEffectorBone->GetBoneNode()->GetWorldMatrix(), EndEffectorPos);
-
-							glm::vec3 CurrJointPos = glm::vec3(0.0f);
-							math::CTransform::CastModelMatrixToTranslation(LinkBone->GetBoneNode()->GetWorldMatrix(), CurrJointPos);
+							glm::vec3 LinkPos = LinkPosList[LinkIndex];
 
 							// 回転行列を計算
-							glm::vec3 ToEndEffectorVector = glm::normalize(EndEffectorPos - CurrJointPos);
-							glm::vec3 ToTargetVector = glm::normalize(IKGoalPos - CurrJointPos);
+							glm::vec3 ToEndEffectorVector = glm::normalize(EndEffectorPos - LinkPos);
+							glm::vec3 ToTargetVector = glm::normalize(IKGoalPos - LinkPos);
 
 							// ここから先が違う /////////////////////////////////////////////
 							// 回転軸となるJoint(CurrJointPos)を中心にJoint以降のノードを回転させる
 							// https://cnc-selfbuild.blogspot.com/2021/03/inverse-kinematics-backward.html
-
-							/*float cosTheta = glm::dot(ToEndEffectorVector, ToTargetVector);
-							float Angle = glm::acos(cosTheta);
-							glm::vec3 RotateAxis = glm::normalize(glm::cross(ToEndEffectorVector, ToTargetVector));*/
-							glm::quat CCDRot = math::CTransform::CalcTwoVectorRotate(ToEndEffectorVector, ToTargetVector, IKParam->LimitedAngle);
-							glm::mat4 LinkInverseWorldMatrix = glm::inverse(LinkNode->GetWorldMatrix());
+							
+							//glm::quat CCDRot = math::CTransform::CalcTwoVectorRotate(ToEndEffectorVector, ToTargetVector, IKParam->LimitedAngle);
+							glm::quat CCDRot = math::CTransform::CalcTwoVectorRotate(ToTargetVector, ToEndEffectorVector, IKParam->LimitedAngle);
+							//glm::mat4 LinkInverseWorldMatrix = glm::inverse(LinkNode->GetWorldMatrix());
 
 							{
-								const auto& EndEffectorNode = EndEffectorBone->GetBoneNode();
+								glm::vec3 LocalPos = EndEffectorPos - LinkPos;
+								glm::vec4 RotPos = glm::mat4_cast(CCDRot) * glm::vec4(LocalPos.x, LocalPos.y, LocalPos.z, 1.0f);
+								LocalPos = glm::vec3(RotPos.x, RotPos.y, RotPos.z);
+
+								EndEffectorPos = LinkPos + LocalPos;
+
+								EndEffectorBone->GetBoneNode()->SetWorldMatrix(glm::translate(glm::mat4(1.0f), EndEffectorPos));
+
+								/*const auto& EndEffectorNode = EndEffectorBone->GetBoneNode();
 
 								// 現在の回転軸を中心としたローカル座標を取得
 								math::CTransform LocalTransform = math::CTransform(LinkInverseWorldMatrix * EndEffectorNode->GetWorldMatrix());
-								LocalTransform.MulRot(CCDRot);
+								//LocalTransformA.MulRot(CCDRot);
+
+								glm::vec4 LocalPos =
+									glm::mat4_cast(CCDRot * LocalTransform.GetRot()) *
+									glm::vec4(LocalTransform.GetPos().x, LocalTransform.GetPos().y, LocalTransform.GetPos().z, 1.0f);
 
 								// 現在の回転軸を中心にワールド座標を再計算
-								glm::mat4 WorldMatrix = LinkNode->GetWorldMatrix() * LocalTransform.GetModelMatrix();
-								EndEffectorNode->SetWorldMatrix(WorldMatrix);
+								//glm::mat4 WorldMatrix = LinkNode->GetWorldMatrix() * LocalTransform.GetModelMatrix();
+								glm::mat4 WorldMatrix = LinkNode->GetWorldMatrix() * glm::translate(glm::mat4(1.0f), glm::vec3(LocalPos.x, LocalPos.y, LocalPos.z));
+
+								EndEffectorNode->SetWorldMatrix(WorldMatrix);*/
 							}
 
 							for (int CalcIndex = 0; CalcIndex < LinkIndex; CalcIndex++)
 							{
-								auto& CalcBone = LinkBoneList[CalcIndex];
+								glm::vec3 LocalPos = LinkPosList[CalcIndex] - LinkPos;
+								glm::vec4 RotPos = glm::mat4_cast(CCDRot) * glm::vec4(LocalPos.x, LocalPos.y, LocalPos.z, 1.0f);
+								LocalPos = glm::vec3(RotPos.x, RotPos.y, RotPos.z);
+
+								LinkPosList[CalcIndex] = LinkPos + LocalPos;
+
+								LinkBoneList[CalcIndex]->GetBoneNode()->SetWorldMatrix(glm::translate(glm::mat4(1.0f), LinkPosList[CalcIndex]));
+
+								/*auto& CalcBone = LinkBoneList[CalcIndex];
 								const auto& CalcNode = CalcBone->GetBoneNode();
 
 								// 現在の回転軸を中心としたローカル座標を取得
 								math::CTransform LocalTransform = math::CTransform(LinkInverseWorldMatrix * CalcNode->GetWorldMatrix());
-								LocalTransform.MulRot(CCDRot);
+								//LocalTransformA.MulRot(CCDRot);
+
+								glm::vec4 LocalPos =
+									glm::mat4_cast(CCDRot * LocalTransform.GetRot()) *
+									glm::vec4(LocalTransform.GetPos().x, LocalTransform.GetPos().y, LocalTransform.GetPos().z, 1.0f);
 
 								// 現在の回転軸を中心にワールド座標を再計算
-								glm::mat4 WorldMatrix = LinkNode->GetWorldMatrix() * LocalTransform.GetModelMatrix();
-								CalcNode->SetWorldMatrix(WorldMatrix);
+								//glm::mat4 WorldMatrix = LinkNode->GetWorldMatrix() * LocalTransform.GetModelMatrix();
+								glm::mat4 WorldMatrix = LinkNode->GetWorldMatrix() * glm::translate(glm::mat4(1.0f), glm::vec3(LocalPos.x, LocalPos.y, LocalPos.z));
+
+								CalcNode->SetWorldMatrix(WorldMatrix);*/
 							}
 
 							/*glm::quat Rot = math::CTransform::CalcTwoVectorRotate(ToEndEffectorVector, ToTargetVector, IKParam->LimitedAngle);
@@ -210,10 +261,11 @@ namespace animation
 							}*/
 
 							// 計算結果を見て末端のボーンがIKBoneにどれくらい近づいたか見る
-							glm::vec3 CyclicResultPos = glm::vec3(0.0f);
-							math::CTransform::CastModelMatrixToTranslation(EndEffectorBone->GetBoneNode()->GetWorldMatrix(), CyclicResultPos);
+							//glm::vec3 CyclicResultPos = glm::vec3(0.0f);
+							//math::CTransform::CastModelMatrixToTranslation(EndEffectorBone->GetBoneNode()->GetWorldMatrix(), CyclicResultPos);
 
-							if (glm::distance(IKGoalPos, CyclicResultPos) < CyclicThreshold)
+							//if (glm::distance(IKGoalPos, CyclicResultPos) < CyclicThreshold)
+							if (glm::distance(IKGoalPos, EndEffectorPos) < CyclicThreshold)
 							{
 								Result = true;
 
