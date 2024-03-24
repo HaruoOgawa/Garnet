@@ -67,8 +67,8 @@ namespace scene
 
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Avatar\\Tda_Miku\\Tda_Miku.pmx", m_TdaMiku_Model, "", "ShadowPass"));
 		//pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CAnimationLoader>("Resources\\Motions\\mmd_running.vmd", m_VMDAnimationSet));
-		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CAnimationLoader>("Resources\\Motions\\Run_m4th_Loop.vmd", m_VMDAnimationSet));
-		//pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CAnimationLoader>("Resources\\Motions\\Bling-Bang-Bang-Born.vmd", m_VMDAnimationSet));
+		//pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CAnimationLoader>("Resources\\Motions\\Run_m4th_Loop.vmd", m_VMDAnimationSet));
+		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CAnimationLoader>("Resources\\Motions\\Bling-Bang-Bang-Born.vmd", m_VMDAnimationSet));
 		//pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CAnimationLoader>("Resources\\Motions\\biglove_dance.vmd", m_VMDAnimationSet));
 		//pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CAnimationLoader>("Resources\\Motions\\BackFlip.vmd", m_VMDAnimationSet));
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CAnimationLoader>("Resources\\Motions\\biglove_expression.vmd", m_ExpressionVMD));
@@ -161,7 +161,7 @@ namespace scene
 		const float ZOffset = 3.0f;
 
 		// m_PhysicsGround
-		{
+		/*{
 			auto Material = m_PBRMF->CreateMaterial(pGraphicsAPI, 1, graphics::ECullMode::CULL_BACK);
 
 			//m_PhysicsGround->GetTextureSet()->AddCubeMap(m_Cube_Texture);
@@ -176,7 +176,7 @@ namespace scene
 			auto PhysicsBox = pPhysicsEngine->CreatePhysicsBox(glm::vec3(0.5f), false, 0.0f, {});
 
 			if (!m_PhysicsGround->CreateSimply(pGraphicsAPI, pPhysicsEngine, graphics::CPresetPrimitive::CreateBox(pGraphicsAPI), Material, m_DepthMF, LocalTransform, PhysicsBox)) return false;
-		}
+		}*/
 
 		// m_PhysicsSphere
 		/*{

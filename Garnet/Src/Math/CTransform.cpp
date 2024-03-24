@@ -9,6 +9,14 @@ namespace math
 	{
 	}
 
+	CTransform::CTransform(const glm::mat4& Matrix) :
+		m_Pos(0.0f),
+		m_Rot(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)),
+		m_Scale(1.0f)
+	{
+		CTransform::CastModelMatrixToTransform(Matrix, m_Pos, m_Rot, m_Scale);
+	}
+
 	glm::mat4 CTransform::GetModelMatrix()
 	{
 		glm::mat4 trsMatrix = glm::translate(glm::mat4(1.0f), m_Pos);

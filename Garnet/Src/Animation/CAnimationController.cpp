@@ -100,7 +100,7 @@ namespace animation
 
 				// IKターゲットボーン
 				if (IKParam->IKTargetBoneIndex < 0 || IKParam->IKTargetBoneIndex >= BoneList.size()) continue;
-				const auto& IKTargetBone = BoneList[IKParam->IKTargetBoneIndex];
+				const auto& EndEffectorBone = BoneList[IKParam->IKTargetBoneIndex];
 
 				// CCD-IKを採用
 				// CCD-IKに使用するサイクリックボーンリスト
@@ -130,19 +130,56 @@ namespace animation
 						for (int LinkIndex = 0; LinkIndex < LinkBoneList.size(); LinkIndex++)
 						{
 							const auto& LinkBone = LinkBoneList[LinkIndex];
+							const auto& LinkNode = LinkBone->GetBoneNode();
 
 							//
-							glm::vec3 FirstLinkPos = glm::vec3(0.0f);
-							math::CTransform::CastModelMatrixToTranslation(IKTargetBone->GetBoneNode()->GetWorldMatrix(), FirstLinkPos);
+							glm::vec3 EndEffectorPos = glm::vec3(0.0f);
+							math::CTransform::CastModelMatrixToTranslation(EndEffectorBone->GetBoneNode()->GetWorldMatrix(), EndEffectorPos);
 
-							glm::vec3 SecondLinkPos = glm::vec3(0.0f);
-							math::CTransform::CastModelMatrixToTranslation(LinkBone->GetBoneNode()->GetWorldMatrix(), SecondLinkPos);
+							glm::vec3 CurrJointPos = glm::vec3(0.0f);
+							math::CTransform::CastModelMatrixToTranslation(LinkBone->GetBoneNode()->GetWorldMatrix(), CurrJointPos);
 
 							// 回転行列を計算
-							glm::vec3 ToFistVector = glm::normalize(FirstLinkPos - SecondLinkPos);
-							glm::vec3 ToTargetVector = glm::normalize(IKGoalPos - SecondLinkPos);
+							glm::vec3 ToEndEffectorVector = glm::normalize(EndEffectorPos - CurrJointPos);
+							glm::vec3 ToTargetVector = glm::normalize(IKGoalPos - CurrJointPos);
 
-							glm::quat Rot = math::CTransform::CalcTwoVectorRotate(ToFistVector, ToTargetVector, IKParam->LimitedAngle);
+							// ここから先が違う /////////////////////////////////////////////
+							// 回転軸となるJoint(CurrJointPos)を中心にJoint以降のノードを回転させる
+							// https://cnc-selfbuild.blogspot.com/2021/03/inverse-kinematics-backward.html
+
+							/*float cosTheta = glm::dot(ToEndEffectorVector, ToTargetVector);
+							float Angle = glm::acos(cosTheta);
+							glm::vec3 RotateAxis = glm::normalize(glm::cross(ToEndEffectorVector, ToTargetVector));*/
+							glm::quat CCDRot = math::CTransform::CalcTwoVectorRotate(ToEndEffectorVector, ToTargetVector, IKParam->LimitedAngle);
+							glm::mat4 LinkInverseWorldMatrix = glm::inverse(LinkNode->GetWorldMatrix());
+
+							{
+								const auto& EndEffectorNode = EndEffectorBone->GetBoneNode();
+
+								// 現在の回転軸を中心としたローカル座標を取得
+								math::CTransform LocalTransform = math::CTransform(LinkInverseWorldMatrix * EndEffectorNode->GetWorldMatrix());
+								LocalTransform.MulRot(CCDRot);
+
+								// 現在の回転軸を中心にワールド座標を再計算
+								glm::mat4 WorldMatrix = LinkNode->GetWorldMatrix() * LocalTransform.GetModelMatrix();
+								EndEffectorNode->SetWorldMatrix(WorldMatrix);
+							}
+
+							for (int CalcIndex = 0; CalcIndex < LinkIndex; CalcIndex++)
+							{
+								auto& CalcBone = LinkBoneList[CalcIndex];
+								const auto& CalcNode = CalcBone->GetBoneNode();
+
+								// 現在の回転軸を中心としたローカル座標を取得
+								math::CTransform LocalTransform = math::CTransform(LinkInverseWorldMatrix * CalcNode->GetWorldMatrix());
+								LocalTransform.MulRot(CCDRot);
+
+								// 現在の回転軸を中心にワールド座標を再計算
+								glm::mat4 WorldMatrix = LinkNode->GetWorldMatrix() * LocalTransform.GetModelMatrix();
+								CalcNode->SetWorldMatrix(WorldMatrix);
+							}
+
+							/*glm::quat Rot = math::CTransform::CalcTwoVectorRotate(ToEndEffectorVector, ToTargetVector, IKParam->LimitedAngle);
 
 							{
 								// SecondLinkPosの位置のボーンの回転を更新する(自動的に子要素も回転するので便利)
@@ -170,11 +207,11 @@ namespace animation
 
 									CalcWorldMatrix(WorldMatrix, ChildNode, NodeList);
 								}
-							}
+							}*/
 
 							// 計算結果を見て末端のボーンがIKBoneにどれくらい近づいたか見る
 							glm::vec3 CyclicResultPos = glm::vec3(0.0f);
-							math::CTransform::CastModelMatrixToTranslation(IKTargetBone->GetBoneNode()->GetWorldMatrix(), CyclicResultPos);
+							math::CTransform::CastModelMatrixToTranslation(EndEffectorBone->GetBoneNode()->GetWorldMatrix(), CyclicResultPos);
 
 							if (glm::distance(IKGoalPos, CyclicResultPos) < CyclicThreshold)
 							{

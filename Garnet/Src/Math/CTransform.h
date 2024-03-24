@@ -12,6 +12,7 @@ namespace math
 		glm::vec3 m_Scale;
 	public:
 		CTransform();
+		CTransform(const glm::mat4& Matrix);
 		virtual ~CTransform() = default;
 
 		glm::mat4 GetModelMatrix();
