@@ -104,6 +104,12 @@ namespace animation
 	{
 		for (const auto& Bone : m_BoneList)
 		{
+			// IKLinkの右足とかに付与が働くと嫌なのでひとまず0.0fより小さい時はスキップする(腰キャンセル右)
+			if (Bone->GetGrantRate() < 0.0f)
+			{
+				continue;
+			}
+
 			if (Bone->IsRotateGrant() || Bone->IsMoveGrant())
 			{
 				m_GrantBoneList.push_back(Bone);

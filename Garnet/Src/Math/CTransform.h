@@ -36,6 +36,8 @@ namespace math
 		static void CastModelMatrixToRotation(const glm::mat4& ModelMatrix, glm::quat& Rotation);
 		static void CastModelMatrixToScale(const glm::mat4& ModelMatrix, glm::vec3& Scale);
 
+		static glm::vec3 GetTranslationFromModelMatrix(const glm::mat4& ModelMatrix);
+
 		// Œ´“_‚É‚ ‚é“_‚ª‚Ç‚±‚ÉˆÚ“®‚·‚é‚©
 		static void GetMoveFromModelMatrix(const glm::mat4& ModelMatrix, glm::vec3& Move);
 

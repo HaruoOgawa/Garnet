@@ -129,6 +129,15 @@ namespace math
 		);
 	}
 
+	glm::vec3 CTransform::GetTranslationFromModelMatrix(const glm::mat4& ModelMatrix)
+	{
+		glm::vec3 Translation = glm::vec3(0.0f);
+
+		CastModelMatrixToTranslation(ModelMatrix, Translation);
+
+		return Translation;
+	}
+
 	// Œ´“_‚É‚ ‚é“_‚ª‚Ç‚±‚ÉˆÚ“®‚·‚é‚©
 	void CTransform::GetMoveFromModelMatrix(const glm::mat4& ModelMatrix, glm::vec3& Move)
 	{

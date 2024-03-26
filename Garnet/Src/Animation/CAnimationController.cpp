@@ -172,8 +172,8 @@ namespace animation
 							// 回転軸となるJoint(CurrJointPos)を中心にJoint以降のノードを回転させる
 							// https://cnc-selfbuild.blogspot.com/2021/03/inverse-kinematics-backward.html
 							
-							//glm::quat CCDRot = math::CTransform::CalcTwoVectorRotate(ToEndEffectorVector, ToTargetVector, IKParam->LimitedAngle);
-							glm::quat CCDRot = math::CTransform::CalcTwoVectorRotate(ToTargetVector, ToEndEffectorVector, IKParam->LimitedAngle);
+							glm::quat CCDRot = math::CTransform::CalcTwoVectorRotate(ToEndEffectorVector, ToTargetVector, IKParam->LimitedAngle);
+							//glm::quat CCDRot = math::CTransform::CalcTwoVectorRotate(ToTargetVector, ToEndEffectorVector, IKParam->LimitedAngle);
 							//glm::mat4 LinkInverseWorldMatrix = glm::inverse(LinkNode->GetWorldMatrix());
 
 							{
@@ -183,7 +183,7 @@ namespace animation
 
 								EndEffectorPos = LinkPos + LocalPos;
 
-								EndEffectorBone->GetBoneNode()->SetWorldMatrix(glm::translate(glm::mat4(1.0f), EndEffectorPos));
+								//EndEffectorBone->GetBoneNode()->SetWorldMatrix(glm::translate(glm::mat4(1.0f), EndEffectorPos));
 
 								/*const auto& EndEffectorNode = EndEffectorBone->GetBoneNode();
 
@@ -210,7 +210,7 @@ namespace animation
 
 								LinkPosList[CalcIndex] = LinkPos + LocalPos;
 
-								LinkBoneList[CalcIndex]->GetBoneNode()->SetWorldMatrix(glm::translate(glm::mat4(1.0f), LinkPosList[CalcIndex]));
+								//LinkBoneList[CalcIndex]->GetBoneNode()->SetWorldMatrix(glm::translate(glm::mat4(1.0f), LinkPosList[CalcIndex]));
 
 								/*auto& CalcBone = LinkBoneList[CalcIndex];
 								const auto& CalcNode = CalcBone->GetBoneNode();
@@ -278,6 +278,46 @@ namespace animation
 
 						// ループ回数を更新
 						CurrentLoopNum++;
+					}
+
+					// IK計算結果を回転にしてボーンに返す
+					{
+						// LinkNode
+						for (int LinkIndex = static_cast<int>(LinkBoneList.size()) - 1; LinkIndex >= 0; LinkIndex--)
+						{
+							const auto& LinkBone = LinkBoneList[LinkIndex];
+							const auto& LinkNode = LinkBone->GetBoneNode();
+
+							glm::vec3 LocalLinkPos = LinkNode->GetPos();
+
+							const auto& CalcIKLinkPos = LinkPosList[LinkIndex];
+							glm::vec3 LocalCalcIKLinkPos = CalcIKLinkPos - math::CTransform::GetTranslationFromModelMatrix(LinkNode->GetParentNode()->GetWorldMatrix());
+
+							// 回転軸と角度を取得
+							const auto& LocalIKRot = math::CTransform::CalcTwoVectorRotate(LocalLinkPos, LocalCalcIKLinkPos);
+
+							LinkNode->MulRot(LocalIKRot);
+
+							LinkNode->SetWorldMatrix(LinkNode->GetParentNode()->GetWorldMatrix()* LinkNode->GetLocalMatrix());
+						}
+
+						// EndEffector
+						{
+							const auto& EndEffectorNode = EndEffectorBone->GetBoneNode();
+
+							glm::vec3 LocalEndPos = EndEffectorNode->GetPos();
+
+							const auto& CalcIKEndPos = EndEffectorPos;
+							
+							glm::vec3 LocalCalcIKEndPos = CalcIKEndPos - math::CTransform::GetTranslationFromModelMatrix(EndEffectorNode->GetParentNode()->GetWorldMatrix());
+
+							// 回転軸と角度を取得
+							const auto& LocalIKRot = math::CTransform::CalcTwoVectorRotate(LocalEndPos, CalcIKEndPos);
+
+							EndEffectorNode->MulRot(LocalIKRot);
+
+							EndEffectorNode->SetWorldMatrix(EndEffectorNode->GetParentNode()->GetWorldMatrix()* EndEffectorNode->GetLocalMatrix());
+						}
 					}
 				}
 			}
