@@ -401,7 +401,7 @@ namespace object
 		if (!m_MorphController->Update(DeltaSecondsTime, m_MeshList)) return false;
 
 		// 物理ジョイントの位置をボーン位置に合わせる
-		AlignPhysicsJoint();
+		//AlignPhysicsJoint();
 
 		return true;
 	}
@@ -414,7 +414,7 @@ namespace object
 	bool C3DObject::FixedUpdate(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, float DeltaSecondsTime)
 	{
 		// 物理演算の結果を反映する
-		ApplyPhysicsWorldMatrix();
+		//ApplyPhysicsWorldMatrix();
 
 #ifdef USE_ANIMATION
 		// IKや物理演算が終わって最終的なWorldMatrixが確定した段階でSkinMatrixを計算する
@@ -532,7 +532,7 @@ namespace object
 					// Debug用: Boneの描画
 					{
 						DebugSphere->SetPos(m_ObjectTransform->GetModelMatrix() * BoneNode->GetWorldMatrix() * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
-						DebugSphere->SetScale(glm::vec3(0.025f));
+						DebugSphere->SetScale(glm::vec3(0.05f));
 					}
 
 					// Debug用: ローカル軸の描画(SphereをBoxに変更する)
@@ -544,6 +544,7 @@ namespace object
 
 					DebugSphere->GetMaterialList()[0]->SetUniformValue("useColor", &glm::ivec1(1)[0], sizeof(glm::ivec1));
 					DebugSphere->GetMaterialList()[0]->SetUniformValue("baseColor", &glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)[0], sizeof(glm::vec4));
+					//DebugSphere->GetMaterialList()[0]->SetUniformValue("baseColorFactor", &glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)[0], sizeof(glm::vec4));
 
 					if (!DebugSphere->Draw(IsDepthPass, false, Camera, Projection, DrawInfo)) return false;
 				}
