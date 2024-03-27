@@ -573,6 +573,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Src\Animation\CIKSolver.h" />
     <ClInclude Include="Src\Graphics\CMorphController.h" />
     <ClInclude Include="Src\GraphicsAPI\OpenGL\COpenGLIndexBuffer.h" />
     <ClInclude Include="Src\GraphicsAPI\WebGPU\CWebGPUIndexBuffer.h" />
@@ -1443,6 +1444,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClInclude Include="Src\Interface\IRenderer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\Animation\CIKSolver.cpp" />
     <ClCompile Include="Src\Graphics\CMorphController.cpp" />
     <ClCompile Include="Src\GraphicsAPI\OpenGL\COpenGLIndexBuffer.cpp" />
     <ClCompile Include="Src\GraphicsAPI\WebGPU\CWebGPUIndexBuffer.cpp" />

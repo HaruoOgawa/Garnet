@@ -74,7 +74,12 @@ namespace animation
 	// IKの計算
 	bool CAnimationController::CalculateIK(const std::vector<std::shared_ptr<object::CNode>>& NodeList)
 	{
-		if (!DoCCDIK(NodeList)) return false;
+		if (m_Skeleton)
+		{
+			if (!m_Skeleton->SolveIK()) return false;
+		}
+
+		//if (!DoCCDIK(NodeList)) return false;
 
 		return true;
 	}
@@ -281,9 +286,10 @@ namespace animation
 		return true;
 	}
 
-	// 付与ボーンの再計算
-	bool CAnimationController::ReCalculateGrantBone(const std::vector<std::shared_ptr<object::CNode>>& NodeList)
+	// 付与ボーンの計算
+	bool CAnimationController::CalculateGrantBone(const std::vector<std::shared_ptr<object::CNode>>& NodeList)
 	{
+		// 付与はローカルトランスフォームに対して実行する
 		if(m_Skeleton)
 		{
 			const auto& BoneList = m_Skeleton->GetBoneList();
@@ -295,49 +301,49 @@ namespace animation
 				if (GrantParentBoneIndex < 0 || GrantParentBoneIndex >= BoneList.size()) continue;
 
 				const auto& ParentGrantBone = BoneList[GrantParentBoneIndex];
+				if (!ParentGrantBone) continue;
 
 				// 付与率
 				const float GrantRate = GrantBone->GetGrantRate();
 
-				// 自身のPosとRot
-				glm::vec3 GrantPos = glm::vec3(0.0f);
-				glm::quat GrantRot = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
-				math::CTransform::CastModelMatrixToTransform(GrantBone->GetBoneNode()->GetWorldMatrix(), GrantPos, GrantRot);
-
-				// 親ボーンのPosとRot
-				glm::vec3 ParentGrantPos = glm::vec3(0.0f);
-				glm::quat ParentGrantRot = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
-				math::CTransform::CastModelMatrixToTransform(ParentGrantBone->GetBoneNode()->GetWorldMatrix(), ParentGrantPos, ParentGrantRot);
-
-				// 付与を実行
-				glm::vec3 ResultPos = GrantPos;
-				glm::quat ResultRot = GrantRot;
-
 				if (GrantBone->IsRotateGrant())
 				{
 					// 回転付与
-					ResultRot = glm::slerp(GrantRot, ParentGrantRot, GrantRate);
+
+					glm::quat LocalParentRot = ParentGrantBone->GetBoneNode()->GetRot();
+
+					if (GrantRate >= 0.0f)
+					{
+						glm::quat GrantRot = (GrantRate * LocalParentRot) * GrantBone->GetBoneNode()->GetRot();
+
+						GrantBone->GetBoneNode()->SetRot(GrantRot);
+					}
+					else
+					{
+						// 付与率が負の時は逆行列をかける
+						glm::quat GrantRot = (fabsf(GrantRate) * glm::inverse(LocalParentRot)) * GrantBone->GetBoneNode()->GetRot();
+
+						GrantBone->GetBoneNode()->SetRot(GrantRot);
+					}
 				}
 				else if (GrantBone->IsMoveGrant())
 				{
+					glm::vec3 LocalParentPos = ParentGrantBone->GetBoneNode()->GetPos();
+
 					// 移動付与
-					ResultPos = (1.0f - GrantRate) * GrantPos + GrantRate * ParentGrantPos;
-				}
+					if (GrantRate >= 0.0f)
+					{
+						glm::vec3 GrantPos = GrantRate * LocalParentPos + GrantBone->GetBoneNode()->GetPos();
 
-				// 付与結果をボーンに再割り当て
-				glm::mat4 ResultMatrix = glm::mat4(1.0f);
-				math::CTransform::CalcModelMatrix(ResultMatrix, ResultPos, ResultRot, false);
+						GrantBone->GetBoneNode()->SetPos(GrantPos);
+					}
+					else
+					{
+						// 付与率が負の時は逆行列をかける
+						glm::vec3 GrantPos = (-1.0f) * GrantRate * LocalParentPos + GrantBone->GetBoneNode()->GetPos();
 
-				GrantBone->GetBoneNode()->SetWorldMatrix(ResultMatrix);
-
-				// 子要素にも回転付与・移動付与の計算結果を適応する
-				for (int ChildIndex : GrantBone->GetBoneNode()->GetChildrenNodeIndexList())
-				{
-					if (ChildIndex < 0 || ChildIndex >= NodeList.size()) continue;
-
-					const auto& ChildNode = NodeList[ChildIndex];
-
-					CalcWorldMatrix(ResultMatrix, ChildNode, NodeList);
+						GrantBone->GetBoneNode()->SetPos(GrantPos);
+					}
 				}
 			}
 		}

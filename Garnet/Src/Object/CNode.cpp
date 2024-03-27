@@ -198,6 +198,21 @@ namespace object
 		return m_WorldMatrix;
 	}
 
+	glm::mat4 CNode::CalcWorldMatrix()
+	{
+		glm::mat4 result = GetLocalMatrix();
+
+		std::shared_ptr<CNode> parentNode = m_ParentNode;
+		while (parentNode)
+		{
+			result = parentNode->GetDefaultLocalMatrix() * result;
+
+			parentNode = parentNode->GetParentNode();
+		}
+
+		return result;
+	}
+
 	void CNode::SetParentNode(const std::shared_ptr<CNode>& ParentNode)
 	{
 		m_ParentNode = ParentNode;

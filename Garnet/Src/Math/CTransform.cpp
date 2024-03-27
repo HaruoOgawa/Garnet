@@ -220,7 +220,9 @@ namespace math
 
 		float cosTheta = glm::dot(FromVector, ToVector);
 
-		if (cosTheta < -1.0f + 0.001f)
+		constexpr float Epsilon = std::numeric_limits<float>::epsilon();
+
+		if (cosTheta < -1.0f + Epsilon)
 		{
 			// 2つのベクトルが逆を向いている特殊ケース
 			// まず平行ではない任意のベクトルを決める

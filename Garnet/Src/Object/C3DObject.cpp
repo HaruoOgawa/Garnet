@@ -385,20 +385,19 @@ namespace object
 #ifdef USE_ANIMATION
 		if (!m_AnimationController->Update(DeltaSecondsTime)) return false;
 		if (!m_BlendShapeController->Update(DeltaSecondsTime)) return false;
+
+		// IKの計算を行う
+		if (!m_AnimationController->CalculateIK(m_NodeList)) return false;
+
+		// 付与ボーンの位置を計算
+		if (!m_AnimationController->CalculateGrantBone(m_NodeList)) return false;
+
+		// モーフ
+		if (!m_MorphController->Update(DeltaSecondsTime, m_MeshList)) return false;
 #endif
 		// ワールド行列の更新
 		// 全ノードマイフレーム更新しているので、そのうちキャッシュを入れて更新は必要なものだけにする
 		CalcWorldMatrix();
-
-#ifdef USE_ANIMATION
-		// IKの計算を行う
-		if (!m_AnimationController->CalculateIK(m_NodeList)) return false;
-
-		// 付与ボーンの位置を再計算
-		if (!m_AnimationController->ReCalculateGrantBone(m_NodeList)) return false;
-#endif
-		// モーフ
-		if (!m_MorphController->Update(DeltaSecondsTime, m_MeshList)) return false;
 
 		// 物理ジョイントの位置をボーン位置に合わせる
 		//AlignPhysicsJoint();
