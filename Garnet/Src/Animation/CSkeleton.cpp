@@ -86,6 +86,9 @@ namespace animation
 	{
 		for (const auto& Bone : m_BoneList)
 		{
+			// IKは重いのでひとまず標準ボーン以外は除外する
+			if (Bone->GetBoneName() == EHumanoidBones::None) continue;
+
 			// IKParamを持っていればリストに追加する
 			if (Bone->GetIKParam())
 			{

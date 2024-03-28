@@ -4,7 +4,10 @@
 
 namespace animation
 {
-	CIKSolver::CIKSolver()
+	CIKSolver::CIKSolver():
+		m_IKParam(nullptr),
+		m_IKTarget(nullptr),
+		m_OriginWorldMatrix(glm::mat4(1.0f))
 	{
 	}
 
@@ -51,6 +54,10 @@ namespace animation
 
 		constexpr float Epsilon = std::numeric_limits<float>::epsilon();
 
+		// Chainの始点となる共通の親ワールド行列
+		m_OriginWorldMatrix = m_IKChainList[0]->GetParentNode()->CalcWorldMatrix();
+
+		//
 		glm::vec3 GoalPos = math::CTransform(m_IKTarget->CalcWorldMatrix()).GetPos();
 
 		// ターゲットに届くかサイクルの最大値に達するまで計算を繰り返す
@@ -59,19 +66,16 @@ namespace animation
 		{
 			bool Result = false;
 
-			//
-			auto& EffectorChain = m_IKChainList[Last];
-			glm::vec3 EffectorPos = math::CTransform(EffectorChain->CalcWorldMatrix()).GetPos();
+			glm::vec3 EffectorPos = GetWorldTransform(Last).GetPos();
 
 			// 既に接触しているなら終了
 			if (glm::length(GoalPos - EffectorPos) < Threshold) break;
 
 			for (int j = Size - 2; j >= 0; j--)
 			{
-				EffectorPos = math::CTransform(EffectorChain->CalcWorldMatrix()).GetPos();
+				EffectorPos = GetWorldTransform(Last).GetPos();
 
-				auto& IKChain = m_IKChainList[j];
-				math::CTransform ChainWorldTransform = math::CTransform(IKChain->CalcWorldMatrix());
+				math::CTransform ChainWorldTransform = GetWorldTransform(j);
 
 				glm::vec3 ChainWorldPos = ChainWorldTransform.GetPos();
 				glm::quat ChainWorldRot = ChainWorldTransform.GetRot();
@@ -83,16 +87,25 @@ namespace animation
 
 				if (glm::length(ToGoal) > Epsilon)
 				{
-					EffectorToGoalQuat = math::CTransform::CalcTwoVectorRotate(ToEffector, ToGoal);
+					EffectorToGoalQuat = math::CTransform::CalcTwoVectorRotate(glm::normalize(ToEffector), glm::normalize(ToGoal), m_IKParam->LimitedAngle);
 				}
 
 				glm::quat WorldRotated = ChainWorldRot * EffectorToGoalQuat;
 				glm::quat LocalRotated = WorldRotated * glm::inverse(ChainWorldRot);
 
+				// 角度制限を行うかどうか
+				/*{
+					int LinkIndex = static_cast<int>(m_IKParam->IKLinkList.size()) - 1 - j;
+					if (m_IKParam->IKLinkList[LinkIndex].IsLimitAngle)
+					{
+						math::CTransform::ClampRotate(, m_IKParam->IKLinkList[LinkIndex].LowerAngle, m_IKParam->IKLinkList[LinkIndex].UpperAngle);
+					}
+				}*/
+
 				m_IKChainList[j]->SetRot(LocalRotated * m_IKChainList[j]->GetRot());
 
 				// 接触しているなら終了
-				EffectorPos = math::CTransform(EffectorChain->CalcWorldMatrix()).GetPos();
+				EffectorPos = GetWorldTransform(Last).GetPos();
 
 				if (glm::length(GoalPos - EffectorPos) < Threshold)
 				{
@@ -110,6 +123,20 @@ namespace animation
 		}
 
 		return true;
+	}
+
+	math::CTransform CIKSolver::GetWorldTransform(int ChainIndex)
+	{
+		glm::mat4 WorldMatrix = m_OriginWorldMatrix;
+
+		for (int i = 0; i <= ChainIndex; i++)
+		{
+			WorldMatrix *= m_IKChainList[i]->GetLocalMatrix();
+		}
+
+		math::CTransform WorldTransform = math::CTransform(WorldMatrix);
+
+		return WorldTransform;
 	}
 }
 #endif

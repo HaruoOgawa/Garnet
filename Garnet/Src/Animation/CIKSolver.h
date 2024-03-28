@@ -20,6 +20,10 @@ namespace animation
 		std::vector<std::shared_ptr<object::CNode>> m_IKChainList;
 
 		std::shared_ptr<object::CNode> m_IKTarget;
+
+		glm::mat4 m_OriginWorldMatrix;
+	private:
+		math::CTransform GetWorldTransform(int ChainIndex);
 	public:
 		CIKSolver();
 		virtual ~CIKSolver();

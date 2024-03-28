@@ -306,6 +306,9 @@ namespace animation
 				// 付与率
 				const float GrantRate = GrantBone->GetGrantRate();
 
+				// ひとまず負の時はスキップする
+				if (GrantRate < 0.0f) continue;
+
 				if (GrantBone->IsRotateGrant())
 				{
 					// 回転付与
@@ -314,7 +317,8 @@ namespace animation
 
 					if (GrantRate >= 0.0f)
 					{
-						glm::quat GrantRot = (GrantRate * LocalParentRot) * GrantBone->GetBoneNode()->GetRot();
+						//glm::quat GrantRot = (GrantRate * LocalParentRot) * GrantBone->GetBoneNode()->GetRot();
+						glm::quat GrantRot = glm::slerp(GrantBone->GetBoneNode()->GetRot(), LocalParentRot, GrantRate);
 
 						GrantBone->GetBoneNode()->SetRot(GrantRot);
 					}
@@ -333,7 +337,8 @@ namespace animation
 					// 移動付与
 					if (GrantRate >= 0.0f)
 					{
-						glm::vec3 GrantPos = GrantRate * LocalParentPos + GrantBone->GetBoneNode()->GetPos();
+						//glm::vec3 GrantPos = GrantRate * LocalParentPos + GrantBone->GetBoneNode()->GetPos();
+						glm::vec3 GrantPos = (1.0f - GrantRate) * GrantBone->GetBoneNode()->GetPos() + GrantRate * LocalParentPos;
 
 						GrantBone->GetBoneNode()->SetPos(GrantPos);
 					}

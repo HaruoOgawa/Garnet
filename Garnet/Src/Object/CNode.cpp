@@ -205,7 +205,7 @@ namespace object
 		std::shared_ptr<CNode> parentNode = m_ParentNode;
 		while (parentNode)
 		{
-			result = parentNode->GetDefaultLocalMatrix() * result;
+			result = parentNode->GetLocalMatrix() * result;
 
 			parentNode = parentNode->GetParentNode();
 		}
