@@ -2,6 +2,8 @@
 #include "CIKSolver.h"
 #include "CBone.h"
 
+#include "../Debug/Message/Console.h"
+
 namespace animation
 {
 	CIKSolver::CIKSolver():
@@ -85,22 +87,26 @@ namespace animation
 
 				glm::quat EffectorToGoalQuat = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
 
+				float Angle = 3.1415f;
+
 				if (glm::length(ToGoal) > Epsilon)
 				{
-					EffectorToGoalQuat = math::CTransform::CalcTwoVectorRotate(glm::normalize(ToEffector), glm::normalize(ToGoal), m_IKParam->LimitedAngle);
+					EffectorToGoalQuat = math::CTransform::CalcTwoVectorRotate(glm::normalize(ToEffector), glm::normalize(ToGoal), Angle, m_IKParam->LimitedAngle);
+					//EffectorToGoalQuat = math::CTransform::CalcTwoVectorRotate(glm::normalize(ToEffector), glm::normalize(ToGoal), Angle);
 				}
 
 				glm::quat WorldRotated = ChainWorldRot * EffectorToGoalQuat;
-				glm::quat LocalRotated = WorldRotated * glm::inverse(ChainWorldRot);
 
 				// 角度制限を行うかどうか
-				/*{
+				{
 					int LinkIndex = static_cast<int>(m_IKParam->IKLinkList.size()) - 1 - j;
 					if (m_IKParam->IKLinkList[LinkIndex].IsLimitAngle)
 					{
-						math::CTransform::ClampRotate(, m_IKParam->IKLinkList[LinkIndex].LowerAngle, m_IKParam->IKLinkList[LinkIndex].UpperAngle);
+						math::CTransform::ClampRotate(WorldRotated, m_IKParam->IKLinkList[LinkIndex].LowerAngle, m_IKParam->IKLinkList[LinkIndex].UpperAngle);
 					}
-				}*/
+				}
+
+				glm::quat LocalRotated = WorldRotated * glm::inverse(ChainWorldRot);
 
 				m_IKChainList[j]->SetRot(LocalRotated * m_IKChainList[j]->GetRot());
 
@@ -112,6 +118,14 @@ namespace animation
 					Result = true;
 
 					break;
+				}
+
+				// 接触していなくてかつ回転角度がほぼ0の時は、ToEffectorとToGoalが平行で永遠に動かなくなってしまうのでわざと少しだけ回転してあげる
+				// 回転角度は調整(もしかしたらこれがPmxでいう単位角なのかも？)
+				if (Angle < 0.001f)
+				{
+					//m_IKChainList[j]->SetRot(glm::angleAxis(3.1415f / 6.0f, glm::vec3(0.0f, 0.0f, 1.0f)) * m_IKChainList[j]->GetRot());
+					//m_IKChainList[j]->SetRot(glm::angleAxis(m_IKParam->LimitedAngle, glm::vec3(0.0f, 0.0f, 1.0f)) * m_IKChainList[j]->GetRot());
 				}
 			}
 

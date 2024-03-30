@@ -213,7 +213,7 @@ namespace math
 		}
 	}
 
-	glm::quat CTransform::CalcTwoVectorRotate(const glm::vec3& FromVector, const glm::vec3& ToVector, float MaxAngle)
+	glm::quat CTransform::CalcTwoVectorRotate(const glm::vec3& FromVector, const glm::vec3& ToVector, float& Angle, float MaxAngle)
 	{
 		// https://www.opengl-tutorial.org/jp/intermediate-tutorials/tutorial-17-quaternions/
 		glm::quat Result = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
@@ -241,7 +241,7 @@ namespace math
 
 			// ãÅÇ‹Ç¡ÇΩÉxÉNÉgÉãÇå≥Ç…âÒì]Ç∑ÇÈ
 			glm::vec3 RotateAxis = glm::cross(FromVector, SubVector);
-			float Angle = glm::acos(cosTheta);
+			Angle = glm::acos(cosTheta);
 			Angle = fminf(MaxAngle, Angle);
 
 			Result = glm::angleAxis(Angle, RotateAxis);
@@ -249,7 +249,7 @@ namespace math
 		else
 		{
 			glm::vec3 RotateAxis = glm::cross(FromVector, ToVector);
-			float Angle = glm::acos(cosTheta);
+			Angle = glm::acos(cosTheta);
 			Angle = fminf(MaxAngle, Angle);
 
 			Result = glm::angleAxis(Angle, RotateAxis);

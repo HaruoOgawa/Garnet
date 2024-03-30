@@ -54,7 +54,7 @@ namespace math
 
 		static void CalcModelMatrix(glm::mat4& ModelMatrix, const glm::vec3& Translation, const glm::quat& Rotation, bool UseScale, const glm::vec3& Scale = glm::vec3(1.0f));
 
-		static glm::quat CalcTwoVectorRotate(const glm::vec3& FromVector, const glm::vec3& ToVector, float MaxAngle = 2.0f * 3.1415f);
+		static glm::quat CalcTwoVectorRotate(const glm::vec3& FromVector, const glm::vec3& ToVector, float& Angle, float MaxAngle = 2.0f * 3.1415f);
 
 		static void ClampRotate(glm::quat& Rotation, const glm::vec3& LowerAngle, const glm::vec3& UpperAngle);
 		static void ClampRotate(glm::mat4& ModelMatrix, const glm::vec3& LowerAngle, const glm::vec3& UpperAngle);
