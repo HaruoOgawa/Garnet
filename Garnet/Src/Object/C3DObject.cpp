@@ -507,7 +507,7 @@ namespace object
 			}
 		}
 
-		if (!DrawDebugBone(IsDepthPass, DrawOutline, Camera, Projection, DrawInfo, DebugSphere)) return false;
+		//if (!DrawDebugBone(IsDepthPass, DrawOutline, Camera, Projection, DrawInfo, DebugSphere)) return false;
 		//if (!DrawDebugPhysics(IsDepthPass, DrawOutline, Camera, Projection, DrawInfo, DebugSphere)) return false;
 
 		return true;
@@ -525,20 +525,6 @@ namespace object
 				for (const auto& Bone : Skeleton->GetBoneList())
 				{
 					//if (Bone->GetBoneName() == animation::EHumanoidBones::None) continue;
-
-					if (
-						Bone->GetBoneName() != animation::EHumanoidBones::LeftLegIK &&
-						Bone->GetBoneName() != animation::EHumanoidBones::LeftUpperLeg &&
-						Bone->GetBoneName() != animation::EHumanoidBones::LeftLowerLeg &&
-						Bone->GetBoneName() != animation::EHumanoidBones::LeftFoot &&
-						Bone->GetBoneName() != animation::EHumanoidBones::RightLegIK &&
-						Bone->GetBoneName() != animation::EHumanoidBones::RightUpperLeg &&
-						Bone->GetBoneName() != animation::EHumanoidBones::RightLowerLeg &&
-						Bone->GetBoneName() != animation::EHumanoidBones::RightFoot
-						)
-					{
-						continue;
-					}
 
 					const auto& BoneNode = Bone->GetBoneNode();
 
@@ -558,11 +544,6 @@ namespace object
 					DebugSphere->GetMaterialList()[0]->SetUniformValue("useColor", &glm::ivec1(1)[0], sizeof(glm::ivec1));
 					DebugSphere->GetMaterialList()[0]->SetUniformValue("baseColor", &glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)[0], sizeof(glm::vec4));
 					DebugSphere->GetMaterialList()[0]->SetUniformValue("baseColorFactor", &glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)[0], sizeof(glm::vec4));
-
-					if (Bone->GetBoneName() == animation::EHumanoidBones::LeftLegIK || Bone->GetBoneName() == animation::EHumanoidBones::RightLegIK)
-					{
-						DebugSphere->GetMaterialList()[0]->SetUniformValue("baseColorFactor", &glm::vec4(1.0f, 0.0f, 0.0f, 1.0f)[0], sizeof(glm::vec4));
-					}
 
 					if (!DebugSphere->Draw(IsDepthPass, false, Camera, Projection, DrawInfo)) return false;
 				}
