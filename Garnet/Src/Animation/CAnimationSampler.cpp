@@ -2,13 +2,15 @@
 
 #include "CAnimationSampler.h"
 #include "../Math/CTransform.h"
+#include "../../Debug/Message/Console.h"
 
 namespace animation
 {
 	CAnimationSampler::CAnimationSampler(EInterpolationType InterpolationType):
 		m_InterpolationType(InterpolationType),
 		m_StartTime(0.0f),
-		m_EndTime(0.0f)
+		m_EndTime(0.0f),
+		m_SelfSamplerIndex(-1)
 	{
 	}
 
@@ -84,6 +86,11 @@ namespace animation
 	float CAnimationSampler::GetEndTime() const
 	{
 		return m_EndTime;
+	}
+
+	void CAnimationSampler::SetSelfSamplerIndex(int Index)
+	{
+		m_SelfSamplerIndex = Index;
 	}
 
 	bool CAnimationSampler::IsEnd(float CurrentTime)
@@ -284,6 +291,19 @@ namespace animation
 		return true;
 	}
 
+	float CAnimationSampler::GetInterpolateValue(float CurrentTime, const std::shared_ptr<animation::CKeyFrame>& PrevKeyFrame, const std::shared_ptr<animation::CKeyFrame>& NextKeyFrame)
+	{
+		float PrevTime = PrevKeyFrame->GetInput();
+		float NextTime = NextKeyFrame->GetInput();
+
+		float L = (CurrentTime - PrevTime) / (NextTime - PrevTime);
+
+		// 最終フレームIDがクリップ全体のフレーム数よりも小さい時があり、補間係数が爆発することがあるので0から1にクランプする
+		L = glm::clamp(L, 0.0f, 1.0f);
+
+		return L;
+	}
+
 	bool CAnimationSampler::DoStepInterpolation(float CurrentTime, std::vector<float>& Value, const std::shared_ptr<animation::CKeyFrame>& PrevKeyFrame, const std::shared_ptr<animation::CKeyFrame>& NextKeyFrame)
 	{
 		// Step: 補完機能はなく、常にPrevTimeのValueを参照するアニメーション
@@ -305,7 +325,8 @@ namespace animation
 		float PrevTime = PrevKeyFrame->GetInput();
 		float NextTime = NextKeyFrame->GetInput();
 
-		float L = (CurrentTime - PrevTime) / (NextTime - PrevTime);
+		// 補間係数を計算
+		const float L = GetInterpolateValue(CurrentTime, PrevKeyFrame, NextKeyFrame);
 
 		const auto& PrevValue = PrevKeyFrame->GetOutput();
 		const auto& NextValue = NextKeyFrame->GetOutput();
@@ -328,7 +349,8 @@ namespace animation
 		float PrevTime = PrevKeyFrame->GetInput();
 		float NextTime = NextKeyFrame->GetInput();
 
-		float L = (CurrentTime - PrevTime) / (NextTime - PrevTime);
+		// 補間係数を計算
+		const float L = GetInterpolateValue(CurrentTime, PrevKeyFrame, NextKeyFrame);
 
 		const auto& PrevValue = PrevKeyFrame->GetOutput();
 		const auto& NextValue = NextKeyFrame->GetOutput();
@@ -353,10 +375,9 @@ namespace animation
 	bool CAnimationSampler::DoModelMatrixLinearInterpolation(float CurrentTime, std::vector<float>& Value, const std::shared_ptr<animation::CKeyFrame>& PrevKeyFrame, const std::shared_ptr<animation::CKeyFrame>& NextKeyFrame)
 	{
 		// 線形補完(Linear)
-		float PrevTime = PrevKeyFrame->GetInput();
-		float NextTime = NextKeyFrame->GetInput();
-
-		float L = (CurrentTime - PrevTime) / (NextTime - PrevTime);
+		
+		// 補間係数を計算
+		const float L = GetInterpolateValue(CurrentTime, PrevKeyFrame, NextKeyFrame);
 
 		const auto& PrevValue = PrevKeyFrame->GetOutput();
 		const auto& NextValue = NextKeyFrame->GetOutput();
@@ -444,7 +465,8 @@ namespace animation
 		float PrevTime = PrevKeyFrame->GetInput();
 		float NextTime = NextKeyFrame->GetInput();
 
-		float L = (CurrentTime - PrevTime) / (NextTime - PrevTime);
+		// 補間係数を計算
+		const float L = GetInterpolateValue(CurrentTime, PrevKeyFrame, NextKeyFrame);
 
 		const auto& PrevValue = PrevKeyFrame->GetOutput();
 		const auto& NextValue = NextKeyFrame->GetOutput();

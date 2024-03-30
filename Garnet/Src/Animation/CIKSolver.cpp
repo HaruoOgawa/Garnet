@@ -64,7 +64,11 @@ namespace animation
 
 		// ターゲットに届くかサイクルの最大値に達するまで計算を繰り返す
 		int CurrentLoopNum = 0;
-		while (CurrentLoopNum < m_IKParam->IKLoopCount)
+		//const int MaxLoopNum = m_IKParam->IKLoopCount;
+		// 重いので最大30回にする
+		const int MaxLoopNum = std::min(30, m_IKParam->IKLoopCount);
+
+		while (CurrentLoopNum < MaxLoopNum)
 		{
 			bool Result = false;
 

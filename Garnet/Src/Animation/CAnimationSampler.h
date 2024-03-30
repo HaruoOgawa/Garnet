@@ -30,7 +30,11 @@ namespace animation
 
 		float m_StartTime;
 		float m_EndTime;
+
+		int m_SelfSamplerIndex;
 	private:
+		float GetInterpolateValue(float CurrentTime, const std::shared_ptr<animation::CKeyFrame>& PrevKeyFrame, const std::shared_ptr<animation::CKeyFrame>& NextKeyFrame);
+
 		std::vector<float> CopyFromNumComponent(int NumComponent, const std::vector<float>& Src, int Offset);
 		int GetNumComponentsInType(EKeyFrameType Type);
 		std::vector<float> GetDefaultValueFromAnimationTarget(EAnimationTarget AnimationTarget);
@@ -59,6 +63,8 @@ namespace animation
 		float GetStartTime() const;
 		void SetEndTime(float EndTime);
 		float GetEndTime() const;
+
+		void SetSelfSamplerIndex(int Index);
 
 		bool IsEnd(float CurrentTime);
 
