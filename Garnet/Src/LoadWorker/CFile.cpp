@@ -1,5 +1,5 @@
 #include "CFile.h"
-#include "../Debug/Message/Console.h"
+#include "../Message/Console.h"
 #include "../Format/CPathFormatter.h"
 
 namespace resource

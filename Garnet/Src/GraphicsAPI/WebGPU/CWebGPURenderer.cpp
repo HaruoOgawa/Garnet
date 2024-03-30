@@ -4,7 +4,7 @@
 #include "CWebGPUMaterial.h"
 #include "CWebGPUVertexBuffer.h"
 #include "CWebGPUIndexBuffer.h"
-#include "../../Debug/Message/Console.h"
+#include "../../Message/Console.h"
 
 namespace api
 {

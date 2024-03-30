@@ -1,7 +1,7 @@
 #ifdef USE_MMD
 #include "CVMDImporter.h"
 #include "../../Math/CTransform.h"
-#include "../../Debug/Message/Console.h"
+#include "../../Message/Console.h"
 #include "../../Animation/CBlendShapeNameProvider.h"
 #include <algorithm>
 

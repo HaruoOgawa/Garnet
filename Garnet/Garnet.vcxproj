@@ -1437,7 +1437,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClInclude Include="Src\GraphicsAPI\Vulkan\CVulkanAPI.h" />
     <ClInclude Include="Src\App\CDescAppManager.h" />
     <ClInclude Include="Src\App\ScriptApp\CScriptApp.h" />
-    <ClInclude Include="Src\Debug\Message\Console.h" />
+    <ClInclude Include="Src\Message\Console.h" />
     <ClInclude Include="Src\App\CWebAppManager.h" />
     <ClInclude Include="Src\Interface\IApp.h" />
     <ClInclude Include="Src\Interface\IGraphicsAPI.h" />

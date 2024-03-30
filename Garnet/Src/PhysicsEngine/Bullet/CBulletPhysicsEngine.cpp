@@ -1,6 +1,6 @@
 #ifdef USE_PHYSICS
 #include "CBulletPhysicsEngine.h"
-#include "../../Debug/Message/Console.h"
+#include "../../Message/Console.h"
 #include "CBulletBox.h"
 #include "CBulletSphere.h"
 #include "CBulletCapsule.h"

@@ -6,7 +6,7 @@
 
 #include "../Object/C3DObject.h"
 
-#include "../Debug/Message/Console.h"
+#include "../Message/Console.h"
 #include "../Math/CMath.h"
 
 #include "../Animation/CAnimationClip.h"

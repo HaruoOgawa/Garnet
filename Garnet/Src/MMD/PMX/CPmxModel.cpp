@@ -2,7 +2,7 @@
 #include "CPmxModel.h"
 #include "../../Binary/CBinaryAnalyser.h"
 #include "../../Animation/CBlendShapeNameProvider.h"
-#include "../../Debug/Message/Console.h"
+#include "../../Message/Console.h"
 
 namespace mmd
 {

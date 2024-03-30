@@ -1,6 +1,6 @@
 #ifdef USE_MMD
 #include "CPmxImporter.h"
-#include "../../Debug/Message/Console.h"
+#include "../../Message/Console.h"
 #include "../../Math/CMath.h"
 #include "../../Math/CTransform.h"
 #include "../../Object/C3DObject.h"

@@ -413,7 +413,7 @@ namespace object
 	bool C3DObject::FixedUpdate(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, float DeltaSecondsTime)
 	{
 		// •¨—‰‰ŽZ‚ÌŒ‹‰Ê‚ð”½‰f‚·‚é
-		//ApplyPhysicsWorldMatrix();
+		ApplyPhysicsWorldMatrix();
 
 #ifdef USE_ANIMATION
 		// IK‚â•¨—‰‰ŽZ‚ªI‚í‚Á‚ÄÅI“I‚ÈWorldMatrix‚ªŠm’è‚µ‚½’iŠK‚ÅSkinMatrix‚ðŒvŽZ‚·‚é
@@ -507,7 +507,7 @@ namespace object
 			}
 		}
 
-		//if (!DrawDebugBone(IsDepthPass, DrawOutline, Camera, Projection, DrawInfo, DebugSphere)) return false;
+		if (!DrawDebugBone(IsDepthPass, DrawOutline, Camera, Projection, DrawInfo, DebugSphere)) return false;
 		//if (!DrawDebugPhysics(IsDepthPass, DrawOutline, Camera, Projection, DrawInfo, DebugSphere)) return false;
 
 		return true;
@@ -526,6 +526,20 @@ namespace object
 				{
 					//if (Bone->GetBoneName() == animation::EHumanoidBones::None) continue;
 
+					if (
+						Bone->GetBoneName() != animation::EHumanoidBones::LeftLegIK &&
+						Bone->GetBoneName() != animation::EHumanoidBones::LeftUpperLeg &&
+						Bone->GetBoneName() != animation::EHumanoidBones::LeftLowerLeg &&
+						Bone->GetBoneName() != animation::EHumanoidBones::LeftFoot &&
+						Bone->GetBoneName() != animation::EHumanoidBones::RightLegIK &&
+						Bone->GetBoneName() != animation::EHumanoidBones::RightUpperLeg &&
+						Bone->GetBoneName() != animation::EHumanoidBones::RightLowerLeg &&
+						Bone->GetBoneName() != animation::EHumanoidBones::RightFoot
+						)
+					{
+						continue;
+					}
+
 					const auto& BoneNode = Bone->GetBoneNode();
 
 					// Debug—p: Bone‚Ì•`‰æ
@@ -543,7 +557,12 @@ namespace object
 
 					DebugSphere->GetMaterialList()[0]->SetUniformValue("useColor", &glm::ivec1(1)[0], sizeof(glm::ivec1));
 					DebugSphere->GetMaterialList()[0]->SetUniformValue("baseColor", &glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)[0], sizeof(glm::vec4));
-					//DebugSphere->GetMaterialList()[0]->SetUniformValue("baseColorFactor", &glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)[0], sizeof(glm::vec4));
+					DebugSphere->GetMaterialList()[0]->SetUniformValue("baseColorFactor", &glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)[0], sizeof(glm::vec4));
+
+					if (Bone->GetBoneName() == animation::EHumanoidBones::LeftLegIK || Bone->GetBoneName() == animation::EHumanoidBones::RightLegIK)
+					{
+						DebugSphere->GetMaterialList()[0]->SetUniformValue("baseColorFactor", &glm::vec4(1.0f, 0.0f, 0.0f, 1.0f)[0], sizeof(glm::vec4));
+					}
 
 					if (!DebugSphere->Draw(IsDepthPass, false, Camera, Projection, DrawInfo)) return false;
 				}

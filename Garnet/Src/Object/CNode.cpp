@@ -1,5 +1,5 @@
 #include "CNode.h"
-#include "../Debug/Message/Console.h"
+#include "../Message/Console.h"
 
 namespace object
 {

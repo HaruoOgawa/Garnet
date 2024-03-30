@@ -2,7 +2,7 @@
 
 #include "../GLTF/CGLTFImporter.h"
 #include "../FBX/CFBXImporter.h"
-#include "../Debug/Message/Console.h"
+#include "../Message/Console.h"
 
 namespace resource
 {

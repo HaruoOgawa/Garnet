@@ -2,7 +2,7 @@
 #include "CMesh.h"
 #include "CVertexBuffer.h"
 #include "../Object/CNode.h"
-#include "../Debug/Message/Console.h"
+#include "../Message/Console.h"
 #include "../Interface/IRenderer.h"
 
 namespace graphics

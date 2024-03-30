@@ -2,7 +2,7 @@
 #include "CIKSolver.h"
 #include "CBone.h"
 
-#include "../Debug/Message/Console.h"
+#include "../Message/Console.h"
 
 namespace animation
 {

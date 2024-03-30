@@ -1,7 +1,7 @@
 #ifdef USE_MMD
 #include "CVMDData.h"
 #include "../../Binary/CBinaryAnalyser.h"
-#include "../../Debug/Message/Console.h"
+#include "../../Message/Console.h"
 #include "../../Animation/CBoneNameProvider.h"
 #include "../../Animation/CBlendShapeNameProvider.h"
 

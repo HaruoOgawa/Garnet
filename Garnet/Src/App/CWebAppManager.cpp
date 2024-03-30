@@ -1,7 +1,7 @@
 #ifdef __EMSCRIPTEN__
 #include "CWebAppManager.h"
 #include "../LoadWorker/CLoadWorker.h"
-#include "../Debug/Message/Console.h"
+#include "../Message/Console.h"
 
 #include "../GraphicsAPI/WebGPU/CWebGPUAPI.h"
 #include "./ScriptApp/CScriptApp.h"

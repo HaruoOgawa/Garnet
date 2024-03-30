@@ -1,5 +1,5 @@
 #include "../../App/CWebAppManager.h"
-#include "../../Debug/Message/Console.h"
+#include "../../Message/Console.h"
 #include "../../App/EAppType.h"
 
 #ifdef __EMSCRIPTEN__

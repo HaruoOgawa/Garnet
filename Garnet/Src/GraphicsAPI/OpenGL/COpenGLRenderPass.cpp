@@ -3,7 +3,7 @@
 #include "COpenGLTexture.h"
 #include "../../Graphics/ETextureType.h"
 #include "../../Graphics/ETextureType.h"
-#include "../../Debug/Message/Console.h"
+#include "../../Message/Console.h"
 
 namespace api
 {

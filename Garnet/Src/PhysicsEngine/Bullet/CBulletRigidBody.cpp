@@ -1,5 +1,6 @@
 #ifdef USE_PHYSICS
 #include "CBulletRigidBody.h"
+#include "../../Message/Console.h"
 
 namespace physics
 {
@@ -67,7 +68,8 @@ namespace physics
 		btDefaultMotionState* pMotionState = nullptr;
 
 		// Bulletは質量が0のものはStatic(固定されている)、そうでないものはDynamic(物理演算で動く)として扱われる
-		if (bodyMass != 0.0f)
+		// Kinematicは物理演算上は固定されているが、ユーザーが動かすのでMotionStateを作る
+		if (bodyMass != 0.0f || IsKinematic)
 		{
 			// 慣性力の計算でここではそれを0に初期化している
 			pCollisionShape->calculateLocalInertia(bodyMass, localInertia);
@@ -101,7 +103,7 @@ namespace physics
 		}
 
 		// ワールド座標をセットする
-		SetWorldTransform(transform);
+		//SetWorldTransform(transform);
 
 		// RigidBodyを物理演算ワールドに追加
 		// 非衝突グループの設定のビットマスクもここで設定する
