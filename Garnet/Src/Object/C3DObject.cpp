@@ -272,6 +272,14 @@ namespace object
 		}
 	}
 
+	void C3DObject::AlignPhysicsJoint()
+	{
+		for (const auto& Node : m_NodeList)
+		{
+			Node->AlignPhysicsJoint();
+		}
+	}
+
 	// ワールド行列の初期値を計算(アニメーション等で後々更新される可能性がある)
 	void C3DObject::CalcWorldMatrix()
 	{
@@ -377,20 +385,22 @@ namespace object
 #ifdef USE_ANIMATION
 		if (!m_AnimationController->Update(DeltaSecondsTime)) return false;
 		if (!m_BlendShapeController->Update(DeltaSecondsTime)) return false;
+
+		// IKの計算を行う
+		if (!m_AnimationController->CalculateIK(m_NodeList)) return false;
+
+		// 付与ボーンの位置を計算
+		if (!m_AnimationController->CalculateGrantBone(m_NodeList)) return false;
+
+		// モーフ
+		if (!m_MorphController->Update(DeltaSecondsTime, m_MeshList)) return false;
 #endif
 		// ワールド行列の更新
 		// 全ノードマイフレーム更新しているので、そのうちキャッシュを入れて更新は必要なものだけにする
 		CalcWorldMatrix();
 
-#ifdef USE_ANIMATION
-		// IKの計算を行う
-		if (!m_AnimationController->CalculateIK(m_NodeList)) return false;
-
-		// 付与ボーンの位置を再計算
-		if (!m_AnimationController->ReCalculateGrantBone(m_NodeList)) return false;
-#endif
-		// モーフ
-		if (!m_MorphController->Update(DeltaSecondsTime, m_MeshList)) return false;
+		// 物理ジョイントの位置をボーン位置に合わせる
+		//AlignPhysicsJoint();
 
 		return true;
 	}
@@ -403,7 +413,7 @@ namespace object
 	bool C3DObject::FixedUpdate(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, float DeltaSecondsTime)
 	{
 		// 物理演算の結果を反映する
-		ApplyPhysicsWorldMatrix();
+		//ApplyPhysicsWorldMatrix();
 
 #ifdef USE_ANIMATION
 		// IKや物理演算が終わって最終的なWorldMatrixが確定した段階でSkinMatrixを計算する
@@ -521,7 +531,7 @@ namespace object
 					// Debug用: Boneの描画
 					{
 						DebugSphere->SetPos(m_ObjectTransform->GetModelMatrix() * BoneNode->GetWorldMatrix() * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
-						DebugSphere->SetScale(glm::vec3(0.025f));
+						DebugSphere->SetScale(glm::vec3(0.05f));
 					}
 
 					// Debug用: ローカル軸の描画(SphereをBoxに変更する)
@@ -533,6 +543,7 @@ namespace object
 
 					DebugSphere->GetMaterialList()[0]->SetUniformValue("useColor", &glm::ivec1(1)[0], sizeof(glm::ivec1));
 					DebugSphere->GetMaterialList()[0]->SetUniformValue("baseColor", &glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)[0], sizeof(glm::vec4));
+					//DebugSphere->GetMaterialList()[0]->SetUniformValue("baseColorFactor", &glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)[0], sizeof(glm::vec4));
 
 					if (!DebugSphere->Draw(IsDepthPass, false, Camera, Projection, DrawInfo)) return false;
 				}
@@ -553,6 +564,8 @@ namespace object
 			{
 				for (const auto& Bone : Skeleton->GetBoneList())
 				{
+					if (Bone->GetBoneName() == animation::EHumanoidBones::Center) continue;
+
 					const auto& BoneNode = Bone->GetBoneNode();
 
 					DebugSphere->GetMaterialList()[0]->SetUniformValue("useColor", &glm::ivec1(1)[0], sizeof(glm::ivec1));
@@ -569,13 +582,15 @@ namespace object
 						}
 
 						{
-							glm::mat4 Matrix = m_ObjectTransform->GetModelMatrix() * BoneNode->GetWorldMatrix();
+							glm::mat4 Matrix = m_ObjectTransform->GetModelMatrix() * PhysicsObject->GetCurrentPhysicsWorldMatrix();
 
 							glm::vec3 WorldPos = glm::vec3(0.0f);
 							glm::quat WorldRotate = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
 							glm::vec3 WorldScale = glm::vec3(1.0f);
 
 							math::CTransform::CastModelMatrixToTransform(Matrix, WorldPos, WorldRotate, WorldScale);
+
+							WorldScale = m_ObjectTransform->GetScale() * PhysicsObject->GetSize();
 
 							DebugSphere->SetPos(WorldPos);
 							DebugSphere->SetRot(WorldRotate);

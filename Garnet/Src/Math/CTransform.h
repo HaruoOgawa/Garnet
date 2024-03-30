@@ -12,6 +12,7 @@ namespace math
 		glm::vec3 m_Scale;
 	public:
 		CTransform();
+		CTransform(const glm::mat4& Matrix);
 		virtual ~CTransform() = default;
 
 		glm::mat4 GetModelMatrix();
@@ -35,6 +36,8 @@ namespace math
 		static void CastModelMatrixToRotation(const glm::mat4& ModelMatrix, glm::quat& Rotation);
 		static void CastModelMatrixToScale(const glm::mat4& ModelMatrix, glm::vec3& Scale);
 
+		static glm::vec3 GetTranslationFromModelMatrix(const glm::mat4& ModelMatrix);
+
 		// Œ´“_‚É‚ ‚é“_‚ª‚Ç‚±‚ÉˆÚ“®‚·‚é‚©
 		static void GetMoveFromModelMatrix(const glm::mat4& ModelMatrix, glm::vec3& Move);
 
@@ -51,7 +54,7 @@ namespace math
 
 		static void CalcModelMatrix(glm::mat4& ModelMatrix, const glm::vec3& Translation, const glm::quat& Rotation, bool UseScale, const glm::vec3& Scale = glm::vec3(1.0f));
 
-		static glm::quat CalcTwoVectorRotate(const glm::vec3& FromVector, const glm::vec3& ToVector, float MaxAngle = 2.0f * 3.1415f);
+		static glm::quat CalcTwoVectorRotate(const glm::vec3& FromVector, const glm::vec3& ToVector, float& Angle, float MaxAngle = 2.0f * 3.1415f);
 
 		static void ClampRotate(glm::quat& Rotation, const glm::vec3& LowerAngle, const glm::vec3& UpperAngle);
 		static void ClampRotate(glm::mat4& ModelMatrix, const glm::vec3& LowerAngle, const glm::vec3& UpperAngle);

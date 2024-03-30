@@ -702,15 +702,15 @@ namespace mmd
 
 			if (PmxRigidbody.PhysicsShape == EPmxPhysicsShape::SPHERE)
 			{
-				PhysicsObject = pPhysicsEngine->CreatePhysicsSphere(Size.x, (PmxRigidbody.PhysicsType == EPmxPhysicsType::STATIC), PmxRigidbody.Mass, { PmxRigidbody.RigidbodyName, static_cast<physics::EPhysicsType>(PmxRigidbody.PhysicsType), PmxRigidbody.Pos, PmxRigidbody.Rotate, PmxRigidbody.group, PmxRigidbody.NoneCollideGroupFlag, PmxRigidbody.TransDamping, PmxRigidbody.RotateDamping, PmxRigidbody.Repulsion, PmxRigidbody.Friction});
+				PhysicsObject = pPhysicsEngine->CreatePhysicsSphere(Size.x, (PmxRigidbody.PhysicsType == EPmxPhysicsType::STATIC), PmxRigidbody.Mass, { PmxRigidbody.RigidbodyName, static_cast<physics::EPhysicsType>(PmxRigidbody.PhysicsType), PmxRigidbody.Pos, PmxRigidbody.Rotate, true, PmxRigidbody.group, PmxRigidbody.NoneCollideGroupFlag, PmxRigidbody.TransDamping, PmxRigidbody.RotateDamping, PmxRigidbody.Repulsion, PmxRigidbody.Friction});
 			}
 			else if (PmxRigidbody.PhysicsShape == EPmxPhysicsShape::BOX)
 			{
-				PhysicsObject = pPhysicsEngine->CreatePhysicsBox(Size, (PmxRigidbody.PhysicsType == EPmxPhysicsType::STATIC), PmxRigidbody.Mass, {PmxRigidbody.RigidbodyName, static_cast<physics::EPhysicsType>(PmxRigidbody.PhysicsType), PmxRigidbody.Pos, PmxRigidbody.Rotate, PmxRigidbody.group, PmxRigidbody.NoneCollideGroupFlag, PmxRigidbody.TransDamping, PmxRigidbody.RotateDamping, PmxRigidbody.Repulsion, PmxRigidbody.Friction});
+				PhysicsObject = pPhysicsEngine->CreatePhysicsBox(Size, (PmxRigidbody.PhysicsType == EPmxPhysicsType::STATIC), PmxRigidbody.Mass, {PmxRigidbody.RigidbodyName, static_cast<physics::EPhysicsType>(PmxRigidbody.PhysicsType), PmxRigidbody.Pos, PmxRigidbody.Rotate, true, PmxRigidbody.group, PmxRigidbody.NoneCollideGroupFlag, PmxRigidbody.TransDamping, PmxRigidbody.RotateDamping, PmxRigidbody.Repulsion, PmxRigidbody.Friction});
 			}
 			else if (PmxRigidbody.PhysicsShape == EPmxPhysicsShape::CAPSULE)
 			{
-				PhysicsObject = pPhysicsEngine->CreatePhysicsCapsule(Size.x, Size.y, (PmxRigidbody.PhysicsType == EPmxPhysicsType::STATIC), PmxRigidbody.Mass, { PmxRigidbody.RigidbodyName, static_cast<physics::EPhysicsType>(PmxRigidbody.PhysicsType), PmxRigidbody.Pos, PmxRigidbody.Rotate, PmxRigidbody.group, PmxRigidbody.NoneCollideGroupFlag, PmxRigidbody.TransDamping, PmxRigidbody.RotateDamping, PmxRigidbody.Repulsion, PmxRigidbody.Friction });
+				PhysicsObject = pPhysicsEngine->CreatePhysicsCapsule(Size.x, Size.y, (PmxRigidbody.PhysicsType == EPmxPhysicsType::STATIC), PmxRigidbody.Mass, { PmxRigidbody.RigidbodyName, static_cast<physics::EPhysicsType>(PmxRigidbody.PhysicsType), PmxRigidbody.Pos, PmxRigidbody.Rotate, true, PmxRigidbody.group, PmxRigidbody.NoneCollideGroupFlag, PmxRigidbody.TransDamping, PmxRigidbody.RotateDamping, PmxRigidbody.Repulsion, PmxRigidbody.Friction });
 			}
 			else
 			{
@@ -751,10 +751,12 @@ namespace mmd
 
 			if (!PhysicsObjA || !PhysicsObjB) continue;
 
+			glm::vec3 Pos = glm::vec3(PmxJoint.Pos.z, PmxJoint.Pos.y, PmxJoint.Pos.x);
+
 			// Constraint‚ð—\–ñ‚·‚é
 			PhysicsObjB->ReserveConstraint(PhysicsObjA, static_cast<physics::EJointType>(PmxJoint.PmxJointType), 
 				{ 
-					PmxJoint.JointName, PmxJoint.Pos, PmxJoint.Rotate, PmxJoint.LowerTransLimit, PmxJoint.UpperTransLimit, PmxJoint.LowerRotateLimit, PmxJoint.UpperRotateLimit, PmxJoint.TransSpring, PmxJoint.RotateSpring
+					PmxJoint.JointName, Pos, PmxJoint.Rotate, PmxJoint.LowerTransLimit, PmxJoint.UpperTransLimit, PmxJoint.LowerRotateLimit, PmxJoint.UpperRotateLimit, PmxJoint.TransSpring, PmxJoint.RotateSpring
 				}
 			);
 		}

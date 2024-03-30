@@ -1,6 +1,7 @@
 #ifdef USE_ANIMATION
 
 #include "CAnimationController.h"
+#include "../../Debug/Message/Console.h"
 
 namespace animation
 {
@@ -73,7 +74,19 @@ namespace animation
 	// IKの計算
 	bool CAnimationController::CalculateIK(const std::vector<std::shared_ptr<object::CNode>>& NodeList)
 	{
-		if(m_Skeleton)
+		if (m_Skeleton)
+		{
+			if (!m_Skeleton->SolveIK()) return false;
+		}
+
+		//if (!DoCCDIK(NodeList)) return false;
+
+		return true;
+	}
+
+	bool CAnimationController::DoCCDIK(const std::vector<std::shared_ptr<object::CNode>>& NodeList)
+	{
+		if (m_Skeleton)
 		{
 			const auto& BoneList = m_Skeleton->GetBoneList();
 
@@ -82,6 +95,8 @@ namespace animation
 				// TargetBoneが目指すボーンの位置
 				glm::vec3 IKGoalPos = glm::vec3(0.0f);
 				math::CTransform::CastModelMatrixToTranslation(IKBone->GetBoneNode()->GetWorldMatrix(), IKGoalPos);
+
+				glm::vec4 TestIKPos = IKBone->GetBoneNode()->GetWorldMatrix() * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 
 				const auto& IKParam = IKBone->GetIKParam();
 
@@ -93,11 +108,15 @@ namespace animation
 
 				// IKターゲットボーン
 				if (IKParam->IKTargetBoneIndex < 0 || IKParam->IKTargetBoneIndex >= BoneList.size()) continue;
-				const auto& IKTargetBone = BoneList[IKParam->IKTargetBoneIndex];
+				const auto& EndEffectorBone = BoneList[IKParam->IKTargetBoneIndex];
+				
+				glm::vec3 EndEffectorPos = glm::vec3(0.0f);
+				math::CTransform::CastModelMatrixToTranslation(EndEffectorBone->GetBoneNode()->GetWorldMatrix(), EndEffectorPos);
 
 				// CCD-IKを採用
 				// CCD-IKに使用するサイクリックボーンリスト
 				std::vector<std::shared_ptr<CBone>> LinkBoneList;
+				std::vector<glm::vec3> LinkPosList;
 
 				for (const auto& Link : IKParam->IKLinkList)
 				{
@@ -106,6 +125,11 @@ namespace animation
 					const auto& CyclicBone = BoneList[Link.IKLinkBoneIndex];
 
 					LinkBoneList.push_back(CyclicBone);
+
+					glm::vec3 CyclicPos = glm::vec3(0.0f);
+					math::CTransform::CastModelMatrixToTranslation(CyclicBone->GetBoneNode()->GetWorldMatrix(), CyclicPos);
+
+					LinkPosList.push_back(CyclicPos);
 				}
 
 				// サイクルスタート
@@ -113,6 +137,19 @@ namespace animation
 				{
 					// どれくらい近づいたらターゲットに届いたと判定するかの閾値
 					const float CyclicThreshold = 0.01f;
+
+					{
+						glm::mat4 TestMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(5.0f, 5.0f, 0.0f));
+
+						glm::vec4 TestPosA = TestMatrix * glm::vec4(1.0f, 1.0f, 0.0f, 1.0f);
+
+						//TestMatrix = TestMatrix * glm::mat4_cast(glm::angleAxis(3.1415f, glm::vec3(0.0f, 0.0f, 1.0f)));
+						TestMatrix = TestMatrix * glm::mat4_cast(glm::angleAxis(3.1415f * 0.5f, glm::vec3(0.0f, 0.0f, 1.0f)));
+
+						glm::vec4 TestPosB = TestMatrix * glm::vec4(1.0f, 1.0f, 0.0f, 1.0f);
+
+						float x = 0.0f;
+					}
 
 					// ターゲットに届くかサイクルの最大値に達するまで計算を繰り返す
 					int CurrentLoopNum = 0;
@@ -123,20 +160,78 @@ namespace animation
 						for (int LinkIndex = 0; LinkIndex < LinkBoneList.size(); LinkIndex++)
 						{
 							const auto& LinkBone = LinkBoneList[LinkIndex];
+							const auto& LinkNode = LinkBone->GetBoneNode();
 
-							//
-							glm::vec3 FirstLinkPos = glm::vec3(0.0f);
-							math::CTransform::CastModelMatrixToTranslation(IKTargetBone->GetBoneNode()->GetWorldMatrix(), FirstLinkPos);
-
-							glm::vec3 SecondLinkPos = glm::vec3(0.0f);
-							math::CTransform::CastModelMatrixToTranslation(LinkBone->GetBoneNode()->GetWorldMatrix(), SecondLinkPos);
+							glm::vec3 LinkPos = LinkPosList[LinkIndex];
 
 							// 回転行列を計算
-							glm::vec3 ToFistVector = glm::normalize(FirstLinkPos - SecondLinkPos);
-							glm::vec3 ToTargetVector = glm::normalize(IKGoalPos - SecondLinkPos);
+							glm::vec3 ToEndEffectorVector = glm::normalize(EndEffectorPos - LinkPos);
+							glm::vec3 ToTargetVector = glm::normalize(IKGoalPos - LinkPos);
 
-							glm::quat Rot = math::CTransform::CalcTwoVectorRotate(ToFistVector, ToTargetVector, IKParam->LimitedAngle);
+							// ここから先が違う /////////////////////////////////////////////
+							// 回転軸となるJoint(CurrJointPos)を中心にJoint以降のノードを回転させる
+							// https://cnc-selfbuild.blogspot.com/2021/03/inverse-kinematics-backward.html
 							
+							glm::quat CCDRot = math::CTransform::CalcTwoVectorRotate(ToEndEffectorVector, ToTargetVector, IKParam->LimitedAngle);
+							//glm::quat CCDRot = math::CTransform::CalcTwoVectorRotate(ToTargetVector, ToEndEffectorVector, IKParam->LimitedAngle);
+							//glm::mat4 LinkInverseWorldMatrix = glm::inverse(LinkNode->GetWorldMatrix());
+
+							{
+								glm::vec3 LocalPos = EndEffectorPos - LinkPos;
+								glm::vec4 RotPos = glm::mat4_cast(CCDRot) * glm::vec4(LocalPos.x, LocalPos.y, LocalPos.z, 1.0f);
+								LocalPos = glm::vec3(RotPos.x, RotPos.y, RotPos.z);
+
+								EndEffectorPos = LinkPos + LocalPos;
+
+								EndEffectorBone->GetBoneNode()->SetWorldMatrix(glm::translate(glm::mat4(1.0f), EndEffectorPos));
+
+								/*const auto& EndEffectorNode = EndEffectorBone->GetBoneNode();
+
+								// 現在の回転軸を中心としたローカル座標を取得
+								math::CTransform LocalTransform = math::CTransform(LinkInverseWorldMatrix * EndEffectorNode->GetWorldMatrix());
+								//LocalTransformA.MulRot(CCDRot);
+
+								glm::vec4 LocalPos =
+									glm::mat4_cast(CCDRot * LocalTransform.GetRot()) *
+									glm::vec4(LocalTransform.GetPos().x, LocalTransform.GetPos().y, LocalTransform.GetPos().z, 1.0f);
+
+								// 現在の回転軸を中心にワールド座標を再計算
+								//glm::mat4 WorldMatrix = LinkNode->GetWorldMatrix() * LocalTransform.GetModelMatrix();
+								glm::mat4 WorldMatrix = LinkNode->GetWorldMatrix() * glm::translate(glm::mat4(1.0f), glm::vec3(LocalPos.x, LocalPos.y, LocalPos.z));
+
+								EndEffectorNode->SetWorldMatrix(WorldMatrix);*/
+							}
+
+							for (int CalcIndex = 0; CalcIndex < LinkIndex; CalcIndex++)
+							{
+								glm::vec3 LocalPos = LinkPosList[CalcIndex] - LinkPos;
+								glm::vec4 RotPos = glm::mat4_cast(CCDRot) * glm::vec4(LocalPos.x, LocalPos.y, LocalPos.z, 1.0f);
+								LocalPos = glm::vec3(RotPos.x, RotPos.y, RotPos.z);
+
+								LinkPosList[CalcIndex] = LinkPos + LocalPos;
+
+								LinkBoneList[CalcIndex]->GetBoneNode()->SetWorldMatrix(glm::translate(glm::mat4(1.0f), LinkPosList[CalcIndex]));
+
+								/*auto& CalcBone = LinkBoneList[CalcIndex];
+								const auto& CalcNode = CalcBone->GetBoneNode();
+
+								// 現在の回転軸を中心としたローカル座標を取得
+								math::CTransform LocalTransform = math::CTransform(LinkInverseWorldMatrix * CalcNode->GetWorldMatrix());
+								//LocalTransformA.MulRot(CCDRot);
+
+								glm::vec4 LocalPos =
+									glm::mat4_cast(CCDRot * LocalTransform.GetRot()) *
+									glm::vec4(LocalTransform.GetPos().x, LocalTransform.GetPos().y, LocalTransform.GetPos().z, 1.0f);
+
+								// 現在の回転軸を中心にワールド座標を再計算
+								//glm::mat4 WorldMatrix = LinkNode->GetWorldMatrix() * LocalTransform.GetModelMatrix();
+								glm::mat4 WorldMatrix = LinkNode->GetWorldMatrix() * glm::translate(glm::mat4(1.0f), glm::vec3(LocalPos.x, LocalPos.y, LocalPos.z));
+
+								CalcNode->SetWorldMatrix(WorldMatrix);*/
+							}
+
+							/*glm::quat Rot = math::CTransform::CalcTwoVectorRotate(ToEndEffectorVector, ToTargetVector, IKParam->LimitedAngle);
+
 							{
 								// SecondLinkPosの位置のボーンの回転を更新する(自動的に子要素も回転するので便利)
 								glm::quat LinkRot = LinkBone->GetBoneNode()->GetRot();
@@ -147,7 +242,7 @@ namespace animation
 								{
 									math::CTransform::ClampRotate(LinkRot, IKParam->IKLinkList[LinkIndex].LowerAngle, IKParam->IKLinkList[LinkIndex].UpperAngle);
 								}
-								
+
 								LinkBone->GetBoneNode()->SetRot(LinkRot);
 
 								// CyclicBoneのワールド行列を更新
@@ -163,13 +258,14 @@ namespace animation
 
 									CalcWorldMatrix(WorldMatrix, ChildNode, NodeList);
 								}
-							}
+							}*/
 
 							// 計算結果を見て末端のボーンがIKBoneにどれくらい近づいたか見る
-							glm::vec3 CyclicResultPos = glm::vec3(0.0f);
-							math::CTransform::CastModelMatrixToTranslation(IKTargetBone->GetBoneNode()->GetWorldMatrix(), CyclicResultPos);
+							//glm::vec3 CyclicResultPos = glm::vec3(0.0f);
+							//math::CTransform::CastModelMatrixToTranslation(EndEffectorBone->GetBoneNode()->GetWorldMatrix(), CyclicResultPos);
 
-							if (glm::distance(IKGoalPos, CyclicResultPos) < CyclicThreshold)
+							//if (glm::distance(IKGoalPos, CyclicResultPos) < CyclicThreshold)
+							if (glm::distance(IKGoalPos, EndEffectorPos) < CyclicThreshold)
 							{
 								Result = true;
 
@@ -190,9 +286,10 @@ namespace animation
 		return true;
 	}
 
-	// 付与ボーンの再計算
-	bool CAnimationController::ReCalculateGrantBone(const std::vector<std::shared_ptr<object::CNode>>& NodeList)
+	// 付与ボーンの計算
+	bool CAnimationController::CalculateGrantBone(const std::vector<std::shared_ptr<object::CNode>>& NodeList)
 	{
+		// 付与はローカルトランスフォームに対して実行する
 		if(m_Skeleton)
 		{
 			const auto& BoneList = m_Skeleton->GetBoneList();
@@ -204,49 +301,54 @@ namespace animation
 				if (GrantParentBoneIndex < 0 || GrantParentBoneIndex >= BoneList.size()) continue;
 
 				const auto& ParentGrantBone = BoneList[GrantParentBoneIndex];
+				if (!ParentGrantBone) continue;
 
 				// 付与率
 				const float GrantRate = GrantBone->GetGrantRate();
 
-				// 自身のPosとRot
-				glm::vec3 GrantPos = glm::vec3(0.0f);
-				glm::quat GrantRot = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
-				math::CTransform::CastModelMatrixToTransform(GrantBone->GetBoneNode()->GetWorldMatrix(), GrantPos, GrantRot);
-
-				// 親ボーンのPosとRot
-				glm::vec3 ParentGrantPos = glm::vec3(0.0f);
-				glm::quat ParentGrantRot = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
-				math::CTransform::CastModelMatrixToTransform(ParentGrantBone->GetBoneNode()->GetWorldMatrix(), ParentGrantPos, ParentGrantRot);
-
-				// 付与を実行
-				glm::vec3 ResultPos = GrantPos;
-				glm::quat ResultRot = GrantRot;
+				// ひとまず負の時はスキップする
+				if (GrantRate < 0.0f) continue;
 
 				if (GrantBone->IsRotateGrant())
 				{
 					// 回転付与
-					ResultRot = glm::slerp(GrantRot, ParentGrantRot, GrantRate);
+
+					glm::quat LocalParentRot = ParentGrantBone->GetBoneNode()->GetRot();
+
+					if (GrantRate >= 0.0f)
+					{
+						//glm::quat GrantRot = (GrantRate * LocalParentRot) * GrantBone->GetBoneNode()->GetRot();
+						glm::quat GrantRot = glm::slerp(GrantBone->GetBoneNode()->GetRot(), LocalParentRot, GrantRate);
+
+						GrantBone->GetBoneNode()->SetRot(GrantRot);
+					}
+					else
+					{
+						// 付与率が負の時は逆行列をかける
+						glm::quat GrantRot = (fabsf(GrantRate) * glm::inverse(LocalParentRot)) * GrantBone->GetBoneNode()->GetRot();
+
+						GrantBone->GetBoneNode()->SetRot(GrantRot);
+					}
 				}
 				else if (GrantBone->IsMoveGrant())
 				{
+					glm::vec3 LocalParentPos = ParentGrantBone->GetBoneNode()->GetPos();
+
 					// 移動付与
-					ResultPos = (1.0f - GrantRate) * GrantPos + GrantRate * ParentGrantPos;
-				}
+					if (GrantRate >= 0.0f)
+					{
+						//glm::vec3 GrantPos = GrantRate * LocalParentPos + GrantBone->GetBoneNode()->GetPos();
+						glm::vec3 GrantPos = (1.0f - GrantRate) * GrantBone->GetBoneNode()->GetPos() + GrantRate * LocalParentPos;
 
-				// 付与結果をボーンに再割り当て
-				glm::mat4 ResultMatrix = glm::mat4(1.0f);
-				math::CTransform::CalcModelMatrix(ResultMatrix, ResultPos, ResultRot, false);
+						GrantBone->GetBoneNode()->SetPos(GrantPos);
+					}
+					else
+					{
+						// 付与率が負の時は逆行列をかける
+						glm::vec3 GrantPos = (-1.0f) * GrantRate * LocalParentPos + GrantBone->GetBoneNode()->GetPos();
 
-				GrantBone->GetBoneNode()->SetWorldMatrix(ResultMatrix);
-
-				// 子要素にも回転付与・移動付与の計算結果を適応する
-				for (int ChildIndex : GrantBone->GetBoneNode()->GetChildrenNodeIndexList())
-				{
-					if (ChildIndex < 0 || ChildIndex >= NodeList.size()) continue;
-
-					const auto& ChildNode = NodeList[ChildIndex];
-
-					CalcWorldMatrix(ResultMatrix, ChildNode, NodeList);
+						GrantBone->GetBoneNode()->SetPos(GrantPos);
+					}
 				}
 			}
 		}

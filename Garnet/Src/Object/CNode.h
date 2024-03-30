@@ -57,6 +57,7 @@ namespace object
 		void ApplyPhysicsConstraint(physics::IPhysicsEngine* pPhysicsEngine);
 
 		void ApplyPhysicsWorldMatrix();
+		void AlignPhysicsJoint();
 
 		// ÉÇÅ[Ét
 		void ClearMorphWeights();
@@ -72,6 +73,7 @@ namespace object
 
 		void SetWorldMatrix(const glm::mat4& WorldMatrix);
 		const glm::mat4& GetWorldMatrix() const;
+		glm::mat4 CalcWorldMatrix();
 
 		void SetParentNode(const std::shared_ptr<CNode>& ParentNode);
 		const std::shared_ptr<CNode>& GetParentNode() const;

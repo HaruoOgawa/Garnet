@@ -5,8 +5,8 @@
 
 namespace physics
 {
-	CBulletSphere::CBulletSphere(float Radius, bool IsStaticFlag, float Mass, const SRigidbodyParam& RBParam) :
-		CBulletPhysicsObject(IsStaticFlag, Mass, RBParam),
+	CBulletSphere::CBulletSphere(float Radius, bool Kinematic, float Mass, const SRigidbodyParam& RBParam) :
+		CBulletPhysicsObject(Kinematic, Mass, RBParam),
 		m_Radius(Radius)
 	{
 	}
@@ -22,7 +22,7 @@ namespace physics
 		float MaxScale = fmaxf(WorldScale.x, fmaxf(WorldScale.y, WorldScale.z));
 
 		m_CollisionShape = std::make_shared<btSphereShape>(btScalar(m_Radius * MaxScale));
-		m_RigidBody = std::make_shared<CBulletRigidBody>(pBulletPhysics->GetDynamicsWorld(), m_CollisionShape.get(), WorldPos, WorldRotate, m_IsStatic, m_Mass, m_RBParam);
+		m_RigidBody = std::make_shared<CBulletRigidBody>(pBulletPhysics->GetDynamicsWorld(), m_CollisionShape.get(), WorldPos, WorldRotate, m_Kinematic, m_Mass, m_RBParam);
 
 		return true;
 	}

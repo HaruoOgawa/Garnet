@@ -9,6 +9,14 @@ namespace math
 	{
 	}
 
+	CTransform::CTransform(const glm::mat4& Matrix) :
+		m_Pos(0.0f),
+		m_Rot(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)),
+		m_Scale(1.0f)
+	{
+		CTransform::CastModelMatrixToTransform(Matrix, m_Pos, m_Rot, m_Scale);
+	}
+
 	glm::mat4 CTransform::GetModelMatrix()
 	{
 		glm::mat4 trsMatrix = glm::translate(glm::mat4(1.0f), m_Pos);
@@ -121,6 +129,15 @@ namespace math
 		);
 	}
 
+	glm::vec3 CTransform::GetTranslationFromModelMatrix(const glm::mat4& ModelMatrix)
+	{
+		glm::vec3 Translation = glm::vec3(0.0f);
+
+		CastModelMatrixToTranslation(ModelMatrix, Translation);
+
+		return Translation;
+	}
+
 	// 原点にある点がどこに移動するか
 	void CTransform::GetMoveFromModelMatrix(const glm::mat4& ModelMatrix, glm::vec3& Move)
 	{
@@ -196,14 +213,16 @@ namespace math
 		}
 	}
 
-	glm::quat CTransform::CalcTwoVectorRotate(const glm::vec3& FromVector, const glm::vec3& ToVector, float MaxAngle)
+	glm::quat CTransform::CalcTwoVectorRotate(const glm::vec3& FromVector, const glm::vec3& ToVector, float& Angle, float MaxAngle)
 	{
 		// https://www.opengl-tutorial.org/jp/intermediate-tutorials/tutorial-17-quaternions/
 		glm::quat Result = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
 
 		float cosTheta = glm::dot(FromVector, ToVector);
 
-		if (cosTheta < -1.0f + 0.001f)
+		constexpr float Epsilon = std::numeric_limits<float>::epsilon();
+
+		if (cosTheta < -1.0f + Epsilon)
 		{
 			// 2つのベクトルが逆を向いている特殊ケース
 			// まず平行ではない任意のベクトルを決める
@@ -222,7 +241,7 @@ namespace math
 
 			// 求まったベクトルを元に回転する
 			glm::vec3 RotateAxis = glm::cross(FromVector, SubVector);
-			float Angle = glm::acos(cosTheta);
+			Angle = glm::acos(cosTheta);
 			Angle = fminf(MaxAngle, Angle);
 
 			Result = glm::angleAxis(Angle, RotateAxis);
@@ -230,7 +249,7 @@ namespace math
 		else
 		{
 			glm::vec3 RotateAxis = glm::cross(FromVector, ToVector);
-			float Angle = glm::acos(cosTheta);
+			Angle = glm::acos(cosTheta);
 			Angle = fminf(MaxAngle, Angle);
 
 			Result = glm::angleAxis(Angle, RotateAxis);

@@ -32,6 +32,8 @@ namespace animation
 
 	void CAnimationClip::AddAnimationSampler(const std::shared_ptr<animation::CAnimationSampler>& Sampler)
 	{
+		Sampler->SetSelfSamplerIndex(static_cast<int>(m_SamplerList.size()));
+
 		m_SamplerList.push_back(Sampler);
 	}
 

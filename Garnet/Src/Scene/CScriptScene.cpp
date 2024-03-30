@@ -67,13 +67,15 @@ namespace scene
 
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Avatar\\Tda_Miku\\Tda_Miku.pmx", m_TdaMiku_Model, "", "ShadowPass"));
 		//pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CAnimationLoader>("Resources\\Motions\\mmd_running.vmd", m_VMDAnimationSet));
-		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CAnimationLoader>("Resources\\Motions\\Run_m4th_Loop.vmd", m_VMDAnimationSet));
+		//pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CAnimationLoader>("Resources\\Motions\\Run_m4th_Loop.vmd", m_VMDAnimationSet));
+		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CAnimationLoader>("Resources\\Motions\\Bling-Bang-Bang-Born.vmd", m_VMDAnimationSet));
+		//pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CAnimationLoader>("Resources\\Motions\\biglove_dance.vmd", m_VMDAnimationSet));
 		//pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CAnimationLoader>("Resources\\Motions\\BackFlip.vmd", m_VMDAnimationSet));
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CAnimationLoader>("Resources\\Motions\\biglove_expression.vmd", m_ExpressionVMD));
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CAnimationLoader>("Resources\\Motions\\biglove_Ripsync.vmd", m_RipSyncVMD));
 		
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CTextureLoader>(pGraphicsAPI, std::vector<std::string>({ "Resources\\IBL\\output_skybox.hdr" }), m_IBL_Skybox_Texture));
-		//pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CTextureLoader>(pGraphicsAPI, std::vector<std::string>({ "Resources\\Cubemaps\\environment\\environment_back_0.jpg", "Resources\\Cubemaps\\environment\\environment_bottom_0.jpg", "Resources\\Cubemaps\\environment\\environment_front_0.jpg", "Resources\\Cubemaps\\environment\\environment_left_0.jpg", "Resources\\Cubemaps\\environment\\environment_right_0.jpg", "Resources\\Cubemaps\\environment\\environment_top_0.jpg" }), m_Cube_Texture));
+		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CTextureLoader>(pGraphicsAPI, std::vector<std::string>({ "Resources\\Cubemaps\\environment\\environment_back_0.jpg", "Resources\\Cubemaps\\environment\\environment_bottom_0.jpg", "Resources\\Cubemaps\\environment\\environment_front_0.jpg", "Resources\\Cubemaps\\environment\\environment_left_0.jpg", "Resources\\Cubemaps\\environment\\environment_right_0.jpg", "Resources\\Cubemaps\\environment\\environment_top_0.jpg" }), m_Cube_Texture));
 	}
 
 	CScriptScene::~CScriptScene()
@@ -154,30 +156,30 @@ namespace scene
 
 			// 再生するアニメーションクリップを指定する
 			m_WarrokObject->ChangeMotion("Walk");
-		}
+		}*/
 
 		const float ZOffset = 3.0f;
 
 		// m_PhysicsGround
-		{
+		/*{
 			auto Material = m_PBRMF->CreateMaterial(pGraphicsAPI, 1, graphics::ECullMode::CULL_BACK);
 
-			m_PhysicsGround->GetTextureSet()->AddCubeMap(m_Cube_Texture);
-			Material->ReplacePreloadUniformValue("useCubeMap", &glm::ivec1(1)[0], sizeof(glm::ivec1), 0);
-			Material->ReplaceTextureIndex("cubemapTexture", 0);
-			Material->ReplacePreloadUniformValue("roughnessFactor", &glm::vec1(1.0f)[0], sizeof(float), 0);
+			//m_PhysicsGround->GetTextureSet()->AddCubeMap(m_Cube_Texture);
+			//Material->ReplacePreloadUniformValue("useCubeMap", &glm::ivec1(1)[0], sizeof(glm::ivec1), 0);
+			//Material->ReplaceTextureIndex("cubemapTexture", 0);
+			//Material->ReplacePreloadUniformValue("roughnessFactor", &glm::vec1(1.0f)[0], sizeof(float), 0);
 
 			std::shared_ptr<math::CTransform> LocalTransform = std::make_shared<math::CTransform>();
-			LocalTransform->SetPos(glm::vec3(0.0f, -1.0f, 0.0f));
+			LocalTransform->SetPos(glm::vec3(0.0f, 0.1f, 0.0f));
 			LocalTransform->SetScale(glm::vec3(10.0f, 0.1f, 10.0f));
 
-			auto PhysicsBox = pPhysicsEngine->CreatePhysicsBox(glm::vec3(0.5f), true, 0.0f, {});
+			auto PhysicsBox = pPhysicsEngine->CreatePhysicsBox(glm::vec3(0.5f), false, 0.0f, {});
 
 			if (!m_PhysicsGround->CreateSimply(pGraphicsAPI, pPhysicsEngine, graphics::CPresetPrimitive::CreateBox(pGraphicsAPI), Material, m_DepthMF, LocalTransform, PhysicsBox)) return false;
-		}
+		}*/
 
 		// m_PhysicsSphere
-		{
+		/*{
 			// Material
 			auto Material = m_PBRMF->CreateMaterial(pGraphicsAPI, 5, graphics::ECullMode::CULL_BACK);
 
@@ -201,7 +203,10 @@ namespace scene
 			RbParam.group = 32;
 			//RbParam.NoneCollideGroupFlag = 161; // 1,6,8に当たらないようにする。6は自分たちのグループなのでお互いがぶつからないようにする => 10100001b
 			RbParam.NoneCollideGroupFlag = 32; 
+			RbParam.PhysicsType = physics::EPhysicsType::STATIC;
 			auto PhysicsSphere0 = pPhysicsEngine->CreatePhysicsSphere(1.0f, true, 0.0f, RbParam);
+
+			RbParam.PhysicsType = physics::EPhysicsType::DYNAMIC;
 			auto PhysicsSphere1 = pPhysicsEngine->CreatePhysicsSphere(1.0f, false, 50.0f, RbParam);
 			auto PhysicsSphere2 = pPhysicsEngine->CreatePhysicsSphere(1.0f, false, 50.0f, RbParam);
 			auto PhysicsSphere3 = pPhysicsEngine->CreatePhysicsSphere(1.0f, false, 50.0f, RbParam);
@@ -215,7 +220,7 @@ namespace scene
 
 				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(0, -1);
 				Node->SetLocalTransform(LocalTransform);
-				Node->SetPhysicsObject(PhysicsSphere0);
+				Node->AddPhysicsObject(PhysicsSphere0);
 
 				m_PhysicsSphere->AddNode(Node);
 			}
@@ -227,7 +232,7 @@ namespace scene
 
 				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(0, -1);
 				Node->SetLocalTransform(LocalTransform);
-				Node->SetPhysicsObject(PhysicsSphere1);
+				Node->AddPhysicsObject(PhysicsSphere1);
 
 				m_PhysicsSphere->AddNode(Node);
 			}
@@ -239,7 +244,7 @@ namespace scene
 
 				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(0, -1);
 				Node->SetLocalTransform(LocalTransform);
-				Node->SetPhysicsObject(PhysicsSphere2);
+				Node->AddPhysicsObject(PhysicsSphere2);
 
 				m_PhysicsSphere->AddNode(Node);
 			}
@@ -251,7 +256,7 @@ namespace scene
 
 				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(0, -1);
 				Node->SetLocalTransform(LocalTransform);
-				Node->SetPhysicsObject(PhysicsSphere3);
+				Node->AddPhysicsObject(PhysicsSphere3);
 
 				m_PhysicsSphere->AddNode(Node);
 			}
@@ -263,36 +268,43 @@ namespace scene
 
 				std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(0, -1);
 				Node->SetLocalTransform(LocalTransform);
-				Node->SetPhysicsObject(PhysicsSphere4);
+				Node->AddPhysicsObject(PhysicsSphere4);
 
 				m_PhysicsSphere->AddNode(Node);
 			}
 			
 			// Constraintを予約する
-			physics::SJointParam JParam = {};
-			JParam.Pos6DofBody = glm::vec3(0.0f, -0.5f, 0.0f);
+			{
+				physics::SJointParam JParam = {};
+				JParam.JointPos = m_PhysicsSphere->GetNodeList()[1]->GetPos();
 
-			// JParam.LowerTransLimit = glm::vec3(-0.5f);
-			// JParam.UpperTransLimit = glm::vec3(0.5f);
-			JParam.LowerTransLimit = glm::vec3(0.0f);
-			JParam.UpperTransLimit = glm::vec3(0.0f);
-
-			 JParam.LowerRotateLimit = glm::vec3(-1.39626348f, -0.0872664675f, -1.39626348f);
-			 JParam.UpperRotateLimit = glm::vec3(1.39626348f, 0.174532935f, 1.39626348f);
-			//JParam.LowerRotateLimit = glm::vec3(0.0f);
-			//JParam.UpperRotateLimit = glm::vec3(0.0f);
-
-			PhysicsSphere1->ReserveConstraint(PhysicsSphere0, physics::EJointType::SPRING_6DOF, JParam);
-			PhysicsSphere2->ReserveConstraint(PhysicsSphere1, physics::EJointType::SPRING_6DOF, JParam);
-			PhysicsSphere3->ReserveConstraint(PhysicsSphere2, physics::EJointType::SPRING_6DOF, JParam);
-			PhysicsSphere4->ReserveConstraint(PhysicsSphere3, physics::EJointType::SPRING_6DOF, JParam);
+				PhysicsSphere1->ReserveConstraint(PhysicsSphere0, physics::EJointType::SPRING_6DOF, JParam);
+			}
+			
+			{
+				physics::SJointParam JParam = {};
+				JParam.JointPos = m_PhysicsSphere->GetNodeList()[2]->GetPos();
+				PhysicsSphere2->ReserveConstraint(PhysicsSphere1, physics::EJointType::SPRING_6DOF, JParam);
+			}
+			
+			{
+				physics::SJointParam JParam = {};
+				JParam.JointPos = m_PhysicsSphere->GetNodeList()[3]->GetPos();
+				PhysicsSphere3->ReserveConstraint(PhysicsSphere2, physics::EJointType::SPRING_6DOF, JParam);
+			}
+			
+			{
+				physics::SJointParam JParam = {};
+				JParam.JointPos = m_PhysicsSphere->GetNodeList()[4]->GetPos();
+				PhysicsSphere4->ReserveConstraint(PhysicsSphere3, physics::EJointType::SPRING_6DOF, JParam);
+			}
 
 			// Create
 			if (!m_PhysicsSphere->Create(pGraphicsAPI, pPhysicsEngine, m_DepthMF)) return false;
-		}*/
+		}
 
 		// m_PhysicsCubeList
-		/*{
+		{
 			// 
 			const float XMax = 4.0f;
 			const float YMax = 4.0f;
@@ -312,7 +324,8 @@ namespace scene
 
 			// Mesh
 			std::shared_ptr<graphics::CMesh> Mesh = std::make_shared<graphics::CMesh>();
-			Mesh->CreateSimpleMesh(graphics::CPresetPrimitive::CreateBox(pGraphicsAPI), 0);
+			auto VertexIndexPair = graphics::CPresetPrimitive::CreateBox(pGraphicsAPI);
+			Mesh->CreateSimpleMesh(VertexIndexPair.first, VertexIndexPair.second, 0);
 
 			m_PhysicsCubeList->AddMesh(Mesh);
 
@@ -335,11 +348,13 @@ namespace scene
 						RbParam.group = 128;
 						//RbParam.NoneCollideGroupFlag = 32; // 6個目のビットを立てる → 6と当たらないようにする => 00100000b
 
+						RbParam.PhysicsType = physics::EPhysicsType::DYNAMIC;
+
 						auto PhysicsBox = pPhysicsEngine->CreatePhysicsBox(glm::vec3(0.5f), false, 1.0f, RbParam);
 
 						std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(0, -1);
 						Node->SetLocalTransform(LocalTransform);
-						Node->SetPhysicsObject(PhysicsBox);
+						Node->AddPhysicsObject(PhysicsBox);
 
 						m_PhysicsCubeList->AddNode(Node);
 					}
@@ -360,15 +375,16 @@ namespace scene
 			auto Clip = m_VMDAnimationSet->GetAnimationClip(0);
 			if (Clip) m_TdaMiku_Model->AddHumanoidAnimationClip(Clip, "Walk", { nullptr, "" }, true);
 
-			auto ExpressionClip = m_ExpressionVMD->GetBlendShapeClip(0);
-			if (ExpressionClip) m_TdaMiku_Model->AddBlendShapeClip(ExpressionClip, "Face", true);
+			//auto ExpressionClip = m_VMDAnimationSet->GetBlendShapeClip(0);
+			//auto ExpressionClip = m_ExpressionVMD->GetBlendShapeClip(0);
+			//if (ExpressionClip) m_TdaMiku_Model->AddBlendShapeClip(ExpressionClip, "Face", true);
 
-			auto RipSyncClip = m_RipSyncVMD->GetBlendShapeClip(0);
-			if (RipSyncClip) m_TdaMiku_Model->AddBlendShapeClip(RipSyncClip, "RipSync", true);
+			//auto RipSyncClip = m_RipSyncVMD->GetBlendShapeClip(0);
+			//if (RipSyncClip) m_TdaMiku_Model->AddBlendShapeClip(RipSyncClip, "RipSync", true);
 
 			m_TdaMiku_Model->ChangeMotion("Walk");
-			m_TdaMiku_Model->PlayBlendShape("Face");
-			m_TdaMiku_Model->PlayBlendShape("RipSync");
+			//m_TdaMiku_Model->PlayBlendShape("Face");
+			//m_TdaMiku_Model->PlayBlendShape("RipSync");
 		}
 
 		// m_Background

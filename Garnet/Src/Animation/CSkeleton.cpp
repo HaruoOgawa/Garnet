@@ -86,12 +86,31 @@ namespace animation
 	{
 		for (const auto& Bone : m_BoneList)
 		{
+			// IKは重いのでひとまず標準ボーン以外は除外する
+			if (Bone->GetBoneName() == EHumanoidBones::None) continue;
+
 			// IKParamを持っていればリストに追加する
 			if (Bone->GetIKParam())
 			{
+				std::shared_ptr<CIKSolver> IKSolver = std::make_shared<CIKSolver>();
+				if (!IKSolver->Create(Bone, m_BoneList)) continue;
+
+				m_IKSolverList.push_back(IKSolver);
+
+				// m_IKBoneListはあとで消す
 				m_IKBoneList.push_back(Bone);
 			}
 		}
+	}
+
+	bool CSkeleton::SolveIK()
+	{
+		for (const auto& IKSolver : m_IKSolverList)
+		{
+			if (!IKSolver->Solve()) return false;
+		}
+
+		return true;
 	}
 
 	const std::vector<std::shared_ptr<CBone>>& CSkeleton::GetIKBoneList() const

@@ -37,6 +37,9 @@ namespace animation
 		void BlendRotation(const std::shared_ptr<object::CNode>& Node, float L);
 
 		void CalcWorldMatrix(const glm::mat4& ParentWorldMatrix, const std::shared_ptr<object::CNode>& Node, const std::vector<std::shared_ptr<object::CNode>>& NodeList);
+
+		// IKの計算
+		bool DoCCDIK(const std::vector<std::shared_ptr<object::CNode>>& NodeList);
 	public:
 		CAnimationController();
 		virtual ~CAnimationController();
@@ -49,8 +52,8 @@ namespace animation
 		// IKの計算
 		bool CalculateIK(const std::vector<std::shared_ptr<object::CNode>>& NodeList);
 
-		// 付与ボーンの再計算
-		bool ReCalculateGrantBone(const std::vector<std::shared_ptr<object::CNode>>& NodeList);
+		// 付与ボーンの計算
+		bool CalculateGrantBone(const std::vector<std::shared_ptr<object::CNode>>& NodeList);
 
 		void ChangeMotion(int Index); // インデックス指定でモーションを変更
 		void ChangeMotion(const std::string& MotionName); // 名前指定でモーションを変更

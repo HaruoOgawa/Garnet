@@ -106,10 +106,34 @@ namespace object
 		{
 			if (!PhysicsObject->IsStatic())
 			{
+				// サイズを取得
+				glm::vec3 WorldScale = glm::vec3(1.0f);
+				math::CTransform::CastModelMatrixToScale(m_WorldMatrix, WorldScale);
+
+				glm::mat4 sclMatrix = glm::scale(glm::mat4(1.0f), WorldScale);
+
 				// 物理オブジェクトのワールド座標を渡す
 				// 物理オブジェクトに親子関係を持たせるのはConstraints(Joint)を形成するとき(PMXの髪とか服)で、一度物理エンジンにオブジェクトを登録するとConstraints(Joint)の効果で子要素は親要素に自動で引っ張られるようになる
 				// なので一度ワールド行列を計算したうえで物理オブジェクトを生成した後は、位置計算を全て物理エンジンに任せる
-				m_WorldMatrix = PhysicsObject->GetCurrentPhysicsWorldMatrix();
+				m_WorldMatrix = PhysicsObject->GetCurrentPhysicsWorldMatrix() * sclMatrix;
+			}
+		}
+	}
+
+	void CNode::AlignPhysicsJoint()
+	{
+		for (auto& PhysicsObject : m_PhysicsObjectList)
+		{
+			if (PhysicsObject && PhysicsObject->IsDynamicJoint())
+			{
+				glm::vec3 WorldPos = glm::vec3(0.0f);
+				glm::quat WorldRotate = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
+
+				math::CTransform::CastModelMatrixToTransform(m_WorldMatrix, WorldPos, WorldRotate);
+
+				//PhysicsObject->AlignConstraint(WorldPos, WorldRotate);
+
+				PhysicsObject->SetPhysicsWorldTransform(WorldPos, WorldRotate);
 			}
 		}
 	}
@@ -157,22 +181,14 @@ namespace object
 		// Staticな物理オブジェクトを持っている時はそれにも位置変更を反映する
 		for (auto& PhysicsObject : m_PhysicsObjectList)
 		{
-			if (PhysicsObject && (PhysicsObject->IsStatic() || PhysicsObject->IsDynamicJoint()))
+			if (PhysicsObject && PhysicsObject->IsKinematic())
 			{
 				glm::vec3 WorldPos = glm::vec3(0.0f);
 				glm::quat WorldRotate = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
 
 				math::CTransform::CastModelMatrixToTransform(m_WorldMatrix, WorldPos, WorldRotate);
 
-				if (PhysicsObject->IsStatic())
-				{
-					PhysicsObject->SetPhysicsWorldTransform(WorldPos, WorldRotate);
-				}
-
-				if (PhysicsObject->IsDynamicJoint())
-				{
-					//PhysicsObject->ResetConstraintTransform();
-				}
+				PhysicsObject->SetPhysicsWorldTransform(WorldPos, WorldRotate);
 			}
 		}
 	}
@@ -180,6 +196,21 @@ namespace object
 	const glm::mat4& CNode::GetWorldMatrix() const
 	{
 		return m_WorldMatrix;
+	}
+
+	glm::mat4 CNode::CalcWorldMatrix()
+	{
+		glm::mat4 result = GetLocalMatrix();
+
+		std::shared_ptr<CNode> parentNode = m_ParentNode;
+		while (parentNode)
+		{
+			result = parentNode->GetLocalMatrix() * result;
+
+			parentNode = parentNode->GetParentNode();
+		}
+
+		return result;
 	}
 
 	void CNode::SetParentNode(const std::shared_ptr<CNode>& ParentNode)

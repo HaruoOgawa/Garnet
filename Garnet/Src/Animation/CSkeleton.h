@@ -6,6 +6,7 @@
 // しかしglTFのSkeletonプロパティはアニメーションのルートを示すもので、なくてもルートはわかるものなので
 
 #include "CBone.h"
+#include "CIKSolver.h"
 #include <memory>
 #include <vector>
 #include <unordered_map>
@@ -20,6 +21,8 @@ namespace animation
 		std::unordered_map<EHumanoidBones, std::shared_ptr<CBone>> m_BoneTable;
 
 		// IK
+		std::vector<std::shared_ptr<CIKSolver>> m_IKSolverList;
+		// 後で消す
 		std::vector<std::shared_ptr<CBone>> m_IKBoneList;
 
 		// 付与ボーンリスト
@@ -40,6 +43,8 @@ namespace animation
 
 		// IK
 		void MakeIKBoneList();
+		bool SolveIK();
+
 		const std::vector<std::shared_ptr<CBone>>& GetIKBoneList() const;
 
 		// 付与ボーン

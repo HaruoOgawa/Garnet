@@ -19,6 +19,7 @@ namespace physics
 		virtual bool Create(IPhysicsEngine* pPhysicsEngine, const glm::vec3& WorldPos, const glm::quat& WorldRotate, const glm::vec3& WorldScale) = 0;
 
 		virtual bool IsStatic() = 0;
+		virtual bool IsKinematic() = 0;
 		virtual bool IsDynamicJoint() = 0;
 
 		virtual glm::vec3 GetSize() = 0;
@@ -33,7 +34,7 @@ namespace physics
 
 		virtual void ReserveConstraint(const std::shared_ptr<IPhysicsObject>& FixedObject, EJointType JointType, const SJointParam& JParam) = 0;
 		virtual void ApplyConstraint(IPhysicsEngine* pPhysicsEngine) = 0;
-		virtual void ResetConstraintTransform() = 0;
+		virtual void AlignConstraint(const glm::vec3& WorldPos, const glm::quat& WorldRotate) = 0;
 	};
 }
 #endif
