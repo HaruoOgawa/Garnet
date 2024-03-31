@@ -70,7 +70,7 @@ namespace resource
 			return false;
 		}
 
-		if (!m_TargetAudioClip->Create(m_File->GetData())) return false;
+		if (!m_TargetAudioClip->Create(m_File->GetData(), m_FileName)) return false;
 
 		// ƒ[ƒhŠ®—¹
 		m_Status = resource::ELoadStatus::Loaded;

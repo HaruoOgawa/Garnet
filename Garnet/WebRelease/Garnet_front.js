@@ -1,13 +1,14 @@
 document.body.style.overflow = 'hidden';
 
+window.g3dBGM = null;
+
 const InitWG = async () => {
     // WebGPUのサポート状況をチェック
     if (!navigator.gpu) {
         console.log("WebGPU isn't support your browser");
         return;
     }
-    else
-    {
+    else {
         // モジュールの設定
         const canvas = document.getElementById('MainCanvas');
         const width = canvas.clientWidth;
@@ -19,8 +20,7 @@ const InitWG = async () => {
         const adapter = await navigator.gpu.requestAdapter();
 
         const requiredFeatures = [];
-        if (adapter.features.has("depth32float-stencil8"))
-        {
+        if (adapter.features.has("depth32float-stencil8")) {
             requiredFeatures.push("depth32float-stencil8");
         }
 
@@ -117,3 +117,22 @@ addEventListener("wheel", (event) => {
         [event.deltaY]
     );
 });
+
+window.g3dPlayAudio = (fileName, loop) => {
+    if (window.g3dBGM !== undefined && window.g3dBGM !== null) {
+        window.g3dBGM.pause();
+    }
+
+    window.g3dBGM = new Audio(fileName);
+
+    window.g3dBGM.addEventListener('canplaythrough', () => {
+        window.g3dBGM.loop = loop;
+        window.g3dBGM.play();
+    });
+}
+
+window.g3dStopAudio = () => {
+    if (window.g3dBGM !== undefined && window.g3dBGM !== null) {
+        window.g3dBGM.pause();
+    }
+}

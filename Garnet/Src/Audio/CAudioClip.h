@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <string>
 
 namespace audio
 {
@@ -15,12 +16,13 @@ namespace audio
 	{
 		bool m_Loop;
 
+		std::string m_FileName;
 		std::vector<unsigned char> m_BinaryData;
 	public:
 		CAudioClip();
 		virtual ~CAudioClip();
 
-		bool Create(const std::vector<unsigned char>& Data);
+		bool Create(const std::vector<unsigned char>& Data, const std::string& FileName);
 
 		bool PlayLoop();
 		bool PlayOneShot();
