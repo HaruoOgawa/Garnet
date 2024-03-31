@@ -1,4 +1,4 @@
-# Garnet
+# Garnet 3D Engine
 ## Dependencies
 * [naga](https://github.com/gfx-rs/naga)
   * Convert SPIR-V to WGSL
