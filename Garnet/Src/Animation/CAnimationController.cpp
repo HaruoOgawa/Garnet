@@ -1,7 +1,7 @@
 #ifdef USE_ANIMATION
 
 #include "CAnimationController.h"
-#include "../../Debug/Message/Console.h"
+#include "../../Message/Console.h"
 
 namespace animation
 {

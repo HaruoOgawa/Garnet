@@ -2,7 +2,7 @@
 #include "CWebGPURenderPass.h"
 #include "CWebGPUAPI.h"
 #include "CWebGPUTexture.h"
-#include "../../Debug/Message/Console.h"
+#include "../../Message/Console.h"
 
 namespace api
 {

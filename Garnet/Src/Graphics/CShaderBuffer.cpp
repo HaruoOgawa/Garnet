@@ -1,7 +1,7 @@
 #include "CShaderBuffer.h"
 #include "CShaderBufferDescriptor.h"
 #include "CMaterial.h"
-#include "../Debug/Message/Console.h"
+#include "../Message/Console.h"
 #include "../../Math/CMath.h"
 
 namespace graphics

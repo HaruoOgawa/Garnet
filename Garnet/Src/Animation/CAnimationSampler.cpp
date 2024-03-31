@@ -2,7 +2,7 @@
 
 #include "CAnimationSampler.h"
 #include "../Math/CTransform.h"
-#include "../../Debug/Message/Console.h"
+#include "../../Message/Console.h"
 
 namespace animation
 {

@@ -2,7 +2,7 @@
 #include "CIKSolver.h"
 #include "CBone.h"
 
-#include "../Debug/Message/Console.h"
+#include "../Message/Console.h"
 
 namespace animation
 {
@@ -64,6 +64,7 @@ namespace animation
 
 		// ターゲットに届くかサイクルの最大値に達するまで計算を繰り返す
 		int CurrentLoopNum = 0;
+
 		//const int MaxLoopNum = m_IKParam->IKLoopCount;
 		// 重いので最大30回にする
 		const int MaxLoopNum = std::min(30, m_IKParam->IKLoopCount);
@@ -96,7 +97,6 @@ namespace animation
 				if (glm::length(ToGoal) > Epsilon)
 				{
 					EffectorToGoalQuat = math::CTransform::CalcTwoVectorRotate(glm::normalize(ToEffector), glm::normalize(ToGoal), Angle, m_IKParam->LimitedAngle);
-					//EffectorToGoalQuat = math::CTransform::CalcTwoVectorRotate(glm::normalize(ToEffector), glm::normalize(ToGoal), Angle);
 				}
 
 				glm::quat WorldRotated = ChainWorldRot * EffectorToGoalQuat;
@@ -122,14 +122,6 @@ namespace animation
 					Result = true;
 
 					break;
-				}
-
-				// 接触していなくてかつ回転角度がほぼ0の時は、ToEffectorとToGoalが平行で永遠に動かなくなってしまうのでわざと少しだけ回転してあげる
-				// 回転角度は調整(もしかしたらこれがPmxでいう単位角なのかも？)
-				if (Angle < 0.001f)
-				{
-					//m_IKChainList[j]->SetRot(glm::angleAxis(3.1415f / 6.0f, glm::vec3(0.0f, 0.0f, 1.0f)) * m_IKChainList[j]->GetRot());
-					//m_IKChainList[j]->SetRot(glm::angleAxis(m_IKParam->LimitedAngle, glm::vec3(0.0f, 0.0f, 1.0f)) * m_IKChainList[j]->GetRot());
 				}
 			}
 

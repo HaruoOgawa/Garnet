@@ -1,5 +1,7 @@
 document.body.style.overflow = 'hidden';
 
+window.g3dBGM = null;
+
 const InitWG = async () => {
     // WebGPUのサポート状況をチェック
     if (!navigator.gpu) {
@@ -117,3 +119,23 @@ addEventListener("wheel", (event) => {
         [event.deltaY]
     );
 });
+
+window.g3dPlayAudio = (fileName, loop) => {
+    if (window.g3dBGM !== undefined && window.g3dBGM !== null)
+    {
+        window.g3dBGM.pause();
+    }
+
+    window.g3dBGM = new Audio(fileName);
+
+    window.g3dBGM.addEventListener('canplaythrough', () => {
+        window.g3dBGM.loop = loop;
+        window.g3dBGM.play();
+    });
+}
+
+window.g3dStopAudio = () => {
+    if (window.g3dBGM !== undefined && window.g3dBGM !== null) {
+        window.g3dBGM.pause();
+    }
+}

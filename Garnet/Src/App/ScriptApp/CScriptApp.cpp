@@ -5,7 +5,7 @@
 #include "../../Camera/CCamera.h"
 #include "../../Projection/CProjection.h"
 #include "../../ImageEffect/CBlurEffect.h"
-#include "../../Debug/Message/Console.h"
+#include "../../Message/Console.h"
 
 #ifdef USE_VIEWER_CAMERA
 #include "../../Camera/CViewerCamera.h"

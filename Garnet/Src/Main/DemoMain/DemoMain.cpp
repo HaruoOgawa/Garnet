@@ -2,7 +2,7 @@
 
 #include "../../App/CDemoAppManager.h"
 #include "../../App/EAppType.h"
-#include "../../Debug/Message/Console.h"
+#include "../../Message/Console.h"
 
 #include <Windows.h>
 

@@ -7,7 +7,7 @@
 #include "CVulkanMaterial.h"
 #include "CVulkanTexture.h"
 #include "CVulkanGPGPUHandler.h"
-#include "../../Debug/Message/Console.h"
+#include "../../Message/Console.h"
 
 namespace api
 {

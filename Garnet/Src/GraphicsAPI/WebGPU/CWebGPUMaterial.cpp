@@ -3,7 +3,7 @@
 #include "CWebGPUAPI.h"
 #include "CWebGPUTexture.h"
 #include "../CMaterialCreateInfo.h"
-#include "../../Debug/Message/Console.h"
+#include "../../Message/Console.h"
 #include "../../Camera/CCamera.h"
 #include "../../Projection/CProjection.h"
 

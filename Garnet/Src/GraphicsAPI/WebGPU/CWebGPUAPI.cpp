@@ -7,7 +7,7 @@
 #include "CWebGPUMaterial.h"
 #include "CWebGPUTexture.h"
 #include "CWebGPUGPGPUHandler.h"
-#include "../../Debug/Message/Console.h"
+#include "../../Message/Console.h"
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten/emscripten.h>

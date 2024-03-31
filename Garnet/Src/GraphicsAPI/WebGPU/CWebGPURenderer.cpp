@@ -4,7 +4,7 @@
 #include "CWebGPUMaterial.h"
 #include "CWebGPUVertexBuffer.h"
 #include "CWebGPUIndexBuffer.h"
-#include "../../Debug/Message/Console.h"
+#include "../../Message/Console.h"
 
 namespace api
 {
@@ -171,8 +171,10 @@ namespace api
 		WGPUDepthStencilState depthStencilState;
 		SetDefaultDepthStencil(depthStencilState);
 		depthStencilState.nextInChain = nullptr;
-		depthStencilState.depthCompare = WGPUCompareFunction_Less;
-		depthStencilState.depthWriteEnabled = pWebGPUMat->IsEnabledZTest();
+		depthStencilState.depthCompare = (pWebGPUMat->IsEnabledZTest())? WGPUCompareFunction_Less : WGPUCompareFunction_Always;
+		//depthStencilState.depthCompare = WGPUCompareFunction_Less;
+		//depthStencilState.depthWriteEnabled = pWebGPUMat->IsEnabledZTest();
+		depthStencilState.depthWriteEnabled = true;
 		WGPUTextureFormat depthTextureFormat = WGPUTextureFormat_Depth24Plus;
 		depthStencilState.format = depthTextureFormat;
 		depthStencilState.stencilReadMask = 0; // ステンシルバッファの読み書きをオフにしておく

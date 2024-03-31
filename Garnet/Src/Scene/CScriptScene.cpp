@@ -6,12 +6,12 @@
 #include "../LoadWorker/CTextureLoader.h"
 #include "../LoadWorker/C3DObjectLoader.h"
 #include "../LoadWorker/CAnimationLoader.h"
+#include "../LoadWorker/CAudioLoader.h"
 
-#include "../Debug/Message/Console.h"
+#include "../Message/Console.h"
 
 #include "../Object/C3DObject.h"
 #include "../Animation/CAnimationClipSet.h"
-
 #include "../Graphics/CMaterialFrame.h"
 
 namespace scene
@@ -21,6 +21,8 @@ namespace scene
 		m_SimpleTextureMF(std::make_shared<graphics::CMaterialFrame>()),
 		m_DepthMF(std::make_shared<graphics::CMaterialFrame>()),
 		m_PBRMF(std::make_shared<graphics::CMaterialFrame>()),
+
+		m_AudioClip(std::make_shared<audio::CAudioClip>()),
 
 		m_SimpleMorphObj(std::make_shared<object::C3DObject>("", "ShadowPass")),
 		m_BrainStemObj(std::make_shared<object::C3DObject>("", "ShadowPass")),
@@ -68,14 +70,16 @@ namespace scene
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Avatar\\Tda_Miku\\Tda_Miku.pmx", m_TdaMiku_Model, "", "ShadowPass"));
 		//pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CAnimationLoader>("Resources\\Motions\\mmd_running.vmd", m_VMDAnimationSet));
 		//pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CAnimationLoader>("Resources\\Motions\\Run_m4th_Loop.vmd", m_VMDAnimationSet));
-		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CAnimationLoader>("Resources\\Motions\\Bling-Bang-Bang-Born.vmd", m_VMDAnimationSet));
-		//pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CAnimationLoader>("Resources\\Motions\\biglove_dance.vmd", m_VMDAnimationSet));
+		//pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CAnimationLoader>("Resources\\Motions\\Bling-Bang-Bang-Born.vmd", m_VMDAnimationSet));
+		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CAnimationLoader>("Resources\\Motions\\biglove_dance.vmd", m_VMDAnimationSet));
 		//pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CAnimationLoader>("Resources\\Motions\\BackFlip.vmd", m_VMDAnimationSet));
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CAnimationLoader>("Resources\\Motions\\biglove_expression.vmd", m_ExpressionVMD));
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CAnimationLoader>("Resources\\Motions\\biglove_Ripsync.vmd", m_RipSyncVMD));
 		
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CTextureLoader>(pGraphicsAPI, std::vector<std::string>({ "Resources\\IBL\\output_skybox.hdr" }), m_IBL_Skybox_Texture));
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CTextureLoader>(pGraphicsAPI, std::vector<std::string>({ "Resources\\Cubemaps\\environment\\environment_back_0.jpg", "Resources\\Cubemaps\\environment\\environment_bottom_0.jpg", "Resources\\Cubemaps\\environment\\environment_front_0.jpg", "Resources\\Cubemaps\\environment\\environment_left_0.jpg", "Resources\\Cubemaps\\environment\\environment_right_0.jpg", "Resources\\Cubemaps\\environment\\environment_top_0.jpg" }), m_Cube_Texture));
+	
+		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CAudioLoader>("Resources\\Audio\\biglove_audio.wav", m_AudioClip));
 	}
 
 	CScriptScene::~CScriptScene()
@@ -376,15 +380,15 @@ namespace scene
 			if (Clip) m_TdaMiku_Model->AddHumanoidAnimationClip(Clip, "Walk", { nullptr, "" }, true);
 
 			//auto ExpressionClip = m_VMDAnimationSet->GetBlendShapeClip(0);
-			//auto ExpressionClip = m_ExpressionVMD->GetBlendShapeClip(0);
-			//if (ExpressionClip) m_TdaMiku_Model->AddBlendShapeClip(ExpressionClip, "Face", true);
+			auto ExpressionClip = m_ExpressionVMD->GetBlendShapeClip(0);
+			if (ExpressionClip) m_TdaMiku_Model->AddBlendShapeClip(ExpressionClip, "Face", true);
 
-			//auto RipSyncClip = m_RipSyncVMD->GetBlendShapeClip(0);
-			//if (RipSyncClip) m_TdaMiku_Model->AddBlendShapeClip(RipSyncClip, "RipSync", true);
+			auto RipSyncClip = m_RipSyncVMD->GetBlendShapeClip(0);
+			if (RipSyncClip) m_TdaMiku_Model->AddBlendShapeClip(RipSyncClip, "RipSync", true);
 
 			m_TdaMiku_Model->ChangeMotion("Walk");
-			//m_TdaMiku_Model->PlayBlendShape("Face");
-			//m_TdaMiku_Model->PlayBlendShape("RipSync");
+			m_TdaMiku_Model->PlayBlendShape("Face");
+			m_TdaMiku_Model->PlayBlendShape("RipSync");
 		}
 
 		// m_Background
@@ -407,6 +411,8 @@ namespace scene
 			m_DebugSphere->SetScale(glm::vec3(0.1f));
 			if (!m_DebugSphere->CreateSimply(pGraphicsAPI, pPhysicsEngine, graphics::CPresetPrimitive::CreateSphere(pGraphicsAPI), Mat, m_DepthMF)) return false;
 		}
+
+		if (!m_AudioClip->PlayLoop()) return false;
 
 		return true;
 	}

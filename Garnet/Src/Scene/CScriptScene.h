@@ -18,7 +18,7 @@ namespace graphics
 	class CTexture;
 	class CMaterialFrame;
 }
-
+namespace audio { class CAudioClip; }
 
 namespace scene
 {
@@ -30,6 +30,9 @@ namespace scene
 		std::shared_ptr<graphics::CMaterialFrame> m_SimpleTextureMF;
 		std::shared_ptr<graphics::CMaterialFrame> m_DepthMF;
 		std::shared_ptr<graphics::CMaterialFrame> m_PBRMF;
+
+		// Audio
+		std::shared_ptr<audio::CAudioClip> m_AudioClip;
 
 		//
 		std::shared_ptr<graphics::CTexture> m_Cube_Texture;

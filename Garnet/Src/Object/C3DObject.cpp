@@ -413,7 +413,7 @@ namespace object
 	bool C3DObject::FixedUpdate(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, float DeltaSecondsTime)
 	{
 		// •¨—‰‰ŽZ‚ÌŒ‹‰Ê‚ð”½‰f‚·‚é
-		//ApplyPhysicsWorldMatrix();
+		ApplyPhysicsWorldMatrix();
 
 #ifdef USE_ANIMATION
 		// IK‚â•¨—‰‰ŽZ‚ªI‚í‚Á‚ÄÅI“I‚ÈWorldMatrix‚ªŠm’è‚µ‚½’iŠK‚ÅSkinMatrix‚ðŒvŽZ‚·‚é
@@ -543,7 +543,7 @@ namespace object
 
 					DebugSphere->GetMaterialList()[0]->SetUniformValue("useColor", &glm::ivec1(1)[0], sizeof(glm::ivec1));
 					DebugSphere->GetMaterialList()[0]->SetUniformValue("baseColor", &glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)[0], sizeof(glm::vec4));
-					//DebugSphere->GetMaterialList()[0]->SetUniformValue("baseColorFactor", &glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)[0], sizeof(glm::vec4));
+					DebugSphere->GetMaterialList()[0]->SetUniformValue("baseColorFactor", &glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)[0], sizeof(glm::vec4));
 
 					if (!DebugSphere->Draw(IsDepthPass, false, Camera, Projection, DrawInfo)) return false;
 				}

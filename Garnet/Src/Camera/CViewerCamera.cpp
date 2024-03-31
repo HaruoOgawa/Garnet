@@ -1,7 +1,7 @@
 #ifdef USE_VIEWER_CAMERA
 
 #include "CViewerCamera.h"
-#include "../Debug/Message/Console.h"
+#include "../Message/Console.h"
 
 namespace camera
 {

@@ -22,7 +22,7 @@
 #endif // !__EMSCRIPTEN__
 
 #include <tiny_gltf.h>
-#include "../Debug/Message/Console.h"
+#include "../Message/Console.h"
 #include "../Math/CMath.h"
 
 #include "../Animation/CAnimationClip.h"
