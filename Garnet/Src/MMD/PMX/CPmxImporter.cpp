@@ -14,12 +14,13 @@
 #include "../../Graphics/CIndexBuffer.h"
 
 #include "../../LoadWorker/CLoadWorker.h"
+#include "../../LoadWorker/C3DObjectLoader.h"
 #include "../../LoadWorker/CTextureLoader.h"
 
 namespace mmd
 {
-	bool CPmxImporter::ImportPmx(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, const std::string& ModelFileName, 
-		const std::vector<unsigned char>& Data, object::C3DObject* Object, const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame)
+	bool CPmxImporter::ImportPmx(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, const std::string& ModelFileName, 
+		const std::vector<unsigned char>& Data, object::C3DObject* Object, const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, resource::C3DObjectLoader* p3DObjectLoader)
 	{
 		CPmxModel model;
 
@@ -62,9 +63,8 @@ namespace mmd
 
 		// テクスチャリスト
 		std::vector<std::shared_ptr<graphics::CTexture>> TextureList;
-		std::vector<std::shared_ptr<resource::IResource>> RuntimeLoadResourceList;
 
-		if (!CreateTextureList(pGraphicsAPI, pLoadWorker, ModelFileName, model, TextureList, RuntimeLoadResourceList)) return false;
+		if (!CreateTextureList(pGraphicsAPI, p3DObjectLoader, ModelFileName, model, TextureList)) return false;
 
 		// メッシュ
 		std::vector<std::shared_ptr<graphics::CMesh>> MeshList;
@@ -95,11 +95,6 @@ namespace mmd
 		for (const auto& Texture : TextureList)
 		{
 			Object->GetTextureSet()->Add2DTexture(Texture);
-		}
-
-		for (const auto& Resource : RuntimeLoadResourceList)
-		{
-			Object->AddRuntimeLoadResource(Resource);
 		}
 
 		for (const auto& Mesh : MeshList)
@@ -649,8 +644,7 @@ namespace mmd
 		return true;
 	}
 
-	bool CPmxImporter::CreateTextureList(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, const std::string& ModelFileName, const CPmxModel& model, std::vector<std::shared_ptr<graphics::CTexture>>& TextureList,
-		std::vector<std::shared_ptr<resource::IResource>>& RuntimeLoadResourceList)
+	bool CPmxImporter::CreateTextureList(api::IGraphicsAPI* pGraphicsAPI, resource::C3DObjectLoader* p3DObjectLoader, const std::string& ModelFileName, const CPmxModel& model, std::vector<std::shared_ptr<graphics::CTexture>>& TextureList)
 	{
 		for (const auto& PmxTexture : model.GetPmxTextureList())
 		{
@@ -680,9 +674,7 @@ namespace mmd
 
 			//
 			TextureList.push_back(Texture);
-			RuntimeLoadResourceList.push_back(TexLoader);
-			//pLoadWorker->AddFirstLoadResource(TexLoader);
-			pLoadWorker->AddRuntimeLoadResource(TexLoader);
+			p3DObjectLoader->AddSubResource(TexLoader);
 		}
 
 		return true;

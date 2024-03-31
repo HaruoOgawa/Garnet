@@ -34,10 +34,14 @@
 #include "../../Graphics/CVertexBuffer.h"
 #include "../../Graphics/CIndexBuffer.h"
 
+#include "../../LoadWorker/CLoadWorker.h"
+#include "../../LoadWorker/C3DObjectLoader.h"
+#include "../../LoadWorker/CTextureLoader.h"
+
 namespace gltf
 {
 	bool CGLTFImporter::ImportFromMemory(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& Data, object::C3DObject* Object,
-		const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame)
+		const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, resource::C3DObjectLoader* p3DObjectLoader)
 	{
 		tinygltf::Model model;
 		tinygltf::TinyGLTF loader;
@@ -65,7 +69,7 @@ namespace gltf
 	}
 
 	bool CGLTFImporter::ImportFromString(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& Data, const std::string& BaseDir, object::C3DObject* Object,
-		const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame)
+		const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, resource::C3DObjectLoader* p3DObjectLoader)
 	{
 		tinygltf::Model model;
 		tinygltf::TinyGLTF loader;

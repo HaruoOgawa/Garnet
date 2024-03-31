@@ -8,7 +8,8 @@ const InitWG = async () => {
         console.log("WebGPU isn't support your browser");
         return;
     }
-    else {
+    else
+    {
         // ƒ‚ƒWƒ…[ƒ‹‚ÌÝ’è
         const canvas = document.getElementById('MainCanvas');
         const width = canvas.clientWidth;
@@ -20,7 +21,8 @@ const InitWG = async () => {
         const adapter = await navigator.gpu.requestAdapter();
 
         const requiredFeatures = [];
-        if (adapter.features.has("depth32float-stencil8")) {
+        if (adapter.features.has("depth32float-stencil8"))
+        {
             requiredFeatures.push("depth32float-stencil8");
         }
 
@@ -119,7 +121,8 @@ addEventListener("wheel", (event) => {
 });
 
 window.g3dPlayAudio = (fileName, loop) => {
-    if (window.g3dBGM !== undefined && window.g3dBGM !== null) {
+    if (window.g3dBGM !== undefined && window.g3dBGM !== null)
+    {
         window.g3dBGM.pause();
     }
 

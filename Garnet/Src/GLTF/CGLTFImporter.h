@@ -38,6 +38,11 @@ namespace object {
 	class CNode;
 }
 
+namespace resource {
+	class CLoadWorker;
+	class C3DObjectLoader;
+}
+
 namespace tinygltf { 
 	class Model; 
 	struct Accessor;
@@ -80,10 +85,10 @@ namespace gltf
 		static int GetByteStride(const tinygltf::Model& model, const tinygltf::Accessor& Accessor);
 	public:
 		static bool ImportFromMemory(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& Data, object::C3DObject* Object,
-			const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame);
+			const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, resource::C3DObjectLoader* p3DObjectLoader);
 		
 		static bool ImportFromString(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& Data, const std::string& BaseDir, object::C3DObject* Object,
-			const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame);
+			const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, resource::C3DObjectLoader* p3DObjectLoader);
 	};
 }
 #endif // USE_GLTF

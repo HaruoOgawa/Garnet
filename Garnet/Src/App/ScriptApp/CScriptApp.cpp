@@ -66,7 +66,7 @@ namespace app
 	bool CScriptApp::Initialize(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker)
 	{
 		// View‚Ì‰Šú‰»
-		m_ScriptScene = std::make_shared<scene::CScriptScene>(pGraphicsAPI, pLoadWorker);
+		m_ScriptScene = std::make_shared<scene::CScriptScene>(pGraphicsAPI, pLoadWorker, m_PhysicsEngine.get());
 
 		// •¨—ƒGƒ“ƒWƒ“
 		if (!m_PhysicsEngine->Initialize()) return false;
