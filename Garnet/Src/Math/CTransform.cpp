@@ -242,7 +242,7 @@ namespace math
 			// ãÅÇ‹Ç¡ÇΩÉxÉNÉgÉãÇå≥Ç…âÒì]Ç∑ÇÈ
 			glm::vec3 RotateAxis = glm::cross(FromVector, SubVector);
 			Angle = glm::acos(cosTheta);
-			Angle = fminf(MaxAngle, Angle);
+			Angle = glm::clamp(Angle, -MaxAngle, MaxAngle);
 
 			Result = glm::angleAxis(Angle, RotateAxis);
 		}
@@ -250,7 +250,7 @@ namespace math
 		{
 			glm::vec3 RotateAxis = glm::cross(FromVector, ToVector);
 			Angle = glm::acos(cosTheta);
-			Angle = fminf(MaxAngle, Angle);
+			Angle = glm::clamp(Angle, -MaxAngle, MaxAngle);
 
 			Result = glm::angleAxis(Angle, RotateAxis);
 		}
