@@ -19,6 +19,8 @@ namespace animation
 
 		bool m_IsLoop;
 
+		bool m_UseIK;
+
 		std::vector<std::shared_ptr<animation::CAnimationSampler>> m_SamplerList;
 		std::vector<std::shared_ptr<animation::CAnimationChannel>> m_ChannelList;
 		
@@ -28,6 +30,9 @@ namespace animation
 
 		virtual void SetIsLoop(bool val);
 		virtual bool IsLoop() const;
+
+		virtual void SetUseIK(bool Val);
+		virtual bool IsUseIK() const;
 
 		virtual void Initialize();
 

@@ -7,6 +7,7 @@ namespace animation
 	CAnimationClip::CAnimationClip():
 		m_CurrentTime(0.0f),
 		m_IsLoop(false),
+		m_UseIK(false),
 		m_DefaultSkeleton(nullptr)
 	{
 	}
@@ -23,6 +24,16 @@ namespace animation
 	bool CAnimationClip::IsLoop() const
 	{
 		return m_IsLoop;
+	}
+
+	void CAnimationClip::SetUseIK(bool Val)
+	{
+		m_UseIK = Val;
+	}
+
+	bool CAnimationClip::IsUseIK() const
+	{
+		return m_UseIK;
 	}
 
 	void CAnimationClip::Initialize()

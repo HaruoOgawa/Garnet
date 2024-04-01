@@ -10,8 +10,7 @@ namespace animation
 		m_CurrBlendingTime(0.0f),
 		m_SavedPrevTrs(false),
 		m_Skeleton(nullptr),
-		m_CurrentClipIndex(-1),
-		m_CurrentClipName("")
+		m_CurrentLayout(SAnimationLayout())
 	{
 	}
 
@@ -24,48 +23,33 @@ namespace animation
 	{
 		m_CurrBlendingTime = 0.0f;
 		m_SavedPrevTrs = false;
-		m_CurrentClipIndex = -1;
-		m_CurrentClipName = "";
+		m_CurrentLayout = {};
 	}
 
 	bool CAnimationController::Update(float DeltaSecondsTime)
 	{
 		// アニメーションの計算
-		if (m_CurrentClipIndex >= 0 && m_CurrentClipIndex < m_ClipList.size())
+		const auto& Clip = m_CurrentLayout.Clip;
+		if (!Clip) return true;
+
+		if (Clip->IsEnd() && !Clip->IsLoop())
 		{
-			const auto& Clip = m_ClipList[m_CurrentClipIndex];
+			// アニメーションが終了しているので次のアニメーションに遷移する
+			const std::string& NextClipName = m_CurrentLayout.NextClipName;
+
+			if (!NextClipName.empty())
+			{
+				ChangeMotion(NextClipName);
+
+				return true;
+			}
+		}
+		else
+		{
 			if (!Clip->Update(DeltaSecondsTime)) return false;
 
 			// モーションブレンド
 			if (!BlendMotion(DeltaSecondsTime)) return false;
-		}
-		else if (m_ClipMap.find(m_CurrentClipName) != m_ClipMap.end())
-		{
-			const auto& Layout = m_ClipMap.find(m_CurrentClipName);
-			if (Layout != m_ClipMap.end())
-			{
-				const auto& Clip = Layout->second.Clip;
-
-				if (Clip->IsEnd() && !Clip->IsLoop())
-				{
-					// アニメーションが終了しているので次のアニメーションに遷移する
-					const std::string& NextClipName = Layout->second.NextClipName;
-
-					if (!NextClipName.empty())
-					{
-						ChangeMotion(NextClipName);
-
-						return true;
-					}
-				}
-				else
-				{
-					if (!Clip->Update(DeltaSecondsTime)) return false;
-
-					// モーションブレンド
-					if (!BlendMotion(DeltaSecondsTime)) return false;
-				}
-			}
 		}
 
 		return true;
@@ -74,12 +58,15 @@ namespace animation
 	// IKの計算
 	bool CAnimationController::CalculateIK(const std::vector<std::shared_ptr<object::CNode>>& NodeList)
 	{
-		if (m_Skeleton)
+		const auto& CurrentClip = m_CurrentLayout.Clip;
+
+		if (!CurrentClip || !m_Skeleton) return true;
+
+		if (CurrentClip->IsUseIK())
 		{
 			if (!m_Skeleton->SolveIK()) return false;
+			//if (!DoCCDIK(NodeList)) return false;
 		}
-
-		//if (!DoCCDIK(NodeList)) return false;
 
 		return true;
 	}
@@ -376,13 +363,13 @@ namespace animation
 	{
 		Reset();
 
-		m_CurrentClipIndex = Index;
-
 		// 初期化
-		if (m_CurrentClipIndex >= 0 && m_CurrentClipIndex < m_ClipList.size())
+		if (Index >= 0 && Index < m_ClipList.size())
 		{
-			const auto& Clip = m_ClipList[m_CurrentClipIndex];
+			const auto& Clip = m_ClipList[Index];
 			Clip->Initialize();
+
+			m_CurrentLayout.Clip = Clip;
 		}
 	}
 
@@ -391,16 +378,14 @@ namespace animation
 	{
 		Reset();
 
-		m_CurrentClipName = MotionName;
-
 		// 初期化
-		if (m_ClipMap.find(m_CurrentClipName) != m_ClipMap.end())
+		const auto& Layout = m_ClipMap.find(MotionName);
+		if (Layout != m_ClipMap.end())
 		{
-			const auto& Clip = m_ClipMap.find(m_CurrentClipName);
-			if (Clip != m_ClipMap.end())
-			{
-				Clip->second.Clip->Initialize();
-			}
+			m_CurrentLayout = Layout->second;
+
+			const auto& Clip = m_CurrentLayout.Clip;
+			if(Clip) Clip->Initialize();
 		}
 
 		// 現在の姿勢を保存する
@@ -439,18 +424,7 @@ namespace animation
 
 	bool CAnimationController::IsPlayingAnimation()
 	{
-		bool result = false;
-
-		if (m_CurrentClipIndex >= 0 && m_CurrentClipIndex < m_ClipList.size())
-		{
-			result = true;
-		}
-		else if (m_ClipMap.find(m_CurrentClipName) != m_ClipMap.end())
-		{
-			result = true;
-		}
-
-		return result;
+		return (m_CurrentLayout.Clip != nullptr);
 	}
 
 	void CAnimationController::AddMotion(const std::string& MotionName, animation::SAnimationLayout Layout)
@@ -474,7 +448,8 @@ namespace animation
 		m_ClipList.push_back(Clip);
 	}
 
-	void CAnimationController::AddHumanoidAnimationClip(const std::shared_ptr<animation::CAnimationClip>& SourceClip, const std::string& MotionName, animation::SAnimationLayout Layout, bool IsLoop)
+	void CAnimationController::AddHumanoidAnimationClip(const std::shared_ptr<animation::CAnimationClip>& SourceClip, 
+		const std::string& MotionName, animation::SAnimationLayout Layout, bool IsLoop, bool UseIK)
 	{
 		if (!m_Skeleton) return;
 
@@ -543,6 +518,7 @@ namespace animation
 		}
 
 		TargetClip->SetIsLoop(IsLoop);
+		TargetClip->SetUseIK(UseIK);
 
 		Layout.Clip = TargetClip;
 		AddMotion(MotionName, Layout);

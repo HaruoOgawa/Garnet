@@ -22,10 +22,9 @@ namespace animation
 		std::vector<std::shared_ptr<animation::CAnimationClip>> m_ClipList;
 		std::unordered_map<std::string, SAnimationLayout> m_ClipMap;
 
-		std::shared_ptr<animation::CSkeleton> m_Skeleton;
+		SAnimationLayout m_CurrentLayout;
 
-		int m_CurrentClipIndex; // インデックスで使用するアニメーションを選択
-		std::string m_CurrentClipName; // Clip名でアニメーションを選択
+		std::shared_ptr<animation::CSkeleton> m_Skeleton;
 	private:
 		void Reset();
 
@@ -66,7 +65,8 @@ namespace animation
 		const std::shared_ptr<animation::CSkeleton>& GetSkeleton() const;
 
 		void AddAnimationClip(const std::shared_ptr<animation::CAnimationClip>& Clip);
-		void AddHumanoidAnimationClip(const std::shared_ptr<animation::CAnimationClip>& SourceClip, const std::string& MotionName, animation::SAnimationLayout Layout, bool IsLoop);
+		void AddHumanoidAnimationClip(const std::shared_ptr<animation::CAnimationClip>& SourceClip, const std::string& MotionName, 
+			animation::SAnimationLayout Layout, bool IsLoop, bool UseIK);
 
 		const std::vector<std::shared_ptr<animation::CAnimationClip>>& GetAnimationClipList() const;
 		const std::unordered_map<std::string, SAnimationLayout>& GetAnimationClipMap() const;

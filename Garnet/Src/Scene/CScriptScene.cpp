@@ -121,9 +121,9 @@ namespace scene
 		{
 			if (!m_XBotObject->Create(pGraphicsAPI, pPhysicsEngine, m_DepthMF)) return false;
 
-			m_XBotObject->AddHumanoidAnimationClip(AnimationClipList[0], "Walk", { nullptr, "" }, true);
-			m_XBotObject->AddHumanoidAnimationClip(AnimationClipList[1], "Jump", { nullptr, "Walk" }, false);
-			m_XBotObject->AddHumanoidAnimationClip(AnimationClipList[2], "Punch", { nullptr, "Walk" }, false);
+			m_XBotObject->AddHumanoidAnimationClip(AnimationClipList[0], "Walk", { nullptr, "" }, true, false);
+			m_XBotObject->AddHumanoidAnimationClip(AnimationClipList[1], "Jump", { nullptr, "Walk" }, false, false);
+			m_XBotObject->AddHumanoidAnimationClip(AnimationClipList[2], "Punch", { nullptr, "Walk" }, false, false);
 
 			// 再生するアニメーションクリップを指定する
 			m_XBotObject->ChangeMotion("Walk");
@@ -135,9 +135,9 @@ namespace scene
 		{
 			if (!m_MouseyObject->Create(pGraphicsAPI, pPhysicsEngine, m_DepthMF)) return false;
 
-			m_MouseyObject->AddHumanoidAnimationClip(AnimationClipList[0], "Walk", { nullptr, "" }, true);
-			m_MouseyObject->AddHumanoidAnimationClip(AnimationClipList[1], "Jump", { nullptr, "Walk" }, false);
-			m_MouseyObject->AddHumanoidAnimationClip(AnimationClipList[2], "Punch", { nullptr, "Walk" }, false);
+			m_MouseyObject->AddHumanoidAnimationClip(AnimationClipList[0], "Walk", { nullptr, "" }, true, false);
+			m_MouseyObject->AddHumanoidAnimationClip(AnimationClipList[1], "Jump", { nullptr, "Walk" }, false, false);
+			m_MouseyObject->AddHumanoidAnimationClip(AnimationClipList[2], "Punch", { nullptr, "Walk" }, false, false);
 
 			// 再生するアニメーションクリップを指定する
 			m_MouseyObject->ChangeMotion("Walk");
@@ -150,9 +150,9 @@ namespace scene
 		{
 			if (!m_WarrokObject->Create(pGraphicsAPI, pPhysicsEngine, m_DepthMF)) return false;
 
-			m_WarrokObject->AddHumanoidAnimationClip(AnimationClipList[0], "Walk", { nullptr, "" }, true);
-			m_WarrokObject->AddHumanoidAnimationClip(AnimationClipList[1], "Jump", { nullptr, "Walk" }, false);
-			m_WarrokObject->AddHumanoidAnimationClip(AnimationClipList[2], "Punch", { nullptr, "Walk" }, false);
+			m_WarrokObject->AddHumanoidAnimationClip(AnimationClipList[0], "Walk", { nullptr, "" }, true, false);
+			m_WarrokObject->AddHumanoidAnimationClip(AnimationClipList[1], "Jump", { nullptr, "Walk" }, false, false);
+			m_WarrokObject->AddHumanoidAnimationClip(AnimationClipList[2], "Punch", { nullptr, "Walk" }, false, false);
 
 			m_WarrokObject->SetPos(glm::vec3(-4.0f, 0.0f, 0.0f));
 			m_WarrokObject->SetRot(glm::angleAxis(3.1515f, glm::vec3(0.0f, 1.0f, 0.0f)));
@@ -377,7 +377,7 @@ namespace scene
 			if (!m_TdaMiku_Model->Create(pGraphicsAPI, pPhysicsEngine, m_DepthMF)) return false;
 
 			auto Clip = m_VMDAnimationSet->GetAnimationClip(0);
-			if (Clip) m_TdaMiku_Model->AddHumanoidAnimationClip(Clip, "Walk", { nullptr, "" }, true);
+			if (Clip) m_TdaMiku_Model->AddHumanoidAnimationClip(Clip, "Walk", { nullptr, "" }, true, true);
 
 			//auto ExpressionClip = m_VMDAnimationSet->GetBlendShapeClip(0);
 			auto ExpressionClip = m_ExpressionVMD->GetBlendShapeClip(0);
