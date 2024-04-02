@@ -35,6 +35,8 @@ namespace object
 		// モーフ
 		std::vector<float> m_CurrentMorphWeights;
 
+		// IK
+		glm::quat m_IKRotate;
 	public:
 		CNode(int MeshIndex, int SelfNodeIndex);
 		virtual ~CNode();
@@ -58,6 +60,11 @@ namespace object
 
 		void ApplyPhysicsWorldMatrix();
 		void AlignPhysicsJoint();
+
+		// IK
+		void InitIKRotate();
+		void MulIKRotate(const glm::quat& Rotate);
+		const glm::quat& GetIKRotate() const;
 
 		// モーフ
 		void ClearMorphWeights();

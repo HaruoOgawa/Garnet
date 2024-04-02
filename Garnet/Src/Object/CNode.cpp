@@ -138,6 +138,22 @@ namespace object
 		}
 	}
 
+	// IK
+	void CNode::InitIKRotate()
+	{
+		m_IKRotate = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
+	}
+
+	void CNode::MulIKRotate(const glm::quat& Rotate)
+	{
+		m_IKRotate *= Rotate;
+	}
+
+	const glm::quat& CNode::GetIKRotate() const
+	{
+		return m_IKRotate;
+	}
+
 	// ÉÇÅ[Ét
 	void CNode::ClearMorphWeights()
 	{
