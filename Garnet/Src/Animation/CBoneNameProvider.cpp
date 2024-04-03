@@ -206,7 +206,9 @@ namespace animation
 	{
 		// コードにUTF8以外の文字が含まれているとEmscriptenでコンパイルできないっぽいのでバイト列を実行時にwstringに変換している
 		// また、Shift_JISからUTF16への変換が大変なので2番目にShift_JISのバイト列を追加している
+		m_BoneNameTableU16.emplace(animation::EHumanoidBones::AllParent, std::vector<std::wstring>{ HexToWstr({ 0x5168, 0x3066, 0x306e, 0x89aa }), HexToWstr({ 0x9153, 0x82c4, 0x82cc, 0x9065 }) }); // 全ての親
 		m_BoneNameTableU16.emplace(animation::EHumanoidBones::Center, std::vector<std::wstring>{ HexToWstr({ 0x30bb, 0x30f3, 0x30bf, 0x30fc }), HexToWstr({ 0x835a, 0x8393, 0x835e, 0x815b }) }); // センター
+		m_BoneNameTableU16.emplace(animation::EHumanoidBones::Group, std::vector<std::wstring>{ HexToWstr({ 0x30b0, 0x30eb, 0x30fc, 0x30d6 }), HexToWstr({ 0x834f, 0x838b, 0x815b, 0x8375 }) }); // グルーブ
 		m_BoneNameTableU16.emplace(animation::EHumanoidBones::Hips, std::vector<std::wstring>{ HexToWstr({ 0x8170 }), HexToWstr({ 0x8d98 }) }); // 腰
 		m_BoneNameTableU16.emplace(animation::EHumanoidBones::LowerBody, std::vector<std::wstring>{ HexToWstr({ 0x4e0b, 0x534a, 0x8eab }), HexToWstr({ 0x89ba, 0x94bc, 0x9067 }) }); // 下半身
 		m_BoneNameTableU16.emplace(animation::EHumanoidBones::Spine, std::vector<std::wstring>{ HexToWstr({ 0x4e0a, 0x534a, 0x8eab }), HexToWstr({ 0x8fe3, 0x94bc, 0x9067 }) }); // 上半身
