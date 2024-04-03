@@ -117,9 +117,9 @@ namespace animation
 				}
 
 				glm::quat LocalRotated = WorldRotated * glm::inverse(ChainWorldRot);
-				m_IKChainList[j]->MulIKRotate(LocalRotated);
+				//m_IKChainList[j]->MulIKRotate(LocalRotated);
 
-				//m_IKChainList[j]->SetRot(LocalRotated * m_IKChainList[j]->GetRot());
+				m_IKChainList[j]->SetRot(LocalRotated * m_IKChainList[j]->GetRot());
 
 				// ÚG‚µ‚Ä‚¢‚é‚È‚çI—¹
 				EffectorPos = GetWorldTransform(Last).GetPos();
@@ -154,12 +154,12 @@ namespace animation
 
 		for (int i = 0; i <= ChainIndex; i++)
 		{
-			math::CTransform DefaultLocalTransform = math::CTransform(m_IKChainList[i]->GetDefaultLocalMatrix());
+			/*math::CTransform DefaultLocalTransform = math::CTransform(m_IKChainList[i]->GetDefaultLocalMatrix());
 			DefaultLocalTransform.MulRot(m_IKChainList[i]->GetIKRotate());
 
-			WorldMatrix *= DefaultLocalTransform.GetModelMatrix();
+			WorldMatrix *= DefaultLocalTransform.GetModelMatrix();*/
 
-			//WorldMatrix *= m_IKChainList[i]->GetLocalMatrix();
+			WorldMatrix *= m_IKChainList[i]->GetLocalMatrix();
 		}
 
 		math::CTransform WorldTransform = math::CTransform(WorldMatrix);
