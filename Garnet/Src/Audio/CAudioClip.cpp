@@ -10,7 +10,7 @@ namespace audio
 {
 	CAudioClip::CAudioClip():
 		m_Loop(false),
-		m_FileName(std::string())
+		m_Playing(false)
 	{
 	}
 
@@ -22,7 +22,11 @@ namespace audio
 	bool CAudioClip::Create(const std::vector<unsigned char>& Data, const std::string& FileName)
 	{
 #ifdef __EMSCRIPTEN__
-		m_FileName = FileName;
+		EM_ASM({
+			const fileName = Module.UTF8ToString($0);
+
+			window.g3dCreateAudio(fileName);
+			}, FileName.c_str());
 #else
 		m_BinaryData = Data;
 #endif
@@ -33,14 +37,14 @@ namespace audio
 	bool CAudioClip::PlayLoop()
 	{
 		m_Loop = true;
-		
+		m_Playing = true;
+
 #ifdef __EMSCRIPTEN__
 		EM_ASM({
-			const fileName = Module.UTF8ToString($0);
-			const loop = ($1 != 0);
+			const loop = ($0 != 0);
 
-			window.g3dPlayAudio(fileName, loop);
-		}, m_FileName.c_str(), 1);
+			window.g3dPlayAudio(loop);
+		}, 1);
 
 		return true;
 #else
@@ -52,15 +56,20 @@ namespace audio
 
 	bool CAudioClip::PlayOneShot()
 	{
+		if (m_Playing)
+		{
+			Stop();
+		}
+
 		m_Loop = false;
+		m_Playing = true;
 
 #ifdef __EMSCRIPTEN__
 		EM_ASM({
-			const fileName = Module.UTF8ToString($0);
-			const loop = ($1 != 0);
+			const loop = ($0 != 0);
 
-			window.g3dPlayAudio(fileName, loop);
-		}, m_FileName.c_str(), 0);
+			window.g3dPlayAudio(loop);
+		}, 0);
 
 		return true;
 #else
@@ -71,6 +80,8 @@ namespace audio
 
 	bool CAudioClip::Stop()
 	{
+		m_Playing = false;
+
 #ifdef __EMSCRIPTEN__
 		EM_ASM({
 			window.g3dStopAudio();
@@ -80,5 +91,20 @@ namespace audio
 #else
 		return PlaySound(NULL, 0, 0);
 #endif // __EMSCRIPTEN__
+	}
+
+	bool CAudioClip::IsPlaying() const
+	{
+		if (!m_Playing) return m_Playing;
+
+#ifdef __EMSCRIPTEN__
+		int Result = EM_ASM_INT({
+			return window.g3dIsAudioPlaying();
+		});
+
+		return (Result != 0);
+#else
+		return false;
+#endif
 	}
 }

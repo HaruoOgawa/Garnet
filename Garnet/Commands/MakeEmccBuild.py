@@ -69,7 +69,7 @@ def Make():
 		exportText += "call echo [%d/%d] %s" % (counter + 1, len(pathList), path) + "\n"
 		
 		#
-		exportText += "call emcc -o2 -c " + path + " -o " + dstPath + str(counter) + ".o "
+		exportText += "call emcc -o2 --no-heap-copy -c " + path + " -o " + dstPath + str(counter) + ".o "
 		
 		# Include Dir
 		for inc in IncludeDirectoryList:
@@ -84,7 +84,7 @@ def Make():
 		counter += 1
 
 	# All Link
-	exportText += "call emcc -o2 "
+	exportText += "call emcc -o2 --no-heap-copy "
 
 	for i in range(0, counter):
 		exportText += dstPath + str(i) + ".o" + " "

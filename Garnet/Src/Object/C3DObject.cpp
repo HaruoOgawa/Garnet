@@ -561,6 +561,11 @@ namespace object
 	{
 		return m_AnimationController->GetAnimationClipList();
 	}
+
+	bool C3DObject::IsPlayingAnimation() const
+	{
+		return m_AnimationController->IsPlayingAnimation();
+	}
 #endif
 
 	const std::vector<std::shared_ptr<graphics::CMaterial>>& C3DObject::GetMaterialList() const

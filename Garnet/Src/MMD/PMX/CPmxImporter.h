@@ -64,6 +64,8 @@ namespace mmd
 			std::vector<std::shared_ptr<physics::IPhysicsObject>>& PhysicsObjectList);
 		static bool CreateJoint(physics::IPhysicsEngine* pPhysicsEngine, const CPmxModel& model, std::shared_ptr<animation::CSkeleton>& Skeleton, 
 			const std::vector<std::shared_ptr<physics::IPhysicsObject>>& PhysicsObjectList);
+
+		static glm::vec3 CovertToZYX(const glm::vec3& Val);
 	public:
 		static bool ImportPmx(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, const std::string& ModelFileName, const std::vector<unsigned char>& Data, object::C3DObject* Object,
 			const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, resource::C3DObjectLoader* p3DObjectLoader);

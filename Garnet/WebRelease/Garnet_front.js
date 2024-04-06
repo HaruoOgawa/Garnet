@@ -120,7 +120,7 @@ addEventListener("wheel", (event) => {
     );
 });
 
-window.g3dPlayAudio = (fileName, loop) => {
+window.g3dCreateAudio = (fileName) => {
     if (window.g3dBGM !== undefined && window.g3dBGM !== null)
     {
         window.g3dBGM.pause();
@@ -129,13 +129,33 @@ window.g3dPlayAudio = (fileName, loop) => {
     window.g3dBGM = new Audio(fileName);
 
     window.g3dBGM.addEventListener('canplaythrough', () => {
-        window.g3dBGM.loop = loop;
-        window.g3dBGM.play();
+        
     });
+}
+
+window.g3dPlayAudio = (loop) => {
+    window.g3dBGM.loop = loop;
+    window.g3dBGM.play();
 }
 
 window.g3dStopAudio = () => {
     if (window.g3dBGM !== undefined && window.g3dBGM !== null) {
         window.g3dBGM.pause();
+        window.g3dBGM.currentTime = 0;
     }
 }
+
+window.g3dIsAudioPlaying = () => {
+    if (window.g3dBGM === undefined || window.g3dBGM === null) {
+        return 0;
+    }
+
+    if (window.g3dBGM.currentTime < window.g3dBGM.duration) {
+        return 1;
+    }
+    else {
+        return 0;
+    }
+}
+
+

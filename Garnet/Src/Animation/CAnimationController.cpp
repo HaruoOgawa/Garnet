@@ -424,7 +424,7 @@ namespace animation
 
 	bool CAnimationController::IsPlayingAnimation()
 	{
-		return (m_CurrentLayout.Clip != nullptr);
+		return (m_CurrentLayout.Clip != nullptr && !m_CurrentLayout.Clip->IsEnd());
 	}
 
 	void CAnimationController::AddMotion(const std::string& MotionName, animation::SAnimationLayout Layout)

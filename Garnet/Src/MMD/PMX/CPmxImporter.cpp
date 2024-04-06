@@ -690,19 +690,28 @@ namespace mmd
 			// 物理オブジェクトを作成
 			std::shared_ptr<physics::IPhysicsObject> PhysicsObject = nullptr;
 
-			glm::vec3 Size = glm::vec3(PmxRigidbody.Size.z, PmxRigidbody.Size.y, PmxRigidbody.Size.x);
+#ifdef __EMSCRIPTEN__
+			// EmscriptenかVSかでなぜか反転する必要があったりなかったりするので調整する(VSとEmscriptenの数値をそろえるため)
+			glm::vec3 Pos = CovertToZYX(PmxRigidbody.Pos);
+			glm::vec3 Rotate = CovertToZYX(PmxRigidbody.Rotate);
+			glm::vec3 Size = PmxRigidbody.Size;
+#else
+			glm::vec3 Pos = PmxRigidbody.Pos;
+			glm::vec3 Rotate = PmxRigidbody.Rotate;
+			glm::vec3 Size = CovertToZYX(PmxRigidbody.Size);
+#endif
 
 			if (PmxRigidbody.PhysicsShape == EPmxPhysicsShape::SPHERE)
 			{
-				PhysicsObject = pPhysicsEngine->CreatePhysicsSphere(Size.x, (PmxRigidbody.PhysicsType == EPmxPhysicsType::STATIC), PmxRigidbody.Mass, { PmxRigidbody.RigidbodyName, static_cast<physics::EPhysicsType>(PmxRigidbody.PhysicsType), PmxRigidbody.Pos, PmxRigidbody.Rotate, true, PmxRigidbody.group, PmxRigidbody.NoneCollideGroupFlag, PmxRigidbody.TransDamping, PmxRigidbody.RotateDamping, PmxRigidbody.Repulsion, PmxRigidbody.Friction});
+				PhysicsObject = pPhysicsEngine->CreatePhysicsSphere(Size.x, (PmxRigidbody.PhysicsType == EPmxPhysicsType::STATIC), PmxRigidbody.Mass, { PmxRigidbody.RigidbodyName, static_cast<physics::EPhysicsType>(PmxRigidbody.PhysicsType), Pos, Rotate, true, PmxRigidbody.group, PmxRigidbody.NoneCollideGroupFlag, PmxRigidbody.TransDamping, PmxRigidbody.RotateDamping, PmxRigidbody.Repulsion, PmxRigidbody.Friction});
 			}
 			else if (PmxRigidbody.PhysicsShape == EPmxPhysicsShape::BOX)
 			{
-				PhysicsObject = pPhysicsEngine->CreatePhysicsBox(Size, (PmxRigidbody.PhysicsType == EPmxPhysicsType::STATIC), PmxRigidbody.Mass, {PmxRigidbody.RigidbodyName, static_cast<physics::EPhysicsType>(PmxRigidbody.PhysicsType), PmxRigidbody.Pos, PmxRigidbody.Rotate, true, PmxRigidbody.group, PmxRigidbody.NoneCollideGroupFlag, PmxRigidbody.TransDamping, PmxRigidbody.RotateDamping, PmxRigidbody.Repulsion, PmxRigidbody.Friction});
+				PhysicsObject = pPhysicsEngine->CreatePhysicsBox(Size, (PmxRigidbody.PhysicsType == EPmxPhysicsType::STATIC), PmxRigidbody.Mass, {PmxRigidbody.RigidbodyName, static_cast<physics::EPhysicsType>(PmxRigidbody.PhysicsType), Pos, Rotate, true, PmxRigidbody.group, PmxRigidbody.NoneCollideGroupFlag, PmxRigidbody.TransDamping, PmxRigidbody.RotateDamping, PmxRigidbody.Repulsion, PmxRigidbody.Friction});
 			}
 			else if (PmxRigidbody.PhysicsShape == EPmxPhysicsShape::CAPSULE)
 			{
-				PhysicsObject = pPhysicsEngine->CreatePhysicsCapsule(Size.x, Size.y, (PmxRigidbody.PhysicsType == EPmxPhysicsType::STATIC), PmxRigidbody.Mass, { PmxRigidbody.RigidbodyName, static_cast<physics::EPhysicsType>(PmxRigidbody.PhysicsType), PmxRigidbody.Pos, PmxRigidbody.Rotate, true, PmxRigidbody.group, PmxRigidbody.NoneCollideGroupFlag, PmxRigidbody.TransDamping, PmxRigidbody.RotateDamping, PmxRigidbody.Repulsion, PmxRigidbody.Friction });
+				PhysicsObject = pPhysicsEngine->CreatePhysicsCapsule(Size.x, Size.y, (PmxRigidbody.PhysicsType == EPmxPhysicsType::STATIC), PmxRigidbody.Mass, { PmxRigidbody.RigidbodyName, static_cast<physics::EPhysicsType>(PmxRigidbody.PhysicsType), Pos, Rotate, true, PmxRigidbody.group, PmxRigidbody.NoneCollideGroupFlag, PmxRigidbody.TransDamping, PmxRigidbody.RotateDamping, PmxRigidbody.Repulsion, PmxRigidbody.Friction });
 			}
 			else
 			{
@@ -743,17 +752,30 @@ namespace mmd
 
 			if (!PhysicsObjA || !PhysicsObjB) continue;
 
-			glm::vec3 Pos = glm::vec3(PmxJoint.Pos.z, PmxJoint.Pos.y, PmxJoint.Pos.x);
-
 			// Constraintを予約する
-			PhysicsObjB->ReserveConstraint(PhysicsObjA, static_cast<physics::EJointType>(PmxJoint.PmxJointType), 
-				{ 
-					PmxJoint.JointName, Pos, PmxJoint.Rotate, PmxJoint.LowerTransLimit, PmxJoint.UpperTransLimit, PmxJoint.LowerRotateLimit, PmxJoint.UpperRotateLimit, PmxJoint.TransSpring, PmxJoint.RotateSpring
+#ifdef __EMSCRIPTEN__
+			// EmscriptenかVSかでなぜか反転する必要があったりなかったりするので調整する(VSとEmscriptenの数値をそろえるため)
+			PhysicsObjB->ReserveConstraint(PhysicsObjA, static_cast<physics::EJointType>(PmxJoint.PmxJointType),
+				{
+					PmxJoint.JointName, PmxJoint.Pos, CovertToZYX(PmxJoint.Rotate), CovertToZYX(PmxJoint.LowerTransLimit), CovertToZYX(PmxJoint.UpperTransLimit), 
+					CovertToZYX(PmxJoint.LowerRotateLimit), CovertToZYX(PmxJoint.UpperRotateLimit), CovertToZYX(PmxJoint.TransSpring), CovertToZYX(PmxJoint.RotateSpring)
 				}
 			);
+#else
+			PhysicsObjB->ReserveConstraint(PhysicsObjA, static_cast<physics::EJointType>(PmxJoint.PmxJointType),
+				{
+					PmxJoint.JointName, CovertToZYX(PmxJoint.Pos), PmxJoint.Rotate, PmxJoint.LowerTransLimit, PmxJoint.UpperTransLimit, PmxJoint.LowerRotateLimit, PmxJoint.UpperRotateLimit, PmxJoint.TransSpring, PmxJoint.RotateSpring
+				}
+			);
+#endif
 		}
 
 		return true;
+	}
+
+	glm::vec3 CPmxImporter::CovertToZYX(const glm::vec3& Val)
+	{
+		return glm::vec3(Val.z, Val.y, Val.x);
 	}
 }
 #endif // USE_MMD

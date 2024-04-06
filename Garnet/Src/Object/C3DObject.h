@@ -109,6 +109,8 @@ namespace object
 		void AddBlendShapeClip(const std::shared_ptr<animation::CBlendShapeClip>& Clip, const std::string& MotionName, bool IsLoop);
 
 		const std::vector<std::shared_ptr<animation::CAnimationClip>>& GetAnimationClipList() const;
+
+		bool IsPlayingAnimation() const;
 #endif
 
 		void SetRootNodeIndexList(const std::vector<std::vector<int>>& RootNodeIndexList);
