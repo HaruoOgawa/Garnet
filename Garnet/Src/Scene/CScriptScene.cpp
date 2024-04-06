@@ -70,8 +70,8 @@ namespace scene
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Avatar\\Tda_Miku\\Tda_Miku.pmx", m_TdaMiku_Model, m_BasicToonMF, "", "ShadowPass", pPhysicsEngine));
 		//pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CAnimationLoader>("Resources\\Motions\\mmd_running.vmd", m_VMDAnimationSet));
 		//pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CAnimationLoader>("Resources\\Motions\\Run_m4th_Loop.vmd", m_VMDAnimationSet));
-		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CAnimationLoader>("Resources\\Motions\\Bling-Bang-Bang-Born.vmd", m_VMDAnimationSet));
-		//pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CAnimationLoader>("Resources\\Motions\\biglove_dance.vmd", m_VMDAnimationSet));
+		//pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CAnimationLoader>("Resources\\Motions\\Bling-Bang-Bang-Born_noik.vmd", m_VMDAnimationSet));
+		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CAnimationLoader>("Resources\\Motions\\biglove_dance_noik.vmd", m_VMDAnimationSet));
 		//pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CAnimationLoader>("Resources\\Motions\\BackFlip.vmd", m_VMDAnimationSet));
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CAnimationLoader>("Resources\\Motions\\biglove_expression.vmd", m_ExpressionVMD));
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CAnimationLoader>("Resources\\Motions\\biglove_Ripsync.vmd", m_RipSyncVMD));
@@ -79,7 +79,7 @@ namespace scene
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CTextureLoader>(pGraphicsAPI, std::vector<std::string>({ "Resources\\IBL\\output_skybox.hdr" }), m_IBL_Skybox_Texture));
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CTextureLoader>(pGraphicsAPI, std::vector<std::string>({ "Resources\\Cubemaps\\environment\\environment_back_0.jpg", "Resources\\Cubemaps\\environment\\environment_bottom_0.jpg", "Resources\\Cubemaps\\environment\\environment_front_0.jpg", "Resources\\Cubemaps\\environment\\environment_left_0.jpg", "Resources\\Cubemaps\\environment\\environment_right_0.jpg", "Resources\\Cubemaps\\environment\\environment_top_0.jpg" }), m_Cube_Texture));
 	
-		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CAudioLoader>("Resources\\Audio\\biglove_audio.wav", m_AudioClip));
+		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CAudioLoader>("Resources\\Audio\\biglove_audio_trim.wav", m_AudioClip));
 	}
 
 	CScriptScene::~CScriptScene()
@@ -377,7 +377,7 @@ namespace scene
 			if (!m_TdaMiku_Model->Create(pGraphicsAPI, pPhysicsEngine, m_DepthMF)) return false;
 
 			auto Clip = m_VMDAnimationSet->GetAnimationClip(0);
-			if (Clip) m_TdaMiku_Model->AddHumanoidAnimationClip(Clip, "Walk", { nullptr, "" }, true, true);
+			if (Clip) m_TdaMiku_Model->AddHumanoidAnimationClip(Clip, "Walk", { nullptr, "" }, true, false);
 
 			//auto ExpressionClip = m_VMDAnimationSet->GetBlendShapeClip(0);
 			auto ExpressionClip = m_ExpressionVMD->GetBlendShapeClip(0);
@@ -412,7 +412,7 @@ namespace scene
 			if (!m_DebugSphere->CreateSimply(pGraphicsAPI, pPhysicsEngine, graphics::CPresetPrimitive::CreateSphere(pGraphicsAPI), Mat, m_DepthMF)) return false;
 		}
 
-		//if (!m_AudioClip->PlayLoop()) return false;
+		if (!m_AudioClip->PlayLoop()) return false;
 
 		return true;
 	}
