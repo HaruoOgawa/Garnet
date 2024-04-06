@@ -17,12 +17,16 @@
 #include "../../Graphics/CVertexBuffer.h"
 #include "../../Graphics/CIndexBuffer.h"
 
+#include "../../LoadWorker/CLoadWorker.h"
+#include "../../LoadWorker/C3DObjectLoader.h"
+#include "../../LoadWorker/CTextureLoader.h"
+
 using namespace fbxsdk;
 
 namespace fbx
 {
 	bool CFBXImporter::ImportFBX(api::IGraphicsAPI* pGraphicsAPI, const std::string& FileName, object::C3DObject* Object,
-		const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame)
+		const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, resource::C3DObjectLoader* p3DObjectLoader)
 	{
 		std::vector<std::shared_ptr<animation::CAnimationClip>> AnimationClipList;
 

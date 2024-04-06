@@ -62,6 +62,12 @@ namespace animation
 		//
 		glm::vec3 GoalPos = math::CTransform(m_IKTarget->CalcWorldMatrix()).GetPos();
 
+		// IKRotateを初期化
+		for (auto& ChainNode : m_IKChainList)
+		{
+			ChainNode->InitIKRotate();
+		}
+
 		// ターゲットに届くかサイクルの最大値に達するまで計算を繰り返す
 		int CurrentLoopNum = 0;
 
@@ -111,6 +117,7 @@ namespace animation
 				}
 
 				glm::quat LocalRotated = WorldRotated * glm::inverse(ChainWorldRot);
+				//m_IKChainList[j]->MulIKRotate(LocalRotated);
 
 				m_IKChainList[j]->SetRot(LocalRotated * m_IKChainList[j]->GetRot());
 
@@ -132,6 +139,12 @@ namespace animation
 			CurrentLoopNum++;
 		}
 
+		// IKRotateを反映する
+		for (auto& ChainNode : m_IKChainList)
+		{
+			ChainNode->MulRot(ChainNode->GetIKRotate());
+		}
+
 		return true;
 	}
 
@@ -141,6 +154,11 @@ namespace animation
 
 		for (int i = 0; i <= ChainIndex; i++)
 		{
+			/*math::CTransform DefaultLocalTransform = math::CTransform(m_IKChainList[i]->GetDefaultLocalMatrix());
+			DefaultLocalTransform.MulRot(m_IKChainList[i]->GetIKRotate());
+
+			WorldMatrix *= DefaultLocalTransform.GetModelMatrix();*/
+
 			WorldMatrix *= m_IKChainList[i]->GetLocalMatrix();
 		}
 

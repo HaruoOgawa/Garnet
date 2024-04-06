@@ -16,7 +16,7 @@
 
 namespace scene
 {
-	CScriptScene::CScriptScene(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker):
+	CScriptScene::CScriptScene(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, physics::IPhysicsEngine* pPhysicsEngine):
 		m_BasicToonMF(std::make_shared<graphics::CMaterialFrame>()),
 		m_SimpleTextureMF(std::make_shared<graphics::CMaterialFrame>()),
 		m_DepthMF(std::make_shared<graphics::CMaterialFrame>()),
@@ -55,23 +55,23 @@ namespace scene
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CMaterialFrameLoader>("Resources\\MaterialFrame\\Depth_MF.json", m_DepthMF));
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CMaterialFrameLoader>("Resources\\MaterialFrame\\PBR_MF.json", m_PBRMF));
 		
-		//pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Models\\SimpleMorphTarget\\SimpleMorphTarget.gltf", m_SimpleMorphObj, "", "ShadowPass"));
-		//pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Models\\MorphPrimitivesTest\\glTF-Binary\\MorphPrimitivesTest.glb", m_SimpleMorphObj, "", "ShadowPass"));
-		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Models\\MorphStressTest\\glTF-Binary\\MorphStressTest.glb", m_SimpleMorphObj, "", "ShadowPass"));
-		/*pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Models\\BrainStem\\glTF-Binary\\BrainStem.glb", m_BrainStemObj, "", "ShadowPass"));
+		//pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Models\\SimpleMorphTarget\\SimpleMorphTarget.gltf", m_SimpleMorphObj, "", "ShadowPass", pPhysicsEngine));
+		//pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Models\\MorphPrimitivesTest\\glTF-Binary\\MorphPrimitivesTest.glb", m_SimpleMorphObj, "", "ShadowPass", pPhysicsEngine));
+		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Models\\MorphStressTest\\glTF-Binary\\MorphStressTest.glb", m_SimpleMorphObj, m_PBRMF, "", "ShadowPass", pPhysicsEngine));
+		/*pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Models\\BrainStem\\glTF-Binary\\BrainStem.glb", m_BrainStemObj, m_PBRMF, "", "ShadowPass", pPhysicsEngine));
 
-		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Avatar\\X_Bot.fbx", m_XBotObject, "", "ShadowPass"));
-		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Avatar\\Mousey.fbx", m_MouseyObject, "", "ShadowPass"));
-		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Avatar\\Warrok_W_Kurniawan.fbx", m_WarrokObject, "", "ShadowPass"));
-		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Motions\\Walking.fbx", m_Walk_Animation, "", "ShadowPass"));
-		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Motions\\Jumping.fbx", m_Jump_Animation, "", "ShadowPass"));
-		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Motions\\Combo_Punch_hand.fbx", m_Punch_Animation, "", "ShadowPass"));*/
+		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Avatar\\X_Bot.fbx", m_XBotObject, m_PBRMF, "", "ShadowPass", pPhysicsEngine));
+		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Avatar\\Mousey.fbx", m_MouseyObject, m_PBRMF, "", "ShadowPass", pPhysicsEngine));
+		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Avatar\\Warrok_W_Kurniawan.fbx", m_WarrokObject, m_PBRMF, "", "ShadowPass", pPhysicsEngine));
+		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Motions\\Walking.fbx", m_Walk_Animation, m_PBRMF, "", "ShadowPass", pPhysicsEngine));
+		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Motions\\Jumping.fbx", m_Jump_Animation, m_PBRMF, "", "ShadowPass", pPhysicsEngine));
+		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Motions\\Combo_Punch_hand.fbx", m_Punch_Animation, m_PBRMF, "", "ShadowPass", pPhysicsEngine));*/
 
-		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Avatar\\Tda_Miku\\Tda_Miku.pmx", m_TdaMiku_Model, "", "ShadowPass"));
+		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Avatar\\Tda_Miku\\Tda_Miku.pmx", m_TdaMiku_Model, m_BasicToonMF, "", "ShadowPass", pPhysicsEngine));
 		//pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CAnimationLoader>("Resources\\Motions\\mmd_running.vmd", m_VMDAnimationSet));
 		//pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CAnimationLoader>("Resources\\Motions\\Run_m4th_Loop.vmd", m_VMDAnimationSet));
-		//pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CAnimationLoader>("Resources\\Motions\\Bling-Bang-Bang-Born.vmd", m_VMDAnimationSet));
-		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CAnimationLoader>("Resources\\Motions\\biglove_dance.vmd", m_VMDAnimationSet));
+		//pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CAnimationLoader>("Resources\\Motions\\Bling-Bang-Bang-Born_noik.vmd", m_VMDAnimationSet));
+		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CAnimationLoader>("Resources\\Motions\\biglove_dance_noik.vmd", m_VMDAnimationSet));
 		//pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CAnimationLoader>("Resources\\Motions\\BackFlip.vmd", m_VMDAnimationSet));
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CAnimationLoader>("Resources\\Motions\\biglove_expression.vmd", m_ExpressionVMD));
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CAnimationLoader>("Resources\\Motions\\biglove_Ripsync.vmd", m_RipSyncVMD));
@@ -79,7 +79,7 @@ namespace scene
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CTextureLoader>(pGraphicsAPI, std::vector<std::string>({ "Resources\\IBL\\output_skybox.hdr" }), m_IBL_Skybox_Texture));
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CTextureLoader>(pGraphicsAPI, std::vector<std::string>({ "Resources\\Cubemaps\\environment\\environment_back_0.jpg", "Resources\\Cubemaps\\environment\\environment_bottom_0.jpg", "Resources\\Cubemaps\\environment\\environment_front_0.jpg", "Resources\\Cubemaps\\environment\\environment_left_0.jpg", "Resources\\Cubemaps\\environment\\environment_right_0.jpg", "Resources\\Cubemaps\\environment\\environment_top_0.jpg" }), m_Cube_Texture));
 	
-		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CAudioLoader>("Resources\\Audio\\biglove_audio.wav", m_AudioClip));
+		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CAudioLoader>("Resources\\Audio\\biglove_audio_trim.wav", m_AudioClip));
 	}
 
 	CScriptScene::~CScriptScene()
@@ -96,22 +96,22 @@ namespace scene
 	{
 		// m_SimpleMorphObj
 		/*{
-			if (!m_SimpleMorphObj->CreateFromMemory(pGraphicsAPI, pPhysicsEngine, pLoadWorker, m_PBRMF, m_DepthMF)) return false;
+			if (!m_SimpleMorphObj->Create(pGraphicsAPI, pPhysicsEngine, m_DepthMF)) return false;
 			m_SimpleMorphObj->ChangeMotion(0);
 		}*/
 		
 		// m_BrainStemObj
 		/*{
-			if (!m_BrainStemObj->CreateFromMemory(pGraphicsAPI, pPhysicsEngine, pLoadWorker, m_PBRMF, m_DepthMF)) return false;
+			if (!m_BrainStemObj->Create(pGraphicsAPI, pPhysicsEngine, m_DepthMF)) return false;
 			m_BrainStemObj->ChangeMotion(0);
 		}
 
 		// FBX Humanoid Animation Clip
 		std::vector<std::shared_ptr<animation::CAnimationClip>> AnimationClipList;
 		{
-			if (!m_Walk_Animation->CreateFromMemory(pGraphicsAPI, pPhysicsEngine, pLoadWorker, nullptr, nullptr)) return false;
-			if (!m_Jump_Animation->CreateFromMemory(pGraphicsAPI, pPhysicsEngine, pLoadWorker, nullptr, nullptr)) return false;
-			if (!m_Punch_Animation->CreateFromMemory(pGraphicsAPI, pPhysicsEngine, pLoadWorker, nullptr, nullptr)) return false;
+			//if (!m_Walk_Animation->Create(pGraphicsAPI, pPhysicsEngine, nullptr)) return false;
+			//if (!m_Jump_Animation->Create(pGraphicsAPI, pPhysicsEngine, nullptr)) return false;
+			//if (!m_Punch_Animation->Create(pGraphicsAPI, pPhysicsEngine, nullptr)) return false;
 
 			AnimationClipList.push_back(m_Walk_Animation->GetAnimationClipList()[0]);
 			AnimationClipList.push_back(m_Jump_Animation->GetAnimationClipList()[0]);
@@ -119,11 +119,11 @@ namespace scene
 		}
 
 		{
-			if (!m_XBotObject->CreateFromMemory(pGraphicsAPI, pPhysicsEngine, pLoadWorker, m_PBRMF, m_DepthMF)) return false;
+			if (!m_XBotObject->Create(pGraphicsAPI, pPhysicsEngine, m_DepthMF)) return false;
 
-			m_XBotObject->AddHumanoidAnimationClip(AnimationClipList[0], "Walk", { nullptr, "" }, true);
-			m_XBotObject->AddHumanoidAnimationClip(AnimationClipList[1], "Jump", { nullptr, "Walk" }, false);
-			m_XBotObject->AddHumanoidAnimationClip(AnimationClipList[2], "Punch", { nullptr, "Walk" }, false);
+			m_XBotObject->AddHumanoidAnimationClip(AnimationClipList[0], "Walk", { nullptr, "" }, true, false);
+			m_XBotObject->AddHumanoidAnimationClip(AnimationClipList[1], "Jump", { nullptr, "Walk" }, false, false);
+			m_XBotObject->AddHumanoidAnimationClip(AnimationClipList[2], "Punch", { nullptr, "Walk" }, false, false);
 
 			// 再生するアニメーションクリップを指定する
 			m_XBotObject->ChangeMotion("Walk");
@@ -133,11 +133,11 @@ namespace scene
 		}
 
 		{
-			if (!m_MouseyObject->CreateFromMemory(pGraphicsAPI, pPhysicsEngine, pLoadWorker, m_PBRMF, m_DepthMF)) return false;
+			if (!m_MouseyObject->Create(pGraphicsAPI, pPhysicsEngine, m_DepthMF)) return false;
 
-			m_MouseyObject->AddHumanoidAnimationClip(AnimationClipList[0], "Walk", { nullptr, "" }, true);
-			m_MouseyObject->AddHumanoidAnimationClip(AnimationClipList[1], "Jump", { nullptr, "Walk" }, false);
-			m_MouseyObject->AddHumanoidAnimationClip(AnimationClipList[2], "Punch", { nullptr, "Walk" }, false);
+			m_MouseyObject->AddHumanoidAnimationClip(AnimationClipList[0], "Walk", { nullptr, "" }, true, false);
+			m_MouseyObject->AddHumanoidAnimationClip(AnimationClipList[1], "Jump", { nullptr, "Walk" }, false, false);
+			m_MouseyObject->AddHumanoidAnimationClip(AnimationClipList[2], "Punch", { nullptr, "Walk" }, false, false);
 
 			// 再生するアニメーションクリップを指定する
 			m_MouseyObject->ChangeMotion("Walk");
@@ -148,11 +148,11 @@ namespace scene
 		}
 
 		{
-			if (!m_WarrokObject->CreateFromMemory(pGraphicsAPI, pPhysicsEngine, pLoadWorker, m_PBRMF, m_DepthMF)) return false;
+			if (!m_WarrokObject->Create(pGraphicsAPI, pPhysicsEngine, m_DepthMF)) return false;
 
-			m_WarrokObject->AddHumanoidAnimationClip(AnimationClipList[0], "Walk", { nullptr, "" }, true);
-			m_WarrokObject->AddHumanoidAnimationClip(AnimationClipList[1], "Jump", { nullptr, "Walk" }, false);
-			m_WarrokObject->AddHumanoidAnimationClip(AnimationClipList[2], "Punch", { nullptr, "Walk" }, false);
+			m_WarrokObject->AddHumanoidAnimationClip(AnimationClipList[0], "Walk", { nullptr, "" }, true, false);
+			m_WarrokObject->AddHumanoidAnimationClip(AnimationClipList[1], "Jump", { nullptr, "Walk" }, false, false);
+			m_WarrokObject->AddHumanoidAnimationClip(AnimationClipList[2], "Punch", { nullptr, "Walk" }, false, false);
 
 			m_WarrokObject->SetPos(glm::vec3(-4.0f, 0.0f, 0.0f));
 			m_WarrokObject->SetRot(glm::angleAxis(3.1515f, glm::vec3(0.0f, 1.0f, 0.0f)));
@@ -374,10 +374,10 @@ namespace scene
 			m_TdaMiku_Model->SetPos(glm::vec3(0.0f, 0.0f, 0.0f));
 			m_TdaMiku_Model->SetScale(glm::vec3(0.1f));
 
-			if (!m_TdaMiku_Model->CreateFromMemory(pGraphicsAPI, pPhysicsEngine, pLoadWorker, m_BasicToonMF, m_DepthMF)) return false;
+			if (!m_TdaMiku_Model->Create(pGraphicsAPI, pPhysicsEngine, m_DepthMF)) return false;
 
 			auto Clip = m_VMDAnimationSet->GetAnimationClip(0);
-			if (Clip) m_TdaMiku_Model->AddHumanoidAnimationClip(Clip, "Walk", { nullptr, "" }, true);
+			if (Clip) m_TdaMiku_Model->AddHumanoidAnimationClip(Clip, "Walk", { nullptr, "" }, true, false);
 
 			//auto ExpressionClip = m_VMDAnimationSet->GetBlendShapeClip(0);
 			auto ExpressionClip = m_ExpressionVMD->GetBlendShapeClip(0);

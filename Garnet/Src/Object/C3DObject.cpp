@@ -1,28 +1,9 @@
 #include "C3DObject.h"
-#include "../Format/CPathFormatter.h"
-#include "../GLTF/CGLTFImporter.h"
-#include "../LoadWorker/CLoadWorker.h"
-
-#if defined(USE_FBX)
-
-#ifdef USE_SMALL_FBX
-
-#include "../FBX/CSmallFBXImporter.h"
-#else
-#include "../FBX/CFBXImporter.h"
-#endif // USE_SMALL_FBX
-
-#endif
-
-#ifdef USE_MMD
-#include "../MMD/PMX/CPmxImporter.h"
-#endif
 
 namespace object
 {
 	C3DObject::C3DObject(const std::string& PassName, const std::string& DepthPassName):
 		m_IsCreated(false),
-		m_ExistFirstDelayResource(false),
 		m_PassName(PassName),
 		m_DepthPassName(DepthPassName),
 		m_ObjectTransform(std::make_shared<math::CTransform>()),
@@ -32,8 +13,6 @@ namespace object
 #endif
 		m_MorphController(std::make_shared<graphics::CMorphController>()),
 		m_TextureSet(std::make_shared<graphics::CTextureSet>()),
-		m_FileName(""),
-		m_ObjectType(E3DObjectType::None),
 		m_DepthMF(nullptr)
 	{
 	}
@@ -43,13 +22,6 @@ namespace object
 		m_IsCreated = false;
 		m_NodeList.clear();
 		m_MaterialList.clear();
-	}
-
-	void C3DObject::SetBinaryData(const std::vector<unsigned char>& Data, const std::string& FileName, E3DObjectType ObjectType)
-	{
-		m_BinaryData = Data;
-		m_FileName = FileName;
-		m_ObjectType = ObjectType;
 	}
 
 	bool C3DObject::CreateSimply(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine,
@@ -73,59 +45,6 @@ namespace object
 		AddNode(Node);
 
 		// Create
-		if (!Create(pGraphicsAPI, pPhysicsEngine, DepthMF)) return false;
-
-		return true;
-	}
-
-	bool C3DObject::CreateFromMemory(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<graphics::CMaterialFrame>& BaseMF, const std::shared_ptr<graphics::CMaterialFrame>& DepthMF)
-	{
-		m_DepthMF = DepthMF;
-
-		if (m_BinaryData.empty()) return false;
-
-		switch (m_ObjectType)
-		{
-#ifdef USE_GLTF
-		case object::E3DObjectType::glTF:
-			{
-				std::string BaseDir = format::CPathFormatter::GetParentDir(m_FileName);
-				if (!gltf::CGLTFImporter::ImportFromString(pGraphicsAPI, m_BinaryData, BaseDir, this, BaseMF)) return false;
-			}
-			break;
-			
-		case object::E3DObjectType::glb:
-			if (!gltf::CGLTFImporter::ImportFromMemory(pGraphicsAPI, m_BinaryData, this, BaseMF)) return false;
-			break;
-#endif
-#if defined(USE_FBX)
-		case object::E3DObjectType::Fbx:
-#ifdef USE_SMALL_FBX
-			if (!fbx::CSmallFBXImporter::ImportFBX(pGraphicsAPI, m_BinaryData, this, BaseMF)) return false;
-#else
-			if (!fbx::CFBXImporter::ImportFBX(pGraphicsAPI, m_FileName, this, BaseMF)) return false;
-#endif // USE_SMALL_FBX
-			break;
-#endif
-		case object::E3DObjectType::Pmx:
-#ifdef USE_MMD
-			if (!mmd::CPmxImporter::ImportPmx(pGraphicsAPI, pPhysicsEngine, pLoadWorker, m_FileName, m_BinaryData, this, BaseMF)) return false;
-#endif
-			break;
-		default:
-			break;
-		}
-
-		m_BinaryData.clear();
-
-		// インポートの結果、遅延ロードリソースが見つかった時はCreateを後回しにする
-		if (m_RuntimeLoadResourceList.size() != 0)
-		{
-			m_ExistFirstDelayResource = true;
-
-			return true;
-		}
-
 		if (!Create(pGraphicsAPI, pPhysicsEngine, DepthMF)) return false;
 
 		return true;
@@ -339,33 +258,6 @@ namespace object
 
 	bool C3DObject::Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, float DeltaSecondsTime)
 	{
-		for (auto& Resource : m_RuntimeLoadResourceList)
-		{
-			switch (Resource->GetStatus())
-			{
-			case resource::ELoadStatus::Loaded:
-			{
-				m_RuntimeLoadResourceList.erase(m_RuntimeLoadResourceList.begin());
-				m_RuntimeLoadResourceList.shrink_to_fit();
-
-				return true;
-			}
-
-			case resource::ELoadStatus::None:
-			case resource::ELoadStatus::Loading:
-			default:
-				break;
-			}
-		}
-
-		// Create関数を伴う初回動的ロード
-		if (m_ExistFirstDelayResource && m_RuntimeLoadResourceList.size() == 0 && !m_IsCreated)
-		{
-			if (!Create(pGraphicsAPI, pPhysicsEngine, m_DepthMF)) return false;
-
-			m_ExistFirstDelayResource = false;
-		}
-
 		if (!m_IsCreated) return true;
 
 		// マテリアルの参照カウントをリセット
@@ -654,9 +546,10 @@ namespace object
 		m_AnimationController->AddAnimationClip(Clip);
 	}
 
-	void C3DObject::AddHumanoidAnimationClip(const std::shared_ptr<animation::CAnimationClip>& SourceClip, const std::string& MotionName, animation::SAnimationLayout Layout, bool IsLoop)
+	void C3DObject::AddHumanoidAnimationClip(const std::shared_ptr<animation::CAnimationClip>& SourceClip, const std::string& MotionName, 
+		animation::SAnimationLayout Layout, bool IsLoop, bool UseIK)
 	{
-		m_AnimationController->AddHumanoidAnimationClip(SourceClip, MotionName, Layout, IsLoop);
+		m_AnimationController->AddHumanoidAnimationClip(SourceClip, MotionName, Layout, IsLoop, UseIK);
 	}
 
 	void C3DObject::AddBlendShapeClip(const std::shared_ptr<animation::CBlendShapeClip>& Clip, const std::string& MotionName, bool IsLoop)
@@ -738,10 +631,5 @@ namespace object
 	const std::shared_ptr<graphics::CTextureSet>& C3DObject::GetTextureSet() const
 	{
 		return m_TextureSet;
-	}
-
-	void C3DObject::AddRuntimeLoadResource(const std::shared_ptr <resource::IResource>& Resource)
-	{
-		m_RuntimeLoadResourceList.push_back(Resource);
 	}
 }

@@ -66,6 +66,11 @@ namespace object {
 	class CNode;
 }
 
+namespace resource {
+	class CLoadWorker;
+	class C3DObjectLoader;
+}
+
 namespace fbx
 {
 	class CSmallFBXImporter
@@ -113,7 +118,7 @@ namespace fbx
 		static bool CheckIsMixamo(sfbx::Object* pFBXNode);
 	public:
 		static bool ImportFBX(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& Data, object::C3DObject* Object,
-			const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame);
+			const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, resource::C3DObjectLoader* p3DObjectLoader);
 		static bool ImportFBXAnimation(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& Data, std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList);
 	};
 }

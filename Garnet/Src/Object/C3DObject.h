@@ -25,16 +25,8 @@ namespace object
 
 	class C3DObject
 	{
-		//
 		bool m_IsCreated;
-		bool m_ExistFirstDelayResource;
-
-		std::vector<unsigned char> m_BinaryData;
-		std::string m_FileName;
-		E3DObjectType m_ObjectType;
-		std::vector<std::shared_ptr<resource::IResource>> m_RuntimeLoadResourceList;
-
-		//
+		
 		const std::string m_PassName;
 		const std::string m_DepthPassName;
 		
@@ -71,15 +63,11 @@ namespace object
 		C3DObject(const std::string& PassName, const std::string& DepthPassName);
 		virtual ~C3DObject();
 
-		void SetBinaryData(const std::vector<unsigned char>& Data, const std::string& FileName, E3DObjectType ObjectType);
-
 		bool CreateSimply(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine,
 			const std::pair<std::shared_ptr<graphics::CVertexBuffer>, std::shared_ptr<graphics::CIndexBuffer>>& createInfo,
 			const std::shared_ptr<graphics::CMaterial>& Material, const std::shared_ptr<graphics::CMaterialFrame>& DepthMF, 
 			const std::shared_ptr<math::CTransform> NodeTransform = std::make_shared<math::CTransform>(), const std::shared_ptr<physics::IPhysicsObject>& PhysicsObject = nullptr);
-
-		bool		 CreateFromMemory(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<graphics::CMaterialFrame>& BaseMF, 
-			const std::shared_ptr<graphics::CMaterialFrame>& DepthMF);
+		
 		bool		 Create(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, const std::shared_ptr<graphics::CMaterialFrame>& DepthMF);
 		
 		virtual bool Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, float DeltaSecondsTime);
@@ -116,7 +104,8 @@ namespace object
 
 		void SetAnimationSkeleton(const std::shared_ptr<animation::CSkeleton>& Skeleton);
 		void AddAnimationClip(const std::shared_ptr<animation::CAnimationClip>& Clip);
-		void AddHumanoidAnimationClip(const std::shared_ptr<animation::CAnimationClip>& SourceClip, const std::string& MotionName, animation::SAnimationLayout Layout, bool IsLoop);
+		void AddHumanoidAnimationClip(const std::shared_ptr<animation::CAnimationClip>& SourceClip, const std::string& MotionName, 
+			animation::SAnimationLayout Layout, bool IsLoop, bool UseIK);
 		void AddBlendShapeClip(const std::shared_ptr<animation::CBlendShapeClip>& Clip, const std::string& MotionName, bool IsLoop);
 
 		const std::vector<std::shared_ptr<animation::CAnimationClip>>& GetAnimationClipList() const;
@@ -140,7 +129,5 @@ namespace object
 		void StopBlendShape(const std::string& MotionName);
 		
 		const std::shared_ptr<graphics::CTextureSet>& GetTextureSet() const;
-
-		void AddRuntimeLoadResource(const std::shared_ptr <resource::IResource>& Resource);
 	};
 }

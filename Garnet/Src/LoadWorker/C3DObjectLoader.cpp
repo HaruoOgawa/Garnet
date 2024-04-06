@@ -1,16 +1,33 @@
 #include "C3DObjectLoader.h"
-
-#include "../GLTF/CGLTFImporter.h"
-#include "../FBX/CFBXImporter.h"
 #include "../Message/Console.h"
+
+#include "../Format/CPathFormatter.h"
+#include "../LoadWorker/CLoadWorker.h"
+#include "../GLTF/CGLTFImporter.h"
+
+#if defined(USE_FBX)
+#ifdef USE_SMALL_FBX
+#include "../FBX/CSmallFBXImporter.h"
+#else
+#include "../FBX/CFBXImporter.h"
+#endif // USE_SMALL_FBX
+#endif
+
+#ifdef USE_MMD
+#include "../MMD/PMX/CPmxImporter.h"
+#endif
 
 namespace resource
 {
-	C3DObjectLoader::C3DObjectLoader(const std::string& FileName, const  std::shared_ptr<object::C3DObject>& TargetObject, const std::string& PassName, const std::string& DepthPassName):
+	C3DObjectLoader::C3DObjectLoader(const std::string& FileName, const std::shared_ptr<object::C3DObject>& TargetObject, const std::shared_ptr<graphics::CMaterialFrame>& BaseMaterialFrame,
+		const std::string& PassName, const std::string& DepthPassName, physics::IPhysicsEngine* pPhysicsEngine) :
+		m_pPhysicsEngine(pPhysicsEngine),
 		m_Status(ELoadStatus::None),
+		m_LoadState(E3DObjectLoadState::None),
 		m_File(std::make_shared<CFile>(FileName)),
 		m_FileName(FileName),
-		m_TargetObject(TargetObject)
+		m_TargetObject(TargetObject),
+		m_BaseMaterialFrame(BaseMaterialFrame)
 	{
 	}
 
@@ -54,25 +71,76 @@ namespace resource
 			return true;
 		}
 		
-		// 拡張子からオブジェクトタイプを判断する
-		object::E3DObjectType ObjectType = object::E3DObjectType::None;
+		switch (m_LoadState)
+		{
+		case resource::E3DObjectLoadState::None:
+			m_LoadState = resource::E3DObjectLoadState::ImportObject;
+			return true;
+		case resource::E3DObjectLoadState::ImportObject:
+			{
+				if (!Import(pGraphicsAPI, m_pPhysicsEngine)) return false;
+				
+				m_LoadState = resource::E3DObjectLoadState::LoadSubResouce;
 
+				return true;
+			}
+		case resource::E3DObjectLoadState::LoadSubResouce:
+			{
+				if (!LoadSubResources(pGraphicsAPI)) return false;
+
+				if (static_cast<int>(m_SubResources.size()) == 0) m_LoadState = resource::E3DObjectLoadState::Finish;
+
+				return true;
+			}
+		case resource::E3DObjectLoadState::Finish:
+			break;
+		default:
+			break;
+		}
+
+		// ロード完了
+		m_Status = resource::ELoadStatus::Loaded;
+
+		return true;
+	}
+
+	void C3DObjectLoader::AddSubResource(const std::shared_ptr <resource::IResource>& Resource)
+	{
+		m_SubResources.push_back(Resource);
+	}
+
+	bool C3DObjectLoader::Import(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine)
+	{
 		const auto& Extention = m_File->GetExtention();
+
 		if (Extention == "gltf")
 		{
-			ObjectType = object::E3DObjectType::glTF;
+#ifdef USE_GLTF
+			std::string BaseDir = format::CPathFormatter::GetParentDir(m_FileName);
+			if (!gltf::CGLTFImporter::ImportFromString(pGraphicsAPI, m_File->GetData(), BaseDir, m_TargetObject.get(), m_BaseMaterialFrame, this)) return false;
+#endif
 		}
 		else if (Extention == "glb")
 		{
-			ObjectType = object::E3DObjectType::glb;
+#ifdef USE_GLTF
+			if (!gltf::CGLTFImporter::ImportFromMemory(pGraphicsAPI, m_File->GetData(), m_TargetObject.get(), m_BaseMaterialFrame, this)) return false;
+#endif
 		}
 		else if (Extention == "fbx")
 		{
-			ObjectType = object::E3DObjectType::Fbx;
+#if defined(USE_FBX)
+#ifdef USE_SMALL_FBX
+			if (!fbx::CSmallFBXImporter::ImportFBX(pGraphicsAPI, m_File->GetData(), m_TargetObject.get(), m_BaseMaterialFrame, this)) return false;
+#else
+			if (!fbx::CFBXImporter::ImportFBX(pGraphicsAPI, m_FileName, m_TargetObject.get(), m_BaseMaterialFrame, this)) return false;
+#endif // USE_SMALL_FBX
+#endif
 		}
 		else if (Extention == "pmx")
 		{
-			ObjectType = object::E3DObjectType::Pmx;
+#ifdef USE_MMD
+			if (!mmd::CPmxImporter::ImportPmx(pGraphicsAPI, pPhysicsEngine, m_FileName, m_File->GetData(), m_TargetObject.get(), m_BaseMaterialFrame, this)) return false;
+#endif
 		}
 		else
 		{
@@ -81,11 +149,35 @@ namespace resource
 			return false;
 		}
 
-		// バイナリデータを渡しておく. その解析は後で行う
-		m_TargetObject->SetBinaryData(m_File->GetData(), m_FileName, ObjectType);
+		return true;
+	}
 
-		// ロード完了
-		m_Status = resource::ELoadStatus::Loaded;
+	bool C3DObjectLoader::LoadSubResources(api::IGraphicsAPI* pGraphicsAPI)
+	{
+		// サブリソースのロード
+		for (auto& Resource : m_SubResources)
+		{
+			switch (Resource->GetStatus())
+			{
+			case resource::ELoadStatus::None:
+				if (!Resource->Load()) return false;
+				return true;
+
+			case resource::ELoadStatus::Loading:
+				if (!Resource->Update(pGraphicsAPI)) return false;
+				return true;
+
+			case resource::ELoadStatus::Loaded:
+			{
+				m_SubResources.erase(m_SubResources.begin());
+				m_SubResources.shrink_to_fit();
+			}
+			return true;
+
+			default:
+				break;
+			}
+		}
 
 		return true;
 	}

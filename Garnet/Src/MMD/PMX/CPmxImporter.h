@@ -38,7 +38,10 @@ namespace object {
 	class CNode;
 }
 
-namespace resource { class CLoadWorker; }
+namespace resource { 
+	class CLoadWorker; 
+	class C3DObjectLoader;
+}
 
 namespace mmd
 {
@@ -55,16 +58,15 @@ namespace mmd
 			const std::shared_ptr<object::CNode>& RootNode, std::vector<std::shared_ptr<object::CNode>>& NodeList,
 			const std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList, bool ExistSkeleton);
 
-		static bool CreateTextureList(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, const std::string& ModelFileName, const CPmxModel& model, std::vector<std::shared_ptr<graphics::CTexture>>& TextureList,
-			std::vector<std::shared_ptr<resource::IResource>>& RuntimeLoadResourceList);
+		static bool CreateTextureList(api::IGraphicsAPI* pGraphicsAPI, resource::C3DObjectLoader* p3DObjectLoader, const std::string& ModelFileName, const CPmxModel& model, std::vector<std::shared_ptr<graphics::CTexture>>& TextureList);
 
 		static bool CreateRigidbody(physics::IPhysicsEngine* pPhysicsEngine, const CPmxModel& model, std::shared_ptr<animation::CSkeleton>& Skeleton, 
 			std::vector<std::shared_ptr<physics::IPhysicsObject>>& PhysicsObjectList);
 		static bool CreateJoint(physics::IPhysicsEngine* pPhysicsEngine, const CPmxModel& model, std::shared_ptr<animation::CSkeleton>& Skeleton, 
 			const std::vector<std::shared_ptr<physics::IPhysicsObject>>& PhysicsObjectList);
 	public:
-		static bool ImportPmx(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, const std::string& ModelFileName, const std::vector<unsigned char>& Data, object::C3DObject* Object,
-			const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame);
+		static bool ImportPmx(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, const std::string& ModelFileName, const std::vector<unsigned char>& Data, object::C3DObject* Object,
+			const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, resource::C3DObjectLoader* p3DObjectLoader);
 	};
 }
 #endif // USE_MMD
