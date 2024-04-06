@@ -377,18 +377,14 @@ namespace scene
 			if (!m_TdaMiku_Model->Create(pGraphicsAPI, pPhysicsEngine, m_DepthMF)) return false;
 
 			auto Clip = m_VMDAnimationSet->GetAnimationClip(0);
-			if (Clip) m_TdaMiku_Model->AddHumanoidAnimationClip(Clip, "Walk", { nullptr, "" }, true, false);
+			if (Clip) m_TdaMiku_Model->AddHumanoidAnimationClip(Clip, "Walk", { nullptr, "" }, false, false);
 
 			//auto ExpressionClip = m_VMDAnimationSet->GetBlendShapeClip(0);
 			auto ExpressionClip = m_ExpressionVMD->GetBlendShapeClip(0);
-			if (ExpressionClip) m_TdaMiku_Model->AddBlendShapeClip(ExpressionClip, "Face", true);
+			if (ExpressionClip) m_TdaMiku_Model->AddBlendShapeClip(ExpressionClip, "Face", false);
 
 			auto RipSyncClip = m_RipSyncVMD->GetBlendShapeClip(0);
-			if (RipSyncClip) m_TdaMiku_Model->AddBlendShapeClip(RipSyncClip, "RipSync", true);
-
-			m_TdaMiku_Model->ChangeMotion("Walk");
-			m_TdaMiku_Model->PlayBlendShape("Face");
-			m_TdaMiku_Model->PlayBlendShape("RipSync");
+			if (RipSyncClip) m_TdaMiku_Model->AddBlendShapeClip(RipSyncClip, "RipSync", false);
 		}
 
 		// m_Background
@@ -411,8 +407,6 @@ namespace scene
 			m_DebugSphere->SetScale(glm::vec3(0.1f));
 			if (!m_DebugSphere->CreateSimply(pGraphicsAPI, pPhysicsEngine, graphics::CPresetPrimitive::CreateSphere(pGraphicsAPI), Mat, m_DepthMF)) return false;
 		}
-
-		if (!m_AudioClip->PlayLoop()) return false;
 
 		return true;
 	}
@@ -491,6 +485,15 @@ namespace scene
 
 		if (m_TdaMiku_Model)
 		{
+			if (!m_TdaMiku_Model->IsPlayingAnimation() && !m_AudioClip->IsPlaying())
+			{
+				m_TdaMiku_Model->ChangeMotion("Walk");
+				m_TdaMiku_Model->PlayBlendShape("Face");
+				m_TdaMiku_Model->PlayBlendShape("RipSync");
+
+				if (!m_AudioClip->PlayOneShot()) return false;
+			}
+
 			if (!m_TdaMiku_Model->Update(pGraphicsAPI, pPhysicsEngine, DrawInfo->GetDeltaSecondsTime())) return false;
 
 			if (m_TdaMiku_Model->GetNodeList().size() > 0)

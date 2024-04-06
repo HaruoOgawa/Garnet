@@ -15,9 +15,12 @@ namespace audio
 	class CAudioClip
 	{
 		bool m_Loop;
+		bool m_Playing;
 
-		std::string m_FileName;
+#ifndef __EMSCRIPTEN__
 		std::vector<unsigned char> m_BinaryData;
+#endif // !__EMSCRIPTEN__
+
 	public:
 		CAudioClip();
 		virtual ~CAudioClip();
@@ -28,5 +31,7 @@ namespace audio
 		bool PlayOneShot();
 
 		bool Stop();
+
+		bool IsPlaying() const;
 	};
 }

@@ -980,9 +980,11 @@ function dbg(text) {
 var ASM_CONSTS = {
   172820: ($0, $1, $2, $3) => { const w0 = Module.UTF16ToString($0); const w1 = Module.UTF16ToString($1); const windex = $2; const nameCount = $3; return (w0 == w1[windex] && w1.length == nameCount) ? 1 : 0; },  
  173000: ($0, $1, $2, $3) => { const w0 = Module.UTF16ToString($0); const w1 = Module.UTF16ToString($1); const windex = $2; const nameCount = $3; return (w0 == w1[windex] && w1.length == nameCount) ? 1 : 0; },  
- 173180: ($0, $1) => { const fileName = Module.UTF8ToString($0); const loop = ($1 != 0); window.g3dPlayAudio(fileName, loop); },  
- 173287: ($0, $1) => { const fileName = Module.UTF8ToString($0); const loop = ($1 != 0); window.g3dPlayAudio(fileName, loop); },  
- 173394: () => { window.g3dStopAudio(); }
+ 173180: ($0) => { const fileName = Module.UTF8ToString($0); window.g3dCreateAudio(fileName); },  
+ 173259: ($0) => { const loop = ($0 != 0); window.g3dPlayAudio(loop); },  
+ 173314: ($0) => { const loop = ($0 != 0); window.g3dPlayAudio(loop); },  
+ 173369: () => { window.g3dStopAudio(); },  
+ 173396: () => { return window.g3dIsAudioPlaying(); }
 };
 
 
