@@ -106,7 +106,7 @@ def Make():
 	exportText += "call del /s /q ..\\WebRelease\\*\n > nul"
 	exportText += "call xcopy Garnet_front.js ..\\WebRelease\\ /y /s /i\n"
 	exportText += "call xcopy Garnet*.* ..\\WebRelease\\ /y /s /i\n"
-	exportText += "call xcopy ..\\Resources ..\\WebRelease\\Resources /y /s /i > nul\n"
+	#exportText += "call xcopy ..\\Resources ..\\WebRelease\\Resources /y /s /i > nul\n"
 	exportText += "call xcopy index.html ..\\WebRelease\\ /y /s /i > nul\n"
 	
 	exportText += "pause\n"

@@ -640,6 +640,5 @@ call mkdir ..\WebRelease
  > nulcall del /s /q ..\WebRelease\*
  > nulcall xcopy Garnet_front.js ..\WebRelease\ /y /s /i
 call xcopy Garnet*.* ..\WebRelease\ /y /s /i
-call xcopy ..\Resources ..\WebRelease\Resources /y /s /i > nul
 call xcopy index.html ..\WebRelease\ /y /s /i > nul
 pause
