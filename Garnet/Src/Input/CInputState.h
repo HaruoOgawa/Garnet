@@ -1,6 +1,5 @@
 #pragma once
 
-#ifdef USE_INPUT_SYSTEM
 #include <glm/glm.hpp>
 #include <map>
 #include <vector>
@@ -67,4 +66,3 @@ namespace input
 		bool IsKeyUp(EKeyType KeyType);
 	};
 }
-#endif // #ifdef USE_INPUT_SYSTEM

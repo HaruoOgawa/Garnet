@@ -48,7 +48,6 @@ namespace camera
 		}
 	}
 
-#ifdef USE_INPUT_SYSTEM
 	void CViewerCamera::Update(float DeltaTime, const std::shared_ptr<input::CInputState>& InputState)
 	{
 		// É}ÉEÉXëÄçÏ
@@ -166,6 +165,5 @@ namespace camera
 			}
 		}
 	}
-#endif // USE_INPUT_SYSTEM
 }
 #endif // USE_VIEWER_CAMERA

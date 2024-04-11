@@ -24,6 +24,7 @@ namespace app{ class IApp; }
 
 namespace input { class CInputState; }
 namespace resource { class CLoadWorker; }
+namespace gui { class IGUIEngine; }
 
 namespace descapp
 {
@@ -36,9 +37,7 @@ namespace descapp
 		std::shared_ptr<api::CVulkanAPI> m_GraphicsAPI;
 #endif
 		std::shared_ptr<app::IApp> m_App;
-#ifdef USE_INPUT_SYSTEM
 		std::shared_ptr<input::CInputState> m_InputState;
-#endif
 		const int WIDTH = 1920;
 		const int HEIGHT = 1080;
 
@@ -48,6 +47,8 @@ namespace descapp
 		float m_DeltaSecondsTime;
 
 		std::shared_ptr<resource::CLoadWorker> m_LoadWorker;
+
+		std::shared_ptr<gui::IGUIEngine> m_GUIEngine;
 
 	private:
 		bool InitWindow();
@@ -65,9 +66,7 @@ namespace descapp
 		bool RunLopp();
 
 		bool IsRunLoop() { return m_IsRunLoop; }
-#ifdef USE_INPUT_SYSTEM
 		const std::shared_ptr<input::CInputState>& GetInputState()const { return m_InputState; }
-#endif
 		void ResizeWindow(int w, int h);
 	};
 }

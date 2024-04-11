@@ -1,4 +1,3 @@
-#ifdef USE_INPUT_SYSTEM
 #include "CInputState.h"
 
 namespace input
@@ -137,4 +136,3 @@ namespace input
 		return (m_UpKeyMap.find(KeyType) != m_UpKeyMap.end());
 	}
 }
-#endif // #ifdef USE_INPUT_SYSTEM

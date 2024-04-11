@@ -9,11 +9,9 @@ namespace camera
 	{
 	}
 
-#ifdef USE_INPUT_SYSTEM
 	void CCamera::Update(float DeltaTime, const std::shared_ptr<input::CInputState>& InputState)
 	{
 	}
-#endif // USE_INPUT_SYSTEM
 
 	glm::mat4 CCamera::GetViewMatrix()
 	{

@@ -3,10 +3,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/quaternion.hpp>
 #include <memory>
-
-#ifdef USE_INPUT_SYSTEM
 #include "../Input/CInputState.h"
-#endif // USE_INPUT_SYSTEM
 
 
 namespace camera
@@ -21,9 +18,7 @@ namespace camera
 		CCamera();
 		virtual ~CCamera() = default;
 
-#ifdef USE_INPUT_SYSTEM
 		virtual void Update(float DeltaTime, const std::shared_ptr<input::CInputState>& InputState);
-#endif // USE_INPUT_SYSTEM
 
 		virtual glm::mat4 GetViewMatrix();
 

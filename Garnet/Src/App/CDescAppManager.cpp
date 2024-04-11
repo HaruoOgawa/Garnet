@@ -20,6 +20,12 @@
 #include "../../Camera/CViewerCamera.h"
 #endif // USE_VIEWER_CAMERA
 
+#ifdef USE_GUIENGINE
+#include "../GUIEngine/imgui/CImGuiGUIEngine.h"
+#else
+#include "../GUIEngine/CDummyGUIEngine.h"
+#endif
+
 #include "../Input/CInputState.h"
 
 #include "./ScriptApp/CScriptApp.h"
@@ -35,14 +41,9 @@ namespace descapp
 		m_IsRunLoop(g_IsRunLoop),
 		m_SecondsTime(0.0f), 
 		m_LoadWorker(nullptr),
-#ifdef USE_INPUT_SYSTEM
-#ifdef USE_WEBGPU
 		m_InputState(std::make_shared<input::CInputState>(1.0f)),
-#else
-		m_InputState(std::make_shared<input::CInputState>(1.0f)),
-#endif // USE_WEBGPU
-#endif
-		m_DeltaSecondsTime(0.0f)
+		m_DeltaSecondsTime(0.0f),
+		m_GUIEngine(nullptr)
 	{
 		//
 #ifdef USE_WEBGPU
@@ -52,6 +53,12 @@ namespace descapp
 #endif // USE_WEBGPU
 		
 		m_App = std::make_shared<app::CScriptApp>();
+
+#ifdef USE_GUIENGINE
+		m_GUIEngine = std::make_shared<gui::CImGuiGUIEngine>();
+#else
+		m_GUIEngine = std::make_shared<gui::CDummyGUIEngine>();
+#endif
 	}
 
 	CDescAppManager::~CDescAppManager()
@@ -105,6 +112,15 @@ namespace descapp
 #else
 		if(!m_GraphicsAPI->InitializeWithGLFW(m_pWindow)) return false;
 #endif
+
+#ifdef USE_GUIENGINE
+#ifdef USE_VULKAN
+		if (!m_GUIEngine->Initialize_GLFW_Vulkan(m_pWindow)) return false;
+#elif USE_WEBGPU
+		if (!m_GUIEngine->Initialize_GLFW_WebGPU(m_pWindow)) return false;
+#endif
+#endif
+
 		// ロードワーカー
 		m_LoadWorker = std::make_shared<resource::CLoadWorker>(m_GraphicsAPI.get());
 
@@ -294,9 +310,7 @@ namespace descapp
 			if (!FixedUpdate()) return false;
 			if (!Draw()) return false;
 
-#ifdef USE_INPUT_SYSTEM
 			m_InputState->Clear();
-#endif
 		}
 		else
 		{
@@ -317,15 +331,10 @@ namespace descapp
 		m_App->GetDrawInfo()->SetSecondsTime(m_SecondsTime);
 		m_App->GetDrawInfo()->SetDeltaSecondsTime(m_DeltaSecondsTime);
 
-		// ViewCameraのUpdate
-#ifdef USE_INPUT_SYSTEM
 		const auto& MainCamera = m_App->GetMainCamera();
 		if (MainCamera) MainCamera->Update(m_DeltaSecondsTime, m_InputState);
 
 		if (!m_App->Update(m_GraphicsAPI.get(), m_LoadWorker.get(), m_InputState)) return false;
-#else
-		if (!m_App->Update(m_GraphicsAPI.get(), m_LoadWorker.get())) return false;
-#endif // USE_INPUT_SYSTEM
 
 #ifdef _DEBUG
 		// FPSの計測と表示(60FPSを基準とする)

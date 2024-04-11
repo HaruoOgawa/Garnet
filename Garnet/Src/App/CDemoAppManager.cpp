@@ -25,9 +25,7 @@ namespace app
 		m_SecondsTime(0.0f),
 		m_DeltaSecondsTime(0.0f),
 		m_LoadWorker(nullptr),
-#ifdef USE_INPUT_SYSTEM
 		m_InputState(std::make_shared<input::CInputState>(1.0f)),
-#endif
 		m_GraphicsAPI(std::make_shared<api::COpenGLAPI>(WIDTH, HEIGHT)),
 		m_App(nullptr)
 	{
@@ -312,9 +310,7 @@ namespace app
 			if (!FixedUpdate()) return false;
 			if (!Draw()) return false;
 
-#ifdef USE_INPUT_SYSTEM
 			m_InputState->Clear();
-#endif
 		}
 
 		return true;
@@ -456,14 +452,10 @@ namespace app
 		m_App->GetDrawInfo()->SetDeltaSecondsTime(m_DeltaSecondsTime);
 
 		// ViewCamera‚ÌUpdate
-#ifdef USE_INPUT_SYSTEM
 		const auto& MainCamera = m_App->GetMainCamera();
 		if (MainCamera) MainCamera->Update(m_DeltaSecondsTime, m_InputState);
 
 		if (!m_App->Update(m_GraphicsAPI.get(), m_LoadWorker.get(), m_InputState)) return false;
-#else
-		if (!m_App->Update(m_GraphicsAPI.get(), m_LoadWorker.get())) return false;
-#endif // USE_INPUT_SYSTEM
 
 		return true;
 	}

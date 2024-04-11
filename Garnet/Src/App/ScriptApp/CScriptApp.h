@@ -10,9 +10,7 @@ namespace projection { class CProjection; }
 namespace graphics { class CDrawInfo; }
 namespace imageeffect { class CBlurEffect; }
 namespace resource { class CLoadWorker; }
-#ifdef USE_INPUT_SYSTEM
 namespace input { class CInputState; }
-#endif
 
 namespace physics { class IPhysicsEngine; }
 
@@ -36,12 +34,7 @@ namespace app
 		virtual bool Initialize(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker) override;
 		virtual bool ProcessInput(api::IGraphicsAPI* pGraphicsAPI) override;
 		virtual bool Resize(int Width, int Height) override;
-
-#ifdef USE_INPUT_SYSTEM
 		virtual bool Update(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<input::CInputState>& InputState) override;
-#else
-		virtual bool Update(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker) override;
-#endif
 		virtual bool LateUpdate(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker) override;
 		virtual bool FixedUpdate(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker) override;
 

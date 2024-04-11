@@ -110,10 +110,8 @@ namespace webapp
 		m_App->GetDrawInfo()->SetDeltaSecondsTime(m_DeltaSecondsTime);
 
 		// ViewCamera‚ÌUpdate
-#ifdef USE_INPUT_SYSTEM
 		const auto& MainCamera = m_App->GetMainCamera();
 		if (MainCamera) MainCamera->Update(m_DeltaSecondsTime, m_InputState);
-#endif // USE_INPUT_SYSTEM
 
 		if (!m_App->Update(m_GraphicsAPI.get(), m_LoadWorker.get(), m_InputState)) return false;
 

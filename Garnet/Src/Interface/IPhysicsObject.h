@@ -1,6 +1,5 @@
 #pragma once
 
-#ifdef USE_PHYSICS
 #include <memory>
 #include <glm/glm.hpp>
 #include <glm/gtx/quaternion.hpp>
@@ -37,4 +36,3 @@ namespace physics
 		virtual void AlignConstraint(const glm::vec3& WorldPos, const glm::quat& WorldRotate) = 0;
 	};
 }
-#endif
