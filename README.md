@@ -11,3 +11,9 @@
 Garnet is Computer Graphics Engine running on Vulkan and WebGPU.
 https://scrapbox.io/Garnet/
 ![image](https://user-images.githubusercontent.com/55416754/215251947-5618f9cd-3a50-4127-9ff0-dde9790b004b.png)
+
+## 開発ルール
+* プリプロセッサの使用はライブラリと紐づくクラスに対してのみ使用可能
+  * そのライブラリを使用しない時はダミー継承クラスで代用する
+  * 関数の引数がプリプロセッサで無限に汚くなるのを防ぐため
+  
