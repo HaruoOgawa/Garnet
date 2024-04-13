@@ -10,6 +10,7 @@ namespace api { class COpenGLAPI; }
 namespace app { class IApp; }
 namespace input { class CInputState; }
 namespace resource { class CLoadWorker; }
+namespace gui { class IGUIEngine; }
 
 namespace app
 {
@@ -34,6 +35,8 @@ namespace app
 		std::shared_ptr<app::IApp> m_App;
 
 		std::shared_ptr<input::CInputState> m_InputState;
+
+		std::shared_ptr<gui::IGUIEngine> m_GUIEngine;
 	private:
 		bool InitWindow(HINSTANCE hInstance);
 		bool InitGLContext();

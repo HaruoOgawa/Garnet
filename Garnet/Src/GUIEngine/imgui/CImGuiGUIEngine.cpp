@@ -15,6 +15,7 @@
 #elif USE_WEBGPU
 #include "Core/CImGuiCoreWebGPU.h"
 #elif USE_OPENGL
+#include "Core/CImGuiCoreOpenGL.h"
 #endif 
 
 namespace gui
@@ -27,6 +28,7 @@ namespace gui
 #elif USE_WEBGPU
 		m_ImGuiCore = std::make_shared<CImGuiCoreWebGPU>();
 #elif USE_OPENGL
+		m_ImGuiCore = std::make_shared<CImGuiCoreOpenGL>();
 #endif 
 	}
 
@@ -43,7 +45,12 @@ namespace gui
 			m_ImGuiCore = nullptr;
 		}
 
+#ifdef USE_GLFW
 		ImGui_ImplGlfw_Shutdown();
+#elif USE_WIN32_WindowAPI
+		ImGui_ImplWin32_Shutdown();
+#endif // USE_GLFW
+		
 		ImGui::DestroyContext();
 	}
 
@@ -72,6 +79,21 @@ namespace gui
 #elif USE_WIN32_WindowAPI
 	bool CImGuiGUIEngine::InitializeWithWin32API(HWND window, api::IGraphicsAPI* pGraphicsAPI)
 	{
+		// Dear ImGuiのコンテキストを作成
+		IMGUI_CHECKVERSION();
+		ImGui::CreateContext();
+
+		ImGuiIO& io = ImGui::GetIO();
+		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard
+
+		// Window APIの初期化
+#ifdef USE_OPENGL
+		ImGui_ImplWin32_InitForOpenGL(window);
+#endif // USE_OPENGL
+
+		// GraphicsAPI周りの初期化
+		if (!m_ImGuiCore->Initialize(pGraphicsAPI)) return false;
+
 		return true;
 	}
 #endif
@@ -82,6 +104,8 @@ namespace gui
 
 #ifdef USE_GLFW
 		ImGui_ImplGlfw_NewFrame();
+#elif USE_WIN32_WindowAPI
+		ImGui_ImplWin32_NewFrame();
 #endif
 
 		ImGui::NewFrame();

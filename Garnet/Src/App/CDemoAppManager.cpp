@@ -11,6 +11,12 @@
 
 #define WGL_IMPLEMENTATION
 
+#ifdef USE_GUIENGINE
+#include "../GUIEngine/imgui/CImGuiGUIEngine.h"
+#else
+#include "../GUIEngine/CDummyGUIEngine.h"
+#endif
+
 namespace app
 {
 	// 仮のグローバル変数
@@ -27,11 +33,18 @@ namespace app
 		m_LoadWorker(nullptr),
 		m_InputState(std::make_shared<input::CInputState>(1.0f)),
 		m_GraphicsAPI(std::make_shared<api::COpenGLAPI>(WIDTH, HEIGHT)),
-		m_App(nullptr)
+		m_App(nullptr),
+		m_GUIEngine(nullptr)
 	{
 		g_AppManager = this; // 仮のグローバル変数
 
 		m_App = std::make_shared<app::CScriptApp>();
+
+#ifdef USE_GUIENGINE
+		m_GUIEngine = std::make_shared<gui::CImGuiGUIEngine>();
+#else
+		m_GUIEngine = std::make_shared<gui::CDummyGUIEngine>();
+#endif
 	}
 
 	CDemoAppManager::~CDemoAppManager()
@@ -47,6 +60,13 @@ namespace app
 		{
 			m_LoadWorker.reset();
 			m_LoadWorker = nullptr;
+		}
+
+		if (m_GUIEngine)
+		{
+			m_GUIEngine->Release(m_GraphicsAPI.get());
+			m_GUIEngine.reset();
+			m_GUIEngine = nullptr;
 		}
 
 		if (m_GraphicsAPI)
@@ -73,6 +93,10 @@ namespace app
 		//if (!InitWGL()) return false;
 		if (!InitGLContext()) return false;
 		if (!m_GraphicsAPI->Initialize()) return false;
+
+#ifdef USE_GUIENGINE
+		if (!m_GUIEngine->InitializeWithWin32API(m_Window, m_GraphicsAPI.get())) return false;
+#endif
 
 		// ロードワーカー
 		m_LoadWorker = std::make_shared<resource::CLoadWorker>(m_GraphicsAPI.get());
@@ -477,7 +501,7 @@ namespace app
 	bool CDemoAppManager::Draw()
 	{
 		// Appの描画
-		if (!m_App->Draw(m_GraphicsAPI.get(), m_LoadWorker.get())) return false;
+		if (!m_App->Draw(m_GraphicsAPI.get(), m_LoadWorker.get(), m_GUIEngine)) return false;
 
 		//カラーバッファを入れ替える
 		SwapBuffers(m_Device_Context);
