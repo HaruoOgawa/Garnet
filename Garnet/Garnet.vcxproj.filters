@@ -2688,6 +2688,9 @@
     <ClInclude Include="Src\GUIEngine\imgui\Core\IImGuiCore.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="Src\GUIEngine\imgui\Core\CImGuiCoreWebGPU.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\Main\DescMain\DescMain.cpp">
@@ -3741,6 +3744,9 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Src\GUIEngine\imgui\Core\CImGuiCoreVulkan.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\GUIEngine\imgui\Core\CImGuiCoreWebGPU.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>

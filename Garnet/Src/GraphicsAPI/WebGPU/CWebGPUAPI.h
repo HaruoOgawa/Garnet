@@ -134,8 +134,10 @@ namespace api
 		//
 		WGPUDevice GetLogicalDevice() const;
 		WGPUQueue GetQueue() const;
+		
+		WGPURenderPassEncoder GetSwapChainRenderPass() const;
 		WGPURenderPassEncoder GetCurrentRenderPass() const;
-
+		
 		// Buffer
 		bool CreateBuffer(WGPUBuffer& Buffer, WGPUBufferUsageFlags Usage, void const* Data, uint64_t ByteSize);
 

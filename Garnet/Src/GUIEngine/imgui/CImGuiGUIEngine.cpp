@@ -13,6 +13,7 @@
 #ifdef USE_VULKAN
 #include "Core/CImGuiCoreVulkan.h"
 #elif USE_WEBGPU
+#include "Core/CImGuiCoreWebGPU.h"
 #elif USE_OPENGL
 #endif 
 
@@ -24,6 +25,7 @@ namespace gui
 #ifdef USE_VULKAN
 		m_ImGuiCore = std::make_shared<CImGuiCoreVulkan>();
 #elif USE_WEBGPU
+		m_ImGuiCore = std::make_shared<CImGuiCoreWebGPU>();
 #elif USE_OPENGL
 #endif 
 	}
@@ -56,7 +58,11 @@ namespace gui
 		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard
 
 		// Window API‚Ì‰Šú‰»
+#ifdef USE_VULKAN
 		ImGui_ImplGlfw_InitForVulkan(pWindow, true);
+#elif USE_WEBGPU
+		ImGui_ImplGlfw_InitForOther(pWindow, true);
+#endif
 
 		// GraphicsAPIŽü‚è‚Ì‰Šú‰»
 		if (!m_ImGuiCore->Initialize(pGraphicsAPI)) return false;
