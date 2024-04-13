@@ -573,8 +573,10 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Src\GUIEngine\imgui\Core\CImGuiCoreVulkan.h" />
     <ClInclude Include="Src\GUIEngine\imgui\CImGuiGUIEngine.h" />
     <ClInclude Include="Src\GUIEngine\CDummyGUIEngine.h" />
+    <ClInclude Include="Src\GUIEngine\imgui\Core\IImGuiCore.h" />
     <ClInclude Include="Src\Interface\IGUIEngine.h" />
     <ClInclude Include="Src\PhysicsEngine\CDummyPhysicsEngine.h" />
     <ClInclude Include="Src\Audio\CAudioMachine.h" />
@@ -1464,6 +1466,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClInclude Include="Src\Interface\IRenderer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\GUIEngine\imgui\Core\CImGuiCoreVulkan.cpp" />
     <ClCompile Include="Src\GUIEngine\imgui\CImGuiGUIEngine.cpp" />
     <ClCompile Include="Src\GUIEngine\CDummyGUIEngine.cpp" />
     <ClCompile Include="Src\PhysicsEngine\CDummyPhysicsEngine.cpp" />

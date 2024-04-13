@@ -10,25 +10,29 @@ namespace gui
 	{
 	}
 
-#ifdef USE_GLFW
-#ifdef USE_VULKAN
-	bool CDummyGUIEngine::Initialize_GLFW_Vulkan(GLFWwindow* pWindow)
+	void CDummyGUIEngine::Release(api::IGraphicsAPI* pGraphicsAPI)
 	{
-		return true;
 	}
-#endif
-#ifdef USE_WEBGPU
-	bool CDummyGUIEngine::Initialize_GLFW_WebGPU(GLFWwindow* pWindow)
-	{
-		return true;
-	}
-#endif
-#endif // USE_GLFW
 
-#ifdef USE_WIN32_WindowAPI
-	bool CDummyGUIEngine::Initialize_Win32API_OpenGL(HWND window)
+#ifdef USE_GLFW
+	bool CDummyGUIEngine::InitializeWithGLFW(GLFWwindow* pWindow, api::IGraphicsAPI* pGraphicsAPI)
 	{
 		return true;
 	}
-#endif // USE_WIN32_WindowAPI
+#elif USE_WIN32_WindowAPI
+	bool CDummyGUIEngine::InitializeWithWin32API(HWND window, api::IGraphicsAPI* pGraphicsAPI)
+	{
+		return true;
+	}
+#endif
+
+	bool CDummyGUIEngine::BeginFrame(api::IGraphicsAPI* pGraphicsAPI)
+	{
+		return true;
+	}
+
+	bool CDummyGUIEngine::EndFrame(api::IGraphicsAPI* pGraphicsAPI)
+	{
+		return true;
+	}
 }

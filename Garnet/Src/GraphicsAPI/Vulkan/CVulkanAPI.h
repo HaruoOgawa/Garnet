@@ -204,6 +204,9 @@ namespace api
 		//
 		int GetMaxFramesInFlight() const { return MAX_FRAMES_IN_FLIGHT; }
 
+		// Instance
+		const VkInstance& GetInstance() const;
+
 		// Device
 		const VkPhysicalDevice& GetPhysicalDevice() const;
 		const VkDevice& GetLogicalDevice() const;

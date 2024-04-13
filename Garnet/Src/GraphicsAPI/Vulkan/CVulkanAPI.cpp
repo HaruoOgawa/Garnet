@@ -278,6 +278,13 @@ namespace api
 		// コマンドバッファをグラフィックキューに送信
 		// コマンドバッファにはコマンドが入っていてそのコマンドをキューが実行する
 		// キューはタスクでその具体的なタスク内容がコマンドという理解もできる
+		// レンダーパスへの描画コマンドを実行する
+
+		// キューは複数のコマンドを記録するのに必要
+		// BeginSingleTimeCommandsみたいなやつは一つのコマンドだけを記録して即時実行する
+		// レンダリングのような複数コマンドを記録するにはキューが必須である
+
+		// そしてそのキューには格納できるコマンドの種類が決まっていて、描画系だとGraphicsQueue、プレゼント系だとPresentQueueといった感じで分かれている
 		if (vkQueueSubmit(m_GraphicsQueue, 1, &submitInfo, m_InFlightFences[m_CurrentFrame]) != VK_SUCCESS)
 		{
 			return false;
@@ -334,6 +341,12 @@ namespace api
 	VkRenderPass CVulkanAPI::GetSwapChainRenderPass() const
 	{
 		return m_SwapChainRenderPass;
+	}
+
+	// Instance
+	const VkInstance& CVulkanAPI::GetInstance() const
+	{
+		return m_Instance;
 	}
 
 	// Device

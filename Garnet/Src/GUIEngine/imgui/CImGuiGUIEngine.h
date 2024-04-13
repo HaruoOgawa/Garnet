@@ -2,28 +2,29 @@
 
 #ifdef USE_GUIENGINE
 
+#include <memory>
 #include "../../Interface/IGUIEngine.h"
+#include "Core/IImGuiCore.h"
 
 namespace gui
 {
 	class CImGuiGUIEngine : public IGUIEngine
 	{
+		std::shared_ptr<IImGuiCore> m_ImGuiCore;
 	public:
 		CImGuiGUIEngine();
 		virtual ~CImGuiGUIEngine();
 
 #ifdef USE_GLFW
-#ifdef USE_VULKAN
-		virtual bool Initialize_GLFW_Vulkan(GLFWwindow* pWindow) override;
+		virtual bool InitializeWithGLFW(GLFWwindow* pWindow, api::IGraphicsAPI* pGraphicsAPI) override;
+#elif USE_WIN32_WindowAPI
+		virtual bool InitializeWithWin32API(HWND window, api::IGraphicsAPI* pGraphicsAPI) override;
 #endif
-#ifdef USE_WEBGPU
-		virtual bool Initialize_GLFW_WebGPU(GLFWwindow* pWindow) override;
-#endif
-#endif // USE_GLFW
+		virtual void Release(api::IGraphicsAPI* pGraphicsAPI) override;
 
-#ifdef USE_WIN32_WindowAPI
-		virtual bool Initialize_Win32API_OpenGL(HWND window) override;
-#endif // USE_WIN32_WindowAPI
+		virtual bool BeginFrame(api::IGraphicsAPI* pGraphicsAPI) override;
+
+		virtual bool EndFrame(api::IGraphicsAPI* pGraphicsAPI) override;
 	};
 }
 

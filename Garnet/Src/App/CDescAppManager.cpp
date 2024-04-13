@@ -86,6 +86,13 @@ namespace descapp
 			m_LoadWorker = nullptr;
 		}
 
+		if (m_GUIEngine)
+		{
+			m_GUIEngine->Release(m_GraphicsAPI.get());
+			m_GUIEngine.reset();
+			m_GUIEngine = nullptr;
+		}
+
 		if (m_GraphicsAPI)
 		{
 			m_GraphicsAPI->Release();
@@ -114,11 +121,7 @@ namespace descapp
 #endif
 
 #ifdef USE_GUIENGINE
-#ifdef USE_VULKAN
-		if (!m_GUIEngine->Initialize_GLFW_Vulkan(m_pWindow)) return false;
-#elif USE_WEBGPU
-		if (!m_GUIEngine->Initialize_GLFW_WebGPU(m_pWindow)) return false;
-#endif
+		if (!m_GUIEngine->InitializeWithGLFW(m_pWindow, m_GraphicsAPI.get())) return false;
 #endif
 
 		// ロードワーカー
@@ -361,7 +364,7 @@ namespace descapp
 
 	bool CDescAppManager::Draw()
 	{
-		if (!m_App->Draw(m_GraphicsAPI.get(), m_LoadWorker.get())) return false;
+		if (!m_App->Draw(m_GraphicsAPI.get(), m_LoadWorker.get(), m_GUIEngine)) return false;
 
 		return true;
 	}

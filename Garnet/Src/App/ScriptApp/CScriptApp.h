@@ -11,7 +11,7 @@ namespace graphics { class CDrawInfo; }
 namespace imageeffect { class CBlurEffect; }
 namespace resource { class CLoadWorker; }
 namespace input { class CInputState; }
-
+namespace gui { class IGUIEngine; }
 namespace physics { class IPhysicsEngine; }
 
 namespace app
@@ -38,7 +38,7 @@ namespace app
 		virtual bool LateUpdate(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker) override;
 		virtual bool FixedUpdate(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker) override;
 
-		virtual bool Draw(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker) override;
+		virtual bool Draw(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<gui::IGUIEngine>& GUIEngine) override;
 
 		virtual const std::shared_ptr<camera::CCamera>& GetMainCamera() const override;
 		virtual const std::shared_ptr<graphics::CDrawInfo>& GetDrawInfo() const override;

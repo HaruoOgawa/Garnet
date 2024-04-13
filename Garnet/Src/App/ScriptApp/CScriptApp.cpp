@@ -6,6 +6,7 @@
 #include "../../Projection/CProjection.h"
 #include "../../ImageEffect/CBlurEffect.h"
 #include "../../Message/Console.h"
+#include "../../Interface/IGUIEngine.h"
 
 #ifdef USE_VIEWER_CAMERA
 #include "../../Camera/CViewerCamera.h"
@@ -123,7 +124,7 @@ namespace app
 		return true;
 	}
 
-	bool CScriptApp::Draw(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker)
+	bool CScriptApp::Draw(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<gui::IGUIEngine>& GUIEngine)
 	{
 		// Prepare
 		if (!pGraphicsAPI->PrepareRender()) return false;
@@ -145,6 +146,10 @@ namespace app
 		if (!m_ScriptScene->Draw(pGraphicsAPI, false, m_MainCamera, m_Projection, m_DrawInfo)) return false;
 		if (!pLoadWorker->Draw(pGraphicsAPI, false, m_MainCamera, m_Projection, m_DrawInfo)) return false;
 		
+		// GUIEngine
+		if (!GUIEngine->BeginFrame(pGraphicsAPI)) return false;
+		if (!GUIEngine->EndFrame(pGraphicsAPI)) return false;
+
 		if (!pGraphicsAPI->EndRender()) return false;
 
 		// Submit
