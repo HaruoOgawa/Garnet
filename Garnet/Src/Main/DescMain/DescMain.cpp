@@ -1,4 +1,4 @@
-#if (defined(USE_VULKAN) || defined(USE_WEBGPU)) && !defined(__EMSCRIPTEN__)
+#ifdef USE_GLFW
 
 #include "../../App/CDescAppManager.h"
 #include "../../App/EAppType.h"
@@ -24,10 +24,40 @@ bool RunLopp()
 }
 
 #ifdef __EMSCRIPTEN__
+// InputŒn‚ÍGLFW‚É”C‚¹‚é‚Ì‚Å‰½‚à‚µ‚È‚¢
 EMSCRIPTEN_KEEPALIVE
 void OnKeyDown(char* key)
 {
-	Console::Log("[OnKeyDown] key: %c\n", key);
+}
+
+EMSCRIPTEN_KEEPALIVE
+void OnKeyUp(char* key)
+{
+}
+
+EMSCRIPTEN_KEEPALIVE
+void OnResize(int w, int h)
+{
+}
+
+EMSCRIPTEN_KEEPALIVE
+void OnMouseDown(int buttonNum, int x, int y)
+{
+}
+
+EMSCRIPTEN_KEEPALIVE
+void OnMouseUp(int buttonNum, int x, int y)
+{
+}
+
+EMSCRIPTEN_KEEPALIVE
+void OnMouseMove(int x, int y)
+{
+}
+
+EMSCRIPTEN_KEEPALIVE
+void OnMouseWheel(int deltaY)
+{
 }
 
 EMSCRIPTEN_KEEPALIVE
@@ -68,4 +98,4 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
 
 }
 
-#endif // USE_VULKAN
+#endif // USE_GLFW

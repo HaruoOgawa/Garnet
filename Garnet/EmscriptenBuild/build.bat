@@ -20,7 +20,7 @@ del /s /q ..\WebRelease\*
 
 xcopy Garnet_front.js ..\WebRelease\ /y /s /i
 xcopy build\Garnet*.* ..\WebRelease\ /y /s /i
-@rem xcopy ..\Resources ..\WebRelease\Resources /y /s /i
+xcopy ..\Resources ..\WebRelease\Resources /y /s /i
 xcopy index.html ..\WebRelease\ /y /s /i
 
 pause

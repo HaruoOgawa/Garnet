@@ -1,6 +1,6 @@
 #pragma once
 
-#ifdef USE_OPENGL
+#ifdef USE_WIN32_WindowAPI
 #include <memory>
 #include <Windows.h>
 //#include "../GraphicsAPI/OpenGL/wglDef.h"
@@ -31,7 +31,10 @@ namespace app
 
 		std::shared_ptr<resource::CLoadWorker> m_LoadWorker;
 
+#ifdef USE_OPENGL
 		std::shared_ptr<api::COpenGLAPI> m_GraphicsAPI;
+#endif // USE_OPENGL
+		
 		std::shared_ptr<app::IApp> m_App;
 
 		std::shared_ptr<input::CInputState> m_InputState;
@@ -58,4 +61,4 @@ namespace app
 		void ResizeWindow(int w, int h);
 	};
 }
-#endif // USE_OPENGL
+#endif // USE_WIN32_WindowAPI

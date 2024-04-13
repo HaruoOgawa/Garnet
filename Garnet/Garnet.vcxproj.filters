@@ -4248,5 +4248,12 @@
     <None Include="Resources\Shaders\unlit_frag.wgsl" />
     <None Include="Resources\Shaders\pbrmorph.vert" />
     <None Include="Resources\MaterialFrame\PBRMorph_MF.json" />
+    <None Include="Commands\RemakeCmakeLists.py" />
+    <None Include="Commands\RemakeCmakeLists_DescApp.py" />
+    <None Include="Commands\wgslc_ALL.bat">
+      <Filter>ソース ファイル</Filter>
+    </None>
+    <None Include="Commands\UTF8Encorder.py" />
+    <None Include="Commands\GetLibAndPath.py" />
   </ItemGroup>
 </Project>

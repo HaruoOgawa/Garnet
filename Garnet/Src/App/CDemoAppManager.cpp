@@ -1,8 +1,10 @@
-#ifdef USE_OPENGL
+#ifdef USE_WIN32_WindowAPI
 
 #include "CDemoAppManager.h"
 #include "../LoadWorker/CLoadWorker.h"
+#ifdef USE_OPENGL
 #include "../GraphicsAPI/OpenGL/COpenGLAPI.h"
+#endif
 #include "./ScriptApp/CScriptApp.h"
 
 #ifdef USE_VIEWER_CAMERA
@@ -32,11 +34,15 @@ namespace app
 		m_DeltaSecondsTime(0.0f),
 		m_LoadWorker(nullptr),
 		m_InputState(std::make_shared<input::CInputState>(1.0f)),
-		m_GraphicsAPI(std::make_shared<api::COpenGLAPI>(WIDTH, HEIGHT)),
+		m_GraphicsAPI(nullptr),
 		m_App(nullptr),
 		m_GUIEngine(nullptr)
 	{
 		g_AppManager = this; // âºÇÃÉOÉçÅ[ÉoÉãïœêî
+
+#ifdef USE_OPENGL
+		m_GraphicsAPI = std::make_shared<api::COpenGLAPI>(WIDTH, HEIGHT);
+#endif
 
 		m_App = std::make_shared<app::CScriptApp>();
 
@@ -509,4 +515,4 @@ namespace app
 		return true;
 	}
 }
-#endif // USE_OPENGL
+#endif // USE_WIN32_WindowAPI

@@ -1,4 +1,4 @@
-#if (defined(USE_VULKAN) || defined(USE_WEBGPU)) && !defined(__EMSCRIPTEN__)
+#ifdef USE_GLFW
 
 #include "CDescAppManager.h"
 #include "../LoadWorker/CLoadWorker.h"
@@ -369,4 +369,4 @@ namespace descapp
 		return true;
 	}
 }
-#endif
+#endif // USE_GLFW

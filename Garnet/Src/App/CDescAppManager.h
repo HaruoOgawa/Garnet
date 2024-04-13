@@ -1,6 +1,6 @@
 #pragma once
 
-#if (defined(USE_VULKAN) || defined(USE_WEBGPU)) && !defined(__EMSCRIPTEN__)
+#ifdef USE_GLFW
 
 #ifdef USE_VULKAN
 #define NOMINMAX
