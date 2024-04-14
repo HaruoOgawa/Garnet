@@ -2,10 +2,11 @@
 
 namespace input
 {
-	CInputState::CInputState(float MouseRotSpeed) :
+	CInputState::CInputState(float InputSpeed) :
 		m_MousePos(glm::vec2(0.0f)),
 		m_PrevMousePos(glm::vec2(0.0f)),
 		m_WheelScrollAmount(glm::vec2(0.0f)),
+		m_GloabalInputSpeed(InputSpeed),
 		m_IsLocked(false),
 		m_OnDownMouseLeft(false),
 		m_OnDownMouseRight(false)
@@ -15,6 +16,11 @@ namespace input
 	CInputState::~CInputState()
 	{
 		Clear();
+	}
+
+	float CInputState::GetGloabalInputSpeed() const
+	{
+		return m_GloabalInputSpeed;
 	}
 
 	void CInputState::Clear()

@@ -29,6 +29,8 @@ namespace input
 
 		glm::vec2 m_WheelScrollAmount;
 
+		const float m_GloabalInputSpeed;
+
 		bool m_IsLocked;
 
 		bool m_OnDownMouseLeft;
@@ -41,6 +43,8 @@ namespace input
 		virtual ~CInputState();
 
 		void Clear();
+
+		float GetGloabalInputSpeed() const;
 
 		void StartMousePos(const glm::vec2& MousePos);
 		void SetMousePos(const glm::vec2& MousePos);
