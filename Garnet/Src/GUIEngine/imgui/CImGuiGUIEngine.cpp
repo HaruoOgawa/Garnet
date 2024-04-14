@@ -71,6 +71,10 @@ namespace gui
 		ImGui_ImplGlfw_InitForOther(pWindow, true);
 #endif
 
+#ifdef __EMSCRIPTEN__
+		ImGui_ImplGlfw_InstallEmscriptenCanvasResizeCallback("#MainCanvas");
+#endif // __EMSCRIPTEN__
+
 		// GraphicsAPIŽü‚è‚Ì‰Šú‰»
 		if (!m_ImGuiCore->Initialize(pGraphicsAPI)) return false;
 

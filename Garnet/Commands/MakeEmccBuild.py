@@ -1,17 +1,19 @@
 from math import e
 import os
 
+#ExcludedFolderList = ["Library", "Vulkan", "OpenGL", "DescMain", "CDescAppManager.cpp", "CDescAppManager.h", "DemoMain", "CDemoAppManager.cpp", "CDemoAppManager.h", "Bullet3Serialize", "btBulletCollisionAll.cpp", "btBulletDynamicsAll.cpp", "btLinearMathAll.cpp"]
+#IncludeDirectoryList = ["../src/Library/DawnLib/include", "../src/Library/glm", "../src/Library/tinygltf", "../src/Library/SmallFBX/include", "../src/Library/bullet3/src"]
+#PreprocessorList = ["USE_WEB_NATIVE", "USE_WEBGPU", "USE_TEXTURE_LOADER", "USE_GLTF", "USE_VIEWER_CAMERA", "USE_INPUT_SYSTEM", "USE_GPGPU", "USE_FBX", "USE_ANIMATION", "USE_SMALL_FBX", "USE_MMD", "USE_PHYSICS", "B3_USE_CLEW", "BT_USE_DOUBLE_PRECISION", "BT_INTERNAL_UPDATE_SERIALIZATION_STRUCTURES"]
 
-ExcludedFolderList = ["Library", "Vulkan", "OpenGL", "DescMain", "CDescAppManager.cpp", "CDescAppManager.h", "DemoMain", "CDemoAppManager.cpp", "CDemoAppManager.h", "Bullet3Serialize", "btBulletCollisionAll.cpp", "btBulletDynamicsAll.cpp", "btLinearMathAll.cpp"]
-
-IncludeDirectoryList = ["../src/Library/DawnLib/include", "../src/Library/glm", "../src/Library/tinygltf", "../src/Library/SmallFBX/include", "../src/Library/bullet3/src"]
-PreprocessorList = ["USE_WEB_NATIVE", "USE_WEBGPU", "USE_TEXTURE_LOADER", "USE_GLTF", "USE_VIEWER_CAMERA", "USE_INPUT_SYSTEM", "USE_GPGPU", "USE_FBX", "USE_ANIMATION", "USE_SMALL_FBX", "USE_MMD", "USE_PHYSICS", "B3_USE_CLEW", "BT_USE_DOUBLE_PRECISION", "BT_INTERNAL_UPDATE_SERIALIZATION_STRUCTURES"]
+ExcludedFolderList = ["Library", "Vulkan", "OpenGL", "WebMain", "CWebAppManager.cpp", "CWebAppManager.h", "DemoMain", "CDemoAppManager.cpp", "CDemoAppManager.h", "Bullet3Serialize", "btBulletCollisionAll.cpp", "btBulletDynamicsAll.cpp", "btLinearMathAll.cpp"]
+IncludeDirectoryList = ["../src/Library/DawnLib/include", "../Src/Library/GLFW/include", "../Src/Library/glfw3webgpu", "../src/Library/glm", "../src/Library/tinygltf", "../src/Library/SmallFBX/include", "../src/Library/bullet3/src", "../Src/Library/imgui", "../Src/Library/imgui/backends"]
+PreprocessorList = ["USE_GLFW", "USE_WEBGPU", "USE_GUIENGINE", "USE_TEXTURE_LOADER", "USE_GLTF", "USE_VIEWER_CAMERA", "USE_INPUT_SYSTEM", "USE_GPGPU", "USE_FBX", "USE_ANIMATION", "USE_SMALL_FBX", "USE_MMD", "USE_PHYSICS", "B3_USE_CLEW", "BT_USE_DOUBLE_PRECISION", "BT_INTERNAL_UPDATE_SERIALIZATION_STRUCTURES"]
 
 # It's not something that changes that often, so every time there are more libs to link, I'll add my own.
 LibObjDirList = ["/SmallFBX_lib"];
 
 #
-EmccCompileDirList = ["../src", "../Src/Library/SmallFBX/include", "../Src/Library/bullet3/src"]
+EmccCompileDirList = ["../src", "../Src/Library/SmallFBX/include", "../Src/Library/bullet3/src", "../Src/Library/imgui"]
 
 # 
 def FindDir(subfolders, pathList, parentPath):
@@ -98,6 +100,8 @@ def Make():
 	exportText += "-sUSE_WEBGPU=1 "
 	exportText += "-sALLOW_MEMORY_GROWTH "
 	exportText += "-sFETCH "
+	
+	exportText += "-sUSE_GLFW=3 "
 
 	exportText += "-o Garnet.js\n"
 

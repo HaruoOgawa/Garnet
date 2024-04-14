@@ -1,3 +1,4 @@
+#ifdef USE_OPENGL
 //-----------------------------------------------------------------------------
 // About imgui_impl_opengl3_loader.h:
 //
@@ -814,3 +815,5 @@ static void load_procs(GL3WGetProcAddressProc proc)
 }
 #endif
 #endif
+
+#endif // #ifdef USE_OPENGL

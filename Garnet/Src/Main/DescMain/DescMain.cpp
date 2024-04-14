@@ -5,9 +5,7 @@
 #include "../../Message/Console.h"
 
 #ifdef __EMSCRIPTEN__
-#include <emscripten/emscripten.h>
-#include <emscripten/html5_webgpu.h>
-#elif defined(USE_WEBGPU) && defined(__CMAKE__)
+#include <emscripten.h>
 #else
 #include <Windows.h>
 #endif
@@ -16,11 +14,30 @@ extern "C" {
 
 descapp::CDescAppManager* g_DescApp = nullptr;
 
-bool RunLopp()
+void Release()
 {
-	if(!g_DescApp->RunLopp()) return false;
+	delete g_DescApp;
+	g_DescApp = nullptr;
+}
 
+#ifdef __EMSCRIPTEN__
+void RunLopp()
+#else
+bool RunLopp()
+#endif // __EMSCRIPTEN__
+{
+	if (!g_DescApp->RunLopp() || !g_DescApp->IsRunLoop())
+	{
+		Release();
+
+#ifndef __EMSCRIPTEN__
+		return false;
+#endif // !__EMSCRIPTEN__
+	}
+
+#ifndef __EMSCRIPTEN__
 	return true;
+#endif // !__EMSCRIPTEN__
 }
 
 #ifdef __EMSCRIPTEN__
@@ -68,22 +85,22 @@ void StartApp()
 	
 	if (g_DescApp->Initialize())
 	{
-#ifndef __EMSCRIPTEN__
+#ifdef __EMSCRIPTEN__
+		emscripten_set_main_loop(RunLopp, 60, true);
+#else
 		while (g_DescApp->IsRunLoop())
 		{
 			if (!RunLopp()) break;
 		}
-#else
-		emscripten_set_main_loop(RunLopp, 60, true);
-#endif
-		
+#endif // __EMSCRIPTEN__
 	}
-
-	delete g_DescApp;
-	g_DescApp = nullptr;
+	else
+	{
+		Release();
+	}
 }
 
-#if defined(USE_WEBGPU) && defined(__CMAKE__)
+#if defined(__EMSCRIPTEN__) || defined(__CMAKE__)
 int main()
 #else
 int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
