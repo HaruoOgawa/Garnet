@@ -21,13 +21,18 @@
 #include "Core/CImGuiCoreOpenGL.h"
 #endif 
 
+#ifdef USE_WIN32_WindowAPI
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+#endif // USE_WIN32_WindowAPI
 
 namespace gui
 {
 	class CImGuiGUIEngine : public IGUIEngine
 	{
 		std::shared_ptr<IImGuiCore> m_ImGuiCore;
+
+		float m_TestFloatVal;
+		float m_TestFloatSliderVal;
 	public:
 		CImGuiGUIEngine();
 		virtual ~CImGuiGUIEngine();
