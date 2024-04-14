@@ -24,6 +24,11 @@ namespace gui
 	{
 		return true;
 	}
+
+	bool CDummyGUIEngine::CheckInput(HWND window, UINT msg, WPARAM w_param, LPARAM l_param)
+	{
+		return false;
+	}
 #endif
 
 	bool CDummyGUIEngine::BeginFrame(api::IGraphicsAPI* pGraphicsAPI)

@@ -52,6 +52,8 @@ namespace app
 		CDemoAppManager(app::EAppType AppType);
 		virtual ~CDemoAppManager();
 
+		const std::shared_ptr<gui::IGUIEngine>& GetGUIEngine() const;
+
 		bool Initialize(HINSTANCE hInstance);
 		bool RunLopp();
 

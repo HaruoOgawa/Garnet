@@ -93,6 +93,11 @@ namespace app
 		g_AppManager = nullptr;
 	}
 
+	const std::shared_ptr<gui::IGUIEngine>& CDemoAppManager::GetGUIEngine() const
+	{
+		return m_GUIEngine;
+	}
+
 	bool CDemoAppManager::Initialize(HINSTANCE hInstance)
 	{
 		if (!InitWindow(hInstance)) return false;
@@ -128,7 +133,7 @@ namespace app
 		AppManager->ResizeWindow(width, height);
 	}*/
 
-	void KetCallback(HWND window, UINT msg, WPARAM w_param, LPARAM l_param, bool IsDown)
+	void KeyCallback(HWND window, UINT msg, WPARAM w_param, LPARAM l_param, bool IsDown)
 	{
 		if (w_param < 256)
 		{
@@ -272,19 +277,28 @@ namespace app
 	// ウィンドウのコールバック関数
 	LRESULT MainWindowCallback(HWND window, UINT msg, WPARAM w_param, LPARAM l_param)
 	{
-		LRESULT result = 0;
+		if (!g_AppManager) return false;
 
+		auto AppManager = g_AppManager;
+		
+		auto GUIEngine = AppManager->GetGUIEngine();
+		if (GUIEngine)
+		{
+			if (GUIEngine->CheckInput(window, msg, w_param, l_param)) return true;
+		}
+
+		LRESULT result = 0;
 
 		// インプット
 		switch (msg)
 		{
 
 			case WM_KEYDOWN : 
-				KetCallback(window, msg, w_param, l_param, true);
+				KeyCallback(window, msg, w_param, l_param, true);
 				break;
 
 			case WM_KEYUP:
-				KetCallback(window, msg, w_param, l_param, false);
+				KeyCallback(window, msg, w_param, l_param, false);
 				break;
 #ifdef USE_INPUT_SYSTEM
 			case WM_LBUTTONDOWN:

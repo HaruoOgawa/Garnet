@@ -3,21 +3,6 @@
 #include "CImGuiGUIEngine.h"
 #include "../../Message/Console.h"
 
-#include <imgui.h>
-#ifdef USE_GLFW
-#include <imgui_impl_glfw.h>
-#elif USE_WIN32_WindowAPI
-#include <imgui_impl_win32.h>
-#endif // USE_GLFW
-
-#ifdef USE_VULKAN
-#include "Core/CImGuiCoreVulkan.h"
-#elif USE_WEBGPU
-#include "Core/CImGuiCoreWebGPU.h"
-#elif USE_OPENGL
-#include "Core/CImGuiCoreOpenGL.h"
-#endif 
-
 namespace gui
 {
 	CImGuiGUIEngine::CImGuiGUIEngine():
@@ -99,6 +84,11 @@ namespace gui
 		if (!m_ImGuiCore->Initialize(pGraphicsAPI)) return false;
 
 		return true;
+	}
+
+	bool CImGuiGUIEngine::CheckInput(HWND window, UINT msg, WPARAM w_param, LPARAM l_param)
+	{
+		return ImGui_ImplWin32_WndProcHandler(window, msg, w_param, l_param);
 	}
 #endif
 

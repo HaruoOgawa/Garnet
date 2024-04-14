@@ -18,6 +18,8 @@ namespace gui
 		virtual bool InitializeWithGLFW(GLFWwindow* pWindow, api::IGraphicsAPI* pGraphicsAPI) = 0;
 #elif USE_WIN32_WindowAPI
 		virtual bool InitializeWithWin32API(HWND window, api::IGraphicsAPI* pGraphicsAPI) = 0;
+
+		virtual bool CheckInput(HWND window, UINT msg, WPARAM w_param, LPARAM l_param) = 0;
 #endif
 		virtual void Release(api::IGraphicsAPI* pGraphicsAPI) = 0;
 
