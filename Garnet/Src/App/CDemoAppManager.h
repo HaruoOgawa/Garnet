@@ -1,6 +1,6 @@
 #pragma once
 
-#ifdef USE_OPENGL
+#ifdef USE_WIN32_WindowAPI
 #include <memory>
 #include <Windows.h>
 //#include "../GraphicsAPI/OpenGL/wglDef.h"
@@ -10,6 +10,7 @@ namespace api { class COpenGLAPI; }
 namespace app { class IApp; }
 namespace input { class CInputState; }
 namespace resource { class CLoadWorker; }
+namespace gui { class IGUIEngine; }
 
 namespace app
 {
@@ -30,12 +31,15 @@ namespace app
 
 		std::shared_ptr<resource::CLoadWorker> m_LoadWorker;
 
+#ifdef USE_OPENGL
 		std::shared_ptr<api::COpenGLAPI> m_GraphicsAPI;
+#endif // USE_OPENGL
+		
 		std::shared_ptr<app::IApp> m_App;
 
-#ifdef USE_INPUT_SYSTEM
 		std::shared_ptr<input::CInputState> m_InputState;
-#endif
+
+		std::shared_ptr<gui::IGUIEngine> m_GUIEngine;
 	private:
 		bool InitWindow(HINSTANCE hInstance);
 		bool InitGLContext();
@@ -48,15 +52,15 @@ namespace app
 		CDemoAppManager(app::EAppType AppType);
 		virtual ~CDemoAppManager();
 
+		const std::shared_ptr<gui::IGUIEngine>& GetGUIEngine() const;
+
 		bool Initialize(HINSTANCE hInstance);
 		bool RunLopp();
 
 		bool IsRunLoop() { return m_IsRunLoop; }
 		void SetRunLoop(bool RunLoop) { m_IsRunLoop = RunLoop; }
-#ifdef USE_INPUT_SYSTEM
 		const std::shared_ptr<input::CInputState>& GetInputState()const { return m_InputState; }
-#endif
 		void ResizeWindow(int w, int h);
 	};
 }
-#endif // USE_OPENGL
+#endif // USE_WIN32_WindowAPI

@@ -8,8 +8,6 @@
 #include "IRenderPass.h"
 #include "../GraphicsAPI/ERenderPassFormat.h"
 
-#ifndef __EMSCRIPTEN__
-
 #ifdef USE_VULKAN 
 #define NOMINMAX
 #define VK_USE_PLATFORM_WIN32_KHR
@@ -17,12 +15,10 @@
 #define GLFW_EXPOSE_NATIVE_WIN32
 #endif
 
-#ifndef USE_OPENGL
+#ifdef USE_GLFW
 #include <glfw3.h>
 #include <glfw3native.h>
-#endif // !USE_OPENGL
-
-#endif // !__EMSCRIPTEN__
+#endif // USE_GLFW
 
 namespace graphics
 {

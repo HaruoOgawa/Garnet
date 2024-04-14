@@ -1,13 +1,11 @@
-#if (defined(USE_VULKAN) || defined(USE_WEBGPU)) && !defined(__EMSCRIPTEN__)
+#ifdef USE_GLFW
 
 #include "../../App/CDescAppManager.h"
 #include "../../App/EAppType.h"
 #include "../../Message/Console.h"
 
 #ifdef __EMSCRIPTEN__
-#include <emscripten/emscripten.h>
-#include <emscripten/html5_webgpu.h>
-#elif defined(USE_WEBGPU) && defined(__CMAKE__)
+#include <emscripten.h>
 #else
 #include <Windows.h>
 #endif
@@ -16,18 +14,67 @@ extern "C" {
 
 descapp::CDescAppManager* g_DescApp = nullptr;
 
-bool RunLopp()
+void Release()
 {
-	if(!g_DescApp->RunLopp()) return false;
-
-	return true;
+	delete g_DescApp;
+	g_DescApp = nullptr;
 }
 
 #ifdef __EMSCRIPTEN__
+void RunLopp()
+#else
+bool RunLopp()
+#endif // __EMSCRIPTEN__
+{
+	if (!g_DescApp->RunLopp() || !g_DescApp->IsRunLoop())
+	{
+		Release();
+
+#ifndef __EMSCRIPTEN__
+		return false;
+#endif // !__EMSCRIPTEN__
+	}
+
+#ifndef __EMSCRIPTEN__
+	return true;
+#endif // !__EMSCRIPTEN__
+}
+
+#ifdef __EMSCRIPTEN__
+// InputŒn‚ÍGLFW‚É”C‚¹‚é‚Ì‚Å‰½‚à‚µ‚È‚¢
 EMSCRIPTEN_KEEPALIVE
 void OnKeyDown(char* key)
 {
-	Console::Log("[OnKeyDown] key: %c\n", key);
+}
+
+EMSCRIPTEN_KEEPALIVE
+void OnKeyUp(char* key)
+{
+}
+
+EMSCRIPTEN_KEEPALIVE
+void OnResize(int w, int h)
+{
+}
+
+EMSCRIPTEN_KEEPALIVE
+void OnMouseDown(int buttonNum, int x, int y)
+{
+}
+
+EMSCRIPTEN_KEEPALIVE
+void OnMouseUp(int buttonNum, int x, int y)
+{
+}
+
+EMSCRIPTEN_KEEPALIVE
+void OnMouseMove(int x, int y)
+{
+}
+
+EMSCRIPTEN_KEEPALIVE
+void OnMouseWheel(int deltaY)
+{
 }
 
 EMSCRIPTEN_KEEPALIVE
@@ -38,22 +85,22 @@ void StartApp()
 	
 	if (g_DescApp->Initialize())
 	{
-#ifndef __EMSCRIPTEN__
+#ifdef __EMSCRIPTEN__
+		emscripten_set_main_loop(RunLopp, 60, true);
+#else
 		while (g_DescApp->IsRunLoop())
 		{
 			if (!RunLopp()) break;
 		}
-#else
-		emscripten_set_main_loop(RunLopp, 60, true);
-#endif
-		
+#endif // __EMSCRIPTEN__
 	}
-
-	delete g_DescApp;
-	g_DescApp = nullptr;
+	else
+	{
+		Release();
+	}
 }
 
-#if defined(USE_WEBGPU) && defined(__CMAKE__)
+#if defined(__EMSCRIPTEN__) || defined(__CMAKE__)
 int main()
 #else
 int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
@@ -68,4 +115,4 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
 
 }
 
-#endif // USE_VULKAN
+#endif // USE_GLFW

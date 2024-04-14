@@ -1,0 +1,30 @@
+#pragma once
+
+#ifdef USE_GLFW
+#include <glfw3.h>
+#include <glfw3native.h>
+#elif USE_WIN32_WindowAPI
+#include <Windows.h>
+#endif
+
+#include "../../Interface/IGraphicsAPI.h"
+
+namespace gui
+{
+	class IGUIEngine
+	{
+	public:
+#ifdef USE_GLFW
+		virtual bool InitializeWithGLFW(GLFWwindow* pWindow, api::IGraphicsAPI* pGraphicsAPI) = 0;
+#elif USE_WIN32_WindowAPI
+		virtual bool InitializeWithWin32API(HWND window, api::IGraphicsAPI* pGraphicsAPI) = 0;
+
+		virtual bool CheckInput(HWND window, UINT msg, WPARAM w_param, LPARAM l_param) = 0;
+#endif
+		virtual void Release(api::IGraphicsAPI* pGraphicsAPI) = 0;
+
+		virtual bool BeginFrame(api::IGraphicsAPI* pGraphicsAPI) = 0;
+
+		virtual bool EndFrame(api::IGraphicsAPI* pGraphicsAPI) = 0;
+	};
+}

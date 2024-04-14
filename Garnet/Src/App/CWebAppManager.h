@@ -1,5 +1,5 @@
 #pragma once
-#ifdef __EMSCRIPTEN__
+#ifdef USE_WEB_NATIVE
 #include <string>
 #include <memory>
 #include "EAppType.h"
@@ -8,6 +8,7 @@ namespace api { class CWebGPUAPI; }
 namespace app { class IApp; }
 namespace input { class CInputState; }
 namespace resource { class CLoadWorker; }
+namespace gui { class IGUIEngine; }
 
 namespace webapp
 {
@@ -27,6 +28,8 @@ namespace webapp
 		int m_Width;
 		int m_Height;
 
+		std::shared_ptr<gui::IGUIEngine> m_GUIEngine;
+
 	private:
 		bool Release();
 
@@ -43,10 +46,6 @@ namespace webapp
 		bool RunLoop();
 		bool IsRunLoop(){ return m_IsRunLoop; }
 
-#ifndef __EMSCRIPTEN__
-		//bool InputState
-#endif // !__EMSCRIPTEN__
-
 		// インプットイベント
 		void OnKeyDown(std::string key);
 		void OnKeyUp(std::string key);
@@ -61,4 +60,4 @@ namespace webapp
 		void OnMouseWheel(int deltaY);
 	};
 }
-#endif
+#endif // USE_WEB_NATIVE

@@ -302,6 +302,11 @@ namespace api
 		return m_SwapChainFormat;
 	}
 
+	WGPURenderPassEncoder CWebGPUAPI::GetSwapChainRenderPass() const
+	{
+		return m_SwapChainRenderPass;
+	}
+
 	WGPURenderPassEncoder CWebGPUAPI::GetCurrentRenderPass() const
 	{
 		return m_CurrentRenderPass;

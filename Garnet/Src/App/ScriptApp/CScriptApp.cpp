@@ -6,6 +6,7 @@
 #include "../../Projection/CProjection.h"
 #include "../../ImageEffect/CBlurEffect.h"
 #include "../../Message/Console.h"
+#include "../../Interface/IGUIEngine.h"
 
 #ifdef USE_VIEWER_CAMERA
 #include "../../Camera/CViewerCamera.h"
@@ -96,23 +97,13 @@ namespace app
 		return true;
 	}
 
-#ifdef USE_INPUT_SYSTEM
 	bool CScriptApp::Update(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<input::CInputState>& InputState)
-#else
-	bool CScriptApp::Update(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker)
-#endif
 	{
 		if (!pLoadWorker->Update(pGraphicsAPI)) return false;
 
-#ifdef USE_INPUT_SYSTEM
 		if (!m_ScriptScene->Update(pGraphicsAPI, m_PhysicsEngine.get(), pLoadWorker, m_MainCamera, m_Projection, m_DrawInfo, InputState)) return false;
-#else
-		if (!m_ScriptScene->Update(pGraphicsAPI, m_PhysicsEngine.get(), pLoadWorker, m_MainCamera, m_Projection, m_DrawInfo)) return false;
-#endif
 
 		if (!m_BlurEffect->Update(pLoadWorker)) return false;
-
-		//Console::Log("[CPP] m_MainCamera => x: %f, y: %f, z: %f\n", m_MainCamera->GetPos().x, m_MainCamera->GetPos().y, m_MainCamera->GetPos().z);
 
 		return true;
 	}
@@ -133,7 +124,7 @@ namespace app
 		return true;
 	}
 
-	bool CScriptApp::Draw(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker)
+	bool CScriptApp::Draw(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<gui::IGUIEngine>& GUIEngine)
 	{
 		// Prepare
 		if (!pGraphicsAPI->PrepareRender()) return false;
@@ -155,6 +146,10 @@ namespace app
 		if (!m_ScriptScene->Draw(pGraphicsAPI, false, m_MainCamera, m_Projection, m_DrawInfo)) return false;
 		if (!pLoadWorker->Draw(pGraphicsAPI, false, m_MainCamera, m_Projection, m_DrawInfo)) return false;
 		
+		// GUIEngine
+		if (!GUIEngine->BeginFrame(pGraphicsAPI)) return false;
+		if (!GUIEngine->EndFrame(pGraphicsAPI)) return false;
+
 		if (!pGraphicsAPI->EndRender()) return false;
 
 		// Submit

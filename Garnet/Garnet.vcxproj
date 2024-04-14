@@ -391,9 +391,9 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;USE_VULKAN;USE_TEXTURE_LOADER;USE_GLTF;USE_VIEWER_CAMERA;USE_INPUT_SYSTEM;USE_GPGPU;USE_FBX;USE_ANIMATION;USE_MMD;USE_PHYSICS;B3_USE_CLEW;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;USE_GLFW;USE_VULKAN;USE_TEXTURE_LOADER;USE_GLTF;USE_VIEWER_CAMERA;USE_INPUT_SYSTEM;USE_GPGPU;USE_FBX;USE_ANIMATION;USE_MMD;USE_PHYSICS;B3_USE_CLEW;USE_GUIENGINE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)src\Library\glm;$(ProjectDir)Src\Library\json;$(ProjectDir)src\Library\GLFW\include;$(ProjectDir)src\Library\Vulkan\include;$(ProjectDir)src\Library\tinygltf\;$(ProjectDir)Src\Library\FBX-SDK\include;$(ProjectDir)Src\Library\bullet3\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src\Library\glm;$(ProjectDir)Src\Library\json;$(ProjectDir)src\Library\GLFW\include;$(ProjectDir)src\Library\Vulkan\include;$(ProjectDir)src\Library\tinygltf\;$(ProjectDir)Src\Library\FBX-SDK\include;$(ProjectDir)Src\Library\bullet3\src;$(ProjectDir)Src\Library\imgui;$(ProjectDir)Src\Library\imgui\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
@@ -415,9 +415,9 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;USE_OPENGL;USE_TEXTURE_LOADER;USE_GLTF;USE_VIEWER_CAMERA;USE_INPUT_SYSTEM;USE_GPGPU;USE_FBX;USE_ANIMATION;USE_MMD;USE_PHYSICS;B3_USE_CLEW;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;USE_OPENGL;USE_WIN32_WindowAPI;USE_TEXTURE_LOADER;USE_GLTF;USE_VIEWER_CAMERA;USE_INPUT_SYSTEM;USE_GPGPU;USE_FBX;USE_ANIMATION;USE_MMD;USE_PHYSICS;B3_USE_CLEW;USE_GUIENGINE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)src\Library\glm;$(ProjectDir)Src\Library\json;$(ProjectDir)src\Library\tinygltf\;$(ProjectDir)Src\Library\FBX-SDK\include;$(ProjectDir)Src\Library\bullet3\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src\Library\glm;$(ProjectDir)Src\Library\json;$(ProjectDir)src\Library\tinygltf\;$(ProjectDir)Src\Library\FBX-SDK\include;$(ProjectDir)Src\Library\bullet3\src;$(ProjectDir)Src\Library\imgui;$(ProjectDir)Src\Library\imgui\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
@@ -437,9 +437,9 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;USE_WEBGPU;USE_WebGPUNative;USE_TEXTURE_LOADER;USE_GLTF;USE_VIEWER_CAMERA;USE_INPUT_SYSTEM;USE_GPGPU;USE_FBX;USE_ANIMATION;USE_SMALL_FBX;mrDebug;USE_MMD;USE_PHYSICS;B3_USE_CLEW;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;USE_GLFW;USE_WEBGPU;USE_WebGPUNative;USE_TEXTURE_LOADER;USE_GLTF;USE_VIEWER_CAMERA;USE_INPUT_SYSTEM;USE_GPGPU;USE_FBX;USE_ANIMATION;USE_SMALL_FBX;mrDebug;USE_MMD;USE_PHYSICS;B3_USE_CLEW;USE_GUIENGINE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)src\Library\glm;$(ProjectDir)Src\Library\json;$(ProjectDir)src\Library\GLFW\include;$(ProjectDir)src\Library\tinygltf\;$(ProjectDir)src\Library\glfw3webgpu;//$(ProjectDir)Src\Library\DawnLib\include;//$(ProjectDir)Src\Library\DawnLib\src;$(ProjectDir)Src\Library\WebGPU;$(ProjectDir)Src\Library\SmallFBX\include;$(ProjectDir)Src\Library\bullet3\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src\Library\glm;$(ProjectDir)Src\Library\json;$(ProjectDir)src\Library\GLFW\include;$(ProjectDir)src\Library\tinygltf\;$(ProjectDir)src\Library\glfw3webgpu;//$(ProjectDir)Src\Library\DawnLib\include;//$(ProjectDir)Src\Library\DawnLib\src;$(ProjectDir)Src\Library\WebGPU;$(ProjectDir)Src\Library\SmallFBX\include;$(ProjectDir)Src\Library\bullet3\src;$(ProjectDir)Src\Library\imgui;$(ProjectDir)Src\Library\imgui\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
@@ -573,8 +573,29 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Src\GUIEngine\imgui\Core\CImGuiCoreOpenGL.h" />
+    <ClInclude Include="Src\GUIEngine\imgui\Core\CImGuiCoreWebGPU.h" />
+    <ClInclude Include="Src\GUIEngine\imgui\Core\CImGuiCoreVulkan.h" />
+    <ClInclude Include="Src\GUIEngine\imgui\CImGuiGUIEngine.h" />
+    <ClInclude Include="Src\GUIEngine\CDummyGUIEngine.h" />
+    <ClInclude Include="Src\GUIEngine\imgui\Core\IImGuiCore.h" />
+    <ClInclude Include="Src\Interface\IGUIEngine.h" />
+    <ClInclude Include="Src\PhysicsEngine\CDummyPhysicsEngine.h" />
     <ClInclude Include="Src\Audio\CAudioMachine.h" />
     <ClInclude Include="Src\Audio\CAudioClip.h" />
+    <ClInclude Include="Src\Library\imgui\backends\imgui_impl_glfw.h" />
+    <ClInclude Include="Src\Library\imgui\backends\imgui_impl_opengl3.h" />
+    <ClInclude Include="Src\Library\imgui\backends\imgui_impl_opengl3_loader.h" />
+    <ClInclude Include="Src\Library\imgui\backends\imgui_impl_vulkan.h" />
+    <ClInclude Include="Src\Library\imgui\backends\imgui_impl_wgpu.h" />
+    <ClInclude Include="Src\Library\imgui\backends\imgui_impl_win32.h" />
+    <ClInclude Include="Src\Library\imgui\imconfig.h" />
+    <ClInclude Include="Src\Library\imgui\imgui.h" />
+    <ClInclude Include="Src\Library\imgui\imgui_internal.h" />
+    <ClInclude Include="Src\Library\imgui\imstb_rectpack.h" />
+    <ClInclude Include="Src\Library\imgui\imstb_textedit.h" />
+    <ClInclude Include="Src\Library\imgui\imstb_truetype.h" />
+    <ClInclude Include="Src\Library\imgui\misc\cpp\imgui_stdlib.h" />
     <ClInclude Include="Src\LoadWorker\CAudioLoader.h" />
     <ClInclude Include="Src\Animation\CIKSolver.h" />
     <ClInclude Include="Src\Graphics\CMorphController.h" />
@@ -1447,8 +1468,25 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClInclude Include="Src\Interface\IRenderer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\GUIEngine\imgui\Core\CImGuiCoreOpenGL.cpp" />
+    <ClCompile Include="Src\GUIEngine\imgui\Core\CImGuiCoreWebGPU.cpp" />
+    <ClCompile Include="Src\GUIEngine\imgui\Core\CImGuiCoreVulkan.cpp" />
+    <ClCompile Include="Src\GUIEngine\imgui\CImGuiGUIEngine.cpp" />
+    <ClCompile Include="Src\GUIEngine\CDummyGUIEngine.cpp" />
+    <ClCompile Include="Src\PhysicsEngine\CDummyPhysicsEngine.cpp" />
     <ClCompile Include="Src\Audio\CAudioMachine.cpp" />
     <ClCompile Include="Src\Audio\CAudioClip.cpp" />
+    <ClCompile Include="Src\Library\imgui\backends\imgui_impl_glfw.cpp" />
+    <ClCompile Include="Src\Library\imgui\backends\imgui_impl_opengl3.cpp" />
+    <ClCompile Include="Src\Library\imgui\backends\imgui_impl_vulkan.cpp" />
+    <ClCompile Include="Src\Library\imgui\backends\imgui_impl_wgpu.cpp" />
+    <ClCompile Include="Src\Library\imgui\backends\imgui_impl_win32.cpp" />
+    <ClCompile Include="Src\Library\imgui\imgui.cpp" />
+    <ClCompile Include="Src\Library\imgui\imgui_demo.cpp" />
+    <ClCompile Include="Src\Library\imgui\imgui_draw.cpp" />
+    <ClCompile Include="Src\Library\imgui\imgui_tables.cpp" />
+    <ClCompile Include="Src\Library\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="Src\Library\imgui\misc\cpp\imgui_stdlib.cpp" />
     <ClCompile Include="Src\LoadWorker\CAudioLoader.cpp" />
     <ClCompile Include="Src\Animation\CIKSolver.cpp" />
     <ClCompile Include="Src\Graphics\CMorphController.cpp" />
@@ -1787,8 +1825,13 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
   <ItemGroup>
     <None Include="CMakeBuild\Garnet_front.js" />
     <None Include="CMakeBuild\index.html" />
+    <None Include="Commands\GetLibAndPath.py" />
     <None Include="Commands\MakeEmccBuild.bat" />
     <None Include="Commands\MakeEmccBuild.py" />
+    <None Include="Commands\RemakeCmakeLists.py" />
+    <None Include="Commands\RemakeCmakeLists_DescApp.py" />
+    <None Include="Commands\UTF8Encorder.py" />
+    <None Include="Commands\wgslc_ALL.bat" />
     <None Include="Resources\MaterialFrame\basic_toon_mf.json" />
     <None Include="Resources\MaterialFrame\Blur_MF.json" />
     <None Include="Resources\MaterialFrame\Depth_MF.json" />

@@ -1,6 +1,5 @@
 #pragma once
 
-#ifdef USE_INPUT_SYSTEM
 #include <glm/glm.hpp>
 #include <map>
 #include <vector>
@@ -30,6 +29,8 @@ namespace input
 
 		glm::vec2 m_WheelScrollAmount;
 
+		const float m_GloabalInputSpeed;
+
 		bool m_IsLocked;
 
 		bool m_OnDownMouseLeft;
@@ -42,6 +43,8 @@ namespace input
 		virtual ~CInputState();
 
 		void Clear();
+
+		float GetGloabalInputSpeed() const;
 
 		void StartMousePos(const glm::vec2& MousePos);
 		void SetMousePos(const glm::vec2& MousePos);
@@ -67,4 +70,3 @@ namespace input
 		bool IsKeyUp(EKeyType KeyType);
 	};
 }
-#endif // #ifdef USE_INPUT_SYSTEM

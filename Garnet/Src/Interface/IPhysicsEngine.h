@@ -1,5 +1,4 @@
 #pragma once
-#ifdef USE_PHYSICS
 #include <memory>
 #include <glm/glm.hpp>
 
@@ -21,4 +20,3 @@ namespace physics
 		virtual bool Update(float DeltaTime) = 0;
 	};
 }
-#endif // USE_PHYSICS

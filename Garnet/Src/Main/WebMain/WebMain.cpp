@@ -1,9 +1,11 @@
+#ifdef USE_WEB_NATIVE
 #include "../../App/CWebAppManager.h"
 #include "../../Message/Console.h"
 #include "../../App/EAppType.h"
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
+#endif // __EMSCRIPTEN__
 
 extern "C"
 {
@@ -101,4 +103,4 @@ extern "C"
 		}
 	}
 }
-#endif // __EMSCRIPTEN__
+#endif // USE_WEB_NATIVE

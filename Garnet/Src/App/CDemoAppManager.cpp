@@ -1,8 +1,10 @@
-#ifdef USE_OPENGL
+#ifdef USE_WIN32_WindowAPI
 
 #include "CDemoAppManager.h"
 #include "../LoadWorker/CLoadWorker.h"
+#ifdef USE_OPENGL
 #include "../GraphicsAPI/OpenGL/COpenGLAPI.h"
+#endif
 #include "./ScriptApp/CScriptApp.h"
 
 #ifdef USE_VIEWER_CAMERA
@@ -10,6 +12,12 @@
 #endif // USE_VIEWER_CAMERA
 
 #define WGL_IMPLEMENTATION
+
+#ifdef USE_GUIENGINE
+#include "../GUIEngine/imgui/CImGuiGUIEngine.h"
+#else
+#include "../GUIEngine/CDummyGUIEngine.h"
+#endif
 
 namespace app
 {
@@ -25,15 +33,24 @@ namespace app
 		m_SecondsTime(0.0f),
 		m_DeltaSecondsTime(0.0f),
 		m_LoadWorker(nullptr),
-#ifdef USE_INPUT_SYSTEM
 		m_InputState(std::make_shared<input::CInputState>(1.0f)),
-#endif
-		m_GraphicsAPI(std::make_shared<api::COpenGLAPI>(WIDTH, HEIGHT)),
-		m_App(nullptr)
+		m_GraphicsAPI(nullptr),
+		m_App(nullptr),
+		m_GUIEngine(nullptr)
 	{
 		g_AppManager = this; // 仮のグローバル変数
 
+#ifdef USE_OPENGL
+		m_GraphicsAPI = std::make_shared<api::COpenGLAPI>(WIDTH, HEIGHT);
+#endif
+
 		m_App = std::make_shared<app::CScriptApp>();
+
+#ifdef USE_GUIENGINE
+		m_GUIEngine = std::make_shared<gui::CImGuiGUIEngine>();
+#else
+		m_GUIEngine = std::make_shared<gui::CDummyGUIEngine>();
+#endif
 	}
 
 	CDemoAppManager::~CDemoAppManager()
@@ -49,6 +66,13 @@ namespace app
 		{
 			m_LoadWorker.reset();
 			m_LoadWorker = nullptr;
+		}
+
+		if (m_GUIEngine)
+		{
+			m_GUIEngine->Release(m_GraphicsAPI.get());
+			m_GUIEngine.reset();
+			m_GUIEngine = nullptr;
 		}
 
 		if (m_GraphicsAPI)
@@ -69,12 +93,21 @@ namespace app
 		g_AppManager = nullptr;
 	}
 
+	const std::shared_ptr<gui::IGUIEngine>& CDemoAppManager::GetGUIEngine() const
+	{
+		return m_GUIEngine;
+	}
+
 	bool CDemoAppManager::Initialize(HINSTANCE hInstance)
 	{
 		if (!InitWindow(hInstance)) return false;
 		//if (!InitWGL()) return false;
 		if (!InitGLContext()) return false;
 		if (!m_GraphicsAPI->Initialize()) return false;
+
+#ifdef USE_GUIENGINE
+		if (!m_GUIEngine->InitializeWithWin32API(m_Window, m_GraphicsAPI.get())) return false;
+#endif
 
 		// ロードワーカー
 		m_LoadWorker = std::make_shared<resource::CLoadWorker>(m_GraphicsAPI.get());
@@ -100,7 +133,7 @@ namespace app
 		AppManager->ResizeWindow(width, height);
 	}*/
 
-	void KetCallback(HWND window, UINT msg, WPARAM w_param, LPARAM l_param, bool IsDown)
+	void KeyCallback(HWND window, UINT msg, WPARAM w_param, LPARAM l_param, bool IsDown)
 	{
 		if (w_param < 256)
 		{
@@ -244,19 +277,28 @@ namespace app
 	// ウィンドウのコールバック関数
 	LRESULT MainWindowCallback(HWND window, UINT msg, WPARAM w_param, LPARAM l_param)
 	{
-		LRESULT result = 0;
+		if (!g_AppManager) return false;
 
+		auto AppManager = g_AppManager;
+		
+		auto GUIEngine = AppManager->GetGUIEngine();
+		if (GUIEngine)
+		{
+			if (GUIEngine->CheckInput(window, msg, w_param, l_param)) return true;
+		}
+
+		LRESULT result = 0;
 
 		// インプット
 		switch (msg)
 		{
 
 			case WM_KEYDOWN : 
-				KetCallback(window, msg, w_param, l_param, true);
+				KeyCallback(window, msg, w_param, l_param, true);
 				break;
 
 			case WM_KEYUP:
-				KetCallback(window, msg, w_param, l_param, false);
+				KeyCallback(window, msg, w_param, l_param, false);
 				break;
 #ifdef USE_INPUT_SYSTEM
 			case WM_LBUTTONDOWN:
@@ -312,9 +354,7 @@ namespace app
 			if (!FixedUpdate()) return false;
 			if (!Draw()) return false;
 
-#ifdef USE_INPUT_SYSTEM
 			m_InputState->Clear();
-#endif
 		}
 
 		return true;
@@ -456,14 +496,10 @@ namespace app
 		m_App->GetDrawInfo()->SetDeltaSecondsTime(m_DeltaSecondsTime);
 
 		// ViewCameraのUpdate
-#ifdef USE_INPUT_SYSTEM
 		const auto& MainCamera = m_App->GetMainCamera();
 		if (MainCamera) MainCamera->Update(m_DeltaSecondsTime, m_InputState);
 
 		if (!m_App->Update(m_GraphicsAPI.get(), m_LoadWorker.get(), m_InputState)) return false;
-#else
-		if (!m_App->Update(m_GraphicsAPI.get(), m_LoadWorker.get())) return false;
-#endif // USE_INPUT_SYSTEM
 
 		return true;
 	}
@@ -485,7 +521,7 @@ namespace app
 	bool CDemoAppManager::Draw()
 	{
 		// Appの描画
-		if (!m_App->Draw(m_GraphicsAPI.get(), m_LoadWorker.get())) return false;
+		if (!m_App->Draw(m_GraphicsAPI.get(), m_LoadWorker.get(), m_GUIEngine)) return false;
 
 		//カラーバッファを入れ替える
 		SwapBuffers(m_Device_Context);
@@ -493,4 +529,4 @@ namespace app
 		return true;
 	}
 }
-#endif // USE_OPENGL
+#endif // USE_WIN32_WindowAPI

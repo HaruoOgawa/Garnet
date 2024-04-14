@@ -9,6 +9,7 @@ project(Garnet, C CXX)
 set(CMAKE_BUILD_TYPE debug)
 
 add_definitions(
+	-DUSE_WEB_NATIVE
 	-DUSE_WEBGPU
 	-DUSE_TEXTURE_LOADER
 	-DUSE_GLTF

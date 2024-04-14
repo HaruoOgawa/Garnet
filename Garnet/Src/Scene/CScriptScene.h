@@ -31,28 +31,8 @@ namespace scene
 		std::shared_ptr<graphics::CMaterialFrame> m_DepthMF;
 		std::shared_ptr<graphics::CMaterialFrame> m_PBRMF;
 
-		// Audio
-		std::shared_ptr<audio::CAudioClip> m_AudioClip;
-
 		//
-		std::shared_ptr<graphics::CTexture> m_Cube_Texture;
-
-		// glTF
-		std::shared_ptr<object::C3DObject> m_SimpleMorphObj;
-		std::shared_ptr<object::C3DObject> m_BrainStemObj;
-
-		// Fbx
-		std::shared_ptr<object::C3DObject> m_Walk_Animation;
-		std::shared_ptr<object::C3DObject> m_Jump_Animation;
-		std::shared_ptr<object::C3DObject> m_Punch_Animation;
-		std::shared_ptr<object::C3DObject> m_XBotObject;
-		std::shared_ptr<object::C3DObject> m_MouseyObject;
-		std::shared_ptr<object::C3DObject> m_WarrokObject;
-
-		// PhysicsObj
-		std::shared_ptr<object::C3DObject> m_PhysicsGround;
-		std::shared_ptr<object::C3DObject> m_PhysicsSphere;
-		std::shared_ptr<object::C3DObject> m_PhysicsCubeList;
+		std::shared_ptr<object::C3DObject> m_UITestSphere;
 
 		// MMD
 		std::shared_ptr<object::C3DObject> m_TdaMiku_Model;
@@ -74,13 +54,8 @@ namespace scene
 
 		bool IsLoaded() const;
 
-#ifdef USE_INPUT_SYSTEM
 		bool Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
 			const std::shared_ptr<graphics::CDrawInfo>& DrawInfo, const std::shared_ptr<input::CInputState>& InputState);
-#else
-		bool Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<camera::CCamera>& Camera, 
-			const std::shared_ptr<projection::CProjection>& Projection, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo);
-#endif
 		bool LateUpdate(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo);
 		bool FixedUpdate(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo);
 

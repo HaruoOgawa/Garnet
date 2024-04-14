@@ -1,4 +1,4 @@
-#ifdef __EMSCRIPTEN__
+#ifdef USE_WEB_NATIVE
 #include "CWebAppManager.h"
 #include "../LoadWorker/CLoadWorker.h"
 #include "../Message/Console.h"
@@ -16,6 +16,12 @@
 
 #include "../Input/CInputState.h"
 
+#ifdef USE_GUIENGINE
+#include "../GUIEngine/imgui/CImGuiGUIEngine.h"
+#else
+#include "../GUIEngine/CDummyGUIEngine.h"
+#endif
+
 namespace webapp
 {
 	CWebAppManager::CWebAppManager(app::EAppType AppType, int Width, int Height):
@@ -32,6 +38,12 @@ namespace webapp
 		m_GraphicsAPI = std::make_shared<api::CWebGPUAPI>(Width, Height);
 
 		m_App = std::make_shared<app::CScriptApp>();
+
+#ifdef USE_GUIENGINE
+		m_GUIEngine = std::make_shared<gui::CImGuiGUIEngine>();
+#else
+		m_GUIEngine = std::make_shared<gui::CDummyGUIEngine>();
+#endif
 	}
 
 	CWebAppManager::~CWebAppManager()
@@ -54,6 +66,13 @@ namespace webapp
 			m_LoadWorker = nullptr;
 		}
 
+		if (m_GUIEngine)
+		{
+			m_GUIEngine->Release(m_GraphicsAPI.get());
+			m_GUIEngine.reset();
+			m_GUIEngine = nullptr;
+		}
+
 		if (m_GraphicsAPI)
 		{
 			m_GraphicsAPI->Release();
@@ -67,6 +86,10 @@ namespace webapp
 	bool CWebAppManager::Initialize()
 	{
 		if (!m_GraphicsAPI->Initialize()) return false;
+
+#ifdef USE_GUIENGINE
+		//if (!m_GUIEngine->InitializeWithGLFW(m_pWindow, m_GraphicsAPI.get())) return false;
+#endif
 
 		// ロードワーカー
 		m_LoadWorker = std::make_shared<resource::CLoadWorker>(m_GraphicsAPI.get());
@@ -110,10 +133,8 @@ namespace webapp
 		m_App->GetDrawInfo()->SetDeltaSecondsTime(m_DeltaSecondsTime);
 
 		// ViewCameraのUpdate
-#ifdef USE_INPUT_SYSTEM
 		const auto& MainCamera = m_App->GetMainCamera();
 		if (MainCamera) MainCamera->Update(m_DeltaSecondsTime, m_InputState);
-#endif // USE_INPUT_SYSTEM
 
 		if (!m_App->Update(m_GraphicsAPI.get(), m_LoadWorker.get(), m_InputState)) return false;
 
@@ -136,7 +157,7 @@ namespace webapp
 
 	bool CWebAppManager::Draw()
 	{
-		if (!m_App->Draw(m_GraphicsAPI.get(), m_LoadWorker.get())) return false;
+		if (!m_App->Draw(m_GraphicsAPI.get(), m_LoadWorker.get(), m_GUIEngine)) return false;
 
 		return true;
 	}
@@ -277,4 +298,4 @@ namespace webapp
 	}
 }
 
-#endif
+#endif // USE_WEB_NATIVE

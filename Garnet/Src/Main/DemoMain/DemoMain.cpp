@@ -1,4 +1,4 @@
-#ifdef USE_OPENGL
+#ifdef USE_WIN32_WindowAPI
 
 #include "../../App/CDemoAppManager.h"
 #include "../../App/EAppType.h"
@@ -42,4 +42,4 @@ extern "C" {
 
 }
 
-#endif // USE_OPENGL
+#endif // USE_WIN32_WindowAPI

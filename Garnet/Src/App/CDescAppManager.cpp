@@ -1,4 +1,4 @@
-#if (defined(USE_VULKAN) || defined(USE_WEBGPU)) && !defined(__EMSCRIPTEN__)
+#ifdef USE_GLFW
 
 #include "CDescAppManager.h"
 #include "../LoadWorker/CLoadWorker.h"
@@ -20,6 +20,12 @@
 #include "../../Camera/CViewerCamera.h"
 #endif // USE_VIEWER_CAMERA
 
+#ifdef USE_GUIENGINE
+#include "../GUIEngine/imgui/CImGuiGUIEngine.h"
+#else
+#include "../GUIEngine/CDummyGUIEngine.h"
+#endif
+
 #include "../Input/CInputState.h"
 
 #include "./ScriptApp/CScriptApp.h"
@@ -35,14 +41,13 @@ namespace descapp
 		m_IsRunLoop(g_IsRunLoop),
 		m_SecondsTime(0.0f), 
 		m_LoadWorker(nullptr),
-#ifdef USE_INPUT_SYSTEM
-#ifdef USE_WEBGPU
-		m_InputState(std::make_shared<input::CInputState>(1.0f)),
+#ifdef __EMSCRIPTEN__
+		m_InputState(std::make_shared<input::CInputState>(0.001f)),
 #else
 		m_InputState(std::make_shared<input::CInputState>(1.0f)),
-#endif // USE_WEBGPU
 #endif
-		m_DeltaSecondsTime(0.0f)
+		m_DeltaSecondsTime(0.0f),
+		m_GUIEngine(nullptr)
 	{
 		//
 #ifdef USE_WEBGPU
@@ -52,6 +57,12 @@ namespace descapp
 #endif // USE_WEBGPU
 		
 		m_App = std::make_shared<app::CScriptApp>();
+
+#ifdef USE_GUIENGINE
+		m_GUIEngine = std::make_shared<gui::CImGuiGUIEngine>();
+#else
+		m_GUIEngine = std::make_shared<gui::CDummyGUIEngine>();
+#endif
 	}
 
 	CDescAppManager::~CDescAppManager()
@@ -77,6 +88,13 @@ namespace descapp
 		{
 			m_LoadWorker.reset();
 			m_LoadWorker = nullptr;
+		}
+
+		if (m_GUIEngine)
+		{
+			m_GUIEngine->Release(m_GraphicsAPI.get());
+			m_GUIEngine.reset();
+			m_GUIEngine = nullptr;
 		}
 
 		if (m_GraphicsAPI)
@@ -105,6 +123,11 @@ namespace descapp
 #else
 		if(!m_GraphicsAPI->InitializeWithGLFW(m_pWindow)) return false;
 #endif
+
+#ifdef USE_GUIENGINE
+		if (!m_GUIEngine->InitializeWithGLFW(m_pWindow, m_GraphicsAPI.get())) return false;
+#endif
+
 		// ロードワーカー
 		m_LoadWorker = std::make_shared<resource::CLoadWorker>(m_GraphicsAPI.get());
 
@@ -294,9 +317,7 @@ namespace descapp
 			if (!FixedUpdate()) return false;
 			if (!Draw()) return false;
 
-#ifdef USE_INPUT_SYSTEM
 			m_InputState->Clear();
-#endif
 		}
 		else
 		{
@@ -317,15 +338,10 @@ namespace descapp
 		m_App->GetDrawInfo()->SetSecondsTime(m_SecondsTime);
 		m_App->GetDrawInfo()->SetDeltaSecondsTime(m_DeltaSecondsTime);
 
-		// ViewCameraのUpdate
-#ifdef USE_INPUT_SYSTEM
 		const auto& MainCamera = m_App->GetMainCamera();
 		if (MainCamera) MainCamera->Update(m_DeltaSecondsTime, m_InputState);
 
 		if (!m_App->Update(m_GraphicsAPI.get(), m_LoadWorker.get(), m_InputState)) return false;
-#else
-		if (!m_App->Update(m_GraphicsAPI.get(), m_LoadWorker.get())) return false;
-#endif // USE_INPUT_SYSTEM
 
 #ifdef _DEBUG
 		// FPSの計測と表示(60FPSを基準とする)
@@ -352,9 +368,9 @@ namespace descapp
 
 	bool CDescAppManager::Draw()
 	{
-		if (!m_App->Draw(m_GraphicsAPI.get(), m_LoadWorker.get())) return false;
+		if (!m_App->Draw(m_GraphicsAPI.get(), m_LoadWorker.get(), m_GUIEngine)) return false;
 
 		return true;
 	}
 }
-#endif
+#endif // USE_GLFW
