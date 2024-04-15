@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.32901.82
+# Visual Studio Version 17
+VisualStudioVersion = 17.7.34024.191
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Garnet", "Garnet.vcxproj", "{9BB5F0A3-4CD3-470F-8D71-8C187FA3332B}"
 EndProject
@@ -11,6 +11,8 @@ Global
 		CompGL|x86 = CompGL|x86
 		DebugGL|x64 = DebugGL|x64
 		DebugGL|x86 = DebugGL|x86
+		DebugGLFW|x64 = DebugGLFW|x64
+		DebugGLFW|x86 = DebugGLFW|x86
 		DebugVK|x64 = DebugVK|x64
 		DebugVK|x86 = DebugVK|x86
 		DebugWG|x64 = DebugWG|x64
@@ -31,6 +33,10 @@ Global
 		{9BB5F0A3-4CD3-470F-8D71-8C187FA3332B}.DebugGL|x64.Build.0 = DebugGL|x64
 		{9BB5F0A3-4CD3-470F-8D71-8C187FA3332B}.DebugGL|x86.ActiveCfg = DebugGL|Win32
 		{9BB5F0A3-4CD3-470F-8D71-8C187FA3332B}.DebugGL|x86.Build.0 = DebugGL|Win32
+		{9BB5F0A3-4CD3-470F-8D71-8C187FA3332B}.DebugGLFW|x64.ActiveCfg = DebugGLFW|x64
+		{9BB5F0A3-4CD3-470F-8D71-8C187FA3332B}.DebugGLFW|x64.Build.0 = DebugGLFW|x64
+		{9BB5F0A3-4CD3-470F-8D71-8C187FA3332B}.DebugGLFW|x86.ActiveCfg = DebugGLFW|Win32
+		{9BB5F0A3-4CD3-470F-8D71-8C187FA3332B}.DebugGLFW|x86.Build.0 = DebugGLFW|Win32
 		{9BB5F0A3-4CD3-470F-8D71-8C187FA3332B}.DebugVK|x64.ActiveCfg = Debug|x64
 		{9BB5F0A3-4CD3-470F-8D71-8C187FA3332B}.DebugVK|x64.Build.0 = Debug|x64
 		{9BB5F0A3-4CD3-470F-8D71-8C187FA3332B}.DebugVK|x86.ActiveCfg = Debug|Win32

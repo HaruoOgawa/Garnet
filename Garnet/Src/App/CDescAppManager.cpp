@@ -12,8 +12,10 @@
 
 #ifdef USE_WEBGPU
 #include "../GraphicsAPI/WebGPU/CWebGPUAPI.h"
-#else
+#elif USE_VULKAN
 #include "../GraphicsAPI/Vulkan/CVulkanAPI.h"
+#elif USE_OPENGL
+#include "../GraphicsAPI/OpenGL/COpenGLAPI.h"
 #endif // USE_WEBGPU
 
 #ifdef USE_VIEWER_CAMERA
@@ -52,8 +54,10 @@ namespace descapp
 		//
 #ifdef USE_WEBGPU
 		m_GraphicsAPI = std::make_shared<api::CWebGPUAPI>(WIDTH, HEIGHT);
-#else
+#elif USE_VULKAN
 		m_GraphicsAPI = std::make_shared<api::CVulkanAPI>(WIDTH, HEIGHT);
+#elif USE_OPENGL
+		m_GraphicsAPI = std::make_shared<api::COpenGLAPI>(WIDTH, HEIGHT);
 #endif // USE_WEBGPU
 		
 		m_App = std::make_shared<app::CScriptApp>();
@@ -281,10 +285,18 @@ namespace descapp
 	bool CDescAppManager::InitWindow()
 	{
 		glfwInit();
+
+#ifndef USE_OPENGL
 		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API); // OpenGL‚ðŽg—p‚µ‚½‚­‚È‚¢‚Ì‚Å‚±‚±‚Å–¾Ž¦“I‚ÉØ‚é
+#endif // !USE_OPENGL
+		
 		//glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
 		m_pWindow = glfwCreateWindow(WIDTH, HEIGHT, "Garnet", nullptr, nullptr);
+
+#ifdef USE_OPENGL
+		glfwMakeContextCurrent(m_pWindow);
+#endif
 
 		glfwSetWindowUserPointer(m_pWindow, this);
 
@@ -369,6 +381,10 @@ namespace descapp
 	bool CDescAppManager::Draw()
 	{
 		if (!m_App->Draw(m_GraphicsAPI.get(), m_LoadWorker.get(), m_GUIEngine)) return false;
+
+#ifdef USE_OPENGL
+		glfwSwapBuffers(m_pWindow);
+#endif
 
 		return true;
 	}
