@@ -122,11 +122,8 @@ namespace descapp
 	bool CDescAppManager::Initialize()
 	{
 		if (!InitWindow()) return false;
-#ifdef __EMSCRIPTEN__
-		if (!m_GraphicsAPI->Initialize()) return false;
-#else
-		if(!m_GraphicsAPI->InitializeWithGLFW(m_pWindow)) return false;
-#endif
+
+		if (!m_GraphicsAPI->InitializeWithGLFW(m_pWindow)) return false;
 
 #ifdef USE_GUIENGINE
 		if (!m_GUIEngine->InitializeWithGLFW(m_pWindow, m_GraphicsAPI.get())) return false;

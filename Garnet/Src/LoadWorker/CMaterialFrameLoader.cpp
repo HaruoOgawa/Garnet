@@ -287,6 +287,12 @@ namespace resource
 				std::vector<float> initValue;
 				GetArray32("initValue", initValue, val);
 
+				bool useInitValue = true;
+				GetBoolean("useInitValue", useInitValue, val);
+
+				int arraySize = 0;
+				GetInt("arraySize", arraySize, val);
+
 				int ByteSize = 0;
 				if (value_type == "mat4")
 				{
@@ -322,7 +328,29 @@ namespace resource
 				}
 				else if (value_type == "float_array")
 				{
-					ByteSize = sizeof(float) * static_cast<int>(initValue.size());
+					if (useInitValue)
+					{
+						ByteSize = sizeof(float) * static_cast<int>(initValue.size());
+					}
+					else
+					{
+						ByteSize = sizeof(float) * arraySize;
+
+						initValue.resize(arraySize, 0.0f);
+					}
+				}
+				else if (value_type == "mat4_array")
+				{
+					if (useInitValue)
+					{
+						ByteSize = sizeof(float) * static_cast<int>(initValue.size());
+					}
+					else
+					{
+						ByteSize = sizeof(float) * 16 * arraySize;
+
+						initValue.resize(16 * arraySize, 0.0f);
+					}
 				}
 
 				std::shared_ptr<graphics::SBufferValueLayout> ValueLayout = std::make_shared<graphics::SBufferValueLayout>();

@@ -166,18 +166,14 @@
           "name": "SkinMatrixBuffer",
           "binding": 1,
           "isWritable": false,
-          "type": "ssbo",
+          "type": "ubo",
           "bufferUpdateType": "cpu",
           "values": [
             {
               "name": "r_SkinMatrixBuffer",
-              "type": "float_array",
-              "initValue": [ 
-                1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0 ,
-                1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0 ,
-                1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0 ,
-                1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0 
-              ]
+              "type": "mat4_array",
+              "useInitValue": false,
+              "arraySize": 512
             }
           ]
         }

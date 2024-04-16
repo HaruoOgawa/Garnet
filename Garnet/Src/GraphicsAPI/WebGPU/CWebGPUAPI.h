@@ -85,11 +85,11 @@ namespace api
 		CWebGPUAPI(int Width, int Height);
 		virtual ~CWebGPUAPI();
 
-#ifdef __EMSCRIPTEN__
-		virtual bool Initialize() override;
-#else
+#ifdef USE_GLFW
 		virtual bool InitializeWithGLFW(GLFWwindow* pWindow) override;
-#endif // __EMSCRIPTEN__
+#else
+		virtual bool Initialize() override;
+#endif
 
 		void Release();
 

@@ -62,7 +62,7 @@ namespace camera
 		// ƒ}ƒEƒX‘€ì
 		if (InputState->IsDownMouseLeft()) // ƒJƒƒ‰‚Ì‰ñ“]
 		{
-			float RotperSecond = 60.0 * InputState->GetGloabalInputSpeed(); // 1•b‚ ‚½‚è‰½“x‰ñ“]‚³‚¹‚é‚©
+			float RotperSecond = 60.0f * InputState->GetGloabalInputSpeed(); // 1•b‚ ‚½‚è‰½“x‰ñ“]‚³‚¹‚é‚©
 
 			const auto& ViewDir = GetViewDir();
 			glm::vec3 AxisSide = glm::cross(ViewDir, glm::vec3(0.0f, 1.0f, 0.0f));

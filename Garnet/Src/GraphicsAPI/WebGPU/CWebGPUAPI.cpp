@@ -55,11 +55,11 @@ namespace api
 	}
 
 	// IGraphicsAPI //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#ifdef __EMSCRIPTEN__
-	bool CWebGPUAPI::Initialize()
-#else
+#ifdef USE_GLFW
 	bool CWebGPUAPI::InitializeWithGLFW(GLFWwindow* pWindow)
-#endif // __EMSCRIPTEN__
+#else
+	bool CWebGPUAPI::Initialize()
+#endif
 	{
 		if (!CreateInstance()) return false; // インスタンスを生成
 #ifdef __EMSCRIPTEN__

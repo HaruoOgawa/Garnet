@@ -74,14 +74,14 @@ namespace api
 		const COpenGLIndexBuffer* pOpenGLIndexBuffer = static_cast<const COpenGLIndexBuffer*>(IndexBuffer.get());
 		api::COpenGLMaterial* pOpenGLMat = static_cast<api::COpenGLMaterial*>(Material.get());
 
-		// ユニフォームバッファの準備
-		if (!pOpenGLMat->BuildDrawBuffer(DynamicOffsetNum)) return false;
+		// レンダラーをバインド
+		SetActive();
 
 		// マテリアルをバインド
 		pOpenGLMat->SetActive();
 
-		// レンダラーをバインド
-		SetActive();
+		// ユニフォームバッファの準備
+		if (!pOpenGLMat->BuildDrawBuffer(DynamicOffsetNum)) return false;
 
 		// 描画方法の設定
 		// ZTest

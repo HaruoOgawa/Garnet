@@ -46,9 +46,9 @@ layout(binding = 0) uniform UniformBufferObject{
     int   pad2;
 } ubo;
 
-readonly layout(std430, binding = 1) buffer SkinMatrixBuffer
+layout(binding = 1) uniform SkinMatrixBuffer
 {
-    mat4 SkinMat[];
+    mat4 SkinMat[512];
 } r_SkinMatrixBuffer;
 
 layout(location = 0) out vec3 f_WorldNormal;
