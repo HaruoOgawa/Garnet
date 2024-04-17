@@ -29,7 +29,12 @@ namespace api
 		COpenGLAPI(int Width, int Height);
 		virtual ~COpenGLAPI();
 
+#ifdef USE_GLFW
+		virtual bool InitializeWithGLFW(GLFWwindow* pWindow) override;
+#else
 		virtual bool Initialize() override;
+#endif
+		
 		void Release();
 
 		virtual bool CreateRenderPass(const std::string& PassName, ERenderPassFormat RenderPassFormat, const glm::vec4& InitColor, int Width = -1, int Height = -1) override;

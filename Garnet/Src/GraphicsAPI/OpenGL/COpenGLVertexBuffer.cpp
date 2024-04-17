@@ -4,8 +4,7 @@
 namespace api
 {
 	COpenGLVertexBuffer::COpenGLVertexBuffer(api::COpenGLAPI* pGraphicsAPI):
-		m_pGraphicsAPI(pGraphicsAPI),
-		m_VertexBuffer(-1)
+		m_pGraphicsAPI(pGraphicsAPI)
 	{
 	}
 
@@ -13,9 +12,10 @@ namespace api
 	{
 	}
 
-	GLuint COpenGLVertexBuffer::GetVertexBufferIndex() const
+	GLuint COpenGLVertexBuffer::GetPositionVertexBufferIndex() const
 	{
-		return m_VertexBuffer;
+		// 頂点位置は先頭に入っている想定
+		return (m_VertexBufferList.empty() ? -1 : m_VertexBufferList[0]);
 	}
 
 	bool COpenGLVertexBuffer::Create()
@@ -34,8 +34,11 @@ namespace api
 			// http://muko.damember.org/gl4/html-ja/glVertexAttribPointer.xhtml
 			GLsizei byteStride = GetAttribByteStrides()[location];
 
-			glGenBuffers(1, &m_VertexBuffer);
-			glBindBuffer(GL_ARRAY_BUFFER, m_VertexBuffer);
+			GLuint VertexBuffer;
+
+			// バッファオブジェクトは頂点データごとに作る必要がある
+			glGenBuffers(1, &VertexBuffer);
+			glBindBuffer(GL_ARRAY_BUFFER, VertexBuffer);
 			//glBufferData(GL_ARRAY_BUFFER, data.size() * sizeof(data[0]), &data[0], GL_STATIC_DRAW);
 			glBufferData(GL_ARRAY_BUFFER, data.size() * sizeof(data[0]), &data[0], GL_DYNAMIC_DRAW);
 
@@ -50,6 +53,8 @@ namespace api
 				// https://registry.khronos.org/OpenGL-Refpages/gl4/html/glVertexAttribPointer.xhtml
 				glVertexAttribIPointer(location, dimention, attribDataType, byteStride, 0);
 			}
+
+			m_VertexBufferList.push_back(VertexBuffer);
 
 			//glBindBuffer(GL_ARRAY_BUFFER, 0);
 		}

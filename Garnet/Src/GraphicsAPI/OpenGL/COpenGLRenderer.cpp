@@ -74,14 +74,14 @@ namespace api
 		const COpenGLIndexBuffer* pOpenGLIndexBuffer = static_cast<const COpenGLIndexBuffer*>(IndexBuffer.get());
 		api::COpenGLMaterial* pOpenGLMat = static_cast<api::COpenGLMaterial*>(Material.get());
 
-		// ユニフォームバッファの準備
-		if (!pOpenGLMat->BuildDrawBuffer(DynamicOffsetNum)) return false;
+		// レンダラーをバインド
+		SetActive();
 
 		// マテリアルをバインド
 		pOpenGLMat->SetActive();
 
-		// レンダラーをバインド
-		SetActive();
+		// ユニフォームバッファの準備
+		if (!pOpenGLMat->BuildDrawBuffer(DynamicOffsetNum)) return false;
 
 		// 描画方法の設定
 		// ZTest
@@ -168,6 +168,9 @@ namespace api
 			// 後ほど頂点バッファの列挙型を導入する
 			int location = 0;
 
+			GLuint PositionVertexBufferIndex = pRefRendererVertexBuffer->GetPositionVertexBufferIndex();
+			if (PositionVertexBufferIndex == -1) continue;
+
 			int dimention = pRefRendererVertexBuffer->GetAttributeDimensions()[location];
 			GLenum attributeDataType = pRefRendererVertexBuffer->GetGLenumDataType(pRefRendererVertexBuffer->GetAttribDataTypes()[location]);
 			GLsizei byteStride = pRefRendererVertexBuffer->GetAttribByteStrides()[location];
@@ -175,7 +178,7 @@ namespace api
 			//
 			Renderer->SetActive();
 
-			glBindBuffer(GL_ARRAY_BUFFER, pRefRendererVertexBuffer->GetVertexBufferIndex());
+			glBindBuffer(GL_ARRAY_BUFFER, PositionVertexBufferIndex);
 			glBufferData(GL_ARRAY_BUFFER, sizeof(PosAttribute[0]) * PosAttribute.size(), &PosAttribute[0], GL_DYNAMIC_DRAW);
 
 			glEnableVertexAttribArray(location);

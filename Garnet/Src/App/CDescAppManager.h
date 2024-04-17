@@ -17,8 +17,10 @@
 
 #ifdef USE_WEBGPU
 namespace api { class CWebGPUAPI; }
-#else
+#elif USE_VULKAN
 namespace api { class CVulkanAPI; }
+#elif USE_OPENGL
+namespace api { class COpenGLAPI; }
 #endif
 namespace app{ class IApp; }
 
@@ -33,8 +35,10 @@ namespace descapp
 		GLFWwindow* m_pWindow;
 #ifdef USE_WEBGPU
 		std::shared_ptr<api::CWebGPUAPI> m_GraphicsAPI;
-#else
+#elif USE_VULKAN
 		std::shared_ptr<api::CVulkanAPI> m_GraphicsAPI;
+#elif USE_OPENGL
+		std::shared_ptr<api::COpenGLAPI> m_GraphicsAPI;
 #endif
 		std::shared_ptr<app::IApp> m_App;
 		std::shared_ptr<input::CInputState> m_InputState;

@@ -38,11 +38,11 @@ namespace api
 	class IGraphicsAPI
 	{
 	public:
-#if defined(__EMSCRIPTEN__) || defined(USE_OPENGL) 
-		virtual bool Initialize() = 0;
-#else
+#ifdef USE_GLFW
 		virtual bool InitializeWithGLFW(GLFWwindow* pWindow) = 0;
-#endif // __EMSCRIPTEN__
+#else
+		virtual bool Initialize() = 0;
+#endif
 		
 		virtual bool CreateRenderPass(const std::string& PassName, ERenderPassFormat RenderPassFormat, const glm::vec4& InitColor, int Width = -1, int Height = -1) = 0;
 		virtual std::shared_ptr<graphics::CVertexBuffer> CreateVertexBuffer() = 0;

@@ -12,7 +12,7 @@ namespace api
 	{
 		api::COpenGLAPI* m_pGraphicsAPI;
 
-		GLuint m_VertexBuffer;
+		std::vector<GLuint> m_VertexBufferList;
 
 		// Ç±ÇÃVertexBufferÇéQè∆ÇµÇƒÇ¢ÇÈRendererList;
 		std::vector<COpenGLRenderer*> m_RefRendererList;
@@ -20,7 +20,7 @@ namespace api
 		COpenGLVertexBuffer(api::COpenGLAPI* pGraphicsAPI);
 		virtual ~COpenGLVertexBuffer();
 
-		GLuint GetVertexBufferIndex() const;
+		GLuint GetPositionVertexBufferIndex() const;
 
 		GLenum GetGLenumDataType(graphics::EDataType DataType) const;
 

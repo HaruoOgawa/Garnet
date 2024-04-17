@@ -39,8 +39,6 @@ namespace api
 
 	bool COpenGLMaterial::BuildDrawBuffer(int DynamicOffsetNum)
 	{
-		SetActive();
-
 		int index = 0;
 		for (const auto& Buffer : m_ShaderBufferList)
 		{

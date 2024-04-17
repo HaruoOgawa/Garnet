@@ -57,6 +57,8 @@ namespace gui
 		ImGui_ImplGlfw_InitForVulkan(pWindow, true);
 #elif USE_WEBGPU
 		ImGui_ImplGlfw_InitForOther(pWindow, true);
+#elif USE_OPENGL
+		ImGui_ImplGlfw_InitForOpenGL(pWindow, true);
 #endif
 
 #ifdef __EMSCRIPTEN__
