@@ -5,7 +5,7 @@
 #ifdef USE_OPENGL
 #include "../GraphicsAPI/OpenGL/COpenGLAPI.h"
 #endif
-#include "./ScriptApp/CScriptApp.h"
+#include "../App/ScriptApp/CScriptApp.h"
 
 #ifdef USE_VIEWER_CAMERA
 #include "../../Camera/CViewerCamera.h"

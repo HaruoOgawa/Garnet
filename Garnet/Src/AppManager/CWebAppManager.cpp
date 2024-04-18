@@ -4,7 +4,7 @@
 #include "../Message/Console.h"
 
 #include "../GraphicsAPI/WebGPU/CWebGPUAPI.h"
-#include "./ScriptApp/CScriptApp.h"
+#include "../App/ScriptApp/CScriptApp.h"
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>

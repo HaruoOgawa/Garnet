@@ -30,9 +30,6 @@ namespace gui
 	class CImGuiGUIEngine : public IGUIEngine
 	{
 		std::shared_ptr<IImGuiCore> m_ImGuiCore;
-
-		float m_TestFloatVal;
-		float m_TestFloatSliderVal;
 	public:
 		CImGuiGUIEngine();
 		virtual ~CImGuiGUIEngine();

@@ -1,7 +1,7 @@
 #ifdef USE_WEB_NATIVE
-#include "../../App/CWebAppManager.h"
+#include "../../AppManager/CWebAppManager.h"
+#include "../../AppManager/EAppType.h"
 #include "../../Message/Console.h"
-#include "../../App/EAppType.h"
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>

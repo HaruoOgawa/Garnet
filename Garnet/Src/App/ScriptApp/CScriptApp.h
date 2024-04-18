@@ -11,7 +11,11 @@ namespace graphics { class CDrawInfo; }
 namespace imageeffect { class CBlurEffect; }
 namespace resource { class CLoadWorker; }
 namespace input { class CInputState; }
-namespace gui { class IGUIEngine; }
+namespace gui
+{ 
+	class IGUIEngine; 
+	class CGraphicsEditingWindow; 
+}
 namespace physics { class IPhysicsEngine; }
 
 namespace app
@@ -25,6 +29,9 @@ namespace app
 		std::shared_ptr<projection::CProjection> m_Projection;
 		std::shared_ptr<graphics::CDrawInfo> m_DrawInfo;
 		std::shared_ptr<imageeffect::CBlurEffect> m_BlurEffect;
+
+		std::shared_ptr<gui::CGraphicsEditingWindow> m_GraphicsEditingWindow;
+		
 	public:
 		CScriptApp();
 		virtual ~CScriptApp();
