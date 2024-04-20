@@ -2,14 +2,13 @@
 
 #ifdef USE_GUIENGINE
 
+#include <string>
 #include <imgui.h>
 
 namespace gui
 {
 	class CGraphicsEditingWindow
 	{
-		float m_TestFloatVal;
-		float m_TestFloatSliderVal;
 	public:
 		CGraphicsEditingWindow();
 		virtual ~CGraphicsEditingWindow();

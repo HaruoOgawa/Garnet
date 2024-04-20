@@ -1,11 +1,14 @@
 #include "CGraphicsEditingWindow.h"
+#include "../../Message/Console.h"
+
+#include "CGUIObjectTab.h"
+#include "CGUIRenderingTab.h"
+#include "CGUICameraTab.h"
 
 #ifdef USE_GUIENGINE
 namespace gui
 {
-	CGraphicsEditingWindow::CGraphicsEditingWindow():
-		m_TestFloatVal(0.0f),
-		m_TestFloatSliderVal(0.0f)
+	CGraphicsEditingWindow::CGraphicsEditingWindow()
 	{
 	}
 
@@ -15,34 +18,24 @@ namespace gui
 
 	bool CGraphicsEditingWindow::Draw()
 	{
-		// Start Example ///////////////////////////////////////////////////////////////////////////////
-		ImGui::Begin("Hello World");
+		// ウィンドウの初期位置・サイズ
+		//const ImGuiViewport* viewport = ImGui::GetMainViewport();
+		//ImGui::SetNextWindowPos(ImVec2(viewport->WorkPos.x, viewport->WorkPos.y), ImGuiCond_FirstUseEver);
+		//ImGui::SetNextWindowSize(ImVec2(1000, 1000), ImGuiCond_FirstUseEver);
 
-		ImGui::Text("This is Hello World Text");
+		if (ImGui::Begin("Garnet3D"))
+		{
+			if (ImGui::BeginTabBar("MainMenuBar"))
+			{
+				if (!CGUIObjectTab::Draw()) return false;
+				if (!CGUIRenderingTab::Draw()) return false;
+				if (!CGUICameraTab::Draw()) return false;
 
-		static int counter = 0;
+				ImGui::EndTabBar();
+			}
 
-		ImGui::SliderFloat("float", &m_TestFloatSliderVal, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-
-		if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
-			counter++;
-		ImGui::SameLine();
-		ImGui::Text("counter = %d", counter);
-
-		//
-		ImGui::BeginTabBar("TabBar1");
-		static bool Flag = true;
-		//ImGui::TabItemButton("TabTest", Flag);
-
-		ImGui::BeginTabItem("TabItemTest", &Flag);
-		ImGui::InputFloat("TestInput", &m_TestFloatVal);
-		ImGui::EndTabItem();
-
-		ImGui::EndTabBar();
-
-		ImGui::End();
-
-		// End Example ///////////////////////////////////////////////////////////////////////////////
+			ImGui::End();
+		}
 
 		return true;
 	}

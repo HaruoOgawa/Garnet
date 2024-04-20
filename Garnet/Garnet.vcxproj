@@ -647,6 +647,11 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Src\App\ScriptApp\GUI\CGUITransformTab.h" />
+    <ClInclude Include="Src\App\ScriptApp\GUI\CGUIMaterialTab.h" />
+    <ClInclude Include="Src\App\ScriptApp\GUI\CGUICameraTab.h" />
+    <ClInclude Include="Src\App\ScriptApp\GUI\CGUIRenderingTab.h" />
+    <ClInclude Include="Src\App\ScriptApp\GUI\CGUIObjectTab.h" />
     <ClInclude Include="Src\App\ScriptApp\GUI\CGraphicsEditingWindow.h" />
     <ClInclude Include="Src\GUIEngine\imgui\Core\CImGuiCoreOpenGL.h" />
     <ClInclude Include="Src\GUIEngine\imgui\Core\CImGuiCoreWebGPU.h" />
@@ -1543,6 +1548,11 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClInclude Include="Src\Interface\IRenderer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\App\ScriptApp\GUI\CGUITransformTab.cpp" />
+    <ClCompile Include="Src\App\ScriptApp\GUI\CGUIMaterialTab.cpp" />
+    <ClCompile Include="Src\App\ScriptApp\GUI\CGUICameraTab.cpp" />
+    <ClCompile Include="Src\App\ScriptApp\GUI\CGUIRenderingTab.cpp" />
+    <ClCompile Include="Src\App\ScriptApp\GUI\CGUIObjectTab.cpp" />
     <ClCompile Include="Src\App\ScriptApp\GUI\CGraphicsEditingWindow.cpp" />
     <ClCompile Include="Src\GUIEngine\imgui\Core\CImGuiCoreOpenGL.cpp" />
     <ClCompile Include="Src\GUIEngine\imgui\Core\CImGuiCoreWebGPU.cpp" />
