@@ -2,12 +2,19 @@
 
 namespace graphics
 {
-	CMaterialFrame::CMaterialFrame()
+	CMaterialFrame::CMaterialFrame():
+		m_MaterialName(std::string()),
+		m_CreateInfo(nullptr)
 	{
 	}
 
 	CMaterialFrame::~CMaterialFrame()
 	{
+	}
+
+	void CMaterialFrame::SetMaterialName(const std::string& Name)
+	{
+		m_MaterialName = Name;
 	}
 
 	void CMaterialFrame::SetCreateInfo(const std::shared_ptr<graphics::CMaterialCreateInfo>& CreateInfo)
@@ -31,6 +38,9 @@ namespace graphics
 
 		std::shared_ptr<CMaterial> Material = pGraphicsAPI->CreateMaterial(m_CreateInfo, RefCount, CullMode);
 
+		// MaterialName
+		Material->SetMaterialName(m_MaterialName);
+
 		// ShaderBuffer
 		for (const auto& ShaderBuffer : m_ShaderBufferList)
 		{
@@ -44,7 +54,7 @@ namespace graphics
 
 				for (const auto& Value : ValueList)
 				{
-					Buffer->AddData(Value->Name, &Value->Data[0], Value->ByteSize, Value->BindingIndex);
+					Buffer->AddData(Value->Name, Value->ValueType, &Value->Data[0], Value->ByteSize, Value->BindingIndex);
 				}
 
 				Material->AddShaderBuffer(Buffer);
@@ -59,7 +69,7 @@ namespace graphics
 
 				for (const auto& Value : ValueList)
 				{
-					Buffer->AddData(Value->Name, &Value->Data[0], Value->ByteSize, Value->BindingIndex);
+					Buffer->AddData(Value->Name, Value->ValueType, &Value->Data[0], Value->ByteSize, Value->BindingIndex);
 				}
 
 				Material->AddShaderBuffer(Buffer);

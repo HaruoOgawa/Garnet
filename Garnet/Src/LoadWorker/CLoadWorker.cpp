@@ -30,10 +30,10 @@ namespace resource
 		auto Material = pGraphicsAPI->CreateMaterial(createInfo, 1, graphics::ECullMode::CULL_BACK);
 
 		auto UniforBuffer = createInfo->CreateUniformBuffer("UniformBufferObject", {graphics::SBindingLayout("UniformBufferObject", 0, false)});
-		UniforBuffer->AddData("rate", &glm::vec1(0.0f)[0], sizeof(glm::vec1), 0);
-		UniforBuffer->AddData("time", &glm::vec1(0.0f)[0], sizeof(glm::vec1), 0);
-		UniforBuffer->AddData("alpha", &m_Alpha, sizeof(float), 0);
-		UniforBuffer->AddData("pad", &glm::vec1(0.0f)[0], sizeof(glm::vec1), 0);
+		UniforBuffer->AddData("rate", graphics::EUniformValueType::VALUE_TYPE_FLOAT, &glm::vec1(0.0f)[0], sizeof(glm::vec1), 0);
+		UniforBuffer->AddData("time", graphics::EUniformValueType::VALUE_TYPE_FLOAT, &glm::vec1(0.0f)[0], sizeof(glm::vec1), 0);
+		UniforBuffer->AddData("alpha", graphics::EUniformValueType::VALUE_TYPE_FLOAT, &m_Alpha, sizeof(float), 0);
+		UniforBuffer->AddData("pad", graphics::EUniformValueType::VALUE_TYPE_FLOAT, &glm::vec1(0.0f)[0], sizeof(glm::vec1), 0);
 
 		Material->AddShaderBuffer(UniforBuffer);
 

@@ -3,11 +3,14 @@
 #include <map>
 #include <string>
 #include "../Interface/IDescriptor.h"
+#include "../Graphics/EUniformValueType.h"
 
 namespace graphics
 {
 	struct SUniformBufferValue
 	{
+		std::string UniformName;
+		EUniformValueType ValueType;
 		int ByteSize;
 		int ByteOffset;
 	};

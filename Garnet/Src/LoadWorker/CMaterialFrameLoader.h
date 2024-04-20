@@ -38,6 +38,8 @@ namespace resource
 		std::unordered_map <std::string, std::shared_ptr<CFile>> m_TextureFileList;
 
 		// MfData
+		std::string m_MaterialName;
+
 		std::vector<graphics::SShaderBufferSet> m_ShaderBufferList;
 		std::vector<graphics::STextureBindingLayout> m_TextureBufferList;
 

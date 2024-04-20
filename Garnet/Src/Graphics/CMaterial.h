@@ -28,6 +28,8 @@ namespace graphics
 	class CMaterial
 	{
 	protected:
+		std::string m_MaterialName;
+
 		std::shared_ptr<CMaterialCreateInfo> m_CreateInfo;
 
 		std::vector<std::shared_ptr<CShaderBuffer>> m_ShaderBufferList;
@@ -52,6 +54,11 @@ namespace graphics
 	public:
 		CMaterial(const std::shared_ptr<CMaterialCreateInfo>& createInfo, int RefCount, ECullMode CullMode);
 		virtual ~CMaterial() = default;
+
+		void SetMaterialName(const std::string& Name);
+		const std::string& GetMaterialName() const;
+
+		virtual std::vector<std::shared_ptr<CShaderBuffer>>& GetShaderBufferList();
 
 		virtual bool Create(const std::shared_ptr<graphics::CTextureSet>& TextureSet) = 0;
 		virtual bool CreateDepthMaterial(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<graphics::CMaterialFrame>& DepthMF);
