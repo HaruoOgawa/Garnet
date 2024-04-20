@@ -33,7 +33,11 @@ namespace scene
 		std::shared_ptr<graphics::CMaterialFrame> m_DepthMF;
 		std::shared_ptr<graphics::CMaterialFrame> m_PBRMF;
 
-		//
+		// Texture
+		std::shared_ptr<graphics::CTexture> m_Cube_Texture;
+		std::shared_ptr<graphics::CTexture> m_IBL_Skybox_Texture;
+
+		// Custom Object
 		std::shared_ptr<object::C3DObject> m_UITestSphere;
 
 		// MMD
@@ -43,7 +47,6 @@ namespace scene
 		std::shared_ptr<animation::CAnimationClipSet> m_RipSyncVMD;
 
 		// Background
-		std::shared_ptr<graphics::CTexture> m_IBL_Skybox_Texture;
 		std::shared_ptr<object::C3DObject> m_Background;
 		std::shared_ptr<object::C3DObject> m_DebugSphere;
 	private:

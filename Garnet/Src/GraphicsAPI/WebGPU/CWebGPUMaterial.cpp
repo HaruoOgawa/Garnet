@@ -81,6 +81,7 @@ namespace api
 			{
 				const int ByteOffset = UniformData->second.ByteOffset;
 
+				// API側のBufferを更新
 				if (IsUseDynamicOffset())
 				{
 					if (DynamicOffsetNum == -1)
@@ -99,6 +100,9 @@ namespace api
 				{
 					wgpuQueueWriteBuffer(m_pGraphicsAPI->GetQueue(), m_WGPUUniformBufferList[i], ByteOffset, Data, ByteSize);
 				}
+
+				// CPU側のBufferを更新
+				UniformBuffer->SetValue(Data, ByteOffset, ByteSize);
 			}
 		}
 	}

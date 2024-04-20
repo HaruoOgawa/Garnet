@@ -27,10 +27,12 @@ namespace scene
 		m_ExpressionVMD(std::make_shared<animation::CAnimationClipSet>()),
 		m_RipSyncVMD(std::make_shared<animation::CAnimationClipSet>()),
 
+		m_IBL_Skybox_Texture(pGraphicsAPI->CreateTexture(false)),
+		m_Cube_Texture(pGraphicsAPI->CreateTexture(false)),
+
 		m_UITestSphere(std::make_shared<object::C3DObject>("", "ShadowPass")),
 
 		m_Background(std::make_shared<object::C3DObject>("", "ShadowPass")),
-		m_IBL_Skybox_Texture(pGraphicsAPI->CreateTexture(false)),
 		m_DebugSphere(std::make_shared<object::C3DObject>("", "ShadowPass")),
 
 		m_IsLoaded(false)
@@ -53,6 +55,7 @@ namespace scene
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CAnimationLoader>("Resources\\Motions\\biglove_expression.vmd", m_ExpressionVMD));
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CAnimationLoader>("Resources\\Motions\\biglove_Ripsync.vmd", m_RipSyncVMD));
 		
+		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CTextureLoader>(pGraphicsAPI, std::vector<std::string>({ "Resources\\Cubemaps\\environment\\environment_back_0.jpg", "Resources\\Cubemaps\\environment\\environment_bottom_0.jpg", "Resources\\Cubemaps\\environment\\environment_front_0.jpg", "Resources\\Cubemaps\\environment\\environment_left_0.jpg", "Resources\\Cubemaps\\environment\\environment_right_0.jpg", "Resources\\Cubemaps\\environment\\environment_top_0.jpg" }), m_Cube_Texture));
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CTextureLoader>(pGraphicsAPI, std::vector<std::string>({ "Resources\\IBL\\output_skybox.hdr" }), m_IBL_Skybox_Texture));
 	}
 
@@ -97,7 +100,13 @@ namespace scene
 
 		// m_UITestSphere
 		{
-			if (!m_UITestSphere->CreateSimply(pGraphicsAPI, pPhysicsEngine, graphics::CPresetPrimitive::CreateSphere(pGraphicsAPI), m_PBRMF->CreateMaterial(pGraphicsAPI, 2, graphics::ECullMode::CULL_BACK), m_DepthMF)) return false;
+			m_UITestSphere->GetTextureSet()->AddCubeMap(m_Cube_Texture);
+
+			auto Material = m_PBRMF->CreateMaterial(pGraphicsAPI, 2, graphics::ECullMode::CULL_BACK);
+			Material->ReplacePreloadUniformValue("useCubeMap", &glm::ivec1(1)[0], sizeof(glm::ivec1), 0);
+			Material->ReplaceTextureIndex("cubemapTexture", 0);
+
+			if (!m_UITestSphere->CreateSimply(pGraphicsAPI, pPhysicsEngine, graphics::CPresetPrimitive::CreateSphere(pGraphicsAPI), Material, m_DepthMF)) return false;
 		}
 
 		// m_Background
