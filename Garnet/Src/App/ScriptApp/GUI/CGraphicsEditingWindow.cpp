@@ -1,10 +1,6 @@
 #include "CGraphicsEditingWindow.h"
 #include "../../Message/Console.h"
 
-#include "CGUIObjectTab.h"
-#include "CGUIRenderingTab.h"
-#include "CGUICameraTab.h"
-
 #ifdef USE_GUIENGINE
 namespace gui
 {
@@ -16,8 +12,10 @@ namespace gui
 	{
 	}
 
-	bool CGraphicsEditingWindow::Draw()
+	bool CGraphicsEditingWindow::Draw(const app::IApp* pApp)
 	{
+		if (!pApp) return true;
+
 		// ウィンドウの初期位置・サイズ
 		//const ImGuiViewport* viewport = ImGui::GetMainViewport();
 		//ImGui::SetNextWindowPos(ImVec2(viewport->WorkPos.x, viewport->WorkPos.y), ImGuiCond_FirstUseEver);
@@ -27,7 +25,7 @@ namespace gui
 		{
 			if (ImGui::BeginTabBar("MainMenuBar"))
 			{
-				if (!CGUIObjectTab::Draw()) return false;
+				if (!m_GUIObjectTab.Draw(pApp->GetObjectList())) return false;
 				if (!CGUIRenderingTab::Draw()) return false;
 				if (!CGUICameraTab::Draw()) return false;
 

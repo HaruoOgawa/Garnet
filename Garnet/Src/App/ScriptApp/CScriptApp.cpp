@@ -152,7 +152,7 @@ namespace app
 		
 		// GUIEngine
 		if (!GUIEngine->BeginFrame(pGraphicsAPI)) return false;
-		if (!m_GraphicsEditingWindow->Draw()) return false;
+		if (!m_GraphicsEditingWindow->Draw(this)) return false;
 		if (!GUIEngine->EndFrame(pGraphicsAPI)) return false;
 
 		if (!pGraphicsAPI->EndRender()) return false;
@@ -171,5 +171,10 @@ namespace app
 	const std::shared_ptr<graphics::CDrawInfo>& CScriptApp::GetDrawInfo() const
 	{
 		return m_DrawInfo;
+	}
+
+	const std::vector<std::shared_ptr<object::C3DObject>>& CScriptApp::GetObjectList() const
+	{
+		return m_ScriptScene->GetObjectList();
 	}
 }

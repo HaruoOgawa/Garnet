@@ -8,6 +8,7 @@ namespace resource { class CLoadWorker; }
 namespace graphics { class CDrawInfo; }
 namespace input { class CInputState; }
 namespace gui { class IGUIEngine; }
+namespace object { class C3DObject; }
 
 namespace app
 {
@@ -26,5 +27,7 @@ namespace app
 		virtual const std::shared_ptr<camera::CCamera>& GetMainCamera() const = 0;
 
 		virtual const std::shared_ptr<graphics::CDrawInfo>& GetDrawInfo() const = 0;
+
+		virtual const std::vector<std::shared_ptr<object::C3DObject>>& GetObjectList() const = 0;
 	};
 }

@@ -134,6 +134,7 @@ namespace mmd
 
 			const auto& Name = PmxBone->GetBoneName().second;
 			BoneNode->SetU16Name(Name);
+			BoneNode->SetName("BoneNode_" + std::to_string(BoneIndex));
 
 			glm::vec3 Pos = PmxBone->GetPos();
 			glm::quat Rot = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);

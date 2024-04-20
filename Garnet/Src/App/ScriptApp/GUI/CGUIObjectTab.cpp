@@ -1,65 +1,74 @@
 #ifdef USE_GUIENGINE
 #include "CGUIObjectTab.h"
+#include "CGUIMaterialTab.h"
+#include "CGUITransformTab.h"
+
+#include "../../Object/C3DObject.h"
 
 namespace gui
 {
-	CGUIObjectTab::CGUIObjectTab()
+	CGUIObjectTab::CGUIObjectTab():
+		m_SelectedObjectIndex(-1),
+		m_SelectedNodeIndex(-1)
 	{
 	}
 
-	bool CGUIObjectTab::Draw()
+	bool CGUIObjectTab::Draw(const std::vector<std::shared_ptr<object::C3DObject>>& ObjectList)
 	{
-		if (ImGui::BeginTabItem("Object"))
+		if (ImGui::BeginTabItem("ObjectTabItem"))
 		{
-			ImGui::Text("This is Object Window");
-
 			if (ImGui::BeginChild("ObjectListChild", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y * 0.25f), ImGuiChildFlags_Border, 0))
 			{
-				ImGui::Text("Object List Box");
-
-				if (ImGui::TreeNodeEx((void*)(intptr_t)-1, ImGuiTreeNodeFlags_OpenOnArrow, "glTFObject"))
+				for (int CurrentObjectIndex = 0; CurrentObjectIndex < static_cast<int>(ObjectList.size()); CurrentObjectIndex++)
 				{
-					for (int i = 0; i < 50; i++)
+					const auto& Object = ObjectList[CurrentObjectIndex];
+
+					//
+					static bool Flag = true;
+					ImGui::Checkbox("Enable", &Flag);
+
+					ImGui::SameLine();
+					std::string BtnLabel = "Show_" + Object->GetObjectName();
+					if (ImGui::Button(BtnLabel.c_str()))
 					{
-						int index = i * 3;
-
-						if (ImGui::TreeNodeEx((void*)(intptr_t)index, ImGuiTreeNodeFlags_OpenOnArrow, "aaa"))
-						{
-							for (int m = 0; m < 3; m++)
-							{
-								if (ImGui::TreeNodeEx((void*)(intptr_t)(index + m), ImGuiTreeNodeFlags_OpenOnArrow, "bbb"))
-								{
-									ImGui::TreePop();
-								}
-
-								ImGui::SameLine();
-								static bool Flag = true;
-								ImGui::Checkbox("", &Flag);
-
-								ImGui::SameLine();
-								std::string Name = "ChildNode " + std::to_string(i);
-								ImGui::Button("Show");
-								//ImGui::Button(Name.c_str(), ImVec2(-FLT_MIN, 0.0f));
-							}
-
-							ImGui::TreePop();
-						}
-
-						ImGui::SameLine();
-						static bool Flag = true;
-						ImGui::Checkbox("", &Flag);
-
-						ImGui::SameLine();
-						std::string Name = "Node " + std::to_string(i);
-						ImGui::Button("Show");
-						//ImGui::Button(Name.c_str(), ImVec2(-FLT_MIN, 0.0f));
+						m_SelectedObjectIndex = CurrentObjectIndex;
+						m_SelectedNodeIndex = -1;
 					}
 
-					ImGui::TreePop();
-				}
+					// Object‚ÌTreeNode‚ð”z’u
+					ImGui::SameLine();
+					if (ImGui::TreeNodeEx(Object->GetObjectName().c_str(), ImGuiTreeNodeFlags_OpenOnArrow))
+					{
+						// NodeList‚ðTreeNode‚É”z’u
+						const auto& NodeList = Object->GetNodeList();
 
-				/*for (int i = 0; i < 100; i++)
-					ImGui::Text("%04d: scrollable region", i);*/
+						const auto& RootNodeIndexList = Object->GetRootNodeIndexList();
+						if (!RootNodeIndexList.empty())
+						{
+							for (const auto& SceneRootNodeList : RootNodeIndexList)
+							{
+								for (const int RootNodeIndex : SceneRootNodeList)
+								{
+									if (RootNodeIndex < 0 || RootNodeIndex >= NodeList.size()) continue;
+
+									const auto& RootNode = NodeList[RootNodeIndex];
+									if (!DrawNodeGUI(m_SelectedObjectIndex, m_SelectedNodeIndex, CurrentObjectIndex, RootNodeIndex, RootNode, NodeList)) return false;
+								}
+							}
+						}
+						else
+						{
+							for (int NodeIndex = 0; NodeIndex < static_cast<int>(NodeList.size()); NodeIndex++)
+							{
+								const auto& Node = NodeList[NodeIndex];
+
+								if (!DrawNodeGUI(m_SelectedObjectIndex, m_SelectedNodeIndex, CurrentObjectIndex, NodeIndex, Node, NodeList)) return false;
+							}
+						}
+
+						ImGui::TreePop();
+					}
+				}
 
 				ImGui::EndChild();
 			}
@@ -69,16 +78,8 @@ namespace gui
 			{
 				if (ImGui::BeginTabBar("ObjectDetail"))
 				{
-					if (ImGui::BeginTabItem("Material"))
-					{
-						ImGui::Text("This is Material Window");
-						ImGui::EndTabItem();
-					}
-					if (ImGui::BeginTabItem("Transform"))
-					{
-						ImGui::Text("This is Transform Window");
-						ImGui::EndTabItem();
-					}
+					if (!CGUIMaterialTab::Draw(ObjectList, m_SelectedObjectIndex, m_SelectedNodeIndex)) return false;
+					if (!CGUITransformTab::Draw(ObjectList, m_SelectedObjectIndex, m_SelectedNodeIndex)) return false;
 
 					ImGui::EndTabBar(); // ObjectDetail
 				}
@@ -87,6 +88,40 @@ namespace gui
 			}
 
 			ImGui::EndTabItem();
+		}
+
+		return true;
+	}
+
+	bool CGUIObjectTab::DrawNodeGUI(int& SelectedObjectIndex, int& SelectedNodeIndex, int CurrentObjectIndex, int CurrentNodeIndex,
+		const std::shared_ptr<object::CNode>& Node, const std::vector<std::shared_ptr<object::CNode>>& NodeList)
+	{
+		//
+		static bool Flag = true;
+		ImGui::Checkbox("Enable", &Flag);
+
+		ImGui::SameLine();
+		std::string Label = "Show_" + Node->GetName();
+		if (ImGui::Button(Label.c_str()))
+		{
+			SelectedObjectIndex = CurrentObjectIndex;
+			SelectedNodeIndex = CurrentNodeIndex;
+		}
+
+		// GUI‚Ì•`‰æ
+		ImGui::SameLine();
+		if (ImGui::TreeNodeEx(Node->GetName().c_str(), ImGuiTreeNodeFlags_OpenOnArrow))
+		{
+			// Žq—v‘f‚Ì‘–”j
+			for (const int ChildIndex : Node->GetChildrenNodeIndexList())
+			{
+				if (ChildIndex < 0 || ChildIndex >= NodeList.size()) continue;
+
+				const auto& ChildNode = NodeList[ChildIndex];
+				if (!DrawNodeGUI(SelectedObjectIndex, SelectedNodeIndex, CurrentObjectIndex, ChildIndex, ChildNode, NodeList)) return false;
+			}
+
+			ImGui::TreePop();
 		}
 
 		return true;

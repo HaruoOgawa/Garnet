@@ -35,6 +35,14 @@ namespace scene
 
 		m_IsLoaded(false)
 	{
+		m_TdaMiku_Model->SetObjectName("TdaMiku_Model");
+		m_UITestSphere->SetObjectName("UITestSphere");
+		m_Background->SetObjectName("Background");
+
+		m_ObjectList.push_back(m_TdaMiku_Model);
+		m_ObjectList.push_back(m_UITestSphere);
+		m_ObjectList.push_back(m_Background);
+
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CMaterialFrameLoader>("Resources\\MaterialFrame\\basic_toon_mf.json", m_BasicToonMF));
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CMaterialFrameLoader>("Resources\\MaterialFrame\\SimpleTexture_MF.json", m_SimpleTextureMF));
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CMaterialFrameLoader>("Resources\\MaterialFrame\\Depth_MF.json", m_DepthMF));
@@ -56,6 +64,11 @@ namespace scene
 	bool CScriptScene::IsLoaded() const
 	{
 		return m_IsLoaded;
+	}
+
+	const std::vector<std::shared_ptr<object::C3DObject>>& CScriptScene::GetObjectList() const
+	{
+		return m_ObjectList;
 	}
 
 	bool CScriptScene::Load(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker)
