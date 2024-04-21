@@ -67,6 +67,8 @@ namespace object
 		void SetObjectName(const std::string& Name);
 		const std::string& GetObjectName() const;
 
+		const std::shared_ptr<math::CTransform>& GetObjectTransform() const;
+
 		bool CreateSimply(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine,
 			const std::pair<std::shared_ptr<graphics::CVertexBuffer>, std::shared_ptr<graphics::CIndexBuffer>>& createInfo,
 			const std::shared_ptr<graphics::CMaterial>& Material, const std::shared_ptr<graphics::CMaterialFrame>& DepthMF, 

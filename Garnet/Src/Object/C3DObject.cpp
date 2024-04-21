@@ -33,6 +33,11 @@ namespace object
 	{
 		return m_ObjectName;
 	}
+
+	const std::shared_ptr<math::CTransform>& C3DObject::GetObjectTransform() const
+	{
+		return m_ObjectTransform;
+	}
 	
 	bool C3DObject::CreateSimply(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine,
 		const std::pair<std::shared_ptr<graphics::CVertexBuffer>, std::shared_ptr<graphics::CIndexBuffer>>& createInfo,

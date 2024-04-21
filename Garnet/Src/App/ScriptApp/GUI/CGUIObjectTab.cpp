@@ -78,8 +78,8 @@ namespace gui
 			{
 				if (ImGui::BeginTabBar("ObjectDetail"))
 				{
-					if (!CGUIMaterialTab::Draw(ObjectList, m_SelectedObjectIndex, m_SelectedNodeIndex)) return false;
 					if (!CGUITransformTab::Draw(ObjectList, m_SelectedObjectIndex, m_SelectedNodeIndex)) return false;
+					if (!CGUIMaterialTab::Draw(ObjectList, m_SelectedObjectIndex, m_SelectedNodeIndex)) return false;
 
 					ImGui::EndTabBar(); // ObjectDetail
 				}

@@ -16,6 +16,8 @@ namespace gui
 	class CGUIMaterialTab
 	{
 	private:
+		static bool DrawMaterialGUI(const std::vector<std::shared_ptr<object::C3DObject>>& ObjectList, int SelectedObjectIndex, int SelectedNodeIndex);
+
 		static float GetFloat(const std::vector<unsigned char>& BufferData, int Offset);
 		static int GetInt(const std::vector<unsigned char>& BufferData, int Offset);
 	public:
