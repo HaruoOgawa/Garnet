@@ -6,6 +6,7 @@ namespace object
 		m_IsCreated(false),
 		m_PassName(PassName),
 		m_DepthPassName(DepthPassName),
+		m_ObjectName("3DObject"),
 		m_ObjectTransform(std::make_shared<math::CTransform>()),
 #ifdef USE_ANIMATION
 		m_AnimationController(std::make_shared<animation::CAnimationController>()),
@@ -24,6 +25,20 @@ namespace object
 		m_MaterialList.clear();
 	}
 
+	void C3DObject::SetObjectName(const std::string& Name)
+	{
+		m_ObjectName = Name;
+	}
+	const std::string& C3DObject::GetObjectName() const
+	{
+		return m_ObjectName;
+	}
+
+	const std::shared_ptr<math::CTransform>& C3DObject::GetObjectTransform() const
+	{
+		return m_ObjectTransform;
+	}
+	
 	bool C3DObject::CreateSimply(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine,
 		const std::pair<std::shared_ptr<graphics::CVertexBuffer>, std::shared_ptr<graphics::CIndexBuffer>>& createInfo,
 		const std::shared_ptr<graphics::CMaterial>& Material, const std::shared_ptr<graphics::CMaterialFrame>& DepthMF, 

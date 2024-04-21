@@ -1,18 +1,18 @@
 #include "CScriptApp.h"
 #include "../../LoadWorker/CLoadWorker.h"
-#include "../../Scene/CScriptScene.h"
+#include "Scene/CScriptScene.h"
 #include "../../Graphics/CDrawInfo.h"
 #include "../../Camera/CCamera.h"
 #include "../../Projection/CProjection.h"
 #include "../../ImageEffect/CBlurEffect.h"
 #include "../../Message/Console.h"
 #include "../../Interface/IGUIEngine.h"
-
 #ifdef USE_VIEWER_CAMERA
 #include "../../Camera/CViewerCamera.h"
 #endif // USE_VIEWER_CAMERA
-
 #include "../../PhysicsEngine/Bullet/CBulletPhysicsEngine.h"
+#include "GUI/CGraphicsEditingWindow.h"
+
 
 // CScriptApp は旧エンジンでもやっていたof風にCppでエンジンコードを直接シーンを構築していくアプリ
 
@@ -34,7 +34,11 @@ namespace app
 		m_Projection(std::make_shared<projection::CProjection>()),
 		m_DrawInfo(std::make_shared<graphics::CDrawInfo>()),
 		m_BlurEffect(nullptr),
-		m_PhysicsEngine(std::make_shared<physics::CBulletPhysicsEngine>())
+#ifdef USE_GUIENGINE
+
+#endif // USE_GUIENGINE
+		m_PhysicsEngine(std::make_shared<physics::CBulletPhysicsEngine>()),
+		m_GraphicsEditingWindow(std::make_shared<gui::CGraphicsEditingWindow>())
 	{
 		m_MainCamera->SetPos(glm::vec3(0.0f, 1.0f, -7.0f));
 		//m_MainCamera->SetCenter(glm::vec3(0.0f, 50.0f, 349.0f));
@@ -148,6 +152,7 @@ namespace app
 		
 		// GUIEngine
 		if (!GUIEngine->BeginFrame(pGraphicsAPI)) return false;
+		if (!m_GraphicsEditingWindow->Draw(this)) return false;
 		if (!GUIEngine->EndFrame(pGraphicsAPI)) return false;
 
 		if (!pGraphicsAPI->EndRender()) return false;
@@ -166,5 +171,10 @@ namespace app
 	const std::shared_ptr<graphics::CDrawInfo>& CScriptApp::GetDrawInfo() const
 	{
 		return m_DrawInfo;
+	}
+
+	const std::vector<std::shared_ptr<object::C3DObject>>& CScriptApp::GetObjectList() const
+	{
+		return m_ScriptScene->GetObjectList();
 	}
 }

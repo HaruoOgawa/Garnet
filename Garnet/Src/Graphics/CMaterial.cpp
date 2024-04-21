@@ -4,6 +4,7 @@
 namespace graphics
 {
 	CMaterial::CMaterial(const std::shared_ptr<CMaterialCreateInfo>& createInfo, int RefCount, ECullMode CullMode):
+		m_MaterialName(std::string()),
 		m_CreateInfo(createInfo),
 		m_RefCount(RefCount),
 		m_CurrentDynamicOffset(0),
@@ -20,6 +21,21 @@ namespace graphics
 	bool CMaterial::Create(const std::shared_ptr<graphics::CTextureSet>& TextureSet)
 	{
 		return true;
+	}
+
+	void CMaterial::SetMaterialName(const std::string& Name)
+	{
+		m_MaterialName = Name;
+	}
+
+	const std::string& CMaterial::GetMaterialName() const
+	{
+		return m_MaterialName;
+	}
+
+	std::vector<std::shared_ptr<CShaderBuffer>>& CMaterial::GetShaderBufferList()
+	{
+		return m_ShaderBufferList;
 	}
 
 	bool CMaterial::CreateDepthMaterial(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<graphics::CMaterialFrame>& DepthMF)

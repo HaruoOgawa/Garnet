@@ -26,10 +26,11 @@ namespace object
 	class C3DObject
 	{
 		bool m_IsCreated;
-		
+
 		const std::string m_PassName;
 		const std::string m_DepthPassName;
 		
+		std::string						  m_ObjectName;
 		std::shared_ptr<math::CTransform> m_ObjectTransform;
 
 		std::vector<std::shared_ptr<CNode>> m_NodeList;
@@ -62,6 +63,11 @@ namespace object
 	public:
 		C3DObject(const std::string& PassName, const std::string& DepthPassName);
 		virtual ~C3DObject();
+
+		void SetObjectName(const std::string& Name);
+		const std::string& GetObjectName() const;
+
+		const std::shared_ptr<math::CTransform>& GetObjectTransform() const;
 
 		bool CreateSimply(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine,
 			const std::pair<std::shared_ptr<graphics::CVertexBuffer>, std::shared_ptr<graphics::CIndexBuffer>>& createInfo,
@@ -112,7 +118,6 @@ namespace object
 
 		bool IsPlayingAnimation() const;
 #endif
-
 		void SetRootNodeIndexList(const std::vector<std::vector<int>>& RootNodeIndexList);
 		const std::vector<std::vector<int>>& GetRootNodeIndexList() const;
 

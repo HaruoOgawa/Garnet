@@ -1,7 +1,7 @@
 #ifdef USE_GLFW
 
-#include "../../App/CDescAppManager.h"
-#include "../../App/EAppType.h"
+#include "../../AppManager/CDescAppManager.h"
+#include "../../AppManager/EAppType.h"
 #include "../../Message/Console.h"
 
 #ifdef __EMSCRIPTEN__

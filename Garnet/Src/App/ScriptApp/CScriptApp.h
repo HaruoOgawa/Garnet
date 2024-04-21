@@ -11,7 +11,13 @@ namespace graphics { class CDrawInfo; }
 namespace imageeffect { class CBlurEffect; }
 namespace resource { class CLoadWorker; }
 namespace input { class CInputState; }
-namespace gui { class IGUIEngine; }
+namespace object { class C3DObject; }
+
+namespace gui
+{ 
+	class IGUIEngine; 
+	class CGraphicsEditingWindow; 
+}
 namespace physics { class IPhysicsEngine; }
 
 namespace app
@@ -25,6 +31,9 @@ namespace app
 		std::shared_ptr<projection::CProjection> m_Projection;
 		std::shared_ptr<graphics::CDrawInfo> m_DrawInfo;
 		std::shared_ptr<imageeffect::CBlurEffect> m_BlurEffect;
+
+		std::shared_ptr<gui::CGraphicsEditingWindow> m_GraphicsEditingWindow;
+		
 	public:
 		CScriptApp();
 		virtual ~CScriptApp();
@@ -41,6 +50,9 @@ namespace app
 		virtual bool Draw(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<gui::IGUIEngine>& GUIEngine) override;
 
 		virtual const std::shared_ptr<camera::CCamera>& GetMainCamera() const override;
+
 		virtual const std::shared_ptr<graphics::CDrawInfo>& GetDrawInfo() const override;
+
+		virtual const std::vector<std::shared_ptr<object::C3DObject>>& GetObjectList() const override;
 	};
 }

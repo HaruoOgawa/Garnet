@@ -7,7 +7,8 @@ namespace resource
 		m_MfFile(std::make_shared<CFile>(filename)),
 		m_AnalyseDone(false),
 		m_TargetMaterialFrame(TargetMaterialFrame),
-		m_CreateInfo(std::make_shared<graphics::CMaterialCreateInfo>())
+		m_CreateInfo(std::make_shared<graphics::CMaterialCreateInfo>()),
+		m_MaterialName(std::string())
 	{
 	}
 
@@ -102,6 +103,13 @@ namespace resource
 		std::memcpy(&RawData[0], &m_MfFile->GetData()[0], m_MfFile->GetData().size());
 
 		m_MfJson = json::parse(RawData.c_str());
+
+		// MaterialName
+		const auto MaterialName = m_MfJson.find("name");
+		if (MaterialName != m_MfJson.end() && MaterialName->is_string())
+		{
+			m_MaterialName = MaterialName.value();
+		}
 
 		// shaderList
 		const auto shaderList = m_MfJson.find("shaderList");
@@ -294,37 +302,47 @@ namespace resource
 				GetInt("arraySize", arraySize, val);
 
 				int ByteSize = 0;
+				graphics::EUniformValueType ValueType = graphics::EUniformValueType::NONE;
+
 				if (value_type == "mat4")
 				{
 					ByteSize = sizeof(glm::mat4);
+					ValueType = graphics::EUniformValueType::VALUE_TYPE_MAT4;
 				}
 				else if (value_type == "mat3")
 				{
 					ByteSize = sizeof(glm::mat3);
+					ValueType = graphics::EUniformValueType::VALUE_TYPE_MAT3;
 				}
 				else if (value_type == "mat2")
 				{
 					ByteSize = sizeof(glm::mat2);
+					ValueType = graphics::EUniformValueType::VALUE_TYPE_MAT2;
 				}
 				else if (value_type == "vec4")
 				{
 					ByteSize = sizeof(glm::vec4);
+					ValueType = graphics::EUniformValueType::VALUE_TYPE_VEC4;
 				}
 				else if (value_type == "vec3")
 				{
 					ByteSize = sizeof(glm::vec3);
+					ValueType = graphics::EUniformValueType::VALUE_TYPE_VEC3;
 				}
 				else if (value_type == "vec2")
 				{
 					ByteSize = sizeof(glm::vec2);
+					ValueType = graphics::EUniformValueType::VALUE_TYPE_VEC2;
 				}
 				else if (value_type == "float")
 				{
 					ByteSize = sizeof(float);
+					ValueType = graphics::EUniformValueType::VALUE_TYPE_FLOAT;
 				}
 				else if (value_type == "int")
 				{
 					ByteSize = sizeof(int);
+					ValueType = graphics::EUniformValueType::VALUE_TYPE_INT;
 				}
 				else if (value_type == "float_array")
 				{
@@ -338,6 +356,8 @@ namespace resource
 
 						initValue.resize(arraySize, 0.0f);
 					}
+
+					ValueType = graphics::EUniformValueType::VALUE_TYPE_FLOAT_ARRAY;
 				}
 				else if (value_type == "mat4_array")
 				{
@@ -351,10 +371,13 @@ namespace resource
 
 						initValue.resize(16 * arraySize, 0.0f);
 					}
+
+					ValueType = graphics::EUniformValueType::VALUE_TYPE_MAT4_ARRAY;
 				}
 
 				std::shared_ptr<graphics::SBufferValueLayout> ValueLayout = std::make_shared<graphics::SBufferValueLayout>();
 				ValueLayout->Name = value_name;
+				ValueLayout->ValueType = ValueType;
 				ValueLayout->Data = initValue;
 				ValueLayout->ByteSize = ByteSize;
 				ValueLayout->BindingIndex = binding;
@@ -480,6 +503,7 @@ namespace resource
 		// MaterialFrame‚ð¶¬
 		if (m_TargetMaterialFrame)
 		{
+			m_TargetMaterialFrame->SetMaterialName(m_MaterialName);
 			m_TargetMaterialFrame->SetCreateInfo(m_CreateInfo);
 			m_TargetMaterialFrame->SetShaderBufferList(m_ShaderBufferList);
 			m_TargetMaterialFrame->SetTextureBufferList(m_TextureBufferList);

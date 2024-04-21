@@ -1,7 +1,7 @@
 #ifdef USE_WIN32_WindowAPI
 
-#include "../../App/CDemoAppManager.h"
-#include "../../App/EAppType.h"
+#include "../../AppManager/CDemoAppManager.h"
+#include "../../AppManager/EAppType.h"
 #include "../../Message/Console.h"
 
 #include <Windows.h>

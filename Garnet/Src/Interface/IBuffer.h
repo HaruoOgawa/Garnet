@@ -5,6 +5,7 @@
 #include <vector>
 #include <map>
 #include "../Interface/IDescriptor.h"
+#include "../Graphics/EUniformValueType.h"
 
 namespace graphics
 {
@@ -20,7 +21,7 @@ namespace graphics
 	class IBuffer
 	{
 	public:
-		virtual void AddData(const std::string& Name, const void* Data, int ByteSize, int BindingIndex) = 0;
+		virtual void AddData(const std::string& Name, EUniformValueType ValueType, const void* Data, int ByteSize, int BindingIndex) = 0;
 		virtual void SetData(const std::string& Name, const void* Data, int ByteSize) = 0;
 		virtual const std::vector<unsigned char>& GetData() const = 0;
 

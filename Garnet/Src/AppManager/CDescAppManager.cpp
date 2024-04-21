@@ -30,7 +30,7 @@
 
 #include "../Input/CInputState.h"
 
-#include "./ScriptApp/CScriptApp.h"
+#include "../App/ScriptApp/CScriptApp.h"
 
 bool g_IsRunLoop = true;
 

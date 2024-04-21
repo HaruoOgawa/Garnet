@@ -3,8 +3,8 @@
 #include <vector>
 #include <glm/glm.hpp>
 
-#include "../Interface/IGraphicsAPI.h"
-#include "../Interface/IPhysicsEngine.h"
+#include "../../../Interface/IGraphicsAPI.h"
+#include "../../../Interface/IPhysicsEngine.h"
 
 namespace object { class C3DObject; }
 namespace camera { class CCamera; }
@@ -26,12 +26,18 @@ namespace scene
 	{
 		bool m_IsLoaded;
 
+		std::vector<std::shared_ptr<object::C3DObject>> m_ObjectList;
+
 		std::shared_ptr<graphics::CMaterialFrame> m_BasicToonMF;
 		std::shared_ptr<graphics::CMaterialFrame> m_SimpleTextureMF;
 		std::shared_ptr<graphics::CMaterialFrame> m_DepthMF;
 		std::shared_ptr<graphics::CMaterialFrame> m_PBRMF;
 
-		//
+		// Texture
+		std::shared_ptr<graphics::CTexture> m_Cube_Texture;
+		std::shared_ptr<graphics::CTexture> m_IBL_Skybox_Texture;
+
+		// Custom Object
 		std::shared_ptr<object::C3DObject> m_UITestSphere;
 
 		// MMD
@@ -41,7 +47,6 @@ namespace scene
 		std::shared_ptr<animation::CAnimationClipSet> m_RipSyncVMD;
 
 		// Background
-		std::shared_ptr<graphics::CTexture> m_IBL_Skybox_Texture;
 		std::shared_ptr<object::C3DObject> m_Background;
 		std::shared_ptr<object::C3DObject> m_DebugSphere;
 	private:
@@ -53,6 +58,8 @@ namespace scene
 		virtual ~CScriptScene();
 
 		bool IsLoaded() const;
+
+		const std::vector<std::shared_ptr<object::C3DObject>>& GetObjectList() const;
 
 		bool Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
 			const std::shared_ptr<graphics::CDrawInfo>& DrawInfo, const std::shared_ptr<input::CInputState>& InputState);

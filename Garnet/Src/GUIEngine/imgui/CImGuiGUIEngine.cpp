@@ -6,10 +6,7 @@
 namespace gui
 {
 	CImGuiGUIEngine::CImGuiGUIEngine():
-		m_ImGuiCore(nullptr),
-
-		m_TestFloatVal(0.0f),
-		m_TestFloatSliderVal(0.0f)
+		m_ImGuiCore(nullptr)
 	{
 #ifdef USE_VULKAN
 		m_ImGuiCore = std::make_shared<CImGuiCoreVulkan>();
@@ -108,31 +105,6 @@ namespace gui
 #endif
 
 		ImGui::NewFrame();
-
-		// Start Example ///////////////////////////////////////////////////////////////////////////////
-		ImGui::Begin("Hello World");
-
-		ImGui::Text("This is Hello World Text");
-
-		static int counter = 0;
-
-		ImGui::SliderFloat("float", &m_TestFloatSliderVal, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-
-		if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
-			counter++;
-		ImGui::SameLine();
-		ImGui::Text("counter = %d", counter);
-
-		ImGui::End();
-
-		//
-		ImGui::Begin("Another Window");
-
-		ImGui::InputFloat("TestInput", &m_TestFloatVal);
-
-		ImGui::End();
-
-		// End Example ///////////////////////////////////////////////////////////////////////////////
 
 		return true;
 	}

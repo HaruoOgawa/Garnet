@@ -5,8 +5,8 @@ namespace object
 {
 	CNode::CNode(int MeshIndex, int SelfNodeIndex):
 		m_SelfNodeIndex(SelfNodeIndex),
-		m_Name(""),
-		m_U16Name(L""),
+		m_Name("Node"),
+		m_U16Name(L"Node"),
 		m_MeshIndex(MeshIndex),
 		m_SkeletonIndex(-1),
 		m_LocalTransform(std::make_shared<math::CTransform>()),
@@ -14,7 +14,8 @@ namespace object
 		m_PrevLocalTransform(std::make_shared<math::CTransform>()),
 		m_WorldMatrix(glm::mat4(1.0f)),
 		m_InverseBindMatrix(glm::mat4(1.0f)),
-		m_ParentNode(nullptr)
+		m_ParentNode(nullptr),
+		m_IKRotate(glm::quat(1.0f, 0.0f, 0.0f, 0.0f))
 	{
 	}
 
