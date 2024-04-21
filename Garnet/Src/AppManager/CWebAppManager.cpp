@@ -28,7 +28,7 @@ namespace webapp
 		m_IsRunLoop(true),
 		m_GraphicsAPI(nullptr),
 		m_App(nullptr),
-		m_InputState(std::make_shared<input::CInputState>(1.0f)),
+		m_InputState(std::make_shared<input::CInputState>()),
 		m_SecondsTime(0.0f),
 		m_DeltaSecondsTime(0.0f),
 		m_LoadWorker(nullptr),

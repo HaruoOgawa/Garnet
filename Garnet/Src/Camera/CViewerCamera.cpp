@@ -62,7 +62,7 @@ namespace camera
 		// ƒ}ƒEƒX‘€ì
 		if (InputState->IsDownMouseLeft()) // ƒJƒƒ‰‚Ì‰ñ“]
 		{
-			float RotperSecond = 60.0f * InputState->GetGloabalInputSpeed(); // 1•b‚ ‚½‚è‰½“x‰ñ“]‚³‚¹‚é‚©
+			float RotperSecond = 60.0f; // 1•b‚ ‚½‚è‰½“x‰ñ“]‚³‚¹‚é‚©
 
 			const auto& ViewDir = GetViewDir();
 			glm::vec3 AxisSide = glm::cross(ViewDir, glm::vec3(0.0f, 1.0f, 0.0f));
@@ -87,7 +87,7 @@ namespace camera
 		}
 		else if (InputState->IsDownMouseRight()) // ƒJƒƒ‰‚Ì•½sˆÚ“®
 		{
-			float MoveRate = 60.0f * InputState->GetGloabalInputSpeed(); // 1•b‚ ‚½‚è‚Ç‚ê‚®‚ç‚¢ˆÚ“®‚·‚é‚©
+			float MoveRate = 60.0f; // 1•b‚ ‚½‚è‚Ç‚ê‚®‚ç‚¢ˆÚ“®‚·‚é‚©
 
 			const auto& ViewDir = GetViewDir();
 			glm::vec3 AxisSide = glm::cross(ViewDir, glm::vec3(0.0f, 1.0f, 0.0f));
@@ -101,7 +101,7 @@ namespace camera
 		else if (InputState->IsMouseWheeled())
 		{
 			// ’Ž‹“_‚ÆƒJƒƒ‰ˆÊ’u‚ÌŠÔ‚ðL‚Ñk‚Ý‚³‚ê‚éƒ^ƒCƒv‚Ì‘€ì
-			float MoveRate = 30.0f * InputState->GetGloabalInputSpeed(); // 1•b‚ ‚½‚è‚Ç‚ê‚®‚ç‚¢ˆÚ“®‚·‚é‚©
+			float MoveRate = 30.0f; // 1•b‚ ‚½‚è‚Ç‚ê‚®‚ç‚¢ˆÚ“®‚·‚é‚©
 
 			const auto& ViewDir = GetViewDir();
 
@@ -132,7 +132,7 @@ namespace camera
 				if (!IsDown) continue;
 
 				//
-				float MoveRate = 3.0f * InputState->GetGloabalInputSpeed(); // 1•b‚ ‚½‚è‚Ç‚ê‚®‚ç‚¢ˆÚ“®‚·‚é‚©
+				float MoveRate = 3.0f; // 1•b‚ ‚½‚è‚Ç‚ê‚®‚ç‚¢ˆÚ“®‚·‚é‚©
 
 				const auto& ViewDir = GetViewDir();
 				glm::vec3 AxisSide = glm::cross(ViewDir, glm::vec3(0.0f, 1.0f, 0.0f));

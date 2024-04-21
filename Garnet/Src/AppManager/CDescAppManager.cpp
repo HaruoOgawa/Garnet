@@ -43,11 +43,7 @@ namespace descapp
 		m_IsRunLoop(g_IsRunLoop),
 		m_SecondsTime(0.0f), 
 		m_LoadWorker(nullptr),
-#ifdef __EMSCRIPTEN__
-		m_InputState(std::make_shared<input::CInputState>(0.001f)),
-#else
-		m_InputState(std::make_shared<input::CInputState>(1.0f)),
-#endif
+		m_InputState(std::make_shared<input::CInputState>()),
 		m_DeltaSecondsTime(0.0f),
 		m_GUIEngine(nullptr)
 	{
@@ -341,7 +337,12 @@ namespace descapp
 	bool CDescAppManager::Update()
 	{
 		float PrevSecondsTime = m_SecondsTime;
+#ifdef __EMSCRIPTEN__
+		// Webè„ÇæÇ∆Ç≥ÇÁÇ…íPà Ç™à·Ç§
+		m_SecondsTime = static_cast<float>(clock()) * 0.001f * 0.001f;
+#else
 		m_SecondsTime = static_cast<float>(clock()) * 0.001f;
+#endif
 		m_DeltaSecondsTime = m_SecondsTime - PrevSecondsTime;
 
 		m_App->GetDrawInfo()->SetSecondsTime(m_SecondsTime);
