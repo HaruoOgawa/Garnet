@@ -33,6 +33,8 @@ namespace object
 		std::string						  m_ObjectName;
 		std::shared_ptr<math::CTransform> m_ObjectTransform;
 
+		bool m_Enabled;
+
 		std::vector<std::shared_ptr<CNode>> m_NodeList;
 		std::vector<std::shared_ptr<graphics::CMesh>> m_MeshList;
 		std::vector<std::shared_ptr<graphics::CMaterial>> m_MaterialList;
@@ -68,6 +70,9 @@ namespace object
 		const std::string& GetObjectName() const;
 
 		const std::shared_ptr<math::CTransform>& GetObjectTransform() const;
+
+		void SetEnabled(bool Flag);
+		bool IsEnabled() const;
 
 		bool CreateSimply(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine,
 			const std::pair<std::shared_ptr<graphics::CVertexBuffer>, std::shared_ptr<graphics::CIndexBuffer>>& createInfo,

@@ -15,6 +15,9 @@ namespace object
 		std::string						  m_Name;
 		std::wstring					  m_U16Name;
 
+		bool m_Enabled;
+		bool m_Drawable;
+
 		int								  m_MeshIndex;
 
 		int								  m_SkeletonIndex;
@@ -48,6 +51,12 @@ namespace object
 		
 		void SetU16Name(const std::wstring& U16Name);
 		const std::wstring& GetU16Name() const;
+
+		void SetEnabled(bool Flag);
+		bool IsEnabled() const;
+		
+		void SetDrawable(bool Flag);
+		bool IsDrawable() const;
 
 		void SetMeshIndex(int MeshIndex);
 		int GetMeshIndex() const;

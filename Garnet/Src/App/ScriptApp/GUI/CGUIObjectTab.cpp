@@ -9,12 +9,20 @@ namespace gui
 {
 	CGUIObjectTab::CGUIObjectTab():
 		m_SelectedObjectIndex(-1),
-		m_SelectedNodeIndex(-1)
+		m_SelectedNodeIndex(-1),
+		m_OperateButtonID(-1)
 	{
+	}
+
+	void CGUIObjectTab::Reset()
+	{
+		m_OperateButtonID = -1;
 	}
 
 	bool CGUIObjectTab::Draw(const std::vector<std::shared_ptr<object::C3DObject>>& ObjectList)
 	{
+		Reset();
+
 		if (ImGui::BeginTabItem("ObjectTabItem"))
 		{
 			if (ImGui::BeginChild("ObjectListChild", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y * 0.25f), ImGuiChildFlags_Border, 0))
@@ -23,21 +31,31 @@ namespace gui
 				{
 					const auto& Object = ObjectList[CurrentObjectIndex];
 
-					//
-					static bool Flag = true;
-					ImGui::Checkbox("Enable", &Flag);
+					// Object‚ÌTreeNode‚ð”z’u
+					const bool IsOpend = ImGui::TreeNodeEx(Object->GetObjectName().c_str(), ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanFullWidth);
 
-					ImGui::SameLine();
-					std::string BtnLabel = "Show_" + Object->GetObjectName();
-					if (ImGui::Button(BtnLabel.c_str()))
+					// OperateButton
 					{
-						m_SelectedObjectIndex = CurrentObjectIndex;
-						m_SelectedNodeIndex = -1;
+						m_OperateButtonID++;
+
+						ImGui::SameLine(ImGui::GetWindowWidth() - 70);
+						std::string BtnLabel = "Edit##" + std::to_string(m_OperateButtonID);
+						if (ImGui::Button(BtnLabel.c_str()))
+						{
+							m_SelectedObjectIndex = CurrentObjectIndex;
+							m_SelectedNodeIndex = -1;
+						}
+
+						ImGui::SameLine(ImGui::GetWindowWidth() - 30);
+						std::string BoxLabel = "##" + std::to_string(m_OperateButtonID);
+						bool Flag = Object->IsEnabled();
+						if (ImGui::Checkbox(BoxLabel.c_str(), &Flag))
+						{
+							Object->SetEnabled(Flag);
+						}
 					}
 
-					// Object‚ÌTreeNode‚ð”z’u
-					ImGui::SameLine();
-					if (ImGui::TreeNodeEx(Object->GetObjectName().c_str(), ImGuiTreeNodeFlags_OpenOnArrow))
+					if(IsOpend)
 					{
 						// NodeList‚ðTreeNode‚É”z’u
 						const auto& NodeList = Object->GetNodeList();
@@ -96,21 +114,33 @@ namespace gui
 	bool CGUIObjectTab::DrawNodeGUI(int& SelectedObjectIndex, int& SelectedNodeIndex, int CurrentObjectIndex, int CurrentNodeIndex,
 		const std::shared_ptr<object::CNode>& Node, const std::vector<std::shared_ptr<object::CNode>>& NodeList)
 	{
-		//
-		static bool Flag = true;
-		ImGui::Checkbox("Enable", &Flag);
+		// GUI‚Ì•`‰æ
+		const bool IsOpened = ImGui::TreeNodeEx(Node->GetName().c_str(), ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanFullWidth);
 
-		ImGui::SameLine();
-		std::string Label = "Show_" + Node->GetName();
-		if (ImGui::Button(Label.c_str()))
+		// OperateButton
 		{
-			SelectedObjectIndex = CurrentObjectIndex;
-			SelectedNodeIndex = CurrentNodeIndex;
+			m_OperateButtonID++;
+
+			ImGui::SameLine(ImGui::GetWindowWidth() - 70);
+			std::string BtnLabel = "Edit##" + std::to_string(m_OperateButtonID);
+			if (ImGui::Button(BtnLabel.c_str()))
+			{
+				SelectedObjectIndex = CurrentObjectIndex;
+				SelectedNodeIndex = CurrentNodeIndex;
+			}
+
+			ImGui::SameLine(ImGui::GetWindowWidth() - 30);
+			std::string BoxLabel = "##" + std::to_string(m_OperateButtonID);
+			bool Flag = Node->IsEnabled();
+			if (ImGui::Checkbox(BoxLabel.c_str(), &Flag))
+			{
+				Node->SetEnabled(Flag);
+
+				SetDrawable(Flag, Node, NodeList);
+			}
 		}
 
-		// GUI‚Ì•`‰æ
-		ImGui::SameLine();
-		if (ImGui::TreeNodeEx(Node->GetName().c_str(), ImGuiTreeNodeFlags_OpenOnArrow))
+		if (IsOpened)
 		{
 			// Žq—v‘f‚Ì‘–”j
 			for (const int ChildIndex : Node->GetChildrenNodeIndexList())
@@ -125,6 +155,20 @@ namespace gui
 		}
 
 		return true;
+	}
+
+	void CGUIObjectTab::SetDrawable(bool Flag, const std::shared_ptr<object::CNode>& Node, const std::vector<std::shared_ptr<object::CNode>>& NodeList)
+	{
+		Node->SetDrawable(Flag);
+
+		// Žq—v‘f‚Ì‘–”j
+		for (const int ChildIndex : Node->GetChildrenNodeIndexList())
+		{
+			if (ChildIndex < 0 || ChildIndex >= NodeList.size()) continue;
+
+			const auto& ChildNode = NodeList[ChildIndex];
+			SetDrawable(Flag, ChildNode, NodeList);
+		}
 	}
 }
 #endif
