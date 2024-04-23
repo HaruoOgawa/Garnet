@@ -4,6 +4,7 @@
 #include <string>
 #include "../Interface/IDescriptor.h"
 #include "../Graphics/EUniformValueType.h"
+#include "../Graphics/SUniformValueInput.h"
 
 namespace graphics
 {
@@ -13,6 +14,7 @@ namespace graphics
 		EUniformValueType ValueType;
 		int ByteSize;
 		int ByteOffset;
+		SUniformValueInput ValueInput;
 	};
 
 	class CShaderBufferDescriptor : public IDescriptor

@@ -70,6 +70,9 @@ namespace gui
 						for (const auto& UniformDataMap : Descriptor->GetDataList())
 						{
 							const auto& UniformData = UniformDataMap.second;
+							const auto ValueInput = UniformData.ValueInput;
+
+							if (ValueInput.Hide) continue;
 
 							switch (UniformData.ValueType)
 							{
@@ -91,9 +94,33 @@ namespace gui
 									GetFloat(BufferData, UniformData.ByteOffset + sizeof(float) * 3)
 								);
 
-								if (ImGui::InputFloat4(UniformName.c_str(), &val[0]))
+								graphics::EUniformInputType InputType = ValueInput.Type;
+
+								switch (InputType)
 								{
-									Material->SetUniformValue(UniformName, &val, sizeof(val));
+								case graphics::EUniformInputType::None:
+									if (ImGui::InputFloat4(UniformName.c_str(), &val[0]))
+									{
+										Material->SetUniformValue(UniformName, &val, sizeof(val));
+									}
+									break;
+								case graphics::EUniformInputType::Range:
+									if (ImGui::SliderFloat4(UniformName.c_str(), &val[0], ValueInput.MinValue, ValueInput.MaxValue))
+									{
+										Material->SetUniformValue(UniformName, &val, sizeof(val));
+									}
+									break;
+								case graphics::EUniformInputType::Color:
+									{
+										float col[4] = { val.x, val.y, val.z, val.w };
+										if (ImGui::ColorEdit4(UniformName.c_str(), &col[0]))
+										{
+											Material->SetUniformValue(UniformName, &col[0], sizeof(float) * 4);
+										}
+									}
+									break;
+								default:
+									break;
 								}
 							}
 							break;
@@ -106,9 +133,33 @@ namespace gui
 									GetFloat(BufferData, UniformData.ByteOffset + sizeof(float) * 2)
 								);
 
-								if (ImGui::InputFloat3(UniformName.c_str(), &val[0]))
+								graphics::EUniformInputType InputType = ValueInput.Type;
+
+								switch (InputType)
 								{
-									Material->SetUniformValue(UniformName, &val, sizeof(val));
+								case graphics::EUniformInputType::None:
+									if (ImGui::InputFloat3(UniformName.c_str(), &val[0]))
+									{
+										Material->SetUniformValue(UniformName, &val, sizeof(val));
+									}
+									break;
+								case graphics::EUniformInputType::Range:
+									if (ImGui::SliderFloat3(UniformName.c_str(), &val[0], ValueInput.MinValue, ValueInput.MaxValue))
+									{
+										Material->SetUniformValue(UniformName, &val, sizeof(val));
+									}
+									break;
+								case graphics::EUniformInputType::Color:
+								{
+									float col[3] = { val.x, val.y, val.z};
+									if (ImGui::ColorEdit3(UniformName.c_str(), &col[0]))
+									{
+										Material->SetUniformValue(UniformName, &col[0], sizeof(float) * 3);
+									}
+								}
+									break;
+								default:
+									break;
 								}
 							}
 							break;
@@ -120,9 +171,26 @@ namespace gui
 									GetFloat(BufferData, UniformData.ByteOffset + sizeof(float) * 1)
 								);
 
-								if (ImGui::InputFloat2(UniformName.c_str(), &val[0]))
+								graphics::EUniformInputType InputType = ValueInput.Type;
+
+								switch (InputType)
 								{
-									Material->SetUniformValue(UniformName, &val, sizeof(val));
+								case graphics::EUniformInputType::None:
+									if (ImGui::InputFloat2(UniformName.c_str(), &val[0]))
+									{
+										Material->SetUniformValue(UniformName, &val, sizeof(val));
+									}
+									break;
+								case graphics::EUniformInputType::Range:
+									if (ImGui::SliderFloat2(UniformName.c_str(), &val[0], ValueInput.MinValue, ValueInput.MaxValue))
+									{
+										Material->SetUniformValue(UniformName, &val, sizeof(val));
+									}
+									break;
+								case graphics::EUniformInputType::Color:
+									break;
+								default:
+									break;
 								}
 							}
 							break;
@@ -131,9 +199,26 @@ namespace gui
 								const std::string& UniformName = UniformData.UniformName;
 								float val = GetFloat(BufferData, UniformData.ByteOffset);
 
-								if (ImGui::InputFloat(UniformName.c_str(), &val))
+								graphics::EUniformInputType InputType = ValueInput.Type;
+
+								switch (InputType)
 								{
-									Material->SetUniformValue(UniformName, &val, sizeof(val));
+								case graphics::EUniformInputType::None:
+									if (ImGui::InputFloat(UniformName.c_str(), &val))
+									{
+										Material->SetUniformValue(UniformName, &val, sizeof(val));
+									}
+									break;
+								case graphics::EUniformInputType::Range:
+									if (ImGui::SliderFloat(UniformName.c_str(), &val, ValueInput.MinValue, ValueInput.MaxValue))
+									{
+										Material->SetUniformValue(UniformName, &val, sizeof(val));
+									}
+									break;
+								case graphics::EUniformInputType::Color:
+									break;
+								default:
+									break;
 								}
 							}
 							break;
@@ -142,9 +227,26 @@ namespace gui
 								const std::string& UniformName = UniformData.UniformName;
 								int val = GetInt(BufferData, UniformData.ByteOffset);
 
-								if (ImGui::InputInt(UniformName.c_str(), &val))
+								graphics::EUniformInputType InputType = ValueInput.Type;
+
+								switch (InputType)
 								{
-									Material->SetUniformValue(UniformName, &val, sizeof(val));
+								case graphics::EUniformInputType::None:
+									if (ImGui::InputInt(UniformName.c_str(), &val))
+									{
+										Material->SetUniformValue(UniformName, &val, sizeof(val));
+									}
+									break;
+								case graphics::EUniformInputType::Range:
+									if (ImGui::SliderInt(UniformName.c_str(), &val, static_cast<int>(ValueInput.MinValue), static_cast<int>(ValueInput.MaxValue)))
+									{
+										Material->SetUniformValue(UniformName, &val, sizeof(val));
+									}
+									break;
+								case graphics::EUniformInputType::Color:
+									break;
+								default:
+									break;
 								}
 							}
 							break;

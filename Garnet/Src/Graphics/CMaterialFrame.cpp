@@ -54,7 +54,7 @@ namespace graphics
 
 				for (const auto& Value : ValueList)
 				{
-					Buffer->AddData(Value->Name, Value->ValueType, &Value->Data[0], Value->ByteSize, Value->BindingIndex);
+					Buffer->AddData(Value->Name, Value->ValueType, &Value->Data[0], Value->ByteSize, Value->BindingIndex, Value->ValueInput);
 				}
 
 				Material->AddShaderBuffer(Buffer);
@@ -69,7 +69,7 @@ namespace graphics
 
 				for (const auto& Value : ValueList)
 				{
-					Buffer->AddData(Value->Name, Value->ValueType, &Value->Data[0], Value->ByteSize, Value->BindingIndex);
+					Buffer->AddData(Value->Name, Value->ValueType, &Value->Data[0], Value->ByteSize, Value->BindingIndex, Value->ValueInput);
 				}
 
 				Material->AddShaderBuffer(Buffer);

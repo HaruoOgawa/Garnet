@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "EUniformValueType.h"
+#include "SUniformValueInput.h"
 
 namespace graphics
 {
@@ -14,5 +15,6 @@ namespace graphics
 		std::vector<float> Data;
 		int ByteSize = 0;
 		int BindingIndex = -1;
+		SUniformValueInput ValueInput = {};
 	};
 }
