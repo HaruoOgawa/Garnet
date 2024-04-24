@@ -19,6 +19,8 @@ namespace gui
 
 		int m_SelectedObjectIndex;
 		int m_SelectedNodeIndex;
+
+		std::string m_SelectedName;
 	private:
 		void Reset();
 
