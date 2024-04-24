@@ -23,7 +23,7 @@ namespace gui
 	{
 		Reset();
 
-		if (ImGui::BeginTabItem("ObjectTabItem"))
+		if (ImGui::BeginTabItem("Object"))
 		{
 			if (ImGui::BeginChild("ObjectListChild", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y * 0.25f), ImGuiChildFlags_Border, 0))
 			{
@@ -32,13 +32,14 @@ namespace gui
 					const auto& Object = ObjectList[CurrentObjectIndex];
 
 					// Object‚ÌTreeNode‚ð”z’u
-					const bool IsOpend = ImGui::TreeNodeEx(Object->GetObjectName().c_str(), ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanFullWidth);
+					const bool IsOpend = ImGui::TreeNodeEx(Object->GetObjectName().c_str(), ImGuiTreeNodeFlags_OpenOnArrow);
 
 					// OperateButton
 					{
 						m_OperateButtonID++;
 
-						ImGui::SameLine(ImGui::GetWindowWidth() - 70);
+						//ImGui::SameLine(ImGui::GetWindowWidth() - 70);
+						ImGui::SameLine();
 						std::string BtnLabel = "Edit##" + std::to_string(m_OperateButtonID);
 						if (ImGui::Button(BtnLabel.c_str()))
 						{
@@ -46,7 +47,8 @@ namespace gui
 							m_SelectedNodeIndex = -1;
 						}
 
-						ImGui::SameLine(ImGui::GetWindowWidth() - 30);
+						//ImGui::SameLine(ImGui::GetWindowWidth() - 30);
+						ImGui::SameLine();
 						std::string BoxLabel = "##" + std::to_string(m_OperateButtonID);
 						bool Flag = Object->IsEnabled();
 						if (ImGui::Checkbox(BoxLabel.c_str(), &Flag))
@@ -115,13 +117,14 @@ namespace gui
 		const std::shared_ptr<object::CNode>& Node, const std::vector<std::shared_ptr<object::CNode>>& NodeList)
 	{
 		// GUI‚Ì•`‰æ
-		const bool IsOpened = ImGui::TreeNodeEx(Node->GetName().c_str(), ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanFullWidth);
+		const bool IsOpened = ImGui::TreeNodeEx(Node->GetName().c_str(), ImGuiTreeNodeFlags_OpenOnArrow);
 
 		// OperateButton
 		{
 			m_OperateButtonID++;
 
-			ImGui::SameLine(ImGui::GetWindowWidth() - 70);
+			//ImGui::SameLine(ImGui::GetWindowWidth() - 70);
+			ImGui::SameLine();
 			std::string BtnLabel = "Edit##" + std::to_string(m_OperateButtonID);
 			if (ImGui::Button(BtnLabel.c_str()))
 			{
@@ -129,7 +132,8 @@ namespace gui
 				SelectedNodeIndex = CurrentNodeIndex;
 			}
 
-			ImGui::SameLine(ImGui::GetWindowWidth() - 30);
+			//ImGui::SameLine(ImGui::GetWindowWidth() - 30);
+			ImGui::SameLine();
 			std::string BoxLabel = "##" + std::to_string(m_OperateButtonID);
 			bool Flag = Node->IsEnabled();
 			if (ImGui::Checkbox(BoxLabel.c_str(), &Flag))

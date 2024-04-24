@@ -31,9 +31,9 @@ namespace gui
 
 				ImGui::EndTabBar();
 			}
-
-			ImGui::End();
 		}
+
+		ImGui::End();
 
 		return true;
 	}

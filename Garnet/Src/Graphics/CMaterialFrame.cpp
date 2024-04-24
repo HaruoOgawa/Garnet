@@ -3,6 +3,7 @@
 namespace graphics
 {
 	CMaterialFrame::CMaterialFrame():
+		m_CreateCounter(0),
 		m_MaterialName(std::string()),
 		m_CreateInfo(nullptr)
 	{
@@ -39,7 +40,8 @@ namespace graphics
 		std::shared_ptr<CMaterial> Material = pGraphicsAPI->CreateMaterial(m_CreateInfo, RefCount, CullMode);
 
 		// MaterialName
-		Material->SetMaterialName(m_MaterialName);
+		std::string MaterialName = m_MaterialName + "_" + std::to_string(m_CreateCounter);
+		Material->SetMaterialName(MaterialName);
 
 		// ShaderBuffer
 		for (const auto& ShaderBuffer : m_ShaderBufferList)
@@ -81,6 +83,9 @@ namespace graphics
 		{
 			Material->AddTextureBindingLayout({ TextureBuffer.TextureName, TextureBuffer.ViewBindingIndex, TextureBuffer.SamplerBindingIndex,TextureBuffer.TextureIndex,TextureBuffer.TextureUsage });
 		}
+
+		// カウンターを更新
+		m_CreateCounter++;
 
 		return Material;
 	}
