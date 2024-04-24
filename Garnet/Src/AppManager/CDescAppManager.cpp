@@ -70,6 +70,11 @@ namespace descapp
 		Release();
 	}
 
+	const std::shared_ptr<gui::IGUIEngine>& CDescAppManager::GetGUIEngine() const
+	{
+		return m_GUIEngine;
+	}
+
 	bool CDescAppManager::Release()
 	{
 #ifdef USE_VULKAN
@@ -144,6 +149,12 @@ namespace descapp
 		//
 		auto AppManager = reinterpret_cast<CDescAppManager*>(glfwGetWindowUserPointer(window));
 
+		auto GUIEngine = AppManager->GetGUIEngine();
+		if (GUIEngine)
+		{
+			if (GUIEngine->IsExistMouseOnGUI()) return;
+		}
+
 #ifdef USE_INPUT_SYSTEM
 		auto InputState = AppManager->GetInputState();
 
@@ -208,6 +219,12 @@ namespace descapp
 	{
 		auto AppManager = reinterpret_cast<CDescAppManager*>(glfwGetWindowUserPointer(window));
 		
+		auto GUIEngine = AppManager->GetGUIEngine();
+		if (GUIEngine)
+		{
+			if (GUIEngine->IsExistMouseOnGUI()) return;
+		}
+
 #ifdef USE_INPUT_SYSTEM
 		auto InputState = AppManager->GetInputState();
 
@@ -244,6 +261,12 @@ namespace descapp
 	{
 		auto AppManager = reinterpret_cast<CDescAppManager*>(glfwGetWindowUserPointer(window));
 
+		auto GUIEngine = AppManager->GetGUIEngine();
+		if (GUIEngine)
+		{
+			if (GUIEngine->IsExistMouseOnGUI()) return;
+		}
+
 #ifdef USE_INPUT_SYSTEM
 		auto InputState = AppManager->GetInputState();
 
@@ -267,6 +290,12 @@ namespace descapp
 	void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
 	{
 		auto AppManager = reinterpret_cast<CDescAppManager*>(glfwGetWindowUserPointer(window));
+
+		auto GUIEngine = AppManager->GetGUIEngine();
+		if (GUIEngine)
+		{
+			if (GUIEngine->IsExistMouseOnGUI()) return;
+		}
 
 #ifdef USE_INPUT_SYSTEM
 		auto InputState = AppManager->GetInputState();

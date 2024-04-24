@@ -40,4 +40,9 @@ namespace gui
 	{
 		return true;
 	}
+
+	bool CDummyGUIEngine::IsExistMouseOnGUI()
+	{
+		return false;
+	}
 }

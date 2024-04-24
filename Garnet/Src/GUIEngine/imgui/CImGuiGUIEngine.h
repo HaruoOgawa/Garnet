@@ -29,6 +29,8 @@ namespace gui
 {
 	class CImGuiGUIEngine : public IGUIEngine
 	{
+		bool m_Initialized;
+
 		std::shared_ptr<IImGuiCore> m_ImGuiCore;
 	public:
 		CImGuiGUIEngine();
@@ -46,6 +48,8 @@ namespace gui
 		virtual bool BeginFrame(api::IGraphicsAPI* pGraphicsAPI) override;
 
 		virtual bool EndFrame(api::IGraphicsAPI* pGraphicsAPI) override;
+
+		virtual bool IsExistMouseOnGUI() override;
 	};
 }
 

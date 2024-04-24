@@ -285,6 +285,8 @@ namespace app
 		if (GUIEngine)
 		{
 			if (GUIEngine->CheckInput(window, msg, w_param, l_param)) return true;
+
+			if (GUIEngine->IsExistMouseOnGUI()) return true;
 		}
 
 		LRESULT result = 0;

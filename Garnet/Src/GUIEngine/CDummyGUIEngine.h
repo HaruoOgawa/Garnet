@@ -24,5 +24,7 @@ namespace gui
 		virtual bool BeginFrame(api::IGraphicsAPI* pGraphicsAPI) override;
 
 		virtual bool EndFrame(api::IGraphicsAPI* pGraphicsAPI) override;
+
+		virtual bool IsExistMouseOnGUI() override;
 	};
 }
