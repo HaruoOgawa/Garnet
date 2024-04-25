@@ -7,6 +7,8 @@ namespace object
 		m_SelfNodeIndex(SelfNodeIndex),
 		m_Name("Node"),
 		m_U16Name(L"Node"),
+		m_Enabled(true),
+		m_Drawable(true),
 		m_MeshIndex(MeshIndex),
 		m_SkeletonIndex(-1),
 		m_LocalTransform(std::make_shared<math::CTransform>()),
@@ -40,6 +42,26 @@ namespace object
 	const std::wstring& CNode::GetU16Name() const
 	{
 		return m_U16Name;
+	}
+
+	void CNode::SetEnabled(bool Flag)
+	{
+		m_Enabled = Flag;
+	}
+
+	bool CNode::IsEnabled() const
+	{
+		return m_Enabled;
+	}
+
+	void CNode::SetDrawable(bool Flag)
+	{
+		m_Drawable = Flag;
+	}
+
+	bool CNode::IsDrawable() const
+	{
+		return m_Drawable;
 	}
 
 	int CNode::GetSelfNodeIndex() const

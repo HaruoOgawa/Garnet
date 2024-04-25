@@ -18,62 +18,104 @@
             {
               "name": "model",
               "type": "mat4",
-              "initValue": [ 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0 ]
+              "initValue": [ 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0 ],
+              "input": {
+                "hide": true
+              }
             },
             {
               "name": "view",
               "type": "mat4",
-              "initValue": [ 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0 ]
+              "initValue": [ 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0 ],
+              "input": {
+                "hide": true
+              }
             },
             {
               "name": "proj",
               "type": "mat4",
-              "initValue": [ 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0 ]
+              "initValue": [ 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0 ],
+              "input": {
+                "hide": true
+              }
             },
             {
               "name": "lightVPMat",
               "type": "mat4",
-              "initValue": [ 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0 ]
+              "initValue": [ 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0 ],
+              "input": {
+                "hide": true
+              }
             },
             {
               "name": "lightDir",
               "type": "vec4",
-              "initValue": [ 0.0, 0.0, 0.0, 0.0 ]
+              "initValue": [ 0.0, 0.0, 0.0, 0.0 ],
+              "input": {
+                "hide": true
+              }
             },
             {
               "name": "lightColor",
               "type": "vec4",
-              "initValue": [ 0.0, 0.0, 0.0, 0.0 ]
+              "initValue": [ 0.0, 0.0, 0.0, 0.0 ],
+              "input": {
+                "hide": true
+              }
             },
             {
               "name": "cameraPos",
               "type": "vec4",
-              "initValue": [ 0.0, 0.0, 0.0, 0.0 ]
+              "initValue": [ 0.0, 0.0, 0.0, 0.0 ],
+              "input": {
+                "hide": true
+              }
             },
             {
               "name": "baseColorFactor",
               "type": "vec4",
-              "initValue": [ 1.0, 1.0, 1.0, 1.0 ]
+              "initValue": [ 1.0, 1.0, 1.0, 1.0 ],
+              "input": {
+                "type": "color"
+              }
             },
             {
               "name": "emissiveFactor",
               "type": "vec4",
-              "initValue": [ 0.0, 0.0, 0.0, 0.0 ]
+              "initValue": [ 0.0, 0.0, 0.0, 0.0 ],
+              "input": {
+                "type": "range",
+                "minvalue": 0.0,
+                "maxvalue": 1.0
+              }
             },
             {
               "name": "time",
               "type": "float",
-              "initValue": [ 0.0 ]
+              "initValue": [ 0.0 ],
+              "input": {
+                "hide": true
+              }
             },
             {
               "name": "metallicFactor",
               "type": "float",
-              "initValue": [ 0.0 ]
+              "initValue": [ 0.0 ],
+              "input": {
+                "type": "range",
+                "minvalue":  0.0,
+                "maxvalue":  1.0
+              }
             },
             {
               "name": "roughnessFactor",
               "type": "float",
-              "initValue": [ 0.0 ]
+              "initValue": [ 0.0 ],
+              "input": {
+                "type": "range",
+                "minvalue": 0.0,
+                "maxvalue": 1.0
+              }
             },
             {
               "name": "normalMapScale",
@@ -88,77 +130,122 @@
             {
               "name": "mipCount",
               "type": "float",
-              "initValue": [ 1.0 ]
+              "initValue": [ 1.0 ],
+              "input": {
+                "hide": true
+              }
             },
             {
               "name": "ShadowMapX",
               "type": "float",
-              "initValue": [ 1.0 ]
+              "initValue": [ 1.0 ],
+              "input": {
+                "hide": true
+              }
             },
             {
               "name": "ShadowMapY",
               "type": "float",
-              "initValue": [ 1.0 ]
+              "initValue": [ 1.0 ],
+              "input": {
+                "hide": true
+              }
             },
             {
               "name": "useBaseColorTexture",
               "type": "int",
-              "initValue": [ 0 ]
+              "initValue": [ 0 ],
+              "input": {
+                "hide": true
+              }
             },
             {
               "name": "useMetallicRoughnessTexture",
               "type": "int",
-              "initValue": [ 0 ]
+              "initValue": [ 0 ],
+              "input": {
+                "hide": true
+              }
             },
             {
               "name": "useEmissiveTexture",
               "type": "int",
-              "initValue": [ 0 ]
+              "initValue": [ 0 ],
+              "input": {
+                "hide": true
+              }
             },
             {
               "name": "useNormalTexture",
               "type": "int",
-              "initValue": [ 0 ]
+              "initValue": [ 0 ],
+              "input": {
+                "hide": true
+              }
             },
             {
               "name": "useOcclusionTexture",
               "type": "int",
-              "initValue": [ 0 ]
+              "initValue": [ 0 ],
+              "input": {
+                "hide": true
+              }
             },
             {
               "name": "useCubeMap",
               "type": "int",
-              "initValue": [ 0 ]
+              "initValue": [ 0 ],
+              "input": {
+                "hide": true
+              }
             },
             {
               "name": "useShadowMap",
               "type": "int",
-              "initValue": [ 0 ]
+              "initValue": [ 0 ],
+              "input": {
+                "hide": true
+              }
             },
             {
               "name": "useIBL",
               "type": "int",
-              "initValue": [ 0 ]
+              "initValue": [ 0 ],
+              "input": {
+                "hide": true
+              }
             },
             {
               "name": "useSkinMeshAnimation",
               "type": "int",
-              "initValue": [ 0 ]
+              "initValue": [ 0 ],
+              "input": {
+                "hide": true
+              }
             },
             {
               "name": "useDirCubemap",
               "type": "int",
-              "initValue": [ 0 ]
+              "initValue": [ 0 ],
+              "input": {
+                "hide": true
+              }
             },
             {
               "name": "pad1",
               "type": "int",
-              "initValue": [ 0 ]
+              "initValue": [ 0 ],
+              "input": {
+                "hide": true
+              }
             },
             {
               "name": "pad2",
               "type": "int",
-              "initValue": [ 0 ]
+              "initValue": [ 0 ],
+              "input": {
+                "hide": true
+              }
             }
           ]
         },
@@ -173,7 +260,10 @@
               "name": "r_SkinMatrixBuffer",
               "type": "mat4_array",
               "useInitValue": false,
-              "arraySize": 512
+              "arraySize": 512,
+              "input": {
+                "hide": true
+              }
             }
           ]
         }

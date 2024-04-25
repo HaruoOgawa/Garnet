@@ -66,6 +66,9 @@ namespace descapp
 	public:
 		CDescAppManager(app::EAppType AppType);
 		virtual ~CDescAppManager();
+
+		const std::shared_ptr<gui::IGUIEngine>& GetGUIEngine() const;
+
 		bool Initialize();
 		bool RunLopp();
 

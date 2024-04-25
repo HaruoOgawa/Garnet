@@ -11,7 +11,6 @@ namespace gui
 	{
 		if (ImGui::BeginTabItem("Rendering"))
 		{
-			ImGui::Text("This is Rendering Window");
 			ImGui::EndTabItem();
 		}
 

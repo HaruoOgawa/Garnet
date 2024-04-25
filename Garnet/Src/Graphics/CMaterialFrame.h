@@ -23,6 +23,8 @@ namespace graphics
 
 	class CMaterialFrame
 	{
+		int m_CreateCounter;
+
 		std::string m_MaterialName;
 
 		std::shared_ptr<graphics::CMaterialCreateInfo> m_CreateInfo;

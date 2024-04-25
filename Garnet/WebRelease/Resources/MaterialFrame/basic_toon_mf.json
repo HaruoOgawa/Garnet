@@ -18,22 +18,34 @@
             {
               "name": "model",
               "type": "mat4",
-              "initValue": [ 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0 ]
+              "initValue": [ 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0 ],
+              "input": {
+                "hide": true
+              }
             },
             {
               "name": "view",
               "type": "mat4",
-              "initValue": [ 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0 ]
+              "initValue": [ 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0 ],
+              "input": {
+                "hide": true
+              }
             },
             {
               "name": "proj",
               "type": "mat4",
-              "initValue": [ 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0 ]
+              "initValue": [ 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0 ],
+              "input": {
+                "hide": true
+              }
             },
             {
               "name": "lightVPMat",
               "type": "mat4",
-              "initValue": [ 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0 ]
+              "initValue": [ 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0 ],
+              "input": {
+                "hide": true
+              }
             },
             {
               "name": "edgeSize",
@@ -43,37 +55,58 @@
             {
               "name": "fPad0",
               "type": "float",
-              "initValue": [ 0.0 ]
+              "initValue": [ 0.0 ],
+              "input": {
+                "hide": true
+              }
             },
             {
               "name": "fPad1",
               "type": "float",
-              "initValue": [ 0.0 ]
+              "initValue": [ 0.0 ],
+              "input": {
+                "hide": true
+              }
             },
             {
               "name": "fPad2",
               "type": "float",
-              "initValue": [ 0.0 ]
+              "initValue": [ 0.0 ],
+              "input": {
+                "hide": true
+              }
             },
             {
               "name": "useSkinMeshAnimation",
               "type": "int",
-              "initValue": [ 0 ]
+              "initValue": [ 0 ],
+              "input": {
+                "hide": true
+              }
             },
             {
               "name": "pad0",
               "type": "int",
-              "initValue": [ 0 ]
+              "initValue": [ 0 ],
+              "input": {
+                "hide": true
+              }
             },
             {
               "name": "drawPathIndex",
               "type": "int",
-              "initValue": [ -1 ]
+              "initValue": [ -1 ],
+              "input": {
+                "hide": true
+              }
             },
             {
               "name": "pad1",
               "type": "int",
-              "initValue": [ 0 ]
+              "initValue": [ 0 ],
+              "input": {
+                "hide": true
+              }
             }
           ]
         },
@@ -88,7 +121,10 @@
               "name": "r_SkinMatrixBuffer",
               "type": "mat4_array",
               "useInitValue": false,
-              "arraySize" : 512
+              "arraySize": 512,
+              "input": {
+                "hide": true
+              }
             }
           ]
         }
@@ -111,17 +147,26 @@
             {
               "name": "lightDir",
               "type": "vec4",
-              "initValue": [ 0.0, 0.0, 0.0, 0.0 ]
+              "initValue": [ 0.0, 0.0, 0.0, 0.0 ],
+              "input": {
+                "hide": true
+              }
             },
             {
               "name": "lightColor",
               "type": "vec4",
-              "initValue": [ 0.0, 0.0, 0.0, 0.0 ]
+              "initValue": [ 0.0, 0.0, 0.0, 0.0 ],
+              "input": {
+                "hide": true
+              }
             },
             {
               "name": "cameraPos",
               "type": "vec4",
-              "initValue": [ 0.0, 0.0, 0.0, 0.0 ]
+              "initValue": [ 0.0, 0.0, 0.0, 0.0 ],
+              "input": {
+                "hide": true
+              }
             },
             {
               "name": "diffuseFactor",
@@ -141,7 +186,10 @@
             {
               "name": "edgeColor",
               "type": "vec4",
-              "initValue": [ 1.0, 1.0, 1.0, 1.0 ]
+              "initValue": [ 1.0, 1.0, 1.0, 1.0 ],
+              "input": {
+                "type": "color"
+              }
             },
             {
               "name": "specularIntensity",
@@ -151,77 +199,122 @@
             {
               "name": "f_pad0",
               "type": "float",
-              "initValue": [ 1.0 ]
+              "initValue": [ 1.0 ],
+              "input": {
+                "hide": true
+              }
             },
             {
               "name": "f_pad1",
               "type": "float",
-              "initValue": [ 1.0 ]
+              "initValue": [ 1.0 ],
+              "input": {
+                "hide": true
+              }
             },
             {
               "name": "f_pad2",
               "type": "float",
-              "initValue": [ 1.0 ]
+              "initValue": [ 1.0 ],
+              "input": {
+                "hide": true
+              }
             },
             {
               "name": "UseMainTexture",
               "type": "int",
-              "initValue": [ 0 ]
+              "initValue": [ 0 ],
+              "input": {
+                "hide": true
+              }
             },
             {
               "name": "UseToonTexture",
               "type": "int",
-              "initValue": [ 0 ]
+              "initValue": [ 0 ],
+              "input": {
+                "hide": true
+              }
             },
             {
               "name": "UseSphereTexture",
               "type": "int",
-              "initValue": [ 0 ]
+              "initValue": [ 0 ],
+              "input": {
+                "hide": true
+              }
             },
             {
               "name": "SphereMode",
               "type": "int",
-              "initValue": [ 0 ]
+              "initValue": [ 0 ],
+              "input": {
+                "hide": true
+              }
             },
             {
               "name": "drawPathIndex",
               "type": "int",
-              "initValue": [ -1 ]
+              "initValue": [ -1 ],
+              "input": {
+                "hide": true
+              }
             },
             {
               "name": "iPad0",
               "type": "int",
-              "initValue": [ 0 ]
+              "initValue": [ 0 ],
+              "input": {
+                "hide": true
+              }
             },
             {
               "name": "iPad1",
               "type": "int",
-              "initValue": [ 0 ]
+              "initValue": [ 0 ],
+              "input": {
+                "hide": true
+              }
             },
             {
               "name": "iPad2",
               "type": "int",
-              "initValue": [ 0 ]
+              "initValue": [ 0 ],
+              "input": {
+                "hide": true
+              }
             },
             {
               "name": "mPad0",
               "type": "mat4",
-              "initValue": [ 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0 ]
+              "initValue": [ 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0 ],
+              "input": {
+                "hide": true
+              }
             },
             {
               "name": "mPad1",
               "type": "mat4",
-              "initValue": [ 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0 ]
+              "initValue": [ 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0 ],
+              "input": {
+                "hide": true
+              }
             },
             {
               "name": "mPad2",
               "type": "mat4",
-              "initValue": [ 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0 ]
+              "initValue": [ 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0 ],
+              "input": {
+                "hide": true
+              }
             },
             {
               "name": "mPad3",
               "type": "mat4",
-              "initValue": [ 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0 ]
+              "initValue": [ 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0 ],
+              "input": {
+                "hide": true
+              }
             }
           ]
         },

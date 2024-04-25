@@ -375,12 +375,44 @@ namespace resource
 					ValueType = graphics::EUniformValueType::VALUE_TYPE_MAT4_ARRAY;
 				}
 
+				// ValueInput
+				graphics::SUniformValueInput ValueInput = {};
+
+				const auto input = val->find("input");
+				if (input != val->end() && input->is_object())
+				{
+					// type
+					std::string type = "";
+					GetString("type", type, input);
+
+					if (type == "range")
+					{
+						ValueInput.Type = graphics::EUniformInputType::Range;
+					}
+					else if (type == "color")
+					{
+						ValueInput.Type = graphics::EUniformInputType::Color;
+					}
+					else
+					{
+						ValueInput.Type = graphics::EUniformInputType::None;
+					}
+
+					// minvalue, maxvalue
+					GetFloat("minvalue", ValueInput.MinValue, input);
+					GetFloat("maxvalue", ValueInput.MaxValue, input);
+
+					// hide
+					GetBoolean("hide", ValueInput.Hide, input);
+				}
+
 				std::shared_ptr<graphics::SBufferValueLayout> ValueLayout = std::make_shared<graphics::SBufferValueLayout>();
 				ValueLayout->Name = value_name;
 				ValueLayout->ValueType = ValueType;
 				ValueLayout->Data = initValue;
 				ValueLayout->ByteSize = ByteSize;
 				ValueLayout->BindingIndex = binding;
+				ValueLayout->ValueInput = ValueInput;
 
 				ValueLayoutList.push_back(ValueLayout);
 			}

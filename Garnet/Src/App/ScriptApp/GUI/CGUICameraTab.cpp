@@ -11,7 +11,6 @@ namespace gui
 	{
 		if (ImGui::BeginTabItem("Camera"))
 		{
-			ImGui::Text("This is Camera Window");
 			ImGui::EndTabItem();
 		}
 

@@ -41,7 +41,7 @@ namespace graphics
 
 		const std::string& GetBufferName() const;
 
-		virtual void AddData(const std::string& Name, EUniformValueType ValueType, const void* Data, int ByteSize, int BindingIndex) override;
+		virtual void AddData(const std::string& Name, EUniformValueType ValueType, const void* Data, int ByteSize, int BindingIndex, SUniformValueInput ValueInput) override;
 		virtual void ReplaceData(const std::string& SrcName, const void* SrcData, int SrcByteSize, int BindingIndex);
 
 		virtual void SetData(const std::string& Name, const void* Data, int ByteSize) override;

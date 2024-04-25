@@ -6,6 +6,7 @@
 namespace gui
 {
 	CImGuiGUIEngine::CImGuiGUIEngine():
+		m_Initialized(false),
 		m_ImGuiCore(nullptr)
 	{
 #ifdef USE_VULKAN
@@ -65,6 +66,8 @@ namespace gui
 		// GraphicsAPIŽü‚è‚Ì‰Šú‰»
 		if (!m_ImGuiCore->Initialize(pGraphicsAPI)) return false;
 
+		m_Initialized = true;
+
 		return true;
 	}
 #elif USE_WIN32_WindowAPI
@@ -84,6 +87,8 @@ namespace gui
 
 		// GraphicsAPIŽü‚è‚Ì‰Šú‰»
 		if (!m_ImGuiCore->Initialize(pGraphicsAPI)) return false;
+
+		m_Initialized = true;
 
 		return true;
 	}
@@ -116,6 +121,15 @@ namespace gui
 		if (!m_ImGuiCore->EndFrame(pGraphicsAPI)) return false;
 
 		return true;
+	}
+
+	bool CImGuiGUIEngine::IsExistMouseOnGUI()
+	{
+		if (!m_Initialized) return false;
+
+		ImGuiIO& io = ImGui::GetIO();
+
+		return io.WantCaptureMouse;
 	}
 }
 #endif // USE_GUIENGINE

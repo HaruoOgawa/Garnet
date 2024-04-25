@@ -15,11 +15,20 @@ namespace gui
 {
 	class CGUIObjectTab
 	{
+		int m_OperateButtonID;
+
 		int m_SelectedObjectIndex;
 		int m_SelectedNodeIndex;
+
+		std::string m_SelectedName;
 	private:
+		void Reset();
+
 		bool DrawNodeGUI(int& SelectedObjectIndex, int& SelectedNodeIndex, int CurrentObjectIndex, int CurrentNodeIndex, 
 			const std::shared_ptr<object::CNode>& Node, const std::vector<std::shared_ptr<object::CNode>>& NodeList);
+
+		void SetDrawable(bool Flag, const std::shared_ptr<object::CNode>& Node, const std::vector<std::shared_ptr<object::CNode>>& NodeList);
+
 	public:
 		CGUIObjectTab();
 		virtual ~CGUIObjectTab() = default;

@@ -9,13 +9,22 @@ namespace gui
 {
 	CGUIObjectTab::CGUIObjectTab():
 		m_SelectedObjectIndex(-1),
-		m_SelectedNodeIndex(-1)
+		m_SelectedNodeIndex(-1),
+		m_SelectedName(""),
+		m_OperateButtonID(-1)
 	{
+	}
+
+	void CGUIObjectTab::Reset()
+	{
+		m_OperateButtonID = -1;
 	}
 
 	bool CGUIObjectTab::Draw(const std::vector<std::shared_ptr<object::C3DObject>>& ObjectList)
 	{
-		if (ImGui::BeginTabItem("ObjectTabItem"))
+		Reset();
+
+		if (ImGui::BeginTabItem("Object"))
 		{
 			if (ImGui::BeginChild("ObjectListChild", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y * 0.25f), ImGuiChildFlags_Border, 0))
 			{
@@ -23,21 +32,32 @@ namespace gui
 				{
 					const auto& Object = ObjectList[CurrentObjectIndex];
 
-					//
-					static bool Flag = true;
-					ImGui::Checkbox("Enable", &Flag);
-
-					ImGui::SameLine();
-					std::string BtnLabel = "Show_" + Object->GetObjectName();
-					if (ImGui::Button(BtnLabel.c_str()))
+					// OperateButton
 					{
-						m_SelectedObjectIndex = CurrentObjectIndex;
-						m_SelectedNodeIndex = -1;
+						m_OperateButtonID++;
+
+						std::string BoxLabel = "##" + std::to_string(m_OperateButtonID);
+						bool Flag = Object->IsEnabled();
+						if (ImGui::Checkbox(BoxLabel.c_str(), &Flag))
+						{
+							Object->SetEnabled(Flag);
+						}
+
+						ImGui::SameLine();
 					}
 
 					// Object‚ÌTreeNode‚ð”z’u
-					ImGui::SameLine();
-					if (ImGui::TreeNodeEx(Object->GetObjectName().c_str(), ImGuiTreeNodeFlags_OpenOnArrow))
+					const bool IsOpend = ImGui::TreeNodeEx(Object->GetObjectName().c_str(), ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_Framed);
+					
+					if (ImGui::IsItemClicked())
+					{
+						m_SelectedObjectIndex = CurrentObjectIndex;
+						m_SelectedNodeIndex = -1;
+
+						m_SelectedName = Object->GetObjectName();
+					}
+					
+					if(IsOpend)
 					{
 						// NodeList‚ðTreeNode‚É”z’u
 						const auto& NodeList = Object->GetNodeList();
@@ -76,6 +96,11 @@ namespace gui
 			// ImGui::GetContentRegionAvail().y * 0.5‚Æ‚©‚ÌŒã‚É0‚É‚µ‚½‚ç‚È‚ñ‚©‚µ‚ç‚ñ‚ª‚¢‚¢Š´‚¶‚É‚Ò‚Á‚½‚è‚ÌˆÊ’u‚É”z’u‚µ‚Ä‚­‚ê‚é
 			if (ImGui::BeginChild("ObjectDetailChild", ImVec2(ImGui::GetContentRegionAvail().x, 0), ImGuiChildFlags_Border, 0))
 			{
+				if (!m_SelectedName.empty())
+				{
+					ImGui::Text("%s", m_SelectedName.c_str());
+				}
+
 				if (ImGui::BeginTabBar("ObjectDetail"))
 				{
 					if (!CGUITransformTab::Draw(ObjectList, m_SelectedObjectIndex, m_SelectedNodeIndex)) return false;
@@ -96,21 +121,35 @@ namespace gui
 	bool CGUIObjectTab::DrawNodeGUI(int& SelectedObjectIndex, int& SelectedNodeIndex, int CurrentObjectIndex, int CurrentNodeIndex,
 		const std::shared_ptr<object::CNode>& Node, const std::vector<std::shared_ptr<object::CNode>>& NodeList)
 	{
-		//
-		static bool Flag = true;
-		ImGui::Checkbox("Enable", &Flag);
+		// GUI‚Ì•`‰æ
+		// OperateButton
+		{
+			m_OperateButtonID++;
 
-		ImGui::SameLine();
-		std::string Label = "Show_" + Node->GetName();
-		if (ImGui::Button(Label.c_str()))
+			std::string BoxLabel = "##" + std::to_string(m_OperateButtonID);
+			bool Flag = Node->IsEnabled();
+			if (ImGui::Checkbox(BoxLabel.c_str(), &Flag))
+			{
+				Node->SetEnabled(Flag);
+
+				SetDrawable(Flag, Node, NodeList);
+			}
+
+			ImGui::SameLine();
+		}
+
+		//
+		const bool IsOpened = ImGui::TreeNodeEx(Node->GetName().c_str(), ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_Framed);
+
+		if (ImGui::IsItemClicked())
 		{
 			SelectedObjectIndex = CurrentObjectIndex;
 			SelectedNodeIndex = CurrentNodeIndex;
+
+			m_SelectedName = Node->GetName();
 		}
 
-		// GUI‚Ì•`‰æ
-		ImGui::SameLine();
-		if (ImGui::TreeNodeEx(Node->GetName().c_str(), ImGuiTreeNodeFlags_OpenOnArrow))
+		if (IsOpened)
 		{
 			// Žq—v‘f‚Ì‘–”j
 			for (const int ChildIndex : Node->GetChildrenNodeIndexList())
@@ -125,6 +164,20 @@ namespace gui
 		}
 
 		return true;
+	}
+
+	void CGUIObjectTab::SetDrawable(bool Flag, const std::shared_ptr<object::CNode>& Node, const std::vector<std::shared_ptr<object::CNode>>& NodeList)
+	{
+		Node->SetDrawable(Flag);
+
+		// Žq—v‘f‚Ì‘–”j
+		for (const int ChildIndex : Node->GetChildrenNodeIndexList())
+		{
+			if (ChildIndex < 0 || ChildIndex >= NodeList.size()) continue;
+
+			const auto& ChildNode = NodeList[ChildIndex];
+			SetDrawable(Flag, ChildNode, NodeList);
+		}
 	}
 }
 #endif

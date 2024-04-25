@@ -8,6 +8,7 @@ namespace object
 		m_DepthPassName(DepthPassName),
 		m_ObjectName("3DObject"),
 		m_ObjectTransform(std::make_shared<math::CTransform>()),
+		m_Enabled(true),
 #ifdef USE_ANIMATION
 		m_AnimationController(std::make_shared<animation::CAnimationController>()),
 		m_BlendShapeController(std::make_shared<animation::CBlendShapeController>()),
@@ -37,6 +38,16 @@ namespace object
 	const std::shared_ptr<math::CTransform>& C3DObject::GetObjectTransform() const
 	{
 		return m_ObjectTransform;
+	}
+
+	void C3DObject::SetEnabled(bool Flag)
+	{
+		m_Enabled = Flag;
+	}
+
+	bool C3DObject::IsEnabled() const
+	{
+		return m_Enabled;
 	}
 	
 	bool C3DObject::CreateSimply(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine,
@@ -336,9 +347,13 @@ namespace object
 	{
 		if (!m_IsCreated) return true;
 
+		if (!m_Enabled) return true;
+
 		// •`‰æ
 		for (const auto& Node : m_NodeList)
 		{
+			if (!Node->IsEnabled() || !Node->IsDrawable()) continue;
+
 			int MeshIndex = Node->GetMeshIndex();
 			if (MeshIndex < 0 || MeshIndex >= m_MeshList.size()) continue;
 

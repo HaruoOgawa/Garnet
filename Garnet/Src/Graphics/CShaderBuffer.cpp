@@ -27,7 +27,7 @@ namespace graphics
 		return m_BufferName;
 	}
 
-	void CShaderBuffer::AddData(const std::string& Name, EUniformValueType ValueType, const void* Data, int ByteSize, int BindingIndex)
+	void CShaderBuffer::AddData(const std::string& Name, EUniformValueType ValueType, const void* Data, int ByteSize, int BindingIndex, SUniformValueInput ValueInput)
 	{
 		const auto& Layout = m_BindingLayoutList.find(BindingIndex);
 
@@ -52,7 +52,8 @@ namespace graphics
 			Name,
 			ValueType,
 			ByteSize,
-			ByteOffset
+			ByteOffset,
+			ValueInput
 		};
 		m_Descriptor->AddData(Name, value);
 
