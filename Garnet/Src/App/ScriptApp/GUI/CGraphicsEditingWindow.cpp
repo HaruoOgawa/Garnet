@@ -17,11 +17,13 @@ namespace gui
 		if (!pApp) return true;
 
 		// ウィンドウの初期位置・サイズ
-		//const ImGuiViewport* viewport = ImGui::GetMainViewport();
-		//ImGui::SetNextWindowPos(ImVec2(viewport->WorkPos.x, viewport->WorkPos.y), ImGuiCond_FirstUseEver);
-		//ImGui::SetNextWindowSize(ImVec2(1000, 1000), ImGuiCond_FirstUseEver);
+		float padding = 0.0f;
+		ImGuiIO& io = ImGui::GetIO();
+		ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x - padding, padding), ImGuiCond_Always, ImVec2(1.0f, 0.0f));
+		ImGui::SetNextWindowSize(ImVec2(io.DisplaySize.x * 0.25f, io.DisplaySize.y), ImGuiCond_Always);
 
-		if (ImGui::Begin("Garnet3D"))
+		bool Open = true;
+		if (ImGui::Begin("Garnet3D", &Open, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings))
 		{
 			if (ImGui::BeginTabBar("MainMenuBar"))
 			{
