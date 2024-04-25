@@ -151,9 +151,12 @@ namespace app
 		if (!pLoadWorker->Draw(pGraphicsAPI, false, m_MainCamera, m_Projection, m_DrawInfo)) return false;
 		
 		// GUIEngine
-		if (!GUIEngine->BeginFrame(pGraphicsAPI)) return false;
-		if (!m_GraphicsEditingWindow->Draw(this)) return false;
-		if (!GUIEngine->EndFrame(pGraphicsAPI)) return false;
+		if (pLoadWorker->IsLoaded())
+		{
+			if (!GUIEngine->BeginFrame(pGraphicsAPI)) return false;
+			if (!m_GraphicsEditingWindow->Draw(this)) return false;
+			if (!GUIEngine->EndFrame(pGraphicsAPI)) return false;
+		}
 
 		if (!pGraphicsAPI->EndRender()) return false;
 

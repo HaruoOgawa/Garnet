@@ -98,7 +98,7 @@ namespace gui
 			{
 				if (!m_SelectedName.empty())
 				{
-					ImGui::Text(m_SelectedName.c_str());
+					ImGui::Text("%s", m_SelectedName.c_str());
 				}
 
 				if (ImGui::BeginTabBar("ObjectDetail"))
