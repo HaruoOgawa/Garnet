@@ -54,6 +54,30 @@
               "input": {
                 "hide": true
               }
+            },
+            {
+              "name": "resolution",
+              "type": "vec2",
+              "initValue": [ 1.0, 1.0 ],
+              "input": {
+                "hide": true
+              }
+            },
+            {
+              "name": "time",
+              "type": "float",
+              "initValue": [ 0.0 ],
+              "input": {
+                "hide": true
+              }
+            },
+            {
+              "name": "deltaTime",
+              "type": "float",
+              "initValue": [ 0.0 ],
+              "input": {
+                "hide": true
+              }
             }
           ]
         }

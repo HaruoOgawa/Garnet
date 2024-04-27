@@ -174,10 +174,44 @@ namespace api
 		WGPUDepthStencilState depthStencilState;
 		SetDefaultDepthStencil(depthStencilState);
 		depthStencilState.nextInChain = nullptr;
-		depthStencilState.depthCompare = (pWebGPUMat->IsEnabledZTest())? WGPUCompareFunction_Less : WGPUCompareFunction_Always;
-		//depthStencilState.depthCompare = WGPUCompareFunction_Less;
-		//depthStencilState.depthWriteEnabled = pWebGPUMat->IsEnabledZTest();
-		depthStencilState.depthWriteEnabled = true;
+
+		// Depth
+		{
+			depthStencilState.depthWriteEnabled = pWebGPUMat->IsEnabledZWrite();
+
+			graphics::EDepthFunc DepthFunc = pWebGPUMat->GetDepthFunc();
+			switch (DepthFunc)
+			{
+			case graphics::EDepthFunc::Never:
+				depthStencilState.depthCompare = WGPUCompareFunction_Never;
+				break;
+			case graphics::EDepthFunc::Less:
+				depthStencilState.depthCompare = WGPUCompareFunction_Less;
+				break;
+			case graphics::EDepthFunc::LessEqual:
+				depthStencilState.depthCompare = WGPUCompareFunction_LessEqual;
+				break;
+			case graphics::EDepthFunc::Greater:
+				depthStencilState.depthCompare = WGPUCompareFunction_Greater;
+				break;
+			case graphics::EDepthFunc::GreaterEqual:
+				depthStencilState.depthCompare = WGPUCompareFunction_GreaterEqual;
+				break;
+			case graphics::EDepthFunc::Equal:
+				depthStencilState.depthCompare = WGPUCompareFunction_Equal;
+				break;
+			case graphics::EDepthFunc::NotEqual:
+				depthStencilState.depthCompare = WGPUCompareFunction_NotEqual;
+				break;
+			case graphics::EDepthFunc::Always:
+				depthStencilState.depthCompare = WGPUCompareFunction_Always;
+				break;
+			default:
+				depthStencilState.depthCompare = WGPUCompareFunction_Less;
+				break;
+			}
+		}
+		
 		WGPUTextureFormat depthTextureFormat = WGPUTextureFormat_Depth24Plus;
 		depthStencilState.format = depthTextureFormat;
 		depthStencilState.stencilReadMask = 0; // ステンシルバッファの読み書きをオフにしておく

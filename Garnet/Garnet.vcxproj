@@ -653,6 +653,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClInclude Include="Src\App\ScriptApp\GUI\CGUIRenderingTab.h" />
     <ClInclude Include="Src\App\ScriptApp\GUI\CGUIObjectTab.h" />
     <ClInclude Include="Src\App\ScriptApp\GUI\CGraphicsEditingWindow.h" />
+    <ClInclude Include="Src\Graphics\EDepthFunc.h" />
     <ClInclude Include="Src\Graphics\SUniformValueInput.h" />
     <ClInclude Include="Src\Graphics\EUniformValueType.h" />
     <ClInclude Include="Src\GUIEngine\imgui\Core\CImGuiCoreOpenGL.h" />

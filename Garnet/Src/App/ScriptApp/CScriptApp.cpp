@@ -95,8 +95,9 @@ namespace app
 
 	bool CScriptApp::Resize(int Width, int Height)
 	{
-		m_Projection->SetAspect(static_cast<float>(Width) / static_cast<float>(Height));
-		m_DrawInfo->GetLightProjection()->SetAspect(static_cast<float>(Width) / static_cast<float>(Height));
+		m_Projection->SetScreenResolution(Width, Height);
+
+		m_DrawInfo->GetLightProjection()->SetScreenResolution(Width, Height);
 
 		return true;
 	}

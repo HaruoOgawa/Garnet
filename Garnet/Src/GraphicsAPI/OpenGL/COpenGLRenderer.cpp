@@ -84,17 +84,48 @@ namespace api
 		if (!pOpenGLMat->BuildDrawBuffer(DynamicOffsetNum)) return false;
 
 		// •`‰æ•û–@‚ÌÝ’è
-		// ZTest
-		if (pOpenGLMat->IsEnabledZTest())
+		// Depth
 		{
-			glEnable(GL_DEPTH_TEST);
-			glDepthFunc(GL_LESS);
-		}
-		else
-		{
-			//glDisable(GL_DEPTH_TEST);
-			glEnable(GL_DEPTH_TEST);
-			glDepthFunc(GL_ALWAYS);
+			if (pOpenGLMat->IsEnabledZWrite())
+			{
+				glEnable(GL_DEPTH_TEST);
+			}
+			else
+			{
+				glDisable(GL_DEPTH_TEST);
+			}
+
+			graphics::EDepthFunc DepthFunc = pOpenGLMat->GetDepthFunc();
+			switch (DepthFunc)
+			{
+			case graphics::EDepthFunc::Never:
+				glDepthFunc(GL_NEVER);
+				break;
+			case graphics::EDepthFunc::Less:
+				glDepthFunc(GL_LESS);
+				break;
+			case graphics::EDepthFunc::LessEqual:
+				glDepthFunc(GL_LEQUAL);
+				break;
+			case graphics::EDepthFunc::Greater:
+				glDepthFunc(GL_GREATER);
+				break;
+			case graphics::EDepthFunc::GreaterEqual:
+				glDepthFunc(GL_GEQUAL);
+				break;
+			case graphics::EDepthFunc::Equal:
+				glDepthFunc(GL_EQUAL);
+				break;
+			case graphics::EDepthFunc::NotEqual:
+				glDepthFunc(GL_NOTEQUAL);
+				break;
+			case graphics::EDepthFunc::Always:
+				glDepthFunc(GL_ALWAYS);
+				break;
+			default:
+				glDepthFunc(GL_LESS);
+				break;
+			}
 		}
 
 		// Culling

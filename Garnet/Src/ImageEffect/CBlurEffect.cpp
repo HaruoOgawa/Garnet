@@ -153,7 +153,7 @@ namespace imageeffect
 	{
 		// MaterialX
 		auto MaterialX = m_BlurMF->CreateMaterial(m_pGraphicsAPI, 1, graphics::ECullMode::CULL_BACK);
-		MaterialX->SetEnabledZTest(false);
+		MaterialX->SetDepthFunc(graphics::EDepthFunc::Always);
 		MaterialX->SetCullMode(graphics::ECullMode::CULL_NONE);
 		
 		MaterialX->ReplacePreloadUniformValue("UseBlur", &glm::ivec1(1)[0], sizeof(glm::ivec1), 0);
@@ -168,7 +168,7 @@ namespace imageeffect
 
 		// MaterialY
 		auto MaterialY = m_BlurMF->CreateMaterial(m_pGraphicsAPI, 1, graphics::ECullMode::CULL_BACK);
-		MaterialY->SetEnabledZTest(false);
+		MaterialY->SetDepthFunc(graphics::EDepthFunc::Always);
 		MaterialY->SetCullMode(graphics::ECullMode::CULL_NONE);
 
 		MaterialY->ReplacePreloadUniformValue("UseBlur", &glm::ivec1(1)[0], sizeof(glm::ivec1), 0);

@@ -37,7 +37,7 @@ namespace resource
 
 		Material->AddShaderBuffer(UniforBuffer);
 
-		Material->SetEnabledZTest(false);
+		Material->SetDepthFunc(graphics::EDepthFunc::Always);
 		Material->SetCullMode(graphics::ECullMode::CULL_NONE);
 
 		// CreateŠÖ”‚ğÀs

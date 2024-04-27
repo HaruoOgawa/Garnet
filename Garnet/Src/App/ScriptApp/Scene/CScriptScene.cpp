@@ -108,6 +108,8 @@ namespace scene
 			//Material->ReplacePreloadUniformValue("useCubeMap", &glm::ivec1(1)[0], sizeof(glm::ivec1), 0);
 			//Material->ReplaceTextureIndex("cubemapTexture", 0);
 
+			Material->SetEnabledZWrite(false);
+
 			if (!m_RaymarchingObj->CreateSimply(pGraphicsAPI, pPhysicsEngine, graphics::CPresetPrimitive::CreateBoard(pGraphicsAPI), Material, m_DepthMF)) return false;
 		}
 
@@ -121,13 +123,16 @@ namespace scene
 			m_Background->GetTextureSet()->Add2DTexture(m_IBL_Skybox_Texture);
 
 			m_Background->SetScale(glm::vec3(500.0f));
+
+			m_Background->SetEnabled(false);
+
 			if (!m_Background->CreateSimply(pGraphicsAPI, pPhysicsEngine, graphics::CPresetPrimitive::CreateSphere(pGraphicsAPI), Mat , m_DepthMF)) return false;
 		}
 
 		// m_DebugSphere
 		{
 			auto Mat = m_PBRMF->CreateMaterial(pGraphicsAPI, 512, graphics::ECullMode::CULL_BACK);
-			Mat->SetEnabledZTest(false);
+			Mat->SetDepthFunc(graphics::EDepthFunc::Always);
 			m_DebugSphere->SetScale(glm::vec3(0.1f));
 			if (!m_DebugSphere->CreateSimply(pGraphicsAPI, pPhysicsEngine, graphics::CPresetPrimitive::CreateSphere(pGraphicsAPI), Mat, m_DepthMF)) return false;
 		}
@@ -201,20 +206,20 @@ namespace scene
 	{
 		if (!m_IsLoaded) return true;
 		
-		if (m_TdaMiku_Model)
-		{
-			if (!m_TdaMiku_Model->Draw(IsDepthPass, false, Camera, Projection, DrawInfo, m_DebugSphere)) return false;
-			//if (!m_TdaMiku_Model->Draw(IsDepthPass, true, Camera, Projection, DrawInfo, nullptr)) return false;
-		}
-		
 		if (m_RaymarchingObj)
 		{
 			if (!m_RaymarchingObj->Draw(IsDepthPass, false, Camera, Projection, DrawInfo)) return false;
 		}
-		
+
 		if (m_Background)
 		{
 			if (!m_Background->Draw(IsDepthPass, false, Camera, Projection, DrawInfo)) return false;
+		}
+
+		if (m_TdaMiku_Model)
+		{
+			if (!m_TdaMiku_Model->Draw(IsDepthPass, false, Camera, Projection, DrawInfo, m_DebugSphere)) return false;
+			//if (!m_TdaMiku_Model->Draw(IsDepthPass, true, Camera, Projection, DrawInfo, nullptr)) return false;
 		}
 
 		return true;

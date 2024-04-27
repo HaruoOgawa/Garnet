@@ -346,11 +346,45 @@ namespace api
 		// レンダリングパイプラインでデプスとステンシルを有効にする
 		VkPipelineDepthStencilStateCreateInfo depthStencil{};
 		depthStencil.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
-		//depthStencil.depthTestEnable = (pVulkanMat->IsEnabledZTest()) ? VK_TRUE : VK_FALSE;
-		depthStencil.depthTestEnable = VK_TRUE;
-		//depthStencil.depthWriteEnable = (pVulkanMat->IsEnabledZTest()) ? VK_TRUE : VK_FALSE;
-		depthStencil.depthWriteEnable = VK_TRUE;
-		depthStencil.depthCompareOp = (pVulkanMat->IsEnabledZTest()) ? VK_COMPARE_OP_LESS : VK_COMPARE_OP_ALWAYS;
+
+		// Depth
+		{
+			depthStencil.depthTestEnable = (pVulkanMat->IsEnabledZWrite()) ? VK_TRUE : VK_FALSE;
+			depthStencil.depthWriteEnable = (pVulkanMat->IsEnabledZWrite()) ? VK_TRUE : VK_FALSE;
+
+			graphics::EDepthFunc DepthFunc = pVulkanMat->GetDepthFunc();
+			switch (DepthFunc)
+			{
+			case graphics::EDepthFunc::Never:
+				depthStencil.depthCompareOp = VK_COMPARE_OP_NEVER;
+				break;
+			case graphics::EDepthFunc::Less:
+				depthStencil.depthCompareOp = VK_COMPARE_OP_LESS;
+				break;
+			case graphics::EDepthFunc::LessEqual:
+				depthStencil.depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
+				break;
+			case graphics::EDepthFunc::Greater:
+				depthStencil.depthCompareOp = VK_COMPARE_OP_GREATER;
+				break;
+			case graphics::EDepthFunc::GreaterEqual:
+				depthStencil.depthCompareOp = VK_COMPARE_OP_GREATER_OR_EQUAL;
+				break;
+			case graphics::EDepthFunc::Equal:
+				depthStencil.depthCompareOp = VK_COMPARE_OP_EQUAL;
+				break;
+			case graphics::EDepthFunc::NotEqual:
+				depthStencil.depthCompareOp = VK_COMPARE_OP_NOT_EQUAL;
+				break;
+			case graphics::EDepthFunc::Always:
+				depthStencil.depthCompareOp = VK_COMPARE_OP_ALWAYS;
+				break;
+			default:
+				depthStencil.depthCompareOp = VK_COMPARE_OP_LESS;
+				break;
+			}
+		}
+
 		depthStencil.depthBoundsTestEnable = VK_FALSE;
 		depthStencil.minDepthBounds = 0.0f;
 		depthStencil.maxDepthBounds = 1.0f;

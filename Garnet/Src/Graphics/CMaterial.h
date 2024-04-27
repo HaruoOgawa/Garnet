@@ -13,6 +13,7 @@
 #include "CDrawInfo.h"
 #include "ECullMode.h"
 #include "EBlendType.h"
+#include "EDepthFunc.h"
 
 #include "../Camera/CCamera.h"
 
@@ -43,7 +44,8 @@ namespace graphics
 
 		std::shared_ptr<graphics::CMaterial> m_DepthMaterial;
 
-		bool m_EnabledZTest;
+		bool m_EnabledZWrite;
+		EDepthFunc m_DepthFunc;
 
 		const ECullMode m_DefaultCullMode;
 		ECullMode m_CullMode;
@@ -67,8 +69,11 @@ namespace graphics
 
 		virtual std::shared_ptr<graphics::CMaterial> GetDepthMaterial();
 
-		virtual void SetEnabledZTest(bool EnabledZTest);
-		virtual bool IsEnabledZTest() const;
+		virtual void SetEnabledZWrite(bool Flag);
+		virtual bool IsEnabledZWrite() const;
+
+		virtual void SetDepthFunc(EDepthFunc DepthFunc);
+		virtual EDepthFunc GetDepthFunc() const;
 
 		virtual void SetCullMode(ECullMode CullMode);
 		virtual ECullMode GetCullMode() const;

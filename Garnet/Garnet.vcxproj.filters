@@ -2718,6 +2718,9 @@
     <ClInclude Include="Src\Graphics\SUniformValueInput.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Graphics\EDepthFunc.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\Main\DescMain\DescMain.cpp">
