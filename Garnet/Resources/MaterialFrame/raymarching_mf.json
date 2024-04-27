@@ -1,0 +1,63 @@
+{
+  "name": "raymarching_mat",
+  "shaderList": [
+    {
+      "name": "renderboard",
+      "shaderFile": "Resources\\Shaders\\renderboard",
+      "autoShaderExtension": true,
+      "shadercode": "",
+      "shaderType": "vertex",
+      "uniformBlockList": []
+    },
+    {
+      "name": "raymarching",
+      "shaderFile": "Resources\\Shaders\\raymarching",
+      "autoShaderExtension": true,
+      "shadercode": "",
+      "shaderType": "fragment",
+      "uniformBlockList": [
+        {
+          "name": "FragUniformBufferObject",
+          "binding": 0,
+          "isWritable": false,
+          "type": "ubo",
+          "bufferUpdateType": "cpu",
+          "values": [
+            {
+              "name": "mPad0",
+              "type": "mat4",
+              "initValue": [ 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0 ],
+              "input": {
+                "hide": true
+              }
+            },
+            {
+              "name": "mPad1",
+              "type": "mat4",
+              "initValue": [ 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0 ],
+              "input": {
+                "hide": true
+              }
+            },
+            {
+              "name": "mPad2",
+              "type": "mat4",
+              "initValue": [ 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0 ],
+              "input": {
+                "hide": true
+              }
+            },
+            {
+              "name": "mPad3",
+              "type": "mat4",
+              "initValue": [ 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0 ],
+              "input": {
+                "hide": true
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1925,6 +1925,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <None Include="Resources\MaterialFrame\Depth_MF.json" />
     <None Include="Resources\MaterialFrame\PBRMorph_MF.json" />
     <None Include="Resources\MaterialFrame\PBR_MF.json" />
+    <None Include="Resources\MaterialFrame\raymarching_mf.json" />
     <None Include="Resources\MaterialFrame\Sample_MF.json" />
     <None Include="Resources\MaterialFrame\SimpleTexture_MF.json" />
     <None Include="Resources\Shaders\basic_toon.frag" />
@@ -1971,6 +1972,8 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <None Include="Resources\Shaders\pbr_NativeSafe_frag.wgsl" />
     <None Include="Resources\Shaders\pbr_vert.spv" />
     <None Include="Resources\Shaders\pbr_vert.wgsl" />
+    <None Include="Resources\Shaders\raymarching.frag" />
+    <None Include="Resources\Shaders\renderboard.vert" />
     <None Include="Resources\Shaders\sample.frag" />
     <None Include="Resources\Shaders\sample.vert" />
     <None Include="Resources\Shaders\sample_frag.spv" />

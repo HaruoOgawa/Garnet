@@ -60,20 +60,23 @@ namespace api
 		}
 
 		// バインドグループを割り当てる
-		std::vector<uint32_t> dynamicOffsetList;
-		for (const auto& Size : pWebGPUMat->GetBindingRefSizeList())
+		if (pWebGPUMat->IsUseShaderBuffer())
 		{
-			uint32_t dynamicOffset = (DynamicOffsetNum - 1) * Size;
-			dynamicOffsetList.push_back(dynamicOffset);
-		}
+			std::vector<uint32_t> dynamicOffsetList;
+			for (const auto& Size : pWebGPUMat->GetBindingRefSizeList())
+			{
+				uint32_t dynamicOffset = (DynamicOffsetNum - 1) * Size;
+				dynamicOffsetList.push_back(dynamicOffset);
+			}
 
-		if (pWebGPUMat->IsUseDynamicOffset())
-		{
-			wgpuRenderPassEncoderSetBindGroup(m_pGraphicsAPI->GetCurrentRenderPass(), 0, pWebGPUMat->GetBindGroup(), static_cast<uint32_t>(dynamicOffsetList.size()), &dynamicOffsetList[0]);
-		}
-		else
-		{
-			wgpuRenderPassEncoderSetBindGroup(m_pGraphicsAPI->GetCurrentRenderPass(), 0, pWebGPUMat->GetBindGroup(), 0, nullptr);
+			if (pWebGPUMat->IsUseDynamicOffset())
+			{
+				wgpuRenderPassEncoderSetBindGroup(m_pGraphicsAPI->GetCurrentRenderPass(), 0, pWebGPUMat->GetBindGroup(), static_cast<uint32_t>(dynamicOffsetList.size()), &dynamicOffsetList[0]);
+			}
+			else
+			{
+				wgpuRenderPassEncoderSetBindGroup(m_pGraphicsAPI->GetCurrentRenderPass(), 0, pWebGPUMat->GetBindGroup(), 0, nullptr);
+			}
 		}
 
 		// 描画を実行
@@ -248,8 +251,17 @@ namespace api
 		// パイプラインレイアウトは、レンダリングパイプラインで使用されるすべてのリソースをどのようにバインドする必要があるかを示す
 		WGPUPipelineLayoutDescriptor layoutDesc{};
 		layoutDesc.nextInChain = nullptr;
-		layoutDesc.bindGroupLayoutCount = 1;
-		layoutDesc.bindGroupLayouts = &pWebGPUMat->GetBindGroupLayout();//&m_BindGroupLayout;
+		if (pWebGPUMat->IsUseShaderBuffer())
+		{
+			layoutDesc.bindGroupLayoutCount = 1;
+			layoutDesc.bindGroupLayouts = &pWebGPUMat->GetBindGroupLayout();//&m_BindGroupLayout;
+		}
+		else
+		{
+			layoutDesc.bindGroupLayoutCount = 0;
+			layoutDesc.bindGroupLayouts = nullptr;
+		}
+		
 		WGPUPipelineLayout layout = wgpuDeviceCreatePipelineLayout(m_pGraphicsAPI->GetLogicalDevice(), &layoutDesc);
 
 		pipelineDesc.layout = layout;

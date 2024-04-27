@@ -23,6 +23,11 @@ namespace graphics
 		return true;
 	}
 
+	bool CMaterial::IsUseShaderBuffer()
+	{
+		return (m_ShaderBufferList.size() > 0 || m_TextureBindingLayoutList.size() > 0);
+	}
+
 	void CMaterial::SetMaterialName(const std::string& Name)
 	{
 		m_MaterialName = Name;

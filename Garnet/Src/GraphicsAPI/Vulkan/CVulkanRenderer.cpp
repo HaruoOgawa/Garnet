@@ -84,22 +84,25 @@ namespace api
 		}
 		
 		// UBOのセット
-		std::vector<uint32_t> dynamicOffsetList;
-		for (const auto& Size : pVulkanMat->GetBindingRefSizeList())
+		if (pVulkanMat->IsUseShaderBuffer())
 		{
-			uint32_t dynamicOffset = (DynamicOffsetNum - 1) * Size;
-			dynamicOffsetList.push_back(dynamicOffset);
-		}
+			std::vector<uint32_t> dynamicOffsetList;
+			for (const auto& Size : pVulkanMat->GetBindingRefSizeList())
+			{
+				uint32_t dynamicOffset = (DynamicOffsetNum - 1) * Size;
+				dynamicOffsetList.push_back(dynamicOffset);
+			}
 
-		if (pVulkanMat->IsUseDynamicOffset())
-		{
-			vkCmdBindDescriptorSets(m_pGraphicsAPI->GetCurrentCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS,
-				m_PipelineLayout, 0, 1, &pVulkanMat->GetDescriptorSets()[m_pGraphicsAPI->GetCurrentFrame()], static_cast<uint32_t>(dynamicOffsetList.size()), &dynamicOffsetList[0]);
-		}
-		else
-		{
-			vkCmdBindDescriptorSets(m_pGraphicsAPI->GetCurrentCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS,
-				m_PipelineLayout, 0, 1, &pVulkanMat->GetDescriptorSets()[m_pGraphicsAPI->GetCurrentFrame()], 0, nullptr);
+			if (pVulkanMat->IsUseDynamicOffset())
+			{
+				vkCmdBindDescriptorSets(m_pGraphicsAPI->GetCurrentCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS,
+					m_PipelineLayout, 0, 1, &pVulkanMat->GetDescriptorSets()[m_pGraphicsAPI->GetCurrentFrame()], static_cast<uint32_t>(dynamicOffsetList.size()), &dynamicOffsetList[0]);
+			}
+			else
+			{
+				vkCmdBindDescriptorSets(m_pGraphicsAPI->GetCurrentCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS,
+					m_PipelineLayout, 0, 1, &pVulkanMat->GetDescriptorSets()[m_pGraphicsAPI->GetCurrentFrame()], 0, nullptr);
+			}
 		}
 
 		// 描画コマンドを発行
@@ -323,8 +326,16 @@ namespace api
 		// たぶんここではLayoutは意味としてUniformを指すのでは？
 		VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
 		pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-		pipelineLayoutInfo.setLayoutCount = 1;
-		pipelineLayoutInfo.pSetLayouts = &pVulkanMat->GetDescriptorSetLayout();
+		if (pVulkanMat->IsUseShaderBuffer())
+		{
+			pipelineLayoutInfo.setLayoutCount = 1;
+			pipelineLayoutInfo.pSetLayouts = &pVulkanMat->GetDescriptorSetLayout();
+		}
+		else
+		{
+			pipelineLayoutInfo.setLayoutCount = 0;
+			pipelineLayoutInfo.pSetLayouts = nullptr;
+		}
 		pipelineLayoutInfo.pushConstantRangeCount = 0;
 		pipelineLayoutInfo.pPushConstantRanges = nullptr;
 
@@ -350,7 +361,7 @@ namespace api
 		// これまでの情報をもとにレンダリングパイプラインを構築
 		VkGraphicsPipelineCreateInfo pipelineInfo{};
 		pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-		pipelineInfo.stageCount = static_cast<uint32_t>(pVulkanMat->GetShaderStages().size()); // しぇだーステージの数
+		pipelineInfo.stageCount = static_cast<uint32_t>(pVulkanMat->GetShaderStages().size()); // シェーダーステージの数
 		pipelineInfo.pStages = pVulkanMat->GetShaderStages().data();
 
 		pipelineInfo.pVertexInputState = &vertexInputInto;

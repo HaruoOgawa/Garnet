@@ -4297,5 +4297,8 @@
     </None>
     <None Include="Commands\UTF8Encorder.py" />
     <None Include="Commands\GetLibAndPath.py" />
+    <None Include="Resources\Shaders\renderboard.vert" />
+    <None Include="Resources\Shaders\raymarching.frag" />
+    <None Include="Resources\MaterialFrame\raymarching_mf.json" />
   </ItemGroup>
 </Project>

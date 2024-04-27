@@ -55,8 +55,10 @@ namespace graphics
 		CMaterial(const std::shared_ptr<CMaterialCreateInfo>& createInfo, int RefCount, ECullMode CullMode);
 		virtual ~CMaterial() = default;
 
-		void SetMaterialName(const std::string& Name);
-		const std::string& GetMaterialName() const;
+		virtual bool IsUseShaderBuffer();
+
+		virtual void SetMaterialName(const std::string& Name);
+		virtual const std::string& GetMaterialName() const;
 
 		virtual std::vector<std::shared_ptr<CShaderBuffer>>& GetShaderBufferList();
 
