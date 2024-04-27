@@ -21,6 +21,7 @@ namespace scene
 		m_SimpleTextureMF(std::make_shared<graphics::CMaterialFrame>()),
 		m_DepthMF(std::make_shared<graphics::CMaterialFrame>()),
 		m_PBRMF(std::make_shared<graphics::CMaterialFrame>()),
+		m_RaymarchingMF(std::make_shared<graphics::CMaterialFrame>()),
 
 		m_TdaMiku_Model(std::make_shared<object::C3DObject>("", "ShadowPass")),
 		m_VMDAnimationSet(std::make_shared<animation::CAnimationClipSet>()),
@@ -30,7 +31,7 @@ namespace scene
 		m_IBL_Skybox_Texture(pGraphicsAPI->CreateTexture(false)),
 		m_Cube_Texture(pGraphicsAPI->CreateTexture(false)),
 
-		m_UITestSphere(std::make_shared<object::C3DObject>("", "ShadowPass")),
+		m_RaymarchingObj(std::make_shared<object::C3DObject>("", "ShadowPass")),
 
 		m_Background(std::make_shared<object::C3DObject>("", "ShadowPass")),
 		m_DebugSphere(std::make_shared<object::C3DObject>("", "ShadowPass")),
@@ -38,17 +39,18 @@ namespace scene
 		m_IsLoaded(false)
 	{
 		m_TdaMiku_Model->SetObjectName("TdaMiku_Model");
-		m_UITestSphere->SetObjectName("UITestSphere");
+		m_RaymarchingObj->SetObjectName("Raymarching");
 		m_Background->SetObjectName("Background");
 
 		m_ObjectList.push_back(m_TdaMiku_Model);
-		m_ObjectList.push_back(m_UITestSphere);
+		m_ObjectList.push_back(m_RaymarchingObj);
 		m_ObjectList.push_back(m_Background);
 
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CMaterialFrameLoader>("Resources\\MaterialFrame\\basic_toon_mf.json", m_BasicToonMF));
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CMaterialFrameLoader>("Resources\\MaterialFrame\\SimpleTexture_MF.json", m_SimpleTextureMF));
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CMaterialFrameLoader>("Resources\\MaterialFrame\\Depth_MF.json", m_DepthMF));
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CMaterialFrameLoader>("Resources\\MaterialFrame\\PBR_MF.json", m_PBRMF));
+		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CMaterialFrameLoader>("Resources\\MaterialFrame\\raymarching_mf.json", m_RaymarchingMF));
 		
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::C3DObjectLoader>("Resources\\Avatar\\Tda_Miku\\Tda_Miku.pmx", m_TdaMiku_Model, m_BasicToonMF, "", "ShadowPass", pPhysicsEngine));
 		pLoadWorker->AddFirstLoadResource(std::make_shared<resource::CAnimationLoader>("Resources\\Motions\\biglove_dance_noik.vmd", m_VMDAnimationSet));
@@ -98,15 +100,17 @@ namespace scene
 			m_TdaMiku_Model->PlayBlendShape("RipSync");
 		}
 
-		// m_UITestSphere
+		// m_RaymarchingObj
 		{
-			m_UITestSphere->GetTextureSet()->AddCubeMap(m_Cube_Texture);
+			m_RaymarchingObj->GetTextureSet()->AddCubeMap(m_Cube_Texture);
 
-			auto Material = m_PBRMF->CreateMaterial(pGraphicsAPI, 2, graphics::ECullMode::CULL_BACK);
-			Material->ReplacePreloadUniformValue("useCubeMap", &glm::ivec1(1)[0], sizeof(glm::ivec1), 0);
-			Material->ReplaceTextureIndex("cubemapTexture", 0);
+			auto Material = m_RaymarchingMF->CreateMaterial(pGraphicsAPI, 2, graphics::ECullMode::CULL_NONE);
+			//Material->ReplacePreloadUniformValue("useCubeMap", &glm::ivec1(1)[0], sizeof(glm::ivec1), 0);
+			//Material->ReplaceTextureIndex("cubemapTexture", 0);
 
-			if (!m_UITestSphere->CreateSimply(pGraphicsAPI, pPhysicsEngine, graphics::CPresetPrimitive::CreateSphere(pGraphicsAPI), Material, m_DepthMF)) return false;
+			Material->SetEnabledZWrite(false);
+
+			if (!m_RaymarchingObj->CreateSimply(pGraphicsAPI, pPhysicsEngine, graphics::CPresetPrimitive::CreateBoard(pGraphicsAPI), Material, m_DepthMF)) return false;
 		}
 
 		// m_Background
@@ -119,13 +123,16 @@ namespace scene
 			m_Background->GetTextureSet()->Add2DTexture(m_IBL_Skybox_Texture);
 
 			m_Background->SetScale(glm::vec3(500.0f));
+
+			m_Background->SetEnabled(false);
+
 			if (!m_Background->CreateSimply(pGraphicsAPI, pPhysicsEngine, graphics::CPresetPrimitive::CreateSphere(pGraphicsAPI), Mat , m_DepthMF)) return false;
 		}
 
 		// m_DebugSphere
 		{
 			auto Mat = m_PBRMF->CreateMaterial(pGraphicsAPI, 512, graphics::ECullMode::CULL_BACK);
-			Mat->SetEnabledZTest(false);
+			Mat->SetDepthFunc(graphics::EDepthFunc::Always);
 			m_DebugSphere->SetScale(glm::vec3(0.1f));
 			if (!m_DebugSphere->CreateSimply(pGraphicsAPI, pPhysicsEngine, graphics::CPresetPrimitive::CreateSphere(pGraphicsAPI), Mat, m_DepthMF)) return false;
 		}
@@ -149,9 +156,9 @@ namespace scene
 			if (!m_TdaMiku_Model->Update(pGraphicsAPI, pPhysicsEngine, DrawInfo->GetDeltaSecondsTime())) return false;
 		}
 		
-		if (m_UITestSphere)
+		if (m_RaymarchingObj)
 		{
-			if (!m_UITestSphere->Update(pGraphicsAPI, pPhysicsEngine, DrawInfo->GetDeltaSecondsTime())) return false;
+			if (!m_RaymarchingObj->Update(pGraphicsAPI, pPhysicsEngine, DrawInfo->GetDeltaSecondsTime())) return false;
 		}
 		
 		if (m_Background)
@@ -199,20 +206,20 @@ namespace scene
 	{
 		if (!m_IsLoaded) return true;
 		
+		if (m_RaymarchingObj)
+		{
+			if (!m_RaymarchingObj->Draw(IsDepthPass, false, Camera, Projection, DrawInfo)) return false;
+		}
+
+		if (m_Background)
+		{
+			if (!m_Background->Draw(IsDepthPass, false, Camera, Projection, DrawInfo)) return false;
+		}
+
 		if (m_TdaMiku_Model)
 		{
 			if (!m_TdaMiku_Model->Draw(IsDepthPass, false, Camera, Projection, DrawInfo, m_DebugSphere)) return false;
 			//if (!m_TdaMiku_Model->Draw(IsDepthPass, true, Camera, Projection, DrawInfo, nullptr)) return false;
-		}
-		
-		if (m_UITestSphere)
-		{
-			if (!m_UITestSphere->Draw(IsDepthPass, false, Camera, Projection, DrawInfo)) return false;
-		}
-		
-		if (m_Background)
-		{
-			if (!m_Background->Draw(IsDepthPass, false, Camera, Projection, DrawInfo)) return false;
 		}
 
 		return true;

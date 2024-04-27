@@ -14,7 +14,7 @@ layout(binding = 0) uniform UniformBufferObject
 
 void main()
 {
-	vec2 uv = 1.0 - fragTexCoord; // そういえばなんかUVが逆なんよ・・・
+	vec2 uv = fragTexCoord;
 	vec2 st = fragTexCoord * 2.0 - 1.0;
 
 	vec2  pad = vec2(0.2, 0.48); // 縦横の隙間・パディング. uvなので0.0 ~ 0.5の値

@@ -26,10 +26,10 @@ namespace graphics
 		};
 
 		std::vector<float> UV = {
-			1.0f, 0.0f,
 			0.0f, 0.0f,
-			0.0f, 1.0f,
-			1.0f, 1.0f
+			1.0f, 0.0f,
+			1.0f, 1.0f,
+			0.0f, 1.0f
 		};
 
 		std::vector<float> Tangent(16, 0.0f);

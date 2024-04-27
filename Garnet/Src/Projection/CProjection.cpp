@@ -4,7 +4,7 @@ namespace projection
 {
 	CProjection::CProjection():
 		m_FOV(45.0f),
-		m_Aspect(1.0f),
+		m_ScreenResolution(glm::vec2(1.0f)),
 		m_Near(0.1f),
 		m_Far(1000.0f)
 	{
@@ -12,7 +12,9 @@ namespace projection
 
 	glm::mat4 CProjection::GetPrejectionMatrix()
 	{
-		glm::mat4 pmat = glm::perspective(glm::radians(m_FOV), m_Aspect, m_Near, m_Far);
+		float Aspect = m_ScreenResolution.x / m_ScreenResolution.y;
+
+		glm::mat4 pmat = glm::perspective(glm::radians(m_FOV), Aspect, m_Near, m_Far);
 #ifndef USE_OPENGL
 		pmat[1][1] *= -1.0f; /// Yç¿ïWÇÃå¸Ç´ÇîΩì]ÅBVulkan(WebGPU)Ç∆OpenGLÇÕãtÇ»ÇÃÇ©Ç»ÅH
 #endif // !USE_OPENGL
@@ -30,14 +32,14 @@ namespace projection
 		return m_FOV;
 	}
 
-	void CProjection::SetAspect(float Aspect)
+	void CProjection::SetScreenResolution(int Width, int Height)
 	{
-		m_Aspect = Aspect;
+		m_ScreenResolution = glm::vec2(static_cast<float>(Width), static_cast<float>(Height));
 	}
 
-	float CProjection::GetAspect() const
+	const glm::vec2& CProjection::GetScreenResolution() const
 	{
-		return m_Aspect;
+		return m_ScreenResolution;
 	}
 
 	void CProjection::SetNear(float Near)

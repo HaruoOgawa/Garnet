@@ -60,20 +60,23 @@ namespace api
 		}
 
 		// バインドグループを割り当てる
-		std::vector<uint32_t> dynamicOffsetList;
-		for (const auto& Size : pWebGPUMat->GetBindingRefSizeList())
+		if (pWebGPUMat->IsUseShaderBuffer())
 		{
-			uint32_t dynamicOffset = (DynamicOffsetNum - 1) * Size;
-			dynamicOffsetList.push_back(dynamicOffset);
-		}
+			std::vector<uint32_t> dynamicOffsetList;
+			for (const auto& Size : pWebGPUMat->GetBindingRefSizeList())
+			{
+				uint32_t dynamicOffset = (DynamicOffsetNum - 1) * Size;
+				dynamicOffsetList.push_back(dynamicOffset);
+			}
 
-		if (pWebGPUMat->IsUseDynamicOffset())
-		{
-			wgpuRenderPassEncoderSetBindGroup(m_pGraphicsAPI->GetCurrentRenderPass(), 0, pWebGPUMat->GetBindGroup(), static_cast<uint32_t>(dynamicOffsetList.size()), &dynamicOffsetList[0]);
-		}
-		else
-		{
-			wgpuRenderPassEncoderSetBindGroup(m_pGraphicsAPI->GetCurrentRenderPass(), 0, pWebGPUMat->GetBindGroup(), 0, nullptr);
+			if (pWebGPUMat->IsUseDynamicOffset())
+			{
+				wgpuRenderPassEncoderSetBindGroup(m_pGraphicsAPI->GetCurrentRenderPass(), 0, pWebGPUMat->GetBindGroup(), static_cast<uint32_t>(dynamicOffsetList.size()), &dynamicOffsetList[0]);
+			}
+			else
+			{
+				wgpuRenderPassEncoderSetBindGroup(m_pGraphicsAPI->GetCurrentRenderPass(), 0, pWebGPUMat->GetBindGroup(), 0, nullptr);
+			}
 		}
 
 		// 描画を実行
@@ -171,10 +174,44 @@ namespace api
 		WGPUDepthStencilState depthStencilState;
 		SetDefaultDepthStencil(depthStencilState);
 		depthStencilState.nextInChain = nullptr;
-		depthStencilState.depthCompare = (pWebGPUMat->IsEnabledZTest())? WGPUCompareFunction_Less : WGPUCompareFunction_Always;
-		//depthStencilState.depthCompare = WGPUCompareFunction_Less;
-		//depthStencilState.depthWriteEnabled = pWebGPUMat->IsEnabledZTest();
-		depthStencilState.depthWriteEnabled = true;
+
+		// Depth
+		{
+			depthStencilState.depthWriteEnabled = pWebGPUMat->IsEnabledZWrite();
+
+			graphics::EDepthFunc DepthFunc = pWebGPUMat->GetDepthFunc();
+			switch (DepthFunc)
+			{
+			case graphics::EDepthFunc::Never:
+				depthStencilState.depthCompare = WGPUCompareFunction_Never;
+				break;
+			case graphics::EDepthFunc::Less:
+				depthStencilState.depthCompare = WGPUCompareFunction_Less;
+				break;
+			case graphics::EDepthFunc::LessEqual:
+				depthStencilState.depthCompare = WGPUCompareFunction_LessEqual;
+				break;
+			case graphics::EDepthFunc::Greater:
+				depthStencilState.depthCompare = WGPUCompareFunction_Greater;
+				break;
+			case graphics::EDepthFunc::GreaterEqual:
+				depthStencilState.depthCompare = WGPUCompareFunction_GreaterEqual;
+				break;
+			case graphics::EDepthFunc::Equal:
+				depthStencilState.depthCompare = WGPUCompareFunction_Equal;
+				break;
+			case graphics::EDepthFunc::NotEqual:
+				depthStencilState.depthCompare = WGPUCompareFunction_NotEqual;
+				break;
+			case graphics::EDepthFunc::Always:
+				depthStencilState.depthCompare = WGPUCompareFunction_Always;
+				break;
+			default:
+				depthStencilState.depthCompare = WGPUCompareFunction_Less;
+				break;
+			}
+		}
+		
 		WGPUTextureFormat depthTextureFormat = WGPUTextureFormat_Depth24Plus;
 		depthStencilState.format = depthTextureFormat;
 		depthStencilState.stencilReadMask = 0; // ステンシルバッファの読み書きをオフにしておく
@@ -248,8 +285,17 @@ namespace api
 		// パイプラインレイアウトは、レンダリングパイプラインで使用されるすべてのリソースをどのようにバインドする必要があるかを示す
 		WGPUPipelineLayoutDescriptor layoutDesc{};
 		layoutDesc.nextInChain = nullptr;
-		layoutDesc.bindGroupLayoutCount = 1;
-		layoutDesc.bindGroupLayouts = &pWebGPUMat->GetBindGroupLayout();//&m_BindGroupLayout;
+		if (pWebGPUMat->IsUseShaderBuffer())
+		{
+			layoutDesc.bindGroupLayoutCount = 1;
+			layoutDesc.bindGroupLayouts = &pWebGPUMat->GetBindGroupLayout();//&m_BindGroupLayout;
+		}
+		else
+		{
+			layoutDesc.bindGroupLayoutCount = 0;
+			layoutDesc.bindGroupLayouts = nullptr;
+		}
+		
 		WGPUPipelineLayout layout = wgpuDeviceCreatePipelineLayout(m_pGraphicsAPI->GetLogicalDevice(), &layoutDesc);
 
 		pipelineDesc.layout = layout;

@@ -84,22 +84,25 @@ namespace api
 		}
 		
 		// UBOのセット
-		std::vector<uint32_t> dynamicOffsetList;
-		for (const auto& Size : pVulkanMat->GetBindingRefSizeList())
+		if (pVulkanMat->IsUseShaderBuffer())
 		{
-			uint32_t dynamicOffset = (DynamicOffsetNum - 1) * Size;
-			dynamicOffsetList.push_back(dynamicOffset);
-		}
+			std::vector<uint32_t> dynamicOffsetList;
+			for (const auto& Size : pVulkanMat->GetBindingRefSizeList())
+			{
+				uint32_t dynamicOffset = (DynamicOffsetNum - 1) * Size;
+				dynamicOffsetList.push_back(dynamicOffset);
+			}
 
-		if (pVulkanMat->IsUseDynamicOffset())
-		{
-			vkCmdBindDescriptorSets(m_pGraphicsAPI->GetCurrentCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS,
-				m_PipelineLayout, 0, 1, &pVulkanMat->GetDescriptorSets()[m_pGraphicsAPI->GetCurrentFrame()], static_cast<uint32_t>(dynamicOffsetList.size()), &dynamicOffsetList[0]);
-		}
-		else
-		{
-			vkCmdBindDescriptorSets(m_pGraphicsAPI->GetCurrentCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS,
-				m_PipelineLayout, 0, 1, &pVulkanMat->GetDescriptorSets()[m_pGraphicsAPI->GetCurrentFrame()], 0, nullptr);
+			if (pVulkanMat->IsUseDynamicOffset())
+			{
+				vkCmdBindDescriptorSets(m_pGraphicsAPI->GetCurrentCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS,
+					m_PipelineLayout, 0, 1, &pVulkanMat->GetDescriptorSets()[m_pGraphicsAPI->GetCurrentFrame()], static_cast<uint32_t>(dynamicOffsetList.size()), &dynamicOffsetList[0]);
+			}
+			else
+			{
+				vkCmdBindDescriptorSets(m_pGraphicsAPI->GetCurrentCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS,
+					m_PipelineLayout, 0, 1, &pVulkanMat->GetDescriptorSets()[m_pGraphicsAPI->GetCurrentFrame()], 0, nullptr);
+			}
 		}
 
 		// 描画コマンドを発行
@@ -323,8 +326,16 @@ namespace api
 		// たぶんここではLayoutは意味としてUniformを指すのでは？
 		VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
 		pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-		pipelineLayoutInfo.setLayoutCount = 1;
-		pipelineLayoutInfo.pSetLayouts = &pVulkanMat->GetDescriptorSetLayout();
+		if (pVulkanMat->IsUseShaderBuffer())
+		{
+			pipelineLayoutInfo.setLayoutCount = 1;
+			pipelineLayoutInfo.pSetLayouts = &pVulkanMat->GetDescriptorSetLayout();
+		}
+		else
+		{
+			pipelineLayoutInfo.setLayoutCount = 0;
+			pipelineLayoutInfo.pSetLayouts = nullptr;
+		}
 		pipelineLayoutInfo.pushConstantRangeCount = 0;
 		pipelineLayoutInfo.pPushConstantRanges = nullptr;
 
@@ -335,11 +346,45 @@ namespace api
 		// レンダリングパイプラインでデプスとステンシルを有効にする
 		VkPipelineDepthStencilStateCreateInfo depthStencil{};
 		depthStencil.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
-		//depthStencil.depthTestEnable = (pVulkanMat->IsEnabledZTest()) ? VK_TRUE : VK_FALSE;
-		depthStencil.depthTestEnable = VK_TRUE;
-		//depthStencil.depthWriteEnable = (pVulkanMat->IsEnabledZTest()) ? VK_TRUE : VK_FALSE;
-		depthStencil.depthWriteEnable = VK_TRUE;
-		depthStencil.depthCompareOp = (pVulkanMat->IsEnabledZTest()) ? VK_COMPARE_OP_LESS : VK_COMPARE_OP_ALWAYS;
+
+		// Depth
+		{
+			depthStencil.depthTestEnable = (pVulkanMat->IsEnabledZWrite()) ? VK_TRUE : VK_FALSE;
+			depthStencil.depthWriteEnable = (pVulkanMat->IsEnabledZWrite()) ? VK_TRUE : VK_FALSE;
+
+			graphics::EDepthFunc DepthFunc = pVulkanMat->GetDepthFunc();
+			switch (DepthFunc)
+			{
+			case graphics::EDepthFunc::Never:
+				depthStencil.depthCompareOp = VK_COMPARE_OP_NEVER;
+				break;
+			case graphics::EDepthFunc::Less:
+				depthStencil.depthCompareOp = VK_COMPARE_OP_LESS;
+				break;
+			case graphics::EDepthFunc::LessEqual:
+				depthStencil.depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
+				break;
+			case graphics::EDepthFunc::Greater:
+				depthStencil.depthCompareOp = VK_COMPARE_OP_GREATER;
+				break;
+			case graphics::EDepthFunc::GreaterEqual:
+				depthStencil.depthCompareOp = VK_COMPARE_OP_GREATER_OR_EQUAL;
+				break;
+			case graphics::EDepthFunc::Equal:
+				depthStencil.depthCompareOp = VK_COMPARE_OP_EQUAL;
+				break;
+			case graphics::EDepthFunc::NotEqual:
+				depthStencil.depthCompareOp = VK_COMPARE_OP_NOT_EQUAL;
+				break;
+			case graphics::EDepthFunc::Always:
+				depthStencil.depthCompareOp = VK_COMPARE_OP_ALWAYS;
+				break;
+			default:
+				depthStencil.depthCompareOp = VK_COMPARE_OP_LESS;
+				break;
+			}
+		}
+
 		depthStencil.depthBoundsTestEnable = VK_FALSE;
 		depthStencil.minDepthBounds = 0.0f;
 		depthStencil.maxDepthBounds = 1.0f;
@@ -350,7 +395,7 @@ namespace api
 		// これまでの情報をもとにレンダリングパイプラインを構築
 		VkGraphicsPipelineCreateInfo pipelineInfo{};
 		pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-		pipelineInfo.stageCount = static_cast<uint32_t>(pVulkanMat->GetShaderStages().size()); // しぇだーステージの数
+		pipelineInfo.stageCount = static_cast<uint32_t>(pVulkanMat->GetShaderStages().size()); // シェーダーステージの数
 		pipelineInfo.pStages = pVulkanMat->GetShaderStages().data();
 
 		pipelineInfo.pVertexInputState = &vertexInputInto;

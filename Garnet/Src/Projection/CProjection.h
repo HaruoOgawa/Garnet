@@ -8,7 +8,7 @@ namespace projection
 	class CProjection
 	{
 		float m_FOV;
-		float m_Aspect;
+		glm::vec2 m_ScreenResolution;
 		float m_Near;
 		float m_Far;
 	public:
@@ -20,8 +20,8 @@ namespace projection
 		void SetFOV(float FOV);
 		float GetFOV() const;
 
-		void SetAspect(float Aspect);
-		float GetAspect() const;
+		void SetScreenResolution(int Width, int Height);
+		const glm::vec2& GetScreenResolution() const;
 
 		void SetNear(float Near);
 		float GetNear() const;
