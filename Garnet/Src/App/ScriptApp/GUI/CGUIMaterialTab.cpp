@@ -57,7 +57,7 @@ namespace gui
 				const auto& Material = MaterialList[MaterialIndex];
 
 				// ƒ}ƒeƒŠƒAƒ‹–¼
-				if (ImGui::TreeNodeEx(Material->GetMaterialName().c_str(), ImGuiTreeNodeFlags_OpenOnArrow))
+				if (ImGui::TreeNodeEx(Material->GetMaterialName().c_str(), ImGuiTreeNodeFlags_Framed))
 				{
 					auto& ShaderBufferList = Material->GetShaderBufferList();
 
