@@ -647,6 +647,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Src\App\ScriptApp\GUI\CGUIResourcesTab.h" />
     <ClInclude Include="Src\App\ScriptApp\GUI\CGUITransformTab.h" />
     <ClInclude Include="Src\App\ScriptApp\GUI\CGUIMaterialTab.h" />
     <ClInclude Include="Src\App\ScriptApp\GUI\CGUICameraTab.h" />
@@ -1551,6 +1552,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClInclude Include="Src\Interface\IRenderer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\App\ScriptApp\GUI\CGUIResourcesTab.cpp" />
     <ClCompile Include="Src\App\ScriptApp\GUI\CGUITransformTab.cpp" />
     <ClCompile Include="Src\App\ScriptApp\GUI\CGUIMaterialTab.cpp" />
     <ClCompile Include="Src\App\ScriptApp\GUI\CGUICameraTab.cpp" />
@@ -2131,6 +2133,9 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <None Include="Src\Library\glm\glm\gtx\wrap.inl" />
     <None Include="WebRelease\Resources\Shaders\frag.spv" />
     <None Include="WebRelease\Resources\Shaders\vert.spv" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="Commands\TestCmd.bat" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />

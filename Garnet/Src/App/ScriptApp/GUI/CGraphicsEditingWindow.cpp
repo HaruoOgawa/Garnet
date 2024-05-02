@@ -28,6 +28,7 @@ namespace gui
 			if (ImGui::BeginTabBar("MainMenuBar"))
 			{
 				if (!m_GUIObjectTab.Draw(pApp->GetObjectList())) return false;
+				if (!m_GUIResourcesTab.Draw()) return false;
 				if (!CGUIRenderingTab::Draw()) return false;
 				if (!CGUICameraTab::Draw()) return false;
 
