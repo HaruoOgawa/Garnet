@@ -6,7 +6,6 @@
 
 /*#ifdef USE_OPENGL
 
-#define NOMINMAX
 #define WIN32_LEAN_AND_MEAD
 #include <Windows.h>
 

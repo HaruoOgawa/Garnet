@@ -131,9 +131,6 @@ namespace app
 
 	bool CScriptApp::Draw(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<gui::IGUIEngine>& GUIEngine)
 	{
-		// Prepare
-		if (!pGraphicsAPI->PrepareRender()) return false;
-
 		/*// Dispatch GPGPU
 		if (!m_ScriptScene->Dispatch(pGraphicsAPI, pLoadWorker, m_MainCamera, m_Projection, m_DrawInfo)) return false;
 
@@ -160,9 +157,6 @@ namespace app
 		}
 
 		if (!pGraphicsAPI->EndRender()) return false;
-
-		// Submit
-		if (!pGraphicsAPI->SubmitRender()) return false;
 
 		return true;
 	}

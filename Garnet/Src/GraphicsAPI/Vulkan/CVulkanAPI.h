@@ -10,6 +10,8 @@
 
 #include "../../Interface/IGraphicsAPI.h"
 
+#include <vulkan/vulkan.h>
+
 namespace api
 {
 	class CVulkanRenderPass;
@@ -168,7 +170,7 @@ namespace api
 		CVulkanAPI(int Width, int Height);
 		virtual ~CVulkanAPI();
 
-		virtual bool InitializeWithGLFW(GLFWwindow* pWindow) override;
+		virtual bool Initialize(IWindowAPI* pWindowAPI) override;
 		void Release();
 
 		virtual bool CreateRenderPass(const std::string& PassName, ERenderPassFormat RenderPassFormat, const glm::vec4& InitColor, int Width = -1, int Height = -1) override;

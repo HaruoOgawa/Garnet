@@ -29,11 +29,7 @@ namespace api
 		COpenGLAPI(int Width, int Height);
 		virtual ~COpenGLAPI();
 
-#ifdef USE_GLFW
-		virtual bool InitializeWithGLFW(GLFWwindow* pWindow) override;
-#else
-		virtual bool Initialize() override;
-#endif
+		virtual bool Initialize(IWindowAPI* pWindowAPI) override;
 		
 		void Release();
 

@@ -9,14 +9,6 @@
 #include <emscripten/html5_webgpu.h>
 #endif
 
-#ifdef USE_WEBGPU
-#include "../GraphicsAPI/WebGPU/CWebGPUAPI.h"
-#elif USE_VULKAN
-#include "../GraphicsAPI/Vulkan/CVulkanAPI.h"
-#elif USE_OPENGL
-#include "../GraphicsAPI/OpenGL/COpenGLAPI.h"
-#endif // USE_WEBGPU
-
 #ifdef USE_VIEWER_CAMERA
 #include "../../Camera/CViewerCamera.h"
 #endif // USE_VIEWER_CAMERA
@@ -37,22 +29,11 @@ namespace descapp
 {
 	CDescAppManager::CDescAppManager(app::EAppType AppType):
 		m_pWindow(nullptr),
-		m_GraphicsAPI(nullptr),
 		m_AppCore(nullptr),
 		m_IsRunLoop(g_IsRunLoop),
 		m_SecondsTime(0.0f), 
-		m_InputState(std::make_shared<input::CInputState>()),
 		m_DeltaSecondsTime(0.0f)
 	{
-		//
-#ifdef USE_WEBGPU
-		m_GraphicsAPI = std::make_shared<api::CWebGPUAPI>(WIDTH, HEIGHT);
-#elif USE_VULKAN
-		m_GraphicsAPI = std::make_shared<api::CVulkanAPI>(WIDTH, HEIGHT);
-#elif USE_OPENGL
-		m_GraphicsAPI = std::make_shared<api::COpenGLAPI>(WIDTH, HEIGHT);
-#endif // USE_WEBGPU
-		
 		m_AppCore = std::make_shared<app::CAppCore>();
 	}
 
@@ -73,25 +54,13 @@ namespace descapp
 
 	bool CDescAppManager::Release()
 	{
-#ifdef USE_VULKAN
-		// 論理デバイスが操作を完了するのを待つ
-		vkDeviceWaitIdle(m_GraphicsAPI->GetLogicalDevice());
-#endif
-
 		if (m_AppCore)
 		{
-			m_AppCore->Release(m_GraphicsAPI.get());
+			m_AppCore->Release();
 			m_AppCore.reset();
 			m_AppCore = nullptr;
 		}
 		
-		if (m_GraphicsAPI)
-		{
-			m_GraphicsAPI->Release();
-			m_GraphicsAPI.reset();
-			m_GraphicsAPI = nullptr;
-		}
-
 		if (m_pWindow)
 		{
 			glfwDestroyWindow(m_pWindow);
@@ -107,14 +76,11 @@ namespace descapp
 	{
 		if (!InitWindow()) return false;
 
-		if (!m_GraphicsAPI->InitializeWithGLFW(m_pWindow)) return false;
-
-		if (!m_AppCore->Initialize(m_GraphicsAPI.get(), this)) return false;
+		if (!m_AppCore->Initialize(this)) return false;
 
 		int w, h;
 		glfwGetWindowSize(m_pWindow, &w, &h);
 
-		m_GraphicsAPI->Resize(w, h);
 		m_AppCore->Resize(w, h);
 
 		return true;
@@ -136,7 +102,7 @@ namespace descapp
 		}
 
 #ifdef USE_INPUT_SYSTEM
-		auto InputState = AppManager->GetInputState();
+		auto InputState = AppCore->GetInputState();
 
 		//
 		input::EKeyType KeyType = input::EKeyType::KEY_TYPE_NONE;
@@ -211,7 +177,7 @@ namespace descapp
 		}
 
 #ifdef USE_INPUT_SYSTEM
-		auto InputState = AppManager->GetInputState();
+		auto InputState = AppCore->GetInputState();
 
 		if (button == GLFW_MOUSE_BUTTON_LEFT && !InputState->IsDownMouseRight())
 		{
@@ -258,7 +224,7 @@ namespace descapp
 		}
 
 #ifdef USE_INPUT_SYSTEM
-		auto InputState = AppManager->GetInputState();
+		auto InputState = AppCore->GetInputState();
 
 		if (InputState->IsDownMouseLeft() || InputState->IsDownMouseRight())
 		{
@@ -293,7 +259,7 @@ namespace descapp
 		}
 
 #ifdef USE_INPUT_SYSTEM
-		auto InputState = AppManager->GetInputState();
+		auto InputState = AppCore->GetInputState();
 
 		InputState->SetWheelScrollAmount(glm::vec2(static_cast<float>(xoffset), static_cast<float>(yoffset)));
 #endif
@@ -329,7 +295,6 @@ namespace descapp
 
 	void CDescAppManager::ResizeWindow(int w, int h)
 	{
-		m_GraphicsAPI->Resize(w, h);
 		m_AppCore->Resize(w, h);
 	}
 
@@ -345,8 +310,8 @@ namespace descapp
 			if (!LateUpdate()) return false;
 			if (!FixedUpdate()) return false;
 			if (!Draw()) return false;
-
-			m_InputState->Clear();
+			
+			m_AppCore->GetInputState()->Clear();
 		}
 		else
 		{
@@ -369,7 +334,7 @@ namespace descapp
 #endif
 		m_DeltaSecondsTime = m_SecondsTime - PrevSecondsTime;
 
-		if (!m_AppCore->Update(m_GraphicsAPI.get(), m_InputState, m_SecondsTime, m_DeltaSecondsTime)) return false;
+		if (!m_AppCore->Update(m_SecondsTime, m_DeltaSecondsTime)) return false;
 
 #ifdef _DEBUG
 		// FPSの計測と表示(60FPSを基準とする)
@@ -382,21 +347,21 @@ namespace descapp
 
 	bool CDescAppManager::LateUpdate()
 	{
-		if (!m_AppCore->LateUpdate(m_GraphicsAPI.get())) return false;
+		if (!m_AppCore->LateUpdate()) return false;
 
 		return true;
 	}
 
 	bool CDescAppManager::FixedUpdate()
 	{
-		if (!m_AppCore->FixedUpdate(m_GraphicsAPI.get())) return false;
+		if (!m_AppCore->FixedUpdate()) return false;
 
 		return true;
 	}
 
 	bool CDescAppManager::Draw()
 	{
-		if (!m_AppCore->Draw(m_GraphicsAPI.get())) return false;
+		if (!m_AppCore->Draw()) return false;
 
 #ifdef USE_OPENGL
 		glfwSwapBuffers(m_pWindow);

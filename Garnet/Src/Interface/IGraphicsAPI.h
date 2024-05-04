@@ -6,14 +6,9 @@
 
 #include "IRenderer.h"
 #include "IRenderPass.h"
-#include "../GraphicsAPI/ERenderPassFormat.h"
+#include "IWindowAPI.h"
 
-#ifdef USE_VULKAN 
-#define NOMINMAX
-#define VK_USE_PLATFORM_WIN32_KHR
-#define GLFW_INCLUDE_VULKAN
-#define GLFW_EXPOSE_NATIVE_WIN32
-#endif
+#include "../GraphicsAPI/ERenderPassFormat.h"
 
 #ifdef USE_GLFW
 #include <glfw3.h>
@@ -38,11 +33,7 @@ namespace api
 	class IGraphicsAPI
 	{
 	public:
-#ifdef USE_GLFW
-		virtual bool InitializeWithGLFW(GLFWwindow* pWindow) = 0;
-#else
-		virtual bool Initialize() = 0;
-#endif
+		virtual bool Initialize(IWindowAPI* pWindowAPI) = 0;
 		
 		virtual bool CreateRenderPass(const std::string& PassName, ERenderPassFormat RenderPassFormat, const glm::vec4& InitColor, int Width = -1, int Height = -1) = 0;
 		virtual std::shared_ptr<graphics::CVertexBuffer> CreateVertexBuffer() = 0;

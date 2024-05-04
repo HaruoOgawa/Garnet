@@ -1,9 +1,6 @@
 #ifdef USE_WIN32_WindowAPI
 
 #include "CDemoAppManager.h"
-#ifdef USE_OPENGL
-#include "../GraphicsAPI/OpenGL/COpenGLAPI.h"
-#endif
 
 #include "CAppCore.h"
 
@@ -32,15 +29,9 @@ namespace app
 		m_IsRunLoop(true),
 		m_SecondsTime(0.0f),
 		m_DeltaSecondsTime(0.0f),
-		m_InputState(std::make_shared<input::CInputState>()),
-		m_GraphicsAPI(nullptr),
 		m_AppCore(nullptr)
 	{
 		g_AppManager = this; // 仮のグローバル変数
-
-#ifdef USE_OPENGL
-		m_GraphicsAPI = std::make_shared<api::COpenGLAPI>(WIDTH, HEIGHT);
-#endif
 
 		m_AppCore = std::make_shared<app::CAppCore>();
 	}
@@ -49,16 +40,9 @@ namespace app
 	{
 		if (m_AppCore)
 		{
-			m_AppCore->Release(m_GraphicsAPI.get());
+			m_AppCore->Release();
 			m_AppCore.reset();
 			m_AppCore = nullptr;
-		}
-
-		if (m_GraphicsAPI)
-		{
-			m_GraphicsAPI->Release();
-			m_GraphicsAPI.reset();
-			m_GraphicsAPI = nullptr;
 		}
 
 		if (m_Rendering_Context)
@@ -87,9 +71,8 @@ namespace app
 		if (!InitWindow(hInstance)) return false;
 		//if (!InitWGL()) return false;
 		if (!InitGLContext()) return false;
-		if (!m_GraphicsAPI->Initialize()) return false;
 
-		if (!m_AppCore->Initialize(m_GraphicsAPI.get(), this)) return false;
+		if (!m_AppCore->Initialize(this)) return false;
 
 		RECT rect;
 		if (GetWindowRect(m_Window, &rect))
@@ -97,7 +80,6 @@ namespace app
 			int w = rect.right - rect.left;
 			int h = rect.bottom - rect.top;
 
-			m_GraphicsAPI->Resize(w, h);
 			m_AppCore->Resize(w, h);
 		}
 
@@ -125,8 +107,11 @@ namespace app
 
 			auto AppManager = g_AppManager;
 
+			auto AppCore = AppManager->GetAppCore();
+			if (!AppCore) return;
+
 #ifdef USE_INPUT_SYSTEM
-			auto InputState = AppManager->GetInputState();
+			auto InputState = AppCore->GetInputState();
 
 			//
 			input::EKeyType KeyType = input::EKeyType::KEY_TYPE_NONE;
@@ -175,7 +160,11 @@ namespace app
 		if (!g_AppManager) return;
 
 		auto AppManager = g_AppManager;
-		auto InputState = AppManager->GetInputState();
+
+		auto AppCore = AppManager->GetAppCore();
+		if (!AppCore) return;
+
+		auto InputState = AppCore->GetInputState();
 
 		if ((msg == WM_LBUTTONDOWN || msg == WM_LBUTTONUP) && !InputState->IsDownMouseRight())
 		{
@@ -211,7 +200,11 @@ namespace app
 		if (!g_AppManager) return;
 
 		auto AppManager = g_AppManager;
-		auto InputState = AppManager->GetInputState();
+
+		auto AppCore = AppManager->GetAppCore();
+		if (!AppCore) return;
+
+		auto InputState = AppCore->GetInputState();
 
 		if (InputState->IsDownMouseLeft() || InputState->IsDownMouseRight())
 		{
@@ -241,7 +234,11 @@ namespace app
 		if (!g_AppManager) return;
 
 		auto AppManager = g_AppManager;
-		auto InputState = AppManager->GetInputState();
+
+		auto AppCore = AppManager->GetAppCore();
+		if (!AppCore) return;
+
+		auto InputState = AppCore->GetInputState();
 
 		auto Amount = GET_WHEEL_DELTA_WPARAM(w_param);
 
@@ -336,7 +333,7 @@ namespace app
 			if (!FixedUpdate()) return false;
 			if (!Draw()) return false;
 
-			m_InputState->Clear();
+			m_AppCore->GetInputState()->Clear();
 		}
 
 		return true;
@@ -344,7 +341,6 @@ namespace app
 
 	void CDemoAppManager::ResizeWindow(int w, int h)
 	{
-		m_GraphicsAPI->Resize(w, h);
 		m_AppCore->Resize(w, h);
 	}
 
@@ -474,21 +470,21 @@ namespace app
 		m_SecondsTime = static_cast<float>(clock()) * 0.001f;
 		m_DeltaSecondsTime = m_SecondsTime - PrevSecondsTime;
 
-		if (!m_AppCore->Update(m_GraphicsAPI.get(), m_InputState, m_SecondsTime, m_DeltaSecondsTime)) return false;
+		if (!m_AppCore->Update(m_SecondsTime, m_DeltaSecondsTime)) return false;
 
 		return true;
 	}
 
 	bool CDemoAppManager::LateUpdate()
 	{
-		if (!m_AppCore->LateUpdate(m_GraphicsAPI.get())) return false;
+		if (!m_AppCore->LateUpdate()) return false;
 
 		return true;
 	}
 
 	bool CDemoAppManager::FixedUpdate()
 	{
-		if (!m_AppCore->FixedUpdate(m_GraphicsAPI.get())) return false;
+		if (!m_AppCore->FixedUpdate()) return false;
 
 		return true;
 	}
@@ -496,7 +492,7 @@ namespace app
 	bool CDemoAppManager::Draw()
 	{
 		// Appの描画
-		if (!m_AppCore->Draw(m_GraphicsAPI.get())) return false;
+		if (!m_AppCore->Draw()) return false;
 
 		//カラーバッファを入れ替える
 		SwapBuffers(m_Device_Context);

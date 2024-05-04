@@ -5,19 +5,14 @@
 #include "../Interface/IWindowAPI.h"
 #include "EAppType.h"
 
-namespace api { class CWebGPUAPI; }
 namespace app { class CAppCore; }
-namespace input { class CInputState; }
 
 namespace webapp
 {
 	class CWebAppManager : public IWindowAPI
 	{
 		bool m_IsRunLoop;
-		std::shared_ptr<api::CWebGPUAPI> m_GraphicsAPI;
 		std::shared_ptr<app::CAppCore> m_AppCore;
-		
-		std::shared_ptr<input::CInputState> m_InputState;
 
 		float m_SecondsTime;
 		float m_DeltaSecondsTime;

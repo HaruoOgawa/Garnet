@@ -28,7 +28,6 @@ namespace webapp
 		m_IsRunLoop(true),
 		m_GraphicsAPI(nullptr),
 		m_AppCore(nullptr),
-		m_InputState(std::make_shared<input::CInputState>()),
 		m_SecondsTime(0.0f),
 		m_DeltaSecondsTime(0.0f),
 		m_Width(Width),
@@ -95,7 +94,7 @@ namespace webapp
 			if (!FixedUpdate()) return false;
 			if (!Draw()) return false;
 
-			m_InputState->Clear();
+			m_AppCore->GetInputState()->Clear();
 		}
 
 		return true;
@@ -107,7 +106,7 @@ namespace webapp
 		m_SecondsTime = static_cast<float>(clock()) * 0.001f * 0.001f;
 		m_DeltaSecondsTime = m_SecondsTime - PrevSecondsTime;
 
-		if (!m_AppCore->Update(m_GraphicsAPI.get(), m_InputState, m_SecondsTime, m_DeltaSecondsTime)) return false;
+		if (!m_AppCore->Update(m_SecondsTime, m_DeltaSecondsTime)) return false;
 
 		return true;
 	}
@@ -186,7 +185,8 @@ namespace webapp
 			KeyType = input::EKeyType::KEY_TYPE_5;
 		}
 
-		m_InputState->SetKeyState(KeyType, IsDown);
+		auto InputState = m_AppCore->GetInputState();
+		InputState->SetKeyState(KeyType, IsDown);
 
 		//
 		if (key == "Escape" && IsDown)
@@ -206,13 +206,15 @@ namespace webapp
 	// マウスイベント
 	void CWebAppManager::OnMouseDown(int buttonNum, int x, int y)
 	{
-		if (buttonNum == 0 && !m_InputState->IsDownMouseRight())
+		auto InputState = m_AppCore->GetInputState();
+
+		if (buttonNum == 0 && !InputState->IsDownMouseRight())
 		{
-			m_InputState->SetDownMouseLeft(true);
+			InputState->SetDownMouseLeft(true);
 		}
-		else if (buttonNum == 2 && !m_InputState->IsDownMouseLeft())
+		else if (buttonNum == 2 && !InputState->IsDownMouseLeft())
 		{
-			m_InputState->SetDownMouseRight(true);
+			InputState->SetDownMouseRight(true);
 		}
 
 		// 位置を正規化する
@@ -222,18 +224,20 @@ namespace webapp
 		rPosX = rPosX * 2.0f - 1.0f;
 		rPosY = rPosY * 2.0f - 1.0f;
 
-		m_InputState->StartMousePos(glm::vec2(rPosX, rPosY));
+		InputState->StartMousePos(glm::vec2(rPosX, rPosY));
 	}
 
 	void CWebAppManager::OnMouseUp(int buttonNum, int x, int y)
 	{
-		if (buttonNum == 0 && !m_InputState->IsDownMouseRight())
+		auto InputState = m_AppCore->GetInputState();
+
+		if (buttonNum == 0 && !InputState->IsDownMouseRight())
 		{
-			m_InputState->SetDownMouseLeft(false);
+			InputState->SetDownMouseLeft(false);
 		}
-		else if (buttonNum == 2 && !m_InputState->IsDownMouseLeft())
+		else if (buttonNum == 2 && !InputState->IsDownMouseLeft())
 		{
-			m_InputState->SetDownMouseRight(false);
+			InputState->SetDownMouseRight(false);
 		}
 
 		// 位置を正規化する
@@ -243,12 +247,14 @@ namespace webapp
 		rPosX = rPosX * 2.0f - 1.0f;
 		rPosY = rPosY * 2.0f - 1.0f;
 
-		m_InputState->StartMousePos(glm::vec2(rPosX, rPosY));
+		InputState->StartMousePos(glm::vec2(rPosX, rPosY));
 	}
 
 	void CWebAppManager::OnMouseMove(int x, int y)
 	{
-		if (m_InputState->IsDownMouseLeft() || m_InputState->IsDownMouseRight())
+		auto InputState = m_AppCore->GetInputState();
+
+		if (InputState->IsDownMouseLeft() || InputState->IsDownMouseRight())
 		{
 			// 位置を正規化する
 			float rPosX = static_cast<float>(x) / static_cast<float>(m_Width);
@@ -257,15 +263,17 @@ namespace webapp
 			rPosX = rPosX * 2.0f - 1.0f;
 			rPosY = rPosY * 2.0f - 1.0f;
 
-			m_InputState->SetMousePos(glm::vec2(rPosX, rPosY));
+			InputState->SetMousePos(glm::vec2(rPosX, rPosY));
 		}
 	}
 
 	void CWebAppManager::OnMouseWheel(int deltaY)
 	{
+		auto InputState = m_AppCore->GetInputState();
+
 		// ブラウザだとピクセルに基づくホイール量が -150 ~ 150の範囲で返ってくるのでひとまず -1.0 ~ 1.0fにしておく
 		float wheelRate = glm::sign(-1.0f * static_cast<float>(deltaY)) * 1.0f;
-		m_InputState->SetWheelScrollAmount(glm::vec2(0.0f, wheelRate));
+		InputState->SetWheelScrollAmount(glm::vec2(0.0f, wheelRate));
 	}
 }
 
