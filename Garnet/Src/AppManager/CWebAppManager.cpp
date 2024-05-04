@@ -4,7 +4,8 @@
 #include "../Message/Console.h"
 
 #include "../GraphicsAPI/WebGPU/CWebGPUAPI.h"
-#include "../App/ScriptApp/CScriptApp.h"
+
+#include "CAppCore.h"
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
@@ -27,7 +28,7 @@ namespace webapp
 	CWebAppManager::CWebAppManager(app::EAppType AppType, int Width, int Height):
 		m_IsRunLoop(true),
 		m_GraphicsAPI(nullptr),
-		m_App(nullptr),
+		m_AppCore(nullptr),
 		m_InputState(std::make_shared<input::CInputState>()),
 		m_SecondsTime(0.0f),
 		m_DeltaSecondsTime(0.0f),
@@ -37,7 +38,7 @@ namespace webapp
 	{
 		m_GraphicsAPI = std::make_shared<api::CWebGPUAPI>(Width, Height);
 
-		m_App = std::make_shared<app::CScriptApp>();
+		m_AppCore = std::make_shared<app::CAppCore>();
 
 #ifdef USE_GUIENGINE
 		m_GUIEngine = std::make_shared<gui::CImGuiGUIEngine>();
@@ -53,11 +54,11 @@ namespace webapp
 
 	bool CWebAppManager::Release()
 	{
-		if (m_App)
+		if (m_AppCore)
 		{
-			m_App->Release(m_GraphicsAPI.get());
-			m_App.reset();
-			m_App = nullptr;
+			m_AppCore->Release(m_GraphicsAPI.get());
+			m_AppCore.reset();
+			m_AppCore = nullptr;
 		}
 
 		if (m_LoadWorker)
@@ -94,10 +95,10 @@ namespace webapp
 		// ロードワーカー
 		m_LoadWorker = std::make_shared<resource::CLoadWorker>(m_GraphicsAPI.get());
 
-		if (!m_App->Initialize(m_GraphicsAPI.get(), m_LoadWorker.get())) return false;
+		if (!m_AppCore->Initialize(m_GraphicsAPI.get(), m_LoadWorker.get())) return false;
 		
 		m_GraphicsAPI->Resize(m_Width, m_Height);
-		m_App->Resize(m_Width, m_Height);
+		m_AppCore->Resize(m_Width, m_Height);
 
 		return true;
 	}
@@ -129,35 +130,28 @@ namespace webapp
 		m_SecondsTime = static_cast<float>(clock()) * 0.001f * 0.001f;
 		m_DeltaSecondsTime = m_SecondsTime - PrevSecondsTime;
 
-		m_App->GetDrawInfo()->SetSecondsTime(m_SecondsTime);
-		m_App->GetDrawInfo()->SetDeltaSecondsTime(m_DeltaSecondsTime);
-
-		// ViewCameraのUpdate
-		const auto& MainCamera = m_App->GetMainCamera();
-		if (MainCamera) MainCamera->Update(m_DeltaSecondsTime, m_InputState);
-
-		if (!m_App->Update(m_GraphicsAPI.get(), m_LoadWorker.get(), m_InputState)) return false;
+		if (!m_AppCore->Update(m_GraphicsAPI.get(), m_LoadWorker.get(), m_InputState, m_SecondsTime, m_DeltaSecondsTime)) return false;
 
 		return true;
 	}
 
 	bool CWebAppManager::LateUpdate()
 	{
-		if (!m_App->LateUpdate(m_GraphicsAPI.get(), m_LoadWorker.get())) return false;
+		if (!m_AppCore->LateUpdate(m_GraphicsAPI.get(), m_LoadWorker.get())) return false;
 
 		return true;
 	}
 
 	bool CWebAppManager::FixedUpdate()
 	{
-		if (!m_App->FixedUpdate(m_GraphicsAPI.get(), m_LoadWorker.get())) return false;
+		if (!m_AppCore->FixedUpdate(m_GraphicsAPI.get(), m_LoadWorker.get())) return false;
 
 		return true;
 	}
 
 	bool CWebAppManager::Draw()
 	{
-		if (!m_App->Draw(m_GraphicsAPI.get(), m_LoadWorker.get(), m_GUIEngine)) return false;
+		if (!m_AppCore->Draw(m_GraphicsAPI.get(), m_LoadWorker.get(), m_GUIEngine)) return false;
 
 		return true;
 	}
@@ -229,7 +223,7 @@ namespace webapp
 	void CWebAppManager::OnResize(int w, int h)
 	{
 		m_GraphicsAPI->Resize(w, h);
-		m_App->Resize(w, h);
+		m_AppCore->Resize(w, h);
 	}
 
 	// マウスイベント

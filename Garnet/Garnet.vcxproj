@@ -647,6 +647,9 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Src\AppManager\CAppRunner.h" />
+    <ClInclude Include="Src\AppManager\CAppCore.h" />
+    <ClInclude Include="Src\LoadWorker\CResourceManager.h" />
     <ClInclude Include="Src\App\ScriptApp\GUI\CGUIResourcesTab.h" />
     <ClInclude Include="Src\App\ScriptApp\GUI\CGUITransformTab.h" />
     <ClInclude Include="Src\App\ScriptApp\GUI\CGUIMaterialTab.h" />
@@ -1552,6 +1555,9 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClInclude Include="Src\Interface\IRenderer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\AppManager\CAppRunner.cpp" />
+    <ClCompile Include="Src\AppManager\CAppCore.cpp" />
+    <ClCompile Include="Src\LoadWorker\CResourceManager.cpp" />
     <ClCompile Include="Src\App\ScriptApp\GUI\CGUIResourcesTab.cpp" />
     <ClCompile Include="Src\App\ScriptApp\GUI\CGUITransformTab.cpp" />
     <ClCompile Include="Src\App\ScriptApp\GUI\CGUIMaterialTab.cpp" />

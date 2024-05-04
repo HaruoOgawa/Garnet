@@ -30,7 +30,7 @@
 
 #include "../Input/CInputState.h"
 
-#include "../App/ScriptApp/CScriptApp.h"
+#include "CAppCore.h"
 
 bool g_IsRunLoop = true;
 
@@ -39,7 +39,7 @@ namespace descapp
 	CDescAppManager::CDescAppManager(app::EAppType AppType):
 		m_pWindow(nullptr),
 		m_GraphicsAPI(nullptr),
-		m_App(nullptr),
+		m_AppCore(nullptr),
 		m_IsRunLoop(g_IsRunLoop),
 		m_SecondsTime(0.0f), 
 		m_LoadWorker(nullptr),
@@ -56,8 +56,8 @@ namespace descapp
 		m_GraphicsAPI = std::make_shared<api::COpenGLAPI>(WIDTH, HEIGHT);
 #endif // USE_WEBGPU
 		
-		m_App = std::make_shared<app::CScriptApp>();
-
+		m_AppCore = std::make_shared<app::CAppCore>();
+		
 #ifdef USE_GUIENGINE
 		m_GUIEngine = std::make_shared<gui::CImGuiGUIEngine>();
 #else
@@ -82,13 +82,13 @@ namespace descapp
 		vkDeviceWaitIdle(m_GraphicsAPI->GetLogicalDevice());
 #endif
 
-		if (m_App)
+		if (m_AppCore)
 		{
-			m_App->Release(m_GraphicsAPI.get());
-			m_App.reset();
-			m_App = nullptr;
+			m_AppCore->Release(m_GraphicsAPI.get());
+			m_AppCore.reset();
+			m_AppCore = nullptr;
 		}
-
+		
 		if (m_LoadWorker)
 		{
 			m_LoadWorker.reset();
@@ -133,13 +133,13 @@ namespace descapp
 		// ロードワーカー
 		m_LoadWorker = std::make_shared<resource::CLoadWorker>(m_GraphicsAPI.get());
 
-		if (!m_App->Initialize(m_GraphicsAPI.get(), m_LoadWorker.get())) return false;
+		if (!m_AppCore->Initialize(m_GraphicsAPI.get(), m_LoadWorker.get())) return false;
 
 		int w, h;
 		glfwGetWindowSize(m_pWindow, &w, &h);
 
 		m_GraphicsAPI->Resize(w, h);
-		m_App->Resize(w, h);
+		m_AppCore->Resize(w, h);
 
 		return true;
 	}
@@ -335,7 +335,7 @@ namespace descapp
 	void CDescAppManager::ResizeWindow(int w, int h)
 	{
 		m_GraphicsAPI->Resize(w, h);
-		m_App->Resize(w, h);
+		m_AppCore->Resize(w, h);
 	}
 
 	bool CDescAppManager::RunLopp()
@@ -374,13 +374,7 @@ namespace descapp
 #endif
 		m_DeltaSecondsTime = m_SecondsTime - PrevSecondsTime;
 
-		m_App->GetDrawInfo()->SetSecondsTime(m_SecondsTime);
-		m_App->GetDrawInfo()->SetDeltaSecondsTime(m_DeltaSecondsTime);
-
-		const auto& MainCamera = m_App->GetMainCamera();
-		if (MainCamera) MainCamera->Update(m_DeltaSecondsTime, m_InputState);
-
-		if (!m_App->Update(m_GraphicsAPI.get(), m_LoadWorker.get(), m_InputState)) return false;
+		if (!m_AppCore->Update(m_GraphicsAPI.get(), m_LoadWorker.get(), m_InputState, m_SecondsTime, m_DeltaSecondsTime)) return false;
 
 #ifdef _DEBUG
 		// FPSの計測と表示(60FPSを基準とする)
@@ -393,21 +387,21 @@ namespace descapp
 
 	bool CDescAppManager::LateUpdate()
 	{
-		if (!m_App->LateUpdate(m_GraphicsAPI.get(), m_LoadWorker.get())) return false;
+		if (!m_AppCore->LateUpdate(m_GraphicsAPI.get(), m_LoadWorker.get())) return false;
 
 		return true;
 	}
 
 	bool CDescAppManager::FixedUpdate()
 	{
-		if (!m_App->FixedUpdate(m_GraphicsAPI.get(), m_LoadWorker.get())) return false;
+		if (!m_AppCore->FixedUpdate(m_GraphicsAPI.get(), m_LoadWorker.get())) return false;
 
 		return true;
 	}
 
 	bool CDescAppManager::Draw()
 	{
-		if (!m_App->Draw(m_GraphicsAPI.get(), m_LoadWorker.get(), m_GUIEngine)) return false;
+		if (!m_AppCore->Draw(m_GraphicsAPI.get(), m_LoadWorker.get(), m_GUIEngine)) return false;
 
 #ifdef USE_OPENGL
 		glfwSwapBuffers(m_pWindow);

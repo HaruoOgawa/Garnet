@@ -22,7 +22,7 @@ namespace api { class CVulkanAPI; }
 #elif USE_OPENGL
 namespace api { class COpenGLAPI; }
 #endif
-namespace app{ class IApp; }
+namespace app{ class CAppCore; }
 
 namespace input { class CInputState; }
 namespace resource { class CLoadWorker; }
@@ -40,7 +40,7 @@ namespace descapp
 #elif USE_OPENGL
 		std::shared_ptr<api::COpenGLAPI> m_GraphicsAPI;
 #endif
-		std::shared_ptr<app::IApp> m_App;
+		std::shared_ptr<app::CAppCore> m_AppCore;
 		std::shared_ptr<input::CInputState> m_InputState;
 		const int WIDTH = 1920;
 		const int HEIGHT = 1080;

@@ -5,7 +5,7 @@
 #include "EAppType.h"
 
 namespace api { class CWebGPUAPI; }
-namespace app { class IApp; }
+namespace app { class CAppCore; }
 namespace input { class CInputState; }
 namespace resource { class CLoadWorker; }
 namespace gui { class IGUIEngine; }
@@ -16,7 +16,7 @@ namespace webapp
 	{
 		bool m_IsRunLoop;
 		std::shared_ptr<api::CWebGPUAPI> m_GraphicsAPI;
-		std::shared_ptr<app::IApp> m_App;
+		std::shared_ptr<app::CAppCore> m_AppCore;
 		
 		std::shared_ptr<input::CInputState> m_InputState;
 

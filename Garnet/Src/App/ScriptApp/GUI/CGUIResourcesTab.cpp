@@ -103,6 +103,9 @@ namespace gui
 
 	std::vector<std::string> CGUIResourcesTab::ExecuteCommand(const char* cmd)
 	{
+#ifdef __EMSCRIPTEN__
+		return std::vector<std::string>();
+#else
 		char buffer[128];
 		std::string result = "";
 
@@ -121,6 +124,8 @@ namespace gui
 		_pclose(pipe);
 
 		return Split(result, '\n');
+#endif // __EMSCRIPTEN__
+		
 	}
 
 	std::vector<std::string> CGUIResourcesTab::Split(const std::string& Src, const char separate)

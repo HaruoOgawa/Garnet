@@ -5,7 +5,8 @@
 #ifdef USE_OPENGL
 #include "../GraphicsAPI/OpenGL/COpenGLAPI.h"
 #endif
-#include "../App/ScriptApp/CScriptApp.h"
+
+#include "CAppCore.h"
 
 #ifdef USE_VIEWER_CAMERA
 #include "../../Camera/CViewerCamera.h"
@@ -35,7 +36,7 @@ namespace app
 		m_LoadWorker(nullptr),
 		m_InputState(std::make_shared<input::CInputState>()),
 		m_GraphicsAPI(nullptr),
-		m_App(nullptr),
+		m_AppCore(nullptr),
 		m_GUIEngine(nullptr)
 	{
 		g_AppManager = this; // 仮のグローバル変数
@@ -44,7 +45,7 @@ namespace app
 		m_GraphicsAPI = std::make_shared<api::COpenGLAPI>(WIDTH, HEIGHT);
 #endif
 
-		m_App = std::make_shared<app::CScriptApp>();
+		m_AppCore = std::make_shared<app::CAppCore>();
 
 #ifdef USE_GUIENGINE
 		m_GUIEngine = std::make_shared<gui::CImGuiGUIEngine>();
@@ -55,11 +56,11 @@ namespace app
 
 	CDemoAppManager::~CDemoAppManager()
 	{
-		if (m_App)
+		if (m_AppCore)
 		{
-			m_App->Release(m_GraphicsAPI.get());
-			m_App.reset();
-			m_App = nullptr;
+			m_AppCore->Release(m_GraphicsAPI.get());
+			m_AppCore.reset();
+			m_AppCore = nullptr;
 		}
 
 		if (m_LoadWorker)
@@ -112,7 +113,7 @@ namespace app
 		// ロードワーカー
 		m_LoadWorker = std::make_shared<resource::CLoadWorker>(m_GraphicsAPI.get());
 
-		if (!m_App->Initialize(m_GraphicsAPI.get(), m_LoadWorker.get())) return false;
+		if (!m_AppCore->Initialize(m_GraphicsAPI.get(), m_LoadWorker.get())) return false;
 
 		RECT rect;
 		if (GetWindowRect(m_Window, &rect))
@@ -121,7 +122,7 @@ namespace app
 			int h = rect.bottom - rect.top;
 
 			m_GraphicsAPI->Resize(w, h);
-			m_App->Resize(w, h);
+			m_AppCore->Resize(w, h);
 		}
 
 		return true;
@@ -365,7 +366,7 @@ namespace app
 	void CDemoAppManager::ResizeWindow(int w, int h)
 	{
 		m_GraphicsAPI->Resize(w, h);
-		m_App->Resize(w, h);
+		m_AppCore->Resize(w, h);
 	}
 
 	bool CDemoAppManager::InitWindow(HINSTANCE hInstance)
@@ -494,28 +495,21 @@ namespace app
 		m_SecondsTime = static_cast<float>(clock()) * 0.001f;
 		m_DeltaSecondsTime = m_SecondsTime - PrevSecondsTime;
 
-		m_App->GetDrawInfo()->SetSecondsTime(m_SecondsTime);
-		m_App->GetDrawInfo()->SetDeltaSecondsTime(m_DeltaSecondsTime);
-
-		// ViewCameraのUpdate
-		const auto& MainCamera = m_App->GetMainCamera();
-		if (MainCamera) MainCamera->Update(m_DeltaSecondsTime, m_InputState);
-
-		if (!m_App->Update(m_GraphicsAPI.get(), m_LoadWorker.get(), m_InputState)) return false;
+		if (!m_AppCore->Update(m_GraphicsAPI.get(), m_LoadWorker.get(), m_InputState, m_SecondsTime, m_DeltaSecondsTime)) return false;
 
 		return true;
 	}
 
 	bool CDemoAppManager::LateUpdate()
 	{
-		if (!m_App->LateUpdate(m_GraphicsAPI.get(), m_LoadWorker.get())) return false;
+		if (!m_AppCore->LateUpdate(m_GraphicsAPI.get(), m_LoadWorker.get())) return false;
 
 		return true;
 	}
 
 	bool CDemoAppManager::FixedUpdate()
 	{
-		if (!m_App->FixedUpdate(m_GraphicsAPI.get(), m_LoadWorker.get())) return false;
+		if (!m_AppCore->FixedUpdate(m_GraphicsAPI.get(), m_LoadWorker.get())) return false;
 
 		return true;
 	}
@@ -523,7 +517,7 @@ namespace app
 	bool CDemoAppManager::Draw()
 	{
 		// Appの描画
-		if (!m_App->Draw(m_GraphicsAPI.get(), m_LoadWorker.get(), m_GUIEngine)) return false;
+		if (!m_AppCore->Draw(m_GraphicsAPI.get(), m_LoadWorker.get(), m_GUIEngine)) return false;
 
 		//カラーバッファを入れ替える
 		SwapBuffers(m_Device_Context);
