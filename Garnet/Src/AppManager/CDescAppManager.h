@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../Interface/IWindowAPI.h"
+
 #ifdef USE_GLFW
 
 #ifdef USE_VULKAN
@@ -25,12 +27,10 @@ namespace api { class COpenGLAPI; }
 namespace app{ class CAppCore; }
 
 namespace input { class CInputState; }
-namespace resource { class CLoadWorker; }
-namespace gui { class IGUIEngine; }
 
 namespace descapp
 {
-	class CDescAppManager
+	class CDescAppManager : public IWindowAPI
 	{
 		GLFWwindow* m_pWindow;
 #ifdef USE_WEBGPU
@@ -50,10 +50,6 @@ namespace descapp
 		float m_SecondsTime;
 		float m_DeltaSecondsTime;
 
-		std::shared_ptr<resource::CLoadWorker> m_LoadWorker;
-
-		std::shared_ptr<gui::IGUIEngine> m_GUIEngine;
-
 	private:
 		bool InitWindow();
 
@@ -67,8 +63,10 @@ namespace descapp
 		CDescAppManager(app::EAppType AppType);
 		virtual ~CDescAppManager();
 
-		const std::shared_ptr<gui::IGUIEngine>& GetGUIEngine() const;
+		virtual GLFWwindow* GetGLFWWindow() const override;
 
+		const std::shared_ptr<app::CAppCore>& GetAppCore() const;
+		
 		bool Initialize();
 		bool RunLopp();
 

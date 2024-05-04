@@ -2,17 +2,16 @@
 #ifdef USE_WEB_NATIVE
 #include <string>
 #include <memory>
+#include "../Interface/IWindowAPI.h"
 #include "EAppType.h"
 
 namespace api { class CWebGPUAPI; }
 namespace app { class CAppCore; }
 namespace input { class CInputState; }
-namespace resource { class CLoadWorker; }
-namespace gui { class IGUIEngine; }
 
 namespace webapp
 {
-	class CWebAppManager
+	class CWebAppManager : public IWindowAPI
 	{
 		bool m_IsRunLoop;
 		std::shared_ptr<api::CWebGPUAPI> m_GraphicsAPI;
@@ -23,12 +22,8 @@ namespace webapp
 		float m_SecondsTime;
 		float m_DeltaSecondsTime;
 
-		std::shared_ptr<resource::CLoadWorker> m_LoadWorker;
-
 		int m_Width;
 		int m_Height;
-
-		std::shared_ptr<gui::IGUIEngine> m_GUIEngine;
 
 	private:
 		bool Release();
@@ -42,6 +37,9 @@ namespace webapp
 	public:
 		CWebAppManager(app::EAppType AppType, int Width, int Height);
 		virtual ~CWebAppManager();
+
+		const std::shared_ptr<app::CAppCore>& GetAppCore() const;
+
 		bool Initialize();
 		bool RunLoop();
 		bool IsRunLoop(){ return m_IsRunLoop; }

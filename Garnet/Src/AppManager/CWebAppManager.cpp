@@ -1,6 +1,5 @@
 #ifdef USE_WEB_NATIVE
 #include "CWebAppManager.h"
-#include "../LoadWorker/CLoadWorker.h"
 #include "../Message/Console.h"
 
 #include "../GraphicsAPI/WebGPU/CWebGPUAPI.h"
@@ -32,19 +31,12 @@ namespace webapp
 		m_InputState(std::make_shared<input::CInputState>()),
 		m_SecondsTime(0.0f),
 		m_DeltaSecondsTime(0.0f),
-		m_LoadWorker(nullptr),
 		m_Width(Width),
 		m_Height(Height)
 	{
 		m_GraphicsAPI = std::make_shared<api::CWebGPUAPI>(Width, Height);
 
 		m_AppCore = std::make_shared<app::CAppCore>();
-
-#ifdef USE_GUIENGINE
-		m_GUIEngine = std::make_shared<gui::CImGuiGUIEngine>();
-#else
-		m_GUIEngine = std::make_shared<gui::CDummyGUIEngine>();
-#endif
 	}
 
 	CWebAppManager::~CWebAppManager()
@@ -61,19 +53,6 @@ namespace webapp
 			m_AppCore = nullptr;
 		}
 
-		if (m_LoadWorker)
-		{
-			m_LoadWorker.reset();
-			m_LoadWorker = nullptr;
-		}
-
-		if (m_GUIEngine)
-		{
-			m_GUIEngine->Release(m_GraphicsAPI.get());
-			m_GUIEngine.reset();
-			m_GUIEngine = nullptr;
-		}
-
 		if (m_GraphicsAPI)
 		{
 			m_GraphicsAPI->Release();
@@ -84,18 +63,16 @@ namespace webapp
 		return true;
 	}
 
+	const std::shared_ptr<app::CAppCore>& CWebAppManager::GetAppCore() const
+	{
+		return m_AppCore;
+	}
+
 	bool CWebAppManager::Initialize()
 	{
 		if (!m_GraphicsAPI->Initialize()) return false;
 
-#ifdef USE_GUIENGINE
-		//if (!m_GUIEngine->InitializeWithGLFW(m_pWindow, m_GraphicsAPI.get())) return false;
-#endif
-
-		// ロードワーカー
-		m_LoadWorker = std::make_shared<resource::CLoadWorker>(m_GraphicsAPI.get());
-
-		if (!m_AppCore->Initialize(m_GraphicsAPI.get(), m_LoadWorker.get())) return false;
+		if (!m_AppCore->Initialize(m_GraphicsAPI.get(), this)) return false;
 		
 		m_GraphicsAPI->Resize(m_Width, m_Height);
 		m_AppCore->Resize(m_Width, m_Height);
@@ -130,28 +107,28 @@ namespace webapp
 		m_SecondsTime = static_cast<float>(clock()) * 0.001f * 0.001f;
 		m_DeltaSecondsTime = m_SecondsTime - PrevSecondsTime;
 
-		if (!m_AppCore->Update(m_GraphicsAPI.get(), m_LoadWorker.get(), m_InputState, m_SecondsTime, m_DeltaSecondsTime)) return false;
+		if (!m_AppCore->Update(m_GraphicsAPI.get(), m_InputState, m_SecondsTime, m_DeltaSecondsTime)) return false;
 
 		return true;
 	}
 
 	bool CWebAppManager::LateUpdate()
 	{
-		if (!m_AppCore->LateUpdate(m_GraphicsAPI.get(), m_LoadWorker.get())) return false;
+		if (!m_AppCore->LateUpdate(m_GraphicsAPI.get())) return false;
 
 		return true;
 	}
 
 	bool CWebAppManager::FixedUpdate()
 	{
-		if (!m_AppCore->FixedUpdate(m_GraphicsAPI.get(), m_LoadWorker.get())) return false;
+		if (!m_AppCore->FixedUpdate(m_GraphicsAPI.get())) return false;
 
 		return true;
 	}
 
 	bool CWebAppManager::Draw()
 	{
-		if (!m_AppCore->Draw(m_GraphicsAPI.get(), m_LoadWorker.get(), m_GUIEngine)) return false;
+		if (!m_AppCore->Draw(m_GraphicsAPI.get())) return false;
 
 		return true;
 	}

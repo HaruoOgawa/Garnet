@@ -1,7 +1,6 @@
 #ifdef USE_WIN32_WindowAPI
 
 #include "CDemoAppManager.h"
-#include "../LoadWorker/CLoadWorker.h"
 #ifdef USE_OPENGL
 #include "../GraphicsAPI/OpenGL/COpenGLAPI.h"
 #endif
@@ -33,11 +32,9 @@ namespace app
 		m_IsRunLoop(true),
 		m_SecondsTime(0.0f),
 		m_DeltaSecondsTime(0.0f),
-		m_LoadWorker(nullptr),
 		m_InputState(std::make_shared<input::CInputState>()),
 		m_GraphicsAPI(nullptr),
-		m_AppCore(nullptr),
-		m_GUIEngine(nullptr)
+		m_AppCore(nullptr)
 	{
 		g_AppManager = this; // 仮のグローバル変数
 
@@ -46,12 +43,6 @@ namespace app
 #endif
 
 		m_AppCore = std::make_shared<app::CAppCore>();
-
-#ifdef USE_GUIENGINE
-		m_GUIEngine = std::make_shared<gui::CImGuiGUIEngine>();
-#else
-		m_GUIEngine = std::make_shared<gui::CDummyGUIEngine>();
-#endif
 	}
 
 	CDemoAppManager::~CDemoAppManager()
@@ -61,19 +52,6 @@ namespace app
 			m_AppCore->Release(m_GraphicsAPI.get());
 			m_AppCore.reset();
 			m_AppCore = nullptr;
-		}
-
-		if (m_LoadWorker)
-		{
-			m_LoadWorker.reset();
-			m_LoadWorker = nullptr;
-		}
-
-		if (m_GUIEngine)
-		{
-			m_GUIEngine->Release(m_GraphicsAPI.get());
-			m_GUIEngine.reset();
-			m_GUIEngine = nullptr;
 		}
 
 		if (m_GraphicsAPI)
@@ -94,9 +72,14 @@ namespace app
 		g_AppManager = nullptr;
 	}
 
-	const std::shared_ptr<gui::IGUIEngine>& CDemoAppManager::GetGUIEngine() const
+	const HWND& CDemoAppManager::GetWin32Window() const
 	{
-		return m_GUIEngine;
+		return m_Window;
+	}
+
+	const std::shared_ptr<app::CAppCore>& CDemoAppManager::GetAppCore() const
+	{
+		return m_AppCore;
 	}
 
 	bool CDemoAppManager::Initialize(HINSTANCE hInstance)
@@ -106,14 +89,7 @@ namespace app
 		if (!InitGLContext()) return false;
 		if (!m_GraphicsAPI->Initialize()) return false;
 
-#ifdef USE_GUIENGINE
-		if (!m_GUIEngine->InitializeWithWin32API(m_Window, m_GraphicsAPI.get())) return false;
-#endif
-
-		// ロードワーカー
-		m_LoadWorker = std::make_shared<resource::CLoadWorker>(m_GraphicsAPI.get());
-
-		if (!m_AppCore->Initialize(m_GraphicsAPI.get(), m_LoadWorker.get())) return false;
+		if (!m_AppCore->Initialize(m_GraphicsAPI.get(), this)) return false;
 
 		RECT rect;
 		if (GetWindowRect(m_Window, &rect))
@@ -282,7 +258,10 @@ namespace app
 
 		auto AppManager = g_AppManager;
 		
-		auto GUIEngine = AppManager->GetGUIEngine();
+		auto AppCore = AppManager->GetAppCore();
+		if (!AppCore) return false;
+
+		auto GUIEngine = AppCore->GetGUIEngine();
 		if (GUIEngine)
 		{
 			if (GUIEngine->CheckInput(window, msg, w_param, l_param)) return true;
@@ -495,21 +474,21 @@ namespace app
 		m_SecondsTime = static_cast<float>(clock()) * 0.001f;
 		m_DeltaSecondsTime = m_SecondsTime - PrevSecondsTime;
 
-		if (!m_AppCore->Update(m_GraphicsAPI.get(), m_LoadWorker.get(), m_InputState, m_SecondsTime, m_DeltaSecondsTime)) return false;
+		if (!m_AppCore->Update(m_GraphicsAPI.get(), m_InputState, m_SecondsTime, m_DeltaSecondsTime)) return false;
 
 		return true;
 	}
 
 	bool CDemoAppManager::LateUpdate()
 	{
-		if (!m_AppCore->LateUpdate(m_GraphicsAPI.get(), m_LoadWorker.get())) return false;
+		if (!m_AppCore->LateUpdate(m_GraphicsAPI.get())) return false;
 
 		return true;
 	}
 
 	bool CDemoAppManager::FixedUpdate()
 	{
-		if (!m_AppCore->FixedUpdate(m_GraphicsAPI.get(), m_LoadWorker.get())) return false;
+		if (!m_AppCore->FixedUpdate(m_GraphicsAPI.get())) return false;
 
 		return true;
 	}
@@ -517,7 +496,7 @@ namespace app
 	bool CDemoAppManager::Draw()
 	{
 		// Appの描画
-		if (!m_AppCore->Draw(m_GraphicsAPI.get(), m_LoadWorker.get(), m_GUIEngine)) return false;
+		if (!m_AppCore->Draw(m_GraphicsAPI.get())) return false;
 
 		//カラーバッファを入れ替える
 		SwapBuffers(m_Device_Context);

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../Interface/IWindowAPI.h"
+
 #include <memory>
 
 namespace api { class IGraphicsAPI; }
@@ -13,16 +15,22 @@ namespace app
 	class CAppCore
 	{
 		std::shared_ptr<app::IApp> m_App;
+
+		std::shared_ptr<resource::CLoadWorker> m_LoadWorker;
+
+		std::shared_ptr<gui::IGUIEngine> m_GUIEngine;
 	public:
 		CAppCore();
-		virtual ~CAppCore();
+		virtual ~CAppCore() = default;
 
-		bool Initialize(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker);
+		const std::shared_ptr<gui::IGUIEngine>& GetGUIEngine() const;
+
+		bool Initialize(api::IGraphicsAPI* pGraphicsAPI, IWindowAPI* pWindowAPI);
 		bool Release(api::IGraphicsAPI* pGraphicsAPI);
 		bool Resize(int Width, int Height);
-		bool Update(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<input::CInputState>& InputState, float SecondsTime, float DeltaSecondsTime);
-		bool LateUpdate(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker);
-		bool FixedUpdate(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker);
-		bool Draw(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<gui::IGUIEngine>& GUIEngine);
+		bool Update(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<input::CInputState>& InputState, float SecondsTime, float DeltaSecondsTime);
+		bool LateUpdate(api::IGraphicsAPI* pGraphicsAPI);
+		bool FixedUpdate(api::IGraphicsAPI* pGraphicsAPI);
+		bool Draw(api::IGraphicsAPI* pGraphicsAPI);
 	};
 }

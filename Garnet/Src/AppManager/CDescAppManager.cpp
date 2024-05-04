@@ -1,7 +1,6 @@
 #ifdef USE_GLFW
 
 #include "CDescAppManager.h"
-#include "../LoadWorker/CLoadWorker.h"
 #include "../Message/Console.h"
 
 #ifdef __EMSCRIPTEN__
@@ -42,10 +41,8 @@ namespace descapp
 		m_AppCore(nullptr),
 		m_IsRunLoop(g_IsRunLoop),
 		m_SecondsTime(0.0f), 
-		m_LoadWorker(nullptr),
 		m_InputState(std::make_shared<input::CInputState>()),
-		m_DeltaSecondsTime(0.0f),
-		m_GUIEngine(nullptr)
+		m_DeltaSecondsTime(0.0f)
 	{
 		//
 #ifdef USE_WEBGPU
@@ -57,12 +54,6 @@ namespace descapp
 #endif // USE_WEBGPU
 		
 		m_AppCore = std::make_shared<app::CAppCore>();
-		
-#ifdef USE_GUIENGINE
-		m_GUIEngine = std::make_shared<gui::CImGuiGUIEngine>();
-#else
-		m_GUIEngine = std::make_shared<gui::CDummyGUIEngine>();
-#endif
 	}
 
 	CDescAppManager::~CDescAppManager()
@@ -70,9 +61,14 @@ namespace descapp
 		Release();
 	}
 
-	const std::shared_ptr<gui::IGUIEngine>& CDescAppManager::GetGUIEngine() const
+	GLFWwindow* CDescAppManager::GetGLFWWindow() const
 	{
-		return m_GUIEngine;
+		return m_pWindow;
+	}
+
+	const std::shared_ptr<app::CAppCore>& CDescAppManager::GetAppCore() const
+	{
+		return m_AppCore;
 	}
 
 	bool CDescAppManager::Release()
@@ -89,19 +85,6 @@ namespace descapp
 			m_AppCore = nullptr;
 		}
 		
-		if (m_LoadWorker)
-		{
-			m_LoadWorker.reset();
-			m_LoadWorker = nullptr;
-		}
-
-		if (m_GUIEngine)
-		{
-			m_GUIEngine->Release(m_GraphicsAPI.get());
-			m_GUIEngine.reset();
-			m_GUIEngine = nullptr;
-		}
-
 		if (m_GraphicsAPI)
 		{
 			m_GraphicsAPI->Release();
@@ -126,14 +109,7 @@ namespace descapp
 
 		if (!m_GraphicsAPI->InitializeWithGLFW(m_pWindow)) return false;
 
-#ifdef USE_GUIENGINE
-		if (!m_GUIEngine->InitializeWithGLFW(m_pWindow, m_GraphicsAPI.get())) return false;
-#endif
-
-		// ロードワーカー
-		m_LoadWorker = std::make_shared<resource::CLoadWorker>(m_GraphicsAPI.get());
-
-		if (!m_AppCore->Initialize(m_GraphicsAPI.get(), m_LoadWorker.get())) return false;
+		if (!m_AppCore->Initialize(m_GraphicsAPI.get(), this)) return false;
 
 		int w, h;
 		glfwGetWindowSize(m_pWindow, &w, &h);
@@ -146,10 +122,14 @@ namespace descapp
 
 	void KetCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
 	{
-		//
 		auto AppManager = reinterpret_cast<CDescAppManager*>(glfwGetWindowUserPointer(window));
+		if (!AppManager) return;
 
-		auto GUIEngine = AppManager->GetGUIEngine();
+		auto AppCore = AppManager->GetAppCore();
+		if (!AppCore) return;
+
+		auto GUIEngine = AppCore->GetGUIEngine();
+
 		if (GUIEngine)
 		{
 			if (GUIEngine->IsExistMouseOnGUI()) return;
@@ -218,8 +198,13 @@ namespace descapp
 	void MousebuttonCallback(GLFWwindow* window, int button, int action, int mods)
 	{
 		auto AppManager = reinterpret_cast<CDescAppManager*>(glfwGetWindowUserPointer(window));
-		
-		auto GUIEngine = AppManager->GetGUIEngine();
+		if (!AppManager) return;
+
+		auto AppCore = AppManager->GetAppCore();
+		if (!AppCore) return;
+
+		auto GUIEngine = AppCore->GetGUIEngine();
+
 		if (GUIEngine)
 		{
 			if (GUIEngine->IsExistMouseOnGUI()) return;
@@ -260,8 +245,13 @@ namespace descapp
 	void CursorPosCallback(GLFWwindow* window, double PosX, double PosY)
 	{
 		auto AppManager = reinterpret_cast<CDescAppManager*>(glfwGetWindowUserPointer(window));
+		if (!AppManager) return;
 
-		auto GUIEngine = AppManager->GetGUIEngine();
+		auto AppCore = AppManager->GetAppCore();
+		if (!AppCore) return;
+
+		auto GUIEngine = AppCore->GetGUIEngine();
+
 		if (GUIEngine)
 		{
 			if (GUIEngine->IsExistMouseOnGUI()) return;
@@ -290,8 +280,13 @@ namespace descapp
 	void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
 	{
 		auto AppManager = reinterpret_cast<CDescAppManager*>(glfwGetWindowUserPointer(window));
+		if (!AppManager) return;
 
-		auto GUIEngine = AppManager->GetGUIEngine();
+		auto AppCore = AppManager->GetAppCore();
+		if (!AppCore) return;
+
+		auto GUIEngine = AppCore->GetGUIEngine();
+
 		if (GUIEngine)
 		{
 			if (GUIEngine->IsExistMouseOnGUI()) return;
@@ -374,7 +369,7 @@ namespace descapp
 #endif
 		m_DeltaSecondsTime = m_SecondsTime - PrevSecondsTime;
 
-		if (!m_AppCore->Update(m_GraphicsAPI.get(), m_LoadWorker.get(), m_InputState, m_SecondsTime, m_DeltaSecondsTime)) return false;
+		if (!m_AppCore->Update(m_GraphicsAPI.get(), m_InputState, m_SecondsTime, m_DeltaSecondsTime)) return false;
 
 #ifdef _DEBUG
 		// FPSの計測と表示(60FPSを基準とする)
@@ -387,21 +382,21 @@ namespace descapp
 
 	bool CDescAppManager::LateUpdate()
 	{
-		if (!m_AppCore->LateUpdate(m_GraphicsAPI.get(), m_LoadWorker.get())) return false;
+		if (!m_AppCore->LateUpdate(m_GraphicsAPI.get())) return false;
 
 		return true;
 	}
 
 	bool CDescAppManager::FixedUpdate()
 	{
-		if (!m_AppCore->FixedUpdate(m_GraphicsAPI.get(), m_LoadWorker.get())) return false;
+		if (!m_AppCore->FixedUpdate(m_GraphicsAPI.get())) return false;
 
 		return true;
 	}
 
 	bool CDescAppManager::Draw()
 	{
-		if (!m_AppCore->Draw(m_GraphicsAPI.get(), m_LoadWorker.get(), m_GUIEngine)) return false;
+		if (!m_AppCore->Draw(m_GraphicsAPI.get())) return false;
 
 #ifdef USE_OPENGL
 		glfwSwapBuffers(m_pWindow);

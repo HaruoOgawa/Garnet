@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../Interface/IWindowAPI.h"
+
 #ifdef USE_WIN32_WindowAPI
 #include <memory>
 #include <Windows.h>
@@ -9,12 +11,10 @@
 namespace api { class COpenGLAPI; }
 namespace app { class CAppCore; }
 namespace input { class CInputState; }
-namespace resource { class CLoadWorker; }
-namespace gui { class IGUIEngine; }
 
 namespace app
 {
-	class CDemoAppManager
+	class CDemoAppManager : public IWindowAPI
 	{
 		HWND  m_Window; // ハンドルウィンドウ
 		RECT  m_WorkArea; // スクリーンサイズ
@@ -29,8 +29,6 @@ namespace app
 		float m_SecondsTime;
 		float m_DeltaSecondsTime;
 
-		std::shared_ptr<resource::CLoadWorker> m_LoadWorker;
-
 #ifdef USE_OPENGL
 		std::shared_ptr<api::COpenGLAPI> m_GraphicsAPI;
 #endif // USE_OPENGL
@@ -39,7 +37,6 @@ namespace app
 
 		std::shared_ptr<input::CInputState> m_InputState;
 
-		std::shared_ptr<gui::IGUIEngine> m_GUIEngine;
 	private:
 		bool InitWindow(HINSTANCE hInstance);
 		bool InitGLContext();
@@ -52,7 +49,9 @@ namespace app
 		CDemoAppManager(app::EAppType AppType);
 		virtual ~CDemoAppManager();
 
-		const std::shared_ptr<gui::IGUIEngine>& GetGUIEngine() const;
+		virtual const HWND& GetWin32Window() const override;
+
+		const std::shared_ptr<app::CAppCore>& GetAppCore() const;
 
 		bool Initialize(HINSTANCE hInstance);
 		bool RunLopp();

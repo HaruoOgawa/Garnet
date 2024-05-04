@@ -649,6 +649,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
   <ItemGroup>
     <ClInclude Include="Src\AppManager\CAppRunner.h" />
     <ClInclude Include="Src\AppManager\CAppCore.h" />
+    <ClInclude Include="Src\Interface\IWindowAPI.h" />
     <ClInclude Include="Src\LoadWorker\CResourceManager.h" />
     <ClInclude Include="Src\App\ScriptApp\GUI\CGUIResourcesTab.h" />
     <ClInclude Include="Src\App\ScriptApp\GUI\CGUITransformTab.h" />
