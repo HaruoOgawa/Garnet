@@ -1,7 +1,6 @@
 #ifdef USE_GLFW
 
-#include "../../AppManager/CDescAppManager.h"
-#include "../../AppManager/EAppType.h"
+#include "../../WindowAPI/CGLFWWindowAPI.h"
 #include "../../Message/Console.h"
 
 #ifdef __EMSCRIPTEN__
@@ -12,7 +11,7 @@
 
 extern "C" {
 
-descapp::CDescAppManager* g_DescApp = nullptr;
+descapp::CGLFWWindowAPI* g_DescApp = nullptr;
 
 void Release()
 {
@@ -81,7 +80,7 @@ EMSCRIPTEN_KEEPALIVE
 #endif
 void StartApp()
 {
-	g_DescApp = new descapp::CDescAppManager(app::EAppType::ScriptApp);
+	g_DescApp = new descapp::CGLFWWindowAPI();
 	
 	if (g_DescApp->Initialize())
 	{

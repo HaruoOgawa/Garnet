@@ -1,6 +1,6 @@
 #ifdef USE_GLFW
 
-#include "CDescAppManager.h"
+#include "CGLFWWindowAPI.h"
 #include "../Message/Console.h"
 
 #ifdef __EMSCRIPTEN__
@@ -21,13 +21,13 @@
 
 #include "../Input/CInputState.h"
 
-#include "CAppCore.h"
+#include "../AppCore/CAppCore.h"
 
 bool g_IsRunLoop = true;
 
 namespace descapp
 {
-	CDescAppManager::CDescAppManager(app::EAppType AppType):
+	CGLFWWindowAPI::CGLFWWindowAPI():
 		m_pWindow(nullptr),
 		m_AppCore(nullptr),
 		m_IsRunLoop(g_IsRunLoop),
@@ -37,22 +37,22 @@ namespace descapp
 		m_AppCore = std::make_shared<app::CAppCore>();
 	}
 
-	CDescAppManager::~CDescAppManager()
+	CGLFWWindowAPI::~CGLFWWindowAPI()
 	{
 		Release();
 	}
 
-	GLFWwindow* CDescAppManager::GetGLFWWindow() const
+	GLFWwindow* CGLFWWindowAPI::GetGLFWWindow() const
 	{
 		return m_pWindow;
 	}
 
-	const std::shared_ptr<app::CAppCore>& CDescAppManager::GetAppCore() const
+	const std::shared_ptr<app::CAppCore>& CGLFWWindowAPI::GetAppCore() const
 	{
 		return m_AppCore;
 	}
 
-	bool CDescAppManager::Release()
+	bool CGLFWWindowAPI::Release()
 	{
 		if (m_AppCore)
 		{
@@ -72,7 +72,7 @@ namespace descapp
 		return true;
 	}
 
-	bool CDescAppManager::Initialize()
+	bool CGLFWWindowAPI::Initialize()
 	{
 		if (!InitWindow()) return false;
 
@@ -88,7 +88,7 @@ namespace descapp
 
 	void KetCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
 	{
-		auto AppManager = reinterpret_cast<CDescAppManager*>(glfwGetWindowUserPointer(window));
+		auto AppManager = reinterpret_cast<CGLFWWindowAPI*>(glfwGetWindowUserPointer(window));
 		if (!AppManager) return;
 
 		auto AppCore = AppManager->GetAppCore();
@@ -152,7 +152,7 @@ namespace descapp
 
 	void Resize_Callback(GLFWwindow* window, int width, int height)
 	{
-		auto AppManager = reinterpret_cast<CDescAppManager*>(glfwGetWindowUserPointer(window));
+		auto AppManager = reinterpret_cast<CGLFWWindowAPI*>(glfwGetWindowUserPointer(window));
 		AppManager->ResizeWindow(width, height);
 	}
 
@@ -163,7 +163,7 @@ namespace descapp
 
 	void MousebuttonCallback(GLFWwindow* window, int button, int action, int mods)
 	{
-		auto AppManager = reinterpret_cast<CDescAppManager*>(glfwGetWindowUserPointer(window));
+		auto AppManager = reinterpret_cast<CGLFWWindowAPI*>(glfwGetWindowUserPointer(window));
 		if (!AppManager) return;
 
 		auto AppCore = AppManager->GetAppCore();
@@ -210,7 +210,7 @@ namespace descapp
 
 	void CursorPosCallback(GLFWwindow* window, double PosX, double PosY)
 	{
-		auto AppManager = reinterpret_cast<CDescAppManager*>(glfwGetWindowUserPointer(window));
+		auto AppManager = reinterpret_cast<CGLFWWindowAPI*>(glfwGetWindowUserPointer(window));
 		if (!AppManager) return;
 
 		auto AppCore = AppManager->GetAppCore();
@@ -245,7 +245,7 @@ namespace descapp
 
 	void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
 	{
-		auto AppManager = reinterpret_cast<CDescAppManager*>(glfwGetWindowUserPointer(window));
+		auto AppManager = reinterpret_cast<CGLFWWindowAPI*>(glfwGetWindowUserPointer(window));
 		if (!AppManager) return;
 
 		auto AppCore = AppManager->GetAppCore();
@@ -265,7 +265,7 @@ namespace descapp
 #endif
 	}
 
-	bool CDescAppManager::InitWindow()
+	bool CGLFWWindowAPI::InitWindow()
 	{
 		glfwInit();
 
@@ -293,12 +293,12 @@ namespace descapp
 		return true;
 	}
 
-	void CDescAppManager::ResizeWindow(int w, int h)
+	void CGLFWWindowAPI::ResizeWindow(int w, int h)
 	{
 		m_AppCore->Resize(w, h);
 	}
 
-	bool CDescAppManager::RunLopp()
+	bool CGLFWWindowAPI::RunLopp()
 	{
 		m_IsRunLoop = g_IsRunLoop;
 
@@ -323,7 +323,7 @@ namespace descapp
 		return true;
 	}
 
-	bool CDescAppManager::Update()
+	bool CGLFWWindowAPI::Update()
 	{
 		float PrevSecondsTime = m_SecondsTime;
 #ifdef __EMSCRIPTEN__
@@ -345,21 +345,21 @@ namespace descapp
 		return true;
 	}
 
-	bool CDescAppManager::LateUpdate()
+	bool CGLFWWindowAPI::LateUpdate()
 	{
 		if (!m_AppCore->LateUpdate()) return false;
 
 		return true;
 	}
 
-	bool CDescAppManager::FixedUpdate()
+	bool CGLFWWindowAPI::FixedUpdate()
 	{
 		if (!m_AppCore->FixedUpdate()) return false;
 
 		return true;
 	}
 
-	bool CDescAppManager::Draw()
+	bool CGLFWWindowAPI::Draw()
 	{
 		if (!m_AppCore->Draw()) return false;
 

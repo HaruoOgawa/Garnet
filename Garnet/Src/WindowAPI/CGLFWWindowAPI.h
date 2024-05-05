@@ -7,13 +7,12 @@
 #include <glfw3native.h>
 
 #include <memory>
-#include "EAppType.h"
 
 namespace app{ class CAppCore; }
 
 namespace descapp
 {
-	class CDescAppManager : public IWindowAPI
+	class CGLFWWindowAPI : public IWindowAPI
 	{
 		GLFWwindow* m_pWindow;
 
@@ -37,8 +36,8 @@ namespace descapp
 		bool FixedUpdate();
 		bool Draw();
 	public:
-		CDescAppManager(app::EAppType AppType);
-		virtual ~CDescAppManager();
+		CGLFWWindowAPI();
+		virtual ~CGLFWWindowAPI();
 
 		virtual GLFWwindow* GetGLFWWindow() const override;
 

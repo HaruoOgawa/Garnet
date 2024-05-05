@@ -6,13 +6,12 @@
 #include <memory>
 #include <Windows.h>
 //#include "../GraphicsAPI/OpenGL/wglDef.h"
-#include "EAppType.h"
 
 namespace app { class CAppCore; }
 
 namespace app
 {
-	class CDemoAppManager : public IWindowAPI
+	class CWin32WindowAPI : public IWindowAPI
 	{
 		HWND  m_Window; // ハンドルウィンドウ
 		RECT  m_WorkArea; // スクリーンサイズ
@@ -38,8 +37,8 @@ namespace app
 		bool FixedUpdate();
 		bool Draw();
 	public:
-		CDemoAppManager(app::EAppType AppType);
-		virtual ~CDemoAppManager();
+		CWin32WindowAPI();
+		virtual ~CWin32WindowAPI();
 
 		virtual const HWND& GetWin32Window() const override;
 

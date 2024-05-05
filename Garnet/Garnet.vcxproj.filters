@@ -21,10 +21,10 @@
     <ClInclude Include="Src\App\ScriptApp\CScriptApp.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Src\AppManager\CDescAppManager.h">
+    <ClInclude Include="Src\WindowAPI\CGLFWWindowAPI.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Src\AppManager\CWebAppManager.h">
+    <ClInclude Include="Src\WindowAPI\CWebWindowAPI.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Src\Interface\IApp.h">
@@ -37,9 +37,6 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Src\GraphicsAPI\WebGPU\CWebGPUAPI.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\AppManager\EAppType.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Src\Interface\IRenderer.h">
@@ -975,7 +972,7 @@
     <ClInclude Include="Src\Graphics\CPresetPrimitive.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Src\AppManager\CDemoAppManager.h">
+    <ClInclude Include="Src\WindowAPI\CWin32WindowAPI.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Src\GraphicsAPI\CMaterialCreateInfo.h">
@@ -2727,10 +2724,10 @@
     <ClInclude Include="Src\LoadWorker\CResourceManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Src\AppManager\CAppCore.h">
+    <ClInclude Include="Src\AppCore\CAppCore.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Src\AppManager\CAppRunner.h">
+    <ClInclude Include="Src\AppCore\CAppRunner.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Src\Interface\IWindowAPI.h">
@@ -2747,10 +2744,10 @@
     <ClCompile Include="Src\App\ScriptApp\CScriptApp.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Src\AppManager\CDescAppManager.cpp">
+    <ClCompile Include="Src\WindowAPI\CGLFWWindowAPI.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Src\AppManager\CWebAppManager.cpp">
+    <ClCompile Include="Src\WindowAPI\CWebWindowAPI.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Src\GraphicsAPI\Vulkan\CVulkanAPI.cpp">
@@ -2807,7 +2804,7 @@
     <ClCompile Include="Src\Main\DemoMain\DemoMain.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Src\AppManager\CDemoAppManager.cpp">
+    <ClCompile Include="Src\WindowAPI\CWin32WindowAPI.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Src\GraphicsAPI\CMaterialCreateInfo.cpp">
@@ -3821,10 +3818,10 @@
     <ClCompile Include="Src\LoadWorker\CResourceManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Src\AppManager\CAppCore.cpp">
+    <ClCompile Include="Src\AppCore\CAppCore.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Src\AppManager\CAppRunner.cpp">
+    <ClCompile Include="Src\AppCore\CAppRunner.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>

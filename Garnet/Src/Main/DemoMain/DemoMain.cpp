@@ -1,14 +1,13 @@
 #ifdef USE_WIN32_WindowAPI
 
-#include "../../AppManager/CDemoAppManager.h"
-#include "../../AppManager/EAppType.h"
+#include "../../WindowAPI/CWin32WindowAPI.h"
 #include "../../Message/Console.h"
 
 #include <Windows.h>
 
 extern "C" {
 
-	app::CDemoAppManager* g_DemoApp = nullptr;
+	app::CWin32WindowAPI* g_DemoApp = nullptr;
 
 	bool RunLopp()
 	{
@@ -19,7 +18,7 @@ extern "C" {
 
 	void StartApp(HINSTANCE hInstance)
 	{
-		g_DemoApp = new app::CDemoAppManager(app::EAppType::ScriptApp);
+		g_DemoApp = new app::CWin32WindowAPI();
 
 		if (g_DemoApp->Initialize(hInstance))
 		{

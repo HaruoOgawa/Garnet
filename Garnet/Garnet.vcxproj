@@ -647,8 +647,8 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Src\AppManager\CAppRunner.h" />
-    <ClInclude Include="Src\AppManager\CAppCore.h" />
+    <ClInclude Include="Src\AppCore\CAppRunner.h" />
+    <ClInclude Include="Src\AppCore\CAppCore.h" />
     <ClInclude Include="Src\Interface\IWindowAPI.h" />
     <ClInclude Include="Src\LoadWorker\CResourceManager.h" />
     <ClInclude Include="Src\App\ScriptApp\GUI\CGUIResourcesTab.h" />
@@ -1232,7 +1232,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClInclude Include="Src\GraphicsAPI\WebGPU\CWebGPUMaterial.h" />
     <ClInclude Include="Src\GraphicsAPI\Vulkan\CVulkanMaterial.h" />
     <ClInclude Include="Src\GraphicsAPI\CMaterialCreateInfo.h" />
-    <ClInclude Include="Src\AppManager\CDemoAppManager.h" />
+    <ClInclude Include="Src\WindowAPI\CWin32WindowAPI.h" />
     <ClInclude Include="Src\Graphics\CPresetPrimitive.h" />
     <ClInclude Include="Src\Graphics\SBindingLayout.h" />
     <ClInclude Include="Src\Math\CTransform.h" />
@@ -1544,20 +1544,19 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClInclude Include="Src\Object\CNode.h" />
     <ClInclude Include="Src\GraphicsAPI\WebGPU\CWebGPURenderer.h" />
     <ClInclude Include="Src\GraphicsAPI\Vulkan\CVulkanRenderer.h" />
-    <ClInclude Include="Src\AppManager\EAppType.h" />
     <ClInclude Include="Src\GraphicsAPI\WebGPU\CWebGPUAPI.h" />
     <ClInclude Include="Src\GraphicsAPI\Vulkan\CVulkanAPI.h" />
-    <ClInclude Include="Src\AppManager\CDescAppManager.h" />
+    <ClInclude Include="Src\WindowAPI\CGLFWWindowAPI.h" />
     <ClInclude Include="Src\App\ScriptApp\CScriptApp.h" />
     <ClInclude Include="Src\Message\Console.h" />
-    <ClInclude Include="Src\AppManager\CWebAppManager.h" />
+    <ClInclude Include="Src\WindowAPI\CWebWindowAPI.h" />
     <ClInclude Include="Src\Interface\IApp.h" />
     <ClInclude Include="Src\Interface\IGraphicsAPI.h" />
     <ClInclude Include="Src\Interface\IRenderer.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Src\AppManager\CAppRunner.cpp" />
-    <ClCompile Include="Src\AppManager\CAppCore.cpp" />
+    <ClCompile Include="Src\AppCore\CAppRunner.cpp" />
+    <ClCompile Include="Src\AppCore\CAppCore.cpp" />
     <ClCompile Include="Src\LoadWorker\CResourceManager.cpp" />
     <ClCompile Include="Src\App\ScriptApp\GUI\CGUIResourcesTab.cpp" />
     <ClCompile Include="Src\App\ScriptApp\GUI\CGUITransformTab.cpp" />
@@ -1895,7 +1894,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClCompile Include="Src\GraphicsAPI\WebGPU\CWebGPUMaterial.cpp" />
     <ClCompile Include="Src\GraphicsAPI\Vulkan\CVulkanMaterial.cpp" />
     <ClCompile Include="Src\GraphicsAPI\CMaterialCreateInfo.cpp" />
-    <ClCompile Include="Src\AppManager\CDemoAppManager.cpp" />
+    <ClCompile Include="Src\WindowAPI\CWin32WindowAPI.cpp" />
     <ClCompile Include="Src\Graphics\CPresetPrimitive.cpp" />
     <ClCompile Include="Src\Main\DemoMain\DemoMain.cpp" />
     <ClCompile Include="Src\Math\CTransform.cpp" />
@@ -1914,11 +1913,11 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClCompile Include="Src\GraphicsAPI\Vulkan\CVulkanRenderer.cpp" />
     <ClCompile Include="Src\GraphicsAPI\WebGPU\CWebGPUAPI.cpp" />
     <ClCompile Include="Src\GraphicsAPI\Vulkan\CVulkanAPI.cpp" />
-    <ClCompile Include="Src\AppManager\CDescAppManager.cpp" />
+    <ClCompile Include="Src\WindowAPI\CGLFWWindowAPI.cpp" />
     <ClCompile Include="Src\App\ScriptApp\CScriptApp.cpp" />
     <ClCompile Include="Src\Main\DescMain\DescMain.cpp" />
     <ClCompile Include="Src\Main\WebMain\WebMain.cpp" />
-    <ClCompile Include="Src\AppManager\CWebAppManager.cpp" />
+    <ClCompile Include="Src\WindowAPI\CWebWindowAPI.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="CMakeBuild\Garnet_front.js" />

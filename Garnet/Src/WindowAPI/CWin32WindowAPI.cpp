@@ -1,8 +1,8 @@
 #ifdef USE_WIN32_WindowAPI
 
-#include "CDemoAppManager.h"
+#include "CWin32WindowAPI.h"
 
-#include "CAppCore.h"
+#include "../AppCore/CAppCore.h"
 
 #ifdef USE_VIEWER_CAMERA
 #include "../../Camera/CViewerCamera.h"
@@ -20,9 +20,9 @@ namespace app
 {
 	// 仮のグローバル変数
 	bool g_IsRunLoop = true;
-	CDemoAppManager* g_AppManager = nullptr;
+	CWin32WindowAPI* g_AppManager = nullptr;
 
-	CDemoAppManager::CDemoAppManager(app::EAppType AppType):
+	CWin32WindowAPI::CWin32WindowAPI():
 		m_Window(nullptr),
 		m_Device_Context(nullptr),
 		m_Rendering_Context(nullptr),
@@ -36,7 +36,7 @@ namespace app
 		m_AppCore = std::make_shared<app::CAppCore>();
 	}
 
-	CDemoAppManager::~CDemoAppManager()
+	CWin32WindowAPI::~CWin32WindowAPI()
 	{
 		if (m_AppCore)
 		{
@@ -56,17 +56,17 @@ namespace app
 		g_AppManager = nullptr;
 	}
 
-	const HWND& CDemoAppManager::GetWin32Window() const
+	const HWND& CWin32WindowAPI::GetWin32Window() const
 	{
 		return m_Window;
 	}
 
-	const std::shared_ptr<app::CAppCore>& CDemoAppManager::GetAppCore() const
+	const std::shared_ptr<app::CAppCore>& CWin32WindowAPI::GetAppCore() const
 	{
 		return m_AppCore;
 	}
 
-	bool CDemoAppManager::Initialize(HINSTANCE hInstance)
+	bool CWin32WindowAPI::Initialize(HINSTANCE hInstance)
 	{
 		if (!InitWindow(hInstance)) return false;
 		//if (!InitWGL()) return false;
@@ -88,7 +88,7 @@ namespace app
 
 	/*void Resize_Callback(GLFWwindow* window, int width, int height)
 	{
-		auto AppManager = reinterpret_cast<CDemoAppManager*>(glfwGetWindowUserPointer(window));
+		auto AppManager = reinterpret_cast<CWin32WindowAPI*>(glfwGetWindowUserPointer(window));
 		AppManager->ResizeWindow(width, height);
 	}*/
 
@@ -311,7 +311,7 @@ namespace app
 		return true;
 	}
 
-	bool CDemoAppManager::RunLopp()
+	bool CWin32WindowAPI::RunLopp()
 	{
 		m_IsRunLoop = g_IsRunLoop;
 
@@ -339,12 +339,12 @@ namespace app
 		return true;
 	}
 
-	void CDemoAppManager::ResizeWindow(int w, int h)
+	void CWin32WindowAPI::ResizeWindow(int w, int h)
 	{
 		m_AppCore->Resize(w, h);
 	}
 
-	bool CDemoAppManager::InitWindow(HINSTANCE hInstance)
+	bool CWin32WindowAPI::InitWindow(HINSTANCE hInstance)
 	{
 		/// <summary>
 		/// ウィンドウの設定
@@ -416,7 +416,7 @@ namespace app
 		return true;
 	}
 
-	bool CDemoAppManager::InitGLContext()
+	bool CWin32WindowAPI::InitGLContext()
 	{
 		// デバイスコンテキストの取得
 		m_Device_Context = GetDC(m_Window); 
@@ -464,7 +464,7 @@ namespace app
 		return true;
 	}
 
-	bool CDemoAppManager::Update()
+	bool CWin32WindowAPI::Update()
 	{
 		float PrevSecondsTime = m_SecondsTime;
 		m_SecondsTime = static_cast<float>(clock()) * 0.001f;
@@ -475,21 +475,21 @@ namespace app
 		return true;
 	}
 
-	bool CDemoAppManager::LateUpdate()
+	bool CWin32WindowAPI::LateUpdate()
 	{
 		if (!m_AppCore->LateUpdate()) return false;
 
 		return true;
 	}
 
-	bool CDemoAppManager::FixedUpdate()
+	bool CWin32WindowAPI::FixedUpdate()
 	{
 		if (!m_AppCore->FixedUpdate()) return false;
 
 		return true;
 	}
 
-	bool CDemoAppManager::Draw()
+	bool CWin32WindowAPI::Draw()
 	{
 		// Appの描画
 		if (!m_AppCore->Draw()) return false;

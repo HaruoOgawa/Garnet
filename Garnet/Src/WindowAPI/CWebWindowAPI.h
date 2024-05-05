@@ -3,13 +3,12 @@
 #include <string>
 #include <memory>
 #include "../Interface/IWindowAPI.h"
-#include "EAppType.h"
 
 namespace app { class CAppCore; }
 
 namespace webapp
 {
-	class CWebAppManager : public IWindowAPI
+	class CWebWindowAPI : public IWindowAPI
 	{
 		bool m_IsRunLoop;
 		std::shared_ptr<app::CAppCore> m_AppCore;
@@ -30,8 +29,8 @@ namespace webapp
 
 		void KeyAction(std::string key, bool IsDown);
 	public:
-		CWebAppManager(app::EAppType AppType, int Width, int Height);
-		virtual ~CWebAppManager();
+		CWebWindowAPI(int Width, int Height);
+		virtual ~CWebWindowAPI();
 
 		const std::shared_ptr<app::CAppCore>& GetAppCore() const;
 

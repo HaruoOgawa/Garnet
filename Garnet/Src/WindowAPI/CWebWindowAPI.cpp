@@ -1,10 +1,10 @@
 #ifdef USE_WEB_NATIVE
-#include "CWebAppManager.h"
+#include "CWebWindowAPI.h"
 #include "../Message/Console.h"
 
 #include "../GraphicsAPI/WebGPU/CWebGPUAPI.h"
 
-#include "CAppCore.h"
+#include "../AppCore/CAppCore.h"
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
@@ -24,7 +24,7 @@
 
 namespace webapp
 {
-	CWebAppManager::CWebAppManager(app::EAppType AppType, int Width, int Height):
+	CWebWindowAPI::CWebWindowAPI(int Width, int Height):
 		m_IsRunLoop(true),
 		m_GraphicsAPI(nullptr),
 		m_AppCore(nullptr),
@@ -38,12 +38,12 @@ namespace webapp
 		m_AppCore = std::make_shared<app::CAppCore>();
 	}
 
-	CWebAppManager::~CWebAppManager()
+	CWebWindowAPI::~CWebWindowAPI()
 	{
 		Release();
 	}
 
-	bool CWebAppManager::Release()
+	bool CWebWindowAPI::Release()
 	{
 		if (m_AppCore)
 		{
@@ -62,12 +62,12 @@ namespace webapp
 		return true;
 	}
 
-	const std::shared_ptr<app::CAppCore>& CWebAppManager::GetAppCore() const
+	const std::shared_ptr<app::CAppCore>& CWebWindowAPI::GetAppCore() const
 	{
 		return m_AppCore;
 	}
 
-	bool CWebAppManager::Initialize()
+	bool CWebWindowAPI::Initialize()
 	{
 		if (!m_GraphicsAPI->Initialize()) return false;
 
@@ -79,7 +79,7 @@ namespace webapp
 		return true;
 	}
 
-	bool CWebAppManager::RunLoop()
+	bool CWebWindowAPI::RunLoop()
 	{
 		if (!m_IsRunLoop)
 		{
@@ -100,7 +100,7 @@ namespace webapp
 		return true;
 	}
 
-	bool CWebAppManager::Update()
+	bool CWebWindowAPI::Update()
 	{
 		float PrevSecondsTime = m_SecondsTime;
 		m_SecondsTime = static_cast<float>(clock()) * 0.001f * 0.001f;
@@ -111,21 +111,21 @@ namespace webapp
 		return true;
 	}
 
-	bool CWebAppManager::LateUpdate()
+	bool CWebWindowAPI::LateUpdate()
 	{
 		if (!m_AppCore->LateUpdate(m_GraphicsAPI.get())) return false;
 
 		return true;
 	}
 
-	bool CWebAppManager::FixedUpdate()
+	bool CWebWindowAPI::FixedUpdate()
 	{
 		if (!m_AppCore->FixedUpdate(m_GraphicsAPI.get())) return false;
 
 		return true;
 	}
 
-	bool CWebAppManager::Draw()
+	bool CWebWindowAPI::Draw()
 	{
 		if (!m_AppCore->Draw(m_GraphicsAPI.get())) return false;
 
@@ -133,17 +133,17 @@ namespace webapp
 	}
 
 	// インプットイベント
-	void CWebAppManager::OnKeyDown(std::string key)
+	void CWebWindowAPI::OnKeyDown(std::string key)
 	{
 		KeyAction(key, true);
 	}
 	
-	void CWebAppManager::OnKeyUp(std::string key)
+	void CWebWindowAPI::OnKeyUp(std::string key)
 	{
 		KeyAction(key, false);
 	}
 
-	void CWebAppManager::KeyAction(std::string key, bool IsDown)
+	void CWebWindowAPI::KeyAction(std::string key, bool IsDown)
 	{
 		//
 		input::EKeyType KeyType = input::EKeyType::KEY_TYPE_NONE;
@@ -197,14 +197,14 @@ namespace webapp
 	}
 
 	// リサイズイベント
-	void CWebAppManager::OnResize(int w, int h)
+	void CWebWindowAPI::OnResize(int w, int h)
 	{
 		m_GraphicsAPI->Resize(w, h);
 		m_AppCore->Resize(w, h);
 	}
 
 	// マウスイベント
-	void CWebAppManager::OnMouseDown(int buttonNum, int x, int y)
+	void CWebWindowAPI::OnMouseDown(int buttonNum, int x, int y)
 	{
 		auto InputState = m_AppCore->GetInputState();
 
@@ -227,7 +227,7 @@ namespace webapp
 		InputState->StartMousePos(glm::vec2(rPosX, rPosY));
 	}
 
-	void CWebAppManager::OnMouseUp(int buttonNum, int x, int y)
+	void CWebWindowAPI::OnMouseUp(int buttonNum, int x, int y)
 	{
 		auto InputState = m_AppCore->GetInputState();
 
@@ -250,7 +250,7 @@ namespace webapp
 		InputState->StartMousePos(glm::vec2(rPosX, rPosY));
 	}
 
-	void CWebAppManager::OnMouseMove(int x, int y)
+	void CWebWindowAPI::OnMouseMove(int x, int y)
 	{
 		auto InputState = m_AppCore->GetInputState();
 
@@ -267,7 +267,7 @@ namespace webapp
 		}
 	}
 
-	void CWebAppManager::OnMouseWheel(int deltaY)
+	void CWebWindowAPI::OnMouseWheel(int deltaY)
 	{
 		auto InputState = m_AppCore->GetInputState();
 

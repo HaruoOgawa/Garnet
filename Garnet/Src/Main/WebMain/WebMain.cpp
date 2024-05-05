@@ -1,5 +1,5 @@
 #ifdef USE_WEB_NATIVE
-#include "../../AppManager/CWebAppManager.h"
+#include "../../WindowAPI/CWebWindowAPI.h"
 #include "../../AppManager/EAppType.h"
 #include "../../Message/Console.h"
 
@@ -10,7 +10,7 @@
 extern "C"
 {
 
-	webapp::CWebAppManager* g_WebApp = nullptr;
+	webapp::CWebWindowAPI* g_WebApp = nullptr;
 
 	void Release()
 	{
@@ -29,7 +29,7 @@ extern "C"
 	EMSCRIPTEN_KEEPALIVE
 	void StartApp(int Width, int Height)
 	{
-		g_WebApp = new webapp::CWebAppManager(app::EAppType::ScriptApp, Width, Height);
+		g_WebApp = new webapp::CWebWindowAPI(Width, Height);
 
 		g_WebApp->Initialize();
 		emscripten_set_main_loop(RunLopp, 60, true);
