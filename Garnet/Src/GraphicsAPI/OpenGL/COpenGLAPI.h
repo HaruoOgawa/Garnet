@@ -29,13 +29,9 @@ namespace api
 		COpenGLAPI(int Width, int Height);
 		virtual ~COpenGLAPI();
 
-#ifdef USE_GLFW
-		virtual bool InitializeWithGLFW(GLFWwindow* pWindow) override;
-#else
-		virtual bool Initialize() override;
-#endif
+		virtual bool Initialize(window::IWindowAPI* pWindowAPI) override;
 		
-		void Release();
+		virtual void Release() override;
 
 		virtual bool CreateRenderPass(const std::string& PassName, ERenderPassFormat RenderPassFormat, const glm::vec4& InitColor, int Width = -1, int Height = -1) override;
 		virtual std::shared_ptr<graphics::CVertexBuffer> CreateVertexBuffer() override;

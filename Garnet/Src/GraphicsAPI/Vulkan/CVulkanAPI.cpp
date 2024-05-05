@@ -47,9 +47,9 @@ namespace api
 		
 	}
 
-	bool CVulkanAPI::InitializeWithGLFW(GLFWwindow* pWindow)
+	bool CVulkanAPI::Initialize(window::IWindowAPI* pWindowAPI)
 	{
-		m_pWindow = pWindow;
+		m_pWindow = pWindowAPI->GetGLFWWindow();
 
 		if (!CreateInstance()) return false; // インスタンスを作成
 		if (!SetupDebugMessengerEXT()) return false; // インスタンス生成時に設定したプリセットのDebugMessengerだけではカバーできない範囲のハンドリング

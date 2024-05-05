@@ -1,11 +1,8 @@
 #ifdef USE_WIN32_WindowAPI
 
-#include "CDemoAppManager.h"
-#include "../LoadWorker/CLoadWorker.h"
-#ifdef USE_OPENGL
-#include "../GraphicsAPI/OpenGL/COpenGLAPI.h"
-#endif
-#include "../App/ScriptApp/CScriptApp.h"
+#include "CWin32WindowAPI.h"
+
+#include "../AppCore/CAppCore.h"
 
 #ifdef USE_VIEWER_CAMERA
 #include "../../Camera/CViewerCamera.h"
@@ -19,117 +16,56 @@
 #include "../GUIEngine/CDummyGUIEngine.h"
 #endif
 
-namespace app
+namespace window
 {
 	// 仮のグローバル変数
-	bool g_IsRunLoop = true;
-	CDemoAppManager* g_AppManager = nullptr;
+	CWin32WindowAPI* g_AppManager = nullptr;
 
-	CDemoAppManager::CDemoAppManager(app::EAppType AppType):
+	CWin32WindowAPI::CWin32WindowAPI():
+		m_pCAppCore(nullptr),
 		m_Window(nullptr),
 		m_Device_Context(nullptr),
-		m_Rendering_Context(nullptr),
-		m_IsRunLoop(true),
-		m_SecondsTime(0.0f),
-		m_DeltaSecondsTime(0.0f),
-		m_LoadWorker(nullptr),
-		m_InputState(std::make_shared<input::CInputState>()),
-		m_GraphicsAPI(nullptr),
-		m_App(nullptr),
-		m_GUIEngine(nullptr)
+		m_Rendering_Context(nullptr)
 	{
 		g_AppManager = this; // 仮のグローバル変数
-
-#ifdef USE_OPENGL
-		m_GraphicsAPI = std::make_shared<api::COpenGLAPI>(WIDTH, HEIGHT);
-#endif
-
-		m_App = std::make_shared<app::CScriptApp>();
-
-#ifdef USE_GUIENGINE
-		m_GUIEngine = std::make_shared<gui::CImGuiGUIEngine>();
-#else
-		m_GUIEngine = std::make_shared<gui::CDummyGUIEngine>();
-#endif
 	}
 
-	CDemoAppManager::~CDemoAppManager()
+	bool CWin32WindowAPI::Release()
 	{
-		if (m_App)
-		{
-			m_App->Release(m_GraphicsAPI.get());
-			m_App.reset();
-			m_App = nullptr;
-		}
-
-		if (m_LoadWorker)
-		{
-			m_LoadWorker.reset();
-			m_LoadWorker = nullptr;
-		}
-
-		if (m_GUIEngine)
-		{
-			m_GUIEngine->Release(m_GraphicsAPI.get());
-			m_GUIEngine.reset();
-			m_GUIEngine = nullptr;
-		}
-
-		if (m_GraphicsAPI)
-		{
-			m_GraphicsAPI->Release();
-			m_GraphicsAPI.reset();
-			m_GraphicsAPI = nullptr;
-		}
-
 		if (m_Rendering_Context)
 		{
 			wglMakeCurrent(NULL, NULL);
 			wglDeleteContext(m_Rendering_Context);
 		}
 
-		ReleaseDC(m_Window,m_Device_Context);
+		ReleaseDC(m_Window, m_Device_Context);
 
 		g_AppManager = nullptr;
+
+		return true;
 	}
 
-	const std::shared_ptr<gui::IGUIEngine>& CDemoAppManager::GetGUIEngine() const
+	const HWND& CWin32WindowAPI::GetWin32Window() const
 	{
-		return m_GUIEngine;
+		return m_Window;
 	}
 
-	bool CDemoAppManager::Initialize(HINSTANCE hInstance)
+	bool CWin32WindowAPI::Initialize(app::CAppCore* pAppCore, int Width, int Height)
 	{
-		if (!InitWindow(hInstance)) return false;
+		m_pCAppCore = pAppCore;
+
+		HINSTANCE hInstance = GetModuleHandle(NULL);
+
+		if (!InitWindow(hInstance, Width, Height)) return false;
 		//if (!InitWGL()) return false;
 		if (!InitGLContext()) return false;
-		if (!m_GraphicsAPI->Initialize()) return false;
-
-#ifdef USE_GUIENGINE
-		if (!m_GUIEngine->InitializeWithWin32API(m_Window, m_GraphicsAPI.get())) return false;
-#endif
-
-		// ロードワーカー
-		m_LoadWorker = std::make_shared<resource::CLoadWorker>(m_GraphicsAPI.get());
-
-		if (!m_App->Initialize(m_GraphicsAPI.get(), m_LoadWorker.get())) return false;
-
-		RECT rect;
-		if (GetWindowRect(m_Window, &rect))
-		{
-			int w = rect.right - rect.left;
-			int h = rect.bottom - rect.top;
-
-			m_GraphicsAPI->Resize(w, h);
-			m_App->Resize(w, h);
-		}
 
 		return true;
 	}
 
 	/*void Resize_Callback(GLFWwindow* window, int width, int height)
 	{
-		auto AppManager = reinterpret_cast<CDemoAppManager*>(glfwGetWindowUserPointer(window));
+		auto AppManager = reinterpret_cast<CWin32WindowAPI*>(glfwGetWindowUserPointer(window));
 		AppManager->ResizeWindow(width, height);
 	}*/
 
@@ -137,19 +73,22 @@ namespace app
 	{
 		if (w_param < 256)
 		{
-			// WPARAM Key Codes
-			// https://learn.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes
-			if (w_param == VK_ESCAPE)
-			{
-				g_IsRunLoop = false;
-			}
-
 			if (!g_AppManager) return;
 
 			auto AppManager = g_AppManager;
 
+			auto AppCore = AppManager->GetAppCore();
+			if (!AppCore) return;
+
+			// WPARAM Key Codes
+			// https://learn.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes
+			if (w_param == VK_ESCAPE)
+			{
+				AppCore->SetRunLoop(false);
+			}
+
 #ifdef USE_INPUT_SYSTEM
-			auto InputState = AppManager->GetInputState();
+			auto InputState = AppCore->GetInputState();
 
 			//
 			input::EKeyType KeyType = input::EKeyType::KEY_TYPE_NONE;
@@ -198,7 +137,11 @@ namespace app
 		if (!g_AppManager) return;
 
 		auto AppManager = g_AppManager;
-		auto InputState = AppManager->GetInputState();
+
+		auto AppCore = AppManager->GetAppCore();
+		if (!AppCore) return;
+
+		auto InputState = AppCore->GetInputState();
 
 		if ((msg == WM_LBUTTONDOWN || msg == WM_LBUTTONUP) && !InputState->IsDownMouseRight())
 		{
@@ -234,7 +177,11 @@ namespace app
 		if (!g_AppManager) return;
 
 		auto AppManager = g_AppManager;
-		auto InputState = AppManager->GetInputState();
+
+		auto AppCore = AppManager->GetAppCore();
+		if (!AppCore) return;
+
+		auto InputState = AppCore->GetInputState();
 
 		if (InputState->IsDownMouseLeft() || InputState->IsDownMouseRight())
 		{
@@ -264,7 +211,11 @@ namespace app
 		if (!g_AppManager) return;
 
 		auto AppManager = g_AppManager;
-		auto InputState = AppManager->GetInputState();
+
+		auto AppCore = AppManager->GetAppCore();
+		if (!AppCore) return;
+
+		auto InputState = AppCore->GetInputState();
 
 		auto Amount = GET_WHEEL_DELTA_WPARAM(w_param);
 
@@ -281,7 +232,10 @@ namespace app
 
 		auto AppManager = g_AppManager;
 		
-		auto GUIEngine = AppManager->GetGUIEngine();
+		auto AppCore = AppManager->GetAppCore();
+		if (!AppCore) return false;
+
+		auto GUIEngine = AppCore->GetGUIEngine();
 		if (GUIEngine)
 		{
 			if (GUIEngine->CheckInput(window, msg, w_param, l_param)) return true;
@@ -334,41 +288,7 @@ namespace app
 		return true;
 	}
 
-	bool CDemoAppManager::RunLopp()
-	{
-		m_IsRunLoop = g_IsRunLoop;
-
-		if (m_IsRunLoop)
-		{
-			// Windows Message Handling(Send msg to MainWindowCallback)
-			{
-				MSG msg;
-				if(PeekMessage(&msg, 0, 0, 0, PM_REMOVE))
-				{
-					TranslateMessage(&msg);
-					DispatchMessageA(&msg);
-				}
-			}
-
-			//
-			if (!Update()) return false;
-			if (!LateUpdate()) return false;
-			if (!FixedUpdate()) return false;
-			if (!Draw()) return false;
-
-			m_InputState->Clear();
-		}
-
-		return true;
-	}
-
-	void CDemoAppManager::ResizeWindow(int w, int h)
-	{
-		m_GraphicsAPI->Resize(w, h);
-		m_App->Resize(w, h);
-	}
-
-	bool CDemoAppManager::InitWindow(HINSTANCE hInstance)
+	bool CWin32WindowAPI::InitWindow(HINSTANCE hInstance, int Width, int Height)
 	{
 		/// <summary>
 		/// ウィンドウの設定
@@ -402,8 +322,8 @@ namespace app
 			WS_POPUP | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_VISIBLE | WS_CAPTION, // WindosStyle. たぶんWindowに出てくるボタンとかタブの設定
 			200, // 位置 X (適当な値)
 			200, // 位置 Y (適当な値)
-			WIDTH,         // Width
-			HEIGHT,        // HEIGHT
+			Width,         // Width
+			Height,        // HEIGHT
 			0,             // Window Parent. ウィンドウを複数個作ってグループ化できるのかな？ 例えばUnityのGame Viewと Scene ViewがあってUnityエディタ全体を動かすとそれもついてくるみたいな
 			0,             // Menu(?)
 			hInstance,     // アプリのインスタンス
@@ -440,7 +360,7 @@ namespace app
 		return true;
 	}
 
-	bool CDemoAppManager::InitGLContext()
+	bool CWin32WindowAPI::InitGLContext()
 	{
 		// デバイスコンテキストの取得
 		m_Device_Context = GetDC(m_Window); 
@@ -488,47 +408,76 @@ namespace app
 		return true;
 	}
 
-	bool CDemoAppManager::Update()
+	void CWin32WindowAPI::SwapWindowBuffers()
 	{
-		float PrevSecondsTime = m_SecondsTime;
-		m_SecondsTime = static_cast<float>(clock()) * 0.001f;
-		m_DeltaSecondsTime = m_SecondsTime - PrevSecondsTime;
-
-		m_App->GetDrawInfo()->SetSecondsTime(m_SecondsTime);
-		m_App->GetDrawInfo()->SetDeltaSecondsTime(m_DeltaSecondsTime);
-
-		// ViewCameraのUpdate
-		const auto& MainCamera = m_App->GetMainCamera();
-		if (MainCamera) MainCamera->Update(m_DeltaSecondsTime, m_InputState);
-
-		if (!m_App->Update(m_GraphicsAPI.get(), m_LoadWorker.get(), m_InputState)) return false;
-
-		return true;
-	}
-
-	bool CDemoAppManager::LateUpdate()
-	{
-		if (!m_App->LateUpdate(m_GraphicsAPI.get(), m_LoadWorker.get())) return false;
-
-		return true;
-	}
-
-	bool CDemoAppManager::FixedUpdate()
-	{
-		if (!m_App->FixedUpdate(m_GraphicsAPI.get(), m_LoadWorker.get())) return false;
-
-		return true;
-	}
-
-	bool CDemoAppManager::Draw()
-	{
-		// Appの描画
-		if (!m_App->Draw(m_GraphicsAPI.get(), m_LoadWorker.get(), m_GUIEngine)) return false;
-
 		//カラーバッファを入れ替える
 		SwapBuffers(m_Device_Context);
+	}
 
-		return true;
+	void CWin32WindowAPI::AssignCurrentWindowSize()
+	{
+		RECT rect;
+		if (GetWindowRect(m_Window, &rect))
+		{
+			int w = rect.right - rect.left;
+			int h = rect.bottom - rect.top;
+
+			m_pCAppCore->Resize(w, h);
+		}
+	}
+
+	void CWin32WindowAPI::PollEvents()
+	{
+		// Windows Message Handling(Send msg to MainWindowCallback)
+		{
+			MSG msg;
+			if (PeekMessage(&msg, 0, 0, 0, PM_REMOVE))
+			{
+				TranslateMessage(&msg);
+				DispatchMessageA(&msg);
+			}
+		}
+	}
+
+	app::CAppCore* CWin32WindowAPI::GetAppCore() const
+	{
+		return m_pCAppCore;
+	}
+
+	void CWin32WindowAPI::ResizeWindow(int w, int h)
+	{
+		m_pCAppCore->Resize(w, h);
+	}
+
+	// インプットイベント
+	void CWin32WindowAPI::OnKeyDown(std::string key)
+	{
+	}
+
+	void CWin32WindowAPI::OnKeyUp(std::string key)
+	{
+	}
+
+	// リサイズイベント
+	void CWin32WindowAPI::OnResize(int w, int h)
+	{
+	}
+
+	// マウスイベント
+	void CWin32WindowAPI::OnMouseDown(int buttonNum, int x, int y)
+	{
+	}
+
+	void CWin32WindowAPI::OnMouseUp(int buttonNum, int x, int y)
+	{
+	}
+
+	void CWin32WindowAPI::OnMouseMove(int x, int y)
+	{
+	}
+
+	void CWin32WindowAPI::OnMouseWheel(int deltaY)
+	{
 	}
 }
 #endif // USE_WIN32_WindowAPI

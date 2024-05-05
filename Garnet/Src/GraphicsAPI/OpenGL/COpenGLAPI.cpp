@@ -31,22 +31,12 @@ namespace api
 	{
 	}
 
-#ifdef USE_GLFW
-	bool COpenGLAPI::InitializeWithGLFW(GLFWwindow* pWindow)
+	bool COpenGLAPI::Initialize(window::IWindowAPI* pWindowAPI)
 	{
 		if (!InitGL()) return false;
 
 		return true;
 	}
-#else
-	bool COpenGLAPI::Initialize()
-	{
-		if (!InitGL()) return false;
-
-		return true;
-	}
-#endif
-	
 
 	void COpenGLAPI::Release()
 	{

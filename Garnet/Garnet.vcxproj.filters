@@ -21,10 +21,10 @@
     <ClInclude Include="Src\App\ScriptApp\CScriptApp.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Src\AppManager\CDescAppManager.h">
+    <ClInclude Include="Src\WindowAPI\CGLFWWindowAPI.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Src\AppManager\CWebAppManager.h">
+    <ClInclude Include="Src\WindowAPI\CWebWindowAPI.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Src\Interface\IApp.h">
@@ -37,9 +37,6 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Src\GraphicsAPI\WebGPU\CWebGPUAPI.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\AppManager\EAppType.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Src\Interface\IRenderer.h">
@@ -975,7 +972,7 @@
     <ClInclude Include="Src\Graphics\CPresetPrimitive.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Src\AppManager\CDemoAppManager.h">
+    <ClInclude Include="Src\WindowAPI\CWin32WindowAPI.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Src\GraphicsAPI\CMaterialCreateInfo.h">
@@ -2721,21 +2718,30 @@
     <ClInclude Include="Src\Graphics\EDepthFunc.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="Src\App\ScriptApp\GUI\CGUIResourcesTab.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\LoadWorker\CResourceManager.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\AppCore\CAppCore.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\AppCore\CAppRunner.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Interface\IWindowAPI.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Src\Main\DescMain\DescMain.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Main\WebMain\WebMain.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="Src\App\ScriptApp\CScriptApp.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Src\AppManager\CDescAppManager.cpp">
+    <ClCompile Include="Src\WindowAPI\CGLFWWindowAPI.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Src\AppManager\CWebAppManager.cpp">
+    <ClCompile Include="Src\WindowAPI\CWebWindowAPI.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Src\GraphicsAPI\Vulkan\CVulkanAPI.cpp">
@@ -2789,10 +2795,7 @@
     <ClCompile Include="Src\Graphics\CPresetPrimitive.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Main\DemoMain\DemoMain.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\AppManager\CDemoAppManager.cpp">
+    <ClCompile Include="Src\WindowAPI\CWin32WindowAPI.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Src\GraphicsAPI\CMaterialCreateInfo.cpp">
@@ -3800,6 +3803,21 @@
     <ClCompile Include="Src\App\ScriptApp\GUI\CGUITransformTab.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="Src\App\ScriptApp\GUI\CGUIResourcesTab.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\LoadWorker\CResourceManager.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\AppCore\CAppCore.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\AppCore\CAppRunner.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Main\main.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="CMakeBuild\Garnet_front.js" />
@@ -4303,5 +4321,8 @@
     <None Include="Resources\Shaders\renderboard.vert" />
     <None Include="Resources\Shaders\raymarching.frag" />
     <None Include="Resources\MaterialFrame\raymarching_mf.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="Commands\TestCmd.bat" />
   </ItemGroup>
 </Project>

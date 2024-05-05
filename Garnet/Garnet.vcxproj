@@ -441,14 +441,14 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;USE_GLFW;USE_VULKAN;USE_TEXTURE_LOADER;USE_GLTF;USE_VIEWER_CAMERA;USE_INPUT_SYSTEM;USE_GPGPU;USE_FBX;USE_ANIMATION;USE_MMD;USE_PHYSICS;B3_USE_CLEW;USE_GUIENGINE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;USE_GLFW;USE_VULKAN;NOMINMAX;VK_USE_PLATFORM_WIN32_KHR;GLFW_INCLUDE_VULKAN;GLFW_EXPOSE_NATIVE_WIN32;USE_TEXTURE_LOADER;USE_GLTF;USE_VIEWER_CAMERA;USE_INPUT_SYSTEM;USE_GPGPU;USE_FBX;USE_ANIMATION;USE_MMD;USE_PHYSICS;B3_USE_CLEW;USE_GUIENGINE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(ProjectDir)src\Library\glm;$(ProjectDir)Src\Library\json;$(ProjectDir)src\Library\GLFW\include;$(ProjectDir)src\Library\Vulkan\include;$(ProjectDir)src\Library\tinygltf\;$(ProjectDir)Src\Library\FBX-SDK\include;$(ProjectDir)Src\Library\bullet3\src;$(ProjectDir)Src\Library\imgui;$(ProjectDir)Src\Library\imgui\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>NotSet</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(ProjectDir)src\Library\GLFW\lib;$(ProjectDir)src\Library\Vulkan\lib;$(ProjectDir)Src\Library\FBX-SDK\lib\vs2022\x64\debug;$(ProjectDir)Src\Library\FBX-SDK\lib\vs2022\x64\release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>glfw3dll.lib;vulkan-1.lib;libfbxsdk-md.lib;libxml2-md.lib;zlib-md.lib;Winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -465,14 +465,14 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;USE_GLFW;USE_OPENGL;USE_TEXTURE_LOADER;USE_GLTF;USE_VIEWER_CAMERA;USE_INPUT_SYSTEM;USE_GPGPU;USE_FBX;USE_ANIMATION;USE_MMD;USE_PHYSICS;B3_USE_CLEW;USE_GUIENGINE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;USE_GLFW;USE_OPENGL;NOMINMAX;USE_TEXTURE_LOADER;USE_GLTF;USE_VIEWER_CAMERA;USE_INPUT_SYSTEM;USE_GPGPU;USE_FBX;USE_ANIMATION;USE_MMD;USE_PHYSICS;B3_USE_CLEW;USE_GUIENGINE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(ProjectDir)src\Library\glm;$(ProjectDir)Src\Library\json;$(ProjectDir)src\Library\GLFW\include;$(ProjectDir)src\Library\tinygltf\;$(ProjectDir)Src\Library\FBX-SDK\include;$(ProjectDir)Src\Library\bullet3\src;$(ProjectDir)Src\Library\imgui;$(ProjectDir)Src\Library\imgui\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>NotSet</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(ProjectDir)src\Library\GLFW\lib;$(ProjectDir)Src\Library\FBX-SDK\lib\vs2022\x64\debug;$(ProjectDir)Src\Library\FBX-SDK\lib\vs2022\x64\release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>glfw3dll.lib;opengl32.lib;libfbxsdk-md.lib;libxml2-md.lib;zlib-md.lib;Winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -489,14 +489,14 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;USE_OPENGL;USE_WIN32_WindowAPI;USE_TEXTURE_LOADER;USE_GLTF;USE_VIEWER_CAMERA;USE_INPUT_SYSTEM;USE_GPGPU;USE_FBX;USE_ANIMATION;USE_MMD;USE_PHYSICS;B3_USE_CLEW;USE_GUIENGINE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;USE_OPENGL;NOMINMAX;USE_WIN32_WindowAPI;USE_TEXTURE_LOADER;USE_GLTF;USE_VIEWER_CAMERA;USE_INPUT_SYSTEM;USE_GPGPU;USE_FBX;USE_ANIMATION;USE_MMD;USE_PHYSICS;B3_USE_CLEW;USE_GUIENGINE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(ProjectDir)src\Library\glm;$(ProjectDir)Src\Library\json;$(ProjectDir)src\Library\tinygltf\;$(ProjectDir)Src\Library\FBX-SDK\include;$(ProjectDir)Src\Library\bullet3\src;$(ProjectDir)Src\Library\imgui;$(ProjectDir)Src\Library\imgui\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>NotSet</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(ProjectDir)Src\Library\FBX-SDK\lib\vs2022\x64\debug;$(ProjectDir)Src\Library\FBX-SDK\lib\vs2022\x64\release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>opengl32.lib;libfbxsdk-md.lib;libxml2-md.lib;zlib-md.lib;Winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -511,14 +511,14 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;USE_GLFW;USE_WEBGPU;USE_WebGPUNative;USE_TEXTURE_LOADER;USE_GLTF;USE_VIEWER_CAMERA;USE_INPUT_SYSTEM;USE_GPGPU;USE_FBX;USE_ANIMATION;USE_SMALL_FBX;mrDebug;USE_MMD;USE_PHYSICS;B3_USE_CLEW;USE_GUIENGINE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;USE_GLFW;USE_WEBGPU;NOMINMAX;USE_WebGPUNative;USE_TEXTURE_LOADER;USE_GLTF;USE_VIEWER_CAMERA;USE_INPUT_SYSTEM;USE_GPGPU;USE_FBX;USE_ANIMATION;USE_SMALL_FBX;mrDebug;USE_MMD;USE_PHYSICS;B3_USE_CLEW;USE_GUIENGINE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(ProjectDir)src\Library\glm;$(ProjectDir)Src\Library\json;$(ProjectDir)src\Library\GLFW\include;$(ProjectDir)src\Library\tinygltf\;$(ProjectDir)src\Library\glfw3webgpu;//$(ProjectDir)Src\Library\DawnLib\include;//$(ProjectDir)Src\Library\DawnLib\src;$(ProjectDir)Src\Library\WebGPU;$(ProjectDir)Src\Library\SmallFBX\include;$(ProjectDir)Src\Library\bullet3\src;$(ProjectDir)Src\Library\imgui;$(ProjectDir)Src\Library\imgui\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>NotSet</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(ProjectDir)src\Library\GLFW\lib;//$(ProjectDir)Src\Library\DawnLib\bin;$(ProjectDir)Src\Library\WebGPU\windows-x86_64;$(ProjectDir)Src\Library\SmallFBX\lib\debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>glfw3dll.lib;dxguid.lib;zlib.lib;Winmm.lib;SmallFBX.lib;wgpu_native.lib;//$(ProjectDir)Src\Library\DawnLib\bin\src\dawn\native\Debug\webgpu_dawn.lib;//$(ProjectDir)Src\Library\DawnLib\bin\src\dawn\Debug\dawncpp.lib;//$(ProjectDir)Src\Library\DawnLib\bin\src\dawn\native\Debug\dawn_native.lib;//$(ProjectDir)Src\Library\DawnLib\bin\src\dawn\platform\Debug\dawn_platform.lib;//$(ProjectDir)Src\Library\DawnLib\bin\src\tint\Debug\tint.lib;//$(ProjectDir)Src\Library\DawnLib\bin\src\tint\Debug\tint_diagnostic_utils.lib;//$(ProjectDir)Src\Library\DawnLib\bin\third_party\spirv-tools\source\opt\Debug\SPIRV-Tools-opt.lib;//$(ProjectDir)Src\Library\DawnLib\bin\third_party\spirv-tools\source\Debug\SPIRV-Tools.lib;//$(ProjectDir)Src\Library\DawnLib\bin\third_party\abseil\absl\strings\Debug\absl_str_format_internal.lib;//$(ProjectDir)Src\Library\DawnLib\bin\third_party\abseil\absl\strings\Debug\absl_strings.lib;//$(ProjectDir)Src\Library\DawnLib\bin\third_party\abseil\absl\strings\Debug\absl_strings_internal.lib;//$(ProjectDir)Src\Library\DawnLib\bin\third_party\abseil\absl\base\Debug\absl_base.lib;//$(ProjectDir)Src\Library\DawnLib\bin\third_party\abseil\absl\base\Debug\absl_spinlock_wait.lib;//$(ProjectDir)Src\Library\DawnLib\bin\third_party\abseil\absl\numeric\Debug\absl_int128.lib;//$(ProjectDir)Src\Library\DawnLib\bin\third_party\abseil\absl\base\Debug\absl_throw_delegate.lib;//$(ProjectDir)Src\Library\DawnLib\bin\third_party\abseil\absl\base\Debug\absl_raw_logging_internal.lib;//$(ProjectDir)Src\Library\DawnLib\bin\third_party\abseil\absl\base\Debug\absl_log_severity.lib;//$(ProjectDir)Src\Library\DawnLib\bin\src\dawn\common\Debug\dawn_common.lib;//$(ProjectDir)Src\Library\DawnLib\bin\src\dawn\Debug\dawncpp_headers.lib;//$(ProjectDir)Src\Library\DawnLib\bin\src\dawn\Debug\dawn_headers.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -538,13 +538,13 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions);USE_VULKAN;USE_TEXTURE_LOADER;USE_GLTF;USE_VIEWER_CAMERA;USE_INPUT_SYSTEM;USE_GPGPU</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions);USE_VULKAN;NOMINMAX;VK_USE_PLATFORM_WIN32_KHR;GLFW_INCLUDE_VULKAN;GLFW_EXPOSE_NATIVE_WIN32;USE_TEXTURE_LOADER;USE_GLTF;USE_VIEWER_CAMERA;USE_INPUT_SYSTEM;USE_GPGPU</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(ProjectDir)src\Library\glm;$(ProjectDir)Src\Library\json;$(ProjectDir)src\Library\GLFW\include;$(ProjectDir)src\Library\Vulkan\include;$(ProjectDir)src\Library\tinygltf\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>NotSet</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -566,13 +566,13 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;USE_OPENGL</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;USE_OPENGL;NOMINMAX</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(ProjectDir)src\Library\glm;$(ProjectDir)Src\Library\json;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>NotSet</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -593,13 +593,13 @@ del $(OutDir)Garnet.pdb</Command>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;USE_OPENGL</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;USE_OPENGL;NOMINMAX</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(ProjectDir)src\Library\glm;$(ProjectDir)Src\Library\json;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>NotSet</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -622,13 +622,13 @@ call $(ProjectDir)compress_tools\squishy-x64 -i "$(OutDir)Garnet.exe" -o "$(OutD
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;USE_WEBGPU;%(PreprocessorDefinitions);USE_TEXTURE_LOADER;USE_GLTF;USE_VIEWER_CAMERA;USE_INPUT_SYSTEM;USE_GPGPU</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;USE_WEBGPU;NOMINMAX;%(PreprocessorDefinitions);USE_TEXTURE_LOADER;USE_GLTF;USE_VIEWER_CAMERA;USE_INPUT_SYSTEM;USE_GPGPU</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(ProjectDir)src\Library\glm;$(ProjectDir)Src\Library\json;$(ProjectDir)src\Library\GLFW\include;$(ProjectDir)src\Library\glfw3webgpu;$(ProjectDir)src\Library\DawnLib\include;$(ProjectDir)Src\Library\dawn\include;$(ProjectDir)src\Library\tinygltf\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>NotSet</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -647,6 +647,11 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Src\AppCore\CAppRunner.h" />
+    <ClInclude Include="Src\AppCore\CAppCore.h" />
+    <ClInclude Include="Src\Interface\IWindowAPI.h" />
+    <ClInclude Include="Src\LoadWorker\CResourceManager.h" />
+    <ClInclude Include="Src\App\ScriptApp\GUI\CGUIResourcesTab.h" />
     <ClInclude Include="Src\App\ScriptApp\GUI\CGUITransformTab.h" />
     <ClInclude Include="Src\App\ScriptApp\GUI\CGUIMaterialTab.h" />
     <ClInclude Include="Src\App\ScriptApp\GUI\CGUICameraTab.h" />
@@ -1227,7 +1232,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClInclude Include="Src\GraphicsAPI\WebGPU\CWebGPUMaterial.h" />
     <ClInclude Include="Src\GraphicsAPI\Vulkan\CVulkanMaterial.h" />
     <ClInclude Include="Src\GraphicsAPI\CMaterialCreateInfo.h" />
-    <ClInclude Include="Src\AppManager\CDemoAppManager.h" />
+    <ClInclude Include="Src\WindowAPI\CWin32WindowAPI.h" />
     <ClInclude Include="Src\Graphics\CPresetPrimitive.h" />
     <ClInclude Include="Src\Graphics\SBindingLayout.h" />
     <ClInclude Include="Src\Math\CTransform.h" />
@@ -1539,18 +1544,21 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClInclude Include="Src\Object\CNode.h" />
     <ClInclude Include="Src\GraphicsAPI\WebGPU\CWebGPURenderer.h" />
     <ClInclude Include="Src\GraphicsAPI\Vulkan\CVulkanRenderer.h" />
-    <ClInclude Include="Src\AppManager\EAppType.h" />
     <ClInclude Include="Src\GraphicsAPI\WebGPU\CWebGPUAPI.h" />
     <ClInclude Include="Src\GraphicsAPI\Vulkan\CVulkanAPI.h" />
-    <ClInclude Include="Src\AppManager\CDescAppManager.h" />
+    <ClInclude Include="Src\WindowAPI\CGLFWWindowAPI.h" />
     <ClInclude Include="Src\App\ScriptApp\CScriptApp.h" />
     <ClInclude Include="Src\Message\Console.h" />
-    <ClInclude Include="Src\AppManager\CWebAppManager.h" />
+    <ClInclude Include="Src\WindowAPI\CWebWindowAPI.h" />
     <ClInclude Include="Src\Interface\IApp.h" />
     <ClInclude Include="Src\Interface\IGraphicsAPI.h" />
     <ClInclude Include="Src\Interface\IRenderer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\AppCore\CAppRunner.cpp" />
+    <ClCompile Include="Src\AppCore\CAppCore.cpp" />
+    <ClCompile Include="Src\LoadWorker\CResourceManager.cpp" />
+    <ClCompile Include="Src\App\ScriptApp\GUI\CGUIResourcesTab.cpp" />
     <ClCompile Include="Src\App\ScriptApp\GUI\CGUITransformTab.cpp" />
     <ClCompile Include="Src\App\ScriptApp\GUI\CGUIMaterialTab.cpp" />
     <ClCompile Include="Src\App\ScriptApp\GUI\CGUICameraTab.cpp" />
@@ -1562,6 +1570,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClCompile Include="Src\GUIEngine\imgui\Core\CImGuiCoreVulkan.cpp" />
     <ClCompile Include="Src\GUIEngine\imgui\CImGuiGUIEngine.cpp" />
     <ClCompile Include="Src\GUIEngine\CDummyGUIEngine.cpp" />
+    <ClCompile Include="Src\Main\main.cpp" />
     <ClCompile Include="Src\PhysicsEngine\CDummyPhysicsEngine.cpp" />
     <ClCompile Include="Src\Audio\CAudioMachine.cpp" />
     <ClCompile Include="Src\Audio\CAudioClip.cpp" />
@@ -1886,9 +1895,8 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClCompile Include="Src\GraphicsAPI\WebGPU\CWebGPUMaterial.cpp" />
     <ClCompile Include="Src\GraphicsAPI\Vulkan\CVulkanMaterial.cpp" />
     <ClCompile Include="Src\GraphicsAPI\CMaterialCreateInfo.cpp" />
-    <ClCompile Include="Src\AppManager\CDemoAppManager.cpp" />
+    <ClCompile Include="Src\WindowAPI\CWin32WindowAPI.cpp" />
     <ClCompile Include="Src\Graphics\CPresetPrimitive.cpp" />
-    <ClCompile Include="Src\Main\DemoMain\DemoMain.cpp" />
     <ClCompile Include="Src\Math\CTransform.cpp" />
     <ClCompile Include="Src\Object\C3DObject.cpp" />
     <ClCompile Include="Src\Graphics\CShaderBuffer.cpp" />
@@ -1905,11 +1913,9 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClCompile Include="Src\GraphicsAPI\Vulkan\CVulkanRenderer.cpp" />
     <ClCompile Include="Src\GraphicsAPI\WebGPU\CWebGPUAPI.cpp" />
     <ClCompile Include="Src\GraphicsAPI\Vulkan\CVulkanAPI.cpp" />
-    <ClCompile Include="Src\AppManager\CDescAppManager.cpp" />
+    <ClCompile Include="Src\WindowAPI\CGLFWWindowAPI.cpp" />
     <ClCompile Include="Src\App\ScriptApp\CScriptApp.cpp" />
-    <ClCompile Include="Src\Main\DescMain\DescMain.cpp" />
-    <ClCompile Include="Src\Main\WebMain\WebMain.cpp" />
-    <ClCompile Include="Src\AppManager\CWebAppManager.cpp" />
+    <ClCompile Include="Src\WindowAPI\CWebWindowAPI.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="CMakeBuild\Garnet_front.js" />
@@ -2131,6 +2137,9 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <None Include="Src\Library\glm\glm\gtx\wrap.inl" />
     <None Include="WebRelease\Resources\Shaders\frag.spv" />
     <None Include="WebRelease\Resources\Shaders\vert.spv" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="Commands\TestCmd.bat" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />

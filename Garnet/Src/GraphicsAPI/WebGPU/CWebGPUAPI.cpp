@@ -55,17 +55,13 @@ namespace api
 	}
 
 	// IGraphicsAPI //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#ifdef USE_GLFW
-	bool CWebGPUAPI::InitializeWithGLFW(GLFWwindow* pWindow)
-#else
-	bool CWebGPUAPI::Initialize()
-#endif
+	bool CWebGPUAPI::Initialize(window::IWindowAPI* pWindowAPI)
 	{
 		if (!CreateInstance()) return false; // インスタンスを生成
 #ifdef __EMSCRIPTEN__
 		if (!CreateSurface()) return false; // ウィンドウサーフェイスを生成
 #else
-		if (!CreateSurface(pWindow)) return false; // ウィンドウサーフェイスを生成
+		if (!CreateSurface(pWindowAPI->GetGLFWWindow())) return false; // ウィンドウサーフェイスを生成
 #endif // __EMSCRIPTEN__
 		if (!CreatePhysicalDevice()) return false; // 物理デバイス(アダプター)を生成
 		if (!CreateLogicalDevice()) return false; // 論理デバイスを生成

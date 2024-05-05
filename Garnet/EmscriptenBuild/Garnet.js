@@ -978,8 +978,8 @@ function dbg(text) {
 // === Body ===
 
 var ASM_CONSTS = {
-  225028: ($0, $1, $2, $3) => { const w0 = Module.UTF16ToString($0); const w1 = Module.UTF16ToString($1); const windex = $2; const nameCount = $3; return (w0 == w1[windex] && w1.length == nameCount) ? 1 : 0; },  
- 225208: ($0, $1, $2, $3) => { const w0 = Module.UTF16ToString($0); const w1 = Module.UTF16ToString($1); const windex = $2; const nameCount = $3; return (w0 == w1[windex] && w1.length == nameCount) ? 1 : 0; }
+  173076: ($0, $1, $2, $3) => { const w0 = Module.UTF16ToString($0); const w1 = Module.UTF16ToString($1); const windex = $2; const nameCount = $3; return (w0 == w1[windex] && w1.length == nameCount) ? 1 : 0; },  
+ 173256: ($0, $1, $2, $3) => { const w0 = Module.UTF16ToString($0); const w1 = Module.UTF16ToString($1); const windex = $2; const nameCount = $3; return (w0 == w1[windex] && w1.length == nameCount) ? 1 : 0; }
 };
 
 
@@ -5017,175 +5017,6 @@ var ASM_CONSTS = {
       return Date.now();
     }
 
-  var withStackSave = (f) => {
-      var stack = stackSave();
-      var ret = f();
-      stackRestore(stack);
-      return ret;
-    };
-  var JSEvents = {
-  inEventHandler:0,
-  removeAllEventListeners:function() {
-        for (var i = JSEvents.eventHandlers.length-1; i >= 0; --i) {
-          JSEvents._removeHandler(i);
-        }
-        JSEvents.eventHandlers = [];
-        JSEvents.deferredCalls = [];
-      },
-  registerRemoveEventListeners:function() {
-        if (!JSEvents.removeEventListenersRegistered) {
-          __ATEXIT__.push(JSEvents.removeAllEventListeners);
-          JSEvents.removeEventListenersRegistered = true;
-        }
-      },
-  deferredCalls:[],
-  deferCall:function(targetFunction, precedence, argsList) {
-        function arraysHaveEqualContent(arrA, arrB) {
-          if (arrA.length != arrB.length) return false;
-  
-          for (var i in arrA) {
-            if (arrA[i] != arrB[i]) return false;
-          }
-          return true;
-        }
-        // Test if the given call was already queued, and if so, don't add it again.
-        for (var i in JSEvents.deferredCalls) {
-          var call = JSEvents.deferredCalls[i];
-          if (call.targetFunction == targetFunction && arraysHaveEqualContent(call.argsList, argsList)) {
-            return;
-          }
-        }
-        JSEvents.deferredCalls.push({
-          targetFunction,
-          precedence,
-          argsList
-        });
-  
-        JSEvents.deferredCalls.sort(function(x,y) { return x.precedence < y.precedence; });
-      },
-  removeDeferredCalls:function(targetFunction) {
-        for (var i = 0; i < JSEvents.deferredCalls.length; ++i) {
-          if (JSEvents.deferredCalls[i].targetFunction == targetFunction) {
-            JSEvents.deferredCalls.splice(i, 1);
-            --i;
-          }
-        }
-      },
-  canPerformEventHandlerRequests:function() {
-        if (navigator.userActivation) {
-          // Verify against transient activation status from UserActivation API
-          // whether it is possible to perform a request here without needing to defer. See
-          // https://developer.mozilla.org/en-US/docs/Web/Security/User_activation#transient_activation
-          // and https://caniuse.com/mdn-api_useractivation
-          // At the time of writing, Firefox does not support this API: https://bugzilla.mozilla.org/show_bug.cgi?id=1791079
-          return navigator.userActivation.isActive;
-        }
-        return JSEvents.inEventHandler && JSEvents.currentEventHandler.allowsDeferredCalls;
-      },
-  runDeferredCalls:function() {
-        if (!JSEvents.canPerformEventHandlerRequests()) {
-          return;
-        }
-        for (var i = 0; i < JSEvents.deferredCalls.length; ++i) {
-          var call = JSEvents.deferredCalls[i];
-          JSEvents.deferredCalls.splice(i, 1);
-          --i;
-          call.targetFunction.apply(null, call.argsList);
-        }
-      },
-  eventHandlers:[],
-  removeAllHandlersOnTarget:function(target, eventTypeString) {
-        for (var i = 0; i < JSEvents.eventHandlers.length; ++i) {
-          if (JSEvents.eventHandlers[i].target == target && 
-            (!eventTypeString || eventTypeString == JSEvents.eventHandlers[i].eventTypeString)) {
-             JSEvents._removeHandler(i--);
-           }
-        }
-      },
-  _removeHandler:function(i) {
-        var h = JSEvents.eventHandlers[i];
-        h.target.removeEventListener(h.eventTypeString, h.eventListenerFunc, h.useCapture);
-        JSEvents.eventHandlers.splice(i, 1);
-      },
-  registerOrRemoveHandler:function(eventHandler) {
-        if (!eventHandler.target) {
-          err('registerOrRemoveHandler: the target element for event handler registration does not exist, when processing the following event handler registration:');
-          console.dir(eventHandler);
-          return -4;
-        }
-        var jsEventHandler = function jsEventHandler(event) {
-          // Increment nesting count for the event handler.
-          ++JSEvents.inEventHandler;
-          JSEvents.currentEventHandler = eventHandler;
-          // Process any old deferred calls the user has placed.
-          JSEvents.runDeferredCalls();
-          // Process the actual event, calls back to user C code handler.
-          eventHandler.handlerFunc(event);
-          // Process any new deferred calls that were placed right now from this event handler.
-          JSEvents.runDeferredCalls();
-          // Out of event handler - restore nesting count.
-          --JSEvents.inEventHandler;
-        };
-        
-        if (eventHandler.callbackfunc) {
-          eventHandler.eventListenerFunc = jsEventHandler;
-          eventHandler.target.addEventListener(eventHandler.eventTypeString, jsEventHandler, eventHandler.useCapture);
-          JSEvents.eventHandlers.push(eventHandler);
-          JSEvents.registerRemoveEventListeners();
-        } else {
-          for (var i = 0; i < JSEvents.eventHandlers.length; ++i) {
-            if (JSEvents.eventHandlers[i].target == eventHandler.target
-             && JSEvents.eventHandlers[i].eventTypeString == eventHandler.eventTypeString) {
-               JSEvents._removeHandler(i--);
-             }
-          }
-        }
-        return 0;
-      },
-  getNodeNameForTarget:function(target) {
-        if (!target) return '';
-        if (target == window) return '#window';
-        if (target == screen) return '#screen';
-        return (target && target.nodeName) ? target.nodeName : '';
-      },
-  fullscreenEnabled:function() {
-        return document.fullscreenEnabled
-        // Safari 13.0.3 on macOS Catalina 10.15.1 still ships with prefixed webkitFullscreenEnabled.
-        // TODO: If Safari at some point ships with unprefixed version, update the version check above.
-        || document.webkitFullscreenEnabled
-         ;
-      },
-  };
-  
-  function maybeCStringToJsString(cString) {
-      // "cString > 2" checks if the input is a number, and isn't of the special
-      // values we accept here, EMSCRIPTEN_EVENT_TARGET_* (which map to 0, 1, 2).
-      // In other words, if cString > 2 then it's a pointer to a valid place in
-      // memory, and points to a C string.
-      return cString > 2 ? UTF8ToString(cString) : cString;
-    }
-  
-  var specialHTMLTargets = [0, typeof document != 'undefined' ? document : 0, typeof window != 'undefined' ? window : 0];
-  function findEventTarget(target) {
-      target = maybeCStringToJsString(target);
-      var domElement = specialHTMLTargets[target] || (typeof document != 'undefined' ? document.querySelector(target) : undefined);
-      return domElement;
-    }
-  
-  function getBoundingClientRect(e) {
-      return specialHTMLTargets.indexOf(e) < 0 ? e.getBoundingClientRect() : {'left':0,'top':0};
-    }
-  function _emscripten_get_element_css_size(target, width, height) {
-      target = findEventTarget(target);
-      if (!target) return -4;
-  
-      var rect = getBoundingClientRect(target);
-      HEAPF64[((width)>>3)] = rect.width;
-      HEAPF64[((height)>>3)] = rect.height;
-  
-      return 0;
-    }
-
   function _emscripten_is_main_browser_thread() {
       return !ENVIRONMENT_IS_WORKER;
     }
@@ -5270,36 +5101,6 @@ var ASM_CONSTS = {
 
   
   
-  
-  var stringToUTF8 = (str, outPtr, maxBytesToWrite) => {
-      assert(typeof maxBytesToWrite == 'number', 'stringToUTF8(str, outPtr, maxBytesToWrite) is missing the third parameter that specifies the length of the output buffer!');
-      return stringToUTF8Array(str, HEAPU8,outPtr, maxBytesToWrite);
-    };
-  function fillFullscreenChangeEventData(eventStruct) {
-      var fullscreenElement = document.fullscreenElement || document.mozFullScreenElement || document.webkitFullscreenElement || document.msFullscreenElement;
-      var isFullscreen = !!fullscreenElement;
-      // Assigning a boolean to HEAP32 with expected type coercion.
-      /** @suppress{checkTypes} */
-      HEAP32[((eventStruct)>>2)] = isFullscreen;
-      HEAP32[(((eventStruct)+(4))>>2)] = JSEvents.fullscreenEnabled();
-      // If transitioning to fullscreen, report info about the element that is now fullscreen.
-      // If transitioning to windowed mode, report info about the element that just was fullscreen.
-      var reportedElement = isFullscreen ? fullscreenElement : JSEvents.previousFullscreenElement;
-      var nodeName = JSEvents.getNodeNameForTarget(reportedElement);
-      var id = (reportedElement && reportedElement.id) ? reportedElement.id : '';
-      stringToUTF8(nodeName, eventStruct + 8, 128);
-      stringToUTF8(id, eventStruct + 136, 128);
-      HEAP32[(((eventStruct)+(264))>>2)] = reportedElement ? reportedElement.clientWidth : 0;
-      HEAP32[(((eventStruct)+(268))>>2)] = reportedElement ? reportedElement.clientHeight : 0;
-      HEAP32[(((eventStruct)+(272))>>2)] = screen.width;
-      HEAP32[(((eventStruct)+(276))>>2)] = screen.height;
-      if (isFullscreen) {
-        JSEvents.previousFullscreenElement = fullscreenElement;
-      }
-    }
-  
-  
-  
   var wasmTableMirror = [];
   var getWasmTableEntry = (funcPtr) => {
       var func = wasmTableMirror[funcPtr];
@@ -5310,160 +5111,9 @@ var ASM_CONSTS = {
       assert(wasmTable.get(funcPtr) == func, "JavaScript-side Wasm function table mirror is out of date!");
       return func;
     };
-  function registerFullscreenChangeEventCallback(target, userData, useCapture, callbackfunc, eventTypeId, eventTypeString, targetThread) {
-      if (!JSEvents.fullscreenChangeEvent) JSEvents.fullscreenChangeEvent = _malloc( 280 );
-  
-      var fullscreenChangeEventhandlerFunc = function(e = event) {
-        var fullscreenChangeEvent = JSEvents.fullscreenChangeEvent;
-  
-        fillFullscreenChangeEventData(fullscreenChangeEvent);
-  
-        if (getWasmTableEntry(callbackfunc)(eventTypeId, fullscreenChangeEvent, userData)) e.preventDefault();
-      };
-  
-      var eventHandler = {
-        target,
-        eventTypeString,
-        callbackfunc,
-        handlerFunc: fullscreenChangeEventhandlerFunc,
-        useCapture
-      };
-      return JSEvents.registerOrRemoveHandler(eventHandler);
-    }
-  
-  
-  function _emscripten_set_fullscreenchange_callback_on_thread(target, userData, useCapture, callbackfunc, targetThread) {
-      if (!JSEvents.fullscreenEnabled()) return -1;
-      target = findEventTarget(target);
-      if (!target) return -4;
-  
-      // Unprefixed Fullscreen API shipped in Chromium 71 (https://bugs.chromium.org/p/chromium/issues/detail?id=383813)
-      // As of Safari 13.0.3 on macOS Catalina 10.15.1 still ships with prefixed webkitfullscreenchange. TODO: revisit this check once Safari ships unprefixed version.
-      registerFullscreenChangeEventCallback(target, userData, useCapture, callbackfunc, 19, "webkitfullscreenchange", targetThread);
-  
-      return registerFullscreenChangeEventCallback(target, userData, useCapture, callbackfunc, 19, "fullscreenchange", targetThread);
-    }
-
-  
-  
   function _emscripten_set_main_loop(func, fps, simulateInfiniteLoop) {
       var browserIterationFunc = getWasmTableEntry(func);
       setMainLoop(browserIterationFunc, fps, simulateInfiniteLoop);
-    }
-
-  
-  
-  
-  function registerUiEventCallback(target, userData, useCapture, callbackfunc, eventTypeId, eventTypeString, targetThread) {
-      if (!JSEvents.uiEvent) JSEvents.uiEvent = _malloc( 36 );
-  
-      target = findEventTarget(target);
-  
-      var uiEventHandlerFunc = function(e = event) {
-        if (e.target != target) {
-          // Never take ui events such as scroll via a 'bubbled' route, but always from the direct element that
-          // was targeted. Otherwise e.g. if app logs a message in response to a page scroll, the Emscripten log
-          // message box could cause to scroll, generating a new (bubbled) scroll message, causing a new log print,
-          // causing a new scroll, etc..
-          return;
-        }
-        var b = document.body; // Take document.body to a variable, Closure compiler does not outline access to it on its own.
-        if (!b) {
-          // During a page unload 'body' can be null, with "Cannot read property 'clientWidth' of null" being thrown
-          return;
-        }
-        var uiEvent = JSEvents.uiEvent;
-        HEAP32[((uiEvent)>>2)] = e.detail;
-        HEAP32[(((uiEvent)+(4))>>2)] = b.clientWidth;
-        HEAP32[(((uiEvent)+(8))>>2)] = b.clientHeight;
-        HEAP32[(((uiEvent)+(12))>>2)] = innerWidth;
-        HEAP32[(((uiEvent)+(16))>>2)] = innerHeight;
-        HEAP32[(((uiEvent)+(20))>>2)] = outerWidth;
-        HEAP32[(((uiEvent)+(24))>>2)] = outerHeight;
-        HEAP32[(((uiEvent)+(28))>>2)] = pageXOffset;
-        HEAP32[(((uiEvent)+(32))>>2)] = pageYOffset;
-        if (getWasmTableEntry(callbackfunc)(eventTypeId, uiEvent, userData)) e.preventDefault();
-      };
-  
-      var eventHandler = {
-        target,
-        eventTypeString,
-        callbackfunc,
-        handlerFunc: uiEventHandlerFunc,
-        useCapture
-      };
-      return JSEvents.registerOrRemoveHandler(eventHandler);
-    }
-  function _emscripten_set_resize_callback_on_thread(target, userData, useCapture, callbackfunc, targetThread) {
-      return registerUiEventCallback(target, userData, useCapture, callbackfunc, 10, "resize", targetThread);
-    }
-
-  
-  
-  
-  
-  function fillMouseEventData(eventStruct, e, target) {
-      assert(eventStruct % 4 == 0);
-      HEAPF64[((eventStruct)>>3)] = e.timeStamp;
-      var idx = eventStruct >> 2;
-      HEAP32[idx + 2] = e.screenX;
-      HEAP32[idx + 3] = e.screenY;
-      HEAP32[idx + 4] = e.clientX;
-      HEAP32[idx + 5] = e.clientY;
-      HEAP32[idx + 6] = e.ctrlKey;
-      HEAP32[idx + 7] = e.shiftKey;
-      HEAP32[idx + 8] = e.altKey;
-      HEAP32[idx + 9] = e.metaKey;
-      HEAP16[idx*2 + 20] = e.button;
-      HEAP16[idx*2 + 21] = e.buttons;
-  
-      HEAP32[idx + 11] = e["movementX"]
-        ;
-  
-      HEAP32[idx + 12] = e["movementY"]
-        ;
-  
-      var rect = getBoundingClientRect(target);
-      HEAP32[idx + 13] = e.clientX - rect.left;
-      HEAP32[idx + 14] = e.clientY - rect.top;
-  
-    }
-  
-  
-  
-  function registerWheelEventCallback(target, userData, useCapture, callbackfunc, eventTypeId, eventTypeString, targetThread) {
-      if (!JSEvents.wheelEvent) JSEvents.wheelEvent = _malloc( 104 );
-  
-      // The DOM Level 3 events spec event 'wheel'
-      var wheelHandlerFunc = function(e = event) {
-        var wheelEvent = JSEvents.wheelEvent;
-        fillMouseEventData(wheelEvent, e, target);
-        HEAPF64[(((wheelEvent)+(72))>>3)] = e["deltaX"];
-        HEAPF64[(((wheelEvent)+(80))>>3)] = e["deltaY"];
-        HEAPF64[(((wheelEvent)+(88))>>3)] = e["deltaZ"];
-        HEAP32[(((wheelEvent)+(96))>>2)] = e["deltaMode"];
-        if (getWasmTableEntry(callbackfunc)(eventTypeId, wheelEvent, userData)) e.preventDefault();
-      };
-  
-      var eventHandler = {
-        target,
-        allowsDeferredCalls: true,
-        eventTypeString,
-        callbackfunc,
-        handlerFunc: wheelHandlerFunc,
-        useCapture
-      };
-      return JSEvents.registerOrRemoveHandler(eventHandler);
-    }
-  
-  function _emscripten_set_wheel_callback_on_thread(target, userData, useCapture, callbackfunc, targetThread) {
-      target = findEventTarget(target);
-      if (!target) return -4;
-      if (typeof target.onwheel != 'undefined') {
-        return registerWheelEventCallback(target, userData, useCapture, callbackfunc, 9, "wheel", targetThread);
-      } else {
-        return -1;
-      }
     }
 
   
@@ -5706,6 +5356,10 @@ var ASM_CONSTS = {
       if (deserialized != num) warnOnce('writeI53ToI64() out of range: serialized JS Number ' + num + ' to Wasm heap as bytes lo=' + ptrToString(HEAPU32[ptr>>2]) + ', hi=' + ptrToString(HEAPU32[ptr+4>>2]) + ', which deserializes back to ' + deserialized + ' instead!');
     }
   
+  var stringToUTF8 = (str, outPtr, maxBytesToWrite) => {
+      assert(typeof maxBytesToWrite == 'number', 'stringToUTF8(str, outPtr, maxBytesToWrite) is missing the third parameter that specifies the length of the output buffer!');
+      return stringToUTF8Array(str, HEAPU8,outPtr, maxBytesToWrite);
+    };
   
   function fetchCacheData(/** @type {IDBDatabase} */ db, fetch, data, onsuccess, onerror) {
     if (!db) {
@@ -5928,6 +5582,12 @@ var ASM_CONSTS = {
     return fetch;
   }
 
+  var withStackSave = (f) => {
+      var stack = stackSave();
+      var ret = f();
+      stackRestore(stack);
+      return ret;
+    };
   
   
   var stringToUTF8OnStack = (str) => {
@@ -6322,1330 +5982,6 @@ var ASM_CONSTS = {
     return e.errno;
   }
   }
-
-  
-  function webgl_enable_ANGLE_instanced_arrays(ctx) {
-      // Extension available in WebGL 1 from Firefox 26 and Google Chrome 30 onwards. Core feature in WebGL 2.
-      var ext = ctx.getExtension('ANGLE_instanced_arrays');
-      if (ext) {
-        ctx['vertexAttribDivisor'] = function(index, divisor) { ext['vertexAttribDivisorANGLE'](index, divisor); };
-        ctx['drawArraysInstanced'] = function(mode, first, count, primcount) { ext['drawArraysInstancedANGLE'](mode, first, count, primcount); };
-        ctx['drawElementsInstanced'] = function(mode, count, type, indices, primcount) { ext['drawElementsInstancedANGLE'](mode, count, type, indices, primcount); };
-        return 1;
-      }
-    }
-  
-  function webgl_enable_OES_vertex_array_object(ctx) {
-      // Extension available in WebGL 1 from Firefox 25 and WebKit 536.28/desktop Safari 6.0.3 onwards. Core feature in WebGL 2.
-      var ext = ctx.getExtension('OES_vertex_array_object');
-      if (ext) {
-        ctx['createVertexArray'] = function() { return ext['createVertexArrayOES'](); };
-        ctx['deleteVertexArray'] = function(vao) { ext['deleteVertexArrayOES'](vao); };
-        ctx['bindVertexArray'] = function(vao) { ext['bindVertexArrayOES'](vao); };
-        ctx['isVertexArray'] = function(vao) { return ext['isVertexArrayOES'](vao); };
-        return 1;
-      }
-    }
-  
-  function webgl_enable_WEBGL_draw_buffers(ctx) {
-      // Extension available in WebGL 1 from Firefox 28 onwards. Core feature in WebGL 2.
-      var ext = ctx.getExtension('WEBGL_draw_buffers');
-      if (ext) {
-        ctx['drawBuffers'] = function(n, bufs) { ext['drawBuffersWEBGL'](n, bufs); };
-        return 1;
-      }
-    }
-  
-  function webgl_enable_WEBGL_multi_draw(ctx) {
-      // Closure is expected to be allowed to minify the '.multiDrawWebgl' property, so not accessing it quoted.
-      return !!(ctx.multiDrawWebgl = ctx.getExtension('WEBGL_multi_draw'));
-    }
-  
-  
-  var GL = {
-  counter:1,
-  buffers:[],
-  programs:[],
-  framebuffers:[],
-  renderbuffers:[],
-  textures:[],
-  shaders:[],
-  vaos:[],
-  contexts:[],
-  offscreenCanvases:{
-  },
-  queries:[],
-  stringCache:{
-  },
-  unpackAlignment:4,
-  recordError:function recordError(errorCode) {
-        if (!GL.lastError) {
-          GL.lastError = errorCode;
-        }
-      },
-  getNewId:function(table) {
-        var ret = GL.counter++;
-        for (var i = table.length; i < ret; i++) {
-          table[i] = null;
-        }
-        return ret;
-      },
-  getSource:function(shader, count, string, length) {
-        var source = '';
-        for (var i = 0; i < count; ++i) {
-          var len = length ? HEAP32[(((length)+(i*4))>>2)] : -1;
-          source += UTF8ToString(HEAP32[(((string)+(i*4))>>2)], len < 0 ? undefined : len);
-        }
-        return source;
-      },
-  createContext:function(/** @type {HTMLCanvasElement} */ canvas, webGLContextAttributes) {
-  
-        // BUG: Workaround Safari WebGL issue: After successfully acquiring WebGL context on a canvas,
-        // calling .getContext() will always return that context independent of which 'webgl' or 'webgl2'
-        // context version was passed. See https://bugs.webkit.org/show_bug.cgi?id=222758 and
-        // https://github.com/emscripten-core/emscripten/issues/13295.
-        // TODO: Once the bug is fixed and shipped in Safari, adjust the Safari version field in above check.
-        if (!canvas.getContextSafariWebGL2Fixed) {
-          canvas.getContextSafariWebGL2Fixed = canvas.getContext;
-          /** @type {function(this:HTMLCanvasElement, string, (Object|null)=): (Object|null)} */
-          function fixedGetContext(ver, attrs) {
-            var gl = canvas.getContextSafariWebGL2Fixed(ver, attrs);
-            return ((ver == 'webgl') == (gl instanceof WebGLRenderingContext)) ? gl : null;
-          }
-          canvas.getContext = fixedGetContext;
-        }
-  
-        var ctx =
-          (canvas.getContext("webgl", webGLContextAttributes)
-            // https://caniuse.com/#feat=webgl
-            );
-  
-        if (!ctx) return 0;
-  
-        var handle = GL.registerContext(ctx, webGLContextAttributes);
-  
-        return handle;
-      },
-  registerContext:function(ctx, webGLContextAttributes) {
-        // without pthreads a context is just an integer ID
-        var handle = GL.getNewId(GL.contexts);
-  
-        var context = {
-          handle,
-          attributes: webGLContextAttributes,
-          version: webGLContextAttributes.majorVersion,
-          GLctx: ctx
-        };
-  
-        // Store the created context object so that we can access the context given a canvas without having to pass the parameters again.
-        if (ctx.canvas) ctx.canvas.GLctxObject = context;
-        GL.contexts[handle] = context;
-        if (typeof webGLContextAttributes.enableExtensionsByDefault == 'undefined' || webGLContextAttributes.enableExtensionsByDefault) {
-          GL.initExtensions(context);
-        }
-  
-        return handle;
-      },
-  makeContextCurrent:function(contextHandle) {
-  
-        GL.currentContext = GL.contexts[contextHandle]; // Active Emscripten GL layer context object.
-        Module.ctx = GLctx = GL.currentContext && GL.currentContext.GLctx; // Active WebGL context object.
-        return !(contextHandle && !GLctx);
-      },
-  getContext:function(contextHandle) {
-        return GL.contexts[contextHandle];
-      },
-  deleteContext:function(contextHandle) {
-        if (GL.currentContext === GL.contexts[contextHandle]) GL.currentContext = null;
-        if (typeof JSEvents == 'object') JSEvents.removeAllHandlersOnTarget(GL.contexts[contextHandle].GLctx.canvas); // Release all JS event handlers on the DOM element that the GL context is associated with since the context is now deleted.
-        if (GL.contexts[contextHandle] && GL.contexts[contextHandle].GLctx.canvas) GL.contexts[contextHandle].GLctx.canvas.GLctxObject = undefined; // Make sure the canvas object no longer refers to the context object so there are no GC surprises.
-        GL.contexts[contextHandle] = null;
-      },
-  initExtensions:function(context) {
-        // If this function is called without a specific context object, init the extensions of the currently active context.
-        if (!context) context = GL.currentContext;
-  
-        if (context.initExtensionsDone) return;
-        context.initExtensionsDone = true;
-  
-        var GLctx = context.GLctx;
-  
-        // Detect the presence of a few extensions manually, this GL interop layer itself will need to know if they exist.
-  
-        // Extensions that are only available in WebGL 1 (the calls will be no-ops if called on a WebGL 2 context active)
-        webgl_enable_ANGLE_instanced_arrays(GLctx);
-        webgl_enable_OES_vertex_array_object(GLctx);
-        webgl_enable_WEBGL_draw_buffers(GLctx);
-  
-        {
-          GLctx.disjointTimerQueryExt = GLctx.getExtension("EXT_disjoint_timer_query");
-        }
-  
-        webgl_enable_WEBGL_multi_draw(GLctx);
-  
-        // .getSupportedExtensions() can return null if context is lost, so coerce to empty array.
-        var exts = GLctx.getSupportedExtensions() || [];
-        exts.forEach(function(ext) {
-          // WEBGL_lose_context, WEBGL_debug_renderer_info and WEBGL_debug_shaders are not enabled by default.
-          if (!ext.includes('lose_context') && !ext.includes('debug')) {
-            // Call .getExtension() to enable that extension permanently.
-            GLctx.getExtension(ext);
-          }
-        });
-      },
-  };
-  
-  
-  /** @constructor */
-  function GLFW_Window(id, width, height, title, monitor, share) {
-        this.id = id;
-        this.x = 0;
-        this.y = 0;
-        this.fullscreen = false; // Used to determine if app in fullscreen mode
-        this.storedX = 0; // Used to store X before fullscreen
-        this.storedY = 0; // Used to store Y before fullscreen
-        this.width = width;
-        this.height = height;
-        this.storedWidth = width; // Used to store width before fullscreen
-        this.storedHeight = height; // Used to store height before fullscreen
-        this.title = title;
-        this.monitor = monitor;
-        this.share = share;
-        this.attributes = GLFW.hints;
-        this.inputModes = {
-          0x00033001:0x00034001, // GLFW_CURSOR (GLFW_CURSOR_NORMAL)
-          0x00033002:0, // GLFW_STICKY_KEYS
-          0x00033003:0, // GLFW_STICKY_MOUSE_BUTTONS
-        };
-        this.buttons = 0;
-        this.keys = new Array();
-        this.domKeys = new Array();
-        this.shouldClose = 0;
-        this.title = null;
-        this.windowPosFunc = null; // GLFWwindowposfun
-        this.windowSizeFunc = null; // GLFWwindowsizefun
-        this.windowCloseFunc = null; // GLFWwindowclosefun
-        this.windowRefreshFunc = null; // GLFWwindowrefreshfun
-        this.windowFocusFunc = null; // GLFWwindowfocusfun
-        this.windowIconifyFunc = null; // GLFWwindowiconifyfun
-        this.windowMaximizeFunc = null; // GLFWwindowmaximizefun
-        this.framebufferSizeFunc = null; // GLFWframebuffersizefun
-        this.windowContentScaleFunc = null; // GLFWwindowcontentscalefun
-        this.mouseButtonFunc = null; // GLFWmousebuttonfun
-        this.cursorPosFunc = null; // GLFWcursorposfun
-        this.cursorEnterFunc = null; // GLFWcursorenterfun
-        this.scrollFunc = null; // GLFWscrollfun
-        this.dropFunc = null; // GLFWdropfun
-        this.keyFunc = null; // GLFWkeyfun
-        this.charFunc = null; // GLFWcharfun
-        this.userptr = null;
-      }
-  
-  
-  
-  var stringToNewUTF8 = (str) => {
-      var size = lengthBytesUTF8(str) + 1;
-      var ret = _malloc(size);
-      if (ret) stringToUTF8(str, ret, size);
-      return ret;
-    };
-  
-  
-  
-  
-  var GLFW = {
-  WindowFromId:function(id) {
-        if (id <= 0 || !GLFW.windows) return null;
-        return GLFW.windows[id - 1];
-      },
-  joystickFunc:null,
-  errorFunc:null,
-  monitorFunc:null,
-  active:null,
-  scale:null,
-  windows:null,
-  monitors:null,
-  monitorString:null,
-  versionString:null,
-  initialTime:null,
-  extensions:null,
-  hints:null,
-  defaultHints:{
-  131073:0,
-  131074:0,
-  131075:1,
-  131076:1,
-  131077:1,
-  131082:0,
-  135169:8,
-  135170:8,
-  135171:8,
-  135172:8,
-  135173:24,
-  135174:8,
-  135175:0,
-  135176:0,
-  135177:0,
-  135178:0,
-  135179:0,
-  135180:0,
-  135181:0,
-  135182:0,
-  135183:0,
-  139265:196609,
-  139266:1,
-  139267:0,
-  139268:0,
-  139269:0,
-  139270:0,
-  139271:0,
-  139272:0,
-  139276:0,
-  },
-  DOMToGLFWKeyCode:function(keycode) {
-        switch (keycode) {
-          // these keycodes are only defined for GLFW3, assume they are the same for GLFW2
-          case 0x20:return 32; // DOM_VK_SPACE -> GLFW_KEY_SPACE
-          case 0xDE:return 39; // DOM_VK_QUOTE -> GLFW_KEY_APOSTROPHE
-          case 0xBC:return 44; // DOM_VK_COMMA -> GLFW_KEY_COMMA
-          case 0xAD:return 45; // DOM_VK_HYPHEN_MINUS -> GLFW_KEY_MINUS
-          case 0xBD:return 45; // DOM_VK_MINUS -> GLFW_KEY_MINUS
-          case 0xBE:return 46; // DOM_VK_PERIOD -> GLFW_KEY_PERIOD
-          case 0xBF:return 47; // DOM_VK_SLASH -> GLFW_KEY_SLASH
-          case 0x30:return 48; // DOM_VK_0 -> GLFW_KEY_0
-          case 0x31:return 49; // DOM_VK_1 -> GLFW_KEY_1
-          case 0x32:return 50; // DOM_VK_2 -> GLFW_KEY_2
-          case 0x33:return 51; // DOM_VK_3 -> GLFW_KEY_3
-          case 0x34:return 52; // DOM_VK_4 -> GLFW_KEY_4
-          case 0x35:return 53; // DOM_VK_5 -> GLFW_KEY_5
-          case 0x36:return 54; // DOM_VK_6 -> GLFW_KEY_6
-          case 0x37:return 55; // DOM_VK_7 -> GLFW_KEY_7
-          case 0x38:return 56; // DOM_VK_8 -> GLFW_KEY_8
-          case 0x39:return 57; // DOM_VK_9 -> GLFW_KEY_9
-          case 0x3B:return 59; // DOM_VK_SEMICOLON -> GLFW_KEY_SEMICOLON
-          case 0x3D:return 61; // DOM_VK_EQUALS -> GLFW_KEY_EQUAL
-          case 0xBB:return 61; // DOM_VK_EQUALS -> GLFW_KEY_EQUAL
-          case 0x41:return 65; // DOM_VK_A -> GLFW_KEY_A
-          case 0x42:return 66; // DOM_VK_B -> GLFW_KEY_B
-          case 0x43:return 67; // DOM_VK_C -> GLFW_KEY_C
-          case 0x44:return 68; // DOM_VK_D -> GLFW_KEY_D
-          case 0x45:return 69; // DOM_VK_E -> GLFW_KEY_E
-          case 0x46:return 70; // DOM_VK_F -> GLFW_KEY_F
-          case 0x47:return 71; // DOM_VK_G -> GLFW_KEY_G
-          case 0x48:return 72; // DOM_VK_H -> GLFW_KEY_H
-          case 0x49:return 73; // DOM_VK_I -> GLFW_KEY_I
-          case 0x4A:return 74; // DOM_VK_J -> GLFW_KEY_J
-          case 0x4B:return 75; // DOM_VK_K -> GLFW_KEY_K
-          case 0x4C:return 76; // DOM_VK_L -> GLFW_KEY_L
-          case 0x4D:return 77; // DOM_VK_M -> GLFW_KEY_M
-          case 0x4E:return 78; // DOM_VK_N -> GLFW_KEY_N
-          case 0x4F:return 79; // DOM_VK_O -> GLFW_KEY_O
-          case 0x50:return 80; // DOM_VK_P -> GLFW_KEY_P
-          case 0x51:return 81; // DOM_VK_Q -> GLFW_KEY_Q
-          case 0x52:return 82; // DOM_VK_R -> GLFW_KEY_R
-          case 0x53:return 83; // DOM_VK_S -> GLFW_KEY_S
-          case 0x54:return 84; // DOM_VK_T -> GLFW_KEY_T
-          case 0x55:return 85; // DOM_VK_U -> GLFW_KEY_U
-          case 0x56:return 86; // DOM_VK_V -> GLFW_KEY_V
-          case 0x57:return 87; // DOM_VK_W -> GLFW_KEY_W
-          case 0x58:return 88; // DOM_VK_X -> GLFW_KEY_X
-          case 0x59:return 89; // DOM_VK_Y -> GLFW_KEY_Y
-          case 0x5a:return 90; // DOM_VK_Z -> GLFW_KEY_Z
-          case 0xDB:return 91; // DOM_VK_OPEN_BRACKET -> GLFW_KEY_LEFT_BRACKET
-          case 0xDC:return 92; // DOM_VK_BACKSLASH -> GLFW_KEY_BACKSLASH
-          case 0xDD:return 93; // DOM_VK_CLOSE_BRACKET -> GLFW_KEY_RIGHT_BRACKET
-          case 0xC0:return 96; // DOM_VK_BACK_QUOTE -> GLFW_KEY_GRAVE_ACCENT
-  
-          case 0x1B:return 256; // DOM_VK_ESCAPE -> GLFW_KEY_ESCAPE
-          case 0x0D:return 257; // DOM_VK_RETURN -> GLFW_KEY_ENTER
-          case 0x09:return 258; // DOM_VK_TAB -> GLFW_KEY_TAB
-          case 0x08:return 259; // DOM_VK_BACK -> GLFW_KEY_BACKSPACE
-          case 0x2D:return 260; // DOM_VK_INSERT -> GLFW_KEY_INSERT
-          case 0x2E:return 261; // DOM_VK_DELETE -> GLFW_KEY_DELETE
-          case 0x27:return 262; // DOM_VK_RIGHT -> GLFW_KEY_RIGHT
-          case 0x25:return 263; // DOM_VK_LEFT -> GLFW_KEY_LEFT
-          case 0x28:return 264; // DOM_VK_DOWN -> GLFW_KEY_DOWN
-          case 0x26:return 265; // DOM_VK_UP -> GLFW_KEY_UP
-          case 0x21:return 266; // DOM_VK_PAGE_UP -> GLFW_KEY_PAGE_UP
-          case 0x22:return 267; // DOM_VK_PAGE_DOWN -> GLFW_KEY_PAGE_DOWN
-          case 0x24:return 268; // DOM_VK_HOME -> GLFW_KEY_HOME
-          case 0x23:return 269; // DOM_VK_END -> GLFW_KEY_END
-          case 0x14:return 280; // DOM_VK_CAPS_LOCK -> GLFW_KEY_CAPS_LOCK
-          case 0x91:return 281; // DOM_VK_SCROLL_LOCK -> GLFW_KEY_SCROLL_LOCK
-          case 0x90:return 282; // DOM_VK_NUM_LOCK -> GLFW_KEY_NUM_LOCK
-          case 0x2C:return 283; // DOM_VK_SNAPSHOT -> GLFW_KEY_PRINT_SCREEN
-          case 0x13:return 284; // DOM_VK_PAUSE -> GLFW_KEY_PAUSE
-          case 0x70:return 290; // DOM_VK_F1 -> GLFW_KEY_F1
-          case 0x71:return 291; // DOM_VK_F2 -> GLFW_KEY_F2
-          case 0x72:return 292; // DOM_VK_F3 -> GLFW_KEY_F3
-          case 0x73:return 293; // DOM_VK_F4 -> GLFW_KEY_F4
-          case 0x74:return 294; // DOM_VK_F5 -> GLFW_KEY_F5
-          case 0x75:return 295; // DOM_VK_F6 -> GLFW_KEY_F6
-          case 0x76:return 296; // DOM_VK_F7 -> GLFW_KEY_F7
-          case 0x77:return 297; // DOM_VK_F8 -> GLFW_KEY_F8
-          case 0x78:return 298; // DOM_VK_F9 -> GLFW_KEY_F9
-          case 0x79:return 299; // DOM_VK_F10 -> GLFW_KEY_F10
-          case 0x7A:return 300; // DOM_VK_F11 -> GLFW_KEY_F11
-          case 0x7B:return 301; // DOM_VK_F12 -> GLFW_KEY_F12
-          case 0x7C:return 302; // DOM_VK_F13 -> GLFW_KEY_F13
-          case 0x7D:return 303; // DOM_VK_F14 -> GLFW_KEY_F14
-          case 0x7E:return 304; // DOM_VK_F15 -> GLFW_KEY_F15
-          case 0x7F:return 305; // DOM_VK_F16 -> GLFW_KEY_F16
-          case 0x80:return 306; // DOM_VK_F17 -> GLFW_KEY_F17
-          case 0x81:return 307; // DOM_VK_F18 -> GLFW_KEY_F18
-          case 0x82:return 308; // DOM_VK_F19 -> GLFW_KEY_F19
-          case 0x83:return 309; // DOM_VK_F20 -> GLFW_KEY_F20
-          case 0x84:return 310; // DOM_VK_F21 -> GLFW_KEY_F21
-          case 0x85:return 311; // DOM_VK_F22 -> GLFW_KEY_F22
-          case 0x86:return 312; // DOM_VK_F23 -> GLFW_KEY_F23
-          case 0x87:return 313; // DOM_VK_F24 -> GLFW_KEY_F24
-          case 0x88:return 314; // 0x88 (not used?) -> GLFW_KEY_F25
-          case 0x60:return 320; // DOM_VK_NUMPAD0 -> GLFW_KEY_KP_0
-          case 0x61:return 321; // DOM_VK_NUMPAD1 -> GLFW_KEY_KP_1
-          case 0x62:return 322; // DOM_VK_NUMPAD2 -> GLFW_KEY_KP_2
-          case 0x63:return 323; // DOM_VK_NUMPAD3 -> GLFW_KEY_KP_3
-          case 0x64:return 324; // DOM_VK_NUMPAD4 -> GLFW_KEY_KP_4
-          case 0x65:return 325; // DOM_VK_NUMPAD5 -> GLFW_KEY_KP_5
-          case 0x66:return 326; // DOM_VK_NUMPAD6 -> GLFW_KEY_KP_6
-          case 0x67:return 327; // DOM_VK_NUMPAD7 -> GLFW_KEY_KP_7
-          case 0x68:return 328; // DOM_VK_NUMPAD8 -> GLFW_KEY_KP_8
-          case 0x69:return 329; // DOM_VK_NUMPAD9 -> GLFW_KEY_KP_9
-          case 0x6E:return 330; // DOM_VK_DECIMAL -> GLFW_KEY_KP_DECIMAL
-          case 0x6F:return 331; // DOM_VK_DIVIDE -> GLFW_KEY_KP_DIVIDE
-          case 0x6A:return 332; // DOM_VK_MULTIPLY -> GLFW_KEY_KP_MULTIPLY
-          case 0x6D:return 333; // DOM_VK_SUBTRACT -> GLFW_KEY_KP_SUBTRACT
-          case 0x6B:return 334; // DOM_VK_ADD -> GLFW_KEY_KP_ADD
-          // case 0x0D:return 335; // DOM_VK_RETURN -> GLFW_KEY_KP_ENTER (DOM_KEY_LOCATION_RIGHT)
-          // case 0x61:return 336; // DOM_VK_EQUALS -> GLFW_KEY_KP_EQUAL (DOM_KEY_LOCATION_RIGHT)
-          case 0x10:return 340; // DOM_VK_SHIFT -> GLFW_KEY_LEFT_SHIFT
-          case 0x11:return 341; // DOM_VK_CONTROL -> GLFW_KEY_LEFT_CONTROL
-          case 0x12:return 342; // DOM_VK_ALT -> GLFW_KEY_LEFT_ALT
-          case 0x5B:return 343; // DOM_VK_WIN -> GLFW_KEY_LEFT_SUPER
-          // case 0x10:return 344; // DOM_VK_SHIFT -> GLFW_KEY_RIGHT_SHIFT (DOM_KEY_LOCATION_RIGHT)
-          // case 0x11:return 345; // DOM_VK_CONTROL -> GLFW_KEY_RIGHT_CONTROL (DOM_KEY_LOCATION_RIGHT)
-          // case 0x12:return 346; // DOM_VK_ALT -> GLFW_KEY_RIGHT_ALT (DOM_KEY_LOCATION_RIGHT)
-          // case 0x5B:return 347; // DOM_VK_WIN -> GLFW_KEY_RIGHT_SUPER (DOM_KEY_LOCATION_RIGHT)
-          case 0x5D:return 348; // DOM_VK_CONTEXT_MENU -> GLFW_KEY_MENU
-          // XXX: GLFW_KEY_WORLD_1, GLFW_KEY_WORLD_2 what are these?
-          default:return -1; // GLFW_KEY_UNKNOWN
-        };
-      },
-  getModBits:function(win) {
-        var mod = 0;
-        if (win.keys[340]) mod |= 0x0001; // GLFW_MOD_SHIFT
-        if (win.keys[341]) mod |= 0x0002; // GLFW_MOD_CONTROL
-        if (win.keys[342]) mod |= 0x0004; // GLFW_MOD_ALT
-        if (win.keys[343]) mod |= 0x0008; // GLFW_MOD_SUPER
-        // add caps and num lock keys? only if lock_key_mod is set
-        return mod;
-      },
-  onKeyPress:function(event) {
-        if (!GLFW.active || !GLFW.active.charFunc) return;
-        if (event.ctrlKey || event.metaKey) return;
-  
-        // correct unicode charCode is only available with onKeyPress event
-        var charCode = event.charCode;
-        if (charCode == 0 || (charCode >= 0x00 && charCode <= 0x1F)) return;
-  
-        getWasmTableEntry(GLFW.active.charFunc)(GLFW.active.id, charCode);
-      },
-  onKeyChanged:function(keyCode, status) {
-        if (!GLFW.active) return;
-  
-        var key = GLFW.DOMToGLFWKeyCode(keyCode);
-        if (key == -1) return;
-  
-        var repeat = status && GLFW.active.keys[key];
-        GLFW.active.keys[key] = status;
-        GLFW.active.domKeys[keyCode] = status;
-  
-        if (GLFW.active.keyFunc) {
-          if (repeat) status = 2; // GLFW_REPEAT
-          getWasmTableEntry(GLFW.active.keyFunc)(GLFW.active.id, key, keyCode, status, GLFW.getModBits(GLFW.active));
-        }
-      },
-  onGamepadConnected:function(event) {
-        GLFW.refreshJoysticks();
-      },
-  onGamepadDisconnected:function(event) {
-        GLFW.refreshJoysticks();
-      },
-  onKeydown:function(event) {
-        GLFW.onKeyChanged(event.keyCode, 1); // GLFW_PRESS or GLFW_REPEAT
-  
-        // This logic comes directly from the sdl implementation. We cannot
-        // call preventDefault on all keydown events otherwise onKeyPress will
-        // not get called
-        if (event.keyCode === 8 /* backspace */ || event.keyCode === 9 /* tab */) {
-          event.preventDefault();
-        }
-      },
-  onKeyup:function(event) {
-        GLFW.onKeyChanged(event.keyCode, 0); // GLFW_RELEASE
-      },
-  onBlur:function(event) {
-        if (!GLFW.active) return;
-  
-        for (var i = 0; i < GLFW.active.domKeys.length; ++i) {
-          if (GLFW.active.domKeys[i]) {
-            GLFW.onKeyChanged(i, 0); // GLFW_RELEASE
-          }
-        }
-      },
-  onMousemove:function(event) {
-        if (!GLFW.active) return;
-  
-        Browser.calculateMouseEvent(event);
-  
-        if (event.target != Module["canvas"] || !GLFW.active.cursorPosFunc) return;
-  
-        if (GLFW.active.cursorPosFunc) {
-          getWasmTableEntry(GLFW.active.cursorPosFunc)(GLFW.active.id, Browser.mouseX, Browser.mouseY);
-        }
-      },
-  DOMToGLFWMouseButton:function(event) {
-        // DOM and glfw have different button codes.
-        // See http://www.w3schools.com/jsref/event_button.asp.
-        var eventButton = event['button'];
-        if (eventButton > 0) {
-          if (eventButton == 1) {
-            eventButton = 2;
-          } else {
-            eventButton = 1;
-          }
-        }
-        return eventButton;
-      },
-  onMouseenter:function(event) {
-        if (!GLFW.active) return;
-  
-        if (event.target != Module["canvas"]) return;
-  
-        if (GLFW.active.cursorEnterFunc) {
-          getWasmTableEntry(GLFW.active.cursorEnterFunc)(GLFW.active.id, 1);
-        }
-      },
-  onMouseleave:function(event) {
-        if (!GLFW.active) return;
-  
-        if (event.target != Module["canvas"]) return;
-  
-        if (GLFW.active.cursorEnterFunc) {
-          getWasmTableEntry(GLFW.active.cursorEnterFunc)(GLFW.active.id, 0);
-        }
-      },
-  onMouseButtonChanged:function(event, status) {
-        if (!GLFW.active) return;
-  
-        Browser.calculateMouseEvent(event);
-  
-        if (event.target != Module["canvas"]) return;
-  
-        var eventButton = GLFW.DOMToGLFWMouseButton(event);
-  
-        if (status == 1) { // GLFW_PRESS
-          GLFW.active.buttons |= (1 << eventButton);
-          try {
-            event.target.setCapture();
-          } catch (e) {}
-        } else {  // GLFW_RELEASE
-          GLFW.active.buttons &= ~(1 << eventButton);
-        }
-  
-        if (GLFW.active.mouseButtonFunc) {
-          getWasmTableEntry(GLFW.active.mouseButtonFunc)(GLFW.active.id, eventButton, status, GLFW.getModBits(GLFW.active));
-        }
-      },
-  onMouseButtonDown:function(event) {
-        if (!GLFW.active) return;
-        GLFW.onMouseButtonChanged(event, 1); // GLFW_PRESS
-      },
-  onMouseButtonUp:function(event) {
-        if (!GLFW.active) return;
-        GLFW.onMouseButtonChanged(event, 0); // GLFW_RELEASE
-      },
-  onMouseWheel:function(event) {
-        // Note the minus sign that flips browser wheel direction (positive direction scrolls page down) to native wheel direction (positive direction is mouse wheel up)
-        var delta = -Browser.getMouseWheelDelta(event);
-        delta = (delta == 0) ? 0 : (delta > 0 ? Math.max(delta, 1) : Math.min(delta, -1)); // Quantize to integer so that minimum scroll is at least +/- 1.
-        GLFW.wheelPos += delta;
-  
-        if (!GLFW.active || !GLFW.active.scrollFunc || event.target != Module['canvas']) return;
-        var sx = 0;
-        var sy = delta;
-        if (event.type == 'mousewheel') {
-          sx = event.wheelDeltaX;
-        } else {
-          sx = event.deltaX;
-        }
-  
-        getWasmTableEntry(GLFW.active.scrollFunc)(GLFW.active.id, sx, sy);
-  
-        event.preventDefault();
-      },
-  onCanvasResize:function(width, height) {
-        if (!GLFW.active) return;
-  
-        var resizeNeeded = true;
-  
-        // If the client is requesting fullscreen mode
-        if (document["fullscreen"] || document["fullScreen"] || document["mozFullScreen"] || document["webkitIsFullScreen"]) {
-          GLFW.active.storedX = GLFW.active.x;
-          GLFW.active.storedY = GLFW.active.y;
-          GLFW.active.storedWidth = GLFW.active.width;
-          GLFW.active.storedHeight = GLFW.active.height;
-          GLFW.active.x = GLFW.active.y = 0;
-          GLFW.active.width = screen.width;
-          GLFW.active.height = screen.height;
-          GLFW.active.fullscreen = true;
-  
-        // If the client is reverting from fullscreen mode
-        } else if (GLFW.active.fullscreen == true) {
-          GLFW.active.x = GLFW.active.storedX;
-          GLFW.active.y = GLFW.active.storedY;
-          GLFW.active.width = GLFW.active.storedWidth;
-          GLFW.active.height = GLFW.active.storedHeight;
-          GLFW.active.fullscreen = false;
-  
-        // If the width/height values do not match current active window sizes
-        } else if (GLFW.active.width != width || GLFW.active.height != height) {
-            GLFW.active.width = width;
-            GLFW.active.height = height;
-        } else {
-          resizeNeeded = false;
-        }
-  
-        // If any of the above conditions were true, we need to resize the canvas
-        if (resizeNeeded) {
-          // resets the canvas size to counter the aspect preservation of Browser.updateCanvasDimensions
-          Browser.setCanvasSize(GLFW.active.width, GLFW.active.height, true);
-          // TODO: Client dimensions (clientWidth/clientHeight) vs pixel dimensions (width/height) of
-          // the canvas should drive window and framebuffer size respectfully.
-          GLFW.onWindowSizeChanged();
-          GLFW.onFramebufferSizeChanged();
-        }
-      },
-  onWindowSizeChanged:function() {
-        if (!GLFW.active) return;
-  
-        if (GLFW.active.windowSizeFunc) {
-          getWasmTableEntry(GLFW.active.windowSizeFunc)(GLFW.active.id, GLFW.active.width, GLFW.active.height);
-        }
-      },
-  onFramebufferSizeChanged:function() {
-        if (!GLFW.active) return;
-  
-        if (GLFW.active.framebufferSizeFunc) {
-          getWasmTableEntry(GLFW.active.framebufferSizeFunc)(GLFW.active.id, GLFW.active.width, GLFW.active.height);
-        }
-      },
-  onWindowContentScaleChanged:function(scale) {
-        GLFW.scale = scale;
-        if (!GLFW.active) return;
-  
-        if (GLFW.active.windowContentScaleFunc) {
-          getWasmTableEntry(GLFW.active.windowContentScaleFunc)(GLFW.active.id, GLFW.scale, GLFW.scale);
-        }
-      },
-  getTime:function() {
-        return _emscripten_get_now() / 1000;
-      },
-  setWindowTitle:function(winid, title) {
-        var win = GLFW.WindowFromId(winid);
-        if (!win) return;
-  
-        win.title = UTF8ToString(title);
-        if (GLFW.active.id == win.id) {
-          document.title = win.title;
-        }
-      },
-  setJoystickCallback:function(cbfun) {
-        GLFW.joystickFunc = cbfun;
-        GLFW.refreshJoysticks();
-      },
-  joys:{
-  },
-  lastGamepadState:[],
-  lastGamepadStateFrame:null,
-  refreshJoysticks:function() {
-        // Produce a new Gamepad API sample if we are ticking a new game frame, or if not using emscripten_set_main_loop() at all to drive animation.
-        if (Browser.mainLoop.currentFrameNumber !== GLFW.lastGamepadStateFrame || !Browser.mainLoop.currentFrameNumber) {
-          GLFW.lastGamepadState = navigator.getGamepads ? navigator.getGamepads() : (navigator.webkitGetGamepads ? navigator.webkitGetGamepads : []);
-          GLFW.lastGamepadStateFrame = Browser.mainLoop.currentFrameNumber;
-  
-          for (var joy = 0; joy < GLFW.lastGamepadState.length; ++joy) {
-            var gamepad = GLFW.lastGamepadState[joy];
-  
-            if (gamepad) {
-              if (!GLFW.joys[joy]) {
-                out('glfw joystick connected:',joy);
-                GLFW.joys[joy] = {
-                  id: stringToNewUTF8(gamepad.id),
-                  buttonsCount: gamepad.buttons.length,
-                  axesCount: gamepad.axes.length,
-                  buttons: _malloc(gamepad.buttons.length),
-                  axes: _malloc(gamepad.axes.length*4),
-                };
-  
-                if (GLFW.joystickFunc) {
-                  getWasmTableEntry(GLFW.joystickFunc)(joy, 0x00040001); // GLFW_CONNECTED
-                }
-              }
-  
-              var data = GLFW.joys[joy];
-  
-              for (var i = 0; i < gamepad.buttons.length;  ++i) {
-                HEAP8[((data.buttons + i)>>0)] = gamepad.buttons[i].pressed;
-              }
-  
-              for (var i = 0; i < gamepad.axes.length; ++i) {
-                HEAPF32[((data.axes + i*4)>>2)] = gamepad.axes[i];
-              }
-            } else {
-              if (GLFW.joys[joy]) {
-                out('glfw joystick disconnected',joy);
-  
-                if (GLFW.joystickFunc) {
-                  getWasmTableEntry(GLFW.joystickFunc)(joy, 0x00040002); // GLFW_DISCONNECTED
-                }
-  
-                _free(GLFW.joys[joy].id);
-                _free(GLFW.joys[joy].buttons);
-                _free(GLFW.joys[joy].axes);
-  
-                delete GLFW.joys[joy];
-              }
-            }
-          }
-        }
-      },
-  setKeyCallback:function(winid, cbfun) {
-        var win = GLFW.WindowFromId(winid);
-        if (!win) return null;
-        var prevcbfun = win.keyFunc;
-        win.keyFunc = cbfun;
-        return prevcbfun;
-      },
-  setCharCallback:function(winid, cbfun) {
-        var win = GLFW.WindowFromId(winid);
-        if (!win) return null;
-        var prevcbfun = win.charFunc;
-        win.charFunc = cbfun;
-        return prevcbfun;
-      },
-  setMouseButtonCallback:function(winid, cbfun) {
-        var win = GLFW.WindowFromId(winid);
-        if (!win) return null;
-        var prevcbfun = win.mouseButtonFunc;
-        win.mouseButtonFunc = cbfun;
-        return prevcbfun;
-      },
-  setCursorPosCallback:function(winid, cbfun) {
-        var win = GLFW.WindowFromId(winid);
-        if (!win) return null;
-        var prevcbfun = win.cursorPosFunc;
-        win.cursorPosFunc = cbfun;
-        return prevcbfun;
-      },
-  setScrollCallback:function(winid, cbfun) {
-        var win = GLFW.WindowFromId(winid);
-        if (!win) return null;
-        var prevcbfun = win.scrollFunc;
-        win.scrollFunc = cbfun;
-        return prevcbfun;
-      },
-  setDropCallback:function(winid, cbfun) {
-        var win = GLFW.WindowFromId(winid);
-        if (!win) return null;
-        var prevcbfun = win.dropFunc;
-        win.dropFunc = cbfun;
-        return prevcbfun;
-      },
-  onDrop:function(event) {
-        if (!GLFW.active || !GLFW.active.dropFunc) return;
-        if (!event.dataTransfer || !event.dataTransfer.files || event.dataTransfer.files.length == 0) return;
-  
-        event.preventDefault();
-  
-        var filenames = _malloc(event.dataTransfer.files.length*4);
-        var filenamesArray = [];
-        var count = event.dataTransfer.files.length;
-  
-        // Read and save the files to emscripten's FS
-        var written = 0;
-        var drop_dir = '.glfw_dropped_files';
-        FS.createPath('/', drop_dir);
-  
-        function save(file) {
-          var path = '/' + drop_dir + '/' + file.name.replace(/\//g, '_');
-          var reader = new FileReader();
-          reader.onloadend = (e) => {
-            if (reader.readyState != 2) { // not DONE
-              ++written;
-              out('failed to read dropped file: '+file.name+': '+reader.error);
-              return;
-            }
-  
-            var data = e.target.result;
-            FS.writeFile(path, new Uint8Array(data));
-            if (++written === count) {
-              getWasmTableEntry(GLFW.active.dropFunc)(GLFW.active.id, count, filenames);
-  
-              for (var i = 0; i < filenamesArray.length; ++i) {
-                _free(filenamesArray[i]);
-              }
-              _free(filenames);
-            }
-          };
-          reader.readAsArrayBuffer(file);
-  
-          var filename = stringToNewUTF8(path);
-          filenamesArray.push(filename);
-          HEAPU32[((filenames + i*4)>>2)] = filename;
-        }
-  
-        for (var i = 0; i < count; ++i) {
-          save(event.dataTransfer.files[i]);
-        }
-  
-        return false;
-      },
-  onDragover:function(event) {
-        if (!GLFW.active || !GLFW.active.dropFunc) return;
-  
-        event.preventDefault();
-        return false;
-      },
-  setWindowSizeCallback:function(winid, cbfun) {
-        var win = GLFW.WindowFromId(winid);
-        if (!win) return null;
-        var prevcbfun = win.windowSizeFunc;
-        win.windowSizeFunc = cbfun;
-  
-        return prevcbfun;
-      },
-  setWindowCloseCallback:function(winid, cbfun) {
-        var win = GLFW.WindowFromId(winid);
-        if (!win) return null;
-        var prevcbfun = win.windowCloseFunc;
-        win.windowCloseFunc = cbfun;
-        return prevcbfun;
-      },
-  setWindowRefreshCallback:function(winid, cbfun) {
-        var win = GLFW.WindowFromId(winid);
-        if (!win) return null;
-        var prevcbfun = win.windowRefreshFunc;
-        win.windowRefreshFunc = cbfun;
-        return prevcbfun;
-      },
-  onClickRequestPointerLock:function(e) {
-        if (!Browser.pointerLock && Module['canvas'].requestPointerLock) {
-          Module['canvas'].requestPointerLock();
-          e.preventDefault();
-        }
-      },
-  setInputMode:function(winid, mode, value) {
-        var win = GLFW.WindowFromId(winid);
-        if (!win) return;
-  
-        switch (mode) {
-          case 0x00033001: { // GLFW_CURSOR
-            switch (value) {
-              case 0x00034001: { // GLFW_CURSOR_NORMAL
-                win.inputModes[mode] = value;
-                Module['canvas'].removeEventListener('click', GLFW.onClickRequestPointerLock, true);
-                Module['canvas'].exitPointerLock();
-                break;
-              }
-              case 0x00034002: { // GLFW_CURSOR_HIDDEN
-                out("glfwSetInputMode called with GLFW_CURSOR_HIDDEN value not implemented.");
-                break;
-              }
-              case 0x00034003: { // GLFW_CURSOR_DISABLED
-                win.inputModes[mode] = value;
-                Module['canvas'].addEventListener('click', GLFW.onClickRequestPointerLock, true);
-                Module['canvas'].requestPointerLock();
-                break;
-              }
-              default: {
-                out("glfwSetInputMode called with unknown value parameter value: " + value + ".");
-                break;
-              }
-            }
-            break;
-          }
-          case 0x00033002: { // GLFW_STICKY_KEYS
-            out("glfwSetInputMode called with GLFW_STICKY_KEYS mode not implemented.");
-            break;
-          }
-          case 0x00033003: { // GLFW_STICKY_MOUSE_BUTTONS
-            out("glfwSetInputMode called with GLFW_STICKY_MOUSE_BUTTONS mode not implemented.");
-            break;
-          }
-          case 0x00033004: { // GLFW_LOCK_KEY_MODS
-            out("glfwSetInputMode called with GLFW_LOCK_KEY_MODS mode not implemented.");
-            break;
-          }
-          case 0x000330005: { // GLFW_RAW_MOUSE_MOTION
-            out("glfwSetInputMode called with GLFW_RAW_MOUSE_MOTION mode not implemented.");
-            break;
-          }
-          default: {
-            out("glfwSetInputMode called with unknown mode parameter value: " + mode + ".");
-            break;
-          }
-        }
-      },
-  getKey:function(winid, key) {
-        var win = GLFW.WindowFromId(winid);
-        if (!win) return 0;
-        return win.keys[key];
-      },
-  getMouseButton:function(winid, button) {
-        var win = GLFW.WindowFromId(winid);
-        if (!win) return 0;
-        return (win.buttons & (1 << button)) > 0;
-      },
-  getCursorPos:function(winid, x, y) {
-        HEAPF64[((x)>>3)] = Browser.mouseX;
-        HEAPF64[((y)>>3)] = Browser.mouseY;
-      },
-  getMousePos:function(winid, x, y) {
-        HEAP32[((x)>>2)] = Browser.mouseX;
-        HEAP32[((y)>>2)] = Browser.mouseY;
-      },
-  setCursorPos:function(winid, x, y) {
-      },
-  getWindowPos:function(winid, x, y) {
-        var wx = 0;
-        var wy = 0;
-  
-        var win = GLFW.WindowFromId(winid);
-        if (win) {
-          wx = win.x;
-          wy = win.y;
-        }
-  
-        if (x) {
-          HEAP32[((x)>>2)] = wx;
-        }
-  
-        if (y) {
-          HEAP32[((y)>>2)] = wy;
-        }
-      },
-  setWindowPos:function(winid, x, y) {
-        var win = GLFW.WindowFromId(winid);
-        if (!win) return;
-        win.x = x;
-        win.y = y;
-      },
-  getWindowSize:function(winid, width, height) {
-        var ww = 0;
-        var wh = 0;
-  
-        var win = GLFW.WindowFromId(winid);
-        if (win) {
-          ww = win.width;
-          wh = win.height;
-        }
-  
-        if (width) {
-          HEAP32[((width)>>2)] = ww;
-        }
-  
-        if (height) {
-          HEAP32[((height)>>2)] = wh;
-        }
-      },
-  setWindowSize:function(winid, width, height) {
-        var win = GLFW.WindowFromId(winid);
-        if (!win) return;
-  
-        if (GLFW.active.id == win.id) {
-          if (width == screen.width && height == screen.height) {
-            Browser.requestFullscreen();
-          } else {
-            Browser.exitFullscreen();
-            Browser.setCanvasSize(width, height);
-            win.width = width;
-            win.height = height;
-          }
-        }
-  
-        if (win.windowSizeFunc) {
-          getWasmTableEntry(win.windowSizeFunc)(win.id, width, height);
-        }
-      },
-  createWindow:function(width, height, title, monitor, share) {
-        var i, id;
-        for (i = 0; i < GLFW.windows.length && GLFW.windows[i] !== null; i++) {
-          // no-op
-        }
-        if (i > 0) throw "glfwCreateWindow only supports one window at time currently";
-  
-        // id for window
-        id = i + 1;
-  
-        // not valid
-        if (width <= 0 || height <= 0) return 0;
-  
-        if (monitor) {
-          Browser.requestFullscreen();
-        } else {
-          Browser.setCanvasSize(width, height);
-        }
-  
-        // Create context when there are no existing alive windows
-        for (i = 0; i < GLFW.windows.length && GLFW.windows[i] == null; i++) {
-          // no-op
-        }
-        var useWebGL = GLFW.hints[0x00022001] > 0; // Use WebGL when we are told to based on GLFW_CLIENT_API
-        if (i == GLFW.windows.length) {
-          if (useWebGL) {
-            var contextAttributes = {
-              antialias: (GLFW.hints[0x0002100D] > 1), // GLFW_SAMPLES
-              depth: (GLFW.hints[0x00021005] > 0),     // GLFW_DEPTH_BITS
-              stencil: (GLFW.hints[0x00021006] > 0),   // GLFW_STENCIL_BITS
-              alpha: (GLFW.hints[0x00021004] > 0)      // GLFW_ALPHA_BITS
-            }
-            Module.ctx = Browser.createContext(Module['canvas'], true, true, contextAttributes);
-          } else {
-            Browser.init();
-          }
-        }
-  
-        // If context creation failed, do not return a valid window
-        if (!Module.ctx && useWebGL) return 0;
-  
-        // Get non alive id
-        var win = new GLFW_Window(id, width, height, title, monitor, share);
-  
-        // Set window to array
-        if (id - 1 == GLFW.windows.length) {
-          GLFW.windows.push(win);
-        } else {
-          GLFW.windows[id - 1] = win;
-        }
-  
-        GLFW.active = win;
-        return win.id;
-      },
-  destroyWindow:function(winid) {
-        var win = GLFW.WindowFromId(winid);
-        if (!win) return;
-  
-        if (win.windowCloseFunc) {
-          getWasmTableEntry(win.windowCloseFunc)(win.id);
-        }
-  
-        GLFW.windows[win.id - 1] = null;
-        if (GLFW.active.id == win.id)
-          GLFW.active = null;
-  
-        // Destroy context when no alive windows
-        for (var i = 0; i < GLFW.windows.length; i++)
-          if (GLFW.windows[i] !== null) return;
-  
-        Module.ctx = Browser.destroyContext(Module['canvas'], true, true);
-      },
-  swapBuffers:function(winid) {
-      },
-  GLFW2ParamToGLFW3Param:function(param) {
-        var table = {
-          0x00030001:0, // GLFW_MOUSE_CURSOR
-          0x00030002:0, // GLFW_STICKY_KEYS
-          0x00030003:0, // GLFW_STICKY_MOUSE_BUTTONS
-          0x00030004:0, // GLFW_SYSTEM_KEYS
-          0x00030005:0, // GLFW_KEY_REPEAT
-          0x00030006:0, // GLFW_AUTO_POLL_EVENTS
-          0x00020001:0, // GLFW_OPENED
-          0x00020002:0, // GLFW_ACTIVE
-          0x00020003:0, // GLFW_ICONIFIED
-          0x00020004:0, // GLFW_ACCELERATED
-          0x00020005:0x00021001, // GLFW_RED_BITS
-          0x00020006:0x00021002, // GLFW_GREEN_BITS
-          0x00020007:0x00021003, // GLFW_BLUE_BITS
-          0x00020008:0x00021004, // GLFW_ALPHA_BITS
-          0x00020009:0x00021005, // GLFW_DEPTH_BITS
-          0x0002000A:0x00021006, // GLFW_STENCIL_BITS
-          0x0002000B:0x0002100F, // GLFW_REFRESH_RATE
-          0x0002000C:0x00021007, // GLFW_ACCUM_RED_BITS
-          0x0002000D:0x00021008, // GLFW_ACCUM_GREEN_BITS
-          0x0002000E:0x00021009, // GLFW_ACCUM_BLUE_BITS
-          0x0002000F:0x0002100A, // GLFW_ACCUM_ALPHA_BITS
-          0x00020010:0x0002100B, // GLFW_AUX_BUFFERS
-          0x00020011:0x0002100C, // GLFW_STEREO
-          0x00020012:0, // GLFW_WINDOW_NO_RESIZE
-          0x00020013:0x0002100D, // GLFW_FSAA_SAMPLES
-          0x00020014:0x00022002, // GLFW_OPENGL_VERSION_MAJOR
-          0x00020015:0x00022003, // GLFW_OPENGL_VERSION_MINOR
-          0x00020016:0x00022006, // GLFW_OPENGL_FORWARD_COMPAT
-          0x00020017:0x00022007, // GLFW_OPENGL_DEBUG_CONTEXT
-          0x00020018:0x00022008, // GLFW_OPENGL_PROFILE
-        };
-        return table[param];
-      },
-  };
-  function _glfwCreateStandardCursor(shape) {}
-
-  function _glfwCreateWindow(width, height, title, monitor, share) {
-      return GLFW.createWindow(width, height, title, monitor, share);
-    }
-
-  function _glfwDestroyCursor(cursor) {}
-
-  function _glfwDestroyWindow(winid) {
-      return GLFW.destroyWindow(winid);
-    }
-
-  function _glfwGetClipboardString(win) {}
-
-  function _glfwGetCursorPos(winid, x, y) {
-      GLFW.getCursorPos(winid, x, y);
-    }
-
-  function _glfwGetFramebufferSize(winid, width, height) {
-      var ww = 0;
-      var wh = 0;
-  
-      var win = GLFW.WindowFromId(winid);
-      if (win) {
-        ww = win.width;
-        wh = win.height;
-      }
-  
-      if (width) {
-        HEAP32[((width)>>2)] = ww;
-      }
-  
-      if (height) {
-        HEAP32[((height)>>2)] = wh;
-      }
-    }
-
-  function _glfwGetInputMode(winid, mode) {
-      var win = GLFW.WindowFromId(winid);
-      if (!win) return;
-  
-      switch (mode) {
-        case 0x00033001: { // GLFW_CURSOR
-          if (Browser.pointerLock) {
-            win.inputModes[mode] = 0x00034003; // GLFW_CURSOR_DISABLED
-          } else {
-            win.inputModes[mode] = 0x00034001; // GLFW_CURSOR_NORMAL
-          }
-        }
-      }
-  
-      return win.inputModes[mode];
-    }
-
-  function _glfwGetJoystickAxes(joy, count) {
-      GLFW.refreshJoysticks();
-  
-      var state = GLFW.joys[joy];
-      if (!state || !state.axes) {
-        HEAP32[((count)>>2)] = 0;
-        return;
-      }
-  
-      HEAP32[((count)>>2)] = state.axesCount;
-      return state.axes;
-    }
-
-  function _glfwGetJoystickButtons(joy, count) {
-      GLFW.refreshJoysticks();
-  
-      var state = GLFW.joys[joy];
-      if (!state || !state.buttons) {
-        HEAP32[((count)>>2)] = 0;
-        return;
-      }
-  
-      HEAP32[((count)>>2)] = state.buttonsCount;
-      return state.buttons;
-    }
-
-  function _glfwGetKey(winid, key) {
-      return GLFW.getKey(winid, key);
-    }
-
-  function _glfwGetTime() {
-      return GLFW.getTime() - GLFW.initialTime;
-    }
-
-  function _glfwGetWindowSize(winid, width, height) {
-      GLFW.getWindowSize(winid, width, height);
-    }
-
-  function _glfwGetWindowUserPointer(winid) {
-      var win = GLFW.WindowFromId(winid);
-      if (!win) return 0;
-      return win.userptr;
-    }
-
-  function _emscripten_get_device_pixel_ratio() {
-      return (typeof devicePixelRatio == 'number' && devicePixelRatio) || 1.0;
-    }
-  
-  
-  
-  function _glfwInit() {
-      if (GLFW.windows) return 1; // GL_TRUE
-  
-      GLFW.initialTime = GLFW.getTime();
-      GLFW.hints = GLFW.defaultHints;
-      GLFW.windows = new Array()
-      GLFW.active = null;
-      GLFW.scale  = _emscripten_get_device_pixel_ratio();
-  
-      window.addEventListener("gamepadconnected", GLFW.onGamepadConnected, true);
-      window.addEventListener("gamepaddisconnected", GLFW.onGamepadDisconnected, true);
-      window.addEventListener("keydown", GLFW.onKeydown, true);
-      window.addEventListener("keypress", GLFW.onKeyPress, true);
-      window.addEventListener("keyup", GLFW.onKeyup, true);
-      window.addEventListener("blur", GLFW.onBlur, true);
-      // from https://stackoverflow.com/a/70514686/7484780 . maybe add this to browser.js?
-      // no idea how to remove this listener.
-      (function updatePixelRatio(){
-        window.matchMedia("(resolution: " + window.devicePixelRatio + "dppx)")
-        .addEventListener('change', updatePixelRatio, {once: true});
-        GLFW.onWindowContentScaleChanged(_emscripten_get_device_pixel_ratio());
-        })();
-      Module["canvas"].addEventListener("touchmove", GLFW.onMousemove, true);
-      Module["canvas"].addEventListener("touchstart", GLFW.onMouseButtonDown, true);
-      Module["canvas"].addEventListener("touchcancel", GLFW.onMouseButtonUp, true);
-      Module["canvas"].addEventListener("touchend", GLFW.onMouseButtonUp, true);
-      Module["canvas"].addEventListener("mousemove", GLFW.onMousemove, true);
-      Module["canvas"].addEventListener("mousedown", GLFW.onMouseButtonDown, true);
-      Module["canvas"].addEventListener("mouseup", GLFW.onMouseButtonUp, true);
-      Module["canvas"].addEventListener('wheel', GLFW.onMouseWheel, true);
-      Module["canvas"].addEventListener('mousewheel', GLFW.onMouseWheel, true);
-      Module["canvas"].addEventListener('mouseenter', GLFW.onMouseenter, true);
-      Module["canvas"].addEventListener('mouseleave', GLFW.onMouseleave, true);
-      Module["canvas"].addEventListener('drop', GLFW.onDrop, true);
-      Module["canvas"].addEventListener('dragover', GLFW.onDragover, true);
-  
-      Browser.resizeListeners.push((width, height) => {
-         GLFW.onCanvasResize(width, height);
-      });
-      return 1; // GL_TRUE
-    }
-
-  function _glfwPollEvents() {}
-
-  function _glfwSetCharCallback(winid, cbfun) {
-      return GLFW.setCharCallback(winid, cbfun);
-    }
-
-  function _glfwSetClipboardString(win, string) {}
-
-  function _glfwSetCursor(winid, cursor) {}
-
-  function _glfwSetCursorEnterCallback(winid, cbfun) {
-      var win = GLFW.WindowFromId(winid);
-      if (!win) return null;
-      var prevcbfun = win.cursorEnterFunc;
-      win.cursorEnterFunc = cbfun;
-      return prevcbfun;
-    }
-
-  function _glfwSetCursorPos(winid, x, y) {
-      GLFW.setCursorPos(winid, x, y);
-    }
-
-  function _glfwSetCursorPosCallback(winid, cbfun) {
-      return GLFW.setCursorPosCallback(winid, cbfun);
-    }
-
-  function _glfwSetErrorCallback(cbfun) {
-      var prevcbfun = GLFW.errorFunc;
-      GLFW.errorFunc = cbfun;
-      return prevcbfun;
-    }
-
-  function _glfwSetFramebufferSizeCallback(winid, cbfun) {
-      var win = GLFW.WindowFromId(winid);
-      if (!win) return null;
-      var prevcbfun = win.framebufferSizeFunc;
-      win.framebufferSizeFunc = cbfun;
-      return prevcbfun;
-    }
-
-  function _glfwSetInputMode(winid, mode, value) {
-      GLFW.setInputMode(winid, mode, value);
-    }
-
-  function _glfwSetKeyCallback(winid, cbfun) {
-      return GLFW.setKeyCallback(winid, cbfun);
-    }
-
-  function _glfwSetMonitorCallback(cbfun) {
-      var prevcbfun = GLFW.monitorFunc;
-      GLFW.monitorFunc = cbfun;
-      return prevcbfun;
-    }
-
-  function _glfwSetMouseButtonCallback(winid, cbfun) {
-      return GLFW.setMouseButtonCallback(winid, cbfun);
-    }
-
-  function _glfwSetScrollCallback(winid, cbfun) {
-      return GLFW.setScrollCallback(winid, cbfun);
-    }
-
-  function _glfwSetWindowCloseCallback(winid, cbfun) {
-      return GLFW.setWindowCloseCallback(winid, cbfun);
-    }
-
-  function _glfwSetWindowFocusCallback(winid, cbfun) {
-      var win = GLFW.WindowFromId(winid);
-      if (!win) return null;
-      var prevcbfun = win.windowFocusFunc;
-      win.windowFocusFunc = cbfun;
-      return prevcbfun;
-    }
-
-  function _glfwSetWindowSize(winid, width, height) {
-      GLFW.setWindowSize(winid, width, height);
-    }
-
-  function _glfwSetWindowUserPointer(winid, ptr) {
-      var win = GLFW.WindowFromId(winid);
-      if (!win) return;
-      win.userptr = ptr;
-    }
-
-  function _glfwTerminate() {
-      window.removeEventListener("gamepadconnected", GLFW.onGamepadConnected, true);
-      window.removeEventListener("gamepaddisconnected", GLFW.onGamepadDisconnected, true);
-      window.removeEventListener("keydown", GLFW.onKeydown, true);
-      window.removeEventListener("keypress", GLFW.onKeyPress, true);
-      window.removeEventListener("keyup", GLFW.onKeyup, true);
-      window.removeEventListener("blur", GLFW.onBlur, true);
-      Module["canvas"].removeEventListener("touchmove", GLFW.onMousemove, true);
-      Module["canvas"].removeEventListener("touchstart", GLFW.onMouseButtonDown, true);
-      Module["canvas"].removeEventListener("touchcancel", GLFW.onMouseButtonUp, true);
-      Module["canvas"].removeEventListener("touchend", GLFW.onMouseButtonUp, true);
-      Module["canvas"].removeEventListener("mousemove", GLFW.onMousemove, true);
-      Module["canvas"].removeEventListener("mousedown", GLFW.onMouseButtonDown, true);
-      Module["canvas"].removeEventListener("mouseup", GLFW.onMouseButtonUp, true);
-      Module["canvas"].removeEventListener('wheel', GLFW.onMouseWheel, true);
-      Module["canvas"].removeEventListener('mousewheel', GLFW.onMouseWheel, true);
-      Module["canvas"].removeEventListener('mouseenter', GLFW.onMouseenter, true);
-      Module["canvas"].removeEventListener('mouseleave', GLFW.onMouseleave, true);
-      Module["canvas"].removeEventListener('drop', GLFW.onDrop, true);
-      Module["canvas"].removeEventListener('dragover', GLFW.onDragover, true);
-  
-      Module["canvas"].width = Module["canvas"].height = 1;
-      GLFW.windows = null;
-      GLFW.active = null;
-    }
-
-  function _glfwWindowHint(target, hint) {
-      GLFW.hints[target] = hint;
-    }
 
   var isLeapYear = (year) => {
         return year%4 === 0 && (year%100 !== 0 || year%400 === 0);
@@ -8740,6 +7076,20 @@ var ASM_CONSTS = {
       return queueId;
     }
 
+  function maybeCStringToJsString(cString) {
+      // "cString > 2" checks if the input is a number, and isn't of the special
+      // values we accept here, EMSCRIPTEN_EVENT_TARGET_* (which map to 0, 1, 2).
+      // In other words, if cString > 2 then it's a pointer to a valid place in
+      // memory, and points to a C string.
+      return cString > 2 ? UTF8ToString(cString) : cString;
+    }
+  
+  var specialHTMLTargets = [0, typeof document != 'undefined' ? document : 0, typeof window != 'undefined' ? window : 0];
+  function findEventTarget(target) {
+      target = maybeCStringToJsString(target);
+      var domElement = specialHTMLTargets[target] || (typeof document != 'undefined' ? document.querySelector(target) : undefined);
+      return domElement;
+    }
   function findCanvasEventTarget(target) { return findEventTarget(target); }
   
   
@@ -8825,12 +7175,6 @@ var ASM_CONSTS = {
       }
     }
 
-  function _wgpuRenderPassEncoderSetBlendConstant(passId, colorPtr) {
-      var pass = WebGPU.mgrRenderPassEncoder.get(passId);
-      var color = WebGPU.makeColor(colorPtr);
-      pass["setBlendConstant"](color);
-    }
-
   
   function _wgpuRenderPassEncoderSetIndexBuffer(passId,bufferId,format,offset_low, offset_high,size_low, size_high) {
     var offset = convertI32PairToI53Checked(offset_low, offset_high);;
@@ -8849,11 +7193,6 @@ var ASM_CONSTS = {
       pass["setPipeline"](pipeline);
     }
 
-  function _wgpuRenderPassEncoderSetScissorRect(passId, x, y, w, h) {
-      var pass = WebGPU.mgrRenderPassEncoder.get(passId);
-      pass["setScissorRect"](x, y, w, h);
-    }
-
   
   function _wgpuRenderPassEncoderSetVertexBuffer(passId,slot,bufferId,offset_low, offset_high,size_low, size_high) {
     var offset = convertI32PairToI53Checked(offset_low, offset_high);;
@@ -8865,11 +7204,6 @@ var ASM_CONSTS = {
       pass["setVertexBuffer"](slot, buffer, offset, size);
     ;
   }
-
-  function _wgpuRenderPassEncoderSetViewport(passId, x, y, w, h, minDepth, maxDepth) {
-      var pass = WebGPU.mgrRenderPassEncoder.get(passId);
-      pass["setViewport"](x, y, w, h, minDepth, maxDepth);
-    }
 
   function _wgpuSwapChainGetCurrentTextureView(swapChainId) {
       var context = WebGPU.mgrSwapChain.get(swapChainId);
@@ -9195,7 +7529,6 @@ ERRNO_CODES = {
 Fetch.init();;
 handleAllocatorInit();
 WebGPU.initManagers();;
-var GLctx;;
 function checkIncomingModuleAPI() {
   ignoredModuleProp('fetchSettings');
 }
@@ -9214,14 +7547,10 @@ var wasmImports = {
   emscripten_asm_const_int: _emscripten_asm_const_int,
   emscripten_cancel_main_loop: _emscripten_cancel_main_loop,
   emscripten_date_now: _emscripten_date_now,
-  emscripten_get_element_css_size: _emscripten_get_element_css_size,
   emscripten_is_main_browser_thread: _emscripten_is_main_browser_thread,
   emscripten_memcpy_big: _emscripten_memcpy_big,
   emscripten_resize_heap: _emscripten_resize_heap,
-  emscripten_set_fullscreenchange_callback_on_thread: _emscripten_set_fullscreenchange_callback_on_thread,
   emscripten_set_main_loop: _emscripten_set_main_loop,
-  emscripten_set_resize_callback_on_thread: _emscripten_set_resize_callback_on_thread,
-  emscripten_set_wheel_callback_on_thread: _emscripten_set_wheel_callback_on_thread,
   emscripten_start_fetch: _emscripten_start_fetch,
   emscripten_webgpu_get_device: _emscripten_webgpu_get_device,
   environ_get: _environ_get,
@@ -9230,41 +7559,6 @@ var wasmImports = {
   fd_read: _fd_read,
   fd_seek: _fd_seek,
   fd_write: _fd_write,
-  glfwCreateStandardCursor: _glfwCreateStandardCursor,
-  glfwCreateWindow: _glfwCreateWindow,
-  glfwDestroyCursor: _glfwDestroyCursor,
-  glfwDestroyWindow: _glfwDestroyWindow,
-  glfwGetClipboardString: _glfwGetClipboardString,
-  glfwGetCursorPos: _glfwGetCursorPos,
-  glfwGetFramebufferSize: _glfwGetFramebufferSize,
-  glfwGetInputMode: _glfwGetInputMode,
-  glfwGetJoystickAxes: _glfwGetJoystickAxes,
-  glfwGetJoystickButtons: _glfwGetJoystickButtons,
-  glfwGetKey: _glfwGetKey,
-  glfwGetTime: _glfwGetTime,
-  glfwGetWindowSize: _glfwGetWindowSize,
-  glfwGetWindowUserPointer: _glfwGetWindowUserPointer,
-  glfwInit: _glfwInit,
-  glfwPollEvents: _glfwPollEvents,
-  glfwSetCharCallback: _glfwSetCharCallback,
-  glfwSetClipboardString: _glfwSetClipboardString,
-  glfwSetCursor: _glfwSetCursor,
-  glfwSetCursorEnterCallback: _glfwSetCursorEnterCallback,
-  glfwSetCursorPos: _glfwSetCursorPos,
-  glfwSetCursorPosCallback: _glfwSetCursorPosCallback,
-  glfwSetErrorCallback: _glfwSetErrorCallback,
-  glfwSetFramebufferSizeCallback: _glfwSetFramebufferSizeCallback,
-  glfwSetInputMode: _glfwSetInputMode,
-  glfwSetKeyCallback: _glfwSetKeyCallback,
-  glfwSetMonitorCallback: _glfwSetMonitorCallback,
-  glfwSetMouseButtonCallback: _glfwSetMouseButtonCallback,
-  glfwSetScrollCallback: _glfwSetScrollCallback,
-  glfwSetWindowCloseCallback: _glfwSetWindowCloseCallback,
-  glfwSetWindowFocusCallback: _glfwSetWindowFocusCallback,
-  glfwSetWindowSize: _glfwSetWindowSize,
-  glfwSetWindowUserPointer: _glfwSetWindowUserPointer,
-  glfwTerminate: _glfwTerminate,
-  glfwWindowHint: _glfwWindowHint,
   strftime_l: _strftime_l,
   wgpuBufferDestroy: _wgpuBufferDestroy,
   wgpuCommandEncoderBeginComputePass: _wgpuCommandEncoderBeginComputePass,
@@ -9294,21 +7588,16 @@ var wasmImports = {
   wgpuRenderPassEncoderDrawIndexed: _wgpuRenderPassEncoderDrawIndexed,
   wgpuRenderPassEncoderEnd: _wgpuRenderPassEncoderEnd,
   wgpuRenderPassEncoderSetBindGroup: _wgpuRenderPassEncoderSetBindGroup,
-  wgpuRenderPassEncoderSetBlendConstant: _wgpuRenderPassEncoderSetBlendConstant,
   wgpuRenderPassEncoderSetIndexBuffer: _wgpuRenderPassEncoderSetIndexBuffer,
   wgpuRenderPassEncoderSetPipeline: _wgpuRenderPassEncoderSetPipeline,
-  wgpuRenderPassEncoderSetScissorRect: _wgpuRenderPassEncoderSetScissorRect,
   wgpuRenderPassEncoderSetVertexBuffer: _wgpuRenderPassEncoderSetVertexBuffer,
-  wgpuRenderPassEncoderSetViewport: _wgpuRenderPassEncoderSetViewport,
   wgpuSwapChainGetCurrentTextureView: _wgpuSwapChainGetCurrentTextureView,
   wgpuTextureCreateView: _wgpuTextureCreateView,
   wgpuTextureDestroy: _wgpuTextureDestroy
 };
 var asm = createWasm();
 var ___wasm_call_ctors = createExportWrapper('__wasm_call_ctors');
-var _free = createExportWrapper('free');
-var _malloc = createExportWrapper('malloc');
-var ___errno_location = createExportWrapper('__errno_location');
+var _StartApp = Module['_StartApp'] = createExportWrapper('StartApp');
 var _OnKeyDown = Module['_OnKeyDown'] = createExportWrapper('OnKeyDown');
 var _OnKeyUp = Module['_OnKeyUp'] = createExportWrapper('OnKeyUp');
 var _OnResize = Module['_OnResize'] = createExportWrapper('OnResize');
@@ -9316,7 +7605,9 @@ var _OnMouseDown = Module['_OnMouseDown'] = createExportWrapper('OnMouseDown');
 var _OnMouseUp = Module['_OnMouseUp'] = createExportWrapper('OnMouseUp');
 var _OnMouseMove = Module['_OnMouseMove'] = createExportWrapper('OnMouseMove');
 var _OnMouseWheel = Module['_OnMouseWheel'] = createExportWrapper('OnMouseWheel');
-var _StartApp = Module['_StartApp'] = createExportWrapper('StartApp');
+var _free = createExportWrapper('free');
+var _malloc = createExportWrapper('malloc');
+var ___errno_location = createExportWrapper('__errno_location');
 var _main = Module['_main'] = createExportWrapper('main');
 var _fflush = Module['_fflush'] = createExportWrapper('fflush');
 var setTempRet0 = createExportWrapper('setTempRet0');
@@ -9398,8 +7689,13 @@ var missingLibrarySymbols = [
   'UTF32ToString',
   'stringToUTF32',
   'lengthBytesUTF32',
+  'stringToNewUTF8',
   'registerKeyEventCallback',
+  'getBoundingClientRect',
+  'fillMouseEventData',
   'registerMouseEventCallback',
+  'registerWheelEventCallback',
+  'registerUiEventCallback',
   'registerFocusEventCallback',
   'fillDeviceOrientationEventData',
   'registerDeviceOrientationEventCallback',
@@ -9408,6 +7704,8 @@ var missingLibrarySymbols = [
   'screenOrientation',
   'fillOrientationChangeEventData',
   'registerOrientationChangeEventCallback',
+  'fillFullscreenChangeEventData',
+  'registerFullscreenChangeEventCallback',
   'JSEvents_requestFullscreen',
   'JSEvents_resizeCanvasForFullscreen',
   'registerRestoreOldStyle',
@@ -9450,6 +7748,10 @@ var missingLibrarySymbols = [
   '_setNetworkCallback',
   'heapObjectForWebGLType',
   'heapAccessShiftForWebGLHeap',
+  'webgl_enable_ANGLE_instanced_arrays',
+  'webgl_enable_OES_vertex_array_object',
+  'webgl_enable_WEBGL_draw_buffers',
+  'webgl_enable_WEBGL_multi_draw',
   'emscriptenWebGLGet',
   'computeUnpackAlignedImageSize',
   'colorChannelsInGlTextureFormat',
@@ -9467,6 +7769,7 @@ var missingLibrarySymbols = [
   'SDL_unicode',
   'SDL_ttfContext',
   'SDL_audio',
+  'GLFW_Window',
   'ALLOC_NORMAL',
   'ALLOC_STACK',
   'allocate',
@@ -9562,7 +7865,6 @@ var unexportedSymbols = [
   'intArrayFromString',
   'stringToAscii',
   'UTF16Decoder',
-  'stringToNewUTF8',
   'stringToUTF8OnStack',
   'writeArrayToMemory',
   'JSEvents',
@@ -9570,12 +7872,6 @@ var unexportedSymbols = [
   'maybeCStringToJsString',
   'findEventTarget',
   'findCanvasEventTarget',
-  'getBoundingClientRect',
-  'fillMouseEventData',
-  'registerWheelEventCallback',
-  'registerUiEventCallback',
-  'fillFullscreenChangeEventData',
-  'registerFullscreenChangeEventCallback',
   'currentFullscreenStrategy',
   'restoreOldWindowedStyle',
   'demangle',
@@ -9607,10 +7903,6 @@ var unexportedSymbols = [
   'tempFixedLengthArray',
   'miniTempWebGLFloatBuffers',
   'miniTempWebGLIntBuffers',
-  'webgl_enable_ANGLE_instanced_arrays',
-  'webgl_enable_OES_vertex_array_object',
-  'webgl_enable_WEBGL_draw_buffers',
-  'webgl_enable_WEBGL_multi_draw',
   'GL',
   'emscripten_webgl_power_preferences',
   'AL',
@@ -9620,7 +7912,6 @@ var unexportedSymbols = [
   'IDBStore',
   'SDL',
   'SDL_gfx',
-  'GLFW_Window',
   'GLFW',
   'WebGPU',
   'JsValStore',

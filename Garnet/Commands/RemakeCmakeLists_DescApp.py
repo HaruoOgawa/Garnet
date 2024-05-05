@@ -11,6 +11,7 @@ set(CMAKE_BUILD_TYPE Release)
 add_definitions(
 	-D__CMAKE__
 	-DUSE_WEBGPU
+	-DNOMINMAX
 	-DUSE_WebGPUNative
 	-DUSE_TEXTURE_LOADER
 	-DUSE_GLTF
