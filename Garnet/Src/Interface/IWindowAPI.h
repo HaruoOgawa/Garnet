@@ -23,11 +23,7 @@ namespace window
 #endif
 		virtual bool Release() = 0;
 
-#ifdef USE_WIN32_WindowAPI
-		virtual bool Initialize(HINSTANCE hInstance, app::CAppCore* pAppCore, int Width, int Height) = 0;
-#else
 		virtual bool Initialize(app::CAppCore* pAppCore, int Width, int Height) = 0;
-#endif // USE_WIN32_WindowAPI
 
 		virtual void SwapWindowBuffers() = 0;
 

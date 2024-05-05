@@ -50,9 +50,11 @@ namespace window
 		return m_Window;
 	}
 
-	bool CWin32WindowAPI::Initialize(HINSTANCE hInstance, app::CAppCore* pAppCore, int Width, int Height)
+	bool CWin32WindowAPI::Initialize(app::CAppCore* pAppCore, int Width, int Height)
 	{
 		m_pCAppCore = pAppCore;
+
+		HINSTANCE hInstance = GetModuleHandle(NULL);
 
 		if (!InitWindow(hInstance, Width, Height)) return false;
 		//if (!InitWGL()) return false;

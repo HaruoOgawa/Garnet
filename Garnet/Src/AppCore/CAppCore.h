@@ -46,18 +46,14 @@ namespace app
 
 		std::shared_ptr<input::CInputState> m_InputState;
 	public:
-		CAppCore();
-		virtual ~CAppCore() = default;
+		CAppCore(const std::shared_ptr<app::IApp>& App);
+		virtual ~CAppCore();
 
 		const std::shared_ptr<gui::IGUIEngine>& GetGUIEngine() const;
 
 		const std::shared_ptr<input::CInputState>& GetInputState()const { return m_InputState; }
 
-#ifdef USE_WIN32_WindowAPI
-		bool Initialize(HINSTANCE hInstance, int Width, int Height);
-#else
 		bool Initialize(int Width, int Height);
-#endif // USE_WIN32_WindowAPI
 
 		bool Release();
 		

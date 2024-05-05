@@ -978,8 +978,8 @@ function dbg(text) {
 // === Body ===
 
 var ASM_CONSTS = {
-  173044: ($0, $1, $2, $3) => { const w0 = Module.UTF16ToString($0); const w1 = Module.UTF16ToString($1); const windex = $2; const nameCount = $3; return (w0 == w1[windex] && w1.length == nameCount) ? 1 : 0; },  
- 173224: ($0, $1, $2, $3) => { const w0 = Module.UTF16ToString($0); const w1 = Module.UTF16ToString($1); const windex = $2; const nameCount = $3; return (w0 == w1[windex] && w1.length == nameCount) ? 1 : 0; }
+  173060: ($0, $1, $2, $3) => { const w0 = Module.UTF16ToString($0); const w1 = Module.UTF16ToString($1); const windex = $2; const nameCount = $3; return (w0 == w1[windex] && w1.length == nameCount) ? 1 : 0; },  
+ 173240: ($0, $1, $2, $3) => { const w0 = Module.UTF16ToString($0); const w1 = Module.UTF16ToString($1); const windex = $2; const nameCount = $3; return (w0 == w1[windex] && w1.length == nameCount) ? 1 : 0; }
 };
 
 
@@ -7597,9 +7597,6 @@ var wasmImports = {
 };
 var asm = createWasm();
 var ___wasm_call_ctors = createExportWrapper('__wasm_call_ctors');
-var _free = createExportWrapper('free');
-var _malloc = createExportWrapper('malloc');
-var ___errno_location = createExportWrapper('__errno_location');
 var _StartApp = Module['_StartApp'] = createExportWrapper('StartApp');
 var _OnKeyDown = Module['_OnKeyDown'] = createExportWrapper('OnKeyDown');
 var _OnKeyUp = Module['_OnKeyUp'] = createExportWrapper('OnKeyUp');
@@ -7608,6 +7605,9 @@ var _OnMouseDown = Module['_OnMouseDown'] = createExportWrapper('OnMouseDown');
 var _OnMouseUp = Module['_OnMouseUp'] = createExportWrapper('OnMouseUp');
 var _OnMouseMove = Module['_OnMouseMove'] = createExportWrapper('OnMouseMove');
 var _OnMouseWheel = Module['_OnMouseWheel'] = createExportWrapper('OnMouseWheel');
+var _free = createExportWrapper('free');
+var _malloc = createExportWrapper('malloc');
+var ___errno_location = createExportWrapper('__errno_location');
 var _main = Module['_main'] = createExportWrapper('main');
 var _fflush = Module['_fflush'] = createExportWrapper('fflush');
 var setTempRet0 = createExportWrapper('setTempRet0');

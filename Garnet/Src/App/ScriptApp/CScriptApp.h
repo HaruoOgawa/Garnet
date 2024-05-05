@@ -38,7 +38,7 @@ namespace app
 		
 	public:
 		CScriptApp();
-		virtual ~CScriptApp();
+		virtual ~CScriptApp() = default;
 
 		virtual bool Release(api::IGraphicsAPI* pGraphicsAPI) override;
 

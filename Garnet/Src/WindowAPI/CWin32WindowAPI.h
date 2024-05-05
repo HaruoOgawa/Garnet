@@ -30,7 +30,7 @@ namespace window
 
 		virtual bool Release() override;
 
-		virtual bool Initialize(HINSTANCE hInstance, app::CAppCore* pAppCore, int Width, int Height) override;
+		virtual bool Initialize(app::CAppCore* pAppCore, int Width, int Height) override;
 
 		virtual void SwapWindowBuffers() override;
 

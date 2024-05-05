@@ -31,17 +31,22 @@
 
 namespace app
 {
-	CAppCore::CAppCore():
+	CAppCore::CAppCore(const std::shared_ptr<app::IApp>& App):
 		m_WindowAPI(nullptr),
 		m_GraphicsAPI(nullptr),
 		m_IsRunLoop(true),
 		m_SecondsTime(0.0f),
 		m_DeltaSecondsTime(0.0f),
-		m_App(nullptr),
+		m_App(App),
 		m_InputState(std::make_shared<input::CInputState>()),
 		m_LoadWorker(nullptr),
 		m_GUIEngine(nullptr)
 	{
+	}
+
+	CAppCore::~CAppCore()
+	{
+		Release();
 	}
 
 	bool CAppCore::Release()
@@ -93,11 +98,7 @@ namespace app
 		return m_GUIEngine;
 	}
 
-#ifdef USE_WIN32_WindowAPI
-	bool CAppCore::Initialize(HINSTANCE hInstance, int Width, int Height)
-#else
 	bool CAppCore::Initialize(int Width, int Height)
-#endif // USE_WIN32_WindowAPI
 	{
 		{
 			// WindowAPI
@@ -117,10 +118,7 @@ namespace app
 #elif USE_OPENGL
 			m_GraphicsAPI = std::make_shared<api::COpenGLAPI>(Width, Height);
 #endif // USE_WEBGPU
-
-			// App
-			m_App = std::make_shared<app::CScriptApp>();
-
+			
 			// GUI
 #ifdef USE_GUIENGINE
 			m_GUIEngine = std::make_shared<gui::CImGuiGUIEngine>();
@@ -129,12 +127,7 @@ namespace app
 #endif
 		}
 
-		// 
-#ifdef USE_WIN32_WindowAPI
-		if (!m_WindowAPI->Initialize(hInstance, this, Width, Height)) return false;
-#else
 		if (!m_WindowAPI->Initialize(this, Width, Height)) return false;
-#endif // USE_WIN32_WindowAPI
 
 		if (!m_GraphicsAPI->Initialize(m_WindowAPI.get())) return false;
 

@@ -448,7 +448,7 @@
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>NotSet</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(ProjectDir)src\Library\GLFW\lib;$(ProjectDir)src\Library\Vulkan\lib;$(ProjectDir)Src\Library\FBX-SDK\lib\vs2022\x64\debug;$(ProjectDir)Src\Library\FBX-SDK\lib\vs2022\x64\release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>glfw3dll.lib;vulkan-1.lib;libfbxsdk-md.lib;libxml2-md.lib;zlib-md.lib;Winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -472,7 +472,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>NotSet</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(ProjectDir)src\Library\GLFW\lib;$(ProjectDir)Src\Library\FBX-SDK\lib\vs2022\x64\debug;$(ProjectDir)Src\Library\FBX-SDK\lib\vs2022\x64\release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>glfw3dll.lib;opengl32.lib;libfbxsdk-md.lib;libxml2-md.lib;zlib-md.lib;Winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -496,7 +496,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>NotSet</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(ProjectDir)Src\Library\FBX-SDK\lib\vs2022\x64\debug;$(ProjectDir)Src\Library\FBX-SDK\lib\vs2022\x64\release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>opengl32.lib;libfbxsdk-md.lib;libxml2-md.lib;zlib-md.lib;Winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -518,7 +518,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>NotSet</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(ProjectDir)src\Library\GLFW\lib;//$(ProjectDir)Src\Library\DawnLib\bin;$(ProjectDir)Src\Library\WebGPU\windows-x86_64;$(ProjectDir)Src\Library\SmallFBX\lib\debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>glfw3dll.lib;dxguid.lib;zlib.lib;Winmm.lib;SmallFBX.lib;wgpu_native.lib;//$(ProjectDir)Src\Library\DawnLib\bin\src\dawn\native\Debug\webgpu_dawn.lib;//$(ProjectDir)Src\Library\DawnLib\bin\src\dawn\Debug\dawncpp.lib;//$(ProjectDir)Src\Library\DawnLib\bin\src\dawn\native\Debug\dawn_native.lib;//$(ProjectDir)Src\Library\DawnLib\bin\src\dawn\platform\Debug\dawn_platform.lib;//$(ProjectDir)Src\Library\DawnLib\bin\src\tint\Debug\tint.lib;//$(ProjectDir)Src\Library\DawnLib\bin\src\tint\Debug\tint_diagnostic_utils.lib;//$(ProjectDir)Src\Library\DawnLib\bin\third_party\spirv-tools\source\opt\Debug\SPIRV-Tools-opt.lib;//$(ProjectDir)Src\Library\DawnLib\bin\third_party\spirv-tools\source\Debug\SPIRV-Tools.lib;//$(ProjectDir)Src\Library\DawnLib\bin\third_party\abseil\absl\strings\Debug\absl_str_format_internal.lib;//$(ProjectDir)Src\Library\DawnLib\bin\third_party\abseil\absl\strings\Debug\absl_strings.lib;//$(ProjectDir)Src\Library\DawnLib\bin\third_party\abseil\absl\strings\Debug\absl_strings_internal.lib;//$(ProjectDir)Src\Library\DawnLib\bin\third_party\abseil\absl\base\Debug\absl_base.lib;//$(ProjectDir)Src\Library\DawnLib\bin\third_party\abseil\absl\base\Debug\absl_spinlock_wait.lib;//$(ProjectDir)Src\Library\DawnLib\bin\third_party\abseil\absl\numeric\Debug\absl_int128.lib;//$(ProjectDir)Src\Library\DawnLib\bin\third_party\abseil\absl\base\Debug\absl_throw_delegate.lib;//$(ProjectDir)Src\Library\DawnLib\bin\third_party\abseil\absl\base\Debug\absl_raw_logging_internal.lib;//$(ProjectDir)Src\Library\DawnLib\bin\third_party\abseil\absl\base\Debug\absl_log_severity.lib;//$(ProjectDir)Src\Library\DawnLib\bin\src\dawn\common\Debug\dawn_common.lib;//$(ProjectDir)Src\Library\DawnLib\bin\src\dawn\Debug\dawncpp_headers.lib;//$(ProjectDir)Src\Library\DawnLib\bin\src\dawn\Debug\dawn_headers.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -544,7 +544,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>NotSet</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -572,7 +572,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>NotSet</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -599,7 +599,7 @@ del $(OutDir)Garnet.pdb</Command>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>NotSet</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -628,7 +628,7 @@ call $(ProjectDir)compress_tools\squishy-x64 -i "$(OutDir)Garnet.exe" -o "$(OutD
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>NotSet</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -1570,6 +1570,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClCompile Include="Src\GUIEngine\imgui\Core\CImGuiCoreVulkan.cpp" />
     <ClCompile Include="Src\GUIEngine\imgui\CImGuiGUIEngine.cpp" />
     <ClCompile Include="Src\GUIEngine\CDummyGUIEngine.cpp" />
+    <ClCompile Include="Src\Main\main.cpp" />
     <ClCompile Include="Src\PhysicsEngine\CDummyPhysicsEngine.cpp" />
     <ClCompile Include="Src\Audio\CAudioMachine.cpp" />
     <ClCompile Include="Src\Audio\CAudioClip.cpp" />
@@ -1896,7 +1897,6 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClCompile Include="Src\GraphicsAPI\CMaterialCreateInfo.cpp" />
     <ClCompile Include="Src\WindowAPI\CWin32WindowAPI.cpp" />
     <ClCompile Include="Src\Graphics\CPresetPrimitive.cpp" />
-    <ClCompile Include="Src\Main\DemoMain\DemoMain.cpp" />
     <ClCompile Include="Src\Math\CTransform.cpp" />
     <ClCompile Include="Src\Object\C3DObject.cpp" />
     <ClCompile Include="Src\Graphics\CShaderBuffer.cpp" />
@@ -1915,8 +1915,6 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClCompile Include="Src\GraphicsAPI\Vulkan\CVulkanAPI.cpp" />
     <ClCompile Include="Src\WindowAPI\CGLFWWindowAPI.cpp" />
     <ClCompile Include="Src\App\ScriptApp\CScriptApp.cpp" />
-    <ClCompile Include="Src\Main\DescMain\DescMain.cpp" />
-    <ClCompile Include="Src\Main\WebMain\WebMain.cpp" />
     <ClCompile Include="Src\WindowAPI\CWebWindowAPI.cpp" />
   </ItemGroup>
   <ItemGroup>

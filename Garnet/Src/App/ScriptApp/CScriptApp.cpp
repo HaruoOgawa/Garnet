@@ -47,12 +47,18 @@ namespace app
 		m_DrawInfo->GetLightProjection()->SetFar(100.0f);
 	}
 
-	CScriptApp::~CScriptApp()
+	bool CScriptApp::Release(api::IGraphicsAPI* pGraphicsAPI)
 	{
 		if (m_ScriptScene)
 		{
 			m_ScriptScene.reset();
 			m_ScriptScene = nullptr;
+		}
+		
+		if (m_BlurEffect)
+		{
+			m_BlurEffect.reset();
+			m_BlurEffect = nullptr;
 		}
 
 		if (m_PhysicsEngine)
@@ -60,10 +66,7 @@ namespace app
 			m_PhysicsEngine.reset();
 			m_PhysicsEngine = nullptr;
 		}
-	}
 
-	bool CScriptApp::Release(api::IGraphicsAPI* pGraphicsAPI)
-	{
 		return true;
 	}
 

@@ -2735,12 +2735,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Src\Main\DescMain\DescMain.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Main\WebMain\WebMain.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="Src\App\ScriptApp\CScriptApp.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
@@ -2799,9 +2793,6 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Src\Graphics\CPresetPrimitive.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Main\DemoMain\DemoMain.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Src\WindowAPI\CWin32WindowAPI.cpp">
@@ -3822,6 +3813,9 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Src\AppCore\CAppRunner.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Main\main.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
