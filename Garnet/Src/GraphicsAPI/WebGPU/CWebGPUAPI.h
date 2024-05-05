@@ -87,7 +87,7 @@ namespace api
 
 		virtual bool Initialize(window::IWindowAPI* pWindowAPI) override;
 
-		void Release();
+		virtual void Release() override;
 
 		virtual bool CreateRenderPass(const std::string& PassName, ERenderPassFormat RenderPassFormat, const glm::vec4& InitColor, int Width = -1, int Height = -1) override;
 		virtual std::shared_ptr<graphics::CVertexBuffer> CreateVertexBuffer() override;

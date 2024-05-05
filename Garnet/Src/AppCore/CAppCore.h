@@ -10,14 +10,7 @@ namespace input { class CInputState; }
 namespace resource { class CLoadWorker; }
 namespace gui { class IGUIEngine; }
 namespace window { class IWindowAPI; }
-
-#ifdef USE_WEBGPU
-namespace api { class CWebGPUAPI; }
-#elif USE_VULKAN
-namespace api { class CVulkanAPI; }
-#elif USE_OPENGL
-namespace api { class COpenGLAPI; }
-#endif
+namespace physics { class IPhysicsEngine; }
 
 namespace app
 {
@@ -25,13 +18,7 @@ namespace app
 	{
 		std::shared_ptr<window::IWindowAPI> m_WindowAPI;
 
-#ifdef USE_WEBGPU
-		std::shared_ptr<api::CWebGPUAPI> m_GraphicsAPI;
-#elif USE_VULKAN
-		std::shared_ptr<api::CVulkanAPI> m_GraphicsAPI;
-#elif USE_OPENGL
-		std::shared_ptr<api::COpenGLAPI> m_GraphicsAPI;
-#endif
+		std::shared_ptr<api::IGraphicsAPI> m_GraphicsAPI;
 
 		bool m_IsRunLoop;
 
@@ -41,6 +28,8 @@ namespace app
 		std::shared_ptr<app::IApp> m_App;
 
 		std::shared_ptr<resource::CLoadWorker> m_LoadWorker;
+
+		std::shared_ptr<physics::IPhysicsEngine> m_PhysicsEngine;
 
 		std::shared_ptr<gui::IGUIEngine> m_GUIEngine;
 

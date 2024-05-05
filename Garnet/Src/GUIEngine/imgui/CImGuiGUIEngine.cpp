@@ -40,8 +40,7 @@ namespace gui
 		ImGui::DestroyContext();
 	}
 
-#ifdef USE_GLFW
-	bool CImGuiGUIEngine::InitializeWithGLFW(GLFWwindow* pWindow, api::IGraphicsAPI* pGraphicsAPI)
+	bool CImGuiGUIEngine::Initialize(window::IWindowAPI* pWindowAPI, api::IGraphicsAPI* pGraphicsAPI)
 	{
 		// Dear ImGuiのコンテキストを作成
 		IMGUI_CHECKVERSION();
@@ -52,11 +51,13 @@ namespace gui
 
 		// Window APIの初期化
 #ifdef USE_VULKAN
-		ImGui_ImplGlfw_InitForVulkan(pWindow, true);
+		ImGui_ImplGlfw_InitForVulkan(pWindowAPI->GetGLFWWindow(), true);
 #elif USE_WEBGPU
-		ImGui_ImplGlfw_InitForOther(pWindow, true);
-#elif USE_OPENGL
-		ImGui_ImplGlfw_InitForOpenGL(pWindow, true);
+		ImGui_ImplGlfw_InitForOther(pWindowAPI->GetGLFWWindow(), true);
+#elif defined(USE_OPENGL) && defined(USE_GLFW)
+		ImGui_ImplGlfw_InitForOpenGL(pWindowAPI->GetGLFWWindow(), true);
+#elif defined(USE_OPENGL) && defined(USE_WIN32_WindowAPI)
+		ImGui_ImplWin32_InitForOpenGL(pWindowAPI->GetWin32Window());
 #endif
 
 #ifdef __EMSCRIPTEN__
@@ -70,29 +71,8 @@ namespace gui
 
 		return true;
 	}
-#elif USE_WIN32_WindowAPI
-	bool CImGuiGUIEngine::InitializeWithWin32API(HWND window, api::IGraphicsAPI* pGraphicsAPI)
-	{
-		// Dear ImGuiのコンテキストを作成
-		IMGUI_CHECKVERSION();
-		ImGui::CreateContext();
 
-		ImGuiIO& io = ImGui::GetIO();
-		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard
-
-		// Window APIの初期化
-#ifdef USE_OPENGL
-		ImGui_ImplWin32_InitForOpenGL(window);
-#endif // USE_OPENGL
-
-		// GraphicsAPI周りの初期化
-		if (!m_ImGuiCore->Initialize(pGraphicsAPI)) return false;
-
-		m_Initialized = true;
-
-		return true;
-	}
-
+#ifdef USE_WIN32_WindowAPI
 	bool CImGuiGUIEngine::CheckInput(HWND window, UINT msg, WPARAM w_param, LPARAM l_param)
 	{
 		return ImGui_ImplWin32_WndProcHandler(window, msg, w_param, l_param);

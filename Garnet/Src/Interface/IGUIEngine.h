@@ -7,18 +7,16 @@
 #include <Windows.h>
 #endif
 
-#include "../../Interface/IGraphicsAPI.h"
+#include "IGraphicsAPI.h"
+#include "IWindowAPI.h"
 
 namespace gui
 {
 	class IGUIEngine
 	{
 	public:
-#ifdef USE_GLFW
-		virtual bool InitializeWithGLFW(GLFWwindow* pWindow, api::IGraphicsAPI* pGraphicsAPI) = 0;
-#elif USE_WIN32_WindowAPI
-		virtual bool InitializeWithWin32API(HWND window, api::IGraphicsAPI* pGraphicsAPI) = 0;
-
+		virtual bool Initialize(window::IWindowAPI* pWindowAPI, api::IGraphicsAPI* pGraphicsAPI) = 0;
+#ifdef USE_WIN32_WindowAPI
 		virtual bool CheckInput(HWND window, UINT msg, WPARAM w_param, LPARAM l_param) = 0;
 #endif
 		virtual void Release(api::IGraphicsAPI* pGraphicsAPI) = 0;

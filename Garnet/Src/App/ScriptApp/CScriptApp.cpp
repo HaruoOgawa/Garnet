@@ -10,7 +10,7 @@
 #ifdef USE_VIEWER_CAMERA
 #include "../../Camera/CViewerCamera.h"
 #endif // USE_VIEWER_CAMERA
-#include "../../PhysicsEngine/Bullet/CBulletPhysicsEngine.h"
+
 #include "GUI/CGraphicsEditingWindow.h"
 
 
@@ -33,11 +33,10 @@ namespace app
 #endif // USE_VIEWER_CAMERA
 		m_Projection(std::make_shared<projection::CProjection>()),
 		m_DrawInfo(std::make_shared<graphics::CDrawInfo>()),
-		m_BlurEffect(nullptr),
 #ifdef USE_GUIENGINE
 		m_GraphicsEditingWindow(std::make_shared<gui::CGraphicsEditingWindow>()),
 #endif // USE_GUIENGINE
-		m_PhysicsEngine(std::make_shared<physics::CBulletPhysicsEngine>())
+		m_BlurEffect(nullptr)
 	{
 		m_MainCamera->SetPos(glm::vec3(0.0f, 1.0f, -7.0f));
 		//m_MainCamera->SetCenter(glm::vec3(0.0f, 50.0f, 349.0f));
@@ -60,23 +59,14 @@ namespace app
 			m_BlurEffect.reset();
 			m_BlurEffect = nullptr;
 		}
-
-		if (m_PhysicsEngine)
-		{
-			m_PhysicsEngine.reset();
-			m_PhysicsEngine = nullptr;
-		}
-
+		
 		return true;
 	}
 
-	bool CScriptApp::Initialize(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker)
+	bool CScriptApp::Initialize(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker)
 	{
 		// Viewの初期化
-		m_ScriptScene = std::make_shared<scene::CScriptScene>(pGraphicsAPI, pLoadWorker, m_PhysicsEngine.get());
-
-		// 物理エンジン
-		if (!m_PhysicsEngine->Initialize()) return false;
+		m_ScriptScene = std::make_shared<scene::CScriptScene>(pGraphicsAPI, pLoadWorker, pPhysicsEngine);
 
 		// オフスクリーンレンダリング
 		if (!pGraphicsAPI->CreateRenderPass("ShadowPass", api::ERenderPassFormat::COLOR_RENDERPASS, glm::vec4(1.0f), 512, 512)) return false;
@@ -104,29 +94,27 @@ namespace app
 		return true;
 	}
 
-	bool CScriptApp::Update(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<input::CInputState>& InputState)
+	bool CScriptApp::Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<input::CInputState>& InputState)
 	{
-		if (!pLoadWorker->Update(pGraphicsAPI)) return false;
-
-		if (!m_ScriptScene->Update(pGraphicsAPI, m_PhysicsEngine.get(), pLoadWorker, m_MainCamera, m_Projection, m_DrawInfo, InputState)) return false;
+		if (!m_ScriptScene->Update(pGraphicsAPI, pPhysicsEngine, pLoadWorker, m_MainCamera, m_Projection, m_DrawInfo, InputState)) return false;
 
 		if (!m_BlurEffect->Update(pLoadWorker)) return false;
 
-		return true;
-	}
-
-	bool CScriptApp::LateUpdate(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker)
-	{
-		if (!m_PhysicsEngine->Update(m_DrawInfo->GetDeltaSecondsTime())) return false;
-
-		if (!m_ScriptScene->LateUpdate(pGraphicsAPI, m_PhysicsEngine.get(), pLoadWorker, m_DrawInfo)) return false;
+		m_MainCamera->Update(m_DrawInfo->GetDeltaSecondsTime(), InputState);
 
 		return true;
 	}
 
-	bool CScriptApp::FixedUpdate(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker)
+	bool CScriptApp::LateUpdate(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker)
 	{
-		if (!m_ScriptScene->FixedUpdate(pGraphicsAPI, m_PhysicsEngine.get(), pLoadWorker, m_DrawInfo)) return false;
+		if (!m_ScriptScene->LateUpdate(pGraphicsAPI, pPhysicsEngine, pLoadWorker, m_DrawInfo)) return false;
+
+		return true;
+	}
+
+	bool CScriptApp::FixedUpdate(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker)
+	{
+		if (!m_ScriptScene->FixedUpdate(pGraphicsAPI, pPhysicsEngine, pLoadWorker, m_DrawInfo)) return false;
 
 		return true;
 	}
@@ -163,11 +151,6 @@ namespace app
 		if (!pGraphicsAPI->EndRender()) return false;
 
 		return true;
-	}
-
-	const std::shared_ptr<camera::CCamera>& CScriptApp::GetMainCamera() const
-	{
-		return m_MainCamera;
 	}
 
 	const std::shared_ptr<graphics::CDrawInfo>& CScriptApp::GetDrawInfo() const

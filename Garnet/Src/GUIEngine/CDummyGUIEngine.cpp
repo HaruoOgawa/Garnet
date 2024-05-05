@@ -14,17 +14,12 @@ namespace gui
 	{
 	}
 
-#ifdef USE_GLFW
-	bool CDummyGUIEngine::InitializeWithGLFW(GLFWwindow* pWindow, api::IGraphicsAPI* pGraphicsAPI)
-	{
-		return true;
-	}
-#elif USE_WIN32_WindowAPI
-	bool CDummyGUIEngine::InitializeWithWin32API(HWND window, api::IGraphicsAPI* pGraphicsAPI)
+	bool CDummyGUIEngine::Initialize(window::IWindowAPI* pWindowAPI, api::IGraphicsAPI* pGraphicsAPI)
 	{
 		return true;
 	}
 
+#ifdef USE_WIN32_WindowAPI
 	bool CDummyGUIEngine::CheckInput(HWND window, UINT msg, WPARAM w_param, LPARAM l_param)
 	{
 		return false;

@@ -6,6 +6,7 @@
 #include "../Camera/CCamera.h"
 #include "../Graphics/CDrawInfo.h"
 #include "../Message/Console.h"
+#include "../../PhysicsEngine/Bullet/CBulletPhysicsEngine.h"
 
 #ifdef USE_GLFW
 #include "../WindowAPI/CGLFWWindowAPI.h"
@@ -40,6 +41,7 @@ namespace app
 		m_App(App),
 		m_InputState(std::make_shared<input::CInputState>()),
 		m_LoadWorker(nullptr),
+		m_PhysicsEngine(std::make_shared<physics::CBulletPhysicsEngine>()),
 		m_GUIEngine(nullptr)
 	{
 	}
@@ -71,10 +73,11 @@ namespace app
 			m_GUIEngine = nullptr;
 		}
 
-#ifdef USE_VULKAN
-		// 論理デバイスが操作を完了するのを待つ
-		vkDeviceWaitIdle(m_GraphicsAPI->GetLogicalDevice());
-#endif
+		if (m_PhysicsEngine)
+		{
+			m_PhysicsEngine.reset();
+			m_PhysicsEngine = nullptr;
+		}
 
 		if (m_GraphicsAPI)
 		{
@@ -119,6 +122,9 @@ namespace app
 			m_GraphicsAPI = std::make_shared<api::COpenGLAPI>(Width, Height);
 #endif // USE_WEBGPU
 			
+			// 物理エンジン
+			if (!m_PhysicsEngine->Initialize()) return false;
+
 			// GUI
 #ifdef USE_GUIENGINE
 			m_GUIEngine = std::make_shared<gui::CImGuiGUIEngine>();
@@ -135,14 +141,10 @@ namespace app
 		m_LoadWorker = std::make_shared<resource::CLoadWorker>(m_GraphicsAPI.get());
 
 #ifdef USE_GUIENGINE
-#ifdef USE_GLFW
-		if (!m_GUIEngine->InitializeWithGLFW(m_WindowAPI->GetGLFWWindow(), m_GraphicsAPI.get())) return false;
-#elif USE_WIN32_WindowAPI
-		if (!m_GUIEngine->InitializeWithWin32API(m_WindowAPI->GetWin32Window(), m_GraphicsAPI.get())) return false;
-#endif
+		if (!m_GUIEngine->Initialize(m_WindowAPI.get(), m_GraphicsAPI.get())) return false;
 #endif // USE_GUIENGINE
 
-		if (!m_App->Initialize(m_GraphicsAPI.get(), m_LoadWorker.get())) return false;
+		if (!m_App->Initialize(m_GraphicsAPI.get(), m_PhysicsEngine.get(), m_LoadWorker.get())) return false;
 
 		m_WindowAPI->AssignCurrentWindowSize();
 
@@ -210,27 +212,32 @@ namespace app
 #endif // _DEBUG
 
 		//
-		m_App->GetDrawInfo()->SetSecondsTime(m_SecondsTime);
-		m_App->GetDrawInfo()->SetDeltaSecondsTime(m_DeltaSecondsTime);
+		const auto& DrawInfo = m_App->GetDrawInfo();
+		if (DrawInfo)
+		{
+			DrawInfo->SetSecondsTime(m_SecondsTime);
+			DrawInfo->SetDeltaSecondsTime(m_DeltaSecondsTime);
+		}
 
-		const auto& MainCamera = m_App->GetMainCamera();
-		if (MainCamera) MainCamera->Update(m_DeltaSecondsTime, m_InputState);
+		if (!m_LoadWorker->Update(m_GraphicsAPI.get())) return false;
 
-		if (!m_App->Update(m_GraphicsAPI.get(), m_LoadWorker.get(), m_InputState)) return false;
+		if (!m_App->Update(m_GraphicsAPI.get(), m_PhysicsEngine.get(), m_LoadWorker.get(), m_InputState)) return false;
 
 		return true;
 	}
 
 	bool CAppCore::LateUpdate()
 	{
-		if (!m_App->LateUpdate(m_GraphicsAPI.get(), m_LoadWorker.get())) return false;
+		if (!m_PhysicsEngine->Update(m_DeltaSecondsTime)) return false;
+
+		if (!m_App->LateUpdate(m_GraphicsAPI.get(), m_PhysicsEngine.get(), m_LoadWorker.get())) return false;
 
 		return true;
 	}
 
 	bool CAppCore::FixedUpdate()
 	{
-		if (!m_App->FixedUpdate(m_GraphicsAPI.get(), m_LoadWorker.get())) return false;
+		if (!m_App->FixedUpdate(m_GraphicsAPI.get(), m_PhysicsEngine.get(), m_LoadWorker.get())) return false;
 
 		return true;
 	}
