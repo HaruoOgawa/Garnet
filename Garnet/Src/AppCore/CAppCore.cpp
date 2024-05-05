@@ -5,6 +5,15 @@
 #include "../Input/CInputState.h"
 #include "../Camera/CCamera.h"
 #include "../Graphics/CDrawInfo.h"
+#include "../Message/Console.h"
+
+#ifdef USE_GLFW
+#include "../WindowAPI/CGLFWWindowAPI.h"
+#elif USE_WEB_NATIVE
+#include "../WindowAPI/CWebWindowAPI.h"
+#elif USE_WIN32_WindowAPI
+#include "../WindowAPI/CWin32WindowAPI.h"
+#endif // WindowAPI
 
 #ifdef USE_WEBGPU
 #include "../GraphicsAPI/WebGPU/CWebGPUAPI.h"
@@ -23,27 +32,16 @@
 namespace app
 {
 	CAppCore::CAppCore():
+		m_WindowAPI(nullptr),
 		m_GraphicsAPI(nullptr),
+		m_IsRunLoop(true),
+		m_SecondsTime(0.0f),
+		m_DeltaSecondsTime(0.0f),
 		m_App(nullptr),
 		m_InputState(std::make_shared<input::CInputState>()),
 		m_LoadWorker(nullptr),
 		m_GUIEngine(nullptr)
 	{
-#ifdef USE_WEBGPU
-		m_GraphicsAPI = std::make_shared<api::CWebGPUAPI>(WIDTH, HEIGHT);
-#elif USE_VULKAN
-		m_GraphicsAPI = std::make_shared<api::CVulkanAPI>(WIDTH, HEIGHT);
-#elif USE_OPENGL
-		m_GraphicsAPI = std::make_shared<api::COpenGLAPI>(WIDTH, HEIGHT);
-#endif // USE_WEBGPU
-
-		m_App = std::make_shared<app::CScriptApp>();
-
-#ifdef USE_GUIENGINE
-		m_GUIEngine = std::make_shared<gui::CImGuiGUIEngine>();
-#else
-		m_GUIEngine = std::make_shared<gui::CDummyGUIEngine>();
-#endif
 	}
 
 	bool CAppCore::Release()
@@ -79,6 +77,13 @@ namespace app
 			m_GraphicsAPI.reset();
 			m_GraphicsAPI = nullptr;
 		}
+		
+		if (m_WindowAPI)
+		{
+			m_WindowAPI->Release();
+			m_WindowAPI.reset();
+			m_WindowAPI = nullptr;
+		}
 
 		return true;
 	}
@@ -88,23 +93,65 @@ namespace app
 		return m_GUIEngine;
 	}
 
-	bool CAppCore::Initialize(IWindowAPI* pWindowAPI)
+#ifdef USE_WIN32_WindowAPI
+	bool CAppCore::Initialize(HINSTANCE hInstance, int Width, int Height)
+#else
+	bool CAppCore::Initialize(int Width, int Height)
+#endif // USE_WIN32_WindowAPI
 	{
-		if (!m_GraphicsAPI->Initialize(pWindowAPI)) return false;
+		{
+			// WindowAPI
+#ifdef USE_GLFW
+			m_WindowAPI = std::make_shared<window::CGLFWWindowAPI>();
+#elif USE_WEB_NATIVE
+			m_WindowAPI = std::make_shared<window::CWebWindowAPI>();
+#elif USE_WIN32_WindowAPI
+			m_WindowAPI = std::make_shared<window::CWin32WindowAPI>();
+#endif
+
+			// GraphicsAPI
+#ifdef USE_WEBGPU
+			m_GraphicsAPI = std::make_shared<api::CWebGPUAPI>(Width, Height);
+#elif USE_VULKAN
+			m_GraphicsAPI = std::make_shared<api::CVulkanAPI>(Width, Height);
+#elif USE_OPENGL
+			m_GraphicsAPI = std::make_shared<api::COpenGLAPI>(Width, Height);
+#endif // USE_WEBGPU
+
+			// App
+			m_App = std::make_shared<app::CScriptApp>();
+
+			// GUI
+#ifdef USE_GUIENGINE
+			m_GUIEngine = std::make_shared<gui::CImGuiGUIEngine>();
+#else
+			m_GUIEngine = std::make_shared<gui::CDummyGUIEngine>();
+#endif
+		}
+
+		// 
+#ifdef USE_WIN32_WindowAPI
+		if (!m_WindowAPI->Initialize(hInstance, this, Width, Height)) return false;
+#else
+		if (!m_WindowAPI->Initialize(this, Width, Height)) return false;
+#endif // USE_WIN32_WindowAPI
+
+		if (!m_GraphicsAPI->Initialize(m_WindowAPI.get())) return false;
 
 		// ロードワーカー
 		m_LoadWorker = std::make_shared<resource::CLoadWorker>(m_GraphicsAPI.get());
 
 #ifdef USE_GUIENGINE
 #ifdef USE_GLFW
-		if (!m_GUIEngine->InitializeWithGLFW(pWindowAPI->GetGLFWWindow(), m_GraphicsAPI.get())) return false;
+		if (!m_GUIEngine->InitializeWithGLFW(m_WindowAPI->GetGLFWWindow(), m_GraphicsAPI.get())) return false;
 #elif USE_WIN32_WindowAPI
-		if (!m_GUIEngine->InitializeWithWin32API(pWindowAPI->GetWin32Window(), m_GraphicsAPI.get())) return false;
+		if (!m_GUIEngine->InitializeWithWin32API(m_WindowAPI->GetWin32Window(), m_GraphicsAPI.get())) return false;
 #endif
 #endif // USE_GUIENGINE
 
-		//
 		if (!m_App->Initialize(m_GraphicsAPI.get(), m_LoadWorker.get())) return false;
+
+		m_WindowAPI->AssignCurrentWindowSize();
 
 		return true;
 	}
@@ -118,13 +165,63 @@ namespace app
 		return true;
 	}
 
-	bool CAppCore::Update(float SecondsTime, float DeltaSecondsTime)
+	bool CAppCore::RunLoop()
 	{
-		m_App->GetDrawInfo()->SetSecondsTime(SecondsTime);
-		m_App->GetDrawInfo()->SetDeltaSecondsTime(DeltaSecondsTime);
+		if (m_IsRunLoop)
+		{
+			m_WindowAPI->PollEvents();
+
+			if (!Update()) return false;
+			if (!LateUpdate()) return false;
+			if (!FixedUpdate()) return false;
+			if (!Draw()) return false;
+
+			m_InputState->Clear();
+		}
+		else
+		{
+#ifdef __EMSCRIPTEN__
+			emscripten_cancel_main_loop();
+#endif // __EMSCRIPTEN__
+		}
+
+		return true;
+	}
+
+	void CAppCore::SetRunLoop(bool Flag)
+	{
+		m_IsRunLoop = Flag;
+	}
+
+	bool CAppCore::IsRunLoop()
+	{ 
+		return m_IsRunLoop; 
+	}
+
+	bool CAppCore::Update()
+	{
+		//
+		float PrevSecondsTime = m_SecondsTime;
+#ifdef __EMSCRIPTEN__
+		// Web上だとさらに単位が違う
+		m_SecondsTime = static_cast<float>(clock()) * 0.001f * 0.001f;
+#else
+		m_SecondsTime = static_cast<float>(clock()) * 0.001f;
+#endif
+		m_DeltaSecondsTime = m_SecondsTime - PrevSecondsTime;
+
+#ifdef _DEBUG
+		// FPSの計測と表示(60FPSを基準とする)
+		float FPS = 60.0f / (m_DeltaSecondsTime * 60.0f);
+		Console::Log("[FPS] %f fps / [CurrentTime] %f s\n", FPS, m_SecondsTime);
+#endif // _DEBUG
+
+		//
+		m_App->GetDrawInfo()->SetSecondsTime(m_SecondsTime);
+		m_App->GetDrawInfo()->SetDeltaSecondsTime(m_DeltaSecondsTime);
 
 		const auto& MainCamera = m_App->GetMainCamera();
-		if (MainCamera) MainCamera->Update(DeltaSecondsTime, m_InputState);
+		if (MainCamera) MainCamera->Update(m_DeltaSecondsTime, m_InputState);
 
 		if (!m_App->Update(m_GraphicsAPI.get(), m_LoadWorker.get(), m_InputState)) return false;
 
@@ -156,6 +253,47 @@ namespace app
 		// Submit
 		if (!m_GraphicsAPI->SubmitRender()) return false;
 
+		// SwapBuffer
+		m_WindowAPI->SwapWindowBuffers();
+
 		return true;
+	}
+
+	// インプットイベント
+	void CAppCore::OnKeyDown(std::string key)
+	{
+		m_WindowAPI->OnKeyDown(key);
+	}
+
+	void CAppCore::OnKeyUp(std::string key)
+	{
+		m_WindowAPI->OnKeyUp(key);
+	}
+
+	// リサイズイベント
+	void CAppCore::OnResize(int w, int h)
+	{
+		m_WindowAPI->OnResize(w, h);
+	}
+
+	// マウスイベント
+	void CAppCore::OnMouseDown(int buttonNum, int x, int y)
+	{
+		m_WindowAPI->OnMouseDown(buttonNum, x, y);
+	}
+
+	void CAppCore::OnMouseUp(int buttonNum, int x, int y)
+	{
+		m_WindowAPI->OnMouseUp(buttonNum, x, y);
+	}
+
+	void CAppCore::OnMouseMove(int x, int y)
+	{
+		m_WindowAPI->OnMouseMove(x, y);
+	}
+
+	void CAppCore::OnMouseWheel(int deltaY)
+	{
+		m_WindowAPI->OnMouseWheel(deltaY);
 	}
 }

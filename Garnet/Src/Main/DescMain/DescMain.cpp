@@ -1,6 +1,6 @@
 #ifdef USE_GLFW
 
-#include "../../WindowAPI/CGLFWWindowAPI.h"
+#include "../../AppCore/CAppCore.h"
 #include "../../Message/Console.h"
 
 #ifdef __EMSCRIPTEN__
@@ -11,21 +11,21 @@
 
 extern "C" {
 
-descapp::CGLFWWindowAPI* g_DescApp = nullptr;
+app::CAppCore* g_AppCore = nullptr;
 
 void Release()
 {
-	delete g_DescApp;
-	g_DescApp = nullptr;
+	delete g_AppCore;
+	g_AppCore = nullptr;
 }
 
 #ifdef __EMSCRIPTEN__
-void RunLopp()
+void RunLoop()
 #else
-bool RunLopp()
+bool RunLoop()
 #endif // __EMSCRIPTEN__
 {
-	if (!g_DescApp->RunLopp() || !g_DescApp->IsRunLoop())
+	if (!g_AppCore->RunLoop() || !g_AppCore->IsRunLoop())
 	{
 		Release();
 
@@ -80,16 +80,16 @@ EMSCRIPTEN_KEEPALIVE
 #endif
 void StartApp()
 {
-	g_DescApp = new descapp::CGLFWWindowAPI();
+	g_AppCore = new app::CAppCore();
 	
-	if (g_DescApp->Initialize())
+	if (g_AppCore->Initialize(1920, 1080))
 	{
 #ifdef __EMSCRIPTEN__
-		emscripten_set_main_loop(RunLopp, 60, true);
+		emscripten_set_main_loop(RunLoop, 60, true);
 #else
-		while (g_DescApp->IsRunLoop())
+		while (g_AppCore->IsRunLoop())
 		{
-			if (!RunLopp()) break;
+			if (!RunLoop()) break;
 		}
 #endif // __EMSCRIPTEN__
 	}

@@ -22,114 +22,49 @@
 #include "../GUIEngine/CDummyGUIEngine.h"
 #endif
 
-namespace webapp
+namespace window
 {
-	CWebWindowAPI::CWebWindowAPI(int Width, int Height):
-		m_IsRunLoop(true),
-		m_GraphicsAPI(nullptr),
-		m_AppCore(nullptr),
-		m_SecondsTime(0.0f),
-		m_DeltaSecondsTime(0.0f),
-		m_Width(Width),
-		m_Height(Height)
+	CWebWindowAPI::CWebWindowAPI():
+		m_pCAppCore(nullptr),
+		m_Width(1920),
+		m_Height(1080)
 	{
-		m_GraphicsAPI = std::make_shared<api::CWebGPUAPI>(Width, Height);
-
-		m_AppCore = std::make_shared<app::CAppCore>();
-	}
-
-	CWebWindowAPI::~CWebWindowAPI()
-	{
-		Release();
 	}
 
 	bool CWebWindowAPI::Release()
 	{
-		if (m_AppCore)
-		{
-			m_AppCore->Release(m_GraphicsAPI.get());
-			m_AppCore.reset();
-			m_AppCore = nullptr;
-		}
-
-		if (m_GraphicsAPI)
-		{
-			m_GraphicsAPI->Release();
-			m_GraphicsAPI.reset();
-			m_GraphicsAPI = nullptr;
-		}
-
 		return true;
 	}
 
-	const std::shared_ptr<app::CAppCore>& CWebWindowAPI::GetAppCore() const
+	bool CWebWindowAPI::Initialize(app::CAppCore* pAppCore, int Width, int Height)
 	{
-		return m_AppCore;
-	}
+		m_pCAppCore = pAppCore;
 
-	bool CWebWindowAPI::Initialize()
-	{
-		if (!m_GraphicsAPI->Initialize()) return false;
-
-		if (!m_AppCore->Initialize(m_GraphicsAPI.get(), this)) return false;
-		
-		m_GraphicsAPI->Resize(m_Width, m_Height);
-		m_AppCore->Resize(m_Width, m_Height);
+		m_Width = Width;
+		m_Height = Height;
 
 		return true;
 	}
-
-	bool CWebWindowAPI::RunLoop()
+	
+	void CWebWindowAPI::SwapWindowBuffers()
 	{
-		if (!m_IsRunLoop)
-		{
-#ifdef __EMSCRIPTEN__
-			emscripten_cancel_main_loop();
-#endif // __EMSCRIPTEN__
-		}
-		else
-		{
-			if (!Update()) return false;
-			if (!LateUpdate()) return false;
-			if (!FixedUpdate()) return false;
-			if (!Draw()) return false;
-
-			m_AppCore->GetInputState()->Clear();
-		}
-
-		return true;
 	}
 
-	bool CWebWindowAPI::Update()
+	void CWebWindowAPI::AssignCurrentWindowSize()
 	{
-		float PrevSecondsTime = m_SecondsTime;
-		m_SecondsTime = static_cast<float>(clock()) * 0.001f * 0.001f;
-		m_DeltaSecondsTime = m_SecondsTime - PrevSecondsTime;
-
-		if (!m_AppCore->Update(m_SecondsTime, m_DeltaSecondsTime)) return false;
-
-		return true;
 	}
 
-	bool CWebWindowAPI::LateUpdate()
+	void CWebWindowAPI::PollEvents()
 	{
-		if (!m_AppCore->LateUpdate(m_GraphicsAPI.get())) return false;
-
-		return true;
 	}
 
-	bool CWebWindowAPI::FixedUpdate()
+	app::CAppCore* CWebWindowAPI::GetAppCore() const
 	{
-		if (!m_AppCore->FixedUpdate(m_GraphicsAPI.get())) return false;
-
-		return true;
+		return m_pCAppCore;
 	}
 
-	bool CWebWindowAPI::Draw()
+	void CWebWindowAPI::ResizeWindow(int w, int h)
 	{
-		if (!m_AppCore->Draw(m_GraphicsAPI.get())) return false;
-
-		return true;
 	}
 
 	// インプットイベント
@@ -185,28 +120,27 @@ namespace webapp
 			KeyType = input::EKeyType::KEY_TYPE_5;
 		}
 
-		auto InputState = m_AppCore->GetInputState();
+		auto InputState = m_pCAppCore->GetInputState();
 		InputState->SetKeyState(KeyType, IsDown);
 
 		//
 		if (key == "Escape" && IsDown)
 		{
 			// Webアプリでは止める必要がない
-			//m_IsRunLoop = false;
+			// m_pCAppCore->SetRunLoop(false);
 		}
 	}
 
 	// リサイズイベント
 	void CWebWindowAPI::OnResize(int w, int h)
 	{
-		m_GraphicsAPI->Resize(w, h);
-		m_AppCore->Resize(w, h);
+		m_pCAppCore->Resize(w, h);
 	}
 
 	// マウスイベント
 	void CWebWindowAPI::OnMouseDown(int buttonNum, int x, int y)
 	{
-		auto InputState = m_AppCore->GetInputState();
+		auto InputState = m_pCAppCore->GetInputState();
 
 		if (buttonNum == 0 && !InputState->IsDownMouseRight())
 		{
@@ -229,7 +163,7 @@ namespace webapp
 
 	void CWebWindowAPI::OnMouseUp(int buttonNum, int x, int y)
 	{
-		auto InputState = m_AppCore->GetInputState();
+		auto InputState = m_pCAppCore->GetInputState();
 
 		if (buttonNum == 0 && !InputState->IsDownMouseRight())
 		{
@@ -252,7 +186,7 @@ namespace webapp
 
 	void CWebWindowAPI::OnMouseMove(int x, int y)
 	{
-		auto InputState = m_AppCore->GetInputState();
+		auto InputState = m_pCAppCore->GetInputState();
 
 		if (InputState->IsDownMouseLeft() || InputState->IsDownMouseRight())
 		{
@@ -269,7 +203,7 @@ namespace webapp
 
 	void CWebWindowAPI::OnMouseWheel(int deltaY)
 	{
-		auto InputState = m_AppCore->GetInputState();
+		auto InputState = m_pCAppCore->GetInputState();
 
 		// ブラウザだとピクセルに基づくホイール量が -150 ~ 150の範囲で返ってくるのでひとまず -1.0 ~ 1.0fにしておく
 		float wheelRate = glm::sign(-1.0f * static_cast<float>(deltaY)) * 1.0f;

@@ -1,35 +1,35 @@
 #ifdef USE_WIN32_WindowAPI
 
-#include "../../WindowAPI/CWin32WindowAPI.h"
+#include "../../AppCore/CAppCore.h"
 #include "../../Message/Console.h"
 
 #include <Windows.h>
 
 extern "C" {
 
-	app::CWin32WindowAPI* g_DemoApp = nullptr;
+	app::CAppCore* g_AppCore = nullptr;
 
-	bool RunLopp()
+	bool RunLoop()
 	{
-		if (!g_DemoApp->RunLopp()) return false;
+		if (!g_AppCore->RunLoop()) return false;
 
 		return true;
 	}
 
 	void StartApp(HINSTANCE hInstance)
 	{
-		g_DemoApp = new app::CWin32WindowAPI();
+		g_AppCore = new app::CAppCore();
 
-		if (g_DemoApp->Initialize(hInstance))
+		if (g_AppCore->Initialize(hInstance, 1920, 1080))
 		{
-			while (g_DemoApp->IsRunLoop())
+			while (g_AppCore->IsRunLoop())
 			{
-				if (!RunLopp()) break;
+				if (!RunLoop()) break;
 			}
 		}
 
-		delete g_DemoApp;
-		g_DemoApp = nullptr;
+		delete g_AppCore;
+		g_AppCore = nullptr;
 	}
 
 	int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)

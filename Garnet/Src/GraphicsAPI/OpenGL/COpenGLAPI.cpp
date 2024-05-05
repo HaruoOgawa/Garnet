@@ -31,7 +31,7 @@ namespace api
 	{
 	}
 
-	bool COpenGLAPI::Initialize(IWindowAPI* pWindowAPI)
+	bool COpenGLAPI::Initialize(window::IWindowAPI* pWindowAPI)
 	{
 		if (!InitGL()) return false;
 

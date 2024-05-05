@@ -1,6 +1,5 @@
 #ifdef USE_WEB_NATIVE
-#include "../../WindowAPI/CWebWindowAPI.h"
-#include "../../AppManager/EAppType.h"
+#include "../../AppCore/CAppCore.h"
 #include "../../Message/Console.h"
 
 #ifdef __EMSCRIPTEN__
@@ -9,18 +8,17 @@
 
 extern "C"
 {
-
-	webapp::CWebWindowAPI* g_WebApp = nullptr;
+	app::CAppCore* g_AppCore = nullptr;
 
 	void Release()
 	{
-		delete g_WebApp;
-		g_WebApp = nullptr;
+		delete g_AppCore;
+		g_AppCore = nullptr;
 	}
 
-	void RunLopp()
+	void RunLoop()
 	{
-		if (!g_WebApp->RunLoop() || !g_WebApp->IsRunLoop())
+		if (!g_AppCore->RunLoop() || !g_AppCore->IsRunLoop())
 		{
 			Release();
 		}
@@ -29,10 +27,10 @@ extern "C"
 	EMSCRIPTEN_KEEPALIVE
 	void StartApp(int Width, int Height)
 	{
-		g_WebApp = new webapp::CWebWindowAPI(Width, Height);
+		g_AppCore = new app::CAppCore();
 
-		g_WebApp->Initialize();
-		emscripten_set_main_loop(RunLopp, 60, true);
+		g_AppCore->Initialize(Width, Height);
+		emscripten_set_main_loop(RunLoop, 60, true);
 	}
 
 	int main()
@@ -43,63 +41,63 @@ extern "C"
 	EMSCRIPTEN_KEEPALIVE
 	void OnKeyDown(char* key)
 	{
-		if (g_WebApp)
+		if (g_AppCore)
 		{
-			g_WebApp->OnKeyDown(std::string(key));
+			g_AppCore->OnKeyDown(std::string(key));
 		}
 	}
 	
 	EMSCRIPTEN_KEEPALIVE
 	void OnKeyUp(char* key)
 	{
-		if (g_WebApp)
+		if (g_AppCore)
 		{
-			g_WebApp->OnKeyUp(std::string(key));
+			g_AppCore->OnKeyUp(std::string(key));
 		}
 	}
 
 	EMSCRIPTEN_KEEPALIVE
 	void OnResize(int w, int h)
 	{
-		if (g_WebApp)
+		if (g_AppCore)
 		{
-			g_WebApp->OnResize(w, h);
+			g_AppCore->OnResize(w, h);
 		}
 	}
 
 	EMSCRIPTEN_KEEPALIVE
 	void OnMouseDown(int buttonNum, int x, int y)
 	{
-		if (g_WebApp)
+		if (g_AppCore)
 		{
-			g_WebApp->OnMouseDown(buttonNum, x, y);
+			g_AppCore->OnMouseDown(buttonNum, x, y);
 		}
 	}
 	
 	EMSCRIPTEN_KEEPALIVE
 	void OnMouseUp(int buttonNum, int x, int y)
 	{
-		if (g_WebApp)
+		if (g_AppCore)
 		{
-			g_WebApp->OnMouseUp(buttonNum, x, y);
+			g_AppCore->OnMouseUp(buttonNum, x, y);
 		}
 	}
 
 	EMSCRIPTEN_KEEPALIVE
 	void OnMouseMove(int x, int y)
 	{
-		if (g_WebApp)
+		if (g_AppCore)
 		{
-			g_WebApp->OnMouseMove(x, y);
+			g_AppCore->OnMouseMove(x, y);
 		}
 	}
 	
 	EMSCRIPTEN_KEEPALIVE
 	void OnMouseWheel(int deltaY)
 	{
-		if (g_WebApp)
+		if (g_AppCore)
 		{
-			g_WebApp->OnMouseWheel(deltaY);
+			g_AppCore->OnMouseWheel(deltaY);
 		}
 	}
 }

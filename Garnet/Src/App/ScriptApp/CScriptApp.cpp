@@ -35,10 +35,9 @@ namespace app
 		m_DrawInfo(std::make_shared<graphics::CDrawInfo>()),
 		m_BlurEffect(nullptr),
 #ifdef USE_GUIENGINE
-
+		m_GraphicsEditingWindow(std::make_shared<gui::CGraphicsEditingWindow>()),
 #endif // USE_GUIENGINE
-		m_PhysicsEngine(std::make_shared<physics::CBulletPhysicsEngine>()),
-		m_GraphicsEditingWindow(std::make_shared<gui::CGraphicsEditingWindow>())
+		m_PhysicsEngine(std::make_shared<physics::CBulletPhysicsEngine>())
 	{
 		m_MainCamera->SetPos(glm::vec3(0.0f, 1.0f, -7.0f));
 		//m_MainCamera->SetCenter(glm::vec3(0.0f, 50.0f, 349.0f));
@@ -149,12 +148,14 @@ namespace app
 		if (!pLoadWorker->Draw(pGraphicsAPI, false, m_MainCamera, m_Projection, m_DrawInfo)) return false;
 		
 		// GUIEngine
+#ifdef USE_GUIENGINE
 		if (pLoadWorker->IsLoaded())
 		{
 			if (!GUIEngine->BeginFrame(pGraphicsAPI)) return false;
 			if (!m_GraphicsEditingWindow->Draw(this)) return false;
 			if (!GUIEngine->EndFrame(pGraphicsAPI)) return false;
 		}
+#endif // USE_GUIENGINE
 
 		if (!pGraphicsAPI->EndRender()) return false;
 

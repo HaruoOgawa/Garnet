@@ -10,45 +10,47 @@
 
 namespace app{ class CAppCore; }
 
-namespace descapp
+namespace window
 {
 	class CGLFWWindowAPI : public IWindowAPI
 	{
+		app::CAppCore* m_pCAppCore;
+
 		GLFWwindow* m_pWindow;
-
-		std::shared_ptr<app::CAppCore> m_AppCore;
-		
-		const int WIDTH = 1920;
-		const int HEIGHT = 1080;
-
-		bool m_IsRunLoop;
-
-		float m_SecondsTime;
-		float m_DeltaSecondsTime;
-
 	private:
-		bool InitWindow();
-
-		bool Release();
-
-		bool Update();
-		bool LateUpdate();
-		bool FixedUpdate();
-		bool Draw();
+		bool InitWindow(int Width, int Height);
 	public:
 		CGLFWWindowAPI();
-		virtual ~CGLFWWindowAPI();
+		virtual ~CGLFWWindowAPI() = default;
 
 		virtual GLFWwindow* GetGLFWWindow() const override;
-
-		const std::shared_ptr<app::CAppCore>& GetAppCore() const;
 		
-		bool Initialize();
-		bool RunLopp();
+		virtual bool Release() override;
 
-		bool IsRunLoop() { return m_IsRunLoop; }
+		virtual bool Initialize(app::CAppCore* pAppCore, int Width, int Height) override;
 		
-		void ResizeWindow(int w, int h);
+		virtual void SwapWindowBuffers() override;
+
+		virtual void AssignCurrentWindowSize() override;
+
+		virtual void PollEvents() override;
+
+		virtual app::CAppCore* GetAppCore() const override;
+
+		virtual void ResizeWindow(int w, int h) override;
+
+		// インプットイベント
+		virtual void OnKeyDown(std::string key) override;
+		virtual void OnKeyUp(std::string key) override;
+
+		// リサイズイベント
+		virtual void OnResize(int w, int h) override;
+
+		// マウスイベント
+		virtual void OnMouseDown(int buttonNum, int x, int y) override;
+		virtual void OnMouseUp(int buttonNum, int x, int y) override;
+		virtual void OnMouseMove(int x, int y) override;
+		virtual void OnMouseWheel(int deltaY) override;
 	};
 }
 #endif

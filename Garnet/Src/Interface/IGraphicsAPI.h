@@ -33,7 +33,7 @@ namespace api
 	class IGraphicsAPI
 	{
 	public:
-		virtual bool Initialize(IWindowAPI* pWindowAPI) = 0;
+		virtual bool Initialize(window::IWindowAPI* pWindowAPI) = 0;
 		
 		virtual bool CreateRenderPass(const std::string& PassName, ERenderPassFormat RenderPassFormat, const glm::vec4& InitColor, int Width = -1, int Height = -1) = 0;
 		virtual std::shared_ptr<graphics::CVertexBuffer> CreateVertexBuffer() = 0;

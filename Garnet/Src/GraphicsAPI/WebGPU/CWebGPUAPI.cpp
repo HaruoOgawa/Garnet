@@ -55,7 +55,7 @@ namespace api
 	}
 
 	// IGraphicsAPI //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	bool CWebGPUAPI::Initialize(IWindowAPI* pWindowAPI)
+	bool CWebGPUAPI::Initialize(window::IWindowAPI* pWindowAPI)
 	{
 		if (!CreateInstance()) return false; // インスタンスを生成
 #ifdef __EMSCRIPTEN__

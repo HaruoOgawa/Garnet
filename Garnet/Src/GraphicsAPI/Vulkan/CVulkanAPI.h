@@ -170,7 +170,7 @@ namespace api
 		CVulkanAPI(int Width, int Height);
 		virtual ~CVulkanAPI();
 
-		virtual bool Initialize(IWindowAPI* pWindowAPI) override;
+		virtual bool Initialize(window::IWindowAPI* pWindowAPI) override;
 		void Release();
 
 		virtual bool CreateRenderPass(const std::string& PassName, ERenderPassFormat RenderPassFormat, const glm::vec4& InitColor, int Width = -1, int Height = -1) override;

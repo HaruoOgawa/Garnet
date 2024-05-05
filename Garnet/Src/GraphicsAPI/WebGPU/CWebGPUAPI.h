@@ -85,7 +85,7 @@ namespace api
 		CWebGPUAPI(int Width, int Height);
 		virtual ~CWebGPUAPI();
 
-		virtual bool Initialize(IWindowAPI* pWindowAPI) override;
+		virtual bool Initialize(window::IWindowAPI* pWindowAPI) override;
 
 		void Release();
 

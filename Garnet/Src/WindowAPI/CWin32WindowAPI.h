@@ -9,47 +9,51 @@
 
 namespace app { class CAppCore; }
 
-namespace app
+namespace window
 {
 	class CWin32WindowAPI : public IWindowAPI
 	{
+		app::CAppCore* m_pCAppCore;
+
 		HWND  m_Window; // ハンドルウィンドウ
 		RECT  m_WorkArea; // スクリーンサイズ
 		HDC   m_Device_Context; // デバイスのコンテキスト
 		HGLRC m_Rendering_Context; // OpenGLのコンテキスト
-
-		const int WIDTH = 1920;
-		const int HEIGHT = 1080;
-
-		bool m_IsRunLoop;
-
-		float m_SecondsTime;
-		float m_DeltaSecondsTime;
-		
-		std::shared_ptr<app::CAppCore> m_AppCore;
-
 	private:
-		bool InitWindow(HINSTANCE hInstance);
+		bool InitWindow(HINSTANCE hInstance, int Width, int Height);
 		bool InitGLContext();
-
-		bool Update();
-		bool LateUpdate();
-		bool FixedUpdate();
-		bool Draw();
 	public:
 		CWin32WindowAPI();
-		virtual ~CWin32WindowAPI();
+		virtual ~CWin32WindowAPI() = default;
 
 		virtual const HWND& GetWin32Window() const override;
 
-		const std::shared_ptr<app::CAppCore>& GetAppCore() const;
+		virtual bool Release() override;
 
-		bool Initialize(HINSTANCE hInstance);
-		bool RunLopp();
+		virtual bool Initialize(HINSTANCE hInstance, app::CAppCore* pAppCore, int Width, int Height) override;
 
-		bool IsRunLoop() { return m_IsRunLoop; }
-		void SetRunLoop(bool RunLoop) { m_IsRunLoop = RunLoop; }
-		void ResizeWindow(int w, int h);
+		virtual void SwapWindowBuffers() override;
+
+		virtual void AssignCurrentWindowSize() override;
+
+		virtual void PollEvents() override;
+
+		virtual app::CAppCore* GetAppCore() const override;
+
+		virtual void ResizeWindow(int w, int h) override;
+
+		// インプットイベント
+		virtual void OnKeyDown(std::string key) override;
+		virtual void OnKeyUp(std::string key) override;
+
+		// リサイズイベント
+		virtual void OnResize(int w, int h) override;
+
+		// マウスイベント
+		virtual void OnMouseDown(int buttonNum, int x, int y) override;
+		virtual void OnMouseUp(int buttonNum, int x, int y) override;
+		virtual void OnMouseMove(int x, int y) override;
+		virtual void OnMouseWheel(int deltaY) override;
 	};
 }
 #endif // USE_WIN32_WindowAPI

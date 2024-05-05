@@ -32,7 +32,9 @@ namespace app
 		std::shared_ptr<graphics::CDrawInfo> m_DrawInfo;
 		std::shared_ptr<imageeffect::CBlurEffect> m_BlurEffect;
 
+#ifdef USE_GUIENGINE
 		std::shared_ptr<gui::CGraphicsEditingWindow> m_GraphicsEditingWindow;
+#endif // USE_GUIENGINE
 		
 	public:
 		CScriptApp();

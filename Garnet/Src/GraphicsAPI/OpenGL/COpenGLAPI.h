@@ -29,7 +29,7 @@ namespace api
 		COpenGLAPI(int Width, int Height);
 		virtual ~COpenGLAPI();
 
-		virtual bool Initialize(IWindowAPI* pWindowAPI) override;
+		virtual bool Initialize(window::IWindowAPI* pWindowAPI) override;
 		
 		void Release();
 

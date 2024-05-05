@@ -16,44 +16,33 @@
 #include "../GUIEngine/CDummyGUIEngine.h"
 #endif
 
-namespace app
+namespace window
 {
 	// 仮のグローバル変数
-	bool g_IsRunLoop = true;
 	CWin32WindowAPI* g_AppManager = nullptr;
 
 	CWin32WindowAPI::CWin32WindowAPI():
+		m_pCAppCore(nullptr),
 		m_Window(nullptr),
 		m_Device_Context(nullptr),
-		m_Rendering_Context(nullptr),
-		m_IsRunLoop(true),
-		m_SecondsTime(0.0f),
-		m_DeltaSecondsTime(0.0f),
-		m_AppCore(nullptr)
+		m_Rendering_Context(nullptr)
 	{
 		g_AppManager = this; // 仮のグローバル変数
-
-		m_AppCore = std::make_shared<app::CAppCore>();
 	}
 
-	CWin32WindowAPI::~CWin32WindowAPI()
+	bool CWin32WindowAPI::Release()
 	{
-		if (m_AppCore)
-		{
-			m_AppCore->Release();
-			m_AppCore.reset();
-			m_AppCore = nullptr;
-		}
-
 		if (m_Rendering_Context)
 		{
 			wglMakeCurrent(NULL, NULL);
 			wglDeleteContext(m_Rendering_Context);
 		}
 
-		ReleaseDC(m_Window,m_Device_Context);
+		ReleaseDC(m_Window, m_Device_Context);
 
 		g_AppManager = nullptr;
+
+		return true;
 	}
 
 	const HWND& CWin32WindowAPI::GetWin32Window() const
@@ -61,27 +50,13 @@ namespace app
 		return m_Window;
 	}
 
-	const std::shared_ptr<app::CAppCore>& CWin32WindowAPI::GetAppCore() const
+	bool CWin32WindowAPI::Initialize(HINSTANCE hInstance, app::CAppCore* pAppCore, int Width, int Height)
 	{
-		return m_AppCore;
-	}
+		m_pCAppCore = pAppCore;
 
-	bool CWin32WindowAPI::Initialize(HINSTANCE hInstance)
-	{
-		if (!InitWindow(hInstance)) return false;
+		if (!InitWindow(hInstance, Width, Height)) return false;
 		//if (!InitWGL()) return false;
 		if (!InitGLContext()) return false;
-
-		if (!m_AppCore->Initialize(this)) return false;
-
-		RECT rect;
-		if (GetWindowRect(m_Window, &rect))
-		{
-			int w = rect.right - rect.left;
-			int h = rect.bottom - rect.top;
-
-			m_AppCore->Resize(w, h);
-		}
 
 		return true;
 	}
@@ -96,19 +71,19 @@ namespace app
 	{
 		if (w_param < 256)
 		{
-			// WPARAM Key Codes
-			// https://learn.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes
-			if (w_param == VK_ESCAPE)
-			{
-				g_IsRunLoop = false;
-			}
-
 			if (!g_AppManager) return;
 
 			auto AppManager = g_AppManager;
 
 			auto AppCore = AppManager->GetAppCore();
 			if (!AppCore) return;
+
+			// WPARAM Key Codes
+			// https://learn.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes
+			if (w_param == VK_ESCAPE)
+			{
+				AppCore->SetRunLoop(false);
+			}
 
 #ifdef USE_INPUT_SYSTEM
 			auto InputState = AppCore->GetInputState();
@@ -311,40 +286,7 @@ namespace app
 		return true;
 	}
 
-	bool CWin32WindowAPI::RunLopp()
-	{
-		m_IsRunLoop = g_IsRunLoop;
-
-		if (m_IsRunLoop)
-		{
-			// Windows Message Handling(Send msg to MainWindowCallback)
-			{
-				MSG msg;
-				if(PeekMessage(&msg, 0, 0, 0, PM_REMOVE))
-				{
-					TranslateMessage(&msg);
-					DispatchMessageA(&msg);
-				}
-			}
-
-			//
-			if (!Update()) return false;
-			if (!LateUpdate()) return false;
-			if (!FixedUpdate()) return false;
-			if (!Draw()) return false;
-
-			m_AppCore->GetInputState()->Clear();
-		}
-
-		return true;
-	}
-
-	void CWin32WindowAPI::ResizeWindow(int w, int h)
-	{
-		m_AppCore->Resize(w, h);
-	}
-
-	bool CWin32WindowAPI::InitWindow(HINSTANCE hInstance)
+	bool CWin32WindowAPI::InitWindow(HINSTANCE hInstance, int Width, int Height)
 	{
 		/// <summary>
 		/// ウィンドウの設定
@@ -378,8 +320,8 @@ namespace app
 			WS_POPUP | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_VISIBLE | WS_CAPTION, // WindosStyle. たぶんWindowに出てくるボタンとかタブの設定
 			200, // 位置 X (適当な値)
 			200, // 位置 Y (適当な値)
-			WIDTH,         // Width
-			HEIGHT,        // HEIGHT
+			Width,         // Width
+			Height,        // HEIGHT
 			0,             // Window Parent. ウィンドウを複数個作ってグループ化できるのかな？ 例えばUnityのGame Viewと Scene ViewがあってUnityエディタ全体を動かすとそれもついてくるみたいな
 			0,             // Menu(?)
 			hInstance,     // アプリのインスタンス
@@ -464,40 +406,76 @@ namespace app
 		return true;
 	}
 
-	bool CWin32WindowAPI::Update()
+	void CWin32WindowAPI::SwapWindowBuffers()
 	{
-		float PrevSecondsTime = m_SecondsTime;
-		m_SecondsTime = static_cast<float>(clock()) * 0.001f;
-		m_DeltaSecondsTime = m_SecondsTime - PrevSecondsTime;
-
-		if (!m_AppCore->Update(m_SecondsTime, m_DeltaSecondsTime)) return false;
-
-		return true;
-	}
-
-	bool CWin32WindowAPI::LateUpdate()
-	{
-		if (!m_AppCore->LateUpdate()) return false;
-
-		return true;
-	}
-
-	bool CWin32WindowAPI::FixedUpdate()
-	{
-		if (!m_AppCore->FixedUpdate()) return false;
-
-		return true;
-	}
-
-	bool CWin32WindowAPI::Draw()
-	{
-		// Appの描画
-		if (!m_AppCore->Draw()) return false;
-
 		//カラーバッファを入れ替える
 		SwapBuffers(m_Device_Context);
+	}
 
-		return true;
+	void CWin32WindowAPI::AssignCurrentWindowSize()
+	{
+		RECT rect;
+		if (GetWindowRect(m_Window, &rect))
+		{
+			int w = rect.right - rect.left;
+			int h = rect.bottom - rect.top;
+
+			m_pCAppCore->Resize(w, h);
+		}
+	}
+
+	void CWin32WindowAPI::PollEvents()
+	{
+		// Windows Message Handling(Send msg to MainWindowCallback)
+		{
+			MSG msg;
+			if (PeekMessage(&msg, 0, 0, 0, PM_REMOVE))
+			{
+				TranslateMessage(&msg);
+				DispatchMessageA(&msg);
+			}
+		}
+	}
+
+	app::CAppCore* CWin32WindowAPI::GetAppCore() const
+	{
+		return m_pCAppCore;
+	}
+
+	void CWin32WindowAPI::ResizeWindow(int w, int h)
+	{
+		m_pCAppCore->Resize(w, h);
+	}
+
+	// インプットイベント
+	void CWin32WindowAPI::OnKeyDown(std::string key)
+	{
+	}
+
+	void CWin32WindowAPI::OnKeyUp(std::string key)
+	{
+	}
+
+	// リサイズイベント
+	void CWin32WindowAPI::OnResize(int w, int h)
+	{
+	}
+
+	// マウスイベント
+	void CWin32WindowAPI::OnMouseDown(int buttonNum, int x, int y)
+	{
+	}
+
+	void CWin32WindowAPI::OnMouseUp(int buttonNum, int x, int y)
+	{
+	}
+
+	void CWin32WindowAPI::OnMouseMove(int x, int y)
+	{
+	}
+
+	void CWin32WindowAPI::OnMouseWheel(int deltaY)
+	{
 	}
 }
 #endif // USE_WIN32_WindowAPI

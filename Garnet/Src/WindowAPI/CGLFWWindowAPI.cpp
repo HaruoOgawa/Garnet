@@ -2,6 +2,8 @@
 
 #include "CGLFWWindowAPI.h"
 #include "../Message/Console.h"
+#include "../Input/CInputState.h"
+#include "../AppCore/CAppCore.h"
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten/emscripten.h>
@@ -19,27 +21,12 @@
 #include "../GUIEngine/CDummyGUIEngine.h"
 #endif
 
-#include "../Input/CInputState.h"
-
-#include "../AppCore/CAppCore.h"
-
-bool g_IsRunLoop = true;
-
-namespace descapp
+namespace window
 {
 	CGLFWWindowAPI::CGLFWWindowAPI():
-		m_pWindow(nullptr),
-		m_AppCore(nullptr),
-		m_IsRunLoop(g_IsRunLoop),
-		m_SecondsTime(0.0f), 
-		m_DeltaSecondsTime(0.0f)
+		m_pCAppCore(nullptr),
+		m_pWindow(nullptr)
 	{
-		m_AppCore = std::make_shared<app::CAppCore>();
-	}
-
-	CGLFWWindowAPI::~CGLFWWindowAPI()
-	{
-		Release();
 	}
 
 	GLFWwindow* CGLFWWindowAPI::GetGLFWWindow() const
@@ -47,20 +34,8 @@ namespace descapp
 		return m_pWindow;
 	}
 
-	const std::shared_ptr<app::CAppCore>& CGLFWWindowAPI::GetAppCore() const
-	{
-		return m_AppCore;
-	}
-
 	bool CGLFWWindowAPI::Release()
 	{
-		if (m_AppCore)
-		{
-			m_AppCore->Release();
-			m_AppCore.reset();
-			m_AppCore = nullptr;
-		}
-		
 		if (m_pWindow)
 		{
 			glfwDestroyWindow(m_pWindow);
@@ -72,26 +47,21 @@ namespace descapp
 		return true;
 	}
 
-	bool CGLFWWindowAPI::Initialize()
+	bool CGLFWWindowAPI::Initialize(app::CAppCore* pAppCore, int Width, int Height)
 	{
-		if (!InitWindow()) return false;
+		m_pCAppCore = pAppCore;
 
-		if (!m_AppCore->Initialize(this)) return false;
-
-		int w, h;
-		glfwGetWindowSize(m_pWindow, &w, &h);
-
-		m_AppCore->Resize(w, h);
+		if (!InitWindow(Width, Height)) return false;
 
 		return true;
 	}
 
 	void KetCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
 	{
-		auto AppManager = reinterpret_cast<CGLFWWindowAPI*>(glfwGetWindowUserPointer(window));
-		if (!AppManager) return;
+		auto WindowAPI = reinterpret_cast<CGLFWWindowAPI*>(glfwGetWindowUserPointer(window));
+		if (!WindowAPI) return;
 
-		auto AppCore = AppManager->GetAppCore();
+		auto AppCore = WindowAPI->GetAppCore();
 		if (!AppCore) return;
 
 		auto GUIEngine = AppCore->GetGUIEngine();
@@ -146,27 +116,33 @@ namespace descapp
 		// ループ終了
 		if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
 		{
-			g_IsRunLoop = false;
+			AppCore->SetRunLoop(false);
 		}
 	}
 
 	void Resize_Callback(GLFWwindow* window, int width, int height)
 	{
-		auto AppManager = reinterpret_cast<CGLFWWindowAPI*>(glfwGetWindowUserPointer(window));
-		AppManager->ResizeWindow(width, height);
+		auto WindowAPI = reinterpret_cast<CGLFWWindowAPI*>(glfwGetWindowUserPointer(window));
+		WindowAPI->ResizeWindow(width, height);
 	}
 
 	void Close_Callback(GLFWwindow* window)
 	{
-		g_IsRunLoop = false;
+		auto WindowAPI = reinterpret_cast<CGLFWWindowAPI*>(glfwGetWindowUserPointer(window));
+		if (!WindowAPI) return;
+
+		auto AppCore = WindowAPI->GetAppCore();
+		if (!AppCore) return;
+
+		AppCore->SetRunLoop(false);
 	}
 
 	void MousebuttonCallback(GLFWwindow* window, int button, int action, int mods)
 	{
-		auto AppManager = reinterpret_cast<CGLFWWindowAPI*>(glfwGetWindowUserPointer(window));
-		if (!AppManager) return;
+		auto WindowAPI = reinterpret_cast<CGLFWWindowAPI*>(glfwGetWindowUserPointer(window));
+		if (!WindowAPI) return;
 
-		auto AppCore = AppManager->GetAppCore();
+		auto AppCore = WindowAPI->GetAppCore();
 		if (!AppCore) return;
 
 		auto GUIEngine = AppCore->GetGUIEngine();
@@ -210,10 +186,10 @@ namespace descapp
 
 	void CursorPosCallback(GLFWwindow* window, double PosX, double PosY)
 	{
-		auto AppManager = reinterpret_cast<CGLFWWindowAPI*>(glfwGetWindowUserPointer(window));
-		if (!AppManager) return;
+		auto WindowAPI = reinterpret_cast<CGLFWWindowAPI*>(glfwGetWindowUserPointer(window));
+		if (!WindowAPI) return;
 
-		auto AppCore = AppManager->GetAppCore();
+		auto AppCore = WindowAPI->GetAppCore();
 		if (!AppCore) return;
 
 		auto GUIEngine = AppCore->GetGUIEngine();
@@ -245,10 +221,10 @@ namespace descapp
 
 	void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
 	{
-		auto AppManager = reinterpret_cast<CGLFWWindowAPI*>(glfwGetWindowUserPointer(window));
-		if (!AppManager) return;
+		auto WindowAPI = reinterpret_cast<CGLFWWindowAPI*>(glfwGetWindowUserPointer(window));
+		if (!WindowAPI) return;
 
-		auto AppCore = AppManager->GetAppCore();
+		auto AppCore = WindowAPI->GetAppCore();
 		if (!AppCore) return;
 
 		auto GUIEngine = AppCore->GetGUIEngine();
@@ -265,7 +241,7 @@ namespace descapp
 #endif
 	}
 
-	bool CGLFWWindowAPI::InitWindow()
+	bool CGLFWWindowAPI::InitWindow(int Width, int Height)
 	{
 		glfwInit();
 
@@ -275,7 +251,7 @@ namespace descapp
 		
 		//glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
-		m_pWindow = glfwCreateWindow(WIDTH, HEIGHT, "Garnet", nullptr, nullptr);
+		m_pWindow = glfwCreateWindow(Width, Height, "Garnet", nullptr, nullptr);
 
 #ifdef USE_OPENGL
 		glfwMakeContextCurrent(m_pWindow);
@@ -293,81 +269,65 @@ namespace descapp
 		return true;
 	}
 
-	void CGLFWWindowAPI::ResizeWindow(int w, int h)
+	void CGLFWWindowAPI::SwapWindowBuffers()
 	{
-		m_AppCore->Resize(w, h);
-	}
-
-	bool CGLFWWindowAPI::RunLopp()
-	{
-		m_IsRunLoop = g_IsRunLoop;
-
-		if (g_IsRunLoop)
-		{
-			glfwPollEvents();
-
-			if (!Update()) return false;
-			if (!LateUpdate()) return false;
-			if (!FixedUpdate()) return false;
-			if (!Draw()) return false;
-			
-			m_AppCore->GetInputState()->Clear();
-		}
-		else
-		{
-#ifdef __EMSCRIPTEN__
-			emscripten_cancel_main_loop();
-#endif // __EMSCRIPTEN__
-		}
-
-		return true;
-	}
-
-	bool CGLFWWindowAPI::Update()
-	{
-		float PrevSecondsTime = m_SecondsTime;
-#ifdef __EMSCRIPTEN__
-		// Web上だとさらに単位が違う
-		m_SecondsTime = static_cast<float>(clock()) * 0.001f * 0.001f;
-#else
-		m_SecondsTime = static_cast<float>(clock()) * 0.001f;
-#endif
-		m_DeltaSecondsTime = m_SecondsTime - PrevSecondsTime;
-
-		if (!m_AppCore->Update(m_SecondsTime, m_DeltaSecondsTime)) return false;
-
-#ifdef _DEBUG
-		// FPSの計測と表示(60FPSを基準とする)
-		float FPS = 60.0f / (m_DeltaSecondsTime * 60.0f);
-		Console::Log("[FPS] %f fps / [CurrentTime] %f s\n", FPS, m_SecondsTime);
-#endif // _DEBUG
-
-		return true;
-	}
-
-	bool CGLFWWindowAPI::LateUpdate()
-	{
-		if (!m_AppCore->LateUpdate()) return false;
-
-		return true;
-	}
-
-	bool CGLFWWindowAPI::FixedUpdate()
-	{
-		if (!m_AppCore->FixedUpdate()) return false;
-
-		return true;
-	}
-
-	bool CGLFWWindowAPI::Draw()
-	{
-		if (!m_AppCore->Draw()) return false;
-
 #ifdef USE_OPENGL
 		glfwSwapBuffers(m_pWindow);
 #endif
+	}
 
-		return true;
+	void CGLFWWindowAPI::AssignCurrentWindowSize()
+	{
+		int w, h;
+		glfwGetWindowSize(m_pWindow, &w, &h);
+
+		ResizeWindow(w, h);
+	}
+
+	void CGLFWWindowAPI::PollEvents()
+	{
+		glfwPollEvents();
+	}
+
+	app::CAppCore* CGLFWWindowAPI::GetAppCore() const
+	{
+		return m_pCAppCore;
+	}
+
+	void CGLFWWindowAPI::ResizeWindow(int w, int h)
+	{
+		m_pCAppCore->Resize(w, h);
+	}
+
+	// インプットイベント
+	void CGLFWWindowAPI::OnKeyDown(std::string key)
+	{
+	}
+
+	void CGLFWWindowAPI::OnKeyUp(std::string key)
+	{
+	}
+
+	// リサイズイベント
+	void CGLFWWindowAPI::OnResize(int w, int h)
+	{
+	}
+
+	// マウスイベント
+	void CGLFWWindowAPI::OnMouseDown(int buttonNum, int x, int y)
+	{
+	}
+
+	void CGLFWWindowAPI::OnMouseUp(int buttonNum, int x, int y)
+	{
+	}
+
+	void CGLFWWindowAPI::OnMouseMove(int x, int y)
+	{
+	}
+
+	void CGLFWWindowAPI::OnMouseWheel(int deltaY)
+	{
 	}
 }
 #endif // USE_GLFW

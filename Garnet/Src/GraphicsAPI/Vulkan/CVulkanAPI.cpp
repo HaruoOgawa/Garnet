@@ -47,7 +47,7 @@ namespace api
 		
 	}
 
-	bool CVulkanAPI::Initialize(IWindowAPI* pWindowAPI)
+	bool CVulkanAPI::Initialize(window::IWindowAPI* pWindowAPI)
 	{
 		m_pWindow = pWindowAPI->GetGLFWWindow();
 

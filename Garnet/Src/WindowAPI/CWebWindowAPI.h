@@ -6,50 +6,47 @@
 
 namespace app { class CAppCore; }
 
-namespace webapp
+namespace window
 {
 	class CWebWindowAPI : public IWindowAPI
 	{
-		bool m_IsRunLoop;
-		std::shared_ptr<app::CAppCore> m_AppCore;
-
-		float m_SecondsTime;
-		float m_DeltaSecondsTime;
+		app::CAppCore* m_pCAppCore;
 
 		int m_Width;
 		int m_Height;
 
 	private:
-		bool Release();
-
-		bool Update();
-		bool LateUpdate();
-		bool FixedUpdate();
-		bool Draw();
-
 		void KeyAction(std::string key, bool IsDown);
 	public:
-		CWebWindowAPI(int Width, int Height);
-		virtual ~CWebWindowAPI();
+		CWebWindowAPI();
+		virtual ~CWebWindowAPI() = default;
 
-		const std::shared_ptr<app::CAppCore>& GetAppCore() const;
+		virtual bool Release() override;
 
-		bool Initialize();
-		bool RunLoop();
-		bool IsRunLoop(){ return m_IsRunLoop; }
+		virtual bool Initialize(app::CAppCore* pAppCore, int Width, int Height) override;
+
+		virtual void SwapWindowBuffers() override;
+
+		virtual void AssignCurrentWindowSize() override;
+
+		virtual void PollEvents() override;
+
+		virtual app::CAppCore* GetAppCore() const override;
+
+		virtual void ResizeWindow(int w, int h) override;
 
 		// インプットイベント
-		void OnKeyDown(std::string key);
-		void OnKeyUp(std::string key);
+		virtual void OnKeyDown(std::string key) override;
+		virtual void OnKeyUp(std::string key) override;
 
 		// リサイズイベント
-		void OnResize(int w, int h);
+		virtual void OnResize(int w, int h) override;
 
 		// マウスイベント
-		void OnMouseDown(int buttonNum, int x, int y);
-		void OnMouseUp(int buttonNum, int x, int y);
-		void OnMouseMove(int x, int y);
-		void OnMouseWheel(int deltaY);
+		virtual void OnMouseDown(int buttonNum, int x, int y) override;
+		virtual void OnMouseUp(int buttonNum, int x, int y) override;
+		virtual void OnMouseMove(int x, int y) override;
+		virtual void OnMouseWheel(int deltaY) override;
 	};
 }
 #endif // USE_WEB_NATIVE
