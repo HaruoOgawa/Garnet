@@ -65,12 +65,14 @@ namespace resource
 		CMaterialFrameLoader(const std::string& filename, const std::shared_ptr<graphics::CMaterialFrame>& TargetMaterialFrame);
 		virtual ~CMaterialFrameLoader();
 
+		virtual const std::string& GetFilename() const override;
+
 		virtual void SetLoadStatus(resource::ELoadStatus Status) override;
 		virtual resource::ELoadStatus GetStatus() const override;
 		virtual bool IsLoaded() const override;
 
 		virtual bool Load() override;
 		virtual bool LoadImmediate() override;
-		virtual bool Update(api::IGraphicsAPI* pGraphicsAPI) override;
+		virtual bool Update(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CResourceManager>& ResourceManager) override;
 	};
 }

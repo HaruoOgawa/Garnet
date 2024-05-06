@@ -1,4 +1,5 @@
 #include "C3DObjectLoader.h"
+#include "CResourceManager.h"
 #include "../Message/Console.h"
 
 #include "../Format/CPathFormatter.h"
@@ -35,6 +36,11 @@ namespace resource
 	{
 	}
 
+	const std::string& C3DObjectLoader::GetFilename() const
+	{
+		return m_File->GetFilename();
+	}
+
 	void C3DObjectLoader::SetLoadStatus(resource::ELoadStatus Status)
 	{
 		m_Status = Status;
@@ -63,11 +69,11 @@ namespace resource
 		return true;
 	}
 
-	bool C3DObjectLoader::Update(api::IGraphicsAPI* pGraphicsAPI)
+	bool C3DObjectLoader::Update(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CResourceManager>& ResourceManager)
 	{
 		if (!m_File->IsLoaded())
 		{
-			if (!m_File->Update(pGraphicsAPI)) return false;
+			if (!m_File->Update(pGraphicsAPI, ResourceManager)) return false;
 			return true;
 		}
 		
@@ -86,7 +92,7 @@ namespace resource
 			}
 		case resource::E3DObjectLoadState::LoadSubResouce:
 			{
-				if (!LoadSubResources(pGraphicsAPI)) return false;
+				if (!LoadSubResources(pGraphicsAPI, ResourceManager)) return false;
 
 				if (static_cast<int>(m_SubResources.size()) == 0) m_LoadState = resource::E3DObjectLoadState::Finish;
 
@@ -100,6 +106,9 @@ namespace resource
 
 		// ロード完了
 		m_Status = resource::ELoadStatus::Loaded;
+
+		// リソースマネージャーに登録
+		ResourceManager->AddOnMemoryResource(shared_from_this(), nullptr);
 
 		return true;
 	}
@@ -152,7 +161,7 @@ namespace resource
 		return true;
 	}
 
-	bool C3DObjectLoader::LoadSubResources(api::IGraphicsAPI* pGraphicsAPI)
+	bool C3DObjectLoader::LoadSubResources(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CResourceManager>& ResourceManager)
 	{
 		// サブリソースのロード
 		for (auto& Resource : m_SubResources)
@@ -164,11 +173,14 @@ namespace resource
 				return true;
 
 			case resource::ELoadStatus::Loading:
-				if (!Resource->Update(pGraphicsAPI)) return false;
+				if (!Resource->Update(pGraphicsAPI, ResourceManager)) return false;
 				return true;
 
 			case resource::ELoadStatus::Loaded:
 			{
+				// リソースマネージャーに登録
+				ResourceManager->AddOnMemoryResource(Resource, shared_from_this());
+
 				m_SubResources.erase(m_SubResources.begin());
 				m_SubResources.shrink_to_fit();
 			}

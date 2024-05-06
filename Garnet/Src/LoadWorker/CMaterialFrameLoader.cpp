@@ -1,4 +1,5 @@
 #include "CMaterialFrameLoader.h"
+#include "CResourceManager.h"
 
 namespace resource
 {
@@ -14,6 +15,11 @@ namespace resource
 
 	CMaterialFrameLoader::~CMaterialFrameLoader()
 	{
+	}
+
+	const std::string& CMaterialFrameLoader::GetFilename() const
+	{
+		return m_MfFile->GetFilename();
 	}
 
 	void CMaterialFrameLoader::SetLoadStatus(resource::ELoadStatus Status)
@@ -45,11 +51,11 @@ namespace resource
 		return true;
 	}
 
-	bool CMaterialFrameLoader::Update(api::IGraphicsAPI* pGraphicsAPI)
+	bool CMaterialFrameLoader::Update(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CResourceManager>& ResourceManager)
 	{
 		if (!m_MfFile->IsLoaded())
 		{
-			if (!m_MfFile->Update(pGraphicsAPI)) return false;
+			if (!m_MfFile->Update(pGraphicsAPI, ResourceManager)) return false;
 			return true;
 		}
 
@@ -73,11 +79,14 @@ namespace resource
 				return true;
 
 			case resource::ELoadStatus::Loading:
-				if (!Resource->Update(pGraphicsAPI)) return false;
+				if (!Resource->Update(pGraphicsAPI, ResourceManager)) return false;
 				return true;
 
 			case resource::ELoadStatus::Loaded:
 			{
+				// リソースマネージャーに登録
+				ResourceManager->AddOnMemoryResource(Resource, shared_from_this());
+
 				m_MfResourceList.erase(m_MfResourceList.begin());
 			}
 			return true;
@@ -92,6 +101,9 @@ namespace resource
 
 		// ロード完了
 		m_Status = resource::ELoadStatus::Loaded;
+
+		// リソースマネージャーに登録
+		ResourceManager->AddOnMemoryResource(shared_from_this(), nullptr);
 
 		return true;
 	}

@@ -37,11 +37,13 @@ namespace resource
 		std::vector<std::shared_ptr<resource::IResource>> m_SubResources;
 	private:
 		bool Import(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine);
-		bool LoadSubResources(api::IGraphicsAPI* pGraphicsAPI);
+		bool LoadSubResources(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CResourceManager>& ResourceManager);
 	public:
 		C3DObjectLoader(const std::string& FileName, const std::shared_ptr<object::C3DObject>& TargetObject, const std::shared_ptr<graphics::CMaterialFrame>& BaseMaterialFrame, 
 			const std::string& PassName, const std::string& DepthPassName, physics::IPhysicsEngine* pPhysicsEngine);
 		virtual ~C3DObjectLoader();
+
+		virtual const std::string& GetFilename() const override;
 
 		virtual void SetLoadStatus(resource::ELoadStatus Status) override;
 		virtual resource::ELoadStatus GetStatus() const override;
@@ -49,7 +51,7 @@ namespace resource
 
 		virtual bool Load() override;
 		virtual bool LoadImmediate() override;
-		virtual bool Update(api::IGraphicsAPI* pGraphicsAPI) override;
+		virtual bool Update(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CResourceManager>& ResourceManager) override;
 
 		void AddSubResource(const std::shared_ptr <resource::IResource>& Resource);
 	};

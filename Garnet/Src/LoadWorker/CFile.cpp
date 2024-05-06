@@ -35,6 +35,11 @@ namespace resource
 		m_Data.clear();
 	}
 
+	const std::string& CFile::GetFilename() const
+	{
+		return m_Filename;
+	}
+
 	void CFile::SetLoadStatus(resource::ELoadStatus Status)
 	{
 		m_Status = Status;
@@ -154,7 +159,7 @@ namespace resource
 		return true;
 	}
 
-	bool CFile::Update(api::IGraphicsAPI* pGraphicsAPI)
+	bool CFile::Update(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CResourceManager>& ResourceManager)
 	{
 #ifndef __EMSCRIPTEN__
 		if (m_Status == resource::ELoadStatus::Loading)

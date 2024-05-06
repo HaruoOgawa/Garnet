@@ -1,5 +1,6 @@
 #ifdef USE_ANIMATION
 #include "CAnimationLoader.h"
+#include "CResourceManager.h"
 
 namespace resource
 {
@@ -13,6 +14,11 @@ namespace resource
 
 	CAnimationLoader::~CAnimationLoader()
 	{
+	}
+
+	const std::string& CAnimationLoader::GetFilename() const
+	{
+		return m_File->GetFilename();
 	}
 
 	void CAnimationLoader::SetLoadStatus(resource::ELoadStatus Status)
@@ -44,11 +50,11 @@ namespace resource
 		return true;
 	}
 
-	bool CAnimationLoader::Update(api::IGraphicsAPI* pGraphicsAPI)
+	bool CAnimationLoader::Update(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CResourceManager>& ResourceManager)
 	{
 		if (!m_File->IsLoaded())
 		{
-			if (!m_File->Update(pGraphicsAPI)) return false;
+			if (!m_File->Update(pGraphicsAPI, ResourceManager)) return false;
 			return true;
 		}
 
@@ -56,6 +62,9 @@ namespace resource
 
 		// ロード完了
 		m_Status = resource::ELoadStatus::Loaded;
+
+		// リソースマネージャーに登録
+		ResourceManager->AddOnMemoryResource(shared_from_this(), nullptr);
 
 		return true;
 	}

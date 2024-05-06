@@ -5,6 +5,7 @@
 #include "../Interface/IGraphicsAPI.h"
 #include "../Interface/IResource.h"
 #include "../Object/C3DObject.h"
+#include "CResourceManager.h"
 
 namespace file { class CFile; }
 
@@ -13,6 +14,8 @@ namespace resource
 	class CLoadWorker
 	{
 		ELoadStatus m_Status;
+
+		std::shared_ptr<CResourceManager> m_ResourceManager;
 
 		int m_FirstResourceCount;
 		float m_Alpha;

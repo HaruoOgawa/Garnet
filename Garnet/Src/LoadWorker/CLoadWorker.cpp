@@ -5,6 +5,7 @@ namespace resource
 {
 	CLoadWorker::CLoadWorker(api::IGraphicsAPI* pGraphicsAPI):
 		m_Status(ELoadStatus::None),
+		m_ResourceManager(std::make_shared<CResourceManager>()),
 		m_FirstResourceCount(0),
 		m_Alpha(1.0f),
 		m_LoadingBar(std::make_shared<object::C3DObject>("", "ShadowPass")),
@@ -86,7 +87,7 @@ namespace resource
 					return true;
 
 				case resource::ELoadStatus::Loading:
-					if (!Resource->Update(pGraphicsAPI)) return false;
+					if (!Resource->Update(pGraphicsAPI, m_ResourceManager)) return false;
 					return true;
 
 				case resource::ELoadStatus::Loaded:
@@ -114,7 +115,7 @@ namespace resource
 					return true;
 
 				case resource::ELoadStatus::Loading:
-					if (!Resource->Update(pGraphicsAPI)) return false;
+					if (!Resource->Update(pGraphicsAPI, m_ResourceManager)) return false;
 					return true;
 
 				case resource::ELoadStatus::Loaded:

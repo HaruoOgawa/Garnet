@@ -17,6 +17,7 @@ namespace resource
 		resource::ELoadStatus m_Status;
 
 		std::vector<std::shared_ptr<CFile>> m_FileList;
+		std::string m_FileName;
 
 		std::vector<unsigned char> m_TextureData;
 
@@ -29,13 +30,15 @@ namespace resource
 		CTextureLoader(api::IGraphicsAPI* pGraphicsAPI, const std::string& FileName, const std::shared_ptr<graphics::CTexture>& Texture);
 		virtual ~CTextureLoader();
 
+		virtual const std::string& GetFilename() const override;
+
 		virtual void SetLoadStatus(resource::ELoadStatus Status) override;
 		virtual resource::ELoadStatus GetStatus() const override;
 		virtual bool IsLoaded() const override;
 
 		virtual bool Load() override;
 		virtual bool LoadImmediate() override;
-		virtual bool Update(api::IGraphicsAPI* pGraphicsAPI) override;
+		virtual bool Update(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CResourceManager>& ResourceManager) override;
 	};
 }
 
