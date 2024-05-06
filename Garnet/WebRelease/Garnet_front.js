@@ -158,4 +158,16 @@ window.g3dIsAudioPlaying = () => {
     }
 }
 
+window.g3dGetMainCanvasWidth = () => {
+    const canvas = document.getElementById('MainCanvas');
+    const width = canvas.clientWidth;
 
+    return width;
+}
+
+window.g3dGetMainCanvasHeight = () => {
+    const canvas = document.getElementById('MainCanvas');
+    const height = canvas.clientHeight;
+
+    return height;
+}

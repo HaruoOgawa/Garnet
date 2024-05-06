@@ -14,7 +14,7 @@
 #include "../../../Animation/CAnimationClipSet.h"
 #include "../../../Graphics/CMaterialFrame.h"
 
-namespace scene
+namespace app
 {
 	CScriptScene::CScriptScene(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, physics::IPhysicsEngine* pPhysicsEngine):
 		m_BasicToonMF(std::make_shared<graphics::CMaterialFrame>()),

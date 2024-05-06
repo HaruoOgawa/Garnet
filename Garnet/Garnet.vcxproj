@@ -647,6 +647,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Src\App\ScriptApp\Model\CFileModifier.h" />
     <ClInclude Include="Src\AppCore\CAppRunner.h" />
     <ClInclude Include="Src\AppCore\CAppCore.h" />
     <ClInclude Include="Src\Interface\IWindowAPI.h" />
@@ -1555,6 +1556,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClInclude Include="Src\Interface\IRenderer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\App\ScriptApp\Model\CFileModifier.cpp" />
     <ClCompile Include="Src\AppCore\CAppRunner.cpp" />
     <ClCompile Include="Src\AppCore\CAppCore.cpp" />
     <ClCompile Include="Src\LoadWorker\CResourceManager.cpp" />

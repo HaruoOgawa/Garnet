@@ -10,7 +10,7 @@
 #include "CGUICameraTab.h"
 #include "CGUIResourcesTab.h"
 
-#include "../../Interface/IApp.h"
+#include "../CScriptApp.h"
 
 namespace gui
 {
@@ -22,7 +22,7 @@ namespace gui
 		CGraphicsEditingWindow();
 		virtual ~CGraphicsEditingWindow();
 
-		bool Draw(const app::IApp* pApp);
+		bool Draw(const app::CScriptApp* pApp);
 	};
 }
 #endif // USE_GUIENGINE

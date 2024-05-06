@@ -20,7 +20,7 @@ namespace graphics
 }
 namespace audio { class CAudioClip; }
 
-namespace scene
+namespace app
 {
 	class CScriptScene
 	{

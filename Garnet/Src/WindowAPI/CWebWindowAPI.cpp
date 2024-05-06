@@ -52,6 +52,12 @@ namespace window
 
 	void CWebWindowAPI::AssignCurrentWindowSize()
 	{
+#ifdef __EMSCRIPTEN__
+		int Width = EM_ASM_INT({ return window.g3dGetMainCanvasWidth(); });
+		int Height = EM_ASM_INT({ return window.g3dGetMainCanvasHeight(); });
+
+		m_pCAppCore->Resize(Width, Height);
+#endif
 	}
 
 	void CWebWindowAPI::PollEvents()

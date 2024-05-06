@@ -978,8 +978,10 @@ function dbg(text) {
 // === Body ===
 
 var ASM_CONSTS = {
-  173444: ($0, $1, $2, $3) => { const w0 = Module.UTF16ToString($0); const w1 = Module.UTF16ToString($1); const windex = $2; const nameCount = $3; return (w0 == w1[windex] && w1.length == nameCount) ? 1 : 0; },  
- 173624: ($0, $1, $2, $3) => { const w0 = Module.UTF16ToString($0); const w1 = Module.UTF16ToString($1); const windex = $2; const nameCount = $3; return (w0 == w1[windex] && w1.length == nameCount) ? 1 : 0; }
+  173604: ($0, $1, $2, $3) => { const w0 = Module.UTF16ToString($0); const w1 = Module.UTF16ToString($1); const windex = $2; const nameCount = $3; return (w0 == w1[windex] && w1.length == nameCount) ? 1 : 0; },  
+ 173784: ($0, $1, $2, $3) => { const w0 = Module.UTF16ToString($0); const w1 = Module.UTF16ToString($1); const windex = $2; const nameCount = $3; return (w0 == w1[windex] && w1.length == nameCount) ? 1 : 0; },  
+ 173964: () => { return window.g3dGetMainCanvasWidth(); },  
+ 174007: () => { return window.g3dGetMainCanvasHeight(); }
 };
 
 

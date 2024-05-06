@@ -7,6 +7,8 @@
 #include <set>
 #include <imgui.h>
 
+namespace app { class CFileModifier; }
+
 namespace gui
 {
 	struct SDirectoryInfo
@@ -21,11 +23,13 @@ namespace gui
 	class CGUIResourcesTab
 	{
 		std::shared_ptr<SDirectoryInfo> m_RootDir;
+
+		std::set<std::string> m_EditingFileNameList;
 	private:
 		void InitDirectoryList(std::string RootDir);
 		std::shared_ptr<SDirectoryInfo> FindDirectory(const std::string& SearchDir);
 
-		bool DrawDirGUI(const std::shared_ptr<SDirectoryInfo>& Dir);
+		bool DrawDirGUI(const std::shared_ptr<SDirectoryInfo>& Dir, app::CFileModifier* pFileModifier);
 
 		std::vector<std::string> ExecuteCommand(const char* cmd);
 
@@ -37,7 +41,7 @@ namespace gui
 		CGUIResourcesTab();
 		virtual ~CGUIResourcesTab();
 
-		bool Draw();
+		bool Draw(app::CFileModifier* pFileModifier);
 	};
 }
 #endif
