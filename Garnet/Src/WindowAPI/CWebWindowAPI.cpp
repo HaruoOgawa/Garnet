@@ -56,7 +56,7 @@ namespace window
 		int Width = EM_ASM_INT({ return window.g3dGetMainCanvasWidth(); });
 		int Height = EM_ASM_INT({ return window.g3dGetMainCanvasHeight(); });
 
-		m_pCAppCore->Resize(Width, Height);
+		m_pCAppCore->ResizeWindow(Width, Height);
 #endif
 	}
 
@@ -140,7 +140,13 @@ namespace window
 	// リサイズイベント
 	void CWebWindowAPI::OnResize(int w, int h)
 	{
-		m_pCAppCore->Resize(w, h);
+		m_pCAppCore->ResizeWindow(w, h);
+	}
+
+	// フォーカスイベント
+	void CWebWindowAPI::OnFocus(int focused)
+	{
+		m_pCAppCore->FocusWindow((focused == 1));
 	}
 
 	// マウスイベント

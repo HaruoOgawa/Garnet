@@ -151,13 +151,18 @@ namespace app
 		return true;
 	}
 
-	bool CAppCore::Resize(int Width, int Height)
+	bool CAppCore::ResizeWindow(int Width, int Height)
 	{
 		m_GraphicsAPI->Resize(Width, Height);
 
 		m_App->Resize(Width, Height);
 
 		return true;
+	}
+
+	void CAppCore::FocusWindow(bool Focused)
+	{
+		Console::Log("[CAppCore] FocusWindow / Focused: %s\n", (Focused ? "true" : "false"));
 	}
 
 	bool CAppCore::RunLoop()
@@ -208,7 +213,7 @@ namespace app
 #ifdef _DEBUG
 		// FPSの計測と表示(60FPSを基準とする)
 		float FPS = 60.0f / (m_DeltaSecondsTime * 60.0f);
-		Console::Log("[FPS] %f fps / [CurrentTime] %f s\n", FPS, m_SecondsTime);
+		//Console::Log("[FPS] %f fps / [CurrentTime] %f s\n", FPS, m_SecondsTime);
 #endif // _DEBUG
 
 		//
@@ -274,6 +279,12 @@ namespace app
 	void CAppCore::OnResize(int w, int h)
 	{
 		m_WindowAPI->OnResize(w, h);
+	}
+
+	// フォーカスイベント
+	void CAppCore::OnFocus(int focused)
+	{
+		m_WindowAPI->OnFocus(focused);
 	}
 
 	// マウスイベント

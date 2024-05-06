@@ -42,6 +42,9 @@ namespace window
 		// リサイズイベント
 		virtual void OnResize(int w, int h) = 0;
 
+		// フォーカスイベント
+		virtual void OnFocus(int focused) = 0;
+
 		// マウスイベント
 		virtual void OnMouseDown(int buttonNum, int x, int y) = 0;
 		virtual void OnMouseUp(int buttonNum, int x, int y) = 0;

@@ -46,7 +46,8 @@ namespace app
 
 		bool Release();
 		
-		bool Resize(int Width, int Height);
+		bool ResizeWindow(int Width, int Height);
+		void FocusWindow(bool Focused);
 		
 		bool RunLoop();
 
@@ -58,12 +59,16 @@ namespace app
 		bool FixedUpdate();
 		bool Draw();
 
+		// ToDo: 将来的にはOnXX関数を各WindowAPIから呼ぶようにしてResizeWindow・FocusWindowを統一する. InputStateへの情報受け渡しもここでやる
 		// インプットイベント
 		void OnKeyDown(std::string key);
 		void OnKeyUp(std::string key);
 
 		// リサイズイベント
 		void OnResize(int w, int h);
+
+		// フォーカスイベント
+		void OnFocus(int focused);
 
 		// マウスイベント
 		void OnMouseDown(int buttonNum, int x, int y);

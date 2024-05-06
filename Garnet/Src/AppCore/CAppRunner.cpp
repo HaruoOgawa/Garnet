@@ -84,6 +84,15 @@ extern "C"
 	}
 
 	EMSCRIPTEN_KEEPALIVE
+		void OnFocus(int focused)
+	{
+		if (g_AppCore)
+		{
+			g_AppCore->OnFocus(focused);
+		}
+	}
+
+	EMSCRIPTEN_KEEPALIVE
 		void OnMouseDown(int buttonNum, int x, int y)
 	{
 		if (g_AppCore)

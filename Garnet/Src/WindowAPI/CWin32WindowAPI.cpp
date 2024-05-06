@@ -19,7 +19,7 @@
 namespace window
 {
 	// 仮のグローバル変数
-	CWin32WindowAPI* g_AppManager = nullptr;
+	CWin32WindowAPI* g_WindowAPI = nullptr;
 
 	CWin32WindowAPI::CWin32WindowAPI():
 		m_pCAppCore(nullptr),
@@ -27,7 +27,7 @@ namespace window
 		m_Device_Context(nullptr),
 		m_Rendering_Context(nullptr)
 	{
-		g_AppManager = this; // 仮のグローバル変数
+		g_WindowAPI = this; // 仮のグローバル変数
 	}
 
 	bool CWin32WindowAPI::Release()
@@ -40,7 +40,7 @@ namespace window
 
 		ReleaseDC(m_Window, m_Device_Context);
 
-		g_AppManager = nullptr;
+		g_WindowAPI = nullptr;
 
 		return true;
 	}
@@ -65,19 +65,19 @@ namespace window
 
 	/*void Resize_Callback(GLFWwindow* window, int width, int height)
 	{
-		auto AppManager = reinterpret_cast<CWin32WindowAPI*>(glfwGetWindowUserPointer(window));
-		AppManager->ResizeWindow(width, height);
+		auto WindowAPI = reinterpret_cast<CWin32WindowAPI*>(glfwGetWindowUserPointer(window));
+		WindowAPI->ResizeWindow(width, height);
 	}*/
 
 	void KeyCallback(HWND window, UINT msg, WPARAM w_param, LPARAM l_param, bool IsDown)
 	{
 		if (w_param < 256)
 		{
-			if (!g_AppManager) return;
+			if (!g_WindowAPI) return;
 
-			auto AppManager = g_AppManager;
+			auto WindowAPI = g_WindowAPI;
 
-			auto AppCore = AppManager->GetAppCore();
+			auto AppCore = WindowAPI->GetAppCore();
 			if (!AppCore) return;
 
 			// WPARAM Key Codes
@@ -134,11 +134,11 @@ namespace window
 #ifdef USE_INPUT_SYSTEM
 	void MousebuttonCallback(HWND window, UINT msg, WPARAM w_param, LPARAM l_param, bool IsDown)
 	{
-		if (!g_AppManager) return;
+		if (!g_WindowAPI) return;
 
-		auto AppManager = g_AppManager;
+		auto WindowAPI = g_WindowAPI;
 
-		auto AppCore = AppManager->GetAppCore();
+		auto AppCore = WindowAPI->GetAppCore();
 		if (!AppCore) return;
 
 		auto InputState = AppCore->GetInputState();
@@ -174,11 +174,11 @@ namespace window
 
 	void CursorPosCallback(HWND window, UINT msg, WPARAM w_param, LPARAM l_param)
 	{
-		if (!g_AppManager) return;
+		if (!g_WindowAPI) return;
 
-		auto AppManager = g_AppManager;
+		auto WindowAPI = g_WindowAPI;
 
-		auto AppCore = AppManager->GetAppCore();
+		auto AppCore = WindowAPI->GetAppCore();
 		if (!AppCore) return;
 
 		auto InputState = AppCore->GetInputState();
@@ -208,11 +208,11 @@ namespace window
 
 	void ScrollCallback(HWND window, UINT msg, WPARAM w_param, LPARAM l_param)
 	{
-		if (!g_AppManager) return;
+		if (!g_WindowAPI) return;
 
-		auto AppManager = g_AppManager;
+		auto WindowAPI = g_WindowAPI;
 
-		auto AppCore = AppManager->GetAppCore();
+		auto AppCore = WindowAPI->GetAppCore();
 		if (!AppCore) return;
 
 		auto InputState = AppCore->GetInputState();
@@ -225,14 +225,26 @@ namespace window
 	}
 #endif
 
+	void FocusCallback(bool Focused)
+	{
+		if (!g_WindowAPI) return;
+
+		auto WindowAPI = g_WindowAPI;
+
+		auto AppCore = WindowAPI->GetAppCore();
+		if (!AppCore) return;
+
+		AppCore->FocusWindow(Focused);
+	}
+
 	// ウィンドウのコールバック関数
 	LRESULT MainWindowCallback(HWND window, UINT msg, WPARAM w_param, LPARAM l_param)
 	{
-		if (!g_AppManager) return false;
+		if (!g_WindowAPI) return false;
 
-		auto AppManager = g_AppManager;
+		auto WindowAPI = g_WindowAPI;
 		
-		auto AppCore = AppManager->GetAppCore();
+		auto AppCore = WindowAPI->GetAppCore();
 		if (!AppCore) return false;
 
 		auto GUIEngine = AppCore->GetGUIEngine();
@@ -279,6 +291,14 @@ namespace window
 
 			case WM_MOUSEWHEEL:
 				ScrollCallback(window, msg, w_param, l_param);
+				break;
+
+			case WM_SETFOCUS:
+				FocusCallback(true);
+				break;
+
+			case WM_KILLFOCUS:
+				FocusCallback(false);
 				break;
 #endif
 			default:
@@ -422,7 +442,7 @@ namespace window
 			int w = rect.right - rect.left;
 			int h = rect.bottom - rect.top;
 
-			m_pCAppCore->Resize(w, h);
+			m_pCAppCore->ResizeWindow(w, h);
 		}
 	}
 
@@ -446,7 +466,7 @@ namespace window
 
 	void CWin32WindowAPI::ResizeWindow(int w, int h)
 	{
-		m_pCAppCore->Resize(w, h);
+		m_pCAppCore->ResizeWindow(w, h);
 	}
 
 	// インプットイベント
@@ -460,6 +480,11 @@ namespace window
 
 	// リサイズイベント
 	void CWin32WindowAPI::OnResize(int w, int h)
+	{
+	}
+
+	// フォーカスイベント
+	void CWin32WindowAPI::OnFocus(int focused)
 	{
 	}
 

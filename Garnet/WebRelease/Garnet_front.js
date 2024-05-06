@@ -84,6 +84,24 @@ addEventListener("resize", (event) => {
     );
 });
 
+addEventListener("focus", (event) => {
+    Module.ccall(
+        'OnFocus',
+        'null',
+        ['number'],
+        [1]
+    );
+});
+
+addEventListener("blur", (event) => {
+    Module.ccall(
+        'OnFocus',
+        'null',
+        ['number'],
+        [0]
+    );
+});
+
 addEventListener("mousedown", (event) => {
     Module.ccall(
         `OnMouseDown`,

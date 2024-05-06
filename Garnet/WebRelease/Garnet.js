@@ -978,10 +978,10 @@ function dbg(text) {
 // === Body ===
 
 var ASM_CONSTS = {
-  173604: ($0, $1, $2, $3) => { const w0 = Module.UTF16ToString($0); const w1 = Module.UTF16ToString($1); const windex = $2; const nameCount = $3; return (w0 == w1[windex] && w1.length == nameCount) ? 1 : 0; },  
- 173784: ($0, $1, $2, $3) => { const w0 = Module.UTF16ToString($0); const w1 = Module.UTF16ToString($1); const windex = $2; const nameCount = $3; return (w0 == w1[windex] && w1.length == nameCount) ? 1 : 0; },  
- 173964: () => { return window.g3dGetMainCanvasWidth(); },  
- 174007: () => { return window.g3dGetMainCanvasHeight(); }
+  173652: ($0, $1, $2, $3) => { const w0 = Module.UTF16ToString($0); const w1 = Module.UTF16ToString($1); const windex = $2; const nameCount = $3; return (w0 == w1[windex] && w1.length == nameCount) ? 1 : 0; },  
+ 173832: ($0, $1, $2, $3) => { const w0 = Module.UTF16ToString($0); const w1 = Module.UTF16ToString($1); const windex = $2; const nameCount = $3; return (w0 == w1[windex] && w1.length == nameCount) ? 1 : 0; },  
+ 174012: () => { return window.g3dGetMainCanvasWidth(); },  
+ 174055: () => { return window.g3dGetMainCanvasHeight(); }
 };
 
 
@@ -7603,6 +7603,7 @@ var _StartApp = Module['_StartApp'] = createExportWrapper('StartApp');
 var _OnKeyDown = Module['_OnKeyDown'] = createExportWrapper('OnKeyDown');
 var _OnKeyUp = Module['_OnKeyUp'] = createExportWrapper('OnKeyUp');
 var _OnResize = Module['_OnResize'] = createExportWrapper('OnResize');
+var _OnFocus = Module['_OnFocus'] = createExportWrapper('OnFocus');
 var _OnMouseDown = Module['_OnMouseDown'] = createExportWrapper('OnMouseDown');
 var _OnMouseUp = Module['_OnMouseUp'] = createExportWrapper('OnMouseUp');
 var _OnMouseMove = Module['_OnMouseMove'] = createExportWrapper('OnMouseMove');
