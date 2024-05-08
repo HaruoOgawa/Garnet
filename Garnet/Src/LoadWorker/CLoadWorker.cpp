@@ -166,4 +166,9 @@ namespace resource
 	{
 		m_RuntimeLoadResourceList.push_back(Resource);
 	}
+
+	const std::shared_ptr<CResourceManager>& CLoadWorker::GetResourceManager() const
+	{
+		return m_ResourceManager;
+	}
 }

@@ -164,6 +164,15 @@ namespace app
 		return m_ScriptScene->GetObjectList();
 	}
 
+	// フォーカスイベント
+	void CScriptApp::OnFocus(bool Focused, api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker)
+	{
+		if (Focused)
+		{
+			m_FileModifier->OnFileUpdated(pLoadWorker->GetResourceManager());
+		}
+	}
+
 	const std::shared_ptr<CFileModifier>& CScriptApp::GetFileModifier() const
 	{
 		return m_FileModifier;

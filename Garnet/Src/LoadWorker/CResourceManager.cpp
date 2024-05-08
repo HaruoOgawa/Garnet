@@ -12,17 +12,19 @@ namespace resource
 
 	void CResourceManager::AddOnMemoryResource(const std::shared_ptr<IResource>& Resource, const std::shared_ptr<IResource>& ParentResource)
 	{
-		auto it = m_OnMemoryResourceList.find(Resource->GetFilename());
+		std::string Filename = ExchangeYenToSlash(Resource->GetFilename());
+
+		auto it = m_OnMemoryResourceList.find(Filename);
 
 		if (it == m_OnMemoryResourceList.end())
 		{
 			// 新規作成
 			SMemoryResource MemoryResource = {};
-			MemoryResource.FileName = Resource->GetFilename();
+			MemoryResource.FileName = Filename;
 			MemoryResource.ResourceData = Resource;
 #ifndef __EMSCRIPTEN__
 			// Emscriptenはサポートしない
-			MemoryResource.FinalEditTime = std::filesystem::last_write_time(Resource->GetFilename());
+			MemoryResource.FinalEditTime = std::filesystem::last_write_time(Filename);
 #endif // !__EMSCRIPTEN__
 			if(ParentResource) MemoryResource.ParentResourceDataList.push_back(ParentResource);
 
@@ -32,5 +34,28 @@ namespace resource
 		{
 			if (ParentResource) it->second.ParentResourceDataList.push_back(ParentResource);
 		}
+	}
+
+	const std::map<std::string, SMemoryResource>& CResourceManager::GetOnMemoryResourceList() const
+	{
+		return m_OnMemoryResourceList;
+	}
+
+	void CResourceManager::UpdateFinalEditTime(const std::string& FileName, std::filesystem::file_time_type FinalEditTime)
+	{
+		if (m_OnMemoryResourceList.find(FileName) == m_OnMemoryResourceList.end()) return;
+
+		m_OnMemoryResourceList[FileName].FinalEditTime = FinalEditTime;
+	}
+
+	std::string CResourceManager::ExchangeYenToSlash(const std::string& SrcName)
+	{
+		std::string DstName = SrcName;
+
+		while (DstName.find("\\") != -1)
+		{
+			DstName.replace(DstName.find("\\"), 1, "/");
+		}
+		return DstName;
 	}
 }

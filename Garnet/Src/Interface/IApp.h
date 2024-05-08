@@ -28,5 +28,8 @@ namespace app
 		virtual const std::shared_ptr<graphics::CDrawInfo>& GetDrawInfo() const = 0;
 
 		virtual const std::vector<std::shared_ptr<object::C3DObject>>& GetObjectList() const = 0;
+
+		// フォーカスイベント
+		virtual void OnFocus(bool Focused, api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker) = 0;
 	};
 }

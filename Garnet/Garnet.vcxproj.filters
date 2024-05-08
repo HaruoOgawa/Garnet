@@ -2736,6 +2736,9 @@
     <ClInclude Include="Src\App\ScriptApp\Model\CFileModifier.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="Src\LoadWorker\CShaderLoader.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\App\ScriptApp\CScriptApp.cpp">
@@ -3822,6 +3825,9 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Src\App\ScriptApp\Model\CFileModifier.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\LoadWorker\CShaderLoader.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>

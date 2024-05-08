@@ -20,11 +20,18 @@ namespace resource
 	class CResourceManager
 	{
 		std::map<std::string, SMemoryResource> m_OnMemoryResourceList;
+
+	private:
+		std::string ExchangeYenToSlash(const std::string& SrcName);
 	public:
 		CResourceManager();
 		virtual ~CResourceManager();
 
 		void AddOnMemoryResource(const std::shared_ptr<IResource>& Resource, const std::shared_ptr<IResource>& ParentResource);
+
+		const std::map<std::string, SMemoryResource>& GetOnMemoryResourceList() const;
+
+		void UpdateFinalEditTime(const std::string& FileName, std::filesystem::file_time_type FinalEditTime);
 	};
 }
 

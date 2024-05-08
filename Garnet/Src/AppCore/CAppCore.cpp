@@ -162,7 +162,7 @@ namespace app
 
 	void CAppCore::FocusWindow(bool Focused)
 	{
-		Console::Log("[CAppCore] FocusWindow / Focused: %s\n", (Focused ? "true" : "false"));
+		m_App->OnFocus(Focused, m_GraphicsAPI.get(), m_LoadWorker.get());
 	}
 
 	bool CAppCore::RunLoop()

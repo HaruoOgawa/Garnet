@@ -1,5 +1,6 @@
 #include "CMaterialFrameLoader.h"
 #include "CResourceManager.h"
+#include "CShaderLoader.h"
 
 namespace resource
 {
@@ -234,7 +235,7 @@ namespace resource
 					}
 
 					// ƒŠƒ\[ƒX‚ğ’Ç‰Á
-					std::shared_ptr<CFile> LoadShaderFile = std::make_shared<CFile>(fullshaderFilePath);
+					std::shared_ptr<CShaderLoader> LoadShaderFile = std::make_shared<CShaderLoader>(fullshaderFilePath, shaderFile, shaderType, autoShaderExtension);
 
 					m_MfResourceList.push_back(LoadShaderFile);
 					m_ShaderFileList.emplace(shaderType, LoadShaderFile);
@@ -513,7 +514,7 @@ namespace resource
 		{
 			const auto& shaderType = ShaderFile.first;
 
-			std::vector<unsigned char> ShaderCodeArray = ShaderFile.second->GetData();
+			std::vector<unsigned char> ShaderCodeArray = ShaderFile.second->GetFile()->GetData();
 
 			// ShaderCode‚ª’¼Ú‘‚©‚ê‚Ä‚¢‚é‚Ì‚Å‚»‚Ì‚Ü‚ÜCreateInfo‚É“n‚·
 			if (shaderType == "vertex")

@@ -40,5 +40,7 @@ namespace resource
 
 		void AddFirstLoadResource(const std::shared_ptr<resource::IResource>& Resource);
 		void AddRuntimeLoadResource(const std::shared_ptr<resource::IResource>& Resource);
+
+		const std::shared_ptr<CResourceManager>& GetResourceManager() const;
 	};
 }

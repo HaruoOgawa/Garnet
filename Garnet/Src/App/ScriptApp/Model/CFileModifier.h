@@ -2,6 +2,9 @@
 
 #include <set>
 #include <string>
+#include <memory>
+
+namespace resource { class CResourceManager; }
 
 namespace app
 {
@@ -14,5 +17,7 @@ namespace app
 		virtual ~CFileModifier() = default;
 
 		void AddEditingFileName(const std::string& FileName);
+
+		void OnFileUpdated(const std::shared_ptr<resource::CResourceManager>& ResourceManager);
 	};
 }

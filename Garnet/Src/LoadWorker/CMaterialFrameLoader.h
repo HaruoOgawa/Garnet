@@ -21,6 +21,7 @@ using namespace nlohmann;
 namespace resource
 {
 	class CFile;
+	class CShaderLoader;
 
 	class CMaterialFrameLoader : public resource::IResource
 	{
@@ -32,10 +33,10 @@ namespace resource
 
 		// MfResource
 		bool m_AnalyseDone;
-		std::vector<std::shared_ptr<CFile>> m_MfResourceList;
+		std::vector<std::shared_ptr<CShaderLoader>> m_MfResourceList;
 
-		std::unordered_map <std::string, std::shared_ptr<CFile>> m_ShaderFileList;
-		std::unordered_map <std::string, std::shared_ptr<CFile>> m_TextureFileList;
+		std::unordered_map <std::string, std::shared_ptr<CShaderLoader>> m_ShaderFileList;
+		std::unordered_map <std::string, std::shared_ptr<IResource>> m_TextureFileList;
 
 		// MfData
 		std::string m_MaterialName;
