@@ -647,6 +647,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Src\Interface\IResource.h" />
     <ClInclude Include="Src\LoadWorker\CShaderLoader.h" />
     <ClInclude Include="Src\App\ScriptApp\Model\CFileModifier.h" />
     <ClInclude Include="Src\AppCore\CAppRunner.h" />
@@ -1196,7 +1197,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClInclude Include="Src\Graphics\ECullMode.h" />
     <ClInclude Include="Src\Graphics\ETextureUsage.h" />
     <ClInclude Include="Src\Interface\IGPGPUHandler.h" />
-    <ClInclude Include="Src\Interface\IResource.h" />
+    <ClInclude Include="Src\LoadWorker\CResource.h" />
     <ClInclude Include="Src\LoadWorker\CLoadWorker.h" />
     <ClInclude Include="Src\GraphicsAPI\OpenGL\COpenGLRenderPass.h" />
     <ClInclude Include="Src\GraphicsAPI\OpenGL\COpenGLRenderer.h" />
@@ -1557,6 +1558,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClInclude Include="Src\Interface\IRenderer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\LoadWorker\CResource.cpp" />
     <ClCompile Include="Src\LoadWorker\CShaderLoader.cpp" />
     <ClCompile Include="Src\App\ScriptApp\Model\CFileModifier.cpp" />
     <ClCompile Include="Src\AppCore\CAppRunner.cpp" />

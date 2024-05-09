@@ -5,8 +5,7 @@
 namespace resource
 {
 	CMaterialFrameLoader::CMaterialFrameLoader(const std::string& filename, const  std::shared_ptr<graphics::CMaterialFrame>& TargetMaterialFrame):
-		m_Status(ELoadStatus::None),
-		m_MfFile(std::make_shared<CFile>(filename)),
+		CResource(filename),
 		m_AnalyseDone(false),
 		m_TargetMaterialFrame(TargetMaterialFrame),
 		m_CreateInfo(std::make_shared<graphics::CMaterialCreateInfo>()),
@@ -18,45 +17,11 @@ namespace resource
 	{
 	}
 
-	const std::string& CMaterialFrameLoader::GetFilename() const
-	{
-		return m_MfFile->GetFilename();
-	}
-
-	void CMaterialFrameLoader::SetLoadStatus(resource::ELoadStatus Status)
-	{
-		m_Status = Status;
-	}
-
-	resource::ELoadStatus CMaterialFrameLoader::GetStatus() const
-	{
-		return m_Status;
-	}
-	bool CMaterialFrameLoader::IsLoaded() const
-	{
-		return (m_Status == resource::ELoadStatus::Loaded);
-	}
-
-	bool CMaterialFrameLoader::Load()
-	{
-		// マテリアルフレームファイルのロード
-		m_Status = resource::ELoadStatus::Loading;
-
-		if (!m_MfFile->Load()) return false;
-
-		return true;
-	}
-
-	bool CMaterialFrameLoader::LoadImmediate()
-	{
-		return true;
-	}
-
 	bool CMaterialFrameLoader::Update(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CResourceManager>& ResourceManager)
 	{
-		if (!m_MfFile->IsLoaded())
+		if (!m_File->IsLoaded())
 		{
-			if (!m_MfFile->Update(pGraphicsAPI, ResourceManager)) return false;
+			if (!m_File->Update(pGraphicsAPI, ResourceManager)) return false;
 			return true;
 		}
 
@@ -112,8 +77,8 @@ namespace resource
 	bool CMaterialFrameLoader::AnalyseResourceList(api::IGraphicsAPI* pGraphicsAPI)
 	{
 		std::string RawData = std::string();
-		RawData.resize(m_MfFile->GetData().size());
-		std::memcpy(&RawData[0], &m_MfFile->GetData()[0], m_MfFile->GetData().size());
+		RawData.resize(m_File->GetData().size());
+		std::memcpy(&RawData[0], &m_File->GetData()[0], m_File->GetData().size());
 
 		m_MfJson = json::parse(RawData.c_str());
 

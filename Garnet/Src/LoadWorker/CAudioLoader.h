@@ -4,7 +4,7 @@
 #include <string>
 #include <memory>
 
-#include "../Interface/IResource.h"
+#include "CResource.h"
 
 #include "CFile.h"
 
@@ -12,26 +12,13 @@
 
 namespace resource
 {
-	class CAudioLoader : public resource::IResource
+	class CAudioLoader : public resource::CResource
 	{
-		resource::ELoadStatus m_Status;
-
-		std::shared_ptr<CFile> m_File;
-		std::string m_FileName;
-
 		std::shared_ptr<audio::CAudioClip> m_TargetAudioClip;
 	public:
 		CAudioLoader(const std::string& FileName, const std::shared_ptr<audio::CAudioClip>& TargetAudioClip);
 		virtual ~CAudioLoader();
 
-		virtual const std::string& GetFilename() const override;
-
-		virtual void SetLoadStatus(resource::ELoadStatus Status) override;
-		virtual resource::ELoadStatus GetStatus() const override;
-		virtual bool IsLoaded() const override;
-
-		virtual bool Load() override;
-		virtual bool LoadImmediate() override;
 		virtual bool Update(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CResourceManager>& ResourceManager) override;
 	};
 }

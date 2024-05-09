@@ -5,48 +5,13 @@
 namespace resource
 {
 	CAudioLoader::CAudioLoader(const std::string& FileName, const std::shared_ptr<audio::CAudioClip>& TargetAudioClip):
-		m_Status(ELoadStatus::None),
-		m_File(std::make_shared<CFile>(FileName)),
-		m_FileName(FileName),
+		CResource(FileName),
 		m_TargetAudioClip(TargetAudioClip)
 	{
 	}
 
 	CAudioLoader::~CAudioLoader()
 	{
-	}
-
-	const std::string& CAudioLoader::GetFilename() const
-	{
-		return m_File->GetFilename();
-	}
-
-	void CAudioLoader::SetLoadStatus(resource::ELoadStatus Status)
-	{
-		m_Status = Status;
-	}
-
-	resource::ELoadStatus CAudioLoader::GetStatus() const
-	{
-		return m_Status;
-	}
-	bool CAudioLoader::IsLoaded() const
-	{
-		return (m_Status == resource::ELoadStatus::Loaded);
-	}
-
-	bool CAudioLoader::Load()
-	{
-		m_Status = resource::ELoadStatus::Loading;
-
-		if (!m_File->Load()) return false;
-
-		return true;
-	}
-
-	bool CAudioLoader::LoadImmediate()
-	{
-		return true;
 	}
 
 	bool CAudioLoader::Update(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CResourceManager>& ResourceManager)

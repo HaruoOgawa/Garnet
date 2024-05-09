@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../Interface/IResource.h"
+#include "../Interface/IResource.h"
 #include <string>
 #include <map>
 #include <memory>

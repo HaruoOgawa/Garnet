@@ -6,7 +6,7 @@
 #include <memory>
 #include <json.hpp>
 
-#include "../Interface/IResource.h"
+#include "CResource.h"
 
 #include "CFile.h"
 
@@ -23,12 +23,8 @@ namespace resource
 	class CFile;
 	class CShaderLoader;
 
-	class CMaterialFrameLoader : public resource::IResource
+	class CMaterialFrameLoader : public resource::CResource
 	{
-		// MfStatus
-		resource::ELoadStatus m_Status;
-
-		std::shared_ptr<CFile> m_MfFile;
 		json m_MfJson;
 
 		// MfResource
@@ -66,14 +62,6 @@ namespace resource
 		CMaterialFrameLoader(const std::string& filename, const std::shared_ptr<graphics::CMaterialFrame>& TargetMaterialFrame);
 		virtual ~CMaterialFrameLoader();
 
-		virtual const std::string& GetFilename() const override;
-
-		virtual void SetLoadStatus(resource::ELoadStatus Status) override;
-		virtual resource::ELoadStatus GetStatus() const override;
-		virtual bool IsLoaded() const override;
-
-		virtual bool Load() override;
-		virtual bool LoadImmediate() override;
 		virtual bool Update(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CResourceManager>& ResourceManager) override;
 	};
 }

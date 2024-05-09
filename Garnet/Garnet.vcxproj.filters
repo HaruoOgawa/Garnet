@@ -1071,7 +1071,7 @@
     <ClInclude Include="Src\LoadWorker\CLoadWorker.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Src\Interface\IResource.h">
+    <ClInclude Include="Src\LoadWorker\CResource.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Src\LoadWorker\ELoadStatus.h">
@@ -2739,6 +2739,9 @@
     <ClInclude Include="Src\LoadWorker\CShaderLoader.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Interface\IResource.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\App\ScriptApp\CScriptApp.cpp">
@@ -3828,6 +3831,9 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Src\LoadWorker\CShaderLoader.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\LoadWorker\CResource.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>

@@ -36,8 +36,19 @@ namespace app
 			// 最終編集時刻を更新
 			ResourceManager->UpdateFinalEditTime(EditingFileName, FinalEditTime);
 
-			// リソースの更新
-			const auto& Resouce = it->second.ResourceData;
+			// リソースを更新予約リストに追加
+			m_UpdateReservedResourceSet.emplace(it->second.ResourceData);
+
+			// 親リソースが存在すれば親リソースも追加する
+			for (const auto& ParentResource : it->second.ParentResourceDataList)
+			{
+				m_UpdateReservedResourceSet.emplace(ParentResource);
+			}
 		}
+
+		// 更新を実行
+
+		// 予約リストをクリア
+		m_UpdateReservedResourceSet.clear();
 	}
 }

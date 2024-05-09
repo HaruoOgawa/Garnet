@@ -6,8 +6,7 @@
 namespace resource
 {
 	CTextureLoader::CTextureLoader(api::IGraphicsAPI* pGraphicsAPI, const std::vector<std::string>& FileNameList, const std::shared_ptr<graphics::CTexture>& Texture):
-		m_Status(ELoadStatus::None),
-		m_FileName(""),
+		CResource(""),
 		m_UseCube(false),
 		m_TargetTexture(Texture)
 	{
@@ -26,8 +25,7 @@ namespace resource
 	}
 
 	CTextureLoader::CTextureLoader(api::IGraphicsAPI* pGraphicsAPI, const std::string& FileName, const std::shared_ptr<graphics::CTexture>& Texture) :
-		m_Status(ELoadStatus::None),
-		m_FileName(FileName),
+		CResource(FileName),
 		m_UseCube(false),
 		m_TargetTexture(Texture)
 	{
@@ -38,31 +36,10 @@ namespace resource
 	{
 	}
 
-	const std::string& CTextureLoader::GetFilename() const
-	{
-		return m_FileName;
-	}
-
-	void CTextureLoader::SetLoadStatus(resource::ELoadStatus Status)
-	{
-		m_Status = Status;
-	}
-
-	resource::ELoadStatus CTextureLoader::GetStatus() const
-	{
-		return m_Status;
-	}
-
-	bool CTextureLoader::IsLoaded() const
-	{
-		return (m_Status == resource::ELoadStatus::Loaded);
-	}
-
 	bool CTextureLoader::Load()
 	{
 		if (m_FileList.size() != 1 && m_FileList.size() != 6) return false;
 
-		// マテリアルフレームファイルのロード
 		m_Status = resource::ELoadStatus::Loading;
 
 		return true;

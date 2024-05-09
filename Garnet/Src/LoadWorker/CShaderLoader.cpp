@@ -4,9 +4,7 @@
 namespace resource
 {
 	CShaderLoader::CShaderLoader(const std::string& FileName, const std::string& BaseFileName, const std::string& shaderType, bool autoShaderExtension):
-		m_Status(ELoadStatus::None),
-		m_File(std::make_shared<CFile>(FileName)),
-		m_FileName(FileName),
+		CResource(FileName),
 		m_EditingBaseFileName(BaseFileName)
 	{
 		if (autoShaderExtension)
@@ -41,38 +39,10 @@ namespace resource
 	CShaderLoader::~CShaderLoader()
 	{
 	}
-
+	
 	const std::string& CShaderLoader::GetFilename() const
 	{
 		return m_EditingBaseFileName;
-	}
-
-	void CShaderLoader::SetLoadStatus(resource::ELoadStatus Status)
-	{
-		m_Status = Status;
-	}
-
-	resource::ELoadStatus CShaderLoader::GetStatus() const
-	{
-		return m_Status;
-	}
-	bool CShaderLoader::IsLoaded() const
-	{
-		return (m_Status == resource::ELoadStatus::Loaded);
-	}
-
-	bool CShaderLoader::Load()
-	{
-		m_Status = resource::ELoadStatus::Loading;
-
-		if (!m_File->Load()) return false;
-
-		return true;
-	}
-
-	bool CShaderLoader::LoadImmediate()
-	{
-		return true;
 	}
 
 	bool CShaderLoader::Update(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CResourceManager>& ResourceManager)
