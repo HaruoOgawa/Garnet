@@ -167,7 +167,7 @@ namespace app
 	// フォーカスイベント
 	void CScriptApp::OnFocus(bool Focused, api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker)
 	{
-		if (Focused)
+		if (Focused && pLoadWorker)
 		{
 			m_FileModifier->OnFileUpdated(pLoadWorker->GetResourceManager());
 		}
