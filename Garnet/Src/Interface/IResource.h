@@ -15,6 +15,8 @@ namespace resource
 		virtual bool LoadImmediate() = 0;
 		virtual bool Update(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CResourceManager>& ResourceManager) = 0;
 
+		virtual void Reset() = 0;
+
 		virtual bool Reload(resource::CLoadWorker* pLoadWorker) = 0;
 
 		virtual const std::string& GetFilename() const = 0;

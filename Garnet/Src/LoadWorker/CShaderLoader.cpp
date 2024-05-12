@@ -1,40 +1,15 @@
 #include "CShaderLoader.h"
+#include "CLoadWorker.h"
 #include "CResourceManager.h"
+#include "CMaterialFrameLoader.h"
 #include "../Message/Console.h"
 
 namespace resource
 {
-	CShaderLoader::CShaderLoader(const std::string& FileName, const std::string& BaseFileName, const std::string& shaderType, bool autoShaderExtension):
+	CShaderLoader::CShaderLoader(const std::string& FileName, const std::string& EditingBaseFileName):
 		CResource(FileName, 1),
-		m_EditingBaseFileName(BaseFileName)
+		m_EditingBaseFileName(EditingBaseFileName)
 	{
-		if (autoShaderExtension)
-		{
-			if (shaderType == "vertex")
-			{
-				m_EditingBaseFileName += ".vert";
-			}
-			else if (shaderType == "fragment")
-			{
-				m_EditingBaseFileName += ".frag";
-			}
-			else if (shaderType == "compute")
-			{
-				m_EditingBaseFileName += ".comp";
-			}
-			else if (shaderType == "geometry")
-			{
-				m_EditingBaseFileName += ".geom";
-			}
-			else if (shaderType == "hull")
-			{
-				m_EditingBaseFileName += ".tesc";
-			}
-			else if (shaderType == "domain")
-			{
-				m_EditingBaseFileName += ".tese";
-			}
-		}
 	}
 
 	CShaderLoader::~CShaderLoader()
@@ -90,7 +65,23 @@ namespace resource
 			}
 		}
 
+		m_Releoading = true;
+
+		// 未ロードに戻す
+		Reset();
+
+		// 参照マテリアルフレームをロードワーカーのランタイムロードリストに追加する
+		for (const auto& Resource : m_RefMFLoaderSet)
+		{
+			if (!Resource->Reload(pLoadWorker)) return false;
+		}
+
 		return true;
+	}
+
+	void CShaderLoader::AddRefMFLoader(const std::shared_ptr<IResource>& MFLoader)
+	{
+		m_RefMFLoaderSet.emplace(MFLoader);
 	}
 
 	std::vector<std::string> CShaderLoader::ExecuteCommand(const char* cmd)

@@ -29,9 +29,9 @@ namespace resource
 
 		// MfResource
 		bool m_AnalyseDone;
-		std::vector<std::shared_ptr<CShaderLoader>> m_MfResourceList;
+		std::vector<std::shared_ptr<IResource>> m_MfResourceList;
 
-		std::unordered_map <std::string, std::shared_ptr<CShaderLoader>> m_ShaderFileList;
+		std::unordered_map <std::string, CShaderLoader*> m_ShaderFileList;
 		std::unordered_map <std::string, std::shared_ptr<IResource>> m_TextureFileList;
 
 		// MfData
@@ -44,8 +44,8 @@ namespace resource
 
 		std::shared_ptr<graphics::CMaterialFrame> m_TargetMaterialFrame;
 	private:
-		bool AnalyseResourceList(api::IGraphicsAPI* pGraphicsAPI);
-		bool AnalyseShaderList(api::IGraphicsAPI* pGraphicsAPI, const json::iterator& shaderList);
+		bool AnalyseResourceList(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CResourceManager>& ResourceManager);
+		bool AnalyseShaderList(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CResourceManager>& ResourceManager, const json::iterator& shaderList);
 		bool AnalyseShaderBuffer(const json::iterator& uniform, const std::string& uniform_type);
 		bool AnalyseTextureBuffer(const json::iterator& uniform);
 
@@ -63,7 +63,5 @@ namespace resource
 		virtual ~CMaterialFrameLoader();
 
 		virtual bool Update(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CResourceManager>& ResourceManager) override;
-
-		virtual bool Reload(resource::CLoadWorker* pLoadWorker) override;
 	};
 }

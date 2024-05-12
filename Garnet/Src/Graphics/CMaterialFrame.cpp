@@ -87,6 +87,19 @@ namespace graphics
 		// カウンターを更新
 		m_CreateCounter++;
 
+		m_RefMaterialList.push_back(Material);
+
 		return Material;
+	}
+
+	bool CMaterialFrame::Reload()
+	{
+		for (auto& Material : m_RefMaterialList)
+		{
+			// APIレベルでマテリアルを更新する
+			float x = 0.0f;
+		}
+
+		return true;
 	}
 }

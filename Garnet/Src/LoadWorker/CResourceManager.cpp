@@ -41,6 +41,14 @@ namespace resource
 		return m_OnMemoryResourceList;
 	}
 
+	std::shared_ptr<IResource> CResourceManager::FindResource(const std::string& FileName)
+	{
+		const auto& it = m_OnMemoryResourceList.find(FileName);
+		if (it == m_OnMemoryResourceList.end()) return nullptr;
+
+		return it->second.ResourceData;
+	}
+
 	void CResourceManager::UpdateFinalEditTime(const std::string& FileName, std::filesystem::file_time_type FinalEditTime)
 	{
 		if (m_OnMemoryResourceList.find(FileName) == m_OnMemoryResourceList.end()) return;

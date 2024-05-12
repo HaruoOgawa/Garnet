@@ -31,6 +31,8 @@ namespace resource
 
 		const std::map<std::string, SMemoryResource>& GetOnMemoryResourceList() const;
 
+		std::shared_ptr<IResource> FindResource(const std::string& FileName);
+
 		void UpdateFinalEditTime(const std::string& FileName, std::filesystem::file_time_type FinalEditTime);
 	};
 }

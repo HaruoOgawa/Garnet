@@ -14,6 +14,8 @@ namespace resource
 	class CResource : public IResource
 	{
 	protected:
+		bool m_Releoading;
+
 		resource::ELoadStatus m_Status;
 
 		std::shared_ptr<CFile> m_File;
@@ -28,6 +30,8 @@ namespace resource
 		virtual bool Load();
 		virtual bool LoadImmediate();
 		virtual bool Update(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CResourceManager>& ResourceManager) = 0;
+
+		virtual void Reset() override;
 
 		virtual bool Reload(resource::CLoadWorker* pLoadWorker) override;
 

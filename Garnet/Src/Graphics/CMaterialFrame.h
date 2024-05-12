@@ -23,6 +23,8 @@ namespace graphics
 
 	class CMaterialFrame
 	{
+		std::vector<std::shared_ptr<CMaterial>> m_RefMaterialList;
+
 		int m_CreateCounter;
 
 		std::string m_MaterialName;
@@ -43,5 +45,7 @@ namespace graphics
 		void SetTextureBufferList(const std::vector<graphics::STextureBindingLayout>& TextureBufferList);
 
 		std::shared_ptr<CMaterial> CreateMaterial(api::IGraphicsAPI* pGraphicsAPI, int RefCount, graphics::ECullMode CullMode);
+
+		bool Reload();
 	};
 }

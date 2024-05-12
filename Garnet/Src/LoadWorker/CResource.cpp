@@ -1,8 +1,10 @@
 #include "CResource.h"
+#include "CLoadWorker.h"
 
 namespace resource
 {
 	CResource::CResource(const std::string& FileName, int LoadPriority):
+		m_Releoading(false),
 		m_Status(ELoadStatus::None),
 		m_File(std::make_shared<CFile>(FileName)),
 		m_FileName(FileName),
@@ -28,8 +30,28 @@ namespace resource
 		return true;
 	}
 
+	void CResource::Reset()
+	{
+		m_Status = ELoadStatus::None;
+
+		if (m_File)
+		{
+			m_File.reset();
+			m_File = nullptr;
+		}
+
+		m_File = std::make_shared<CFile>(m_FileName);
+	}
+
 	bool CResource::Reload(resource::CLoadWorker* pLoadWorker)
 	{
+		m_Releoading = true;
+
+		// –¢ƒ[ƒh‚É–ß‚·
+		Reset();
+
+		pLoadWorker->AddRuntimeLoadResource(shared_from_this());
+
 		return true;
 	}
 

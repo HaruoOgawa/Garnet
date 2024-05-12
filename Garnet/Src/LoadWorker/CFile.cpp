@@ -207,6 +207,13 @@ namespace resource
 		return true;
 	}
 
+	void CFile::Reset()
+	{
+		m_Status = ELoadStatus::None;
+
+		m_Data.clear();
+	}
+
 	bool CFile::Reload(resource::CLoadWorker* pLoadWorker)
 	{
 		return true;

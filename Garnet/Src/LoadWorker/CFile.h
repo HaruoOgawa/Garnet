@@ -52,6 +52,8 @@ namespace resource
 		virtual bool LoadImmediate() override;
 		virtual bool Update(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CResourceManager>& ResourceManager) override;
 
+		virtual void Reset() override;
+
 		virtual bool Reload(resource::CLoadWorker* pLoadWorker) override;
 
 		void SetData(const std::vector<unsigned char>& Data);

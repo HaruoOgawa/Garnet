@@ -50,12 +50,6 @@ namespace app
 			}
 
 			LoadPriorityUpdateResourceMap[LoadPriority].emplace(it->second.ResourceData);
-
-			// 親リソースが存在すれば親リソースも追加する
-			/*for (const auto& ParentResource : it->second.ParentResourceDataList)
-			{
-				ReservedUpdateResourceSet.emplace(ParentResource);
-			}*/
 		}
 
 		// 更新を実行
