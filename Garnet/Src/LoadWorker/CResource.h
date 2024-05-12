@@ -29,7 +29,7 @@ namespace resource
 
 		virtual bool Load();
 		virtual bool LoadImmediate();
-		virtual bool Update(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CResourceManager>& ResourceManager) = 0;
+		virtual bool Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, const std::shared_ptr<CResourceManager>& ResourceManager) = 0;
 
 		virtual void Reset() override;
 
@@ -38,8 +38,10 @@ namespace resource
 		virtual const std::string& GetFilename() const override;
 		virtual int GetLoadPriority() const override;
 
-		virtual void SetLoadStatus(resource::ELoadStatus Status);
-		virtual resource::ELoadStatus GetStatus() const;
-		virtual bool IsLoaded() const;
+		virtual void SetLoadStatus(resource::ELoadStatus Status) override;
+		virtual resource::ELoadStatus GetStatus() const override;
+		virtual bool IsLoaded() const override;
+
+		virtual void AddReference(const std::shared_ptr<IResource>& Resource) override;
 	};
 }

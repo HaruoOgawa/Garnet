@@ -2,6 +2,7 @@
 #include <memory>
 #include "../LoadWorker/ELoadStatus.h"
 #include "../Interface/IGraphicsAPI.h"
+#include "../Interface/IPhysicsEngine.h"
 
 namespace resource
 {
@@ -13,7 +14,7 @@ namespace resource
 	public:
 		virtual bool Load() = 0;
 		virtual bool LoadImmediate() = 0;
-		virtual bool Update(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CResourceManager>& ResourceManager) = 0;
+		virtual bool Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, const std::shared_ptr<CResourceManager>& ResourceManager) = 0;
 
 		virtual void Reset() = 0;
 
@@ -25,5 +26,7 @@ namespace resource
 		virtual void SetLoadStatus(resource::ELoadStatus Status) = 0;
 		virtual resource::ELoadStatus GetStatus() const = 0;
 		virtual bool IsLoaded() const = 0;
+
+		virtual void AddReference(const std::shared_ptr<IResource>& Resource) = 0;
 	};
 }

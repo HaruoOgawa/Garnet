@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include <unordered_map>
 #include <memory>
 
 #include "../Interface/IGraphicsAPI.h"
@@ -24,22 +25,24 @@ namespace resource
 		std::shared_ptr<resource::CFile> m_VertexShader; // ‚ ‚Æ‚ÅSimple3DObject‚ÉˆÚ“®‚·‚é
 		std::shared_ptr<resource::CFile> m_FragmentShader;
 
-		std::vector<std::shared_ptr<resource::IResource>> m_FirstLoadResourceList;
-		std::vector<std::shared_ptr<resource::IResource>> m_RuntimeLoadResourceList;
+		std::unordered_map<std::string, std::shared_ptr<resource::IResource>> m_LoadResourceMap;
 	private:
 		bool Create(api::IGraphicsAPI* pGraphicsAPI);
+
+		bool InitLoadStatus(api::IGraphicsAPI* pGraphicsAPI);
+
+		bool LoadResourceList(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine);
 	public:
 		CLoadWorker(api::IGraphicsAPI* pGraphicsAPI);
 		virtual ~CLoadWorker();
 
-		bool Update(api::IGraphicsAPI* pGraphicsAPI);
+		bool Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine);
 		bool Draw(api::IGraphicsAPI* pGraphicsAPI, bool IsDepthPass, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
 			const std::shared_ptr<graphics::CDrawInfo>& DrawInfo);
 
 		bool IsLoaded();
 
-		void AddFirstLoadResource(const std::shared_ptr<resource::IResource>& Resource);
-		void AddRuntimeLoadResource(const std::shared_ptr<resource::IResource>& Resource);
+		void AddLoadResource(const std::shared_ptr<resource::IResource>& Resource);
 
 		const std::shared_ptr<CResourceManager>& GetResourceManager() const;
 	};

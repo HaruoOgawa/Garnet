@@ -50,7 +50,7 @@ namespace resource
 		return true;
 	}
 
-	bool CTextureLoader::Update(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CResourceManager>& ResourceManager)
+	bool CTextureLoader::Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, const std::shared_ptr<CResourceManager>& ResourceManager)
 	{
 		for (const auto& File : m_FileList)
 		{
@@ -61,7 +61,7 @@ namespace resource
 				return true;
 
 			case resource::ELoadStatus::Loading:
-				if (!File->Update(pGraphicsAPI, ResourceManager)) return false;
+				if (!File->Update(pGraphicsAPI, pPhysicsEngine, ResourceManager)) return false;
 				return true;
 
 			case resource::ELoadStatus::Loaded:

@@ -50,7 +50,7 @@ namespace resource
 		// –¢ƒ[ƒh‚É–ß‚·
 		Reset();
 
-		pLoadWorker->AddRuntimeLoadResource(shared_from_this());
+		pLoadWorker->AddLoadResource(shared_from_this());
 
 		return true;
 	}
@@ -78,5 +78,9 @@ namespace resource
 	bool CResource::IsLoaded() const
 	{
 		return (m_Status == resource::ELoadStatus::Loaded);
+	}
+
+	void CResource::AddReference(const std::shared_ptr<IResource>& Resource)
+	{
 	}
 }

@@ -224,7 +224,7 @@ namespace app
 			DrawInfo->SetDeltaSecondsTime(m_DeltaSecondsTime);
 		}
 
-		if (!m_LoadWorker->Update(m_GraphicsAPI.get())) return false;
+		if (!m_LoadWorker->Update(m_GraphicsAPI.get(), m_PhysicsEngine.get())) return false;
 
 		if (!m_App->Update(m_GraphicsAPI.get(), m_PhysicsEngine.get(), m_LoadWorker.get(), m_InputState)) return false;
 

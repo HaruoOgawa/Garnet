@@ -164,7 +164,7 @@ namespace resource
 		return true;
 	}
 
-	bool CFile::Update(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CResourceManager>& ResourceManager)
+	bool CFile::Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, const std::shared_ptr<CResourceManager>& ResourceManager)
 	{
 #ifndef __EMSCRIPTEN__
 		if (m_Status == resource::ELoadStatus::Loading)
@@ -217,6 +217,10 @@ namespace resource
 	bool CFile::Reload(resource::CLoadWorker* pLoadWorker)
 	{
 		return true;
+	}
+
+	void CFile::AddReference(const std::shared_ptr<IResource>& Resource)
+	{
 	}
 
 	void CFile::SetData(const std::vector<unsigned char>& Data)

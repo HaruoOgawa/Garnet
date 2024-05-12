@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <set>
 #include <unordered_map>
 #include <string>
 #include <memory>
@@ -42,7 +43,7 @@ namespace resource
 
 		std::shared_ptr<graphics::CMaterialCreateInfo> m_CreateInfo;
 
-		std::shared_ptr<graphics::CMaterialFrame> m_TargetMaterialFrame;
+		std::set<std::shared_ptr<graphics::CMaterialFrame>> m_TargetMaterialFrameSet;
 	private:
 		bool AnalyseResourceList(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CResourceManager>& ResourceManager);
 		bool AnalyseShaderList(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CResourceManager>& ResourceManager, const json::iterator& shaderList);
@@ -62,6 +63,10 @@ namespace resource
 		CMaterialFrameLoader(const std::string& filename, const std::shared_ptr<graphics::CMaterialFrame>& TargetMaterialFrame);
 		virtual ~CMaterialFrameLoader();
 
-		virtual bool Update(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CResourceManager>& ResourceManager) override;
+		virtual bool Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, const std::shared_ptr<CResourceManager>& ResourceManager) override;
+
+		virtual void AddReference(const std::shared_ptr<IResource>& Resource) override;
+
+		const std::set<std::shared_ptr<graphics::CMaterialFrame>>& GetTargetMaterialFrameSet() const;
 	};
 }

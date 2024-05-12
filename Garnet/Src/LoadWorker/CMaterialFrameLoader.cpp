@@ -7,21 +7,21 @@ namespace resource
 	CMaterialFrameLoader::CMaterialFrameLoader(const std::string& filename, const  std::shared_ptr<graphics::CMaterialFrame>& TargetMaterialFrame):
 		CResource(filename, 2),
 		m_AnalyseDone(false),
-		m_TargetMaterialFrame(TargetMaterialFrame),
 		m_CreateInfo(std::make_shared<graphics::CMaterialCreateInfo>()),
 		m_MaterialName(std::string())
 	{
+		m_TargetMaterialFrameSet.emplace(TargetMaterialFrame);
 	}
 
 	CMaterialFrameLoader::~CMaterialFrameLoader()
 	{
 	}
 
-	bool CMaterialFrameLoader::Update(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CResourceManager>& ResourceManager)
+	bool CMaterialFrameLoader::Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, const std::shared_ptr<CResourceManager>& ResourceManager)
 	{
 		if (!m_File->IsLoaded())
 		{
-			if (!m_File->Update(pGraphicsAPI, ResourceManager)) return false;
+			if (!m_File->Update(pGraphicsAPI, pPhysicsEngine, ResourceManager)) return false;
 			return true;
 		}
 
@@ -45,7 +45,7 @@ namespace resource
 				return true;
 
 			case resource::ELoadStatus::Loading:
-				if (!Resource->Update(pGraphicsAPI, ResourceManager)) return false;
+				if (!Resource->Update(pGraphicsAPI, pPhysicsEngine, ResourceManager)) return false;
 				return true;
 
 			case resource::ELoadStatus::Loaded:
@@ -69,6 +69,29 @@ namespace resource
 		ResourceManager->AddOnMemoryResource(shared_from_this(), nullptr);
 
 		return true;
+	}
+
+	void CMaterialFrameLoader::AddReference(const std::shared_ptr<IResource>& Resource)
+	{
+		CMaterialFrameLoader* pMaterialFrameLoader = static_cast<CMaterialFrameLoader*>(Resource.get());
+
+		if (IsLoaded())
+		{
+			// ロード済みならデータをすぐに渡す
+			
+		}
+		else
+		{
+			for (const auto& Target : pMaterialFrameLoader->GetTargetMaterialFrameSet())
+			{
+				m_TargetMaterialFrameSet.emplace(Target);
+			}
+		}
+	}
+
+	const std::set<std::shared_ptr<graphics::CMaterialFrame>>& CMaterialFrameLoader::GetTargetMaterialFrameSet() const
+	{
+		return m_TargetMaterialFrameSet;
 	}
 
 	bool CMaterialFrameLoader::AnalyseResourceList(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CResourceManager>& ResourceManager)
@@ -544,17 +567,20 @@ namespace resource
 		// ロードが必要だったテクスチャリストを登録する
 
 		// MaterialFrameを生成
-		if (m_TargetMaterialFrame)
+		for (auto& MaterialFrame : m_TargetMaterialFrameSet)
 		{
-			m_TargetMaterialFrame->SetMaterialName(m_MaterialName);
-			m_TargetMaterialFrame->SetCreateInfo(m_CreateInfo);
-			m_TargetMaterialFrame->SetShaderBufferList(m_ShaderBufferList);
-			m_TargetMaterialFrame->SetTextureBufferList(m_TextureBufferList);
-
-			// リロードなのでLoaderを参照しているマテリアルフレームにも更新を実行する
-			if (m_Releoading)
+			if (MaterialFrame)
 			{
-				if (!m_TargetMaterialFrame->Reload()) return false;
+				MaterialFrame->SetMaterialName(m_MaterialName);
+				MaterialFrame->SetCreateInfo(m_CreateInfo);
+				MaterialFrame->SetShaderBufferList(m_ShaderBufferList);
+				MaterialFrame->SetTextureBufferList(m_TextureBufferList);
+
+				// リロードなのでLoaderを参照しているマテリアルフレームにも更新を実行する
+				if (m_Releoading)
+				{
+					if (!MaterialFrame->Reload()) return false;
+				}
 			}
 		}
 

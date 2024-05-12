@@ -14,11 +14,11 @@ namespace resource
 	{
 	}
 
-	bool CAudioLoader::Update(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CResourceManager>& ResourceManager)
+	bool CAudioLoader::Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, const std::shared_ptr<CResourceManager>& ResourceManager)
 	{
 		if (!m_File->IsLoaded())
 		{
-			if (!m_File->Update(pGraphicsAPI, ResourceManager)) return false;
+			if (!m_File->Update(pGraphicsAPI, pPhysicsEngine, ResourceManager)) return false;
 			return true;
 		}
 
