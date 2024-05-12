@@ -63,5 +63,7 @@ namespace resource
 		virtual ~CMaterialFrameLoader();
 
 		virtual bool Update(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CResourceManager>& ResourceManager) override;
+
+		virtual bool Reload(resource::CLoadWorker* pLoadWorker) override;
 	};
 }

@@ -1,4 +1,5 @@
 #include "CFileModifier.h"
+#include "../../LoadWorker/CLoadWorker.h"
 #include "../../LoadWorker/CResourceManager.h"
 
 namespace app
@@ -12,9 +13,13 @@ namespace app
 		m_EditingFileNameSet.emplace(FileName);
 	}
 
-	void CFileModifier::OnFileUpdated(const std::shared_ptr<resource::CResourceManager>& ResourceManager)
+	void CFileModifier::OnFileUpdated(resource::CLoadWorker* pLoadWorker)
 	{
+		const std::shared_ptr<resource::CResourceManager>& ResourceManager = pLoadWorker->GetResourceManager();
+
 		const auto& OnMemoryResourceList = ResourceManager->GetOnMemoryResourceList();
+
+		std::map<int, std::set<std::shared_ptr<resource::IResource>>> LoadPriorityUpdateResourceMap;
 
 		for (const auto& EditingFileName : m_EditingFileNameSet)
 		{
@@ -37,18 +42,32 @@ namespace app
 			ResourceManager->UpdateFinalEditTime(EditingFileName, FinalEditTime);
 
 			// リソースを更新予約リストに追加
-			m_UpdateReservedResourceSet.emplace(it->second.ResourceData);
+			const int LoadPriority = it->second.ResourceData->GetLoadPriority();
+
+			if (LoadPriorityUpdateResourceMap.find(LoadPriority) == LoadPriorityUpdateResourceMap.end())
+			{
+				LoadPriorityUpdateResourceMap.emplace(LoadPriority, std::set<std::shared_ptr<resource::IResource>>());
+			}
+
+			LoadPriorityUpdateResourceMap[LoadPriority].emplace(it->second.ResourceData);
 
 			// 親リソースが存在すれば親リソースも追加する
-			for (const auto& ParentResource : it->second.ParentResourceDataList)
+			/*for (const auto& ParentResource : it->second.ParentResourceDataList)
 			{
-				m_UpdateReservedResourceSet.emplace(ParentResource);
-			}
+				ReservedUpdateResourceSet.emplace(ParentResource);
+			}*/
 		}
 
 		// 更新を実行
+		for (const auto& ReservedUpdateResourceSet : LoadPriorityUpdateResourceMap)
+		{
+			for (const auto& Resouce : ReservedUpdateResourceSet.second)
+			{
+				Resouce->Reload(pLoadWorker);
+			}
+		}
 
 		// 予約リストをクリア
-		m_UpdateReservedResourceSet.clear();
+		LoadPriorityUpdateResourceMap.clear();
 	}
 }

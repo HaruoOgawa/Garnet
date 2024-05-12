@@ -4339,6 +4339,12 @@
     <None Include="Resources\Shaders\renderboard.vert" />
     <None Include="Resources\Shaders\raymarching.frag" />
     <None Include="Resources\MaterialFrame\raymarching_mf.json" />
+    <None Include="Commands\CompileGLSLToSpirV.bat">
+      <Filter>ソース ファイル</Filter>
+    </None>
+    <None Include="Commands\CompileSpirVToWGSL.bat">
+      <Filter>ソース ファイル</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="Commands\TestCmd.bat" />

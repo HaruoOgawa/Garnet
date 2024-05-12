@@ -31,10 +31,6 @@ namespace gui
 
 		bool DrawDirGUI(const std::shared_ptr<SDirectoryInfo>& Dir, app::CFileModifier* pFileModifier);
 
-		std::vector<std::string> ExecuteCommand(const char* cmd);
-
-		std::vector<std::string> Split(const std::string& Src, const char separate);
-
 		std::string DeleteParentDirName(const std::string& Src);
 		
 	public:

@@ -169,7 +169,7 @@ namespace app
 	{
 		if (Focused && pLoadWorker)
 		{
-			m_FileModifier->OnFileUpdated(pLoadWorker->GetResourceManager());
+			m_FileModifier->OnFileUpdated(pLoadWorker);
 		}
 	}
 

@@ -2,10 +2,11 @@
 
 namespace resource
 {
-	CResource::CResource(const std::string& FileName):
+	CResource::CResource(const std::string& FileName, int LoadPriority):
 		m_Status(ELoadStatus::None),
 		m_File(std::make_shared<CFile>(FileName)),
-		m_FileName(FileName)
+		m_FileName(FileName),
+		m_LoadPriority(LoadPriority)
 	{
 	}
 
@@ -27,9 +28,19 @@ namespace resource
 		return true;
 	}
 
+	bool CResource::Reload(resource::CLoadWorker* pLoadWorker)
+	{
+		return true;
+	}
+
 	const std::string& CResource::GetFilename() const
 	{
 		return m_FileName;
+	}
+
+	int CResource::GetLoadPriority() const
+	{
+		return m_LoadPriority;
 	}
 
 	void CResource::SetLoadStatus(resource::ELoadStatus Status)

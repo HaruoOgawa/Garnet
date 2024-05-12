@@ -5,7 +5,7 @@
 namespace resource
 {
 	CMaterialFrameLoader::CMaterialFrameLoader(const std::string& filename, const  std::shared_ptr<graphics::CMaterialFrame>& TargetMaterialFrame):
-		CResource(filename),
+		CResource(filename, 2),
 		m_AnalyseDone(false),
 		m_TargetMaterialFrame(TargetMaterialFrame),
 		m_CreateInfo(std::make_shared<graphics::CMaterialCreateInfo>()),
@@ -573,5 +573,10 @@ namespace resource
 				}
 			}
 		}
+	}
+
+	bool CMaterialFrameLoader::Reload(resource::CLoadWorker* pLoadWorker)
+	{
+		return true;
 	}
 }

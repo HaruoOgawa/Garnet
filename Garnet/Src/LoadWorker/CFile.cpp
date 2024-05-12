@@ -40,6 +40,11 @@ namespace resource
 		return m_Filename;
 	}
 
+	int CFile::GetLoadPriority() const
+	{
+		return 0;
+	}
+
 	void CFile::SetLoadStatus(resource::ELoadStatus Status)
 	{
 		m_Status = Status;
@@ -199,6 +204,11 @@ namespace resource
 		}
 #endif // !__EMSCRIPTEN__
 
+		return true;
+	}
+
+	bool CFile::Reload(resource::CLoadWorker* pLoadWorker)
+	{
 		return true;
 	}
 

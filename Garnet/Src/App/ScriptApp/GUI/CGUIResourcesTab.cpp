@@ -104,52 +104,6 @@ namespace gui
 		return true;
 	}
 
-	std::vector<std::string> CGUIResourcesTab::ExecuteCommand(const char* cmd)
-	{
-#ifdef __EMSCRIPTEN__
-		return std::vector<std::string>();
-#else
-		char buffer[128];
-		std::string result = "";
-
-		FILE* pipe = _popen(cmd, "r");
-		if (!pipe)
-		{
-			Console::Log("[Error] Failed to execute command\n");
-			return std::vector<std::string>();
-		}
-
-		while (fgets(buffer, sizeof buffer, pipe) != NULL)
-		{
-			result += buffer;
-		}
-
-		_pclose(pipe);
-
-		return Split(result, '\n');
-#endif // __EMSCRIPTEN__
-		
-	}
-
-	std::vector<std::string> CGUIResourcesTab::Split(const std::string& Src, const char separate)
-	{
-		std::vector<std::string> TextList;
-
-		std::string CurrentStr = Src;
-
-		while (CurrentStr.find(separate) != -1)
-		{
-			int Index = static_cast<int>(CurrentStr.find(separate));
-
-			std::string Dst = CurrentStr.substr(0, Index + 1);
-			TextList.push_back(Dst);
-
-			CurrentStr = CurrentStr.substr(Index + 1, CurrentStr.size() - Dst.size());
-		}
-
-		return TextList;
-	}
-
 	std::string CGUIResourcesTab::DeleteParentDirName(const std::string& Src)
 	{
 		int IndexYen = static_cast<int>(Src.rfind('\\'));

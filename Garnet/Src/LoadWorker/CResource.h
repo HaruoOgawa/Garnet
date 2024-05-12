@@ -9,6 +9,7 @@
 namespace resource
 {
 	class CResourceManager;
+	class CLoadWorker;
 
 	class CResource : public IResource
 	{
@@ -18,15 +19,20 @@ namespace resource
 		std::shared_ptr<CFile> m_File;
 
 		std::string m_FileName;
+
+		const int m_LoadPriority;
 	public:
-		CResource(const std::string& FileName);
+		CResource(const std::string& FileName, int LoadPriority = 0);
 		virtual ~CResource();
 
 		virtual bool Load();
 		virtual bool LoadImmediate();
 		virtual bool Update(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CResourceManager>& ResourceManager) = 0;
 
-		virtual const std::string& GetFilename() const;
+		virtual bool Reload(resource::CLoadWorker* pLoadWorker) override;
+
+		virtual const std::string& GetFilename() const override;
+		virtual int GetLoadPriority() const override;
 
 		virtual void SetLoadStatus(resource::ELoadStatus Status);
 		virtual resource::ELoadStatus GetStatus() const;

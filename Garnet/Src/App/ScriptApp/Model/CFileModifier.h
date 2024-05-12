@@ -1,10 +1,12 @@
 #pragma once
 
 #include <set>
+#include <map>
 #include <string>
 #include <memory>
 
-namespace resource { 
+namespace resource {
+	class CLoadWorker;
 	class CResourceManager; 
 	class IResource;
 }
@@ -14,8 +16,6 @@ namespace app
 	class CFileModifier
 	{
 		std::set<std::string> m_EditingFileNameSet;
-
-		std::set<std::shared_ptr<resource::IResource>> m_UpdateReservedResourceSet;
 	public:
 		CFileModifier();
 
@@ -23,6 +23,6 @@ namespace app
 
 		void AddEditingFileName(const std::string& FileName);
 
-		void OnFileUpdated(const std::shared_ptr<resource::CResourceManager>& ResourceManager);
+		void OnFileUpdated(resource::CLoadWorker* pLoadWorker);
 	};
 }

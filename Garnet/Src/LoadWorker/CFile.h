@@ -13,6 +13,8 @@
 
 namespace resource
 {
+	class CLoadWorker;
+
 	class CFile : public resource::IResource
 	{
 #ifndef __EMSCRIPTEN__
@@ -40,6 +42,7 @@ namespace resource
 		void Release();
 
 		virtual const std::string& GetFilename() const override;
+		virtual int GetLoadPriority() const override;
 
 		virtual void SetLoadStatus(resource::ELoadStatus Status) override;
 		virtual resource::ELoadStatus GetStatus() const override;
@@ -48,6 +51,8 @@ namespace resource
 		virtual bool Load() override;
 		virtual bool LoadImmediate() override;
 		virtual bool Update(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CResourceManager>& ResourceManager) override;
+
+		virtual bool Reload(resource::CLoadWorker* pLoadWorker) override;
 
 		void SetData(const std::vector<unsigned char>& Data);
 		const std::vector<unsigned char>& GetData() const;
