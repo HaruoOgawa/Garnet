@@ -73,6 +73,12 @@ namespace resource
 
 	void CMaterialFrameLoader::AddReference(const std::shared_ptr<IResource>& Resource)
 	{
+		// ©g‚Ì‚Í’Ç‰Á‚µ‚È‚¢
+		if (Resource == shared_from_this())
+		{
+			return;
+		}
+
 		CMaterialFrameLoader* pMaterialFrameLoader = static_cast<CMaterialFrameLoader*>(Resource.get());
 
 		if (IsLoaded())

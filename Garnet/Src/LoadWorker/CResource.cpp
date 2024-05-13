@@ -82,5 +82,10 @@ namespace resource
 
 	void CResource::AddReference(const std::shared_ptr<IResource>& Resource)
 	{
+		// ©g‚Ì‚Í’Ç‰Á‚µ‚È‚¢
+		if (Resource == shared_from_this())
+		{
+			return;
+		}
 	}
 }
