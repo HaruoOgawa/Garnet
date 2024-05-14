@@ -192,6 +192,15 @@ namespace api
 	{
 		return m_OffScreenRenderPassMap;
 	}
+
+	bool COpenGLAPI::IsEnabledRuntimeShaderEditing() const
+	{
+#ifdef RUNTIME_SHADER_EDITING
+		return true;
+#else
+		return false;
+#endif // RUNTIME_SHADER_EDITING
+	}
 }
 
 #endif // USE_OPENGL

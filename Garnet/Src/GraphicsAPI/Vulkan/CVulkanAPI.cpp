@@ -343,6 +343,15 @@ namespace api
 		return m_SwapChainRenderPass;
 	}
 
+	bool CVulkanAPI::IsEnabledRuntimeShaderEditing() const
+	{
+#ifdef RUNTIME_SHADER_EDITING
+		return true;
+#else
+		return false;
+#endif // RUNTIME_SHADER_EDITING
+	}
+
 	// Instance
 	const VkInstance& CVulkanAPI::GetInstance() const
 	{

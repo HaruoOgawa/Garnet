@@ -204,6 +204,8 @@ namespace api
 		virtual const std::map<std::string, std::shared_ptr<graphics::IRenderPass>>& GetOffScreenRenderPassMap() const override;
 		VkRenderPass GetSwapChainRenderPass() const;
 
+		virtual bool IsEnabledRuntimeShaderEditing() const override;
+
 		//
 		int GetMaxFramesInFlight() const { return MAX_FRAMES_IN_FLIGHT; }
 

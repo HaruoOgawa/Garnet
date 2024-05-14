@@ -118,6 +118,8 @@ namespace api
 		
 		virtual const std::map<std::string, std::shared_ptr<graphics::IRenderPass>>& GetOffScreenRenderPassMap() const override;
 
+		virtual bool IsEnabledRuntimeShaderEditing() const override;
+
 		WGPUCommandEncoder GetEncoder() { return m_Encoder; }
 		WGPUCommandBuffer GetCommandBuffer() { return m_CommandBuffer; }
 
