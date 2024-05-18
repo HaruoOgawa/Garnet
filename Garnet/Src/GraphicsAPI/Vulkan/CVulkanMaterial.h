@@ -67,6 +67,8 @@ namespace api
 
 		void BindShadersEXT(VkCommandBuffer commandBuffer, uint32_t stageCount, const VkShaderStageFlagBits* pStages, const VkShaderEXT* pShaders);
 
+		void DestroyShaderEXT(VkDevice device, VkShaderEXT shader, const VkAllocationCallbacks* pAllocator);
+
 		// ÉwÉãÉpÅ[ä÷êî ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		bool CreateShaderModule(VkShaderModule& shaderModule, const std::string& code);
 	public:

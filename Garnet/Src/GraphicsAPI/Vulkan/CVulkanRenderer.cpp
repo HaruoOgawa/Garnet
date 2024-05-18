@@ -34,11 +34,12 @@ namespace api
 
 	bool CVulkanRenderer::Create(const std::shared_ptr<graphics::CVertexBuffer>& VertexBuffer, const std::shared_ptr<graphics::CIndexBuffer>& IndexBuffer, const std::shared_ptr<graphics::CMaterial>& Material)
 	{
+		const CVulkanVertexBuffer* pVulkanVertexBuffer = static_cast<const CVulkanVertexBuffer*>(VertexBuffer.get());
 		api::CVulkanMaterial* pVulkanMat = static_cast<api::CVulkanMaterial*>(Material.get());
 
 		m_InstanceCount = VertexBuffer->GetInstanceCount();
 
-		if (!CreateGraphicsPipeline(VertexBuffer, pVulkanMat)) return false; // グラフィックパイプラインを作成
+		if (!CreateGraphicsPipeline(pVulkanVertexBuffer, pVulkanMat)) return false; // グラフィックパイプラインを作成
 
 		return true;
 	}
@@ -52,33 +53,29 @@ namespace api
 		// ユニフォームバッファの準備
 		if (!pVulkanMat->BuildDrawBuffer(DynamicOffsetNum)) return false;
 
-		/*if (m_pGraphicsAPI->IsEnabledRuntimeShaderEditing())
+		if (m_pGraphicsAPI->IsEnabledRuntimeShaderEditing())
 		{
-			// ShaderObjectのバインド
-			pVulkanMat->SetActive();
-
-			// 頂点バッファのバインド
-			// https://github.com/SaschaWillems/Vulkan/blob/master/examples/shaderobjects/shaderobjects.cpp#L369
-			//vkCmdSetVertexInputEXT(m_pGraphicsAPI->GetCurrentCommandBuffer(), 1, )
+			// ランタイム描画設定
+			SetRuntimeGraphicsSettings(pVulkanVertexBuffer, pVulkanMat);
 		}
-		else*/
+		else
 		{
 			// グラフィックパイプラインをコマンドにバインド
 			vkCmdBindPipeline(m_pGraphicsAPI->GetCurrentCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, m_GraphicsPipeline);
+
+			// カリングモードを設定
+			SetCullMode(pVulkanMat->GetCullMode());
 		}
 
-		// カリングモードを設定
-		SetCullMode(pVulkanMat->GetCullMode());
-		
 		// 頂点バッファをパイプラインにバインドする
 		pVulkanVertexBuffer->Bind();
-		
+
 		// インデックスバッファをパイプラインにバインドする
 		pVulkanIndexBuffer->Bind();
-		
+
 		// UBOのセット
 		pVulkanMat->BindUBO(DynamicOffsetNum);
-		
+
 		// 描画コマンドを発行
 		vkCmdDrawIndexed(m_pGraphicsAPI->GetCurrentCommandBuffer(), pVulkanIndexBuffer->GetIndicesCount(), m_InstanceCount, 0, 0, 0);
 
@@ -116,15 +113,13 @@ namespace api
 	}
 
 	// Vulkanメインロジック /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	bool CVulkanRenderer::CreateGraphicsPipeline(const std::shared_ptr<graphics::CVertexBuffer>& VertexBuffer, api::CVulkanMaterial* pVulkanMat)
+	bool CVulkanRenderer::CreateGraphicsPipeline(const CVulkanVertexBuffer* pVulkanVertexBuffer, api::CVulkanMaterial* pVulkanMat)
 	{
 		// Shader編集が有効な時はグラフィックパイプラインは生成しない
 		if (m_pGraphicsAPI->IsEnabledRuntimeShaderEditing())
 		{
-			//return true;
+			return true;
 		}
-
-		const CVulkanVertexBuffer* pVulkanVertexBuffer = static_cast<const CVulkanVertexBuffer*>(VertexBuffer.get());
 
 		// グラフィックパイプラインの固定機の設定 ///////////////////////////////////////////////////////////////////////////////////////
 		// 動的状態(ダイナミックステート)の設定(パイプラインにベイクせずにマイフレームの描画時に設定できるようにするパラメーターの設定)
@@ -393,6 +388,401 @@ namespace api
 		return true;
 	}
 
+	void CVulkanRenderer::SetRuntimeGraphicsSettings(const CVulkanVertexBuffer* pVulkanVertexBuffer, api::CVulkanMaterial* pVulkanMat)
+	{
+		// グラフィックパイプラインの設定をここで全て実行時に行う
+		// https://github.com/SaschaWillems/Vulkan/blob/master/examples/shaderobjects/shaderobjects.cpp#L331
+
+		// 頂点バッファの入力レイアウト
+		// 頂点バッファ入力(Vertex Shaderに渡すデータ形式について設定する)
+		int Size = static_cast<int>(pVulkanVertexBuffer->GetVertexBufferList().size());
+		std::vector<VkVertexInputBindingDescription2EXT> bindingDescriptions(Size);
+		std::vector<VkVertexInputAttributeDescription2EXT> attributeDescriptions(Size);
+
+		for (int i = 0; i < Size; i++)
+		{
+			//
+			int Dimension = pVulkanVertexBuffer->GetAttributeDimensions()[i];
+			int ByteStride = pVulkanVertexBuffer->GetAttribByteStrides()[i];
+
+			// 頂点バッファのバインドに関する説明,設定(頂点バッファレイアウト)
+			bindingDescriptions[i].binding = i; // バインドする頂点バッファのインデックス(?)違う形式で頂点バッファを用意するときに使用する？
+			bindingDescriptions[i].stride = (ByteStride != 0) ? ByteStride : (Dimension * sizeof(pVulkanVertexBuffer->GetVertices()[i][0])); // 頂点バッファ内の要素一つあたりのサイズ。次の要素までのバイト数
+			bindingDescriptions[i].inputRate = VK_VERTEX_INPUT_RATE_VERTEX; // よくわからぬ。各頂点の後、次のデータ エントリに移動します。らしい
+
+			// アトリビュート(頂点データ)の設定
+			attributeDescriptions[i].binding = i; // BindingDescriptionの内どのバインド設定を使用するかのインデックス
+			attributeDescriptions[i].location = i; // Shaderのlayout(location = 0)に設定すｒ数値
+			attributeDescriptions[i].format = GetVertexFormat(Dimension, pVulkanVertexBuffer->GetAttribDataTypes()[i]); // データ型. SFLOAT --> Signed Float
+			attributeDescriptions[i].offset = 0; // データオフセット
+		}
+
+		SetVertexInputEXT(static_cast<uint32_t>(Size), &bindingDescriptions[0], static_cast<uint32_t>(Size), &attributeDescriptions[0]);
+
+		// 入力アセンブリ(頂点から描画されるジオメトリの種類など, GL_TRIANGLE_STRIPみたいなのを設定する場所)
+		SetPrimitiveTopologyEXT(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
+		SetPrimitiveRestartEnableEXT(VK_FALSE);
+
+		// ビューポートの設定
+		// 上記のダイナミックステートのことで動的変更を可にする
+		VkViewport viewport{};
+		viewport.x = 0.0f; // 基準の座標
+		viewport.y = 0.0f;
+		viewport.width = (float)m_pGraphicsAPI->GetSwapChainExtent().width;
+		viewport.height = (float)m_pGraphicsAPI->GetSwapChainExtent().height;
+		viewport.minDepth = 0.0f;
+		viewport.maxDepth = 1.0f;
+
+		SetViewportWithCountEXT(1, &viewport);
+
+		// シザーの設定(シザーとはピクセルが実際に格納される領域を定義する. シザーよりも外側の領域はラスタライザにより破棄される)
+		// 上記のダイナミックステートのことで動的変更を可にする
+		VkRect2D scissor{};
+		scissor.offset = { 0, 0 };
+		scissor.extent = m_pGraphicsAPI->GetSwapChainExtent(); // 解像度
+
+		SetScissorWithCountEXT(1, &scissor);
+
+		// ラスタライザの設定
+		VkPipelineRasterizationStateCreateInfo rasterizer{};
+		rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
+		rasterizer.depthClampEnable = VK_FALSE;
+		rasterizer.rasterizerDiscardEnable = VK_FALSE;
+		rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
+		rasterizer.lineWidth = 1.0f;
+
+		switch (pVulkanMat->GetCullMode())
+		{
+		case graphics::ECullMode::CULL_BACK:
+			rasterizer.cullMode = VK_CULL_MODE_BACK_BIT; // カリングの設定
+			break;
+
+		case graphics::ECullMode::CULL_FRONT:
+			rasterizer.cullMode = VK_CULL_MODE_FRONT_BIT; // カリングの設定
+			break;
+
+		case graphics::ECullMode::CULL_NONE:
+			rasterizer.cullMode = VK_CULL_MODE_NONE; // カリングの設定
+			break;
+
+		default:
+			rasterizer.cullMode = VK_CULL_MODE_BACK_BIT; // カリングの設定
+			break;
+		}
+
+		rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE; // カリングする際の頂点の順番かな？ GL_CWWみたいな
+		rasterizer.depthBiasEnable = VK_FALSE; // デプステストに関する設定
+		rasterizer.depthBiasConstantFactor = 0.0f;
+		rasterizer.depthBiasClamp = 0.0f;
+		rasterizer.depthBiasSlopeFactor = 0.0f;
+
+		SetCullModeEXT(rasterizer.cullMode);
+		SetFrontFaceEXT(rasterizer.frontFace);
+		SetRasterizerDiscardEnableEXT(rasterizer.rasterizerDiscardEnable);
+		SetPolygonModeEXT(rasterizer.polygonMode);
+		SetRasterizationSamplesEXT(VK_SAMPLE_COUNT_1_BIT);
+		SetAlphaToCoverageEnableEXT(rasterizer.rasterizerDiscardEnable);
+
+		// マルチサンプリング(アンチエイリアシング)
+		const uint32_t sampleMask = 0xFF;
+		SetSampleMaskEXT(VK_SAMPLE_COUNT_1_BIT, &sampleMask);
+
+		// レンダリングパイプラインでデプスとステンシルを有効にする
+		VkPipelineDepthStencilStateCreateInfo depthStencil{};
+		depthStencil.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
+
+		// Depth
+		{
+			depthStencil.depthTestEnable = (pVulkanMat->IsEnabledZWrite()) ? VK_TRUE : VK_FALSE;
+			depthStencil.depthWriteEnable = (pVulkanMat->IsEnabledZWrite()) ? VK_TRUE : VK_FALSE;
+
+			graphics::EDepthFunc DepthFunc = pVulkanMat->GetDepthFunc();
+			switch (DepthFunc)
+			{
+			case graphics::EDepthFunc::Never:
+				depthStencil.depthCompareOp = VK_COMPARE_OP_NEVER;
+				break;
+			case graphics::EDepthFunc::Less:
+				depthStencil.depthCompareOp = VK_COMPARE_OP_LESS;
+				break;
+			case graphics::EDepthFunc::LessEqual:
+				depthStencil.depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
+				break;
+			case graphics::EDepthFunc::Greater:
+				depthStencil.depthCompareOp = VK_COMPARE_OP_GREATER;
+				break;
+			case graphics::EDepthFunc::GreaterEqual:
+				depthStencil.depthCompareOp = VK_COMPARE_OP_GREATER_OR_EQUAL;
+				break;
+			case graphics::EDepthFunc::Equal:
+				depthStencil.depthCompareOp = VK_COMPARE_OP_EQUAL;
+				break;
+			case graphics::EDepthFunc::NotEqual:
+				depthStencil.depthCompareOp = VK_COMPARE_OP_NOT_EQUAL;
+				break;
+			case graphics::EDepthFunc::Always:
+				depthStencil.depthCompareOp = VK_COMPARE_OP_ALWAYS;
+				break;
+			default:
+				depthStencil.depthCompareOp = VK_COMPARE_OP_LESS;
+				break;
+			}
+		}
+
+		depthStencil.depthBoundsTestEnable = VK_FALSE;
+		depthStencil.minDepthBounds = 0.0f;
+		depthStencil.maxDepthBounds = 1.0f;
+		depthStencil.stencilTestEnable = VK_FALSE;
+		depthStencil.front = {};
+		depthStencil.back = {};
+
+		SetDepthTestEnableEXT(depthStencil.depthTestEnable);
+		SetDepthWriteEnableEXT(depthStencil.depthWriteEnable);
+		SetDepthCompareOpEXT(depthStencil.depthCompareOp);
+		SetDepthBiasEnableEXT(VK_FALSE);
+		SetStencilTestEnableEXT(VK_FALSE);
+
+		// カラーブレンディング /////////////////////////////////////////////
+		// カラーブレンディング /////////////////////////////////////////////
+		// ローカルカラーブレンディング(アタッチされたフレームバッファごとの設定)
+		VkPipelineColorBlendAttachmentState colorBlendAttachment{};
+		colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+		colorBlendAttachment.blendEnable = VK_TRUE;
+
+		switch (pVulkanMat->GetBlendType())
+		{
+		case graphics::EBlendType::BLEND_TYPE_ADDITIVE:
+			colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_ONE;
+			colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ZERO;
+			colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
+
+			colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+			colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
+			colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
+			break;
+		case graphics::EBlendType::BLEND_TYPE_TRANSPARENT_ALPHA:
+			colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
+			colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+			colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
+
+			colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+			colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
+			colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
+
+			break;
+		default:
+			colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_ONE;
+			colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ZERO;
+			colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
+
+			colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+			colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
+			colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
+
+			break;
+		}
+
+		SetColorBlendEnableEXT(0, 1, &colorBlendAttachment.blendEnable);
+		SetColorWriteMaskEXT(0, 1, &colorBlendAttachment.colorWriteMask);
+
+		// ShaderObjectのバインド
+		pVulkanMat->SetActive();
+	}
+
+	// Vulkan Extensions /////////////////////////////////////////////////////////////////////
+	
+	void CVulkanRenderer::SetVertexInputEXT(uint32_t vertexBindingDescriptionCount, const VkVertexInputBindingDescription2EXT* pVertexBindingDescriptions,
+		uint32_t vertexAttributeDescriptionCount, const VkVertexInputAttributeDescription2EXT* pVertexAttributeDescriptions)
+	{
+		auto func = (PFN_vkCmdSetVertexInputEXT)vkGetInstanceProcAddr(m_pGraphicsAPI->GetInstance(), "vkCmdSetVertexInputEXT");
+
+		if (func != nullptr)
+		{
+			func(m_pGraphicsAPI->GetCurrentCommandBuffer(), vertexBindingDescriptionCount, pVertexBindingDescriptions, vertexAttributeDescriptionCount, pVertexAttributeDescriptions);
+		}
+	}
+
+	void CVulkanRenderer::SetPrimitiveTopologyEXT(VkPrimitiveTopology primitiveTopology)
+	{
+		auto func = (PFN_vkCmdSetPrimitiveTopologyEXT)vkGetInstanceProcAddr(m_pGraphicsAPI->GetInstance(), "vkCmdSetPrimitiveTopologyEXT");
+
+		if (func != nullptr)
+		{
+			func(m_pGraphicsAPI->GetCurrentCommandBuffer(), primitiveTopology);
+		}
+	}
+
+	void CVulkanRenderer::SetPrimitiveRestartEnableEXT(VkBool32 primitiveRestartEnable)
+	{
+		auto func = (PFN_vkCmdSetPrimitiveRestartEnableEXT)vkGetInstanceProcAddr(m_pGraphicsAPI->GetInstance(), "vkCmdSetPrimitiveRestartEnableEXT");
+
+		if (func != nullptr)
+		{
+			func(m_pGraphicsAPI->GetCurrentCommandBuffer(), primitiveRestartEnable);
+		}
+	}
+
+	void CVulkanRenderer::SetViewportWithCountEXT(uint32_t viewportCount, const VkViewport* pViewports)
+	{
+		auto func = (PFN_vkCmdSetViewportWithCountEXT)vkGetInstanceProcAddr(m_pGraphicsAPI->GetInstance(), "vkCmdSetViewportWithCountEXT");
+
+		if (func != nullptr)
+		{
+			func(m_pGraphicsAPI->GetCurrentCommandBuffer(), viewportCount, pViewports);
+		}
+	}
+
+	void CVulkanRenderer::SetScissorWithCountEXT(uint32_t scissorCount, const VkRect2D* pScissors)
+	{
+		auto func = (PFN_vkCmdSetScissorWithCountEXT)vkGetInstanceProcAddr(m_pGraphicsAPI->GetInstance(), "vkCmdSetScissorWithCountEXT");
+
+		if (func != nullptr)
+		{
+			func(m_pGraphicsAPI->GetCurrentCommandBuffer(), scissorCount, pScissors);
+		}
+	}
+
+	void CVulkanRenderer::SetCullModeEXT(VkCullModeFlags cullMode)
+	{
+		auto func = (PFN_vkCmdSetCullModeEXT)vkGetInstanceProcAddr(m_pGraphicsAPI->GetInstance(), "vkCmdSetCullModeEXT");
+
+		if (func != nullptr)
+		{
+			func(m_pGraphicsAPI->GetCurrentCommandBuffer(), cullMode);
+		}
+	}
+
+	void CVulkanRenderer::SetFrontFaceEXT(VkFrontFace frontFace)
+	{
+		auto func = (PFN_vkCmdSetFrontFaceEXT)vkGetInstanceProcAddr(m_pGraphicsAPI->GetInstance(), "vkCmdSetFrontFaceEXT");
+
+		if (func != nullptr)
+		{
+			func(m_pGraphicsAPI->GetCurrentCommandBuffer(), frontFace);
+		}
+	}
+
+	void CVulkanRenderer::SetRasterizerDiscardEnableEXT(VkBool32 rasterizerDiscardEnable)
+	{
+		auto func = (PFN_vkCmdSetRasterizerDiscardEnableEXT)vkGetInstanceProcAddr(m_pGraphicsAPI->GetInstance(), "vkCmdSetRasterizerDiscardEnableEXT");
+
+		if (func != nullptr)
+		{
+			func(m_pGraphicsAPI->GetCurrentCommandBuffer(), rasterizerDiscardEnable);
+		}
+	}
+
+	void CVulkanRenderer::SetPolygonModeEXT(VkPolygonMode polygonMode)
+	{
+		auto func = (PFN_vkCmdSetPolygonModeEXT)vkGetInstanceProcAddr(m_pGraphicsAPI->GetInstance(), "vkCmdSetPolygonModeEXT");
+
+		if (func != nullptr)
+		{
+			func(m_pGraphicsAPI->GetCurrentCommandBuffer(), polygonMode);
+		}
+	}
+
+	void CVulkanRenderer::SetRasterizationSamplesEXT(VkSampleCountFlagBits rasterizationSamples)
+	{
+		auto func = (PFN_vkCmdSetRasterizationSamplesEXT)vkGetInstanceProcAddr(m_pGraphicsAPI->GetInstance(), "vkCmdSetRasterizationSamplesEXT");
+
+		if (func != nullptr)
+		{
+			func(m_pGraphicsAPI->GetCurrentCommandBuffer(), rasterizationSamples);
+		}
+	}
+
+	void CVulkanRenderer::SetAlphaToCoverageEnableEXT(VkBool32 alphaToCoverageEnable)
+	{
+		auto func = (PFN_vkCmdSetAlphaToCoverageEnableEXT)vkGetInstanceProcAddr(m_pGraphicsAPI->GetInstance(), "vkCmdSetAlphaToCoverageEnableEXT");
+
+		if (func != nullptr)
+		{
+			func(m_pGraphicsAPI->GetCurrentCommandBuffer(), alphaToCoverageEnable);
+		}
+	}
+
+	void CVulkanRenderer::SetDepthTestEnableEXT(VkBool32 depthTestEnable)
+	{
+		auto func = (PFN_vkCmdSetDepthTestEnableEXT)vkGetInstanceProcAddr(m_pGraphicsAPI->GetInstance(), "vkCmdSetDepthTestEnableEXT");
+
+		if (func != nullptr)
+		{
+			func(m_pGraphicsAPI->GetCurrentCommandBuffer(), depthTestEnable);
+		}
+	}
+
+	void CVulkanRenderer::SetDepthWriteEnableEXT(VkBool32 depthWriteEnable)
+	{
+		auto func = (PFN_vkCmdSetDepthWriteEnableEXT)vkGetInstanceProcAddr(m_pGraphicsAPI->GetInstance(), "vkCmdSetDepthWriteEnableEXT");
+
+		if (func != nullptr)
+		{
+			func(m_pGraphicsAPI->GetCurrentCommandBuffer(), depthWriteEnable);
+		}
+	}
+
+	void CVulkanRenderer::SetDepthCompareOpEXT(VkCompareOp depthCompareOp)
+	{
+		auto func = (PFN_vkCmdSetDepthCompareOpEXT)vkGetInstanceProcAddr(m_pGraphicsAPI->GetInstance(), "vkCmdSetDepthCompareOpEXT");
+
+		if (func != nullptr)
+		{
+			func(m_pGraphicsAPI->GetCurrentCommandBuffer(), depthCompareOp);
+		}
+	}
+
+	void CVulkanRenderer::SetDepthBiasEnableEXT(VkBool32 depthBiasEnable)
+	{
+		auto func = (PFN_vkCmdSetDepthBiasEnableEXT)vkGetInstanceProcAddr(m_pGraphicsAPI->GetInstance(), "vkCmdSetDepthBiasEnableEXT");
+
+		if (func != nullptr)
+		{
+			func(m_pGraphicsAPI->GetCurrentCommandBuffer(), depthBiasEnable);
+		}
+	}
+
+	void CVulkanRenderer::SetStencilTestEnableEXT(VkBool32 stencilTestEnable)
+	{
+		auto func = (PFN_vkCmdSetStencilTestEnableEXT)vkGetInstanceProcAddr(m_pGraphicsAPI->GetInstance(), "vkCmdSetStencilTestEnableEXT");
+
+		if (func != nullptr)
+		{
+			func(m_pGraphicsAPI->GetCurrentCommandBuffer(), stencilTestEnable);
+		}
+	}
+
+	void CVulkanRenderer::SetSampleMaskEXT(VkSampleCountFlagBits samples, const VkSampleMask* pSampleMask)
+	{
+		auto func = (PFN_vkCmdSetSampleMaskEXT)vkGetInstanceProcAddr(m_pGraphicsAPI->GetInstance(), "vkCmdSetSampleMaskEXT");
+
+		if (func != nullptr)
+		{
+			func(m_pGraphicsAPI->GetCurrentCommandBuffer(), samples, pSampleMask);
+		}
+	}
+
+	void CVulkanRenderer::SetColorBlendEnableEXT(uint32_t firstAttachment, uint32_t attachmentCount, const VkBool32* pColorBlendEnables)
+	{
+		auto func = (PFN_vkCmdSetColorBlendEnableEXT)vkGetInstanceProcAddr(m_pGraphicsAPI->GetInstance(), "vkCmdSetColorBlendEnableEXT");
+
+		if (func != nullptr)
+		{
+			func(m_pGraphicsAPI->GetCurrentCommandBuffer(), firstAttachment, attachmentCount, pColorBlendEnables);
+		}
+	}
+
+	void CVulkanRenderer::SetColorWriteMaskEXT(uint32_t firstAttachment, uint32_t attachmentCount, const VkColorComponentFlags* pColorWriteMasks)
+	{
+		auto func = (PFN_vkCmdSetColorWriteMaskEXT)vkGetInstanceProcAddr(m_pGraphicsAPI->GetInstance(), "vkCmdSetColorWriteMaskEXT");
+
+		if (func != nullptr)
+		{
+			func(m_pGraphicsAPI->GetCurrentCommandBuffer(), firstAttachment, attachmentCount, pColorWriteMasks);
+		}
+	}
+
+	// ヘルパー関数 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	void CVulkanRenderer::SetCullMode(graphics::ECullMode CullMode)
 	{
 		switch (CullMode)
@@ -414,8 +804,7 @@ namespace api
 			break;
 		}
 	}
-
-	// ヘルパー関数 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	
 	VkFormat CVulkanRenderer::GetVertexFormat(int Dimention, graphics::EDataType DataType)
 	{
 		VkFormat result = VK_FORMAT_UNDEFINED;

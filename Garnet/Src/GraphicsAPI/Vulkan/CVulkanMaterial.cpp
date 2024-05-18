@@ -46,12 +46,12 @@ namespace api
 		if (!CreateDescriptorSets(m_CreateInfo, TextureSet)) return false; // DescriptorSetsを作成 -> Uniformが使用するバッファをCPUからGPUに送信するための仕組みこと. https://vkguide.dev/docs/chapter-4/descriptors/
 		if (!CreatePipelineLayout()) return false; // パイプラインレイアウトを生成
 
-		//if (m_pGraphicsAPI->IsEnabledRuntimeShaderEditing())
+		if (m_pGraphicsAPI->IsEnabledRuntimeShaderEditing())
 		{
 			// ShaderObjectの作成
 			if (!CreateShaderObjects(m_CreateInfo)) return false;
 		}
-		//else
+		else
 		{
 			if (!CreateShaderStages(m_CreateInfo)) return false; // Shaderの作成
 		}
@@ -184,6 +184,18 @@ namespace api
 					}
 				}
 			}
+		}
+
+		// ShaderObjectの削除
+		if (m_pGraphicsAPI->IsEnabledRuntimeShaderEditing())
+		{
+
+			for (auto& Shader : m_ShaderMap)
+			{
+				DestroyShaderEXT(m_pGraphicsAPI->GetLogicalDevice(), Shader.second, nullptr);
+			}
+
+			m_ShaderMap.clear();
 		}
 
 		// パイプラインレイアウトの破棄(たぶん本来は3Dオブジェクトごとにあるやつ) 
@@ -808,6 +820,16 @@ namespace api
 		if (func == nullptr) return;
 
 		func(commandBuffer, stageCount, pStages, pShaders);
+	}
+
+	void CVulkanMaterial::DestroyShaderEXT(VkDevice device, VkShaderEXT shader, const VkAllocationCallbacks* pAllocator)
+	{
+		auto func = (PFN_vkDestroyShaderEXT)vkGetInstanceProcAddr(m_pGraphicsAPI->GetInstance(), "vkDestroyShaderEXT");
+
+		if (func != nullptr)
+		{
+			func(device, shader, pAllocator);
+		}
 	}
 
 	// ヘルパー関数 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
