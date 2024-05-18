@@ -90,5 +90,14 @@ namespace api
 
 		return true;
 	}
+
+	void CVulkanVertexBuffer::Bind() const
+	{
+		VkDeviceSize offsets[] = { 0 };
+		for (int i = 0; i < static_cast<int>(GetVertexBufferList().size()); i++)
+		{
+			vkCmdBindVertexBuffers(m_pGraphicsAPI->GetCurrentCommandBuffer(), i, 1, &GetVertexBufferList()[i], offsets);
+		}
+	}
 }
 #endif

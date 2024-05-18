@@ -13,7 +13,6 @@ namespace api
 		m_PassName(PassName),
 		m_DynamicOffsetNum(0),
 		m_InstanceCount(1),
-		m_PipelineLayout(nullptr),
 		m_GraphicsPipeline(nullptr)
 	{
 	}
@@ -31,13 +30,6 @@ namespace api
 			vkDestroyPipeline(m_pGraphicsAPI->GetLogicalDevice(), m_GraphicsPipeline, nullptr);
 			m_GraphicsPipeline = nullptr;
 		}
-
-		// パイプラインレイアウトの破棄(たぶん本来は3Dオブジェクトごとにあるやつ) 
-		if (m_PipelineLayout)
-		{
-			vkDestroyPipelineLayout(m_pGraphicsAPI->GetLogicalDevice(), m_PipelineLayout, nullptr);
-			m_PipelineLayout = nullptr;
-		}
 	}
 
 	bool CVulkanRenderer::Create(const std::shared_ptr<graphics::CVertexBuffer>& VertexBuffer, const std::shared_ptr<graphics::CIndexBuffer>& IndexBuffer, const std::shared_ptr<graphics::CMaterial>& Material)
@@ -46,7 +38,7 @@ namespace api
 
 		m_InstanceCount = VertexBuffer->GetInstanceCount();
 
-		if (!CreateGraphicsPipeline(VertexBuffer, IndexBuffer, pVulkanMat)) return false; // グラフィックパイプラインを作成
+		if (!CreateGraphicsPipeline(VertexBuffer, pVulkanMat)) return false; // グラフィックパイプラインを作成
 
 		return true;
 	}
@@ -60,54 +52,34 @@ namespace api
 		// ユニフォームバッファの準備
 		if (!pVulkanMat->BuildDrawBuffer(DynamicOffsetNum)) return false;
 
-		// グラフィックパイプラインをコマンドにバインド
-		vkCmdBindPipeline(m_pGraphicsAPI->GetCurrentCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, m_GraphicsPipeline);
+		/*if (m_pGraphicsAPI->IsEnabledRuntimeShaderEditing())
+		{
+			// ShaderObjectのバインド
+			pVulkanMat->SetActive();
+
+			// 頂点バッファのバインド
+			// https://github.com/SaschaWillems/Vulkan/blob/master/examples/shaderobjects/shaderobjects.cpp#L369
+			//vkCmdSetVertexInputEXT(m_pGraphicsAPI->GetCurrentCommandBuffer(), 1, )
+		}
+		else*/
+		{
+			// グラフィックパイプラインをコマンドにバインド
+			vkCmdBindPipeline(m_pGraphicsAPI->GetCurrentCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, m_GraphicsPipeline);
+		}
 
 		// カリングモードを設定
 		SetCullMode(pVulkanMat->GetCullMode());
 		
 		// 頂点バッファをパイプラインにバインドする
-		VkDeviceSize offsets[] = { 0 };
-		for (int i = 0; i < static_cast<int>(pVulkanVertexBuffer->GetVertexBufferList().size()); i++)
-		{
-			vkCmdBindVertexBuffers(m_pGraphicsAPI->GetCurrentCommandBuffer(), i, 1, &pVulkanVertexBuffer->GetVertexBufferList()[i], offsets);
-		}
-
+		pVulkanVertexBuffer->Bind();
+		
 		// インデックスバッファをパイプラインにバインドする
-		if (pVulkanIndexBuffer->GetIndiceType() == graphics::EIndiceType::UNSIGNED_SHORT)
-		{
-			vkCmdBindIndexBuffer(m_pGraphicsAPI->GetCurrentCommandBuffer(), pVulkanIndexBuffer->GetIndexBuffer(), 0, VK_INDEX_TYPE_UINT16);
-		}
-		else if (pVulkanIndexBuffer->GetIndiceType() == graphics::EIndiceType::UNSIGNED_INT)
-		{
-			vkCmdBindIndexBuffer(m_pGraphicsAPI->GetCurrentCommandBuffer(), pVulkanIndexBuffer->GetIndexBuffer(), 0, VK_INDEX_TYPE_UINT32);
-		}
+		pVulkanIndexBuffer->Bind();
 		
 		// UBOのセット
-		if (pVulkanMat->IsUseShaderBuffer())
-		{
-			std::vector<uint32_t> dynamicOffsetList;
-			for (const auto& Size : pVulkanMat->GetBindingRefSizeList())
-			{
-				uint32_t dynamicOffset = (DynamicOffsetNum - 1) * Size;
-				dynamicOffsetList.push_back(dynamicOffset);
-			}
-
-			if (pVulkanMat->IsUseDynamicOffset())
-			{
-				vkCmdBindDescriptorSets(m_pGraphicsAPI->GetCurrentCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS,
-					m_PipelineLayout, 0, 1, &pVulkanMat->GetDescriptorSets()[m_pGraphicsAPI->GetCurrentFrame()], static_cast<uint32_t>(dynamicOffsetList.size()), &dynamicOffsetList[0]);
-			}
-			else
-			{
-				vkCmdBindDescriptorSets(m_pGraphicsAPI->GetCurrentCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS,
-					m_PipelineLayout, 0, 1, &pVulkanMat->GetDescriptorSets()[m_pGraphicsAPI->GetCurrentFrame()], 0, nullptr);
-			}
-		}
-
+		pVulkanMat->BindUBO(DynamicOffsetNum);
+		
 		// 描画コマンドを発行
-		//vkCmdDraw(m_CommandBuffers[m_CurrentFrame], 3, 1, 0, 0); // パラメーター: vertexCount, instanceCount, firstVertex, firstInstance
-		// インデックス付のドローコマンドはこちら
 		vkCmdDrawIndexed(m_pGraphicsAPI->GetCurrentCommandBuffer(), pVulkanIndexBuffer->GetIndicesCount(), m_InstanceCount, 0, 0, 0);
 
 		return true;
@@ -144,10 +116,15 @@ namespace api
 	}
 
 	// Vulkanメインロジック /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	bool CVulkanRenderer::CreateGraphicsPipeline(const std::shared_ptr<graphics::CVertexBuffer>& VertexBuffer, const std::shared_ptr<graphics::CIndexBuffer>& IndexBuffer, api::CVulkanMaterial* pVulkanMat)
+	bool CVulkanRenderer::CreateGraphicsPipeline(const std::shared_ptr<graphics::CVertexBuffer>& VertexBuffer, api::CVulkanMaterial* pVulkanMat)
 	{
+		// Shader編集が有効な時はグラフィックパイプラインは生成しない
+		if (m_pGraphicsAPI->IsEnabledRuntimeShaderEditing())
+		{
+			//return true;
+		}
+
 		const CVulkanVertexBuffer* pVulkanVertexBuffer = static_cast<const CVulkanVertexBuffer*>(VertexBuffer.get());
-		const CVulkanIndexBuffer* pVulkanIndexBuffer = static_cast<const CVulkanIndexBuffer*>(IndexBuffer.get());
 
 		// グラフィックパイプラインの固定機の設定 ///////////////////////////////////////////////////////////////////////////////////////
 		// 動的状態(ダイナミックステート)の設定(パイプラインにベイクせずにマイフレームの描画時に設定できるようにするパラメーターの設定)
@@ -319,30 +296,6 @@ namespace api
 		colorBlendingInfo.blendConstants[2] = 0.0f;
 		colorBlendingInfo.blendConstants[3] = 0.0f;
 
-		///////////////////////////////////////////////////////////////////
-
-		// パイプラインレイアウト(Uniformをシェーダーに渡すための仕組み)
-		// Uniformの値自体はいつでも変更できるが、どのUniformを使用するかはここで事前にこのパイプラインレイアウトで設定しておく必要がある。
-		// たぶんここではLayoutは意味としてUniformを指すのでは？
-		VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
-		pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-		if (pVulkanMat->IsUseShaderBuffer())
-		{
-			pipelineLayoutInfo.setLayoutCount = 1;
-			pipelineLayoutInfo.pSetLayouts = &pVulkanMat->GetDescriptorSetLayout();
-		}
-		else
-		{
-			pipelineLayoutInfo.setLayoutCount = 0;
-			pipelineLayoutInfo.pSetLayouts = nullptr;
-		}
-		pipelineLayoutInfo.pushConstantRangeCount = 0;
-		pipelineLayoutInfo.pPushConstantRanges = nullptr;
-
-		if (vkCreatePipelineLayout(m_pGraphicsAPI->GetLogicalDevice(), &pipelineLayoutInfo, nullptr, &m_PipelineLayout) != VK_SUCCESS) return false;
-
-		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 		// レンダリングパイプラインでデプスとステンシルを有効にする
 		VkPipelineDepthStencilStateCreateInfo depthStencil{};
 		depthStencil.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
@@ -407,7 +360,7 @@ namespace api
 		pipelineInfo.pColorBlendState = &colorBlendingInfo;
 		pipelineInfo.pDynamicState = &dynamicStateCreateInfo;
 
-		pipelineInfo.layout = m_PipelineLayout;
+		pipelineInfo.layout = pVulkanMat->GetPipelineLayout();
 
 		if (!m_PassName.empty())
 		{

@@ -36,6 +36,18 @@ namespace api
 		return m_IndexBuffer;
 	}
 
+	void CVulkanIndexBuffer::Bind() const
+	{
+		if (GetIndiceType() == graphics::EIndiceType::UNSIGNED_SHORT)
+		{
+			vkCmdBindIndexBuffer(m_pGraphicsAPI->GetCurrentCommandBuffer(), GetIndexBuffer(), 0, VK_INDEX_TYPE_UINT16);
+		}
+		else if (GetIndiceType() == graphics::EIndiceType::UNSIGNED_INT)
+		{
+			vkCmdBindIndexBuffer(m_pGraphicsAPI->GetCurrentCommandBuffer(), GetIndexBuffer(), 0, VK_INDEX_TYPE_UINT32);
+		}
+	}
+
 	uint32_t CVulkanIndexBuffer::GetIndicesCount() const
 	{
 		return m_IndicesCount;

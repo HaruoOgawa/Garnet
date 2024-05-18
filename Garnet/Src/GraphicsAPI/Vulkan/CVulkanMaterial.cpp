@@ -21,6 +21,8 @@ namespace api
 		m_DescriptorSetLayout(nullptr),
 		m_DescriptorPool(nullptr),
 
+		m_PipelineLayout(nullptr),
+
 		m_EmptyTexture(nullptr)
 	{
 		m_EmptyTexture = std::make_shared<CVulkanTexture>(pGraphicsAPI, false);
@@ -42,6 +44,7 @@ namespace api
 		if (!CreateDescriptorSetLayout(m_CreateInfo)) return false; // DescriptorSetLayoutの作成(Uniformをどのようにバインドするか), WebGPUでいうバインドグループの生成
 		if (!CreateDescriptorPool(m_CreateInfo)) return false; // DescriptorPoolを作成する -> DescriptorSetsは直接生成できず、コマンドで生成する必要がある。記述子プールはそのコマンド群のことかな？
 		if (!CreateDescriptorSets(m_CreateInfo, TextureSet)) return false; // DescriptorSetsを作成 -> Uniformが使用するバッファをCPUからGPUに送信するための仕組みこと. https://vkguide.dev/docs/chapter-4/descriptors/
+		if (!CreatePipelineLayout()) return false; // パイプラインレイアウトを生成
 
 		//if (m_pGraphicsAPI->IsEnabledRuntimeShaderEditing())
 		{
@@ -104,6 +107,38 @@ namespace api
 		}
 	}
 
+	void CVulkanMaterial::SetActive()
+	{
+		for (const auto& Shader : m_ShaderMap)
+		{
+			BindShadersEXT(m_pGraphicsAPI->GetCurrentCommandBuffer(), 1, &Shader.first, &Shader.second);
+		}
+	}
+
+	void CVulkanMaterial::BindUBO(int DynamicOffsetNum)
+	{
+		if (IsUseShaderBuffer())
+		{
+			std::vector<uint32_t> dynamicOffsetList;
+			for (const auto& Size : GetBindingRefSizeList())
+			{
+				uint32_t dynamicOffset = (DynamicOffsetNum - 1) * Size;
+				dynamicOffsetList.push_back(dynamicOffset);
+			}
+
+			if (IsUseDynamicOffset())
+			{
+				vkCmdBindDescriptorSets(m_pGraphicsAPI->GetCurrentCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS,
+					GetPipelineLayout(), 0, 1, &GetDescriptorSets()[m_pGraphicsAPI->GetCurrentFrame()], static_cast<uint32_t>(dynamicOffsetList.size()), &dynamicOffsetList[0]);
+			}
+			else
+			{
+				vkCmdBindDescriptorSets(m_pGraphicsAPI->GetCurrentCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS,
+					GetPipelineLayout(), 0, 1, &GetDescriptorSets()[m_pGraphicsAPI->GetCurrentFrame()], 0, nullptr);
+			}
+		}
+	}
+
 	void CVulkanMaterial::Release()
 	{
 		// ShaderModuleの破棄
@@ -149,6 +184,13 @@ namespace api
 					}
 				}
 			}
+		}
+
+		// パイプラインレイアウトの破棄(たぶん本来は3Dオブジェクトごとにあるやつ) 
+		if (m_PipelineLayout)
+		{
+			vkDestroyPipelineLayout(m_pGraphicsAPI->GetLogicalDevice(), m_PipelineLayout, nullptr);
+			m_PipelineLayout = nullptr;
 		}
 
 		// 記述子プールの破棄
@@ -221,13 +263,16 @@ namespace api
 		}
 
 		std::vector<VkShaderEXT> Shaders;
-		Shaders.resize(2);
+		Shaders.resize(static_cast<int>(CreateInfoList.size()));
 
 		if (!CreateShadersEXT(m_pGraphicsAPI->GetLogicalDevice(), static_cast<uint32_t>(CreateInfoList.size()), &CreateInfoList[0], nullptr, &Shaders[0])) return false;
 
-		//auto stage = VK_SHADER_STAGE_VERTEX_BIT;
+		for (int i = 0; i < static_cast<int>(CreateInfoList.size()); i++)
+		{
+			const auto& createInfo = CreateInfoList[i];
 
-		//CmdBindShadersEXT(m_pGraphicsAPI->GetCurrentCommandBuffer(), 1, &stage, &Shaders[0]);
+			m_ShaderMap.emplace(createInfo.stage, Shaders[i]);
+		}
 
 		return true;
 	}
@@ -719,6 +764,31 @@ namespace api
 		return true;
 	}
 
+	bool CVulkanMaterial::CreatePipelineLayout()
+	{
+		// パイプラインレイアウト(Uniformをシェーダーに渡すための仕組み)
+		// Uniformの値自体はいつでも変更できるが、どのUniformを使用するかはここで事前にこのパイプラインレイアウトで設定しておく必要がある。
+		// たぶんここではLayoutは意味としてUniformを指すのでは？
+		VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
+		pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+		if (IsUseShaderBuffer())
+		{
+			pipelineLayoutInfo.setLayoutCount = 1;
+			pipelineLayoutInfo.pSetLayouts = &GetDescriptorSetLayout();
+		}
+		else
+		{
+			pipelineLayoutInfo.setLayoutCount = 0;
+			pipelineLayoutInfo.pSetLayouts = nullptr;
+		}
+		pipelineLayoutInfo.pushConstantRangeCount = 0;
+		pipelineLayoutInfo.pPushConstantRanges = nullptr;
+
+		if (vkCreatePipelineLayout(m_pGraphicsAPI->GetLogicalDevice(), &pipelineLayoutInfo, nullptr, &m_PipelineLayout) != VK_SUCCESS) return false;
+
+		return true;
+	}
+
 	// Vulkan Extensions /////////////////////////////////////////////////////////////////////
 	bool CVulkanMaterial::CreateShadersEXT(VkDevice device, uint32_t createInfoCount, const VkShaderCreateInfoEXT* pCreateInfos, const VkAllocationCallbacks* pAllocator, VkShaderEXT* pShaders)
 	{
@@ -731,7 +801,7 @@ namespace api
 		return (result == VK_SUCCESS);
 	}
 
-	void CVulkanMaterial::CmdBindShadersEXT(VkCommandBuffer commandBuffer, uint32_t stageCount, const VkShaderStageFlagBits* pStages, const VkShaderEXT* pShaders)
+	void CVulkanMaterial::BindShadersEXT(VkCommandBuffer commandBuffer, uint32_t stageCount, const VkShaderStageFlagBits* pStages, const VkShaderEXT* pShaders)
 	{
 		auto func = (PFN_vkCmdBindShadersEXT)vkGetInstanceProcAddr(m_pGraphicsAPI->GetInstance(), "vkCmdBindShadersEXT");
 

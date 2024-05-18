@@ -37,12 +37,11 @@ namespace api
 		int m_InstanceCount;
 
 		// Pipeline
-		VkPipelineLayout m_PipelineLayout;
 		VkPipeline m_GraphicsPipeline;
 	private:
 		// Vulkanメインロジック /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		bool CreateGraphicsPipeline(const std::shared_ptr<graphics::CVertexBuffer>& VertexBuffer, const std::shared_ptr<graphics::CIndexBuffer>& IndexBuffer, api::CVulkanMaterial* pVulkanMat);
-
+		bool CreateGraphicsPipeline(const std::shared_ptr<graphics::CVertexBuffer>& VertexBuffer, api::CVulkanMaterial* pVulkanMat);
+		
 		void SetCullMode(graphics::ECullMode CullMode);
 
 		// ヘルパー関数 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////

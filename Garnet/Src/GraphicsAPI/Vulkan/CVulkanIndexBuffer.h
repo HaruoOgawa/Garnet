@@ -39,6 +39,8 @@ namespace api
 		uint32_t GetIndicesCount() const;
 
 		virtual bool Create() override;
+
+		void Bind() const;
 	};
 }
 #endif

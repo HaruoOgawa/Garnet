@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <map>
+#include <set>
 
 #include <glfw3.h>
 #include <glfw3native.h>
@@ -30,6 +31,11 @@ namespace api
 		VkShaderModule m_FragShaderModule;
 		VkShaderModule m_ComputeShaderModule;
 
+		std::map<VkShaderStageFlagBits, VkShaderEXT> m_ShaderMap;
+
+		// PipelineLayout
+		VkPipelineLayout m_PipelineLayout;
+
 		// Uniform Buffer Object
 		VkDescriptorSetLayout m_DescriptorSetLayout;
 
@@ -46,18 +52,20 @@ namespace api
 		// Vulkanメインロジック /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		bool CreateShaderObjects(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo);
 		bool CreateShaderStages(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo);
-		
+
 		bool CreateDescriptorSetLayout(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo);
 		bool CreateShaderBuffers(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo);
 		bool CreateDescriptorPool(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo);
 		bool CreateDescriptorSets(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, const std::shared_ptr<graphics::CTextureSet>& TextureSet);
+
+		bool CreatePipelineLayout();
 
 		void Release();
 
 		// Vulkan Extensions /////////////////////////////////////////////////////////////////////
 		bool CreateShadersEXT(VkDevice device, uint32_t createInfoCount, const VkShaderCreateInfoEXT* pCreateInfos, const VkAllocationCallbacks* pAllocator, VkShaderEXT* pShaders);
 
-		void CmdBindShadersEXT(VkCommandBuffer commandBuffer, uint32_t stageCount, const VkShaderStageFlagBits* pStages, const VkShaderEXT* pShaders);
+		void BindShadersEXT(VkCommandBuffer commandBuffer, uint32_t stageCount, const VkShaderStageFlagBits* pStages, const VkShaderEXT* pShaders);
 
 		// ヘルパー関数 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		bool CreateShaderModule(VkShaderModule& shaderModule, const std::string& code);
@@ -70,11 +78,16 @@ namespace api
 
 		virtual void SetUniformValue(const std::string Name, const void* Data, int ByteSize, int DynamicOffsetNum = -1) override;
 
+		void SetActive();
+
+		void BindUBO(int DynamicOffsetNum);
+
 		const std::vector<VkPipelineShaderStageCreateInfo>& GetShaderStages()const { return m_ShaderStages; }
 		const VkDescriptorSetLayout& GetDescriptorSetLayout() const { return m_DescriptorSetLayout; }
 		const std::vector<VkDescriptorSet>& GetDescriptorSets() const { return m_DescriptorSets; }
 		const std::vector<std::vector<VkBuffer>>& GetVKUniformBufferList() const { return m_VKUniformBufferList; }
 		const std::vector<std::vector<uint32_t>>& GetVKUniformBufferSizeList() const { return m_VKUniformBufferSizeList; }
+		const VkPipelineLayout GetPipelineLayout() const { return m_PipelineLayout; }
 	};
 }
 #endif

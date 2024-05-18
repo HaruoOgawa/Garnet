@@ -34,6 +34,8 @@ namespace api
 		const std::vector<VkDeviceMemory> GetVertexBufferMemoryList() const;
 
 		virtual bool Create() override;
+
+		void Bind() const;
 	};
 }
 #endif
