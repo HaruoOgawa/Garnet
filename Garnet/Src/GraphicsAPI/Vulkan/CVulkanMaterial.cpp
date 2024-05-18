@@ -59,6 +59,29 @@ namespace api
 		return true;
 	}
 
+	bool CVulkanMaterial::ReCreate(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo)
+	{
+		m_CreateInfo = createInfo;
+
+		// 仮でShaderのみ
+		// ShaderObjectの削除
+		if (m_pGraphicsAPI->IsEnabledRuntimeShaderEditing())
+		{
+
+			for (auto& Shader : m_ShaderMap)
+			{
+				DestroyShaderEXT(m_pGraphicsAPI->GetLogicalDevice(), Shader.second, nullptr);
+			}
+
+			m_ShaderMap.clear();
+		}
+
+		// ShaderObjectの作成
+		if (!CreateShaderObjects(m_CreateInfo)) return false;
+
+		return true;
+	}
+
 	bool CVulkanMaterial::BuildDrawBuffer(int DynamicOffsetNum)
 	{
 		for (int i = 0; i < m_ShaderBufferList.size(); i++)
@@ -160,6 +183,18 @@ namespace api
 			m_ComputeShaderModule = nullptr;
 		}
 
+		// ShaderObjectの削除
+		if (m_pGraphicsAPI->IsEnabledRuntimeShaderEditing())
+		{
+
+			for (auto& Shader : m_ShaderMap)
+			{
+				DestroyShaderEXT(m_pGraphicsAPI->GetLogicalDevice(), Shader.second, nullptr);
+			}
+
+			m_ShaderMap.clear();
+		}
+
 		// ユニフォームの破棄
 		for (size_t i = 0; i < m_pGraphicsAPI->GetMaxFramesInFlight(); i++)
 		{
@@ -184,18 +219,6 @@ namespace api
 					}
 				}
 			}
-		}
-
-		// ShaderObjectの削除
-		if (m_pGraphicsAPI->IsEnabledRuntimeShaderEditing())
-		{
-
-			for (auto& Shader : m_ShaderMap)
-			{
-				DestroyShaderEXT(m_pGraphicsAPI->GetLogicalDevice(), Shader.second, nullptr);
-			}
-
-			m_ShaderMap.clear();
 		}
 
 		// パイプラインレイアウトの破棄(たぶん本来は3Dオブジェクトごとにあるやつ) 

@@ -17,14 +17,18 @@ namespace resource
 	{
 	}
 
+	bool CMaterialFrameLoader::Reload(resource::CLoadWorker* pLoadWorker)
+	{
+		if (!CResource::Reload(pLoadWorker)) return false;
+
+		m_AnalyseDone = false;
+		m_CreateInfo = std::make_shared<graphics::CMaterialCreateInfo>();
+
+		return true;
+	}
+
 	bool CMaterialFrameLoader::Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, const std::shared_ptr<CResourceManager>& ResourceManager)
 	{
-		if (!m_File->IsLoaded())
-		{
-			if (!m_File->Update(pGraphicsAPI, pPhysicsEngine, ResourceManager)) return false;
-			return true;
-		}
-
 		// マテリアルフレームが持っているリソース一覧を取得する
 		if (!m_AnalyseDone)
 		{
@@ -262,7 +266,7 @@ namespace resource
 
 						m_MfResourceList.push_back(ShaderLoader);
 
-						m_ShaderFileList.emplace(shaderType, ShaderLoader.get());
+						m_ShaderFileList.emplace(shaderType, ShaderLoader);
 					}
 				}
 

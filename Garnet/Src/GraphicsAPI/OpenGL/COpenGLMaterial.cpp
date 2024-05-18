@@ -37,6 +37,18 @@ namespace api
 		return true;
 	}
 
+	bool COpenGLMaterial::ReCreate(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo)
+	{
+		m_CreateInfo = createInfo;
+
+		glDeleteProgram(m_ShaderPrg);
+
+		// ‰¼ŽÀ‘•
+		if (!CreateShaderStages()) return false;
+
+		return true;
+	}
+
 	bool COpenGLMaterial::BuildDrawBuffer(int DynamicOffsetNum)
 	{
 		int index = 0;

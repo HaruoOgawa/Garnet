@@ -97,7 +97,7 @@ namespace graphics
 		for (auto& Material : m_RefMaterialList)
 		{
 			// APIレベルでマテリアルを更新する
-			float x = 0.0f;
+			if (!Material->ReCreate(m_CreateInfo)) return false;
 		}
 
 		return true;

@@ -55,6 +55,11 @@ namespace graphics
 		return true;
 	}
 
+	bool CMaterial::ReCreate(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo)
+	{
+		return true;
+	}
+
 	std::shared_ptr<graphics::CMaterial> CMaterial::GetDepthMaterial() 
 	{
 		return m_DepthMaterial; 

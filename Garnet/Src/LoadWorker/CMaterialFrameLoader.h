@@ -32,7 +32,7 @@ namespace resource
 		bool m_AnalyseDone;
 		std::vector<std::shared_ptr<IResource>> m_MfResourceList;
 
-		std::unordered_map <std::string, CShaderLoader*> m_ShaderFileList;
+		std::unordered_map <std::string, std::shared_ptr<CShaderLoader>> m_ShaderFileList;
 		std::unordered_map <std::string, std::shared_ptr<IResource>> m_TextureFileList;
 
 		// MfData
@@ -62,6 +62,8 @@ namespace resource
 	public:
 		CMaterialFrameLoader(const std::string& filename, const std::shared_ptr<graphics::CMaterialFrame>& TargetMaterialFrame);
 		virtual ~CMaterialFrameLoader();
+
+		virtual bool Reload(resource::CLoadWorker* pLoadWorker) override;
 
 		virtual bool Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, const std::shared_ptr<CResourceManager>& ResourceManager) override;
 

@@ -67,6 +67,8 @@ namespace graphics
 		virtual bool Create(const std::shared_ptr<graphics::CTextureSet>& TextureSet) = 0;
 		virtual bool CreateDepthMaterial(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<graphics::CMaterialFrame>& DepthMF);
 
+		virtual bool ReCreate(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo);
+
 		virtual std::shared_ptr<graphics::CMaterial> GetDepthMaterial();
 
 		virtual void SetEnabledZWrite(bool Flag);

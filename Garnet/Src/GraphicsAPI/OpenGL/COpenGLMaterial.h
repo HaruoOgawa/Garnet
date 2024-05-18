@@ -44,6 +44,9 @@ namespace api
 		virtual ~COpenGLMaterial();
 
 		virtual bool Create(const std::shared_ptr<graphics::CTextureSet>& TextureSet) override;
+
+		virtual bool ReCreate(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo) override;
+
 		virtual bool BuildDrawBuffer(int DynamicOffsetNum) override;
 
 		virtual void SetUniformValue(const std::string Name, const void* Data, int ByteSize, int DynamicOffsetNum = -1) override;
