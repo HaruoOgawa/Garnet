@@ -35,8 +35,6 @@ namespace api
 
 	bool CVulkanMaterial::Create(const std::shared_ptr<graphics::CTextureSet>& TextureSet)
 	{
-		if (!CreateShaderStages(m_CreateInfo)) return false; // Shaderの作成
-
 		// Uniform Buffer
 		if (!CreateShaderBuffers(m_CreateInfo)) return false; // ユニフォームバッファを作成
 
@@ -44,6 +42,16 @@ namespace api
 		if (!CreateDescriptorSetLayout(m_CreateInfo)) return false; // DescriptorSetLayoutの作成(Uniformをどのようにバインドするか), WebGPUでいうバインドグループの生成
 		if (!CreateDescriptorPool(m_CreateInfo)) return false; // DescriptorPoolを作成する -> DescriptorSetsは直接生成できず、コマンドで生成する必要がある。記述子プールはそのコマンド群のことかな？
 		if (!CreateDescriptorSets(m_CreateInfo, TextureSet)) return false; // DescriptorSetsを作成 -> Uniformが使用するバッファをCPUからGPUに送信するための仕組みこと. https://vkguide.dev/docs/chapter-4/descriptors/
+
+		//if (m_pGraphicsAPI->IsEnabledRuntimeShaderEditing())
+		{
+			// ShaderObjectの作成
+			if (!CreateShaderObjects(m_CreateInfo)) return false;
+		}
+		//else
+		{
+			if (!CreateShaderStages(m_CreateInfo)) return false; // Shaderの作成
+		}
 
 		return true;
 	}
@@ -159,6 +167,71 @@ namespace api
 	}
 
 	// Vulkanメインロジック /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	bool CVulkanMaterial::CreateShaderObjects(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo)
+	{
+		std::vector<VkShaderCreateInfoEXT> CreateInfoList;
+
+		// ひとまずVertexとFragmentのみ並列で作る
+		{
+			const auto& ShaderCode = createInfo->GetVertexShaderCode();
+
+			VkShaderCreateInfoEXT shaderCreateInfo{};
+			shaderCreateInfo.sType = VK_STRUCTURE_TYPE_SHADER_CREATE_INFO_EXT;
+			shaderCreateInfo.pNext = nullptr;
+			shaderCreateInfo.flags = VK_SHADER_CREATE_LINK_STAGE_BIT_EXT;
+			shaderCreateInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
+			shaderCreateInfo.nextStage = VK_SHADER_STAGE_FRAGMENT_BIT;
+			shaderCreateInfo.codeType = VK_SHADER_CODE_TYPE_SPIRV_EXT;
+			shaderCreateInfo.codeSize = ShaderCode.size();
+			shaderCreateInfo.pCode = &ShaderCode[0];
+			shaderCreateInfo.pName = "main";
+			// RenderのGraphicsPipelineに渡していたDescriptorSetLayoutをここで渡せるので完全に切り離せそう？
+			// つまりShaderBufferの更新もマテリアルだけで完結できそう？
+			shaderCreateInfo.setLayoutCount = 1;
+			shaderCreateInfo.pSetLayouts = &m_DescriptorSetLayout;
+			shaderCreateInfo.pushConstantRangeCount = 0;
+			shaderCreateInfo.pPushConstantRanges = nullptr;
+			shaderCreateInfo.pSpecializationInfo = nullptr;
+
+			CreateInfoList.push_back(shaderCreateInfo);
+		}
+
+		{
+			const auto& ShaderCode = createInfo->GetFragmentShaderCode();
+
+			VkShaderCreateInfoEXT shaderCreateInfo{};
+			shaderCreateInfo.sType = VK_STRUCTURE_TYPE_SHADER_CREATE_INFO_EXT;
+			shaderCreateInfo.pNext = nullptr;
+			shaderCreateInfo.flags = VK_SHADER_CREATE_LINK_STAGE_BIT_EXT;
+			shaderCreateInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
+			shaderCreateInfo.nextStage = 0;
+			shaderCreateInfo.codeType = VK_SHADER_CODE_TYPE_SPIRV_EXT;
+			shaderCreateInfo.codeSize = ShaderCode.size();
+			shaderCreateInfo.pCode = &ShaderCode[0];
+			shaderCreateInfo.pName = "main";
+			// RenderのGraphicsPipelineに渡していたDescriptorSetLayoutをここで渡せるので完全に切り離せそう？
+			// つまりShaderBufferの更新もマテリアルだけで完結できそう？
+			shaderCreateInfo.setLayoutCount = 1;
+			shaderCreateInfo.pSetLayouts = &m_DescriptorSetLayout;
+			shaderCreateInfo.pushConstantRangeCount = 0;
+			shaderCreateInfo.pPushConstantRanges = nullptr;
+			shaderCreateInfo.pSpecializationInfo = nullptr;
+
+			CreateInfoList.push_back(shaderCreateInfo);
+		}
+
+		std::vector<VkShaderEXT> Shaders;
+		Shaders.resize(2);
+
+		if (!CreateShadersEXT(m_pGraphicsAPI->GetLogicalDevice(), static_cast<uint32_t>(CreateInfoList.size()), &CreateInfoList[0], nullptr, &Shaders[0])) return false;
+
+		//auto stage = VK_SHADER_STAGE_VERTEX_BIT;
+
+		//CmdBindShadersEXT(m_pGraphicsAPI->GetCurrentCommandBuffer(), 1, &stage, &Shaders[0]);
+
+		return true;
+	}
+	
 	bool CVulkanMaterial::CreateShaderStages(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo)
 	{
 		// シェーダーの準備
@@ -644,6 +717,27 @@ namespace api
 		}
 
 		return true;
+	}
+
+	// Vulkan Extensions /////////////////////////////////////////////////////////////////////
+	bool CVulkanMaterial::CreateShadersEXT(VkDevice device, uint32_t createInfoCount, const VkShaderCreateInfoEXT* pCreateInfos, const VkAllocationCallbacks* pAllocator, VkShaderEXT* pShaders)
+	{
+		auto func = (PFN_vkCreateShadersEXT)vkGetInstanceProcAddr(m_pGraphicsAPI->GetInstance(), "vkCreateShadersEXT");
+
+		if (func == nullptr) return false;
+
+		VkResult result = func(device, createInfoCount, pCreateInfos, pAllocator, pShaders);
+
+		return (result == VK_SUCCESS);
+	}
+
+	void CVulkanMaterial::CmdBindShadersEXT(VkCommandBuffer commandBuffer, uint32_t stageCount, const VkShaderStageFlagBits* pStages, const VkShaderEXT* pShaders)
+	{
+		auto func = (PFN_vkCmdBindShadersEXT)vkGetInstanceProcAddr(m_pGraphicsAPI->GetInstance(), "vkCmdBindShadersEXT");
+
+		if (func == nullptr) return;
+
+		func(commandBuffer, stageCount, pStages, pShaders);
 	}
 
 	// ヘルパー関数 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -74,7 +74,8 @@ namespace api
 		VkPhysicalDevice m_PhysicalDevice;
 		VkDevice m_LogicalDevice;
 		const std::vector<const char*> m_DeviceExtensions = {
-			VK_KHR_SWAPCHAIN_EXTENSION_NAME
+			VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+			VK_EXT_SHADER_OBJECT_EXTENSION_NAME,
 		};
 
 		// Queue
