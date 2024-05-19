@@ -55,8 +55,23 @@ namespace graphics
 		return true;
 	}
 
-	bool CMaterial::ReCreate(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo)
+	bool CMaterial::ReCreate(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, const std::vector<std::shared_ptr<CShaderBuffer>>& ShaderBufferList, const std::vector<STextureBindingLayout>& TextureBindingLayoutList)
 	{
+		return true;
+	}
+
+	bool CMaterial::ReCreateBuffer(const std::vector<std::shared_ptr<graphics::CShaderBuffer>>& ShaderBufferList, const std::vector<graphics::STextureBindingLayout>& TextureBindingLayoutList)
+	{
+		// 古いバッファの保存
+		const auto& PrevShaderBufferList = m_ShaderBufferList;
+		const auto& PrevTextureBindingLayoutList = m_TextureBindingLayoutList;
+
+		// バッファの更新
+		m_ShaderBufferList = ShaderBufferList;
+		m_TextureBindingLayoutList = TextureBindingLayoutList;
+
+		// 設定済みの値を反映
+
 		return true;
 	}
 

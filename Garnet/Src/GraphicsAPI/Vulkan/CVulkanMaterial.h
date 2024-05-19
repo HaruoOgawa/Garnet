@@ -13,7 +13,11 @@
 
 #include "../../Graphics/CMaterial.h"
 
-namespace graphics { class CMaterialCreateInfo; }
+namespace graphics { 
+	class CMaterialCreateInfo; 
+	class CShaderBuffer;
+	struct STextureBindingLayout;
+}
 
 namespace api
 {
@@ -48,6 +52,14 @@ namespace api
 
 		// Texture
 		std::shared_ptr<CVulkanTexture> m_EmptyTexture;
+
+		// 参照中のテクスチャリスト
+		std::map<std::string, std::shared_ptr<graphics::CTexture>> m_RefTextureMap;
+		std::map<std::string, std::shared_ptr<graphics::CTexture>> m_RefCubeMapMap;
+		std::map<std::string, std::shared_ptr<graphics::CTexture>> m_RefFrameTextureMap;
+		std::shared_ptr<graphics::CTexture> m_RefDiffuse_Tex = nullptr;
+		std::shared_ptr<graphics::CTexture> m_RefSpecular_Tex = nullptr;
+		std::shared_ptr<graphics::CTexture> m_RefGGXLUT_Tex = nullptr;
 	private:
 		// Vulkanメインロジック /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		bool CreateShaderObjects(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo);
@@ -56,11 +68,14 @@ namespace api
 		bool CreateDescriptorSetLayout(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo);
 		bool CreateShaderBuffers(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo);
 		bool CreateDescriptorPool(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo);
-		bool CreateDescriptorSets(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, const std::shared_ptr<graphics::CTextureSet>& TextureSet);
+		bool CreateDescriptorSets(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo);
 
 		bool CreatePipelineLayout();
 
 		void Release();
+
+		bool CreateRefTextureList(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, const std::shared_ptr<graphics::CTextureSet>& TextureSet);
+		bool ReCreateRefTextureList(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo);
 
 		// Vulkan Extensions /////////////////////////////////////////////////////////////////////
 		bool CreateShadersEXT(VkDevice device, uint32_t createInfoCount, const VkShaderCreateInfoEXT* pCreateInfos, const VkAllocationCallbacks* pAllocator, VkShaderEXT* pShaders);
@@ -77,7 +92,7 @@ namespace api
 
 		virtual bool Create(const std::shared_ptr<graphics::CTextureSet>& TextureSet) override;
 
-		virtual bool ReCreate(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo) override;
+		virtual bool ReCreate(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, const std::vector<std::shared_ptr<graphics::CShaderBuffer>>& ShaderBufferList, const std::vector<graphics::STextureBindingLayout>& TextureBindingLayoutList) override;
 
 		virtual bool BuildDrawBuffer(int DynamicOffsetNum) override;
 

@@ -94,10 +94,61 @@ namespace graphics
 
 	bool CMaterialFrame::Reload()
 	{
+		std::vector<std::shared_ptr<CShaderBuffer>> ShaderBufferList;
+		std::vector<STextureBindingLayout> TextureBindingLayoutList;
+
+		// ShaderBuffer
+		for (const auto& ShaderBuffer : m_ShaderBufferList)
+		{
+			if (ShaderBuffer.BufferType == graphics::EBufferType::UNIFORM)
+			{
+				// UniformBuffer
+				auto BindingLayout = ShaderBuffer.BindingLayout;
+				const auto& ValueList = ShaderBuffer.ValueLayoutList;
+
+				auto Buffer = graphics::CMaterialCreateInfo::CreateUniformBuffer(ShaderBuffer.BindingLayout.BindingName, { BindingLayout });
+
+				for (const auto& Value : ValueList)
+				{
+					Buffer->AddData(Value->Name, Value->ValueType, &Value->Data[0], Value->ByteSize, Value->BindingIndex, Value->ValueInput);
+				}
+
+				Buffer->RecalculateBindingLayoutOffset();
+				Buffer->ResizePowerOfTwo(); // バッファサイズを2のn乗にする
+
+				ShaderBufferList.push_back(Buffer);
+			}
+			else if (ShaderBuffer.BufferType == graphics::EBufferType::SHADERSTORAGE)
+			{
+				// StorageBuffer
+				auto BindingLayout = ShaderBuffer.BindingLayout;
+				const auto& ValueList = ShaderBuffer.ValueLayoutList;
+
+				auto Buffer = graphics::CMaterialCreateInfo::CreateShaderStorageBuffer(ShaderBuffer.BindingLayout.BindingName, { BindingLayout }, BindingLayout.BufferUpdateType);
+
+				for (const auto& Value : ValueList)
+				{
+					Buffer->AddData(Value->Name, Value->ValueType, &Value->Data[0], Value->ByteSize, Value->BindingIndex, Value->ValueInput);
+				}
+
+				Buffer->RecalculateBindingLayoutOffset();
+				Buffer->ResizePowerOfTwo(); // バッファサイズを2のn乗にする
+
+				ShaderBufferList.push_back(Buffer);
+			}
+		}
+
+		// TextureBuffer
+		for (const auto& TextureBuffer : m_TextureBufferList)
+		{
+			TextureBindingLayoutList.push_back({ TextureBuffer.TextureName, TextureBuffer.ViewBindingIndex, TextureBuffer.SamplerBindingIndex,TextureBuffer.TextureIndex,TextureBuffer.TextureUsage });
+		}
+
+		//
 		for (auto& Material : m_RefMaterialList)
 		{
 			// APIレベルでマテリアルを更新する
-			if (!Material->ReCreate(m_CreateInfo)) return false;
+			if (!Material->ReCreate(m_CreateInfo, ShaderBufferList, TextureBindingLayoutList)) return false;
 		}
 
 		return true;

@@ -37,29 +37,34 @@ namespace api
 
 	bool CVulkanMaterial::Create(const std::shared_ptr<graphics::CTextureSet>& TextureSet)
 	{
-		// Uniform Buffer
-		if (!CreateShaderBuffers(m_CreateInfo)) return false; // ユニフォームバッファを作成
+		// 参照テクスチャリスト
+		if (!CreateRefTextureList(m_CreateInfo, TextureSet)) return false;
 
-		// バインドグループ(UniformとTextureで共通項)
-		if (!CreateDescriptorSetLayout(m_CreateInfo)) return false; // DescriptorSetLayoutの作成(Uniformをどのようにバインドするか), WebGPUでいうバインドグループの生成
-		if (!CreateDescriptorPool(m_CreateInfo)) return false; // DescriptorPoolを作成する -> DescriptorSetsは直接生成できず、コマンドで生成する必要がある。記述子プールはそのコマンド群のことかな？
-		if (!CreateDescriptorSets(m_CreateInfo, TextureSet)) return false; // DescriptorSetsを作成 -> Uniformが使用するバッファをCPUからGPUに送信するための仕組みこと. https://vkguide.dev/docs/chapter-4/descriptors/
-		if (!CreatePipelineLayout()) return false; // パイプラインレイアウトを生成
+		{
+			// Uniform Buffer
+			if (!CreateShaderBuffers(m_CreateInfo)) return false; // ユニフォームバッファを作成
 
-		if (m_pGraphicsAPI->IsEnabledRuntimeShaderEditing())
-		{
-			// ShaderObjectの作成
-			if (!CreateShaderObjects(m_CreateInfo)) return false;
-		}
-		else
-		{
-			if (!CreateShaderStages(m_CreateInfo)) return false; // Shaderの作成
+			// バインドグループ(UniformとTextureで共通項)
+			if (!CreateDescriptorSetLayout(m_CreateInfo)) return false; // DescriptorSetLayoutの作成(Uniformをどのようにバインドするか), WebGPUでいうバインドグループの生成
+			if (!CreateDescriptorPool(m_CreateInfo)) return false; // DescriptorPoolを作成する -> DescriptorSetsは直接生成できず、コマンドで生成する必要がある。記述子プールはそのコマンド群のことかな？
+			if (!CreateDescriptorSets(m_CreateInfo)) return false; // DescriptorSetsを作成 -> Uniformが使用するバッファをCPUからGPUに送信するための仕組みこと. https://vkguide.dev/docs/chapter-4/descriptors/
+			if (!CreatePipelineLayout()) return false; // パイプラインレイアウトを生成
+
+			if (m_pGraphicsAPI->IsEnabledRuntimeShaderEditing())
+			{
+				// ShaderObjectの作成
+				if (!CreateShaderObjects(m_CreateInfo)) return false;
+			}
+			else
+			{
+				if (!CreateShaderStages(m_CreateInfo)) return false; // Shaderの作成
+			}
 		}
 
 		return true;
 	}
 
-	bool CVulkanMaterial::ReCreate(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo)
+	bool CVulkanMaterial::ReCreate(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, const std::vector<std::shared_ptr<graphics::CShaderBuffer>>& ShaderBufferList, const std::vector<graphics::STextureBindingLayout>& TextureBindingLayoutList)
 	{
 		m_CreateInfo = createInfo;
 
@@ -76,8 +81,34 @@ namespace api
 			m_ShaderMap.clear();
 		}
 
-		// ShaderObjectの作成
-		if (!CreateShaderObjects(m_CreateInfo)) return false;
+		// 参照テクスチャリストの再生成
+		if (!ReCreateRefTextureList(m_CreateInfo)) return false;
+
+		// バッファの再生成
+		if (!ReCreateBuffer(ShaderBufferList, TextureBindingLayoutList)) return false;
+
+		Release();
+
+		{
+			// Uniform Buffer
+			if (!CreateShaderBuffers(m_CreateInfo)) return false; // ユニフォームバッファを作成
+
+			// バインドグループ(UniformとTextureで共通項)
+			if (!CreateDescriptorSetLayout(m_CreateInfo)) return false; // DescriptorSetLayoutの作成(Uniformをどのようにバインドするか), WebGPUでいうバインドグループの生成
+			if (!CreateDescriptorPool(m_CreateInfo)) return false; // DescriptorPoolを作成する -> DescriptorSetsは直接生成できず、コマンドで生成する必要がある。記述子プールはそのコマンド群のことかな？
+			if (!CreateDescriptorSets(m_CreateInfo)) return false; // DescriptorSetsを作成 -> Uniformが使用するバッファをCPUからGPUに送信するための仕組みこと. https://vkguide.dev/docs/chapter-4/descriptors/
+			if (!CreatePipelineLayout()) return false; // パイプラインレイアウトを生成
+
+			if (m_pGraphicsAPI->IsEnabledRuntimeShaderEditing())
+			{
+				// ShaderObjectの作成
+				if (!CreateShaderObjects(m_CreateInfo)) return false;
+			}
+			else
+			{
+				if (!CreateShaderStages(m_CreateInfo)) return false; // Shaderの作成
+			}
+		}
 
 		return true;
 	}
@@ -597,27 +628,8 @@ namespace api
 
 		return true;
 	}
-	bool CVulkanMaterial::CreateDescriptorSets(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, const std::shared_ptr<graphics::CTextureSet>& TextureSet)
+	bool CVulkanMaterial::CreateDescriptorSets(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo)
 	{
-		//
-		std::vector<std::shared_ptr<graphics::CTexture>> TextureList(0);
-		if (TextureSet) TextureList = TextureSet->Get2DTextureList();
-
-		std::vector<std::shared_ptr<graphics::CTexture>> CubeMapList(0);
-		if (TextureSet) CubeMapList = TextureSet->GetCubeMapList();
-
-		std::vector<std::shared_ptr<graphics::CTexture>> FrameTextureList(0);
-		if (TextureSet) FrameTextureList = TextureSet->GetFrameTextureList();
-
-		std::shared_ptr<graphics::CTexture> Diffuse_Tex = nullptr;
-		if (TextureSet) Diffuse_Tex = TextureSet->GetDiffuse_Tex();
-
-		std::shared_ptr<graphics::CTexture> Specular_Tex = nullptr;
-		if (TextureSet) Specular_Tex = TextureSet->GetSpecular_Tex();
-
-		std::shared_ptr<graphics::CTexture> GGXLUT_Tex = nullptr;
-		if (TextureSet) GGXLUT_Tex = TextureSet->GetGGXLUT_Tex();
-
 		//
 		std::vector<VkDescriptorSetLayout> layouts(m_pGraphicsAPI->GetMaxFramesInFlight(), m_DescriptorSetLayout);
 		VkDescriptorSetAllocateInfo allocInfo{};
@@ -730,27 +742,33 @@ namespace api
 
 					if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_2D)
 					{
-						Texture = (TextureIndex >= 0 && TextureIndex < TextureList.size()) ? static_cast<api::CVulkanTexture*>(TextureList[TextureIndex].get()) : m_EmptyTexture.get();
+						const auto& it = m_RefTextureMap.find(TexLayout.TextureName);
+
+						Texture = (it != m_RefTextureMap.end()) ? static_cast<api::CVulkanTexture*>(it->second.get()) : m_EmptyTexture.get();
 					}
 					else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_CUBE)
 					{
-						Texture = (TextureIndex >= 0 && TextureIndex < CubeMapList.size()) ? static_cast<api::CVulkanTexture*>(CubeMapList[TextureIndex].get()) : m_EmptyTexture.get();
+						const auto& it = m_RefCubeMapMap.find(TexLayout.TextureName);
+
+						Texture = (it != m_RefCubeMapMap.end()) ? static_cast<api::CVulkanTexture*>(it->second.get()) : m_EmptyTexture.get();
 					}
 					else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_FRAME)
 					{
-						Texture = (TextureIndex >= 0 && TextureIndex < FrameTextureList.size()) ? static_cast<api::CVulkanTexture*>(FrameTextureList[TextureIndex].get()) : m_EmptyTexture.get();
+						const auto& it = m_RefFrameTextureMap.find(TexLayout.TextureName);
+
+						Texture = (it != m_RefFrameTextureMap.end()) ? static_cast<api::CVulkanTexture*>(it->second.get()) : m_EmptyTexture.get();
 					}
 					else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_IBL_Diffuse)
 					{
-						Texture = (TextureIndex >= 0 && Diffuse_Tex) ? static_cast<api::CVulkanTexture*>(Diffuse_Tex.get()) : m_EmptyTexture.get();
+						Texture = (m_RefDiffuse_Tex) ? static_cast<api::CVulkanTexture*>(m_RefDiffuse_Tex.get()) : m_EmptyTexture.get();
 					}
 					else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_IBL_Specular)
 					{
-						Texture = (TextureIndex >= 0 && Specular_Tex) ? static_cast<api::CVulkanTexture*>(Specular_Tex.get()) : m_EmptyTexture.get();
+						Texture = (m_RefSpecular_Tex) ? static_cast<api::CVulkanTexture*>(m_RefSpecular_Tex.get()) : m_EmptyTexture.get();
 					}
 					else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_IBL_GGXLUT)
 					{
-						Texture = (TextureIndex >= 0 && GGXLUT_Tex) ? static_cast<api::CVulkanTexture*>(GGXLUT_Tex.get()) : m_EmptyTexture.get();
+						Texture = (m_RefGGXLUT_Tex) ? static_cast<api::CVulkanTexture*>(m_RefGGXLUT_Tex.get()) : m_EmptyTexture.get();
 					}
 
 					if (!Texture)
@@ -820,6 +838,152 @@ namespace api
 		pipelineLayoutInfo.pPushConstantRanges = nullptr;
 
 		if (vkCreatePipelineLayout(m_pGraphicsAPI->GetLogicalDevice(), &pipelineLayoutInfo, nullptr, &m_PipelineLayout) != VK_SUCCESS) return false;
+
+		return true;
+	}
+
+	bool CVulkanMaterial::CreateRefTextureList(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, const std::shared_ptr<graphics::CTextureSet>& TextureSet)
+	{
+		m_RefTextureMap.clear();
+		m_RefCubeMapMap.clear();
+		m_RefFrameTextureMap.clear();
+		m_RefDiffuse_Tex = nullptr;
+		m_RefSpecular_Tex = nullptr;
+		m_RefGGXLUT_Tex = nullptr;
+
+		// 参照中のテクスチャリストを生成
+		std::vector<std::shared_ptr<graphics::CTexture>> TextureList(0);
+		if (TextureSet) TextureList = TextureSet->Get2DTextureList();
+
+		std::vector<std::shared_ptr<graphics::CTexture>> CubeMapList(0);
+		if (TextureSet) CubeMapList = TextureSet->GetCubeMapList();
+
+		std::vector<std::shared_ptr<graphics::CTexture>> FrameTextureList(0);
+		if (TextureSet) FrameTextureList = TextureSet->GetFrameTextureList();
+
+		std::shared_ptr<graphics::CTexture> Diffuse_Tex = nullptr;
+		if (TextureSet) Diffuse_Tex = TextureSet->GetDiffuse_Tex();
+
+		std::shared_ptr<graphics::CTexture> Specular_Tex = nullptr;
+		if (TextureSet) Specular_Tex = TextureSet->GetSpecular_Tex();
+
+		std::shared_ptr<graphics::CTexture> GGXLUT_Tex = nullptr;
+		if (TextureSet) GGXLUT_Tex = TextureSet->GetGGXLUT_Tex();
+
+		for (int BufferIndex = 0; BufferIndex < m_ShaderBufferList.size(); BufferIndex++)
+		{
+			size_t TexLayoutSize = m_TextureBindingLayoutList.size() * 2; // ImageViewとSamplerがあるので2倍にしている
+
+			// テクスチャ
+			for (int ImageInfoIndex = 0, TextureBindingLayoutIndex = 0; ImageInfoIndex < TexLayoutSize; ImageInfoIndex += 2, TextureBindingLayoutIndex++)
+			{
+				const auto& TexLayout = m_TextureBindingLayoutList[TextureBindingLayoutIndex];
+
+				int TextureIndex = TexLayout.TextureIndex;
+
+				if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_2D)
+				{
+					const std::shared_ptr<graphics::CTexture>& Texture = (TextureIndex >= 0 && TextureIndex < TextureList.size()) ? TextureList[TextureIndex] : m_EmptyTexture;
+
+					m_RefTextureMap.emplace(TexLayout.TextureName, Texture);
+				}
+				else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_CUBE)
+				{
+					const std::shared_ptr<graphics::CTexture>& Texture = (TextureIndex >= 0 && TextureIndex < CubeMapList.size()) ? CubeMapList[TextureIndex] : m_EmptyTexture;
+
+					m_RefCubeMapMap.emplace(TexLayout.TextureName, Texture);
+				}
+				else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_FRAME)
+				{
+					const std::shared_ptr<graphics::CTexture>& Texture = (TextureIndex >= 0 && TextureIndex < FrameTextureList.size()) ? FrameTextureList[TextureIndex] : m_EmptyTexture;
+
+					m_RefFrameTextureMap.emplace(TexLayout.TextureName, Texture);
+				}
+				else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_IBL_Diffuse)
+				{
+					const std::shared_ptr<graphics::CTexture>& Texture = (TextureIndex >= 0 && Diffuse_Tex) ? Diffuse_Tex : m_EmptyTexture;
+
+					m_RefDiffuse_Tex = Texture;
+				}
+				else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_IBL_Specular)
+				{
+					const std::shared_ptr<graphics::CTexture>& Texture = (TextureIndex >= 0 && Specular_Tex) ? Specular_Tex : m_EmptyTexture;
+
+					m_RefSpecular_Tex = Texture;
+				}
+				else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_IBL_GGXLUT)
+				{
+					const std::shared_ptr<graphics::CTexture>& Texture = (TextureIndex >= 0 && GGXLUT_Tex) ? GGXLUT_Tex : m_EmptyTexture;
+
+					m_RefGGXLUT_Tex = Texture;
+				}
+			}
+		}
+
+		return true;
+	}
+
+	bool CVulkanMaterial::ReCreateRefTextureList(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo)
+	{
+		// 参照テクスチャリストの生成
+		// 減ることはあっても増えることはないのでTextureSetは不要
+
+		// 古い情報を一時保存する
+		const auto PrevRefTextureMap = m_RefTextureMap;
+		const auto PrevRefCubeMapMap = m_RefCubeMapMap;
+		const auto PrevRefFrameTextureMap = m_RefFrameTextureMap;
+		const auto PrevRefDiffuse_Tex = m_RefDiffuse_Tex;
+		const auto PrevRefSpecular_Tex = m_RefSpecular_Tex;
+		const auto PrevRefGGXLUT_Tex = m_RefGGXLUT_Tex;
+
+		// クリア
+		m_RefTextureMap.clear();
+		m_RefCubeMapMap.clear();
+		m_RefFrameTextureMap.clear();
+		m_RefDiffuse_Tex = nullptr;
+		m_RefSpecular_Tex = nullptr;
+		m_RefGGXLUT_Tex = nullptr;
+
+		for (int BufferIndex = 0; BufferIndex < m_ShaderBufferList.size(); BufferIndex++)
+		{
+			size_t TexLayoutSize = m_TextureBindingLayoutList.size() * 2; // ImageViewとSamplerがあるので2倍にしている
+
+			// テクスチャ
+			for (int ImageInfoIndex = 0, TextureBindingLayoutIndex = 0; ImageInfoIndex < TexLayoutSize; ImageInfoIndex += 2, TextureBindingLayoutIndex++)
+			{
+				const auto& TexLayout = m_TextureBindingLayoutList[TextureBindingLayoutIndex];
+
+				int TextureIndex = TexLayout.TextureIndex;
+
+				if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_2D)
+				{
+					const auto& it = PrevRefTextureMap.find(TexLayout.TextureName);
+					if (it != PrevRefTextureMap.end()) m_RefTextureMap.emplace(it->first, it->second);
+				}
+				else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_CUBE)
+				{
+					const auto& it = PrevRefCubeMapMap.find(TexLayout.TextureName);
+					if(it != PrevRefCubeMapMap.end()) m_RefCubeMapMap.emplace(it->first, it->second);
+				}
+				else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_FRAME)
+				{
+					const auto& it = PrevRefFrameTextureMap.find(TexLayout.TextureName);
+					if(it != PrevRefFrameTextureMap.end()) m_RefFrameTextureMap.emplace(it->first, it->second);
+				}
+				else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_IBL_Diffuse)
+				{
+					m_RefDiffuse_Tex = PrevRefDiffuse_Tex;
+				}
+				else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_IBL_Specular)
+				{
+					m_RefSpecular_Tex = PrevRefSpecular_Tex;
+				}
+				else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_IBL_GGXLUT)
+				{
+					m_RefGGXLUT_Tex = PrevRefGGXLUT_Tex;
+				}
+			}
+		}
 
 		return true;
 	}
