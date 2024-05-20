@@ -45,6 +45,8 @@ namespace resource
 
 		std::set<std::shared_ptr<graphics::CMaterialFrame>> m_TargetMaterialFrameSet;
 	private:
+		void Release();
+
 		bool AnalyseResourceList(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CResourceManager>& ResourceManager);
 		bool AnalyseShaderList(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CResourceManager>& ResourceManager, const json::iterator& shaderList);
 		bool AnalyseShaderBuffer(const json::iterator& uniform, const std::string& uniform_type);

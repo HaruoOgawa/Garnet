@@ -49,17 +49,6 @@ namespace api
 
 		VkDescriptorPool m_DescriptorPool;
 		std::vector<VkDescriptorSet> m_DescriptorSets;
-
-		// Texture
-		std::shared_ptr<CVulkanTexture> m_EmptyTexture;
-
-		// 参照中のテクスチャリスト
-		std::map<std::string, std::shared_ptr<graphics::CTexture>> m_RefTextureMap;
-		std::map<std::string, std::shared_ptr<graphics::CTexture>> m_RefCubeMapMap;
-		std::map<std::string, std::shared_ptr<graphics::CTexture>> m_RefFrameTextureMap;
-		std::shared_ptr<graphics::CTexture> m_RefDiffuse_Tex = nullptr;
-		std::shared_ptr<graphics::CTexture> m_RefSpecular_Tex = nullptr;
-		std::shared_ptr<graphics::CTexture> m_RefGGXLUT_Tex = nullptr;
 	private:
 		// Vulkanメインロジック /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		bool CreateShaderObjects(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo);
@@ -73,9 +62,6 @@ namespace api
 		bool CreatePipelineLayout();
 
 		void Release();
-
-		bool CreateRefTextureList(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, const std::shared_ptr<graphics::CTextureSet>& TextureSet);
-		bool ReCreateRefTextureList(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo);
 
 		// Vulkan Extensions /////////////////////////////////////////////////////////////////////
 		bool CreateShadersEXT(VkDevice device, uint32_t createInfoCount, const VkShaderCreateInfoEXT* pCreateInfos, const VkAllocationCallbacks* pAllocator, VkShaderEXT* pShaders);

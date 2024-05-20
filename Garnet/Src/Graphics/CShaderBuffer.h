@@ -47,6 +47,8 @@ namespace graphics
 		virtual void SetData(const std::string& Name, const void* Data, int ByteSize) override;
 		virtual const std::vector<unsigned char>& GetData() const override;
 
+		virtual std::vector<unsigned char> GetUniformValue(const std::string& Name);
+
 		void SetValue(const void* Value, int ByteOffset, int ByteSize);
 
 		virtual std::shared_ptr<CShaderBufferDescriptor> GetDescriptor() const;

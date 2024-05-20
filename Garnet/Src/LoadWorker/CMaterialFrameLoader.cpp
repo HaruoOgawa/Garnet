@@ -15,13 +15,26 @@ namespace resource
 
 	CMaterialFrameLoader::~CMaterialFrameLoader()
 	{
+		Release();
+	}
+
+	void CMaterialFrameLoader::Release()
+	{
+		m_MfJson.clear();
+		m_AnalyseDone = false;
+		m_MfResourceList.clear();
+		m_ShaderFileList.clear();
+		m_TextureFileList.clear();
+		m_ShaderBufferList.clear();
+		m_TextureBufferList.clear();
+		m_CreateInfo = nullptr;
 	}
 
 	bool CMaterialFrameLoader::Reload(resource::CLoadWorker* pLoadWorker)
 	{
 		if (!CResource::Reload(pLoadWorker)) return false;
-
-		m_AnalyseDone = false;
+		
+		Release();
 		m_CreateInfo = std::make_shared<graphics::CMaterialCreateInfo>();
 
 		return true;

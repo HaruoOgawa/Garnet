@@ -10,30 +10,14 @@
 namespace api
 {
 	CWebGPUMaterial::CWebGPUMaterial(api::CWebGPUAPI* pGraphicsAPI, const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, int RefCount, graphics::ECullMode CullMode):
-		CMaterial(createInfo, RefCount, CullMode),
+		CMaterial(pGraphicsAPI, createInfo, RefCount, CullMode),
 		m_pGraphicsAPI(pGraphicsAPI),
 		m_VertexShaderModele(nullptr),
 		m_FragmentShaderModele(nullptr),
 		m_ComputeShaderModele(nullptr),
 		m_BindGroupLayout(nullptr),
-		m_BindGroup(nullptr),
-
-		m_EmptyTexture(nullptr),
-		m_EmptyCubeTexture(nullptr)
+		m_BindGroup(nullptr)
 	{
-		{
-			m_EmptyTexture = std::make_shared<CWebGPUTexture>(pGraphicsAPI, false);
-			std::vector<unsigned char> emptyPixel = { 0, 0, 0, 0 };
-			m_EmptyTexture->Create(emptyPixel, static_cast<int>(emptyPixel.size() * sizeof(unsigned char)));
-		}
-
-		{
-			m_EmptyCubeTexture = std::make_shared<CWebGPUTexture>(pGraphicsAPI, false);
-			m_EmptyCubeTexture->SetTextureType(graphics::ETextureType::TEXTURE_CUBE);
-			std::vector<unsigned char> emptyCubePixel;
-			for (int i = 0; i < 4 * 6; i++) { emptyCubePixel.push_back(0); }
-			m_EmptyCubeTexture->Create(emptyCubePixel, static_cast<int>(emptyCubePixel.size() * sizeof(unsigned char)));
-		}
 	}
 
 	CWebGPUMaterial::~CWebGPUMaterial()
@@ -47,12 +31,12 @@ namespace api
 
 	bool CWebGPUMaterial::Create(const std::shared_ptr<graphics::CTextureSet>& TextureSet)
 	{
+		// 参照テクスチャリスト
+		if (!CreateRefTextureList(m_CreateInfo, TextureSet)) return false;
+
 		if (!CreateShaderStages(m_CreateInfo)) return false;
 		if (!CreateShaderBuffers(m_CreateInfo)) return false; // ユニフォームバッファを生成
 		if (!CreateBindGroup(m_CreateInfo, TextureSet)) return false; // バインドグループを生成(レンダリングパイプラインで使用するすべてのリソースをどのようにバインドするかを指定するオブジェクト)
-
-		// 生成処理が終わったので不要なリソースを解放する
-		m_CreateInfo = nullptr;
 
 		return true;
 	}
@@ -242,37 +226,43 @@ namespace api
 		// Texture
 		for (const auto& TexLayout : m_TextureBindingLayoutList)
 		{
-			api::CWebGPUTexture* Texture = nullptr;
+			std::shared_ptr<graphics::CTexture> Texture = nullptr;
 			int TextureIndex = TexLayout.TextureIndex;
 
 			if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_2D)
 			{
-				Texture = (TextureIndex >= 0 && TextureIndex < TextureList.size()) ? static_cast<api::CWebGPUTexture*>(TextureList[TextureIndex].get()) : m_EmptyTexture.get();
+				const auto& it = m_RefTextureMap.find(TexLayout.TextureName);
+
+				Texture = (it != m_RefTextureMap.end()) ? it->second : m_EmptyTexture;
 			}
 			else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_CUBE)
 			{
-				Texture = (TextureIndex >= 0 && TextureIndex < CubeMapList.size()) ? static_cast<api::CWebGPUTexture*>(CubeMapList[TextureIndex].get()) : m_EmptyCubeTexture.get();
+				const auto& it = m_RefCubeMapMap.find(TexLayout.TextureName);
+
+				Texture = (it != m_RefCubeMapMap.end()) ? it->second : m_EmptyCubeTexture;
 			}
 			else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_FRAME)
 			{
-				Texture = (TextureIndex >= 0 && TextureIndex < FrameTextureList.size()) ? static_cast<api::CWebGPUTexture*>(FrameTextureList[TextureIndex].get()) : m_EmptyTexture.get();
+				const auto& it = m_RefFrameTextureMap.find(TexLayout.TextureName);
+
+				Texture = (it != m_RefFrameTextureMap.end()) ? it->second : m_EmptyTexture;
 			}
 			else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_IBL_Diffuse)
 			{
-				Texture = (TextureIndex >= 0 && Diffuse_Tex) ? static_cast<api::CWebGPUTexture*>(Diffuse_Tex.get()) : m_EmptyTexture.get();
+				Texture = (m_RefDiffuse_Tex) ? m_RefDiffuse_Tex : m_EmptyTexture;
 			}
 			else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_IBL_Specular)
 			{
-				Texture = (TextureIndex >= 0 && Specular_Tex) ? static_cast<api::CWebGPUTexture*>(Specular_Tex.get()) : m_EmptyTexture.get();
+				Texture = (m_RefSpecular_Tex) ? m_RefSpecular_Tex : m_EmptyTexture;
 			}
 			else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_IBL_GGXLUT)
 			{
-				Texture = (TextureIndex >= 0 && GGXLUT_Tex) ? static_cast<api::CWebGPUTexture*>(GGXLUT_Tex.get()) : m_EmptyTexture.get();
+				Texture = (m_RefGGXLUT_Tex) ? m_RefGGXLUT_Tex : m_EmptyTexture;
 			}
 
 			if (!Texture)
 			{
-				Console::Log("[ERROR] Texture is nullptr\n");
+				Console::Log("[ERROR] Texture is nullpte\n");
 				return false;
 			}
 
@@ -363,45 +353,53 @@ namespace api
 		// Texture
 		for (const auto& TexLayout : m_TextureBindingLayoutList)
 		{
-			api::CWebGPUTexture* Texture = nullptr;
+			std::shared_ptr<graphics::CTexture> Texture = nullptr;
 			int TextureIndex = TexLayout.TextureIndex;
 
 			if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_2D)
 			{
-				Texture = (TextureIndex >= 0 && TextureIndex < TextureList.size()) ? static_cast<api::CWebGPUTexture*>(TextureList[TextureIndex].get()) : m_EmptyTexture.get();
+				const auto& it = m_RefTextureMap.find(TexLayout.TextureName);
+
+				Texture = (it != m_RefTextureMap.end()) ? it->second : m_EmptyTexture;
 			}
 			else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_CUBE)
 			{
-				Texture = (TextureIndex >= 0 && TextureIndex < CubeMapList.size()) ? static_cast<api::CWebGPUTexture*>(CubeMapList[TextureIndex].get()) : m_EmptyCubeTexture.get();
+				const auto& it = m_RefCubeMapMap.find(TexLayout.TextureName);
+
+				Texture = (it != m_RefCubeMapMap.end()) ? it->second : m_EmptyCubeTexture;
 			}
 			else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_FRAME)
 			{
-				Texture = (TextureIndex >= 0 && TextureIndex < FrameTextureList.size()) ? static_cast<api::CWebGPUTexture*>(FrameTextureList[TextureIndex].get()) : m_EmptyTexture.get();
+				const auto& it = m_RefFrameTextureMap.find(TexLayout.TextureName);
+
+				Texture = (it != m_RefFrameTextureMap.end()) ? it->second : m_EmptyTexture;
 			}
 			else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_IBL_Diffuse)
 			{
-				Texture = (TextureIndex >= 0 && Diffuse_Tex) ? static_cast<api::CWebGPUTexture*>(Diffuse_Tex.get()) : m_EmptyTexture.get();
+				Texture = (m_RefDiffuse_Tex) ? m_RefDiffuse_Tex : m_EmptyTexture;
 			}
 			else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_IBL_Specular)
 			{
-				Texture = (TextureIndex >= 0 && Specular_Tex) ? static_cast<api::CWebGPUTexture*>(Specular_Tex.get()) : m_EmptyTexture.get();
+				Texture = (m_RefSpecular_Tex) ? m_RefSpecular_Tex : m_EmptyTexture;
 			}
 			else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_IBL_GGXLUT)
 			{
-				Texture = (TextureIndex >= 0 && GGXLUT_Tex) ? static_cast<api::CWebGPUTexture*>(GGXLUT_Tex.get()) : m_EmptyTexture.get();
+				Texture = (m_RefGGXLUT_Tex) ? m_RefGGXLUT_Tex : m_EmptyTexture;
 			}
 
 			if (!Texture)
 			{
-				Console::Log("[ERROR] Texture is nullptr\n");
+				Console::Log("[ERROR] Texture is nullpte\n");
 				return false;
 			}
+
+			api::CWebGPUTexture* pWebGPUTexture = static_cast<api::CWebGPUTexture*>(Texture.get());
 
 			{
 				WGPUBindGroupEntry binding{};
 				binding.nextInChain = nullptr;
 				binding.binding = TexLayout.ViewBindingIndex;
-				binding.textureView = Texture->GetTextureImageView();
+				binding.textureView = pWebGPUTexture->GetTextureImageView();
 
 				bindingList.push_back(binding);
 			}
@@ -410,7 +408,7 @@ namespace api
 				WGPUBindGroupEntry binding{};
 				binding.nextInChain = nullptr;
 				binding.binding = TexLayout.SamplerBindingIndex;
-				binding.sampler = Texture->GetTextureSampler();
+				binding.sampler = pWebGPUTexture->GetTextureSampler();
 
 				bindingList.push_back(binding);
 			}

@@ -11,40 +11,50 @@
 namespace api
 {
 	COpenGLMaterial::COpenGLMaterial(api::COpenGLAPI* pGraphicsAPI, const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, int RefCount, graphics::ECullMode CullMode):
-		CMaterial(createInfo, RefCount, CullMode),
+		CMaterial(pGraphicsAPI, createInfo, RefCount, CullMode),
 		m_pGraphicsAPI(pGraphicsAPI),
 
-		m_ShaderPrg(-1),
-		m_TextureSet(nullptr)
+		m_ShaderPrg(-1)
 	{
-		m_EmptyTexture = std::make_shared<COpenGLTexture>(pGraphicsAPI, false);
-		std::vector<unsigned char> emptyPixel = { 0, 0, 0, 0 };
-		m_EmptyTexture->Create(emptyPixel, static_cast<int>(emptyPixel.size() * sizeof(unsigned char)));
 	}
 
 	COpenGLMaterial::~COpenGLMaterial()
 	{
+		Release();
+	}
+
+	void COpenGLMaterial::Release()
+	{
+		m_UBOList.clear();
+
 		glDeleteProgram(m_ShaderPrg);
 	}
 
 	bool COpenGLMaterial::Create(const std::shared_ptr<graphics::CTextureSet>& TextureSet)
 	{
+		// 参照テクスチャリスト
+		if (!CreateRefTextureList(m_CreateInfo, TextureSet)) return false;
+
 		if (!CreateShaderStages()) return false;
 		if (!CreateShaderBuffers()) return false;
-
-		m_TextureSet = TextureSet;
 
 		return true;
 	}
 
-	bool COpenGLMaterial::ReCreate(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo)
+	bool COpenGLMaterial::ReCreate(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, const std::vector<std::shared_ptr<graphics::CShaderBuffer>>& ShaderBufferList, const std::vector<graphics::STextureBindingLayout>& TextureBindingLayoutList)
 	{
 		m_CreateInfo = createInfo;
 
-		glDeleteProgram(m_ShaderPrg);
+		Release();
 
-		// 仮実装
+		// 参照テクスチャリストの再生成
+		if (!ReCreateRefTextureList(m_CreateInfo)) return false;
+
+		// バッファの再生成
+		if (!ReCreateBuffer(ShaderBufferList, TextureBindingLayoutList)) return false;
+
 		if (!CreateShaderStages()) return false;
+		if (!CreateShaderBuffers()) return false;
 
 		return true;
 	}
@@ -81,67 +91,57 @@ namespace api
 		}
 
 		// テクスチャをShaderにバインドする
-		std::vector<std::shared_ptr<graphics::CTexture>> TextureList(0);
-		if (m_TextureSet) TextureList = m_TextureSet->Get2DTextureList();
-
-		std::vector<std::shared_ptr<graphics::CTexture>> CubeMapList(0);
-		if (m_TextureSet) CubeMapList = m_TextureSet->GetCubeMapList();
-
-		std::vector<std::shared_ptr<graphics::CTexture>> FrameTextureList(0);
-		if (m_TextureSet) FrameTextureList = m_TextureSet->GetFrameTextureList();
-
-		std::shared_ptr<graphics::CTexture> Diffuse_Tex = nullptr;
-		if (m_TextureSet) Diffuse_Tex = m_TextureSet->GetDiffuse_Tex();
-
-		std::shared_ptr<graphics::CTexture> Specular_Tex = nullptr;
-		if (m_TextureSet) Specular_Tex = m_TextureSet->GetSpecular_Tex();
-
-		std::shared_ptr<graphics::CTexture> GGXLUT_Tex = nullptr;
-		if (m_TextureSet) GGXLUT_Tex = m_TextureSet->GetGGXLUT_Tex();
-
 		int TexOrderIndex = 0;
 		for (const auto& TexLayout : m_TextureBindingLayoutList)
 		{
-			COpenGLTexture* Texture = nullptr;
+			std::shared_ptr<graphics::CTexture> Texture = nullptr;
 			int TextureIndex = TexLayout.TextureIndex;
 
 			if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_2D)
 			{
-				Texture = (TextureIndex >= 0 && TextureIndex < TextureList.size()) ? static_cast<api::COpenGLTexture*>(TextureList[TextureIndex].get()) : m_EmptyTexture.get();
+				const auto& it = m_RefTextureMap.find(TexLayout.TextureName);
+
+				Texture = (it != m_RefTextureMap.end()) ? it->second : m_EmptyTexture;
 			}
 			else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_CUBE)
 			{
-				Texture = (TextureIndex >= 0 && TextureIndex < CubeMapList.size()) ? static_cast<api::COpenGLTexture*>(CubeMapList[TextureIndex].get()) : m_EmptyTexture.get();
+				const auto& it = m_RefCubeMapMap.find(TexLayout.TextureName);
+
+				Texture = (it != m_RefCubeMapMap.end()) ? it->second : m_EmptyCubeTexture;
 			}
 			else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_FRAME)
 			{
-				Texture = (TextureIndex >= 0 && TextureIndex < FrameTextureList.size()) ? static_cast<api::COpenGLTexture*>(FrameTextureList[TextureIndex].get()) : m_EmptyTexture.get();
+				const auto& it = m_RefFrameTextureMap.find(TexLayout.TextureName);
+
+				Texture = (it != m_RefFrameTextureMap.end()) ? it->second : m_EmptyTexture;
 			}
 			else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_IBL_Diffuse)
 			{
-				Texture = (TextureIndex >= 0 && Diffuse_Tex) ? static_cast<api::COpenGLTexture*>(Diffuse_Tex.get()) : m_EmptyTexture.get();
+				Texture = (m_RefDiffuse_Tex) ? m_RefDiffuse_Tex : m_EmptyTexture;
 			}
 			else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_IBL_Specular)
 			{
-				Texture = (TextureIndex >= 0 && Specular_Tex) ? static_cast<api::COpenGLTexture*>(Specular_Tex.get()) : m_EmptyTexture.get();
+				Texture = (m_RefSpecular_Tex) ? m_RefSpecular_Tex : m_EmptyTexture;
 			}
 			else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_IBL_GGXLUT)
 			{
-				Texture = (TextureIndex >= 0 && GGXLUT_Tex) ? static_cast<api::COpenGLTexture*>(GGXLUT_Tex.get()) : m_EmptyTexture.get();
+				Texture = (m_RefGGXLUT_Tex) ? m_RefGGXLUT_Tex : m_EmptyTexture;
 			}
-			
+
 			if (!Texture)
 			{
 				Console::Log("[ERROR] Texture is nullpte\n");
 				return false;
 			}
 
-			Texture->SetActive(GL_TEXTURE0 + TexOrderIndex);
+			api::COpenGLTexture* pOpenGLTexture = static_cast<api::COpenGLTexture*>(Texture.get());
+
+			pOpenGLTexture->SetActive(GL_TEXTURE0 + TexOrderIndex);
 
 			GLuint location = glGetUniformLocation(m_ShaderPrg, TexLayout.TextureName.c_str());
 			glUniform1i(location, TexOrderIndex);
 
-			Texture->SetEactive(GL_TEXTURE0 + TexOrderIndex);
+			pOpenGLTexture->SetEactive(GL_TEXTURE0 + TexOrderIndex);
 
 			TexOrderIndex++;
 		}

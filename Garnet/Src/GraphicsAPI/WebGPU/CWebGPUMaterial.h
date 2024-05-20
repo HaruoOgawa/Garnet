@@ -31,10 +31,6 @@ namespace api
 		// BindGroup
 		WGPUBindGroupLayout m_BindGroupLayout;
 		WGPUBindGroup m_BindGroup;
-
-		// Texture
-		std::shared_ptr<CWebGPUTexture> m_EmptyTexture;
-		std::shared_ptr<CWebGPUTexture> m_EmptyCubeTexture;
 	private:
 		// WebGPU Main Logic /////////////////////////////////////////////////////////////////////
 		bool CreateShaderStages(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo);
