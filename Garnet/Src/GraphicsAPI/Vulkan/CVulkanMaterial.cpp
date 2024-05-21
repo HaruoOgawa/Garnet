@@ -177,6 +177,9 @@ namespace api
 
 	void CVulkanMaterial::Release()
 	{
+		//
+		m_ShaderStages.clear();
+
 		// ShaderModuleの破棄
 		if (m_VertShaderModule)
 		{
@@ -234,12 +237,20 @@ namespace api
 			}
 		}
 
+		m_VKUniformBufferList.clear();
+		m_VKUniformBufferMemoryList.clear();
+		m_VKUniformBufferSizeList.clear();
+
 		// パイプラインレイアウトの破棄(たぶん本来は3Dオブジェクトごとにあるやつ) 
 		if (m_PipelineLayout)
 		{
 			vkDestroyPipelineLayout(m_pGraphicsAPI->GetLogicalDevice(), m_PipelineLayout, nullptr);
 			m_PipelineLayout = nullptr;
 		}
+
+		// DescriptorSetsの破棄
+		vkFreeDescriptorSets(m_pGraphicsAPI->GetLogicalDevice(), m_DescriptorPool, static_cast<uint32_t>(m_DescriptorSets.size()), &m_DescriptorSets[0]);
+		m_DescriptorSets.clear();
 
 		// 記述子プールの破棄
 		if (m_DescriptorPool)
