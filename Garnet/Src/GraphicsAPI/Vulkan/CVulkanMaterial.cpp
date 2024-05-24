@@ -30,6 +30,98 @@ namespace api
 		Release();
 	}
 
+	void CVulkanMaterial::Release()
+	{
+		//
+		m_ShaderStages.clear();
+
+		// ShaderModuleの破棄
+		if (m_VertShaderModule)
+		{
+			vkDestroyShaderModule(m_pGraphicsAPI->GetLogicalDevice(), m_VertShaderModule, nullptr);
+			m_VertShaderModule = nullptr;
+		}
+
+		if (m_FragShaderModule)
+		{
+			vkDestroyShaderModule(m_pGraphicsAPI->GetLogicalDevice(), m_FragShaderModule, nullptr);
+			m_FragShaderModule = nullptr;
+		}
+
+		if (m_ComputeShaderModule)
+		{
+			vkDestroyShaderModule(m_pGraphicsAPI->GetLogicalDevice(), m_ComputeShaderModule, nullptr);
+			m_ComputeShaderModule = nullptr;
+		}
+
+		// ShaderObjectの削除
+		if (m_pGraphicsAPI->IsEnabledRuntimeShaderEditing())
+		{
+
+			for (auto& Shader : m_ShaderMap)
+			{
+				DestroyShaderEXT(m_pGraphicsAPI->GetLogicalDevice(), Shader.second, nullptr);
+			}
+
+			m_ShaderMap.clear();
+		}
+
+		// パイプラインレイアウトの破棄(たぶん本来は3Dオブジェクトごとにあるやつ) 
+		if (m_PipelineLayout)
+		{
+			vkDestroyPipelineLayout(m_pGraphicsAPI->GetLogicalDevice(), m_PipelineLayout, nullptr);
+			m_PipelineLayout = nullptr;
+		}
+
+		// DescriptorSetsの破棄
+		vkFreeDescriptorSets(m_pGraphicsAPI->GetLogicalDevice(), m_DescriptorPool, static_cast<uint32_t>(m_DescriptorSets.size()), &m_DescriptorSets[0]);
+		m_DescriptorSets.clear();
+
+		// 記述子プールの破棄
+		if (m_DescriptorPool)
+		{
+			vkDestroyDescriptorPool(m_pGraphicsAPI->GetLogicalDevice(), m_DescriptorPool, nullptr);
+			m_DescriptorPool = nullptr;
+		}
+
+		// ユニフォームレイアウトセットを破棄
+		if (m_DescriptorSetLayout)
+		{
+			vkDestroyDescriptorSetLayout(m_pGraphicsAPI->GetLogicalDevice(), m_DescriptorSetLayout, nullptr);
+			m_DescriptorSetLayout = nullptr;
+		}
+
+		// ユニフォームの破棄
+		for (size_t i = 0; i < m_pGraphicsAPI->GetMaxFramesInFlight(); i++)
+		{
+			if (m_VKUniformBufferList.size() > 0)
+			{
+				for (auto& Buffer : m_VKUniformBufferList[i])
+				{
+					if (Buffer)
+					{
+						vkDestroyBuffer(m_pGraphicsAPI->GetLogicalDevice(), Buffer, nullptr);
+					}
+				}
+			}
+
+			if (m_VKUniformBufferMemoryList.size() > 0)
+			{
+				for (auto& Memory : m_VKUniformBufferMemoryList[i])
+				{
+					if (Memory)
+					{
+						vkFreeMemory(m_pGraphicsAPI->GetLogicalDevice(), Memory, nullptr);
+					}
+				}
+			}
+		}
+
+		m_VKUniformBufferList.clear();
+		m_VKUniformBufferMemoryList.clear();
+		m_VKUniformBufferSizeList.clear();
+	}
+
 	bool CVulkanMaterial::Create(const std::shared_ptr<graphics::CTextureSet>& TextureSet)
 	{
 		// 参照テクスチャリスト
@@ -63,23 +155,37 @@ namespace api
 	{
 		m_CreateInfo = createInfo;
 
-		Release();
+		// ShaderObjectの削除
+		if (m_pGraphicsAPI->IsEnabledRuntimeShaderEditing())
+		{
+
+			for (auto& Shader : m_ShaderMap)
+			{
+				DestroyShaderEXT(m_pGraphicsAPI->GetLogicalDevice(), Shader.second, nullptr);
+			}
+
+			m_ShaderMap.clear();
+		}
+
+		// CommandのSubmit時にエラーが発生するので、ひとまずVulkanについてはShaderの更新のみとする
+		// Uniformを編集したいときはOpenGLを使用する
+		/*Release();
 
 		// 参照テクスチャリストの再生成
 		if (!ReCreateRefTextureList(m_CreateInfo)) return false;
 
 		// バッファの再生成
-		if (!ReCreateBuffer(ShaderBufferList, TextureBindingLayoutList)) return false;
+		if (!ReCreateBuffer(ShaderBufferList, TextureBindingLayoutList)) return false;*/
 
 		{
-			// Uniform Buffer
+			/*// Uniform Buffer
 			if (!CreateShaderBuffers(m_CreateInfo)) return false; // ユニフォームバッファを作成
 
 			// バインドグループ(UniformとTextureで共通項)
 			if (!CreateDescriptorSetLayout(m_CreateInfo)) return false; // DescriptorSetLayoutの作成(Uniformをどのようにバインドするか), WebGPUでいうバインドグループの生成
 			if (!CreateDescriptorPool(m_CreateInfo)) return false; // DescriptorPoolを作成する -> DescriptorSetsは直接生成できず、コマンドで生成する必要がある。記述子プールはそのコマンド群のことかな？
 			if (!CreateDescriptorSets(m_CreateInfo)) return false; // DescriptorSetsを作成 -> Uniformが使用するバッファをCPUからGPUに送信するための仕組みこと. https://vkguide.dev/docs/chapter-4/descriptors/
-			if (!CreatePipelineLayout()) return false; // パイプラインレイアウトを生成
+			if (!CreatePipelineLayout()) return false; // パイプラインレイアウトを生成*/
 
 			if (m_pGraphicsAPI->IsEnabledRuntimeShaderEditing())
 			{
@@ -172,98 +278,6 @@ namespace api
 				vkCmdBindDescriptorSets(m_pGraphicsAPI->GetCurrentCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS,
 					GetPipelineLayout(), 0, 1, &GetDescriptorSets()[m_pGraphicsAPI->GetCurrentFrame()], 0, nullptr);
 			}
-		}
-	}
-
-	void CVulkanMaterial::Release()
-	{
-		//
-		m_ShaderStages.clear();
-
-		// ShaderModuleの破棄
-		if (m_VertShaderModule)
-		{
-			vkDestroyShaderModule(m_pGraphicsAPI->GetLogicalDevice(), m_VertShaderModule, nullptr);
-			m_VertShaderModule = nullptr;
-		}
-		
-		if (m_FragShaderModule)
-		{
-			vkDestroyShaderModule(m_pGraphicsAPI->GetLogicalDevice(), m_FragShaderModule, nullptr);
-			m_FragShaderModule = nullptr;
-		}
-		
-		if (m_ComputeShaderModule)
-		{
-			vkDestroyShaderModule(m_pGraphicsAPI->GetLogicalDevice(), m_ComputeShaderModule, nullptr);
-			m_ComputeShaderModule = nullptr;
-		}
-
-		// ShaderObjectの削除
-		if (m_pGraphicsAPI->IsEnabledRuntimeShaderEditing())
-		{
-
-			for (auto& Shader : m_ShaderMap)
-			{
-				DestroyShaderEXT(m_pGraphicsAPI->GetLogicalDevice(), Shader.second, nullptr);
-			}
-
-			m_ShaderMap.clear();
-		}
-
-		// ユニフォームの破棄
-		for (size_t i = 0; i < m_pGraphicsAPI->GetMaxFramesInFlight(); i++)
-		{
-			if (m_VKUniformBufferList.size() > 0)
-			{
-				for (auto& Buffer : m_VKUniformBufferList[i])
-				{
-					if (Buffer)
-					{
-						vkDestroyBuffer(m_pGraphicsAPI->GetLogicalDevice(), Buffer, nullptr);
-					}
-				}
-			}
-
-			if (m_VKUniformBufferMemoryList.size() > 0)
-			{
-				for (auto& Memory : m_VKUniformBufferMemoryList[i])
-				{
-					if (Memory)
-					{
-						vkFreeMemory(m_pGraphicsAPI->GetLogicalDevice(), Memory, nullptr);
-					}
-				}
-			}
-		}
-
-		m_VKUniformBufferList.clear();
-		m_VKUniformBufferMemoryList.clear();
-		m_VKUniformBufferSizeList.clear();
-
-		// パイプラインレイアウトの破棄(たぶん本来は3Dオブジェクトごとにあるやつ) 
-		if (m_PipelineLayout)
-		{
-			vkDestroyPipelineLayout(m_pGraphicsAPI->GetLogicalDevice(), m_PipelineLayout, nullptr);
-			m_PipelineLayout = nullptr;
-		}
-
-		// DescriptorSetsの破棄
-		vkFreeDescriptorSets(m_pGraphicsAPI->GetLogicalDevice(), m_DescriptorPool, static_cast<uint32_t>(m_DescriptorSets.size()), &m_DescriptorSets[0]);
-		m_DescriptorSets.clear();
-
-		// 記述子プールの破棄
-		if (m_DescriptorPool)
-		{
-			vkDestroyDescriptorPool(m_pGraphicsAPI->GetLogicalDevice(), m_DescriptorPool, nullptr);
-			m_DescriptorPool = nullptr;
-		}
-
-		// ユニフォームレイアウトセットを破棄
-		if (m_DescriptorSetLayout)
-		{
-			vkDestroyDescriptorSetLayout(m_pGraphicsAPI->GetLogicalDevice(), m_DescriptorSetLayout, nullptr);
-			m_DescriptorSetLayout = nullptr;
 		}
 	}
 

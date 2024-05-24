@@ -97,6 +97,8 @@ namespace app
 
 	bool CScriptApp::Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<input::CInputState>& InputState)
 	{
+		if (!m_FileModifier->Update(pLoadWorker)) return false;
+
 		if (!m_ScriptScene->Update(pGraphicsAPI, pPhysicsEngine, pLoadWorker, m_MainCamera, m_Projection, m_DrawInfo, InputState)) return false;
 
 		if (!m_BlurEffect->Update(pLoadWorker)) return false;

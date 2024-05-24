@@ -30,6 +30,11 @@ namespace resource
 		return true;
 	}
 
+	bool CResource::Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, const std::shared_ptr<CResourceManager>& ResourceManager)
+	{
+		return true;
+	}
+
 	void CResource::Reset()
 	{
 		m_Status = ELoadStatus::None;

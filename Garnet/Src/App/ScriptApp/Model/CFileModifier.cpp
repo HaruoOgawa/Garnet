@@ -4,7 +4,8 @@
 
 namespace app
 {
-	CFileModifier::CFileModifier()
+	CFileModifier::CFileModifier():
+		m_UpdateReserved(false)
 	{
 	}
 
@@ -13,7 +14,24 @@ namespace app
 		m_EditingFileNameSet.emplace(FileName);
 	}
 
+	bool CFileModifier::Update(resource::CLoadWorker* pLoadWorker)
+	{
+		if (m_UpdateReserved)
+		{
+			m_UpdateReserved = false;
+
+			UpdateFile(pLoadWorker);
+		}
+
+		return true;
+	}
+
 	void CFileModifier::OnFileUpdated(resource::CLoadWorker* pLoadWorker)
+	{
+		m_UpdateReserved = true;
+	}
+
+	void CFileModifier::UpdateFile(resource::CLoadWorker* pLoadWorker)
 	{
 		const std::shared_ptr<resource::CResourceManager>& ResourceManager = pLoadWorker->GetResourceManager();
 

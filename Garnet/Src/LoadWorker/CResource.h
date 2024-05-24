@@ -27,9 +27,9 @@ namespace resource
 		CResource(const std::string& FileName, int LoadPriority = 0);
 		virtual ~CResource();
 
-		virtual bool Load();
-		virtual bool LoadImmediate();
-		virtual bool Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, const std::shared_ptr<CResourceManager>& ResourceManager) = 0;
+		virtual bool Load() override;
+		virtual bool LoadImmediate() override;
+		virtual bool Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, const std::shared_ptr<CResourceManager>& ResourceManager) override;
 
 		virtual void Reset() override;
 
