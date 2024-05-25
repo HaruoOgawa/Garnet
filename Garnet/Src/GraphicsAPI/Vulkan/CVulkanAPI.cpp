@@ -564,7 +564,16 @@ namespace api
 		}
 		
 		// 物理デバイス生成の拡張を設定する
-		std::vector<const void*> ExtensionFeatureList;
+		// VK_DYNAMIC_STATE_CULL_MODEを使用するために必要な設定
+		// https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/vkCmdSetCullModeEXT.html#VUID-vkCmdSetCullMode-None-08971
+		VkPhysicalDeviceExtendedDynamicStateFeaturesEXT extentedDynamicState{};
+		extentedDynamicState.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTENDED_DYNAMIC_STATE_FEATURES_EXT;
+		extentedDynamicState.pNext = nullptr;
+		extentedDynamicState.extendedDynamicState = true;
+
+		deviceCreateInfo.pNext = &extentedDynamicState;
+
+		/*std::vector<const void*> ExtensionFeatureList;
 
 		{
 			// VK_DYNAMIC_STATE_CULL_MODEを使用するために必要な設定
@@ -587,7 +596,7 @@ namespace api
 			ExtensionFeatureList.push_back(&extentedShaderObject);
 		}
 
-		deviceCreateInfo.pNext = ExtensionFeatureList.data();
+		deviceCreateInfo.pNext = ExtensionFeatureList.data();*/
 
 		// 論理デバイスを作成
 		VkResult result = vkCreateDevice(m_PhysicalDevice, &deviceCreateInfo, nullptr, &m_LogicalDevice);

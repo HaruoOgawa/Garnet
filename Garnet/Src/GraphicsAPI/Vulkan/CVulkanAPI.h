@@ -75,7 +75,10 @@ namespace api
 		VkDevice m_LogicalDevice;
 		const std::vector<const char*> m_DeviceExtensions = {
 			VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+#ifdef RUNTIME_SHADER_EDITING
+			// ToDo: ShaderObject拡張が有効になっているとRenderDocでデバッグができなくなる
 			VK_EXT_SHADER_OBJECT_EXTENSION_NAME,
+#endif // RUNTIME_SHADER_EDITING
 		};
 
 		// Queue
