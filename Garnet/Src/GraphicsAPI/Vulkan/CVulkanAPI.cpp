@@ -64,6 +64,8 @@ namespace api
 		if (!CreateCommandBuffer()) return false; // コマンドバッファの作成
 		if (!CreateSyncObjects()) return false; // 同期オブジェクトの作成(各種コマンドの順序を操作するために使用)
 
+		if (!LoadExtensions()) return false;
+
 		return true;
 	}
 
@@ -1752,6 +1754,37 @@ namespace api
 		{
 			return false;
 		}
+
+		return true;
+	}
+
+	// Extension /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	bool CVulkanAPI::LoadExtensions()
+	{
+		if (!IsEnabledRuntimeShaderEditing()) return true;
+
+		BindShadersEXT = (PFN_vkCmdBindShadersEXT)vkGetInstanceProcAddr(GetInstance(), "vkCmdBindShadersEXT");
+		CreateShadersEXT = (PFN_vkCreateShadersEXT)vkGetInstanceProcAddr(GetInstance(), "vkCreateShadersEXT");
+		DestroyShaderEXT = (PFN_vkDestroyShaderEXT)vkGetInstanceProcAddr(GetInstance(), "vkDestroyShaderEXT");
+		SetVertexInputEXT = (PFN_vkCmdSetVertexInputEXT)vkGetInstanceProcAddr(GetInstance(), "vkCmdSetVertexInputEXT");
+		SetPrimitiveTopologyEXT = (PFN_vkCmdSetPrimitiveTopologyEXT)vkGetInstanceProcAddr(GetInstance(), "vkCmdSetPrimitiveTopologyEXT");
+		SetPrimitiveRestartEnableEXT = (PFN_vkCmdSetPrimitiveRestartEnableEXT)vkGetInstanceProcAddr(GetInstance(), "vkCmdSetPrimitiveRestartEnableEXT");
+		SetViewportWithCountEXT = (PFN_vkCmdSetViewportWithCountEXT)vkGetInstanceProcAddr(GetInstance(), "vkCmdSetViewportWithCountEXT");
+		SetScissorWithCountEXT = (PFN_vkCmdSetScissorWithCountEXT)vkGetInstanceProcAddr(GetInstance(), "vkCmdSetScissorWithCountEXT");
+		SetCullModeEXT = (PFN_vkCmdSetCullModeEXT)vkGetInstanceProcAddr(GetInstance(), "vkCmdSetCullModeEXT");
+		SetFrontFaceEXT = (PFN_vkCmdSetFrontFaceEXT)vkGetInstanceProcAddr(GetInstance(), "vkCmdSetFrontFaceEXT");
+		SetRasterizerDiscardEnableEXT = (PFN_vkCmdSetRasterizerDiscardEnableEXT)vkGetInstanceProcAddr(GetInstance(), "vkCmdSetRasterizerDiscardEnableEXT");
+		SetPolygonModeEXT = (PFN_vkCmdSetPolygonModeEXT)vkGetInstanceProcAddr(GetInstance(), "vkCmdSetPolygonModeEXT");
+		SetRasterizationSamplesEXT = (PFN_vkCmdSetRasterizationSamplesEXT)vkGetInstanceProcAddr(GetInstance(), "vkCmdSetRasterizationSamplesEXT");
+		SetAlphaToCoverageEnableEXT = (PFN_vkCmdSetAlphaToCoverageEnableEXT)vkGetInstanceProcAddr(GetInstance(), "vkCmdSetAlphaToCoverageEnableEXT");
+		SetDepthTestEnableEXT = (PFN_vkCmdSetDepthTestEnableEXT)vkGetInstanceProcAddr(GetInstance(), "vkCmdSetDepthTestEnableEXT");
+		SetDepthWriteEnableEXT = (PFN_vkCmdSetDepthWriteEnableEXT)vkGetInstanceProcAddr(GetInstance(), "vkCmdSetDepthWriteEnableEXT");
+		SetDepthCompareOpEXT = (PFN_vkCmdSetDepthCompareOpEXT)vkGetInstanceProcAddr(GetInstance(), "vkCmdSetDepthCompareOpEXT");
+		SetDepthBiasEnableEXT = (PFN_vkCmdSetDepthBiasEnableEXT)vkGetInstanceProcAddr(GetInstance(), "vkCmdSetDepthBiasEnableEXT");
+		SetStencilTestEnableEXT = (PFN_vkCmdSetStencilTestEnableEXT)vkGetInstanceProcAddr(GetInstance(), "vkCmdSetStencilTestEnableEXT");
+		SetSampleMaskEXT = (PFN_vkCmdSetSampleMaskEXT)vkGetInstanceProcAddr(GetInstance(), "vkCmdSetSampleMaskEXT");
+		SetColorBlendEnableEXT = (PFN_vkCmdSetColorBlendEnableEXT)vkGetInstanceProcAddr(GetInstance(), "vkCmdSetColorBlendEnableEXT");
+		SetColorWriteMaskEXT = (PFN_vkCmdSetColorWriteMaskEXT)vkGetInstanceProcAddr(GetInstance(), "vkCmdSetColorWriteMaskEXT");
 
 		return true;
 	}

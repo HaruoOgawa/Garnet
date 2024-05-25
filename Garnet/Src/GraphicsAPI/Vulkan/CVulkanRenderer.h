@@ -47,46 +47,6 @@ namespace api
 
 		void SetCullMode(graphics::ECullMode CullMode);
 
-		// Vulkan Extensions /////////////////////////////////////////////////////////////////////
-		void SetVertexInputEXT(uint32_t vertexBindingDescriptionCount, const VkVertexInputBindingDescription2EXT* pVertexBindingDescriptions, 
-			uint32_t vertexAttributeDescriptionCount, const VkVertexInputAttributeDescription2EXT* pVertexAttributeDescriptions);
-
-		void SetPrimitiveTopologyEXT(VkPrimitiveTopology primitiveTopology);
-
-		void SetPrimitiveRestartEnableEXT(VkBool32 primitiveRestartEnable);
-
-		void SetViewportWithCountEXT(uint32_t viewportCount, const VkViewport* pViewports);
-
-		void SetScissorWithCountEXT(uint32_t scissorCount, const VkRect2D* pScissors);
-
-		void SetCullModeEXT(VkCullModeFlags cullMode);
-
-		void SetFrontFaceEXT(VkFrontFace frontFace);
-
-		void SetRasterizerDiscardEnableEXT(VkBool32 rasterizerDiscardEnable);
-
-		void SetPolygonModeEXT(VkPolygonMode polygonMode);
-
-		void SetRasterizationSamplesEXT(VkSampleCountFlagBits rasterizationSamples);
-
-		void SetAlphaToCoverageEnableEXT(VkBool32 alphaToCoverageEnable);
-
-		void SetDepthTestEnableEXT(VkBool32 depthTestEnable);
-
-		void SetDepthWriteEnableEXT(VkBool32 depthWriteEnable);
-
-		void SetDepthCompareOpEXT(VkCompareOp depthCompareOp);
-
-		void SetDepthBiasEnableEXT(VkBool32 depthBiasEnable);
-
-		void SetStencilTestEnableEXT(VkBool32 stencilTestEnable);
-
-		void SetSampleMaskEXT(VkSampleCountFlagBits samples, const VkSampleMask* pSampleMask);
-
-		void SetColorBlendEnableEXT(uint32_t firstAttachment, uint32_t attachmentCount, const VkBool32* pColorBlendEnables);
-
-		void SetColorWriteMaskEXT(uint32_t firstAttachment, uint32_t attachmentCount, const VkColorComponentFlags* pColorWriteMasks);
-
 		// ÉwÉãÉpÅ[ä÷êî ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		VkFormat GetVertexFormat(int Dimention, graphics::EDataType DataType);
 	public:

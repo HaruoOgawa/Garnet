@@ -417,11 +417,11 @@ namespace api
 			attributeDescriptions[i].offset = 0; // データオフセット
 		}
 
-		SetVertexInputEXT(static_cast<uint32_t>(Size), &bindingDescriptions[0], static_cast<uint32_t>(Size), &attributeDescriptions[0]);
+		m_pGraphicsAPI->SetVertexInputEXT(m_pGraphicsAPI->GetCurrentCommandBuffer(), static_cast<uint32_t>(Size), &bindingDescriptions[0], static_cast<uint32_t>(Size), &attributeDescriptions[0]);
 
 		// 入力アセンブリ(頂点から描画されるジオメトリの種類など, GL_TRIANGLE_STRIPみたいなのを設定する場所)
-		SetPrimitiveTopologyEXT(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
-		SetPrimitiveRestartEnableEXT(VK_FALSE);
+		m_pGraphicsAPI->SetPrimitiveTopologyEXT(m_pGraphicsAPI->GetCurrentCommandBuffer(), VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
+		m_pGraphicsAPI->SetPrimitiveRestartEnableEXT(m_pGraphicsAPI->GetCurrentCommandBuffer(), VK_FALSE);
 
 		// ビューポートの設定
 		// 上記のダイナミックステートのことで動的変更を可にする
@@ -433,7 +433,7 @@ namespace api
 		viewport.minDepth = 0.0f;
 		viewport.maxDepth = 1.0f;
 
-		SetViewportWithCountEXT(1, &viewport);
+		m_pGraphicsAPI->SetViewportWithCountEXT(m_pGraphicsAPI->GetCurrentCommandBuffer(), 1, &viewport);
 
 		// シザーの設定(シザーとはピクセルが実際に格納される領域を定義する. シザーよりも外側の領域はラスタライザにより破棄される)
 		// 上記のダイナミックステートのことで動的変更を可にする
@@ -441,7 +441,7 @@ namespace api
 		scissor.offset = { 0, 0 };
 		scissor.extent = m_pGraphicsAPI->GetSwapChainExtent(); // 解像度
 
-		SetScissorWithCountEXT(1, &scissor);
+		m_pGraphicsAPI->SetScissorWithCountEXT(m_pGraphicsAPI->GetCurrentCommandBuffer(), 1, &scissor);
 
 		// ラスタライザの設定
 		VkPipelineRasterizationStateCreateInfo rasterizer{};
@@ -476,16 +476,16 @@ namespace api
 		rasterizer.depthBiasClamp = 0.0f;
 		rasterizer.depthBiasSlopeFactor = 0.0f;
 
-		SetCullModeEXT(rasterizer.cullMode);
-		SetFrontFaceEXT(rasterizer.frontFace);
-		SetRasterizerDiscardEnableEXT(rasterizer.rasterizerDiscardEnable);
-		SetPolygonModeEXT(rasterizer.polygonMode);
-		SetRasterizationSamplesEXT(VK_SAMPLE_COUNT_1_BIT);
-		SetAlphaToCoverageEnableEXT(rasterizer.rasterizerDiscardEnable);
+		m_pGraphicsAPI->SetCullModeEXT(m_pGraphicsAPI->GetCurrentCommandBuffer(), rasterizer.cullMode);
+		m_pGraphicsAPI->SetFrontFaceEXT(m_pGraphicsAPI->GetCurrentCommandBuffer(), rasterizer.frontFace);
+		m_pGraphicsAPI->SetRasterizerDiscardEnableEXT(m_pGraphicsAPI->GetCurrentCommandBuffer(), rasterizer.rasterizerDiscardEnable);
+		m_pGraphicsAPI->SetPolygonModeEXT(m_pGraphicsAPI->GetCurrentCommandBuffer(), rasterizer.polygonMode);
+		m_pGraphicsAPI->SetRasterizationSamplesEXT(m_pGraphicsAPI->GetCurrentCommandBuffer(), VK_SAMPLE_COUNT_1_BIT);
+		m_pGraphicsAPI->SetAlphaToCoverageEnableEXT(m_pGraphicsAPI->GetCurrentCommandBuffer(), rasterizer.rasterizerDiscardEnable);
 
 		// マルチサンプリング(アンチエイリアシング)
 		const uint32_t sampleMask = 0xFF;
-		SetSampleMaskEXT(VK_SAMPLE_COUNT_1_BIT, &sampleMask);
+		m_pGraphicsAPI->SetSampleMaskEXT(m_pGraphicsAPI->GetCurrentCommandBuffer(), VK_SAMPLE_COUNT_1_BIT, &sampleMask);
 
 		// レンダリングパイプラインでデプスとステンシルを有効にする
 		VkPipelineDepthStencilStateCreateInfo depthStencil{};
@@ -536,11 +536,11 @@ namespace api
 		depthStencil.front = {};
 		depthStencil.back = {};
 
-		SetDepthTestEnableEXT(depthStencil.depthTestEnable);
-		SetDepthWriteEnableEXT(depthStencil.depthWriteEnable);
-		SetDepthCompareOpEXT(depthStencil.depthCompareOp);
-		SetDepthBiasEnableEXT(VK_FALSE);
-		SetStencilTestEnableEXT(VK_FALSE);
+		m_pGraphicsAPI->SetDepthTestEnableEXT(m_pGraphicsAPI->GetCurrentCommandBuffer(), depthStencil.depthTestEnable);
+		m_pGraphicsAPI->SetDepthWriteEnableEXT(m_pGraphicsAPI->GetCurrentCommandBuffer(), depthStencil.depthWriteEnable);
+		m_pGraphicsAPI->SetDepthCompareOpEXT(m_pGraphicsAPI->GetCurrentCommandBuffer(), depthStencil.depthCompareOp);
+		m_pGraphicsAPI->SetDepthBiasEnableEXT(m_pGraphicsAPI->GetCurrentCommandBuffer(), VK_FALSE);
+		m_pGraphicsAPI->SetStencilTestEnableEXT(m_pGraphicsAPI->GetCurrentCommandBuffer(), VK_FALSE);
 
 		// カラーブレンディング /////////////////////////////////////////////
 		// カラーブレンディング /////////////////////////////////////////////
@@ -582,204 +582,11 @@ namespace api
 			break;
 		}
 
-		SetColorBlendEnableEXT(0, 1, &colorBlendAttachment.blendEnable);
-		SetColorWriteMaskEXT(0, 1, &colorBlendAttachment.colorWriteMask);
+		m_pGraphicsAPI->SetColorBlendEnableEXT(m_pGraphicsAPI->GetCurrentCommandBuffer(), 0, 1, &colorBlendAttachment.blendEnable);
+		m_pGraphicsAPI->SetColorWriteMaskEXT(m_pGraphicsAPI->GetCurrentCommandBuffer(), 0, 1, &colorBlendAttachment.colorWriteMask);
 
 		// ShaderObjectのバインド
 		pVulkanMat->SetActive();
-	}
-
-	// Vulkan Extensions /////////////////////////////////////////////////////////////////////
-	
-	void CVulkanRenderer::SetVertexInputEXT(uint32_t vertexBindingDescriptionCount, const VkVertexInputBindingDescription2EXT* pVertexBindingDescriptions,
-		uint32_t vertexAttributeDescriptionCount, const VkVertexInputAttributeDescription2EXT* pVertexAttributeDescriptions)
-	{
-		auto func = (PFN_vkCmdSetVertexInputEXT)vkGetInstanceProcAddr(m_pGraphicsAPI->GetInstance(), "vkCmdSetVertexInputEXT");
-
-		if (func != nullptr)
-		{
-			func(m_pGraphicsAPI->GetCurrentCommandBuffer(), vertexBindingDescriptionCount, pVertexBindingDescriptions, vertexAttributeDescriptionCount, pVertexAttributeDescriptions);
-		}
-	}
-
-	void CVulkanRenderer::SetPrimitiveTopologyEXT(VkPrimitiveTopology primitiveTopology)
-	{
-		auto func = (PFN_vkCmdSetPrimitiveTopologyEXT)vkGetInstanceProcAddr(m_pGraphicsAPI->GetInstance(), "vkCmdSetPrimitiveTopologyEXT");
-
-		if (func != nullptr)
-		{
-			func(m_pGraphicsAPI->GetCurrentCommandBuffer(), primitiveTopology);
-		}
-	}
-
-	void CVulkanRenderer::SetPrimitiveRestartEnableEXT(VkBool32 primitiveRestartEnable)
-	{
-		auto func = (PFN_vkCmdSetPrimitiveRestartEnableEXT)vkGetInstanceProcAddr(m_pGraphicsAPI->GetInstance(), "vkCmdSetPrimitiveRestartEnableEXT");
-
-		if (func != nullptr)
-		{
-			func(m_pGraphicsAPI->GetCurrentCommandBuffer(), primitiveRestartEnable);
-		}
-	}
-
-	void CVulkanRenderer::SetViewportWithCountEXT(uint32_t viewportCount, const VkViewport* pViewports)
-	{
-		auto func = (PFN_vkCmdSetViewportWithCountEXT)vkGetInstanceProcAddr(m_pGraphicsAPI->GetInstance(), "vkCmdSetViewportWithCountEXT");
-
-		if (func != nullptr)
-		{
-			func(m_pGraphicsAPI->GetCurrentCommandBuffer(), viewportCount, pViewports);
-		}
-	}
-
-	void CVulkanRenderer::SetScissorWithCountEXT(uint32_t scissorCount, const VkRect2D* pScissors)
-	{
-		auto func = (PFN_vkCmdSetScissorWithCountEXT)vkGetInstanceProcAddr(m_pGraphicsAPI->GetInstance(), "vkCmdSetScissorWithCountEXT");
-
-		if (func != nullptr)
-		{
-			func(m_pGraphicsAPI->GetCurrentCommandBuffer(), scissorCount, pScissors);
-		}
-	}
-
-	void CVulkanRenderer::SetCullModeEXT(VkCullModeFlags cullMode)
-	{
-		auto func = (PFN_vkCmdSetCullModeEXT)vkGetInstanceProcAddr(m_pGraphicsAPI->GetInstance(), "vkCmdSetCullModeEXT");
-
-		if (func != nullptr)
-		{
-			func(m_pGraphicsAPI->GetCurrentCommandBuffer(), cullMode);
-		}
-	}
-
-	void CVulkanRenderer::SetFrontFaceEXT(VkFrontFace frontFace)
-	{
-		auto func = (PFN_vkCmdSetFrontFaceEXT)vkGetInstanceProcAddr(m_pGraphicsAPI->GetInstance(), "vkCmdSetFrontFaceEXT");
-
-		if (func != nullptr)
-		{
-			func(m_pGraphicsAPI->GetCurrentCommandBuffer(), frontFace);
-		}
-	}
-
-	void CVulkanRenderer::SetRasterizerDiscardEnableEXT(VkBool32 rasterizerDiscardEnable)
-	{
-		auto func = (PFN_vkCmdSetRasterizerDiscardEnableEXT)vkGetInstanceProcAddr(m_pGraphicsAPI->GetInstance(), "vkCmdSetRasterizerDiscardEnableEXT");
-
-		if (func != nullptr)
-		{
-			func(m_pGraphicsAPI->GetCurrentCommandBuffer(), rasterizerDiscardEnable);
-		}
-	}
-
-	void CVulkanRenderer::SetPolygonModeEXT(VkPolygonMode polygonMode)
-	{
-		auto func = (PFN_vkCmdSetPolygonModeEXT)vkGetInstanceProcAddr(m_pGraphicsAPI->GetInstance(), "vkCmdSetPolygonModeEXT");
-
-		if (func != nullptr)
-		{
-			func(m_pGraphicsAPI->GetCurrentCommandBuffer(), polygonMode);
-		}
-	}
-
-	void CVulkanRenderer::SetRasterizationSamplesEXT(VkSampleCountFlagBits rasterizationSamples)
-	{
-		auto func = (PFN_vkCmdSetRasterizationSamplesEXT)vkGetInstanceProcAddr(m_pGraphicsAPI->GetInstance(), "vkCmdSetRasterizationSamplesEXT");
-
-		if (func != nullptr)
-		{
-			func(m_pGraphicsAPI->GetCurrentCommandBuffer(), rasterizationSamples);
-		}
-	}
-
-	void CVulkanRenderer::SetAlphaToCoverageEnableEXT(VkBool32 alphaToCoverageEnable)
-	{
-		auto func = (PFN_vkCmdSetAlphaToCoverageEnableEXT)vkGetInstanceProcAddr(m_pGraphicsAPI->GetInstance(), "vkCmdSetAlphaToCoverageEnableEXT");
-
-		if (func != nullptr)
-		{
-			func(m_pGraphicsAPI->GetCurrentCommandBuffer(), alphaToCoverageEnable);
-		}
-	}
-
-	void CVulkanRenderer::SetDepthTestEnableEXT(VkBool32 depthTestEnable)
-	{
-		auto func = (PFN_vkCmdSetDepthTestEnableEXT)vkGetInstanceProcAddr(m_pGraphicsAPI->GetInstance(), "vkCmdSetDepthTestEnableEXT");
-
-		if (func != nullptr)
-		{
-			func(m_pGraphicsAPI->GetCurrentCommandBuffer(), depthTestEnable);
-		}
-	}
-
-	void CVulkanRenderer::SetDepthWriteEnableEXT(VkBool32 depthWriteEnable)
-	{
-		auto func = (PFN_vkCmdSetDepthWriteEnableEXT)vkGetInstanceProcAddr(m_pGraphicsAPI->GetInstance(), "vkCmdSetDepthWriteEnableEXT");
-
-		if (func != nullptr)
-		{
-			func(m_pGraphicsAPI->GetCurrentCommandBuffer(), depthWriteEnable);
-		}
-	}
-
-	void CVulkanRenderer::SetDepthCompareOpEXT(VkCompareOp depthCompareOp)
-	{
-		auto func = (PFN_vkCmdSetDepthCompareOpEXT)vkGetInstanceProcAddr(m_pGraphicsAPI->GetInstance(), "vkCmdSetDepthCompareOpEXT");
-
-		if (func != nullptr)
-		{
-			func(m_pGraphicsAPI->GetCurrentCommandBuffer(), depthCompareOp);
-		}
-	}
-
-	void CVulkanRenderer::SetDepthBiasEnableEXT(VkBool32 depthBiasEnable)
-	{
-		auto func = (PFN_vkCmdSetDepthBiasEnableEXT)vkGetInstanceProcAddr(m_pGraphicsAPI->GetInstance(), "vkCmdSetDepthBiasEnableEXT");
-
-		if (func != nullptr)
-		{
-			func(m_pGraphicsAPI->GetCurrentCommandBuffer(), depthBiasEnable);
-		}
-	}
-
-	void CVulkanRenderer::SetStencilTestEnableEXT(VkBool32 stencilTestEnable)
-	{
-		auto func = (PFN_vkCmdSetStencilTestEnableEXT)vkGetInstanceProcAddr(m_pGraphicsAPI->GetInstance(), "vkCmdSetStencilTestEnableEXT");
-
-		if (func != nullptr)
-		{
-			func(m_pGraphicsAPI->GetCurrentCommandBuffer(), stencilTestEnable);
-		}
-	}
-
-	void CVulkanRenderer::SetSampleMaskEXT(VkSampleCountFlagBits samples, const VkSampleMask* pSampleMask)
-	{
-		auto func = (PFN_vkCmdSetSampleMaskEXT)vkGetInstanceProcAddr(m_pGraphicsAPI->GetInstance(), "vkCmdSetSampleMaskEXT");
-
-		if (func != nullptr)
-		{
-			func(m_pGraphicsAPI->GetCurrentCommandBuffer(), samples, pSampleMask);
-		}
-	}
-
-	void CVulkanRenderer::SetColorBlendEnableEXT(uint32_t firstAttachment, uint32_t attachmentCount, const VkBool32* pColorBlendEnables)
-	{
-		auto func = (PFN_vkCmdSetColorBlendEnableEXT)vkGetInstanceProcAddr(m_pGraphicsAPI->GetInstance(), "vkCmdSetColorBlendEnableEXT");
-
-		if (func != nullptr)
-		{
-			func(m_pGraphicsAPI->GetCurrentCommandBuffer(), firstAttachment, attachmentCount, pColorBlendEnables);
-		}
-	}
-
-	void CVulkanRenderer::SetColorWriteMaskEXT(uint32_t firstAttachment, uint32_t attachmentCount, const VkColorComponentFlags* pColorWriteMasks)
-	{
-		auto func = (PFN_vkCmdSetColorWriteMaskEXT)vkGetInstanceProcAddr(m_pGraphicsAPI->GetInstance(), "vkCmdSetColorWriteMaskEXT");
-
-		if (func != nullptr)
-		{
-			func(m_pGraphicsAPI->GetCurrentCommandBuffer(), firstAttachment, attachmentCount, pColorWriteMasks);
-		}
 	}
 
 	// ヘルパー関数 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////

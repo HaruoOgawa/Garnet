@@ -60,7 +60,7 @@ namespace api
 
 			for (auto& Shader : m_ShaderMap)
 			{
-				DestroyShaderEXT(m_pGraphicsAPI->GetLogicalDevice(), Shader.second, nullptr);
+				m_pGraphicsAPI->DestroyShaderEXT(m_pGraphicsAPI->GetLogicalDevice(), Shader.second, nullptr);
 			}
 
 			m_ShaderMap.clear();
@@ -161,7 +161,7 @@ namespace api
 
 			for (auto& Shader : m_ShaderMap)
 			{
-				DestroyShaderEXT(m_pGraphicsAPI->GetLogicalDevice(), Shader.second, nullptr);
+				m_pGraphicsAPI->DestroyShaderEXT(m_pGraphicsAPI->GetLogicalDevice(), Shader.second, nullptr);
 			}
 
 			m_ShaderMap.clear();
@@ -253,7 +253,7 @@ namespace api
 	{
 		for (const auto& Shader : m_ShaderMap)
 		{
-			BindShadersEXT(m_pGraphicsAPI->GetCurrentCommandBuffer(), 1, &Shader.first, &Shader.second);
+			m_pGraphicsAPI->BindShadersEXT(m_pGraphicsAPI->GetCurrentCommandBuffer(), 1, &Shader.first, &Shader.second);
 		}
 	}
 
@@ -338,7 +338,7 @@ namespace api
 		std::vector<VkShaderEXT> Shaders;
 		Shaders.resize(static_cast<int>(CreateInfoList.size()));
 
-		if (!CreateShadersEXT(m_pGraphicsAPI->GetLogicalDevice(), static_cast<uint32_t>(CreateInfoList.size()), &CreateInfoList[0], nullptr, &Shaders[0])) return false;
+		if (m_pGraphicsAPI->CreateShadersEXT(m_pGraphicsAPI->GetLogicalDevice(), static_cast<uint32_t>(CreateInfoList.size()), &CreateInfoList[0], nullptr, &Shaders[0]) != VK_SUCCESS) return false;
 
 		for (int i = 0; i < static_cast<int>(CreateInfoList.size()); i++)
 		{
@@ -849,37 +849,6 @@ namespace api
 		if (vkCreatePipelineLayout(m_pGraphicsAPI->GetLogicalDevice(), &pipelineLayoutInfo, nullptr, &m_PipelineLayout) != VK_SUCCESS) return false;
 
 		return true;
-	}
-
-	// Vulkan Extensions /////////////////////////////////////////////////////////////////////
-	bool CVulkanMaterial::CreateShadersEXT(VkDevice device, uint32_t createInfoCount, const VkShaderCreateInfoEXT* pCreateInfos, const VkAllocationCallbacks* pAllocator, VkShaderEXT* pShaders)
-	{
-		auto func = (PFN_vkCreateShadersEXT)vkGetInstanceProcAddr(m_pGraphicsAPI->GetInstance(), "vkCreateShadersEXT");
-
-		if (func == nullptr) return false;
-
-		VkResult result = func(device, createInfoCount, pCreateInfos, pAllocator, pShaders);
-
-		return (result == VK_SUCCESS);
-	}
-
-	void CVulkanMaterial::BindShadersEXT(VkCommandBuffer commandBuffer, uint32_t stageCount, const VkShaderStageFlagBits* pStages, const VkShaderEXT* pShaders)
-	{
-		auto func = (PFN_vkCmdBindShadersEXT)vkGetInstanceProcAddr(m_pGraphicsAPI->GetInstance(), "vkCmdBindShadersEXT");
-
-		if (func == nullptr) return;
-
-		func(commandBuffer, stageCount, pStages, pShaders);
-	}
-
-	void CVulkanMaterial::DestroyShaderEXT(VkDevice device, VkShaderEXT shader, const VkAllocationCallbacks* pAllocator)
-	{
-		auto func = (PFN_vkDestroyShaderEXT)vkGetInstanceProcAddr(m_pGraphicsAPI->GetInstance(), "vkDestroyShaderEXT");
-
-		if (func != nullptr)
-		{
-			func(device, shader, pAllocator);
-		}
 	}
 
 	// ÉwÉãÉpÅ[ä÷êî ///////////////////////////////////////////////////////////////////////////////////////////////////////////////

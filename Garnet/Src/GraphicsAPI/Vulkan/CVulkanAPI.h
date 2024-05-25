@@ -266,6 +266,32 @@ namespace api
 
 		// Frame Buffer
 		uint32_t GetCurrentFrame() const;
+
+		// Extension /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		bool LoadExtensions();
+		
+		PFN_vkCmdBindShadersEXT BindShadersEXT;
+		PFN_vkCreateShadersEXT CreateShadersEXT;
+		PFN_vkDestroyShaderEXT DestroyShaderEXT;
+		PFN_vkCmdSetVertexInputEXT SetVertexInputEXT;
+		PFN_vkCmdSetPrimitiveTopologyEXT SetPrimitiveTopologyEXT;
+		PFN_vkCmdSetPrimitiveRestartEnableEXT SetPrimitiveRestartEnableEXT;
+		PFN_vkCmdSetViewportWithCountEXT SetViewportWithCountEXT;
+		PFN_vkCmdSetScissorWithCountEXT SetScissorWithCountEXT;
+		PFN_vkCmdSetCullModeEXT SetCullModeEXT;
+		PFN_vkCmdSetFrontFaceEXT SetFrontFaceEXT;
+		PFN_vkCmdSetRasterizerDiscardEnableEXT SetRasterizerDiscardEnableEXT;
+		PFN_vkCmdSetPolygonModeEXT SetPolygonModeEXT;
+		PFN_vkCmdSetRasterizationSamplesEXT SetRasterizationSamplesEXT;
+		PFN_vkCmdSetAlphaToCoverageEnableEXT SetAlphaToCoverageEnableEXT;
+		PFN_vkCmdSetDepthTestEnableEXT SetDepthTestEnableEXT;
+		PFN_vkCmdSetDepthWriteEnableEXT SetDepthWriteEnableEXT;
+		PFN_vkCmdSetDepthCompareOpEXT SetDepthCompareOpEXT;
+		PFN_vkCmdSetDepthBiasEnableEXT SetDepthBiasEnableEXT;
+		PFN_vkCmdSetStencilTestEnableEXT SetStencilTestEnableEXT;
+		PFN_vkCmdSetSampleMaskEXT SetSampleMaskEXT;
+		PFN_vkCmdSetColorBlendEnableEXT SetColorBlendEnableEXT;
+		PFN_vkCmdSetColorWriteMaskEXT SetColorWriteMaskEXT;
 	};
 }
 #endif
