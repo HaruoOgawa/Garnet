@@ -156,7 +156,7 @@ namespace api
 		m_CreateInfo = createInfo;
 
 		// ShaderObjectの削除
-		if (m_pGraphicsAPI->IsEnabledRuntimeShaderEditing())
+		/*if (m_pGraphicsAPI->IsEnabledRuntimeShaderEditing())
 		{
 
 			for (auto& Shader : m_ShaderMap)
@@ -165,27 +165,27 @@ namespace api
 			}
 
 			m_ShaderMap.clear();
-		}
+		}*/
 
 		// CommandのSubmit時にエラーが発生するので、ひとまずVulkanについてはShaderの更新のみとする
 		// Uniformを編集したいときはOpenGLを使用する
-		/*Release();
+		Release();
 
 		// 参照テクスチャリストの再生成
 		if (!ReCreateRefTextureList(m_CreateInfo)) return false;
 
 		// バッファの再生成
-		if (!ReCreateBuffer(ShaderBufferList, TextureBindingLayoutList)) return false;*/
+		if (!ReCreateBuffer(ShaderBufferList, TextureBindingLayoutList)) return false;
 
 		{
-			/*// Uniform Buffer
+			// Uniform Buffer
 			if (!CreateShaderBuffers(m_CreateInfo)) return false; // ユニフォームバッファを作成
 
 			// バインドグループ(UniformとTextureで共通項)
 			if (!CreateDescriptorSetLayout(m_CreateInfo)) return false; // DescriptorSetLayoutの作成(Uniformをどのようにバインドするか), WebGPUでいうバインドグループの生成
 			if (!CreateDescriptorPool(m_CreateInfo)) return false; // DescriptorPoolを作成する -> DescriptorSetsは直接生成できず、コマンドで生成する必要がある。記述子プールはそのコマンド群のことかな？
 			if (!CreateDescriptorSets(m_CreateInfo)) return false; // DescriptorSetsを作成 -> Uniformが使用するバッファをCPUからGPUに送信するための仕組みこと. https://vkguide.dev/docs/chapter-4/descriptors/
-			if (!CreatePipelineLayout()) return false; // パイプラインレイアウトを生成*/
+			if (!CreatePipelineLayout()) return false; // パイプラインレイアウトを生成
 
 			if (m_pGraphicsAPI->IsEnabledRuntimeShaderEditing())
 			{
@@ -247,6 +247,19 @@ namespace api
 				UniformBuffer->SetValue(Data, ByteOffset, ByteSize);
 			}
 		}
+	}
+
+	bool CVulkanMaterial::IsAvailable() const
+	{
+		if (m_ShaderStages.empty() && m_ShaderMap.empty()) return false;
+
+		if (m_PipelineLayout == nullptr) return false;
+		if (m_DescriptorSetLayout == nullptr) return false;
+		if (m_DescriptorPool == nullptr) return false;
+
+		if (m_DescriptorSets.empty()) return false;
+
+		return true;
 	}
 
 	void CVulkanMaterial::SetActive()

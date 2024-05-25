@@ -77,6 +77,8 @@ namespace api
 
 		virtual void SetUniformValue(const std::string Name, const void* Data, int ByteSize, int DynamicOffsetNum = -1) override;
 
+		bool IsAvailable() const;
+
 		void SetActive();
 
 		void BindUBO(int DynamicOffsetNum);

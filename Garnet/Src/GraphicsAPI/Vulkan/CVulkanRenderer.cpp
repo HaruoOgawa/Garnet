@@ -50,6 +50,8 @@ namespace api
 		const CVulkanIndexBuffer* pVulkanIndexBuffer = static_cast<const CVulkanIndexBuffer*>(IndexBuffer.get());
 		api::CVulkanMaterial* pVulkanMat = static_cast<api::CVulkanMaterial*>(Material.get());
 
+		if (!pVulkanMat->IsAvailable()) return true;
+
 		// ユニフォームバッファの準備
 		if (!pVulkanMat->BuildDrawBuffer(DynamicOffsetNum)) return false;
 
