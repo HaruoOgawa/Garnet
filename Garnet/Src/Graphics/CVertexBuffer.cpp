@@ -15,9 +15,11 @@ namespace graphics
 	void CVertexBuffer::Release()
 	{
 		m_Vertices.clear();
-		m_AttributeDimensions.clear();
+		
+		// Vulkan‚ÌShaderObject‚ÅŽg—p‚·‚é‚Ì‚ÅŽc‚µ‚Ä‚¨‚­
+		/*m_AttributeDimensions.clear();
 		m_AttribDataTypes.clear();
-		m_AttribByteStrides.clear();
+		m_AttribByteStrides.clear();*/
 	}
 
 	void CVertexBuffer::SetVertices(const std::vector<std::vector<float>>& Vertices)

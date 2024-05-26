@@ -1,4 +1,5 @@
 #include "C3DObjectLoader.h"
+#include "CResourceManager.h"
 #include "../Message/Console.h"
 
 #include "../Format/CPathFormatter.h"
@@ -19,13 +20,9 @@
 
 namespace resource
 {
-	C3DObjectLoader::C3DObjectLoader(const std::string& FileName, const std::shared_ptr<object::C3DObject>& TargetObject, const std::shared_ptr<graphics::CMaterialFrame>& BaseMaterialFrame,
-		const std::string& PassName, const std::string& DepthPassName, physics::IPhysicsEngine* pPhysicsEngine) :
-		m_pPhysicsEngine(pPhysicsEngine),
-		m_Status(ELoadStatus::None),
+	C3DObjectLoader::C3DObjectLoader(const std::string& FileName, const std::shared_ptr<object::C3DObject>& TargetObject, const std::shared_ptr<graphics::CMaterialFrame>& BaseMaterialFrame) :
+		CResource(FileName, 3),
 		m_LoadState(E3DObjectLoadState::None),
-		m_File(std::make_shared<CFile>(FileName)),
-		m_FileName(FileName),
 		m_TargetObject(TargetObject),
 		m_BaseMaterialFrame(BaseMaterialFrame)
 	{
@@ -35,39 +32,11 @@ namespace resource
 	{
 	}
 
-	void C3DObjectLoader::SetLoadStatus(resource::ELoadStatus Status)
-	{
-		m_Status = Status;
-	}
-
-	resource::ELoadStatus C3DObjectLoader::GetStatus() const
-	{
-		return m_Status;
-	}
-	bool C3DObjectLoader::IsLoaded() const
-	{
-		return (m_Status == resource::ELoadStatus::Loaded);
-	}
-
-	bool C3DObjectLoader::Load()
-	{
-		m_Status = resource::ELoadStatus::Loading;
-
-		if (!m_File->Load()) return false;
-
-		return true;
-	}
-
-	bool C3DObjectLoader::LoadImmediate()
-	{
-		return true;
-	}
-
-	bool C3DObjectLoader::Update(api::IGraphicsAPI* pGraphicsAPI)
+	bool C3DObjectLoader::Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, const std::shared_ptr<CResourceManager>& ResourceManager)
 	{
 		if (!m_File->IsLoaded())
 		{
-			if (!m_File->Update(pGraphicsAPI)) return false;
+			if (!m_File->Update(pGraphicsAPI, pPhysicsEngine, ResourceManager)) return false;
 			return true;
 		}
 		
@@ -78,7 +47,7 @@ namespace resource
 			return true;
 		case resource::E3DObjectLoadState::ImportObject:
 			{
-				if (!Import(pGraphicsAPI, m_pPhysicsEngine)) return false;
+				if (!Import(pGraphicsAPI, pPhysicsEngine)) return false;
 				
 				m_LoadState = resource::E3DObjectLoadState::LoadSubResouce;
 
@@ -86,7 +55,7 @@ namespace resource
 			}
 		case resource::E3DObjectLoadState::LoadSubResouce:
 			{
-				if (!LoadSubResources(pGraphicsAPI)) return false;
+				if (!LoadSubResources(pGraphicsAPI, pPhysicsEngine, ResourceManager)) return false;
 
 				if (static_cast<int>(m_SubResources.size()) == 0) m_LoadState = resource::E3DObjectLoadState::Finish;
 
@@ -100,6 +69,9 @@ namespace resource
 
 		// ロード完了
 		m_Status = resource::ELoadStatus::Loaded;
+
+		// リソースマネージャーに登録
+		ResourceManager->AddOnMemoryResource(shared_from_this(), nullptr);
 
 		return true;
 	}
@@ -152,7 +124,7 @@ namespace resource
 		return true;
 	}
 
-	bool C3DObjectLoader::LoadSubResources(api::IGraphicsAPI* pGraphicsAPI)
+	bool C3DObjectLoader::LoadSubResources(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, const std::shared_ptr<CResourceManager>& ResourceManager)
 	{
 		// サブリソースのロード
 		for (auto& Resource : m_SubResources)
@@ -164,11 +136,14 @@ namespace resource
 				return true;
 
 			case resource::ELoadStatus::Loading:
-				if (!Resource->Update(pGraphicsAPI)) return false;
+				if (!Resource->Update(pGraphicsAPI, pPhysicsEngine, ResourceManager)) return false;
 				return true;
 
 			case resource::ELoadStatus::Loaded:
 			{
+				// リソースマネージャーに登録
+				ResourceManager->AddOnMemoryResource(Resource, shared_from_this());
+
 				m_SubResources.erase(m_SubResources.begin());
 				m_SubResources.shrink_to_fit();
 			}

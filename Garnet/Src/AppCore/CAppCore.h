@@ -1,5 +1,6 @@
 #pragma once
 
+#include "SAppSettings.h"
 #include "../Interface/IWindowAPI.h"
 #include <string>
 #include <memory>
@@ -16,6 +17,8 @@ namespace app
 {
 	class CAppCore
 	{
+		SAppSettings m_AppSettings;
+
 		std::shared_ptr<window::IWindowAPI> m_WindowAPI;
 
 		std::shared_ptr<api::IGraphicsAPI> m_GraphicsAPI;
@@ -35,18 +38,19 @@ namespace app
 
 		std::shared_ptr<input::CInputState> m_InputState;
 	public:
-		CAppCore(const std::shared_ptr<app::IApp>& App);
+		CAppCore(const std::shared_ptr<app::IApp>& App, SAppSettings Settings);
 		virtual ~CAppCore();
 
 		const std::shared_ptr<gui::IGUIEngine>& GetGUIEngine() const;
 
 		const std::shared_ptr<input::CInputState>& GetInputState()const { return m_InputState; }
 
-		bool Initialize(int Width, int Height);
+		bool Initialize();
 
 		bool Release();
 		
-		bool Resize(int Width, int Height);
+		bool ResizeWindow(int Width, int Height);
+		void FocusWindow(bool Focused);
 		
 		bool RunLoop();
 
@@ -58,12 +62,16 @@ namespace app
 		bool FixedUpdate();
 		bool Draw();
 
+		// ToDo: 将来的にはOnXX関数を各WindowAPIから呼ぶようにしてResizeWindow・FocusWindowを統一する. InputStateへの情報受け渡しもここでやる
 		// インプットイベント
 		void OnKeyDown(std::string key);
 		void OnKeyUp(std::string key);
 
 		// リサイズイベント
 		void OnResize(int w, int h);
+
+		// フォーカスイベント
+		void OnFocus(int focused);
 
 		// マウスイベント
 		void OnMouseDown(int buttonNum, int x, int y);

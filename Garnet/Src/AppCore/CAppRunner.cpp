@@ -36,7 +36,7 @@ extern "C"
 #endif // __EMSCRIPTEN__
 		void StartApp()
 	{
-		if (g_AppCore->Initialize(1920, 1080))
+		if (g_AppCore->Initialize())
 		{
 #ifdef __EMSCRIPTEN__
 			emscripten_set_main_loop(RunLoop, 60, true);
@@ -84,6 +84,15 @@ extern "C"
 	}
 
 	EMSCRIPTEN_KEEPALIVE
+		void OnFocus(int focused)
+	{
+		if (g_AppCore)
+		{
+			g_AppCore->OnFocus(focused);
+		}
+	}
+
+	EMSCRIPTEN_KEEPALIVE
 		void OnMouseDown(int buttonNum, int x, int y)
 	{
 		if (g_AppCore)
@@ -122,9 +131,9 @@ extern "C"
 
 	namespace app
 	{
-		bool CAppRunner::Run(const std::shared_ptr<app::IApp>& App)
+		bool CAppRunner::Run(const std::shared_ptr<app::IApp>& App, SAppSettings Settings)
 		{
-			g_AppCore = new app::CAppCore(App);
+			g_AppCore = new app::CAppCore(App, Settings);
 
 			// EmscriptenÇ≈ÇÕå„ÇŸÇ«JSÇ©ÇÁStartAppÇé¿çsÇ∑ÇÈ
 #ifndef __EMSCRIPTEN__

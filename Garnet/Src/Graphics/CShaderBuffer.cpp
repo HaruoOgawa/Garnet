@@ -127,6 +127,27 @@ namespace graphics
 		return m_Buffer;
 	}
 
+	std::vector<unsigned char> CShaderBuffer::GetUniformValue(const std::string& Name)
+	{
+		for (const auto& UniformDataMap : m_Descriptor->GetDataList())
+		{
+			const auto& UniformData = UniformDataMap.second;
+			if (Name != UniformData.UniformName) continue;
+
+			int ByteSize = UniformData.ByteSize;
+			int ByteOffset = UniformData.ByteOffset;
+
+			std::vector<unsigned char> DstData;
+			DstData.resize(ByteSize);
+
+			std::memcpy(&DstData[0], &m_Buffer[ByteOffset], ByteSize);
+
+			return DstData;
+		}
+
+		return std::vector<unsigned char>();
+	}
+
 	void CShaderBuffer::SetValue(const void* Value, int ByteOffset, int ByteSize)
 	{
 		std::memcpy(&m_Buffer[ByteOffset], Value, ByteSize);

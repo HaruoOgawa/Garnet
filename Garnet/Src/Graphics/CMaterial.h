@@ -26,6 +26,7 @@ namespace graphics
 	class CShaderBuffer;
 	class CMaterialFrame;
 	class CDrawInfo;
+
 	class CMaterial
 	{
 	protected:
@@ -53,8 +54,20 @@ namespace graphics
 		EBlendType m_BlendType;
 
 		bool m_IsDrawOutline;
+
+		// Texture
+		std::shared_ptr<graphics::CTexture> m_EmptyTexture;
+		std::shared_ptr<graphics::CTexture> m_EmptyCubeTexture;
+
+		// 参照中のテクスチャリスト
+		std::map<std::string, std::shared_ptr<graphics::CTexture>> m_RefTextureMap;
+		std::map<std::string, std::shared_ptr<graphics::CTexture>> m_RefCubeMapMap;
+		std::map<std::string, std::shared_ptr<graphics::CTexture>> m_RefFrameTextureMap;
+		std::shared_ptr<graphics::CTexture> m_RefDiffuse_Tex = nullptr;
+		std::shared_ptr<graphics::CTexture> m_RefSpecular_Tex = nullptr;
+		std::shared_ptr<graphics::CTexture> m_RefGGXLUT_Tex = nullptr;
 	public:
-		CMaterial(const std::shared_ptr<CMaterialCreateInfo>& createInfo, int RefCount, ECullMode CullMode);
+		CMaterial(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CMaterialCreateInfo>& createInfo, int RefCount, ECullMode CullMode);
 		virtual ~CMaterial() = default;
 
 		virtual bool IsUseShaderBuffer();
@@ -66,6 +79,13 @@ namespace graphics
 
 		virtual bool Create(const std::shared_ptr<graphics::CTextureSet>& TextureSet) = 0;
 		virtual bool CreateDepthMaterial(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<graphics::CMaterialFrame>& DepthMF);
+
+		virtual bool ReCreate(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, const std::vector<std::shared_ptr<CShaderBuffer>>& ShaderBufferList, const std::vector<STextureBindingLayout>& TextureBindingLayoutList);
+
+		virtual bool ReCreateBuffer(const std::vector<std::shared_ptr<graphics::CShaderBuffer>>& ShaderBufferList, const std::vector<graphics::STextureBindingLayout>& TextureBindingLayoutList);
+
+		virtual bool CreateRefTextureList(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, const std::shared_ptr<graphics::CTextureSet>& TextureSet);
+		virtual bool ReCreateRefTextureList(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo);
 
 		virtual std::shared_ptr<graphics::CMaterial> GetDepthMaterial();
 

@@ -3,7 +3,10 @@
 
 int main()
 {
-	if (!app::CAppRunner::Run(std::make_shared<app::CScriptApp>())) return 1;
+	app::SAppSettings Settings = {};
+	Settings.FullScreen = false;
+
+	if (!app::CAppRunner::Run(std::make_shared<app::CScriptApp>(), Settings)) return 1;
 
 	return 0;
 }

@@ -1,12 +1,11 @@
 #include "CAudioLoader.h"
 #include "../Message/Console.h"
+#include "CResourceManager.h"
 
 namespace resource
 {
 	CAudioLoader::CAudioLoader(const std::string& FileName, const std::shared_ptr<audio::CAudioClip>& TargetAudioClip):
-		m_Status(ELoadStatus::None),
-		m_File(std::make_shared<CFile>(FileName)),
-		m_FileName(FileName),
+		CResource(FileName),
 		m_TargetAudioClip(TargetAudioClip)
 	{
 	}
@@ -15,39 +14,11 @@ namespace resource
 	{
 	}
 
-	void CAudioLoader::SetLoadStatus(resource::ELoadStatus Status)
-	{
-		m_Status = Status;
-	}
-
-	resource::ELoadStatus CAudioLoader::GetStatus() const
-	{
-		return m_Status;
-	}
-	bool CAudioLoader::IsLoaded() const
-	{
-		return (m_Status == resource::ELoadStatus::Loaded);
-	}
-
-	bool CAudioLoader::Load()
-	{
-		m_Status = resource::ELoadStatus::Loading;
-
-		if (!m_File->Load()) return false;
-
-		return true;
-	}
-
-	bool CAudioLoader::LoadImmediate()
-	{
-		return true;
-	}
-
-	bool CAudioLoader::Update(api::IGraphicsAPI* pGraphicsAPI)
+	bool CAudioLoader::Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, const std::shared_ptr<CResourceManager>& ResourceManager)
 	{
 		if (!m_File->IsLoaded())
 		{
-			if (!m_File->Update(pGraphicsAPI)) return false;
+			if (!m_File->Update(pGraphicsAPI, pPhysicsEngine, ResourceManager)) return false;
 			return true;
 		}
 
@@ -74,6 +45,9 @@ namespace resource
 
 		// ロード完了
 		m_Status = resource::ELoadStatus::Loaded;
+
+		// リソースマネージャーに登録
+		ResourceManager->AddOnMemoryResource(shared_from_this(), nullptr);
 
 		return true;
 	}

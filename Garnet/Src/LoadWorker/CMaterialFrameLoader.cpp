@@ -1,62 +1,51 @@
 #include "CMaterialFrameLoader.h"
+#include "CResourceManager.h"
+#include "CShaderLoader.h"
 
 namespace resource
 {
 	CMaterialFrameLoader::CMaterialFrameLoader(const std::string& filename, const  std::shared_ptr<graphics::CMaterialFrame>& TargetMaterialFrame):
-		m_Status(ELoadStatus::None),
-		m_MfFile(std::make_shared<CFile>(filename)),
+		CResource(filename, 2),
 		m_AnalyseDone(false),
-		m_TargetMaterialFrame(TargetMaterialFrame),
 		m_CreateInfo(std::make_shared<graphics::CMaterialCreateInfo>()),
 		m_MaterialName(std::string())
 	{
+		m_TargetMaterialFrameSet.emplace(TargetMaterialFrame);
 	}
 
 	CMaterialFrameLoader::~CMaterialFrameLoader()
 	{
+		Release();
 	}
 
-	void CMaterialFrameLoader::SetLoadStatus(resource::ELoadStatus Status)
+	void CMaterialFrameLoader::Release()
 	{
-		m_Status = Status;
+		m_MfJson.clear();
+		m_AnalyseDone = false;
+		m_MfResourceList.clear();
+		m_ShaderFileList.clear();
+		m_TextureFileList.clear();
+		m_ShaderBufferList.clear();
+		m_TextureBufferList.clear();
+		m_CreateInfo = nullptr;
 	}
 
-	resource::ELoadStatus CMaterialFrameLoader::GetStatus() const
+	bool CMaterialFrameLoader::Reload(resource::CLoadWorker* pLoadWorker)
 	{
-		return m_Status;
-	}
-	bool CMaterialFrameLoader::IsLoaded() const
-	{
-		return (m_Status == resource::ELoadStatus::Loaded);
-	}
-
-	bool CMaterialFrameLoader::Load()
-	{
-		// マテリアルフレームファイルのロード
-		m_Status = resource::ELoadStatus::Loading;
-
-		if (!m_MfFile->Load()) return false;
+		if (!CResource::Reload(pLoadWorker)) return false;
+		
+		Release();
+		m_CreateInfo = std::make_shared<graphics::CMaterialCreateInfo>();
 
 		return true;
 	}
 
-	bool CMaterialFrameLoader::LoadImmediate()
+	bool CMaterialFrameLoader::Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, const std::shared_ptr<CResourceManager>& ResourceManager)
 	{
-		return true;
-	}
-
-	bool CMaterialFrameLoader::Update(api::IGraphicsAPI* pGraphicsAPI)
-	{
-		if (!m_MfFile->IsLoaded())
-		{
-			if (!m_MfFile->Update(pGraphicsAPI)) return false;
-			return true;
-		}
-
 		// マテリアルフレームが持っているリソース一覧を取得する
 		if (!m_AnalyseDone)
 		{
-			if (!AnalyseResourceList(pGraphicsAPI)) return false;
+			if (!AnalyseResourceList(pGraphicsAPI, ResourceManager)) return false;
 
 			m_AnalyseDone = true;
 
@@ -73,7 +62,7 @@ namespace resource
 				return true;
 
 			case resource::ELoadStatus::Loading:
-				if (!Resource->Update(pGraphicsAPI)) return false;
+				if (!Resource->Update(pGraphicsAPI, pPhysicsEngine, ResourceManager)) return false;
 				return true;
 
 			case resource::ELoadStatus::Loaded:
@@ -93,14 +82,46 @@ namespace resource
 		// ロード完了
 		m_Status = resource::ELoadStatus::Loaded;
 
+		// リソースマネージャーに登録
+		ResourceManager->AddOnMemoryResource(shared_from_this(), nullptr);
+
 		return true;
 	}
 
-	bool CMaterialFrameLoader::AnalyseResourceList(api::IGraphicsAPI* pGraphicsAPI)
+	void CMaterialFrameLoader::AddReference(const std::shared_ptr<IResource>& Resource)
+	{
+		// 自身の時は追加しない
+		if (Resource == shared_from_this())
+		{
+			return;
+		}
+
+		CMaterialFrameLoader* pMaterialFrameLoader = static_cast<CMaterialFrameLoader*>(Resource.get());
+
+		if (IsLoaded())
+		{
+			// ロード済みならデータをすぐに渡す
+			
+		}
+		else
+		{
+			for (const auto& Target : pMaterialFrameLoader->GetTargetMaterialFrameSet())
+			{
+				m_TargetMaterialFrameSet.emplace(Target);
+			}
+		}
+	}
+
+	const std::set<std::shared_ptr<graphics::CMaterialFrame>>& CMaterialFrameLoader::GetTargetMaterialFrameSet() const
+	{
+		return m_TargetMaterialFrameSet;
+	}
+
+	bool CMaterialFrameLoader::AnalyseResourceList(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CResourceManager>& ResourceManager)
 	{
 		std::string RawData = std::string();
-		RawData.resize(m_MfFile->GetData().size());
-		std::memcpy(&RawData[0], &m_MfFile->GetData()[0], m_MfFile->GetData().size());
+		RawData.resize(m_File->GetData().size());
+		std::memcpy(&RawData[0], &m_File->GetData()[0], m_File->GetData().size());
 
 		m_MfJson = json::parse(RawData.c_str());
 
@@ -115,7 +136,7 @@ namespace resource
 		const auto shaderList = m_MfJson.find("shaderList");
 		if (shaderList != m_MfJson.end() && shaderList->is_array())
 		{
-			if (!AnalyseShaderList(pGraphicsAPI, shaderList)) return false;
+			if (!AnalyseShaderList(pGraphicsAPI, ResourceManager, shaderList)) return false;
 		}
 		
 		// textureList
@@ -128,7 +149,7 @@ namespace resource
 		return true;
 	}
 
-	bool CMaterialFrameLoader::AnalyseShaderList(api::IGraphicsAPI* pGraphicsAPI, const json::iterator& shaderList)
+	bool CMaterialFrameLoader::AnalyseShaderList(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CResourceManager>& ResourceManager, const json::iterator& shaderList)
 	{
 		for (json::iterator shader = shaderList->begin(); shader != shaderList->end(); ++shader)
 		{
@@ -191,6 +212,8 @@ namespace resource
 					// ロードファイルリストに入れてファイルをロードする
 					std::string fullshaderFilePath = shaderFile;
 
+					std::string EditingBaseFileName = shaderFile;
+
 					// OpenGL・Vulkan・WebGPUに沿った拡張子を自動でつける
 					// ファイル名のルールに従う必要がある
 					if (autoShaderExtension)
@@ -198,34 +221,66 @@ namespace resource
 						if (shaderType == "vertex")
 						{
 							fullshaderFilePath += pGraphicsAPI->GetVertexShaderExtension();
+							EditingBaseFileName += ".vert";
 						}
 						else if (shaderType == "fragment")
 						{
 							fullshaderFilePath += pGraphicsAPI->GetFragmentShaderExtension();
+							EditingBaseFileName += ".frag";
 						}
 						else if (shaderType == "compute")
 						{
 							fullshaderFilePath += pGraphicsAPI->GetComputeShaderExtension();
+							EditingBaseFileName += ".comp";
 						}
 						else if (shaderType == "geometry")
 						{
 							fullshaderFilePath += pGraphicsAPI->GetGeometryShaderExtension();
+							EditingBaseFileName += ".geom";
 						}
 						else if (shaderType == "hull")
 						{
 							fullshaderFilePath += pGraphicsAPI->GetHullShaderExtension();
+							EditingBaseFileName += ".tesc";
 						}
 						else if (shaderType == "domain")
 						{
 							fullshaderFilePath += pGraphicsAPI->GetDomainShaderExtension();
+							EditingBaseFileName += ".tese";
 						}
 					}
 
-					// リソースを追加
-					std::shared_ptr<CFile> LoadShaderFile = std::make_shared<CFile>(fullshaderFilePath);
+					// リソースマネージャーに既に登録されていてかつロード済みかチェックする
+					auto Resource = ResourceManager->FindResource(EditingBaseFileName);
 
-					m_MfResourceList.push_back(LoadShaderFile);
-					m_ShaderFileList.emplace(shaderType, LoadShaderFile);
+					if (Resource)
+					{
+						// 登録済み
+						// 参照の追加
+						static_cast<CShaderLoader*>(Resource.get())->AddRefMFLoader(shared_from_this());
+
+						m_ShaderFileList.emplace(shaderType, static_cast<CShaderLoader*>(Resource.get()));
+
+						if (!Resource->IsLoaded())
+						{
+							// 未ロードなのでロードリストに追加
+							m_MfResourceList.push_back(Resource);
+						}
+					}
+					else
+					{
+						// 未登録なのでリソースマネージャーに登録. ロードリストにも追加
+						std::shared_ptr<CShaderLoader> ShaderLoader = std::make_shared<CShaderLoader>(fullshaderFilePath, EditingBaseFileName);
+
+						// 参照の追加
+						ShaderLoader->AddRefMFLoader(shared_from_this());
+
+						ResourceManager->AddOnMemoryResource(ShaderLoader, shared_from_this());
+
+						m_MfResourceList.push_back(ShaderLoader);
+
+						m_ShaderFileList.emplace(shaderType, ShaderLoader);
+					}
 				}
 
 				// uniformBlockList
@@ -501,7 +556,7 @@ namespace resource
 		{
 			const auto& shaderType = ShaderFile.first;
 
-			std::vector<unsigned char> ShaderCodeArray = ShaderFile.second->GetData();
+			std::vector<unsigned char> ShaderCodeArray = ShaderFile.second->GetFile()->GetData();
 
 			// ShaderCodeが直接書かれているのでそのままCreateInfoに渡す
 			if (shaderType == "vertex")
@@ -530,15 +585,26 @@ namespace resource
 			}
 		}
 
+		m_ShaderFileList.clear();
+
 		// ロードが必要だったテクスチャリストを登録する
 
 		// MaterialFrameを生成
-		if (m_TargetMaterialFrame)
+		for (auto& MaterialFrame : m_TargetMaterialFrameSet)
 		{
-			m_TargetMaterialFrame->SetMaterialName(m_MaterialName);
-			m_TargetMaterialFrame->SetCreateInfo(m_CreateInfo);
-			m_TargetMaterialFrame->SetShaderBufferList(m_ShaderBufferList);
-			m_TargetMaterialFrame->SetTextureBufferList(m_TextureBufferList);
+			if (MaterialFrame)
+			{
+				MaterialFrame->SetMaterialName(m_MaterialName);
+				MaterialFrame->SetCreateInfo(m_CreateInfo);
+				MaterialFrame->SetShaderBufferList(m_ShaderBufferList);
+				MaterialFrame->SetTextureBufferList(m_TextureBufferList);
+
+				// リロードなのでLoaderを参照しているマテリアルフレームにも更新を実行する
+				if (m_Releoading)
+				{
+					if (!MaterialFrame->Reload()) return false;
+				}
+			}
 		}
 
 		return true;

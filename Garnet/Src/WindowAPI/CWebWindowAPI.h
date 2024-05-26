@@ -23,7 +23,7 @@ namespace window
 
 		virtual bool Release() override;
 
-		virtual bool Initialize(app::CAppCore* pAppCore, int Width, int Height) override;
+		virtual bool Initialize(app::CAppCore* pAppCore, app::SAppSettings Settings) override;
 
 		virtual void SwapWindowBuffers() override;
 
@@ -41,6 +41,9 @@ namespace window
 
 		// リサイズイベント
 		virtual void OnResize(int w, int h) override;
+
+		// フォーカスイベント
+		virtual void OnFocus(int focused) override;
 
 		// マウスイベント
 		virtual void OnMouseDown(int buttonNum, int x, int y) override;

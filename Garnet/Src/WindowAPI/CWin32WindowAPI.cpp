@@ -19,7 +19,7 @@
 namespace window
 {
 	// 仮のグローバル変数
-	CWin32WindowAPI* g_AppManager = nullptr;
+	CWin32WindowAPI* g_WindowAPI = nullptr;
 
 	CWin32WindowAPI::CWin32WindowAPI():
 		m_pCAppCore(nullptr),
@@ -27,7 +27,7 @@ namespace window
 		m_Device_Context(nullptr),
 		m_Rendering_Context(nullptr)
 	{
-		g_AppManager = this; // 仮のグローバル変数
+		g_WindowAPI = this; // 仮のグローバル変数
 	}
 
 	bool CWin32WindowAPI::Release()
@@ -40,7 +40,7 @@ namespace window
 
 		ReleaseDC(m_Window, m_Device_Context);
 
-		g_AppManager = nullptr;
+		g_WindowAPI = nullptr;
 
 		return true;
 	}
@@ -50,34 +50,43 @@ namespace window
 		return m_Window;
 	}
 
-	bool CWin32WindowAPI::Initialize(app::CAppCore* pAppCore, int Width, int Height)
+	bool CWin32WindowAPI::Initialize(app::CAppCore* pAppCore, app::SAppSettings Settings)
 	{
 		m_pCAppCore = pAppCore;
 
 		HINSTANCE hInstance = GetModuleHandle(NULL);
-
-		if (!InitWindow(hInstance, Width, Height)) return false;
+		
+		if (!InitWindow(hInstance, Settings)) return false;
 		//if (!InitWGL()) return false;
 		if (!InitGLContext()) return false;
 
 		return true;
 	}
 
-	/*void Resize_Callback(GLFWwindow* window, int width, int height)
+	void ResizeCallback(HWND window, UINT msg, WPARAM w_param, LPARAM l_param)
 	{
-		auto AppManager = reinterpret_cast<CWin32WindowAPI*>(glfwGetWindowUserPointer(window));
-		AppManager->ResizeWindow(width, height);
-	}*/
+		if (!g_WindowAPI) return;
+
+		auto WindowAPI = g_WindowAPI;
+
+		RECT rect;
+		GetWindowRect(window, &rect);
+
+		int width = rect.right - rect.left;
+		int height = rect.bottom - rect.top;
+
+		WindowAPI->ResizeWindow(width, height);
+	}
 
 	void KeyCallback(HWND window, UINT msg, WPARAM w_param, LPARAM l_param, bool IsDown)
 	{
 		if (w_param < 256)
 		{
-			if (!g_AppManager) return;
+			if (!g_WindowAPI) return;
 
-			auto AppManager = g_AppManager;
+			auto WindowAPI = g_WindowAPI;
 
-			auto AppCore = AppManager->GetAppCore();
+			auto AppCore = WindowAPI->GetAppCore();
 			if (!AppCore) return;
 
 			// WPARAM Key Codes
@@ -134,11 +143,11 @@ namespace window
 #ifdef USE_INPUT_SYSTEM
 	void MousebuttonCallback(HWND window, UINT msg, WPARAM w_param, LPARAM l_param, bool IsDown)
 	{
-		if (!g_AppManager) return;
+		if (!g_WindowAPI) return;
 
-		auto AppManager = g_AppManager;
+		auto WindowAPI = g_WindowAPI;
 
-		auto AppCore = AppManager->GetAppCore();
+		auto AppCore = WindowAPI->GetAppCore();
 		if (!AppCore) return;
 
 		auto InputState = AppCore->GetInputState();
@@ -174,11 +183,11 @@ namespace window
 
 	void CursorPosCallback(HWND window, UINT msg, WPARAM w_param, LPARAM l_param)
 	{
-		if (!g_AppManager) return;
+		if (!g_WindowAPI) return;
 
-		auto AppManager = g_AppManager;
+		auto WindowAPI = g_WindowAPI;
 
-		auto AppCore = AppManager->GetAppCore();
+		auto AppCore = WindowAPI->GetAppCore();
 		if (!AppCore) return;
 
 		auto InputState = AppCore->GetInputState();
@@ -208,11 +217,11 @@ namespace window
 
 	void ScrollCallback(HWND window, UINT msg, WPARAM w_param, LPARAM l_param)
 	{
-		if (!g_AppManager) return;
+		if (!g_WindowAPI) return;
 
-		auto AppManager = g_AppManager;
+		auto WindowAPI = g_WindowAPI;
 
-		auto AppCore = AppManager->GetAppCore();
+		auto AppCore = WindowAPI->GetAppCore();
 		if (!AppCore) return;
 
 		auto InputState = AppCore->GetInputState();
@@ -225,109 +234,161 @@ namespace window
 	}
 #endif
 
+	void FocusCallback(bool Focused)
+	{
+		if (!g_WindowAPI) return;
+
+		auto WindowAPI = g_WindowAPI;
+
+		auto AppCore = WindowAPI->GetAppCore();
+		if (!AppCore) return;
+
+		AppCore->FocusWindow(Focused);
+	}
+
 	// ウィンドウのコールバック関数
 	LRESULT MainWindowCallback(HWND window, UINT msg, WPARAM w_param, LPARAM l_param)
 	{
-		if (!g_AppManager) return false;
-
-		auto AppManager = g_AppManager;
+		auto WindowAPI = g_WindowAPI;
 		
-		auto AppCore = AppManager->GetAppCore();
-		if (!AppCore) return false;
-
-		auto GUIEngine = AppCore->GetGUIEngine();
-		if (GUIEngine)
+		if (WindowAPI)
 		{
-			if (GUIEngine->CheckInput(window, msg, w_param, l_param)) return true;
+			auto AppCore = WindowAPI->GetAppCore();
 
-			if (GUIEngine->IsExistMouseOnGUI()) return true;
-		}
+			if (AppCore)
+			{
+				auto GUIEngine = AppCore->GetGUIEngine();
+				if (GUIEngine)
+				{
+					if (GUIEngine->CheckInput(window, msg, w_param, l_param)) return DefWindowProc(window, msg, w_param, l_param);
 
-		LRESULT result = 0;
+					if (GUIEngine->IsExistMouseOnGUI()) return DefWindowProc(window, msg, w_param, l_param);
+				}
 
-		// インプット
-		switch (msg)
-		{
+				// インプット
+				switch (msg)
+				{
+				case WM_KEYDOWN:
+					KeyCallback(window, msg, w_param, l_param, true);
+					break;
 
-			case WM_KEYDOWN : 
-				KeyCallback(window, msg, w_param, l_param, true);
-				break;
-
-			case WM_KEYUP:
-				KeyCallback(window, msg, w_param, l_param, false);
-				break;
+				case WM_KEYUP:
+					KeyCallback(window, msg, w_param, l_param, false);
+					break;
 #ifdef USE_INPUT_SYSTEM
-			case WM_LBUTTONDOWN:
-				MousebuttonCallback(window, msg, w_param, l_param, true);
-				break;
+				case WM_LBUTTONDOWN:
+					MousebuttonCallback(window, msg, w_param, l_param, true);
+					break;
 
-			case WM_RBUTTONDOWN:
-				MousebuttonCallback(window, msg, w_param, l_param, true);
-				break;
+				case WM_RBUTTONDOWN:
+					MousebuttonCallback(window, msg, w_param, l_param, true);
+					break;
 
-			case WM_LBUTTONUP:
-				MousebuttonCallback(window, msg, w_param, l_param, false);
-				break;
+				case WM_LBUTTONUP:
+					MousebuttonCallback(window, msg, w_param, l_param, false);
+					break;
 
-			case WM_RBUTTONUP:
-				MousebuttonCallback(window, msg, w_param, l_param, false);
-				break;
+				case WM_RBUTTONUP:
+					MousebuttonCallback(window, msg, w_param, l_param, false);
+					break;
 
-			case WM_MOUSEMOVE:
-				CursorPosCallback(window, msg, w_param, l_param);
-				break;
+				case WM_MOUSEMOVE:
+					CursorPosCallback(window, msg, w_param, l_param);
+					break;
 
-			case WM_MOUSEWHEEL:
-				ScrollCallback(window, msg, w_param, l_param);
-				break;
+				case WM_MOUSEWHEEL:
+					ScrollCallback(window, msg, w_param, l_param);
+					break;
+
+				case WM_SETFOCUS:
+					FocusCallback(true);
+					break;
+
+				case WM_KILLFOCUS:
+					FocusCallback(false);
+					break;
+
+				case WM_SIZE:
+					ResizeCallback(window, msg, w_param, l_param);
+					break;
 #endif
-			default:
-				break;
+				default:
+					break;
+				}
+			}
 		}
 
-		return true;
+		// 0/1でリターンとDefWindowProcが無いとシステムメニューなどが表示されなくなるので注意
+		//return 0;
+		return DefWindowProc(window, msg, w_param, l_param);
 	}
 
-	bool CWin32WindowAPI::InitWindow(HINSTANCE hInstance, int Width, int Height)
+	bool CWin32WindowAPI::InitWindow(HINSTANCE hInstance, app::SAppSettings Settings)
 	{
 		/// <summary>
 		/// ウィンドウの設定
 		/// </summary>
 		/// <returns></returns>
-		WNDCLASSA window_class = {}; 
-		
+		WNDCLASSEX window_class = {}; 
+		window_class.cbSize = sizeof(WNDCLASSEX);
 		window_class.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
 		// https://learn.microsoft.com/en-us/windows/win32/winmsg/window-class-styles
 		// CS_HREDRAW : 移動またはサイズ調整によってクライアント領域の幅が変化した場合、ウィンドウ全体を再描画します。
 		// CS_VREDRAW : 移動またはサイズ調整によってクライアント領域の高さが変化した場合、ウィンドウ全体を再描画します。
 		// CS_OWNDC   : クラス内の各ウィンドウに一意のデバイス コンテキストを割り当てます。
 		window_class.lpfnWndProc = MainWindowCallback; // ウィンドウのコールバック関数
+		window_class.cbClsExtra = 0;
+		window_class.cbWndExtra = 0;
 		window_class.hInstance = hInstance; // アプリのインスタンス
-		//window_class.hIcon = ""; // ウィンドウのアイコン(?)ひとまず今は要らない
-		window_class.lpszClassName = "GarnetWindowClass"; // WindosClassの名前. たぶんVulkanとかでいうラベルみたいなやつだと思う
+		window_class.hIcon = LoadIcon(NULL, IDI_APPLICATION); // ウィンドウのアイコン
+		window_class.hCursor = LoadCursor(NULL, IDC_ARROW);
+		window_class.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
+		window_class.lpszMenuName = NULL;
+		window_class.lpszClassName = L"GarnetWindowClass"; // WindosClassの名前. たぶんVulkanとかでいうラベルみたいなやつだと思う
+		window_class.hIconSm = LoadIcon(NULL, IDI_APPLICATION);
 
-		if (!RegisterClassA(&window_class)) // WindowClassを登録する
+		if (!RegisterClassEx(&window_class)) // WindowClassを登録する
 		{
 			Console::Log("[Error] could not regist WindowClass\n");
 
 			return false;
 		}
 
+		DWORD dwStyle = 0;
+		int nWidth = 0;
+		int nHeight = 0;
+
+		if (Settings.FullScreen)
+		{
+			dwStyle = WS_POPUP | WS_VISIBLE;
+
+			nWidth = GetSystemMetrics(SM_CXSCREEN);
+			nHeight = GetSystemMetrics(SM_CYSCREEN);
+		}
+		else
+		{
+			dwStyle = WS_OVERLAPPEDWINDOW | WS_VISIBLE;
+
+			nWidth = CW_USEDEFAULT;
+			nHeight = CW_USEDEFAULT;
+		}
+
 		// ウィンドウを生成
-		m_Window = CreateWindowExA(
-			0, // WindowStyleの拡張
+		m_Window = CreateWindowEx(
+			// https://learn.microsoft.com/ja-jp/windows/win32/winmsg/extended-window-styles
+			WS_EX_APPWINDOW, // WindowStyleの拡張
 			window_class.lpszClassName, // WindowClassの名前. 先ほど登録しておいたもの
-			"Garnet", // WindowName
+			L"Garnet", // WindowName
 			// WindowStyle : https://learn.microsoft.com/en-us/windows/win32/winmsg/window-styles
-			WS_POPUP | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_VISIBLE | WS_CAPTION, // WindosStyle. たぶんWindowに出てくるボタンとかタブの設定
-			200, // 位置 X (適当な値)
-			200, // 位置 Y (適当な値)
-			Width,         // Width
-			Height,        // HEIGHT
-			0,             // Window Parent. ウィンドウを複数個作ってグループ化できるのかな？ 例えばUnityのGame Viewと Scene ViewがあってUnityエディタ全体を動かすとそれもついてくるみたいな
-			0,             // Menu(?)
+			dwStyle, // WindosStyle. たぶんWindowに出てくるボタンとかタブの設定
+			nWidth, // 位置 X (適当な値)
+			nHeight, // 位置 Y (適当な値)
+			Settings.ScreenWidth,   // Width
+			Settings.ScreenHeight,  // HEIGHT
+			NULL,          // Window Parent. ウィンドウを複数個作ってグループ化できるのかな？ 例えばUnityのGame Viewと Scene ViewがあってUnityエディタ全体を動かすとそれもついてくるみたいな
+			NULL,          // Menu(?)
 			hInstance,     // アプリのインスタンス
-			0              // lpParam(?)
+			NULL           // lpParam(?)
 		);
 
 		if (!m_Window)
@@ -338,24 +399,22 @@ namespace window
 		}
 
 		// スクリーンサイズを取得
-		SystemParametersInfo(SPI_GETWORKAREA, 0, &m_WorkArea, 0);
-
-#ifdef _DEBUG
-		RECT rect;
-		if (GetWindowRect(m_Window, &rect))
+		if (Settings.FullScreen)
 		{
-			int w = rect.right - rect.left;
-			int h = rect.bottom - rect.top;
-
-			SetWindowPos(m_Window, HWND_TOP, rect.left, rect.top, w, h, NULL);
+			// Full Screen
+			SetWindowPos(m_Window, HWND_TOP, 0, 0, nWidth, nHeight, NULL);
 		}
-#else
-		// Full Screen
-		int workAreaWidth = m_WorkArea.right - m_WorkArea.left;
-		int workAreaHeight = m_WorkArea.bottom - m_WorkArea.top;
+		else
+		{
+			RECT rect;
+			if (GetWindowRect(m_Window, &rect))
+			{
+				int w = rect.right - rect.left;
+				int h = rect.bottom - rect.top;
 
-		SetWindowPos(m_Window, HWND_TOP, m_WorkArea.left, m_WorkArea.top, workAreaWidth, workAreaHeight, NULL);
-#endif // _DEBUG
+				SetWindowPos(m_Window, HWND_TOP, rect.left, rect.top, w, h, NULL);
+			}
+		}
 
 		return true;
 	}
@@ -422,7 +481,7 @@ namespace window
 			int w = rect.right - rect.left;
 			int h = rect.bottom - rect.top;
 
-			m_pCAppCore->Resize(w, h);
+			m_pCAppCore->ResizeWindow(w, h);
 		}
 	}
 
@@ -446,7 +505,7 @@ namespace window
 
 	void CWin32WindowAPI::ResizeWindow(int w, int h)
 	{
-		m_pCAppCore->Resize(w, h);
+		m_pCAppCore->ResizeWindow(w, h);
 	}
 
 	// インプットイベント
@@ -460,6 +519,11 @@ namespace window
 
 	// リサイズイベント
 	void CWin32WindowAPI::OnResize(int w, int h)
+	{
+	}
+
+	// フォーカスイベント
+	void CWin32WindowAPI::OnFocus(int focused)
 	{
 	}
 

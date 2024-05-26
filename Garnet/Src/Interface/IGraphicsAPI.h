@@ -64,5 +64,7 @@ namespace api
 		virtual int GetHeight() const = 0;
 
 		virtual const std::map<std::string, std::shared_ptr<graphics::IRenderPass>>& GetOffScreenRenderPassMap() const = 0;
+
+		virtual bool IsEnabledRuntimeShaderEditing() const = 0;
 	};
 }

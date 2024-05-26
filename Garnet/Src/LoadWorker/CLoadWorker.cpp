@@ -5,6 +5,7 @@ namespace resource
 {
 	CLoadWorker::CLoadWorker(api::IGraphicsAPI* pGraphicsAPI):
 		m_Status(ELoadStatus::None),
+		m_ResourceManager(std::make_shared<CResourceManager>()),
 		m_FirstResourceCount(0),
 		m_Alpha(1.0f),
 		m_LoadingBar(std::make_shared<object::C3DObject>("", "ShadowPass")),
@@ -17,8 +18,7 @@ namespace resource
 
 	CLoadWorker::~CLoadWorker()
 	{
-		m_FirstLoadResourceList.clear();
-		m_RuntimeLoadResourceList.clear();
+		m_LoadResourceList.clear();
 	}
 
 	bool CLoadWorker::Create(api::IGraphicsAPI* pGraphicsAPI)
@@ -46,7 +46,41 @@ namespace resource
 		return true;
 	}
 
-	bool CLoadWorker::Update(api::IGraphicsAPI* pGraphicsAPI)
+	bool CLoadWorker::Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine)
+	{
+		// 初期化
+		if (!InitLoadStatus(pGraphicsAPI)) return false;
+		
+		// ローディングバー
+		if (m_LoadingBar)
+		{
+			if (!m_LoadingBar->Update(pGraphicsAPI, nullptr, 0.0f)) return false;
+		}
+
+		// ローディング
+		if (!LoadResourceList(pGraphicsAPI, pPhysicsEngine)) return false;
+		
+		return true;
+	}
+
+	bool CLoadWorker::Draw(api::IGraphicsAPI* pGraphicsAPI, bool IsDepthPass, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
+		const std::shared_ptr<graphics::CDrawInfo>& DrawInfo)
+	{
+		if(m_Status == ELoadStatus::Loaded) return true;
+
+		if (m_Status == ELoadStatus::Loading && m_LoadingBar)
+		{
+			float rate = 1.0f - (static_cast<float>(m_LoadResourceList.size()) / m_FirstResourceCount);
+			m_LoadingBar->GetMaterialList()[0]->SetUniformValue("rate", &glm::vec1(rate)[0], sizeof(float));
+			m_LoadingBar->GetMaterialList()[0]->SetUniformValue("alpha", &m_Alpha, sizeof(float));
+
+			if (!m_LoadingBar->Draw(IsDepthPass, false, Camera, Projection, DrawInfo)) return false;
+		}
+
+		return true;
+	}
+
+	bool CLoadWorker::InitLoadStatus(api::IGraphicsAPI* pGraphicsAPI)
 	{
 		// 初期化
 		if (m_Status == ELoadStatus::None)
@@ -55,7 +89,7 @@ namespace resource
 
 			if (!Create(pGraphicsAPI)) return false;
 
-			m_FirstResourceCount = static_cast<int>(m_FirstLoadResourceList.size()); // 初回ロードのリソース数を取得
+			m_FirstResourceCount = static_cast<int>(m_LoadResourceList.size()); // 初回ロードのリソース数を取得
 
 			if (m_FirstResourceCount > 0)
 			{
@@ -68,85 +102,36 @@ namespace resource
 			}
 		}
 
-		// ローディングバー
-		if (m_LoadingBar)
-		{
-			if (!m_LoadingBar->Update(pGraphicsAPI, nullptr, 0.0f)) return false;
-		}
-
-		// ローディング
-		if (m_Status != ELoadStatus::Loaded) // 初回リソースのロード
-		{
-			for (auto& Resource : m_FirstLoadResourceList)
-			{
-				switch (Resource->GetStatus())
-				{
-				case resource::ELoadStatus::None:
-					if (!Resource->Load()) return false;
-					return true;
-
-				case resource::ELoadStatus::Loading:
-					if (!Resource->Update(pGraphicsAPI)) return false;
-					return true;
-
-				case resource::ELoadStatus::Loaded:
-				{
-					m_FirstLoadResourceList.erase(m_FirstLoadResourceList.begin());
-					m_FirstLoadResourceList.shrink_to_fit();
-				}
-				return true;
-
-				default:
-					break;
-				}
-			}
-
-			m_Status = ELoadStatus::Loaded;
-		}
-		else // ランタイムリソースのロード
-		{
-			for (auto& Resource : m_RuntimeLoadResourceList)
-			{
-				switch (Resource->GetStatus())
-				{
-				case resource::ELoadStatus::None:
-					if (!Resource->Load()) return false;
-					return true;
-
-				case resource::ELoadStatus::Loading:
-					if (!Resource->Update(pGraphicsAPI)) return false;
-					return true;
-
-				case resource::ELoadStatus::Loaded:
-				{
-					m_RuntimeLoadResourceList.erase(m_RuntimeLoadResourceList.begin());
-					m_RuntimeLoadResourceList.shrink_to_fit();
-
-					return true;
-				}
-
-				default:
-					break;
-				}
-			}
-		}
-
 		return true;
 	}
 
-	bool CLoadWorker::Draw(api::IGraphicsAPI* pGraphicsAPI, bool IsDepthPass, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
-		const std::shared_ptr<graphics::CDrawInfo>& DrawInfo)
+	bool CLoadWorker::LoadResourceList(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine)
 	{
-		if(m_Status == ELoadStatus::Loaded) return true;
-
-		if (m_Status == ELoadStatus::Loading && m_LoadingBar)
+		// ローディング
+		for (auto& Resource : m_LoadResourceList)
 		{
-			float rate = 1.0f - (static_cast<float>(m_FirstLoadResourceList.size()) / m_FirstResourceCount);
-			m_LoadingBar->GetMaterialList()[0]->SetUniformValue("rate", &glm::vec1(rate)[0], sizeof(float));
-			m_LoadingBar->GetMaterialList()[0]->SetUniformValue("alpha", &m_Alpha, sizeof(float));
+			switch (Resource->GetStatus())
+			{
+			case resource::ELoadStatus::None:
+				if (!Resource->Load()) return false;
+				return true;
 
-			if (!m_LoadingBar->Draw(IsDepthPass, false, Camera, Projection, DrawInfo)) return false;
+			case resource::ELoadStatus::Loading:
+				if (!Resource->Update(pGraphicsAPI, pPhysicsEngine, m_ResourceManager)) return false;
+				return true;
+
+			case resource::ELoadStatus::Loaded:
+			{
+				m_LoadResourceList.erase(m_LoadResourceList.begin());
+			}
+			return true;
+
+			default:
+				break;
+			}
 		}
+
+		m_Status = ELoadStatus::Loaded;
 
 		return true;
 	}
@@ -156,13 +141,37 @@ namespace resource
 		return (m_Status == ELoadStatus::Loaded);
 	}
 
-	void CLoadWorker::AddFirstLoadResource(const std::shared_ptr<resource::IResource>& Resource)
+	void CLoadWorker::AddLoadResource(const std::shared_ptr<resource::IResource>& Resource)
 	{
-		m_FirstLoadResourceList.push_back(Resource);
+		auto LoadingResource = GetLoadingResource(Resource->GetFilename());
+
+		if (LoadingResource)
+		{
+			// リソースにターゲットの参照だけを追加する
+			LoadingResource->AddReference(Resource);
+		}
+		else
+		{
+			// mapに新規追加する
+			m_LoadResourceList.push_back(Resource);
+		}
 	}
 
-	void CLoadWorker::AddRuntimeLoadResource(const std::shared_ptr<resource::IResource>& Resource)
+	std::shared_ptr<resource::IResource> CLoadWorker::GetLoadingResource(const std::string& Filename) const
 	{
-		m_RuntimeLoadResourceList.push_back(Resource);
+		for (const auto& Resouce : m_LoadResourceList)
+		{
+			if (Filename == Resouce->GetFilename())
+			{
+				return Resouce;
+			}
+		}
+
+		return nullptr;
+	}
+
+	const std::shared_ptr<CResourceManager>& CLoadWorker::GetResourceManager() const
+	{
+		return m_ResourceManager;
 	}
 }

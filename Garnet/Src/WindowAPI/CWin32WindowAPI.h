@@ -16,11 +16,10 @@ namespace window
 		app::CAppCore* m_pCAppCore;
 
 		HWND  m_Window; // ハンドルウィンドウ
-		RECT  m_WorkArea; // スクリーンサイズ
 		HDC   m_Device_Context; // デバイスのコンテキスト
 		HGLRC m_Rendering_Context; // OpenGLのコンテキスト
 	private:
-		bool InitWindow(HINSTANCE hInstance, int Width, int Height);
+		bool InitWindow(HINSTANCE hInstance, app::SAppSettings Settings);
 		bool InitGLContext();
 	public:
 		CWin32WindowAPI();
@@ -30,7 +29,7 @@ namespace window
 
 		virtual bool Release() override;
 
-		virtual bool Initialize(app::CAppCore* pAppCore, int Width, int Height) override;
+		virtual bool Initialize(app::CAppCore* pAppCore, app::SAppSettings Settings) override;
 
 		virtual void SwapWindowBuffers() override;
 
@@ -48,6 +47,9 @@ namespace window
 
 		// リサイズイベント
 		virtual void OnResize(int w, int h) override;
+
+		// フォーカスイベント
+		virtual void OnFocus(int focused) override;
 
 		// マウスイベント
 		virtual void OnMouseDown(int buttonNum, int x, int y) override;

@@ -4,7 +4,6 @@
 #include "../../Interface/IApp.h"
 #include "../../Interface/IGraphicsAPI.h"
 
-namespace scene { class CScriptScene; }
 namespace camera { class CCamera; }
 namespace projection { class CProjection; }
 namespace graphics { class CDrawInfo; }
@@ -21,14 +20,18 @@ namespace gui
 
 namespace app
 {
+	class CScriptScene;
+	class CFileModifier;
+
 	class CScriptApp : public IApp
 	{
-		std::shared_ptr<scene::CScriptScene> m_ScriptScene;
+		std::shared_ptr<app::CScriptScene> m_ScriptScene;
 		std::shared_ptr<camera::CCamera> m_MainCamera;
 		std::shared_ptr<projection::CProjection> m_Projection;
 		std::shared_ptr<graphics::CDrawInfo> m_DrawInfo;
 		std::shared_ptr<imageeffect::CBlurEffect> m_BlurEffect;
 
+		std::shared_ptr<CFileModifier> m_FileModifier;
 #ifdef USE_GUIENGINE
 		std::shared_ptr<gui::CGraphicsEditingWindow> m_GraphicsEditingWindow;
 #endif // USE_GUIENGINE
@@ -51,5 +54,10 @@ namespace app
 		virtual const std::shared_ptr<graphics::CDrawInfo>& GetDrawInfo() const override;
 
 		virtual const std::vector<std::shared_ptr<object::C3DObject>>& GetObjectList() const override;
+
+		// フォーカスイベント
+		virtual void OnFocus(bool Focused, api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker) override;
+
+		const std::shared_ptr<CFileModifier>& GetFileModifier() const;
 	};
 }

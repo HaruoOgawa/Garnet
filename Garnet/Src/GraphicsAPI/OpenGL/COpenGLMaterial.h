@@ -27,11 +27,9 @@ namespace api
 
 		// Uniform Buffer Object
 		std::vector<GLuint> m_UBOList;
-
-		// Texture
-		std::shared_ptr<COpenGLTexture> m_EmptyTexture;
-		std::shared_ptr<graphics::CTextureSet> m_TextureSet;
 	private:
+		void Release();
+
 		// Main Logics
 		bool CreateShaderStages();
 		bool CreateShaderBuffers();
@@ -44,6 +42,9 @@ namespace api
 		virtual ~COpenGLMaterial();
 
 		virtual bool Create(const std::shared_ptr<graphics::CTextureSet>& TextureSet) override;
+
+		virtual bool ReCreate(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, const std::vector<std::shared_ptr<graphics::CShaderBuffer>>& ShaderBufferList, const std::vector<graphics::STextureBindingLayout>& TextureBindingLayoutList) override;
+
 		virtual bool BuildDrawBuffer(int DynamicOffsetNum) override;
 
 		virtual void SetUniformValue(const std::string Name, const void* Data, int ByteSize, int DynamicOffsetNum = -1) override;

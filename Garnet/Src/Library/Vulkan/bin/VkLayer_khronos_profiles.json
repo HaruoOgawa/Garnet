@@ -4,12 +4,18 @@
         "name": "VK_LAYER_KHRONOS_profiles",
         "type": "GLOBAL",
         "library_path": ".\\VkLayer_khronos_profiles.dll",
-        "api_version": "1.3.236",
-        "implementation_version": "1.0.2",
+        "api_version": "1.3.283",
+        "implementation_version": "1.3.0",
         "status": "STABLE",
         "description": "Khronos Profiles layer",
         "introduction": "The Khronos Profiles layer helps test across a wide range of hardware capabilities without requiring a physical copy of every device.",
         "url": "https://vulkan.lunarg.com/doc/sdk/latest/windows/profiles_layer.html",
+        "instance_extensions": [
+            {
+                "name": "VK_EXT_layer_settings",
+                "spec_version": "2"
+            }
+        ],
         "device_extensions": [
             {
                 "name": "VK_EXT_tooling_info",
@@ -22,14 +28,82 @@
         "features": {
             "presets": [
                 {
-                    "label": "LunarG Desktop Portability 2022",
-                    "description": "Check the Vulkan 1.1 application will run on Windows, Linux and macOS platforms without exceeding ecosystem effective devices capabilities",
+                    "label": "Force Physical Device Only",
+                    "description": "Use the Profiles layer to force a specific physical device",
                     "platforms": [ "WINDOWS", "LINUX", "MACOS" ],
                     "status": "STABLE",
                     "settings": [
                         {
-                            "key": "profile_file",
-                            "value": "${VULKAN_CONTENT}/VK_LAYER_KHRONOS_profiles/VP_LUNARG_desktop_baseline_2022.json"
+                            "key": "force_device",
+                            "value": "FORCE_DEVICE_WITH_NAME"
+                        },
+                        {
+                            "key": "profile_emulation",
+                            "value": false
+                        },
+                        {
+                            "key": "simulate_capabilities",
+                            "value": []
+                        },
+                        {
+                            "key": "emulate_portability",
+                            "value": false
+                        }
+                    ]
+                },
+                {
+                    "label": "Emulate a Vulkan Conformant Profile",
+                    "description": "Emulate a Conformant Vulkan Profile",
+                    "platforms": [ "WINDOWS", "LINUX", "MACOS" ],
+                    "status": "STABLE",
+                    "settings": [
+                        {
+                            "key": "force_device",
+                            "value": "FORCE_DEVICE_OFF"
+                        },
+                        {
+                            "key": "profile_emulation",
+                            "value": true
+                        },
+                        {
+                            "key": "profile_dirs",
+                            "value": "${VULKAN_CONTENT}/VK_LAYER_KHRONOS_profiles"
+                        },
+                        {
+                            "key": "profile_name",
+                            "value": "VP_LUNARG_desktop_baseline_2023"
+                        },
+                        {
+                            "key": "simulate_capabilities",
+                            "value": [ "SIMULATE_API_VERSION_BIT", "SIMULATE_FEATURES_BIT", "SIMULATE_PROPERTIES_BIT" ]
+                        },
+                        {
+                            "key": "emulate_portability",
+                            "value": false
+                        }
+                    ]
+                },
+                {
+                    "label": "Emulate a Vulkan Portability Profile",
+                    "description": "Emulate a Vulkan Profile with Vulkan Portability",
+                    "platforms": [ "WINDOWS", "LINUX", "MACOS" ],
+                    "status": "STABLE",
+                    "settings": [
+                        {
+                            "key": "force_device",
+                            "value": "FORCE_DEVICE_OFF"
+                        },
+                        {
+                            "key": "profile_emulation",
+                            "value": true
+                        },
+                        {
+                            "key": "profile_dirs",
+                            "value": "${VULKAN_CONTENT}/VK_LAYER_KHRONOS_profiles"
+                        },
+                        {
+                            "key": "profile_name",
+                            "value": "VP_LUNARG_desktop_baseline_2023"
                         },
                         {
                             "key": "simulate_capabilities",
@@ -72,106 +146,196 @@
                             "value": true
                         }
                     ]
-                },
-                {
-                    "label": "LunarG Desktop Baseline 2022",
-                    "description": "Check the Vulkan 1.1 application will run on Windows and Linux platforms without exceeding ecosystem effective devices capabilities",
-                    "platforms": [ "WINDOWS", "LINUX", "MACOS" ],
-                    "status": "STABLE",
-                    "settings": [
-                        {
-                            "key": "emulate_portability",
-                            "value": false
-                        },
-                        {
-                            "key": "profile_file",
-                            "value": "${VULKAN_CONTENT}/VK_LAYER_KHRONOS_profiles/VP_LUNARG_desktop_baseline_2022.json"
-                        },
-                        {
-                            "key": "simulate_capabilities",
-                            "value": [ "SIMULATE_API_VERSION_BIT", "SIMULATE_FEATURES_BIT", "SIMULATE_PROPERTIES_BIT" ]
-                        }
-                    ]
-                },
-                {
-                    "label": "Khronos Roadmap 2022",
-                    "description": "Check the Vulkan 1.3 application will run on the Khronos Roadmap 2022 Profile devices",
-                    "platforms": [ "WINDOWS", "LINUX", "MACOS" ],
-                    "status": "STABLE",
-                    "settings": [
-                        {
-                            "key": "emulate_portability",
-                            "value": false
-                        },
-                        {
-                            "key": "profile_file",
-                            "value": "${VULKAN_CONTENT}/VK_LAYER_KHRONOS_profiles/VP_KHR_roadmap_2022.json"
-                        },
-                        {
-                            "key": "simulate_capabilities",
-                            "value": [ "SIMULATE_API_VERSION_BIT", "SIMULATE_FEATURES_BIT", "SIMULATE_PROPERTIES_BIT" ]
-                        }
-                    ]
-                },
-                {
-                    "label": "Android Baseline 2021",
-                    "description": "Check the Vulkan 1.0 application will run on the Android Baseline 2022 Profile devices",
-                    "platforms": [ "WINDOWS", "LINUX", "MACOS" ],
-                    "status": "STABLE",
-                    "settings": [
-                        {
-                            "key": "emulate_portability",
-                            "value": false
-                        },
-                        {
-                            "key": "profile_file",
-                            "value": "${VULKAN_CONTENT}/VK_LAYER_KHRONOS_profiles/VP_ANDROID_baseline_2021.json"
-                        },
-                        {
-                            "key": "simulate_capabilities",
-                            "value": [ "SIMULATE_API_VERSION_BIT", "SIMULATE_FEATURES_BIT", "SIMULATE_PROPERTIES_BIT", "SIMULATE_EXTENSIONS_BIT", "SIMULATE_FORMATS_BIT" ]
-                        }
-                    ]
                 }
             ],
             "settings": [
                 {
-                    "key": "profile_file",
-                    "env": "VK_KHRONOS_PROFILES_PROFILE_FILE",
-                    "label": "Profile Selection",
-                    "description": "Path of a profile file and the name of the profile to load.",
+                    "key": "force_device",
+                    "label": "Force Device",
+                    "description": "On system with multiple physical devices, force the use of one specific physical device.",
                     "status": "STABLE",
-                    "type": "LOAD_FILE",
-                    "format": "PROFILE",
-                    "filter": "*.json",
-                    "default": "${VULKAN_CONTENT}/VK_LAYER_KHRONOS_profiles/VP_LUNARG_desktop_portability_2022.json",
-                    "expanded": true,
+                    "type": "ENUM",
+                    "default": "FORCE_DEVICE_OFF",
                     "platforms": [ "WINDOWS", "LINUX", "MACOS" ],
-                    "settings": [
+                    "flags": [
                         {
-                            "key": "profile_name",
-                            "env": "VK_KHRONOS_PROFILES_PROFILE_NAME",
-                            "label": "Profile",
-                            "description": "Name of the profile specified by the profile file to use. If set to ${VP_DEFAULT}, the layer will load the first profile in the file.",
-                            "type": "ENUM",
-                            "platforms": [ "WINDOWS", "LINUX", "MACOS" ],
-                            "flags": [],
-                            "default": "${VP_DEFAULT}"
+                            "key": "FORCE_DEVICE_OFF",
+                            "label": "Off",
+                            "description": "Let the Vulkan Loader list all the Physical Device."
                         },
                         {
-                            "key": "profile_validation",
-                            "env": "VK_KHRONOS_PROFILES_PROFILE_VALIDATION",
-                            "label": "Schema Validation",
-                            "description": "Validate the profile file against the Vulkan SDK profile schema if the file is found.",
-                            "type": "BOOL",
-                            "default": false,
-                            "platforms": [ "WINDOWS", "LINUX", "MACOS" ]
+                            "key": "FORCE_DEVICE_WITH_UUID",
+                            "label": "Using Device UUID",
+                            "description": "Force the Physical Device identified by the device UUID.",
+                            "settings": [
+                                {
+                                    "key": "force_device_uuid",
+                                    "label": "Device UUID",
+                                    "description": "Device UUID of the forced physical devices",
+                                    "status": "STABLE",
+                                    "platforms": [ "WINDOWS", "LINUX", "MACOS" ],
+                                    "type": "STRING",
+                                    "default": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+                                    "dependence": {
+                                        "mode": "ALL",
+                                        "settings": [
+                                            {
+                                                "key": "force_device",
+                                                "value": "FORCE_DEVICE_WITH_UUID"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "key": "FORCE_DEVICE_WITH_NAME",
+                            "label": "Using Device Name",
+                            "description": "Force the Physical Device identified by the device UUID.",
+                            "settings": [
+                                {
+                                    "key": "force_device_name",
+                                    "label": "Device Name",
+                                    "description": "Device Name of the forced physical devices",
+                                    "status": "STABLE",
+                                    "platforms": [ "WINDOWS", "LINUX", "MACOS" ],
+                                    "type": "ENUM",
+                                    "flags": [],
+                                    "default": "${VP_PHYSICAL_DEVICES}",
+                                    "dependence": {
+                                        "mode": "ALL",
+                                        "settings": [
+                                            {
+                                                "key": "force_device",
+                                                "value": "FORCE_DEVICE_WITH_NAME"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ]
                         }
                     ]
                 },
                 {
+                    "key": "profile_emulation",
+                    "label": "Emulate a Vulkan Profile",
+                    "description": "Emulate a Vulkan Profile on the Developer System",
+                    "status": "STABLE",
+                    "type": "BOOL",
+                    "default": true,
+                    "settings": [
+                        {
+                            "key": "profile_dirs",
+                            "label": "Loading Directory",
+                            "description": "Select the location all the profiles.",
+                            "type": "LOAD_FOLDER",
+                            "format": "PROFILE",
+                            "default": "",
+                            "dependence": {
+                                "mode": "ALL",
+                                "settings": [
+                                    {
+                                        "key": "profile_emulation",
+                                        "value": true
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "key": "profile_name",
+                            "label": "Name",
+                            "description": "Name of the profile specified by the profile file to use.",
+                            "type": "ENUM",
+                            "flags": [],
+                            "default": "${VP_DEFAULT}",
+                            "dependence": {
+                                "mode": "ALL",
+                                "settings": [
+                                    {
+                                        "key": "profile_emulation",
+                                        "value": true
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "key": "profile_validation",
+                            "label": "Schema Validation",
+                            "description": "Validate the profile files against the Vulkan SDK profile schema if the file is found.",
+                            "type": "BOOL",
+                            "default": false,
+                            "platforms": [ "WINDOWS", "LINUX", "MACOS" ],
+                            "dependence": {
+                                "mode": "ALL",
+                                "settings": [
+                                    {
+                                        "key": "profile_emulation",
+                                        "value": true
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "key": "simulate_capabilities",
+                    "label": "Simulate Profile Capabilities",
+                    "description": "Control of the simulated capabilities of the Vulkan physical device from the selected Vulkan Profile.",
+                    "status": "STABLE",
+                    "type": "FLAGS",
+                    "flags": [
+                        {
+                            "key": "SIMULATE_API_VERSION_BIT",
+                            "label": "Version",
+                            "description": "The Vulkan device will report the API version from the selected Profile. It also overrides the `api-version` set in VkPhysicalDeviceProperties."
+                        },
+                        {
+                            "key": "SIMULATE_FEATURES_BIT",
+                            "label": "Features",
+                            "description": "The Vulkan device will report the features from the selected Profile.",
+                            "settings": [
+                                {
+                                    "key": "default_feature_values",
+                                    "label": "Unspecified Features",
+                                    "description": "Feature values when not specified in the select Vulkan profiles.",
+                                    "status": "STABLE",
+                                    "type": "ENUM",
+                                    "default": "DEFAULT_FEATURE_VALUES_DEVICE",
+                                    "flags": [
+                                        {
+                                            "key": "DEFAULT_FEATURE_VALUES_DEVICE",
+                                            "label": "Use Device Values",
+                                            "description": "When a feature is not mentionned in the select Vulkan profiles, set is to the physical device value."
+                                        },
+                                        {
+                                            "key": "DEFAULT_FEATURE_VALUES_FALSE",
+                                            "label": "Use False",
+                                            "description": "When a feature is not mentionned in the select Vulkan profiles, set it to false."
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "key": "SIMULATE_PROPERTIES_BIT",
+                            "label": "Properties",
+                            "description": "The Vulkan device will report the properties from the selected Profile."
+                        },
+                        {
+                            "key": "SIMULATE_EXTENSIONS_BIT",
+                            "label": "Device Extensions",
+                            "description": "The Vulkan device will report the extensions from the selected Profile."
+                        },
+                        {
+                            "key": "SIMULATE_FORMATS_BIT",
+                            "label": "Formats",
+                            "description": "The Vulkan device will report the formats from the selected Profile."
+                        }
+                    ],
+                    "default": [ "SIMULATE_API_VERSION_BIT", "SIMULATE_FEATURES_BIT", "SIMULATE_PROPERTIES_BIT" ]
+                },
+                {
                     "key": "emulate_portability",
-                    "env": "VK_KHRONOS_PROFILES_EMULATE_PORTABILITY",
                     "label": "Emulate VK_KHR_portability_subset",
                     "description": "Emulate the VK_KHR_portability_subset extension on the device.",
                     "status": "STABLE",
@@ -442,45 +606,7 @@
                     ]
                 },
                 {
-                    "key": "simulate_capabilities",
-                    "env": "VK_KHRONOS_PROFILES_SIMULATE_CAPABILITIES",
-                    "label": "Simulate Profile Capabilities",
-                    "description": "Control of the simulated capabilities of the Vulkan physical device from the selected Vulkan Profile.",
-                    "status": "STABLE",
-                    "type": "FLAGS",
-                    "platforms": [ "WINDOWS", "LINUX", "MACOS" ],
-                    "flags": [
-                        {
-                            "key": "SIMULATE_API_VERSION_BIT",
-                            "label": "Version",
-                            "description": "The Vulkan device will report the API version from the selected Profile. It also overrides the `api-version` set in VkPhysicalDeviceProperties."
-                        },
-                        {
-                            "key": "SIMULATE_FEATURES_BIT",
-                            "label": "Features",
-                            "description": "The Vulkan device will report the features from the selected Profile."
-                        },
-                        {
-                            "key": "SIMULATE_PROPERTIES_BIT",
-                            "label": "Properties",
-                            "description": "The Vulkan device will report the properties from the selected Profile."
-                        },
-                        {
-                            "key": "SIMULATE_EXTENSIONS_BIT",
-                            "label": "Device Extensions",
-                            "description": "The Vulkan device will report the extensions from the selected Profile."
-                        },
-                        {
-                            "key": "SIMULATE_FORMATS_BIT",
-                            "label": "Formats",
-                            "description": "The Vulkan device will report the formats from the selected Profile."
-                        }
-                    ],
-                    "default": [ "SIMULATE_API_VERSION_BIT", "SIMULATE_FEATURES_BIT", "SIMULATE_PROPERTIES_BIT" ]
-                },
-                {
                     "key": "exclude_device_extensions",
-                    "env": "VK_KHRONOS_PROFILES_EXCLUDE_DEVICE_EXTENSIONS",
                     "label": "Exclude Device Extensions",
                     "description": "Removes the listed device extensions from being reported by the Vulkan physical device.",
                     "status": "STABLE",
@@ -725,7 +851,6 @@
                 },
                 {
                     "key": "exclude_formats",
-                    "env": "VK_KHRONOS_PROFILES_EXCLUDE_FORMATS",
                     "label": "Exclude Formats",
                     "description": "Removes the format feature flags from being reported by the Vulkan physical device.",
                     "status": "STABLE",
@@ -982,7 +1107,6 @@
                 },
                 {
                     "key": "debug_actions",
-                    "env": "VK_KHRONOS_PROFILES_DEBUG_ACTIONS",
                     "label": "Debug Actions",
                     "description": "This indicates what action is to be taken when a layer wants to report information",
                     "status": "STABLE",
@@ -1007,7 +1131,6 @@
                             "settings": [
                                 {
                                     "key": "debug_filename",
-                                    "env": "VK_KHRONOS_PROFILES_DEBUG_FILENAME",
                                     "label": "Log Filename",
                                     "description": "Specifies the output filename",
                                     "type": "SAVE_FILE",
@@ -1052,7 +1175,6 @@
                                 },
                                 {
                                     "key": "debug_file_clear",
-                                    "env": "VK_KHRONOS_PROFILES_DEBUG_FILE_CLEAR",
                                     "label": "Clear Log at Launch",
                                     "description": "Discard the content of the log file between each layer run",
                                     "type": "BOOL",
@@ -1109,7 +1231,6 @@
                 },
                 {
                     "key": "debug_fail_on_error",
-                    "env": "VK_KHRONOS_PROFILES_DEBUG_FAIL_ON_ERROR",
                     "label": "Fail on Error",
                     "description": "If the device doesn't support the capabilities of the selected Profile, the layer fail to load. When enabled, vkEnumeratePhysicalDevices will fail when the selected Profile is not supported.",
                     "status": "STABLE",
@@ -1119,7 +1240,6 @@
                 },
                 {
                     "key": "debug_reports",
-                    "env": "VK_KHRONOS_PROFILES_DEBUG_REPORTS",
                     "label": "Message Types",
                     "description": "This is a comma-delineated list of options telling the layer what types of messages it should report back",
                     "status": "STABLE",
@@ -1149,6 +1269,7 @@
                         }
                     ],
                     "default": [
+                        "DEBUG_REPORT_NOTIFICATION_BIT",
                         "DEBUG_REPORT_WARNING_BIT",
                         "DEBUG_REPORT_ERROR_BIT"
                     ]

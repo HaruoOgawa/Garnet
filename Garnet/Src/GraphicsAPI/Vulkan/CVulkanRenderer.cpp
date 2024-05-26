@@ -13,7 +13,6 @@ namespace api
 		m_PassName(PassName),
 		m_DynamicOffsetNum(0),
 		m_InstanceCount(1),
-		m_PipelineLayout(nullptr),
 		m_GraphicsPipeline(nullptr)
 	{
 	}
@@ -31,22 +30,16 @@ namespace api
 			vkDestroyPipeline(m_pGraphicsAPI->GetLogicalDevice(), m_GraphicsPipeline, nullptr);
 			m_GraphicsPipeline = nullptr;
 		}
-
-		// パイプラインレイアウトの破棄(たぶん本来は3Dオブジェクトごとにあるやつ) 
-		if (m_PipelineLayout)
-		{
-			vkDestroyPipelineLayout(m_pGraphicsAPI->GetLogicalDevice(), m_PipelineLayout, nullptr);
-			m_PipelineLayout = nullptr;
-		}
 	}
 
 	bool CVulkanRenderer::Create(const std::shared_ptr<graphics::CVertexBuffer>& VertexBuffer, const std::shared_ptr<graphics::CIndexBuffer>& IndexBuffer, const std::shared_ptr<graphics::CMaterial>& Material)
 	{
+		const CVulkanVertexBuffer* pVulkanVertexBuffer = static_cast<const CVulkanVertexBuffer*>(VertexBuffer.get());
 		api::CVulkanMaterial* pVulkanMat = static_cast<api::CVulkanMaterial*>(Material.get());
 
 		m_InstanceCount = VertexBuffer->GetInstanceCount();
 
-		if (!CreateGraphicsPipeline(VertexBuffer, IndexBuffer, pVulkanMat)) return false; // グラフィックパイプラインを作成
+		if (!CreateGraphicsPipeline(pVulkanVertexBuffer, pVulkanMat)) return false; // グラフィックパイプラインを作成
 
 		return true;
 	}
@@ -57,57 +50,35 @@ namespace api
 		const CVulkanIndexBuffer* pVulkanIndexBuffer = static_cast<const CVulkanIndexBuffer*>(IndexBuffer.get());
 		api::CVulkanMaterial* pVulkanMat = static_cast<api::CVulkanMaterial*>(Material.get());
 
+		if (!pVulkanMat->IsAvailable()) return true;
+
 		// ユニフォームバッファの準備
 		if (!pVulkanMat->BuildDrawBuffer(DynamicOffsetNum)) return false;
 
-		// グラフィックパイプラインをコマンドにバインド
-		vkCmdBindPipeline(m_pGraphicsAPI->GetCurrentCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, m_GraphicsPipeline);
-
-		// カリングモードを設定
-		SetCullMode(pVulkanMat->GetCullMode());
-		
-		// 頂点バッファをパイプラインにバインドする
-		VkDeviceSize offsets[] = { 0 };
-		for (int i = 0; i < static_cast<int>(pVulkanVertexBuffer->GetVertexBufferList().size()); i++)
+		if (m_pGraphicsAPI->IsEnabledRuntimeShaderEditing())
 		{
-			vkCmdBindVertexBuffers(m_pGraphicsAPI->GetCurrentCommandBuffer(), i, 1, &pVulkanVertexBuffer->GetVertexBufferList()[i], offsets);
+			// ランタイム描画設定
+			SetRuntimeGraphicsSettings(pVulkanVertexBuffer, pVulkanMat);
 		}
+		else
+		{
+			// グラフィックパイプラインをコマンドにバインド
+			vkCmdBindPipeline(m_pGraphicsAPI->GetCurrentCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, m_GraphicsPipeline);
+
+			// カリングモードを設定
+			SetCullMode(pVulkanMat->GetCullMode());
+		}
+
+		// 頂点バッファをパイプラインにバインドする
+		pVulkanVertexBuffer->Bind();
 
 		// インデックスバッファをパイプラインにバインドする
-		if (pVulkanIndexBuffer->GetIndiceType() == graphics::EIndiceType::UNSIGNED_SHORT)
-		{
-			vkCmdBindIndexBuffer(m_pGraphicsAPI->GetCurrentCommandBuffer(), pVulkanIndexBuffer->GetIndexBuffer(), 0, VK_INDEX_TYPE_UINT16);
-		}
-		else if (pVulkanIndexBuffer->GetIndiceType() == graphics::EIndiceType::UNSIGNED_INT)
-		{
-			vkCmdBindIndexBuffer(m_pGraphicsAPI->GetCurrentCommandBuffer(), pVulkanIndexBuffer->GetIndexBuffer(), 0, VK_INDEX_TYPE_UINT32);
-		}
-		
-		// UBOのセット
-		if (pVulkanMat->IsUseShaderBuffer())
-		{
-			std::vector<uint32_t> dynamicOffsetList;
-			for (const auto& Size : pVulkanMat->GetBindingRefSizeList())
-			{
-				uint32_t dynamicOffset = (DynamicOffsetNum - 1) * Size;
-				dynamicOffsetList.push_back(dynamicOffset);
-			}
+		pVulkanIndexBuffer->Bind();
 
-			if (pVulkanMat->IsUseDynamicOffset())
-			{
-				vkCmdBindDescriptorSets(m_pGraphicsAPI->GetCurrentCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS,
-					m_PipelineLayout, 0, 1, &pVulkanMat->GetDescriptorSets()[m_pGraphicsAPI->GetCurrentFrame()], static_cast<uint32_t>(dynamicOffsetList.size()), &dynamicOffsetList[0]);
-			}
-			else
-			{
-				vkCmdBindDescriptorSets(m_pGraphicsAPI->GetCurrentCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS,
-					m_PipelineLayout, 0, 1, &pVulkanMat->GetDescriptorSets()[m_pGraphicsAPI->GetCurrentFrame()], 0, nullptr);
-			}
-		}
+		// UBOのセット
+		pVulkanMat->BindUBO(DynamicOffsetNum);
 
 		// 描画コマンドを発行
-		//vkCmdDraw(m_CommandBuffers[m_CurrentFrame], 3, 1, 0, 0); // パラメーター: vertexCount, instanceCount, firstVertex, firstInstance
-		// インデックス付のドローコマンドはこちら
 		vkCmdDrawIndexed(m_pGraphicsAPI->GetCurrentCommandBuffer(), pVulkanIndexBuffer->GetIndicesCount(), m_InstanceCount, 0, 0, 0);
 
 		return true;
@@ -144,10 +115,13 @@ namespace api
 	}
 
 	// Vulkanメインロジック /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	bool CVulkanRenderer::CreateGraphicsPipeline(const std::shared_ptr<graphics::CVertexBuffer>& VertexBuffer, const std::shared_ptr<graphics::CIndexBuffer>& IndexBuffer, api::CVulkanMaterial* pVulkanMat)
+	bool CVulkanRenderer::CreateGraphicsPipeline(const CVulkanVertexBuffer* pVulkanVertexBuffer, api::CVulkanMaterial* pVulkanMat)
 	{
-		const CVulkanVertexBuffer* pVulkanVertexBuffer = static_cast<const CVulkanVertexBuffer*>(VertexBuffer.get());
-		const CVulkanIndexBuffer* pVulkanIndexBuffer = static_cast<const CVulkanIndexBuffer*>(IndexBuffer.get());
+		// Shader編集が有効な時はグラフィックパイプラインは生成しない
+		if (m_pGraphicsAPI->IsEnabledRuntimeShaderEditing())
+		{
+			return true;
+		}
 
 		// グラフィックパイプラインの固定機の設定 ///////////////////////////////////////////////////////////////////////////////////////
 		// 動的状態(ダイナミックステート)の設定(パイプラインにベイクせずにマイフレームの描画時に設定できるようにするパラメーターの設定)
@@ -319,30 +293,6 @@ namespace api
 		colorBlendingInfo.blendConstants[2] = 0.0f;
 		colorBlendingInfo.blendConstants[3] = 0.0f;
 
-		///////////////////////////////////////////////////////////////////
-
-		// パイプラインレイアウト(Uniformをシェーダーに渡すための仕組み)
-		// Uniformの値自体はいつでも変更できるが、どのUniformを使用するかはここで事前にこのパイプラインレイアウトで設定しておく必要がある。
-		// たぶんここではLayoutは意味としてUniformを指すのでは？
-		VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
-		pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-		if (pVulkanMat->IsUseShaderBuffer())
-		{
-			pipelineLayoutInfo.setLayoutCount = 1;
-			pipelineLayoutInfo.pSetLayouts = &pVulkanMat->GetDescriptorSetLayout();
-		}
-		else
-		{
-			pipelineLayoutInfo.setLayoutCount = 0;
-			pipelineLayoutInfo.pSetLayouts = nullptr;
-		}
-		pipelineLayoutInfo.pushConstantRangeCount = 0;
-		pipelineLayoutInfo.pPushConstantRanges = nullptr;
-
-		if (vkCreatePipelineLayout(m_pGraphicsAPI->GetLogicalDevice(), &pipelineLayoutInfo, nullptr, &m_PipelineLayout) != VK_SUCCESS) return false;
-
-		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 		// レンダリングパイプラインでデプスとステンシルを有効にする
 		VkPipelineDepthStencilStateCreateInfo depthStencil{};
 		depthStencil.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
@@ -407,7 +357,7 @@ namespace api
 		pipelineInfo.pColorBlendState = &colorBlendingInfo;
 		pipelineInfo.pDynamicState = &dynamicStateCreateInfo;
 
-		pipelineInfo.layout = m_PipelineLayout;
+		pipelineInfo.layout = pVulkanMat->GetPipelineLayout();
 
 		if (!m_PassName.empty())
 		{
@@ -440,6 +390,208 @@ namespace api
 		return true;
 	}
 
+	void CVulkanRenderer::SetRuntimeGraphicsSettings(const CVulkanVertexBuffer* pVulkanVertexBuffer, api::CVulkanMaterial* pVulkanMat)
+	{
+		// グラフィックパイプラインの設定をここで全て実行時に行う
+		// https://github.com/SaschaWillems/Vulkan/blob/master/examples/shaderobjects/shaderobjects.cpp#L331
+
+		// 頂点バッファの入力レイアウト
+		// 頂点バッファ入力(Vertex Shaderに渡すデータ形式について設定する)
+		int Size = static_cast<int>(pVulkanVertexBuffer->GetVertexBufferList().size());
+		std::vector<VkVertexInputBindingDescription2EXT> bindingDescriptions(Size);
+		std::vector<VkVertexInputAttributeDescription2EXT> attributeDescriptions(Size);
+
+		for (int i = 0; i < Size; i++)
+		{
+			//
+			int Dimension = pVulkanVertexBuffer->GetAttributeDimensions()[i];
+			int ByteStride = pVulkanVertexBuffer->GetAttribByteStrides()[i];
+
+			// 頂点バッファのバインドに関する説明,設定(頂点バッファレイアウト)
+			bindingDescriptions[i].binding = i; // バインドする頂点バッファのインデックス(?)違う形式で頂点バッファを用意するときに使用する？
+			bindingDescriptions[i].stride = (ByteStride != 0) ? ByteStride : (Dimension * sizeof(pVulkanVertexBuffer->GetVertices()[i][0])); // 頂点バッファ内の要素一つあたりのサイズ。次の要素までのバイト数
+			bindingDescriptions[i].inputRate = VK_VERTEX_INPUT_RATE_VERTEX; // よくわからぬ。各頂点の後、次のデータ エントリに移動します。らしい
+
+			// アトリビュート(頂点データ)の設定
+			attributeDescriptions[i].binding = i; // BindingDescriptionの内どのバインド設定を使用するかのインデックス
+			attributeDescriptions[i].location = i; // Shaderのlayout(location = 0)に設定すｒ数値
+			attributeDescriptions[i].format = GetVertexFormat(Dimension, pVulkanVertexBuffer->GetAttribDataTypes()[i]); // データ型. SFLOAT --> Signed Float
+			attributeDescriptions[i].offset = 0; // データオフセット
+		}
+
+		m_pGraphicsAPI->SetVertexInputEXT(m_pGraphicsAPI->GetCurrentCommandBuffer(), static_cast<uint32_t>(Size), &bindingDescriptions[0], static_cast<uint32_t>(Size), &attributeDescriptions[0]);
+
+		// 入力アセンブリ(頂点から描画されるジオメトリの種類など, GL_TRIANGLE_STRIPみたいなのを設定する場所)
+		m_pGraphicsAPI->SetPrimitiveTopologyEXT(m_pGraphicsAPI->GetCurrentCommandBuffer(), VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
+		m_pGraphicsAPI->SetPrimitiveRestartEnableEXT(m_pGraphicsAPI->GetCurrentCommandBuffer(), VK_FALSE);
+
+		// ビューポートの設定
+		// 上記のダイナミックステートのことで動的変更を可にする
+		VkViewport viewport{};
+		viewport.x = 0.0f; // 基準の座標
+		viewport.y = 0.0f;
+		viewport.width = (float)m_pGraphicsAPI->GetSwapChainExtent().width;
+		viewport.height = (float)m_pGraphicsAPI->GetSwapChainExtent().height;
+		viewport.minDepth = 0.0f;
+		viewport.maxDepth = 1.0f;
+
+		m_pGraphicsAPI->SetViewportWithCountEXT(m_pGraphicsAPI->GetCurrentCommandBuffer(), 1, &viewport);
+
+		// シザーの設定(シザーとはピクセルが実際に格納される領域を定義する. シザーよりも外側の領域はラスタライザにより破棄される)
+		// 上記のダイナミックステートのことで動的変更を可にする
+		VkRect2D scissor{};
+		scissor.offset = { 0, 0 };
+		scissor.extent = m_pGraphicsAPI->GetSwapChainExtent(); // 解像度
+
+		m_pGraphicsAPI->SetScissorWithCountEXT(m_pGraphicsAPI->GetCurrentCommandBuffer(), 1, &scissor);
+
+		// ラスタライザの設定
+		VkPipelineRasterizationStateCreateInfo rasterizer{};
+		rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
+		rasterizer.depthClampEnable = VK_FALSE;
+		rasterizer.rasterizerDiscardEnable = VK_FALSE;
+		rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
+		rasterizer.lineWidth = 1.0f;
+
+		switch (pVulkanMat->GetCullMode())
+		{
+		case graphics::ECullMode::CULL_BACK:
+			rasterizer.cullMode = VK_CULL_MODE_BACK_BIT; // カリングの設定
+			break;
+
+		case graphics::ECullMode::CULL_FRONT:
+			rasterizer.cullMode = VK_CULL_MODE_FRONT_BIT; // カリングの設定
+			break;
+
+		case graphics::ECullMode::CULL_NONE:
+			rasterizer.cullMode = VK_CULL_MODE_NONE; // カリングの設定
+			break;
+
+		default:
+			rasterizer.cullMode = VK_CULL_MODE_BACK_BIT; // カリングの設定
+			break;
+		}
+
+		rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE; // カリングする際の頂点の順番かな？ GL_CWWみたいな
+		rasterizer.depthBiasEnable = VK_FALSE; // デプステストに関する設定
+		rasterizer.depthBiasConstantFactor = 0.0f;
+		rasterizer.depthBiasClamp = 0.0f;
+		rasterizer.depthBiasSlopeFactor = 0.0f;
+
+		m_pGraphicsAPI->SetCullModeEXT(m_pGraphicsAPI->GetCurrentCommandBuffer(), rasterizer.cullMode);
+		m_pGraphicsAPI->SetFrontFaceEXT(m_pGraphicsAPI->GetCurrentCommandBuffer(), rasterizer.frontFace);
+		m_pGraphicsAPI->SetRasterizerDiscardEnableEXT(m_pGraphicsAPI->GetCurrentCommandBuffer(), rasterizer.rasterizerDiscardEnable);
+		m_pGraphicsAPI->SetPolygonModeEXT(m_pGraphicsAPI->GetCurrentCommandBuffer(), rasterizer.polygonMode);
+		m_pGraphicsAPI->SetRasterizationSamplesEXT(m_pGraphicsAPI->GetCurrentCommandBuffer(), VK_SAMPLE_COUNT_1_BIT);
+		m_pGraphicsAPI->SetAlphaToCoverageEnableEXT(m_pGraphicsAPI->GetCurrentCommandBuffer(), rasterizer.rasterizerDiscardEnable);
+
+		// マルチサンプリング(アンチエイリアシング)
+		const uint32_t sampleMask = 0xFF;
+		m_pGraphicsAPI->SetSampleMaskEXT(m_pGraphicsAPI->GetCurrentCommandBuffer(), VK_SAMPLE_COUNT_1_BIT, &sampleMask);
+
+		// レンダリングパイプラインでデプスとステンシルを有効にする
+		VkPipelineDepthStencilStateCreateInfo depthStencil{};
+		depthStencil.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
+
+		// Depth
+		{
+			depthStencil.depthTestEnable = (pVulkanMat->IsEnabledZWrite()) ? VK_TRUE : VK_FALSE;
+			depthStencil.depthWriteEnable = (pVulkanMat->IsEnabledZWrite()) ? VK_TRUE : VK_FALSE;
+
+			graphics::EDepthFunc DepthFunc = pVulkanMat->GetDepthFunc();
+			switch (DepthFunc)
+			{
+			case graphics::EDepthFunc::Never:
+				depthStencil.depthCompareOp = VK_COMPARE_OP_NEVER;
+				break;
+			case graphics::EDepthFunc::Less:
+				depthStencil.depthCompareOp = VK_COMPARE_OP_LESS;
+				break;
+			case graphics::EDepthFunc::LessEqual:
+				depthStencil.depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
+				break;
+			case graphics::EDepthFunc::Greater:
+				depthStencil.depthCompareOp = VK_COMPARE_OP_GREATER;
+				break;
+			case graphics::EDepthFunc::GreaterEqual:
+				depthStencil.depthCompareOp = VK_COMPARE_OP_GREATER_OR_EQUAL;
+				break;
+			case graphics::EDepthFunc::Equal:
+				depthStencil.depthCompareOp = VK_COMPARE_OP_EQUAL;
+				break;
+			case graphics::EDepthFunc::NotEqual:
+				depthStencil.depthCompareOp = VK_COMPARE_OP_NOT_EQUAL;
+				break;
+			case graphics::EDepthFunc::Always:
+				depthStencil.depthCompareOp = VK_COMPARE_OP_ALWAYS;
+				break;
+			default:
+				depthStencil.depthCompareOp = VK_COMPARE_OP_LESS;
+				break;
+			}
+		}
+
+		depthStencil.depthBoundsTestEnable = VK_FALSE;
+		depthStencil.minDepthBounds = 0.0f;
+		depthStencil.maxDepthBounds = 1.0f;
+		depthStencil.stencilTestEnable = VK_FALSE;
+		depthStencil.front = {};
+		depthStencil.back = {};
+
+		m_pGraphicsAPI->SetDepthTestEnableEXT(m_pGraphicsAPI->GetCurrentCommandBuffer(), depthStencil.depthTestEnable);
+		m_pGraphicsAPI->SetDepthWriteEnableEXT(m_pGraphicsAPI->GetCurrentCommandBuffer(), depthStencil.depthWriteEnable);
+		m_pGraphicsAPI->SetDepthCompareOpEXT(m_pGraphicsAPI->GetCurrentCommandBuffer(), depthStencil.depthCompareOp);
+		m_pGraphicsAPI->SetDepthBiasEnableEXT(m_pGraphicsAPI->GetCurrentCommandBuffer(), VK_FALSE);
+		m_pGraphicsAPI->SetStencilTestEnableEXT(m_pGraphicsAPI->GetCurrentCommandBuffer(), VK_FALSE);
+
+		// カラーブレンディング /////////////////////////////////////////////
+		// カラーブレンディング /////////////////////////////////////////////
+		// ローカルカラーブレンディング(アタッチされたフレームバッファごとの設定)
+		VkPipelineColorBlendAttachmentState colorBlendAttachment{};
+		colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+		colorBlendAttachment.blendEnable = VK_TRUE;
+
+		switch (pVulkanMat->GetBlendType())
+		{
+		case graphics::EBlendType::BLEND_TYPE_ADDITIVE:
+			colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_ONE;
+			colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ZERO;
+			colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
+
+			colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+			colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
+			colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
+			break;
+		case graphics::EBlendType::BLEND_TYPE_TRANSPARENT_ALPHA:
+			colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
+			colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+			colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
+
+			colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+			colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
+			colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
+
+			break;
+		default:
+			colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_ONE;
+			colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ZERO;
+			colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
+
+			colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+			colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
+			colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
+
+			break;
+		}
+
+		m_pGraphicsAPI->SetColorBlendEnableEXT(m_pGraphicsAPI->GetCurrentCommandBuffer(), 0, 1, &colorBlendAttachment.blendEnable);
+		m_pGraphicsAPI->SetColorWriteMaskEXT(m_pGraphicsAPI->GetCurrentCommandBuffer(), 0, 1, &colorBlendAttachment.colorWriteMask);
+
+		// ShaderObjectのバインド
+		pVulkanMat->SetActive();
+	}
+
+	// ヘルパー関数 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	void CVulkanRenderer::SetCullMode(graphics::ECullMode CullMode)
 	{
 		switch (CullMode)
@@ -461,8 +613,7 @@ namespace api
 			break;
 		}
 	}
-
-	// ヘルパー関数 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	
 	VkFormat CVulkanRenderer::GetVertexFormat(int Dimention, graphics::EDataType DataType)
 	{
 		VkFormat result = VK_FORMAT_UNDEFINED;

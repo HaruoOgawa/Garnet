@@ -36,12 +36,12 @@ namespace window
 		return true;
 	}
 
-	bool CWebWindowAPI::Initialize(app::CAppCore* pAppCore, int Width, int Height)
+	bool CWebWindowAPI::Initialize(app::CAppCore* pAppCore, app::SAppSettings Settings)
 	{
 		m_pCAppCore = pAppCore;
 
-		m_Width = Width;
-		m_Height = Height;
+		m_Width = Settings.ScreenWidth;
+		m_Height = Settings.ScreenHeight;
 
 		return true;
 	}
@@ -52,6 +52,12 @@ namespace window
 
 	void CWebWindowAPI::AssignCurrentWindowSize()
 	{
+#ifdef __EMSCRIPTEN__
+		int Width = EM_ASM_INT({ return window.g3dGetMainCanvasWidth(); });
+		int Height = EM_ASM_INT({ return window.g3dGetMainCanvasHeight(); });
+
+		m_pCAppCore->ResizeWindow(Width, Height);
+#endif
 	}
 
 	void CWebWindowAPI::PollEvents()
@@ -134,7 +140,13 @@ namespace window
 	// リサイズイベント
 	void CWebWindowAPI::OnResize(int w, int h)
 	{
-		m_pCAppCore->Resize(w, h);
+		m_pCAppCore->ResizeWindow(w, h);
+	}
+
+	// フォーカスイベント
+	void CWebWindowAPI::OnFocus(int focused)
+	{
+		m_pCAppCore->FocusWindow((focused == 1));
 	}
 
 	// マウスイベント

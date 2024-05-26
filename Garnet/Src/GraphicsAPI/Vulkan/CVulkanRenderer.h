@@ -24,6 +24,7 @@ namespace graphics
 namespace api
 {
 	class CVulkanAPI;
+	class CVulkanVertexBuffer;
 	class CVulkanMaterial;
 
 	class CVulkanRenderer : public graphics::IRenderer
@@ -37,11 +38,12 @@ namespace api
 		int m_InstanceCount;
 
 		// Pipeline
-		VkPipelineLayout m_PipelineLayout;
 		VkPipeline m_GraphicsPipeline;
 	private:
 		// Vulkanメインロジック /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		bool CreateGraphicsPipeline(const std::shared_ptr<graphics::CVertexBuffer>& VertexBuffer, const std::shared_ptr<graphics::CIndexBuffer>& IndexBuffer, api::CVulkanMaterial* pVulkanMat);
+		bool CreateGraphicsPipeline(const CVulkanVertexBuffer* pVulkanVertexBuffer, api::CVulkanMaterial* pVulkanMat);
+		
+		void SetRuntimeGraphicsSettings(const CVulkanVertexBuffer* pVulkanVertexBuffer, api::CVulkanMaterial* pVulkanMat);
 
 		void SetCullMode(graphics::ECullMode CullMode);
 

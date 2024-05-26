@@ -1,12 +1,13 @@
 #pragma once
 
 #include <vector>
+#include <set>
 #include <unordered_map>
 #include <string>
 #include <memory>
 #include <json.hpp>
 
-#include "../Interface/IResource.h"
+#include "CResource.h"
 
 #include "CFile.h"
 
@@ -21,21 +22,18 @@ using namespace nlohmann;
 namespace resource
 {
 	class CFile;
+	class CShaderLoader;
 
-	class CMaterialFrameLoader : public resource::IResource
+	class CMaterialFrameLoader : public resource::CResource
 	{
-		// MfStatus
-		resource::ELoadStatus m_Status;
-
-		std::shared_ptr<CFile> m_MfFile;
 		json m_MfJson;
 
 		// MfResource
 		bool m_AnalyseDone;
-		std::vector<std::shared_ptr<CFile>> m_MfResourceList;
+		std::vector<std::shared_ptr<IResource>> m_MfResourceList;
 
-		std::unordered_map <std::string, std::shared_ptr<CFile>> m_ShaderFileList;
-		std::unordered_map <std::string, std::shared_ptr<CFile>> m_TextureFileList;
+		std::unordered_map <std::string, std::shared_ptr<CShaderLoader>> m_ShaderFileList;
+		std::unordered_map <std::string, std::shared_ptr<IResource>> m_TextureFileList;
 
 		// MfData
 		std::string m_MaterialName;
@@ -45,10 +43,12 @@ namespace resource
 
 		std::shared_ptr<graphics::CMaterialCreateInfo> m_CreateInfo;
 
-		std::shared_ptr<graphics::CMaterialFrame> m_TargetMaterialFrame;
+		std::set<std::shared_ptr<graphics::CMaterialFrame>> m_TargetMaterialFrameSet;
 	private:
-		bool AnalyseResourceList(api::IGraphicsAPI* pGraphicsAPI);
-		bool AnalyseShaderList(api::IGraphicsAPI* pGraphicsAPI, const json::iterator& shaderList);
+		void Release();
+
+		bool AnalyseResourceList(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CResourceManager>& ResourceManager);
+		bool AnalyseShaderList(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CResourceManager>& ResourceManager, const json::iterator& shaderList);
 		bool AnalyseShaderBuffer(const json::iterator& uniform, const std::string& uniform_type);
 		bool AnalyseTextureBuffer(const json::iterator& uniform);
 
@@ -65,12 +65,12 @@ namespace resource
 		CMaterialFrameLoader(const std::string& filename, const std::shared_ptr<graphics::CMaterialFrame>& TargetMaterialFrame);
 		virtual ~CMaterialFrameLoader();
 
-		virtual void SetLoadStatus(resource::ELoadStatus Status) override;
-		virtual resource::ELoadStatus GetStatus() const override;
-		virtual bool IsLoaded() const override;
+		virtual bool Reload(resource::CLoadWorker* pLoadWorker) override;
 
-		virtual bool Load() override;
-		virtual bool LoadImmediate() override;
-		virtual bool Update(api::IGraphicsAPI* pGraphicsAPI) override;
+		virtual bool Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, const std::shared_ptr<CResourceManager>& ResourceManager) override;
+
+		virtual void AddReference(const std::shared_ptr<IResource>& Resource) override;
+
+		const std::set<std::shared_ptr<graphics::CMaterialFrame>>& GetTargetMaterialFrameSet() const;
 	};
 }

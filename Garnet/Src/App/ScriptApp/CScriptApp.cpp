@@ -12,7 +12,7 @@
 #endif // USE_VIEWER_CAMERA
 
 #include "GUI/CGraphicsEditingWindow.h"
-
+#include "Model/CFileModifier.h"
 
 // CScriptApp は旧エンジンでもやっていたof風にCppでエンジンコードを直接シーンを構築していくアプリ
 
@@ -36,7 +36,8 @@ namespace app
 #ifdef USE_GUIENGINE
 		m_GraphicsEditingWindow(std::make_shared<gui::CGraphicsEditingWindow>()),
 #endif // USE_GUIENGINE
-		m_BlurEffect(nullptr)
+		m_BlurEffect(nullptr),
+		m_FileModifier(std::make_shared<CFileModifier>())
 	{
 		m_MainCamera->SetPos(glm::vec3(0.0f, 1.0f, -7.0f));
 		//m_MainCamera->SetCenter(glm::vec3(0.0f, 50.0f, 349.0f));
@@ -66,7 +67,7 @@ namespace app
 	bool CScriptApp::Initialize(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker)
 	{
 		// Viewの初期化
-		m_ScriptScene = std::make_shared<scene::CScriptScene>(pGraphicsAPI, pLoadWorker, pPhysicsEngine);
+		m_ScriptScene = std::make_shared<app::CScriptScene>(pGraphicsAPI, pLoadWorker, pPhysicsEngine);
 
 		// オフスクリーンレンダリング
 		if (!pGraphicsAPI->CreateRenderPass("ShadowPass", api::ERenderPassFormat::COLOR_RENDERPASS, glm::vec4(1.0f), 512, 512)) return false;
@@ -96,6 +97,8 @@ namespace app
 
 	bool CScriptApp::Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<input::CInputState>& InputState)
 	{
+		if (!m_FileModifier->Update(pLoadWorker)) return false;
+
 		if (!m_ScriptScene->Update(pGraphicsAPI, pPhysicsEngine, pLoadWorker, m_MainCamera, m_Projection, m_DrawInfo, InputState)) return false;
 
 		if (!m_BlurEffect->Update(pLoadWorker)) return false;
@@ -161,5 +164,19 @@ namespace app
 	const std::vector<std::shared_ptr<object::C3DObject>>& CScriptApp::GetObjectList() const
 	{
 		return m_ScriptScene->GetObjectList();
+	}
+
+	// フォーカスイベント
+	void CScriptApp::OnFocus(bool Focused, api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker)
+	{
+		if (Focused && pLoadWorker)
+		{
+			m_FileModifier->OnFileUpdated(pLoadWorker);
+		}
+	}
+
+	const std::shared_ptr<CFileModifier>& CScriptApp::GetFileModifier() const
+	{
+		return m_FileModifier;
 	}
 }

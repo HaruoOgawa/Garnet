@@ -74,7 +74,11 @@ namespace api
 		VkPhysicalDevice m_PhysicalDevice;
 		VkDevice m_LogicalDevice;
 		const std::vector<const char*> m_DeviceExtensions = {
-			VK_KHR_SWAPCHAIN_EXTENSION_NAME
+			VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+#ifdef RUNTIME_SHADER_EDITING
+			// ToDo: ShaderObject拡張が有効になっているとRenderDocでデバッグができなくなる
+			VK_EXT_SHADER_OBJECT_EXTENSION_NAME,
+#endif // RUNTIME_SHADER_EDITING
 		};
 
 		// Queue
@@ -204,6 +208,8 @@ namespace api
 		virtual const std::map<std::string, std::shared_ptr<graphics::IRenderPass>>& GetOffScreenRenderPassMap() const override;
 		VkRenderPass GetSwapChainRenderPass() const;
 
+		virtual bool IsEnabledRuntimeShaderEditing() const override;
+
 		//
 		int GetMaxFramesInFlight() const { return MAX_FRAMES_IN_FLIGHT; }
 
@@ -263,6 +269,32 @@ namespace api
 
 		// Frame Buffer
 		uint32_t GetCurrentFrame() const;
+
+		// Extension /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		bool LoadExtensions();
+		
+		PFN_vkCmdBindShadersEXT BindShadersEXT;
+		PFN_vkCreateShadersEXT CreateShadersEXT;
+		PFN_vkDestroyShaderEXT DestroyShaderEXT;
+		PFN_vkCmdSetVertexInputEXT SetVertexInputEXT;
+		PFN_vkCmdSetPrimitiveTopologyEXT SetPrimitiveTopologyEXT;
+		PFN_vkCmdSetPrimitiveRestartEnableEXT SetPrimitiveRestartEnableEXT;
+		PFN_vkCmdSetViewportWithCountEXT SetViewportWithCountEXT;
+		PFN_vkCmdSetScissorWithCountEXT SetScissorWithCountEXT;
+		PFN_vkCmdSetCullModeEXT SetCullModeEXT;
+		PFN_vkCmdSetFrontFaceEXT SetFrontFaceEXT;
+		PFN_vkCmdSetRasterizerDiscardEnableEXT SetRasterizerDiscardEnableEXT;
+		PFN_vkCmdSetPolygonModeEXT SetPolygonModeEXT;
+		PFN_vkCmdSetRasterizationSamplesEXT SetRasterizationSamplesEXT;
+		PFN_vkCmdSetAlphaToCoverageEnableEXT SetAlphaToCoverageEnableEXT;
+		PFN_vkCmdSetDepthTestEnableEXT SetDepthTestEnableEXT;
+		PFN_vkCmdSetDepthWriteEnableEXT SetDepthWriteEnableEXT;
+		PFN_vkCmdSetDepthCompareOpEXT SetDepthCompareOpEXT;
+		PFN_vkCmdSetDepthBiasEnableEXT SetDepthBiasEnableEXT;
+		PFN_vkCmdSetStencilTestEnableEXT SetStencilTestEnableEXT;
+		PFN_vkCmdSetSampleMaskEXT SetSampleMaskEXT;
+		PFN_vkCmdSetColorBlendEnableEXT SetColorBlendEnableEXT;
+		PFN_vkCmdSetColorWriteMaskEXT SetColorWriteMaskEXT;
 	};
 }
 #endif

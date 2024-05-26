@@ -4,9 +4,8 @@
 #include <string>
 #include <memory>
 
-#include "../Interface/IResource.h"
+#include "CResource.h"
 
-#include "CFile.h"
 #include "../Object/C3DObject.h"
 
 namespace resource
@@ -19,16 +18,9 @@ namespace resource
 		Finish,
 	};
 
-	class C3DObjectLoader : public resource::IResource
+	class C3DObjectLoader : public resource::CResource
 	{
-		physics::IPhysicsEngine* m_pPhysicsEngine;
-
-		resource::ELoadStatus m_Status;
-
 		E3DObjectLoadState m_LoadState;
-
-		std::shared_ptr<CFile> m_File;
-		std::string m_FileName;
 
 		std::shared_ptr<object::C3DObject> m_TargetObject;
 
@@ -37,19 +29,12 @@ namespace resource
 		std::vector<std::shared_ptr<resource::IResource>> m_SubResources;
 	private:
 		bool Import(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine);
-		bool LoadSubResources(api::IGraphicsAPI* pGraphicsAPI);
+		bool LoadSubResources(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, const std::shared_ptr<CResourceManager>& ResourceManager);
 	public:
-		C3DObjectLoader(const std::string& FileName, const std::shared_ptr<object::C3DObject>& TargetObject, const std::shared_ptr<graphics::CMaterialFrame>& BaseMaterialFrame, 
-			const std::string& PassName, const std::string& DepthPassName, physics::IPhysicsEngine* pPhysicsEngine);
+		C3DObjectLoader(const std::string& FileName, const std::shared_ptr<object::C3DObject>& TargetObject, const std::shared_ptr<graphics::CMaterialFrame>& BaseMaterialFrame);
 		virtual ~C3DObjectLoader();
-
-		virtual void SetLoadStatus(resource::ELoadStatus Status) override;
-		virtual resource::ELoadStatus GetStatus() const override;
-		virtual bool IsLoaded() const override;
-
-		virtual bool Load() override;
-		virtual bool LoadImmediate() override;
-		virtual bool Update(api::IGraphicsAPI* pGraphicsAPI) override;
+		
+		virtual bool Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, const std::shared_ptr<CResourceManager>& ResourceManager) override;
 
 		void AddSubResource(const std::shared_ptr <resource::IResource>& Resource);
 	};

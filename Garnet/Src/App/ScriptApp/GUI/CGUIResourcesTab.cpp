@@ -1,5 +1,6 @@
 #ifdef USE_GUIENGINE
 #include "CGUIResourcesTab.h"
+#include "../Model/CFileModifier.h"
 #include "../../Message/Console.h"
 #include <filesystem>
 
@@ -49,7 +50,7 @@ namespace gui
 		return DstDir;
 	}
 
-	bool CGUIResourcesTab::Draw()
+	bool CGUIResourcesTab::Draw(app::CFileModifier* pFileModifier)
 	{
 		// Emscriptenはサポートしない
 #ifdef __EMSCRIPTEN__
@@ -58,7 +59,7 @@ namespace gui
 
 		if (ImGui::BeginTabItem("Resources"))
 		{
-			if (!DrawDirGUI(m_RootDir)) return false;
+			if (!DrawDirGUI(m_RootDir, pFileModifier)) return false;
 
 			ImGui::EndTabItem();
 		}
@@ -66,7 +67,7 @@ namespace gui
 		return true;
 	}
 
-	bool CGUIResourcesTab::DrawDirGUI(const std::shared_ptr<SDirectoryInfo>& Dir)
+	bool CGUIResourcesTab::DrawDirGUI(const std::shared_ptr<SDirectoryInfo>& Dir, app::CFileModifier* pFileModifier)
 	{
 		// Emscriptenはサポートしない
 #ifdef __EMSCRIPTEN__
@@ -80,7 +81,7 @@ namespace gui
 			// Draw SubDir
 			for (const auto& SubDir : Dir->SubDirList)
 			{
-				if (!DrawDirGUI(SubDir)) return false;
+				if (!DrawDirGUI(SubDir, pFileModifier)) return false;
 			}
 
 			// Draw File
@@ -92,6 +93,8 @@ namespace gui
 				{
 					std::string cmd = "start " + File.second;
 					std::system(cmd.c_str());
+
+					pFileModifier->AddEditingFileName(File.second);
 				}
 			}
 
@@ -99,52 +102,6 @@ namespace gui
 		}
 
 		return true;
-	}
-
-	std::vector<std::string> CGUIResourcesTab::ExecuteCommand(const char* cmd)
-	{
-#ifdef __EMSCRIPTEN__
-		return std::vector<std::string>();
-#else
-		char buffer[128];
-		std::string result = "";
-
-		FILE* pipe = _popen(cmd, "r");
-		if (!pipe)
-		{
-			Console::Log("[Error] Failed to execute command\n");
-			return std::vector<std::string>();
-		}
-
-		while (fgets(buffer, sizeof buffer, pipe) != NULL)
-		{
-			result += buffer;
-		}
-
-		_pclose(pipe);
-
-		return Split(result, '\n');
-#endif // __EMSCRIPTEN__
-		
-	}
-
-	std::vector<std::string> CGUIResourcesTab::Split(const std::string& Src, const char separate)
-	{
-		std::vector<std::string> TextList;
-
-		std::string CurrentStr = Src;
-
-		while (CurrentStr.find(separate) != -1)
-		{
-			int Index = static_cast<int>(CurrentStr.find(separate));
-
-			std::string Dst = CurrentStr.substr(0, Index + 1);
-			TextList.push_back(Dst);
-
-			CurrentStr = CurrentStr.substr(Index + 1, CurrentStr.size() - Dst.size());
-		}
-
-		return TextList;
 	}
 
 	std::string CGUIResourcesTab::DeleteParentDirName(const std::string& Src)

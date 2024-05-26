@@ -32,7 +32,8 @@
 
 namespace app
 {
-	CAppCore::CAppCore(const std::shared_ptr<app::IApp>& App):
+	CAppCore::CAppCore(const std::shared_ptr<app::IApp>& App, SAppSettings Settings):
+		m_AppSettings(Settings),
 		m_WindowAPI(nullptr),
 		m_GraphicsAPI(nullptr),
 		m_IsRunLoop(true),
@@ -101,7 +102,7 @@ namespace app
 		return m_GUIEngine;
 	}
 
-	bool CAppCore::Initialize(int Width, int Height)
+	bool CAppCore::Initialize()
 	{
 		{
 			// WindowAPI
@@ -115,11 +116,11 @@ namespace app
 
 			// GraphicsAPI
 #ifdef USE_WEBGPU
-			m_GraphicsAPI = std::make_shared<api::CWebGPUAPI>(Width, Height);
+			m_GraphicsAPI = std::make_shared<api::CWebGPUAPI>(m_AppSettings.ScreenWidth, m_AppSettings.ScreenHeight);
 #elif USE_VULKAN
-			m_GraphicsAPI = std::make_shared<api::CVulkanAPI>(Width, Height);
+			m_GraphicsAPI = std::make_shared<api::CVulkanAPI>(m_AppSettings.ScreenWidth, m_AppSettings.ScreenHeight);
 #elif USE_OPENGL
-			m_GraphicsAPI = std::make_shared<api::COpenGLAPI>(Width, Height);
+			m_GraphicsAPI = std::make_shared<api::COpenGLAPI>(m_AppSettings.ScreenWidth, m_AppSettings.ScreenHeight);
 #endif // USE_WEBGPU
 			
 			// 物理エンジン
@@ -133,7 +134,7 @@ namespace app
 #endif
 		}
 
-		if (!m_WindowAPI->Initialize(this, Width, Height)) return false;
+		if (!m_WindowAPI->Initialize(this, m_AppSettings)) return false;
 
 		if (!m_GraphicsAPI->Initialize(m_WindowAPI.get())) return false;
 
@@ -151,13 +152,18 @@ namespace app
 		return true;
 	}
 
-	bool CAppCore::Resize(int Width, int Height)
+	bool CAppCore::ResizeWindow(int Width, int Height)
 	{
 		m_GraphicsAPI->Resize(Width, Height);
 
 		m_App->Resize(Width, Height);
 
 		return true;
+	}
+
+	void CAppCore::FocusWindow(bool Focused)
+	{
+		m_App->OnFocus(Focused, m_GraphicsAPI.get(), m_LoadWorker.get());
 	}
 
 	bool CAppCore::RunLoop()
@@ -219,7 +225,7 @@ namespace app
 			DrawInfo->SetDeltaSecondsTime(m_DeltaSecondsTime);
 		}
 
-		if (!m_LoadWorker->Update(m_GraphicsAPI.get())) return false;
+		if (!m_LoadWorker->Update(m_GraphicsAPI.get(), m_PhysicsEngine.get())) return false;
 
 		if (!m_App->Update(m_GraphicsAPI.get(), m_PhysicsEngine.get(), m_LoadWorker.get(), m_InputState)) return false;
 
@@ -274,6 +280,12 @@ namespace app
 	void CAppCore::OnResize(int w, int h)
 	{
 		m_WindowAPI->OnResize(w, h);
+	}
+
+	// フォーカスイベント
+	void CAppCore::OnFocus(int focused)
+	{
+		m_WindowAPI->OnFocus(focused);
 	}
 
 	// マウスイベント

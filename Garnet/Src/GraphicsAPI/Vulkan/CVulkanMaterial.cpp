@@ -11,7 +11,7 @@
 namespace api
 {
 	CVulkanMaterial::CVulkanMaterial(api::CVulkanAPI* pGraphicsAPI, const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, int RefCount, graphics::ECullMode CullMode):
-		CMaterial(createInfo, RefCount, CullMode),
+		CMaterial(pGraphicsAPI, createInfo, RefCount, CullMode),
 		m_pGraphicsAPI(pGraphicsAPI),
 
 		m_VertShaderModule(nullptr),
@@ -21,11 +21,8 @@ namespace api
 		m_DescriptorSetLayout(nullptr),
 		m_DescriptorPool(nullptr),
 
-		m_EmptyTexture(nullptr)
+		m_PipelineLayout(nullptr)
 	{
-		m_EmptyTexture = std::make_shared<CVulkanTexture>(pGraphicsAPI, false);
-		std::vector<unsigned char> emptyPixel = { 0, 0, 0, 0 };
-		m_EmptyTexture->Create(emptyPixel, static_cast<int>(emptyPixel.size() * sizeof(unsigned char)));
 	}
 
 	CVulkanMaterial::~CVulkanMaterial()
@@ -33,17 +30,173 @@ namespace api
 		Release();
 	}
 
+	void CVulkanMaterial::Release()
+	{
+		//
+		m_ShaderStages.clear();
+
+		// ShaderModuleの破棄
+		if (m_VertShaderModule)
+		{
+			vkDestroyShaderModule(m_pGraphicsAPI->GetLogicalDevice(), m_VertShaderModule, nullptr);
+			m_VertShaderModule = nullptr;
+		}
+
+		if (m_FragShaderModule)
+		{
+			vkDestroyShaderModule(m_pGraphicsAPI->GetLogicalDevice(), m_FragShaderModule, nullptr);
+			m_FragShaderModule = nullptr;
+		}
+
+		if (m_ComputeShaderModule)
+		{
+			vkDestroyShaderModule(m_pGraphicsAPI->GetLogicalDevice(), m_ComputeShaderModule, nullptr);
+			m_ComputeShaderModule = nullptr;
+		}
+
+		// ShaderObjectの削除
+		if (m_pGraphicsAPI->IsEnabledRuntimeShaderEditing())
+		{
+
+			for (auto& Shader : m_ShaderMap)
+			{
+				m_pGraphicsAPI->DestroyShaderEXT(m_pGraphicsAPI->GetLogicalDevice(), Shader.second, nullptr);
+			}
+
+			m_ShaderMap.clear();
+		}
+
+		// パイプラインレイアウトの破棄(たぶん本来は3Dオブジェクトごとにあるやつ) 
+		if (m_PipelineLayout)
+		{
+			vkDestroyPipelineLayout(m_pGraphicsAPI->GetLogicalDevice(), m_PipelineLayout, nullptr);
+			m_PipelineLayout = nullptr;
+		}
+
+		// DescriptorSetsの破棄
+		vkFreeDescriptorSets(m_pGraphicsAPI->GetLogicalDevice(), m_DescriptorPool, static_cast<uint32_t>(m_DescriptorSets.size()), &m_DescriptorSets[0]);
+		m_DescriptorSets.clear();
+
+		// 記述子プールの破棄
+		if (m_DescriptorPool)
+		{
+			vkDestroyDescriptorPool(m_pGraphicsAPI->GetLogicalDevice(), m_DescriptorPool, nullptr);
+			m_DescriptorPool = nullptr;
+		}
+
+		// ユニフォームレイアウトセットを破棄
+		if (m_DescriptorSetLayout)
+		{
+			vkDestroyDescriptorSetLayout(m_pGraphicsAPI->GetLogicalDevice(), m_DescriptorSetLayout, nullptr);
+			m_DescriptorSetLayout = nullptr;
+		}
+
+		// ユニフォームの破棄
+		for (size_t i = 0; i < m_pGraphicsAPI->GetMaxFramesInFlight(); i++)
+		{
+			if (m_VKUniformBufferList.size() > 0)
+			{
+				for (auto& Buffer : m_VKUniformBufferList[i])
+				{
+					if (Buffer)
+					{
+						vkDestroyBuffer(m_pGraphicsAPI->GetLogicalDevice(), Buffer, nullptr);
+					}
+				}
+			}
+
+			if (m_VKUniformBufferMemoryList.size() > 0)
+			{
+				for (auto& Memory : m_VKUniformBufferMemoryList[i])
+				{
+					if (Memory)
+					{
+						vkFreeMemory(m_pGraphicsAPI->GetLogicalDevice(), Memory, nullptr);
+					}
+				}
+			}
+		}
+
+		m_VKUniformBufferList.clear();
+		m_VKUniformBufferMemoryList.clear();
+		m_VKUniformBufferSizeList.clear();
+	}
+
 	bool CVulkanMaterial::Create(const std::shared_ptr<graphics::CTextureSet>& TextureSet)
 	{
-		if (!CreateShaderStages(m_CreateInfo)) return false; // Shaderの作成
+		// 参照テクスチャリスト
+		if (!CreateRefTextureList(m_CreateInfo, TextureSet)) return false;
 
-		// Uniform Buffer
-		if (!CreateShaderBuffers(m_CreateInfo)) return false; // ユニフォームバッファを作成
+		{
+			// Uniform Buffer
+			if (!CreateShaderBuffers(m_CreateInfo)) return false; // ユニフォームバッファを作成
 
-		// バインドグループ(UniformとTextureで共通項)
-		if (!CreateDescriptorSetLayout(m_CreateInfo)) return false; // DescriptorSetLayoutの作成(Uniformをどのようにバインドするか), WebGPUでいうバインドグループの生成
-		if (!CreateDescriptorPool(m_CreateInfo)) return false; // DescriptorPoolを作成する -> DescriptorSetsは直接生成できず、コマンドで生成する必要がある。記述子プールはそのコマンド群のことかな？
-		if (!CreateDescriptorSets(m_CreateInfo, TextureSet)) return false; // DescriptorSetsを作成 -> Uniformが使用するバッファをCPUからGPUに送信するための仕組みこと. https://vkguide.dev/docs/chapter-4/descriptors/
+			// バインドグループ(UniformとTextureで共通項)
+			if (!CreateDescriptorSetLayout(m_CreateInfo)) return false; // DescriptorSetLayoutの作成(Uniformをどのようにバインドするか), WebGPUでいうバインドグループの生成
+			if (!CreateDescriptorPool(m_CreateInfo)) return false; // DescriptorPoolを作成する -> DescriptorSetsは直接生成できず、コマンドで生成する必要がある。記述子プールはそのコマンド群のことかな？
+			if (!CreateDescriptorSets(m_CreateInfo)) return false; // DescriptorSetsを作成 -> Uniformが使用するバッファをCPUからGPUに送信するための仕組みこと. https://vkguide.dev/docs/chapter-4/descriptors/
+			if (!CreatePipelineLayout()) return false; // パイプラインレイアウトを生成
+
+			if (m_pGraphicsAPI->IsEnabledRuntimeShaderEditing())
+			{
+				// ShaderObjectの作成
+				if (!CreateShaderObjects(m_CreateInfo)) return false;
+			}
+			else
+			{
+				if (!CreateShaderStages(m_CreateInfo)) return false; // Shaderの作成
+			}
+		}
+
+		return true;
+	}
+
+	bool CVulkanMaterial::ReCreate(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, const std::vector<std::shared_ptr<graphics::CShaderBuffer>>& ShaderBufferList, const std::vector<graphics::STextureBindingLayout>& TextureBindingLayoutList)
+	{
+		m_CreateInfo = createInfo;
+
+		// ShaderObjectの削除
+		/*if (m_pGraphicsAPI->IsEnabledRuntimeShaderEditing())
+		{
+
+			for (auto& Shader : m_ShaderMap)
+			{
+				m_pGraphicsAPI->DestroyShaderEXT(m_pGraphicsAPI->GetLogicalDevice(), Shader.second, nullptr);
+			}
+
+			m_ShaderMap.clear();
+		}*/
+
+		// CommandのSubmit時にエラーが発生するので、ひとまずVulkanについてはShaderの更新のみとする
+		// Uniformを編集したいときはOpenGLを使用する
+		Release();
+
+		// 参照テクスチャリストの再生成
+		if (!ReCreateRefTextureList(m_CreateInfo)) return false;
+
+		// バッファの再生成
+		if (!ReCreateBuffer(ShaderBufferList, TextureBindingLayoutList)) return false;
+
+		{
+			// Uniform Buffer
+			if (!CreateShaderBuffers(m_CreateInfo)) return false; // ユニフォームバッファを作成
+
+			// バインドグループ(UniformとTextureで共通項)
+			if (!CreateDescriptorSetLayout(m_CreateInfo)) return false; // DescriptorSetLayoutの作成(Uniformをどのようにバインドするか), WebGPUでいうバインドグループの生成
+			if (!CreateDescriptorPool(m_CreateInfo)) return false; // DescriptorPoolを作成する -> DescriptorSetsは直接生成できず、コマンドで生成する必要がある。記述子プールはそのコマンド群のことかな？
+			if (!CreateDescriptorSets(m_CreateInfo)) return false; // DescriptorSetsを作成 -> Uniformが使用するバッファをCPUからGPUに送信するための仕組みこと. https://vkguide.dev/docs/chapter-4/descriptors/
+			if (!CreatePipelineLayout()) return false; // パイプラインレイアウトを生成
+
+			if (m_pGraphicsAPI->IsEnabledRuntimeShaderEditing())
+			{
+				// ShaderObjectの作成
+				if (!CreateShaderObjects(m_CreateInfo)) return false;
+			}
+			else
+			{
+				if (!CreateShaderStages(m_CreateInfo)) return false; // Shaderの作成
+			}
+		}
 
 		return true;
 	}
@@ -96,69 +249,120 @@ namespace api
 		}
 	}
 
-	void CVulkanMaterial::Release()
+	bool CVulkanMaterial::IsAvailable() const
 	{
-		// ShaderModuleの破棄
-		if (m_VertShaderModule)
-		{
-			vkDestroyShaderModule(m_pGraphicsAPI->GetLogicalDevice(), m_VertShaderModule, nullptr);
-			m_VertShaderModule = nullptr;
-		}
-		
-		if (m_FragShaderModule)
-		{
-			vkDestroyShaderModule(m_pGraphicsAPI->GetLogicalDevice(), m_FragShaderModule, nullptr);
-			m_FragShaderModule = nullptr;
-		}
-		
-		if (m_ComputeShaderModule)
-		{
-			vkDestroyShaderModule(m_pGraphicsAPI->GetLogicalDevice(), m_ComputeShaderModule, nullptr);
-			m_ComputeShaderModule = nullptr;
-		}
+		if (m_ShaderStages.empty() && m_ShaderMap.empty()) return false;
 
-		// ユニフォームの破棄
-		for (size_t i = 0; i < m_pGraphicsAPI->GetMaxFramesInFlight(); i++)
+		if (m_PipelineLayout == nullptr) return false;
+		if (m_DescriptorSetLayout == nullptr) return false;
+		if (m_DescriptorPool == nullptr) return false;
+
+		if (m_DescriptorSets.empty()) return false;
+
+		return true;
+	}
+
+	void CVulkanMaterial::SetActive()
+	{
+		for (const auto& Shader : m_ShaderMap)
 		{
-			if (m_VKUniformBufferList.size() > 0)
+			m_pGraphicsAPI->BindShadersEXT(m_pGraphicsAPI->GetCurrentCommandBuffer(), 1, &Shader.first, &Shader.second);
+		}
+	}
+
+	void CVulkanMaterial::BindUBO(int DynamicOffsetNum)
+	{
+		if (IsUseShaderBuffer())
+		{
+			std::vector<uint32_t> dynamicOffsetList;
+			for (const auto& Size : GetBindingRefSizeList())
 			{
-				for (auto& Buffer : m_VKUniformBufferList[i])
-				{
-					if (Buffer)
-					{
-						vkDestroyBuffer(m_pGraphicsAPI->GetLogicalDevice(), Buffer, nullptr);
-					}
-				}
+				uint32_t dynamicOffset = (DynamicOffsetNum - 1) * Size;
+				dynamicOffsetList.push_back(dynamicOffset);
 			}
 
-			if (m_VKUniformBufferMemoryList.size() > 0)
+			if (IsUseDynamicOffset())
 			{
-				for (auto& Memory : m_VKUniformBufferMemoryList[i])
-				{
-					if (Memory)
-					{
-						vkFreeMemory(m_pGraphicsAPI->GetLogicalDevice(), Memory, nullptr);
-					}
-				}
+				vkCmdBindDescriptorSets(m_pGraphicsAPI->GetCurrentCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS,
+					GetPipelineLayout(), 0, 1, &GetDescriptorSets()[m_pGraphicsAPI->GetCurrentFrame()], static_cast<uint32_t>(dynamicOffsetList.size()), &dynamicOffsetList[0]);
 			}
-		}
-
-		// 記述子プールの破棄
-		if (m_DescriptorPool)
-		{
-			vkDestroyDescriptorPool(m_pGraphicsAPI->GetLogicalDevice(), m_DescriptorPool, nullptr);
-			m_DescriptorPool = nullptr;
-		}
-
-		// ユニフォームレイアウトセットを破棄
-		if (m_DescriptorSetLayout)
-		{
-			vkDestroyDescriptorSetLayout(m_pGraphicsAPI->GetLogicalDevice(), m_DescriptorSetLayout, nullptr);
-			m_DescriptorSetLayout = nullptr;
+			else
+			{
+				vkCmdBindDescriptorSets(m_pGraphicsAPI->GetCurrentCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS,
+					GetPipelineLayout(), 0, 1, &GetDescriptorSets()[m_pGraphicsAPI->GetCurrentFrame()], 0, nullptr);
+			}
 		}
 	}
 
 	// Vulkanメインロジック /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	bool CVulkanMaterial::CreateShaderObjects(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo)
+	{
+		std::vector<VkShaderCreateInfoEXT> CreateInfoList;
+
+		// ひとまずVertexとFragmentのみ並列で作る
+		{
+			const auto& ShaderCode = createInfo->GetVertexShaderCode();
+
+			VkShaderCreateInfoEXT shaderCreateInfo{};
+			shaderCreateInfo.sType = VK_STRUCTURE_TYPE_SHADER_CREATE_INFO_EXT;
+			shaderCreateInfo.pNext = nullptr;
+			shaderCreateInfo.flags = VK_SHADER_CREATE_LINK_STAGE_BIT_EXT;
+			shaderCreateInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
+			shaderCreateInfo.nextStage = VK_SHADER_STAGE_FRAGMENT_BIT;
+			shaderCreateInfo.codeType = VK_SHADER_CODE_TYPE_SPIRV_EXT;
+			shaderCreateInfo.codeSize = ShaderCode.size();
+			shaderCreateInfo.pCode = &ShaderCode[0];
+			shaderCreateInfo.pName = "main";
+			// RenderのGraphicsPipelineに渡していたDescriptorSetLayoutをここで渡せるので完全に切り離せそう？
+			// つまりShaderBufferの更新もマテリアルだけで完結できそう？
+			shaderCreateInfo.setLayoutCount = 1;
+			shaderCreateInfo.pSetLayouts = &m_DescriptorSetLayout;
+			shaderCreateInfo.pushConstantRangeCount = 0;
+			shaderCreateInfo.pPushConstantRanges = nullptr;
+			shaderCreateInfo.pSpecializationInfo = nullptr;
+
+			CreateInfoList.push_back(shaderCreateInfo);
+		}
+
+		{
+			const auto& ShaderCode = createInfo->GetFragmentShaderCode();
+
+			VkShaderCreateInfoEXT shaderCreateInfo{};
+			shaderCreateInfo.sType = VK_STRUCTURE_TYPE_SHADER_CREATE_INFO_EXT;
+			shaderCreateInfo.pNext = nullptr;
+			shaderCreateInfo.flags = VK_SHADER_CREATE_LINK_STAGE_BIT_EXT;
+			shaderCreateInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
+			shaderCreateInfo.nextStage = 0;
+			shaderCreateInfo.codeType = VK_SHADER_CODE_TYPE_SPIRV_EXT;
+			shaderCreateInfo.codeSize = ShaderCode.size();
+			shaderCreateInfo.pCode = &ShaderCode[0];
+			shaderCreateInfo.pName = "main";
+			// RenderのGraphicsPipelineに渡していたDescriptorSetLayoutをここで渡せるので完全に切り離せそう？
+			// つまりShaderBufferの更新もマテリアルだけで完結できそう？
+			shaderCreateInfo.setLayoutCount = 1;
+			shaderCreateInfo.pSetLayouts = &m_DescriptorSetLayout;
+			shaderCreateInfo.pushConstantRangeCount = 0;
+			shaderCreateInfo.pPushConstantRanges = nullptr;
+			shaderCreateInfo.pSpecializationInfo = nullptr;
+
+			CreateInfoList.push_back(shaderCreateInfo);
+		}
+
+		std::vector<VkShaderEXT> Shaders;
+		Shaders.resize(static_cast<int>(CreateInfoList.size()));
+
+		if (m_pGraphicsAPI->CreateShadersEXT(m_pGraphicsAPI->GetLogicalDevice(), static_cast<uint32_t>(CreateInfoList.size()), &CreateInfoList[0], nullptr, &Shaders[0]) != VK_SUCCESS) return false;
+
+		for (int i = 0; i < static_cast<int>(CreateInfoList.size()); i++)
+		{
+			const auto& createInfo = CreateInfoList[i];
+
+			m_ShaderMap.emplace(createInfo.stage, Shaders[i]);
+		}
+
+		return true;
+	}
+	
 	bool CVulkanMaterial::CreateShaderStages(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo)
 	{
 		// シェーダーの準備
@@ -444,27 +648,8 @@ namespace api
 
 		return true;
 	}
-	bool CVulkanMaterial::CreateDescriptorSets(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, const std::shared_ptr<graphics::CTextureSet>& TextureSet)
+	bool CVulkanMaterial::CreateDescriptorSets(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo)
 	{
-		//
-		std::vector<std::shared_ptr<graphics::CTexture>> TextureList(0);
-		if (TextureSet) TextureList = TextureSet->Get2DTextureList();
-
-		std::vector<std::shared_ptr<graphics::CTexture>> CubeMapList(0);
-		if (TextureSet) CubeMapList = TextureSet->GetCubeMapList();
-
-		std::vector<std::shared_ptr<graphics::CTexture>> FrameTextureList(0);
-		if (TextureSet) FrameTextureList = TextureSet->GetFrameTextureList();
-
-		std::shared_ptr<graphics::CTexture> Diffuse_Tex = nullptr;
-		if (TextureSet) Diffuse_Tex = TextureSet->GetDiffuse_Tex();
-
-		std::shared_ptr<graphics::CTexture> Specular_Tex = nullptr;
-		if (TextureSet) Specular_Tex = TextureSet->GetSpecular_Tex();
-
-		std::shared_ptr<graphics::CTexture> GGXLUT_Tex = nullptr;
-		if (TextureSet) GGXLUT_Tex = TextureSet->GetGGXLUT_Tex();
-
 		//
 		std::vector<VkDescriptorSetLayout> layouts(m_pGraphicsAPI->GetMaxFramesInFlight(), m_DescriptorSetLayout);
 		VkDescriptorSetAllocateInfo allocInfo{};
@@ -572,32 +757,38 @@ namespace api
 				{
 					const auto& TexLayout = m_TextureBindingLayoutList[TextureBindingLayoutIndex];
 
-					api::CVulkanTexture* Texture = nullptr;
+					std::shared_ptr<graphics::CTexture> Texture = nullptr;
 					int TextureIndex = TexLayout.TextureIndex;
 
 					if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_2D)
 					{
-						Texture = (TextureIndex >= 0 && TextureIndex < TextureList.size()) ? static_cast<api::CVulkanTexture*>(TextureList[TextureIndex].get()) : m_EmptyTexture.get();
+						const auto& it = m_RefTextureMap.find(TexLayout.TextureName);
+
+						Texture = (it != m_RefTextureMap.end()) ? it->second : m_EmptyTexture;
 					}
 					else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_CUBE)
 					{
-						Texture = (TextureIndex >= 0 && TextureIndex < CubeMapList.size()) ? static_cast<api::CVulkanTexture*>(CubeMapList[TextureIndex].get()) : m_EmptyTexture.get();
+						const auto& it = m_RefCubeMapMap.find(TexLayout.TextureName);
+
+						Texture = (it != m_RefCubeMapMap.end()) ? it->second : m_EmptyCubeTexture;
 					}
 					else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_FRAME)
 					{
-						Texture = (TextureIndex >= 0 && TextureIndex < FrameTextureList.size()) ? static_cast<api::CVulkanTexture*>(FrameTextureList[TextureIndex].get()) : m_EmptyTexture.get();
+						const auto& it = m_RefFrameTextureMap.find(TexLayout.TextureName);
+
+						Texture = (it != m_RefFrameTextureMap.end()) ? it->second : m_EmptyTexture;
 					}
 					else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_IBL_Diffuse)
 					{
-						Texture = (TextureIndex >= 0 && Diffuse_Tex) ? static_cast<api::CVulkanTexture*>(Diffuse_Tex.get()) : m_EmptyTexture.get();
+						Texture = (m_RefDiffuse_Tex) ? m_RefDiffuse_Tex : m_EmptyTexture;
 					}
 					else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_IBL_Specular)
 					{
-						Texture = (TextureIndex >= 0 && Specular_Tex) ? static_cast<api::CVulkanTexture*>(Specular_Tex.get()) : m_EmptyTexture.get();
+						Texture = (m_RefSpecular_Tex) ? m_RefSpecular_Tex : m_EmptyTexture;
 					}
 					else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_IBL_GGXLUT)
 					{
-						Texture = (TextureIndex >= 0 && GGXLUT_Tex) ? static_cast<api::CVulkanTexture*>(GGXLUT_Tex.get()) : m_EmptyTexture.get();
+						Texture = (m_RefGGXLUT_Tex) ? m_RefGGXLUT_Tex : m_EmptyTexture;
 					}
 
 					if (!Texture)
@@ -606,6 +797,8 @@ namespace api
 						return false;
 					}
 
+					api::CVulkanTexture* pVulkanTexture = static_cast<api::CVulkanTexture*>(Texture.get());
+
 					{
 						descriptorWrites[LayoutIndex].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 						descriptorWrites[LayoutIndex].dstSet = m_DescriptorSets[FrameIndex]; // どのDescriptorSets(キューファミリが入ってる？)でCPUからGPUにバッファを渡すコマンドを発行するか
@@ -613,7 +806,7 @@ namespace api
 						descriptorWrites[LayoutIndex].dstArrayElement = 0; // ???
 
 						imageInfoList[ImageInfoIndex].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-						imageInfoList[ImageInfoIndex].imageView = Texture->GetTextureImageView();
+						imageInfoList[ImageInfoIndex].imageView = pVulkanTexture->GetTextureImageView();
 
 						descriptorWrites[LayoutIndex].descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
 						descriptorWrites[LayoutIndex].descriptorCount = 1;
@@ -628,7 +821,7 @@ namespace api
 						descriptorWrites[LayoutIndex].dstBinding = TexLayout.SamplerBindingIndex; // layout(location = n)
 						descriptorWrites[LayoutIndex].dstArrayElement = 0; // ???
 
-						imageInfoList[ImageInfoIndex + 1].sampler = Texture->GetTextureSampler();
+						imageInfoList[ImageInfoIndex + 1].sampler = pVulkanTexture->GetTextureSampler();
 
 						descriptorWrites[LayoutIndex].descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER;
 						descriptorWrites[LayoutIndex].descriptorCount = 1;
@@ -642,6 +835,31 @@ namespace api
 				vkUpdateDescriptorSets(m_pGraphicsAPI->GetLogicalDevice(), static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
 			}
 		}
+
+		return true;
+	}
+
+	bool CVulkanMaterial::CreatePipelineLayout()
+	{
+		// パイプラインレイアウト(Uniformをシェーダーに渡すための仕組み)
+		// Uniformの値自体はいつでも変更できるが、どのUniformを使用するかはここで事前にこのパイプラインレイアウトで設定しておく必要がある。
+		// たぶんここではLayoutは意味としてUniformを指すのでは？
+		VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
+		pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+		if (IsUseShaderBuffer())
+		{
+			pipelineLayoutInfo.setLayoutCount = 1;
+			pipelineLayoutInfo.pSetLayouts = &GetDescriptorSetLayout();
+		}
+		else
+		{
+			pipelineLayoutInfo.setLayoutCount = 0;
+			pipelineLayoutInfo.pSetLayouts = nullptr;
+		}
+		pipelineLayoutInfo.pushConstantRangeCount = 0;
+		pipelineLayoutInfo.pPushConstantRanges = nullptr;
+
+		if (vkCreatePipelineLayout(m_pGraphicsAPI->GetLogicalDevice(), &pipelineLayoutInfo, nullptr, &m_PipelineLayout) != VK_SUCCESS) return false;
 
 		return true;
 	}

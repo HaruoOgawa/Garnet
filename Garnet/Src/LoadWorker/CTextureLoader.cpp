@@ -1,11 +1,12 @@
 #ifdef USE_TEXTURE_LOADER
 
 #include "CTextureLoader.h"
+#include "CResourceManager.h"
 
 namespace resource
 {
 	CTextureLoader::CTextureLoader(api::IGraphicsAPI* pGraphicsAPI, const std::vector<std::string>& FileNameList, const std::shared_ptr<graphics::CTexture>& Texture):
-		m_Status(ELoadStatus::None),
+		CResource(""),
 		m_UseCube(false),
 		m_TargetTexture(Texture)
 	{
@@ -15,10 +16,16 @@ namespace resource
 		{
 			m_FileList.push_back(std::make_shared<CFile>(filename));
 		}
+
+		if (!m_FileList.empty())
+		{
+			// 最初のファイルをファイル名とする
+			m_FileName = m_FileList[0]->GetFilename();
+		}
 	}
 
 	CTextureLoader::CTextureLoader(api::IGraphicsAPI* pGraphicsAPI, const std::string& FileName, const std::shared_ptr<graphics::CTexture>& Texture) :
-		m_Status(ELoadStatus::None),
+		CResource(FileName),
 		m_UseCube(false),
 		m_TargetTexture(Texture)
 	{
@@ -29,26 +36,10 @@ namespace resource
 	{
 	}
 
-	void CTextureLoader::SetLoadStatus(resource::ELoadStatus Status)
-	{
-		m_Status = Status;
-	}
-
-	resource::ELoadStatus CTextureLoader::GetStatus() const
-	{
-		return m_Status;
-	}
-
-	bool CTextureLoader::IsLoaded() const
-	{
-		return (m_Status == resource::ELoadStatus::Loaded);
-	}
-
 	bool CTextureLoader::Load()
 	{
 		if (m_FileList.size() != 1 && m_FileList.size() != 6) return false;
 
-		// マテリアルフレームファイルのロード
 		m_Status = resource::ELoadStatus::Loading;
 
 		return true;
@@ -59,7 +50,7 @@ namespace resource
 		return true;
 	}
 
-	bool CTextureLoader::Update(api::IGraphicsAPI* pGraphicsAPI)
+	bool CTextureLoader::Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, const std::shared_ptr<CResourceManager>& ResourceManager)
 	{
 		for (const auto& File : m_FileList)
 		{
@@ -70,7 +61,7 @@ namespace resource
 				return true;
 
 			case resource::ELoadStatus::Loading:
-				if (!File->Update(pGraphicsAPI)) return false;
+				if (!File->Update(pGraphicsAPI, pPhysicsEngine, ResourceManager)) return false;
 				return true;
 
 			case resource::ELoadStatus::Loaded:
@@ -83,6 +74,9 @@ namespace resource
 				{
 					m_TextureData = File->GetData();
 				}
+
+				// リソースマネージャーに登録
+				ResourceManager->AddOnMemoryResource(File, shared_from_this());
 
 				m_FileList.erase(m_FileList.begin());
 			}
@@ -105,6 +99,9 @@ namespace resource
 
 		// ロード完了
 		m_Status = resource::ELoadStatus::Loaded;
+
+		// リソースマネージャーに登録
+		ResourceManager->AddOnMemoryResource(shared_from_this(), nullptr);
 
 		return true;
 	}

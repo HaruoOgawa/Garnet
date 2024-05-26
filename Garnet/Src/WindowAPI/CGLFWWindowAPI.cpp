@@ -47,11 +47,11 @@ namespace window
 		return true;
 	}
 
-	bool CGLFWWindowAPI::Initialize(app::CAppCore* pAppCore, int Width, int Height)
+	bool CGLFWWindowAPI::Initialize(app::CAppCore* pAppCore, app::SAppSettings Settings)
 	{
 		m_pCAppCore = pAppCore;
 
-		if (!InitWindow(Width, Height)) return false;
+		if (!InitWindow(Settings.ScreenWidth, Settings.ScreenHeight)) return false;
 
 		return true;
 	}
@@ -241,6 +241,17 @@ namespace window
 #endif
 	}
 
+	void FocusCallback(GLFWwindow* window, int focused)
+	{
+		auto WindowAPI = reinterpret_cast<CGLFWWindowAPI*>(glfwGetWindowUserPointer(window));
+		if (!WindowAPI) return;
+
+		auto AppCore = WindowAPI->GetAppCore();
+		if (!AppCore) return;
+
+		AppCore->FocusWindow((focused == 1));
+	}
+
 	bool CGLFWWindowAPI::InitWindow(int Width, int Height)
 	{
 		glfwInit();
@@ -265,6 +276,7 @@ namespace window
 		glfwSetMouseButtonCallback(m_pWindow, MousebuttonCallback);
 		glfwSetCursorPosCallback(m_pWindow, CursorPosCallback);
 		glfwSetScrollCallback(m_pWindow, ScrollCallback);
+		glfwSetWindowFocusCallback(m_pWindow, FocusCallback);
 
 		return true;
 	}
@@ -296,7 +308,7 @@ namespace window
 
 	void CGLFWWindowAPI::ResizeWindow(int w, int h)
 	{
-		m_pCAppCore->Resize(w, h);
+		m_pCAppCore->ResizeWindow(w, h);
 	}
 
 	// インプットイベント
@@ -310,6 +322,11 @@ namespace window
 
 	// リサイズイベント
 	void CGLFWWindowAPI::OnResize(int w, int h)
+	{
+	}
+
+	// フォーカスイベント
+	void CGLFWWindowAPI::OnFocus(int focused)
 	{
 	}
 

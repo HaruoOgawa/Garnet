@@ -64,6 +64,8 @@ namespace api
 		if (!CreateCommandBuffer()) return false; // コマンドバッファの作成
 		if (!CreateSyncObjects()) return false; // 同期オブジェクトの作成(各種コマンドの順序を操作するために使用)
 
+		if (!LoadExtensions()) return false;
+
 		return true;
 	}
 
@@ -343,6 +345,15 @@ namespace api
 		return m_SwapChainRenderPass;
 	}
 
+	bool CVulkanAPI::IsEnabledRuntimeShaderEditing() const
+	{
+#ifdef RUNTIME_SHADER_EDITING
+		return true;
+#else
+		return false;
+#endif // RUNTIME_SHADER_EDITING
+	}
+
 	// Instance
 	const VkInstance& CVulkanAPI::GetInstance() const
 	{
@@ -561,6 +572,31 @@ namespace api
 		extentedDynamicState.extendedDynamicState = true;
 
 		deviceCreateInfo.pNext = &extentedDynamicState;
+
+		/*std::vector<const void*> ExtensionFeatureList;
+
+		{
+			// VK_DYNAMIC_STATE_CULL_MODEを使用するために必要な設定
+			// https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/vkCmdSetCullModeEXT.html#VUID-vkCmdSetCullMode-None-08971
+			VkPhysicalDeviceExtendedDynamicStateFeaturesEXT extentedDynamicState{};
+			extentedDynamicState.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTENDED_DYNAMIC_STATE_FEATURES_EXT;
+			extentedDynamicState.pNext = nullptr;
+			extentedDynamicState.extendedDynamicState = true;
+
+			ExtensionFeatureList.push_back(&extentedDynamicState);
+		}
+
+		{
+			// ShaderObject拡張を使用するのに必要な設定
+			VkPhysicalDeviceShaderObjectFeaturesEXT extentedShaderObject{};
+			extentedShaderObject.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_OBJECT_FEATURES_EXT;
+			extentedShaderObject.pNext = nullptr;
+			extentedShaderObject.shaderObject = true;
+
+			ExtensionFeatureList.push_back(&extentedShaderObject);
+		}
+
+		deviceCreateInfo.pNext = ExtensionFeatureList.data();*/
 
 		// 論理デバイスを作成
 		VkResult result = vkCreateDevice(m_PhysicalDevice, &deviceCreateInfo, nullptr, &m_LogicalDevice);
@@ -1727,6 +1763,37 @@ namespace api
 		{
 			return false;
 		}
+
+		return true;
+	}
+
+	// Extension /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	bool CVulkanAPI::LoadExtensions()
+	{
+		if (!IsEnabledRuntimeShaderEditing()) return true;
+
+		BindShadersEXT = (PFN_vkCmdBindShadersEXT)vkGetInstanceProcAddr(GetInstance(), "vkCmdBindShadersEXT");
+		CreateShadersEXT = (PFN_vkCreateShadersEXT)vkGetInstanceProcAddr(GetInstance(), "vkCreateShadersEXT");
+		DestroyShaderEXT = (PFN_vkDestroyShaderEXT)vkGetInstanceProcAddr(GetInstance(), "vkDestroyShaderEXT");
+		SetVertexInputEXT = (PFN_vkCmdSetVertexInputEXT)vkGetInstanceProcAddr(GetInstance(), "vkCmdSetVertexInputEXT");
+		SetPrimitiveTopologyEXT = (PFN_vkCmdSetPrimitiveTopologyEXT)vkGetInstanceProcAddr(GetInstance(), "vkCmdSetPrimitiveTopologyEXT");
+		SetPrimitiveRestartEnableEXT = (PFN_vkCmdSetPrimitiveRestartEnableEXT)vkGetInstanceProcAddr(GetInstance(), "vkCmdSetPrimitiveRestartEnableEXT");
+		SetViewportWithCountEXT = (PFN_vkCmdSetViewportWithCountEXT)vkGetInstanceProcAddr(GetInstance(), "vkCmdSetViewportWithCountEXT");
+		SetScissorWithCountEXT = (PFN_vkCmdSetScissorWithCountEXT)vkGetInstanceProcAddr(GetInstance(), "vkCmdSetScissorWithCountEXT");
+		SetCullModeEXT = (PFN_vkCmdSetCullModeEXT)vkGetInstanceProcAddr(GetInstance(), "vkCmdSetCullModeEXT");
+		SetFrontFaceEXT = (PFN_vkCmdSetFrontFaceEXT)vkGetInstanceProcAddr(GetInstance(), "vkCmdSetFrontFaceEXT");
+		SetRasterizerDiscardEnableEXT = (PFN_vkCmdSetRasterizerDiscardEnableEXT)vkGetInstanceProcAddr(GetInstance(), "vkCmdSetRasterizerDiscardEnableEXT");
+		SetPolygonModeEXT = (PFN_vkCmdSetPolygonModeEXT)vkGetInstanceProcAddr(GetInstance(), "vkCmdSetPolygonModeEXT");
+		SetRasterizationSamplesEXT = (PFN_vkCmdSetRasterizationSamplesEXT)vkGetInstanceProcAddr(GetInstance(), "vkCmdSetRasterizationSamplesEXT");
+		SetAlphaToCoverageEnableEXT = (PFN_vkCmdSetAlphaToCoverageEnableEXT)vkGetInstanceProcAddr(GetInstance(), "vkCmdSetAlphaToCoverageEnableEXT");
+		SetDepthTestEnableEXT = (PFN_vkCmdSetDepthTestEnableEXT)vkGetInstanceProcAddr(GetInstance(), "vkCmdSetDepthTestEnableEXT");
+		SetDepthWriteEnableEXT = (PFN_vkCmdSetDepthWriteEnableEXT)vkGetInstanceProcAddr(GetInstance(), "vkCmdSetDepthWriteEnableEXT");
+		SetDepthCompareOpEXT = (PFN_vkCmdSetDepthCompareOpEXT)vkGetInstanceProcAddr(GetInstance(), "vkCmdSetDepthCompareOpEXT");
+		SetDepthBiasEnableEXT = (PFN_vkCmdSetDepthBiasEnableEXT)vkGetInstanceProcAddr(GetInstance(), "vkCmdSetDepthBiasEnableEXT");
+		SetStencilTestEnableEXT = (PFN_vkCmdSetStencilTestEnableEXT)vkGetInstanceProcAddr(GetInstance(), "vkCmdSetStencilTestEnableEXT");
+		SetSampleMaskEXT = (PFN_vkCmdSetSampleMaskEXT)vkGetInstanceProcAddr(GetInstance(), "vkCmdSetSampleMaskEXT");
+		SetColorBlendEnableEXT = (PFN_vkCmdSetColorBlendEnableEXT)vkGetInstanceProcAddr(GetInstance(), "vkCmdSetColorBlendEnableEXT");
+		SetColorWriteMaskEXT = (PFN_vkCmdSetColorWriteMaskEXT)vkGetInstanceProcAddr(GetInstance(), "vkCmdSetColorWriteMaskEXT");
 
 		return true;
 	}

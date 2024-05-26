@@ -5,17 +5,15 @@
 #include <string>
 #include <memory>
 
-#include "../Interface/IResource.h"
+#include "CResource.h"
 
 #include "CFile.h"
 #include "../Graphics/CTexture.h"
 
 namespace resource
 {
-	class CTextureLoader : public resource::IResource
+	class CTextureLoader : public resource::CResource
 	{
-		resource::ELoadStatus m_Status;
-
 		std::vector<std::shared_ptr<CFile>> m_FileList;
 
 		std::vector<unsigned char> m_TextureData;
@@ -29,13 +27,10 @@ namespace resource
 		CTextureLoader(api::IGraphicsAPI* pGraphicsAPI, const std::string& FileName, const std::shared_ptr<graphics::CTexture>& Texture);
 		virtual ~CTextureLoader();
 
-		virtual void SetLoadStatus(resource::ELoadStatus Status) override;
-		virtual resource::ELoadStatus GetStatus() const override;
-		virtual bool IsLoaded() const override;
-
 		virtual bool Load() override;
 		virtual bool LoadImmediate() override;
-		virtual bool Update(api::IGraphicsAPI* pGraphicsAPI) override;
+
+		virtual bool Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, const std::shared_ptr<CResourceManager>& ResourceManager) override;
 	};
 }
 

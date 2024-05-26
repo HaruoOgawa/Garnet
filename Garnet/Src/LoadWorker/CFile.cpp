@@ -35,6 +35,16 @@ namespace resource
 		m_Data.clear();
 	}
 
+	const std::string& CFile::GetFilename() const
+	{
+		return m_Filename;
+	}
+
+	int CFile::GetLoadPriority() const
+	{
+		return 0;
+	}
+
 	void CFile::SetLoadStatus(resource::ELoadStatus Status)
 	{
 		m_Status = Status;
@@ -154,7 +164,7 @@ namespace resource
 		return true;
 	}
 
-	bool CFile::Update(api::IGraphicsAPI* pGraphicsAPI)
+	bool CFile::Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, const std::shared_ptr<CResourceManager>& ResourceManager)
 	{
 #ifndef __EMSCRIPTEN__
 		if (m_Status == resource::ELoadStatus::Loading)
@@ -195,6 +205,27 @@ namespace resource
 #endif // !__EMSCRIPTEN__
 
 		return true;
+	}
+
+	void CFile::Reset()
+	{
+		m_Status = ELoadStatus::None;
+
+		m_Data.clear();
+	}
+
+	bool CFile::Reload(resource::CLoadWorker* pLoadWorker)
+	{
+		return true;
+	}
+
+	void CFile::AddReference(const std::shared_ptr<IResource>& Resource)
+	{
+		// é©êgÇÃéûÇÕí«â¡ÇµÇ»Ç¢
+		if (Resource == shared_from_this())
+		{
+			return;
+		}
 	}
 
 	void CFile::SetData(const std::vector<unsigned char>& Data)
