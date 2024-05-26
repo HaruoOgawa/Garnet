@@ -63,11 +63,20 @@ namespace window
 		return true;
 	}
 
-	/*void Resize_Callback(GLFWwindow* window, int width, int height)
+	void ResizeCallback(HWND window, UINT msg, WPARAM w_param, LPARAM l_param)
 	{
-		auto WindowAPI = reinterpret_cast<CWin32WindowAPI*>(glfwGetWindowUserPointer(window));
+		if (!g_WindowAPI) return;
+
+		auto WindowAPI = g_WindowAPI;
+
+		RECT rect;
+		GetWindowRect(window, &rect);
+
+		int width = rect.right - rect.left;
+		int height = rect.bottom - rect.top;
+
 		WindowAPI->ResizeWindow(width, height);
-	}*/
+	}
 
 	void KeyCallback(HWND window, UINT msg, WPARAM w_param, LPARAM l_param, bool IsDown)
 	{
@@ -299,6 +308,10 @@ namespace window
 
 			case WM_KILLFOCUS:
 				FocusCallback(false);
+				break;
+
+			case WM_SIZE:
+				ResizeCallback(window, msg, w_param, l_param);
 				break;
 #endif
 			default:
