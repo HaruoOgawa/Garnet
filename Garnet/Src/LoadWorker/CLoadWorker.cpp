@@ -18,7 +18,7 @@ namespace resource
 
 	CLoadWorker::~CLoadWorker()
 	{
-		m_LoadResourceMap.clear();
+		m_LoadResourceList.clear();
 	}
 
 	bool CLoadWorker::Create(api::IGraphicsAPI* pGraphicsAPI)
@@ -70,7 +70,7 @@ namespace resource
 
 		if (m_Status == ELoadStatus::Loading && m_LoadingBar)
 		{
-			float rate = 1.0f - (static_cast<float>(m_LoadResourceMap.size()) / m_FirstResourceCount);
+			float rate = 1.0f - (static_cast<float>(m_LoadResourceList.size()) / m_FirstResourceCount);
 			m_LoadingBar->GetMaterialList()[0]->SetUniformValue("rate", &glm::vec1(rate)[0], sizeof(float));
 			m_LoadingBar->GetMaterialList()[0]->SetUniformValue("alpha", &m_Alpha, sizeof(float));
 
@@ -89,7 +89,7 @@ namespace resource
 
 			if (!Create(pGraphicsAPI)) return false;
 
-			m_FirstResourceCount = static_cast<int>(m_LoadResourceMap.size()); // 初回ロードのリソース数を取得
+			m_FirstResourceCount = static_cast<int>(m_LoadResourceList.size()); // 初回ロードのリソース数を取得
 
 			if (m_FirstResourceCount > 0)
 			{
@@ -108,21 +108,21 @@ namespace resource
 	bool CLoadWorker::LoadResourceList(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine)
 	{
 		// ローディング
-		for (auto& ResourcePair : m_LoadResourceMap)
+		for (auto& Resource : m_LoadResourceList)
 		{
-			switch (ResourcePair.second->GetStatus())
+			switch (Resource->GetStatus())
 			{
 			case resource::ELoadStatus::None:
-				if (!ResourcePair.second->Load()) return false;
+				if (!Resource->Load()) return false;
 				return true;
 
 			case resource::ELoadStatus::Loading:
-				if (!ResourcePair.second->Update(pGraphicsAPI, pPhysicsEngine, m_ResourceManager)) return false;
+				if (!Resource->Update(pGraphicsAPI, pPhysicsEngine, m_ResourceManager)) return false;
 				return true;
 
 			case resource::ELoadStatus::Loaded:
 			{
-				m_LoadResourceMap.erase(m_LoadResourceMap.begin());
+				m_LoadResourceList.erase(m_LoadResourceList.begin());
 			}
 			return true;
 
@@ -143,18 +143,31 @@ namespace resource
 
 	void CLoadWorker::AddLoadResource(const std::shared_ptr<resource::IResource>& Resource)
 	{
-		auto it = m_LoadResourceMap.find(Resource->GetFilename());
+		auto LoadingResource = GetLoadingResource(Resource->GetFilename());
 
-		if (it == m_LoadResourceMap.end())
+		if (LoadingResource)
 		{
-			// mapに新規追加する
-			m_LoadResourceMap.emplace(Resource->GetFilename(), Resource);
+			// リソースにターゲットの参照だけを追加する
+			LoadingResource->AddReference(Resource);
 		}
 		else
 		{
-			// リソースにターゲットの参照だけを追加する
-			it->second->AddReference(Resource);
+			// mapに新規追加する
+			m_LoadResourceList.push_back(Resource);
 		}
+	}
+
+	std::shared_ptr<resource::IResource> CLoadWorker::GetLoadingResource(const std::string& Filename) const
+	{
+		for (const auto& Resouce : m_LoadResourceList)
+		{
+			if (Filename == Resouce->GetFilename())
+			{
+				return Resouce;
+			}
+		}
+
+		return nullptr;
 	}
 
 	const std::shared_ptr<CResourceManager>& CLoadWorker::GetResourceManager() const

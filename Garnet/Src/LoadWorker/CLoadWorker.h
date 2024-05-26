@@ -25,13 +25,15 @@ namespace resource
 		std::shared_ptr<resource::CFile> m_VertexShader; // ‚ ‚Æ‚ÅSimple3DObject‚ÉˆÚ“®‚·‚é
 		std::shared_ptr<resource::CFile> m_FragmentShader;
 
-		std::unordered_map<std::string, std::shared_ptr<resource::IResource>> m_LoadResourceMap;
+		std::vector<std::shared_ptr<resource::IResource>> m_LoadResourceList;
 	private:
 		bool Create(api::IGraphicsAPI* pGraphicsAPI);
 
 		bool InitLoadStatus(api::IGraphicsAPI* pGraphicsAPI);
 
 		bool LoadResourceList(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine);
+
+		std::shared_ptr<resource::IResource> GetLoadingResource(const std::string& Filename) const;
 	public:
 		CLoadWorker(api::IGraphicsAPI* pGraphicsAPI);
 		virtual ~CLoadWorker();
