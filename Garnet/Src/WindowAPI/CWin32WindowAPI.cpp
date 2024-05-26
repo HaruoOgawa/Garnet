@@ -240,19 +240,19 @@ namespace window
 	// ウィンドウのコールバック関数
 	LRESULT MainWindowCallback(HWND window, UINT msg, WPARAM w_param, LPARAM l_param)
 	{
-		if (!g_WindowAPI) return false;
+		if (!g_WindowAPI) return 1;
 
 		auto WindowAPI = g_WindowAPI;
 		
 		auto AppCore = WindowAPI->GetAppCore();
-		if (!AppCore) return false;
+		if (!AppCore) return 1;
 
 		auto GUIEngine = AppCore->GetGUIEngine();
 		if (GUIEngine)
 		{
-			if (GUIEngine->CheckInput(window, msg, w_param, l_param)) return true;
+			if (GUIEngine->CheckInput(window, msg, w_param, l_param)) return 0;
 
-			if (GUIEngine->IsExistMouseOnGUI()) return true;
+			if (GUIEngine->IsExistMouseOnGUI()) return 0;
 		}
 
 		LRESULT result = 0;
@@ -302,10 +302,11 @@ namespace window
 				break;
 #endif
 			default:
-				break;
+				return DefWindowProc(window, msg, w_param, l_param);
 		}
 
-		return true;
+		// 0/1でリターンとDefWindowProcが無いとシステムメニューなどが表示されなくなるので注意
+		return 0;
 	}
 
 	bool CWin32WindowAPI::InitWindow(HINSTANCE hInstance, int Width, int Height)
@@ -314,19 +315,25 @@ namespace window
 		/// ウィンドウの設定
 		/// </summary>
 		/// <returns></returns>
-		WNDCLASSA window_class = {}; 
-		
+		WNDCLASSEX window_class = {}; 
+		window_class.cbSize = sizeof(WNDCLASSEX);
 		window_class.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
 		// https://learn.microsoft.com/en-us/windows/win32/winmsg/window-class-styles
 		// CS_HREDRAW : 移動またはサイズ調整によってクライアント領域の幅が変化した場合、ウィンドウ全体を再描画します。
 		// CS_VREDRAW : 移動またはサイズ調整によってクライアント領域の高さが変化した場合、ウィンドウ全体を再描画します。
 		// CS_OWNDC   : クラス内の各ウィンドウに一意のデバイス コンテキストを割り当てます。
 		window_class.lpfnWndProc = MainWindowCallback; // ウィンドウのコールバック関数
+		window_class.cbClsExtra = 0;
+		window_class.cbWndExtra = 0;
 		window_class.hInstance = hInstance; // アプリのインスタンス
-		//window_class.hIcon = ""; // ウィンドウのアイコン(?)ひとまず今は要らない
-		window_class.lpszClassName = "GarnetWindowClass"; // WindosClassの名前. たぶんVulkanとかでいうラベルみたいなやつだと思う
+		window_class.hIcon = LoadIcon(NULL, IDI_APPLICATION); // ウィンドウのアイコン
+		window_class.hCursor = LoadCursor(NULL, IDC_ARROW);
+		window_class.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
+		window_class.lpszMenuName = NULL;
+		window_class.lpszClassName = L"GarnetWindowClass"; // WindosClassの名前. たぶんVulkanとかでいうラベルみたいなやつだと思う
+		window_class.hIconSm = LoadIcon(NULL, IDI_APPLICATION);
 
-		if (!RegisterClassA(&window_class)) // WindowClassを登録する
+		if (!RegisterClassEx(&window_class)) // WindowClassを登録する
 		{
 			Console::Log("[Error] could not regist WindowClass\n");
 
@@ -334,20 +341,21 @@ namespace window
 		}
 
 		// ウィンドウを生成
-		m_Window = CreateWindowExA(
-			0, // WindowStyleの拡張
+		m_Window = CreateWindowEx(
+			// https://learn.microsoft.com/ja-jp/windows/win32/winmsg/extended-window-styles
+			WS_EX_APPWINDOW, // WindowStyleの拡張
 			window_class.lpszClassName, // WindowClassの名前. 先ほど登録しておいたもの
-			"Garnet", // WindowName
+			L"Garnet", // WindowName
 			// WindowStyle : https://learn.microsoft.com/en-us/windows/win32/winmsg/window-styles
-			WS_POPUP | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_VISIBLE | WS_CAPTION, // WindosStyle. たぶんWindowに出てくるボタンとかタブの設定
-			200, // 位置 X (適当な値)
-			200, // 位置 Y (適当な値)
+			WS_OVERLAPPEDWINDOW | WS_VISIBLE, // WindosStyle. たぶんWindowに出てくるボタンとかタブの設定
+			CW_USEDEFAULT, // 位置 X (適当な値)
+			CW_USEDEFAULT, // 位置 Y (適当な値)
 			Width,         // Width
 			Height,        // HEIGHT
-			0,             // Window Parent. ウィンドウを複数個作ってグループ化できるのかな？ 例えばUnityのGame Viewと Scene ViewがあってUnityエディタ全体を動かすとそれもついてくるみたいな
-			0,             // Menu(?)
+			NULL,          // Window Parent. ウィンドウを複数個作ってグループ化できるのかな？ 例えばUnityのGame Viewと Scene ViewがあってUnityエディタ全体を動かすとそれもついてくるみたいな
+			NULL,          // Menu(?)
 			hInstance,     // アプリのインスタンス
-			0              // lpParam(?)
+			NULL           // lpParam(?)
 		);
 
 		if (!m_Window)
