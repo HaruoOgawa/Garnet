@@ -249,77 +249,78 @@ namespace window
 	// ウィンドウのコールバック関数
 	LRESULT MainWindowCallback(HWND window, UINT msg, WPARAM w_param, LPARAM l_param)
 	{
-		if (!g_WindowAPI) return 1;
-
 		auto WindowAPI = g_WindowAPI;
 		
-		auto AppCore = WindowAPI->GetAppCore();
-		if (!AppCore) return 1;
-
-		auto GUIEngine = AppCore->GetGUIEngine();
-		if (GUIEngine)
+		if (WindowAPI)
 		{
-			if (GUIEngine->CheckInput(window, msg, w_param, l_param)) return 0;
+			auto AppCore = WindowAPI->GetAppCore();
 
-			if (GUIEngine->IsExistMouseOnGUI()) return 0;
-		}
+			if (AppCore)
+			{
+				auto GUIEngine = AppCore->GetGUIEngine();
+				if (GUIEngine)
+				{
+					if (GUIEngine->CheckInput(window, msg, w_param, l_param)) return DefWindowProc(window, msg, w_param, l_param);
 
-		LRESULT result = 0;
+					if (GUIEngine->IsExistMouseOnGUI()) return DefWindowProc(window, msg, w_param, l_param);
+				}
 
-		// インプット
-		switch (msg)
-		{
+				// インプット
+				switch (msg)
+				{
+				case WM_KEYDOWN:
+					KeyCallback(window, msg, w_param, l_param, true);
+					break;
 
-			case WM_KEYDOWN : 
-				KeyCallback(window, msg, w_param, l_param, true);
-				break;
-
-			case WM_KEYUP:
-				KeyCallback(window, msg, w_param, l_param, false);
-				break;
+				case WM_KEYUP:
+					KeyCallback(window, msg, w_param, l_param, false);
+					break;
 #ifdef USE_INPUT_SYSTEM
-			case WM_LBUTTONDOWN:
-				MousebuttonCallback(window, msg, w_param, l_param, true);
-				break;
+				case WM_LBUTTONDOWN:
+					MousebuttonCallback(window, msg, w_param, l_param, true);
+					break;
 
-			case WM_RBUTTONDOWN:
-				MousebuttonCallback(window, msg, w_param, l_param, true);
-				break;
+				case WM_RBUTTONDOWN:
+					MousebuttonCallback(window, msg, w_param, l_param, true);
+					break;
 
-			case WM_LBUTTONUP:
-				MousebuttonCallback(window, msg, w_param, l_param, false);
-				break;
+				case WM_LBUTTONUP:
+					MousebuttonCallback(window, msg, w_param, l_param, false);
+					break;
 
-			case WM_RBUTTONUP:
-				MousebuttonCallback(window, msg, w_param, l_param, false);
-				break;
+				case WM_RBUTTONUP:
+					MousebuttonCallback(window, msg, w_param, l_param, false);
+					break;
 
-			case WM_MOUSEMOVE:
-				CursorPosCallback(window, msg, w_param, l_param);
-				break;
+				case WM_MOUSEMOVE:
+					CursorPosCallback(window, msg, w_param, l_param);
+					break;
 
-			case WM_MOUSEWHEEL:
-				ScrollCallback(window, msg, w_param, l_param);
-				break;
+				case WM_MOUSEWHEEL:
+					ScrollCallback(window, msg, w_param, l_param);
+					break;
 
-			case WM_SETFOCUS:
-				FocusCallback(true);
-				break;
+				case WM_SETFOCUS:
+					FocusCallback(true);
+					break;
 
-			case WM_KILLFOCUS:
-				FocusCallback(false);
-				break;
+				case WM_KILLFOCUS:
+					FocusCallback(false);
+					break;
 
-			case WM_SIZE:
-				ResizeCallback(window, msg, w_param, l_param);
-				break;
+				case WM_SIZE:
+					ResizeCallback(window, msg, w_param, l_param);
+					break;
 #endif
-			default:
-				return DefWindowProc(window, msg, w_param, l_param);
+				default:
+					break;
+				}
+			}
 		}
 
 		// 0/1でリターンとDefWindowProcが無いとシステムメニューなどが表示されなくなるので注意
-		return 0;
+		//return 0;
+		return DefWindowProc(window, msg, w_param, l_param);
 	}
 
 	bool CWin32WindowAPI::InitWindow(HINSTANCE hInstance, app::SAppSettings Settings)
