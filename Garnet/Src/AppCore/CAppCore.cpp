@@ -32,7 +32,8 @@
 
 namespace app
 {
-	CAppCore::CAppCore(const std::shared_ptr<app::IApp>& App):
+	CAppCore::CAppCore(const std::shared_ptr<app::IApp>& App, SAppSettings Settings):
+		m_AppSettings(Settings),
 		m_WindowAPI(nullptr),
 		m_GraphicsAPI(nullptr),
 		m_IsRunLoop(true),
@@ -101,7 +102,7 @@ namespace app
 		return m_GUIEngine;
 	}
 
-	bool CAppCore::Initialize(int Width, int Height)
+	bool CAppCore::Initialize()
 	{
 		{
 			// WindowAPI
@@ -115,11 +116,11 @@ namespace app
 
 			// GraphicsAPI
 #ifdef USE_WEBGPU
-			m_GraphicsAPI = std::make_shared<api::CWebGPUAPI>(Width, Height);
+			m_GraphicsAPI = std::make_shared<api::CWebGPUAPI>(m_AppSettings.ScreenWidth, m_AppSettings.ScreenHeight);
 #elif USE_VULKAN
-			m_GraphicsAPI = std::make_shared<api::CVulkanAPI>(Width, Height);
+			m_GraphicsAPI = std::make_shared<api::CVulkanAPI>(m_AppSettings.ScreenWidth, m_AppSettings.ScreenHeight);
 #elif USE_OPENGL
-			m_GraphicsAPI = std::make_shared<api::COpenGLAPI>(Width, Height);
+			m_GraphicsAPI = std::make_shared<api::COpenGLAPI>(m_AppSettings.ScreenWidth, m_AppSettings.ScreenHeight);
 #endif // USE_WEBGPU
 			
 			// •¨—ƒGƒ“ƒWƒ“
@@ -133,7 +134,7 @@ namespace app
 #endif
 		}
 
-		if (!m_WindowAPI->Initialize(this, Width, Height)) return false;
+		if (!m_WindowAPI->Initialize(this, m_AppSettings)) return false;
 
 		if (!m_GraphicsAPI->Initialize(m_WindowAPI.get())) return false;
 

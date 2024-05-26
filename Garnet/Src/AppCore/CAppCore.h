@@ -1,5 +1,6 @@
 #pragma once
 
+#include "SAppSettings.h"
 #include "../Interface/IWindowAPI.h"
 #include <string>
 #include <memory>
@@ -16,6 +17,8 @@ namespace app
 {
 	class CAppCore
 	{
+		SAppSettings m_AppSettings;
+
 		std::shared_ptr<window::IWindowAPI> m_WindowAPI;
 
 		std::shared_ptr<api::IGraphicsAPI> m_GraphicsAPI;
@@ -35,14 +38,14 @@ namespace app
 
 		std::shared_ptr<input::CInputState> m_InputState;
 	public:
-		CAppCore(const std::shared_ptr<app::IApp>& App);
+		CAppCore(const std::shared_ptr<app::IApp>& App, SAppSettings Settings);
 		virtual ~CAppCore();
 
 		const std::shared_ptr<gui::IGUIEngine>& GetGUIEngine() const;
 
 		const std::shared_ptr<input::CInputState>& GetInputState()const { return m_InputState; }
 
-		bool Initialize(int Width, int Height);
+		bool Initialize();
 
 		bool Release();
 		

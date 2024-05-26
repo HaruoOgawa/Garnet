@@ -3105,6 +3105,9 @@
     <ClInclude Include="Src\Library\Vulkan\include\vulkan\vulkan_xlib_xrandr.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="Src\AppCore\SAppSettings.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\App\ScriptApp\CScriptApp.cpp">

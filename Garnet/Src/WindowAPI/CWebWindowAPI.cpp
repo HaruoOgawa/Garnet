@@ -36,12 +36,12 @@ namespace window
 		return true;
 	}
 
-	bool CWebWindowAPI::Initialize(app::CAppCore* pAppCore, int Width, int Height)
+	bool CWebWindowAPI::Initialize(app::CAppCore* pAppCore, app::SAppSettings Settings)
 	{
 		m_pCAppCore = pAppCore;
 
-		m_Width = Width;
-		m_Height = Height;
+		m_Width = Settings.ScreenWidth;
+		m_Height = Settings.ScreenHeight;
 
 		return true;
 	}

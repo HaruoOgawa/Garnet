@@ -50,13 +50,13 @@ namespace window
 		return m_Window;
 	}
 
-	bool CWin32WindowAPI::Initialize(app::CAppCore* pAppCore, int Width, int Height)
+	bool CWin32WindowAPI::Initialize(app::CAppCore* pAppCore, app::SAppSettings Settings)
 	{
 		m_pCAppCore = pAppCore;
 
 		HINSTANCE hInstance = GetModuleHandle(NULL);
-
-		if (!InitWindow(hInstance, Width, Height)) return false;
+		
+		if (!InitWindow(hInstance, Settings)) return false;
 		//if (!InitWGL()) return false;
 		if (!InitGLContext()) return false;
 
@@ -309,7 +309,7 @@ namespace window
 		return 0;
 	}
 
-	bool CWin32WindowAPI::InitWindow(HINSTANCE hInstance, int Width, int Height)
+	bool CWin32WindowAPI::InitWindow(HINSTANCE hInstance, app::SAppSettings Settings)
 	{
 		/// <summary>
 		/// ウィンドウの設定
@@ -340,6 +340,25 @@ namespace window
 			return false;
 		}
 
+		DWORD dwStyle = 0;
+		int nWidth = 0;
+		int nHeight = 0;
+
+		if (Settings.FullScreen)
+		{
+			dwStyle = WS_POPUP | WS_VISIBLE;
+
+			nWidth = GetSystemMetrics(SM_CXSCREEN);
+			nHeight = GetSystemMetrics(SM_CYSCREEN);
+		}
+		else
+		{
+			dwStyle = WS_OVERLAPPEDWINDOW | WS_VISIBLE;
+
+			nWidth = CW_USEDEFAULT;
+			nHeight = CW_USEDEFAULT;
+		}
+
 		// ウィンドウを生成
 		m_Window = CreateWindowEx(
 			// https://learn.microsoft.com/ja-jp/windows/win32/winmsg/extended-window-styles
@@ -347,11 +366,11 @@ namespace window
 			window_class.lpszClassName, // WindowClassの名前. 先ほど登録しておいたもの
 			L"Garnet", // WindowName
 			// WindowStyle : https://learn.microsoft.com/en-us/windows/win32/winmsg/window-styles
-			WS_OVERLAPPEDWINDOW | WS_VISIBLE, // WindosStyle. たぶんWindowに出てくるボタンとかタブの設定
-			CW_USEDEFAULT, // 位置 X (適当な値)
-			CW_USEDEFAULT, // 位置 Y (適当な値)
-			Width,         // Width
-			Height,        // HEIGHT
+			dwStyle, // WindosStyle. たぶんWindowに出てくるボタンとかタブの設定
+			nWidth, // 位置 X (適当な値)
+			nHeight, // 位置 Y (適当な値)
+			Settings.ScreenWidth,   // Width
+			Settings.ScreenHeight,  // HEIGHT
 			NULL,          // Window Parent. ウィンドウを複数個作ってグループ化できるのかな？ 例えばUnityのGame Viewと Scene ViewがあってUnityエディタ全体を動かすとそれもついてくるみたいな
 			NULL,          // Menu(?)
 			hInstance,     // アプリのインスタンス
@@ -366,24 +385,22 @@ namespace window
 		}
 
 		// スクリーンサイズを取得
-		SystemParametersInfo(SPI_GETWORKAREA, 0, &m_WorkArea, 0);
-
-#ifdef _DEBUG
-		RECT rect;
-		if (GetWindowRect(m_Window, &rect))
+		if (Settings.FullScreen)
 		{
-			int w = rect.right - rect.left;
-			int h = rect.bottom - rect.top;
-
-			SetWindowPos(m_Window, HWND_TOP, rect.left, rect.top, w, h, NULL);
+			// Full Screen
+			SetWindowPos(m_Window, HWND_TOP, 0, 0, nWidth, nHeight, NULL);
 		}
-#else
-		// Full Screen
-		int workAreaWidth = m_WorkArea.right - m_WorkArea.left;
-		int workAreaHeight = m_WorkArea.bottom - m_WorkArea.top;
+		else
+		{
+			RECT rect;
+			if (GetWindowRect(m_Window, &rect))
+			{
+				int w = rect.right - rect.left;
+				int h = rect.bottom - rect.top;
 
-		SetWindowPos(m_Window, HWND_TOP, m_WorkArea.left, m_WorkArea.top, workAreaWidth, workAreaHeight, NULL);
-#endif // _DEBUG
+				SetWindowPos(m_Window, HWND_TOP, rect.left, rect.top, w, h, NULL);
+			}
+		}
 
 		return true;
 	}

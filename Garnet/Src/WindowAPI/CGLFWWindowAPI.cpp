@@ -47,11 +47,11 @@ namespace window
 		return true;
 	}
 
-	bool CGLFWWindowAPI::Initialize(app::CAppCore* pAppCore, int Width, int Height)
+	bool CGLFWWindowAPI::Initialize(app::CAppCore* pAppCore, app::SAppSettings Settings)
 	{
 		m_pCAppCore = pAppCore;
 
-		if (!InitWindow(Width, Height)) return false;
+		if (!InitWindow(Settings.ScreenWidth, Settings.ScreenHeight)) return false;
 
 		return true;
 	}

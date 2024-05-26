@@ -9,7 +9,10 @@
 #include <Windows.h>
 #endif
 
-namespace app { class CAppCore; }
+namespace app { 
+	class CAppCore;
+	struct SAppSettings;
+}
 
 namespace window
 {
@@ -23,7 +26,7 @@ namespace window
 #endif
 		virtual bool Release() = 0;
 
-		virtual bool Initialize(app::CAppCore* pAppCore, int Width, int Height) = 0;
+		virtual bool Initialize(app::CAppCore* pAppCore, app::SAppSettings Settings) = 0;
 
 		virtual void SwapWindowBuffers() = 0;
 

@@ -23,7 +23,7 @@ namespace window
 
 		virtual bool Release() override;
 
-		virtual bool Initialize(app::CAppCore* pAppCore, int Width, int Height) override;
+		virtual bool Initialize(app::CAppCore* pAppCore, app::SAppSettings Settings) override;
 
 		virtual void SwapWindowBuffers() override;
 

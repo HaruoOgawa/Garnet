@@ -647,6 +647,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Src\AppCore\SAppSettings.h" />
     <ClInclude Include="Src\Interface\IResource.h" />
     <ClInclude Include="Src\Library\Vulkan\include\dxc\dxcapi.h" />
     <ClInclude Include="Src\Library\Vulkan\include\dxc\WinAdapter.h" />
