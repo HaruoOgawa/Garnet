@@ -1,0 +1,62 @@
+{
+  "name": "sample_scene",
+
+  "materialframes": [
+    "Resources\\MaterialFrame\\basic_toon_mf.json",
+    "Resources\\MaterialFrame\\SimpleTexture_MF.json",
+    "Resources\\MaterialFrame\\Depth_MF.json",
+    "Resources\\MaterialFrame\\PBR_MF.json",
+    "Resources\\MaterialFrame\\raymarching_mf.json"
+  ],
+
+  "scenetextureset": {
+    "cubemaps": [
+      {
+        "back": "Resources\\Cubemaps\\environment\\environment_back_0.jpg",
+        "bottom": "Resources\\Cubemaps\\environment\\environment_bottom_0.jpg",
+        "front": "Resources\\Cubemaps\\environment\\environment_front_0.jpg",
+        "left": "Resources\\Cubemaps\\environment\\environment_left_0.jpg",
+        "right": "Resources\\Cubemaps\\environment\\environment_right_0.jpg",
+        "top": "Resources\\Cubemaps\\environment\\environment_top_0.jpg"
+      }
+    ],
+    "frametextures": [
+
+    ],
+    "ibl": {
+      "diffuse": "",
+      "specular": "",
+      "ggx": ""
+    }
+  },
+
+  "animations": [
+    "Resources\\Motions\\biglove_dance_noik.vmd",
+    "Resources\\Motions\\biglove_expression.vmd",
+    "Resources\\Motions\\biglove_Ripsync.vmd"
+  ],
+
+  "objects": [
+    {
+      "name": "TestObj",
+      "transform": {
+        "pos": [ 0.0, 0.0, 0.0 ],
+        "rotate": [ 0.0, 0.0, 0.0 ],
+        "scale": [ 1.0, 1.0, 1.0 ]
+      },
+      "enable": true,
+      "nodes": [
+
+      ],
+      "meshs": [
+
+      ],
+      "materials": [
+
+      ],
+      "textureset": {
+
+      }
+    }
+  ]
+}

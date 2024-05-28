@@ -7,11 +7,14 @@
 #include "../Interface/IResource.h"
 #include "../Object/C3DObject.h"
 #include "CResourceManager.h"
+#include "CSceneLoader.h"
 
 namespace file { class CFile; }
 
 namespace resource
 {
+	class CSceneLoader;
+
 	class CLoadWorker
 	{
 		ELoadStatus m_Status;
@@ -25,10 +28,12 @@ namespace resource
 		std::shared_ptr<resource::CFile> m_VertexShader; // ‚ ‚Æ‚ÅSimple3DObject‚ÉˆÚ“®‚·‚é
 		std::shared_ptr<resource::CFile> m_FragmentShader;
 
+		std::vector<std::shared_ptr<resource::IResource>> m_InitialResourceList;
 		std::vector<std::shared_ptr<resource::IResource>> m_LoadResourceList;
 	private:
 		bool Create(api::IGraphicsAPI* pGraphicsAPI);
 
+		bool CheckInitialResource(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine);
 		bool InitLoadStatus(api::IGraphicsAPI* pGraphicsAPI);
 
 		bool LoadResourceList(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine);
@@ -43,6 +48,8 @@ namespace resource
 			const std::shared_ptr<graphics::CDrawInfo>& DrawInfo);
 
 		bool IsLoaded();
+
+		void AddScene(const std::shared_ptr<CSceneLoader>& SceneLoader);
 
 		void AddLoadResource(const std::shared_ptr<resource::IResource>& Resource);
 

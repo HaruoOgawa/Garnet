@@ -12,8 +12,8 @@ namespace resource
 		m_VertexShader(std::make_shared<resource::CFile>("Resources\\Shaders\\loadingbar" + pGraphicsAPI->GetVertexShaderExtension())),
 		m_FragmentShader(std::make_shared<resource::CFile>("Resources\\Shaders\\loadingbar" + pGraphicsAPI->GetFragmentShaderExtension()))
 	{
-		m_VertexShader->LoadImmediate();
-		m_FragmentShader->LoadImmediate();
+		m_InitialResourceList.push_back(m_VertexShader);
+		m_InitialResourceList.push_back(m_FragmentShader);
 	}
 
 	CLoadWorker::~CLoadWorker()
@@ -49,7 +49,11 @@ namespace resource
 	bool CLoadWorker::Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine)
 	{
 		// 初期化
-		if (!InitLoadStatus(pGraphicsAPI)) return false;
+		if (m_Status == ELoadStatus::None)
+		{
+			if (CheckInitialResource(pGraphicsAPI, pPhysicsEngine)) return true;
+			if (!InitLoadStatus(pGraphicsAPI)) return false;
+		}
 		
 		// ローディングバー
 		if (m_LoadingBar)
@@ -80,26 +84,48 @@ namespace resource
 		return true;
 	}
 
+	bool CLoadWorker::CheckInitialResource(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine)
+	{
+		for (auto& Resource : m_InitialResourceList)
+		{
+			switch (Resource->GetStatus())
+			{
+			case resource::ELoadStatus::None:
+				if (!Resource->Load()) return false;
+				return true;
+
+			case resource::ELoadStatus::Loading:
+				if (!Resource->Update(pGraphicsAPI, pPhysicsEngine, m_ResourceManager)) return false;
+				return true;
+
+			case resource::ELoadStatus::Loaded:
+			{
+				m_InitialResourceList.erase(m_InitialResourceList.begin());
+			}
+			return true;
+
+			default:
+				break;
+			}
+		}
+		
+		return false;
+	}
+
 	bool CLoadWorker::InitLoadStatus(api::IGraphicsAPI* pGraphicsAPI)
 	{
-		// 初期化
-		if (m_Status == ELoadStatus::None)
+		if (!Create(pGraphicsAPI)) return false;
+
+		m_FirstResourceCount = static_cast<int>(m_LoadResourceList.size()); // 初回ロードのリソース数を取得
+
+		if (m_FirstResourceCount > 0)
 		{
-			if (!m_VertexShader->IsLoaded() || !m_FragmentShader->IsLoaded()) return true;
-
-			if (!Create(pGraphicsAPI)) return false;
-
-			m_FirstResourceCount = static_cast<int>(m_LoadResourceList.size()); // 初回ロードのリソース数を取得
-
-			if (m_FirstResourceCount > 0)
-			{
-				m_Status = ELoadStatus::Loading;
-			}
-			else
-			{
-				// 初回ロードリソースがない場合は即ロード完了にする
-				m_Status = ELoadStatus::Loaded;
-			}
+			m_Status = ELoadStatus::Loading;
+		}
+		else
+		{
+			// 初回ロードリソースがない場合は即ロード完了にする
+			m_Status = ELoadStatus::Loaded;
 		}
 
 		return true;
@@ -139,6 +165,11 @@ namespace resource
 	bool CLoadWorker::IsLoaded()
 	{
 		return (m_Status == ELoadStatus::Loaded);
+	}
+
+	void CLoadWorker::AddScene(const std::shared_ptr<CSceneLoader>& SceneLoader)
+	{
+		m_InitialResourceList.push_back(SceneLoader);
 	}
 
 	void CLoadWorker::AddLoadResource(const std::shared_ptr<resource::IResource>& Resource)

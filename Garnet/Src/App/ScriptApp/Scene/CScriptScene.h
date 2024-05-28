@@ -20,36 +20,17 @@ namespace graphics
 }
 namespace audio { class CAudioClip; }
 
+namespace scene { class CSceneController; }
+
 namespace app
 {
 	class CScriptScene
 	{
 		bool m_IsLoaded;
 
+		std::shared_ptr<scene::CSceneController> m_SceneController;
+
 		std::vector<std::shared_ptr<object::C3DObject>> m_ObjectList;
-
-		std::shared_ptr<graphics::CMaterialFrame> m_BasicToonMF;
-		std::shared_ptr<graphics::CMaterialFrame> m_SimpleTextureMF;
-		std::shared_ptr<graphics::CMaterialFrame> m_DepthMF;
-		std::shared_ptr<graphics::CMaterialFrame> m_PBRMF;
-		std::shared_ptr<graphics::CMaterialFrame> m_RaymarchingMF;
-
-		// Texture
-		std::shared_ptr<graphics::CTexture> m_Cube_Texture;
-		std::shared_ptr<graphics::CTexture> m_IBL_Skybox_Texture;
-
-		// Custom Object
-		std::shared_ptr<object::C3DObject> m_RaymarchingObj;
-
-		// MMD
-		std::shared_ptr<object::C3DObject> m_TdaMiku_Model;
-		std::shared_ptr<animation::CAnimationClipSet> m_VMDAnimationSet;
-		std::shared_ptr<animation::CAnimationClipSet> m_ExpressionVMD;
-		std::shared_ptr<animation::CAnimationClipSet> m_RipSyncVMD;
-
-		// Background
-		std::shared_ptr<object::C3DObject> m_Background;
-		std::shared_ptr<object::C3DObject> m_DebugSphere;
 	private:
 		bool Load(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker);
 
