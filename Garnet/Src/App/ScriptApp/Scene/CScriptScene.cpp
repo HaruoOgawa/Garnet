@@ -35,13 +35,27 @@ namespace app
 		return m_IsLoaded;
 	}
 
-	const std::vector<std::shared_ptr<object::C3DObject>>& CScriptScene::GetObjectList() const
+	std::vector<std::shared_ptr<object::C3DObject>> CScriptScene::GetObjectList() const
 	{
-		return m_ObjectList;
+		std::vector<std::shared_ptr<object::C3DObject>> ObjectList;
+
+		for (const auto& Object : m_SceneController->GetObjectList())
+		{
+			ObjectList.push_back(Object);
+		}
+
+		for (const auto& Object : m_ObjectList)
+		{
+			ObjectList.push_back(Object);
+		}
+
+		return ObjectList;
 	}
 
 	bool CScriptScene::Load(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker)
 	{
+		if (!m_SceneController->Create(pGraphicsAPI, pPhysicsEngine)) return false;
+
 		return true;
 	}
 
@@ -55,6 +69,8 @@ namespace app
 			if (!Load(pGraphicsAPI, pPhysicsEngine, pLoadWorker)) return false;
 			m_IsLoaded = true;
 		}
+
+		if (!m_SceneController->Update(pGraphicsAPI, pPhysicsEngine, pLoadWorker, Camera, Projection, DrawInfo, InputState)) return false;
 		
 		return true;
 	}
@@ -63,6 +79,8 @@ namespace app
 	{
 		if (!m_IsLoaded) return true;
 
+		if (!m_SceneController->LateUpdate(pGraphicsAPI, pPhysicsEngine, pLoadWorker, DrawInfo)) return false;
+
 		return true;
 	}
 
@@ -70,6 +88,8 @@ namespace app
 	{
 		if (!m_IsLoaded) return true;
 		
+		if (!m_SceneController->FixedUpdate(pGraphicsAPI, pPhysicsEngine, pLoadWorker, DrawInfo)) return false;
+
 		return true;
 	}
 
@@ -85,6 +105,8 @@ namespace app
 		const std::shared_ptr<graphics::CDrawInfo>& DrawInfo)
 	{
 		if (!m_IsLoaded) return true;
+
+		if (!m_SceneController->Draw(pGraphicsAPI, false, Camera, Projection, DrawInfo)) return false;
 
 		return true;
 	}

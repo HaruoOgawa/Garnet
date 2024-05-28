@@ -53,7 +53,7 @@ namespace app
 
 		virtual const std::shared_ptr<graphics::CDrawInfo>& GetDrawInfo() const override;
 
-		virtual const std::vector<std::shared_ptr<object::C3DObject>>& GetObjectList() const override;
+		virtual std::vector<std::shared_ptr<object::C3DObject>> GetObjectList() const override;
 
 		// フォーカスイベント
 		virtual void OnFocus(bool Focused, api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker) override;

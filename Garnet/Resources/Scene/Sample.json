@@ -46,7 +46,47 @@
       },
       "enable": true,
       "nodes": [
-
+        {
+          "name": "testnode_0",
+          "transform": {
+            "pos": [ 0.0, 0.0, 0.0 ],
+            "rotate": [ 0.0, 0.0, 0.0 ],
+            "scale": [ 1.0, 1.0, 1.0 ]
+          },
+          "meshindex": -1,
+          "root": true,
+          "children": [ 1, 2 ]
+        },
+        {
+          "name": "testnode_1",
+          "transform": {
+            "pos": [ 1.0, 0.5, -1.0 ],
+            "rotate": [ 0.0, 45.0, 0.0 ],
+            "scale": [ 1.0, 2.0, 1.0 ]
+          },
+          "meshindex": -1,
+          "children": []
+        },
+        {
+          "name": "testnode_2",
+          "transform": {
+            "pos": [ 1.0, 0.5, -1.0 ],
+            "rotate": [ 0.0, 45.0, 0.0 ],
+            "scale": [ 1.0, 2.0, 1.0 ]
+          },
+          "meshindex": -1,
+          "children": [ 3 ]
+        },
+        {
+          "name": "testnode_3",
+          "transform": {
+            "pos": [ 1.0, 0.5, -1.0 ],
+            "rotate": [ 0.0, 45.0, 0.0 ],
+            "scale": [ 1.0, 2.0, 1.0 ]
+          },
+          "meshindex": -1,
+          "children": []
+        }
       ],
       "meshs": [
 

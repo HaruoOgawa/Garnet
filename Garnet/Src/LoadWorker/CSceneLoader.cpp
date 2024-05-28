@@ -1,4 +1,6 @@
 #include "CSceneLoader.h"
+#include "../Scene/CSceneController.h"
+#include "../Object/C3DObject.h"
 
 namespace resource
 {
@@ -16,9 +18,239 @@ namespace resource
 	{
 		if (!m_File->IsLoaded()) return true;
 
+		// シーン読み込み
+		if (!AnalyseScene()) return false;
+
 		// ロード完了
 		m_Status = resource::ELoadStatus::Loaded;
 
 		return true;
+	}
+
+	bool CSceneLoader::AnalyseScene()
+	{
+		std::string RawData = std::string();
+		RawData.resize(m_File->GetData().size());
+		std::memcpy(&RawData[0], &m_File->GetData()[0], m_File->GetData().size());
+
+		json SceneJSON = json::parse(RawData.c_str());
+
+		// materialframes
+		{
+			//const auto materialframes = SceneJSON
+		}
+
+		// objects
+		{
+			const auto objects = SceneJSON.find("objects");
+			if (objects != SceneJSON.end() && objects->is_array())
+			{
+				if (!AnalyseObjects(objects)) return false;
+			}
+		}
+
+		return true;
+	}
+
+	bool CSceneLoader::AnalyseObjects(const json::iterator& objects)
+	{
+		for (json::iterator objectJSON = objects->begin(); objectJSON != objects->end(); objectJSON++)
+		{
+			if (!objectJSON->is_object()) continue;
+
+			std::shared_ptr<object::C3DObject> Object = std::make_shared<object::C3DObject>("", "");
+
+			// ObjectName
+			{
+				std::string objname = "";
+				GetString("name", objname, objectJSON);
+
+				Object->SetObjectName(objname);
+			}
+
+			// Transform
+			{
+				auto Transform = AnalyseTransform(objectJSON);
+
+				Object->SetPos(Transform->GetPos());
+				Object->SetRot(Transform->GetRot());
+				Object->SetScale(Transform->GetScale());
+			}
+
+			// nodes
+			std::vector<std::vector<int>> RootNodeIndexList;
+			
+			const auto nodes = objectJSON->find("nodes");
+			if (nodes != objectJSON->end() && nodes->is_array())
+			{
+				for (json::iterator nodeJSON = nodes->begin(); nodeJSON != nodes->end(); nodeJSON++)
+				{
+					if (!nodeJSON->is_object()) continue;
+
+					std::string nodename = "";
+					GetString("name", nodename, nodeJSON);
+
+					auto Transform = AnalyseTransform(nodeJSON);
+
+					int meshindex = -1;
+					GetInt("meshindex", meshindex, nodeJSON);
+
+					bool root = false;
+					GetBoolean("root", root, nodeJSON);
+
+					std::vector<int> children;
+					GetArrayInt32("children", children, nodeJSON);
+
+					// ノードを作成
+					int SelfNodeIndex = static_cast<int>(Object->GetNodeList().size());
+
+					std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(meshindex, SelfNodeIndex);
+
+					Node->SetName(nodename);
+					Node->SetLocalTransform(Transform);
+					Node->SetChildrenNodeIndexList(children);
+
+					// RootNodeIndexListの仕組みは害悪すぎるのではやくリファクタで消したい
+					if (root)
+					{
+						RootNodeIndexList.push_back(std::vector<int>({ SelfNodeIndex }));
+					}
+					
+					// 登録
+					Object->AddNode(Node);
+
+					Object->SetRootNodeIndexList(RootNodeIndexList);
+				}
+			}
+
+			// Objectを追加
+			m_Target->AddObject(Object);
+		}
+
+		return true;
+	}
+
+	std::shared_ptr<math::CTransform> CSceneLoader::AnalyseTransform(const json::iterator& Object)
+	{
+		std::shared_ptr<math::CTransform> Transform = std::make_shared<math::CTransform>();
+
+		const auto transformJSON = Object->find("transform");
+		if (transformJSON->is_object())
+		{
+			// pos
+			glm::vec3 pos = glm::vec3(0.0f);
+			{
+				std::vector<float> posArray;
+				GetArrayFloat32("pos", posArray, transformJSON);
+
+				if (posArray.size() == 3)
+				{
+					pos = glm::vec3(posArray[0], posArray[1], posArray[2]);
+				}
+			}
+
+			// rotate
+			glm::quat rotate = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
+			{
+				std::vector<float> rotateArray;
+				GetArrayFloat32("rotate", rotateArray, transformJSON);
+
+				if (rotateArray.size() == 3)
+				{
+					// rotateArrayはDegreeである
+					rotate =
+						glm::angleAxis(glm::radians(rotateArray[2]), glm::vec3(0.0f, 0.0f, 1.0f)) *
+						glm::angleAxis(glm::radians(rotateArray[1]), glm::vec3(0.0f, 1.0f, 0.0f)) *
+						glm::angleAxis(glm::radians(rotateArray[0]), glm::vec3(1.0f, 0.0f, 0.0f));
+				}
+			}
+
+			// scale
+			glm::vec3 scale = glm::vec3(1.0f);
+			{
+				std::vector<float> scaleArray;
+				GetArrayFloat32("scale", scaleArray, transformJSON);
+
+				if (scaleArray.size() == 3)
+				{
+					scale = glm::vec3(scaleArray[0], scaleArray[1], scaleArray[2]);
+				}
+			}
+
+			//
+
+		}
+
+		return Transform;
+	}
+
+	void CSceneLoader::GetString(const std::string& Key, std::string& Value, const json::iterator& Object)
+	{
+		const auto it = Object->find(Key);
+		if (it != Object->end() && it->is_string())
+		{
+			Value = it.value();
+		}
+	}
+
+	void CSceneLoader::GetBoolean(const std::string& Key, bool& Value, const json::iterator& Object)
+	{
+		const auto it = Object->find(Key);
+		if (it != Object->end() && it->is_boolean())
+		{
+			Value = it.value();
+		}
+	}
+
+	void CSceneLoader::GetInt(const std::string& Key, int& Value, const json::iterator& Object)
+	{
+		const auto it = Object->find(Key);
+		if (it != Object->end() && it->is_number_integer())
+		{
+			Value = it.value();
+		}
+	}
+
+	void CSceneLoader::GetArrayInt32(const std::string& Key, std::vector<int>& Value, const json::iterator& Object)
+	{
+		const auto it = Object->find(Key);
+		if (it != Object->end() && it->is_array())
+		{
+			for (json::iterator it2 = it->begin(); it2 != it->end(); it2++)
+			{
+				if (it2->is_number())
+				{
+					int val = it2.value();
+
+					Value.push_back(val);
+				}
+			}
+		}
+	}
+
+	void CSceneLoader::GetFloat(const std::string& Key, float& Value, const json::iterator& Object)
+	{
+		const auto it = Object->find(Key);
+		if (it != Object->end() && it->is_number_float())
+		{
+			Value = it.value();
+		}
+	}
+
+	void CSceneLoader::GetArrayFloat32(const std::string& Key, std::vector<float>& Value, const json::iterator& Object)
+	{
+		const auto it = Object->find(Key);
+		if (it != Object->end() && it->is_array())
+		{
+			for (json::iterator it2 = it->begin(); it2 != it->end(); it2++)
+			{
+				if (it2->is_number())
+				{
+					float val = it2.value();
+
+					Value.push_back(val);
+				}
+			}
+		}
 	}
 }

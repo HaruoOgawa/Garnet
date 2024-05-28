@@ -161,7 +161,7 @@ namespace app
 		return m_DrawInfo;
 	}
 
-	const std::vector<std::shared_ptr<object::C3DObject>>& CScriptApp::GetObjectList() const
+	std::vector<std::shared_ptr<object::C3DObject>> CScriptApp::GetObjectList() const
 	{
 		return m_ScriptScene->GetObjectList();
 	}
