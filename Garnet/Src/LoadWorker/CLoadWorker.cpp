@@ -95,7 +95,7 @@ namespace resource
 				return true;
 
 			case resource::ELoadStatus::Loading:
-				if (!Resource->Update(pGraphicsAPI, pPhysicsEngine, m_ResourceManager)) return false;
+				if (!Resource->Update(pGraphicsAPI, pPhysicsEngine, this)) return false;
 				return true;
 
 			case resource::ELoadStatus::Loaded:
@@ -143,7 +143,7 @@ namespace resource
 				return true;
 
 			case resource::ELoadStatus::Loading:
-				if (!Resource->Update(pGraphicsAPI, pPhysicsEngine, m_ResourceManager)) return false;
+				if (!Resource->Update(pGraphicsAPI, pPhysicsEngine, this)) return false;
 				return true;
 
 			case resource::ELoadStatus::Loaded:

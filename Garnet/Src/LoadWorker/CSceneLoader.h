@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <string>
+#include <map>
 #include <json.hpp>
 #include <glm/glm.hpp>
 #include <glm/gtx/quaternion.hpp>
@@ -13,15 +14,19 @@ using namespace nlohmann;
 
 namespace scene { class CSceneController; }
 namespace object { class C3DObject; }
+namespace graphics { class CMaterialFrame; }
 
 namespace resource
 {
 	class CSceneLoader : public resource::CResource
 	{
 		std::shared_ptr<scene::CSceneController> m_Target;
+
+		std::map<std::string, std::shared_ptr<graphics::CMaterialFrame>> m_MaterialFrameMap;
 	private:
-		bool AnalyseScene();
-		bool AnalyseObjects(const json::iterator& objects);
+		bool AnalyseScene(resource::CLoadWorker* pLoadWorker);
+		bool AnalyseMaterialFrames(const json::iterator& materialframes, resource::CLoadWorker* pLoadWorker);
+		bool AnalyseObjects(const json::iterator& objects, resource::CLoadWorker* pLoadWorker);
 
 		std::shared_ptr<math::CTransform> AnalyseTransform(const json::iterator& Object);
 
@@ -35,6 +40,6 @@ namespace resource
 		CSceneLoader(const std::string& FileName, const std::shared_ptr<scene::CSceneController>& Target);
 		virtual ~CSceneLoader();
 
-		virtual bool Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, const std::shared_ptr<CResourceManager>& ResourceManager) override;
+		virtual bool Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker) override;
 	};
 }

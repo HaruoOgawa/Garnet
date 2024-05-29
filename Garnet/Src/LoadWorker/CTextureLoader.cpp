@@ -1,7 +1,7 @@
 #ifdef USE_TEXTURE_LOADER
 
 #include "CTextureLoader.h"
-#include "CResourceManager.h"
+#include "CLoadWorker.h"
 
 namespace resource
 {
@@ -50,7 +50,7 @@ namespace resource
 		return true;
 	}
 
-	bool CTextureLoader::Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, const std::shared_ptr<CResourceManager>& ResourceManager)
+	bool CTextureLoader::Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker)
 	{
 		for (const auto& File : m_FileList)
 		{
@@ -61,7 +61,7 @@ namespace resource
 				return true;
 
 			case resource::ELoadStatus::Loading:
-				if (!File->Update(pGraphicsAPI, pPhysicsEngine, ResourceManager)) return false;
+				if (!File->Update(pGraphicsAPI, pPhysicsEngine, pLoadWorker)) return false;
 				return true;
 
 			case resource::ELoadStatus::Loaded:
@@ -76,7 +76,7 @@ namespace resource
 				}
 
 				// リソースマネージャーに登録
-				ResourceManager->AddOnMemoryResource(File, shared_from_this());
+				pLoadWorker->GetResourceManager()->AddOnMemoryResource(File, shared_from_this());
 
 				m_FileList.erase(m_FileList.begin());
 			}
@@ -101,7 +101,7 @@ namespace resource
 		m_Status = resource::ELoadStatus::Loaded;
 
 		// リソースマネージャーに登録
-		ResourceManager->AddOnMemoryResource(shared_from_this(), nullptr);
+		pLoadWorker->GetResourceManager()->AddOnMemoryResource(shared_from_this(), nullptr);
 
 		return true;
 	}

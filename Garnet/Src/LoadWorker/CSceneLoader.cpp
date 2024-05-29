@@ -1,4 +1,6 @@
 #include "CSceneLoader.h"
+#include "CLoadWorker.h"
+#include "CMaterialFrameLoader.h"
 #include "../Scene/CSceneController.h"
 #include "../Object/C3DObject.h"
 
@@ -14,12 +16,12 @@ namespace resource
 	{
 	}
 
-	bool CSceneLoader::Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, const std::shared_ptr<CResourceManager>& ResourceManager)
+	bool CSceneLoader::Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker)
 	{
 		if (!m_File->IsLoaded()) return true;
 
 		// シーン読み込み
-		if (!AnalyseScene()) return false;
+		if (!AnalyseScene(pLoadWorker)) return false;
 
 		// ロード完了
 		m_Status = resource::ELoadStatus::Loaded;
@@ -27,7 +29,7 @@ namespace resource
 		return true;
 	}
 
-	bool CSceneLoader::AnalyseScene()
+	bool CSceneLoader::AnalyseScene(resource::CLoadWorker* pLoadWorker)
 	{
 		std::string RawData = std::string();
 		RawData.resize(m_File->GetData().size());
@@ -37,7 +39,11 @@ namespace resource
 
 		// materialframes
 		{
-			//const auto materialframes = SceneJSON
+			const auto materialframes = SceneJSON.find("materialframes");
+			if (materialframes != SceneJSON.end() && materialframes->is_array())
+			{
+				if (!AnalyseMaterialFrames(materialframes, pLoadWorker)) return false;
+			}
 		}
 
 		// objects
@@ -45,14 +51,37 @@ namespace resource
 			const auto objects = SceneJSON.find("objects");
 			if (objects != SceneJSON.end() && objects->is_array())
 			{
-				if (!AnalyseObjects(objects)) return false;
+				if (!AnalyseObjects(objects, pLoadWorker)) return false;
 			}
 		}
 
 		return true;
 	}
 
-	bool CSceneLoader::AnalyseObjects(const json::iterator& objects)
+	bool CSceneLoader::AnalyseMaterialFrames(const json::iterator& materialframes, resource::CLoadWorker* pLoadWorker)
+	{
+		for (json::iterator mfJSON = materialframes->begin(); mfJSON != materialframes->end(); mfJSON++)
+		{
+			if (!mfJSON->is_object()) continue;
+
+			std::string name = "";
+			GetString("name", name, mfJSON);
+
+			std::string filename = "";
+			GetString("filename", filename, mfJSON);
+
+			if (name.empty() || filename.empty()) continue;
+
+			std::shared_ptr<graphics::CMaterialFrame> MaterialFrame = std::make_shared<graphics::CMaterialFrame>();
+
+			m_MaterialFrameMap.emplace(filename, MaterialFrame);
+			pLoadWorker->AddLoadResource(std::make_shared<resource::CMaterialFrameLoader>(filename, MaterialFrame));
+		}
+
+		return true;
+	}
+
+	bool CSceneLoader::AnalyseObjects(const json::iterator& objects, resource::CLoadWorker* pLoadWorker)
 	{
 		for (json::iterator objectJSON = objects->begin(); objectJSON != objects->end(); objectJSON++)
 		{

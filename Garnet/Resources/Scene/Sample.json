@@ -2,11 +2,26 @@
   "name": "sample_scene",
 
   "materialframes": [
-    "Resources\\MaterialFrame\\basic_toon_mf.json",
-    "Resources\\MaterialFrame\\SimpleTexture_MF.json",
-    "Resources\\MaterialFrame\\Depth_MF.json",
-    "Resources\\MaterialFrame\\PBR_MF.json",
-    "Resources\\MaterialFrame\\raymarching_mf.json"
+    {
+      "name": "basic_toon_mf",
+      "filename": "Resources\\MaterialFrame\\basic_toon_mf.json"
+    },
+    {
+      "name": "SimpleTexture_MF",
+      "filename": "Resources\\MaterialFrame\\SimpleTexture_MF.json"
+    },
+    {
+      "name": "Depth_MF",
+      "filename": "Resources\\MaterialFrame\\Depth_MF.json"
+    },
+    {
+      "name": "PBR_MF",
+      "filename": "Resources\\MaterialFrame\\PBR_MF.json"
+    },
+    {
+      "name": "raymarching_mf",
+      "filename": "Resources\\MaterialFrame\\raymarching_mf.json"
+    }
   ],
 
   "scenetextureset": {

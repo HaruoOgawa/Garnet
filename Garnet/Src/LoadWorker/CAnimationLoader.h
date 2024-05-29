@@ -18,7 +18,7 @@ namespace resource
 		CAnimationLoader(const std::string& FileName, const std::shared_ptr<animation::CAnimationClipSet>& Target);
 		virtual ~CAnimationLoader();
 
-		virtual bool Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, const std::shared_ptr<CResourceManager>& ResourceManager) override;
+		virtual bool Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker) override;
 	};
 }
 #endif

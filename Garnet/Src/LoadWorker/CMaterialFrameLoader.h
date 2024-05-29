@@ -47,8 +47,8 @@ namespace resource
 	private:
 		void Release();
 
-		bool AnalyseResourceList(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CResourceManager>& ResourceManager);
-		bool AnalyseShaderList(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CResourceManager>& ResourceManager, const json::iterator& shaderList);
+		bool AnalyseResourceList(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker);
+		bool AnalyseShaderList(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, const json::iterator& shaderList);
 		bool AnalyseShaderBuffer(const json::iterator& uniform, const std::string& uniform_type);
 		bool AnalyseTextureBuffer(const json::iterator& uniform);
 
@@ -67,7 +67,7 @@ namespace resource
 
 		virtual bool Reload(resource::CLoadWorker* pLoadWorker) override;
 
-		virtual bool Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, const std::shared_ptr<CResourceManager>& ResourceManager) override;
+		virtual bool Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker) override;
 
 		virtual void AddReference(const std::shared_ptr<IResource>& Resource) override;
 
