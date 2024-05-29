@@ -77,9 +77,24 @@ namespace resource
 				Object->SetScale(Transform->GetScale());
 			}
 
+			// rootnodes
+			{
+				// ToDo: この2次元配列のIndexListは害悪なのでリファクタリングしたい
+				std::vector<std::vector<int>> RootNodeIndexList;
+
+				std::vector<int> rootnodes;
+
+				GetArrayInt32("rootnodes", rootnodes, objectJSON);
+
+				for (int root : rootnodes)
+				{
+					RootNodeIndexList.push_back(std::vector<int>({ root }));
+				}
+
+				Object->SetRootNodeIndexList(RootNodeIndexList);
+			}
+
 			// nodes
-			std::vector<std::vector<int>> RootNodeIndexList;
-			
 			const auto nodes = objectJSON->find("nodes");
 			if (nodes != objectJSON->end() && nodes->is_array())
 			{
@@ -95,9 +110,6 @@ namespace resource
 					int meshindex = -1;
 					GetInt("meshindex", meshindex, nodeJSON);
 
-					bool root = false;
-					GetBoolean("root", root, nodeJSON);
-
 					std::vector<int> children;
 					GetArrayInt32("children", children, nodeJSON);
 
@@ -109,17 +121,9 @@ namespace resource
 					Node->SetName(nodename);
 					Node->SetLocalTransform(Transform);
 					Node->SetChildrenNodeIndexList(children);
-
-					// RootNodeIndexListの仕組みは害悪すぎるのではやくリファクタで消したい
-					if (root)
-					{
-						RootNodeIndexList.push_back(std::vector<int>({ SelfNodeIndex }));
-					}
 					
 					// 登録
 					Object->AddNode(Node);
-
-					Object->SetRootNodeIndexList(RootNodeIndexList);
 				}
 			}
 
@@ -177,8 +181,10 @@ namespace resource
 				}
 			}
 
-			//
-
+			// 登録
+			Transform->SetPos(pos);
+			Transform->SetRot(rotate);
+			Transform->SetScale(scale);
 		}
 
 		return Transform;

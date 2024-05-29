@@ -45,6 +45,9 @@
         "scale": [ 1.0, 1.0, 1.0 ]
       },
       "enable": true,
+      "rootnodes": [
+        0
+      ],
       "nodes": [
         {
           "name": "testnode_0",
@@ -54,7 +57,6 @@
             "scale": [ 1.0, 1.0, 1.0 ]
           },
           "meshindex": -1,
-          "root": true,
           "children": [ 1, 2 ]
         },
         {
@@ -70,9 +72,9 @@
         {
           "name": "testnode_2",
           "transform": {
-            "pos": [ 1.0, 0.5, -1.0 ],
-            "rotate": [ 0.0, 45.0, 0.0 ],
-            "scale": [ 1.0, 2.0, 1.0 ]
+            "pos": [ 1.0, -0.2, -1.0 ],
+            "rotate": [ 0.0, 0.0, 30.0 ],
+            "scale": [ 1.0, 1.0, 1.0 ]
           },
           "meshindex": -1,
           "children": [ 3 ]
@@ -80,9 +82,9 @@
         {
           "name": "testnode_3",
           "transform": {
-            "pos": [ 1.0, 0.5, -1.0 ],
-            "rotate": [ 0.0, 45.0, 0.0 ],
-            "scale": [ 1.0, 2.0, 1.0 ]
+            "pos": [ 5.0, 0.5, 5.0 ],
+            "rotate": [ 7.0, 0.0, 0.0 ],
+            "scale": [ 1.0, 0.5, 1.0 ]
           },
           "meshindex": -1,
           "children": []
