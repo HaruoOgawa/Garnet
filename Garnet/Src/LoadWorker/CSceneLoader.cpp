@@ -21,7 +21,7 @@ namespace resource
 		if (!m_File->IsLoaded()) return true;
 
 		// シーン読み込み
-		if (!AnalyseScene(pLoadWorker)) return false;
+		if (!AnalyseScene(pGraphicsAPI, pLoadWorker)) return false;
 
 		// ロード完了
 		m_Status = resource::ELoadStatus::Loaded;
@@ -29,7 +29,7 @@ namespace resource
 		return true;
 	}
 
-	bool CSceneLoader::AnalyseScene(resource::CLoadWorker* pLoadWorker)
+	bool CSceneLoader::AnalyseScene(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker)
 	{
 		std::string RawData = std::string();
 		RawData.resize(m_File->GetData().size());
@@ -51,7 +51,7 @@ namespace resource
 			const auto objects = SceneJSON.find("objects");
 			if (objects != SceneJSON.end() && objects->is_array())
 			{
-				if (!AnalyseObjects(objects, pLoadWorker)) return false;
+				if (!AnalyseObjects(objects, pGraphicsAPI, pLoadWorker)) return false;
 			}
 		}
 
@@ -64,24 +64,24 @@ namespace resource
 		{
 			if (!mfJSON->is_object()) continue;
 
-			std::string name = "";
-			GetString("name", name, mfJSON);
+			std::string MFName = "";
+			GetString("name", MFName, mfJSON);
 
 			std::string filename = "";
 			GetString("filename", filename, mfJSON);
 
-			if (name.empty() || filename.empty()) continue;
+			if (MFName.empty() || filename.empty()) continue;
 
 			std::shared_ptr<graphics::CMaterialFrame> MaterialFrame = std::make_shared<graphics::CMaterialFrame>();
 
-			m_MaterialFrameMap.emplace(filename, MaterialFrame);
 			pLoadWorker->AddLoadResource(std::make_shared<resource::CMaterialFrameLoader>(filename, MaterialFrame));
+			m_Target->AddMaterialFrame(MFName, MaterialFrame);
 		}
 
 		return true;
 	}
 
-	bool CSceneLoader::AnalyseObjects(const json::iterator& objects, resource::CLoadWorker* pLoadWorker)
+	bool CSceneLoader::AnalyseObjects(const json::iterator& objects, api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker)
 	{
 		for (json::iterator objectJSON = objects->begin(); objectJSON != objects->end(); objectJSON++)
 		{
@@ -131,36 +131,106 @@ namespace resource
 				{
 					if (!nodeJSON->is_object()) continue;
 
-					std::string nodename = "";
-					GetString("name", nodename, nodeJSON);
-
-					auto Transform = AnalyseTransform(nodeJSON);
-
-					int meshindex = -1;
-					GetInt("meshindex", meshindex, nodeJSON);
-
-					std::vector<int> children;
-					GetArrayInt32("children", children, nodeJSON);
-
-					// ノードを作成
-					int SelfNodeIndex = static_cast<int>(Object->GetNodeList().size());
-
-					std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(meshindex, SelfNodeIndex);
-
-					Node->SetName(nodename);
-					Node->SetLocalTransform(Transform);
-					Node->SetChildrenNodeIndexList(children);
-					
-					// 登録
+					std::shared_ptr<object::CNode> Node = AnalyseNode(nodeJSON, Object);
 					Object->AddNode(Node);
 				}
 			}
+
+			// meshs
+			const auto meshs = objectJSON->find("meshs");
+			if (meshs != objectJSON->end() && meshs->is_array())
+			{
+				for (json::iterator meshJSON = meshs->begin(); meshJSON != meshs->end(); meshJSON++)
+				{
+					if (!meshJSON->is_object()) continue;
+
+					std::shared_ptr<graphics::CMesh> Mesh = AnalyseMesh(pGraphicsAPI, meshJSON);
+					Object->AddMesh(Mesh);
+				}
+			}
+
+			// materials
+
+			// textureset
 
 			// Objectを追加
 			m_Target->AddObject(Object);
 		}
 
 		return true;
+	}
+
+	std::shared_ptr<object::CNode> CSceneLoader::AnalyseNode(const json::iterator& nodeJSON, const std::shared_ptr<object::C3DObject>& Object)
+	{
+		std::string nodename = "";
+		GetString("name", nodename, nodeJSON);
+
+		auto Transform = AnalyseTransform(nodeJSON);
+
+		int meshindex = -1;
+		GetInt("meshindex", meshindex, nodeJSON);
+
+		std::vector<int> children;
+		GetArrayInt32("children", children, nodeJSON);
+
+		// ノードを作成
+		int SelfNodeIndex = static_cast<int>(Object->GetNodeList().size());
+
+		std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(meshindex, SelfNodeIndex);
+
+		Node->SetName(nodename);
+		Node->SetLocalTransform(Transform);
+		Node->SetChildrenNodeIndexList(children);
+
+		return Node;
+	}
+
+	std::shared_ptr<graphics::CMesh> CSceneLoader::AnalyseMesh(api::IGraphicsAPI* pGraphicsAPI, const json::iterator& meshJSON)
+	{
+		std::shared_ptr<graphics::CMesh> Mesh = std::make_shared<graphics::CMesh>();
+
+		const auto primitives = meshJSON->find("primitives");
+		if (primitives != meshJSON->end() && primitives->is_array())
+		{
+			for (json::iterator primitiveJSON = primitives->begin(); primitiveJSON != primitives->end(); primitiveJSON++)
+			{
+				if (!primitiveJSON->is_object()) continue;
+
+				int materialindex = -1;
+				GetInt("materialindex", materialindex, primitiveJSON);
+
+				std::string type = "";
+				GetString("type", type, primitiveJSON);
+
+				std::pair<std::shared_ptr<graphics::CVertexBuffer>, std::shared_ptr<graphics::CIndexBuffer>> createInfo;
+
+				if (type == "cube")
+				{
+					createInfo = graphics::CPresetPrimitive::CreateBox(pGraphicsAPI);
+				}
+				else if (type == "board")
+				{
+					createInfo = graphics::CPresetPrimitive::CreateBoard(pGraphicsAPI);
+				}
+				else if (type == "sphere")
+				{
+					createInfo = graphics::CPresetPrimitive::CreateSphere(pGraphicsAPI);
+				}
+				else if (type == "point")
+				{
+					createInfo = graphics::CPresetPrimitive::CreatePoint(pGraphicsAPI);
+				}
+				else
+				{
+					createInfo = graphics::CPresetPrimitive::CreateBox(pGraphicsAPI);
+				}
+
+				//
+				Mesh->CreateSimpleMesh(createInfo.first, createInfo.second, materialindex);
+			}
+		}
+
+		return Mesh;
 	}
 
 	std::shared_ptr<math::CTransform> CSceneLoader::AnalyseTransform(const json::iterator& Object)

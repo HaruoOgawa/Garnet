@@ -71,7 +71,7 @@
             "rotate": [ 0.0, 0.0, 0.0 ],
             "scale": [ 1.0, 1.0, 1.0 ]
           },
-          "meshindex": -1,
+          "meshindex": 0,
           "children": [ 1, 2 ]
         },
         {
@@ -81,7 +81,7 @@
             "rotate": [ 0.0, 45.0, 0.0 ],
             "scale": [ 1.0, 2.0, 1.0 ]
           },
-          "meshindex": -1,
+          "meshindex": 1,
           "children": []
         },
         {
@@ -106,10 +106,37 @@
         }
       ],
       "meshs": [
-
+        {
+          "name": "testmesh_0",
+          "primitives": [
+            {
+              "materialindex": 0,
+              "type": "cube"
+            }
+          ]
+        },
+        {
+          "name": "testmesh_1",
+          "primitives": [
+            {
+              "materialindex": 0,
+              "type": "sphere"
+            }
+          ]
+        }
       ],
       "materials": [
-
+        {
+          "name": "test_mat",
+          "materialframe": "PBR_MF",
+          "uniformvalues": [
+            {
+              "name": "baseColorFactor",
+              "type": "vec4",
+              "value": [ 1.0, 0.0, 0.0, 1.0 ]
+            }
+          ]
+        }
       ],
       "textureset": {
 

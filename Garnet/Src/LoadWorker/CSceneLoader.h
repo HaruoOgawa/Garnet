@@ -13,21 +13,26 @@
 using namespace nlohmann;
 
 namespace scene { class CSceneController; }
-namespace object { class C3DObject; }
-namespace graphics { class CMaterialFrame; }
+namespace object { 
+	class C3DObject; 
+	class CNode;
+}
+namespace graphics { 
+	class CMesh;
+}
 
 namespace resource
 {
 	class CSceneLoader : public resource::CResource
 	{
 		std::shared_ptr<scene::CSceneController> m_Target;
-
-		std::map<std::string, std::shared_ptr<graphics::CMaterialFrame>> m_MaterialFrameMap;
 	private:
-		bool AnalyseScene(resource::CLoadWorker* pLoadWorker);
+		bool AnalyseScene(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker);
 		bool AnalyseMaterialFrames(const json::iterator& materialframes, resource::CLoadWorker* pLoadWorker);
-		bool AnalyseObjects(const json::iterator& objects, resource::CLoadWorker* pLoadWorker);
+		bool AnalyseObjects(const json::iterator& objects, api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker);
 
+		std::shared_ptr<object::CNode> AnalyseNode(const json::iterator& nodeJSON, const std::shared_ptr<object::C3DObject>& Object);
+		std::shared_ptr<graphics::CMesh> AnalyseMesh(api::IGraphicsAPI* pGraphicsAPI, const json::iterator& meshJSON);
 		std::shared_ptr<math::CTransform> AnalyseTransform(const json::iterator& Object);
 
 		void GetString(const std::string& Key, std::string& Value, const json::iterator& Object);

@@ -21,11 +21,23 @@ namespace scene
 		return m_ObjectList;
 	}
 
+	void CSceneController::AddMaterialFrame(const std::string& MFName, const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame)
+	{
+		m_MaterialFrameMap.emplace(MFName, MaterialFrame);
+	}
+
 	bool CSceneController::Create(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine)
 	{
 		for (const auto& Object : m_ObjectList)
 		{
-			//if (!Object->Create(pGraphicsAPI, pPhysicsEngine, nullptr)) return false;
+			// ‰¼ŽÀ‘•
+			const auto& MaterialFrame = m_MaterialFrameMap.find("PBR_MF");
+			if (MaterialFrame == m_MaterialFrameMap.end()) return false;
+			auto Material = MaterialFrame->second->CreateMaterial(pGraphicsAPI, static_cast<int>(Object->GetNodeList().size()), graphics::ECullMode::CULL_BACK);
+
+			Object->AddMaterial(Material);
+
+			if (!Object->Create(pGraphicsAPI, pPhysicsEngine, nullptr)) return false;
 		}
 
 		return true;

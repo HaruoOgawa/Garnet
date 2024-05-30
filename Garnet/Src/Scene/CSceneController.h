@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <vector>
+#include <map>
 #include <string>
 
 #include "../../../Interface/IGraphicsAPI.h"
@@ -12,19 +13,26 @@ namespace camera { class CCamera; }
 namespace projection { class CProjection; }
 namespace resource { class CLoadWorker; }
 namespace input { class CInputState; }
-namespace graphics { class CDrawInfo; }
+namespace graphics { 
+	class CDrawInfo; 
+	class CMaterialFrame;
+}
 
 namespace scene
 {
 	class CSceneController
 	{
 		std::vector<std::shared_ptr<object::C3DObject>> m_ObjectList;
+
+		std::map<std::string, std::shared_ptr<graphics::CMaterialFrame>> m_MaterialFrameMap;
 	public:
 		CSceneController();
 		virtual ~CSceneController();
 
 		void AddObject(const std::shared_ptr<object::C3DObject>& Object);
 		std::vector<std::shared_ptr<object::C3DObject>> GetObjectList() const;
+
+		void AddMaterialFrame(const std::string& MFName, const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame);
 
 		bool Create(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine);
 
