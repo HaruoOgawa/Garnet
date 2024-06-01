@@ -22,6 +22,7 @@ namespace object {
 }
 namespace graphics { 
 	class CMesh;
+	class CTextureSet;
 }
 
 namespace resource
@@ -31,8 +32,10 @@ namespace resource
 		std::shared_ptr<scene::CSceneController> m_Target;
 	private:
 		bool AnalyseScene(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker);
+
 		bool AnalyseMaterialFrames(const json::iterator& materialframes, resource::CLoadWorker* pLoadWorker);
-		bool AnalyseObjects(const json::iterator& objects, api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker);
+		bool AnalyseSceneTextureSet(const json::iterator& scenetexturesetJSON, api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, std::shared_ptr<graphics::CTextureSet>& SceneTextureSet);
+		bool AnalyseObjects(const json::iterator& objects, api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<graphics::CTextureSet>& SceneTextureSet);
 
 		std::shared_ptr<object::CNode> AnalyseNode(const json::iterator& nodeJSON, const std::shared_ptr<object::C3DObject>& Object);
 		std::shared_ptr<graphics::CMesh> AnalyseMesh(api::IGraphicsAPI* pGraphicsAPI, const json::iterator& meshJSON, std::map<int, int>& MatRefCountMap);

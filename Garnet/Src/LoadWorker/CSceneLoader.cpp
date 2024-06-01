@@ -47,12 +47,22 @@ namespace resource
 			}
 		}
 
+		// scenetextureset
+		std::shared_ptr<graphics::CTextureSet> SceneTextureSet = std::make_shared<graphics::CTextureSet>();
+		{
+			const auto scenetexturesetJSON = SceneJSON.find("scenetextureset");
+			if (scenetexturesetJSON != SceneJSON.end() && scenetexturesetJSON->is_object())
+			{
+				if (!AnalyseSceneTextureSet(scenetexturesetJSON, pGraphicsAPI, pLoadWorker, SceneTextureSet)) return false;
+			}
+		}
+
 		// objects
 		{
 			const auto objects = SceneJSON.find("objects");
 			if (objects != SceneJSON.end() && objects->is_array())
 			{
-				if (!AnalyseObjects(objects, pGraphicsAPI, pLoadWorker)) return false;
+				if (!AnalyseObjects(objects, pGraphicsAPI, pLoadWorker, SceneTextureSet)) return false;
 			}
 		}
 
@@ -82,7 +92,74 @@ namespace resource
 		return true;
 	}
 
-	bool CSceneLoader::AnalyseObjects(const json::iterator& objects, api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker)
+	bool CSceneLoader::AnalyseSceneTextureSet(const json::iterator& scenetexturesetJSON, api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, std::shared_ptr<graphics::CTextureSet>& SceneTextureSet)
+	{
+		// cubemaps
+		const auto cubemaps = scenetexturesetJSON->find("cubemaps");
+		if (cubemaps != scenetexturesetJSON->end() && cubemaps->is_array())
+		{
+			for (json::iterator cubemapJSON = cubemaps->begin(); cubemapJSON != cubemaps->end(); cubemapJSON++)
+			{
+				std::string back = "";
+				GetString("back", back, cubemapJSON);
+
+				std::string bottom = "";
+				GetString("bottom", bottom, cubemapJSON);
+
+				std::string front = "";
+				GetString("front", front, cubemapJSON);
+
+				std::string left = "";
+				GetString("left", left, cubemapJSON);
+
+				std::string right = "";
+				GetString("right", right, cubemapJSON);
+
+				std::string top = "";
+				GetString("top", top, cubemapJSON);
+
+				if (back.empty() || bottom.empty() || front.empty() || left.empty() || right.empty() || top.empty()) continue;
+
+				std::vector<std::string> FileNameList = { back, bottom, front, left, right, top };
+
+				auto Texture = pGraphicsAPI->CreateTexture();
+				pLoadWorker->AddLoadResource(std::make_shared<resource::CTextureLoader>(pGraphicsAPI, FileNameList, Texture));
+				SceneTextureSet->AddCubeMap(Texture);
+			}
+		}
+
+		// ibl
+		const auto ibl = scenetexturesetJSON->find("ibl");
+		if (ibl != scenetexturesetJSON->end() && ibl->is_object())
+		{
+			std::string diffuse = "";
+			GetString("diffuse", diffuse, ibl);
+
+			std::string specular = "";
+			GetString("specular", specular, ibl);
+
+			std::string ggx = "";
+			GetString("ggx", ggx, ibl);
+
+			if (!diffuse.empty() && !specular.empty() && !ggx.empty())
+			{
+				auto diffuseTexture = pGraphicsAPI->CreateTexture();
+				pLoadWorker->AddLoadResource(std::make_shared<resource::CTextureLoader>(pGraphicsAPI, diffuse, diffuseTexture));
+
+				auto specularTexture = pGraphicsAPI->CreateTexture();
+				pLoadWorker->AddLoadResource(std::make_shared<resource::CTextureLoader>(pGraphicsAPI, specular, specularTexture));
+
+				auto ggxTexture = pGraphicsAPI->CreateTexture();
+				pLoadWorker->AddLoadResource(std::make_shared<resource::CTextureLoader>(pGraphicsAPI, ggx, ggxTexture));
+
+				SceneTextureSet->AddIBLTexture(diffuseTexture, specularTexture, ggxTexture);
+			}
+		}
+
+		return true;
+	}
+
+	bool CSceneLoader::AnalyseObjects(const json::iterator& objects, api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<graphics::CTextureSet>& SceneTextureSet)
 	{
 		for (json::iterator objectJSON = objects->begin(); objectJSON != objects->end(); objectJSON++)
 		{
@@ -199,6 +276,22 @@ namespace resource
 				}
 
 				m_Target->AddTextureInfo(Object, TextureInfoList);
+			}
+
+			// SceneTextureSet
+			{
+				for (const auto& CubeMap : SceneTextureSet->GetCubeMapList())
+				{
+					Object->GetTextureSet()->AddCubeMap(CubeMap);
+				}
+				
+				const auto& Diffuse_Tex = SceneTextureSet->GetDiffuse_Tex();
+				const auto& Specular_Tex = SceneTextureSet->GetSpecular_Tex();
+				const auto& GGXLUT_Tex = SceneTextureSet->GetGGXLUT_Tex();
+				if (Diffuse_Tex && Specular_Tex && GGXLUT_Tex)
+				{
+					Object->GetTextureSet()->AddIBLTexture(Diffuse_Tex, Specular_Tex, GGXLUT_Tex);
+				}
 			}
 
 			// Object‚ð’Ç‰Á
@@ -394,7 +487,10 @@ namespace resource
 				std::string texturename = "";
 				GetString("texturename", texturename, textureJSON);
 
-				MaterialInfo.Textures.emplace(texturebuffername, texturename);
+				int textureindex = -1;
+				GetInt("textureindex", textureindex, textureJSON);
+
+				MaterialInfo.Textures.push_back(std::make_tuple(texturebuffername, texturename, textureindex));
 			}
 		}
 

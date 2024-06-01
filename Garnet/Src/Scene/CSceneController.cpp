@@ -166,13 +166,23 @@ namespace scene
 			// Texture‚ğİ’è
 			for (const auto& Texture : MaterialInfo.Textures)
 			{
-				const auto& TextureBufferName = Texture.first;
-				const auto& TextureName = Texture.second;
+				const auto& TextureBufferName = std::get<0>(Texture);
+				const auto& TextureName = std::get<1>(Texture);
+				int Index = std::get<2>(Texture);
+
+				int TextureIndex = -1;
 
 				auto TexIndexIT = TexIndexMap.find(TextureName);
-				if (TexIndexIT == TexIndexMap.end()) continue;
+				if (TexIndexIT != TexIndexMap.end())
+				{
+					TextureIndex = TexIndexIT->second;
+				}
+				else if (Index != -1)
+				{
+					TextureIndex = Index;
+				}
 
-				int TextureIndex = TexIndexIT->second;
+				if (TextureIndex == -1) continue;
 
 				Material->ReplaceTextureIndex(TextureBufferName, TextureIndex);
 			}

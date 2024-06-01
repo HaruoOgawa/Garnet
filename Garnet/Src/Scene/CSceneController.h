@@ -3,6 +3,7 @@
 #include <memory>
 #include <vector>
 #include <map>
+#include <tuple>
 #include <string>
 
 #include "../../../Interface/IGraphicsAPI.h"
@@ -33,7 +34,7 @@ namespace scene
 	{
 		std::string MaterialFrameName = "";
 		std::vector<SUniformInfo> UniformInfoList;
-		std::map<std::string, std::string> Textures;
+		std::vector<std::tuple<std::string, std::string, int>> Textures;
 		int RefCount = 0;
 		graphics::ECullMode CullMode = graphics::ECullMode::CULL_BACK;
 	};
