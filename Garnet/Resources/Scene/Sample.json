@@ -46,9 +46,30 @@
   },
 
   "animations": [
-    "Resources/Motions/biglove_dance_noik.vmd",
-    "Resources/Motions/biglove_expression.vmd",
-    "Resources/Motions/biglove_Ripsync.vmd"
+    {
+      "name": "biglove_dance_noik",
+      "filename": "Resources/Motions/biglove_dance_noik.vmd"
+    },
+    {
+      "name": "biglove_expression",
+      "filename": "Resources/Motions/biglove_expression.vmd"
+    },
+    {
+      "name": "biglove_Ripsync",
+      "filename": "Resources/Motions/biglove_Ripsync.vmd"
+    },
+    {
+      "name": "FBX_Walking",
+      "filename": "Resources/Motions/Walking.fbx"
+    },
+    {
+      "name": "FBX_Jumping",
+      "filename": "Resources/Motions/Jumping.fbx"
+    },
+    {
+      "name": "FBX_Punch",
+      "filename": "Resources/Motions/Combo_Punch_hand.fbx"
+    }
   ],
 
   "objects": [
@@ -61,6 +82,9 @@
         "rotate": [ 0.0, 0.0, 0.0 ],
         "scale": [ 1.0, 1.0, 1.0 ]
       },
+      "animation": {
+        "playmotionindex": 0
+      },
       "enable": true
     },
     {
@@ -72,6 +96,21 @@
         "rotate": [ 0.0, 0.0, 0.0 ],
         "scale": [ 0.01, 0.01, 0.01 ]
       },
+      "animation": {
+        "clips": [
+
+        ],
+        "humanoidclips": [
+          {
+            "key": "Walk",
+            "motionname": "FBX_Walking",
+            "index": 0,
+            "loop": true,
+            "ik": false
+          }
+        ],
+        "playmotion": "Walk"
+      },
       "enable": true
     },
     {
@@ -82,6 +121,40 @@
         "pos": [ 3.0, 0.0, 0.0 ],
         "rotate": [ 0.0, 0.0, 0.0 ],
         "scale": [ 0.1, 0.1, 0.1 ]
+      },
+      "animation": {
+        "clips": [
+
+        ],
+        "humanoidclips": [
+          {
+            "key": "Dance",
+            "motionname": "biglove_dance_noik",
+            "index": 0,
+            "loop": true,
+            "ik": false
+          }
+        ],
+        "blendshapes": [
+          {
+            "key": "Face",
+            "motionname": "biglove_expression",
+            "index": 0,
+            "loop": true
+          },
+          {
+            "key": "RipSync",
+            "motionname": "biglove_Ripsync",
+            "index": 0,
+            "loop": true
+          }
+        ],
+        "playmotion": "Dance",
+        "playmotionindex": -1,
+        "playblendshapes": [
+          "Face",
+          "RipSync"
+        ]
       },
       "enable": true
     },

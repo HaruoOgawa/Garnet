@@ -3,6 +3,7 @@
 #include "C3DObjectLoader.h"
 #include "CMaterialFrameLoader.h"
 #include "CTextureLoader.h"
+#include "CAnimationLoader.h"
 #include "../Scene/CSceneController.h"
 #include "../Object/C3DObject.h"
 #include "../../Message/Console.h"
@@ -56,6 +57,15 @@ namespace resource
 			if (scenetexturesetJSON != SceneJSON.end() && scenetexturesetJSON->is_object())
 			{
 				if (!AnalyseSceneTextureSet(scenetexturesetJSON, pGraphicsAPI, pLoadWorker, SceneTextureSet)) return false;
+			}
+		}
+
+		// animations
+		{
+			const auto animations = SceneJSON.find("animations");
+			if (animations != SceneJSON.end() && animations->is_array())
+			{
+				if (!AnalyseSceneAnimations(animations, pGraphicsAPI, pLoadWorker)) return false;
 			}
 		}
 
@@ -156,6 +166,28 @@ namespace resource
 
 				SceneTextureSet->AddIBLTexture(diffuseTexture, specularTexture, ggxTexture);
 			}
+		}
+
+		return true;
+	}
+
+	bool CSceneLoader::AnalyseSceneAnimations(const json::iterator& animations, api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker)
+	{
+		for (json::iterator animationJSON = animations->begin(); animationJSON != animations->end(); animationJSON++)
+		{
+			if (!animationJSON->is_object()) continue;
+
+			std::string name = "";
+			GetString("name", name, animationJSON);
+
+			std::string filename = "";
+			GetString("filename", filename, animationJSON);
+
+			std::shared_ptr<animation::CAnimationClipSet> AnimationClipSet = std::make_shared<animation::CAnimationClipSet>();
+
+			pLoadWorker->AddLoadResource(std::make_shared<resource::CAnimationLoader>(filename, AnimationClipSet));
+
+			m_Target->AddAnimationClipSet(name, AnimationClipSet);
 		}
 
 		return true;
@@ -300,6 +332,15 @@ namespace resource
 				}
 
 				m_Target->AddTextureInfo(Object, TextureInfoList);
+			}
+
+			// animation
+			const auto animationJSON = objectJSON->find("animation");
+			if (animationJSON != objectJSON->end() && animationJSON->is_object())
+			{
+				scene::SAnimationInfo AnimationInfo = AnalyseAnimationInfo(animationJSON);
+
+				m_Target->AddAnimationInfo(Object, AnimationInfo);
 			}
 
 			// SceneTextureSet
@@ -542,6 +583,105 @@ namespace resource
 		}
 
 		return MaterialInfo;
+	}
+
+	scene::SAnimationInfo CSceneLoader::AnalyseAnimationInfo(const json::iterator& animationJSON)
+	{
+		scene::SAnimationInfo AnimationInfo{};
+
+		// clips
+		const auto clips = animationJSON->find("clips");
+		if (clips != animationJSON->end() && clips->is_array())
+		{
+			// –¢ŽÀ‘•
+		}
+
+		// humanoidclips
+		const auto humanoidclips = animationJSON->find("humanoidclips");
+		if (humanoidclips != animationJSON->end() && humanoidclips->is_array())
+		{
+			for (json::iterator humanoidJSON = humanoidclips->begin(); humanoidJSON != humanoidclips->end(); humanoidJSON++)
+			{
+				if (!humanoidJSON->is_object()) continue;
+				
+				scene::SHumanoidclip Clip{};
+
+				std::string key = "";
+				GetString("key", key, humanoidJSON);
+				Clip.Key = key;
+
+				std::string motionname = "";
+				GetString("motionname", motionname, humanoidJSON);
+				Clip.MotionName = motionname;
+
+				int index = -1;
+				GetInt("index", index, humanoidJSON);
+				Clip.Index = index;
+
+				bool loop = false;
+				GetBoolean("loop", loop, humanoidJSON);
+				Clip.Loop = loop;
+
+				bool ik = false;
+				GetBoolean("ik", ik, humanoidJSON);
+				Clip.IK = ik;
+
+				AnimationInfo.Humanoidclips.push_back(Clip);
+			}
+		}
+
+		// blendshapes
+		const auto blendshapes = animationJSON->find("blendshapes");
+		if (blendshapes != animationJSON->end() && blendshapes->is_array())
+		{
+			for (json::iterator blendshapeJSON = blendshapes->begin(); blendshapeJSON != blendshapes->end(); blendshapeJSON++)
+			{
+				if (!blendshapeJSON->is_object()) continue;
+
+				scene::SBlendshape Clip{};
+
+				std::string key = "";
+				GetString("key", key, blendshapeJSON);
+				Clip.Key = key;
+
+				std::string motionname = "";
+				GetString("motionname", motionname, blendshapeJSON);
+				Clip.MotionName = motionname;
+
+				int index = -1;
+				GetInt("index", index, blendshapeJSON);
+				Clip.Index = index;
+
+				bool loop = false;
+				GetBoolean("loop", loop, blendshapeJSON);
+				Clip.Loop = loop;
+
+				AnimationInfo.Blendshapes.push_back(Clip);
+			}
+		}
+
+		// playmotion
+		std::string playmotion = "";
+		GetString("playmotion", playmotion, animationJSON);
+		AnimationInfo.PlayMotion = playmotion;
+
+		// playmotionindex
+		int playmotionindex = -1;
+		GetInt("playmotionindex", playmotionindex, animationJSON);
+		AnimationInfo.PlayMotionIndex = playmotionindex;
+
+		// playblendshapes
+		const auto playblendshapes = animationJSON->find("playblendshapes");
+		if (playblendshapes != animationJSON->end() && playblendshapes->is_array())
+		{
+			for (json::iterator blendshape = playblendshapes->begin(); blendshape != playblendshapes->end(); blendshape++)
+			{
+				std::string Key = blendshape.value();
+				AnimationInfo.PlayBlendShapes.push_back(Key);
+			}
+		}
+
+		return AnimationInfo;
 	}
 
 	std::shared_ptr<math::CTransform> CSceneLoader::AnalyseTransform(const json::iterator& Object)

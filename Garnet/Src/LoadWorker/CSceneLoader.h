@@ -15,6 +15,7 @@ using namespace nlohmann;
 namespace scene { 
 	class CSceneController; 
 	struct SMaterialInfo;
+	struct SAnimationInfo;
 }
 namespace object { 
 	class C3DObject; 
@@ -35,12 +36,14 @@ namespace resource
 
 		bool AnalyseMaterialFrames(const json::iterator& materialframes, resource::CLoadWorker* pLoadWorker);
 		bool AnalyseSceneTextureSet(const json::iterator& scenetexturesetJSON, api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, std::shared_ptr<graphics::CTextureSet>& SceneTextureSet);
+		bool AnalyseSceneAnimations(const json::iterator& animations, api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker);
 		bool AnalyseObjects(const json::iterator& objects, api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<graphics::CTextureSet>& SceneTextureSet);
 
+		std::shared_ptr<math::CTransform> AnalyseTransform(const json::iterator& Object);
 		std::shared_ptr<object::CNode> AnalyseNode(const json::iterator& nodeJSON, const std::shared_ptr<object::C3DObject>& Object);
 		std::shared_ptr<graphics::CMesh> AnalyseMesh(api::IGraphicsAPI* pGraphicsAPI, const json::iterator& meshJSON, std::map<int, int>& MatRefCountMap);
 		scene::SMaterialInfo AnalyseMaterialInfo(const json::iterator& materialJSON, int MaterialIndex, const std::map<int, int>& MatRefCountMap);
-		std::shared_ptr<math::CTransform> AnalyseTransform(const json::iterator& Object);
+		scene::SAnimationInfo AnalyseAnimationInfo(const json::iterator& animationJSON);
 
 		void GetString(const std::string& Key, std::string& Value, const json::iterator& Object);
 		void GetBoolean(const std::string& Key, bool& Value, const json::iterator& Object);

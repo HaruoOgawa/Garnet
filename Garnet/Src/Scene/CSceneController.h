@@ -20,6 +20,7 @@ namespace graphics {
 	class CMaterialFrame;
 	class CTexture;
 }
+namespace animation { class CAnimationClipSet; }
 
 namespace scene
 {
@@ -45,18 +46,56 @@ namespace scene
 		std::shared_ptr<graphics::CTexture> Texture = nullptr;
 	};
 
+	struct SAnimationClip
+	{
+	};
+
+	struct SHumanoidclip
+	{
+		std::string Key = "";
+		std::string MotionName = "";
+		int Index = -1;
+		bool Loop = false;
+		bool IK = false;
+	};
+
+	struct SBlendshape
+	{
+		std::string Key = "";
+		std::string MotionName = "";
+		int Index = -1;
+		bool Loop = false;
+	};
+
+	struct SAnimationInfo
+	{
+		std::vector<SAnimationClip> Clips;
+		std::vector<SHumanoidclip> Humanoidclips;
+		std::vector<SBlendshape> Blendshapes;
+
+		std::string PlayMotion;
+		int PlayMotionIndex = -1;
+		std::vector<std::string> PlayBlendShapes;
+	};
+
 	class CSceneController
 	{
+		//
 		std::vector<std::shared_ptr<object::C3DObject>> m_ObjectList;
 
+		//
 		std::map<std::string, std::shared_ptr<graphics::CMaterialFrame>> m_MaterialFrameMap;
+		std::map<std::string, std::shared_ptr<animation::CAnimationClipSet>> m_AnimationClipSetMap;
 
+		//
 		std::map<std::shared_ptr<object::C3DObject>, std::vector<SMaterialInfo>> m_MaterialInfoMap;
-
 		std::map<std::shared_ptr<object::C3DObject>, std::vector<SLoadTextureInfo>> m_TextureInfoMap;
+		std::map<std::shared_ptr<object::C3DObject>, SAnimationInfo> m_AnimationInfoMap;
+		
 	private:
 		bool PrepareTextureList(const std::shared_ptr<object::C3DObject>& Object, std::map<std::string, int>& TexIndexMap);
 		bool PrepareMaterialList(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<object::C3DObject>& Object, const std::map<std::string, int>& TexIndexMap);
+		bool PrepareAnimationList(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<object::C3DObject>& Object);
 		bool CreateMaterialList(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<object::C3DObject>& Object, const std::map<std::string, int>& TexIndexMap);
 		bool UpdateMaterialUniform(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<object::C3DObject>& Object, const std::map<std::string, int>& TexIndexMap);
 	public:
@@ -69,9 +108,13 @@ namespace scene
 		void AddMaterialFrame(const std::string& MFName, const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame);
 		const std::map<std::string, std::shared_ptr<graphics::CMaterialFrame>>& GetMaterialFrameMap() const;
 
+		void AddAnimationClipSet(const std::string& Name, const std::shared_ptr<animation::CAnimationClipSet>& AnimationClipSet);
+
 		void AddMaterialInfo(const std::shared_ptr<object::C3DObject>& Object, const std::vector<SMaterialInfo>& MaterialInfoList);
 
 		void AddTextureInfo(const std::shared_ptr<object::C3DObject>& Object, const std::vector<SLoadTextureInfo>& TextureInfoList);
+		
+		void AddAnimationInfo(const std::shared_ptr<object::C3DObject>& Object, const SAnimationInfo& AnimationInfo);
 
 		bool Create(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine);
 

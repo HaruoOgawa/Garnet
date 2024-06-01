@@ -1,5 +1,6 @@
 #include "CSceneController.h"
 #include "../Object/C3DObject.h"
+#include "../Animation/CAnimationClipSet.h"
 #include "../Message/Console.h"
 
 namespace scene
@@ -32,6 +33,11 @@ namespace scene
 		return m_MaterialFrameMap;
 	}
 
+	void CSceneController::AddAnimationClipSet(const std::string& Name, const std::shared_ptr<animation::CAnimationClipSet>& AnimationClipSet)
+	{
+		m_AnimationClipSetMap.emplace(Name, AnimationClipSet);
+	}
+
 	void CSceneController::AddMaterialInfo(const std::shared_ptr<object::C3DObject>& Object, const std::vector<SMaterialInfo>& MaterialInfoList)
 	{
 		m_MaterialInfoMap.emplace(Object, MaterialInfoList);
@@ -40,6 +46,11 @@ namespace scene
 	void CSceneController::AddTextureInfo(const std::shared_ptr<object::C3DObject>& Object, const std::vector<SLoadTextureInfo>& TextureInfoList)
 	{
 		m_TextureInfoMap.emplace(Object, TextureInfoList);
+	}
+
+	void CSceneController::AddAnimationInfo(const std::shared_ptr<object::C3DObject>& Object, const SAnimationInfo& AnimationInfo)
+	{
+		m_AnimationInfoMap.emplace(Object, AnimationInfo);
 	}
 
 	bool CSceneController::Create(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine)
@@ -53,6 +64,9 @@ namespace scene
 			// マテリアルの追加
 			if (!PrepareMaterialList(pGraphicsAPI, Object, TexIndexMap)) return false;
 			
+			// アニメーションを追加
+			if (!PrepareAnimationList(pGraphicsAPI, Object)) return false;
+
 			// Object生成
 			if (!Object->Create(pGraphicsAPI, pPhysicsEngine, nullptr)) return false;
 		}
@@ -130,6 +144,55 @@ namespace scene
 		{
 			// Material情報を更新
 			if (!UpdateMaterialUniform(pGraphicsAPI, Object, TexIndexMap)) return false;
+		}
+
+		return true;
+	}
+
+	bool CSceneController::PrepareAnimationList(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<object::C3DObject>& Object)
+	{
+		const auto& it = m_AnimationInfoMap.find(Object);
+		if (it == m_AnimationInfoMap.end()) return true;
+
+		const auto& AnimationInfo = it->second;
+
+		// humanoidclips
+		for (const auto& Humanoidclip : AnimationInfo.Humanoidclips)
+		{
+			const auto& AnimationClipSet = m_AnimationClipSetMap.find(Humanoidclip.MotionName);
+			if (AnimationClipSet == m_AnimationClipSetMap.end()) continue;
+
+			const auto& Clip = AnimationClipSet->second->GetAnimationClip(Humanoidclip.Index);
+			if (!Clip) continue;
+
+			Object->AddHumanoidAnimationClip(Clip, Humanoidclip.Key, { nullptr, "" }, Humanoidclip.Loop, Humanoidclip.IK);
+		}
+
+		// blendshapes
+		for (const auto& BlendshapeClip : AnimationInfo.Blendshapes)
+		{
+			const auto& AnimationClipSet = m_AnimationClipSetMap.find(BlendshapeClip.MotionName);
+			if (AnimationClipSet == m_AnimationClipSetMap.end()) continue;
+
+			const auto& Clip = AnimationClipSet->second->GetBlendShapeClip(BlendshapeClip.Index);
+			if (!Clip) continue;
+
+			Object->AddBlendShapeClip(Clip, BlendshapeClip.Key, BlendshapeClip.Loop);
+		}
+
+		if (!AnimationInfo.PlayMotion.empty())
+		{
+			Object->ChangeMotion(AnimationInfo.PlayMotion);
+		}
+
+		if (AnimationInfo.PlayMotionIndex != -1)
+		{
+			Object->ChangeMotion(AnimationInfo.PlayMotionIndex);
+		}
+
+		for (const std::string& playShape : AnimationInfo.PlayBlendShapes)
+		{
+			Object->PlayBlendShape(playShape);
 		}
 
 		return true;
