@@ -17,6 +17,7 @@ namespace input { class CInputState; }
 namespace graphics { 
 	class CDrawInfo; 
 	class CMaterialFrame;
+	class CTexture;
 }
 
 namespace scene
@@ -32,8 +33,15 @@ namespace scene
 	{
 		std::string MaterialFrameName = "";
 		std::vector<SUniformInfo> UniformInfoList;
+		std::map<std::string, std::string> Textures;
 		int RefCount = 0;
 		graphics::ECullMode CullMode = graphics::ECullMode::CULL_BACK;
+	};
+
+	struct SLoadTextureInfo
+	{
+		std::string TextureName = "";
+		std::shared_ptr<graphics::CTexture> Texture = nullptr;
 	};
 
 	class CSceneController
@@ -43,9 +51,13 @@ namespace scene
 		std::map<std::string, std::shared_ptr<graphics::CMaterialFrame>> m_MaterialFrameMap;
 
 		std::map<std::shared_ptr<object::C3DObject>, std::vector<SMaterialInfo>> m_MaterialInfoMap;
+
+		std::map<std::shared_ptr<object::C3DObject>, std::vector<SLoadTextureInfo>> m_TextureInfoMap;
 	private:
-		bool CreateMaterialList(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<object::C3DObject>& Object);
-		bool UpdateMaterialUniform(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<object::C3DObject>& Object);
+		bool PrepareTextureList(const std::shared_ptr<object::C3DObject>& Object, std::map<std::string, int>& TexIndexMap);
+		bool PrepareMaterialList(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<object::C3DObject>& Object, const std::map<std::string, int>& TexIndexMap);
+		bool CreateMaterialList(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<object::C3DObject>& Object, const std::map<std::string, int>& TexIndexMap);
+		bool UpdateMaterialUniform(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<object::C3DObject>& Object, const std::map<std::string, int>& TexIndexMap);
 	public:
 		CSceneController();
 		virtual ~CSceneController();
@@ -56,6 +68,8 @@ namespace scene
 		void AddMaterialFrame(const std::string& MFName, const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame);
 
 		void AddMaterialInfo(const std::shared_ptr<object::C3DObject>& Object, const std::vector<SMaterialInfo>& MaterialInfoList);
+
+		void AddTextureInfo(const std::shared_ptr<object::C3DObject>& Object, const std::vector<SLoadTextureInfo>& TextureInfoList);
 
 		bool Create(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine);
 

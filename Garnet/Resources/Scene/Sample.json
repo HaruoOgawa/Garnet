@@ -133,13 +133,35 @@
               "name": "baseColorFactor",
               "type": "vec4",
               "value": [ 0.02, 0.3, 0.79, 1.0 ]
+            },
+            {
+              "name": "useBaseColorTexture",
+              "type": "int",
+              "value": [ 1 ]
+            }
+          ],
+          "textures": [
+            {
+              "texturebuffername": "baseColorTexture",
+              "texturename": "brock"
             }
           ]
         }
       ],
-      "textureset": {
-
-      }
+      "textureset": [
+        {
+          "name": "brock",
+          "filename": "Resources\\Textures\\brock.jpg"
+        },
+        {
+          "name": "UVTile",
+          "filename": "Resources\\Textures\\UVTile.jpg"
+        },
+        {
+          "name": "perlinnoise",
+          "filename": "Resources\\Textures\\perlinnoise.png"
+        }
+      ]
     }
   ]
 }

@@ -32,21 +32,22 @@ namespace scene
 		m_MaterialInfoMap.emplace(Object, MaterialInfoList);
 	}
 
+	void CSceneController::AddTextureInfo(const std::shared_ptr<object::C3DObject>& Object, const std::vector<SLoadTextureInfo>& TextureInfoList)
+	{
+		m_TextureInfoMap.emplace(Object, TextureInfoList);
+	}
+
 	bool CSceneController::Create(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine)
 	{
 		for (const auto& Object : m_ObjectList)
 		{
-			if (Object->GetMaterialList().size() == 0)
-			{
-				// MaterialListを生成
-				if (!CreateMaterialList(pGraphicsAPI, Object)) return false;
-			}
-			else
-			{
-				// Material情報を更新
-				if (!UpdateMaterialUniform(pGraphicsAPI, Object)) return false;
-			}
-
+			// テクスチャの追加
+			std::map<std::string, int> TexIndexMap;
+			if (!PrepareTextureList(Object, TexIndexMap)) return false;
+			
+			// マテリアルの追加
+			if (!PrepareMaterialList(pGraphicsAPI, Object, TexIndexMap)) return false;
+			
 			// Object生成
 			if (!Object->Create(pGraphicsAPI, pPhysicsEngine, nullptr)) return false;
 		}
@@ -95,7 +96,41 @@ namespace scene
 		return true;
 	}
 
-	bool CSceneController::CreateMaterialList(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<object::C3DObject>& Object)
+	bool CSceneController::PrepareTextureList(const std::shared_ptr<object::C3DObject>& Object, std::map<std::string, int>& TexIndexMap)
+	{
+		const auto& it = m_TextureInfoMap.find(Object);
+		if (it != m_TextureInfoMap.end())
+		{
+			const auto& TextureInfoList = it->second;
+
+			for (const auto& TextureInfo : TextureInfoList)
+			{
+				TexIndexMap.emplace(TextureInfo.TextureName, static_cast<int>(Object->GetTextureSet()->Get2DTextureList().size()));
+
+				Object->GetTextureSet()->Add2DTexture(TextureInfo.Texture);
+			}
+		}
+
+		return true;
+	}
+
+	bool CSceneController::PrepareMaterialList(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<object::C3DObject>& Object, const std::map<std::string, int>& TexIndexMap)
+	{
+		if (static_cast<int>(Object->GetMaterialList().size()) == 0)
+		{
+			// MaterialListを生成
+			if (!CreateMaterialList(pGraphicsAPI, Object, TexIndexMap)) return false;
+		}
+		else
+		{
+			// Material情報を更新
+			if (!UpdateMaterialUniform(pGraphicsAPI, Object, TexIndexMap)) return false;
+		}
+
+		return true;
+	}
+
+	bool CSceneController::CreateMaterialList(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<object::C3DObject>& Object, const std::map<std::string, int>& TexIndexMap)
 	{
 		// MaterialInfoを取得
 		const auto& it = m_MaterialInfoMap.find(Object);
@@ -128,6 +163,20 @@ namespace scene
 				Material->SetUniformValue(UniformInfo.UniformName, &UniformInfo.UniformData[0], UniformInfo.ByteSize);
 			}
 
+			// Textureを設定
+			for (const auto& Texture : MaterialInfo.Textures)
+			{
+				const auto& TextureBufferName = Texture.first;
+				const auto& TextureName = Texture.second;
+
+				auto TexIndexIT = TexIndexMap.find(TextureName);
+				if (TexIndexIT == TexIndexMap.end()) continue;
+
+				int TextureIndex = TexIndexIT->second;
+
+				Material->ReplaceTextureIndex(TextureBufferName, TextureIndex);
+			}
+
 			// Materialを登録
 			Object->AddMaterial(Material);
 		}
@@ -135,7 +184,7 @@ namespace scene
 		return true;
 	}
 
-	bool CSceneController::UpdateMaterialUniform(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<object::C3DObject>& Object)
+	bool CSceneController::UpdateMaterialUniform(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<object::C3DObject>& Object, const std::map<std::string, int>& TexIndexMap)
 	{
 		// MaterialInfoを取得
 		const auto& it = m_MaterialInfoMap.find(Object);
@@ -148,7 +197,7 @@ namespace scene
 		if (MaterialInfoList.size() != MaterialList.size()) return true;
 
 		//
-		for (int MaterialIndex = 0; MaterialIndex < MaterialList.size(); MaterialIndex++)
+		for (int MaterialIndex = 0; MaterialIndex < static_cast<int>(MaterialList.size()); MaterialIndex++)
 		{
 			const auto& MaterialInfo = MaterialInfoList[MaterialIndex];
 			const auto& Material = MaterialList[MaterialIndex];

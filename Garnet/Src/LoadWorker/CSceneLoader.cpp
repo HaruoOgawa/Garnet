@@ -1,6 +1,7 @@
 #include "CSceneLoader.h"
 #include "CLoadWorker.h"
 #include "CMaterialFrameLoader.h"
+#include "CTextureLoader.h"
 #include "../Scene/CSceneController.h"
 #include "../Object/C3DObject.h"
 
@@ -161,98 +162,9 @@ namespace resource
 				{
 					if (!materialJSON->is_object()) continue;
 
-					//
-					scene::SMaterialInfo MaterialInfo{};
+					int MaterialIndex = static_cast<int>(MaterialInfoList.size());
 
-					// マテリアルフレーム名
-					std::string materialframe = "";
-					GetString("materialframe", materialframe, materialJSON);
-
-					MaterialInfo.MaterialFrameName = materialframe;
-
-					// マテリアル参照数
-					{
-						int MaterialIndex = static_cast<int>(MaterialInfoList.size());
-
-						auto it = MatRefCountMap.find(MaterialIndex);
-
-						if (it != MatRefCountMap.end())
-						{
-							MaterialInfo.RefCount = it->second;
-						}
-					}
-
-					// Uniformリスト
-					const auto uniformvalues = materialJSON->find("uniformvalues");
-					if (uniformvalues != materialJSON->end() && uniformvalues->is_array())
-					{
-						for (json::iterator uniformJSON = uniformvalues->begin(); uniformJSON != uniformvalues->end(); uniformJSON++)
-						{
-							scene::SUniformInfo UniformInfo{};
-
-							std::string UniformName = "";
-							GetString("name", UniformName, uniformJSON);
-							UniformInfo.UniformName = UniformName;
-
-							std::string UniformType = "";
-							GetString("type", UniformType, uniformJSON);
-
-							// ByteSize
-							int ByteSize = 0;
-							{
-								if (UniformType == "mat4")
-								{
-									ByteSize = sizeof(glm::mat4);
-								}
-								else if (UniformType == "mat3")
-								{
-									ByteSize = sizeof(glm::mat3);
-								}
-								else if (UniformType == "mat2")
-								{
-									ByteSize = sizeof(glm::mat2);
-								}
-								else if (UniformType == "vec4")
-								{
-									ByteSize = sizeof(glm::vec4);
-								}
-								else if (UniformType == "vec3")
-								{
-									ByteSize = sizeof(glm::vec3);
-								}
-								else if (UniformType == "vec2")
-								{
-									ByteSize = sizeof(glm::vec2);
-								}
-								else if (UniformType == "float")
-								{
-									ByteSize = sizeof(float);
-								}
-								else if (UniformType == "int")
-								{
-									ByteSize = sizeof(int);
-								}
-
-								UniformInfo.ByteSize = ByteSize;
-							}
-
-							//
-							std::vector<float> value;
-							GetArrayFloat32("value", value, uniformJSON);
-
-							std::vector<unsigned char> UniformData;
-							UniformData.resize(ByteSize);
-
-							std::memcpy(&UniformData[0], &value[0], ByteSize);
-
-							UniformInfo.UniformData = UniformData;
-
-							//
-							MaterialInfo.UniformInfoList.push_back(UniformInfo);
-						}
-					}
-
-					//
+					scene::SMaterialInfo MaterialInfo = AnalyseMaterialInfo(materialJSON, MaterialIndex, MatRefCountMap);
 					MaterialInfoList.push_back(MaterialInfo);
 				}
 
@@ -261,6 +173,33 @@ namespace resource
 			}
 
 			// textureset
+			const auto textureset = objectJSON->find("textureset");
+			if (textureset != objectJSON->end() && textureset->is_array())
+			{
+				std::vector<scene::SLoadTextureInfo> TextureInfoList;
+
+				for (json::iterator textureJSON = textureset->begin(); textureJSON != textureset->end(); textureJSON++)
+				{
+					if (!textureJSON->is_object()) continue;
+
+					std::string TextureName = "";
+					GetString("name", TextureName, textureJSON);
+
+					std::string TextureFileName = "";
+					GetString("filename", TextureFileName, textureJSON);
+
+					auto Texture = pGraphicsAPI->CreateTexture();
+					pLoadWorker->AddLoadResource(std::make_shared<resource::CTextureLoader>(pGraphicsAPI, TextureFileName, Texture));
+
+					scene::SLoadTextureInfo TextureInfo{};
+					TextureInfo.TextureName = TextureName;
+					TextureInfo.Texture = Texture;
+
+					TextureInfoList.push_back(TextureInfo);
+				}
+
+				m_Target->AddTextureInfo(Object, TextureInfoList);
+			}
 
 			// Objectを追加
 			m_Target->AddObject(Object);
@@ -349,6 +288,117 @@ namespace resource
 		}
 
 		return Mesh;
+	}
+
+	scene::SMaterialInfo CSceneLoader::AnalyseMaterialInfo(const json::iterator& materialJSON, int MaterialIndex, const std::map<int, int>& MatRefCountMap)
+	{
+		scene::SMaterialInfo MaterialInfo{};
+
+		// マテリアルフレーム名
+		std::string materialframe = "";
+		GetString("materialframe", materialframe, materialJSON);
+
+		MaterialInfo.MaterialFrameName = materialframe;
+
+		// マテリアル参照数
+		{
+			auto it = MatRefCountMap.find(MaterialIndex);
+
+			if (it != MatRefCountMap.end())
+			{
+				MaterialInfo.RefCount = it->second;
+			}
+		}
+
+		// Uniformリスト
+		const auto uniformvalues = materialJSON->find("uniformvalues");
+		if (uniformvalues != materialJSON->end() && uniformvalues->is_array())
+		{
+			for (json::iterator uniformJSON = uniformvalues->begin(); uniformJSON != uniformvalues->end(); uniformJSON++)
+			{
+				scene::SUniformInfo UniformInfo{};
+
+				std::string UniformName = "";
+				GetString("name", UniformName, uniformJSON);
+				UniformInfo.UniformName = UniformName;
+
+				std::string UniformType = "";
+				GetString("type", UniformType, uniformJSON);
+
+				// ByteSize
+				int ByteSize = 0;
+				{
+					if (UniformType == "mat4")
+					{
+						ByteSize = sizeof(glm::mat4);
+					}
+					else if (UniformType == "mat3")
+					{
+						ByteSize = sizeof(glm::mat3);
+					}
+					else if (UniformType == "mat2")
+					{
+						ByteSize = sizeof(glm::mat2);
+					}
+					else if (UniformType == "vec4")
+					{
+						ByteSize = sizeof(glm::vec4);
+					}
+					else if (UniformType == "vec3")
+					{
+						ByteSize = sizeof(glm::vec3);
+					}
+					else if (UniformType == "vec2")
+					{
+						ByteSize = sizeof(glm::vec2);
+					}
+					else if (UniformType == "float")
+					{
+						ByteSize = sizeof(float);
+					}
+					else if (UniformType == "int")
+					{
+						ByteSize = sizeof(int);
+					}
+
+					UniformInfo.ByteSize = ByteSize;
+				}
+
+				//
+				std::vector<float> value;
+				GetArrayFloat32("value", value, uniformJSON);
+
+				std::vector<unsigned char> UniformData;
+				UniformData.resize(ByteSize);
+
+				std::memcpy(&UniformData[0], &value[0], ByteSize);
+
+				UniformInfo.UniformData = UniformData;
+
+				//
+				MaterialInfo.UniformInfoList.push_back(UniformInfo);
+			}
+		}
+
+		// textures
+		const auto textures = materialJSON->find("textures");
+		if (textures != materialJSON->end() && textures->is_array())
+		{
+			for (json::iterator textureJSON = textures->begin(); textureJSON != textures->end(); textureJSON++)
+			{
+				if (!textureJSON->is_object()) continue;
+
+				std::string texturebuffername = "";
+				GetString("texturebuffername", texturebuffername, textureJSON);
+
+				std::string texturename = "";
+				GetString("texturename", texturename, textureJSON);
+
+				MaterialInfo.Textures.emplace(texturebuffername, texturename);
+			}
+		}
+
+		return MaterialInfo;
 	}
 
 	std::shared_ptr<math::CTransform> CSceneLoader::AnalyseTransform(const json::iterator& Object)
