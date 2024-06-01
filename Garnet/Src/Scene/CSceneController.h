@@ -67,6 +67,7 @@ namespace scene
 		std::vector<std::shared_ptr<object::C3DObject>> GetObjectList() const;
 
 		void AddMaterialFrame(const std::string& MFName, const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame);
+		const std::map<std::string, std::shared_ptr<graphics::CMaterialFrame>>& GetMaterialFrameMap() const;
 
 		void AddMaterialInfo(const std::shared_ptr<object::C3DObject>& Object, const std::vector<SMaterialInfo>& MaterialInfoList);
 

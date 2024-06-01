@@ -1,9 +1,11 @@
 #include "CSceneLoader.h"
 #include "CLoadWorker.h"
+#include "C3DObjectLoader.h"
 #include "CMaterialFrameLoader.h"
 #include "CTextureLoader.h"
 #include "../Scene/CSceneController.h"
 #include "../Object/C3DObject.h"
+#include "../../Message/Console.h"
 
 namespace resource
 {
@@ -173,6 +175,28 @@ namespace resource
 				GetString("name", objname, objectJSON);
 
 				Object->SetObjectName(objname);
+			}
+
+			{
+				std::string filename = "";
+				GetString("filename", filename, objectJSON);
+
+				std::string commonmaterialframe = "";
+				GetString("commonmaterialframe", commonmaterialframe, objectJSON);
+
+				if (!filename.empty())
+				{
+					const auto& MaterialFrameMap = m_Target->GetMaterialFrameMap();
+					const auto& MaterialFrame = MaterialFrameMap.find(commonmaterialframe);
+					if (MaterialFrame == MaterialFrameMap.end())
+					{
+						Console::Log("[SceneLoader Error] commonmaterialframe not found\n");
+
+						return false;
+					}
+
+					pLoadWorker->AddLoadResource(std::make_shared<resource::C3DObjectLoader>(filename, Object, MaterialFrame->second));
+				}
 			}
 
 			// Transform
@@ -470,6 +494,29 @@ namespace resource
 
 				//
 				MaterialInfo.UniformInfoList.push_back(UniformInfo);
+			}
+		}
+
+		// CullMode
+		{
+			std::string cull = "";
+			GetString("cull", cull, materialJSON);
+
+			if (cull == "none")
+			{
+				MaterialInfo.CullMode = graphics::ECullMode::CULL_NONE;
+			}
+			else if (cull == "back")
+			{
+				MaterialInfo.CullMode = graphics::ECullMode::CULL_BACK;
+			}
+			else if (cull == "front")
+			{
+				MaterialInfo.CullMode = graphics::ECullMode::CULL_FRONT;
+			}
+			else
+			{
+				MaterialInfo.CullMode = graphics::ECullMode::CULL_BACK;
 			}
 		}
 

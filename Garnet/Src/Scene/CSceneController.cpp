@@ -27,6 +27,11 @@ namespace scene
 		m_MaterialFrameMap.emplace(MFName, MaterialFrame);
 	}
 
+	const std::map<std::string, std::shared_ptr<graphics::CMaterialFrame>>& CSceneController::GetMaterialFrameMap() const
+	{
+		return m_MaterialFrameMap;
+	}
+
 	void CSceneController::AddMaterialInfo(const std::shared_ptr<object::C3DObject>& Object, const std::vector<SMaterialInfo>& MaterialInfoList)
 	{
 		m_MaterialInfoMap.emplace(Object, MaterialInfoList);
@@ -138,7 +143,7 @@ namespace scene
 		{
 			Console::Log("[SceneController Error] MaterialInfo Not Found\n");
 
-			return false;
+			return true;
 		}
 
 		const auto& MaterialInfoList = it->second;
@@ -162,6 +167,9 @@ namespace scene
 			{
 				Material->SetUniformValue(UniformInfo.UniformName, &UniformInfo.UniformData[0], UniformInfo.ByteSize);
 			}
+
+			// CullMode
+			Material->SetCullMode(MaterialInfo.CullMode);
 
 			// Texture‚ğİ’è
 			for (const auto& Texture : MaterialInfo.Textures)
