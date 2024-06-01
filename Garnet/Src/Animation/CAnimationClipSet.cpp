@@ -29,9 +29,9 @@ namespace animation
 #if defined(USE_FBX) ///////////////////////////////////////////////////
 
 #ifdef USE_SMALL_FBX
-			if (!fbx::CSmallFBXImporter::ImportFBX(pGraphicsAPI, Data, nullptr, nullptr, nullptr)) return false;
+			if (!fbx::CSmallFBXImporter::ImportFBXAnimation(pGraphicsAPI, Data, m_AnimationClipList)) return false;
 #else
-			if (!fbx::CFBXImporter::ImportFBX(pGraphicsAPI, FileName, nullptr, nullptr, nullptr)) return false;
+			if (!fbx::CFBXImporter::ImportFBXAnimation(pGraphicsAPI, FileName, m_AnimationClipList)) return false;
 #endif // USE_SMALL_FBX
 
 #endif  ///////////////////////////////////////////////////////////////

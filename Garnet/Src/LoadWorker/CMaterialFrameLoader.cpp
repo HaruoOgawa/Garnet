@@ -1,5 +1,5 @@
 #include "CMaterialFrameLoader.h"
-#include "CResourceManager.h"
+#include "CLoadWorker.h"
 #include "CShaderLoader.h"
 
 namespace resource
@@ -40,12 +40,12 @@ namespace resource
 		return true;
 	}
 
-	bool CMaterialFrameLoader::Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, const std::shared_ptr<CResourceManager>& ResourceManager)
+	bool CMaterialFrameLoader::Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker)
 	{
 		// マテリアルフレームが持っているリソース一覧を取得する
 		if (!m_AnalyseDone)
 		{
-			if (!AnalyseResourceList(pGraphicsAPI, ResourceManager)) return false;
+			if (!AnalyseResourceList(pGraphicsAPI, pLoadWorker)) return false;
 
 			m_AnalyseDone = true;
 
@@ -62,7 +62,7 @@ namespace resource
 				return true;
 
 			case resource::ELoadStatus::Loading:
-				if (!Resource->Update(pGraphicsAPI, pPhysicsEngine, ResourceManager)) return false;
+				if (!Resource->Update(pGraphicsAPI, pPhysicsEngine, pLoadWorker)) return false;
 				return true;
 
 			case resource::ELoadStatus::Loaded:
@@ -83,7 +83,7 @@ namespace resource
 		m_Status = resource::ELoadStatus::Loaded;
 
 		// リソースマネージャーに登録
-		ResourceManager->AddOnMemoryResource(shared_from_this(), nullptr);
+		pLoadWorker->GetResourceManager()->AddOnMemoryResource(shared_from_this(), nullptr);
 
 		return true;
 	}
@@ -117,7 +117,7 @@ namespace resource
 		return m_TargetMaterialFrameSet;
 	}
 
-	bool CMaterialFrameLoader::AnalyseResourceList(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CResourceManager>& ResourceManager)
+	bool CMaterialFrameLoader::AnalyseResourceList(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker)
 	{
 		std::string RawData = std::string();
 		RawData.resize(m_File->GetData().size());
@@ -136,7 +136,7 @@ namespace resource
 		const auto shaderList = m_MfJson.find("shaderList");
 		if (shaderList != m_MfJson.end() && shaderList->is_array())
 		{
-			if (!AnalyseShaderList(pGraphicsAPI, ResourceManager, shaderList)) return false;
+			if (!AnalyseShaderList(pGraphicsAPI, pLoadWorker, shaderList)) return false;
 		}
 		
 		// textureList
@@ -149,7 +149,7 @@ namespace resource
 		return true;
 	}
 
-	bool CMaterialFrameLoader::AnalyseShaderList(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CResourceManager>& ResourceManager, const json::iterator& shaderList)
+	bool CMaterialFrameLoader::AnalyseShaderList(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, const json::iterator& shaderList)
 	{
 		for (json::iterator shader = shaderList->begin(); shader != shaderList->end(); ++shader)
 		{
@@ -251,7 +251,7 @@ namespace resource
 					}
 
 					// リソースマネージャーに既に登録されていてかつロード済みかチェックする
-					auto Resource = ResourceManager->FindResource(EditingBaseFileName);
+					auto Resource = pLoadWorker->GetResourceManager()->FindResource(EditingBaseFileName);
 
 					if (Resource)
 					{
@@ -275,7 +275,7 @@ namespace resource
 						// 参照の追加
 						ShaderLoader->AddRefMFLoader(shared_from_this());
 
-						ResourceManager->AddOnMemoryResource(ShaderLoader, shared_from_this());
+						pLoadWorker->GetResourceManager()->AddOnMemoryResource(ShaderLoader, shared_from_this());
 
 						m_MfResourceList.push_back(ShaderLoader);
 

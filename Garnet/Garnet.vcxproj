@@ -647,6 +647,8 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Src\Scene\CSceneController.h" />
+    <ClInclude Include="Src\LoadWorker\CSceneLoader.h" />
     <ClInclude Include="Src\AppCore\SAppSettings.h" />
     <ClInclude Include="Src\Interface\IResource.h" />
     <ClInclude Include="Src\Library\Vulkan\include\dxc\dxcapi.h" />
@@ -1680,6 +1682,8 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClInclude Include="Src\Interface\IRenderer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\Scene\CSceneController.cpp" />
+    <ClCompile Include="Src\LoadWorker\CSceneLoader.cpp" />
     <ClCompile Include="Src\LoadWorker\CResource.cpp" />
     <ClCompile Include="Src\LoadWorker\CShaderLoader.cpp" />
     <ClCompile Include="Src\App\ScriptApp\Model\CFileModifier.cpp" />
@@ -2065,6 +2069,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <None Include="Resources\MaterialFrame\raymarching_mf.json" />
     <None Include="Resources\MaterialFrame\Sample_MF.json" />
     <None Include="Resources\MaterialFrame\SimpleTexture_MF.json" />
+    <None Include="Resources\Scene\Sample.json" />
     <None Include="Resources\Shaders\basic_toon.frag" />
     <None Include="Resources\Shaders\basic_toon.vert" />
     <None Include="Resources\Shaders\basic_toon_frag.spv" />

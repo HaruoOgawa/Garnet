@@ -32,11 +32,11 @@ namespace resource
 	{
 	}
 
-	bool C3DObjectLoader::Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, const std::shared_ptr<CResourceManager>& ResourceManager)
+	bool C3DObjectLoader::Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker)
 	{
 		if (!m_File->IsLoaded())
 		{
-			if (!m_File->Update(pGraphicsAPI, pPhysicsEngine, ResourceManager)) return false;
+			if (!m_File->Update(pGraphicsAPI, pPhysicsEngine, pLoadWorker)) return false;
 			return true;
 		}
 		
@@ -55,7 +55,7 @@ namespace resource
 			}
 		case resource::E3DObjectLoadState::LoadSubResouce:
 			{
-				if (!LoadSubResources(pGraphicsAPI, pPhysicsEngine, ResourceManager)) return false;
+				if (!LoadSubResources(pGraphicsAPI, pPhysicsEngine, pLoadWorker)) return false;
 
 				if (static_cast<int>(m_SubResources.size()) == 0) m_LoadState = resource::E3DObjectLoadState::Finish;
 
@@ -71,7 +71,7 @@ namespace resource
 		m_Status = resource::ELoadStatus::Loaded;
 
 		// リソースマネージャーに登録
-		ResourceManager->AddOnMemoryResource(shared_from_this(), nullptr);
+		pLoadWorker->GetResourceManager()->AddOnMemoryResource(shared_from_this(), nullptr);
 
 		return true;
 	}
@@ -124,7 +124,7 @@ namespace resource
 		return true;
 	}
 
-	bool C3DObjectLoader::LoadSubResources(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, const std::shared_ptr<CResourceManager>& ResourceManager)
+	bool C3DObjectLoader::LoadSubResources(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker)
 	{
 		// サブリソースのロード
 		for (auto& Resource : m_SubResources)
@@ -136,13 +136,13 @@ namespace resource
 				return true;
 
 			case resource::ELoadStatus::Loading:
-				if (!Resource->Update(pGraphicsAPI, pPhysicsEngine, ResourceManager)) return false;
+				if (!Resource->Update(pGraphicsAPI, pPhysicsEngine, pLoadWorker)) return false;
 				return true;
 
 			case resource::ELoadStatus::Loaded:
 			{
 				// リソースマネージャーに登録
-				ResourceManager->AddOnMemoryResource(Resource, shared_from_this());
+				pLoadWorker->GetResourceManager()->AddOnMemoryResource(Resource, shared_from_this());
 
 				m_SubResources.erase(m_SubResources.begin());
 				m_SubResources.shrink_to_fit();

@@ -8,7 +8,6 @@
 
 namespace resource
 {
-	class CResourceManager;
 	class CLoadWorker;
 
 	class CResource : public IResource
@@ -29,7 +28,7 @@ namespace resource
 
 		virtual bool Load() override;
 		virtual bool LoadImmediate() override;
-		virtual bool Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, const std::shared_ptr<CResourceManager>& ResourceManager) override;
+		virtual bool Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker) override;
 
 		virtual void Reset() override;
 

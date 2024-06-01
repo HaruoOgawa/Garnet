@@ -1,6 +1,6 @@
 #include "CAudioLoader.h"
 #include "../Message/Console.h"
-#include "CResourceManager.h"
+#include "CLoadWorker.h"
 
 namespace resource
 {
@@ -14,11 +14,11 @@ namespace resource
 	{
 	}
 
-	bool CAudioLoader::Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, const std::shared_ptr<CResourceManager>& ResourceManager)
+	bool CAudioLoader::Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker)
 	{
 		if (!m_File->IsLoaded())
 		{
-			if (!m_File->Update(pGraphicsAPI, pPhysicsEngine, ResourceManager)) return false;
+			if (!m_File->Update(pGraphicsAPI, pPhysicsEngine, pLoadWorker)) return false;
 			return true;
 		}
 
@@ -47,7 +47,7 @@ namespace resource
 		m_Status = resource::ELoadStatus::Loaded;
 
 		// リソースマネージャーに登録
-		ResourceManager->AddOnMemoryResource(shared_from_this(), nullptr);
+		pLoadWorker->GetResourceManager()->AddOnMemoryResource(shared_from_this(), nullptr);
 
 		return true;
 	}

@@ -7,14 +7,13 @@
 namespace resource
 {
 	class CLoadWorker;
-	class CResourceManager;
 
 	class IResource : public std::enable_shared_from_this<IResource>
 	{
 	public:
 		virtual bool Load() = 0;
 		virtual bool LoadImmediate() = 0;
-		virtual bool Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, const std::shared_ptr<CResourceManager>& ResourceManager) = 0;
+		virtual bool Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker) = 0;
 
 		virtual void Reset() = 0;
 

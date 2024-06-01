@@ -29,12 +29,12 @@ namespace resource
 		std::vector<std::shared_ptr<resource::IResource>> m_SubResources;
 	private:
 		bool Import(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine);
-		bool LoadSubResources(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, const std::shared_ptr<CResourceManager>& ResourceManager);
+		bool LoadSubResources(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker);
 	public:
 		C3DObjectLoader(const std::string& FileName, const std::shared_ptr<object::C3DObject>& TargetObject, const std::shared_ptr<graphics::CMaterialFrame>& BaseMaterialFrame);
 		virtual ~C3DObjectLoader();
 		
-		virtual bool Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, const std::shared_ptr<CResourceManager>& ResourceManager) override;
+		virtual bool Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker) override;
 
 		void AddSubResource(const std::shared_ptr <resource::IResource>& Resource);
 	};
