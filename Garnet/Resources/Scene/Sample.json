@@ -127,13 +127,12 @@
       ],
       "materials": [
         {
-          "name": "test_mat",
           "materialframe": "PBR_MF",
           "uniformvalues": [
             {
               "name": "baseColorFactor",
               "type": "vec4",
-              "value": [ 1.0, 0.0, 0.0, 1.0 ]
+              "value": [ 0.02, 0.3, 0.79, 1.0 ]
             }
           ]
         }

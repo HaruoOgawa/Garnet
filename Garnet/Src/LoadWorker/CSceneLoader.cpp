@@ -137,6 +137,8 @@ namespace resource
 			}
 
 			// meshs
+			std::map<int, int> MatRefCountMap;
+
 			const auto meshs = objectJSON->find("meshs");
 			if (meshs != objectJSON->end() && meshs->is_array())
 			{
@@ -144,12 +146,119 @@ namespace resource
 				{
 					if (!meshJSON->is_object()) continue;
 
-					std::shared_ptr<graphics::CMesh> Mesh = AnalyseMesh(pGraphicsAPI, meshJSON);
+					std::shared_ptr<graphics::CMesh> Mesh = AnalyseMesh(pGraphicsAPI, meshJSON, MatRefCountMap);
 					Object->AddMesh(Mesh);
 				}
 			}
 
 			// materials
+			const auto materials = objectJSON->find("materials");
+			if (materials != objectJSON->end() && materials->is_array())
+			{
+				std::vector<scene::SMaterialInfo> MaterialInfoList;
+
+				for (json::iterator materialJSON = materials->begin(); materialJSON != materials->end(); materialJSON++)
+				{
+					if (!materialJSON->is_object()) continue;
+
+					//
+					scene::SMaterialInfo MaterialInfo{};
+
+					// マテリアルフレーム名
+					std::string materialframe = "";
+					GetString("materialframe", materialframe, materialJSON);
+
+					MaterialInfo.MaterialFrameName = materialframe;
+
+					// マテリアル参照数
+					{
+						int MaterialIndex = static_cast<int>(MaterialInfoList.size());
+
+						auto it = MatRefCountMap.find(MaterialIndex);
+
+						if (it != MatRefCountMap.end())
+						{
+							MaterialInfo.RefCount = it->second;
+						}
+					}
+
+					// Uniformリスト
+					const auto uniformvalues = materialJSON->find("uniformvalues");
+					if (uniformvalues != materialJSON->end() && uniformvalues->is_array())
+					{
+						for (json::iterator uniformJSON = uniformvalues->begin(); uniformJSON != uniformvalues->end(); uniformJSON++)
+						{
+							scene::SUniformInfo UniformInfo{};
+
+							std::string UniformName = "";
+							GetString("name", UniformName, uniformJSON);
+							UniformInfo.UniformName = UniformName;
+
+							std::string UniformType = "";
+							GetString("type", UniformType, uniformJSON);
+
+							// ByteSize
+							int ByteSize = 0;
+							{
+								if (UniformType == "mat4")
+								{
+									ByteSize = sizeof(glm::mat4);
+								}
+								else if (UniformType == "mat3")
+								{
+									ByteSize = sizeof(glm::mat3);
+								}
+								else if (UniformType == "mat2")
+								{
+									ByteSize = sizeof(glm::mat2);
+								}
+								else if (UniformType == "vec4")
+								{
+									ByteSize = sizeof(glm::vec4);
+								}
+								else if (UniformType == "vec3")
+								{
+									ByteSize = sizeof(glm::vec3);
+								}
+								else if (UniformType == "vec2")
+								{
+									ByteSize = sizeof(glm::vec2);
+								}
+								else if (UniformType == "float")
+								{
+									ByteSize = sizeof(float);
+								}
+								else if (UniformType == "int")
+								{
+									ByteSize = sizeof(int);
+								}
+
+								UniformInfo.ByteSize = ByteSize;
+							}
+
+							//
+							std::vector<float> value;
+							GetArrayFloat32("value", value, uniformJSON);
+
+							std::vector<unsigned char> UniformData;
+							UniformData.resize(ByteSize);
+
+							std::memcpy(&UniformData[0], &value[0], ByteSize);
+
+							UniformInfo.UniformData = UniformData;
+
+							//
+							MaterialInfo.UniformInfoList.push_back(UniformInfo);
+						}
+					}
+
+					//
+					MaterialInfoList.push_back(MaterialInfo);
+				}
+
+				// SceneControllerに登録
+				m_Target->AddMaterialInfo(Object, MaterialInfoList);
+			}
 
 			// textureset
 
@@ -185,7 +294,7 @@ namespace resource
 		return Node;
 	}
 
-	std::shared_ptr<graphics::CMesh> CSceneLoader::AnalyseMesh(api::IGraphicsAPI* pGraphicsAPI, const json::iterator& meshJSON)
+	std::shared_ptr<graphics::CMesh> CSceneLoader::AnalyseMesh(api::IGraphicsAPI* pGraphicsAPI, const json::iterator& meshJSON, std::map<int, int>& MatRefCountMap)
 	{
 		std::shared_ptr<graphics::CMesh> Mesh = std::make_shared<graphics::CMesh>();
 
@@ -198,6 +307,15 @@ namespace resource
 
 				int materialindex = -1;
 				GetInt("materialindex", materialindex, primitiveJSON);
+
+				// マテリアル参照数の追加
+				{
+					auto it = MatRefCountMap.find(materialindex);
+
+					if (it == MatRefCountMap.end()) MatRefCountMap.emplace(materialindex, 0);
+
+					MatRefCountMap[materialindex]++;
+				}
 
 				std::string type = "";
 				GetString("type", type, primitiveJSON);

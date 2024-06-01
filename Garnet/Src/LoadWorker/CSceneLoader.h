@@ -32,7 +32,7 @@ namespace resource
 		bool AnalyseObjects(const json::iterator& objects, api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker);
 
 		std::shared_ptr<object::CNode> AnalyseNode(const json::iterator& nodeJSON, const std::shared_ptr<object::C3DObject>& Object);
-		std::shared_ptr<graphics::CMesh> AnalyseMesh(api::IGraphicsAPI* pGraphicsAPI, const json::iterator& meshJSON);
+		std::shared_ptr<graphics::CMesh> AnalyseMesh(api::IGraphicsAPI* pGraphicsAPI, const json::iterator& meshJSON, std::map<int, int>& MatRefCountMap);
 		std::shared_ptr<math::CTransform> AnalyseTransform(const json::iterator& Object);
 
 		void GetString(const std::string& Key, std::string& Value, const json::iterator& Object);
