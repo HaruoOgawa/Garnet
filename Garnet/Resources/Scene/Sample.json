@@ -72,6 +72,14 @@
     }
   ],
 
+  "sound": {
+    "bgm": {
+      "filename": "Resources\\Audio\\biglove_audio.wav",
+      "autoplay": true,
+      "loop": true
+    }
+  },
+
   "objects": [
     {
       "name": "glTFObj",

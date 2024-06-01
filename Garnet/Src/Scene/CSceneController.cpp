@@ -1,11 +1,13 @@
 #include "CSceneController.h"
 #include "../Object/C3DObject.h"
 #include "../Animation/CAnimationClipSet.h"
+#include "../Audio/CAudioClip.h"
 #include "../Message/Console.h"
 
 namespace scene
 {
-	CSceneController::CSceneController()
+	CSceneController::CSceneController():
+		m_BGM(std::make_tuple(nullptr, false, false))
 	{
 	}
 
@@ -53,6 +55,11 @@ namespace scene
 		m_AnimationInfoMap.emplace(Object, AnimationInfo);
 	}
 
+	void CSceneController::AddBGM(const std::shared_ptr<audio::CAudioClip>& AudioClip, bool autoplay, bool loop)
+	{
+		m_BGM = std::make_tuple(AudioClip, autoplay, loop);
+	}
+
 	bool CSceneController::Create(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine)
 	{
 		for (const auto& Object : m_ObjectList)
@@ -71,6 +78,28 @@ namespace scene
 			if (!Object->Create(pGraphicsAPI, pPhysicsEngine, nullptr)) return false;
 		}
 
+		{
+			const auto& AudioClip = std::get<0>(m_BGM);
+
+			if (AudioClip)
+			{
+				bool autoplay = std::get<1>(m_BGM);
+				bool loop = std::get<2>(m_BGM);
+
+				if (autoplay)
+				{
+					if (loop)
+					{
+						AudioClip->PlayLoop();
+					}
+					else
+					{
+						AudioClip->PlayOneShot();
+					}
+				}
+			}
+		}
+
 		return true;
 	}
 
@@ -84,6 +113,7 @@ namespace scene
 
 		return true;
 	}
+
 	bool CSceneController::LateUpdate(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo)
 	{
 		for (const auto& Object : m_ObjectList)

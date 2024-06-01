@@ -21,6 +21,7 @@ namespace graphics {
 	class CTexture;
 }
 namespace animation { class CAnimationClipSet; }
+namespace audio { class CAudioClip; }
 
 namespace scene
 {
@@ -92,6 +93,7 @@ namespace scene
 		std::map<std::shared_ptr<object::C3DObject>, std::vector<SLoadTextureInfo>> m_TextureInfoMap;
 		std::map<std::shared_ptr<object::C3DObject>, SAnimationInfo> m_AnimationInfoMap;
 		
+		std::tuple<std::shared_ptr<audio::CAudioClip>, bool, bool> m_BGM;
 	private:
 		bool PrepareTextureList(const std::shared_ptr<object::C3DObject>& Object, std::map<std::string, int>& TexIndexMap);
 		bool PrepareMaterialList(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<object::C3DObject>& Object, const std::map<std::string, int>& TexIndexMap);
@@ -115,6 +117,8 @@ namespace scene
 		void AddTextureInfo(const std::shared_ptr<object::C3DObject>& Object, const std::vector<SLoadTextureInfo>& TextureInfoList);
 		
 		void AddAnimationInfo(const std::shared_ptr<object::C3DObject>& Object, const SAnimationInfo& AnimationInfo);
+
+		void AddBGM(const std::shared_ptr<audio::CAudioClip>& AudioClip, bool autoplay, bool loop);
 
 		bool Create(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine);
 

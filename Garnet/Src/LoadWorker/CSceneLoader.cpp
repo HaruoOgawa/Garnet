@@ -4,6 +4,7 @@
 #include "CMaterialFrameLoader.h"
 #include "CTextureLoader.h"
 #include "CAnimationLoader.h"
+#include "CAudioLoader.h"
 #include "../Scene/CSceneController.h"
 #include "../Object/C3DObject.h"
 #include "../../Message/Console.h"
@@ -66,6 +67,36 @@ namespace resource
 			if (animations != SceneJSON.end() && animations->is_array())
 			{
 				if (!AnalyseSceneAnimations(animations, pGraphicsAPI, pLoadWorker)) return false;
+			}
+		}
+
+
+		// sound
+		{
+			const auto sound = SceneJSON.find("sound");
+			if (sound != SceneJSON.end() && sound->is_object())
+			{
+				// bgm
+				{
+					const auto bgm = sound->find("bgm");
+					if (bgm != sound->end() && bgm->is_object())
+					{
+						std::string filename = "";
+						GetString("filename", filename, bgm);
+
+						bool autoplay = false;
+						GetBoolean("autoplay", autoplay, bgm);
+						
+						bool loop = false;
+						GetBoolean("loop", loop, bgm);
+
+						std::shared_ptr<audio::CAudioClip> AudioClip = std::make_shared<audio::CAudioClip>();
+
+						pLoadWorker->AddLoadResource(std::make_shared<resource::CAudioLoader>(filename, AudioClip));
+
+						m_Target->AddBGM(AudioClip, autoplay, loop);
+					}
+				}
 			}
 		}
 
