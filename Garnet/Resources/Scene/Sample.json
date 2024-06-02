@@ -84,7 +84,7 @@
     {
       "name": "glTFObj",
       "filename": "Resources/Models/BrainStem/glTF-Binary/BrainStem.glb",
-      "commonmaterialframe": "PBR_MF",
+      "defaultmaterialframe": "PBR_MF",
       "transform": {
         "pos": [ -1.0, 0.0, 0.0 ],
         "rotate": [ 0.0, 0.0, 0.0 ],
@@ -98,7 +98,7 @@
     {
       "name": "FbxObj",
       "filename": "Resources/Avatar/Warrok_W_Kurniawan.fbx",
-      "commonmaterialframe": "PBR_MF",
+      "defaultmaterialframe": "PBR_MF",
       "transform": {
         "pos": [ -2.0, 0.0, 0.0 ],
         "rotate": [ 0.0, 0.0, 0.0 ],
@@ -124,7 +124,7 @@
     {
       "name": "PmxObj",
       "filename": "Resources/Avatar/Tda_Miku/Tda_Miku.pmx",
-      "commonmaterialframe": "basic_toon_mf",
+      "defaultmaterialframe": "basic_toon_mf",
       "transform": {
         "pos": [ 3.0, 0.0, 0.0 ],
         "rotate": [ 0.0, 0.0, 0.0 ],

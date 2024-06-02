@@ -30,7 +30,7 @@ namespace object
 		std::string m_FileName;
 
 		// ToDo: ‰¼ŽÀ‘•
-		std::string m_CommonMaterialFrame;
+		std::string m_DefaultMaterialFrame;
 
 		const std::string m_PassName;
 		const std::string m_DepthPassName;
@@ -74,9 +74,8 @@ namespace object
 		void SetFileName(const std::string& Name);
 		const std::string& GetFileName() const;
 		
-		// ToDo: ‰¼ŽÀ‘•
-		void SetCommonMaterialFrame(const std::string& Name);
-		const std::string& GetCommonMaterialFrame() const;
+		void SetDefaultMaterialFrame(const std::string& Name);
+		const std::string& GetDefaultMaterialFrame() const;
 
 		void SetObjectName(const std::string& Name);
 		const std::string& GetObjectName() const;

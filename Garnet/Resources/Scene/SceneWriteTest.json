@@ -1,63 +1,87 @@
 {
-    "animations": [
-        {
-            "filename": "Resources/Motions/Jumping.fbx",
-            "name": "FBX_Jumping"
-        },
-        {
-            "filename": "Resources/Motions/Combo_Punch_hand.fbx",
-            "name": "FBX_Punch"
-        },
-        {
-            "filename": "Resources/Motions/Walking.fbx",
-            "name": "FBX_Walking"
-        },
-        {
-            "filename": "Resources/Motions/biglove_Ripsync.vmd",
-            "name": "biglove_Ripsync"
-        },
-        {
-            "filename": "Resources/Motions/biglove_dance_noik.vmd",
-            "name": "biglove_dance_noik"
-        },
-        {
-            "filename": "Resources/Motions/biglove_expression.vmd",
-            "name": "biglove_expression"
-        }
-    ],
     "materialframes": [
         {
-            "filename": "Resources/MaterialFrame/Depth_MF.json",
-            "name": "Depth_MF"
+            "name": "Depth_MF",
+            "filename": "Resources/MaterialFrame/Depth_MF.json"
         },
         {
-            "filename": "Resources/MaterialFrame/PBR_MF.json",
-            "name": "PBR_MF"
+            "name": "PBR_MF",
+            "filename": "Resources/MaterialFrame/PBR_MF.json"
         },
         {
-            "filename": "Resources/MaterialFrame/SimpleTexture_MF.json",
-            "name": "SimpleTexture_MF"
+            "name": "SimpleTexture_MF",
+            "filename": "Resources/MaterialFrame/SimpleTexture_MF.json"
         },
         {
-            "filename": "Resources/MaterialFrame/basic_toon_mf.json",
-            "name": "basic_toon_mf"
+            "name": "basic_toon_mf",
+            "filename": "Resources/MaterialFrame/basic_toon_mf.json"
         },
         {
-            "filename": "Resources/MaterialFrame/raymarching_mf.json",
-            "name": "raymarching_mf"
+            "name": "raymarching_mf",
+            "filename": "Resources/MaterialFrame/raymarching_mf.json"
         }
     ],
+    "scenetextureset": {
+        "cubemaps": [
+            {
+                "back": "Resources/Cubemaps/environment/environment_back_0.jpg",
+                "bottom": "Resources/Cubemaps/environment/environment_bottom_0.jpg",
+                "front": "Resources/Cubemaps/environment/environment_front_0.jpg",
+                "left": "Resources/Cubemaps/environment/environment_left_0.jpg",
+                "right": "Resources/Cubemaps/environment/environment_right_0.jpg",
+                "top": "Resources/Cubemaps/environment/environment_top_0.jpg"
+            }
+        ],
+        "frametextures": null,
+        "ibl": {
+            "diffuse": "Resources/IBL/output_iem.hdr",
+            "specular": "Resources/IBL/output_pmrem.hdr",
+            "ggx": "Resources/Textures/ggx_lut.jpg"
+        }
+    },
+    "animations": [
+        {
+            "name": "FBX_Jumping",
+            "filename": "Resources/Motions/Jumping.fbx"
+        },
+        {
+            "name": "FBX_Punch",
+            "filename": "Resources/Motions/Combo_Punch_hand.fbx"
+        },
+        {
+            "name": "FBX_Walking",
+            "filename": "Resources/Motions/Walking.fbx"
+        },
+        {
+            "name": "biglove_Ripsync",
+            "filename": "Resources/Motions/biglove_Ripsync.vmd"
+        },
+        {
+            "name": "biglove_dance_noik",
+            "filename": "Resources/Motions/biglove_dance_noik.vmd"
+        },
+        {
+            "name": "biglove_expression",
+            "filename": "Resources/Motions/biglove_expression.vmd"
+        }
+    ],
+    "sound": {
+        "bgm": {
+            "filename": "Resources\\Audio\\biglove_audio.wav",
+            "autoplay": false,
+            "loop": false
+        }
+    },
     "objects": [
         {
+            "name": "glTFObj",
+            "filename": "Resources/Models/BrainStem/glTF-Binary/BrainStem.glb",
+            "defaultmaterialframe": "PBR_MF",
             "animation": {
                 "clips": null,
-                "playmotion": "",
-                "playmotionindex": 0
+                "playmotionindex": 0,
+                "playmotion": ""
             },
-            "commonmaterialframe": "PBR_MF",
-            "enable": true,
-            "filename": "Resources/Models/BrainStem/glTF-Binary/BrainStem.glb",
-            "name": "glTFObj",
             "transform": {
                 "pos": [
                     -1.0,
@@ -74,27 +98,27 @@
                     1.0,
                     1.0
                 ]
-            }
+            },
+            "enable": true
         },
         {
+            "name": "FbxObj",
+            "filename": "Resources/Avatar/Warrok_W_Kurniawan.fbx",
+            "defaultmaterialframe": "PBR_MF",
             "animation": {
                 "clips": null,
                 "humanoidclips": [
                     {
-                        "ik": false,
-                        "index": 0,
                         "key": "Walk",
+                        "motionname": "FBX_Walking",
+                        "index": 0,
                         "loop": true,
-                        "motionname": "FBX_Walking"
+                        "ik": false
                     }
                 ],
-                "playmotion": "Walk",
-                "playmotionindex": -1
+                "playmotionindex": -1,
+                "playmotion": "Walk"
             },
-            "commonmaterialframe": "PBR_MF",
-            "enable": true,
-            "filename": "Resources/Avatar/Warrok_W_Kurniawan.fbx",
-            "name": "FbxObj",
             "transform": {
                 "pos": [
                     -2.0,
@@ -111,45 +135,45 @@
                     0.009999999776482582,
                     0.009999999776482582
                 ]
-            }
+            },
+            "enable": true
         },
         {
+            "name": "PmxObj",
+            "filename": "Resources/Avatar/Tda_Miku/Tda_Miku.pmx",
+            "defaultmaterialframe": "basic_toon_mf",
             "animation": {
-                "blendshapes": [
-                    {
-                        "index": 0,
-                        "key": "Face",
-                        "loop": true,
-                        "motionname": "biglove_expression"
-                    },
-                    {
-                        "index": 0,
-                        "key": "RipSync",
-                        "loop": true,
-                        "motionname": "biglove_Ripsync"
-                    }
-                ],
                 "clips": null,
                 "humanoidclips": [
                     {
-                        "ik": false,
-                        "index": 0,
                         "key": "Dance",
+                        "motionname": "biglove_dance_noik",
+                        "index": 0,
                         "loop": true,
-                        "motionname": "biglove_dance_noik"
+                        "ik": false
+                    }
+                ],
+                "playmotionindex": -1,
+                "playmotion": "Dance",
+                "blendshapes": [
+                    {
+                        "key": "Face",
+                        "motionname": "biglove_expression",
+                        "index": 0,
+                        "loop": true
+                    },
+                    {
+                        "key": "RipSync",
+                        "motionname": "biglove_Ripsync",
+                        "index": 0,
+                        "loop": true
                     }
                 ],
                 "playblendshapes": [
                     "Face",
                     "RipSync"
-                ],
-                "playmotion": "Dance",
-                "playmotionindex": -1
+                ]
             },
-            "commonmaterialframe": "basic_toon_mf",
-            "enable": true,
-            "filename": "Resources/Avatar/Tda_Miku/Tda_Miku.pmx",
-            "name": "PmxObj",
             "transform": {
                 "pos": [
                     3.0,
@@ -166,30 +190,75 @@
                     0.10000000149011612,
                     0.10000000149011612
                 ]
-            }
+            },
+            "enable": true
         },
         {
-            "enable": true,
+            "name": "Background",
             "filename": "",
+            "transform": {
+                "pos": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "rotate": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scale": [
+                    500.0,
+                    500.0,
+                    500.0
+                ]
+            },
+            "enable": true,
+            "nodes": [
+                {
+                    "name": "node",
+                    "transform": {
+                        "pos": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "rotate": [
+                            0.0,
+                            -0.0,
+                            0.0
+                        ],
+                        "scale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ]
+                    },
+                    "meshindex": 0
+                }
+            ],
+            "meshs": [
+                {
+                    "primitives": [
+                        {
+                            "materialindex": 0,
+                            "type": "sphere"
+                        }
+                    ]
+                }
+            ],
             "materials": [
                 {
-                    "cull": "front",
                     "materialframe": "SimpleTexture_MF",
-                    "textures": [
-                        {
-                            "texturebuffername": "texImage",
-                            "textureindex": -1,
-                            "texturename": "bgtex"
-                        }
-                    ],
+                    "cull": "front",
                     "uniformvalues": [
                         {
                             "name": "cameraPos",
                             "type": "vec4",
                             "value": [
-                                6.41111946105957,
-                                5.210241317749023,
-                                -8.58725643157959,
+                                0.7376717925071716,
+                                2.5659286975860596,
+                                -8.459783554077148,
                                 0.0
                             ]
                         },
@@ -263,21 +332,21 @@
                             "name": "view",
                             "type": "mat4",
                             "value": [
-                                -0.8490020632743835,
-                                -0.1913996785879135,
-                                0.49250560998916626,
+                                -0.9962198734283447,
+                                -0.025126218795776367,
+                                0.08315466344356537,
                                 0.0,
                                 0.0,
-                                0.9320880174636841,
-                                0.3622320890426636,
+                                0.9572547078132629,
+                                0.28924643993377686,
                                 0.0,
-                                -0.5283896327018738,
-                                0.3075357973575592,
-                                -0.7913445830345154,
+                                -0.08686786144971848,
+                                0.2881530523300171,
+                                -0.953636109828949,
                                 0.0,
-                                0.9056363105773926,
-                                -0.9884285926818848,
-                                -11.840307235717773,
+                                -0.0,
+                                -0.0,
+                                -8.871082305908203,
                                 1.0
                             ]
                         },
@@ -383,7 +452,7 @@
                             "name": "time",
                             "type": "float",
                             "value": [
-                                51.342002868652344
+                                19.284000396728516
                             ]
                         },
                         {
@@ -407,24 +476,50 @@
                                 1.0
                             ]
                         }
-                    ]
-                }
-            ],
-            "meshs": [
-                {
-                    "primitives": [
+                    ],
+                    "textures": [
                         {
-                            "materialindex": 0,
-                            "type": "sphere"
+                            "texturebuffername": "texImage",
+                            "textureindex": -1,
+                            "texturename": "bgtex"
                         }
                     ]
                 }
             ],
-            "name": "Background",
+            "textureset": [
+                {
+                    "name": "bgtex",
+                    "filename": "Resources/IBL/output_skybox.hdr"
+                }
+            ]
+        },
+        {
+            "name": "TestObj",
+            "filename": "",
+            "transform": {
+                "pos": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "rotate": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "enable": true,
+            "rootnodes": [
+                0
+            ],
             "nodes": [
                 {
-                    "meshindex": 0,
-                    "name": "node",
+                    "name": "testnode_0",
                     "transform": {
                         "pos": [
                             0.0,
@@ -441,72 +536,102 @@
                             1.0,
                             1.0
                         ]
-                    }
-                }
-            ],
-            "textureset": [
+                    },
+                    "meshindex": 0,
+                    "children": [
+                        1,
+                        2
+                    ]
+                },
                 {
-                    "filename": "Resources/IBL/output_skybox.hdr",
-                    "name": "bgtex"
+                    "name": "testnode_1",
+                    "transform": {
+                        "pos": [
+                            1.0,
+                            0.5,
+                            -1.0
+                        ],
+                        "rotate": [
+                            0.0,
+                            45.000003814697266,
+                            0.0
+                        ],
+                        "scale": [
+                            1.0,
+                            2.0,
+                            1.0
+                        ]
+                    },
+                    "meshindex": 1
+                },
+                {
+                    "name": "testnode_2",
+                    "transform": {
+                        "pos": [
+                            1.0,
+                            -0.20000000298023224,
+                            -1.0
+                        ],
+                        "rotate": [
+                            0.0,
+                            -0.0,
+                            30.000001907348633
+                        ],
+                        "scale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ]
+                    },
+                    "meshindex": -1,
+                    "children": [
+                        3
+                    ]
+                },
+                {
+                    "name": "testnode_3",
+                    "transform": {
+                        "pos": [
+                            5.0,
+                            0.5,
+                            5.0
+                        ],
+                        "rotate": [
+                            7.000000476837158,
+                            -0.0,
+                            0.0
+                        ],
+                        "scale": [
+                            1.0,
+                            0.5,
+                            1.0
+                        ]
+                    },
+                    "meshindex": -1
                 }
             ],
-            "transform": {
-                "pos": [
-                    0.0,
-                    0.0,
-                    0.0
-                ],
-                "rotate": [
-                    0.0,
-                    -0.0,
-                    0.0
-                ],
-                "scale": [
-                    500.0,
-                    500.0,
-                    500.0
-                ]
-            }
-        },
-        {
-            "enable": true,
-            "filename": "",
+            "meshs": [
+                {
+                    "primitives": [
+                        {
+                            "materialindex": 0,
+                            "type": "cube"
+                        }
+                    ]
+                },
+                {
+                    "primitives": [
+                        {
+                            "materialindex": 0,
+                            "type": "sphere"
+                        }
+                    ]
+                }
+            ],
             "materials": [
                 {
-                    "cull": "back",
                     "materialframe": "PBR_MF",
-                    "textures": [
-                        {
-                            "texturebuffername": "baseColorTexture",
-                            "textureindex": -1,
-                            "texturename": "brock"
-                        },
-                        {
-                            "texturebuffername": "cubemapTexture",
-                            "textureindex": 0,
-                            "texturename": ""
-                        },
-                        {
-                            "texturebuffername": "shadowmapTexture",
-                            "textureindex": -1,
-                            "texturename": ""
-                        },
-                        {
-                            "texturebuffername": "IBL_Diffuse_Texture",
-                            "textureindex": 0,
-                            "texturename": ""
-                        },
-                        {
-                            "texturebuffername": "IBL_Specular_Texture",
-                            "textureindex": 0,
-                            "texturename": ""
-                        },
-                        {
-                            "texturebuffername": "IBL_GGXLUT_Texture",
-                            "textureindex": 0,
-                            "texturename": ""
-                        }
-                    ],
+                    "cull": "back",
                     "uniformvalues": [
                         {
                             "name": "baseColorFactor",
@@ -560,7 +685,7 @@
                             "name": "useBaseColorTexture",
                             "type": "int",
                             "value": [
-                                0.0
+                                1.0
                             ]
                         },
                         {
@@ -588,7 +713,7 @@
                             "name": "useIBL",
                             "type": "int",
                             "value": [
-                                1.401298464324817e-45
+                                1.0
                             ]
                         },
                         {
@@ -619,180 +744,55 @@
                                 0.0
                             ]
                         }
-                    ]
-                }
-            ],
-            "meshs": [
-                {
-                    "primitives": [
+                    ],
+                    "textures": [
                         {
-                            "materialindex": 0,
-                            "type": "cube"
+                            "texturebuffername": "baseColorTexture",
+                            "textureindex": -1,
+                            "texturename": "brock"
+                        },
+                        {
+                            "texturebuffername": "cubemapTexture",
+                            "textureindex": 0,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "shadowmapTexture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_Diffuse_Texture",
+                            "textureindex": 0,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_Specular_Texture",
+                            "textureindex": 0,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_GGXLUT_Texture",
+                            "textureindex": 0,
+                            "texturename": ""
                         }
                     ]
-                },
-                {
-                    "primitives": [
-                        {
-                            "materialindex": 0,
-                            "type": "sphere"
-                        }
-                    ]
                 }
-            ],
-            "name": "TestObj",
-            "nodes": [
-                {
-                    "children": [
-                        1,
-                        2
-                    ],
-                    "meshindex": 0,
-                    "name": "testnode_0",
-                    "transform": {
-                        "pos": [
-                            0.0,
-                            1.0,
-                            0.0
-                        ],
-                        "rotate": [
-                            8.651421921967994e-06,
-                            65.40841674804688,
-                            8.651421921967994e-06
-                        ],
-                        "scale": [
-                            1.0,
-                            1.0,
-                            1.0
-                        ]
-                    }
-                },
-                {
-                    "meshindex": 1,
-                    "name": "testnode_1",
-                    "transform": {
-                        "pos": [
-                            1.0,
-                            0.5,
-                            -1.0
-                        ],
-                        "rotate": [
-                            0.0,
-                            45.000003814697266,
-                            0.0
-                        ],
-                        "scale": [
-                            1.0,
-                            2.0,
-                            1.0
-                        ]
-                    }
-                },
-                {
-                    "children": [
-                        3
-                    ],
-                    "meshindex": -1,
-                    "name": "testnode_2",
-                    "transform": {
-                        "pos": [
-                            1.0,
-                            -0.20000000298023224,
-                            -1.0
-                        ],
-                        "rotate": [
-                            0.0,
-                            -0.0,
-                            30.000001907348633
-                        ],
-                        "scale": [
-                            1.0,
-                            1.0,
-                            1.0
-                        ]
-                    }
-                },
-                {
-                    "meshindex": -1,
-                    "name": "testnode_3",
-                    "transform": {
-                        "pos": [
-                            5.0,
-                            0.5,
-                            5.0
-                        ],
-                        "rotate": [
-                            7.000001430511475,
-                            -0.0,
-                            0.0
-                        ],
-                        "scale": [
-                            1.0,
-                            0.5,
-                            1.0
-                        ]
-                    }
-                }
-            ],
-            "rootnodes": [
-                0
             ],
             "textureset": [
                 {
-                    "filename": "Resources/Textures/UVTile.jpg",
-                    "name": "UVTile"
+                    "name": "UVTile",
+                    "filename": "Resources/Textures/UVTile.jpg"
                 },
                 {
-                    "filename": "Resources/Textures/brock.jpg",
-                    "name": "brock"
+                    "name": "brock",
+                    "filename": "Resources/Textures/brock.jpg"
                 },
                 {
-                    "filename": "Resources/Textures/perlinnoise.png",
-                    "name": "perlinnoise"
+                    "name": "perlinnoise",
+                    "filename": "Resources/Textures/perlinnoise.png"
                 }
-            ],
-            "transform": {
-                "pos": [
-                    6.0,
-                    2.0,
-                    3.0
-                ],
-                "rotate": [
-                    180.0,
-                    65.40841674804688,
-                    180.0
-                ],
-                "scale": [
-                    1.0,
-                    1.0,
-                    1.0
-                ]
-            }
+            ]
         }
-    ],
-    "scenetextureset": {
-        "cubemaps": [
-            {
-                "back": "Resources/Cubemaps/environment/environment_back_0.jpg",
-                "bottom": "Resources/Cubemaps/environment/environment_bottom_0.jpg",
-                "front": "Resources/Cubemaps/environment/environment_front_0.jpg",
-                "left": "Resources/Cubemaps/environment/environment_left_0.jpg",
-                "right": "Resources/Cubemaps/environment/environment_right_0.jpg",
-                "top": "Resources/Cubemaps/environment/environment_top_0.jpg"
-            }
-        ],
-        "frametextures": null,
-        "ibl": {
-            "diffuse": "Resources/IBL/output_iem.hdr",
-            "ggx": "Resources/Textures/ggx_lut.jpg",
-            "specular": "Resources/IBL/output_pmrem.hdr"
-        }
-    },
-    "sound": {
-        "bgm": {
-            "autoplay": false,
-            "filename": "Resources\\Audio\\biglove_audio.wav",
-            "loop": false
-        }
-    }
+    ]
 }
