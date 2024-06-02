@@ -26,6 +26,7 @@ namespace resource
 		m_TargetObject(TargetObject),
 		m_BaseMaterialFrame(BaseMaterialFrame)
 	{
+		m_TargetObject->SetFileName(FileName);
 	}
 
 	C3DObjectLoader::~C3DObjectLoader()

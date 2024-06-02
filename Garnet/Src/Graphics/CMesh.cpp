@@ -47,12 +47,13 @@ namespace graphics
 		return m_PrimitiveList;
 	}
 
-	void CMesh::CreateSimpleMesh(const std::shared_ptr<CVertexBuffer>& VertexBuffer, const std::shared_ptr<CIndexBuffer>& IndexBuffer, int MaterialIndex)
+	void CMesh::CreatePresetSimpleMesh(const std::shared_ptr<CVertexBuffer>& VertexBuffer, const std::shared_ptr<CIndexBuffer>& IndexBuffer, int MaterialIndex, graphics::EPresetPrimitiveType PresetType)
 	{
 		AddVertexBuffer(VertexBuffer);
 		AddIndexBuffer(IndexBuffer);
 
 		std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(VertexBuffer, IndexBuffer, MaterialIndex);
+		Primitive->SetPresetType(PresetType);
 		AddPrimitive(Primitive);
 	}
 

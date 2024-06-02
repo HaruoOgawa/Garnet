@@ -42,12 +42,6 @@ namespace scene
 		graphics::ECullMode CullMode = graphics::ECullMode::CULL_BACK;
 	};
 
-	struct SLoadTextureInfo
-	{
-		std::string TextureName = "";
-		std::shared_ptr<graphics::CTexture> Texture = nullptr;
-	};
-
 	struct SAnimationClip
 	{
 	};
@@ -93,7 +87,7 @@ namespace scene
 
 		//
 		std::map<std::shared_ptr<object::C3DObject>, std::vector<SMaterialInfo>> m_MaterialInfoMap;
-		std::map<std::shared_ptr<object::C3DObject>, std::vector<SLoadTextureInfo>> m_TextureInfoMap;
+		std::map<std::shared_ptr<object::C3DObject>, std::map<std::string, std::shared_ptr<graphics::CTexture>>> m_TextureInfoMap;
 		std::map<std::shared_ptr<object::C3DObject>, SAnimationInfo> m_AnimationInfoMap;
 		
 	private:
@@ -124,11 +118,14 @@ namespace scene
 
 		//
 		void AddMaterialInfo(const std::shared_ptr<object::C3DObject>& Object, const std::vector<SMaterialInfo>& MaterialInfoList);
+		const std::map<std::shared_ptr<object::C3DObject>, std::vector<SMaterialInfo>>& GetMaterialInfoMap() const;
 
-		void AddTextureInfo(const std::shared_ptr<object::C3DObject>& Object, const std::vector<SLoadTextureInfo>& TextureInfoList);
-		
+		void AddTextureInfo(const std::shared_ptr<object::C3DObject>& Object, const std::map<std::string, std::shared_ptr<graphics::CTexture>>& TextureInfoList);
+		const std::map<std::shared_ptr<object::C3DObject>, std::map<std::string, std::shared_ptr<graphics::CTexture>>>& GetTextureInfoMap() const;
+
 		void AddAnimationInfo(const std::shared_ptr<object::C3DObject>& Object, const SAnimationInfo& AnimationInfo);
-
+		const std::map<std::shared_ptr<object::C3DObject>, SAnimationInfo>& GetAnimationInfoMap() const;
+		
 		//
 		bool Create(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine);
 

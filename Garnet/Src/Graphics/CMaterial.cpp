@@ -5,6 +5,7 @@ namespace graphics
 {
 	CMaterial::CMaterial(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CMaterialCreateInfo>& createInfo, int RefCount, ECullMode CullMode):
 		m_MaterialName(std::string()),
+		m_RefMaterialFrameName(std::string()),
 		m_CreateInfo(createInfo),
 		m_RefCount(RefCount),
 		m_CurrentDynamicOffset(0),
@@ -56,9 +57,24 @@ namespace graphics
 		return m_MaterialName;
 	}
 
+	void CMaterial::SetRefMaterialFrameName(const std::string& Name)
+	{
+		m_RefMaterialFrameName = Name;
+	}
+
+	const std::string& CMaterial::GetRefMaterialFrameName() const
+	{
+		return m_RefMaterialFrameName;
+	}
+
 	std::vector<std::shared_ptr<CShaderBuffer>>& CMaterial::GetShaderBufferList()
 	{
 		return m_ShaderBufferList;
+	}
+
+	const std::vector<STextureBindingLayout>& CMaterial::GetTextureBindingLayoutList() const
+	{
+		return m_TextureBindingLayoutList;
 	}
 
 	bool CMaterial::CreateDepthMaterial(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<graphics::CMaterialFrame>& DepthMF)

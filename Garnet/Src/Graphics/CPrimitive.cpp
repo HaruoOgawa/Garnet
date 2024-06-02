@@ -8,6 +8,7 @@
 namespace graphics
 {
 	CPrimitive::CPrimitive(const std::shared_ptr<CVertexBuffer>& VertexBuffer, const std::shared_ptr<CIndexBuffer>& IndexBuffer, int MaterialIndex) :
+		m_PresetType(graphics::EPresetPrimitiveType::None),
 		m_VertexBuffer(VertexBuffer),
 		m_IndexBuffer(IndexBuffer),
 		m_Renderer(nullptr),
@@ -19,6 +20,16 @@ namespace graphics
 	
 	CPrimitive::~CPrimitive()
 	{
+	}
+
+	void CPrimitive::SetPresetType(graphics::EPresetPrimitiveType Type)
+	{
+		m_PresetType = Type;
+	}
+
+	graphics::EPresetPrimitiveType CPrimitive::GetPresetType() const
+	{
+		return m_PresetType;
 	}
 
 	void CPrimitive::Release()

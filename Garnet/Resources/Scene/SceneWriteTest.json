@@ -47,6 +47,609 @@
             "name": "raymarching_mf"
         }
     ],
+    "objects": [
+        {
+            "enable": true,
+            "filename": "",
+            "materials": [
+                {
+                    "cull": "front",
+                    "materialframe": "SimpleTexture_MF",
+                    "textures": [
+                        {
+                            "texturebuffername": "texImage",
+                            "textureindex": -1,
+                            "texturename": "bgtex"
+                        }
+                    ],
+                    "uniformvalues": [
+                        {
+                            "name": "cameraPos",
+                            "type": "vec4",
+                            "value": [
+                                -1.3902591466903687,
+                                1.8979690074920654,
+                                -6.6681928634643555,
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "lightVPMat",
+                            "type": "mat4",
+                            "value": [
+                                -0.32962512969970703,
+                                2.314091920852661,
+                                0.15544772148132324,
+                                0.14935173094272614,
+                                0.0,
+                                0.37168246507644653,
+                                -1.028407335281372,
+                                -0.9880776405334473,
+                                1.317383050918579,
+                                0.5790136456489563,
+                                0.0388948917388916,
+                                0.03736960142850876,
+                                0.0,
+                                5.036441734773689e-07,
+                                12.351015090942383,
+                                15.788230895996094
+                            ]
+                        },
+                        {
+                            "name": "model",
+                            "type": "mat4",
+                            "value": [
+                                500.0,
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0,
+                                500.0,
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0,
+                                500.0,
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "proj",
+                            "type": "mat4",
+                            "value": [
+                                1.3579951524734497,
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0,
+                                2.4142134189605713,
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0,
+                                -1.0001999139785767,
+                                -1.0,
+                                0.0,
+                                0.0,
+                                -0.20002000033855438,
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "view",
+                            "type": "mat4",
+                            "value": [
+                                -0.9789496064186096,
+                                0.054783839732408524,
+                                -0.19661253690719604,
+                                0.0,
+                                0.0,
+                                0.963303804397583,
+                                0.26841360330581665,
+                                0.0,
+                                0.2041023224592209,
+                                0.2627633810043335,
+                                -0.9430258274078369,
+                                0.0,
+                                -0.0,
+                                -1.1920928955078125e-07,
+                                -7.071061134338379,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "baseColor",
+                            "type": "vec4",
+                            "value": [
+                                1.0,
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "mPad0",
+                            "type": "mat4",
+                            "value": [
+                                1.0,
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0,
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0,
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "mPad1",
+                            "type": "mat4",
+                            "value": [
+                                1.0,
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0,
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0,
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "mPad2",
+                            "type": "mat4",
+                            "value": [
+                                1.0,
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0,
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0,
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "mPad3",
+                            "type": "mat4",
+                            "value": [
+                                1.0,
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0,
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0,
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "time",
+                            "type": "float",
+                            "value": [
+                                18.709001541137695
+                            ]
+                        },
+                        {
+                            "name": "useColor",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useDirSampling",
+                            "type": "int",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "useTexColor",
+                            "type": "int",
+                            "value": [
+                                1.0
+                            ]
+                        }
+                    ]
+                }
+            ],
+            "meshs": [
+                {
+                    "primitives": [
+                        {
+                            "materialindex": 0,
+                            "type": "sphere"
+                        }
+                    ]
+                }
+            ],
+            "name": "Background",
+            "nodes": [
+                {
+                    "meshindex": 0,
+                    "name": "node",
+                    "transform": {
+                        "pos": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "rotate": [
+                            0.0,
+                            -0.0,
+                            0.0
+                        ],
+                        "scale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ]
+                    }
+                }
+            ],
+            "textureset": [
+                {
+                    "filename": "Resources/IBL/output_skybox.hdr",
+                    "name": "bgtex"
+                }
+            ],
+            "transform": {
+                "pos": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "rotate": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scale": [
+                    500.0,
+                    500.0,
+                    500.0
+                ]
+            }
+        },
+        {
+            "enable": true,
+            "filename": "",
+            "materials": [
+                {
+                    "cull": "back",
+                    "materialframe": "PBR_MF",
+                    "textures": [
+                        {
+                            "texturebuffername": "baseColorTexture",
+                            "textureindex": -1,
+                            "texturename": "brock"
+                        },
+                        {
+                            "texturebuffername": "cubemapTexture",
+                            "textureindex": 0,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "shadowmapTexture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_Diffuse_Texture",
+                            "textureindex": 0,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_Specular_Texture",
+                            "textureindex": 0,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_GGXLUT_Texture",
+                            "textureindex": 0,
+                            "texturename": ""
+                        }
+                    ],
+                    "uniformvalues": [
+                        {
+                            "name": "baseColorFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.019999999552965164,
+                                0.30000001192092896,
+                                0.7900000214576721,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "emissiveFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "metallicFactor",
+                            "type": "float",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "normalMapScale",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "occlusionStrength",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "roughnessFactor",
+                            "type": "float",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useBaseColorTexture",
+                            "type": "int",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "useCubeMap",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useDirCubemap",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useEmissiveTexture",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useIBL",
+                            "type": "int",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "useMetallicRoughnessTexture",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useNormalTexture",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useOcclusionTexture",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useShadowMap",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        }
+                    ]
+                }
+            ],
+            "meshs": [
+                {
+                    "primitives": [
+                        {
+                            "materialindex": 0,
+                            "type": "cube"
+                        }
+                    ]
+                },
+                {
+                    "primitives": [
+                        {
+                            "materialindex": 0,
+                            "type": "sphere"
+                        }
+                    ]
+                }
+            ],
+            "name": "TestObj",
+            "nodes": [
+                {
+                    "children": [
+                        1,
+                        2
+                    ],
+                    "meshindex": 0,
+                    "name": "testnode_0",
+                    "transform": {
+                        "pos": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "rotate": [
+                            0.0,
+                            -0.0,
+                            0.0
+                        ],
+                        "scale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ]
+                    }
+                },
+                {
+                    "meshindex": 1,
+                    "name": "testnode_1",
+                    "transform": {
+                        "pos": [
+                            1.0,
+                            0.5,
+                            -1.0
+                        ],
+                        "rotate": [
+                            0.0,
+                            45.000003814697266,
+                            0.0
+                        ],
+                        "scale": [
+                            1.0,
+                            2.0,
+                            1.0
+                        ]
+                    }
+                },
+                {
+                    "children": [
+                        3
+                    ],
+                    "meshindex": -1,
+                    "name": "testnode_2",
+                    "transform": {
+                        "pos": [
+                            1.0,
+                            -0.20000000298023224,
+                            -1.0
+                        ],
+                        "rotate": [
+                            0.0,
+                            -0.0,
+                            30.000001907348633
+                        ],
+                        "scale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ]
+                    }
+                },
+                {
+                    "meshindex": -1,
+                    "name": "testnode_3",
+                    "transform": {
+                        "pos": [
+                            5.0,
+                            0.5,
+                            5.0
+                        ],
+                        "rotate": [
+                            7.000000476837158,
+                            -0.0,
+                            0.0
+                        ],
+                        "scale": [
+                            1.0,
+                            0.5,
+                            1.0
+                        ]
+                    }
+                }
+            ],
+            "rootnodes": [
+                0
+            ],
+            "textureset": [
+                {
+                    "filename": "Resources/Textures/UVTile.jpg",
+                    "name": "UVTile"
+                },
+                {
+                    "filename": "Resources/Textures/brock.jpg",
+                    "name": "brock"
+                },
+                {
+                    "filename": "Resources/Textures/perlinnoise.png",
+                    "name": "perlinnoise"
+                }
+            ],
+            "transform": {
+                "pos": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "rotate": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            }
+        }
+    ],
     "scenetextureset": {
         "cubemaps": [
             {

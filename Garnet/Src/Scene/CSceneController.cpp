@@ -62,14 +62,29 @@ namespace scene
 		m_MaterialInfoMap.emplace(Object, MaterialInfoList);
 	}
 
-	void CSceneController::AddTextureInfo(const std::shared_ptr<object::C3DObject>& Object, const std::vector<SLoadTextureInfo>& TextureInfoList)
+	const std::map<std::shared_ptr<object::C3DObject>, std::vector<SMaterialInfo>>& CSceneController::GetMaterialInfoMap() const
+	{
+		return m_MaterialInfoMap;
+	}
+
+	void CSceneController::AddTextureInfo(const std::shared_ptr<object::C3DObject>& Object, const std::map<std::string, std::shared_ptr<graphics::CTexture>>& TextureInfoList)
 	{
 		m_TextureInfoMap.emplace(Object, TextureInfoList);
+	}
+
+	const std::map<std::shared_ptr<object::C3DObject>, std::map<std::string, std::shared_ptr<graphics::CTexture>>>& CSceneController::GetTextureInfoMap() const
+	{
+		return m_TextureInfoMap;
 	}
 
 	void CSceneController::AddAnimationInfo(const std::shared_ptr<object::C3DObject>& Object, const SAnimationInfo& AnimationInfo)
 	{
 		m_AnimationInfoMap.emplace(Object, AnimationInfo);
+	}
+
+	const std::map<std::shared_ptr<object::C3DObject>, SAnimationInfo>& CSceneController::GetAnimationInfoMap() const
+	{
+		return m_AnimationInfoMap;
 	}
 
 	void CSceneController::AddBGM(const std::shared_ptr<audio::CAudioClip>& AudioClip, bool autoplay, bool loop)
@@ -181,9 +196,9 @@ namespace scene
 
 			for (const auto& TextureInfo : TextureInfoList)
 			{
-				TexIndexMap.emplace(TextureInfo.TextureName, static_cast<int>(Object->GetTextureSet()->Get2DTextureList().size()));
+				TexIndexMap.emplace(TextureInfo.first, static_cast<int>(Object->GetTextureSet()->Get2DTextureList().size()));
 
-				Object->GetTextureSet()->Add2DTexture(TextureInfo.Texture);
+				Object->GetTextureSet()->Add2DTexture(TextureInfo.second);
 			}
 		}
 
@@ -281,6 +296,8 @@ namespace scene
 
 			// MaterialÇê∂ê¨
 			auto Material = MaterialFrame->second->CreateMaterial(pGraphicsAPI, MaterialInfo.RefCount, MaterialInfo.CullMode);
+
+			Material->SetRefMaterialFrameName(MaterialInfo.MaterialFrameName);
 
 			// UniformValueÇê›íË
 			for (const auto& UniformInfo : MaterialInfo.UniformInfoList)

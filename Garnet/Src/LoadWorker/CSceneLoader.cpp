@@ -343,7 +343,7 @@ namespace resource
 			const auto textureset = objectJSON->find("textureset");
 			if (textureset != objectJSON->end() && textureset->is_array())
 			{
-				std::vector<scene::SLoadTextureInfo> TextureInfoList;
+				std::map<std::string, std::shared_ptr<graphics::CTexture>> TextureInfoList;
 
 				for (json::iterator textureJSON = textureset->begin(); textureJSON != textureset->end(); textureJSON++)
 				{
@@ -358,11 +358,7 @@ namespace resource
 					auto Texture = pGraphicsAPI->CreateTexture();
 					pLoadWorker->AddLoadResource(std::make_shared<resource::CTextureLoader>(pGraphicsAPI, TextureFileName, Texture));
 
-					scene::SLoadTextureInfo TextureInfo{};
-					TextureInfo.TextureName = TextureName;
-					TextureInfo.Texture = Texture;
-
-					TextureInfoList.push_back(TextureInfo);
+					TextureInfoList.emplace(TextureName, Texture);
 				}
 
 				m_Target->AddTextureInfo(Object, TextureInfoList);
@@ -453,31 +449,38 @@ namespace resource
 				std::string type = "";
 				GetString("type", type, primitiveJSON);
 
+				graphics::EPresetPrimitiveType PrimitiveType = graphics::EPresetPrimitiveType::None;
+
 				std::pair<std::shared_ptr<graphics::CVertexBuffer>, std::shared_ptr<graphics::CIndexBuffer>> createInfo;
 
 				if (type == "cube")
 				{
 					createInfo = graphics::CPresetPrimitive::CreateBox(pGraphicsAPI);
+					PrimitiveType = graphics::EPresetPrimitiveType::CUBE;
 				}
 				else if (type == "board")
 				{
 					createInfo = graphics::CPresetPrimitive::CreateBoard(pGraphicsAPI);
+					PrimitiveType = graphics::EPresetPrimitiveType::BOARD;
 				}
 				else if (type == "sphere")
 				{
 					createInfo = graphics::CPresetPrimitive::CreateSphere(pGraphicsAPI);
+					PrimitiveType = graphics::EPresetPrimitiveType::SPHERE;
 				}
 				else if (type == "point")
 				{
 					createInfo = graphics::CPresetPrimitive::CreatePoint(pGraphicsAPI);
+					PrimitiveType = graphics::EPresetPrimitiveType::POINT;
 				}
 				else
 				{
 					createInfo = graphics::CPresetPrimitive::CreateBox(pGraphicsAPI);
+					PrimitiveType = graphics::EPresetPrimitiveType::CUBE;
 				}
 
 				//
-				Mesh->CreateSimpleMesh(createInfo.first, createInfo.second, materialindex);
+				Mesh->CreatePresetSimpleMesh(createInfo.first, createInfo.second, materialindex, PrimitiveType);
 			}
 		}
 

@@ -33,7 +33,7 @@ namespace graphics
 		void AddPrimitive(const std::shared_ptr<CPrimitive>& Primitive);
 		const std::vector<std::shared_ptr<CPrimitive>>& GetPrimitiveList() const;
 
-		void CreateSimpleMesh(const std::shared_ptr<CVertexBuffer>& VertexBuffer, const std::shared_ptr<CIndexBuffer>& IndexBuffer, int MaterialIndex);
+		void CreatePresetSimpleMesh(const std::shared_ptr<CVertexBuffer>& VertexBuffer, const std::shared_ptr<CIndexBuffer>& IndexBuffer, int MaterialIndex, graphics::EPresetPrimitiveType PresetType);
 
 		void SetMorphDataList(const std::shared_ptr<CPrimitive>& Primitive, int PrimitiveIndex, const std::vector<std::map<int, glm::vec3>>& MorphDataList);
 		const std::map<int, std::vector<std::map<int, glm::vec3>>>& GetMorphDataList() const;
