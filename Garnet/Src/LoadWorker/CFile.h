@@ -61,6 +61,8 @@ namespace resource
 		void SetData(const std::vector<unsigned char>& Data);
 		const std::vector<unsigned char>& GetData() const;
 
+		bool Write();
+
 		static std::string GetParentDir(const std::string& Path);
 		static std::string AddPunct(const std::string& Path);
 

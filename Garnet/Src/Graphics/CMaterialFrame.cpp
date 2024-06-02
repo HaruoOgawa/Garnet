@@ -5,6 +5,7 @@ namespace graphics
 	CMaterialFrame::CMaterialFrame():
 		m_CreateCounter(0),
 		m_MaterialName(std::string()),
+		m_FileName(std::string()),
 		m_CreateInfo(nullptr)
 	{
 	}
@@ -16,6 +17,16 @@ namespace graphics
 	void CMaterialFrame::SetMaterialName(const std::string& Name)
 	{
 		m_MaterialName = Name;
+	}
+
+	void CMaterialFrame::SetFileName(const std::string& Name)
+	{
+		m_FileName = Name;
+	}
+
+	const std::string& CMaterialFrame::GetFileName() const
+	{
+		return m_FileName;
 	}
 
 	void CMaterialFrame::SetCreateInfo(const std::shared_ptr<graphics::CMaterialCreateInfo>& CreateInfo)

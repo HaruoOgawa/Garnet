@@ -14,7 +14,7 @@ namespace graphics
 		None = -1,
 
 		BOARD,
-		BOX,
+		CUBE,
 		POINT,
 		SPHERE,
 	};

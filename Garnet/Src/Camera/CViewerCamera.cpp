@@ -118,6 +118,8 @@ namespace camera
 
 	void CViewerCamera::KeyAction(float DeltaTime, const std::shared_ptr<input::CInputState>& InputState)
 	{
+		if (InputState->IsKeyDown(input::EKeyType::KEY_TYPE_CONTROL)) return;
+
 		// キーボード操作
 		const auto& KeyInputMap = InputState->GetKeyInputMap();
 

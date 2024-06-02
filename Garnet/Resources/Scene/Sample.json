@@ -75,8 +75,8 @@
   "sound": {
     "bgm": {
       "filename": "Resources\\Audio\\biglove_audio.wav",
-      "autoplay": true,
-      "loop": true
+      "autoplay": false,
+      "loop": false
     }
   },
 
@@ -282,7 +282,6 @@
       ],
       "meshs": [
         {
-          "name": "testmesh_0",
           "primitives": [
             {
               "materialindex": 0,
@@ -291,7 +290,6 @@
           ]
         },
         {
-          "name": "testmesh_1",
           "primitives": [
             {
               "materialindex": 0,

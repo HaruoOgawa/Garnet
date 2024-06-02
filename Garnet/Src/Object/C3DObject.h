@@ -27,6 +27,11 @@ namespace object
 	{
 		bool m_IsCreated;
 
+		std::string m_FileName;
+
+		// ToDo: ‰¼ŽÀ‘•
+		std::string m_CommonMaterialFrame;
+
 		const std::string m_PassName;
 		const std::string m_DepthPassName;
 		
@@ -66,6 +71,13 @@ namespace object
 		C3DObject(const std::string& PassName, const std::string& DepthPassName);
 		virtual ~C3DObject();
 
+		void SetFileName(const std::string& Name);
+		const std::string& GetFileName() const;
+		
+		// ToDo: ‰¼ŽÀ‘•
+		void SetCommonMaterialFrame(const std::string& Name);
+		const std::string& GetCommonMaterialFrame() const;
+
 		void SetObjectName(const std::string& Name);
 		const std::string& GetObjectName() const;
 
@@ -74,8 +86,9 @@ namespace object
 		void SetEnabled(bool Flag);
 		bool IsEnabled() const;
 
-		bool CreateSimply(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine,
+		bool CreatePresetSimply(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine,
 			const std::pair<std::shared_ptr<graphics::CVertexBuffer>, std::shared_ptr<graphics::CIndexBuffer>>& createInfo,
+			graphics::EPresetPrimitiveType PresetType,
 			const std::shared_ptr<graphics::CMaterial>& Material, const std::shared_ptr<graphics::CMaterialFrame>& DepthMF, 
 			const std::shared_ptr<math::CTransform> NodeTransform = std::make_shared<math::CTransform>(), const std::shared_ptr<physics::IPhysicsObject>& PhysicsObject = nullptr);
 		
@@ -111,6 +124,9 @@ namespace object
 		void AddMorphNode(const std::shared_ptr<CNode>& Node);
 
 #ifdef USE_ANIMATION
+		const std::shared_ptr<animation::CAnimationController>& GetAnimationController() const;
+		const std::shared_ptr<animation::CBlendShapeController>& GetBlendShapeController() const;
+
 		void AddBlendShapeNode(const std::shared_ptr<CNode>& Node);
 
 		void SetAnimationSkeleton(const std::shared_ptr<animation::CSkeleton>& Skeleton);

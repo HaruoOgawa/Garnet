@@ -15,6 +15,7 @@ namespace resource
 		CResource(FileName),
 		m_Target(Target)
 	{
+		m_Target->SetFileName(FileName);
 	}
 
 	CSceneLoader::~CSceneLoader()
@@ -52,12 +53,15 @@ namespace resource
 		}
 
 		// scenetextureset
-		std::shared_ptr<graphics::CTextureSet> SceneTextureSet = std::make_shared<graphics::CTextureSet>();
 		{
 			const auto scenetexturesetJSON = SceneJSON.find("scenetextureset");
 			if (scenetexturesetJSON != SceneJSON.end() && scenetexturesetJSON->is_object())
 			{
+				std::shared_ptr<graphics::CTextureSet> SceneTextureSet = std::make_shared<graphics::CTextureSet>();
+
 				if (!AnalyseSceneTextureSet(scenetexturesetJSON, pGraphicsAPI, pLoadWorker, SceneTextureSet)) return false;
+
+				m_Target->SetSceneTextureSet(SceneTextureSet);
 			}
 		}
 
@@ -105,7 +109,7 @@ namespace resource
 			const auto objects = SceneJSON.find("objects");
 			if (objects != SceneJSON.end() && objects->is_array())
 			{
-				if (!AnalyseObjects(objects, pGraphicsAPI, pLoadWorker, SceneTextureSet)) return false;
+				if (!AnalyseObjects(objects, pGraphicsAPI, pLoadWorker)) return false;
 			}
 		}
 
@@ -224,7 +228,7 @@ namespace resource
 		return true;
 	}
 
-	bool CSceneLoader::AnalyseObjects(const json::iterator& objects, api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<graphics::CTextureSet>& SceneTextureSet)
+	bool CSceneLoader::AnalyseObjects(const json::iterator& objects, api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker)
 	{
 		for (json::iterator objectJSON = objects->begin(); objectJSON != objects->end(); objectJSON++)
 		{
@@ -258,7 +262,8 @@ namespace resource
 						return false;
 					}
 
-					pLoadWorker->AddLoadResource(std::make_shared<resource::C3DObjectLoader>(filename, Object, MaterialFrame->second));
+					// ‰¼ŽÀ‘•
+					pLoadWorker->AddLoadResource(std::make_shared<resource::C3DObjectLoader>(filename, Object, MaterialFrame->second, commonmaterialframe));
 				}
 			}
 
@@ -340,7 +345,7 @@ namespace resource
 			const auto textureset = objectJSON->find("textureset");
 			if (textureset != objectJSON->end() && textureset->is_array())
 			{
-				std::vector<scene::SLoadTextureInfo> TextureInfoList;
+				std::map<std::string, std::shared_ptr<graphics::CTexture>> TextureInfoList;
 
 				for (json::iterator textureJSON = textureset->begin(); textureJSON != textureset->end(); textureJSON++)
 				{
@@ -355,11 +360,7 @@ namespace resource
 					auto Texture = pGraphicsAPI->CreateTexture();
 					pLoadWorker->AddLoadResource(std::make_shared<resource::CTextureLoader>(pGraphicsAPI, TextureFileName, Texture));
 
-					scene::SLoadTextureInfo TextureInfo{};
-					TextureInfo.TextureName = TextureName;
-					TextureInfo.Texture = Texture;
-
-					TextureInfoList.push_back(TextureInfo);
+					TextureInfoList.emplace(TextureName, Texture);
 				}
 
 				m_Target->AddTextureInfo(Object, TextureInfoList);
@@ -375,12 +376,14 @@ namespace resource
 			}
 
 			// SceneTextureSet
+			const auto& SceneTextureSet = m_Target->GetSceneTextureSet();
+			if (SceneTextureSet)
 			{
 				for (const auto& CubeMap : SceneTextureSet->GetCubeMapList())
 				{
 					Object->GetTextureSet()->AddCubeMap(CubeMap);
 				}
-				
+
 				const auto& Diffuse_Tex = SceneTextureSet->GetDiffuse_Tex();
 				const auto& Specular_Tex = SceneTextureSet->GetSpecular_Tex();
 				const auto& GGXLUT_Tex = SceneTextureSet->GetGGXLUT_Tex();
@@ -448,31 +451,38 @@ namespace resource
 				std::string type = "";
 				GetString("type", type, primitiveJSON);
 
+				graphics::EPresetPrimitiveType PrimitiveType = graphics::EPresetPrimitiveType::None;
+
 				std::pair<std::shared_ptr<graphics::CVertexBuffer>, std::shared_ptr<graphics::CIndexBuffer>> createInfo;
 
 				if (type == "cube")
 				{
 					createInfo = graphics::CPresetPrimitive::CreateBox(pGraphicsAPI);
+					PrimitiveType = graphics::EPresetPrimitiveType::CUBE;
 				}
 				else if (type == "board")
 				{
 					createInfo = graphics::CPresetPrimitive::CreateBoard(pGraphicsAPI);
+					PrimitiveType = graphics::EPresetPrimitiveType::BOARD;
 				}
 				else if (type == "sphere")
 				{
 					createInfo = graphics::CPresetPrimitive::CreateSphere(pGraphicsAPI);
+					PrimitiveType = graphics::EPresetPrimitiveType::SPHERE;
 				}
 				else if (type == "point")
 				{
 					createInfo = graphics::CPresetPrimitive::CreatePoint(pGraphicsAPI);
+					PrimitiveType = graphics::EPresetPrimitiveType::POINT;
 				}
 				else
 				{
 					createInfo = graphics::CPresetPrimitive::CreateBox(pGraphicsAPI);
+					PrimitiveType = graphics::EPresetPrimitiveType::CUBE;
 				}
 
 				//
-				Mesh->CreateSimpleMesh(createInfo.first, createInfo.second, materialindex);
+				Mesh->CreatePresetSimpleMesh(createInfo.first, createInfo.second, materialindex, PrimitiveType);
 			}
 		}
 
@@ -657,7 +667,7 @@ namespace resource
 				GetBoolean("ik", ik, humanoidJSON);
 				Clip.IK = ik;
 
-				AnimationInfo.Humanoidclips.push_back(Clip);
+				AnimationInfo.Humanoidclips.emplace(key, Clip);
 			}
 		}
 
@@ -687,7 +697,7 @@ namespace resource
 				GetBoolean("loop", loop, blendshapeJSON);
 				Clip.Loop = loop;
 
-				AnimationInfo.Blendshapes.push_back(Clip);
+				AnimationInfo.Blendshapes.emplace(key, Clip);
 			}
 		}
 

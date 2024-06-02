@@ -1,5 +1,6 @@
 #pragma once
 
+#include <string>
 #include <vector>
 #include "ETextureType.h"
 #include "../GraphicsAPI/ERenderPassFormat.h"
@@ -11,6 +12,9 @@ namespace graphics
 	protected:
 		ETextureType m_TextureType;
 		api::ERenderPassFormat m_RenderPassFormat;
+
+		std::string m_FileName;
+		std::vector<std::string> m_FileNameList;
 
 		int m_Width;
 		int m_Height;
@@ -24,6 +28,12 @@ namespace graphics
 	public:
 		CTexture(bool UseMipMap);
 		virtual ~CTexture();
+
+		void SetFileName(const std::string& Name);
+		const std::string& GetFileName() const;
+
+		void SetFileNameList(const std::vector<std::string>& NameList);
+		const std::vector<std::string>& GetFileNameList() const;
 
 		int GetWidth() const;
 		int GetHeight() const;

@@ -1,4 +1,5 @@
 #include "CSceneController.h"
+#include "CSceneWriter.h"
 #include "../Object/C3DObject.h"
 #include "../Animation/CAnimationClipSet.h"
 #include "../Audio/CAudioClip.h"
@@ -7,12 +8,23 @@
 namespace scene
 {
 	CSceneController::CSceneController():
+		m_SceneTextureSet(nullptr),
 		m_BGM(std::make_tuple(nullptr, false, false))
 	{
 	}
 
 	CSceneController::~CSceneController()
 	{
+	}
+
+	void CSceneController::SetFileName(const std::string& Name)
+	{
+		m_FileName = Name;
+	}
+
+	const std::string& CSceneController::GetFileName() const
+	{
+		return m_FileName;
 	}
 
 	void CSceneController::AddObject(const std::shared_ptr<object::C3DObject>& Object)
@@ -40,14 +52,39 @@ namespace scene
 		m_AnimationClipSetMap.emplace(Name, AnimationClipSet);
 	}
 
+	const std::map<std::string, std::shared_ptr<animation::CAnimationClipSet>>& CSceneController::GetAnimationClipSetMap() const
+	{
+		return m_AnimationClipSetMap;
+	}
+
+	void CSceneController::SetSceneTextureSet(const std::shared_ptr<graphics::CTextureSet>& TextureSet)
+	{
+		m_SceneTextureSet = TextureSet;
+	}
+
+	const std::shared_ptr<graphics::CTextureSet>& CSceneController::GetSceneTextureSet() const
+	{
+		return m_SceneTextureSet;
+	}
+
 	void CSceneController::AddMaterialInfo(const std::shared_ptr<object::C3DObject>& Object, const std::vector<SMaterialInfo>& MaterialInfoList)
 	{
 		m_MaterialInfoMap.emplace(Object, MaterialInfoList);
 	}
 
-	void CSceneController::AddTextureInfo(const std::shared_ptr<object::C3DObject>& Object, const std::vector<SLoadTextureInfo>& TextureInfoList)
+	const std::map<std::shared_ptr<object::C3DObject>, std::vector<SMaterialInfo>>& CSceneController::GetMaterialInfoMap() const
+	{
+		return m_MaterialInfoMap;
+	}
+
+	void CSceneController::AddTextureInfo(const std::shared_ptr<object::C3DObject>& Object, const std::map<std::string, std::shared_ptr<graphics::CTexture>>& TextureInfoList)
 	{
 		m_TextureInfoMap.emplace(Object, TextureInfoList);
+	}
+
+	const std::map<std::shared_ptr<object::C3DObject>, std::map<std::string, std::shared_ptr<graphics::CTexture>>>& CSceneController::GetTextureInfoMap() const
+	{
+		return m_TextureInfoMap;
 	}
 
 	void CSceneController::AddAnimationInfo(const std::shared_ptr<object::C3DObject>& Object, const SAnimationInfo& AnimationInfo)
@@ -55,9 +92,19 @@ namespace scene
 		m_AnimationInfoMap.emplace(Object, AnimationInfo);
 	}
 
+	const std::map<std::shared_ptr<object::C3DObject>, SAnimationInfo>& CSceneController::GetAnimationInfoMap() const
+	{
+		return m_AnimationInfoMap;
+	}
+
 	void CSceneController::AddBGM(const std::shared_ptr<audio::CAudioClip>& AudioClip, bool autoplay, bool loop)
 	{
 		m_BGM = std::make_tuple(AudioClip, autoplay, loop);
+	}
+
+	const std::tuple<std::shared_ptr<audio::CAudioClip>, bool, bool>& CSceneController::GetSound() const
+	{
+		return m_BGM;
 	}
 
 	bool CSceneController::Create(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine)
@@ -67,7 +114,7 @@ namespace scene
 			// テクスチャの追加
 			std::map<std::string, int> TexIndexMap;
 			if (!PrepareTextureList(Object, TexIndexMap)) return false;
-			
+
 			// マテリアルの追加
 			if (!PrepareMaterialList(pGraphicsAPI, Object, TexIndexMap)) return false;
 			
@@ -106,6 +153,11 @@ namespace scene
 	bool CSceneController::Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
 		const std::shared_ptr<graphics::CDrawInfo>& DrawInfo, const std::shared_ptr<input::CInputState>& InputState)
 	{
+		if (InputState->IsKeyDown(input::EKeyType::KEY_TYPE_CONTROL) && InputState->IsKeyUp(input::EKeyType::KEY_TYPE_S))
+		{
+			if (!CSceneWriter::Write(this)) return false;
+		}
+
 		for (const auto& Object : m_ObjectList)
 		{
 			if (!Object->Update(pGraphicsAPI, pPhysicsEngine, DrawInfo->GetDeltaSecondsTime())) return false;
@@ -154,9 +206,9 @@ namespace scene
 
 			for (const auto& TextureInfo : TextureInfoList)
 			{
-				TexIndexMap.emplace(TextureInfo.TextureName, static_cast<int>(Object->GetTextureSet()->Get2DTextureList().size()));
+				TexIndexMap.emplace(TextureInfo.first, static_cast<int>(Object->GetTextureSet()->Get2DTextureList().size()));
 
-				Object->GetTextureSet()->Add2DTexture(TextureInfo.Texture);
+				Object->GetTextureSet()->Add2DTexture(TextureInfo.second);
 			}
 		}
 
@@ -189,25 +241,25 @@ namespace scene
 		// humanoidclips
 		for (const auto& Humanoidclip : AnimationInfo.Humanoidclips)
 		{
-			const auto& AnimationClipSet = m_AnimationClipSetMap.find(Humanoidclip.MotionName);
+			const auto& AnimationClipSet = m_AnimationClipSetMap.find(Humanoidclip.second.MotionName);
 			if (AnimationClipSet == m_AnimationClipSetMap.end()) continue;
 
-			const auto& Clip = AnimationClipSet->second->GetAnimationClip(Humanoidclip.Index);
+			const auto& Clip = AnimationClipSet->second->GetAnimationClip(Humanoidclip.second.Index);
 			if (!Clip) continue;
 
-			Object->AddHumanoidAnimationClip(Clip, Humanoidclip.Key, { nullptr, "" }, Humanoidclip.Loop, Humanoidclip.IK);
+			Object->AddHumanoidAnimationClip(Clip, Humanoidclip.second.Key, { nullptr, "" }, Humanoidclip.second.Loop, Humanoidclip.second.IK);
 		}
 
 		// blendshapes
 		for (const auto& BlendshapeClip : AnimationInfo.Blendshapes)
 		{
-			const auto& AnimationClipSet = m_AnimationClipSetMap.find(BlendshapeClip.MotionName);
+			const auto& AnimationClipSet = m_AnimationClipSetMap.find(BlendshapeClip.second.MotionName);
 			if (AnimationClipSet == m_AnimationClipSetMap.end()) continue;
 
-			const auto& Clip = AnimationClipSet->second->GetBlendShapeClip(BlendshapeClip.Index);
+			const auto& Clip = AnimationClipSet->second->GetBlendShapeClip(BlendshapeClip.second.Index);
 			if (!Clip) continue;
 
-			Object->AddBlendShapeClip(Clip, BlendshapeClip.Key, BlendshapeClip.Loop);
+			Object->AddBlendShapeClip(Clip, BlendshapeClip.second.Key, BlendshapeClip.second.Loop);
 		}
 
 		if (!AnimationInfo.PlayMotion.empty())
@@ -254,6 +306,8 @@ namespace scene
 
 			// Materialを生成
 			auto Material = MaterialFrame->second->CreateMaterial(pGraphicsAPI, MaterialInfo.RefCount, MaterialInfo.CullMode);
+
+			Material->SetRefMaterialFrameName(MaterialInfo.MaterialFrameName);
 
 			// UniformValueを設定
 			for (const auto& UniformInfo : MaterialInfo.UniformInfoList)

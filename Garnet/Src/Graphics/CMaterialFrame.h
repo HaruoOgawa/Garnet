@@ -21,13 +21,15 @@ namespace graphics
 		std::vector<std::shared_ptr<graphics::SBufferValueLayout>> ValueLayoutList;
 	};
 
-	class CMaterialFrame
+	class CMaterialFrame : public std::enable_shared_from_this<CMaterialFrame>
 	{
 		std::vector<std::shared_ptr<CMaterial>> m_RefMaterialList;
 
 		int m_CreateCounter;
 
 		std::string m_MaterialName;
+
+		std::string m_FileName;
 
 		std::shared_ptr<graphics::CMaterialCreateInfo> m_CreateInfo;
 
@@ -38,6 +40,9 @@ namespace graphics
 		virtual ~CMaterialFrame();
 
 		void SetMaterialName(const std::string& Name);
+
+		void SetFileName(const std::string& Name);
+		const std::string& GetFileName() const;
 
 		void SetCreateInfo(const std::shared_ptr<graphics::CMaterialCreateInfo>& CreateInfo);
 

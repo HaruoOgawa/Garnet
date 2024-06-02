@@ -8,6 +8,7 @@ namespace resource
 		CResource(FileName),
 		m_TargetAudioClip(TargetAudioClip)
 	{
+		m_TargetAudioClip->SetFileName(FileName);
 	}
 
 	CAudioLoader::~CAudioLoader()

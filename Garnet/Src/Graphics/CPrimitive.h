@@ -4,20 +4,19 @@
 
 #include "CPresetPrimitive.h"
 
-namespace graphics {
-	class IRenderer;
-}
-
 namespace api { class IGraphicsAPI; }
 
 namespace graphics
 {
+	class IRenderer;
 	class CMaterial;
 	class CVertexBuffer;
 	class CIndexBuffer;
 
 	class CPrimitive
 	{
+		graphics::EPresetPrimitiveType m_PresetType;
+
 		std::shared_ptr<CVertexBuffer> m_VertexBuffer;
 		std::shared_ptr<CIndexBuffer> m_IndexBuffer;
 
@@ -31,6 +30,9 @@ namespace graphics
 	public:
 		CPrimitive(const std::shared_ptr<CVertexBuffer>& VertexBuffer, const std::shared_ptr<CIndexBuffer>& IndexBuffer, int MaterialIndex);
 		virtual ~CPrimitive();
+
+		void SetPresetType(graphics::EPresetPrimitiveType Type);
+		graphics::EPresetPrimitiveType GetPresetType() const;
 
 		void Release();
 

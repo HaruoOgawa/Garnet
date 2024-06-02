@@ -1,0 +1,798 @@
+{
+    "animations": [
+        {
+            "filename": "Resources/Motions/Jumping.fbx",
+            "name": "FBX_Jumping"
+        },
+        {
+            "filename": "Resources/Motions/Combo_Punch_hand.fbx",
+            "name": "FBX_Punch"
+        },
+        {
+            "filename": "Resources/Motions/Walking.fbx",
+            "name": "FBX_Walking"
+        },
+        {
+            "filename": "Resources/Motions/biglove_Ripsync.vmd",
+            "name": "biglove_Ripsync"
+        },
+        {
+            "filename": "Resources/Motions/biglove_dance_noik.vmd",
+            "name": "biglove_dance_noik"
+        },
+        {
+            "filename": "Resources/Motions/biglove_expression.vmd",
+            "name": "biglove_expression"
+        }
+    ],
+    "materialframes": [
+        {
+            "filename": "Resources/MaterialFrame/Depth_MF.json",
+            "name": "Depth_MF"
+        },
+        {
+            "filename": "Resources/MaterialFrame/PBR_MF.json",
+            "name": "PBR_MF"
+        },
+        {
+            "filename": "Resources/MaterialFrame/SimpleTexture_MF.json",
+            "name": "SimpleTexture_MF"
+        },
+        {
+            "filename": "Resources/MaterialFrame/basic_toon_mf.json",
+            "name": "basic_toon_mf"
+        },
+        {
+            "filename": "Resources/MaterialFrame/raymarching_mf.json",
+            "name": "raymarching_mf"
+        }
+    ],
+    "objects": [
+        {
+            "animation": {
+                "clips": null,
+                "playmotion": "",
+                "playmotionindex": 0
+            },
+            "commonmaterialframe": "PBR_MF",
+            "enable": true,
+            "filename": "Resources/Models/BrainStem/glTF-Binary/BrainStem.glb",
+            "name": "glTFObj",
+            "transform": {
+                "pos": [
+                    -1.0,
+                    0.0,
+                    0.0
+                ],
+                "rotate": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            }
+        },
+        {
+            "animation": {
+                "clips": null,
+                "humanoidclips": [
+                    {
+                        "ik": false,
+                        "index": 0,
+                        "key": "Walk",
+                        "loop": true,
+                        "motionname": "FBX_Walking"
+                    }
+                ],
+                "playmotion": "Walk",
+                "playmotionindex": -1
+            },
+            "commonmaterialframe": "PBR_MF",
+            "enable": true,
+            "filename": "Resources/Avatar/Warrok_W_Kurniawan.fbx",
+            "name": "FbxObj",
+            "transform": {
+                "pos": [
+                    -2.0,
+                    0.0,
+                    0.0
+                ],
+                "rotate": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scale": [
+                    0.009999999776482582,
+                    0.009999999776482582,
+                    0.009999999776482582
+                ]
+            }
+        },
+        {
+            "animation": {
+                "blendshapes": [
+                    {
+                        "index": 0,
+                        "key": "Face",
+                        "loop": true,
+                        "motionname": "biglove_expression"
+                    },
+                    {
+                        "index": 0,
+                        "key": "RipSync",
+                        "loop": true,
+                        "motionname": "biglove_Ripsync"
+                    }
+                ],
+                "clips": null,
+                "humanoidclips": [
+                    {
+                        "ik": false,
+                        "index": 0,
+                        "key": "Dance",
+                        "loop": true,
+                        "motionname": "biglove_dance_noik"
+                    }
+                ],
+                "playblendshapes": [
+                    "Face",
+                    "RipSync"
+                ],
+                "playmotion": "Dance",
+                "playmotionindex": -1
+            },
+            "commonmaterialframe": "basic_toon_mf",
+            "enable": true,
+            "filename": "Resources/Avatar/Tda_Miku/Tda_Miku.pmx",
+            "name": "PmxObj",
+            "transform": {
+                "pos": [
+                    3.0,
+                    0.0,
+                    0.0
+                ],
+                "rotate": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scale": [
+                    0.10000000149011612,
+                    0.10000000149011612,
+                    0.10000000149011612
+                ]
+            }
+        },
+        {
+            "enable": true,
+            "filename": "",
+            "materials": [
+                {
+                    "cull": "front",
+                    "materialframe": "SimpleTexture_MF",
+                    "textures": [
+                        {
+                            "texturebuffername": "texImage",
+                            "textureindex": -1,
+                            "texturename": "bgtex"
+                        }
+                    ],
+                    "uniformvalues": [
+                        {
+                            "name": "cameraPos",
+                            "type": "vec4",
+                            "value": [
+                                6.41111946105957,
+                                5.210241317749023,
+                                -8.58725643157959,
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "lightVPMat",
+                            "type": "mat4",
+                            "value": [
+                                -0.32962512969970703,
+                                2.314091920852661,
+                                0.15544772148132324,
+                                0.14935173094272614,
+                                0.0,
+                                0.37168246507644653,
+                                -1.028407335281372,
+                                -0.9880776405334473,
+                                1.317383050918579,
+                                0.5790136456489563,
+                                0.0388948917388916,
+                                0.03736960142850876,
+                                0.0,
+                                5.036441734773689e-07,
+                                12.351015090942383,
+                                15.788230895996094
+                            ]
+                        },
+                        {
+                            "name": "model",
+                            "type": "mat4",
+                            "value": [
+                                500.0,
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0,
+                                500.0,
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0,
+                                500.0,
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "proj",
+                            "type": "mat4",
+                            "value": [
+                                1.3579951524734497,
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0,
+                                2.4142134189605713,
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0,
+                                -1.0001999139785767,
+                                -1.0,
+                                0.0,
+                                0.0,
+                                -0.20002000033855438,
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "view",
+                            "type": "mat4",
+                            "value": [
+                                -0.8490020632743835,
+                                -0.1913996785879135,
+                                0.49250560998916626,
+                                0.0,
+                                0.0,
+                                0.9320880174636841,
+                                0.3622320890426636,
+                                0.0,
+                                -0.5283896327018738,
+                                0.3075357973575592,
+                                -0.7913445830345154,
+                                0.0,
+                                0.9056363105773926,
+                                -0.9884285926818848,
+                                -11.840307235717773,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "baseColor",
+                            "type": "vec4",
+                            "value": [
+                                1.0,
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "mPad0",
+                            "type": "mat4",
+                            "value": [
+                                1.0,
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0,
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0,
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "mPad1",
+                            "type": "mat4",
+                            "value": [
+                                1.0,
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0,
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0,
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "mPad2",
+                            "type": "mat4",
+                            "value": [
+                                1.0,
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0,
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0,
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "mPad3",
+                            "type": "mat4",
+                            "value": [
+                                1.0,
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0,
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0,
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "time",
+                            "type": "float",
+                            "value": [
+                                51.342002868652344
+                            ]
+                        },
+                        {
+                            "name": "useColor",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useDirSampling",
+                            "type": "int",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "useTexColor",
+                            "type": "int",
+                            "value": [
+                                1.0
+                            ]
+                        }
+                    ]
+                }
+            ],
+            "meshs": [
+                {
+                    "primitives": [
+                        {
+                            "materialindex": 0,
+                            "type": "sphere"
+                        }
+                    ]
+                }
+            ],
+            "name": "Background",
+            "nodes": [
+                {
+                    "meshindex": 0,
+                    "name": "node",
+                    "transform": {
+                        "pos": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "rotate": [
+                            0.0,
+                            -0.0,
+                            0.0
+                        ],
+                        "scale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ]
+                    }
+                }
+            ],
+            "textureset": [
+                {
+                    "filename": "Resources/IBL/output_skybox.hdr",
+                    "name": "bgtex"
+                }
+            ],
+            "transform": {
+                "pos": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "rotate": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scale": [
+                    500.0,
+                    500.0,
+                    500.0
+                ]
+            }
+        },
+        {
+            "enable": true,
+            "filename": "",
+            "materials": [
+                {
+                    "cull": "back",
+                    "materialframe": "PBR_MF",
+                    "textures": [
+                        {
+                            "texturebuffername": "baseColorTexture",
+                            "textureindex": -1,
+                            "texturename": "brock"
+                        },
+                        {
+                            "texturebuffername": "cubemapTexture",
+                            "textureindex": 0,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "shadowmapTexture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_Diffuse_Texture",
+                            "textureindex": 0,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_Specular_Texture",
+                            "textureindex": 0,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_GGXLUT_Texture",
+                            "textureindex": 0,
+                            "texturename": ""
+                        }
+                    ],
+                    "uniformvalues": [
+                        {
+                            "name": "baseColorFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.019999999552965164,
+                                0.30000001192092896,
+                                0.7900000214576721,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "emissiveFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "metallicFactor",
+                            "type": "float",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "normalMapScale",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "occlusionStrength",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "roughnessFactor",
+                            "type": "float",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useBaseColorTexture",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useCubeMap",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useDirCubemap",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useEmissiveTexture",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useIBL",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useMetallicRoughnessTexture",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useNormalTexture",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useOcclusionTexture",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useShadowMap",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        }
+                    ]
+                }
+            ],
+            "meshs": [
+                {
+                    "primitives": [
+                        {
+                            "materialindex": 0,
+                            "type": "cube"
+                        }
+                    ]
+                },
+                {
+                    "primitives": [
+                        {
+                            "materialindex": 0,
+                            "type": "sphere"
+                        }
+                    ]
+                }
+            ],
+            "name": "TestObj",
+            "nodes": [
+                {
+                    "children": [
+                        1,
+                        2
+                    ],
+                    "meshindex": 0,
+                    "name": "testnode_0",
+                    "transform": {
+                        "pos": [
+                            0.0,
+                            1.0,
+                            0.0
+                        ],
+                        "rotate": [
+                            8.651421921967994e-06,
+                            65.40841674804688,
+                            8.651421921967994e-06
+                        ],
+                        "scale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ]
+                    }
+                },
+                {
+                    "meshindex": 1,
+                    "name": "testnode_1",
+                    "transform": {
+                        "pos": [
+                            1.0,
+                            0.5,
+                            -1.0
+                        ],
+                        "rotate": [
+                            0.0,
+                            45.000003814697266,
+                            0.0
+                        ],
+                        "scale": [
+                            1.0,
+                            2.0,
+                            1.0
+                        ]
+                    }
+                },
+                {
+                    "children": [
+                        3
+                    ],
+                    "meshindex": -1,
+                    "name": "testnode_2",
+                    "transform": {
+                        "pos": [
+                            1.0,
+                            -0.20000000298023224,
+                            -1.0
+                        ],
+                        "rotate": [
+                            0.0,
+                            -0.0,
+                            30.000001907348633
+                        ],
+                        "scale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ]
+                    }
+                },
+                {
+                    "meshindex": -1,
+                    "name": "testnode_3",
+                    "transform": {
+                        "pos": [
+                            5.0,
+                            0.5,
+                            5.0
+                        ],
+                        "rotate": [
+                            7.000001430511475,
+                            -0.0,
+                            0.0
+                        ],
+                        "scale": [
+                            1.0,
+                            0.5,
+                            1.0
+                        ]
+                    }
+                }
+            ],
+            "rootnodes": [
+                0
+            ],
+            "textureset": [
+                {
+                    "filename": "Resources/Textures/UVTile.jpg",
+                    "name": "UVTile"
+                },
+                {
+                    "filename": "Resources/Textures/brock.jpg",
+                    "name": "brock"
+                },
+                {
+                    "filename": "Resources/Textures/perlinnoise.png",
+                    "name": "perlinnoise"
+                }
+            ],
+            "transform": {
+                "pos": [
+                    6.0,
+                    2.0,
+                    3.0
+                ],
+                "rotate": [
+                    180.0,
+                    65.40841674804688,
+                    180.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            }
+        }
+    ],
+    "scenetextureset": {
+        "cubemaps": [
+            {
+                "back": "Resources/Cubemaps/environment/environment_back_0.jpg",
+                "bottom": "Resources/Cubemaps/environment/environment_bottom_0.jpg",
+                "front": "Resources/Cubemaps/environment/environment_front_0.jpg",
+                "left": "Resources/Cubemaps/environment/environment_left_0.jpg",
+                "right": "Resources/Cubemaps/environment/environment_right_0.jpg",
+                "top": "Resources/Cubemaps/environment/environment_top_0.jpg"
+            }
+        ],
+        "frametextures": null,
+        "ibl": {
+            "diffuse": "Resources/IBL/output_iem.hdr",
+            "ggx": "Resources/Textures/ggx_lut.jpg",
+            "specular": "Resources/IBL/output_pmrem.hdr"
+        }
+    },
+    "sound": {
+        "bgm": {
+            "autoplay": false,
+            "filename": "Resources\\Audio\\biglove_audio.wav",
+            "loop": false
+        }
+    }
+}

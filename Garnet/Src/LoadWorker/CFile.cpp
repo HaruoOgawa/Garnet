@@ -238,6 +238,27 @@ namespace resource
 		return m_Data;
 	}
 
+	bool CFile::Write()
+	{
+#ifdef __EMSCRIPTEN__
+		return true;
+#else
+		int fileSize = static_cast<int>(m_Data.size());
+
+		std::vector<char> OutputData;
+		OutputData.resize(fileSize);
+		std::memcpy(&OutputData[0], reinterpret_cast<const char*>(&m_Data[0]), fileSize);
+
+		std::ofstream file;
+		file.open(m_Filename);
+		file.write(&OutputData[0], fileSize);
+		file.close();
+
+		return true;
+#endif // __EMSCRIPTEN__
+
+	}
+
 	std::string CFile::GetParentDir(const std::string& Path)
 	{
 		if (Path.rfind("\\") != -1)

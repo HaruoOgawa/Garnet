@@ -9,6 +9,7 @@
 namespace audio
 {
 	CAudioClip::CAudioClip():
+		m_FileName(std::string()),
 		m_Loop(false),
 		m_Playing(false)
 	{
@@ -17,6 +18,16 @@ namespace audio
 	CAudioClip::~CAudioClip()
 	{
 		Stop();
+	}
+
+	void CAudioClip::SetFileName(const std::string& Name)
+	{
+		m_FileName = Name;
+	}
+
+	const std::string& CAudioClip::GetFileName() const
+	{
+		return m_FileName;
 	}
 
 	bool CAudioClip::Create(const std::vector<unsigned char>& Data, const std::string& FileName)

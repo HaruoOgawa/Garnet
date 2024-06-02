@@ -4,6 +4,8 @@ namespace object
 {
 	C3DObject::C3DObject(const std::string& PassName, const std::string& DepthPassName):
 		m_IsCreated(false),
+		m_FileName(std::string()),
+		m_CommonMaterialFrame(std::string()),
 		m_PassName(PassName),
 		m_DepthPassName(DepthPassName),
 		m_ObjectName("3DObject"),
@@ -24,6 +26,27 @@ namespace object
 		m_IsCreated = false;
 		m_NodeList.clear();
 		m_MaterialList.clear();
+	}
+
+	void C3DObject::SetFileName(const std::string& Name)
+	{
+		m_FileName = Name;
+	}
+
+	const std::string& C3DObject::GetFileName() const
+	{
+		return m_FileName;
+	}
+
+	// ToDo: ‰¼ŽÀ‘•
+	void C3DObject::SetCommonMaterialFrame(const std::string& Name)
+	{
+		m_CommonMaterialFrame = Name;
+	}
+
+	const std::string& C3DObject::GetCommonMaterialFrame() const
+	{
+		return m_CommonMaterialFrame;
 	}
 
 	void C3DObject::SetObjectName(const std::string& Name)
@@ -50,8 +73,9 @@ namespace object
 		return m_Enabled;
 	}
 	
-	bool C3DObject::CreateSimply(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine,
+	bool C3DObject::CreatePresetSimply(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine,
 		const std::pair<std::shared_ptr<graphics::CVertexBuffer>, std::shared_ptr<graphics::CIndexBuffer>>& createInfo,
+		graphics::EPresetPrimitiveType PresetType,
 		const std::shared_ptr<graphics::CMaterial>& Material, const std::shared_ptr<graphics::CMaterialFrame>& DepthMF, 
 		const std::shared_ptr<math::CTransform> NodeTransform, const std::shared_ptr<physics::IPhysicsObject>& PhysicsObject)
 	{
@@ -60,7 +84,7 @@ namespace object
 
 		// Mesh
 		std::shared_ptr<graphics::CMesh> Mesh = std::make_shared<graphics::CMesh>();
-		Mesh->CreateSimpleMesh(createInfo.first, createInfo.second, 0);
+		Mesh->CreatePresetSimpleMesh(createInfo.first, createInfo.second, 0, PresetType);
 
 		AddMesh(Mesh);
 
@@ -560,6 +584,16 @@ namespace object
 	}
 
 #ifdef USE_ANIMATION
+	const std::shared_ptr<animation::CAnimationController>& C3DObject::GetAnimationController() const
+	{
+		return m_AnimationController;
+	}
+
+	const std::shared_ptr<animation::CBlendShapeController>& C3DObject::GetBlendShapeController() const
+	{
+		return m_BlendShapeController;
+	}
+
 	void C3DObject::AddBlendShapeNode(const std::shared_ptr<CNode>& Node)
 	{
 		AddMorphNode(Node);

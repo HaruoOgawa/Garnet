@@ -131,6 +131,9 @@ namespace window
 			case 0x35:
 				KeyType = input::EKeyType::KEY_TYPE_5;
 				break;
+			case VK_CONTROL:
+				KeyType = input::EKeyType::KEY_TYPE_CONTROL;
+				break;
 			default:
 				break;
 			}
@@ -310,6 +313,10 @@ namespace window
 
 				case WM_SIZE:
 					ResizeCallback(window, msg, w_param, l_param);
+					break;
+
+				case WM_CLOSE:
+					AppCore->SetRunLoop(false);
 					break;
 #endif
 				default:

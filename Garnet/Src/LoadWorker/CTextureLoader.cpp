@@ -22,6 +22,8 @@ namespace resource
 			// 最初のファイルをファイル名とする
 			m_FileName = m_FileList[0]->GetFilename();
 		}
+
+		Texture->SetFileNameList(FileNameList);
 	}
 
 	CTextureLoader::CTextureLoader(api::IGraphicsAPI* pGraphicsAPI, const std::string& FileName, const std::shared_ptr<graphics::CTexture>& Texture) :
@@ -30,6 +32,8 @@ namespace resource
 		m_TargetTexture(Texture)
 	{
 		m_FileList.push_back(std::make_shared<CFile>(FileName));
+
+		Texture->SetFileName(FileName);
 	}
 
 	CTextureLoader::~CTextureLoader()

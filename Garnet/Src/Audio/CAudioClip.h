@@ -14,6 +14,8 @@ namespace audio
 
 	class CAudioClip
 	{
+		std::string m_FileName;
+
 		bool m_Loop;
 		bool m_Playing;
 
@@ -24,6 +26,9 @@ namespace audio
 	public:
 		CAudioClip();
 		virtual ~CAudioClip();
+
+		void SetFileName(const std::string& Name);
+		const std::string& GetFileName() const;
 
 		bool Create(const std::vector<unsigned char>& Data, const std::string& FileName);
 

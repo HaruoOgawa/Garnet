@@ -647,6 +647,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Src\Scene\CSceneWriter.h" />
     <ClInclude Include="Src\Scene\CSceneController.h" />
     <ClInclude Include="Src\LoadWorker\CSceneLoader.h" />
     <ClInclude Include="Src\AppCore\SAppSettings.h" />
@@ -1682,6 +1683,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClInclude Include="Src\Interface\IRenderer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\Scene\CSceneWriter.cpp" />
     <ClCompile Include="Src\Scene\CSceneController.cpp" />
     <ClCompile Include="Src\LoadWorker\CSceneLoader.cpp" />
     <ClCompile Include="Src\LoadWorker\CResource.cpp" />
@@ -2070,6 +2072,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <None Include="Resources\MaterialFrame\Sample_MF.json" />
     <None Include="Resources\MaterialFrame\SimpleTexture_MF.json" />
     <None Include="Resources\Scene\Sample.json" />
+    <None Include="Resources\Scene\SceneWriteTest.json" />
     <None Include="Resources\Shaders\basic_toon.frag" />
     <None Include="Resources\Shaders\basic_toon.vert" />
     <None Include="Resources\Shaders\basic_toon_frag.spv" />

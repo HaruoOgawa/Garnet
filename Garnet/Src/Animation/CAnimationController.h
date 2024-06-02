@@ -22,6 +22,8 @@ namespace animation
 		std::vector<std::shared_ptr<animation::CAnimationClip>> m_ClipList;
 		std::unordered_map<std::string, SAnimationLayout> m_ClipMap;
 
+		int m_CurrentMotionIndex;
+		std::string m_CurrentMotionName;
 		SAnimationLayout m_CurrentLayout;
 
 		std::shared_ptr<animation::CSkeleton> m_Skeleton;
@@ -45,6 +47,9 @@ namespace animation
 
 		bool IsEnabledSkeleton();
 		bool IsPlayingAnimation();
+
+		int GetCurrentMotionIndex() const;
+		const std::string& GetCurrentMotionName() const;
 
 		bool Update(float DeltaSecondsTime);
 

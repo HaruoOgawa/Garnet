@@ -11,6 +11,8 @@ namespace resource
 		m_MaterialName(std::string())
 	{
 		m_TargetMaterialFrameSet.emplace(TargetMaterialFrame);
+
+		TargetMaterialFrame->SetFileName(m_FileName);
 	}
 
 	CMaterialFrameLoader::~CMaterialFrameLoader()
@@ -101,13 +103,14 @@ namespace resource
 		if (IsLoaded())
 		{
 			// ロード済みならデータをすぐに渡す
-			
 		}
 		else
 		{
 			for (const auto& Target : pMaterialFrameLoader->GetTargetMaterialFrameSet())
 			{
 				m_TargetMaterialFrameSet.emplace(Target);
+
+				Target->SetFileName(m_FileName);
 			}
 		}
 	}

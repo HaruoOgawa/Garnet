@@ -8,6 +8,7 @@ namespace resource
 		CResource(FileName),
 		m_Target(Target)
 	{
+		m_Target->SetFileName(FileName);
 	}
 
 	CAnimationLoader::~CAnimationLoader()

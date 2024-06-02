@@ -41,7 +41,7 @@ namespace resource
 		Material->SetCullMode(graphics::ECullMode::CULL_NONE);
 
 		// CreateŠÖ”‚ðŽÀs
-		if (!m_LoadingBar->CreateSimply(pGraphicsAPI, nullptr, graphics::CPresetPrimitive::CreateBoard(pGraphicsAPI), Material, nullptr)) return false;
+		if (!m_LoadingBar->CreatePresetSimply(pGraphicsAPI, nullptr, graphics::CPresetPrimitive::CreateBoard(pGraphicsAPI), graphics::EPresetPrimitiveType::BOARD, Material, nullptr)) return false;
 
 		return true;
 	}

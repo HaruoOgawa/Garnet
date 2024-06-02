@@ -3114,6 +3114,9 @@
     <ClInclude Include="Src\Scene\CSceneController.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Scene\CSceneWriter.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\App\ScriptApp\CScriptApp.cpp">
@@ -4214,6 +4217,9 @@
     <ClCompile Include="Src\Scene\CSceneController.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="Src\Scene\CSceneWriter.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="CMakeBuild\Garnet_front.js" />
@@ -4724,6 +4730,7 @@
       <Filter>ソース ファイル</Filter>
     </None>
     <None Include="Resources\Scene\Sample.json" />
+    <None Include="Resources\Scene\SceneWriteTest.json" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Commands\TestCmd.bat" />
