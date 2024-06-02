@@ -52,12 +52,15 @@ namespace resource
 		}
 
 		// scenetextureset
-		std::shared_ptr<graphics::CTextureSet> SceneTextureSet = std::make_shared<graphics::CTextureSet>();
 		{
 			const auto scenetexturesetJSON = SceneJSON.find("scenetextureset");
 			if (scenetexturesetJSON != SceneJSON.end() && scenetexturesetJSON->is_object())
 			{
+				std::shared_ptr<graphics::CTextureSet> SceneTextureSet = std::make_shared<graphics::CTextureSet>();
+
 				if (!AnalyseSceneTextureSet(scenetexturesetJSON, pGraphicsAPI, pLoadWorker, SceneTextureSet)) return false;
+
+				m_Target->SetSceneTextureSet(SceneTextureSet);
 			}
 		}
 
@@ -105,7 +108,7 @@ namespace resource
 			const auto objects = SceneJSON.find("objects");
 			if (objects != SceneJSON.end() && objects->is_array())
 			{
-				if (!AnalyseObjects(objects, pGraphicsAPI, pLoadWorker, SceneTextureSet)) return false;
+				if (!AnalyseObjects(objects, pGraphicsAPI, pLoadWorker)) return false;
 			}
 		}
 
@@ -224,7 +227,7 @@ namespace resource
 		return true;
 	}
 
-	bool CSceneLoader::AnalyseObjects(const json::iterator& objects, api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<graphics::CTextureSet>& SceneTextureSet)
+	bool CSceneLoader::AnalyseObjects(const json::iterator& objects, api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker)
 	{
 		for (json::iterator objectJSON = objects->begin(); objectJSON != objects->end(); objectJSON++)
 		{
@@ -375,12 +378,14 @@ namespace resource
 			}
 
 			// SceneTextureSet
+			const auto& SceneTextureSet = m_Target->GetSceneTextureSet();
+			if (SceneTextureSet)
 			{
 				for (const auto& CubeMap : SceneTextureSet->GetCubeMapList())
 				{
 					Object->GetTextureSet()->AddCubeMap(CubeMap);
 				}
-				
+
 				const auto& Diffuse_Tex = SceneTextureSet->GetDiffuse_Tex();
 				const auto& Specular_Tex = SceneTextureSet->GetSpecular_Tex();
 				const auto& GGXLUT_Tex = SceneTextureSet->GetGGXLUT_Tex();

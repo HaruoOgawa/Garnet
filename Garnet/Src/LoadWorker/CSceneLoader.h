@@ -37,7 +37,7 @@ namespace resource
 		bool AnalyseMaterialFrames(const json::iterator& materialframes, resource::CLoadWorker* pLoadWorker);
 		bool AnalyseSceneTextureSet(const json::iterator& scenetexturesetJSON, api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, std::shared_ptr<graphics::CTextureSet>& SceneTextureSet);
 		bool AnalyseSceneAnimations(const json::iterator& animations, api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker);
-		bool AnalyseObjects(const json::iterator& objects, api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<graphics::CTextureSet>& SceneTextureSet);
+		bool AnalyseObjects(const json::iterator& objects, api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker);
 
 		std::shared_ptr<math::CTransform> AnalyseTransform(const json::iterator& Object);
 		std::shared_ptr<object::CNode> AnalyseNode(const json::iterator& nodeJSON, const std::shared_ptr<object::C3DObject>& Object);

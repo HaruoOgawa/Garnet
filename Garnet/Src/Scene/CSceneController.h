@@ -19,6 +19,7 @@ namespace graphics {
 	class CDrawInfo; 
 	class CMaterialFrame;
 	class CTexture;
+	class CTextureSet;
 }
 namespace animation { class CAnimationClipSet; }
 namespace audio { class CAudioClip; }
@@ -87,13 +88,14 @@ namespace scene
 		//
 		std::map<std::string, std::shared_ptr<graphics::CMaterialFrame>> m_MaterialFrameMap;
 		std::map<std::string, std::shared_ptr<animation::CAnimationClipSet>> m_AnimationClipSetMap;
+		std::shared_ptr<graphics::CTextureSet> m_SceneTextureSet;
+		std::tuple<std::shared_ptr<audio::CAudioClip>, bool, bool> m_BGM;
 
 		//
 		std::map<std::shared_ptr<object::C3DObject>, std::vector<SMaterialInfo>> m_MaterialInfoMap;
 		std::map<std::shared_ptr<object::C3DObject>, std::vector<SLoadTextureInfo>> m_TextureInfoMap;
 		std::map<std::shared_ptr<object::C3DObject>, SAnimationInfo> m_AnimationInfoMap;
 		
-		std::tuple<std::shared_ptr<audio::CAudioClip>, bool, bool> m_BGM;
 	private:
 		bool PrepareTextureList(const std::shared_ptr<object::C3DObject>& Object, std::map<std::string, int>& TexIndexMap);
 		bool PrepareMaterialList(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<object::C3DObject>& Object, const std::map<std::string, int>& TexIndexMap);
@@ -104,6 +106,7 @@ namespace scene
 		CSceneController();
 		virtual ~CSceneController();
 
+		//
 		void AddObject(const std::shared_ptr<object::C3DObject>& Object);
 		std::vector<std::shared_ptr<object::C3DObject>> GetObjectList() const;
 
@@ -111,15 +114,22 @@ namespace scene
 		const std::map<std::string, std::shared_ptr<graphics::CMaterialFrame>>& GetMaterialFrameMap() const;
 
 		void AddAnimationClipSet(const std::string& Name, const std::shared_ptr<animation::CAnimationClipSet>& AnimationClipSet);
+		const std::map<std::string, std::shared_ptr<animation::CAnimationClipSet>>& GetAnimationClipSetMap() const;
 
+		void SetSceneTextureSet(const std::shared_ptr<graphics::CTextureSet>& TextureSet);
+		const std::shared_ptr<graphics::CTextureSet>& GetSceneTextureSet() const;
+
+		void AddBGM(const std::shared_ptr<audio::CAudioClip>& AudioClip, bool autoplay, bool loop);
+		const std::tuple<std::shared_ptr<audio::CAudioClip>, bool, bool>& GetSound() const;
+
+		//
 		void AddMaterialInfo(const std::shared_ptr<object::C3DObject>& Object, const std::vector<SMaterialInfo>& MaterialInfoList);
 
 		void AddTextureInfo(const std::shared_ptr<object::C3DObject>& Object, const std::vector<SLoadTextureInfo>& TextureInfoList);
 		
 		void AddAnimationInfo(const std::shared_ptr<object::C3DObject>& Object, const SAnimationInfo& AnimationInfo);
 
-		void AddBGM(const std::shared_ptr<audio::CAudioClip>& AudioClip, bool autoplay, bool loop);
-
+		//
 		bool Create(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine);
 
 		bool Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,

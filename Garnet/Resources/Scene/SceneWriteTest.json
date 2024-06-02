@@ -1,16 +1,75 @@
 {
-    "Object": {
-        "currency": "USD",
-        "value": 42.99
-    },
-    "SubTest": {
-        "SecondBlock": 123
-    },
-    "aaa": 12345,
-    "arrayTest": [
-        0.0,
-        0.0
+    "animations": [
+        {
+            "filename": "Resources/Motions/Jumping.fbx",
+            "name": "FBX_Jumping"
+        },
+        {
+            "filename": "Resources/Motions/Combo_Punch_hand.fbx",
+            "name": "FBX_Punch"
+        },
+        {
+            "filename": "Resources/Motions/Walking.fbx",
+            "name": "FBX_Walking"
+        },
+        {
+            "filename": "Resources/Motions/biglove_Ripsync.vmd",
+            "name": "biglove_Ripsync"
+        },
+        {
+            "filename": "Resources/Motions/biglove_dance_noik.vmd",
+            "name": "biglove_dance_noik"
+        },
+        {
+            "filename": "Resources/Motions/biglove_expression.vmd",
+            "name": "biglove_expression"
+        }
     ],
-    "test": "Hello Writer",
-    "www": false
+    "materialframes": [
+        {
+            "filename": "Resources/MaterialFrame/Depth_MF.json",
+            "name": "Depth_MF"
+        },
+        {
+            "filename": "Resources/MaterialFrame/PBR_MF.json",
+            "name": "PBR_MF"
+        },
+        {
+            "filename": "Resources/MaterialFrame/SimpleTexture_MF.json",
+            "name": "SimpleTexture_MF"
+        },
+        {
+            "filename": "Resources/MaterialFrame/basic_toon_mf.json",
+            "name": "basic_toon_mf"
+        },
+        {
+            "filename": "Resources/MaterialFrame/raymarching_mf.json",
+            "name": "raymarching_mf"
+        }
+    ],
+    "scenetextureset": {
+        "cubemaps": [
+            {
+                "back": "Resources/Cubemaps/environment/environment_back_0.jpg",
+                "bottom": "Resources/Cubemaps/environment/environment_bottom_0.jpg",
+                "front": "Resources/Cubemaps/environment/environment_front_0.jpg",
+                "left": "Resources/Cubemaps/environment/environment_left_0.jpg",
+                "right": "Resources/Cubemaps/environment/environment_right_0.jpg",
+                "top": "Resources/Cubemaps/environment/environment_top_0.jpg"
+            }
+        ],
+        "frametextures": null,
+        "ibl": {
+            "diffuse": "Resources/IBL/output_iem.hdr",
+            "ggx": "Resources/Textures/ggx_lut.jpg",
+            "specular": "Resources/IBL/output_pmrem.hdr"
+        }
+    },
+    "sound": {
+        "bgm": {
+            "autoplay": false,
+            "filename": "Resources\\Audio\\biglove_audio.wav",
+            "loop": false
+        }
+    }
 }

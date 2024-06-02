@@ -13,6 +13,7 @@ namespace graphics
 	CTexture::CTexture(bool UseMipMap):
 		m_Width(1),
 		m_Height(1),
+		m_FileName(std::string()),
 		m_NumOfChannels(1),
 		m_UseMipMap(UseMipMap),
 		m_HasMipData(false),
@@ -24,6 +25,26 @@ namespace graphics
 
 	CTexture::~CTexture()
 	{
+	}
+
+	void CTexture::SetFileName(const std::string& Name)
+	{
+		m_FileName = Name;
+	}
+
+	const std::string& CTexture::GetFileName() const
+	{
+		return m_FileName;
+	}
+
+	void CTexture::SetFileNameList(const std::vector<std::string>& NameList)
+	{
+		m_FileNameList = NameList;
+	}
+
+	const std::vector<std::string>& CTexture::GetFileNameList() const
+	{
+		return m_FileNameList;
 	}
 
 	int CTexture::GetWidth() const

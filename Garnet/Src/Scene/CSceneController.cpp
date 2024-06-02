@@ -8,6 +8,7 @@
 namespace scene
 {
 	CSceneController::CSceneController():
+		m_SceneTextureSet(nullptr),
 		m_BGM(std::make_tuple(nullptr, false, false))
 	{
 	}
@@ -41,6 +42,21 @@ namespace scene
 		m_AnimationClipSetMap.emplace(Name, AnimationClipSet);
 	}
 
+	const std::map<std::string, std::shared_ptr<animation::CAnimationClipSet>>& CSceneController::GetAnimationClipSetMap() const
+	{
+		return m_AnimationClipSetMap;
+	}
+
+	void CSceneController::SetSceneTextureSet(const std::shared_ptr<graphics::CTextureSet>& TextureSet)
+	{
+		m_SceneTextureSet = TextureSet;
+	}
+
+	const std::shared_ptr<graphics::CTextureSet>& CSceneController::GetSceneTextureSet() const
+	{
+		return m_SceneTextureSet;
+	}
+
 	void CSceneController::AddMaterialInfo(const std::shared_ptr<object::C3DObject>& Object, const std::vector<SMaterialInfo>& MaterialInfoList)
 	{
 		m_MaterialInfoMap.emplace(Object, MaterialInfoList);
@@ -61,6 +77,11 @@ namespace scene
 		m_BGM = std::make_tuple(AudioClip, autoplay, loop);
 	}
 
+	const std::tuple<std::shared_ptr<audio::CAudioClip>, bool, bool>& CSceneController::GetSound() const
+	{
+		return m_BGM;
+	}
+
 	bool CSceneController::Create(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine)
 	{
 		for (const auto& Object : m_ObjectList)
@@ -68,7 +89,7 @@ namespace scene
 			// テクスチャの追加
 			std::map<std::string, int> TexIndexMap;
 			if (!PrepareTextureList(Object, TexIndexMap)) return false;
-			
+
 			// マテリアルの追加
 			if (!PrepareMaterialList(pGraphicsAPI, Object, TexIndexMap)) return false;
 			

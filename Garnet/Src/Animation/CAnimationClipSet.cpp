@@ -18,8 +18,19 @@
 
 namespace animation
 {
-	CAnimationClipSet::CAnimationClipSet()
+	CAnimationClipSet::CAnimationClipSet():
+		m_FileName(std::string())
 	{
+	}
+
+	void CAnimationClipSet::SetFileName(const std::string& Name)
+	{
+		m_FileName = Name;
+	}
+
+	const std::string& CAnimationClipSet::GetFileName() const
+	{
+		return m_FileName;
 	}
 
 	bool CAnimationClipSet::Import(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& Data, const std::string& FileName, const std::string& Extension)

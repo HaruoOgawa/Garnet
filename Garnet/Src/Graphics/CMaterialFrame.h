@@ -29,6 +29,8 @@ namespace graphics
 
 		std::string m_MaterialName;
 
+		std::string m_FileName;
+
 		std::shared_ptr<graphics::CMaterialCreateInfo> m_CreateInfo;
 
 		std::vector<SShaderBufferSet> m_ShaderBufferList;
@@ -38,6 +40,9 @@ namespace graphics
 		virtual ~CMaterialFrame();
 
 		void SetMaterialName(const std::string& Name);
+
+		void SetFileName(const std::string& Name);
+		const std::string& GetFileName() const;
 
 		void SetCreateInfo(const std::shared_ptr<graphics::CMaterialCreateInfo>& CreateInfo);
 

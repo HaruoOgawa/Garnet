@@ -314,6 +314,10 @@ namespace window
 				case WM_SIZE:
 					ResizeCallback(window, msg, w_param, l_param);
 					break;
+
+				case WM_CLOSE:
+					AppCore->SetRunLoop(false);
+					break;
 #endif
 				default:
 					break;
