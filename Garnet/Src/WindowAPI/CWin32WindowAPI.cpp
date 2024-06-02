@@ -131,6 +131,9 @@ namespace window
 			case 0x35:
 				KeyType = input::EKeyType::KEY_TYPE_5;
 				break;
+			case VK_CONTROL:
+				KeyType = input::EKeyType::KEY_TYPE_CONTROL;
+				break;
 			default:
 				break;
 			}

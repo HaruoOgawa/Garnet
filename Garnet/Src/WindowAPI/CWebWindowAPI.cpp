@@ -125,6 +125,10 @@ namespace window
 		{
 			KeyType = input::EKeyType::KEY_TYPE_5;
 		}
+		else if (key == "Control")
+		{
+			KeyType = input::EKeyType::KEY_TYPE_CONTROL;
+		}
 
 		auto InputState = m_pCAppCore->GetInputState();
 		InputState->SetKeyState(KeyType, IsDown);

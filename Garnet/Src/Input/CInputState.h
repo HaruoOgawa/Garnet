@@ -10,6 +10,8 @@ namespace input
 	{
 		KEY_TYPE_NONE,
 
+		KEY_TYPE_CONTROL,
+
 		KEY_TYPE_W,
 		KEY_TYPE_A,
 		KEY_TYPE_S,

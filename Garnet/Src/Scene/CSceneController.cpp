@@ -1,4 +1,5 @@
 #include "CSceneController.h"
+#include "CSceneWriter.h"
 #include "../Object/C3DObject.h"
 #include "../Animation/CAnimationClipSet.h"
 #include "../Audio/CAudioClip.h"
@@ -106,6 +107,11 @@ namespace scene
 	bool CSceneController::Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
 		const std::shared_ptr<graphics::CDrawInfo>& DrawInfo, const std::shared_ptr<input::CInputState>& InputState)
 	{
+		if (InputState->IsKeyDown(input::EKeyType::KEY_TYPE_CONTROL) && InputState->IsKeyUp(input::EKeyType::KEY_TYPE_S))
+		{
+			if (!CSceneWriter::Write(this)) return false;
+		}
+
 		for (const auto& Object : m_ObjectList)
 		{
 			if (!Object->Update(pGraphicsAPI, pPhysicsEngine, DrawInfo->GetDeltaSecondsTime())) return false;

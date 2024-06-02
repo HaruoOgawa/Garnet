@@ -1,0 +1,16 @@
+{
+    "Object": {
+        "currency": "USD",
+        "value": 42.99
+    },
+    "SubTest": {
+        "SecondBlock": 123
+    },
+    "aaa": 12345,
+    "arrayTest": [
+        0.0,
+        0.0
+    ],
+    "test": "Hello Writer",
+    "www": false
+}

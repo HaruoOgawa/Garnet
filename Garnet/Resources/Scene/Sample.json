@@ -75,8 +75,8 @@
   "sound": {
     "bgm": {
       "filename": "Resources\\Audio\\biglove_audio.wav",
-      "autoplay": true,
-      "loop": true
+      "autoplay": false,
+      "loop": false
     }
   },
 
