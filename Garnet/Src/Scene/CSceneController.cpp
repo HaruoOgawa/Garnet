@@ -17,6 +17,16 @@ namespace scene
 	{
 	}
 
+	void CSceneController::SetFileName(const std::string& Name)
+	{
+		m_FileName = Name;
+	}
+
+	const std::string& CSceneController::GetFileName() const
+	{
+		return m_FileName;
+	}
+
 	void CSceneController::AddObject(const std::shared_ptr<object::C3DObject>& Object)
 	{
 		m_ObjectList.push_back(Object);
@@ -231,25 +241,25 @@ namespace scene
 		// humanoidclips
 		for (const auto& Humanoidclip : AnimationInfo.Humanoidclips)
 		{
-			const auto& AnimationClipSet = m_AnimationClipSetMap.find(Humanoidclip.MotionName);
+			const auto& AnimationClipSet = m_AnimationClipSetMap.find(Humanoidclip.second.MotionName);
 			if (AnimationClipSet == m_AnimationClipSetMap.end()) continue;
 
-			const auto& Clip = AnimationClipSet->second->GetAnimationClip(Humanoidclip.Index);
+			const auto& Clip = AnimationClipSet->second->GetAnimationClip(Humanoidclip.second.Index);
 			if (!Clip) continue;
 
-			Object->AddHumanoidAnimationClip(Clip, Humanoidclip.Key, { nullptr, "" }, Humanoidclip.Loop, Humanoidclip.IK);
+			Object->AddHumanoidAnimationClip(Clip, Humanoidclip.second.Key, { nullptr, "" }, Humanoidclip.second.Loop, Humanoidclip.second.IK);
 		}
 
 		// blendshapes
 		for (const auto& BlendshapeClip : AnimationInfo.Blendshapes)
 		{
-			const auto& AnimationClipSet = m_AnimationClipSetMap.find(BlendshapeClip.MotionName);
+			const auto& AnimationClipSet = m_AnimationClipSetMap.find(BlendshapeClip.second.MotionName);
 			if (AnimationClipSet == m_AnimationClipSetMap.end()) continue;
 
-			const auto& Clip = AnimationClipSet->second->GetBlendShapeClip(BlendshapeClip.Index);
+			const auto& Clip = AnimationClipSet->second->GetBlendShapeClip(BlendshapeClip.second.Index);
 			if (!Clip) continue;
 
-			Object->AddBlendShapeClip(Clip, BlendshapeClip.Key, BlendshapeClip.Loop);
+			Object->AddBlendShapeClip(Clip, BlendshapeClip.second.Key, BlendshapeClip.second.Loop);
 		}
 
 		if (!AnimationInfo.PlayMotion.empty())

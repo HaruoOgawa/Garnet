@@ -23,7 +23,9 @@ namespace scene
 		std::memcpy(&Data[0], &JSONStr[0], static_cast<int>(JSONStr.size()));
 
 		// ファイル書き出し
+		// ToDo: 今はテスト実装なのでファイルを直指定している
 		resource::CFile File = resource::CFile("Resources\\Scene\\SceneWriteTest.json");
+		//resource::CFile File = resource::CFile(pSceneController->GetFileName());
 		File.SetData(Data);
 		if (!File.Write()) return false;
 
@@ -139,15 +141,28 @@ namespace scene
 				}
 			}
 
-			// ToDo: ひとまずFileはいったん後回し
-			if (StoredFile3DModel) continue;
-
 			json ObjectJSON;
 
 			ObjectJSON["name"] = Object->GetObjectName();
 			ObjectJSON["filename"] = Object->GetFileName();
 
-			// ToDo: commonmaterialframe
+			// ToDo: 今後ファイルオブジェクトのマテリアルも編集できるようにリファクタリングするが、C3DObjectに仮登録しているCommonMaterialFrameを使う
+			if (StoredFile3DModel)
+			{
+				ObjectJSON["commonmaterialframe"] = Object->GetCommonMaterialFrame();
+			}
+
+			// animation
+			if (StoredFile3DModel)
+			{
+				const auto& AnimationInfoMap = pSceneController->GetAnimationInfoMap();
+				const auto& it = AnimationInfoMap.find(Object);
+
+				if (it != AnimationInfoMap.end())
+				{
+					if (!WriteAnimation(ObjectJSON, Object.get(), it->second)) return false;
+				}
+			}
 
 			// transform
 			{
@@ -161,6 +176,7 @@ namespace scene
 				};
 			}
 
+			// enable
 			ObjectJSON["enable"] = Object->IsEnabled();
 
 			// rootnodes
@@ -188,11 +204,13 @@ namespace scene
 			}
 
 			// materials
+			if (!StoredFile3DModel)
 			{
 				if (!WriteMaterials(ObjectJSON, Object.get(), TextureInfoList)) return false;
 			}
 
 			// textureset
+			if (!StoredFile3DModel)
 			{
 				if (!WriteTextureSet(ObjectJSON, Object.get(), TextureInfoList)) return false;
 			}
@@ -461,6 +479,64 @@ namespace scene
 				{ "filename", Texture2D->GetFileName() },
 			});
 		}
+
+		return true;
+	}
+
+	bool CSceneWriter::WriteAnimation(json& ObjectJSON, object::C3DObject* pObject, const SAnimationInfo& AnimationInfo)
+	{
+		json animationJSON;
+
+		const auto& AnimationController = pObject->GetAnimationController();
+		const auto& BlendShapeController = pObject->GetBlendShapeController();
+
+		const auto& HumanoidclipInfoList = AnimationInfo.Humanoidclips;
+		const auto& BlendshapeInfoList = AnimationInfo.Blendshapes;
+
+		animationJSON["clips"] = {};
+
+		if (AnimationController)
+		{
+			for (const auto& AnimationClip : AnimationController->GetAnimationClipMap())
+			{
+				const auto& it = HumanoidclipInfoList.find(AnimationClip.first);
+				if (it == HumanoidclipInfoList.end()) continue;
+
+				animationJSON["humanoidclips"].push_back({
+					{ "key", AnimationClip.first },
+					{ "motionname", it->second.MotionName },
+					{ "index",  it->second.Index },
+					{ "loop", AnimationClip.second.Clip->IsLoop() },
+					{ "ik", AnimationClip.second.Clip->IsUseIK() }
+				});
+			}
+
+			animationJSON["playmotionindex"] = AnimationController->GetCurrentMotionIndex();
+			animationJSON["playmotion"] = AnimationController->GetCurrentMotionName();
+		}
+
+		if (BlendShapeController)
+		{
+			for (const auto& BlendShapeClip : BlendShapeController->GetBlendShapeClipMap())
+			{
+				const auto& it = BlendshapeInfoList.find(BlendShapeClip.first);
+				if (it == BlendshapeInfoList.end()) continue;
+
+				animationJSON["blendshapes"].push_back({
+					{ "key", BlendShapeClip.first },
+					{ "motionname", it->second.MotionName },
+					{ "index", it->second.Index },
+					{ "loop", BlendShapeClip.second->IsLoop()}
+				});
+			}
+
+			for (const auto& PlayingBlendShape : BlendShapeController->GetPlayingBlendShapeSet())
+			{
+				animationJSON["playblendshapes"].push_back(PlayingBlendShape);
+			}
+		}
+
+		ObjectJSON["animation"] = animationJSON;
 
 		return true;
 	}

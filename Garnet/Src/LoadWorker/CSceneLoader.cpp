@@ -15,6 +15,7 @@ namespace resource
 		CResource(FileName),
 		m_Target(Target)
 	{
+		m_Target->SetFileName(FileName);
 	}
 
 	CSceneLoader::~CSceneLoader()
@@ -261,7 +262,8 @@ namespace resource
 						return false;
 					}
 
-					pLoadWorker->AddLoadResource(std::make_shared<resource::C3DObjectLoader>(filename, Object, MaterialFrame->second));
+					// ‰¼ŽÀ‘•
+					pLoadWorker->AddLoadResource(std::make_shared<resource::C3DObjectLoader>(filename, Object, MaterialFrame->second, commonmaterialframe));
 				}
 			}
 
@@ -665,7 +667,7 @@ namespace resource
 				GetBoolean("ik", ik, humanoidJSON);
 				Clip.IK = ik;
 
-				AnimationInfo.Humanoidclips.push_back(Clip);
+				AnimationInfo.Humanoidclips.emplace(key, Clip);
 			}
 		}
 
@@ -695,7 +697,7 @@ namespace resource
 				GetBoolean("loop", loop, blendshapeJSON);
 				Clip.Loop = loop;
 
-				AnimationInfo.Blendshapes.push_back(Clip);
+				AnimationInfo.Blendshapes.emplace(key, Clip);
 			}
 		}
 

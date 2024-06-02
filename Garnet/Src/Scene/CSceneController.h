@@ -66,8 +66,8 @@ namespace scene
 	struct SAnimationInfo
 	{
 		std::vector<SAnimationClip> Clips;
-		std::vector<SHumanoidclip> Humanoidclips;
-		std::vector<SBlendshape> Blendshapes;
+		std::map<std::string, SHumanoidclip> Humanoidclips;
+		std::map<std::string, SBlendshape> Blendshapes;
 
 		std::string PlayMotion;
 		int PlayMotionIndex = -1;
@@ -76,6 +76,8 @@ namespace scene
 
 	class CSceneController
 	{
+		std::string m_FileName;
+
 		//
 		std::vector<std::shared_ptr<object::C3DObject>> m_ObjectList;
 
@@ -99,6 +101,9 @@ namespace scene
 	public:
 		CSceneController();
 		virtual ~CSceneController();
+
+		void SetFileName(const std::string& Name);
+		const std::string& GetFileName() const;
 
 		//
 		void AddObject(const std::shared_ptr<object::C3DObject>& Object);

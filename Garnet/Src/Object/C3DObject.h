@@ -29,6 +29,9 @@ namespace object
 
 		std::string m_FileName;
 
+		// ToDo: ‰¼ŽÀ‘•
+		std::string m_CommonMaterialFrame;
+
 		const std::string m_PassName;
 		const std::string m_DepthPassName;
 		
@@ -70,6 +73,10 @@ namespace object
 
 		void SetFileName(const std::string& Name);
 		const std::string& GetFileName() const;
+		
+		// ToDo: ‰¼ŽÀ‘•
+		void SetCommonMaterialFrame(const std::string& Name);
+		const std::string& GetCommonMaterialFrame() const;
 
 		void SetObjectName(const std::string& Name);
 		const std::string& GetObjectName() const;
@@ -117,6 +124,9 @@ namespace object
 		void AddMorphNode(const std::shared_ptr<CNode>& Node);
 
 #ifdef USE_ANIMATION
+		const std::shared_ptr<animation::CAnimationController>& GetAnimationController() const;
+		const std::shared_ptr<animation::CBlendShapeController>& GetBlendShapeController() const;
+
 		void AddBlendShapeNode(const std::shared_ptr<CNode>& Node);
 
 		void SetAnimationSkeleton(const std::shared_ptr<animation::CSkeleton>& Skeleton);

@@ -10,7 +10,9 @@ namespace animation
 		m_CurrBlendingTime(0.0f),
 		m_SavedPrevTrs(false),
 		m_Skeleton(nullptr),
-		m_CurrentLayout(SAnimationLayout())
+		m_CurrentLayout(SAnimationLayout()),
+		m_CurrentMotionIndex(-1),
+		m_CurrentMotionName(std::string())
 	{
 	}
 
@@ -24,6 +26,8 @@ namespace animation
 		m_CurrBlendingTime = 0.0f;
 		m_SavedPrevTrs = false;
 		m_CurrentLayout = {};
+		m_CurrentMotionIndex = -1;
+		m_CurrentMotionName = std::string();
 	}
 
 	bool CAnimationController::Update(float DeltaSecondsTime)
@@ -369,6 +373,7 @@ namespace animation
 			const auto& Clip = m_ClipList[Index];
 			Clip->Initialize();
 
+			m_CurrentMotionIndex = Index;
 			m_CurrentLayout.Clip = Clip;
 		}
 	}
@@ -382,6 +387,7 @@ namespace animation
 		const auto& Layout = m_ClipMap.find(MotionName);
 		if (Layout != m_ClipMap.end())
 		{
+			m_CurrentMotionName = MotionName;
 			m_CurrentLayout = Layout->second;
 
 			const auto& Clip = m_CurrentLayout.Clip;
@@ -425,6 +431,16 @@ namespace animation
 	bool CAnimationController::IsPlayingAnimation()
 	{
 		return (m_CurrentLayout.Clip != nullptr && !m_CurrentLayout.Clip->IsEnd());
+	}
+
+	int CAnimationController::GetCurrentMotionIndex() const
+	{
+		return m_CurrentMotionIndex;
+	}
+
+	const std::string& CAnimationController::GetCurrentMotionName() const
+	{
+		return m_CurrentMotionName;
 	}
 
 	void CAnimationController::AddMotion(const std::string& MotionName, animation::SAnimationLayout Layout)

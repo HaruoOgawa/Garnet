@@ -20,13 +20,14 @@
 
 namespace resource
 {
-	C3DObjectLoader::C3DObjectLoader(const std::string& FileName, const std::shared_ptr<object::C3DObject>& TargetObject, const std::shared_ptr<graphics::CMaterialFrame>& BaseMaterialFrame) :
+	C3DObjectLoader::C3DObjectLoader(const std::string& FileName, const std::shared_ptr<object::C3DObject>& TargetObject, const std::shared_ptr<graphics::CMaterialFrame>& BaseMaterialFrame, std::string CommonMaterialFrame) :
 		CResource(FileName, 3),
 		m_LoadState(E3DObjectLoadState::None),
 		m_TargetObject(TargetObject),
 		m_BaseMaterialFrame(BaseMaterialFrame)
 	{
 		m_TargetObject->SetFileName(FileName);
+		m_TargetObject->SetCommonMaterialFrame(CommonMaterialFrame);
 	}
 
 	C3DObjectLoader::~C3DObjectLoader()

@@ -13,6 +13,11 @@ namespace animation
 	{
 	}
 
+	const std::set<std::string>& CBlendShapeController::GetPlayingBlendShapeSet() const
+	{
+		return m_PlayingBlendShapeSet;
+	}
+
 	void CBlendShapeController::Reset()
 	{
 		// ウェイトをリセット
@@ -24,6 +29,11 @@ namespace animation
 		Clip->SetIsLoop(IsLoop);
 
 		m_BlendShapeClipMap.emplace(MotionName, Clip);
+	}
+
+	const std::map<std::string, std::shared_ptr<animation::CBlendShapeClip>>& CBlendShapeController::GetBlendShapeClipMap() const
+	{
+		return m_BlendShapeClipMap;
 	}
 
 	void CBlendShapeController::AddBlendShapeNode(const std::shared_ptr<object::CNode>& Node)

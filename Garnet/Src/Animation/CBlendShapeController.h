@@ -29,7 +29,10 @@ namespace animation
 		CBlendShapeController();
 		virtual ~CBlendShapeController();
 
+		const std::set<std::string>& GetPlayingBlendShapeSet() const;
+
 		void AddBlendShapeClip(const std::shared_ptr<animation::CBlendShapeClip>& Clip, const std::string& MotionName, bool IsLoop);
+		const std::map<std::string, std::shared_ptr<animation::CBlendShapeClip>>& GetBlendShapeClipMap() const;
 
 		void AddBlendShapeNode(const std::shared_ptr<object::CNode>& Node);
 

@@ -49,6 +49,126 @@
     ],
     "objects": [
         {
+            "animation": {
+                "clips": null,
+                "playmotion": "",
+                "playmotionindex": 0
+            },
+            "commonmaterialframe": "PBR_MF",
+            "enable": true,
+            "filename": "Resources/Models/BrainStem/glTF-Binary/BrainStem.glb",
+            "name": "glTFObj",
+            "transform": {
+                "pos": [
+                    -1.0,
+                    0.0,
+                    0.0
+                ],
+                "rotate": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            }
+        },
+        {
+            "animation": {
+                "clips": null,
+                "humanoidclips": [
+                    {
+                        "ik": false,
+                        "index": 0,
+                        "key": "Walk",
+                        "loop": true,
+                        "motionname": "FBX_Walking"
+                    }
+                ],
+                "playmotion": "Walk",
+                "playmotionindex": -1
+            },
+            "commonmaterialframe": "PBR_MF",
+            "enable": true,
+            "filename": "Resources/Avatar/Warrok_W_Kurniawan.fbx",
+            "name": "FbxObj",
+            "transform": {
+                "pos": [
+                    -2.0,
+                    0.0,
+                    0.0
+                ],
+                "rotate": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scale": [
+                    0.009999999776482582,
+                    0.009999999776482582,
+                    0.009999999776482582
+                ]
+            }
+        },
+        {
+            "animation": {
+                "blendshapes": [
+                    {
+                        "index": 0,
+                        "key": "Face",
+                        "loop": true,
+                        "motionname": "biglove_expression"
+                    },
+                    {
+                        "index": 0,
+                        "key": "RipSync",
+                        "loop": true,
+                        "motionname": "biglove_Ripsync"
+                    }
+                ],
+                "clips": null,
+                "humanoidclips": [
+                    {
+                        "ik": false,
+                        "index": 0,
+                        "key": "Dance",
+                        "loop": true,
+                        "motionname": "biglove_dance_noik"
+                    }
+                ],
+                "playblendshapes": [
+                    "Face",
+                    "RipSync"
+                ],
+                "playmotion": "Dance",
+                "playmotionindex": -1
+            },
+            "commonmaterialframe": "basic_toon_mf",
+            "enable": true,
+            "filename": "Resources/Avatar/Tda_Miku/Tda_Miku.pmx",
+            "name": "PmxObj",
+            "transform": {
+                "pos": [
+                    3.0,
+                    0.0,
+                    0.0
+                ],
+                "rotate": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scale": [
+                    0.10000000149011612,
+                    0.10000000149011612,
+                    0.10000000149011612
+                ]
+            }
+        },
+        {
             "enable": true,
             "filename": "",
             "materials": [
@@ -67,9 +187,9 @@
                             "name": "cameraPos",
                             "type": "vec4",
                             "value": [
-                                -1.3902591466903687,
-                                1.8979690074920654,
-                                -6.6681928634643555,
+                                6.41111946105957,
+                                5.210241317749023,
+                                -8.58725643157959,
                                 0.0
                             ]
                         },
@@ -143,21 +263,21 @@
                             "name": "view",
                             "type": "mat4",
                             "value": [
-                                -0.9789496064186096,
-                                0.054783839732408524,
-                                -0.19661253690719604,
+                                -0.8490020632743835,
+                                -0.1913996785879135,
+                                0.49250560998916626,
                                 0.0,
                                 0.0,
-                                0.963303804397583,
-                                0.26841360330581665,
+                                0.9320880174636841,
+                                0.3622320890426636,
                                 0.0,
-                                0.2041023224592209,
-                                0.2627633810043335,
-                                -0.9430258274078369,
+                                -0.5283896327018738,
+                                0.3075357973575592,
+                                -0.7913445830345154,
                                 0.0,
-                                -0.0,
-                                -1.1920928955078125e-07,
-                                -7.071061134338379,
+                                0.9056363105773926,
+                                -0.9884285926818848,
+                                -11.840307235717773,
                                 1.0
                             ]
                         },
@@ -263,7 +383,7 @@
                             "name": "time",
                             "type": "float",
                             "value": [
-                                18.709001541137695
+                                51.342002868652344
                             ]
                         },
                         {
@@ -440,7 +560,7 @@
                             "name": "useBaseColorTexture",
                             "type": "int",
                             "value": [
-                                1.0
+                                0.0
                             ]
                         },
                         {
@@ -468,7 +588,7 @@
                             "name": "useIBL",
                             "type": "int",
                             "value": [
-                                1.0
+                                1.401298464324817e-45
                             ]
                         },
                         {
@@ -532,13 +652,13 @@
                     "transform": {
                         "pos": [
                             0.0,
-                            0.0,
+                            1.0,
                             0.0
                         ],
                         "rotate": [
-                            0.0,
-                            -0.0,
-                            0.0
+                            8.651421921967994e-06,
+                            65.40841674804688,
+                            8.651421921967994e-06
                         ],
                         "scale": [
                             1.0,
@@ -602,7 +722,7 @@
                             5.0
                         ],
                         "rotate": [
-                            7.000000476837158,
+                            7.000001430511475,
                             -0.0,
                             0.0
                         ],
@@ -633,14 +753,14 @@
             ],
             "transform": {
                 "pos": [
-                    0.0,
-                    0.0,
-                    0.0
+                    6.0,
+                    2.0,
+                    3.0
                 ],
                 "rotate": [
-                    0.0,
-                    -0.0,
-                    0.0
+                    180.0,
+                    65.40841674804688,
+                    180.0
                 ],
                 "scale": [
                     1.0,
