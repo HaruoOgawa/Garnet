@@ -29,7 +29,6 @@ namespace object
 
 		std::string m_FileName;
 
-		// ToDo: ‰¼ŽÀ‘•
 		std::string m_DefaultMaterialFrame;
 
 		const std::string m_PassName;

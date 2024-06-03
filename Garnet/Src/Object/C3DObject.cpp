@@ -38,7 +38,6 @@ namespace object
 		return m_FileName;
 	}
 
-	// ToDo: ‰¼ŽÀ‘•
 	void C3DObject::SetDefaultMaterialFrame(const std::string& Name)
 	{
 		m_DefaultMaterialFrame = Name;

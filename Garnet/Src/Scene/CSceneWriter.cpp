@@ -23,7 +23,6 @@ namespace scene
 		std::memcpy(&Data[0], &JSONStr[0], static_cast<int>(JSONStr.size()));
 
 		// ファイル書き出し
-		// ToDo: 今はテスト実装なのでファイルを直指定している
 		resource::CFile File = resource::CFile("Resources\\Scene\\SceneWriteTest.json");
 		//resource::CFile File = resource::CFile(pSceneController->GetFileName());
 		File.SetData(Data);
@@ -203,13 +202,11 @@ namespace scene
 			}
 
 			// materials
-			if (!StoredFile3DModel)
 			{
 				if (!WriteMaterials(ObjectJSON, Object.get(), TextureInfoList)) return false;
 			}
 
 			// textureset
-			if (!StoredFile3DModel)
 			{
 				if (!WriteTextureSet(ObjectJSON, Object.get(), TextureInfoList)) return false;
 			}
@@ -316,8 +313,9 @@ namespace scene
 			ordered_json materialJSON;
 
 			// materialframe
-			// ToDo: あとでリファクタリングが必要かも
-			materialJSON["materialframe"] = Material->GetRefMaterialFrameName();
+			const auto& MaterialFrame = Material->GetMaterialFrame();
+			if (!MaterialFrame) return false;
+			materialJSON["materialframe"] = MaterialFrame->GetMaterialFrameName();
 
 			// cull
 			{
@@ -443,11 +441,13 @@ namespace scene
 
 						const auto& Texture = Texture2DList[TextureIndex];
 						const auto& it = std::find_if(TextureInfoList.begin(), TextureInfoList.end(), [&](const auto& val) { return (Texture == val.second); });
-						if (it == TextureInfoList.end()) continue;
+						
+						if (it != TextureInfoList.end())
+						{
+							RefTextureName = it->first;
 
-						RefTextureName = it->first;
-
-						TextureIndex = -1;
+							TextureIndex = -1;
+						}
 					}
 
 					materialJSON["textures"].push_back({
@@ -474,7 +474,7 @@ namespace scene
 			if (it == TextureInfoList.end()) continue;
 
 			ObjectJSON["textureset"].push_back({
-				{ "name", it->first }, // ToDo: リファクタリングが必要かも
+				{ "name", it->first }, 
 				{ "filename", Texture2D->GetFileName() },
 			});
 		}

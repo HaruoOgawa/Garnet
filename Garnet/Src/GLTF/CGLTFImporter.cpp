@@ -759,7 +759,13 @@ namespace gltf
 
 			std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(MeshIndex, static_cast<int>(NodeList.size()));
 			
-			Node->SetName(glTFNode.name);
+			std::string NodeName = glTFNode.name;
+			if (NodeName.empty())
+			{
+				NodeName = "node_" + std::to_string(static_cast<int>(NodeList.size()));
+			}
+
+			Node->SetName(NodeName);
 			Node->SetSkeletonIndex(SkeletonIndex);
 
 			const auto& glTFMatrix = glTFNode.matrix;

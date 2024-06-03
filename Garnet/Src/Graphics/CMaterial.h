@@ -30,8 +30,9 @@ namespace graphics
 	class CMaterial
 	{
 	protected:
+		std::shared_ptr<CMaterialFrame> m_MaterialFrame;
+
 		std::string m_MaterialName;
-		std::string m_RefMaterialFrameName;
 
 		std::shared_ptr<CMaterialCreateInfo> m_CreateInfo;
 
@@ -75,9 +76,9 @@ namespace graphics
 
 		virtual void SetMaterialName(const std::string& Name);
 		virtual const std::string& GetMaterialName() const;
-		
-		virtual void SetRefMaterialFrameName(const std::string& Name);
-		virtual const std::string& GetRefMaterialFrameName() const;
+
+		virtual const std::shared_ptr<CMaterialFrame>& GetMaterialFrame() const;
+		virtual void SetMaterialFrame(const std::shared_ptr<CMaterialFrame>& MaterialFrame);
 
 		virtual std::vector<std::shared_ptr<CShaderBuffer>>& GetShaderBufferList();
 		virtual const std::vector<STextureBindingLayout>& GetTextureBindingLayoutList() const;

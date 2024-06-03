@@ -5,7 +5,7 @@ namespace graphics
 {
 	CMaterial::CMaterial(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CMaterialCreateInfo>& createInfo, int RefCount, ECullMode CullMode):
 		m_MaterialName(std::string()),
-		m_RefMaterialFrameName(std::string()),
+		m_MaterialFrame(nullptr),
 		m_CreateInfo(createInfo),
 		m_RefCount(RefCount),
 		m_CurrentDynamicOffset(0),
@@ -57,14 +57,14 @@ namespace graphics
 		return m_MaterialName;
 	}
 
-	void CMaterial::SetRefMaterialFrameName(const std::string& Name)
+	const std::shared_ptr<CMaterialFrame>& CMaterial::GetMaterialFrame() const
 	{
-		m_RefMaterialFrameName = Name;
+		return m_MaterialFrame;
 	}
 
-	const std::string& CMaterial::GetRefMaterialFrameName() const
+	void CMaterial::SetMaterialFrame(const std::shared_ptr<CMaterialFrame>& MaterialFrame)
 	{
-		return m_RefMaterialFrameName;
+		m_MaterialFrame = MaterialFrame;
 	}
 
 	std::vector<std::shared_ptr<CShaderBuffer>>& CMaterial::GetShaderBufferList()

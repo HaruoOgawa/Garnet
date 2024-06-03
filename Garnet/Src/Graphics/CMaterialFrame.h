@@ -27,7 +27,7 @@ namespace graphics
 
 		int m_CreateCounter;
 
-		std::string m_MaterialName;
+		std::string m_MaterialFrameName;
 
 		std::string m_FileName;
 
@@ -39,7 +39,8 @@ namespace graphics
 		CMaterialFrame();
 		virtual ~CMaterialFrame();
 
-		void SetMaterialName(const std::string& Name);
+		void SetMaterialFrameName(const std::string& Name);
+		const std::string& GetMaterialFrameName() const;
 
 		void SetFileName(const std::string& Name);
 		const std::string& GetFileName() const;
