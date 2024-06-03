@@ -23,8 +23,7 @@ namespace scene
 		std::memcpy(&Data[0], &JSONStr[0], static_cast<int>(JSONStr.size()));
 
 		// ファイル書き出し
-		resource::CFile File = resource::CFile("Resources\\Scene\\SceneWriteTest.json");
-		//resource::CFile File = resource::CFile(pSceneController->GetFileName());
+		resource::CFile File = resource::CFile(pSceneController->GetFileName());
 		File.SetData(Data);
 		if (!File.Write()) return false;
 
