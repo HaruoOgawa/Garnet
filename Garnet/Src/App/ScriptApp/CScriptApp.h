@@ -11,6 +11,7 @@ namespace imageeffect { class CBlurEffect; }
 namespace resource { class CLoadWorker; }
 namespace input { class CInputState; }
 namespace object { class C3DObject; }
+namespace scene { class CSceneController; }
 
 namespace gui
 { 
@@ -59,5 +60,7 @@ namespace app
 		virtual void OnFocus(bool Focused, api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker) override;
 
 		const std::shared_ptr<CFileModifier>& GetFileModifier() const;
+
+		const std::shared_ptr<scene::CSceneController>& GetSceneController() const;
 	};
 }

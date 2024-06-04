@@ -118,7 +118,8 @@ namespace object
 
 		void AddMaterial(const std::shared_ptr<graphics::CMaterial>& Material);
 		const std::vector<std::shared_ptr<graphics::CMaterial>>& GetMaterialList() const;
-		
+		bool ReplaceMaterial(const std::shared_ptr<graphics::CMaterial>& OldMaterial, const std::shared_ptr<graphics::CMaterial>& NewMaterial);
+
 		void AddMorphNode(const std::shared_ptr<CNode>& Node);
 
 #ifdef USE_ANIMATION

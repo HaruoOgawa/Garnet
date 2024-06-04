@@ -27,7 +27,7 @@ namespace graphics
 	class CMaterialFrame;
 	class CDrawInfo;
 
-	class CMaterial
+	class CMaterial : public std::enable_shared_from_this<CMaterial>
 	{
 	protected:
 		std::shared_ptr<CMaterialFrame> m_MaterialFrame;
@@ -79,6 +79,7 @@ namespace graphics
 
 		virtual const std::shared_ptr<CMaterialFrame>& GetMaterialFrame() const;
 		virtual void SetMaterialFrame(const std::shared_ptr<CMaterialFrame>& MaterialFrame);
+		virtual bool DeleteMaterialFrameReference();
 
 		virtual std::vector<std::shared_ptr<CShaderBuffer>>& GetShaderBufferList();
 		virtual const std::vector<STextureBindingLayout>& GetTextureBindingLayoutList() const;

@@ -67,6 +67,13 @@ namespace graphics
 		m_MaterialFrame = MaterialFrame;
 	}
 
+	bool CMaterial::DeleteMaterialFrameReference()
+	{
+		if (!m_MaterialFrame) return false;
+
+		return m_MaterialFrame->DeleteRefMaterial(shared_from_this());
+	}
+
 	std::vector<std::shared_ptr<CShaderBuffer>>& CMaterial::GetShaderBufferList()
 	{
 		return m_ShaderBufferList;

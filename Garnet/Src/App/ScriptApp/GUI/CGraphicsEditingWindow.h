@@ -12,6 +12,8 @@
 
 #include "../CScriptApp.h"
 
+namespace api { class IGraphicsAPI; }
+
 namespace gui
 {
 	class CGraphicsEditingWindow
@@ -22,7 +24,7 @@ namespace gui
 		CGraphicsEditingWindow();
 		virtual ~CGraphicsEditingWindow();
 
-		bool Draw(const app::CScriptApp* pApp);
+		bool Draw(api::IGraphicsAPI* pGraphicsAPI, const app::CScriptApp* pApp);
 	};
 }
 #endif // USE_GUIENGINE

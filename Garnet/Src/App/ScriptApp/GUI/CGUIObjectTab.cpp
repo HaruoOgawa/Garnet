@@ -20,7 +20,7 @@ namespace gui
 		m_OperateButtonID = -1;
 	}
 
-	bool CGUIObjectTab::Draw(const std::vector<std::shared_ptr<object::C3DObject>>& ObjectList)
+	bool CGUIObjectTab::Draw(api::IGraphicsAPI* pGraphicsAPI, const std::vector<std::shared_ptr<object::C3DObject>>& ObjectList, const std::shared_ptr<scene::CSceneController>& SceneController)
 	{
 		Reset();
 
@@ -104,7 +104,7 @@ namespace gui
 				if (ImGui::BeginTabBar("ObjectDetail"))
 				{
 					if (!CGUITransformTab::Draw(ObjectList, m_SelectedObjectIndex, m_SelectedNodeIndex)) return false;
-					if (!CGUIMaterialTab::Draw(ObjectList, m_SelectedObjectIndex, m_SelectedNodeIndex)) return false;
+					if (!CGUIMaterialTab::Draw(pGraphicsAPI, ObjectList, SceneController, m_SelectedObjectIndex, m_SelectedNodeIndex)) return false;
 
 					ImGui::EndTabBar(); // ObjectDetail
 				}

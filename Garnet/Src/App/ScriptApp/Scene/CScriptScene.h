@@ -41,6 +41,7 @@ namespace app
 
 		bool IsLoaded() const;
 
+		const std::shared_ptr<scene::CSceneController>& GetSceneController() const;
 		std::vector<std::shared_ptr<object::C3DObject>> GetObjectList() const;
 
 		bool Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,

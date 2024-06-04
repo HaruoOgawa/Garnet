@@ -51,6 +51,7 @@ namespace graphics
 		void SetTextureBufferList(const std::vector<graphics::STextureBindingLayout>& TextureBufferList);
 
 		std::shared_ptr<CMaterial> CreateMaterial(api::IGraphicsAPI* pGraphicsAPI, int RefCount, graphics::ECullMode CullMode);
+		bool DeleteRefMaterial(const std::shared_ptr<graphics::CMaterial>& Material);
 
 		bool Reload();
 	};

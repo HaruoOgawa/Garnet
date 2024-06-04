@@ -637,6 +637,22 @@ namespace object
 		return m_MaterialList;
 	}
 
+	bool C3DObject::ReplaceMaterial(const std::shared_ptr<graphics::CMaterial>& OldMaterial, const std::shared_ptr<graphics::CMaterial>& NewMaterial)
+	{
+		auto it = std::find(m_MaterialList.begin(), m_MaterialList.end(), OldMaterial);
+		if (it == m_MaterialList.end()) return false;
+
+		OldMaterial->DeleteMaterialFrameReference();
+
+		int MaterialIndex = static_cast<int>(it - m_MaterialList.begin());
+
+		if (!NewMaterial->Create(m_TextureSet)) return false;
+
+		m_MaterialList[MaterialIndex] = NewMaterial;
+
+		return true;
+	}
+
 	void C3DObject::SetRootNodeIndexList(const std::vector<std::vector<int>>& RootNodeIndexList)
 	{
 		m_RootNodeIndexList = RootNodeIndexList;

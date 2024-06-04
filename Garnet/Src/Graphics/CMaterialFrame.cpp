@@ -109,6 +109,18 @@ namespace graphics
 		return Material;
 	}
 
+	bool CMaterialFrame::DeleteRefMaterial(const std::shared_ptr<graphics::CMaterial>& Material)
+	{
+		const auto& it = std::find(m_RefMaterialList.begin(), m_RefMaterialList.end(), Material);
+
+		if (it == m_RefMaterialList.end()) return false;
+
+		m_RefMaterialList.erase(it);
+		m_RefMaterialList.shrink_to_fit();
+
+		return true;
+	}
+
 	bool CMaterialFrame::Reload()
 	{
 		std::vector<std::shared_ptr<CShaderBuffer>> ShaderBufferList;

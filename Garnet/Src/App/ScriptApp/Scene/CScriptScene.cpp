@@ -35,6 +35,11 @@ namespace app
 		return m_IsLoaded;
 	}
 
+	const std::shared_ptr<scene::CSceneController>& CScriptScene::GetSceneController() const
+	{
+		return m_SceneController;
+	}
+
 	std::vector<std::shared_ptr<object::C3DObject>> CScriptScene::GetObjectList() const
 	{
 		std::vector<std::shared_ptr<object::C3DObject>> ObjectList;

@@ -1,15 +1,18 @@
 #ifdef USE_GUIENGINE
 #include "CGUIMaterialTab.h"
+#include "../../Scene/CSceneController.h"
+#include "../../Interface/IGraphicsAPI.h"
 #include "../../Object/C3DObject.h"
 #include <set>
 
 namespace gui
 {
-	bool CGUIMaterialTab::Draw(const std::vector<std::shared_ptr<object::C3DObject>>& ObjectList, int SelectedObjectIndex, int SelectedNodeIndex)
+	bool CGUIMaterialTab::Draw(api::IGraphicsAPI* pGraphicsAPI, const std::vector<std::shared_ptr<object::C3DObject>>& ObjectList, const std::shared_ptr<scene::CSceneController>& SceneController, 
+		int SelectedObjectIndex, int SelectedNodeIndex)
 	{
 		if (ImGui::BeginTabItem("Material"))
 		{
-			DrawMaterialGUI(ObjectList, SelectedObjectIndex, SelectedNodeIndex);
+			DrawMaterialGUI(pGraphicsAPI, ObjectList, SceneController, SelectedObjectIndex, SelectedNodeIndex);
 
 			ImGui::EndTabItem();
 		}
@@ -17,7 +20,8 @@ namespace gui
 		return true;
 	}
 
-	bool CGUIMaterialTab::DrawMaterialGUI(const std::vector<std::shared_ptr<object::C3DObject>>& ObjectList, int SelectedObjectIndex, int SelectedNodeIndex)
+	bool CGUIMaterialTab::DrawMaterialGUI(api::IGraphicsAPI* pGraphicsAPI, const std::vector<std::shared_ptr<object::C3DObject>>& ObjectList, const std::shared_ptr<scene::CSceneController>& SceneController, 
+		int SelectedObjectIndex, int SelectedNodeIndex)
 	{
 		if (SelectedObjectIndex == -1 || SelectedNodeIndex == -1) return true;
 
@@ -59,6 +63,36 @@ namespace gui
 				// マテリアル名
 				if (ImGui::TreeNodeEx(Material->GetMaterialName().c_str(), ImGuiTreeNodeFlags_Framed))
 				{
+					//
+					if (pGraphicsAPI->IsEnabledRuntimeShaderEditing())
+					{
+						const auto& CurrentMaterialFrame = Material->GetMaterialFrame();
+
+						if (CurrentMaterialFrame)
+						{
+							if (ImGui::BeginCombo("MaterialFrame##CGUIMaterialTab", CurrentMaterialFrame->GetMaterialFrameName().c_str()))
+							{
+								const auto& MaterialFrameMap = SceneController->GetMaterialFrameMap();
+
+								for (const auto& MaterialFrame : MaterialFrameMap)
+								{
+									const bool IsSelected = (CurrentMaterialFrame == MaterialFrame.second);
+
+									std::string Label = MaterialFrame.first;
+									if (ImGui::Selectable(Label.c_str(), IsSelected) && !IsSelected)
+									{
+										// マテリアルの置き換え
+										auto NewMaterial = MaterialFrame.second->CreateMaterial(pGraphicsAPI, Material->GetRefCount(), Material->GetCullMode());
+										Object->ReplaceMaterial(Material, NewMaterial);
+									}
+								}
+
+								ImGui::EndCombo();
+							}
+						}
+					}
+
+					//
 					auto& ShaderBufferList = Material->GetShaderBufferList();
 
 					for (auto& UniformBuffer : ShaderBufferList)

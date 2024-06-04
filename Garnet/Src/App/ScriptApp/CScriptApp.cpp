@@ -146,7 +146,7 @@ namespace app
 		if (pLoadWorker->IsLoaded())
 		{
 			if (!GUIEngine->BeginFrame(pGraphicsAPI)) return false;
-			if (!m_GraphicsEditingWindow->Draw(this)) return false;
+			if (!m_GraphicsEditingWindow->Draw(pGraphicsAPI, this)) return false;
 			if (!GUIEngine->EndFrame(pGraphicsAPI)) return false;
 		}
 #endif // USE_GUIENGINE
@@ -178,5 +178,10 @@ namespace app
 	const std::shared_ptr<CFileModifier>& CScriptApp::GetFileModifier() const
 	{
 		return m_FileModifier;
+	}
+
+	const std::shared_ptr<scene::CSceneController>& CScriptApp::GetSceneController() const
+	{
+		return m_ScriptScene->GetSceneController();
 	}
 }
