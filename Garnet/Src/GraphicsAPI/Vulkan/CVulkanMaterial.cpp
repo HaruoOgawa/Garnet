@@ -793,7 +793,7 @@ namespace api
 
 					if (!Texture)
 					{
-						Console::Log("[ERROR] Texture is nullpte\n");
+						Console::Log("[ERROR] Texture is nullptr\n");
 						return false;
 					}
 

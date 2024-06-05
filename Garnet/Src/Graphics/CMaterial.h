@@ -83,6 +83,7 @@ namespace graphics
 
 		virtual std::vector<std::shared_ptr<CShaderBuffer>>& GetShaderBufferList();
 		virtual const std::vector<STextureBindingLayout>& GetTextureBindingLayoutList() const;
+		virtual void SetTextureBindingLayoutTextureIndex(int BindingLayoutIndex, int TextureIndex, const std::shared_ptr<graphics::CTextureSet>& TextureSet);
 
 		virtual bool Create(const std::shared_ptr<graphics::CTextureSet>& TextureSet) = 0;
 		virtual bool CreateDepthMaterial(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<graphics::CMaterialFrame>& DepthMF);

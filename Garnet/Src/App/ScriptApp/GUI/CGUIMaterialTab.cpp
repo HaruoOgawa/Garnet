@@ -63,7 +63,7 @@ namespace gui
 				// ƒ}ƒeƒŠƒAƒ‹–¼
 				if (ImGui::TreeNodeEx(Material->GetMaterialName().c_str(), ImGuiTreeNodeFlags_Framed))
 				{
-					//
+					// MaterialFrame
 					if (pGraphicsAPI->IsEnabledRuntimeShaderEditing())
 					{
 						const auto& CurrentMaterialFrame = Material->GetMaterialFrame();
@@ -92,7 +92,7 @@ namespace gui
 						}
 					}
 
-					//
+					// Uniform
 					auto& ShaderBufferList = Material->GetShaderBufferList();
 
 					for (auto& UniformBuffer : ShaderBufferList)
@@ -290,6 +290,67 @@ namespace gui
 								continue;
 							default:
 								break;
+							}
+						}
+					}
+
+					// Texture
+					if (pGraphicsAPI->IsEnabledRuntimeShaderEditing())
+					{
+						const auto& TextureSet = Object->GetTextureSet();
+
+						for (int BindingLayoutIndex = 0; BindingLayoutIndex < static_cast<int>(Material->GetTextureBindingLayoutList().size()); BindingLayoutIndex++)
+						{
+							const auto& TextureBindingLayout = Material->GetTextureBindingLayoutList()[BindingLayoutIndex];
+
+							int TextureIndex = TextureBindingLayout.TextureIndex;
+							int PrevTextureIndex = TextureIndex;
+
+							std::string Label = TextureBindingLayout.TextureName + "##InputInt_Texture_CGUIMaterialTab";
+
+							if (ImGui::InputInt(Label.c_str(), &TextureIndex) && TextureIndex != PrevTextureIndex)
+							{
+								switch (TextureBindingLayout.TextureUsage)
+								{
+								case graphics::ETextureUsage::TEXTURE_USAGE_2D:
+									if (TextureIndex >= -1 && TextureIndex < static_cast<int>(TextureSet->Get2DTextureList().size()))
+									{
+										Material->SetTextureBindingLayoutTextureIndex(BindingLayoutIndex, TextureIndex, TextureSet);
+									}
+									break;
+								case graphics::ETextureUsage::TEXTURE_USAGE_CUBE:
+									if (TextureIndex >= -1 && TextureIndex < static_cast<int>(TextureSet->GetCubeMapList().size()))
+									{
+										Material->SetTextureBindingLayoutTextureIndex(BindingLayoutIndex, TextureIndex, TextureSet);
+									}
+									break;
+								case graphics::ETextureUsage::TEXTURE_USAGE_FRAME:
+									if (TextureIndex >= -1 && TextureIndex < static_cast<int>(TextureSet->GetFrameTextureList().size()))
+									{
+										Material->SetTextureBindingLayoutTextureIndex(BindingLayoutIndex, TextureIndex, TextureSet);
+									}
+									break;
+								case graphics::ETextureUsage::TEXTURE_USAGE_IBL_Diffuse:
+									if ((TextureIndex == 0 || TextureIndex == -1) && TextureSet->GetDiffuse_Tex())
+									{
+										Material->SetTextureBindingLayoutTextureIndex(BindingLayoutIndex, TextureIndex, TextureSet);
+									}
+									break;
+								case graphics::ETextureUsage::TEXTURE_USAGE_IBL_Specular:
+									if ((TextureIndex == 0 || TextureIndex == -1) && TextureSet->GetSpecular_Tex())
+									{
+										Material->SetTextureBindingLayoutTextureIndex(BindingLayoutIndex, TextureIndex, TextureSet);
+									}
+									break;
+								case graphics::ETextureUsage::TEXTURE_USAGE_IBL_GGXLUT:
+									if ((TextureIndex == 0 || TextureIndex == -1) && TextureSet->GetGGXLUT_Tex())
+									{
+										Material->SetTextureBindingLayoutTextureIndex(BindingLayoutIndex, TextureIndex, TextureSet);
+									}
+									break;
+								default:
+									break;
+								}
 							}
 						}
 					}

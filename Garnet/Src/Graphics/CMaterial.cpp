@@ -84,6 +84,15 @@ namespace graphics
 		return m_TextureBindingLayoutList;
 	}
 
+	void CMaterial::SetTextureBindingLayoutTextureIndex(int BindingLayoutIndex, int TextureIndex, const std::shared_ptr<graphics::CTextureSet>& TextureSet)
+	{
+		if (BindingLayoutIndex < 0 || BindingLayoutIndex >= static_cast<int>(m_TextureBindingLayoutList.size())) return;
+
+		m_TextureBindingLayoutList[BindingLayoutIndex].TextureIndex = TextureIndex;
+
+		CreateRefTextureList(m_CreateInfo, TextureSet);
+	}
+
 	bool CMaterial::CreateDepthMaterial(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<graphics::CMaterialFrame>& DepthMF)
 	{
 		m_DepthMaterial = DepthMF->CreateMaterial(pGraphicsAPI, m_RefCount, m_CullMode);
@@ -261,8 +270,6 @@ namespace graphics
 			for (int ImageInfoIndex = 0, TextureBindingLayoutIndex = 0; ImageInfoIndex < TexLayoutSize; ImageInfoIndex += 2, TextureBindingLayoutIndex++)
 			{
 				const auto& TexLayout = m_TextureBindingLayoutList[TextureBindingLayoutIndex];
-
-				int TextureIndex = TexLayout.TextureIndex;
 
 				if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_2D)
 				{
