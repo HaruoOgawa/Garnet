@@ -248,22 +248,22 @@ namespace resource
 				std::string filename = "";
 				GetString("filename", filename, objectJSON);
 
-				std::string commonmaterialframe = "";
-				GetString("commonmaterialframe", commonmaterialframe, objectJSON);
+				std::string defaultmaterialframe = "";
+				GetString("defaultmaterialframe", defaultmaterialframe, objectJSON);
 
 				if (!filename.empty())
 				{
 					const auto& MaterialFrameMap = m_Target->GetMaterialFrameMap();
-					const auto& MaterialFrame = MaterialFrameMap.find(commonmaterialframe);
+					const auto& MaterialFrame = MaterialFrameMap.find(defaultmaterialframe);
 					if (MaterialFrame == MaterialFrameMap.end())
 					{
-						Console::Log("[SceneLoader Error] commonmaterialframe not found\n");
+						Console::Log("[SceneLoader Error] defaultmaterialframe not found\n");
 
 						return false;
 					}
 
 					// ‰¼ŽÀ‘•
-					pLoadWorker->AddLoadResource(std::make_shared<resource::C3DObjectLoader>(filename, Object, MaterialFrame->second, commonmaterialframe));
+					pLoadWorker->AddLoadResource(std::make_shared<resource::C3DObjectLoader>(filename, Object, MaterialFrame->second, defaultmaterialframe));
 				}
 			}
 

@@ -12,7 +12,7 @@ namespace gui
 	{
 	}
 
-	bool CGraphicsEditingWindow::Draw(const app::CScriptApp* pApp)
+	bool CGraphicsEditingWindow::Draw(api::IGraphicsAPI* pGraphicsAPI, const app::CScriptApp* pApp)
 	{
 		if (!pApp) return true;
 
@@ -27,7 +27,7 @@ namespace gui
 		{
 			if (ImGui::BeginTabBar("MainMenuBar"))
 			{
-				if (!m_GUIObjectTab.Draw(pApp->GetObjectList())) return false;
+				if (!m_GUIObjectTab.Draw(pGraphicsAPI, pApp->GetObjectList(), pApp->GetSceneController())) return false;
 				if (!m_GUIResourcesTab.Draw(pApp->GetFileModifier().get())) return false;
 				if (!CGUIRenderingTab::Draw()) return false;
 				if (!CGUICameraTab::Draw()) return false;

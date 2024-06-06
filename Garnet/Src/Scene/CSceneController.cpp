@@ -307,8 +307,6 @@ namespace scene
 			// Material‚ğ¶¬
 			auto Material = MaterialFrame->second->CreateMaterial(pGraphicsAPI, MaterialInfo.RefCount, MaterialInfo.CullMode);
 
-			Material->SetRefMaterialFrameName(MaterialInfo.MaterialFrameName);
-
 			// UniformValue‚ğİ’è
 			for (const auto& UniformInfo : MaterialInfo.UniformInfoList)
 			{

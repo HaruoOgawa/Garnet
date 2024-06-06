@@ -27,7 +27,7 @@ namespace graphics
 
 		int m_CreateCounter;
 
-		std::string m_MaterialName;
+		std::string m_MaterialFrameName;
 
 		std::string m_FileName;
 
@@ -39,7 +39,8 @@ namespace graphics
 		CMaterialFrame();
 		virtual ~CMaterialFrame();
 
-		void SetMaterialName(const std::string& Name);
+		void SetMaterialFrameName(const std::string& Name);
+		const std::string& GetMaterialFrameName() const;
 
 		void SetFileName(const std::string& Name);
 		const std::string& GetFileName() const;
@@ -50,6 +51,7 @@ namespace graphics
 		void SetTextureBufferList(const std::vector<graphics::STextureBindingLayout>& TextureBufferList);
 
 		std::shared_ptr<CMaterial> CreateMaterial(api::IGraphicsAPI* pGraphicsAPI, int RefCount, graphics::ECullMode CullMode);
+		bool DeleteRefMaterial(const std::shared_ptr<graphics::CMaterial>& Material);
 
 		bool Reload();
 	};

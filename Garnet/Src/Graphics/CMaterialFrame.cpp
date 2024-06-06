@@ -4,7 +4,7 @@ namespace graphics
 {
 	CMaterialFrame::CMaterialFrame():
 		m_CreateCounter(0),
-		m_MaterialName(std::string()),
+		m_MaterialFrameName(std::string()),
 		m_FileName(std::string()),
 		m_CreateInfo(nullptr)
 	{
@@ -14,9 +14,14 @@ namespace graphics
 	{
 	}
 
-	void CMaterialFrame::SetMaterialName(const std::string& Name)
+	void CMaterialFrame::SetMaterialFrameName(const std::string& Name)
 	{
-		m_MaterialName = Name;
+		m_MaterialFrameName = Name;
+	}
+
+	const std::string& CMaterialFrame::GetMaterialFrameName() const
+	{
+		return m_MaterialFrameName;
 	}
 
 	void CMaterialFrame::SetFileName(const std::string& Name)
@@ -51,7 +56,7 @@ namespace graphics
 		std::shared_ptr<CMaterial> Material = pGraphicsAPI->CreateMaterial(m_CreateInfo, RefCount, CullMode);
 
 		// MaterialName
-		std::string MaterialName = m_MaterialName + "_" + std::to_string(m_CreateCounter);
+		std::string MaterialName = m_MaterialFrameName + "_" + std::to_string(m_CreateCounter);
 		Material->SetMaterialName(MaterialName);
 
 		// ShaderBuffer
@@ -98,9 +103,22 @@ namespace graphics
 		// カウンターを更新
 		m_CreateCounter++;
 
+		Material->SetMaterialFrame(shared_from_this());
 		m_RefMaterialList.push_back(Material);
 
 		return Material;
+	}
+
+	bool CMaterialFrame::DeleteRefMaterial(const std::shared_ptr<graphics::CMaterial>& Material)
+	{
+		const auto& it = std::find(m_RefMaterialList.begin(), m_RefMaterialList.end(), Material);
+
+		if (it == m_RefMaterialList.end()) return false;
+
+		m_RefMaterialList.erase(it);
+		m_RefMaterialList.shrink_to_fit();
+
+		return true;
 	}
 
 	bool CMaterialFrame::Reload()

@@ -9,7 +9,7 @@ namespace scene
 {
 	bool CSceneWriter::Write(CSceneController* pSceneController)
 	{
-		json SceneJSON;
+		ordered_json SceneJSON;
 
 		// シーンJSONに現在の状態を書き出し
 		if (!WriteScene(SceneJSON, pSceneController)) return false;
@@ -23,16 +23,14 @@ namespace scene
 		std::memcpy(&Data[0], &JSONStr[0], static_cast<int>(JSONStr.size()));
 
 		// ファイル書き出し
-		// ToDo: 今はテスト実装なのでファイルを直指定している
-		resource::CFile File = resource::CFile("Resources\\Scene\\SceneWriteTest.json");
-		//resource::CFile File = resource::CFile(pSceneController->GetFileName());
+		resource::CFile File = resource::CFile(pSceneController->GetFileName());
 		File.SetData(Data);
 		if (!File.Write()) return false;
 
 		return true;
 	}
 
-	bool CSceneWriter::WriteScene(json& SceneJSON, CSceneController* pSceneController)
+	bool CSceneWriter::WriteScene(ordered_json& SceneJSON, CSceneController* pSceneController)
 	{
 		if (!WriteMaterialFrames(SceneJSON, pSceneController)) return false;
 		if (!WriteSceneTextureSet(SceneJSON, pSceneController)) return false;
@@ -43,7 +41,7 @@ namespace scene
 		return true;
 	}
 
-	bool CSceneWriter::WriteMaterialFrames(json& SceneJSON, CSceneController* pSceneController)
+	bool CSceneWriter::WriteMaterialFrames(ordered_json& SceneJSON, CSceneController* pSceneController)
 	{
 		const auto& MaterialFrameMap = pSceneController->GetMaterialFrameMap();
 
@@ -55,7 +53,7 @@ namespace scene
 		return true;
 	}
 
-	bool CSceneWriter::WriteSceneTextureSet(json& SceneJSON, CSceneController* pSceneController)
+	bool CSceneWriter::WriteSceneTextureSet(ordered_json& SceneJSON, CSceneController* pSceneController)
 	{
 		const auto& SceneTextureSet = pSceneController->GetSceneTextureSet();
 
@@ -91,7 +89,7 @@ namespace scene
 		return true;
 	}
 
-	bool CSceneWriter::WriteAnimations(json& SceneJSON, CSceneController* pSceneController)
+	bool CSceneWriter::WriteAnimations(ordered_json& SceneJSON, CSceneController* pSceneController)
 	{
 		const auto& AnimationClipSetMap = pSceneController->GetAnimationClipSetMap();
 
@@ -103,7 +101,7 @@ namespace scene
 		return true;
 	}
 
-	bool CSceneWriter::WriteSound(json& SceneJSON, CSceneController* pSceneController)
+	bool CSceneWriter::WriteSound(ordered_json& SceneJSON, CSceneController* pSceneController)
 	{
 		const auto& Sound = pSceneController->GetSound();
 
@@ -123,7 +121,7 @@ namespace scene
 		return true;
 	}
 
-	bool CSceneWriter::WriteObjects(json& SceneJSON, CSceneController* pSceneController)
+	bool CSceneWriter::WriteObjects(ordered_json& SceneJSON, CSceneController* pSceneController)
 	{
 		const auto& ObjectList = pSceneController->GetObjectList();
 
@@ -141,15 +139,14 @@ namespace scene
 				}
 			}
 
-			json ObjectJSON;
+			ordered_json ObjectJSON;
 
 			ObjectJSON["name"] = Object->GetObjectName();
 			ObjectJSON["filename"] = Object->GetFileName();
 
-			// ToDo: 今後ファイルオブジェクトのマテリアルも編集できるようにリファクタリングするが、C3DObjectに仮登録しているCommonMaterialFrameを使う
 			if (StoredFile3DModel)
 			{
-				ObjectJSON["commonmaterialframe"] = Object->GetCommonMaterialFrame();
+				ObjectJSON["defaultmaterialframe"] = Object->GetDefaultMaterialFrame();
 			}
 
 			// animation
@@ -204,13 +201,11 @@ namespace scene
 			}
 
 			// materials
-			if (!StoredFile3DModel)
 			{
 				if (!WriteMaterials(ObjectJSON, Object.get(), TextureInfoList)) return false;
 			}
 
 			// textureset
-			if (!StoredFile3DModel)
 			{
 				if (!WriteTextureSet(ObjectJSON, Object.get(), TextureInfoList)) return false;
 			}
@@ -222,13 +217,13 @@ namespace scene
 		return true;
 	}
 
-	bool CSceneWriter::WriteNodes(json& ObjectJSON, object::C3DObject* pObject)
+	bool CSceneWriter::WriteNodes(ordered_json& ObjectJSON, object::C3DObject* pObject)
 	{
 		const auto& NodeList = pObject->GetNodeList();
 
 		for (const auto& Node : NodeList)
 		{
-			json node;
+			ordered_json node;
 
 			node["name"] = Node->GetName();
 
@@ -257,19 +252,19 @@ namespace scene
 		return true;
 	}
 
-	bool CSceneWriter::WriteMeshs(json& ObjectJSON, object::C3DObject* pObject)
+	bool CSceneWriter::WriteMeshs(ordered_json& ObjectJSON, object::C3DObject* pObject)
 	{
 		const auto& MeshList = pObject->GetMeshList();
 
 		for (const auto& Mesh : MeshList)
 		{
-			json meshJSON;
+			ordered_json meshJSON;
 
 			const auto& PrimitiveList = Mesh->GetPrimitiveList();
 
 			for (const auto& Primitive : PrimitiveList)
 			{
-				json primitiveJSON;
+				ordered_json primitiveJSON;
 
 				graphics::EPresetPrimitiveType PresetType = Primitive->GetPresetType();
 				std::string type = std::string();
@@ -306,7 +301,7 @@ namespace scene
 		return true;
 	}
 
-	bool CSceneWriter::WriteMaterials(json& ObjectJSON, object::C3DObject* pObject, const std::map<std::string, std::shared_ptr<graphics::CTexture>>& TextureInfoList)
+	bool CSceneWriter::WriteMaterials(ordered_json& ObjectJSON, object::C3DObject* pObject, const std::map<std::string, std::shared_ptr<graphics::CTexture>>& TextureInfoList)
 	{
 		const auto& MaterialList = pObject->GetMaterialList();
 		const auto& TextureSet = pObject->GetTextureSet();
@@ -314,11 +309,12 @@ namespace scene
 
 		for (const auto& Material : MaterialList)
 		{
-			json materialJSON;
+			ordered_json materialJSON;
 
 			// materialframe
-			// ToDo: あとでリファクタリングが必要かも
-			materialJSON["materialframe"] = Material->GetRefMaterialFrameName();
+			const auto& MaterialFrame = Material->GetMaterialFrame();
+			if (!MaterialFrame) return false;
+			materialJSON["materialframe"] = MaterialFrame->GetMaterialFrameName();
 
 			// cull
 			{
@@ -410,7 +406,7 @@ namespace scene
 						Value.resize(UniformData.ByteSize / sizeof(float));
 						std::memcpy(&Value[0], &BufferData[UniformData.ByteOffset], UniformData.ByteSize);
 
-						json valueJSON;
+						ordered_json valueJSON;
 
 						for (auto v : Value)
 						{
@@ -444,11 +440,13 @@ namespace scene
 
 						const auto& Texture = Texture2DList[TextureIndex];
 						const auto& it = std::find_if(TextureInfoList.begin(), TextureInfoList.end(), [&](const auto& val) { return (Texture == val.second); });
-						if (it == TextureInfoList.end()) continue;
+						
+						if (it != TextureInfoList.end())
+						{
+							RefTextureName = it->first;
 
-						RefTextureName = it->first;
-
-						TextureIndex = -1;
+							TextureIndex = -1;
+						}
 					}
 
 					materialJSON["textures"].push_back({
@@ -465,7 +463,7 @@ namespace scene
 		return true;
 	}
 
-	bool CSceneWriter::WriteTextureSet(json& ObjectJSON, object::C3DObject* pObject, const std::map<std::string, std::shared_ptr<graphics::CTexture>>& TextureInfoList)
+	bool CSceneWriter::WriteTextureSet(ordered_json& ObjectJSON, object::C3DObject* pObject, const std::map<std::string, std::shared_ptr<graphics::CTexture>>& TextureInfoList)
 	{
 		const auto& TextureSet = pObject->GetTextureSet();
 
@@ -475,7 +473,7 @@ namespace scene
 			if (it == TextureInfoList.end()) continue;
 
 			ObjectJSON["textureset"].push_back({
-				{ "name", it->first }, // ToDo: リファクタリングが必要かも
+				{ "name", it->first }, 
 				{ "filename", Texture2D->GetFileName() },
 			});
 		}
@@ -483,9 +481,9 @@ namespace scene
 		return true;
 	}
 
-	bool CSceneWriter::WriteAnimation(json& ObjectJSON, object::C3DObject* pObject, const SAnimationInfo& AnimationInfo)
+	bool CSceneWriter::WriteAnimation(ordered_json& ObjectJSON, object::C3DObject* pObject, const SAnimationInfo& AnimationInfo)
 	{
-		json animationJSON;
+		ordered_json animationJSON;
 
 		const auto& AnimationController = pObject->GetAnimationController();
 		const auto& BlendShapeController = pObject->GetBlendShapeController();

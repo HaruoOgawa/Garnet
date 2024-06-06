@@ -5,7 +5,7 @@ namespace graphics
 {
 	CMaterial::CMaterial(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CMaterialCreateInfo>& createInfo, int RefCount, ECullMode CullMode):
 		m_MaterialName(std::string()),
-		m_RefMaterialFrameName(std::string()),
+		m_MaterialFrame(nullptr),
 		m_CreateInfo(createInfo),
 		m_RefCount(RefCount),
 		m_CurrentDynamicOffset(0),
@@ -57,14 +57,21 @@ namespace graphics
 		return m_MaterialName;
 	}
 
-	void CMaterial::SetRefMaterialFrameName(const std::string& Name)
+	const std::shared_ptr<CMaterialFrame>& CMaterial::GetMaterialFrame() const
 	{
-		m_RefMaterialFrameName = Name;
+		return m_MaterialFrame;
 	}
 
-	const std::string& CMaterial::GetRefMaterialFrameName() const
+	void CMaterial::SetMaterialFrame(const std::shared_ptr<CMaterialFrame>& MaterialFrame)
 	{
-		return m_RefMaterialFrameName;
+		m_MaterialFrame = MaterialFrame;
+	}
+
+	bool CMaterial::DeleteMaterialFrameReference()
+	{
+		if (!m_MaterialFrame) return false;
+
+		return m_MaterialFrame->DeleteRefMaterial(shared_from_this());
 	}
 
 	std::vector<std::shared_ptr<CShaderBuffer>>& CMaterial::GetShaderBufferList()
@@ -75,6 +82,15 @@ namespace graphics
 	const std::vector<STextureBindingLayout>& CMaterial::GetTextureBindingLayoutList() const
 	{
 		return m_TextureBindingLayoutList;
+	}
+
+	void CMaterial::SetTextureBindingLayoutTextureIndex(int BindingLayoutIndex, int TextureIndex, const std::shared_ptr<graphics::CTextureSet>& TextureSet)
+	{
+		if (BindingLayoutIndex < 0 || BindingLayoutIndex >= static_cast<int>(m_TextureBindingLayoutList.size())) return;
+
+		m_TextureBindingLayoutList[BindingLayoutIndex].TextureIndex = TextureIndex;
+
+		CreateRefTextureList(m_CreateInfo, TextureSet);
 	}
 
 	bool CMaterial::CreateDepthMaterial(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<graphics::CMaterialFrame>& DepthMF)
@@ -254,8 +270,6 @@ namespace graphics
 			for (int ImageInfoIndex = 0, TextureBindingLayoutIndex = 0; ImageInfoIndex < TexLayoutSize; ImageInfoIndex += 2, TextureBindingLayoutIndex++)
 			{
 				const auto& TexLayout = m_TextureBindingLayoutList[TextureBindingLayoutIndex];
-
-				int TextureIndex = TexLayout.TextureIndex;
 
 				if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_2D)
 				{

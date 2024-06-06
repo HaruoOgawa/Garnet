@@ -36,7 +36,7 @@ namespace resource
 		std::unordered_map <std::string, std::shared_ptr<IResource>> m_TextureFileList;
 
 		// MfData
-		std::string m_MaterialName;
+		std::string m_MaterialFrameName;
 
 		std::vector<graphics::SShaderBufferSet> m_ShaderBufferList;
 		std::vector<graphics::STextureBindingLayout> m_TextureBufferList;

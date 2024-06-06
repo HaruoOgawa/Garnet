@@ -3,23 +3,23 @@
 
   "materialframes": [
     {
-      "name": "basic_toon_mf",
+      "name": "basic_toon_mat",
       "filename": "Resources/MaterialFrame/basic_toon_mf.json"
     },
     {
-      "name": "SimpleTexture_MF",
+      "name": "simple_texture_mat",
       "filename": "Resources/MaterialFrame/SimpleTexture_MF.json"
     },
     {
-      "name": "Depth_MF",
+      "name": "depth_mat",
       "filename": "Resources/MaterialFrame/Depth_MF.json"
     },
     {
-      "name": "PBR_MF",
+      "name": "pbr_mat",
       "filename": "Resources/MaterialFrame/PBR_MF.json"
     },
     {
-      "name": "raymarching_mf",
+      "name": "raymarching_mat",
       "filename": "Resources/MaterialFrame/raymarching_mf.json"
     }
   ],
@@ -84,7 +84,7 @@
     {
       "name": "glTFObj",
       "filename": "Resources/Models/BrainStem/glTF-Binary/BrainStem.glb",
-      "commonmaterialframe": "PBR_MF",
+      "defaultmaterialframe": "pbr_mat",
       "transform": {
         "pos": [ -1.0, 0.0, 0.0 ],
         "rotate": [ 0.0, 0.0, 0.0 ],
@@ -98,7 +98,7 @@
     {
       "name": "FbxObj",
       "filename": "Resources/Avatar/Warrok_W_Kurniawan.fbx",
-      "commonmaterialframe": "PBR_MF",
+      "defaultmaterialframe": "pbr_mat",
       "transform": {
         "pos": [ -2.0, 0.0, 0.0 ],
         "rotate": [ 0.0, 0.0, 0.0 ],
@@ -124,7 +124,7 @@
     {
       "name": "PmxObj",
       "filename": "Resources/Avatar/Tda_Miku/Tda_Miku.pmx",
-      "commonmaterialframe": "basic_toon_mf",
+      "defaultmaterialframe": "basic_toon_mat",
       "transform": {
         "pos": [ 3.0, 0.0, 0.0 ],
         "rotate": [ 0.0, 0.0, 0.0 ],
@@ -198,7 +198,7 @@
       ],
       "materials": [
         {
-          "materialframe": "SimpleTexture_MF",
+          "materialframe": "simple_texture_mat",
           "cull": "front",
           "uniformvalues": [
             {
@@ -300,7 +300,7 @@
       ],
       "materials": [
         {
-          "materialframe": "PBR_MF",
+          "materialframe": "pbr_mat",
           "uniformvalues": [
             {
               "name": "baseColorFactor",

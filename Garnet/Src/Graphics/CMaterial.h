@@ -27,11 +27,12 @@ namespace graphics
 	class CMaterialFrame;
 	class CDrawInfo;
 
-	class CMaterial
+	class CMaterial : public std::enable_shared_from_this<CMaterial>
 	{
 	protected:
+		std::shared_ptr<CMaterialFrame> m_MaterialFrame;
+
 		std::string m_MaterialName;
-		std::string m_RefMaterialFrameName;
 
 		std::shared_ptr<CMaterialCreateInfo> m_CreateInfo;
 
@@ -75,12 +76,14 @@ namespace graphics
 
 		virtual void SetMaterialName(const std::string& Name);
 		virtual const std::string& GetMaterialName() const;
-		
-		virtual void SetRefMaterialFrameName(const std::string& Name);
-		virtual const std::string& GetRefMaterialFrameName() const;
+
+		virtual const std::shared_ptr<CMaterialFrame>& GetMaterialFrame() const;
+		virtual void SetMaterialFrame(const std::shared_ptr<CMaterialFrame>& MaterialFrame);
+		virtual bool DeleteMaterialFrameReference();
 
 		virtual std::vector<std::shared_ptr<CShaderBuffer>>& GetShaderBufferList();
 		virtual const std::vector<STextureBindingLayout>& GetTextureBindingLayoutList() const;
+		virtual void SetTextureBindingLayoutTextureIndex(int BindingLayoutIndex, int TextureIndex, const std::shared_ptr<graphics::CTextureSet>& TextureSet);
 
 		virtual bool Create(const std::shared_ptr<graphics::CTextureSet>& TextureSet) = 0;
 		virtual bool CreateDepthMaterial(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<graphics::CMaterialFrame>& DepthMF);

@@ -1,15 +1,18 @@
 #ifdef USE_GUIENGINE
 #include "CGUIMaterialTab.h"
+#include "../../Scene/CSceneController.h"
+#include "../../Interface/IGraphicsAPI.h"
 #include "../../Object/C3DObject.h"
 #include <set>
 
 namespace gui
 {
-	bool CGUIMaterialTab::Draw(const std::vector<std::shared_ptr<object::C3DObject>>& ObjectList, int SelectedObjectIndex, int SelectedNodeIndex)
+	bool CGUIMaterialTab::Draw(api::IGraphicsAPI* pGraphicsAPI, const std::vector<std::shared_ptr<object::C3DObject>>& ObjectList, const std::shared_ptr<scene::CSceneController>& SceneController, 
+		int SelectedObjectIndex, int SelectedNodeIndex)
 	{
 		if (ImGui::BeginTabItem("Material"))
 		{
-			DrawMaterialGUI(ObjectList, SelectedObjectIndex, SelectedNodeIndex);
+			DrawMaterialGUI(pGraphicsAPI, ObjectList, SceneController, SelectedObjectIndex, SelectedNodeIndex);
 
 			ImGui::EndTabItem();
 		}
@@ -17,7 +20,8 @@ namespace gui
 		return true;
 	}
 
-	bool CGUIMaterialTab::DrawMaterialGUI(const std::vector<std::shared_ptr<object::C3DObject>>& ObjectList, int SelectedObjectIndex, int SelectedNodeIndex)
+	bool CGUIMaterialTab::DrawMaterialGUI(api::IGraphicsAPI* pGraphicsAPI, const std::vector<std::shared_ptr<object::C3DObject>>& ObjectList, const std::shared_ptr<scene::CSceneController>& SceneController, 
+		int SelectedObjectIndex, int SelectedNodeIndex)
 	{
 		if (SelectedObjectIndex == -1 || SelectedNodeIndex == -1) return true;
 
@@ -59,6 +63,36 @@ namespace gui
 				// マテリアル名
 				if (ImGui::TreeNodeEx(Material->GetMaterialName().c_str(), ImGuiTreeNodeFlags_Framed))
 				{
+					// MaterialFrame
+					if (pGraphicsAPI->IsEnabledRuntimeShaderEditing())
+					{
+						const auto& CurrentMaterialFrame = Material->GetMaterialFrame();
+
+						if (CurrentMaterialFrame)
+						{
+							if (ImGui::BeginCombo("MaterialFrame##CGUIMaterialTab", CurrentMaterialFrame->GetMaterialFrameName().c_str()))
+							{
+								const auto& MaterialFrameMap = SceneController->GetMaterialFrameMap();
+
+								for (const auto& MaterialFrame : MaterialFrameMap)
+								{
+									const bool IsSelected = (CurrentMaterialFrame == MaterialFrame.second);
+
+									std::string Label = MaterialFrame.first;
+									if (ImGui::Selectable(Label.c_str(), IsSelected) && !IsSelected)
+									{
+										// マテリアルの置き換え
+										auto NewMaterial = MaterialFrame.second->CreateMaterial(pGraphicsAPI, Material->GetRefCount(), Material->GetCullMode());
+										Object->ReplaceMaterial(Material, NewMaterial);
+									}
+								}
+
+								ImGui::EndCombo();
+							}
+						}
+					}
+
+					// Uniform
 					auto& ShaderBufferList = Material->GetShaderBufferList();
 
 					for (auto& UniformBuffer : ShaderBufferList)
@@ -256,6 +290,67 @@ namespace gui
 								continue;
 							default:
 								break;
+							}
+						}
+					}
+
+					// Texture
+					if (pGraphicsAPI->IsEnabledRuntimeShaderEditing())
+					{
+						const auto& TextureSet = Object->GetTextureSet();
+
+						for (int BindingLayoutIndex = 0; BindingLayoutIndex < static_cast<int>(Material->GetTextureBindingLayoutList().size()); BindingLayoutIndex++)
+						{
+							const auto& TextureBindingLayout = Material->GetTextureBindingLayoutList()[BindingLayoutIndex];
+
+							int TextureIndex = TextureBindingLayout.TextureIndex;
+							int PrevTextureIndex = TextureIndex;
+
+							std::string Label = TextureBindingLayout.TextureName + "##InputInt_Texture_CGUIMaterialTab";
+
+							if (ImGui::InputInt(Label.c_str(), &TextureIndex) && TextureIndex != PrevTextureIndex)
+							{
+								switch (TextureBindingLayout.TextureUsage)
+								{
+								case graphics::ETextureUsage::TEXTURE_USAGE_2D:
+									if (TextureIndex >= -1 && TextureIndex < static_cast<int>(TextureSet->Get2DTextureList().size()))
+									{
+										Material->SetTextureBindingLayoutTextureIndex(BindingLayoutIndex, TextureIndex, TextureSet);
+									}
+									break;
+								case graphics::ETextureUsage::TEXTURE_USAGE_CUBE:
+									if (TextureIndex >= -1 && TextureIndex < static_cast<int>(TextureSet->GetCubeMapList().size()))
+									{
+										Material->SetTextureBindingLayoutTextureIndex(BindingLayoutIndex, TextureIndex, TextureSet);
+									}
+									break;
+								case graphics::ETextureUsage::TEXTURE_USAGE_FRAME:
+									if (TextureIndex >= -1 && TextureIndex < static_cast<int>(TextureSet->GetFrameTextureList().size()))
+									{
+										Material->SetTextureBindingLayoutTextureIndex(BindingLayoutIndex, TextureIndex, TextureSet);
+									}
+									break;
+								case graphics::ETextureUsage::TEXTURE_USAGE_IBL_Diffuse:
+									if ((TextureIndex == 0 || TextureIndex == -1) && TextureSet->GetDiffuse_Tex())
+									{
+										Material->SetTextureBindingLayoutTextureIndex(BindingLayoutIndex, TextureIndex, TextureSet);
+									}
+									break;
+								case graphics::ETextureUsage::TEXTURE_USAGE_IBL_Specular:
+									if ((TextureIndex == 0 || TextureIndex == -1) && TextureSet->GetSpecular_Tex())
+									{
+										Material->SetTextureBindingLayoutTextureIndex(BindingLayoutIndex, TextureIndex, TextureSet);
+									}
+									break;
+								case graphics::ETextureUsage::TEXTURE_USAGE_IBL_GGXLUT:
+									if ((TextureIndex == 0 || TextureIndex == -1) && TextureSet->GetGGXLUT_Tex())
+									{
+										Material->SetTextureBindingLayoutTextureIndex(BindingLayoutIndex, TextureIndex, TextureSet);
+									}
+									break;
+								default:
+									break;
+								}
 							}
 						}
 					}

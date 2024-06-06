@@ -8,7 +8,7 @@ namespace resource
 		CResource(filename, 2),
 		m_AnalyseDone(false),
 		m_CreateInfo(std::make_shared<graphics::CMaterialCreateInfo>()),
-		m_MaterialName(std::string())
+		m_MaterialFrameName(std::string())
 	{
 		m_TargetMaterialFrameSet.emplace(TargetMaterialFrame);
 
@@ -132,7 +132,7 @@ namespace resource
 		const auto MaterialName = m_MfJson.find("name");
 		if (MaterialName != m_MfJson.end() && MaterialName->is_string())
 		{
-			m_MaterialName = MaterialName.value();
+			m_MaterialFrameName = MaterialName.value();
 		}
 
 		// shaderList
@@ -597,7 +597,7 @@ namespace resource
 		{
 			if (MaterialFrame)
 			{
-				MaterialFrame->SetMaterialName(m_MaterialName);
+				MaterialFrame->SetMaterialFrameName(m_MaterialFrameName);
 				MaterialFrame->SetCreateInfo(m_CreateInfo);
 				MaterialFrame->SetShaderBufferList(m_ShaderBufferList);
 				MaterialFrame->SetTextureBufferList(m_TextureBufferList);

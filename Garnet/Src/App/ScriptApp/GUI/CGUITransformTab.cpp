@@ -54,11 +54,16 @@ namespace gui
 		// Rotate
 		glm::quat Rot = Transform->GetRot();
 		glm::vec3 Euler = glm::eulerAngles(Rot);
+		glm::vec3 Degree = glm::vec3(glm::degrees(Euler.x), glm::degrees(Euler.y), glm::degrees(Euler.z));
+		const glm::vec3 PreDegree = Degree;
 
-		if (ImGui::InputFloat3("Rotation", &Euler[0]))
+		if (ImGui::InputFloat3("Rotation", &Degree[0]))
 		{
-			Rot = glm::angleAxis(Euler.z, glm::vec3(0.0f, 0.0f, 1.0f)) * glm::angleAxis(Euler.y, glm::vec3(0.0f, 1.0f, 0.0f)) * glm::angleAxis(Euler.x, glm::vec3(1.0f, 0.0f, 0.0f));
-
+			if (PreDegree.x != Degree.x || PreDegree.y != Degree.y || PreDegree.z != Degree.z)
+			{
+				Rot = glm::angleAxis(glm::radians(Degree.z), glm::vec3(0.0f, 0.0f, 1.0f)) * glm::angleAxis(glm::radians(Degree.y), glm::vec3(0.0f, 1.0f, 0.0f)) * glm::angleAxis(glm::radians(Degree.x), glm::vec3(1.0f, 0.0f, 0.0f));
+			}
+			
 			Transform->SetRot(Rot);
 		}
 

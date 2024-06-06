@@ -95,7 +95,6 @@ namespace api
 		for (const auto& TexLayout : m_TextureBindingLayoutList)
 		{
 			std::shared_ptr<graphics::CTexture> Texture = nullptr;
-			int TextureIndex = TexLayout.TextureIndex;
 
 			if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_2D)
 			{
@@ -130,7 +129,7 @@ namespace api
 
 			if (!Texture)
 			{
-				Console::Log("[ERROR] Texture is nullpte\n");
+				Console::Log("[ERROR] Texture is nullptr\n");
 				return false;
 			}
 

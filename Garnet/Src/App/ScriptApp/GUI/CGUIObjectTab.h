@@ -6,6 +6,9 @@
 #include <vector>
 #include <memory>
 
+namespace api { class IGraphicsAPI; }
+namespace scene { class CSceneController; }
+
 namespace object { 
 	class C3DObject; 
 	class CNode;
@@ -33,7 +36,7 @@ namespace gui
 		CGUIObjectTab();
 		virtual ~CGUIObjectTab() = default;
 
-		bool Draw(const std::vector<std::shared_ptr<object::C3DObject>>& ObjectList);
+		bool Draw(api::IGraphicsAPI* pGraphicsAPI, const std::vector<std::shared_ptr<object::C3DObject>>& ObjectList, const std::shared_ptr<scene::CSceneController>& SceneController);
 	};
 }
 #endif
