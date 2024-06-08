@@ -265,7 +265,15 @@ namespace window
 		
 		//glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
-		m_pWindow = glfwCreateWindow(Width, Height, "Garnet", nullptr, nullptr);
+#ifdef USE_WEBGPU
+		std::string Title = "Garnet (WebGPU)";
+#elif USE_VULKAN
+		std::string Title = "Garnet (Vulkan)";
+#elif USE_OPENGL
+		std::string Title = "Garnet (OpenGL)";
+#endif // USE_WEBGPU
+
+		m_pWindow = glfwCreateWindow(Width, Height, Title.c_str(), nullptr, nullptr);
 
 #ifdef USE_OPENGL
 		glfwMakeContextCurrent(m_pWindow);

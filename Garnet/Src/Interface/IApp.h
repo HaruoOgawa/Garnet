@@ -2,17 +2,29 @@
 
 #include "IGraphicsAPI.h"
 #include <memory>
+#include <vector>
 
-namespace camera { class CCamera; }
-namespace resource { class CLoadWorker; }
-namespace graphics { class CDrawInfo; }
-namespace input { class CInputState; }
-namespace gui { class IGUIEngine; }
-namespace object { class C3DObject; }
 namespace physics { class IPhysicsEngine; }
+namespace camera { class CCamera; }
+namespace projection { class CProjection; }
+namespace graphics { class CDrawInfo; }
+namespace imageeffect { class CBlurEffect; }
+namespace resource { class CLoadWorker; }
+namespace input { class CInputState; }
+namespace object { class C3DObject; }
+namespace scene { class CSceneController; }
+
+namespace gui
+{
+	class IGUIEngine;
+	class CGraphicsEditingWindow;
+}
 
 namespace app
 {
+	class CScriptScene;
+	class CFileModifier;
+
 	class IApp
 	{
 	public:

@@ -380,12 +380,20 @@ namespace window
 			nHeight = CW_USEDEFAULT;
 		}
 
+#ifdef USE_WEBGPU
+		std::wstring Title = L"Garnet (WebGPU)";
+#elif USE_VULKAN
+		std::wstring Title = L"Garnet (Vulkan)";
+#elif USE_OPENGL
+		std::wstring Title = L"Garnet (OpenGL)";
+#endif // USE_WEBGPU
+
 		// ウィンドウを生成
 		m_Window = CreateWindowEx(
 			// https://learn.microsoft.com/ja-jp/windows/win32/winmsg/extended-window-styles
 			WS_EX_APPWINDOW, // WindowStyleの拡張
 			window_class.lpszClassName, // WindowClassの名前. 先ほど登録しておいたもの
-			L"Garnet", // WindowName
+			Title.c_str(), // WindowName
 			// WindowStyle : https://learn.microsoft.com/en-us/windows/win32/winmsg/window-styles
 			dwStyle, // WindosStyle. たぶんWindowに出てくるボタンとかタブの設定
 			nWidth, // 位置 X (適当な値)

@@ -127,53 +127,53 @@
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugGLFW|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugGL|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugWG|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
     <EnableASAN>false</EnableASAN>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseGL|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='CompGL|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseWG|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -457,6 +457,12 @@
       <Command>
       </Command>
     </PostBuildEvent>
+    <Lib>
+      <AdditionalDependencies>glfw3.lib;vulkan-1.lib;libfbxsdk-md.lib;libxml2-md.lib;zlib-md.lib;Winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Lib>
+    <Lib>
+      <AdditionalLibraryDirectories>$(ProjectDir)src\Library\GLFW\lib;$(ProjectDir)src\Library\Vulkan\lib;$(ProjectDir)Src\Library\FBX-SDK\lib\vs2022\x64\debug;$(ProjectDir)Src\Library\FBX-SDK\lib\vs2022\x64\release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugGLFW|x64'">
     <ClCompile>
@@ -478,6 +484,12 @@
       <Command>
       </Command>
     </PostBuildEvent>
+    <Lib>
+      <AdditionalDependencies>glfw3.lib;opengl32.lib;libfbxsdk-md.lib;libxml2-md.lib;zlib-md.lib;Winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Lib>
+    <Lib>
+      <AdditionalLibraryDirectories>$(ProjectDir)src\Library\GLFW\lib;$(ProjectDir)Src\Library\FBX-SDK\lib\vs2022\x64\debug;$(ProjectDir)Src\Library\FBX-SDK\lib\vs2022\x64\release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugGL|x64'">
     <ClCompile>
@@ -499,6 +511,12 @@
       <Command>
       </Command>
     </PostBuildEvent>
+    <Lib>
+      <AdditionalDependencies>opengl32.lib;libfbxsdk-md.lib;libxml2-md.lib;zlib-md.lib;Winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Lib>
+    <Lib>
+      <AdditionalLibraryDirectories>$(ProjectDir)Src\Library\FBX-SDK\lib\vs2022\x64\debug;$(ProjectDir)Src\Library\FBX-SDK\lib\vs2022\x64\release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugWG|x64'">
     <ClCompile>
@@ -520,6 +538,12 @@
       <Command>xcopy $(ProjectDir)src\Library\WebGPU\windows-x86_64\wgpu_native.dll $(OutDir) /y /s /i
 </Command>
     </PostBuildEvent>
+    <Lib>
+      <AdditionalDependencies>glfw3.lib;dxguid.lib;zlib.lib;Winmm.lib;SmallFBX.lib;wgpu_native.lib;//$(ProjectDir)Src\Library\DawnLib\bin\src\dawn\native\Debug\webgpu_dawn.lib;//$(ProjectDir)Src\Library\DawnLib\bin\src\dawn\Debug\dawncpp.lib;//$(ProjectDir)Src\Library\DawnLib\bin\src\dawn\native\Debug\dawn_native.lib;//$(ProjectDir)Src\Library\DawnLib\bin\src\dawn\platform\Debug\dawn_platform.lib;//$(ProjectDir)Src\Library\DawnLib\bin\src\tint\Debug\tint.lib;//$(ProjectDir)Src\Library\DawnLib\bin\src\tint\Debug\tint_diagnostic_utils.lib;//$(ProjectDir)Src\Library\DawnLib\bin\third_party\spirv-tools\source\opt\Debug\SPIRV-Tools-opt.lib;//$(ProjectDir)Src\Library\DawnLib\bin\third_party\spirv-tools\source\Debug\SPIRV-Tools.lib;//$(ProjectDir)Src\Library\DawnLib\bin\third_party\abseil\absl\strings\Debug\absl_str_format_internal.lib;//$(ProjectDir)Src\Library\DawnLib\bin\third_party\abseil\absl\strings\Debug\absl_strings.lib;//$(ProjectDir)Src\Library\DawnLib\bin\third_party\abseil\absl\strings\Debug\absl_strings_internal.lib;//$(ProjectDir)Src\Library\DawnLib\bin\third_party\abseil\absl\base\Debug\absl_base.lib;//$(ProjectDir)Src\Library\DawnLib\bin\third_party\abseil\absl\base\Debug\absl_spinlock_wait.lib;//$(ProjectDir)Src\Library\DawnLib\bin\third_party\abseil\absl\numeric\Debug\absl_int128.lib;//$(ProjectDir)Src\Library\DawnLib\bin\third_party\abseil\absl\base\Debug\absl_throw_delegate.lib;//$(ProjectDir)Src\Library\DawnLib\bin\third_party\abseil\absl\base\Debug\absl_raw_logging_internal.lib;//$(ProjectDir)Src\Library\DawnLib\bin\third_party\abseil\absl\base\Debug\absl_log_severity.lib;//$(ProjectDir)Src\Library\DawnLib\bin\src\dawn\common\Debug\dawn_common.lib;//$(ProjectDir)Src\Library\DawnLib\bin\src\dawn\Debug\dawncpp_headers.lib;//$(ProjectDir)Src\Library\DawnLib\bin\src\dawn\Debug\dawn_headers.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Lib>
+    <Lib>
+      <AdditionalLibraryDirectories>$(ProjectDir)src\Library\GLFW\lib;//$(ProjectDir)Src\Library\DawnLib\bin;$(ProjectDir)Src\Library\WebGPU\windows-x86_64;$(ProjectDir)Src\Library\SmallFBX\lib\debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -548,6 +572,12 @@ xcopy Resources $(OutDir)Resources /y /s /i
 del $(OutDir)Garnet.pdb
 xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     </PostBuildEvent>
+    <Lib>
+      <AdditionalDependencies>glfw3dll.lib;vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Lib>
+    <Lib>
+      <AdditionalLibraryDirectories>$(ProjectDir)src\Library\GLFW\lib;$(ProjectDir)src\Library\Vulkan\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseGL|x64'">
     <ClCompile>
@@ -575,6 +605,12 @@ del /s /q $(OutDir)Resources\*
 xcopy Resources $(OutDir)Resources /y /s /i
 del $(OutDir)Garnet.pdb</Command>
     </PostBuildEvent>
+    <Lib>
+      <AdditionalDependencies>opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Lib>
+    <Lib>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='CompGL|x64'">
     <ClCompile>
@@ -604,6 +640,9 @@ del $(OutDir)Garnet.pdb
 
 call $(ProjectDir)compress_tools\squishy-x64 -i "$(OutDir)Garnet.exe" -o "$(OutDir)Garnet.exe"</Command>
     </PostBuildEvent>
+    <Lib>
+      <AdditionalDependencies>opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseWG|x64'">
     <ClCompile>
@@ -634,6 +673,12 @@ xcopy $(ProjectDir)src\Library\WebGPU\windows-x86_64\wgpu_native.dll $(OutDir) /
 del $(OutDir)Garnet.pdb
 xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     </PostBuildEvent>
+    <Lib>
+      <AdditionalDependencies>glfw3dll.lib;dawn_common.lib;dawn_glfw.lib;dawn_headers.lib;dawn_native.lib;dawn_platform.lib;dawn_proc.lib;dawn_sample_utils.lib;dawn_utils.lib;dawn_wire.lib;dawncpp.lib;dawncpp_headers.lib;webgpu_dawn.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Lib>
+    <Lib>
+      <AdditionalLibraryDirectories>$(ProjectDir)src\Library\GLFW\lib;$(ProjectDir)src\Library\DawnLib\bin;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Src\Scene\CSceneWriter.h" />
