@@ -48,7 +48,7 @@ def Main():
     # 資材のコピー
     GarnetPath = AddPunct(args.input_garnet_path)
     GeneratePath = AddPunct(args.generate_path)
-    GarnetFramePath = AddPunct("./GarnetFrame/")
+    GarnetFramePath = AddPunct(GarnetPath + "../GarnetLauncher/GarnetFrame/")
 
     shutil.copytree(GarnetFramePath, GeneratePath, dirs_exist_ok=True)
     
