@@ -10,6 +10,8 @@ Garnet/EmscriptenBuild/nulcall
 Garnet/DebugGL/
 Garnet/ReleaseGL/
 Garnet/imgui.ini
+GarnetDev/imgui.ini
+GarnetLauncher/GarnetFrame/imgui.ini
 GarnetLauncher_Python/GarnetLauncher/GarnetLauncher/GarnetLauncher.spec
 GarnetLauncher_Python/GarnetLauncher/GarnetLauncher/build/
 
