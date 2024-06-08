@@ -1,23 +1,6 @@
 #pragma once
 #include <memory>
-
-#include "../../Interface/IApp.h"
-#include "../../Interface/IGraphicsAPI.h"
-
-namespace camera { class CCamera; }
-namespace projection { class CProjection; }
-namespace graphics { class CDrawInfo; }
-namespace imageeffect { class CBlurEffect; }
-namespace resource { class CLoadWorker; }
-namespace input { class CInputState; }
-namespace object { class C3DObject; }
-namespace scene { class CSceneController; }
-
-namespace gui
-{ 
-	class IGUIEngine; 
-	class CGraphicsEditingWindow; 
-}
+#include <Interface/IApp.h>
 
 namespace app
 {

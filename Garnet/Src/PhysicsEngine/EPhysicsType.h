@@ -1,6 +1,5 @@
 #pragma once
 
-#ifdef USE_PHYSICS
 namespace physics
 {
 	enum class EPhysicsType
@@ -10,4 +9,3 @@ namespace physics
 		DYNAMIC_JOINT = 2,
 	};
 }
-#endif

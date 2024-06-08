@@ -1,20 +1,20 @@
 #include "CScriptScene.h"
 
-#include "../../../LoadWorker/CLoadWorker.h"
-#include "../../../LoadWorker/CFile.h"
-#include "../../../LoadWorker/CMaterialFrameLoader.h"
-#include "../../../LoadWorker/CTextureLoader.h"
-#include "../../../LoadWorker/C3DObjectLoader.h"
-#include "../../../LoadWorker/CAnimationLoader.h"
-#include "../../../LoadWorker/CAudioLoader.h"
+#include <LoadWorker/CLoadWorker.h>
+#include <LoadWorker/CFile.h>
+#include <LoadWorker/CMaterialFrameLoader.h>
+#include <LoadWorker/CTextureLoader.h>
+#include <LoadWorker/C3DObjectLoader.h>
+#include <LoadWorker/CAnimationLoader.h>
+#include <LoadWorker/CAudioLoader.h>
 
-#include "../../../Message/Console.h"
+#include <Message/Console.h>
 
-#include "../../../Object/C3DObject.h"
-#include "../../../Animation/CAnimationClipSet.h"
-#include "../../../Graphics/CMaterialFrame.h"
+#include <Object/C3DObject.h>
+#include <Animation/CAnimationClipSet.h>
+#include <Graphics/CMaterialFrame.h>
 
-#include "../../../Scene/CSceneController.h"
+#include <Scene/CSceneController.h>
 
 namespace app
 {

@@ -3,8 +3,8 @@
 #include <vector>
 #include <glm/glm.hpp>
 
-#include "../../../Interface/IGraphicsAPI.h"
-#include "../../../Interface/IPhysicsEngine.h"
+#include <Interface/IGraphicsAPI.h>
+#include <Interface/IPhysicsEngine.h>
 
 namespace object { class C3DObject; }
 namespace camera { class CCamera; }

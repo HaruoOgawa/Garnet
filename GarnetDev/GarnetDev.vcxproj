@@ -104,7 +104,8 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>E:\CppDev\Garnet\Garnet/Src;E:\CppDev\Garnet\Garnet/Src\Library\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>E:\CppDev\Garnet\Garnet/Src;E:\CppDev\Garnet\Garnet/Src\Library\glm;E:\CppDev\Garnet\Garnet/Src\Library\json;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -120,6 +121,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>E:\CppDev\Garnet\Garnet/Src;E:\CppDev\Garnet\Garnet/Src\Library\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -134,11 +136,29 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Src\App\CApp.cpp" />
     <ClCompile Include="Src\Main\main.cpp" />
+    <ClCompile Include="Src\App\ScriptApp\CScriptApp.cpp" />
+    <ClCompile Include="Src\App\ScriptApp\GUI\CGraphicsEditingWindow.cpp" />
+    <ClCompile Include="Src\App\ScriptApp\GUI\CGUICameraTab.cpp" />
+    <ClCompile Include="Src\App\ScriptApp\GUI\CGUIMaterialTab.cpp" />
+    <ClCompile Include="Src\App\ScriptApp\GUI\CGUIObjectTab.cpp" />
+    <ClCompile Include="Src\App\ScriptApp\GUI\CGUIRenderingTab.cpp" />
+    <ClCompile Include="Src\App\ScriptApp\GUI\CGUIResourcesTab.cpp" />
+    <ClCompile Include="Src\App\ScriptApp\GUI\CGUITransformTab.cpp" />
+    <ClCompile Include="Src\App\ScriptApp\Model\CFileModifier.cpp" />
+    <ClCompile Include="Src\App\ScriptApp\Scene\CScriptScene.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Src\App\CApp.h" />
+    <ClInclude Include="Src\App\ScriptApp\CScriptApp.h" />
+    <ClInclude Include="Src\App\ScriptApp\GUI\CGraphicsEditingWindow.h" />
+    <ClInclude Include="Src\App\ScriptApp\GUI\CGUICameraTab.h" />
+    <ClInclude Include="Src\App\ScriptApp\GUI\CGUIMaterialTab.h" />
+    <ClInclude Include="Src\App\ScriptApp\GUI\CGUIObjectTab.h" />
+    <ClInclude Include="Src\App\ScriptApp\GUI\CGUIRenderingTab.h" />
+    <ClInclude Include="Src\App\ScriptApp\GUI\CGUIResourcesTab.h" />
+    <ClInclude Include="Src\App\ScriptApp\GUI\CGUITransformTab.h" />
+    <ClInclude Include="Src\App\ScriptApp\Model\CFileModifier.h" />
+    <ClInclude Include="Src\App\ScriptApp\Scene\CScriptScene.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\MaterialFrame\basic_toon_mf.json" />

@@ -1,6 +1,5 @@
 #pragma once
 
-#ifdef USE_PHYSICS
 namespace physics
 {
 	enum class EJointType
@@ -14,4 +13,3 @@ namespace physics
 		Slider = 5,
 	};
 }
-#endif
