@@ -4580,25 +4580,5 @@
     </None>
     <None Include="WebRelease\Resources\Shaders\frag.spv" />
     <None Include="WebRelease\Resources\Shaders\vert.spv" />
-    <None Include="Commands\MakeEmccBuild.py" />
-    <None Include="Commands\MakeEmccBuild.bat">
-      <Filter>ソース ファイル</Filter>
-    </None>
-    <None Include="Commands\RemakeCmakeLists.py" />
-    <None Include="Commands\RemakeCmakeLists_DescApp.py" />
-    <None Include="Commands\wgslc_ALL.bat">
-      <Filter>ソース ファイル</Filter>
-    </None>
-    <None Include="Commands\UTF8Encorder.py" />
-    <None Include="Commands\GetLibAndPath.py" />
-    <None Include="Commands\CompileGLSLToSpirV.bat">
-      <Filter>ソース ファイル</Filter>
-    </None>
-    <None Include="Commands\CompileSpirVToWGSL.bat">
-      <Filter>ソース ファイル</Filter>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="Commands\TestCmd.bat" />
   </ItemGroup>
 </Project>

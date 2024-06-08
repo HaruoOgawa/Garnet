@@ -102,9 +102,9 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;USE_TEXTURE_LOADER;USE_GLTF;USE_VIEWER_CAMERA;USE_INPUT_SYSTEM;USE_GPGPU;USE_FBX;USE_ANIMATION;USE_MMD;USE_PHYSICS;B3_USE_CLEW;//USE_GUIENGINE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>E:\CppDev\Garnet\Garnet/Src;E:\CppDev\Garnet\Garnet/Src\Library\glm;E:\CppDev\Garnet\Garnet/Src\Library\json;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>E:\CppDev\Garnet\Garnet/Src;E:\CppDev\Garnet\Garnet/Src\Library\imgui\backends;E:\CppDev\Garnet\Garnet/Src\Library\imgui;E:\CppDev\Garnet\Garnet/Src\Library\glm;E:\CppDev\Garnet\Garnet/Src\Library\json;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -118,9 +118,9 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;USE_TEXTURE_LOADER;USE_GLTF;USE_VIEWER_CAMERA;USE_INPUT_SYSTEM;USE_GPGPU;USE_FBX;USE_ANIMATION;USE_MMD;USE_PHYSICS;B3_USE_CLEW;USE_GUIENGINE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>E:\CppDev\Garnet\Garnet/Src;E:\CppDev\Garnet\Garnet/Src\Library\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>E:\CppDev\Garnet\Garnet/Src;E:\CppDev\Garnet\Garnet/Src\Library\imgui\backends;E:\CppDev\Garnet\Garnet/Src\Library\imgui;E:\CppDev\Garnet\Garnet/Src\Library\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -161,6 +161,16 @@
     <ClInclude Include="Src\App\ScriptApp\Scene\CScriptScene.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Commands\CompileGLSLToSpirV.bat" />
+    <None Include="Commands\CompileSpirVToWGSL.bat" />
+    <None Include="Commands\GetLibAndPath.py" />
+    <None Include="Commands\MakeEmccBuild.bat" />
+    <None Include="Commands\MakeEmccBuild.py" />
+    <None Include="Commands\RemakeCmakeLists.py" />
+    <None Include="Commands\RemakeCmakeLists_DescApp.py" />
+    <None Include="Commands\TestCmd.bat" />
+    <None Include="Commands\UTF8Encorder.py" />
+    <None Include="Commands\wgslc_ALL.bat" />
     <None Include="Resources\MaterialFrame\basic_toon_mf.json" />
     <None Include="Resources\MaterialFrame\Blur_MF.json" />
     <None Include="Resources\MaterialFrame\Depth_MF.json" />

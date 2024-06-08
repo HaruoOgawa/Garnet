@@ -157,5 +157,25 @@
     <None Include="Resources\Shaders\unlit.frag" />
     <None Include="Resources\Shaders\unlit_frag.spv" />
     <None Include="Resources\Shaders\unlit_frag.wgsl" />
+    <None Include="Commands\CompileGLSLToSpirV.bat">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="Commands\CompileSpirVToWGSL.bat">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="Commands\GetLibAndPath.py" />
+    <None Include="Commands\MakeEmccBuild.bat">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="Commands\MakeEmccBuild.py" />
+    <None Include="Commands\RemakeCmakeLists.py" />
+    <None Include="Commands\RemakeCmakeLists_DescApp.py" />
+    <None Include="Commands\TestCmd.bat">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="Commands\UTF8Encorder.py" />
+    <None Include="Commands\wgslc_ALL.bat">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

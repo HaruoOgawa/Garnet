@@ -2067,15 +2067,6 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
   <ItemGroup>
     <None Include="CMakeBuild\Garnet_front.js" />
     <None Include="CMakeBuild\index.html" />
-    <None Include="Commands\CompileGLSLToSpirV.bat" />
-    <None Include="Commands\CompileSpirVToWGSL.bat" />
-    <None Include="Commands\GetLibAndPath.py" />
-    <None Include="Commands\MakeEmccBuild.bat" />
-    <None Include="Commands\MakeEmccBuild.py" />
-    <None Include="Commands\RemakeCmakeLists.py" />
-    <None Include="Commands\RemakeCmakeLists_DescApp.py" />
-    <None Include="Commands\UTF8Encorder.py" />
-    <None Include="Commands\wgslc_ALL.bat" />
     <None Include="Src\Library\glm\glm\detail\func_common.inl" />
     <None Include="Src\Library\glm\glm\detail\func_common_simd.inl" />
     <None Include="Src\Library\glm\glm\detail\func_exponential.inl" />
@@ -2217,9 +2208,6 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <None Include="Src\Library\glm\glm\gtx\wrap.inl" />
     <None Include="WebRelease\Resources\Shaders\frag.spv" />
     <None Include="WebRelease\Resources\Shaders\vert.spv" />
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="Commands\TestCmd.bat" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />
