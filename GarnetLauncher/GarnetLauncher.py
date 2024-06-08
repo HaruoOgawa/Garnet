@@ -9,15 +9,15 @@ def AddPunct(Path):
     
     return Path
 
-def ReplaceGarnetDir(GarnetPath, ProjectName, TargetFileName):
+def ReplaceGarnetDir(GarnetPath, ProjectName, TargetFileName, SearchText, encodingType):
     data = []
 
-    with open(TargetFileName, 'r',encoding="utf-8_sig") as file:
+    with open(TargetFileName, 'r',encoding=encodingType) as file:
         data = file.read()
-        data = data.replace("..\\..\\Garnet\\", GarnetPath)
+        data = data.replace(SearchText, GarnetPath)
         data = data.replace("GarnetFrame", ProjectName)
 
-    with open(TargetFileName, 'w',encoding="utf-8_sig") as file:
+    with open(TargetFileName, 'w',encoding=encodingType) as file:
         file.write(data)
 
 def Main():
@@ -61,8 +61,9 @@ def Main():
     os.rename(GeneratePath + "GarnetFrame.vcxproj.user", GeneratePath + ProjectName + ".vcxproj.user")
 
     # ファイルの『..\..\Garnet』をGarnetPathに置換する
-    ReplaceGarnetDir(GarnetPath, ProjectName, GeneratePath + ProjectName + ".sln")
-    ReplaceGarnetDir(GarnetPath, ProjectName, GeneratePath + ProjectName + ".vcxproj")
+    ReplaceGarnetDir(GarnetPath, ProjectName, GeneratePath + ProjectName + ".sln", "..\\..\\Garnet\\", "utf-8_sig")
+    ReplaceGarnetDir(GarnetPath, ProjectName, GeneratePath + ProjectName + ".vcxproj", "..\\..\\Garnet\\", "utf-8_sig")
+    ReplaceGarnetDir(GarnetPath, ProjectName, GeneratePath + "Commands/MakeEmccBuild.bat", "../../../Garnet/", None)
 
     return True
 #

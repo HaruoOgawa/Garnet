@@ -1,3 +1,3 @@
-call python MakeEmccBuild.py
+call python MakeEmccBuild.py E:\CppDev\Garnet\Garnet/
 
 pause

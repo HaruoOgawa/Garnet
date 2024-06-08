@@ -141,6 +141,24 @@
     <ClInclude Include="Src\App\CApp.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Commands\CompileGLSLToSpirV.bat" />
+    <None Include="Commands\CompileSpirVToWGSL.bat" />
+    <None Include="Commands\compVK.bat" />
+    <None Include="Commands\compWG.bat" />
+    <None Include="Commands\CopyDawnLib.bat" />
+    <None Include="Commands\GetLibAndPath.py" />
+    <None Include="Commands\glslc_ALL.bat" />
+    <None Include="Commands\MakeEmccBuild.bat" />
+    <None Include="Commands\MakeEmccBuild.py" />
+    <None Include="Commands\RemakeCmakeLists.bat" />
+    <None Include="Commands\RemakeCmakeLists.py" />
+    <None Include="Commands\RemakeCmakeLists_DescApp.bat" />
+    <None Include="Commands\RemakeCmakeLists_DescApp.py" />
+    <None Include="Commands\RunLocalHost.bat" />
+    <None Include="Commands\TestCmd.bat" />
+    <None Include="Commands\update.bat" />
+    <None Include="Commands\UTF8Encorder.py" />
+    <None Include="Commands\wgslc_ALL.bat" />
     <None Include="Resources\MaterialFrame\basic_toon_mf.json" />
     <None Include="Resources\MaterialFrame\Blur_MF.json" />
     <None Include="Resources\MaterialFrame\Depth_MF.json" />
@@ -216,6 +234,9 @@
     <None Include="Resources\Shaders\unlit.frag" />
     <None Include="Resources\Shaders\unlit_frag.spv" />
     <None Include="Resources\Shaders\unlit_frag.wgsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="Commands\LibList.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

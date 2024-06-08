@@ -1,15 +1,19 @@
+from ast import arg
 from math import e
 import os
+import sys
 
 #ExcludedFolderList = ["Library", "Vulkan", "OpenGL", "DescMain", "CDescAppManager.cpp", "CDescAppManager.h", "DemoMain", "CDemoAppManager.cpp", "CDemoAppManager.h", "Bullet3Serialize", "btBulletCollisionAll.cpp", "btBulletDynamicsAll.cpp", "btLinearMathAll.cpp"]
-#IncludeDirectoryList = ["../../../Garnet/Src/Library/DawnLib/include", "../../../Garnet/Src/Library/glm", "../../../Garnet/Src/Library/tinygltf", "../../../Garnet/Src/Library/SmallFBX/include", "../../../Garnet/Src/Library/bullet3/Src"]
+#IncludeDirectoryList = ["Src/Library/DawnLib/include", "Src/Library/glm", "Src/Library/tinygltf", "Src/Library/SmallFBX/include", "Src/Library/bullet3/Src"]
 #PreprocessorList = ["NOMINMAX", "USE_WEB_NATIVE", "USE_WEBGPU", "USE_TEXTURE_LOADER", "USE_GLTF", "USE_VIEWER_CAMERA", "USE_INPUT_SYSTEM", "USE_GPGPU", "USE_FBX", "USE_ANIMATION", "USE_SMALL_FBX", "USE_MMD", "USE_PHYSICS", "B3_USE_CLEW", "BT_USE_DOUBLE_PRECISION", "BT_INTERNAL_UPDATE_SERIALIZATION_STRUCTURES"]
-#EmccCompileDirList = ["../../../Garnet/Src", "../../../Garnet/Src/Library/SmallFBX/include", "../../../Garnet/Src/Library/bullet3/Src"]
+#EmccCompileDirList = ["Src", "Src/Library/SmallFBX/include", "Src/Library/bullet3/Src"]
 
 ExcludedFolderList = ["Library", "Vulkan", "OpenGL", "WebMain", "CWebAppManager.cpp", "CWebAppManager.h", "DemoMain", "CDemoAppManager.cpp", "CDemoAppManager.h", "Bullet3Serialize", "btBulletCollisionAll.cpp", "btBulletDynamicsAll.cpp", "btLinearMathAll.cpp"]
-IncludeDirectoryList = ["../../../Garnet/Src", "../../../Garnet/Src/Library/DawnLib/include", "../../../Garnet/Src/Library/GLFW/include", "../../../Garnet/Src/Library/glfw3webgpu", "../../../Garnet/Src/Library/glm", "../../../Garnet/Src/Library/tinygltf", "../../../Garnet/Src/Library/SmallFBX/include", "../../../Garnet/Src/Library/bullet3/Src", "../../../Garnet/Src/Library/imgui", "../../../Garnet/Src/Library/imgui/backends"]
+IncludeDirectoryList = ["Src", "Src/Library/DawnLib/include", "Src/Library/GLFW/include", "Src/Library/glfw3webgpu", "Src/Library/glm", "Src/Library/tinygltf", "Src/Library/SmallFBX/include", "Src/Library/bullet3/Src", "Src/Library/imgui", "Src/Library/imgui/backends"]
 PreprocessorList = ["NOMINMAX", "USE_GLFW", "USE_WEBGPU", "USE_GUIENGINE", "USE_TEXTURE_LOADER", "USE_GLTF", "USE_VIEWER_CAMERA", "USE_INPUT_SYSTEM", "USE_GPGPU", "USE_FBX", "USE_ANIMATION", "USE_SMALL_FBX", "USE_MMD", "USE_PHYSICS", "B3_USE_CLEW", "BT_USE_DOUBLE_PRECISION", "BT_INTERNAL_UPDATE_SERIALIZATION_STRUCTURES"]
-EmccCompileDirList = ["../Src", "../../../Garnet/Src", "../../../Garnet/Src/Library/SmallFBX/include", "../../../Garnet/Src/Library/bullet3/Src", "../../../Garnet/Src/Library/imgui"]
+EmccCompileDirList = ["Src", "Src/Library/SmallFBX/include", "Src/Library/bullet3/Src", "Src/Library/imgui"]
+
+ProjectEmccCompileDirList = ["../Src"]
 
 # It's not something that changes that often, so every time there are more libs to link, I'll add my own.
 LibObjDirList = ["/SmallFBX_lib"];
@@ -37,6 +41,15 @@ def FindDir(subfolders, pathList, parentPath):
 def Make():
 	print("[START] Remake CMakeLists\n")
 
+	args = sys.argv
+	GarnetPath = args[1]
+	
+	if(GarnetPath == None or GarnetPath == ""):
+		print("[Error] GarnetPath is empty.")
+		return False
+	
+	print("GarnetPath: " + GarnetPath)
+
 	#
 	exportText = ""
 
@@ -44,8 +57,12 @@ def Make():
 
 	# Find Cpp or C
 	pathList = []
-	for srcPath in EmccCompileDirList:
+	for srcPath in ProjectEmccCompileDirList:
 		FindDir(os.listdir(srcPath), pathList, srcPath)
+		
+	for srcPath in EmccCompileDirList:
+		GarnetSrcPath = GarnetPath + srcPath
+		FindDir(os.listdir(GarnetSrcPath), pathList, GarnetSrcPath)
 	
 	# Find obj
 	RootLibObjDir = "../EmscriptenBuild/obj_lib"
@@ -74,7 +91,7 @@ def Make():
 		
 		# Include Dir
 		for inc in IncludeDirectoryList:
-			exportText += "-I" + inc + " "
+			exportText += "-I" + GarnetPath + inc + " "
 
 		# Preprocessor
 		for pre in PreprocessorList:
