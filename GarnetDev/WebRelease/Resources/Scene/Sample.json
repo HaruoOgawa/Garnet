@@ -1,0 +1,366 @@
+{
+  "name": "sample_scene",
+
+  "materialframes": [
+    {
+      "name": "basic_toon_mat",
+      "filename": "Resources/MaterialFrame/basic_toon_mf.json"
+    },
+    {
+      "name": "simple_texture_mat",
+      "filename": "Resources/MaterialFrame/SimpleTexture_MF.json"
+    },
+    {
+      "name": "depth_mat",
+      "filename": "Resources/MaterialFrame/Depth_MF.json"
+    },
+    {
+      "name": "pbr_mat",
+      "filename": "Resources/MaterialFrame/PBR_MF.json"
+    },
+    {
+      "name": "raymarching_mat",
+      "filename": "Resources/MaterialFrame/raymarching_mf.json"
+    }
+  ],
+
+  "scenetextureset": {
+    "cubemaps": [
+      {
+        "back": "Resources/Cubemaps/environment/environment_back_0.jpg",
+        "bottom": "Resources/Cubemaps/environment/environment_bottom_0.jpg",
+        "front": "Resources/Cubemaps/environment/environment_front_0.jpg",
+        "left": "Resources/Cubemaps/environment/environment_left_0.jpg",
+        "right": "Resources/Cubemaps/environment/environment_right_0.jpg",
+        "top": "Resources/Cubemaps/environment/environment_top_0.jpg"
+      }
+    ],
+    "frametextures": [
+
+    ],
+    "ibl": {
+      "diffuse": "Resources/IBL/output_iem.hdr",
+      "specular": "Resources/IBL/output_pmrem.hdr",
+      "ggx": "Resources/Textures/ggx_lut.jpg"
+    }
+  },
+
+  "animations": [
+    {
+      "name": "biglove_dance_noik",
+      "filename": "Resources/Motions/biglove_dance_noik.vmd"
+    },
+    {
+      "name": "biglove_expression",
+      "filename": "Resources/Motions/biglove_expression.vmd"
+    },
+    {
+      "name": "biglove_Ripsync",
+      "filename": "Resources/Motions/biglove_Ripsync.vmd"
+    },
+    {
+      "name": "FBX_Walking",
+      "filename": "Resources/Motions/Walking.fbx"
+    },
+    {
+      "name": "FBX_Jumping",
+      "filename": "Resources/Motions/Jumping.fbx"
+    },
+    {
+      "name": "FBX_Punch",
+      "filename": "Resources/Motions/Combo_Punch_hand.fbx"
+    }
+  ],
+
+  "sound": {
+    "bgm": {
+      "filename": "Resources\\Audio\\biglove_audio.wav",
+      "autoplay": false,
+      "loop": false
+    }
+  },
+
+  "objects": [
+    {
+      "name": "glTFObj",
+      "filename": "Resources/Models/BrainStem/glTF-Binary/BrainStem.glb",
+      "defaultmaterialframe": "pbr_mat",
+      "transform": {
+        "pos": [ -1.0, 0.0, 0.0 ],
+        "rotate": [ 0.0, 0.0, 0.0 ],
+        "scale": [ 1.0, 1.0, 1.0 ]
+      },
+      "animation": {
+        "playmotionindex": 0
+      },
+      "enable": true
+    },
+    {
+      "name": "FbxObj",
+      "filename": "Resources/Avatar/Warrok_W_Kurniawan.fbx",
+      "defaultmaterialframe": "pbr_mat",
+      "transform": {
+        "pos": [ -2.0, 0.0, 0.0 ],
+        "rotate": [ 0.0, 0.0, 0.0 ],
+        "scale": [ 0.01, 0.01, 0.01 ]
+      },
+      "animation": {
+        "clips": [
+
+        ],
+        "humanoidclips": [
+          {
+            "key": "Walk",
+            "motionname": "FBX_Walking",
+            "index": 0,
+            "loop": true,
+            "ik": false
+          }
+        ],
+        "playmotion": "Walk"
+      },
+      "enable": true
+    },
+    {
+      "name": "PmxObj",
+      "filename": "Resources/Avatar/Tda_Miku/Tda_Miku.pmx",
+      "defaultmaterialframe": "basic_toon_mat",
+      "transform": {
+        "pos": [ 3.0, 0.0, 0.0 ],
+        "rotate": [ 0.0, 0.0, 0.0 ],
+        "scale": [ 0.1, 0.1, 0.1 ]
+      },
+      "animation": {
+        "clips": [
+
+        ],
+        "humanoidclips": [
+          {
+            "key": "Dance",
+            "motionname": "biglove_dance_noik",
+            "index": 0,
+            "loop": true,
+            "ik": false
+          }
+        ],
+        "blendshapes": [
+          {
+            "key": "Face",
+            "motionname": "biglove_expression",
+            "index": 0,
+            "loop": true
+          },
+          {
+            "key": "RipSync",
+            "motionname": "biglove_Ripsync",
+            "index": 0,
+            "loop": true
+          }
+        ],
+        "playmotion": "Dance",
+        "playmotionindex": -1,
+        "playblendshapes": [
+          "Face",
+          "RipSync"
+        ]
+      },
+      "enable": true
+    },
+    {
+      "name": "Background",
+      "transform": {
+        "pos": [ 0.0, 0.0, 0.0 ],
+        "rotate": [ 0.0, 0.0, 0.0 ],
+        "scale": [ 500.0, 500.0, 500.0 ]
+      },
+      "enable": true,
+      "nodes": [
+        {
+          "name": "node",
+          "transform": {
+            "pos": [ 0.0, 0.0, 0.0 ],
+            "rotate": [ 0.0, 0.0, 0.0 ],
+            "scale": [ 1.0, 1.0, 1.0 ]
+          },
+          "meshindex": 0
+        }
+      ],
+      "meshs": [
+        {
+          "name": "mesh",
+          "primitives": [
+            {
+              "materialindex": 0,
+              "type": "sphere"
+            }
+          ]
+        }
+      ],
+      "materials": [
+        {
+          "materialframe": "simple_texture_mat",
+          "cull": "front",
+          "uniformvalues": [
+            {
+              "name": "useDirSampling",
+              "type": "int",
+              "value": [ 1 ]
+            },
+            {
+              "name": "useTexColor",
+              "type": "int",
+              "value": [ 1 ]
+            }
+          ],
+          "textures": [
+            {
+              "texturebuffername": "texImage",
+              "texturename": "bgtex"
+            }
+          ]
+        }
+      ],
+      "textureset": [
+        {
+          "name": "bgtex",
+          "filename": "Resources/IBL/output_skybox.hdr"
+        }
+      ]
+    },
+    {
+      "name": "TestObj",
+      "transform": {
+        "pos": [ 0.0, 0.0, 0.0 ],
+        "rotate": [ 0.0, 0.0, 0.0 ],
+        "scale": [ 1.0, 1.0, 1.0 ]
+      },
+      "enable": true,
+      "rootnodes": [
+        0
+      ],
+      "nodes": [
+        {
+          "name": "testnode_0",
+          "transform": {
+            "pos": [ 0.0, 0.0, 0.0 ],
+            "rotate": [ 0.0, 0.0, 0.0 ],
+            "scale": [ 1.0, 1.0, 1.0 ]
+          },
+          "meshindex": 0,
+          "children": [ 1, 2 ]
+        },
+        {
+          "name": "testnode_1",
+          "transform": {
+            "pos": [ 1.0, 0.5, -1.0 ],
+            "rotate": [ 0.0, 45.0, 0.0 ],
+            "scale": [ 1.0, 2.0, 1.0 ]
+          },
+          "meshindex": 1,
+          "children": []
+        },
+        {
+          "name": "testnode_2",
+          "transform": {
+            "pos": [ 1.0, -0.2, -1.0 ],
+            "rotate": [ 0.0, 0.0, 30.0 ],
+            "scale": [ 1.0, 1.0, 1.0 ]
+          },
+          "meshindex": -1,
+          "children": [ 3 ]
+        },
+        {
+          "name": "testnode_3",
+          "transform": {
+            "pos": [ 5.0, 0.5, 5.0 ],
+            "rotate": [ 7.0, 0.0, 0.0 ],
+            "scale": [ 1.0, 0.5, 1.0 ]
+          },
+          "meshindex": -1,
+          "children": []
+        }
+      ],
+      "meshs": [
+        {
+          "primitives": [
+            {
+              "materialindex": 0,
+              "type": "cube"
+            }
+          ]
+        },
+        {
+          "primitives": [
+            {
+              "materialindex": 0,
+              "type": "sphere"
+            }
+          ]
+        }
+      ],
+      "materials": [
+        {
+          "materialframe": "pbr_mat",
+          "uniformvalues": [
+            {
+              "name": "baseColorFactor",
+              "type": "vec4",
+              "value": [ 0.02, 0.3, 0.79, 1.0 ]
+            },
+            {
+              "name": "useBaseColorTexture",
+              "type": "int",
+              "value": [ 1 ]
+            },
+            {
+              "name": "useCubeMap",
+              "type": "int",
+              "value": [ 0 ]
+            },
+            {
+              "name": "useIBL",
+              "type": "int",
+              "value": [ 1 ]
+            }
+          ],
+          "textures": [
+            {
+              "texturebuffername": "baseColorTexture",
+              "texturename": "brock"
+            },
+            {
+              "texturebuffername": "cubemapTexture",
+              "textureindex": 0
+            },
+            {
+              "texturebuffername": "IBL_Diffuse_Texture",
+              "textureindex": 0
+            },
+            {
+              "texturebuffername": "IBL_Specular_Texture",
+              "textureindex": 0
+            },
+            {
+              "texturebuffername": "IBL_GGXLUT_Texture",
+              "textureindex": 0
+            }
+          ]
+        }
+      ],
+      "textureset": [
+        {
+          "name": "brock",
+          "filename": "Resources/Textures/brock.jpg"
+        },
+        {
+          "name": "UVTile",
+          "filename": "Resources/Textures/UVTile.jpg"
+        },
+        {
+          "name": "perlinnoise",
+          "filename": "Resources/Textures/perlinnoise.png"
+        }
+      ]
+    }
+  ]
+}

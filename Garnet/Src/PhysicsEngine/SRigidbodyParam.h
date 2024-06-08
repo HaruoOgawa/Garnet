@@ -1,6 +1,5 @@
 #pragma once
 
-#ifdef USE_PHYSICS
 #include "EPhysicsType.h"
 #include <string>
 #include <glm/glm.hpp>
@@ -48,4 +47,3 @@ namespace physics
 		float Friction = 0.5f;
 	};
 }
-#endif

@@ -1,6 +1,5 @@
 #pragma once
 
-#ifdef USE_PHYSICS
 #include <glm/glm.hpp>
 #include <string>
 
@@ -19,4 +18,3 @@ namespace physics
 		glm::vec3 RotateSpring = glm::vec3(35.0f, 35.0f, 35.0f);
 	};
 }
-#endif

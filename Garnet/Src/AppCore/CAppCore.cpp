@@ -1,12 +1,10 @@
 #include "CAppCore.h"
 #include "../Interface/IWindowAPI.h"
-#include "../App/ScriptApp/CScriptApp.h"
 #include "../LoadWorker/CLoadWorker.h"
 #include "../Input/CInputState.h"
 #include "../Camera/CCamera.h"
 #include "../Graphics/CDrawInfo.h"
 #include "../Message/Console.h"
-#include "../../PhysicsEngine/Bullet/CBulletPhysicsEngine.h"
 
 #ifdef USE_GLFW
 #include "../WindowAPI/CGLFWWindowAPI.h"
@@ -23,6 +21,12 @@
 #elif USE_OPENGL
 #include "../GraphicsAPI/OpenGL/COpenGLAPI.h"
 #endif // USE_WEBGPU
+
+#ifdef USE_PHYSICS
+#include "../../PhysicsEngine/Bullet/CBulletPhysicsEngine.h"
+#else
+#include "../../PhysicsEngine/CDummyPhysicsEngine.h"
+#endif // USE_PHYSICS
 
 #ifdef USE_GUIENGINE
 #include "../GUIEngine/imgui/CImGuiGUIEngine.h"
@@ -42,7 +46,7 @@ namespace app
 		m_App(App),
 		m_InputState(std::make_shared<input::CInputState>()),
 		m_LoadWorker(nullptr),
-		m_PhysicsEngine(std::make_shared<physics::CBulletPhysicsEngine>()),
+		m_PhysicsEngine(nullptr),
 		m_GUIEngine(nullptr)
 	{
 	}
@@ -124,6 +128,12 @@ namespace app
 #endif // USE_WEBGPU
 			
 			// ï®óùÉGÉìÉWÉì
+#ifdef USE_PHYSICS
+			m_PhysicsEngine = std::make_shared<physics::CBulletPhysicsEngine>();
+#else
+			m_PhysicsEngine = std::make_shared<physics::CDummyPhysicsEngine>();
+#endif // USE_PHYSICS
+
 			if (!m_PhysicsEngine->Initialize()) return false;
 
 			// GUI

@@ -2,6 +2,7 @@
 
 #include "SAppSettings.h"
 #include "../Interface/IWindowAPI.h"
+#include "../Interface/IApp.h"
 #include <string>
 #include <memory>
 

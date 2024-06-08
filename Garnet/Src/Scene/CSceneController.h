@@ -6,9 +6,9 @@
 #include <tuple>
 #include <string>
 
-#include "../../../Interface/IGraphicsAPI.h"
-#include "../../../Interface/IPhysicsEngine.h"
-#include "../../Graphics/ECullMode.h"
+#include <Interface/IGraphicsAPI.h>
+#include <Interface/IPhysicsEngine.h>
+#include <Graphics/ECullMode.h>
 
 namespace object { class C3DObject; }
 namespace camera { class CCamera; }
