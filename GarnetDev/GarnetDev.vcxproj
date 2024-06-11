@@ -478,7 +478,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Src\App\CApp.cpp" />
     <ClCompile Include="Src\App\ScriptApp\CScriptApp.cpp" />
     <ClCompile Include="Src\App\ScriptApp\GUI\CGraphicsEditingWindow.cpp" />
     <ClCompile Include="Src\App\ScriptApp\GUI\CGUICameraTab.cpp" />
@@ -492,7 +491,6 @@
     <ClCompile Include="Src\Main\main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Src\App\CApp.h" />
     <ClInclude Include="Src\App\ScriptApp\CScriptApp.h" />
     <ClInclude Include="Src\App\ScriptApp\GUI\CGraphicsEditingWindow.h" />
     <ClInclude Include="Src\App\ScriptApp\GUI\CGUICameraTab.h" />

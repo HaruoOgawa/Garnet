@@ -1,14 +1,22 @@
 #pragma once
 
 #include <Interface/IApp.h>
+#include <memory>
 
 namespace app
 {
-	class CApp : public IApp
+	class CScriptScene;
+
+	class CScriptApp : public IApp
 	{
+		std::shared_ptr<app::CScriptScene> m_ScriptScene;
+
+		std::shared_ptr<camera::CCamera> m_MainCamera;
+		std::shared_ptr<projection::CProjection> m_Projection;
+		std::shared_ptr<graphics::CDrawInfo> m_DrawInfo;
 	public:
-		CApp();
-		virtual ~CApp();
+		CScriptApp();
+		virtual ~CScriptApp();
 
 		virtual bool Release(api::IGraphicsAPI* pGraphicsAPI) override;
 
