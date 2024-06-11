@@ -18,12 +18,18 @@
     <ClCompile Include="Src\Main\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Src\App\CApp.cpp">
+    <ClCompile Include="Src\App\ScriptApp\CScriptApp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\App\ScriptApp\Scene\CScriptScene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Src\App\CApp.h">
+    <ClInclude Include="Src\App\ScriptApp\CScriptApp.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\App\ScriptApp\Scene\CScriptScene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -147,6 +153,7 @@
       <Filter>Source Files</Filter>
     </None>
     <None Include="Commands\UTF8Encorder.py" />
+    <None Include="Resources\Scene\Sample.json" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Commands\LibList.txt" />

@@ -18,9 +18,6 @@
     <ClCompile Include="Src\Main\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Src\App\CApp.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Src\App\ScriptApp\GUI\CGraphicsEditingWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -53,9 +50,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Src\App\CApp.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Src\App\ScriptApp\GUI\CGraphicsEditingWindow.h">
       <Filter>Header Files</Filter>
     </ClInclude>
