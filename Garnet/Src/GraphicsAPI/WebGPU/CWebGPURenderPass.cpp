@@ -12,7 +12,6 @@ namespace api
 		m_PassName(PassName),
 		m_InitColor(InitColor),
 		m_RenderPassFormat(RenderPassFormat),
-		m_FrameTexture(nullptr),
 		m_DepthTexture(nullptr),
 
 		m_RenderPass(nullptr)
@@ -23,20 +22,32 @@ namespace api
 	{
 	}
 
-	std::shared_ptr<graphics::CTexture> CWebGPURenderPass::GetFrameTexture()
+	std::shared_ptr<graphics::CTexture> CWebGPURenderPass::GetFrameTexture(int Index)
 	{
-		return m_FrameTexture;
+		if (Index < 0 || Index >= static_cast<int>(m_FrameTextureList.size())) return nullptr;
+
+		return m_FrameTextureList[Index];
 	}
 
-	std::shared_ptr<graphics::CTexture> CWebGPURenderPass::GetDepthTexture()
+	const std::vector<std::shared_ptr<graphics::CTexture>>& CWebGPURenderPass::GetFrameTextureList() const
+	{
+		return m_FrameTextureList;
+	}
+
+	const std::shared_ptr<graphics::CTexture>& CWebGPURenderPass::GetDepthTexture() const
 	{
 		return m_DepthTexture;
 	}
 
-	bool CWebGPURenderPass::Create(int Width, int Height)
+	bool CWebGPURenderPass::Create(int Width, int Height, int RenderTargetCount)
 	{
-		m_FrameTexture = std::make_shared<CWebGPUTexture>(m_pGraphicsAPI, false);
-		if (!m_FrameTexture->CreateFrameTexture(Width, Height, m_RenderPassFormat)) return false;
+		for (int AttachmentIndex = 0; AttachmentIndex < RenderTargetCount; AttachmentIndex++)
+		{
+			auto FrameTexture = m_pGraphicsAPI->CreateTexture(false);
+			if (!FrameTexture->CreateFrameTexture(Width, Height, m_RenderPassFormat)) return false;
+
+			m_FrameTextureList.push_back(FrameTexture);
+		}
 		
 		m_DepthTexture = std::make_shared<CWebGPUTexture>(m_pGraphicsAPI, false);
 		if (!m_DepthTexture->CreateFrameTexture(Width, Height, api::ERenderPassFormat::DEPTH_RENDERPASS)) return false;
@@ -47,16 +58,22 @@ namespace api
 	bool CWebGPURenderPass::BeginRenderPass()
 	{
 		// レンダーパスの設定
-		WGPURenderPassColorAttachment renderPassColorAttachment = {};
-		renderPassColorAttachment.view = m_FrameTexture->GetTextureImageView(); // レンダリングの描画先テクスチャを指定
-		renderPassColorAttachment.resolveTarget = nullptr; // マルチサンプリングの設定
-		renderPassColorAttachment.loadOp = WGPULoadOp_Clear; // レンダー パスを実行する前にビューで実行するロード操作を示します。例えばクリア値に初期化するだったり
-		renderPassColorAttachment.storeOp = WGPUStoreOp_Store; // レンダリング実行後の操作
-		renderPassColorAttachment.clearValue = WGPUColor{ m_InitColor.x, m_InitColor.y, m_InitColor.z, m_InitColor.w }; // 初期カラー
+		std::vector<WGPURenderPassColorAttachment> renderPassColorAttachments;
+		for (const auto& FrameTexture : m_FrameTextureList)
+		{
+			WGPURenderPassColorAttachment colorAttachment = {};
+			colorAttachment.view = static_cast<CWebGPUTexture*>(FrameTexture.get())->GetTextureImageView(); // レンダリングの描画先テクスチャを指定
+			colorAttachment.resolveTarget = nullptr; // マルチサンプリングの設定
+			colorAttachment.loadOp = WGPULoadOp_Clear; // レンダー パスを実行する前にビューで実行するロード操作を示します。例えばクリア値に初期化するだったり
+			colorAttachment.storeOp = WGPUStoreOp_Store; // レンダリング実行後の操作
+			colorAttachment.clearValue = WGPUColor{ m_InitColor.x, m_InitColor.y, m_InitColor.z, m_InitColor.w }; // 初期カラー
+
+			renderPassColorAttachments.push_back(colorAttachment);
+		}
 
 		// デプスステンシルバッファの設定
 		WGPURenderPassDepthStencilAttachment depthStencilAttachment;
-		depthStencilAttachment.view = m_DepthTexture->GetTextureImageView(); // デプステクスチャ
+		depthStencilAttachment.view = static_cast<CWebGPUTexture*>(m_DepthTexture.get())->GetTextureImageView(); // デプステクスチャ
 		depthStencilAttachment.depthClearValue = 1.0f; // デプスの初期値
 		depthStencilAttachment.depthLoadOp = WGPULoadOp_Clear; // 処理開始時(ロード)にどうするか。ここでは全てクリアする
 		depthStencilAttachment.depthStoreOp = WGPUStoreOp_Store; // デプスデータの保存処理(ストア)の時どうするか。普通に保存する
@@ -72,8 +89,8 @@ namespace api
 
 		//
 		WGPURenderPassDescriptor renderPassDesc = {};
-		renderPassDesc.colorAttachmentCount = 1;
-		renderPassDesc.colorAttachments = &renderPassColorAttachment; // レンダーパスのカラーフォーマットを指定
+		renderPassDesc.colorAttachmentCount = static_cast<uint32_t>(renderPassColorAttachments.size());
+		renderPassDesc.colorAttachments = &renderPassColorAttachments[0]; // レンダーパスのカラーフォーマットを指定
 		renderPassDesc.depthStencilAttachment = &depthStencilAttachment; // デプスステンシルバッファ
 		renderPassDesc.timestampWriteCount = 0;
 		renderPassDesc.timestampWrites = nullptr; // レンダリングの同期用のオブジェクト領域
