@@ -10,13 +10,12 @@ namespace api
 {
 	CVulkanRenderPass::CVulkanRenderPass(api::CVulkanAPI* pGraphicsAPI, const std::string& PassName, ERenderPassFormat RenderPassFormat, const glm::vec4& InitColor):
 		m_pGraphicsAPI(pGraphicsAPI),
-		
+		m_RenderTargetCount(1),
 		m_PassName(PassName),
 		m_Width(0),
 		m_Height(0),
 		m_InitColor(InitColor),
 		m_RenderPassFormat(RenderPassFormat),
-		m_FrameTexture(nullptr),
 		m_DepthTexture(nullptr),
 		
 		m_CommandPool(nullptr),
@@ -29,7 +28,7 @@ namespace api
 
 	CVulkanRenderPass::~CVulkanRenderPass()
 	{
-		m_FrameTexture = nullptr;
+		m_FrameTextureList.clear();
 		m_DepthTexture = nullptr;
 
 		if (m_CommandPool)
@@ -53,28 +52,41 @@ namespace api
 		}
 	}
 
-	std::shared_ptr<graphics::CTexture> CVulkanRenderPass::GetFrameTexture()
+	std::shared_ptr<graphics::CTexture> CVulkanRenderPass::GetFrameTexture(int Index)
 	{
-		return m_FrameTexture;
+		if (Index < 0 || Index >= static_cast<int>(m_FrameTextureList.size())) return nullptr;
+
+		return m_FrameTextureList[Index];
+	}
+
+	const std::vector<std::shared_ptr<graphics::CTexture>>& CVulkanRenderPass::GetFrameTextureList() const
+	{
+		return m_FrameTextureList;
 	}
 	
-	std::shared_ptr<graphics::CTexture> CVulkanRenderPass::GetDepthTexture()
+	const std::shared_ptr<graphics::CTexture>& CVulkanRenderPass::GetDepthTexture() const
 	{
 		return m_DepthTexture;
 	}
 
-	bool CVulkanRenderPass::Create(int Width, int Height)
+	bool CVulkanRenderPass::Create(int Width, int Height, int RenderTargetCount)
 	{
 		m_Width = Width;
 		m_Height = Height;
+		m_RenderTargetCount = RenderTargetCount;
 
-		m_FrameTexture = std::make_shared<CVulkanTexture>(m_pGraphicsAPI, false);
-		if (!m_FrameTexture->CreateFrameTexture(Width, Height, m_RenderPassFormat)) return false;
+		for (int AttachmentIndex = 0; AttachmentIndex < RenderTargetCount; AttachmentIndex++)
+		{
+			auto FrameTexture = m_pGraphicsAPI->CreateTexture(false);
+			if (!FrameTexture->CreateFrameTexture(Width, Height, m_RenderPassFormat)) return false;
+
+			m_FrameTextureList.push_back(FrameTexture);
+		}
 		
 		m_DepthTexture = std::make_shared<CVulkanTexture>(m_pGraphicsAPI, false);
 		if (!m_DepthTexture->CreateFrameTexture(Width, Height, api::ERenderPassFormat::DEPTH_RENDERPASS)) return false;
 
-		if (!CreateRenderPass()) return false; // レンダーパスの作成(描画全体のマネージャー。実際に描画に使用するのがサブパス。サブパスを複数個用意することでポストプロセスもできる)
+		if (!CreateRenderPass(RenderTargetCount)) return false; // レンダーパスの作成(描画全体のマネージャー。実際に描画に使用するのがサブパス。サブパスを複数個用意することでポストプロセスもできる)
 		if (!CreateFrameBuffer(Width, Height)) return false; // フレームバッファの作成
 		if (!m_pGraphicsAPI->CreateCommandPool(m_CommandPool)) return false;
 		if (!m_pGraphicsAPI->CreateCommandBuffer(m_CommandBuffer, m_CommandPool)) return false;
@@ -82,29 +94,39 @@ namespace api
 		return true;
 	}
 
-	bool CVulkanRenderPass::CreateRenderPass()
+	bool CVulkanRenderPass::CreateRenderPass(int RenderTargetCount)
 	{
 		//
 		std::vector<VkAttachmentDescription> attachments;
 
 		// <カラーバッファ> ////////////////////////////////////////////////////////////////
 		// レンダーパスの基本的な設定
-		VkAttachmentDescription colorAttachment{};
-		colorAttachment.format = (m_RenderPassFormat == ERenderPassFormat::COLOR_FLOAT_RENDERPASS) ? VK_FORMAT_R16G16B16A16_SFLOAT : VK_FORMAT_R8G8B8A8_UNORM;
-		colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT; // マルチサンプリング
-		colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR; // レンダリングの前後にどのような処理を施すか(クリアの方法など)
-		colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE; // レンダリング結果をメモリに保存し読み取り可にする
-		colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE; // 上記の設定をステンシルバッファに適応。 DONT_CAREは何もしない
-		colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE; // 上記の設定をステンシルバッファに適応
-		colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED; // レンダリング前にどのようなレイアウトとして使用するか
-		colorAttachment.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL; // レンダリング後にどのようなレイアウトとして使用するか
+		for (int AttachmentIndex = 0; AttachmentIndex < RenderTargetCount; AttachmentIndex++)
+		{
+			VkAttachmentDescription colorAttachment{};
+			colorAttachment.format = (m_RenderPassFormat == ERenderPassFormat::COLOR_FLOAT_RENDERPASS) ? VK_FORMAT_R16G16B16A16_SFLOAT : VK_FORMAT_R8G8B8A8_UNORM;
+			colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT; // マルチサンプリング
+			colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR; // レンダリングの前後にどのような処理を施すか(クリアの方法など)
+			colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE; // レンダリング結果をメモリに保存し読み取り可にする
+			colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE; // 上記の設定をステンシルバッファに適応。 DONT_CAREは何もしない
+			colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE; // 上記の設定をステンシルバッファに適応
+			colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED; // レンダリング前にどのようなレイアウトとして使用するか
+			colorAttachment.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL; // レンダリング後にどのようなレイアウトとして使用するか
 
-		attachments.push_back(colorAttachment);
+			attachments.push_back(colorAttachment);
+		}
 
 		// サブパスの設定(サブパスとは前のパスのフレームバッファの内容を参照するレンダリング操作。ポストプロセスなどに有用)
-		VkAttachmentReference colorAttachmentRef{}; // 前のパスの参照方法の定義(かな？)
-		colorAttachmentRef.attachment = 0;
-		colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL; // カラーレンダーバッファとして使用することを明示???
+		std::vector<VkAttachmentReference> colorAttachmentRefs; // 前のパスの参照方法の定義(かな？)
+		for (int AttachmentIndex = 0; AttachmentIndex < RenderTargetCount; AttachmentIndex++)
+		{
+			VkAttachmentReference attachmentRef{};
+
+			attachmentRef.attachment = AttachmentIndex;
+			attachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL; // カラーレンダーバッファとして使用することを明示???
+
+			colorAttachmentRefs.push_back(attachmentRef);
+		}
 
 		// <デプスバッファ> ////////////////////////////////////////////////////////////////
 		// レンダーパスの基本的な設定
@@ -122,15 +144,16 @@ namespace api
 
 		// サブパスの設定(サブパスとは前のパスのフレームバッファの内容を参照するレンダリング操作。ポストプロセスなどに有用)
 		VkAttachmentReference depthAttachmentRef{}; // 前のパスの参照方法の定義(かな？)
-		depthAttachmentRef.attachment = 1;
+		uint32_t depthIndex = static_cast<uint32_t>(colorAttachmentRefs.size());
+		depthAttachmentRef.attachment = depthIndex;
 		depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL; // カラーレンダーバッファとして使用することを明示???
 
 		///////////////////////////////////////////////////////////////////////////////////
 		//
 		VkSubpassDescription subpass{}; // 実際に使用するサブパスの設定
 		subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS; // グラフィック用のサブパスであることを指定する
-		subpass.colorAttachmentCount = 1;
-		subpass.pColorAttachments = &colorAttachmentRef; // 参照方法について
+		subpass.colorAttachmentCount = RenderTargetCount;
+		subpass.pColorAttachments = &colorAttachmentRefs[0]; // 参照方法について
 		subpass.pDepthStencilAttachment = &depthAttachmentRef;
 
 		// レンダーパスの作成
@@ -165,16 +188,22 @@ namespace api
 
 	bool CVulkanRenderPass::CreateFrameBuffer(int Width, int Height)
 	{
-		std::array<VkImageView, 2> attachments[] = {
-				m_FrameTexture->GetTextureImageView(),
-				m_DepthTexture->GetTextureImageView()
-		};
+		std::vector<VkImageView> attachments;
+
+		for (const auto& FrameTexture : m_FrameTextureList)
+		{
+			CVulkanTexture* pVulkanTexture = static_cast<CVulkanTexture*>(FrameTexture.get());
+
+			attachments.push_back(pVulkanTexture->GetTextureImageView());
+		}
+
+		attachments.push_back(static_cast<CVulkanTexture*>(m_DepthTexture.get())->GetTextureImageView());
 
 		VkFramebufferCreateInfo frameBufferInfo{};
 		frameBufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
 		frameBufferInfo.renderPass = m_RenderPass;
-		frameBufferInfo.attachmentCount = static_cast<uint32_t>(attachments->size());
-		frameBufferInfo.pAttachments = attachments->data();
+		frameBufferInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
+		frameBufferInfo.pAttachments = &attachments[0];
 		frameBufferInfo.width = Width;
 		frameBufferInfo.height = Height;
 		frameBufferInfo.layers = 1;
@@ -199,10 +228,25 @@ namespace api
 		renderPassInfo.framebuffer = m_FrameBuffer;
 		renderPassInfo.renderArea.offset = { 0, 0 };
 		renderPassInfo.renderArea.extent = {static_cast<unsigned int>(m_Width), static_cast<unsigned int>(m_Height)};
+		
+		std::vector<VkClearValue> clearValues;
 
-		std::array<VkClearValue, 2> clearValues{};
-		clearValues[0].color = { {m_InitColor.x, m_InitColor.y, m_InitColor.z, m_InitColor.w} };
-		clearValues[1].depthStencil = { 1.0f, 0 };
+		for (int AttachmentIndex = 0; AttachmentIndex < m_RenderTargetCount; AttachmentIndex++)
+		{
+			VkClearValue clearValue{};
+			clearValue.color = { {0.0f, 0.0f, 0.0f, 0.0f} };
+			//clearValue.color = { {m_InitColor.x, m_InitColor.y, m_InitColor.z, m_InitColor.w} };
+
+			clearValues.push_back(clearValue);
+		}
+		
+		{
+			VkClearValue clearValue{};
+			clearValue.depthStencil = { 1.0f, 0 };
+
+			clearValues.push_back(clearValue);
+		}
+
 		renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
 		renderPassInfo.pClearValues = clearValues.data();
 

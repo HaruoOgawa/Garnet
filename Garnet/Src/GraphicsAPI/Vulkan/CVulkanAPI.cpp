@@ -108,17 +108,17 @@ namespace api
 		vkDestroyInstance(m_Instance, nullptr);
 	}
 
-	bool CVulkanAPI::CreateRenderPass(const std::string& PassName, ERenderPassFormat RenderPassFormat, const glm::vec4& InitColor, int Width, int Height)
+	bool CVulkanAPI::CreateRenderPass(const std::string& PassName, ERenderPassFormat RenderPassFormat, const glm::vec4& InitColor, int Width, int Height, int RenderTargetCount)
 	{
 		std::shared_ptr<CVulkanRenderPass> RenderPass = std::make_shared<CVulkanRenderPass>(this, PassName, RenderPassFormat, InitColor);
 		
 		if (Width != -1 && Height != -1)
 		{
-			if (!RenderPass->Create(Width, Height)) return false;
+			if (!RenderPass->Create(Width, Height, RenderTargetCount)) return false;
 		}
 		else
 		{
-			if (!RenderPass->Create(m_Width, m_Height)) return false;
+			if (!RenderPass->Create(m_Width, m_Height, RenderTargetCount)) return false;
 		}
 
 		m_OffScreenRenderPassMap.insert({ PassName, RenderPass });
@@ -338,6 +338,14 @@ namespace api
 	const std::map<std::string, std::shared_ptr<graphics::IRenderPass>>& CVulkanAPI::GetOffScreenRenderPassMap() const
 	{
 		return m_OffScreenRenderPassMap;
+	}
+
+	std::shared_ptr<graphics::IRenderPass> CVulkanAPI::FindOffScreenRenderPass(const std::string& PassName)
+	{
+		auto it = m_OffScreenRenderPassMap.find(PassName);
+		if (it == m_OffScreenRenderPassMap.end()) return nullptr;
+
+		return it->second;
 	}
 
 	VkRenderPass CVulkanAPI::GetSwapChainRenderPass() const
