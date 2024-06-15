@@ -478,6 +478,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\Graphics\CDeferredRenderer.cpp" />
     <ClCompile Include="Src\ImageEffect\CBlurEffect.cpp" />
     <ClCompile Include="Src\App\ScriptApp\CScriptApp.cpp" />
     <ClCompile Include="Src\App\ScriptApp\GUI\CGraphicsEditingWindow.cpp" />
@@ -492,6 +493,7 @@
     <ClCompile Include="Src\Main\main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Src\Graphics\CDeferredRenderer.h" />
     <ClInclude Include="Src\ImageEffect\CBlurEffect.h" />
     <ClInclude Include="Src\App\ScriptApp\CScriptApp.h" />
     <ClInclude Include="Src\App\ScriptApp\GUI\CGraphicsEditingWindow.h" />
@@ -526,6 +528,7 @@
     <None Include="Resources\MaterialFrame\basic_toon_mf.json" />
     <None Include="Resources\MaterialFrame\Blur_MF.json" />
     <None Include="Resources\MaterialFrame\Depth_MF.json" />
+    <None Include="Resources\MaterialFrame\MRTSample_MF.json" />
     <None Include="Resources\MaterialFrame\PBRMorph_MF.json" />
     <None Include="Resources\MaterialFrame\PBR_MF.json" />
     <None Include="Resources\MaterialFrame\PBR_MRT_MF.json" />
@@ -569,6 +572,7 @@
     <None Include="Resources\Shaders\minimum.vert" />
     <None Include="Resources\Shaders\minimum_vert.spv" />
     <None Include="Resources\Shaders\minimum_vert.wgsl" />
+    <None Include="Resources\Shaders\mrt_sample.frag" />
     <None Include="Resources\Shaders\pbr.frag" />
     <None Include="Resources\Shaders\pbr.vert" />
     <None Include="Resources\Shaders\pbrmorph.vert" />

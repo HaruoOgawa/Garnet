@@ -193,6 +193,14 @@ namespace api
 		return m_OffScreenRenderPassMap;
 	}
 
+	std::shared_ptr<graphics::IRenderPass> COpenGLAPI::FindOffScreenRenderPass(const std::string& PassName)
+	{
+		auto it = m_OffScreenRenderPassMap.find(PassName);
+		if (it == m_OffScreenRenderPassMap.end()) return nullptr;
+
+		return it->second;
+	}
+
 	bool COpenGLAPI::IsEnabledRuntimeShaderEditing() const
 	{
 #ifdef RUNTIME_SHADER_EDITING

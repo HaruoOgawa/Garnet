@@ -188,53 +188,50 @@ namespace graphics
 		std::shared_ptr<graphics::CTexture> GGXLUT_Tex = nullptr;
 		if (TextureSet) GGXLUT_Tex = TextureSet->GetGGXLUT_Tex();
 
-		for (int BufferIndex = 0; BufferIndex < m_ShaderBufferList.size(); BufferIndex++)
+		size_t TexLayoutSize = m_TextureBindingLayoutList.size() * 2; // ImageViewとSamplerがあるので2倍にしている
+
+		// テクスチャ
+		for (int ImageInfoIndex = 0, TextureBindingLayoutIndex = 0; ImageInfoIndex < TexLayoutSize; ImageInfoIndex += 2, TextureBindingLayoutIndex++)
 		{
-			size_t TexLayoutSize = m_TextureBindingLayoutList.size() * 2; // ImageViewとSamplerがあるので2倍にしている
+			const auto& TexLayout = m_TextureBindingLayoutList[TextureBindingLayoutIndex];
 
-			// テクスチャ
-			for (int ImageInfoIndex = 0, TextureBindingLayoutIndex = 0; ImageInfoIndex < TexLayoutSize; ImageInfoIndex += 2, TextureBindingLayoutIndex++)
+			int TextureIndex = TexLayout.TextureIndex;
+
+			if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_2D)
 			{
-				const auto& TexLayout = m_TextureBindingLayoutList[TextureBindingLayoutIndex];
+				const std::shared_ptr<graphics::CTexture>& Texture = (TextureIndex >= 0 && TextureIndex < TextureList.size()) ? TextureList[TextureIndex] : m_EmptyTexture;
 
-				int TextureIndex = TexLayout.TextureIndex;
+				m_RefTextureMap.emplace(TexLayout.TextureName, Texture);
+			}
+			else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_CUBE)
+			{
+				const std::shared_ptr<graphics::CTexture>& Texture = (TextureIndex >= 0 && TextureIndex < CubeMapList.size()) ? CubeMapList[TextureIndex] : m_EmptyCubeTexture;
 
-				if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_2D)
-				{
-					const std::shared_ptr<graphics::CTexture>& Texture = (TextureIndex >= 0 && TextureIndex < TextureList.size()) ? TextureList[TextureIndex] : m_EmptyTexture;
+				m_RefCubeMapMap.emplace(TexLayout.TextureName, Texture);
+			}
+			else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_FRAME)
+			{
+				const std::shared_ptr<graphics::CTexture>& Texture = (TextureIndex >= 0 && TextureIndex < FrameTextureList.size()) ? FrameTextureList[TextureIndex] : m_EmptyTexture;
 
-					m_RefTextureMap.emplace(TexLayout.TextureName, Texture);
-				}
-				else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_CUBE)
-				{
-					const std::shared_ptr<graphics::CTexture>& Texture = (TextureIndex >= 0 && TextureIndex < CubeMapList.size()) ? CubeMapList[TextureIndex] : m_EmptyCubeTexture;
+				m_RefFrameTextureMap.emplace(TexLayout.TextureName, Texture);
+			}
+			else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_IBL_Diffuse)
+			{
+				const std::shared_ptr<graphics::CTexture>& Texture = (TextureIndex >= 0 && Diffuse_Tex) ? Diffuse_Tex : m_EmptyTexture;
 
-					m_RefCubeMapMap.emplace(TexLayout.TextureName, Texture);
-				}
-				else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_FRAME)
-				{
-					const std::shared_ptr<graphics::CTexture>& Texture = (TextureIndex >= 0 && TextureIndex < FrameTextureList.size()) ? FrameTextureList[TextureIndex] : m_EmptyTexture;
+				m_RefDiffuse_Tex = Texture;
+			}
+			else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_IBL_Specular)
+			{
+				const std::shared_ptr<graphics::CTexture>& Texture = (TextureIndex >= 0 && Specular_Tex) ? Specular_Tex : m_EmptyTexture;
 
-					m_RefFrameTextureMap.emplace(TexLayout.TextureName, Texture);
-				}
-				else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_IBL_Diffuse)
-				{
-					const std::shared_ptr<graphics::CTexture>& Texture = (TextureIndex >= 0 && Diffuse_Tex) ? Diffuse_Tex : m_EmptyTexture;
+				m_RefSpecular_Tex = Texture;
+			}
+			else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_IBL_GGXLUT)
+			{
+				const std::shared_ptr<graphics::CTexture>& Texture = (TextureIndex >= 0 && GGXLUT_Tex) ? GGXLUT_Tex : m_EmptyTexture;
 
-					m_RefDiffuse_Tex = Texture;
-				}
-				else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_IBL_Specular)
-				{
-					const std::shared_ptr<graphics::CTexture>& Texture = (TextureIndex >= 0 && Specular_Tex) ? Specular_Tex : m_EmptyTexture;
-
-					m_RefSpecular_Tex = Texture;
-				}
-				else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_IBL_GGXLUT)
-				{
-					const std::shared_ptr<graphics::CTexture>& Texture = (TextureIndex >= 0 && GGXLUT_Tex) ? GGXLUT_Tex : m_EmptyTexture;
-
-					m_RefGGXLUT_Tex = Texture;
-				}
+				m_RefGGXLUT_Tex = Texture;
 			}
 		}
 
@@ -262,42 +259,39 @@ namespace graphics
 		m_RefSpecular_Tex = nullptr;
 		m_RefGGXLUT_Tex = nullptr;
 
-		for (int BufferIndex = 0; BufferIndex < m_ShaderBufferList.size(); BufferIndex++)
+		size_t TexLayoutSize = m_TextureBindingLayoutList.size() * 2; // ImageViewとSamplerがあるので2倍にしている
+
+		// テクスチャ
+		for (int ImageInfoIndex = 0, TextureBindingLayoutIndex = 0; ImageInfoIndex < TexLayoutSize; ImageInfoIndex += 2, TextureBindingLayoutIndex++)
 		{
-			size_t TexLayoutSize = m_TextureBindingLayoutList.size() * 2; // ImageViewとSamplerがあるので2倍にしている
+			const auto& TexLayout = m_TextureBindingLayoutList[TextureBindingLayoutIndex];
 
-			// テクスチャ
-			for (int ImageInfoIndex = 0, TextureBindingLayoutIndex = 0; ImageInfoIndex < TexLayoutSize; ImageInfoIndex += 2, TextureBindingLayoutIndex++)
+			if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_2D)
 			{
-				const auto& TexLayout = m_TextureBindingLayoutList[TextureBindingLayoutIndex];
-
-				if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_2D)
-				{
-					const auto& it = PrevRefTextureMap.find(TexLayout.TextureName);
-					if (it != PrevRefTextureMap.end()) m_RefTextureMap.emplace(it->first, it->second);
-				}
-				else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_CUBE)
-				{
-					const auto& it = PrevRefCubeMapMap.find(TexLayout.TextureName);
-					if (it != PrevRefCubeMapMap.end()) m_RefCubeMapMap.emplace(it->first, it->second);
-				}
-				else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_FRAME)
-				{
-					const auto& it = PrevRefFrameTextureMap.find(TexLayout.TextureName);
-					if (it != PrevRefFrameTextureMap.end()) m_RefFrameTextureMap.emplace(it->first, it->second);
-				}
-				else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_IBL_Diffuse)
-				{
-					m_RefDiffuse_Tex = PrevRefDiffuse_Tex;
-				}
-				else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_IBL_Specular)
-				{
-					m_RefSpecular_Tex = PrevRefSpecular_Tex;
-				}
-				else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_IBL_GGXLUT)
-				{
-					m_RefGGXLUT_Tex = PrevRefGGXLUT_Tex;
-				}
+				const auto& it = PrevRefTextureMap.find(TexLayout.TextureName);
+				if (it != PrevRefTextureMap.end()) m_RefTextureMap.emplace(it->first, it->second);
+			}
+			else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_CUBE)
+			{
+				const auto& it = PrevRefCubeMapMap.find(TexLayout.TextureName);
+				if (it != PrevRefCubeMapMap.end()) m_RefCubeMapMap.emplace(it->first, it->second);
+			}
+			else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_FRAME)
+			{
+				const auto& it = PrevRefFrameTextureMap.find(TexLayout.TextureName);
+				if (it != PrevRefFrameTextureMap.end()) m_RefFrameTextureMap.emplace(it->first, it->second);
+			}
+			else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_IBL_Diffuse)
+			{
+				m_RefDiffuse_Tex = PrevRefDiffuse_Tex;
+			}
+			else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_IBL_Specular)
+			{
+				m_RefSpecular_Tex = PrevRefSpecular_Tex;
+			}
+			else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_IBL_GGXLUT)
+			{
+				m_RefGGXLUT_Tex = PrevRefGGXLUT_Tex;
 			}
 		}
 

@@ -5,6 +5,7 @@
 #include "../../Camera/CCamera.h"
 #include "../../Projection/CProjection.h"
 #include "../../ImageEffect/CBlurEffect.h"
+#include "../../Graphics/CDeferredRenderer.h"
 #include "../../Message/Console.h"
 #include "../../Interface/IGUIEngine.h"
 #ifdef USE_VIEWER_CAMERA
@@ -37,6 +38,7 @@ namespace app
 		m_GraphicsEditingWindow(std::make_shared<gui::CGraphicsEditingWindow>()),
 #endif // USE_GUIENGINE
 		m_BlurEffect(nullptr),
+		m_DeferredRenderer(nullptr),
 		m_FileModifier(std::make_shared<CFileModifier>())
 	{
 		m_MainCamera->SetPos(glm::vec3(0.0f, 1.0f, -7.0f));
@@ -71,10 +73,13 @@ namespace app
 
 		// オフスクリーンレンダリング
 		//if (!pGraphicsAPI->CreateRenderPass("ShadowPass", api::ERenderPassFormat::COLOR_RENDERPASS, glm::vec4(1.0f), 512, 512)) return false;
-		if (!pGraphicsAPI->CreateRenderPass("MRTTest", api::ERenderPassFormat::COLOR_RENDERPASS, glm::vec4(1.0f), 512, 512, 3)) return false;
+		if (!pGraphicsAPI->CreateRenderPass("MRTTest", api::ERenderPassFormat::COLOR_FLOAT_RENDERPASS, glm::vec4(1.0f), -1, -1, 3)) return false;
 
 		m_BlurEffect = std::make_shared<imageeffect::CBlurEffect>(pGraphicsAPI);
 		if (!m_BlurEffect->Create(pLoadWorker)) return false;
+		
+		m_DeferredRenderer = std::make_shared<graphics::CDeferredRenderer>(pGraphicsAPI);
+		if (!m_DeferredRenderer->Create(pLoadWorker)) return false;
 
 		// FrameTextureを渡す
 		//m_ScriptScene->SetFrameTexture(m_BlurEffect->GetFrameTexture());
@@ -103,6 +108,8 @@ namespace app
 		if (!m_ScriptScene->Update(pGraphicsAPI, pPhysicsEngine, pLoadWorker, m_MainCamera, m_Projection, m_DrawInfo, InputState)) return false;
 
 		if (!m_BlurEffect->Update(pLoadWorker)) return false;
+
+		if (!m_DeferredRenderer->Update(pGraphicsAPI, pPhysicsEngine, pLoadWorker, m_MainCamera, m_Projection, m_DrawInfo, InputState)) return false;
 
 		m_MainCamera->Update(m_DrawInfo->GetDeltaSecondsTime(), InputState);
 
@@ -147,6 +154,7 @@ namespace app
 		{
 			if (!pGraphicsAPI->BeginRender()) return false;
 
+			if (!m_DeferredRenderer->Draw(m_MainCamera, m_Projection, m_DrawInfo)) return false;
 			if (!pLoadWorker->Draw(pGraphicsAPI, false, m_MainCamera, m_Projection, m_DrawInfo)) return false;
 
 			// GUIEngine
