@@ -167,7 +167,7 @@ namespace resource
 
 				if (back.empty() || bottom.empty() || front.empty() || left.empty() || right.empty() || top.empty()) continue;
 
-				std::vector<std::string> FileNameList = { back, bottom, front, left, right, top };
+				std::vector<std::string> FileNameList = { right, left, top, bottom, front, back };
 
 				auto Texture = pGraphicsAPI->CreateTexture();
 				pLoadWorker->AddLoadResource(std::make_shared<resource::CTextureLoader>(pGraphicsAPI, FileNameList, Texture));
