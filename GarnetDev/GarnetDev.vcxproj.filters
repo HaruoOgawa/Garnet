@@ -48,6 +48,9 @@
     <ClCompile Include="Src\App\ScriptApp\CScriptApp.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Src\ImageEffect\CBlurEffect.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\App\ScriptApp\GUI\CGraphicsEditingWindow.h">
@@ -78,6 +81,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Src\App\ScriptApp\CScriptApp.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\ImageEffect\CBlurEffect.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -202,6 +208,8 @@
     </None>
     <None Include="Commands\UTF8Encorder.py" />
     <None Include="Resources\Scene\MRTTest.json" />
+    <None Include="Resources\MaterialFrame\PBR_MRT_MF.json" />
+    <None Include="Resources\Shaders\pbr_mrt.frag" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Commands\LibList.txt" />

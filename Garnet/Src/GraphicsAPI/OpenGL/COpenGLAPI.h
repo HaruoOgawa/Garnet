@@ -33,7 +33,7 @@ namespace api
 		
 		virtual void Release() override;
 
-		virtual bool CreateRenderPass(const std::string& PassName, ERenderPassFormat RenderPassFormat, const glm::vec4& InitColor, int Width = -1, int Height = -1) override;
+		virtual bool CreateRenderPass(const std::string& PassName, ERenderPassFormat RenderPassFormat, const glm::vec4& InitColor, int Width = -1, int Height = -1, int RenderTargetCount = 1) override;
 		virtual std::shared_ptr<graphics::CVertexBuffer> CreateVertexBuffer() override;
 		virtual std::shared_ptr<graphics::CIndexBuffer> CreateIndexBuffer() override;
 		virtual std::shared_ptr<graphics::IRenderer> CreateRenderer(const std::string& PassName) override;

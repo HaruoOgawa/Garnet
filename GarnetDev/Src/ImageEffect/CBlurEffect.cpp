@@ -1,11 +1,11 @@
 #include "CBlurEffect.h"
-#include "../../LoadWorker/CLoadWorker.h"
-#include "../../LoadWorker/CMaterialFrameLoader.h"
-#include "../LoadWorker/CFile.h"
-#include "../Message/Console.h"
-#include "../Interface/IGraphicsAPI.h"
-#include "../Graphics/CTextureSet.h"
-#include "../Graphics/CMaterialFrame.h"
+#include <LoadWorker/CLoadWorker.h>
+#include <LoadWorker/CMaterialFrameLoader.h>
+#include <LoadWorker/CFile.h>
+#include <Message/Console.h>
+#include <Interface/IGraphicsAPI.h>
+#include <Graphics/CTextureSet.h>
+#include <Graphics/CMaterialFrame.h>
 
 namespace imageeffect
 {

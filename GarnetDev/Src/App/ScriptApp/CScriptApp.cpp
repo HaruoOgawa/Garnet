@@ -70,7 +70,8 @@ namespace app
 		m_ScriptScene = std::make_shared<app::CScriptScene>(pGraphicsAPI, pLoadWorker, pPhysicsEngine);
 
 		// オフスクリーンレンダリング
-		if (!pGraphicsAPI->CreateRenderPass("ShadowPass", api::ERenderPassFormat::COLOR_RENDERPASS, glm::vec4(1.0f), 512, 512)) return false;
+		//if (!pGraphicsAPI->CreateRenderPass("ShadowPass", api::ERenderPassFormat::COLOR_RENDERPASS, glm::vec4(1.0f), 512, 512)) return false;
+		if (!pGraphicsAPI->CreateRenderPass("MRTTest", api::ERenderPassFormat::COLOR_RENDERPASS, glm::vec4(1.0f), 512, 512, 3)) return false;
 
 		m_BlurEffect = std::make_shared<imageeffect::CBlurEffect>(pGraphicsAPI);
 		if (!m_BlurEffect->Create(pLoadWorker)) return false;
@@ -134,24 +135,32 @@ namespace app
 
 		// ShadowMapにブラーをかける
 		if (!m_BlurEffect->Draw(m_MainCamera, m_Projection, m_DrawInfo)) return false;*/
-
-		// DefaultPass(SwapChain)
-		if (!pGraphicsAPI->BeginRender()) return false;
-
-		if (!m_ScriptScene->Draw(pGraphicsAPI, false, m_MainCamera, m_Projection, m_DrawInfo)) return false;
-		if (!pLoadWorker->Draw(pGraphicsAPI, false, m_MainCamera, m_Projection, m_DrawInfo)) return false;
 		
-		// GUIEngine
-#ifdef USE_GUIENGINE
-		if (pLoadWorker->IsLoaded())
+		// MRTTest FrameBuffer
 		{
-			if (!GUIEngine->BeginFrame(pGraphicsAPI)) return false;
-			if (!m_GraphicsEditingWindow->Draw(pGraphicsAPI, this)) return false;
-			if (!GUIEngine->EndFrame(pGraphicsAPI)) return false;
+			if (!pGraphicsAPI->BeginRender("MRTTest")) return false;
+			if (!m_ScriptScene->Draw(pGraphicsAPI, false, m_MainCamera, m_Projection, m_DrawInfo)) return false;
+			if (!pGraphicsAPI->EndRender()) return false;
 		}
+
+		// Main FrameBuffer
+		{
+			if (!pGraphicsAPI->BeginRender()) return false;
+
+			if (!pLoadWorker->Draw(pGraphicsAPI, false, m_MainCamera, m_Projection, m_DrawInfo)) return false;
+
+			// GUIEngine
+#ifdef USE_GUIENGINE
+			if (pLoadWorker->IsLoaded())
+			{
+				if (!GUIEngine->BeginFrame(pGraphicsAPI)) return false;
+				if (!m_GraphicsEditingWindow->Draw(pGraphicsAPI, this)) return false;
+				if (!GUIEngine->EndFrame(pGraphicsAPI)) return false;
+			}
 #endif // USE_GUIENGINE
 
-		if (!pGraphicsAPI->EndRender()) return false;
+			if (!pGraphicsAPI->EndRender()) return false;
+		}
 
 		return true;
 	}

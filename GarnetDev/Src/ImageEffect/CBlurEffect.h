@@ -3,7 +3,7 @@
 #include <vector>
 #include <memory>
 #include <glm/glm.hpp>
-#include "../Object/C3DObject.h"
+#include <Object/C3DObject.h>
 
 namespace file { class CFile; }
 namespace api { class IGraphicsAPI; }

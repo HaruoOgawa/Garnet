@@ -42,17 +42,17 @@ namespace api
 	{
 	}
 
-	bool COpenGLAPI::CreateRenderPass(const std::string& PassName, ERenderPassFormat RenderPassFormat, const glm::vec4& InitColor, int Width, int Height)
+	bool COpenGLAPI::CreateRenderPass(const std::string& PassName, ERenderPassFormat RenderPassFormat, const glm::vec4& InitColor, int Width, int Height, int RenderTargetCount)
 	{
 		std::shared_ptr<COpenGLRenderPass> RenderPass = std::make_shared<COpenGLRenderPass>(this, PassName, RenderPassFormat, InitColor);
 
 		if (Width != -1 && Height != -1)
 		{
-			if (!RenderPass->Create(Width, Height)) return false;
+			if (!RenderPass->Create(Width, Height, RenderTargetCount)) return false;
 		}
 		else
 		{
-			if (!RenderPass->Create(m_Width, m_Height)) return false;
+			if (!RenderPass->Create(m_Width, m_Height, RenderTargetCount)) return false;
 		}
 
 		m_OffScreenRenderPassMap.insert({ PassName, RenderPass });

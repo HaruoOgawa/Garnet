@@ -1,9 +1,9 @@
 {
     "materialframes": [
-        {
-            "name": "pbr_mat",
-            "filename": "Resources/MaterialFrame/PBR_MF.json"
-        }
+      {
+        "name": "pbr_mrt_mat",
+        "filename": "Resources/MaterialFrame/PBR_MRT_MF.json"
+      }
     ],
   "scenetextureset": {
     "cubemaps": [
@@ -22,7 +22,7 @@
         {
             "name": "glTFObj",
             "filename": "Resources/Models/Sponza/glTF/Sponza.glb",
-            "defaultmaterialframe": "pbr_mat",
+            "defaultmaterialframe": "pbr_mrt_mat",
             "transform": {
                 "pos": [
                     0.0,
@@ -43,7 +43,7 @@
             "enable": true,
             "materials": [
                 {
-                    "materialframe": "pbr_mat",
+                    "materialframe": "pbr_mrt_mat",
                     "cull": "back",
                     "uniformvalues": [
                         {
@@ -202,7 +202,7 @@
                     ]
                 },
                 {
-                    "materialframe": "pbr_mat",
+                    "materialframe": "pbr_mrt_mat",
                     "cull": "back",
                     "uniformvalues": [
                         {
@@ -361,7 +361,7 @@
                     ]
                 },
                 {
-                    "materialframe": "pbr_mat",
+                    "materialframe": "pbr_mrt_mat",
                     "cull": "back",
                     "uniformvalues": [
                         {
@@ -510,7 +510,7 @@
                     ]
                 },
                 {
-                    "materialframe": "pbr_mat",
+                    "materialframe": "pbr_mrt_mat",
                     "cull": "back",
                     "uniformvalues": [
                         {
@@ -669,7 +669,7 @@
                     ]
                 },
                 {
-                    "materialframe": "pbr_mat",
+                    "materialframe": "pbr_mrt_mat",
                     "cull": "back",
                     "uniformvalues": [
                         {
@@ -828,7 +828,7 @@
                     ]
                 },
                 {
-                    "materialframe": "pbr_mat",
+                    "materialframe": "pbr_mrt_mat",
                     "cull": "back",
                     "uniformvalues": [
                         {
@@ -987,7 +987,7 @@
                     ]
                 },
                 {
-                    "materialframe": "pbr_mat",
+                    "materialframe": "pbr_mrt_mat",
                     "cull": "back",
                     "uniformvalues": [
                         {
@@ -1146,7 +1146,7 @@
                     ]
                 },
                 {
-                    "materialframe": "pbr_mat",
+                    "materialframe": "pbr_mrt_mat",
                     "cull": "back",
                     "uniformvalues": [
                         {
@@ -1305,7 +1305,7 @@
                     ]
                 },
                 {
-                    "materialframe": "pbr_mat",
+                    "materialframe": "pbr_mrt_mat",
                     "cull": "back",
                     "uniformvalues": [
                         {
@@ -1464,7 +1464,7 @@
                     ]
                 },
                 {
-                    "materialframe": "pbr_mat",
+                    "materialframe": "pbr_mrt_mat",
                     "cull": "back",
                     "uniformvalues": [
                         {
@@ -1623,7 +1623,7 @@
                     ]
                 },
                 {
-                    "materialframe": "pbr_mat",
+                    "materialframe": "pbr_mrt_mat",
                     "cull": "back",
                     "uniformvalues": [
                         {
@@ -1782,7 +1782,7 @@
                     ]
                 },
                 {
-                    "materialframe": "pbr_mat",
+                    "materialframe": "pbr_mrt_mat",
                     "cull": "back",
                     "uniformvalues": [
                         {
@@ -1941,7 +1941,7 @@
                     ]
                 },
                 {
-                    "materialframe": "pbr_mat",
+                    "materialframe": "pbr_mrt_mat",
                     "cull": "back",
                     "uniformvalues": [
                         {
@@ -2100,7 +2100,7 @@
                     ]
                 },
                 {
-                    "materialframe": "pbr_mat",
+                    "materialframe": "pbr_mrt_mat",
                     "cull": "back",
                     "uniformvalues": [
                         {
@@ -2259,7 +2259,7 @@
                     ]
                 },
                 {
-                    "materialframe": "pbr_mat",
+                    "materialframe": "pbr_mrt_mat",
                     "cull": "back",
                     "uniformvalues": [
                         {
@@ -2418,7 +2418,7 @@
                     ]
                 },
                 {
-                    "materialframe": "pbr_mat",
+                    "materialframe": "pbr_mrt_mat",
                     "cull": "back",
                     "uniformvalues": [
                         {
@@ -2577,7 +2577,7 @@
                     ]
                 },
                 {
-                    "materialframe": "pbr_mat",
+                    "materialframe": "pbr_mrt_mat",
                     "cull": "back",
                     "uniformvalues": [
                         {
@@ -2736,7 +2736,7 @@
                     ]
                 },
                 {
-                    "materialframe": "pbr_mat",
+                    "materialframe": "pbr_mrt_mat",
                     "cull": "back",
                     "uniformvalues": [
                         {
@@ -2895,7 +2895,7 @@
                     ]
                 },
                 {
-                    "materialframe": "pbr_mat",
+                    "materialframe": "pbr_mrt_mat",
                     "cull": "back",
                     "uniformvalues": [
                         {
@@ -3054,7 +3054,7 @@
                     ]
                 },
                 {
-                    "materialframe": "pbr_mat",
+                    "materialframe": "pbr_mrt_mat",
                     "cull": "back",
                     "uniformvalues": [
                         {
@@ -3213,7 +3213,7 @@
                     ]
                 },
                 {
-                    "materialframe": "pbr_mat",
+                    "materialframe": "pbr_mrt_mat",
                     "cull": "back",
                     "uniformvalues": [
                         {
@@ -3372,7 +3372,7 @@
                     ]
                 },
                 {
-                    "materialframe": "pbr_mat",
+                    "materialframe": "pbr_mrt_mat",
                     "cull": "back",
                     "uniformvalues": [
                         {
@@ -3531,7 +3531,7 @@
                     ]
                 },
                 {
-                    "materialframe": "pbr_mat",
+                    "materialframe": "pbr_mrt_mat",
                     "cull": "back",
                     "uniformvalues": [
                         {
@@ -3690,7 +3690,7 @@
                     ]
                 },
                 {
-                    "materialframe": "pbr_mat",
+                    "materialframe": "pbr_mrt_mat",
                     "cull": "back",
                     "uniformvalues": [
                         {
@@ -3849,7 +3849,7 @@
                     ]
                 },
                 {
-                    "materialframe": "pbr_mat",
+                    "materialframe": "pbr_mrt_mat",
                     "cull": "back",
                     "uniformvalues": [
                         {
@@ -4068,7 +4068,7 @@
             ],
             "materials": [
                 {
-                    "materialframe": "pbr_mat",
+                    "materialframe": "pbr_mrt_mat",
                     "cull": "back",
                     "uniformvalues": [
                         {
