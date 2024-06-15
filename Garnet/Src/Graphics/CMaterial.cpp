@@ -392,6 +392,11 @@ namespace graphics
 	{
 	}
 
+	void CMaterial::AddRefCount()
+	{
+		m_RefCount++;
+	}
+
 	int CMaterial::GetRefCount() const
 	{
 		return m_RefCount;

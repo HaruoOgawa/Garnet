@@ -201,6 +201,7 @@
       <Filter>Source Files</Filter>
     </None>
     <None Include="Commands\UTF8Encorder.py" />
+    <None Include="Resources\Scene\MRTTest.json" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Commands\LibList.txt" />

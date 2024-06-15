@@ -40,7 +40,7 @@ namespace graphics
 		std::vector<STextureBindingLayout> m_TextureBindingLayoutList;
 
 		// VulkanやWebGPUはOpenGLの様に何も考えずにマテリアルを使いまわすことができないのでその数をあらかじめ設定しておく必要がある
-		const int m_RefCount;
+		int m_RefCount;
 		int m_CurrentDynamicOffset;
 
 		std::vector<uint32_t> m_BindingRefSizeList; // GLSLの各bindingが参照しているバッファのサイズ
@@ -120,6 +120,7 @@ namespace graphics
 
 		virtual void SetUniformValue(const std::string Name, const void* Data, int ByteSize, int DynamicOffsetNum = -1) = 0;
 
+		virtual void AddRefCount();
 		virtual int GetRefCount() const;
 
 		virtual bool IsUseDynamicOffset();

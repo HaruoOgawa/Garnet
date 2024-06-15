@@ -129,7 +129,7 @@ namespace gltf
 
 		// メッシュ
 		std::vector<std::shared_ptr<graphics::CMesh>> MeshList;
-		if (!CreateMesh(pGraphicsAPI, model, MeshList))
+		if (!CreateMesh(pGraphicsAPI, model, MeshList, MaterialList))
 		{
 			Console::Log("[Error GLTFImporter] Failed to CreateMesh\n");
 
@@ -455,7 +455,7 @@ namespace gltf
 		return true;
 	}
 
-	bool CGLTFImporter::CreateMesh(api::IGraphicsAPI* pGraphicsAPI, const tinygltf::Model& model, std::vector<std::shared_ptr<graphics::CMesh>>& MeshList)
+	bool CGLTFImporter::CreateMesh(api::IGraphicsAPI* pGraphicsAPI, const tinygltf::Model& model, std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, const std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList)
 	{
 		for (const auto& glTFMesh : model.meshes)
 		{
@@ -718,6 +718,12 @@ namespace gltf
 				std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(VertexBuffer, IndexBuffer, MaterialIndex);
 				Mesh->SetMorphDataList(Primitive, static_cast<int>(Mesh->GetPrimitiveList().size()), MorphDataList);
 				Mesh->AddPrimitive(Primitive);
+
+				// マテリアルに参照を追加
+				if (MaterialIndex >= 0 && MaterialIndex < static_cast<int>(MaterialList.size()))
+				{
+					MaterialList[MaterialIndex]->AddRefCount();
+				}
 			}
 
 			// メッシュを登録する
