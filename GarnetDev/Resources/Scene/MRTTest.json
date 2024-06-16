@@ -4053,7 +4053,7 @@
                             1.0
                         ]
                     },
-                    "meshindex": 0
+                    "meshindex": -1
                 }
             ],
             "meshs": [

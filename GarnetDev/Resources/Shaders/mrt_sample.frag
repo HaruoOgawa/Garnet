@@ -17,9 +17,15 @@ layout(binding = 6) uniform sampler texGAlbedoSampler;
 
 layout(location = 0) out vec4 outColor;
 
+struct Light
+{
+	vec3 Posision;
+	vec3 Color;
+};
+
 void main()
 {
-	vec4 col = vec4(0.0); 
+	vec4 col = vec4(0.0, 0.0, 0.0, 1.0); 
 	vec2 st = mod(fUV * 2.0, 1.0);
 	vec2 id = floor(fUV * 2.0);
 
@@ -55,6 +61,28 @@ void main()
 	}
 	else if(id.x == 1.0 && id.y == 0.0)
 	{
+		const int NUM_OF_LIGHT = 5;
+		float width = 3.0;
+
+		Light lightList[NUM_OF_LIGHT];
+		lightList[0].Posision = vec3(0.0, 1.0, 0.0);
+		lightList[0].Color = vec3(1.0, 1.0, 1.0);
+		lightList[1].Posision = vec3(1.0 * width, 1.0, 0.0);
+		lightList[1].Color = vec3(1.0, 0.0, 0.0);
+		lightList[2].Posision = vec3(-1.0 * width, 1.0, 0.0);
+		lightList[2].Color = vec3(0.0, 1.0, 0.0);
+		lightList[3].Posision = vec3(-2.0 * width, 1.0, 0.0);
+		lightList[3].Color = vec3(0.0, 0.0, 1.0);
+		lightList[4].Posision = vec3(-2.0 * width, 1.0, 0.0);
+		lightList[4].Color = vec3(1.0, 0.0, 1.0);
+
+		for(int i = 0; i < NUM_OF_LIGHT; i++)
+		{
+			vec3 lightDir = normalize(lightList[i].Posision - GPositionCol.xyz);
+			vec3 diffuse = max(0.0, dot(GNormalCol.xyz, lightDir)) * GAlbedoCol.rgb * lightList[i].Color;
+
+			col.rgb += diffuse;
+		}
 	}
 
 	outColor = col;
