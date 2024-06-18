@@ -218,6 +218,9 @@
     <None Include="Resources\Shaders\pbr_mrt.frag" />
     <None Include="Resources\Shaders\mrt_sample.frag" />
     <None Include="Resources\MaterialFrame\MRTSample_MF.json" />
+    <None Include="Resources\Shaders\objectspace_raymarching.frag" />
+    <None Include="Resources\Shaders\objectspace_raymarching.vert" />
+    <None Include="Resources\MaterialFrame\Objectspace_Ray_MF.json" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Commands\LibList.txt" />

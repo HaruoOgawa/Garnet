@@ -531,6 +531,7 @@
     <None Include="Resources\MaterialFrame\Blur_MF.json" />
     <None Include="Resources\MaterialFrame\Depth_MF.json" />
     <None Include="Resources\MaterialFrame\MRTSample_MF.json" />
+    <None Include="Resources\MaterialFrame\Objectspace_Ray_MF.json" />
     <None Include="Resources\MaterialFrame\PBRMorph_MF.json" />
     <None Include="Resources\MaterialFrame\PBR_MF.json" />
     <None Include="Resources\MaterialFrame\PBR_MRT_MF.json" />
@@ -575,6 +576,8 @@
     <None Include="Resources\Shaders\minimum_vert.spv" />
     <None Include="Resources\Shaders\minimum_vert.wgsl" />
     <None Include="Resources\Shaders\mrt_sample.frag" />
+    <None Include="Resources\Shaders\objectspace_raymarching.frag" />
+    <None Include="Resources\Shaders\objectspace_raymarching.vert" />
     <None Include="Resources\Shaders\pbr.frag" />
     <None Include="Resources\Shaders\pbr.vert" />
     <None Include="Resources\Shaders\pbrmorph.vert" />

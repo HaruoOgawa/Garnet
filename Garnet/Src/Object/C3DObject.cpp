@@ -381,6 +381,7 @@ namespace object
 			if (MeshIndex < 0 || MeshIndex >= m_MeshList.size()) continue;
 
 			const auto& WorldMatrix = m_ObjectTransform->GetModelMatrix() * Node->GetWorldMatrix();
+			const auto& InvWorldMatrix = glm::inverse(WorldMatrix);
 			const auto& Mesh = m_MeshList[MeshIndex];
 
 			int SkeletonIndex = Node->GetSkeletonIndex();
@@ -424,12 +425,15 @@ namespace object
 
 				Material->SetUniformValue("drawPathIndex", &DynamicOffsetNum, sizeof(int), DynamicOffsetNum);
 				Material->SetUniformValue("model", &WorldMatrix[0][0], sizeof(glm::mat4), DynamicOffsetNum);
+				Material->SetUniformValue("invModel", &InvWorldMatrix[0][0], sizeof(glm::mat4), DynamicOffsetNum);
 				Material->SetUniformValue("view", &Camera->GetViewMatrix()[0][0], sizeof(glm::mat4), DynamicOffsetNum);
 				Material->SetUniformValue("proj", &Projection->GetPrejectionMatrix()[0][0], sizeof(glm::mat4), DynamicOffsetNum);
 				Material->SetUniformValue("lightVPMat", &lightVPMat[0][0], sizeof(glm::mat4), DynamicOffsetNum);
-				Material->SetUniformValue("lightDir", &DrawInfo->GetLightCamera()->GetViewDir()[0], sizeof(glm::vec3), DynamicOffsetNum);
+				glm::vec3 lightDir = DrawInfo->GetLightCamera()->GetViewDir();
+				Material->SetUniformValue("lightDir", &glm::vec4(lightDir.x, lightDir.y, lightDir.z, 0.0f)[0], sizeof(glm::vec4), DynamicOffsetNum);
 				Material->SetUniformValue("lightColor", &DrawInfo->GetLightColor()[0], sizeof(glm::vec4), DynamicOffsetNum);
-				Material->SetUniformValue("cameraPos", &Camera->GetPos()[0], sizeof(glm::vec3), DynamicOffsetNum);
+				glm::vec3 CameraPos = Camera->GetPos();
+				Material->SetUniformValue("cameraPos", &glm::vec4(CameraPos.x, CameraPos.y, CameraPos.z, 1.0f)[0], sizeof(glm::vec4), DynamicOffsetNum);
 				Material->SetUniformValue("time", &glm::vec1(DrawInfo->GetSecondsTime())[0], sizeof(float), DynamicOffsetNum);
 				Material->SetUniformValue("deltaTime", &glm::vec1(DrawInfo->GetDeltaSecondsTime())[0], sizeof(float), DynamicOffsetNum);
 				Material->SetUniformValue("resolution", &Projection->GetScreenResolution()[0], sizeof(glm::vec2), DynamicOffsetNum);
