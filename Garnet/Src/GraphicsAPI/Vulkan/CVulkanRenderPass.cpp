@@ -234,8 +234,7 @@ namespace api
 		for (int AttachmentIndex = 0; AttachmentIndex < m_RenderTargetCount; AttachmentIndex++)
 		{
 			VkClearValue clearValue{};
-			clearValue.color = { {0.0f, 0.0f, 0.0f, 0.0f} };
-			//clearValue.color = { {m_InitColor.x, m_InitColor.y, m_InitColor.z, m_InitColor.w} };
+			clearValue.color = { {m_InitColor.x, m_InitColor.y, m_InitColor.z, m_InitColor.w} };
 
 			clearValues.push_back(clearValue);
 		}

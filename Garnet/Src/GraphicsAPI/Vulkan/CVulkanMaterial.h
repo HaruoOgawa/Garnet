@@ -61,6 +61,9 @@ namespace api
 
 		bool CreatePipelineLayout();
 
+		bool UpdateShaderBufferDescriptorSets(size_t FrameIndex);
+		bool UpdateTextureBufferDescriptorSets(size_t FrameIndex);
+
 		void Release();
 
 		// ƒwƒ‹ƒp[ŠÖ” ///////////////////////////////////////////////////////////////////////////////////////////////////////////////

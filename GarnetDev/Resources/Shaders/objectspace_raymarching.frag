@@ -61,6 +61,8 @@ void main()
         gPosition = vec4(p, 1.0);
 	    gNormal = vec4(n, 1.0);
 	    gAlbedo = vec4(1.0);
+        
+        //gl_FragDepth = 0.0;
     }
     else
     {
