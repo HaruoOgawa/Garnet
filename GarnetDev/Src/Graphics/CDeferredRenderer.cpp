@@ -30,13 +30,15 @@ namespace graphics
 		m_RenderBoard->GetTextureSet()->Add2DTexture(RenderTarget->GetFrameTexture(0));
 		m_RenderBoard->GetTextureSet()->Add2DTexture(RenderTarget->GetFrameTexture(1));
 		m_RenderBoard->GetTextureSet()->Add2DTexture(RenderTarget->GetFrameTexture(2));
+		m_RenderBoard->GetTextureSet()->Add2DTexture(RenderTarget->GetFrameTexture(3));
 
 		auto Material = m_MRTMF->CreateMaterial(m_pGraphicsAPI, 1, graphics::ECullMode::CULL_NONE);
 		Material->ReplaceTextureIndex("texGPosition", 0);
 		Material->ReplaceTextureIndex("texGNormal", 1);
 		Material->ReplaceTextureIndex("texGAlbedo", 2);
-		Material->SetEnabledZWrite(false);
-		Material->SetDepthFunc(graphics::EDepthFunc::Always);
+		Material->ReplaceTextureIndex("texDepth", 3);
+		/*Material->SetEnabledZWrite(false);
+		Material->SetDepthFunc(graphics::EDepthFunc::Always);*/
 
 		if (!m_RenderBoard->CreatePresetSimply(m_pGraphicsAPI, nullptr, graphics::CPresetPrimitive::CreateBoard(m_pGraphicsAPI), graphics::EPresetPrimitiveType::BOARD,
 			Material, nullptr)) return false;

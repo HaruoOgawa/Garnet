@@ -24,6 +24,8 @@
 
 #define GL_FRAMEBUFFER                    0x8D40
 #define GL_FRAMEBUFFER_COMPLETE           0x8CD5
+#define GL_READ_FRAMEBUFFER               0x8CA8
+#define GL_DRAW_FRAMEBUFFER               0x8CA9
 #define GL_FUNC_ADD                       0x8006
 #define GL_MAJOR_VERSION                  0x821B
 #define GL_MINOR_VERSION                  0x821C
@@ -109,6 +111,7 @@ typedef ptrdiff_t GLsizeiptr;
 	GL_FUNC(void,	DrawElementsInstanced,GLenum mode, GLsizei count, GLenum type, const void* indices, GLsizei instancecount) \
 	GL_FUNC(void,	DispatchCompute, 	  GLuint num_groups_x, GLuint num_groups_y, GLuint num_groups_z) \
 	GL_FUNC(void,	DrawBuffers, 	      GLsizei n, const GLenum* bufs) \
+	GL_FUNC(void,	BlitFramebuffer, 	  GLint srcX0, GLint srcY0, GLint srcX1, GLint srcY1, GLint dstX0, GLint dstY0, GLint dstX1, GLint dstY1, GLbitfield mask, GLenum filter) \
 /* end */
 
 // プリプロセッサ芸でまずGL_FUNC_LISTの中身をtypedef や externで展開する

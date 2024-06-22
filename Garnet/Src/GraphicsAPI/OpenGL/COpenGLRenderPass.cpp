@@ -122,5 +122,10 @@ namespace api
 	{
 		return true;
 	}
+
+	GLuint COpenGLRenderPass::GetFrameBuffer() const
+	{
+		return m_FrameBuffer;
+	}
 }
 #endif

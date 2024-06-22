@@ -38,7 +38,8 @@ namespace api
 		m_SwapChainDepthImage(nullptr),
 		m_SwapChainDepthImageMemory(nullptr),
 		m_SwapChainDepthImageView(nullptr),
-		m_CommandPool(nullptr)
+		m_CommandPool(nullptr),
+		m_CurrentRenderPassName(std::string())
 	{
 	}
 
@@ -241,6 +242,8 @@ namespace api
 			if (!BeginRenderPass(m_CurrentImageIndex)) return false;
 		}
 
+		m_CurrentRenderPassName = PassName;
+
 		return true;
 	}
 
@@ -346,6 +349,21 @@ namespace api
 		if (it == m_OffScreenRenderPassMap.end()) return nullptr;
 
 		return it->second;
+	}
+
+	const std::string& CVulkanAPI::GetCurrentRenderPassName() const
+	{
+		return m_CurrentRenderPassName;
+	}
+
+	bool CVulkanAPI::CopyColorBuffer(const std::string& SrcPassName, const std::string& DstPassName)
+	{
+		return true;
+	}
+
+	bool CVulkanAPI::CopyDepthBuffer(const std::string& SrcPassName, const std::string& DstPassName)
+	{
+		return true;
 	}
 
 	VkRenderPass CVulkanAPI::GetSwapChainRenderPass() const

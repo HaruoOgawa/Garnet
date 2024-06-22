@@ -50,6 +50,8 @@ namespace api
 
 		virtual bool BeginRenderPass() override;
 		virtual bool EndRenderPass() override;
+
+		GLuint GetFrameBuffer() const;
 	};
 }
 #endif

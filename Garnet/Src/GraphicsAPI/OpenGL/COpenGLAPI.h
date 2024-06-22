@@ -24,6 +24,7 @@ namespace api
 		int m_Height;
 
 		std::map<std::string, std::shared_ptr<graphics::IRenderPass>> m_OffScreenRenderPassMap;
+		std::string m_CurrentRenderPassName;
 	private:
 	public:
 		COpenGLAPI(int Width, int Height);
@@ -46,7 +47,7 @@ namespace api
 		virtual bool Resize(int Width, int Height) override;
 
 		virtual bool PrepareRender() override;
-		virtual bool BeginRender(const std::string& PassName = "") override;
+		virtual bool BeginRender(const std::string& PassName = std::string()) override;
 		virtual bool EndRender() override;
 		virtual bool SubmitRender() override;
 
@@ -62,8 +63,13 @@ namespace api
 
 		virtual const std::map<std::string, std::shared_ptr<graphics::IRenderPass>>& GetOffScreenRenderPassMap() const override;
 		virtual std::shared_ptr<graphics::IRenderPass> FindOffScreenRenderPass(const std::string& PassName) override;
+		virtual const std::string& GetCurrentRenderPassName() const override;
+		virtual bool CopyColorBuffer(const std::string& SrcPassName, const std::string& DstPassName) override;
+		virtual bool CopyDepthBuffer(const std::string& SrcPassName, const std::string& DstPassName) override;
 
 		virtual bool IsEnabledRuntimeShaderEditing() const override;
+
+		GLuint GetFrameBuffer(const std::string& PassName);
 	};
 }
 

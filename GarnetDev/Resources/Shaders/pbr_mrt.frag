@@ -10,6 +10,7 @@ layout(location = 5) in vec4 f_LightSpacePos;
 layout(location = 0) out vec4 gPosition;
 layout(location = 1) out vec4 gNormal;
 layout(location = 2) out vec4 gAlbedo;
+layout(location = 3) out vec4 gDepth;
 
 layout(binding = 0) uniform UniformBufferObject{
 	mat4 model;
@@ -453,8 +454,10 @@ void main(){
 	}
 	
 	vec3 n = getNormal();
+	float depth = gl_FragCoord.z;
 
 	gPosition = f_WorldPos;
 	gNormal = vec4(n, 1.0);
 	gAlbedo = baseColor;
+	gDepth = vec4(depth);
 }

@@ -372,6 +372,17 @@ namespace object
 
 		if (!m_Enabled) return true;
 
+		// •`‰æƒpƒX‚ªˆá‚¤‚È‚ç•`‰æ‚µ‚È‚¢
+		// ToDo: PassName‚Í”z—ñ‚É‚µ‚Ä‚à‚¢‚¢‚©‚à‚µ‚ê‚È‚¢
+		if (IsDepthPass)
+		{
+			if (m_DepthPassName != pGraphicsAPI->GetCurrentRenderPassName()) return true;
+		}
+		else
+		{
+			if (m_PassName != pGraphicsAPI->GetCurrentRenderPassName()) return true;
+		}
+
 		// •`‰æ
 		for (const auto& Node : m_NodeList)
 		{

@@ -73,7 +73,7 @@ namespace app
 
 		// オフスクリーンレンダリング
 		//if (!pGraphicsAPI->CreateRenderPass("ShadowPass", api::ERenderPassFormat::COLOR_RENDERPASS, glm::vec4(1.0f), 512, 512)) return false;
-		if (!pGraphicsAPI->CreateRenderPass("MRTTest", api::ERenderPassFormat::COLOR_FLOAT_RENDERPASS, glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), -1, -1, 3)) return false;
+		if (!pGraphicsAPI->CreateRenderPass("MRTTest", api::ERenderPassFormat::COLOR_FLOAT_RENDERPASS, glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), -1, -1, 4)) return false;
 
 		m_BlurEffect = std::make_shared<imageeffect::CBlurEffect>(pGraphicsAPI);
 		if (!m_BlurEffect->Create(pLoadWorker)) return false;
@@ -153,8 +153,8 @@ namespace app
 		// Main FrameBuffer
 		{
 			if (!pGraphicsAPI->BeginRender()) return false;
-
 			if (!m_DeferredRenderer->Draw(pGraphicsAPI, m_MainCamera, m_Projection, m_DrawInfo)) return false;
+			if (!m_ScriptScene->Draw(pGraphicsAPI, false, m_MainCamera, m_Projection, m_DrawInfo)) return false;
 			if (!pLoadWorker->Draw(pGraphicsAPI, false, m_MainCamera, m_Projection, m_DrawInfo)) return false;
 
 			// GUIEngine

@@ -40,6 +40,14 @@
           "textureIndex": -1,
           "type": "texture",
           "textureUsage": "2d"
+        },
+        {
+          "name": "texDepth",
+          "viewBinding": 7,
+          "samplerBinding": 8,
+          "textureIndex": -1,
+          "type": "texture",
+          "textureUsage": "2d"
         }
       ]
     }

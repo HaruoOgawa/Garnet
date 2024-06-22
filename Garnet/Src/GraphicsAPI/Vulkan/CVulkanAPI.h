@@ -98,6 +98,8 @@ namespace api
 
 		// Rendering
 		std::map<std::string, std::shared_ptr<graphics::IRenderPass>> m_OffScreenRenderPassMap;
+		std::string m_CurrentRenderPassName;
+
 		VkRenderPass m_SwapChainRenderPass;
 		VkRenderPass m_CurrentRenderPass;
 		CVulkanRenderPass* m_pCurrentVulkanRenderPass;
@@ -207,6 +209,9 @@ namespace api
 
 		virtual const std::map<std::string, std::shared_ptr<graphics::IRenderPass>>& GetOffScreenRenderPassMap() const override;
 		virtual std::shared_ptr<graphics::IRenderPass> FindOffScreenRenderPass(const std::string& PassName) override;
+		virtual const std::string& GetCurrentRenderPassName() const override;
+		virtual bool CopyColorBuffer(const std::string& SrcPassName, const std::string& DstPassName) override;
+		virtual bool CopyDepthBuffer(const std::string& SrcPassName, const std::string& DstPassName) override;
 
 		VkRenderPass GetSwapChainRenderPass() const;
 

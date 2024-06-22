@@ -34,6 +34,7 @@ struct FragmentOutput {
     @location(0) member: vec4<f32>,
     @location(1) member_1: vec4<f32>,
     @location(2) member_2: vec4<f32>,
+    @location(3) member_3: vec4<f32>,
 }
 
 @group(0) @binding(0) 
@@ -54,10 +55,12 @@ var metallicRoughnessTextureSampler: sampler;
 var baseColorTexture: texture_2d<f32>;
 @group(0) @binding(3) 
 var baseColorTextureSampler: sampler;
+var<private> gl_FragCoord_1: vec4<f32>;
 var<private> gPosition: vec4<f32>;
 var<private> f_WorldPos_1: vec4<f32>;
 var<private> gNormal: vec4<f32>;
 var<private> gAlbedo: vec4<f32>;
+var<private> gDepth: vec4<f32>;
 var<private> f_LightSpacePos_1: vec4<f32>;
 @group(0) @binding(6) 
 var emissiveTexture: texture_2d<f32>;
@@ -100,32 +103,32 @@ fn getNormal() -> vec3<f32> {
     var tbn: mat3x3<f32>;
 
     nomral = vec3<f32>(0.0, 0.0, 0.0);
-    let _e59 = ubo.useNormalTexture;
-    if (_e59 != 0) {
-        let _e61 = f_WorldTangent_1;
-        t = normalize(_e61);
-        let _e63 = f_WorldBioTangent_1;
-        b = normalize(_e63);
-        let _e65 = f_WorldNormal_1;
-        n = normalize(_e65);
-        let _e67 = t;
-        let _e68 = b;
-        let _e69 = n;
-        tbn = mat3x3<f32>(vec3<f32>(_e67.x, _e67.y, _e67.z), vec3<f32>(_e68.x, _e68.y, _e68.z), vec3<f32>(_e69.x, _e69.y, _e69.z));
-        let _e83 = f_Texcoord_1;
-        let _e84 = textureSample(normalTexture, normalTextureSampler, _e83);
-        nomral = _e84.xyz;
-        let _e86 = tbn;
-        let _e87 = nomral;
-        let _e92 = ubo.normalMapScale;
+    let _e61 = ubo.useNormalTexture;
+    if (_e61 != 0) {
+        let _e63 = f_WorldTangent_1;
+        t = normalize(_e63);
+        let _e65 = f_WorldBioTangent_1;
+        b = normalize(_e65);
+        let _e67 = f_WorldNormal_1;
+        n = normalize(_e67);
+        let _e69 = t;
+        let _e70 = b;
+        let _e71 = n;
+        tbn = mat3x3<f32>(vec3<f32>(_e69.x, _e69.y, _e69.z), vec3<f32>(_e70.x, _e70.y, _e70.z), vec3<f32>(_e71.x, _e71.y, _e71.z));
+        let _e85 = f_Texcoord_1;
+        let _e86 = textureSample(normalTexture, normalTextureSampler, _e85);
+        nomral = _e86.xyz;
+        let _e88 = tbn;
+        let _e89 = nomral;
         let _e94 = ubo.normalMapScale;
-        nomral = normalize((_e86 * (((_e87 * 2.0) - vec3<f32>(1.0)) * vec3<f32>(_e92, _e94, 1.0))));
+        let _e96 = ubo.normalMapScale;
+        nomral = normalize((_e88 * (((_e89 * 2.0) - vec3<f32>(1.0)) * vec3<f32>(_e94, _e96, 1.0))));
     } else {
-        let _e99 = f_WorldNormal_1;
-        nomral = _e99;
+        let _e101 = f_WorldNormal_1;
+        nomral = _e101;
     }
-    let _e100 = nomral;
-    return _e100;
+    let _e102 = nomral;
+    return _e102;
 }
 
 fn main_1() {
@@ -135,59 +138,66 @@ fn main_1() {
     var metallicRoughnessColor: vec4<f32>;
     var baseColor: vec4<f32>;
     var n_1: vec3<f32>;
+    var depth: f32;
 
     col = vec4<f32>(1.0, 1.0, 1.0, 1.0);
-    let _e60 = ubo.roughnessFactor;
-    perceptualRoughness = _e60;
-    let _e62 = ubo.metallicFactor;
-    metallic = _e62;
-    let _e64 = ubo.useMetallicRoughnessTexture;
-    if (_e64 != 0) {
-        let _e66 = f_Texcoord_1;
-        let _e67 = textureSample(metallicRoughnessTexture, metallicRoughnessTextureSampler, _e66);
-        metallicRoughnessColor = _e67;
-        let _e68 = perceptualRoughness;
-        let _e70 = metallicRoughnessColor[1u];
-        perceptualRoughness = (_e68 * _e70);
-        let _e72 = metallic;
-        let _e74 = metallicRoughnessColor[2u];
-        metallic = (_e72 * _e74);
+    let _e63 = ubo.roughnessFactor;
+    perceptualRoughness = _e63;
+    let _e65 = ubo.metallicFactor;
+    metallic = _e65;
+    let _e67 = ubo.useMetallicRoughnessTexture;
+    if (_e67 != 0) {
+        let _e69 = f_Texcoord_1;
+        let _e70 = textureSample(metallicRoughnessTexture, metallicRoughnessTextureSampler, _e69);
+        metallicRoughnessColor = _e70;
+        let _e71 = perceptualRoughness;
+        let _e73 = metallicRoughnessColor[1u];
+        perceptualRoughness = (_e71 * _e73);
+        let _e75 = metallic;
+        let _e77 = metallicRoughnessColor[2u];
+        metallic = (_e75 * _e77);
     }
-    let _e76 = perceptualRoughness;
-    perceptualRoughness = clamp(_e76, 0.03999999910593033, 1.0);
-    let _e78 = metallic;
-    metallic = clamp(_e78, 0.0, 1.0);
-    let _e81 = ubo.useBaseColorTexture;
-    if (_e81 != 0) {
-        let _e83 = f_Texcoord_1;
-        let _e84 = textureSample(baseColorTexture, baseColorTextureSampler, _e83);
-        baseColor = _e84;
+    let _e79 = perceptualRoughness;
+    perceptualRoughness = clamp(_e79, 0.03999999910593033, 1.0);
+    let _e81 = metallic;
+    metallic = clamp(_e81, 0.0, 1.0);
+    let _e84 = ubo.useBaseColorTexture;
+    if (_e84 != 0) {
+        let _e86 = f_Texcoord_1;
+        let _e87 = textureSample(baseColorTexture, baseColorTextureSampler, _e86);
+        baseColor = _e87;
     } else {
-        let _e86 = ubo.baseColorFactor;
-        baseColor = _e86;
+        let _e89 = ubo.baseColorFactor;
+        baseColor = _e89;
     }
-    let _e87 = getNormal();
-    n_1 = _e87;
-    let _e88 = f_WorldPos_1;
-    gPosition = _e88;
-    let _e89 = n_1;
-    gNormal = vec4<f32>(_e89.x, _e89.y, _e89.z, 1.0);
-    let _e94 = baseColor;
-    gAlbedo = _e94;
+    let _e90 = getNormal();
+    n_1 = _e90;
+    let _e92 = gl_FragCoord_1[2u];
+    depth = _e92;
+    let _e93 = f_WorldPos_1;
+    gPosition = _e93;
+    let _e94 = n_1;
+    gNormal = vec4<f32>(_e94.x, _e94.y, _e94.z, 1.0);
+    let _e99 = baseColor;
+    gAlbedo = _e99;
+    let _e100 = depth;
+    gDepth = vec4<f32>(_e100);
     return;
 }
 
 @fragment 
-fn main(@location(3) f_WorldTangent: vec3<f32>, @location(4) f_WorldBioTangent: vec3<f32>, @location(0) f_WorldNormal: vec3<f32>, @location(1) f_Texcoord: vec2<f32>, @location(2) f_WorldPos: vec4<f32>, @location(5) f_LightSpacePos: vec4<f32>) -> FragmentOutput {
+fn main(@location(3) f_WorldTangent: vec3<f32>, @location(4) f_WorldBioTangent: vec3<f32>, @location(0) f_WorldNormal: vec3<f32>, @location(1) f_Texcoord: vec2<f32>, @builtin(position) gl_FragCoord: vec4<f32>, @location(2) f_WorldPos: vec4<f32>, @location(5) f_LightSpacePos: vec4<f32>) -> FragmentOutput {
     f_WorldTangent_1 = f_WorldTangent;
     f_WorldBioTangent_1 = f_WorldBioTangent;
     f_WorldNormal_1 = f_WorldNormal;
     f_Texcoord_1 = f_Texcoord;
+    gl_FragCoord_1 = gl_FragCoord;
     f_WorldPos_1 = f_WorldPos;
     f_LightSpacePos_1 = f_LightSpacePos;
     main_1();
-    let _e15 = gPosition;
-    let _e16 = gNormal;
-    let _e17 = gAlbedo;
-    return FragmentOutput(_e15, _e16, _e17);
+    let _e18 = gPosition;
+    let _e19 = gNormal;
+    let _e20 = gAlbedo;
+    let _e21 = gDepth;
+    return FragmentOutput(_e18, _e19, _e20, _e21);
 }

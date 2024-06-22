@@ -45,7 +45,8 @@ namespace api
 		m_SwapChainDepthTextureView(nullptr),
 		m_SwapChainRenderPass(nullptr),
 		m_CurrentRenderPass(nullptr),
-		m_pWebGPURenderPass(nullptr)
+		m_pWebGPURenderPass(nullptr),
+		m_CurrentRenderPassName(std::string())
 	{
 	}
 
@@ -188,6 +189,8 @@ namespace api
 			m_CurrentRenderPass = m_SwapChainRenderPass;
 		}
 
+		m_CurrentRenderPassName = PassName;
+
 		return true;
 	}
 
@@ -288,6 +291,21 @@ namespace api
 		if (it == m_OffScreenRenderPassMap.end()) return nullptr;
 
 		return it->second;
+	}
+
+	const std::string& CWebGPUAPI::GetCurrentRenderPassName() const
+	{
+		return m_CurrentRenderPassName;
+	}
+
+	bool CWebGPUAPI::CopyColorBuffer(const std::string& SrcPassName, const std::string& DstPassName)
+	{
+		return true;
+	}
+
+	bool CWebGPUAPI::CopyDepthBuffer(const std::string& SrcPassName, const std::string& DstPassName)
+	{
+		return true;
 	}
 
 	bool CWebGPUAPI::IsEnabledRuntimeShaderEditing() const
