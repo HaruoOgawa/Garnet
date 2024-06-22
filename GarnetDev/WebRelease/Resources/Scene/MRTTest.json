@@ -3,6 +3,10 @@
       {
         "name": "pbr_mrt_mat",
         "filename": "Resources/MaterialFrame/PBR_MRT_MF.json"
+      },
+      {
+        "name": "Objectspace_Ray_MF",
+        "filename": "Resources/MaterialFrame/Objectspace_Ray_MF.json"
       }
     ],
   "scenetextureset": {
@@ -21,6 +25,8 @@
     "objects": [
         {
             "name": "glTFObj",
+            "renderpass": "MRTTest",
+            "depthpass": "",
             "filename": "Resources/Models/Sponza/glTF/Sponza.glb",
             "defaultmaterialframe": "pbr_mrt_mat",
             "transform": {
@@ -4011,11 +4017,13 @@
         },
         {
             "name": "SampleObj",
+            "renderpass": "MRTTest",
+            "depthpass": "",
             "filename": "",
             "transform": {
                 "pos": [
                     0.0,
-                    1.0,
+                    0.0,
                     0.0
                 ],
                 "rotate": [
@@ -4061,155 +4069,15 @@
                     "primitives": [
                         {
                             "materialindex": 0,
-                            "type": "sphere"
+                            "type": "cube"
                         }
                     ]
                 }
             ],
             "materials": [
                 {
-                    "materialframe": "pbr_mrt_mat",
-                    "cull": "back",
-                    "uniformvalues": [
-                        {
-                            "name": "baseColorFactor",
-                            "type": "vec4",
-                            "value": [
-                                1.0,
-                                1.0,
-                                1.0,
-                                1.0
-                            ]
-                        },
-                        {
-                            "name": "emissiveFactor",
-                            "type": "vec4",
-                            "value": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.0
-                            ]
-                        },
-                        {
-                            "name": "metallicFactor",
-                            "type": "float",
-                            "value": [
-                                0.8090000152587891
-                            ]
-                        },
-                        {
-                            "name": "normalMapScale",
-                            "type": "float",
-                            "value": [
-                                1.0
-                            ]
-                        },
-                        {
-                            "name": "occlusionStrength",
-                            "type": "float",
-                            "value": [
-                                1.0
-                            ]
-                        },
-                        {
-                            "name": "roughnessFactor",
-                            "type": "float",
-                            "value": [
-                                0.0
-                            ]
-                        },
-                        {
-                            "name": "useBaseColorTexture",
-                            "type": "int",
-                            "value": [
-                                0.0
-                            ]
-                        },
-                        {
-                            "name": "useCubeMap",
-                            "type": "int",
-                            "value": [
-                                1.401298464324817e-45
-                            ]
-                        },
-                        {
-                            "name": "useDirCubemap",
-                            "type": "int",
-                            "value": [
-                                0.0
-                            ]
-                        },
-                        {
-                            "name": "useEmissiveTexture",
-                            "type": "int",
-                            "value": [
-                                0.0
-                            ]
-                        },
-                        {
-                            "name": "useIBL",
-                            "type": "int",
-                            "value": [
-                                0.0
-                            ]
-                        },
-                        {
-                            "name": "useMetallicRoughnessTexture",
-                            "type": "int",
-                            "value": [
-                                0.0
-                            ]
-                        },
-                        {
-                            "name": "useNormalTexture",
-                            "type": "int",
-                            "value": [
-                                0.0
-                            ]
-                        },
-                        {
-                            "name": "useOcclusionTexture",
-                            "type": "int",
-                            "value": [
-                                0.0
-                            ]
-                        },
-                        {
-                            "name": "useShadowMap",
-                            "type": "int",
-                            "value": [
-                                0.0
-                            ]
-                        }
-                    ],
-                    "textures": [
-                        {
-                            "texturebuffername": "cubemapTexture",
-                            "textureindex": 0,
-                            "texturename": ""
-                        },
-                        {
-                            "texturebuffername": "shadowmapTexture",
-                            "textureindex": -1,
-                            "texturename": ""
-                        },
-                        {
-                            "texturebuffername": "IBL_Diffuse_Texture",
-                            "textureindex": -1,
-                            "texturename": ""
-                        },
-                        {
-                            "texturebuffername": "IBL_Specular_Texture",
-                            "textureindex": -1,
-                            "texturename": ""
-                        },
-                        {
-                            "texturebuffername": "IBL_GGXLUT_Texture",
-                            "textureindex": -1,
-                            "texturename": ""
-                        }
-                    ]
+                    "materialframe": "Objectspace_Ray_MF",
+                    "cull": "back"
                 }
             ]
         }
