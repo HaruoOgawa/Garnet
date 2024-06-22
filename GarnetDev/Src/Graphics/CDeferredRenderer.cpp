@@ -31,10 +31,12 @@ namespace graphics
 		m_RenderBoard->GetTextureSet()->Add2DTexture(RenderTarget->GetFrameTexture(1));
 		m_RenderBoard->GetTextureSet()->Add2DTexture(RenderTarget->GetFrameTexture(2));
 
-		auto Material = m_MRTMF->CreateMaterial(m_pGraphicsAPI, 1, graphics::ECullMode::CULL_BACK);
+		auto Material = m_MRTMF->CreateMaterial(m_pGraphicsAPI, 1, graphics::ECullMode::CULL_NONE);
 		Material->ReplaceTextureIndex("texGPosition", 0);
 		Material->ReplaceTextureIndex("texGNormal", 1);
 		Material->ReplaceTextureIndex("texGAlbedo", 2);
+		Material->SetEnabledZWrite(false);
+		Material->SetDepthFunc(graphics::EDepthFunc::Always);
 
 		if (!m_RenderBoard->CreatePresetSimply(m_pGraphicsAPI, nullptr, graphics::CPresetPrimitive::CreateBoard(m_pGraphicsAPI), graphics::EPresetPrimitiveType::BOARD,
 			Material, nullptr)) return false;
@@ -59,9 +61,9 @@ namespace graphics
 		return true;
 	}
 
-	bool CDeferredRenderer::Draw(const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo)
+	bool CDeferredRenderer::Draw(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo)
 	{
-		if (!m_RenderBoard->Draw(false, false, Camera, Projection, DrawInfo)) return false;
+		if (!m_RenderBoard->Draw(pGraphicsAPI, false, false, Camera, Projection, DrawInfo)) return false;
 
 		return true;
 	}

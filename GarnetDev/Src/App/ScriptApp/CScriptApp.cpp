@@ -141,7 +141,7 @@ namespace app
 		if (!pGraphicsAPI->EndRender()) return false;
 
 		// ShadowMap‚Éƒuƒ‰[‚ð‚©‚¯‚é
-		if (!m_BlurEffect->Draw(m_MainCamera, m_Projection, m_DrawInfo)) return false;*/
+		if (!m_BlurEffect->Draw(pGraphicsAPI, m_MainCamera, m_Projection, m_DrawInfo)) return false;*/
 		
 		// MRTTest FrameBuffer
 		{
@@ -154,7 +154,7 @@ namespace app
 		{
 			if (!pGraphicsAPI->BeginRender()) return false;
 
-			if (!m_DeferredRenderer->Draw(m_MainCamera, m_Projection, m_DrawInfo)) return false;
+			if (!m_DeferredRenderer->Draw(pGraphicsAPI, m_MainCamera, m_Projection, m_DrawInfo)) return false;
 			if (!pLoadWorker->Draw(pGraphicsAPI, false, m_MainCamera, m_Projection, m_DrawInfo)) return false;
 
 			// GUIEngine

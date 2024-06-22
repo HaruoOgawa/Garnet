@@ -35,6 +35,9 @@ namespace graphics
 
 		std::vector<SShaderBufferSet> m_ShaderBufferList;
 		std::vector<graphics::STextureBindingLayout> m_TextureBufferList;
+
+		// カラーバッファへのアウトプット数(MRTで使用)
+		int m_OutputColorCount;
 	public:
 		CMaterialFrame();
 		virtual ~CMaterialFrame();
@@ -44,6 +47,10 @@ namespace graphics
 
 		void SetFileName(const std::string& Name);
 		const std::string& GetFileName() const;
+
+		// カラーバッファへのアウトプット数(MRTで使用)
+		void SetOutputColorCount(int Val);
+		int GetOutputColorCount() const;
 
 		void SetCreateInfo(const std::shared_ptr<graphics::CMaterialCreateInfo>& CreateInfo);
 

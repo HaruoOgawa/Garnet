@@ -234,7 +234,16 @@ namespace resource
 		{
 			if (!objectJSON->is_object()) continue;
 
-			std::shared_ptr<object::C3DObject> Object = std::make_shared<object::C3DObject>("", "");
+			// renderpass
+			std::string renderpass = std::string();
+			GetString("renderpass", renderpass, objectJSON);
+			
+			// renderpass
+			std::string depthpass = std::string();
+			GetString("depthpass", depthpass, objectJSON);
+
+			// C3DObjectê∂ê¨
+			std::shared_ptr<object::C3DObject> Object = std::make_shared<object::C3DObject>(renderpass, depthpass);
 
 			// ObjectName
 			{

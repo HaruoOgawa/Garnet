@@ -365,7 +365,7 @@ namespace object
 		return true;
 	}
 
-	bool C3DObject::Draw(bool IsDepthPass, bool DrawOutline, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo,
+	bool C3DObject::Draw(api::IGraphicsAPI* pGraphicsAPI, bool IsDepthPass, bool DrawOutline, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo,
 		const std::shared_ptr<object::C3DObject>& DebugSphere)
 	{
 		if (!m_IsCreated) return true;
@@ -463,7 +463,7 @@ namespace object
 		return true;
 	}
 
-	bool C3DObject::DrawDebugBone(bool IsDepthPass, bool DrawOutline, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
+	bool C3DObject::DrawDebugBone(api::IGraphicsAPI* pGraphicsAPI, bool IsDepthPass, bool DrawOutline, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
 		const std::shared_ptr<graphics::CDrawInfo>& DrawInfo, const std::shared_ptr<object::C3DObject>& DebugSphere)
 	{
 #ifdef USE_ANIMATION
@@ -495,7 +495,7 @@ namespace object
 					DebugSphere->GetMaterialList()[0]->SetUniformValue("baseColor", &glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)[0], sizeof(glm::vec4));
 					DebugSphere->GetMaterialList()[0]->SetUniformValue("baseColorFactor", &glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)[0], sizeof(glm::vec4));
 
-					if (!DebugSphere->Draw(IsDepthPass, false, Camera, Projection, DrawInfo)) return false;
+					if (!DebugSphere->Draw(pGraphicsAPI, IsDepthPass, false, Camera, Projection, DrawInfo)) return false;
 				}
 			}
 		}
@@ -503,7 +503,7 @@ namespace object
 		return true;
 	}
 
-	bool C3DObject::DrawDebugPhysics(bool IsDepthPass, bool DrawOutline, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
+	bool C3DObject::DrawDebugPhysics(api::IGraphicsAPI* pGraphicsAPI, bool IsDepthPass, bool DrawOutline, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
 		const std::shared_ptr<graphics::CDrawInfo>& DrawInfo, const std::shared_ptr<object::C3DObject>& DebugSphere)
 	{
 #ifdef USE_ANIMATION
@@ -547,7 +547,7 @@ namespace object
 							DebugSphere->SetScale(WorldScale);
 						}
 
-						if (!DebugSphere->Draw(IsDepthPass, false, Camera, Projection, DrawInfo)) return false;
+						if (!DebugSphere->Draw(pGraphicsAPI, IsDepthPass, false, Camera, Projection, DrawInfo)) return false;
 					}
 				}
 			}

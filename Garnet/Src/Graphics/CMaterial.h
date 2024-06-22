@@ -68,6 +68,9 @@ namespace graphics
 		std::shared_ptr<graphics::CTexture> m_RefDiffuse_Tex = nullptr;
 		std::shared_ptr<graphics::CTexture> m_RefSpecular_Tex = nullptr;
 		std::shared_ptr<graphics::CTexture> m_RefGGXLUT_Tex = nullptr;
+
+		// カラーバッファへのアウトプット数(MRTで使用)
+		int m_OutputColorCount;
 	public:
 		CMaterial(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CMaterialCreateInfo>& createInfo, int RefCount, ECullMode CullMode);
 		virtual ~CMaterial() = default;
@@ -76,6 +79,10 @@ namespace graphics
 
 		virtual void SetMaterialName(const std::string& Name);
 		virtual const std::string& GetMaterialName() const;
+
+		// カラーバッファへのアウトプット数(MRTで使用)
+		virtual void SetOutputColorCount(int Val);
+		virtual int GetOutputColorCount() const;
 
 		virtual const std::shared_ptr<CMaterialFrame>& GetMaterialFrame() const;
 		virtual void SetMaterialFrame(const std::shared_ptr<CMaterialFrame>& MaterialFrame);

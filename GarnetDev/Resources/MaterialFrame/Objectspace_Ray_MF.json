@@ -1,5 +1,6 @@
 {
   "name": "Objectspace_Ray_Mat",
+  "outputcolorcount": 3,
   "shaderList": [
     {
       "name": "objectspace_raymarching_vert",

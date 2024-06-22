@@ -17,7 +17,8 @@ namespace graphics
 		m_BlendType(EBlendType::BLEND_TYPE_ADDITIVE),
 		m_IsDrawOutline(false),
 		m_EmptyTexture(nullptr),
-		m_EmptyCubeTexture(nullptr)
+		m_EmptyCubeTexture(nullptr),
+		m_OutputColorCount(1)
 	{
 		ResetDynamicOffset();
 
@@ -55,6 +56,17 @@ namespace graphics
 	const std::string& CMaterial::GetMaterialName() const
 	{
 		return m_MaterialName;
+	}
+
+	// カラーバッファへのアウトプット数(MRTで使用)
+	void CMaterial::SetOutputColorCount(int Val)
+	{
+		m_OutputColorCount = Val;
+	}
+
+	int CMaterial::GetOutputColorCount() const
+	{
+		return m_OutputColorCount;
 	}
 
 	const std::shared_ptr<CMaterialFrame>& CMaterial::GetMaterialFrame() const

@@ -244,41 +244,49 @@ namespace api
 
 		// カラーブレンディング /////////////////////////////////////////////
 		// ローカルカラーブレンディング(アタッチされたフレームバッファごとの設定)
-		VkPipelineColorBlendAttachmentState colorBlendAttachment{};
-		colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
-		colorBlendAttachment.blendEnable = VK_TRUE;
+		std::vector<VkPipelineColorBlendAttachmentState> colorBlendAttachmentList;
 
-		switch (pVulkanMat->GetBlendType())
+		// MRTの時は複数個必要
+		for (int ColorIndex = 0; ColorIndex < pVulkanMat->GetOutputColorCount(); ColorIndex++)
 		{
-		case graphics::EBlendType::BLEND_TYPE_ADDITIVE:
-			colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_ONE;
-			colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ZERO;
-			colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
+			VkPipelineColorBlendAttachmentState colorBlendAttachment{};
+			colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+			colorBlendAttachment.blendEnable = VK_TRUE;
 
-			colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
-			colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
-			colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
-			break;
-		case graphics::EBlendType::BLEND_TYPE_TRANSPARENT_ALPHA:
-			colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
-			colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
-			colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
+			switch (pVulkanMat->GetBlendType())
+			{
+			case graphics::EBlendType::BLEND_TYPE_ADDITIVE:
+				colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_ONE;
+				colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ZERO;
+				colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
 
-			colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
-			colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
-			colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
+				colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+				colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
+				colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
+				break;
+			case graphics::EBlendType::BLEND_TYPE_TRANSPARENT_ALPHA:
+				colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
+				colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+				colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
 
-			break;
-		default:
-			colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_ONE;
-			colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ZERO;
-			colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
+				colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+				colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
+				colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
 
-			colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
-			colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
-			colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
+				break;
+			default:
+				colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_ONE;
+				colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ZERO;
+				colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
 
-			break;
+				colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+				colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
+				colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
+
+				break;
+			}
+
+			colorBlendAttachmentList.push_back(colorBlendAttachment);
 		}
 		
 		// グローバルカラーブレンディング(全体で共通の設定???)
@@ -286,8 +294,8 @@ namespace api
 		colorBlendingInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
 		colorBlendingInfo.logicOpEnable = VK_FALSE;
 		colorBlendingInfo.logicOp = VK_LOGIC_OP_COPY;
-		colorBlendingInfo.attachmentCount = 1;
-		colorBlendingInfo.pAttachments = &colorBlendAttachment;
+		colorBlendingInfo.attachmentCount = static_cast<uint32_t>(colorBlendAttachmentList.size());
+		colorBlendingInfo.pAttachments = &colorBlendAttachmentList[0];
 		colorBlendingInfo.blendConstants[0] = 0.0f;
 		colorBlendingInfo.blendConstants[1] = 0.0f;
 		colorBlendingInfo.blendConstants[2] = 0.0f;
@@ -547,45 +555,57 @@ namespace api
 		// カラーブレンディング /////////////////////////////////////////////
 		// カラーブレンディング /////////////////////////////////////////////
 		// ローカルカラーブレンディング(アタッチされたフレームバッファごとの設定)
-		VkPipelineColorBlendAttachmentState colorBlendAttachment{};
-		colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
-		colorBlendAttachment.blendEnable = VK_TRUE;
+		std::vector<VkPipelineColorBlendAttachmentState> colorBlendAttachmentList;
+		std::vector<VkBool32> blendEnableList;
+		std::vector<VkColorComponentFlags> colorWriteMaskList;
 
-		switch (pVulkanMat->GetBlendType())
+		// MRTの時は複数個必要
+		for (int ColorIndex = 0; ColorIndex < pVulkanMat->GetOutputColorCount(); ColorIndex++)
 		{
-		case graphics::EBlendType::BLEND_TYPE_ADDITIVE:
-			colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_ONE;
-			colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ZERO;
-			colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
+			VkPipelineColorBlendAttachmentState colorBlendAttachment{};
+			colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+			colorBlendAttachment.blendEnable = VK_TRUE;
 
-			colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
-			colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
-			colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
-			break;
-		case graphics::EBlendType::BLEND_TYPE_TRANSPARENT_ALPHA:
-			colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
-			colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
-			colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
+			switch (pVulkanMat->GetBlendType())
+			{
+			case graphics::EBlendType::BLEND_TYPE_ADDITIVE:
+				colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_ONE;
+				colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ZERO;
+				colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
 
-			colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
-			colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
-			colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
+				colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+				colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
+				colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
+				break;
+			case graphics::EBlendType::BLEND_TYPE_TRANSPARENT_ALPHA:
+				colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
+				colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+				colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
 
-			break;
-		default:
-			colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_ONE;
-			colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ZERO;
-			colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
+				colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+				colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
+				colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
 
-			colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
-			colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
-			colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
+				break;
+			default:
+				colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_ONE;
+				colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ZERO;
+				colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
 
-			break;
+				colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+				colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
+				colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
+
+				break;
+			}
+
+			colorBlendAttachmentList.push_back(colorBlendAttachment);
+			blendEnableList.push_back(colorBlendAttachment.blendEnable);
+			colorWriteMaskList.push_back(colorBlendAttachment.colorWriteMask);
 		}
 
-		m_pGraphicsAPI->SetColorBlendEnableEXT(m_pGraphicsAPI->GetCurrentCommandBuffer(), 0, 1, &colorBlendAttachment.blendEnable);
-		m_pGraphicsAPI->SetColorWriteMaskEXT(m_pGraphicsAPI->GetCurrentCommandBuffer(), 0, 1, &colorBlendAttachment.colorWriteMask);
+		m_pGraphicsAPI->SetColorBlendEnableEXT(m_pGraphicsAPI->GetCurrentCommandBuffer(), 0, static_cast<uint32_t>(blendEnableList.size()), &blendEnableList[0]);
+		m_pGraphicsAPI->SetColorWriteMaskEXT(m_pGraphicsAPI->GetCurrentCommandBuffer(), 0, static_cast<uint32_t>(colorWriteMaskList.size()), &colorWriteMaskList[0]);
 
 		// ShaderObjectのバインド
 		pVulkanMat->SetActive();

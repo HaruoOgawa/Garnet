@@ -61,7 +61,7 @@ namespace imageeffect
 		return true;
 	}
 
-	bool CBlurEffect::Draw(const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
+	bool CBlurEffect::Draw(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
 		const std::shared_ptr<graphics::CDrawInfo>& DrawInfo)
 	{
 		if (!m_IsLoaded) return true;
@@ -78,7 +78,7 @@ namespace imageeffect
 			glm::vec2 OffsetV = glm::vec2(1.0f / w, 0.0f);
 			m_ScreenObjX->GetMaterialList()[0]->SetUniformValue("Direction", &OffsetV[0], sizeof(glm::vec2));
 
-			if (!m_ScreenObjX->Draw(false, false, Camera, Projection, DrawInfo)) return false;
+			if (!m_ScreenObjX->Draw(pGraphicsAPI, false, false, Camera, Projection, DrawInfo)) return false;
 			if (!m_pGraphicsAPI->EndRender()) return false;
 		}
 		
@@ -88,7 +88,7 @@ namespace imageeffect
 			glm::vec2 OffsetV = glm::vec2(0.0f, 1.0f / h);
 			m_ScreenObjY->GetMaterialList()[0]->SetUniformValue("Direction", &OffsetV[0], sizeof(glm::vec2));
 
-			if (!m_ScreenObjY->Draw(false, false, Camera, Projection, DrawInfo)) return false;
+			if (!m_ScreenObjY->Draw(pGraphicsAPI, false, false, Camera, Projection, DrawInfo)) return false;
 			if (!m_pGraphicsAPI->EndRender()) return false;
 		}
 

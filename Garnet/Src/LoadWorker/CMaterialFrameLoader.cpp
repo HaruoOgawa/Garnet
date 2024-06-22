@@ -8,7 +8,8 @@ namespace resource
 		CResource(filename, 2),
 		m_AnalyseDone(false),
 		m_CreateInfo(std::make_shared<graphics::CMaterialCreateInfo>()),
-		m_MaterialFrameName(std::string())
+		m_MaterialFrameName(std::string()),
+		m_OutputColorCount(1)
 	{
 		m_TargetMaterialFrameSet.emplace(TargetMaterialFrame);
 
@@ -133,6 +134,13 @@ namespace resource
 		if (MaterialName != m_MfJson.end() && MaterialName->is_string())
 		{
 			m_MaterialFrameName = MaterialName.value();
+		}
+
+		// outcolorcount
+		const auto outputcolorcount = m_MfJson.find("outputcolorcount");
+		if (outputcolorcount != m_MfJson.end() && outputcolorcount->is_number_integer())
+		{
+			m_OutputColorCount = outputcolorcount.value();
 		}
 
 		// shaderList
@@ -601,6 +609,7 @@ namespace resource
 				MaterialFrame->SetCreateInfo(m_CreateInfo);
 				MaterialFrame->SetShaderBufferList(m_ShaderBufferList);
 				MaterialFrame->SetTextureBufferList(m_TextureBufferList);
+				MaterialFrame->SetOutputColorCount(m_OutputColorCount);
 
 				// リロードなのでLoaderを参照しているマテリアルフレームにも更新を実行する
 				if (m_Releoading)
