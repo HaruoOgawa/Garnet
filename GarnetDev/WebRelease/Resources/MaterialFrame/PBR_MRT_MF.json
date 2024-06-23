@@ -1,6 +1,6 @@
 {
   "name": "pbr_mrt_mat",
-  "outputcolorcount": 3,
+  "outputcolorcount": 4,
   "shaderList": [
     {
       "name": "pbr_vert",

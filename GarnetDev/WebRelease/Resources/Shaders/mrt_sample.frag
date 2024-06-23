@@ -6,6 +6,7 @@ layout(location = 0) in vec2 fUV;
 layout(binding = 1) uniform sampler2D texGPosition;
 layout(binding = 3) uniform sampler2D texGNormal;
 layout(binding = 5) uniform sampler2D texGAlbedo;
+layout(binding = 7) uniform sampler2D texDepth;
 #else
 layout(binding = 1) uniform texture2D texGPosition;
 layout(binding = 2) uniform sampler texGPositionSampler;
@@ -13,6 +14,8 @@ layout(binding = 3) uniform texture2D texGNormal;
 layout(binding = 4) uniform sampler texGNormalSampler;
 layout(binding = 5) uniform texture2D texGAlbedo;
 layout(binding = 6) uniform sampler texGAlbedoSampler;
+layout(binding = 7) uniform texture2D texDepth;
+layout(binding = 8) uniform sampler texDepthSampler;
 #endif
 
 layout(location = 0) out vec4 outColor;
@@ -26,7 +29,8 @@ struct Light
 void main()
 {
 	vec4 col = vec4(0.0, 0.0, 0.0, 1.0); 
-	vec2 st = mod(fUV * 2.0, 1.0);
+	vec2 st = fUV;
+	//vec2 st = mod(fUV * 2.0, 1.0);
 	vec2 id = floor(fUV * 2.0);
 
 	#ifdef USE_OPENGL
@@ -47,7 +51,13 @@ void main()
 	vec4 GAlbedoCol = texture(sampler2D(texGAlbedo, texGAlbedoSampler), st);
 	#endif
 
-	if(id.x == 0.0 && id.y == 0.0)
+	#ifdef USE_OPENGL
+	vec4 GDepthCol = texture(texDepth, st);
+	#else
+	vec4 GDepthCol = texture(sampler2D(texDepth, texDepthSampler), st);
+	#endif
+
+	/*if(id.x == 0.0 && id.y == 0.0)
 	{
 		col = GPositionCol;
 	}
@@ -59,7 +69,7 @@ void main()
 	{
 		col = GAlbedoCol;
 	}
-	else if(id.x == 1.0 && id.y == 0.0)
+	else if(id.x == 1.0 && id.y == 0.0)*/
 	{
 		const int NUM_OF_LIGHT = 5;
 		float width = 3.0;
@@ -86,4 +96,5 @@ void main()
 	}
 
 	outColor = col;
+	gl_FragDepth = GDepthCol.r;
 }

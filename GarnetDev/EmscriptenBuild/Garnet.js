@@ -978,13 +978,13 @@ function dbg(text) {
 // === Body ===
 
 var ASM_CONSTS = {
-  233372: ($0, $1, $2, $3) => { const w0 = Module.UTF16ToString($0); const w1 = Module.UTF16ToString($1); const windex = $2; const nameCount = $3; return (w0 == w1[windex] && w1.length == nameCount) ? 1 : 0; },  
- 233552: ($0, $1, $2, $3) => { const w0 = Module.UTF16ToString($0); const w1 = Module.UTF16ToString($1); const windex = $2; const nameCount = $3; return (w0 == w1[windex] && w1.length == nameCount) ? 1 : 0; },  
- 233732: ($0) => { const fileName = Module.UTF8ToString($0); window.g3dCreateAudio(fileName); },  
- 233811: ($0) => { const loop = ($0 != 0); window.g3dPlayAudio(loop); },  
- 233866: ($0) => { const loop = ($0 != 0); window.g3dPlayAudio(loop); },  
- 233921: () => { window.g3dStopAudio(); },  
- 233948: () => { return window.g3dIsAudioPlaying(); }
+  233404: ($0, $1, $2, $3) => { const w0 = Module.UTF16ToString($0); const w1 = Module.UTF16ToString($1); const windex = $2; const nameCount = $3; return (w0 == w1[windex] && w1.length == nameCount) ? 1 : 0; },  
+ 233584: ($0, $1, $2, $3) => { const w0 = Module.UTF16ToString($0); const w1 = Module.UTF16ToString($1); const windex = $2; const nameCount = $3; return (w0 == w1[windex] && w1.length == nameCount) ? 1 : 0; },  
+ 233764: ($0) => { const fileName = Module.UTF8ToString($0); window.g3dCreateAudio(fileName); },  
+ 233843: ($0) => { const loop = ($0 != 0); window.g3dPlayAudio(loop); },  
+ 233898: ($0) => { const loop = ($0 != 0); window.g3dPlayAudio(loop); },  
+ 233953: () => { window.g3dStopAudio(); },  
+ 233980: () => { return window.g3dIsAudioPlaying(); }
 };
 
 

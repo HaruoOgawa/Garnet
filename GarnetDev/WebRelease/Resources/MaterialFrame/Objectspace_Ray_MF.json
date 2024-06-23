@@ -1,6 +1,6 @@
 {
   "name": "Objectspace_Ray_Mat",
-  "outputcolorcount": 3,
+  "outputcolorcount": 4,
   "shaderList": [
     {
       "name": "objectspace_raymarching_vert",
@@ -75,7 +75,7 @@
               }
             },
             {
-              "name": "mPad0",
+              "name": "model",
               "type": "mat4",
               "initValue": [ 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0 ],
               "input": {
@@ -83,7 +83,7 @@
               }
             },
             {
-              "name": "mPad1",
+              "name": "view",
               "type": "mat4",
               "initValue": [ 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0 ],
               "input": {
@@ -91,7 +91,7 @@
               }
             },
             {
-              "name": "mPad3",
+              "name": "proj",
               "type": "mat4",
               "initValue": [ 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0 ],
               "input": {

@@ -5,12 +5,13 @@ layout(location = 0) in vec4 v2f_ObjectPos;
 layout(location = 0) out vec4 gPosition;
 layout(location = 1) out vec4 gNormal;
 layout(location = 2) out vec4 gAlbedo;
+layout(location = 3) out vec4 gDepth;
 
 layout(binding = 1) uniform FragmentUniformBuffer{
 	mat4 invModel;
-    mat4 mPad0;
-    mat4 mPad1;
-    mat4 mPad2;
+    mat4 model;
+    mat4 view;
+    mat4 proj;
 
 	vec4 cameraPos;
     vec4 v4Pad0;
@@ -57,12 +58,18 @@ void main()
     {
         vec3 p = ro + rd * t;
         vec3 n = gn(p);
+        
+        //vec4 projPos = f_ubo.proj * f_ubo.view * f_ubo.model * vec4(p, 1.0);
+        //float depth = projPos.z / projPos.w;
+        // デプスがずれるのでひとまず元のキューブのデプスを採用
+        // レイマーチング的に何かあれば抜けるのでひとまず深度は保てるはず(何もないとこはdiscardで捨てられるので)
+        float depth = gl_FragCoord.z;
 
         gPosition = vec4(p, 1.0);
 	    gNormal = vec4(n, 1.0);
 	    gAlbedo = vec4(1.0);
-        
-        //gl_FragDepth = 0.0;
+        gDepth  = vec4(depth);
+        gl_FragDepth = depth;
     }
     else
     {
