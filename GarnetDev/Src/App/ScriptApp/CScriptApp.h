@@ -2,6 +2,8 @@
 #include <memory>
 #include <Interface/IApp.h>
 
+namespace graphics { class CDeferredRenderer; }
+
 namespace app
 {
 	class CScriptScene;
@@ -14,6 +16,7 @@ namespace app
 		std::shared_ptr<projection::CProjection> m_Projection;
 		std::shared_ptr<graphics::CDrawInfo> m_DrawInfo;
 		std::shared_ptr<imageeffect::CBlurEffect> m_BlurEffect;
+		std::shared_ptr<graphics::CDeferredRenderer> m_DeferredRenderer;
 
 		std::shared_ptr<CFileModifier> m_FileModifier;
 #ifdef USE_GUIENGINE

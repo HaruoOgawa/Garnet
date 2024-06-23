@@ -38,6 +38,9 @@ namespace resource
 		// MfData
 		std::string m_MaterialFrameName;
 
+		// カラーバッファへのアウトプット数(MRTで使用)
+		int m_OutputColorCount;
+
 		std::vector<graphics::SShaderBufferSet> m_ShaderBufferList;
 		std::vector<graphics::STextureBindingLayout> m_TextureBufferList;
 

@@ -56,6 +56,7 @@ namespace scene
 	bool CSceneWriter::WriteSceneTextureSet(ordered_json& SceneJSON, CSceneController* pSceneController)
 	{
 		const auto& SceneTextureSet = pSceneController->GetSceneTextureSet();
+		if (!SceneTextureSet) return true;
 
 		for (const auto& CubeMap : SceneTextureSet->GetCubeMapList())
 		{

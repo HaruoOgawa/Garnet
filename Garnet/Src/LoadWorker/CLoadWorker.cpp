@@ -78,7 +78,7 @@ namespace resource
 			m_LoadingBar->GetMaterialList()[0]->SetUniformValue("rate", &glm::vec1(rate)[0], sizeof(float));
 			m_LoadingBar->GetMaterialList()[0]->SetUniformValue("alpha", &m_Alpha, sizeof(float));
 
-			if (!m_LoadingBar->Draw(IsDepthPass, false, Camera, Projection, DrawInfo)) return false;
+			if (!m_LoadingBar->Draw(pGraphicsAPI, IsDepthPass, false, Camera, Projection, DrawInfo)) return false;
 		}
 
 		return true;

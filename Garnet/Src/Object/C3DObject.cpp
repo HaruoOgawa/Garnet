@@ -365,12 +365,23 @@ namespace object
 		return true;
 	}
 
-	bool C3DObject::Draw(bool IsDepthPass, bool DrawOutline, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo,
+	bool C3DObject::Draw(api::IGraphicsAPI* pGraphicsAPI, bool IsDepthPass, bool DrawOutline, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo,
 		const std::shared_ptr<object::C3DObject>& DebugSphere)
 	{
 		if (!m_IsCreated) return true;
 
 		if (!m_Enabled) return true;
+
+		// •`‰æƒpƒX‚ªˆá‚¤‚È‚ç•`‰æ‚µ‚È‚¢
+		// ToDo: PassName‚Í”z—ñ‚É‚µ‚Ä‚à‚¢‚¢‚©‚à‚µ‚ê‚È‚¢
+		if (IsDepthPass)
+		{
+			if (m_DepthPassName != pGraphicsAPI->GetCurrentRenderPassName()) return true;
+		}
+		else
+		{
+			if (m_PassName != pGraphicsAPI->GetCurrentRenderPassName()) return true;
+		}
 
 		// •`‰æ
 		for (const auto& Node : m_NodeList)
@@ -381,6 +392,7 @@ namespace object
 			if (MeshIndex < 0 || MeshIndex >= m_MeshList.size()) continue;
 
 			const auto& WorldMatrix = m_ObjectTransform->GetModelMatrix() * Node->GetWorldMatrix();
+			const auto& InvWorldMatrix = glm::inverse(WorldMatrix);
 			const auto& Mesh = m_MeshList[MeshIndex];
 
 			int SkeletonIndex = Node->GetSkeletonIndex();
@@ -424,12 +436,15 @@ namespace object
 
 				Material->SetUniformValue("drawPathIndex", &DynamicOffsetNum, sizeof(int), DynamicOffsetNum);
 				Material->SetUniformValue("model", &WorldMatrix[0][0], sizeof(glm::mat4), DynamicOffsetNum);
+				Material->SetUniformValue("invModel", &InvWorldMatrix[0][0], sizeof(glm::mat4), DynamicOffsetNum);
 				Material->SetUniformValue("view", &Camera->GetViewMatrix()[0][0], sizeof(glm::mat4), DynamicOffsetNum);
 				Material->SetUniformValue("proj", &Projection->GetPrejectionMatrix()[0][0], sizeof(glm::mat4), DynamicOffsetNum);
 				Material->SetUniformValue("lightVPMat", &lightVPMat[0][0], sizeof(glm::mat4), DynamicOffsetNum);
-				Material->SetUniformValue("lightDir", &DrawInfo->GetLightCamera()->GetViewDir()[0], sizeof(glm::vec3), DynamicOffsetNum);
+				glm::vec3 lightDir = DrawInfo->GetLightCamera()->GetViewDir();
+				Material->SetUniformValue("lightDir", &glm::vec4(lightDir.x, lightDir.y, lightDir.z, 0.0f)[0], sizeof(glm::vec4), DynamicOffsetNum);
 				Material->SetUniformValue("lightColor", &DrawInfo->GetLightColor()[0], sizeof(glm::vec4), DynamicOffsetNum);
-				Material->SetUniformValue("cameraPos", &Camera->GetPos()[0], sizeof(glm::vec3), DynamicOffsetNum);
+				glm::vec3 CameraPos = Camera->GetPos();
+				Material->SetUniformValue("cameraPos", &glm::vec4(CameraPos.x, CameraPos.y, CameraPos.z, 1.0f)[0], sizeof(glm::vec4), DynamicOffsetNum);
 				Material->SetUniformValue("time", &glm::vec1(DrawInfo->GetSecondsTime())[0], sizeof(float), DynamicOffsetNum);
 				Material->SetUniformValue("deltaTime", &glm::vec1(DrawInfo->GetDeltaSecondsTime())[0], sizeof(float), DynamicOffsetNum);
 				Material->SetUniformValue("resolution", &Projection->GetScreenResolution()[0], sizeof(glm::vec2), DynamicOffsetNum);
@@ -459,7 +474,7 @@ namespace object
 		return true;
 	}
 
-	bool C3DObject::DrawDebugBone(bool IsDepthPass, bool DrawOutline, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
+	bool C3DObject::DrawDebugBone(api::IGraphicsAPI* pGraphicsAPI, bool IsDepthPass, bool DrawOutline, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
 		const std::shared_ptr<graphics::CDrawInfo>& DrawInfo, const std::shared_ptr<object::C3DObject>& DebugSphere)
 	{
 #ifdef USE_ANIMATION
@@ -491,7 +506,7 @@ namespace object
 					DebugSphere->GetMaterialList()[0]->SetUniformValue("baseColor", &glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)[0], sizeof(glm::vec4));
 					DebugSphere->GetMaterialList()[0]->SetUniformValue("baseColorFactor", &glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)[0], sizeof(glm::vec4));
 
-					if (!DebugSphere->Draw(IsDepthPass, false, Camera, Projection, DrawInfo)) return false;
+					if (!DebugSphere->Draw(pGraphicsAPI, IsDepthPass, false, Camera, Projection, DrawInfo)) return false;
 				}
 			}
 		}
@@ -499,7 +514,7 @@ namespace object
 		return true;
 	}
 
-	bool C3DObject::DrawDebugPhysics(bool IsDepthPass, bool DrawOutline, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
+	bool C3DObject::DrawDebugPhysics(api::IGraphicsAPI* pGraphicsAPI, bool IsDepthPass, bool DrawOutline, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
 		const std::shared_ptr<graphics::CDrawInfo>& DrawInfo, const std::shared_ptr<object::C3DObject>& DebugSphere)
 	{
 #ifdef USE_ANIMATION
@@ -543,7 +558,7 @@ namespace object
 							DebugSphere->SetScale(WorldScale);
 						}
 
-						if (!DebugSphere->Draw(IsDepthPass, false, Camera, Projection, DrawInfo)) return false;
+						if (!DebugSphere->Draw(pGraphicsAPI, IsDepthPass, false, Camera, Projection, DrawInfo)) return false;
 					}
 				}
 			}

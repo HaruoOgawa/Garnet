@@ -5,7 +5,7 @@
 #ifdef USE_WIN32_WindowAPI
 #include <memory>
 #include <Windows.h>
-//#include "../GraphicsAPI/OpenGL/wglDef.h"
+#include "../GraphicsAPI/OpenGL/wglDef.h"
 
 namespace app { class CAppCore; }
 

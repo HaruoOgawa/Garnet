@@ -167,7 +167,7 @@ namespace resource
 
 				if (back.empty() || bottom.empty() || front.empty() || left.empty() || right.empty() || top.empty()) continue;
 
-				std::vector<std::string> FileNameList = { back, bottom, front, left, right, top };
+				std::vector<std::string> FileNameList = { right, left, top, bottom, front, back };
 
 				auto Texture = pGraphicsAPI->CreateTexture();
 				pLoadWorker->AddLoadResource(std::make_shared<resource::CTextureLoader>(pGraphicsAPI, FileNameList, Texture));
@@ -234,7 +234,16 @@ namespace resource
 		{
 			if (!objectJSON->is_object()) continue;
 
-			std::shared_ptr<object::C3DObject> Object = std::make_shared<object::C3DObject>("", "");
+			// renderpass
+			std::string renderpass = std::string();
+			GetString("renderpass", renderpass, objectJSON);
+			
+			// renderpass
+			std::string depthpass = std::string();
+			GetString("depthpass", depthpass, objectJSON);
+
+			// C3DObjectê∂ê¨
+			std::shared_ptr<object::C3DObject> Object = std::make_shared<object::C3DObject>(renderpass, depthpass);
 
 			// ObjectName
 			{

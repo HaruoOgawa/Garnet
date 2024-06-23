@@ -23,7 +23,8 @@ namespace api
 		m_DomainShaderExtension(".tese"),
 		m_ComputeShaderExtension(".comp"),
 		m_Width(Width),
-		m_Height(Height)
+		m_Height(Height),
+		m_CurrentRenderPassName(std::string())
 	{
 	}
 
@@ -42,17 +43,17 @@ namespace api
 	{
 	}
 
-	bool COpenGLAPI::CreateRenderPass(const std::string& PassName, ERenderPassFormat RenderPassFormat, const glm::vec4& InitColor, int Width, int Height)
+	bool COpenGLAPI::CreateRenderPass(const std::string& PassName, ERenderPassFormat RenderPassFormat, const glm::vec4& InitColor, int Width, int Height, int RenderTargetCount)
 	{
 		std::shared_ptr<COpenGLRenderPass> RenderPass = std::make_shared<COpenGLRenderPass>(this, PassName, RenderPassFormat, InitColor);
 
 		if (Width != -1 && Height != -1)
 		{
-			if (!RenderPass->Create(Width, Height)) return false;
+			if (!RenderPass->Create(Width, Height, RenderTargetCount)) return false;
 		}
 		else
 		{
-			if (!RenderPass->Create(m_Width, m_Height)) return false;
+			if (!RenderPass->Create(m_Width, m_Height, RenderTargetCount)) return false;
 		}
 
 		m_OffScreenRenderPassMap.insert({ PassName, RenderPass });
@@ -134,6 +135,8 @@ namespace api
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		}
 
+		m_CurrentRenderPassName = PassName;
+
 		return true;
 	}
 
@@ -191,6 +194,88 @@ namespace api
 	const std::map<std::string, std::shared_ptr<graphics::IRenderPass>>& COpenGLAPI::GetOffScreenRenderPassMap() const
 	{
 		return m_OffScreenRenderPassMap;
+	}
+
+	std::shared_ptr<graphics::IRenderPass> COpenGLAPI::FindOffScreenRenderPass(const std::string& PassName)
+	{
+		auto it = m_OffScreenRenderPassMap.find(PassName);
+		if (it == m_OffScreenRenderPassMap.end()) return nullptr;
+
+		return it->second;
+	}
+
+	const std::string& COpenGLAPI::GetCurrentRenderPassName() const
+	{
+		return m_CurrentRenderPassName;
+	}
+
+	bool COpenGLAPI::CopyColorBuffer(const std::string& SrcPassName, const std::string& DstPassName)
+	{
+		GLuint SrcFrameBuffer = GetFrameBuffer(SrcPassName);
+		GLuint DstFrameBuffer = GetFrameBuffer(DstPassName);
+
+		if (SrcFrameBuffer == -1 || DstFrameBuffer == -1) return false;
+
+		//
+		const auto& it = m_OffScreenRenderPassMap.find(SrcPassName);
+		if (it == m_OffScreenRenderPassMap.end()) return false;
+		COpenGLRenderPass* pSrcRenderPass = static_cast<COpenGLRenderPass*>(it->second.get());
+
+		int Width = pSrcRenderPass->GetFrameTexture()->GetWidth();
+		int Height = pSrcRenderPass->GetFrameTexture()->GetHeight();
+
+		//
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, SrcFrameBuffer);
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, DstFrameBuffer);
+
+		glBlitFramebuffer(0, 0, Width, Height, 0, 0, Width, Height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+		return true;
+	}
+
+	bool COpenGLAPI::CopyDepthBuffer(const std::string& SrcPassName, const std::string& DstPassName)
+	{
+		GLuint SrcFrameBuffer = GetFrameBuffer(SrcPassName);
+		GLuint DstFrameBuffer = GetFrameBuffer(DstPassName);
+
+		if (SrcFrameBuffer == -1 || DstFrameBuffer == -1) return false;
+
+		//
+		const auto& it = m_OffScreenRenderPassMap.find(SrcPassName);
+		if (it == m_OffScreenRenderPassMap.end()) return false;
+		COpenGLRenderPass* pSrcRenderPass = static_cast<COpenGLRenderPass*>(it->second.get());
+
+		int Width = pSrcRenderPass->GetDepthTexture()->GetWidth();
+		int Height = pSrcRenderPass->GetDepthTexture()->GetHeight();
+
+		//
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, SrcFrameBuffer);
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, DstFrameBuffer);
+
+		glBlitFramebuffer(0, 0, Width, Height, 0, 0, Width, Height, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+		return true;
+	}
+
+	GLuint COpenGLAPI::GetFrameBuffer(const std::string& PassName)
+	{
+		if (PassName.empty())
+		{
+			// デフォルトフレームバッファを返す
+			return 0;
+		}
+		else
+		{
+			const auto& it = m_OffScreenRenderPassMap.find(PassName);
+			if (it == m_OffScreenRenderPassMap.end()) return -1;
+
+			COpenGLRenderPass* pRenderPass = static_cast<COpenGLRenderPass*>(it->second.get());
+			return pRenderPass->GetFrameBuffer();
+		}
 	}
 
 	bool COpenGLAPI::IsEnabledRuntimeShaderEditing() const

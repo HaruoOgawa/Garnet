@@ -15,7 +15,6 @@ namespace api
 		m_Height(0),
 		m_InitColor(InitColor),
 		m_RenderPassFormat(RenderPassFormat),
-		m_FrameTexture(nullptr),
 		m_DepthTexture(nullptr),
 
 		m_FrameBuffer(-1),
@@ -28,30 +27,47 @@ namespace api
 	{
 	}
 
-	std::shared_ptr<graphics::CTexture> COpenGLRenderPass::GetFrameTexture()
+	std::shared_ptr<graphics::CTexture> COpenGLRenderPass::GetFrameTexture(int Index)
 	{
-		return m_FrameTexture;
+		if (Index < 0 || Index >= static_cast<int>(m_FrameTextureList.size())) return nullptr;
+
+		return m_FrameTextureList[Index];
 	}
 
-	std::shared_ptr<graphics::CTexture> COpenGLRenderPass::GetDepthTexture()
+	const std::vector<std::shared_ptr<graphics::CTexture>>& COpenGLRenderPass::GetFrameTextureList() const
+	{
+		return m_FrameTextureList;
+	}
+
+	const std::shared_ptr<graphics::CTexture>& COpenGLRenderPass::GetDepthTexture() const
 	{
 		return m_DepthTexture;
 	}
 
-	bool COpenGLRenderPass::Create(int Width, int Height)
+	bool COpenGLRenderPass::Create(int Width, int Height, int RenderTargetCount)
 	{
 		m_Width = Width;
 		m_Height = Height;
 
-		m_FrameTexture = std::make_shared<COpenGLTexture>(m_pGraphicsAPI, false);
-		if (!m_FrameTexture->CreateFrameTexture(Width, Height, m_RenderPassFormat)) return false;
+		for (int AttachmentIndex = 0; AttachmentIndex < RenderTargetCount; AttachmentIndex++)
+		{
+			auto FrameTexture = m_pGraphicsAPI->CreateTexture(false);
+			if (!FrameTexture->CreateFrameTexture(Width, Height, m_RenderPassFormat)) return false;
 
-		m_DepthTexture = std::make_shared<COpenGLTexture>(m_pGraphicsAPI, false);
+			m_FrameTextureList.push_back(FrameTexture);
+		}
+
+		m_DepthTexture = m_pGraphicsAPI->CreateTexture(false);
 		if (!m_DepthTexture->CreateFrameTexture(Width, Height, api::ERenderPassFormat::DEPTH_RENDERPASS)) return false;
 
 		if (!CreateFrameBuffer()) return false; // フレームバッファの作成
-		if (!CreateColorBuffer()) return false; // カラーバッファの作成
+		for(int AttachmentIndex = 0; AttachmentIndex < RenderTargetCount; AttachmentIndex++){ if (!CreateColorBuffer(AttachmentIndex)) return false; } // カラーバッファの作成
 		if (!CreateDepthBuffer()) return false; // デプスバッファの作成
+
+		// フレームバッファに使用するカラーバッファを指定
+		std::vector<unsigned int> Attachments;
+		for (int AttachmentIndex = 0; AttachmentIndex < RenderTargetCount; AttachmentIndex++) { Attachments.push_back(GL_COLOR_ATTACHMENT0 + AttachmentIndex); }
+		glDrawBuffers(RenderTargetCount, &Attachments[0]);
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0); // 後続の描画が映らなくなるのでバインドを解除しておく
 
@@ -66,10 +82,14 @@ namespace api
 		return true;
 	}
 
-	bool COpenGLRenderPass::CreateColorBuffer()
+	bool COpenGLRenderPass::CreateColorBuffer(int AttachmentIndex)
 	{
+		if (AttachmentIndex < 0 || AttachmentIndex >= static_cast<int>(m_FrameTextureList.size())) return false;
+
+		COpenGLTexture* pOpenGLTexture = static_cast<COpenGLTexture*>(m_FrameTextureList[AttachmentIndex].get());
+
 		// ひとまずテクスチャだけ対応しておく
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_FrameTexture->GetTextureID(), 0);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + AttachmentIndex, GL_TEXTURE_2D, pOpenGLTexture->GetTextureID(), 0);
 
 		return true;
 	}
@@ -101,6 +121,11 @@ namespace api
 	bool COpenGLRenderPass::EndRenderPass()
 	{
 		return true;
+	}
+
+	GLuint COpenGLRenderPass::GetFrameBuffer() const
+	{
+		return m_FrameBuffer;
 	}
 }
 #endif

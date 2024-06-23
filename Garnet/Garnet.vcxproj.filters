@@ -1041,9 +1041,6 @@
     <ClInclude Include="Src\Interface\IRenderPass.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Src\ImageEffect\CBlurEffect.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="Src\GraphicsAPI\OpenGL\COpenGLAPI.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
@@ -3186,9 +3183,6 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Src\GraphicsAPI\WebGPU\CWebGPURenderPass.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\ImageEffect\CBlurEffect.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Src\GraphicsAPI\OpenGL\COpenGLAPI.cpp">

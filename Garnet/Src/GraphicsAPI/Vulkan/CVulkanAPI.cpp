@@ -38,7 +38,8 @@ namespace api
 		m_SwapChainDepthImage(nullptr),
 		m_SwapChainDepthImageMemory(nullptr),
 		m_SwapChainDepthImageView(nullptr),
-		m_CommandPool(nullptr)
+		m_CommandPool(nullptr),
+		m_CurrentRenderPassName(std::string())
 	{
 	}
 
@@ -108,17 +109,17 @@ namespace api
 		vkDestroyInstance(m_Instance, nullptr);
 	}
 
-	bool CVulkanAPI::CreateRenderPass(const std::string& PassName, ERenderPassFormat RenderPassFormat, const glm::vec4& InitColor, int Width, int Height)
+	bool CVulkanAPI::CreateRenderPass(const std::string& PassName, ERenderPassFormat RenderPassFormat, const glm::vec4& InitColor, int Width, int Height, int RenderTargetCount)
 	{
 		std::shared_ptr<CVulkanRenderPass> RenderPass = std::make_shared<CVulkanRenderPass>(this, PassName, RenderPassFormat, InitColor);
 		
 		if (Width != -1 && Height != -1)
 		{
-			if (!RenderPass->Create(Width, Height)) return false;
+			if (!RenderPass->Create(Width, Height, RenderTargetCount)) return false;
 		}
 		else
 		{
-			if (!RenderPass->Create(m_Width, m_Height)) return false;
+			if (!RenderPass->Create(m_Width, m_Height, RenderTargetCount)) return false;
 		}
 
 		m_OffScreenRenderPassMap.insert({ PassName, RenderPass });
@@ -241,6 +242,8 @@ namespace api
 			if (!BeginRenderPass(m_CurrentImageIndex)) return false;
 		}
 
+		m_CurrentRenderPassName = PassName;
+
 		return true;
 	}
 
@@ -338,6 +341,29 @@ namespace api
 	const std::map<std::string, std::shared_ptr<graphics::IRenderPass>>& CVulkanAPI::GetOffScreenRenderPassMap() const
 	{
 		return m_OffScreenRenderPassMap;
+	}
+
+	std::shared_ptr<graphics::IRenderPass> CVulkanAPI::FindOffScreenRenderPass(const std::string& PassName)
+	{
+		auto it = m_OffScreenRenderPassMap.find(PassName);
+		if (it == m_OffScreenRenderPassMap.end()) return nullptr;
+
+		return it->second;
+	}
+
+	const std::string& CVulkanAPI::GetCurrentRenderPassName() const
+	{
+		return m_CurrentRenderPassName;
+	}
+
+	bool CVulkanAPI::CopyColorBuffer(const std::string& SrcPassName, const std::string& DstPassName)
+	{
+		return true;
+	}
+
+	bool CVulkanAPI::CopyDepthBuffer(const std::string& SrcPassName, const std::string& DstPassName)
+	{
+		return true;
 	}
 
 	VkRenderPass CVulkanAPI::GetSwapChainRenderPass() const

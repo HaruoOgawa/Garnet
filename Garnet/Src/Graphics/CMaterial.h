@@ -40,7 +40,7 @@ namespace graphics
 		std::vector<STextureBindingLayout> m_TextureBindingLayoutList;
 
 		// VulkanやWebGPUはOpenGLの様に何も考えずにマテリアルを使いまわすことができないのでその数をあらかじめ設定しておく必要がある
-		const int m_RefCount;
+		int m_RefCount;
 		int m_CurrentDynamicOffset;
 
 		std::vector<uint32_t> m_BindingRefSizeList; // GLSLの各bindingが参照しているバッファのサイズ
@@ -68,6 +68,9 @@ namespace graphics
 		std::shared_ptr<graphics::CTexture> m_RefDiffuse_Tex = nullptr;
 		std::shared_ptr<graphics::CTexture> m_RefSpecular_Tex = nullptr;
 		std::shared_ptr<graphics::CTexture> m_RefGGXLUT_Tex = nullptr;
+
+		// カラーバッファへのアウトプット数(MRTで使用)
+		int m_OutputColorCount;
 	public:
 		CMaterial(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CMaterialCreateInfo>& createInfo, int RefCount, ECullMode CullMode);
 		virtual ~CMaterial() = default;
@@ -76,6 +79,10 @@ namespace graphics
 
 		virtual void SetMaterialName(const std::string& Name);
 		virtual const std::string& GetMaterialName() const;
+
+		// カラーバッファへのアウトプット数(MRTで使用)
+		virtual void SetOutputColorCount(int Val);
+		virtual int GetOutputColorCount() const;
 
 		virtual const std::shared_ptr<CMaterialFrame>& GetMaterialFrame() const;
 		virtual void SetMaterialFrame(const std::shared_ptr<CMaterialFrame>& MaterialFrame);
@@ -120,6 +127,7 @@ namespace graphics
 
 		virtual void SetUniformValue(const std::string Name, const void* Data, int ByteSize, int DynamicOffsetNum = -1) = 0;
 
+		virtual void AddRefCount();
 		virtual int GetRefCount() const;
 
 		virtual bool IsUseDynamicOffset();

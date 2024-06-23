@@ -434,6 +434,33 @@ namespace window
 		return true;
 	}
 
+	bool IsExtensionSupported(const char* extList, const char* extension) {
+		const char* start;
+		const char* where, * terminator;
+
+		// Extension names should not have spaces.
+		where = strchr(extension, ' ');
+		if (where || *extension == '\0') {
+			return false;
+		}
+
+		// It takes a bit of care to be fool-proof about parsing the
+		// OpenGL extensions string. Don't be fooled by sub-strings, etc.
+		for (start = extList;;) {
+			where = strstr(start, extension);
+			if (!where) {
+				break;
+			}
+			terminator = where + strlen(extension);
+			if ((where == start || *(where - 1) == ' ') &&
+				(*terminator == ' ' || *terminator == '\0')) {
+				return true;
+			}
+			start = terminator;
+		}
+		return false;
+	}
+
 	bool CWin32WindowAPI::InitGLContext()
 	{
 		// デバイスコンテキストの取得
@@ -467,17 +494,37 @@ namespace window
 			return false;
 		}
 
+		// 一時的なレンダリングコンテキストを作成
+		// wglCreateContextAttribsARBのProcAddressを取得するには何かしらのOpenGLコンテキストが設定されている必要がある
+		HGLRC Tmp_Rendering_Context = wglCreateContext(m_Device_Context);
+		wglMakeCurrent(m_Device_Context, Tmp_Rendering_Context);
+
+		const char* extensions = (const char*)glGetString(GL_EXTENSIONS);
+		if (IsExtensionSupported(extensions, "WGL_ARB_create_context")) {
+			Console::Log("WGL_ARB_create_context is supported.\n");
+		}
+		else {
+			Console::Log("WGL_ARB_create_context is not supported.\n");
+		}
+
 		// RenderingContextを作成
-		/*int attribs[] = {
-			WGL_CONTEXT_MAJOR_VERSION_ARB, 4,
-			WGL_CONTEXT_MINOR_VERSION_ARB, 1,
-			WGL_CONTEXT_FLAGS_ARB, WGL_CONTEXT_PROFILE_MASK_ARB,
-			0
+		int attribs[] = {
+		WGL_CONTEXT_MAJOR_VERSION_ARB, 3,
+		WGL_CONTEXT_MINOR_VERSION_ARB, 3,
+		WGL_CONTEXT_PROFILE_MASK_ARB, WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
+		0
 		};
-		m_Rendering_Context = wglCreateContextAttribsARB(m_Device_Context, 0, attribs);*/
+
+		PFNWGLCREATECONTEXTATTRIBSARBPROC wglCreateContextAttribsARB = (PFNWGLCREATECONTEXTATTRIBSARBPROC)wglGetProcAddress("wglCreateContextAttribsARB");
+
+		m_Rendering_Context = wglCreateContextAttribsARB(m_Device_Context, 0, attribs);
 
 		m_Rendering_Context = wglCreateContext(m_Device_Context);
+
 		wglMakeCurrent(m_Device_Context, m_Rendering_Context);
+
+		// 一時的なコンテキストを削除
+		wglDeleteContext(Tmp_Rendering_Context);
 
 		return true;
 	}

@@ -22,7 +22,7 @@ namespace app
 		m_IsLoaded(false),
 		m_SceneController(std::make_shared<scene::CSceneController>())
 	{
-		pLoadWorker->AddScene(std::make_shared<resource::CSceneLoader>("Resources\\Scene\\SceneWriteTest.json", m_SceneController));
+		pLoadWorker->AddScene(std::make_shared<resource::CSceneLoader>("Resources\\Scene\\MRTTest.json", m_SceneController));
 	}
 
 	CScriptScene::~CScriptScene()

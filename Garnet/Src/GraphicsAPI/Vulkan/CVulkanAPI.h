@@ -98,6 +98,8 @@ namespace api
 
 		// Rendering
 		std::map<std::string, std::shared_ptr<graphics::IRenderPass>> m_OffScreenRenderPassMap;
+		std::string m_CurrentRenderPassName;
+
 		VkRenderPass m_SwapChainRenderPass;
 		VkRenderPass m_CurrentRenderPass;
 		CVulkanRenderPass* m_pCurrentVulkanRenderPass;
@@ -178,7 +180,7 @@ namespace api
 
 		virtual void Release() override;
 
-		virtual bool CreateRenderPass(const std::string& PassName, ERenderPassFormat RenderPassFormat, const glm::vec4& InitColor, int Width = -1, int Height = -1) override;
+		virtual bool CreateRenderPass(const std::string& PassName, ERenderPassFormat RenderPassFormat, const glm::vec4& InitColor, int Width = -1, int Height = -1, int RenderTargetCount = 1) override;
 		virtual std::shared_ptr<graphics::CVertexBuffer> CreateVertexBuffer() override;
 		virtual std::shared_ptr<graphics::CIndexBuffer> CreateIndexBuffer() override;
 		virtual std::shared_ptr<graphics::IRenderer> CreateRenderer(const std::string& PassName) override;
@@ -206,6 +208,11 @@ namespace api
 		virtual int GetHeight() const override;
 
 		virtual const std::map<std::string, std::shared_ptr<graphics::IRenderPass>>& GetOffScreenRenderPassMap() const override;
+		virtual std::shared_ptr<graphics::IRenderPass> FindOffScreenRenderPass(const std::string& PassName) override;
+		virtual const std::string& GetCurrentRenderPassName() const override;
+		virtual bool CopyColorBuffer(const std::string& SrcPassName, const std::string& DstPassName) override;
+		virtual bool CopyDepthBuffer(const std::string& SrcPassName, const std::string& DstPassName) override;
+
 		VkRenderPass GetSwapChainRenderPass() const;
 
 		virtual bool IsEnabledRuntimeShaderEditing() const override;

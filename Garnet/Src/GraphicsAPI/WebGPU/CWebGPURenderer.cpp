@@ -219,11 +219,16 @@ namespace api
 
 		pipelineDesc.depthStencil = &depthStencilState;
 
-		// ブレンディング
-		// <計算式> rgba = srcFactor * rgba [operation] dstFactor * rgba
-		WGPUBlendState blendState{};
-		switch (pWebGPUMat->GetBlendType())
+		// 描画先のカラーバッファの設定
+		// MRTの時は複数個必要
+		std::vector<WGPUColorTargetState> colorTargetList;
+		for (int ColorIndex = 0; ColorIndex < pWebGPUMat->GetOutputColorCount(); ColorIndex++)
 		{
+			// ブレンディング
+		// <計算式> rgba = srcFactor * rgba [operation] dstFactor * rgba
+			WGPUBlendState blendState{};
+			switch (pWebGPUMat->GetBlendType())
+			{
 			case graphics::EBlendType::BLEND_TYPE_ADDITIVE:
 				blendState.color.srcFactor = WGPUBlendFactor_One;
 				blendState.color.dstFactor = WGPUBlendFactor_Zero;
@@ -254,15 +259,18 @@ namespace api
 				blendState.alpha.operation = WGPUBlendOperation_Add;
 
 				break;
+			}
+
+
+			WGPUColorTargetState colorTarget{};
+			colorTarget.nextInChain = nullptr;
+			colorTarget.format = m_pGraphicsAPI->GetSwapChainFormat();
+			colorTarget.blend = &blendState;
+			colorTarget.writeMask = WGPUColorWriteMask_All;
+
+			colorTargetList.push_back(colorTarget);
 		}
 		
-
-		WGPUColorTargetState colorTarget{};
-		colorTarget.nextInChain = nullptr;
-		colorTarget.format = m_pGraphicsAPI->GetSwapChainFormat();
-		colorTarget.blend = &blendState;
-		colorTarget.writeMask = WGPUColorWriteMask_All;
-
 		// マルチサンプリング(MSAA)
 		pipelineDesc.multisample.nextInChain = nullptr;
 		pipelineDesc.multisample.count = 1;
@@ -276,8 +284,8 @@ namespace api
 		fragmentState.entryPoint = "main";
 		fragmentState.constantCount = 0;
 		fragmentState.constants = nullptr;
-		fragmentState.targetCount = 1;
-		fragmentState.targets = &colorTarget;
+		fragmentState.targetCount = static_cast<uint32_t>(colorTargetList.size());
+		fragmentState.targets = &colorTargetList[0];
 
 		pipelineDesc.fragment = &fragmentState;
 		

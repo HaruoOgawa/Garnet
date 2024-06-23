@@ -6,7 +6,8 @@ namespace graphics
 		m_CreateCounter(0),
 		m_MaterialFrameName(std::string()),
 		m_FileName(std::string()),
-		m_CreateInfo(nullptr)
+		m_CreateInfo(nullptr),
+		m_OutputColorCount(1)
 	{
 	}
 
@@ -34,6 +35,17 @@ namespace graphics
 		return m_FileName;
 	}
 
+	// カラーバッファへのアウトプット数(MRTで使用)
+	void CMaterialFrame::SetOutputColorCount(int Val)
+	{
+		m_OutputColorCount = Val;
+	}
+
+	int CMaterialFrame::GetOutputColorCount() const
+	{
+		return m_OutputColorCount;
+	}
+
 	void CMaterialFrame::SetCreateInfo(const std::shared_ptr<graphics::CMaterialCreateInfo>& CreateInfo)
 	{
 		m_CreateInfo = CreateInfo;
@@ -58,6 +70,7 @@ namespace graphics
 		// MaterialName
 		std::string MaterialName = m_MaterialFrameName + "_" + std::to_string(m_CreateCounter);
 		Material->SetMaterialName(MaterialName);
+		Material->SetOutputColorCount(m_OutputColorCount);
 
 		// ShaderBuffer
 		for (const auto& ShaderBuffer : m_ShaderBufferList)
@@ -176,6 +189,8 @@ namespace graphics
 		//
 		for (auto& Material : m_RefMaterialList)
 		{
+			Material->SetOutputColorCount(m_OutputColorCount);
+
 			// APIレベルでマテリアルを更新する
 			if (!Material->ReCreate(m_CreateInfo, ShaderBufferList, TextureBindingLayoutList)) return false;
 		}

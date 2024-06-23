@@ -191,7 +191,7 @@ namespace scene
 	{
 		for (const auto& Object : m_ObjectList)
 		{
-			if (!Object->Draw(IsDepthPass, false, Camera, Projection, DrawInfo)) return false;
+			if (!Object->Draw(pGraphicsAPI, IsDepthPass, false, Camera, Projection, DrawInfo)) return false;
 		}
 
 		return true;

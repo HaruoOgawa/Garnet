@@ -668,172 +668,187 @@ namespace api
 		//
 		for (size_t FrameIndex = 0; FrameIndex < m_pGraphicsAPI->GetMaxFramesInFlight(); FrameIndex++)
 		{
-			//
-			for (int BufferIndex = 0; BufferIndex < m_ShaderBufferList.size(); BufferIndex++)
+			// ShaderBuffer
+			if (!UpdateShaderBufferDescriptorSets(FrameIndex)) return false;
+
+			// テクスチャ
+			if (!UpdateTextureBufferDescriptorSets(FrameIndex)) return false;
+		}
+
+		return true;
+	}
+
+	bool CVulkanMaterial::UpdateShaderBufferDescriptorSets(size_t FrameIndex)
+	{
+		for (int BufferIndex = 0; BufferIndex < m_ShaderBufferList.size(); BufferIndex++)
+		{
+			const auto& Buffer = m_ShaderBufferList[BufferIndex];
+			size_t UniformLayoutSize = Buffer->GetBindingLayoutList().size();
+
+			std::vector<VkWriteDescriptorSet> descriptorWrites(UniformLayoutSize);
+			std::vector<VkDescriptorBufferInfo> bufferInfoList(UniformLayoutSize);
+
+			int LayoutIndex = 0;
+
+			// 共有バッファ
+			const auto& SharedBufferParam = m_ShaderBufferList[BufferIndex]->GetSharedBufferParam();
+
+			// UBO
+			for (const auto& Layout : Buffer->GetBindingLayoutList())
 			{
-				const auto& Buffer = m_ShaderBufferList[BufferIndex];
-				size_t UniformLayoutSize = Buffer->GetBindingLayoutList().size();
-				size_t TexLayoutSize = m_TextureBindingLayoutList.size() * 2; // ImageViewとSamplerがあるので2倍にしている
+				descriptorWrites[LayoutIndex].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+				descriptorWrites[LayoutIndex].dstSet = m_DescriptorSets[FrameIndex]; // どのDescriptorSets(キューファミリが入ってる？)でCPUからGPUにバッファを渡すコマンドを発行するか
+				descriptorWrites[LayoutIndex].dstBinding = Layout.second.BindingIndex; // layout(location = n)
+				descriptorWrites[LayoutIndex].dstArrayElement = 0; // ???
 
-				std::vector<VkWriteDescriptorSet> descriptorWrites(UniformLayoutSize + TexLayoutSize);
-				std::vector<VkDescriptorBufferInfo> bufferInfoList(UniformLayoutSize);
-				std::vector<VkDescriptorImageInfo> imageInfoList(TexLayoutSize);
-				
-				int LayoutIndex = 0;
-
-				// 共有バッファ
-				const auto& SharedBufferParam = m_ShaderBufferList[BufferIndex]->GetSharedBufferParam();
-
-				// UBO
-				int BufferLayoutIndex = 0;
-				for (const auto& Layout : Buffer->GetBindingLayoutList())
+				if (SharedBufferParam.IsShared) // バッファを他のマテリアルと共有する
 				{
-					descriptorWrites[LayoutIndex].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-					descriptorWrites[LayoutIndex].dstSet = m_DescriptorSets[FrameIndex]; // どのDescriptorSets(キューファミリが入ってる？)でCPUからGPUにバッファを渡すコマンドを発行するか
-					descriptorWrites[LayoutIndex].dstBinding = Layout.second.BindingIndex; // layout(location = n)
-					descriptorWrites[LayoutIndex].dstArrayElement = 0; // ???
+					CVulkanMaterial* pSharedVulkanMat = static_cast<CVulkanMaterial*>(SharedBufferParam.SharedBufferMaterial.get());
 
+					bufferInfoList[LayoutIndex].buffer = pSharedVulkanMat->GetVKUniformBufferList()[FrameIndex][SharedBufferParam.BufferIndex]; // UBOの指定
+				}
+				else // 通常のバッファ使用
+				{
+					bufferInfoList[LayoutIndex].buffer = m_VKUniformBufferList[FrameIndex][BufferIndex]; // UBOの指定
+				}
+
+				bufferInfoList[LayoutIndex].offset = Layout.second.ByteOffset; // バッファオフセット
+				bufferInfoList[LayoutIndex].range = Layout.second.ByteSize; // サイズかな？
+
+				if (Buffer->GetBufferType() == graphics::EBufferType::UNIFORM)
+				{
+					if (IsUseDynamicOffset())
+					{
+						descriptorWrites[LayoutIndex].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC; // どのタイプのコマンドを発行してもらうのか
+					}
+					else
+					{
+						descriptorWrites[LayoutIndex].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER; // どのタイプのコマンドを発行してもらうのか
+					}
+				}
+				else if (Buffer->GetBufferType() == graphics::EBufferType::SHADERSTORAGE)
+				{
+					if (IsUseDynamicOffset())
+					{
+						descriptorWrites[LayoutIndex].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC; // どのタイプのコマンドを発行してもらうのか
+					}
+					else
+					{
+						descriptorWrites[LayoutIndex].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER; // どのタイプのコマンドを発行してもらうのか
+					}
+				}
+
+				descriptorWrites[LayoutIndex].descriptorCount = 1;
+				descriptorWrites[LayoutIndex].pBufferInfo = &bufferInfoList[LayoutIndex];
+
+				// 複数個入力しても意味がないので始めのFrameIndexだけを見る
+				if (FrameIndex == 0)
+				{
 					if (SharedBufferParam.IsShared) // バッファを他のマテリアルと共有する
 					{
 						CVulkanMaterial* pSharedVulkanMat = static_cast<CVulkanMaterial*>(SharedBufferParam.SharedBufferMaterial.get());
 
-						bufferInfoList[BufferLayoutIndex].buffer = pSharedVulkanMat->GetVKUniformBufferList()[FrameIndex][SharedBufferParam.BufferIndex]; // UBOの指定
+						m_BindingRefSizeList.push_back(pSharedVulkanMat->GetVKUniformBufferSizeList()[FrameIndex][BufferIndex]);
 					}
-					else // 通常のバッファ使用
+					else
 					{
-						bufferInfoList[BufferLayoutIndex].buffer = m_VKUniformBufferList[FrameIndex][BufferIndex]; // UBOの指定
-					}
-
-					bufferInfoList[BufferLayoutIndex].offset = Layout.second.ByteOffset; // バッファオフセット
-					bufferInfoList[BufferLayoutIndex].range = Layout.second.ByteSize; // サイズかな？
-
-					if (Buffer->GetBufferType() == graphics::EBufferType::UNIFORM)
-					{
-						if (IsUseDynamicOffset())
-						{
-							descriptorWrites[LayoutIndex].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC; // どのタイプのコマンドを発行してもらうのか
-						}
-						else
-						{
-							descriptorWrites[LayoutIndex].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER; // どのタイプのコマンドを発行してもらうのか
-						}
-					}
-					else if (Buffer->GetBufferType() == graphics::EBufferType::SHADERSTORAGE)
-					{
-						if (IsUseDynamicOffset())
-						{
-							descriptorWrites[LayoutIndex].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC; // どのタイプのコマンドを発行してもらうのか
-						}
-						else
-						{
-							descriptorWrites[LayoutIndex].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER; // どのタイプのコマンドを発行してもらうのか
-						}
-					}
-
-					descriptorWrites[LayoutIndex].descriptorCount = 1;
-					descriptorWrites[LayoutIndex].pBufferInfo = &bufferInfoList[BufferLayoutIndex];
-
-					// 複数個入力しても意味がないので始めのFrameIndexだけを見る
-					if (FrameIndex == 0)
-					{
-						if (SharedBufferParam.IsShared) // バッファを他のマテリアルと共有する
-						{
-							CVulkanMaterial* pSharedVulkanMat = static_cast<CVulkanMaterial*>(SharedBufferParam.SharedBufferMaterial.get());
-
-							m_BindingRefSizeList.push_back(pSharedVulkanMat->GetVKUniformBufferSizeList()[FrameIndex][BufferIndex]);
-						}
-						else
-						{
-							m_BindingRefSizeList.push_back(m_VKUniformBufferSizeList[FrameIndex][BufferIndex]);
-						}
-					}
-
-					BufferLayoutIndex++;
-					LayoutIndex++;
-				}
-
-				// テクスチャ
-				for (int ImageInfoIndex = 0, TextureBindingLayoutIndex = 0; ImageInfoIndex < TexLayoutSize; ImageInfoIndex += 2, TextureBindingLayoutIndex++)
-				{
-					const auto& TexLayout = m_TextureBindingLayoutList[TextureBindingLayoutIndex];
-
-					std::shared_ptr<graphics::CTexture> Texture = nullptr;
-					int TextureIndex = TexLayout.TextureIndex;
-
-					if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_2D)
-					{
-						const auto& it = m_RefTextureMap.find(TexLayout.TextureName);
-
-						Texture = (it != m_RefTextureMap.end()) ? it->second : m_EmptyTexture;
-					}
-					else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_CUBE)
-					{
-						const auto& it = m_RefCubeMapMap.find(TexLayout.TextureName);
-
-						Texture = (it != m_RefCubeMapMap.end()) ? it->second : m_EmptyCubeTexture;
-					}
-					else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_FRAME)
-					{
-						const auto& it = m_RefFrameTextureMap.find(TexLayout.TextureName);
-
-						Texture = (it != m_RefFrameTextureMap.end()) ? it->second : m_EmptyTexture;
-					}
-					else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_IBL_Diffuse)
-					{
-						Texture = (m_RefDiffuse_Tex) ? m_RefDiffuse_Tex : m_EmptyTexture;
-					}
-					else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_IBL_Specular)
-					{
-						Texture = (m_RefSpecular_Tex) ? m_RefSpecular_Tex : m_EmptyTexture;
-					}
-					else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_IBL_GGXLUT)
-					{
-						Texture = (m_RefGGXLUT_Tex) ? m_RefGGXLUT_Tex : m_EmptyTexture;
-					}
-
-					if (!Texture)
-					{
-						Console::Log("[ERROR] Texture is nullptr\n");
-						return false;
-					}
-
-					api::CVulkanTexture* pVulkanTexture = static_cast<api::CVulkanTexture*>(Texture.get());
-
-					{
-						descriptorWrites[LayoutIndex].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-						descriptorWrites[LayoutIndex].dstSet = m_DescriptorSets[FrameIndex]; // どのDescriptorSets(キューファミリが入ってる？)でCPUからGPUにバッファを渡すコマンドを発行するか
-						descriptorWrites[LayoutIndex].dstBinding = TexLayout.ViewBindingIndex; // layout(location = n)
-						descriptorWrites[LayoutIndex].dstArrayElement = 0; // ???
-
-						imageInfoList[ImageInfoIndex].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-						imageInfoList[ImageInfoIndex].imageView = pVulkanTexture->GetTextureImageView();
-
-						descriptorWrites[LayoutIndex].descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
-						descriptorWrites[LayoutIndex].descriptorCount = 1;
-						descriptorWrites[LayoutIndex].pImageInfo = &imageInfoList[ImageInfoIndex];
-
-						LayoutIndex++;
-					}
-
-					{
-						descriptorWrites[LayoutIndex].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-						descriptorWrites[LayoutIndex].dstSet = m_DescriptorSets[FrameIndex]; // どのDescriptorSets(キューファミリが入ってる？)でCPUからGPUにバッファを渡すコマンドを発行するか
-						descriptorWrites[LayoutIndex].dstBinding = TexLayout.SamplerBindingIndex; // layout(location = n)
-						descriptorWrites[LayoutIndex].dstArrayElement = 0; // ???
-
-						imageInfoList[ImageInfoIndex + 1].sampler = pVulkanTexture->GetTextureSampler();
-
-						descriptorWrites[LayoutIndex].descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER;
-						descriptorWrites[LayoutIndex].descriptorCount = 1;
-						descriptorWrites[LayoutIndex].pImageInfo = &imageInfoList[ImageInfoIndex + 1];
-
-						LayoutIndex++;
+						m_BindingRefSizeList.push_back(m_VKUniformBufferSizeList[FrameIndex][BufferIndex]);
 					}
 				}
 
-				// たぶんバッファの転送を行うコマンドを発行している
-				vkUpdateDescriptorSets(m_pGraphicsAPI->GetLogicalDevice(), static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
+				LayoutIndex++;
 			}
+
+			// たぶんバッファの転送を行うコマンドを発行している
+			vkUpdateDescriptorSets(m_pGraphicsAPI->GetLogicalDevice(), static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
+		}
+
+		return true;
+	}
+
+	bool CVulkanMaterial::UpdateTextureBufferDescriptorSets(size_t FrameIndex)
+	{
+		{
+			size_t TexLayoutSize = m_TextureBindingLayoutList.size() * 2; // ImageViewとSamplerがあるので2倍にしている
+			std::vector<VkWriteDescriptorSet> descriptorWrites(TexLayoutSize);
+			std::vector<VkDescriptorImageInfo> imageInfoList(TexLayoutSize);
+
+			for (int ImageInfoIndex = 0, TextureBindingLayoutIndex = 0; ImageInfoIndex < TexLayoutSize; ImageInfoIndex += 2, TextureBindingLayoutIndex++)
+			{
+				const auto& TexLayout = m_TextureBindingLayoutList[TextureBindingLayoutIndex];
+
+				std::shared_ptr<graphics::CTexture> Texture = nullptr;
+				int TextureIndex = TexLayout.TextureIndex;
+
+				if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_2D)
+				{
+					const auto& it = m_RefTextureMap.find(TexLayout.TextureName);
+
+					Texture = (it != m_RefTextureMap.end()) ? it->second : m_EmptyTexture;
+				}
+				else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_CUBE)
+				{
+					const auto& it = m_RefCubeMapMap.find(TexLayout.TextureName);
+
+					Texture = (it != m_RefCubeMapMap.end()) ? it->second : m_EmptyCubeTexture;
+				}
+				else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_FRAME)
+				{
+					const auto& it = m_RefFrameTextureMap.find(TexLayout.TextureName);
+
+					Texture = (it != m_RefFrameTextureMap.end()) ? it->second : m_EmptyTexture;
+				}
+				else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_IBL_Diffuse)
+				{
+					Texture = (m_RefDiffuse_Tex) ? m_RefDiffuse_Tex : m_EmptyTexture;
+				}
+				else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_IBL_Specular)
+				{
+					Texture = (m_RefSpecular_Tex) ? m_RefSpecular_Tex : m_EmptyTexture;
+				}
+				else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_IBL_GGXLUT)
+				{
+					Texture = (m_RefGGXLUT_Tex) ? m_RefGGXLUT_Tex : m_EmptyTexture;
+				}
+
+				if (!Texture)
+				{
+					Console::Log("[ERROR] Texture is nullptr\n");
+					return false;
+				}
+
+				api::CVulkanTexture* pVulkanTexture = static_cast<api::CVulkanTexture*>(Texture.get());
+
+				{
+					descriptorWrites[ImageInfoIndex].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+					descriptorWrites[ImageInfoIndex].dstSet = m_DescriptorSets[FrameIndex]; // どのDescriptorSets(キューファミリが入ってる？)でCPUからGPUにバッファを渡すコマンドを発行するか
+					descriptorWrites[ImageInfoIndex].dstBinding = TexLayout.ViewBindingIndex; // layout(location = n)
+					descriptorWrites[ImageInfoIndex].dstArrayElement = 0; // ???
+
+					imageInfoList[ImageInfoIndex].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+					imageInfoList[ImageInfoIndex].imageView = pVulkanTexture->GetTextureImageView();
+
+					descriptorWrites[ImageInfoIndex].descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
+					descriptorWrites[ImageInfoIndex].descriptorCount = 1;
+					descriptorWrites[ImageInfoIndex].pImageInfo = &imageInfoList[ImageInfoIndex];
+				}
+
+				{
+					descriptorWrites[ImageInfoIndex + 1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+					descriptorWrites[ImageInfoIndex + 1].dstSet = m_DescriptorSets[FrameIndex]; // どのDescriptorSets(キューファミリが入ってる？)でCPUからGPUにバッファを渡すコマンドを発行するか
+					descriptorWrites[ImageInfoIndex + 1].dstBinding = TexLayout.SamplerBindingIndex; // layout(location = n)
+					descriptorWrites[ImageInfoIndex + 1].dstArrayElement = 0; // ???
+
+					imageInfoList[ImageInfoIndex + 1].sampler = pVulkanTexture->GetTextureSampler();
+
+					descriptorWrites[ImageInfoIndex + 1].descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER;
+					descriptorWrites[ImageInfoIndex + 1].descriptorCount = 1;
+					descriptorWrites[ImageInfoIndex + 1].pImageInfo = &imageInfoList[ImageInfoIndex + 1];
+				}
+			}
+
+			// たぶんバッファの転送を行うコマンドを発行している
+			vkUpdateDescriptorSets(m_pGraphicsAPI->GetLogicalDevice(), static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
 		}
 
 		return true;

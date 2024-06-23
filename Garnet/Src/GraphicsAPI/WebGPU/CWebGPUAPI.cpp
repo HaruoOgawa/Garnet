@@ -45,7 +45,8 @@ namespace api
 		m_SwapChainDepthTextureView(nullptr),
 		m_SwapChainRenderPass(nullptr),
 		m_CurrentRenderPass(nullptr),
-		m_pWebGPURenderPass(nullptr)
+		m_pWebGPURenderPass(nullptr),
+		m_CurrentRenderPassName(std::string())
 	{
 	}
 
@@ -78,17 +79,17 @@ namespace api
 		m_OffScreenRenderPassMap.clear();
 	}
 
-	bool CWebGPUAPI::CreateRenderPass(const std::string& PassName, ERenderPassFormat RenderPassFormat, const glm::vec4& InitColor, int Width, int Height)
+	bool CWebGPUAPI::CreateRenderPass(const std::string& PassName, ERenderPassFormat RenderPassFormat, const glm::vec4& InitColor, int Width, int Height, int RenderTargetCount)
 	{
 		std::shared_ptr<CWebGPURenderPass> RenderPass = std::make_shared<CWebGPURenderPass>(this, PassName, RenderPassFormat, InitColor);
 		
 		if (Width != -1 && Height != -1)
 		{
-			if (!RenderPass->Create(Width, Height)) return false;
+			if (!RenderPass->Create(Width, Height, RenderTargetCount)) return false;
 		}
 		else
 		{
-			if (!RenderPass->Create(m_Width, m_Height)) return false;
+			if (!RenderPass->Create(m_Width, m_Height, RenderTargetCount)) return false;
 		}
 
 		m_OffScreenRenderPassMap.insert({ PassName, RenderPass });
@@ -188,6 +189,8 @@ namespace api
 			m_CurrentRenderPass = m_SwapChainRenderPass;
 		}
 
+		m_CurrentRenderPassName = PassName;
+
 		return true;
 	}
 
@@ -280,6 +283,29 @@ namespace api
 	const std::map<std::string, std::shared_ptr<graphics::IRenderPass>>& CWebGPUAPI::GetOffScreenRenderPassMap() const
 	{
 		return m_OffScreenRenderPassMap;
+	}
+
+	std::shared_ptr<graphics::IRenderPass> CWebGPUAPI::FindOffScreenRenderPass(const std::string& PassName)
+	{
+		auto it = m_OffScreenRenderPassMap.find(PassName);
+		if (it == m_OffScreenRenderPassMap.end()) return nullptr;
+
+		return it->second;
+	}
+
+	const std::string& CWebGPUAPI::GetCurrentRenderPassName() const
+	{
+		return m_CurrentRenderPassName;
+	}
+
+	bool CWebGPUAPI::CopyColorBuffer(const std::string& SrcPassName, const std::string& DstPassName)
+	{
+		return true;
+	}
+
+	bool CWebGPUAPI::CopyDepthBuffer(const std::string& SrcPassName, const std::string& DstPassName)
+	{
+		return true;
 	}
 
 	bool CWebGPUAPI::IsEnabledRuntimeShaderEditing() const

@@ -8,6 +8,7 @@
 #include "../Object/C3DObject.h"
 #include "CResourceManager.h"
 #include "CSceneLoader.h"
+#include "CMaterialFrameLoader.h"
 
 namespace file { class CFile; }
 

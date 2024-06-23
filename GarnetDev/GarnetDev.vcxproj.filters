@@ -48,6 +48,12 @@
     <ClCompile Include="Src\App\ScriptApp\CScriptApp.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Src\ImageEffect\CBlurEffect.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Graphics\CDeferredRenderer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\App\ScriptApp\GUI\CGraphicsEditingWindow.h">
@@ -78,6 +84,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Src\App\ScriptApp\CScriptApp.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\ImageEffect\CBlurEffect.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Graphics\CDeferredRenderer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -201,6 +213,14 @@
       <Filter>Source Files</Filter>
     </None>
     <None Include="Commands\UTF8Encorder.py" />
+    <None Include="Resources\Scene\MRTTest.json" />
+    <None Include="Resources\MaterialFrame\PBR_MRT_MF.json" />
+    <None Include="Resources\Shaders\pbr_mrt.frag" />
+    <None Include="Resources\Shaders\mrt_sample.frag" />
+    <None Include="Resources\MaterialFrame\MRTSample_MF.json" />
+    <None Include="Resources\Shaders\objectspace_raymarching.frag" />
+    <None Include="Resources\Shaders\objectspace_raymarching.vert" />
+    <None Include="Resources\MaterialFrame\Objectspace_Ray_MF.json" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Commands\LibList.txt" />

@@ -1356,7 +1356,6 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClInclude Include="Src\GraphicsAPI\OpenGL\COpenGLMaterial.h" />
     <ClInclude Include="Src\GraphicsAPI\OpenGL\COpenGLAPI.h" />
     <ClInclude Include="Src\GraphicsAPI\OpenGL\glDef.h" />
-    <ClInclude Include="Src\ImageEffect\CBlurEffect.h" />
     <ClInclude Include="Src\GraphicsAPI\WebGPU\CWebGPURenderPass.h" />
     <ClInclude Include="Src\GraphicsAPI\Vulkan\CVulkanRenderPass.h" />
     <ClInclude Include="Src\Camera\CViewerCamera.h" />
@@ -2029,7 +2028,6 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClCompile Include="Src\GraphicsAPI\OpenGL\COpenGLTexture.cpp" />
     <ClCompile Include="Src\GraphicsAPI\OpenGL\COpenGLMaterial.cpp" />
     <ClCompile Include="Src\GraphicsAPI\OpenGL\COpenGLAPI.cpp" />
-    <ClCompile Include="Src\ImageEffect\CBlurEffect.cpp" />
     <ClCompile Include="Src\GraphicsAPI\WebGPU\CWebGPURenderPass.cpp" />
     <ClCompile Include="Src\GraphicsAPI\Vulkan\CVulkanRenderPass.cpp" />
     <ClCompile Include="Src\Camera\CViewerCamera.cpp" />

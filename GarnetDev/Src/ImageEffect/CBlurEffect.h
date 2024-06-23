@@ -3,7 +3,7 @@
 #include <vector>
 #include <memory>
 #include <glm/glm.hpp>
-#include "../Object/C3DObject.h"
+#include <Object/C3DObject.h>
 
 namespace file { class CFile; }
 namespace api { class IGraphicsAPI; }
@@ -44,7 +44,7 @@ namespace imageeffect
 
 		bool Update(resource::CLoadWorker* pLoadWorker);
 
-		bool Draw(const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
+		bool Draw(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
 			const std::shared_ptr<graphics::CDrawInfo>& DrawInfo);
 	};
 }
