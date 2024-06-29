@@ -5,7 +5,7 @@
 #include "../../Camera/CCamera.h"
 #include "../../Projection/CProjection.h"
 #include "../../ImageEffect/CBlurEffect.h"
-#include "../../Graphics/CDeferredRenderer.h"
+#include "../../Graphics/CFrameRenderer.h"
 #include "../../Message/Console.h"
 #include "../../Interface/IGUIEngine.h"
 #ifdef USE_VIEWER_CAMERA
@@ -39,6 +39,7 @@ namespace app
 #endif // USE_GUIENGINE
 		m_BlurEffect(nullptr),
 		m_DeferredRenderer(nullptr),
+		m_MainFrameRenderer(nullptr),
 		m_FileModifier(std::make_shared<CFileModifier>())
 	{
 		m_MainCamera->SetPos(glm::vec3(-7.0f, 1.0f, 0.0f));
@@ -74,12 +75,16 @@ namespace app
 		// オフスクリーンレンダリング
 		//if (!pGraphicsAPI->CreateRenderPass("ShadowPass", api::ERenderPassFormat::COLOR_RENDERPASS, glm::vec4(1.0f), 512, 512)) return false;
 		if (!pGraphicsAPI->CreateRenderPass("MRTTest", api::ERenderPassFormat::COLOR_FLOAT_RENDERPASS, glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), -1, -1, 4)) return false;
+		if (!pGraphicsAPI->CreateRenderPass("MainResultPass", api::ERenderPassFormat::COLOR_FLOAT_RENDERPASS, glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), -1, -1, 1)) return false;
 
 		m_BlurEffect = std::make_shared<imageeffect::CBlurEffect>(pGraphicsAPI);
 		if (!m_BlurEffect->Create(pLoadWorker)) return false;
 		
-		m_DeferredRenderer = std::make_shared<graphics::CDeferredRenderer>(pGraphicsAPI);
-		if (!m_DeferredRenderer->Create(pLoadWorker)) return false;
+		m_DeferredRenderer = std::make_shared<graphics::CFrameRenderer>(pGraphicsAPI, "MRTTest", "MainResultPass");
+		if (!m_DeferredRenderer->Create(pLoadWorker, "Resources\\MaterialFrame\\MRTSample_MF.json")) return false;
+		
+		m_MainFrameRenderer = std::make_shared<graphics::CFrameRenderer>(pGraphicsAPI, "MainResultPass", "");
+		if (!m_MainFrameRenderer->Create(pLoadWorker, "Resources\\MaterialFrame\\FrameTexture_MF.json")) return false;
 
 		// FrameTextureを渡す
 		//m_ScriptScene->SetFrameTexture(m_BlurEffect->GetFrameTexture());
@@ -110,6 +115,8 @@ namespace app
 		if (!m_BlurEffect->Update(pLoadWorker)) return false;
 
 		if (!m_DeferredRenderer->Update(pGraphicsAPI, pPhysicsEngine, pLoadWorker, m_MainCamera, m_Projection, m_DrawInfo, InputState)) return false;
+
+		if (!m_MainFrameRenderer->Update(pGraphicsAPI, pPhysicsEngine, pLoadWorker, m_MainCamera, m_Projection, m_DrawInfo, InputState)) return false;
 
 		m_MainCamera->Update(m_DrawInfo->GetDeltaSecondsTime(), InputState);
 
@@ -150,12 +157,19 @@ namespace app
 			if (!pGraphicsAPI->EndRender()) return false;
 		}
 
+		// MainResultPass
+		{
+			if (!pGraphicsAPI->BeginRender("MainResultPass")) return false;
+			if (!m_DeferredRenderer->Draw(pGraphicsAPI, m_MainCamera, m_Projection, m_DrawInfo)) return false;
+			if (!m_ScriptScene->Draw(pGraphicsAPI, false, m_MainCamera, m_Projection, m_DrawInfo)) return false;
+			if (!pGraphicsAPI->EndRender()) return false;
+		}
+
 		// Main FrameBuffer
 		{
 			if (!pGraphicsAPI->BeginRender()) return false;
-			if (!m_DeferredRenderer->Draw(pGraphicsAPI, m_MainCamera, m_Projection, m_DrawInfo)) return false;
-			if (!m_ScriptScene->Draw(pGraphicsAPI, false, m_MainCamera, m_Projection, m_DrawInfo)) return false;
-			if (!pLoadWorker->Draw(pGraphicsAPI, false, m_MainCamera, m_Projection, m_DrawInfo)) return false;
+
+			if (!m_MainFrameRenderer->Draw(pGraphicsAPI, m_MainCamera, m_Projection, m_DrawInfo)) return false;
 
 			// GUIEngine
 #ifdef USE_GUIENGINE
@@ -166,6 +180,8 @@ namespace app
 				if (!GUIEngine->EndFrame(pGraphicsAPI)) return false;
 			}
 #endif // USE_GUIENGINE
+
+			if (!pLoadWorker->Draw(pGraphicsAPI, false, m_MainCamera, m_Projection, m_DrawInfo)) return false;
 
 			if (!pGraphicsAPI->EndRender()) return false;
 		}

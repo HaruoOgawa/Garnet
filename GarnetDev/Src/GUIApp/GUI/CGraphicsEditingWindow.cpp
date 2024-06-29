@@ -68,7 +68,7 @@ namespace gui
 			if (ImGui::Begin("3DView", &Open, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings | 
 				ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoScrollbar))
 			{
-				auto RenderPass = pGraphicsAPI->FindOffScreenRenderPass("MRTTest");
+				auto RenderPass = pGraphicsAPI->FindOffScreenRenderPass("MainResultPass");
 
 				auto Core = GUIEngine->GetImGuiCore();
 

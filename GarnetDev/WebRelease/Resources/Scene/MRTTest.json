@@ -4021,7 +4021,7 @@
     },
     {
       "name": "PmxObj",
-      "renderpass": "",
+      "renderpass": "MainResultPass",
       "filename": "Resources/Avatar/Tda_Miku/Tda_Miku.pmx",
       "defaultmaterialframe": "basic_toon_mat",
       "transform": {

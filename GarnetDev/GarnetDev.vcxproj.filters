@@ -51,7 +51,7 @@
     <ClCompile Include="Src\ImageEffect\CBlurEffect.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Graphics\CDeferredRenderer.cpp">
+    <ClCompile Include="Src\Graphics\CFrameRenderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -89,7 +89,7 @@
     <ClInclude Include="Src\ImageEffect\CBlurEffect.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Src\Graphics\CDeferredRenderer.h">
+    <ClInclude Include="Src\Graphics\CFrameRenderer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -221,6 +221,8 @@
     <None Include="Resources\Shaders\objectspace_raymarching.frag" />
     <None Include="Resources\Shaders\objectspace_raymarching.vert" />
     <None Include="Resources\MaterialFrame\Objectspace_Ray_MF.json" />
+    <None Include="Resources\Shaders\texture.frag" />
+    <None Include="Resources\MaterialFrame\FrameTexture_MF.json" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Commands\LibList.txt" />
