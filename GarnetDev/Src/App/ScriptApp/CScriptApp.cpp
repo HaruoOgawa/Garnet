@@ -12,8 +12,8 @@
 #include "../../Camera/CViewerCamera.h"
 #endif // USE_VIEWER_CAMERA
 
-#include "GUI/CGraphicsEditingWindow.h"
-#include "Model/CFileModifier.h"
+#include "../../GUIApp/GUI/CGraphicsEditingWindow.h"
+#include "../../GUIApp/Model/CFileModifier.h"
 
 // CScriptApp は旧エンジンでもやっていたof風にCppでエンジンコードを直接シーンを構築していくアプリ
 

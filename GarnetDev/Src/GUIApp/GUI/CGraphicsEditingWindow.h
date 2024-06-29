@@ -10,7 +10,7 @@
 #include "CGUICameraTab.h"
 #include "CGUIResourcesTab.h"
 
-#include "../CScriptApp.h"
+#include "../../App/ScriptApp/CScriptApp.h"
 
 namespace api { class IGraphicsAPI; }
 
