@@ -1,5 +1,6 @@
 #if defined(USE_OPENGL) and defined(USE_GUIENGINE)
 #include "CImGuiCoreOpenGL.h"
+#include "../../GraphicsAPI/OpenGL/COpenGLTexture.h"
 
 namespace gui
 {
@@ -35,6 +36,13 @@ namespace gui
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
 		return true;
+	}
+
+	void* CImGuiCoreOpenGL::CastTexID(graphics::CTexture* pTexture)
+	{
+		api::COpenGLTexture* pOpenGLTexture = static_cast<api::COpenGLTexture*>(pTexture);
+
+		return (void*)(intptr_t)pOpenGLTexture->GetTextureID();
 	}
 }
 #endif

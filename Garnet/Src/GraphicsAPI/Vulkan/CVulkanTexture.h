@@ -19,12 +19,22 @@ namespace api
 		VkDeviceMemory m_TextureImageMemory;
 		VkImageView m_TextureImageView; // シェーダーでテクスチャを取り扱う用のImageView
 		VkSampler m_TextureSampler;
+
+		// ImGuiが使用
+		VkDescriptorSetLayout m_GUIDescriptorSetLayout;
+		VkDescriptorPool m_GUIDescriptorPool;
+		VkDescriptorSet m_GUIDescriptorSet;
 	private:
 		// Vulkanメインロジック /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		bool CreateFrameTextureImage(VkFormat ImageFormat, VkImageUsageFlags Usage);
 		bool CreateTextureImage(const std::vector<unsigned char>& pixelData, int pixelSize, VkFormat ImageFormat);
 		bool CreateTextureImageView(VkFormat ImageFormat);
 		bool CreateTextureSampler();
+
+		// ImGuiが使用
+		bool CreateGUIDescriptorSetLayout();
+		bool CreateGUIDescriptorPool();
+		bool CreateGUIDescriptorSet();
 
 		// Helper Function ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		bool GenerateMipMap(uint32_t layer);
@@ -39,6 +49,9 @@ namespace api
 		const VkDeviceMemory& GetTextureImageMemory() const;
 		const VkImageView& GetTextureImageView() const;
 		const VkSampler& GetTextureSampler() const;
+
+		//
+		VkDescriptorSet GetGUIDescriptorSet();
 	};
 }
 #endif

@@ -47,6 +47,8 @@ namespace gui
 		virtual bool EndFrame(api::IGraphicsAPI* pGraphicsAPI) override;
 
 		virtual bool IsExistMouseOnGUI() override;
+
+		virtual std::shared_ptr<IImGuiCore> GetImGuiCore() const override;
 	};
 }
 

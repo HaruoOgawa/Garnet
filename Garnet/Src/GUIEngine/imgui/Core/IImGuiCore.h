@@ -3,6 +3,9 @@
 #ifdef USE_GUIENGINE
 
 #include "../../Interface/IGraphicsAPI.h"
+#include <glm/glm.hpp>
+
+namespace graphics { class CTexture; }
 
 namespace gui
 {
@@ -16,6 +19,8 @@ namespace gui
 		virtual bool BeginFrame(api::IGraphicsAPI* pGraphicsAPI) = 0;
 
 		virtual bool EndFrame(api::IGraphicsAPI* pGraphicsAPI) = 0;
+
+		virtual void* CastTexID(graphics::CTexture* pTexture) = 0;
 	};
 }
 #endif

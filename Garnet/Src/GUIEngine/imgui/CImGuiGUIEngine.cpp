@@ -111,5 +111,10 @@ namespace gui
 
 		return io.WantCaptureMouse;
 	}
+
+	std::shared_ptr<IImGuiCore> CImGuiGUIEngine::GetImGuiCore() const
+	{
+		return m_ImGuiCore;
+	}
 }
 #endif // USE_GUIENGINE

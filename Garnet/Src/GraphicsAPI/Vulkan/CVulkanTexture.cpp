@@ -1,6 +1,7 @@
 #ifdef USE_VULKAN
 #include "CVulkanTexture.h"
 #include "CVulkanAPI.h"
+#include "../../Message/Console.h"
 namespace api
 {
 	CVulkanTexture::CVulkanTexture(api::CVulkanAPI* pGraphicsAPI, bool UseMipMap):
@@ -9,12 +10,35 @@ namespace api
 		m_TextureImage(nullptr),
 		m_TextureImageMemory(nullptr),
 		m_TextureImageView(nullptr),
-		m_TextureSampler(nullptr)
+		m_TextureSampler(nullptr),
+		m_GUIDescriptorSetLayout(nullptr),
+		m_GUIDescriptorPool(nullptr),
+		m_GUIDescriptorSet(nullptr)
 	{
 	}
 
 	CVulkanTexture::~CVulkanTexture()
 	{
+		//
+		if (m_GUIDescriptorSet)
+		{
+			vkFreeDescriptorSets(m_pGraphicsAPI->GetLogicalDevice(), m_GUIDescriptorPool, 1, &m_GUIDescriptorSet);
+			m_GUIDescriptorSet = nullptr;
+		}
+		
+		//
+		if (m_GUIDescriptorPool)
+		{
+			vkDestroyDescriptorPool(m_pGraphicsAPI->GetLogicalDevice(), m_GUIDescriptorPool, nullptr);
+			m_GUIDescriptorPool = nullptr;
+		}
+
+		//
+		if (m_GUIDescriptorSetLayout)
+		{
+			vkDestroyDescriptorSetLayout(m_pGraphicsAPI->GetLogicalDevice(), m_GUIDescriptorSetLayout, nullptr);
+		}
+
 		// テクスチャサンプラーを破棄
 		if (m_TextureSampler)
 		{
@@ -63,6 +87,30 @@ namespace api
 	const VkSampler& CVulkanTexture::GetTextureSampler() const
 	{
 		return m_TextureSampler;
+	}
+
+	VkDescriptorSet CVulkanTexture::GetGUIDescriptorSet()
+	{
+		// nullなら生成する
+		if (m_GUIDescriptorSet == nullptr)
+		{
+			if (!CreateGUIDescriptorSetLayout())
+			{
+				Console::Log("[CVulkanTexture Error] Failed to CreateDescriptorSetLayout\n");
+			}
+
+			if (!CreateGUIDescriptorPool())
+			{
+				Console::Log("[CVulkanTexture Error] Failed to CreateDescriptorPool\n");
+			}
+
+			if (!CreateGUIDescriptorSet())
+			{
+				Console::Log("[CVulkanTexture Error] Failed to CreateDescriptorSet\n");
+			}
+		}
+
+		return m_GUIDescriptorSet;
 	}
 
 	bool CVulkanTexture::CreateFrameTexture(int Width, int Height, api::ERenderPassFormat RenderPassFormat)
@@ -209,6 +257,82 @@ namespace api
 		{
 			return false;
 		}
+
+		return true;
+	}
+
+	bool CVulkanTexture::CreateGUIDescriptorSetLayout()
+	{
+		VkDescriptorSetLayoutBinding samplerLayoutBinding = {};
+		samplerLayoutBinding.binding = 0; // テクスチャ1枚をGUIの板ポリに描画するので0番を指定
+		samplerLayoutBinding.descriptorCount = 1;
+		samplerLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER; // サンプラーと組み合わせて使用する
+		samplerLayoutBinding.pImmutableSamplers = nullptr;
+		samplerLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT; // フラグメントシェーダーで使用
+
+		VkDescriptorSetLayoutCreateInfo layoutInfo = {};
+		layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+		layoutInfo.bindingCount = 1; // バインドする数
+		layoutInfo.pBindings = &samplerLayoutBinding;
+
+		if (vkCreateDescriptorSetLayout(m_pGraphicsAPI->GetLogicalDevice(), &layoutInfo, nullptr, &m_GUIDescriptorSetLayout) != VK_SUCCESS)
+		{
+			return false;
+		}
+
+		return true;
+	}
+
+	bool CVulkanTexture::CreateGUIDescriptorPool()
+	{
+		VkDescriptorPoolSize poolSize = {};
+		poolSize.type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		poolSize.descriptorCount = 1;
+
+		VkDescriptorPoolCreateInfo poolInfo = {};
+		poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+		poolInfo.poolSizeCount = 1;
+		poolInfo.pPoolSizes = &poolSize;
+		poolInfo.maxSets = 1;
+
+		if (vkCreateDescriptorPool(m_pGraphicsAPI->GetLogicalDevice(), &poolInfo, nullptr, &m_GUIDescriptorPool) != VK_SUCCESS)
+		{
+			return false;
+		}
+
+		return true;
+	}
+
+	bool CVulkanTexture::CreateGUIDescriptorSet()
+	{
+		if (!m_TextureImageView || !m_TextureSampler) return false;
+
+		VkDescriptorSetAllocateInfo allocInfo = {};
+		allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+		allocInfo.descriptorPool = m_GUIDescriptorPool;
+		allocInfo.descriptorSetCount = 1;
+		allocInfo.pSetLayouts = &m_GUIDescriptorSetLayout;
+
+		if (vkAllocateDescriptorSets(m_pGraphicsAPI->GetLogicalDevice(), &allocInfo, &m_GUIDescriptorSet) != VK_SUCCESS)
+		{
+			return false;
+		}
+
+		VkDescriptorImageInfo imageInfo = {};
+		imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		imageInfo.imageView = m_TextureImageView;
+		imageInfo.sampler = m_TextureSampler;
+
+		VkWriteDescriptorSet descriptorWrite = {};
+		descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		descriptorWrite.dstSet = m_GUIDescriptorSet;
+		descriptorWrite.dstBinding = 0;
+		descriptorWrite.dstArrayElement = 0;
+		descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		descriptorWrite.descriptorCount = 1;
+		descriptorWrite.pImageInfo = &imageInfo;
+
+		vkUpdateDescriptorSets(m_pGraphicsAPI->GetLogicalDevice(), 1, &descriptorWrite, 0, nullptr);
 
 		return true;
 	}

@@ -18,28 +18,28 @@
     <ClCompile Include="Src\Main\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Src\App\ScriptApp\GUI\CGraphicsEditingWindow.cpp">
+    <ClCompile Include="Src\GUIApp\GUI\CGraphicsEditingWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Src\App\ScriptApp\GUI\CGUICameraTab.cpp">
+    <ClCompile Include="Src\GUIApp\GUI\CGUICameraTab.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Src\App\ScriptApp\GUI\CGUIMaterialTab.cpp">
+    <ClCompile Include="Src\GUIApp\GUI\CGUIMaterialTab.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Src\App\ScriptApp\GUI\CGUIObjectTab.cpp">
+    <ClCompile Include="Src\GUIApp\GUI\CGUIObjectTab.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Src\App\ScriptApp\GUI\CGUIRenderingTab.cpp">
+    <ClCompile Include="Src\GUIApp\GUI\CGUIRenderingTab.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Src\App\ScriptApp\GUI\CGUIResourcesTab.cpp">
+    <ClCompile Include="Src\GUIApp\GUI\CGUIResourcesTab.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Src\App\ScriptApp\GUI\CGUITransformTab.cpp">
+    <ClCompile Include="Src\GUIApp\GUI\CGUITransformTab.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Src\App\ScriptApp\Model\CFileModifier.cpp">
+    <ClCompile Include="Src\GUIApp\Model\CFileModifier.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Src\App\ScriptApp\Scene\CScriptScene.cpp">
@@ -51,33 +51,33 @@
     <ClCompile Include="Src\ImageEffect\CBlurEffect.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Graphics\CDeferredRenderer.cpp">
+    <ClCompile Include="Src\Graphics\CFrameRenderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Src\App\ScriptApp\GUI\CGraphicsEditingWindow.h">
+    <ClInclude Include="Src\GUIApp\GUI\CGraphicsEditingWindow.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Src\App\ScriptApp\GUI\CGUICameraTab.h">
+    <ClInclude Include="Src\GUIApp\GUI\CGUICameraTab.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Src\App\ScriptApp\GUI\CGUIMaterialTab.h">
+    <ClInclude Include="Src\GUIApp\GUI\CGUIMaterialTab.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Src\App\ScriptApp\GUI\CGUIObjectTab.h">
+    <ClInclude Include="Src\GUIApp\GUI\CGUIObjectTab.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Src\App\ScriptApp\GUI\CGUIRenderingTab.h">
+    <ClInclude Include="Src\GUIApp\GUI\CGUIRenderingTab.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Src\App\ScriptApp\GUI\CGUIResourcesTab.h">
+    <ClInclude Include="Src\GUIApp\GUI\CGUIResourcesTab.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Src\App\ScriptApp\GUI\CGUITransformTab.h">
+    <ClInclude Include="Src\GUIApp\GUI\CGUITransformTab.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Src\App\ScriptApp\Model\CFileModifier.h">
+    <ClInclude Include="Src\GUIApp\Model\CFileModifier.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Src\App\ScriptApp\Scene\CScriptScene.h">
@@ -89,7 +89,7 @@
     <ClInclude Include="Src\ImageEffect\CBlurEffect.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Src\Graphics\CDeferredRenderer.h">
+    <ClInclude Include="Src\Graphics\CFrameRenderer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -221,6 +221,8 @@
     <None Include="Resources\Shaders\objectspace_raymarching.frag" />
     <None Include="Resources\Shaders\objectspace_raymarching.vert" />
     <None Include="Resources\MaterialFrame\Objectspace_Ray_MF.json" />
+    <None Include="Resources\Shaders\texture.frag" />
+    <None Include="Resources\MaterialFrame\FrameTexture_MF.json" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Commands\LibList.txt" />

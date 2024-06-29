@@ -1,5 +1,6 @@
 #if defined(USE_WEBGPU) and defined(USE_GUIENGINE)
 #include "CImGuiCoreWebGPU.h"
+#include "../../GraphicsAPI/WebGPU/CWebGPUTexture.h"
 
 namespace gui
 {
@@ -48,6 +49,13 @@ namespace gui
 		ImGui_ImplWGPU_RenderDrawData(ImGui::GetDrawData(), pWebGPUApi->GetSwapChainRenderPass());
 
 		return true;
+	}
+
+	void* CImGuiCoreWebGPU::CastTexID(graphics::CTexture* pTexture)
+	{
+		api::CWebGPUTexture* pWebGPUTexture = static_cast<api::CWebGPUTexture*>(pTexture);
+
+		return (void*)(intptr_t)pWebGPUTexture->GetTextureImageView();
 	}
 }
 #endif

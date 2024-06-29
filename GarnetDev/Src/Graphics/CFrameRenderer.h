@@ -12,23 +12,25 @@ namespace graphics { class CDrawInfo; }
 
 namespace graphics
 {
-	class CDeferredRenderer
+	class CFrameRenderer
 	{
 		bool m_IsLoaded;
 
+		std::string m_DrawResourceName;
+
 		api::IGraphicsAPI* m_pGraphicsAPI;
 
-		std::shared_ptr<graphics::CMaterialFrame> m_MRTMF;
+		std::shared_ptr<graphics::CMaterialFrame> m_MaterialFrame;
 
 		std::shared_ptr<object::C3DObject> m_RenderBoard;
 
 	private:
 		bool Load();
 	public:
-		CDeferredRenderer(api::IGraphicsAPI* pGraphicsAPI);
-		virtual ~CDeferredRenderer();
+		CFrameRenderer(api::IGraphicsAPI* pGraphicsAPI, const std::string& DrawResourceName, const std::string& DrawTargetPassName);
+		virtual ~CFrameRenderer();
 
-		bool Create(resource::CLoadWorker* pLoadWorker);
+		bool Create(resource::CLoadWorker* pLoadWorker, const std::string& FileName);
 
 		bool Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
 			const std::shared_ptr<graphics::CDrawInfo>& DrawInfo, const std::shared_ptr<input::CInputState>& InputState);

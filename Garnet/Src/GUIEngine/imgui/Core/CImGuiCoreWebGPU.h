@@ -21,6 +21,8 @@ namespace gui
 		virtual bool BeginFrame(api::IGraphicsAPI* pGraphicsAPI) override;
 
 		virtual bool EndFrame(api::IGraphicsAPI* pGraphicsAPI) override;
+
+		virtual void* CastTexID(graphics::CTexture* pTexture) override;
 	};
 }
 #endif

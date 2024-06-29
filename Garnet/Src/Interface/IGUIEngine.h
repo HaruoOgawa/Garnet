@@ -7,8 +7,11 @@
 #include <Windows.h>
 #endif
 
+#include <memory>
+
 #include "IGraphicsAPI.h"
 #include "IWindowAPI.h"
+#include "../GUIEngine/imgui/Core/IImGuiCore.h"
 
 namespace gui
 {
@@ -26,5 +29,7 @@ namespace gui
 		virtual bool EndFrame(api::IGraphicsAPI* pGraphicsAPI) = 0;
 
 		virtual bool IsExistMouseOnGUI() = 0;
+
+		virtual std::shared_ptr<IImGuiCore> GetImGuiCore() const = 0;
 	};
 }
