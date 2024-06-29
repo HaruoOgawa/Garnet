@@ -22,7 +22,7 @@ namespace gui
 
 		virtual bool EndFrame(api::IGraphicsAPI* pGraphicsAPI) override;
 
-		virtual bool DrawTexture(graphics::CTexture* pTexture, const glm::vec2& Size, const glm::vec2& UV0 = glm::vec2(0.0f, 0.0f), const glm::vec2& UV1 = glm::vec2(1.0f, 1.0f)) override;
+		virtual void* CastTexID(graphics::CTexture* pTexture) override;
 	};
 }
 #endif

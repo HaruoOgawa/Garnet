@@ -84,15 +84,15 @@ namespace gui
 					);
 					ImGui::SetCursorPos(ImagePos);
 
-					glm::vec2 UV0 = glm::vec2(0.0f, 0.0f);
-					glm::vec2 UV1 = glm::vec2(1.0f, 1.0f);
+					ImVec2 UV0 = ImVec2(0.0f, 0.0f);
+					ImVec2 UV1 = ImVec2(1.0f, 1.0f);
 #ifdef USE_OPENGL
 					// OpenGLŽž‚Íã‰º”½“]‚·‚é‚Ì‚Å•â³‚·‚é
-					UV0 = glm::vec2(0.0f, 1.0f);
-					UV1 = glm::vec2(1.0f, 0.0f);
+					UV0 = ImVec2(0.0f, 1.0f);
+					UV1 = ImVec2(1.0f, 0.0f);
 #endif // USE_OPENGL
 
-					Core->DrawTexture(RenderPass->GetFrameTexture().get(), glm::vec2(ImageSize.x, ImageSize.y), UV0, UV1);
+					ImGui::Image(Core->CastTexID(RenderPass->GetFrameTexture().get()), ImageSize, UV0, UV1);
 				}
 			}
 
