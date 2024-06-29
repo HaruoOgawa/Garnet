@@ -41,7 +41,7 @@ namespace app
 		m_DeferredRenderer(nullptr),
 		m_FileModifier(std::make_shared<CFileModifier>())
 	{
-		m_MainCamera->SetPos(glm::vec3(0.0f, 1.0f, -7.0f));
+		m_MainCamera->SetPos(glm::vec3(-7.0f, 1.0f, 0.0f));
 		//m_MainCamera->SetCenter(glm::vec3(0.0f, 50.0f, 349.0f));
 		//m_MainCamera->SetPos(glm::vec3(0.0f, 50.0f, 350.0f));
 		m_DrawInfo->GetLightCamera()->SetPos(glm::vec3(-2.358f, 15.6f, -0.59f));
