@@ -40,4 +40,9 @@ namespace gui
 	{
 		return false;
 	}
+
+	std::shared_ptr<IImGuiCore> CDummyGUIEngine::GetImGuiCore() const
+	{
+		return nullptr;
+	}
 }

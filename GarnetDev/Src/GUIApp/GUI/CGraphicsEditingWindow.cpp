@@ -12,7 +12,7 @@ namespace gui
 	{
 	}
 
-	bool CGraphicsEditingWindow::Draw(api::IGraphicsAPI* pGraphicsAPI, const app::CScriptApp* pApp)
+	bool CGraphicsEditingWindow::Draw(api::IGraphicsAPI* pGraphicsAPI, const app::CScriptApp* pApp, const std::shared_ptr<gui::IGUIEngine>& GUIEngine)
 	{
 		if (!pApp) return true;
 
@@ -67,7 +67,32 @@ namespace gui
 			bool Open = true;
 			if (ImGui::Begin("3DView", &Open, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoInputs))
 			{
+				auto RenderPass = pGraphicsAPI->FindOffScreenRenderPass("MRTTest");
 
+				auto Core = GUIEngine->GetImGuiCore();
+
+				if (RenderPass && Core)
+				{
+					ImVec2 WindowSize = ImGui::GetWindowSize();
+					ImVec2 ImageSize = ImVec2(io.DisplaySize.x * 0.70f, io.DisplaySize.y * 0.70f);
+					
+					// 親ウィンドウの中心に配置
+					ImVec2 ImagePos = ImVec2(
+						(WindowSize.x - ImageSize.x) * 0.5f,
+						(WindowSize.y - ImageSize.y) * 0.5f
+					);
+					ImGui::SetCursorPos(ImagePos);
+
+					glm::vec2 UV0 = glm::vec2(0.0f, 0.0f);
+					glm::vec2 UV1 = glm::vec2(1.0f, 1.0f);
+#ifdef USE_OPENGL
+					// OpenGL時は上下反転するので補正する
+					UV0 = glm::vec2(0.0f, 1.0f);
+					UV1 = glm::vec2(1.0f, 0.0f);
+#endif // USE_OPENGL
+
+					Core->DrawTexture(RenderPass->GetFrameTexture().get(), glm::vec2(ImageSize.x, ImageSize.y), UV0, UV1);
+				}
 			}
 
 			ImGui::End();

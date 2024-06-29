@@ -162,7 +162,7 @@ namespace app
 			if (pLoadWorker->IsLoaded())
 			{
 				if (!GUIEngine->BeginFrame(pGraphicsAPI)) return false;
-				if (!m_GraphicsEditingWindow->Draw(pGraphicsAPI, this)) return false;
+				if (!m_GraphicsEditingWindow->Draw(pGraphicsAPI, this, GUIEngine)) return false;
 				if (!GUIEngine->EndFrame(pGraphicsAPI)) return false;
 			}
 #endif // USE_GUIENGINE

@@ -1,6 +1,7 @@
 #if defined(USE_VULKAN) and defined(USE_GUIENGINE)
 #include "CImGuiCoreVulkan.h"
 #include "../../Message/Console.h"
+#include "../../GraphicsAPI/Vulkan/CVulkanTexture.h"
 
 namespace gui
 {
@@ -71,6 +72,15 @@ namespace gui
 		api::CVulkanAPI* pVulkanAPI = static_cast<api::CVulkanAPI*>(pGraphicsAPI);
 
 		ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), pVulkanAPI->GetCurrentCommandBuffer());
+
+		return true;
+	}
+
+	bool CImGuiCoreVulkan::DrawTexture(graphics::CTexture* pTexture, const glm::vec2& Size, const glm::vec2& UV0, const glm::vec2& UV1)
+	{
+		api::CVulkanTexture* pVulkanTexture = static_cast<api::CVulkanTexture*>(pTexture);
+
+		ImGui::Image((void*)(intptr_t)pVulkanTexture->GetTextureImageView(), ImVec2(Size.x, Size.y), ImVec2(UV0.x, UV0.y), ImVec2(UV1.x, UV1.y));
 
 		return true;
 	}
