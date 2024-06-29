@@ -80,7 +80,7 @@ namespace gui
 	{
 		api::CVulkanTexture* pVulkanTexture = static_cast<api::CVulkanTexture*>(pTexture);
 
-		ImGui::Image((void*)(intptr_t)pVulkanTexture->GetTextureImageView(), ImVec2(Size.x, Size.y), ImVec2(UV0.x, UV0.y), ImVec2(UV1.x, UV1.y));
+		ImGui::Image((void*)(intptr_t)pVulkanTexture->GetGUIDescriptorSet(), ImVec2(Size.x, Size.y), ImVec2(UV0.x, UV0.y), ImVec2(UV1.x, UV1.y));
 
 		return true;
 	}

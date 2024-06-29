@@ -65,7 +65,8 @@ namespace gui
 			ImGui::SetNextWindowSize(ImVec2(io.DisplaySize.x * (1.0f - MainMenuWidthRate), io.DisplaySize.y * (1.0f - TimeLineHeightRate)), ImGuiCond_Always);
 
 			bool Open = true;
-			if (ImGui::Begin("3DView", &Open, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoInputs))
+			if (ImGui::Begin("3DView", &Open, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings | 
+				ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoScrollbar))
 			{
 				auto RenderPass = pGraphicsAPI->FindOffScreenRenderPass("MRTTest");
 
@@ -74,7 +75,7 @@ namespace gui
 				if (RenderPass && Core)
 				{
 					ImVec2 WindowSize = ImGui::GetWindowSize();
-					ImVec2 ImageSize = ImVec2(io.DisplaySize.x * 0.70f, io.DisplaySize.y * 0.70f);
+					ImVec2 ImageSize = ImVec2(io.DisplaySize.x * (1.0f - TimeLineHeightRate), io.DisplaySize.y * (1.0f - TimeLineHeightRate));
 					
 					// 親ウィンドウの中心に配置
 					ImVec2 ImagePos = ImVec2(
