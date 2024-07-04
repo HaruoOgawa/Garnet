@@ -24,6 +24,9 @@ namespace animation
 		std::vector<std::shared_ptr<animation::CAnimationSampler>> m_SamplerList;
 		std::vector<std::shared_ptr<animation::CAnimationChannel>> m_ChannelList;
 		
+	private:
+		std::vector<float> GetDefaultValueFromAnimationTarget(EAnimationTarget AnimationTarget);
+
 	public:
 		CAnimationClip();
 		virtual ~CAnimationClip();

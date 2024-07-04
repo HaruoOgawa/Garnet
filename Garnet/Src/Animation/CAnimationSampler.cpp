@@ -145,53 +145,11 @@ namespace animation
 		}
 	}
 
-	std::vector<float> CAnimationSampler::GetDefaultValueFromAnimationTarget(EAnimationTarget AnimationTarget)
-	{
-		std::vector<float> Value;
-
-		switch (AnimationTarget)
-		{
-		case animation::EAnimationTarget::NONE:
-			break;
-		case animation::EAnimationTarget::TRANSLATION:
-			Value = std::vector<float>({ 0.0f, 0.0f, 0.0f });
-			break;
-		case animation::EAnimationTarget::ROTATION:
-			Value = std::vector<float>({ 0.0f, 0.0f, 0.0f, 1.0f });
-			break;
-		case animation::EAnimationTarget::SCALE:
-			Value = std::vector<float>({ 1.0f, 1.0f, 1.0f });
-			break;
-		case animation::EAnimationTarget::WEIGHTS:
-			Value = std::vector<float>({ 0.0f, 0.0f, 0.0f, 0.0f });
-			break;
-		case animation::EAnimationTarget::MODELMATRIX:
-		{
-			Value = std::vector<float>({
-				1.0f, 0.0f, 0.0f, 0.0f,
-				0.0f, 1.0f, 0.0f, 0.0f,
-				0.0f, 0.0f, 1.0f, 0.0f,
-				0.0f, 0.0f, 0.0f, 1.0f
-			});
-		}
-			break;
-		default:
-			break;
-		}
-
-		return Value;
-	}
-
-	bool CAnimationSampler::ComputeCurrentFrame(float CurrentTime, bool IsLoop, std::vector<float>& Value, EAnimationTarget AnimationTarget)
+	bool CAnimationSampler::ComputeCurrentFrame(float CurrentTime, bool IsLoop, std::vector<float>& Value, EInterpolateValueType ValueType)
 	{
 		// 0の時はエラーにはしないが、何も処理しない
 		// AnimationやSDKに使っていないボーンのアニメーションでもなぜか一つだけInput・Outputが入っていることがあるため
-		if (m_KeyFrameList.size() == 0)
-		{
-			Value = GetDefaultValueFromAnimationTarget(AnimationTarget);
-
-			return true;
-		}
+		if (m_KeyFrameList.size() == 0) return true;
 
 		float CalcCurrentTime = 0.0f;
 
@@ -218,38 +176,36 @@ namespace animation
 			break;
 		case animation::EInterpolationType::LINEAR:
 			{
-				switch (AnimationTarget)
+				switch (ValueType)
 				{
-				case animation::EAnimationTarget::ROTATION:
+				case animation::EInterpolateValueType::NONE:
+					if (!DoLinearInterpolation(CalcCurrentTime, Value, PrevKeyFrame, NextKeyFrame)) return false;
+					break;
+				case animation::EInterpolateValueType::QUATERNION:
 					// 回転のLinearの場合、Slerp( Spherical Linear Interpolation)を使用する必要がある
 					// https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#appendix-c-interpolation
 					if (!DoSphericalLinearInterpolation(CalcCurrentTime, Value, PrevKeyFrame, NextKeyFrame)) return false;
 					break;
-				case animation::EAnimationTarget::TRANSLATION:
-				case animation::EAnimationTarget::SCALE:
-				case animation::EAnimationTarget::WEIGHTS:
-					if (!DoLinearInterpolation(CalcCurrentTime, Value, PrevKeyFrame, NextKeyFrame)) return false;
-					break;
-				case animation::EAnimationTarget::MODELMATRIX:
+				case animation::EInterpolateValueType::MODELMATRIX:
 					if (!DoModelMatrixLinearInterpolation(CalcCurrentTime, Value, PrevKeyFrame, NextKeyFrame)) return false;
 					break;
 				default:
+					if (!DoLinearInterpolation(CalcCurrentTime, Value, PrevKeyFrame, NextKeyFrame)) return false;
 					break;
 				}
 			}
 			break;
 		case animation::EInterpolationType::CUBICSPLINE:
 		{
-			if (AnimationTarget == animation::EAnimationTarget::MODELMATRIX)
+			if (ValueType == animation::EInterpolateValueType::MODELMATRIX)
 			{
-				if (!DoModelMatrixSplineInterpolation(CalcCurrentTime, Value, AnimationTarget, PrevKeyFrame, NextKeyFrame)) return false;
+				if (!DoModelMatrixSplineInterpolation(CalcCurrentTime, Value, PrevKeyFrame, NextKeyFrame)) return false;
 			}
 			else
 			{
-				if (!DoCubicSplineInterpolation(CalcCurrentTime, Value, AnimationTarget, PrevKeyFrame, NextKeyFrame)) return false;
+				if (!DoCubicSplineInterpolation(CalcCurrentTime, Value, PrevKeyFrame, NextKeyFrame)) return false;
 			}
 		}
-			
 			break;
 		default:
 			break;
@@ -441,7 +397,7 @@ namespace animation
 		return true;
 	}
 
-	bool CAnimationSampler::DoCubicSplineInterpolation(float CurrentTime, std::vector<float>& Value, EAnimationTarget AnimationTarget, const std::shared_ptr<animation::CKeyFrame>& PrevKeyFrame, const std::shared_ptr<animation::CKeyFrame>& NextKeyFrame)
+	bool CAnimationSampler::DoCubicSplineInterpolation(float CurrentTime, std::vector<float>& Value, const std::shared_ptr<animation::CKeyFrame>& PrevKeyFrame, const std::shared_ptr<animation::CKeyFrame>& NextKeyFrame)
 	{
 		// CubicSpline: 3次スプライン曲線
 
@@ -456,7 +412,7 @@ namespace animation
 		return true;
 	}
 
-	bool CAnimationSampler::DoModelMatrixSplineInterpolation(float CurrentTime, std::vector<float>& Value, EAnimationTarget AnimationTarget, 
+	bool CAnimationSampler::DoModelMatrixSplineInterpolation(float CurrentTime, std::vector<float>& Value, 
 		const std::shared_ptr<animation::CKeyFrame>& PrevKeyFrame, const std::shared_ptr<animation::CKeyFrame>& NextKeyFrame)
 	{
 		// ModelMatrix

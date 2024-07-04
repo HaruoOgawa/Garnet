@@ -681,6 +681,11 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Src\Timeline\CMaterialTrack.h" />
+    <ClInclude Include="Src\Timeline\CNodeTrack.h" />
+    <ClInclude Include="Src\Timeline\CTimelineTrack.h" />
+    <ClInclude Include="Src\Timeline\CTimelineClip.h" />
+    <ClInclude Include="Src\Timeline\CTimelineController.h" />
     <ClInclude Include="Src\Scene\CSceneWriter.h" />
     <ClInclude Include="Src\Scene\CSceneController.h" />
     <ClInclude Include="Src\LoadWorker\CSceneLoader.h" />
@@ -1385,6 +1390,8 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClInclude Include="Src\GraphicsAPI\WebGPU\CWebGPUMaterial.h" />
     <ClInclude Include="Src\GraphicsAPI\Vulkan\CVulkanMaterial.h" />
     <ClInclude Include="Src\GraphicsAPI\CMaterialCreateInfo.h" />
+    <ClInclude Include="Src\Timeline\ETimelineTrackType.h" />
+    <ClInclude Include="Src\Timeline\STimelineConnector.h" />
     <ClInclude Include="Src\WindowAPI\CWin32WindowAPI.h" />
     <ClInclude Include="Src\Graphics\CPresetPrimitive.h" />
     <ClInclude Include="Src\Graphics\SBindingLayout.h" />
@@ -1706,6 +1713,11 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClInclude Include="Src\Interface\IRenderer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\Timeline\CMaterialTrack.cpp" />
+    <ClCompile Include="Src\Timeline\CNodeTrack.cpp" />
+    <ClCompile Include="Src\Timeline\CTimelineTrack.cpp" />
+    <ClCompile Include="Src\Timeline\CTimelineClip.cpp" />
+    <ClCompile Include="Src\Timeline\CTimelineController.cpp" />
     <ClCompile Include="Src\Scene\CSceneWriter.cpp" />
     <ClCompile Include="Src\Scene\CSceneController.cpp" />
     <ClCompile Include="Src\LoadWorker\CSceneLoader.cpp" />

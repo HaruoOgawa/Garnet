@@ -9,7 +9,6 @@
 #include <glm/gtc/quaternion.hpp>
 
 #include "CKeyFrame.h"
-#include "EAnimationTarget.h"
 #include "EHumanoidBones.h"
 
 namespace animation
@@ -21,6 +20,13 @@ namespace animation
 		STEP,
 		LINEAR,
 		CUBICSPLINE,
+	};
+
+	enum class EInterpolateValueType
+	{
+		NONE,
+		QUATERNION,
+		MODELMATRIX,
 	};
 
 	class CAnimationSampler
@@ -37,16 +43,15 @@ namespace animation
 
 		std::vector<float> CopyFromNumComponent(int NumComponent, const std::vector<float>& Src, int Offset);
 		int GetNumComponentsInType(EKeyFrameType Type);
-		std::vector<float> GetDefaultValueFromAnimationTarget(EAnimationTarget AnimationTarget);
-
+		
 		bool GetNeedKeyFrame(float CurrentTime, std::shared_ptr<animation::CKeyFrame>& PrevKeyFrame, std::shared_ptr<animation::CKeyFrame>& NextKeyFrame);
 
 		bool DoStepInterpolation(float CurrentTime, std::vector<float>& Value, const std::shared_ptr<animation::CKeyFrame>& PrevKeyFrame, const std::shared_ptr<animation::CKeyFrame>& NextKeyFrame);
 		bool DoLinearInterpolation(float CurrentTime, std::vector<float>& Value, const std::shared_ptr<animation::CKeyFrame>& PrevKeyFrame, const std::shared_ptr<animation::CKeyFrame>& NextKeyFrame);
 		bool DoSphericalLinearInterpolation(float CurrentTime, std::vector<float>& Value, const std::shared_ptr<animation::CKeyFrame>& PrevKeyFrame, const std::shared_ptr<animation::CKeyFrame>& NextKeyFrame);
 		bool DoModelMatrixLinearInterpolation(float CurrentTime, std::vector<float>& Value, const std::shared_ptr<animation::CKeyFrame>& PrevKeyFrame, const std::shared_ptr<animation::CKeyFrame>& NextKeyFrame);
-		bool DoCubicSplineInterpolation(float CurrentTime, std::vector<float>& Value, EAnimationTarget AnimationTarget, const std::shared_ptr<animation::CKeyFrame>& PrevKeyFrame, const std::shared_ptr<animation::CKeyFrame>& NextKeyFrame);
-		bool DoModelMatrixSplineInterpolation(float CurrentTime, std::vector<float>& Value, EAnimationTarget AnimationTarget, const std::shared_ptr<animation::CKeyFrame>& PrevKeyFrame, const std::shared_ptr<animation::CKeyFrame>& NextKeyFrame);
+		bool DoCubicSplineInterpolation(float CurrentTime, std::vector<float>& Value, const std::shared_ptr<animation::CKeyFrame>& PrevKeyFrame, const std::shared_ptr<animation::CKeyFrame>& NextKeyFrame);
+		bool DoModelMatrixSplineInterpolation(float CurrentTime, std::vector<float>& Value, const std::shared_ptr<animation::CKeyFrame>& PrevKeyFrame, const std::shared_ptr<animation::CKeyFrame>& NextKeyFrame);
 
 		glm::vec2 CalculateSplinePont(float t, const glm::vec2& p0, const glm::vec2& p1, const glm::vec2& p2, const glm::vec2& p3);
 	public:
@@ -68,7 +73,7 @@ namespace animation
 
 		bool IsEnd(float CurrentTime);
 
-		bool ComputeCurrentFrame(float CurrentTime, bool IsLoop, std::vector<float>& Value, EAnimationTarget AnimationTarget);
+		bool ComputeCurrentFrame(float CurrentTime, bool IsLoop, std::vector<float>& Value, EInterpolateValueType ValueType);
 
 		// ボーンに基づく現在のフレームを取得
 		static std::shared_ptr<CKeyFrame> GetCurrentKeyFrameBasedBone(float CurrentTime, EHumanoidBones BoneName, const std::unordered_map<animation::EHumanoidBones, std::vector<std::shared_ptr<animation::CKeyFrame>>>& FrameMatrixMap);

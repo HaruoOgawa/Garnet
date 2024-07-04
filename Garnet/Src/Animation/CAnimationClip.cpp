@@ -89,10 +89,25 @@ namespace animation
 			int SamplerIndex = Channel->GetSamplerIndex();
 			if (SamplerIndex < 0 || SamplerIndex >= m_SamplerList.size()) continue;
 
+			//
+			EInterpolateValueType ValueType = EInterpolateValueType::NONE;
+			if (Channel->GetAnimationTarget() == EAnimationTarget::ROTATION)
+			{
+				ValueType = EInterpolateValueType::QUATERNION;
+			}
+			else if (Channel->GetAnimationTarget() == EAnimationTarget::MODELMATRIX)
+			{
+				ValueType = EInterpolateValueType::MODELMATRIX;
+			}
+
+			//
 			const auto& Sampler = m_SamplerList[SamplerIndex];
 			std::vector<float> Value;
 
-			if (!Sampler->ComputeCurrentFrame(CurrentTime, m_IsLoop, Value, Channel->GetAnimationTarget())) return false;
+			if (!Sampler->ComputeCurrentFrame(CurrentTime, m_IsLoop, Value, ValueType)) return false;
+
+			// ‹ó‚Å‚à“®‚­‚æ‚¤‚É‰Šú’l‚ð“n‚·
+			if(Value.empty()) Value = GetDefaultValueFromAnimationTarget(Channel->GetAnimationTarget());
 
 			if (!Channel->Update(Value)) return false;
 		}
@@ -147,6 +162,43 @@ namespace animation
 		}
 
 		return true;
+	}
+
+	std::vector<float> CAnimationClip::GetDefaultValueFromAnimationTarget(EAnimationTarget AnimationTarget)
+	{
+		std::vector<float> Value;
+
+		switch (AnimationTarget)
+		{
+		case animation::EAnimationTarget::NONE:
+			break;
+		case animation::EAnimationTarget::TRANSLATION:
+			Value = std::vector<float>({ 0.0f, 0.0f, 0.0f });
+			break;
+		case animation::EAnimationTarget::ROTATION:
+			Value = std::vector<float>({ 0.0f, 0.0f, 0.0f, 1.0f });
+			break;
+		case animation::EAnimationTarget::SCALE:
+			Value = std::vector<float>({ 1.0f, 1.0f, 1.0f });
+			break;
+		case animation::EAnimationTarget::WEIGHTS:
+			Value = std::vector<float>({ 0.0f, 0.0f, 0.0f, 0.0f });
+			break;
+		case animation::EAnimationTarget::MODELMATRIX:
+		{
+			Value = std::vector<float>({
+				1.0f, 0.0f, 0.0f, 0.0f,
+				0.0f, 1.0f, 0.0f, 0.0f,
+				0.0f, 0.0f, 1.0f, 0.0f,
+				0.0f, 0.0f, 0.0f, 1.0f
+				});
+		}
+		break;
+		default:
+			break;
+		}
+
+		return Value;
 	}
 }
 
