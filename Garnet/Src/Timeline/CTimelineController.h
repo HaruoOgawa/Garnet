@@ -19,7 +19,7 @@ namespace timeline
 		bool m_Play;
 
 	private:
-		bool UpdateClip(float CurrentTime, const std::vector<std::shared_ptr<object::C3DObject>>& ObjectList);
+		bool UpdateClip(float CurrentTime);
 
 	public:
 		CTimelineController();
@@ -38,6 +38,6 @@ namespace timeline
 		void SetPlay(bool Flag);
 		bool IsPlay() const;
 
-		bool Update(float DeltaSecondsTime, const std::vector<std::shared_ptr<object::C3DObject>>& ObjectList);
+		bool Update(float DeltaSecondsTime);
 	};
 }

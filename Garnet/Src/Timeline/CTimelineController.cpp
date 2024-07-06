@@ -59,7 +59,7 @@ namespace timeline
 		return m_Play;
 	}
 
-	bool CTimelineController::Update(float DeltaSecondsTime, const std::vector<std::shared_ptr<object::C3DObject>>& ObjectList)
+	bool CTimelineController::Update(float DeltaSecondsTime)
 	{
 		if (m_CurrentTime < 0.0f || m_CurrentTime > m_MaxTime) return true;
 
@@ -68,16 +68,16 @@ namespace timeline
 			m_CurrentTime += DeltaSecondsTime;
 		}
 
-		if (!UpdateClip(m_CurrentTime, ObjectList)) return false;
+		if (!UpdateClip(m_CurrentTime)) return false;
 
 		return true;
 	}
 
-	bool CTimelineController::UpdateClip(float CurrentTime, const std::vector<std::shared_ptr<object::C3DObject>>& ObjectList)
+	bool CTimelineController::UpdateClip(float CurrentTime)
 	{
 		if (!m_Clip) return true;
 
-		if (!m_Clip->Update(CurrentTime, ObjectList)) return false;
+		if (!m_Clip->Update(CurrentTime)) return false;
 
 		return true;
 	}

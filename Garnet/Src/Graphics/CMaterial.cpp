@@ -4,6 +4,7 @@
 namespace graphics
 {
 	CMaterial::CMaterial(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CMaterialCreateInfo>& createInfo, int RefCount, ECullMode CullMode):
+		timeline::CTimelineTrackContent(),
 		m_MaterialName(std::string()),
 		m_MaterialFrame(nullptr),
 		m_CreateInfo(createInfo),

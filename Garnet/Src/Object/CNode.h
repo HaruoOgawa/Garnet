@@ -5,10 +5,11 @@
 #include <string>
 #include "../Math/CTransform.h"
 #include "../Interface/IPhysicsObject.h"
+#include "../Timeline/CTimelineTrackContent.h"
 
 namespace object
 {
-	class CNode
+	class CNode : public timeline::CTimelineTrackContent
 	{
 		const int						  m_SelfNodeIndex;
 

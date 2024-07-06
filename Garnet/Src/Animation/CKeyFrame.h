@@ -3,24 +3,10 @@
 #include <vector>
 #include <memory>
 #include <glm/glm.hpp>
+#include "EKeyFrameType.h"
 
 namespace animation
 {
-	enum class EKeyFrameType
-	{
-		KEYFRAME_TYPE_NONE = -1,
-
-		KEYFRAME_TYPE_SCALAR,
-		KEYFRAME_TYPE_VEC2,
-		KEYFRAME_TYPE_VEC3,
-		KEYFRAME_TYPE_VEC4,
-		KEYFRAME_TYPE_MAT2,
-		KEYFRAME_TYPE_MAT3,
-		KEYFRAME_TYPE_MAT4,
-		KEYFRAME_TYPE_VECTOR,
-		KEYFRAME_TYPE_MATRIX,
-	};
-
 	class CKeyFrame
 	{
 		EKeyFrameType m_Type;

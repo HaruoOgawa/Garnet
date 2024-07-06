@@ -1,4 +1,5 @@
 #include "CTimelineClip.h"
+#include "../Object/C3DObject.h"
 
 namespace timeline
 {
@@ -10,10 +11,12 @@ namespace timeline
 	{
 	}
 
-	bool CTimelineClip::Update(float CurrentTime, const std::vector<std::shared_ptr<object::C3DObject>>& ObjectList)
+	bool CTimelineClip::Update(float CurrentTime)
 	{
-		for (auto& Track : m_TrackList)
+		for (auto& TrackPair : m_TrackList)
 		{
+			auto& Track = TrackPair.second;
+
 			int SamplerIndex = Track->GetSamplerIndex();
 			if (SamplerIndex < 0 || SamplerIndex >= m_SamplerList.size()) continue;
 
@@ -35,7 +38,7 @@ namespace timeline
 			if (!Sampler->ComputeCurrentFrame(CurrentTime, false, Value, ValueType)) return false;
 
 			// Trackの更新
-			if (!Track->Update(CurrentTime, Value, ObjectList)) return false;
+			if (!Track->Update(CurrentTime, Value)) return false;
 		}
 
 		return true;
@@ -48,6 +51,38 @@ namespace timeline
 
 	void CTimelineClip::AddTrack(const std::shared_ptr<CTimelineTrack>& Track)
 	{
-		m_TrackList.push_back(Track);
+		m_TrackList.emplace(Track->GetTrackID(), Track);
+	}
+
+	void CTimelineClip::AssignObjectResourceToTrack(const std::vector<std::shared_ptr<object::C3DObject>>& ObjectList)
+	{
+		// Objectのリソースをトラックに割り当てる
+		for (const auto& Object : ObjectList)
+		{
+			// Node
+			for (const auto& Node : Object->GetNodeList())
+			{
+				for (const auto& RefTrackID : Node->GetRefTrackIDList())
+				{
+					const auto& it = m_TrackList.find(RefTrackID);
+					if (it == m_TrackList.end()) continue;
+
+					it->second->AssignTrackContent(Node);
+				}
+			}
+
+			// Material
+			for (const auto& Material : Object->GetMaterialList())
+			{
+				for (const auto& RefTrackID : Material->GetRefTrackIDList())
+				{
+					const auto& it = m_TrackList.find(RefTrackID);
+					if (it == m_TrackList.end()) continue;
+
+					it->second->AssignTrackContent(Material);
+				}
+			}
+		}
+		
 	}
 }

@@ -116,7 +116,7 @@ namespace app
 
 		if (pLoadWorker->IsLoaded())
 		{
-			if (!m_TimelineController->Update(m_DrawInfo->GetDeltaSecondsTime(), m_ScriptScene->GetObjectList())) return false;
+			if (!m_TimelineController->Update(m_DrawInfo->GetDeltaSecondsTime()/*, m_ScriptScene->GetObjectList()*/)) return false;
 		}
 
 		if (!m_ScriptScene->Update(pGraphicsAPI, pPhysicsEngine, pLoadWorker, m_MainCamera, m_Projection, m_DrawInfo, InputState)) return false;
