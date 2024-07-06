@@ -10,7 +10,7 @@ namespace timeline
 	{
 	}
 
-	bool CTimelineClip::Update(float CurrentTime, const std::vector<object::C3DObject>& ObjectList)
+	bool CTimelineClip::Update(float CurrentTime, const std::vector<std::shared_ptr<object::C3DObject>>& ObjectList)
 	{
 		for (auto& Track : m_TrackList)
 		{

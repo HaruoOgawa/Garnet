@@ -19,7 +19,7 @@ namespace timeline
 		return m_AnimationTarget;
 	}
 
-	bool CTimelineTrack::Update(float CurrentTime, const std::vector<float>& Value, const std::vector<object::C3DObject>& ObjectList)
+	bool CTimelineTrack::Update(float CurrentTime, const std::vector<float>& Value, const std::vector<std::shared_ptr<object::C3DObject>>& ObjectList)
 	{
 		return true;
 	}

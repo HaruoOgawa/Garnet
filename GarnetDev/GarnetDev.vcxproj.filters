@@ -54,6 +54,9 @@
     <ClCompile Include="Src\Graphics\CFrameRenderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Src\GUIApp\GUI\CTimeLineView.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\GUIApp\GUI\CGraphicsEditingWindow.h">
@@ -90,6 +93,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Src\Graphics\CFrameRenderer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\GUIApp\GUI\CTimeLineView.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

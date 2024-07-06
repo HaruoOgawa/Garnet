@@ -13,18 +13,10 @@ namespace resource { class CLoadWorker; }
 namespace input { class CInputState; }
 namespace object { class C3DObject; }
 namespace scene { class CSceneController; }
-
-namespace gui
-{
-	class IGUIEngine;
-	class CGraphicsEditingWindow;
-}
+namespace gui { class IGUIEngine; }
 
 namespace app
 {
-	class CScriptScene;
-	class CFileModifier;
-
 	class IApp
 	{
 	public:
@@ -38,8 +30,6 @@ namespace app
 		virtual bool Draw(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<gui::IGUIEngine>& GUIEngine) = 0;
 
 		virtual const std::shared_ptr<graphics::CDrawInfo>& GetDrawInfo() const = 0;
-
-		virtual std::vector<std::shared_ptr<object::C3DObject>> GetObjectList() const = 0;
 
 		// フォーカスイベント
 		virtual void OnFocus(bool Focused, api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker) = 0;

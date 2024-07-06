@@ -18,7 +18,7 @@ namespace timeline
 		CTimelineClip();
 		virtual ~CTimelineClip();
 
-		bool Update(float CurrentTime, const std::vector<object::C3DObject>& ObjectList);
+		bool Update(float CurrentTime, const std::vector<std::shared_ptr<object::C3DObject>>& ObjectList);
 
 		void AddSampler(const std::shared_ptr<animation::CAnimationSampler>& Sampler);
 		void AddTrack(const std::shared_ptr<CTimelineTrack>& Track);

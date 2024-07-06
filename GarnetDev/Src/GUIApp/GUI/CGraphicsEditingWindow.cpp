@@ -12,10 +12,8 @@ namespace gui
 	{
 	}
 
-	bool CGraphicsEditingWindow::Draw(api::IGraphicsAPI* pGraphicsAPI, const app::CScriptApp* pApp, const std::shared_ptr<gui::IGUIEngine>& GUIEngine)
+	bool CGraphicsEditingWindow::Draw(api::IGraphicsAPI* pGraphicsAPI, const SGUIParams& GUIParams, const std::shared_ptr<gui::IGUIEngine>& GUIEngine)
 	{
-		if (!pApp) return true;
-
 		// ウィンドウの初期位置・サイズ
 		float padding = 0.0f;
 		ImGuiIO& io = ImGui::GetIO();
@@ -33,8 +31,8 @@ namespace gui
 			{
 				if (ImGui::BeginTabBar("MainMenuBar"))
 				{
-					if (!m_GUIObjectTab.Draw(pGraphicsAPI, pApp->GetObjectList(), pApp->GetSceneController())) return false;
-					if (!m_GUIResourcesTab.Draw(pApp->GetFileModifier().get())) return false;
+					if (!m_GUIObjectTab.Draw(pGraphicsAPI, GUIParams.ObjectList, GUIParams.SceneController)) return false;
+					if (!m_GUIResourcesTab.Draw(GUIParams.FileModifier)) return false;
 					if (!CGUIRenderingTab::Draw()) return false;
 					if (!CGUICameraTab::Draw()) return false;
 
@@ -53,7 +51,7 @@ namespace gui
 			bool Open = true;
 			if (ImGui::Begin("TimeLineView", &Open, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoTitleBar))
 			{
-
+				if (!m_TimeLineView.Draw(GUIParams.TimelineController)) return false;
 			}
 
 			ImGui::End();

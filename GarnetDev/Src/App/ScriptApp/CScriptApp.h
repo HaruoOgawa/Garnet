@@ -3,6 +3,8 @@
 #include <Interface/IApp.h>
 
 namespace graphics { class CFrameRenderer; }
+namespace gui { class CGraphicsEditingWindow; }
+namespace timeline { class CTimelineController; }
 
 namespace app
 {
@@ -24,6 +26,8 @@ namespace app
 		std::shared_ptr<gui::CGraphicsEditingWindow> m_GraphicsEditingWindow;
 #endif // USE_GUIENGINE
 		
+		std::shared_ptr<timeline::CTimelineController> m_TimelineController;
+
 	public:
 		CScriptApp();
 		virtual ~CScriptApp() = default;
@@ -41,13 +45,7 @@ namespace app
 
 		virtual const std::shared_ptr<graphics::CDrawInfo>& GetDrawInfo() const override;
 
-		virtual std::vector<std::shared_ptr<object::C3DObject>> GetObjectList() const override;
-
 		// フォーカスイベント
 		virtual void OnFocus(bool Focused, api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker) override;
-
-		const std::shared_ptr<CFileModifier>& GetFileModifier() const;
-
-		const std::shared_ptr<scene::CSceneController>& GetSceneController() const;
 	};
 }

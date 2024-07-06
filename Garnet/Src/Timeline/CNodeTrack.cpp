@@ -11,7 +11,7 @@ namespace timeline
 	{
 	}
 
-	bool CNodeTrack::Update(float CurrentTime, const std::vector<float>& Value, const std::vector<object::C3DObject>& ObjectList)
+	bool CNodeTrack::Update(float CurrentTime, const std::vector<float>& Value, const std::vector<std::shared_ptr<object::C3DObject>>& ObjectList)
 	{
 		return true;
 	}

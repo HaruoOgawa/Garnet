@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <memory>
 
 #include "STimelineConnector.h"
 #include "../Animation/EAnimationTarget.h"
@@ -23,6 +24,6 @@ namespace timeline
 		int GetSamplerIndex() const;
 		animation::EAnimationTarget GetAnimationTarget() const;
 
-		virtual bool Update(float CurrentTime, const std::vector<float>& Value, const std::vector<object::C3DObject>& ObjectList);
+		virtual bool Update(float CurrentTime, const std::vector<float>& Value, const std::vector<std::shared_ptr<object::C3DObject>>& ObjectList);
 	};
 }

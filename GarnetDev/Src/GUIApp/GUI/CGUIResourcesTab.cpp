@@ -50,7 +50,7 @@ namespace gui
 		return DstDir;
 	}
 
-	bool CGUIResourcesTab::Draw(app::CFileModifier* pFileModifier)
+	bool CGUIResourcesTab::Draw(const std::shared_ptr<app::CFileModifier>& FileModifier)
 	{
 		// Emscriptenはサポートしない
 #ifdef __EMSCRIPTEN__
@@ -59,7 +59,7 @@ namespace gui
 
 		if (ImGui::BeginTabItem("Resources"))
 		{
-			if (!DrawDirGUI(m_RootDir, pFileModifier)) return false;
+			if (!DrawDirGUI(m_RootDir, FileModifier)) return false;
 
 			ImGui::EndTabItem();
 		}
@@ -67,7 +67,7 @@ namespace gui
 		return true;
 	}
 
-	bool CGUIResourcesTab::DrawDirGUI(const std::shared_ptr<SDirectoryInfo>& Dir, app::CFileModifier* pFileModifier)
+	bool CGUIResourcesTab::DrawDirGUI(const std::shared_ptr<SDirectoryInfo>& Dir, const std::shared_ptr<app::CFileModifier>& FileModifier)
 	{
 		// Emscriptenはサポートしない
 #ifdef __EMSCRIPTEN__
@@ -81,7 +81,7 @@ namespace gui
 			// Draw SubDir
 			for (const auto& SubDir : Dir->SubDirList)
 			{
-				if (!DrawDirGUI(SubDir, pFileModifier)) return false;
+				if (!DrawDirGUI(SubDir, FileModifier)) return false;
 			}
 
 			// Draw File
@@ -94,7 +94,7 @@ namespace gui
 					std::string cmd = "start " + File.second;
 					std::system(cmd.c_str());
 
-					pFileModifier->AddEditingFileName(File.second);
+					FileModifier->AddEditingFileName(File.second);
 				}
 			}
 

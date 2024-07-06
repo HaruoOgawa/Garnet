@@ -29,7 +29,7 @@ namespace gui
 		void InitDirectoryList(std::string RootDir);
 		std::shared_ptr<SDirectoryInfo> FindDirectory(const std::string& SearchDir);
 
-		bool DrawDirGUI(const std::shared_ptr<SDirectoryInfo>& Dir, app::CFileModifier* pFileModifier);
+		bool DrawDirGUI(const std::shared_ptr<SDirectoryInfo>& Dir, const std::shared_ptr<app::CFileModifier>& FileModifier);
 
 		std::string DeleteParentDirName(const std::string& Src);
 		
@@ -37,7 +37,7 @@ namespace gui
 		CGUIResourcesTab();
 		virtual ~CGUIResourcesTab();
 
-		bool Draw(app::CFileModifier* pFileModifier);
+		bool Draw(const std::shared_ptr<app::CFileModifier>& FileModifier);
 	};
 }
 #endif

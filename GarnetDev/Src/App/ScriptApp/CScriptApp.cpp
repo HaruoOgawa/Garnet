@@ -14,6 +14,7 @@
 
 #include "../../GUIApp/GUI/CGraphicsEditingWindow.h"
 #include "../../GUIApp/Model/CFileModifier.h"
+#include <Timeline/CTimelineController.h>
 
 // CScriptApp は旧エンジンでもやっていたof風にCppでエンジンコードを直接シーンを構築していくアプリ
 
@@ -40,7 +41,8 @@ namespace app
 		m_BlurEffect(nullptr),
 		m_DeferredRenderer(nullptr),
 		m_MainFrameRenderer(nullptr),
-		m_FileModifier(std::make_shared<CFileModifier>())
+		m_FileModifier(std::make_shared<CFileModifier>()),
+		m_TimelineController(std::make_shared<timeline::CTimelineController>())
 	{
 		m_MainCamera->SetPos(glm::vec3(-7.0f, 1.0f, 0.0f));
 		//m_MainCamera->SetCenter(glm::vec3(0.0f, 50.0f, 349.0f));
@@ -48,6 +50,8 @@ namespace app
 		m_DrawInfo->GetLightCamera()->SetPos(glm::vec3(-2.358f, 15.6f, -0.59f));
 		m_DrawInfo->GetLightProjection()->SetNear(2.0f);
 		m_DrawInfo->GetLightProjection()->SetFar(100.0f);
+
+		m_TimelineController->SetMaxTime(30.0f);
 	}
 
 	bool CScriptApp::Release(api::IGraphicsAPI* pGraphicsAPI)
@@ -109,6 +113,11 @@ namespace app
 	bool CScriptApp::Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<input::CInputState>& InputState)
 	{
 		if (!m_FileModifier->Update(pLoadWorker)) return false;
+
+		if (pLoadWorker->IsLoaded())
+		{
+			if (!m_TimelineController->Update(m_DrawInfo->GetDeltaSecondsTime(), m_ScriptScene->GetObjectList())) return false;
+		}
 
 		if (!m_ScriptScene->Update(pGraphicsAPI, pPhysicsEngine, pLoadWorker, m_MainCamera, m_Projection, m_DrawInfo, InputState)) return false;
 
@@ -175,8 +184,14 @@ namespace app
 #ifdef USE_GUIENGINE
 			if (pLoadWorker->IsLoaded())
 			{
+				gui::SGUIParams GUIParams = {};
+				GUIParams.FileModifier = m_FileModifier;
+				GUIParams.ObjectList = m_ScriptScene->GetObjectList();
+				GUIParams.SceneController = m_ScriptScene->GetSceneController();
+				GUIParams.TimelineController = m_TimelineController;
+
 				if (!GUIEngine->BeginFrame(pGraphicsAPI)) return false;
-				if (!m_GraphicsEditingWindow->Draw(pGraphicsAPI, this, GUIEngine)) return false;
+				if (!m_GraphicsEditingWindow->Draw(pGraphicsAPI, GUIParams, GUIEngine)) return false;
 				if (!GUIEngine->EndFrame(pGraphicsAPI)) return false;
 			}
 #endif // USE_GUIENGINE
@@ -194,11 +209,6 @@ namespace app
 		return m_DrawInfo;
 	}
 
-	std::vector<std::shared_ptr<object::C3DObject>> CScriptApp::GetObjectList() const
-	{
-		return m_ScriptScene->GetObjectList();
-	}
-
 	// フォーカスイベント
 	void CScriptApp::OnFocus(bool Focused, api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker)
 	{
@@ -206,15 +216,5 @@ namespace app
 		{
 			m_FileModifier->OnFileUpdated(pLoadWorker);
 		}
-	}
-
-	const std::shared_ptr<CFileModifier>& CScriptApp::GetFileModifier() const
-	{
-		return m_FileModifier;
-	}
-
-	const std::shared_ptr<scene::CSceneController>& CScriptApp::GetSceneController() const
-	{
-		return m_ScriptScene->GetSceneController();
 	}
 }

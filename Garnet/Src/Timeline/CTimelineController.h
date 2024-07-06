@@ -12,14 +12,32 @@ namespace timeline
 	class CTimelineController
 	{
 		float m_CurrentTime;
+		float m_MaxTime;
 
 		std::shared_ptr<CTimelineClip> m_Clip;
 
+		bool m_Play;
+
 	private:
-		bool UpdateClip(float CurrentTime, const std::vector<object::C3DObject>& ObjectList);
+		bool UpdateClip(float CurrentTime, const std::vector<std::shared_ptr<object::C3DObject>>& ObjectList);
 
 	public:
 		CTimelineController();
+		CTimelineController(float CurrentTime, float MaxTime, const std::shared_ptr<CTimelineClip>& Clip, bool PlayFlag);
 		virtual ~CTimelineController();
+		
+		void SetCurrentTime(float Time);
+		float GetCurrentTime() const;
+
+		void SetMaxTime(float Time);
+		float GetMaxTime() const;
+
+		void SetClip(const std::shared_ptr<CTimelineClip>& Clip);
+		const std::shared_ptr<CTimelineClip>& GetClip() const;
+
+		void SetPlay(bool Flag);
+		bool IsPlay() const;
+
+		bool Update(float DeltaSecondsTime, const std::vector<std::shared_ptr<object::C3DObject>>& ObjectList);
 	};
 }
