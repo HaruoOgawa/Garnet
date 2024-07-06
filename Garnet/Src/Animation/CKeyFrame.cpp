@@ -2,13 +2,13 @@
 
 namespace animation
 {
-	CKeyFrame::CKeyFrame(EKeyFrameType Type) :
+	CKeyFrame::CKeyFrame(math::EValueType Type) :
 		m_Type(Type),
 		m_Input(0.0f)
 	{
 	}
 
-	EKeyFrameType CKeyFrame::GetType() const
+	math::EValueType CKeyFrame::GetType() const
 	{
 		return m_Type;
 	}

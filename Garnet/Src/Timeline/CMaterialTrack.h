@@ -3,7 +3,7 @@
 #include <memory>
 #include <string>
 #include "CTimelineTrack.h"
-#include "../Animation/EKeyFrameType.h"
+#include "../Math/CMath.h"
 
 namespace graphics { class CMaterial; }
 
@@ -23,13 +23,11 @@ namespace timeline
 		std::shared_ptr<graphics::CMaterial> m_Material;
 
 		std::string m_UniformName;
-		animation::EKeyFrameType m_ValueType;
+		math::EValueType m_ValueType;
 
-	private:
-		int GetByteSizeFromValueType(animation::EKeyFrameType Type);
 	public:
 		CMaterialTrack(const std::string& TrackID, int SamplerIndex, animation::EAnimationTarget AnimationTarget, EMaterialTrackTarget TrackTarget, 
-			const std::string& UniformName, animation::EKeyFrameType ValueType);
+			const std::string& UniformName, math::EValueType ValueType);
 		virtual ~CMaterialTrack();
 
 		virtual bool Update(float CurrentTime, const std::vector<float>& Value) override;

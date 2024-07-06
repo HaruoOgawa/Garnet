@@ -30,6 +30,7 @@
 
 #include "../Interface/IGraphicsAPI.h"
 #include "../LoadWorker/CFile.h"
+#include "../Math/CMath.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtx/quaternion.hpp>
@@ -57,7 +58,7 @@ namespace animation
 	class CBone;
 	class CAnimationClip;
 	class CAnimationSampler;
-	enum class EKeyFrameType;
+	enum class math::EValueType;
 }
 
 namespace object {

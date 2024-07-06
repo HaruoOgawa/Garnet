@@ -1021,8 +1021,8 @@ namespace fbx
 						std::memcpy(&OutputData[0], &OutputMat[0][0], sizeof(glm::mat4));
 
 						// Create KeyFrame
-						// FBX SDK‚Å‚Í‘S‚ÄKEYFRAME_TYPE_MATRIX
-						std::shared_ptr<animation::CKeyFrame> KeyFrame = std::make_shared<animation::CKeyFrame>(animation::EKeyFrameType::KEYFRAME_TYPE_MATRIX);
+						// FBX SDK‚Å‚Í‘S‚ÄVALUE_TYPE_MATRIX
+						std::shared_ptr<animation::CKeyFrame> KeyFrame = std::make_shared<animation::CKeyFrame>(math::EValueType::VALUE_TYPE_MATRIX);
 
 						KeyFrame->SetInput(InputData);
 						KeyFrame->SetOutput(OutputData);

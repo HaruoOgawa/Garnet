@@ -1150,7 +1150,7 @@ namespace fbx
 						animation::EInterpolationType InterpolationType = animation::EInterpolationType::LINEAR;
 
 						int NumComponent = static_cast<int>(pFbxCurveNode->getAnimationCurves().size());
-						animation::EKeyFrameType KeyFrameType = animation::EKeyFrameType::KEYFRAME_TYPE_NONE;
+						math::EValueType KeyFrameType = math::EValueType::VALUE_TYPE_NONE;
 
 						// ROTATIONÇÃéûÇÕQuaternionÇ…ïœä∑Ç∑ÇÈ
 						if (AnimationTarget == animation::EAnimationTarget::ROTATION)
@@ -1161,15 +1161,15 @@ namespace fbx
 						// SmallFbxÇÕVec3Ç©ScalerÇµÇ©ë∂ç›ÇµÇ»Ç¢
 						if (NumComponent == 3)
 						{
-							KeyFrameType = animation::EKeyFrameType::KEYFRAME_TYPE_VEC3;
+							KeyFrameType = math::EValueType::VALUE_TYPE_VEC3;
 						}
 						else if (NumComponent == 1)
 						{
-							KeyFrameType = animation::EKeyFrameType::KEYFRAME_TYPE_SCALAR;
+							KeyFrameType = math::EValueType::VALUE_TYPE_SCALAR;
 						}
 						else if (NumComponent == 4)
 						{
-							KeyFrameType = animation::EKeyFrameType::KEYFRAME_TYPE_VEC4;
+							KeyFrameType = math::EValueType::VALUE_TYPE_VEC4;
 						}
 						else if (NumComponent == 0)
 						{

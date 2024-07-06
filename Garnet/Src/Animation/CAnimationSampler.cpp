@@ -21,7 +21,7 @@ namespace animation
 		return m_InterpolationType;
 	}
 
-	bool CAnimationSampler::CreateKeyFrame(EKeyFrameType Type, const std::vector<float>& inputList, const std::vector<float>& outputList)
+	bool CAnimationSampler::CreateKeyFrame(math::EValueType Type, const std::vector<float>& inputList, const std::vector<float>& outputList)
 	{
 		//const int NumComponent = GetNumComponentsInType(Type);
 		//if (NumComponent == -1) return false;
@@ -104,43 +104,6 @@ namespace animation
 		std::memcpy(&Dst[0], &Src[Offset], NumComponent * sizeof(float));
 
 		return Dst;
-	}
-
-	int CAnimationSampler::GetNumComponentsInType(EKeyFrameType Type)
-	{
-		if (Type == EKeyFrameType::KEYFRAME_TYPE_SCALAR) 
-		{
-			return 1;
-		}
-		else if (Type == EKeyFrameType::KEYFRAME_TYPE_VEC2) 
-		{
-			return 2;
-		}
-		else if (Type == EKeyFrameType::KEYFRAME_TYPE_VEC3) 
-		{
-			return 3;
-		}
-		else if (Type == EKeyFrameType::KEYFRAME_TYPE_VEC4) 
-		{
-			return 4;
-		}
-		else if (Type == EKeyFrameType::KEYFRAME_TYPE_MAT2) 
-		{
-			return 4;
-		}
-		else if (Type == EKeyFrameType::KEYFRAME_TYPE_MAT3) 
-		{
-			return 9;
-		}
-		else if (Type == EKeyFrameType::KEYFRAME_TYPE_MAT4) 
-		{
-			return 16;
-		}
-		else 
-		{
-			// Unknown component type
-			return -1;
-		}
 	}
 
 	bool CAnimationSampler::ComputeCurrentFrame(float CurrentTime, bool IsLoop, std::vector<float>& Value, EInterpolateValueType ValueType)

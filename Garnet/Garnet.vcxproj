@@ -681,7 +681,6 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Src\Animation\EKeyFrameType.h" />
     <ClInclude Include="Src\Timeline\CTimelineTrackContent.h" />
     <ClInclude Include="Src\Timeline\CMaterialTrack.h" />
     <ClInclude Include="Src\Timeline\CNodeTrack.h" />

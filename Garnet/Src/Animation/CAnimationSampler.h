@@ -41,7 +41,7 @@ namespace animation
 		float GetInterpolateValue(float CurrentTime, const std::shared_ptr<animation::CKeyFrame>& PrevKeyFrame, const std::shared_ptr<animation::CKeyFrame>& NextKeyFrame);
 
 		std::vector<float> CopyFromNumComponent(int NumComponent, const std::vector<float>& Src, int Offset);
-		int GetNumComponentsInType(EKeyFrameType Type);
+		int GetNumComponentsInType(math::EValueType Type);
 		
 		bool GetNeedKeyFrame(float CurrentTime, std::shared_ptr<animation::CKeyFrame>& PrevKeyFrame, std::shared_ptr<animation::CKeyFrame>& NextKeyFrame);
 
@@ -59,7 +59,7 @@ namespace animation
 
 		EInterpolationType GetInterpolationType() const;
 
-		bool CreateKeyFrame(EKeyFrameType Type, const std::vector<float>& inputList, const std::vector<float>& outputList);
+		bool CreateKeyFrame(math::EValueType Type, const std::vector<float>& inputList, const std::vector<float>& outputList);
 		void AddKeyFrame(const std::shared_ptr<animation::CKeyFrame>& KeyFrame);
 		const std::vector<std::shared_ptr<animation::CKeyFrame>>& GetKeyFrameList() const;
 

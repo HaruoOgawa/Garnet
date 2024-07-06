@@ -3,13 +3,13 @@
 #include <vector>
 #include <memory>
 #include <glm/glm.hpp>
-#include "EKeyFrameType.h"
+#include "../Math/CMath.h"
 
 namespace animation
 {
 	class CKeyFrame
 	{
-		EKeyFrameType m_Type;
+		math::EValueType m_Type;
 
 		float m_Input;
 		std::vector<float> m_Output; // ScalarやVEC4・MAT3などもまとめて取り扱う。要素数とタイプをみていい感じにglm::vec4とかglm::mat3に変換して返すクラスを作ってもいいかも
@@ -19,10 +19,10 @@ namespace animation
 		std::vector<glm::vec2> m_ZPointList;
 		std::vector<glm::vec2> m_RPointList;
 	public:
-		CKeyFrame(EKeyFrameType Type);
+		CKeyFrame(math::EValueType Type);
 		virtual ~CKeyFrame() = default;
 
-		EKeyFrameType GetType() const;
+		math::EValueType GetType() const;
 
 		void SetInput(float val);
 		float GetInput() const;
