@@ -1,5 +1,4 @@
 #pragma once
-#ifdef USE_ANIMATION
 
 namespace animation
 {
@@ -11,8 +10,6 @@ namespace animation
 		ROTATION,
 		SCALE,
 		WEIGHTS,
-		MODELMATRIX, // FBX-SDKŒÀ’è
+		MODELMATRIX,
 	};
 }
-
-#endif // USE_ANIMATION

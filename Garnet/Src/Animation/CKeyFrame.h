@@ -1,5 +1,4 @@
 #pragma once
-#ifdef USE_ANIMATION
 
 #include <vector>
 #include <memory>
@@ -61,5 +60,3 @@ namespace animation
 		const std::vector<glm::vec2>& GetRPointList() const;
 	};
 }
-
-#endif // USE_ANIMATION

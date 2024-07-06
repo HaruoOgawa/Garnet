@@ -1,5 +1,3 @@
-#ifdef USE_ANIMATION
-
 #include "CKeyFrame.h"
 
 namespace animation
@@ -88,5 +86,3 @@ namespace animation
 		return m_RPointList;
 	}
 }
-
-#endif // USE_ANIMATION

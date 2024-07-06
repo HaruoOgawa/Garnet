@@ -3096,9 +3096,6 @@
     <ClInclude Include="Src\Timeline\STimelineConnector.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Src\Timeline\ETimelineTrackType.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="Src\Timeline\CNodeTrack.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>

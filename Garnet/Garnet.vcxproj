@@ -1390,7 +1390,6 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClInclude Include="Src\GraphicsAPI\WebGPU\CWebGPUMaterial.h" />
     <ClInclude Include="Src\GraphicsAPI\Vulkan\CVulkanMaterial.h" />
     <ClInclude Include="Src\GraphicsAPI\CMaterialCreateInfo.h" />
-    <ClInclude Include="Src\Timeline\ETimelineTrackType.h" />
     <ClInclude Include="Src\Timeline\STimelineConnector.h" />
     <ClInclude Include="Src\WindowAPI\CWin32WindowAPI.h" />
     <ClInclude Include="Src\Graphics\CPresetPrimitive.h" />

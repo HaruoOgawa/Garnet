@@ -1,7 +1,11 @@
 #pragma once
 
+#include <vector>
+
 #include "STimelineConnector.h"
-#include "ETimelineTrackType.h"
+#include "../Animation/EAnimationTarget.h"
+
+namespace object { class C3DObject; }
 
 namespace timeline
 {
@@ -9,13 +13,16 @@ namespace timeline
 	{
 		int m_SamplerIndex;
 
-		ETimelineTrackType m_TrackType;
+		const animation::EAnimationTarget m_AnimationTarget;
 
 		STimelineConnector m_Connector;
 	public:
-		CTimelineTrack();
+		CTimelineTrack(int SamplerIndex, animation::EAnimationTarget AnimationTarget, const STimelineConnector& Connector);
 		virtual ~CTimelineTrack() = default;
 
 		int GetSamplerIndex() const;
+		animation::EAnimationTarget GetAnimationTarget() const;
+
+		virtual bool Update(float CurrentTime, const std::vector<float>& Value, const std::vector<object::C3DObject>& ObjectList);
 	};
 }
