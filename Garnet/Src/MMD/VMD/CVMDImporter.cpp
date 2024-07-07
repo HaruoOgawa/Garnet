@@ -84,9 +84,9 @@ namespace mmd
 					std::memcpy(&OutputData[0], &CurrentMatrix[0][0], sizeof(glm::mat4));
 
 					// KeyFrameを作成
-					// MMDでは全てKEYFRAME_TYPE_MATRIX
+					// MMDでは全てVALUE_TYPE_MATRIX
 					{
-						std::shared_ptr<animation::CKeyFrame> KeyFrame = std::make_shared<animation::CKeyFrame>(animation::EKeyFrameType::KEYFRAME_TYPE_MATRIX);
+						std::shared_ptr<animation::CKeyFrame> KeyFrame = std::make_shared<animation::CKeyFrame>(math::EValueType::VALUE_TYPE_MATRIX);
 
 						KeyFrame->SetInput(InputData);
 						KeyFrame->SetOutput(OutputData);
@@ -104,7 +104,7 @@ namespace mmd
 					// キーフレームが１つしかない時はEndTimeの位置にもう1つだけ追加する
 					if (Frame.second.size() == 1)
 					{
-						std::shared_ptr<animation::CKeyFrame> KeyFrame = std::make_shared<animation::CKeyFrame>(animation::EKeyFrameType::KEYFRAME_TYPE_MATRIX);
+						std::shared_ptr<animation::CKeyFrame> KeyFrame = std::make_shared<animation::CKeyFrame>(math::EValueType::VALUE_TYPE_MATRIX);
 
 						KeyFrame->SetInput(EndTime);
 						KeyFrame->SetOutput(OutputData);
@@ -132,7 +132,7 @@ namespace mmd
 				// Translate成分がオフセットかどうか
 				const bool IsTransOffset = true;
 
-				// MMDでは全てKEYFRAME_TYPE_MATRIX
+				// MMDでは全てVALUE_TYPE_MATRIX
 				animation::EAnimationTarget AnimationTarget = animation::EAnimationTarget::MODELMATRIX;
 
 				const int TargetSamplerIndex = Index;
@@ -212,7 +212,7 @@ namespace mmd
 
 						// KeyFrameを作成
 						{
-							std::shared_ptr<animation::CKeyFrame> KeyFrame = std::make_shared<animation::CKeyFrame>(animation::EKeyFrameType::KEYFRAME_TYPE_SCALAR);
+							std::shared_ptr<animation::CKeyFrame> KeyFrame = std::make_shared<animation::CKeyFrame>(math::EValueType::VALUE_TYPE_SCALAR);
 
 							KeyFrame->SetInput(InputData);
 							KeyFrame->SetOutput(OutputData);
@@ -224,7 +224,7 @@ namespace mmd
 						// キーフレームが１つしかない時はEndTimeの位置にもう1つだけ追加する
 						if (Frame.second.size() == 1)
 						{
-							std::shared_ptr<animation::CKeyFrame> KeyFrame = std::make_shared<animation::CKeyFrame>(animation::EKeyFrameType::KEYFRAME_TYPE_SCALAR);
+							std::shared_ptr<animation::CKeyFrame> KeyFrame = std::make_shared<animation::CKeyFrame>(math::EValueType::VALUE_TYPE_SCALAR);
 
 							KeyFrame->SetInput(EndTime);
 							KeyFrame->SetOutput(OutputData);

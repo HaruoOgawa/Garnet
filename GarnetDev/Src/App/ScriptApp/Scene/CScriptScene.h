@@ -57,5 +57,8 @@ namespace app
 
 		// Tex of FrameBuffer
 		void SetFrameTexture(const std::shared_ptr<graphics::CTexture>& FrameTexture);
+
+		// ロード完了イベント
+		bool OnLoaded(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker);
 	};
 }

@@ -30,11 +30,23 @@ namespace animation
 
 			int SamplerIndex = Channel->GetSamplerIndex();
 			if (SamplerIndex < 0 || SamplerIndex >= m_SamplerList.size()) continue;
+			
+			//
+			EInterpolateValueType ValueType = EInterpolateValueType::NONE;
+			if (Channel->GetAnimationTarget() == EAnimationTarget::ROTATION)
+			{
+				ValueType = EInterpolateValueType::QUATERNION;
+			}
+			else if (Channel->GetAnimationTarget() == EAnimationTarget::MODELMATRIX)
+			{
+				ValueType = EInterpolateValueType::MODELMATRIX;
+			}
 
+			//
 			const auto& Sampler = m_SamplerList[SamplerIndex];
 			std::vector<float> Value;
 
-			if (!Sampler->ComputeCurrentFrame(CurrentTime, m_IsLoop, Value, Channel->GetAnimationTarget())) return false;
+			if (!Sampler->ComputeCurrentFrame(CurrentTime, m_IsLoop, Value, ValueType)) return false;
 
 			for (float v : Value)
 			{

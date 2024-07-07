@@ -14,6 +14,10 @@
 
 #include "../../GUIApp/GUI/CGraphicsEditingWindow.h"
 #include "../../GUIApp/Model/CFileModifier.h"
+#include <Timeline/CTimelineController.h>
+#include <Timeline/CNodeTrack.h>
+#include <Timeline/CMaterialTrack.h>
+#include <Scene/CSceneController.h>
 
 // CScriptApp は旧エンジンでもやっていたof風にCppでエンジンコードを直接シーンを構築していくアプリ
 
@@ -40,7 +44,8 @@ namespace app
 		m_BlurEffect(nullptr),
 		m_DeferredRenderer(nullptr),
 		m_MainFrameRenderer(nullptr),
-		m_FileModifier(std::make_shared<CFileModifier>())
+		m_FileModifier(std::make_shared<CFileModifier>()),
+		m_TimelineController(std::make_shared<timeline::CTimelineController>())
 	{
 		m_MainCamera->SetPos(glm::vec3(-7.0f, 1.0f, 0.0f));
 		//m_MainCamera->SetCenter(glm::vec3(0.0f, 50.0f, 349.0f));
@@ -110,6 +115,11 @@ namespace app
 	{
 		if (!m_FileModifier->Update(pLoadWorker)) return false;
 
+		if (pLoadWorker->IsLoaded())
+		{
+			if (!m_TimelineController->Update(m_DrawInfo->GetDeltaSecondsTime()/*, m_ScriptScene->GetObjectList()*/)) return false;
+		}
+
 		if (!m_ScriptScene->Update(pGraphicsAPI, pPhysicsEngine, pLoadWorker, m_MainCamera, m_Projection, m_DrawInfo, InputState)) return false;
 
 		if (!m_BlurEffect->Update(pLoadWorker)) return false;
@@ -175,8 +185,14 @@ namespace app
 #ifdef USE_GUIENGINE
 			if (pLoadWorker->IsLoaded())
 			{
+				gui::SGUIParams GUIParams = {};
+				GUIParams.FileModifier = m_FileModifier;
+				GUIParams.ObjectList = m_ScriptScene->GetObjectList();
+				GUIParams.SceneController = m_ScriptScene->GetSceneController();
+				GUIParams.TimelineController = m_TimelineController;
+
 				if (!GUIEngine->BeginFrame(pGraphicsAPI)) return false;
-				if (!m_GraphicsEditingWindow->Draw(pGraphicsAPI, this, GUIEngine)) return false;
+				if (!m_GraphicsEditingWindow->Draw(pGraphicsAPI, GUIParams, GUIEngine)) return false;
 				if (!GUIEngine->EndFrame(pGraphicsAPI)) return false;
 			}
 #endif // USE_GUIENGINE
@@ -194,9 +210,160 @@ namespace app
 		return m_DrawInfo;
 	}
 
-	std::vector<std::shared_ptr<object::C3DObject>> CScriptApp::GetObjectList() const
+	// ロード完了イベント
+	bool CScriptApp::OnLoaded(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker)
 	{
-		return m_ScriptScene->GetObjectList();
+		if (!m_ScriptScene->OnLoaded(pGraphicsAPI, pPhysicsEngine, pLoadWorker)) return false;
+
+		//
+		{
+			auto Object = m_ScriptScene->GetSceneController()->FindObjectByName("SampleObj");
+
+			if (Object)
+			{
+				auto Node = Object->FindNodeByName("testnode");
+				Node->AddRefTrackID("test_track");
+
+				Object->GetMaterialList()[0]->AddRefTrackID("test_mat_track");
+			}
+		}
+
+		// タイムラインのテストクリップを作成
+		{
+			std::shared_ptr<timeline::CTimelineClip> TimelineClip = std::make_shared<timeline::CTimelineClip>(30.0f);
+
+			// NodeTrack
+			{
+				// Sampler
+				{
+					std::shared_ptr<animation::CAnimationSampler> Sampler = std::make_shared<animation::CAnimationSampler>(animation::EInterpolationType::LINEAR);
+
+					// KeyFrame
+					{
+						std::shared_ptr<animation::CKeyFrame> KeyFrame = std::make_shared<animation::CKeyFrame>(math::EValueType::VALUE_TYPE_VEC3);
+
+						KeyFrame->SetInput(0.0f);
+						KeyFrame->SetOutput(std::vector<float>({ 0.0f, 0.0f, 0.0f }));
+
+						Sampler->AddKeyFrame(KeyFrame);
+					}
+
+					{
+						std::shared_ptr<animation::CKeyFrame> KeyFrame = std::make_shared<animation::CKeyFrame>(math::EValueType::VALUE_TYPE_VEC3);
+
+						KeyFrame->SetInput(5.0f);
+						KeyFrame->SetOutput(std::vector<float>({ 5.0f, 0.0f, 0.0f }));
+
+						Sampler->AddKeyFrame(KeyFrame);
+					}
+
+					{
+						std::shared_ptr<animation::CKeyFrame> KeyFrame = std::make_shared<animation::CKeyFrame>(math::EValueType::VALUE_TYPE_VEC3);
+
+						KeyFrame->SetInput(10.0f);
+						KeyFrame->SetOutput(std::vector<float>({ 0.0f, 2.0f, 0.0f }));
+
+						Sampler->AddKeyFrame(KeyFrame);
+					}
+
+					{
+						std::shared_ptr<animation::CKeyFrame> KeyFrame = std::make_shared<animation::CKeyFrame>(math::EValueType::VALUE_TYPE_VEC3);
+
+						KeyFrame->SetInput(15.0f);
+						KeyFrame->SetOutput(std::vector<float>({ -5.0f, 0.0f, 0.0f }));
+
+						Sampler->AddKeyFrame(KeyFrame);
+					}
+
+					{
+						std::shared_ptr<animation::CKeyFrame> KeyFrame = std::make_shared<animation::CKeyFrame>(math::EValueType::VALUE_TYPE_VEC3);
+
+						KeyFrame->SetInput(20.0f);
+						KeyFrame->SetOutput(std::vector<float>({ 0.0f, 0.0f, 0.0f }));
+
+						Sampler->AddKeyFrame(KeyFrame);
+					}
+
+					Sampler->CalcStartEndTime();
+
+					TimelineClip->AddSampler(Sampler);
+				}
+
+				// Track
+				std::shared_ptr<timeline::CNodeTrack> Track = std::make_shared<timeline::CNodeTrack>("test_track", 0, timeline::ETimelineSamplerTarget::NONE, timeline::ENodeTrackTarget::NodeTrackTarget_Translation);
+				TimelineClip->AddTrack(Track);
+			}
+
+			// MaterialTrack
+			{
+				// Sampler
+				{
+					std::shared_ptr<animation::CAnimationSampler> Sampler = std::make_shared<animation::CAnimationSampler>(animation::EInterpolationType::LINEAR);
+
+					// KeyFrame
+					{
+						std::shared_ptr<animation::CKeyFrame> KeyFrame = std::make_shared<animation::CKeyFrame>(math::EValueType::VALUE_TYPE_VEC4);
+
+						KeyFrame->SetInput(0.0f);
+						KeyFrame->SetOutput(std::vector<float>({ 1.0f, 1.0f, 1.0f, 1.0f }));
+
+						Sampler->AddKeyFrame(KeyFrame);
+					}
+
+					{
+						std::shared_ptr<animation::CKeyFrame> KeyFrame = std::make_shared<animation::CKeyFrame>(math::EValueType::VALUE_TYPE_VEC4);
+
+						KeyFrame->SetInput(5.0f);
+						KeyFrame->SetOutput(std::vector<float>({ 0.0f, 0.0f, 1.0f, 1.0f }));
+
+						Sampler->AddKeyFrame(KeyFrame);
+					}
+
+					{
+						std::shared_ptr<animation::CKeyFrame> KeyFrame = std::make_shared<animation::CKeyFrame>(math::EValueType::VALUE_TYPE_VEC4);
+
+						KeyFrame->SetInput(10.0f);
+						KeyFrame->SetOutput(std::vector<float>({ 0.0f, 1.0f, 0.0f, 1.0f }));
+
+						Sampler->AddKeyFrame(KeyFrame);
+					}
+
+					{
+						std::shared_ptr<animation::CKeyFrame> KeyFrame = std::make_shared<animation::CKeyFrame>(math::EValueType::VALUE_TYPE_VEC4);
+
+						KeyFrame->SetInput(15.0f);
+						KeyFrame->SetOutput(std::vector<float>({ 1.0f, 0.0f, 0.0f, 1.0f }));
+
+						Sampler->AddKeyFrame(KeyFrame);
+					}
+
+					{
+						std::shared_ptr<animation::CKeyFrame> KeyFrame = std::make_shared<animation::CKeyFrame>(math::EValueType::VALUE_TYPE_VEC4);
+
+						KeyFrame->SetInput(20.0f);
+						KeyFrame->SetOutput(std::vector<float>({ 1.0f, 1.0f, 1.0f, 1.0f }));
+
+						Sampler->AddKeyFrame(KeyFrame);
+					}
+
+					Sampler->CalcStartEndTime();
+
+					TimelineClip->AddSampler(Sampler);
+				}
+
+				// Track
+				std::shared_ptr<timeline::CMaterialTrack> Track = std::make_shared<timeline::CMaterialTrack>("test_mat_track", 1, timeline::ETimelineSamplerTarget::NONE, 
+					timeline::EMaterialTrackTarget::MaterialTrackTarget_SetUniformValue, "mainColor", math::EValueType::VALUE_TYPE_VEC4);
+				TimelineClip->AddTrack(Track);
+			}
+
+			//
+			TimelineClip->AssignObjectResourceToTrack(m_ScriptScene->GetObjectList());
+
+			m_TimelineController->SetClip(TimelineClip);
+		}
+
+		return true;
 	}
 
 	// フォーカスイベント
@@ -206,15 +373,5 @@ namespace app
 		{
 			m_FileModifier->OnFileUpdated(pLoadWorker);
 		}
-	}
-
-	const std::shared_ptr<CFileModifier>& CScriptApp::GetFileModifier() const
-	{
-		return m_FileModifier;
-	}
-
-	const std::shared_ptr<scene::CSceneController>& CScriptApp::GetSceneController() const
-	{
-		return m_ScriptScene->GetSceneController();
 	}
 }

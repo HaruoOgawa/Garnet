@@ -4,6 +4,7 @@
 namespace object
 {
 	CNode::CNode(int MeshIndex, int SelfNodeIndex):
+		timeline::CTimelineTrackContent(),
 		m_SelfNodeIndex(SelfNodeIndex),
 		m_Name("Node"),
 		m_U16Name(L"Node"),

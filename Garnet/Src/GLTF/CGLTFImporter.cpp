@@ -1097,7 +1097,7 @@ namespace gltf
 
 		// Make Sampler Object
 		AnimationSampler = std::make_shared<animation::CAnimationSampler>(InterpolationType);
-		if (!AnimationSampler->CreateKeyFrame(ConvertToEKeyFrameType(Accessor_type), inputList, outputList)) return false;
+		if (!AnimationSampler->CreateKeyFrame(ConvertToValueType(Accessor_type), inputList, outputList)) return false;
 
 		return true;
 	}
@@ -1239,47 +1239,47 @@ namespace gltf
 		return true;
 	}
 
-	animation::EKeyFrameType CGLTFImporter::ConvertToEKeyFrameType(int Type)
+	math::EValueType CGLTFImporter::ConvertToValueType(int Type)
 	{
 		if (Type == TINYGLTF_TYPE_SCALAR)
 		{
-			return animation::EKeyFrameType::KEYFRAME_TYPE_SCALAR;
+			return math::EValueType::VALUE_TYPE_SCALAR;
 		}
 		else if (Type == TINYGLTF_TYPE_VEC2)
 		{
-			return animation::EKeyFrameType::KEYFRAME_TYPE_VEC2;
+			return math::EValueType::VALUE_TYPE_VEC2;
 		}
 		else if (Type == TINYGLTF_TYPE_VEC3)
 		{
-			return animation::EKeyFrameType::KEYFRAME_TYPE_VEC3;
+			return math::EValueType::VALUE_TYPE_VEC3;
 		}
 		else if (Type == TINYGLTF_TYPE_VEC4)
 		{
-			return animation::EKeyFrameType::KEYFRAME_TYPE_VEC4;
+			return math::EValueType::VALUE_TYPE_VEC4;
 		}
 		else if (Type == TINYGLTF_TYPE_MAT2)
 		{
-			return animation::EKeyFrameType::KEYFRAME_TYPE_MAT2;
+			return math::EValueType::VALUE_TYPE_MAT2;
 		}
 		else if (Type == TINYGLTF_TYPE_MAT3)
 		{
-			return animation::EKeyFrameType::KEYFRAME_TYPE_MAT3;
+			return math::EValueType::VALUE_TYPE_MAT3;
 		}
 		else if (Type == TINYGLTF_TYPE_MAT4)
 		{
-			return animation::EKeyFrameType::KEYFRAME_TYPE_MAT4;
+			return math::EValueType::VALUE_TYPE_MAT4;
 		}
 		else if (Type == TINYGLTF_TYPE_VECTOR)
 		{
-			return animation::EKeyFrameType::KEYFRAME_TYPE_VECTOR;
+			return math::EValueType::VALUE_TYPE_VECTOR;
 		}
 		else if (Type == TINYGLTF_TYPE_MATRIX)
 		{
-			return animation::EKeyFrameType::KEYFRAME_TYPE_MATRIX;
+			return math::EValueType::VALUE_TYPE_MATRIX;
 		}
 		else
 		{
-			return animation::EKeyFrameType::KEYFRAME_TYPE_NONE;
+			return math::EValueType::VALUE_TYPE_NONE;
 		}
 	}
 

@@ -14,7 +14,7 @@ layout(binding = 1) uniform FragmentUniformBuffer{
     mat4 proj;
 
 	vec4 cameraPos;
-    vec4 v4Pad0;
+    vec4 mainColor;
     vec4 v4Pad1;
     vec4 v4Pad2;
 
@@ -67,7 +67,7 @@ void main()
 
         gPosition = vec4(p, 1.0);
 	    gNormal = vec4(n, 1.0);
-	    gAlbedo = vec4(1.0);
+	    gAlbedo = f_ubo.mainColor;
         gDepth  = vec4(depth);
         gl_FragDepth = depth;
     }

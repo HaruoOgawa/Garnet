@@ -1,5 +1,3 @@
-#ifdef USE_ANIMATION
-
 #include "CAnimationSampler.h"
 #include "../Math/CTransform.h"
 #include "../../Message/Console.h"
@@ -23,7 +21,7 @@ namespace animation
 		return m_InterpolationType;
 	}
 
-	bool CAnimationSampler::CreateKeyFrame(EKeyFrameType Type, const std::vector<float>& inputList, const std::vector<float>& outputList)
+	bool CAnimationSampler::CreateKeyFrame(math::EValueType Type, const std::vector<float>& inputList, const std::vector<float>& outputList)
 	{
 		//const int NumComponent = GetNumComponentsInType(Type);
 		//if (NumComponent == -1) return false;
@@ -49,11 +47,8 @@ namespace animation
 			m_KeyFrameList.push_back(KeyFrame);
 		}
 
-		if (m_KeyFrameList.size() > 0)
-		{
-			m_StartTime = m_KeyFrameList[0]->GetInput();
-			m_EndTime = m_KeyFrameList[m_KeyFrameList.size() - 1]->GetInput();
-		}
+		CalcStartEndTime();
+		
 		 
 		return true;
 	}
@@ -66,6 +61,15 @@ namespace animation
 	const std::vector<std::shared_ptr<animation::CKeyFrame>>& CAnimationSampler::GetKeyFrameList() const
 	{
 		return m_KeyFrameList;
+	}
+
+	void CAnimationSampler::CalcStartEndTime()
+	{
+		if (m_KeyFrameList.size() > 0)
+		{
+			m_StartTime = m_KeyFrameList[0]->GetInput();
+			m_EndTime = m_KeyFrameList[m_KeyFrameList.size() - 1]->GetInput();
+		}
 	}
 
 	void CAnimationSampler::SetStartTime(float StartTime)
@@ -108,90 +112,17 @@ namespace animation
 		return Dst;
 	}
 
-	int CAnimationSampler::GetNumComponentsInType(EKeyFrameType Type)
+	bool CAnimationSampler::ComputeCurrentFrame(float CurrentTime, bool IsLoop, std::vector<float>& Value, EInterpolateValueType ValueType)
 	{
-		if (Type == EKeyFrameType::KEYFRAME_TYPE_SCALAR) 
+		if (m_StartTime >= m_EndTime)
 		{
-			return 1;
-		}
-		else if (Type == EKeyFrameType::KEYFRAME_TYPE_VEC2) 
-		{
-			return 2;
-		}
-		else if (Type == EKeyFrameType::KEYFRAME_TYPE_VEC3) 
-		{
-			return 3;
-		}
-		else if (Type == EKeyFrameType::KEYFRAME_TYPE_VEC4) 
-		{
-			return 4;
-		}
-		else if (Type == EKeyFrameType::KEYFRAME_TYPE_MAT2) 
-		{
-			return 4;
-		}
-		else if (Type == EKeyFrameType::KEYFRAME_TYPE_MAT3) 
-		{
-			return 9;
-		}
-		else if (Type == EKeyFrameType::KEYFRAME_TYPE_MAT4) 
-		{
-			return 16;
-		}
-		else 
-		{
-			// Unknown component type
-			return -1;
-		}
-	}
-
-	std::vector<float> CAnimationSampler::GetDefaultValueFromAnimationTarget(EAnimationTarget AnimationTarget)
-	{
-		std::vector<float> Value;
-
-		switch (AnimationTarget)
-		{
-		case animation::EAnimationTarget::NONE:
-			break;
-		case animation::EAnimationTarget::TRANSLATION:
-			Value = std::vector<float>({ 0.0f, 0.0f, 0.0f });
-			break;
-		case animation::EAnimationTarget::ROTATION:
-			Value = std::vector<float>({ 0.0f, 0.0f, 0.0f, 1.0f });
-			break;
-		case animation::EAnimationTarget::SCALE:
-			Value = std::vector<float>({ 1.0f, 1.0f, 1.0f });
-			break;
-		case animation::EAnimationTarget::WEIGHTS:
-			Value = std::vector<float>({ 0.0f, 0.0f, 0.0f, 0.0f });
-			break;
-		case animation::EAnimationTarget::MODELMATRIX:
-		{
-			Value = std::vector<float>({
-				1.0f, 0.0f, 0.0f, 0.0f,
-				0.0f, 1.0f, 0.0f, 0.0f,
-				0.0f, 0.0f, 1.0f, 0.0f,
-				0.0f, 0.0f, 0.0f, 1.0f
-			});
-		}
-			break;
-		default:
-			break;
+			Console::Log("[Error - KeyFrame] StartTime is greater than EndTime. / StartTime: %f, EndTime: %f\n", m_StartTime, m_EndTime);
+			return false;
 		}
 
-		return Value;
-	}
-
-	bool CAnimationSampler::ComputeCurrentFrame(float CurrentTime, bool IsLoop, std::vector<float>& Value, EAnimationTarget AnimationTarget)
-	{
 		// 0の時はエラーにはしないが、何も処理しない
 		// AnimationやSDKに使っていないボーンのアニメーションでもなぜか一つだけInput・Outputが入っていることがあるため
-		if (m_KeyFrameList.size() == 0)
-		{
-			Value = GetDefaultValueFromAnimationTarget(AnimationTarget);
-
-			return true;
-		}
+		if (m_KeyFrameList.size() == 0) return true;
 
 		float CalcCurrentTime = 0.0f;
 
@@ -210,6 +141,13 @@ namespace animation
 		
 		if (!GetNeedKeyFrame(CalcCurrentTime, PrevKeyFrame, NextKeyFrame)) return false;
 
+		// キーフレームが同じなら補間せずにPrevKeyFrameの値をそのまま返す
+		if (PrevKeyFrame == NextKeyFrame)
+		{
+			Value = PrevKeyFrame->GetOutput();
+			return true;
+		}
+
 		// 補完されたVakueを取得
 		switch (m_InterpolationType)
 		{
@@ -218,38 +156,36 @@ namespace animation
 			break;
 		case animation::EInterpolationType::LINEAR:
 			{
-				switch (AnimationTarget)
+				switch (ValueType)
 				{
-				case animation::EAnimationTarget::ROTATION:
+				case animation::EInterpolateValueType::NONE:
+					if (!DoLinearInterpolation(CalcCurrentTime, Value, PrevKeyFrame, NextKeyFrame)) return false;
+					break;
+				case animation::EInterpolateValueType::QUATERNION:
 					// 回転のLinearの場合、Slerp( Spherical Linear Interpolation)を使用する必要がある
 					// https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#appendix-c-interpolation
 					if (!DoSphericalLinearInterpolation(CalcCurrentTime, Value, PrevKeyFrame, NextKeyFrame)) return false;
 					break;
-				case animation::EAnimationTarget::TRANSLATION:
-				case animation::EAnimationTarget::SCALE:
-				case animation::EAnimationTarget::WEIGHTS:
-					if (!DoLinearInterpolation(CalcCurrentTime, Value, PrevKeyFrame, NextKeyFrame)) return false;
-					break;
-				case animation::EAnimationTarget::MODELMATRIX:
+				case animation::EInterpolateValueType::MODELMATRIX:
 					if (!DoModelMatrixLinearInterpolation(CalcCurrentTime, Value, PrevKeyFrame, NextKeyFrame)) return false;
 					break;
 				default:
+					if (!DoLinearInterpolation(CalcCurrentTime, Value, PrevKeyFrame, NextKeyFrame)) return false;
 					break;
 				}
 			}
 			break;
 		case animation::EInterpolationType::CUBICSPLINE:
 		{
-			if (AnimationTarget == animation::EAnimationTarget::MODELMATRIX)
+			if (ValueType == animation::EInterpolateValueType::MODELMATRIX)
 			{
-				if (!DoModelMatrixSplineInterpolation(CalcCurrentTime, Value, AnimationTarget, PrevKeyFrame, NextKeyFrame)) return false;
+				if (!DoModelMatrixSplineInterpolation(CalcCurrentTime, Value, PrevKeyFrame, NextKeyFrame)) return false;
 			}
 			else
 			{
-				if (!DoCubicSplineInterpolation(CalcCurrentTime, Value, AnimationTarget, PrevKeyFrame, NextKeyFrame)) return false;
+				if (!DoCubicSplineInterpolation(CalcCurrentTime, Value, PrevKeyFrame, NextKeyFrame)) return false;
 			}
 		}
-			
 			break;
 		default:
 			break;
@@ -275,10 +211,10 @@ namespace animation
 		// Prev
 		size_t NextIndex = std::distance(m_KeyFrameList.begin(), val);
 
-		// CurrentTimeがKeyFrameの最初よりも小さい時はPrevとNextにそれぞれ0と1のKeyFrameを割り当てる
+		// CurrentTimeがKeyFrameの最初よりも小さい時はPrevとNextにそれぞれ同じキーフレームを割り当てる(補間を機能させない)
 		if (NextIndex <= 0 || NextIndex >= m_KeyFrameList.size())
 		{
-			NextKeyFrame = m_KeyFrameList[1];
+			NextKeyFrame = m_KeyFrameList[0];
 			PrevKeyFrame = m_KeyFrameList[0];
 		}
 		else
@@ -441,7 +377,7 @@ namespace animation
 		return true;
 	}
 
-	bool CAnimationSampler::DoCubicSplineInterpolation(float CurrentTime, std::vector<float>& Value, EAnimationTarget AnimationTarget, const std::shared_ptr<animation::CKeyFrame>& PrevKeyFrame, const std::shared_ptr<animation::CKeyFrame>& NextKeyFrame)
+	bool CAnimationSampler::DoCubicSplineInterpolation(float CurrentTime, std::vector<float>& Value, const std::shared_ptr<animation::CKeyFrame>& PrevKeyFrame, const std::shared_ptr<animation::CKeyFrame>& NextKeyFrame)
 	{
 		// CubicSpline: 3次スプライン曲線
 
@@ -456,7 +392,7 @@ namespace animation
 		return true;
 	}
 
-	bool CAnimationSampler::DoModelMatrixSplineInterpolation(float CurrentTime, std::vector<float>& Value, EAnimationTarget AnimationTarget, 
+	bool CAnimationSampler::DoModelMatrixSplineInterpolation(float CurrentTime, std::vector<float>& Value, 
 		const std::shared_ptr<animation::CKeyFrame>& PrevKeyFrame, const std::shared_ptr<animation::CKeyFrame>& NextKeyFrame)
 	{
 		// ModelMatrix
@@ -625,5 +561,3 @@ namespace animation
 		return dstKeyFrame;
 	}
 }
-
-#endif // USE_ANIMATION

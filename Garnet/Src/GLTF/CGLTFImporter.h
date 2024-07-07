@@ -8,6 +8,7 @@
 
 #include "../Interface/IGraphicsAPI.h"
 #include "../LoadWorker/CFile.h"
+#include "../Math/CMath.h"
 
 namespace graphics
 {
@@ -30,7 +31,6 @@ namespace animation
 	class CBone;
 	class CAnimationClip;
 	class CAnimationSampler;
-	enum class EKeyFrameType;
 }
 
 namespace object { 
@@ -79,7 +79,7 @@ namespace gltf
 		static bool CalculateBufferFromAccessor(const tinygltf::Model& model, const tinygltf::Accessor& Accessor, std::vector<unsigned char>& BufferData);
 		static bool RecalculateTangent(std::vector<float>& TangentDat, const std::vector<float>& PosotionData, const std::vector<float>& TexcoordData, const std::vector<unsigned short>& Indices);
 		static bool RecalculateTangentWithUINT(std::vector<float>& TangentData, const std::vector<float>& PosotionData, const std::vector<float>& TexcoordData, const std::vector<unsigned int>& Indices);
-		static animation::EKeyFrameType ConvertToEKeyFrameType(int Type);
+		static math::EValueType ConvertToValueType(int Type);
 		static int CalcStrideFromAccessor(const tinygltf::Model& model, const tinygltf::Accessor& Accessor);
 		static graphics::EDataType GetComponentTypeFromAccessor(const tinygltf::Accessor& Accessor);
 		static int GetByteStride(const tinygltf::Model& model, const tinygltf::Accessor& Accessor);

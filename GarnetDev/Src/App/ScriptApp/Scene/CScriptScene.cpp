@@ -67,13 +67,7 @@ namespace app
 	bool CScriptScene::Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
 		const std::shared_ptr<graphics::CDrawInfo>& DrawInfo, const std::shared_ptr<input::CInputState>& InputState)
 	{
-		if (!m_IsLoaded)
-		{
-			if (!pLoadWorker->IsLoaded()) return true;
-
-			if (!Load(pGraphicsAPI, pPhysicsEngine, pLoadWorker)) return false;
-			m_IsLoaded = true;
-		}
+		if (!m_IsLoaded) return true;
 
 		if (!m_SceneController->Update(pGraphicsAPI, pPhysicsEngine, pLoadWorker, Camera, Projection, DrawInfo, InputState)) return false;
 		
@@ -119,5 +113,14 @@ namespace app
 	// Tex of FrameBuffer
 	void CScriptScene::SetFrameTexture(const std::shared_ptr<graphics::CTexture>& FrameTexture)
 	{
+	}
+
+	// ロード完了イベント
+	bool CScriptScene::OnLoaded(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker)
+	{
+		if (!Load(pGraphicsAPI, pPhysicsEngine, pLoadWorker)) return false;
+		m_IsLoaded = true;
+
+		return true;
 	}
 }

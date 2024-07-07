@@ -37,6 +37,22 @@ namespace scene
 		return m_ObjectList;
 	}
 
+	std::shared_ptr<object::C3DObject> CSceneController::FindObjectByName(const std::string& Name)
+	{
+		std::shared_ptr<object::C3DObject> DstObject = nullptr;
+
+		for (const auto& Object : m_ObjectList)
+		{
+			if (Object->GetObjectName() == Name)
+			{
+				DstObject = Object;
+				break;
+			}
+		}
+
+		return DstObject;
+	}
+
 	void CSceneController::AddMaterialFrame(const std::string& MFName, const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame)
 	{
 		m_MaterialFrameMap.emplace(MFName, MaterialFrame);

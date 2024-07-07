@@ -8,6 +8,7 @@
 #include "../../Interface/IResource.h"
 #include "../../Interface/IPhysicsEngine.h"
 #include "CPmxModel.h"
+#include "../../Math/CMath.h"
 
 namespace graphics
 {
@@ -30,7 +31,6 @@ namespace animation
 	class CBone;
 	class CAnimationClip;
 	class CAnimationSampler;
-	enum class EKeyFrameType;
 }
 
 namespace object {

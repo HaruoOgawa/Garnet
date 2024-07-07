@@ -1,6 +1,6 @@
 #pragma once
-#ifdef USE_ANIMATION
 
+#ifdef USE_ANIMATION
 namespace animation
 {
 	enum class EAnimationTarget
@@ -11,8 +11,7 @@ namespace animation
 		ROTATION,
 		SCALE,
 		WEIGHTS,
-		MODELMATRIX, // FBX-SDKŒÀ’è
+		MODELMATRIX,
 	};
 }
-
-#endif // USE_ANIMATION
+#endif

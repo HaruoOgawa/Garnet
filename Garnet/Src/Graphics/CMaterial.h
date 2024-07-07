@@ -16,6 +16,7 @@
 #include "EDepthFunc.h"
 
 #include "../Camera/CCamera.h"
+#include "../Timeline/CTimelineTrackContent.h"
 
 namespace camera { class CCamera; }
 namespace projection { class CProjection; }
@@ -27,7 +28,7 @@ namespace graphics
 	class CMaterialFrame;
 	class CDrawInfo;
 
-	class CMaterial : public std::enable_shared_from_this<CMaterial>
+	class CMaterial : public std::enable_shared_from_this<CMaterial>, public timeline::CTimelineTrackContent
 	{
 	protected:
 		std::shared_ptr<CMaterialFrame> m_MaterialFrame;
