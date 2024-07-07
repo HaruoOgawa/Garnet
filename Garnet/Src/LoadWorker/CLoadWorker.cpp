@@ -1,5 +1,7 @@
 #include "CLoadWorker.h"
 #include "CFile.h"
+#include "../AppCore/CAppCore.h"
+#include "../Message/Console.h"
 
 namespace resource
 {
@@ -46,15 +48,17 @@ namespace resource
 		return true;
 	}
 
-	bool CLoadWorker::Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine)
+	bool CLoadWorker::Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, app::CAppCore* pAppCore)
 	{
-		// 初期化
-		if (m_Status == ELoadStatus::None)
+		// 初回ロード
+		bool ExistError = false;
+		if (CheckFirstLoading(ExistError, pGraphicsAPI, pPhysicsEngine, pAppCore)) return true;
+		if (ExistError)
 		{
-			if (CheckInitialResource(pGraphicsAPI, pPhysicsEngine)) return true;
-			if (!InitLoadStatus(pGraphicsAPI)) return false;
+			Console::Log("[Error] Failed to FirstLoading\n");
+			return false;
 		}
-		
+
 		// ローディングバー
 		if (m_LoadingBar)
 		{
@@ -82,6 +86,30 @@ namespace resource
 		}
 
 		return true;
+	}
+
+	bool CLoadWorker::CheckFirstLoading(bool& ExistError, api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, app::CAppCore* pAppCore)
+	{
+		ExistError = false;
+
+		// 初期化
+		if (m_Status == ELoadStatus::None)
+		{
+			if (CheckInitialResource(pGraphicsAPI, pPhysicsEngine)) return true;
+			if (!InitLoadStatus(pGraphicsAPI, pAppCore)) ExistError = true;
+		}
+		else if (m_Status == ELoadStatus::Loading)
+		{
+			if (m_LoadResourceList.empty())
+			{
+				m_Status = ELoadStatus::Loaded;
+
+				// ロード完了コールバックの呼び出し
+				if(!pAppCore->OnLoaded()) ExistError = true;
+			}
+		}
+
+		return false;
 	}
 
 	bool CLoadWorker::CheckInitialResource(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine)
@@ -112,21 +140,13 @@ namespace resource
 		return false;
 	}
 
-	bool CLoadWorker::InitLoadStatus(api::IGraphicsAPI* pGraphicsAPI)
+	bool CLoadWorker::InitLoadStatus(api::IGraphicsAPI* pGraphicsAPI, app::CAppCore* pAppCore)
 	{
 		if (!Create(pGraphicsAPI)) return false;
 
 		m_FirstResourceCount = static_cast<int>(m_LoadResourceList.size()); // 初回ロードのリソース数を取得
 
-		if (m_FirstResourceCount > 0)
-		{
-			m_Status = ELoadStatus::Loading;
-		}
-		else
-		{
-			// 初回ロードリソースがない場合は即ロード完了にする
-			m_Status = ELoadStatus::Loaded;
-		}
+		m_Status = ELoadStatus::Loading;
 
 		return true;
 	}
@@ -156,8 +176,6 @@ namespace resource
 				break;
 			}
 		}
-
-		m_Status = ELoadStatus::Loaded;
 
 		return true;
 	}

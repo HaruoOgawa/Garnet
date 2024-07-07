@@ -45,6 +45,9 @@ namespace app
 
 		virtual const std::shared_ptr<graphics::CDrawInfo>& GetDrawInfo() const override;
 
+		// ロード完了イベント
+		virtual bool OnLoaded(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker) override;
+
 		// フォーカスイベント
 		virtual void OnFocus(bool Focused, api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker) override;
 	};

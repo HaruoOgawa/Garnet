@@ -31,6 +31,9 @@ namespace app
 
 		virtual const std::shared_ptr<graphics::CDrawInfo>& GetDrawInfo() const = 0;
 
+		// ロード完了イベント
+		virtual bool OnLoaded(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker) = 0;
+
 		// フォーカスイベント
 		virtual void OnFocus(bool Focused, api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker) = 0;
 	};

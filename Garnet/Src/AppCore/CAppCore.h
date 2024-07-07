@@ -63,6 +63,9 @@ namespace app
 		bool FixedUpdate();
 		bool Draw();
 
+		// ロード完了イベント
+		bool OnLoaded();
+
 		// ToDo: 将来的にはOnXX関数を各WindowAPIから呼ぶようにしてResizeWindow・FocusWindowを統一する. InputStateへの情報受け渡しもここでやる
 		// インプットイベント
 		void OnKeyDown(std::string key);

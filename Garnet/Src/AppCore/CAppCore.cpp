@@ -235,7 +235,7 @@ namespace app
 			DrawInfo->SetDeltaSecondsTime(m_DeltaSecondsTime);
 		}
 
-		if (!m_LoadWorker->Update(m_GraphicsAPI.get(), m_PhysicsEngine.get())) return false;
+		if (!m_LoadWorker->Update(m_GraphicsAPI.get(), m_PhysicsEngine.get(), this)) return false;
 
 		if (!m_App->Update(m_GraphicsAPI.get(), m_PhysicsEngine.get(), m_LoadWorker.get(), m_InputState)) return false;
 
@@ -271,6 +271,14 @@ namespace app
 
 		// SwapBuffer
 		m_WindowAPI->SwapWindowBuffers();
+
+		return true;
+	}
+
+	// ロード完了イベント
+	bool CAppCore::OnLoaded()
+	{
+		if (!m_App->OnLoaded(m_GraphicsAPI.get(), m_PhysicsEngine.get(), m_LoadWorker.get())) return false;
 
 		return true;
 	}
