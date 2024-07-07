@@ -47,11 +47,8 @@ namespace animation
 			m_KeyFrameList.push_back(KeyFrame);
 		}
 
-		if (m_KeyFrameList.size() > 0)
-		{
-			m_StartTime = m_KeyFrameList[0]->GetInput();
-			m_EndTime = m_KeyFrameList[m_KeyFrameList.size() - 1]->GetInput();
-		}
+		CalcStartEndTime();
+		
 		 
 		return true;
 	}
@@ -64,6 +61,15 @@ namespace animation
 	const std::vector<std::shared_ptr<animation::CKeyFrame>>& CAnimationSampler::GetKeyFrameList() const
 	{
 		return m_KeyFrameList;
+	}
+
+	void CAnimationSampler::CalcStartEndTime()
+	{
+		if (m_KeyFrameList.size() > 0)
+		{
+			m_StartTime = m_KeyFrameList[0]->GetInput();
+			m_EndTime = m_KeyFrameList[m_KeyFrameList.size() - 1]->GetInput();
+		}
 	}
 
 	void CAnimationSampler::SetStartTime(float StartTime)
@@ -108,6 +114,12 @@ namespace animation
 
 	bool CAnimationSampler::ComputeCurrentFrame(float CurrentTime, bool IsLoop, std::vector<float>& Value, EInterpolateValueType ValueType)
 	{
+		if (m_StartTime >= m_EndTime)
+		{
+			Console::Log("[Error - KeyFrame] StartTime is greater than EndTime. / StartTime: %f, EndTime: %f\n", m_StartTime, m_EndTime);
+			return false;
+		}
+
 		// 0の時はエラーにはしないが、何も処理しない
 		// AnimationやSDKに使っていないボーンのアニメーションでもなぜか一つだけInput・Outputが入っていることがあるため
 		if (m_KeyFrameList.size() == 0) return true;
@@ -128,6 +140,13 @@ namespace animation
 		std::shared_ptr<animation::CKeyFrame> NextKeyFrame = nullptr;
 		
 		if (!GetNeedKeyFrame(CalcCurrentTime, PrevKeyFrame, NextKeyFrame)) return false;
+
+		// キーフレームが同じなら補間せずにPrevKeyFrameの値をそのまま返す
+		if (PrevKeyFrame == NextKeyFrame)
+		{
+			Value = PrevKeyFrame->GetOutput();
+			return true;
+		}
 
 		// 補完されたVakueを取得
 		switch (m_InterpolationType)
@@ -192,10 +211,10 @@ namespace animation
 		// Prev
 		size_t NextIndex = std::distance(m_KeyFrameList.begin(), val);
 
-		// CurrentTimeがKeyFrameの最初よりも小さい時はPrevとNextにそれぞれ0と1のKeyFrameを割り当てる
+		// CurrentTimeがKeyFrameの最初よりも小さい時はPrevとNextにそれぞれ同じキーフレームを割り当てる(補間を機能させない)
 		if (NextIndex <= 0 || NextIndex >= m_KeyFrameList.size())
 		{
-			NextKeyFrame = m_KeyFrameList[1];
+			NextKeyFrame = m_KeyFrameList[0];
 			PrevKeyFrame = m_KeyFrameList[0];
 		}
 		else

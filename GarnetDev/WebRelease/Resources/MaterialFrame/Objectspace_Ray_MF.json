@@ -107,9 +107,9 @@
               }
             },
             {
-              "name": "v4Pad0",
+              "name": "mainColor",
               "type": "vec4",
-              "initValue": [ 0.0, 0.0, 0.0, 0.0 ],
+              "initValue": [ 1.0, 1.0, 1.0, 1.0 ],
               "input": {
                 "hide": true
               }

@@ -1,5 +1,6 @@
 #pragma once
 
+#ifdef USE_ANIMATION
 namespace animation
 {
 	enum class EAnimationTarget
@@ -13,3 +14,4 @@ namespace animation
 		MODELMATRIX,
 	};
 }
+#endif

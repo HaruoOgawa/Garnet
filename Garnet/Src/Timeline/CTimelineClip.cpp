@@ -3,12 +3,23 @@
 
 namespace timeline
 {
-	CTimelineClip::CTimelineClip()
+	CTimelineClip::CTimelineClip(float MaxTime):
+		m_MaxTime(MaxTime)
 	{
 	}
 
 	CTimelineClip::~CTimelineClip()
 	{
+	}
+
+	void CTimelineClip::SetMaxTime(float Time)
+	{
+		m_MaxTime = Time;
+	}
+
+	float CTimelineClip::GetMaxTime() const
+	{
+		return m_MaxTime;
 	}
 
 	bool CTimelineClip::Update(float CurrentTime)
@@ -22,11 +33,11 @@ namespace timeline
 
 			//
 			animation::EInterpolateValueType ValueType = animation::EInterpolateValueType::NONE;
-			if (Track->GetAnimationTarget() == animation::EAnimationTarget::ROTATION)
+			if (Track->GetSamplerTarget() == ETimelineSamplerTarget::ROTATION)
 			{
 				ValueType = animation::EInterpolateValueType::QUATERNION;
 			}
-			else if (Track->GetAnimationTarget() == animation::EAnimationTarget::MODELMATRIX)
+			else if (Track->GetSamplerTarget() == ETimelineSamplerTarget::MODELMATRIX)
 			{
 				ValueType = animation::EInterpolateValueType::MODELMATRIX;
 			}
@@ -36,6 +47,8 @@ namespace timeline
 			std::vector<float> Value;
 
 			if (!Sampler->ComputeCurrentFrame(CurrentTime, false, Value, ValueType)) return false;
+
+			if (Value.empty()) continue;
 
 			// Track‚ÌXV
 			if (!Track->Update(CurrentTime, Value)) return false;

@@ -112,6 +112,7 @@ namespace object
 
 		void AddNode(const std::shared_ptr<CNode>& Node);
 		const std::vector<std::shared_ptr<CNode>>& GetNodeList() const;
+		std::shared_ptr<CNode> FindNodeByName(const std::string& Name);
 		
 		void AddMesh(const std::shared_ptr<graphics::CMesh>& Mesh);
 		const std::vector<std::shared_ptr<graphics::CMesh>>& GetMeshList() const;

@@ -3,8 +3,8 @@
 
 namespace timeline
 {
-	CNodeTrack::CNodeTrack(const std::string& TrackID, int SamplerIndex, animation::EAnimationTarget AnimationTarget, ENodeTrackTarget TrackTarget):
-		CTimelineTrack(TrackID, SamplerIndex, AnimationTarget),
+	CNodeTrack::CNodeTrack(const std::string& TrackID, int SamplerIndex, ETimelineSamplerTarget SamplerTarget, ENodeTrackTarget TrackTarget):
+		CTimelineTrack(TrackID, SamplerIndex, SamplerTarget),
 		m_TrackTarget(TrackTarget),
 		m_Node(nullptr)
 	{

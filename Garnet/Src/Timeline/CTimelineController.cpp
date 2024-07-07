@@ -2,16 +2,15 @@
 
 namespace timeline
 {
-	CTimelineController::CTimelineController(float CurrentTime, float MaxTime, const std::shared_ptr<CTimelineClip>& Clip, bool PlayFlag) :
+	CTimelineController::CTimelineController(float CurrentTime, const std::shared_ptr<CTimelineClip>& Clip, bool PlayFlag) :
 		m_CurrentTime(CurrentTime),
-		m_MaxTime(MaxTime),
 		m_Clip(Clip),
 		m_Play(PlayFlag)
 	{
 	}
 
 	CTimelineController::CTimelineController():
-		CTimelineController(0.0f, 0.0f, nullptr, false)
+		CTimelineController(0.0f, nullptr, false)
 	{
 	}
 
@@ -31,12 +30,14 @@ namespace timeline
 
 	void CTimelineController::SetMaxTime(float Time)
 	{
-		m_MaxTime = Time;
+		if (m_Clip) m_Clip->SetMaxTime(Time);
 	}
 
 	float CTimelineController::GetMaxTime() const
 	{
-		return m_MaxTime;
+		if (!m_Clip) return 0.0f;
+
+		return m_Clip->GetMaxTime();
 	}
 
 	void CTimelineController::SetClip(const std::shared_ptr<CTimelineClip>& Clip)
@@ -61,7 +62,7 @@ namespace timeline
 
 	bool CTimelineController::Update(float DeltaSecondsTime)
 	{
-		if (m_CurrentTime < 0.0f || m_CurrentTime > m_MaxTime) return true;
+		if (m_CurrentTime < 0.0f || m_CurrentTime > GetMaxTime()) return true;
 
 		if (m_Play)
 		{

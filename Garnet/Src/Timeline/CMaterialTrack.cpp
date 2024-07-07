@@ -3,9 +3,9 @@
 
 namespace timeline
 {
-	CMaterialTrack::CMaterialTrack(const std::string& TrackID, int SamplerIndex, animation::EAnimationTarget AnimationTarget, EMaterialTrackTarget TrackTarget,
+	CMaterialTrack::CMaterialTrack(const std::string& TrackID, int SamplerIndex, ETimelineSamplerTarget SamplerTarget, EMaterialTrackTarget TrackTarget,
 		const std::string& UniformName, math::EValueType ValueType):
-		CTimelineTrack(TrackID, SamplerIndex, AnimationTarget),
+		CTimelineTrack(TrackID, SamplerIndex, SamplerTarget),
 		m_TrackTarget(TrackTarget),
 		m_Material(nullptr),
 		m_UniformName(UniformName),

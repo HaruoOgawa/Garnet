@@ -26,7 +26,7 @@ namespace timeline
 		math::EValueType m_ValueType;
 
 	public:
-		CMaterialTrack(const std::string& TrackID, int SamplerIndex, animation::EAnimationTarget AnimationTarget, EMaterialTrackTarget TrackTarget, 
+		CMaterialTrack(const std::string& TrackID, int SamplerIndex, ETimelineSamplerTarget SamplerTarget, EMaterialTrackTarget TrackTarget,
 			const std::string& UniformName, math::EValueType ValueType);
 		virtual ~CMaterialTrack();
 

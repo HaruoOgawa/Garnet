@@ -63,6 +63,9 @@ namespace animation
 		void AddKeyFrame(const std::shared_ptr<animation::CKeyFrame>& KeyFrame);
 		const std::vector<std::shared_ptr<animation::CKeyFrame>>& GetKeyFrameList() const;
 
+		void CalcStartEndTime();
+
+		// ToDo: SetStartTime‚ÆSetEndTime‚Ííœ‚µ‚Ä‘S‚ÄCalcStartEndTime‚É‚·‚é
 		void SetStartTime(float StartTime);
 		float GetStartTime() const;
 		void SetEndTime(float EndTime);

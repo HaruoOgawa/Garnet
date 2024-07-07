@@ -108,6 +108,7 @@ namespace scene
 		//
 		void AddObject(const std::shared_ptr<object::C3DObject>& Object);
 		std::vector<std::shared_ptr<object::C3DObject>> GetObjectList() const;
+		std::shared_ptr<object::C3DObject> FindObjectByName(const std::string& Name);
 
 		void AddMaterialFrame(const std::string& MFName, const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame);
 		const std::map<std::string, std::shared_ptr<graphics::CMaterialFrame>>& GetMaterialFrameMap() const;

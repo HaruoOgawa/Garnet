@@ -3,9 +3,8 @@
 #include <vector>
 #include <memory>
 
-#include "STimelineConnector.h"
 #include "CTimelineTrackContent.h"
-#include "../Animation/EAnimationTarget.h"
+#include "ETimelineSamplerTarget.h"
 
 namespace timeline
 {
@@ -15,14 +14,14 @@ namespace timeline
 
 		int m_SamplerIndex;
 
-		const animation::EAnimationTarget m_AnimationTarget;
+		const ETimelineSamplerTarget m_SamplerTarget;
 	public:
-		CTimelineTrack(const std::string& TrackID, int SamplerIndex, animation::EAnimationTarget AnimationTarget);
+		CTimelineTrack(const std::string& TrackID, int SamplerIndex, ETimelineSamplerTarget SamplerTarget);
 		virtual ~CTimelineTrack() = default;
 
 		virtual int GetSamplerIndex() const;
 
-		virtual animation::EAnimationTarget GetAnimationTarget() const;
+		virtual ETimelineSamplerTarget GetSamplerTarget() const;
 
 		virtual void SetTrackID(const std::string& TrackID);
 		virtual const std::string& GetTrackID() const;

@@ -4,7 +4,7 @@ struct FragmentUniformBuffer {
     view: mat4x4<f32>,
     proj: mat4x4<f32>,
     cameraPos: vec4<f32>,
-    v4Pad0_: vec4<f32>,
+    mainColor: vec4<f32>,
     v4Pad1_: vec4<f32>,
     v4Pad2_: vec4<f32>,
     time: f32,
@@ -136,11 +136,12 @@ fn main_1() {
         gPosition = vec4<f32>(_e74.x, _e74.y, _e74.z, 1.0);
         let _e79 = n;
         gNormal = vec4<f32>(_e79.x, _e79.y, _e79.z, 1.0);
-        gAlbedo = vec4<f32>(1.0, 1.0, 1.0, 1.0);
-        let _e84 = depth;
-        gDepth = vec4<f32>(_e84);
+        let _e85 = f_ubo.mainColor;
+        gAlbedo = _e85;
         let _e86 = depth;
-        gl_FragDepth = _e86;
+        gDepth = vec4<f32>(_e86);
+        let _e88 = depth;
+        gl_FragDepth = _e88;
     } else {
         discard;
     }

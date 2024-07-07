@@ -13,11 +13,16 @@ namespace timeline
 {
 	class CTimelineClip
 	{
+		float m_MaxTime;
+
 		std::vector<std::shared_ptr<animation::CAnimationSampler>> m_SamplerList;
 		std::unordered_map<std::string, std::shared_ptr<CTimelineTrack>> m_TrackList;
 	public:
-		CTimelineClip();
+		CTimelineClip(float MaxTime);
 		virtual ~CTimelineClip();
+
+		void SetMaxTime(float Time);
+		float GetMaxTime() const;
 
 		bool Update(float CurrentTime);
 

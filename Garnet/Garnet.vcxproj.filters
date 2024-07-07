@@ -3093,9 +3093,6 @@
     <ClInclude Include="Src\Timeline\CTimelineTrack.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Src\Timeline\STimelineConnector.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="Src\Timeline\CNodeTrack.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
@@ -3103,6 +3100,9 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Src\Timeline\CTimelineTrackContent.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Timeline\ETimelineSamplerTarget.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

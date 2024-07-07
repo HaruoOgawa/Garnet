@@ -30,7 +30,7 @@ namespace timeline
 		bool UpdateScale(const std::vector<float>& Value);
 
 	public:
-		CNodeTrack(const std::string& TrackID, int SamplerIndex, animation::EAnimationTarget AnimationTarget, ENodeTrackTarget TrackTarget);
+		CNodeTrack(const std::string& TrackID, int SamplerIndex, ETimelineSamplerTarget SamplerTarget, ENodeTrackTarget TrackTarget);
 		virtual ~CNodeTrack();
 
 		virtual bool Update(float CurrentTime, const std::vector<float>& Value) override;

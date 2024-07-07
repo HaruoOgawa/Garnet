@@ -6,10 +6,10 @@
 
 namespace timeline
 {
-	CTimelineTrack::CTimelineTrack(const std::string& TrackID, int SamplerIndex, animation::EAnimationTarget AnimationTarget):
+	CTimelineTrack::CTimelineTrack(const std::string& TrackID, int SamplerIndex, ETimelineSamplerTarget SamplerTarget):
 		m_TrackID(TrackID),
 		m_SamplerIndex(SamplerIndex),
-		m_AnimationTarget(AnimationTarget)
+        m_SamplerTarget(SamplerTarget)
 	{
 	}
 
@@ -18,9 +18,9 @@ namespace timeline
 		return m_SamplerIndex;
 	}
 
-	animation::EAnimationTarget CTimelineTrack::GetAnimationTarget() const
+    ETimelineSamplerTarget CTimelineTrack::GetSamplerTarget() const
 	{
-		return m_AnimationTarget;
+		return m_SamplerTarget;
 	}
 
     void CTimelineTrack::SetTrackID(const std::string& TrackID)

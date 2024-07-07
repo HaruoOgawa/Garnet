@@ -58,7 +58,6 @@ namespace animation
 	class CBone;
 	class CAnimationClip;
 	class CAnimationSampler;
-	enum class math::EValueType;
 }
 
 namespace object {

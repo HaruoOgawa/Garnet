@@ -577,6 +577,22 @@ namespace object
 		return m_NodeList;
 	}
 
+	std::shared_ptr<CNode> C3DObject::FindNodeByName(const std::string& Name)
+	{
+		std::shared_ptr<CNode> DstNode = nullptr;
+
+		for (const auto& Node : m_NodeList)
+		{
+			if (Node->GetName() == Name)
+			{
+				DstNode = Node;
+				break;
+			}
+		}
+
+		return DstNode;
+	}
+
 	void C3DObject::AddMesh(const std::shared_ptr<graphics::CMesh>& Mesh)
 	{
 		m_MeshList.push_back(Mesh);

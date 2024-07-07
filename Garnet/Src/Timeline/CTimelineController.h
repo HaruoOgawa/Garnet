@@ -12,8 +12,7 @@ namespace timeline
 	class CTimelineController
 	{
 		float m_CurrentTime;
-		float m_MaxTime;
-
+		
 		std::shared_ptr<CTimelineClip> m_Clip;
 
 		bool m_Play;
@@ -23,7 +22,7 @@ namespace timeline
 
 	public:
 		CTimelineController();
-		CTimelineController(float CurrentTime, float MaxTime, const std::shared_ptr<CTimelineClip>& Clip, bool PlayFlag);
+		CTimelineController(float CurrentTime, const std::shared_ptr<CTimelineClip>& Clip, bool PlayFlag);
 		virtual ~CTimelineController();
 		
 		void SetCurrentTime(float Time);
