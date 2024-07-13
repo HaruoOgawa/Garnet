@@ -31,7 +31,7 @@
       "name": "glTFObj",
       "renderpass": "MRTTest",
       "depthpass": "",
-      "filename": "Resources/Models/Sponza/glTF/Sponza.glb",
+      "comment_filename": "Resources/Models/Sponza/glTF/Sponza.glb",
       "defaultmaterialframe": "pbr_mrt_mat",
       "transform": {
         "pos": [

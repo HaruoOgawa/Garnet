@@ -1,11 +1,18 @@
 #ifdef USE_GUIENGINE
 #include "CTimeLineView.h"
 #include <Timeline/CTimelineController.h>
+#include <Message/Console.h>
 
 namespace gui
 {
-	CTimeLineView::CTimeLineView()
+	CTimeLineView::CTimeLineView():
+		m_LargeMemoryWidth(1.0f),
+		m_MemoryExpandRate(0.0f),
+		m_FirstClicked(true),
+		m_PrevMousePos(ImVec2(0.0f, 0.0f))
 	{
+		m_LeftSideMemory = 0.0f;
+		m_RightSideMemory = static_cast<float>(m_MaxLargeMemoryCount) * m_LargeMemoryWidth;
 	}
 
 	bool CTimeLineView::Draw(const std::shared_ptr<timeline::CTimelineController>& TimelineController)
@@ -105,6 +112,114 @@ namespace gui
 		// タイムラインのメモリバーを描画
 		ImVec2 availableSize = ImGui::GetContentRegionAvail();
 
+		ImVec2 barSize = ImVec2(availableSize.x, 30.0f);
+
+		// メモリとメモリの間隔
+		const float DrawMemorySpace = availableSize.x / (m_MaxLargeMemoryCount * 3);
+
+		// 現在のGUIの描画位置を取得(スクリーン座標系)
+		ImVec2 cursorPos = ImGui::GetCursorScreenPos();
+
+		// 背景の描画
+		ImGui::InvisibleButton("##TimelineMemoryBar", barSize);
+
+		// Item(ここではInvisibleButton)にホバーしているかを見たりするので必ずこの後にマウスホイールやドラッグをチェックする
+		if (!CheckWheelExpand()) return false;
+		if (!CheckMemoryDrag(availableSize, DrawMemorySpace)) return false;
+
+		//
+		ImDrawList* drawList = ImGui::GetWindowDrawList(); // 描画マネージャー？ 自由に板ポリとか線とか文字を描画できるやつらしい
+		drawList->AddRectFilled(cursorPos, ImVec2(cursorPos.x + barSize.x, cursorPos.y + barSize.y), IM_COL32(60, 60, 60, 255)); // 矩形を描画
+
+		// メモリの描画(拡大時に隙間が見えないようにいくつか余分に描画)
+		for (int i = 0; i < (m_MaxLargeMemoryCount * 3 + 4); i++)
+		{
+			float x = cursorPos.x + static_cast<float>(i) * DrawMemorySpace * (1.0f + m_MemoryExpandRate);
+
+			drawList->AddLine(ImVec2(x, cursorPos.y), ImVec2(x, cursorPos.y + 10.0f), IM_COL32(255, 255, 255, 255));
+
+			std::string label = std::to_string(i);
+			drawList->AddText(ImVec2(x, cursorPos.y + 12.0f), IM_COL32(255, 255, 255, 255), label.c_str());
+		}
+
+		return true;
+	}
+
+	bool CTimeLineView::CheckWheelExpand()
+	{
+		// マウスホイール量で拡大率を更新
+		ImGuiIO& io = ImGui::GetIO();
+		const float MouseWheel = io.MouseWheel;
+
+		if (ImGui::IsWindowHovered() && MouseWheel != 0.0f)
+		{
+			const float Speed = 0.05f;
+			const float Width = 0.1f;
+
+			m_MemoryExpandRate += MouseWheel * Speed;
+
+			//Console::Log("m_MemoryExpandRate: %f\n", m_MemoryExpandRate);
+
+			if (m_MemoryExpandRate >= Width)
+			{
+				// 長いメモリの値を大きくする
+				m_LargeMemoryWidth *= 10.0f;
+				m_MemoryExpandRate = 0.0f;
+			}
+			else if (m_MemoryExpandRate <= -Width)
+			{
+				// 長いメモリの値を小さくする
+				m_LargeMemoryWidth *= 0.1f;
+				m_MemoryExpandRate = 0.0f;
+			}
+		}
+
+		return true;
+	}
+
+	bool CTimeLineView::CheckMemoryDrag(const ImVec2& availableSize, float DrawMemorySpace)
+	{
+		const bool IsMemoryHovered = (ImGui::IsItemHovered() && ImGui::IsMouseDragging(0));
+		const bool IsTLMiddleDrag = (ImGui::IsWindowHovered() && ImGui::IsMouseDragging(2));
+
+		// マウスドラッグでメモリの左端と右端の値を更新
+		if (IsMemoryHovered || IsTLMiddleDrag)
+		{
+			ImVec2 MousePos = ImGui::GetMousePos();
+
+			if (!m_FirstClicked)
+			{
+				// マウスの移動量。描画可能範囲で正規化する
+				float OffsetX = (MousePos.x - m_PrevMousePos.x) / availableSize.x; // 左端から右端に行けたら１が返る
+				// 例. メモリの長針のサイズが1.0秒として2.0秒からから3.0秒に移動したときに1.0動くようにする
+				//OffsetX = OffsetX * DrawMemorySpace * 4.0f;
+				OffsetX = OffsetX * DrawMemorySpace;
+
+				// 長針サイズで拡大縮小する
+				OffsetX *= m_LargeMemoryWidth;
+
+				m_LeftSideMemory += OffsetX;
+				m_RightSideMemory += OffsetX;
+
+				Console::Log("OffsetX: %f, m_LeftSideMemory: %f, m_RightSideMemory: %f\n", OffsetX, m_LeftSideMemory, m_RightSideMemory);
+			}
+
+			m_PrevMousePos = MousePos;
+			m_FirstClicked = false;
+		}
+		else
+		{
+			m_FirstClicked = true;
+		}
+
+		return true;
+	}
+
+	void CTimeLineView::TestMemoryBar(const std::shared_ptr<timeline::CTimelineController>& TimelineController)
+	{
+		// タイムラインのメモリバーを描画
+		ImVec2 availableSize = ImGui::GetContentRegionAvail();
+
 		ImVec2 barSize = ImVec2(availableSize.x, 50.0f);
 
 		// 現在のGUIの描画位置を取得(スクリーン座標系)
@@ -112,7 +227,7 @@ namespace gui
 
 		// 背景の描画
 		ImGui::InvisibleButton("##TimelineMemoryBar", barSize);
-		
+
 		ImDrawList* drawList = ImGui::GetWindowDrawList(); // 描画マネージャー？ 自由に板ポリとか線とか文字を描画できるやつらしい
 		drawList->AddRectFilled(cursorPos, ImVec2(cursorPos.x + barSize.x, cursorPos.y + barSize.y), IM_COL32(60, 60, 60, 255)); // 矩形を描画
 
@@ -142,7 +257,7 @@ namespace gui
 		// 現在のフレームを表すインジケーター
 		static float CurrentFrame = 0.0f;
 		float CurrentFrameX = cursorPos.x + CurrentFrame * frameWidth;
-		drawList->AddLine(ImVec2(CurrentFrameX, cursorPos.y), ImVec2(CurrentFrameX, cursorPos.y + barSize.y), IM_COL32(255, 0, 0, 255));
+		drawList->AddLine(ImVec2(CurrentFrameX, cursorPos.y), ImVec2(CurrentFrameX, cursorPos.y + availableSize.y), IM_COL32(255, 0, 0, 255));
 
 		// タイムラインの操作
 		if (ImGui::IsItemHovered())
@@ -155,8 +270,6 @@ namespace gui
 				CurrentFrame = glm::clamp(CurrentFrame, 0.0f, TimelineController->GetMaxTime());
 			}
 		}
-
-		return true;
 	}
 }
 #endif
