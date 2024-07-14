@@ -4,6 +4,7 @@
 #include <imgui.h>
 #include <string>
 #include <memory>
+#include <vector>
 
 namespace timeline { class CTimelineController; }
 
@@ -30,6 +31,8 @@ namespace gui
 
 		bool CheckWheelExpand();
 		bool CheckMemoryDrag(const ImVec2& availableSize, float DrawMemorySpace);
+
+		float GetFirstLargeMemory(float SrcValue, std::vector<bool>& IsLongMemory);
 
 		//////////////////////////////////////////
 		void TestMemoryBar(const std::shared_ptr<timeline::CTimelineController>& TimelineController);

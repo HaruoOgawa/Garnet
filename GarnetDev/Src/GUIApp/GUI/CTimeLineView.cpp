@@ -131,15 +131,36 @@ namespace gui
 		ImDrawList* drawList = ImGui::GetWindowDrawList(); // 描画マネージャー？ 自由に板ポリとか線とか文字を描画できるやつらしい
 		drawList->AddRectFilled(cursorPos, ImVec2(cursorPos.x + barSize.x, cursorPos.y + barSize.y), IM_COL32(60, 60, 60, 255)); // 矩形を描画
 
+		// メモリの開始値
+		std::vector<bool> IsLongMemory;
+		float LargeMemoryValue = GetFirstLargeMemory(m_LeftSideMemory, IsLongMemory);
+
 		// メモリの描画(拡大時に隙間が見えないようにいくつか余分に描画)
 		for (int i = 0; i < (m_MaxLargeMemoryCount * 3 + 4); i++)
 		{
+			int LoopCounter = i % 3;
+
 			float x = cursorPos.x + static_cast<float>(i) * DrawMemorySpace * (1.0f + m_MemoryExpandRate);
 
-			drawList->AddLine(ImVec2(x, cursorPos.y), ImVec2(x, cursorPos.y + 10.0f), IM_COL32(255, 255, 255, 255));
+			if (IsLongMemory[LoopCounter])
+			{
+				// 長い針とメモリテキストを描画
+				drawList->AddLine(ImVec2(x, cursorPos.y), ImVec2(x, cursorPos.y + 20.0f), IM_COL32(255, 255, 255, 255));
 
-			std::string label = std::to_string(i);
-			drawList->AddText(ImVec2(x, cursorPos.y + 12.0f), IM_COL32(255, 255, 255, 255), label.c_str());
+				std::string label = math::CMath::GetFloatWithPrecision(LargeMemoryValue, 3);
+				drawList->AddText(ImVec2(x, cursorPos.y + 22.0f), IM_COL32(255, 255, 255, 255), label.c_str());
+
+				//Console::Log("LargeMemoryValue: %f\n", LargeMemoryValue);
+
+				// 長いメモリの値を更新
+				LargeMemoryValue += m_LargeMemoryWidth;
+			}
+			else
+			{
+				// 短いメモリのみ
+				drawList->AddLine(ImVec2(x, cursorPos.y), ImVec2(x, cursorPos.y + 10.0f), IM_COL32(255, 255, 255, 255));
+			}
+			
 		}
 
 		return true;
@@ -153,23 +174,32 @@ namespace gui
 
 		if (ImGui::IsWindowHovered() && MouseWheel != 0.0f)
 		{
+			if (glm::sign(MouseWheel) == 1.0f && m_LargeMemoryWidth >= 100.0f)
+			{
+				// 最大値は100.0
+				return true;
+			}
+			else if (glm::sign(MouseWheel) == -1.0f && m_LargeMemoryWidth <= 0.01f)
+			{
+				// 最小値は0.01
+				return true;
+			}
+
 			const float Speed = 0.05f;
 			const float Width = 0.1f;
 
 			m_MemoryExpandRate += MouseWheel * Speed;
 
-			//Console::Log("m_MemoryExpandRate: %f\n", m_MemoryExpandRate);
-
 			if (m_MemoryExpandRate >= Width)
 			{
 				// 長いメモリの値を大きくする
-				m_LargeMemoryWidth *= 10.0f;
+				m_LargeMemoryWidth *= 10.0f; 
 				m_MemoryExpandRate = 0.0f;
 			}
 			else if (m_MemoryExpandRate <= -Width)
 			{
 				// 長いメモリの値を小さくする
-				m_LargeMemoryWidth *= 0.1f;
+				m_LargeMemoryWidth *= 0.1f; 
 				m_MemoryExpandRate = 0.0f;
 			}
 		}
@@ -213,6 +243,37 @@ namespace gui
 		}
 
 		return true;
+	}
+
+	float CTimeLineView::GetFirstLargeMemory(float SrcValue, std::vector<bool>& IsLongMemory)
+	{
+		// 一番初めに出てくる長いメモリの値を取得
+		float DecimalPoint = SrcValue - floorf(SrcValue);
+		
+		float DstValue = 0.0f;
+
+		if (DecimalPoint == 0.0f)
+		{
+			DstValue = SrcValue;
+			IsLongMemory = std::vector<bool>({ true, false, false });
+		}
+		else if (DecimalPoint > 0.0f && DecimalPoint <= 0.3f)
+		{
+			DstValue = floorf(SrcValue) + 1.0f;
+			IsLongMemory = std::vector<bool>({ false, false, true });
+		}
+		else if (DecimalPoint > 0.3f && DecimalPoint <= 6.0f)
+		{
+			DstValue = floorf(SrcValue) + 1.0f;
+			IsLongMemory = std::vector<bool>({ false, true, false });
+		}
+		else if (DecimalPoint > 0.6f && DecimalPoint < 1.0f)
+		{
+			DstValue = floorf(SrcValue) + 1.0f;
+			IsLongMemory = std::vector<bool>({ true, false, false });
+		}
+
+		return DstValue;
 	}
 
 	void CTimeLineView::TestMemoryBar(const std::shared_ptr<timeline::CTimelineController>& TimelineController)
