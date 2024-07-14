@@ -22,12 +22,15 @@ namespace gui
 
 		bool m_FirstClicked;
 		ImVec2 m_PrevMousePos;
+
+		bool m_ClickedIndicator;
 	private:
 		bool DrawTimeBar(const std::shared_ptr<timeline::CTimelineController>& TimelineController);
 		bool DrawHierarchyWindow(const std::shared_ptr<timeline::CTimelineController>& TimelineController);
 		bool DrawKeyFrameWindow(const std::shared_ptr<timeline::CTimelineController>& TimelineController);
 
 		bool DrawMemoryBar(const std::shared_ptr<timeline::CTimelineController>& TimelineController);
+		bool DrawIndicator(ImDrawList* drawList, const ImVec2& cursorPos, const ImVec2& availableSize, const ImVec2& barSize);
 
 		bool CheckWheelExpand();
 		bool CheckMemoryDrag(const ImVec2& availableSize, float DrawMemorySpace, float MaxTime);

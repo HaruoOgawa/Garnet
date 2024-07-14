@@ -166,6 +166,30 @@ namespace gui
 			
 		}
 
+		// インジケーターの描画
+		if (!DrawIndicator(drawList, cursorPos, availableSize, barSize)) return false;
+
+		return true;
+	}
+
+	bool CTimeLineView::DrawIndicator(ImDrawList* drawList, const ImVec2& cursorPos, const ImVec2& availableSize, const ImVec2& barSize)
+	{
+		static float CurrentFrame = 0.0f;
+		float CurrentFrameX = cursorPos.x + CurrentFrame * barSize.x;
+
+		drawList->AddLine(ImVec2(CurrentFrameX, cursorPos.y), ImVec2(CurrentFrameX, cursorPos.y + availableSize.y), IM_COL32(255, 0, 0, 255));
+
+		float btnW = 10.0f;
+		ImGui::SetCursorScreenPos(ImVec2(CurrentFrameX - btnW * 0.5f, cursorPos.y));
+		
+		if (ImGui::Button("##TimelineIndicator", ImVec2(btnW, barSize.y)))
+		{
+			ImVec2 mousePos = ImGui::GetMousePos();
+
+			CurrentFrame = (mousePos.x - cursorPos.x) / barSize.x;
+			CurrentFrame = glm::clamp(CurrentFrame, 0.0f, 1.0f);
+		}
+
 		return true;
 	}
 
