@@ -24,12 +24,14 @@ namespace gui
 		ImVec2 m_PrevMousePos;
 
 		bool m_ClickedIndicator;
+		float m_IndicatorRate;
 	private:
 		bool DrawTimeBar(const std::shared_ptr<timeline::CTimelineController>& TimelineController);
 		bool DrawHierarchyWindow(const std::shared_ptr<timeline::CTimelineController>& TimelineController);
 		bool DrawKeyFrameWindow(const std::shared_ptr<timeline::CTimelineController>& TimelineController);
 
 		bool DrawMemoryBar(const std::shared_ptr<timeline::CTimelineController>& TimelineController);
+		bool CalcIndicator(const ImVec2& cursorPos, const ImVec2& barSize);
 		bool DrawIndicator(ImDrawList* drawList, const ImVec2& cursorPos, const ImVec2& availableSize, const ImVec2& barSize);
 
 		bool CheckWheelExpand();

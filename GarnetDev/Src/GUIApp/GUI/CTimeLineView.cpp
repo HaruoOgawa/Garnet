@@ -9,7 +9,9 @@ namespace gui
 		m_LargeMemoryWidth(1.0f),
 		m_MemoryExpandRate(0.0f),
 		m_FirstClicked(true),
-		m_PrevMousePos(ImVec2(0.0f, 0.0f))
+		m_PrevMousePos(ImVec2(0.0f, 0.0f)),
+		m_ClickedIndicator(false),
+		m_IndicatorRate(0.0f)
 	{
 		m_LeftSideMemory = 0.0f;
 		m_RightSideMemory = static_cast<float>(m_MaxLargeMemoryCount) * m_LargeMemoryWidth;
@@ -112,23 +114,27 @@ namespace gui
 		// タイムラインのメモリバーを描画
 		ImVec2 availableSize = ImGui::GetContentRegionAvail();
 
-		ImVec2 barSize = ImVec2(availableSize.x, 30.0f);
+		ImVec2 barSize = ImVec2(availableSize.x, 40.0f);
 
 		// メモリとメモリの間隔
 		const float DrawMemorySpace = availableSize.x / (m_MaxLargeMemoryCount * 3);
 
+		ImDrawList* drawList = ImGui::GetWindowDrawList(); // 描画マネージャー？ 自由に板ポリとか線とか文字を描画できるやつらしい
+
 		// 現在のGUIの描画位置を取得(スクリーン座標系)
 		ImVec2 cursorPos = ImGui::GetCursorScreenPos();
 
+		// インジケーターの前計算。必ずメモリバーよりも先に計算しておく必要がある
+		if (!CalcIndicator(cursorPos, barSize)) return false;
+
 		// 背景の描画
+		ImGui::SetCursorScreenPos(cursorPos);
 		ImGui::InvisibleButton("##TimelineMemoryBar", barSize);
 
 		// Item(ここではInvisibleButton)にホバーしているかを見たりするので必ずこの後にマウスホイールやドラッグをチェックする
 		if (!CheckWheelExpand()) return false;
 		if (!CheckMemoryDrag(availableSize, DrawMemorySpace, TimelineController->GetMaxTime())) return false;
 
-		//
-		ImDrawList* drawList = ImGui::GetWindowDrawList(); // 描画マネージャー？ 自由に板ポリとか線とか文字を描画できるやつらしい
 		drawList->AddRectFilled(cursorPos, ImVec2(cursorPos.x + barSize.x, cursorPos.y + barSize.y), IM_COL32(60, 60, 60, 255)); // 矩形を描画
 
 		// メモリの開始値
@@ -137,8 +143,6 @@ namespace gui
 		const float FirstMemoryValue = GetFirstMemory(m_LeftSideMemory);
 
 		float MemoryOffset = (FirstMemoryValue - m_LeftSideMemory) * DrawMemorySpace;
-
-		//Console::Log("MemoryOffset: %f, FirstMemoryValue: %f, m_LeftSideMemory: %f\n", MemoryOffset, FirstMemoryValue, m_LeftSideMemory);
 
 		// メモリの描画(拡大時に隙間が見えないようにいくつか余分に描画)
 		for (int i = 0; i < (m_MaxLargeMemoryCount * 3 + 4); i++)
@@ -172,29 +176,52 @@ namespace gui
 		return true;
 	}
 
-	bool CTimeLineView::DrawIndicator(ImDrawList* drawList, const ImVec2& cursorPos, const ImVec2& availableSize, const ImVec2& barSize)
+	bool CTimeLineView::CalcIndicator(const ImVec2& cursorPos, const ImVec2& barSize)
 	{
-		static float CurrentFrame = 0.0f;
-		float CurrentFrameX = cursorPos.x + CurrentFrame * barSize.x;
-
-		drawList->AddLine(ImVec2(CurrentFrameX, cursorPos.y), ImVec2(CurrentFrameX, cursorPos.y + availableSize.y), IM_COL32(255, 0, 0, 255));
+		float DrawPos = cursorPos.x + m_IndicatorRate * barSize.x;
 
 		float btnW = 10.0f;
-		ImGui::SetCursorScreenPos(ImVec2(CurrentFrameX - btnW * 0.5f, cursorPos.y));
+		ImGui::SetCursorScreenPos(ImVec2(DrawPos - btnW * 0.5f, cursorPos.y));
 		
-		if (ImGui::Button("##TimelineIndicator", ImVec2(btnW, barSize.y)))
+		bool IsClicked = (ImGui::IsMouseDown(0));
+
+		if (!m_ClickedIndicator)
+		{
+			ImGui::InvisibleButton("##TimelineIndicator", ImVec2(btnW, barSize.y));
+			if (ImGui::IsItemHovered() && IsClicked)
+			{
+				m_ClickedIndicator = true;
+			}
+		}
+
+		if (m_ClickedIndicator && IsClicked)
 		{
 			ImVec2 mousePos = ImGui::GetMousePos();
 
-			CurrentFrame = (mousePos.x - cursorPos.x) / barSize.x;
-			CurrentFrame = glm::clamp(CurrentFrame, 0.0f, 1.0f);
+			m_IndicatorRate = (mousePos.x - cursorPos.x) / barSize.x;
+			m_IndicatorRate = glm::clamp(m_IndicatorRate, 0.0f, 1.0f);
 		}
+		else
+		{
+			m_ClickedIndicator = false;
+		}
+
+		return true;
+	}
+
+	bool CTimeLineView::DrawIndicator(ImDrawList* drawList, const ImVec2& cursorPos, const ImVec2& availableSize, const ImVec2& barSize)
+	{
+		float DrawPos = cursorPos.x + m_IndicatorRate * barSize.x;
+		drawList->AddLine(ImVec2(DrawPos, cursorPos.y), ImVec2(DrawPos, cursorPos.y + availableSize.y), IM_COL32(255, 0, 0, 255));
 
 		return true;
 	}
 
 	bool CTimeLineView::CheckWheelExpand()
 	{
+		// インジケーターと一緒に動かないようにする
+		if (m_ClickedIndicator) return true;
+
 		// マウスホイール量で拡大率を更新
 		ImGuiIO& io = ImGui::GetIO();
 		const float MouseWheel = io.MouseWheel;
@@ -236,6 +263,9 @@ namespace gui
 
 	bool CTimeLineView::CheckMemoryDrag(const ImVec2& availableSize, float DrawMemorySpace, float MaxTime)
 	{
+		// インジケーターと一緒に動かないようにする
+		if (m_ClickedIndicator) return true;
+
 		const bool IsMemoryHovered = (ImGui::IsItemHovered() && ImGui::IsMouseDragging(0));
 		const bool IsTLMiddleDrag = (ImGui::IsWindowHovered() && ImGui::IsMouseDragging(2));
 
