@@ -125,7 +125,7 @@ namespace gui
 
 		// Item(ここではInvisibleButton)にホバーしているかを見たりするので必ずこの後にマウスホイールやドラッグをチェックする
 		if (!CheckWheelExpand()) return false;
-		if (!CheckMemoryDrag(availableSize, DrawMemorySpace)) return false;
+		if (!CheckMemoryDrag(availableSize, DrawMemorySpace, TimelineController->GetMaxTime())) return false;
 
 		//
 		ImDrawList* drawList = ImGui::GetWindowDrawList(); // 描画マネージャー？ 自由に板ポリとか線とか文字を描画できるやつらしい
@@ -149,8 +149,6 @@ namespace gui
 
 				std::string label = math::CMath::GetFloatWithPrecision(LargeMemoryValue, 3);
 				drawList->AddText(ImVec2(x, cursorPos.y + 22.0f), IM_COL32(255, 255, 255, 255), label.c_str());
-
-				//Console::Log("LargeMemoryValue: %f\n", LargeMemoryValue);
 
 				// 長いメモリの値を更新
 				LargeMemoryValue += m_LargeMemoryWidth;
@@ -207,7 +205,7 @@ namespace gui
 		return true;
 	}
 
-	bool CTimeLineView::CheckMemoryDrag(const ImVec2& availableSize, float DrawMemorySpace)
+	bool CTimeLineView::CheckMemoryDrag(const ImVec2& availableSize, float DrawMemorySpace, float MaxTime)
 	{
 		const bool IsMemoryHovered = (ImGui::IsItemHovered() && ImGui::IsMouseDragging(0));
 		const bool IsTLMiddleDrag = (ImGui::IsWindowHovered() && ImGui::IsMouseDragging(2));
@@ -223,15 +221,21 @@ namespace gui
 				float OffsetX = (MousePos.x - m_PrevMousePos.x) / availableSize.x; // 左端から右端に行けたら１が返る
 				// 例. メモリの長針のサイズが1.0秒として2.0秒からから3.0秒に移動したときに1.0動くようにする
 				//OffsetX = OffsetX * DrawMemorySpace * 4.0f;
-				OffsetX = OffsetX * DrawMemorySpace;
+				//OffsetX = OffsetX * DrawMemorySpace;
+				OffsetX = OffsetX * DrawMemorySpace / 4.0f;
 
 				// 長針サイズで拡大縮小する
 				OffsetX *= m_LargeMemoryWidth;
 
-				m_LeftSideMemory += OffsetX;
-				m_RightSideMemory += OffsetX;
+				m_LeftSideMemory -= OffsetX;
+				m_RightSideMemory -= OffsetX;
 
-				Console::Log("OffsetX: %f, m_LeftSideMemory: %f, m_RightSideMemory: %f\n", OffsetX, m_LeftSideMemory, m_RightSideMemory);
+				if (m_LeftSideMemory < 0.0f)
+				{
+					// 0よりも左に行かないようにする
+					m_LeftSideMemory = 0.0f;
+					m_RightSideMemory = static_cast<float>(m_MaxLargeMemoryCount) * m_LargeMemoryWidth;
+				}
 			}
 
 			m_PrevMousePos = MousePos;

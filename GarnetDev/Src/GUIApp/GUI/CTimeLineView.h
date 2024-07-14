@@ -30,7 +30,7 @@ namespace gui
 		bool DrawMemoryBar(const std::shared_ptr<timeline::CTimelineController>& TimelineController);
 
 		bool CheckWheelExpand();
-		bool CheckMemoryDrag(const ImVec2& availableSize, float DrawMemorySpace);
+		bool CheckMemoryDrag(const ImVec2& availableSize, float DrawMemorySpace, float MaxTime);
 
 		float GetFirstLargeMemory(float SrcValue, std::vector<bool>& IsLongMemory);
 
