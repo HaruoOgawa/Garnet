@@ -31,17 +31,18 @@ namespace gui
 		bool DrawKeyFrameWindow(const std::shared_ptr<timeline::CTimelineController>& TimelineController);
 
 		bool DrawMemoryBar(const std::shared_ptr<timeline::CTimelineController>& TimelineController);
-		bool CalcIndicator(const ImVec2& cursorPos, const ImVec2& barSize);
+		bool CalcIndicator(const std::shared_ptr<timeline::CTimelineController>& TimelineController, const ImVec2& cursorPos, const ImVec2& barSize);
 		bool DrawIndicator(ImDrawList* drawList, const ImVec2& cursorPos, const ImVec2& availableSize, const ImVec2& barSize);
 
 		bool CheckWheelExpand();
-		bool CheckMemoryDrag(const ImVec2& availableSize, float DrawMemorySpace, float MaxTime);
+		bool CheckMemoryDrag(const std::shared_ptr<timeline::CTimelineController>& TimelineController, const ImVec2& availableSize, float DrawMemorySpace, float MaxTime);
+
+		bool UpdateCurrentTimeFromMemoryBar(const std::shared_ptr<timeline::CTimelineController>& TimelineController);
+		bool UpdateMemoryFromTimeBar(const std::shared_ptr<timeline::CTimelineController>& TimelineController);
 
 		float GetFirstLargeMemory(float SrcValue, std::vector<bool>& IsLongMemory);
 		float GetFirstMemory(float SrcValue);
-
-		//////////////////////////////////////////
-		void TestMemoryBar(const std::shared_ptr<timeline::CTimelineController>& TimelineController);
+		
 	public:
 		CTimeLineView();
 		virtual ~CTimeLineView() = default;

@@ -67,8 +67,18 @@ namespace gui
 			if (ImGui::SliderFloat(Name.c_str(), &CurrentTime, 0.0f, TimelineController->GetMaxTime()))
 			{
 				TimelineController->SetCurrentTime(CurrentTime);
+
+				// タイムバーの更新と合わせてメモリバーも更新
+				if (!UpdateMemoryFromTimeBar(TimelineController)) return false;
 			}
 			ImGui::PopItemWidth();
+
+			// 再生中
+			if (TimelineController->IsPlay())
+			{
+				// タイムバーの更新と合わせてメモリバーも更新
+				if (!UpdateMemoryFromTimeBar(TimelineController)) return false;
+			}
 		}
 
 		return true;
@@ -125,7 +135,7 @@ namespace gui
 		ImVec2 cursorPos = ImGui::GetCursorScreenPos();
 
 		// インジケーターの前計算。必ずメモリバーよりも先に計算しておく必要がある
-		if (!CalcIndicator(cursorPos, barSize)) return false;
+		if (!CalcIndicator(TimelineController, cursorPos, barSize)) return false;
 
 		// 背景の描画
 		ImGui::SetCursorScreenPos(cursorPos);
@@ -133,7 +143,7 @@ namespace gui
 
 		// Item(ここではInvisibleButton)にホバーしているかを見たりするので必ずこの後にマウスホイールやドラッグをチェックする
 		if (!CheckWheelExpand()) return false;
-		if (!CheckMemoryDrag(availableSize, DrawMemorySpace, TimelineController->GetMaxTime())) return false;
+		if (!CheckMemoryDrag(TimelineController, availableSize, DrawMemorySpace, TimelineController->GetMaxTime())) return false;
 
 		drawList->AddRectFilled(cursorPos, ImVec2(cursorPos.x + barSize.x, cursorPos.y + barSize.y), IM_COL32(60, 60, 60, 255)); // 矩形を描画
 
@@ -176,7 +186,7 @@ namespace gui
 		return true;
 	}
 
-	bool CTimeLineView::CalcIndicator(const ImVec2& cursorPos, const ImVec2& barSize)
+	bool CTimeLineView::CalcIndicator(const std::shared_ptr<timeline::CTimelineController>& TimelineController, const ImVec2& cursorPos, const ImVec2& barSize)
 	{
 		float DrawPos = cursorPos.x + m_IndicatorRate * barSize.x;
 
@@ -200,6 +210,9 @@ namespace gui
 
 			m_IndicatorRate = (mousePos.x - cursorPos.x) / barSize.x;
 			m_IndicatorRate = glm::clamp(m_IndicatorRate, 0.0f, 1.0f);
+
+			// メモリバーの更新に合わせて再生時間も更新する
+			UpdateCurrentTimeFromMemoryBar(TimelineController);
 		}
 		else
 		{
@@ -261,7 +274,7 @@ namespace gui
 		return true;
 	}
 
-	bool CTimeLineView::CheckMemoryDrag(const ImVec2& availableSize, float DrawMemorySpace, float MaxTime)
+	bool CTimeLineView::CheckMemoryDrag(const std::shared_ptr<timeline::CTimelineController>& TimelineController, const ImVec2& availableSize, float DrawMemorySpace, float MaxTime)
 	{
 		// インジケーターと一緒に動かないようにする
 		if (m_ClickedIndicator) return true;
@@ -295,6 +308,9 @@ namespace gui
 					m_LeftSideMemory = 0.0f;
 					m_RightSideMemory = static_cast<float>(m_MaxLargeMemoryCount) * m_LargeMemoryWidth;
 				}
+
+				// メモリバーの更新に合わせて再生時間も更新する
+				UpdateCurrentTimeFromMemoryBar(TimelineController);
 			}
 
 			m_PrevMousePos = MousePos;
@@ -304,6 +320,33 @@ namespace gui
 		{
 			m_FirstClicked = true;
 		}
+
+		return true;
+	}
+
+	bool CTimeLineView::UpdateCurrentTimeFromMemoryBar(const std::shared_ptr<timeline::CTimelineController>& TimelineController)
+	{
+		// メモリバーの情報から再生時間を更新
+		float CurrentTime = glm::mix(m_LeftSideMemory, m_RightSideMemory, m_IndicatorRate);
+		CurrentTime = glm::clamp(CurrentTime, 0.0f, TimelineController->GetMaxTime());
+
+		TimelineController->SetCurrentTime(CurrentTime);
+
+		return true;
+	}
+
+	bool CTimeLineView::UpdateMemoryFromTimeBar(const std::shared_ptr<timeline::CTimelineController>& TimelineController)
+	{
+		// タイムバーの更新と合わせてメモリバーも更新
+		const float CurrentTime = TimelineController->GetCurrentTime();
+
+		// メモリバーの時間の全長
+		const float TimeWidth = static_cast<float>(m_MaxLargeMemoryCount) * m_LargeMemoryWidth;
+
+		m_LeftSideMemory = CurrentTime - TimeWidth * m_IndicatorRate;
+		m_LeftSideMemory = glm::clamp(m_LeftSideMemory, 0.0f, TimelineController->GetMaxTime());
+
+		m_RightSideMemory = m_LeftSideMemory + TimeWidth;
 
 		return true;
 	}
@@ -364,63 +407,6 @@ namespace gui
 		}
 
 		return DstValue;
-	}
-
-	void CTimeLineView::TestMemoryBar(const std::shared_ptr<timeline::CTimelineController>& TimelineController)
-	{
-		// タイムラインのメモリバーを描画
-		ImVec2 availableSize = ImGui::GetContentRegionAvail();
-
-		ImVec2 barSize = ImVec2(availableSize.x, 50.0f);
-
-		// 現在のGUIの描画位置を取得(スクリーン座標系)
-		ImVec2 cursorPos = ImGui::GetCursorScreenPos();
-
-		// 背景の描画
-		ImGui::InvisibleButton("##TimelineMemoryBar", barSize);
-
-		ImDrawList* drawList = ImGui::GetWindowDrawList(); // 描画マネージャー？ 自由に板ポリとか線とか文字を描画できるやつらしい
-		drawList->AddRectFilled(cursorPos, ImVec2(cursorPos.x + barSize.x, cursorPos.y + barSize.y), IM_COL32(60, 60, 60, 255)); // 矩形を描画
-
-		// フレームごとのメモリを描画
-		const float timelineLength = TimelineController->GetMaxTime();
-		float frameWidth = barSize.x / timelineLength;
-
-		for (float i = 0.0f; i < timelineLength; i++)
-		{
-			float x = cursorPos.x + i * frameWidth;
-
-			if (static_cast<int>(i) % 10 == 0)
-			{
-				// 10フレームごとに大きいメモリを描画
-				drawList->AddLine(ImVec2(x, cursorPos.y), ImVec2(x, cursorPos.y + 20.0f), IM_COL32(255, 255, 255, 255));
-
-				std::string label = std::to_string(i);
-				drawList->AddText(ImVec2(x + 2.0f, cursorPos.y + 22.0f), IM_COL32(255, 255, 255, 255), label.c_str());
-			}
-			else
-			{
-				// 通常のメモリを描画
-				drawList->AddLine(ImVec2(x, cursorPos.y), ImVec2(x, cursorPos.y + 10.0f), IM_COL32(255, 255, 255, 255));
-			}
-		}
-
-		// 現在のフレームを表すインジケーター
-		static float CurrentFrame = 0.0f;
-		float CurrentFrameX = cursorPos.x + CurrentFrame * frameWidth;
-		drawList->AddLine(ImVec2(CurrentFrameX, cursorPos.y), ImVec2(CurrentFrameX, cursorPos.y + availableSize.y), IM_COL32(255, 0, 0, 255));
-
-		// タイムラインの操作
-		if (ImGui::IsItemHovered())
-		{
-			if (ImGui::IsMouseClicked(0) || ImGui::IsMouseDragging(0))
-			{
-				ImVec2 mousePos = ImGui::GetMousePos();
-
-				CurrentFrame = (mousePos.x - cursorPos.x) / frameWidth;
-				CurrentFrame = glm::clamp(CurrentFrame, 0.0f, TimelineController->GetMaxTime());
-			}
-		}
 	}
 }
 #endif
