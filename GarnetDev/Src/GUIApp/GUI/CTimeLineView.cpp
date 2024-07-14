@@ -134,13 +134,18 @@ namespace gui
 		// ƒƒ‚ƒŠ‚ÌŠJn’l
 		std::vector<bool> IsLongMemory;
 		float LargeMemoryValue = GetFirstLargeMemory(m_LeftSideMemory, IsLongMemory);
+		const float FirstMemoryValue = GetFirstMemory(m_LeftSideMemory);
+
+		float MemoryOffset = (FirstMemoryValue - m_LeftSideMemory) * DrawMemorySpace;
+
+		//Console::Log("MemoryOffset: %f, FirstMemoryValue: %f, m_LeftSideMemory: %f\n", MemoryOffset, FirstMemoryValue, m_LeftSideMemory);
 
 		// ƒƒ‚ƒŠ‚Ì•`‰æ(Šg‘å‚ÉŒ„ŠÔ‚ªŒ©‚¦‚È‚¢‚æ‚¤‚É‚¢‚­‚Â‚©—]•ª‚É•`‰æ)
 		for (int i = 0; i < (m_MaxLargeMemoryCount * 3 + 4); i++)
 		{
 			int LoopCounter = i % 3;
 
-			float x = cursorPos.x + static_cast<float>(i) * DrawMemorySpace * (1.0f + m_MemoryExpandRate);
+			float x = cursorPos.x + static_cast<float>(i) * DrawMemorySpace * (1.0f + m_MemoryExpandRate) + MemoryOffset;
 
 			if (IsLongMemory[LoopCounter])
 			{
@@ -275,6 +280,33 @@ namespace gui
 		{
 			DstValue = floorf(SrcValue) + 1.0f;
 			IsLongMemory = std::vector<bool>({ true, false, false });
+		}
+
+		return DstValue;
+	}
+
+	float CTimeLineView::GetFirstMemory(float SrcValue)
+	{
+		// ˆê”Ô‰‚ß‚Éo‚Ä‚­‚éƒƒ‚ƒŠ‚Ì’l‚ğæ“¾(’·’ZŠÖŒW‚È‚µ)
+		float DecimalPoint = SrcValue - floorf(SrcValue);
+
+		float DstValue = 0.0f;
+
+		if (DecimalPoint == 0.0f)
+		{
+			DstValue = SrcValue;
+		}
+		else if (DecimalPoint > 0.0f && DecimalPoint <= 0.3f)
+		{
+			DstValue = floorf(SrcValue) + 0.3f;
+		}
+		else if (DecimalPoint > 0.3f && DecimalPoint <= 6.0f)
+		{
+			DstValue = floorf(SrcValue) + 0.6f;
+		}
+		else if (DecimalPoint > 0.6f && DecimalPoint < 1.0f)
+		{
+			DstValue = floorf(SrcValue) + 1.0f;
 		}
 
 		return DstValue;

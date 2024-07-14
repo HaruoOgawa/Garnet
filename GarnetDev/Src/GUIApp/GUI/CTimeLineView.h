@@ -33,6 +33,7 @@ namespace gui
 		bool CheckMemoryDrag(const ImVec2& availableSize, float DrawMemorySpace, float MaxTime);
 
 		float GetFirstLargeMemory(float SrcValue, std::vector<bool>& IsLongMemory);
+		float GetFirstMemory(float SrcValue);
 
 		//////////////////////////////////////////
 		void TestMemoryBar(const std::shared_ptr<timeline::CTimelineController>& TimelineController);
