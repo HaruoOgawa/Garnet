@@ -40,6 +40,7 @@ namespace scene
 		std::vector<std::tuple<std::string, std::string, int>> Textures;
 		int RefCount = 0;
 		graphics::ECullMode CullMode = graphics::ECullMode::CULL_BACK;
+		std::vector<std::string> TrackIDList;
 	};
 
 	struct SAnimationClip

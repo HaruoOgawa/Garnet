@@ -1,18 +1,56 @@
 #ifdef USE_GUIENGINE
 #include "CTimeLineView.h"
-#include <Timeline/CTimelineController.h>
+#include <Object/C3DObject.h>
+#include <Message/Console.h>
+#include <Timeline/CNodeTrack.h>
+#include <Timeline/CMaterialTrack.h>
 
 namespace gui
 {
-	CTimeLineView::CTimeLineView()
+	CTimeLineView::CTimeLineView():
+		m_LargeMemoryWidth(1.0f),
+		m_MemoryExpandRate(0.0f),
+		m_LeftSideScreenPos(ImVec2()),
+		m_RightSideScreenPos(ImVec2()),
+		m_FirstClicked(true),
+		m_PrevMousePos(ImVec2(0.0f, 0.0f)),
+		m_ClickedIndicator(false),
+		m_IndicatorRate(0.0f),
+		m_MemoryBarCursorPos(ImVec2()),
+		m_MemoryBarSize(ImVec2()),
+		m_MemoryBarAvailableSize(ImVec2()),
+		m_ShowAddObjDialog(false),
+		m_ShowAddTrackDialog(false),
+		m_SelectedObjectForAddObj(nullptr),
+		m_ClickedObjectForAddObjectTrack(nullptr),
+		m_SelectedNodeForAddTrack(nullptr),
+		m_SelectedMaterialForAddTrack(nullptr)
 	{
+		m_LeftSideMemory = 0.0f;
+		m_RightSideMemory = static_cast<float>(m_MaxLargeMemoryCount) * m_LargeMemoryWidth;
 	}
 
-	bool CTimeLineView::Draw(const std::shared_ptr<timeline::CTimelineController>& TimelineController)
+	bool CTimeLineView::Initialize(const std::shared_ptr<timeline::CTimelineController>& TimelineController, const std::vector<std::shared_ptr<object::C3DObject>>& ObjectList)
+	{
+		for (const auto& Object : ObjectList)
+		{
+			if (!Object->HasTLTrackContent()) continue;
+
+			m_TrackObjectList.emplace(Object);
+		}
+
+		return true;
+	}
+
+	bool CTimeLineView::Draw(const std::shared_ptr<timeline::CTimelineController>& TimelineController, const std::vector<std::shared_ptr<object::C3DObject>>& ObjectList)
 	{
 		if (!TimelineController) return true;
 
 		if (!DrawTimeBar(TimelineController)) return false;
+		if (!DrawHierarchyWindow(TimelineController)) return false;
+		if (!DrawKeyFrameWindow(TimelineController)) return false;
+		if (m_ShowAddObjDialog && !DrawAddObjectDialog(TimelineController, ObjectList)) return false;
+		if (m_ShowAddTrackDialog && !DrawAddObjectTrackDialog(TimelineController)) return false;
 
 		return true;
 	}
@@ -49,18 +87,971 @@ namespace gui
 			// 再生ボタンと同じ位置に配置する
 			ImGui::SameLine();
 
-			float CurrentTime = TimelineController->GetCurrentTime();
+			float CurrentTime = TimelineController->GetPlayBackTime();
 
 			std::string Name = "##TimelinePlaybackTime";
 			ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x); // 現在のウィンドウの利用可能な範囲までスライダーを引き延ばす. GetContentRegionAvailは現在地での利用可能なサイズを返す
 			if (ImGui::SliderFloat(Name.c_str(), &CurrentTime, 0.0f, TimelineController->GetMaxTime()))
 			{
-				TimelineController->SetCurrentTime(CurrentTime);
+				TimelineController->SetPlayBackTime(CurrentTime);
+
+				// タイムバーの更新と合わせてメモリバーも更新
+				if (!UpdateMemoryFromTimeBar(TimelineController)) return false;
 			}
 			ImGui::PopItemWidth();
+
+			// 再生中
+			if (TimelineController->IsPlay())
+			{
+				// タイムバーの更新と合わせてメモリバーも更新
+				if (!UpdateMemoryFromTimeBar(TimelineController)) return false;
+			}
 		}
 
 		return true;
+	}
+
+	bool CTimeLineView::DrawHierarchyWindow(const std::shared_ptr<timeline::CTimelineController>& TimelineController)
+	{
+		// リセットする
+		m_OpenedTrackPosMap.clear();
+
+		ImVec2 availableSize = ImGui::GetContentRegionAvail();
+
+		ImGui::BeginChild("HierarchyWindow##Timeline", ImVec2(availableSize.x * 0.25f, availableSize.y));
+		
+		ImDrawList* draw_list = ImGui::GetWindowDrawList();
+		ImVec2 window_pos = ImGui::GetWindowPos();
+		ImVec2 window_size = ImGui::GetWindowSize();
+
+		draw_list->AddRectFilled(window_pos, ImVec2(window_pos.x + window_size.x, window_pos.y + window_size.y), IM_COL32(60, 60, 60, 255));
+
+		const auto& TLClip = TimelineController->GetClip();
+		if (!TLClip) return true;
+
+		const auto& TrackList = TLClip->GetTrackList();
+		const auto& SamplerList = TLClip->GetSamplerList();
+
+		ImVec2 CursorPos = ImGui::GetCursorPos();
+		
+		// Object追加ダイアログ表示
+		const bool Clicked_AddProperty_Btn = ImGui::Button("AddProperty##Timeline_HierarchyWindow_AddProperty", ImVec2(availableSize.x * 0.25f, m_MemoryBarHeight));
+		
+		// メモリバーの高さから開始する
+		ImGui::SetCursorPos(ImVec2(CursorPos.x, CursorPos.y + m_MemoryBarHeight));
+		
+		bool IsOpenAndClicked = false;
+
+		for (const auto& Object : m_TrackObjectList)
+		{
+			std::string ObjectTreeLabel = Object->GetObjectName() + "##TimeLineView_Hierarchy_ObjectTree";
+
+			if (ImGui::TreeNodeEx(ObjectTreeLabel.c_str()))
+			{
+				// Track追加ダイアログ表示。Treeの内外両方に必要
+				if (CheckIsClickedObjectTree(Object))
+				{
+					IsOpenAndClicked = true;
+				}
+				
+				// Node Track
+				{
+					std::string TrackLabel = "NodeTrack##Timeline_" + Object->GetObjectName();
+
+					if (ImGui::TreeNodeEx(TrackLabel.c_str()))
+					{
+						for (const auto& Node : Object->GetTLNodeList())
+						{
+							std::string NodeTrackLabel = Node->GetName() + "##TimeLineView_Hierarchy_NodeTree";
+							if (ImGui::TreeNodeEx(NodeTrackLabel.c_str()))
+							{
+								for (const auto& TrackID : Node->GetRefTrackIDList())
+								{
+									const auto& Track = TrackList.find(TrackID);
+									if (Track == TrackList.end()) continue;
+
+									// トラックと描画位置(カーソル位置)を登録
+									m_OpenedTrackPosMap.emplace(Track->second, ImGui::GetCursorScreenPos());
+
+									if (!DrawTrackProperty(TimelineController, Track->second, SamplerList)) return false;
+								}
+
+								ImGui::TreePop();
+							}
+						}
+
+						ImGui::TreePop();
+					}
+				}
+
+				// MaterialTrack
+				{
+					std::string TrackLabel = "MaterialTrack##Timeline_" + Object->GetObjectName();
+
+					if (ImGui::TreeNodeEx(TrackLabel.c_str()))
+					{
+						for (const auto& Material : Object->GetTLMaterial())
+						{
+							std::string MaterialTrackLabel = Material->GetMaterialName() + "##TimeLineView_Hierarchy_MaterialTree";
+							if (ImGui::TreeNodeEx(MaterialTrackLabel.c_str()))
+							{
+								for (const auto& TrackID : Material->GetRefTrackIDList())
+								{
+									const auto& Track = TrackList.find(TrackID);
+									if (Track == TrackList.end()) continue;
+
+									// トラックと描画位置(カーソル位置)を登録
+									m_OpenedTrackPosMap.emplace(Track->second, ImGui::GetCursorScreenPos());
+
+									if (!DrawTrackProperty(TimelineController, Track->second, SamplerList)) return false;
+								}
+
+								ImGui::TreePop();
+							}
+						}
+
+						ImGui::TreePop();
+					}
+				}
+
+				ImGui::TreePop();
+			}
+
+			// Track追加ダイアログ表示。Treeの内外両方に必要
+			CheckIsClickedObjectTree(Object);
+		}
+
+		// AddPropertyの押下かHierarchyウィンドウのどこかしらの右クリックでダイアログを開く。
+		if (Clicked_AddProperty_Btn || (ImGui::IsWindowHovered() && ImGui::IsMouseClicked(1) && !ImGui::IsItemHovered() && !IsOpenAndClicked))
+		{
+			m_ShowAddObjDialog = true;
+		}
+
+		ImGui::EndChild();
+
+		return true;
+	}
+
+	bool CTimeLineView::DrawTrackProperty(const std::shared_ptr<timeline::CTimelineController>& TimelineController, const std::shared_ptr<timeline::CTimelineTrack>& Track,
+		const std::vector<std::shared_ptr<animation::CAnimationSampler>>& SamplerList)
+	{
+		int SamplerIndex = Track->GetSamplerIndex();
+		if (SamplerIndex < 0 || SamplerIndex >= SamplerList.size()) return false;
+
+		//
+		animation::EInterpolateValueType InterpolateValueType = animation::EInterpolateValueType::NONE;
+		if (Track->GetSamplerTarget() == timeline::ETimelineSamplerTarget::ROTATION)
+		{
+			InterpolateValueType = animation::EInterpolateValueType::QUATERNION;
+		}
+		else if (Track->GetSamplerTarget() == timeline::ETimelineSamplerTarget::MODELMATRIX)
+		{
+			InterpolateValueType = animation::EInterpolateValueType::MODELMATRIX;
+		}
+
+		// サンプラーと再生時間から現在のキーフレームの値を取得
+		math::EValueType ValueType = Track->GetValueType();
+
+		auto& Sampler = SamplerList[SamplerIndex];
+		std::vector<float> Value;
+
+		if (!Sampler->ComputeCurrentFrame(TimelineController->GetPlayBackTime(), false, Value, InterpolateValueType)) return false;
+
+		if (Value.empty()) Value = GetDefaultValue(ValueType);
+
+		if (Value.empty()) return true;
+
+		// GUIに描画
+		std::string Label = Track->GetTrackName() + "##Timeline_TrackProperty";
+		
+		switch (ValueType)
+		{
+		case math::EValueType::VALUE_TYPE_NONE:
+			break;
+		case math::EValueType::VALUE_TYPE_SCALAR:
+			ImGui::InputFloat(Label.c_str(), &Value[0]);
+			break;
+		case math::EValueType::VALUE_TYPE_VEC2:
+			ImGui::InputFloat2(Label.c_str(), &Value[0]);
+			break;
+		case math::EValueType::VALUE_TYPE_VEC3:
+			ImGui::InputFloat3(Label.c_str(), &Value[0]);
+			break;
+		case math::EValueType::VALUE_TYPE_VEC4:
+			ImGui::InputFloat4(Label.c_str(), &Value[0]);
+			break;
+		case math::EValueType::VALUE_TYPE_MAT2:
+			break;
+		case math::EValueType::VALUE_TYPE_MAT3:
+			break;
+		case math::EValueType::VALUE_TYPE_MAT4:
+			break;
+		case math::EValueType::VALUE_TYPE_VECTOR:
+			break;
+		case math::EValueType::VALUE_TYPE_MATRIX:
+			break;
+		default:
+			break;
+		}
+
+		return true;
+	}
+
+	bool CTimeLineView::DrawKeyFrameWindow(const std::shared_ptr<timeline::CTimelineController>& TimelineController)
+	{
+		ImGui::SameLine();
+
+		ImVec2 availableSize = ImGui::GetContentRegionAvail();
+		
+		ImGui::BeginChild("KeyFrameWindow##Timeline", availableSize, 0, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+
+		// タイムラインのメモリバーを描画
+		if (!DrawMemoryBar(TimelineController)) return false;
+
+		// キーフレームを描画
+		if (!DrawKeyFrameList(TimelineController)) return false;
+
+		// インジケーターの描画
+		if (!DrawIndicator(m_MemoryBarCursorPos, m_MemoryBarAvailableSize, m_MemoryBarSize)) return false;
+
+		ImGui::EndChild();
+
+		return true;
+	}
+
+	bool CTimeLineView::DrawMemoryBar(const std::shared_ptr<timeline::CTimelineController>& TimelineController)
+	{
+		// タイムラインのメモリバーを描画
+		m_MemoryBarAvailableSize = ImGui::GetContentRegionAvail();
+
+		m_MemoryBarSize = ImVec2(m_MemoryBarAvailableSize.x, m_MemoryBarHeight);
+
+		// メモリとメモリの間隔
+		const float DrawMemorySpace = m_MemoryBarAvailableSize.x / (m_MaxLargeMemoryCount * 3);
+
+		ImDrawList* drawList = ImGui::GetWindowDrawList(); // 描画マネージャー？ 自由に板ポリとか線とか文字を描画できるやつらしい
+
+		// 現在のGUIの描画位置を取得(スクリーン座標系)
+		m_MemoryBarCursorPos = ImGui::GetCursorScreenPos();
+
+		// インジケーターの前計算。必ずメモリバーよりも先に計算しておく必要がある
+		if (!CalcIndicator(TimelineController, m_MemoryBarCursorPos, m_MemoryBarSize)) return false;
+
+		// 背景の描画
+		ImGui::SetCursorScreenPos(m_MemoryBarCursorPos);
+		ImGui::InvisibleButton("##TimelineMemoryBar", m_MemoryBarSize);
+
+		// 左右のメモリのスクリーン座標を設定
+		m_LeftSideScreenPos = m_MemoryBarCursorPos;
+		m_RightSideScreenPos = ImVec2(m_MemoryBarCursorPos.x + m_MemoryBarAvailableSize.x, m_MemoryBarCursorPos.y);
+
+		// Item(ここではInvisibleButton)にホバーしているかを見たりするので必ずこの後にマウスホイールやドラッグをチェックする
+		if (!CheckWheelExpand()) return false;
+		if (!CheckMemoryDrag(TimelineController, m_MemoryBarAvailableSize, DrawMemorySpace, TimelineController->GetMaxTime())) return false;
+
+		drawList->AddRectFilled(m_MemoryBarCursorPos, ImVec2(m_MemoryBarCursorPos.x + m_MemoryBarSize.x, m_MemoryBarCursorPos.y + m_MemoryBarSize.y), IM_COL32(60, 60, 60, 255)); // 矩形を描画
+
+		// メモリの開始値
+		std::vector<bool> IsLongMemory;
+		float LargeMemoryValue = GetFirstLargeMemory(m_LeftSideMemory, IsLongMemory);
+		const float FirstMemoryValue = GetFirstMemory(m_LeftSideMemory);
+
+		float MemoryOffset = (FirstMemoryValue - m_LeftSideMemory) * DrawMemorySpace;
+
+		// メモリの描画(拡大時に隙間が見えないようにいくつか余分に描画)
+		for (int i = 0; i < (m_MaxLargeMemoryCount * 3 + 4); i++)
+		{
+			int LoopCounter = i % 3;
+
+			float x = m_MemoryBarCursorPos.x + static_cast<float>(i) * DrawMemorySpace * (1.0f + m_MemoryExpandRate) + MemoryOffset;
+
+			if (IsLongMemory[LoopCounter])
+			{
+				// 長い針とメモリテキストを描画
+				drawList->AddLine(ImVec2(x, m_MemoryBarCursorPos.y), ImVec2(x, m_MemoryBarCursorPos.y + 20.0f), IM_COL32(255, 255, 255, 255));
+
+				std::string label = math::CMath::GetFloatWithPrecision(LargeMemoryValue, 3);
+				drawList->AddText(ImVec2(x, m_MemoryBarCursorPos.y + 22.0f), IM_COL32(255, 255, 255, 255), label.c_str());
+
+				// 長いメモリの値を更新
+				LargeMemoryValue += m_LargeMemoryWidth;
+			}
+			else
+			{
+				// 短いメモリのみ
+				drawList->AddLine(ImVec2(x, m_MemoryBarCursorPos.y), ImVec2(x, m_MemoryBarCursorPos.y + 10.0f), IM_COL32(255, 255, 255, 255));
+			}
+			
+		}
+
+		return true;
+	}
+
+	bool CTimeLineView::CalcIndicator(const std::shared_ptr<timeline::CTimelineController>& TimelineController, const ImVec2& cursorPos, const ImVec2& barSize)
+	{
+		float DrawPos = cursorPos.x + m_IndicatorRate * barSize.x;
+
+		float btnW = 10.0f;
+		ImGui::SetCursorScreenPos(ImVec2(DrawPos - btnW * 0.5f, cursorPos.y));
+		
+		bool IsClicked = (ImGui::IsMouseDown(0));
+
+		if (!m_ClickedIndicator)
+		{
+			ImGui::InvisibleButton("##TimelineIndicator", ImVec2(btnW, barSize.y));
+			if (ImGui::IsItemHovered() && IsClicked)
+			{
+				m_ClickedIndicator = true;
+			}
+		}
+
+		if (m_ClickedIndicator && IsClicked)
+		{
+			ImVec2 mousePos = ImGui::GetMousePos();
+
+			m_IndicatorRate = (mousePos.x - cursorPos.x) / barSize.x;
+			m_IndicatorRate = glm::clamp(m_IndicatorRate, 0.0f, 1.0f);
+
+			// メモリバーの更新に合わせて再生時間も更新する
+			UpdateCurrentTimeFromMemoryBar(TimelineController);
+		}
+		else
+		{
+			m_ClickedIndicator = false;
+		}
+
+		return true;
+	}
+
+	bool CTimeLineView::DrawIndicator(const ImVec2& cursorPos, const ImVec2& availableSize, const ImVec2& barSize)
+	{
+		ImDrawList* drawList = ImGui::GetWindowDrawList();
+
+		float DrawPos = cursorPos.x + m_IndicatorRate * barSize.x;
+		drawList->AddLine(ImVec2(DrawPos, cursorPos.y), ImVec2(DrawPos, cursorPos.y + availableSize.y), IM_COL32(255, 0, 0, 255));
+
+		return true;
+	}
+
+	bool CTimeLineView::DrawKeyFrameList(const std::shared_ptr<timeline::CTimelineController>& TimelineController)
+	{
+		ImVec2 ScreenCursorPos = ImGui::GetCursorScreenPos();
+
+		ImVec2 availableSize = ImGui::GetContentRegionAvail();
+
+		ImGui::BeginChild("KeyFrameList##Timeline", availableSize);
+
+		const auto& TLClip = TimelineController->GetClip();
+		if (!TLClip) return true;
+
+		const auto& SamplerList = TLClip->GetSamplerList();
+
+		for (const auto& OpenedTrackAndCursor : m_OpenedTrackPosMap)
+		{
+			const auto& Track = OpenedTrackAndCursor.first;
+			const auto& OpenedTrackPos = OpenedTrackAndCursor.second;
+
+			const float TrackHeight = 10.0f;
+
+			ImGui::SetCursorScreenPos(ImVec2(ScreenCursorPos.x, OpenedTrackPos.y));
+
+			// ボタンの色を選択
+			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.24f, 0.24f, 0.24f, 1.0f)); // 通常時の色
+			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.24f, 0.24f, 0.24f, 1.0f)); // ホバーの色
+			ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.24f, 0.24f, 0.24f, 1.0f)); // 押下時の色
+
+			std::string Lebal = "##Timeline_KeyFrameBar_" + Track->GetTrackName();
+			if (ImGui::Button(Lebal.c_str(), ImVec2(availableSize.x, TrackHeight)))
+			{
+				
+			}
+
+			// 色の設定を元に戻す
+			ImGui::PopStyleColor(3); // 3つ分のカラースタックをポップする
+
+			// キーフレーム
+			int SamplerIndex = Track->GetSamplerIndex();
+			if (SamplerIndex < 0 || SamplerIndex >= SamplerList.size()) return false;
+
+			// サンプラーから指定時間内のキーフレームリストを取得
+			auto& Sampler = SamplerList[SamplerIndex];
+
+			const auto& KeyFrameList = Sampler->GetKeyFrameListFromRange(m_LeftSideMemory, m_RightSideMemory);
+
+			// 各キーフレームを該当する時間の座標に描画する
+			for (const auto& KeyFrame : KeyFrameList)
+			{
+				float FrameTime = KeyFrame->GetInput();
+
+				// キーフレームの時間が左右のメモリの時間に対してどれくらいの割合か
+				float t = (FrameTime - m_LeftSideMemory) / (m_RightSideMemory - m_LeftSideMemory);
+
+				// 割合から座標を求める
+				float XPos = glm::mix(m_LeftSideScreenPos.x, m_RightSideScreenPos.x, t);
+
+				ImGui::SetCursorScreenPos(ImVec2(XPos, OpenedTrackPos.y));
+
+				// ボタンの色を選択
+				ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.0f, 1.0f, 0.0f, 1.0f)); // 通常時の色
+				ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(1.0f, 1.0f, 0.6f, 1.0f)); // ホバーの色
+				ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(1.0f, 1.0f, 1.0f, 1.0f)); // 押下時の色
+
+				std::string KeyFrameLabel = "##Timeline_KeyFrame_" + Track->GetTrackName() + "_" + std::to_string(FrameTime);
+				if (ImGui::Button(KeyFrameLabel.c_str(), ImVec2(TrackHeight, TrackHeight)))
+				{
+
+				}
+
+				// 色の設定を元に戻す
+				ImGui::PopStyleColor(3); // 3つ分のカラースタックをポップする
+			}
+		}
+
+		ImGui::EndChild();
+
+		return true;
+	}
+
+	bool CTimeLineView::DrawAddObjectDialog(const std::shared_ptr<timeline::CTimelineController>& TimelineController, const std::vector<std::shared_ptr<object::C3DObject>>& ObjectList)
+	{
+		ImGuiIO& io = ImGui::GetIO();
+
+		ImVec2 WindowSize = ImVec2(io.DisplaySize.x * 0.1f, io.DisplaySize.y * 0.1f);
+		
+		ImGui::SetNextWindowPos(ImVec2(io.MousePos.x - WindowSize.x * 0.5f, io.MousePos.y - WindowSize.y * 0.5f), ImGuiCond_Appearing, ImVec2(0.0f, 0.0f));
+		ImGui::SetNextWindowSize(WindowSize, ImGuiCond_Appearing);
+
+		if (ImGui::Begin("AddObject##Timeline", &m_ShowAddObjDialog))
+		{
+			std::string CurrentValue = (m_SelectedObjectForAddObj) ? m_SelectedObjectForAddObj->GetObjectName() : "";
+
+			if (ImGui::BeginCombo("ObjectList##Timeline_AddObjectDialog", CurrentValue.c_str()))
+			{
+				for (const auto& Object : ObjectList)
+				{
+					std::string LabelSelectable = Object->GetObjectName() + "##Timeline_Selectable";
+
+					const bool IsSelected = (m_SelectedObjectForAddObj == Object);
+
+					if (ImGui::Selectable(LabelSelectable.c_str(), IsSelected) && !IsSelected)
+					{
+						m_SelectedObjectForAddObj = Object;
+					}
+				}
+
+				ImGui::EndCombo();
+			}
+
+			if (ImGui::Button("Add##Timeline_AddObjectDialog"))
+			{
+				m_TrackObjectList.emplace(m_SelectedObjectForAddObj);
+
+				m_SelectedObjectForAddObj = nullptr;
+				m_ShowAddObjDialog = false;
+			}
+		}
+
+		ImGui::End();
+
+		return true;
+	}
+
+	bool CTimeLineView::DrawAddObjectTrackDialog(const std::shared_ptr<timeline::CTimelineController>& TimelineController)
+	{
+		ImGuiIO& io = ImGui::GetIO();
+
+		ImVec2 WindowSize = ImVec2(io.DisplaySize.x * 0.1f, io.DisplaySize.y * 0.1f);
+
+		ImGui::SetNextWindowPos(ImVec2(io.MousePos.x, io.MousePos.y - WindowSize.y * 0.5f), ImGuiCond_Appearing, ImVec2(0.0f, 0.0f));
+		ImGui::SetNextWindowSize(WindowSize, ImGuiCond_Appearing);
+
+		if (ImGui::Begin("AddTrack##Timeline", &m_ShowAddTrackDialog))
+		{
+			if (ImGui::BeginTabBar("##Timeline_AddObjectTrackDialog_TabBar"))
+			{
+				if (!DrawNodeDialogView(TimelineController)) return false;
+				if (!DrawMaterialDialogView(TimelineController)) return false;
+
+				ImGui::EndTabBar();
+			}
+		}
+
+		ImGui::End();
+
+		return true;
+	}
+
+	bool CTimeLineView::DrawNodeDialogView(const std::shared_ptr<timeline::CTimelineController>& TimelineController)
+	{
+		// NodeTrack
+		if (ImGui::BeginTabItem("NodeTrack##Timeline_AddObjectTrackDialog_TabItem"))
+		{
+			static timeline::ENodeTrackTarget SelectedType = timeline::ENodeTrackTarget::NodeTrackTarget_None;
+			std::string SelectedName = timeline::CNodeTrack::CastNodeTrackTarget_Str(SelectedType);
+
+			// Target
+			if (m_ClickedObjectForAddObjectTrack)
+			{
+				static std::string SelectedName_Node = "";
+				if (ImGui::BeginCombo("Node##Timeline_AddObjectTrackDialog_NodeTrack_Combo", SelectedName_Node.c_str()))
+				{
+					for (const auto& Node : m_ClickedObjectForAddObjectTrack->GetNodeList())
+					{
+						std::string NodeName = std::to_string(Node->GetSelfNodeIndex()) + "_" + Node->GetName();
+
+						std::string LabelSelectable = NodeName + "##Timeline_AddObjectTrackDialog_NodeItem_Selectable";
+
+						const bool IsSelected = (m_SelectedNodeForAddTrack == Node);
+
+						if (ImGui::Selectable(LabelSelectable.c_str(), IsSelected) && !IsSelected)
+						{
+							SelectedName_Node = NodeName;
+							m_SelectedNodeForAddTrack = Node;
+						}
+					}
+
+					ImGui::EndCombo();
+				}
+			}
+
+			// Type
+			if (ImGui::BeginCombo("Type##Timeline_AddObjectTrackDialog_NodeTrack_Combo", SelectedName.c_str()))
+			{
+				for (int i = 0; i < static_cast<int>(timeline::ENodeTrackTarget::NodeTrackTarget_Max); i++)
+				{
+					timeline::ENodeTrackTarget Type = static_cast<timeline::ENodeTrackTarget>(i);
+
+					const bool IsSelected = (SelectedType == Type);
+
+					std::string LabelSelectable = timeline::CNodeTrack::CastNodeTrackTarget_Str(Type) + "##Timeline_AddObjectTrackDialog_NodeTrack_Selectable";
+
+					if (ImGui::Selectable(LabelSelectable.c_str(), IsSelected) && !IsSelected)
+					{
+						SelectedType = Type;
+					}
+				}
+
+				ImGui::EndCombo();
+			}
+
+			// Add
+			if (ImGui::Button("Add##Timeline_AddObjectTrackDialog"))
+			{
+				const auto& Clip = TimelineController->GetClip();
+				if (Clip && m_SelectedNodeForAddTrack)
+				{
+					int SamplerIndex = static_cast<int>(Clip->GetSamplerList().size());
+					std::string TrackID = timeline::CTimelineTrack::GenerateUUID();
+
+					timeline::ETimelineSamplerTarget SamplerTarget = timeline::ETimelineSamplerTarget::NONE;
+
+					if (SelectedType == timeline::ENodeTrackTarget::NodeTrackTarget_Rotation)
+					{
+						SamplerTarget = timeline::ETimelineSamplerTarget::ROTATION;
+					}
+
+					// Sampler
+					std::shared_ptr<animation::CAnimationSampler> Sampler = std::make_shared<animation::CAnimationSampler>(animation::EInterpolationType::LINEAR);
+					Clip->AddSampler(Sampler);
+
+					// Track
+					std::shared_ptr<timeline::CNodeTrack> Track = std::make_shared<timeline::CNodeTrack>(TrackID, SamplerIndex, SamplerTarget, SelectedType);
+					Clip->AddTrack(Track);
+
+					// TrackIDをターゲットに割り当てる
+					m_SelectedNodeForAddTrack->AddRefTrackID(TrackID);
+					Track->AssignTrackContent(m_SelectedNodeForAddTrack);
+
+					// Objectに参照追加
+					m_ClickedObjectForAddObjectTrack->AddTLNode(m_SelectedNodeForAddTrack);
+				}
+
+				m_ShowAddTrackDialog = false;
+				m_ClickedObjectForAddObjectTrack = nullptr;
+				m_SelectedNodeForAddTrack = nullptr;
+				m_SelectedMaterialForAddTrack = nullptr;
+			}
+
+			ImGui::EndTabItem();
+		}
+
+		return true;
+	}
+
+	bool CTimeLineView::DrawMaterialDialogView(const std::shared_ptr<timeline::CTimelineController>& TimelineController)
+	{
+		// MaterialTrack
+		if (ImGui::BeginTabItem("MaterialTrack##Timeline_AddObjectTrackDialog_TabItem"))
+		{
+			static timeline::EMaterialTrackTarget SelectedType = timeline::EMaterialTrackTarget::MaterialTrackTarget_None;
+			std::string SelectedName = timeline::CMaterialTrack::CastMaterialTrackTarget_Str(SelectedType);
+
+			static std::string SelectedMaterialName = "";
+			static std::string SelectedUniformName = "";
+			static math::EValueType SelectedValueType = math::EValueType::VALUE_TYPE_NONE;
+
+			// Target
+			if (m_ClickedObjectForAddObjectTrack)
+			{
+				// Select Material
+				if (ImGui::BeginCombo("Material##Timeline_AddObjectTrackDialog_Material_Combo", SelectedMaterialName.c_str()))
+				{
+					for (const auto& Material : m_ClickedObjectForAddObjectTrack->GetMaterialList())
+					{
+						const bool IsSelected = (m_SelectedMaterialForAddTrack == Material);
+
+						std::string LabelSelectable = Material->GetMaterialName() + "##Timeline_AddObjectTrackDialog_Material_Selectable";
+
+						if (ImGui::Selectable(LabelSelectable.c_str(), IsSelected) && !IsSelected)
+						{
+							SelectedMaterialName = Material->GetMaterialName();
+							m_SelectedMaterialForAddTrack = Material;
+						}
+					}
+
+					ImGui::EndCombo();
+				}
+
+				// Select Uniform
+				if (ImGui::BeginCombo("Uniform##Timeline_AddObjectTrackDialog_Uniform_Combo", SelectedUniformName.c_str()))
+				{
+					if (m_SelectedMaterialForAddTrack)
+					{
+						// Uniform
+						const auto& ShaderBufferList = m_SelectedMaterialForAddTrack->GetShaderBufferList();
+
+						for (auto& UniformBuffer : ShaderBufferList)
+						{
+							const auto& BufferData = UniformBuffer->GetData();
+
+							const auto& Descriptor = UniformBuffer->GetDescriptor();
+
+							for (const auto& UniformDataMap : Descriptor->GetDataList())
+							{
+								const auto& UniformData = UniformDataMap.second;
+								const auto ValueInput = UniformData.ValueInput;
+
+								const std::string& UniformName = UniformData.UniformName;
+								math::EValueType ValueType = graphics::CUniformValueType::CastUniformToValueType(UniformData.ValueType);
+
+								const bool IsSelected = (SelectedUniformName == UniformName);
+
+								std::string LabelSelectable = UniformName + "##Timeline_AddObjectTrackDialog_Uniform_Selectable";
+
+								if (ImGui::Selectable(LabelSelectable.c_str(), IsSelected) && !IsSelected)
+								{
+									SelectedUniformName = UniformName;
+									SelectedValueType = ValueType;
+								}
+							}
+						}
+					}
+
+					ImGui::EndCombo();
+				}
+			}
+
+			if (ImGui::BeginCombo("Type##Timeline_AddObjectTrackDialog_MaterialTrack_Combo", SelectedName.c_str()))
+			{
+				for (int i = 0; i < static_cast<int>(timeline::EMaterialTrackTarget::MaterialTrackTarget_Max); i++)
+				{
+					timeline::EMaterialTrackTarget Type = static_cast<timeline::EMaterialTrackTarget>(i);
+
+					const bool IsSelected = (SelectedType == Type);
+
+					std::string LabelSelectable = timeline::CMaterialTrack::CastMaterialTrackTarget_Str(Type) + "##Timeline_AddObjectTrackDialog_MaterialTrack_Selectable";
+
+					if (ImGui::Selectable(LabelSelectable.c_str(), IsSelected) && !IsSelected)
+					{
+						SelectedType = Type;
+					}
+				}
+
+				ImGui::EndCombo();
+			}
+
+			if (ImGui::Button("Add##Timeline_AddObjectTrackDialog"))
+			{
+				const auto& Clip = TimelineController->GetClip();
+				if (Clip && m_SelectedMaterialForAddTrack && !SelectedUniformName.empty() && SelectedValueType != math::EValueType::VALUE_TYPE_NONE)
+				{
+					int SamplerIndex = static_cast<int>(Clip->GetSamplerList().size());
+					std::string TrackID = timeline::CTimelineTrack::GenerateUUID();
+
+					timeline::ETimelineSamplerTarget SamplerTarget = timeline::ETimelineSamplerTarget::NONE;
+
+					// Sampler
+					std::shared_ptr<animation::CAnimationSampler> Sampler = std::make_shared<animation::CAnimationSampler>(animation::EInterpolationType::LINEAR);
+					Clip->AddSampler(Sampler);
+
+					// Track
+					std::shared_ptr<timeline::CMaterialTrack> Track = std::make_shared<timeline::CMaterialTrack>(TrackID, SamplerIndex, SamplerTarget, SelectedType, SelectedUniformName, SelectedValueType);
+					Clip->AddTrack(Track);
+
+					// TrackIDをターゲットに割り当てる
+					m_SelectedMaterialForAddTrack->AddRefTrackID(TrackID);
+					Track->AssignTrackContent(m_SelectedMaterialForAddTrack);
+
+					// Objectに参照追加
+					m_ClickedObjectForAddObjectTrack->AddTLMaterial(m_SelectedMaterialForAddTrack);
+				}
+
+				m_ShowAddTrackDialog = false;
+				m_ClickedObjectForAddObjectTrack = nullptr;
+				m_SelectedNodeForAddTrack = nullptr;
+				m_SelectedMaterialForAddTrack = nullptr;
+			}
+
+			ImGui::EndTabItem();
+		}
+
+		return true;
+	}
+
+	bool CTimeLineView::CheckWheelExpand()
+	{
+		// インジケーターと一緒に動かないようにする
+		if (m_ClickedIndicator) return true;
+
+		// マウスホイール量で拡大率を更新
+		ImGuiIO& io = ImGui::GetIO();
+		const float MouseWheel = io.MouseWheel;
+
+		if (ImGui::IsWindowHovered() && MouseWheel != 0.0f)
+		{
+			if (glm::sign(MouseWheel) == 1.0f && m_LargeMemoryWidth >= 100.0f)
+			{
+				// 最大値は100.0
+				return true;
+			}
+			else if (glm::sign(MouseWheel) == -1.0f && m_LargeMemoryWidth <= 0.01f)
+			{
+				// 最小値は0.01
+				return true;
+			}
+
+			const float Speed = 0.05f;
+			const float Width = 0.1f;
+
+			m_MemoryExpandRate += MouseWheel * Speed;
+
+			if (m_MemoryExpandRate >= Width)
+			{
+				// 長いメモリの値を大きくする
+				m_LargeMemoryWidth *= 10.0f; 
+				m_MemoryExpandRate = 0.0f;
+			}
+			else if (m_MemoryExpandRate <= -Width)
+			{
+				// 長いメモリの値を小さくする
+				m_LargeMemoryWidth *= 0.1f; 
+				m_MemoryExpandRate = 0.0f;
+			}
+		}
+
+		return true;
+	}
+
+	bool CTimeLineView::CheckMemoryDrag(const std::shared_ptr<timeline::CTimelineController>& TimelineController, const ImVec2& availableSize, float DrawMemorySpace, float MaxTime)
+	{
+		// インジケーターと一緒に動かないようにする
+		if (m_ClickedIndicator) return true;
+
+		const bool IsMemoryHovered = (ImGui::IsItemHovered() && ImGui::IsMouseDragging(0));
+		const bool IsTLMiddleDrag = (ImGui::IsWindowHovered() && ImGui::IsMouseDragging(2));
+
+		// マウスドラッグでメモリの左端と右端の値を更新
+		if (IsMemoryHovered || IsTLMiddleDrag)
+		{
+			ImVec2 MousePos = ImGui::GetMousePos();
+
+			if (!m_FirstClicked)
+			{
+				// マウスの移動量。描画可能範囲で正規化する
+				float OffsetX = (MousePos.x - m_PrevMousePos.x) / availableSize.x; // 左端から右端に行けたら１が返る
+				// 例. メモリの長針のサイズが1.0秒として2.0秒からから3.0秒に移動したときに1.0動くようにする
+				//OffsetX = OffsetX * DrawMemorySpace * 4.0f;
+				//OffsetX = OffsetX * DrawMemorySpace;
+				OffsetX = OffsetX * DrawMemorySpace / 4.0f;
+
+				// 長針サイズで拡大縮小する
+				OffsetX *= m_LargeMemoryWidth;
+
+				m_LeftSideMemory -= OffsetX;
+				m_RightSideMemory -= OffsetX;
+
+				if (m_LeftSideMemory < 0.0f)
+				{
+					// 0よりも左に行かないようにする
+					m_LeftSideMemory = 0.0f;
+					m_RightSideMemory = static_cast<float>(m_MaxLargeMemoryCount) * m_LargeMemoryWidth;
+				}
+
+				// メモリバーの更新に合わせて再生時間も更新する
+				UpdateCurrentTimeFromMemoryBar(TimelineController);
+			}
+
+			m_PrevMousePos = MousePos;
+			m_FirstClicked = false;
+		}
+		else
+		{
+			m_FirstClicked = true;
+		}
+
+		return true;
+	}
+
+	bool CTimeLineView::CheckIsClickedObjectTree(const std::shared_ptr<object::C3DObject>& Object)
+	{
+		// Track追加ダイアログ表示
+		// ObjectTreeNodeの右クリックでダイアログを開く
+		if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(1))
+		{
+			m_ShowAddTrackDialog = true;
+			m_ClickedObjectForAddObjectTrack = Object;
+
+			return true;
+		}
+
+		return false;
+	}
+
+	bool CTimeLineView::UpdateCurrentTimeFromMemoryBar(const std::shared_ptr<timeline::CTimelineController>& TimelineController)
+	{
+		// メモリバーの情報から再生時間を更新
+		float CurrentTime = glm::mix(m_LeftSideMemory, m_RightSideMemory, m_IndicatorRate);
+		CurrentTime = glm::clamp(CurrentTime, 0.0f, TimelineController->GetMaxTime());
+
+		TimelineController->SetPlayBackTime(CurrentTime);
+
+		return true;
+	}
+
+	bool CTimeLineView::UpdateMemoryFromTimeBar(const std::shared_ptr<timeline::CTimelineController>& TimelineController)
+	{
+		// タイムバーの更新と合わせてメモリバーも更新
+		const float CurrentTime = TimelineController->GetPlayBackTime();
+
+		// メモリバーの時間の全長
+		const float TimeWidth = static_cast<float>(m_MaxLargeMemoryCount) * m_LargeMemoryWidth;
+
+		m_LeftSideMemory = CurrentTime - TimeWidth * m_IndicatorRate;
+		m_LeftSideMemory = glm::clamp(m_LeftSideMemory, 0.0f, TimelineController->GetMaxTime());
+
+		m_RightSideMemory = m_LeftSideMemory + TimeWidth;
+
+		return true;
+	}
+
+	float CTimeLineView::GetFirstLargeMemory(float SrcValue, std::vector<bool>& IsLongMemory)
+	{
+		// 一番初めに出てくる長いメモリの値を取得
+		float DecimalPoint = SrcValue - floorf(SrcValue);
+		
+		float DstValue = 0.0f;
+
+		if (DecimalPoint == 0.0f)
+		{
+			DstValue = SrcValue;
+			IsLongMemory = std::vector<bool>({ true, false, false });
+		}
+		else if (DecimalPoint > 0.0f && DecimalPoint <= 0.3f)
+		{
+			DstValue = floorf(SrcValue) + 1.0f;
+			IsLongMemory = std::vector<bool>({ false, false, true });
+		}
+		else if (DecimalPoint > 0.3f && DecimalPoint <= 6.0f)
+		{
+			DstValue = floorf(SrcValue) + 1.0f;
+			IsLongMemory = std::vector<bool>({ false, true, false });
+		}
+		else if (DecimalPoint > 0.6f && DecimalPoint < 1.0f)
+		{
+			DstValue = floorf(SrcValue) + 1.0f;
+			IsLongMemory = std::vector<bool>({ true, false, false });
+		}
+
+		return DstValue;
+	}
+
+	float CTimeLineView::GetFirstMemory(float SrcValue)
+	{
+		// 一番初めに出てくるメモリの値を取得(長短関係なし)
+		float DecimalPoint = SrcValue - floorf(SrcValue);
+
+		float DstValue = 0.0f;
+
+		if (DecimalPoint == 0.0f)
+		{
+			DstValue = SrcValue;
+		}
+		else if (DecimalPoint > 0.0f && DecimalPoint <= 0.3f)
+		{
+			DstValue = floorf(SrcValue) + 0.3f;
+		}
+		else if (DecimalPoint > 0.3f && DecimalPoint <= 6.0f)
+		{
+			DstValue = floorf(SrcValue) + 0.6f;
+		}
+		else if (DecimalPoint > 0.6f && DecimalPoint < 1.0f)
+		{
+			DstValue = floorf(SrcValue) + 1.0f;
+		}
+
+		return DstValue;
+	}
+
+	std::vector<float> CTimeLineView::GetDefaultValue(math::EValueType ValueType)
+	{
+		std::vector<float> Value;
+
+		switch (ValueType)
+		{
+		case math::EValueType::VALUE_TYPE_NONE:
+			break;
+		case math::EValueType::VALUE_TYPE_SCALAR:
+			Value = std::vector<float>({ 0.0f });
+			break;
+		case math::EValueType::VALUE_TYPE_VEC2:
+			Value = std::vector<float>({ 0.0f, 0.0f });
+			break;
+		case math::EValueType::VALUE_TYPE_VEC3:
+			Value = std::vector<float>({ 0.0f, 0.0f, 0.0f });
+			break;
+		case math::EValueType::VALUE_TYPE_VEC4:
+			Value = std::vector<float>({ 0.0f, 0.0f, 0.0f, 0.0f });
+			break;
+		case math::EValueType::VALUE_TYPE_MAT2:
+			Value = std::vector<float>({ 
+				1.0f, 0.0f,
+				0.0f, 1.0f
+			});
+			break;
+		case math::EValueType::VALUE_TYPE_MAT3:
+			Value = std::vector<float>({
+				1.0f, 0.0f, 0.0f,
+				0.0f, 1.0f, 0.0f,
+				0.0f, 0.0f, 1.0f
+			});
+			break;
+		case math::EValueType::VALUE_TYPE_MAT4:
+			Value = std::vector<float>({
+				1.0f, 0.0f, 0.0f, 0.0f,
+				0.0f, 1.0f, 0.0f, 0.0f,
+				0.0f, 0.0f, 1.0f, 0.0f,
+				0.0f, 0.0f, 0.0f, 1.0f
+			});
+			break;
+		case math::EValueType::VALUE_TYPE_VECTOR:
+			break;
+		case math::EValueType::VALUE_TYPE_MATRIX:
+			break;
+		default:
+			break;
+		}
+
+		return Value;
 	}
 }
 #endif

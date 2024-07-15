@@ -422,6 +422,9 @@ namespace resource
 		std::vector<int> children;
 		GetArrayInt32("children", children, nodeJSON);
 
+		std::vector<std::string> trackids;
+		GetArrayString("trackids", trackids, nodeJSON);
+
 		// ƒm[ƒh‚ğì¬
 		int SelfNodeIndex = static_cast<int>(Object->GetNodeList().size());
 
@@ -430,6 +433,7 @@ namespace resource
 		Node->SetName(nodename);
 		Node->SetLocalTransform(Transform);
 		Node->SetChildrenNodeIndexList(children);
+		Node->SetRefTrackIDList(trackids);
 
 		return Node;
 	}
@@ -632,6 +636,13 @@ namespace resource
 			}
 		}
 
+		// TrackID
+		{
+			std::vector<std::string> trackids;
+			GetArrayString("trackids", trackids, materialJSON);
+			MaterialInfo.TrackIDList = trackids;
+		}
+
 		return MaterialInfo;
 	}
 
@@ -796,6 +807,23 @@ namespace resource
 		if (it != Object->end() && it->is_string())
 		{
 			Value = it.value();
+		}
+	}
+
+	void CSceneLoader::GetArrayString(const std::string& Key, std::vector<std::string>& Value, const json::iterator& Object)
+	{
+		const auto it = Object->find(Key);
+		if (it != Object->end() && it->is_array())
+		{
+			for (json::iterator it2 = it->begin(); it2 != it->end(); it2++)
+			{
+				if (it2->is_string())
+				{
+					std::string val = it2.value();
+
+					Value.push_back(val);
+				}
+			}
 		}
 	}
 

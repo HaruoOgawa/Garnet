@@ -62,6 +62,7 @@ namespace animation
 		bool CreateKeyFrame(math::EValueType Type, const std::vector<float>& inputList, const std::vector<float>& outputList);
 		void AddKeyFrame(const std::shared_ptr<animation::CKeyFrame>& KeyFrame);
 		const std::vector<std::shared_ptr<animation::CKeyFrame>>& GetKeyFrameList() const;
+		std::vector<std::shared_ptr<animation::CKeyFrame>> GetKeyFrameListFromRange(float FirstTime, float SecondTime);
 
 		void CalcStartEndTime();
 

@@ -9,7 +9,8 @@ namespace timeline
 	CTimelineTrack::CTimelineTrack(const std::string& TrackID, int SamplerIndex, ETimelineSamplerTarget SamplerTarget):
 		m_TrackID(TrackID),
 		m_SamplerIndex(SamplerIndex),
-        m_SamplerTarget(SamplerTarget)
+        m_SamplerTarget(SamplerTarget),
+        m_ValueType(math::EValueType::VALUE_TYPE_NONE)
 	{
 	}
 
@@ -40,6 +41,21 @@ namespace timeline
 
     void CTimelineTrack::AssignTrackContent(const std::shared_ptr<CTimelineTrackContent>& TrackContent)
     {
+    }
+
+    std::string CTimelineTrack::GetTrackName()
+    {
+        return std::string();
+    }
+
+    void CTimelineTrack::SetValueType(math::EValueType ValueType)
+    {
+        m_ValueType = ValueType;
+    }
+    
+    math::EValueType CTimelineTrack::GetValueType() const
+    {
+        return m_ValueType;
     }
 
 	std::string CTimelineTrack::GenerateUUID()

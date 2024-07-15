@@ -224,7 +224,7 @@ namespace app
 #ifdef _DEBUG
 		// FPSの計測と表示(60FPSを基準とする)
 		float FPS = 60.0f / (m_DeltaSecondsTime * 60.0f);
-		Console::Log("[FPS] %f fps / [CurrentTime] %f s\n", FPS, m_SecondsTime);
+		//Console::Log("[FPS] %f fps / [CurrentTime] %f s\n", FPS, m_SecondsTime);
 #endif // _DEBUG
 
 		//
@@ -278,7 +278,7 @@ namespace app
 	// ロード完了イベント
 	bool CAppCore::OnLoaded()
 	{
-		if (!m_App->OnLoaded(m_GraphicsAPI.get(), m_PhysicsEngine.get(), m_LoadWorker.get())) return false;
+		if (!m_App->OnLoaded(m_GraphicsAPI.get(), m_PhysicsEngine.get(), m_LoadWorker.get(), m_GUIEngine)) return false;
 
 		return true;
 	}

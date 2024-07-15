@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 namespace math
 {
 	enum class EValueType
@@ -122,6 +124,21 @@ namespace math
 				// Unknown component type
 				return -1;
 			}
+		}
+
+		static std::string GetFloatWithPrecision(float value, int precision)
+		{
+			//
+			char format[32];
+			snprintf(format, sizeof(format), "%%.%df", precision);
+
+			//
+			char buffer[64];
+			snprintf(buffer, sizeof(buffer), format, value);
+
+			std::string dst = std::string(buffer);
+
+			return dst;
 		}
 	};
 }

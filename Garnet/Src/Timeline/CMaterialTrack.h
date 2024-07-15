@@ -3,7 +3,6 @@
 #include <memory>
 #include <string>
 #include "CTimelineTrack.h"
-#include "../Math/CMath.h"
 
 namespace graphics { class CMaterial; }
 
@@ -13,7 +12,9 @@ namespace timeline
 	{
 		MaterialTrackTarget_None = -1,
 
-		MaterialTrackTarget_SetUniformValue,
+		MaterialTrackTarget_SetUniformValue = 0,
+
+		MaterialTrackTarget_Max = 1,
 	};
 
 	class CMaterialTrack : public CTimelineTrack
@@ -23,8 +24,7 @@ namespace timeline
 		std::shared_ptr<graphics::CMaterial> m_Material;
 
 		std::string m_UniformName;
-		math::EValueType m_ValueType;
-
+		
 	public:
 		CMaterialTrack(const std::string& TrackID, int SamplerIndex, ETimelineSamplerTarget SamplerTarget, EMaterialTrackTarget TrackTarget,
 			const std::string& UniformName, math::EValueType ValueType);
@@ -33,5 +33,9 @@ namespace timeline
 		virtual bool Update(float CurrentTime, const std::vector<float>& Value) override;
 
 		virtual void AssignTrackContent(const std::shared_ptr<CTimelineTrackContent>& TrackContent) override;
+
+		virtual std::string GetTrackName() override;
+
+		static std::string CastMaterialTrackTarget_Str(EMaterialTrackTarget TrackTarget);
 	};
 }

@@ -1,109 +1,5077 @@
 {
-  "materialframes": [
-    {
-      "name": "basic_toon_mat",
-      "filename": "Resources/MaterialFrame/basic_toon_mf.json"
-    },
-    {
-      "name": "pbr_mrt_mat",
-      "filename": "Resources/MaterialFrame/PBR_MRT_MF.json"
-    },
-    {
-      "name": "Objectspace_Ray_MF",
-      "filename": "Resources/MaterialFrame/Objectspace_Ray_MF.json"
-    }
-  ],
-  "scenetextureset": {
-    "cubemaps": [
-      {
-        "back": "Resources/Cubemaps/environment/environment_back_0.jpg",
-        "bottom": "Resources/Cubemaps/environment/environment_bottom_0.jpg",
-        "front": "Resources/Cubemaps/environment/environment_front_0.jpg",
-        "left": "Resources/Cubemaps/environment/environment_left_0.jpg",
-        "right": "Resources/Cubemaps/environment/environment_right_0.jpg",
-        "top": "Resources/Cubemaps/environment/environment_top_0.jpg"
-      }
+    "materialframes": [
+        {
+            "name": "Objectspace_Ray_Mat",
+            "filename": "Resources/MaterialFrame/Objectspace_Ray_MF.json"
+        },
+        {
+            "name": "basic_toon_mat",
+            "filename": "Resources/MaterialFrame/basic_toon_mf.json"
+        },
+        {
+            "name": "pbr_mrt_mat",
+            "filename": "Resources/MaterialFrame/PBR_MRT_MF.json"
+        }
     ],
-    "frametextures": null
-  },
-  "objects": [
-    {
-      "name": "PmxObj",
-      "renderpass": "MainResultPass",
-      "filename": "Resources/Avatar/Tda_Miku/Tda_Miku.pmx",
-      "defaultmaterialframe": "basic_toon_mat",
-      "transform": {
-        "pos": [ 3.0, 0.0, 0.0 ],
-        "rotate": [ 0.0, 0.0, 0.0 ],
-        "scale": [ 0.1, 0.1, 0.1 ]
-      },
-      "enable": true
-    },
-    {
-      "name": "SampleObj",
-      "renderpass": "MRTTest",
-      "depthpass": "",
-      "filename": "",
-      "transform": {
-        "pos": [
-          0.0,
-          0.0,
-          0.0
-        ],
-        "rotate": [
-          0.0,
-          -0.0,
-          0.0
-        ],
-        "scale": [
-          1.0,
-          1.0,
-          1.0
-        ]
-      },
-      "enable": true,
-      "rootnodes": [
-        0
-      ],
-      "nodes": [
-        {
-          "name": "testnode",
-          "transform": {
-            "pos": [
-              0.0,
-              0.0,
-              0.0
-            ],
-            "rotate": [
-              0.0,
-              -0.0,
-              0.0
-            ],
-            "scale": [
-              1.0,
-              1.0,
-              1.0
-            ]
-          },
-          "meshindex": 0
-        }
-      ],
-      "meshs": [
-        {
-          "primitives": [
+    "scenetextureset": {
+        "cubemaps": [
             {
-              "materialindex": 0,
-              "type": "cube"
+                "back": "Resources/Cubemaps/environment/environment_back_0.jpg",
+                "bottom": "Resources/Cubemaps/environment/environment_bottom_0.jpg",
+                "front": "Resources/Cubemaps/environment/environment_front_0.jpg",
+                "left": "Resources/Cubemaps/environment/environment_left_0.jpg",
+                "right": "Resources/Cubemaps/environment/environment_right_0.jpg",
+                "top": "Resources/Cubemaps/environment/environment_top_0.jpg"
             }
-          ]
-        }
-      ],
-      "materials": [
+        ],
+        "frametextures": null
+    },
+    "objects": [
         {
-          "materialframe": "Objectspace_Ray_MF",
-          "cull": "back"
+            "name": "glTFObj",
+            "filename": "",
+            "renderpass": "MRTTest",
+            "depthpass": "",
+            "transform": {
+                "pos": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "rotate": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "enable": true,
+            "materials": [
+                {
+                    "materialframe": "pbr_mrt_mat",
+                    "cull": "back",
+                    "uniformvalues": [
+                        {
+                            "name": "baseColorFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.5879999995231628,
+                                0.5879999995231628,
+                                0.5879999995231628,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "emissiveFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "metallicFactor",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "normalMapScale",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "occlusionStrength",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "roughnessFactor",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "useBaseColorTexture",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useCubeMap",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useDirCubemap",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useEmissiveTexture",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useIBL",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useMetallicRoughnessTexture",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useNormalTexture",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useOcclusionTexture",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useShadowMap",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        }
+                    ],
+                    "textures": [
+                        {
+                            "texturebuffername": "cubemapTexture",
+                            "textureindex": 0,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "shadowmapTexture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_Diffuse_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_Specular_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_GGXLUT_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        }
+                    ]
+                },
+                {
+                    "materialframe": "pbr_mrt_mat",
+                    "cull": "back",
+                    "uniformvalues": [
+                        {
+                            "name": "baseColorFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.5879999995231628,
+                                0.5879999995231628,
+                                0.5879999995231628,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "emissiveFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "metallicFactor",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "normalMapScale",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "occlusionStrength",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "roughnessFactor",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "useBaseColorTexture",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useCubeMap",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useDirCubemap",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useEmissiveTexture",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useIBL",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useMetallicRoughnessTexture",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useNormalTexture",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useOcclusionTexture",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useShadowMap",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        }
+                    ],
+                    "textures": [
+                        {
+                            "texturebuffername": "cubemapTexture",
+                            "textureindex": 0,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "shadowmapTexture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_Diffuse_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_Specular_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_GGXLUT_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        }
+                    ]
+                },
+                {
+                    "materialframe": "pbr_mrt_mat",
+                    "cull": "back",
+                    "uniformvalues": [
+                        {
+                            "name": "baseColorFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.5879999995231628,
+                                0.5879999995231628,
+                                0.5879999995231628,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "emissiveFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "metallicFactor",
+                            "type": "float",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "normalMapScale",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "occlusionStrength",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "roughnessFactor",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "useBaseColorTexture",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useCubeMap",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useDirCubemap",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useEmissiveTexture",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useIBL",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useMetallicRoughnessTexture",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useNormalTexture",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useOcclusionTexture",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useShadowMap",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        }
+                    ],
+                    "textures": [
+                        {
+                            "texturebuffername": "cubemapTexture",
+                            "textureindex": 0,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "shadowmapTexture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_Diffuse_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_Specular_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_GGXLUT_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        }
+                    ]
+                },
+                {
+                    "materialframe": "pbr_mrt_mat",
+                    "cull": "back",
+                    "uniformvalues": [
+                        {
+                            "name": "baseColorFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.5879999995231628,
+                                0.5879999995231628,
+                                0.5879999995231628,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "emissiveFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "metallicFactor",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "normalMapScale",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "occlusionStrength",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "roughnessFactor",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "useBaseColorTexture",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useCubeMap",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useDirCubemap",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useEmissiveTexture",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useIBL",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useMetallicRoughnessTexture",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useNormalTexture",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useOcclusionTexture",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useShadowMap",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        }
+                    ],
+                    "textures": [
+                        {
+                            "texturebuffername": "cubemapTexture",
+                            "textureindex": 0,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "shadowmapTexture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_Diffuse_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_Specular_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_GGXLUT_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        }
+                    ]
+                },
+                {
+                    "materialframe": "pbr_mrt_mat",
+                    "cull": "back",
+                    "uniformvalues": [
+                        {
+                            "name": "baseColorFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.5879999995231628,
+                                0.5879999995231628,
+                                0.5879999995231628,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "emissiveFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "metallicFactor",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "normalMapScale",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "occlusionStrength",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "roughnessFactor",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "useBaseColorTexture",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useCubeMap",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useDirCubemap",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useEmissiveTexture",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useIBL",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useMetallicRoughnessTexture",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useNormalTexture",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useOcclusionTexture",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useShadowMap",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        }
+                    ],
+                    "textures": [
+                        {
+                            "texturebuffername": "cubemapTexture",
+                            "textureindex": 0,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "shadowmapTexture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_Diffuse_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_Specular_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_GGXLUT_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        }
+                    ]
+                },
+                {
+                    "materialframe": "pbr_mrt_mat",
+                    "cull": "back",
+                    "uniformvalues": [
+                        {
+                            "name": "baseColorFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.5879999995231628,
+                                0.5879999995231628,
+                                0.5879999995231628,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "emissiveFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "metallicFactor",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "normalMapScale",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "occlusionStrength",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "roughnessFactor",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "useBaseColorTexture",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useCubeMap",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useDirCubemap",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useEmissiveTexture",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useIBL",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useMetallicRoughnessTexture",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useNormalTexture",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useOcclusionTexture",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useShadowMap",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        }
+                    ],
+                    "textures": [
+                        {
+                            "texturebuffername": "cubemapTexture",
+                            "textureindex": 0,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "shadowmapTexture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_Diffuse_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_Specular_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_GGXLUT_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        }
+                    ]
+                },
+                {
+                    "materialframe": "pbr_mrt_mat",
+                    "cull": "back",
+                    "uniformvalues": [
+                        {
+                            "name": "baseColorFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.5879999995231628,
+                                0.5879999995231628,
+                                0.5879999995231628,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "emissiveFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "metallicFactor",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "normalMapScale",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "occlusionStrength",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "roughnessFactor",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "useBaseColorTexture",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useCubeMap",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useDirCubemap",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useEmissiveTexture",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useIBL",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useMetallicRoughnessTexture",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useNormalTexture",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useOcclusionTexture",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useShadowMap",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        }
+                    ],
+                    "textures": [
+                        {
+                            "texturebuffername": "cubemapTexture",
+                            "textureindex": 0,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "shadowmapTexture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_Diffuse_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_Specular_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_GGXLUT_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        }
+                    ]
+                },
+                {
+                    "materialframe": "pbr_mrt_mat",
+                    "cull": "back",
+                    "uniformvalues": [
+                        {
+                            "name": "baseColorFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.5879999995231628,
+                                0.5879999995231628,
+                                0.5879999995231628,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "emissiveFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "metallicFactor",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "normalMapScale",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "occlusionStrength",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "roughnessFactor",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "useBaseColorTexture",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useCubeMap",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useDirCubemap",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useEmissiveTexture",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useIBL",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useMetallicRoughnessTexture",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useNormalTexture",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useOcclusionTexture",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useShadowMap",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        }
+                    ],
+                    "textures": [
+                        {
+                            "texturebuffername": "cubemapTexture",
+                            "textureindex": 0,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "shadowmapTexture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_Diffuse_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_Specular_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_GGXLUT_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        }
+                    ]
+                },
+                {
+                    "materialframe": "pbr_mrt_mat",
+                    "cull": "back",
+                    "uniformvalues": [
+                        {
+                            "name": "baseColorFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.5879999995231628,
+                                0.5879999995231628,
+                                0.5879999995231628,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "emissiveFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "metallicFactor",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "normalMapScale",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "occlusionStrength",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "roughnessFactor",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "useBaseColorTexture",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useCubeMap",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useDirCubemap",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useEmissiveTexture",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useIBL",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useMetallicRoughnessTexture",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useNormalTexture",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useOcclusionTexture",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useShadowMap",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        }
+                    ],
+                    "textures": [
+                        {
+                            "texturebuffername": "cubemapTexture",
+                            "textureindex": 0,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "shadowmapTexture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_Diffuse_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_Specular_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_GGXLUT_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        }
+                    ]
+                },
+                {
+                    "materialframe": "pbr_mrt_mat",
+                    "cull": "back",
+                    "uniformvalues": [
+                        {
+                            "name": "baseColorFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.5879999995231628,
+                                0.5879999995231628,
+                                0.5879999995231628,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "emissiveFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "metallicFactor",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "normalMapScale",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "occlusionStrength",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "roughnessFactor",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "useBaseColorTexture",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useCubeMap",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useDirCubemap",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useEmissiveTexture",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useIBL",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useMetallicRoughnessTexture",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useNormalTexture",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useOcclusionTexture",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useShadowMap",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        }
+                    ],
+                    "textures": [
+                        {
+                            "texturebuffername": "cubemapTexture",
+                            "textureindex": 0,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "shadowmapTexture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_Diffuse_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_Specular_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_GGXLUT_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        }
+                    ]
+                },
+                {
+                    "materialframe": "pbr_mrt_mat",
+                    "cull": "back",
+                    "uniformvalues": [
+                        {
+                            "name": "baseColorFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.5879999995231628,
+                                0.5879999995231628,
+                                0.5879999995231628,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "emissiveFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "metallicFactor",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "normalMapScale",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "occlusionStrength",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "roughnessFactor",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "useBaseColorTexture",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useCubeMap",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useDirCubemap",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useEmissiveTexture",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useIBL",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useMetallicRoughnessTexture",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useNormalTexture",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useOcclusionTexture",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useShadowMap",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        }
+                    ],
+                    "textures": [
+                        {
+                            "texturebuffername": "cubemapTexture",
+                            "textureindex": 0,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "shadowmapTexture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_Diffuse_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_Specular_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_GGXLUT_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        }
+                    ]
+                },
+                {
+                    "materialframe": "pbr_mrt_mat",
+                    "cull": "back",
+                    "uniformvalues": [
+                        {
+                            "name": "baseColorFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.5879999995231628,
+                                0.5879999995231628,
+                                0.5879999995231628,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "emissiveFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "metallicFactor",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "normalMapScale",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "occlusionStrength",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "roughnessFactor",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "useBaseColorTexture",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useCubeMap",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useDirCubemap",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useEmissiveTexture",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useIBL",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useMetallicRoughnessTexture",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useNormalTexture",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useOcclusionTexture",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useShadowMap",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        }
+                    ],
+                    "textures": [
+                        {
+                            "texturebuffername": "cubemapTexture",
+                            "textureindex": 0,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "shadowmapTexture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_Diffuse_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_Specular_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_GGXLUT_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        }
+                    ]
+                },
+                {
+                    "materialframe": "pbr_mrt_mat",
+                    "cull": "back",
+                    "uniformvalues": [
+                        {
+                            "name": "baseColorFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.5879999995231628,
+                                0.5879999995231628,
+                                0.5879999995231628,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "emissiveFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "metallicFactor",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "normalMapScale",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "occlusionStrength",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "roughnessFactor",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "useBaseColorTexture",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useCubeMap",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useDirCubemap",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useEmissiveTexture",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useIBL",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useMetallicRoughnessTexture",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useNormalTexture",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useOcclusionTexture",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useShadowMap",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        }
+                    ],
+                    "textures": [
+                        {
+                            "texturebuffername": "cubemapTexture",
+                            "textureindex": 0,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "shadowmapTexture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_Diffuse_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_Specular_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_GGXLUT_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        }
+                    ]
+                },
+                {
+                    "materialframe": "pbr_mrt_mat",
+                    "cull": "back",
+                    "uniformvalues": [
+                        {
+                            "name": "baseColorFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.5879999995231628,
+                                0.5879999995231628,
+                                0.5879999995231628,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "emissiveFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "metallicFactor",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "normalMapScale",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "occlusionStrength",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "roughnessFactor",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "useBaseColorTexture",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useCubeMap",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useDirCubemap",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useEmissiveTexture",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useIBL",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useMetallicRoughnessTexture",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useNormalTexture",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useOcclusionTexture",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useShadowMap",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        }
+                    ],
+                    "textures": [
+                        {
+                            "texturebuffername": "cubemapTexture",
+                            "textureindex": 0,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "shadowmapTexture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_Diffuse_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_Specular_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_GGXLUT_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        }
+                    ]
+                },
+                {
+                    "materialframe": "pbr_mrt_mat",
+                    "cull": "back",
+                    "uniformvalues": [
+                        {
+                            "name": "baseColorFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.5879999995231628,
+                                0.5879999995231628,
+                                0.5879999995231628,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "emissiveFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "metallicFactor",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "normalMapScale",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "occlusionStrength",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "roughnessFactor",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "useBaseColorTexture",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useCubeMap",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useDirCubemap",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useEmissiveTexture",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useIBL",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useMetallicRoughnessTexture",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useNormalTexture",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useOcclusionTexture",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useShadowMap",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        }
+                    ],
+                    "textures": [
+                        {
+                            "texturebuffername": "cubemapTexture",
+                            "textureindex": 0,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "shadowmapTexture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_Diffuse_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_Specular_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_GGXLUT_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        }
+                    ]
+                },
+                {
+                    "materialframe": "pbr_mrt_mat",
+                    "cull": "back",
+                    "uniformvalues": [
+                        {
+                            "name": "baseColorFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.5879999995231628,
+                                0.5879999995231628,
+                                0.5879999995231628,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "emissiveFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "metallicFactor",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "normalMapScale",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "occlusionStrength",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "roughnessFactor",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "useBaseColorTexture",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useCubeMap",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useDirCubemap",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useEmissiveTexture",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useIBL",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useMetallicRoughnessTexture",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useNormalTexture",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useOcclusionTexture",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useShadowMap",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        }
+                    ],
+                    "textures": [
+                        {
+                            "texturebuffername": "cubemapTexture",
+                            "textureindex": 0,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "shadowmapTexture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_Diffuse_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_Specular_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_GGXLUT_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        }
+                    ]
+                },
+                {
+                    "materialframe": "pbr_mrt_mat",
+                    "cull": "back",
+                    "uniformvalues": [
+                        {
+                            "name": "baseColorFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.5879999995231628,
+                                0.5879999995231628,
+                                0.5879999995231628,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "emissiveFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "metallicFactor",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "normalMapScale",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "occlusionStrength",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "roughnessFactor",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "useBaseColorTexture",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useCubeMap",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useDirCubemap",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useEmissiveTexture",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useIBL",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useMetallicRoughnessTexture",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useNormalTexture",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useOcclusionTexture",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useShadowMap",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        }
+                    ],
+                    "textures": [
+                        {
+                            "texturebuffername": "cubemapTexture",
+                            "textureindex": 0,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "shadowmapTexture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_Diffuse_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_Specular_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_GGXLUT_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        }
+                    ]
+                },
+                {
+                    "materialframe": "pbr_mrt_mat",
+                    "cull": "back",
+                    "uniformvalues": [
+                        {
+                            "name": "baseColorFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.5879999995231628,
+                                0.5879999995231628,
+                                0.5879999995231628,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "emissiveFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "metallicFactor",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "normalMapScale",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "occlusionStrength",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "roughnessFactor",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "useBaseColorTexture",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useCubeMap",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useDirCubemap",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useEmissiveTexture",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useIBL",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useMetallicRoughnessTexture",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useNormalTexture",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useOcclusionTexture",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useShadowMap",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        }
+                    ],
+                    "textures": [
+                        {
+                            "texturebuffername": "cubemapTexture",
+                            "textureindex": 0,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "shadowmapTexture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_Diffuse_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_Specular_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_GGXLUT_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        }
+                    ]
+                },
+                {
+                    "materialframe": "pbr_mrt_mat",
+                    "cull": "back",
+                    "uniformvalues": [
+                        {
+                            "name": "baseColorFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.5879999995231628,
+                                0.5879999995231628,
+                                0.5879999995231628,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "emissiveFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "metallicFactor",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "normalMapScale",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "occlusionStrength",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "roughnessFactor",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "useBaseColorTexture",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useCubeMap",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useDirCubemap",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useEmissiveTexture",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useIBL",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useMetallicRoughnessTexture",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useNormalTexture",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useOcclusionTexture",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useShadowMap",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        }
+                    ],
+                    "textures": [
+                        {
+                            "texturebuffername": "cubemapTexture",
+                            "textureindex": 0,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "shadowmapTexture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_Diffuse_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_Specular_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_GGXLUT_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        }
+                    ]
+                },
+                {
+                    "materialframe": "pbr_mrt_mat",
+                    "cull": "back",
+                    "uniformvalues": [
+                        {
+                            "name": "baseColorFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.5879999995231628,
+                                0.5879999995231628,
+                                0.5879999995231628,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "emissiveFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "metallicFactor",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "normalMapScale",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "occlusionStrength",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "roughnessFactor",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "useBaseColorTexture",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useCubeMap",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useDirCubemap",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useEmissiveTexture",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useIBL",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useMetallicRoughnessTexture",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useNormalTexture",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useOcclusionTexture",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useShadowMap",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        }
+                    ],
+                    "textures": [
+                        {
+                            "texturebuffername": "cubemapTexture",
+                            "textureindex": 0,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "shadowmapTexture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_Diffuse_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_Specular_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_GGXLUT_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        }
+                    ]
+                },
+                {
+                    "materialframe": "pbr_mrt_mat",
+                    "cull": "back",
+                    "uniformvalues": [
+                        {
+                            "name": "baseColorFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.5879999995231628,
+                                0.5879999995231628,
+                                0.5879999995231628,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "emissiveFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "metallicFactor",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "normalMapScale",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "occlusionStrength",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "roughnessFactor",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "useBaseColorTexture",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useCubeMap",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useDirCubemap",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useEmissiveTexture",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useIBL",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useMetallicRoughnessTexture",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useNormalTexture",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useOcclusionTexture",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useShadowMap",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        }
+                    ],
+                    "textures": [
+                        {
+                            "texturebuffername": "cubemapTexture",
+                            "textureindex": 0,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "shadowmapTexture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_Diffuse_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_Specular_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_GGXLUT_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        }
+                    ]
+                },
+                {
+                    "materialframe": "pbr_mrt_mat",
+                    "cull": "back",
+                    "uniformvalues": [
+                        {
+                            "name": "baseColorFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.5879999995231628,
+                                0.5879999995231628,
+                                0.5879999995231628,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "emissiveFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "metallicFactor",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "normalMapScale",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "occlusionStrength",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "roughnessFactor",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "useBaseColorTexture",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useCubeMap",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useDirCubemap",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useEmissiveTexture",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useIBL",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useMetallicRoughnessTexture",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useNormalTexture",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useOcclusionTexture",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useShadowMap",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        }
+                    ],
+                    "textures": [
+                        {
+                            "texturebuffername": "cubemapTexture",
+                            "textureindex": 0,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "shadowmapTexture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_Diffuse_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_Specular_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_GGXLUT_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        }
+                    ]
+                },
+                {
+                    "materialframe": "pbr_mrt_mat",
+                    "cull": "back",
+                    "uniformvalues": [
+                        {
+                            "name": "baseColorFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.5879999995231628,
+                                0.5879999995231628,
+                                0.5879999995231628,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "emissiveFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "metallicFactor",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "normalMapScale",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "occlusionStrength",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "roughnessFactor",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "useBaseColorTexture",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useCubeMap",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useDirCubemap",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useEmissiveTexture",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useIBL",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useMetallicRoughnessTexture",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useNormalTexture",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useOcclusionTexture",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useShadowMap",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        }
+                    ],
+                    "textures": [
+                        {
+                            "texturebuffername": "cubemapTexture",
+                            "textureindex": 0,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "shadowmapTexture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_Diffuse_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_Specular_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_GGXLUT_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        }
+                    ]
+                },
+                {
+                    "materialframe": "pbr_mrt_mat",
+                    "cull": "back",
+                    "uniformvalues": [
+                        {
+                            "name": "baseColorFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.5879999995231628,
+                                0.5879999995231628,
+                                0.5879999995231628,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "emissiveFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "metallicFactor",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "normalMapScale",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "occlusionStrength",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "roughnessFactor",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "useBaseColorTexture",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useCubeMap",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useDirCubemap",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useEmissiveTexture",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useIBL",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useMetallicRoughnessTexture",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useNormalTexture",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useOcclusionTexture",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useShadowMap",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        }
+                    ],
+                    "textures": [
+                        {
+                            "texturebuffername": "cubemapTexture",
+                            "textureindex": 0,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "shadowmapTexture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_Diffuse_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_Specular_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_GGXLUT_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        }
+                    ]
+                },
+                {
+                    "materialframe": "pbr_mrt_mat",
+                    "cull": "back",
+                    "uniformvalues": [
+                        {
+                            "name": "baseColorFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.5879999995231628,
+                                0.5879999995231628,
+                                0.5879999995231628,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "emissiveFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "metallicFactor",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "normalMapScale",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "occlusionStrength",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "roughnessFactor",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "useBaseColorTexture",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useCubeMap",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useDirCubemap",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useEmissiveTexture",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useIBL",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useMetallicRoughnessTexture",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useNormalTexture",
+                            "type": "int",
+                            "value": [
+                                1.401298464324817e-45
+                            ]
+                        },
+                        {
+                            "name": "useOcclusionTexture",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useShadowMap",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        }
+                    ],
+                    "textures": [
+                        {
+                            "texturebuffername": "cubemapTexture",
+                            "textureindex": 0,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "shadowmapTexture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_Diffuse_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_Specular_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_GGXLUT_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "PmxObj",
+            "filename": "Resources/Avatar/Tda_Miku/Tda_Miku.pmx",
+            "defaultmaterialframe": "basic_toon_mat",
+            "renderpass": "MainResultPass",
+            "depthpass": "",
+            "transform": {
+                "pos": [
+                    3.0,
+                    0.0,
+                    0.0
+                ],
+                "rotate": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scale": [
+                    0.10000000149011612,
+                    0.10000000149011612,
+                    0.10000000149011612
+                ]
+            },
+            "enable": true,
+            "materials": [
+                {
+                    "materialframe": "basic_toon_mat",
+                    "cull": "back",
+                    "uniformvalues": [
+                        {
+                            "name": "edgeSize",
+                            "type": "float",
+                            "value": [
+                                0.6000000238418579
+                            ]
+                        },
+                        {
+                            "name": "ambientFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.5,
+                                0.5,
+                                0.5,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "diffuseFactor",
+                            "type": "vec4",
+                            "value": [
+                                1.0,
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "edgeColor",
+                            "type": "vec4",
+                            "value": [
+                                0.44999998807907104,
+                                0.20000000298023224,
+                                0.30000001192092896,
+                                0.6000000238418579
+                            ]
+                        },
+                        {
+                            "name": "specularFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "specularIntensity",
+                            "type": "float",
+                            "value": [
+                                50.0
+                            ]
+                        }
+                    ],
+                    "textures": [
+                        {
+                            "texturebuffername": "MainTexture",
+                            "textureindex": 0,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "ToonTexture",
+                            "textureindex": 2,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "SphereTexture",
+                            "textureindex": 1,
+                            "texturename": ""
+                        }
+                    ]
+                },
+                {
+                    "materialframe": "basic_toon_mat",
+                    "cull": "back",
+                    "uniformvalues": [
+                        {
+                            "name": "edgeSize",
+                            "type": "float",
+                            "value": [
+                                0.6000000238418579
+                            ]
+                        },
+                        {
+                            "name": "ambientFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.5,
+                                0.5,
+                                0.5,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "diffuseFactor",
+                            "type": "vec4",
+                            "value": [
+                                1.0,
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "edgeColor",
+                            "type": "vec4",
+                            "value": [
+                                0.30000001192092896,
+                                0.20000000298023224,
+                                0.4000000059604645,
+                                0.6000000238418579
+                            ]
+                        },
+                        {
+                            "name": "specularFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "specularIntensity",
+                            "type": "float",
+                            "value": [
+                                50.0
+                            ]
+                        }
+                    ],
+                    "textures": [
+                        {
+                            "texturebuffername": "MainTexture",
+                            "textureindex": 0,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "ToonTexture",
+                            "textureindex": 4,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "SphereTexture",
+                            "textureindex": 3,
+                            "texturename": ""
+                        }
+                    ]
+                },
+                {
+                    "materialframe": "basic_toon_mat",
+                    "cull": "back",
+                    "uniformvalues": [
+                        {
+                            "name": "edgeSize",
+                            "type": "float",
+                            "value": [
+                                0.6000000238418579
+                            ]
+                        },
+                        {
+                            "name": "ambientFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.5,
+                                0.5,
+                                0.5,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "diffuseFactor",
+                            "type": "vec4",
+                            "value": [
+                                1.0,
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "edgeColor",
+                            "type": "vec4",
+                            "value": [
+                                0.10000000149011612,
+                                0.0,
+                                0.20000000298023224,
+                                0.699999988079071
+                            ]
+                        },
+                        {
+                            "name": "specularFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "specularIntensity",
+                            "type": "float",
+                            "value": [
+                                50.0
+                            ]
+                        }
+                    ],
+                    "textures": [
+                        {
+                            "texturebuffername": "MainTexture",
+                            "textureindex": 0,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "ToonTexture",
+                            "textureindex": 4,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "SphereTexture",
+                            "textureindex": 5,
+                            "texturename": ""
+                        }
+                    ]
+                },
+                {
+                    "materialframe": "basic_toon_mat",
+                    "cull": "back",
+                    "uniformvalues": [
+                        {
+                            "name": "edgeSize",
+                            "type": "float",
+                            "value": [
+                                0.6000000238418579
+                            ]
+                        },
+                        {
+                            "name": "ambientFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.4000000059604645,
+                                0.5,
+                                0.5,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "diffuseFactor",
+                            "type": "vec4",
+                            "value": [
+                                1.0,
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "edgeColor",
+                            "type": "vec4",
+                            "value": [
+                                0.0,
+                                0.5,
+                                0.699999988079071,
+                                0.699999988079071
+                            ]
+                        },
+                        {
+                            "name": "specularFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "specularIntensity",
+                            "type": "float",
+                            "value": [
+                                110.0
+                            ]
+                        }
+                    ],
+                    "textures": [
+                        {
+                            "texturebuffername": "MainTexture",
+                            "textureindex": 0,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "ToonTexture",
+                            "textureindex": 4,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "SphereTexture",
+                            "textureindex": 5,
+                            "texturename": ""
+                        }
+                    ]
+                },
+                {
+                    "materialframe": "basic_toon_mat",
+                    "cull": "back",
+                    "uniformvalues": [
+                        {
+                            "name": "edgeSize",
+                            "type": "float",
+                            "value": [
+                                0.6000000238418579
+                            ]
+                        },
+                        {
+                            "name": "ambientFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.30000001192092896,
+                                0.20000000298023224,
+                                0.30000001192092896,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "diffuseFactor",
+                            "type": "vec4",
+                            "value": [
+                                1.0,
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "edgeColor",
+                            "type": "vec4",
+                            "value": [
+                                0.699999988079071,
+                                0.0,
+                                0.20000000298023224,
+                                0.699999988079071
+                            ]
+                        },
+                        {
+                            "name": "specularFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "specularIntensity",
+                            "type": "float",
+                            "value": [
+                                115.0
+                            ]
+                        }
+                    ],
+                    "textures": [
+                        {
+                            "texturebuffername": "MainTexture",
+                            "textureindex": 0,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "ToonTexture",
+                            "textureindex": 4,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "SphereTexture",
+                            "textureindex": 5,
+                            "texturename": ""
+                        }
+                    ]
+                },
+                {
+                    "materialframe": "basic_toon_mat",
+                    "cull": "back",
+                    "uniformvalues": [
+                        {
+                            "name": "edgeSize",
+                            "type": "float",
+                            "value": [
+                                0.6000000238418579
+                            ]
+                        },
+                        {
+                            "name": "ambientFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.4000000059604645,
+                                0.5,
+                                0.5,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "diffuseFactor",
+                            "type": "vec4",
+                            "value": [
+                                1.0,
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "edgeColor",
+                            "type": "vec4",
+                            "value": [
+                                0.0,
+                                0.15000000596046448,
+                                0.44999998807907104,
+                                0.699999988079071
+                            ]
+                        },
+                        {
+                            "name": "specularFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "specularIntensity",
+                            "type": "float",
+                            "value": [
+                                100.0
+                            ]
+                        }
+                    ],
+                    "textures": [
+                        {
+                            "texturebuffername": "MainTexture",
+                            "textureindex": 0,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "ToonTexture",
+                            "textureindex": 4,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "SphereTexture",
+                            "textureindex": 3,
+                            "texturename": ""
+                        }
+                    ]
+                },
+                {
+                    "materialframe": "basic_toon_mat",
+                    "cull": "back",
+                    "uniformvalues": [
+                        {
+                            "name": "edgeSize",
+                            "type": "float",
+                            "value": [
+                                0.6000000238418579
+                            ]
+                        },
+                        {
+                            "name": "ambientFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.5,
+                                0.5,
+                                0.5,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "diffuseFactor",
+                            "type": "vec4",
+                            "value": [
+                                1.0,
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "edgeColor",
+                            "type": "vec4",
+                            "value": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "specularFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "specularIntensity",
+                            "type": "float",
+                            "value": [
+                                50.0
+                            ]
+                        }
+                    ],
+                    "textures": [
+                        {
+                            "texturebuffername": "MainTexture",
+                            "textureindex": 0,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "ToonTexture",
+                            "textureindex": 4,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "SphereTexture",
+                            "textureindex": 3,
+                            "texturename": ""
+                        }
+                    ]
+                },
+                {
+                    "materialframe": "basic_toon_mat",
+                    "cull": "back",
+                    "uniformvalues": [
+                        {
+                            "name": "edgeSize",
+                            "type": "float",
+                            "value": [
+                                0.6000000238418579
+                            ]
+                        },
+                        {
+                            "name": "ambientFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.5,
+                                0.5,
+                                0.5,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "diffuseFactor",
+                            "type": "vec4",
+                            "value": [
+                                1.0,
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "edgeColor",
+                            "type": "vec4",
+                            "value": [
+                                0.44999998807907104,
+                                0.20000000298023224,
+                                0.30000001192092896,
+                                0.6000000238418579
+                            ]
+                        },
+                        {
+                            "name": "specularFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "specularIntensity",
+                            "type": "float",
+                            "value": [
+                                50.0
+                            ]
+                        }
+                    ],
+                    "textures": [
+                        {
+                            "texturebuffername": "MainTexture",
+                            "textureindex": 6,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "SphereTexture",
+                            "textureindex": 1,
+                            "texturename": ""
+                        }
+                    ]
+                },
+                {
+                    "materialframe": "basic_toon_mat",
+                    "cull": "back",
+                    "uniformvalues": [
+                        {
+                            "name": "edgeSize",
+                            "type": "float",
+                            "value": [
+                                0.6000000238418579
+                            ]
+                        },
+                        {
+                            "name": "ambientFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.5,
+                                0.5,
+                                0.5,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "diffuseFactor",
+                            "type": "vec4",
+                            "value": [
+                                1.0,
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "edgeColor",
+                            "type": "vec4",
+                            "value": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "specularFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "specularIntensity",
+                            "type": "float",
+                            "value": [
+                                50.0
+                            ]
+                        }
+                    ],
+                    "textures": [
+                        {
+                            "texturebuffername": "MainTexture",
+                            "textureindex": 6,
+                            "texturename": ""
+                        }
+                    ]
+                },
+                {
+                    "materialframe": "basic_toon_mat",
+                    "cull": "back",
+                    "uniformvalues": [
+                        {
+                            "name": "edgeSize",
+                            "type": "float",
+                            "value": [
+                                0.6000000238418579
+                            ]
+                        },
+                        {
+                            "name": "ambientFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.4000000059604645,
+                                0.5,
+                                0.5,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "diffuseFactor",
+                            "type": "vec4",
+                            "value": [
+                                1.0,
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "edgeColor",
+                            "type": "vec4",
+                            "value": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "specularFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "specularIntensity",
+                            "type": "float",
+                            "value": [
+                                105.0
+                            ]
+                        }
+                    ],
+                    "textures": [
+                        {
+                            "texturebuffername": "MainTexture",
+                            "textureindex": 6,
+                            "texturename": ""
+                        }
+                    ]
+                },
+                {
+                    "materialframe": "basic_toon_mat",
+                    "cull": "back",
+                    "uniformvalues": [
+                        {
+                            "name": "edgeSize",
+                            "type": "float",
+                            "value": [
+                                0.6000000238418579
+                            ]
+                        },
+                        {
+                            "name": "ambientFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.4000000059604645,
+                                0.5,
+                                0.5,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "diffuseFactor",
+                            "type": "vec4",
+                            "value": [
+                                1.0,
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "edgeColor",
+                            "type": "vec4",
+                            "value": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "specularFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "specularIntensity",
+                            "type": "float",
+                            "value": [
+                                102.0
+                            ]
+                        }
+                    ],
+                    "textures": [
+                        {
+                            "texturebuffername": "MainTexture",
+                            "textureindex": 6,
+                            "texturename": ""
+                        }
+                    ]
+                },
+                {
+                    "materialframe": "basic_toon_mat",
+                    "cull": "back",
+                    "uniformvalues": [
+                        {
+                            "name": "edgeSize",
+                            "type": "float",
+                            "value": [
+                                0.6000000238418579
+                            ]
+                        },
+                        {
+                            "name": "ambientFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.5,
+                                0.5,
+                                0.5,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "diffuseFactor",
+                            "type": "vec4",
+                            "value": [
+                                1.0,
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "edgeColor",
+                            "type": "vec4",
+                            "value": [
+                                0.25,
+                                0.30000001192092896,
+                                0.5,
+                                0.6000000238418579
+                            ]
+                        },
+                        {
+                            "name": "specularFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "specularIntensity",
+                            "type": "float",
+                            "value": [
+                                50.0
+                            ]
+                        }
+                    ],
+                    "textures": [
+                        {
+                            "texturebuffername": "MainTexture",
+                            "textureindex": 7,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "ToonTexture",
+                            "textureindex": 9,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "SphereTexture",
+                            "textureindex": 8,
+                            "texturename": ""
+                        }
+                    ]
+                },
+                {
+                    "materialframe": "basic_toon_mat",
+                    "cull": "back",
+                    "uniformvalues": [
+                        {
+                            "name": "edgeSize",
+                            "type": "float",
+                            "value": [
+                                0.6000000238418579
+                            ]
+                        },
+                        {
+                            "name": "ambientFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.5,
+                                0.5,
+                                0.5,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "diffuseFactor",
+                            "type": "vec4",
+                            "value": [
+                                1.0,
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "edgeColor",
+                            "type": "vec4",
+                            "value": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "specularFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "specularIntensity",
+                            "type": "float",
+                            "value": [
+                                50.0
+                            ]
+                        }
+                    ],
+                    "textures": [
+                        {
+                            "texturebuffername": "MainTexture",
+                            "textureindex": 7,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "SphereTexture",
+                            "textureindex": 8,
+                            "texturename": ""
+                        }
+                    ]
+                },
+                {
+                    "materialframe": "basic_toon_mat",
+                    "cull": "back",
+                    "uniformvalues": [
+                        {
+                            "name": "edgeSize",
+                            "type": "float",
+                            "value": [
+                                0.6000000238418579
+                            ]
+                        },
+                        {
+                            "name": "ambientFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.5,
+                                0.5,
+                                0.5,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "diffuseFactor",
+                            "type": "vec4",
+                            "value": [
+                                1.0,
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "edgeColor",
+                            "type": "vec4",
+                            "value": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "specularFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "specularIntensity",
+                            "type": "float",
+                            "value": [
+                                50.0
+                            ]
+                        }
+                    ],
+                    "textures": [
+                        {
+                            "texturebuffername": "MainTexture",
+                            "textureindex": 6,
+                            "texturename": ""
+                        }
+                    ]
+                },
+                {
+                    "materialframe": "basic_toon_mat",
+                    "cull": "back",
+                    "uniformvalues": [
+                        {
+                            "name": "edgeSize",
+                            "type": "float",
+                            "value": [
+                                0.6000000238418579
+                            ]
+                        },
+                        {
+                            "name": "ambientFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.5,
+                                0.5,
+                                0.5,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "diffuseFactor",
+                            "type": "vec4",
+                            "value": [
+                                1.0,
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "edgeColor",
+                            "type": "vec4",
+                            "value": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "specularFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "specularIntensity",
+                            "type": "float",
+                            "value": [
+                                50.0
+                            ]
+                        }
+                    ],
+                    "textures": [
+                        {
+                            "texturebuffername": "MainTexture",
+                            "textureindex": 6,
+                            "texturename": ""
+                        }
+                    ]
+                },
+                {
+                    "materialframe": "basic_toon_mat",
+                    "cull": "back",
+                    "uniformvalues": [
+                        {
+                            "name": "edgeSize",
+                            "type": "float",
+                            "value": [
+                                0.6000000238418579
+                            ]
+                        },
+                        {
+                            "name": "ambientFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.4000000059604645,
+                                0.5,
+                                0.5,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "diffuseFactor",
+                            "type": "vec4",
+                            "value": [
+                                1.0,
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "edgeColor",
+                            "type": "vec4",
+                            "value": [
+                                0.0,
+                                0.699999988079071,
+                                0.800000011920929,
+                                0.5
+                            ]
+                        },
+                        {
+                            "name": "specularFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "specularIntensity",
+                            "type": "float",
+                            "value": [
+                                103.0
+                            ]
+                        }
+                    ],
+                    "textures": [
+                        {
+                            "texturebuffername": "MainTexture",
+                            "textureindex": 0,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "ToonTexture",
+                            "textureindex": 4,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "SphereTexture",
+                            "textureindex": 3,
+                            "texturename": ""
+                        }
+                    ]
+                },
+                {
+                    "materialframe": "basic_toon_mat",
+                    "cull": "back",
+                    "uniformvalues": [
+                        {
+                            "name": "edgeSize",
+                            "type": "float",
+                            "value": [
+                                0.6000000238418579
+                            ]
+                        },
+                        {
+                            "name": "ambientFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.5,
+                                0.5,
+                                0.5,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "diffuseFactor",
+                            "type": "vec4",
+                            "value": [
+                                1.0,
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "edgeColor",
+                            "type": "vec4",
+                            "value": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "specularFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "specularIntensity",
+                            "type": "float",
+                            "value": [
+                                50.0
+                            ]
+                        }
+                    ],
+                    "textures": [
+                        {
+                            "texturebuffername": "MainTexture",
+                            "textureindex": 10,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "ToonTexture",
+                            "textureindex": 4,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "SphereTexture",
+                            "textureindex": 3,
+                            "texturename": ""
+                        }
+                    ]
+                },
+                {
+                    "materialframe": "basic_toon_mat",
+                    "cull": "back",
+                    "uniformvalues": [
+                        {
+                            "name": "edgeSize",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "ambientFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.5,
+                                0.5,
+                                0.5,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "diffuseFactor",
+                            "type": "vec4",
+                            "value": [
+                                1.0,
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "edgeColor",
+                            "type": "vec4",
+                            "value": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "specularFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "specularIntensity",
+                            "type": "float",
+                            "value": [
+                                50.0
+                            ]
+                        }
+                    ],
+                    "textures": [
+                        {
+                            "texturebuffername": "MainTexture",
+                            "textureindex": 10,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "SphereTexture",
+                            "textureindex": 5,
+                            "texturename": ""
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "SampleObj",
+            "filename": "",
+            "renderpass": "MRTTest",
+            "depthpass": "",
+            "transform": {
+                "pos": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "rotate": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "enable": true,
+            "rootnodes": [
+                0
+            ],
+            "nodes": [
+                {
+                    "name": "testnode",
+                    "transform": {
+                        "pos": [
+                            0.6104803085327148,
+                            1.755807876586914,
+                            0.0
+                        ],
+                        "rotate": [
+                            0.0,
+                            -0.0,
+                            0.0
+                        ],
+                        "scale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ]
+                    },
+                    "meshindex": 0,
+                    "trackids": [
+                        "test_track"
+                    ]
+                }
+            ],
+            "meshs": [
+                {
+                    "primitives": [
+                        {
+                            "materialindex": 0,
+                            "type": "cube"
+                        }
+                    ]
+                }
+            ],
+            "materials": [
+                {
+                    "materialframe": "Objectspace_Ray_Mat",
+                    "cull": "back",
+                    "trackids": [
+                        "test_mat_track"
+                    ]
+                }
+            ]
         }
-      ]
-    }
-  ]
+    ]
 }

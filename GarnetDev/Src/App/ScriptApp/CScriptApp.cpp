@@ -211,21 +211,18 @@ namespace app
 	}
 
 	// ロード完了イベント
-	bool CScriptApp::OnLoaded(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker)
+	bool CScriptApp::OnLoaded(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<gui::IGUIEngine>& GUIEngine)
 	{
 		if (!m_ScriptScene->OnLoaded(pGraphicsAPI, pPhysicsEngine, pLoadWorker)) return false;
 
-		//
 		{
-			auto Object = m_ScriptScene->GetSceneController()->FindObjectByName("SampleObj");
+			gui::SGUIParams GUIParams = {};
+			GUIParams.FileModifier = m_FileModifier;
+			GUIParams.ObjectList = m_ScriptScene->GetObjectList();
+			GUIParams.SceneController = m_ScriptScene->GetSceneController();
+			GUIParams.TimelineController = m_TimelineController;
 
-			if (Object)
-			{
-				auto Node = Object->FindNodeByName("testnode");
-				Node->AddRefTrackID("test_track");
-
-				Object->GetMaterialList()[0]->AddRefTrackID("test_mat_track");
-			}
+			if (!m_GraphicsEditingWindow->OnLoaded(pGraphicsAPI, GUIParams, GUIEngine)) return false;
 		}
 
 		// タイムラインのテストクリップを作成

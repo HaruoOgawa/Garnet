@@ -27,7 +27,10 @@ namespace timeline
 		bool Update(float CurrentTime);
 
 		void AddSampler(const std::shared_ptr<animation::CAnimationSampler>& Sampler);
+		const std::vector<std::shared_ptr<animation::CAnimationSampler>>& GetSamplerList() const;
+
 		void AddTrack(const std::shared_ptr<CTimelineTrack>& Track);
+		const std::unordered_map<std::string, std::shared_ptr<CTimelineTrack>>& GetTrackList() const;
 
 		void AssignObjectResourceToTrack(const std::vector<std::shared_ptr<object::C3DObject>>& ObjectList);
 		//void AssignRendererSettingsToTrack();

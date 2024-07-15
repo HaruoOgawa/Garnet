@@ -57,6 +57,41 @@ namespace object
 		return m_ObjectName;
 	}
 
+	const std::string& C3DObject::GetPassName() const
+	{
+		return m_PassName;
+	}
+	
+	const std::string& C3DObject::GetDepthPassName() const
+	{
+		return m_DepthPassName;
+	}
+
+	bool C3DObject::HasTLTrackContent() const
+	{
+		return (!m_TLNodeList.empty() || !m_TLMaterial.empty());
+	}
+
+	void C3DObject::AddTLNode(const std::shared_ptr<CNode>& Node)
+	{
+		m_TLNodeList.emplace(Node);
+	}
+
+	const std::set<std::shared_ptr<CNode>>& C3DObject::GetTLNodeList() const
+	{
+		return m_TLNodeList;
+	}
+
+	void C3DObject::AddTLMaterial(const std::shared_ptr<graphics::CMaterial>& Material)
+	{
+		m_TLMaterial.emplace(Material);
+	}
+
+	const std::set<std::shared_ptr<graphics::CMaterial>>& C3DObject::GetTLMaterial() const
+	{
+		return m_TLMaterial;
+	}
+
 	const std::shared_ptr<math::CTransform>& C3DObject::GetObjectTransform() const
 	{
 		return m_ObjectTransform;
@@ -161,6 +196,27 @@ namespace object
 		if (ExistMorph)
 		{
 			if (!m_MorphController->Create(m_MeshList)) return false;
+		}
+
+		// TrackIDŽQÆƒŠƒXƒg
+		{
+			// Node
+			for (const auto& Node : m_NodeList)
+			{
+				if (!Node->GetRefTrackIDList().empty())
+				{
+					m_TLNodeList.emplace(Node);
+				}
+			}
+
+			// Material
+			for (const auto& Material : m_MaterialList)
+			{
+				if (!Material->GetRefTrackIDList().empty())
+				{
+					m_TLMaterial.emplace(Material);
+				}
+			}
 		}
 
 		m_IsCreated = true;

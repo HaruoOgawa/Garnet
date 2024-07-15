@@ -12,6 +12,14 @@ namespace gui
 	{
 	}
 
+	// ロード完了イベント
+	bool CGraphicsEditingWindow::OnLoaded(api::IGraphicsAPI* pGraphicsAPI, const SGUIParams& GUIParams, const std::shared_ptr<gui::IGUIEngine>& GUIEngine)
+	{
+		if (!m_TimeLineView.Initialize(GUIParams.TimelineController, GUIParams.ObjectList)) return false;
+
+		return true;
+	}
+
 	bool CGraphicsEditingWindow::Draw(api::IGraphicsAPI* pGraphicsAPI, const SGUIParams& GUIParams, const std::shared_ptr<gui::IGUIEngine>& GUIEngine)
 	{
 		// ウィンドウの初期位置・サイズ
@@ -51,7 +59,7 @@ namespace gui
 			bool Open = true;
 			if (ImGui::Begin("TimeLineView", &Open, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoTitleBar))
 			{
-				if (!m_TimeLineView.Draw(GUIParams.TimelineController)) return false;
+				if (!m_TimeLineView.Draw(GUIParams.TimelineController, GUIParams.ObjectList)) return false;
 			}
 
 			ImGui::End();

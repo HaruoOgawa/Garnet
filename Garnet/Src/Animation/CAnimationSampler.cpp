@@ -63,6 +63,25 @@ namespace animation
 		return m_KeyFrameList;
 	}
 
+	std::vector<std::shared_ptr<animation::CKeyFrame>> CAnimationSampler::GetKeyFrameListFromRange(float FirstTime, float SecondTime)
+	{
+		std::vector<std::shared_ptr<animation::CKeyFrame>> dstKeyFrameList;
+
+		for (const auto& KeyFrame : m_KeyFrameList)
+		{
+			// 小さいものはスキップ
+			if (KeyFrame->GetInput() < FirstTime) continue;
+
+			// 大きかったらそれ以上のキーフレームは入らないので探査終了
+			if (KeyFrame->GetInput() >= SecondTime) break;
+
+			// 追加する
+			dstKeyFrameList.push_back(KeyFrame);
+		}
+
+		return dstKeyFrameList;
+	}
+
 	void CAnimationSampler::CalcStartEndTime()
 	{
 		if (m_KeyFrameList.size() > 0)
@@ -114,15 +133,15 @@ namespace animation
 
 	bool CAnimationSampler::ComputeCurrentFrame(float CurrentTime, bool IsLoop, std::vector<float>& Value, EInterpolateValueType ValueType)
 	{
+		// 0の時はエラーにはしないが、何も処理しない
+		// AnimationやSDKに使っていないボーンのアニメーションでもなぜか一つだけInput・Outputが入っていることがあるため
+		if (m_KeyFrameList.size() == 0) return true;
+
 		if (m_StartTime >= m_EndTime)
 		{
 			Console::Log("[Error - KeyFrame] StartTime is greater than EndTime. / StartTime: %f, EndTime: %f\n", m_StartTime, m_EndTime);
 			return false;
 		}
-
-		// 0の時はエラーにはしないが、何も処理しない
-		// AnimationやSDKに使っていないボーンのアニメーションでもなぜか一つだけInput・Outputが入っていることがあるため
-		if (m_KeyFrameList.size() == 0) return true;
 
 		float CalcCurrentTime = 0.0f;
 

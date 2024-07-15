@@ -356,6 +356,9 @@ namespace scene
 				Material->ReplaceTextureIndex(TextureBufferName, TextureIndex);
 			}
 
+			// TrackIDList
+			Material->SetRefTrackIDList(MaterialInfo.TrackIDList);
+
 			// Material‚ð“o˜^
 			Object->AddMaterial(Material);
 		}
@@ -386,6 +389,9 @@ namespace scene
 			{
 				Material->SetUniformValue(UniformInfo.UniformName, &UniformInfo.UniformData[0], UniformInfo.ByteSize);
 			}
+
+			// TrackIDList
+			Material->SetRefTrackIDList(MaterialInfo.TrackIDList);
 		}
 
 		return true;

@@ -8,6 +8,30 @@ namespace timeline
 		m_TrackTarget(TrackTarget),
 		m_Node(nullptr)
 	{
+		switch (m_TrackTarget)
+		{
+		case ENodeTrackTarget::NodeTrackTarget_None:
+			break;
+
+		case ENodeTrackTarget::NodeTrackTarget_EnabledFlag:
+			SetValueType(math::EValueType::VALUE_TYPE_SCALAR);
+			break;
+
+		case ENodeTrackTarget::NodeTrackTarget_Translation:
+			SetValueType(math::EValueType::VALUE_TYPE_VEC3);
+			break;
+
+		case ENodeTrackTarget::NodeTrackTarget_Rotation:
+			SetValueType(math::EValueType::VALUE_TYPE_VEC4);
+			break;
+
+		case ENodeTrackTarget::NodeTrackTarget_Scale:
+			SetValueType(math::EValueType::VALUE_TYPE_VEC3);
+			break;
+
+		default:
+			break;
+		}
 	}
 
 	CNodeTrack::~CNodeTrack()
@@ -49,6 +73,69 @@ namespace timeline
 	void CNodeTrack::AssignTrackContent(const std::shared_ptr<CTimelineTrackContent>& TrackContent)
 	{
 		m_Node = std::dynamic_pointer_cast<object::CNode>(TrackContent);
+	}
+
+	std::string CNodeTrack::GetTrackName()
+	{
+		std::string Name = std::string();
+
+		switch (m_TrackTarget)
+		{
+		case ENodeTrackTarget::NodeTrackTarget_None:
+			break;
+
+		case ENodeTrackTarget::NodeTrackTarget_EnabledFlag:
+			Name = "EnabledFlag";
+			break;
+
+		case ENodeTrackTarget::NodeTrackTarget_Translation:
+			Name = "Translation";
+			break;
+
+		case ENodeTrackTarget::NodeTrackTarget_Rotation:
+			Name = "Rotation";
+			break;
+
+		case ENodeTrackTarget::NodeTrackTarget_Scale:
+			Name = "Scale";
+			break;
+
+		default:
+			break;
+		}
+
+		return Name;
+	}
+
+	std::string CNodeTrack::CastNodeTrackTarget_Str(ENodeTrackTarget TrackTarget)
+	{
+		std::string dst = std::string();
+
+		switch (TrackTarget)
+		{
+		case timeline::ENodeTrackTarget::NodeTrackTarget_None:
+			dst = "None";
+			break;
+		case timeline::ENodeTrackTarget::NodeTrackTarget_EnabledFlag:
+			dst = "EnabledFlag";
+			break;
+		case timeline::ENodeTrackTarget::NodeTrackTarget_Translation:
+			dst = "Translation";
+			break;
+		case timeline::ENodeTrackTarget::NodeTrackTarget_Rotation:
+			dst = "Rotation";
+			break;
+		case timeline::ENodeTrackTarget::NodeTrackTarget_Scale:
+			dst = "Scale";
+			break;
+		case timeline::ENodeTrackTarget::NodeTrackTarget_Max:
+			dst = "Max";
+			break;
+		default:
+			break;
+		}
+
+		return dst;
 	}
 
 	bool CNodeTrack::UpdateEnabledFlag(const std::vector<float>& Value)

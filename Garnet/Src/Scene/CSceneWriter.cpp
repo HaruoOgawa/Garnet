@@ -150,6 +150,9 @@ namespace scene
 				ObjectJSON["defaultmaterialframe"] = Object->GetDefaultMaterialFrame();
 			}
 
+			ObjectJSON["renderpass"] = Object->GetPassName();
+			ObjectJSON["depthpass"] = Object->GetDepthPassName();
+
 			// animation
 			if (StoredFile3DModel)
 			{
@@ -245,6 +248,12 @@ namespace scene
 			for (int ChildIndex : Node->GetChildrenNodeIndexList())
 			{
 				node["children"].push_back(ChildIndex);
+			}
+
+			// Timeline Track ID
+			for (const auto& TrackID : Node->GetRefTrackIDList())
+			{
+				node["trackids"].push_back(TrackID);
 			}
 
 			ObjectJSON["nodes"].push_back(node);
@@ -456,6 +465,12 @@ namespace scene
 						{ "texturename", RefTextureName }
 					});
 				}
+			}
+
+			// Timeline Track ID
+			for (const auto& TrackID : Material->GetRefTrackIDList())
+			{
+				materialJSON["trackids"].push_back(TrackID);
 			}
 
 			ObjectJSON["materials"].push_back(materialJSON);
