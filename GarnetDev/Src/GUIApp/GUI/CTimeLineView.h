@@ -10,7 +10,14 @@
 
 #include <Timeline/CTimelineController.h>
 
-namespace object { class C3DObject; }
+namespace object { 
+	class C3DObject; 
+	class CNode;
+}
+
+namespace graphics {
+	class CMaterial;
+}
 
 namespace gui
 {
@@ -50,7 +57,9 @@ namespace gui
 		std::shared_ptr<object::C3DObject> m_SelectedObjectForAddObj;
 
 		bool m_ShowAddTrackDialog;
-		std::shared_ptr<object::C3DObject> m_ClickedObjectForAddTrack;
+		std::shared_ptr<object::C3DObject> m_ClickedObjectForAddObjectTrack;
+		std::shared_ptr<object::CNode> m_SelectedNodeForAddTrack;
+		std::shared_ptr<graphics::CMaterial> m_SelectedMaterialForAddTrack;
 	private:
 		bool DrawTimeBar(const std::shared_ptr<timeline::CTimelineController>& TimelineController);
 		
@@ -66,11 +75,12 @@ namespace gui
 		bool DrawKeyFrameList(const std::shared_ptr<timeline::CTimelineController>& TimelineController);
 
 		bool DrawAddObjectDialog(const std::shared_ptr<timeline::CTimelineController>& TimelineController, const std::vector<std::shared_ptr<object::C3DObject>>& ObjectList);
+		bool DrawAddObjectTrackDialog(const std::shared_ptr<timeline::CTimelineController>& TimelineController);
 
 		bool CheckWheelExpand();
 		bool CheckMemoryDrag(const std::shared_ptr<timeline::CTimelineController>& TimelineController, const ImVec2& availableSize, float DrawMemorySpace, float MaxTime);
 
-		void CheckIsClickedObjectTree(const std::shared_ptr<object::C3DObject>& Object);
+		bool CheckIsClickedObjectTree(const std::shared_ptr<object::C3DObject>& Object);
 
 		bool UpdateCurrentTimeFromMemoryBar(const std::shared_ptr<timeline::CTimelineController>& TimelineController);
 		bool UpdateMemoryFromTimeBar(const std::shared_ptr<timeline::CTimelineController>& TimelineController);

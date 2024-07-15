@@ -60,4 +60,26 @@ namespace timeline
 
 		return Name;
 	}
+
+	std::string CMaterialTrack::CastMaterialTrackTarget_Str(EMaterialTrackTarget TrackTarget)
+	{
+		std::string dst = std::string();
+
+		switch (TrackTarget)
+		{
+		case timeline::EMaterialTrackTarget::MaterialTrackTarget_None:
+			dst = "None";
+			break;
+		case timeline::EMaterialTrackTarget::MaterialTrackTarget_SetUniformValue:
+			dst = "SetUniform";
+			break;
+		case timeline::EMaterialTrackTarget::MaterialTrackTarget_Max:
+			dst = "Max";
+			break;
+		default:
+			break;
+		}
+
+		return dst;
+	}
 }

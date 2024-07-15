@@ -12,7 +12,9 @@ namespace timeline
 	{
 		MaterialTrackTarget_None = -1,
 
-		MaterialTrackTarget_SetUniformValue,
+		MaterialTrackTarget_SetUniformValue = 0,
+
+		MaterialTrackTarget_Max = 1,
 	};
 
 	class CMaterialTrack : public CTimelineTrack
@@ -33,5 +35,7 @@ namespace timeline
 		virtual void AssignTrackContent(const std::shared_ptr<CTimelineTrackContent>& TrackContent) override;
 
 		virtual std::string GetTrackName() override;
+
+		static std::string CastMaterialTrackTarget_Str(EMaterialTrackTarget TrackTarget);
 	};
 }

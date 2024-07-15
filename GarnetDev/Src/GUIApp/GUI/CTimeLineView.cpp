@@ -2,6 +2,8 @@
 #include "CTimeLineView.h"
 #include <Object/C3DObject.h>
 #include <Message/Console.h>
+#include <Timeline/CNodeTrack.h>
+#include <Timeline/CMaterialTrack.h>
 
 namespace gui
 {
@@ -20,7 +22,9 @@ namespace gui
 		m_ShowAddObjDialog(false),
 		m_ShowAddTrackDialog(false),
 		m_SelectedObjectForAddObj(nullptr),
-		m_ClickedObjectForAddTrack(nullptr)
+		m_ClickedObjectForAddObjectTrack(nullptr),
+		m_SelectedNodeForAddTrack(nullptr),
+		m_SelectedMaterialForAddTrack(nullptr)
 	{
 		m_LeftSideMemory = 0.0f;
 		m_RightSideMemory = static_cast<float>(m_MaxLargeMemoryCount) * m_LargeMemoryWidth;
@@ -45,10 +49,8 @@ namespace gui
 		if (!DrawTimeBar(TimelineController)) return false;
 		if (!DrawHierarchyWindow(TimelineController)) return false;
 		if (!DrawKeyFrameWindow(TimelineController)) return false;
-		if (m_ShowAddObjDialog)
-		{
-			if (!DrawAddObjectDialog(TimelineController, ObjectList)) return false;
-		}
+		if (m_ShowAddObjDialog && !DrawAddObjectDialog(TimelineController, ObjectList)) return false;
+		if (m_ShowAddTrackDialog && !DrawAddObjectTrackDialog(TimelineController)) return false;
 
 		return true;
 	}
@@ -133,19 +135,13 @@ namespace gui
 		ImVec2 CursorPos = ImGui::GetCursorPos();
 		
 		// Object追加ダイアログ表示
-		{
-			const bool Clicked = ImGui::Button("AddProperty##Timeline_HierarchyWindow_AddProperty", ImVec2(availableSize.x * 0.25f, m_MemoryBarHeight));
-
-			// AddPropertyの押下かHierarchyウィンドウのどこかしらの右クリックでダイアログを開く
-			if (Clicked || (ImGui::IsWindowHovered() && ImGui::IsMouseClicked(1)))
-			{
-				m_ShowAddObjDialog = true;
-			}
-		}
-
+		const bool Clicked_AddProperty_Btn = ImGui::Button("AddProperty##Timeline_HierarchyWindow_AddProperty", ImVec2(availableSize.x * 0.25f, m_MemoryBarHeight));
+		
 		// メモリバーの高さから開始する
 		ImGui::SetCursorPos(ImVec2(CursorPos.x, CursorPos.y + m_MemoryBarHeight));
 		
+		bool IsOpenAndClicked = false;
+
 		for (const auto& Object : m_TrackObjectList)
 		{
 			std::string ObjectTreeLabel = Object->GetObjectName() + "##TimeLineView_Hierarchy_ObjectTree";
@@ -153,7 +149,10 @@ namespace gui
 			if (ImGui::TreeNodeEx(ObjectTreeLabel.c_str()))
 			{
 				// Track追加ダイアログ表示。Treeの内外両方に必要
-				CheckIsClickedObjectTree(Object);
+				if (CheckIsClickedObjectTree(Object))
+				{
+					IsOpenAndClicked = true;
+				}
 				
 				// Node Track
 				{
@@ -220,6 +219,12 @@ namespace gui
 
 			// Track追加ダイアログ表示。Treeの内外両方に必要
 			CheckIsClickedObjectTree(Object);
+		}
+
+		// AddPropertyの押下かHierarchyウィンドウのどこかしらの右クリックでダイアログを開く。
+		if (Clicked_AddProperty_Btn || (ImGui::IsWindowHovered() && ImGui::IsMouseClicked(1) && !ImGui::IsItemHovered() && !IsOpenAndClicked))
+		{
+			m_ShowAddObjDialog = true;
 		}
 
 		ImGui::EndChild();
@@ -548,6 +553,159 @@ namespace gui
 		return true;
 	}
 
+	bool CTimeLineView::DrawAddObjectTrackDialog(const std::shared_ptr<timeline::CTimelineController>& TimelineController)
+	{
+		ImGuiIO& io = ImGui::GetIO();
+
+		ImVec2 WindowSize = ImVec2(io.DisplaySize.x * 0.1f, io.DisplaySize.y * 0.1f);
+
+		ImGui::SetNextWindowPos(ImVec2(io.MousePos.x, io.MousePos.y - WindowSize.y * 0.5f), ImGuiCond_Appearing, ImVec2(0.0f, 0.0f));
+		ImGui::SetNextWindowSize(WindowSize, ImGuiCond_Appearing);
+
+		if (ImGui::Begin("AddTrack##Timeline", &m_ShowAddTrackDialog))
+		{
+			if (ImGui::BeginTabBar("##Timeline_AddObjectTrackDialog_TabBar"))
+			{
+				// NodeTrack
+				if (ImGui::BeginTabItem("NodeTrack##Timeline_AddObjectTrackDialog_TabItem"))
+				{
+					static timeline::ENodeTrackTarget SelectedType = timeline::ENodeTrackTarget::NodeTrackTarget_None;
+					std::string SelectedName = timeline::CNodeTrack::CastNodeTrackTarget_Str(SelectedType);
+
+					// ToDo: ターゲットの取得
+					// Target
+					{
+						
+					}
+
+					// Type
+					if (ImGui::BeginCombo("Type##Timeline_AddObjectTrackDialog_NodeTrack_Combo", SelectedName.c_str()))
+					{
+						for (int i = 0; i < static_cast<int>(timeline::ENodeTrackTarget::NodeTrackTarget_Max); i++)
+						{
+							timeline::ENodeTrackTarget Type = static_cast<timeline::ENodeTrackTarget>(i);
+
+							const bool IsSelected = (SelectedType == Type);
+
+							std::string LabelSelectable = timeline::CNodeTrack::CastNodeTrackTarget_Str(Type) + "##Timeline_AddObjectTrackDialog_NodeTrack_Selectable";
+							
+							if (ImGui::Selectable(LabelSelectable.c_str(), IsSelected) && !IsSelected)
+							{
+								SelectedType = Type;
+							}
+						}
+
+						ImGui::EndCombo();
+					}
+
+					// Add
+					if (ImGui::Button("Add##Timeline_AddObjectTrackDialog"))
+					{
+						const auto& Clip = TimelineController->GetClip();
+						if (Clip && m_SelectedNodeForAddTrack)
+						{
+							int SamplerIndex = static_cast<int>(Clip->GetSamplerList().size());
+							std::string TrackID = timeline::CTimelineTrack::GenerateUUID();
+
+							timeline::ETimelineSamplerTarget SamplerTarget = timeline::ETimelineSamplerTarget::NONE;
+
+							if (SelectedType == timeline::ENodeTrackTarget::NodeTrackTarget_Rotation)
+							{
+								SamplerTarget = timeline::ETimelineSamplerTarget::ROTATION;
+							}
+
+							// Sampler
+							std::shared_ptr<animation::CAnimationSampler> Sampler = std::make_shared<animation::CAnimationSampler>(animation::EInterpolationType::LINEAR);
+							Clip->AddSampler(Sampler);
+
+							// Track
+							std::shared_ptr<timeline::CNodeTrack> Track = std::make_shared<timeline::CNodeTrack>(TrackID, SamplerIndex, SamplerTarget, SelectedType);
+							Clip->AddTrack(Track);
+
+							// TrackIDをターゲットに割り当てる
+							m_SelectedNodeForAddTrack->AddRefTrackID(TrackID);
+							Track->AssignTrackContent(m_SelectedNodeForAddTrack);
+						}
+
+						m_ShowAddTrackDialog = false;
+						m_ClickedObjectForAddObjectTrack = nullptr;
+						m_SelectedNodeForAddTrack = nullptr;
+						m_SelectedMaterialForAddTrack = nullptr;
+					}
+
+					ImGui::EndTabItem();
+				}
+
+				// MaterialTrack
+				if (ImGui::BeginTabItem("MaterialTrack##Timeline_AddObjectTrackDialog_TabItem"))
+				{
+					static timeline::EMaterialTrackTarget SelectedType = timeline::EMaterialTrackTarget::MaterialTrackTarget_None;
+					std::string SelectedName = timeline::CMaterialTrack::CastMaterialTrackTarget_Str(SelectedType);
+
+					// ToDo: ターゲットの取得
+					std::string UniformName = "";
+					math::EValueType ValueType = math::EValueType::VALUE_TYPE_NONE;
+
+					if (ImGui::BeginCombo("Type##Timeline_AddObjectTrackDialog_MaterialTrack_Combo", SelectedName.c_str()))
+					{
+						for (int i = 0; i < static_cast<int>(timeline::EMaterialTrackTarget::MaterialTrackTarget_Max); i++)
+						{
+							timeline::EMaterialTrackTarget Type = static_cast<timeline::EMaterialTrackTarget>(i);
+
+							const bool IsSelected = (SelectedType == Type);
+
+							std::string LabelSelectable = timeline::CMaterialTrack::CastMaterialTrackTarget_Str(Type) + "##Timeline_AddObjectTrackDialog_MaterialTrack_Selectable";
+
+							if (ImGui::Selectable(LabelSelectable.c_str(), IsSelected) && !IsSelected)
+							{
+								SelectedType = Type;
+							}
+						}
+
+						ImGui::EndCombo();
+					}
+
+					if (ImGui::Button("Add##Timeline_AddObjectTrackDialog"))
+					{
+						const auto& Clip = TimelineController->GetClip();
+						if (Clip && m_SelectedMaterialForAddTrack)
+						{
+							int SamplerIndex = static_cast<int>(Clip->GetSamplerList().size());
+							std::string TrackID = timeline::CTimelineTrack::GenerateUUID();
+
+							timeline::ETimelineSamplerTarget SamplerTarget = timeline::ETimelineSamplerTarget::NONE;
+
+							// Sampler
+							std::shared_ptr<animation::CAnimationSampler> Sampler = std::make_shared<animation::CAnimationSampler>(animation::EInterpolationType::LINEAR);
+							Clip->AddSampler(Sampler);
+
+							// Track
+							std::shared_ptr<timeline::CMaterialTrack> Track = std::make_shared<timeline::CMaterialTrack>(TrackID, SamplerIndex, SamplerTarget, SelectedType, UniformName, ValueType);
+							Clip->AddTrack(Track);
+
+							// TrackIDをターゲットに割り当てる
+							m_SelectedMaterialForAddTrack->AddRefTrackID(TrackID);
+							Track->AssignTrackContent(m_SelectedMaterialForAddTrack);
+						}
+
+						m_ShowAddTrackDialog = false;
+						m_ClickedObjectForAddObjectTrack = nullptr;
+						m_SelectedNodeForAddTrack = nullptr;
+						m_SelectedMaterialForAddTrack = nullptr;
+					}
+
+					ImGui::EndTabItem();
+				}
+
+				ImGui::EndTabBar();
+			}
+		}
+
+		ImGui::End();
+
+		return true;
+	}
+
 	bool CTimeLineView::CheckWheelExpand()
 	{
 		// インジケーターと一緒に動かないようにする
@@ -642,15 +800,19 @@ namespace gui
 		return true;
 	}
 
-	void CTimeLineView::CheckIsClickedObjectTree(const std::shared_ptr<object::C3DObject>& Object)
+	bool CTimeLineView::CheckIsClickedObjectTree(const std::shared_ptr<object::C3DObject>& Object)
 	{
 		// Track追加ダイアログ表示
 		// ObjectTreeNodeの右クリックでダイアログを開く
 		if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(1))
 		{
 			m_ShowAddTrackDialog = true;
-			m_ClickedObjectForAddTrack = Object;
+			m_ClickedObjectForAddObjectTrack = Object;
+
+			return true;
 		}
+
+		return false;
 	}
 
 	bool CTimeLineView::UpdateCurrentTimeFromMemoryBar(const std::shared_ptr<timeline::CTimelineController>& TimelineController)

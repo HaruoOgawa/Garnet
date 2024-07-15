@@ -11,10 +11,12 @@ namespace timeline
 	{
 		NodeTrackTarget_None = -1,
 
-		NodeTrackTarget_EnabledFlag,
-		NodeTrackTarget_Translation,
-		NodeTrackTarget_Rotation,
-		NodeTrackTarget_Scale,
+		NodeTrackTarget_EnabledFlag = 0,
+		NodeTrackTarget_Translation = 1,
+		NodeTrackTarget_Rotation =2,
+		NodeTrackTarget_Scale = 3,
+
+		NodeTrackTarget_Max = 4,
 	};
 
 	class CNodeTrack : public CTimelineTrack
@@ -38,5 +40,7 @@ namespace timeline
 		virtual void AssignTrackContent(const std::shared_ptr<CTimelineTrackContent>& TrackContent) override;
 
 		virtual std::string GetTrackName() override;
+
+		static std::string CastNodeTrackTarget_Str(ENodeTrackTarget TrackTarget);
 	};
 }

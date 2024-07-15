@@ -107,6 +107,37 @@ namespace timeline
 		return Name;
 	}
 
+	std::string CNodeTrack::CastNodeTrackTarget_Str(ENodeTrackTarget TrackTarget)
+	{
+		std::string dst = std::string();
+
+		switch (TrackTarget)
+		{
+		case timeline::ENodeTrackTarget::NodeTrackTarget_None:
+			dst = "None";
+			break;
+		case timeline::ENodeTrackTarget::NodeTrackTarget_EnabledFlag:
+			dst = "EnabledFlag";
+			break;
+		case timeline::ENodeTrackTarget::NodeTrackTarget_Translation:
+			dst = "Translation";
+			break;
+		case timeline::ENodeTrackTarget::NodeTrackTarget_Rotation:
+			dst = "Rotation";
+			break;
+		case timeline::ENodeTrackTarget::NodeTrackTarget_Scale:
+			dst = "Scale";
+			break;
+		case timeline::ENodeTrackTarget::NodeTrackTarget_Max:
+			dst = "Max";
+			break;
+		default:
+			break;
+		}
+
+		return dst;
+	}
+
 	bool CNodeTrack::UpdateEnabledFlag(const std::vector<float>& Value)
 	{
 		if (Value.size() != 1) return false;
