@@ -215,19 +215,6 @@ namespace app
 	{
 		if (!m_ScriptScene->OnLoaded(pGraphicsAPI, pPhysicsEngine, pLoadWorker)) return false;
 
-		//
-		{
-			auto Object = m_ScriptScene->GetSceneController()->FindObjectByName("SampleObj");
-
-			if (Object)
-			{
-				auto Node = Object->FindNodeByName("testnode");
-				Node->AddRefTrackID("test_track");
-
-				Object->GetMaterialList()[0]->AddRefTrackID("test_mat_track");
-			}
-		}
-
 		// タイムラインのテストクリップを作成
 		{
 			std::shared_ptr<timeline::CTimelineClip> TimelineClip = std::make_shared<timeline::CTimelineClip>(30.0f);

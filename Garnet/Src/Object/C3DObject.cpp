@@ -57,6 +57,16 @@ namespace object
 		return m_ObjectName;
 	}
 
+	const std::string& C3DObject::GetPassName() const
+	{
+		return m_PassName;
+	}
+	
+	const std::string& C3DObject::GetDepthPassName() const
+	{
+		return m_DepthPassName;
+	}
+
 	const std::shared_ptr<math::CTransform>& C3DObject::GetObjectTransform() const
 	{
 		return m_ObjectTransform;

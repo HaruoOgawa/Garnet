@@ -79,6 +79,9 @@ namespace object
 		void SetObjectName(const std::string& Name);
 		const std::string& GetObjectName() const;
 
+		const std::string& GetPassName() const;
+		const std::string& GetDepthPassName() const;
+
 		const std::shared_ptr<math::CTransform>& GetObjectTransform() const;
 
 		void SetEnabled(bool Flag);

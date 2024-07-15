@@ -46,6 +46,7 @@ namespace resource
 		scene::SAnimationInfo AnalyseAnimationInfo(const json::iterator& animationJSON);
 
 		void GetString(const std::string& Key, std::string& Value, const json::iterator& Object);
+		void GetArrayString(const std::string& Key, std::vector<std::string>& Value, const json::iterator& Object);
 		void GetBoolean(const std::string& Key, bool& Value, const json::iterator& Object);
 		void GetInt(const std::string& Key, int& Value, const json::iterator& Object);
 		void GetArrayInt32(const std::string& Key, std::vector<int>& Value, const json::iterator& Object);
