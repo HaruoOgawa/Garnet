@@ -76,6 +76,8 @@ namespace gui
 
 		bool DrawAddObjectDialog(const std::shared_ptr<timeline::CTimelineController>& TimelineController, const std::vector<std::shared_ptr<object::C3DObject>>& ObjectList);
 		bool DrawAddObjectTrackDialog(const std::shared_ptr<timeline::CTimelineController>& TimelineController);
+		bool DrawNodeDialogView(const std::shared_ptr<timeline::CTimelineController>& TimelineController);
+		bool DrawMaterialDialogView(const std::shared_ptr<timeline::CTimelineController>& TimelineController);
 
 		bool CheckWheelExpand();
 		bool CheckMemoryDrag(const std::shared_ptr<timeline::CTimelineController>& TimelineController, const ImVec2& availableSize, float DrawMemorySpace, float MaxTime);
@@ -87,6 +89,8 @@ namespace gui
 
 		float GetFirstLargeMemory(float SrcValue, std::vector<bool>& IsLongMemory);
 		float GetFirstMemory(float SrcValue);
+
+		std::vector<float> GetDefaultValue(math::EValueType ValueType);
 		
 	public:
 		CTimeLineView();

@@ -133,15 +133,15 @@ namespace animation
 
 	bool CAnimationSampler::ComputeCurrentFrame(float CurrentTime, bool IsLoop, std::vector<float>& Value, EInterpolateValueType ValueType)
 	{
+		// 0の時はエラーにはしないが、何も処理しない
+		// AnimationやSDKに使っていないボーンのアニメーションでもなぜか一つだけInput・Outputが入っていることがあるため
+		if (m_KeyFrameList.size() == 0) return true;
+
 		if (m_StartTime >= m_EndTime)
 		{
 			Console::Log("[Error - KeyFrame] StartTime is greater than EndTime. / StartTime: %f, EndTime: %f\n", m_StartTime, m_EndTime);
 			return false;
 		}
-
-		// 0の時はエラーにはしないが、何も処理しない
-		// AnimationやSDKに使っていないボーンのアニメーションでもなぜか一つだけInput・Outputが入っていることがあるため
-		if (m_KeyFrameList.size() == 0) return true;
 
 		float CalcCurrentTime = 0.0f;
 

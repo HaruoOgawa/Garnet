@@ -250,17 +250,20 @@ namespace gui
 		}
 
 		// サンプラーと再生時間から現在のキーフレームの値を取得
+		math::EValueType ValueType = Track->GetValueType();
+
 		auto& Sampler = SamplerList[SamplerIndex];
 		std::vector<float> Value;
 
 		if (!Sampler->ComputeCurrentFrame(TimelineController->GetPlayBackTime(), false, Value, InterpolateValueType)) return false;
 
+		if (Value.empty()) Value = GetDefaultValue(ValueType);
+
 		if (Value.empty()) return true;
 
 		// GUIに描画
 		std::string Label = Track->GetTrackName() + "##Timeline_TrackProperty";
-
-		math::EValueType ValueType = Track->GetValueType();
+		
 		switch (ValueType)
 		{
 		case math::EValueType::VALUE_TYPE_NONE:
@@ -566,142 +569,241 @@ namespace gui
 		{
 			if (ImGui::BeginTabBar("##Timeline_AddObjectTrackDialog_TabBar"))
 			{
-				// NodeTrack
-				if (ImGui::BeginTabItem("NodeTrack##Timeline_AddObjectTrackDialog_TabItem"))
-				{
-					static timeline::ENodeTrackTarget SelectedType = timeline::ENodeTrackTarget::NodeTrackTarget_None;
-					std::string SelectedName = timeline::CNodeTrack::CastNodeTrackTarget_Str(SelectedType);
-
-					// ToDo: ターゲットの取得
-					// Target
-					{
-						
-					}
-
-					// Type
-					if (ImGui::BeginCombo("Type##Timeline_AddObjectTrackDialog_NodeTrack_Combo", SelectedName.c_str()))
-					{
-						for (int i = 0; i < static_cast<int>(timeline::ENodeTrackTarget::NodeTrackTarget_Max); i++)
-						{
-							timeline::ENodeTrackTarget Type = static_cast<timeline::ENodeTrackTarget>(i);
-
-							const bool IsSelected = (SelectedType == Type);
-
-							std::string LabelSelectable = timeline::CNodeTrack::CastNodeTrackTarget_Str(Type) + "##Timeline_AddObjectTrackDialog_NodeTrack_Selectable";
-							
-							if (ImGui::Selectable(LabelSelectable.c_str(), IsSelected) && !IsSelected)
-							{
-								SelectedType = Type;
-							}
-						}
-
-						ImGui::EndCombo();
-					}
-
-					// Add
-					if (ImGui::Button("Add##Timeline_AddObjectTrackDialog"))
-					{
-						const auto& Clip = TimelineController->GetClip();
-						if (Clip && m_SelectedNodeForAddTrack)
-						{
-							int SamplerIndex = static_cast<int>(Clip->GetSamplerList().size());
-							std::string TrackID = timeline::CTimelineTrack::GenerateUUID();
-
-							timeline::ETimelineSamplerTarget SamplerTarget = timeline::ETimelineSamplerTarget::NONE;
-
-							if (SelectedType == timeline::ENodeTrackTarget::NodeTrackTarget_Rotation)
-							{
-								SamplerTarget = timeline::ETimelineSamplerTarget::ROTATION;
-							}
-
-							// Sampler
-							std::shared_ptr<animation::CAnimationSampler> Sampler = std::make_shared<animation::CAnimationSampler>(animation::EInterpolationType::LINEAR);
-							Clip->AddSampler(Sampler);
-
-							// Track
-							std::shared_ptr<timeline::CNodeTrack> Track = std::make_shared<timeline::CNodeTrack>(TrackID, SamplerIndex, SamplerTarget, SelectedType);
-							Clip->AddTrack(Track);
-
-							// TrackIDをターゲットに割り当てる
-							m_SelectedNodeForAddTrack->AddRefTrackID(TrackID);
-							Track->AssignTrackContent(m_SelectedNodeForAddTrack);
-						}
-
-						m_ShowAddTrackDialog = false;
-						m_ClickedObjectForAddObjectTrack = nullptr;
-						m_SelectedNodeForAddTrack = nullptr;
-						m_SelectedMaterialForAddTrack = nullptr;
-					}
-
-					ImGui::EndTabItem();
-				}
-
-				// MaterialTrack
-				if (ImGui::BeginTabItem("MaterialTrack##Timeline_AddObjectTrackDialog_TabItem"))
-				{
-					static timeline::EMaterialTrackTarget SelectedType = timeline::EMaterialTrackTarget::MaterialTrackTarget_None;
-					std::string SelectedName = timeline::CMaterialTrack::CastMaterialTrackTarget_Str(SelectedType);
-
-					// ToDo: ターゲットの取得
-					std::string UniformName = "";
-					math::EValueType ValueType = math::EValueType::VALUE_TYPE_NONE;
-
-					if (ImGui::BeginCombo("Type##Timeline_AddObjectTrackDialog_MaterialTrack_Combo", SelectedName.c_str()))
-					{
-						for (int i = 0; i < static_cast<int>(timeline::EMaterialTrackTarget::MaterialTrackTarget_Max); i++)
-						{
-							timeline::EMaterialTrackTarget Type = static_cast<timeline::EMaterialTrackTarget>(i);
-
-							const bool IsSelected = (SelectedType == Type);
-
-							std::string LabelSelectable = timeline::CMaterialTrack::CastMaterialTrackTarget_Str(Type) + "##Timeline_AddObjectTrackDialog_MaterialTrack_Selectable";
-
-							if (ImGui::Selectable(LabelSelectable.c_str(), IsSelected) && !IsSelected)
-							{
-								SelectedType = Type;
-							}
-						}
-
-						ImGui::EndCombo();
-					}
-
-					if (ImGui::Button("Add##Timeline_AddObjectTrackDialog"))
-					{
-						const auto& Clip = TimelineController->GetClip();
-						if (Clip && m_SelectedMaterialForAddTrack)
-						{
-							int SamplerIndex = static_cast<int>(Clip->GetSamplerList().size());
-							std::string TrackID = timeline::CTimelineTrack::GenerateUUID();
-
-							timeline::ETimelineSamplerTarget SamplerTarget = timeline::ETimelineSamplerTarget::NONE;
-
-							// Sampler
-							std::shared_ptr<animation::CAnimationSampler> Sampler = std::make_shared<animation::CAnimationSampler>(animation::EInterpolationType::LINEAR);
-							Clip->AddSampler(Sampler);
-
-							// Track
-							std::shared_ptr<timeline::CMaterialTrack> Track = std::make_shared<timeline::CMaterialTrack>(TrackID, SamplerIndex, SamplerTarget, SelectedType, UniformName, ValueType);
-							Clip->AddTrack(Track);
-
-							// TrackIDをターゲットに割り当てる
-							m_SelectedMaterialForAddTrack->AddRefTrackID(TrackID);
-							Track->AssignTrackContent(m_SelectedMaterialForAddTrack);
-						}
-
-						m_ShowAddTrackDialog = false;
-						m_ClickedObjectForAddObjectTrack = nullptr;
-						m_SelectedNodeForAddTrack = nullptr;
-						m_SelectedMaterialForAddTrack = nullptr;
-					}
-
-					ImGui::EndTabItem();
-				}
+				if (!DrawNodeDialogView(TimelineController)) return false;
+				if (!DrawMaterialDialogView(TimelineController)) return false;
 
 				ImGui::EndTabBar();
 			}
 		}
 
 		ImGui::End();
+
+		return true;
+	}
+
+	bool CTimeLineView::DrawNodeDialogView(const std::shared_ptr<timeline::CTimelineController>& TimelineController)
+	{
+		// NodeTrack
+		if (ImGui::BeginTabItem("NodeTrack##Timeline_AddObjectTrackDialog_TabItem"))
+		{
+			static timeline::ENodeTrackTarget SelectedType = timeline::ENodeTrackTarget::NodeTrackTarget_None;
+			std::string SelectedName = timeline::CNodeTrack::CastNodeTrackTarget_Str(SelectedType);
+
+			// Target
+			if (m_ClickedObjectForAddObjectTrack)
+			{
+				static std::string SelectedName_Node = "";
+				if (ImGui::BeginCombo("Node##Timeline_AddObjectTrackDialog_NodeTrack_Combo", SelectedName_Node.c_str()))
+				{
+					for (const auto& Node : m_ClickedObjectForAddObjectTrack->GetNodeList())
+					{
+						std::string NodeName = std::to_string(Node->GetSelfNodeIndex()) + "_" + Node->GetName();
+
+						std::string LabelSelectable = NodeName + "##Timeline_AddObjectTrackDialog_NodeItem_Selectable";
+
+						const bool IsSelected = (m_SelectedNodeForAddTrack == Node);
+
+						if (ImGui::Selectable(LabelSelectable.c_str(), IsSelected) && !IsSelected)
+						{
+							SelectedName_Node = NodeName;
+							m_SelectedNodeForAddTrack = Node;
+						}
+					}
+
+					ImGui::EndCombo();
+				}
+			}
+
+			// Type
+			if (ImGui::BeginCombo("Type##Timeline_AddObjectTrackDialog_NodeTrack_Combo", SelectedName.c_str()))
+			{
+				for (int i = 0; i < static_cast<int>(timeline::ENodeTrackTarget::NodeTrackTarget_Max); i++)
+				{
+					timeline::ENodeTrackTarget Type = static_cast<timeline::ENodeTrackTarget>(i);
+
+					const bool IsSelected = (SelectedType == Type);
+
+					std::string LabelSelectable = timeline::CNodeTrack::CastNodeTrackTarget_Str(Type) + "##Timeline_AddObjectTrackDialog_NodeTrack_Selectable";
+
+					if (ImGui::Selectable(LabelSelectable.c_str(), IsSelected) && !IsSelected)
+					{
+						SelectedType = Type;
+					}
+				}
+
+				ImGui::EndCombo();
+			}
+
+			// Add
+			if (ImGui::Button("Add##Timeline_AddObjectTrackDialog"))
+			{
+				const auto& Clip = TimelineController->GetClip();
+				if (Clip && m_SelectedNodeForAddTrack)
+				{
+					int SamplerIndex = static_cast<int>(Clip->GetSamplerList().size());
+					std::string TrackID = timeline::CTimelineTrack::GenerateUUID();
+
+					timeline::ETimelineSamplerTarget SamplerTarget = timeline::ETimelineSamplerTarget::NONE;
+
+					if (SelectedType == timeline::ENodeTrackTarget::NodeTrackTarget_Rotation)
+					{
+						SamplerTarget = timeline::ETimelineSamplerTarget::ROTATION;
+					}
+
+					// Sampler
+					std::shared_ptr<animation::CAnimationSampler> Sampler = std::make_shared<animation::CAnimationSampler>(animation::EInterpolationType::LINEAR);
+					Clip->AddSampler(Sampler);
+
+					// Track
+					std::shared_ptr<timeline::CNodeTrack> Track = std::make_shared<timeline::CNodeTrack>(TrackID, SamplerIndex, SamplerTarget, SelectedType);
+					Clip->AddTrack(Track);
+
+					// TrackIDをターゲットに割り当てる
+					m_SelectedNodeForAddTrack->AddRefTrackID(TrackID);
+					Track->AssignTrackContent(m_SelectedNodeForAddTrack);
+
+					// Objectに参照追加
+					m_ClickedObjectForAddObjectTrack->AddTLNode(m_SelectedNodeForAddTrack);
+				}
+
+				m_ShowAddTrackDialog = false;
+				m_ClickedObjectForAddObjectTrack = nullptr;
+				m_SelectedNodeForAddTrack = nullptr;
+				m_SelectedMaterialForAddTrack = nullptr;
+			}
+
+			ImGui::EndTabItem();
+		}
+
+		return true;
+	}
+
+	bool CTimeLineView::DrawMaterialDialogView(const std::shared_ptr<timeline::CTimelineController>& TimelineController)
+	{
+		// MaterialTrack
+		if (ImGui::BeginTabItem("MaterialTrack##Timeline_AddObjectTrackDialog_TabItem"))
+		{
+			static timeline::EMaterialTrackTarget SelectedType = timeline::EMaterialTrackTarget::MaterialTrackTarget_None;
+			std::string SelectedName = timeline::CMaterialTrack::CastMaterialTrackTarget_Str(SelectedType);
+
+			static std::string SelectedMaterialName = "";
+			static std::string SelectedUniformName = "";
+			static math::EValueType SelectedValueType = math::EValueType::VALUE_TYPE_NONE;
+
+			// Target
+			if (m_ClickedObjectForAddObjectTrack)
+			{
+				// Select Material
+				if (ImGui::BeginCombo("Material##Timeline_AddObjectTrackDialog_Material_Combo", SelectedMaterialName.c_str()))
+				{
+					for (const auto& Material : m_ClickedObjectForAddObjectTrack->GetMaterialList())
+					{
+						const bool IsSelected = (m_SelectedMaterialForAddTrack == Material);
+
+						std::string LabelSelectable = Material->GetMaterialName() + "##Timeline_AddObjectTrackDialog_Material_Selectable";
+
+						if (ImGui::Selectable(LabelSelectable.c_str(), IsSelected) && !IsSelected)
+						{
+							SelectedMaterialName = Material->GetMaterialName();
+							m_SelectedMaterialForAddTrack = Material;
+						}
+					}
+
+					ImGui::EndCombo();
+				}
+
+				// Select Uniform
+				if (ImGui::BeginCombo("Uniform##Timeline_AddObjectTrackDialog_Uniform_Combo", SelectedUniformName.c_str()))
+				{
+					if (m_SelectedMaterialForAddTrack)
+					{
+						// Uniform
+						const auto& ShaderBufferList = m_SelectedMaterialForAddTrack->GetShaderBufferList();
+
+						for (auto& UniformBuffer : ShaderBufferList)
+						{
+							const auto& BufferData = UniformBuffer->GetData();
+
+							const auto& Descriptor = UniformBuffer->GetDescriptor();
+
+							for (const auto& UniformDataMap : Descriptor->GetDataList())
+							{
+								const auto& UniformData = UniformDataMap.second;
+								const auto ValueInput = UniformData.ValueInput;
+
+								const std::string& UniformName = UniformData.UniformName;
+								math::EValueType ValueType = graphics::CUniformValueType::CastUniformToValueType(UniformData.ValueType);
+
+								const bool IsSelected = (SelectedUniformName == UniformName);
+
+								std::string LabelSelectable = UniformName + "##Timeline_AddObjectTrackDialog_Uniform_Selectable";
+
+								if (ImGui::Selectable(LabelSelectable.c_str(), IsSelected) && !IsSelected)
+								{
+									SelectedUniformName = UniformName;
+									SelectedValueType = ValueType;
+								}
+							}
+						}
+					}
+
+					ImGui::EndCombo();
+				}
+			}
+
+			if (ImGui::BeginCombo("Type##Timeline_AddObjectTrackDialog_MaterialTrack_Combo", SelectedName.c_str()))
+			{
+				for (int i = 0; i < static_cast<int>(timeline::EMaterialTrackTarget::MaterialTrackTarget_Max); i++)
+				{
+					timeline::EMaterialTrackTarget Type = static_cast<timeline::EMaterialTrackTarget>(i);
+
+					const bool IsSelected = (SelectedType == Type);
+
+					std::string LabelSelectable = timeline::CMaterialTrack::CastMaterialTrackTarget_Str(Type) + "##Timeline_AddObjectTrackDialog_MaterialTrack_Selectable";
+
+					if (ImGui::Selectable(LabelSelectable.c_str(), IsSelected) && !IsSelected)
+					{
+						SelectedType = Type;
+					}
+				}
+
+				ImGui::EndCombo();
+			}
+
+			if (ImGui::Button("Add##Timeline_AddObjectTrackDialog"))
+			{
+				const auto& Clip = TimelineController->GetClip();
+				if (Clip && m_SelectedMaterialForAddTrack && !SelectedUniformName.empty() && SelectedValueType != math::EValueType::VALUE_TYPE_NONE)
+				{
+					int SamplerIndex = static_cast<int>(Clip->GetSamplerList().size());
+					std::string TrackID = timeline::CTimelineTrack::GenerateUUID();
+
+					timeline::ETimelineSamplerTarget SamplerTarget = timeline::ETimelineSamplerTarget::NONE;
+
+					// Sampler
+					std::shared_ptr<animation::CAnimationSampler> Sampler = std::make_shared<animation::CAnimationSampler>(animation::EInterpolationType::LINEAR);
+					Clip->AddSampler(Sampler);
+
+					// Track
+					std::shared_ptr<timeline::CMaterialTrack> Track = std::make_shared<timeline::CMaterialTrack>(TrackID, SamplerIndex, SamplerTarget, SelectedType, SelectedUniformName, SelectedValueType);
+					Clip->AddTrack(Track);
+
+					// TrackIDをターゲットに割り当てる
+					m_SelectedMaterialForAddTrack->AddRefTrackID(TrackID);
+					Track->AssignTrackContent(m_SelectedMaterialForAddTrack);
+
+					// Objectに参照追加
+					m_ClickedObjectForAddObjectTrack->AddTLMaterial(m_SelectedMaterialForAddTrack);
+				}
+
+				m_ShowAddTrackDialog = false;
+				m_ClickedObjectForAddObjectTrack = nullptr;
+				m_SelectedNodeForAddTrack = nullptr;
+				m_SelectedMaterialForAddTrack = nullptr;
+			}
+
+			ImGui::EndTabItem();
+		}
 
 		return true;
 	}
@@ -898,6 +1000,58 @@ namespace gui
 		}
 
 		return DstValue;
+	}
+
+	std::vector<float> CTimeLineView::GetDefaultValue(math::EValueType ValueType)
+	{
+		std::vector<float> Value;
+
+		switch (ValueType)
+		{
+		case math::EValueType::VALUE_TYPE_NONE:
+			break;
+		case math::EValueType::VALUE_TYPE_SCALAR:
+			Value = std::vector<float>({ 0.0f });
+			break;
+		case math::EValueType::VALUE_TYPE_VEC2:
+			Value = std::vector<float>({ 0.0f, 0.0f });
+			break;
+		case math::EValueType::VALUE_TYPE_VEC3:
+			Value = std::vector<float>({ 0.0f, 0.0f, 0.0f });
+			break;
+		case math::EValueType::VALUE_TYPE_VEC4:
+			Value = std::vector<float>({ 0.0f, 0.0f, 0.0f, 0.0f });
+			break;
+		case math::EValueType::VALUE_TYPE_MAT2:
+			Value = std::vector<float>({ 
+				1.0f, 0.0f,
+				0.0f, 1.0f
+			});
+			break;
+		case math::EValueType::VALUE_TYPE_MAT3:
+			Value = std::vector<float>({
+				1.0f, 0.0f, 0.0f,
+				0.0f, 1.0f, 0.0f,
+				0.0f, 0.0f, 1.0f
+			});
+			break;
+		case math::EValueType::VALUE_TYPE_MAT4:
+			Value = std::vector<float>({
+				1.0f, 0.0f, 0.0f, 0.0f,
+				0.0f, 1.0f, 0.0f, 0.0f,
+				0.0f, 0.0f, 1.0f, 0.0f,
+				0.0f, 0.0f, 0.0f, 1.0f
+			});
+			break;
+		case math::EValueType::VALUE_TYPE_VECTOR:
+			break;
+		case math::EValueType::VALUE_TYPE_MATRIX:
+			break;
+		default:
+			break;
+		}
+
+		return Value;
 	}
 }
 #endif

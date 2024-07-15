@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <memory>
+#include <set>
 
 #include "E3DObjectType.h"
 #include "CNode.h"
@@ -44,8 +45,8 @@ namespace object
 		std::vector<std::shared_ptr<graphics::CMaterial>> m_MaterialList;
 
 		//
-		std::vector<std::shared_ptr<CNode>> m_TLNodeList;
-		std::vector<std::shared_ptr<graphics::CMaterial>> m_TLMaterial;
+		std::set<std::shared_ptr<CNode>> m_TLNodeList;
+		std::set<std::shared_ptr<graphics::CMaterial>> m_TLMaterial;
 
 		std::shared_ptr<graphics::CMorphController> m_MorphController;
 		
@@ -87,8 +88,10 @@ namespace object
 		const std::string& GetDepthPassName() const;
 
 		bool HasTLTrackContent() const;
-		const std::vector<std::shared_ptr<CNode>>& GetTLNodeList() const;
-		const std::vector<std::shared_ptr<graphics::CMaterial>>& GetTLMaterial() const;
+		void AddTLNode(const std::shared_ptr<CNode>& Node);
+		const std::set<std::shared_ptr<CNode>>& GetTLNodeList() const;
+		void AddTLMaterial(const std::shared_ptr<graphics::CMaterial>& Material);
+		const std::set<std::shared_ptr<graphics::CMaterial>>& GetTLMaterial() const;
 
 		const std::shared_ptr<math::CTransform>& GetObjectTransform() const;
 

@@ -72,12 +72,22 @@ namespace object
 		return (!m_TLNodeList.empty() || !m_TLMaterial.empty());
 	}
 
-	const std::vector<std::shared_ptr<CNode>>& C3DObject::GetTLNodeList() const
+	void C3DObject::AddTLNode(const std::shared_ptr<CNode>& Node)
+	{
+		m_TLNodeList.emplace(Node);
+	}
+
+	const std::set<std::shared_ptr<CNode>>& C3DObject::GetTLNodeList() const
 	{
 		return m_TLNodeList;
 	}
 
-	const std::vector<std::shared_ptr<graphics::CMaterial>>& C3DObject::GetTLMaterial() const
+	void C3DObject::AddTLMaterial(const std::shared_ptr<graphics::CMaterial>& Material)
+	{
+		m_TLMaterial.emplace(Material);
+	}
+
+	const std::set<std::shared_ptr<graphics::CMaterial>>& C3DObject::GetTLMaterial() const
 	{
 		return m_TLMaterial;
 	}
@@ -195,7 +205,7 @@ namespace object
 			{
 				if (!Node->GetRefTrackIDList().empty())
 				{
-					m_TLNodeList.push_back(Node);
+					m_TLNodeList.emplace(Node);
 				}
 			}
 
@@ -204,7 +214,7 @@ namespace object
 			{
 				if (!Material->GetRefTrackIDList().empty())
 				{
-					m_TLMaterial.push_back(Material);
+					m_TLMaterial.emplace(Material);
 				}
 			}
 		}
