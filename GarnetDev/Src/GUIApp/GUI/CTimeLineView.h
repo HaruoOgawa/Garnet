@@ -6,6 +6,7 @@
 #include <memory>
 #include <vector>
 #include <unordered_map>
+#include <set>
 
 #include <Timeline/CTimelineController.h>
 
@@ -39,10 +40,17 @@ namespace gui
 		ImVec2 m_MemoryBarAvailableSize;
 
 		// トラックで使用しているオブジェクトリスト
-		std::vector<std::shared_ptr<object::C3DObject>> m_TrackObjectList;
+		std::set<std::shared_ptr<object::C3DObject>> m_TrackObjectList;
 
 		// ツリーが開いているトラックと描画位置のマップ
 		std::unordered_map<std::shared_ptr<timeline::CTimelineTrack>, ImVec2> m_OpenedTrackPosMap;
+
+		// ダイアログの開閉
+		bool m_ShowAddObjDialog;
+		std::shared_ptr<object::C3DObject> m_SelectedObjectForAddObj;
+
+		bool m_ShowAddTrackDialog;
+		std::shared_ptr<object::C3DObject> m_ClickedObjectForAddTrack;
 	private:
 		bool DrawTimeBar(const std::shared_ptr<timeline::CTimelineController>& TimelineController);
 		
@@ -57,8 +65,12 @@ namespace gui
 		bool DrawIndicator(const ImVec2& cursorPos, const ImVec2& availableSize, const ImVec2& barSize);
 		bool DrawKeyFrameList(const std::shared_ptr<timeline::CTimelineController>& TimelineController);
 
+		bool DrawAddObjectDialog(const std::shared_ptr<timeline::CTimelineController>& TimelineController, const std::vector<std::shared_ptr<object::C3DObject>>& ObjectList);
+
 		bool CheckWheelExpand();
 		bool CheckMemoryDrag(const std::shared_ptr<timeline::CTimelineController>& TimelineController, const ImVec2& availableSize, float DrawMemorySpace, float MaxTime);
+
+		void CheckIsClickedObjectTree(const std::shared_ptr<object::C3DObject>& Object);
 
 		bool UpdateCurrentTimeFromMemoryBar(const std::shared_ptr<timeline::CTimelineController>& TimelineController);
 		bool UpdateMemoryFromTimeBar(const std::shared_ptr<timeline::CTimelineController>& TimelineController);
@@ -72,7 +84,7 @@ namespace gui
 
 		bool Initialize(const std::shared_ptr<timeline::CTimelineController>& TimelineController, const std::vector<std::shared_ptr<object::C3DObject>>& ObjectList);
 
-		bool Draw(const std::shared_ptr<timeline::CTimelineController>& TimelineController);
+		bool Draw(const std::shared_ptr<timeline::CTimelineController>& TimelineController, const std::vector<std::shared_ptr<object::C3DObject>>& ObjectList);
 	};
 }
 #endif

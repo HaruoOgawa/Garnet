@@ -59,7 +59,7 @@ namespace gui
 			bool Open = true;
 			if (ImGui::Begin("TimeLineView", &Open, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoTitleBar))
 			{
-				if (!m_TimeLineView.Draw(GUIParams.TimelineController)) return false;
+				if (!m_TimeLineView.Draw(GUIParams.TimelineController, GUIParams.ObjectList)) return false;
 			}
 
 			ImGui::End();

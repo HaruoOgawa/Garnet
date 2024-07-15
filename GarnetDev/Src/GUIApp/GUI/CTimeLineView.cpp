@@ -16,7 +16,11 @@ namespace gui
 		m_IndicatorRate(0.0f),
 		m_MemoryBarCursorPos(ImVec2()),
 		m_MemoryBarSize(ImVec2()),
-		m_MemoryBarAvailableSize(ImVec2())
+		m_MemoryBarAvailableSize(ImVec2()),
+		m_ShowAddObjDialog(false),
+		m_ShowAddTrackDialog(false),
+		m_SelectedObjectForAddObj(nullptr),
+		m_ClickedObjectForAddTrack(nullptr)
 	{
 		m_LeftSideMemory = 0.0f;
 		m_RightSideMemory = static_cast<float>(m_MaxLargeMemoryCount) * m_LargeMemoryWidth;
@@ -28,19 +32,23 @@ namespace gui
 		{
 			if (!Object->HasTLTrackContent()) continue;
 
-			m_TrackObjectList.push_back(Object);
+			m_TrackObjectList.emplace(Object);
 		}
 
 		return true;
 	}
 
-	bool CTimeLineView::Draw(const std::shared_ptr<timeline::CTimelineController>& TimelineController)
+	bool CTimeLineView::Draw(const std::shared_ptr<timeline::CTimelineController>& TimelineController, const std::vector<std::shared_ptr<object::C3DObject>>& ObjectList)
 	{
 		if (!TimelineController) return true;
 
 		if (!DrawTimeBar(TimelineController)) return false;
 		if (!DrawHierarchyWindow(TimelineController)) return false;
 		if (!DrawKeyFrameWindow(TimelineController)) return false;
+		if (m_ShowAddObjDialog)
+		{
+			if (!DrawAddObjectDialog(TimelineController, ObjectList)) return false;
+		}
 
 		return true;
 	}
@@ -103,6 +111,9 @@ namespace gui
 
 	bool CTimeLineView::DrawHierarchyWindow(const std::shared_ptr<timeline::CTimelineController>& TimelineController)
 	{
+		// リセットする
+		m_OpenedTrackPosMap.clear();
+
 		ImVec2 availableSize = ImGui::GetContentRegionAvail();
 
 		ImGui::BeginChild("HierarchyWindow##Timeline", ImVec2(availableSize.x * 0.25f, availableSize.y));
@@ -120,18 +131,30 @@ namespace gui
 		const auto& SamplerList = TLClip->GetSamplerList();
 
 		ImVec2 CursorPos = ImGui::GetCursorPos();
+		
+		// Object追加ダイアログ表示
+		{
+			const bool Clicked = ImGui::Button("AddProperty##Timeline_HierarchyWindow_AddProperty", ImVec2(availableSize.x * 0.25f, m_MemoryBarHeight));
+
+			// AddPropertyの押下かHierarchyウィンドウのどこかしらの右クリックでダイアログを開く
+			if (Clicked || (ImGui::IsWindowHovered() && ImGui::IsMouseClicked(1)))
+			{
+				m_ShowAddObjDialog = true;
+			}
+		}
+
+		// メモリバーの高さから開始する
 		ImGui::SetCursorPos(ImVec2(CursorPos.x, CursorPos.y + m_MemoryBarHeight));
-
-		// リセットする
-		m_OpenedTrackPosMap.clear();
-
-		//
+		
 		for (const auto& Object : m_TrackObjectList)
 		{
 			std::string ObjectTreeLabel = Object->GetObjectName() + "##TimeLineView_Hierarchy_ObjectTree";
 
 			if (ImGui::TreeNodeEx(ObjectTreeLabel.c_str()))
 			{
+				// Track追加ダイアログ表示。Treeの内外両方に必要
+				CheckIsClickedObjectTree(Object);
+				
 				// Node Track
 				{
 					std::string TrackLabel = "NodeTrack##Timeline_" + Object->GetObjectName();
@@ -194,6 +217,9 @@ namespace gui
 
 				ImGui::TreePop();
 			}
+
+			// Track追加ダイアログ表示。Treeの内外両方に必要
+			CheckIsClickedObjectTree(Object);
 		}
 
 		ImGui::EndChild();
@@ -269,7 +295,7 @@ namespace gui
 
 		ImVec2 availableSize = ImGui::GetContentRegionAvail();
 		
-		ImGui::BeginChild("KeyFrameWindow##Timeline", availableSize);
+		ImGui::BeginChild("KeyFrameWindow##Timeline", availableSize, 0, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
 
 		// タイムラインのメモリバーを描画
 		if (!DrawMemoryBar(TimelineController)) return false;
@@ -462,7 +488,8 @@ namespace gui
 				ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(1.0f, 1.0f, 0.6f, 1.0f)); // ホバーの色
 				ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(1.0f, 1.0f, 1.0f, 1.0f)); // 押下時の色
 
-				if (ImGui::Button("##Test_Btn", ImVec2(TrackHeight, TrackHeight)))
+				std::string KeyFrameLabel = "##Timeline_KeyFrame_" + Track->GetTrackName() + "_" + std::to_string(FrameTime);
+				if (ImGui::Button(KeyFrameLabel.c_str(), ImVec2(TrackHeight, TrackHeight)))
 				{
 
 				}
@@ -473,6 +500,50 @@ namespace gui
 		}
 
 		ImGui::EndChild();
+
+		return true;
+	}
+
+	bool CTimeLineView::DrawAddObjectDialog(const std::shared_ptr<timeline::CTimelineController>& TimelineController, const std::vector<std::shared_ptr<object::C3DObject>>& ObjectList)
+	{
+		ImGuiIO& io = ImGui::GetIO();
+
+		ImVec2 WindowSize = ImVec2(io.DisplaySize.x * 0.1f, io.DisplaySize.y * 0.1f);
+		
+		ImGui::SetNextWindowPos(ImVec2(io.MousePos.x - WindowSize.x * 0.5f, io.MousePos.y - WindowSize.y * 0.5f), ImGuiCond_Appearing, ImVec2(0.0f, 0.0f));
+		ImGui::SetNextWindowSize(WindowSize, ImGuiCond_Appearing);
+
+		if (ImGui::Begin("AddObject##Timeline", &m_ShowAddObjDialog))
+		{
+			std::string CurrentValue = (m_SelectedObjectForAddObj) ? m_SelectedObjectForAddObj->GetObjectName() : "";
+
+			if (ImGui::BeginCombo("ObjectList##Timeline_AddObjectDialog", CurrentValue.c_str()))
+			{
+				for (const auto& Object : ObjectList)
+				{
+					std::string LabelSelectable = Object->GetObjectName() + "##Timeline_Selectable";
+
+					const bool IsSelected = (m_SelectedObjectForAddObj == Object);
+
+					if (ImGui::Selectable(LabelSelectable.c_str(), IsSelected) && !IsSelected)
+					{
+						m_SelectedObjectForAddObj = Object;
+					}
+				}
+
+				ImGui::EndCombo();
+			}
+
+			if (ImGui::Button("Add##Timeline_AddObjectDialog"))
+			{
+				m_TrackObjectList.emplace(m_SelectedObjectForAddObj);
+
+				m_SelectedObjectForAddObj = nullptr;
+				m_ShowAddObjDialog = false;
+			}
+		}
+
+		ImGui::End();
 
 		return true;
 	}
@@ -569,6 +640,17 @@ namespace gui
 		}
 
 		return true;
+	}
+
+	void CTimeLineView::CheckIsClickedObjectTree(const std::shared_ptr<object::C3DObject>& Object)
+	{
+		// Track追加ダイアログ表示
+		// ObjectTreeNodeの右クリックでダイアログを開く
+		if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(1))
+		{
+			m_ShowAddTrackDialog = true;
+			m_ClickedObjectForAddTrack = Object;
+		}
 	}
 
 	bool CTimeLineView::UpdateCurrentTimeFromMemoryBar(const std::shared_ptr<timeline::CTimelineController>& TimelineController)
