@@ -67,6 +67,21 @@ namespace object
 		return m_DepthPassName;
 	}
 
+	bool C3DObject::HasTLTrackContent() const
+	{
+		return (!m_TLNodeList.empty() || !m_TLMaterial.empty());
+	}
+
+	const std::vector<std::shared_ptr<CNode>>& C3DObject::GetTLNodeList() const
+	{
+		return m_TLNodeList;
+	}
+
+	const std::vector<std::shared_ptr<graphics::CMaterial>>& C3DObject::GetTLMaterial() const
+	{
+		return m_TLMaterial;
+	}
+
 	const std::shared_ptr<math::CTransform>& C3DObject::GetObjectTransform() const
 	{
 		return m_ObjectTransform;
@@ -171,6 +186,27 @@ namespace object
 		if (ExistMorph)
 		{
 			if (!m_MorphController->Create(m_MeshList)) return false;
+		}
+
+		// TrackIDŽQÆƒŠƒXƒg
+		{
+			// Node
+			for (const auto& Node : m_NodeList)
+			{
+				if (!Node->GetRefTrackIDList().empty())
+				{
+					m_TLNodeList.push_back(Node);
+				}
+			}
+
+			// Material
+			for (const auto& Material : m_MaterialList)
+			{
+				if (!Material->GetRefTrackIDList().empty())
+				{
+					m_TLMaterial.push_back(Material);
+				}
+			}
 		}
 
 		m_IsCreated = true;

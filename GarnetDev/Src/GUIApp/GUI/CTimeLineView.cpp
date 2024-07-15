@@ -1,6 +1,6 @@
 #ifdef USE_GUIENGINE
 #include "CTimeLineView.h"
-#include <Timeline/CTimelineController.h>
+#include <Object/C3DObject.h>
 #include <Message/Console.h>
 
 namespace gui
@@ -15,6 +15,18 @@ namespace gui
 	{
 		m_LeftSideMemory = 0.0f;
 		m_RightSideMemory = static_cast<float>(m_MaxLargeMemoryCount) * m_LargeMemoryWidth;
+	}
+
+	bool CTimeLineView::Initialize(const std::shared_ptr<timeline::CTimelineController>& TimelineController, const std::vector<std::shared_ptr<object::C3DObject>>& ObjectList)
+	{
+		for (const auto& Object : ObjectList)
+		{
+			if (!Object->HasTLTrackContent()) continue;
+
+			m_TrackObjectList.push_back(Object);
+		}
+
+		return true;
 	}
 
 	bool CTimeLineView::Draw(const std::shared_ptr<timeline::CTimelineController>& TimelineController)
@@ -60,13 +72,13 @@ namespace gui
 			// 再生ボタンと同じ位置に配置する
 			ImGui::SameLine();
 
-			float CurrentTime = TimelineController->GetCurrentTime();
+			float CurrentTime = TimelineController->GetPlayBackTime();
 
 			std::string Name = "##TimelinePlaybackTime";
 			ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x); // 現在のウィンドウの利用可能な範囲までスライダーを引き延ばす. GetContentRegionAvailは現在地での利用可能なサイズを返す
 			if (ImGui::SliderFloat(Name.c_str(), &CurrentTime, 0.0f, TimelineController->GetMaxTime()))
 			{
-				TimelineController->SetCurrentTime(CurrentTime);
+				TimelineController->SetPlayBackTime(CurrentTime);
 
 				// タイムバーの更新と合わせてメモリバーも更新
 				if (!UpdateMemoryFromTimeBar(TimelineController)) return false;
@@ -94,11 +106,144 @@ namespace gui
 		ImVec2 window_pos = ImGui::GetWindowPos();
 		ImVec2 window_size = ImGui::GetWindowSize();
 
-		draw_list->AddRectFilled(window_pos, ImVec2(window_pos.x + window_size.x, window_pos.y + window_size.y), IM_COL32(255, 0, 0, 255));
+		draw_list->AddRectFilled(window_pos, ImVec2(window_pos.x + window_size.x, window_pos.y + window_size.y), IM_COL32(60, 60, 60, 255));
 
-		//ImGui::Button("TestButton_AAA##HierarchyWindowChild");
+		const auto& TLClip = TimelineController->GetClip();
+		if (!TLClip) return true;
+
+		const auto& TrackList = TLClip->GetTrackList();
+		const auto& SamplerList = TLClip->GetSamplerList();
+
+		ImVec2 CursorPos = ImGui::GetCursorPos();
+		ImGui::SetCursorPos(ImVec2(CursorPos.x, CursorPos.y + m_MemoryBarHeight));
+
+		for (const auto& Object : m_TrackObjectList)
+		{
+			std::string ObjectTreeLabel = Object->GetObjectName() + "##TimeLineView_Hierarchy_ObjectTree";
+
+			if (ImGui::TreeNodeEx(ObjectTreeLabel.c_str()))
+			{
+				// Node Track
+				{
+					std::string TrackLabel = "NodeTrack##Timeline_" + Object->GetObjectName();
+
+					if (ImGui::TreeNodeEx(TrackLabel.c_str()))
+					{
+						for (const auto& Node : Object->GetTLNodeList())
+						{
+							std::string NodeTrackLabel = Node->GetName() + "##TimeLineView_Hierarchy_NodeTree";
+							if (ImGui::TreeNodeEx(NodeTrackLabel.c_str()))
+							{
+								for (const auto& TrackID : Node->GetRefTrackIDList())
+								{
+									const auto& Track = TrackList.find(TrackID);
+									if (Track == TrackList.end()) continue;
+
+									if (!DrawTrackProperty(TimelineController, Track->second, SamplerList)) return false;
+								}
+
+								ImGui::TreePop();
+							}
+						}
+
+						ImGui::TreePop();
+					}
+				}
+
+				// MaterialTrack
+				{
+					std::string TrackLabel = "MaterialTrack##Timeline_" + Object->GetObjectName();
+
+					if (ImGui::TreeNodeEx(TrackLabel.c_str()))
+					{
+						for (const auto& Material : Object->GetTLMaterial())
+						{
+							std::string MaterialTrackLabel = Material->GetMaterialName() + "##TimeLineView_Hierarchy_MaterialTree";
+							if (ImGui::TreeNodeEx(MaterialTrackLabel.c_str()))
+							{
+								for (const auto& TrackID : Material->GetRefTrackIDList())
+								{
+									const auto& Track = TrackList.find(TrackID);
+									if (Track == TrackList.end()) continue;
+
+									if (!DrawTrackProperty(TimelineController, Track->second, SamplerList)) return false;
+								}
+
+								ImGui::TreePop();
+							}
+						}
+
+						ImGui::TreePop();
+					}
+				}
+
+				ImGui::TreePop();
+			}
+		}
 
 		ImGui::EndChild();
+
+		return true;
+	}
+
+	bool CTimeLineView::DrawTrackProperty(const std::shared_ptr<timeline::CTimelineController>& TimelineController, const std::shared_ptr<timeline::CTimelineTrack>& Track,
+		const std::vector<std::shared_ptr<animation::CAnimationSampler>>& SamplerList)
+	{
+		int SamplerIndex = Track->GetSamplerIndex();
+		if (SamplerIndex < 0 || SamplerIndex >= SamplerList.size()) return false;
+
+		//
+		animation::EInterpolateValueType InterpolateValueType = animation::EInterpolateValueType::NONE;
+		if (Track->GetSamplerTarget() == timeline::ETimelineSamplerTarget::ROTATION)
+		{
+			InterpolateValueType = animation::EInterpolateValueType::QUATERNION;
+		}
+		else if (Track->GetSamplerTarget() == timeline::ETimelineSamplerTarget::MODELMATRIX)
+		{
+			InterpolateValueType = animation::EInterpolateValueType::MODELMATRIX;
+		}
+
+		// サンプラーと再生時間から現在のキーフレームの値を取得
+		auto& Sampler = SamplerList[SamplerIndex];
+		std::vector<float> Value;
+
+		if (!Sampler->ComputeCurrentFrame(TimelineController->GetPlayBackTime(), false, Value, InterpolateValueType)) return false;
+
+		if (Value.empty()) return true;
+
+		// GUIに描画
+		std::string Label = Track->GetTrackName() + "##Timeline_TrackProperty";
+
+		math::EValueType ValueType = Track->GetValueType();
+		switch (ValueType)
+		{
+		case math::EValueType::VALUE_TYPE_NONE:
+			break;
+		case math::EValueType::VALUE_TYPE_SCALAR:
+			ImGui::InputFloat(Label.c_str(), &Value[0]);
+			break;
+		case math::EValueType::VALUE_TYPE_VEC2:
+			ImGui::InputFloat2(Label.c_str(), &Value[0]);
+			break;
+		case math::EValueType::VALUE_TYPE_VEC3:
+			ImGui::InputFloat3(Label.c_str(), &Value[0]);
+			break;
+		case math::EValueType::VALUE_TYPE_VEC4:
+			ImGui::InputFloat4(Label.c_str(), &Value[0]);
+			break;
+		case math::EValueType::VALUE_TYPE_MAT2:
+			break;
+		case math::EValueType::VALUE_TYPE_MAT3:
+			break;
+		case math::EValueType::VALUE_TYPE_MAT4:
+			break;
+		case math::EValueType::VALUE_TYPE_VECTOR:
+			break;
+		case math::EValueType::VALUE_TYPE_MATRIX:
+			break;
+		default:
+			break;
+		}
 
 		return true;
 	}
@@ -124,7 +269,7 @@ namespace gui
 		// タイムラインのメモリバーを描画
 		ImVec2 availableSize = ImGui::GetContentRegionAvail();
 
-		ImVec2 barSize = ImVec2(availableSize.x, 40.0f);
+		ImVec2 barSize = ImVec2(availableSize.x, m_MemoryBarHeight);
 
 		// メモリとメモリの間隔
 		const float DrawMemorySpace = availableSize.x / (m_MaxLargeMemoryCount * 3);
@@ -330,7 +475,7 @@ namespace gui
 		float CurrentTime = glm::mix(m_LeftSideMemory, m_RightSideMemory, m_IndicatorRate);
 		CurrentTime = glm::clamp(CurrentTime, 0.0f, TimelineController->GetMaxTime());
 
-		TimelineController->SetCurrentTime(CurrentTime);
+		TimelineController->SetPlayBackTime(CurrentTime);
 
 		return true;
 	}
@@ -338,7 +483,7 @@ namespace gui
 	bool CTimeLineView::UpdateMemoryFromTimeBar(const std::shared_ptr<timeline::CTimelineController>& TimelineController)
 	{
 		// タイムバーの更新と合わせてメモリバーも更新
-		const float CurrentTime = TimelineController->GetCurrentTime();
+		const float CurrentTime = TimelineController->GetPlayBackTime();
 
 		// メモリバーの時間の全長
 		const float TimeWidth = static_cast<float>(m_MaxLargeMemoryCount) * m_LargeMemoryWidth;

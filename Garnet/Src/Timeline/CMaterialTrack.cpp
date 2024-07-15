@@ -8,9 +8,9 @@ namespace timeline
 		CTimelineTrack(TrackID, SamplerIndex, SamplerTarget),
 		m_TrackTarget(TrackTarget),
 		m_Material(nullptr),
-		m_UniformName(UniformName),
-		m_ValueType(ValueType)
+		m_UniformName(UniformName)
 	{
+		SetValueType(ValueType);
 	}
 
 	CMaterialTrack::~CMaterialTrack()
@@ -27,7 +27,7 @@ namespace timeline
 			break;
 
 		case EMaterialTrackTarget::MaterialTrackTarget_SetUniformValue:
-			m_Material->SetUniformValue(m_UniformName, &Value[0], math::CMath::GetByteSizeFromValueType(m_ValueType));
+			m_Material->SetUniformValue(m_UniformName, &Value[0], math::CMath::GetByteSizeFromValueType(GetValueType()));
 			break;
 
 		default:
@@ -40,5 +40,24 @@ namespace timeline
 	void CMaterialTrack::AssignTrackContent(const std::shared_ptr<CTimelineTrackContent>& TrackContent)
 	{
 		m_Material = std::dynamic_pointer_cast<graphics::CMaterial>(TrackContent);
+	}
+
+	std::string CMaterialTrack::GetTrackName()
+	{
+		std::string Name = std::string();
+
+		switch (m_TrackTarget)
+		{
+		case EMaterialTrackTarget::MaterialTrackTarget_None:
+			break;
+
+		case EMaterialTrackTarget::MaterialTrackTarget_SetUniformValue:
+			Name = m_UniformName + " (Uniform)";
+			break;
+		default:
+			break;
+		}
+
+		return Name;
 	}
 }

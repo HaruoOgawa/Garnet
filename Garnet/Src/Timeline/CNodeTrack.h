@@ -36,5 +36,7 @@ namespace timeline
 		virtual bool Update(float CurrentTime, const std::vector<float>& Value) override;
 
 		virtual void AssignTrackContent(const std::shared_ptr<CTimelineTrackContent>& TrackContent) override;
+
+		virtual std::string GetTrackName() override;
 	};
 }

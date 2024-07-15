@@ -6,13 +6,16 @@
 #include <memory>
 #include <vector>
 
-namespace timeline { class CTimelineController; }
+#include <Timeline/CTimelineController.h>
+
+namespace object { class C3DObject; }
 
 namespace gui
 {
 	class CTimeLineView
 	{
 		const int m_MaxLargeMemoryCount = 20; // 長いメモリの最大数。メモリの数は定数。長いメモリと長いメモリの間に短いメモリが2本あるので長短合わせて最大60本
+		const float m_MemoryBarHeight = 40.0f;
 
 		float m_LeftSideMemory; // タイムラインの左端
 		float m_RightSideMemory; // タイムラインの右端
@@ -25,9 +28,16 @@ namespace gui
 
 		bool m_ClickedIndicator;
 		float m_IndicatorRate;
+
+		// トラックで使用しているオブジェクトリスト
+		std::vector<std::shared_ptr<object::C3DObject>> m_TrackObjectList;
 	private:
 		bool DrawTimeBar(const std::shared_ptr<timeline::CTimelineController>& TimelineController);
+		
 		bool DrawHierarchyWindow(const std::shared_ptr<timeline::CTimelineController>& TimelineController);
+		bool DrawTrackProperty(const std::shared_ptr<timeline::CTimelineController>& TimelineController, const std::shared_ptr<timeline::CTimelineTrack>& Track, 
+			const std::vector<std::shared_ptr<animation::CAnimationSampler>>& SamplerList);
+
 		bool DrawKeyFrameWindow(const std::shared_ptr<timeline::CTimelineController>& TimelineController);
 
 		bool DrawMemoryBar(const std::shared_ptr<timeline::CTimelineController>& TimelineController);
@@ -46,6 +56,8 @@ namespace gui
 	public:
 		CTimeLineView();
 		virtual ~CTimeLineView() = default;
+
+		bool Initialize(const std::shared_ptr<timeline::CTimelineController>& TimelineController, const std::vector<std::shared_ptr<object::C3DObject>>& ObjectList);
 
 		bool Draw(const std::shared_ptr<timeline::CTimelineController>& TimelineController);
 	};

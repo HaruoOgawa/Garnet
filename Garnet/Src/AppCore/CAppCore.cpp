@@ -278,7 +278,7 @@ namespace app
 	// ロード完了イベント
 	bool CAppCore::OnLoaded()
 	{
-		if (!m_App->OnLoaded(m_GraphicsAPI.get(), m_PhysicsEngine.get(), m_LoadWorker.get())) return false;
+		if (!m_App->OnLoaded(m_GraphicsAPI.get(), m_PhysicsEngine.get(), m_LoadWorker.get(), m_GUIEngine)) return false;
 
 		return true;
 	}

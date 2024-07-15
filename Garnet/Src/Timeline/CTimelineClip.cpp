@@ -62,9 +62,19 @@ namespace timeline
 		m_SamplerList.push_back(Sampler);
 	}
 
+	const std::vector<std::shared_ptr<animation::CAnimationSampler>>& CTimelineClip::GetSamplerList() const
+	{
+		return m_SamplerList;
+	}
+
 	void CTimelineClip::AddTrack(const std::shared_ptr<CTimelineTrack>& Track)
 	{
 		m_TrackList.emplace(Track->GetTrackID(), Track);
+	}
+
+	const std::unordered_map<std::string, std::shared_ptr<CTimelineTrack>>& CTimelineClip::GetTrackList() const
+	{
+		return m_TrackList;
 	}
 
 	void CTimelineClip::AssignObjectResourceToTrack(const std::vector<std::shared_ptr<object::C3DObject>>& ObjectList)

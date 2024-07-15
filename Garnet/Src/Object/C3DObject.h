@@ -43,6 +43,10 @@ namespace object
 		std::vector<std::shared_ptr<graphics::CMesh>> m_MeshList;
 		std::vector<std::shared_ptr<graphics::CMaterial>> m_MaterialList;
 
+		//
+		std::vector<std::shared_ptr<CNode>> m_TLNodeList;
+		std::vector<std::shared_ptr<graphics::CMaterial>> m_TLMaterial;
+
 		std::shared_ptr<graphics::CMorphController> m_MorphController;
 		
 		std::vector<std::vector<int>> m_RootNodeIndexList;
@@ -81,6 +85,10 @@ namespace object
 
 		const std::string& GetPassName() const;
 		const std::string& GetDepthPassName() const;
+
+		bool HasTLTrackContent() const;
+		const std::vector<std::shared_ptr<CNode>>& GetTLNodeList() const;
+		const std::vector<std::shared_ptr<graphics::CMaterial>>& GetTLMaterial() const;
 
 		const std::shared_ptr<math::CTransform>& GetObjectTransform() const;
 

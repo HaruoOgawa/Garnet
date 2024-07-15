@@ -211,9 +211,19 @@ namespace app
 	}
 
 	// ロード完了イベント
-	bool CScriptApp::OnLoaded(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker)
+	bool CScriptApp::OnLoaded(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<gui::IGUIEngine>& GUIEngine)
 	{
 		if (!m_ScriptScene->OnLoaded(pGraphicsAPI, pPhysicsEngine, pLoadWorker)) return false;
+
+		{
+			gui::SGUIParams GUIParams = {};
+			GUIParams.FileModifier = m_FileModifier;
+			GUIParams.ObjectList = m_ScriptScene->GetObjectList();
+			GUIParams.SceneController = m_ScriptScene->GetSceneController();
+			GUIParams.TimelineController = m_TimelineController;
+
+			if (!m_GraphicsEditingWindow->OnLoaded(pGraphicsAPI, GUIParams, GUIEngine)) return false;
+		}
 
 		// タイムラインのテストクリップを作成
 		{

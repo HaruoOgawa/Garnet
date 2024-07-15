@@ -37,6 +37,9 @@ namespace gui
 		CGraphicsEditingWindow();
 		virtual ~CGraphicsEditingWindow();
 
+		// ロード完了イベント
+		bool OnLoaded(api::IGraphicsAPI* pGraphicsAPI, const SGUIParams& GUIParams, const std::shared_ptr<gui::IGUIEngine>& GUIEngine);
+
 		bool Draw(api::IGraphicsAPI* pGraphicsAPI, const SGUIParams& GUIParams,  const std::shared_ptr<gui::IGUIEngine>& GUIEngine);
 	};
 }
