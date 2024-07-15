@@ -8,10 +8,15 @@ namespace gui
 	CTimeLineView::CTimeLineView():
 		m_LargeMemoryWidth(1.0f),
 		m_MemoryExpandRate(0.0f),
+		m_LeftSideScreenPos(ImVec2()),
+		m_RightSideScreenPos(ImVec2()),
 		m_FirstClicked(true),
 		m_PrevMousePos(ImVec2(0.0f, 0.0f)),
 		m_ClickedIndicator(false),
-		m_IndicatorRate(0.0f)
+		m_IndicatorRate(0.0f),
+		m_MemoryBarCursorPos(ImVec2()),
+		m_MemoryBarSize(ImVec2()),
+		m_MemoryBarAvailableSize(ImVec2())
 	{
 		m_LeftSideMemory = 0.0f;
 		m_RightSideMemory = static_cast<float>(m_MaxLargeMemoryCount) * m_LargeMemoryWidth;
@@ -117,6 +122,10 @@ namespace gui
 		ImVec2 CursorPos = ImGui::GetCursorPos();
 		ImGui::SetCursorPos(ImVec2(CursorPos.x, CursorPos.y + m_MemoryBarHeight));
 
+		// リセットする
+		m_OpenedTrackPosMap.clear();
+
+		//
 		for (const auto& Object : m_TrackObjectList)
 		{
 			std::string ObjectTreeLabel = Object->GetObjectName() + "##TimeLineView_Hierarchy_ObjectTree";
@@ -138,6 +147,9 @@ namespace gui
 								{
 									const auto& Track = TrackList.find(TrackID);
 									if (Track == TrackList.end()) continue;
+
+									// トラックと描画位置(カーソル位置)を登録
+									m_OpenedTrackPosMap.emplace(Track->second, ImGui::GetCursorScreenPos());
 
 									if (!DrawTrackProperty(TimelineController, Track->second, SamplerList)) return false;
 								}
@@ -165,6 +177,9 @@ namespace gui
 								{
 									const auto& Track = TrackList.find(TrackID);
 									if (Track == TrackList.end()) continue;
+
+									// トラックと描画位置(カーソル位置)を登録
+									m_OpenedTrackPosMap.emplace(Track->second, ImGui::GetCursorScreenPos());
 
 									if (!DrawTrackProperty(TimelineController, Track->second, SamplerList)) return false;
 								}
@@ -259,6 +274,12 @@ namespace gui
 		// タイムラインのメモリバーを描画
 		if (!DrawMemoryBar(TimelineController)) return false;
 
+		// キーフレームを描画
+		if (!DrawKeyFrameList(TimelineController)) return false;
+
+		// インジケーターの描画
+		if (!DrawIndicator(m_MemoryBarCursorPos, m_MemoryBarAvailableSize, m_MemoryBarSize)) return false;
+
 		ImGui::EndChild();
 
 		return true;
@@ -267,30 +288,34 @@ namespace gui
 	bool CTimeLineView::DrawMemoryBar(const std::shared_ptr<timeline::CTimelineController>& TimelineController)
 	{
 		// タイムラインのメモリバーを描画
-		ImVec2 availableSize = ImGui::GetContentRegionAvail();
+		m_MemoryBarAvailableSize = ImGui::GetContentRegionAvail();
 
-		ImVec2 barSize = ImVec2(availableSize.x, m_MemoryBarHeight);
+		m_MemoryBarSize = ImVec2(m_MemoryBarAvailableSize.x, m_MemoryBarHeight);
 
 		// メモリとメモリの間隔
-		const float DrawMemorySpace = availableSize.x / (m_MaxLargeMemoryCount * 3);
+		const float DrawMemorySpace = m_MemoryBarAvailableSize.x / (m_MaxLargeMemoryCount * 3);
 
 		ImDrawList* drawList = ImGui::GetWindowDrawList(); // 描画マネージャー？ 自由に板ポリとか線とか文字を描画できるやつらしい
 
 		// 現在のGUIの描画位置を取得(スクリーン座標系)
-		ImVec2 cursorPos = ImGui::GetCursorScreenPos();
+		m_MemoryBarCursorPos = ImGui::GetCursorScreenPos();
 
 		// インジケーターの前計算。必ずメモリバーよりも先に計算しておく必要がある
-		if (!CalcIndicator(TimelineController, cursorPos, barSize)) return false;
+		if (!CalcIndicator(TimelineController, m_MemoryBarCursorPos, m_MemoryBarSize)) return false;
 
 		// 背景の描画
-		ImGui::SetCursorScreenPos(cursorPos);
-		ImGui::InvisibleButton("##TimelineMemoryBar", barSize);
+		ImGui::SetCursorScreenPos(m_MemoryBarCursorPos);
+		ImGui::InvisibleButton("##TimelineMemoryBar", m_MemoryBarSize);
+
+		// 左右のメモリのスクリーン座標を設定
+		m_LeftSideScreenPos = m_MemoryBarCursorPos;
+		m_RightSideScreenPos = ImVec2(m_MemoryBarCursorPos.x + m_MemoryBarAvailableSize.x, m_MemoryBarCursorPos.y);
 
 		// Item(ここではInvisibleButton)にホバーしているかを見たりするので必ずこの後にマウスホイールやドラッグをチェックする
 		if (!CheckWheelExpand()) return false;
-		if (!CheckMemoryDrag(TimelineController, availableSize, DrawMemorySpace, TimelineController->GetMaxTime())) return false;
+		if (!CheckMemoryDrag(TimelineController, m_MemoryBarAvailableSize, DrawMemorySpace, TimelineController->GetMaxTime())) return false;
 
-		drawList->AddRectFilled(cursorPos, ImVec2(cursorPos.x + barSize.x, cursorPos.y + barSize.y), IM_COL32(60, 60, 60, 255)); // 矩形を描画
+		drawList->AddRectFilled(m_MemoryBarCursorPos, ImVec2(m_MemoryBarCursorPos.x + m_MemoryBarSize.x, m_MemoryBarCursorPos.y + m_MemoryBarSize.y), IM_COL32(60, 60, 60, 255)); // 矩形を描画
 
 		// メモリの開始値
 		std::vector<bool> IsLongMemory;
@@ -304,15 +329,15 @@ namespace gui
 		{
 			int LoopCounter = i % 3;
 
-			float x = cursorPos.x + static_cast<float>(i) * DrawMemorySpace * (1.0f + m_MemoryExpandRate) + MemoryOffset;
+			float x = m_MemoryBarCursorPos.x + static_cast<float>(i) * DrawMemorySpace * (1.0f + m_MemoryExpandRate) + MemoryOffset;
 
 			if (IsLongMemory[LoopCounter])
 			{
 				// 長い針とメモリテキストを描画
-				drawList->AddLine(ImVec2(x, cursorPos.y), ImVec2(x, cursorPos.y + 20.0f), IM_COL32(255, 255, 255, 255));
+				drawList->AddLine(ImVec2(x, m_MemoryBarCursorPos.y), ImVec2(x, m_MemoryBarCursorPos.y + 20.0f), IM_COL32(255, 255, 255, 255));
 
 				std::string label = math::CMath::GetFloatWithPrecision(LargeMemoryValue, 3);
-				drawList->AddText(ImVec2(x, cursorPos.y + 22.0f), IM_COL32(255, 255, 255, 255), label.c_str());
+				drawList->AddText(ImVec2(x, m_MemoryBarCursorPos.y + 22.0f), IM_COL32(255, 255, 255, 255), label.c_str());
 
 				// 長いメモリの値を更新
 				LargeMemoryValue += m_LargeMemoryWidth;
@@ -320,13 +345,10 @@ namespace gui
 			else
 			{
 				// 短いメモリのみ
-				drawList->AddLine(ImVec2(x, cursorPos.y), ImVec2(x, cursorPos.y + 10.0f), IM_COL32(255, 255, 255, 255));
+				drawList->AddLine(ImVec2(x, m_MemoryBarCursorPos.y), ImVec2(x, m_MemoryBarCursorPos.y + 10.0f), IM_COL32(255, 255, 255, 255));
 			}
 			
 		}
-
-		// インジケーターの描画
-		if (!DrawIndicator(drawList, cursorPos, availableSize, barSize)) return false;
 
 		return true;
 	}
@@ -367,10 +389,90 @@ namespace gui
 		return true;
 	}
 
-	bool CTimeLineView::DrawIndicator(ImDrawList* drawList, const ImVec2& cursorPos, const ImVec2& availableSize, const ImVec2& barSize)
+	bool CTimeLineView::DrawIndicator(const ImVec2& cursorPos, const ImVec2& availableSize, const ImVec2& barSize)
 	{
+		ImDrawList* drawList = ImGui::GetWindowDrawList();
+
 		float DrawPos = cursorPos.x + m_IndicatorRate * barSize.x;
 		drawList->AddLine(ImVec2(DrawPos, cursorPos.y), ImVec2(DrawPos, cursorPos.y + availableSize.y), IM_COL32(255, 0, 0, 255));
+
+		return true;
+	}
+
+	bool CTimeLineView::DrawKeyFrameList(const std::shared_ptr<timeline::CTimelineController>& TimelineController)
+	{
+		ImVec2 ScreenCursorPos = ImGui::GetCursorScreenPos();
+
+		ImVec2 availableSize = ImGui::GetContentRegionAvail();
+
+		ImGui::BeginChild("KeyFrameList##Timeline", availableSize);
+
+		const auto& TLClip = TimelineController->GetClip();
+		if (!TLClip) return true;
+
+		const auto& SamplerList = TLClip->GetSamplerList();
+
+		for (const auto& OpenedTrackAndCursor : m_OpenedTrackPosMap)
+		{
+			const auto& Track = OpenedTrackAndCursor.first;
+			const auto& OpenedTrackPos = OpenedTrackAndCursor.second;
+
+			const float TrackHeight = 10.0f;
+
+			ImGui::SetCursorScreenPos(ImVec2(ScreenCursorPos.x, OpenedTrackPos.y));
+
+			// ボタンの色を選択
+			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.24f, 0.24f, 0.24f, 1.0f)); // 通常時の色
+			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.24f, 0.24f, 0.24f, 1.0f)); // ホバーの色
+			ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.24f, 0.24f, 0.24f, 1.0f)); // 押下時の色
+
+			std::string Lebal = "##Timeline_KeyFrameBar_" + Track->GetTrackName();
+			if (ImGui::Button(Lebal.c_str(), ImVec2(availableSize.x, TrackHeight)))
+			{
+				
+			}
+
+			// 色の設定を元に戻す
+			ImGui::PopStyleColor(3); // 3つ分のカラースタックをポップする
+
+			// キーフレーム
+			int SamplerIndex = Track->GetSamplerIndex();
+			if (SamplerIndex < 0 || SamplerIndex >= SamplerList.size()) return false;
+
+			// サンプラーから指定時間内のキーフレームリストを取得
+			auto& Sampler = SamplerList[SamplerIndex];
+
+			const auto& KeyFrameList = Sampler->GetKeyFrameListFromRange(m_LeftSideMemory, m_RightSideMemory);
+
+			// 各キーフレームを該当する時間の座標に描画する
+			for (const auto& KeyFrame : KeyFrameList)
+			{
+				float FrameTime = KeyFrame->GetInput();
+
+				// キーフレームの時間が左右のメモリの時間に対してどれくらいの割合か
+				float t = (FrameTime - m_LeftSideMemory) / (m_RightSideMemory - m_LeftSideMemory);
+
+				// 割合から座標を求める
+				float XPos = glm::mix(m_LeftSideScreenPos.x, m_RightSideScreenPos.x, t);
+
+				ImGui::SetCursorScreenPos(ImVec2(XPos, OpenedTrackPos.y));
+
+				// ボタンの色を選択
+				ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.0f, 1.0f, 0.0f, 1.0f)); // 通常時の色
+				ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(1.0f, 1.0f, 0.6f, 1.0f)); // ホバーの色
+				ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(1.0f, 1.0f, 1.0f, 1.0f)); // 押下時の色
+
+				if (ImGui::Button("##Test_Btn", ImVec2(TrackHeight, TrackHeight)))
+				{
+
+				}
+
+				// 色の設定を元に戻す
+				ImGui::PopStyleColor(3); // 3つ分のカラースタックをポップする
+			}
+		}
+
+		ImGui::EndChild();
 
 		return true;
 	}

@@ -63,6 +63,25 @@ namespace animation
 		return m_KeyFrameList;
 	}
 
+	std::vector<std::shared_ptr<animation::CKeyFrame>> CAnimationSampler::GetKeyFrameListFromRange(float FirstTime, float SecondTime)
+	{
+		std::vector<std::shared_ptr<animation::CKeyFrame>> dstKeyFrameList;
+
+		for (const auto& KeyFrame : m_KeyFrameList)
+		{
+			// 小さいものはスキップ
+			if (KeyFrame->GetInput() < FirstTime) continue;
+
+			// 大きかったらそれ以上のキーフレームは入らないので探査終了
+			if (KeyFrame->GetInput() >= SecondTime) break;
+
+			// 追加する
+			dstKeyFrameList.push_back(KeyFrame);
+		}
+
+		return dstKeyFrameList;
+	}
+
 	void CAnimationSampler::CalcStartEndTime()
 	{
 		if (m_KeyFrameList.size() > 0)

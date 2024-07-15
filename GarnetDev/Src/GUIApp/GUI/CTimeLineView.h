@@ -5,6 +5,7 @@
 #include <string>
 #include <memory>
 #include <vector>
+#include <unordered_map>
 
 #include <Timeline/CTimelineController.h>
 
@@ -14,11 +15,15 @@ namespace gui
 {
 	class CTimeLineView
 	{
+		//
 		const int m_MaxLargeMemoryCount = 20; // 長いメモリの最大数。メモリの数は定数。長いメモリと長いメモリの間に短いメモリが2本あるので長短合わせて最大60本
 		const float m_MemoryBarHeight = 40.0f;
 
-		float m_LeftSideMemory; // タイムラインの左端
-		float m_RightSideMemory; // タイムラインの右端
+		float m_LeftSideMemory; // タイムラインメモリの左端の時間
+		float m_RightSideMemory; // タイムラインメモリの右端の時間
+
+		ImVec2 m_LeftSideScreenPos; // 左端のメモリのスクリーン座標
+		ImVec2 m_RightSideScreenPos; // 右端のメモリのスクリーン座標
 
 		float m_LargeMemoryWidth; // 現在の長いメモリの間隔. 0.01, 0.1, 1.0, 10.0, 100.0といった感じで変化する
 		float m_MemoryExpandRate; // メモリの拡大率
@@ -29,8 +34,15 @@ namespace gui
 		bool m_ClickedIndicator;
 		float m_IndicatorRate;
 
+		ImVec2 m_MemoryBarCursorPos;
+		ImVec2 m_MemoryBarSize;
+		ImVec2 m_MemoryBarAvailableSize;
+
 		// トラックで使用しているオブジェクトリスト
 		std::vector<std::shared_ptr<object::C3DObject>> m_TrackObjectList;
+
+		// ツリーが開いているトラックと描画位置のマップ
+		std::unordered_map<std::shared_ptr<timeline::CTimelineTrack>, ImVec2> m_OpenedTrackPosMap;
 	private:
 		bool DrawTimeBar(const std::shared_ptr<timeline::CTimelineController>& TimelineController);
 		
@@ -42,7 +54,8 @@ namespace gui
 
 		bool DrawMemoryBar(const std::shared_ptr<timeline::CTimelineController>& TimelineController);
 		bool CalcIndicator(const std::shared_ptr<timeline::CTimelineController>& TimelineController, const ImVec2& cursorPos, const ImVec2& barSize);
-		bool DrawIndicator(ImDrawList* drawList, const ImVec2& cursorPos, const ImVec2& availableSize, const ImVec2& barSize);
+		bool DrawIndicator(const ImVec2& cursorPos, const ImVec2& availableSize, const ImVec2& barSize);
+		bool DrawKeyFrameList(const std::shared_ptr<timeline::CTimelineController>& TimelineController);
 
 		bool CheckWheelExpand();
 		bool CheckMemoryDrag(const std::shared_ptr<timeline::CTimelineController>& TimelineController, const ImVec2& availableSize, float DrawMemorySpace, float MaxTime);
