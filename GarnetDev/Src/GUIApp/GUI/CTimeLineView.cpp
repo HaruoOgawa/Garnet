@@ -19,6 +19,7 @@ namespace gui
 		m_MemoryBarCursorPos(ImVec2()),
 		m_MemoryBarSize(ImVec2()),
 		m_MemoryBarAvailableSize(ImVec2()),
+		m_ClickedKeyFrameLabel(std::string()),
 		m_ShowAddObjDialog(false),
 		m_ShowAddTrackDialog(false),
 		m_SelectedObjectForAddObj(nullptr),
@@ -472,29 +473,41 @@ namespace gui
 				{
 					float FrameTime = KeyFrame->GetInput();
 
-					// キーフレームの時間が左右のメモリの時間に対してどれくらいの割合か
-					float t = (FrameTime - m_LeftSideMemory) / (m_RightSideMemory - m_LeftSideMemory);
-
-					// 割合から座標を求める
-					float XPos = glm::mix(m_LeftSideScreenPos.x, m_RightSideScreenPos.x, t);
-
-					ImGui::SetCursorScreenPos(ImVec2(XPos, OpenedTrackPos.y));
-
-					// ボタンの色を選択
-					//ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.0f, 1.0f, 0.0f, 1.0f)); // 通常時の色
-					//ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(1.0f, 1.0f, 0.6f, 1.0f)); // ホバーの色
-					//ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(1.0f, 1.0f, 1.0f, 1.0f)); // 押下時の色
-
 					std::string KeyFrameLabel = "##Timeline_KeyFrame_" + Track->GetTrackName() + "_" + std::to_string(FrameTime);
-					//if (ImGui::Button(KeyFrameLabel.c_str(), ImVec2(TrackHeight, TrackHeight)))
-					if (ImGui::InvisibleButton(KeyFrameLabel.c_str(), ImVec2(TrackHeight, TrackHeight)))
+
+					// 描画位置を決定
+					float XPos = 0.0f;
+					if (!m_ClickedKeyFrameLabel.empty() && m_ClickedKeyFrameLabel == KeyFrameLabel)
 					{
-						float y = 0.0f;
+						// マウスのX座標を割り当てる
+						XPos = ImGui::GetMousePos().x;
+					}
+					else
+					{
+						// キーフレームの時間が左右のメモリの時間に対してどれくらいの割合か
+						float t = (FrameTime - m_LeftSideMemory) / (m_RightSideMemory - m_LeftSideMemory);
+
+						// 割合から座標を求める
+						XPos = glm::mix(m_LeftSideScreenPos.x, m_RightSideScreenPos.x, t);
 					}
 
-					// 色の設定を元に戻す
-					//ImGui::PopStyleColor(3); // 3つ分のカラースタックをポップする
+					ImGui::SetCursorScreenPos(ImVec2(XPos, OpenedTrackPos.y));
+					
+					ImGui::InvisibleButton(KeyFrameLabel.c_str(), ImVec2(TrackHeight, TrackHeight));
+					if (ImGui::IsItemActive())
+					{
+						// 掴んでいる
+						m_ClickedKeyFrameLabel = KeyFrameLabel;
+					}
+					else if (!m_ClickedKeyFrameLabel.empty() && m_ClickedKeyFrameLabel == KeyFrameLabel)
+					{
+						// 離したのでリセットする
+						m_ClickedKeyFrameLabel = std::string();
 
+						// Todo: MousePos.x(XPos)から逆計算してキーフレームの時間を求める
+					}
+
+					// ボタンの色を選択
 					ImVec4 Col = ImVec4();
 					if (ImGui::IsItemHovered())
 					{

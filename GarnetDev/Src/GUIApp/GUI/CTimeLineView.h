@@ -46,6 +46,8 @@ namespace gui
 		ImVec2 m_MemoryBarSize;
 		ImVec2 m_MemoryBarAvailableSize;
 
+		std::string m_ClickedKeyFrameLabel; // クリックされているキーフレームUIの名前
+
 		// トラックで使用しているオブジェクトリスト
 		std::set<std::shared_ptr<object::C3DObject>> m_TrackObjectList;
 
