@@ -453,57 +453,108 @@ namespace gui
 
 			const float TrackHeight = 10.0f;
 
-			ImGui::SetCursorScreenPos(ImVec2(ScreenCursorPos.x, OpenedTrackPos.y));
-
-			// ボタンの色を選択
-			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.24f, 0.24f, 0.24f, 1.0f)); // 通常時の色
-			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.24f, 0.24f, 0.24f, 1.0f)); // ホバーの色
-			ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.24f, 0.24f, 0.24f, 1.0f)); // 押下時の色
-
-			std::string Lebal = "##Timeline_KeyFrameBar_" + Track->GetTrackName();
-			if (ImGui::Button(Lebal.c_str(), ImVec2(availableSize.x, TrackHeight)))
+			// ToDo:バグなのか何なのかわからないが、異なる２つのボタンを重ねて配置し重なった部分をクリックした時、コード的にも先に書かれて下に描画されているボタンのクリックが優先されてしまうので
+			// 先に透明なボタンを描画しておき、あとでRectをベースの上にさらに描画する
+			std::vector<float> KeyXPosList;
+			std::vector<ImVec4> ColList;
 			{
-				
+				// キーフレーム
+				int SamplerIndex = Track->GetSamplerIndex();
+				if (SamplerIndex < 0 || SamplerIndex >= SamplerList.size()) return false;
+
+				// サンプラーから指定時間内のキーフレームリストを取得
+				auto& Sampler = SamplerList[SamplerIndex];
+
+				const auto& KeyFrameList = Sampler->GetKeyFrameListFromRange(m_LeftSideMemory, m_RightSideMemory);
+
+				// 各キーフレームを該当する時間の座標に描画する
+				for (const auto& KeyFrame : KeyFrameList)
+				{
+					float FrameTime = KeyFrame->GetInput();
+
+					// キーフレームの時間が左右のメモリの時間に対してどれくらいの割合か
+					float t = (FrameTime - m_LeftSideMemory) / (m_RightSideMemory - m_LeftSideMemory);
+
+					// 割合から座標を求める
+					float XPos = glm::mix(m_LeftSideScreenPos.x, m_RightSideScreenPos.x, t);
+
+					ImGui::SetCursorScreenPos(ImVec2(XPos, OpenedTrackPos.y));
+
+					// ボタンの色を選択
+					//ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.0f, 1.0f, 0.0f, 1.0f)); // 通常時の色
+					//ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(1.0f, 1.0f, 0.6f, 1.0f)); // ホバーの色
+					//ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(1.0f, 1.0f, 1.0f, 1.0f)); // 押下時の色
+
+					std::string KeyFrameLabel = "##Timeline_KeyFrame_" + Track->GetTrackName() + "_" + std::to_string(FrameTime);
+					//if (ImGui::Button(KeyFrameLabel.c_str(), ImVec2(TrackHeight, TrackHeight)))
+					if (ImGui::InvisibleButton(KeyFrameLabel.c_str(), ImVec2(TrackHeight, TrackHeight)))
+					{
+						float y = 0.0f;
+					}
+
+					// 色の設定を元に戻す
+					//ImGui::PopStyleColor(3); // 3つ分のカラースタックをポップする
+
+					ImVec4 Col = ImVec4();
+					if (ImGui::IsItemHovered())
+					{
+						Col = ImVec4(0.0f, 0.0f, 1.0f, 1.0f);
+					}
+					else if (ImGui::IsItemActive())
+					{
+						Col = ImVec4(1.0f, 0.0f, 0.0f, 1.0f);
+					}
+					else
+					{
+						Col = ImVec4(1.0f, 1.0f, 0.0f, 1.0f);
+					}
+
+					// 各種情報を登録
+					KeyXPosList.push_back(XPos);
+					ColList.push_back(Col);
+				}
 			}
 
-			// 色の設定を元に戻す
-			ImGui::PopStyleColor(3); // 3つ分のカラースタックをポップする
-
-			// キーフレーム
-			int SamplerIndex = Track->GetSamplerIndex();
-			if (SamplerIndex < 0 || SamplerIndex >= SamplerList.size()) return false;
-
-			// サンプラーから指定時間内のキーフレームリストを取得
-			auto& Sampler = SamplerList[SamplerIndex];
-
-			const auto& KeyFrameList = Sampler->GetKeyFrameListFromRange(m_LeftSideMemory, m_RightSideMemory);
-
-			// 各キーフレームを該当する時間の座標に描画する
-			for (const auto& KeyFrame : KeyFrameList)
+			// ベースの描画
 			{
-				float FrameTime = KeyFrame->GetInput();
-
-				// キーフレームの時間が左右のメモリの時間に対してどれくらいの割合か
-				float t = (FrameTime - m_LeftSideMemory) / (m_RightSideMemory - m_LeftSideMemory);
-
-				// 割合から座標を求める
-				float XPos = glm::mix(m_LeftSideScreenPos.x, m_RightSideScreenPos.x, t);
-
-				ImGui::SetCursorScreenPos(ImVec2(XPos, OpenedTrackPos.y));
+				ImGui::SetCursorScreenPos(ImVec2(ScreenCursorPos.x, OpenedTrackPos.y));
 
 				// ボタンの色を選択
-				ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.0f, 1.0f, 0.0f, 1.0f)); // 通常時の色
-				ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(1.0f, 1.0f, 0.6f, 1.0f)); // ホバーの色
-				ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(1.0f, 1.0f, 1.0f, 1.0f)); // 押下時の色
+				ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.24f, 0.24f, 0.24f, 1.0f)); // 通常時の色
+				ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.24f, 0.24f, 0.24f, 1.0f)); // ホバーの色
+				ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.24f, 0.24f, 0.24f, 1.0f)); // 押下時の色
 
-				std::string KeyFrameLabel = "##Timeline_KeyFrame_" + Track->GetTrackName() + "_" + std::to_string(FrameTime);
-				if (ImGui::Button(KeyFrameLabel.c_str(), ImVec2(TrackHeight, TrackHeight)))
+				std::string Lebal = "##Timeline_KeyFrameBar_" + Track->GetTrackName();
+				if (ImGui::Button(Lebal.c_str(), ImVec2(availableSize.x, TrackHeight)))
 				{
-
+					float x = 0.0f;
 				}
 
 				// 色の設定を元に戻す
 				ImGui::PopStyleColor(3); // 3つ分のカラースタックをポップする
+			}
+
+			// キーフレームのUIを上塗りする
+			{
+				if (KeyXPosList.size() == ColList.size())
+				{
+					ImDrawList* DrawList = ImGui::GetWindowDrawList();
+
+					for (size_t i = 0; i < KeyXPosList.size(); i++)
+					{
+						float XPos = KeyXPosList[i];
+						const ImVec4& Col = ColList[i];
+
+						ImU32 Col32 = IM_COL32(
+							static_cast<int>((255.0f * Col.x)),
+							static_cast<int>((255.0f * Col.y)),
+							static_cast<int>((255.0f * Col.z)),
+							static_cast<int>((255.0f * Col.w))
+						);
+
+						DrawList->AddRectFilled(ImVec2(XPos, OpenedTrackPos.y), ImVec2(XPos + TrackHeight, OpenedTrackPos.y + TrackHeight), Col32);
+					}
+				}
 			}
 		}
 
