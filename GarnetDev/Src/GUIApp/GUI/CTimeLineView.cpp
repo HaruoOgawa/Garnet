@@ -640,10 +640,11 @@ namespace gui
 			static timeline::ENodeTrackTarget SelectedType = timeline::ENodeTrackTarget::NodeTrackTarget_None;
 			std::string SelectedName = timeline::CNodeTrack::CastNodeTrackTarget_Str(SelectedType);
 
+			static std::string SelectedName_Node = std::string();
+
 			// Target
 			if (m_ClickedObjectForAddObjectTrack)
 			{
-				static std::string SelectedName_Node = "";
 				if (ImGui::BeginCombo("Node##Timeline_AddObjectTrackDialog_NodeTrack_Combo", SelectedName_Node.c_str()))
 				{
 					for (const auto& Node : m_ClickedObjectForAddObjectTrack->GetNodeList())
@@ -721,6 +722,10 @@ namespace gui
 				m_ClickedObjectForAddObjectTrack = nullptr;
 				m_SelectedNodeForAddTrack = nullptr;
 				m_SelectedMaterialForAddTrack = nullptr;
+
+				// static変数のリセット
+				SelectedType = timeline::ENodeTrackTarget::NodeTrackTarget_None;
+				SelectedName_Node = std::string();
 			}
 
 			ImGui::EndTabItem();
@@ -851,6 +856,12 @@ namespace gui
 				m_ClickedObjectForAddObjectTrack = nullptr;
 				m_SelectedNodeForAddTrack = nullptr;
 				m_SelectedMaterialForAddTrack = nullptr;
+
+				// static変数のリセット
+				SelectedType = timeline::EMaterialTrackTarget::MaterialTrackTarget_None;
+				SelectedMaterialName = "";
+				SelectedUniformName = "";
+				SelectedValueType = math::EValueType::VALUE_TYPE_NONE;
 			}
 
 			ImGui::EndTabItem();
