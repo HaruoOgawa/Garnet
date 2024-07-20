@@ -590,6 +590,8 @@ namespace gui
 
 						// MousePos.x(XPos)から逆計算してキーフレームの時間を求める
 						float NewFrameTime = CalcFrameTimeFromXPos(ImGui::GetMousePos().x);
+
+						Sampler->SetKeyFrameInput(KeyFrame, NewFrameTime);
 					}
 
 					// ボタンの色を選択

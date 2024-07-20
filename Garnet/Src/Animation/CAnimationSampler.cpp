@@ -1,6 +1,7 @@
 #include "CAnimationSampler.h"
 #include "../Math/CTransform.h"
 #include "../../Message/Console.h"
+#include <algorithm>
 
 namespace animation
 {
@@ -77,6 +78,17 @@ namespace animation
 		}
 
 		return dstKeyFrameList;
+	}
+
+	void CAnimationSampler::SetKeyFrameInput(const std::shared_ptr<animation::CKeyFrame>& KeyFrame, float NewInput)
+	{
+		// 既存キーフレームのInputを更新してソートする
+		const auto it = std::find(m_KeyFrameList.begin(), m_KeyFrameList.end(), KeyFrame);
+		if (it == m_KeyFrameList.end()) return;
+		
+		(*it)->SetInput(NewInput);
+
+		std::sort(m_KeyFrameList.begin(), m_KeyFrameList.end(), [](const auto& a, const auto& b) { return (a->GetInput() < b->GetInput()); });
 	}
 
 	void CAnimationSampler::CalcStartEndTime()
