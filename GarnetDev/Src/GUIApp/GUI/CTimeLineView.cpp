@@ -524,18 +524,18 @@ namespace gui
 
 			const float TrackHeight = 10.0f;
 
+			// キーフレーム
+			int SamplerIndex = Track->GetSamplerIndex();
+			if (SamplerIndex < 0 || SamplerIndex >= SamplerList.size()) return false;
+
+			// サンプラーから指定時間内のキーフレームリストを取得
+			auto& Sampler = SamplerList[SamplerIndex];
+
 			// ToDo:バグなのか何なのかわからないが、異なる２つのボタンを重ねて配置し重なった部分をクリックした時、コード的にも先に書かれて下に描画されているボタンのクリックが優先されてしまうので
 			// 先に透明なボタンを描画しておき、あとでRectをベースの上にさらに描画する
 			std::vector<float> KeyXPosList;
 			std::vector<ImVec4> ColList;
 			{
-				// キーフレーム
-				int SamplerIndex = Track->GetSamplerIndex();
-				if (SamplerIndex < 0 || SamplerIndex >= SamplerList.size()) return false;
-
-				// サンプラーから指定時間内のキーフレームリストを取得
-				auto& Sampler = SamplerList[SamplerIndex];
-
 				const auto& KeyFrameList = Sampler->GetKeyFrameListFromRange(m_LeftSideMemory, m_RightSideMemory);
 
 				// 各キーフレームを該当する時間の座標に描画する
@@ -626,10 +626,51 @@ namespace gui
 				ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.24f, 0.24f, 0.24f, 1.0f)); // 押下時の色
 
 				std::string Lebal = "##Timeline_KeyFrameBar_" + Track->GetTrackName();
-				if (ImGui::Button(Lebal.c_str(), ImVec2(availableSize.x, TrackHeight)))
+				ImGui::Button(Lebal.c_str(), ImVec2(availableSize.x, TrackHeight));
+
+				if (ImGui::IsItemClicked(1)) // 右クリックでキーフレームの追加
 				{
 					// MousePos.x(XPos)から逆計算してキーフレームの時間を求める
 					float NewFrameTime = CalcFrameTimeFromXPos(ImGui::GetMousePos().x);
+
+					// 前後のキーフレームを取得
+					std::shared_ptr<animation::CKeyFrame> PrevKeyFrame = nullptr;
+					std::shared_ptr<animation::CKeyFrame> NextKeyFrame = nullptr;
+
+					if (Sampler->GetNeedKeyFrame(NewFrameTime, PrevKeyFrame, NextKeyFrame))
+					{
+						std::vector<float> Value;
+
+						// 近い方をOutputの初期値として使用する
+						const float PrevDeltaTime = (PrevKeyFrame) ? glm::abs(NewFrameTime - PrevKeyFrame->GetInput()) : std::numeric_limits<float>::max();
+						const float NextDeltaTime = (NextKeyFrame) ? glm::abs(NewFrameTime - NextKeyFrame->GetInput()) : std::numeric_limits<float>::max();
+						math::EValueType ValueType = math::EValueType::VALUE_TYPE_NONE;
+
+						if (PrevKeyFrame && PrevDeltaTime < NextDeltaTime)
+						{
+							Value = PrevKeyFrame->GetOutput();
+							ValueType = PrevKeyFrame->GetType();
+						}
+						else if (NextKeyFrame && NextDeltaTime < PrevDeltaTime)
+						{
+							Value = NextKeyFrame->GetOutput();
+							ValueType = NextKeyFrame->GetType();
+						}
+
+						// サンプラーにソート付きで新しくキーフレームを追加する
+						if (!Value.empty())
+						{
+							std::shared_ptr<animation::CKeyFrame> NewKeyFrame = std::make_shared<animation::CKeyFrame>(ValueType);
+							NewKeyFrame->SetInput(NewFrameTime);
+							NewKeyFrame->SetOutput(Value);
+
+							Sampler->AddKeyFrameWithSort(NewKeyFrame);
+						}
+					}
+				}
+				else if (ImGui::IsItemClicked(0)) // 左クリックでキーフレームの選択解除
+				{
+					m_ClickedSamplerKeyFramePair = std::make_tuple(nullptr, nullptr);
 				}
 
 				// 色の設定を元に戻す

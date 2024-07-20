@@ -56,6 +56,13 @@ namespace animation
 		m_KeyFrameList.push_back(KeyFrame);
 	}
 
+	void CAnimationSampler::AddKeyFrameWithSort(const std::shared_ptr<animation::CKeyFrame>& KeyFrame)
+	{
+		m_KeyFrameList.push_back(KeyFrame);
+
+		std::sort(m_KeyFrameList.begin(), m_KeyFrameList.end(), [](const auto& a, const auto& b) { return (a->GetInput() < b->GetInput()); });
+	}
+
 	const std::vector<std::shared_ptr<animation::CKeyFrame>>& CAnimationSampler::GetKeyFrameList() const
 	{
 		return m_KeyFrameList;
