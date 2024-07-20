@@ -411,13 +411,59 @@ namespace gui
 
 	bool CTimeLineView::CalcIndicator(const std::shared_ptr<timeline::CTimelineController>& TimelineController, const ImVec2& cursorPos, const ImVec2& barSize)
 	{
+		bool IsClicked = (ImGui::IsMouseDown(0));
+
 		float DrawPos = cursorPos.x + m_IndicatorRate * barSize.x;
+
+		// ToDo: いったん不要
+		/*if (m_ClickedIndicator && !IsClicked)
+		{
+			// 距離が近いキーフレームがあったらPlayBackTimeがそのキーフレームにぴったり合うようにする
+			const auto& TLClip = TimelineController->GetClip();
+			if (TLClip)
+			{
+				const auto& SamplerList = TLClip->GetSamplerList();
+
+				float MinDist = std::numeric_limits<float>::max();
+
+				for (const auto& OpenedTrackAndCursor : m_OpenedTrackPosMap)
+				{
+					const auto& Track = OpenedTrackAndCursor.first;
+					const auto& OpenedTrackPos = OpenedTrackAndCursor.second;
+
+					// Y座標が描画範囲外だったら除外する
+					//if(OpenedTrackPos.y > )
+
+					// キーフレーム
+					int SamplerIndex = Track->GetSamplerIndex();
+					if (SamplerIndex < 0 || SamplerIndex >= SamplerList.size()) return false;
+
+					// サンプラーから指定時間内のキーフレームリストを取得
+					auto& Sampler = SamplerList[SamplerIndex];
+
+					const auto& KeyFrameList = Sampler->GetKeyFrameListFromRange(m_LeftSideMemory, m_RightSideMemory);
+
+					for (const auto& KeyFrame : KeyFrameList)
+					{
+						float FrameTime = KeyFrame->GetInput();
+
+						// 再生時間からキーフレームの座標を求める
+						float XPos = CalcXPosFromFrameTime(FrameTime);
+
+						// 最も近いものを取得する
+						const float Dist = glm::abs(DrawPos - XPos);
+						if (Dist <= 0.01f && Dist < MinDist)
+						{
+							MinDist = Dist;
+						}
+					}
+				}
+			}
+		}*/
 
 		float btnW = 10.0f;
 		ImGui::SetCursorScreenPos(ImVec2(DrawPos - btnW * 0.5f, cursorPos.y));
 		
-		bool IsClicked = (ImGui::IsMouseDown(0));
-
 		if (!m_ClickedIndicator)
 		{
 			ImGui::InvisibleButton("##TimelineIndicator", ImVec2(btnW, barSize.y));
@@ -442,49 +488,6 @@ namespace gui
 			else
 			{
 				m_ClickedIndicator = false;
-
-				// ToDo: キーフレームの選択で対応できることがわかったので対応保留
-				/*// 距離が近いキーフレームがあったらPlayBackTimeがそのキーフレームにぴったり合うようにする
-				const auto& TLClip = TimelineController->GetClip();
-				if (TLClip)
-				{
-					const auto& SamplerList = TLClip->GetSamplerList();
-
-					float MinDist = std::numeric_limits<float>::max();
-
-					for (const auto& OpenedTrackAndCursor : m_OpenedTrackPosMap)
-					{
-						const auto& Track = OpenedTrackAndCursor.first;
-						const auto& OpenedTrackPos = OpenedTrackAndCursor.second;
-
-						// Y座標が描画範囲外だったら除外する
-						//if(OpenedTrackPos.y > )
-
-						// キーフレーム
-						int SamplerIndex = Track->GetSamplerIndex();
-						if (SamplerIndex < 0 || SamplerIndex >= SamplerList.size()) return false;
-
-						// サンプラーから指定時間内のキーフレームリストを取得
-						auto& Sampler = SamplerList[SamplerIndex];
-
-						const auto& KeyFrameList = Sampler->GetKeyFrameListFromRange(m_LeftSideMemory, m_RightSideMemory);
-						
-						for (const auto& KeyFrame : KeyFrameList)
-						{
-							float FrameTime = KeyFrame->GetInput();
-
-							// 再生時間からキーフレームの座標を求める
-							float XPos = CalcXPosFromFrameTime(FrameTime);
-
-							// 最も近いものを取得する
-							const float Dist = glm::abs(DrawPos - XPos);
-							if (Dist <= 0.01f && Dist < MinDist)
-							{
-								MinDist = Dist;
-							}
-						}
-					}
-				}*/
 			}
 		}
 
@@ -562,7 +565,16 @@ namespace gui
 					// キーフレームがクリックされた
 					if (ImGui::IsItemClicked())
 					{
-						m_ClickedSamplerKeyFramePair = std::make_tuple(Sampler, KeyFrame);
+						if (std::get<1>(m_ClickedSamplerKeyFramePair) == KeyFrame)
+						{
+							// 同じキーフレームがクリックされたら選択を解除する
+							m_ClickedSamplerKeyFramePair = std::make_tuple(nullptr, nullptr);
+						}
+						else
+						{
+							// 新しく選択する
+							m_ClickedSamplerKeyFramePair = std::make_tuple(Sampler, KeyFrame);
+						}
 					}
 
 					// キーフレームがドラッグされた
