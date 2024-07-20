@@ -1170,7 +1170,7 @@
     <ClInclude Include="Src\MMD\PMX\CPmxModel.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Src\Binary\CBinaryAnalyser.h">
+    <ClInclude Include="Src\Binary\CBinaryReader.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Src\MMD\PMX\CPmxMesh.h">
@@ -3105,6 +3105,9 @@
     <ClInclude Include="Src\Timeline\ETimelineSamplerTarget.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Binary\CBinaryWriter.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\WindowAPI\CGLFWWindowAPI.cpp">
@@ -3293,7 +3296,7 @@
     <ClCompile Include="Src\MMD\PMX\CPmxModel.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Binary\CBinaryAnalyser.cpp">
+    <ClCompile Include="Src\Binary\CBinaryReader.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Src\MMD\PMX\CPmxMesh.cpp">
@@ -4188,6 +4191,9 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Src\Timeline\CTimelineTrackContent.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Binary\CBinaryWriter.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>

@@ -1,12 +1,14 @@
 #pragma once
 
+#ifdef USE_BINARY_READ
+
 #include <vector>
 #include <string>
 //#include <Windows.h>
 
 namespace binary
 {
-	class CBinaryAnalyser
+	class CBinaryReader
 	{
 		std::vector<unsigned char> m_Data;
 		
@@ -16,8 +18,8 @@ namespace binary
 	private:
 		void UpdatePointer(size_t ByteSize);
 	public:
-		CBinaryAnalyser(const std::vector<unsigned char>& Data);
-		virtual ~CBinaryAnalyser();
+		CBinaryReader(const std::vector<unsigned char>& Data);
+		virtual ~CBinaryReader();
 
 		unsigned char* GetPointer() const;
 
@@ -45,3 +47,4 @@ namespace binary
 		unsigned short GetUShort();
 	};
 }
+#endif // USE_BINARY_READ

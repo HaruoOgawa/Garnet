@@ -1,6 +1,6 @@
-#ifdef USE_MMD
+#if defined(USE_MMD)  && defined(USE_BINARY_READ)
 #include "CPmxModel.h"
-#include "../../Binary/CBinaryAnalyser.h"
+#include "../../Binary/CBinaryReader.h"
 #include "../../Animation/CBlendShapeNameProvider.h"
 #include "../../Message/Console.h"
 
@@ -58,7 +58,7 @@ namespace mmd
 	bool CPmxModel::Analyse(const std::vector<unsigned char>& Data)
 	{
 		// Analyserを生成
-		binary::CBinaryAnalyser Analyser(Data);
+		binary::CBinaryReader Analyser(Data);
 
 		// ヘッダが『PMX 』かどうか
 		std::string header = "";
@@ -149,7 +149,7 @@ namespace mmd
 		return true;
 	}
 
-	bool CPmxModel::AnalyseMetaData(binary::CBinaryAnalyser& Analyser, SPmxMetaData& MetaData)
+	bool CPmxModel::AnalyseMetaData(binary::CBinaryReader& Analyser, SPmxMetaData& MetaData)
 	{
 		// 後続のメタデータの長さ(PMX 2.0では8に固定)
 		unsigned char MetaSize = 0;
@@ -230,7 +230,7 @@ namespace mmd
 		return true;
 	}
 
-	bool CPmxModel::AnalyseMesh(binary::CBinaryAnalyser& Analyser, const SPmxMetaData& MetaData)
+	bool CPmxModel::AnalyseMesh(binary::CBinaryReader& Analyser, const SPmxMetaData& MetaData)
 	{
 		// 頂点バッファの読み込み
 		std::vector<float> PositionAttribute;
@@ -469,7 +469,7 @@ namespace mmd
 		return true;
 	}
 
-	bool CPmxModel::AnalyseTexture(binary::CBinaryAnalyser& Analyser, const SPmxMetaData& MetaData)
+	bool CPmxModel::AnalyseTexture(binary::CBinaryReader& Analyser, const SPmxMetaData& MetaData)
 	{
 		int NumOfTexture = 0;
 		if (!Analyser.GetInt(NumOfTexture)) return false;
@@ -500,7 +500,7 @@ namespace mmd
 		return true;
 	}
 
-	bool CPmxModel::AnalyseMaterial(binary::CBinaryAnalyser& Analyser, const SPmxMetaData& MetaData)
+	bool CPmxModel::AnalyseMaterial(binary::CBinaryReader& Analyser, const SPmxMetaData& MetaData)
 	{
 		int NumOfMaterial = 0;
 		if (!Analyser.GetInt(NumOfMaterial)) return false;
@@ -674,7 +674,7 @@ namespace mmd
 		return true;
 	}
 
-	bool CPmxModel::AnalyseBone(binary::CBinaryAnalyser& Analyser, const SPmxMetaData& MetaData)
+	bool CPmxModel::AnalyseBone(binary::CBinaryReader& Analyser, const SPmxMetaData& MetaData)
 	{
 		int NumOfBone = 0;
 		if (!Analyser.GetInt(NumOfBone)) return false;
@@ -897,7 +897,7 @@ namespace mmd
 		return true;
 	}
 
-	bool CPmxModel::AnalyseMorph(binary::CBinaryAnalyser& Analyser, const SPmxMetaData& MetaData)
+	bool CPmxModel::AnalyseMorph(binary::CBinaryReader& Analyser, const SPmxMetaData& MetaData)
 	{
 		int NumOfMorph = 0;
 		if (!Analyser.GetInt(NumOfMorph)) return false;
@@ -1225,7 +1225,7 @@ namespace mmd
 		return true;
 	}
 
-	bool CPmxModel::AnalyseDisplayFrame(binary::CBinaryAnalyser& Analyser, const SPmxMetaData& MetaData)
+	bool CPmxModel::AnalyseDisplayFrame(binary::CBinaryReader& Analyser, const SPmxMetaData& MetaData)
 	{
 		// 表示枠数
 		int NumOfDisplayFrame = 0;
@@ -1297,7 +1297,7 @@ namespace mmd
 		return true;
 	}
 
-	bool CPmxModel::AnalyseRigidbody(binary::CBinaryAnalyser& Analyser, const SPmxMetaData& MetaData)
+	bool CPmxModel::AnalyseRigidbody(binary::CBinaryReader& Analyser, const SPmxMetaData& MetaData)
 	{
 		// 剛体数
 		int NumOfRigidbody = 0;
@@ -1420,7 +1420,7 @@ namespace mmd
 		return true;
 	}
 
-	bool CPmxModel::AnalyseJoint(binary::CBinaryAnalyser& Analyser, const SPmxMetaData& MetaData)
+	bool CPmxModel::AnalyseJoint(binary::CBinaryReader& Analyser, const SPmxMetaData& MetaData)
 	{
 		// Joint数
 		int NumOfJoint = 0;
@@ -1531,7 +1531,7 @@ namespace mmd
 	}
 
 	// Helper Functions ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	bool CPmxModel::GetMultiTypeValue(binary::CBinaryAnalyser& Analyser, int ByteSize, std::vector<unsigned int>& UIntValueList, std::vector<unsigned char>& ByteValueList, std::vector<unsigned short>& UShortValueList)
+	bool CPmxModel::GetMultiTypeValue(binary::CBinaryReader& Analyser, int ByteSize, std::vector<unsigned int>& UIntValueList, std::vector<unsigned char>& ByteValueList, std::vector<unsigned short>& UShortValueList)
 	{
 		if (ByteSize == 1)
 		{
@@ -1590,7 +1590,7 @@ namespace mmd
 		return true;
 	}
 
-	int CPmxModel::GetMultiTypeValueAsInterger(binary::CBinaryAnalyser& Analyser, int ByteSize)
+	int CPmxModel::GetMultiTypeValueAsInterger(binary::CBinaryReader& Analyser, int ByteSize)
 	{
 		int Result = -1;
 

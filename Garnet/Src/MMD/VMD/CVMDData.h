@@ -1,5 +1,5 @@
 #pragma once
-#ifdef USE_MMD
+#if defined(USE_MMD)  && defined(USE_BINARY_READ)
 #include <vector>
 #include <map>
 #include <glm/glm.hpp>
@@ -9,7 +9,7 @@
 #include "../../Animation/EHumanoidBones.h"
 #include "../../Animation/EBlendShapeName.h"
 
-namespace binary { class CBinaryAnalyser; }
+namespace binary { class CBinaryReader; }
 
 namespace mmd
 {
@@ -26,11 +26,11 @@ namespace mmd
 		int m_MaxSkinFrameIndex;
 	private:
 		// ‘¼‚É‚àExpression, Camera, Light‚È‚Ç‚ª‚ ‚é‚ç‚µ‚¢‚ª‚Ð‚Æ‚Ü‚¸Frame‚¾‚¯“Ç‚Þ
-		bool AnalyseFrameData(binary::CBinaryAnalyser& Analyser);
-		bool AnalyseFacialExpressionData(binary::CBinaryAnalyser& Analyser);
-		bool AnalyseCameraData(binary::CBinaryAnalyser& Analyser);
-		bool AnalyseLightData(binary::CBinaryAnalyser& Analyser);
-		bool AnalyseSelfShadowData(binary::CBinaryAnalyser& Analyser);
+		bool AnalyseFrameData(binary::CBinaryReader& Analyser);
+		bool AnalyseFacialExpressionData(binary::CBinaryReader& Analyser);
+		bool AnalyseCameraData(binary::CBinaryReader& Analyser);
+		bool AnalyseLightData(binary::CBinaryReader& Analyser);
+		bool AnalyseSelfShadowData(binary::CBinaryReader& Analyser);
 	public:
 		CVMDData();
 		virtual ~CVMDData();

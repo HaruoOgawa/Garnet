@@ -1,6 +1,6 @@
 #pragma once
 
-#ifdef USE_MMD
+#if defined(USE_MMD)  && defined(USE_BINARY_READ)
 #include <vector>
 #include <map>
 #include <string>
@@ -20,7 +20,7 @@
 
 #include "../../Animation/EBlendShapeName.h"
 
-namespace binary { class CBinaryAnalyser; }
+namespace binary { class CBinaryReader; }
 
 namespace mmd
 {
@@ -60,29 +60,29 @@ namespace mmd
 		std::vector<SPmxRigidbody> m_PmxRigidbodyList;
 		std::vector<SPmxJoint> m_PmxJointList;
 	private:
-		bool AnalyseMetaData(binary::CBinaryAnalyser& Analyser, SPmxMetaData& MetaData);
+		bool AnalyseMetaData(binary::CBinaryReader& Analyser, SPmxMetaData& MetaData);
 
-		bool AnalyseMesh(binary::CBinaryAnalyser& Analyser, const SPmxMetaData& MetaData);
+		bool AnalyseMesh(binary::CBinaryReader& Analyser, const SPmxMetaData& MetaData);
 
-		bool AnalyseTexture(binary::CBinaryAnalyser& Analyser, const SPmxMetaData& MetaData);
+		bool AnalyseTexture(binary::CBinaryReader& Analyser, const SPmxMetaData& MetaData);
 
-		bool AnalyseMaterial(binary::CBinaryAnalyser& Analyser, const SPmxMetaData& MetaData);
+		bool AnalyseMaterial(binary::CBinaryReader& Analyser, const SPmxMetaData& MetaData);
 		
-		bool AnalyseBone(binary::CBinaryAnalyser& Analyser, const SPmxMetaData& MetaData);
+		bool AnalyseBone(binary::CBinaryReader& Analyser, const SPmxMetaData& MetaData);
 
-		bool AnalyseMorph(binary::CBinaryAnalyser& Analyser, const SPmxMetaData& MetaData);
+		bool AnalyseMorph(binary::CBinaryReader& Analyser, const SPmxMetaData& MetaData);
 
-		bool AnalyseDisplayFrame(binary::CBinaryAnalyser& Analyser, const SPmxMetaData& MetaData);
+		bool AnalyseDisplayFrame(binary::CBinaryReader& Analyser, const SPmxMetaData& MetaData);
 
-		bool AnalyseRigidbody(binary::CBinaryAnalyser& Analyser, const SPmxMetaData& MetaData);
+		bool AnalyseRigidbody(binary::CBinaryReader& Analyser, const SPmxMetaData& MetaData);
 
-		bool AnalyseJoint(binary::CBinaryAnalyser& Analyser, const SPmxMetaData& MetaData);
+		bool AnalyseJoint(binary::CBinaryReader& Analyser, const SPmxMetaData& MetaData);
 
 		// Helper Functions ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		static bool GetMultiTypeValue(binary::CBinaryAnalyser& Analyser, int ByteSize, std::vector<unsigned int>& UIntValueList, std::vector<unsigned char>& ByteValueList, std::vector<unsigned short>& UShortValueList);
+		static bool GetMultiTypeValue(binary::CBinaryReader& Analyser, int ByteSize, std::vector<unsigned int>& UIntValueList, std::vector<unsigned char>& ByteValueList, std::vector<unsigned short>& UShortValueList);
 		static bool AddEmptyMultiTypeValue(int ByteSize, std::vector<unsigned int>& UIntValueList, std::vector<unsigned char>& ByteValueList, std::vector<unsigned short>& UShortValueList);
 
-		static int GetMultiTypeValueAsInterger(binary::CBinaryAnalyser& Analyser, int ByteSize);
+		static int GetMultiTypeValueAsInterger(binary::CBinaryReader& Analyser, int ByteSize);
 	public:
 		CPmxModel();
 		virtual ~CPmxModel();
