@@ -701,6 +701,19 @@ namespace gui
 			}
 		}
 
+		// Inputをチェック
+		if (ImGui::IsKeyReleased(ImGuiKey_Delete) && ImGui::IsWindowHovered())
+		{
+			// 選択中のキーフレームを削除する
+			const auto& SelectedSampler = std::get<0>(m_ClickedSamplerKeyFramePair);
+			const auto& SelectedKeyFrame = std::get<1>(m_ClickedSamplerKeyFramePair);
+
+			if (SelectedSampler && SelectedKeyFrame)
+			{
+				SelectedSampler->RemoveKeyFrame(SelectedKeyFrame);
+			}
+		}
+
 		ImGui::EndChild();
 
 		return true;

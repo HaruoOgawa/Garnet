@@ -63,6 +63,14 @@ namespace animation
 		std::sort(m_KeyFrameList.begin(), m_KeyFrameList.end(), [](const auto& a, const auto& b) { return (a->GetInput() < b->GetInput()); });
 	}
 
+	void CAnimationSampler::RemoveKeyFrame(const std::shared_ptr<animation::CKeyFrame>& KeyFrame)
+	{
+		const auto it = std::find(m_KeyFrameList.begin(), m_KeyFrameList.end(), KeyFrame);
+		if (it == m_KeyFrameList.end()) return;
+		
+		m_KeyFrameList.erase(it);
+	}
+
 	const std::vector<std::shared_ptr<animation::CKeyFrame>>& CAnimationSampler::GetKeyFrameList() const
 	{
 		return m_KeyFrameList;
