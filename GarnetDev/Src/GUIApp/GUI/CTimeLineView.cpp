@@ -19,6 +19,8 @@ namespace gui
 		m_MemoryBarCursorPos(ImVec2()),
 		m_MemoryBarSize(ImVec2()),
 		m_MemoryBarAvailableSize(ImVec2()),
+		m_ClickedKeyFrameLabel(std::string()),
+		m_ClickedSamplerKeyFramePair(std::make_tuple(nullptr, nullptr)),
 		m_ShowAddObjDialog(false),
 		m_ShowAddTrackDialog(false),
 		m_SelectedObjectForAddObj(nullptr),
@@ -255,30 +257,43 @@ namespace gui
 		auto& Sampler = SamplerList[SamplerIndex];
 		std::vector<float> Value;
 
-		if (!Sampler->ComputeCurrentFrame(TimelineController->GetPlayBackTime(), false, Value, InterpolateValueType)) return false;
+		if (std::get<0>(m_ClickedSamplerKeyFramePair) == Sampler)
+		{
+			// キーフレームが選択されているのでその値を反映する
+			const auto& SelectedKeyFrame = std::get<1>(m_ClickedSamplerKeyFramePair);
 
-		if (Value.empty()) Value = GetDefaultValue(ValueType);
+			Value = SelectedKeyFrame->GetOutput();
+		}
+		else
+		{
+			// 補間された現在の値を取得
+			if (!Sampler->ComputeCurrentFrame(TimelineController->GetPlayBackTime(), false, Value, InterpolateValueType)) return false;
+
+			if (Value.empty()) Value = GetDefaultValue(ValueType);
+		}
 
 		if (Value.empty()) return true;
 
 		// GUIに描画
 		std::string Label = Track->GetTrackName() + "##Timeline_TrackProperty";
 		
+		bool ExistInput = false;
+
 		switch (ValueType)
 		{
 		case math::EValueType::VALUE_TYPE_NONE:
 			break;
 		case math::EValueType::VALUE_TYPE_SCALAR:
-			ImGui::InputFloat(Label.c_str(), &Value[0]);
+			ExistInput = ImGui::InputFloat(Label.c_str(), &Value[0]);
 			break;
 		case math::EValueType::VALUE_TYPE_VEC2:
-			ImGui::InputFloat2(Label.c_str(), &Value[0]);
+			ExistInput = ImGui::InputFloat2(Label.c_str(), &Value[0]);
 			break;
 		case math::EValueType::VALUE_TYPE_VEC3:
-			ImGui::InputFloat3(Label.c_str(), &Value[0]);
+			ExistInput = ImGui::InputFloat3(Label.c_str(), &Value[0]);
 			break;
 		case math::EValueType::VALUE_TYPE_VEC4:
-			ImGui::InputFloat4(Label.c_str(), &Value[0]);
+			ExistInput = ImGui::InputFloat4(Label.c_str(), &Value[0]);
 			break;
 		case math::EValueType::VALUE_TYPE_MAT2:
 			break;
@@ -292,6 +307,13 @@ namespace gui
 			break;
 		default:
 			break;
+		}
+
+		// 値が変わってかつキーフレームが選択中ならデータをキーフレームに反映する
+		if (ExistInput && std::get<0>(m_ClickedSamplerKeyFramePair) == Sampler)
+		{
+			const auto& SelectedKeyFrame = std::get<1>(m_ClickedSamplerKeyFramePair);
+			SelectedKeyFrame->SetOutput(Value);
 		}
 
 		return true;
@@ -389,13 +411,59 @@ namespace gui
 
 	bool CTimeLineView::CalcIndicator(const std::shared_ptr<timeline::CTimelineController>& TimelineController, const ImVec2& cursorPos, const ImVec2& barSize)
 	{
+		bool IsClicked = (ImGui::IsMouseDown(0));
+
 		float DrawPos = cursorPos.x + m_IndicatorRate * barSize.x;
+
+		// ToDo: いったん不要
+		/*if (m_ClickedIndicator && !IsClicked)
+		{
+			// 距離が近いキーフレームがあったらPlayBackTimeがそのキーフレームにぴったり合うようにする
+			const auto& TLClip = TimelineController->GetClip();
+			if (TLClip)
+			{
+				const auto& SamplerList = TLClip->GetSamplerList();
+
+				float MinDist = std::numeric_limits<float>::max();
+
+				for (const auto& OpenedTrackAndCursor : m_OpenedTrackPosMap)
+				{
+					const auto& Track = OpenedTrackAndCursor.first;
+					const auto& OpenedTrackPos = OpenedTrackAndCursor.second;
+
+					// Y座標が描画範囲外だったら除外する
+					//if(OpenedTrackPos.y > )
+
+					// キーフレーム
+					int SamplerIndex = Track->GetSamplerIndex();
+					if (SamplerIndex < 0 || SamplerIndex >= SamplerList.size()) return false;
+
+					// サンプラーから指定時間内のキーフレームリストを取得
+					auto& Sampler = SamplerList[SamplerIndex];
+
+					const auto& KeyFrameList = Sampler->GetKeyFrameListFromRange(m_LeftSideMemory, m_RightSideMemory);
+
+					for (const auto& KeyFrame : KeyFrameList)
+					{
+						float FrameTime = KeyFrame->GetInput();
+
+						// 再生時間からキーフレームの座標を求める
+						float XPos = CalcXPosFromFrameTime(FrameTime);
+
+						// 最も近いものを取得する
+						const float Dist = glm::abs(DrawPos - XPos);
+						if (Dist <= 0.01f && Dist < MinDist)
+						{
+							MinDist = Dist;
+						}
+					}
+				}
+			}
+		}*/
 
 		float btnW = 10.0f;
 		ImGui::SetCursorScreenPos(ImVec2(DrawPos - btnW * 0.5f, cursorPos.y));
 		
-		bool IsClicked = (ImGui::IsMouseDown(0));
-
 		if (!m_ClickedIndicator)
 		{
 			ImGui::InvisibleButton("##TimelineIndicator", ImVec2(btnW, barSize.y));
@@ -405,19 +473,22 @@ namespace gui
 			}
 		}
 
-		if (m_ClickedIndicator && IsClicked)
+		if (m_ClickedIndicator)
 		{
-			ImVec2 mousePos = ImGui::GetMousePos();
+			if (IsClicked)
+			{
+				ImVec2 mousePos = ImGui::GetMousePos();
 
-			m_IndicatorRate = (mousePos.x - cursorPos.x) / barSize.x;
-			m_IndicatorRate = glm::clamp(m_IndicatorRate, 0.0f, 1.0f);
+				m_IndicatorRate = (mousePos.x - cursorPos.x) / barSize.x;
+				m_IndicatorRate = glm::clamp(m_IndicatorRate, 0.0f, 1.0f);
 
-			// メモリバーの更新に合わせて再生時間も更新する
-			UpdateCurrentTimeFromMemoryBar(TimelineController);
-		}
-		else
-		{
-			m_ClickedIndicator = false;
+				// メモリバーの更新に合わせて再生時間も更新する
+				UpdateCurrentTimeFromMemoryBar(TimelineController);
+			}
+			else
+			{
+				m_ClickedIndicator = false;
+			}
 		}
 
 		return true;
@@ -453,22 +524,6 @@ namespace gui
 
 			const float TrackHeight = 10.0f;
 
-			ImGui::SetCursorScreenPos(ImVec2(ScreenCursorPos.x, OpenedTrackPos.y));
-
-			// ボタンの色を選択
-			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.24f, 0.24f, 0.24f, 1.0f)); // 通常時の色
-			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.24f, 0.24f, 0.24f, 1.0f)); // ホバーの色
-			ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.24f, 0.24f, 0.24f, 1.0f)); // 押下時の色
-
-			std::string Lebal = "##Timeline_KeyFrameBar_" + Track->GetTrackName();
-			if (ImGui::Button(Lebal.c_str(), ImVec2(availableSize.x, TrackHeight)))
-			{
-				
-			}
-
-			// 色の設定を元に戻す
-			ImGui::PopStyleColor(3); // 3つ分のカラースタックをポップする
-
 			// キーフレーム
 			int SamplerIndex = Track->GetSamplerIndex();
 			if (SamplerIndex < 0 || SamplerIndex >= SamplerList.size()) return false;
@@ -476,34 +531,200 @@ namespace gui
 			// サンプラーから指定時間内のキーフレームリストを取得
 			auto& Sampler = SamplerList[SamplerIndex];
 
-			const auto& KeyFrameList = Sampler->GetKeyFrameListFromRange(m_LeftSideMemory, m_RightSideMemory);
-
-			// 各キーフレームを該当する時間の座標に描画する
-			for (const auto& KeyFrame : KeyFrameList)
+			// ToDo:バグなのか何なのかわからないが、異なる２つのボタンを重ねて配置し重なった部分をクリックした時、コード的にも先に書かれて下に描画されているボタンのクリックが優先されてしまうので
+			// 先に透明なボタンを描画しておき、あとでRectをベースの上にさらに描画する
+			std::vector<float> KeyXPosList;
+			std::vector<ImVec4> ColList;
 			{
-				float FrameTime = KeyFrame->GetInput();
+				const auto& KeyFrameList = Sampler->GetKeyFrameListFromRange(m_LeftSideMemory, m_RightSideMemory);
 
-				// キーフレームの時間が左右のメモリの時間に対してどれくらいの割合か
-				float t = (FrameTime - m_LeftSideMemory) / (m_RightSideMemory - m_LeftSideMemory);
+				// 各キーフレームを該当する時間の座標に描画する
+				for (const auto& KeyFrame : KeyFrameList)
+				{
+					float FrameTime = KeyFrame->GetInput();
 
-				// 割合から座標を求める
-				float XPos = glm::mix(m_LeftSideScreenPos.x, m_RightSideScreenPos.x, t);
+					std::string KeyFrameLabel = "##Timeline_KeyFrame_" + Track->GetTrackName() + "_" + std::to_string(FrameTime);
 
-				ImGui::SetCursorScreenPos(ImVec2(XPos, OpenedTrackPos.y));
+					// 描画位置を決定
+					float XPos = 0.0f;
+					if (!m_ClickedKeyFrameLabel.empty() && m_ClickedKeyFrameLabel == KeyFrameLabel)
+					{
+						// マウスのX座標を割り当てる
+						XPos = ImGui::GetMousePos().x;
+					}
+					else
+					{
+						// 再生時間からキーフレームの座標を求める
+						XPos = CalcXPosFromFrameTime(FrameTime);
+					}
+
+					ImGui::SetCursorScreenPos(ImVec2(XPos, OpenedTrackPos.y));
+					
+					ImGui::InvisibleButton(KeyFrameLabel.c_str(), ImVec2(TrackHeight, TrackHeight));
+					
+					// キーフレームがクリックされた
+					if (ImGui::IsItemClicked())
+					{
+						if (std::get<1>(m_ClickedSamplerKeyFramePair) == KeyFrame)
+						{
+							// 同じキーフレームがクリックされたら選択を解除する
+							m_ClickedSamplerKeyFramePair = std::make_tuple(nullptr, nullptr);
+						}
+						else
+						{
+							// 新しく選択する
+							m_ClickedSamplerKeyFramePair = std::make_tuple(Sampler, KeyFrame);
+						}
+					}
+
+					// キーフレームがドラッグされた
+					if (ImGui::IsItemActive())
+					{
+						// 掴んでいる
+						m_ClickedKeyFrameLabel = KeyFrameLabel;
+					}
+					else if (!m_ClickedKeyFrameLabel.empty() && m_ClickedKeyFrameLabel == KeyFrameLabel)
+					{
+						// 離したのでリセットする
+						m_ClickedKeyFrameLabel = std::string();
+
+						// MousePos.x(XPos)から逆計算してキーフレームの時間を求める
+						float NewFrameTime = CalcFrameTimeFromXPos(ImGui::GetMousePos().x);
+
+						Sampler->SetKeyFrameInput(KeyFrame, NewFrameTime);
+					}
+
+					// ボタンの色を選択
+					ImVec4 Col = ImVec4();
+					//if (ImGui::IsItemActive())
+					if (std::get<1>(m_ClickedSamplerKeyFramePair) == KeyFrame)
+					{
+						Col = ImVec4(1.0f, 0.0f, 0.0f, 1.0f);
+					}
+					else if (ImGui::IsItemHovered())
+					{
+						Col = ImVec4(0.0f, 0.0f, 1.0f, 1.0f);
+					}
+					else
+					{
+						Col = ImVec4(1.0f, 1.0f, 0.0f, 1.0f);
+					}
+
+					// 各種情報を登録
+					KeyXPosList.push_back(XPos);
+					ColList.push_back(Col);
+				}
+			}
+
+			// ベースの描画
+			{
+				ImGui::SetCursorScreenPos(ImVec2(ScreenCursorPos.x, OpenedTrackPos.y));
 
 				// ボタンの色を選択
-				ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.0f, 1.0f, 0.0f, 1.0f)); // 通常時の色
-				ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(1.0f, 1.0f, 0.6f, 1.0f)); // ホバーの色
-				ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(1.0f, 1.0f, 1.0f, 1.0f)); // 押下時の色
+				ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.24f, 0.24f, 0.24f, 1.0f)); // 通常時の色
+				ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.24f, 0.24f, 0.24f, 1.0f)); // ホバーの色
+				ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.24f, 0.24f, 0.24f, 1.0f)); // 押下時の色
 
-				std::string KeyFrameLabel = "##Timeline_KeyFrame_" + Track->GetTrackName() + "_" + std::to_string(FrameTime);
-				if (ImGui::Button(KeyFrameLabel.c_str(), ImVec2(TrackHeight, TrackHeight)))
+				std::string Lebal = "##Timeline_KeyFrameBar_" + Track->GetTrackName();
+				ImGui::Button(Lebal.c_str(), ImVec2(availableSize.x, TrackHeight));
+
+				if (ImGui::IsItemClicked(1)) // 右クリックでキーフレームの追加
 				{
+					// MousePos.x(XPos)から逆計算してキーフレームの時間を求める
+					float NewFrameTime = CalcFrameTimeFromXPos(ImGui::GetMousePos().x);
 
+					// 前後のキーフレームを取得
+					std::shared_ptr<animation::CKeyFrame> PrevKeyFrame = nullptr;
+					std::shared_ptr<animation::CKeyFrame> NextKeyFrame = nullptr;
+
+					if (Sampler->GetNeedKeyFrame(NewFrameTime, PrevKeyFrame, NextKeyFrame))
+					{
+						std::vector<float> Value;
+
+						// 近い方をOutputの初期値として使用する
+						const float PrevDeltaTime = (PrevKeyFrame) ? glm::abs(NewFrameTime - PrevKeyFrame->GetInput()) : std::numeric_limits<float>::max();
+						const float NextDeltaTime = (NextKeyFrame) ? glm::abs(NewFrameTime - NextKeyFrame->GetInput()) : std::numeric_limits<float>::max();
+						math::EValueType ValueType = math::EValueType::VALUE_TYPE_NONE;
+
+						if (PrevKeyFrame && PrevDeltaTime <= NextDeltaTime)
+						{
+							Value = PrevKeyFrame->GetOutput();
+							ValueType = PrevKeyFrame->GetType();
+						}
+						else if (NextKeyFrame && NextDeltaTime <= PrevDeltaTime)
+						{
+							Value = NextKeyFrame->GetOutput();
+							ValueType = NextKeyFrame->GetType();
+						}
+
+						// サンプラーにソート付きで新しくキーフレームを追加する
+						if (!Value.empty())
+						{
+							std::shared_ptr<animation::CKeyFrame> NewKeyFrame = std::make_shared<animation::CKeyFrame>(ValueType);
+							NewKeyFrame->SetInput(NewFrameTime);
+							NewKeyFrame->SetOutput(Value);
+
+							Sampler->AddKeyFrameWithSort(NewKeyFrame);
+						}
+					}
+					else
+					{
+						// キーフレームリストがまだ空なので初期値を0として渡す
+						int NumComponents = math::CMath::GetNumComponentsInType(Track->GetValueType());
+
+						std::vector<float> Value;
+						Value.resize(NumComponents, 0.0f);
+
+						std::shared_ptr<animation::CKeyFrame> NewKeyFrame = std::make_shared<animation::CKeyFrame>(Track->GetValueType());
+						NewKeyFrame->SetInput(NewFrameTime);
+						NewKeyFrame->SetOutput(Value);
+
+						Sampler->AddKeyFrameWithSort(NewKeyFrame);
+					}
+				}
+				else if (ImGui::IsItemClicked(0)) // 左クリックでキーフレームの選択解除
+				{
+					m_ClickedSamplerKeyFramePair = std::make_tuple(nullptr, nullptr);
 				}
 
 				// 色の設定を元に戻す
 				ImGui::PopStyleColor(3); // 3つ分のカラースタックをポップする
+			}
+
+			// キーフレームのUIを上塗りする
+			{
+				if (KeyXPosList.size() == ColList.size())
+				{
+					ImDrawList* DrawList = ImGui::GetWindowDrawList();
+
+					for (size_t i = 0; i < KeyXPosList.size(); i++)
+					{
+						float XPos = KeyXPosList[i];
+						const ImVec4& Col = ColList[i];
+
+						ImU32 Col32 = IM_COL32(
+							static_cast<int>((255.0f * Col.x)),
+							static_cast<int>((255.0f * Col.y)),
+							static_cast<int>((255.0f * Col.z)),
+							static_cast<int>((255.0f * Col.w))
+						);
+
+						DrawList->AddRectFilled(ImVec2(XPos, OpenedTrackPos.y), ImVec2(XPos + TrackHeight, OpenedTrackPos.y + TrackHeight), Col32);
+					}
+				}
+			}
+		}
+
+		// Inputをチェック
+		if (ImGui::IsKeyReleased(ImGuiKey_Delete) && ImGui::IsWindowHovered())
+		{
+			// 選択中のキーフレームを削除する
+			const auto& SelectedSampler = std::get<0>(m_ClickedSamplerKeyFramePair);
+			const auto& SelectedKeyFrame = std::get<1>(m_ClickedSamplerKeyFramePair);
+
+			if (SelectedSampler && SelectedKeyFrame)
+			{
+				SelectedSampler->RemoveKeyFrame(SelectedKeyFrame);
 			}
 		}
 
@@ -589,10 +810,11 @@ namespace gui
 			static timeline::ENodeTrackTarget SelectedType = timeline::ENodeTrackTarget::NodeTrackTarget_None;
 			std::string SelectedName = timeline::CNodeTrack::CastNodeTrackTarget_Str(SelectedType);
 
+			static std::string SelectedName_Node = std::string();
+
 			// Target
 			if (m_ClickedObjectForAddObjectTrack)
 			{
-				static std::string SelectedName_Node = "";
 				if (ImGui::BeginCombo("Node##Timeline_AddObjectTrackDialog_NodeTrack_Combo", SelectedName_Node.c_str()))
 				{
 					for (const auto& Node : m_ClickedObjectForAddObjectTrack->GetNodeList())
@@ -670,6 +892,10 @@ namespace gui
 				m_ClickedObjectForAddObjectTrack = nullptr;
 				m_SelectedNodeForAddTrack = nullptr;
 				m_SelectedMaterialForAddTrack = nullptr;
+
+				// static変数のリセット
+				SelectedType = timeline::ENodeTrackTarget::NodeTrackTarget_None;
+				SelectedName_Node = std::string();
 			}
 
 			ImGui::EndTabItem();
@@ -800,6 +1026,12 @@ namespace gui
 				m_ClickedObjectForAddObjectTrack = nullptr;
 				m_SelectedNodeForAddTrack = nullptr;
 				m_SelectedMaterialForAddTrack = nullptr;
+
+				// static変数のリセット
+				SelectedType = timeline::EMaterialTrackTarget::MaterialTrackTarget_None;
+				SelectedMaterialName = "";
+				SelectedUniformName = "";
+				SelectedValueType = math::EValueType::VALUE_TYPE_NONE;
 			}
 
 			ImGui::EndTabItem();
@@ -1000,6 +1232,28 @@ namespace gui
 		}
 
 		return DstValue;
+	}
+
+	float CTimeLineView::CalcXPosFromFrameTime(float FrameTime)
+	{
+		// キーフレームの時間が左右のメモリの時間に対してどれくらいの割合か
+		float t = (FrameTime - m_LeftSideMemory) / (m_RightSideMemory - m_LeftSideMemory);
+
+		// 割合から座標を求める
+		float XPos = glm::mix(m_LeftSideScreenPos.x, m_RightSideScreenPos.x, t);
+
+		return XPos;
+	}
+
+	float CTimeLineView::CalcFrameTimeFromXPos(float XPos)
+	{
+		// XPosから逆計算してキーフレームの時間を求める
+		float t = (XPos - m_LeftSideScreenPos.x) / (m_RightSideScreenPos.x - m_LeftSideScreenPos.x);
+
+		//float FrameTime = (1.0f - t) * m_LeftSideMemory + t * m_RightSideMemory;
+		float FrameTime = glm::mix(m_LeftSideMemory, m_RightSideMemory, t);
+
+		return FrameTime;
 	}
 
 	std::vector<float> CTimeLineView::GetDefaultValue(math::EValueType ValueType)

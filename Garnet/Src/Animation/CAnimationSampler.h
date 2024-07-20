@@ -41,10 +41,7 @@ namespace animation
 		float GetInterpolateValue(float CurrentTime, const std::shared_ptr<animation::CKeyFrame>& PrevKeyFrame, const std::shared_ptr<animation::CKeyFrame>& NextKeyFrame);
 
 		std::vector<float> CopyFromNumComponent(int NumComponent, const std::vector<float>& Src, int Offset);
-		int GetNumComponentsInType(math::EValueType Type);
 		
-		bool GetNeedKeyFrame(float CurrentTime, std::shared_ptr<animation::CKeyFrame>& PrevKeyFrame, std::shared_ptr<animation::CKeyFrame>& NextKeyFrame);
-
 		bool DoStepInterpolation(float CurrentTime, std::vector<float>& Value, const std::shared_ptr<animation::CKeyFrame>& PrevKeyFrame, const std::shared_ptr<animation::CKeyFrame>& NextKeyFrame);
 		bool DoLinearInterpolation(float CurrentTime, std::vector<float>& Value, const std::shared_ptr<animation::CKeyFrame>& PrevKeyFrame, const std::shared_ptr<animation::CKeyFrame>& NextKeyFrame);
 		bool DoSphericalLinearInterpolation(float CurrentTime, std::vector<float>& Value, const std::shared_ptr<animation::CKeyFrame>& PrevKeyFrame, const std::shared_ptr<animation::CKeyFrame>& NextKeyFrame);
@@ -61,8 +58,11 @@ namespace animation
 
 		bool CreateKeyFrame(math::EValueType Type, const std::vector<float>& inputList, const std::vector<float>& outputList);
 		void AddKeyFrame(const std::shared_ptr<animation::CKeyFrame>& KeyFrame);
+		void AddKeyFrameWithSort(const std::shared_ptr<animation::CKeyFrame>& KeyFrame);
+		void RemoveKeyFrame(const std::shared_ptr<animation::CKeyFrame>& KeyFrame);
 		const std::vector<std::shared_ptr<animation::CKeyFrame>>& GetKeyFrameList() const;
 		std::vector<std::shared_ptr<animation::CKeyFrame>> GetKeyFrameListFromRange(float FirstTime, float SecondTime);
+		void SetKeyFrameInput(const std::shared_ptr<animation::CKeyFrame>& KeyFrame, float NewInput);
 
 		void CalcStartEndTime();
 
@@ -77,6 +77,8 @@ namespace animation
 		bool IsEnd(float CurrentTime);
 
 		bool ComputeCurrentFrame(float CurrentTime, bool IsLoop, std::vector<float>& Value, EInterpolateValueType ValueType);
+
+		bool GetNeedKeyFrame(float CurrentTime, std::shared_ptr<animation::CKeyFrame>& PrevKeyFrame, std::shared_ptr<animation::CKeyFrame>& NextKeyFrame);
 
 		// ボーンに基づく現在のフレームを取得
 		static std::shared_ptr<CKeyFrame> GetCurrentKeyFrameBasedBone(float CurrentTime, EHumanoidBones BoneName, const std::unordered_map<animation::EHumanoidBones, std::vector<std::shared_ptr<animation::CKeyFrame>>>& FrameMatrixMap);
