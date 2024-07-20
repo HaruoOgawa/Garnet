@@ -46,7 +46,6 @@ namespace animation
 		}
 
 		CalcStartEndTime();
-		
 		 
 		return true;
 	}
@@ -54,6 +53,8 @@ namespace animation
 	void CAnimationSampler::AddKeyFrame(const std::shared_ptr<animation::CKeyFrame>& KeyFrame)
 	{
 		m_KeyFrameList.push_back(KeyFrame);
+
+		CalcStartEndTime();
 	}
 
 	void CAnimationSampler::AddKeyFrameWithSort(const std::shared_ptr<animation::CKeyFrame>& KeyFrame)
@@ -61,6 +62,8 @@ namespace animation
 		m_KeyFrameList.push_back(KeyFrame);
 
 		std::sort(m_KeyFrameList.begin(), m_KeyFrameList.end(), [](const auto& a, const auto& b) { return (a->GetInput() < b->GetInput()); });
+
+		CalcStartEndTime();
 	}
 
 	void CAnimationSampler::RemoveKeyFrame(const std::shared_ptr<animation::CKeyFrame>& KeyFrame)
@@ -69,6 +72,8 @@ namespace animation
 		if (it == m_KeyFrameList.end()) return;
 		
 		m_KeyFrameList.erase(it);
+
+		CalcStartEndTime();
 	}
 
 	const std::vector<std::shared_ptr<animation::CKeyFrame>>& CAnimationSampler::GetKeyFrameList() const
@@ -104,6 +109,8 @@ namespace animation
 		(*it)->SetInput(NewInput);
 
 		std::sort(m_KeyFrameList.begin(), m_KeyFrameList.end(), [](const auto& a, const auto& b) { return (a->GetInput() < b->GetInput()); });
+
+		CalcStartEndTime();
 	}
 
 	void CAnimationSampler::CalcStartEndTime()
@@ -159,9 +166,10 @@ namespace animation
 	{
 		// 0の時はエラーにはしないが、何も処理しない
 		// AnimationやSDKに使っていないボーンのアニメーションでもなぜか一つだけInput・Outputが入っていることがあるため
-		if (m_KeyFrameList.size() == 0) return true;
+		if (m_KeyFrameList.empty()) return true;
 
-		if (m_StartTime >= m_EndTime)
+		// 2つ以上ある時は必ずStartとEndの計算が必要
+		if (m_StartTime >= m_EndTime && m_KeyFrameList.size() >= 2)
 		{
 			Console::Log("[Error - KeyFrame] StartTime is greater than EndTime. / StartTime: %f, EndTime: %f\n", m_StartTime, m_EndTime);
 			return false;
@@ -239,14 +247,26 @@ namespace animation
 
 	bool CAnimationSampler::GetNeedKeyFrame(float CurrentTime, std::shared_ptr<animation::CKeyFrame>& PrevKeyFrame, std::shared_ptr<animation::CKeyFrame>& NextKeyFrame)
 	{
+		if (m_KeyFrameList.empty()) return false;
+
 		// Next
 		const auto& val = std::find_if(m_KeyFrameList.begin(), m_KeyFrameList.end(), [&](std::shared_ptr<CKeyFrame>& f) {  bool r = (CurrentTime <= f->GetInput()); if (r) { NextKeyFrame = f; } return r; });
 		
-		// 次のフレームがない時は最後とその前を返す
+		// 次のフレームがない
 		if (val == m_KeyFrameList.end())
 		{
-			NextKeyFrame = m_KeyFrameList[m_KeyFrameList.size() - 1];
-			PrevKeyFrame = m_KeyFrameList[m_KeyFrameList.size() - 2];
+			if (m_KeyFrameList.size() < 2)
+			{
+				// 1つしかない時は同じフレームを割り当てる(補間を機能させない)
+				NextKeyFrame = m_KeyFrameList[0];
+				PrevKeyFrame = m_KeyFrameList[0];
+			}
+			else
+			{
+				// 最後とその前を返す
+				NextKeyFrame = m_KeyFrameList[m_KeyFrameList.size() - 1];
+				PrevKeyFrame = m_KeyFrameList[m_KeyFrameList.size() - 2];
+			}
 
 			return true;
 		}

@@ -646,12 +646,12 @@ namespace gui
 						const float NextDeltaTime = (NextKeyFrame) ? glm::abs(NewFrameTime - NextKeyFrame->GetInput()) : std::numeric_limits<float>::max();
 						math::EValueType ValueType = math::EValueType::VALUE_TYPE_NONE;
 
-						if (PrevKeyFrame && PrevDeltaTime < NextDeltaTime)
+						if (PrevKeyFrame && PrevDeltaTime <= NextDeltaTime)
 						{
 							Value = PrevKeyFrame->GetOutput();
 							ValueType = PrevKeyFrame->GetType();
 						}
-						else if (NextKeyFrame && NextDeltaTime < PrevDeltaTime)
+						else if (NextKeyFrame && NextDeltaTime <= PrevDeltaTime)
 						{
 							Value = NextKeyFrame->GetOutput();
 							ValueType = NextKeyFrame->GetType();
@@ -666,6 +666,20 @@ namespace gui
 
 							Sampler->AddKeyFrameWithSort(NewKeyFrame);
 						}
+					}
+					else
+					{
+						// キーフレームリストがまだ空なので初期値を0として渡す
+						int NumComponents = math::CMath::GetNumComponentsInType(Track->GetValueType());
+
+						std::vector<float> Value;
+						Value.resize(NumComponents, 0.0f);
+
+						std::shared_ptr<animation::CKeyFrame> NewKeyFrame = std::make_shared<animation::CKeyFrame>(Track->GetValueType());
+						NewKeyFrame->SetInput(NewFrameTime);
+						NewKeyFrame->SetOutput(Value);
+
+						Sampler->AddKeyFrameWithSort(NewKeyFrame);
 					}
 				}
 				else if (ImGui::IsItemClicked(0)) // 左クリックでキーフレームの選択解除
