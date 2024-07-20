@@ -23,9 +23,6 @@ namespace animation
 
 	bool CAnimationSampler::CreateKeyFrame(math::EValueType Type, const std::vector<float>& inputList, const std::vector<float>& outputList)
 	{
-		//const int NumComponent = GetNumComponentsInType(Type);
-		//if (NumComponent == -1) return false;
-
 		// 0‚Ì‚ÍƒGƒ‰[‚É‚Í‚µ‚È‚¢‚ªA‰½‚àˆ—‚µ‚È‚¢
 		if (inputList.size() == 0) return true;
 

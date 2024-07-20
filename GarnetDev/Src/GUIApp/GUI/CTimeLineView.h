@@ -7,6 +7,7 @@
 #include <vector>
 #include <unordered_map>
 #include <set>
+#include <tuple>
 
 #include <Timeline/CTimelineController.h>
 
@@ -47,6 +48,7 @@ namespace gui
 		ImVec2 m_MemoryBarAvailableSize;
 
 		std::string m_ClickedKeyFrameLabel; // クリックされているキーフレームUIの名前
+		std::tuple<std::shared_ptr<animation::CAnimationSampler>, std::shared_ptr<animation::CKeyFrame>> m_ClickedSamplerKeyFramePair; // クリックされているキーフレームそのもの
 
 		// トラックで使用しているオブジェクトリスト
 		std::set<std::shared_ptr<object::C3DObject>> m_TrackObjectList;
@@ -91,6 +93,9 @@ namespace gui
 
 		float GetFirstLargeMemory(float SrcValue, std::vector<bool>& IsLongMemory);
 		float GetFirstMemory(float SrcValue);
+
+		float CalcXPosFromFrameTime(float FrameTime);
+		float CalcFrameTimeFromXPos(float XPos);
 
 		std::vector<float> GetDefaultValue(math::EValueType ValueType);
 		
