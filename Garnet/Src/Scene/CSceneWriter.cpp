@@ -1,3 +1,4 @@
+#ifdef USE_BINARY_WRITE
 #include "CSceneWriter.h"
 #include "CSceneController.h"
 #include "../Object/C3DObject.h"
@@ -555,3 +556,4 @@ namespace scene
 		return true;
 	}
 }
+#endif // USE_BINARY_WRITE

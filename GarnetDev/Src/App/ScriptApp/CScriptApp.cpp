@@ -47,6 +47,8 @@ namespace app
 		m_FileModifier(std::make_shared<CFileModifier>()),
 		m_TimelineController(std::make_shared<timeline::CTimelineController>())
 	{
+		m_TimelineController->SetClip(std::make_shared<timeline::CTimelineClip>());
+
 		m_MainCamera->SetPos(glm::vec3(-7.0f, 1.0f, 0.0f));
 		//m_MainCamera->SetCenter(glm::vec3(0.0f, 50.0f, 349.0f));
 		//m_MainCamera->SetPos(glm::vec3(0.0f, 50.0f, 350.0f));
@@ -94,6 +96,9 @@ namespace app
 		// FrameTextureを渡す
 		//m_ScriptScene->SetFrameTexture(m_BlurEffect->GetFrameTexture());
 
+		// テスト実装
+		pLoadWorker->AddLoadResource(std::make_shared<resource::CTimelineClipLoader>("Resources\\Timeline\\MRTTest.tl", m_TimelineController->GetClip()));
+
 		return true;
 	}
 
@@ -117,7 +122,7 @@ namespace app
 
 		if (pLoadWorker->IsLoaded())
 		{
-			if (!m_TimelineController->Update(m_DrawInfo->GetDeltaSecondsTime()/*, m_ScriptScene->GetObjectList()*/)) return false;
+			if (!m_TimelineController->Update(m_DrawInfo->GetDeltaSecondsTime(), InputState)) return false;
 		}
 
 		if (!m_ScriptScene->Update(pGraphicsAPI, pPhysicsEngine, pLoadWorker, m_MainCamera, m_Projection, m_DrawInfo, InputState)) return false;
@@ -227,8 +232,6 @@ namespace app
 
 		// タイムラインのテストクリップを作成
 		{
-			std::shared_ptr<timeline::CTimelineClip> TimelineClip = std::make_shared<timeline::CTimelineClip>(30.0f);
-
 			// NodeTrack
 			{
 				// Sampler
@@ -283,12 +286,12 @@ namespace app
 
 					Sampler->CalcStartEndTime();
 
-					TimelineClip->AddSampler(Sampler);
+					m_TimelineController->GetClip()->AddSampler(Sampler);
 				}
 
 				// Track
 				std::shared_ptr<timeline::CNodeTrack> Track = std::make_shared<timeline::CNodeTrack>("test_track", 0, timeline::ETimelineSamplerTarget::NONE, timeline::ENodeTrackTarget::NodeTrackTarget_Translation);
-				TimelineClip->AddTrack(Track);
+				m_TimelineController->GetClip()->AddTrack(Track);
 			}
 
 			// MaterialTrack
@@ -345,19 +348,17 @@ namespace app
 
 					Sampler->CalcStartEndTime();
 
-					TimelineClip->AddSampler(Sampler);
+					m_TimelineController->GetClip()->AddSampler(Sampler);
 				}
 
 				// Track
 				std::shared_ptr<timeline::CMaterialTrack> Track = std::make_shared<timeline::CMaterialTrack>("test_mat_track", 1, timeline::ETimelineSamplerTarget::NONE, 
 					timeline::EMaterialTrackTarget::MaterialTrackTarget_SetUniformValue, "mainColor", math::EValueType::VALUE_TYPE_VEC4);
-				TimelineClip->AddTrack(Track);
+				m_TimelineController->GetClip()->AddTrack(Track);
 			}
 
 			//
-			TimelineClip->AssignObjectResourceToTrack(m_ScriptScene->GetObjectList());
-
-			m_TimelineController->SetClip(TimelineClip);
+			m_TimelineController->GetClip()->AssignObjectResourceToTrack(m_ScriptScene->GetObjectList());
 		}
 
 		return true;

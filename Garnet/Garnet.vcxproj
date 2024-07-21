@@ -681,6 +681,9 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Src\LoadWorker\CTimelineClipLoader.h" />
+    <ClInclude Include="Src\Timeline\CTimelineExporter.h" />
+    <ClInclude Include="Src\Timeline\CTimelineImporter.h" />
     <ClInclude Include="Src\Binary\CBinaryWriter.h" />
     <ClInclude Include="Src\Timeline\CTimelineTrackContent.h" />
     <ClInclude Include="Src\Timeline\CMaterialTrack.h" />
@@ -1714,6 +1717,9 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClInclude Include="Src\Interface\IRenderer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\LoadWorker\CTimelineClipLoader.cpp" />
+    <ClCompile Include="Src\Timeline\CTimelineExporter.cpp" />
+    <ClCompile Include="Src\Timeline\CTimelineImporter.cpp" />
     <ClCompile Include="Src\Binary\CBinaryWriter.cpp" />
     <ClCompile Include="Src\Timeline\CTimelineTrackContent.cpp" />
     <ClCompile Include="Src\Timeline\CMaterialTrack.cpp" />

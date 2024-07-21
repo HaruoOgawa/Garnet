@@ -3,8 +3,8 @@
 
 namespace timeline
 {
-	CTimelineClip::CTimelineClip(float MaxTime):
-		m_MaxTime(MaxTime)
+	CTimelineClip::CTimelineClip():
+		m_MaxTime(0.0f)
 	{
 	}
 

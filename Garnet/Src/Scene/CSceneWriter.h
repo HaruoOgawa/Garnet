@@ -1,5 +1,5 @@
 #pragma once
-
+#ifdef USE_BINARY_WRITE
 #include <vector>
 #include <json.hpp>
 using namespace nlohmann;
@@ -32,3 +32,4 @@ namespace scene
 		static bool Write(CSceneController* pSceneController);
 	};
 }
+#endif // USE_BINARY_WRITE

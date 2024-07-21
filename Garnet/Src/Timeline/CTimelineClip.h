@@ -18,7 +18,7 @@ namespace timeline
 		std::vector<std::shared_ptr<animation::CAnimationSampler>> m_SamplerList;
 		std::unordered_map<std::string, std::shared_ptr<CTimelineTrack>> m_TrackList;
 	public:
-		CTimelineClip(float MaxTime);
+		CTimelineClip();
 		virtual ~CTimelineClip();
 
 		void SetMaxTime(float Time);

@@ -2,6 +2,10 @@
 #include "../Message/Console.h"
 #include "../Format/CPathFormatter.h"
 
+#ifndef __EMSCRIPTEN__
+#include <filesystem>
+#endif
+
 namespace resource
 {
 	CFile::CFile(const std::string& filename):
@@ -243,6 +247,13 @@ namespace resource
 #ifdef __EMSCRIPTEN__
 		return true;
 #else
+		// 親ディレクトリが存在しないなら生成する
+		std::string ParentDir = GetParentDir(m_Filename);
+		if (!std::filesystem::exists(ParentDir))
+		{
+			std::filesystem::create_directories(ParentDir);
+		}
+
 		int fileSize = static_cast<int>(m_Data.size());
 
 		std::vector<char> OutputData;

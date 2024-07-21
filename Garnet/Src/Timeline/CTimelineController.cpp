@@ -1,4 +1,8 @@
 #include "CTimelineController.h"
+#ifdef USE_BINARY_WRITE
+#include "CTimelineExporter.h"
+#endif // USE_BINARY_WRITE
+#include "../Input/CInputState.h"
 
 namespace timeline
 {
@@ -60,7 +64,7 @@ namespace timeline
 		return m_Play;
 	}
 
-	bool CTimelineController::Update(float DeltaSecondsTime)
+	bool CTimelineController::Update(float DeltaSecondsTime, const std::shared_ptr<input::CInputState>& InputState)
 	{
 		if (m_PlayBackTime < 0.0f || m_PlayBackTime > GetMaxTime()) return true;
 
@@ -69,16 +73,25 @@ namespace timeline
 			m_PlayBackTime += DeltaSecondsTime;
 		}
 
-		if (!UpdateClip(m_PlayBackTime)) return false;
+		if (!UpdateClip(m_PlayBackTime, InputState)) return false;
 
 		return true;
 	}
 
-	bool CTimelineController::UpdateClip(float CurrentTime)
+	bool CTimelineController::UpdateClip(float CurrentTime, const std::shared_ptr<input::CInputState>& InputState)
 	{
 		if (!m_Clip) return true;
 
 		if (!m_Clip->Update(CurrentTime)) return false;
+
+#ifdef USE_BINARY_WRITE
+		// タイムラインクリップの書き出し
+		if (InputState->IsKeyDown(input::EKeyType::KEY_TYPE_CONTROL) && InputState->IsKeyUp(input::EKeyType::KEY_TYPE_S))
+		{
+			if (!CTimelineExporter::Export("Resources\\Timeline\\MRTTest.tl", m_Clip)) return false;
+			return true;
+		}
+#endif // USE_BINARY_WRITE
 
 		return true;
 	}
