@@ -1,6 +1,6 @@
-#ifdef USE_MMD
+#if defined(USE_MMD)  && defined(USE_BINARY_READ)
 #include "CVMDData.h"
-#include "../../Binary/CBinaryAnalyser.h"
+#include "../../Binary/CBinaryReader.h"
 #include "../../Message/Console.h"
 #include "../../Animation/CBoneNameProvider.h"
 #include "../../Animation/CBlendShapeNameProvider.h"
@@ -54,7 +54,7 @@ namespace mmd
 	bool CVMDData::Analyse(const std::vector<unsigned char>& Data)
 	{
 		// Analyserを生成
-		binary::CBinaryAnalyser Analyser(Data);
+		binary::CBinaryReader Analyser(Data);
 
 		/*
 		// ヘッダ
@@ -91,7 +91,7 @@ namespace mmd
 		return true;
 	}
 
-	bool CVMDData::AnalyseFrameData(binary::CBinaryAnalyser& Analyser)
+	bool CVMDData::AnalyseFrameData(binary::CBinaryReader& Analyser)
 	{
 		/*
 		// モーションデータ数
@@ -252,7 +252,7 @@ namespace mmd
 		return true;
 	}
 
-	bool CVMDData::AnalyseFacialExpressionData(binary::CBinaryAnalyser& Analyser)
+	bool CVMDData::AnalyseFacialExpressionData(binary::CBinaryReader& Analyser)
 	{
 		/*
 		// 表情データ数
@@ -312,7 +312,7 @@ namespace mmd
 		return true;
 	}
 
-	bool CVMDData::AnalyseCameraData(binary::CBinaryAnalyser& Analyser)
+	bool CVMDData::AnalyseCameraData(binary::CBinaryReader& Analyser)
 	{
 		/*
 		// カメラデータ数
@@ -335,7 +335,7 @@ namespace mmd
 		return true;
 	}
 
-	bool CVMDData::AnalyseLightData(binary::CBinaryAnalyser& Analyser)
+	bool CVMDData::AnalyseLightData(binary::CBinaryReader& Analyser)
 	{
 		/*
 		// 照明データ数
@@ -354,7 +354,7 @@ namespace mmd
 		return true;
 	}
 
-	bool CVMDData::AnalyseSelfShadowData(binary::CBinaryAnalyser& Analyser)
+	bool CVMDData::AnalyseSelfShadowData(binary::CBinaryReader& Analyser)
 	{
 		/*
 		// セルフシャドウデータ数

@@ -2,6 +2,10 @@
 #include "../Message/Console.h"
 #include "../Format/CPathFormatter.h"
 
+#ifndef __EMSCRIPTEN__
+#include <filesystem>
+#endif
+
 namespace resource
 {
 	CFile::CFile(const std::string& filename):
@@ -243,6 +247,13 @@ namespace resource
 #ifdef __EMSCRIPTEN__
 		return true;
 #else
+		// 親ディレクトリが存在しないなら生成する
+		std::string ParentDir = GetParentDir(m_Filename);
+		if (!std::filesystem::exists(ParentDir))
+		{
+			std::filesystem::create_directories(ParentDir);
+		}
+
 		int fileSize = static_cast<int>(m_Data.size());
 
 		std::vector<char> OutputData;
@@ -250,7 +261,14 @@ namespace resource
 		std::memcpy(&OutputData[0], reinterpret_cast<const char*>(&m_Data[0]), fileSize);
 
 		std::ofstream file;
-		file.open(m_Filename);
+		
+		// バイナリモードで開く
+		// デフォルト引数だとテキストモードになっており、テキストモードでは書き出し時に改行コード(LF)が自動的にキャリッジリターン(CR)とCFに変換されるとのこと
+		// つまりたまたま書き出したバイト列が改行(\n)を表すcharのバイトと一致した時、改行文字(\n)が自動的に\r\nに変換され、その分バイトが増えるとのこと
+		// 例えばintの10を書き出す時にこの問題が発生していた
+		file.open(m_Filename, std::ios::binary);
+
+		// 書き出しを実行
 		file.write(&OutputData[0], fileSize);
 		file.close();
 

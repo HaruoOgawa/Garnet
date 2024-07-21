@@ -1,4 +1,9 @@
 #include "CTimelineController.h"
+#ifdef USE_BINARY_WRITE
+#include "CTimelineExporter.h"
+#endif // USE_BINARY_WRITE
+#include "../Input/CInputState.h"
+#include "../Scene/CSceneController.h"
 
 namespace timeline
 {
@@ -10,12 +15,46 @@ namespace timeline
 	}
 
 	CTimelineController::CTimelineController():
-		CTimelineController(0.0f, nullptr, false)
+		CTimelineController(0.0f, std::make_shared<timeline::CTimelineClip>(), false)
 	{
 	}
 
 	CTimelineController::~CTimelineController()
 	{
+	}
+
+	bool CTimelineController::Initialize(const std::shared_ptr<app::IApp>& App)
+	{
+		if (m_Clip && App)
+		{
+			// タイムラインにオブジェクトリストを割り当てる
+			m_Clip->AssignObjectResourceToTrack(App->GetObjectList());
+
+			// ファイル名が空ならシーンファイル名の拡張子をtlに変えて割り当てる
+			const std::string FileName = m_Clip->GetFileName();
+
+			const auto& SceneController = App->GetSceneController();
+
+			if (SceneController)
+			{
+				if (FileName.empty())
+				{
+					std::string SceneFileName = SceneController->GetFileName();
+
+					size_t Index = SceneFileName.find(".");
+					if (Index != -1)
+					{
+						SceneFileName = SceneFileName.substr(0, Index) + ".tl";
+
+						m_Clip->SetFileName(SceneFileName);
+					}
+				}
+
+				SceneController->SetTimelineFileName(m_Clip->GetFileName());
+			}
+		}
+
+		return true;
 	}
 
 	void CTimelineController::SetPlayBackTime(float Time)
@@ -40,11 +79,6 @@ namespace timeline
 		return m_Clip->GetMaxTime();
 	}
 
-	void CTimelineController::SetClip(const std::shared_ptr<CTimelineClip>& Clip)
-	{
-		m_Clip = Clip;
-	}
-
 	const std::shared_ptr<CTimelineClip>& CTimelineController::GetClip() const
 	{
 		return m_Clip;
@@ -60,7 +94,7 @@ namespace timeline
 		return m_Play;
 	}
 
-	bool CTimelineController::Update(float DeltaSecondsTime)
+	bool CTimelineController::Update(float DeltaSecondsTime, const std::shared_ptr<input::CInputState>& InputState)
 	{
 		if (m_PlayBackTime < 0.0f || m_PlayBackTime > GetMaxTime()) return true;
 
@@ -69,16 +103,25 @@ namespace timeline
 			m_PlayBackTime += DeltaSecondsTime;
 		}
 
-		if (!UpdateClip(m_PlayBackTime)) return false;
+		if (!UpdateClip(m_PlayBackTime, InputState)) return false;
 
 		return true;
 	}
 
-	bool CTimelineController::UpdateClip(float CurrentTime)
+	bool CTimelineController::UpdateClip(float CurrentTime, const std::shared_ptr<input::CInputState>& InputState)
 	{
 		if (!m_Clip) return true;
 
 		if (!m_Clip->Update(CurrentTime)) return false;
+
+#ifdef USE_BINARY_WRITE
+		// タイムラインクリップの書き出し
+		if (InputState->IsKeyDown(input::EKeyType::KEY_TYPE_CONTROL) && InputState->IsKeyUp(input::EKeyType::KEY_TYPE_S))
+		{
+			if (!CTimelineExporter::Export(m_Clip->GetFileName(), m_Clip)) return false;
+			return true;
+		}
+#endif // USE_BINARY_WRITE
 
 		return true;
 	}

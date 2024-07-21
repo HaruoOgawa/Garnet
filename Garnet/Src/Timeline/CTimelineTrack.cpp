@@ -6,11 +6,12 @@
 
 namespace timeline
 {
-	CTimelineTrack::CTimelineTrack(const std::string& TrackID, int SamplerIndex, ETimelineSamplerTarget SamplerTarget):
+	CTimelineTrack::CTimelineTrack(const std::string& TrackID, int SamplerIndex, ETimelineSamplerTarget SamplerTarget, ETrackType TrackType):
 		m_TrackID(TrackID),
 		m_SamplerIndex(SamplerIndex),
         m_SamplerTarget(SamplerTarget),
-        m_ValueType(math::EValueType::VALUE_TYPE_NONE)
+        m_ValueType(math::EValueType::VALUE_TYPE_NONE),
+        m_TrackType(TrackType)
 	{
 	}
 
@@ -34,6 +35,11 @@ namespace timeline
         return m_TrackID;
     }
 
+    ETrackType CTimelineTrack::GetTrackType() const
+    {
+        return m_TrackType;
+    }
+
 	bool CTimelineTrack::Update(float CurrentTime, const std::vector<float>& Value)
 	{
 		return true;
@@ -44,6 +50,21 @@ namespace timeline
     }
 
     std::string CTimelineTrack::GetTrackName()
+    {
+        return std::string();
+    }
+
+    int CTimelineTrack::GetParam_Int(const std::string Name)
+    {
+        return -1;
+    }
+
+    float CTimelineTrack::GetParam_Float(const std::string Name)
+    {
+        return 0.0f;
+    }
+
+    std::string CTimelineTrack::GetParam_String(const std::string Name)
     {
         return std::string();
     }

@@ -4,8 +4,9 @@
 #include <vector>
 
 #include "CTimelineClip.h"
+#include "../Interface/IApp.h"
 
-namespace object { class C3DObject; }
+namespace input { class CInputState; }
 
 namespace timeline
 {
@@ -18,25 +19,26 @@ namespace timeline
 		bool m_Play;
 
 	private:
-		bool UpdateClip(float CurrentTime);
+		bool UpdateClip(float CurrentTime, const std::shared_ptr<input::CInputState>& InputState);
 
 	public:
 		CTimelineController();
 		CTimelineController(float CurrentTime, const std::shared_ptr<CTimelineClip>& Clip, bool PlayFlag);
 		virtual ~CTimelineController();
 		
+		bool Initialize(const std::shared_ptr<app::IApp>& App);
+
 		void SetPlayBackTime(float Time);
 		float GetPlayBackTime() const;
 
 		void SetMaxTime(float Time);
 		float GetMaxTime() const;
 
-		void SetClip(const std::shared_ptr<CTimelineClip>& Clip);
 		const std::shared_ptr<CTimelineClip>& GetClip() const;
 
 		void SetPlay(bool Flag);
 		bool IsPlay() const;
 
-		bool Update(float DeltaSecondsTime);
+		bool Update(float DeltaSecondsTime, const std::shared_ptr<input::CInputState>& InputState);
 	};
 }

@@ -10,7 +10,7 @@ import sys
 
 ExcludedFolderList = ["Library", "Vulkan", "OpenGL", "WebMain", "CWebAppManager.cpp", "CWebAppManager.h", "DemoMain", "CDemoAppManager.cpp", "CDemoAppManager.h", "Bullet3Serialize", "btBulletCollisionAll.cpp", "btBulletDynamicsAll.cpp", "btLinearMathAll.cpp"]
 IncludeDirectoryList = ["Src", "Src/Library/DawnLib/include", "Src/Library/GLFW/include", "Src/Library/glfw3webgpu", "Src/Library/glm", "Src/Library/tinygltf", "Src/Library/SmallFBX/include", "Src/Library/bullet3/Src", "Src/Library/imgui", "Src/Library/imgui/backends"]
-PreprocessorList = ["NOMINMAX", "USE_GLFW", "USE_WEBGPU", "USE_GUIENGINE", "USE_TEXTURE_LOADER", "USE_GLTF", "USE_VIEWER_CAMERA", "USE_INPUT_SYSTEM", "USE_GPGPU", "USE_FBX", "USE_ANIMATION", "USE_SMALL_FBX", "USE_MMD", "USE_PHYSICS", "B3_USE_CLEW", "BT_USE_DOUBLE_PRECISION", "BT_INTERNAL_UPDATE_SERIALIZATION_STRUCTURES"]
+PreprocessorList = ["NOMINMAX", "USE_GLFW", "USE_WEBGPU", "USE_BINARY_READ", "USE_BINARY_WRITE", "USE_GUIENGINE", "USE_TEXTURE_LOADER", "USE_GLTF", "USE_VIEWER_CAMERA", "USE_INPUT_SYSTEM", "USE_GPGPU", "USE_FBX", "USE_ANIMATION", "USE_SMALL_FBX", "USE_MMD", "USE_PHYSICS", "B3_USE_CLEW", "BT_USE_DOUBLE_PRECISION", "BT_INTERNAL_UPDATE_SERIALIZATION_STRUCTURES"]
 EmccCompileDirList = ["Src", "Src/Library/SmallFBX/include", "Src/Library/bullet3/Src", "Src/Library/imgui"]
 
 ProjectEmccCompileDirList = ["../Src"]

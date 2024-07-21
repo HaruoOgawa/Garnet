@@ -978,13 +978,13 @@ function dbg(text) {
 // === Body ===
 
 var ASM_CONSTS = {
-  234620: ($0, $1, $2, $3) => { const w0 = Module.UTF16ToString($0); const w1 = Module.UTF16ToString($1); const windex = $2; const nameCount = $3; return (w0 == w1[windex] && w1.length == nameCount) ? 1 : 0; },  
- 234800: ($0, $1, $2, $3) => { const w0 = Module.UTF16ToString($0); const w1 = Module.UTF16ToString($1); const windex = $2; const nameCount = $3; return (w0 == w1[windex] && w1.length == nameCount) ? 1 : 0; },  
- 234980: ($0) => { const fileName = Module.UTF8ToString($0); window.g3dCreateAudio(fileName); },  
- 235059: ($0) => { const loop = ($0 != 0); window.g3dPlayAudio(loop); },  
- 235114: ($0) => { const loop = ($0 != 0); window.g3dPlayAudio(loop); },  
- 235169: () => { window.g3dStopAudio(); },  
- 235196: () => { return window.g3dIsAudioPlaying(); }
+  236252: ($0, $1, $2, $3) => { const w0 = Module.UTF16ToString($0); const w1 = Module.UTF16ToString($1); const windex = $2; const nameCount = $3; return (w0 == w1[windex] && w1.length == nameCount) ? 1 : 0; },  
+ 236432: ($0, $1, $2, $3) => { const w0 = Module.UTF16ToString($0); const w1 = Module.UTF16ToString($1); const windex = $2; const nameCount = $3; return (w0 == w1[windex] && w1.length == nameCount) ? 1 : 0; },  
+ 236612: ($0) => { const fileName = Module.UTF8ToString($0); window.g3dCreateAudio(fileName); },  
+ 236691: ($0) => { const loop = ($0 != 0); window.g3dPlayAudio(loop); },  
+ 236746: ($0) => { const loop = ($0 != 0); window.g3dPlayAudio(loop); },  
+ 236801: () => { window.g3dStopAudio(); },  
+ 236828: () => { return window.g3dIsAudioPlaying(); }
 };
 
 
@@ -6328,6 +6328,11 @@ var ASM_CONSTS = {
   }
   }
 
+  var _getentropy = (buffer, size) => {
+      randomFill(HEAPU8.subarray(buffer, buffer + size));
+      return 0;
+    };
+
   
   function webgl_enable_ANGLE_instanced_arrays(ctx) {
       // Extension available in WebGL 1 from Firefox 26 and Google Chrome 30 onwards. Core feature in WebGL 2.
@@ -9235,6 +9240,7 @@ var wasmImports = {
   fd_read: _fd_read,
   fd_seek: _fd_seek,
   fd_write: _fd_write,
+  getentropy: _getentropy,
   glfwCreateStandardCursor: _glfwCreateStandardCursor,
   glfwCreateWindow: _glfwCreateWindow,
   glfwDestroyCursor: _glfwDestroyCursor,

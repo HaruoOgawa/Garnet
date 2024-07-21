@@ -9,7 +9,9 @@ namespace scene
 {
 	CSceneController::CSceneController():
 		m_SceneTextureSet(nullptr),
-		m_BGM(std::make_tuple(nullptr, false, false))
+		m_BGM(std::make_tuple(nullptr, false, false)),
+		m_IsLoaded(false),
+		m_TimelineFileName(std::string())
 	{
 	}
 
@@ -25,6 +27,16 @@ namespace scene
 	const std::string& CSceneController::GetFileName() const
 	{
 		return m_FileName;
+	}
+
+	void CSceneController::SetTimelineFileName(const std::string& Name)
+	{
+		m_TimelineFileName = Name;
+	}
+
+	const std::string& CSceneController::GetTimelineFileName() const
+	{
+		return m_TimelineFileName;
 	}
 
 	void CSceneController::AddObject(const std::shared_ptr<object::C3DObject>& Object)
@@ -163,12 +175,16 @@ namespace scene
 			}
 		}
 
+		m_IsLoaded = true;
+
 		return true;
 	}
 
 	bool CSceneController::Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
 		const std::shared_ptr<graphics::CDrawInfo>& DrawInfo, const std::shared_ptr<input::CInputState>& InputState)
 	{
+		if (!m_IsLoaded) return true;
+
 		if (InputState->IsKeyDown(input::EKeyType::KEY_TYPE_CONTROL) && InputState->IsKeyUp(input::EKeyType::KEY_TYPE_S))
 		{
 			if (!CSceneWriter::Write(this)) return false;
@@ -184,6 +200,8 @@ namespace scene
 
 	bool CSceneController::LateUpdate(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo)
 	{
+		if (!m_IsLoaded) return true;
+
 		for (const auto& Object : m_ObjectList)
 		{
 			if (!Object->LateUpdate(pGraphicsAPI, pPhysicsEngine, DrawInfo->GetDeltaSecondsTime())) return false;
@@ -194,6 +212,8 @@ namespace scene
 
 	bool CSceneController::FixedUpdate(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo)
 	{
+		if (!m_IsLoaded) return true;
+
 		for (const auto& Object : m_ObjectList)
 		{
 			if (!Object->FixedUpdate(pGraphicsAPI, pPhysicsEngine, DrawInfo->GetDeltaSecondsTime())) return false;
@@ -205,6 +225,8 @@ namespace scene
 	bool CSceneController::Draw(api::IGraphicsAPI* pGraphicsAPI, bool IsDepthPass, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
 		const std::shared_ptr<graphics::CDrawInfo>& DrawInfo)
 	{
+		if (!m_IsLoaded) return true;
+
 		for (const auto& Object : m_ObjectList)
 		{
 			if (!Object->Draw(pGraphicsAPI, IsDepthPass, false, Camera, Projection, DrawInfo)) return false;

@@ -9,6 +9,7 @@
 #include "CResourceManager.h"
 #include "CSceneLoader.h"
 #include "CMaterialFrameLoader.h"
+#include "CTimelineClipLoader.h"
 
 namespace file { class CFile; }
 namespace app { class CAppCore; }

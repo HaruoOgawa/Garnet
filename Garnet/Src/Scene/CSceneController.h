@@ -77,6 +77,8 @@ namespace scene
 
 	class CSceneController
 	{
+		bool m_IsLoaded;
+
 		std::string m_FileName;
 
 		//
@@ -92,6 +94,9 @@ namespace scene
 		std::map<std::shared_ptr<object::C3DObject>, std::vector<SMaterialInfo>> m_MaterialInfoMap;
 		std::map<std::shared_ptr<object::C3DObject>, std::map<std::string, std::shared_ptr<graphics::CTexture>>> m_TextureInfoMap;
 		std::map<std::shared_ptr<object::C3DObject>, SAnimationInfo> m_AnimationInfoMap;
+
+		//
+		std::string m_TimelineFileName;
 		
 	private:
 		bool PrepareTextureList(const std::shared_ptr<object::C3DObject>& Object, std::map<std::string, int>& TexIndexMap);
@@ -105,6 +110,9 @@ namespace scene
 
 		void SetFileName(const std::string& Name);
 		const std::string& GetFileName() const;
+		
+		void SetTimelineFileName(const std::string& Name);
+		const std::string& GetTimelineFileName() const;
 
 		//
 		void AddObject(const std::shared_ptr<object::C3DObject>& Object);

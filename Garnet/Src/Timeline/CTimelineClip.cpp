@@ -3,13 +3,24 @@
 
 namespace timeline
 {
-	CTimelineClip::CTimelineClip(float MaxTime):
-		m_MaxTime(MaxTime)
+	CTimelineClip::CTimelineClip():
+		m_FileName(std::string()),
+		m_MaxTime(0.0f)
 	{
 	}
 
 	CTimelineClip::~CTimelineClip()
 	{
+	}
+
+	void CTimelineClip::SetFileName(const std::string& Name)
+	{
+		m_FileName = Name;
+	}
+
+	const std::string& CTimelineClip::GetFileName() const
+	{
+		return m_FileName;
 	}
 
 	void CTimelineClip::SetMaxTime(float Time)
@@ -88,10 +99,18 @@ namespace timeline
 				for (const auto& RefTrackID : Node->GetRefTrackIDList())
 				{
 					const auto& it = m_TrackList.find(RefTrackID);
-					if (it == m_TrackList.end()) continue;
+					if (it == m_TrackList.end())
+					{
+						// トラックが存在しなかったら削除する
+						Node->RemoveRefTrackID(RefTrackID);
+
+						continue;
+					}
 
 					it->second->AssignTrackContent(Node);
 				}
+
+				Node->ShrinkToFitTrackIDList();
 			}
 
 			// Material
@@ -100,10 +119,18 @@ namespace timeline
 				for (const auto& RefTrackID : Material->GetRefTrackIDList())
 				{
 					const auto& it = m_TrackList.find(RefTrackID);
-					if (it == m_TrackList.end()) continue;
+					if (it == m_TrackList.end())
+					{
+						// トラックが存在しなかったら削除する
+						Material->RemoveRefTrackID(RefTrackID);
+
+						continue;
+					}
 
 					it->second->AssignTrackContent(Material);
 				}
+
+				Material->ShrinkToFitTrackIDList();
 			}
 		}
 		

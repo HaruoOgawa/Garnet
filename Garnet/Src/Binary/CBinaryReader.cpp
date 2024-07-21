@@ -1,36 +1,38 @@
-#include "CBinaryAnalyser.h"
+#ifdef USE_BINARY_READ
+
+#include "CBinaryReader.h"
 
 namespace binary
 {
-	CBinaryAnalyser::CBinaryAnalyser(const std::vector<unsigned char>& Data):
+	CBinaryReader::CBinaryReader(const std::vector<unsigned char>& Data):
 		m_Data(Data)
 	{
 		m_Pointer = &m_Data[0];
 		m_Offset = 0;
 	}
 
-	CBinaryAnalyser::~CBinaryAnalyser()
+	CBinaryReader::~CBinaryReader()
 	{
 	}
 
-	unsigned char* CBinaryAnalyser::GetPointer() const
+	unsigned char* CBinaryReader::GetPointer() const
 	{
 		return m_Pointer;
 	}
 
-	bool CBinaryAnalyser::IsValid(size_t ByteSize)
+	bool CBinaryReader::IsValid(size_t ByteSize)
 	{
 		if (m_Offset + ByteSize > m_Data.size()) return false;
 
 		return true;
 	}
 
-	bool CBinaryAnalyser::IsEnd()
+	bool CBinaryReader::IsEnd()
 	{
 		return (m_Data.size() == m_Offset);
 	}
 
-	void CBinaryAnalyser::UpdatePointer(size_t ByteSize)
+	void CBinaryReader::UpdatePointer(size_t ByteSize)
 	{
 		m_Offset += ByteSize;
 
@@ -40,7 +42,7 @@ namespace binary
 		m_Pointer = &m_Data[m_Offset];
 	}
 
-	bool CBinaryAnalyser::Skip(size_t ByteSize)
+	bool CBinaryReader::Skip(size_t ByteSize)
 	{
 		if (!IsValid(ByteSize)) return false;
 
@@ -49,7 +51,7 @@ namespace binary
 		return true;
 	}
 
-	bool CBinaryAnalyser::GetString(std::string& Dst, size_t ByteSize)
+	bool CBinaryReader::GetString(std::string& Dst, size_t ByteSize)
 	{
 		if (!IsValid(ByteSize)) return false;
 
@@ -61,7 +63,7 @@ namespace binary
 		return true;
 	}
 
-	bool CBinaryAnalyser::GetUTF16String(std::wstring& Dst, size_t ByteSize)
+	bool CBinaryReader::GetUTF16String(std::wstring& Dst, size_t ByteSize)
 	{
 		if (!IsValid(ByteSize)) return false;
 
@@ -74,7 +76,7 @@ namespace binary
 		return true;
 	}
 	
-	bool CBinaryAnalyser::GetUTF16ReverseString(std::wstring& Dst, size_t ByteSize)
+	bool CBinaryReader::GetUTF16ReverseString(std::wstring& Dst, size_t ByteSize)
 	{
 		if (!IsValid(ByteSize)) return false;
 
@@ -99,7 +101,7 @@ namespace binary
 		return true;
 	}
 
-	bool CBinaryAnalyser::GetInt(int& Dst)
+	bool CBinaryReader::GetInt(int& Dst)
 	{
 		if (!IsValid(sizeof(int))) return false;
 
@@ -108,7 +110,7 @@ namespace binary
 		return true;
 	}
 
-	int CBinaryAnalyser::GetInt()
+	int CBinaryReader::GetInt()
 	{
 		auto val = (m_Pointer[3] << 24) | (m_Pointer[2] << 16) | (m_Pointer[1] << 8) | (m_Pointer[0]);
 
@@ -119,7 +121,7 @@ namespace binary
 		return Dst;
 	}
 
-	bool CBinaryAnalyser::GetFloat(float& Dst)
+	bool CBinaryReader::GetFloat(float& Dst)
 	{
 		if (!IsValid(sizeof(float))) return false;
 
@@ -128,7 +130,7 @@ namespace binary
 		return true;
 	}
 
-	float CBinaryAnalyser::GetFloat()
+	float CBinaryReader::GetFloat()
 	{
 		auto val = (m_Pointer[3] << 24) | (m_Pointer[2] << 16) | (m_Pointer[1] << 8) | (m_Pointer[0]);
 
@@ -139,7 +141,7 @@ namespace binary
 		return Dst;
 	}
 
-	bool CBinaryAnalyser::GetByte(unsigned char& Dst)
+	bool CBinaryReader::GetByte(unsigned char& Dst)
 	{
 		if (!IsValid(sizeof(unsigned char))) return false;
 
@@ -147,7 +149,7 @@ namespace binary
 
 		return true;
 	}
-	unsigned char CBinaryAnalyser::GetByte()
+	unsigned char CBinaryReader::GetByte()
 	{
 		unsigned char Dst = m_Pointer[0];
 
@@ -156,7 +158,7 @@ namespace binary
 		return Dst;
 	}
 
-	bool CBinaryAnalyser::GetUShort(unsigned short& Dst)
+	bool CBinaryReader::GetUShort(unsigned short& Dst)
 	{
 		if (!IsValid(sizeof(unsigned short))) return false;
 
@@ -165,7 +167,7 @@ namespace binary
 		return true;
 	}
 
-	unsigned short CBinaryAnalyser::GetUShort()
+	unsigned short CBinaryReader::GetUShort()
 	{
 		auto val = ((m_Pointer[1] << 8) | (m_Pointer[0]));
 
@@ -176,3 +178,5 @@ namespace binary
 		return Dst;
 	}
 }
+
+#endif // USE_BINARY_READ

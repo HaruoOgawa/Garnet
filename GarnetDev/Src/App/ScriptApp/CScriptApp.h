@@ -5,6 +5,7 @@
 namespace graphics { class CFrameRenderer; }
 namespace gui { class CGraphicsEditingWindow; }
 namespace timeline { class CTimelineController; }
+namespace scene { class CSceneController; }
 
 namespace app
 {
@@ -13,6 +14,8 @@ namespace app
 
 	class CScriptApp : public IApp
 	{
+		std::shared_ptr<scene::CSceneController> m_SceneController;
+
 		std::shared_ptr<app::CScriptScene> m_ScriptScene;
 		std::shared_ptr<camera::CCamera> m_MainCamera;
 		std::shared_ptr<projection::CProjection> m_Projection;
@@ -27,7 +30,7 @@ namespace app
 #endif // USE_GUIENGINE
 		
 		std::shared_ptr<timeline::CTimelineController> m_TimelineController;
-
+		
 	public:
 		CScriptApp();
 		virtual ~CScriptApp() = default;
@@ -45,10 +48,17 @@ namespace app
 
 		virtual const std::shared_ptr<graphics::CDrawInfo>& GetDrawInfo() const override;
 
+		// 起動準備完了
+		virtual bool OnStartup(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<gui::IGUIEngine>& GUIEngine) override;
+
 		// ロード完了イベント
 		virtual bool OnLoaded(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<gui::IGUIEngine>& GUIEngine) override;
 
 		// フォーカスイベント
 		virtual void OnFocus(bool Focused, api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker) override;
+
+		// Getter
+		virtual std::vector<std::shared_ptr<object::C3DObject>> GetObjectList() const override;
+		virtual std::shared_ptr<scene::CSceneController> GetSceneController() const override;
 	};
 }
