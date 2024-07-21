@@ -4,8 +4,8 @@
 #include <vector>
 
 #include "CTimelineClip.h"
+#include "../Interface/IApp.h"
 
-namespace object { class C3DObject; }
 namespace input { class CInputState; }
 
 namespace timeline
@@ -26,13 +26,14 @@ namespace timeline
 		CTimelineController(float CurrentTime, const std::shared_ptr<CTimelineClip>& Clip, bool PlayFlag);
 		virtual ~CTimelineController();
 		
+		bool Initialize(const std::shared_ptr<app::IApp>& App);
+
 		void SetPlayBackTime(float Time);
 		float GetPlayBackTime() const;
 
 		void SetMaxTime(float Time);
 		float GetMaxTime() const;
 
-		void SetClip(const std::shared_ptr<CTimelineClip>& Clip);
 		const std::shared_ptr<CTimelineClip>& GetClip() const;
 
 		void SetPlay(bool Flag);

@@ -13,6 +13,8 @@ namespace timeline
 {
 	class CTimelineClip
 	{
+		std::string m_FileName;
+
 		float m_MaxTime;
 
 		std::vector<std::shared_ptr<animation::CAnimationSampler>> m_SamplerList;
@@ -20,6 +22,9 @@ namespace timeline
 	public:
 		CTimelineClip();
 		virtual ~CTimelineClip();
+
+		void SetFileName(const std::string& Name);
+		const std::string& GetFileName() const;
 
 		void SetMaxTime(float Time);
 		float GetMaxTime() const;

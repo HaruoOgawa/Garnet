@@ -30,6 +30,7 @@
 namespace app
 {
 	CScriptApp::CScriptApp():
+		m_SceneController(std::make_shared<scene::CSceneController>()),
 		m_ScriptScene(nullptr),
 #ifdef USE_VIEWER_CAMERA
 		m_MainCamera(std::make_shared<camera::CViewerCamera>()),
@@ -47,8 +48,6 @@ namespace app
 		m_FileModifier(std::make_shared<CFileModifier>()),
 		m_TimelineController(std::make_shared<timeline::CTimelineController>())
 	{
-		m_TimelineController->SetClip(std::make_shared<timeline::CTimelineClip>());
-
 		m_MainCamera->SetPos(glm::vec3(-7.0f, 1.0f, 0.0f));
 		//m_MainCamera->SetCenter(glm::vec3(0.0f, 50.0f, 349.0f));
 		//m_MainCamera->SetPos(glm::vec3(0.0f, 50.0f, 350.0f));
@@ -76,6 +75,8 @@ namespace app
 
 	bool CScriptApp::Initialize(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker)
 	{
+		pLoadWorker->AddScene(std::make_shared<resource::CSceneLoader>("Resources\\Scene\\MRTTest.json", m_SceneController));
+
 		// Viewの初期化
 		m_ScriptScene = std::make_shared<app::CScriptScene>(pGraphicsAPI, pLoadWorker, pPhysicsEngine);
 
@@ -125,6 +126,7 @@ namespace app
 			if (!m_TimelineController->Update(m_DrawInfo->GetDeltaSecondsTime(), InputState)) return false;
 		}
 
+		if (!m_SceneController->Update(pGraphicsAPI, pPhysicsEngine, pLoadWorker, m_MainCamera, m_Projection, m_DrawInfo, InputState)) return false;
 		if (!m_ScriptScene->Update(pGraphicsAPI, pPhysicsEngine, pLoadWorker, m_MainCamera, m_Projection, m_DrawInfo, InputState)) return false;
 
 		if (!m_BlurEffect->Update(pLoadWorker)) return false;
@@ -140,6 +142,8 @@ namespace app
 
 	bool CScriptApp::LateUpdate(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker)
 	{
+		if (!m_SceneController->LateUpdate(pGraphicsAPI, pPhysicsEngine, pLoadWorker, m_DrawInfo)) return false;
+
 		if (!m_ScriptScene->LateUpdate(pGraphicsAPI, pPhysicsEngine, pLoadWorker, m_DrawInfo)) return false;
 
 		return true;
@@ -147,6 +151,8 @@ namespace app
 
 	bool CScriptApp::FixedUpdate(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker)
 	{
+		if (!m_SceneController->FixedUpdate(pGraphicsAPI, pPhysicsEngine, pLoadWorker, m_DrawInfo)) return false;
+
 		if (!m_ScriptScene->FixedUpdate(pGraphicsAPI, pPhysicsEngine, pLoadWorker, m_DrawInfo)) return false;
 
 		return true;
@@ -168,6 +174,7 @@ namespace app
 		// MRTTest FrameBuffer
 		{
 			if (!pGraphicsAPI->BeginRender("MRTTest")) return false;
+			if (!m_SceneController->Draw(pGraphicsAPI, false, m_MainCamera, m_Projection, m_DrawInfo)) return false;
 			if (!m_ScriptScene->Draw(pGraphicsAPI, false, m_MainCamera, m_Projection, m_DrawInfo)) return false;
 			if (!pGraphicsAPI->EndRender()) return false;
 		}
@@ -176,6 +183,7 @@ namespace app
 		{
 			if (!pGraphicsAPI->BeginRender("MainResultPass")) return false;
 			if (!m_DeferredRenderer->Draw(pGraphicsAPI, m_MainCamera, m_Projection, m_DrawInfo)) return false;
+			if (!m_SceneController->Draw(pGraphicsAPI, false, m_MainCamera, m_Projection, m_DrawInfo)) return false;
 			if (!m_ScriptScene->Draw(pGraphicsAPI, false, m_MainCamera, m_Projection, m_DrawInfo)) return false;
 			if (!pGraphicsAPI->EndRender()) return false;
 		}
@@ -192,8 +200,8 @@ namespace app
 			{
 				gui::SGUIParams GUIParams = {};
 				GUIParams.FileModifier = m_FileModifier;
-				GUIParams.ObjectList = m_ScriptScene->GetObjectList();
-				GUIParams.SceneController = m_ScriptScene->GetSceneController();
+				GUIParams.ObjectList = GetObjectList();
+				GUIParams.SceneController = m_SceneController;
 				GUIParams.TimelineController = m_TimelineController;
 
 				if (!GUIEngine->BeginFrame(pGraphicsAPI)) return false;
@@ -218,21 +226,22 @@ namespace app
 	// ロード完了イベント
 	bool CScriptApp::OnLoaded(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<gui::IGUIEngine>& GUIEngine)
 	{
+		if (!m_SceneController->Create(pGraphicsAPI, pPhysicsEngine)) return false;
+
 		if (!m_ScriptScene->OnLoaded(pGraphicsAPI, pPhysicsEngine, pLoadWorker)) return false;
+
+		if (!m_TimelineController->Initialize(shared_from_this())) return false;
 
 		{
 			gui::SGUIParams GUIParams = {};
 			GUIParams.FileModifier = m_FileModifier;
-			GUIParams.ObjectList = m_ScriptScene->GetObjectList();
-			GUIParams.SceneController = m_ScriptScene->GetSceneController();
+			GUIParams.ObjectList = GetObjectList();
+			GUIParams.SceneController = m_SceneController;
 			GUIParams.TimelineController = m_TimelineController;
 
 			if (!m_GraphicsEditingWindow->OnLoaded(pGraphicsAPI, GUIParams, GUIEngine)) return false;
 		}
 
-		// タイムラインにオブジェクトリストを割り当てる
-		m_TimelineController->GetClip()->AssignObjectResourceToTrack(m_ScriptScene->GetObjectList());
-		
 		return true;
 	}
 
@@ -243,5 +252,31 @@ namespace app
 		{
 			m_FileModifier->OnFileUpdated(pLoadWorker);
 		}
+	}
+
+	// Getter
+	std::vector<std::shared_ptr<object::C3DObject>> CScriptApp::GetObjectList() const
+	{
+		std::vector<std::shared_ptr<object::C3DObject>> ObjectList;
+
+		for (const auto& Object : m_SceneController->GetObjectList())
+		{
+			ObjectList.push_back(Object);
+		}
+
+		if (m_ScriptScene)
+		{
+			for (const auto& Object : m_ScriptScene->GetObjectList())
+			{
+				ObjectList.push_back(Object);
+			}
+		}
+
+		return ObjectList;
+	}
+
+	std::shared_ptr<scene::CSceneController> CScriptApp::GetSceneController() const
+	{
+		return m_SceneController;
 	}
 }

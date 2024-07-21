@@ -17,7 +17,7 @@ namespace gui { class IGUIEngine; }
 
 namespace app
 {
-	class IApp
+	class IApp : public std::enable_shared_from_this<IApp>
 	{
 	public:
 		virtual bool Initialize(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker) = 0;
@@ -36,5 +36,9 @@ namespace app
 
 		// フォーカスイベント
 		virtual void OnFocus(bool Focused, api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker) = 0;
+
+		// Getter
+		virtual std::vector<std::shared_ptr<object::C3DObject>> GetObjectList() const = 0;
+		virtual std::shared_ptr<scene::CSceneController> GetSceneController() const = 0;
 	};
 }

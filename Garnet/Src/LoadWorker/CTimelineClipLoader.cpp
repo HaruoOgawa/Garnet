@@ -18,6 +18,7 @@ namespace resource
 
 		// ƒ[ƒhŠ®—¹
 		m_Status = resource::ELoadStatus::Loaded;
+		m_Target->SetFileName(GetFilename());
 
 		return true;
 	}

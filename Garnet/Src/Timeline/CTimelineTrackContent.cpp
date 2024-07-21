@@ -18,8 +18,12 @@ namespace timeline
 		if (it != m_RefTrackIDList.end())
 		{
 			m_RefTrackIDList.erase(it);
-			m_RefTrackIDList.shrink_to_fit();
 		}
+	}
+
+	void CTimelineTrackContent::ShrinkToFitTrackIDList()
+	{
+		m_RefTrackIDList.shrink_to_fit();
 	}
 
 	void CTimelineTrackContent::SetRefTrackIDList(const std::vector<std::string>& TrackIDList)

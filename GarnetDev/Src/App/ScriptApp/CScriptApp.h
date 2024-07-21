@@ -5,6 +5,7 @@
 namespace graphics { class CFrameRenderer; }
 namespace gui { class CGraphicsEditingWindow; }
 namespace timeline { class CTimelineController; }
+namespace scene { class CSceneController; }
 
 namespace app
 {
@@ -13,6 +14,8 @@ namespace app
 
 	class CScriptApp : public IApp
 	{
+		std::shared_ptr<scene::CSceneController> m_SceneController;
+
 		std::shared_ptr<app::CScriptScene> m_ScriptScene;
 		std::shared_ptr<camera::CCamera> m_MainCamera;
 		std::shared_ptr<projection::CProjection> m_Projection;
@@ -27,7 +30,7 @@ namespace app
 #endif // USE_GUIENGINE
 		
 		std::shared_ptr<timeline::CTimelineController> m_TimelineController;
-
+		
 	public:
 		CScriptApp();
 		virtual ~CScriptApp() = default;
@@ -50,5 +53,9 @@ namespace app
 
 		// フォーカスイベント
 		virtual void OnFocus(bool Focused, api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker) override;
+
+		// Getter
+		virtual std::vector<std::shared_ptr<object::C3DObject>> GetObjectList() const override;
+		virtual std::shared_ptr<scene::CSceneController> GetSceneController() const override;
 	};
 }

@@ -4,12 +4,23 @@
 namespace timeline
 {
 	CTimelineClip::CTimelineClip():
+		m_FileName(std::string()),
 		m_MaxTime(0.0f)
 	{
 	}
 
 	CTimelineClip::~CTimelineClip()
 	{
+	}
+
+	void CTimelineClip::SetFileName(const std::string& Name)
+	{
+		m_FileName = Name;
+	}
+
+	const std::string& CTimelineClip::GetFileName() const
+	{
+		return m_FileName;
 	}
 
 	void CTimelineClip::SetMaxTime(float Time)
@@ -98,6 +109,8 @@ namespace timeline
 
 					it->second->AssignTrackContent(Node);
 				}
+
+				Node->ShrinkToFitTrackIDList();
 			}
 
 			// Material
@@ -116,6 +129,8 @@ namespace timeline
 
 					it->second->AssignTrackContent(Material);
 				}
+
+				Material->ShrinkToFitTrackIDList();
 			}
 		}
 		

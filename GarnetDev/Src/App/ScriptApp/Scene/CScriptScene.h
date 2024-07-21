@@ -20,15 +20,11 @@ namespace graphics
 }
 namespace audio { class CAudioClip; }
 
-namespace scene { class CSceneController; }
-
 namespace app
 {
 	class CScriptScene
 	{
 		bool m_IsLoaded;
-
-		std::shared_ptr<scene::CSceneController> m_SceneController;
 
 		std::vector<std::shared_ptr<object::C3DObject>> m_ObjectList;
 	private:
@@ -41,8 +37,7 @@ namespace app
 
 		bool IsLoaded() const;
 
-		const std::shared_ptr<scene::CSceneController>& GetSceneController() const;
-		std::vector<std::shared_ptr<object::C3DObject>> GetObjectList() const;
+		const std::vector<std::shared_ptr<object::C3DObject>>& GetObjectList() const;
 
 		bool Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
 			const std::shared_ptr<graphics::CDrawInfo>& DrawInfo, const std::shared_ptr<input::CInputState>& InputState);
@@ -54,9 +49,6 @@ namespace app
 
 		bool Draw(api::IGraphicsAPI* pGraphicsAPI, bool IsDepthPass, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, 
 			const std::shared_ptr<graphics::CDrawInfo>& DrawInfo) ;
-
-		// Tex of FrameBuffer
-		void SetFrameTexture(const std::shared_ptr<graphics::CTexture>& FrameTexture);
 
 		// ロード完了イベント
 		bool OnLoaded(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker);

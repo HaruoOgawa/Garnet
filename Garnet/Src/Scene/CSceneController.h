@@ -77,6 +77,8 @@ namespace scene
 
 	class CSceneController
 	{
+		bool m_IsLoaded;
+
 		std::string m_FileName;
 
 		//
