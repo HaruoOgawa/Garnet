@@ -97,6 +97,9 @@ namespace resource
 		{
 			if (CheckInitialResource(pGraphicsAPI, pPhysicsEngine)) return true;
 			if (!InitLoadStatus(pGraphicsAPI, pAppCore)) ExistError = true;
+
+			// 起動準備完了イベントコールバックの呼び出し
+			if (!pAppCore->OnStartup()) return false;
 		}
 		else if (m_Status == ELoadStatus::Loading)
 		{
@@ -104,7 +107,7 @@ namespace resource
 			{
 				m_Status = ELoadStatus::Loaded;
 
-				// ロード完了コールバックの呼び出し
+				// 初回メインロード完了イベントコールバックの呼び出し
 				if(!pAppCore->OnLoaded()) ExistError = true;
 			}
 		}

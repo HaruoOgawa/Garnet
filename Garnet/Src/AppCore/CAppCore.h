@@ -63,7 +63,10 @@ namespace app
 		bool FixedUpdate();
 		bool Draw();
 
-		// ロード完了イベント
+		// 起動準備完了
+		bool OnStartup();
+
+		// 初回メインロード完了イベント
 		bool OnLoaded();
 
 		// ToDo: 将来的にはOnXX関数を各WindowAPIから呼ぶようにしてResizeWindow・FocusWindowを統一する. InputStateへの情報受け渡しもここでやる

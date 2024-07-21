@@ -275,7 +275,15 @@ namespace app
 		return true;
 	}
 
-	// ロード完了イベント
+	// 起動準備完了
+	bool CAppCore::OnStartup()
+	{
+		if (!m_App->OnStartup(m_GraphicsAPI.get(), m_PhysicsEngine.get(), m_LoadWorker.get(), m_GUIEngine)) return false;
+
+		return true;
+	}
+
+	// 初回メインロード完了イベント
 	bool CAppCore::OnLoaded()
 	{
 		if (!m_App->OnLoaded(m_GraphicsAPI.get(), m_PhysicsEngine.get(), m_LoadWorker.get(), m_GUIEngine)) return false;

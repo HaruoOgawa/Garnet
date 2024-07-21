@@ -33,11 +33,11 @@ namespace timeline
 			// ファイル名が空ならシーンファイル名の拡張子をtlに変えて割り当てる
 			const std::string FileName = m_Clip->GetFileName();
 
-			if (FileName.empty())
-			{
-				const auto& SceneController = App->GetSceneController();
+			const auto& SceneController = App->GetSceneController();
 
-				if (SceneController)
+			if (SceneController)
+			{
+				if (FileName.empty())
 				{
 					std::string SceneFileName = SceneController->GetFileName();
 
@@ -49,6 +49,8 @@ namespace timeline
 						m_Clip->SetFileName(SceneFileName);
 					}
 				}
+
+				SceneController->SetTimelineFileName(m_Clip->GetFileName());
 			}
 		}
 

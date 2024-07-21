@@ -10,7 +10,8 @@ namespace scene
 	CSceneController::CSceneController():
 		m_SceneTextureSet(nullptr),
 		m_BGM(std::make_tuple(nullptr, false, false)),
-		m_IsLoaded(false)
+		m_IsLoaded(false),
+		m_TimelineFileName(std::string())
 	{
 	}
 
@@ -26,6 +27,16 @@ namespace scene
 	const std::string& CSceneController::GetFileName() const
 	{
 		return m_FileName;
+	}
+
+	void CSceneController::SetTimelineFileName(const std::string& Name)
+	{
+		m_TimelineFileName = Name;
+	}
+
+	const std::string& CSceneController::GetTimelineFileName() const
+	{
+		return m_TimelineFileName;
 	}
 
 	void CSceneController::AddObject(const std::shared_ptr<object::C3DObject>& Object)

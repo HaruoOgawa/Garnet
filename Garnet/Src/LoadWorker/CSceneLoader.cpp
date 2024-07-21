@@ -104,6 +104,18 @@ namespace resource
 			}
 		}
 
+		// timeline
+		{
+			const auto timeline = SceneJSON.find("timeline");
+			if (timeline != SceneJSON.end() && timeline->is_object())
+			{
+				std::string filename = "";
+				GetString("filename", filename, timeline);
+
+				m_Target->SetTimelineFileName(filename);
+			}
+		}
+
 		// objects
 		{
 			const auto objects = SceneJSON.find("objects");

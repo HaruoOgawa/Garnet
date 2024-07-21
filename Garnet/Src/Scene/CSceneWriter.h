@@ -21,6 +21,7 @@ namespace scene
 		static bool WriteSceneTextureSet(ordered_json& SceneJSON, CSceneController* pSceneController);
 		static bool WriteAnimations(ordered_json& SceneJSON, CSceneController* pSceneController);
 		static bool WriteSound(ordered_json& SceneJSON, CSceneController* pSceneController);
+		static bool WriteTimeline(ordered_json& SceneJSON, CSceneController* pSceneController);
 		static bool WriteObjects(ordered_json& SceneJSON, CSceneController* pSceneController);
 
 		static bool WriteNodes(ordered_json& ObjectJSON, object::C3DObject* pObject);

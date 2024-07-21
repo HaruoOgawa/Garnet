@@ -31,6 +31,9 @@ namespace app
 
 		virtual const std::shared_ptr<graphics::CDrawInfo>& GetDrawInfo() const = 0;
 
+		// 起動準備完了
+		virtual bool OnStartup(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<gui::IGUIEngine>& GUIEngine) = 0;
+
 		// ロード完了イベント
 		virtual bool OnLoaded(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<gui::IGUIEngine>& GUIEngine) = 0;
 

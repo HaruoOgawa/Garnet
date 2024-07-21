@@ -76,8 +76,7 @@ namespace app
 	bool CScriptApp::Initialize(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker)
 	{
 		pLoadWorker->AddScene(std::make_shared<resource::CSceneLoader>("Resources\\Scene\\MRTTest.json", m_SceneController));
-		pLoadWorker->AddLoadResource(std::make_shared<resource::CTimelineClipLoader>("Resources\\Timeline\\MRTTest.tl", m_TimelineController->GetClip()));
-
+		
 		// Viewの初期化
 		m_ScriptScene = std::make_shared<app::CScriptScene>(pGraphicsAPI, pLoadWorker, pPhysicsEngine);
 
@@ -219,6 +218,15 @@ namespace app
 	const std::shared_ptr<graphics::CDrawInfo>& CScriptApp::GetDrawInfo() const
 	{
 		return m_DrawInfo;
+	}
+
+	// 起動準備完了
+	bool CScriptApp::OnStartup(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<gui::IGUIEngine>& GUIEngine)
+	{
+		const auto& TimelineFileName = m_SceneController->GetTimelineFileName();
+		if(!TimelineFileName.empty()) pLoadWorker->AddLoadResource(std::make_shared<resource::CTimelineClipLoader>(TimelineFileName, m_TimelineController->GetClip()));
+
+		return true;
 	}
 
 	// ロード完了イベント

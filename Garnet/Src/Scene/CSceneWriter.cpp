@@ -37,6 +37,7 @@ namespace scene
 		if (!WriteSceneTextureSet(SceneJSON, pSceneController)) return false;
 		if (!WriteAnimations(SceneJSON, pSceneController)) return false;
 		if (!WriteSound(SceneJSON, pSceneController)) return false;
+		if (!WriteTimeline(SceneJSON, pSceneController)) return false;
 		if (!WriteObjects(SceneJSON, pSceneController)) return false;
 
 		return true;
@@ -119,6 +120,13 @@ namespace scene
 				{ "loop", loop }
 			};
 		}
+
+		return true;
+	}
+
+	bool CSceneWriter::WriteTimeline(ordered_json& SceneJSON, CSceneController* pSceneController)
+	{
+		SceneJSON["timeline"]["filename"] = pSceneController->GetTimelineFileName();
 
 		return true;
 	}
