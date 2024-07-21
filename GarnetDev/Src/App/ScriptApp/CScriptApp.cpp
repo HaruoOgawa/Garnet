@@ -76,6 +76,7 @@ namespace app
 	bool CScriptApp::Initialize(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker)
 	{
 		pLoadWorker->AddScene(std::make_shared<resource::CSceneLoader>("Resources\\Scene\\MRTTest.json", m_SceneController));
+		pLoadWorker->AddLoadResource(std::make_shared<resource::CTimelineClipLoader>("Resources\\Timeline\\MRTTest.tl", m_TimelineController->GetClip()));
 
 		// View‚Ì‰Šú‰»
 		m_ScriptScene = std::make_shared<app::CScriptScene>(pGraphicsAPI, pLoadWorker, pPhysicsEngine);
@@ -96,9 +97,6 @@ namespace app
 
 		// FrameTexture‚ğ“n‚·
 		//m_ScriptScene->SetFrameTexture(m_BlurEffect->GetFrameTexture());
-
-		// ƒeƒXƒgÀ‘•
-		pLoadWorker->AddLoadResource(std::make_shared<resource::CTimelineClipLoader>("Resources\\Timeline\\MRTTest.tl", m_TimelineController->GetClip()));
 
 		return true;
 	}
