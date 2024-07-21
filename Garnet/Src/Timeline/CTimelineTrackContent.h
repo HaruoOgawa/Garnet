@@ -13,6 +13,7 @@ namespace timeline
 		virtual ~CTimelineTrackContent() = default;
 
 		void AddRefTrackID(const std::string& TrackID);
+		void RemoveRefTrackID(const std::string& TrackID);
 		void SetRefTrackIDList(const std::vector<std::string>& TrackIDList);
 		const std::vector<std::string>& GetRefTrackIDList() const;
 	};

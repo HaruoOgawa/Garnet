@@ -88,7 +88,13 @@ namespace timeline
 				for (const auto& RefTrackID : Node->GetRefTrackIDList())
 				{
 					const auto& it = m_TrackList.find(RefTrackID);
-					if (it == m_TrackList.end()) continue;
+					if (it == m_TrackList.end())
+					{
+						// トラックが存在しなかったら削除する
+						Node->RemoveRefTrackID(RefTrackID);
+
+						continue;
+					}
 
 					it->second->AssignTrackContent(Node);
 				}
@@ -100,7 +106,13 @@ namespace timeline
 				for (const auto& RefTrackID : Material->GetRefTrackIDList())
 				{
 					const auto& it = m_TrackList.find(RefTrackID);
-					if (it == m_TrackList.end()) continue;
+					if (it == m_TrackList.end())
+					{
+						// トラックが存在しなかったら削除する
+						Material->RemoveRefTrackID(RefTrackID);
+
+						continue;
+					}
 
 					it->second->AssignTrackContent(Material);
 				}
