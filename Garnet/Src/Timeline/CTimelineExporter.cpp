@@ -56,10 +56,40 @@ namespace timeline
 		// トラックデータ
 		for (const auto& Track : TrackClist)
 		{
+			// 共通パラメーター
+			Writer.SetInt(static_cast<int>(Track.second->GetTrackID().size()));
 			Writer.SetString(Track.second->GetTrackID());
+			
 			Writer.SetInt(Track.second->GetSamplerIndex());
 			Writer.SetInt(static_cast<int>(Track.second->GetSamplerTarget()));
 			Writer.SetInt(static_cast<int>(Track.second->GetValueType()));
+
+			// トラックタイプ
+			ETrackType TrackType = Track.second->GetTrackType();
+			Writer.SetInt(static_cast<int>(TrackType));
+
+			// 各トラックタイプごとのパラメーター
+			switch (TrackType)
+			{
+			case timeline::ETrackType::TrackType_None:
+				break;
+			case timeline::ETrackType::TrackType_Node:
+				{
+					Writer.SetInt(Track.second->GetParam_Int("TrackTarget"));
+				}
+				break;
+			case timeline::ETrackType::TrackType_Material:
+				{
+					Writer.SetInt(Track.second->GetParam_Int("TrackTarget"));
+
+					std::string UniformName = Track.second->GetParam_String("UniformName");
+					Writer.SetInt(static_cast<int>(UniformName.size()));
+					Writer.SetString(UniformName);
+				}
+				break;
+			default:
+				break;
+			}
 		}
 
 		return true;
@@ -86,10 +116,13 @@ namespace timeline
 			// キーフレームデータ
 			for (const auto& KeyFrame : KeyFrameList)
 			{
+				// キーフレームタイプ
 				Writer.SetInt(static_cast<int>(KeyFrame->GetType()));
-
+				
+				// インプット
 				Writer.SetFloat(KeyFrame->GetInput());
 
+				// アウトプット
 				for (float v : KeyFrame->GetOutput())
 				{
 					Writer.SetFloat(v);

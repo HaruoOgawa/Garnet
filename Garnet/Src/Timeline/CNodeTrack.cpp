@@ -4,7 +4,7 @@
 namespace timeline
 {
 	CNodeTrack::CNodeTrack(const std::string& TrackID, int SamplerIndex, ETimelineSamplerTarget SamplerTarget, ENodeTrackTarget TrackTarget):
-		CTimelineTrack(TrackID, SamplerIndex, SamplerTarget),
+		CTimelineTrack(TrackID, SamplerIndex, SamplerTarget, ETrackType::TrackType_Node),
 		m_TrackTarget(TrackTarget),
 		m_Node(nullptr)
 	{
@@ -105,6 +105,26 @@ namespace timeline
 		}
 
 		return Name;
+	}
+
+	int CNodeTrack::GetParam_Int(const std::string Name)
+	{
+		if (Name == "TrackTarget")
+		{
+			return static_cast<int>(m_TrackTarget);
+		}
+
+		return -1;
+	}
+
+	float CNodeTrack::GetParam_Float(const std::string Name)
+	{
+		return 0.0f;
+	}
+
+	std::string CNodeTrack::GetParam_String(const std::string Name)
+	{
+		return std::string();
 	}
 
 	std::string CNodeTrack::CastNodeTrackTarget_Str(ENodeTrackTarget TrackTarget)

@@ -5,7 +5,7 @@ namespace timeline
 {
 	CMaterialTrack::CMaterialTrack(const std::string& TrackID, int SamplerIndex, ETimelineSamplerTarget SamplerTarget, EMaterialTrackTarget TrackTarget,
 		const std::string& UniformName, math::EValueType ValueType):
-		CTimelineTrack(TrackID, SamplerIndex, SamplerTarget),
+		CTimelineTrack(TrackID, SamplerIndex, SamplerTarget, ETrackType::TrackType_Material),
 		m_TrackTarget(TrackTarget),
 		m_Material(nullptr),
 		m_UniformName(UniformName)
@@ -59,6 +59,31 @@ namespace timeline
 		}
 
 		return Name;
+	}
+
+	int CMaterialTrack::GetParam_Int(const std::string Name)
+	{
+		if (Name == "TrackTarget")
+		{
+			return static_cast<int>(m_TrackTarget);
+		}
+
+		return -1;
+	}
+
+	float CMaterialTrack::GetParam_Float(const std::string Name)
+	{
+		return 0.0f;
+	}
+
+	std::string CMaterialTrack::GetParam_String(const std::string Name)
+	{
+		if (Name == "UniformName")
+		{
+			return m_UniformName;
+		}
+
+		return std::string();
 	}
 
 	std::string CMaterialTrack::CastMaterialTrackTarget_Str(EMaterialTrackTarget TrackTarget)

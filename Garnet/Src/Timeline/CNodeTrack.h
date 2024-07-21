@@ -41,6 +41,10 @@ namespace timeline
 
 		virtual std::string GetTrackName() override;
 
+		virtual int GetParam_Int(const std::string Name) override;
+		virtual float GetParam_Float(const std::string Name) override;
+		virtual std::string GetParam_String(const std::string Name) override;
+
 		static std::string CastNodeTrackTarget_Str(ENodeTrackTarget TrackTarget);
 	};
 }
