@@ -8,8 +8,6 @@ namespace timeline
 {
 	bool CTimelineImporter::Import(const std::vector<unsigned char>& Data, std::shared_ptr<CTimelineClip>& DstClip)
 	{
-		// Console::Log("[Timeline Import Error]\n");
-
 		if (Data.empty())
 		{
 			Console::Log("[Timeline Import Error] Data is empty.\n");
@@ -34,6 +32,17 @@ namespace timeline
 			return false;
 		}
 
+		// ƒo[ƒWƒ‡ƒ“
+		int Version = -1;
+		if (!Reader.GetInt(Version)) return false;
+		
+		if (Version < 0 || Version > 0)
+		{
+			Console::Log("[Timeline Import Error] Invalid Version (%d)\n", Version);
+			return false;
+		}
+
+		// Å‘åÄ¶ŠÔ
 		float MaxTime = 0.0f;
 		if (!Reader.GetFloat(MaxTime)) return false;
 

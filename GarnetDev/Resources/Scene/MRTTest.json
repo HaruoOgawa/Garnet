@@ -16,12 +16,12 @@
     "scenetextureset": {
         "cubemaps": [
             {
-                "back": "Resources/Cubemaps/environment/environment_back_0.jpg",
+                "back": "Resources/Cubemaps/environment/environment_front_0.jpg",
                 "bottom": "Resources/Cubemaps/environment/environment_bottom_0.jpg",
-                "front": "Resources/Cubemaps/environment/environment_front_0.jpg",
+                "front": "Resources/Cubemaps/environment/environment_back_0.jpg",
                 "left": "Resources/Cubemaps/environment/environment_left_0.jpg",
-                "right": "Resources/Cubemaps/environment/environment_right_0.jpg",
-                "top": "Resources/Cubemaps/environment/environment_top_0.jpg"
+                "right": "Resources/Cubemaps/environment/environment_top_0.jpg",
+                "top": "Resources/Cubemaps/environment/environment_right_0.jpg"
             }
         ],
         "frametextures": null
