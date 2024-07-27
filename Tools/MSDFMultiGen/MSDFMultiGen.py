@@ -1,6 +1,7 @@
 import argparse
 import subprocess
 import os
+from PIL import Image
 
 def Generate():
     parser = argparse.ArgumentParser()
@@ -16,7 +17,7 @@ def Generate():
     args = parser.parse_args()
 
     msdf_path = args.cmd
-    sdf_chars = set(args.input)
+    sdf_chars = sorted(set(args.input), key=args.input.index)
     output = args.output
     font = args.font if args.font != None else "C:\Windows\Fonts\arialbd.ttf"
     dimension_width = args.dimension_width if args.dimension_width != None else 32
@@ -29,6 +30,9 @@ def Generate():
     os.makedirs(distDir, exist_ok=True)
     os.makedirs(temp, exist_ok=True)
 
+    images = []
+
+    # MSDFGenを実行しテクスチャを作成
     for char in sdf_chars:
         temp_tex_dir = os.path.join(temp, char + "_.png")
         
@@ -39,6 +43,31 @@ def Generate():
             return
         
         print("[TempOutput] ", temp_tex_dir)
+
+        images.append(Image.open(temp_tex_dir))
+        
+    # 複数枚のMSDFテクスチャを1つにまとめる
+    # 合計サイズ
+    widths, heights = zip(*(img.size for img in images))
+    total_width = sum(widths)
+    max_height = max(heights)
+
+    #
+    color_format = 'RGBA'
+    if(mode == "sdf"):
+        # sdfの時は8ビットテクスチャを指定
+        color_format = 'L'
+
+    # 横一列に結合する
+    combined_image = Image.new(color_format, (total_width, max_height))
+
+    x_offset = 0
+    for img in images:
+        combined_image.paste(img, (x_offset, 0))
+        x_offset += img.width
+
+    # 結合された画像を保存
+    combined_image.save(output)
 
 #
 Generate()
