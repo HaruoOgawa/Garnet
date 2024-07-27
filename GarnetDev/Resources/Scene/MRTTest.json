@@ -11,17 +11,21 @@
         {
             "name": "pbr_mrt_mat",
             "filename": "Resources/MaterialFrame/PBR_MRT_MF.json"
+        },
+        {
+            "name": "sdftext_mat",
+            "filename": "Resources/MaterialFrame/sdftext_mf.json"
         }
     ],
     "scenetextureset": {
         "cubemaps": [
             {
-                "back": "Resources/Cubemaps/environment/environment_back_0.jpg",
-                "bottom": "Resources/Cubemaps/environment/environment_bottom_0.jpg",
-                "front": "Resources/Cubemaps/environment/environment_front_0.jpg",
-                "left": "Resources/Cubemaps/environment/environment_left_0.jpg",
-                "right": "Resources/Cubemaps/environment/environment_right_0.jpg",
-                "top": "Resources/Cubemaps/environment/environment_top_0.jpg"
+                "back": "Resources/Cubemaps/environment/environment_top_0.jpg",
+                "bottom": "Resources/Cubemaps/environment/environment_left_0.jpg",
+                "front": "Resources/Cubemaps/environment/environment_right_0.jpg",
+                "left": "Resources/Cubemaps/environment/environment_bottom_0.jpg",
+                "right": "Resources/Cubemaps/environment/environment_back_0.jpg",
+                "top": "Resources/Cubemaps/environment/environment_front_0.jpg"
             }
         ],
         "frametextures": null
@@ -30,6 +34,88 @@
         "filename": "Resources\\Timeline\\MRTTest.tl"
     },
     "objects": [
+        {
+            "name": "SDFText_Test",
+            "filename": "",
+            "renderpass": "MainResultPass",
+            "depthpass": "",
+            "transform": {
+                "pos": [
+                    0.0,
+                    1.0,
+                    0.0
+                ],
+                "rotate": [
+                    0.0,
+                    -89.98021697998047,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "enable": true,
+            "rootnodes": [
+                0
+            ],
+            "nodes": [
+                {
+                    "name": "sdf_node",
+                    "transform": {
+                        "pos": [
+                            0.0,
+                            0.0,
+                            1.0525970458984375
+                        ],
+                        "rotate": [
+                            0.0,
+                            -0.0,
+                            0.0
+                        ],
+                        "scale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ]
+                    },
+                    "meshindex": 0,
+                    "trackids": [
+                        "974405a1-6509-491b-b22f-222ef6c3a571"
+                    ]
+                }
+            ],
+            "meshs": [
+                {
+                    "primitives": [
+                        {
+                            "materialindex": 0,
+                            "type": "board"
+                        }
+                    ]
+                }
+            ],
+            "materials": [
+                {
+                    "materialframe": "sdftext_mat",
+                    "cull": "back",
+                    "textures": [
+                        {
+                            "texturebuffername": "MainTexture",
+                            "textureindex": -1,
+                            "texturename": "sdftex"
+                        }
+                    ]
+                }
+            ],
+            "textureset": [
+                {
+                    "name": "sdftex",
+                    "filename": "Resources/Textures/msdf.png"
+                }
+            ]
+        },
         {
             "name": "glTFObj",
             "filename": "Resources/Models/Sponza/glTF/Sponza.glb",
@@ -5401,8 +5487,8 @@
                     "name": "testnode",
                     "transform": {
                         "pos": [
-                            0.0,
-                            0.0,
+                            4.310622692108154,
+                            4.310622692108154,
                             0.0
                         ],
                         "rotate": [
@@ -5411,9 +5497,9 @@
                             0.0
                         ],
                         "scale": [
-                            1.0,
-                            1.0,
-                            1.0
+                            0.9462293982505798,
+                            0.9462293982505798,
+                            0.9462293982505798
                         ]
                     },
                     "meshindex": 0,

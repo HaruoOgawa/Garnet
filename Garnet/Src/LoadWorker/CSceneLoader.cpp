@@ -485,7 +485,7 @@ namespace resource
 					createInfo = graphics::CPresetPrimitive::CreateBox(pGraphicsAPI);
 					PrimitiveType = graphics::EPresetPrimitiveType::CUBE;
 				}
-				else if (type == "board")
+				else if (type == "board" || type == "plane")
 				{
 					createInfo = graphics::CPresetPrimitive::CreateBoard(pGraphicsAPI);
 					PrimitiveType = graphics::EPresetPrimitiveType::BOARD;
@@ -761,8 +761,8 @@ namespace resource
 	{
 		std::shared_ptr<math::CTransform> Transform = std::make_shared<math::CTransform>();
 
-		const auto transformJSON = Object->find("transform");
-		if (transformJSON->is_object())
+		auto transformJSON = Object->find("transform");
+		if (transformJSON != Object->end() && transformJSON->is_object())
 		{
 			// pos
 			glm::vec3 pos = glm::vec3(0.0f);
