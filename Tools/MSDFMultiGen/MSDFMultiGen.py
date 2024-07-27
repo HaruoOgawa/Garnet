@@ -2,6 +2,7 @@ import argparse
 import subprocess
 import os
 from PIL import Image
+import json
 
 def Generate():
     parser = argparse.ArgumentParser()
@@ -50,7 +51,9 @@ def Generate():
     # 合計サイズ
     widths, heights = zip(*(img.size for img in images))
     total_width = sum(widths)
+    max_width = max(widths)
     max_height = max(heights)
+    numOfChar = len(sdf_chars)
 
     #
     color_format = 'RGBA'
@@ -68,6 +71,19 @@ def Generate():
 
     # 結合された画像を保存
     combined_image.save(output)
+
+    # 複合テクスチャに関する情報をJSONで書き出しておく
+    json_text = json.dumps({"total_width" : total_width, "charWidth" : max_width, "numOfChar" : numOfChar})
+
+    print("json_text: ", json_text)
+    
+    output_json = output.replace(".png", ".json")
+
+    print("output_json:", output_json)
+
+    f = open(output_json, "w")
+    f.write(json_text)
+    f.close()
 
 #
 Generate()

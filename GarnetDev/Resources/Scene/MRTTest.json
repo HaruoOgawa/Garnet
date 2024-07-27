@@ -20,12 +20,12 @@
     "scenetextureset": {
         "cubemaps": [
             {
-                "back": "Resources/Cubemaps/environment/environment_top_0.jpg",
-                "bottom": "Resources/Cubemaps/environment/environment_left_0.jpg",
-                "front": "Resources/Cubemaps/environment/environment_right_0.jpg",
-                "left": "Resources/Cubemaps/environment/environment_bottom_0.jpg",
-                "right": "Resources/Cubemaps/environment/environment_back_0.jpg",
-                "top": "Resources/Cubemaps/environment/environment_front_0.jpg"
+                "back": "Resources/Cubemaps/environment/environment_front_0.jpg",
+                "bottom": "Resources/Cubemaps/environment/environment_bottom_0.jpg",
+                "front": "Resources/Cubemaps/environment/environment_back_0.jpg",
+                "left": "Resources/Cubemaps/environment/environment_left_0.jpg",
+                "right": "Resources/Cubemaps/environment/environment_top_0.jpg",
+                "top": "Resources/Cubemaps/environment/environment_right_0.jpg"
             }
         ],
         "frametextures": null
@@ -67,7 +67,7 @@
                         "pos": [
                             0.0,
                             0.0,
-                            1.0525970458984375
+                            0.0
                         ],
                         "rotate": [
                             0.0,
@@ -100,12 +100,45 @@
                 {
                     "materialframe": "sdftext_mat",
                     "cull": "back",
+                    "uniformvalues": [
+                        {
+                            "name": "charWidth",
+                            "type": "float",
+                            "value": [
+                                32.0
+                            ]
+                        },
+                        {
+                            "name": "maxWidth",
+                            "type": "float",
+                            "value": [
+                                1152.0
+                            ]
+                        },
+                        {
+                            "name": "numOfChar",
+                            "type": "float",
+                            "value": [
+                                36.0
+                            ]
+                        },
+                        {
+                            "name": "textID",
+                            "type": "float",
+                            "value": [
+                                6.0
+                            ]
+                        }
+                    ],
                     "textures": [
                         {
                             "texturebuffername": "MainTexture",
                             "textureindex": -1,
                             "texturename": "sdftex"
                         }
+                    ],
+                    "trackids": [
+                        "be5940ef-6630-44a9-b96d-9fd357593ccb"
                     ]
                 }
             ],
@@ -5487,8 +5520,8 @@
                     "name": "testnode",
                     "transform": {
                         "pos": [
-                            4.310622692108154,
-                            4.310622692108154,
+                            0.0,
+                            0.0,
                             0.0
                         ],
                         "rotate": [
@@ -5497,9 +5530,9 @@
                             0.0
                         ],
                         "scale": [
-                            0.9462293982505798,
-                            0.9462293982505798,
-                            0.9462293982505798
+                            0.5,
+                            0.5,
+                            0.5
                         ]
                     },
                     "meshindex": 0,
