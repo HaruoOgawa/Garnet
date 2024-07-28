@@ -279,34 +279,62 @@ namespace gui
 		
 		bool ExistInput = false;
 
-		switch (ValueType)
+		if (InterpolateValueType == animation::EInterpolateValueType::QUATERNION && ValueType == math::EValueType::VALUE_TYPE_VEC4)
 		{
-		case math::EValueType::VALUE_TYPE_NONE:
-			break;
-		case math::EValueType::VALUE_TYPE_SCALAR:
-			ExistInput = ImGui::InputFloat(Label.c_str(), &Value[0]);
-			break;
-		case math::EValueType::VALUE_TYPE_VEC2:
-			ExistInput = ImGui::InputFloat2(Label.c_str(), &Value[0]);
-			break;
-		case math::EValueType::VALUE_TYPE_VEC3:
-			ExistInput = ImGui::InputFloat3(Label.c_str(), &Value[0]);
-			break;
-		case math::EValueType::VALUE_TYPE_VEC4:
-			ExistInput = ImGui::InputFloat4(Label.c_str(), &Value[0]);
-			break;
-		case math::EValueType::VALUE_TYPE_MAT2:
-			break;
-		case math::EValueType::VALUE_TYPE_MAT3:
-			break;
-		case math::EValueType::VALUE_TYPE_MAT4:
-			break;
-		case math::EValueType::VALUE_TYPE_VECTOR:
-			break;
-		case math::EValueType::VALUE_TYPE_MATRIX:
-			break;
-		default:
-			break;
+			// 回転はオイラー角で表示する
+			glm::quat Rot = glm::quat(Value[3], Value[0], Value[1], Value[2]);
+			glm::vec3 Euler = glm::eulerAngles(Rot);
+			glm::vec3 Degree = glm::vec3(glm::degrees(Euler.x), glm::degrees(Euler.y), glm::degrees(Euler.z));
+			const glm::vec3 PreDegree = Degree;
+
+			ExistInput = ImGui::InputFloat3(Label.c_str(), &Degree[0]);
+
+			if (ExistInput)
+			{
+				if (PreDegree.x != Degree.x || PreDegree.y != Degree.y || PreDegree.z != Degree.z)
+				{
+					// quatのコンストラクタにオイラー角を(glm::vec3)渡すといい感じに内部でいい感じにしてくれるらしい(x, y, z, wの四元数を渡すコンストラクタも別に存在する)
+					Rot = glm::quat(glm::vec3(glm::radians(Degree.x), glm::radians(Degree.y), glm::radians(Degree.z)));
+					//Rot = glm::angleAxis(glm::radians(Degree.z), glm::vec3(0.0f, 0.0f, 1.0f)) * glm::angleAxis(glm::radians(Degree.y), glm::vec3(0.0f, 1.0f, 0.0f)) * glm::angleAxis(glm::radians(Degree.x), glm::vec3(1.0f, 0.0f, 0.0f));
+				}
+
+				Value[0] = Rot.x;
+				Value[1] = Rot.y;
+				Value[2] = Rot.z;
+				Value[3] = Rot.w;
+			}
+		}
+		else
+		{
+			switch (ValueType)
+			{
+			case math::EValueType::VALUE_TYPE_NONE:
+				break;
+			case math::EValueType::VALUE_TYPE_SCALAR:
+				ExistInput = ImGui::InputFloat(Label.c_str(), &Value[0]);
+				break;
+			case math::EValueType::VALUE_TYPE_VEC2:
+				ExistInput = ImGui::InputFloat2(Label.c_str(), &Value[0]);
+				break;
+			case math::EValueType::VALUE_TYPE_VEC3:
+				ExistInput = ImGui::InputFloat3(Label.c_str(), &Value[0]);
+				break;
+			case math::EValueType::VALUE_TYPE_VEC4:
+				ExistInput = ImGui::InputFloat4(Label.c_str(), &Value[0]);
+				break;
+			case math::EValueType::VALUE_TYPE_MAT2:
+				break;
+			case math::EValueType::VALUE_TYPE_MAT3:
+				break;
+			case math::EValueType::VALUE_TYPE_MAT4:
+				break;
+			case math::EValueType::VALUE_TYPE_VECTOR:
+				break;
+			case math::EValueType::VALUE_TYPE_MATRIX:
+				break;
+			default:
+				break;
+			}
 		}
 
 		// 値が変わってかつキーフレームが選択中ならデータをキーフレームに反映する
