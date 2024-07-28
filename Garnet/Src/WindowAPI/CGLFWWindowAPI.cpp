@@ -109,6 +109,9 @@ namespace window
 			case GLFW_KEY_LEFT_CONTROL:
 				KeyType = input::EKeyType::KEY_TYPE_CONTROL;
 				break;
+			case GLFW_KEY_SPACE:
+				KeyType = input::EKeyType::KEY_TYPE_SPACE;
+				break;
 			default:
 				break;
 		}

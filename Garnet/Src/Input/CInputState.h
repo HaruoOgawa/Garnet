@@ -11,6 +11,7 @@ namespace input
 		KEY_TYPE_NONE,
 
 		KEY_TYPE_CONTROL,
+		KEY_TYPE_SPACE,
 
 		KEY_TYPE_W,
 		KEY_TYPE_A,

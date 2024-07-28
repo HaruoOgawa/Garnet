@@ -3,6 +3,7 @@
 #include "Scene/CScriptScene.h"
 #include "../../Graphics/CDrawInfo.h"
 #include "../../Camera/CCamera.h"
+#include "../../Camera/CTraceCamera.h"
 #include "../../Projection/CProjection.h"
 #include "../../ImageEffect/CBlurEffect.h"
 #include "../../Graphics/CFrameRenderer.h"
@@ -32,11 +33,14 @@ namespace app
 	CScriptApp::CScriptApp():
 		m_SceneController(std::make_shared<scene::CSceneController>()),
 		m_ScriptScene(nullptr),
+		m_CameraSwitchToggle(true),
+		m_MainCamera(nullptr),
 #ifdef USE_VIEWER_CAMERA
-		m_MainCamera(std::make_shared<camera::CViewerCamera>()),
+		m_ViewCamera(std::make_shared<camera::CViewerCamera>()),
 #else
-		m_MainCamera(std::make_shared<camera::CCamera>()),
+		m_ViewCamera(std::make_shared<camera::CCamera>()),
 #endif // USE_VIEWER_CAMERA
+		m_TraceCamera(std::make_shared<camera::CTraceCamera>()),
 		m_Projection(std::make_shared<projection::CProjection>()),
 		m_DrawInfo(std::make_shared<graphics::CDrawInfo>()),
 #ifdef USE_GUIENGINE
@@ -48,12 +52,14 @@ namespace app
 		m_FileModifier(std::make_shared<CFileModifier>()),
 		m_TimelineController(std::make_shared<timeline::CTimelineController>())
 	{
-		m_MainCamera->SetPos(glm::vec3(-7.0f, 1.0f, 0.0f));
-		//m_MainCamera->SetCenter(glm::vec3(0.0f, 50.0f, 349.0f));
-		//m_MainCamera->SetPos(glm::vec3(0.0f, 50.0f, 350.0f));
+		m_ViewCamera->SetPos(glm::vec3(-7.0f, 1.0f, 0.0f));
+		m_MainCamera = m_ViewCamera;
+
 		m_DrawInfo->GetLightCamera()->SetPos(glm::vec3(-2.358f, 15.6f, -0.59f));
 		m_DrawInfo->GetLightProjection()->SetNear(2.0f);
 		m_DrawInfo->GetLightProjection()->SetFar(100.0f);
+
+		m_SceneController->SetDefaultPass("MainResultPass", "");
 	}
 
 	bool CScriptApp::Release(api::IGraphicsAPI* pGraphicsAPI)
@@ -133,6 +139,20 @@ namespace app
 		if (!m_MainFrameRenderer->Update(pGraphicsAPI, pPhysicsEngine, pLoadWorker, m_MainCamera, m_Projection, m_DrawInfo, InputState)) return false;
 
 		m_MainCamera->Update(m_DrawInfo->GetDeltaSecondsTime(), InputState);
+
+		if (InputState->IsKeyUp(input::EKeyType::KEY_TYPE_SPACE))
+		{
+			m_CameraSwitchToggle = !m_CameraSwitchToggle;
+
+			if (m_CameraSwitchToggle)
+			{
+				m_MainCamera = m_ViewCamera;
+			}
+			else
+			{
+				m_MainCamera = m_TraceCamera;
+			}
+		}
 
 		return true;
 	}
@@ -246,6 +266,20 @@ namespace app
 			GUIParams.TimelineController = m_TimelineController;
 
 			if (!m_GraphicsEditingWindow->OnLoaded(pGraphicsAPI, GUIParams, GUIEngine)) return false;
+		}
+
+		// ƒJƒƒ‰
+		{
+			const auto& Object = m_SceneController->FindObjectByName("CameraObject");
+			if (Object)
+			{
+				const auto& Node = Object->FindNodeByName("CameraNode");
+
+				if (Node)
+				{
+					m_TraceCamera->SetTargetNode(Node);
+				}
+			}
 		}
 
 		return true;

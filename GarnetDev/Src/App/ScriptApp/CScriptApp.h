@@ -6,6 +6,7 @@ namespace graphics { class CFrameRenderer; }
 namespace gui { class CGraphicsEditingWindow; }
 namespace timeline { class CTimelineController; }
 namespace scene { class CSceneController; }
+namespace camera { class CTraceCamera; }
 
 namespace app
 {
@@ -18,6 +19,8 @@ namespace app
 
 		std::shared_ptr<app::CScriptScene> m_ScriptScene;
 		std::shared_ptr<camera::CCamera> m_MainCamera;
+		std::shared_ptr<camera::CCamera> m_ViewCamera;
+		std::shared_ptr<camera::CTraceCamera> m_TraceCamera;
 		std::shared_ptr<projection::CProjection> m_Projection;
 		std::shared_ptr<graphics::CDrawInfo> m_DrawInfo;
 		std::shared_ptr<imageeffect::CBlurEffect> m_BlurEffect;
@@ -30,6 +33,8 @@ namespace app
 #endif // USE_GUIENGINE
 		
 		std::shared_ptr<timeline::CTimelineController> m_TimelineController;
+
+		bool m_CameraSwitchToggle;
 		
 	public:
 		CScriptApp();

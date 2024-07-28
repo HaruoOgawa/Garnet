@@ -61,10 +61,20 @@ namespace object
 	{
 		return m_PassName;
 	}
+
+	void C3DObject::SetPassName(const std::string& Name)
+	{
+		m_PassName = Name;
+	}
 	
 	const std::string& C3DObject::GetDepthPassName() const
 	{
 		return m_DepthPassName;
+	}
+
+	void C3DObject::SetDepthPassName(const std::string& Name)
+	{
+		m_DepthPassName = Name;
 	}
 
 	bool C3DObject::HasTLTrackContent() const

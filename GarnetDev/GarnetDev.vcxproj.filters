@@ -229,6 +229,8 @@
     <None Include="Resources\MaterialFrame\Objectspace_Ray_MF.json" />
     <None Include="Resources\Shaders\texture.frag" />
     <None Include="Resources\MaterialFrame\FrameTexture_MF.json" />
+    <None Include="Resources\Shaders\sdftext.frag" />
+    <None Include="Resources\MaterialFrame\sdftext_mf.json" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Commands\LibList.txt" />

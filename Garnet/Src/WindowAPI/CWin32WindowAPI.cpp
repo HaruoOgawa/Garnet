@@ -134,6 +134,9 @@ namespace window
 			case VK_CONTROL:
 				KeyType = input::EKeyType::KEY_TYPE_CONTROL;
 				break;
+			case VK_SPACE:
+				KeyType = input::EKeyType::KEY_TYPE_SPACE;
+				break;
 			default:
 				break;
 			}

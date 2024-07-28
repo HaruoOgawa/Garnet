@@ -11,12 +11,20 @@ namespace scene
 		m_SceneTextureSet(nullptr),
 		m_BGM(std::make_tuple(nullptr, false, false)),
 		m_IsLoaded(false),
-		m_TimelineFileName(std::string())
+		m_TimelineFileName(std::string()),
+		m_DefaultRenderPass(std::string()),
+		m_DefaultDepthPass(std::string())
 	{
 	}
 
 	CSceneController::~CSceneController()
 	{
+	}
+
+	void CSceneController::SetDefaultPass(const std::string& RenderPass, const std::string& DepthPass)
+	{
+		m_DefaultRenderPass = RenderPass;
+		m_DefaultDepthPass = DepthPass;
 	}
 
 	void CSceneController::SetFileName(const std::string& Name)
@@ -139,6 +147,17 @@ namespace scene
 	{
 		for (const auto& Object : m_ObjectList)
 		{
+			// レンダーパス名が空ならデフォルトの値を設定する
+			if (Object->GetPassName().empty())
+			{
+				Object->SetPassName(m_DefaultRenderPass);
+			}
+
+			if (Object->GetDepthPassName().empty())
+			{
+				Object->SetDepthPassName(m_DefaultDepthPass);
+			}
+
 			// テクスチャの追加
 			std::map<std::string, int> TexIndexMap;
 			if (!PrepareTextureList(Object, TexIndexMap)) return false;

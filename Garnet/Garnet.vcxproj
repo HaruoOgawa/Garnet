@@ -681,6 +681,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Src\Camera\CTraceCamera.h" />
     <ClInclude Include="Src\LoadWorker\CTimelineClipLoader.h" />
     <ClInclude Include="Src\Timeline\CTimelineExporter.h" />
     <ClInclude Include="Src\Timeline\CTimelineImporter.h" />
@@ -1717,6 +1718,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClInclude Include="Src\Interface\IRenderer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\Camera\CTraceCamera.cpp" />
     <ClCompile Include="Src\LoadWorker\CTimelineClipLoader.cpp" />
     <ClCompile Include="Src\Timeline\CTimelineExporter.cpp" />
     <ClCompile Include="Src\Timeline\CTimelineImporter.cpp" />

@@ -32,8 +32,8 @@ namespace object
 
 		std::string m_DefaultMaterialFrame;
 
-		const std::string m_PassName;
-		const std::string m_DepthPassName;
+		std::string m_PassName;
+		std::string m_DepthPassName;
 		
 		std::string						  m_ObjectName;
 		std::shared_ptr<math::CTransform> m_ObjectTransform;
@@ -85,7 +85,9 @@ namespace object
 		const std::string& GetObjectName() const;
 
 		const std::string& GetPassName() const;
+		void SetPassName(const std::string& Name);
 		const std::string& GetDepthPassName() const;
+		void SetDepthPassName(const std::string& Name);
 
 		bool HasTLTrackContent() const;
 		void AddTLNode(const std::shared_ptr<CNode>& Node);
