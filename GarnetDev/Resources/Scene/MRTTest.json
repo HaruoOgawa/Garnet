@@ -20,12 +20,12 @@
     "scenetextureset": {
         "cubemaps": [
             {
-                "back": "Resources/Cubemaps/environment/environment_back_0.jpg",
-                "bottom": "Resources/Cubemaps/environment/environment_bottom_0.jpg",
-                "front": "Resources/Cubemaps/environment/environment_front_0.jpg",
-                "left": "Resources/Cubemaps/environment/environment_left_0.jpg",
-                "right": "Resources/Cubemaps/environment/environment_right_0.jpg",
-                "top": "Resources/Cubemaps/environment/environment_top_0.jpg"
+                "back": "Resources/Cubemaps/environment/environment_right_0.jpg",
+                "bottom": "Resources/Cubemaps/environment/environment_left_0.jpg",
+                "front": "Resources/Cubemaps/environment/environment_top_0.jpg",
+                "left": "Resources/Cubemaps/environment/environment_bottom_0.jpg",
+                "right": "Resources/Cubemaps/environment/environment_front_0.jpg",
+                "top": "Resources/Cubemaps/environment/environment_back_0.jpg"
             }
         ],
         "frametextures": null
@@ -62,13 +62,13 @@
                     "name": "CameraNode",
                     "transform": {
                         "pos": [
-                            -6.7973809242248535,
-                            1.0,
+                            -7.0,
+                            5.0,
                             0.0
                         ],
                         "rotate": [
-                            0.0,
-                            89.98021697998047,
+                            45.01255798339844,
+                            90.0,
                             0.0
                         ],
                         "scale": [
@@ -118,7 +118,7 @@
                         "pos": [
                             0.0,
                             0.0,
-                            -0.4703161120414734
+                            0.0
                         ],
                         "rotate": [
                             0.0,
@@ -178,7 +178,7 @@
                             "name": "textID",
                             "type": "float",
                             "value": [
-                                2.3928518295288086
+                                10.0
                             ]
                         }
                     ],
@@ -5572,8 +5572,8 @@
                     "name": "testnode",
                     "transform": {
                         "pos": [
-                            5.0,
-                            0.3475290536880493,
+                            0.0,
+                            0.0,
                             0.0
                         ],
                         "rotate": [
@@ -5582,9 +5582,9 @@
                             0.0
                         ],
                         "scale": [
-                            0.7689250111579895,
-                            0.7689250111579895,
-                            0.7689250111579895
+                            0.5,
+                            0.5,
+                            0.5
                         ]
                     },
                     "meshindex": 0,

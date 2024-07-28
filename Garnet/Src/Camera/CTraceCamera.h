@@ -17,5 +17,7 @@ namespace camera
 		void SetTargetNode(const std::shared_ptr<object::CNode>& TargetNode);
 
 		virtual void Update(float DeltaTime, const std::shared_ptr<input::CInputState>& InputState) override;
+
+		//virtual glm::mat4 GetViewMatrix() override;
 	};
 }
