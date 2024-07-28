@@ -97,6 +97,10 @@ namespace scene
 
 		//
 		std::string m_TimelineFileName;
+
+		// PassNameが設定されていない時のデフォルトの値
+		std::string m_DefaultRenderPass;
+		std::string m_DefaultDepthPass;
 		
 	private:
 		bool PrepareTextureList(const std::shared_ptr<object::C3DObject>& Object, std::map<std::string, int>& TexIndexMap);
@@ -107,6 +111,8 @@ namespace scene
 	public:
 		CSceneController();
 		virtual ~CSceneController();
+
+		void SetDefaultPass(const std::string& RenderPass, const std::string& DepthPass);
 
 		void SetFileName(const std::string& Name);
 		const std::string& GetFileName() const;

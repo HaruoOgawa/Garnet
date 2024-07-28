@@ -54,6 +54,8 @@ namespace app
 		m_DrawInfo->GetLightCamera()->SetPos(glm::vec3(-2.358f, 15.6f, -0.59f));
 		m_DrawInfo->GetLightProjection()->SetNear(2.0f);
 		m_DrawInfo->GetLightProjection()->SetFar(100.0f);
+
+		m_SceneController->SetDefaultPass("MainResultPass", "");
 	}
 
 	bool CScriptApp::Release(api::IGraphicsAPI* pGraphicsAPI)
