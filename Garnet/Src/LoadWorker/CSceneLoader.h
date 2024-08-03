@@ -35,8 +35,14 @@ namespace resource
 		bool AnalyseScene(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker);
 
 		bool AnalyseMaterialFrames(const json::iterator& materialframes, resource::CLoadWorker* pLoadWorker);
+
+#ifdef USE_TEXTURE_LOADER
 		bool AnalyseSceneTextureSet(const json::iterator& scenetexturesetJSON, api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, std::shared_ptr<graphics::CTextureSet>& SceneTextureSet);
+#endif // USE_TEXTURE_LOADER
+
+#ifdef USE_ANIMATION
 		bool AnalyseSceneAnimations(const json::iterator& animations, api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker);
+#endif // USE_ANIMATION
 		bool AnalyseObjects(const json::iterator& objects, api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker);
 
 		std::shared_ptr<math::CTransform> AnalyseTransform(const json::iterator& Object);

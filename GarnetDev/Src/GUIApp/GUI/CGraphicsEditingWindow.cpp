@@ -1,7 +1,7 @@
+#ifdef USE_GUIENGINE
 #include "CGraphicsEditingWindow.h"
 #include "../../Message/Console.h"
 
-#ifdef USE_GUIENGINE
 namespace gui
 {
 	CGraphicsEditingWindow::CGraphicsEditingWindow()

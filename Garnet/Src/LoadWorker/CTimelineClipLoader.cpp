@@ -1,3 +1,4 @@
+#ifdef USE_BINARY_READ
 #include "CTimelineClipLoader.h"
 #include "../Timeline/CTimelineClip.h"
 #include "../Timeline/CTimelineImporter.h"
@@ -23,3 +24,4 @@ namespace resource
 		return true;
 	}
 }
+#endif

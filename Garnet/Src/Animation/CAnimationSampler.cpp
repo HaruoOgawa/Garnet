@@ -578,7 +578,8 @@ namespace animation
 		return result;
 	}
 
-	// ボーンに基づく現在のフレームを取得
+	// ToDo: どこも参照していなかったら後で消す
+	/*// ボーンに基づく現在のフレームを取得
 	std::shared_ptr<CKeyFrame> CAnimationSampler::GetCurrentKeyFrameBasedBone(float CurrentTime, EHumanoidBones BoneName, const std::unordered_map<animation::EHumanoidBones, std::vector<std::shared_ptr<animation::CKeyFrame>>>& FrameMatrixMap)
 	{
 		std::shared_ptr<CKeyFrame> dstKeyFrame = nullptr;
@@ -622,5 +623,5 @@ namespace animation
 		}
 
 		return dstKeyFrame;
-	}
+	}*/
 }

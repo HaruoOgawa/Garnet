@@ -52,6 +52,7 @@ namespace resource
 			}
 		}
 
+#ifdef USE_TEXTURE_LOADER
 		// scenetextureset
 		{
 			const auto scenetexturesetJSON = SceneJSON.find("scenetextureset");
@@ -64,7 +65,9 @@ namespace resource
 				m_Target->SetSceneTextureSet(SceneTextureSet);
 			}
 		}
+#endif // USE_TEXTURE_LOADER
 
+#ifdef USE_ANIMATION
 		// animations
 		{
 			const auto animations = SceneJSON.find("animations");
@@ -73,7 +76,7 @@ namespace resource
 				if (!AnalyseSceneAnimations(animations, pGraphicsAPI, pLoadWorker)) return false;
 			}
 		}
-
+#endif // USE_ANIMATION
 
 		// sound
 		{
@@ -151,6 +154,7 @@ namespace resource
 		return true;
 	}
 
+#ifdef USE_TEXTURE_LOADER
 	bool CSceneLoader::AnalyseSceneTextureSet(const json::iterator& scenetexturesetJSON, api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, std::shared_ptr<graphics::CTextureSet>& SceneTextureSet)
 	{
 		// cubemaps
@@ -217,7 +221,9 @@ namespace resource
 
 		return true;
 	}
+#endif // USE_TEXTURE_LOADER
 
+#ifdef USE_ANIMATION
 	bool CSceneLoader::AnalyseSceneAnimations(const json::iterator& animations, api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker)
 	{
 		for (json::iterator animationJSON = animations->begin(); animationJSON != animations->end(); animationJSON++)
@@ -239,6 +245,7 @@ namespace resource
 
 		return true;
 	}
+#endif // USE_ANIMATION
 
 	bool CSceneLoader::AnalyseObjects(const json::iterator& objects, api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker)
 	{
@@ -362,6 +369,7 @@ namespace resource
 				m_Target->AddMaterialInfo(Object, MaterialInfoList);
 			}
 
+#ifdef USE_TEXTURE_LOADER
 			// textureset
 			const auto textureset = objectJSON->find("textureset");
 			if (textureset != objectJSON->end() && textureset->is_array())
@@ -386,6 +394,7 @@ namespace resource
 
 				m_Target->AddTextureInfo(Object, TextureInfoList);
 			}
+#endif // USE_TEXTURE_LOADER
 
 			// animation
 			const auto animationJSON = objectJSON->find("animation");
