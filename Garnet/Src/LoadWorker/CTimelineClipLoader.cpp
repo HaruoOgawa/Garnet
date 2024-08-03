@@ -1,4 +1,4 @@
-#ifdef USE_BINARY_READ
+
 #include "CTimelineClipLoader.h"
 #include "../Timeline/CTimelineClip.h"
 #include "../Timeline/CTimelineImporter.h"
@@ -15,7 +15,9 @@ namespace resource
 	{
 		if (!m_File->IsLoaded()) return true;
 
+#ifdef USE_BINARY_READ
 		if (!timeline::CTimelineImporter::Import(m_File->GetData(), m_Target)) return false;
+#endif
 
 		// ƒ[ƒhŠ®—¹
 		m_Status = resource::ELoadStatus::Loaded;
@@ -24,4 +26,3 @@ namespace resource
 		return true;
 	}
 }
-#endif

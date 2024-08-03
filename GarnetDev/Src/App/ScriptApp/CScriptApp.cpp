@@ -243,11 +243,9 @@ namespace app
 	// ‹N“®€”õŠ®—¹
 	bool CScriptApp::OnStartup(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<gui::IGUIEngine>& GUIEngine)
 	{
-#ifdef USE_BINARY_READ
 		const auto& TimelineFileName = m_SceneController->GetTimelineFileName();
 		if(!TimelineFileName.empty()) pLoadWorker->AddLoadResource(std::make_shared<resource::CTimelineClipLoader>(TimelineFileName, m_TimelineController->GetClip()));
-#endif
-
+		
 		return true;
 	}
 

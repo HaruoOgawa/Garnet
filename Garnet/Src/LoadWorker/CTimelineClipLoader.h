@@ -1,6 +1,5 @@
 #pragma once
 
-#ifdef USE_BINARY_READ
 #include <memory>
 #include <string>
 #include "CResource.h"
@@ -19,4 +18,3 @@ namespace resource
 		virtual bool Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker) override;
 	};
 }
-#endif
