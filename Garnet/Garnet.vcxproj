@@ -682,6 +682,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Src\Camera\CTraceCamera.h" />
+    <ClInclude Include="Src\Graphics\CFrameRenderer.h" />
     <ClInclude Include="Src\Library\bullet3\src\btBulletCollisionCommon.h" />
     <ClInclude Include="Src\Library\bullet3\src\btBulletDynamicsCommon.h" />
     <ClInclude Include="Src\Library\bullet3\src\Bullet3Collision\BroadPhaseCollision\b3BroadphaseCallback.h" />
@@ -1718,6 +1719,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\Camera\CTraceCamera.cpp" />
+    <ClCompile Include="Src\Graphics\CFrameRenderer.cpp" />
     <ClCompile Include="Src\Library\bullet3\src\btBulletCollisionAll.cpp" />
     <ClCompile Include="Src\Library\bullet3\src\btBulletDynamicsAll.cpp" />
     <ClCompile Include="Src\Library\bullet3\src\btLinearMathAll.cpp" />

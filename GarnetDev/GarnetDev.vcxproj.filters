@@ -51,10 +51,10 @@
     <ClCompile Include="Src\ImageEffect\CBlurEffect.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Graphics\CFrameRenderer.cpp">
+    <ClCompile Include="Src\GUIApp\GUI\CTimeLineView.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Src\GUIApp\GUI\CTimeLineView.cpp">
+    <ClCompile Include="Src\App\ScriptApp\CDevApp.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -92,10 +92,10 @@
     <ClInclude Include="Src\ImageEffect\CBlurEffect.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Src\Graphics\CFrameRenderer.h">
+    <ClInclude Include="Src\GUIApp\GUI\CTimeLineView.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Src\GUIApp\GUI\CTimeLineView.h">
+    <ClInclude Include="Src\App\ScriptApp\CDevApp.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -1,28 +1,36 @@
-#include "CScriptApp.h"
+#include "CDevApp.h"
+#include "../../LoadWorker/CLoadWorker.h"
 #include "Scene/CScriptScene.h"
-
 #include "../../Graphics/CDrawInfo.h"
-#include "../../Graphics/CFrameRenderer.h"
-
 #include "../../Camera/CCamera.h"
 #include "../../Camera/CTraceCamera.h"
+#include "../../Projection/CProjection.h"
+#include "../../ImageEffect/CBlurEffect.h"
+#include "../../Graphics/CFrameRenderer.h"
+#include "../../Message/Console.h"
+#include "../../Interface/IGUIEngine.h"
 #ifdef USE_VIEWER_CAMERA
 #include "../../Camera/CViewerCamera.h"
 #endif // USE_VIEWER_CAMERA
 
-#include "../../LoadWorker/CLoadWorker.h"
-#include "../../Projection/CProjection.h"
-#include "../../Message/Console.h"
-#include "../../Interface/IGUIEngine.h"
-
 #include "../../GUIApp/GUI/CGraphicsEditingWindow.h"
 #include "../../GUIApp/Model/CFileModifier.h"
 #include <Timeline/CTimelineController.h>
+#include <Timeline/CNodeTrack.h>
+#include <Timeline/CMaterialTrack.h>
 #include <Scene/CSceneController.h>
+
+// CDevApp は旧エンジンでもやっていたof風にCppでエンジンコードを直接シーンを構築していくアプリ
+
+// MVVMで設計する
+// App => ViewModel, Scene => View, API => Model
+// Garnetで作品を作る時、View(Scene)とViewModel(App)は編集していいが、Modelの変更は一切許さない
+
+// FrameBufferListはAppで作り、そのテクスチャリストをViewにInitializeの最後辺りで渡す
 
 namespace app
 {
-	CScriptApp::CScriptApp() :
+	CDevApp::CDevApp() :
 		m_SceneController(std::make_shared<scene::CSceneController>()),
 		m_ScriptScene(nullptr),
 		m_CameraSwitchToggle(true),
@@ -38,6 +46,9 @@ namespace app
 #ifdef USE_GUIENGINE
 		m_GraphicsEditingWindow(std::make_shared<gui::CGraphicsEditingWindow>()),
 #endif // USE_GUIENGINE
+		m_BlurEffect(nullptr),
+		m_DeferredRenderer(nullptr),
+		m_MainFrameRenderer(nullptr),
 		m_FileModifier(std::make_shared<CFileModifier>()),
 		m_TimelineController(std::make_shared<timeline::CTimelineController>())
 	{
@@ -51,7 +62,7 @@ namespace app
 		m_SceneController->SetDefaultPass("MainResultPass", "");
 	}
 
-	bool CScriptApp::Release(api::IGraphicsAPI* pGraphicsAPI)
+	bool CDevApp::Release(api::IGraphicsAPI* pGraphicsAPI)
 	{
 		if (m_ScriptScene)
 		{
@@ -59,31 +70,48 @@ namespace app
 			m_ScriptScene = nullptr;
 		}
 
+		if (m_BlurEffect)
+		{
+			m_BlurEffect.reset();
+			m_BlurEffect = nullptr;
+		}
+
 		return true;
 	}
 
-	bool CScriptApp::Initialize(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker)
+	bool CDevApp::Initialize(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker)
 	{
-		pLoadWorker->AddScene(std::make_shared<resource::CSceneLoader>("Resources\\Scene\\Sample.json", m_SceneController));
-
-		// オフスクリーンレンダリング
-		if (!pGraphicsAPI->CreateRenderPass("MainResultPass", api::ERenderPassFormat::COLOR_FLOAT_RENDERPASS, glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), -1, -1, 1)) return false;
-
-		m_MainFrameRenderer = std::make_shared<graphics::CFrameRenderer>(pGraphicsAPI, "MainResultPass", "");
-		if (!m_MainFrameRenderer->Create(pLoadWorker, "Resources\\MaterialFrame\\FrameTexture_MF.json")) return false;
+		pLoadWorker->AddScene(std::make_shared<resource::CSceneLoader>("Resources\\Scene\\MRTTest.json", m_SceneController));
 
 		// Viewの初期化
 		m_ScriptScene = std::make_shared<app::CScriptScene>(pGraphicsAPI, pLoadWorker, pPhysicsEngine);
 
+		// オフスクリーンレンダリング
+		//if (!pGraphicsAPI->CreateRenderPass("ShadowPass", api::ERenderPassFormat::COLOR_RENDERPASS, glm::vec4(1.0f), 512, 512)) return false;
+		if (!pGraphicsAPI->CreateRenderPass("MRTTest", api::ERenderPassFormat::COLOR_FLOAT_RENDERPASS, glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), -1, -1, 4)) return false;
+		if (!pGraphicsAPI->CreateRenderPass("MainResultPass", api::ERenderPassFormat::COLOR_FLOAT_RENDERPASS, glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), -1, -1, 1)) return false;
+
+		m_BlurEffect = std::make_shared<imageeffect::CBlurEffect>(pGraphicsAPI);
+		if (!m_BlurEffect->Create(pLoadWorker)) return false;
+
+		m_DeferredRenderer = std::make_shared<graphics::CFrameRenderer>(pGraphicsAPI, "MRTTest", "MainResultPass");
+		if (!m_DeferredRenderer->Create(pLoadWorker, "Resources\\MaterialFrame\\MRTSample_MF.json")) return false;
+
+		m_MainFrameRenderer = std::make_shared<graphics::CFrameRenderer>(pGraphicsAPI, "MainResultPass", "");
+		if (!m_MainFrameRenderer->Create(pLoadWorker, "Resources\\MaterialFrame\\FrameTexture_MF.json")) return false;
+
+		// FrameTextureを渡す
+		//m_ScriptScene->SetFrameTexture(m_BlurEffect->GetFrameTexture());
+
 		return true;
 	}
 
-	bool CScriptApp::ProcessInput(api::IGraphicsAPI* pGraphicsAPI)
+	bool CDevApp::ProcessInput(api::IGraphicsAPI* pGraphicsAPI)
 	{
 		return true;
 	}
 
-	bool CScriptApp::Resize(int Width, int Height)
+	bool CDevApp::Resize(int Width, int Height)
 	{
 		m_Projection->SetScreenResolution(Width, Height);
 
@@ -92,7 +120,7 @@ namespace app
 		return true;
 	}
 
-	bool CScriptApp::Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<input::CInputState>& InputState)
+	bool CDevApp::Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<input::CInputState>& InputState)
 	{
 		if (!m_FileModifier->Update(pLoadWorker)) return false;
 
@@ -103,6 +131,12 @@ namespace app
 
 		if (!m_SceneController->Update(pGraphicsAPI, pPhysicsEngine, pLoadWorker, m_MainCamera, m_Projection, m_DrawInfo, InputState)) return false;
 		if (!m_ScriptScene->Update(pGraphicsAPI, pPhysicsEngine, pLoadWorker, m_MainCamera, m_Projection, m_DrawInfo, InputState)) return false;
+
+		if (!m_BlurEffect->Update(pLoadWorker)) return false;
+
+		if (!m_DeferredRenderer->Update(pGraphicsAPI, pPhysicsEngine, pLoadWorker, m_MainCamera, m_Projection, m_DrawInfo, InputState)) return false;
+
+		if (!m_MainFrameRenderer->Update(pGraphicsAPI, pPhysicsEngine, pLoadWorker, m_MainCamera, m_Projection, m_DrawInfo, InputState)) return false;
 
 		m_MainCamera->Update(m_DrawInfo->GetDeltaSecondsTime(), InputState);
 
@@ -120,12 +154,10 @@ namespace app
 			}
 		}
 
-		if (!m_MainFrameRenderer->Update(pGraphicsAPI, pPhysicsEngine, pLoadWorker, m_MainCamera, m_Projection, m_DrawInfo, InputState)) return false;
-
 		return true;
 	}
 
-	bool CScriptApp::LateUpdate(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker)
+	bool CDevApp::LateUpdate(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker)
 	{
 		if (!m_SceneController->LateUpdate(pGraphicsAPI, pPhysicsEngine, pLoadWorker, m_DrawInfo)) return false;
 
@@ -134,7 +166,7 @@ namespace app
 		return true;
 	}
 
-	bool CScriptApp::FixedUpdate(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker)
+	bool CDevApp::FixedUpdate(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker)
 	{
 		if (!m_SceneController->FixedUpdate(pGraphicsAPI, pPhysicsEngine, pLoadWorker, m_DrawInfo)) return false;
 
@@ -143,12 +175,33 @@ namespace app
 		return true;
 	}
 
-	bool CScriptApp::Draw(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<gui::IGUIEngine>& GUIEngine)
+	bool CDevApp::Draw(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<gui::IGUIEngine>& GUIEngine)
 	{
+		/*// Dispatch GPGPU
+		if (!m_ScriptScene->Dispatch(pGraphicsAPI, pLoadWorker, m_MainCamera, m_Projection, m_DrawInfo)) return false;
+
+		// ShadowPass
+		if (!pGraphicsAPI->BeginRender("ShadowPass")) return false;
+		if (!m_ScriptScene->Draw(pGraphicsAPI, true, m_MainCamera, m_Projection, m_DrawInfo)) return false;
+		if (!pGraphicsAPI->EndRender()) return false;
+
+		// ShadowMapにブラーをかける
+		if (!m_BlurEffect->Draw(pGraphicsAPI, m_MainCamera, m_Projection, m_DrawInfo)) return false;*/
+
+		// MRTTest FrameBuffer
+		{
+			if (!pGraphicsAPI->BeginRender("MRTTest")) return false;
+			if (!m_SceneController->Draw(pGraphicsAPI, false, m_MainCamera, m_Projection, m_DrawInfo)) return false;
+			if (!m_ScriptScene->Draw(pGraphicsAPI, false, m_MainCamera, m_Projection, m_DrawInfo)) return false;
+			if (!pGraphicsAPI->EndRender()) return false;
+		}
+
 		// MainResultPass
 		{
 			if (!pGraphicsAPI->BeginRender("MainResultPass")) return false;
+			if (!m_DeferredRenderer->Draw(pGraphicsAPI, m_MainCamera, m_Projection, m_DrawInfo)) return false;
 			if (!m_SceneController->Draw(pGraphicsAPI, false, m_MainCamera, m_Projection, m_DrawInfo)) return false;
+			if (!m_ScriptScene->Draw(pGraphicsAPI, false, m_MainCamera, m_Projection, m_DrawInfo)) return false;
 			if (!pGraphicsAPI->EndRender()) return false;
 		}
 
@@ -182,13 +235,13 @@ namespace app
 		return true;
 	}
 
-	const std::shared_ptr<graphics::CDrawInfo>& CScriptApp::GetDrawInfo() const
+	const std::shared_ptr<graphics::CDrawInfo>& CDevApp::GetDrawInfo() const
 	{
 		return m_DrawInfo;
 	}
 
 	// 起動準備完了
-	bool CScriptApp::OnStartup(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<gui::IGUIEngine>& GUIEngine)
+	bool CDevApp::OnStartup(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<gui::IGUIEngine>& GUIEngine)
 	{
 		const auto& TimelineFileName = m_SceneController->GetTimelineFileName();
 		if (!TimelineFileName.empty()) pLoadWorker->AddLoadResource(std::make_shared<resource::CTimelineClipLoader>(TimelineFileName, m_TimelineController->GetClip()));
@@ -197,7 +250,7 @@ namespace app
 	}
 
 	// ロード完了イベント
-	bool CScriptApp::OnLoaded(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<gui::IGUIEngine>& GUIEngine)
+	bool CDevApp::OnLoaded(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<gui::IGUIEngine>& GUIEngine)
 	{
 		if (!m_SceneController->Create(pGraphicsAPI, pPhysicsEngine)) return false;
 
@@ -235,7 +288,7 @@ namespace app
 	}
 
 	// フォーカスイベント
-	void CScriptApp::OnFocus(bool Focused, api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker)
+	void CDevApp::OnFocus(bool Focused, api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker)
 	{
 		if (Focused && pLoadWorker)
 		{
@@ -244,7 +297,7 @@ namespace app
 	}
 
 	// Getter
-	std::vector<std::shared_ptr<object::C3DObject>> CScriptApp::GetObjectList() const
+	std::vector<std::shared_ptr<object::C3DObject>> CDevApp::GetObjectList() const
 	{
 		std::vector<std::shared_ptr<object::C3DObject>> ObjectList;
 
@@ -264,7 +317,7 @@ namespace app
 		return ObjectList;
 	}
 
-	std::shared_ptr<scene::CSceneController> CScriptApp::GetSceneController() const
+	std::shared_ptr<scene::CSceneController> CDevApp::GetSceneController() const
 	{
 		return m_SceneController;
 	}
