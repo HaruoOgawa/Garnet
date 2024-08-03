@@ -1,1 +1,0 @@
-C:\emsdk\upstream\emscripten\em++.bat -g "-sEXPORTED_RUNTIME_METHODS=['ccall','UTF8ToString','malloc','free']" -sUSE_WEBGPU=1 -sALLOW_MEMORY_GROWTH -sFETCH @CMakeFiles\Garnet.dir\objects1.rsp -o Garnet.js @CMakeFiles\Garnet.dir\linklibs.rsp
