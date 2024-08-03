@@ -1,6 +1,6 @@
 #pragma once
 
-#ifdef USE_GUIENGINE
+//#ifdef USE_GUIENGINE
 
 #include "../../Interface/IGraphicsAPI.h"
 #include <glm/glm.hpp>
@@ -23,4 +23,4 @@ namespace gui
 		virtual void* CastTexID(graphics::CTexture* pTexture) = 0;
 	};
 }
-#endif
+//#endif

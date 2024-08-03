@@ -790,6 +790,7 @@ namespace object
 		m_ObjectTransform->SetScale(Scale);
 	}
 
+#ifdef USE_ANIMATION
 	void C3DObject::ChangeMotion(int Index)
 	{
 		m_AnimationController->ChangeMotion(Index);
@@ -809,6 +810,7 @@ namespace object
 	{
 		m_BlendShapeController->StopBlendShape(MotionName);
 	}
+#endif // USE_ANIMATION
 
 	const std::shared_ptr<graphics::CTextureSet>& C3DObject::GetTextureSet() const
 	{

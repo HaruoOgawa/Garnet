@@ -13,7 +13,7 @@ namespace app
 	class CScriptScene;
 	class CFileModifier;
 
-	class CScriptApp : public IApp
+	class CDevApp : public IApp
 	{
 		std::shared_ptr<scene::CSceneController> m_SceneController;
 
@@ -23,7 +23,8 @@ namespace app
 		std::shared_ptr<camera::CTraceCamera> m_TraceCamera;
 		std::shared_ptr<projection::CProjection> m_Projection;
 		std::shared_ptr<graphics::CDrawInfo> m_DrawInfo;
-
+		std::shared_ptr<imageeffect::CBlurEffect> m_BlurEffect;
+		std::shared_ptr<graphics::CFrameRenderer> m_DeferredRenderer;
 		std::shared_ptr<graphics::CFrameRenderer> m_MainFrameRenderer;
 
 		std::shared_ptr<CFileModifier> m_FileModifier;
@@ -36,8 +37,8 @@ namespace app
 		bool m_CameraSwitchToggle;
 
 	public:
-		CScriptApp();
-		virtual ~CScriptApp() = default;
+		CDevApp();
+		virtual ~CDevApp() = default;
 
 		virtual bool Release(api::IGraphicsAPI* pGraphicsAPI) override;
 

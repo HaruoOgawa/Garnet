@@ -167,10 +167,12 @@ namespace object
 		const glm::vec3& GetScale() const;
 		void SetScale(const glm::vec3& Scale);
 
+#ifdef USE_ANIMATION
 		void ChangeMotion(int Index); // インデックス指定でモーションを変更
 		void ChangeMotion(const std::string& MotionName); // 名前指定でモーションを変更
 		void PlayBlendShape(const std::string& MotionName);
 		void StopBlendShape(const std::string& MotionName);
+#endif // USE_ANIMATION
 		
 		const std::shared_ptr<graphics::CTextureSet>& GetTextureSet() const;
 	};

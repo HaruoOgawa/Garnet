@@ -15,9 +15,19 @@ def ReplaceGarnetDir(GarnetPath, ProjectName, TargetFileName, SearchText, encodi
     with open(TargetFileName, 'r',encoding=encodingType) as file:
         data = file.read()
         data = data.replace(SearchText, GarnetPath)
-        data = data.replace("GarnetFrame", ProjectName)
+        data = data.replace("GarnetDev", ProjectName)
 
     with open(TargetFileName, 'w',encoding=encodingType) as file:
+        file.write(data)
+
+def ReplaceText(TargetFilePath, SrcText, DstText, encodingType):
+    data = []
+
+    with open(TargetFilePath, 'r',encoding=encodingType) as file:
+        data = file.read()
+        data = data.replace(SrcText, DstText)
+
+    with open(TargetFilePath, 'w',encoding=encodingType) as file:
         file.write(data)
 
 def Main():
@@ -45,25 +55,49 @@ def Main():
     
     print("Start to generate " + args.project_name)
 
-    # 資材のコピー
+    # 資材をまとめてコピー
     GarnetPath = AddPunct(args.input_garnet_path)
     GeneratePath = AddPunct(args.generate_path)
-    GarnetFramePath = AddPunct(GarnetPath + "../GarnetLauncher/GarnetFrame/")
+    GarnetDevPath = AddPunct(GarnetPath + "../GarnetDev/")
 
-    shutil.copytree(GarnetFramePath, GeneratePath, dirs_exist_ok=True)
+    # 最低限必要なものだけ選択する
+    shutil.copytree(GarnetDevPath + "Src", GeneratePath + "Src", dirs_exist_ok=True)
+    shutil.copytree(GarnetDevPath + "Commands", GeneratePath + "Commands", dirs_exist_ok=True)
+    shutil.copytree(GarnetDevPath + "compress_tools", GeneratePath + "compress_tools", dirs_exist_ok=True)
     
-    # ファイル名を変更
+    # 個別に必要なファイルをコピー
+    # プロジェクトファイル
     ProjectName = args.project_name
-    
-    os.rename(GeneratePath + "GarnetFrame.sln", GeneratePath + ProjectName + ".sln")
-    os.rename(GeneratePath + "GarnetFrame.vcxproj", GeneratePath + ProjectName + ".vcxproj")
-    os.rename(GeneratePath + "GarnetFrame.vcxproj.filters", GeneratePath + ProjectName + ".vcxproj.filters")
-    os.rename(GeneratePath + "GarnetFrame.vcxproj.user", GeneratePath + ProjectName + ".vcxproj.user")
 
-    # ファイルの『..\..\Garnet』をGarnetPathに置換する
-    ReplaceGarnetDir(GarnetPath, ProjectName, GeneratePath + ProjectName + ".sln", "..\\..\\Garnet\\", "utf-8_sig")
-    ReplaceGarnetDir(GarnetPath, ProjectName, GeneratePath + ProjectName + ".vcxproj", "..\\..\\Garnet\\", "utf-8_sig")
-    ReplaceGarnetDir(GarnetPath, ProjectName, GeneratePath + "Commands/MakeEmccBuild.bat", "../../../Garnet/", None)
+    shutil.copy(GarnetDevPath + "GarnetDev.sln", GeneratePath + ProjectName + ".sln")
+    shutil.copy(GarnetDevPath + "GarnetDev.vcxproj", GeneratePath + ProjectName + ".vcxproj")
+    shutil.copy(GarnetDevPath + "GarnetDev.vcxproj.filters", GeneratePath + ProjectName + ".vcxproj.filters")
+    shutil.copy(GarnetDevPath + "GarnetDev.vcxproj.user", GeneratePath + ProjectName + ".vcxproj.user")
+
+    # EmscriptenBuild
+    if not os.path.exists(GeneratePath + "EmscriptenBuild"):
+        os.makedirs(GeneratePath + "EmscriptenBuild")
+        
+    shutil.copy(GarnetDevPath + "EmscriptenBuild\\index.html", GeneratePath + "EmscriptenBuild\\index.html", )
+    shutil.copy(GarnetDevPath + "EmscriptenBuild\\Garnet_front.js", GeneratePath + "EmscriptenBuild\\Garnet_front.js")
+    shutil.copytree(GarnetDevPath + "EmscriptenBuild\\obj_fbxsdk", GeneratePath + "EmscriptenBuild\obj_fbxsdk", dirs_exist_ok=True)
+    shutil.copytree(GarnetDevPath + "EmscriptenBuild\\obj_lib", GeneratePath + "EmscriptenBuild\obj_lib", dirs_exist_ok=True)
+
+    # Resouces
+    shutil.copytree(GarnetDevPath + "Resources\\Shaders", GeneratePath + "Resources\\Shaders", dirs_exist_ok=True)
+    
+    shutil.copytree(GarnetDevPath + "Resources\\MaterialFrame", GeneratePath + "Resources\\MaterialFrame", dirs_exist_ok=True)
+
+    if not os.path.exists(GeneratePath + "Resources\\Scene"):
+        os.makedirs(GeneratePath + "Resources\\Scene")
+
+    shutil.copy(GarnetDevPath + "Resources\\Scene\\Sample.json", GeneratePath + "Resources\\Scene\\Sample.json")
+
+    # ファイルの『..\Garnet\』をGarnetPathに置換する
+    ReplaceGarnetDir(GarnetPath, ProjectName, GeneratePath + ProjectName + ".sln", "..\\Garnet\\", "utf-8_sig")
+    ReplaceGarnetDir(GarnetPath, ProjectName, GeneratePath + ProjectName + ".vcxproj", "..\\Garnet\\", "utf-8_sig")
+    ReplaceGarnetDir(GarnetPath, ProjectName, GeneratePath + "Commands/MakeEmccBuild.bat", "..\\Garnet\\", None)
+    ReplaceText(GeneratePath + "Src\\Main\\main.cpp", "CDevApp", "CScriptApp", "utf-8")
 
     return True
 #

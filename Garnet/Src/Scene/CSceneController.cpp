@@ -165,8 +165,10 @@ namespace scene
 			// マテリアルの追加
 			if (!PrepareMaterialList(pGraphicsAPI, Object, TexIndexMap)) return false;
 			
+#ifdef USE_ANIMATION
 			// アニメーションを追加
 			if (!PrepareAnimationList(pGraphicsAPI, Object)) return false;
+#endif // USE_ANIMATION
 
 			// Object生成
 			if (!Object->Create(pGraphicsAPI, pPhysicsEngine, nullptr)) return false;
@@ -204,10 +206,12 @@ namespace scene
 	{
 		if (!m_IsLoaded) return true;
 
+#ifdef USE_BINARY_WRITE
 		if (InputState->IsKeyDown(input::EKeyType::KEY_TYPE_CONTROL) && InputState->IsKeyUp(input::EKeyType::KEY_TYPE_S))
 		{
 			if (!CSceneWriter::Write(this)) return false;
 		}
+#endif // USE_BINARY_WRITE
 
 		for (const auto& Object : m_ObjectList)
 		{
@@ -288,6 +292,7 @@ namespace scene
 		return true;
 	}
 
+#ifdef USE_ANIMATION
 	bool CSceneController::PrepareAnimationList(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<object::C3DObject>& Object)
 	{
 		const auto& it = m_AnimationInfoMap.find(Object);
@@ -336,6 +341,7 @@ namespace scene
 
 		return true;
 	}
+#endif // USE_ANIMATION
 
 	bool CSceneController::CreateMaterialList(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<object::C3DObject>& Object, const std::map<std::string, int>& TexIndexMap)
 	{
