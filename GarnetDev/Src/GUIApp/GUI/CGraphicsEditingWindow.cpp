@@ -41,6 +41,7 @@ namespace gui
 				{
 					if (!m_GUIObjectTab.Draw(pGraphicsAPI, GUIParams)) return false;
 					if (!m_GUIResourcesTab.Draw(GUIParams.FileModifier)) return false;
+					if (!m_MaterialFrameTab.Draw(pGraphicsAPI, GUIParams)) return false;
 					if (!CGUIRenderingTab::Draw()) return false;
 					if (!CGUICameraTab::Draw()) return false;
 

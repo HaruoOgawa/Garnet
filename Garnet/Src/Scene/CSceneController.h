@@ -130,6 +130,7 @@ namespace scene
 		std::shared_ptr<object::C3DObject> FindObjectByIndex(int Index);
 
 		void AddMaterialFrame(const std::string& MFName, const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame);
+		void AddMaterialFrameWithLoading(resource::CLoadWorker* pLoadWorker, const std::string& MFName, const std::string& FileName);
 		const std::map<std::string, std::shared_ptr<graphics::CMaterialFrame>>& GetMaterialFrameMap() const;
 		std::shared_ptr<graphics::CMaterialFrame> FindMaterialFrame(const std::string& MFName);
 

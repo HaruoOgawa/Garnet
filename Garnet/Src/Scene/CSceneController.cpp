@@ -131,6 +131,20 @@ namespace scene
 		m_MaterialFrameMap.emplace(MFName, MaterialFrame);
 	}
 
+	void CSceneController::AddMaterialFrameWithLoading(resource::CLoadWorker* pLoadWorker, const std::string& MFName, const std::string& FileName)
+	{
+		const auto it = m_MaterialFrameMap.find(MFName);
+
+		if (it == m_MaterialFrameMap.end())
+		{
+			std::shared_ptr<graphics::CMaterialFrame> MaterialFrame = std::make_shared<graphics::CMaterialFrame>();
+
+			pLoadWorker->AddLoadResource(std::make_shared<resource::CMaterialFrameLoader>(FileName, MaterialFrame));
+
+			AddMaterialFrame(MFName, MaterialFrame);
+		}
+	}
+
 	const std::map<std::string, std::shared_ptr<graphics::CMaterialFrame>>& CSceneController::GetMaterialFrameMap() const
 	{
 		return m_MaterialFrameMap;

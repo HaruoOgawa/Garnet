@@ -11,6 +11,7 @@
 #include "CGUICameraTab.h"
 #include "CGUIResourcesTab.h"
 #include "CTimeLineView.h"
+#include "CGUIMaterialFrameTab.h"
 #include "SGUIParams.h"
 
 #include <Interface/IGUIEngine.h>
@@ -25,6 +26,7 @@ namespace gui
 		CGUIObjectTab m_GUIObjectTab;
 		CGUIResourcesTab m_GUIResourcesTab;
 		CTimeLineView m_TimeLineView;
+		CGUIMaterialFrameTab m_MaterialFrameTab;
 	public:
 		CGraphicsEditingWindow();
 		virtual ~CGraphicsEditingWindow();
