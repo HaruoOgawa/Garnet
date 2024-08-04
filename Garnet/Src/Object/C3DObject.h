@@ -129,6 +129,7 @@ namespace object
 		void AddNode(const std::shared_ptr<CNode>& Node);
 		const std::vector<std::shared_ptr<CNode>>& GetNodeList() const;
 		std::shared_ptr<CNode> FindNodeByName(const std::string& Name);
+		std::shared_ptr<CNode> FindNodeByIndex(int Index);
 		
 		void AddMesh(const std::shared_ptr<graphics::CMesh>& Mesh);
 		const std::vector<std::shared_ptr<graphics::CMesh>>& GetMeshList() const;
@@ -156,6 +157,7 @@ namespace object
 		bool IsPlayingAnimation() const;
 #endif
 		void SetRootNodeIndexList(const std::vector<std::vector<int>>& RootNodeIndexList);
+		void AddRootNodeIndex(int Index);
 		const std::vector<std::vector<int>>& GetRootNodeIndexList() const;
 
 		const glm::vec3& GetPos() const;

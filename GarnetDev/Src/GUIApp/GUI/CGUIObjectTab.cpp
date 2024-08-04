@@ -15,7 +15,8 @@ namespace gui
 		m_SelectedNodeIndex(-1),
 		m_SelectedName(""),
 		m_OperateButtonID(-1),
-		m_ShowAddObjectDialog(false)
+		m_ShowAddObjectDialog(false),
+		m_ShowAddNodeDialog(false)
 	{
 	}
 
@@ -40,6 +41,11 @@ namespace gui
 		if (m_ShowAddObjectDialog)
 		{
 			if (!DrawAddObjectDialog(pGraphicsAPI, GUIParams)) return false;
+		}
+
+		if (m_ShowAddNodeDialog)
+		{
+			if (!DrawAddNodeDialog(pGraphicsAPI, GUIParams)) return false;
 		}
 
 		return true;
@@ -70,12 +76,17 @@ namespace gui
 				// ObjectのTreeNodeを配置
 				const bool IsOpend = ImGui::TreeNodeEx(Object->GetObjectName().c_str(), ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_Framed);
 
-				if (ImGui::IsItemClicked())
+				if (ImGui::IsItemClicked(0) || ImGui::IsItemClicked(1))
 				{
 					m_SelectedObjectIndex = CurrentObjectIndex;
 					m_SelectedNodeIndex = -1;
 
 					m_SelectedName = Object->GetObjectName();
+
+					if (ImGui::IsMouseClicked(1))
+					{
+						m_ShowAddNodeDialog = true;
+					}
 				}
 
 				if (IsOpend)
@@ -145,12 +156,17 @@ namespace gui
 		//
 		const bool IsOpened = ImGui::TreeNodeEx(Node->GetName().c_str(), ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_Framed);
 
-		if (ImGui::IsItemClicked())
+		if (ImGui::IsItemClicked(0) || ImGui::IsItemClicked(1))
 		{
 			SelectedObjectIndex = CurrentObjectIndex;
 			SelectedNodeIndex = CurrentNodeIndex;
 
 			m_SelectedName = Node->GetName();
+
+			if (ImGui::IsMouseClicked(1))
+			{
+				m_ShowAddNodeDialog = true;
+			}
 		}
 
 		if (IsOpened)
@@ -298,6 +314,67 @@ namespace gui
 					{
 						fileName = std::string(buf);
 					}
+				}
+			}
+		}
+
+		ImGui::End();
+
+		return true;
+	}
+
+	bool CGUIObjectTab::DrawAddNodeDialog(api::IGraphicsAPI* pGraphicsAPI, const SGUIParams& GUIParams)
+	{
+		if (m_SelectedObjectIndex == -1) return true;
+
+		ImGuiIO& io = ImGui::GetIO();
+
+		ImVec2 WindowSize = ImVec2(io.DisplaySize.x * 0.15f, io.DisplaySize.y * 0.15f);
+
+		ImGui::SetNextWindowPos(ImVec2(io.MousePos.x - WindowSize.x * 0.5f, io.MousePos.y - WindowSize.y * 0.5f), ImGuiCond_Appearing, ImVec2(0.0f, 0.0f));
+		ImGui::SetNextWindowSize(WindowSize, ImGuiCond_Appearing);
+
+		if (ImGui::Begin("AddNode##ObjectTab", &m_ShowAddNodeDialog))
+		{
+			// NodeName
+			static std::string NodeName = std::string();
+			{
+				static char buf[256] = "";
+
+				if (ImGui::InputText("NodeName##AddNodeDialog", buf, IM_ARRAYSIZE(buf)))
+				{
+					NodeName = std::string(buf);
+				}
+
+				if (ImGui::Button("Add##DrawAddNodeDialog"))
+				{
+					const auto& Object = GUIParams.SceneController->FindObjectByIndex(m_SelectedObjectIndex);
+
+					if (Object)
+					{
+						std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(-1, static_cast<int>(Object->GetNodeList().size()));
+						Node->SetName(NodeName);
+
+						Object->AddNode(Node);
+
+						if (m_SelectedNodeIndex >= 0)
+						{
+							// 子ノードを追加
+							const auto& ParentNode = Object->FindNodeByIndex(m_SelectedNodeIndex);
+
+							ParentNode->AddChildrenNodeIndex(Node->GetSelfNodeIndex());
+						}
+						else
+						{
+							// オブジェクト直下にルートノードを追加
+							Object->AddRootNodeIndex(Node->GetSelfNodeIndex());
+						}
+					}
+
+					m_ShowAddNodeDialog = false;
+
+					std::memset(buf, 0, sizeof(buf));
+					NodeName = std::string();
 				}
 			}
 		}

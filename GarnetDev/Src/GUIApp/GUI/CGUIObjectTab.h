@@ -28,6 +28,9 @@ namespace gui
 
 		// オブジェクト追加ダイアログ
 		bool m_ShowAddObjectDialog;
+
+		// ノード追加ダイアログ
+		bool m_ShowAddNodeDialog;
 	private:
 		void Reset();
 
@@ -37,6 +40,7 @@ namespace gui
 		bool DrawObjectDetail(api::IGraphicsAPI* pGraphicsAPI, const SGUIParams& GUIParams);
 
 		bool DrawAddObjectDialog(api::IGraphicsAPI* pGraphicsAPI, const SGUIParams& GUIParams);
+		bool DrawAddNodeDialog(api::IGraphicsAPI* pGraphicsAPI, const SGUIParams& GUIParams);
 
 		void SetDrawable(bool Flag, const std::shared_ptr<object::CNode>& Node, const std::vector<std::shared_ptr<object::CNode>>& NodeList);
 

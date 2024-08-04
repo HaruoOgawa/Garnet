@@ -661,6 +661,18 @@ namespace object
 		return DstNode;
 	}
 
+	std::shared_ptr<CNode> C3DObject::FindNodeByIndex(int Index)
+	{
+		std::shared_ptr<CNode> DstNode = nullptr;
+
+		if (Index >= 0 && Index < static_cast<int>(m_NodeList.size()))
+		{
+			DstNode = m_NodeList[Index];
+		}
+
+		return DstNode;
+	}
+
 	void C3DObject::AddMesh(const std::shared_ptr<graphics::CMesh>& Mesh)
 	{
 		m_MeshList.push_back(Mesh);
@@ -752,9 +764,15 @@ namespace object
 		return true;
 	}
 
+	// ToDo: å„Ç≈RootNodeIndexListÇ1éüå≥îzóÒÇ…íºÇµÇƒSetRootNodeIndexListÇÕè¡Ç∑
 	void C3DObject::SetRootNodeIndexList(const std::vector<std::vector<int>>& RootNodeIndexList)
 	{
 		m_RootNodeIndexList = RootNodeIndexList;
+	}
+
+	void C3DObject::AddRootNodeIndex(int Index)
+	{
+		m_RootNodeIndexList.push_back(std::vector<int>({ Index }));
 	}
 
 	const std::vector<std::vector<int>>& C3DObject::GetRootNodeIndexList() const

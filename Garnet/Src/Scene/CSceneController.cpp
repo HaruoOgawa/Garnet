@@ -114,6 +114,18 @@ namespace scene
 		return DstObject;
 	}
 
+	std::shared_ptr<object::C3DObject> CSceneController::FindObjectByIndex(int Index)
+	{
+		std::shared_ptr<object::C3DObject> DstObject = nullptr;
+
+		if (Index >= 0 && Index < static_cast<int>(m_ObjectList.size()))
+		{
+			DstObject = m_ObjectList[Index];
+		}
+
+		return DstObject;
+	}
+
 	void CSceneController::AddMaterialFrame(const std::string& MFName, const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame)
 	{
 		m_MaterialFrameMap.emplace(MFName, MaterialFrame);
