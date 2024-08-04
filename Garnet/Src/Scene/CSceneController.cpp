@@ -1,5 +1,6 @@
 #include "CSceneController.h"
 #include "CSceneWriter.h"
+#include <LoadWorker/CLoadWorker.h>
 #include "../Object/C3DObject.h"
 #include "../Animation/CAnimationClipSet.h"
 #include "../Audio/CAudioClip.h"
@@ -49,7 +50,47 @@ namespace scene
 
 	void CSceneController::AddObject(const std::shared_ptr<object::C3DObject>& Object)
 	{
+		// レンダーパス名が空ならデフォルトの値を設定する
+		if (Object->GetPassName().empty())
+		{
+			Object->SetPassName(m_DefaultRenderPass);
+		}
+
+		if (Object->GetDepthPassName().empty())
+		{
+			Object->SetDepthPassName(m_DefaultDepthPass);
+		}
+
+		// SceneTextureSet
+		if (m_SceneTextureSet)
+		{
+			for (const auto& CubeMap : m_SceneTextureSet->GetCubeMapList())
+			{
+				Object->GetTextureSet()->AddCubeMap(CubeMap);
+			}
+
+			const auto& Diffuse_Tex = m_SceneTextureSet->GetDiffuse_Tex();
+			const auto& Specular_Tex = m_SceneTextureSet->GetSpecular_Tex();
+			const auto& GGXLUT_Tex = m_SceneTextureSet->GetGGXLUT_Tex();
+			if (Diffuse_Tex && Specular_Tex && GGXLUT_Tex)
+			{
+				Object->GetTextureSet()->AddIBLTexture(Diffuse_Tex, Specular_Tex, GGXLUT_Tex);
+			}
+		}
+
 		m_ObjectList.push_back(Object);
+	}
+
+	void CSceneController::AddObjectWithLoading(resource::CLoadWorker* pLoadWorker, const std::shared_ptr<object::C3DObject>& Object, const std::string& FileName, const std::string& DefaultMaterialframeName)
+	{
+		const auto MaterialFrame = FindMaterialFrame(DefaultMaterialframeName);
+		if (!MaterialFrame) return;
+
+		// ObjectListに追加
+		AddObject(Object);
+
+		// ロードワーカーに渡してロード開始
+		pLoadWorker->AddLoadResource(std::make_shared<resource::C3DObjectLoader>(FileName, Object, MaterialFrame, DefaultMaterialframeName));
 	}
 
 	std::vector<std::shared_ptr<object::C3DObject>> CSceneController::GetObjectList() const
@@ -81,6 +122,16 @@ namespace scene
 	const std::map<std::string, std::shared_ptr<graphics::CMaterialFrame>>& CSceneController::GetMaterialFrameMap() const
 	{
 		return m_MaterialFrameMap;
+	}
+
+	std::shared_ptr<graphics::CMaterialFrame> CSceneController::FindMaterialFrame(const std::string& MFName)
+	{
+		std::shared_ptr<graphics::CMaterialFrame> MaterialFrame = nullptr;
+
+		const auto it = m_MaterialFrameMap.find(MFName);
+		if (it != m_MaterialFrameMap.end()) MaterialFrame = it->second;
+
+		return MaterialFrame;
 	}
 
 	void CSceneController::AddAnimationClipSet(const std::string& Name, const std::shared_ptr<animation::CAnimationClipSet>& AnimationClipSet)
@@ -147,17 +198,6 @@ namespace scene
 	{
 		for (const auto& Object : m_ObjectList)
 		{
-			// レンダーパス名が空ならデフォルトの値を設定する
-			if (Object->GetPassName().empty())
-			{
-				Object->SetPassName(m_DefaultRenderPass);
-			}
-
-			if (Object->GetDepthPassName().empty())
-			{
-				Object->SetDepthPassName(m_DefaultDepthPass);
-			}
-
 			// テクスチャの追加
 			std::map<std::string, int> TexIndexMap;
 			if (!PrepareTextureList(Object, TexIndexMap)) return false;
@@ -174,6 +214,7 @@ namespace scene
 			if (!Object->Create(pGraphicsAPI, pPhysicsEngine, nullptr)) return false;
 		}
 
+		// Audio
 		{
 			const auto& AudioClip = std::get<0>(m_BGM);
 

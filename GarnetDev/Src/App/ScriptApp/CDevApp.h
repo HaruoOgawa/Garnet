@@ -1,4 +1,6 @@
 #pragma once
+#ifdef _DEBUG
+
 #include <memory>
 #include <Interface/IApp.h>
 
@@ -67,3 +69,5 @@ namespace app
 		virtual std::shared_ptr<scene::CSceneController> GetSceneController() const override;
 	};
 }
+
+#endif // _DEBUG

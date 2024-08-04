@@ -146,6 +146,8 @@ namespace object
 
 	bool C3DObject::Create(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, const std::shared_ptr<graphics::CMaterialFrame>& DepthMF)
 	{
+		if (m_IsCreated) return true;
+
 		// DefaultLocalTransform‚ð•Û‘¶‚·‚é
 		ApplyDefaultLocalTransform();
 

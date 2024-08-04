@@ -405,24 +405,6 @@ namespace resource
 				m_Target->AddAnimationInfo(Object, AnimationInfo);
 			}
 
-			// SceneTextureSet
-			const auto& SceneTextureSet = m_Target->GetSceneTextureSet();
-			if (SceneTextureSet)
-			{
-				for (const auto& CubeMap : SceneTextureSet->GetCubeMapList())
-				{
-					Object->GetTextureSet()->AddCubeMap(CubeMap);
-				}
-
-				const auto& Diffuse_Tex = SceneTextureSet->GetDiffuse_Tex();
-				const auto& Specular_Tex = SceneTextureSet->GetSpecular_Tex();
-				const auto& GGXLUT_Tex = SceneTextureSet->GetGGXLUT_Tex();
-				if (Diffuse_Tex && Specular_Tex && GGXLUT_Tex)
-				{
-					Object->GetTextureSet()->AddIBLTexture(Diffuse_Tex, Specular_Tex, GGXLUT_Tex);
-				}
-			}
-
 			// Object‚ð’Ç‰Á
 			m_Target->AddObject(Object);
 		}

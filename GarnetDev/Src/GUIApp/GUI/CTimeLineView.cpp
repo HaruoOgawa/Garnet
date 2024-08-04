@@ -911,14 +911,20 @@ namespace gui
 					std::string TrackID = timeline::CTimelineTrack::GenerateUUID();
 
 					timeline::ETimelineSamplerTarget SamplerTarget = timeline::ETimelineSamplerTarget::NONE;
+					animation::EInterpolationType InterpolationType = animation::EInterpolationType::LINEAR;
 
 					if (SelectedType == timeline::ENodeTrackTarget::NodeTrackTarget_Rotation)
 					{
 						SamplerTarget = timeline::ETimelineSamplerTarget::ROTATION;
 					}
+					else if (SelectedType == timeline::ENodeTrackTarget::NodeTrackTarget_EnabledFlag)
+					{
+						// オンオフフラグの時はStepで補完する
+						InterpolationType = animation::EInterpolationType::STEP;
+					}
 
 					// Sampler
-					std::shared_ptr<animation::CAnimationSampler> Sampler = std::make_shared<animation::CAnimationSampler>(animation::EInterpolationType::LINEAR);
+					std::shared_ptr<animation::CAnimationSampler> Sampler = std::make_shared<animation::CAnimationSampler>(InterpolationType);
 					Clip->AddSampler(Sampler);
 
 					// Track

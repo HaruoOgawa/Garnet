@@ -7,8 +7,14 @@
 #include "../Interface/IResource.h"
 #include "../Object/C3DObject.h"
 #include "CResourceManager.h"
-#include "CSceneLoader.h"
+
+#include "C3DObjectLoader.h"
+#include "CAnimationLoader.h"
+#include "CAudioLoader.h"
 #include "CMaterialFrameLoader.h"
+#include "CSceneLoader.h"
+#include "CShaderLoader.h"
+#include "CTextureLoader.h"
 #include "CTimelineClipLoader.h"
 
 namespace file { class CFile; }

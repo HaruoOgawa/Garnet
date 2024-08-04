@@ -39,7 +39,7 @@ namespace gui
 			{
 				if (ImGui::BeginTabBar("MainMenuBar"))
 				{
-					if (!m_GUIObjectTab.Draw(pGraphicsAPI, GUIParams.ObjectList, GUIParams.SceneController)) return false;
+					if (!m_GUIObjectTab.Draw(pGraphicsAPI, GUIParams)) return false;
 					if (!m_GUIResourcesTab.Draw(GUIParams.FileModifier)) return false;
 					if (!CGUIRenderingTab::Draw()) return false;
 					if (!CGUICameraTab::Draw()) return false;

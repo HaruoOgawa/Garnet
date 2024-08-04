@@ -498,6 +498,7 @@
   <ItemGroup>
     <ClInclude Include="Src\App\ScriptApp\CDevApp.h" />
     <ClInclude Include="Src\GUIApp\GUI\CTimeLineView.h" />
+    <ClInclude Include="Src\GUIApp\GUI\SGUIParams.h" />
     <ClInclude Include="Src\ImageEffect\CBlurEffect.h" />
     <ClInclude Include="Src\App\ScriptApp\CScriptApp.h" />
     <ClInclude Include="Src\GUIApp\GUI\CGraphicsEditingWindow.h" />

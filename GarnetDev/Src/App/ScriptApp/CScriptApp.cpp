@@ -162,11 +162,7 @@ namespace app
 #ifdef USE_GUIENGINE
 			if (pLoadWorker->IsLoaded())
 			{
-				gui::SGUIParams GUIParams = {};
-				GUIParams.FileModifier = m_FileModifier;
-				GUIParams.ObjectList = GetObjectList();
-				GUIParams.SceneController = m_SceneController;
-				GUIParams.TimelineController = m_TimelineController;
+				gui::SGUIParams GUIParams = gui::SGUIParams(GetObjectList(), m_SceneController, m_FileModifier, m_TimelineController, pLoadWorker);
 
 				if (!GUIEngine->BeginFrame(pGraphicsAPI)) return false;
 				if (!m_GraphicsEditingWindow->Draw(pGraphicsAPI, GUIParams, GUIEngine)) return false;
@@ -207,11 +203,7 @@ namespace app
 
 #ifdef USE_GUIENGINE
 		{
-			gui::SGUIParams GUIParams = {};
-			GUIParams.FileModifier = m_FileModifier;
-			GUIParams.ObjectList = GetObjectList();
-			GUIParams.SceneController = m_SceneController;
-			GUIParams.TimelineController = m_TimelineController;
+			gui::SGUIParams GUIParams = gui::SGUIParams(GetObjectList(), m_SceneController, m_FileModifier, m_TimelineController, pLoadWorker);
 
 			if (!m_GraphicsEditingWindow->OnLoaded(pGraphicsAPI, GUIParams, GUIEngine)) return false;
 		}

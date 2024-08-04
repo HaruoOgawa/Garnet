@@ -11,23 +11,15 @@
 #include "CGUICameraTab.h"
 #include "CGUIResourcesTab.h"
 #include "CTimeLineView.h"
+#include "SGUIParams.h"
 
 #include <Interface/IGUIEngine.h>
 #include <Interface/IApp.h>
 
 namespace api { class IGraphicsAPI; }
-namespace timeline { class CTimelineController; }
 
 namespace gui
 {
-	struct SGUIParams
-	{
-		std::vector<std::shared_ptr<object::C3DObject>> ObjectList;
-		std::shared_ptr<scene::CSceneController> SceneController = nullptr;
-		std::shared_ptr<app::CFileModifier> FileModifier = nullptr;
-		std::shared_ptr<timeline::CTimelineController> TimelineController = nullptr;
-	};
-
 	class CGraphicsEditingWindow
 	{
 		CGUIObjectTab m_GUIObjectTab;

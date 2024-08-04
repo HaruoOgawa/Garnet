@@ -75,6 +75,9 @@ namespace resource
 		// リソースマネージャーに登録
 		pLoadWorker->GetResourceManager()->AddOnMemoryResource(shared_from_this(), nullptr);
 
+		// Object生成
+		if (!m_TargetObject->Create(pGraphicsAPI, pPhysicsEngine, nullptr)) return false;
+
 		return true;
 	}
 
