@@ -2,6 +2,7 @@
 #include "CGUIObjectTab.h"
 #include "CGUIMaterialTab.h"
 #include "CGUITransformTab.h"
+#include "CGUIMeshTab.h"
 
 #include <Scene/CSceneController.h>
 #include <Object/C3DObject.h>
@@ -200,6 +201,7 @@ namespace gui
 			{
 				if (!CGUITransformTab::Draw(GUIParams.ObjectList, m_SelectedObjectIndex, m_SelectedNodeIndex)) return false;
 				if (!CGUIMaterialTab::Draw(pGraphicsAPI, GUIParams.ObjectList, GUIParams.SceneController, m_SelectedObjectIndex, m_SelectedNodeIndex)) return false;
+				if (!CGUIMeshTab::Draw(pGraphicsAPI, GUIParams.ObjectList, GUIParams.SceneController, m_SelectedObjectIndex, m_SelectedNodeIndex)) return false;
 
 				ImGui::EndTabBar(); // ObjectDetail
 			}

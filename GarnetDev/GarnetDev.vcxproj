@@ -480,6 +480,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\GUIApp\GUI\CGUIMeshTab.cpp" />
     <ClCompile Include="Src\GUIApp\GUI\CGUIMaterialFrameTab.cpp" />
     <ClCompile Include="Src\App\ScriptApp\CDevApp.cpp" />
     <ClCompile Include="Src\GUIApp\GUI\CTimeLineView.cpp" />
@@ -497,6 +498,7 @@
     <ClCompile Include="Src\Main\main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Src\GUIApp\GUI\CGUIMeshTab.h" />
     <ClInclude Include="Src\GUIApp\GUI\CGUIMaterialFrameTab.h" />
     <ClInclude Include="Src\App\ScriptApp\CDevApp.h" />
     <ClInclude Include="Src\GUIApp\GUI\CTimeLineView.h" />

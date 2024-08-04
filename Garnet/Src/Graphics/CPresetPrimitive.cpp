@@ -6,6 +6,26 @@
 
 namespace graphics
 {
+	std::pair<std::shared_ptr<graphics::CVertexBuffer>, std::shared_ptr<graphics::CIndexBuffer>> CPresetPrimitive::CreateFromType(api::IGraphicsAPI* pGraphicsAPI, graphics::EPresetPrimitiveType PresetType)
+	{
+		switch (PresetType)
+		{
+		case graphics::EPresetPrimitiveType::None:
+			return std::make_pair(pGraphicsAPI->CreateVertexBuffer(), pGraphicsAPI->CreateIndexBuffer());
+		case graphics::EPresetPrimitiveType::BOARD:
+			return CreateBoard(pGraphicsAPI);
+		case graphics::EPresetPrimitiveType::CUBE:
+			return CreateBox(pGraphicsAPI);
+		case graphics::EPresetPrimitiveType::POINT:
+			return CreatePoint(pGraphicsAPI);
+		case graphics::EPresetPrimitiveType::SPHERE:
+			return CreateSphere(pGraphicsAPI);
+		case graphics::EPresetPrimitiveType::Max:
+		default:
+			return std::make_pair(pGraphicsAPI->CreateVertexBuffer(), pGraphicsAPI->CreateIndexBuffer());
+		}
+	}
+
 	std::pair<std::shared_ptr<graphics::CVertexBuffer>, std::shared_ptr<graphics::CIndexBuffer>> CPresetPrimitive::CreateBoard(api::IGraphicsAPI* pGraphicsAPI)
 	{
 		std::pair<std::shared_ptr<graphics::CVertexBuffer>, std::shared_ptr<graphics::CIndexBuffer>> createInfo = std::make_pair(pGraphicsAPI->CreateVertexBuffer(), pGraphicsAPI->CreateIndexBuffer());

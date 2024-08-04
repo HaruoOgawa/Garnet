@@ -60,6 +60,9 @@
     <ClCompile Include="Src\GUIApp\GUI\CGUIMaterialFrameTab.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Src\GUIApp\GUI\CGUIMeshTab.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\GUIApp\GUI\CGraphicsEditingWindow.h">
@@ -105,6 +108,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Src\GUIApp\GUI\CGUIMaterialFrameTab.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\GUIApp\GUI\CGUIMeshTab.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
