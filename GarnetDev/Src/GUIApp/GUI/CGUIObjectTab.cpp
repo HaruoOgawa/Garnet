@@ -286,6 +286,9 @@ namespace gui
 				Object->SetPassName(PassName);
 				Object->SetDepthPassName(DepthPassName);
 
+				// ToDo: ‘¦Žž¶¬‚·‚é
+				if (!Object->Create(pGraphicsAPI, nullptr, nullptr)) return false;
+
 				GUIParams.SceneController->AddObject(Object);
 			}
 

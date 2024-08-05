@@ -177,30 +177,12 @@ namespace object
 
 		for (const auto& Mesh : m_MeshList)
 		{
-			if (!Mesh->CreateBuffer()) return false;
+			if (!Mesh->Create(pGraphicsAPI, m_MaterialList, m_PassName, m_DepthPassName)) return false;
 
 			// モーフ処理が必要かどうか
 			if (Mesh->GetMorphDataList().size() > 0)
 			{
 				ExistMorph = true;
-			}
-
-			for (const auto& Primitive : Mesh->GetPrimitiveList())
-			{
-				int MaterialIndex = Primitive->GetMaterialIndex();
-				if (MaterialIndex < 0 || MaterialIndex >= m_MaterialList.size()) continue;
-
-				const auto& Material = m_MaterialList[MaterialIndex];
-
-				if (!Primitive->Create(pGraphicsAPI, m_PassName, Material, false)) return false;
-				
-				if (Material->GetDepthMaterial())
-				{
-					if (!Primitive->Create(pGraphicsAPI, m_DepthPassName, Material->GetDepthMaterial(), true)) return false;
-				}
-
-				// 生成処理が終わったので不要なリソースを解放する
-				Primitive->Release();
 			}
 		}
 

@@ -104,6 +104,9 @@ namespace gui
 					const auto& NewMaterial = CurrentMaterialFrame->CreateMaterial(pGraphicsAPI, 1, CullMode);
 					NewMaterial->SetMaterialName(MaterialName);
 
+					// ToDO: ‘¦Žž¶¬‚·‚é
+					if (!NewMaterial->Create(Object->GetTextureSet())) return false;
+
 					Object->AddMaterial(NewMaterial);
 				}
 

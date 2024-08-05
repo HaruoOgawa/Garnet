@@ -1,6 +1,7 @@
 #include "CMesh.h"
 #include "CVertexBuffer.h"
 #include "CIndexBuffer.h"
+#include "CMaterial.h"
 
 namespace graphics
 {
@@ -10,6 +11,31 @@ namespace graphics
 
 	CMesh::~CMesh()
 	{
+	}
+
+	bool CMesh::Create(api::IGraphicsAPI* pGraphicsAPI, const std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList, std::string PassName, std::string DepthPassName)
+	{
+		if (!CreateBuffer()) return false;
+
+		for (const auto& Primitive : GetPrimitiveList())
+		{
+			int MaterialIndex = Primitive->GetMaterialIndex();
+			if (MaterialIndex < 0 || MaterialIndex >= MaterialList.size()) continue;
+
+			const auto& Material = MaterialList[MaterialIndex];
+
+			if (!Primitive->Create(pGraphicsAPI, PassName, Material, false)) return false;
+
+			if (Material->GetDepthMaterial())
+			{
+				if (!Primitive->Create(pGraphicsAPI, DepthPassName, Material->GetDepthMaterial(), true)) return false;
+			}
+
+			// 生成処理が終わったので不要なリソースを解放する
+			Primitive->Release();
+		}
+
+		return true;
 	}
 
 	bool CMesh::CreateBuffer()

@@ -104,6 +104,9 @@ namespace gui
 						const auto& CreateInfo = graphics::CPresetPrimitive::CreateFromType(pGraphicsAPI, PresetType);
 						Mesh->CreatePresetSimpleMesh(CreateInfo.first, CreateInfo.second, MaterialIndex, PresetType);
 
+						// プリセットなので即時生成
+						if (!Mesh->Create(pGraphicsAPI, MaterialList, Object->GetPassName(), Object->GetDepthPassName())) return false;
+
 						Object->AddMesh(Mesh);
 					}
 
