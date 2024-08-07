@@ -238,6 +238,9 @@ namespace app
 	// エラー通知イベント
 	void CScriptApp::OnAssertError(const std::string& Message)
 	{
+#ifdef USE_GUIENGINE
+		m_GraphicsEditingWindow->AddLog(gui::EGUILogType::Error, Message);
+#endif
 	}
 
 	// Getter

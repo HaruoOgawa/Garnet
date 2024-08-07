@@ -12,6 +12,8 @@
 #include "CGUIResourcesTab.h"
 #include "CTimeLineView.h"
 #include "CGUIMaterialFrameTab.h"
+#include "CGUILogTab.h"
+
 #include "SGUIParams.h"
 
 #include <Interface/IGUIEngine.h>
@@ -27,6 +29,7 @@ namespace gui
 		CGUIResourcesTab m_GUIResourcesTab;
 		CTimeLineView m_TimeLineView;
 		CGUIMaterialFrameTab m_MaterialFrameTab;
+		CGUILogTab m_LogTab;
 	public:
 		CGraphicsEditingWindow();
 		virtual ~CGraphicsEditingWindow();
@@ -35,6 +38,8 @@ namespace gui
 		bool OnLoaded(api::IGraphicsAPI* pGraphicsAPI, const SGUIParams& GUIParams, const std::shared_ptr<gui::IGUIEngine>& GUIEngine);
 
 		bool Draw(api::IGraphicsAPI* pGraphicsAPI, const SGUIParams& GUIParams,  const std::shared_ptr<gui::IGUIEngine>& GUIEngine);
+
+		void AddLog(gui::EGUILogType LogType, const std::string Msg);
 	};
 }
 #endif // USE_GUIENGINE
