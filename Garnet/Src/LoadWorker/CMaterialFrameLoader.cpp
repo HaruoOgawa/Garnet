@@ -603,7 +603,9 @@ namespace resource
 			// コンパイルエラーチェック
 			std::string ErrorMsg = std::string();
 
-			if(!pGraphicsAPI->CheckValidShader(ErrorMsg, ShaderCodeArray, ShaderStage))
+			// リロードでかつコンパイルエラーなら通知する
+			// リロードでなければ通常通りShaderCompileエラーで止める
+			if(m_Releoading &&!pGraphicsAPI->CheckValidShader(ErrorMsg, ShaderCodeArray, ShaderStage))
 			{
 				// コンパイルエラーが出たので終了する
 				m_AssertedErrorMessage = "[ShaderCompileError] " + ShaderFile.second->GetFile()->GetFilename() + " : " + ErrorMsg;
