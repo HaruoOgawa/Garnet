@@ -8,7 +8,8 @@ namespace resource
 		m_Status(ELoadStatus::None),
 		m_File(std::make_shared<CFile>(FileName)),
 		m_FileName(FileName),
-		m_LoadPriority(LoadPriority)
+		m_LoadPriority(LoadPriority),
+		m_AssertedErrorMessage(std::string())
 	{
 	}
 
@@ -46,6 +47,8 @@ namespace resource
 		}
 
 		m_File = std::make_shared<CFile>(m_FileName);
+
+		m_AssertedErrorMessage = std::string();
 	}
 
 	bool CResource::Reload(resource::CLoadWorker* pLoadWorker)
@@ -92,5 +95,10 @@ namespace resource
 		{
 			return;
 		}
+	}
+
+	const std::string& CResource::GetAssertedErrorMessage()
+	{
+		return m_AssertedErrorMessage;
 	}
 }

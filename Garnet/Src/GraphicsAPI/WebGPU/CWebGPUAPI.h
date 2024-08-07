@@ -126,6 +126,8 @@ namespace api
 
 		virtual bool IsEnabledRuntimeShaderEditing() const override;
 
+		virtual bool CheckValidShader(std::string& ErrorMsg, const std::vector<unsigned char>& ShaderCode, graphics::EShaderStage ShaderStage) override;
+
 		WGPUCommandEncoder GetEncoder() { return m_Encoder; }
 		WGPUCommandBuffer GetCommandBuffer() { return m_CommandBuffer; }
 

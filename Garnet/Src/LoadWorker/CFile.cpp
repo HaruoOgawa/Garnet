@@ -14,7 +14,8 @@ namespace resource
 #endif // !__EMSCRIPTEN__
 		m_Status(resource::ELoadStatus::None),
 		m_Filename(filename),
-		m_IsSync(false)
+		m_IsSync(false),
+		m_AssertedErrorMessage(std::string())
 	{
 		m_Extention = format::CPathFormatter::GetExtention(filename);
 	}
@@ -216,6 +217,8 @@ namespace resource
 		m_Status = ELoadStatus::None;
 
 		m_Data.clear();
+
+		m_AssertedErrorMessage = std::string();
 	}
 
 	bool CFile::Reload(resource::CLoadWorker* pLoadWorker)
@@ -230,6 +233,11 @@ namespace resource
 		{
 			return;
 		}
+	}
+
+	const std::string& CFile::GetAssertedErrorMessage()
+	{
+		return m_AssertedErrorMessage;
 	}
 
 	void CFile::SetData(const std::vector<unsigned char>& Data)

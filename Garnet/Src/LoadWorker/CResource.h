@@ -22,6 +22,8 @@ namespace resource
 		std::string m_FileName;
 
 		const int m_LoadPriority;
+
+		std::string m_AssertedErrorMessage;
 	public:
 		CResource(const std::string& FileName, int LoadPriority = 0);
 		virtual ~CResource();
@@ -42,5 +44,7 @@ namespace resource
 		virtual bool IsLoaded() const override;
 
 		virtual void AddReference(const std::shared_ptr<IResource>& Resource) override;
+
+		virtual const std::string& GetAssertedErrorMessage() override;
 	};
 }

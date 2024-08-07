@@ -31,6 +31,8 @@ namespace resource
 
 		std::vector<unsigned char> m_Data;
 
+		std::string m_AssertedErrorMessage;
+
 	public:
 		CFile(const std::string& filename);
 		virtual ~CFile();
@@ -57,6 +59,8 @@ namespace resource
 		virtual bool Reload(resource::CLoadWorker* pLoadWorker) override;
 
 		virtual void AddReference(const std::shared_ptr<IResource>& Resource) override;
+
+		virtual const std::string& GetAssertedErrorMessage() override;
 
 		void SetData(const std::vector<unsigned char>& Data);
 		const std::vector<unsigned char>& GetData() const;

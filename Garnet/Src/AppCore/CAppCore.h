@@ -80,6 +80,9 @@ namespace app
 		// フォーカスイベント
 		void OnFocus(int focused);
 
+		// エラー通知イベント
+		void OnAssertError(const std::string& Message);
+
 		// マウスイベント
 		void OnMouseDown(int buttonNum, int x, int y);
 		void OnMouseUp(int buttonNum, int x, int y);

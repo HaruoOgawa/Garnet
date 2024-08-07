@@ -380,6 +380,12 @@ namespace api
 #endif // RUNTIME_SHADER_EDITING
 	}
 
+	bool CVulkanAPI::CheckValidShader(std::string& ErrorMsg, const std::vector<unsigned char>& ShaderCode, graphics::EShaderStage ShaderStage)
+	{
+		// Vulkan‚Å‚Í–¢‘Î‰ž
+		return true;
+	}
+
 	// Instance
 	const VkInstance& CVulkanAPI::GetInstance() const
 	{

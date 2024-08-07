@@ -27,5 +27,7 @@ namespace resource
 		virtual bool IsLoaded() const = 0;
 
 		virtual void AddReference(const std::shared_ptr<IResource>& Resource) = 0;
+
+		virtual const std::string& GetAssertedErrorMessage() = 0;
 	};
 }

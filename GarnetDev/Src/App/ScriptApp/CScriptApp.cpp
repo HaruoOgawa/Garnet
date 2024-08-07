@@ -235,6 +235,11 @@ namespace app
 		}
 	}
 
+	// エラー通知イベント
+	void CScriptApp::OnAssertError(const std::string& Message)
+	{
+	}
+
 	// Getter
 	std::vector<std::shared_ptr<object::C3DObject>> CScriptApp::GetObjectList() const
 	{

@@ -46,7 +46,7 @@ namespace resource
 		bool CheckInitialResource(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine);
 		bool InitLoadStatus(api::IGraphicsAPI* pGraphicsAPI, app::CAppCore* pAppCore);
 		
-		bool LoadResourceList(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine);
+		bool LoadResourceList(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, app::CAppCore* pAppCore);
 
 		std::shared_ptr<resource::IResource> GetLoadingResource(const std::string& Filename) const;
 	public:

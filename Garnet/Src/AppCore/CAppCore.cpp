@@ -314,6 +314,12 @@ namespace app
 		m_WindowAPI->OnFocus(focused);
 	}
 
+	// エラー通知イベント
+	void CAppCore::OnAssertError(const std::string& Message)
+	{
+		m_App->OnAssertError(Message);
+	}
+
 	// マウスイベント
 	void CAppCore::OnMouseDown(int buttonNum, int x, int y)
 	{

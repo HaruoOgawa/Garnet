@@ -82,6 +82,9 @@ namespace resource
 		// マテリアルフレームを作成
 		if (!CreateMaterialFrame(pGraphicsAPI)) return false;
 
+		// 強制終了はしないが、エラー通知を行う
+		if (m_Status == resource::ELoadStatus::AssertError) return true;
+
 		// ロード完了
 		m_Status = resource::ELoadStatus::Loaded;
 
@@ -567,30 +570,70 @@ namespace resource
 		{
 			const auto& shaderType = ShaderFile.first;
 
-			std::vector<unsigned char> ShaderCodeArray = ShaderFile.second->GetFile()->GetData();
-
-			// ShaderCodeが直接書かれているのでそのままCreateInfoに渡す
+			//
+			graphics::EShaderStage ShaderStage = graphics::EShaderStage::SHADER_STAGE_NONE;
 			if (shaderType == "vertex")
 			{
-				m_CreateInfo->SetVertexShaderCode(ShaderCodeArray);
+				ShaderStage = graphics::EShaderStage::SHADER_STAGE_VERTEX;
 			}
 			else if (shaderType == "fragment")
 			{
-				m_CreateInfo->SetFragmentShaderCode(ShaderCodeArray);
+				ShaderStage = graphics::EShaderStage::SHADER_STAGE_FRAGMENT;
 			}
 			else if (shaderType == "compute")
 			{
-				m_CreateInfo->SetComputeShaderCode(ShaderCodeArray);
+				ShaderStage = graphics::EShaderStage::SHADER_STAGE_COMPUTE;
 			}
 			else if (shaderType == "geometry")
 			{
-				m_CreateInfo->SetGeometryShaderCode(ShaderCodeArray);
+				ShaderStage = graphics::EShaderStage::SHADER_STAGE_GEOMETRY;
 			}
 			else if (shaderType == "hull")
 			{
-				m_CreateInfo->SetHullShaderCode(ShaderCodeArray);
+				ShaderStage = graphics::EShaderStage::SHADER_STAGE_HULL;
 			}
 			else if (shaderType == "domain")
+			{
+				ShaderStage = graphics::EShaderStage::SHADER_STAGE_DOMAIN;
+			}
+
+			//
+			std::vector<unsigned char> ShaderCodeArray = ShaderFile.second->GetFile()->GetData();
+
+			// コンパイルエラーチェック
+			std::string ErrorMsg = std::string();
+
+			if(!pGraphicsAPI->CheckValidShader(ErrorMsg, ShaderCodeArray, ShaderStage))
+			{
+				// コンパイルエラーが出たので終了する
+				m_AssertedErrorMessage = "[ShaderCompileError] " + ShaderFile.second->GetFile()->GetFilename() + " : " + ErrorMsg;
+				m_Status = resource::ELoadStatus::AssertError;
+
+				return true;
+			}
+
+			// ShaderCodeが直接書かれているのでそのままCreateInfoに渡す
+			if (ShaderStage == graphics::EShaderStage::SHADER_STAGE_VERTEX)
+			{
+				m_CreateInfo->SetVertexShaderCode(ShaderCodeArray);
+			}
+			else if (ShaderStage == graphics::EShaderStage::SHADER_STAGE_FRAGMENT)
+			{
+				m_CreateInfo->SetFragmentShaderCode(ShaderCodeArray);
+			}
+			else if (ShaderStage == graphics::EShaderStage::SHADER_STAGE_COMPUTE)
+			{
+				m_CreateInfo->SetComputeShaderCode(ShaderCodeArray);
+			}
+			else if (ShaderStage == graphics::EShaderStage::SHADER_STAGE_GEOMETRY)
+			{
+				m_CreateInfo->SetGeometryShaderCode(ShaderCodeArray);
+			}
+			else if (ShaderStage == graphics::EShaderStage::SHADER_STAGE_HULL)
+			{
+				m_CreateInfo->SetHullShaderCode(ShaderCodeArray);
+			}
+			else if (ShaderStage == graphics::EShaderStage::SHADER_STAGE_DOMAIN)
 			{
 				m_CreateInfo->SetDomainShaderCode(ShaderCodeArray);
 			}

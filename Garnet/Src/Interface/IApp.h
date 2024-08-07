@@ -40,6 +40,9 @@ namespace app
 		// フォーカスイベント
 		virtual void OnFocus(bool Focused, api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker) = 0;
 
+		// エラー通知イベント
+		virtual void OnAssertError(const std::string& Message) = 0;
+
 		// Getter
 		virtual std::vector<std::shared_ptr<object::C3DObject>> GetObjectList() const = 0;
 		virtual std::shared_ptr<scene::CSceneController> GetSceneController() const = 0;
