@@ -22,16 +22,16 @@ namespace gui
 
 	class CGUILogTab
 	{
-		std::vector<std::tuple<gui::EGUILogType, std::string>> m_LogList;
+		std::vector<std::tuple<gui::EGUILogType, std::string, std::string>> m_LogList;
 
 		bool m_ShowErrorDialog;
-		std::string m_ErrorDialogMsg;
+		std::tuple<gui::EGUILogType, std::string, std::string> m_ErrorDialogMsg;
 
 	private:
 		bool DrawLogList();
 		bool DrawErrorDialog();
 
-		//static std::string GetCurrentTime();
+		static std::string GetCurrentTime();
 	public:
 		CGUILogTab();
 		virtual ~CGUILogTab() = default;
