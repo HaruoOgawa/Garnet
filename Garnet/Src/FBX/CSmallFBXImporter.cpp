@@ -77,7 +77,7 @@ namespace fbx
 
 		// ÉmÅ[Éh
 		std::vector<std::shared_ptr<object::CNode>> NodeList;
-		std::vector<std::vector<int>> RootNodeIndexList;
+		std::vector<int> RootNodeIndexList;
 		std::vector<sfbx::Object*> pFbxNodeList;
 
 		if (!CreateNodeList(Doc, pFbxNodeList, NodeList, RootNodeIndexList, IsMixamoFbx)) return false;
@@ -200,7 +200,7 @@ namespace fbx
 		return true;
 	}
 
-	bool CSmallFBXImporter::CreateNodeList(const sfbx::DocumentPtr& Doc, std::vector<sfbx::Object*>& pFbxNodeList, std::vector<std::shared_ptr<object::CNode>>& NodeList, std::vector<std::vector<int>>& RootNodeIndexList, const bool IsMixamoFbx)
+	bool CSmallFBXImporter::CreateNodeList(const sfbx::DocumentPtr& Doc, std::vector<sfbx::Object*>& pFbxNodeList, std::vector<std::shared_ptr<object::CNode>>& NodeList, std::vector<int>& RootNodeIndexList, const bool IsMixamoFbx)
 	{
 		int RootIndex = 0;
 
@@ -213,7 +213,7 @@ namespace fbx
 
 			if (!RootObj) continue;
 
-			RootNodeIndexList.push_back(std::vector<int>(1, RootIndex));
+			RootNodeIndexList.push_back(RootIndex);
 
 			if (!CreateNode(RootObj, pFbxNodeList, NodeList, IsMixamoFbx)) return false;
 

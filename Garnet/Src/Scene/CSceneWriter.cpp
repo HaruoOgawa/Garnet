@@ -192,12 +192,9 @@ namespace scene
 			// rootnodes
 			if (!StoredFile3DModel)
 			{
-				for (const auto& RootNodes : Object->GetRootNodeIndexList())
+				for (int RootNodeIndex : Object->GetRootNodeIndexList())
 				{
-					for (int Root : RootNodes)
-					{
-						ObjectJSON["rootnodes"].push_back(Root);
-					}
+					ObjectJSON["rootnodes"].push_back(RootNodeIndex);
 				}
 			}
 

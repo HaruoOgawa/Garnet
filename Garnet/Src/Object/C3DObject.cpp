@@ -228,25 +228,19 @@ namespace object
 
 	void C3DObject::ApplyParentNode()
 	{
-		if (!m_RootNodeIndexList.empty())
+		for (const int RootNodeIndex : m_RootNodeIndexList)
 		{
-			for (const auto& SceneRootNodeList : m_RootNodeIndexList)
+			if (RootNodeIndex < 0 || RootNodeIndex >= m_NodeList.size()) continue;
+
+			auto& RootNode = m_NodeList[RootNodeIndex];
+
+			// 子要素の走破をスタートする
+			for (const int ChildIndex : RootNode->GetChildrenNodeIndexList())
 			{
-				for (const int RootNodeIndex : SceneRootNodeList)
-				{
-					if (RootNodeIndex < 0 || RootNodeIndex >= m_NodeList.size()) continue;
+				if (ChildIndex < 0 || ChildIndex >= m_NodeList.size()) continue;
 
-					auto& RootNode = m_NodeList[RootNodeIndex];
-
-					// 子要素の走破をスタートする
-					for (const int ChildIndex : RootNode->GetChildrenNodeIndexList())
-					{
-						if (ChildIndex < 0 || ChildIndex >= m_NodeList.size()) continue;
-
-						auto& ChildNode = m_NodeList[ChildIndex];
-						ApplyParentNode(ChildNode, RootNode);
-					}
-				}
+				auto& ChildNode = m_NodeList[ChildIndex];
+				ApplyParentNode(ChildNode, RootNode);
 			}
 		}
 	}
@@ -304,26 +298,23 @@ namespace object
 		if (!m_RootNodeIndexList.empty()) 
 		{
 			// ルートノードから順に走破してワールド行列を計算する
-			for (const auto& SceneRootNodeList : m_RootNodeIndexList)
+			for (const int RootNodeIndex : m_RootNodeIndexList)
 			{
-				for (const int RootNodeIndex : SceneRootNodeList)
+				if (RootNodeIndex < 0 || RootNodeIndex >= m_NodeList.size()) continue;
+
+				auto& RootNode = m_NodeList[RootNodeIndex];
+				const auto& WorldMatrix = RootNode->GetLocalTransform()->GetModelMatrix();
+
+				// ルートなので自身のローカルトランスフォームをワールド行列にする
+				RootNode->SetWorldMatrix(WorldMatrix);
+
+				// 子要素の走破をスタートする
+				for (const int ChildIndex : RootNode->GetChildrenNodeIndexList())
 				{
-					if (RootNodeIndex < 0 || RootNodeIndex >= m_NodeList.size()) continue;
+					if (ChildIndex < 0 || ChildIndex >= m_NodeList.size()) continue;
 
-					auto& RootNode = m_NodeList[RootNodeIndex];
-					const auto& WorldMatrix = RootNode->GetLocalTransform()->GetModelMatrix();
-
-					// ルートなので自身のローカルトランスフォームをワールド行列にする
-					RootNode->SetWorldMatrix(WorldMatrix);
-
-					// 子要素の走破をスタートする
-					for (const int ChildIndex : RootNode->GetChildrenNodeIndexList())
-					{
-						if (ChildIndex < 0 || ChildIndex >= m_NodeList.size()) continue;
-
-						auto& ChildNode = m_NodeList[ChildIndex];
-						CalcWorldMatrix(ChildNode, WorldMatrix);
-					}
+					auto& ChildNode = m_NodeList[ChildIndex];
+					CalcWorldMatrix(ChildNode, WorldMatrix);
 				}
 			}
 		}
@@ -746,18 +737,17 @@ namespace object
 		return true;
 	}
 
-	// ToDo: 後でRootNodeIndexListを1次元配列に直してSetRootNodeIndexListは消す
-	void C3DObject::SetRootNodeIndexList(const std::vector<std::vector<int>>& RootNodeIndexList)
+	void C3DObject::SetRootNodeIndexList(const std::vector<int>& RootNodeIndexList)
 	{
 		m_RootNodeIndexList = RootNodeIndexList;
 	}
 
 	void C3DObject::AddRootNodeIndex(int Index)
 	{
-		m_RootNodeIndexList.push_back(std::vector<int>({ Index }));
+		m_RootNodeIndexList.push_back(Index);
 	}
 
-	const std::vector<std::vector<int>>& C3DObject::GetRootNodeIndexList() const
+	const std::vector<int>& C3DObject::GetRootNodeIndexList() const
 	{
 		return m_RootNodeIndexList;
 	}

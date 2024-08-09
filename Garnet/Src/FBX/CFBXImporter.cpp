@@ -105,7 +105,7 @@ namespace fbx
 
 		// ノード
 		std::vector<std::shared_ptr<object::CNode>> NodeList;
-		std::vector<std::vector<int>> RootNodeIndexList;
+		std::vector<int> RootNodeIndexList;
 		std::vector<FbxNode*> pFbxNodeList;
 
 		if (!CreateNodeList(Scene, pFbxNodeList, NodeList, RootNodeIndexList, IsMixamoFbx)) return false;
@@ -746,13 +746,13 @@ namespace fbx
 		return true;
 	}
 
-	bool CFBXImporter::CreateNodeList(FbxScene* Scene, std::vector<FbxNode*>& pFbxNodeList, std::vector<std::shared_ptr<object::CNode>>& NodeList, std::vector<std::vector<int>>& RootNodeIndexList, const bool IsMixamoFbx)
+	bool CFBXImporter::CreateNodeList(FbxScene* Scene, std::vector<FbxNode*>& pFbxNodeList, std::vector<std::shared_ptr<object::CNode>>& NodeList, std::vector<int>& RootNodeIndexList, const bool IsMixamoFbx)
 	{
 		// ルートノードを取得
 		FbxNode* RootNode = Scene->GetRootNode();
 		if (RootNode)
 		{
-			RootNodeIndexList.push_back(std::vector<int>(1, 0));
+			RootNodeIndexList.push_back(0);
 
 			if (!CreateNode(RootNode, pFbxNodeList, NodeList, IsMixamoFbx)) return false;
 		}

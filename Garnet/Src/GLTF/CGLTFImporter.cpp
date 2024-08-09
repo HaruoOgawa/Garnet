@@ -149,7 +149,7 @@ namespace gltf
 
 		// ノード
 		std::vector<std::shared_ptr<object::CNode>> NodeList;
-		std::vector<std::vector<int>> RootNodeIndexList;
+		std::vector<int> RootNodeIndexList;
 		if (!CreateNode(model, NodeList, RootNodeIndexList))
 		{
 			Console::Log("[Error GLTFImporter] Failed to CreateNode\n");
@@ -755,7 +755,7 @@ namespace gltf
 		return true;
 	}
 
-	bool CGLTFImporter::CreateNode(const tinygltf::Model& model, std::vector<std::shared_ptr<object::CNode>>& NodeList, std::vector<std::vector<int>>& RootNodeIndexList)
+	bool CGLTFImporter::CreateNode(const tinygltf::Model& model, std::vector<std::shared_ptr<object::CNode>>& NodeList, std::vector<int>& RootNodeIndexList)
 	{
 		for (const auto& glTFNode : model.nodes)
 		{
@@ -835,7 +835,10 @@ namespace gltf
 		// scenesのnodesはルートノードを示すのでそこから走破をスタートする必要がある(たぶん以前glTFアニメーションがうまくいかなかったのはこれが原因. それと親要素から子要素ではなく子要素から親要素に走破していたのも原因かも)
 		for (const auto& scene : model.scenes)
 		{
-			RootNodeIndexList.push_back(scene.nodes);
+			for (int RootNodeIndex : scene.nodes)
+			{
+				RootNodeIndexList.push_back(RootNodeIndex);
+			}
 		}
 
 		return true;

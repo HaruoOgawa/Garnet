@@ -50,7 +50,7 @@ namespace object
 
 		std::shared_ptr<graphics::CMorphController> m_MorphController;
 		
-		std::vector<std::vector<int>> m_RootNodeIndexList;
+		std::vector<int> m_RootNodeIndexList;
 
 		std::shared_ptr<graphics::CTextureSet> m_TextureSet;
 
@@ -156,9 +156,9 @@ namespace object
 
 		bool IsPlayingAnimation() const;
 #endif
-		void SetRootNodeIndexList(const std::vector<std::vector<int>>& RootNodeIndexList);
+		void SetRootNodeIndexList(const std::vector<int>& RootNodeIndexList);
 		void AddRootNodeIndex(int Index);
-		const std::vector<std::vector<int>>& GetRootNodeIndexList() const;
+		const std::vector<int>& GetRootNodeIndexList() const;
 
 		const glm::vec3& GetPos() const;
 		void SetPos(const glm::vec3& Pos);

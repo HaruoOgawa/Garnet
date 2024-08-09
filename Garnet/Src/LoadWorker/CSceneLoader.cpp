@@ -306,17 +306,9 @@ namespace resource
 
 			// rootnodes
 			{
-				// ToDo: この2次元配列のIndexListは害悪なのでリファクタリングしたい
-				std::vector<std::vector<int>> RootNodeIndexList;
+				std::vector<int> RootNodeIndexList;
 
-				std::vector<int> rootnodes;
-
-				GetArrayInt32("rootnodes", rootnodes, objectJSON);
-
-				for (int root : rootnodes)
-				{
-					RootNodeIndexList.push_back(std::vector<int>({ root }));
-				}
+				GetArrayInt32("rootnodes", RootNodeIndexList, objectJSON);
 
 				Object->SetRootNodeIndexList(RootNodeIndexList);
 			}

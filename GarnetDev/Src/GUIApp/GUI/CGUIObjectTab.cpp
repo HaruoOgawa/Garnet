@@ -98,15 +98,12 @@ namespace gui
 					const auto& RootNodeIndexList = Object->GetRootNodeIndexList();
 					if (!RootNodeIndexList.empty())
 					{
-						for (const auto& SceneRootNodeList : RootNodeIndexList)
+						for (const int RootNodeIndex : RootNodeIndexList)
 						{
-							for (const int RootNodeIndex : SceneRootNodeList)
-							{
-								if (RootNodeIndex < 0 || RootNodeIndex >= NodeList.size()) continue;
+							if (RootNodeIndex < 0 || RootNodeIndex >= NodeList.size()) continue;
 
-								const auto& RootNode = NodeList[RootNodeIndex];
-								if (!DrawNodeGUI(m_SelectedObjectIndex, m_SelectedNodeIndex, CurrentObjectIndex, RootNodeIndex, RootNode, NodeList)) return false;
-							}
+							const auto& RootNode = NodeList[RootNodeIndex];
+							if (!DrawNodeGUI(m_SelectedObjectIndex, m_SelectedNodeIndex, CurrentObjectIndex, RootNodeIndex, RootNode, NodeList)) return false;
 						}
 					}
 					else
