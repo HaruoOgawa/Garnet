@@ -55,6 +55,18 @@ namespace gui
 		if (m_ShowAddObjDialog && !DrawAddObjectDialog(TimelineController, ObjectList)) return false;
 		if (m_ShowAddTrackDialog && !DrawAddObjectTrackDialog(TimelineController)) return false;
 
+		// トラックとサンプラーを削除
+		{
+			const auto& TLClip = TimelineController->GetClip();
+
+			if (TLClip && !m_RemovedTrackID.empty())
+			{
+				TLClip->RemoveTrackAndSampler(m_RemovedTrackID);
+
+				m_RemovedTrackID = std::string();
+			}
+		}
+
 		return true;
 	}
 
@@ -261,14 +273,6 @@ namespace gui
 		}
 
 		ImGui::EndChild();
-
-		// トラックとサンプラーを削除
-		if (!m_RemovedTrackID.empty())
-		{
-			TLClip->RemoveTrackAndSampler(m_RemovedTrackID);
-
-			m_RemovedTrackID = std::string();
-		}
 
 		return true;
 	}

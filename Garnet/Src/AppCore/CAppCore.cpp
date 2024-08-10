@@ -182,10 +182,29 @@ namespace app
 		{
 			m_WindowAPI->PollEvents();
 
-			if (!Update()) return false;
-			if (!LateUpdate()) return false;
-			if (!FixedUpdate()) return false;
-			if (!Draw()) return false;
+			if (!Update())
+			{
+				Console::Log("[Error] Failed to Update.\n");
+				return false;
+			}
+
+			if (!LateUpdate())
+			{
+				Console::Log("[Error] Failed to LateUpdate.\n");
+				return false;
+			}
+
+			if (!FixedUpdate())
+			{
+				Console::Log("[Error] Failed to FixedUpdate.\n");
+				return false;
+			}
+
+			if (!Draw())
+			{
+				Console::Log("[Error] Failed to Draw.\n");
+				return false;
+			}
 
 			m_InputState->Clear();
 		}

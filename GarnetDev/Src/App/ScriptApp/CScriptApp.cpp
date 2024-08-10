@@ -165,7 +165,11 @@ namespace app
 				gui::SGUIParams GUIParams = gui::SGUIParams(GetObjectList(), m_SceneController, m_FileModifier, m_TimelineController, pLoadWorker);
 
 				if (!GUIEngine->BeginFrame(pGraphicsAPI)) return false;
-				if (!m_GraphicsEditingWindow->Draw(pGraphicsAPI, GUIParams, GUIEngine)) return false;
+				if (!m_GraphicsEditingWindow->Draw(pGraphicsAPI, GUIParams, GUIEngine))
+				{
+					Console::Log("[Error] InValid GUI\n");
+					return false;
+				}
 				if (!GUIEngine->EndFrame(pGraphicsAPI)) return false;
 			}
 #endif // USE_GUIENGINE
