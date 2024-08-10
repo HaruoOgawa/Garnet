@@ -43,7 +43,7 @@ namespace gui
 			for (const auto& MaterialFrame : GUIParams.SceneController->GetMaterialFrameMap())
 			{
 				std::string Label = MaterialFrame.first /*+ "##GUIMaterialFrameTab_MaterialFrameName"*/;
-				ImGui::Text(Label.c_str());
+				ImGui::Text("%s", Label.c_str());
 			}
 
 			ImGui::EndChild();

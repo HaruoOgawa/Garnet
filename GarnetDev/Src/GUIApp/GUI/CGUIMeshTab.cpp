@@ -183,7 +183,7 @@ namespace gui
 
 						std::string Text = "PresetType: " + GetStrFromPresetPrimitiveType(PresetType);
 
-						ImGui::Text(Text.c_str());
+						ImGui::Text("%s", Text.c_str());
 					}
 
 					int MaterialIndex = Primitive->GetMaterialIndex();
@@ -194,7 +194,7 @@ namespace gui
 
 						std::string Text = "MaterialName: " + Material->GetMaterialName();
 
-						ImGui::Text(Text.c_str());
+						ImGui::Text("%s", Text.c_str());
 					}
 
 					ImGui::TreePop();

@@ -229,7 +229,7 @@ namespace gui
 
 		if (ImGui::Begin("AddObject##ObjectTab", &m_ShowAddObjectDialog))
 		{
-			ImGui::Text("Basic Info");
+			ImGui::Text("%s", "Basic Info");
 			ImGui::SameLine();
 			ImGui::Separator();
 
@@ -277,7 +277,7 @@ namespace gui
 				}
 			}
 
-			ImGui::Text("Add");
+			ImGui::Text("%s", "Add");
 			ImGui::SameLine();
 			ImGui::Separator();
 

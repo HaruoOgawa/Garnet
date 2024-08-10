@@ -81,11 +81,11 @@ namespace gui
 
 				// Msg
 				ImGui::PushStyleColor(ImGuiCol_Text, TextColor);
-				ImGui::TextWrapped(std::get<1>(Log).c_str());
+				ImGui::TextWrapped("%s", std::get<1>(Log).c_str());
 				ImGui::PopStyleColor();
 
 				// Time
-				ImGui::Text(std::get<2>(Log).c_str());
+				ImGui::Text("%s", std::get<2>(Log).c_str());
 
 				// Close
 				ImGui::SameLine();
@@ -125,11 +125,11 @@ namespace gui
 			ImVec4 textColor = ImVec4(1.0f, 0.0f, 0.0f, 1.0f);
 
 			ImGui::PushStyleColor(ImGuiCol_Text, textColor);
-			ImGui::Text(std::get<1>(m_ErrorDialogMsg).c_str());
+			ImGui::Text("%s", std::get<1>(m_ErrorDialogMsg).c_str());
 			ImGui::PopStyleColor();
 
 			//
-			ImGui::Text(std::get<2>(m_ErrorDialogMsg).c_str());
+			ImGui::Text("%s", std::get<2>(m_ErrorDialogMsg).c_str());
 		}
 
 		ImGui::End();
