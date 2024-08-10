@@ -182,10 +182,29 @@ namespace app
 		{
 			m_WindowAPI->PollEvents();
 
-			if (!Update()) return false;
-			if (!LateUpdate()) return false;
-			if (!FixedUpdate()) return false;
-			if (!Draw()) return false;
+			if (!Update())
+			{
+				Console::Log("[Error] Failed to Update.\n");
+				return false;
+			}
+
+			if (!LateUpdate())
+			{
+				Console::Log("[Error] Failed to LateUpdate.\n");
+				return false;
+			}
+
+			if (!FixedUpdate())
+			{
+				Console::Log("[Error] Failed to FixedUpdate.\n");
+				return false;
+			}
+
+			if (!Draw())
+			{
+				Console::Log("[Error] Failed to Draw.\n");
+				return false;
+			}
 
 			m_InputState->Clear();
 		}
@@ -312,6 +331,12 @@ namespace app
 	void CAppCore::OnFocus(int focused)
 	{
 		m_WindowAPI->OnFocus(focused);
+	}
+
+	// エラー通知イベント
+	void CAppCore::OnAssertError(const std::string& Message)
+	{
+		m_App->OnAssertError(Message);
 	}
 
 	// マウスイベント

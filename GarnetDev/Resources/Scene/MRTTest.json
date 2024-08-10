@@ -20,12 +20,12 @@
     "scenetextureset": {
         "cubemaps": [
             {
-                "back": "Resources/Cubemaps/environment/environment_right_0.jpg",
+                "back": "Resources/Cubemaps/environment/environment_top_0.jpg",
                 "bottom": "Resources/Cubemaps/environment/environment_left_0.jpg",
-                "front": "Resources/Cubemaps/environment/environment_top_0.jpg",
+                "front": "Resources/Cubemaps/environment/environment_right_0.jpg",
                 "left": "Resources/Cubemaps/environment/environment_bottom_0.jpg",
-                "right": "Resources/Cubemaps/environment/environment_front_0.jpg",
-                "top": "Resources/Cubemaps/environment/environment_back_0.jpg"
+                "right": "Resources/Cubemaps/environment/environment_back_0.jpg",
+                "top": "Resources/Cubemaps/environment/environment_front_0.jpg"
             }
         ],
         "frametextures": null
@@ -62,14 +62,14 @@
                     "name": "CameraNode",
                     "transform": {
                         "pos": [
-                            -7.0,
-                            5.0,
+                            0.0,
+                            0.0,
                             0.0
                         ],
                         "rotate": [
-                            45.01255798339844,
-                            90.0,
-                            0.0
+                            45.00612258911133,
+                            29.999998092651367,
+                            0.004945793189108372
                         ],
                         "scale": [
                             1.0,
@@ -118,7 +118,7 @@
                         "pos": [
                             0.0,
                             0.0,
-                            0.0
+                            -5.0
                         ],
                         "rotate": [
                             0.0,
@@ -178,7 +178,7 @@
                             "name": "textID",
                             "type": "float",
                             "value": [
-                                10.0
+                                0.0
                             ]
                         }
                     ],
@@ -5582,9 +5582,9 @@
                             0.0
                         ],
                         "scale": [
-                            0.5,
-                            0.5,
-                            0.5
+                            1.0,
+                            1.0,
+                            1.0
                         ]
                     },
                     "meshindex": 0,
@@ -5610,6 +5610,215 @@
                     "cull": "back",
                     "trackids": [
                         "test_mat_track"
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "a",
+            "filename": "",
+            "renderpass": "MainResultPass",
+            "depthpass": "",
+            "transform": {
+                "pos": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "rotate": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "enable": true,
+            "rootnodes": [
+                0
+            ],
+            "nodes": [
+                {
+                    "name": "s",
+                    "transform": {
+                        "pos": [
+                            2.0,
+                            3.0,
+                            0.0
+                        ],
+                        "rotate": [
+                            0.0,
+                            -0.0,
+                            0.0
+                        ],
+                        "scale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ]
+                    },
+                    "meshindex": 0,
+                    "trackids": [
+                        "a3df72e5-9c7d-4623-9438-70bf5b6e047e"
+                    ]
+                }
+            ],
+            "meshs": [
+                {
+                    "primitives": [
+                        {
+                            "materialindex": 0,
+                            "type": "sphere"
+                        }
+                    ]
+                }
+            ],
+            "materials": [
+                {
+                    "materialframe": "pbr_mrt_mat",
+                    "cull": "back",
+                    "uniformvalues": [
+                        {
+                            "name": "baseColorFactor",
+                            "type": "vec4",
+                            "value": [
+                                1.0,
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "emissiveFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "metallicFactor",
+                            "type": "float",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "normalMapScale",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "occlusionStrength",
+                            "type": "float",
+                            "value": [
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "roughnessFactor",
+                            "type": "float",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useBaseColorTexture",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useCubeMap",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useDirCubemap",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useEmissiveTexture",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useIBL",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useMetallicRoughnessTexture",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useNormalTexture",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useOcclusionTexture",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        },
+                        {
+                            "name": "useShadowMap",
+                            "type": "int",
+                            "value": [
+                                0.0
+                            ]
+                        }
+                    ],
+                    "textures": [
+                        {
+                            "texturebuffername": "cubemapTexture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "shadowmapTexture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_Diffuse_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_Specular_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_GGXLUT_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        }
                     ]
                 }
             ]

@@ -66,7 +66,7 @@ namespace resource
 		}
 
 		// ローディング
-		if (!LoadResourceList(pGraphicsAPI, pPhysicsEngine)) return false;
+		if (!LoadResourceList(pGraphicsAPI, pPhysicsEngine, pAppCore)) return false;
 		
 		return true;
 	}
@@ -154,7 +154,7 @@ namespace resource
 		return true;
 	}
 
-	bool CLoadWorker::LoadResourceList(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine)
+	bool CLoadWorker::LoadResourceList(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, app::CAppCore* pAppCore)
 	{
 		// ローディング
 		for (auto& Resource : m_LoadResourceList)
@@ -170,10 +170,18 @@ namespace resource
 				return true;
 
 			case resource::ELoadStatus::Loaded:
-			{
 				m_LoadResourceList.erase(m_LoadResourceList.begin());
-			}
-			return true;
+				return true;
+
+			case resource::ELoadStatus::AssertError:
+				{
+					// エラー表示通知を行う(強制終了しないタイプのエラーなので通知)
+					pAppCore->OnAssertError(Resource->GetAssertedErrorMessage());
+
+					Resource->SetLoadStatus(resource::ELoadStatus::Loaded);
+
+					return true;
+				}
 
 			default:
 				break;

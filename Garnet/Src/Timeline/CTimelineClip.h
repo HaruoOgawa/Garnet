@@ -39,5 +39,7 @@ namespace timeline
 
 		void AssignObjectResourceToTrack(const std::vector<std::shared_ptr<object::C3DObject>>& ObjectList);
 		//void AssignRendererSettingsToTrack();
+
+		void RemoveTrackAndSampler(const std::string& TrackID);
 	};
 }

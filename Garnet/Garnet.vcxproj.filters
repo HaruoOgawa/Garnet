@@ -3120,6 +3120,9 @@
     <ClInclude Include="Src\Graphics\CFrameRenderer.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Graphics\EShaderStage.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\WindowAPI\CGLFWWindowAPI.cpp">

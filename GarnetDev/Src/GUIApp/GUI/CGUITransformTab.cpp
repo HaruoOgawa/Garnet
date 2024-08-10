@@ -6,27 +6,39 @@ namespace gui
 {
 	bool CGUITransformTab::Draw(const std::vector<std::shared_ptr<object::C3DObject>>& ObjectList, int SelectedObjectIndex, int SelectedNodeIndex)
 	{
-		if (ImGui::BeginTabItem("Transform"))
+		if (ImGui::BeginTabItem("Base"))
 		{
 			if (SelectedObjectIndex >= 0 && SelectedObjectIndex < static_cast<int>(ObjectList.size()))
 			{
 				const auto& Object = ObjectList[SelectedObjectIndex];
 
 				const auto& NodeList = Object->GetNodeList();
+				const auto& MeshList = Object->GetMeshList();
 
 				if (SelectedNodeIndex >= 0 && SelectedNodeIndex < static_cast<int>(NodeList.size()))
 				{
-					ImGui::SeparatorText("Node Transform");
+					//ImGui::SeparatorText("Node Transform");
+
+					const auto& Node = NodeList[SelectedNodeIndex];
+
+					// メッシュ
+					int MeshIndex = Node->GetMeshIndex();
+					if (ImGui::InputInt("MeshIndex##CGUITransformTab", &MeshIndex))
+					{
+						if (MeshIndex >= 0 && MeshIndex < static_cast<int>(MeshList.size()))
+						{
+							Node->SetMeshIndex(MeshIndex);
+						}
+					}
 
 					// Node Transformを表示
-					const auto& Node = NodeList[SelectedNodeIndex];
 					const auto& Transform = Node->GetLocalTransform();
 
 					if (!DrawTransformGUI(Transform)) return false;
 				}
 				else
 				{
-					ImGui::SeparatorText("Object Transform");
+					//ImGui::SeparatorText("Object Transform");
 
 					// Object Transformを表示
 					const auto& Transform = Object->GetObjectTransform();

@@ -83,7 +83,7 @@ namespace fbx
 			std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList,
 			const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame);
 
-		static bool CreateNodeList(const sfbx::DocumentPtr& Doc, std::vector<sfbx::Object*>& pFbxNodeList, std::vector<std::shared_ptr<object::CNode>>& NodeList, std::vector<std::vector<int>>& RootNodeIndexList, const bool IsMixamoFbx);
+		static bool CreateNodeList(const sfbx::DocumentPtr& Doc, std::vector<sfbx::Object*>& pFbxNodeList, std::vector<std::shared_ptr<object::CNode>>& NodeList, std::vector<int>& RootNodeIndexList, const bool IsMixamoFbx);
 		static bool CreateNode(sfbx::Object* pFBXNode, std::vector<sfbx::Object*>& pFbxNodeList, std::vector<std::shared_ptr<object::CNode>>& NodeList, const bool IsMixamoFbx);
 		static bool ConnectNodeTo(std::vector<std::shared_ptr<object::CNode>>& NodeList, const std::vector<sfbx::Object*>& pFbxNodeList, const std::vector<sfbx::Mesh*>& pFbxMeshList, const std::shared_ptr<animation::CSkeleton>& Skeleton);
 

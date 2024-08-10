@@ -306,17 +306,9 @@ namespace resource
 
 			// rootnodes
 			{
-				// ToDo: この2次元配列のIndexListは害悪なのでリファクタリングしたい
-				std::vector<std::vector<int>> RootNodeIndexList;
+				std::vector<int> RootNodeIndexList;
 
-				std::vector<int> rootnodes;
-
-				GetArrayInt32("rootnodes", rootnodes, objectJSON);
-
-				for (int root : rootnodes)
-				{
-					RootNodeIndexList.push_back(std::vector<int>({ root }));
-				}
+				GetArrayInt32("rootnodes", RootNodeIndexList, objectJSON);
 
 				Object->SetRootNodeIndexList(RootNodeIndexList);
 			}
@@ -403,24 +395,6 @@ namespace resource
 				scene::SAnimationInfo AnimationInfo = AnalyseAnimationInfo(animationJSON);
 
 				m_Target->AddAnimationInfo(Object, AnimationInfo);
-			}
-
-			// SceneTextureSet
-			const auto& SceneTextureSet = m_Target->GetSceneTextureSet();
-			if (SceneTextureSet)
-			{
-				for (const auto& CubeMap : SceneTextureSet->GetCubeMapList())
-				{
-					Object->GetTextureSet()->AddCubeMap(CubeMap);
-				}
-
-				const auto& Diffuse_Tex = SceneTextureSet->GetDiffuse_Tex();
-				const auto& Specular_Tex = SceneTextureSet->GetSpecular_Tex();
-				const auto& GGXLUT_Tex = SceneTextureSet->GetGGXLUT_Tex();
-				if (Diffuse_Tex && Specular_Tex && GGXLUT_Tex)
-				{
-					Object->GetTextureSet()->AddIBLTexture(Diffuse_Tex, Specular_Tex, GGXLUT_Tex);
-				}
 			}
 
 			// Objectを追加

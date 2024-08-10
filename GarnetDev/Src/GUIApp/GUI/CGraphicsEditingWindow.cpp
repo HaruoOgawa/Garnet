@@ -39,8 +39,10 @@ namespace gui
 			{
 				if (ImGui::BeginTabBar("MainMenuBar"))
 				{
-					if (!m_GUIObjectTab.Draw(pGraphicsAPI, GUIParams.ObjectList, GUIParams.SceneController)) return false;
+					if (!m_GUIObjectTab.Draw(pGraphicsAPI, GUIParams)) return false;
 					if (!m_GUIResourcesTab.Draw(GUIParams.FileModifier)) return false;
+					if (!m_MaterialFrameTab.Draw(pGraphicsAPI, GUIParams)) return false;
+					if (!m_LogTab.Draw(pGraphicsAPI, GUIParams)) return false;
 					if (!CGUIRenderingTab::Draw()) return false;
 					if (!CGUICameraTab::Draw()) return false;
 
@@ -106,6 +108,11 @@ namespace gui
 		}
 
 		return true;
+	}
+
+	void CGraphicsEditingWindow::AddLog(gui::EGUILogType LogType, const std::string Msg)
+	{
+		m_LogTab.AddLog(LogType, Msg);
 	}
 }
 #endif // USE_GUIENGINE

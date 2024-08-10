@@ -6,8 +6,9 @@
 #include <vector>
 #include <memory>
 
+#include "SGUIParams.h"
+
 namespace api { class IGraphicsAPI; }
-namespace scene { class CSceneController; }
 
 namespace object { 
 	class C3DObject; 
@@ -24,11 +25,22 @@ namespace gui
 		int m_SelectedNodeIndex;
 
 		std::string m_SelectedName;
+
+		// オブジェクト追加ダイアログ
+		bool m_ShowAddObjectDialog;
+
+		// ノード追加ダイアログ
+		bool m_ShowAddNodeDialog;
 	private:
 		void Reset();
 
+		bool DrawObjectList(api::IGraphicsAPI* pGraphicsAPI, const SGUIParams& GUIParams);
 		bool DrawNodeGUI(int& SelectedObjectIndex, int& SelectedNodeIndex, int CurrentObjectIndex, int CurrentNodeIndex, 
 			const std::shared_ptr<object::CNode>& Node, const std::vector<std::shared_ptr<object::CNode>>& NodeList);
+		bool DrawObjectDetail(api::IGraphicsAPI* pGraphicsAPI, const SGUIParams& GUIParams);
+
+		bool DrawAddObjectDialog(api::IGraphicsAPI* pGraphicsAPI, const SGUIParams& GUIParams);
+		bool DrawAddNodeDialog(api::IGraphicsAPI* pGraphicsAPI, const SGUIParams& GUIParams);
 
 		void SetDrawable(bool Flag, const std::shared_ptr<object::CNode>& Node, const std::vector<std::shared_ptr<object::CNode>>& NodeList);
 
@@ -36,7 +48,7 @@ namespace gui
 		CGUIObjectTab();
 		virtual ~CGUIObjectTab() = default;
 
-		bool Draw(api::IGraphicsAPI* pGraphicsAPI, const std::vector<std::shared_ptr<object::C3DObject>>& ObjectList, const std::shared_ptr<scene::CSceneController>& SceneController);
+		bool Draw(api::IGraphicsAPI* pGraphicsAPI, const SGUIParams& GUIParams);
 	};
 }
 #endif

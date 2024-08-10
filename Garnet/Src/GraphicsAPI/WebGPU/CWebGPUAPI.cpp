@@ -317,6 +317,12 @@ namespace api
 #endif // RUNTIME_SHADER_EDITING
 	}
 
+	bool CWebGPUAPI::CheckValidShader(std::string& ErrorMsg, const std::vector<unsigned char>& ShaderCode, graphics::EShaderStage ShaderStage)
+	{
+		// WebGPU‚Å‚Í–¢‘Î‰ž
+		return true;
+	}
+
 	//
 	WGPUDevice CWebGPUAPI::GetLogicalDevice() const
 	{

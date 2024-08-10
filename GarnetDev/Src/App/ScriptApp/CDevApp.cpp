@@ -1,3 +1,5 @@
+#ifdef _DEBUG
+
 #include "CDevApp.h"
 #include "../../LoadWorker/CLoadWorker.h"
 #include "Scene/CScriptScene.h"
@@ -215,14 +217,14 @@ namespace app
 #ifdef USE_GUIENGINE
 			if (pLoadWorker->IsLoaded())
 			{
-				gui::SGUIParams GUIParams = {};
-				GUIParams.FileModifier = m_FileModifier;
-				GUIParams.ObjectList = GetObjectList();
-				GUIParams.SceneController = m_SceneController;
-				GUIParams.TimelineController = m_TimelineController;
+				gui::SGUIParams GUIParams = gui::SGUIParams(GetObjectList(), m_SceneController, m_FileModifier, m_TimelineController, pLoadWorker);
 
 				if (!GUIEngine->BeginFrame(pGraphicsAPI)) return false;
-				if (!m_GraphicsEditingWindow->Draw(pGraphicsAPI, GUIParams, GUIEngine)) return false;
+				if (!m_GraphicsEditingWindow->Draw(pGraphicsAPI, GUIParams, GUIEngine))
+				{
+					Console::Log("[Error] InValid GUI\n");
+					return false;
+				}
 				if (!GUIEngine->EndFrame(pGraphicsAPI)) return false;
 			}
 #endif // USE_GUIENGINE
@@ -260,11 +262,7 @@ namespace app
 
 #ifdef USE_GUIENGINE
 		{
-			gui::SGUIParams GUIParams = {};
-			GUIParams.FileModifier = m_FileModifier;
-			GUIParams.ObjectList = GetObjectList();
-			GUIParams.SceneController = m_SceneController;
-			GUIParams.TimelineController = m_TimelineController;
+			gui::SGUIParams GUIParams = gui::SGUIParams(GetObjectList(), m_SceneController, m_FileModifier, m_TimelineController, pLoadWorker);
 
 			if (!m_GraphicsEditingWindow->OnLoaded(pGraphicsAPI, GUIParams, GUIEngine)) return false;
 		}
@@ -296,6 +294,14 @@ namespace app
 		}
 	}
 
+	// エラー通知イベント
+	void CDevApp::OnAssertError(const std::string& Message)
+	{
+#ifdef USE_GUIENGINE
+		m_GraphicsEditingWindow->AddLog(gui::EGUILogType::Error, Message);
+#endif
+	}
+
 	// Getter
 	std::vector<std::shared_ptr<object::C3DObject>> CDevApp::GetObjectList() const
 	{
@@ -322,3 +328,5 @@ namespace app
 		return m_SceneController;
 	}
 }
+
+#endif // _DEBUG

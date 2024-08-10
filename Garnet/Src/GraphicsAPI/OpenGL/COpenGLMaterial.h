@@ -9,6 +9,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "../../Graphics/CMaterial.h"
+#include "../../Graphics/EShaderStage.h"
 #include "COpenGLAPI.h"
 
 namespace graphics { class CMaterialCreateInfo; }
@@ -34,10 +35,13 @@ namespace api
 		bool CreateShaderStages();
 		bool CreateShaderBuffers();
 
-		// Helper Functions
-		static bool CompileShader(const std::vector<unsigned char>& shaderCode, GLenum shaderType, GLuint& shaderPrg);
 		static std::string PreparePreprocessor();
+
+		static bool CompileAndAttachShader(const std::vector<unsigned char>& shaderCode, GLuint& shaderPrg, graphics::EShaderStage ShaderStage, GLuint& shader);
+		static void AttachShader(GLuint& shaderPrg, GLuint& shader);
 	public:
+		static bool CompileShader(const std::vector<unsigned char>& shaderCode, graphics::EShaderStage ShaderStage, GLuint& shader, std::string& ErrorMsg);
+
 		COpenGLMaterial(api::COpenGLAPI* pGraphicsAPI, const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, int RefCount, graphics::ECullMode CullMode);
 		virtual ~COpenGLMaterial();
 

@@ -35,14 +35,15 @@ namespace mmd
 		// ノードリスト
 		// PMXにはNodeの概念が無さそうなのでいい感じに調整する
 		std::vector<std::shared_ptr<object::CNode>> NodeList;
-		std::vector<std::vector<int>> RootNodeIndexList;
+		std::vector<int> RootNodeIndexList;
 
+		// ルートノードを作成
 		std::shared_ptr<object::CNode> RootNode = std::make_shared<object::CNode>(-1, static_cast<int>(NodeList.size()));
 		RootNode->SetName("RootNode");
 		RootNode->SetU16Name(L"RootNode");
 		NodeList.push_back(RootNode);
 
-		RootNodeIndexList.push_back(std::vector<int>({ 0 }));
+		RootNodeIndexList.push_back(0);
 
 		// Skeleton
 		std::shared_ptr<animation::CSkeleton> Skeleton = std::make_shared<animation::CSkeleton>();

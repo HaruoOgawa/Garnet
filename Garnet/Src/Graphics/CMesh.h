@@ -8,6 +8,7 @@
 
 namespace graphics
 {
+	class CMaterial;
 	class CPrimitive;
 	class CVertexBuffer;
 	class CIndexBuffer;
@@ -24,6 +25,8 @@ namespace graphics
 	public:
 		CMesh();
 		virtual ~CMesh();
+
+		bool Create(api::IGraphicsAPI* pGraphicsAPI, const std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList, std::string PassName, std::string DepthPassName);
 
 		bool CreateBuffer();
 

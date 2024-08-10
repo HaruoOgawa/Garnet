@@ -26,7 +26,8 @@ namespace gui
 		m_SelectedObjectForAddObj(nullptr),
 		m_ClickedObjectForAddObjectTrack(nullptr),
 		m_SelectedNodeForAddTrack(nullptr),
-		m_SelectedMaterialForAddTrack(nullptr)
+		m_SelectedMaterialForAddTrack(nullptr),
+		m_RemovedTrackID(std::string())
 	{
 		m_LeftSideMemory = 0.0f;
 		m_RightSideMemory = static_cast<float>(m_MaxLargeMemoryCount) * m_LargeMemoryWidth;
@@ -53,6 +54,18 @@ namespace gui
 		if (!DrawKeyFrameWindow(TimelineController)) return false;
 		if (m_ShowAddObjDialog && !DrawAddObjectDialog(TimelineController, ObjectList)) return false;
 		if (m_ShowAddTrackDialog && !DrawAddObjectTrackDialog(TimelineController)) return false;
+
+		// トラックとサンプラーを削除
+		{
+			const auto& TLClip = TimelineController->GetClip();
+
+			if (TLClip && !m_RemovedTrackID.empty())
+			{
+				TLClip->RemoveTrackAndSampler(m_RemovedTrackID);
+
+				m_RemovedTrackID = std::string();
+			}
+		}
 
 		return true;
 	}
@@ -162,6 +175,11 @@ namespace gui
 
 					if (ImGui::TreeNodeEx(TrackLabel.c_str()))
 					{
+						if (CheckIsClickedObjectTree(Object))
+						{
+							IsOpenAndClicked = true;
+						}
+
 						for (const auto& Node : Object->GetTLNodeList())
 						{
 							std::string NodeTrackLabel = Node->GetName() + "##TimeLineView_Hierarchy_NodeTree";
@@ -171,11 +189,17 @@ namespace gui
 								{
 									const auto& Track = TrackList.find(TrackID);
 									if (Track == TrackList.end()) continue;
+									
+									ImVec2 DstCursorPos = ImVec2();
+									if (!DrawTrackProperty(TimelineController, Track->first, Track->second, SamplerList, DstCursorPos)) return false;
+
+									if (m_RemovedTrackID == TrackID)
+									{
+										Node->RemoveRefTrackID(TrackID);
+									}
 
 									// トラックと描画位置(カーソル位置)を登録
-									m_OpenedTrackPosMap.emplace(Track->second, ImGui::GetCursorScreenPos());
-
-									if (!DrawTrackProperty(TimelineController, Track->second, SamplerList)) return false;
+									m_OpenedTrackPosMap.emplace(Track->second, DstCursorPos);
 								}
 
 								ImGui::TreePop();
@@ -183,6 +207,11 @@ namespace gui
 						}
 
 						ImGui::TreePop();
+					}
+
+					if (CheckIsClickedObjectTree(Object))
+					{
+						IsOpenAndClicked = true;
 					}
 				}
 
@@ -192,6 +221,11 @@ namespace gui
 
 					if (ImGui::TreeNodeEx(TrackLabel.c_str()))
 					{
+						if (CheckIsClickedObjectTree(Object))
+						{
+							IsOpenAndClicked = true;
+						}
+
 						for (const auto& Material : Object->GetTLMaterial())
 						{
 							std::string MaterialTrackLabel = Material->GetMaterialName() + "##TimeLineView_Hierarchy_MaterialTree";
@@ -202,10 +236,16 @@ namespace gui
 									const auto& Track = TrackList.find(TrackID);
 									if (Track == TrackList.end()) continue;
 
-									// トラックと描画位置(カーソル位置)を登録
-									m_OpenedTrackPosMap.emplace(Track->second, ImGui::GetCursorScreenPos());
+									ImVec2 DstCursorPos = ImVec2();
+									if (!DrawTrackProperty(TimelineController, Track->first, Track->second, SamplerList, DstCursorPos)) return false;
 
-									if (!DrawTrackProperty(TimelineController, Track->second, SamplerList)) return false;
+									if (m_RemovedTrackID == TrackID)
+									{
+										Material->RemoveRefTrackID(TrackID);
+									}
+
+									// トラックと描画位置(カーソル位置)を登録
+									m_OpenedTrackPosMap.emplace(Track->second, DstCursorPos);
 								}
 
 								ImGui::TreePop();
@@ -213,6 +253,11 @@ namespace gui
 						}
 
 						ImGui::TreePop();
+					}
+
+					if (CheckIsClickedObjectTree(Object))
+					{
+						IsOpenAndClicked = true;
 					}
 				}
 
@@ -234,8 +279,8 @@ namespace gui
 		return true;
 	}
 
-	bool CTimeLineView::DrawTrackProperty(const std::shared_ptr<timeline::CTimelineController>& TimelineController, const std::shared_ptr<timeline::CTimelineTrack>& Track,
-		const std::vector<std::shared_ptr<animation::CAnimationSampler>>& SamplerList)
+	bool CTimeLineView::DrawTrackProperty(const std::shared_ptr<timeline::CTimelineController>& TimelineController, const std::string& TrackID, const std::shared_ptr<timeline::CTimelineTrack>& Track,
+		const std::vector<std::shared_ptr<animation::CAnimationSampler>>& SamplerList, ImVec2& DstCursorPos)
 	{
 		int SamplerIndex = Track->GetSamplerIndex();
 		if (SamplerIndex < 0 || SamplerIndex >= SamplerList.size()) return false;
@@ -274,10 +319,16 @@ namespace gui
 
 		if (Value.empty()) return true;
 
+		//
+		ImGui::SeparatorText(Track->GetTrackName().c_str());
+
 		// GUIに描画
-		std::string Label = Track->GetTrackName() + "##Timeline_TrackProperty";
+		std::string Label = "##Timeline_TrackProperty_" + Track->GetTrackName();
 		
 		bool ExistInput = false;
+
+		// InputのCursorPosを取得
+		DstCursorPos = ImGui::GetCursorScreenPos();
 
 		if (InterpolateValueType == animation::EInterpolateValueType::QUATERNION && ValueType == math::EValueType::VALUE_TYPE_VEC4)
 		{
@@ -352,6 +403,12 @@ namespace gui
 			default:
 				break;
 			}
+		}
+
+		std::string RemoveLavel = "Remove##" + Label;
+		if (ImGui::Button(RemoveLavel.c_str()))
+		{
+			m_RemovedTrackID = TrackID;
 		}
 
 		// 値が変わってかつキーフレームが選択中ならデータをキーフレームに反映する
@@ -911,14 +968,20 @@ namespace gui
 					std::string TrackID = timeline::CTimelineTrack::GenerateUUID();
 
 					timeline::ETimelineSamplerTarget SamplerTarget = timeline::ETimelineSamplerTarget::NONE;
+					animation::EInterpolationType InterpolationType = animation::EInterpolationType::LINEAR;
 
 					if (SelectedType == timeline::ENodeTrackTarget::NodeTrackTarget_Rotation)
 					{
 						SamplerTarget = timeline::ETimelineSamplerTarget::ROTATION;
 					}
+					else if (SelectedType == timeline::ENodeTrackTarget::NodeTrackTarget_EnabledFlag)
+					{
+						// オンオフフラグの時はStepで補完する
+						InterpolationType = animation::EInterpolationType::STEP;
+					}
 
 					// Sampler
-					std::shared_ptr<animation::CAnimationSampler> Sampler = std::make_shared<animation::CAnimationSampler>(animation::EInterpolationType::LINEAR);
+					std::shared_ptr<animation::CAnimationSampler> Sampler = std::make_shared<animation::CAnimationSampler>(InterpolationType);
 					Clip->AddSampler(Sampler);
 
 					// Track

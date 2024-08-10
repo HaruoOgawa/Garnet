@@ -32,8 +32,9 @@ namespace timeline
 		CTimelineTrack(const std::string& TrackID, int SamplerIndex, ETimelineSamplerTarget SamplerTarget, ETrackType TrackType);
 		virtual ~CTimelineTrack() = default;
 
+		virtual void SetSamplerIndex(int Index);
 		virtual int GetSamplerIndex() const;
-
+		
 		virtual ETimelineSamplerTarget GetSamplerTarget() const;
 
 		virtual void SetTrackID(const std::string& TrackID);

@@ -124,11 +124,16 @@ namespace scene
 
 		//
 		void AddObject(const std::shared_ptr<object::C3DObject>& Object);
+		void AddObjectWithLoading(resource::CLoadWorker* pLoadWorker, const std::shared_ptr<object::C3DObject>& Object, const std::string& FileName, const std::string& DefaultMaterialframeName);
 		std::vector<std::shared_ptr<object::C3DObject>> GetObjectList() const;
 		std::shared_ptr<object::C3DObject> FindObjectByName(const std::string& Name);
+		std::shared_ptr<object::C3DObject> FindObjectByIndex(int Index);
+		void RemoveObject(int Index);
 
 		void AddMaterialFrame(const std::string& MFName, const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame);
+		void AddMaterialFrameWithLoading(resource::CLoadWorker* pLoadWorker, const std::string& MFName, const std::string& FileName);
 		const std::map<std::string, std::shared_ptr<graphics::CMaterialFrame>>& GetMaterialFrameMap() const;
+		std::shared_ptr<graphics::CMaterialFrame> FindMaterialFrame(const std::string& MFName);
 
 		void AddAnimationClipSet(const std::string& Name, const std::shared_ptr<animation::CAnimationClipSet>& AnimationClipSet);
 		const std::map<std::string, std::shared_ptr<animation::CAnimationClipSet>>& GetAnimationClipSetMap() const;

@@ -7,8 +7,14 @@
 #include "../Interface/IResource.h"
 #include "../Object/C3DObject.h"
 #include "CResourceManager.h"
-#include "CSceneLoader.h"
+
+#include "C3DObjectLoader.h"
+#include "CAnimationLoader.h"
+#include "CAudioLoader.h"
 #include "CMaterialFrameLoader.h"
+#include "CSceneLoader.h"
+#include "CShaderLoader.h"
+#include "CTextureLoader.h"
 #include "CTimelineClipLoader.h"
 
 namespace file { class CFile; }
@@ -40,7 +46,7 @@ namespace resource
 		bool CheckInitialResource(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine);
 		bool InitLoadStatus(api::IGraphicsAPI* pGraphicsAPI, app::CAppCore* pAppCore);
 		
-		bool LoadResourceList(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine);
+		bool LoadResourceList(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, app::CAppCore* pAppCore);
 
 		std::shared_ptr<resource::IResource> GetLoadingResource(const std::string& Filename) const;
 	public:

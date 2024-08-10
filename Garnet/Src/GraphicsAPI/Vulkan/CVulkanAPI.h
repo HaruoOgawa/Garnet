@@ -217,6 +217,8 @@ namespace api
 
 		virtual bool IsEnabledRuntimeShaderEditing() const override;
 
+		virtual bool CheckValidShader(std::string& ErrorMsg, const std::vector<unsigned char>& ShaderCode, graphics::EShaderStage ShaderStage) override;
+
 		//
 		int GetMaxFramesInFlight() const { return MAX_FRAMES_IN_FLIGHT; }
 

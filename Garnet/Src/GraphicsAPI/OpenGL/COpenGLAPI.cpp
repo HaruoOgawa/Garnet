@@ -286,6 +286,17 @@ namespace api
 		return false;
 #endif // RUNTIME_SHADER_EDITING
 	}
+
+	bool COpenGLAPI::CheckValidShader(std::string& ErrorMsg, const std::vector<unsigned char>& ShaderCode, graphics::EShaderStage ShaderStage)
+	{
+		GLuint shader = 0;
+
+		const bool Result = COpenGLMaterial::CompileShader(ShaderCode, ShaderStage, shader, ErrorMsg);
+
+		if (shader != 0) glDeleteShader(shader);
+
+		return Result;
+	}
 }
 
 #endif // USE_OPENGL

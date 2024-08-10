@@ -135,4 +135,34 @@ namespace timeline
 		}
 		
 	}
+
+	void CTimelineClip::RemoveTrackAndSampler(const std::string& TrackID)
+	{
+		auto it = m_TrackList.find(TrackID);
+
+		if (it == m_TrackList.end()) return;
+
+		const int RemovedSamplerIndex = it->second->GetSamplerIndex();
+
+		// Trackを削除
+		m_TrackList.erase(it);
+
+		// Samplerを削除する
+		if (RemovedSamplerIndex >= 0 && RemovedSamplerIndex < static_cast<int>(m_SamplerList.size()))
+		{
+			m_SamplerList.erase(m_SamplerList.begin() + RemovedSamplerIndex);
+			m_SamplerList.shrink_to_fit();
+
+			// SamplerIndexを詰める
+			for (auto& Track : m_TrackList)
+			{
+				int ExistSamplerIndex = Track.second->GetSamplerIndex();
+
+				// 消されたサンプラーよりも後ろのインデックスを示していたら１だけインデックスを詰める
+				if (ExistSamplerIndex <= RemovedSamplerIndex) continue;
+
+				Track.second->SetSamplerIndex(ExistSamplerIndex - 1);
+			}
+		}
+	}
 }

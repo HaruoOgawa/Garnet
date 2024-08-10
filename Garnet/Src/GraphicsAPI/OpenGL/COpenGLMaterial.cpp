@@ -181,12 +181,14 @@ namespace api
 		m_ShaderPrg = glCreateProgram();
 
 		// Shaderをコンパイル
-		if (!CompileShader(m_CreateInfo->GetVertexShaderCode(), GL_VERTEX_SHADER, m_ShaderPrg)) return false;
-		if (!CompileShader(m_CreateInfo->GetFragmentShaderCode(), GL_FRAGMENT_SHADER, m_ShaderPrg)) return false;
-		if (!CompileShader(m_CreateInfo->GetGeometryShaderCode(), GL_GEOMETRY_SHADER, m_ShaderPrg)) return false;
-		if (!CompileShader(m_CreateInfo->GetHullShaderCode(), GL_TESS_CONTROL_SHADER, m_ShaderPrg)) return false;
-		if (!CompileShader(m_CreateInfo->GetDomainShaderCode(), GL_TESS_EVALUATION_SHADER, m_ShaderPrg)) return false;
-		if (!CompileShader(m_CreateInfo->GetComputeShaderCode(), GL_COMPUTE_SHADER, m_ShaderPrg)) return false;
+		GLuint vertexShader = 0, fragmentShader = 0, computeShader = 0, geometryShader = 0, hullShader = 0, domainShader = 0;
+		
+		if (!CompileAndAttachShader(m_CreateInfo->GetVertexShaderCode(), m_ShaderPrg, graphics::EShaderStage::SHADER_STAGE_VERTEX, vertexShader)) return false;
+		if (!CompileAndAttachShader(m_CreateInfo->GetFragmentShaderCode(), m_ShaderPrg, graphics::EShaderStage::SHADER_STAGE_FRAGMENT, fragmentShader)) return false;
+		if (!CompileAndAttachShader(m_CreateInfo->GetComputeShaderCode(), m_ShaderPrg, graphics::EShaderStage::SHADER_STAGE_COMPUTE, computeShader)) return false;
+		if (!CompileAndAttachShader(m_CreateInfo->GetGeometryShaderCode(), m_ShaderPrg, graphics::EShaderStage::SHADER_STAGE_GEOMETRY, geometryShader)) return false;
+		if (!CompileAndAttachShader(m_CreateInfo->GetHullShaderCode(), m_ShaderPrg, graphics::EShaderStage::SHADER_STAGE_HULL, hullShader)) return false;
+		if (!CompileAndAttachShader(m_CreateInfo->GetDomainShaderCode(), m_ShaderPrg, graphics::EShaderStage::SHADER_STAGE_DOMAIN, domainShader)) return false;
 
 		// ShaderをProgramにリンクする
 		glLinkProgram(m_ShaderPrg);
@@ -295,13 +297,52 @@ namespace api
 	}
 
 	// Helper Functions //////////////////////////////////////////////////
-	bool COpenGLMaterial::CompileShader(const std::vector<unsigned char>& shaderCode, GLenum shaderType, GLuint& shaderPrg)
+	bool COpenGLMaterial::CompileAndAttachShader(const std::vector<unsigned char>& shaderCode, GLuint& shaderPrg, graphics::EShaderStage ShaderStage, GLuint& shader)
+	{
+		std::string ErrorMsg = std::string();
+
+		if (!CompileShader(shaderCode, ShaderStage, shader, ErrorMsg)) return false;
+		AttachShader(shaderPrg, shader);
+
+		return true;
+	}
+	
+	bool COpenGLMaterial::CompileShader(const std::vector<unsigned char>& shaderCode, graphics::EShaderStage ShaderStage, GLuint& shader, std::string& ErrorMsg)
 	{
 		// 空のシェーダーはセーフ
 		if (shaderCode.empty()) return true;
 
+		//
+		GLenum shaderType;
+
+		switch (ShaderStage)
+		{
+		case graphics::EShaderStage::SHADER_STAGE_NONE:
+			return true;
+		case graphics::EShaderStage::SHADER_STAGE_VERTEX:
+			shaderType = GL_VERTEX_SHADER;
+			break;
+		case graphics::EShaderStage::SHADER_STAGE_FRAGMENT:
+			shaderType = GL_FRAGMENT_SHADER;
+			break;
+		case graphics::EShaderStage::SHADER_STAGE_COMPUTE:
+			shaderType = GL_COMPUTE_SHADER;
+			break;
+		case graphics::EShaderStage::SHADER_STAGE_GEOMETRY:
+			shaderType = GL_GEOMETRY_SHADER;
+			break;
+		case graphics::EShaderStage::SHADER_STAGE_HULL:
+			shaderType = GL_TESS_CONTROL_SHADER;
+			break;
+		case graphics::EShaderStage::SHADER_STAGE_DOMAIN:
+			shaderType = GL_TESS_EVALUATION_SHADER;
+			break;
+		default:
+			return true;
+		}
+
 		// Shader Objectを生成
-		GLuint shader = glCreateShader(shaderType);
+		shader = glCreateShader(shaderType);
 
 		std::string code_str = std::string(shaderCode.begin(), shaderCode.end());
 		
@@ -328,16 +369,23 @@ namespace api
 			Console::Log("[Error] GLSL Compile Error - {Error Message: %s}\n", buffer);
 			Console::Log("[Error] ShaderCode: {%s}\n", content);
 
+			ErrorMsg = std::string(buffer);
+
 			return false;
 		}
+
+		return true;
+	}
+
+	void COpenGLMaterial::AttachShader(GLuint& shaderPrg, GLuint& shader)
+	{
+		if (shader == 0) return;
 
 		// コンパイルに成功したのでShader ProgramにShaderをアタッチする
 		glAttachShader(shaderPrg, shader);
 
 		// アタッチしたので削除する
 		glDeleteShader(shader);
-
-		return true;
 	}
 
 	std::string COpenGLMaterial::PreparePreprocessor()

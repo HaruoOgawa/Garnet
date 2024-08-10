@@ -15,6 +15,11 @@ namespace timeline
 	{
 	}
 
+    void CTimelineTrack::SetSamplerIndex(int Index)
+    {
+        m_SamplerIndex = Index;
+    }
+
 	int CTimelineTrack::GetSamplerIndex() const
 	{
 		return m_SamplerIndex;

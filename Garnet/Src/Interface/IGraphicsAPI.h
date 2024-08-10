@@ -9,6 +9,7 @@
 #include "IWindowAPI.h"
 
 #include "../GraphicsAPI/ERenderPassFormat.h"
+#include "../Graphics/EShaderStage.h"
 
 #ifdef USE_GLFW
 #include <glfw3.h>
@@ -70,5 +71,7 @@ namespace api
 		virtual bool CopyDepthBuffer(const std::string& SrcPassName, const std::string& DstPassName) = 0;
 
 		virtual bool IsEnabledRuntimeShaderEditing() const = 0;
+
+		virtual bool CheckValidShader(std::string& ErrorMsg, const std::vector<unsigned char>& ShaderCode, graphics::EShaderStage ShaderStage) = 0;
 	};
 }

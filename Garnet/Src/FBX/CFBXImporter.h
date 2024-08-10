@@ -77,7 +77,7 @@ namespace fbx
 		static bool CreateMesh(api::IGraphicsAPI* pGraphicsAPI, FbxNode* pFBXNode, std::vector<FbxMesh*>& pFbxMeshList, const std::vector<FbxSurfaceMaterial*>& pFbxMaterialList,
 			std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, const std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList, const std::shared_ptr<animation::CSkeleton>& Skeleton, const bool IsMixamoFbx);
 
-		static bool CreateNodeList(FbxScene* Scene, std::vector<FbxNode*>& pFbxNodeList, std::vector<std::shared_ptr<object::CNode>>& NodeList, std::vector<std::vector<int>>& RootNodeIndexList, const bool IsMixamoFbx);
+		static bool CreateNodeList(FbxScene* Scene, std::vector<FbxNode*>& pFbxNodeList, std::vector<std::shared_ptr<object::CNode>>& NodeList, std::vector<int>& RootNodeIndexList, const bool IsMixamoFbx);
 		
 		static bool CreateNode(FbxNode* pFBXNode, std::vector<FbxNode*>& pFbxNodeList, std::vector<std::shared_ptr<object::CNode>>& NodeList, const bool IsMixamoFbx);
 

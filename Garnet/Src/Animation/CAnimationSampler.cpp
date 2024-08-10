@@ -257,15 +257,15 @@ namespace animation
 		{
 			if (m_KeyFrameList.size() < 2)
 			{
-				// 1つしかない時は同じフレームを割り当てる(補間を機能させない)
+				// 1つしかない時は最初のフレームを割り当てる
 				NextKeyFrame = m_KeyFrameList[0];
 				PrevKeyFrame = m_KeyFrameList[0];
 			}
 			else
 			{
-				// 最後とその前を返す
+				// 最後のフレームを返す
 				NextKeyFrame = m_KeyFrameList[m_KeyFrameList.size() - 1];
-				PrevKeyFrame = m_KeyFrameList[m_KeyFrameList.size() - 2];
+				PrevKeyFrame = m_KeyFrameList[m_KeyFrameList.size() - 1];
 			}
 
 			return true;
@@ -274,7 +274,7 @@ namespace animation
 		// Prev
 		size_t NextIndex = std::distance(m_KeyFrameList.begin(), val);
 
-		// CurrentTimeがKeyFrameの最初よりも小さい時はPrevとNextにそれぞれ同じキーフレームを割り当てる(補間を機能させない)
+		// CurrentTimeがKeyFrameの最初よりも小さい時はPrevとNextにそれぞれ同じキーフレームを割り当てる
 		if (NextIndex <= 0 || NextIndex >= m_KeyFrameList.size())
 		{
 			NextKeyFrame = m_KeyFrameList[0];

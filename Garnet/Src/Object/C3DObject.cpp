@@ -146,6 +146,8 @@ namespace object
 
 	bool C3DObject::Create(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, const std::shared_ptr<graphics::CMaterialFrame>& DepthMF)
 	{
+		if (m_IsCreated) return true;
+
 		// DefaultLocalTransformを保存する
 		ApplyDefaultLocalTransform();
 
@@ -175,30 +177,12 @@ namespace object
 
 		for (const auto& Mesh : m_MeshList)
 		{
-			if (!Mesh->CreateBuffer()) return false;
+			if (!Mesh->Create(pGraphicsAPI, m_MaterialList, m_PassName, m_DepthPassName)) return false;
 
 			// モーフ処理が必要かどうか
 			if (Mesh->GetMorphDataList().size() > 0)
 			{
 				ExistMorph = true;
-			}
-
-			for (const auto& Primitive : Mesh->GetPrimitiveList())
-			{
-				int MaterialIndex = Primitive->GetMaterialIndex();
-				if (MaterialIndex < 0 || MaterialIndex >= m_MaterialList.size()) continue;
-
-				const auto& Material = m_MaterialList[MaterialIndex];
-
-				if (!Primitive->Create(pGraphicsAPI, m_PassName, Material, false)) return false;
-				
-				if (Material->GetDepthMaterial())
-				{
-					if (!Primitive->Create(pGraphicsAPI, m_DepthPassName, Material->GetDepthMaterial(), true)) return false;
-				}
-
-				// 生成処理が終わったので不要なリソースを解放する
-				Primitive->Release();
 			}
 		}
 
@@ -244,25 +228,19 @@ namespace object
 
 	void C3DObject::ApplyParentNode()
 	{
-		if (!m_RootNodeIndexList.empty())
+		for (const int RootNodeIndex : m_RootNodeIndexList)
 		{
-			for (const auto& SceneRootNodeList : m_RootNodeIndexList)
+			if (RootNodeIndex < 0 || RootNodeIndex >= m_NodeList.size()) continue;
+
+			auto& RootNode = m_NodeList[RootNodeIndex];
+
+			// 子要素の走破をスタートする
+			for (const int ChildIndex : RootNode->GetChildrenNodeIndexList())
 			{
-				for (const int RootNodeIndex : SceneRootNodeList)
-				{
-					if (RootNodeIndex < 0 || RootNodeIndex >= m_NodeList.size()) continue;
+				if (ChildIndex < 0 || ChildIndex >= m_NodeList.size()) continue;
 
-					auto& RootNode = m_NodeList[RootNodeIndex];
-
-					// 子要素の走破をスタートする
-					for (const int ChildIndex : RootNode->GetChildrenNodeIndexList())
-					{
-						if (ChildIndex < 0 || ChildIndex >= m_NodeList.size()) continue;
-
-						auto& ChildNode = m_NodeList[ChildIndex];
-						ApplyParentNode(ChildNode, RootNode);
-					}
-				}
+				auto& ChildNode = m_NodeList[ChildIndex];
+				ApplyParentNode(ChildNode, RootNode);
 			}
 		}
 	}
@@ -320,26 +298,23 @@ namespace object
 		if (!m_RootNodeIndexList.empty()) 
 		{
 			// ルートノードから順に走破してワールド行列を計算する
-			for (const auto& SceneRootNodeList : m_RootNodeIndexList)
+			for (const int RootNodeIndex : m_RootNodeIndexList)
 			{
-				for (const int RootNodeIndex : SceneRootNodeList)
+				if (RootNodeIndex < 0 || RootNodeIndex >= m_NodeList.size()) continue;
+
+				auto& RootNode = m_NodeList[RootNodeIndex];
+				const auto& WorldMatrix = RootNode->GetLocalTransform()->GetModelMatrix();
+
+				// ルートなので自身のローカルトランスフォームをワールド行列にする
+				RootNode->SetWorldMatrix(WorldMatrix);
+
+				// 子要素の走破をスタートする
+				for (const int ChildIndex : RootNode->GetChildrenNodeIndexList())
 				{
-					if (RootNodeIndex < 0 || RootNodeIndex >= m_NodeList.size()) continue;
+					if (ChildIndex < 0 || ChildIndex >= m_NodeList.size()) continue;
 
-					auto& RootNode = m_NodeList[RootNodeIndex];
-					const auto& WorldMatrix = RootNode->GetLocalTransform()->GetModelMatrix();
-
-					// ルートなので自身のローカルトランスフォームをワールド行列にする
-					RootNode->SetWorldMatrix(WorldMatrix);
-
-					// 子要素の走破をスタートする
-					for (const int ChildIndex : RootNode->GetChildrenNodeIndexList())
-					{
-						if (ChildIndex < 0 || ChildIndex >= m_NodeList.size()) continue;
-
-						auto& ChildNode = m_NodeList[ChildIndex];
-						CalcWorldMatrix(ChildNode, WorldMatrix);
-					}
+					auto& ChildNode = m_NodeList[ChildIndex];
+					CalcWorldMatrix(ChildNode, WorldMatrix);
 				}
 			}
 		}
@@ -659,6 +634,18 @@ namespace object
 		return DstNode;
 	}
 
+	std::shared_ptr<CNode> C3DObject::FindNodeByIndex(int Index)
+	{
+		std::shared_ptr<CNode> DstNode = nullptr;
+
+		if (Index >= 0 && Index < static_cast<int>(m_NodeList.size()))
+		{
+			DstNode = m_NodeList[Index];
+		}
+
+		return DstNode;
+	}
+
 	void C3DObject::AddMesh(const std::shared_ptr<graphics::CMesh>& Mesh)
 	{
 		m_MeshList.push_back(Mesh);
@@ -750,12 +737,17 @@ namespace object
 		return true;
 	}
 
-	void C3DObject::SetRootNodeIndexList(const std::vector<std::vector<int>>& RootNodeIndexList)
+	void C3DObject::SetRootNodeIndexList(const std::vector<int>& RootNodeIndexList)
 	{
 		m_RootNodeIndexList = RootNodeIndexList;
 	}
 
-	const std::vector<std::vector<int>>& C3DObject::GetRootNodeIndexList() const
+	void C3DObject::AddRootNodeIndex(int Index)
+	{
+		m_RootNodeIndexList.push_back(Index);
+	}
+
+	const std::vector<int>& C3DObject::GetRootNodeIndexList() const
 	{
 		return m_RootNodeIndexList;
 	}

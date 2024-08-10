@@ -1,4 +1,6 @@
 #pragma once
+#ifdef _DEBUG
+
 #include <memory>
 #include <Interface/IApp.h>
 
@@ -62,8 +64,13 @@ namespace app
 		// フォーカスイベント
 		virtual void OnFocus(bool Focused, api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker) override;
 
+		// エラー通知イベント
+		virtual void OnAssertError(const std::string& Message) override;
+
 		// Getter
 		virtual std::vector<std::shared_ptr<object::C3DObject>> GetObjectList() const override;
 		virtual std::shared_ptr<scene::CSceneController> GetSceneController() const override;
 	};
 }
+
+#endif // _DEBUG
