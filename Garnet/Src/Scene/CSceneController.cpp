@@ -126,6 +126,14 @@ namespace scene
 		return DstObject;
 	}
 
+	void CSceneController::RemoveObject(int Index)
+	{
+		if (Index < 0 || Index >= static_cast<int>(m_ObjectList.size())) return;
+
+		m_ObjectList.erase(m_ObjectList.begin() + Index);
+		m_ObjectList.shrink_to_fit();
+	}
+
 	void CSceneController::AddMaterialFrame(const std::string& MFName, const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame)
 	{
 		m_MaterialFrameMap.emplace(MFName, MaterialFrame);

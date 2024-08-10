@@ -128,6 +128,7 @@ namespace scene
 		std::vector<std::shared_ptr<object::C3DObject>> GetObjectList() const;
 		std::shared_ptr<object::C3DObject> FindObjectByName(const std::string& Name);
 		std::shared_ptr<object::C3DObject> FindObjectByIndex(int Index);
+		void RemoveObject(int Index);
 
 		void AddMaterialFrame(const std::string& MFName, const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame);
 		void AddMaterialFrameWithLoading(resource::CLoadWorker* pLoadWorker, const std::string& MFName, const std::string& FileName);

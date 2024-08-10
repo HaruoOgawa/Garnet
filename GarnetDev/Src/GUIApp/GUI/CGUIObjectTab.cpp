@@ -125,6 +125,15 @@ namespace gui
 				m_ShowAddObjectDialog = true;
 			}
 
+			// オブジェクトの削除
+			if (ImGui::IsKeyReleased(ImGuiKey_Delete) && ImGui::IsWindowHovered())
+			{
+				GUIParams.SceneController->RemoveObject(m_SelectedObjectIndex);
+
+				m_SelectedObjectIndex = -1;
+				m_SelectedNodeIndex = -1;
+			}
+
 			ImGui::EndChild();
 		}
 
