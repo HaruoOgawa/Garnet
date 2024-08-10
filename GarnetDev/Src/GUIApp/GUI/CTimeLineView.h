@@ -64,11 +64,14 @@ namespace gui
 		std::shared_ptr<object::C3DObject> m_ClickedObjectForAddObjectTrack;
 		std::shared_ptr<object::CNode> m_SelectedNodeForAddTrack;
 		std::shared_ptr<graphics::CMaterial> m_SelectedMaterialForAddTrack;
+
+		//
+		std::string m_RemovedTrackID;
 	private:
 		bool DrawTimeBar(const std::shared_ptr<timeline::CTimelineController>& TimelineController);
 		
 		bool DrawHierarchyWindow(const std::shared_ptr<timeline::CTimelineController>& TimelineController);
-		bool DrawTrackProperty(const std::shared_ptr<timeline::CTimelineController>& TimelineController, const std::shared_ptr<timeline::CTimelineTrack>& Track, 
+		bool DrawTrackProperty(const std::shared_ptr<timeline::CTimelineController>& TimelineController, const std::string& TrackID, const std::shared_ptr<timeline::CTimelineTrack>& Track,
 			const std::vector<std::shared_ptr<animation::CAnimationSampler>>& SamplerList);
 
 		bool DrawKeyFrameWindow(const std::shared_ptr<timeline::CTimelineController>& TimelineController);

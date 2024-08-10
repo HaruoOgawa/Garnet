@@ -135,4 +135,16 @@ namespace timeline
 		}
 		
 	}
+
+	void CTimelineClip::RemoveTrackAndSampler(const std::string& TrackID)
+	{
+		auto it = m_TrackList.find(TrackID);
+
+		if (it == m_TrackList.end()) return;
+
+		// ToDo: ‚È‚ñ‚Æ‚©‚µ‚ÄSampler‚àÁ‚¹‚é‚æ‚¤‚É‚·‚é
+
+		// Track‚ğíœ
+		m_TrackList.erase(it);
+	}
 }
