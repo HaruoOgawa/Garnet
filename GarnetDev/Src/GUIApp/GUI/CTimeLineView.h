@@ -72,7 +72,7 @@ namespace gui
 		
 		bool DrawHierarchyWindow(const std::shared_ptr<timeline::CTimelineController>& TimelineController);
 		bool DrawTrackProperty(const std::shared_ptr<timeline::CTimelineController>& TimelineController, const std::string& TrackID, const std::shared_ptr<timeline::CTimelineTrack>& Track,
-			const std::vector<std::shared_ptr<animation::CAnimationSampler>>& SamplerList);
+			const std::vector<std::shared_ptr<animation::CAnimationSampler>>& SamplerList, ImVec2& DstCursorPos);
 
 		bool DrawKeyFrameWindow(const std::shared_ptr<timeline::CTimelineController>& TimelineController);
 

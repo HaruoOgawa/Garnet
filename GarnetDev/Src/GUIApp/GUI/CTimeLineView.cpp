@@ -189,16 +189,17 @@ namespace gui
 								{
 									const auto& Track = TrackList.find(TrackID);
 									if (Track == TrackList.end()) continue;
-
-									// トラックと描画位置(カーソル位置)を登録
-									m_OpenedTrackPosMap.emplace(Track->second, ImGui::GetCursorScreenPos());
-
-									if (!DrawTrackProperty(TimelineController, Track->first, Track->second, SamplerList)) return false;
+									
+									ImVec2 DstCursorPos = ImVec2();
+									if (!DrawTrackProperty(TimelineController, Track->first, Track->second, SamplerList, DstCursorPos)) return false;
 
 									if (m_RemovedTrackID == TrackID)
 									{
 										Node->RemoveRefTrackID(TrackID);
 									}
+
+									// トラックと描画位置(カーソル位置)を登録
+									m_OpenedTrackPosMap.emplace(Track->second, DstCursorPos);
 								}
 
 								ImGui::TreePop();
@@ -235,15 +236,16 @@ namespace gui
 									const auto& Track = TrackList.find(TrackID);
 									if (Track == TrackList.end()) continue;
 
-									// トラックと描画位置(カーソル位置)を登録
-									m_OpenedTrackPosMap.emplace(Track->second, ImGui::GetCursorScreenPos());
-
-									if (!DrawTrackProperty(TimelineController, Track->first, Track->second, SamplerList)) return false;
+									ImVec2 DstCursorPos = ImVec2();
+									if (!DrawTrackProperty(TimelineController, Track->first, Track->second, SamplerList, DstCursorPos)) return false;
 
 									if (m_RemovedTrackID == TrackID)
 									{
 										Material->RemoveRefTrackID(TrackID);
 									}
+
+									// トラックと描画位置(カーソル位置)を登録
+									m_OpenedTrackPosMap.emplace(Track->second, DstCursorPos);
 								}
 
 								ImGui::TreePop();
@@ -278,7 +280,7 @@ namespace gui
 	}
 
 	bool CTimeLineView::DrawTrackProperty(const std::shared_ptr<timeline::CTimelineController>& TimelineController, const std::string& TrackID, const std::shared_ptr<timeline::CTimelineTrack>& Track,
-		const std::vector<std::shared_ptr<animation::CAnimationSampler>>& SamplerList)
+		const std::vector<std::shared_ptr<animation::CAnimationSampler>>& SamplerList, ImVec2& DstCursorPos)
 	{
 		int SamplerIndex = Track->GetSamplerIndex();
 		if (SamplerIndex < 0 || SamplerIndex >= SamplerList.size()) return false;
@@ -324,6 +326,9 @@ namespace gui
 		std::string Label = "##Timeline_TrackProperty_" + Track->GetTrackName();
 		
 		bool ExistInput = false;
+
+		// InputのCursorPosを取得
+		DstCursorPos = ImGui::GetCursorScreenPos();
 
 		if (InterpolateValueType == animation::EInterpolateValueType::QUATERNION && ValueType == math::EValueType::VALUE_TYPE_VEC4)
 		{
