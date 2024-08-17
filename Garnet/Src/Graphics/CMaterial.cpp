@@ -148,6 +148,9 @@ namespace graphics
 
 						std::vector<unsigned char> PrevValue = PrevShaderBuffer->GetUniformValue(UniformData.UniformName);
 
+						// 空の時はそのバッファがその名前のユニフォームを持っていないのでスキップする
+						if (PrevValue.empty()) continue;
+
 						ShaderBuffer->SetValue(&PrevValue[0], UniformData.ByteOffset, UniformData.ByteSize);
 					}
 				}
