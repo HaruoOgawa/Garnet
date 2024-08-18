@@ -373,7 +373,15 @@ namespace window
 
 		if (Settings.FullScreen)
 		{
-			dwStyle = WS_POPUP | WS_VISIBLE;
+			if (Settings.Overlap)
+			{
+				// オーバーラップ(重なり)有効
+				dwStyle = WS_OVERLAPPEDWINDOW | WS_VISIBLE;
+			}
+			else
+			{
+				dwStyle = WS_POPUP | WS_VISIBLE;
+			}
 
 			nWidth = GetSystemMetrics(SM_CXSCREEN);
 			nHeight = GetSystemMetrics(SM_CYSCREEN);

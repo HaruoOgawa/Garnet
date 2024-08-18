@@ -4,7 +4,8 @@ namespace app
 {
 	struct SAppSettings
 	{
-		bool FullScreen = false;
+		bool FullScreen = true;
+		bool Overlap = true;
 		int ScreenWidth = 1920;
 		int ScreenHeight = 1080;
 	};
