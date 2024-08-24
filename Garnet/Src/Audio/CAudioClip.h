@@ -39,6 +39,8 @@ namespace audio
 
 		bool Stop();
 
+		bool SetPlayPos(float PlaybackTime);
+
 		bool IsPlaying() const;
 	};
 }

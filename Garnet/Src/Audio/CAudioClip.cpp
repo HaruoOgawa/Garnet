@@ -5,8 +5,9 @@
 #include <emscripten.h>
 #else
 #include <array>
+#include <sstream>
 #include <Windows.h>
-#include "../Message/Console.h"
+//#include "../Message/Console.h"
 #endif
 
 namespace audio
@@ -50,9 +51,8 @@ namespace audio
 				nullptr),
 			errorString.data(), MAXERRORLENGTH);
 
-		Console::Log("[Audio Log] %s\n", errorString.data());
+		//Console::Log("[Audio Log] %s\n", errorString.data());
 
-		/*return .empty();*/
 		return true;
 #endif
 	}
@@ -88,11 +88,12 @@ namespace audio
 	bool CAudioClip::Release()
 	{
 #ifdef __EMSCRIPTEN__
-		return true;
 #else
 		std::string Cmd = "close " + m_Extension;
-		return DoCmdWithError(Cmd);
+		if (!DoCmdWithError(Cmd)) return false;
 #endif
+
+		return true;
 	}
 
 	bool CAudioClip::PlayLoop()
@@ -106,12 +107,12 @@ namespace audio
 
 			window.g3dPlayAudio(loop);
 		}, 1);
+#else
+		std::string Cmd = "play " + m_Extension + " repeat";
+		if (!DoCmdWithError(Cmd)) return false;
+#endif // __EMSCRIPTEN__
 
 		return true;
-#else
-		std::string Cmd = "play " + m_Extension;
-		return DoCmdWithError(Cmd);
-#endif // __EMSCRIPTEN__
 	}
 
 	bool CAudioClip::PlayOneShot()
@@ -130,12 +131,12 @@ namespace audio
 
 			window.g3dPlayAudio(loop);
 		}, 0);
-
-		return true;
 #else
 		std::string Cmd = "play " + m_Extension;
-		return DoCmdWithError(Cmd);
+		if (!DoCmdWithError(Cmd)) return false;
 #endif // __EMSCRIPTEN__
+
+		return true;
 	}
 
 	bool CAudioClip::Stop()
@@ -146,12 +147,28 @@ namespace audio
 		EM_ASM({
 			window.g3dStopAudio();
 		});
-
-		return true;
 #else
 		std::string Cmd = "pause " + m_Extension;
-		return DoCmdWithError(Cmd);
+		if (!DoCmdWithError(Cmd)) return false;
 #endif // __EMSCRIPTEN__
+
+		return true;
+	}
+
+	bool  CAudioClip::SetPlayPos(float PlaybackTime)
+	{
+#ifdef __EMSCRIPTEN__
+#else
+		float Offset = PlaybackTime * 1000.0f; // ƒ~ƒŠ•b‚É–ß‚·
+
+		std::ostringstream ss;
+		ss << Offset;
+		std::string Offset_str(ss.str());
+
+		std::string Cmd = "seek " + m_Extension + " to " + Offset_str;
+		if (!DoCmdWithError(Cmd)) return false;
+#endif
+		return true;
 	}
 
 	bool CAudioClip::IsPlaying() const
