@@ -18,12 +18,13 @@ namespace timeline
 
 		bool m_Play;
 
+		std::shared_ptr<app::IApp> m_App;
+
 	private:
 		bool UpdateClip(float CurrentTime, const std::shared_ptr<input::CInputState>& InputState);
 
 	public:
 		CTimelineController();
-		CTimelineController(float CurrentTime, const std::shared_ptr<CTimelineClip>& Clip, bool PlayFlag);
 		virtual ~CTimelineController();
 		
 		bool Initialize(const std::shared_ptr<app::IApp>& App);
@@ -36,7 +37,8 @@ namespace timeline
 
 		const std::shared_ptr<CTimelineClip>& GetClip() const;
 
-		void SetPlay(bool Flag);
+		void Play();
+		void Stop();
 		bool IsPlay() const;
 
 		bool Update(float DeltaSecondsTime, const std::shared_ptr<input::CInputState>& InputState);

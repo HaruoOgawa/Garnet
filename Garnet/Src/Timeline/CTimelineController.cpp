@@ -7,15 +7,11 @@
 
 namespace timeline
 {
-	CTimelineController::CTimelineController(float CurrentTime, const std::shared_ptr<CTimelineClip>& Clip, bool PlayFlag) :
-		m_PlayBackTime(CurrentTime),
-		m_Clip(Clip),
-		m_Play(PlayFlag)
-	{
-	}
-
 	CTimelineController::CTimelineController():
-		CTimelineController(0.0f, std::make_shared<timeline::CTimelineClip>(), false)
+		m_PlayBackTime(0.0f),
+		m_Clip(std::make_shared<timeline::CTimelineClip>()),
+		m_Play(false),
+		m_App(nullptr)
 	{
 	}
 
@@ -27,6 +23,9 @@ namespace timeline
 	{
 		if (m_Clip && App)
 		{
+			//
+			m_App = App;
+
 			// タイムラインにオブジェクトリストを割り当てる
 			m_Clip->AssignObjectResourceToTrack(App->GetObjectList());
 
@@ -84,9 +83,18 @@ namespace timeline
 		return m_Clip;
 	}
 
-	void CTimelineController::SetPlay(bool Flag)
+	void CTimelineController::Play()
 	{
-		m_Play = Flag;
+		m_Play = true;
+
+		if (m_App) m_App->OnPlayedTimeline(m_Play);
+	}
+
+	void CTimelineController::Stop()
+	{
+		m_Play = false;
+
+		if (m_App) m_App->OnPlayedTimeline(m_Play);
 	}
 
 	bool CTimelineController::IsPlay() const

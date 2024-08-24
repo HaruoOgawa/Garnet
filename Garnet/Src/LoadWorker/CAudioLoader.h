@@ -10,6 +10,8 @@
 
 #include "../Audio/CAudioClip.h"
 
+// CAudioLoaderはSound Shaderや4klangのように動的にオーディオファイルを生成する時に使う
+
 namespace resource
 {
 	class CAudioLoader : public resource::CResource

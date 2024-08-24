@@ -15,14 +15,15 @@ namespace audio
 	class CAudioClip
 	{
 		std::string m_FileName;
+		std::string m_Extension;
 
 		bool m_Loop;
 		bool m_Playing;
 
-#ifndef __EMSCRIPTEN__
-		std::vector<unsigned char> m_BinaryData;
-#endif // !__EMSCRIPTEN__
+	private:
+		bool DoCmdWithError(const std::string Cmd);
 
+		bool Release();
 	public:
 		CAudioClip();
 		virtual ~CAudioClip();
@@ -30,7 +31,8 @@ namespace audio
 		void SetFileName(const std::string& Name);
 		const std::string& GetFileName() const;
 
-		bool Create(const std::vector<unsigned char>& Data, const std::string& FileName);
+		bool CreateFromFile(const std::string& FileName);
+		bool CreateFromMemory(const std::vector<unsigned char>& Data);
 
 		bool PlayLoop();
 		bool PlayOneShot();
