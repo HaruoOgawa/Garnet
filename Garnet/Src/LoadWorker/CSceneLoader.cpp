@@ -274,6 +274,11 @@ namespace resource
 				Object->SetObjectName(objname);
 			}
 
+			// enable
+			bool enable = true;
+			GetBoolean("enable", enable, objectJSON);
+			Object->SetEnabled(enable);
+
 			{
 				std::string filename = "";
 				GetString("filename", filename, objectJSON);
