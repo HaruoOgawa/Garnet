@@ -483,6 +483,8 @@ namespace object
 				Material->SetUniformValue("lightVPMat", &lightVPMat[0][0], sizeof(glm::mat4), DynamicOffsetNum);
 				glm::vec3 lightDir = DrawInfo->GetLightCamera()->GetViewDir();
 				Material->SetUniformValue("lightDir", &glm::vec4(lightDir.x, lightDir.y, lightDir.z, 0.0f)[0], sizeof(glm::vec4), DynamicOffsetNum);
+				glm::vec3 lightPos = DrawInfo->GetLightCamera()->GetPos();
+				Material->SetUniformValue("lightPos", &glm::vec4(lightPos.x, lightPos.y, lightPos.z, 0.0f)[0], sizeof(glm::vec4), DynamicOffsetNum);
 				Material->SetUniformValue("lightColor", &DrawInfo->GetLightColor()[0], sizeof(glm::vec4), DynamicOffsetNum);
 				glm::vec3 CameraPos = Camera->GetPos();
 				Material->SetUniformValue("cameraPos", &glm::vec4(CameraPos.x, CameraPos.y, CameraPos.z, 1.0f)[0], sizeof(glm::vec4), DynamicOffsetNum);
