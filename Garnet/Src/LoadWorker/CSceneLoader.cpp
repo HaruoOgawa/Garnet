@@ -99,7 +99,9 @@ namespace resource
 
 						std::shared_ptr<audio::CAudioClip> AudioClip = std::make_shared<audio::CAudioClip>();
 
-						pLoadWorker->AddLoadResource(std::make_shared<resource::CAudioLoader>(filename, AudioClip));
+						// ロードワーカーには渡さずにファイル名からネイティブAPIから読む
+						if (!AudioClip->CreateFromFile(filename)) return false;
+						//pLoadWorker->AddLoadResource(std::make_shared<resource::CAudioLoader>(filename, AudioClip));
 
 						m_Target->AddBGM(AudioClip, autoplay, loop);
 					}
@@ -271,6 +273,11 @@ namespace resource
 
 				Object->SetObjectName(objname);
 			}
+
+			// enable
+			bool enable = true;
+			GetBoolean("enable", enable, objectJSON);
+			Object->SetEnabled(enable);
 
 			{
 				std::string filename = "";

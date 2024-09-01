@@ -67,6 +67,8 @@ namespace gui
 		// GraphicsAPIŽü‚è‚Ì‰Šú‰»
 		if (!m_ImGuiCore->Initialize(pGraphicsAPI)) return false;
 
+		ImGui::StyleColorsLight();
+
 		m_Initialized = true;
 
 		return true;

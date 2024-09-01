@@ -131,6 +131,9 @@ namespace window
 			case 0x35:
 				KeyType = input::EKeyType::KEY_TYPE_5;
 				break;
+			case 0x70:
+				KeyType = input::EKeyType::KEY_TYPE_F1;
+				break;
 			case VK_CONTROL:
 				KeyType = input::EKeyType::KEY_TYPE_CONTROL;
 				break;
@@ -370,7 +373,15 @@ namespace window
 
 		if (Settings.FullScreen)
 		{
-			dwStyle = WS_POPUP | WS_VISIBLE;
+			if (Settings.Overlap)
+			{
+				// オーバーラップ(重なり)有効
+				dwStyle = WS_OVERLAPPEDWINDOW | WS_VISIBLE;
+			}
+			else
+			{
+				dwStyle = WS_POPUP | WS_VISIBLE;
+			}
 
 			nWidth = GetSystemMetrics(SM_CXSCREEN);
 			nHeight = GetSystemMetrics(SM_CYSCREEN);

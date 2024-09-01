@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <vector>
 #include <Interface/IGraphicsAPI.h>
 #include <Object/C3DObject.h>
 
@@ -16,19 +17,23 @@ namespace graphics
 	{
 		bool m_IsLoaded;
 
-		std::string m_DrawResourceName;
-
 		api::IGraphicsAPI* m_pGraphicsAPI;
 
 		std::shared_ptr<graphics::CMaterialFrame> m_MaterialFrame;
 
 		std::shared_ptr<object::C3DObject> m_RenderBoard;
 
+		std::shared_ptr<CMaterial> m_Material;
+
+		std::vector<std::shared_ptr<graphics::CTexture>> m_TextureList;
+
 	private:
 		bool Load();
 	public:
-		CFrameRenderer(api::IGraphicsAPI* pGraphicsAPI, const std::string& DrawResourceName, const std::string& DrawTargetPassName);
+		CFrameRenderer(api::IGraphicsAPI* pGraphicsAPI, const std::string& DrawTargetPassName, const std::vector<std::shared_ptr<graphics::CTexture>>& TextureList);
 		virtual ~CFrameRenderer();
+
+		const std::shared_ptr<CMaterial>& GetMaterial() const;
 
 		bool Create(resource::CLoadWorker* pLoadWorker, const std::string& FileName);
 

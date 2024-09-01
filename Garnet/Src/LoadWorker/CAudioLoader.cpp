@@ -2,6 +2,8 @@
 #include "../Message/Console.h"
 #include "CLoadWorker.h"
 
+// CAudioLoaderはSound Shaderや4klangのように動的にオーディオファイルを生成する時に使う
+
 namespace resource
 {
 	CAudioLoader::CAudioLoader(const std::string& FileName, const std::shared_ptr<audio::CAudioClip>& TargetAudioClip):
@@ -42,7 +44,7 @@ namespace resource
 			return false;
 		}
 
-		if (!m_TargetAudioClip->Create(m_File->GetData(), m_FileName)) return false;
+		if (!m_TargetAudioClip->CreateFromMemory(m_File->GetData())) return false;
 
 		// ロード完了
 		m_Status = resource::ELoadStatus::Loaded;

@@ -23,6 +23,8 @@ namespace input
 		KEY_TYPE_3,
 		KEY_TYPE_4,
 		KEY_TYPE_5,
+
+		KEY_TYPE_F1,
 	};
 
 	class CInputState

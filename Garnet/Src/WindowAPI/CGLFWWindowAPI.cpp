@@ -106,6 +106,9 @@ namespace window
 			case GLFW_KEY_5:
 				KeyType = input::EKeyType::KEY_TYPE_5;
 				break;
+			case GLFW_KEY_F1:
+				KeyType = input::EKeyType::KEY_TYPE_F1;
+				break;
 			case GLFW_KEY_LEFT_CONTROL:
 				KeyType = input::EKeyType::KEY_TYPE_CONTROL;
 				break;

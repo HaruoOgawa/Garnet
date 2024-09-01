@@ -125,8 +125,8 @@ namespace graphics
 	bool CMaterial::ReCreateBuffer(const std::vector<std::shared_ptr<graphics::CShaderBuffer>>& ShaderBufferList, const std::vector<graphics::STextureBindingLayout>& TextureBindingLayoutList)
 	{
 		// 古いバッファの保存
-		const auto& PrevShaderBufferList = m_ShaderBufferList;
-		const auto& PrevTextureBindingLayoutList = m_TextureBindingLayoutList;
+		std::vector<std::shared_ptr<CShaderBuffer>> PrevShaderBufferList = m_ShaderBufferList;
+		std::vector<STextureBindingLayout> PrevTextureBindingLayoutList = m_TextureBindingLayoutList;
 
 		// バッファの更新
 		m_ShaderBufferList = ShaderBufferList;
@@ -138,7 +138,7 @@ namespace graphics
 		{
 			for (const auto& PrevShaderBuffer : PrevShaderBufferList)
 			{
-				if (ShaderBuffer->GetBufferName() != PrevShaderBuffer->GetBufferName())
+				if (ShaderBuffer->GetBufferName() == PrevShaderBuffer->GetBufferName())
 				{
 					const auto& Descriptor = ShaderBuffer->GetDescriptor();
 
@@ -147,6 +147,9 @@ namespace graphics
 						const auto& UniformData = UniformDataMap.second;
 
 						std::vector<unsigned char> PrevValue = PrevShaderBuffer->GetUniformValue(UniformData.UniformName);
+
+						// 空の時はそのバッファがその名前のユニフォームを持っていないのでスキップする
+						if (PrevValue.empty()) continue;
 
 						ShaderBuffer->SetValue(&PrevValue[0], UniformData.ByteOffset, UniformData.ByteSize);
 					}

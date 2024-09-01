@@ -241,9 +241,13 @@ namespace app
 		m_DeltaSecondsTime = m_SecondsTime - PrevSecondsTime;
 
 #ifdef _DEBUG
-		// FPSの計測と表示(60FPSを基準とする)
-		float FPS = 60.0f / (m_DeltaSecondsTime * 60.0f);
-		//Console::Log("[FPS] %f fps / [CurrentTime] %f s\n", FPS, m_SecondsTime);
+		if (m_AppSettings.ShowFPS)
+		{
+			// FPSの計測と表示(60FPSを基準とする)
+			float FPS = 60.0f / (m_DeltaSecondsTime * 60.0f);
+			Console::Log("[FPS] %f fps / [CurrentTime] %f s\n", FPS, m_SecondsTime);
+		}
+		
 #endif // _DEBUG
 
 		//
