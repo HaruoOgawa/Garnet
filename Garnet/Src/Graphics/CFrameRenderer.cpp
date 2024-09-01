@@ -1,20 +1,27 @@
 #include "CFrameRenderer.h"
 #include <LoadWorker/CLoadWorker.h>
+#include <Message/Console.h>
 
 namespace graphics
 {
 	// DrawResourceName: フレームテクスチャの参照元, DrawTargetPassName: m_RenderBoardの描画先
-	CFrameRenderer::CFrameRenderer(api::IGraphicsAPI* pGraphicsAPI, const std::string& DrawResourceName, const std::string& DrawTargetPassName):
+	CFrameRenderer::CFrameRenderer(api::IGraphicsAPI* pGraphicsAPI, const std::string& DrawTargetPassName, const std::vector<std::shared_ptr<graphics::CTexture>>& TextureList) :
 		m_IsLoaded(false),
-		m_DrawResourceName(DrawResourceName),
 		m_pGraphicsAPI(pGraphicsAPI),
 		m_MaterialFrame(std::make_shared<graphics::CMaterialFrame>()),
-		m_RenderBoard(std::make_shared<object::C3DObject>(DrawTargetPassName, ""))
+		m_RenderBoard(std::make_shared<object::C3DObject>(DrawTargetPassName, "")),
+		m_Material(nullptr),
+		m_TextureList(TextureList)
 	{
 	}
 
 	CFrameRenderer::~CFrameRenderer()
 	{
+	}
+
+	const std::shared_ptr<CMaterial>& CFrameRenderer::GetMaterial() const
+	{
+		return m_Material;
 	}
 
 	bool CFrameRenderer::Create(resource::CLoadWorker* pLoadWorker, const std::string& FileName)
@@ -26,21 +33,28 @@ namespace graphics
 
 	bool CFrameRenderer::Load()
 	{
-		auto RenderTarget = m_pGraphicsAPI->FindOffScreenRenderPass(m_DrawResourceName);
-		if (!RenderTarget) return false;
+		m_Material = m_MaterialFrame->CreateMaterial(m_pGraphicsAPI, 1, graphics::ECullMode::CULL_NONE);
 
-		auto Material = m_MaterialFrame->CreateMaterial(m_pGraphicsAPI, 1, graphics::ECullMode::CULL_NONE);
-
-		for (int Index = 0; Index < static_cast<int>(Material->GetTextureBindingLayoutList().size()); Index++)
+		for (int Index = 0; Index < static_cast<int>(m_Material->GetTextureBindingLayoutList().size()); Index++)
 		{
-			const auto& TexLayout = Material->GetTextureBindingLayoutList()[Index];
+			if (Index > static_cast<int>(m_TextureList.size()))
+			{
+				Console::Log("[Error] InValid TextureIndex or TextureList Size - FrameRenderer::Load\n");
+				return false;
+			}
 
-			m_RenderBoard->GetTextureSet()->Add2DTexture(RenderTarget->GetFrameTexture(Index));
-			Material->ReplaceTextureIndex(TexLayout.TextureName, Index);
+			const auto& TexLayout = m_Material->GetTextureBindingLayoutList()[Index];
+
+			m_RenderBoard->GetTextureSet()->Add2DTexture(m_TextureList[Index]);
+			m_Material->ReplaceTextureIndex(TexLayout.TextureName, Index);
 		}
 
 		if (!m_RenderBoard->CreatePresetSimply(m_pGraphicsAPI, nullptr, graphics::CPresetPrimitive::CreateBoard(m_pGraphicsAPI), graphics::EPresetPrimitiveType::BOARD,
-			Material, nullptr)) return false;
+			m_Material, nullptr)) return false;
+
+		// 使わないのでリリースしておく
+		m_TextureList.clear();
+		m_TextureList.shrink_to_fit();
 
 		return true;
 	}
