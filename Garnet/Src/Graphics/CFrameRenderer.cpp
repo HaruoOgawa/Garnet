@@ -37,7 +37,7 @@ namespace graphics
 
 		for (int Index = 0; Index < static_cast<int>(m_Material->GetTextureBindingLayoutList().size()); Index++)
 		{
-			if (Index > static_cast<int>(m_TextureList.size()))
+			if (Index >= static_cast<int>(m_TextureList.size()))
 			{
 				Console::Log("[Error] InValid TextureIndex or TextureList Size - FrameRenderer::Load\n");
 				return false;
