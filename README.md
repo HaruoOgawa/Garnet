@@ -1,3 +1,5 @@
+Issueはタスクリストじゃないよ！将来的に好きなタイミングでやってみたいことリストだからいっぱいあっても気にしなくてヨシ。これは願望リストじゃから
+
 # Garnet 3D Engine
 ## Dependencies
 * [naga](https://github.com/gfx-rs/naga)
