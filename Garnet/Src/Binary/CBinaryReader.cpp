@@ -121,6 +121,46 @@ namespace binary
 		return Dst;
 	}
 
+	bool CBinaryReader::GetUInt(unsigned int& Dst)
+	{
+		if (!IsValid(sizeof(unsigned int))) return false;
+
+		Dst = GetUInt();
+
+		return true;
+	}
+
+	unsigned int CBinaryReader::GetUInt()
+	{
+		auto val = (m_Pointer[3] << 24) | (m_Pointer[2] << 16) | (m_Pointer[1] << 8) | (m_Pointer[0]);
+
+		unsigned int Dst = *reinterpret_cast<const unsigned int*>(&val);
+
+		UpdatePointer(sizeof(unsigned int));
+
+		return Dst;
+	}
+
+	bool CBinaryReader::GetUIntReverse(unsigned int& Dst)
+	{
+		if (!IsValid(sizeof(unsigned int))) return false;
+
+		Dst = GetUIntReverse();
+
+		return true;
+	}
+
+	unsigned int CBinaryReader::GetUIntReverse()
+	{
+		auto val = (m_Pointer[0] << 24) | (m_Pointer[1] << 16) | (m_Pointer[2] << 8) | (m_Pointer[3]);
+
+		unsigned int Dst = *reinterpret_cast<const unsigned int*>(&val);
+
+		UpdatePointer(sizeof(unsigned int));
+
+		return Dst;
+	}
+
 	bool CBinaryReader::GetFloat(float& Dst)
 	{
 		if (!IsValid(sizeof(float))) return false;

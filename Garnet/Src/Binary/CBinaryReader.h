@@ -37,6 +37,12 @@ namespace binary
 		bool GetInt(int& Dst);
 		int GetInt();
 
+		bool GetUInt(unsigned int& Dst);
+		unsigned int GetUInt();
+
+		bool GetUIntReverse(unsigned int& Dst);
+		unsigned int GetUIntReverse();
+
 		bool GetFloat(float& Dst);
 		float GetFloat();
 
