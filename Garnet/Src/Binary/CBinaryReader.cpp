@@ -217,6 +217,17 @@ namespace binary
 
 		return Dst;
 	}
+
+	bool CBinaryReader::GetBinary(size_t DstByteOffset, std::vector<unsigned char>& Dst, size_t ByteSize)
+	{
+		if (!IsValid(ByteSize)) return false;
+
+		std::memcpy(&Dst[DstByteOffset], &m_Pointer[0], ByteSize);
+
+		UpdatePointer(ByteSize);
+
+		return true;
+	}
 }
 
 #endif // USE_BINARY_READ

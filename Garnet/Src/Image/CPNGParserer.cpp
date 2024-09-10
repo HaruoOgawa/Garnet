@@ -23,6 +23,12 @@ namespace image_parse
 		// https://qiita.com/spc_ehara/items/c748ec636283df805926
 		bool idat_found = false; // idatチャンクを見つけたか
 
+		int BitDepth = 0;
+		int NumOfChannel = 0;
+
+		// 実際のイメージデータ
+		std::vector<unsigned char> compressed_data;
+
 		while (!Analyser.IsEnd())
 		{
 			unsigned int ChunkLength = 0;
@@ -31,20 +37,64 @@ namespace image_parse
 			std::string ChunkType = std::string();
 			if (!Analyser.GetString(ChunkType, 4)) return false;
 
-			/*if (ChunkType == "IHDR")
+			if (ChunkType == "IHDR")
 			{
+				// 画像サイズ
+				unsigned int w = 0, h = 0;
 
+				if (!Analyser.GetUIntReverse(w)) return false;
+				if (!Analyser.GetUIntReverse(h)) return false;
+
+				Width = static_cast<int>(w);
+				Height = static_cast<int>(h);
+
+				// ビット深度(8が通常, グレースケール画像は8ビットが1つ, カラー画像は8ビットが4つが基本)
+				unsigned char bit_depth = 0;
+				if (!Analyser.GetByte(bit_depth)) return false;
+				BitDepth = static_cast<int>(bit_depth);
+
+				// カラータイプ(0: グレースケール画像, 6: RGBAカラー画像)
+				unsigned char ColorType = 0;
+				if (!Analyser.GetByte(ColorType)) return false;
+
+				if (ColorType == 0)
+				{
+					NumOfChannel = 1;
+				}
+				else if (ColorType == 6)
+				{
+					NumOfChannel = 4; // RGBA
+				}
+
+				// 圧縮手法(使わないのでスキップ)
+				if (!Analyser.Skip(1)) return false;
+
+				// フィルター手法(使わないのでスキップ)
+				if (!Analyser.Skip(1)) return false;
+
+				// インターレース手法(使わないのでスキップ)
+				if (!Analyser.Skip(1)) return false;
+
+				// 8ビットグレースケール画像かRGBAカラー画像でない場合はエラーとする
+				if (BitDepth != 8 || (ColorType != 0 && ColorType != 6))
+				{
+					Console::Log("[Error] PNGParser - InValid Image Format.\n");
+					return false;
+				}
 			}
 			else if (ChunkType == "IDAT")
 			{
-
+				// PNG形式に圧縮されている実際のイメージデータ
+				idat_found = true;
+				compressed_data.resize(ChunkLength);
+				if (!Analyser.GetBinary(0, compressed_data, ChunkLength)) return false;
 			}
 			else if (ChunkType == "IEND")
 			{
 				// PNGの終わり
 				break;
 			}
-			else*/
+			else
 			{
 				// その他チャンクは無視
 				if (!Analyser.Skip(ChunkLength)) return false;
@@ -55,11 +105,30 @@ namespace image_parse
 		}
 
 		// zlibを使ってデータを解凍
-		std::vector<uint8_t> compressed_data;
-		std::vector<uint8_t> decompressed_data;  // フィルタバイト込み
-		
-		uLongf decompressed_size = decompressed_data.size();
-		int result = uncompress(decompressed_data.data(), &decompressed_size, compressed_data.data(), compressed_data.size());
+		std::vector<uint8_t> decompressed_data(Width * Height * BitDepth * NumOfChannel + Height * 1);  // フィルタバイト込み(よくわからんが + Heightのこと？ → 後述の実装によるとピクセル列の先頭4バイトにフィルタタイプとかいうのが入っているらしい)
+		uLongf decompressed_size = static_cast<uLongf>(decompressed_data.size());
+		int result = uncompress(decompressed_data.data(), &decompressed_size, compressed_data.data(), static_cast<uLongf>(compressed_data.size()));
+
+		if (result != Z_OK)
+		{
+			Console::Log("[Error] PNGParser - ZLib Decompress Error.\n");
+			return false;
+		}
+
+		// フィルタバイトを取り除きながらピクセルデータを取得
+		// フィルタには対応しないのでこの部分を取り除く(無視)しながらピクセル取得を進める
+		outPixelData.resize(Width * Height * BitDepth * NumOfChannel);
+
+		binary::CBinaryReader PixelAnalyser(decompressed_data);
+
+		for (int Row = 0; Row < Height; Row++)
+		{
+			// フィルタはスキップ(1Byteのフラグ)
+			if (!PixelAnalyser.Skip(1)) return false;
+
+			// 1列分コピー
+			if (!PixelAnalyser.GetBinary(Width * Row * BitDepth * NumOfChannel, outPixelData, Width * BitDepth * NumOfChannel)) return false;
+		}
 
 		return true;
 	}
