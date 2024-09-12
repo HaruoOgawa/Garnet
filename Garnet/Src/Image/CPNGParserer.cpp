@@ -23,7 +23,7 @@ namespace image_parse
 		// https://qiita.com/spc_ehara/items/c748ec636283df805926
 		bool idat_found = false; // idatチャンクを見つけたか
 
-		int BitDepth = 0;
+		int BytePerPixel = 0;
 		int NumOfChannel = 0;
 
 		// 実際のイメージデータ
@@ -51,7 +51,7 @@ namespace image_parse
 				// ビット深度(8が通常, グレースケール画像は8ビットが1つ, カラー画像は8ビットが4つが基本)
 				unsigned char bit_depth = 0;
 				if (!Analyser.GetByte(bit_depth)) return false;
-				BitDepth = static_cast<int>(bit_depth);
+				BytePerPixel = static_cast<int>(bit_depth) / 8;
 
 				// カラータイプ(0: グレースケール画像, 6: RGBAカラー画像)
 				unsigned char ColorType = 0;
@@ -76,7 +76,7 @@ namespace image_parse
 				if (!Analyser.Skip(1)) return false;
 
 				// 8ビットグレースケール画像かRGBAカラー画像でない場合はエラーとする
-				if (BitDepth != 8 || (ColorType != 0 && ColorType != 6))
+				if (bit_depth != 8 || (ColorType != 0 && ColorType != 6))
 				{
 					Console::Log("[Error] PNGParser - InValid Image Format.\n");
 					return false;
@@ -92,7 +92,6 @@ namespace image_parse
 			else if (ChunkType == "IEND")
 			{
 				// PNGの終わり
-				break;
 			}
 			else
 			{
@@ -105,9 +104,10 @@ namespace image_parse
 		}
 
 		// zlibを使ってデータを解凍
-		std::vector<uint8_t> decompressed_data(Width * Height * BitDepth * NumOfChannel + Height * 1);  // フィルタバイト込み(よくわからんが + Heightのこと？ → 後述の実装によるとピクセル列の先頭4バイトにフィルタタイプとかいうのが入っているらしい)
+		std::vector<uint8_t> decompressed_data(Width * Height * BytePerPixel * NumOfChannel + Height * 1);  // フィルタバイト込み(よくわからんが + Heightのこと？ → 後述の実装によるとピクセル列の先頭4バイトにフィルタタイプとかいうのが入っているらしい)
 		uLongf decompressed_size = static_cast<uLongf>(decompressed_data.size());
 		int result = uncompress(decompressed_data.data(), &decompressed_size, compressed_data.data(), static_cast<uLongf>(compressed_data.size()));
+		decompressed_data.resize(decompressed_size);
 
 		if (result != Z_OK)
 		{
@@ -117,7 +117,8 @@ namespace image_parse
 
 		// フィルタバイトを取り除きながらピクセルデータを取得
 		// フィルタには対応しないのでこの部分を取り除く(無視)しながらピクセル取得を進める
-		outPixelData.resize(Width * Height * BitDepth * NumOfChannel);
+		// エンジンとしては画像は常にカラー画像として取り扱っているので4倍してRGBA分のサイズを確保している
+		outPixelData.resize(Width * Height * BytePerPixel * 4);
 
 		binary::CBinaryReader PixelAnalyser(decompressed_data);
 
@@ -126,8 +127,31 @@ namespace image_parse
 			// フィルタはスキップ(1Byteのフラグ)
 			if (!PixelAnalyser.Skip(1)) return false;
 
-			// 1列分コピー
-			if (!PixelAnalyser.GetBinary(Width * Row * BitDepth * NumOfChannel, outPixelData, Width * BitDepth * NumOfChannel)) return false;
+			if (NumOfChannel == 1)
+			{
+				// エンジンとしては画像は常にカラー画像として取り扱っているのでグレースケール画像はカラー画像に変換する
+				// 1列分コピー
+				int ByteSize = Width * BytePerPixel * NumOfChannel;
+				std::vector<unsigned char> CurrentPixelData(ByteSize);
+				if (!PixelAnalyser.GetBinary(0, CurrentPixelData, ByteSize)) return false;
+
+				//
+				int RowStartPos = Width * Row * BytePerPixel * NumOfChannel * 4;
+				for (int Col = 0; Col < ByteSize; Col++)
+				{
+					unsigned char data = CurrentPixelData[Col];
+
+					outPixelData[RowStartPos + Col * 4 + 0] = data; // R
+					outPixelData[RowStartPos + Col * 4 + 1] = data; // G
+					outPixelData[RowStartPos + Col * 4 + 2] = data; // B
+					outPixelData[RowStartPos + Col * 4 + 3] = 255;  // A
+				}
+			}
+			else if (NumOfChannel == 4)
+			{
+				// カラー画像なのでそのままコピー
+				if (!PixelAnalyser.GetBinary(Width * Row * BytePerPixel * NumOfChannel, outPixelData, Width * BytePerPixel * NumOfChannel)) return false;
+			}
 		}
 
 		return true;

@@ -103,7 +103,7 @@ namespace graphics
 			return false;
 		}
 
-		int pixelSize = m_Width * m_Height * 4;
+		int pixelSize = static_cast<int>(pixelData.size());
 #else
 		// stbi /////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// stbiでテクスチャバイナリを解析してピクセルデータを取得する
