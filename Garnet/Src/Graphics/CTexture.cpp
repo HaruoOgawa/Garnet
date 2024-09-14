@@ -1,11 +1,17 @@
 #include "CTexture.h"
 
+#include "../Message/Console.h"
+
 #if defined(USE_TEXTURE_LOADER)
-#define STB_IMAGE_STATIC
-#ifndef STB_IMAGE_IMPLEMENTATION
-#define STB_IMAGE_IMPLEMENTATION
-#endif // !STB_IMAGE_IMPLEMENTATION
-#include <stb_image.h>
+	#ifdef USE_PNG_PARSER
+		#include "../Image/CPNGParserer.h"
+	#else
+		#define STB_IMAGE_STATIC
+		#ifndef STB_IMAGE_IMPLEMENTATION
+		#define STB_IMAGE_IMPLEMENTATION
+		#endif // !STB_IMAGE_IMPLEMENTATION
+		#include <stb_image.h>
+	#endif // USE_PNG_PARSER
 #endif // USE_TEXTURE_LOADER
 
 namespace graphics
@@ -88,6 +94,18 @@ namespace graphics
 		// 単一のピクセル配列を使用しているので2D
 		m_TextureType = ETextureType::TEXTURE_2D;
 
+#ifdef USE_PNG_PARSER
+		// png parser ////////////////////////////////////////////////////////////////////////////////////////////////////
+		std::vector<unsigned char> pixelData;
+		if (!image_parse::CPNGParserer::Parse(Data, pixelData, m_Width, m_Height))
+		{
+			Console::Log("[Error] Failed to parse PNG Image.\n");
+			return false;
+		}
+
+		int pixelSize = static_cast<int>(pixelData.size());
+#else
+		// stbi /////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// stbiでテクスチャバイナリを解析してピクセルデータを取得する
 		stbi_uc* stbi_pixelData = stbi_load_from_memory(reinterpret_cast<const stbi_uc*>(&Data[0]), static_cast<int>(Data.size()), &m_Width, &m_Height, &m_NumOfChannels, STBI_rgb_alpha);
 
@@ -98,6 +116,7 @@ namespace graphics
 
 		// stbiのメモリを解放
 		stbi_image_free(stbi_pixelData);
+#endif // USE_PNG_PARSER
 
 		// MipCountを計算
 		int CurrentSize = (m_Width < m_Height) ? m_Width : m_Height;
@@ -131,6 +150,11 @@ namespace graphics
 		std::vector<std::vector<unsigned char>> pixelDataList;
 		std::vector<int> pixelSizeList;
 
+#ifdef USE_PNG_PARSER
+		// png parser ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+#else
+		// stbi /////////////////////////////////////////////////////////////////////////////////////////////////////////
 		for (int i = 0; i < DataList.size(); i++)
 		{
 			// stbiでテクスチャバイナリを解析してピクセルデータを取得する
@@ -148,6 +172,7 @@ namespace graphics
 			pixelDataList.push_back(pixelData);
 			pixelSizeList.push_back(pixelSize);
 		}
+#endif // USE_PNG_PARSER
 
 		// データをまとめる
 		std::vector<unsigned char> pixelData;

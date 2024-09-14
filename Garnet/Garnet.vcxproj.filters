@@ -3123,6 +3123,42 @@
     <ClInclude Include="Src\Graphics\EShaderStage.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Library\zlib\crc32.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Library\zlib\deflate.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Library\zlib\gzguts.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Library\zlib\inffast.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Library\zlib\inffixed.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Library\zlib\inflate.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Library\zlib\inftrees.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Library\zlib\trees.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Library\zlib\zconf.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Library\zlib\zlib.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Library\zlib\zutil.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Image\CPNGParserer.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\WindowAPI\CGLFWWindowAPI.cpp">
@@ -4223,6 +4259,9 @@
     <ClCompile Include="Src\Graphics\CFrameRenderer.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="Src\Image\CPNGParserer.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="CMakeBuild\Garnet_front.js" />
@@ -4646,5 +4685,9 @@
     </None>
     <None Include="WebRelease\Resources\Shaders\frag.spv" />
     <None Include="WebRelease\Resources\Shaders\vert.spv" />
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="Src\Library\zlib\lib\Debug\libz-static.lib" />
+    <Library Include="Src\Library\zlib\lib\Release\libz-static.lib" />
   </ItemGroup>
 </Project>

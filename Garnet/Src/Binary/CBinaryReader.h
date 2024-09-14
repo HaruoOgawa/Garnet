@@ -37,6 +37,12 @@ namespace binary
 		bool GetInt(int& Dst);
 		int GetInt();
 
+		bool GetUInt(unsigned int& Dst);
+		unsigned int GetUInt();
+
+		bool GetUIntReverse(unsigned int& Dst);
+		unsigned int GetUIntReverse();
+
 		bool GetFloat(float& Dst);
 		float GetFloat();
 
@@ -45,6 +51,8 @@ namespace binary
 
 		bool GetUShort(unsigned short& Dst);
 		unsigned short GetUShort();
+
+		bool GetBinary(size_t DstByteOffset, std::vector<unsigned char>& Dst, size_t ByteSize);
 	};
 }
 #endif // USE_BINARY_READ
