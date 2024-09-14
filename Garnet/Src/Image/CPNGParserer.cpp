@@ -183,56 +183,74 @@ namespace image_parse
 	{
 		switch (FilterType)
 		{
-		case 0: // None
+		case 0: // Noneフィルタ : 前処理は行わない
 			{
-			for (size_t i = 0; i < Scanline.size(); ++i)
-				Recon[i] = Scanline[i];
+				for (size_t i = 0; i < Scanline.size(); ++i)
+				{
+					Recon[i] = Scanline[i];
+				}
 			}
 			break;
 
-		case 1: // Sub
+		case 1: // Subフィルタ : 左隣との差分を取る
 			{
 				for (size_t i = 0; i < BPP; ++i)
+				{
 					Recon[i] = Scanline[i];  // 最初のBPPバイトはそのまま
+				}
+
 				for (size_t i = BPP; i < Scanline.size(); ++i)
+				{
 					Recon[i] = Scanline[i] + Recon[i - BPP];
+				}
 			}
 			break;
 
-		case 2: // Up
+		case 2: // Upフィルタ : 真上との差分を取る
 			{
-				if (PrevScanline.empty()) {
+				if (PrevScanline.empty()) 
+				{
 					for (size_t i = 0; i < Scanline.size(); ++i)
+					{
 						Recon[i] = Scanline[i];
+					}
 				}
-				else {
+				else 
+				{
 					for (size_t i = 0; i < Scanline.size(); ++i)
+					{
 						Recon[i] = Scanline[i] + PrevScanline[i];
+					}
 				}
 			}
 			break;
 
-		case 3: // Average
+		case 3: // Averageフィルタ : 左隣と真上の成分を足して2で割った値との差分を取る
 			{
-				for (size_t i = 0; i < BPP; ++i) {
+				for (size_t i = 0; i < BPP; ++i) 
+				{
 					Recon[i] = Scanline[i] + (PrevScanline.empty() ? 0 : PrevScanline[i]) / 2;
 				}
-				for (size_t i = BPP; i < Scanline.size(); ++i) {
+				for (size_t i = BPP; i < Scanline.size(); ++i) 
+				{
 					Recon[i] = Scanline[i] + ((Recon[i - BPP] + (PrevScanline.empty() ? 0 : PrevScanline[i])) / 2);
 				}
 			}
-			break;
+		break;
 
-		case 4: // Paeth
+		case 4: // Paethフィルタ : 左隣、真上、左上の中で最も値が近いものとの差分を取る
 			{
-				for (size_t i = 0; i < BPP; ++i) {
+				for (size_t i = 0; i < BPP; ++i) 
+				{
 					Recon[i] = Scanline[i] + (PrevScanline.empty() ? 0 : PrevScanline[i]);
 				}
-				for (size_t i = BPP; i < Scanline.size(); ++i) {
-					Recon[i] = Scanline[i] + paethPredictor(Recon[i - BPP], PrevScanline.empty() ? 0 : PrevScanline[i], PrevScanline.empty() ? 0 : PrevScanline[i - BPP]);
+
+				for (size_t i = BPP; i < Scanline.size(); ++i) 
+				{
+					Recon[i] = Scanline[i] + PaethPredictor(Recon[i - BPP], PrevScanline.empty() ? 0 : PrevScanline[i], PrevScanline.empty() ? 0 : PrevScanline[i - BPP]);
 				}
 			}
-			break;
+		break;
 
 		default:
 			break;
@@ -242,7 +260,7 @@ namespace image_parse
 	}
 
 	// Paethフィルタのヘルパー関数
-	int CPNGParserer::paethPredictor(int a, int b, int c)
+	int CPNGParserer::PaethPredictor(int a, int b, int c)
 	{
 		int p = a + b - c;
 		int pa = abs(p - a);
