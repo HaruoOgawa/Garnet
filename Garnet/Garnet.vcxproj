@@ -585,7 +585,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;USE_OPENGL;NOMINMAX;USE_TEXTURE_LOADER;USE_PNG_PARSER</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;USE_OPENGL;NOMINMAX;USE_TEXTURE_LOADER;USE_PNG_PARSER;USE_BINARY_READ</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(ProjectDir)Src;$(ProjectDir)src\Library\glm;$(ProjectDir)Src\Library\json;$(ProjectDir)Src\Library\zlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
