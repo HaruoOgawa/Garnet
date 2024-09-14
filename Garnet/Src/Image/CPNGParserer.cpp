@@ -24,7 +24,7 @@ namespace image_parse
 		bool idat_found = false; // idatチャンクを見つけたか
 
 		int BytePerPixel = 0;
-		int NumOfChannel = 0;
+		int BPP = 0; // ピクセルあたりのバイト数。NumOfChannelでもいい。RGBAカラーは4, グレースケールは1
 
 		// 実際のイメージデータ
 		std::vector<unsigned char> compressed_data;
@@ -59,11 +59,11 @@ namespace image_parse
 
 				if (ColorType == 0)
 				{
-					NumOfChannel = 1;
+					BPP = 1;
 				}
 				else if (ColorType == 6)
 				{
-					NumOfChannel = 4; // RGBA
+					BPP = 4; // RGBA
 				}
 
 				// 圧縮手法(使わないのでスキップ)
@@ -104,7 +104,7 @@ namespace image_parse
 		}
 
 		// zlibを使ってデータを解凍
-		std::vector<uint8_t> decompressed_data(Width * Height * BytePerPixel * NumOfChannel + Height * 1);  // フィルタバイト込み(よくわからんが + Heightのこと？ → 後述の実装によるとピクセル列の先頭4バイトにフィルタタイプとかいうのが入っているらしい)
+		std::vector<uint8_t> decompressed_data(Width * Height * BytePerPixel * BPP + Height * 1);  // フィルタバイト込み
 		uLongf decompressed_size = static_cast<uLongf>(decompressed_data.size());
 		int result = uncompress(decompressed_data.data(), &decompressed_size, compressed_data.data(), static_cast<uLongf>(compressed_data.size()));
 		decompressed_data.resize(decompressed_size);
@@ -122,21 +122,33 @@ namespace image_parse
 
 		binary::CBinaryReader PixelAnalyser(decompressed_data);
 
+		std::vector<unsigned char> PrevScanline;
+
 		for (int Row = 0; Row < Height; Row++)
 		{
-			// フィルタはスキップ(1Byteのフラグ)
-			if (!PixelAnalyser.Skip(1)) return false;
+			// フィルタータイプ
+			unsigned char FilterType = 0;
+			if (!PixelAnalyser.GetByte(FilterType)) return false;
 
-			if (NumOfChannel == 1)
+			// 1列分コピー
+			int ByteSize = Width * BytePerPixel * BPP;
+			std::vector<unsigned char> Scanline(ByteSize);
+			if (!PixelAnalyser.GetBinary(0, Scanline, ByteSize)) return false;
+
+			std::vector<unsigned char> CurrentPixelData(ByteSize);
+
+			// フィルタリングを解除して元のピクセルデータを復元する
+			if (!UnfilterScanline(CurrentPixelData, Scanline, PrevScanline, FilterType, BPP)) return false;
+
+			// 次のフィルタリング解除のために1つ前のデータを保持しておく
+			PrevScanline = CurrentPixelData;
+
+			// ピクセルデータを保存
+			int ByteOffset = Width * Row * BytePerPixel * BPP;
+			if (BPP == 1)
 			{
 				// エンジンとしては画像は常にカラー画像として取り扱っているのでグレースケール画像はカラー画像に変換する
-				// 1列分コピー
-				int ByteSize = Width * BytePerPixel * NumOfChannel;
-				std::vector<unsigned char> CurrentPixelData(ByteSize);
-				if (!PixelAnalyser.GetBinary(0, CurrentPixelData, ByteSize)) return false;
-
-				//
-				int RowStartPos = Width * Row * BytePerPixel * NumOfChannel * 4;
+				int RowStartPos = ByteOffset * 4;
 				for (int Col = 0; Col < ByteSize; Col++)
 				{
 					unsigned char data = CurrentPixelData[Col];
@@ -147,10 +159,10 @@ namespace image_parse
 					outPixelData[RowStartPos + Col * 4 + 3] = 255;  // A
 				}
 			}
-			else if (NumOfChannel == 4)
+			else if (BPP == 4)
 			{
 				// カラー画像なのでそのままコピー
-				if (!PixelAnalyser.GetBinary(Width * Row * BytePerPixel * NumOfChannel, outPixelData, Width * BytePerPixel * NumOfChannel)) return false;
+				std::memcpy(&outPixelData[ByteOffset], &CurrentPixelData[0], ByteSize);
 			}
 		}
 
@@ -165,6 +177,80 @@ namespace image_parse
 			Analyser.GetByte() != 0x0D || Analyser.GetByte() != 0x0A || Analyser.GetByte() != 0x1A || Analyser.GetByte() != 0x0A) return false;
 
 		return true;
+	}
+
+	bool CPNGParserer::UnfilterScanline(std::vector<unsigned char>& Recon, const std::vector<unsigned char>& Scanline, const std::vector<unsigned char>& PrevScanline, unsigned char FilterType, int BPP)
+	{
+		switch (FilterType)
+		{
+		case 0: // None
+			{
+			for (size_t i = 0; i < Scanline.size(); ++i)
+				Recon[i] = Scanline[i];
+			}
+			break;
+
+		case 1: // Sub
+			{
+				for (size_t i = 0; i < BPP; ++i)
+					Recon[i] = Scanline[i];  // 最初のBPPバイトはそのまま
+				for (size_t i = BPP; i < Scanline.size(); ++i)
+					Recon[i] = Scanline[i] + Recon[i - BPP];
+			}
+			break;
+
+		case 2: // Up
+			{
+				if (PrevScanline.empty()) {
+					for (size_t i = 0; i < Scanline.size(); ++i)
+						Recon[i] = Scanline[i];
+				}
+				else {
+					for (size_t i = 0; i < Scanline.size(); ++i)
+						Recon[i] = Scanline[i] + PrevScanline[i];
+				}
+			}
+			break;
+
+		case 3: // Average
+			{
+				for (size_t i = 0; i < BPP; ++i) {
+					Recon[i] = Scanline[i] + (PrevScanline.empty() ? 0 : PrevScanline[i]) / 2;
+				}
+				for (size_t i = BPP; i < Scanline.size(); ++i) {
+					Recon[i] = Scanline[i] + ((Recon[i - BPP] + (PrevScanline.empty() ? 0 : PrevScanline[i])) / 2);
+				}
+			}
+			break;
+
+		case 4: // Paeth
+			{
+				for (size_t i = 0; i < BPP; ++i) {
+					Recon[i] = Scanline[i] + (PrevScanline.empty() ? 0 : PrevScanline[i]);
+				}
+				for (size_t i = BPP; i < Scanline.size(); ++i) {
+					Recon[i] = Scanline[i] + paethPredictor(Recon[i - BPP], PrevScanline.empty() ? 0 : PrevScanline[i], PrevScanline.empty() ? 0 : PrevScanline[i - BPP]);
+				}
+			}
+			break;
+
+		default:
+			break;
+		}
+
+		return true;
+	}
+
+	// Paethフィルタのヘルパー関数
+	int CPNGParserer::paethPredictor(int a, int b, int c)
+	{
+		int p = a + b - c;
+		int pa = abs(p - a);
+		int pb = abs(p - b);
+		int pc = abs(p - c);
+		if (pa <= pb && pa <= pc) return a;
+		else if (pb <= pc) return b;
+		else return c;
 	}
 }
 #endif
