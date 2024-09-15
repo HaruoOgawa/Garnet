@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <vector>
 #include <map>
 #include <string>
@@ -16,7 +17,7 @@ namespace scriptable
 		std::vector<unsigned char> Buffer;
 	};
 
-	class CValueRegistry
+	class CValueRegistry : public std::enable_shared_from_this<CValueRegistry>
 	{
 		const std::string m_RegistryName;
 

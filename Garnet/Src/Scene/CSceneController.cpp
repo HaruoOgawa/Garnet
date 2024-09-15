@@ -168,6 +168,25 @@ namespace scene
 		return MaterialFrame;
 	}
 
+	void CSceneController::SetValueRegistry(const std::string& Registryname, const std::shared_ptr<scriptable::CValueRegistry>& ValueRegistry)
+	{
+		const auto it = m_ValueRegistryList.find(Registryname);
+		if (it == m_ValueRegistryList.end())
+		{
+			// 新規追加する
+			m_ValueRegistryList.emplace(Registryname, ValueRegistry);
+		}
+		else
+		{
+			// 値を更新する
+			m_ValueRegistryList[Registryname] = ValueRegistry;
+		}
+	}
+	const std::map<std::string, std::shared_ptr<scriptable::CValueRegistry>>& CSceneController::GetValueRegistryList()
+	{
+		return m_ValueRegistryList;
+	}
+
 	void CSceneController::AddAnimationClipSet(const std::string& Name, const std::shared_ptr<animation::CAnimationClipSet>& AnimationClipSet)
 	{
 		m_AnimationClipSetMap.emplace(Name, AnimationClipSet);

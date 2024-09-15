@@ -52,6 +52,15 @@ namespace resource
 			}
 		}
 
+		// valueregistries
+		{
+			const auto valueregistries = SceneJSON.find("valueregistries");
+			if (valueregistries != SceneJSON.end() && valueregistries->is_array())
+			{
+				if (!AnalyseValueRegistries(valueregistries)) return false;
+			}
+		}
+
 #ifdef USE_TEXTURE_LOADER
 		// scenetextureset
 		{
@@ -151,6 +160,89 @@ namespace resource
 
 			pLoadWorker->AddLoadResource(std::make_shared<resource::CMaterialFrameLoader>(filename, MaterialFrame));
 			m_Target->AddMaterialFrame(MFName, MaterialFrame);
+		}
+
+		return true;
+	}
+
+	bool CSceneLoader::AnalyseValueRegistries(const json::iterator& valueregistries)
+	{
+		for (json::iterator registryJSON = valueregistries->begin(); registryJSON != valueregistries->end(); registryJSON++)
+		{
+			std::string registryname = std::string();
+			GetString("registryname", registryname, registryJSON);
+
+			std::shared_ptr<scriptable::CValueRegistry> ValueRegistry = std::make_shared<scriptable::CValueRegistry>(registryname);
+
+			const auto values = registryJSON->find("values");
+			if (values != registryJSON->end() && values->is_array())
+			{
+				for (json::iterator valueJSON = values->begin(); valueJSON != values->end(); valueJSON++)
+				{
+					std::string name = std::string();
+					GetString("name", name, valueJSON);
+
+					graphics::EUniformValueType ValueType = graphics::EUniformValueType::NONE;
+					std::string type = std::string();
+					GetString("type", type, valueJSON);
+
+					int ByteSize = 0;
+
+					if (type == "mat4")
+					{
+						ValueType = graphics::EUniformValueType::VALUE_TYPE_MAT4;
+						ByteSize = sizeof(glm::mat4);
+					}
+					else if (type == "mat3")
+					{
+						ValueType = graphics::EUniformValueType::VALUE_TYPE_MAT3;
+						ByteSize = sizeof(glm::mat3);
+					}
+					else if (type == "mat2")
+					{
+						ValueType = graphics::EUniformValueType::VALUE_TYPE_MAT2;
+						ByteSize = sizeof(glm::mat2);
+					}
+					else if (type == "vec4")
+					{
+						ValueType = graphics::EUniformValueType::VALUE_TYPE_VEC4;
+						ByteSize = sizeof(glm::vec4);
+					}
+					else if (type == "vec3")
+					{
+						ValueType = graphics::EUniformValueType::VALUE_TYPE_VEC3;
+						ByteSize = sizeof(glm::vec3);
+					}
+					else if (type == "vec2")
+					{
+						ValueType = graphics::EUniformValueType::VALUE_TYPE_VEC2;
+						ByteSize = sizeof(glm::vec2);
+					}
+					else if (type == "float")
+					{
+						ValueType = graphics::EUniformValueType::VALUE_TYPE_FLOAT;
+						ByteSize = sizeof(float);
+					}
+					else if (type == "int")
+					{
+						ValueType = graphics::EUniformValueType::VALUE_TYPE_INT;
+						ByteSize = sizeof(int);
+					}
+
+					std::vector<float> initValue;
+					GetArrayFloat32("initValue", initValue, valueJSON);
+
+					std::vector<unsigned char> Buffer;
+					Buffer.resize(ByteSize);
+					std::memcpy(&Buffer[0], &initValue[0], ByteSize);
+
+					//
+					ValueRegistry->SetValue(name, ValueType, &Buffer[0], ByteSize);
+				}
+			}
+
+			// SceneController‚É“o˜^‚·‚é
+			m_Target->SetValueRegistry(registryname, ValueRegistry);
 		}
 
 		return true;

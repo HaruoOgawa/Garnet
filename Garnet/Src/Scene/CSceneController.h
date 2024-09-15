@@ -9,6 +9,7 @@
 #include <Interface/IGraphicsAPI.h>
 #include <Interface/IPhysicsEngine.h>
 #include <Graphics/ECullMode.h>
+#include <Scriptable/CValueRegistry.h>
 
 namespace object { class C3DObject; }
 namespace camera { class CCamera; }
@@ -86,6 +87,7 @@ namespace scene
 
 		//
 		std::map<std::string, std::shared_ptr<graphics::CMaterialFrame>> m_MaterialFrameMap;
+		std::map<std::string, std::shared_ptr<scriptable::CValueRegistry>> m_ValueRegistryList;
 		std::map<std::string, std::shared_ptr<animation::CAnimationClipSet>> m_AnimationClipSetMap;
 		std::shared_ptr<graphics::CTextureSet> m_SceneTextureSet;
 		std::tuple<std::shared_ptr<audio::CAudioClip>, bool, bool> m_BGM;
@@ -101,7 +103,7 @@ namespace scene
 		// PassNameが設定されていない時のデフォルトの値
 		std::string m_DefaultRenderPass;
 		std::string m_DefaultDepthPass;
-		
+
 	private:
 		bool PrepareTextureList(const std::shared_ptr<object::C3DObject>& Object, std::map<std::string, int>& TexIndexMap);
 		bool PrepareMaterialList(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<object::C3DObject>& Object, const std::map<std::string, int>& TexIndexMap);
@@ -134,6 +136,9 @@ namespace scene
 		void AddMaterialFrameWithLoading(resource::CLoadWorker* pLoadWorker, const std::string& MFName, const std::string& FileName);
 		const std::map<std::string, std::shared_ptr<graphics::CMaterialFrame>>& GetMaterialFrameMap() const;
 		std::shared_ptr<graphics::CMaterialFrame> FindMaterialFrame(const std::string& MFName);
+
+		void SetValueRegistry(const std::string& Registryname, const std::shared_ptr<scriptable::CValueRegistry>& ValueRegistry);
+		const std::map<std::string, std::shared_ptr<scriptable::CValueRegistry>>& GetValueRegistryList();
 
 		void AddAnimationClipSet(const std::string& Name, const std::shared_ptr<animation::CAnimationClipSet>& AnimationClipSet);
 		const std::map<std::string, std::shared_ptr<animation::CAnimationClipSet>>& GetAnimationClipSetMap() const;
