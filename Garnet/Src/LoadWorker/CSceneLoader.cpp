@@ -22,7 +22,7 @@ namespace resource
 	{
 	}
 
-	bool CSceneLoader::Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker)
+	bool CSceneLoader::Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, app::IApp* pApp)
 	{
 		if (!m_File->IsLoaded()) return true;
 
@@ -528,8 +528,24 @@ namespace resource
 
 		// ノードを作成
 		int SelfNodeIndex = static_cast<int>(Object->GetNodeList().size());
-
 		std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(meshindex, SelfNodeIndex);
+
+		// コンポーネント
+		const auto components = nodeJSON->find("components");
+		if (components != nodeJSON->end() && components->is_array())
+		{
+			for (json::iterator componentJSON = components->begin(); componentJSON != components->end(); componentJSON++)
+			{
+				std::string type = std::string();
+				GetString("type", type, componentJSON);
+
+				std::string valueregistry = std::string();
+				GetString("valueregistry", valueregistry, componentJSON);
+
+				// コンポーネントを作成
+
+			}
+		}
 
 		Node->SetName(nodename);
 		Node->SetLocalTransform(Transform);

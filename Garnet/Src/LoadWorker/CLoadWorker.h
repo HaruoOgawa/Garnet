@@ -43,7 +43,7 @@ namespace resource
 		bool Create(api::IGraphicsAPI* pGraphicsAPI);
 
 		bool CheckFirstLoading(bool& ExistError, api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, app::CAppCore* pAppCore);
-		bool CheckInitialResource(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine);
+		bool CheckInitialResource(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, app::CAppCore* pAppCore);
 		bool InitLoadStatus(api::IGraphicsAPI* pGraphicsAPI, app::CAppCore* pAppCore);
 		
 		bool LoadResourceList(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, app::CAppCore* pAppCore);

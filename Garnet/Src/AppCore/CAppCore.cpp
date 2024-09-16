@@ -101,6 +101,11 @@ namespace app
 		return true;
 	}
 
+	const std::shared_ptr<app::IApp>& CAppCore::GetApp() const
+	{
+		return m_App;
+	}
+
 	const std::shared_ptr<gui::IGUIEngine>& CAppCore::GetGUIEngine() const
 	{
 		return m_GUIEngine;

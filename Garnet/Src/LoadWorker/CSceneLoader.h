@@ -63,6 +63,6 @@ namespace resource
 		CSceneLoader(const std::string& FileName, const std::shared_ptr<scene::CSceneController>& Target);
 		virtual ~CSceneLoader();
 
-		virtual bool Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker) override;
+		virtual bool Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, app::IApp* pApp) override;
 	};
 }
