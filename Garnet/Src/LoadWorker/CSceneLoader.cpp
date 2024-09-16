@@ -27,7 +27,7 @@ namespace resource
 		if (!m_File->IsLoaded()) return true;
 
 		// シーン読み込み
-		if (!AnalyseScene(pGraphicsAPI, pLoadWorker)) return false;
+		if (!AnalyseScene(pGraphicsAPI, pLoadWorker, pApp)) return false;
 
 		// ロード完了
 		m_Status = resource::ELoadStatus::Loaded;
@@ -35,7 +35,7 @@ namespace resource
 		return true;
 	}
 
-	bool CSceneLoader::AnalyseScene(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker)
+	bool CSceneLoader::AnalyseScene(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, app::IApp* pApp)
 	{
 		std::string RawData = std::string();
 		RawData.resize(m_File->GetData().size());
@@ -135,7 +135,7 @@ namespace resource
 			const auto objects = SceneJSON.find("objects");
 			if (objects != SceneJSON.end() && objects->is_array())
 			{
-				if (!AnalyseObjects(objects, pGraphicsAPI, pLoadWorker)) return false;
+				if (!AnalyseObjects(objects, pGraphicsAPI, pLoadWorker, pApp)) return false;
 			}
 		}
 
@@ -348,7 +348,7 @@ namespace resource
 	}
 #endif // USE_ANIMATION
 
-	bool CSceneLoader::AnalyseObjects(const json::iterator& objects, api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker)
+	bool CSceneLoader::AnalyseObjects(const json::iterator& objects, api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, app::IApp* pApp)
 	{
 		for (json::iterator objectJSON = objects->begin(); objectJSON != objects->end(); objectJSON++)
 		{
@@ -427,7 +427,7 @@ namespace resource
 				{
 					if (!nodeJSON->is_object()) continue;
 
-					std::shared_ptr<object::CNode> Node = AnalyseNode(nodeJSON, Object);
+					std::shared_ptr<object::CNode> Node = AnalyseNode(nodeJSON, Object, pApp);
 					Object->AddNode(Node);
 				}
 			}
@@ -510,7 +510,7 @@ namespace resource
 		return true;
 	}
 
-	std::shared_ptr<object::CNode> CSceneLoader::AnalyseNode(const json::iterator& nodeJSON, const std::shared_ptr<object::C3DObject>& Object)
+	std::shared_ptr<object::CNode> CSceneLoader::AnalyseNode(const json::iterator& nodeJSON, const std::shared_ptr<object::C3DObject>& Object, app::IApp* pApp)
 	{
 		std::string nodename = "";
 		GetString("name", nodename, nodeJSON);
@@ -543,7 +543,11 @@ namespace resource
 				GetString("valueregistry", valueregistry, componentJSON);
 
 				// コンポーネントを作成
-
+				auto Component = pApp->CreateComponent(type, valueregistry);
+				if (Component)
+				{
+					Node->AddComponent(Component);
+				}
 			}
 		}
 

@@ -267,6 +267,19 @@ namespace scene
 			if (!PrepareAnimationList(pGraphicsAPI, Object)) return false;
 #endif // USE_ANIMATION
 
+
+			// コンポーネントを追加 Component
+			for (const auto& Node : Object->GetNodeList())
+			{
+				for (const auto& Component : Node->GetComponentList())
+				{
+					const auto& ValueRegistry = m_ValueRegistryList.find(Component->GetRegistryName());
+					if (ValueRegistry == m_ValueRegistryList.end()) continue;
+
+					Component->SetValueRegistry(ValueRegistry->second);
+				}
+			}
+
 			// Object生成
 			if (!Object->Create(pGraphicsAPI, pPhysicsEngine, nullptr)) return false;
 		}
@@ -314,6 +327,14 @@ namespace scene
 		for (const auto& Object : m_ObjectList)
 		{
 			if (!Object->Update(pGraphicsAPI, pPhysicsEngine, DrawInfo->GetDeltaSecondsTime())) return false;
+
+			for (const auto& Node : Object->GetNodeList())
+			{
+				for (const auto& Component : Node->GetComponentList())
+				{
+					if (!Component->Update(pGraphicsAPI, pPhysicsEngine, pLoadWorker, Camera, Projection, DrawInfo, InputState)) return false;
+				}
+			}
 		}
 
 		return true;
@@ -351,6 +372,14 @@ namespace scene
 		for (const auto& Object : m_ObjectList)
 		{
 			if (!Object->Draw(pGraphicsAPI, IsDepthPass, false, Camera, Projection, DrawInfo)) return false;
+
+			for (const auto& Node : Object->GetNodeList())
+			{
+				for (const auto& Component : Node->GetComponentList())
+				{
+					if (!Component->Draw(pGraphicsAPI, Camera, Projection, DrawInfo)) return false;
+				}
+			}
 		}
 
 		return true;

@@ -16,14 +16,21 @@ namespace graphics { class CDrawInfo; }
 
 namespace scriptable
 {
-	class CComponent : public CValueRegistry
+	class CComponent
 	{
-		const std::string m_Name;
+		const std::string m_ComponentName;
+		const std::string m_RegistryName;
+
+		std::shared_ptr<scriptable::CValueRegistry> m_ValueRegistry;
 	public:
-		CComponent(const std::string& Name);
+		CComponent(const std::string& ComponentName, const std::string& RegistryName);
 		virtual ~CComponent();
 
-		const std::string GetName() const;
+		const std::string GetComponentName() const;
+		const std::string GetRegistryName() const;
+
+		virtual void SetValueRegistry(const std::shared_ptr<scriptable::CValueRegistry>& ValueRegistry);
+		virtual const std::shared_ptr<scriptable::CValueRegistry>& GetValueRegistry() const;
 
 		virtual void OnLoaded(const std::shared_ptr<scene::CSceneController>& SceneController);
 

@@ -2,9 +2,10 @@
 
 namespace scriptable
 {
-	CComponent::CComponent(const std::string& Name):
-		CValueRegistry(Name),
-		m_Name(Name)
+	CComponent::CComponent(const std::string& ComponentName, const std::string& RegistryName):
+		m_ComponentName(ComponentName),
+		m_RegistryName(RegistryName),
+		m_ValueRegistry(nullptr)
 	{
 	}
 
@@ -12,9 +13,24 @@ namespace scriptable
 	{
 	}
 
-	const std::string CComponent::GetName() const
+	const std::string CComponent::GetComponentName() const
 	{
-		return m_Name;
+		return m_ComponentName;
+	}
+
+	const std::string CComponent::GetRegistryName() const
+	{
+		return m_RegistryName;
+	}
+
+	void CComponent::SetValueRegistry(const std::shared_ptr<scriptable::CValueRegistry>& ValueRegistry)
+	{
+		m_ValueRegistry = ValueRegistry;
+	}
+
+	const std::shared_ptr<scriptable::CValueRegistry>& CComponent::GetValueRegistry() const
+	{
+		return m_ValueRegistry;
 	}
 
 	void CComponent::OnLoaded(const std::shared_ptr<scene::CSceneController>& SceneController)

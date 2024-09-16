@@ -347,6 +347,16 @@ namespace scene
 				node["trackids"].push_back(TrackID);
 			}
 
+			// コンポーネント
+			for (const auto& Component : Node->GetComponentList())
+			{
+				ordered_json componentJSON;
+				componentJSON["type"] = Component->GetComponentName();
+				componentJSON["valueregistry"] = Component->GetRegistryName();
+
+				node["components"].push_back(componentJSON);
+			}
+
 			ObjectJSON["nodes"].push_back(node);
 		}
 
