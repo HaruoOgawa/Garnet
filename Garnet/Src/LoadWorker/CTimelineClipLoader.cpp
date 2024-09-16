@@ -11,7 +11,7 @@ namespace resource
 	{
 	}
 	
-	bool CTimelineClipLoader::Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker)
+	bool CTimelineClipLoader::Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, app::IApp* pApp)
 	{
 		if (!m_File->IsLoaded()) return true;
 

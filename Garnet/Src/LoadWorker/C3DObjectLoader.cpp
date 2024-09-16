@@ -34,11 +34,11 @@ namespace resource
 	{
 	}
 
-	bool C3DObjectLoader::Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker)
+	bool C3DObjectLoader::Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, app::IApp* pApp)
 	{
 		if (!m_File->IsLoaded())
 		{
-			if (!m_File->Update(pGraphicsAPI, pPhysicsEngine, pLoadWorker)) return false;
+			if (!m_File->Update(pGraphicsAPI, pPhysicsEngine, pLoadWorker, pApp)) return false;
 			return true;
 		}
 		
@@ -57,7 +57,7 @@ namespace resource
 			}
 		case resource::E3DObjectLoadState::LoadSubResouce:
 			{
-				if (!LoadSubResources(pGraphicsAPI, pPhysicsEngine, pLoadWorker)) return false;
+				if (!LoadSubResources(pGraphicsAPI, pPhysicsEngine, pLoadWorker, pApp)) return false;
 
 				if (static_cast<int>(m_SubResources.size()) == 0) m_LoadState = resource::E3DObjectLoadState::Finish;
 
@@ -129,7 +129,7 @@ namespace resource
 		return true;
 	}
 
-	bool C3DObjectLoader::LoadSubResources(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker)
+	bool C3DObjectLoader::LoadSubResources(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, app::IApp* pApp)
 	{
 		// サブリソースのロード
 		for (auto& Resource : m_SubResources)
@@ -141,7 +141,7 @@ namespace resource
 				return true;
 
 			case resource::ELoadStatus::Loading:
-				if (!Resource->Update(pGraphicsAPI, pPhysicsEngine, pLoadWorker)) return false;
+				if (!Resource->Update(pGraphicsAPI, pPhysicsEngine, pLoadWorker, pApp)) return false;
 				return true;
 
 			case resource::ELoadStatus::Loaded:

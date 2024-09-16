@@ -1,4 +1,5 @@
 #include "C3DObject.h"
+#include "../Scriptable/CComponent.h"
 
 namespace object
 {

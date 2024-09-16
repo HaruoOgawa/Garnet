@@ -42,6 +42,8 @@ namespace app
 		CAppCore(const std::shared_ptr<app::IApp>& App, SAppSettings Settings);
 		virtual ~CAppCore();
 
+		const std::shared_ptr<app::IApp>& GetApp() const;
+
 		const std::shared_ptr<gui::IGUIEngine>& GetGUIEngine() const;
 
 		const std::shared_ptr<input::CInputState>& GetInputState()const { return m_InputState; }

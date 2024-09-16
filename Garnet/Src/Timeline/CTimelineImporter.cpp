@@ -3,6 +3,7 @@
 #include "CTimelineClip.h"
 #include "CNodeTrack.h"
 #include "CMaterialTrack.h"
+#include "CCustomTrack.h"
 #include "../Binary/CBinaryReader.h"
 #include "../Message/Console.h"
 
@@ -104,6 +105,7 @@ namespace timeline
 			{
 			case timeline::ETrackType::TrackType_None:
 				break;
+
 			case timeline::ETrackType::TrackType_Node:
 				{
 					int TrackTarget_Int = -1;
@@ -115,6 +117,7 @@ namespace timeline
 					DstClip->AddTrack(Track);
 				}
 				break;
+
 			case timeline::ETrackType::TrackType_Material:
 				{
 					int TrackTarget_Int = -1;
@@ -132,6 +135,21 @@ namespace timeline
 					DstClip->AddTrack(Track);
 				}
 				break;
+
+			case timeline::ETrackType::TrackType_Custom:
+			{
+				int ValueNameByteSize = 0;
+				if (!Reader.GetInt(ValueNameByteSize)) return false;
+
+				std::string ValueName = std::string();
+				if (!Reader.GetString(ValueName, ValueNameByteSize)) return false;
+
+				// ƒgƒ‰ƒbƒN‚ğì¬
+				std::shared_ptr<CCustomTrack> Track = std::make_shared<CCustomTrack>(TrackID, SamplerIndex, SamplerTarget, ValueName);
+				DstClip->AddTrack(Track);
+			}
+			break;
+
 			default:
 				break;
 			}

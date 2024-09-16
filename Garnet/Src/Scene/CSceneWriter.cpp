@@ -34,6 +34,7 @@ namespace scene
 	bool CSceneWriter::WriteScene(ordered_json& SceneJSON, CSceneController* pSceneController)
 	{
 		if (!WriteMaterialFrames(SceneJSON, pSceneController)) return false;
+		if (!WriteValueRegistries(SceneJSON, pSceneController)) return false;
 		if (!WriteSceneTextureSet(SceneJSON, pSceneController)) return false;
 		if (!WriteAnimations(SceneJSON, pSceneController)) return false;
 		if (!WriteSound(SceneJSON, pSceneController)) return false;
@@ -50,6 +51,90 @@ namespace scene
 		for (const auto& MaterialFrame : MaterialFrameMap)
 		{
 			SceneJSON["materialframes"].push_back({ {"name" , MaterialFrame.first}, { "filename", MaterialFrame.second->GetFileName()} });
+		}
+
+		return true;
+	}
+
+	bool CSceneWriter::WriteValueRegistries(ordered_json& SceneJSON, CSceneController* pSceneController)
+	{
+		for (const auto& ValueRegistry : pSceneController->GetValueRegistryList())
+		{
+			ordered_json ValueRegistryJSON;
+
+			ValueRegistryJSON["registryname"] = ValueRegistry.first;
+
+			// Timeline Track ID
+			for (const auto& TrackID : ValueRegistry.second->GetRefTrackIDList())
+			{
+				ValueRegistryJSON["trackids"].push_back(TrackID);
+			}
+
+			for (const auto& Value : ValueRegistry.second->GetValueList())
+			{
+				ordered_json ValueJSON;
+
+				ValueJSON["name"] = Value.second.Name;
+
+				// type
+				std::string type = std::string();
+				graphics::EUniformValueType ValueType = Value.second.Type;
+				switch (ValueType)
+				{
+				case graphics::EUniformValueType::NONE:
+					break;
+				case graphics::EUniformValueType::VALUE_TYPE_MAT4:
+					type = "mat4";
+					break;
+				case graphics::EUniformValueType::VALUE_TYPE_MAT3:
+					type = "mat3";
+					break;
+				case graphics::EUniformValueType::VALUE_TYPE_MAT2:
+					type = "mat2";
+					break;
+				case graphics::EUniformValueType::VALUE_TYPE_VEC4:
+					type = "vec4";
+					break;
+				case graphics::EUniformValueType::VALUE_TYPE_VEC3:
+					type = "vec3";
+					break;
+				case graphics::EUniformValueType::VALUE_TYPE_VEC2:
+					type = "vec2";
+					break;
+				case graphics::EUniformValueType::VALUE_TYPE_FLOAT:
+					type = "float";
+					break;
+				case graphics::EUniformValueType::VALUE_TYPE_INT:
+					type = "int";
+					break;
+				case graphics::EUniformValueType::VALUE_TYPE_FLOAT_ARRAY:
+					break;
+				case graphics::EUniformValueType::VALUE_TYPE_MAT4_ARRAY:
+					break;
+				default:
+					break;
+				}
+
+				if (type.empty()) continue;
+
+				ValueJSON["type"] = type;
+
+				// Value
+				std::vector<float> DstValue(Value.second.ByteSize / 4);
+				std::memcpy(&DstValue[0], &Value.second.Buffer[0], Value.second.ByteSize);
+
+				ordered_json valueJSON;
+
+				for (auto v : DstValue)
+				{
+					ValueJSON["initValue"].push_back(v);
+				}
+
+				//
+				ValueRegistryJSON["values"].push_back(ValueJSON);
+			}
+
+			SceneJSON["valueregistries"].push_back(ValueRegistryJSON);
 		}
 
 		return true;
@@ -260,6 +345,16 @@ namespace scene
 			for (const auto& TrackID : Node->GetRefTrackIDList())
 			{
 				node["trackids"].push_back(TrackID);
+			}
+
+			// コンポーネント
+			for (const auto& Component : Node->GetComponentList())
+			{
+				ordered_json componentJSON;
+				componentJSON["type"] = Component->GetComponentName();
+				componentJSON["valueregistry"] = Component->GetRegistryName();
+
+				node["components"].push_back(componentJSON);
 			}
 
 			ObjectJSON["nodes"].push_back(node);

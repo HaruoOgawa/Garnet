@@ -168,6 +168,29 @@ namespace scene
 		return MaterialFrame;
 	}
 
+	void CSceneController::SetValueRegistry(const std::string& Registryname, const std::shared_ptr<scriptable::CValueRegistry>& ValueRegistry)
+	{
+		const auto it = m_ValueRegistryList.find(Registryname);
+		if (it == m_ValueRegistryList.end())
+		{
+			// 新規追加する
+			m_ValueRegistryList.emplace(Registryname, ValueRegistry);
+		}
+		else
+		{
+			// 以前の一部値を保持する
+			std::vector<std::string> TrackIDList = m_ValueRegistryList[Registryname]->GetRefTrackIDList();
+
+			// 値を更新する
+			m_ValueRegistryList[Registryname] = ValueRegistry;
+			m_ValueRegistryList[Registryname]->SetRefTrackIDList(TrackIDList);
+		}
+	}
+	const std::map<std::string, std::shared_ptr<scriptable::CValueRegistry>>& CSceneController::GetValueRegistryList()
+	{
+		return m_ValueRegistryList;
+	}
+
 	void CSceneController::AddAnimationClipSet(const std::string& Name, const std::shared_ptr<animation::CAnimationClipSet>& AnimationClipSet)
 	{
 		m_AnimationClipSetMap.emplace(Name, AnimationClipSet);
@@ -244,6 +267,19 @@ namespace scene
 			if (!PrepareAnimationList(pGraphicsAPI, Object)) return false;
 #endif // USE_ANIMATION
 
+
+			// コンポーネントを追加 Component
+			for (const auto& Node : Object->GetNodeList())
+			{
+				for (const auto& Component : Node->GetComponentList())
+				{
+					const auto& ValueRegistry = m_ValueRegistryList.find(Component->GetRegistryName());
+					if (ValueRegistry == m_ValueRegistryList.end()) continue;
+
+					Component->SetValueRegistry(ValueRegistry->second);
+				}
+			}
+
 			// Object生成
 			if (!Object->Create(pGraphicsAPI, pPhysicsEngine, nullptr)) return false;
 		}
@@ -291,6 +327,14 @@ namespace scene
 		for (const auto& Object : m_ObjectList)
 		{
 			if (!Object->Update(pGraphicsAPI, pPhysicsEngine, DrawInfo->GetDeltaSecondsTime())) return false;
+
+			for (const auto& Node : Object->GetNodeList())
+			{
+				for (const auto& Component : Node->GetComponentList())
+				{
+					if (!Component->Update(pGraphicsAPI, pPhysicsEngine, pLoadWorker, Camera, Projection, DrawInfo, InputState)) return false;
+				}
+			}
 		}
 
 		return true;
@@ -328,6 +372,14 @@ namespace scene
 		for (const auto& Object : m_ObjectList)
 		{
 			if (!Object->Draw(pGraphicsAPI, IsDepthPass, false, Camera, Projection, DrawInfo)) return false;
+
+			for (const auto& Node : Object->GetNodeList())
+			{
+				for (const auto& Component : Node->GetComponentList())
+				{
+					if (!Component->Draw(pGraphicsAPI, Camera, Projection, DrawInfo)) return false;
+				}
+			}
 		}
 
 		return true;

@@ -14,6 +14,7 @@ namespace input { class CInputState; }
 namespace object { class C3DObject; }
 namespace scene { class CSceneController; }
 namespace gui { class IGUIEngine; }
+namespace scriptable { class CComponent; }
 
 namespace app
 {
@@ -30,6 +31,9 @@ namespace app
 		virtual bool Draw(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<gui::IGUIEngine>& GUIEngine) = 0;
 
 		virtual const std::shared_ptr<graphics::CDrawInfo>& GetDrawInfo() const = 0;
+
+		// コンポーネント作成
+		virtual std::shared_ptr<scriptable::CComponent> CreateComponent(const std::string& ComponentType, const std::string& ValueRegistry) = 0;
 
 		// 起動準備完了
 		virtual bool OnStartup(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<gui::IGUIEngine>& GUIEngine) = 0;

@@ -3,6 +3,7 @@
 #include "../LoadWorker/ELoadStatus.h"
 #include "../Interface/IGraphicsAPI.h"
 #include "../Interface/IPhysicsEngine.h"
+#include "../Interface/IApp.h"
 
 namespace resource
 {
@@ -13,7 +14,7 @@ namespace resource
 	public:
 		virtual bool Load() = 0;
 		virtual bool LoadImmediate() = 0;
-		virtual bool Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker) = 0;
+		virtual bool Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, app::IApp* pApp) = 0;
 
 		virtual void Reset() = 0;
 

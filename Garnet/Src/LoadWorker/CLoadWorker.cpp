@@ -95,7 +95,7 @@ namespace resource
 		// 初期化
 		if (m_Status == ELoadStatus::None)
 		{
-			if (CheckInitialResource(pGraphicsAPI, pPhysicsEngine)) return true;
+			if (CheckInitialResource(pGraphicsAPI, pPhysicsEngine, pAppCore)) return true;
 			if (!InitLoadStatus(pGraphicsAPI, pAppCore)) ExistError = true;
 
 			// 起動準備完了イベントコールバックの呼び出し
@@ -115,7 +115,7 @@ namespace resource
 		return false;
 	}
 
-	bool CLoadWorker::CheckInitialResource(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine)
+	bool CLoadWorker::CheckInitialResource(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, app::CAppCore* pAppCore)
 	{
 		for (auto& Resource : m_InitialResourceList)
 		{
@@ -126,7 +126,7 @@ namespace resource
 				return true;
 
 			case resource::ELoadStatus::Loading:
-				if (!Resource->Update(pGraphicsAPI, pPhysicsEngine, this)) return false;
+				if (!Resource->Update(pGraphicsAPI, pPhysicsEngine, this, pAppCore->GetApp().get())) return false;
 				return true;
 
 			case resource::ELoadStatus::Loaded:
@@ -166,7 +166,7 @@ namespace resource
 				return true;
 
 			case resource::ELoadStatus::Loading:
-				if (!Resource->Update(pGraphicsAPI, pPhysicsEngine, this)) return false;
+				if (!Resource->Update(pGraphicsAPI, pPhysicsEngine, this, pAppCore->GetApp().get())) return false;
 				return true;
 
 			case resource::ELoadStatus::Loaded:

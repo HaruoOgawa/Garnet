@@ -43,7 +43,7 @@ namespace resource
 		return true;
 	}
 
-	bool CMaterialFrameLoader::Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker)
+	bool CMaterialFrameLoader::Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, app::IApp* pApp)
 	{
 		// マテリアルフレームが持っているリソース一覧を取得する
 		if (!m_AnalyseDone)
@@ -65,7 +65,7 @@ namespace resource
 				return true;
 
 			case resource::ELoadStatus::Loading:
-				if (!Resource->Update(pGraphicsAPI, pPhysicsEngine, pLoadWorker)) return false;
+				if (!Resource->Update(pGraphicsAPI, pPhysicsEngine, pLoadWorker, pApp)) return false;
 				return true;
 
 			case resource::ELoadStatus::Loaded:

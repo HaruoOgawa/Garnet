@@ -70,7 +70,7 @@ namespace resource
 
 		virtual bool Reload(resource::CLoadWorker* pLoadWorker) override;
 
-		virtual bool Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker) override;
+		virtual bool Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, app::IApp* pApp) override;
 
 		virtual void AddReference(const std::shared_ptr<IResource>& Resource) override;
 

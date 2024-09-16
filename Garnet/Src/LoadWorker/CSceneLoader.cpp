@@ -22,12 +22,12 @@ namespace resource
 	{
 	}
 
-	bool CSceneLoader::Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker)
+	bool CSceneLoader::Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, app::IApp* pApp)
 	{
 		if (!m_File->IsLoaded()) return true;
 
 		// シーン読み込み
-		if (!AnalyseScene(pGraphicsAPI, pLoadWorker)) return false;
+		if (!AnalyseScene(pGraphicsAPI, pLoadWorker, pApp)) return false;
 
 		// ロード完了
 		m_Status = resource::ELoadStatus::Loaded;
@@ -35,7 +35,7 @@ namespace resource
 		return true;
 	}
 
-	bool CSceneLoader::AnalyseScene(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker)
+	bool CSceneLoader::AnalyseScene(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, app::IApp* pApp)
 	{
 		std::string RawData = std::string();
 		RawData.resize(m_File->GetData().size());
@@ -49,6 +49,15 @@ namespace resource
 			if (materialframes != SceneJSON.end() && materialframes->is_array())
 			{
 				if (!AnalyseMaterialFrames(materialframes, pLoadWorker)) return false;
+			}
+		}
+
+		// valueregistries
+		{
+			const auto valueregistries = SceneJSON.find("valueregistries");
+			if (valueregistries != SceneJSON.end() && valueregistries->is_array())
+			{
+				if (!AnalyseValueRegistries(valueregistries)) return false;
 			}
 		}
 
@@ -126,7 +135,7 @@ namespace resource
 			const auto objects = SceneJSON.find("objects");
 			if (objects != SceneJSON.end() && objects->is_array())
 			{
-				if (!AnalyseObjects(objects, pGraphicsAPI, pLoadWorker)) return false;
+				if (!AnalyseObjects(objects, pGraphicsAPI, pLoadWorker, pApp)) return false;
 			}
 		}
 
@@ -151,6 +160,96 @@ namespace resource
 
 			pLoadWorker->AddLoadResource(std::make_shared<resource::CMaterialFrameLoader>(filename, MaterialFrame));
 			m_Target->AddMaterialFrame(MFName, MaterialFrame);
+		}
+
+		return true;
+	}
+
+	bool CSceneLoader::AnalyseValueRegistries(const json::iterator& valueregistries)
+	{
+		for (json::iterator registryJSON = valueregistries->begin(); registryJSON != valueregistries->end(); registryJSON++)
+		{
+			std::string registryname = std::string();
+			GetString("registryname", registryname, registryJSON);
+
+			std::shared_ptr<scriptable::CValueRegistry> ValueRegistry = std::make_shared<scriptable::CValueRegistry>(registryname);
+
+			// TimelineTrack
+			std::vector<std::string> trackids;
+			GetArrayString("trackids", trackids, registryJSON);
+
+			ValueRegistry->SetRefTrackIDList(trackids);
+
+			const auto values = registryJSON->find("values");
+			if (values != registryJSON->end() && values->is_array())
+			{
+				for (json::iterator valueJSON = values->begin(); valueJSON != values->end(); valueJSON++)
+				{
+					std::string name = std::string();
+					GetString("name", name, valueJSON);
+
+					graphics::EUniformValueType ValueType = graphics::EUniformValueType::NONE;
+					std::string type = std::string();
+					GetString("type", type, valueJSON);
+
+					int ByteSize = 0;
+					{
+						if (type == "mat4")
+						{
+							ValueType = graphics::EUniformValueType::VALUE_TYPE_MAT4;
+							ByteSize = sizeof(glm::mat4);
+						}
+						else if (type == "mat3")
+						{
+							ValueType = graphics::EUniformValueType::VALUE_TYPE_MAT3;
+							ByteSize = sizeof(glm::mat3);
+						}
+						else if (type == "mat2")
+						{
+							ValueType = graphics::EUniformValueType::VALUE_TYPE_MAT2;
+							ByteSize = sizeof(glm::mat2);
+						}
+						else if (type == "vec4")
+						{
+							ValueType = graphics::EUniformValueType::VALUE_TYPE_VEC4;
+							ByteSize = sizeof(glm::vec4);
+						}
+						else if (type == "vec3")
+						{
+							ValueType = graphics::EUniformValueType::VALUE_TYPE_VEC3;
+							ByteSize = sizeof(glm::vec3);
+						}
+						else if (type == "vec2")
+						{
+							ValueType = graphics::EUniformValueType::VALUE_TYPE_VEC2;
+							ByteSize = sizeof(glm::vec2);
+						}
+						else if (type == "float")
+						{
+							ValueType = graphics::EUniformValueType::VALUE_TYPE_FLOAT;
+							ByteSize = sizeof(float);
+						}
+						else if (type == "int")
+						{
+							ValueType = graphics::EUniformValueType::VALUE_TYPE_INT;
+							ByteSize = sizeof(int);
+						}
+					}
+
+					std::vector<float> initValue;
+					GetArrayFloat32("initValue", initValue, valueJSON);
+
+					std::vector<unsigned char> Buffer;
+					Buffer.resize(ByteSize);
+					std::memcpy(&Buffer[0], &initValue[0], ByteSize);
+
+					//
+					ValueRegistry->SetValue(name, ValueType, &Buffer[0], ByteSize);
+				}
+			}
+
+			// SceneControllerに登録する
+			m_Target->SetValueRegistry(registryname, ValueRegistry);
 		}
 
 		return true;
@@ -249,7 +348,7 @@ namespace resource
 	}
 #endif // USE_ANIMATION
 
-	bool CSceneLoader::AnalyseObjects(const json::iterator& objects, api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker)
+	bool CSceneLoader::AnalyseObjects(const json::iterator& objects, api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, app::IApp* pApp)
 	{
 		for (json::iterator objectJSON = objects->begin(); objectJSON != objects->end(); objectJSON++)
 		{
@@ -328,7 +427,7 @@ namespace resource
 				{
 					if (!nodeJSON->is_object()) continue;
 
-					std::shared_ptr<object::CNode> Node = AnalyseNode(nodeJSON, Object);
+					std::shared_ptr<object::CNode> Node = AnalyseNode(nodeJSON, Object, pApp);
 					Object->AddNode(Node);
 				}
 			}
@@ -411,7 +510,7 @@ namespace resource
 		return true;
 	}
 
-	std::shared_ptr<object::CNode> CSceneLoader::AnalyseNode(const json::iterator& nodeJSON, const std::shared_ptr<object::C3DObject>& Object)
+	std::shared_ptr<object::CNode> CSceneLoader::AnalyseNode(const json::iterator& nodeJSON, const std::shared_ptr<object::C3DObject>& Object, app::IApp* pApp)
 	{
 		std::string nodename = "";
 		GetString("name", nodename, nodeJSON);
@@ -429,8 +528,28 @@ namespace resource
 
 		// ノードを作成
 		int SelfNodeIndex = static_cast<int>(Object->GetNodeList().size());
-
 		std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(meshindex, SelfNodeIndex);
+
+		// コンポーネント
+		const auto components = nodeJSON->find("components");
+		if (components != nodeJSON->end() && components->is_array())
+		{
+			for (json::iterator componentJSON = components->begin(); componentJSON != components->end(); componentJSON++)
+			{
+				std::string type = std::string();
+				GetString("type", type, componentJSON);
+
+				std::string valueregistry = std::string();
+				GetString("valueregistry", valueregistry, componentJSON);
+
+				// コンポーネントを作成
+				auto Component = pApp->CreateComponent(type, valueregistry);
+				if (Component)
+				{
+					Node->AddComponent(Component);
+				}
+			}
+		}
 
 		Node->SetName(nodename);
 		Node->SetLocalTransform(Transform);

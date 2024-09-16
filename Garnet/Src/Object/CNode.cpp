@@ -80,6 +80,17 @@ namespace object
 		return m_MeshIndex;
 	}
 
+	// コンポーネント
+	void CNode::AddComponent(const std::shared_ptr<scriptable::CComponent>& Component)
+	{
+		m_ComponentList.push_back(Component);
+	}
+
+	const std::vector<std::shared_ptr<scriptable::CComponent>>& CNode::GetComponentList() const
+	{
+		return m_ComponentList;
+	}
+
 	// 物理
 	void CNode::AddPhysicsObject(const std::shared_ptr<physics::IPhysicsObject>& PhysicsObject)
 	{

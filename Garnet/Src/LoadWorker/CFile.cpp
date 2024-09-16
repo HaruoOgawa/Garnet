@@ -169,7 +169,7 @@ namespace resource
 		return true;
 	}
 
-	bool CFile::Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker)
+	bool CFile::Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, app::IApp* pApp)
 	{
 #ifndef __EMSCRIPTEN__
 		if (m_Status == resource::ELoadStatus::Loading)

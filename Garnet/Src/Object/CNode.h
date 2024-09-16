@@ -6,6 +6,7 @@
 #include "../Math/CTransform.h"
 #include "../Interface/IPhysicsObject.h"
 #include "../Timeline/CTimelineTrackContent.h"
+#include "../Scriptable/CComponent.h"
 
 namespace object
 {
@@ -32,6 +33,9 @@ namespace object
 		glm::mat4 m_InverseBindMatrix;
 
 		std::shared_ptr<CNode> m_ParentNode;
+
+		// コンポーネント
+		std::vector<std::shared_ptr<scriptable::CComponent>> m_ComponentList;
 
 		// 物理
 		std::vector<std::shared_ptr<physics::IPhysicsObject>> m_PhysicsObjectList;
@@ -61,6 +65,10 @@ namespace object
 
 		void SetMeshIndex(int MeshIndex);
 		int GetMeshIndex() const;
+
+		// コンポーネント
+		void AddComponent(const std::shared_ptr<scriptable::CComponent>& Component);
+		const std::vector<std::shared_ptr<scriptable::CComponent>>& GetComponentList() const;
 
 		// 物理
 		void AddPhysicsObject(const std::shared_ptr<physics::IPhysicsObject>& PhysicsObject);

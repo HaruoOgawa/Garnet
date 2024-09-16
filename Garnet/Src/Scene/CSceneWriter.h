@@ -18,6 +18,7 @@ namespace scene
 	private:
 		static bool WriteScene(ordered_json& SceneJSON, CSceneController* pSceneController);
 		static bool WriteMaterialFrames(ordered_json& SceneJSON, CSceneController* pSceneController);
+		static bool WriteValueRegistries(ordered_json& SceneJSON, CSceneController* pSceneController);
 		static bool WriteSceneTextureSet(ordered_json& SceneJSON, CSceneController* pSceneController);
 		static bool WriteAnimations(ordered_json& SceneJSON, CSceneController* pSceneController);
 		static bool WriteSound(ordered_json& SceneJSON, CSceneController* pSceneController);
