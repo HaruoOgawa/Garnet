@@ -64,6 +64,12 @@ namespace scene
 
 			ValueRegistryJSON["registryname"] = ValueRegistry.first;
 
+			// Timeline Track ID
+			for (const auto& TrackID : ValueRegistry.second->GetRefTrackIDList())
+			{
+				ValueRegistryJSON["trackids"].push_back(TrackID);
+			}
+
 			for (const auto& Value : ValueRegistry.second->GetValueList())
 			{
 				ordered_json ValueJSON;

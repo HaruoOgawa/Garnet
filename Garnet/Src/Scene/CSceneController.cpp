@@ -178,8 +178,12 @@ namespace scene
 		}
 		else
 		{
+			// 以前の一部値を保持する
+			std::vector<std::string> TrackIDList = m_ValueRegistryList[Registryname]->GetRefTrackIDList();
+
 			// 値を更新する
 			m_ValueRegistryList[Registryname] = ValueRegistry;
+			m_ValueRegistryList[Registryname]->SetRefTrackIDList(TrackIDList);
 		}
 	}
 	const std::map<std::string, std::shared_ptr<scriptable::CValueRegistry>>& CSceneController::GetValueRegistryList()

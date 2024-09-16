@@ -174,6 +174,12 @@ namespace resource
 
 			std::shared_ptr<scriptable::CValueRegistry> ValueRegistry = std::make_shared<scriptable::CValueRegistry>(registryname);
 
+			// TimelineTrack
+			std::vector<std::string> trackids;
+			GetArrayString("trackids", trackids, registryJSON);
+
+			ValueRegistry->SetRefTrackIDList(trackids);
+
 			const auto values = registryJSON->find("values");
 			if (values != registryJSON->end() && values->is_array())
 			{
@@ -187,46 +193,47 @@ namespace resource
 					GetString("type", type, valueJSON);
 
 					int ByteSize = 0;
-
-					if (type == "mat4")
 					{
-						ValueType = graphics::EUniformValueType::VALUE_TYPE_MAT4;
-						ByteSize = sizeof(glm::mat4);
-					}
-					else if (type == "mat3")
-					{
-						ValueType = graphics::EUniformValueType::VALUE_TYPE_MAT3;
-						ByteSize = sizeof(glm::mat3);
-					}
-					else if (type == "mat2")
-					{
-						ValueType = graphics::EUniformValueType::VALUE_TYPE_MAT2;
-						ByteSize = sizeof(glm::mat2);
-					}
-					else if (type == "vec4")
-					{
-						ValueType = graphics::EUniformValueType::VALUE_TYPE_VEC4;
-						ByteSize = sizeof(glm::vec4);
-					}
-					else if (type == "vec3")
-					{
-						ValueType = graphics::EUniformValueType::VALUE_TYPE_VEC3;
-						ByteSize = sizeof(glm::vec3);
-					}
-					else if (type == "vec2")
-					{
-						ValueType = graphics::EUniformValueType::VALUE_TYPE_VEC2;
-						ByteSize = sizeof(glm::vec2);
-					}
-					else if (type == "float")
-					{
-						ValueType = graphics::EUniformValueType::VALUE_TYPE_FLOAT;
-						ByteSize = sizeof(float);
-					}
-					else if (type == "int")
-					{
-						ValueType = graphics::EUniformValueType::VALUE_TYPE_INT;
-						ByteSize = sizeof(int);
+						if (type == "mat4")
+						{
+							ValueType = graphics::EUniformValueType::VALUE_TYPE_MAT4;
+							ByteSize = sizeof(glm::mat4);
+						}
+						else if (type == "mat3")
+						{
+							ValueType = graphics::EUniformValueType::VALUE_TYPE_MAT3;
+							ByteSize = sizeof(glm::mat3);
+						}
+						else if (type == "mat2")
+						{
+							ValueType = graphics::EUniformValueType::VALUE_TYPE_MAT2;
+							ByteSize = sizeof(glm::mat2);
+						}
+						else if (type == "vec4")
+						{
+							ValueType = graphics::EUniformValueType::VALUE_TYPE_VEC4;
+							ByteSize = sizeof(glm::vec4);
+						}
+						else if (type == "vec3")
+						{
+							ValueType = graphics::EUniformValueType::VALUE_TYPE_VEC3;
+							ByteSize = sizeof(glm::vec3);
+						}
+						else if (type == "vec2")
+						{
+							ValueType = graphics::EUniformValueType::VALUE_TYPE_VEC2;
+							ByteSize = sizeof(glm::vec2);
+						}
+						else if (type == "float")
+						{
+							ValueType = graphics::EUniformValueType::VALUE_TYPE_FLOAT;
+							ByteSize = sizeof(float);
+						}
+						else if (type == "int")
+						{
+							ValueType = graphics::EUniformValueType::VALUE_TYPE_INT;
+							ByteSize = sizeof(int);
+						}
 					}
 
 					std::vector<float> initValue;
