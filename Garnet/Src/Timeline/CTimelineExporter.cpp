@@ -73,20 +73,28 @@ namespace timeline
 			{
 			case timeline::ETrackType::TrackType_None:
 				break;
-			case timeline::ETrackType::TrackType_Node:
-				{
-					Writer.SetInt(Track.second->GetParam_Int("TrackTarget"));
-				}
-				break;
-			case timeline::ETrackType::TrackType_Material:
-				{
-					Writer.SetInt(Track.second->GetParam_Int("TrackTarget"));
 
-					std::string UniformName = Track.second->GetParam_String("UniformName");
-					Writer.SetInt(static_cast<int>(UniformName.size()));
-					Writer.SetString(UniformName);
-				}
-				break;
+			case timeline::ETrackType::TrackType_Node: {
+				Writer.SetInt(Track.second->GetParam_Int("TrackTarget"));
+			}
+			break;
+
+			case timeline::ETrackType::TrackType_Material: {
+				Writer.SetInt(Track.second->GetParam_Int("TrackTarget"));
+
+				std::string UniformName = Track.second->GetParam_String("UniformName");
+				Writer.SetInt(static_cast<int>(UniformName.size()));
+				Writer.SetString(UniformName);
+			}
+			break;
+
+			case timeline::ETrackType::TrackType_Custom: {
+				std::string ValueName = Track.second->GetParam_String("ValueName");
+				Writer.SetInt(static_cast<int>(ValueName.size()));
+				Writer.SetString(ValueName);
+			}
+			break;
+
 			default:
 				break;
 			}

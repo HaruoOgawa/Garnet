@@ -1,5 +1,6 @@
 #include "CTimelineClip.h"
 #include "../Object/C3DObject.h"
+#include "../Scene/CSceneController.h"
 
 namespace timeline
 {
@@ -88,7 +89,7 @@ namespace timeline
 		return m_TrackList;
 	}
 
-	void CTimelineClip::AssignObjectResourceToTrack(const std::vector<std::shared_ptr<object::C3DObject>>& ObjectList)
+	void CTimelineClip::AssignObjectResourceToTrack(const std::vector<std::shared_ptr<object::C3DObject>>& ObjectList, const std::shared_ptr<scene::CSceneController>& SceneController)
 	{
 		// Objectのリソースをトラックに割り当てる
 		for (const auto& Object : ObjectList)
@@ -134,6 +135,28 @@ namespace timeline
 			}
 		}
 		
+		// SceneControllerのリソースをトラックに割り当てる
+		if (SceneController)
+		{
+			for (const auto& ValueRegistry : SceneController->GetValueRegistryList())
+			{
+				for (const auto& RefTrackID : ValueRegistry.second->GetRefTrackIDList())
+				{
+					const auto& it = m_TrackList.find(RefTrackID);
+					if (it == m_TrackList.end())
+					{
+						// トラックが存在しなかったら削除する
+						ValueRegistry.second->RemoveRefTrackID(RefTrackID);
+
+						continue;
+					}
+
+					it->second->AssignTrackContent(ValueRegistry.second);
+				}
+
+				ValueRegistry.second->ShrinkToFitTrackIDList();
+			}
+		}
 	}
 
 	void CTimelineClip::RemoveTrackAndSampler(const std::string& TrackID)

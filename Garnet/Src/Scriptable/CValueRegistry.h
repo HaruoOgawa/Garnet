@@ -4,8 +4,10 @@
 #include <vector>
 #include <map>
 #include <string>
-#include "../Graphics/EUniformValueType.h"
 #include <glm/glm.hpp>
+
+#include "../Graphics/EUniformValueType.h"
+#include "../Timeline/CTimelineTrackContent.h"
 
 namespace scriptable
 {
@@ -17,7 +19,7 @@ namespace scriptable
 		std::vector<unsigned char> Buffer;
 	};
 
-	class CValueRegistry : public std::enable_shared_from_this<CValueRegistry>
+	class CValueRegistry : public std::enable_shared_from_this<CValueRegistry>, public timeline::CTimelineTrackContent
 	{
 		const std::string m_RegistryName;
 
@@ -32,6 +34,7 @@ namespace scriptable
 		const std::map<std::string, SValue>& GetValueList() const;
 
 		void SetValue(const std::string& Key, graphics::EUniformValueType ValueType, const void* Data, int ByteSize);
+		void SetValue(const std::string& Key, const void* Data);
 		SValue GetValue(const std::string& Key) const;
 	};
 }

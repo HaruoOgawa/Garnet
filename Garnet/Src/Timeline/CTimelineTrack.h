@@ -15,6 +15,7 @@ namespace timeline
 
 		TrackType_Node,
 		TrackType_Material,
+		TrackType_Custom,
 	};
 
 	class CTimelineTrack

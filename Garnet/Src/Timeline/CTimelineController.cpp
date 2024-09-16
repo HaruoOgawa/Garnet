@@ -27,7 +27,7 @@ namespace timeline
 			m_App = App;
 
 			// タイムラインにオブジェクトリストを割り当てる
-			m_Clip->AssignObjectResourceToTrack(App->GetObjectList());
+			m_Clip->AssignObjectResourceToTrack(App->GetObjectList(), App->GetSceneController());
 
 			// ファイル名が空ならシーンファイル名の拡張子をtlに変えて割り当てる
 			const std::string FileName = m_Clip->GetFileName();

@@ -3,6 +3,7 @@
 namespace scriptable
 {
 	CValueRegistry::CValueRegistry(const std::string& RegistryName):
+		timeline::CTimelineTrackContent(),
 		m_RegistryName(RegistryName)
 	{
 	}
@@ -41,6 +42,20 @@ namespace scriptable
 		Value.Buffer.shrink_to_fit();
 		Value.Buffer.resize(ByteSize);
 		std::memcpy(&Value.Buffer[0], Data, ByteSize);
+	}
+
+	void CValueRegistry::SetValue(const std::string& Key, const void* Data)
+	{
+		const auto it = m_ValueList.find(Key);
+		if (it == m_ValueList.end()) return;
+
+		// ílçXêV
+		auto& Value = m_ValueList[Key];
+
+		Value.Buffer.clear();
+		Value.Buffer.shrink_to_fit();
+		Value.Buffer.resize(Value.ByteSize);
+		std::memcpy(&Value.Buffer[0], Data, Value.ByteSize);
 	}
 
 	SValue CValueRegistry::GetValue(const std::string& Key) const

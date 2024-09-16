@@ -681,6 +681,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Src\Timeline\CCustomTrack.h" />
     <ClInclude Include="Src\Scriptable\CComponent.h" />
     <ClInclude Include="Src\Scriptable\CValueRegistry.h" />
     <ClInclude Include="Src\Image\CPNGParserer.h" />
@@ -1733,6 +1734,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClInclude Include="Src\Interface\IRenderer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\Timeline\CCustomTrack.cpp" />
     <ClCompile Include="Src\Scriptable\CComponent.cpp" />
     <ClCompile Include="Src\Scriptable\CValueRegistry.cpp" />
     <ClCompile Include="Src\Image\CPNGParserer.cpp" />
