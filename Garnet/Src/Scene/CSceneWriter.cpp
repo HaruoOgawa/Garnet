@@ -61,6 +61,24 @@ namespace scene
 	{
 		for (const auto& ValueRegistry : pSceneController->GetValueRegistryList())
 		{
+			// 使用しているトラックの種類
+			std::set<std::string> TrackValueNameList;
+			if (TimelineController)
+			{
+				const auto& Clip = TimelineController->GetClip();
+
+				if (Clip)
+				{
+					for (const auto& TrackID : ValueRegistry.second->GetRefTrackIDList())
+					{
+						auto Track = Clip->FindTrack(TrackID);
+						if (!Track) continue;
+
+						TrackValueNameList.emplace(Track->GetParam_String("ValueName"));
+					}
+				}
+			}
+
 			ordered_json ValueRegistryJSON;
 
 			ValueRegistryJSON["registryname"] = ValueRegistry.first;
@@ -73,6 +91,9 @@ namespace scene
 
 			for (const auto& Value : ValueRegistry.second->GetValueList())
 			{
+				// タイムラインで管理されていたら書き込まない
+				if (TrackValueNameList.find(Value.second.Name) != TrackValueNameList.end()) continue;
+
 				ordered_json ValueJSON;
 
 				ValueJSON["name"] = Value.second.Name;
