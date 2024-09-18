@@ -441,6 +441,24 @@ namespace scene
 
 		for (const auto& Material : MaterialList)
 		{
+			// 使用しているトラックの種類
+			std::set<std::string> TrackUniformNameList;
+			if (TimelineController)
+			{
+				const auto& Clip = TimelineController->GetClip();
+
+				if (Clip)
+				{
+					for (const auto& TrackID : Material->GetRefTrackIDList())
+					{
+						auto Track = Clip->FindTrack(TrackID);
+						if (!Track) continue;
+
+						TrackUniformNameList.emplace(Track->GetParam_String("UniformName"));
+					}
+				}
+			}
+
 			ordered_json materialJSON;
 
 			// materialframe
@@ -489,6 +507,9 @@ namespace scene
 
 						// name
 						const auto& UniformName = UniformData.UniformName;
+
+						// タイムラインで管理されているなら書き込みをスキップ
+						if (TrackUniformNameList.find(UniformName) != TrackUniformNameList.end()) continue;
 
 						// type
 						std::string type = std::string();
