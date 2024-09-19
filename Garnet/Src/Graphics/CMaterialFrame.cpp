@@ -35,6 +35,31 @@ namespace graphics
 		return m_FileName;
 	}
 
+	bool CMaterialFrame::GetDefaultValue(const std::string& BufferName, const std::string& UniformName, std::vector<float>& DstData) const
+	{
+		if (m_ShaderBufferList.empty()) return false;
+
+		for (const auto& ShaderBuffer : m_ShaderBufferList)
+		{
+			if (ShaderBuffer.BindingLayout.BindingName != BufferName) continue;
+
+			const auto& ValueList = ShaderBuffer.ValueLayoutList;
+
+			for (const auto& Value : ValueList)
+			{
+				if (Value->Name != UniformName) continue;
+
+				// 対象のUniformを見つけた
+				std::vector<float> Data = Value->Data;
+				DstData = Data;
+
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 	// カラーバッファへのアウトプット数(MRTで使用)
 	void CMaterialFrame::SetOutputColorCount(int Val)
 	{

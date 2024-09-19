@@ -573,6 +573,11 @@ namespace scene
 
 						if (type.empty()) continue;
 
+						// 初期値
+						std::vector<float> InitValue;
+						bool ExistInitValue = MaterialFrame->GetDefaultValue(UniformBuffer->GetBufferName(), UniformName, InitValue);
+						
+
 						// Value
 						const auto& BufferData = UniformBuffer->GetData();
 
@@ -582,10 +587,31 @@ namespace scene
 
 						ordered_json valueJSON;
 
-						for (auto v : Value)
+						bool ValueUpdated = false; // 値が更新されたかどうか
+
+						for (int vIndex = 0; vIndex < static_cast<int>(Value.size()); vIndex++)
 						{
+							auto v = Value[vIndex];
+
 							valueJSON.push_back(v);
+
+							if (ExistInitValue)
+							{
+								// 初期値との差が0.01よりも大きいパラメーターが1つでもあれば更新された判定にする
+								if (fabs(v - InitValue[vIndex]) >= 0.01)
+								{
+									ValueUpdated = true;
+								}
+							}
+							else
+							{
+								// 初期値が存在しないので値は更新されたことにする
+								ValueUpdated = true;
+							}
 						}
+
+						// 値が更新されていなければスキップ
+						if (!ValueUpdated) continue;
 
 						//
 						materialJSON["uniformvalues"].push_back({
