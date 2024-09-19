@@ -313,14 +313,14 @@ namespace scene
 	}
 
 	bool CSceneController::Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
-		const std::shared_ptr<graphics::CDrawInfo>& DrawInfo, const std::shared_ptr<input::CInputState>& InputState)
+		const std::shared_ptr<graphics::CDrawInfo>& DrawInfo, const std::shared_ptr<input::CInputState>& InputState, const std::shared_ptr<timeline::CTimelineController>& TimelineController)
 	{
 		if (!m_IsLoaded) return true;
 
 #ifdef USE_BINARY_WRITE
 		if (InputState->IsKeyDown(input::EKeyType::KEY_TYPE_CONTROL) && InputState->IsKeyUp(input::EKeyType::KEY_TYPE_S))
 		{
-			if (!CSceneWriter::Write(this)) return false;
+			if (!CSceneWriter::Write(this, TimelineController)) return false;
 		}
 #endif // USE_BINARY_WRITE
 

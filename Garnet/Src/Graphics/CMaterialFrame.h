@@ -48,6 +48,8 @@ namespace graphics
 		void SetFileName(const std::string& Name);
 		const std::string& GetFileName() const;
 
+		bool GetDefaultValue(const std::string& BufferName, const std::string& UniformName, std::vector<float>& DstData) const;
+
 		// カラーバッファへのアウトプット数(MRTで使用)
 		void SetOutputColorCount(int Val);
 		int GetOutputColorCount() const;

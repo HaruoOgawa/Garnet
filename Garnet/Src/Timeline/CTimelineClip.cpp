@@ -89,6 +89,14 @@ namespace timeline
 		return m_TrackList;
 	}
 
+	std::shared_ptr<CTimelineTrack> CTimelineClip::FindTrack(const std::string& Key) const
+	{
+		const auto it = m_TrackList.find(Key);
+		if (it == m_TrackList.end()) return nullptr;
+
+		return it->second;
+	}
+
 	void CTimelineClip::AssignObjectResourceToTrack(const std::vector<std::shared_ptr<object::C3DObject>>& ObjectList, const std::shared_ptr<scene::CSceneController>& SceneController)
 	{
 		// Objectのリソースをトラックに割り当てる

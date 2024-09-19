@@ -517,6 +517,10 @@ namespace resource
 
 		auto Transform = AnalyseTransform(nodeJSON);
 
+		// enable
+		bool enable = true;
+		GetBoolean("enable", enable, nodeJSON);
+
 		int meshindex = -1;
 		GetInt("meshindex", meshindex, nodeJSON);
 
@@ -551,6 +555,7 @@ namespace resource
 			}
 		}
 
+		Node->SetEnabled(enable);
 		Node->SetName(nodename);
 		Node->SetLocalTransform(Transform);
 		Node->SetChildrenNodeIndexList(children);

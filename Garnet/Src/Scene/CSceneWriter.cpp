@@ -5,15 +5,16 @@
 #include "../Animation/CAnimationClipSet.h"
 #include "../Audio/CAudioClip.h"
 #include "../LoadWorker/CFile.h"
+#include "../Timeline/CTimelineController.h"
 
 namespace scene
 {
-	bool CSceneWriter::Write(CSceneController* pSceneController)
+	bool CSceneWriter::Write(CSceneController* pSceneController, const std::shared_ptr<timeline::CTimelineController>& TimelineController)
 	{
 		ordered_json SceneJSON;
 
 		// シーンJSONに現在の状態を書き出し
-		if (!WriteScene(SceneJSON, pSceneController)) return false;
+		if (!WriteScene(SceneJSON, pSceneController, TimelineController)) return false;
 
 		// データを取得
 		const auto& JSONStr = SceneJSON.dump(4);
@@ -31,15 +32,15 @@ namespace scene
 		return true;
 	}
 
-	bool CSceneWriter::WriteScene(ordered_json& SceneJSON, CSceneController* pSceneController)
+	bool CSceneWriter::WriteScene(ordered_json& SceneJSON, CSceneController* pSceneController, const std::shared_ptr<timeline::CTimelineController>& TimelineController)
 	{
 		if (!WriteMaterialFrames(SceneJSON, pSceneController)) return false;
-		if (!WriteValueRegistries(SceneJSON, pSceneController)) return false;
+		if (!WriteValueRegistries(SceneJSON, pSceneController, TimelineController)) return false;
 		if (!WriteSceneTextureSet(SceneJSON, pSceneController)) return false;
 		if (!WriteAnimations(SceneJSON, pSceneController)) return false;
 		if (!WriteSound(SceneJSON, pSceneController)) return false;
 		if (!WriteTimeline(SceneJSON, pSceneController)) return false;
-		if (!WriteObjects(SceneJSON, pSceneController)) return false;
+		if (!WriteObjects(SceneJSON, pSceneController, TimelineController)) return false;
 
 		return true;
 	}
@@ -56,10 +57,28 @@ namespace scene
 		return true;
 	}
 
-	bool CSceneWriter::WriteValueRegistries(ordered_json& SceneJSON, CSceneController* pSceneController)
+	bool CSceneWriter::WriteValueRegistries(ordered_json& SceneJSON, CSceneController* pSceneController, const std::shared_ptr<timeline::CTimelineController>& TimelineController)
 	{
 		for (const auto& ValueRegistry : pSceneController->GetValueRegistryList())
 		{
+			// 使用しているトラックの種類
+			std::set<std::string> TrackValueNameList;
+			if (TimelineController)
+			{
+				const auto& Clip = TimelineController->GetClip();
+
+				if (Clip)
+				{
+					for (const auto& TrackID : ValueRegistry.second->GetRefTrackIDList())
+					{
+						auto Track = Clip->FindTrack(TrackID);
+						if (!Track) continue;
+
+						TrackValueNameList.emplace(Track->GetParam_String("ValueName"));
+					}
+				}
+			}
+
 			ordered_json ValueRegistryJSON;
 
 			ValueRegistryJSON["registryname"] = ValueRegistry.first;
@@ -72,6 +91,9 @@ namespace scene
 
 			for (const auto& Value : ValueRegistry.second->GetValueList())
 			{
+				// タイムラインで管理されていたら書き込まない
+				if (TrackValueNameList.find(Value.second.Name) != TrackValueNameList.end()) continue;
+
 				ordered_json ValueJSON;
 
 				ValueJSON["name"] = Value.second.Name;
@@ -216,7 +238,7 @@ namespace scene
 		return true;
 	}
 
-	bool CSceneWriter::WriteObjects(ordered_json& SceneJSON, CSceneController* pSceneController)
+	bool CSceneWriter::WriteObjects(ordered_json& SceneJSON, CSceneController* pSceneController, const std::shared_ptr<timeline::CTimelineController>& TimelineController)
 	{
 		const auto& ObjectList = pSceneController->GetObjectList();
 
@@ -286,7 +308,7 @@ namespace scene
 			// nodes
 			if (!StoredFile3DModel)
 			{
-				if (!WriteNodes(ObjectJSON, Object.get())) return false;
+				if (!WriteNodes(ObjectJSON, Object.get(), TimelineController)) return false;
 			}
 
 			// meshs
@@ -297,7 +319,7 @@ namespace scene
 
 			// materials
 			{
-				if (!WriteMaterials(ObjectJSON, Object.get(), TextureInfoList)) return false;
+				if (!WriteMaterials(ObjectJSON, Object.get(), TextureInfoList, TimelineController)) return false;
 			}
 
 			// textureset
@@ -312,12 +334,31 @@ namespace scene
 		return true;
 	}
 
-	bool CSceneWriter::WriteNodes(ordered_json& ObjectJSON, object::C3DObject* pObject)
+	bool CSceneWriter::WriteNodes(ordered_json& ObjectJSON, object::C3DObject* pObject, const std::shared_ptr<timeline::CTimelineController>& TimelineController)
 	{
 		const auto& NodeList = pObject->GetNodeList();
 
 		for (const auto& Node : NodeList)
 		{
+			// 使用しているトラックの種類
+			std::set<std::string> TrackNameList;
+			if (TimelineController)
+			{
+				const auto& Clip = TimelineController->GetClip();
+
+				if (Clip)
+				{
+					for (const auto& TrackID : Node->GetRefTrackIDList())
+					{
+						auto Track = Clip->FindTrack(TrackID);
+						if (!Track) continue;
+
+						TrackNameList.emplace(Track->GetTrackName());
+					}
+				}
+			}
+
+			//
 			ordered_json node;
 
 			node["name"] = Node->GetName();
@@ -327,12 +368,13 @@ namespace scene
 				const auto& transform = Node->GetLocalTransform();
 				const auto& rotate = glm::eulerAngles(transform->GetRot());
 
-				node["transform"] = {
-					{ "pos", {transform->GetPos().x, transform->GetPos().y, transform->GetPos().z} },
-					{ "rotate", {glm::degrees(rotate.x), glm::degrees(rotate.y), glm::degrees(rotate.z)} },
-					{ "scale", {transform->GetScale().x, transform->GetScale().y, transform->GetScale().z} }
-				};
+				if(TrackNameList.find("Translation") == TrackNameList.end()) node["transform"]["pos"] = { transform->GetPos().x, transform->GetPos().y, transform->GetPos().z };
+				if (TrackNameList.find("Rotation") == TrackNameList.end()) node["transform"]["rotate"] = { glm::degrees(rotate.x), glm::degrees(rotate.y), glm::degrees(rotate.z) };
+				if (TrackNameList.find("Scale") == TrackNameList.end()) node["transform"]["scale"] = { transform->GetScale().x, transform->GetScale().y, transform->GetScale().z };
 			}
+
+			// enable
+			if (TrackNameList.find("EnabledFlag") == TrackNameList.end()) node["enable"] = Node->IsEnabled();
 
 			node["meshindex"] = Node->GetMeshIndex();
 
@@ -412,7 +454,7 @@ namespace scene
 		return true;
 	}
 
-	bool CSceneWriter::WriteMaterials(ordered_json& ObjectJSON, object::C3DObject* pObject, const std::map<std::string, std::shared_ptr<graphics::CTexture>>& TextureInfoList)
+	bool CSceneWriter::WriteMaterials(ordered_json& ObjectJSON, object::C3DObject* pObject, const std::map<std::string, std::shared_ptr<graphics::CTexture>>& TextureInfoList, const std::shared_ptr<timeline::CTimelineController>& TimelineController)
 	{
 		const auto& MaterialList = pObject->GetMaterialList();
 		const auto& TextureSet = pObject->GetTextureSet();
@@ -420,6 +462,24 @@ namespace scene
 
 		for (const auto& Material : MaterialList)
 		{
+			// 使用しているトラックの種類
+			std::set<std::string> TrackUniformNameList;
+			if (TimelineController)
+			{
+				const auto& Clip = TimelineController->GetClip();
+
+				if (Clip)
+				{
+					for (const auto& TrackID : Material->GetRefTrackIDList())
+					{
+						auto Track = Clip->FindTrack(TrackID);
+						if (!Track) continue;
+
+						TrackUniformNameList.emplace(Track->GetParam_String("UniformName"));
+					}
+				}
+			}
+
 			ordered_json materialJSON;
 
 			// materialframe
@@ -469,6 +529,9 @@ namespace scene
 						// name
 						const auto& UniformName = UniformData.UniformName;
 
+						// タイムラインで管理されているなら書き込みをスキップ
+						if (TrackUniformNameList.find(UniformName) != TrackUniformNameList.end()) continue;
+
 						// type
 						std::string type = std::string();
 						graphics::EUniformValueType ValueType = UniformData.ValueType;
@@ -510,6 +573,11 @@ namespace scene
 
 						if (type.empty()) continue;
 
+						// 初期値
+						std::vector<float> InitValue;
+						bool ExistInitValue = MaterialFrame->GetDefaultValue(UniformBuffer->GetBufferName(), UniformName, InitValue);
+						
+
 						// Value
 						const auto& BufferData = UniformBuffer->GetData();
 
@@ -519,10 +587,31 @@ namespace scene
 
 						ordered_json valueJSON;
 
-						for (auto v : Value)
+						bool ValueUpdated = false; // 値が更新されたかどうか
+
+						for (int vIndex = 0; vIndex < static_cast<int>(Value.size()); vIndex++)
 						{
+							auto v = Value[vIndex];
+
 							valueJSON.push_back(v);
+
+							if (ExistInitValue)
+							{
+								// 初期値との差が0.01よりも大きいパラメーターが1つでもあれば更新された判定にする
+								if (fabs(v - InitValue[vIndex]) >= 0.01)
+								{
+									ValueUpdated = true;
+								}
+							}
+							else
+							{
+								// 初期値が存在しないので値は更新されたことにする
+								ValueUpdated = true;
+							}
 						}
+
+						// 値が更新されていなければスキップ
+						if (!ValueUpdated) continue;
 
 						//
 						materialJSON["uniformvalues"].push_back({

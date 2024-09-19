@@ -37,6 +37,7 @@ namespace timeline
 
 		void AddTrack(const std::shared_ptr<CTimelineTrack>& Track);
 		const std::unordered_map<std::string, std::shared_ptr<CTimelineTrack>>& GetTrackList() const;
+		std::shared_ptr<CTimelineTrack> FindTrack(const std::string& Key) const;
 
 		void AssignObjectResourceToTrack(const std::vector<std::shared_ptr<object::C3DObject>>& ObjectList, const std::shared_ptr<scene::CSceneController>& SceneController);
 		//void AssignRendererSettingsToTrack();
