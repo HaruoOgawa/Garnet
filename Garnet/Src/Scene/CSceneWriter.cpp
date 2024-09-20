@@ -92,7 +92,7 @@ namespace scene
 			for (const auto& Value : ValueRegistry.second->GetValueList())
 			{
 				// ƒ^ƒCƒ€ƒ‰ƒCƒ“‚ÅŠÇ—‚³‚ê‚Ä‚¢‚½‚ç‘‚«‚Ü‚È‚¢
-				if (TrackValueNameList.find(Value.second.Name) != TrackValueNameList.end()) continue;
+				//if (TrackValueNameList.find(Value.second.Name) != TrackValueNameList.end()) continue;
 
 				ordered_json ValueJSON;
 
