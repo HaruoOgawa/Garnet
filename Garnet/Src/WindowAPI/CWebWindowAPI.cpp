@@ -86,7 +86,7 @@ namespace window
 
 	void CWebWindowAPI::KeyAction(std::string key, bool IsDown)
 	{
-		//
+		// https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key#result
 		input::EKeyType KeyType = input::EKeyType::KEY_TYPE_NONE;
 
 		if (key == "w")
@@ -136,6 +136,10 @@ namespace window
 		else if (key == " ")
 		{
 			KeyType = input::EKeyType::KEY_TYPE_SPACE;
+		}
+		else if (key == "Enter")
+		{
+			KeyType = input::EKeyType::KEY_TYPE_ENTER;
 		}
 
 		auto InputState = m_pCAppCore->GetInputState();

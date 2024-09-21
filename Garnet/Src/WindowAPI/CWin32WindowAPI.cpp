@@ -140,6 +140,11 @@ namespace window
 			case VK_SPACE:
 				KeyType = input::EKeyType::KEY_TYPE_SPACE;
 				break;
+
+			case VK_RETURN:
+				KeyType = input::EKeyType::KEY_TYPE_ENTER;
+				break;
+
 			default:
 				break;
 			}
