@@ -18,13 +18,14 @@ namespace scriptable
 		const auto& InitValueRegistryList = SceneController->GetValueRegistryList();
 
 		const auto& it = InitValueRegistryList.find(GetRegistryName());
-		if (it == InitValueRegistryList.end()) return;
-
-		const auto& InitValueRegistry = it->second;
-
-		for (const auto& Value : InitValueRegistry->GetValueList())
+		if (it != InitValueRegistryList.end())
 		{
-			SetValue(Value.second.Name, Value.second.Type, &Value.second.Buffer[0], Value.second.ByteSize);
+			const auto& InitValueRegistry = it->second;
+
+			for (const auto& Value : InitValueRegistry->GetValueList())
+			{
+				SetValue(Value.second.Name, Value.second.Type, &Value.second.Buffer[0], Value.second.ByteSize);
+			}
 		}
 
 		// çXêV
