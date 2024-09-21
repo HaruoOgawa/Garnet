@@ -1,5 +1,4 @@
 #include "CSceneController.h"
-#include "CSceneWriter.h"
 #include <LoadWorker/CLoadWorker.h>
 #include "../Object/C3DObject.h"
 #include "../Animation/CAnimationClipSet.h"
@@ -316,13 +315,6 @@ namespace scene
 		const std::shared_ptr<graphics::CDrawInfo>& DrawInfo, const std::shared_ptr<input::CInputState>& InputState, const std::shared_ptr<timeline::CTimelineController>& TimelineController)
 	{
 		if (!m_IsLoaded) return true;
-
-#ifdef USE_BINARY_WRITE
-		if (InputState->IsKeyDown(input::EKeyType::KEY_TYPE_CONTROL) && InputState->IsKeyUp(input::EKeyType::KEY_TYPE_S))
-		{
-			if (!CSceneWriter::Write(this, TimelineController)) return false;
-		}
-#endif // USE_BINARY_WRITE
 
 		for (const auto& Object : m_ObjectList)
 		{
