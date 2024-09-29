@@ -22,7 +22,7 @@ namespace resource
 	{
 	}
 
-	bool CSceneLoader::Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, app::IApp* pApp)
+	bool CSceneLoader::Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, app::CApp* pApp)
 	{
 		if (!m_File->IsLoaded()) return true;
 
@@ -35,7 +35,7 @@ namespace resource
 		return true;
 	}
 
-	bool CSceneLoader::AnalyseScene(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, app::IApp* pApp)
+	bool CSceneLoader::AnalyseScene(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, app::CApp* pApp)
 	{
 		std::string RawData = std::string();
 		RawData.resize(m_File->GetData().size());
@@ -348,7 +348,7 @@ namespace resource
 	}
 #endif // USE_ANIMATION
 
-	bool CSceneLoader::AnalyseObjects(const json::iterator& objects, api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, app::IApp* pApp)
+	bool CSceneLoader::AnalyseObjects(const json::iterator& objects, api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, app::CApp* pApp)
 	{
 		for (json::iterator objectJSON = objects->begin(); objectJSON != objects->end(); objectJSON++)
 		{
@@ -510,7 +510,7 @@ namespace resource
 		return true;
 	}
 
-	std::shared_ptr<object::CNode> CSceneLoader::AnalyseNode(const json::iterator& nodeJSON, const std::shared_ptr<object::C3DObject>& Object, app::IApp* pApp)
+	std::shared_ptr<object::CNode> CSceneLoader::AnalyseNode(const json::iterator& nodeJSON, const std::shared_ptr<object::C3DObject>& Object, app::CApp* pApp)
 	{
 		std::string nodename = "";
 		GetString("name", nodename, nodeJSON);

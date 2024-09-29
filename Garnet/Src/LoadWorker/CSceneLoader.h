@@ -32,7 +32,7 @@ namespace resource
 	{
 		std::shared_ptr<scene::CSceneController> m_Target;
 	private:
-		bool AnalyseScene(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, app::IApp* pApp);
+		bool AnalyseScene(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, app::CApp* pApp);
 
 		bool AnalyseMaterialFrames(const json::iterator& materialframes, resource::CLoadWorker* pLoadWorker);
 		bool AnalyseValueRegistries(const json::iterator& valueregistries);
@@ -44,10 +44,10 @@ namespace resource
 #ifdef USE_ANIMATION
 		bool AnalyseSceneAnimations(const json::iterator& animations, api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker);
 #endif // USE_ANIMATION
-		bool AnalyseObjects(const json::iterator& objects, api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, app::IApp* pApp);
+		bool AnalyseObjects(const json::iterator& objects, api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, app::CApp* pApp);
 
 		std::shared_ptr<math::CTransform> AnalyseTransform(const json::iterator& Object);
-		std::shared_ptr<object::CNode> AnalyseNode(const json::iterator& nodeJSON, const std::shared_ptr<object::C3DObject>& Object, app::IApp* pApp);
+		std::shared_ptr<object::CNode> AnalyseNode(const json::iterator& nodeJSON, const std::shared_ptr<object::C3DObject>& Object, app::CApp* pApp);
 		std::shared_ptr<graphics::CMesh> AnalyseMesh(api::IGraphicsAPI* pGraphicsAPI, const json::iterator& meshJSON, std::map<int, int>& MatRefCountMap);
 		scene::SMaterialInfo AnalyseMaterialInfo(const json::iterator& materialJSON, int MaterialIndex, const std::map<int, int>& MatRefCountMap);
 		scene::SAnimationInfo AnalyseAnimationInfo(const json::iterator& animationJSON);
@@ -63,6 +63,6 @@ namespace resource
 		CSceneLoader(const std::string& FileName, const std::shared_ptr<scene::CSceneController>& Target);
 		virtual ~CSceneLoader();
 
-		virtual bool Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, app::IApp* pApp) override;
+		virtual bool Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, app::CApp* pApp) override;
 	};
 }

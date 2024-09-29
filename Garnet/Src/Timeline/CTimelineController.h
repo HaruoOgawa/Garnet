@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "CTimelineClip.h"
-#include "../Interface/IApp.h"
+#include "../AppCore/CApp.h"
 
 namespace input { class CInputState; }
 
@@ -18,7 +18,7 @@ namespace timeline
 
 		bool m_Play;
 
-		std::shared_ptr<app::IApp> m_App;
+		std::shared_ptr<app::CApp> m_App;
 
 	private:
 		bool UpdateClip(float CurrentTime, const std::shared_ptr<input::CInputState>& InputState);
@@ -27,7 +27,7 @@ namespace timeline
 		CTimelineController();
 		virtual ~CTimelineController();
 		
-		bool Initialize(const std::shared_ptr<app::IApp>& App);
+		bool Initialize(const std::shared_ptr<app::CApp>& App);
 
 		void SetPlayBackTime(float Time);
 		float GetPlayBackTime() const;

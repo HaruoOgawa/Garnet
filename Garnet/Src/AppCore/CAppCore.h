@@ -2,12 +2,12 @@
 
 #include "SAppSettings.h"
 #include "../Interface/IWindowAPI.h"
-#include "../Interface/IApp.h"
+#include "../AppCore/CApp.h"
 #include <string>
 #include <memory>
 
 namespace api { class IGraphicsAPI; }
-namespace app { class IApp; }
+namespace app { class CApp; }
 namespace input { class CInputState; }
 namespace resource { class CLoadWorker; }
 namespace gui { class IGUIEngine; }
@@ -29,7 +29,7 @@ namespace app
 		float m_SecondsTime;
 		float m_DeltaSecondsTime;
 
-		std::shared_ptr<app::IApp> m_App;
+		std::shared_ptr<app::CApp> m_App;
 
 		std::shared_ptr<resource::CLoadWorker> m_LoadWorker;
 
@@ -39,10 +39,10 @@ namespace app
 
 		std::shared_ptr<input::CInputState> m_InputState;
 	public:
-		CAppCore(const std::shared_ptr<app::IApp>& App, SAppSettings Settings);
+		CAppCore(const std::shared_ptr<app::CApp>& App, SAppSettings Settings);
 		virtual ~CAppCore();
 
-		const std::shared_ptr<app::IApp>& GetApp() const;
+		const std::shared_ptr<app::CApp>& GetApp() const;
 
 		const std::shared_ptr<gui::IGUIEngine>& GetGUIEngine() const;
 

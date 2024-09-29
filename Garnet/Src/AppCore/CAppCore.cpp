@@ -36,7 +36,7 @@
 
 namespace app
 {
-	CAppCore::CAppCore(const std::shared_ptr<app::IApp>& App, SAppSettings Settings):
+	CAppCore::CAppCore(const std::shared_ptr<app::CApp>& App, SAppSettings Settings):
 		m_AppSettings(Settings),
 		m_WindowAPI(nullptr),
 		m_GraphicsAPI(nullptr),
@@ -101,7 +101,7 @@ namespace app
 		return true;
 	}
 
-	const std::shared_ptr<app::IApp>& CAppCore::GetApp() const
+	const std::shared_ptr<app::CApp>& CAppCore::GetApp() const
 	{
 		return m_App;
 	}

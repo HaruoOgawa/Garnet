@@ -26,7 +26,7 @@ namespace resource
 		virtual ~CShaderLoader();
 
 		virtual const std::string& GetFilename() const override;
-		virtual bool Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, app::IApp* pApp) override;
+		virtual bool Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, app::CApp* pApp) override;
 
 		const std::shared_ptr<CFile>& GetFile() const;
 

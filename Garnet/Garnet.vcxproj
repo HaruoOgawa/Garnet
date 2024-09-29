@@ -1729,11 +1729,12 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClInclude Include="Src\WindowAPI\CGLFWWindowAPI.h" />
     <ClInclude Include="Src\Message\Console.h" />
     <ClInclude Include="Src\WindowAPI\CWebWindowAPI.h" />
-    <ClInclude Include="Src\Interface\IApp.h" />
+    <ClInclude Include="Src\AppCore\CApp.h" />
     <ClInclude Include="Src\Interface\IGraphicsAPI.h" />
     <ClInclude Include="Src\Interface\IRenderer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\AppCore\CApp.cpp" />
     <ClCompile Include="Src\Timeline\CCustomTrack.cpp" />
     <ClCompile Include="Src\Scriptable\CComponent.cpp" />
     <ClCompile Include="Src\Scriptable\CValueRegistry.cpp" />
