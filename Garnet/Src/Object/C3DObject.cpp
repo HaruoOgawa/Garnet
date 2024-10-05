@@ -430,6 +430,11 @@ namespace object
 		{
 			if (!Node->IsEnabled() || !Node->IsDrawable()) continue;
 
+			for (const auto& Component : Node->GetComponentList())
+			{
+				if (!Component->Draw(pGraphicsAPI, Camera, Projection, DrawInfo)) return false;
+			}
+
 			int MeshIndex = Node->GetMeshIndex();
 			if (MeshIndex < 0 || MeshIndex >= m_MeshList.size()) continue;
 

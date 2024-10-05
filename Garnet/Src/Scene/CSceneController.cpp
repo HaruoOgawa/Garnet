@@ -367,14 +367,6 @@ namespace scene
 		for (const auto& Object : m_ObjectList)
 		{
 			if (!Object->Draw(pGraphicsAPI, IsDepthPass, false, Camera, Projection, DrawInfo)) return false;
-
-			for (const auto& Node : Object->GetNodeList())
-			{
-				for (const auto& Component : Node->GetComponentList())
-				{
-					if (!Component->Draw(pGraphicsAPI, Camera, Projection, DrawInfo)) return false;
-				}
-			}
 		}
 
 		return true;
