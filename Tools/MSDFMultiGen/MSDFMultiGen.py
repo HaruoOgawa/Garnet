@@ -76,7 +76,7 @@ def Generate():
     sdf_chars_with_order = []
     index = 0
     for char in sdf_chars:
-        sdf_chars_with_order.append([index, char])
+        sdf_chars_with_order.append((char, index))
         index += 1
 
     # 複合テクスチャに関する情報をJSONで書き出しておく
