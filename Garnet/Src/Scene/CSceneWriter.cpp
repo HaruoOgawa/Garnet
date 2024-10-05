@@ -394,7 +394,7 @@ namespace scene
 			{
 				ordered_json componentJSON;
 				componentJSON["type"] = Component->GetComponentName();
-				componentJSON["valueregistry"] = Component->GetRegistryName();
+				if(!Component->GetRegistryName().empty()) componentJSON["valueregistry"] = Component->GetRegistryName();
 
 				node["components"].push_back(componentJSON);
 			}

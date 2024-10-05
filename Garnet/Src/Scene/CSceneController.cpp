@@ -275,10 +275,16 @@ namespace scene
 					// OnLoaded‚ðŽÀs
 					Component->OnLoaded(shared_from_this());
 
-					const auto& ValueRegistry = m_ValueRegistryList.find(Component->GetRegistryName());
-					if (ValueRegistry == m_ValueRegistryList.end()) continue;
+					// ValueRegistry‚Ì“o˜^
+					{
+						const auto& RegistryName = Component->GetRegistryName();
+						if (RegistryName.empty()) continue;
 
-					Component->SetValueRegistry(ValueRegistry->second);
+						const auto& ValueRegistry = m_ValueRegistryList.find(RegistryName);
+						if (ValueRegistry == m_ValueRegistryList.end()) continue;
+
+						Component->SetValueRegistry(ValueRegistry->second);
+					}
 				}
 			}
 
