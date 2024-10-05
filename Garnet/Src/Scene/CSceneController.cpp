@@ -272,6 +272,9 @@ namespace scene
 			{
 				for (const auto& Component : Node->GetComponentList())
 				{
+					// OnLoaded‚ðŽÀs
+					Component->OnLoaded(shared_from_this());
+
 					const auto& ValueRegistry = m_ValueRegistryList.find(Component->GetRegistryName());
 					if (ValueRegistry == m_ValueRegistryList.end()) continue;
 

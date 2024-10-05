@@ -77,7 +77,7 @@ namespace scene
 		std::vector<std::string> PlayBlendShapes;
 	};
 
-	class CSceneController
+	class CSceneController : public std::enable_shared_from_this<CSceneController>
 	{
 		bool m_IsLoaded;
 
