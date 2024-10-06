@@ -24,7 +24,7 @@ namespace object
 {
 	class CNode;
 
-	class C3DObject
+	class C3DObject : public std::enable_shared_from_this<C3DObject>
 	{
 		bool m_IsCreated;
 

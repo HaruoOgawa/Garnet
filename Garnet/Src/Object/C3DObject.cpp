@@ -432,7 +432,7 @@ namespace object
 
 			for (const auto& Component : Node->GetComponentList())
 			{
-				if (!Component->Draw(pGraphicsAPI, Camera, Projection, DrawInfo)) return false;
+				if (!Component->Draw(pGraphicsAPI, Camera, Projection, DrawInfo, shared_from_this(), Node)) return false;
 			}
 
 			int MeshIndex = Node->GetMeshIndex();

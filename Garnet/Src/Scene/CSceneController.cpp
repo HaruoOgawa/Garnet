@@ -273,7 +273,11 @@ namespace scene
 				for (const auto& Component : Node->GetComponentList())
 				{
 					// OnLoaded‚ðŽÀs
-					Component->OnLoaded(shared_from_this());
+					if (!Component->OnLoaded(pGraphicsAPI, shared_from_this(), Object, Node))
+					{
+						Console::Log("[Error] Faield to load Component.\n");
+						return false;
+					}
 
 					// ValueRegistry‚Ì“o˜^
 					{
