@@ -18,7 +18,6 @@ namespace object
 		std::wstring					  m_U16Name;
 
 		bool m_Enabled;
-		bool m_Drawable;
 
 		int								  m_MeshIndex;
 
@@ -59,9 +58,6 @@ namespace object
 
 		void SetEnabled(bool Flag);
 		bool IsEnabled() const;
-		
-		void SetDrawable(bool Flag);
-		bool IsDrawable() const;
 
 		void SetMeshIndex(int MeshIndex);
 		int GetMeshIndex() const;

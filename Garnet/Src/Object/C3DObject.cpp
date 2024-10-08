@@ -426,99 +426,142 @@ namespace object
 		}
 
 		// 描画
-		for (const auto& Node : m_NodeList)
+		if (!m_RootNodeIndexList.empty())
 		{
-			if (!Node->IsEnabled() || !Node->IsDrawable()) continue;
-
-			for (const auto& Component : Node->GetComponentList())
+			// ルートノードから順に子要素を探査して描画
+			for (const int RootNodeIndex : m_RootNodeIndexList)
 			{
-				if (!Component->Draw(pGraphicsAPI, Camera, Projection, DrawInfo, shared_from_this(), Node)) return false;
+				if (RootNodeIndex < 0 || RootNodeIndex >= m_NodeList.size()) continue;
+
+				auto& RootNode = m_NodeList[RootNodeIndex];
+
+				if (!DrawFromNode(RootNode, pGraphicsAPI, IsDepthPass, DrawOutline, Camera, Projection, DrawInfo)) return false;
 			}
-
-			int MeshIndex = Node->GetMeshIndex();
-			if (MeshIndex < 0 || MeshIndex >= m_MeshList.size()) continue;
-
-			const auto& WorldMatrix = m_ObjectTransform->GetModelMatrix() * Node->GetWorldMatrix();
-			const auto& InvWorldMatrix = glm::inverse(WorldMatrix);
-			const auto& Mesh = m_MeshList[MeshIndex];
-
-			int SkeletonIndex = Node->GetSkeletonIndex();
-
-			for (int PrimitiveIndex = 0; PrimitiveIndex < Mesh->GetPrimitiveList().size(); PrimitiveIndex++)
+		}
+		else
+		{
+			// ルートノードが指定されていないので全ノードを順番に描画
+			for (const auto& Node : m_NodeList)
 			{
-				const auto& Primitive = Mesh->GetPrimitiveList()[PrimitiveIndex];
-
-				int MaterialIndex = Primitive->GetMaterialIndex();
-				if (MaterialIndex < 0 || MaterialIndex >= m_MaterialList.size()) continue;
-
-				std::shared_ptr<graphics::CMaterial> Material = nullptr;
-
-				if (IsDepthPass)
-				{
-					Material = m_MaterialList[MaterialIndex]->GetDepthMaterial();
-				}
-				else
-				{
-					Material = m_MaterialList[MaterialIndex];
-				}
-
-				if (!Material) continue;
-				
-				// マテリアルの参照カウントをダイナミックオフセットとして使用する
-				int DynamicOffsetNum = Material->GetDynamicOffset();
-
-				// ダイナミックオフセットがマテリアル参照数よりも大きい時は終了する
-				if (DynamicOffsetNum > Material->GetRefCount()) continue;
-
-				// アウトライン
-				if (DrawOutline)
-				{
-					if (DrawOutline != Material->IsDrawOutline()) continue;
-
-					Material->SetCullMode(graphics::ECullMode::CULL_FRONT);
-				}
-
-				// 共通のユニフォームバッファの更新
-				glm::mat4 lightVPMat = DrawInfo->GetLightProjection()->GetPrejectionMatrix() * DrawInfo->GetLightCamera()->GetViewMatrix();
-
-				Material->SetUniformValue("drawPathIndex", &DynamicOffsetNum, sizeof(int), DynamicOffsetNum);
-				Material->SetUniformValue("model", &WorldMatrix[0][0], sizeof(glm::mat4), DynamicOffsetNum);
-				Material->SetUniformValue("invModel", &InvWorldMatrix[0][0], sizeof(glm::mat4), DynamicOffsetNum);
-				Material->SetUniformValue("view", &Camera->GetViewMatrix()[0][0], sizeof(glm::mat4), DynamicOffsetNum);
-				Material->SetUniformValue("proj", &Projection->GetPrejectionMatrix()[0][0], sizeof(glm::mat4), DynamicOffsetNum);
-				Material->SetUniformValue("lightVPMat", &lightVPMat[0][0], sizeof(glm::mat4), DynamicOffsetNum);
-				glm::vec3 lightDir = DrawInfo->GetLightCamera()->GetViewDir();
-				Material->SetUniformValue("lightDir", &glm::vec4(lightDir.x, lightDir.y, lightDir.z, 0.0f)[0], sizeof(glm::vec4), DynamicOffsetNum);
-				glm::vec3 lightPos = DrawInfo->GetLightCamera()->GetPos();
-				Material->SetUniformValue("lightPos", &glm::vec4(lightPos.x, lightPos.y, lightPos.z, 0.0f)[0], sizeof(glm::vec4), DynamicOffsetNum);
-				Material->SetUniformValue("lightColor", &DrawInfo->GetLightColor()[0], sizeof(glm::vec4), DynamicOffsetNum);
-				glm::vec3 CameraPos = Camera->GetPos();
-				Material->SetUniformValue("cameraPos", &glm::vec4(CameraPos.x, CameraPos.y, CameraPos.z, 1.0f)[0], sizeof(glm::vec4), DynamicOffsetNum);
-				Material->SetUniformValue("time", &glm::vec1(DrawInfo->GetSecondsTime())[0], sizeof(float), DynamicOffsetNum);
-				Material->SetUniformValue("deltaTime", &glm::vec1(DrawInfo->GetDeltaSecondsTime())[0], sizeof(float), DynamicOffsetNum);
-				Material->SetUniformValue("resolution", &Projection->GetScreenResolution()[0], sizeof(glm::vec2), DynamicOffsetNum);
-#ifdef USE_ANIMATION
-				Material->SetUniformValue("useSkinMeshAnimation", &glm::ivec1((m_AnimationController->IsEnabledSkeleton() ? 1 : 0))[0], sizeof(glm::ivec1), DynamicOffsetNum);
-
-				// SkinMatrixをShaderに渡す
-				if (m_CurrentSkinMatrixList.size() > 0)
-				{
-					Material->SetUniformValue("r_SkinMatrixBuffer", &m_CurrentSkinMatrixList[0], sizeof(glm::mat4) * static_cast<int>(m_CurrentSkinMatrixList.size()), DynamicOffsetNum);
-				}
-#endif
-				// 描画実行
-				if (!Primitive->Draw(Material, DynamicOffsetNum, IsDepthPass)) return false;
-
-				// マテリアルの参照カウントをインクリメントする
-				Material->IncreaseDynamicOffset();
-
-				// 描画準備のために変更した設定を元に戻す
-				Material->ResetToDefaultCullMode();
+				if (!Draw(Node, pGraphicsAPI, IsDepthPass, DrawOutline, Camera, Projection, DrawInfo)) return false;
 			}
 		}
 
 		//if (!DrawDebugBone(IsDepthPass, DrawOutline, Camera, Projection, DrawInfo, DebugSphere)) return false;
 		//if (!DrawDebugPhysics(IsDepthPass, DrawOutline, Camera, Projection, DrawInfo, DebugSphere)) return false;
+
+		return true;
+	}
+
+	bool C3DObject::DrawFromNode(const std::shared_ptr<CNode>& Node, api::IGraphicsAPI* pGraphicsAPI, bool IsDepthPass, bool DrawOutline, const std::shared_ptr<camera::CCamera>& Camera,
+		const std::shared_ptr<projection::CProjection>& Projection, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo)
+	{
+		// 非表示だったら子要素も描画しない
+		if (!Node->IsEnabled()) return true;
+
+		// 自分自身の描画
+		if (!Draw(Node, pGraphicsAPI, IsDepthPass, DrawOutline, Camera, Projection, DrawInfo)) return false;
+
+		// 子要素の描画
+		for (const int ChildIndex : Node->GetChildrenNodeIndexList())
+		{
+			if (ChildIndex < 0 || ChildIndex >= m_NodeList.size()) continue;
+
+			auto& ChildNode = m_NodeList[ChildIndex];
+			if (!DrawFromNode(ChildNode, pGraphicsAPI, IsDepthPass, DrawOutline, Camera, Projection, DrawInfo)) return false;
+		}
+
+		return true;
+	}
+
+	bool C3DObject::Draw(const std::shared_ptr<CNode>& Node, api::IGraphicsAPI* pGraphicsAPI, bool IsDepthPass, bool DrawOutline, const std::shared_ptr<camera::CCamera>& Camera,
+		const std::shared_ptr<projection::CProjection>& Projection, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo)
+	{
+		for (const auto& Component : Node->GetComponentList())
+		{
+			if (!Component->Draw(pGraphicsAPI, Camera, Projection, DrawInfo, shared_from_this(), Node)) return false;
+		}
+
+		int MeshIndex = Node->GetMeshIndex();
+		if (MeshIndex < 0 || MeshIndex >= m_MeshList.size()) return true;
+
+		const auto& WorldMatrix = m_ObjectTransform->GetModelMatrix() * Node->GetWorldMatrix();
+		const auto& InvWorldMatrix = glm::inverse(WorldMatrix);
+		const auto& Mesh = m_MeshList[MeshIndex];
+
+		int SkeletonIndex = Node->GetSkeletonIndex();
+
+		for (int PrimitiveIndex = 0; PrimitiveIndex < Mesh->GetPrimitiveList().size(); PrimitiveIndex++)
+		{
+			const auto& Primitive = Mesh->GetPrimitiveList()[PrimitiveIndex];
+
+			int MaterialIndex = Primitive->GetMaterialIndex();
+			if (MaterialIndex < 0 || MaterialIndex >= m_MaterialList.size()) return true;
+
+			std::shared_ptr<graphics::CMaterial> Material = nullptr;
+
+			if (IsDepthPass)
+			{
+				Material = m_MaterialList[MaterialIndex]->GetDepthMaterial();
+			}
+			else
+			{
+				Material = m_MaterialList[MaterialIndex];
+			}
+
+			if (!Material) return true;
+
+			// マテリアルの参照カウントをダイナミックオフセットとして使用する
+			int DynamicOffsetNum = Material->GetDynamicOffset();
+
+			// ダイナミックオフセットがマテリアル参照数よりも大きい時は終了する
+			if (DynamicOffsetNum > Material->GetRefCount()) return true;
+
+			// アウトライン
+			if (DrawOutline)
+			{
+				if (DrawOutline != Material->IsDrawOutline()) return true;
+
+				Material->SetCullMode(graphics::ECullMode::CULL_FRONT);
+			}
+
+			// 共通のユニフォームバッファの更新
+			glm::mat4 lightVPMat = DrawInfo->GetLightProjection()->GetPrejectionMatrix() * DrawInfo->GetLightCamera()->GetViewMatrix();
+
+			Material->SetUniformValue("drawPathIndex", &DynamicOffsetNum, sizeof(int), DynamicOffsetNum);
+			Material->SetUniformValue("model", &WorldMatrix[0][0], sizeof(glm::mat4), DynamicOffsetNum);
+			Material->SetUniformValue("invModel", &InvWorldMatrix[0][0], sizeof(glm::mat4), DynamicOffsetNum);
+			Material->SetUniformValue("view", &Camera->GetViewMatrix()[0][0], sizeof(glm::mat4), DynamicOffsetNum);
+			Material->SetUniformValue("proj", &Projection->GetPrejectionMatrix()[0][0], sizeof(glm::mat4), DynamicOffsetNum);
+			Material->SetUniformValue("lightVPMat", &lightVPMat[0][0], sizeof(glm::mat4), DynamicOffsetNum);
+			glm::vec3 lightDir = DrawInfo->GetLightCamera()->GetViewDir();
+			Material->SetUniformValue("lightDir", &glm::vec4(lightDir.x, lightDir.y, lightDir.z, 0.0f)[0], sizeof(glm::vec4), DynamicOffsetNum);
+			glm::vec3 lightPos = DrawInfo->GetLightCamera()->GetPos();
+			Material->SetUniformValue("lightPos", &glm::vec4(lightPos.x, lightPos.y, lightPos.z, 0.0f)[0], sizeof(glm::vec4), DynamicOffsetNum);
+			Material->SetUniformValue("lightColor", &DrawInfo->GetLightColor()[0], sizeof(glm::vec4), DynamicOffsetNum);
+			glm::vec3 CameraPos = Camera->GetPos();
+			Material->SetUniformValue("cameraPos", &glm::vec4(CameraPos.x, CameraPos.y, CameraPos.z, 1.0f)[0], sizeof(glm::vec4), DynamicOffsetNum);
+			Material->SetUniformValue("time", &glm::vec1(DrawInfo->GetSecondsTime())[0], sizeof(float), DynamicOffsetNum);
+			Material->SetUniformValue("deltaTime", &glm::vec1(DrawInfo->GetDeltaSecondsTime())[0], sizeof(float), DynamicOffsetNum);
+			Material->SetUniformValue("resolution", &Projection->GetScreenResolution()[0], sizeof(glm::vec2), DynamicOffsetNum);
+#ifdef USE_ANIMATION
+			Material->SetUniformValue("useSkinMeshAnimation", &glm::ivec1((m_AnimationController->IsEnabledSkeleton() ? 1 : 0))[0], sizeof(glm::ivec1), DynamicOffsetNum);
+
+			// SkinMatrixをShaderに渡す
+			if (m_CurrentSkinMatrixList.size() > 0)
+			{
+				Material->SetUniformValue("r_SkinMatrixBuffer", &m_CurrentSkinMatrixList[0], sizeof(glm::mat4) * static_cast<int>(m_CurrentSkinMatrixList.size()), DynamicOffsetNum);
+			}
+#endif
+			// 描画実行
+			if (!Primitive->Draw(Material, DynamicOffsetNum, IsDepthPass)) return false;
+
+			// マテリアルの参照カウントをインクリメントする
+			Material->IncreaseDynamicOffset();
+
+			// 描画準備のために変更した設定を元に戻す
+			Material->ResetToDefaultCullMode();
+		}
 
 		return true;
 	}

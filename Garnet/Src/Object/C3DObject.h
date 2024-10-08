@@ -65,6 +65,12 @@ namespace object
 
 		void ApplyParentNode(std::shared_ptr<CNode>& Node, const std::shared_ptr<CNode>& ParentNode);
 
+		bool DrawFromNode(const std::shared_ptr<CNode>& Node, api::IGraphicsAPI* pGraphicsAPI, bool IsDepthPass, bool DrawOutline, const std::shared_ptr<camera::CCamera>& Camera,
+			const std::shared_ptr<projection::CProjection>& Projection, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo);
+
+		bool Draw(const std::shared_ptr<CNode>& Node, api::IGraphicsAPI* pGraphicsAPI, bool IsDepthPass, bool DrawOutline, const std::shared_ptr<camera::CCamera>& Camera,
+			const std::shared_ptr<projection::CProjection>& Projection, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo);
+
 		// ï®óù
 		void CreatePhysics(physics::IPhysicsEngine* pPhysicsEngine);
 		void ApplyPhysicsConstraint(physics::IPhysicsEngine* pPhysicsEngine);

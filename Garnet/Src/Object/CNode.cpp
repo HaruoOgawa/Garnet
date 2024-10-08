@@ -9,7 +9,6 @@ namespace object
 		m_Name("Node"),
 		m_U16Name(L"Node"),
 		m_Enabled(true),
-		m_Drawable(true),
 		m_MeshIndex(MeshIndex),
 		m_SkeletonIndex(-1),
 		m_LocalTransform(std::make_shared<math::CTransform>()),
@@ -53,16 +52,6 @@ namespace object
 	bool CNode::IsEnabled() const
 	{
 		return m_Enabled;
-	}
-
-	void CNode::SetDrawable(bool Flag)
-	{
-		m_Drawable = Flag;
-	}
-
-	bool CNode::IsDrawable() const
-	{
-		return m_Drawable;
 	}
 
 	int CNode::GetSelfNodeIndex() const
