@@ -664,6 +664,11 @@ namespace object
 		m_NodeList.push_back(Node);
 	}
 
+	void C3DObject::ReserveNodeCount(size_t Count)
+	{
+		m_NodeList.reserve(Count);
+	}
+
 	const std::vector<std::shared_ptr<CNode>>& C3DObject::GetNodeList() const
 	{
 		return m_NodeList;

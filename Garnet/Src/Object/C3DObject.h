@@ -133,10 +133,11 @@ namespace object
 		void ApplyParentNode();
 
 		void AddNode(const std::shared_ptr<CNode>& Node);
+		void ReserveNodeCount(size_t Count);
 		const std::vector<std::shared_ptr<CNode>>& GetNodeList() const;
 		std::shared_ptr<CNode> FindNodeByName(const std::string& Name);
 		std::shared_ptr<CNode> FindNodeByIndex(int Index);
-		
+
 		void AddMesh(const std::shared_ptr<graphics::CMesh>& Mesh);
 		const std::vector<std::shared_ptr<graphics::CMesh>>& GetMeshList() const;
 

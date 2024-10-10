@@ -268,12 +268,12 @@ namespace scene
 
 
 			// コンポーネントを追加 Component
-			for (const auto& Node : Object->GetNodeList())
+			for (size_t NodeIndex = 0; NodeIndex < Object->GetNodeList().size(); NodeIndex++)
 			{
-				for (const auto& Component : Node->GetComponentList())
+				for (const auto& Component : Object->GetNodeList()[NodeIndex]->GetComponentList())
 				{
 					// OnLoadedを実行
-					if (!Component->OnLoaded(pGraphicsAPI, shared_from_this(), Object, Node))
+					if (!Component->OnLoaded(pGraphicsAPI, shared_from_this(), Object, Object->GetNodeList()[NodeIndex]))
 					{
 						Console::Log("[Error] Faield to load Component.\n");
 						return false;
