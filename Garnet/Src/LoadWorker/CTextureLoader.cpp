@@ -56,31 +56,35 @@ namespace resource
 
 	bool CTextureLoader::Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, app::CApp* pApp)
 	{
-		for (const auto& File : m_FileList)
+		for (auto& Resource : m_FileList)
 		{
-			switch (File->GetStatus())
+			switch (Resource->GetStatus())
 			{
 			case resource::ELoadStatus::None:
-				if (!File->Load()) return false;
+				// ファイルのバイナリが実行ファイルに埋め込まれていないかチェックする
+				if (pLoadWorker->FindEmbeddedBinary(pGraphicsAPI, pPhysicsEngine, Resource, pApp)) return true;
+
+				// 通常通りロードする
+				if (!Resource->Load()) return false;
 				return true;
 
 			case resource::ELoadStatus::Loading:
-				if (!File->Update(pGraphicsAPI, pPhysicsEngine, pLoadWorker, pApp)) return false;
+				if (!Resource->Update(pGraphicsAPI, pPhysicsEngine, pLoadWorker, pApp)) return false;
 				return true;
 
 			case resource::ELoadStatus::Loaded:
 			{
 				if (m_UseCube)
 				{
-					m_CubeDataList.push_back(File->GetData());
+					m_CubeDataList.push_back(Resource->GetData());
 				}
 				else
 				{
-					m_TextureData = File->GetData();
+					m_TextureData = Resource->GetData();
 				}
 
 				// リソースマネージャーに登録
-				pLoadWorker->GetResourceManager()->AddOnMemoryResource(File, shared_from_this());
+				pLoadWorker->GetResourceManager()->AddOnMemoryResource(Resource, shared_from_this());
 
 				m_FileList.erase(m_FileList.begin());
 			}

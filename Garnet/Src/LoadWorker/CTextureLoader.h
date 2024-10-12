@@ -5,6 +5,7 @@
 #include <string>
 #include <memory>
 
+#include "../Interface/IResource.h"
 #include "CResource.h"
 
 #include "CFile.h"
@@ -14,7 +15,7 @@ namespace resource
 {
 	class CTextureLoader : public resource::CResource
 	{
-		std::vector<std::shared_ptr<CFile>> m_FileList;
+		std::vector<std::shared_ptr<IResource>> m_FileList;
 
 		std::vector<unsigned char> m_TextureData;
 
