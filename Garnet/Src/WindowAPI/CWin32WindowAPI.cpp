@@ -362,7 +362,11 @@ namespace window
 		window_class.hCursor = LoadCursor(NULL, IDC_ARROW);
 		window_class.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
 		window_class.lpszMenuName = NULL;
+#ifdef _DEBUG
+		window_class.lpszClassName = L"GarnetWindowClass"; // WindosClassの名前. たぶんVulkanとかでいうラベルみたいなやつだと思う
+#else
 		window_class.lpszClassName = (LPCSTR)L"GarnetWindowClass"; // WindosClassの名前. たぶんVulkanとかでいうラベルみたいなやつだと思う
+#endif // _DEBUG
 		window_class.hIconSm = LoadIcon(NULL, IDI_APPLICATION);
 
 		if (!RegisterClassEx(&window_class)) // WindowClassを登録する
@@ -414,7 +418,11 @@ namespace window
 			// https://learn.microsoft.com/ja-jp/windows/win32/winmsg/extended-window-styles
 			WS_EX_APPWINDOW, // WindowStyleの拡張
 			window_class.lpszClassName, // WindowClassの名前. 先ほど登録しておいたもの
+#ifdef _DEBUG
+			Title.c_str(), // WindowName
+#else
 			(LPCSTR)Title.c_str(), // WindowName
+#endif // _DEBUG
 			// WindowStyle : https://learn.microsoft.com/en-us/windows/win32/winmsg/window-styles
 			dwStyle, // WindosStyle. たぶんWindowに出てくるボタンとかタブの設定
 			nWidth, // 位置 X (適当な値)

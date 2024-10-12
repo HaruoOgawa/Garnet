@@ -37,6 +37,8 @@ def CreateSourceFile(resouces, fileList, prefix, cppFileName, dstDir):
     binaryDataList = []
     
     for localPath in fileList:
+        localPath = localPath.replace("\\", "/")
+
         # print("localPath: %s" % (localPath))
         with open(localPath, 'rb', ) as f:
             content = f.read()
