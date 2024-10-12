@@ -137,6 +137,10 @@ namespace resource
 			switch (Resource->GetStatus())
 			{
 			case resource::ELoadStatus::None:
+				// ファイルのバイナリが実行ファイルに埋め込まれていないかチェックする
+				if (pLoadWorker->FindEmbeddedBinary(pGraphicsAPI, pPhysicsEngine, Resource, pApp)) return true;
+
+				// 通常通りロードする
 				if (!Resource->Load()) return false;
 				return true;
 
