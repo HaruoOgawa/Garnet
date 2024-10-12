@@ -3,6 +3,7 @@
 #include "../Interface/IGraphicsAPI.h"
 #include <memory>
 #include <vector>
+#include <string>
 
 namespace physics { class IPhysicsEngine; }
 namespace camera { class CCamera; }
@@ -31,6 +32,8 @@ namespace app
 		virtual bool Draw(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<input::CInputState>& InputState, const std::shared_ptr<gui::IGUIEngine>& GUIEngine);
 
 		virtual const std::shared_ptr<graphics::CDrawInfo>& GetDrawInfo() const;
+
+		virtual std::vector<unsigned char> GetEmbeddedBinary(const std::string& Key);
 
 		// コンポーネント作成
 		virtual std::shared_ptr<scriptable::CComponent> CreateComponent(const std::string& ComponentType, const std::string& ValueRegistry);

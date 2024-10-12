@@ -48,6 +48,11 @@ namespace app
 		return nullptr;
 	}
 
+	std::vector<unsigned char> CApp::GetEmbeddedBinary(const std::string& Key)
+	{
+		return {};
+	}
+
 	// コンポーネント作成
 	std::shared_ptr<scriptable::CComponent> CApp::CreateComponent(const std::string& ComponentType, const std::string& ValueRegistry)
 	{

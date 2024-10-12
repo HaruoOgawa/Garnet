@@ -101,4 +101,20 @@ namespace resource
 	{
 		return m_AssertedErrorMessage;
 	}
+
+	void CResource::SetData(const std::vector<unsigned char>& Data)
+	{
+		m_File->SetData(Data);
+	}
+
+	void CResource::SetDataWithLoaded(const std::vector<unsigned char>& Data)
+	{
+		SetData(Data);
+		m_File->SetLoadStatus(resource::ELoadStatus::Loaded);
+	}
+
+	const std::vector<unsigned char>& CResource::GetData() const
+	{
+		return m_File->GetData();
+	}
 }

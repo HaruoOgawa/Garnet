@@ -245,6 +245,12 @@ namespace resource
 		m_Data = Data;
 	}
 
+	void CFile::SetDataWithLoaded(const std::vector<unsigned char>& Data)
+	{
+		SetData(Data);
+		SetLoadStatus(resource::ELoadStatus::Loaded);
+	}
+
 	const std::vector<unsigned char>& CFile::GetData() const
 	{
 		return m_Data;

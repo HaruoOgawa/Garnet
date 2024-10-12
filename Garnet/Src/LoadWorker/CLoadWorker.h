@@ -49,6 +49,8 @@ namespace resource
 		bool LoadResourceList(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, app::CAppCore* pAppCore);
 
 		std::shared_ptr<resource::IResource> GetLoadingResource(const std::string& Filename) const;
+
+		bool FindEmbeddedBinary(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, std::shared_ptr<resource::IResource>& Resource, app::CAppCore* pAppCore);
 	public:
 		CLoadWorker(api::IGraphicsAPI* pGraphicsAPI);
 		virtual ~CLoadWorker();

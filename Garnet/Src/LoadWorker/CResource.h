@@ -46,5 +46,9 @@ namespace resource
 		virtual void AddReference(const std::shared_ptr<IResource>& Resource) override;
 
 		virtual const std::string& GetAssertedErrorMessage() override;
+
+		virtual void SetData(const std::vector<unsigned char>& Data) override;
+		virtual void SetDataWithLoaded(const std::vector<unsigned char>& Data) override;
+		virtual const std::vector<unsigned char>& GetData() const override;
 	};
 }

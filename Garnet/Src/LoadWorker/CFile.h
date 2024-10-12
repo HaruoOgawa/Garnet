@@ -62,8 +62,9 @@ namespace resource
 
 		virtual const std::string& GetAssertedErrorMessage() override;
 
-		void SetData(const std::vector<unsigned char>& Data);
-		const std::vector<unsigned char>& GetData() const;
+		virtual void SetData(const std::vector<unsigned char>& Data) override;
+		virtual void SetDataWithLoaded(const std::vector<unsigned char>& Data) override;
+		virtual const std::vector<unsigned char>& GetData() const override;
 
 		bool Write();
 
