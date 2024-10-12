@@ -54,7 +54,8 @@ def CreateSourceFile(resouces, fileList, prefix, cppFileName, dstDir):
     #
     dstBinaryLine = ''
     for localPath,binaryData in binaryDataList:
-        dstBinaryLine += '''        else if (Key == \"%s\")
+        dstBinaryLine += '''
+        else if (Key == \"%s\")
         {
             DstBuffer = { %s };
         }
