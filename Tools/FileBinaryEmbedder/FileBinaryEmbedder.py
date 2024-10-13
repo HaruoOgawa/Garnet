@@ -38,9 +38,15 @@ def CreateSourceFile(resouces, fileList, prefix, cppFileName, dstDir):
     
     for localPath in fileList:
         localPath = localPath.replace("\\", "/")
+        
+        srcPath = localPath
+        paramList = srcPath.split(".")
+        if len(paramList) == 2:
+            srcPath = paramList[0] + prefix + "." + paramList[1]
 
-        # print("localPath: %s" % (localPath))
-        with open(localPath, 'rb', ) as f:
+        # print("srcPath: %s" % (srcPath))
+
+        with open(srcPath, 'rb', ) as f:
             content = f.read()
 
             data = ', '.join(f'0x{byte:02x}' for byte in content)
@@ -97,14 +103,18 @@ def Generate():
     parser.add_argument("-i", "--input", help="file input list", nargs='+', default=[], required=True)
     parser.add_argument("-o", "--output", help="output path", type=str, required=True)
     parser.add_argument("-c", "--cppname", help="cppname", type=str, required=True)
-    parser.add_argument("-p", "--prefix", help="prefix", type=str, required=False)
+    parser.add_argument("-p", "--prefix", help="prefix", type=str, required=False, default='')
 
     args = parser.parse_args()
+
+    prefix = ''
+    if(args.prefix != None):
+        prefix = args.prefix
     
     #
     CreateHeaderFile(args.cppname, args.output)
 
     #
-    CreateSourceFile(args.resouces, args.input, args.prefix, args.cppname, args.output)
+    CreateSourceFile(args.resouces, args.input, prefix, args.cppname, args.output)
 
 Generate()
