@@ -52,7 +52,7 @@ namespace resource
 
 		virtual bool Load() override;
 		virtual bool LoadImmediate() override;
-		virtual bool Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, app::IApp* pApp) override;
+		virtual bool Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, app::CApp* pApp) override;
 
 		virtual void Reset() override;
 
@@ -62,8 +62,9 @@ namespace resource
 
 		virtual const std::string& GetAssertedErrorMessage() override;
 
-		void SetData(const std::vector<unsigned char>& Data);
-		const std::vector<unsigned char>& GetData() const;
+		virtual void SetData(const std::vector<unsigned char>& Data) override;
+		virtual void SetDataWithLoaded(const std::vector<unsigned char>& Data) override;
+		virtual const std::vector<unsigned char>& GetData() const override;
 
 		bool Write();
 

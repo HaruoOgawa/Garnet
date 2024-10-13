@@ -131,7 +131,7 @@ extern "C"
 
 	namespace app
 	{
-		bool CAppRunner::Run(const std::shared_ptr<app::IApp>& App, SAppSettings Settings)
+		bool CAppRunner::Run(const std::shared_ptr<app::CApp>& App, SAppSettings Settings)
 		{
 			g_AppCore = new app::CAppCore(App, Settings);
 

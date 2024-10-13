@@ -24,7 +24,7 @@ namespace object
 {
 	class CNode;
 
-	class C3DObject
+	class C3DObject : public std::enable_shared_from_this<C3DObject>
 	{
 		bool m_IsCreated;
 
@@ -64,6 +64,12 @@ namespace object
 		void CalcWorldMatrix(std::shared_ptr<CNode>& Node, const glm::mat4& ParentWorldMatrix);
 
 		void ApplyParentNode(std::shared_ptr<CNode>& Node, const std::shared_ptr<CNode>& ParentNode);
+
+		bool DrawFromNode(const std::shared_ptr<CNode>& Node, api::IGraphicsAPI* pGraphicsAPI, bool IsDepthPass, bool DrawOutline, const std::shared_ptr<camera::CCamera>& Camera,
+			const std::shared_ptr<projection::CProjection>& Projection, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo);
+
+		bool Draw(const std::shared_ptr<CNode>& Node, api::IGraphicsAPI* pGraphicsAPI, bool IsDepthPass, bool DrawOutline, const std::shared_ptr<camera::CCamera>& Camera,
+			const std::shared_ptr<projection::CProjection>& Projection, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo);
 
 		// ï®óù
 		void CreatePhysics(physics::IPhysicsEngine* pPhysicsEngine);
@@ -127,10 +133,11 @@ namespace object
 		void ApplyParentNode();
 
 		void AddNode(const std::shared_ptr<CNode>& Node);
+		void ReserveNodeCount(size_t Count);
 		const std::vector<std::shared_ptr<CNode>>& GetNodeList() const;
 		std::shared_ptr<CNode> FindNodeByName(const std::string& Name);
 		std::shared_ptr<CNode> FindNodeByIndex(int Index);
-		
+
 		void AddMesh(const std::shared_ptr<graphics::CMesh>& Mesh);
 		const std::vector<std::shared_ptr<graphics::CMesh>>& GetMeshList() const;
 

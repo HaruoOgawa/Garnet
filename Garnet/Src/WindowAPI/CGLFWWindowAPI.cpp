@@ -115,6 +115,11 @@ namespace window
 			case GLFW_KEY_SPACE:
 				KeyType = input::EKeyType::KEY_TYPE_SPACE;
 				break;
+
+			case GLFW_KEY_ENTER:
+				KeyType = input::EKeyType::KEY_TYPE_ENTER;
+				break;
+
 			default:
 				break;
 		}

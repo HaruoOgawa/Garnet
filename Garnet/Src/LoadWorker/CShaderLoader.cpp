@@ -20,7 +20,7 @@ namespace resource
 		return m_EditingBaseFileName;
 	}
 
-	bool CShaderLoader::Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, app::IApp* pApp)
+	bool CShaderLoader::Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, app::CApp* pApp)
 	{
 		if (!m_File->IsLoaded())
 		{

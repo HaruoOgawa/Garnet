@@ -24,7 +24,10 @@ namespace resource
 			MemoryResource.ResourceData = Resource;
 #ifndef __EMSCRIPTEN__
 			// Emscriptenはサポートしない
-			MemoryResource.FinalEditTime = std::filesystem::last_write_time(Filename);
+			if (std::filesystem::exists(Filename))
+			{
+				MemoryResource.FinalEditTime = std::filesystem::last_write_time(Filename);
+			}
 #endif // !__EMSCRIPTEN__
 			if(ParentResource) MemoryResource.ParentResourceDataList.push_back(ParentResource);
 

@@ -5,11 +5,11 @@
 
 namespace app
 {
-	class IApp;
+	class CApp;
 
 	class CAppRunner
 	{
 	public:
-		static bool Run(const std::shared_ptr<app::IApp>& App, SAppSettings Settings);
+		static bool Run(const std::shared_ptr<app::CApp>& App, SAppSettings Settings);
 	};
 }

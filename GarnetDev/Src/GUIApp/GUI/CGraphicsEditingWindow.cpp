@@ -1,10 +1,13 @@
 #ifdef USE_GUIENGINE
 #include "CGraphicsEditingWindow.h"
 #include "../../Message/Console.h"
+#include <Scene/CSceneWriter.h>
+#include <Input/CInputState.h>
 
 namespace gui
 {
-	CGraphicsEditingWindow::CGraphicsEditingWindow()
+	CGraphicsEditingWindow::CGraphicsEditingWindow():
+		m_ShowSavedDialog(false)
 	{
 	}
 
@@ -15,7 +18,7 @@ namespace gui
 	// ロード完了イベント
 	bool CGraphicsEditingWindow::OnLoaded(api::IGraphicsAPI* pGraphicsAPI, const SGUIParams& GUIParams, const std::shared_ptr<gui::IGUIEngine>& GUIEngine)
 	{
-		if (!m_TimeLineView.Initialize(GUIParams.TimelineController, GUIParams.ObjectList)) return false;
+		if (!m_TimeLineView.Initialize(GUIParams)) return false;
 
 		return true;
 	}
@@ -45,6 +48,7 @@ namespace gui
 					if (!m_LogTab.Draw(pGraphicsAPI, GUIParams)) return false;
 					if (!CGUIRenderingTab::Draw()) return false;
 					if (!CGUICameraTab::Draw()) return false;
+					if (!CGUICustomTab::Draw(pGraphicsAPI, GUIParams)) return false;
 
 					ImGui::EndTabBar();
 				}
@@ -61,7 +65,7 @@ namespace gui
 			bool Open = true;
 			if (ImGui::Begin("TimeLineView", &Open, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoTitleBar))
 			{
-				if (!m_TimeLineView.Draw(GUIParams.TimelineController, GUIParams.ObjectList)) return false;
+				if (!m_TimeLineView.Draw(GUIParams)) return false;
 			}
 
 			ImGui::End();
@@ -73,34 +77,54 @@ namespace gui
 			ImGui::SetNextWindowSize(ImVec2(io.DisplaySize.x * (1.0f - MainMenuWidthRate), io.DisplaySize.y * (1.0f - TimeLineHeightRate)), ImGuiCond_Always);
 
 			bool Open = true;
-			if (ImGui::Begin("3DView", &Open, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings | 
-				ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoScrollbar))
+
+			ImGuiWindowFlags flags = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings |
+				ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoInputs;
+
+			if (ImGui::Begin("3DView", &Open, flags))
 			{
-				auto RenderPass = pGraphicsAPI->FindOffScreenRenderPass("MainResultPass");
+				ImVec2 WindowSize = ImGui::GetWindowSize();
+				ImVec2 ImageSize = ImVec2(io.DisplaySize.x * (1.0f - TimeLineHeightRate), io.DisplaySize.y * (1.0f - TimeLineHeightRate));
 
-				auto Core = GUIEngine->GetImGuiCore();
+				if (!m_3DView.Draw(pGraphicsAPI, GUIParams, GUIEngine, WindowSize, ImageSize)) return false;
+			}
 
-				if (RenderPass && Core)
+			ImGui::End();
+		}
+
+		// シーン保存
+#ifdef USE_BINARY_WRITE
+		if ( (ImGui::IsKeyDown(ImGuiKey_LeftCtrl) && ImGui::IsKeyReleased(ImGuiKey_S)) || (GUIParams.InputState->IsKeyDown(input::EKeyType::KEY_TYPE_CONTROL) && GUIParams.InputState->IsKeyUp(input::EKeyType::KEY_TYPE_S)) )
+		{
+			if (!scene::CSceneWriter::Write(GUIParams.SceneController.get(), GUIParams.TimelineController)) return false;
+
+			m_ShowSavedDialog = true;
+		}
+#endif
+
+		if (m_ShowSavedDialog)
+		{
+			ImVec2 DisplaySize = io.DisplaySize;
+			ImVec2 WindowSize = ImVec2(DisplaySize.x * 0.25f, DisplaySize.y * 0.25f);
+			ImVec2 WindowPos = ImVec2(DisplaySize.x * 0.5f - WindowSize.x * 0.5f, DisplaySize.y * 0.5f - WindowSize.y * 0.5f);
+
+			ImGui::SetNextWindowPos(WindowPos, ImGuiCond_Appearing, ImVec2(0.0f, 0.0f));
+			ImGui::SetNextWindowSize(WindowSize, ImGuiCond_Appearing);
+
+			if (ImGui::Begin("##Timeline_SavedScene_Dialog", &m_ShowSavedDialog))
+			{
+				ImVec2 CursorPos = ImGui::GetCursorPos();
+
+				ImGui::Text("The scene was saved successfully.");
+
+				if (ImGui::Button("OK##Timeline_SavedScene_Dialog"))
 				{
-					ImVec2 WindowSize = ImGui::GetWindowSize();
-					ImVec2 ImageSize = ImVec2(io.DisplaySize.x * (1.0f - TimeLineHeightRate), io.DisplaySize.y * (1.0f - TimeLineHeightRate));
-					
-					// 親ウィンドウの中心に配置
-					ImVec2 ImagePos = ImVec2(
-						(WindowSize.x - ImageSize.x) * 0.5f,
-						(WindowSize.y - ImageSize.y) * 0.5f
-					);
-					ImGui::SetCursorPos(ImagePos);
+					m_ShowSavedDialog = false;
+				}
 
-					ImVec2 UV0 = ImVec2(0.0f, 0.0f);
-					ImVec2 UV1 = ImVec2(1.0f, 1.0f);
-#ifdef USE_OPENGL
-					// OpenGL時は上下反転するので補正する
-					UV0 = ImVec2(0.0f, 1.0f);
-					UV1 = ImVec2(1.0f, 0.0f);
-#endif // USE_OPENGL
-
-					ImGui::Image(Core->CastTexID(RenderPass->GetFrameTexture().get()), ImageSize, UV0, UV1);
+				if (ImGui::IsKeyReleased(ImGuiKey_Enter) || GUIParams.InputState->IsKeyUp(input::EKeyType::KEY_TYPE_ENTER))
+				{
+					m_ShowSavedDialog = false;
 				}
 			}
 
@@ -113,6 +137,11 @@ namespace gui
 	void CGraphicsEditingWindow::AddLog(gui::EGUILogType LogType, const std::string Msg)
 	{
 		m_LogTab.AddLog(LogType, Msg);
+	}
+
+	void CGraphicsEditingWindow::SetDefaultPass(const std::string& RenderPass, const std::string& DepthPass)
+	{
+		m_3DView.SetDefaultPass(RenderPass, DepthPass);
 	}
 }
 #endif // USE_GUIENGINE

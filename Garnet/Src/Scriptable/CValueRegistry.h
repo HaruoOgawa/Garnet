@@ -9,6 +9,8 @@
 #include "../Graphics/EUniformValueType.h"
 #include "../Timeline/CTimelineTrackContent.h"
 
+namespace scene { class CSceneController; }
+
 namespace scriptable
 {
 	struct SValue
@@ -28,6 +30,8 @@ namespace scriptable
 	public:
 		explicit CValueRegistry(const std::string& RegistryName);
 		virtual ~CValueRegistry();
+
+		virtual void OnLoaded(const std::shared_ptr<scene::CSceneController>& SceneController);
 
 		const std::string& GetRegistryName() const;
 

@@ -1,4 +1,5 @@
 #include "CValueRegistry.h"
+#include <Scene/CSceneController.h>
 
 namespace scriptable
 {
@@ -10,6 +11,27 @@ namespace scriptable
 
 	CValueRegistry::~CValueRegistry()
 	{
+	}
+
+	void CValueRegistry::OnLoaded(const std::shared_ptr<scene::CSceneController>& SceneController)
+	{
+		if (m_RegistryName.empty()) return;
+
+		const auto& InitValueRegistryList = SceneController->GetValueRegistryList();
+
+		const auto& it = InitValueRegistryList.find(GetRegistryName());
+		if (it != InitValueRegistryList.end())
+		{
+			const auto& InitValueRegistry = it->second;
+
+			for (const auto& Value : InitValueRegistry->GetValueList())
+			{
+				SetValue(Value.second.Name, Value.second.Type, &Value.second.Buffer[0], Value.second.ByteSize);
+			}
+		}
+
+		// XV
+		SceneController->SetValueRegistry(GetRegistryName(), shared_from_this());
 	}
 
 	const std::string& CValueRegistry::GetRegistryName() const
@@ -24,6 +46,8 @@ namespace scriptable
 
 	void CValueRegistry::SetValue(const std::string& Key, graphics::EUniformValueType ValueType, const void* Data, int ByteSize)
 	{
+		if (m_RegistryName.empty()) return;
+
 		const auto it = m_ValueList.find(Key);
 		if (it == m_ValueList.end())
 		{
@@ -46,6 +70,8 @@ namespace scriptable
 
 	void CValueRegistry::SetValue(const std::string& Key, const void* Data)
 	{
+		if (m_RegistryName.empty()) return;
+
 		const auto it = m_ValueList.find(Key);
 		if (it == m_ValueList.end()) return;
 

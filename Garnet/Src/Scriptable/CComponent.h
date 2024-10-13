@@ -13,6 +13,10 @@ namespace input { class CInputState; }
 namespace physics { class IPhysicsEngine; }
 namespace scene { class CSceneController; }
 namespace graphics { class CDrawInfo; }
+namespace object { 
+	class C3DObject; 
+	class CNode;
+}
 
 namespace scriptable
 {
@@ -32,7 +36,8 @@ namespace scriptable
 		virtual void SetValueRegistry(const std::shared_ptr<scriptable::CValueRegistry>& ValueRegistry);
 		virtual const std::shared_ptr<scriptable::CValueRegistry>& GetValueRegistry() const;
 
-		virtual void OnLoaded(const std::shared_ptr<scene::CSceneController>& SceneController);
+		virtual bool OnLoaded(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<scene::CSceneController>& SceneController, 
+			const std::shared_ptr<object::C3DObject>& Object, const std::shared_ptr<object::CNode>& SelfNode);
 
 		virtual bool Initialize(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker);
 
@@ -40,6 +45,6 @@ namespace scriptable
 			const std::shared_ptr<graphics::CDrawInfo>& DrawInfo, const std::shared_ptr<input::CInputState>& InputState);
 
 		virtual bool Draw(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
-			const std::shared_ptr<graphics::CDrawInfo>& DrawInfo);
+			const std::shared_ptr<graphics::CDrawInfo>& DrawInfo, const std::shared_ptr<object::C3DObject>& Object, const std::shared_ptr<object::CNode>& SelfNode);
 	};
 }

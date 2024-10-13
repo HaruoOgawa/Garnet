@@ -2,8 +2,10 @@
 #include "CTimeLineView.h"
 #include <Object/C3DObject.h>
 #include <Message/Console.h>
+#include <Scriptable/CValueRegistry.h>
 #include <Timeline/CNodeTrack.h>
 #include <Timeline/CMaterialTrack.h>
+#include <Timeline/CCustomTrack.h>
 
 namespace gui
 {
@@ -21,43 +23,53 @@ namespace gui
 		m_MemoryBarAvailableSize(ImVec2()),
 		m_ClickedKeyFrameLabel(std::string()),
 		m_ClickedSamplerKeyFramePair(std::make_tuple(nullptr, nullptr)),
-		m_ShowAddObjDialog(false),
+		m_ShowAddPropertyDialog(false),
 		m_ShowAddTrackDialog(false),
 		m_SelectedObjectForAddObj(nullptr),
 		m_ClickedObjectForAddObjectTrack(nullptr),
 		m_SelectedNodeForAddTrack(nullptr),
 		m_SelectedMaterialForAddTrack(nullptr),
+		m_ShowAddCustomTrackDialog(false),
+		m_SelectedValueRegistry(nullptr),
 		m_RemovedTrackID(std::string())
 	{
 		m_LeftSideMemory = 0.0f;
 		m_RightSideMemory = static_cast<float>(m_MaxLargeMemoryCount) * m_LargeMemoryWidth;
 	}
 
-	bool CTimeLineView::Initialize(const std::shared_ptr<timeline::CTimelineController>& TimelineController, const std::vector<std::shared_ptr<object::C3DObject>>& ObjectList)
+	bool CTimeLineView::Initialize(const SGUIParams& GUIParams)
 	{
-		for (const auto& Object : ObjectList)
+		for (const auto& Object : GUIParams.ObjectList)
 		{
 			if (!Object->HasTLTrackContent()) continue;
 
 			m_TrackObjectList.emplace(Object);
 		}
 
+		for (const auto& ValueRegistry : GUIParams.ValueRegistryList)
+		{
+			if (ValueRegistry.second->GetRefTrackIDList().empty()) continue;
+
+			m_TrackValueRegistryList.emplace(ValueRegistry.second);
+		}
+
 		return true;
 	}
 
-	bool CTimeLineView::Draw(const std::shared_ptr<timeline::CTimelineController>& TimelineController, const std::vector<std::shared_ptr<object::C3DObject>>& ObjectList)
+	bool CTimeLineView::Draw(const SGUIParams& GUIParams)
 	{
-		if (!TimelineController) return true;
+		if (!GUIParams.TimelineController) return true;
 
-		if (!DrawTimeBar(TimelineController)) return false;
-		if (!DrawHierarchyWindow(TimelineController)) return false;
-		if (!DrawKeyFrameWindow(TimelineController)) return false;
-		if (m_ShowAddObjDialog && !DrawAddObjectDialog(TimelineController, ObjectList)) return false;
-		if (m_ShowAddTrackDialog && !DrawAddObjectTrackDialog(TimelineController)) return false;
+		if (!DrawTimeBar(GUIParams.TimelineController)) return false;
+		if (!DrawHierarchyWindow(GUIParams.TimelineController)) return false;
+		if (!DrawKeyFrameWindow(GUIParams.TimelineController)) return false;
+		if (m_ShowAddPropertyDialog && !DrawAddPropertyDialog(GUIParams.TimelineController, GUIParams.ObjectList, GUIParams.ValueRegistryList)) return false;
+		if (m_ShowAddTrackDialog && !DrawAddObjectTrackDialog(GUIParams.TimelineController)) return false;
+		if (m_ShowAddCustomTrackDialog && !DrawAddCustomValueDialog(GUIParams.TimelineController, GUIParams.ValueRegistryList)) return false;
 
 		// トラックとサンプラーを削除
 		{
-			const auto& TLClip = TimelineController->GetClip();
+			const auto& TLClip = GUIParams.TimelineController->GetClip();
 
 			if (TLClip && !m_RemovedTrackID.empty())
 			{
@@ -77,7 +89,16 @@ namespace gui
 			std::string Name = (TimelineController->IsPlay()) ? "Stop##Timeline" : "Play##Timeline";
 			if (ImGui::Button(Name.c_str()))
 			{
-				TimelineController->SetPlay(!TimelineController->IsPlay());
+				bool IsPlay = !TimelineController->IsPlay();
+
+				if (IsPlay)
+				{
+					TimelineController->Play();
+				}
+				else
+				{
+					TimelineController->Stop();
+				}
 			}
 		}
 
@@ -139,7 +160,7 @@ namespace gui
 		ImVec2 window_pos = ImGui::GetWindowPos();
 		ImVec2 window_size = ImGui::GetWindowSize();
 
-		draw_list->AddRectFilled(window_pos, ImVec2(window_pos.x + window_size.x, window_pos.y + window_size.y), IM_COL32(60, 60, 60, 255));
+		draw_list->AddRectFilled(window_pos, ImVec2(window_pos.x + window_size.x, window_pos.y + window_size.y), ImGui::ColorConvertFloat4ToU32(ImGui::GetStyle().Colors[ImGuiCol_Tab]));
 
 		const auto& TLClip = TimelineController->GetClip();
 		if (!TLClip) return true;
@@ -155,8 +176,10 @@ namespace gui
 		// メモリバーの高さから開始する
 		ImGui::SetCursorPos(ImVec2(CursorPos.x, CursorPos.y + m_MemoryBarHeight));
 		
-		bool IsOpenAndClicked = false;
+		bool IsOpenAndClickedObj = false;
+		bool IsOpenAndClickedCustom = false;
 
+		// Object
 		for (const auto& Object : m_TrackObjectList)
 		{
 			std::string ObjectTreeLabel = Object->GetObjectName() + "##TimeLineView_Hierarchy_ObjectTree";
@@ -166,7 +189,7 @@ namespace gui
 				// Track追加ダイアログ表示。Treeの内外両方に必要
 				if (CheckIsClickedObjectTree(Object))
 				{
-					IsOpenAndClicked = true;
+					IsOpenAndClickedObj = true;
 				}
 				
 				// Node Track
@@ -177,7 +200,7 @@ namespace gui
 					{
 						if (CheckIsClickedObjectTree(Object))
 						{
-							IsOpenAndClicked = true;
+							IsOpenAndClickedObj = true;
 						}
 
 						for (const auto& Node : Object->GetTLNodeList())
@@ -211,7 +234,7 @@ namespace gui
 
 					if (CheckIsClickedObjectTree(Object))
 					{
-						IsOpenAndClicked = true;
+						IsOpenAndClickedObj = true;
 					}
 				}
 
@@ -223,7 +246,7 @@ namespace gui
 					{
 						if (CheckIsClickedObjectTree(Object))
 						{
-							IsOpenAndClicked = true;
+							IsOpenAndClickedObj = true;
 						}
 
 						for (const auto& Material : Object->GetTLMaterial())
@@ -257,7 +280,7 @@ namespace gui
 
 					if (CheckIsClickedObjectTree(Object))
 					{
-						IsOpenAndClicked = true;
+						IsOpenAndClickedObj = true;
 					}
 				}
 
@@ -268,11 +291,56 @@ namespace gui
 			CheckIsClickedObjectTree(Object);
 		}
 
-		// AddPropertyの押下かHierarchyウィンドウのどこかしらの右クリックでダイアログを開く。
-		if (Clicked_AddProperty_Btn || (ImGui::IsWindowHovered() && ImGui::IsMouseClicked(1) && !ImGui::IsItemHovered() && !IsOpenAndClicked))
+		// ValueRegistry
+		for (const auto& ValueRegistry : m_TrackValueRegistryList)
 		{
-			m_ShowAddObjDialog = true;
+			std::string ValueRegistryTreeLabel = ValueRegistry->GetRegistryName() + "##TimeLineView_Hierarchy_ValueRegistryTree";
+
+			// CustomTrack
+			if (ImGui::TreeNodeEx(ValueRegistryTreeLabel.c_str()))
+			{
+				std::string TrackLabel = "CustomTrack##Timeline_" + ValueRegistry->GetRegistryName();
+
+				if (ImGui::TreeNodeEx(TrackLabel.c_str()))
+				{
+					if (CheckIsClickedCustomTree(ValueRegistry))
+					{
+						IsOpenAndClickedCustom = true;
+					}
+
+					for (const auto& TrackID : ValueRegistry->GetRefTrackIDList())
+					{
+						const auto& Track = TrackList.find(TrackID);
+						if (Track == TrackList.end()) continue;
+
+						ImVec2 DstCursorPos = ImVec2();
+						if (!DrawTrackProperty(TimelineController, Track->first, Track->second, SamplerList, DstCursorPos)) return false;
+
+						// トラックと描画位置(カーソル位置)を登録
+						m_OpenedTrackPosMap.emplace(Track->second, DstCursorPos);
+					}
+
+					ImGui::TreePop();
+				}
+
+				if (CheckIsClickedCustomTree(ValueRegistry))
+				{
+					IsOpenAndClickedCustom = true;
+				}
+
+				ImGui::TreePop();
+			}
 		}
+
+		// AddPropertyの押下かHierarchyウィンドウのどこかしらの右クリックでダイアログを開く。
+		if (Clicked_AddProperty_Btn || (ImGui::IsWindowHovered() && ImGui::IsMouseClicked(1) && !ImGui::IsItemHovered() && !IsOpenAndClickedObj))
+		{
+			m_ShowAddPropertyDialog = true;
+		}
+		/*else if (Clicked_AddProperty_Btn || (ImGui::IsWindowHovered() && ImGui::IsMouseClicked(1) && !ImGui::IsItemHovered() && !IsOpenAndClickedCustom))
+		{
+			m_ShowAddCustomTrackDialog = true;
+		}*/
 
 		ImGui::EndChild();
 
@@ -455,6 +523,8 @@ namespace gui
 
 		ImDrawList* drawList = ImGui::GetWindowDrawList(); // 描画マネージャー？ 自由に板ポリとか線とか文字を描画できるやつらしい
 
+		ImGuiStyle& style = ImGui::GetStyle();
+
 		// 現在のGUIの描画位置を取得(スクリーン座標系)
 		m_MemoryBarCursorPos = ImGui::GetCursorScreenPos();
 
@@ -473,7 +543,7 @@ namespace gui
 		if (!CheckWheelExpand()) return false;
 		if (!CheckMemoryDrag(TimelineController, m_MemoryBarAvailableSize, DrawMemorySpace, TimelineController->GetMaxTime())) return false;
 
-		drawList->AddRectFilled(m_MemoryBarCursorPos, ImVec2(m_MemoryBarCursorPos.x + m_MemoryBarSize.x, m_MemoryBarCursorPos.y + m_MemoryBarSize.y), IM_COL32(60, 60, 60, 255)); // 矩形を描画
+		drawList->AddRectFilled(m_MemoryBarCursorPos, ImVec2(m_MemoryBarCursorPos.x + m_MemoryBarSize.x, m_MemoryBarCursorPos.y + m_MemoryBarSize.y), ImGui::ColorConvertFloat4ToU32(style.Colors[ImGuiCol_Tab])); // 矩形を描画
 
 		// メモリの開始値
 		std::vector<bool> IsLongMemory;
@@ -619,6 +689,11 @@ namespace gui
 
 		const auto& SamplerList = TLClip->GetSamplerList();
 
+		auto& style = ImGui::GetStyle();
+
+		// 単に選択したいだけの時もあるので必ずフレーム当たりのドラッグ量をチェックする。何かしらドラッグしているなら0以外になるはず
+		const bool IsDragging = (ImGui::GetMouseDragDelta().x != 0.0);
+
 		for (const auto& OpenedTrackAndCursor : m_OpenedTrackPosMap)
 		{
 			const auto& Track = OpenedTrackAndCursor.first;
@@ -649,7 +724,8 @@ namespace gui
 
 					// 描画位置を決定
 					float XPos = 0.0f;
-					if (!m_ClickedKeyFrameLabel.empty() && m_ClickedKeyFrameLabel == KeyFrameLabel)
+					
+					if (!m_ClickedKeyFrameLabel.empty() && m_ClickedKeyFrameLabel == KeyFrameLabel && IsDragging)
 					{
 						// マウスのX座標を割り当てる
 						XPos = ImGui::GetMousePos().x;
@@ -690,10 +766,13 @@ namespace gui
 						// 離したのでリセットする
 						m_ClickedKeyFrameLabel = std::string();
 
-						// MousePos.x(XPos)から逆計算してキーフレームの時間を求める
-						float NewFrameTime = CalcFrameTimeFromXPos(ImGui::GetMousePos().x);
+						if (IsDragging)
+						{
+							// MousePos.x(XPos)から逆計算してキーフレームの時間を求める
+							float NewFrameTime = CalcFrameTimeFromXPos(ImGui::GetMousePos().x);
 
-						Sampler->SetKeyFrameInput(KeyFrame, NewFrameTime);
+							Sampler->SetKeyFrameInput(KeyFrame, NewFrameTime);
+						}
 					}
 
 					// ボタンの色を選択
@@ -701,15 +780,15 @@ namespace gui
 					//if (ImGui::IsItemActive())
 					if (std::get<1>(m_ClickedSamplerKeyFramePair) == KeyFrame)
 					{
-						Col = ImVec4(1.0f, 0.0f, 0.0f, 1.0f);
+						Col = style.Colors[ImGuiCol_Button];
 					}
 					else if (ImGui::IsItemHovered())
 					{
-						Col = ImVec4(0.0f, 0.0f, 1.0f, 1.0f);
+						Col = ImVec4(0.42f, 0.42f, 0.42f, 1.0f);
 					}
 					else
 					{
-						Col = ImVec4(1.0f, 1.0f, 0.0f, 1.0f);
+						Col = ImVec4(0.42f, 0.42f, 0.42f, 1.0f);
 					}
 
 					// 各種情報を登録
@@ -723,9 +802,9 @@ namespace gui
 				ImGui::SetCursorScreenPos(ImVec2(ScreenCursorPos.x, OpenedTrackPos.y));
 
 				// ボタンの色を選択
-				ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.24f, 0.24f, 0.24f, 1.0f)); // 通常時の色
-				ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.24f, 0.24f, 0.24f, 1.0f)); // ホバーの色
-				ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.24f, 0.24f, 0.24f, 1.0f)); // 押下時の色
+				ImGui::PushStyleColor(ImGuiCol_Button, style.Colors[ImGuiCol_Tab]); // 通常時の色
+				ImGui::PushStyleColor(ImGuiCol_ButtonHovered, style.Colors[ImGuiCol_Tab]); // ホバーの色
+				ImGui::PushStyleColor(ImGuiCol_ButtonActive, style.Colors[ImGuiCol_Tab]); // 押下時の色
 
 				std::string Lebal = "##Timeline_KeyFrameBar_" + Track->GetTrackName();
 				ImGui::Button(Lebal.c_str(), ImVec2(availableSize.x, TrackHeight));
@@ -835,7 +914,8 @@ namespace gui
 		return true;
 	}
 
-	bool CTimeLineView::DrawAddObjectDialog(const std::shared_ptr<timeline::CTimelineController>& TimelineController, const std::vector<std::shared_ptr<object::C3DObject>>& ObjectList)
+	bool CTimeLineView::DrawAddPropertyDialog(const std::shared_ptr<timeline::CTimelineController>& TimelineController, const std::vector<std::shared_ptr<object::C3DObject>>& ObjectList, 
+		const std::map<std::string, std::shared_ptr<scriptable::CValueRegistry>>& ValueRegistryList)
 	{
 		ImGuiIO& io = ImGui::GetIO();
 
@@ -844,33 +924,52 @@ namespace gui
 		ImGui::SetNextWindowPos(ImVec2(io.MousePos.x - WindowSize.x * 0.5f, io.MousePos.y - WindowSize.y * 0.5f), ImGuiCond_Appearing, ImVec2(0.0f, 0.0f));
 		ImGui::SetNextWindowSize(WindowSize, ImGuiCond_Appearing);
 
-		if (ImGui::Begin("AddObject##Timeline", &m_ShowAddObjDialog))
+		if (ImGui::Begin("AddProperty##Timeline", &m_ShowAddPropertyDialog))
 		{
-			std::string CurrentValue = (m_SelectedObjectForAddObj) ? m_SelectedObjectForAddObj->GetObjectName() : "";
-
-			if (ImGui::BeginCombo("ObjectList##Timeline_AddObjectDialog", CurrentValue.c_str()))
+			if (ImGui::BeginTabBar("##Timeline_DrawAddPropertyDialog_TabBar"))
 			{
-				for (const auto& Object : ObjectList)
+				if (ImGui::BeginTabItem("Object##Timeline_DrawAddPropertyDialog_TabBar"))
 				{
-					std::string LabelSelectable = Object->GetObjectName() + "##Timeline_Selectable";
+					// Object
+					std::string CurrentValue = (m_SelectedObjectForAddObj) ? m_SelectedObjectForAddObj->GetObjectName() : "";
 
-					const bool IsSelected = (m_SelectedObjectForAddObj == Object);
-
-					if (ImGui::Selectable(LabelSelectable.c_str(), IsSelected) && !IsSelected)
+					if (ImGui::BeginCombo("ObjectList##Timeline_AddObjectDialog", CurrentValue.c_str()))
 					{
-						m_SelectedObjectForAddObj = Object;
+						for (const auto& Object : ObjectList)
+						{
+							std::string LabelSelectable = Object->GetObjectName() + "##Timeline_Selectable";
+
+							const bool IsSelected = (m_SelectedObjectForAddObj == Object);
+
+							if (ImGui::Selectable(LabelSelectable.c_str(), IsSelected) && !IsSelected)
+							{
+								m_SelectedObjectForAddObj = Object;
+							}
+						}
+
+						ImGui::EndCombo();
 					}
+
+					if (ImGui::Button("Add##Timeline_AddObjectDialog"))
+					{
+						m_TrackObjectList.emplace(m_SelectedObjectForAddObj);
+
+						m_SelectedObjectForAddObj = nullptr;
+						m_ShowAddPropertyDialog = false;
+					}
+
+					ImGui::EndTabItem();
 				}
 
-				ImGui::EndCombo();
-			}
+				if (ImGui::BeginTabItem("Custom##Timeline_DrawAddPropertyDialog_TabBar"))
+				{
+					// Custom
+					if (!DrawAddCustomTrackDialog(TimelineController, ValueRegistryList)) return false;
 
-			if (ImGui::Button("Add##Timeline_AddObjectDialog"))
-			{
-				m_TrackObjectList.emplace(m_SelectedObjectForAddObj);
+					ImGui::EndTabItem();
+				}
 
-				m_SelectedObjectForAddObj = nullptr;
-				m_ShowAddObjDialog = false;
+				ImGui::EndTabBar();
 			}
 		}
 
@@ -1148,6 +1247,118 @@ namespace gui
 		return true;
 	}
 
+	bool CTimeLineView::DrawAddCustomTrackDialog(const std::shared_ptr<timeline::CTimelineController>& TimelineController, const std::map<std::string, std::shared_ptr<scriptable::CValueRegistry>>& ValueRegistryList)
+	{
+		static std::string CurrentRegistry = std::string();
+
+		if (ImGui::BeginCombo("ValueRegistryList##Timeline_AddCustomTrackDialog", CurrentRegistry.c_str()))
+		{
+			for (const auto& ValueRegistry : ValueRegistryList)
+			{
+				std::string RegistryName = ValueRegistry.first;
+
+				const bool IsSelected = (RegistryName == CurrentRegistry);
+
+				if (ImGui::Selectable(RegistryName.c_str(), IsSelected) && !IsSelected)
+				{
+					CurrentRegistry = RegistryName;
+
+					
+				}
+			}
+
+			ImGui::EndCombo();
+		}
+
+		if (ImGui::Button("Add##Timeline_AddCustomTrackDialog"))
+		{
+			if (!CurrentRegistry.empty())
+			{
+				const auto it = ValueRegistryList.find(CurrentRegistry);
+
+				if (it != ValueRegistryList.end())
+				{
+					m_TrackValueRegistryList.emplace(it->second);
+					CurrentRegistry = std::string();
+				}
+			}
+		}
+
+		return true;
+	}
+
+	bool CTimeLineView::DrawAddCustomValueDialog(const std::shared_ptr<timeline::CTimelineController>& TimelineController, const std::map<std::string, std::shared_ptr<scriptable::CValueRegistry>>& ValueRegistryList)
+	{
+		ImGuiIO& io = ImGui::GetIO();
+
+		ImVec2 WindowSize = ImVec2(io.DisplaySize.x * 0.1f, io.DisplaySize.y * 0.1f);
+
+		ImGui::SetNextWindowPos(ImVec2(io.MousePos.x, io.MousePos.y - WindowSize.y * 0.5f), ImGuiCond_Appearing, ImVec2(0.0f, 0.0f));
+		ImGui::SetNextWindowSize(WindowSize, ImGuiCond_Appearing);
+
+		if (ImGui::Begin("AddCustomTrack##Timeline", &m_ShowAddCustomTrackDialog))
+		{
+			static std::string SelectedValueName = std::string();
+			
+			if (m_SelectedValueRegistry)
+			{
+				// Target
+				if (ImGui::BeginCombo("ValueName##Timeline_AddCustomValueDialog_CustomTrack_Combo", SelectedValueName.c_str()))
+				{
+					for (const auto& Value : m_SelectedValueRegistry->GetValueList())
+					{
+						std::string ValueName = Value.second.Name;
+
+						const bool IsSelected = (SelectedValueName == ValueName);
+
+						if (ImGui::Selectable(ValueName.c_str(), IsSelected) && !IsSelected)
+						{
+							SelectedValueName = ValueName;
+						}
+					}
+
+					ImGui::EndCombo();
+				}
+
+				// Add
+				if (ImGui::Button("Add##Timeline_AddCustomValueDialog"))
+				{
+					const auto& Clip = TimelineController->GetClip();
+					if (Clip && !SelectedValueName.empty())
+					{
+						int SamplerIndex = static_cast<int>(Clip->GetSamplerList().size());
+						std::string TrackID = timeline::CTimelineTrack::GenerateUUID();
+
+						timeline::ETimelineSamplerTarget SamplerTarget = timeline::ETimelineSamplerTarget::NONE;
+						animation::EInterpolationType InterpolationType = animation::EInterpolationType::LINEAR;
+
+						// Sampler
+						std::shared_ptr<animation::CAnimationSampler> Sampler = std::make_shared<animation::CAnimationSampler>(InterpolationType);
+						Clip->AddSampler(Sampler);
+
+						// Track
+						std::shared_ptr<timeline::CCustomTrack> Track = std::make_shared<timeline::CCustomTrack>(TrackID, SamplerIndex, SamplerTarget, SelectedValueName);
+						Clip->AddTrack(Track);
+
+						// TrackIDをターゲットに割り当てる
+						m_SelectedValueRegistry->AddRefTrackID(TrackID);
+						Track->AssignTrackContent(m_SelectedValueRegistry);
+					}
+
+					m_ShowAddCustomTrackDialog = false;
+					m_SelectedValueRegistry = nullptr;
+
+					// static変数のリセット
+					SelectedValueName = std::string();
+				}
+			}
+		}
+
+		ImGui::End();
+
+		return true;
+	}
+
 	bool CTimeLineView::CheckWheelExpand()
 	{
 		// インジケーターと一緒に動かないようにする
@@ -1250,6 +1461,21 @@ namespace gui
 		{
 			m_ShowAddTrackDialog = true;
 			m_ClickedObjectForAddObjectTrack = Object;
+
+			return true;
+		}
+
+		return false;
+	}
+
+	bool CTimeLineView::CheckIsClickedCustomTree(const std::shared_ptr<scriptable::CValueRegistry>& ValueRegistry)
+	{
+		// Track追加ダイアログ表示
+		// CustomTreeeの右クリックでダイアログを開く
+		if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(1))
+		{
+			m_ShowAddCustomTrackDialog = true;
+			m_SelectedValueRegistry = ValueRegistry;
 
 			return true;
 		}

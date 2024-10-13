@@ -19,7 +19,7 @@ namespace timeline
 	{
 	}
 
-	bool CTimelineController::Initialize(const std::shared_ptr<app::IApp>& App)
+	bool CTimelineController::Initialize(const std::shared_ptr<app::CApp>& App)
 	{
 		if (m_Clip && App)
 		{

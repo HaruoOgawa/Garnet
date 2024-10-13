@@ -18,7 +18,10 @@
 #include "CTimelineClipLoader.h"
 
 namespace file { class CFile; }
-namespace app { class CAppCore; }
+namespace app { 
+	class CAppCore; 
+	class CApp;
+}
 
 namespace resource
 {
@@ -64,5 +67,7 @@ namespace resource
 		void AddLoadResource(const std::shared_ptr<resource::IResource>& Resource);
 
 		const std::shared_ptr<CResourceManager>& GetResourceManager() const;
+
+		bool FindEmbeddedBinary(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, std::shared_ptr<resource::IResource>& Resource, app::CApp* pApp);
 	};
 }

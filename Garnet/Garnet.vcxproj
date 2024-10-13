@@ -555,6 +555,7 @@
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(ProjectDir)Src;$(ProjectDir)src\Library\glm;$(ProjectDir)Src\Library\json;$(ProjectDir)src\Library\GLFW\include;$(ProjectDir)src\Library\Vulkan\include;$(ProjectDir)src\Library\tinygltf\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
     </ClCompile>
     <Link>
       <SubSystem>NotSet</SubSystem>
@@ -569,7 +570,6 @@
 del /s /q $(OutDir)Resources\*
 
 xcopy Resources $(OutDir)Resources /y /s /i
-del $(OutDir)Garnet.pdb
 xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     </PostBuildEvent>
     <Lib>
@@ -585,10 +585,11 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;USE_OPENGL;NOMINMAX;USE_TEXTURE_LOADER;USE_PNG_PARSER;USE_BINARY_READ</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;USE_OPENGL;NOMINMAX;USE_TEXTURE_LOADER;USE_PNG_PARSER;USE_BINARY_READ;USE_WIN32_WindowAPI</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(ProjectDir)Src;$(ProjectDir)src\Library\glm;$(ProjectDir)Src\Library\json;$(ProjectDir)Src\Library\zlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
     </ClCompile>
     <Link>
       <SubSystem>NotSet</SubSystem>
@@ -599,11 +600,8 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
       <AdditionalDependencies>opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>mkdir $(OutDir)Resources
-del /s /q $(OutDir)Resources\*
-
-xcopy Resources $(OutDir)Resources /y /s /i
-del $(OutDir)Garnet.pdb</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
     <Lib>
       <AdditionalDependencies>opengl32.lib;Winmm.lib;libz-static.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -618,10 +616,11 @@ del $(OutDir)Garnet.pdb</Command>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;USE_OPENGL;NOMINMAX</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;USE_OPENGL;NOMINMAX;USE_TEXTURE_LOADER;USE_PNG_PARSER;USE_BINARY_READ;USE_WIN32_WindowAPI</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)Src;$(ProjectDir)src\Library\glm;$(ProjectDir)Src\Library\json;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)Src;$(ProjectDir)src\Library\glm;$(ProjectDir)Src\Library\json;$(ProjectDir)Src\Library\zlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
     </ClCompile>
     <Link>
       <SubSystem>NotSet</SubSystem>
@@ -632,16 +631,12 @@ del $(OutDir)Garnet.pdb</Command>
       <AdditionalDependencies>opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>mkdir $(OutDir)Resources
-del /s /q $(OutDir)Resources\*
-
-xcopy Resources $(OutDir)Resources /y /s /i
-del $(OutDir)Garnet.pdb
-
-call $(ProjectDir)compress_tools\squishy-x64 -i "$(OutDir)Garnet.exe" -o "$(OutDir)Garnet.exe"</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
     <Lib>
-      <AdditionalDependencies>opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;Winmm.lib;libz-static.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)Src\Library\zlib\lib\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseWG|x64'">
@@ -654,6 +649,7 @@ call $(ProjectDir)compress_tools\squishy-x64 -i "$(OutDir)Garnet.exe" -o "$(OutD
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(ProjectDir)Src;$(ProjectDir)src\Library\glm;$(ProjectDir)Src\Library\json;$(ProjectDir)src\Library\GLFW\include;$(ProjectDir)src\Library\glfw3webgpu;$(ProjectDir)src\Library\DawnLib\include;$(ProjectDir)Src\Library\dawn\include;$(ProjectDir)src\Library\tinygltf\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
     </ClCompile>
     <Link>
       <SubSystem>NotSet</SubSystem>
@@ -670,7 +666,6 @@ del /s /q $(OutDir)Resources\*
 xcopy Resources $(OutDir)Resources /y /s /i
 xcopy $(ProjectDir)src\Library\WebGPU\windows-x86_64\wgpu_native.dll $(OutDir) /y /s /i
 
-del $(OutDir)Garnet.pdb
 xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     </PostBuildEvent>
     <Lib>
@@ -1729,11 +1724,12 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClInclude Include="Src\WindowAPI\CGLFWWindowAPI.h" />
     <ClInclude Include="Src\Message\Console.h" />
     <ClInclude Include="Src\WindowAPI\CWebWindowAPI.h" />
-    <ClInclude Include="Src\Interface\IApp.h" />
+    <ClInclude Include="Src\AppCore\CApp.h" />
     <ClInclude Include="Src\Interface\IGraphicsAPI.h" />
     <ClInclude Include="Src\Interface\IRenderer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\AppCore\CApp.cpp" />
     <ClCompile Include="Src\Timeline\CCustomTrack.cpp" />
     <ClCompile Include="Src\Scriptable\CComponent.cpp" />
     <ClCompile Include="Src\Scriptable\CValueRegistry.cpp" />

@@ -17,7 +17,7 @@ namespace resource
 	{
 	}
 
-	bool CAudioLoader::Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, app::IApp* pApp)
+	bool CAudioLoader::Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, app::CApp* pApp)
 	{
 		if (!m_File->IsLoaded())
 		{

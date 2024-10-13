@@ -96,10 +96,10 @@ namespace app
 		m_BlurEffect = std::make_shared<imageeffect::CBlurEffect>(pGraphicsAPI);
 		if (!m_BlurEffect->Create(pLoadWorker)) return false;
 
-		m_DeferredRenderer = std::make_shared<graphics::CFrameRenderer>(pGraphicsAPI, "MRTTest", "MainResultPass");
+		m_DeferredRenderer = std::make_shared<graphics::CFrameRenderer>(pGraphicsAPI, "MainResultPass", pGraphicsAPI->FindOffScreenRenderPass("MRTTest")->GetFrameTextureList());
 		if (!m_DeferredRenderer->Create(pLoadWorker, "Resources\\MaterialFrame\\MRTSample_MF.json")) return false;
 
-		m_MainFrameRenderer = std::make_shared<graphics::CFrameRenderer>(pGraphicsAPI, "MainResultPass", "");
+		m_MainFrameRenderer = std::make_shared<graphics::CFrameRenderer>(pGraphicsAPI, "", pGraphicsAPI->FindOffScreenRenderPass("MainResultPass")->GetFrameTextureList());
 		if (!m_MainFrameRenderer->Create(pLoadWorker, "Resources\\MaterialFrame\\FrameTexture_MF.json")) return false;
 
 		// FrameTexture‚ð“n‚·
@@ -131,7 +131,7 @@ namespace app
 			if (!m_TimelineController->Update(m_DrawInfo->GetDeltaSecondsTime(), InputState)) return false;
 		}
 
-		if (!m_SceneController->Update(pGraphicsAPI, pPhysicsEngine, pLoadWorker, m_MainCamera, m_Projection, m_DrawInfo, InputState)) return false;
+		if (!m_SceneController->Update(pGraphicsAPI, pPhysicsEngine, pLoadWorker, m_MainCamera, m_Projection, m_DrawInfo, InputState, m_TimelineController)) return false;
 		if (!m_ScriptScene->Update(pGraphicsAPI, pPhysicsEngine, pLoadWorker, m_MainCamera, m_Projection, m_DrawInfo, InputState)) return false;
 
 		if (!m_BlurEffect->Update(pLoadWorker)) return false;
@@ -177,7 +177,7 @@ namespace app
 		return true;
 	}
 
-	bool CDevApp::Draw(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<gui::IGUIEngine>& GUIEngine)
+	bool CDevApp::Draw(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<input::CInputState>& InputState, const std::shared_ptr<gui::IGUIEngine>& GUIEngine)
 	{
 		/*// Dispatch GPGPU
 		if (!m_ScriptScene->Dispatch(pGraphicsAPI, pLoadWorker, m_MainCamera, m_Projection, m_DrawInfo)) return false;
@@ -217,7 +217,7 @@ namespace app
 #ifdef USE_GUIENGINE
 			if (pLoadWorker->IsLoaded())
 			{
-				gui::SGUIParams GUIParams = gui::SGUIParams(GetObjectList(), m_SceneController, m_FileModifier, m_TimelineController, pLoadWorker);
+				gui::SGUIParams GUIParams = gui::SGUIParams(GetObjectList(), m_SceneController, m_FileModifier, m_TimelineController, pLoadWorker, {});
 
 				if (!GUIEngine->BeginFrame(pGraphicsAPI)) return false;
 				if (!m_GraphicsEditingWindow->Draw(pGraphicsAPI, GUIParams, GUIEngine))
@@ -262,7 +262,7 @@ namespace app
 
 #ifdef USE_GUIENGINE
 		{
-			gui::SGUIParams GUIParams = gui::SGUIParams(GetObjectList(), m_SceneController, m_FileModifier, m_TimelineController, pLoadWorker);
+			gui::SGUIParams GUIParams = gui::SGUIParams(GetObjectList(), m_SceneController, m_FileModifier, m_TimelineController, pLoadWorker, {});
 
 			if (!m_GraphicsEditingWindow->OnLoaded(pGraphicsAPI, GUIParams, GUIEngine)) return false;
 		}

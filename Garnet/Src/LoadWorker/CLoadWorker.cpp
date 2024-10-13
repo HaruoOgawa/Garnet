@@ -122,7 +122,12 @@ namespace resource
 			switch (Resource->GetStatus())
 			{
 			case resource::ELoadStatus::None:
+				// ファイルのバイナリが実行ファイルに埋め込まれていないかチェックする
+				if (FindEmbeddedBinary(pGraphicsAPI, pPhysicsEngine, Resource, pAppCore->GetApp().get())) return true;
+
+				// 通常通りロードする
 				if (!Resource->Load()) return false;
+
 				return true;
 
 			case resource::ELoadStatus::Loading:
@@ -162,7 +167,12 @@ namespace resource
 			switch (Resource->GetStatus())
 			{
 			case resource::ELoadStatus::None:
+				// ファイルのバイナリが実行ファイルに埋め込まれていないかチェックする
+				if (FindEmbeddedBinary(pGraphicsAPI, pPhysicsEngine, Resource, pAppCore->GetApp().get())) return true;
+
+				// 通常通りロードする
 				if (!Resource->Load()) return false;
+				
 				return true;
 
 			case resource::ELoadStatus::Loading:
@@ -228,6 +238,32 @@ namespace resource
 		}
 
 		return nullptr;
+	}
+
+	bool CLoadWorker::FindEmbeddedBinary(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, std::shared_ptr<resource::IResource>& Resource, app::CApp* pApp)
+	{
+		std::string Key = Resource->GetFilename();
+		size_t Index = Key.find("\\");
+		while (Index != -1)
+		{
+			Key.replace(Index, 1, "/");
+
+			Index = Key.find("\\");
+		}
+
+		auto Binary = pApp->GetEmbeddedBinary(Key);
+
+		const bool Exist = (!Binary.empty());
+
+		if (Exist)
+		{
+			Resource->SetDataWithLoaded(Binary);
+
+			// Updateだけ一回実行しておく
+			if (!Resource->Update(pGraphicsAPI, pPhysicsEngine, this, pApp)) return false;
+		}
+
+		return Exist;
 	}
 
 	const std::shared_ptr<CResourceManager>& CLoadWorker::GetResourceManager() const

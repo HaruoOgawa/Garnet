@@ -92,7 +92,7 @@ namespace scene
 			for (const auto& Value : ValueRegistry.second->GetValueList())
 			{
 				// ƒ^ƒCƒ€ƒ‰ƒCƒ“‚ÅŠÇ—‚³‚ê‚Ä‚¢‚½‚ç‘‚«ž‚Ü‚È‚¢
-				if (TrackValueNameList.find(Value.second.Name) != TrackValueNameList.end()) continue;
+				//if (TrackValueNameList.find(Value.second.Name) != TrackValueNameList.end()) continue;
 
 				ordered_json ValueJSON;
 
@@ -394,7 +394,7 @@ namespace scene
 			{
 				ordered_json componentJSON;
 				componentJSON["type"] = Component->GetComponentName();
-				componentJSON["valueregistry"] = Component->GetRegistryName();
+				if(!Component->GetRegistryName().empty()) componentJSON["valueregistry"] = Component->GetRegistryName();
 
 				node["components"].push_back(componentJSON);
 			}

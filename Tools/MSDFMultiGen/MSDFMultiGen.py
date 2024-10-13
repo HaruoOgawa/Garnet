@@ -72,8 +72,15 @@ def Generate():
     # 結合された画像を保存
     combined_image.save(output)
 
+    # 文字リスト
+    sdf_chars_with_order = []
+    index = 0
+    for char in sdf_chars:
+        sdf_chars_with_order.append((char, index))
+        index += 1
+
     # 複合テクスチャに関する情報をJSONで書き出しておく
-    json_text = json.dumps({"total_width" : total_width, "charWidth" : max_width, "numOfChar" : numOfChar})
+    json_text = json.dumps({"total_width" : total_width, "charWidth" : max_width, "numOfChar" : numOfChar, "sdf_chars" : sdf_chars_with_order}, indent=4, sort_keys=True, separators=(',', ':'))
 
     print("json_text: ", json_text)
     

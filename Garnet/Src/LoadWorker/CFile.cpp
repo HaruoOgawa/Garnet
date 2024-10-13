@@ -169,7 +169,7 @@ namespace resource
 		return true;
 	}
 
-	bool CFile::Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, app::IApp* pApp)
+	bool CFile::Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, app::CApp* pApp)
 	{
 #ifndef __EMSCRIPTEN__
 		if (m_Status == resource::ELoadStatus::Loading)
@@ -243,6 +243,12 @@ namespace resource
 	void CFile::SetData(const std::vector<unsigned char>& Data)
 	{
 		m_Data = Data;
+	}
+
+	void CFile::SetDataWithLoaded(const std::vector<unsigned char>& Data)
+	{
+		SetData(Data);
+		SetLoadStatus(resource::ELoadStatus::Loaded);
 	}
 
 	const std::vector<unsigned char>& CFile::GetData() const

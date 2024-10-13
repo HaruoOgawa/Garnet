@@ -140,6 +140,11 @@ namespace window
 			case VK_SPACE:
 				KeyType = input::EKeyType::KEY_TYPE_SPACE;
 				break;
+
+			case VK_RETURN:
+				KeyType = input::EKeyType::KEY_TYPE_ENTER;
+				break;
+
 			default:
 				break;
 			}
@@ -357,12 +362,18 @@ namespace window
 		window_class.hCursor = LoadCursor(NULL, IDC_ARROW);
 		window_class.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
 		window_class.lpszMenuName = NULL;
+#ifdef _DEBUG
 		window_class.lpszClassName = L"GarnetWindowClass"; // WindosClassの名前. たぶんVulkanとかでいうラベルみたいなやつだと思う
+#else
+		window_class.lpszClassName = (LPCSTR)L"GarnetWindowClass"; // WindosClassの名前. たぶんVulkanとかでいうラベルみたいなやつだと思う
+#endif // _DEBUG
 		window_class.hIconSm = LoadIcon(NULL, IDI_APPLICATION);
 
 		if (!RegisterClassEx(&window_class)) // WindowClassを登録する
 		{
+#ifdef _DEBUG
 			Console::Log("[Error] could not regist WindowClass\n");
+#endif // _DEBUG
 
 			return false;
 		}
@@ -407,7 +418,11 @@ namespace window
 			// https://learn.microsoft.com/ja-jp/windows/win32/winmsg/extended-window-styles
 			WS_EX_APPWINDOW, // WindowStyleの拡張
 			window_class.lpszClassName, // WindowClassの名前. 先ほど登録しておいたもの
+#ifdef _DEBUG
 			Title.c_str(), // WindowName
+#else
+			(LPCSTR)Title.c_str(), // WindowName
+#endif // _DEBUG
 			// WindowStyle : https://learn.microsoft.com/en-us/windows/win32/winmsg/window-styles
 			dwStyle, // WindosStyle. たぶんWindowに出てくるボタンとかタブの設定
 			nWidth, // 位置 X (適当な値)
@@ -422,7 +437,9 @@ namespace window
 
 		if (!m_Window)
 		{
+#ifdef _DEBUG
 			Console::Log("[Error] Failed to create window\n");
+#endif
 
 			return false;
 		}
@@ -496,14 +513,18 @@ namespace window
 		INT32 pixel_format = ChoosePixelFormat(m_Device_Context, &pixel_format_desc);
 		if(!pixel_format)
 		{
+#ifdef _DEBUG
 			Console::Log("[Error] Failed to choose Pixel Format\n");
+#endif
 
 			return false;
 		}
 
 		if (!SetPixelFormat(m_Device_Context, pixel_format, &pixel_format_desc))
 		{
+#ifdef _DEBUG
 			Console::Log("[Error] Failed to set Pixel Format\n");
+#endif
 
 			return false;
 		}
@@ -513,13 +534,17 @@ namespace window
 		HGLRC Tmp_Rendering_Context = wglCreateContext(m_Device_Context);
 		wglMakeCurrent(m_Device_Context, Tmp_Rendering_Context);
 
-		const char* extensions = (const char*)glGetString(GL_EXTENSIONS);
+		/*const char* extensions = (const char*)glGetString(GL_EXTENSIONS);
 		if (IsExtensionSupported(extensions, "WGL_ARB_create_context")) {
+#ifdef _DEBUG
 			Console::Log("WGL_ARB_create_context is supported.\n");
+#endif
 		}
 		else {
+#ifdef _DEBUG
 			Console::Log("WGL_ARB_create_context is not supported.\n");
-		}
+#endif
+		}*/
 
 		// RenderingContextを作成
 		int attribs[] = {

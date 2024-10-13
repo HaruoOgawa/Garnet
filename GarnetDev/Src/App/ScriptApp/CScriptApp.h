@@ -1,6 +1,6 @@
 #pragma once
 #include <memory>
-#include <Interface/IApp.h>
+#include <AppCore/CApp.h>
 
 namespace graphics { class CFrameRenderer; }
 namespace gui { class CGraphicsEditingWindow; }
@@ -13,7 +13,7 @@ namespace app
 	class CScriptScene;
 	class CFileModifier;
 
-	class CScriptApp : public IApp
+	class CScriptApp : public CApp
 	{
 		std::shared_ptr<scene::CSceneController> m_SceneController;
 
@@ -48,7 +48,7 @@ namespace app
 		virtual bool LateUpdate(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker) override;
 		virtual bool FixedUpdate(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker) override;
 
-		virtual bool Draw(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<gui::IGUIEngine>& GUIEngine) override;
+		virtual bool Draw(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<input::CInputState>& InputState, const std::shared_ptr<gui::IGUIEngine>& GUIEngine) override;
 
 		virtual const std::shared_ptr<graphics::CDrawInfo>& GetDrawInfo() const override;
 

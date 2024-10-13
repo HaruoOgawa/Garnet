@@ -34,7 +34,7 @@ namespace resource
 	{
 	}
 
-	bool C3DObjectLoader::Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, app::IApp* pApp)
+	bool C3DObjectLoader::Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, app::CApp* pApp)
 	{
 		if (!m_File->IsLoaded())
 		{
@@ -129,7 +129,7 @@ namespace resource
 		return true;
 	}
 
-	bool C3DObjectLoader::LoadSubResources(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, app::IApp* pApp)
+	bool C3DObjectLoader::LoadSubResources(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, app::CApp* pApp)
 	{
 		// サブリソースのロード
 		for (auto& Resource : m_SubResources)
@@ -137,6 +137,10 @@ namespace resource
 			switch (Resource->GetStatus())
 			{
 			case resource::ELoadStatus::None:
+				// ファイルのバイナリが実行ファイルに埋め込まれていないかチェックする
+				if (pLoadWorker->FindEmbeddedBinary(pGraphicsAPI, pPhysicsEngine, Resource, pApp)) return true;
+
+				// 通常通りロードする
 				if (!Resource->Load()) return false;
 				return true;
 
