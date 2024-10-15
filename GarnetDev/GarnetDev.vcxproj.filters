@@ -36,9 +36,6 @@
     <ClCompile Include="Src\GUIApp\GUI\CGUIResourcesTab.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Src\GUIApp\GUI\CGUITransformTab.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Src\GUIApp\Model\CFileModifier.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -93,9 +90,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Src\GUIApp\GUI\CGUIResourcesTab.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\GUIApp\GUI\CGUITransformTab.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Src\GUIApp\Model\CFileModifier.h">

@@ -63,13 +63,13 @@ namespace gui
 
 				for (const auto& MaterialFrame : MaterialFrameMap)
 				{
-					std::string Name = MaterialFrame.first;
+					std::string Name = MaterialFrame.second->GetMaterialFrameName();
 
 					const bool IsSelected = (CurrentMaterialFrameName == Name);
 
 					if (ImGui::Selectable(Name.c_str(), IsSelected) && !IsSelected)
 					{
-						CurrentMaterialFrameName = MaterialFrame.first;
+						CurrentMaterialFrameName = MaterialFrame.second->GetMaterialFrameName();
 					}
 				}
 
@@ -196,7 +196,7 @@ namespace gui
 						{
 							const bool IsSelected = (CurrentMaterialFrame == MaterialFrame.second);
 
-							std::string Label = MaterialFrame.first;
+							std::string Label = MaterialFrame.second->GetMaterialFrameName();
 							if (ImGui::Selectable(Label.c_str(), IsSelected) && !IsSelected)
 							{
 								// マテリアルの置き換え

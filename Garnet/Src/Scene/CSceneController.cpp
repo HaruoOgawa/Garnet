@@ -133,14 +133,14 @@ namespace scene
 		m_ObjectList.shrink_to_fit();
 	}
 
-	void CSceneController::AddMaterialFrame(const std::string& MFName, const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame)
+	void CSceneController::AddMaterialFrame(const std::string& FileName, const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame)
 	{
-		m_MaterialFrameMap.emplace(MFName, MaterialFrame);
+		m_MaterialFrameMap.emplace(FileName, MaterialFrame);
 	}
 
-	void CSceneController::AddMaterialFrameWithLoading(resource::CLoadWorker* pLoadWorker, const std::string& MFName, const std::string& FileName)
+	void CSceneController::AddMaterialFrameWithLoading(resource::CLoadWorker* pLoadWorker, const std::string& FileName)
 	{
-		const auto it = m_MaterialFrameMap.find(MFName);
+		const auto it = m_MaterialFrameMap.find(FileName);
 
 		if (it == m_MaterialFrameMap.end())
 		{
@@ -148,7 +148,7 @@ namespace scene
 
 			pLoadWorker->AddLoadResource(std::make_shared<resource::CMaterialFrameLoader>(FileName, MaterialFrame));
 
-			AddMaterialFrame(MFName, MaterialFrame);
+			AddMaterialFrame(FileName, MaterialFrame);
 		}
 	}
 
@@ -157,11 +157,11 @@ namespace scene
 		return m_MaterialFrameMap;
 	}
 
-	std::shared_ptr<graphics::CMaterialFrame> CSceneController::FindMaterialFrame(const std::string& MFName)
+	std::shared_ptr<graphics::CMaterialFrame> CSceneController::FindMaterialFrame(const std::string& FileName)
 	{
 		std::shared_ptr<graphics::CMaterialFrame> MaterialFrame = nullptr;
 
-		const auto it = m_MaterialFrameMap.find(MFName);
+		const auto it = m_MaterialFrameMap.find(FileName);
 		if (it != m_MaterialFrameMap.end()) MaterialFrame = it->second;
 
 		return MaterialFrame;

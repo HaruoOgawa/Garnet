@@ -169,6 +169,7 @@ namespace app
 				gui::SGUIParams GUIParams = gui::SGUIParams(GetObjectList(), m_SceneController, m_FileModifier, m_TimelineController, pLoadWorker, {});
 				GUIParams.CameraMode = (m_CameraSwitchToggle) ? "ViewCamera" : "TraceCamera";
 				GUIParams.Camera = m_MainCamera;
+				GUIParams.InputState = InputState;
 
 				if (!GUIEngine->BeginFrame(pGraphicsAPI)) return false;
 				if (!m_GraphicsEditingWindow->Draw(pGraphicsAPI, GUIParams, GUIEngine))

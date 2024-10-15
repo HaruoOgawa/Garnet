@@ -133,10 +133,10 @@ namespace scene
 		std::shared_ptr<object::C3DObject> FindObjectByIndex(int Index);
 		void RemoveObject(int Index);
 
-		void AddMaterialFrame(const std::string& MFName, const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame);
-		void AddMaterialFrameWithLoading(resource::CLoadWorker* pLoadWorker, const std::string& MFName, const std::string& FileName);
+		void AddMaterialFrame(const std::string& FileName, const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame);
+		void AddMaterialFrameWithLoading(resource::CLoadWorker* pLoadWorker, const std::string& FileName);
 		const std::map<std::string, std::shared_ptr<graphics::CMaterialFrame>>& GetMaterialFrameMap() const;
-		std::shared_ptr<graphics::CMaterialFrame> FindMaterialFrame(const std::string& MFName);
+		std::shared_ptr<graphics::CMaterialFrame> FindMaterialFrame(const std::string& FileName);
 
 		void SetValueRegistry(const std::string& Registryname, const std::shared_ptr<scriptable::CValueRegistry>& ValueRegistry);
 		const std::map<std::string, std::shared_ptr<scriptable::CValueRegistry>>& GetValueRegistryList();
