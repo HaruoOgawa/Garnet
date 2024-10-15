@@ -51,7 +51,7 @@ namespace scene
 
 		for (const auto& MaterialFrame : MaterialFrameMap)
 		{
-			SceneJSON["materialframes"].push_back({ {"name" , MaterialFrame.first}, { "filename", MaterialFrame.second->GetFileName()} });
+			SceneJSON["materialframes"].push_back({ {"name" , MaterialFrame.second->GetMaterialFrameName()}, {"filename", MaterialFrame.second->GetFileName()}});
 		}
 
 		return true;

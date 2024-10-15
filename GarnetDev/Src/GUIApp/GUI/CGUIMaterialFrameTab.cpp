@@ -1,6 +1,7 @@
 #ifdef USE_GUIENGINE
 #include "CGUIMaterialFrameTab.h"
 #include <Scene/CSceneController.h>
+#include <Graphics/CMaterialFrame.h>
 
 namespace gui
 {
@@ -42,7 +43,7 @@ namespace gui
 			//
 			for (const auto& MaterialFrame : GUIParams.SceneController->GetMaterialFrameMap())
 			{
-				std::string Label = MaterialFrame.first /*+ "##GUIMaterialFrameTab_MaterialFrameName"*/;
+				std::string Label = MaterialFrame.second->GetMaterialFrameName();
 				ImGui::Text("%s", Label.c_str());
 			}
 
@@ -63,16 +64,6 @@ namespace gui
 
 		if (ImGui::Begin("AddMFDialog##GUIMaterialFrameTab", &m_ShowAddMFDialog))
 		{
-			// MFName
-			static std::string MFName = std::string();
-			{
-				static char buf[256] = "";
-				if (ImGui::InputText("MaterialFrameName##AddMFDialog_FileName", buf, IM_ARRAYSIZE(buf)))
-				{
-					MFName = std::string(buf);
-				}
-			}
-
 			// FileName
 			static std::string FileName = std::string();
 			{
@@ -83,12 +74,12 @@ namespace gui
 				}
 			}
 
-			if (ImGui::Button("Add##GUIMaterialFrameTab") && !MFName.empty() && !FileName.empty())
+			if (ImGui::Button("Add##GUIMaterialFrameTab") && !FileName.empty())
 			{
 				m_ShowAddMFDialog = false;
 
 				// MaterialFrameì¬
-				GUIParams.SceneController->AddMaterialFrameWithLoading(GUIParams.pLoadWorker, MFName, FileName);
+				GUIParams.SceneController->AddMaterialFrameWithLoading(GUIParams.pLoadWorker, FileName);
 			}
 		}
 

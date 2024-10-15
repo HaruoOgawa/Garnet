@@ -62,6 +62,10 @@ namespace app
 		m_DrawInfo->GetLightProjection()->SetFar(100.0f);
 
 		m_SceneController->SetDefaultPass("MainResultPass", "");
+
+#ifdef USE_GUIENGINE
+		m_GraphicsEditingWindow->SetDefaultPass("MainResultPass", "");
+#endif
 	}
 
 	bool CDevApp::Release(api::IGraphicsAPI* pGraphicsAPI)
@@ -218,6 +222,9 @@ namespace app
 			if (pLoadWorker->IsLoaded())
 			{
 				gui::SGUIParams GUIParams = gui::SGUIParams(GetObjectList(), m_SceneController, m_FileModifier, m_TimelineController, pLoadWorker, {});
+				GUIParams.CameraMode = (m_CameraSwitchToggle) ? "ViewCamera" : "TraceCamera";
+				GUIParams.Camera = m_MainCamera;
+				GUIParams.InputState = InputState;
 
 				if (!GUIEngine->BeginFrame(pGraphicsAPI)) return false;
 				if (!m_GraphicsEditingWindow->Draw(pGraphicsAPI, GUIParams, GUIEngine))
