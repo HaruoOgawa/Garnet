@@ -15,6 +15,8 @@ namespace graphics
 
 	class CPrimitive
 	{
+		bool m_Enabled;
+
 		graphics::EPresetPrimitiveType m_PresetType;
 
 		std::shared_ptr<CVertexBuffer> m_VertexBuffer;
@@ -30,6 +32,9 @@ namespace graphics
 	public:
 		CPrimitive(const std::shared_ptr<CVertexBuffer>& VertexBuffer, const std::shared_ptr<CIndexBuffer>& IndexBuffer, int MaterialIndex);
 		virtual ~CPrimitive();
+
+		void SetEnabled(bool Flag);
+		bool IsEnabled() const;
 
 		void SetPresetType(graphics::EPresetPrimitiveType Type);
 		graphics::EPresetPrimitiveType GetPresetType() const;

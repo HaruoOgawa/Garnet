@@ -1,0 +1,27 @@
+{
+    "materialframes": [
+        {
+            "name": "basic_toon_mat",
+            "filename": "Resources/MaterialFrame/basic_toon_mf.json"
+        }
+    ],
+    "objects": [
+        {
+            "name": "PmxObj",
+            "filename": "Resources/Avatar/Tda_Miku/Tda_Miku.pmx",
+            "defaultmaterialframe": "basic_toon_mat",
+            "transform": {
+                "pos": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+              "scale": [
+                0.1,
+                0.1,
+                0.1
+              ]
+            }
+        }
+    ]
+}
