@@ -16,6 +16,7 @@
 namespace api
 {
 	COpenGLAPI::COpenGLAPI(int Width, int Height):
+		CGraphicsAPI(),
 		m_VertexShaderExtension(".vert"),
 		m_FragmentShaderExtension(".frag"),
 		m_GeometryShaderExtension(".geom"),

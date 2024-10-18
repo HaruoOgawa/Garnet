@@ -1,43 +1,20 @@
 #pragma once
-#include <memory>
-#include <string>
-#include <map>
-#include <glm/glm.hpp>
 
-#include "IRenderer.h"
-#include "IRenderPass.h"
-#include "IWindowAPI.h"
-
-#include "../GraphicsAPI/ERenderPassFormat.h"
-#include "../Graphics/EShaderStage.h"
-
-#ifdef USE_GLFW
-#include <glfw3.h>
-#include <glfw3native.h>
-#endif // USE_GLFW
-
-namespace graphics
-{
-	class CMaterial;
-	class CTexture;
-	enum class ETextureType;
-	class CMaterialCreateInfo;
-	enum class ECullMode;
-	class CVertexBuffer;
-	class CIndexBuffer;
-}
+#include "../../Interface/IGraphicsAPI.h"
 
 namespace api
 {
-	class IGPGPUHandler;
-
-	class IGraphicsAPI
+	class CGraphicsAPI : public IGraphicsAPI
 	{
+		const int m_MaxBoneCount;
 	public:
+		CGraphicsAPI();
+		virtual ~CGraphicsAPI();
+
 		virtual bool Initialize(window::IWindowAPI* pWindowAPI) = 0;
 
 		virtual void Release() = 0;
-		
+
 		virtual bool CreateRenderPass(const std::string& PassName, ERenderPassFormat RenderPassFormat, const glm::vec4& InitColor, int Width = -1, int Height = -1, int RenderTargetCount = 1) = 0;
 		virtual std::shared_ptr<graphics::CVertexBuffer> CreateVertexBuffer() = 0;
 		virtual std::shared_ptr<graphics::CIndexBuffer> CreateIndexBuffer() = 0;
@@ -54,7 +31,7 @@ namespace api
 		virtual bool EndRender() = 0;
 		virtual bool SubmitRender() = 0;
 
-		virtual int GetMaxBoneCount() = 0;
+		virtual int GetMaxBoneCount() override;
 
 		virtual const std::string& GetVertexShaderExtension() const = 0;
 		virtual const std::string& GetFragmentShaderExtension() const = 0;

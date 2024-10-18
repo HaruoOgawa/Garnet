@@ -442,6 +442,13 @@ namespace gltf
 				// SSBOのサイズは2のn乗である必要がある
 				SkinMatCount = math::CMath::CalcNextPowerOfTwo(SkinMatCount);
 
+				// 最大ボーン数よりも多いのならエラーとする
+				if (SkinMatCount > pGraphicsAPI->GetMaxBoneCount())
+				{
+					Console::Log("[Error] SkinMatCount is over MaxBoneCount. - SkinMatCount: %d, MaxBoneCount: %d\n", SkinMatCount, pGraphicsAPI->GetMaxBoneCount());
+					return false;
+				}
+
 				std::vector<glm::mat4> SkinMatrixList;
 				SkinMatrixList.resize(SkinMatCount, glm::mat4(0.0f));
 

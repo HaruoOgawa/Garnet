@@ -8,11 +8,11 @@
 #include <glm/glm.hpp>
 
 #include "glDef.h"
-#include "../../Interface/IGraphicsAPI.h"
+#include "../CGraphicsAPI.h"
 
 namespace api
 {
-	class COpenGLAPI : public IGraphicsAPI
+	class COpenGLAPI : public CGraphicsAPI
 	{
 		const std::string m_VertexShaderExtension;
 		const std::string m_FragmentShaderExtension;

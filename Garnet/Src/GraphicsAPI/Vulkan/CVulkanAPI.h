@@ -8,7 +8,7 @@
 #include <array>
 #include <map>
 
-#include "../../Interface/IGraphicsAPI.h"
+#include "../CGraphicsAPI.h"
 
 #include <vulkan/vulkan.h>
 
@@ -34,7 +34,7 @@ namespace api
 		std::vector<VkPresentModeKHR> m_PresentModes;
 	};
 
-	class CVulkanAPI : public IGraphicsAPI
+	class CVulkanAPI : public CGraphicsAPI
 	{
 		//
 		const std::string m_VertexShaderExtension;

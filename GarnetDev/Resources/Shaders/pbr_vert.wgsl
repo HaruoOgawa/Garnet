@@ -31,7 +31,7 @@ struct UniformBufferObject {
 }
 
 struct SkinMatrixBuffer {
-    SkinMat: array<mat4x4<f32>,512u>,
+    SkinMat: array<mat4x4<f32>,1024u>,
 }
 
 struct gl_PerVertex {
