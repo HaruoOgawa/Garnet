@@ -60,12 +60,13 @@ namespace mmd
 
 		// マテリアルリスト
 		std::vector<std::shared_ptr<graphics::CMaterial>> MaterialList;
-		if (!CreateMaterialList(pGraphicsAPI, model, MaterialList, MaterialFrame, Skeleton)) return false;
+		std::map<int, std::vector<std::shared_ptr<graphics::CMaterial>>> SharedToonUsingList;
+		if (!CreateMaterialList(pGraphicsAPI, model, MaterialList, SharedToonUsingList, MaterialFrame, Skeleton)) return false;
 
 		// テクスチャリスト
 		std::vector<std::shared_ptr<graphics::CTexture>> TextureList;
 
-		if (!CreateTextureList(pGraphicsAPI, p3DObjectLoader, ModelFileName, model, TextureList)) return false;
+		if (!CreateTextureList(pGraphicsAPI, p3DObjectLoader, ModelFileName, model, TextureList, SharedToonUsingList)) return false;
 
 		// メッシュ
 		std::vector<std::shared_ptr<graphics::CMesh>> MeshList;
@@ -227,6 +228,7 @@ namespace mmd
 	}
 
 	bool CPmxImporter::CreateMaterialList(api::IGraphicsAPI* pGraphicsAPI, const CPmxModel& model, std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList,
+		std::map<int, std::vector<std::shared_ptr<graphics::CMaterial>>>& SharedToonUsingList,
 		const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, const std::shared_ptr<animation::CSkeleton>& Skeleton)
 	{
 		if (!MaterialFrame) return false;
@@ -280,15 +282,10 @@ namespace mmd
 				}
 				else if (SharedToonTexIndex >= 0 && SharedToonTexIndex < model.GetPmxTextureList().size())
 				{
-					// 未対応
-					// 滅多に必要なPMXに出会わないので出てきたときに対応する
-					// それまではエラーにする
-					Console::Log("[Error - Pmx Material] Please implement Shared Toon Texture.\n");
+					// 共通トゥーンテクスチャ使用リストに追加
+					if (SharedToonUsingList.find(SharedToonTexIndex) == SharedToonUsingList.end()) SharedToonUsingList.emplace(SharedToonTexIndex, std::vector<std::shared_ptr<graphics::CMaterial>>());
 
-					return false;
-
-					//material->ReplacePreloadUniformValue("UseToonTexture", &glm::ivec1(1)[0], sizeof(int), 2);
-					//material->ReplaceTextureIndex("ToonTexture", SharedToonTexIndex);
+					SharedToonUsingList[SharedToonTexIndex].push_back(material);
 				}
 			}
 
@@ -310,8 +307,8 @@ namespace mmd
 			{
 				// SkinMatは存在するBoneの数だけ用意する必要がある
 				// DynamicOffsetが256バイトからしか使えない都合上SkinMatCountの最小値は4とする(4 * 16 * 4 = 256)
-				unsigned int SkinMatCount = 0;
-				if (Skeleton && Skeleton->GetBoneList().size() > 0) SkinMatCount = static_cast<unsigned int>(Skeleton->GetBoneList().size());
+				int SkinMatCount = 0;
+				if (Skeleton && Skeleton->GetBoneList().size() > 0) SkinMatCount = static_cast<int>(Skeleton->GetBoneList().size());
 
 				// DynamicOffsetが256バイトからしか使えない都合上SkinMatCountの最小値は4とする(4 * 16 * 4 = 256)
 				if (SkinMatCount < 4) SkinMatCount = 4;
@@ -653,7 +650,8 @@ namespace mmd
 		return true;
 	}
 
-	bool CPmxImporter::CreateTextureList(api::IGraphicsAPI* pGraphicsAPI, resource::C3DObjectLoader* p3DObjectLoader, const std::string& ModelFileName, const CPmxModel& model, std::vector<std::shared_ptr<graphics::CTexture>>& TextureList)
+	bool CPmxImporter::CreateTextureList(api::IGraphicsAPI* pGraphicsAPI, resource::C3DObjectLoader* p3DObjectLoader, const std::string& ModelFileName, const CPmxModel& model,
+		std::vector<std::shared_ptr<graphics::CTexture>>& TextureList, std::map<int, std::vector<std::shared_ptr<graphics::CMaterial>>>& SharedToonUsingList)
 	{
 		for (const auto& PmxTexture : model.GetPmxTextureList())
 		{
@@ -684,6 +682,36 @@ namespace mmd
 			//
 			TextureList.push_back(Texture);
 			p3DObjectLoader->AddSubResource(TexLoader);
+		}
+
+		// 共通トゥーンテクスチャを使っていれば登録して有効化する
+		for (auto& SharedToonPair : SharedToonUsingList)
+		{
+			int SharedToonIndex = SharedToonPair.first + 1;
+
+			// テクスチャオブジェクトを生成
+			std::shared_ptr<graphics::CTexture> Texture = pGraphicsAPI->CreateTexture();
+			std::shared_ptr<resource::CTextureLoader> TexLoader = nullptr;
+
+			std::string NumberStr = std::to_string(SharedToonIndex);
+			if (NumberStr.length() < 2) NumberStr = "0" + NumberStr;
+
+			std::string FullPath = "Resources/Textures/SharedToon/toon" + NumberStr + ".bmp";
+
+			TexLoader = std::make_shared<resource::CTextureLoader>(pGraphicsAPI, FullPath, Texture);
+
+			// ロードワーカーに追加する
+			TextureList.push_back(Texture);
+			p3DObjectLoader->AddSubResource(TexLoader);
+
+			// 各マテリアルのインデックスを設定する
+			int MatTexIndex = static_cast<int>(TextureList.size()) - 1;
+
+			for (auto& material : SharedToonPair.second)
+			{
+				material->ReplacePreloadUniformValue("UseToonTexture", &glm::ivec1(1)[0], sizeof(int), 2);
+				material->ReplaceTextureIndex("ToonTexture", MatTexIndex);
+			}
 		}
 
 		return true;
