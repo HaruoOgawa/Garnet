@@ -8,6 +8,7 @@
 namespace graphics
 {
 	CPrimitive::CPrimitive(const std::shared_ptr<CVertexBuffer>& VertexBuffer, const std::shared_ptr<CIndexBuffer>& IndexBuffer, int MaterialIndex) :
+		m_Enabled(true),
 		m_PresetType(graphics::EPresetPrimitiveType::None),
 		m_VertexBuffer(VertexBuffer),
 		m_IndexBuffer(IndexBuffer),
@@ -20,6 +21,16 @@ namespace graphics
 	
 	CPrimitive::~CPrimitive()
 	{
+	}
+
+	void CPrimitive::SetEnabled(bool Flag)
+	{
+		m_Enabled = Flag;
+	}
+
+	bool CPrimitive::IsEnabled() const
+	{
+		return m_Enabled;
 	}
 
 	void CPrimitive::SetPresetType(graphics::EPresetPrimitiveType Type)
@@ -63,6 +74,8 @@ namespace graphics
 
 	bool CPrimitive::Draw(const std::shared_ptr<CMaterial>& Material, int DynamicOffsetNum, bool IsDepth)
 	{
+		if (!IsEnabled()) return true;
+
 		if (IsDepth)
 		{
 			if (!m_DepthRenderer->Draw(m_VertexBuffer, m_IndexBuffer, Material, DynamicOffsetNum)) return false;

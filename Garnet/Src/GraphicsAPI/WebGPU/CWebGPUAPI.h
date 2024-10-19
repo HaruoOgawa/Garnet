@@ -1,6 +1,6 @@
 #pragma once
 #ifdef USE_WEBGPU
-#include "../../Interface/IGraphicsAPI.h"
+#include "../CGraphicsAPI.h"
 #include <vector>
 #include <map>
 #include <memory>
@@ -19,7 +19,7 @@ namespace api
 {
 	class CWebGPURenderPass;
 
-	class CWebGPUAPI : public IGraphicsAPI
+	class CWebGPUAPI : public CGraphicsAPI
 	{
 		//
 		const std::string m_VertexShaderExtension;

@@ -12,6 +12,7 @@
 namespace api
 {
 	CVulkanAPI::CVulkanAPI(int Width, int Height):
+		CGraphicsAPI(),
 		m_pWindow(nullptr),
 		m_CurrentImageIndex(0),
 		m_VertexShaderExtension("_vert.spv"),

@@ -434,6 +434,13 @@ namespace fbx
 				// SSBOのサイズは2のn乗である必要がある
 				SkinMatCount = math::CMath::CalcNextPowerOfTwo(SkinMatCount);
 
+				// 最大ボーン数よりも多いのならエラーとする
+				if (SkinMatCount > pGraphicsAPI->GetMaxBoneCount())
+				{
+					Console::Log("[Error] SkinMatCount is over MaxBoneCount. - SkinMatCount: %d, MaxBoneCount: %d\n", SkinMatCount, pGraphicsAPI->GetMaxBoneCount());
+					return false;
+				}
+
 				std::vector<glm::mat4> SkinMatrixList;
 				SkinMatrixList.resize(SkinMatCount, glm::mat4(1.0f));
 
@@ -468,11 +475,18 @@ namespace fbx
 		// SkinMatrix StorageBuffer
 		{
 			// SkinMatは存在するBoneの数だけ用意する必要がある
-			unsigned int SkinMatCount = 1;
-			if (Skeleton && Skeleton->GetBoneList().size() > 0) SkinMatCount = static_cast<unsigned int>(Skeleton->GetBoneList().size());
+			int SkinMatCount = 1;
+			if (Skeleton && Skeleton->GetBoneList().size() > 0) SkinMatCount = static_cast<int>(Skeleton->GetBoneList().size());
 
 			// SSBOのサイズは2のn乗である必要がある
 			SkinMatCount = math::CMath::CalcNextPowerOfTwo(SkinMatCount);
+
+			// 最大ボーン数よりも多いのならエラーとする
+			if (SkinMatCount > pGraphicsAPI->GetMaxBoneCount())
+			{
+				Console::Log("[Error] SkinMatCount is over MaxBoneCount. - SkinMatCount: %d, MaxBoneCount: %d\n", SkinMatCount, pGraphicsAPI->GetMaxBoneCount());
+				return false;
+			}
 
 			std::vector<glm::mat4> SkinMatrixList;
 			SkinMatrixList.resize(SkinMatCount, glm::mat4(1.0f));

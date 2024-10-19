@@ -22,6 +22,7 @@
 namespace api
 {
 	CWebGPUAPI::CWebGPUAPI(int Width, int Height):
+		CGraphicsAPI(),
 		m_VertexShaderExtension("_vert.wgsl"),
 		m_FragmentShaderExtension("_frag.wgsl"),
 		m_GeometryShaderExtension("_geom.wgsl"),

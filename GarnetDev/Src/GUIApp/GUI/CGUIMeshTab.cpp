@@ -166,6 +166,8 @@ namespace gui
 	{
 		const auto& MaterialList = Object->GetMaterialList();
 
+		int OperateButtonID = 0;
+
 		std::string TreeNodeLabel_Mesh = "Mesh##" + std::to_string(MeshIndex) + "GUIMeshTab_DrawMeshGUI_TreeNodeEx_Mesh_" + Object->GetObjectName();
 		if (ImGui::TreeNodeEx(TreeNodeLabel_Mesh.c_str(), ImGuiTreeNodeFlags_Framed))
 		{
@@ -175,29 +177,46 @@ namespace gui
 			{
 				const auto& Primitive = PrimitiveList[PrimitiveIndex];
 
-				std::string TreeNodeLabel_Primitive = "Primitive##" + std::to_string(PrimitiveIndex) + "GUIMeshTab_DrawMeshGUI_TreeNodeEx_Primitive_" + Object->GetObjectName();
-				if (ImGui::TreeNodeEx(TreeNodeLabel_Primitive.c_str(), ImGuiTreeNodeFlags_Framed))
+				// OperateButton
 				{
+					std::string BoxLabel = "##" + std::to_string(OperateButtonID);
+					bool Flag = Primitive->IsEnabled();
+					if (ImGui::Checkbox(BoxLabel.c_str(), &Flag))
 					{
-						graphics::EPresetPrimitiveType PresetType = Primitive->GetPresetType();
-
-						std::string Text = "PresetType: " + GetStrFromPresetPrimitiveType(PresetType);
-
-						ImGui::Text("%s", Text.c_str());
+						Primitive->SetEnabled(Flag);
 					}
 
-					int MaterialIndex = Primitive->GetMaterialIndex();
+					OperateButtonID++;
 
-					if (MaterialIndex >= 0 && MaterialIndex < static_cast<int>(MaterialList.size()))
+					ImGui::SameLine();
+				}
+
+				// Primitive Tree
+				{
+					std::string TreeNodeLabel_Primitive = "Primitive_" + std::to_string(PrimitiveIndex) + "##" + "GUIMeshTab_DrawMeshGUI_TreeNodeEx_Primitive_" + Object->GetObjectName();
+					if (ImGui::TreeNodeEx(TreeNodeLabel_Primitive.c_str(), ImGuiTreeNodeFlags_Framed))
 					{
-						const auto& Material = MaterialList[MaterialIndex];
+						{
+							graphics::EPresetPrimitiveType PresetType = Primitive->GetPresetType();
 
-						std::string Text = "MaterialName: " + Material->GetMaterialName();
+							std::string Text = "PresetType: " + GetStrFromPresetPrimitiveType(PresetType);
 
-						ImGui::Text("%s", Text.c_str());
+							ImGui::Text("%s", Text.c_str());
+						}
+
+						int MaterialIndex = Primitive->GetMaterialIndex();
+
+						if (MaterialIndex >= 0 && MaterialIndex < static_cast<int>(MaterialList.size()))
+						{
+							const auto& Material = MaterialList[MaterialIndex];
+
+							std::string Text = "MaterialName: " + Material->GetMaterialName();
+
+							ImGui::Text("%s", Text.c_str());
+						}
+
+						ImGui::TreePop();
 					}
-
-					ImGui::TreePop();
 				}
 			}
 
