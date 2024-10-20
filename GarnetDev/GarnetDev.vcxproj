@@ -480,6 +480,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\Component\CCDIKTest.cpp" />
     <ClCompile Include="Src\GUIApp\GUI\C3DView.cpp" />
     <ClCompile Include="Src\GUIApp\GUI\CGUIBaseTab.cpp" />
     <ClCompile Include="Src\GUIApp\GUI\CGUICustomTab.cpp" />
@@ -501,6 +502,7 @@
     <ClCompile Include="Src\Main\main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Src\Component\CCDIKTest.h" />
     <ClInclude Include="Src\GUIApp\GUI\C3DView.h" />
     <ClInclude Include="Src\GUIApp\GUI\CGUIBaseTab.h" />
     <ClInclude Include="Src\GUIApp\GUI\CGUICustomTab.h" />
