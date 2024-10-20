@@ -14,1174 +14,6 @@
     },
     "objects": [
         {
-            "name": "PmxObj",
-            "filename": "Resources/Avatar/Tda_Miku/Tda_Miku.pmx",
-            "defaultmaterialframe": "basic_toon_mat",
-            "renderpass": "MainResultPass",
-            "depthpass": "",
-            "transform": {
-                "pos": [
-                    0.0,
-                    0.0,
-                    0.0
-                ],
-                "rotate": [
-                    0.0,
-                    -0.0,
-                    0.0
-                ],
-                "scale": [
-                    0.10000000149011612,
-                    0.10000000149011612,
-                    0.10000000149011612
-                ]
-            },
-            "enable": true,
-            "materials": [
-                {
-                    "materialframe": "basic_toon_mat",
-                    "cull": "back",
-                    "uniformvalues": [
-                        {
-                            "name": "edgeSize",
-                            "type": "float",
-                            "value": [
-                                0.6000000238418579
-                            ]
-                        },
-                        {
-                            "name": "ambientFactor",
-                            "type": "vec4",
-                            "value": [
-                                0.5,
-                                0.5,
-                                0.5,
-                                1.0
-                            ]
-                        },
-                        {
-                            "name": "edgeColor",
-                            "type": "vec4",
-                            "value": [
-                                0.44999998807907104,
-                                0.20000000298023224,
-                                0.30000001192092896,
-                                0.6000000238418579
-                            ]
-                        },
-                        {
-                            "name": "specularFactor",
-                            "type": "vec4",
-                            "value": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ]
-                        },
-                        {
-                            "name": "specularIntensity",
-                            "type": "float",
-                            "value": [
-                                50.0
-                            ]
-                        }
-                    ],
-                    "textures": [
-                        {
-                            "texturebuffername": "MainTexture",
-                            "textureindex": 0,
-                            "texturename": ""
-                        },
-                        {
-                            "texturebuffername": "ToonTexture",
-                            "textureindex": 2,
-                            "texturename": ""
-                        },
-                        {
-                            "texturebuffername": "SphereTexture",
-                            "textureindex": 1,
-                            "texturename": ""
-                        }
-                    ]
-                },
-                {
-                    "materialframe": "basic_toon_mat",
-                    "cull": "back",
-                    "uniformvalues": [
-                        {
-                            "name": "edgeSize",
-                            "type": "float",
-                            "value": [
-                                0.6000000238418579
-                            ]
-                        },
-                        {
-                            "name": "ambientFactor",
-                            "type": "vec4",
-                            "value": [
-                                0.5,
-                                0.5,
-                                0.5,
-                                1.0
-                            ]
-                        },
-                        {
-                            "name": "edgeColor",
-                            "type": "vec4",
-                            "value": [
-                                0.30000001192092896,
-                                0.20000000298023224,
-                                0.4000000059604645,
-                                0.6000000238418579
-                            ]
-                        },
-                        {
-                            "name": "specularFactor",
-                            "type": "vec4",
-                            "value": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ]
-                        },
-                        {
-                            "name": "specularIntensity",
-                            "type": "float",
-                            "value": [
-                                50.0
-                            ]
-                        }
-                    ],
-                    "textures": [
-                        {
-                            "texturebuffername": "MainTexture",
-                            "textureindex": 0,
-                            "texturename": ""
-                        },
-                        {
-                            "texturebuffername": "ToonTexture",
-                            "textureindex": 4,
-                            "texturename": ""
-                        },
-                        {
-                            "texturebuffername": "SphereTexture",
-                            "textureindex": 3,
-                            "texturename": ""
-                        }
-                    ]
-                },
-                {
-                    "materialframe": "basic_toon_mat",
-                    "cull": "back",
-                    "uniformvalues": [
-                        {
-                            "name": "edgeSize",
-                            "type": "float",
-                            "value": [
-                                0.6000000238418579
-                            ]
-                        },
-                        {
-                            "name": "ambientFactor",
-                            "type": "vec4",
-                            "value": [
-                                0.5,
-                                0.5,
-                                0.5,
-                                1.0
-                            ]
-                        },
-                        {
-                            "name": "edgeColor",
-                            "type": "vec4",
-                            "value": [
-                                0.10000000149011612,
-                                0.0,
-                                0.20000000298023224,
-                                0.699999988079071
-                            ]
-                        },
-                        {
-                            "name": "specularFactor",
-                            "type": "vec4",
-                            "value": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ]
-                        },
-                        {
-                            "name": "specularIntensity",
-                            "type": "float",
-                            "value": [
-                                50.0
-                            ]
-                        }
-                    ],
-                    "textures": [
-                        {
-                            "texturebuffername": "MainTexture",
-                            "textureindex": 0,
-                            "texturename": ""
-                        },
-                        {
-                            "texturebuffername": "ToonTexture",
-                            "textureindex": 4,
-                            "texturename": ""
-                        },
-                        {
-                            "texturebuffername": "SphereTexture",
-                            "textureindex": 5,
-                            "texturename": ""
-                        }
-                    ]
-                },
-                {
-                    "materialframe": "basic_toon_mat",
-                    "cull": "back",
-                    "uniformvalues": [
-                        {
-                            "name": "edgeSize",
-                            "type": "float",
-                            "value": [
-                                0.6000000238418579
-                            ]
-                        },
-                        {
-                            "name": "ambientFactor",
-                            "type": "vec4",
-                            "value": [
-                                0.4000000059604645,
-                                0.5,
-                                0.5,
-                                1.0
-                            ]
-                        },
-                        {
-                            "name": "edgeColor",
-                            "type": "vec4",
-                            "value": [
-                                0.0,
-                                0.5,
-                                0.699999988079071,
-                                0.699999988079071
-                            ]
-                        },
-                        {
-                            "name": "specularFactor",
-                            "type": "vec4",
-                            "value": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ]
-                        },
-                        {
-                            "name": "specularIntensity",
-                            "type": "float",
-                            "value": [
-                                110.0
-                            ]
-                        }
-                    ],
-                    "textures": [
-                        {
-                            "texturebuffername": "MainTexture",
-                            "textureindex": 0,
-                            "texturename": ""
-                        },
-                        {
-                            "texturebuffername": "ToonTexture",
-                            "textureindex": 4,
-                            "texturename": ""
-                        },
-                        {
-                            "texturebuffername": "SphereTexture",
-                            "textureindex": 5,
-                            "texturename": ""
-                        }
-                    ]
-                },
-                {
-                    "materialframe": "basic_toon_mat",
-                    "cull": "back",
-                    "uniformvalues": [
-                        {
-                            "name": "edgeSize",
-                            "type": "float",
-                            "value": [
-                                0.6000000238418579
-                            ]
-                        },
-                        {
-                            "name": "ambientFactor",
-                            "type": "vec4",
-                            "value": [
-                                0.30000001192092896,
-                                0.20000000298023224,
-                                0.30000001192092896,
-                                1.0
-                            ]
-                        },
-                        {
-                            "name": "edgeColor",
-                            "type": "vec4",
-                            "value": [
-                                0.699999988079071,
-                                0.0,
-                                0.20000000298023224,
-                                0.699999988079071
-                            ]
-                        },
-                        {
-                            "name": "specularFactor",
-                            "type": "vec4",
-                            "value": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ]
-                        },
-                        {
-                            "name": "specularIntensity",
-                            "type": "float",
-                            "value": [
-                                115.0
-                            ]
-                        }
-                    ],
-                    "textures": [
-                        {
-                            "texturebuffername": "MainTexture",
-                            "textureindex": 0,
-                            "texturename": ""
-                        },
-                        {
-                            "texturebuffername": "ToonTexture",
-                            "textureindex": 4,
-                            "texturename": ""
-                        },
-                        {
-                            "texturebuffername": "SphereTexture",
-                            "textureindex": 5,
-                            "texturename": ""
-                        }
-                    ]
-                },
-                {
-                    "materialframe": "basic_toon_mat",
-                    "cull": "back",
-                    "uniformvalues": [
-                        {
-                            "name": "edgeSize",
-                            "type": "float",
-                            "value": [
-                                0.6000000238418579
-                            ]
-                        },
-                        {
-                            "name": "ambientFactor",
-                            "type": "vec4",
-                            "value": [
-                                0.4000000059604645,
-                                0.5,
-                                0.5,
-                                1.0
-                            ]
-                        },
-                        {
-                            "name": "edgeColor",
-                            "type": "vec4",
-                            "value": [
-                                0.0,
-                                0.15000000596046448,
-                                0.44999998807907104,
-                                0.699999988079071
-                            ]
-                        },
-                        {
-                            "name": "specularFactor",
-                            "type": "vec4",
-                            "value": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ]
-                        },
-                        {
-                            "name": "specularIntensity",
-                            "type": "float",
-                            "value": [
-                                100.0
-                            ]
-                        }
-                    ],
-                    "textures": [
-                        {
-                            "texturebuffername": "MainTexture",
-                            "textureindex": 0,
-                            "texturename": ""
-                        },
-                        {
-                            "texturebuffername": "ToonTexture",
-                            "textureindex": 4,
-                            "texturename": ""
-                        },
-                        {
-                            "texturebuffername": "SphereTexture",
-                            "textureindex": 3,
-                            "texturename": ""
-                        }
-                    ]
-                },
-                {
-                    "materialframe": "basic_toon_mat",
-                    "cull": "back",
-                    "uniformvalues": [
-                        {
-                            "name": "edgeSize",
-                            "type": "float",
-                            "value": [
-                                0.6000000238418579
-                            ]
-                        },
-                        {
-                            "name": "ambientFactor",
-                            "type": "vec4",
-                            "value": [
-                                0.5,
-                                0.5,
-                                0.5,
-                                1.0
-                            ]
-                        },
-                        {
-                            "name": "edgeColor",
-                            "type": "vec4",
-                            "value": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ]
-                        },
-                        {
-                            "name": "specularFactor",
-                            "type": "vec4",
-                            "value": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ]
-                        },
-                        {
-                            "name": "specularIntensity",
-                            "type": "float",
-                            "value": [
-                                50.0
-                            ]
-                        }
-                    ],
-                    "textures": [
-                        {
-                            "texturebuffername": "MainTexture",
-                            "textureindex": 0,
-                            "texturename": ""
-                        },
-                        {
-                            "texturebuffername": "ToonTexture",
-                            "textureindex": 4,
-                            "texturename": ""
-                        },
-                        {
-                            "texturebuffername": "SphereTexture",
-                            "textureindex": 3,
-                            "texturename": ""
-                        }
-                    ]
-                },
-                {
-                    "materialframe": "basic_toon_mat",
-                    "cull": "back",
-                    "uniformvalues": [
-                        {
-                            "name": "edgeSize",
-                            "type": "float",
-                            "value": [
-                                0.6000000238418579
-                            ]
-                        },
-                        {
-                            "name": "ambientFactor",
-                            "type": "vec4",
-                            "value": [
-                                0.5,
-                                0.5,
-                                0.5,
-                                1.0
-                            ]
-                        },
-                        {
-                            "name": "edgeColor",
-                            "type": "vec4",
-                            "value": [
-                                0.44999998807907104,
-                                0.20000000298023224,
-                                0.30000001192092896,
-                                0.6000000238418579
-                            ]
-                        },
-                        {
-                            "name": "specularFactor",
-                            "type": "vec4",
-                            "value": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ]
-                        },
-                        {
-                            "name": "specularIntensity",
-                            "type": "float",
-                            "value": [
-                                50.0
-                            ]
-                        }
-                    ],
-                    "textures": [
-                        {
-                            "texturebuffername": "MainTexture",
-                            "textureindex": 6,
-                            "texturename": ""
-                        },
-                        {
-                            "texturebuffername": "SphereTexture",
-                            "textureindex": 1,
-                            "texturename": ""
-                        }
-                    ]
-                },
-                {
-                    "materialframe": "basic_toon_mat",
-                    "cull": "back",
-                    "uniformvalues": [
-                        {
-                            "name": "edgeSize",
-                            "type": "float",
-                            "value": [
-                                0.6000000238418579
-                            ]
-                        },
-                        {
-                            "name": "ambientFactor",
-                            "type": "vec4",
-                            "value": [
-                                0.5,
-                                0.5,
-                                0.5,
-                                1.0
-                            ]
-                        },
-                        {
-                            "name": "edgeColor",
-                            "type": "vec4",
-                            "value": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ]
-                        },
-                        {
-                            "name": "specularFactor",
-                            "type": "vec4",
-                            "value": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ]
-                        },
-                        {
-                            "name": "specularIntensity",
-                            "type": "float",
-                            "value": [
-                                50.0
-                            ]
-                        }
-                    ],
-                    "textures": [
-                        {
-                            "texturebuffername": "MainTexture",
-                            "textureindex": 6,
-                            "texturename": ""
-                        }
-                    ]
-                },
-                {
-                    "materialframe": "basic_toon_mat",
-                    "cull": "back",
-                    "uniformvalues": [
-                        {
-                            "name": "edgeSize",
-                            "type": "float",
-                            "value": [
-                                0.6000000238418579
-                            ]
-                        },
-                        {
-                            "name": "ambientFactor",
-                            "type": "vec4",
-                            "value": [
-                                0.4000000059604645,
-                                0.5,
-                                0.5,
-                                1.0
-                            ]
-                        },
-                        {
-                            "name": "edgeColor",
-                            "type": "vec4",
-                            "value": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ]
-                        },
-                        {
-                            "name": "specularFactor",
-                            "type": "vec4",
-                            "value": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ]
-                        },
-                        {
-                            "name": "specularIntensity",
-                            "type": "float",
-                            "value": [
-                                105.0
-                            ]
-                        }
-                    ],
-                    "textures": [
-                        {
-                            "texturebuffername": "MainTexture",
-                            "textureindex": 6,
-                            "texturename": ""
-                        }
-                    ]
-                },
-                {
-                    "materialframe": "basic_toon_mat",
-                    "cull": "back",
-                    "uniformvalues": [
-                        {
-                            "name": "edgeSize",
-                            "type": "float",
-                            "value": [
-                                0.6000000238418579
-                            ]
-                        },
-                        {
-                            "name": "ambientFactor",
-                            "type": "vec4",
-                            "value": [
-                                0.4000000059604645,
-                                0.5,
-                                0.5,
-                                1.0
-                            ]
-                        },
-                        {
-                            "name": "edgeColor",
-                            "type": "vec4",
-                            "value": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ]
-                        },
-                        {
-                            "name": "specularFactor",
-                            "type": "vec4",
-                            "value": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ]
-                        },
-                        {
-                            "name": "specularIntensity",
-                            "type": "float",
-                            "value": [
-                                102.0
-                            ]
-                        }
-                    ],
-                    "textures": [
-                        {
-                            "texturebuffername": "MainTexture",
-                            "textureindex": 6,
-                            "texturename": ""
-                        }
-                    ]
-                },
-                {
-                    "materialframe": "basic_toon_mat",
-                    "cull": "back",
-                    "uniformvalues": [
-                        {
-                            "name": "edgeSize",
-                            "type": "float",
-                            "value": [
-                                0.6000000238418579
-                            ]
-                        },
-                        {
-                            "name": "ambientFactor",
-                            "type": "vec4",
-                            "value": [
-                                0.5,
-                                0.5,
-                                0.5,
-                                1.0
-                            ]
-                        },
-                        {
-                            "name": "edgeColor",
-                            "type": "vec4",
-                            "value": [
-                                0.25,
-                                0.30000001192092896,
-                                0.5,
-                                0.6000000238418579
-                            ]
-                        },
-                        {
-                            "name": "specularFactor",
-                            "type": "vec4",
-                            "value": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ]
-                        },
-                        {
-                            "name": "specularIntensity",
-                            "type": "float",
-                            "value": [
-                                50.0
-                            ]
-                        }
-                    ],
-                    "textures": [
-                        {
-                            "texturebuffername": "MainTexture",
-                            "textureindex": 7,
-                            "texturename": ""
-                        },
-                        {
-                            "texturebuffername": "ToonTexture",
-                            "textureindex": 9,
-                            "texturename": ""
-                        },
-                        {
-                            "texturebuffername": "SphereTexture",
-                            "textureindex": 8,
-                            "texturename": ""
-                        }
-                    ]
-                },
-                {
-                    "materialframe": "basic_toon_mat",
-                    "cull": "back",
-                    "uniformvalues": [
-                        {
-                            "name": "edgeSize",
-                            "type": "float",
-                            "value": [
-                                0.6000000238418579
-                            ]
-                        },
-                        {
-                            "name": "ambientFactor",
-                            "type": "vec4",
-                            "value": [
-                                0.5,
-                                0.5,
-                                0.5,
-                                1.0
-                            ]
-                        },
-                        {
-                            "name": "edgeColor",
-                            "type": "vec4",
-                            "value": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ]
-                        },
-                        {
-                            "name": "specularFactor",
-                            "type": "vec4",
-                            "value": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ]
-                        },
-                        {
-                            "name": "specularIntensity",
-                            "type": "float",
-                            "value": [
-                                50.0
-                            ]
-                        }
-                    ],
-                    "textures": [
-                        {
-                            "texturebuffername": "MainTexture",
-                            "textureindex": 7,
-                            "texturename": ""
-                        },
-                        {
-                            "texturebuffername": "SphereTexture",
-                            "textureindex": 8,
-                            "texturename": ""
-                        }
-                    ]
-                },
-                {
-                    "materialframe": "basic_toon_mat",
-                    "cull": "back",
-                    "uniformvalues": [
-                        {
-                            "name": "edgeSize",
-                            "type": "float",
-                            "value": [
-                                0.6000000238418579
-                            ]
-                        },
-                        {
-                            "name": "ambientFactor",
-                            "type": "vec4",
-                            "value": [
-                                0.5,
-                                0.5,
-                                0.5,
-                                1.0
-                            ]
-                        },
-                        {
-                            "name": "edgeColor",
-                            "type": "vec4",
-                            "value": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ]
-                        },
-                        {
-                            "name": "specularFactor",
-                            "type": "vec4",
-                            "value": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ]
-                        },
-                        {
-                            "name": "specularIntensity",
-                            "type": "float",
-                            "value": [
-                                50.0
-                            ]
-                        }
-                    ],
-                    "textures": [
-                        {
-                            "texturebuffername": "MainTexture",
-                            "textureindex": 6,
-                            "texturename": ""
-                        }
-                    ]
-                },
-                {
-                    "materialframe": "basic_toon_mat",
-                    "cull": "back",
-                    "uniformvalues": [
-                        {
-                            "name": "edgeSize",
-                            "type": "float",
-                            "value": [
-                                0.6000000238418579
-                            ]
-                        },
-                        {
-                            "name": "ambientFactor",
-                            "type": "vec4",
-                            "value": [
-                                0.5,
-                                0.5,
-                                0.5,
-                                1.0
-                            ]
-                        },
-                        {
-                            "name": "edgeColor",
-                            "type": "vec4",
-                            "value": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ]
-                        },
-                        {
-                            "name": "specularFactor",
-                            "type": "vec4",
-                            "value": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ]
-                        },
-                        {
-                            "name": "specularIntensity",
-                            "type": "float",
-                            "value": [
-                                50.0
-                            ]
-                        }
-                    ],
-                    "textures": [
-                        {
-                            "texturebuffername": "MainTexture",
-                            "textureindex": 6,
-                            "texturename": ""
-                        }
-                    ]
-                },
-                {
-                    "materialframe": "basic_toon_mat",
-                    "cull": "back",
-                    "uniformvalues": [
-                        {
-                            "name": "edgeSize",
-                            "type": "float",
-                            "value": [
-                                0.6000000238418579
-                            ]
-                        },
-                        {
-                            "name": "ambientFactor",
-                            "type": "vec4",
-                            "value": [
-                                0.4000000059604645,
-                                0.5,
-                                0.5,
-                                1.0
-                            ]
-                        },
-                        {
-                            "name": "edgeColor",
-                            "type": "vec4",
-                            "value": [
-                                0.0,
-                                0.699999988079071,
-                                0.800000011920929,
-                                0.5
-                            ]
-                        },
-                        {
-                            "name": "specularFactor",
-                            "type": "vec4",
-                            "value": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ]
-                        },
-                        {
-                            "name": "specularIntensity",
-                            "type": "float",
-                            "value": [
-                                103.0
-                            ]
-                        }
-                    ],
-                    "textures": [
-                        {
-                            "texturebuffername": "MainTexture",
-                            "textureindex": 0,
-                            "texturename": ""
-                        },
-                        {
-                            "texturebuffername": "ToonTexture",
-                            "textureindex": 4,
-                            "texturename": ""
-                        },
-                        {
-                            "texturebuffername": "SphereTexture",
-                            "textureindex": 3,
-                            "texturename": ""
-                        }
-                    ]
-                },
-                {
-                    "materialframe": "basic_toon_mat",
-                    "cull": "back",
-                    "uniformvalues": [
-                        {
-                            "name": "edgeSize",
-                            "type": "float",
-                            "value": [
-                                0.6000000238418579
-                            ]
-                        },
-                        {
-                            "name": "ambientFactor",
-                            "type": "vec4",
-                            "value": [
-                                0.5,
-                                0.5,
-                                0.5,
-                                1.0
-                            ]
-                        },
-                        {
-                            "name": "edgeColor",
-                            "type": "vec4",
-                            "value": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ]
-                        },
-                        {
-                            "name": "specularFactor",
-                            "type": "vec4",
-                            "value": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ]
-                        },
-                        {
-                            "name": "specularIntensity",
-                            "type": "float",
-                            "value": [
-                                50.0
-                            ]
-                        }
-                    ],
-                    "textures": [
-                        {
-                            "texturebuffername": "MainTexture",
-                            "textureindex": 10,
-                            "texturename": ""
-                        },
-                        {
-                            "texturebuffername": "ToonTexture",
-                            "textureindex": 4,
-                            "texturename": ""
-                        },
-                        {
-                            "texturebuffername": "SphereTexture",
-                            "textureindex": 3,
-                            "texturename": ""
-                        }
-                    ]
-                },
-                {
-                    "materialframe": "basic_toon_mat",
-                    "cull": "back",
-                    "uniformvalues": [
-                        {
-                            "name": "edgeSize",
-                            "type": "float",
-                            "value": [
-                                1.0
-                            ]
-                        },
-                        {
-                            "name": "ambientFactor",
-                            "type": "vec4",
-                            "value": [
-                                0.5,
-                                0.5,
-                                0.5,
-                                1.0
-                            ]
-                        },
-                        {
-                            "name": "edgeColor",
-                            "type": "vec4",
-                            "value": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ]
-                        },
-                        {
-                            "name": "specularFactor",
-                            "type": "vec4",
-                            "value": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ]
-                        },
-                        {
-                            "name": "specularIntensity",
-                            "type": "float",
-                            "value": [
-                                50.0
-                            ]
-                        }
-                    ],
-                    "textures": [
-                        {
-                            "texturebuffername": "MainTexture",
-                            "textureindex": 10,
-                            "texturename": ""
-                        },
-                        {
-                            "texturebuffername": "SphereTexture",
-                            "textureindex": 5,
-                            "texturename": ""
-                        }
-                    ]
-                }
-            ]
-        },
-        {
             "name": "CCDIKTest",
             "filename": "Resources\\Models\\CCDIKTest\\CCDIKTest.glb",
             "defaultmaterialframe": "pbr_mat",
@@ -1214,9 +46,9 @@
                             "name": "baseColorFactor",
                             "type": "vec4",
                             "value": [
-                                0.800000011920929,
-                                0.800000011920929,
-                                0.800000011920929,
+                                0.8000001907348633,
+                                0.0,
+                                1.0,
                                 1.0
                             ]
                         },
@@ -1228,6 +60,237 @@
                             ]
                         }
                     ],
+                    "textures": [
+                        {
+                            "texturebuffername": "cubemapTexture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "shadowmapTexture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_Diffuse_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_Specular_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_GGXLUT_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        }
+                    ]
+                },
+                {
+                    "materialframe": "pbr_mat",
+                    "cull": "back",
+                    "uniformvalues": [
+                        {
+                            "name": "baseColorFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.0,
+                                0.39999985694885254,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "roughnessFactor",
+                            "type": "float",
+                            "value": [
+                                0.5
+                            ]
+                        }
+                    ],
+                    "textures": [
+                        {
+                            "texturebuffername": "cubemapTexture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "shadowmapTexture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_Diffuse_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_Specular_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_GGXLUT_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        }
+                    ]
+                },
+                {
+                    "materialframe": "pbr_mat",
+                    "cull": "back",
+                    "uniformvalues": [
+                        {
+                            "name": "baseColorFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.0,
+                                1.0,
+                                0.40000009536743164,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "roughnessFactor",
+                            "type": "float",
+                            "value": [
+                                0.5
+                            ]
+                        }
+                    ],
+                    "textures": [
+                        {
+                            "texturebuffername": "cubemapTexture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "shadowmapTexture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_Diffuse_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_Specular_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_GGXLUT_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        }
+                    ]
+                },
+                {
+                    "materialframe": "pbr_mat",
+                    "cull": "back",
+                    "uniformvalues": [
+                        {
+                            "name": "baseColorFactor",
+                            "type": "vec4",
+                            "value": [
+                                0.7999999523162842,
+                                1.0,
+                                0.0,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "roughnessFactor",
+                            "type": "float",
+                            "value": [
+                                0.5
+                            ]
+                        }
+                    ],
+                    "textures": [
+                        {
+                            "texturebuffername": "cubemapTexture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "shadowmapTexture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_Diffuse_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_Specular_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_GGXLUT_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        }
+                    ]
+                },
+                {
+                    "materialframe": "pbr_mat",
+                    "cull": "back",
+                    "uniformvalues": [
+                        {
+                            "name": "baseColorFactor",
+                            "type": "vec4",
+                            "value": [
+                                1.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "roughnessFactor",
+                            "type": "float",
+                            "value": [
+                                0.5
+                            ]
+                        }
+                    ],
+                    "textures": [
+                        {
+                            "texturebuffername": "cubemapTexture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "shadowmapTexture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_Diffuse_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_Specular_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        },
+                        {
+                            "texturebuffername": "IBL_GGXLUT_Texture",
+                            "textureindex": -1,
+                            "texturename": ""
+                        }
+                    ]
+                },
+                {
+                    "materialframe": "pbr_mat",
+                    "cull": "back",
                     "textures": [
                         {
                             "texturebuffername": "cubemapTexture",
