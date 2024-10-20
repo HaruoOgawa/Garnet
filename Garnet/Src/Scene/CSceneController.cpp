@@ -1,5 +1,6 @@
 #include "CSceneController.h"
 #include <LoadWorker/CLoadWorker.h>
+#include <LoadWorker/CMaterialFrameLoader.h>
 #include "../Object/C3DObject.h"
 #include "../Animation/CAnimationClipSet.h"
 #include "../Audio/CAudioClip.h"
@@ -133,22 +134,23 @@ namespace scene
 		m_ObjectList.shrink_to_fit();
 	}
 
-	void CSceneController::AddMaterialFrame(const std::string& FileName, const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame)
+	void CSceneController::AddMaterialFrame(const std::string& MFName, const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame)
 	{
-		m_MaterialFrameMap.emplace(FileName, MaterialFrame);
+		m_MaterialFrameMap.emplace(MFName, MaterialFrame);
 	}
 
 	void CSceneController::AddMaterialFrameWithLoading(resource::CLoadWorker* pLoadWorker, const std::string& FileName)
 	{
-		const auto it = m_MaterialFrameMap.find(FileName);
+		const auto it = m_MaterialFrameLoaderMap.find(FileName);
 
-		if (it == m_MaterialFrameMap.end())
+		if (it == m_MaterialFrameLoaderMap.end())
 		{
 			std::shared_ptr<graphics::CMaterialFrame> MaterialFrame = std::make_shared<graphics::CMaterialFrame>();
+			std::shared_ptr<resource::CMaterialFrameLoader> MaterialFrameLoader = std::make_shared<resource::CMaterialFrameLoader>(FileName, MaterialFrame);
 
-			pLoadWorker->AddLoadResource(std::make_shared<resource::CMaterialFrameLoader>(FileName, MaterialFrame));
+			pLoadWorker->AddLoadResource(MaterialFrameLoader);
 
-			AddMaterialFrame(FileName, MaterialFrame);
+			m_MaterialFrameLoaderMap.emplace(FileName, MaterialFrameLoader);
 		}
 	}
 
@@ -157,11 +159,11 @@ namespace scene
 		return m_MaterialFrameMap;
 	}
 
-	std::shared_ptr<graphics::CMaterialFrame> CSceneController::FindMaterialFrame(const std::string& FileName)
+	std::shared_ptr<graphics::CMaterialFrame> CSceneController::FindMaterialFrame(const std::string& MFName)
 	{
 		std::shared_ptr<graphics::CMaterialFrame> MaterialFrame = nullptr;
 
-		const auto it = m_MaterialFrameMap.find(FileName);
+		const auto it = m_MaterialFrameMap.find(MFName);
 		if (it != m_MaterialFrameMap.end()) MaterialFrame = it->second;
 
 		return MaterialFrame;
@@ -327,8 +329,33 @@ namespace scene
 	bool CSceneController::Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
 		const std::shared_ptr<graphics::CDrawInfo>& DrawInfo, const std::shared_ptr<input::CInputState>& InputState, const std::shared_ptr<timeline::CTimelineController>& TimelineController)
 	{
+		// Loading Check
+		{
+			for (auto it = m_MaterialFrameLoaderMap.begin(); it != m_MaterialFrameLoaderMap.end(); )
+			{
+				if (it->second->IsLoaded())
+				{
+					for (const auto& MaterialFrame : it->second->GetTargetMaterialFrameSet())
+					{
+						// 既に存在するならスキップ
+						if (m_MaterialFrameMap.find(MaterialFrame->GetMaterialFrameName()) != m_MaterialFrameMap.end()) continue;
+
+						AddMaterialFrame(MaterialFrame->GetMaterialFrameName(), MaterialFrame);
+					}
+
+					m_MaterialFrameLoaderMap.erase(it++);
+				}
+				else
+				{
+					it++;
+				}
+			}
+		}
+
+		//
 		if (!m_IsLoaded) return true;
 
+		//
 		for (const auto& Object : m_ObjectList)
 		{
 			if (!Object->Update(pGraphicsAPI, pPhysicsEngine, DrawInfo->GetDeltaSecondsTime())) return false;

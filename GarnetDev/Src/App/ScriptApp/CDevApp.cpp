@@ -20,6 +20,8 @@
 #include <Timeline/CTimelineController.h>
 #include <Scene/CSceneController.h>
 
+#include "../../Component/CCDIKTest.h"
+
 namespace app
 {
 	CDevApp::CDevApp() :
@@ -41,7 +43,8 @@ namespace app
 		m_FileModifier(std::make_shared<CFileModifier>()),
 		m_TimelineController(std::make_shared<timeline::CTimelineController>())
 	{
-		m_ViewCamera->SetPos(glm::vec3(0.0f, 5.0f, -5.0f));
+		m_ViewCamera->SetPos(glm::vec3(0.0f, 2.5f, -10.0f));
+		m_ViewCamera->SetCenter(glm::vec3(0.0f, 2.5f, 0.0f));
 		m_MainCamera = m_ViewCamera;
 
 		m_DrawInfo->GetLightCamera()->SetPos(glm::vec3(-2.358f, 15.6f, -0.59f));
@@ -206,6 +209,15 @@ namespace app
 	// ロード完了イベント
 	bool CDevApp::OnLoaded(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<gui::IGUIEngine>& GUIEngine)
 	{
+		{
+			const auto& Object = m_SceneController->FindObjectByName("CCDIKTest");
+			if (Object)
+			{
+				const auto& Node = Object->FindNodeByName("Link.004");
+				Node->AddComponent(std::make_shared<component::CCDIKTest>("CCDIKTest", ""));
+			}
+		}
+
 		if (!m_SceneController->Create(pGraphicsAPI, pPhysicsEngine)) return false;
 
 		if (!m_ScriptScene->OnLoaded(pGraphicsAPI, pPhysicsEngine, pLoadWorker)) return false;
