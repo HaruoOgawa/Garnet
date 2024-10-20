@@ -266,13 +266,21 @@ namespace gui
 
 			// DefaultMaterialframe
 			static std::string DefaultMaterialframe = std::string();
+			if (ImGui::BeginCombo("DefaultMaterialframe##CGUIObjectTab_DrawAddObjectDialog", DefaultMaterialframe.c_str()))
 			{
-				static char buf[256] = "";
-
-				if (ImGui::InputText("DefaultMaterialframe##AddObjectDialog", buf, IM_ARRAYSIZE(buf)))
+				for (const auto& MaterialFrame : GUIParams.SceneController->GetMaterialFrameMap())
 				{
-					DefaultMaterialframe = std::string(buf);
+					std::string Name = MaterialFrame.second->GetMaterialFrameName();
+
+					const bool IsSelected = (DefaultMaterialframe == Name);
+
+					if (ImGui::Selectable(Name.c_str(), IsSelected) && !IsSelected)
+					{
+						DefaultMaterialframe = MaterialFrame.second->GetMaterialFrameName();
+					}
 				}
+
+				ImGui::EndCombo();
 			}
 
 			ImGui::Text("%s", "Add");
