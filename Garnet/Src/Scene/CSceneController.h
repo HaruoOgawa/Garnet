@@ -14,7 +14,10 @@
 namespace object { class C3DObject; }
 namespace camera { class CCamera; }
 namespace projection { class CProjection; }
-namespace resource { class CLoadWorker; }
+namespace resource { 
+	class CLoadWorker; 
+	class CMaterialFrameLoader;
+}
 namespace input { class CInputState; }
 namespace timeline { class CTimelineController; }
 namespace graphics { 
@@ -86,6 +89,9 @@ namespace scene
 		//
 		std::vector<std::shared_ptr<object::C3DObject>> m_ObjectList;
 
+		// Loading
+		std::map<std::string, std::shared_ptr<resource::CMaterialFrameLoader>> m_MaterialFrameLoaderMap;
+
 		//
 		std::map<std::string, std::shared_ptr<graphics::CMaterialFrame>> m_MaterialFrameMap;
 		std::map<std::string, std::shared_ptr<scriptable::CValueRegistry>> m_ValueRegistryList;
@@ -133,10 +139,10 @@ namespace scene
 		std::shared_ptr<object::C3DObject> FindObjectByIndex(int Index);
 		void RemoveObject(int Index);
 
-		void AddMaterialFrame(const std::string& FileName, const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame);
+		void AddMaterialFrame(const std::string& MFName, const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame);
 		void AddMaterialFrameWithLoading(resource::CLoadWorker* pLoadWorker, const std::string& FileName);
 		const std::map<std::string, std::shared_ptr<graphics::CMaterialFrame>>& GetMaterialFrameMap() const;
-		std::shared_ptr<graphics::CMaterialFrame> FindMaterialFrame(const std::string& FileName);
+		std::shared_ptr<graphics::CMaterialFrame> FindMaterialFrame(const std::string& MFName);
 
 		void SetValueRegistry(const std::string& Registryname, const std::shared_ptr<scriptable::CValueRegistry>& ValueRegistry);
 		const std::map<std::string, std::shared_ptr<scriptable::CValueRegistry>>& GetValueRegistryList();
