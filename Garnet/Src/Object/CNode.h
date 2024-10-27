@@ -94,6 +94,7 @@ namespace object
 
 		void SetWorldMatrix(const glm::mat4& WorldMatrix);
 		const glm::mat4& GetWorldMatrix() const;
+		void SetWorldPos(const glm::vec3& Pos);
 		glm::vec3 GetWorldPos();
 		glm::mat4 CalcWorldMatrix();
 

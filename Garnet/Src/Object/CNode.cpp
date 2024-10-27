@@ -238,6 +238,13 @@ namespace object
 		return m_WorldMatrix;
 	}
 
+	void CNode::SetWorldPos(const glm::vec3& Pos)
+	{
+		m_WorldMatrix[3][0] = Pos.x;
+		m_WorldMatrix[3][1] = Pos.y;
+		m_WorldMatrix[3][2] = Pos.z;
+	}
+
 	glm::vec3 CNode::GetWorldPos()
 	{
 		return glm::vec3(m_WorldMatrix[3][0], m_WorldMatrix[3][1], m_WorldMatrix[3][2]);
