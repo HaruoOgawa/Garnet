@@ -18,14 +18,9 @@ namespace component
 {
 	class CCDIKTest : public scriptable::CComponent
 	{
-		std::shared_ptr<object::C3DObject> m_Object;
+		std::shared_ptr<object::CNode> m_TargetNode;
 
 		std::vector<std::shared_ptr<object::CNode>> m_LinkList;
-
-		int m_NumOfLink;
-
-		glm::vec3 m_InitTargetPos;
-		std::shared_ptr<object::CNode> m_TargetNode;
 	public:
 		CCDIKTest(const std::string& ComponentName, const std::string& RegistryName);
 		virtual ~CCDIKTest();

@@ -7,10 +7,7 @@ namespace component
 {
 	CCDIKTest::CCDIKTest(const std::string& ComponentName, const std::string& RegistryName):
 		CComponent(ComponentName, RegistryName),
-		m_Object(nullptr),
-		m_NumOfLink(5),
-		m_TargetNode(nullptr),
-		m_InitTargetPos(glm::vec3(0.0f))
+		m_TargetNode(nullptr)
 	{
 	}
 
@@ -22,16 +19,13 @@ namespace component
 		const std::shared_ptr<object::C3DObject>& Object, const std::shared_ptr<object::CNode>& SelfNode)
 	{
 		if (!Object) return false;
-		m_Object = Object;
 
 		m_TargetNode = Object->FindNodeByName("Target");
 		if (!m_TargetNode) return false;
 
-		m_InitTargetPos = m_TargetNode->GetWorldPos();
-
 		// Link0 ~ 4の順番(根本から先端)に入っていて0が根本・4が先端
 		// Link数は先端も入れて全部で5
-		for (int i = 0; i < m_NumOfLink; i++)
+		for (int i = 0; i < 5; i++)
 		{
 			auto LinkNode = Object->FindNodeByName("Link.00" + std::to_string(i));
 			if (!LinkNode) return false;
@@ -54,7 +48,7 @@ namespace component
 			glm::vec3 Pos = m_TargetNode->GetPos();
 			Pos.x = r * glm::cos(DrawInfo->GetSecondsTime());
 			Pos.y = r * glm::abs(glm::sin(DrawInfo->GetSecondsTime()));
-			Pos.z = r * glm::sin(DrawInfo->GetSecondsTime());
+			//Pos.z = r * glm::sin(DrawInfo->GetSecondsTime()); // あとでPosのアニメーションはパーリンノイズにしたい。今のやり方だと急に位置が飛んだりしてデバッグにならない
 
 			m_TargetNode->SetPos(Pos);
 		}
@@ -68,17 +62,19 @@ namespace component
 
 		const glm::vec3 TargetPos = m_TargetNode->GetWorldPos();
 
-		std::shared_ptr<object::CNode> EndNode = m_LinkList[m_NumOfLink - 1];
+		int NumOfLink = static_cast<int>(m_LinkList.size());
 
 		int NumOfCicle = 64;
 		int Count = 0;
 		bool DoLoop = true;
 
+		std::shared_ptr<object::CNode> EndNode = m_LinkList[NumOfLink - 1];
+
 		while(DoLoop && Count < NumOfCicle)
 		{
 			glm::vec3 EndPos = EndNode->GetWorldPos();
 
-			for (int i = m_NumOfLink - 2; i >= 0; i--)
+			for (int i = NumOfLink - 2; i >= 0; i--)
 			{
 				std::shared_ptr<object::CNode> LinkNode = m_LinkList[i];
 
@@ -138,7 +134,25 @@ namespace component
 				//PrevLinkNode->SetRot(rot * PrevLinkNode->GetRot());
 
 				// ひとまず全てのワールド行列を更新
-				m_Object->CalcWorldMatrix();
+				//m_Object->CalcWorldMatrix();
+
+				// Linkノードのワールド行列を再計算する
+				for (int n = i; n < NumOfLink; n++)
+				{
+					std::shared_ptr<object::CNode> ReCalcNode = m_LinkList[n];
+
+					const auto& ParentNode = ReCalcNode->GetParentNode();
+					if (!ParentNode)
+					{
+						// 親ノードがない時はローカル行列をワールド行列として渡す
+						ReCalcNode->SetWorldMatrix(ReCalcNode->GetLocalMatrix());
+
+						continue;
+					}
+
+					glm::mat4 NewWorldMatrix = ParentNode->GetWorldMatrix() * ReCalcNode->GetLocalMatrix();
+					ReCalcNode->SetWorldMatrix(NewWorldMatrix);
+				}
 
 				// EndNodeの座標を更新
 				EndPos = EndNode->GetWorldPos();
