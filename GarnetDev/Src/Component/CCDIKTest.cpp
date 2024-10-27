@@ -59,14 +59,23 @@ namespace component
 			m_TargetNode->SetPos(Pos);
 		}
 
-		// 注意点
-		// * せん断が発生してしまうのでCCDIKのリンクのスケールは必ず(1, 1, 1)になるようにする
+		// 注意点 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		// せん断が発生してしまうのでCCDIKのリンクのスケールは必ず(1, 1, 1)になるようにする
+		// つまり複数メッシュが親子ノード関係になっており、それぞれのスケールのノルム(ベクトルの長さ)が1出ない場合、せん断が発生する
+		// せん断とは例えば自ノードを90度回転させてもなぜか回転していなかったり、45度にすると形が斜めになって崩れるような見た目になる状態のことである
+		// たぶん自ノードの親ノードのスケールノルムが1ではない時に、自ノードを回転すると発生するのかもしれない
+		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 		const glm::vec3 TargetPos = m_TargetNode->GetWorldPos();
 
+		std::shared_ptr<object::CNode> EndNode = m_LinkList[m_NumOfLink - 1];
+
 		int NumOfCicle = 64;
-		for (int c = 0; c < NumOfCicle; c++)
+		int Count = 0;
+		bool DoLoop = true;
+
+		while(DoLoop && Count < NumOfCicle)
 		{
-			std::shared_ptr<object::CNode> EndNode = m_LinkList[m_NumOfLink - 1];
 			glm::vec3 EndPos = EndNode->GetWorldPos();
 
 			for (int i = m_NumOfLink - 2; i >= 0; i--)
@@ -125,6 +134,8 @@ namespace component
 				}
 
 				LinkNode->SetRot(rot * LinkNode->GetRot());
+				//std::shared_ptr<object::CNode> PrevLinkNode = m_LinkList[i + 1];
+				//PrevLinkNode->SetRot(rot * PrevLinkNode->GetRot());
 
 				// ひとまず全てのワールド行列を更新
 				m_Object->CalcWorldMatrix();
@@ -135,10 +146,21 @@ namespace component
 				if (glm::distance2(TargetPos, EndPos) < 0.01f)
 				{
 					// 終了
-					return true;
+					DoLoop = false;
+					break;
 				}
 			}
+			
+			Count++;
 		}
+
+		// アルゴリズム的には合っているが、見栄えのためにTargetがEndの先端に表示されるようにする
+		// EndNodeの位置に表示されればいいので根元に描画されるのは合っているのだが、モデリング的にどう対処したらいいのかわからない
+		// WorldMatrixは次のフレームで即リセットされるのでCCDIKの計算には影響ないはず
+		glm::quat EndWorldRot;
+		math::CTransform::CastModelMatrixToRotation(EndNode->GetWorldMatrix(), EndWorldRot);
+
+		m_TargetNode->SetWorldPos(m_TargetNode->GetPos() + EndWorldRot * glm::vec3(0.0f, 1.0f, 0.0f));
 
 		return true;
 	}
