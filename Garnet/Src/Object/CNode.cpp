@@ -238,6 +238,11 @@ namespace object
 		return m_WorldMatrix;
 	}
 
+	glm::vec3 CNode::GetWorldPos()
+	{
+		return glm::vec3(m_WorldMatrix[3][0], m_WorldMatrix[3][1], m_WorldMatrix[3][2]);
+	}
+
 	glm::mat4 CNode::CalcWorldMatrix()
 	{
 		glm::mat4 result = GetLocalMatrix();

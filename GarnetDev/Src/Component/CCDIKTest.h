@@ -2,6 +2,7 @@
 
 #include <Scriptable/CComponent.h>
 #include <vector>
+#include <glm/glm.hpp>
 
 namespace object { class CNode; }
 
@@ -14,7 +15,10 @@ namespace component
 {
 	class CCDIKTest : public scriptable::CComponent
 	{
-		std::vector<std::shared_ptr<object::CNode>> m_NodeList;
+		std::vector<std::shared_ptr<object::CNode>> m_LinkList;
+
+		glm::vec3 m_InitTargetPos;
+		std::shared_ptr<object::CNode> m_Target;
 	public:
 		CCDIKTest(const std::string& ComponentName, const std::string& RegistryName);
 		virtual ~CCDIKTest();

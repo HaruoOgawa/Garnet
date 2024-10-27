@@ -94,6 +94,7 @@ namespace object
 
 		void SetWorldMatrix(const glm::mat4& WorldMatrix);
 		const glm::mat4& GetWorldMatrix() const;
+		glm::vec3 GetWorldPos();
 		glm::mat4 CalcWorldMatrix();
 
 		void SetParentNode(const std::shared_ptr<CNode>& ParentNode);

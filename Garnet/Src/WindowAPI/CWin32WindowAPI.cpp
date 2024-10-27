@@ -206,7 +206,7 @@ namespace window
 
 		auto InputState = AppCore->GetInputState();
 
-		if (InputState->IsDownMouseLeft() || InputState->IsDownMouseRight())
+		//if (InputState->IsDownMouseLeft() || InputState->IsDownMouseRight())
 		{
 			POINT p;
 			GetCursorPos(&p);
