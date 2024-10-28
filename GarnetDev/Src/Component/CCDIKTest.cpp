@@ -43,12 +43,12 @@ namespace component
 		
 		// ターゲットのアニメーション
 		{
-			float r = 2.0f;
+			float r = 2.0f, t = DrawInfo->GetSecondsTime(), f = DrawInfo->GetSecondsTime();
 
 			glm::vec3 Pos = m_TargetNode->GetPos();
-			Pos.x = r * glm::cos(DrawInfo->GetSecondsTime());
-			Pos.y = r * glm::abs(glm::sin(DrawInfo->GetSecondsTime()));
-			//Pos.z = r * glm::sin(DrawInfo->GetSecondsTime()); // あとでPosのアニメーションはパーリンノイズにしたい。今のやり方だと急に位置が飛んだりしてデバッグにならない
+			Pos.x = r * glm::sin(t) * glm::cos(f);
+			Pos.y = r * glm::sin(t) * glm::sin(f);
+			Pos.z = r * glm::cos(t);
 
 			m_TargetNode->SetPos(Pos);
 		}
@@ -133,8 +133,45 @@ namespace component
 				//std::shared_ptr<object::CNode> PrevLinkNode = m_LinkList[i + 1];
 				//PrevLinkNode->SetRot(rot * PrevLinkNode->GetRot());
 
-				// ひとまず全てのワールド行列を更新
-				//m_Object->CalcWorldMatrix();
+				// 回転角度制限
+				{
+					// まずクォータニオンを回転軸と角度にばらす
+					// クォータニオンの定義は以下
+					// (λx, λy, λq): 回転軸, theta: 回転角度
+					// quat.x = λx * sin(theta / 2.0)
+					// quat.y = λy * sin(theta / 2.0)
+					// quat.z = λz * sin(theta / 2.0)
+					// quat.w = cos(theta / 2.0)
+					glm::quat q = LinkNode->GetRot();
+
+					float LinkTheta = 2.0f * glm::acos(q.w);
+
+					// wが1の時は任意軸回転である
+					glm::vec3 LinkAxis = glm::vec3(0.0f, 1.0f, 0.0f);
+					
+					if (q.w != 1.0f)
+					{
+						LinkAxis = glm::vec3(q.x, q.y, q.z) / glm::sin(LinkTheta / 2.0f);
+					}
+
+					// 回転角度をクランプする
+					LinkTheta = glm::clamp(LinkTheta, -3.1415f * 0.5f, 3.1415f * 0.5f);
+
+					// クォータニオンに直す
+					q = glm::angleAxis(LinkTheta, LinkAxis);
+
+					// だんだん歪が溜まってきてNaNになってしまうのできちんと最後には正規化しておく
+					q = glm::normalize(q);
+
+					// 再設定
+					LinkNode->SetRot(q);
+				}
+
+				if (std::isnan(rot.x) || std::isnan(rot.y) || std::isnan(rot.z) || std::isnan(rot.w))
+				{
+					Console::Log("[Error] CCDIK - found NaN value in ik rot. when clamp rotation.\n");
+					return false;
+				}
 
 				// Linkノードのワールド行列を再計算する
 				for (int n = i; n < NumOfLink; n++)
