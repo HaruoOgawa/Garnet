@@ -16,8 +16,7 @@ namespace object
 		m_PrevLocalTransform(std::make_shared<math::CTransform>()),
 		m_WorldMatrix(glm::mat4(1.0f)),
 		m_InverseBindMatrix(glm::mat4(1.0f)),
-		m_ParentNode(nullptr),
-		m_IKRotate(glm::quat(1.0f, 0.0f, 0.0f, 0.0f))
+		m_ParentNode(nullptr)
 	{
 	}
 
@@ -160,22 +159,6 @@ namespace object
 				PhysicsObject->SetPhysicsWorldTransform(WorldPos, WorldRotate);
 			}
 		}
-	}
-
-	// IK
-	void CNode::InitIKRotate()
-	{
-		m_IKRotate = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
-	}
-
-	void CNode::MulIKRotate(const glm::quat& Rotate)
-	{
-		m_IKRotate *= Rotate;
-	}
-
-	const glm::quat& CNode::GetIKRotate() const
-	{
-		return m_IKRotate;
 	}
 
 	// ÉÇÅ[Ét

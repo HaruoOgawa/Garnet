@@ -46,20 +46,9 @@ namespace animation
 		// CCD-IKを採用
 		int NumOfLink = static_cast<int>(m_IKChainList.size());
 
-		// CCD-IKには最低でも２つChainが必要
-		if (NumOfLink < 2) return true;
-
 		float Threshold = 0.01f;
 
-		constexpr float Epsilon = std::numeric_limits<float>::epsilon();
-
 		const glm::vec3 TargetPos = m_IKTarget->GetWorldPos();
-
-		// IKRotateを初期化
-		/*for (auto& ChainNode : m_IKChainList)
-		{
-			ChainNode->InitIKRotate();
-		}*/
 
 		// ターゲットに届くかサイクルの最大値に達するまで計算を繰り返す
 		int CurrentLoopNum = 0;
@@ -152,8 +141,6 @@ namespace animation
 				}
 
 				LinkNode->SetRot(rot * LinkNode->GetRot());
-				//std::shared_ptr<object::CNode> PrevLinkNode = m_LinkList[i + 1];
-				//PrevLinkNode->SetRot(rot * PrevLinkNode->GetRot());
 
 				if (std::isnan(rot.x) || std::isnan(rot.y) || std::isnan(rot.z) || std::isnan(rot.w))
 				{
@@ -194,12 +181,6 @@ namespace animation
 			// ループ回数を更新
 			CurrentLoopNum++;
 		}
-
-		// IKRotateを反映する
-		/*for (auto& ChainNode : m_IKChainList)
-		{
-			ChainNode->MulRot(ChainNode->GetIKRotate());
-		}*/
 
 		return true;
 	}
