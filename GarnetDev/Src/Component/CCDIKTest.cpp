@@ -137,7 +137,7 @@ namespace component
 				{
 					// まずクォータニオンを回転軸と角度にばらす
 					// クォータニオンの定義は以下
-					// (λx, λy, λq): 回転軸, theta: 回転角度
+					// (λx, λy, λz): 回転軸, theta: 回転角度
 					// quat.x = λx * sin(theta / 2.0)
 					// quat.y = λy * sin(theta / 2.0)
 					// quat.z = λz * sin(theta / 2.0)

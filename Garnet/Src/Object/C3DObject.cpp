@@ -369,6 +369,10 @@ namespace object
 		if (!m_AnimationController->Update(DeltaSecondsTime)) return false;
 		if (!m_BlendShapeController->Update(DeltaSecondsTime)) return false;
 
+		// ワールド行列の更新
+		// 全ノードマイフレーム更新しているので、そのうちキャッシュを入れて更新は必要なものだけにする
+		CalcWorldMatrix(); // (仮でここにも置いてる)
+
 		// IKの計算を行う
 		if (!m_AnimationController->CalculateIK(m_NodeList)) return false;
 

@@ -12,7 +12,53 @@
     "timeline": {
         "filename": "Resources\\Scene\\CCDIK.tl"
     },
+    "animations": [
+        {
+            "name": "Bling-Bang-Bang-Born",
+            "filename": "Resources/Motions/Bling-Bang-Bang-Born.vmd"
+        }
+    ],
     "objects": [
+        {
+            "name": "PmxObj",
+            "filename": "Resources/Avatar/Tda_Miku/Tda_Miku.pmx",
+            "defaultmaterialframe": "basic_toon_mat",
+            "animation": {
+                "clips": null,
+                "humanoidclips": [
+                    {
+                        "key": "Dance",
+                        "motionname": "Bling-Bang-Bang-Born",
+                        "index": 0,
+                        "loop": true,
+                        "ik": true
+                    }
+                ],
+                "playmotionindex": -1,
+                "playmotion": "Dance",
+                "blendshapes": [
+                ],
+                "playblendshapes": [
+                ]
+            },
+            "transform": {
+                "pos": [
+                    3.0,
+                    0.0,
+                    0.0
+                ],
+                "rotate": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scale": [
+                    0.10000000149011612,
+                    0.10000000149011612,
+                    0.10000000149011612
+                ]
+            }
+        },
         {
             "name": "CCDIKTest",
             "filename": "Resources\\Models\\CCDIKTest\\CCDIKTest.glb",
