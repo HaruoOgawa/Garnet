@@ -14,7 +14,7 @@
     },
     "animations": [
       {
-        "name": "Bling-Bang-Bang-Born",
+        "name": "MotionTest",
         "filename": "Resources/Motions/mmd_running.vmd"
       }
     ],
@@ -26,13 +26,13 @@
             "animation": {
                 "clips": null,
                 "humanoidclips": [
-                    {
-                        "key": "Dance",
-                        "motionname": "Bling-Bang-Bang-Born",
-                        "index": 0,
-                        "loop": true,
-                        "ik": true
-                    }
+                  {
+                    "key": "Dance",
+                    "motionname": "MotionTest",
+                    "index": 0,
+                    "loop": true,
+                    "ik": true
+                  }
                 ],
                 "playmotionindex": -1,
                 "playmotion": "Dance",
