@@ -62,13 +62,36 @@ namespace component
 
 		const glm::vec3 TargetPos = m_TargetNode->GetWorldPos();
 
-		int NumOfLink = static_cast<int>(m_LinkList.size());
+		// 元のノード情報をコピーしておく
+		// CCDIKはコピーノードに対して行い最後に反映するため
+		std::vector<std::shared_ptr<object::CNode>> LocalLinkList;
+		{
+			std::shared_ptr<object::CNode> LocalParentNode = m_LinkList[0]->GetParentNode();
+
+			for (auto& SrcNode : m_LinkList)
+			{
+				std::shared_ptr<object::CNode> LocalNode = std::make_shared<object::CNode>(-1, -1);
+
+				LocalNode->SetParentNode(LocalParentNode);
+				LocalNode->SetPos(SrcNode->GetPos());
+				LocalNode->SetRot(SrcNode->GetRot());
+				LocalNode->SetScale(SrcNode->GetScale());
+				LocalNode->SetWorldMatrix(SrcNode->GetWorldMatrix());
+
+				LocalLinkList.push_back(LocalNode);
+
+				LocalParentNode = LocalNode;
+			}
+		}
+
+		//
+		int NumOfLink = static_cast<int>(LocalLinkList.size());
 
 		int NumOfCicle = 64;
 		int Count = 0;
 		bool DoLoop = true;
 
-		std::shared_ptr<object::CNode> EndNode = m_LinkList[NumOfLink - 1];
+		std::shared_ptr<object::CNode> EndNode = LocalLinkList[NumOfLink - 1];
 
 		while(DoLoop && Count < NumOfCicle)
 		{
@@ -76,7 +99,7 @@ namespace component
 
 			for (int i = NumOfLink - 2; i >= 0; i--)
 			{
-				std::shared_ptr<object::CNode> LinkNode = m_LinkList[i];
+				std::shared_ptr<object::CNode> LinkNode = LocalLinkList[i];
 
 				glm::vec3 LinkPos = LinkNode->GetWorldPos();
 
@@ -130,8 +153,6 @@ namespace component
 				}
 
 				LinkNode->SetRot(rot * LinkNode->GetRot());
-				//std::shared_ptr<object::CNode> PrevLinkNode = m_LinkList[i + 1];
-				//PrevLinkNode->SetRot(rot * PrevLinkNode->GetRot());
 
 				// 回転角度制限
 				{
@@ -176,7 +197,7 @@ namespace component
 				// Linkノードのワールド行列を再計算する
 				for (int n = i; n < NumOfLink; n++)
 				{
-					std::shared_ptr<object::CNode> ReCalcNode = m_LinkList[n];
+					std::shared_ptr<object::CNode> ReCalcNode = LocalLinkList[n];
 
 					const auto& ParentNode = ReCalcNode->GetParentNode();
 					if (!ParentNode)
@@ -205,13 +226,41 @@ namespace component
 			Count++;
 		}
 
+		// CCDIKの演算結果を元のノードに反映する
+		for (int i = 0; i < static_cast<int>(m_LinkList.size()); i++)
+		{
+			auto& LocalNode = LocalLinkList[i];
+			auto& SrcNode = m_LinkList[i];
+
+			// 回転にローパスフィルタをかけて急激に変化しないようにする
+			float t = DrawInfo->GetDeltaSecondsTime() * 8.0f;
+			glm::quat filterRot = glm::slerp(SrcNode->GetRot(), LocalNode->GetRot(), t);
+
+			SrcNode->SetRot(filterRot);
+
+			//
+			const auto& ParentNode = SrcNode->GetParentNode();
+			if (!ParentNode)
+			{
+				// 親ノードがない時はローカル行列をワールド行列として渡す
+				SrcNode->SetWorldMatrix(SrcNode->GetLocalMatrix());
+
+				continue;
+			}
+
+			glm::mat4 NewWorldMatrix = ParentNode->GetWorldMatrix() * SrcNode->GetLocalMatrix();
+			SrcNode->SetWorldMatrix(NewWorldMatrix);
+		}
+
 		// アルゴリズム的には合っているが、見栄えのためにTargetがEndの先端に表示されるようにする
 		// EndNodeの位置に表示されればいいので根元に描画されるのは合っているのだが、モデリング的にどう対処したらいいのかわからない
 		// WorldMatrixは次のフレームで即リセットされるのでCCDIKの計算には影響ないはず
-		glm::quat EndWorldRot;
-		math::CTransform::CastModelMatrixToRotation(EndNode->GetWorldMatrix(), EndWorldRot);
+		{
+			glm::quat EndWorldRot;
+			math::CTransform::CastModelMatrixToRotation(EndNode->GetWorldMatrix(), EndWorldRot);
 
-		m_TargetNode->SetWorldPos(m_TargetNode->GetPos() + EndWorldRot * glm::vec3(0.0f, 1.0f, 0.0f));
+			m_TargetNode->SetWorldPos(m_TargetNode->GetPos() + EndWorldRot * glm::vec3(0.0f, 1.0f, 0.0f));
+		}
 
 		return true;
 	}
