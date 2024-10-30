@@ -13,10 +13,10 @@
         "filename": "Resources\\Scene\\CCDIK.tl"
     },
     "animations": [
-        {
-            "name": "Bling-Bang-Bang-Born",
-            "filename": "Resources/Motions/Bling-Bang-Bang-Born.vmd"
-        }
+      {
+        "name": "Bling-Bang-Bang-Born",
+        "filename": "Resources/Motions/mmd_running.vmd"
+      }
     ],
     "objects": [
         {
