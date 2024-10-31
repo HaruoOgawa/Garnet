@@ -111,6 +111,8 @@ namespace scene
 		std::string m_DefaultRenderPass;
 		std::string m_DefaultDepthPass;
 
+		std::shared_ptr<object::C3DObject> m_DebugSphere = nullptr;
+
 	private:
 		bool PrepareTextureList(const std::shared_ptr<object::C3DObject>& Object, std::map<std::string, int>& TexIndexMap);
 		bool PrepareMaterialList(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<object::C3DObject>& Object, const std::map<std::string, int>& TexIndexMap);
