@@ -116,7 +116,7 @@ namespace animation
 					// 通常通り内積結果から回転
 					float angle = glm::acos(dot);
 
-					// 単位角で回転量を制限
+					// 単位角で回転量を制限。LimitedAngleはラジアン
 					angle = glm::min(angle, m_IKParam->LimitedAngle);
 
 					rot = glm::angleAxis(angle, glm::normalize(axis)); // 回転角度がおかしくなってしまうので回転取得前にちゃんと軸を正規化しておく
@@ -133,9 +133,10 @@ namespace animation
 					glm::vec3 euler = glm::eulerAngles(rot);
 
 					// オイラー角に対して角度制限を行う
-					euler.x = glm::radians(glm::clamp(glm::degrees(euler.x), LowerAngle.x, UpperAngle.x));
-					euler.y = glm::radians(glm::clamp(glm::degrees(euler.y), LowerAngle.y, UpperAngle.y));
-					euler.z = glm::radians(glm::clamp(glm::degrees(euler.z), LowerAngle.z, UpperAngle.z));
+					// LowerAngleとUpperAngleはラジアン
+					euler.x = glm::clamp(euler.x, LowerAngle.x, UpperAngle.x);
+					euler.y = glm::clamp(euler.y, LowerAngle.y, UpperAngle.y);
+					euler.z = glm::clamp(euler.z, LowerAngle.z, UpperAngle.z);
 
 					rot = glm::quat(euler);
 				}
