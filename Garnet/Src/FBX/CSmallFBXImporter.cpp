@@ -193,7 +193,7 @@ namespace fbx
 			// 大抵は2つ目のクリップがどのモーションでも一番良いみたいだが、これがFBXの仕様なのかMixamoの仕様なのかわからないのでひとまずそういうことにしておく
 			for (const auto& Clip : AnimationClipList)
 			{
-				Object->AddAnimationClip(Clip);
+				Object->AddAnimationClip(Clip, "Default", { nullptr, "" }, true);
 			}
 		}
 

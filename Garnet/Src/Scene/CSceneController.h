@@ -50,6 +50,10 @@ namespace scene
 
 	struct SAnimationClip
 	{
+		std::string Key = "";
+		std::string MotionName = "";
+		int Index = -1;
+		bool Loop = false;
 	};
 
 	struct SHumanoidclip
@@ -71,7 +75,7 @@ namespace scene
 
 	struct SAnimationInfo
 	{
-		std::vector<SAnimationClip> Clips;
+		std::map<std::string, SAnimationClip> Clips;
 		std::map<std::string, SHumanoidclip> Humanoidclips;
 		std::map<std::string, SBlendshape> Blendshapes;
 

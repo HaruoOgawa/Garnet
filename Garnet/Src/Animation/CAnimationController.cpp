@@ -270,9 +270,13 @@ namespace animation
 		return m_Skeleton;
 	}
 
-	void CAnimationController::AddAnimationClip(const std::shared_ptr<animation::CAnimationClip>& Clip)
+	void CAnimationController::AddAnimationClip(const std::shared_ptr<animation::CAnimationClip>& Clip, const std::string& MotionName, animation::SAnimationLayout Layout, bool IsLoop)
 	{
 		m_ClipList.push_back(Clip);
+
+		Clip->SetIsLoop(IsLoop);
+		Layout.Clip = Clip;
+		AddMotion(MotionName, Layout);
 	}
 
 	void CAnimationController::AddHumanoidAnimationClip(const std::shared_ptr<animation::CAnimationClip>& SourceClip, 

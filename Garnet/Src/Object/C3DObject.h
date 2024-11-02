@@ -154,7 +154,7 @@ namespace object
 		void AddBlendShapeNode(const std::shared_ptr<CNode>& Node);
 
 		void SetAnimationSkeleton(const std::shared_ptr<animation::CSkeleton>& Skeleton);
-		void AddAnimationClip(const std::shared_ptr<animation::CAnimationClip>& Clip);
+		void AddAnimationClip(const std::shared_ptr<animation::CAnimationClip>& Clip, const std::string& MotionName, animation::SAnimationLayout Layout, bool IsLoop);
 		void AddHumanoidAnimationClip(const std::shared_ptr<animation::CAnimationClip>& SourceClip, const std::string& MotionName, 
 			animation::SAnimationLayout Layout, bool IsLoop, bool UseIK);
 		void AddBlendShapeClip(const std::shared_ptr<animation::CBlendShapeClip>& Clip, const std::string& MotionName, bool IsLoop);

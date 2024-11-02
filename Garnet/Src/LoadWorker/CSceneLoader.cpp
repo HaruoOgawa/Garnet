@@ -780,7 +780,30 @@ namespace resource
 		const auto clips = animationJSON->find("clips");
 		if (clips != animationJSON->end() && clips->is_array())
 		{
-			// –¢ŽÀ‘•
+			for (json::iterator clipJSON = clips->begin(); clipJSON != clips->end(); clipJSON++)
+			{
+				if (!clipJSON->is_object()) continue;
+
+				scene::SAnimationClip Clip{};
+
+				std::string key = "";
+				GetString("key", key, clipJSON);
+				Clip.Key = key;
+
+				std::string motionname = "";
+				GetString("motionname", motionname, clipJSON);
+				Clip.MotionName = motionname;
+
+				int index = -1;
+				GetInt("index", index, clipJSON);
+				Clip.Index = index;
+
+				bool loop = false;
+				GetBoolean("loop", loop, clipJSON);
+				Clip.Loop = loop;
+
+				AnimationInfo.Clips.emplace(key, Clip);
+			}
 		}
 
 		// humanoidclips

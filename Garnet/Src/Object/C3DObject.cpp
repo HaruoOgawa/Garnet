@@ -747,9 +747,9 @@ namespace object
 		m_AnimationController->SetAnimationSkeleton(Skeleton);
 	}
 
-	void C3DObject::AddAnimationClip(const std::shared_ptr<animation::CAnimationClip>& Clip)
+	void C3DObject::AddAnimationClip(const std::shared_ptr<animation::CAnimationClip>& Clip, const std::string& MotionName, animation::SAnimationLayout Layout, bool IsLoop)
 	{
-		m_AnimationController->AddAnimationClip(Clip);
+		m_AnimationController->AddAnimationClip(Clip, MotionName, Layout, IsLoop);
 	}
 
 	void C3DObject::AddHumanoidAnimationClip(const std::shared_ptr<animation::CAnimationClip>& SourceClip, const std::string& MotionName, 

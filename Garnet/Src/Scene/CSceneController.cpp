@@ -472,7 +472,19 @@ namespace scene
 
 		const auto& AnimationInfo = it->second;
 
-		// humanoidclips
+		// clips(通常のスキンメッシュアニメーション)
+		for (const auto& clip : AnimationInfo.Clips)
+		{
+			const auto& AnimationClipSet = m_AnimationClipSetMap.find(clip.second.MotionName);
+			if (AnimationClipSet == m_AnimationClipSetMap.end()) continue;
+
+			const auto& Clip = AnimationClipSet->second->GetAnimationClip(clip.second.Index);
+			if (!Clip) continue;
+
+			Object->AddAnimationClip(Clip, clip.second.Key, { nullptr, "" }, clip.second.Loop);
+		}
+
+		// humanoidclips(ヒューマノイドアニメーション)
 		for (const auto& Humanoidclip : AnimationInfo.Humanoidclips)
 		{
 			const auto& AnimationClipSet = m_AnimationClipSetMap.find(Humanoidclip.second.MotionName);

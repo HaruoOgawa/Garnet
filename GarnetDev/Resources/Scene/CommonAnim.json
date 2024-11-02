@@ -26,14 +26,12 @@
             "renderpass": "MainResultPass",
             "depthpass": "",
             "animation": {
-                "clips": null,
-                "humanoidclips": [
+                "clips": [
                     {
                         "key": "Idle",
                         "motionname": "PBROrc_Walk",
                         "index": 0,
-                        "loop": true,
-                        "ik": false
+                        "loop": true
                     }
                 ],
                 "playmotionindex": -1,
@@ -98,14 +96,12 @@
             "renderpass": "MainResultPass",
             "depthpass": "",
             "animation": {
-                "clips": null,
-                "humanoidclips": [
+                "clips": [
                     {
                         "key": "Idle",
                         "motionname": "Salamander_Idle01",
                         "index": 0,
-                        "loop": true,
-                        "ik": false
+                        "loop": true
                     }
                 ],
                 "playmotionindex": -1,

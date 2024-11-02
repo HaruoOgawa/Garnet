@@ -213,7 +213,7 @@ namespace gltf
 
 		for (const auto& Clip : AnimationClipList)
 		{
-			Object->AddAnimationClip(Clip);
+			Object->AddAnimationClip(Clip, "Default", {nullptr, "" }, true);
 		}
 
 		// モーフノードを追加
