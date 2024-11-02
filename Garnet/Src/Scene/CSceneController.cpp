@@ -16,6 +16,7 @@ namespace scene
 		m_DefaultRenderPass(std::string()),
 		m_DefaultDepthPass(std::string())
 	{
+
 	}
 
 	CSceneController::~CSceneController()
@@ -321,6 +322,19 @@ namespace scene
 			}
 		}
 
+#ifdef _DEBUG
+		if(!m_MaterialFrameMap.empty())
+		{
+			// Materialを生成
+			// 適当に最初のマテリアルを使う
+			auto MaterialFrame = m_MaterialFrameMap.begin()->second;
+			auto Material = MaterialFrame->CreateMaterial(pGraphicsAPI, pGraphicsAPI->GetMaxBoneCount(), graphics::ECullMode::CULL_BACK);
+			
+			m_DebugSphere = std::make_shared<object::C3DObject>(m_DefaultRenderPass, m_DefaultDepthPass);
+			if (!m_DebugSphere->CreatePresetSimply(pGraphicsAPI, nullptr, graphics::CPresetPrimitive::CreateSphere(pGraphicsAPI), graphics::EPresetPrimitiveType::SPHERE, Material, nullptr)) return false;
+		}
+#endif // _DEBUG
+
 		m_IsLoaded = true;
 
 		return true;
@@ -369,6 +383,13 @@ namespace scene
 			}
 		}
 
+#ifdef _DEBUG
+		if (m_DebugSphere)
+		{
+			if (!m_DebugSphere->Update(pGraphicsAPI, pPhysicsEngine, DrawInfo->GetDeltaSecondsTime())) return false;
+		}
+#endif
+
 		return true;
 	}
 
@@ -403,7 +424,7 @@ namespace scene
 
 		for (const auto& Object : m_ObjectList)
 		{
-			if (!Object->Draw(pGraphicsAPI, IsDepthPass, false, Camera, Projection, DrawInfo)) return false;
+			if (!Object->Draw(pGraphicsAPI, IsDepthPass, false, Camera, Projection, DrawInfo, m_DebugSphere)) return false;
 		}
 
 		return true;

@@ -19,11 +19,11 @@ namespace input
 
 	void CInputState::Clear()
 	{
-		if (!m_OnDownMouseLeft && !m_OnDownMouseRight)
+		/*if (!m_OnDownMouseLeft && !m_OnDownMouseRight)
 		{
 			m_MousePos = glm::vec2(0.0f);
 			m_PrevMousePos = glm::vec2(0.0f);
-		}
+		}*/
 
 		// マウスホイール量は毎回リセットする
 		m_WheelScrollAmount = glm::vec2(0.0f);
@@ -42,6 +42,11 @@ namespace input
 	{
 		m_PrevMousePos = m_MousePos;
 		m_MousePos = MousePos;
+	}
+
+	const glm::vec2& CInputState::GetMousePos() const
+	{
+		return m_MousePos;
 	}
 
 	void CInputState::SetWheelScrollAmount(const glm::vec2& ScrollAmount)

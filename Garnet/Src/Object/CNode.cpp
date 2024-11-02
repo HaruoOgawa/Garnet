@@ -16,8 +16,7 @@ namespace object
 		m_PrevLocalTransform(std::make_shared<math::CTransform>()),
 		m_WorldMatrix(glm::mat4(1.0f)),
 		m_InverseBindMatrix(glm::mat4(1.0f)),
-		m_ParentNode(nullptr),
-		m_IKRotate(glm::quat(1.0f, 0.0f, 0.0f, 0.0f))
+		m_ParentNode(nullptr)
 	{
 	}
 
@@ -162,22 +161,6 @@ namespace object
 		}
 	}
 
-	// IK
-	void CNode::InitIKRotate()
-	{
-		m_IKRotate = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
-	}
-
-	void CNode::MulIKRotate(const glm::quat& Rotate)
-	{
-		m_IKRotate *= Rotate;
-	}
-
-	const glm::quat& CNode::GetIKRotate() const
-	{
-		return m_IKRotate;
-	}
-
 	// ÉÇÅ[Ét
 	void CNode::ClearMorphWeights()
 	{
@@ -236,6 +219,18 @@ namespace object
 	const glm::mat4& CNode::GetWorldMatrix() const
 	{
 		return m_WorldMatrix;
+	}
+
+	void CNode::SetWorldPos(const glm::vec3& Pos)
+	{
+		m_WorldMatrix[3][0] = Pos.x;
+		m_WorldMatrix[3][1] = Pos.y;
+		m_WorldMatrix[3][2] = Pos.z;
+	}
+
+	glm::vec3 CNode::GetWorldPos()
+	{
+		return glm::vec3(m_WorldMatrix[3][0], m_WorldMatrix[3][1], m_WorldMatrix[3][2]);
 	}
 
 	glm::mat4 CNode::CalcWorldMatrix()

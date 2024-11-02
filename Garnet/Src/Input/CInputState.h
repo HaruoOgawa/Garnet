@@ -51,6 +51,8 @@ namespace input
 		void StartMousePos(const glm::vec2& MousePos);
 		void SetMousePos(const glm::vec2& MousePos);
 
+		const glm::vec2& GetMousePos() const;
+
 		void SetWheelScrollAmount(const glm::vec2& ScrollAmount);
 		const glm::vec2& GetWheelScrollAmount() const;
 		bool IsMouseWheeled();

@@ -8,8 +8,7 @@ namespace animation
 {
 	CIKSolver::CIKSolver():
 		m_IKParam(nullptr),
-		m_IKTarget(nullptr),
-		m_OriginWorldMatrix(glm::mat4(1.0f))
+		m_IKTarget(nullptr)
 	{
 	}
 
@@ -45,126 +44,145 @@ namespace animation
 	bool CIKSolver::Solve()
 	{
 		// CCD-IKを採用
-		int Size = static_cast<int>(m_IKChainList.size());
-
-		// CCD-IKには最低でも２つChainが必要
-		if (Size < 2) return true;
-
-		int Last = Size - 1;
+		int NumOfLink = static_cast<int>(m_IKChainList.size());
 
 		float Threshold = 0.01f;
 
-		constexpr float Epsilon = std::numeric_limits<float>::epsilon();
-
-		// Chainの始点となる共通の親ワールド行列
-		m_OriginWorldMatrix = m_IKChainList[0]->GetParentNode()->CalcWorldMatrix();
-
-		//
-		glm::vec3 GoalPos = math::CTransform(m_IKTarget->CalcWorldMatrix()).GetPos();
-
-		// IKRotateを初期化
-		for (auto& ChainNode : m_IKChainList)
-		{
-			ChainNode->InitIKRotate();
-		}
+		const glm::vec3 TargetPos = m_IKTarget->GetWorldPos();
 
 		// ターゲットに届くかサイクルの最大値に達するまで計算を繰り返す
 		int CurrentLoopNum = 0;
+		bool DoLoop = true;
 
-		//const int MaxLoopNum = m_IKParam->IKLoopCount;
-		// 重いので最大30回にする
-		const int MaxLoopNum = std::min(30, m_IKParam->IKLoopCount);
+		const int MaxLoopNum = m_IKParam->IKLoopCount;
 
-		while (CurrentLoopNum < MaxLoopNum)
+		std::shared_ptr<object::CNode> EndNode = m_IKChainList[NumOfLink - 1];
+
+		while (DoLoop && CurrentLoopNum < MaxLoopNum)
 		{
-			bool Result = false;
-
-			glm::vec3 EffectorPos = GetWorldTransform(Last).GetPos();
+			glm::vec3 EndPos = EndNode->GetWorldPos();
 
 			// 既に接触しているなら終了
-			if (glm::length(GoalPos - EffectorPos) < Threshold) break;
-
-			for (int j = Size - 2; j >= 0; j--)
+			if (glm::distance2(TargetPos, EndPos) < Threshold)
 			{
-				EffectorPos = GetWorldTransform(Last).GetPos();
+				DoLoop = false;
+				break;
+			}
 
-				math::CTransform ChainWorldTransform = GetWorldTransform(j);
+			for (int i = NumOfLink - 2; i >= 0; i--)
+			{
+				std::shared_ptr<object::CNode> LinkNode = m_IKChainList[i];
 
-				glm::vec3 ChainWorldPos = ChainWorldTransform.GetPos();
-				glm::quat ChainWorldRot = ChainWorldTransform.GetRot();
+				glm::vec3 LinkPos = LinkNode->GetWorldPos();
 
-				glm::vec3 ToEffector = EffectorPos - ChainWorldPos;
-				glm::vec3 ToGoal = GoalPos - ChainWorldPos;
+				glm::vec3 e_i = glm::normalize(EndPos - LinkPos);
+				glm::vec3 t_i = glm::normalize(TargetPos - LinkPos);
 
-				glm::quat EffectorToGoalQuat = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
+				// 内積
+				// なぜか1を微妙に越してNaNになってしまうことがあるのでちゃんとクランプしておく
+				float dot = glm::clamp(glm::dot(e_i, t_i), -1.0f, 1.0f);
 
-				float Angle = 3.1415f;
+				// 外積
+				glm::vec3 axis = glm::cross(e_i, t_i);
 
-				if (glm::length(ToGoal) > Epsilon)
+				glm::quat rot;
+
+				if (glm::length(axis) < 1e-6f)
 				{
-					EffectorToGoalQuat = math::CTransform::CalcTwoVectorRotate(glm::normalize(ToEffector), glm::normalize(ToGoal), Angle, m_IKParam->LimitedAngle);
-				}
-
-				glm::quat WorldRotated = ChainWorldRot * EffectorToGoalQuat;
-
-				// 角度制限を行うかどうか
-				{
-					int LinkIndex = static_cast<int>(m_IKParam->IKLinkList.size()) - 1 - j;
-					if (m_IKParam->IKLinkList[LinkIndex].IsLimitAngle)
+					if (glm::sign(dot) == 1.0f)
 					{
-						math::CTransform::ClampRotate(WorldRotated, m_IKParam->IKLinkList[LinkIndex].LowerAngle, m_IKParam->IKLinkList[LinkIndex].UpperAngle);
+						// 同じ方向に平行な時は回転の必要がない
+						continue;
+					}
+					else
+					{
+						// 反対方向に平行なので任意の垂直軸で180度回転する
+						glm::vec3 XAxis = glm::vec3(1.0f, 0.0f, 0.0f);
+						glm::vec3 YAxis = glm::vec3(0.0f, 1.0f, 0.0f);
+
+						glm::vec3 SubAxis = glm::cross(XAxis, e_i);
+
+						if (glm::length(SubAxis) < 1e-6f)
+						{
+							// X軸とも平行なのでY軸の方を使う(さすがにXとYを見れば大丈夫なはず？)
+							SubAxis = glm::cross(YAxis, e_i);
+						}
+
+						rot = glm::angleAxis(3.1415f, glm::normalize(SubAxis)); // 回転角度がおかしくなってしまうので回転取得前にちゃんと軸を正規化しておく
 					}
 				}
+				else
+				{
+					// 通常通り内積結果から回転
+					float angle = glm::acos(dot);
 
-				glm::quat LocalRotated = WorldRotated * glm::inverse(ChainWorldRot);
-				//m_IKChainList[j]->MulIKRotate(LocalRotated);
+					// 単位角で回転量を制限
+					angle = glm::min(angle, m_IKParam->LimitedAngle);
 
-				m_IKChainList[j]->SetRot(LocalRotated * m_IKChainList[j]->GetRot());
+					rot = glm::angleAxis(angle, glm::normalize(axis)); // 回転角度がおかしくなってしまうので回転取得前にちゃんと軸を正規化しておく
+				}
+
+				// 回転角度制限
+				// 制限を行うことで例えば膝が変な方向に曲がらないようにする
+				int LinkIndex = static_cast<int>(m_IKParam->IKLinkList.size()) - 1 - i;
+				if (m_IKParam->IKLinkList[LinkIndex].IsLimitAngle)
+				{
+					const auto& LowerAngle = m_IKParam->IKLinkList[LinkIndex].LowerAngle;
+					const auto& UpperAngle = m_IKParam->IKLinkList[LinkIndex].UpperAngle;
+
+					glm::vec3 euler = glm::eulerAngles(rot);
+
+					// オイラー角に対して角度制限を行う
+					euler.x = glm::radians(glm::clamp(glm::degrees(euler.x), LowerAngle.x, UpperAngle.x));
+					euler.y = glm::radians(glm::clamp(glm::degrees(euler.y), LowerAngle.y, UpperAngle.y));
+					euler.z = glm::radians(glm::clamp(glm::degrees(euler.z), LowerAngle.z, UpperAngle.z));
+
+					rot = glm::quat(euler);
+				}
+
+				LinkNode->SetRot(rot * LinkNode->GetRot());
+
+				if (std::isnan(rot.x) || std::isnan(rot.y) || std::isnan(rot.z) || std::isnan(rot.w))
+				{
+					Console::Log("[Error] CCDIK - found NaN value in ik rot. when clamp rotation.\n");
+					return false;
+				}
+
+				// Linkノードのワールド行列を再計算する
+				for (int n = i; n < NumOfLink; n++)
+				{
+					std::shared_ptr<object::CNode> ReCalcNode = m_IKChainList[n];
+
+					const auto& ParentNode = ReCalcNode->GetParentNode();
+					if (!ParentNode)
+					{
+						// 親ノードがない時はローカル行列をワールド行列として渡す
+						ReCalcNode->SetWorldMatrix(ReCalcNode->GetLocalMatrix());
+
+						continue;
+					}
+
+					glm::mat4 NewWorldMatrix = ParentNode->GetWorldMatrix() * ReCalcNode->GetLocalMatrix();
+					ReCalcNode->SetWorldMatrix(NewWorldMatrix);
+				}
+
+				// EndNodeの座標を更新
+				EndPos = EndNode->GetWorldPos();
 
 				// 接触しているなら終了
-				EffectorPos = GetWorldTransform(Last).GetPos();
-
-				if (glm::length(GoalPos - EffectorPos) < Threshold)
+				if (glm::distance2(TargetPos, EndPos) < 0.01f)
 				{
-					Result = true;
-
+					// 終了
+					DoLoop = false;
 					break;
 				}
 			}
-
-			// ターゲットIKに届いたらループを終了する
-			if (Result) break;
 
 			// ループ回数を更新
 			CurrentLoopNum++;
 		}
 
-		// IKRotateを反映する
-		for (auto& ChainNode : m_IKChainList)
-		{
-			ChainNode->MulRot(ChainNode->GetIKRotate());
-		}
-
 		return true;
-	}
-
-	math::CTransform CIKSolver::GetWorldTransform(int ChainIndex)
-	{
-		glm::mat4 WorldMatrix = m_OriginWorldMatrix;
-
-		for (int i = 0; i <= ChainIndex; i++)
-		{
-			/*math::CTransform DefaultLocalTransform = math::CTransform(m_IKChainList[i]->GetDefaultLocalMatrix());
-			DefaultLocalTransform.MulRot(m_IKChainList[i]->GetIKRotate());
-
-			WorldMatrix *= DefaultLocalTransform.GetModelMatrix();*/
-
-			WorldMatrix *= m_IKChainList[i]->GetLocalMatrix();
-		}
-
-		math::CTransform WorldTransform = math::CTransform(WorldMatrix);
-
-		return WorldTransform;
 	}
 }
 #endif
