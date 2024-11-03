@@ -39,6 +39,9 @@ namespace animation
 			// https://github.com/KhronosGroup/glTF-Tutorials/blob/master/gltfTutorial/gltfTutorial_020_Skeletons.md#the-Bone-matrices
 			const glm::mat4& InverseBindMatrix = BoneNode->GeInverseBindMatrix();
 
+			// ボーンアニメーションに関する注意 ////////////////////////////////
+			// ボーンアニメーションにおいてボーンノードのスケールが1以外だとせん断(シアー)が発生しメッシュが変な形に折れ曲がる(平行四辺形みたいにずれる)現象が発生するので注意
+			///////////////////////////////////////////////////////////////
 			glm::mat4 SkinMatrix = BoneWorldMatrix * InverseBindMatrix;
 
 			// Skeletonを持ってる3DObjectのModelMatrixを適応する

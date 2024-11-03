@@ -164,7 +164,7 @@ namespace fbx
 			{
 				// 描画情報の取得
 				std::vector<FbxMesh*> pFbxMeshList;
-				if (!CreateDrawInfo(pGraphicsAPI, pFbxMeshList, MaterialFrame, RootNode, TextureList, MaterialList, MeshList, Skeleton, IsMixamoFbx)) return false;
+				if (!CreateDrawInfo(pGraphicsAPI, pFbxMeshList, MaterialFrame, pFbxNodeList, RootNode, TextureList, MaterialList, MeshList, Skeleton, IsMixamoFbx)) return false;
 
 				// マテリアルを持っていないのならダミーを渡す
 				if (MaterialList.size() <= 0)
@@ -218,9 +218,16 @@ namespace fbx
 	}
 
 	bool CFBXImporter::CreateDrawInfo(api::IGraphicsAPI* pGraphicsAPI, std::vector<FbxMesh*>& pFbxMeshList, const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame,
-		FbxNode* pFBXNode, std::vector<std::shared_ptr<graphics::CTexture>>& TextureList,
+		const std::vector<FbxNode*>& pFbxNodeList, FbxNode* pFBXNode, std::vector<std::shared_ptr<graphics::CTexture>>& TextureList,
 		std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList, std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, const std::shared_ptr<animation::CSkeleton>& Skeleton, const bool IsMixamoFbx)
 	{
+		int NodeIndex = -1;
+		const auto it = std::find(pFbxNodeList.begin(), pFbxNodeList.end(), pFBXNode);
+		if (it != pFbxNodeList.end())
+		{
+			NodeIndex = static_cast<int>(it - pFbxNodeList.begin());
+		}
+
 		// 知りたいのは描画情報なのでここではeMeshのみ見る
 		if (pFBXNode->GetNodeAttribute() && pFBXNode->GetNodeAttribute()->GetAttributeType() && pFBXNode->GetNodeAttribute()->GetAttributeType() == FbxNodeAttribute::eMesh)
 		{
@@ -232,14 +239,14 @@ namespace fbx
 			if (!CreateMaterial(pGraphicsAPI, pFBXNode, pFbxMaterialList, MaterialList, MaterialFrame, Skeleton)) return false;
 
 			// メッシュ
-			if (!CreateMesh(pGraphicsAPI, pFBXNode, pFbxMeshList, pFbxMaterialList, MeshList, MaterialList, Skeleton, IsMixamoFbx)) return false;
+			if (!CreateMesh(pGraphicsAPI, NodeIndex, pFBXNode, pFbxMeshList, pFbxMaterialList, MeshList, MaterialList, Skeleton, IsMixamoFbx)) return false;
 		}
 		
 
 		// 子要素のNodeを調べる
 		for (int i = 0; i < pFBXNode->GetChildCount(); i++)
 		{
-			if (!CreateDrawInfo(pGraphicsAPI, pFbxMeshList, MaterialFrame, pFBXNode->GetChild(i), TextureList, MaterialList, MeshList, Skeleton, IsMixamoFbx)) return false;
+			if (!CreateDrawInfo(pGraphicsAPI, pFbxMeshList, MaterialFrame, pFbxNodeList, pFBXNode->GetChild(i), TextureList, MaterialList, MeshList, Skeleton, IsMixamoFbx)) return false;
 		}
 
 		return true;
@@ -343,7 +350,7 @@ namespace fbx
 		return true;
 	}
 
-	bool CFBXImporter::CreateMesh(api::IGraphicsAPI* pGraphicsAPI, FbxNode* pFBXNode, std::vector<FbxMesh*>& pFbxMeshList, const std::vector<FbxSurfaceMaterial*>& pFbxMaterialList,
+	bool CFBXImporter::CreateMesh(api::IGraphicsAPI* pGraphicsAPI, int NodeIndex, FbxNode* pFBXNode, std::vector<FbxMesh*>& pFbxMeshList, const std::vector<FbxSurfaceMaterial*>& pFbxMaterialList,
 		std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, const std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList, const std::shared_ptr<animation::CSkeleton>& Skeleton, const bool IsMixamoFbx)
 	{
 		FbxMesh* pFbxMesh = pFBXNode->GetMesh();
@@ -545,13 +552,9 @@ namespace fbx
 								}
 								else
 								{
-									// 数が4つより少ない時は0で埋める
-
-									// Bone
-									ushort_AttributeBoneData.push_back(0);
-
-									// Weights
-									AttributeWeightsData.push_back(0.0f);
+									// 数が4つより少ない時は0に設定する
+									ushort_AttributeBoneData.push_back(0); // Bone
+									AttributeWeightsData.push_back(0.0f); // Weights
 								}
 							}
 
@@ -685,7 +688,22 @@ namespace fbx
 							// 頂点数
 							int VertexCount = pFbxMesh->GetControlPointsCount();
 
-							ReservedVertexDataList.insert({ AttribName, std::vector<float>(VertexCount * Dimention, 0.0f) });
+							if (AttribName == "JOINTS_0")
+							{
+								// BoneWeightsが存在しない時はそのメッシュを持つノードのインデックスを参照するようにする
+								ReservedVertexDataList.insert({ AttribName, std::vector<float>(VertexCount * Dimention, static_cast<float>(NodeIndex)) });
+							}
+							else if (AttribName == "WEIGHTS_0")
+							{
+								// BoneWeightsが存在しない時はそのメッシュを持つノードのインデックスを参照するようにする
+								ReservedVertexDataList.insert({ AttribName, std::vector<float>(VertexCount * Dimention, 1.0f) });
+							}
+							else
+							{
+								ReservedVertexDataList.insert({ AttribName, std::vector<float>(VertexCount * Dimention, 0.0f) });
+							}
+
+							
 
 							// 接線もしく複接線の再計算が必要
 							if (AttribName == "TANGENT")
