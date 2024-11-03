@@ -330,6 +330,8 @@ namespace scene
 			auto MaterialFrame = m_MaterialFrameMap.begin()->second;
 			auto Material = MaterialFrame->CreateMaterial(pGraphicsAPI, pGraphicsAPI->GetMaxBoneCount(), graphics::ECullMode::CULL_BACK);
 			
+			Material->SetDepthFunc(graphics::EDepthFunc::Always);
+
 			m_DebugSphere = std::make_shared<object::C3DObject>(m_DefaultRenderPass, m_DefaultDepthPass);
 			if (!m_DebugSphere->CreatePresetSimply(pGraphicsAPI, nullptr, graphics::CPresetPrimitive::CreateSphere(pGraphicsAPI), graphics::EPresetPrimitiveType::SPHERE, Material, nullptr)) return false;
 		}

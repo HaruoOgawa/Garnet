@@ -449,8 +449,8 @@ namespace object
 			}
 		}
 
-		//if (!DrawDebugBone(IsDepthPass, DrawOutline, Camera, Projection, DrawInfo, DebugSphere)) return false;
-		//if (!DrawDebugPhysics(IsDepthPass, DrawOutline, Camera, Projection, DrawInfo, DebugSphere)) return false;
+		//if (!DrawDebugBone(pGraphicsAPI ,IsDepthPass, DrawOutline, Camera, Projection, DrawInfo, DebugSphere)) return false;
+		//if (!DrawDebugPhysics(pGraphicsAPI, IsDepthPass, DrawOutline, Camera, Projection, DrawInfo, DebugSphere)) return false;
 
 		return true;
 	}
