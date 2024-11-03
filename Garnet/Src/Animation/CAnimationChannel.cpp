@@ -44,6 +44,13 @@ namespace animation
 		return m_BoneName;
 	}
 
+	std::string CAnimationChannel::GetTargetNodeName() const
+	{
+		if (!m_TargetNode) return std::string();
+
+		return m_TargetNode->GetName();
+	}
+
 	bool CAnimationChannel::Update(const std::vector<float>& Value)
 	{
 		switch (m_AnimationTarget)

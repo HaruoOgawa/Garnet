@@ -44,6 +44,8 @@ namespace animation
 
 		EHumanoidBones GetBoneName() const;
 
+		std::string GetTargetNodeName() const;
+
 		bool Update(const std::vector<float>& Value);
 	};
 }

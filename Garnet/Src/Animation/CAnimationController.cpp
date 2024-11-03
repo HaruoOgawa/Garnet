@@ -270,12 +270,79 @@ namespace animation
 		return m_Skeleton;
 	}
 
-	void CAnimationController::AddAnimationClip(const std::shared_ptr<animation::CAnimationClip>& Clip, const std::string& MotionName, animation::SAnimationLayout Layout, bool IsLoop)
+	void CAnimationController::AddAnimationClip(const std::shared_ptr<animation::CAnimationClip>& SourceClip, const std::string& MotionName, animation::SAnimationLayout Layout, bool IsLoop)
 	{
-		m_ClipList.push_back(Clip);
+		//
+		m_ClipList.push_back(SourceClip);
 
-		Clip->SetIsLoop(IsLoop);
-		Layout.Clip = Clip;
+		if (!m_Skeleton) return;
+
+		// Clipの値をコピーする
+		std::shared_ptr<animation::CAnimationClip> TargetClip = std::make_shared<animation::CAnimationClip>();
+
+		// samplers
+		for (const auto& SourceSampler : SourceClip->GetSamplerList())
+		{
+			std::shared_ptr<animation::CAnimationSampler> TargetSampler = std::make_shared<animation::CAnimationSampler>(SourceSampler->GetInterpolationType());
+
+			for (const auto& SourceKeyFrame : SourceSampler->GetKeyFrameList())
+			{
+				std::shared_ptr<animation::CKeyFrame> TargetKeyFrame = std::make_shared<animation::CKeyFrame>(SourceKeyFrame->GetType());
+
+				TargetKeyFrame->SetInput(SourceKeyFrame->GetInput());
+
+				std::vector<float> TargetOutput = SourceKeyFrame->GetOutput();
+				TargetKeyFrame->SetOutput(TargetOutput);
+
+				TargetKeyFrame->SetXPointList(SourceKeyFrame->GetXPointList());
+				TargetKeyFrame->SetYPointList(SourceKeyFrame->GetYPointList());
+				TargetKeyFrame->SetZPointList(SourceKeyFrame->GetZPointList());
+				TargetKeyFrame->SetRPointList(SourceKeyFrame->GetRPointList());
+
+				TargetSampler->AddKeyFrame(TargetKeyFrame);
+			}
+
+			TargetSampler->SetStartTime(SourceSampler->GetStartTime());
+			TargetSampler->SetEndTime(SourceSampler->GetEndTime());
+
+			TargetClip->AddAnimationSampler(TargetSampler);
+		}
+
+		// channels
+		// 同じ名前のノードは一つしかない前提でchannelを作成する
+		for (const auto& SourceChannel : SourceClip->GetChannelList())
+		{
+			std::shared_ptr<object::CNode> TargetNode = nullptr;
+
+			for (const auto& Bone : m_Skeleton->GetBoneList())
+			{
+				// 非ヒューマノイドなのでボーン名考慮は不要
+				//if (Bone->GetBoneName() == animation::EHumanoidBones::None) continue;
+
+				/*if (Bone->GetBoneName() == SourceChannel->GetBoneName())
+				{
+					TargetNode = Bone->GetBoneNode();
+
+					break;
+				}*/
+
+				if (Bone->GetBoneNode()->GetName() == SourceChannel->GetTargetNodeName())
+				{
+					TargetNode = Bone->GetBoneNode();
+
+					break;
+				}
+			}
+
+			std::shared_ptr<animation::CAnimationChannel> TargetChannel = std::make_shared<animation::CAnimationChannel>(SourceChannel->IsUseAnimLocalAxis(), SourceChannel->IsTransOffset(), SourceChannel->GetSamplerIndex(), SourceChannel->GetAnimationTarget(), TargetNode, SourceChannel->GetBoneName());
+
+			TargetClip->AddAnimationChannel(TargetChannel);
+		}
+
+		//
+		TargetClip->SetIsLoop(IsLoop);
+		Layout.Clip = TargetClip;
+
 		AddMotion(MotionName, Layout);
 	}
 
