@@ -719,10 +719,23 @@ namespace scene
 		const auto& AnimationController = pObject->GetAnimationController();
 		const auto& BlendShapeController = pObject->GetBlendShapeController();
 
+		const auto& Clips = AnimationInfo.Clips;
 		const auto& HumanoidclipInfoList = AnimationInfo.Humanoidclips;
 		const auto& BlendshapeInfoList = AnimationInfo.Blendshapes;
 
-		animationJSON["clips"] = {};
+		// clips
+		for (const auto& AnimationClip : AnimationController->GetAnimationClipMap())
+		{
+			const auto& it = Clips.find(AnimationClip.first);
+			if (it == Clips.end()) continue;
+
+			animationJSON["clips"].push_back({
+				{ "key", AnimationClip.first },
+				{ "motionname", it->second.MotionName },
+				{ "index",  it->second.Index },
+				{ "loop", AnimationClip.second.Clip->IsLoop() }
+				});
+		}
 
 		if (AnimationController)
 		{
