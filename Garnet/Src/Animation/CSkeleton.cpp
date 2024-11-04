@@ -63,20 +63,24 @@ namespace animation
 		return m_BoneList;
 	}
 
-	void CSkeleton::MakeBoneTable()
+	void CSkeleton::MakeHumanoidBoneTable()
 	{
 		for (const auto& Bone : m_BoneList)
 		{
 			EHumanoidBones CurrentBoneName = std::get<1>(Bone)->GetBoneName();
 
-			if (CurrentBoneName != animation::EHumanoidBones::None && m_BoneTable.find(CurrentBoneName) == m_BoneTable.end())
-			{
-				m_BoneTable.emplace(CurrentBoneName, std::get<1>(Bone));
-			}
+			if (CurrentBoneName == animation::EHumanoidBones::None) continue;
+
+			m_BoneTable.emplace(CurrentBoneName, std::get<1>(Bone));
 		}
 	}
 
-	const std::unordered_map<EHumanoidBones, std::shared_ptr<CBone>>& CSkeleton::GetBoneTable() const
+	void CSkeleton::AddHumanoidBone(EHumanoidBones BoneName, const std::shared_ptr<CBone>& Bone)
+	{
+		m_BoneTable.emplace(BoneName, Bone);
+	}
+
+	const std::unordered_map<EHumanoidBones, std::shared_ptr<CBone>>& CSkeleton::GetHumanoidBoneTable() const
 	{
 		return m_BoneTable;
 	}

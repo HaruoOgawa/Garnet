@@ -968,7 +968,7 @@ namespace gltf
 		// Šg’£‹@”\‚ÌŒ‹‰Ê‚ðŒ³‚ÉBoneTable‚ðì¬
 		if(Skeleton)
 		{
-			Skeleton->MakeBoneTable();
+			Skeleton->MakeHumanoidBoneTable();
 		}
 
 		return true;

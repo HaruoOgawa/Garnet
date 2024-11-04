@@ -50,7 +50,7 @@ namespace mmd
 		if (!CreateAnimationSkeleton(model, Skeleton, NodeList, RootNode)) return false;
 
 		// BoneTable‚ðì¬
-		Skeleton->MakeBoneTable();
+		Skeleton->MakeHumanoidBoneTable();
 
 		// IKBoneList‚ðì¬
 		Skeleton->MakeIKBoneList();

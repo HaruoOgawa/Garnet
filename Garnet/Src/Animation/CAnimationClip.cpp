@@ -128,10 +128,10 @@ namespace animation
 		// ヒューマノイドボーン
 		if (RigType == ERigType::Humanoid)
 		{
-			const auto& BoneTable = Skeleton->GetBoneTable();
+			const auto& BoneTable = Skeleton->GetHumanoidBoneTable();
 			const auto& it = BoneTable.find(Channel->GetBoneName());
 
-			if (it != BoneTable.end()) return it->second->GetBoneNode();
+			if (it != BoneTable.end() && it->second) return it->second->GetBoneNode();
 		}
 
 		// 非ヒューマノイドボーン(普通のスキンメッシュアニメーション)

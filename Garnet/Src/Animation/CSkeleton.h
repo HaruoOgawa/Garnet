@@ -44,8 +44,9 @@ namespace animation
 
 		const std::vector<std::tuple<std::string, std::shared_ptr<CBone>>>& GetBoneList() const;
 
-		void MakeBoneTable();
-		const std::unordered_map<EHumanoidBones, std::shared_ptr<CBone>>& GetBoneTable() const;
+		void MakeHumanoidBoneTable();
+		void AddHumanoidBone(EHumanoidBones BoneName, const std::shared_ptr<CBone>& Bone);
+		const std::unordered_map<EHumanoidBones, std::shared_ptr<CBone>>& GetHumanoidBoneTable() const;
 		std::shared_ptr<CBone> GetBone(EHumanoidBones BoneName);
 
 		// IK

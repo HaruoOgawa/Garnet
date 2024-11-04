@@ -137,7 +137,7 @@ namespace fbx
 		Object->SetAnimationSkeleton(Skeleton);
 
 		// BoneTable‚ðì¬
-		Skeleton->MakeBoneTable();
+		Skeleton->MakeHumanoidBoneTable();
 
 		// DefaultLocalTransform‚ð•Û‘¶‚·‚é
 		Object->ApplyDefaultLocalTransform();

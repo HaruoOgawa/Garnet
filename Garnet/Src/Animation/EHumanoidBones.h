@@ -86,6 +86,9 @@ namespace animation
 
         // 左つま先ＩＫ(MMD用)
         LeftToesIK,
+
+        // 最大ヒューマノイドボーン数
+        Max = 63,
 	};
 }
 
