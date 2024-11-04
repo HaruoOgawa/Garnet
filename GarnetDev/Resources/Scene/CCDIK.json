@@ -15,7 +15,7 @@
     "animations": [
       {
         "name": "MotionTest",
-        "filename": "Resources/Motions/mmd_running.vmd"
+        "filename": "Resources/Motions/maegeritsuki.vmd"
       }
     ],
     "objects": [
@@ -31,7 +31,7 @@
                     "motionname": "MotionTest",
                     "index": 0,
                     "loop": true,
-                    "ik": true
+                    "ik": false
                   }
                 ],
                 "playmotionindex": -1,
