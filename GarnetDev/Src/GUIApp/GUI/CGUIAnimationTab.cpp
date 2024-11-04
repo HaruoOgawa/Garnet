@@ -2,6 +2,8 @@
 
 #include "CGUIAnimationTab.h"
 #include <Animation/CSkeleton.h>
+#include <Animation/CAnimationClipSet.h>
+#include <Scene/CSceneController.h>
 
 namespace gui
 {
@@ -10,6 +12,27 @@ namespace gui
 		if (ImGui::BeginTabItem("Animation"))
 		{
 			if (!CGUIAnimationTab::DrawSkeleton(Skeleton)) return false;
+
+			ImGui::EndTabItem();
+		}
+
+		return true;
+	}
+
+	bool CGUIAnimationTab::DrawClipList(const SGUIParams& GUIParams)
+	{
+		const auto& SceneController = GUIParams.SceneController;
+		if (!SceneController) return true;
+
+		if (ImGui::BeginTabItem("AnimationClip"))
+		{
+			for (const auto& ClipSet : SceneController->GetAnimationClipSetMap())
+			{
+				for (const auto& AnimationClip : ClipSet.second->GetAnimationClipList())
+				{
+					if (!DrawSkeleton(AnimationClip->GetDefaultSkeleton())) return false;
+				}
+			}
 
 			ImGui::EndTabItem();
 		}

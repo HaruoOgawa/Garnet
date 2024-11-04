@@ -159,7 +159,7 @@ namespace gltf
 		}
 
 		// ÉXÉLÉì
-		std::shared_ptr<animation::CSkeleton> Skeleton = std::make_shared<animation::CSkeleton>(RigType, (Object->GetObjectName() + "_Skeleton"));
+		std::shared_ptr<animation::CSkeleton> Skeleton = std::make_shared<animation::CSkeleton>(RigType, (Object->GetObjectName() + "(Skeleton)"));
 		if (!CreateAnimationSkeleton(model, Skeleton, NodeList))
 		{
 			Console::Log("[Error GLTFImporter] Failed to CreateAnimationSkeleton\n");

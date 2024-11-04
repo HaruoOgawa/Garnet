@@ -71,5 +71,10 @@ namespace animation
 
 		return m_BlendShapeClipList[Index];
 	}
+
+	const std::vector<std::shared_ptr<animation::CAnimationClip>>& CAnimationClipSet::GetAnimationClipList() const
+	{
+		return m_AnimationClipList;
+	}
 }
 #endif

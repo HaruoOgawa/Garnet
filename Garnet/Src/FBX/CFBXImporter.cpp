@@ -41,6 +41,8 @@ namespace fbx
 	{
 		std::shared_ptr<object::C3DObject> Object = std::make_shared<object::C3DObject>("", "");
 
+		Object->SetObjectName(FileName);
+
 		if (!Import(pGraphicsAPI, FileName, false, Object.get(), AnimationClipList, nullptr, RigType, HumanoidBoneList)) return false;
 
 		return true;
@@ -129,7 +131,7 @@ namespace fbx
 		Object->ApplyParentNode();
 
 		// Skeleton
-		std::shared_ptr<animation::CSkeleton> Skeleton = std::make_shared<animation::CSkeleton>(RigType, (Object->GetObjectName() + "_Skeleton"));
+		std::shared_ptr<animation::CSkeleton> Skeleton = std::make_shared<animation::CSkeleton>(RigType, (Object->GetObjectName() + "(Skeleton)"));
 		std::vector<FbxNode*> FbxBoneList;
 		if (RootNode)
 		{

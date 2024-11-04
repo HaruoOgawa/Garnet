@@ -30,6 +30,8 @@ namespace animation
 
 		std::shared_ptr<animation::CAnimationClip> GetAnimationClip(int Index);
 		std::shared_ptr<animation::CBlendShapeClip> GetBlendShapeClip(int Index);
+
+		const std::vector<std::shared_ptr<animation::CAnimationClip>>& GetAnimationClipList() const;
 	};
 }
 #endif

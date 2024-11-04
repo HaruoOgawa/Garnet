@@ -16,6 +16,7 @@
 #include "CGUIMaterialFrameTab.h"
 #include "CGUILogTab.h"
 #include "CGUICustomTab.h"
+#include "CGUIAnimationTab.h"
 
 #include "SGUIParams.h"
 
