@@ -1,6 +1,8 @@
 #pragma once
 #ifdef USE_ANIMATION
 
+#include <string>
+
 namespace animation
 {
 	enum class EHumanoidBones
@@ -61,6 +63,9 @@ namespace animation
         RightLittleProximal,
         RightLittleIntermediate,
         RightLittleDistal,
+
+        // 最大ヒューマノイドボーン数
+        Max = 55,
        
         // MMD用の追加ボーンリスト ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // 全ての親(MMD用)
@@ -86,9 +91,6 @@ namespace animation
 
         // 左つま先ＩＫ(MMD用)
         LeftToesIK,
-
-        // 最大ヒューマノイドボーン数
-        Max = 63,
 	};
 }
 

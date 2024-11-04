@@ -8,6 +8,7 @@ using namespace nlohmann;
 namespace object { class C3DObject; }
 namespace graphics { class CTexture; }
 namespace timeline { class CTimelineController; }
+namespace animation { class CSkeleton; }
 
 namespace scene
 {
@@ -32,6 +33,8 @@ namespace scene
 		static bool WriteMaterials(ordered_json& ObjectJSON, object::C3DObject* pObject, const std::map<std::string, std::shared_ptr<graphics::CTexture>>& TextureInfoList, const std::shared_ptr<timeline::CTimelineController>& TimelineController);
 		static bool WriteTextureSet(ordered_json& ObjectJSON, object::C3DObject* pObject, const std::map<std::string, std::shared_ptr<graphics::CTexture>>& TextureInfoList);
 		static bool WriteAnimation(ordered_json& ObjectJSON, object::C3DObject* pObject, const SAnimationInfo& AnimationInfo);
+
+		static bool WriteHumanoidBoneList(json& AnimationJSON, const std::shared_ptr<animation::CSkeleton>& Skeleton);
 	public:
 		static bool Write(CSceneController* pSceneController, const std::shared_ptr<timeline::CTimelineController>& TimelineController);
 	};

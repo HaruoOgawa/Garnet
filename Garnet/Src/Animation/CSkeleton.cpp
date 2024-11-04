@@ -154,6 +154,130 @@ namespace animation
 			std::get<1>(Bone)->GetBoneNode()->ResetToDefaultLocalTransform();
 		}
 	}
+
+	std::string CSkeleton::CastHumanoidBonesToString(EHumanoidBones BoneName)
+	{
+		switch (BoneName)
+		{
+		case animation::EHumanoidBones::None:
+			break;
+		case animation::EHumanoidBones::Hips:
+			return "Hips";
+		case animation::EHumanoidBones::LeftUpperLeg:
+			return "LeftUpperLeg";
+		case animation::EHumanoidBones::RightUpperLeg:
+			return "RightUpperLeg";
+		case animation::EHumanoidBones::LeftLowerLeg:
+			return "LeftLowerLeg";
+		case animation::EHumanoidBones::RightLowerLeg:
+			return "RightLowerLeg";
+		case animation::EHumanoidBones::LeftFoot:
+			return "LeftFoot";
+		case animation::EHumanoidBones::RightFoot:
+			return "RightFoot";
+		case animation::EHumanoidBones::Spine:
+			return "Spine";
+		case animation::EHumanoidBones::Chest:
+			return "Chest";
+		case animation::EHumanoidBones::UpperChest:
+			return "UpperChest";
+		case animation::EHumanoidBones::Neck:
+			return "Neck";
+		case animation::EHumanoidBones::Head:
+			return "Head";
+		case animation::EHumanoidBones::LeftShoulder:
+			return "LeftShoulder";
+		case animation::EHumanoidBones::RightShoulder:
+			return "RightShoulder";
+		case animation::EHumanoidBones::LeftUpperArm:
+			return "LeftUpperArm";
+		case animation::EHumanoidBones::RightUpperArm:
+			return "RightUpperArm";
+		case animation::EHumanoidBones::LeftLowerArm:
+			return "LeftLowerArm";
+		case animation::EHumanoidBones::RightLowerArm:
+			return "RightLowerArm";
+		case animation::EHumanoidBones::LeftHand:
+			return "LeftHand";
+		case animation::EHumanoidBones::RightHand:
+			return "RightHand";
+		case animation::EHumanoidBones::LeftToes:
+			return "LeftToes";
+		case animation::EHumanoidBones::RightToes:
+			return "RightToes";
+		case animation::EHumanoidBones::LeftEye:
+			return "LeftEye";
+		case animation::EHumanoidBones::RightEye:
+			return "RightEye";
+		case animation::EHumanoidBones::Jaw:
+			return "Jaw";
+		case animation::EHumanoidBones::LeftThumbProximal:
+			return "LeftThumbProximal";
+		case animation::EHumanoidBones::LeftThumbIntermediate:
+			return "LeftThumbIntermediate";
+		case animation::EHumanoidBones::LeftThumbDistal:
+			return "LeftThumbDistal";
+		case animation::EHumanoidBones::LeftIndexProximal:
+			return "LeftIndexProximal";
+		case animation::EHumanoidBones::LeftIndexIntermediate:
+			return "LeftIndexIntermediate";
+		case animation::EHumanoidBones::LeftIndexDistal:
+			return "LeftIndexDistal";
+		case animation::EHumanoidBones::LeftMiddleProximal:
+			return "LeftMiddleProximal";
+		case animation::EHumanoidBones::LeftMiddleIntermediate:
+			return "LeftMiddleIntermediate";
+		case animation::EHumanoidBones::LeftMiddleDistal:
+			return "LeftMiddleDistal";
+		case animation::EHumanoidBones::LeftRingProximal:
+			return "LeftRingProximal";
+		case animation::EHumanoidBones::LeftRingIntermediate:
+			return "LeftRingIntermediate";
+		case animation::EHumanoidBones::LeftRingDistal:
+			return "LeftRingDistal";
+		case animation::EHumanoidBones::LeftLittleProximal:
+			return "LeftLittleProximal";
+		case animation::EHumanoidBones::LeftLittleIntermediate:
+			return "LeftLittleIntermediate";
+		case animation::EHumanoidBones::LeftLittleDistal:
+			return "LeftLittleDistal";
+		case animation::EHumanoidBones::RightThumbProximal:
+			return "RightThumbProximal";
+		case animation::EHumanoidBones::RightThumbIntermediate:
+			return "RightThumbIntermediate";
+		case animation::EHumanoidBones::RightThumbDistal:
+			return "RightThumbDistal";
+		case animation::EHumanoidBones::RightIndexProximal:
+			return "RightIndexProximal";
+		case animation::EHumanoidBones::RightIndexIntermediate:
+			return "RightIndexIntermediate";
+		case animation::EHumanoidBones::RightIndexDistal:
+			return "RightIndexDistal";
+		case animation::EHumanoidBones::RightMiddleProximal:
+			return "RightMiddleProximal";
+		case animation::EHumanoidBones::RightMiddleIntermediate:
+			return "RightMiddleIntermediate";
+		case animation::EHumanoidBones::RightMiddleDistal:
+			return "RightMiddleDistal";
+		case animation::EHumanoidBones::RightRingProximal:
+			return "RightRingProximal";
+		case animation::EHumanoidBones::RightRingIntermediate:
+			return "RightRingIntermediate";
+		case animation::EHumanoidBones::RightRingDistal:
+			return "RightRingDistal";
+		case animation::EHumanoidBones::RightLittleProximal:
+			return "RightLittleProximal";
+		case animation::EHumanoidBones::RightLittleIntermediate:
+			return "RightLittleIntermediate";
+		case animation::EHumanoidBones::RightLittleDistal:
+			return "RightLittleDistal";
+
+		default:
+			break;
+		}
+
+		return std::string();
+	}
 }
 
 #endif // USE_ANIMATION

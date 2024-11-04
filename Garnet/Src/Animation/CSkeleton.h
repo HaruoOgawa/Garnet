@@ -61,6 +61,8 @@ namespace animation
 
 		//
 		void ResetToDefaultSkeletonLocal();
+
+		static std::string CastHumanoidBonesToString(EHumanoidBones BoneName);
 	};
 }
 

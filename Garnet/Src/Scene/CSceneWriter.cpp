@@ -221,13 +221,16 @@ namespace scene
 					default:
 						break;
 					}
+
+					// HumanoidBoneList
+					WriteHumanoidBoneList(animation, Skeleton);
 				}
 			}
 
 			animation["name"] = AnimationClipSet.first;
 			animation["filename"] = AnimationClipSet.second->GetFileName();
 
-			SceneJSON["animations"].push_back({ animation });
+			SceneJSON["animations"].emplace_back(animation);
 		}
 
 		return true;
@@ -711,15 +714,13 @@ namespace scene
 
 	bool CSceneWriter::WriteAnimation(ordered_json& ObjectJSON, object::C3DObject* pObject, const SAnimationInfo& AnimationInfo)
 	{
-		ordered_json animationJSON;
+		json animationJSON;
 
 		const auto& AnimationController = pObject->GetAnimationController();
 		const auto& BlendShapeController = pObject->GetBlendShapeController();
 
 		const auto& HumanoidclipInfoList = AnimationInfo.Humanoidclips;
 		const auto& BlendshapeInfoList = AnimationInfo.Blendshapes;
-
-
 
 		animationJSON["clips"] = {};
 
@@ -729,6 +730,7 @@ namespace scene
 
 			if (Skeleton)
 			{
+				// Rig
 				switch (Skeleton->GetRig())
 				{
 				case animation::ERigType::Humanoid:
@@ -737,6 +739,9 @@ namespace scene
 				default:
 					break;
 				}
+
+				// HumanoidBoneList
+				WriteHumanoidBoneList(animationJSON, Skeleton);
 			}
 
 			for (const auto& AnimationClip : AnimationController->GetAnimationClipMap())
@@ -779,6 +784,30 @@ namespace scene
 		}
 
 		ObjectJSON["animation"] = animationJSON;
+
+		return true;
+	}
+
+	bool CSceneWriter::WriteHumanoidBoneList(json& AnimationJSON, const std::shared_ptr<animation::CSkeleton>& Skeleton)
+	{
+		const auto& BoneTable = Skeleton->GetHumanoidBoneTable();
+
+		for (int n = 0; n < static_cast<int>(animation::EHumanoidBones::Max); n++)
+		{
+			animation::EHumanoidBones BoneName = static_cast<animation::EHumanoidBones>(n);
+
+			const auto& it = BoneTable.find(BoneName);
+			if (it == BoneTable.end()) continue;
+
+			std::string BoneNameStr = animation::CSkeleton::CastHumanoidBonesToString(BoneName);
+			if (BoneNameStr.empty()) continue;
+
+			json boneJson{};
+			boneJson["bonename"] = BoneNameStr;
+			boneJson["nodename"] = it->second->GetBoneNode()->GetName();
+
+			AnimationJSON["humanbonelist"].emplace_back(boneJson);
+		}
 
 		return true;
 	}
