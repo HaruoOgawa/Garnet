@@ -167,6 +167,9 @@ namespace gltf
 			return false;
 		}
 
+		// BoneTable‚ðì¬
+		Skeleton->MakeHumanoidBoneTable(HumanoidBoneList);
+
 		// Node‚ÆSkeleton‚Íæ‚É’Ç‰Á‚µ‚Ä‚¨‚­
 		for (const auto& Node : NodeList)
 		{
@@ -963,12 +966,6 @@ namespace gltf
 				}
 				
 			}
-		}
-
-		// Šg’£‹@”\‚ÌŒ‹‰Ê‚ðŒ³‚ÉBoneTable‚ðì¬
-		if(Skeleton)
-		{
-			Skeleton->MakeHumanoidBoneTable();
 		}
 
 		return true;

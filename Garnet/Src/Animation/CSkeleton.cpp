@@ -63,7 +63,7 @@ namespace animation
 		return m_BoneList;
 	}
 
-	void CSkeleton::MakeHumanoidBoneTable()
+	void CSkeleton::MakeHumanoidBoneTable(const std::map<animation::EHumanoidBones, std::string>& HumanoidBoneList)
 	{
 		for (const auto& Bone : m_BoneList)
 		{
@@ -73,6 +73,23 @@ namespace animation
 
 			m_BoneTable.emplace(CurrentBoneName, std::get<1>(Bone));
 		}
+
+		// ボーンテーブルを再構築
+		for (const auto& HumanoidBone : HumanoidBoneList)
+		{
+			EHumanoidBones BoneName = HumanoidBone.first;
+			const auto& NodeName = HumanoidBone.second;
+
+			auto it = std::find_if(m_BoneList.begin(), m_BoneList.end(), [&](const auto& Src) { return (std::get<0>(Src) == NodeName); });
+			if (it == m_BoneList.end()) continue;
+
+			// ボーンを再設定
+			auto Bone = std::get<1>(*it);
+
+			Bone->SetBoneName(BoneName);
+
+			AddHumanoidBone(BoneName, Bone);
+		}
 	}
 
 	void CSkeleton::AddHumanoidBone(EHumanoidBones BoneName, const std::shared_ptr<CBone>& Bone)
@@ -80,7 +97,7 @@ namespace animation
 		m_BoneTable.emplace(BoneName, Bone);
 	}
 
-	const std::unordered_map<EHumanoidBones, std::shared_ptr<CBone>>& CSkeleton::GetHumanoidBoneTable() const
+	const std::map<EHumanoidBones, std::shared_ptr<CBone>>& CSkeleton::GetHumanoidBoneTable() const
 	{
 		return m_BoneTable;
 	}
