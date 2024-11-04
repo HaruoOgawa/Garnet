@@ -23,40 +23,43 @@
 namespace fbx
 {
 	bool CSmallFBXImporter::ImportFBX(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& Data, object::C3DObject* Object,
-		const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, resource::C3DObjectLoader* p3DObjectLoader, animation::ERigType RigType)
+		const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, resource::C3DObjectLoader* p3DObjectLoader, animation::ERigType RigType, 
+		const std::map<animation::EHumanoidBones, std::string>& HumanoidBoneList)
 	{
 		std::vector<std::shared_ptr<animation::CAnimationClip>> AnimationClipList;
 
-		if (!Import(pGraphicsAPI, Data, true, Object, AnimationClipList, MaterialFrame, RigType)) return false;
+		if (!Import(pGraphicsAPI, Data, true, Object, AnimationClipList, MaterialFrame, RigType, HumanoidBoneList)) return false;
 
 		return true;
 	}
 
-	bool CSmallFBXImporter::ImportFBXAnimation(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& Data, std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList, animation::ERigType RigType)
+	bool CSmallFBXImporter::ImportFBXAnimation(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& Data, std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList, 
+		animation::ERigType RigType, const std::map<animation::EHumanoidBones, std::string>& HumanoidBoneList)
 	{
 		std::shared_ptr<object::C3DObject> Object = std::make_shared<object::C3DObject>("", "");
 
-		if (!Import(pGraphicsAPI, Data, false, Object.get(), AnimationClipList, nullptr, RigType)) return false;
+		if (!Import(pGraphicsAPI, Data, false, Object.get(), AnimationClipList, nullptr, RigType, HumanoidBoneList)) return false;
 
 		return true;
 	}
 
 	bool CSmallFBXImporter::Import(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& Data, bool IsUseObject, object::C3DObject* Object,
 		std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList,
-		const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, animation::ERigType RigType)
+		const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, animation::ERigType RigType, const std::map<animation::EHumanoidBones, std::string>& HumanoidBoneList)
 	{
 		std::istringstream stream(std::string(Data.begin(), Data.end()));
 
 		sfbx::DocumentPtr Doc = sfbx::MakeDocument();
 		Doc->readBinary(stream);
 
-		if (!Analyse(pGraphicsAPI, Doc, IsUseObject, Object, AnimationClipList, MaterialFrame, RigType)) return false;
+		if (!Analyse(pGraphicsAPI, Doc, IsUseObject, Object, AnimationClipList, MaterialFrame, RigType, HumanoidBoneList)) return false;
 
 		return true;
 	}
 
 	bool CSmallFBXImporter::Analyse(api::IGraphicsAPI* pGraphicsAPI, const sfbx::DocumentPtr& Doc, bool IsUseObject, object::C3DObject* Object,
-		std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList, const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, animation::ERigType RigType)
+		std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList, const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, 
+		animation::ERigType RigType, const std::map<animation::EHumanoidBones, std::string>& HumanoidBoneList)
 	{
 		// MixamoのFbxかどうか. MixamoのデータはPosの単位やRoationが特殊なので内部的に色々と補正する必要がある
 		bool MixamoResult = false;

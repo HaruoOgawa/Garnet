@@ -12,6 +12,7 @@
 #include <Scriptable/CValueRegistry.h>
 
 #include "../Animation/ERigType.h"
+#include "../Animation/EHumanoidBones.h"
 
 namespace object { class C3DObject; }
 namespace camera { class CCamera; }
@@ -80,6 +81,7 @@ namespace scene
 	struct SAnimationInfo
 	{
 		animation::ERigType RigType = animation::ERigType::None;
+		std::map<animation::EHumanoidBones, std::string> HumanoidBoneList;
 
 		std::map<std::string, SAnimationClip> Clips;
 		std::map<std::string, SHumanoidclip> Humanoidclips;

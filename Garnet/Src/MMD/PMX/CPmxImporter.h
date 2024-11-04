@@ -10,6 +10,7 @@
 #include "../../Interface/IPhysicsEngine.h"
 #include "CPmxModel.h"
 #include "../../Math/CMath.h"
+#include "../../Animation/EHumanoidBones.h"
 
 namespace graphics
 {
@@ -72,7 +73,8 @@ namespace mmd
 		static glm::vec3 CovertToZYX(const glm::vec3& Val);
 	public:
 		static bool ImportPmx(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, const std::string& ModelFileName, const std::vector<unsigned char>& Data, object::C3DObject* Object,
-			const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, resource::C3DObjectLoader* p3DObjectLoader, animation::ERigType RigType);
+			const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, resource::C3DObjectLoader* p3DObjectLoader, 
+			animation::ERigType RigType, const std::map<animation::EHumanoidBones, std::string>& HumanoidBoneList);
 	};
 }
 #endif // USE_MMD

@@ -342,6 +342,31 @@ namespace resource
 				RigType = animation::ERigType::Humanoid;
 			}
 
+			// humanbonelist
+			std::map<animation::EHumanoidBones, std::string> SrcHumanoidBoneList;
+			
+			const auto humanbonelist = animationJSON->find("humanbonelist");
+			if (humanbonelist != animationJSON->end() && humanbonelist->is_array())
+			{
+				for (json::iterator humanBoneJSON = humanbonelist->begin(); humanBoneJSON != humanbonelist->end(); humanBoneJSON++)
+				{
+					if (!humanBoneJSON->is_object()) continue;
+
+					// bonename
+					std::string bonename_str = std::string();
+					GetString("bonename", bonename_str, humanBoneJSON);
+
+					// nodename
+					std::string nodename = std::string();
+					GetString("nodename", nodename, humanBoneJSON);
+
+					// EHumanoidBonesにキャスト
+					animation::EHumanoidBones BoneName = animation::CSkeleton::CastStringToHumanoidBones(bonename_str);
+
+					SrcHumanoidBoneList.emplace(BoneName, nodename);
+				}
+			}
+
 			std::string name = "";
 			GetString("name", name, animationJSON);
 
@@ -350,7 +375,7 @@ namespace resource
 
 			std::shared_ptr<animation::CAnimationClipSet> AnimationClipSet = std::make_shared<animation::CAnimationClipSet>();
 
-			pLoadWorker->AddLoadResource(std::make_shared<resource::CAnimationLoader>(filename, AnimationClipSet, RigType));
+			pLoadWorker->AddLoadResource(std::make_shared<resource::CAnimationLoader>(filename, AnimationClipSet, RigType, SrcHumanoidBoneList));
 
 			m_Target->AddAnimationClipSet(name, AnimationClipSet);
 		}
@@ -512,7 +537,7 @@ namespace resource
 					}
 					
 					// 仮実装
-					pLoadWorker->AddLoadResource(std::make_shared<resource::C3DObjectLoader>(filename, Object, MaterialFrame->second, defaultmaterialframe, AnimationInfo.RigType));
+					pLoadWorker->AddLoadResource(std::make_shared<resource::C3DObjectLoader>(filename, Object, MaterialFrame->second, defaultmaterialframe, AnimationInfo.RigType, AnimationInfo.HumanoidBoneList));
 				}
 			}
 
@@ -797,6 +822,34 @@ namespace resource
 		{
 			AnimationInfo.RigType = animation::ERigType::Humanoid;
 		}
+
+		// humanbonelist
+		std::map<animation::EHumanoidBones, std::string> SrcHumanoidBoneList;
+
+		const auto humanbonelist = animationJSON->find("humanbonelist");
+		if (humanbonelist != animationJSON->end() && humanbonelist->is_array())
+		{
+			for (json::iterator humanBoneJSON = humanbonelist->begin(); humanBoneJSON != humanbonelist->end(); humanBoneJSON++)
+			{
+				if (!humanBoneJSON->is_object()) continue;
+
+				// bonename
+				std::string bonename_str = std::string();
+				GetString("bonename", bonename_str, humanBoneJSON);
+
+				// nodename
+				std::string nodename = std::string();
+				GetString("nodename", nodename, humanBoneJSON);
+
+				// EHumanoidBonesにキャスト
+				animation::EHumanoidBones BoneName = animation::CSkeleton::CastStringToHumanoidBones(bonename_str);
+				if (BoneName == animation::EHumanoidBones::None) continue;
+
+				SrcHumanoidBoneList.emplace(BoneName, nodename);
+			}
+		}
+
+		AnimationInfo.HumanoidBoneList = SrcHumanoidBoneList;
 
 		// clips
 		const auto clips = animationJSON->find("clips");

@@ -278,6 +278,122 @@ namespace animation
 
 		return std::string();
 	}
+	
+	EHumanoidBones CSkeleton::CastStringToHumanoidBones(const std::string& BoneNameStr)
+	{
+		if (BoneNameStr == "Hips")
+			return EHumanoidBones::Hips;
+		else if (BoneNameStr == "LeftUpperLeg")
+			return EHumanoidBones::LeftUpperLeg;
+		else if (BoneNameStr == "RightUpperLeg")
+			return EHumanoidBones::RightUpperLeg;
+		else if (BoneNameStr == "LeftLowerLeg")
+			return EHumanoidBones::LeftLowerLeg;
+		else if (BoneNameStr == "RightLowerLeg")
+			return EHumanoidBones::RightLowerLeg;
+		else if (BoneNameStr == "LeftFoot")
+			return EHumanoidBones::LeftFoot;
+		else if (BoneNameStr == "RightFoot")
+			return EHumanoidBones::RightFoot;
+		else if (BoneNameStr == "Spine")
+			return EHumanoidBones::Spine;
+		else if (BoneNameStr == "Chest")
+			return EHumanoidBones::Chest;
+		else if (BoneNameStr == "UpperChest")
+			return EHumanoidBones::UpperChest;
+		else if (BoneNameStr == "Neck")
+			return EHumanoidBones::Neck;
+		else if (BoneNameStr == "Head")
+			return EHumanoidBones::Head;
+		else if (BoneNameStr == "LeftShoulder")
+			return EHumanoidBones::LeftShoulder;
+		else if (BoneNameStr == "RightShoulder")
+			return EHumanoidBones::RightShoulder;
+		else if (BoneNameStr == "LeftUpperArm")
+			return EHumanoidBones::LeftUpperArm;
+		else if (BoneNameStr == "RightUpperArm")
+			return EHumanoidBones::RightUpperArm;
+		else if (BoneNameStr == "LeftLowerArm")
+			return EHumanoidBones::LeftLowerArm;
+		else if (BoneNameStr == "RightLowerArm")
+			return EHumanoidBones::RightLowerArm;
+		else if (BoneNameStr == "LeftHand")
+			return EHumanoidBones::LeftHand;
+		else if (BoneNameStr == "RightHand")
+			return EHumanoidBones::RightHand;
+		else if (BoneNameStr == "LeftToes")
+			return EHumanoidBones::LeftToes;
+		else if (BoneNameStr == "RightToes")
+			return EHumanoidBones::RightToes;
+		else if (BoneNameStr == "LeftEye")
+			return EHumanoidBones::LeftEye;
+		else if (BoneNameStr == "RightEye")
+			return EHumanoidBones::RightEye;
+		else if (BoneNameStr == "Jaw")
+			return EHumanoidBones::Jaw;
+		else if (BoneNameStr == "LeftThumbProximal")
+			return EHumanoidBones::LeftThumbProximal;
+		else if (BoneNameStr == "LeftThumbIntermediate")
+			return EHumanoidBones::LeftThumbIntermediate;
+		else if (BoneNameStr == "LeftThumbDistal")
+			return EHumanoidBones::LeftThumbDistal;
+		else if (BoneNameStr == "LeftIndexProximal")
+			return EHumanoidBones::LeftIndexProximal;
+		else if (BoneNameStr == "LeftIndexIntermediate")
+			return EHumanoidBones::LeftIndexIntermediate;
+		else if (BoneNameStr == "LeftIndexDistal")
+			return EHumanoidBones::LeftIndexDistal;
+		else if (BoneNameStr == "LeftMiddleProximal")
+			return EHumanoidBones::LeftMiddleProximal;
+		else if (BoneNameStr == "LeftMiddleIntermediate")
+			return EHumanoidBones::LeftMiddleIntermediate;
+		else if (BoneNameStr == "LeftMiddleDistal")
+			return EHumanoidBones::LeftMiddleDistal;
+		else if (BoneNameStr == "LeftRingProximal")
+			return EHumanoidBones::LeftRingProximal;
+		else if (BoneNameStr == "LeftRingIntermediate")
+			return EHumanoidBones::LeftRingIntermediate;
+		else if (BoneNameStr == "LeftRingDistal")
+			return EHumanoidBones::LeftRingDistal;
+		else if (BoneNameStr == "LeftLittleProximal")
+			return EHumanoidBones::LeftLittleProximal;
+		else if (BoneNameStr == "LeftLittleIntermediate")
+			return EHumanoidBones::LeftLittleIntermediate;
+		else if (BoneNameStr == "LeftLittleDistal")
+			return EHumanoidBones::LeftLittleDistal;
+		else if (BoneNameStr == "RightThumbProximal")
+			return EHumanoidBones::RightThumbProximal;
+		else if (BoneNameStr == "RightThumbIntermediate")
+			return EHumanoidBones::RightThumbIntermediate;
+		else if (BoneNameStr == "RightThumbDistal")
+			return EHumanoidBones::RightThumbDistal;
+		else if (BoneNameStr == "RightIndexProximal")
+			return EHumanoidBones::RightIndexProximal;
+		else if (BoneNameStr == "RightIndexIntermediate")
+			return EHumanoidBones::RightIndexIntermediate;
+		else if (BoneNameStr == "RightIndexDistal")
+			return EHumanoidBones::RightIndexDistal;
+		else if (BoneNameStr == "RightMiddleProximal")
+			return EHumanoidBones::RightMiddleProximal;
+		else if (BoneNameStr == "RightMiddleIntermediate")
+			return EHumanoidBones::RightMiddleIntermediate;
+		else if (BoneNameStr == "RightMiddleDistal")
+			return EHumanoidBones::RightMiddleDistal;
+		else if (BoneNameStr == "RightRingProximal")
+			return EHumanoidBones::RightRingProximal;
+		else if (BoneNameStr == "RightRingIntermediate")
+			return EHumanoidBones::RightRingIntermediate;
+		else if (BoneNameStr == "RightRingDistal")
+			return EHumanoidBones::RightRingDistal;
+		else if (BoneNameStr == "RightLittleProximal")
+			return EHumanoidBones::RightLittleProximal;
+		else if (BoneNameStr == "RightLittleIntermediate")
+			return EHumanoidBones::RightLittleIntermediate;
+		else if (BoneNameStr == "RightLittleDistal")
+			return EHumanoidBones::RightLittleDistal;
+
+		return EHumanoidBones::None;
+	}
 }
 
 #endif // USE_ANIMATION
