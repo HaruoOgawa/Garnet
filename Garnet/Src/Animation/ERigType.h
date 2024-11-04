@@ -6,5 +6,7 @@ namespace animation
 	{
 		None = -1,
 		Humanoid,
+
+		Max = 2,
 	};
 }

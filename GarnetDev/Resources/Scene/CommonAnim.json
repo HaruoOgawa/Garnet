@@ -7,19 +7,8 @@
     ],
     "animations": [
         {
-            "rig" : "humanoid",
-            "humanbonelist":[
-                {
-                    "bonename": "hips",
-                    "nodename": "BONE_hips"
-                }
-            ],
             "name": "PBROrc_Walk",
             "filename": "Resources/Avatar/PBROrc/PBROrc_Walk.fbx"
-        },
-        {
-            "name": "Salamander_Idle01",
-            "filename": "Resources/Avatar/Salamander/Salamander_Idle01.fbx"
         }
     ],
     "timeline": {
@@ -32,6 +21,9 @@
             "defaultmaterialframe": "pbr_mat",
             "renderpass": "MainResultPass",
             "depthpass": "",
+            "animation": {
+                "rig": "humanoid"
+            },
             "transform": {
                 "pos": [
                     0.0,
@@ -57,13 +49,6 @@
             "renderpass": "MainResultPass",
             "depthpass": "",
             "animation": {
-                "rig" : "humanoid",
-                "humanbonelist":[
-                    {
-                        "bonename": "hips",
-                        "nodename": "BONE_hips"
-                    }
-                ],
                 "clips": [
                     {
                         "key": "Idle",

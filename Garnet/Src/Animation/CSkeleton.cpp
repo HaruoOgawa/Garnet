@@ -5,7 +5,8 @@
 
 namespace animation
 {
-	CSkeleton::CSkeleton(ERigType RigType):
+	CSkeleton::CSkeleton(ERigType RigType, const std::string& Name):
+		m_Name(Name),
 		m_RigType(RigType)
 	{
 	}
@@ -14,9 +15,19 @@ namespace animation
 	{
 	}
 
+	const std::string& CSkeleton::GetName() const
+	{
+		return m_Name;
+	}
+
 	ERigType CSkeleton::GetRig() const
 	{
 		return m_RigType;
+	}
+
+	void CSkeleton::SetRig(ERigType Type)
+	{
+		m_RigType = Type;
 	}
 
 	void CSkeleton::AddBone(const std::shared_ptr<CBone>& Bone)
@@ -94,7 +105,16 @@ namespace animation
 
 	void CSkeleton::AddHumanoidBone(EHumanoidBones BoneName, const std::shared_ptr<CBone>& Bone)
 	{
-		m_BoneTable.emplace(BoneName, Bone);
+		if (BoneName == animation::EHumanoidBones::None) return;
+
+		if (m_BoneTable.find(BoneName) == m_BoneTable.end())
+		{
+			m_BoneTable.emplace(BoneName, Bone);
+		}
+		else
+		{
+			m_BoneTable[BoneName] = Bone;
+		}
 	}
 
 	const std::map<EHumanoidBones, std::shared_ptr<CBone>>& CSkeleton::GetHumanoidBoneTable() const

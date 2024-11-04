@@ -9,6 +9,7 @@
 #include <vector>
 #include <map>
 #include <tuple>
+#include <string>
 #include <glm/glm.hpp>
 
 #include "CBone.h"
@@ -20,7 +21,9 @@ namespace animation
 {
 	class CSkeleton
 	{
-		const ERigType m_RigType;
+		const std::string m_Name;
+
+		ERigType m_RigType;
 
 		std::vector<std::tuple<std::string, std::shared_ptr<CBone>>> m_BoneList;
 		
@@ -34,10 +37,13 @@ namespace animation
 		// 付与ボーンリスト
 		std::vector<std::shared_ptr<CBone>> m_GrantBoneList;
 	public:
-		CSkeleton(ERigType RigType);
+		CSkeleton(ERigType RigType, const std::string& Name);
 		virtual ~CSkeleton();
 
+		const std::string& GetName() const;
+
 		ERigType GetRig() const;
+		void SetRig(ERigType Type);
 
 		void AddBone(const std::shared_ptr<CBone>& Bone);
 		

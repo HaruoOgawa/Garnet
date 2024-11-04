@@ -47,7 +47,7 @@ namespace mmd
 		RootNodeIndexList.push_back(0);
 
 		// Skeleton
-		std::shared_ptr<animation::CSkeleton> Skeleton = std::make_shared<animation::CSkeleton>(RigType);
+		std::shared_ptr<animation::CSkeleton> Skeleton = std::make_shared<animation::CSkeleton>(RigType, (Object->GetObjectName() + "_Skeleton"));
 		if (!CreateAnimationSkeleton(model, Skeleton, NodeList, RootNode)) return false;
 
 		// BoneTable‚ğì¬

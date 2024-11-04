@@ -3,6 +3,7 @@
 #include "CGUIMaterialTab.h"
 #include "CGUIBaseTab.h"
 #include "CGUIMeshTab.h"
+#include "CGUIAnimationTab.h"
 
 #include <Scene/CSceneController.h>
 #include <Object/C3DObject.h>
@@ -206,6 +207,14 @@ namespace gui
 				if (!CGUIBaseTab::Draw(GUIParams.ObjectList, m_SelectedObjectIndex, m_SelectedNodeIndex)) return false;
 				if (!CGUIMaterialTab::Draw(pGraphicsAPI, GUIParams.ObjectList, GUIParams.SceneController, m_SelectedObjectIndex, m_SelectedNodeIndex)) return false;
 				if (!CGUIMeshTab::Draw(pGraphicsAPI, GUIParams.ObjectList, GUIParams.SceneController, m_SelectedObjectIndex, m_SelectedNodeIndex)) return false;
+				
+				if (m_SelectedObjectIndex >= 0 && m_SelectedObjectIndex < static_cast<int>(GUIParams.ObjectList.size()))
+				{
+					const auto& Object = GUIParams.ObjectList[m_SelectedObjectIndex];
+					const auto& Skeleton = Object->GetAnimationController()->GetSkeleton();
+
+					if (!CGUIAnimationTab::DrawTab(Skeleton)) return false;
+				}
 
 				ImGui::EndTabBar(); // ObjectDetail
 			}

@@ -129,7 +129,7 @@ namespace fbx
 		Object->ApplyParentNode();
 
 		// Skeleton
-		std::shared_ptr<animation::CSkeleton> Skeleton = std::make_shared<animation::CSkeleton>(RigType);
+		std::shared_ptr<animation::CSkeleton> Skeleton = std::make_shared<animation::CSkeleton>(RigType, (Object->GetObjectName() + "_Skeleton"));
 		std::vector<FbxNode*> FbxBoneList;
 		if (RootNode)
 		{
