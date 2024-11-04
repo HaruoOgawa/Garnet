@@ -23,40 +23,40 @@
 namespace fbx
 {
 	bool CSmallFBXImporter::ImportFBX(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& Data, object::C3DObject* Object,
-		const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, resource::C3DObjectLoader* p3DObjectLoader)
+		const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, resource::C3DObjectLoader* p3DObjectLoader, animation::ERigType RigType)
 	{
 		std::vector<std::shared_ptr<animation::CAnimationClip>> AnimationClipList;
 
-		if (!Import(pGraphicsAPI, Data, true, Object, AnimationClipList, MaterialFrame)) return false;
+		if (!Import(pGraphicsAPI, Data, true, Object, AnimationClipList, MaterialFrame, RigType)) return false;
 
 		return true;
 	}
 
-	bool CSmallFBXImporter::ImportFBXAnimation(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& Data, std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList)
+	bool CSmallFBXImporter::ImportFBXAnimation(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& Data, std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList, animation::ERigType RigType)
 	{
 		std::shared_ptr<object::C3DObject> Object = std::make_shared<object::C3DObject>("", "");
 
-		if (!Import(pGraphicsAPI, Data, false, Object.get(), AnimationClipList, nullptr)) return false;
+		if (!Import(pGraphicsAPI, Data, false, Object.get(), AnimationClipList, nullptr, RigType)) return false;
 
 		return true;
 	}
 
 	bool CSmallFBXImporter::Import(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& Data, bool IsUseObject, object::C3DObject* Object,
 		std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList,
-		const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame)
+		const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, animation::ERigType RigType)
 	{
 		std::istringstream stream(std::string(Data.begin(), Data.end()));
 
 		sfbx::DocumentPtr Doc = sfbx::MakeDocument();
 		Doc->readBinary(stream);
 
-		if (!Analyse(pGraphicsAPI, Doc, IsUseObject, Object, AnimationClipList, MaterialFrame)) return false;
+		if (!Analyse(pGraphicsAPI, Doc, IsUseObject, Object, AnimationClipList, MaterialFrame, RigType)) return false;
 
 		return true;
 	}
 
 	bool CSmallFBXImporter::Analyse(api::IGraphicsAPI* pGraphicsAPI, const sfbx::DocumentPtr& Doc, bool IsUseObject, object::C3DObject* Object,
-		std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList, const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame)
+		std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList, const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, animation::ERigType RigType)
 	{
 		// MixamoのFbxかどうか. MixamoのデータはPosの単位やRoationが特殊なので内部的に色々と補正する必要がある
 		bool MixamoResult = false;
@@ -99,7 +99,7 @@ namespace fbx
 		Object->ApplyParentNode();
 
 		// Skeleton
-		std::shared_ptr<animation::CSkeleton> Skeleton = std::make_shared<animation::CSkeleton>();
+		std::shared_ptr<animation::CSkeleton> Skeleton = std::make_shared<animation::CSkeleton>(RigType);
 		std::vector<sfbx::Object*> FbxBoneList;
 
 		for (const auto& RootNode : Doc->getRootObjects())
@@ -1316,7 +1316,7 @@ namespace fbx
 						std::shared_ptr<animation::CBoneNameProvider> Provider = std::make_shared<animation::CBoneNameProvider>();
 						animation::EHumanoidBones BoneName = Provider->GetBoneName(Name);
 
-						std::shared_ptr<animation::CAnimationChannel> AnimationChannel = std::make_shared<animation::CAnimationChannel>(UseAnimLocalAxis, false, TargetSamplerIndex, AnimationTarget, TargetNode, BoneName);
+						std::shared_ptr<animation::CAnimationChannel> AnimationChannel = std::make_shared<animation::CAnimationChannel>(UseAnimLocalAxis, false, TargetSamplerIndex, AnimationTarget, TargetNode->GetName(), BoneName);
 
 						AnimationClip->AddAnimationChannel(AnimationChannel);
 					}

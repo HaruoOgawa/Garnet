@@ -7,6 +7,13 @@
     ],
     "animations": [
         {
+            "rig" : "humanoid",
+            "humanbonelist":[
+                {
+                    "bonename": "hips",
+                    "nodename": "BONE_hips"
+                }
+            ],
             "name": "PBROrc_Walk",
             "filename": "Resources/Avatar/PBROrc/PBROrc_Walk.fbx"
         },
@@ -50,7 +57,21 @@
             "renderpass": "MainResultPass",
             "depthpass": "",
             "animation": {
-                "clips": null,
+                "rig" : "humanoid",
+                "humanbonelist":[
+                    {
+                        "bonename": "hips",
+                        "nodename": "BONE_hips"
+                    }
+                ],
+                "clips": [
+                    {
+                        "key": "Idle",
+                        "motionname": "PBROrc_Walk",
+                        "index": 0,
+                        "loop": true
+                    }
+                ],
                 "playmotionindex": -1,
                 "playmotion": "Idle"
             },

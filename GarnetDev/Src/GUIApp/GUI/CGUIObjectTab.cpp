@@ -264,6 +264,17 @@ namespace gui
 				}
 			}
 
+			// RigType
+			static std::string Rig = std::string();
+			{
+				static char buf[256] = "";
+
+				if (ImGui::InputText("Rig##AddObjectDialog", buf, IM_ARRAYSIZE(buf)))
+				{
+					Rig = std::string(buf);
+				}
+			}
+
 			// DefaultMaterialframe
 			static std::string DefaultMaterialframe = std::string();
 			if (ImGui::BeginCombo("DefaultMaterialframe##CGUIObjectTab_DrawAddObjectDialog", DefaultMaterialframe.c_str()))
@@ -302,6 +313,11 @@ namespace gui
 				if (!Object->Create(pGraphicsAPI, nullptr, nullptr)) return false;
 
 				GUIParams.SceneController->AddObject(Object);
+
+				ObjectName = std::string();
+				PassName = std::string();
+				DepthPassName = std::string();
+				Rig = std::string();
 			}
 
 			// AddFile
@@ -319,7 +335,18 @@ namespace gui
 					Object->SetPassName(PassName);
 					Object->SetDepthPassName(DepthPassName);
 
-					GUIParams.SceneController->AddObjectWithLoading(GUIParams.pLoadWorker, Object, fileName, DefaultMaterialframe);
+					animation::ERigType RigType = animation::ERigType::None;
+					if (Rig == "humanoid")
+					{
+						RigType = animation::ERigType::Humanoid;
+					}
+
+					GUIParams.SceneController->AddObjectWithLoading(GUIParams.pLoadWorker, Object, fileName, DefaultMaterialframe, RigType);
+
+					ObjectName = std::string();
+					PassName = std::string();
+					DepthPassName = std::string();
+					Rig = std::string();
 				}
 
 				ImGui::SameLine();

@@ -1,6 +1,7 @@
 #ifdef USE_ANIMATION
 
 #include "CAnimationClip.h"
+#include "CSkeleton.h"
 
 namespace animation
 {
@@ -73,16 +74,16 @@ namespace animation
 		return m_ChannelList;
 	}
 
-	bool CAnimationClip::Update(float DeltaSecondsTime)
+	bool CAnimationClip::Update(float DeltaSecondsTime, const std::shared_ptr<CSkeleton>& Skeleton)
 	{
 		m_CurrentTime += DeltaSecondsTime;
 
-		if (!UpdateFrame(m_CurrentTime)) return false;
+		if (!UpdateFrame(m_CurrentTime, Skeleton)) return false;
 
 		return true;
 	}
 
-	bool CAnimationClip::UpdateFrame(float CurrentTime)
+	bool CAnimationClip::UpdateFrame(float CurrentTime, const std::shared_ptr<CSkeleton>& Skeleton)
 	{
 		for (const auto& Channel : m_ChannelList)
 		{
@@ -108,11 +109,41 @@ namespace animation
 
 			// 空でも動くように初期値を渡す
 			if(Value.empty()) Value = GetDefaultValueFromAnimationTarget(Channel->GetAnimationTarget());
-
-			if (!Channel->Update(Value)) return false;
+			
+			// ノードを取得
+			std::shared_ptr<object::CNode> TargetNode = FindTargetNode(Skeleton, Channel);
+			
+			//
+			if (!Channel->Update(Value, TargetNode)) return false;
 		}
 
 		return true;
+	}
+
+	std::shared_ptr<object::CNode> CAnimationClip::FindTargetNode(const std::shared_ptr<CSkeleton>& Skeleton, const std::shared_ptr<animation::CAnimationChannel>& Channel)
+	{
+		// DefaultSkeletonのリグを見ることでヒューマノイドでも通常のアニメーションクリップが再生できるようになる
+		animation::ERigType RigType = (m_DefaultSkeleton) ? m_DefaultSkeleton->GetRig() : Skeleton->GetRig();
+
+		// ヒューマノイドボーン
+		if (RigType == ERigType::Humanoid)
+		{
+			const auto& BoneTable = Skeleton->GetBoneTable();
+			const auto& it = BoneTable.find(Channel->GetBoneName());
+
+			if (it != BoneTable.end()) return it->second->GetBoneNode();
+		}
+
+		// 非ヒューマノイドボーン(普通のスキンメッシュアニメーション)
+		// ヒューマノイドボーンが見つからなかったらこっちから探す
+		{
+			const auto& BoneList = Skeleton->GetBoneList();
+			const auto it = std::find_if(BoneList.begin(), BoneList.end(), [&](const auto& Src) { return (std::get<0>(Src) == Channel->GetTargetNodeName()); });
+
+			if (it != BoneList.end()) return std::get<1>(*it)->GetBoneNode();
+		}
+
+		return nullptr;
 	}
 
 	int CAnimationClip::GetFrameCount()

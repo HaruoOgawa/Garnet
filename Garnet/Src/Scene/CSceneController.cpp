@@ -82,7 +82,8 @@ namespace scene
 		m_ObjectList.push_back(Object);
 	}
 
-	void CSceneController::AddObjectWithLoading(resource::CLoadWorker* pLoadWorker, const std::shared_ptr<object::C3DObject>& Object, const std::string& FileName, const std::string& DefaultMaterialframeName)
+	void CSceneController::AddObjectWithLoading(resource::CLoadWorker* pLoadWorker, const std::shared_ptr<object::C3DObject>& Object, const std::string& FileName,
+		const std::string& DefaultMaterialframeName, animation::ERigType RigType)
 	{
 		const auto MaterialFrame = FindMaterialFrame(DefaultMaterialframeName);
 		if (!MaterialFrame) return;
@@ -91,7 +92,7 @@ namespace scene
 		AddObject(Object);
 
 		// ロードワーカーに渡してロード開始
-		pLoadWorker->AddLoadResource(std::make_shared<resource::C3DObjectLoader>(FileName, Object, MaterialFrame, DefaultMaterialframeName));
+		pLoadWorker->AddLoadResource(std::make_shared<resource::C3DObjectLoader>(FileName, Object, MaterialFrame, DefaultMaterialframeName, RigType));
 	}
 
 	std::vector<std::shared_ptr<object::C3DObject>> CSceneController::GetObjectList() const

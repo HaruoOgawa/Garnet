@@ -205,7 +205,29 @@ namespace scene
 
 		for (const auto& AnimationClipSet : AnimationClipSetMap)
 		{
-			SceneJSON["animations"].push_back({ {"name" , AnimationClipSet.first}, { "filename", AnimationClipSet.second->GetFileName()} });
+			json animation{};
+
+			const auto& Clip = AnimationClipSet.second->GetAnimationClip(0);
+			if (Clip)
+			{
+				const auto& Skeleton = Clip->GetDefaultSkeleton();
+				if (Skeleton)
+				{
+					switch (Skeleton->GetRig())
+					{
+					case animation::ERigType::Humanoid:
+						animation["rig"] = "humanoid";
+						break;
+					default:
+						break;
+					}
+				}
+			}
+
+			animation["name"] = AnimationClipSet.first;
+			animation["filename"] = AnimationClipSet.second->GetFileName();
+
+			SceneJSON["animations"].push_back({ animation });
 		}
 
 		return true;
@@ -697,10 +719,26 @@ namespace scene
 		const auto& HumanoidclipInfoList = AnimationInfo.Humanoidclips;
 		const auto& BlendshapeInfoList = AnimationInfo.Blendshapes;
 
+
+
 		animationJSON["clips"] = {};
 
 		if (AnimationController)
 		{
+			const auto& Skeleton = AnimationController->GetSkeleton();
+
+			if (Skeleton)
+			{
+				switch (Skeleton->GetRig())
+				{
+				case animation::ERigType::Humanoid:
+					animationJSON["rig"] = "humanoid";
+					break;
+				default:
+					break;
+				}
+			}
+
 			for (const auto& AnimationClip : AnimationController->GetAnimationClipMap())
 			{
 				const auto& it = HumanoidclipInfoList.find(AnimationClip.first);

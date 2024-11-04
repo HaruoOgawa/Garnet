@@ -50,7 +50,7 @@ namespace animation
 		}
 		else
 		{
-			if (!Clip->Update(DeltaSecondsTime)) return false;
+			if (!Clip->Update(DeltaSecondsTime, m_Skeleton)) return false;
 
 			// モーションブレンド
 			if (!BlendMotion(DeltaSecondsTime)) return false;
@@ -376,7 +376,9 @@ namespace animation
 				}
 			}
 
-			std::shared_ptr<animation::CAnimationChannel> TargetChannel = std::make_shared<animation::CAnimationChannel>(SourceChannel->IsUseAnimLocalAxis(), SourceChannel->IsTransOffset(), SourceChannel->GetSamplerIndex(), SourceChannel->GetAnimationTarget(), TargetNode, SourceChannel->GetBoneName());
+			std::string TargetNodeName = (TargetNode)? TargetNode->GetName() : std::string();
+
+			std::shared_ptr<animation::CAnimationChannel> TargetChannel = std::make_shared<animation::CAnimationChannel>(SourceChannel->IsUseAnimLocalAxis(), SourceChannel->IsTransOffset(), SourceChannel->GetSamplerIndex(), SourceChannel->GetAnimationTarget(), TargetNodeName, SourceChannel->GetBoneName());
 
 			Dst->AddAnimationChannel(TargetChannel);
 		}

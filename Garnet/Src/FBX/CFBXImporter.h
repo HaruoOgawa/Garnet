@@ -39,6 +39,7 @@ namespace animation
 	class CBone;
 	class CAnimationClip;
 	class CAnimationSampler;
+	enum class ERigType;
 }
 
 namespace object {
@@ -58,11 +59,11 @@ namespace fbx
 	private:
 		static bool Import(api::IGraphicsAPI* pGraphicsAPI, const std::string& FileName, bool IsUseObject, object::C3DObject* Object,
 			std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList,
-			const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame);
+			const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, animation::ERigType RigType);
 		
 		static bool Analyse(api::IGraphicsAPI* pGraphicsAPI, FbxScene* Scene, bool IsUseObject, object::C3DObject* Object,
 			std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList,
-			const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame);
+			const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, animation::ERigType RigType);
 
 		static bool CreateDrawInfo(api::IGraphicsAPI* pGraphicsAPI, std::vector<FbxMesh*>& pFbxMeshList, const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame,
 			const std::vector<FbxNode*>& pFbxNodeList, FbxNode* pFBXNode, std::vector<std::shared_ptr<graphics::CTexture>>& TextureList,
@@ -103,8 +104,8 @@ namespace fbx
 		static bool CheckIsMixamo(FbxNode* pFBXNode);
 	public:
 		static bool ImportFBX(api::IGraphicsAPI* pGraphicsAPI, const std::string& FileName, object::C3DObject* Object,
-			const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, resource::C3DObjectLoader* p3DObjectLoader);
-		static bool ImportFBXAnimation(api::IGraphicsAPI* pGraphicsAPI, const std::string& FileName, std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList);
+			const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, resource::C3DObjectLoader* p3DObjectLoader, animation::ERigType RigType);
+		static bool ImportFBXAnimation(api::IGraphicsAPI* pGraphicsAPI, const std::string& FileName, std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList, animation::ERigType RigType);
 	};
 }
 #endif // USE_FBX

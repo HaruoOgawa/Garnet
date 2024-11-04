@@ -29,6 +29,7 @@
 #include "../Animation/CSkeleton.h"
 #include "../Animation/CBone.h"
 #include "../Animation/CBoneNameProvider.h"
+#include "../Animation/ERigType.h"
 
 #include "../Graphics/CMaterialFrame.h"
 #include "../../Graphics/CVertexBuffer.h"
@@ -41,7 +42,7 @@
 namespace gltf
 {
 	bool CGLTFImporter::ImportFromMemory(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& Data, object::C3DObject* Object,
-		const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, resource::C3DObjectLoader* p3DObjectLoader)
+		const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, resource::C3DObjectLoader* p3DObjectLoader, animation::ERigType RigType)
 	{
 		tinygltf::Model model;
 		tinygltf::TinyGLTF loader;
@@ -63,13 +64,13 @@ namespace gltf
 
 		if (!result) return false;
 
-		if (!Import(pGraphicsAPI, model, Object, MaterialFrame)) return false;
+		if (!Import(pGraphicsAPI, model, Object, MaterialFrame, RigType)) return false;
 
 		return true;
 	}
 
 	bool CGLTFImporter::ImportFromString(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& Data, const std::string& BaseDir, object::C3DObject* Object,
-		const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, resource::C3DObjectLoader* p3DObjectLoader)
+		const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, resource::C3DObjectLoader* p3DObjectLoader, animation::ERigType RigType)
 	{
 		tinygltf::Model model;
 		tinygltf::TinyGLTF loader;
@@ -91,7 +92,7 @@ namespace gltf
 
 		if (!result) return false;
 
-		if (!Import(pGraphicsAPI, model, Object, MaterialFrame))
+		if (!Import(pGraphicsAPI, model, Object, MaterialFrame, RigType))
 		{
 			Console::Log("[Error GLTFImporter] Failed to Import\n");
 
@@ -102,7 +103,7 @@ namespace gltf
 	}
 
 	bool CGLTFImporter::Import(api::IGraphicsAPI* pGraphicsAPI, tinygltf::Model model, object::C3DObject* Object,
-		const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame)
+		const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, animation::ERigType RigType)
 	{
 		// テクスチャ
 		std::vector<std::shared_ptr<graphics::CTexture>> TextureList;
@@ -158,7 +159,7 @@ namespace gltf
 		}
 
 		// スキン
-		std::shared_ptr<animation::CSkeleton> Skeleton = std::make_shared<animation::CSkeleton>();
+		std::shared_ptr<animation::CSkeleton> Skeleton = std::make_shared<animation::CSkeleton>(RigType);
 		if (!CreateAnimationSkeleton(model, Skeleton, NodeList))
 		{
 			Console::Log("[Error GLTFImporter] Failed to CreateAnimationSkeleton\n");
@@ -1041,7 +1042,7 @@ namespace gltf
 
 				animation::EHumanoidBones BoneName = animation::EHumanoidBones::None;
 
-				std::shared_ptr<animation::CAnimationChannel> AnimationChannel = std::make_shared<animation::CAnimationChannel>(UseAnimLocalAxis, false, sampler, AnimationTarget, Node, BoneName);
+				std::shared_ptr<animation::CAnimationChannel> AnimationChannel = std::make_shared<animation::CAnimationChannel>(UseAnimLocalAxis, false, sampler, AnimationTarget, Node->GetName(), BoneName);
 
 				AnimationClip->AddAnimationChannel(AnimationChannel);
 			}

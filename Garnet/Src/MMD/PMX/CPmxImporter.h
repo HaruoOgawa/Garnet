@@ -32,6 +32,7 @@ namespace animation
 	class CBone;
 	class CAnimationClip;
 	class CAnimationSampler;
+	enum class ERigType;
 }
 
 namespace object {
@@ -71,7 +72,7 @@ namespace mmd
 		static glm::vec3 CovertToZYX(const glm::vec3& Val);
 	public:
 		static bool ImportPmx(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, const std::string& ModelFileName, const std::vector<unsigned char>& Data, object::C3DObject* Object,
-			const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, resource::C3DObjectLoader* p3DObjectLoader);
+			const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, resource::C3DObjectLoader* p3DObjectLoader, animation::ERigType RigType);
 	};
 }
 #endif // USE_MMD

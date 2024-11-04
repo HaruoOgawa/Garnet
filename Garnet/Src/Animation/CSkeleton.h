@@ -13,10 +13,14 @@
 #include <tuple>
 #include <glm/glm.hpp>
 
+#include "ERigType.h"
+
 namespace animation
 {
 	class CSkeleton
 	{
+		const ERigType m_RigType;
+
 		std::vector<std::tuple<std::string, std::shared_ptr<CBone>>> m_BoneList;
 		
 		std::unordered_map<EHumanoidBones, std::shared_ptr<CBone>> m_BoneTable;
@@ -29,8 +33,10 @@ namespace animation
 		// 付与ボーンリスト
 		std::vector<std::shared_ptr<CBone>> m_GrantBoneList;
 	public:
-		CSkeleton();
+		CSkeleton(ERigType RigType);
 		virtual ~CSkeleton();
+
+		ERigType GetRig() const;
 
 		void AddBone(const std::shared_ptr<CBone>& Bone);
 		

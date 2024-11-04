@@ -10,6 +10,8 @@
 
 namespace animation
 {
+	class CSkeleton;
+
 	class CAnimationClip
 	{
 		std::shared_ptr<animation::CSkeleton> m_DefaultSkeleton;
@@ -26,6 +28,8 @@ namespace animation
 		
 	private:
 		std::vector<float> GetDefaultValueFromAnimationTarget(EAnimationTarget AnimationTarget);
+
+		std::shared_ptr<object::CNode> FindTargetNode(const std::shared_ptr<CSkeleton>& Skeleton, const std::shared_ptr<animation::CAnimationChannel>& Channel);
 
 	public:
 		CAnimationClip();
@@ -48,8 +52,8 @@ namespace animation
 		virtual const std::vector<std::shared_ptr<animation::CAnimationSampler>>& GetSamplerList() const;
 		virtual const std::vector<std::shared_ptr<animation::CAnimationChannel>>& GetChannelList() const;
 
-		virtual bool Update(float DeltaSecondsTime);
-		virtual bool UpdateFrame(float CurrentTime);
+		virtual bool Update(float DeltaSecondsTime, const std::shared_ptr<CSkeleton>& Skeleton);
+		virtual bool UpdateFrame(float CurrentTime, const std::shared_ptr<CSkeleton>& Skeleton);
 
 		virtual int GetFrameCount();
 

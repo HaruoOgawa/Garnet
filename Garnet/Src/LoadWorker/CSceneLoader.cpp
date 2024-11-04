@@ -331,6 +331,17 @@ namespace resource
 		{
 			if (!animationJSON->is_object()) continue;
 
+			// humanoid
+			std::string rig = std::string();
+			GetString("rig", rig, animationJSON);
+
+			animation::ERigType RigType = animation::ERigType::None;
+
+			if (rig == "humanoid")
+			{
+				RigType = animation::ERigType::Humanoid;
+			}
+
 			std::string name = "";
 			GetString("name", name, animationJSON);
 
@@ -339,7 +350,7 @@ namespace resource
 
 			std::shared_ptr<animation::CAnimationClipSet> AnimationClipSet = std::make_shared<animation::CAnimationClipSet>();
 
-			pLoadWorker->AddLoadResource(std::make_shared<resource::CAnimationLoader>(filename, AnimationClipSet));
+			pLoadWorker->AddLoadResource(std::make_shared<resource::CAnimationLoader>(filename, AnimationClipSet, RigType));
 
 			m_Target->AddAnimationClipSet(name, AnimationClipSet);
 		}
@@ -377,29 +388,6 @@ namespace resource
 			bool enable = true;
 			GetBoolean("enable", enable, objectJSON);
 			Object->SetEnabled(enable);
-
-			{
-				std::string filename = "";
-				GetString("filename", filename, objectJSON);
-
-				std::string defaultmaterialframe = "";
-				GetString("defaultmaterialframe", defaultmaterialframe, objectJSON);
-
-				if (!filename.empty())
-				{
-					const auto& MaterialFrameMap = m_Target->GetMaterialFrameMap();
-					const auto& MaterialFrame = MaterialFrameMap.find(defaultmaterialframe);
-					if (MaterialFrame == MaterialFrameMap.end())
-					{
-						Console::Log("[SceneLoader Error] defaultmaterialframe not found\n");
-
-						return false;
-					}
-
-					// 仮実装
-					pLoadWorker->AddLoadResource(std::make_shared<resource::C3DObjectLoader>(filename, Object, MaterialFrame->second, defaultmaterialframe));
-				}
-			}
 
 			// Transform
 			{
@@ -495,12 +483,37 @@ namespace resource
 #endif // USE_TEXTURE_LOADER
 
 			// animation
+			scene::SAnimationInfo AnimationInfo{};
 			const auto animationJSON = objectJSON->find("animation");
 			if (animationJSON != objectJSON->end() && animationJSON->is_object())
 			{
-				scene::SAnimationInfo AnimationInfo = AnalyseAnimationInfo(animationJSON);
+				AnimationInfo = AnalyseAnimationInfo(animationJSON);
 
 				m_Target->AddAnimationInfo(Object, AnimationInfo);
+			}
+
+			// ファイルロード開始
+			{
+				std::string filename = "";
+				GetString("filename", filename, objectJSON);
+
+				std::string defaultmaterialframe = "";
+				GetString("defaultmaterialframe", defaultmaterialframe, objectJSON);
+
+				if (!filename.empty())
+				{
+					const auto& MaterialFrameMap = m_Target->GetMaterialFrameMap();
+					const auto& MaterialFrame = MaterialFrameMap.find(defaultmaterialframe);
+					if (MaterialFrame == MaterialFrameMap.end())
+					{
+						Console::Log("[SceneLoader Error] defaultmaterialframe not found\n");
+
+						return false;
+					}
+					
+					// 仮実装
+					pLoadWorker->AddLoadResource(std::make_shared<resource::C3DObjectLoader>(filename, Object, MaterialFrame->second, defaultmaterialframe, AnimationInfo.RigType));
+				}
 			}
 
 			// Objectを追加
@@ -775,6 +788,15 @@ namespace resource
 	scene::SAnimationInfo CSceneLoader::AnalyseAnimationInfo(const json::iterator& animationJSON)
 	{
 		scene::SAnimationInfo AnimationInfo{};
+
+		// humanoid
+		std::string rig = std::string();
+		GetString("rig", rig, animationJSON);
+
+		if (rig == "humanoid")
+		{
+			AnimationInfo.RigType = animation::ERigType::Humanoid;
+		}
 
 		// clips
 		const auto clips = animationJSON->find("clips");

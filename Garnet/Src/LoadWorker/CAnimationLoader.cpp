@@ -4,9 +4,10 @@
 
 namespace resource
 {
-	CAnimationLoader::CAnimationLoader(const std::string& FileName, const std::shared_ptr<animation::CAnimationClipSet>& Target) :
+	CAnimationLoader::CAnimationLoader(const std::string& FileName, const std::shared_ptr<animation::CAnimationClipSet>& Target, animation::ERigType RigType) :
 		CResource(FileName),
-		m_Target(Target)
+		m_Target(Target),
+		m_TargetRigType(RigType)
 	{
 		m_Target->SetFileName(FileName);
 	}
@@ -23,7 +24,7 @@ namespace resource
 			return true;
 		}
 
-		if (!m_Target->Import(pGraphicsAPI, m_File->GetData(), m_FileName, m_File->GetExtention())) return false;
+		if (!m_Target->Import(pGraphicsAPI, m_File->GetData(), m_FileName, m_File->GetExtention(), m_TargetRigType)) return false;
 
 		// ƒ[ƒhŠ®—¹
 		m_Status = resource::ELoadStatus::Loaded;

@@ -24,16 +24,17 @@ namespace animation
 
 		const int m_SamplerIndex;
 		const EAnimationTarget m_AnimationTarget;
-		std::shared_ptr<object::CNode> m_TargetNode;
+
+		std::string m_TargetNodeName;
 		EHumanoidBones m_BoneName;
 	private:
-		bool UpdateTranslation(const std::vector<float>& Value);
-		bool UpdateRotation(const std::vector<float>& Value);
-		bool UpdateScale(const std::vector<float>& Value);
-		bool UpdateWeights(const std::vector<float>& Value);
-		bool UpdateModelMatrix(const std::vector<float>& Value);
+		bool UpdateTranslation(const std::vector<float>& Value, const std::shared_ptr<object::CNode>& TargetNode);
+		bool UpdateRotation(const std::vector<float>& Value, const std::shared_ptr<object::CNode>& TargetNode);
+		bool UpdateScale(const std::vector<float>& Value, const std::shared_ptr<object::CNode>& TargetNode);
+		bool UpdateWeights(const std::vector<float>& Value, const std::shared_ptr<object::CNode>& TargetNode);
+		bool UpdateModelMatrix(const std::vector<float>& Value, const std::shared_ptr<object::CNode>& TargetNode);
 	public:
-		CAnimationChannel(bool UseAnimLocalAxis, bool TransOffset, int SamplerIndex, EAnimationTarget AnimationTarget, const std::shared_ptr<object::CNode>& TargetNode, EHumanoidBones BoneName);
+		CAnimationChannel(bool UseAnimLocalAxis, bool TransOffset, int SamplerIndex, EAnimationTarget AnimationTarget, const std::string& TargetNodeName, EHumanoidBones BoneName);
 		virtual ~CAnimationChannel();
 
 		bool IsUseAnimLocalAxis() const;
@@ -46,7 +47,7 @@ namespace animation
 
 		std::string GetTargetNodeName() const;
 
-		bool Update(const std::vector<float>& Value);
+		bool Update(const std::vector<float>& Value, const std::shared_ptr<object::CNode>& TargetNode);
 	};
 }
 

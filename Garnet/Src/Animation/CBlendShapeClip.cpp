@@ -19,7 +19,7 @@ namespace animation
 		return m_CurrentMorphWeightMap;
 	}
 
-	bool CBlendShapeClip::UpdateFrame(float CurrentTime)
+	bool CBlendShapeClip::UpdateFrame(float CurrentTime, const std::shared_ptr<CSkeleton>& Skeleton)
 	{
 		m_CurrentMorphWeightMap.clear();
 

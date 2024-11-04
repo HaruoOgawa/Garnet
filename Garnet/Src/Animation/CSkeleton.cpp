@@ -5,12 +5,18 @@
 
 namespace animation
 {
-	CSkeleton::CSkeleton()
+	CSkeleton::CSkeleton(ERigType RigType):
+		m_RigType(RigType)
 	{
 	}
 
 	CSkeleton::~CSkeleton()
 	{
+	}
+
+	ERigType CSkeleton::GetRig() const
+	{
+		return m_RigType;
 	}
 
 	void CSkeleton::AddBone(const std::shared_ptr<CBone>& Bone)

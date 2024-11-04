@@ -41,14 +41,17 @@
     },
     "animations": [
         {
+            "rig" : "humanoid",
             "name": "FBX_Jumping",
             "filename": "Resources/Motions/Jumping.fbx"
         },
         {
+            "rig" : "humanoid",
             "name": "FBX_Punch",
             "filename": "Resources/Motions/Combo_Punch_hand.fbx"
         },
         {
+            "rig" : "humanoid",
             "name": "FBX_Walking",
             "filename": "Resources/Motions/Walking.fbx"
         },
@@ -57,6 +60,7 @@
             "filename": "Resources/Motions/biglove_Ripsync.vmd"
         },
         {
+            "rig" : "humanoid",
             "name": "biglove_dance_noik",
             "filename": "Resources/Motions/biglove_dance_noik.vmd"
         },
@@ -8604,6 +8608,7 @@
             "filename": "Resources/Avatar/Warrok_W_Kurniawan.fbx",
             "defaultmaterialframe": "pbr_mat",
             "animation": {
+                "rig" : "humanoid",
                 "clips": null,
                 "humanoidclips": [
                     {
@@ -8787,6 +8792,7 @@
             "filename": "Resources/Avatar/Tda_Miku/Tda_Miku.pmx",
             "defaultmaterialframe": "basic_toon_mat",
             "animation": {
+                "rig" : "humanoid",
                 "clips": null,
                 "humanoidclips": [
                     {
