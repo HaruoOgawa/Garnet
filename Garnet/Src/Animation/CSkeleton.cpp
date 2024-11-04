@@ -15,15 +15,14 @@ namespace animation
 
 	void CSkeleton::AddBone(const std::shared_ptr<CBone>& Bone)
 	{
-		m_BoneList.push_back(Bone);
+		m_BoneList.push_back(std::make_tuple(Bone->GetBoneNode()->GetName(), Bone));
 	}
 
 	bool CSkeleton::CalCSkinMatrixList(std::vector<glm::mat4>& MatrixList, const glm::mat4& ObjectModelMatrix)
 	{
-		for (int i = 0; i < m_BoneList.size(); i++)
+		for (const auto& Bone : m_BoneList)
 		{
-			const auto& Bone = m_BoneList[i];
-			const auto& BoneNode = Bone->GetBoneNode();
+			const auto& BoneNode = std::get<1>(Bone)->GetBoneNode();
 
 			glm::mat4 BoneWorldMatrix = BoneNode->GetWorldMatrix();
 
@@ -53,7 +52,7 @@ namespace animation
 		return true;
 	}
 
-	const std::vector<std::shared_ptr<CBone>>& CSkeleton::GetBoneList() const
+	const std::vector<std::tuple<std::string, std::shared_ptr<CBone>>>& CSkeleton::GetBoneList() const
 	{
 		return m_BoneList;
 	}
@@ -62,11 +61,11 @@ namespace animation
 	{
 		for (const auto& Bone : m_BoneList)
 		{
-			EHumanoidBones CurrentBoneName = Bone->GetBoneName();
+			EHumanoidBones CurrentBoneName = std::get<1>(Bone)->GetBoneName();
 
 			if (CurrentBoneName != animation::EHumanoidBones::None && m_BoneTable.find(CurrentBoneName) == m_BoneTable.end())
 			{
-				m_BoneTable.emplace(CurrentBoneName, Bone);
+				m_BoneTable.emplace(CurrentBoneName, std::get<1>(Bone));
 			}
 		}
 	}
@@ -90,18 +89,18 @@ namespace animation
 		for (const auto& Bone : m_BoneList)
 		{
 			// IKは重いのでひとまず標準ボーン以外は除外する
-			if (Bone->GetBoneName() == EHumanoidBones::None) continue;
+			if (std::get<1>(Bone)->GetBoneName() == EHumanoidBones::None) continue;
 
 			// IKParamを持っていればリストに追加する
-			if (Bone->GetIKParam())
+			if (std::get<1>(Bone)->GetIKParam())
 			{
 				std::shared_ptr<CIKSolver> IKSolver = std::make_shared<CIKSolver>();
-				if (!IKSolver->Create(Bone, m_BoneList)) continue;
+				if (!IKSolver->Create(std::get<1>(Bone), m_BoneList)) continue;
 
 				m_IKSolverList.push_back(IKSolver);
 
 				// m_IKBoneListはあとで消す
-				m_IKBoneList.push_back(Bone);
+				m_IKBoneList.push_back(std::get<1>(Bone));
 			}
 		}
 	}
@@ -126,9 +125,9 @@ namespace animation
 	{
 		for (const auto& Bone : m_BoneList)
 		{
-			if (Bone->IsRotateGrant() || Bone->IsMoveGrant())
+			if (std::get<1>(Bone)->IsRotateGrant() || std::get<1>(Bone)->IsMoveGrant())
 			{
-				m_GrantBoneList.push_back(Bone);
+				m_GrantBoneList.push_back(std::get<1>(Bone));
 			}
 		}
 	}
@@ -142,7 +141,7 @@ namespace animation
 	{
 		for (const auto& Bone : m_BoneList)
 		{
-			Bone->GetBoneNode()->ResetToDefaultLocalTransform();
+			std::get<1>(Bone)->GetBoneNode()->ResetToDefaultLocalTransform();
 		}
 	}
 }

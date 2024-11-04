@@ -89,7 +89,7 @@ namespace animation
 				if (GrantParentBoneIndex < 0 || GrantParentBoneIndex >= BoneList.size()) continue;
 
 				const auto& ParentGrantBone = BoneList[GrantParentBoneIndex];
-				if (!ParentGrantBone) continue;
+				if (!std::get<1>(ParentGrantBone)) continue;
 
 				// 付与率
 				const float GrantRate = GrantBone->GetGrantRate();
@@ -101,7 +101,7 @@ namespace animation
 				{
 					// 回転付与
 
-					glm::quat LocalParentRot = ParentGrantBone->GetBoneNode()->GetRot();
+					glm::quat LocalParentRot = std::get<1>(ParentGrantBone)->GetBoneNode()->GetRot();
 
 					if (GrantRate >= 0.0f)
 					{
@@ -120,7 +120,7 @@ namespace animation
 				}
 				else if (GrantBone->IsMoveGrant())
 				{
-					glm::vec3 LocalParentPos = ParentGrantBone->GetBoneNode()->GetPos();
+					glm::vec3 LocalParentPos = std::get<1>(ParentGrantBone)->GetBoneNode()->GetPos();
 
 					// 移動付与
 					if (GrantRate >= 0.0f)
@@ -212,7 +212,7 @@ namespace animation
 			{
 				for (const auto& Bone : m_Skeleton->GetBoneList())
 				{
-					Bone->GetBoneNode()->SavePrevLocalTransform();
+					std::get<1>(Bone)->GetBoneNode()->SavePrevLocalTransform();
 				}
 			}
 
@@ -355,11 +355,11 @@ namespace animation
 				if (IsHuman)
 				{
 					// ヒューマノイドボーン
-					if (Bone->GetBoneName() == animation::EHumanoidBones::None) continue;
+					if (std::get<1>(Bone)->GetBoneName() == animation::EHumanoidBones::None) continue;
 
-					if (Bone->GetBoneName() == SourceChannel->GetBoneName())
+					if (std::get<1>(Bone)->GetBoneName() == SourceChannel->GetBoneName())
 					{
-						TargetNode = Bone->GetBoneNode();
+						TargetNode = std::get<1>(Bone)->GetBoneNode();
 
 						break;
 					}
@@ -367,9 +367,9 @@ namespace animation
 				else
 				{
 					// 通常のスキンメッシュアニメーション
-					if (Bone->GetBoneNode()->GetName() == SourceChannel->GetTargetNodeName())
+					if (std::get<1>(Bone)->GetBoneNode()->GetName() == SourceChannel->GetTargetNodeName())
 					{
-						TargetNode = Bone->GetBoneNode();
+						TargetNode = std::get<1>(Bone)->GetBoneNode();
 
 						break;
 					}
@@ -412,7 +412,7 @@ namespace animation
 			{
 				for (const auto& Bone : m_Skeleton->GetBoneList())
 				{
-					const auto& Node = Bone->GetBoneNode();
+					const auto& Node = std::get<1>(Bone)->GetBoneNode();
 
 					BlendTranslation(Node, L);
 					BlendRotation(Node, L);

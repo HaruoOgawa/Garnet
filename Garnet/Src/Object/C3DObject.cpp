@@ -581,7 +581,7 @@ namespace object
 				{
 					//if (Bone->GetBoneName() == animation::EHumanoidBones::None) continue;
 
-					const auto& BoneNode = Bone->GetBoneNode();
+					const auto& BoneNode = std::get<1>(Bone)->GetBoneNode();
 
 					// Debug—p: Bone‚Ì•`‰æ
 					{
@@ -617,8 +617,10 @@ namespace object
 			const auto& Skeleton = m_AnimationController->GetSkeleton();
 			if(Skeleton)
 			{
-				for (const auto& Bone : Skeleton->GetBoneList())
+				for (const auto& BonePair : Skeleton->GetBoneList())
 				{
+					const auto& Bone = std::get<1>(BonePair);
+
 					if (Bone->GetBoneName() == animation::EHumanoidBones::Center) continue;
 
 					const auto& BoneNode = Bone->GetBoneNode();

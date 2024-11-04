@@ -20,20 +20,37 @@
     },
     "objects": [
         {
+            "name": "unitychan",
+            "filename": "Resources/Avatar/unitychan.fbx",
+            "defaultmaterialframe": "pbr_mat",
+            "renderpass": "MainResultPass",
+            "depthpass": "",
+            "transform": {
+                "pos": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "rotate": [
+                    180.0,
+                    -5.008956122765085e-06,
+                    180.0
+                ],
+                "scale": [
+                    0.009999999776482582,
+                    0.009999999776482582,
+                    0.009999999776482582
+                ]
+            }
+        },
+        {
             "name": "PBROrc",
             "filename": "Resources/Avatar/PBROrc/PBROrc.fbx",
             "defaultmaterialframe": "pbr_mat",
             "renderpass": "MainResultPass",
             "depthpass": "",
             "animation": {
-                "clips": [
-                    {
-                        "key": "Idle",
-                        "motionname": "PBROrc_Walk",
-                        "index": 0,
-                        "loop": true
-                    }
-                ],
+                "clips": null,
                 "playmotionindex": -1,
                 "playmotion": "Idle"
             },
@@ -46,149 +63,14 @@
                 "rotate": [
                     90.0,
                     -5.008956122765085e-06,
-                    180.0
+                    -180.0
                 ],
                 "scale": [
                     0.009999999776482582,
                     0.009999999776482582,
                     0.009999999776482582
                 ]
-            },
-            "enable": true,
-            "materials": [
-                {
-                    "materialframe": "pbr_mat",
-                    "cull": "back",
-                    "textures": [
-                        {
-                            "texturebuffername": "cubemapTexture",
-                            "textureindex": -1,
-                            "texturename": ""
-                        },
-                        {
-                            "texturebuffername": "shadowmapTexture",
-                            "textureindex": -1,
-                            "texturename": ""
-                        },
-                        {
-                            "texturebuffername": "IBL_Diffuse_Texture",
-                            "textureindex": -1,
-                            "texturename": ""
-                        },
-                        {
-                            "texturebuffername": "IBL_Specular_Texture",
-                            "textureindex": -1,
-                            "texturename": ""
-                        },
-                        {
-                            "texturebuffername": "IBL_GGXLUT_Texture",
-                            "textureindex": -1,
-                            "texturename": ""
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "name": "salamander01",
-            "filename": "Resources/Avatar/Salamander/salamander01.fbx",
-            "defaultmaterialframe": "pbr_mat",
-            "renderpass": "MainResultPass",
-            "depthpass": "",
-            "animation": {
-                "clips": [
-                    {
-                        "key": "Idle",
-                        "motionname": "Salamander_Idle01",
-                        "index": 0,
-                        "loop": true
-                    }
-                ],
-                "playmotionindex": -1,
-                "playmotion": "Idle"
-            },
-            "transform": {
-                "pos": [
-                    1.0,
-                    0.0,
-                    0.0
-                ],
-                "rotate": [
-                    90.0,
-                    -5.008956122765085e-06,
-                    180.0
-                ],
-                "scale": [
-                    1.0,
-                    1.0,
-                    1.0
-                ]
-            },
-            "enable": true,
-            "materials": [
-                {
-                    "materialframe": "pbr_mat",
-                    "cull": "back",
-                    "textures": [
-                        {
-                            "texturebuffername": "cubemapTexture",
-                            "textureindex": -1,
-                            "texturename": ""
-                        },
-                        {
-                            "texturebuffername": "shadowmapTexture",
-                            "textureindex": -1,
-                            "texturename": ""
-                        },
-                        {
-                            "texturebuffername": "IBL_Diffuse_Texture",
-                            "textureindex": -1,
-                            "texturename": ""
-                        },
-                        {
-                            "texturebuffername": "IBL_Specular_Texture",
-                            "textureindex": -1,
-                            "texturename": ""
-                        },
-                        {
-                            "texturebuffername": "IBL_GGXLUT_Texture",
-                            "textureindex": -1,
-                            "texturename": ""
-                        }
-                    ]
-                },
-                {
-                    "materialframe": "pbr_mat",
-                    "cull": "back",
-                    "textures": [
-                        {
-                            "texturebuffername": "cubemapTexture",
-                            "textureindex": -1,
-                            "texturename": ""
-                        },
-                        {
-                            "texturebuffername": "shadowmapTexture",
-                            "textureindex": -1,
-                            "texturename": ""
-                        },
-                        {
-                            "texturebuffername": "IBL_Diffuse_Texture",
-                            "textureindex": -1,
-                            "texturename": ""
-                        },
-                        {
-                            "texturebuffername": "IBL_Specular_Texture",
-                            "textureindex": -1,
-                            "texturename": ""
-                        },
-                        {
-                            "texturebuffername": "IBL_GGXLUT_Texture",
-                            "textureindex": -1,
-                            "texturename": ""
-                        }
-                    ]
-                }
-            ]
+            }
         }
     ]
 }

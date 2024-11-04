@@ -16,7 +16,7 @@ namespace animation
 	{
 	}
 
-	bool CIKSolver::Create(const std::shared_ptr<CBone>& IKTargetBone, const std::vector<std::shared_ptr<CBone>>& BoneList)
+	bool CIKSolver::Create(const std::shared_ptr<CBone>& IKTargetBone, const std::vector<std::tuple<std::string, std::shared_ptr<CBone>>>& BoneList)
 	{
 		m_IKTarget = IKTargetBone->GetBoneNode();
 		m_IKParam = IKTargetBone->GetIKParam();
@@ -29,7 +29,7 @@ namespace animation
 			int BoneIndex = IKLink.IKLinkBoneIndex;
 			if (BoneIndex < 0 || BoneIndex >= BoneList.size()) return false;
 
-			m_IKChainList.push_back(BoneList[BoneIndex]->GetBoneNode());
+			m_IKChainList.push_back(std::get<1>(BoneList[BoneIndex])->GetBoneNode());
 		}
 
 		// EndEffector‚ðChain‚Ì––”ö‚É’Ç‰Á
@@ -37,7 +37,7 @@ namespace animation
 		if (EndEffectorIndex < 0 || EndEffectorIndex >= BoneList.size()) return false;
 
 		// ª–{‚©‚çæ’[‚Ì•ûŒü‚ÅLinkNode‚ª“ü‚Á‚Ä‚¢‚é
-		m_IKChainList.push_back(BoneList[EndEffectorIndex]->GetBoneNode());
+		m_IKChainList.push_back(std::get<1>(BoneList[EndEffectorIndex])->GetBoneNode());
 
 		return true;
 	}

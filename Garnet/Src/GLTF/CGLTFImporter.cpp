@@ -906,7 +906,7 @@ namespace gltf
 			{
 				// Bone‚Ì‡”Ô‚ÆinverseBindMatrix‚Ì‡”Ô‚Í“¯‚¶
 				const auto& Bone = Skeleton->GetBoneList()[j];
-				Bone->GetBoneNode()->SetInverseBindMatrix(inverseBindMatrices[j]);
+				std::get<1>(Bone)->GetBoneNode()->SetInverseBindMatrix(inverseBindMatrices[j]);
 			}
 		}
 
@@ -947,9 +947,9 @@ namespace gltf
 									{
 										for (const auto& Bone : Skeleton->GetBoneList())
 										{
-											if (Bone->GetBoneNode() == TargetNode)
+											if (std::get<1>(Bone)->GetBoneNode() == TargetNode)
 											{
-												Bone->SetBoneName(BoneName);
+												std::get<1>(Bone)->SetBoneName(BoneName);
 
 												break;
 											}
@@ -978,7 +978,7 @@ namespace gltf
 	{
 		for (const auto& Bone : Skeleton->GetBoneList())
 		{
-			const auto& ParentNode = Bone->GetBoneNode()->GetParentNode();
+			const auto& ParentNode = std::get<1>(Bone)->GetBoneNode()->GetParentNode();
 			if (!ParentNode) continue;
 
 			std::shared_ptr<animation::CBoneNameProvider> Provider = std::make_shared<animation::CBoneNameProvider>();
@@ -987,7 +987,7 @@ namespace gltf
 			const auto& ParentBone = Skeleton->GetBone(ParentBoneName);
 			if (!ParentBone) continue;
 
-			Bone->SetParentBoneName(ParentBone->GetBoneName());
+			std::get<1>(Bone)->SetParentBoneName(ParentBone->GetBoneName());
 		}
 	}
 

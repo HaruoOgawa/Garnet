@@ -958,7 +958,7 @@ namespace fbx
 	{
 		for (const auto& Bone : Skeleton->GetBoneList())
 		{
-			const auto& ParentNode = Bone->GetBoneNode()->GetParentNode();
+			const auto& ParentNode = std::get<1>(Bone)->GetBoneNode()->GetParentNode();
 			if (!ParentNode) continue;
 
 			std::shared_ptr<animation::CBoneNameProvider> Provider = std::make_shared<animation::CBoneNameProvider>();
@@ -967,7 +967,7 @@ namespace fbx
 			const auto& ParentBone = Skeleton->GetBone(ParentBoneName);
 			if (!ParentBone) continue;
 
-			Bone->SetParentBoneName(ParentBone->GetBoneName());
+			std::get<1>(Bone)->SetParentBoneName(ParentBone->GetBoneName());
 		}
 	}
 
@@ -1280,7 +1280,7 @@ namespace fbx
 		{
 			const auto& Bone = Skeleton->GetBoneList()[j];
 
-			if (Bone->GetBoneNode()->GetName() == BoneName)
+			if (std::get<1>(Bone)->GetBoneNode()->GetName() == BoneName)
 			{
 				BoneIndex = j;
 
