@@ -15,7 +15,7 @@
     "animations": [
       {
         "name": "MotionTest",
-        "filename": "Resources/Motions/maegeritsuki.vmd"
+        "filename": "Resources/Motions/mmd_running.vmd"
       }
     ],
     "objects": [

@@ -44,6 +44,27 @@ namespace animation
 
 	bool CIKSolver::Solve()
 	{
+		// まずLinkNodeを初期姿勢に戻す
+		// T-Pose(元の姿勢)にリセットして演算を行うことで演算結果が安定するようになる
+		// このようにしないと途中で変な方向を向いたりぶるぶるしたりして不安定になる
+		for (auto& LinkNode : m_IKChainList)
+		{
+			LinkNode->ResetToDefaultLocalTransform();
+
+			// Linkノードのワールド行列を再計算する
+			const auto& ParentNode = LinkNode->GetParentNode();
+			if (!ParentNode)
+			{
+				// 親ノードがない時はローカル行列をワールド行列として渡す
+				LinkNode->SetWorldMatrix(LinkNode->GetLocalMatrix());
+
+				continue;
+			}
+
+			glm::mat4 NewWorldMatrix = ParentNode->GetWorldMatrix() * LinkNode->GetLocalMatrix();
+			LinkNode->SetWorldMatrix(NewWorldMatrix);
+		}
+
 		// CCD-IKを採用
 		const int NumOfLink = static_cast<int>(m_IKChainList.size());
 
@@ -196,50 +217,6 @@ namespace animation
 			// ループ回数を更新
 			CurrentLoopNum++;
 		}
-
-		/*// 回転角度制限
-		// 制限を行うことで例えば膝が変な方向に曲がらないようにする
-		const int NumOfIKLink = static_cast<int>(m_IKParam->IKLinkList.size());
-
-		for (int LinkIndex = NumOfIKLink - 1; LinkIndex >= 0; LinkIndex--)
-		{
-			const auto& IKLink = m_IKParam->IKLinkList[LinkIndex];
-
-			// m_IKChainListにはIKLinkListの先頭から順番に入れている
-			std::shared_ptr<object::CNode> ReCalcNode = m_IKChainList[NumOfIKLink - LinkIndex - 1];
-
-			glm::quat rot = ReCalcNode->GetRot();
-			
-			if (IKLink.IsLimitAngle)
-			{
-				const auto& LowerAngle = IKLink.LowerAngle;
-				const auto& UpperAngle = IKLink.UpperAngle;
-
-				glm::vec3 euler = glm::eulerAngles(rot);
-
-				// オイラー角に対して角度制限を行う
-				// LowerAngleとUpperAngleはラジアン
-				euler.x = glm::clamp(euler.x, LowerAngle.x, UpperAngle.x);
-				euler.y = glm::clamp(euler.y, LowerAngle.y, UpperAngle.y);
-				euler.z = glm::clamp(euler.z, LowerAngle.z, UpperAngle.z);
-
-				rot = glm::quat(euler);
-			}
-
-			ReCalcNode->SetRot(rot);
-
-			const auto& ParentNode = ReCalcNode->GetParentNode();
-			if (!ParentNode)
-			{
-				// 親ノードがない時はローカル行列をワールド行列として渡す
-				ReCalcNode->SetWorldMatrix(ReCalcNode->GetLocalMatrix());
-
-				continue;
-			}
-
-			glm::mat4 NewWorldMatrix = ParentNode->GetWorldMatrix() * ReCalcNode->GetLocalMatrix();
-			ReCalcNode->SetWorldMatrix(NewWorldMatrix);
-		}*/
 
 		return true;
 	}

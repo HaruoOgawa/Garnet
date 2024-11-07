@@ -62,14 +62,12 @@ namespace animation
 	// IKの計算
 	bool CAnimationController::CalculateIK(const std::vector<std::shared_ptr<object::CNode>>& NodeList)
 	{
+		if (!m_Skeleton) return true;
+
 		const auto& CurrentClip = m_CurrentLayout.Clip;
+		if (!CurrentClip || !CurrentClip->IsUseIK()) return true; // ここをコメントアウトすることでクリップがなくてもIKテストができる
 
-		if (!CurrentClip || !m_Skeleton) return true;
-
-		if (CurrentClip->IsUseIK())
-		{
-			if (!m_Skeleton->SolveIK()) return false;
-		}
+		if (!m_Skeleton->SolveIK()) return false;
 
 		return true;
 	}

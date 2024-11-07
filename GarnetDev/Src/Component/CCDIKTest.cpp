@@ -232,7 +232,12 @@ namespace component
 			auto& LocalNode = LocalLinkList[i];
 			auto& SrcNode = m_LinkList[i];
 
-			// 回転にローパスフィルタをかけて急激に変化しないようにする
+			// ワールド行列だけを反映する
+			// ローカル座標に反映しないことで次のフレームのCCDIK演算時にT-Pose(元の姿勢)にリセットして演算を行うことができ、演算結果が安定するようになる
+			// このようにしないと途中で変な方向を向いたりぶるぶるしたりして不安定になる
+			SrcNode->SetWorldMatrix(LocalNode->GetWorldMatrix());
+
+			/*// 回転にローパスフィルタをかけて急激に変化しないようにする
 			float t = DrawInfo->GetDeltaSecondsTime() * 8.0f;
 			glm::quat filterRot = glm::slerp(SrcNode->GetRot(), LocalNode->GetRot(), t);
 
@@ -249,7 +254,7 @@ namespace component
 			}
 
 			glm::mat4 NewWorldMatrix = ParentNode->GetWorldMatrix() * SrcNode->GetLocalMatrix();
-			SrcNode->SetWorldMatrix(NewWorldMatrix);
+			SrcNode->SetWorldMatrix(NewWorldMatrix);*/
 		}
 
 		// アルゴリズム的には合っているが、見栄えのためにTargetがEndの先端に表示されるようにする
