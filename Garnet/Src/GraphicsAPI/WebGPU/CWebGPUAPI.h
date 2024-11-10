@@ -108,19 +108,17 @@ namespace api
 		virtual bool EndRender() override;
 		virtual bool SubmitRender() override;
 
-		virtual const std::string& GetVertexShaderExtension() const override;
-		virtual const std::string& GetFragmentShaderExtension() const override;
-		virtual const std::string& GetGeometryShaderExtension() const override;
-		virtual const std::string& GetHullShaderExtension() const override;
-		virtual const std::string& GetDomainShaderExtension() const override;
-		virtual const std::string& GetComputeShaderExtension() const override;
+		virtual std::string GetVertexShaderExtension() const override;
+		virtual std::string GetFragmentShaderExtension() const override;
+		virtual std::string GetGeometryShaderExtension() const override;
+		virtual std::string GetHullShaderExtension() const override;
+		virtual std::string GetDomainShaderExtension() const override;
+		virtual std::string GetComputeShaderExtension() const override;
 
 		virtual int GetWidth() const override;
 		virtual int GetHeight() const override;
 		
-		virtual const std::map<std::string, std::shared_ptr<graphics::IRenderPass>>& GetOffScreenRenderPassMap() const override;
 		virtual std::shared_ptr<graphics::IRenderPass> FindOffScreenRenderPass(const std::string& PassName) override;
-		virtual const std::string& GetCurrentRenderPassName() const override;
 		virtual bool CopyColorBuffer(const std::string& SrcPassName, const std::string& DstPassName) override;
 		virtual bool CopyDepthBuffer(const std::string& SrcPassName, const std::string& DstPassName) override;
 

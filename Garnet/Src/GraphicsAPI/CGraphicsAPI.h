@@ -7,6 +7,12 @@ namespace api
 	class CGraphicsAPI : public IGraphicsAPI
 	{
 		const int m_MaxBoneCount;
+
+		std::shared_ptr<animation::CBoneNameProvider> m_BoneNameProvider;
+		std::shared_ptr<animation::CBlendShapeNameProvider> m_BlendShapeNameProvider;
+	protected:
+		std::map<std::string, std::shared_ptr<graphics::IRenderPass>> m_OffScreenRenderPassMap;
+		std::string m_CurrentRenderPassName;
 	public:
 		CGraphicsAPI();
 		virtual ~CGraphicsAPI();
@@ -33,24 +39,27 @@ namespace api
 
 		virtual int GetMaxBoneCount() override;
 
-		virtual const std::string& GetVertexShaderExtension() const = 0;
-		virtual const std::string& GetFragmentShaderExtension() const = 0;
-		virtual const std::string& GetGeometryShaderExtension() const = 0;
-		virtual const std::string& GetHullShaderExtension() const = 0;
-		virtual const std::string& GetDomainShaderExtension() const = 0;
-		virtual const std::string& GetComputeShaderExtension() const = 0;
+		virtual std::string GetVertexShaderExtension() const = 0;
+		virtual std::string GetFragmentShaderExtension() const = 0;
+		virtual std::string GetGeometryShaderExtension() const = 0;
+		virtual std::string GetHullShaderExtension() const = 0;
+		virtual std::string GetDomainShaderExtension() const = 0;
+		virtual std::string GetComputeShaderExtension() const = 0;
 
 		virtual int GetWidth() const = 0;
 		virtual int GetHeight() const = 0;
 
-		virtual const std::map<std::string, std::shared_ptr<graphics::IRenderPass>>& GetOffScreenRenderPassMap() const = 0;
+		virtual const std::map<std::string, std::shared_ptr<graphics::IRenderPass>>& GetOffScreenRenderPassMap() const override;
 		virtual std::shared_ptr<graphics::IRenderPass> FindOffScreenRenderPass(const std::string& PassName) = 0;
-		virtual const std::string& GetCurrentRenderPassName() const = 0;
+		virtual const std::string& GetCurrentRenderPassName() const override;
 		virtual bool CopyColorBuffer(const std::string& SrcPassName, const std::string& DstPassName) = 0;
 		virtual bool CopyDepthBuffer(const std::string& SrcPassName, const std::string& DstPassName) = 0;
 
 		virtual bool IsEnabledRuntimeShaderEditing() const = 0;
 
 		virtual bool CheckValidShader(std::string& ErrorMsg, const std::vector<unsigned char>& ShaderCode, graphics::EShaderStage ShaderStage) = 0;
+
+		virtual const std::shared_ptr<animation::CBoneNameProvider>& GetBoneNameProvider() const override;
+		virtual const std::shared_ptr<animation::CBlendShapeNameProvider>& GetBlendShapeNameProvider() const override;
 	};
 }

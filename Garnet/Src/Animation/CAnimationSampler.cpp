@@ -175,22 +175,11 @@ namespace animation
 			return false;
 		}
 
-		float CalcCurrentTime = 0.0f;
-
-		if (IsLoop)
-		{
-			CalcCurrentTime = glm::mod(CurrentTime, m_EndTime);
-		}
-		else
-		{
-			CalcCurrentTime = fminf(CurrentTime, m_EndTime);
-		}
-
 		// 処理対処のキーフレームを取得
 		std::shared_ptr<animation::CKeyFrame> PrevKeyFrame = nullptr;
 		std::shared_ptr<animation::CKeyFrame> NextKeyFrame = nullptr;
 		
-		if (!GetNeedKeyFrame(CalcCurrentTime, PrevKeyFrame, NextKeyFrame)) return false;
+		if (!GetNeedKeyFrame(CurrentTime, PrevKeyFrame, NextKeyFrame)) return false;
 
 		// キーフレームが同じなら補間せずにPrevKeyFrameの値をそのまま返す
 		if (PrevKeyFrame == NextKeyFrame)
@@ -203,25 +192,25 @@ namespace animation
 		switch (m_InterpolationType)
 		{
 		case animation::EInterpolationType::STEP:
-			if (!DoStepInterpolation(CalcCurrentTime, Value, PrevKeyFrame, NextKeyFrame)) return false;
+			if (!DoStepInterpolation(CurrentTime, Value, PrevKeyFrame, NextKeyFrame)) return false;
 			break;
 		case animation::EInterpolationType::LINEAR:
 			{
 				switch (ValueType)
 				{
 				case animation::EInterpolateValueType::NONE:
-					if (!DoLinearInterpolation(CalcCurrentTime, Value, PrevKeyFrame, NextKeyFrame)) return false;
+					if (!DoLinearInterpolation(CurrentTime, Value, PrevKeyFrame, NextKeyFrame)) return false;
 					break;
 				case animation::EInterpolateValueType::QUATERNION:
 					// 回転のLinearの場合、Slerp( Spherical Linear Interpolation)を使用する必要がある
 					// https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#appendix-c-interpolation
-					if (!DoSphericalLinearInterpolation(CalcCurrentTime, Value, PrevKeyFrame, NextKeyFrame)) return false;
+					if (!DoSphericalLinearInterpolation(CurrentTime, Value, PrevKeyFrame, NextKeyFrame)) return false;
 					break;
 				case animation::EInterpolateValueType::MODELMATRIX:
-					if (!DoModelMatrixLinearInterpolation(CalcCurrentTime, Value, PrevKeyFrame, NextKeyFrame)) return false;
+					if (!DoModelMatrixLinearInterpolation(CurrentTime, Value, PrevKeyFrame, NextKeyFrame)) return false;
 					break;
 				default:
-					if (!DoLinearInterpolation(CalcCurrentTime, Value, PrevKeyFrame, NextKeyFrame)) return false;
+					if (!DoLinearInterpolation(CurrentTime, Value, PrevKeyFrame, NextKeyFrame)) return false;
 					break;
 				}
 			}
@@ -230,11 +219,11 @@ namespace animation
 		{
 			if (ValueType == animation::EInterpolateValueType::MODELMATRIX)
 			{
-				if (!DoModelMatrixSplineInterpolation(CalcCurrentTime, Value, PrevKeyFrame, NextKeyFrame)) return false;
+				if (!DoModelMatrixSplineInterpolation(CurrentTime, Value, PrevKeyFrame, NextKeyFrame)) return false;
 			}
 			else
 			{
-				if (!DoCubicSplineInterpolation(CalcCurrentTime, Value, PrevKeyFrame, NextKeyFrame)) return false;
+				if (!DoCubicSplineInterpolation(CurrentTime, Value, PrevKeyFrame, NextKeyFrame)) return false;
 			}
 		}
 			break;

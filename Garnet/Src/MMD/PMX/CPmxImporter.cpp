@@ -26,7 +26,7 @@ namespace mmd
 		CPmxModel model;
 
 		// バイナリの解析
-		if (!model.Analyse(Data))
+		if (!model.Analyse(pGraphicsAPI, Data))
 		{
 			Console::Log("[Cpp Log] Error - Failed to Analyse Pmx Binary.\n");
 
@@ -48,7 +48,7 @@ namespace mmd
 
 		// Skeleton
 		std::shared_ptr<animation::CSkeleton> Skeleton = std::make_shared<animation::CSkeleton>(RigType, (Object->GetObjectName() + "(Skeleton)"));
-		if (!CreateAnimationSkeleton(model, Skeleton, NodeList, RootNode)) return false;
+		if (!CreateAnimationSkeleton(pGraphicsAPI, model, Skeleton, NodeList, RootNode)) return false;
 
 		// BoneTableを作成
 		Skeleton->MakeHumanoidBoneTable(HumanoidBoneList);
@@ -120,12 +120,9 @@ namespace mmd
 		return true;
 	}
 
-	bool CPmxImporter::CreateAnimationSkeleton(const CPmxModel& model, std::shared_ptr<animation::CSkeleton>& Skeleton, std::vector<std::shared_ptr<object::CNode>>& NodeList, const std::shared_ptr<object::CNode>& RootNode)
+	bool CPmxImporter::CreateAnimationSkeleton(api::IGraphicsAPI* pGraphicsAPI, const CPmxModel& model, std::shared_ptr<animation::CSkeleton>& Skeleton, std::vector<std::shared_ptr<object::CNode>>& NodeList, const std::shared_ptr<object::CNode>& RootNode)
 	{
-		animation::CBoneNameProvider Provider;
-
 		// PmxではBoneとBoneは全くの別物でそれぞれ違う役割を持っているので厳格に名前分けする必要がある!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
 		const auto& PmxBoneList = model.GetPmxBoneList();
 
 		for (int BoneIndex = 0; BoneIndex < PmxBoneList.size(); BoneIndex++)
@@ -166,7 +163,7 @@ namespace mmd
 			std::shared_ptr<animation::CBone> Bone = std::make_shared<animation::CBone>(BoneNode);
 
 			// BoneにBoneNameを割り当てる
-			animation::EHumanoidBones BoneName = Provider.GetBoneNameU16(Name);
+			animation::EHumanoidBones BoneName = pGraphicsAPI->GetBoneNameProvider()->GetBoneNameU16(animation::EBonePattern::PMX, Name);
 			Bone->SetBoneName(BoneName);
 
 			// ボーンの付与

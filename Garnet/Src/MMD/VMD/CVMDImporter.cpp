@@ -2,7 +2,6 @@
 #include "CVMDImporter.h"
 #include "../../Math/CTransform.h"
 #include "../../Message/Console.h"
-#include "../../Animation/CBlendShapeNameProvider.h"
 #include <algorithm>
 
 namespace mmd
@@ -15,7 +14,7 @@ namespace mmd
 		CVMDData vmd;
 
 		// ƒoƒCƒiƒŠ‚Ì‰ğÍ
-		if (!vmd.Analyse(Data))
+		if (!vmd.Analyse(pGraphicsAPI, Data))
 		{
 			Console::Log("[Cpp Log] Error - Failed to Analyse VMD Binary.\n");
 

@@ -18,6 +18,8 @@ namespace animation
 
 	protected:
 		float m_CurrentTime;
+		float m_ClipStartTime;
+		float m_ClipEndTime;
 
 		bool m_IsLoop;
 
@@ -61,6 +63,7 @@ namespace animation
 		virtual std::shared_ptr<animation::CAnimationSampler> GetSamplerWithMostFrames();
 
 		virtual float GetCurrentTime() const;
+
 		virtual bool IsEnd();
 	};
 }

@@ -24,8 +24,7 @@ namespace api
 		m_DomainShaderExtension(".tese"),
 		m_ComputeShaderExtension(".comp"),
 		m_Width(Width),
-		m_Height(Height),
-		m_CurrentRenderPassName(std::string())
+		m_Height(Height)
 	{
 	}
 
@@ -151,32 +150,32 @@ namespace api
 		return true;
 	}
 
-	const std::string& COpenGLAPI::GetVertexShaderExtension() const
+	std::string COpenGLAPI::GetVertexShaderExtension() const
 	{
 		return m_VertexShaderExtension;
 	}
 
-	const std::string& COpenGLAPI::GetFragmentShaderExtension() const
+	std::string COpenGLAPI::GetFragmentShaderExtension() const
 	{
 		return m_FragmentShaderExtension;
 	}
 
-	const std::string& COpenGLAPI::GetGeometryShaderExtension() const
+	std::string COpenGLAPI::GetGeometryShaderExtension() const
 	{
 		return m_GeometryShaderExtension;
 	}
 
-	const std::string& COpenGLAPI::GetHullShaderExtension() const
+	std::string COpenGLAPI::GetHullShaderExtension() const
 	{
 		return m_HullShaderExtension;
 	}
 
-	const std::string& COpenGLAPI::GetDomainShaderExtension() const
+	std::string COpenGLAPI::GetDomainShaderExtension() const
 	{
 		return m_DomainShaderExtension;
 	}
 
-	const std::string& COpenGLAPI::GetComputeShaderExtension() const
+	std::string COpenGLAPI::GetComputeShaderExtension() const
 	{
 		return m_ComputeShaderExtension;
 	}
@@ -192,22 +191,12 @@ namespace api
 		return m_Height;
 	}
 
-	const std::map<std::string, std::shared_ptr<graphics::IRenderPass>>& COpenGLAPI::GetOffScreenRenderPassMap() const
-	{
-		return m_OffScreenRenderPassMap;
-	}
-
 	std::shared_ptr<graphics::IRenderPass> COpenGLAPI::FindOffScreenRenderPass(const std::string& PassName)
 	{
 		auto it = m_OffScreenRenderPassMap.find(PassName);
 		if (it == m_OffScreenRenderPassMap.end()) return nullptr;
 
 		return it->second;
-	}
-
-	const std::string& COpenGLAPI::GetCurrentRenderPassName() const
-	{
-		return m_CurrentRenderPassName;
 	}
 
 	bool COpenGLAPI::CopyColorBuffer(const std::string& SrcPassName, const std::string& DstPassName)

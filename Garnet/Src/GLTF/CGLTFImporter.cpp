@@ -160,7 +160,7 @@ namespace gltf
 
 		// スキン
 		std::shared_ptr<animation::CSkeleton> Skeleton = std::make_shared<animation::CSkeleton>(RigType, (Object->GetObjectName() + "(Skeleton)"));
-		if (!CreateAnimationSkeleton(model, Skeleton, NodeList))
+		if (!CreateAnimationSkeleton(pGraphicsAPI, model, Skeleton, NodeList))
 		{
 			Console::Log("[Error GLTFImporter] Failed to CreateAnimationSkeleton\n");
 
@@ -192,7 +192,7 @@ namespace gltf
 		// 親のBoneを追加
 		if(Skeleton)
 		{
-			ApplyParentBoneList(Skeleton, NodeList);
+			ApplyParentBoneList(pGraphicsAPI, Skeleton, NodeList);
 		}
 
 		// アニメーション
@@ -855,7 +855,7 @@ namespace gltf
 		return true;
 	}
 
-	bool CGLTFImporter::CreateAnimationSkeleton(const tinygltf::Model& model, std::shared_ptr<animation::CSkeleton>& Skeleton, const std::vector<std::shared_ptr<object::CNode>>& NodeList)
+	bool CGLTFImporter::CreateAnimationSkeleton(api::IGraphicsAPI* pGraphicsAPI, const tinygltf::Model& model, std::shared_ptr<animation::CSkeleton>& Skeleton, const std::vector<std::shared_ptr<object::CNode>>& NodeList)
 	{
 		for (const auto& glTFSkeleton : model.skins)
 		{
@@ -939,8 +939,7 @@ namespace gltf
 								int nodeIndex = bone.Get("node").Get<int>();
 
 								// BoneNameを取得
-								std::shared_ptr<animation::CBoneNameProvider> Provider = std::make_shared<animation::CBoneNameProvider>();
-								animation::EHumanoidBones BoneName = Provider->GetBoneName(name);
+								animation::EHumanoidBones BoneName = pGraphicsAPI->GetBoneNameProvider()->GetBoneName(name);
 
 								// BoneにBoneNameを割り当てる
 								if (nodeIndex >= 0 && nodeIndex < NodeList.size())
@@ -972,15 +971,14 @@ namespace gltf
 	}
 
 
-	void CGLTFImporter::ApplyParentBoneList(const std::shared_ptr<animation::CSkeleton>& Skeleton, const std::vector<std::shared_ptr<object::CNode>>& NodeList)
+	void CGLTFImporter::ApplyParentBoneList(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<animation::CSkeleton>& Skeleton, const std::vector<std::shared_ptr<object::CNode>>& NodeList)
 	{
 		for (const auto& Bone : Skeleton->GetBoneList())
 		{
 			const auto& ParentNode = std::get<1>(Bone)->GetBoneNode()->GetParentNode();
 			if (!ParentNode) continue;
 
-			std::shared_ptr<animation::CBoneNameProvider> Provider = std::make_shared<animation::CBoneNameProvider>();
-			animation::EHumanoidBones ParentBoneName = Provider->GetBoneName(ParentNode->GetName());
+			animation::EHumanoidBones ParentBoneName = pGraphicsAPI->GetBoneNameProvider()->GetBoneName(ParentNode->GetName());
 
 			const auto& ParentBone = Skeleton->GetBone(ParentBoneName);
 			if (!ParentBone) continue;

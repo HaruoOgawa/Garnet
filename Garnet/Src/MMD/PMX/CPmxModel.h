@@ -19,6 +19,7 @@
 #include "SPmxJoint.h"
 
 #include "../../Animation/EBlendShapeName.h"
+#include "../../Interface/IGraphicsAPI.h"
 
 namespace binary { class CBinaryReader; }
 
@@ -70,7 +71,7 @@ namespace mmd
 		
 		bool AnalyseBone(binary::CBinaryReader& Analyser, const SPmxMetaData& MetaData);
 
-		bool AnalyseMorph(binary::CBinaryReader& Analyser, const SPmxMetaData& MetaData);
+		bool AnalyseMorph(api::IGraphicsAPI* pGraphicsAPI, binary::CBinaryReader& Analyser, const SPmxMetaData& MetaData);
 
 		bool AnalyseDisplayFrame(binary::CBinaryReader& Analyser, const SPmxMetaData& MetaData);
 
@@ -103,7 +104,7 @@ namespace mmd
 
 		const std::vector<SPmxJoint>& GetPmxJointList() const;
 
-		bool Analyse(const std::vector<unsigned char>& Data);
+		bool Analyse(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& Data);
 	};
 }
 #endif

@@ -55,7 +55,7 @@ namespace mmd
 		return m_PmxJointList;
 	}
 
-	bool CPmxModel::Analyse(const std::vector<unsigned char>& Data)
+	bool CPmxModel::Analyse(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& Data)
 	{
 		// AnalyserÇê∂ê¨
 		binary::CBinaryReader Analyser(Data);
@@ -115,7 +115,7 @@ namespace mmd
 		}
 		
 		// Morph
-		if (!AnalyseMorph(Analyser, m_MetaData))
+		if (!AnalyseMorph(pGraphicsAPI, Analyser, m_MetaData))
 		{
 			Console::Log("[Error] Pmx AnalyseMorph Error\n");
 
@@ -897,12 +897,10 @@ namespace mmd
 		return true;
 	}
 
-	bool CPmxModel::AnalyseMorph(binary::CBinaryReader& Analyser, const SPmxMetaData& MetaData)
+	bool CPmxModel::AnalyseMorph(api::IGraphicsAPI* pGraphicsAPI, binary::CBinaryReader& Analyser, const SPmxMetaData& MetaData)
 	{
 		int NumOfMorph = 0;
 		if (!Analyser.GetInt(NumOfMorph)) return false;
-
-		animation::CBlendShapeNameProvider Provider;
 
 		for (int i = 0; i < NumOfMorph; i++)
 		{
@@ -988,7 +986,7 @@ namespace mmd
 					PmxMorph->AddVertexMorph(VertexIndex, Offset);
 				}
 
-				animation::EBlendShapeName BlendShapeName = Provider.GetBlendShapeNameU16(MorphName.second);
+				animation::EBlendShapeName BlendShapeName = pGraphicsAPI->GetBlendShapeNameProvider()->GetBlendShapeNameU16(MorphName.second);
 
 				m_PmxVertexMorphList.emplace(BlendShapeName, PmxMorph);
 			}

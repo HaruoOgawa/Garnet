@@ -51,7 +51,7 @@ namespace mmd
 	class CPmxImporter
 	{
 	private:
-		static bool CreateAnimationSkeleton(const CPmxModel& model, std::shared_ptr<animation::CSkeleton>& Skeleton, std::vector<std::shared_ptr<object::CNode>>& NodeList, const std::shared_ptr<object::CNode>& RootNode);
+		static bool CreateAnimationSkeleton(api::IGraphicsAPI* pGraphicsAPI, const CPmxModel& model, std::shared_ptr<animation::CSkeleton>& Skeleton, std::vector<std::shared_ptr<object::CNode>>& NodeList, const std::shared_ptr<object::CNode>& RootNode);
 		static bool CalcInverseBindPose(std::shared_ptr<animation::CSkeleton>& Skeleton);
 
 		static bool CreateMaterialList(api::IGraphicsAPI* pGraphicsAPI, const CPmxModel& model, std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList, 
