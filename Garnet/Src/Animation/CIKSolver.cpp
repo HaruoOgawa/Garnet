@@ -47,13 +47,17 @@ namespace animation
 		// まずLinkNodeを初期姿勢に戻す
 		// T-Pose(元の姿勢)にリセットして演算を行うことで演算結果が安定するようになる
 		// このようにしないと途中で変な方向を向いたりぶるぶるしたりして不安定になる
-		for (auto& LinkNode : m_IKChainList)
+		for (int n = 0; n < static_cast<int>(m_IKChainList.size()); n++)
 		{
+			auto& LinkNode = m_IKChainList[n];
+
 			LinkNode->ResetToDefaultLocalTransform();
 
 			// Linkノードのワールド行列を再計算する
 			const auto& ParentNode = LinkNode->GetParentNode();
-			if (!ParentNode)
+			// 始点(先頭リンク)の親ワールド行列を無視する
+			// これを考慮すると例えば体を捻った時にIKが暴れてしまう
+			if (!ParentNode || n == 0)
 			{
 				// 親ノードがない時はローカル行列をワールド行列として渡す
 				LinkNode->SetWorldMatrix(LinkNode->GetLocalMatrix());
@@ -67,12 +71,17 @@ namespace animation
 
 		// CCD-IKを採用
 		const int NumOfLink = static_cast<int>(m_IKChainList.size());
+		if (NumOfLink < 2) return true;
 
 		const int EndIndex = NumOfLink - 1;
 
 		float Threshold = 0.01f;
 
-		const glm::vec3 TargetPos = m_IKTarget->GetWorldPos();
+		// 始点(先頭リンク)の親ワールド行列を無視する
+		// これを考慮すると例えば体を捻った時にIKが暴れてしまう
+		glm::mat4 TargetMat = glm::inverse(m_IKChainList[0]->GetParentNode()->GetWorldMatrix()) * m_IKTarget->GetWorldMatrix();
+		const glm::vec3 TargetPos = glm::vec3(TargetMat[3][0], TargetMat[3][1], TargetMat[3][2]);
+		//const glm::vec3 TargetPos = m_IKTarget->GetWorldPos();
 
 		// ターゲットに届くかサイクルの最大値に達するまで計算を繰り返す
 		int CurrentLoopNum = 0;
@@ -210,7 +219,9 @@ namespace animation
 					std::shared_ptr<object::CNode> ReCalcNode = m_IKChainList[n];
 
 					const auto& ParentNode = ReCalcNode->GetParentNode();
-					if (!ParentNode)
+					// 始点(先頭リンク)の親ワールド行列を無視する
+					// これを考慮すると例えば体を捻った時にIKが暴れてしまう
+					if (!ParentNode || n == 0)
 					{
 						// 親ノードがない時はローカル行列をワールド行列として渡す
 						ReCalcNode->SetWorldMatrix(ReCalcNode->GetLocalMatrix());
@@ -244,6 +255,23 @@ namespace animation
 
 			// ループ回数を更新
 			CurrentLoopNum++;
+		}
+
+		// 始点(先頭Link)の親ワールド行列を考慮したうえで再計算する
+		for (auto& LinkNode : m_IKChainList)
+		{
+			// Linkノードのワールド行列を再計算する
+			const auto& ParentNode = LinkNode->GetParentNode();
+			if (!ParentNode)
+			{
+				// 親ノードがない時はローカル行列をワールド行列として渡す
+				LinkNode->SetWorldMatrix(LinkNode->GetLocalMatrix());
+
+				continue;
+			}
+
+			glm::mat4 NewWorldMatrix = ParentNode->GetWorldMatrix() * LinkNode->GetLocalMatrix();
+			LinkNode->SetWorldMatrix(NewWorldMatrix);
 		}
 
 		return true;
