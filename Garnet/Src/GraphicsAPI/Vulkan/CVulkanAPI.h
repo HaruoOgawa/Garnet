@@ -97,9 +97,6 @@ namespace api
 		//bool m_IsReCreateSwapChain;
 
 		// Rendering
-		std::map<std::string, std::shared_ptr<graphics::IRenderPass>> m_OffScreenRenderPassMap;
-		std::string m_CurrentRenderPassName;
-
 		VkRenderPass m_SwapChainRenderPass;
 		VkRenderPass m_CurrentRenderPass;
 		CVulkanRenderPass* m_pCurrentVulkanRenderPass;

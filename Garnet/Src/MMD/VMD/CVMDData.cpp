@@ -280,7 +280,7 @@ namespace mmd
 			// 同じ『まばたき』の文字列でもなぜかwstringのバイナリ上では途中にDとか)が入ってmapとしては別のものとして扱われてしまうようなのでVmdのパース段階で分ける必要がある
 			// (本当はBlendName数 * ExpressionCountだけロードに時間がかかってしまうのであまりやりたくはないが・・・)
 			// Boneの方も同じ理屈でVmdパース時にHumanoidBoneNameを見ている
-			animation::EBlendShapeName BlendShapeName = pGraphicsAPI->GetBlendShapeNameProvider()->GetBlendShapeNameU16(Name);
+			animation::EBlendShapeName BlendShapeName = pGraphicsAPI->GetBlendShapeNameProvider()->GetBlendShapeNameU16(animation::EBonePattern::VMD, Name);
 			
 			// なぜかNoneチェックをしているとNoneではないものも飛ばされてしまうのでひとまずコメントアウトしている(Blinkが16個あるはずなのになぜか4つとかになっていた)
 			//if (BlendShapeName == animation::EBlendShapeName::None) continue;
