@@ -110,8 +110,15 @@ namespace app
 			if (!m_TimelineController->Update(m_DrawInfo->GetDeltaSecondsTime(), InputState)) return false;
 		}
 
+		// ƒXƒ[Ä¶‚·‚é
+		//float PrevSelta = m_DrawInfo->GetDeltaSecondsTime();
+		//m_DrawInfo->SetDeltaSecondsTime(1.0f / 500.0f);
+
 		if (!m_SceneController->Update(pGraphicsAPI, pPhysicsEngine, pLoadWorker, m_MainCamera, m_Projection, m_DrawInfo, InputState, m_TimelineController)) return false;
 		if (!m_ScriptScene->Update(pGraphicsAPI, pPhysicsEngine, pLoadWorker, m_MainCamera, m_Projection, m_DrawInfo, InputState)) return false;
+
+		// Ä¶‘¬“x‚ðŒ³‚É–ß‚·
+		//m_DrawInfo->SetDeltaSecondsTime(PrevSelta); 
 
 		m_MainCamera->Update(m_DrawInfo->GetDeltaSecondsTime(), InputState);
 

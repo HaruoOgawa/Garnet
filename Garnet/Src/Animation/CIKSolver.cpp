@@ -155,7 +155,18 @@ namespace animation
 					rot = glm::angleAxis(angle, glm::normalize(axis)); // 回転角度がおかしくなってしまうので回転取得前にちゃんと軸を正規化しておく
 				}
 
-				// 回転角度制限
+				if (std::isnan(rot.x) || std::isnan(rot.y) || std::isnan(rot.z) || std::isnan(rot.w))
+				{
+					Console::Log("[Error] CCDIK - found NaN value in ik rot. when clamp rotation.\n");
+					return false;
+				}
+
+				// 角度制限前にいったん反映する
+				LinkNode->SetRot(rot * LinkNode->GetRot());
+
+				glm::quat ResultRot = LinkNode->GetRot();
+
+				// 演算終了後の回転に対して角度を制限行う
 				// 制限を行うことで例えば膝が変な方向に曲がらないようにする
 				int LinkIndex = static_cast<int>(m_IKParam->IKLinkList.size()) - 1 - i;
 				const auto& IKLink = m_IKParam->IKLinkList[LinkIndex];
@@ -165,7 +176,7 @@ namespace animation
 					const auto& LowerAngle = IKLink.LowerAngle;
 					const auto& UpperAngle = IKLink.UpperAngle;
 
-					glm::vec3 euler = glm::eulerAngles(rot);
+					glm::vec3 euler = glm::eulerAngles(ResultRot);
 
 					// オイラー角に対して角度制限を行う
 					// LowerAngleとUpperAngleはラジアン
@@ -173,15 +184,15 @@ namespace animation
 					euler.y = glm::clamp(euler.y, LowerAngle.y, UpperAngle.y);
 					euler.z = glm::clamp(euler.z, LowerAngle.z, UpperAngle.z);
 
-					rot = glm::quat(euler);
-				}
+					ResultRot = glm::quat(euler);
 
-				LinkNode->SetRot(rot * LinkNode->GetRot());
+					LinkNode->SetRot(ResultRot);
 
-				if (std::isnan(rot.x) || std::isnan(rot.y) || std::isnan(rot.z) || std::isnan(rot.w))
-				{
-					Console::Log("[Error] CCDIK - found NaN value in ik rot. when clamp rotation.\n");
-					return false;
+					if (std::isnan(ResultRot.x) || std::isnan(ResultRot.y) || std::isnan(ResultRot.z) || std::isnan(ResultRot.w))
+					{
+						Console::Log("[Error] CCDIK - found NaN value in ik ResultRot. when clamp rotation.\n");
+						return false;
+					}
 				}
 
 				// Linkノードのワールド行列を再計算する

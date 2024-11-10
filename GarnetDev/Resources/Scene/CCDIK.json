@@ -31,7 +31,7 @@
                     "motionname": "MotionTest",
                     "index": 0,
                     "loop": true,
-                    "ik": false
+                    "ik": true
                   }
                 ],
                 "playmotionindex": -1,
