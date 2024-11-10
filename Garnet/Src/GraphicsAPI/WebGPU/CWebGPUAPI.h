@@ -58,9 +58,6 @@ namespace api
 		WGPUTextureView m_SwapChainDepthTextureView;
 
 		// RenderPass
-		std::map<std::string, std::shared_ptr<graphics::IRenderPass>> m_OffScreenRenderPassMap;
-		std::string m_CurrentRenderPassName;
-
 		WGPURenderPassEncoder m_SwapChainRenderPass;
 
 		WGPURenderPassEncoder m_CurrentRenderPass;
