@@ -117,6 +117,15 @@ namespace animation
 				{
 					if (glm::sign(dot) == 1.0f)
 					{
+						// Linkが２つしかないなら1回だけ演算したら終了とする
+						// 回転不要なのでここで終了
+						if (NumOfLink <= 2)
+						{
+							// 終了
+							DoLoop = false;
+							break;
+						}
+
 						// 同じ方向に平行な時は回転の必要がない
 						continue;
 					}
@@ -218,6 +227,14 @@ namespace animation
 
 				// 接触しているなら終了
 				if (glm::distance2(TargetPos, EndPos) < 0.01f)
+				{
+					// 終了
+					DoLoop = false;
+					break;
+				}
+
+				// Linkが２つしかないなら1回だけ演算したら終了とする
+				if (NumOfLink <= 2)
 				{
 					// 終了
 					DoLoop = false;
