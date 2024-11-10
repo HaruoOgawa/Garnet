@@ -82,7 +82,8 @@ namespace scene
 		m_ObjectList.push_back(Object);
 	}
 
-	void CSceneController::AddObjectWithLoading(resource::CLoadWorker* pLoadWorker, const std::shared_ptr<object::C3DObject>& Object, const std::string& FileName, const std::string& DefaultMaterialframeName)
+	void CSceneController::AddObjectWithLoading(resource::CLoadWorker* pLoadWorker, const std::shared_ptr<object::C3DObject>& Object, const std::string& FileName,
+		const std::string& DefaultMaterialframeName, animation::ERigType RigType)
 	{
 		const auto MaterialFrame = FindMaterialFrame(DefaultMaterialframeName);
 		if (!MaterialFrame) return;
@@ -91,7 +92,7 @@ namespace scene
 		AddObject(Object);
 
 		// ロードワーカーに渡してロード開始
-		pLoadWorker->AddLoadResource(std::make_shared<resource::C3DObjectLoader>(FileName, Object, MaterialFrame, DefaultMaterialframeName));
+		pLoadWorker->AddLoadResource(std::make_shared<resource::C3DObjectLoader>(FileName, Object, MaterialFrame, DefaultMaterialframeName, RigType, std::map<animation::EHumanoidBones, std::string>()));
 	}
 
 	std::vector<std::shared_ptr<object::C3DObject>> CSceneController::GetObjectList() const
@@ -327,11 +328,16 @@ namespace scene
 		{
 			// Materialを生成
 			// 適当に最初のマテリアルを使う
-			auto MaterialFrame = m_MaterialFrameMap.begin()->second;
-			auto Material = MaterialFrame->CreateMaterial(pGraphicsAPI, pGraphicsAPI->GetMaxBoneCount(), graphics::ECullMode::CULL_BACK);
-			
-			m_DebugSphere = std::make_shared<object::C3DObject>(m_DefaultRenderPass, m_DefaultDepthPass);
-			if (!m_DebugSphere->CreatePresetSimply(pGraphicsAPI, nullptr, graphics::CPresetPrimitive::CreateSphere(pGraphicsAPI), graphics::EPresetPrimitiveType::SPHERE, Material, nullptr)) return false;
+			auto MaterialFrame = m_MaterialFrameMap.find("pbr_mat");
+			if (MaterialFrame != m_MaterialFrameMap.end())
+			{
+				auto Material = MaterialFrame->second->CreateMaterial(pGraphicsAPI, pGraphicsAPI->GetMaxBoneCount(), graphics::ECullMode::CULL_BACK);
+
+				Material->SetDepthFunc(graphics::EDepthFunc::Always);
+
+				m_DebugSphere = std::make_shared<object::C3DObject>(m_DefaultRenderPass, m_DefaultDepthPass);
+				if (!m_DebugSphere->CreatePresetSimply(pGraphicsAPI, nullptr, graphics::CPresetPrimitive::CreateSphere(pGraphicsAPI), graphics::EPresetPrimitiveType::SPHERE, Material, nullptr)) return false;
+			}
 		}
 #endif // _DEBUG
 
@@ -472,7 +478,19 @@ namespace scene
 
 		const auto& AnimationInfo = it->second;
 
-		// humanoidclips
+		// clips(通常のスキンメッシュアニメーション)
+		for (const auto& clip : AnimationInfo.Clips)
+		{
+			const auto& AnimationClipSet = m_AnimationClipSetMap.find(clip.second.MotionName);
+			if (AnimationClipSet == m_AnimationClipSetMap.end()) continue;
+
+			const auto& Clip = AnimationClipSet->second->GetAnimationClip(clip.second.Index);
+			if (!Clip) continue;
+
+			Object->AddAnimationClip(Clip, clip.second.Key, { nullptr, "" }, clip.second.Loop);
+		}
+
+		// humanoidclips(ヒューマノイドアニメーション)
 		for (const auto& Humanoidclip : AnimationInfo.Humanoidclips)
 		{
 			const auto& AnimationClipSet = m_AnimationClipSetMap.find(Humanoidclip.second.MotionName);

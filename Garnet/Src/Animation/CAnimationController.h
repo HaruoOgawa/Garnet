@@ -38,6 +38,8 @@ namespace animation
 		void BlendRotation(const std::shared_ptr<object::CNode>& Node, float L);
 
 		void CalcWorldMatrix(const glm::mat4& ParentWorldMatrix, const std::shared_ptr<object::CNode>& Node, const std::vector<std::shared_ptr<object::CNode>>& NodeList);
+
+		bool TransferSkeletonAndCopyAnimation(const std::shared_ptr<animation::CAnimationClip>& Src, std::shared_ptr<animation::CAnimationClip>& Dst, bool IsHuman);
 	public:
 		CAnimationController();
 		virtual ~CAnimationController();
@@ -66,7 +68,7 @@ namespace animation
 		void SetAnimationSkeleton(const std::shared_ptr<animation::CSkeleton>& Skeleton);
 		const std::shared_ptr<animation::CSkeleton>& GetSkeleton() const;
 
-		void AddAnimationClip(const std::shared_ptr<animation::CAnimationClip>& Clip);
+		void AddAnimationClip(const std::shared_ptr<animation::CAnimationClip>& SourceClip, const std::string& MotionName, animation::SAnimationLayout Layout, bool IsLoop);
 		void AddHumanoidAnimationClip(const std::shared_ptr<animation::CAnimationClip>& SourceClip, const std::string& MotionName, 
 			animation::SAnimationLayout Layout, bool IsLoop, bool UseIK);
 

@@ -33,16 +33,17 @@ namespace animation
 		return m_FileName;
 	}
 
-	bool CAnimationClipSet::Import(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& Data, const std::string& FileName, const std::string& Extension)
+	bool CAnimationClipSet::Import(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& Data, const std::string& FileName, const std::string& Extension, 
+		animation::ERigType RigType, const std::map<animation::EHumanoidBones, std::string>& HumanoidBoneList)
 	{
 		if (Extension == "fbx")
 		{
 #if defined(USE_FBX) ///////////////////////////////////////////////////
 
 #ifdef USE_SMALL_FBX
-			if (!fbx::CSmallFBXImporter::ImportFBXAnimation(pGraphicsAPI, Data, m_AnimationClipList)) return false;
+			if (!fbx::CSmallFBXImporter::ImportFBXAnimation(pGraphicsAPI, Data, m_AnimationClipList, RigType, HumanoidBoneList)) return false;
 #else
-			if (!fbx::CFBXImporter::ImportFBXAnimation(pGraphicsAPI, FileName, m_AnimationClipList)) return false;
+			if (!fbx::CFBXImporter::ImportFBXAnimation(pGraphicsAPI, FileName, m_AnimationClipList, RigType, HumanoidBoneList)) return false;
 #endif // USE_SMALL_FBX
 
 #endif  ///////////////////////////////////////////////////////////////
@@ -69,6 +70,11 @@ namespace animation
 		if (Index < 0 || Index >= m_BlendShapeClipList.size()) return nullptr;
 
 		return m_BlendShapeClipList[Index];
+	}
+
+	const std::vector<std::shared_ptr<animation::CAnimationClip>>& CAnimationClipSet::GetAnimationClipList() const
+	{
+		return m_AnimationClipList;
 	}
 }
 #endif

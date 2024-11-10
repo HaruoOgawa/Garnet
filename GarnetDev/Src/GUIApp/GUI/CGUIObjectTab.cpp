@@ -3,6 +3,7 @@
 #include "CGUIMaterialTab.h"
 #include "CGUIBaseTab.h"
 #include "CGUIMeshTab.h"
+#include "CGUIAnimationTab.h"
 
 #include <Scene/CSceneController.h>
 #include <Object/C3DObject.h>
@@ -206,6 +207,14 @@ namespace gui
 				if (!CGUIBaseTab::Draw(GUIParams.ObjectList, m_SelectedObjectIndex, m_SelectedNodeIndex)) return false;
 				if (!CGUIMaterialTab::Draw(pGraphicsAPI, GUIParams.ObjectList, GUIParams.SceneController, m_SelectedObjectIndex, m_SelectedNodeIndex)) return false;
 				if (!CGUIMeshTab::Draw(pGraphicsAPI, GUIParams.ObjectList, GUIParams.SceneController, m_SelectedObjectIndex, m_SelectedNodeIndex)) return false;
+				
+				if (m_SelectedObjectIndex >= 0 && m_SelectedObjectIndex < static_cast<int>(GUIParams.ObjectList.size()))
+				{
+					const auto& Object = GUIParams.ObjectList[m_SelectedObjectIndex];
+					const auto& Skeleton = Object->GetAnimationController()->GetSkeleton();
+
+					if (!CGUIAnimationTab::DrawTab(Skeleton)) return false;
+				}
 
 				ImGui::EndTabBar(); // ObjectDetail
 			}
@@ -264,6 +273,17 @@ namespace gui
 				}
 			}
 
+			// RigType
+			static std::string Rig = std::string();
+			{
+				static char buf[256] = "";
+
+				if (ImGui::InputText("Rig##AddObjectDialog", buf, IM_ARRAYSIZE(buf)))
+				{
+					Rig = std::string(buf);
+				}
+			}
+
 			// DefaultMaterialframe
 			static std::string DefaultMaterialframe = std::string();
 			if (ImGui::BeginCombo("DefaultMaterialframe##CGUIObjectTab_DrawAddObjectDialog", DefaultMaterialframe.c_str()))
@@ -302,6 +322,11 @@ namespace gui
 				if (!Object->Create(pGraphicsAPI, nullptr, nullptr)) return false;
 
 				GUIParams.SceneController->AddObject(Object);
+
+				ObjectName = std::string();
+				PassName = std::string();
+				DepthPassName = std::string();
+				Rig = std::string();
 			}
 
 			// AddFile
@@ -319,7 +344,18 @@ namespace gui
 					Object->SetPassName(PassName);
 					Object->SetDepthPassName(DepthPassName);
 
-					GUIParams.SceneController->AddObjectWithLoading(GUIParams.pLoadWorker, Object, fileName, DefaultMaterialframe);
+					animation::ERigType RigType = animation::ERigType::None;
+					if (Rig == "humanoid")
+					{
+						RigType = animation::ERigType::Humanoid;
+					}
+
+					GUIParams.SceneController->AddObjectWithLoading(GUIParams.pLoadWorker, Object, fileName, DefaultMaterialframe, RigType);
+
+					ObjectName = std::string();
+					PassName = std::string();
+					DepthPassName = std::string();
+					Rig = std::string();
 				}
 
 				ImGui::SameLine();

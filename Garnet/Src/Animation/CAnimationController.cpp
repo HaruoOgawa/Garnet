@@ -50,7 +50,7 @@ namespace animation
 		}
 		else
 		{
-			if (!Clip->Update(DeltaSecondsTime)) return false;
+			if (!Clip->Update(DeltaSecondsTime, m_Skeleton)) return false;
 
 			// モーションブレンド
 			if (!BlendMotion(DeltaSecondsTime)) return false;
@@ -62,14 +62,12 @@ namespace animation
 	// IKの計算
 	bool CAnimationController::CalculateIK(const std::vector<std::shared_ptr<object::CNode>>& NodeList)
 	{
+		if (!m_Skeleton) return true;
+
 		const auto& CurrentClip = m_CurrentLayout.Clip;
+		if (!CurrentClip || !CurrentClip->IsUseIK()) return true; // ここをコメントアウトすることでクリップがなくてもIKテストができる
 
-		if (!CurrentClip || !m_Skeleton) return true;
-
-		if (CurrentClip->IsUseIK())
-		{
-			if (!m_Skeleton->SolveIK()) return false;
-		}
+		if (!m_Skeleton->SolveIK()) return false;
 
 		return true;
 	}
@@ -89,7 +87,7 @@ namespace animation
 				if (GrantParentBoneIndex < 0 || GrantParentBoneIndex >= BoneList.size()) continue;
 
 				const auto& ParentGrantBone = BoneList[GrantParentBoneIndex];
-				if (!ParentGrantBone) continue;
+				if (!std::get<1>(ParentGrantBone)) continue;
 
 				// 付与率
 				const float GrantRate = GrantBone->GetGrantRate();
@@ -101,7 +99,7 @@ namespace animation
 				{
 					// 回転付与
 
-					glm::quat LocalParentRot = ParentGrantBone->GetBoneNode()->GetRot();
+					glm::quat LocalParentRot = std::get<1>(ParentGrantBone)->GetBoneNode()->GetRot();
 
 					if (GrantRate >= 0.0f)
 					{
@@ -120,7 +118,7 @@ namespace animation
 				}
 				else if (GrantBone->IsMoveGrant())
 				{
-					glm::vec3 LocalParentPos = ParentGrantBone->GetBoneNode()->GetPos();
+					glm::vec3 LocalParentPos = std::get<1>(ParentGrantBone)->GetBoneNode()->GetPos();
 
 					// 移動付与
 					if (GrantRate >= 0.0f)
@@ -212,7 +210,7 @@ namespace animation
 			{
 				for (const auto& Bone : m_Skeleton->GetBoneList())
 				{
-					Bone->GetBoneNode()->SavePrevLocalTransform();
+					std::get<1>(Bone)->GetBoneNode()->SavePrevLocalTransform();
 				}
 			}
 
@@ -270,9 +268,20 @@ namespace animation
 		return m_Skeleton;
 	}
 
-	void CAnimationController::AddAnimationClip(const std::shared_ptr<animation::CAnimationClip>& Clip)
+	void CAnimationController::AddAnimationClip(const std::shared_ptr<animation::CAnimationClip>& SourceClip, const std::string& MotionName, animation::SAnimationLayout Layout, bool IsLoop)
 	{
-		m_ClipList.push_back(Clip);
+		m_ClipList.push_back(SourceClip);
+
+		if (!m_Skeleton) return;
+
+		// Clipをコピーする
+		std::shared_ptr<animation::CAnimationClip> TargetClip = std::make_shared<animation::CAnimationClip>();
+		if (!TransferSkeletonAndCopyAnimation(SourceClip, TargetClip, false)) return;
+
+		TargetClip->SetIsLoop(IsLoop);
+		Layout.Clip = TargetClip;
+
+		AddMotion(MotionName, Layout);
 	}
 
 	void CAnimationController::AddHumanoidAnimationClip(const std::shared_ptr<animation::CAnimationClip>& SourceClip, 
@@ -280,11 +289,33 @@ namespace animation
 	{
 		if (!m_Skeleton) return;
 
-		// Clipの値をコピーする
+		// Clipをコピーする
 		std::shared_ptr<animation::CAnimationClip> TargetClip = std::make_shared<animation::CAnimationClip>();
+		if (!TransferSkeletonAndCopyAnimation(SourceClip, TargetClip, true)) return;
 
+		// DefaultSkeletonを持っている時のみリターゲットを行う
+		// リターゲットは平行移動成分(Pos)に対して行うものなので、回転だけのアニメーションには必要ない
+		if (SourceClip->GetDefaultSkeleton())
+		{
+			// RigのReTargetingを行う
+			// リターゲティングとはリグの形が異なるアニメーションを自身のアニメーションに合うように調整すること
+			// 例えば身長が違うとアバターが伸びてしまう
+			if (!ReTargetRig(SourceClip, TargetClip)) return;
+		}
+
+		TargetClip->SetIsLoop(IsLoop);
+		TargetClip->SetUseIK(UseIK);
+
+		Layout.Clip = TargetClip;
+		AddMotion(MotionName, Layout);
+	}
+
+	// 自身のスケルトン情報を転写したうえでアニメーションクリップをコピーする
+	// 元クリップがそれが持っているボーンをターゲットボーンとして持っているのでそれを置き換える必要がある
+	bool CAnimationController::TransferSkeletonAndCopyAnimation(const std::shared_ptr<animation::CAnimationClip>& Src, std::shared_ptr<animation::CAnimationClip>& Dst, bool IsHuman)
+	{
 		// samplers
-		for (const auto& SourceSampler : SourceClip->GetSamplerList())
+		for (const auto& SourceSampler : Src->GetSamplerList())
 		{
 			std::shared_ptr<animation::CAnimationSampler> TargetSampler = std::make_shared<animation::CAnimationSampler>(SourceSampler->GetInterpolationType());
 
@@ -308,47 +339,49 @@ namespace animation
 			TargetSampler->SetStartTime(SourceSampler->GetStartTime());
 			TargetSampler->SetEndTime(SourceSampler->GetEndTime());
 
-			TargetClip->AddAnimationSampler(TargetSampler);
+			Dst->AddAnimationSampler(TargetSampler);
 		}
 
 		// channels
 		// 同じ名前のノードは一つしかない前提でchannelを作成する
-		for (const auto& SourceChannel : SourceClip->GetChannelList())
+		for (const auto& SourceChannel : Src->GetChannelList())
 		{
 			std::shared_ptr<object::CNode> TargetNode = nullptr;
 
 			for (const auto& Bone : m_Skeleton->GetBoneList())
 			{
-				if (Bone->GetBoneName() == animation::EHumanoidBones::None) continue;
-
-				if (Bone->GetBoneName() == SourceChannel->GetBoneName())
+				if (IsHuman)
 				{
-					TargetNode = Bone->GetBoneNode();
+					// ヒューマノイドボーン
+					if (std::get<1>(Bone)->GetBoneName() == animation::EHumanoidBones::None) continue;
 
-					break;
+					if (std::get<1>(Bone)->GetBoneName() == SourceChannel->GetBoneName())
+					{
+						TargetNode = std::get<1>(Bone)->GetBoneNode();
+
+						break;
+					}
+				}
+				else
+				{
+					// 通常のスキンメッシュアニメーション
+					if (std::get<1>(Bone)->GetBoneNode()->GetName() == SourceChannel->GetTargetNodeName())
+					{
+						TargetNode = std::get<1>(Bone)->GetBoneNode();
+
+						break;
+					}
 				}
 			}
 
-			std::shared_ptr<animation::CAnimationChannel> TargetChannel = std::make_shared<animation::CAnimationChannel>(SourceChannel->IsUseAnimLocalAxis(), SourceChannel->IsTransOffset(), SourceChannel->GetSamplerIndex(), SourceChannel->GetAnimationTarget(), TargetNode, SourceChannel->GetBoneName());
+			std::string TargetNodeName = (TargetNode)? TargetNode->GetName() : std::string();
 
-			TargetClip->AddAnimationChannel(TargetChannel);
+			std::shared_ptr<animation::CAnimationChannel> TargetChannel = std::make_shared<animation::CAnimationChannel>(SourceChannel->IsUseAnimLocalAxis(), SourceChannel->IsTransOffset(), SourceChannel->GetSamplerIndex(), SourceChannel->GetAnimationTarget(), TargetNodeName, SourceChannel->GetBoneName());
+
+			Dst->AddAnimationChannel(TargetChannel);
 		}
 
-		// DefaultSkeletonを持っている時のみリターゲットを行う
-		// リターゲットは平行移動成分(Pos)に対して行うものなので、回転だけのアニメーションには必要ない
-		if (SourceClip->GetDefaultSkeleton())
-		{
-			// RigのReTargetingを行う
-			// リターゲティングとはリグの形が異なるアニメーションを自身のアニメーションに合うように調整すること
-			// 例えば身長が違うとアバターが伸びてしまう
-			if (!ReTargetRig(SourceClip, TargetClip)) return;
-		}
-
-		TargetClip->SetIsLoop(IsLoop);
-		TargetClip->SetUseIK(UseIK);
-
-		Layout.Clip = TargetClip;
-		AddMotion(MotionName, Layout);
+		return true;
 	}
 
 	const std::vector<std::shared_ptr<animation::CAnimationClip>>& CAnimationController::GetAnimationClipList() const
@@ -379,7 +412,7 @@ namespace animation
 			{
 				for (const auto& Bone : m_Skeleton->GetBoneList())
 				{
-					const auto& Node = Bone->GetBoneNode();
+					const auto& Node = std::get<1>(Bone)->GetBoneNode();
 
 					BlendTranslation(Node, L);
 					BlendRotation(Node, L);

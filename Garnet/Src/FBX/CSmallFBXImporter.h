@@ -31,6 +31,7 @@
 #include "../Interface/IGraphicsAPI.h"
 #include "../LoadWorker/CFile.h"
 #include "../Math/CMath.h"
+#include "../Animation/EHumanoidBones.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtx/quaternion.hpp>
@@ -58,6 +59,7 @@ namespace animation
 	class CBone;
 	class CAnimationClip;
 	class CAnimationSampler;
+	enum class ERigType;
 }
 
 namespace object {
@@ -77,11 +79,11 @@ namespace fbx
 	private:
 		static bool Import(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& Data, bool IsUseObject, object::C3DObject* Object,
 			std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList,
-			const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame);
+			const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, animation::ERigType RigType, const std::map<animation::EHumanoidBones, std::string>& HumanoidBoneList);
 
 		static bool Analyse(api::IGraphicsAPI* pGraphicsAPI, const sfbx::DocumentPtr& Doc, bool IsUseObject, object::C3DObject* Object,
 			std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList,
-			const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame);
+			const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, animation::ERigType RigType, const std::map<animation::EHumanoidBones, std::string>& HumanoidBoneList);
 
 		static bool CreateNodeList(const sfbx::DocumentPtr& Doc, std::vector<sfbx::Object*>& pFbxNodeList, std::vector<std::shared_ptr<object::CNode>>& NodeList, std::vector<int>& RootNodeIndexList, const bool IsMixamoFbx);
 		static bool CreateNode(sfbx::Object* pFBXNode, std::vector<sfbx::Object*>& pFbxNodeList, std::vector<std::shared_ptr<object::CNode>>& NodeList, const bool IsMixamoFbx);
@@ -117,8 +119,10 @@ namespace fbx
 		static bool CheckIsMixamo(sfbx::Object* pFBXNode);
 	public:
 		static bool ImportFBX(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& Data, object::C3DObject* Object,
-			const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, resource::C3DObjectLoader* p3DObjectLoader);
-		static bool ImportFBXAnimation(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& Data, std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList);
+			const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, resource::C3DObjectLoader* p3DObjectLoader, 
+			animation::ERigType RigType, const std::map<animation::EHumanoidBones, std::string>& HumanoidBoneList);
+		static bool ImportFBXAnimation(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& Data, std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList, 
+			animation::ERigType RigType, const std::map<animation::EHumanoidBones, std::string>& HumanoidBoneList);
 	};
 }
 #endif

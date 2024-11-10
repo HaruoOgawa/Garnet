@@ -5,20 +5,29 @@
 // Boneを組み合わせた全体構造がSkeleton もしくは Skeleton
 // しかしglTFのSkeletonプロパティはアニメーションのルートを示すもので、なくてもルートはわかるものなので
 
-#include "CBone.h"
-#include "CIKSolver.h"
 #include <memory>
 #include <vector>
-#include <unordered_map>
+#include <map>
+#include <tuple>
+#include <string>
 #include <glm/glm.hpp>
+
+#include "CBone.h"
+#include "CIKSolver.h"
+#include "ERigType.h"
+#include "EHumanoidBones.h"
 
 namespace animation
 {
 	class CSkeleton
 	{
-		std::vector<std::shared_ptr<CBone>> m_BoneList;
+		const std::string m_Name;
+
+		ERigType m_RigType;
+
+		std::vector<std::tuple<std::string, std::shared_ptr<CBone>>> m_BoneList;
 		
-		std::unordered_map<EHumanoidBones, std::shared_ptr<CBone>> m_BoneTable;
+		std::map<EHumanoidBones, std::shared_ptr<CBone>> m_BoneTable;
 
 		// IK
 		std::vector<std::shared_ptr<CIKSolver>> m_IKSolverList;
@@ -28,17 +37,23 @@ namespace animation
 		// 付与ボーンリスト
 		std::vector<std::shared_ptr<CBone>> m_GrantBoneList;
 	public:
-		CSkeleton();
+		CSkeleton(ERigType RigType, const std::string& Name);
 		virtual ~CSkeleton();
+
+		const std::string& GetName() const;
+
+		ERigType GetRig() const;
+		void SetRig(ERigType Type);
 
 		void AddBone(const std::shared_ptr<CBone>& Bone);
 		
 		bool CalCSkinMatrixList(std::vector<glm::mat4>& MatrixList, const glm::mat4& ObjectModelMatrix);
 
-		const std::vector<std::shared_ptr<CBone>>& GetBoneList() const;
+		const std::vector<std::tuple<std::string, std::shared_ptr<CBone>>>& GetBoneList() const;
 
-		void MakeBoneTable();
-		const std::unordered_map<EHumanoidBones, std::shared_ptr<CBone>>& GetBoneTable() const;
+		void MakeHumanoidBoneTable(const std::map<animation::EHumanoidBones, std::string>& HumanoidBoneList);
+		void AddHumanoidBone(EHumanoidBones BoneName, const std::shared_ptr<CBone>& Bone);
+		const std::map<EHumanoidBones, std::shared_ptr<CBone>>& GetHumanoidBoneTable() const;
 		std::shared_ptr<CBone> GetBone(EHumanoidBones BoneName);
 
 		// IK
@@ -53,6 +68,9 @@ namespace animation
 
 		//
 		void ResetToDefaultSkeletonLocal();
+
+		static std::string CastHumanoidBonesToString(EHumanoidBones BoneName);
+		static EHumanoidBones CastStringToHumanoidBones(const std::string& BoneNameStr);
 	};
 }
 

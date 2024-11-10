@@ -43,7 +43,7 @@ namespace app
 		m_FileModifier(std::make_shared<CFileModifier>()),
 		m_TimelineController(std::make_shared<timeline::CTimelineController>())
 	{
-		m_ViewCamera->SetPos(glm::vec3(0.0f, 2.5f, -10.0f));
+		m_ViewCamera->SetPos(glm::vec3(0.0f, 2.5f, 10.0f));
 		m_ViewCamera->SetCenter(glm::vec3(0.0f, 2.5f, 0.0f));
 		m_MainCamera = m_ViewCamera;
 
@@ -72,6 +72,8 @@ namespace app
 	bool CDevApp::Initialize(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker)
 	{
 		pLoadWorker->AddScene(std::make_shared<resource::CSceneLoader>("Resources\\Scene\\CCDIK.json", m_SceneController));
+		//pLoadWorker->AddScene(std::make_shared<resource::CSceneLoader>("Resources\\Scene\\CommonAnim.json", m_SceneController));
+		//pLoadWorker->AddScene(std::make_shared<resource::CSceneLoader>("Resources\\Scene\\SceneWriteTest.json", m_SceneController));
 
 		// オフスクリーンレンダリング
 		if (!pGraphicsAPI->CreateRenderPass("MainResultPass", api::ERenderPassFormat::COLOR_FLOAT_RENDERPASS, glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), -1, -1, 1)) return false;
@@ -108,8 +110,15 @@ namespace app
 			if (!m_TimelineController->Update(m_DrawInfo->GetDeltaSecondsTime(), InputState)) return false;
 		}
 
+		// スロー再生する
+		//float PrevSelta = m_DrawInfo->GetDeltaSecondsTime();
+		//m_DrawInfo->SetDeltaSecondsTime(1.0f / 500.0f);
+
 		if (!m_SceneController->Update(pGraphicsAPI, pPhysicsEngine, pLoadWorker, m_MainCamera, m_Projection, m_DrawInfo, InputState, m_TimelineController)) return false;
 		if (!m_ScriptScene->Update(pGraphicsAPI, pPhysicsEngine, pLoadWorker, m_MainCamera, m_Projection, m_DrawInfo, InputState)) return false;
+
+		// 再生速度を元に戻す
+		//m_DrawInfo->SetDeltaSecondsTime(PrevSelta); 
 
 		m_MainCamera->Update(m_DrawInfo->GetDeltaSecondsTime(), InputState);
 

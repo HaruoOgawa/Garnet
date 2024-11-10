@@ -23,7 +23,7 @@ namespace animation
 
 		const std::map<EBlendShapeName, float>& GetCurrentMorphWeightMap() const;
 
-		virtual bool UpdateFrame(float CurrentTime) override;
+		virtual bool UpdateFrame(float CurrentTime, const std::shared_ptr<CSkeleton>& Skeleton) override;
 	};
 }
 #endif

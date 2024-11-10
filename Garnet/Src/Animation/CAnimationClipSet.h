@@ -2,6 +2,7 @@
 
 #ifdef USE_ANIMATION
 #include <vector>
+#include <map>
 #include <memory>
 
 #include "../Animation/CAnimationClip.h"
@@ -24,10 +25,13 @@ namespace animation
 		void SetFileName(const std::string& Name);
 		const std::string& GetFileName() const;
 
-		bool Import(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& Data, const std::string& FileName, const std::string& Extension);
+		bool Import(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& Data, const std::string& FileName, const std::string& Extension, 
+			animation::ERigType RigType, const std::map<animation::EHumanoidBones, std::string>& HumanoidBoneList);
 
 		std::shared_ptr<animation::CAnimationClip> GetAnimationClip(int Index);
 		std::shared_ptr<animation::CBlendShapeClip> GetBlendShapeClip(int Index);
+
+		const std::vector<std::shared_ptr<animation::CAnimationClip>>& GetAnimationClipList() const;
 	};
 }
 #endif

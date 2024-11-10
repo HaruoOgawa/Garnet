@@ -5,12 +5,12 @@
 
 namespace animation
 {
-	CAnimationChannel::CAnimationChannel(bool UseAnimLocalAxis, bool TransOffset, int SamplerIndex, EAnimationTarget AnimationTarget, const std::shared_ptr<object::CNode>& TargetNode, EHumanoidBones BoneName):
+	CAnimationChannel::CAnimationChannel(bool UseAnimLocalAxis, bool TransOffset, int SamplerIndex, EAnimationTarget AnimationTarget, const std::string& TargetNodeName, EHumanoidBones BoneName):
 		m_UseAnimLocalAxis(UseAnimLocalAxis),
 		m_IsTransOffset(TransOffset),
 		m_SamplerIndex(SamplerIndex),
 		m_AnimationTarget(AnimationTarget),
-		m_TargetNode(TargetNode),
+		m_TargetNodeName(TargetNodeName),
 		m_BoneName(BoneName)
 	{
 	}
@@ -44,24 +44,31 @@ namespace animation
 		return m_BoneName;
 	}
 
-	bool CAnimationChannel::Update(const std::vector<float>& Value)
+	std::string CAnimationChannel::GetTargetNodeName() const
 	{
+		return m_TargetNodeName;
+	}
+
+	bool CAnimationChannel::Update(const std::vector<float>& Value, const std::shared_ptr<object::CNode>& TargetNode)
+	{
+		if (!TargetNode) return true;
+
 		switch (m_AnimationTarget)
 		{
 		case EAnimationTarget::TRANSLATION:
-			if (!UpdateTranslation(Value)) return false;
+			if (!UpdateTranslation(Value, TargetNode)) return false;
 			break;
 		case EAnimationTarget::ROTATION:
-			if (!UpdateRotation(Value)) return false;
+			if (!UpdateRotation(Value, TargetNode)) return false;
 			break;
 		case EAnimationTarget::SCALE:
-			if (!UpdateScale(Value)) return false;
+			if (!UpdateScale(Value, TargetNode)) return false;
 			break;
 		case EAnimationTarget::WEIGHTS:
-			if (!UpdateWeights(Value)) return false;
+			if (!UpdateWeights(Value, TargetNode)) return false;
 			break;
 		case EAnimationTarget::MODELMATRIX:
-			if (!UpdateModelMatrix(Value)) return false;
+			if (!UpdateModelMatrix(Value, TargetNode)) return false;
 			break;
 		default:
 			break;
@@ -70,32 +77,32 @@ namespace animation
 		return true;
 	}
 
-	bool CAnimationChannel::UpdateTranslation(const std::vector<float>& Value)
+	bool CAnimationChannel::UpdateTranslation(const std::vector<float>& Value, const std::shared_ptr<object::CNode>& TargetNode)
 	{
 		if (Value.size() != 3) return true;
 
-		if (!m_TargetNode) return true;
+		if (!TargetNode) return true;
 
 		if (m_IsTransOffset)
 		{
 			// オフセットなので元の座標に加算する
-			m_TargetNode->SetPos(m_TargetNode->GetDefaultLocalTransform()->GetPos() + glm::vec3(Value[0], Value[1], Value[2]));
+			TargetNode->SetPos(TargetNode->GetDefaultLocalTransform()->GetPos() + glm::vec3(Value[0], Value[1], Value[2]));
 		}
 		else
 		{
 			// 座標なので元の座標を置き換える
-			m_TargetNode->SetPos(glm::vec3(Value[0], Value[1], Value[2]));
+			TargetNode->SetPos(glm::vec3(Value[0], Value[1], Value[2]));
 		}
 		
 
 		return true;
 	}
 
-	bool CAnimationChannel::UpdateRotation(const std::vector<float>& Value)
+	bool CAnimationChannel::UpdateRotation(const std::vector<float>& Value, const std::shared_ptr<object::CNode>& TargetNode)
 	{
 		if (Value.size() != 4) return true;
 
-		if (!m_TargetNode) return true;
+		if (!TargetNode) return true;
 
 		// glmのクォータニオンは wxyzで指定する必要がある
 		glm::quat quat = glm::quat(Value[3], Value[0], Value[1], Value[2]);
@@ -106,60 +113,60 @@ namespace animation
 		// たぶんVRM 1.0からはこのローカル軸がデータに含まれるようになるのかな？
 		if (m_UseAnimLocalAxis)
 		{
-			glm::quat dstQuat = m_TargetNode->GetDefaultLocalTransform()->GetRot() * quat;
+			glm::quat dstQuat = TargetNode->GetDefaultLocalTransform()->GetRot() * quat;
 
-			m_TargetNode->SetRot(dstQuat);
+			TargetNode->SetRot(dstQuat);
 		}
 		else
 		{
 			glm::quat dstQuat = quat;
 
-			m_TargetNode->SetRot(dstQuat);
+			TargetNode->SetRot(dstQuat);
 		}
 
 		return true;
 	}
 
-	bool CAnimationChannel::UpdateScale(const std::vector<float>& Value)
+	bool CAnimationChannel::UpdateScale(const std::vector<float>& Value, const std::shared_ptr<object::CNode>& TargetNode)
 	{
 		if (Value.size() != 3) return true;
 
-		if (!m_TargetNode) return true;
+		if (!TargetNode) return true;
 
-		m_TargetNode->SetScale(glm::vec3(Value[0], Value[1], Value[2]));
+		TargetNode->SetScale(glm::vec3(Value[0], Value[1], Value[2]));
 
 		return true;
 	}
 
-	bool CAnimationChannel::UpdateWeights(const std::vector<float>& Value)
+	bool CAnimationChannel::UpdateWeights(const std::vector<float>& Value, const std::shared_ptr<object::CNode>& TargetNode)
 	{
-		if (!m_TargetNode) return true;
+		if (!TargetNode) return true;
 
-		m_TargetNode->ClearMorphWeights();
+		TargetNode->ClearMorphWeights();
 
 		for (float Weight : Value)
 		{
-			m_TargetNode->AddMorphWeight(Weight);
+			TargetNode->AddMorphWeight(Weight);
 		}
 
 		return true;
 	}
 
-	bool CAnimationChannel::UpdateModelMatrix(const std::vector<float>& Value)
+	bool CAnimationChannel::UpdateModelMatrix(const std::vector<float>& Value, const std::shared_ptr<object::CNode>& TargetNode)
 	{
 		if (Value.size() != 10) return true;
 
-		if (!m_TargetNode) return true;
+		if (!TargetNode) return true;
 
 		if (m_IsTransOffset)
 		{
 			// オフセットなので元の座標に加算する
-			m_TargetNode->SetPos(m_TargetNode->GetDefaultLocalTransform()->GetPos() + glm::vec3(Value[0], Value[1], Value[2]));
+			TargetNode->SetPos(TargetNode->GetDefaultLocalTransform()->GetPos() + glm::vec3(Value[0], Value[1], Value[2]));
 		}
 		else
 		{
 			// 座標なので元の座標を置き換える
-			m_TargetNode->SetPos(glm::vec3(Value[0], Value[1], Value[2]));
+			TargetNode->SetPos(glm::vec3(Value[0], Value[1], Value[2]));
 		}
 
 		// glmのクォータニオンは wxyzで指定する必要がある
@@ -171,18 +178,18 @@ namespace animation
 		// たぶんVRM 1.0からはこのローカル軸がデータに含まれるようになるのかな？
 		if (m_UseAnimLocalAxis)
 		{
-			glm::quat dstQuat = m_TargetNode->GetDefaultLocalTransform()->GetRot() * quat;
+			glm::quat dstQuat = TargetNode->GetDefaultLocalTransform()->GetRot() * quat;
 
-			m_TargetNode->SetRot(dstQuat);
+			TargetNode->SetRot(dstQuat);
 		}
 		else
 		{
 			glm::quat dstQuat = quat;
 
-			m_TargetNode->SetRot(dstQuat);
+			TargetNode->SetRot(dstQuat);
 		}
 
-		m_TargetNode->SetScale(glm::vec3(Value[7], Value[8], Value[9]));
+		TargetNode->SetScale(glm::vec3(Value[7], Value[8], Value[9]));
 
 		return true;
 	}

@@ -4,9 +4,11 @@
 
 namespace resource
 {
-	CAnimationLoader::CAnimationLoader(const std::string& FileName, const std::shared_ptr<animation::CAnimationClipSet>& Target) :
+	CAnimationLoader::CAnimationLoader(const std::string& FileName, const std::shared_ptr<animation::CAnimationClipSet>& Target, animation::ERigType RigType, const std::map<animation::EHumanoidBones, std::string>& HumanoidBoneList) :
 		CResource(FileName),
-		m_Target(Target)
+		m_Target(Target),
+		m_TargetRigType(RigType),
+		m_TargetHumanoidBoneList(HumanoidBoneList)
 	{
 		m_Target->SetFileName(FileName);
 	}
@@ -23,7 +25,7 @@ namespace resource
 			return true;
 		}
 
-		if (!m_Target->Import(pGraphicsAPI, m_File->GetData(), m_FileName, m_File->GetExtention())) return false;
+		if (!m_Target->Import(pGraphicsAPI, m_File->GetData(), m_FileName, m_File->GetExtention(), m_TargetRigType, m_TargetHumanoidBoneList)) return false;
 
 		// ÉçÅ[ÉhäÆóπ
 		m_Status = resource::ELoadStatus::Loaded;

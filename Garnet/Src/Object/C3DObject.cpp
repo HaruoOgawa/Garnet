@@ -449,8 +449,8 @@ namespace object
 			}
 		}
 
-		//if (!DrawDebugBone(IsDepthPass, DrawOutline, Camera, Projection, DrawInfo, DebugSphere)) return false;
-		//if (!DrawDebugPhysics(IsDepthPass, DrawOutline, Camera, Projection, DrawInfo, DebugSphere)) return false;
+		//if (!DrawDebugBone(pGraphicsAPI ,IsDepthPass, DrawOutline, Camera, Projection, DrawInfo, DebugSphere)) return false;
+		//if (!DrawDebugPhysics(pGraphicsAPI, IsDepthPass, DrawOutline, Camera, Projection, DrawInfo, DebugSphere)) return false;
 
 		return true;
 	}
@@ -581,7 +581,7 @@ namespace object
 				{
 					//if (Bone->GetBoneName() == animation::EHumanoidBones::None) continue;
 
-					const auto& BoneNode = Bone->GetBoneNode();
+					const auto& BoneNode = std::get<1>(Bone)->GetBoneNode();
 
 					// Debug—p: Bone‚Ì•`‰æ
 					{
@@ -617,8 +617,10 @@ namespace object
 			const auto& Skeleton = m_AnimationController->GetSkeleton();
 			if(Skeleton)
 			{
-				for (const auto& Bone : Skeleton->GetBoneList())
+				for (const auto& BonePair : Skeleton->GetBoneList())
 				{
+					const auto& Bone = std::get<1>(BonePair);
+
 					if (Bone->GetBoneName() == animation::EHumanoidBones::Center) continue;
 
 					const auto& BoneNode = Bone->GetBoneNode();
@@ -747,9 +749,9 @@ namespace object
 		m_AnimationController->SetAnimationSkeleton(Skeleton);
 	}
 
-	void C3DObject::AddAnimationClip(const std::shared_ptr<animation::CAnimationClip>& Clip)
+	void C3DObject::AddAnimationClip(const std::shared_ptr<animation::CAnimationClip>& Clip, const std::string& MotionName, animation::SAnimationLayout Layout, bool IsLoop)
 	{
-		m_AnimationController->AddAnimationClip(Clip);
+		m_AnimationController->AddAnimationClip(Clip, MotionName, Layout, IsLoop);
 	}
 
 	void C3DObject::AddHumanoidAnimationClip(const std::shared_ptr<animation::CAnimationClip>& SourceClip, const std::string& MotionName, 

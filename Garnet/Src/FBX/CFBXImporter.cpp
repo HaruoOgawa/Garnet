@@ -26,27 +26,31 @@ using namespace fbxsdk;
 namespace fbx
 {
 	bool CFBXImporter::ImportFBX(api::IGraphicsAPI* pGraphicsAPI, const std::string& FileName, object::C3DObject* Object,
-		const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, resource::C3DObjectLoader* p3DObjectLoader)
+		const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, resource::C3DObjectLoader* p3DObjectLoader, 
+		animation::ERigType RigType, const std::map<animation::EHumanoidBones, std::string>& HumanoidBoneList)
 	{
 		std::vector<std::shared_ptr<animation::CAnimationClip>> AnimationClipList;
 
-		if (!Import(pGraphicsAPI, FileName, true, Object, AnimationClipList, MaterialFrame)) return false;
+		if (!Import(pGraphicsAPI, FileName, true, Object, AnimationClipList, MaterialFrame, RigType, HumanoidBoneList)) return false;
 
 		return true;
 	}
 
-	bool CFBXImporter::ImportFBXAnimation(api::IGraphicsAPI* pGraphicsAPI, const std::string& FileName, std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList)
+	bool CFBXImporter::ImportFBXAnimation(api::IGraphicsAPI* pGraphicsAPI, const std::string& FileName, std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList, 
+		animation::ERigType RigType, const std::map<animation::EHumanoidBones, std::string>& HumanoidBoneList)
 	{
 		std::shared_ptr<object::C3DObject> Object = std::make_shared<object::C3DObject>("", "");
 
-		if (!Import(pGraphicsAPI, FileName, false, Object.get(), AnimationClipList, nullptr)) return false;
+		Object->SetObjectName(FileName);
+
+		if (!Import(pGraphicsAPI, FileName, false, Object.get(), AnimationClipList, nullptr, RigType, HumanoidBoneList)) return false;
 
 		return true;
 	}
 
 	bool CFBXImporter::Import(api::IGraphicsAPI* pGraphicsAPI, const std::string& FileName, bool IsUseObject, object::C3DObject* Object,
 		std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList,
-		const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame)
+		const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, animation::ERigType RigType, const std::map<animation::EHumanoidBones, std::string>& HumanoidBoneList)
 	{
 		// 全体のメモリやObjectを管理するManagerを作成
 		FbxManager* Manager = FbxManager::Create();
@@ -86,7 +90,7 @@ namespace fbx
 		int Coordinate = Scene->GetGlobalSettings().GetAxisSystem().GetCoorSystem();
 
 		// FBXの解析開始
-		if (!Analyse(pGraphicsAPI, Scene, IsUseObject, Object, AnimationClipList, MaterialFrame)) return false;
+		if (!Analyse(pGraphicsAPI, Scene, IsUseObject, Object, AnimationClipList, MaterialFrame, RigType, HumanoidBoneList)) return false;
 
 		// FBX解析を終了
 		Manager->Destroy();
@@ -96,7 +100,7 @@ namespace fbx
 
 	bool CFBXImporter::Analyse(api::IGraphicsAPI* pGraphicsAPI, FbxScene* Scene, bool IsUseObject, object::C3DObject* Object,
 		std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList,
-		const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame)
+		const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, animation::ERigType RigType, const std::map<animation::EHumanoidBones, std::string>& HumanoidBoneList)
 	{
 		FbxNode* RootNode = Scene->GetRootNode();
 
@@ -127,7 +131,7 @@ namespace fbx
 		Object->ApplyParentNode();
 
 		// Skeleton
-		std::shared_ptr<animation::CSkeleton> Skeleton = std::make_shared<animation::CSkeleton>();
+		std::shared_ptr<animation::CSkeleton> Skeleton = std::make_shared<animation::CSkeleton>(RigType, (Object->GetObjectName() + "(Skeleton)"));
 		std::vector<FbxNode*> FbxBoneList;
 		if (RootNode)
 		{
@@ -137,7 +141,7 @@ namespace fbx
 		Object->SetAnimationSkeleton(Skeleton);
 
 		// BoneTableを作成
-		Skeleton->MakeBoneTable();
+		Skeleton->MakeHumanoidBoneTable(HumanoidBoneList);
 
 		// DefaultLocalTransformを保存する
 		Object->ApplyDefaultLocalTransform();
@@ -164,7 +168,7 @@ namespace fbx
 			{
 				// 描画情報の取得
 				std::vector<FbxMesh*> pFbxMeshList;
-				if (!CreateDrawInfo(pGraphicsAPI, pFbxMeshList, MaterialFrame, RootNode, TextureList, MaterialList, MeshList, Skeleton, IsMixamoFbx)) return false;
+				if (!CreateDrawInfo(pGraphicsAPI, pFbxMeshList, MaterialFrame, pFbxNodeList, RootNode, TextureList, MaterialList, MeshList, Skeleton, IsMixamoFbx)) return false;
 
 				// マテリアルを持っていないのならダミーを渡す
 				if (MaterialList.size() <= 0)
@@ -210,7 +214,7 @@ namespace fbx
 			// 大抵は2つ目のクリップがどのモーションでも一番良いみたいだが、これがFBXの仕様なのかMixamoの仕様なのかわからないのでひとまずそういうことにしておく
 			for (const auto& Clip : AnimationClipList)
 			{
-				Object->AddAnimationClip(Clip);
+				Object->AddAnimationClip(Clip, "Default", { nullptr, "" }, true);
 			}
 		}
 
@@ -218,9 +222,16 @@ namespace fbx
 	}
 
 	bool CFBXImporter::CreateDrawInfo(api::IGraphicsAPI* pGraphicsAPI, std::vector<FbxMesh*>& pFbxMeshList, const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame,
-		FbxNode* pFBXNode, std::vector<std::shared_ptr<graphics::CTexture>>& TextureList,
+		const std::vector<FbxNode*>& pFbxNodeList, FbxNode* pFBXNode, std::vector<std::shared_ptr<graphics::CTexture>>& TextureList,
 		std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList, std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, const std::shared_ptr<animation::CSkeleton>& Skeleton, const bool IsMixamoFbx)
 	{
+		int NodeIndex = -1;
+		const auto it = std::find(pFbxNodeList.begin(), pFbxNodeList.end(), pFBXNode);
+		if (it != pFbxNodeList.end())
+		{
+			NodeIndex = static_cast<int>(it - pFbxNodeList.begin());
+		}
+
 		// 知りたいのは描画情報なのでここではeMeshのみ見る
 		if (pFBXNode->GetNodeAttribute() && pFBXNode->GetNodeAttribute()->GetAttributeType() && pFBXNode->GetNodeAttribute()->GetAttributeType() == FbxNodeAttribute::eMesh)
 		{
@@ -232,14 +243,14 @@ namespace fbx
 			if (!CreateMaterial(pGraphicsAPI, pFBXNode, pFbxMaterialList, MaterialList, MaterialFrame, Skeleton)) return false;
 
 			// メッシュ
-			if (!CreateMesh(pGraphicsAPI, pFBXNode, pFbxMeshList, pFbxMaterialList, MeshList, MaterialList, Skeleton, IsMixamoFbx)) return false;
+			if (!CreateMesh(pGraphicsAPI, NodeIndex, pFBXNode, pFbxMeshList, pFbxMaterialList, MeshList, MaterialList, Skeleton, IsMixamoFbx)) return false;
 		}
 		
 
 		// 子要素のNodeを調べる
 		for (int i = 0; i < pFBXNode->GetChildCount(); i++)
 		{
-			if (!CreateDrawInfo(pGraphicsAPI, pFbxMeshList, MaterialFrame, pFBXNode->GetChild(i), TextureList, MaterialList, MeshList, Skeleton, IsMixamoFbx)) return false;
+			if (!CreateDrawInfo(pGraphicsAPI, pFbxMeshList, MaterialFrame, pFbxNodeList, pFBXNode->GetChild(i), TextureList, MaterialList, MeshList, Skeleton, IsMixamoFbx)) return false;
 		}
 
 		return true;
@@ -343,7 +354,7 @@ namespace fbx
 		return true;
 	}
 
-	bool CFBXImporter::CreateMesh(api::IGraphicsAPI* pGraphicsAPI, FbxNode* pFBXNode, std::vector<FbxMesh*>& pFbxMeshList, const std::vector<FbxSurfaceMaterial*>& pFbxMaterialList,
+	bool CFBXImporter::CreateMesh(api::IGraphicsAPI* pGraphicsAPI, int NodeIndex, FbxNode* pFBXNode, std::vector<FbxMesh*>& pFbxMeshList, const std::vector<FbxSurfaceMaterial*>& pFbxMaterialList,
 		std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, const std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList, const std::shared_ptr<animation::CSkeleton>& Skeleton, const bool IsMixamoFbx)
 	{
 		FbxMesh* pFbxMesh = pFBXNode->GetMesh();
@@ -545,13 +556,9 @@ namespace fbx
 								}
 								else
 								{
-									// 数が4つより少ない時は0で埋める
-
-									// Bone
-									ushort_AttributeBoneData.push_back(0);
-
-									// Weights
-									AttributeWeightsData.push_back(0.0f);
+									// 数が4つより少ない時は0に設定する
+									ushort_AttributeBoneData.push_back(0); // Bone
+									AttributeWeightsData.push_back(0.0f); // Weights
 								}
 							}
 
@@ -685,7 +692,22 @@ namespace fbx
 							// 頂点数
 							int VertexCount = pFbxMesh->GetControlPointsCount();
 
-							ReservedVertexDataList.insert({ AttribName, std::vector<float>(VertexCount * Dimention, 0.0f) });
+							if (AttribName == "JOINTS_0")
+							{
+								// BoneWeightsが存在しない時はそのメッシュを持つノードのインデックスを参照するようにする
+								ReservedVertexDataList.insert({ AttribName, std::vector<float>(VertexCount * Dimention, static_cast<float>(NodeIndex)) });
+							}
+							else if (AttribName == "WEIGHTS_0")
+							{
+								// BoneWeightsが存在しない時はそのメッシュを持つノードのインデックスを参照するようにする
+								ReservedVertexDataList.insert({ AttribName, std::vector<float>(VertexCount * Dimention, 1.0f) });
+							}
+							else
+							{
+								ReservedVertexDataList.insert({ AttribName, std::vector<float>(VertexCount * Dimention, 0.0f) });
+							}
+
+							
 
 							// 接線もしく複接線の再計算が必要
 							if (AttribName == "TANGENT")
@@ -940,7 +962,7 @@ namespace fbx
 	{
 		for (const auto& Bone : Skeleton->GetBoneList())
 		{
-			const auto& ParentNode = Bone->GetBoneNode()->GetParentNode();
+			const auto& ParentNode = std::get<1>(Bone)->GetBoneNode()->GetParentNode();
 			if (!ParentNode) continue;
 
 			std::shared_ptr<animation::CBoneNameProvider> Provider = std::make_shared<animation::CBoneNameProvider>();
@@ -949,7 +971,7 @@ namespace fbx
 			const auto& ParentBone = Skeleton->GetBone(ParentBoneName);
 			if (!ParentBone) continue;
 
-			Bone->SetParentBoneName(ParentBone->GetBoneName());
+			std::get<1>(Bone)->SetParentBoneName(ParentBone->GetBoneName());
 		}
 	}
 
@@ -1087,7 +1109,7 @@ namespace fbx
 				std::shared_ptr<animation::CBoneNameProvider> Provider = std::make_shared<animation::CBoneNameProvider>();
 				animation::EHumanoidBones BoneName = Provider->GetBoneName(Name);
 
-				std::shared_ptr<animation::CAnimationChannel> AnimationChannel = std::make_shared<animation::CAnimationChannel>(UseAnimLocalAxis, false, TargetSamplerIndex, AnimationTarget, TargetNode, BoneName);
+				std::shared_ptr<animation::CAnimationChannel> AnimationChannel = std::make_shared<animation::CAnimationChannel>(UseAnimLocalAxis, false, TargetSamplerIndex, AnimationTarget, TargetNode->GetName(), BoneName);
 
 				AnimationClip->AddAnimationChannel(AnimationChannel);
 			}
@@ -1262,7 +1284,7 @@ namespace fbx
 		{
 			const auto& Bone = Skeleton->GetBoneList()[j];
 
-			if (Bone->GetBoneNode()->GetName() == BoneName)
+			if (std::get<1>(Bone)->GetBoneNode()->GetName() == BoneName)
 			{
 				BoneIndex = j;
 

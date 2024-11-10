@@ -56,7 +56,7 @@ namespace animation
 			if (it != m_BlendShapeClipMap.end())
 			{
 				auto& Clip = it->second;
-				if (!Clip->Update(DeltaSecondsTime)) return false;
+				if (!Clip->Update(DeltaSecondsTime, nullptr)) return false;
 
 				m_MorphWeightsList.push_back(Clip->GetCurrentMorphWeightMap());
 			}

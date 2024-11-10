@@ -676,6 +676,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Src\Animation\ERigType.h" />
     <ClInclude Include="Src\GraphicsAPI\CGraphicsAPI.h" />
     <ClInclude Include="Src\Timeline\CCustomTrack.h" />
     <ClInclude Include="Src\Scriptable\CComponent.h" />

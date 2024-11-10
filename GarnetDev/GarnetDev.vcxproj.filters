@@ -75,6 +75,9 @@
     <ClCompile Include="Src\Component\CCDIKTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Src\GUIApp\GUI\CGUIAnimationTab.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\GUIApp\GUI\CGraphicsEditingWindow.h">
@@ -135,6 +138,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Src\Component\CCDIKTest.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\GUIApp\GUI\CGUIAnimationTab.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -270,6 +276,7 @@
     <None Include="Resources\MaterialFrame\FrameTexture_MF.json" />
     <None Include="Resources\Shaders\sdftext.frag" />
     <None Include="Resources\MaterialFrame\sdftext_mf.json" />
+    <None Include="Resources\Scene\CommonAnim.json" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Commands\LibList.txt" />

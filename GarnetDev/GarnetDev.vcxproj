@@ -480,6 +480,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\GUIApp\GUI\CGUIAnimationTab.cpp" />
     <ClCompile Include="Src\Component\CCDIKTest.cpp" />
     <ClCompile Include="Src\GUIApp\GUI\C3DView.cpp" />
     <ClCompile Include="Src\GUIApp\GUI\CGUIBaseTab.cpp" />
@@ -502,6 +503,7 @@
     <ClCompile Include="Src\Main\main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Src\GUIApp\GUI\CGUIAnimationTab.h" />
     <ClInclude Include="Src\Component\CCDIKTest.h" />
     <ClInclude Include="Src\GUIApp\GUI\C3DView.h" />
     <ClInclude Include="Src\GUIApp\GUI\CGUIBaseTab.h" />
@@ -555,6 +557,7 @@
     <None Include="Resources\MaterialFrame\Sample_MF.json" />
     <None Include="Resources\MaterialFrame\sdftext_mf.json" />
     <None Include="Resources\MaterialFrame\SimpleTexture_MF.json" />
+    <None Include="Resources\Scene\CommonAnim.json" />
     <None Include="Resources\Scene\MRTTest.json" />
     <None Include="Resources\Shaders\basic_toon.frag" />
     <None Include="Resources\Shaders\basic_toon.vert" />

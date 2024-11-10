@@ -331,6 +331,42 @@ namespace resource
 		{
 			if (!animationJSON->is_object()) continue;
 
+			// humanoid
+			std::string rig = std::string();
+			GetString("rig", rig, animationJSON);
+
+			animation::ERigType RigType = animation::ERigType::None;
+
+			if (rig == "humanoid")
+			{
+				RigType = animation::ERigType::Humanoid;
+			}
+
+			// humanbonelist
+			std::map<animation::EHumanoidBones, std::string> SrcHumanoidBoneList;
+			
+			const auto humanbonelist = animationJSON->find("humanbonelist");
+			if (humanbonelist != animationJSON->end() && humanbonelist->is_array())
+			{
+				for (json::iterator humanBoneJSON = humanbonelist->begin(); humanBoneJSON != humanbonelist->end(); humanBoneJSON++)
+				{
+					if (!humanBoneJSON->is_object()) continue;
+
+					// bonename
+					std::string bonename_str = std::string();
+					GetString("bonename", bonename_str, humanBoneJSON);
+
+					// nodename
+					std::string nodename = std::string();
+					GetString("nodename", nodename, humanBoneJSON);
+
+					// EHumanoidBonesにキャスト
+					animation::EHumanoidBones BoneName = animation::CSkeleton::CastStringToHumanoidBones(bonename_str);
+
+					SrcHumanoidBoneList.emplace(BoneName, nodename);
+				}
+			}
+
 			std::string name = "";
 			GetString("name", name, animationJSON);
 
@@ -339,7 +375,7 @@ namespace resource
 
 			std::shared_ptr<animation::CAnimationClipSet> AnimationClipSet = std::make_shared<animation::CAnimationClipSet>();
 
-			pLoadWorker->AddLoadResource(std::make_shared<resource::CAnimationLoader>(filename, AnimationClipSet));
+			pLoadWorker->AddLoadResource(std::make_shared<resource::CAnimationLoader>(filename, AnimationClipSet, RigType, SrcHumanoidBoneList));
 
 			m_Target->AddAnimationClipSet(name, AnimationClipSet);
 		}
@@ -377,29 +413,6 @@ namespace resource
 			bool enable = true;
 			GetBoolean("enable", enable, objectJSON);
 			Object->SetEnabled(enable);
-
-			{
-				std::string filename = "";
-				GetString("filename", filename, objectJSON);
-
-				std::string defaultmaterialframe = "";
-				GetString("defaultmaterialframe", defaultmaterialframe, objectJSON);
-
-				if (!filename.empty())
-				{
-					const auto& MaterialFrameMap = m_Target->GetMaterialFrameMap();
-					const auto& MaterialFrame = MaterialFrameMap.find(defaultmaterialframe);
-					if (MaterialFrame == MaterialFrameMap.end())
-					{
-						Console::Log("[SceneLoader Error] defaultmaterialframe not found\n");
-
-						return false;
-					}
-
-					// 仮実装
-					pLoadWorker->AddLoadResource(std::make_shared<resource::C3DObjectLoader>(filename, Object, MaterialFrame->second, defaultmaterialframe));
-				}
-			}
 
 			// Transform
 			{
@@ -495,12 +508,37 @@ namespace resource
 #endif // USE_TEXTURE_LOADER
 
 			// animation
+			scene::SAnimationInfo AnimationInfo{};
 			const auto animationJSON = objectJSON->find("animation");
 			if (animationJSON != objectJSON->end() && animationJSON->is_object())
 			{
-				scene::SAnimationInfo AnimationInfo = AnalyseAnimationInfo(animationJSON);
+				AnimationInfo = AnalyseAnimationInfo(animationJSON);
 
 				m_Target->AddAnimationInfo(Object, AnimationInfo);
+			}
+
+			// ファイルロード開始
+			{
+				std::string filename = "";
+				GetString("filename", filename, objectJSON);
+
+				std::string defaultmaterialframe = "";
+				GetString("defaultmaterialframe", defaultmaterialframe, objectJSON);
+
+				if (!filename.empty())
+				{
+					const auto& MaterialFrameMap = m_Target->GetMaterialFrameMap();
+					const auto& MaterialFrame = MaterialFrameMap.find(defaultmaterialframe);
+					if (MaterialFrame == MaterialFrameMap.end())
+					{
+						Console::Log("[SceneLoader Error] defaultmaterialframe not found\n");
+
+						return false;
+					}
+					
+					// 仮実装
+					pLoadWorker->AddLoadResource(std::make_shared<resource::C3DObjectLoader>(filename, Object, MaterialFrame->second, defaultmaterialframe, AnimationInfo.RigType, AnimationInfo.HumanoidBoneList));
+				}
 			}
 
 			// Objectを追加
@@ -776,11 +814,71 @@ namespace resource
 	{
 		scene::SAnimationInfo AnimationInfo{};
 
+		// humanoid
+		std::string rig = std::string();
+		GetString("rig", rig, animationJSON);
+
+		if (rig == "humanoid")
+		{
+			AnimationInfo.RigType = animation::ERigType::Humanoid;
+		}
+
+		// humanbonelist
+		std::map<animation::EHumanoidBones, std::string> SrcHumanoidBoneList;
+
+		const auto humanbonelist = animationJSON->find("humanbonelist");
+		if (humanbonelist != animationJSON->end() && humanbonelist->is_array())
+		{
+			for (json::iterator humanBoneJSON = humanbonelist->begin(); humanBoneJSON != humanbonelist->end(); humanBoneJSON++)
+			{
+				if (!humanBoneJSON->is_object()) continue;
+
+				// bonename
+				std::string bonename_str = std::string();
+				GetString("bonename", bonename_str, humanBoneJSON);
+
+				// nodename
+				std::string nodename = std::string();
+				GetString("nodename", nodename, humanBoneJSON);
+
+				// EHumanoidBonesにキャスト
+				animation::EHumanoidBones BoneName = animation::CSkeleton::CastStringToHumanoidBones(bonename_str);
+				if (BoneName == animation::EHumanoidBones::None) continue;
+
+				SrcHumanoidBoneList.emplace(BoneName, nodename);
+			}
+		}
+
+		AnimationInfo.HumanoidBoneList = SrcHumanoidBoneList;
+
 		// clips
 		const auto clips = animationJSON->find("clips");
 		if (clips != animationJSON->end() && clips->is_array())
 		{
-			// 未実装
+			for (json::iterator clipJSON = clips->begin(); clipJSON != clips->end(); clipJSON++)
+			{
+				if (!clipJSON->is_object()) continue;
+
+				scene::SAnimationClip Clip{};
+
+				std::string key = "";
+				GetString("key", key, clipJSON);
+				Clip.Key = key;
+
+				std::string motionname = "";
+				GetString("motionname", motionname, clipJSON);
+				Clip.MotionName = motionname;
+
+				int index = -1;
+				GetInt("index", index, clipJSON);
+				Clip.Index = index;
+
+				bool loop = false;
+				GetBoolean("loop", loop, clipJSON);
+				Clip.Loop = loop;
+
+				AnimationInfo.Clips.emplace(key, Clip);
+			}
 		}
 
 		// humanoidclips

@@ -49,6 +49,7 @@ namespace gui
 					if (!CGUIRenderingTab::Draw()) return false;
 					if (!CGUICameraTab::Draw()) return false;
 					if (!CGUICustomTab::Draw(pGraphicsAPI, GUIParams)) return false;
+					if (!CGUIAnimationTab::DrawClipList(GUIParams)) return false;
 
 					ImGui::EndTabBar();
 				}

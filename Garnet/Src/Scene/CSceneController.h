@@ -11,6 +11,9 @@
 #include <Graphics/ECullMode.h>
 #include <Scriptable/CValueRegistry.h>
 
+#include "../Animation/ERigType.h"
+#include "../Animation/EHumanoidBones.h"
+
 namespace object { class C3DObject; }
 namespace camera { class CCamera; }
 namespace projection { class CProjection; }
@@ -26,7 +29,9 @@ namespace graphics {
 	class CTexture;
 	class CTextureSet;
 }
-namespace animation { class CAnimationClipSet; }
+namespace animation { 
+	class CAnimationClipSet;
+}
 namespace audio { class CAudioClip; }
 
 namespace scene
@@ -50,6 +55,10 @@ namespace scene
 
 	struct SAnimationClip
 	{
+		std::string Key = "";
+		std::string MotionName = "";
+		int Index = -1;
+		bool Loop = false;
 	};
 
 	struct SHumanoidclip
@@ -71,7 +80,10 @@ namespace scene
 
 	struct SAnimationInfo
 	{
-		std::vector<SAnimationClip> Clips;
+		animation::ERigType RigType = animation::ERigType::None;
+		std::map<animation::EHumanoidBones, std::string> HumanoidBoneList;
+
+		std::map<std::string, SAnimationClip> Clips;
 		std::map<std::string, SHumanoidclip> Humanoidclips;
 		std::map<std::string, SBlendshape> Blendshapes;
 
@@ -135,7 +147,8 @@ namespace scene
 
 		//
 		void AddObject(const std::shared_ptr<object::C3DObject>& Object);
-		void AddObjectWithLoading(resource::CLoadWorker* pLoadWorker, const std::shared_ptr<object::C3DObject>& Object, const std::string& FileName, const std::string& DefaultMaterialframeName);
+		void AddObjectWithLoading(resource::CLoadWorker* pLoadWorker, const std::shared_ptr<object::C3DObject>& Object, const std::string& FileName, 
+			const std::string& DefaultMaterialframeName, animation::ERigType RigType);
 		std::vector<std::shared_ptr<object::C3DObject>> GetObjectList() const;
 		std::shared_ptr<object::C3DObject> FindObjectByName(const std::string& Name);
 		std::shared_ptr<object::C3DObject> FindObjectByIndex(int Index);

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <map>
 #include <string>
 #include <memory>
 
@@ -23,6 +24,8 @@ namespace resource
 		E3DObjectLoadState m_LoadState;
 
 		std::shared_ptr<object::C3DObject> m_TargetObject;
+		const animation::ERigType		   m_TargetRigType;
+		std::map<animation::EHumanoidBones, std::string> m_TargetHumanoidBoneList;
 
 		std::shared_ptr<graphics::CMaterialFrame> m_BaseMaterialFrame;
 
@@ -31,7 +34,8 @@ namespace resource
 		bool Import(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine);
 		bool LoadSubResources(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, app::CApp* pApp);
 	public:
-		C3DObjectLoader(const std::string& FileName, const std::shared_ptr<object::C3DObject>& TargetObject, const std::shared_ptr<graphics::CMaterialFrame>& BaseMaterialFrame, std::string DefaultMaterialFrame = std::string());
+		C3DObjectLoader(const std::string& FileName, const std::shared_ptr<object::C3DObject>& TargetObject, 
+			const std::shared_ptr<graphics::CMaterialFrame>& BaseMaterialFrame, std::string DefaultMaterialFrame, animation::ERigType RigType, const std::map<animation::EHumanoidBones, std::string>& HumanoidBoneList);
 		virtual ~C3DObjectLoader();
 		
 		virtual bool Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, app::CApp* pApp) override;

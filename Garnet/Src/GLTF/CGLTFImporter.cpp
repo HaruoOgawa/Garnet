@@ -29,6 +29,7 @@
 #include "../Animation/CSkeleton.h"
 #include "../Animation/CBone.h"
 #include "../Animation/CBoneNameProvider.h"
+#include "../Animation/ERigType.h"
 
 #include "../Graphics/CMaterialFrame.h"
 #include "../../Graphics/CVertexBuffer.h"
@@ -41,7 +42,7 @@
 namespace gltf
 {
 	bool CGLTFImporter::ImportFromMemory(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& Data, object::C3DObject* Object,
-		const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, resource::C3DObjectLoader* p3DObjectLoader)
+		const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, resource::C3DObjectLoader* p3DObjectLoader, animation::ERigType RigType, const std::map<animation::EHumanoidBones, std::string>& HumanoidBoneList)
 	{
 		tinygltf::Model model;
 		tinygltf::TinyGLTF loader;
@@ -63,13 +64,13 @@ namespace gltf
 
 		if (!result) return false;
 
-		if (!Import(pGraphicsAPI, model, Object, MaterialFrame)) return false;
+		if (!Import(pGraphicsAPI, model, Object, MaterialFrame, RigType, HumanoidBoneList)) return false;
 
 		return true;
 	}
 
 	bool CGLTFImporter::ImportFromString(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& Data, const std::string& BaseDir, object::C3DObject* Object,
-		const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, resource::C3DObjectLoader* p3DObjectLoader)
+		const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, resource::C3DObjectLoader* p3DObjectLoader, animation::ERigType RigType, const std::map<animation::EHumanoidBones, std::string>& HumanoidBoneList)
 	{
 		tinygltf::Model model;
 		tinygltf::TinyGLTF loader;
@@ -91,7 +92,7 @@ namespace gltf
 
 		if (!result) return false;
 
-		if (!Import(pGraphicsAPI, model, Object, MaterialFrame))
+		if (!Import(pGraphicsAPI, model, Object, MaterialFrame, RigType, HumanoidBoneList))
 		{
 			Console::Log("[Error GLTFImporter] Failed to Import\n");
 
@@ -102,7 +103,7 @@ namespace gltf
 	}
 
 	bool CGLTFImporter::Import(api::IGraphicsAPI* pGraphicsAPI, tinygltf::Model model, object::C3DObject* Object,
-		const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame)
+		const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, animation::ERigType RigType, const std::map<animation::EHumanoidBones, std::string>& HumanoidBoneList)
 	{
 		// テクスチャ
 		std::vector<std::shared_ptr<graphics::CTexture>> TextureList;
@@ -158,13 +159,16 @@ namespace gltf
 		}
 
 		// スキン
-		std::shared_ptr<animation::CSkeleton> Skeleton = std::make_shared<animation::CSkeleton>();
+		std::shared_ptr<animation::CSkeleton> Skeleton = std::make_shared<animation::CSkeleton>(RigType, (Object->GetObjectName() + "(Skeleton)"));
 		if (!CreateAnimationSkeleton(model, Skeleton, NodeList))
 		{
 			Console::Log("[Error GLTFImporter] Failed to CreateAnimationSkeleton\n");
 
 			return false;
 		}
+
+		// BoneTableを作成
+		Skeleton->MakeHumanoidBoneTable(HumanoidBoneList);
 
 		// NodeとSkeletonは先に追加しておく
 		for (const auto& Node : NodeList)
@@ -213,7 +217,7 @@ namespace gltf
 
 		for (const auto& Clip : AnimationClipList)
 		{
-			Object->AddAnimationClip(Clip);
+			Object->AddAnimationClip(Clip, "Default", {nullptr, "" }, true);
 		}
 
 		// モーフノードを追加
@@ -906,7 +910,7 @@ namespace gltf
 			{
 				// Boneの順番とinverseBindMatrixの順番は同じ
 				const auto& Bone = Skeleton->GetBoneList()[j];
-				Bone->GetBoneNode()->SetInverseBindMatrix(inverseBindMatrices[j]);
+				std::get<1>(Bone)->GetBoneNode()->SetInverseBindMatrix(inverseBindMatrices[j]);
 			}
 		}
 
@@ -947,9 +951,9 @@ namespace gltf
 									{
 										for (const auto& Bone : Skeleton->GetBoneList())
 										{
-											if (Bone->GetBoneNode() == TargetNode)
+											if (std::get<1>(Bone)->GetBoneNode() == TargetNode)
 											{
-												Bone->SetBoneName(BoneName);
+												std::get<1>(Bone)->SetBoneName(BoneName);
 
 												break;
 											}
@@ -964,12 +968,6 @@ namespace gltf
 			}
 		}
 
-		// 拡張機能の結果を元にBoneTableを作成
-		if(Skeleton)
-		{
-			Skeleton->MakeBoneTable();
-		}
-
 		return true;
 	}
 
@@ -978,7 +976,7 @@ namespace gltf
 	{
 		for (const auto& Bone : Skeleton->GetBoneList())
 		{
-			const auto& ParentNode = Bone->GetBoneNode()->GetParentNode();
+			const auto& ParentNode = std::get<1>(Bone)->GetBoneNode()->GetParentNode();
 			if (!ParentNode) continue;
 
 			std::shared_ptr<animation::CBoneNameProvider> Provider = std::make_shared<animation::CBoneNameProvider>();
@@ -987,7 +985,7 @@ namespace gltf
 			const auto& ParentBone = Skeleton->GetBone(ParentBoneName);
 			if (!ParentBone) continue;
 
-			Bone->SetParentBoneName(ParentBone->GetBoneName());
+			std::get<1>(Bone)->SetParentBoneName(ParentBone->GetBoneName());
 		}
 	}
 
@@ -1041,7 +1039,7 @@ namespace gltf
 
 				animation::EHumanoidBones BoneName = animation::EHumanoidBones::None;
 
-				std::shared_ptr<animation::CAnimationChannel> AnimationChannel = std::make_shared<animation::CAnimationChannel>(UseAnimLocalAxis, false, sampler, AnimationTarget, Node, BoneName);
+				std::shared_ptr<animation::CAnimationChannel> AnimationChannel = std::make_shared<animation::CAnimationChannel>(UseAnimLocalAxis, false, sampler, AnimationTarget, Node->GetName(), BoneName);
 
 				AnimationClip->AddAnimationChannel(AnimationChannel);
 			}

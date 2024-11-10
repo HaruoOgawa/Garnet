@@ -4,6 +4,7 @@
 
 #include <glm/glm.hpp>
 #include <vector>
+#include <tuple>
 #include <memory>
 
 #include "../Object/CNode.h"
@@ -24,7 +25,7 @@ namespace animation
 		CIKSolver();
 		virtual ~CIKSolver();
 
-		bool Create(const std::shared_ptr<CBone>& IKTargetBone, const std::vector<std::shared_ptr<CBone>>& BoneList);
+		bool Create(const std::shared_ptr<CBone>& IKTargetBone, const std::vector<std::tuple<std::string, std::shared_ptr<CBone>>>& BoneList);
 
 		bool Solve();
 	};

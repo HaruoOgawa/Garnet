@@ -20,7 +20,8 @@
 namespace mmd
 {
 	bool CPmxImporter::ImportPmx(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, const std::string& ModelFileName, 
-		const std::vector<unsigned char>& Data, object::C3DObject* Object, const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, resource::C3DObjectLoader* p3DObjectLoader)
+		const std::vector<unsigned char>& Data, object::C3DObject* Object, const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, resource::C3DObjectLoader* p3DObjectLoader, 
+		animation::ERigType RigType, const std::map<animation::EHumanoidBones, std::string>& HumanoidBoneList)
 	{
 		CPmxModel model;
 
@@ -46,11 +47,11 @@ namespace mmd
 		RootNodeIndexList.push_back(0);
 
 		// Skeleton
-		std::shared_ptr<animation::CSkeleton> Skeleton = std::make_shared<animation::CSkeleton>();
+		std::shared_ptr<animation::CSkeleton> Skeleton = std::make_shared<animation::CSkeleton>(RigType, (Object->GetObjectName() + "(Skeleton)"));
 		if (!CreateAnimationSkeleton(model, Skeleton, NodeList, RootNode)) return false;
 
 		// BoneTableを作成
-		Skeleton->MakeBoneTable();
+		Skeleton->MakeHumanoidBoneTable(HumanoidBoneList);
 
 		// IKBoneListを作成
 		Skeleton->MakeIKBoneList();
@@ -195,7 +196,7 @@ namespace mmd
 				const auto& PmxBone = PmxBoneList[BoneIndex];
 
 				const auto& Bone = BoneList[BoneIndex];
-				int SelfNodeIndex = Bone->GetBoneNode()->GetSelfNodeIndex();
+				int SelfNodeIndex = std::get<1>(Bone)->GetBoneNode()->GetSelfNodeIndex();
 
 				int ParentBoneIndex = PmxBone->GetParentBoneIndex();
 
@@ -207,7 +208,7 @@ namespace mmd
 				else
 				{
 					// 自身を親ノードの子要素リストに追加する
-					BoneList[ParentBoneIndex]->GetBoneNode()->AddChildrenNodeIndex(SelfNodeIndex);
+					std::get<1>(BoneList[ParentBoneIndex])->GetBoneNode()->AddChildrenNodeIndex(SelfNodeIndex);
 				}
 			}
 		}
@@ -217,8 +218,10 @@ namespace mmd
 
 	bool CPmxImporter::CalcInverseBindPose(std::shared_ptr<animation::CSkeleton>& Skeleton)
 	{
-		for (const auto& Bone : Skeleton->GetBoneList())
+		for (const auto& BonePair : Skeleton->GetBoneList())
 		{
+			const auto& Bone = std::get<1>(BonePair);
+
 			// MMDのBoneはローカル座標系ではなくワールド座標系なのでセンターとかの親ボーンを考慮するかは迷うところ
 			glm::mat4 InverseBindMatrix = glm::inverse(Bone->GetBoneNode()->GetWorldMatrix());
 			Bone->GetBoneNode()->SetInverseBindMatrix(InverseBindMatrix);
@@ -758,7 +761,7 @@ namespace mmd
 			// 物理オブジェクトを割り当てる
 			if (PmxRigidbody.RelationBoneIndex < 0 || PmxRigidbody.RelationBoneIndex >= BoneList.size()) continue;
 
-			BoneList[PmxRigidbody.RelationBoneIndex]->GetBoneNode()->AddPhysicsObject(PhysicsObject);
+			std::get<1>(BoneList[PmxRigidbody.RelationBoneIndex])->GetBoneNode()->AddPhysicsObject(PhysicsObject);
 
 			//
 			PhysicsObjectList.push_back(PhysicsObject);

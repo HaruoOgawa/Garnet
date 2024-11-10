@@ -205,7 +205,32 @@ namespace scene
 
 		for (const auto& AnimationClipSet : AnimationClipSetMap)
 		{
-			SceneJSON["animations"].push_back({ {"name" , AnimationClipSet.first}, { "filename", AnimationClipSet.second->GetFileName()} });
+			json animation{};
+
+			const auto& Clip = AnimationClipSet.second->GetAnimationClip(0);
+			if (Clip)
+			{
+				const auto& Skeleton = Clip->GetDefaultSkeleton();
+				if (Skeleton)
+				{
+					switch (Skeleton->GetRig())
+					{
+					case animation::ERigType::Humanoid:
+						animation["rig"] = "humanoid";
+						break;
+					default:
+						break;
+					}
+
+					// HumanoidBoneList
+					WriteHumanoidBoneList(animation, Skeleton);
+				}
+			}
+
+			animation["name"] = AnimationClipSet.first;
+			animation["filename"] = AnimationClipSet.second->GetFileName();
+
+			SceneJSON["animations"].emplace_back(animation);
 		}
 
 		return true;
@@ -689,18 +714,49 @@ namespace scene
 
 	bool CSceneWriter::WriteAnimation(ordered_json& ObjectJSON, object::C3DObject* pObject, const SAnimationInfo& AnimationInfo)
 	{
-		ordered_json animationJSON;
+		json animationJSON;
 
 		const auto& AnimationController = pObject->GetAnimationController();
 		const auto& BlendShapeController = pObject->GetBlendShapeController();
 
+		const auto& Clips = AnimationInfo.Clips;
 		const auto& HumanoidclipInfoList = AnimationInfo.Humanoidclips;
 		const auto& BlendshapeInfoList = AnimationInfo.Blendshapes;
 
-		animationJSON["clips"] = {};
+		// clips
+		for (const auto& AnimationClip : AnimationController->GetAnimationClipMap())
+		{
+			const auto& it = Clips.find(AnimationClip.first);
+			if (it == Clips.end()) continue;
+
+			animationJSON["clips"].push_back({
+				{ "key", AnimationClip.first },
+				{ "motionname", it->second.MotionName },
+				{ "index",  it->second.Index },
+				{ "loop", AnimationClip.second.Clip->IsLoop() }
+				});
+		}
 
 		if (AnimationController)
 		{
+			const auto& Skeleton = AnimationController->GetSkeleton();
+
+			if (Skeleton)
+			{
+				// Rig
+				switch (Skeleton->GetRig())
+				{
+				case animation::ERigType::Humanoid:
+					animationJSON["rig"] = "humanoid";
+					break;
+				default:
+					break;
+				}
+
+				// HumanoidBoneList
+				WriteHumanoidBoneList(animationJSON, Skeleton);
+			}
+
 			for (const auto& AnimationClip : AnimationController->GetAnimationClipMap())
 			{
 				const auto& it = HumanoidclipInfoList.find(AnimationClip.first);
@@ -741,6 +797,30 @@ namespace scene
 		}
 
 		ObjectJSON["animation"] = animationJSON;
+
+		return true;
+	}
+
+	bool CSceneWriter::WriteHumanoidBoneList(json& AnimationJSON, const std::shared_ptr<animation::CSkeleton>& Skeleton)
+	{
+		const auto& BoneTable = Skeleton->GetHumanoidBoneTable();
+
+		for (int n = 0; n < static_cast<int>(animation::EHumanoidBones::Max); n++)
+		{
+			animation::EHumanoidBones BoneName = static_cast<animation::EHumanoidBones>(n);
+
+			const auto& it = BoneTable.find(BoneName);
+			if (it == BoneTable.end()) continue;
+
+			std::string BoneNameStr = animation::CSkeleton::CastHumanoidBonesToString(BoneName);
+			if (BoneNameStr.empty()) continue;
+
+			json boneJson{};
+			boneJson["bonename"] = BoneNameStr;
+			boneJson["nodename"] = it->second->GetBoneNode()->GetName();
+
+			AnimationJSON["humanbonelist"].emplace_back(boneJson);
+		}
 
 		return true;
 	}
