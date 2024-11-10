@@ -46,8 +46,7 @@ namespace api
 		m_SwapChainDepthTextureView(nullptr),
 		m_SwapChainRenderPass(nullptr),
 		m_CurrentRenderPass(nullptr),
-		m_pWebGPURenderPass(nullptr),
-		m_CurrentRenderPassName(std::string())
+		m_pWebGPURenderPass(nullptr)
 	{
 	}
 
@@ -241,32 +240,32 @@ namespace api
 		return true;
 	}
 
-	const std::string& CWebGPUAPI::GetVertexShaderExtension() const
+	std::string CWebGPUAPI::GetVertexShaderExtension() const
 	{
 		return m_VertexShaderExtension;
 	}
 
-	const std::string& CWebGPUAPI::GetFragmentShaderExtension() const
+	std::string CWebGPUAPI::GetFragmentShaderExtension() const
 	{
 		return m_FragmentShaderExtension;
 	}
 
-	const std::string& CWebGPUAPI::GetGeometryShaderExtension() const
+	std::string CWebGPUAPI::GetGeometryShaderExtension() const
 	{
 		return m_GeometryShaderExtension;
 	}
 
-	const std::string& CWebGPUAPI::GetHullShaderExtension() const
+	std::string CWebGPUAPI::GetHullShaderExtension() const
 	{
 		return m_HullShaderExtension;
 	}
 
-	const std::string& CWebGPUAPI::GetDomainShaderExtension() const
+	std::string CWebGPUAPI::GetDomainShaderExtension() const
 	{
 		return m_DomainShaderExtension;
 	}
 
-	const std::string& CWebGPUAPI::GetComputeShaderExtension() const
+	std::string CWebGPUAPI::GetComputeShaderExtension() const
 	{
 		return m_ComputeShaderExtension;
 	}
@@ -281,22 +280,12 @@ namespace api
 		return m_Width;
 	}
 
-	const std::map<std::string, std::shared_ptr<graphics::IRenderPass>>& CWebGPUAPI::GetOffScreenRenderPassMap() const
-	{
-		return m_OffScreenRenderPassMap;
-	}
-
 	std::shared_ptr<graphics::IRenderPass> CWebGPUAPI::FindOffScreenRenderPass(const std::string& PassName)
 	{
 		auto it = m_OffScreenRenderPassMap.find(PassName);
 		if (it == m_OffScreenRenderPassMap.end()) return nullptr;
 
 		return it->second;
-	}
-
-	const std::string& CWebGPUAPI::GetCurrentRenderPassName() const
-	{
-		return m_CurrentRenderPassName;
 	}
 
 	bool CWebGPUAPI::CopyColorBuffer(const std::string& SrcPassName, const std::string& DstPassName)

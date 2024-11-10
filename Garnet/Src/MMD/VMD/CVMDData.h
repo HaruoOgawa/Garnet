@@ -8,6 +8,7 @@
 #include "SVMDFrame.h"
 #include "../../Animation/EHumanoidBones.h"
 #include "../../Animation/EBlendShapeName.h"
+#include "../../Interface/IGraphicsAPI.h"
 
 namespace binary { class CBinaryReader; }
 
@@ -26,8 +27,8 @@ namespace mmd
 		int m_MaxSkinFrameIndex;
 	private:
 		// ‘¼‚É‚àExpression, Camera, Light‚È‚Ç‚ª‚ ‚é‚ç‚µ‚¢‚ª‚Ð‚Æ‚Ü‚¸Frame‚¾‚¯“Ç‚Þ
-		bool AnalyseFrameData(binary::CBinaryReader& Analyser);
-		bool AnalyseFacialExpressionData(binary::CBinaryReader& Analyser);
+		bool AnalyseFrameData(api::IGraphicsAPI* pGraphicsAPI, binary::CBinaryReader& Analyser);
+		bool AnalyseFacialExpressionData(api::IGraphicsAPI* pGraphicsAPI, binary::CBinaryReader& Analyser);
 		bool AnalyseCameraData(binary::CBinaryReader& Analyser);
 		bool AnalyseLightData(binary::CBinaryReader& Analyser);
 		bool AnalyseSelfShadowData(binary::CBinaryReader& Analyser);
@@ -45,7 +46,7 @@ namespace mmd
 		int GetMinSkinFrameIndex() const;
 		int GetMaxSkinFrameIndex() const;
 
-		bool Analyse(const std::vector<unsigned char>& Data);
+		bool Analyse(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& Data);
 	};
 }
 #endif

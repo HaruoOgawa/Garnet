@@ -102,11 +102,11 @@ namespace fbx
 		static bool CreateMesh(api::IGraphicsAPI* pGraphicsAPI, sfbx::Object* pFBXNode, std::vector<sfbx::Mesh*>& pFbxMeshList, const std::vector<sfbx::Material*>& pFbxMaterialList, const std::vector<sfbx::Object*>& FbxBoneList,
 			std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, const std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList, const std::shared_ptr<animation::CSkeleton>& Skeleton, const bool IsMixamoFbx);
 
-		static bool CreateAnimationSkeleton(sfbx::Object* pFBXNode, std::shared_ptr<animation::CSkeleton>& Skeleton, std::vector<sfbx::Object*>& FbxBoneList, const std::vector<std::shared_ptr<object::CNode>>& NodeList);
+		static bool CreateAnimationSkeleton(api::IGraphicsAPI* pGraphicsAPI, sfbx::Object* pFBXNode, std::shared_ptr<animation::CSkeleton>& Skeleton, std::vector<sfbx::Object*>& FbxBoneList, const std::vector<std::shared_ptr<object::CNode>>& NodeList);
 
-		static void ApplyParentBoneList(const std::shared_ptr<animation::CSkeleton>& Skeleton, const std::vector<std::shared_ptr<object::CNode>>& NodeList);
+		static void ApplyParentBoneList(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<animation::CSkeleton>& Skeleton, const std::vector<std::shared_ptr<object::CNode>>& NodeList);
 
-		static bool CreateAnimation(const sfbx::DocumentPtr& Doc, std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList, const std::vector<std::shared_ptr<object::CNode>>& NodeList,
+		static bool CreateAnimation(api::IGraphicsAPI* pGraphicsAPI, const sfbx::DocumentPtr& Doc, std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList, const std::vector<std::shared_ptr<object::CNode>>& NodeList,
 			const std::shared_ptr<animation::CSkeleton>& Skeleton, const std::vector<sfbx::Object*>& FbxBoneList, const bool IsMixamoFbx);
 
 		// Helper Function //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

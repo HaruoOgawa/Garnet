@@ -39,8 +39,7 @@ namespace api
 		m_SwapChainDepthImage(nullptr),
 		m_SwapChainDepthImageMemory(nullptr),
 		m_SwapChainDepthImageView(nullptr),
-		m_CommandPool(nullptr),
-		m_CurrentRenderPassName(std::string())
+		m_CommandPool(nullptr)
 	{
 	}
 
@@ -299,32 +298,32 @@ namespace api
 		return true;
 	}
 
-	const std::string& CVulkanAPI::GetVertexShaderExtension() const
+	std::string CVulkanAPI::GetVertexShaderExtension() const
 	{
 		return m_VertexShaderExtension;
 	}
 
-	const std::string& CVulkanAPI::GetFragmentShaderExtension() const
+	std::string CVulkanAPI::GetFragmentShaderExtension() const
 	{
 		return m_FragmentShaderExtension;
 	}
 
-	const std::string& CVulkanAPI::GetGeometryShaderExtension() const
+	std::string CVulkanAPI::GetGeometryShaderExtension() const
 	{
 		return m_GeometryShaderExtension;
 	}
 
-	const std::string& CVulkanAPI::GetHullShaderExtension() const
+	std::string CVulkanAPI::GetHullShaderExtension() const
 	{
 		return m_HullShaderExtension;
 	}
 
-	const std::string& CVulkanAPI::GetDomainShaderExtension() const
+	std::string CVulkanAPI::GetDomainShaderExtension() const
 	{
 		return m_DomainShaderExtension;
 	}
 
-	const std::string& CVulkanAPI::GetComputeShaderExtension() const
+	std::string CVulkanAPI::GetComputeShaderExtension() const
 	{
 		return m_ComputeShaderExtension;
 	}
@@ -339,22 +338,12 @@ namespace api
 		return m_Height;
 	}
 
-	const std::map<std::string, std::shared_ptr<graphics::IRenderPass>>& CVulkanAPI::GetOffScreenRenderPassMap() const
-	{
-		return m_OffScreenRenderPassMap;
-	}
-
 	std::shared_ptr<graphics::IRenderPass> CVulkanAPI::FindOffScreenRenderPass(const std::string& PassName)
 	{
 		auto it = m_OffScreenRenderPassMap.find(PassName);
 		if (it == m_OffScreenRenderPassMap.end()) return nullptr;
 
 		return it->second;
-	}
-
-	const std::string& CVulkanAPI::GetCurrentRenderPassName() const
-	{
-		return m_CurrentRenderPassName;
 	}
 
 	bool CVulkanAPI::CopyColorBuffer(const std::string& SrcPassName, const std::string& DstPassName)

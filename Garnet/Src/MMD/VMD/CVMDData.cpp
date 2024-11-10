@@ -51,7 +51,7 @@ namespace mmd
 		return m_MaxSkinFrameIndex;
 	}
 
-	bool CVMDData::Analyse(const std::vector<unsigned char>& Data)
+	bool CVMDData::Analyse(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& Data)
 	{
 		// Analyserを生成
 		binary::CBinaryReader Analyser(Data);
@@ -72,12 +72,12 @@ namespace mmd
 		if (!Analyser.GetUTF16ReverseString(modelName, 20)) return false;
 
 		// フレームデータ
-		if (!AnalyseFrameData(Analyser)) return false;
+		if (!AnalyseFrameData(pGraphicsAPI, Analyser)) return false;
 
 		// 表情データ
 		// スキンデータと書かれることが多いがこれはリターゲット用のスキンデータではなく表情という意味らしい
 		// (なのでVMDモーションはリターゲット不要と捉えていいのかな？)
-		if (!AnalyseFacialExpressionData(Analyser)) return false;
+		if (!AnalyseFacialExpressionData(pGraphicsAPI, Analyser)) return false;
 
 		// カメラデータ
 		if (!AnalyseCameraData(Analyser)) return false;
@@ -91,7 +91,7 @@ namespace mmd
 		return true;
 	}
 
-	bool CVMDData::AnalyseFrameData(binary::CBinaryReader& Analyser)
+	bool CVMDData::AnalyseFrameData(api::IGraphicsAPI* pGraphicsAPI, binary::CBinaryReader& Analyser)
 	{
 		/*
 		// モーションデータ数
@@ -231,8 +231,7 @@ namespace mmd
 			if (!Analyser.Skip(16 * 3)) return false;
 
 			// ボーン名を取得
-			animation::CBoneNameProvider Provider;
-			animation::EHumanoidBones BoneName = Provider.GetBoneNameU16(Name);
+			animation::EHumanoidBones BoneName = pGraphicsAPI->GetBoneNameProvider()->GetBoneNameU16(Name);
 
 			// Noneはどのボーンに割り当てればいいかわからないのでスキップする
 			if (BoneName == animation::EHumanoidBones::None) continue;
@@ -252,7 +251,7 @@ namespace mmd
 		return true;
 	}
 
-	bool CVMDData::AnalyseFacialExpressionData(binary::CBinaryReader& Analyser)
+	bool CVMDData::AnalyseFacialExpressionData(api::IGraphicsAPI* pGraphicsAPI, binary::CBinaryReader& Analyser)
 	{
 		/*
 		// 表情データ数
@@ -267,8 +266,6 @@ namespace mmd
 		float Weight; // 表情の設定値(表情スライダーの値)
 		} vmd_Skeleton;
 		*/
-		
-		animation::CBlendShapeNameProvider Provider;
 
 		// 表情データ数
 		int ExpressionCount = 0;
@@ -283,7 +280,7 @@ namespace mmd
 			// 同じ『まばたき』の文字列でもなぜかwstringのバイナリ上では途中にDとか)が入ってmapとしては別のものとして扱われてしまうようなのでVmdのパース段階で分ける必要がある
 			// (本当はBlendName数 * ExpressionCountだけロードに時間がかかってしまうのであまりやりたくはないが・・・)
 			// Boneの方も同じ理屈でVmdパース時にHumanoidBoneNameを見ている
-			animation::EBlendShapeName BlendShapeName = Provider.GetBlendShapeNameU16(Name);
+			animation::EBlendShapeName BlendShapeName = pGraphicsAPI->GetBlendShapeNameProvider()->GetBlendShapeNameU16(Name);
 			
 			// なぜかNoneチェックをしているとNoneではないものも飛ばされてしまうのでひとまずコメントアウトしている(Blinkが16個あるはずなのになぜか4つとかになっていた)
 			//if (BlendShapeName == animation::EBlendShapeName::None) continue;

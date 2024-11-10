@@ -1,9 +1,14 @@
 #include "CGraphicsAPI.h"
+#include "../Animation/CBoneNameProvider.h"
+#include "../Animation/CBlendShapeNameProvider.h"
 
 namespace api
 {
 	CGraphicsAPI::CGraphicsAPI():
-		m_MaxBoneCount(1024)
+		m_MaxBoneCount(1024),
+		m_BoneNameProvider(std::make_shared<animation::CBoneNameProvider>()),
+		m_BlendShapeNameProvider(std::make_shared<animation::CBlendShapeNameProvider>()),
+		m_CurrentRenderPassName(std::string())
 	{
 	}
 
@@ -87,32 +92,32 @@ namespace api
 		return m_MaxBoneCount;
 	}
 
-	const std::string& CGraphicsAPI::GetVertexShaderExtension() const
+	std::string CGraphicsAPI::GetVertexShaderExtension() const
 	{
 		return std::string();
 	}
 
-	const std::string& CGraphicsAPI::GetFragmentShaderExtension() const
+	std::string CGraphicsAPI::GetFragmentShaderExtension() const
 	{
 		return std::string();
 	}
 
-	const std::string& CGraphicsAPI::GetGeometryShaderExtension() const
+	std::string CGraphicsAPI::GetGeometryShaderExtension() const
 	{
 		return std::string();
 	}
 
-	const std::string& CGraphicsAPI::GetHullShaderExtension() const
+	std::string CGraphicsAPI::GetHullShaderExtension() const
 	{
 		return std::string();
 	}
 
-	const std::string& CGraphicsAPI::GetDomainShaderExtension() const
+	std::string CGraphicsAPI::GetDomainShaderExtension() const
 	{
 		return std::string();
 	}
 
-	const std::string& CGraphicsAPI::GetComputeShaderExtension() const
+	std::string CGraphicsAPI::GetComputeShaderExtension() const
 	{
 		return std::string();
 	}
@@ -129,7 +134,7 @@ namespace api
 
 	const std::map<std::string, std::shared_ptr<graphics::IRenderPass>>& CGraphicsAPI::GetOffScreenRenderPassMap() const
 	{
-		return {};
+		return m_OffScreenRenderPassMap;
 	}
 
 	std::shared_ptr<graphics::IRenderPass> CGraphicsAPI::FindOffScreenRenderPass(const std::string& PassName)
@@ -139,7 +144,7 @@ namespace api
 
 	const std::string& CGraphicsAPI::GetCurrentRenderPassName() const
 	{
-		return std::string();
+		return m_CurrentRenderPassName;
 	}
 
 	bool CGraphicsAPI::CopyColorBuffer(const std::string& SrcPassName, const std::string& DstPassName)
@@ -160,5 +165,15 @@ namespace api
 	bool CGraphicsAPI::CheckValidShader(std::string& ErrorMsg, const std::vector<unsigned char>& ShaderCode, graphics::EShaderStage ShaderStage)
 	{
 		return true;
+	}
+
+	const std::shared_ptr<animation::CBoneNameProvider>& CGraphicsAPI::GetBoneNameProvider() const
+	{
+		return m_BoneNameProvider;
+	}
+
+	const std::shared_ptr<animation::CBlendShapeNameProvider>& CGraphicsAPI::GetBlendShapeNameProvider() const
+	{
+		return m_BlendShapeNameProvider;
 	}
 }

@@ -27,6 +27,11 @@ namespace graphics
 	class CIndexBuffer;
 }
 
+namespace animation { 
+	class CBoneNameProvider; 
+	class CBlendShapeNameProvider;
+}
+
 namespace api
 {
 	class IGPGPUHandler;
@@ -55,13 +60,13 @@ namespace api
 		virtual bool SubmitRender() = 0;
 
 		virtual int GetMaxBoneCount() = 0;
-
-		virtual const std::string& GetVertexShaderExtension() const = 0;
-		virtual const std::string& GetFragmentShaderExtension() const = 0;
-		virtual const std::string& GetGeometryShaderExtension() const = 0;
-		virtual const std::string& GetHullShaderExtension() const = 0;
-		virtual const std::string& GetDomainShaderExtension() const = 0;
-		virtual const std::string& GetComputeShaderExtension() const = 0;
+		 
+		virtual std::string GetVertexShaderExtension() const = 0;
+		virtual std::string GetFragmentShaderExtension() const = 0;
+		virtual std::string GetGeometryShaderExtension() const = 0;
+		virtual std::string GetHullShaderExtension() const = 0;
+		virtual std::string GetDomainShaderExtension() const = 0;
+		virtual std::string GetComputeShaderExtension() const = 0;
 
 		virtual int GetWidth() const = 0;
 		virtual int GetHeight() const = 0;
@@ -75,5 +80,8 @@ namespace api
 		virtual bool IsEnabledRuntimeShaderEditing() const = 0;
 
 		virtual bool CheckValidShader(std::string& ErrorMsg, const std::vector<unsigned char>& ShaderCode, graphics::EShaderStage ShaderStage) = 0;
+
+		virtual const std::shared_ptr<animation::CBoneNameProvider>& GetBoneNameProvider() const = 0;
+		virtual const std::shared_ptr<animation::CBlendShapeNameProvider>& GetBlendShapeNameProvider() const = 0;
 	};
 }

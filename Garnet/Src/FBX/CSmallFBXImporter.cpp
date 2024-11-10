@@ -111,7 +111,7 @@ namespace fbx
 
 			if (RootNode)
 			{
-				if (!CreateAnimationSkeleton(RootNode, Skeleton, FbxBoneList, NodeList)) return false;
+				if (!CreateAnimationSkeleton(pGraphicsAPI, RootNode, Skeleton, FbxBoneList, NodeList)) return false;
 			}
 		}
 
@@ -130,10 +130,10 @@ namespace fbx
 		Object->CalcWorldMatrix();
 
 		// 親のBoneを追加
-		ApplyParentBoneList(Skeleton, NodeList);
+		ApplyParentBoneList(pGraphicsAPI, Skeleton, NodeList);
 
 		// アニメーション
-		if (!CreateAnimation(Doc, AnimationClipList, NodeList, Skeleton, FbxBoneList, IsMixamoFbx)) return false;
+		if (!CreateAnimation(pGraphicsAPI, Doc, AnimationClipList, NodeList, Skeleton, FbxBoneList, IsMixamoFbx)) return false;
 
 		if (IsUseObject)
 		{
@@ -1065,7 +1065,7 @@ namespace fbx
 		return true;
 	}
 
-	bool CSmallFBXImporter::CreateAnimationSkeleton(sfbx::Object* pFBXNode, std::shared_ptr<animation::CSkeleton>& Skeleton, std::vector<sfbx::Object*>& FbxBoneList, const std::vector<std::shared_ptr<object::CNode>>& NodeList)
+	bool CSmallFBXImporter::CreateAnimationSkeleton(api::IGraphicsAPI* pGraphicsAPI, sfbx::Object* pFBXNode, std::shared_ptr<animation::CSkeleton>& Skeleton, std::vector<sfbx::Object*>& FbxBoneList, const std::vector<std::shared_ptr<object::CNode>>& NodeList)
 	{
 		if (pFBXNode->getClass() != sfbx::ObjectClass::Model) return true;
 
@@ -1083,8 +1083,7 @@ namespace fbx
 				Bone->GetBoneNode()->SetInverseBindMatrix(InverseBindMatrix);
 
 				// BoneNameを取得
-				std::shared_ptr<animation::CBoneNameProvider> Provider = std::make_shared<animation::CBoneNameProvider>();
-				animation::EHumanoidBones BoneName = Provider->GetBoneName(Name);
+				animation::EHumanoidBones BoneName = pGraphicsAPI->GetBoneNameProvider()->GetBoneName(Name);
 
 				// BoneにBoneNameを割り当てる
 				Bone->SetBoneName(BoneName);
@@ -1099,21 +1098,20 @@ namespace fbx
 		// 子要素のNodeを調べる
 		for (int i = 0; i < pFBXNode->getChildren().size(); i++)
 		{
-			if (!CreateAnimationSkeleton(pFBXNode->getChild(i), Skeleton, FbxBoneList, NodeList)) return false;
+			if (!CreateAnimationSkeleton(pGraphicsAPI, pFBXNode->getChild(i), Skeleton, FbxBoneList, NodeList)) return false;
 		}
 
 		return true;
 	}
 
-	void CSmallFBXImporter::ApplyParentBoneList(const std::shared_ptr<animation::CSkeleton>& Skeleton, const std::vector<std::shared_ptr<object::CNode>>& NodeList)
+	void CSmallFBXImporter::ApplyParentBoneList(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<animation::CSkeleton>& Skeleton, const std::vector<std::shared_ptr<object::CNode>>& NodeList)
 	{
 		for (const auto& Bone : Skeleton->GetBoneList())
 		{
 			const auto& ParentNode = std::get<1>(Bone)->GetBoneNode()->GetParentNode();
 			if (!ParentNode) continue;
 
-			std::shared_ptr<animation::CBoneNameProvider> Provider = std::make_shared<animation::CBoneNameProvider>();
-			animation::EHumanoidBones ParentBoneName = Provider->GetBoneName(ParentNode->GetName());
+			animation::EHumanoidBones ParentBoneName = pGraphicsAPI->GetBoneNameProvider()->GetBoneName(ParentNode->GetName());
 
 			const auto& ParentBone = Skeleton->GetBone(ParentBoneName);
 			if (!ParentBone) continue;
@@ -1122,7 +1120,7 @@ namespace fbx
 		}
 	}
 
-	bool CSmallFBXImporter::CreateAnimation(const sfbx::DocumentPtr& Doc, std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList, const std::vector<std::shared_ptr<object::CNode>>& NodeList,
+	bool CSmallFBXImporter::CreateAnimation(api::IGraphicsAPI* pGraphicsAPI, const sfbx::DocumentPtr& Doc, std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList, const std::vector<std::shared_ptr<object::CNode>>& NodeList,
 		const std::shared_ptr<animation::CSkeleton>& Skeleton, const std::vector<sfbx::Object*>& FbxBoneList, const bool IsMixamoFbx)
 	{
 		for (int i = 0; i < Doc->getAnimationStacks().size(); i++)
@@ -1316,8 +1314,7 @@ namespace fbx
 						const auto& TargetNode = GetBoneNode(Name, NodeList);
 
 						// Bone Name を取得
-						std::shared_ptr<animation::CBoneNameProvider> Provider = std::make_shared<animation::CBoneNameProvider>();
-						animation::EHumanoidBones BoneName = Provider->GetBoneName(Name);
+						animation::EHumanoidBones BoneName = pGraphicsAPI->GetBoneNameProvider()->GetBoneName(Name);
 
 						std::shared_ptr<animation::CAnimationChannel> AnimationChannel = std::make_shared<animation::CAnimationChannel>(UseAnimLocalAxis, false, TargetSamplerIndex, AnimationTarget, TargetNode->GetName(), BoneName);
 
