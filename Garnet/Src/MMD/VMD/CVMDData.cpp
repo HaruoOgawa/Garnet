@@ -231,7 +231,7 @@ namespace mmd
 			if (!Analyser.Skip(16 * 3)) return false;
 
 			// ボーン名を取得
-			animation::EHumanoidBones BoneName = pGraphicsAPI->GetBoneNameProvider()->GetBoneNameU16(Name);
+			animation::EHumanoidBones BoneName = pGraphicsAPI->GetBoneNameProvider()->GetBoneNameU16(animation::EBonePattern::VMD, Name);
 
 			// Noneはどのボーンに割り当てればいいかわからないのでスキップする
 			if (BoneName == animation::EHumanoidBones::None) continue;

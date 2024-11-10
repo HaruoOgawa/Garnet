@@ -2,6 +2,7 @@
 #ifdef USE_ANIMATION
 
 #include <unordered_map>
+#include <map>
 #include <vector>
 #include <string>
 
@@ -9,23 +10,39 @@
 
 namespace animation
 {
+	enum class EBonePattern
+	{
+		NONE = -1,
+
+		VRM,
+		FBX,
+		MIXAMO,
+		PMX,
+		VMD,
+		
+	};
+
 	class CBoneNameProvider
 	{
 		std::unordered_map<EHumanoidBones, std::vector<std::string>> m_BoneNameTable;
-		std::unordered_map<EHumanoidBones, std::vector<std::wstring>> m_BoneNameTableU16;
+		std::map<EBonePattern, std::map<std::wstring, EHumanoidBones>> m_TableListU16;
 		
 	private:
 		void InitTable();
 		void InitTableU16();
+
+		void InitPMXTable();
+		void InitVMDTable();
 
 	public:
 		CBoneNameProvider();
 		virtual ~CBoneNameProvider() = default;
 
 		EHumanoidBones GetBoneName(const std::string& SrcNodeName);
-		EHumanoidBones GetBoneNameU16(const std::wstring& SrcNodeName);
+		EHumanoidBones GetBoneNameU16(EBonePattern Pattern, const std::wstring& SrcNodeName);
 
 		static std::wstring HexToWstr(std::vector<int> byteArray);
+		static std::wstring ToNoZeroStr(const std::wstring& Src);
 	};
 }
 

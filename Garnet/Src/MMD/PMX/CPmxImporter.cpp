@@ -163,7 +163,7 @@ namespace mmd
 			std::shared_ptr<animation::CBone> Bone = std::make_shared<animation::CBone>(BoneNode);
 
 			// Bone‚ÉBoneName‚ğŠ„‚è“–‚Ä‚é
-			animation::EHumanoidBones BoneName = pGraphicsAPI->GetBoneNameProvider()->GetBoneNameU16(Name);
+			animation::EHumanoidBones BoneName = pGraphicsAPI->GetBoneNameProvider()->GetBoneNameU16(animation::EBonePattern::PMX, Name);
 			Bone->SetBoneName(BoneName);
 
 			// ƒ{[ƒ“‚Ì•t—^
