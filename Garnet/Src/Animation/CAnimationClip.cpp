@@ -49,6 +49,9 @@ namespace animation
 		Sampler->SetSelfSamplerIndex(static_cast<int>(m_SamplerList.size()));
 
 		m_SamplerList.push_back(Sampler);
+
+		m_ClipStartTime = glm::min(m_ClipStartTime, Sampler->GetStartTime());
+		m_ClipEndTime = glm::max(m_ClipEndTime, Sampler->GetEndTime());
 	}
 
 	void CAnimationClip::AddAnimationChannel(const std::shared_ptr<animation::CAnimationChannel>& AnimationChannel)
@@ -194,15 +197,6 @@ namespace animation
 	float CAnimationClip::GetCurrentTime() const
 	{
 		return m_CurrentTime;
-	}
-
-	void CAnimationClip::CalculateClipStartEnd()
-	{
-		for (const auto& Sampler : m_SamplerList)
-		{
-			m_ClipStartTime = glm::min(m_ClipStartTime, Sampler->GetStartTime());
-			m_ClipEndTime = glm::max(m_ClipEndTime, Sampler->GetEndTime());
-		}
 	}
 
 	bool CAnimationClip::IsEnd()

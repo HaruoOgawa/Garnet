@@ -148,8 +148,6 @@ namespace mmd
 			Index++;
 		}
 
-		AnimationClip->CalculateClipStartEnd();
-
 		// ƒNƒŠƒbƒv‚ğ“o˜^
 		AnimationClipList.push_back(AnimationClip);
 
@@ -255,8 +253,6 @@ namespace mmd
 
 				Index++;
 			}
-
-			BlendShapeClip->CalculateClipStartEnd();
 
 			// ƒNƒŠƒbƒv‚ğ“o˜^
 			BlendShapeClipList.push_back(BlendShapeClip);

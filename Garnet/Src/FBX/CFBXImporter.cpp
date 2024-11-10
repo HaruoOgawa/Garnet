@@ -1115,7 +1115,6 @@ namespace fbx
 			}
 
 			//
-			AnimationClip->CalculateClipStartEnd();
 			AnimationClip->SetDefaultSkeleton(Skeleton);
 
 			AnimationClipList.push_back(AnimationClip);
