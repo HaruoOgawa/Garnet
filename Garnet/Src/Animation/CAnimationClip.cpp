@@ -7,6 +7,8 @@ namespace animation
 {
 	CAnimationClip::CAnimationClip():
 		m_CurrentTime(0.0f),
+		m_ClipStartTime(0.0f),
+		m_ClipEndTime(0.0f),
 		m_IsLoop(false),
 		m_UseIK(false),
 		m_DefaultSkeleton(nullptr)
@@ -77,6 +79,15 @@ namespace animation
 	bool CAnimationClip::Update(float DeltaSecondsTime, const std::shared_ptr<CSkeleton>& Skeleton)
 	{
 		m_CurrentTime += DeltaSecondsTime;
+
+		if (m_IsLoop)
+		{
+			m_CurrentTime = glm::mod(m_CurrentTime, m_ClipEndTime);
+		}
+		else
+		{
+			m_CurrentTime = fminf(m_CurrentTime, m_ClipEndTime);
+		}
 
 		if (!UpdateFrame(m_CurrentTime, Skeleton)) return false;
 
@@ -183,6 +194,15 @@ namespace animation
 	float CAnimationClip::GetCurrentTime() const
 	{
 		return m_CurrentTime;
+	}
+
+	void CAnimationClip::CalculateClipStartEnd()
+	{
+		for (const auto& Sampler : m_SamplerList)
+		{
+			m_ClipStartTime = glm::min(m_ClipStartTime, Sampler->GetStartTime());
+			m_ClipEndTime = glm::max(m_ClipEndTime, Sampler->GetEndTime());
+		}
 	}
 
 	bool CAnimationClip::IsEnd()

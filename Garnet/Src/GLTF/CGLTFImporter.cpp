@@ -1044,6 +1044,7 @@ namespace gltf
 				AnimationClip->AddAnimationChannel(AnimationChannel);
 			}
 
+			AnimationClip->CalculateClipStartEnd();
 			AnimationClip->SetIsLoop(true);
 
 			AnimationClipList.push_back(AnimationClip);

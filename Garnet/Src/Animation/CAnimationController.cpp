@@ -278,6 +278,7 @@ namespace animation
 		std::shared_ptr<animation::CAnimationClip> TargetClip = std::make_shared<animation::CAnimationClip>();
 		if (!TransferSkeletonAndCopyAnimation(SourceClip, TargetClip, false)) return;
 
+		TargetClip->CalculateClipStartEnd();
 		TargetClip->SetIsLoop(IsLoop);
 		Layout.Clip = TargetClip;
 
@@ -303,6 +304,7 @@ namespace animation
 			if (!ReTargetRig(SourceClip, TargetClip)) return;
 		}
 
+		TargetClip->CalculateClipStartEnd();
 		TargetClip->SetIsLoop(IsLoop);
 		TargetClip->SetUseIK(UseIK);
 
