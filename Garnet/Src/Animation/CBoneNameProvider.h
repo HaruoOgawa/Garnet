@@ -7,21 +7,10 @@
 #include <string>
 
 #include "EHumanoidBones.h"
+#include "EBonePattern.h"
 
 namespace animation
 {
-	enum class EBonePattern
-	{
-		NONE = -1,
-
-		VRM,
-		FBX,
-		MIXAMO,
-		PMX,
-		VMD,
-		
-	};
-
 	class CBoneNameProvider
 	{
 		std::unordered_map<EHumanoidBones, std::vector<std::string>> m_BoneNameTable;

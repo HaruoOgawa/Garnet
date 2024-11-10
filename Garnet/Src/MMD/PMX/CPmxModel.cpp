@@ -986,7 +986,7 @@ namespace mmd
 					PmxMorph->AddVertexMorph(VertexIndex, Offset);
 				}
 
-				animation::EBlendShapeName BlendShapeName = pGraphicsAPI->GetBlendShapeNameProvider()->GetBlendShapeNameU16(MorphName.second);
+				animation::EBlendShapeName BlendShapeName = pGraphicsAPI->GetBlendShapeNameProvider()->GetBlendShapeNameU16(animation::EBonePattern::PMX, MorphName.second);
 
 				m_PmxVertexMorphList.emplace(BlendShapeName, PmxMorph);
 			}
