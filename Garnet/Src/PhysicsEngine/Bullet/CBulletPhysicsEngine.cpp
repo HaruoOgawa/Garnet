@@ -19,6 +19,11 @@ namespace physics
 
 	CBulletPhysicsEngine::~CBulletPhysicsEngine()
 	{
+#ifdef BT_ENABLE_THREADING
+		m_TaskSchedulerMgr.Shutdown();
+#endif // BT_ENABLE_THREADING
+
+
 		if (m_DynamicsWorld)
 		{
 			m_DynamicsWorld.reset();
@@ -52,6 +57,40 @@ namespace physics
 
 	bool CBulletPhysicsEngine::Initialize()
 	{
+#ifdef BT_ENABLE_THREADING
+		// マルチスレッドモード
+		m_TaskSchedulerMgr.Init();
+
+		btDefaultCollisionConstructionInfo cci;
+		cci.m_defaultMaxCollisionAlgorithmPoolSize = 80000;
+		cci.m_defaultMaxPersistentManifoldPoolSize = 80000;
+
+		m_CollisionConfigration = std::make_unique<btDefaultCollisionConfiguration>(cci);
+
+		btCollisionDispatcherMt* multi_dispacher = new btCollisionDispatcherMt(m_CollisionConfigration.get(), 40);
+
+		m_OverlappingPairCache = std::make_unique<btDbvtBroadphase>();
+
+		btConstraintSolverPoolMt* solverPool;
+		{
+			btConstraintSolver* solvers[BT_MAX_THREAD_COUNT];
+			int maxThreadCount = BT_MAX_THREAD_COUNT;
+			for (int i = 0; i < maxThreadCount; ++i)
+			{
+				solvers[i] = new btSequentialImpulseConstraintSolverMt();
+			}
+			solverPool = new btConstraintSolverPoolMt(solvers, maxThreadCount);
+		}
+
+		btSequentialImpulseConstraintSolverMt* solverMt = new btSequentialImpulseConstraintSolverMt();
+
+		// dynamics world. 物理演算を行う仮想世界
+		m_DynamicsWorld = std::make_unique<btDiscreteDynamicsWorldMt>(multi_dispacher, m_OverlappingPairCache.get(), solverPool, solverMt, m_CollisionConfigration.get());
+
+		// 重力を設定
+		m_DynamicsWorld->setGravity(btVector3(0.0f, -9.8f * 10.0f, 0.0f));
+#else
+		// シングルスレッドモード
 		// 物理エンジンの設定オブジェクトを初期化
 		m_CollisionConfigration = std::make_unique<btDefaultCollisionConfiguration>();
 
@@ -69,6 +108,7 @@ namespace physics
 
 		// 重力を設定
 		m_DynamicsWorld->setGravity(btVector3(0.0f, -9.8f * 10.0f, 0.0f));
+#endif // BT_ENABLE_THREADING
 
 		return true;
 	}
@@ -104,14 +144,23 @@ namespace physics
 		if (m_DynamicsWorld)
 		{
 			// timeStepは定数の方が軽いのでひとまず定数にしておく
+#ifdef BT_ENABLE_THREADING
+			m_DynamicsWorld->stepSimulation(1.0f / 30.0f, 10, 1.0f / 30.0f);
+			//m_DynamicsWorld->stepSimulation(DeltaTime, 10);
+#else
 			m_DynamicsWorld->stepSimulation(1.0f / 30.0f, 10);
 			//m_DynamicsWorld->stepSimulation(DeltaTime, 10);
+#endif // BT_ENABLE_THREADING
 		}
 
 		return true;
 	}
 
+#ifdef BT_ENABLE_THREADING
+	btDiscreteDynamicsWorldMt* CBulletPhysicsEngine::GetDynamicsWorld()
+#else
 	btDiscreteDynamicsWorld* CBulletPhysicsEngine::GetDynamicsWorld()
+#endif // BT_ENABLE_THREADING
 	{
 		return m_DynamicsWorld.get();
 	}
