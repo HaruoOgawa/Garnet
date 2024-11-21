@@ -1,14 +1,15 @@
-Issueはタスクリストじゃないよ！将来的に好きなタイミングでやってみたいことリストだからいっぱいあっても気にしなくてヨシ。これは願望リストじゃから
-
 # Garnet 3D Engine
 ## Dependencies
+* nuget packages
+  * [tbb](https://github.com/oneapi-src/oneTBB) 
 * [naga](https://github.com/gfx-rs/naga)
   * Convert SPIR-V to WGSL
 * [VSYASM](https://github.com/ShiftMediaProject/VSYASM)
   * compile 4klang
 * emsdk 3.1.44
-* Google Dawn [chromium/5904](https://dawn.googlesource.com/dawn/+/refs/heads/chromium/5904)
-* [ninja 1.11.1](https://github.com/ninja-build/ninja)
+* webgpu
+  * Google Dawn [chromium/5904](https://dawn.googlesource.com/dawn/+/refs/heads/chromium/5904)
+  * [ninja 1.11.1](https://github.com/ninja-build/ninja)
 ## Overview
 Garnet is Computer Graphics Engine running on Vulkan and WebGPU.
 https://scrapbox.io/Garnet/
@@ -18,4 +19,5 @@ https://scrapbox.io/Garnet/
 * プリプロセッサの使用はライブラリと紐づくクラスに対してのみ使用可能
   * そのライブラリを使用しない時はダミー継承クラスで代用する
   * 関数の引数がプリプロセッサで無限に汚くなるのを防ぐため
+  
   
