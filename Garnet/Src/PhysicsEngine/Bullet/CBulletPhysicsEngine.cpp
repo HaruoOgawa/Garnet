@@ -135,21 +135,19 @@ namespace physics
 
 	bool CBulletPhysicsEngine::Update(float DeltaTime)
 	{
-		m_PhysicsTime += DeltaTime;
-
-		if (m_PhysicsTime < (1.0f / 30.0f)) return true;
-
-		m_PhysicsTime = 0.0f;
-
 		if (m_DynamicsWorld)
 		{
 			// timeStep‚Í’è”‚Ì•û‚ªŒy‚¢‚Ì‚Å‚Ð‚Æ‚Ü‚¸’è”‚É‚µ‚Ä‚¨‚­
 #ifdef BT_ENABLE_THREADING
-			m_DynamicsWorld->stepSimulation(1.0f / 30.0f, 10, 1.0f / 30.0f);
-			//m_DynamicsWorld->stepSimulation(DeltaTime, 10);
+			m_DynamicsWorld->stepSimulation(1.0 / 30.0f, 10, 1.0 / 30.0f);
 #else
+			m_PhysicsTime += DeltaTime;
+
+			if (m_PhysicsTime < (1.0f / 30.0f)) return true;
+
+			m_PhysicsTime = 0.0f;
+
 			m_DynamicsWorld->stepSimulation(1.0f / 30.0f, 10);
-			//m_DynamicsWorld->stepSimulation(DeltaTime, 10);
 #endif // BT_ENABLE_THREADING
 		}
 
