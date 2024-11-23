@@ -58,7 +58,13 @@ namespace physics
 	bool CBulletPhysicsEngine::Initialize()
 	{
 #ifdef BT_ENABLE_THREADING
-		// マルチスレッドモード
+		// マルチスレッドモード //////////////////////////////////////////////////////
+		// 有効にするには以下のプリプロセッサを使用する
+		// BT_THREADSAFE
+		// BT_USE_OPENMP
+		// BT_USE_PPL
+		// BT_ENABLE_THREADING
+		///////////////////////////////////////////////////////////////////////////
 		m_TaskSchedulerMgr.Init();
 
 		btDefaultCollisionConstructionInfo cci;

@@ -1,6 +1,6 @@
 #pragma once
 
-#ifdef BT_ENABLE_THREADING
+#if defined(USE_PHYSICS) && defined(BT_ENABLE_THREADING)
 #include <BulletCollision/CollisionDispatch/btCollisionDispatcherMt.h>
 #include <BulletDynamics/ConstraintSolver/btSequentialImpulseConstraintSolverMt.h>
 #include <BulletDynamics/Dynamics/btDiscreteDynamicsWorldMt.h>
@@ -26,4 +26,4 @@ namespace physics
 		btITaskScheduler* GetTaskScheduler(int i);
 	};
 }
-#endif // BT_ENABLE_THREADING
+#endif // USE_PHYSICS && BT_ENABLE_THREADING
