@@ -30,6 +30,8 @@ namespace physics
 		CBulletRigidBody(btDiscreteDynamicsWorld* pDynamicWorld, btCollisionShape* pCollisionShape, const glm::vec3& WorldPos, const glm::quat& WorldRotate, bool IsKinematic, float Mass, const SRigidbodyParam& RBParam);
 		virtual ~CBulletRigidBody();
 
+		void SetActivation(bool Flag);
+
 		const SRigidbodyParam& GetRbParam() const;
 
 		void Add6DofSpringConstraint(btDiscreteDynamicsWorld* pDynamicWorld, const std::shared_ptr<CBulletRigidBody>& FixedRigidbody, SJointParam JParam);
