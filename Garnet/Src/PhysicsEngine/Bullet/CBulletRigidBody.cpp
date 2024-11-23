@@ -90,8 +90,8 @@ namespace physics
 		m_Rigidbody->setRestitution(RBParam.Repulsion); // 反発係数の設定
 		m_Rigidbody->setFriction(RBParam.Friction); // 摩擦係数の設定
 
-		m_Rigidbody->setSleepingThresholds(0.01f, glm::radians(0.1f)); // 最適化用。物理演算を行わなくなるまでの閾値
-		
+		m_Rigidbody->setSleepingThresholds(0.01f, 0.01f); // 最適化用。物理演算を行わなくなるまでの閾値
+
 		if (IsKinematic && RBParam.PhysicsType == EPhysicsType::STATIC)
 		{
 			// KinematicObjectとは動かすことのできるStaticObject
@@ -127,7 +127,8 @@ namespace physics
 		// btGeneric6DofSpring2Constraint(*d6body0,*fixedBody1,frameInA,frameInB);
 		// frameInAとframeInBはバネに例えるとバネの端点・剛体との接合点を表す. 二つの剛体にバネを挟むことをイメージするとわかりやすい. それは必ず２つの接合点があるはずである
 		// frameInAはd6body0の接合点、frameInBのfixedBody1の接合点
-		// そしてその座標はframeInA・frameInBともに『『fixedBody1』』の座標を中心とした移動・回転で表される
+		// frameInA・frameInBはバネの中心からのローカルオフセット(座標・回転)である
+		// これらのローカル座標は中心のワールド座標に接合点のワールド座標の逆行列をかけることで求まる
 
 		btTransform JointWorldTransform;
 		{
