@@ -11,6 +11,9 @@ import sys
 ExcludedFolderList = ["Library", "Vulkan", "OpenGL", "WebMain", "CWebAppManager.cpp", "CWebAppManager.h", "DemoMain", "CDemoAppManager.cpp", "CDemoAppManager.h", "Bullet3Serialize", "btBulletCollisionAll.cpp", "btBulletDynamicsAll.cpp", "btLinearMathAll.cpp"]
 IncludeDirectoryList = ["Src", "Src/Library/DawnLib/include", "Src/Library/GLFW/include", "Src/Library/glfw3webgpu", "Src/Library/glm", "Src/Library/tinygltf", "Src/Library/SmallFBX/include", "Src/Library/bullet3/Src", "Src/Library/imgui", "Src/Library/imgui/backends", "Src/Library/json"]
 PreprocessorList = ["NDEBUG", "NOMINMAX", "USE_GLFW", "USE_WEBGPU", "USE_BINARY_READ", "USE_BINARY_WRITE", "USE_GUIENGINE", "USE_TEXTURE_LOADER", "USE_GLTF", "USE_VIEWER_CAMERA", "USE_INPUT_SYSTEM", "USE_GPGPU", "USE_FBX", "USE_ANIMATION", "USE_SMALL_FBX", "USE_MMD", "USE_PHYSICS", "B3_USE_CLEW", "_CRT_SECURE_NO_WARNINGS"]
+
+# , "BT_NO_PROFILE", "BT_NO_DEBUG"
+
 EmccCompileDirList = ["Src", "Src/Library/SmallFBX/include", "Src/Library/bullet3/Src", "Src/Library/imgui"]
 
 ProjectEmccCompileDirList = ["../Src"]
@@ -87,7 +90,7 @@ def Make():
 		exportText += "call echo [%d/%d] %s" % (counter + 1, len(pathList), path) + "\n"
 		
 		#
-		exportText += "call emcc -o2 --no-heap-copy -c " + path + " -o " + dstPath + str(counter) + ".o "
+		exportText += "call emcc -O3 --no-heap-copy -c " + path + " -o " + dstPath + str(counter) + ".o "
 		
 		# Include Dir
 		for inc in IncludeDirectoryList:
@@ -102,7 +105,7 @@ def Make():
 		counter += 1
 
 	# All Link
-	exportText += "call emcc -o2 --no-heap-copy "
+	exportText += "call emcc -O3 --no-heap-copy "
 
 	for i in range(0, counter):
 		exportText += dstPath + str(i) + ".o" + " "
