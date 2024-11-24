@@ -27,7 +27,7 @@ namespace resource
 		if (!m_File->IsLoaded()) return true;
 
 		// シーン読み込み
-		if (!AnalyseScene(pGraphicsAPI, pLoadWorker, pApp)) return false;
+		if (!AnalyseScene(pGraphicsAPI, pPhysicsEngine, pLoadWorker, pApp)) return false;
 
 		// ロード完了
 		m_Status = resource::ELoadStatus::Loaded;
@@ -35,7 +35,7 @@ namespace resource
 		return true;
 	}
 
-	bool CSceneLoader::AnalyseScene(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, app::CApp* pApp)
+	bool CSceneLoader::AnalyseScene(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, app::CApp* pApp)
 	{
 		std::string RawData = std::string();
 		RawData.resize(m_File->GetData().size());
@@ -127,6 +127,21 @@ namespace resource
 				GetString("filename", filename, timeline);
 
 				m_Target->SetTimelineFileName(filename);
+			}
+		}
+
+		// physics
+		{
+			const auto physics = SceneJSON.find("physics");
+			if (physics != SceneJSON.end() && physics->is_object())
+			{
+				bool enabled = true;
+				GetBoolean("enabled", enabled, physics);
+
+				if (pPhysicsEngine)
+				{
+					pPhysicsEngine->SetEnabled(enabled);
+				}
 			}
 		}
 

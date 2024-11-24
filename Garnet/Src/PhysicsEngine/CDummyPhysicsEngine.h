@@ -14,6 +14,9 @@ namespace physics
 		CDummyPhysicsEngine();
 		virtual ~CDummyPhysicsEngine();
 
+		virtual bool IsEnabled() const override;
+		virtual void SetEnabled(bool Flag) override;
+
 		virtual bool Initialize() override;
 
 		virtual std::shared_ptr<IPhysicsObject> CreatePhysicsBox(const glm::vec3& BoxHalfSize, bool Kinematic, float Mass, const SRigidbodyParam& RBParam) override;

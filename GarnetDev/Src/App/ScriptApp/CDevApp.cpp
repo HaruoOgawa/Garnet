@@ -159,7 +159,8 @@ namespace app
 		return true;
 	}
 
-	bool CDevApp::Draw(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<input::CInputState>& InputState, const std::shared_ptr<gui::IGUIEngine>& GUIEngine)
+	bool CDevApp::Draw(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<input::CInputState>& InputState,
+		const std::shared_ptr<gui::IGUIEngine>& GUIEngine)
 	{
 		// MainResultPass
 		{
@@ -178,7 +179,7 @@ namespace app
 #ifdef USE_GUIENGINE
 			if (pLoadWorker->IsLoaded())
 			{
-				gui::SGUIParams GUIParams = gui::SGUIParams(GetObjectList(), m_SceneController, m_FileModifier, m_TimelineController, pLoadWorker, {});
+				gui::SGUIParams GUIParams = gui::SGUIParams(GetObjectList(), m_SceneController, m_FileModifier, m_TimelineController, pLoadWorker, {}, pPhysicsEngine);
 				GUIParams.CameraMode = (m_CameraSwitchToggle) ? "ViewCamera" : "TraceCamera";
 				GUIParams.Camera = m_MainCamera;
 				GUIParams.InputState = InputState;
@@ -235,7 +236,7 @@ namespace app
 
 #ifdef USE_GUIENGINE
 		{
-			gui::SGUIParams GUIParams = gui::SGUIParams(GetObjectList(), m_SceneController, m_FileModifier, m_TimelineController, pLoadWorker, {});
+			gui::SGUIParams GUIParams = gui::SGUIParams(GetObjectList(), m_SceneController, m_FileModifier, m_TimelineController, pLoadWorker, {}, pPhysicsEngine);
 
 			if (!m_GraphicsEditingWindow->OnLoaded(pGraphicsAPI, GUIParams, GUIEngine)) return false;
 		}

@@ -11,6 +11,9 @@ namespace physics
 	class IPhysicsEngine
 	{
 	public:
+		virtual bool IsEnabled() const = 0;
+		virtual void SetEnabled(bool Flag) = 0;
+
 		virtual bool Initialize() = 0;
 
 		virtual std::shared_ptr<IPhysicsObject> CreatePhysicsBox(const glm::vec3& BoxHalfSize, bool IsStatic, float Mass, const SRigidbodyParam& RBParam) = 0;

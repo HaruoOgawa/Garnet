@@ -73,12 +73,16 @@ namespace mmd
 		std::vector<std::shared_ptr<graphics::CMesh>> MeshList;
 		if (!CreateMeshList(pGraphicsAPI, Object, model, MeshList, RootNode, NodeList, MaterialList, (Skeleton->GetBoneList().size() > 0))) return false;
 
-		// 剛体
-		std::vector<std::shared_ptr<physics::IPhysicsObject>> PhysicsObjectList;
-		if (!CreateRigidbody(pPhysicsEngine, model, Skeleton, PhysicsObjectList)) return false;
+		// 物理演算
+		if (pPhysicsEngine->IsEnabled())
+		{
+			// 剛体
+			std::vector<std::shared_ptr<physics::IPhysicsObject>> PhysicsObjectList;
+			if (!CreateRigidbody(pPhysicsEngine, model, Skeleton, PhysicsObjectList)) return false;
 
-		// ジョイント
-		if (!CreateJoint(pPhysicsEngine, model, Skeleton, PhysicsObjectList)) return false;
+			// ジョイント
+			if (!CreateJoint(pPhysicsEngine, model, Skeleton, PhysicsObjectList)) return false;
+		}
 
 		// リソースを登録
 		Object->SetRootNodeIndexList(RootNodeIndexList);

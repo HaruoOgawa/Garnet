@@ -294,7 +294,7 @@ namespace app
 		if (!m_GraphicsAPI->PrepareRender()) return false;
 
 		//  Record Draw Command
-		if (!m_App->Draw(m_GraphicsAPI.get(), m_LoadWorker.get(), m_InputState, m_GUIEngine)) return false;
+		if (!m_App->Draw(m_GraphicsAPI.get(), m_PhysicsEngine.get(), m_LoadWorker.get(), m_InputState, m_GUIEngine)) return false;
 
 		// Submit
 		if (!m_GraphicsAPI->SubmitRender()) return false;

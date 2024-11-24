@@ -8,6 +8,7 @@
 namespace physics
 {
 	CBulletPhysicsEngine::CBulletPhysicsEngine():
+		m_Enabled(true),
 		m_CollisionConfigration(nullptr),
 		m_Dispathcer(nullptr),
 		m_OverlappingPairCache(nullptr),
@@ -52,6 +53,16 @@ namespace physics
 			m_CollisionConfigration.reset();
 			m_CollisionConfigration = nullptr;
 		}
+	}
+
+	bool CBulletPhysicsEngine::IsEnabled() const
+	{
+		return m_Enabled;
+	}
+
+	void CBulletPhysicsEngine::SetEnabled(bool Flag)
+	{
+		m_Enabled = Flag;
 	}
 
 	bool CBulletPhysicsEngine::Initialize()
@@ -140,6 +151,8 @@ namespace physics
 
 	bool CBulletPhysicsEngine::Update(float DeltaTime)
 	{
+		if (!m_Enabled) return true;
+
 		if (m_DynamicsWorld)
 		{
 			m_DynamicsWorld->stepSimulation(DeltaTime, 10, 1.0 / 60.0f);

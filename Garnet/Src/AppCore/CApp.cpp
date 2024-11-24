@@ -37,7 +37,8 @@ namespace app
 		return true;
 	}
 
-	bool CApp::Draw(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<input::CInputState>& InputState, const std::shared_ptr<gui::IGUIEngine>& GUIEngine)
+	bool CApp::Draw(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<input::CInputState>& InputState,
+		const std::shared_ptr<gui::IGUIEngine>& GUIEngine)
 	{
 		return true;
 	}
