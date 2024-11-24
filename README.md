@@ -20,4 +20,5 @@ https://scrapbox.io/Garnet/
   * そのライブラリを使用しない時はダミー継承クラスで代用する
   * 関数の引数がプリプロセッサで無限に汚くなるのを防ぐため
   
-  
+## 注意事項
+* bulletはReleaseビルドを使わないと重い(Debug: 10 ~ 20FPS, Release: 60FPS)
