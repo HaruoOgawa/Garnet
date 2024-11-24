@@ -245,15 +245,17 @@ namespace app
 #endif
 		m_DeltaSecondsTime = m_SecondsTime - PrevSecondsTime;
 
-#ifdef _DEBUG
+
 		if (m_AppSettings.ShowFPS)
 		{
 			// FPS‚ÌŒv‘ª‚Æ•\Ž¦(60FPS‚ðŠî€‚Æ‚·‚é)
 			float FPS = 60.0f / (m_DeltaSecondsTime * 60.0f);
+#ifdef _DEBUG
 			Console::Log("[FPS] %f fps / [CurrentTime] %f s\n", FPS, m_SecondsTime);
-		}
-		
+#else
+			printf("[FPS] %f fps / [CurrentTime] %f s\n", FPS, m_SecondsTime);
 #endif // _DEBUG
+		}
 
 		//
 		const auto& DrawInfo = m_App->GetDrawInfo();
