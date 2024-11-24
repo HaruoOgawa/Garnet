@@ -6,15 +6,16 @@
 #include "../Audio/CAudioClip.h"
 #include "../LoadWorker/CFile.h"
 #include "../Timeline/CTimelineController.h"
+#include "../Interface/IPhysicsEngine.h"
 
 namespace scene
 {
-	bool CSceneWriter::Write(CSceneController* pSceneController, const std::shared_ptr<timeline::CTimelineController>& TimelineController)
+	bool CSceneWriter::Write(CSceneController* pSceneController, const std::shared_ptr<timeline::CTimelineController>& TimelineController, physics::IPhysicsEngine* pPhysicsEngine)
 	{
 		ordered_json SceneJSON;
 
 		// シーンJSONに現在の状態を書き出し
-		if (!WriteScene(SceneJSON, pSceneController, TimelineController)) return false;
+		if (!WriteScene(SceneJSON, pSceneController, TimelineController, pPhysicsEngine)) return false;
 
 		// データを取得
 		const auto& JSONStr = SceneJSON.dump(4);
@@ -32,7 +33,7 @@ namespace scene
 		return true;
 	}
 
-	bool CSceneWriter::WriteScene(ordered_json& SceneJSON, CSceneController* pSceneController, const std::shared_ptr<timeline::CTimelineController>& TimelineController)
+	bool CSceneWriter::WriteScene(ordered_json& SceneJSON, CSceneController* pSceneController, const std::shared_ptr<timeline::CTimelineController>& TimelineController, physics::IPhysicsEngine* pPhysicsEngine)
 	{
 		if (!WriteMaterialFrames(SceneJSON, pSceneController)) return false;
 		if (!WriteValueRegistries(SceneJSON, pSceneController, TimelineController)) return false;
@@ -40,6 +41,7 @@ namespace scene
 		if (!WriteAnimations(SceneJSON, pSceneController)) return false;
 		if (!WriteSound(SceneJSON, pSceneController)) return false;
 		if (!WriteTimeline(SceneJSON, pSceneController)) return false;
+		if (!WritePhysics(SceneJSON, pPhysicsEngine)) return false;
 		if (!WriteObjects(SceneJSON, pSceneController, TimelineController)) return false;
 
 		return true;
@@ -259,6 +261,16 @@ namespace scene
 	bool CSceneWriter::WriteTimeline(ordered_json& SceneJSON, CSceneController* pSceneController)
 	{
 		SceneJSON["timeline"]["filename"] = pSceneController->GetTimelineFileName();
+
+		return true;
+	}
+
+	bool CSceneWriter::WritePhysics(ordered_json& SceneJSON, physics::IPhysicsEngine* pPhysicsEngine)
+	{
+		if (pPhysicsEngine)
+		{
+			SceneJSON["physics"]["enabled"] = pPhysicsEngine->IsEnabled();
+		}
 
 		return true;
 	}

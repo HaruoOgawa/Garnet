@@ -12,6 +12,9 @@
     "timeline": {
         "filename": "Resources\\Scene\\CCDIK.tl"
     },
+    "physics":{
+        "enabled" : true
+    },
     "animations": [
       {
         "name": "MotionTest",

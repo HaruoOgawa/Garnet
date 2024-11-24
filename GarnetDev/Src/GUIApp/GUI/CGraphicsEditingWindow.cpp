@@ -97,7 +97,7 @@ namespace gui
 #ifdef USE_BINARY_WRITE
 		if ( (ImGui::IsKeyDown(ImGuiKey_LeftCtrl) && ImGui::IsKeyReleased(ImGuiKey_S)) || (GUIParams.InputState->IsKeyDown(input::EKeyType::KEY_TYPE_CONTROL) && GUIParams.InputState->IsKeyUp(input::EKeyType::KEY_TYPE_S)) )
 		{
-			if (!scene::CSceneWriter::Write(GUIParams.SceneController.get(), GUIParams.TimelineController)) return false;
+			if (!scene::CSceneWriter::Write(GUIParams.SceneController.get(), GUIParams.TimelineController, GUIParams.pPhysicsEngine)) return false;
 
 			m_ShowSavedDialog = true;
 		}

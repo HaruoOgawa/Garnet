@@ -90,17 +90,16 @@ namespace physics
 		m_Rigidbody->setRestitution(RBParam.Repulsion); // 反発係数の設定
 		m_Rigidbody->setFriction(RBParam.Friction); // 摩擦係数の設定
 
-		m_Rigidbody->setSleepingThresholds(0.01f, 0.01f); // 最適化用。物理演算を行わなくなるまでの閾値
-
 		if (IsKinematic && RBParam.PhysicsType == EPhysicsType::STATIC)
 		{
 			// KinematicObjectとは動かすことのできるStaticObject
 			// 言い換えるとユーザーが動かすことができる。動的オブジェクトを押したりすることはできるが、オブジェクトからは影響を受けない。つまり一方通行
 			// http://bulletjpn.web.fc2.com/07_RigidBodyDynamics.html
 			m_Rigidbody->setCollisionFlags(m_Rigidbody->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT);
-
-			m_Rigidbody->setActivationState(DISABLE_DEACTIVATION);
 		}
+
+		m_Rigidbody->setSleepingThresholds(0.01f, 0.01f); // 最適化用。物理演算を行わなくなるまでの閾値
+		m_Rigidbody->setActivationState(DISABLE_DEACTIVATION); // 動いていないなら非アクティブになるようにする
 
 		// ワールド座標をセットする
 		//SetWorldTransform(transform);
@@ -117,6 +116,11 @@ namespace physics
 		}
 
 		return true;
+	}
+
+	void CBulletRigidBody::SetActivation(bool Flag)
+	{
+		m_Rigidbody->activate(Flag);
 	}
 
 	void CBulletRigidBody::Add6DofSpringConstraint(btDiscreteDynamicsWorld* pDynamicWorld, const std::shared_ptr<CBulletRigidBody>& FixedRigidbody, SJointParam JParam)

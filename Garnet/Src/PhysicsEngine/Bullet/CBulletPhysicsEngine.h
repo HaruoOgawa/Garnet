@@ -16,7 +16,7 @@ namespace physics
 {
 	class CBulletPhysicsEngine : public IPhysicsEngine
 	{
-		float m_PhysicsTime;
+		bool m_Enabled;
 
 #ifdef BT_ENABLE_THREADING
 		std::unique_ptr<btCollisionConfiguration> m_CollisionConfigration;
@@ -37,6 +37,9 @@ namespace physics
 	public:
 		CBulletPhysicsEngine();
 		virtual ~CBulletPhysicsEngine();
+
+		virtual bool IsEnabled() const override;
+		virtual void SetEnabled(bool Flag) override;
 
 		virtual bool Initialize() override;
 

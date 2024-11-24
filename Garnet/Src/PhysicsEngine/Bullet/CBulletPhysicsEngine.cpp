@@ -8,7 +8,7 @@
 namespace physics
 {
 	CBulletPhysicsEngine::CBulletPhysicsEngine():
-		m_PhysicsTime(0.0f),
+		m_Enabled(true),
 		m_CollisionConfigration(nullptr),
 		m_Dispathcer(nullptr),
 		m_OverlappingPairCache(nullptr),
@@ -55,10 +55,26 @@ namespace physics
 		}
 	}
 
+	bool CBulletPhysicsEngine::IsEnabled() const
+	{
+		return m_Enabled;
+	}
+
+	void CBulletPhysicsEngine::SetEnabled(bool Flag)
+	{
+		m_Enabled = Flag;
+	}
+
 	bool CBulletPhysicsEngine::Initialize()
 	{
 #ifdef BT_ENABLE_THREADING
-		// マルチスレッドモード
+		// マルチスレッドモード //////////////////////////////////////////////////////
+		// 有効にするには以下のプリプロセッサを使用する
+		// BT_THREADSAFE
+		// BT_USE_OPENMP
+		// BT_USE_PPL
+		// BT_ENABLE_THREADING
+		///////////////////////////////////////////////////////////////////////////
 		m_TaskSchedulerMgr.Init();
 
 		btDefaultCollisionConstructionInfo cci;
@@ -88,7 +104,7 @@ namespace physics
 		m_DynamicsWorld = std::make_unique<btDiscreteDynamicsWorldMt>(multi_dispacher, m_OverlappingPairCache.get(), solverPool, solverMt, m_CollisionConfigration.get());
 
 		// 重力を設定
-		m_DynamicsWorld->setGravity(btVector3(0.0f, -9.8f * 10.0f, 0.0f));
+		m_DynamicsWorld->setGravity(btVector3(0.0f, -9.8f, 0.0f));
 #else
 		// シングルスレッドモード
 		// 物理エンジンの設定オブジェクトを初期化
@@ -107,7 +123,7 @@ namespace physics
 		m_DynamicsWorld = std::make_unique<btDiscreteDynamicsWorld>(m_Dispathcer.get(), m_OverlappingPairCache.get(), m_Solver.get(), m_CollisionConfigration.get());
 
 		// 重力を設定
-		m_DynamicsWorld->setGravity(btVector3(0.0f, -9.8f * 10.0f, 0.0f));
+		m_DynamicsWorld->setGravity(btVector3(0.0f, -9.8f, 0.0f));
 #endif // BT_ENABLE_THREADING
 
 		return true;
@@ -135,20 +151,11 @@ namespace physics
 
 	bool CBulletPhysicsEngine::Update(float DeltaTime)
 	{
+		if (!m_Enabled) return true;
+
 		if (m_DynamicsWorld)
 		{
-			// timeStepは定数の方が軽いのでひとまず定数にしておく
-#ifdef BT_ENABLE_THREADING
-			m_DynamicsWorld->stepSimulation(1.0 / 30.0f, 10, 1.0 / 30.0f);
-#else
-			m_PhysicsTime += DeltaTime;
-
-			if (m_PhysicsTime < (1.0f / 30.0f)) return true;
-
-			m_PhysicsTime = 0.0f;
-
-			m_DynamicsWorld->stepSimulation(1.0f / 30.0f, 10);
-#endif // BT_ENABLE_THREADING
+			m_DynamicsWorld->stepSimulation(DeltaTime, 10, 1.0 / 60.0f);
 		}
 
 		return true;

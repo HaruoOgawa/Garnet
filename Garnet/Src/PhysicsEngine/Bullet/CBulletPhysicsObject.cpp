@@ -202,5 +202,10 @@ namespace physics
 			}
 		}
 	}
+
+	void CBulletPhysicsObject::SetActivation(bool Flag)
+	{
+		m_RigidBody->SetActivation(Flag);
+	}
 }
 #endif

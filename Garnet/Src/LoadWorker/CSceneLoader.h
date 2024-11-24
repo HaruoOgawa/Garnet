@@ -32,7 +32,7 @@ namespace resource
 	{
 		std::shared_ptr<scene::CSceneController> m_Target;
 	private:
-		bool AnalyseScene(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, app::CApp* pApp);
+		bool AnalyseScene(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, app::CApp* pApp);
 
 		bool AnalyseMaterialFrames(const json::iterator& materialframes, resource::CLoadWorker* pLoadWorker);
 		bool AnalyseValueRegistries(const json::iterator& valueregistries);

@@ -1,4 +1,4 @@
-#ifdef BT_ENABLE_THREADING
+#if defined(USE_PHYSICS) && defined(BT_ENABLE_THREADING)
 #include "CBulletTaskSchedulerManager.h"
 
 namespace physics
@@ -66,4 +66,4 @@ namespace physics
 		return m_taskSchedulers[i]; 
 	}
 }
-#endif // BT_ENABLE_THREADING
+#endif // USE_PHYSICS && BT_ENABLE_THREADING

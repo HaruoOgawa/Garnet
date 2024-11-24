@@ -245,15 +245,17 @@ namespace app
 #endif
 		m_DeltaSecondsTime = m_SecondsTime - PrevSecondsTime;
 
-#ifdef _DEBUG
+
 		if (m_AppSettings.ShowFPS)
 		{
 			// FPS‚ÌŒv‘ª‚Æ•\¦(60FPS‚ğŠî€‚Æ‚·‚é)
 			float FPS = 60.0f / (m_DeltaSecondsTime * 60.0f);
+#ifdef _DEBUG
 			Console::Log("[FPS] %f fps / [CurrentTime] %f s\n", FPS, m_SecondsTime);
-		}
-		
+#else
+			printf("[FPS] %f fps / [CurrentTime] %f s\n", FPS, m_SecondsTime);
 #endif // _DEBUG
+		}
 
 		//
 		const auto& DrawInfo = m_App->GetDrawInfo();
@@ -292,7 +294,7 @@ namespace app
 		if (!m_GraphicsAPI->PrepareRender()) return false;
 
 		//  Record Draw Command
-		if (!m_App->Draw(m_GraphicsAPI.get(), m_LoadWorker.get(), m_InputState, m_GUIEngine)) return false;
+		if (!m_App->Draw(m_GraphicsAPI.get(), m_PhysicsEngine.get(), m_LoadWorker.get(), m_InputState, m_GUIEngine)) return false;
 
 		// Submit
 		if (!m_GraphicsAPI->SubmitRender()) return false;

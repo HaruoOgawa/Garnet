@@ -11,6 +11,15 @@ namespace physics
 	{
 	}
 
+	bool CDummyPhysicsEngine::IsEnabled() const
+	{
+		return false;
+	}
+
+	void CDummyPhysicsEngine::SetEnabled(bool Flag)
+	{
+	}
+
 	bool CDummyPhysicsEngine::Initialize()
 	{
 		return true;
