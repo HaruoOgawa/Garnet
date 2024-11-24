@@ -978,11 +978,11 @@ function dbg(text) {
 // === Body ===
 
 var ASM_CONSTS = {
-  213628: ($0) => { const fileName = Module.UTF8ToString($0); window.g3dCreateAudio(fileName); },  
- 213707: ($0) => { const loop = ($0 != 0); window.g3dPlayAudio(loop); },  
- 213762: ($0) => { const loop = ($0 != 0); window.g3dPlayAudio(loop); },  
- 213817: () => { window.g3dStopAudio(); },  
- 213844: () => { return window.g3dIsAudioPlaying(); }
+  213500: ($0) => { const fileName = Module.UTF8ToString($0); window.g3dCreateAudio(fileName); },  
+ 213579: ($0) => { const loop = ($0 != 0); window.g3dPlayAudio(loop); },  
+ 213634: ($0) => { const loop = ($0 != 0); window.g3dPlayAudio(loop); },  
+ 213689: () => { window.g3dStopAudio(); },  
+ 213716: () => { return window.g3dIsAudioPlaying(); }
 };
 
 
