@@ -94,7 +94,7 @@ namespace physics
 		m_DynamicsWorld = std::make_unique<btDiscreteDynamicsWorldMt>(multi_dispacher, m_OverlappingPairCache.get(), solverPool, solverMt, m_CollisionConfigration.get());
 
 		// 重力を設定
-		m_DynamicsWorld->setGravity(btVector3(0.0f, -9.8f * 10.0f, 0.0f));
+		m_DynamicsWorld->setGravity(btVector3(0.0f, -9.8f, 0.0f));
 #else
 		// シングルスレッドモード
 		// 物理エンジンの設定オブジェクトを初期化
@@ -113,7 +113,7 @@ namespace physics
 		m_DynamicsWorld = std::make_unique<btDiscreteDynamicsWorld>(m_Dispathcer.get(), m_OverlappingPairCache.get(), m_Solver.get(), m_CollisionConfigration.get());
 
 		// 重力を設定
-		m_DynamicsWorld->setGravity(btVector3(0.0f, -9.8f * 10.0f, 0.0f));
+		m_DynamicsWorld->setGravity(btVector3(0.0f, -9.8f, 0.0f));
 #endif // BT_ENABLE_THREADING
 
 		return true;
@@ -145,7 +145,7 @@ namespace physics
 		{
 			// timeStepは定数の方が軽いのでひとまず定数にしておく
 #ifdef BT_ENABLE_THREADING
-			m_DynamicsWorld->stepSimulation(1.0 / 30.0f, 10, 1.0 / 30.0f);
+			m_DynamicsWorld->stepSimulation(DeltaTime, 10, 1.0 / 60.0f);
 #else
 			m_PhysicsTime += DeltaTime;
 
