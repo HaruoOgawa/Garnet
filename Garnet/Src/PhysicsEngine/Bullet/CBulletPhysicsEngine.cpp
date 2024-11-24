@@ -8,7 +8,6 @@
 namespace physics
 {
 	CBulletPhysicsEngine::CBulletPhysicsEngine():
-		m_PhysicsTime(0.0f),
 		m_CollisionConfigration(nullptr),
 		m_Dispathcer(nullptr),
 		m_OverlappingPairCache(nullptr),
@@ -143,18 +142,7 @@ namespace physics
 	{
 		if (m_DynamicsWorld)
 		{
-			// timeStep‚Í’è”‚Ì•û‚ªŒy‚¢‚Ì‚Å‚Ð‚Æ‚Ü‚¸’è”‚É‚µ‚Ä‚¨‚­
-#ifdef BT_ENABLE_THREADING
 			m_DynamicsWorld->stepSimulation(DeltaTime, 10, 1.0 / 60.0f);
-#else
-			m_PhysicsTime += DeltaTime;
-
-			if (m_PhysicsTime < (1.0f / 30.0f)) return true;
-
-			m_PhysicsTime = 0.0f;
-
-			m_DynamicsWorld->stepSimulation(1.0f / 30.0f, 10);
-#endif // BT_ENABLE_THREADING
 		}
 
 		return true;

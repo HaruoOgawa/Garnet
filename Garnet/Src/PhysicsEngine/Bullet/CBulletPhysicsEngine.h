@@ -16,8 +16,6 @@ namespace physics
 {
 	class CBulletPhysicsEngine : public IPhysicsEngine
 	{
-		float m_PhysicsTime;
-
 #ifdef BT_ENABLE_THREADING
 		std::unique_ptr<btCollisionConfiguration> m_CollisionConfigration;
 		std::unique_ptr<btCollisionDispatcherMt> m_Dispathcer;
