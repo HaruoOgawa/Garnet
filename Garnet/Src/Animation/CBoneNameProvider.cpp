@@ -64,7 +64,7 @@ namespace animation
 		if (it == m_TableListU16.end()) return EHumanoidBones::None;
 
 		const auto it2 = it->second.find(SearchName);
-		if(it2 == it->second.end()) return EHumanoidBones::None;
+		if (it2 == it->second.end()) return EHumanoidBones::None;
 
 		return it2->second;
 	}
@@ -321,12 +321,55 @@ namespace animation
 	{
 		std::wstring Dst = std::wstring();
 
+#ifdef __EMSCRIPTEN__
+		int* result_ptr = nullptr;
+		int result_size = 0;
+
+		EM_ASM({
+			const ptr = $0;
+			const length = $1;
+			const data = new Uint16Array(Module.HEAPU16.buffer, ptr, length);
+			
+			const validData = [];
+			//const hexArray = [];
+
+			for (let i = 0; i < data.length; i++)
+			{
+				if (data[i] === 0) break;
+
+				validData.push(data[i]);
+				//hexArray.push(data[i].toString(16));
+			}
+
+			let size = validData.length;
+
+			const resultPtr = Module._malloc(size * 4);
+			for (let i = 0; i < size; i++)
+			{
+				HEAP32[resultPtr / 4 + i] = validData[i];
+			}
+
+			// ’l‚ðƒƒ‚ƒŠ‚É“n‚·
+			Module.setValue($2, resultPtr, "i32");
+			Module.setValue($3, size, "i32");
+
+			return resultPtr;
+
+		}, &Src[0], static_cast<int>(Src.size()), &result_ptr, &result_size);
+
+		std::vector<int> ByteArray(result_ptr, result_ptr + result_size);
+
+		free(reinterpret_cast<void*>(result_ptr));
+
+		Dst = HexToWstr(ByteArray);
+#else
 		for (auto c : Src)
 		{
 			if (c == '\0') break;
 
 			Dst.push_back(c);
 		}
+#endif
 
 		return Dst;
 	}

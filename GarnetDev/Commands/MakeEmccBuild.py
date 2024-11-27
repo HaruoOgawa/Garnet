@@ -123,7 +123,8 @@ def Make():
 		exportText += o + " "
 
 	# Compile Options
-	exportText += "-sEXPORTED_RUNTIME_METHODS=ccall,UTF8ToString,UTF16ToString "
+	exportText += "-sEXPORTED_RUNTIME_METHODS=ccall,UTF8ToString,UTF16ToString,setValue "
+	exportText += "-sEXPORTED_FUNCTIONS=_main,_malloc,_free "
 	exportText += "-sUSE_WEBGPU=1 "
 	exportText += "-sALLOW_MEMORY_GROWTH "
 	exportText += "-sFETCH "
