@@ -221,6 +221,8 @@ namespace animation
 
 	void CBoneNameProvider::InitVMDTable()
 	{
+		// VMDは鏡反転しているので左右反対に解釈する
+
 		std::map<std::wstring, EHumanoidBones> BoneNameTable;
 
 		// コードにUTF8以外の文字が含まれているとEmscriptenでコンパイルできないっぽいのでバイト列を実行時にwstringに変換している
@@ -232,10 +234,10 @@ namespace animation
 		// なぜなら別のバイト列とみなされるから(0x32だと本当は0x3200なのに0x0032になったり)
 
 		// VMD
-		BoneNameTable.emplace(HexToWstr({ 0x8945, 0x91ab, 0x8268, 0x826a }), animation::EHumanoidBones::RightLegIK); // 右足ＩＫ
-		BoneNameTable.emplace(HexToWstr({ 0x8945, 0x82c2, 0x82dc, 0x90e6, 0x8268, 0x826a }), animation::EHumanoidBones::RightToesIK); // 右つま先ＩＫ
-		BoneNameTable.emplace(HexToWstr({ 0x8db6, 0x91ab, 0x8268, 0x826a }), animation::EHumanoidBones::LeftLegIK); // 左足ＩＫ
-		BoneNameTable.emplace(HexToWstr({ 0x8db6, 0x82c2, 0x82dc, 0x90e6, 0x8268, 0x826a }), animation::EHumanoidBones::LeftToesIK); // 左つま先ＩＫ
+		BoneNameTable.emplace(HexToWstr({ 0x8945, 0x91ab, 0x8268, 0x826a }), animation::EHumanoidBones::LeftLegIK); // 右足ＩＫ
+		BoneNameTable.emplace(HexToWstr({ 0x8945, 0x82c2, 0x82dc, 0x90e6, 0x8268, 0x826a }), animation::EHumanoidBones::LeftToesIK); // 右つま先ＩＫ
+		BoneNameTable.emplace(HexToWstr({ 0x8db6, 0x91ab, 0x8268, 0x826a }), animation::EHumanoidBones::RightLegIK); // 左足ＩＫ
+		BoneNameTable.emplace(HexToWstr({ 0x8db6, 0x82c2, 0x82dc, 0x90e6, 0x8268, 0x826a }), animation::EHumanoidBones::RightToesIK); // 左つま先ＩＫ
 
 		BoneNameTable.emplace(HexToWstr({ 0x9153, 0x82c4, 0x82cc, 0x9065 }), animation::EHumanoidBones::AllParent); // 全ての親
 		BoneNameTable.emplace(HexToWstr({ 0x835a, 0x8393, 0x835e, 0x815b }), animation::EHumanoidBones::Center); // センター
@@ -247,57 +249,57 @@ namespace animation
 		//BoneNameTable.emplace(HexToWstr({}), animation::EHumanoidBones::UpperChest);
 		BoneNameTable.emplace(HexToWstr({ 0x8ef1 }), animation::EHumanoidBones::Neck); // 首
 		BoneNameTable.emplace(HexToWstr({ 0x93aa }), animation::EHumanoidBones::Head); // 頭
-		BoneNameTable.emplace(HexToWstr({ 0x8db6, 0x96da }), animation::EHumanoidBones::LeftEye); // 左目
-		BoneNameTable.emplace(HexToWstr({ 0x8945, 0x96da }), animation::EHumanoidBones::RightEye); // 右目
+		BoneNameTable.emplace(HexToWstr({ 0x8db6, 0x96da }), animation::EHumanoidBones::RightEye); // 左目
+		BoneNameTable.emplace(HexToWstr({ 0x8945, 0x96da }), animation::EHumanoidBones::LeftEye); // 右目
 		//BoneNameTable.emplace(HexToWstr({}), animation::EHumanoidBones::Jaw);
-		BoneNameTable.emplace(HexToWstr({ 0x8db6, 0x8ca8 }), animation::EHumanoidBones::LeftShoulder); // 左肩
-		BoneNameTable.emplace(HexToWstr({ 0x8db6, 0x9872 }), animation::EHumanoidBones::LeftUpperArm); // 左腕
-		BoneNameTable.emplace(HexToWstr({ 0x8db6, 0x82d0, 0x82b6 }), animation::EHumanoidBones::LeftLowerArm); // 左ひじ
-		BoneNameTable.emplace(HexToWstr({ 0x8db6, 0x8ee8, 0x8ef1 }), animation::EHumanoidBones::LeftHand); // 左手首
-		BoneNameTable.emplace(HexToWstr({ 0x8945, 0x8ca8 }), animation::EHumanoidBones::RightShoulder); // 右肩
-		BoneNameTable.emplace(HexToWstr({ 0x8945, 0x9872 }), animation::EHumanoidBones::RightUpperArm); // 右腕
-		BoneNameTable.emplace(HexToWstr({ 0x8945, 0x82d0, 0x82b6 }), animation::EHumanoidBones::RightLowerArm); // 右ひじ
-		BoneNameTable.emplace(HexToWstr({ 0x8945, 0x8ee8, 0x8ef1 }), animation::EHumanoidBones::RightHand); // 右手首
-		BoneNameTable.emplace(HexToWstr({ 0x8db6, 0x91ab }), animation::EHumanoidBones::LeftUpperLeg); // 左足
-		BoneNameTable.emplace(HexToWstr({ 0x8db6, 0x82d0, 0x82b4 }), animation::EHumanoidBones::LeftLowerLeg); // 左ひざ
-		BoneNameTable.emplace(HexToWstr({ 0x8db6, 0x91ab, 0x8ef1 }), animation::EHumanoidBones::LeftFoot); // 左足首
-		BoneNameTable.emplace(HexToWstr({ 0x8db6, 0x82c2, 0x82dc, 0x90e6 }), animation::EHumanoidBones::LeftToes); // 左つま先
-		BoneNameTable.emplace(HexToWstr({ 0x8945, 0x91ab }), animation::EHumanoidBones::RightUpperLeg); // 右足
-		BoneNameTable.emplace(HexToWstr({ 0x8945, 0x82d0, 0x82b4 }), animation::EHumanoidBones::RightLowerLeg); // 右ひざ
-		BoneNameTable.emplace(HexToWstr({ 0x8945, 0x91ab, 0x8ef1 }), animation::EHumanoidBones::RightFoot); // 右足首
-		BoneNameTable.emplace(HexToWstr({ 0x8945, 0x82c2, 0x82dc, 0x90e6 }), animation::EHumanoidBones::RightToes); // 右つま先
+		BoneNameTable.emplace(HexToWstr({ 0x8db6, 0x8ca8 }), animation::EHumanoidBones::RightShoulder); // 左肩
+		BoneNameTable.emplace(HexToWstr({ 0x8db6, 0x9872 }), animation::EHumanoidBones::RightUpperArm); // 左腕
+		BoneNameTable.emplace(HexToWstr({ 0x8db6, 0x82d0, 0x82b6 }), animation::EHumanoidBones::RightLowerArm); // 左ひじ
+		BoneNameTable.emplace(HexToWstr({ 0x8db6, 0x8ee8, 0x8ef1 }), animation::EHumanoidBones::RightHand); // 左手首
+		BoneNameTable.emplace(HexToWstr({ 0x8945, 0x8ca8 }), animation::EHumanoidBones::LeftShoulder); // 右肩
+		BoneNameTable.emplace(HexToWstr({ 0x8945, 0x9872 }), animation::EHumanoidBones::LeftUpperArm); // 右腕
+		BoneNameTable.emplace(HexToWstr({ 0x8945, 0x82d0, 0x82b6 }), animation::EHumanoidBones::LeftLowerArm); // 右ひじ
+		BoneNameTable.emplace(HexToWstr({ 0x8945, 0x8ee8, 0x8ef1 }), animation::EHumanoidBones::LeftHand); // 右手首
+		BoneNameTable.emplace(HexToWstr({ 0x8db6, 0x91ab }), animation::EHumanoidBones::RightUpperLeg); // 左足
+		BoneNameTable.emplace(HexToWstr({ 0x8db6, 0x82d0, 0x82b4 }), animation::EHumanoidBones::RightLowerLeg); // 左ひざ
+		BoneNameTable.emplace(HexToWstr({ 0x8db6, 0x91ab, 0x8ef1 }), animation::EHumanoidBones::RightFoot); // 左足首
+		BoneNameTable.emplace(HexToWstr({ 0x8db6, 0x82c2, 0x82dc, 0x90e6 }), animation::EHumanoidBones::RightToes); // 左つま先
+		BoneNameTable.emplace(HexToWstr({ 0x8945, 0x91ab }), animation::EHumanoidBones::LeftUpperLeg); // 右足
+		BoneNameTable.emplace(HexToWstr({ 0x8945, 0x82d0, 0x82b4 }), animation::EHumanoidBones::LeftLowerLeg); // 右ひざ
+		BoneNameTable.emplace(HexToWstr({ 0x8945, 0x91ab, 0x8ef1 }), animation::EHumanoidBones::LeftFoot); // 右足首
+		BoneNameTable.emplace(HexToWstr({ 0x8945, 0x82c2, 0x82dc, 0x90e6 }), animation::EHumanoidBones::LeftToes); // 右つま先
 
 		// 手の指のボーン。足のボーンは一般的にはないらしい(まぁ使う場面限られてるよね)
-		BoneNameTable.emplace(HexToWstr({ 0x8db6, 0x9065, 0x8e77, 0x824f }), animation::EHumanoidBones::LeftThumbProximal); // 左親指０
-		BoneNameTable.emplace(HexToWstr({ 0x8db6, 0x9065, 0x8e77, 0x8250 }), animation::EHumanoidBones::LeftThumbIntermediate); // 左親指１
-		BoneNameTable.emplace(HexToWstr({ 0x8db6, 0x9065, 0x8e77, 0x8251 }), animation::EHumanoidBones::LeftThumbDistal); // 左親指２
-		BoneNameTable.emplace(HexToWstr({ 0x8db6, 0x906c, 0x8e77, 0x8250 }), animation::EHumanoidBones::LeftIndexProximal); // 左人指１
-		BoneNameTable.emplace(HexToWstr({ 0x8db6, 0x906c, 0x8e77, 0x8251 }), animation::EHumanoidBones::LeftIndexIntermediate); // 左人指２
-		BoneNameTable.emplace(HexToWstr({ 0x8db6, 0x906c, 0x8e77, 0x8252 }), animation::EHumanoidBones::LeftIndexDistal); // 左人指３
-		BoneNameTable.emplace(HexToWstr({ 0x8db6, 0x9286, 0x8e77, 0x8250 }), animation::EHumanoidBones::LeftMiddleProximal); // 左中指１
-		BoneNameTable.emplace(HexToWstr({ 0x8db6, 0x9286, 0x8e77, 0x8251 }), animation::EHumanoidBones::LeftMiddleIntermediate); // 左中指２
-		BoneNameTable.emplace(HexToWstr({ 0x8db6, 0x9286, 0x8e77, 0x8252 }), animation::EHumanoidBones::LeftMiddleDistal); // 左中指３
-		BoneNameTable.emplace(HexToWstr({ 0x8db6, 0x96f2, 0x8e77, 0x8250 }), animation::EHumanoidBones::LeftRingProximal); // 左薬指１
-		BoneNameTable.emplace(HexToWstr({ 0x8db6, 0x96f2, 0x8e77, 0x8251 }), animation::EHumanoidBones::LeftRingIntermediate); // 左薬指２
-		BoneNameTable.emplace(HexToWstr({ 0x8db6, 0x96f2, 0x8e77, 0x8252 }), animation::EHumanoidBones::LeftRingDistal); // 左薬指３
-		BoneNameTable.emplace(HexToWstr({ 0x8db6, 0x8fac, 0x8e77, 0x8250 }), animation::EHumanoidBones::LeftLittleProximal); // 左小指１
-		BoneNameTable.emplace(HexToWstr({ 0x8db6, 0x8fac, 0x8e77, 0x8251 }), animation::EHumanoidBones::LeftLittleIntermediate); // 左小指２
-		BoneNameTable.emplace(HexToWstr({ 0x8db6, 0x8fac, 0x8e77, 0x8252 }), animation::EHumanoidBones::LeftLittleDistal); // 左小指３
-		BoneNameTable.emplace(HexToWstr({ 0x8945, 0x9065, 0x8e77, 0x3000 }), animation::EHumanoidBones::RightThumbProximal); // 右親指0
-		BoneNameTable.emplace(HexToWstr({ 0x8945, 0x9065, 0x8e77, 0x8250 }), animation::EHumanoidBones::RightThumbIntermediate); // 右親指１
-		BoneNameTable.emplace(HexToWstr({ 0x8945, 0x9065, 0x8e77, 0x8251 }), animation::EHumanoidBones::RightThumbDistal); // 右親指２
-		BoneNameTable.emplace(HexToWstr({ 0x8945, 0x906c, 0x8e77, 0x8250 }), animation::EHumanoidBones::RightIndexProximal); // 右人指１
-		BoneNameTable.emplace(HexToWstr({ 0x8945, 0x906c, 0x8e77, 0x8251 }), animation::EHumanoidBones::RightIndexIntermediate); // 右人指２
-		BoneNameTable.emplace(HexToWstr({ 0x8945, 0x906c, 0x8e77, 0x8252 }), animation::EHumanoidBones::RightIndexDistal); // 右人指３
-		BoneNameTable.emplace(HexToWstr({ 0x8945, 0x9286, 0x8e77, 0x8250 }), animation::EHumanoidBones::RightMiddleProximal); // 右中指１
-		BoneNameTable.emplace(HexToWstr({ 0x8945, 0x9286, 0x8e77, 0x8251 }), animation::EHumanoidBones::RightMiddleIntermediate); // 右中指２
-		BoneNameTable.emplace(HexToWstr({ 0x8945, 0x9286, 0x8e77, 0x8252 }), animation::EHumanoidBones::RightMiddleDistal); // 右中指３
-		BoneNameTable.emplace(HexToWstr({ 0x8945, 0x96f2, 0x8e77, 0x8250 }), animation::EHumanoidBones::RightRingProximal); // 右薬指１
-		BoneNameTable.emplace(HexToWstr({ 0x8945, 0x96f2, 0x8e77, 0x8251 }), animation::EHumanoidBones::RightRingIntermediate); // 右薬指２
-		BoneNameTable.emplace(HexToWstr({ 0x8945, 0x96f2, 0x8e77, 0x8252 }), animation::EHumanoidBones::RightRingDistal); // 右薬指３
-		BoneNameTable.emplace(HexToWstr({ 0x8945, 0x8fac, 0x8e77, 0x8250 }), animation::EHumanoidBones::RightLittleProximal); // 右小指１
-		BoneNameTable.emplace(HexToWstr({ 0x8945, 0x8fac, 0x8e77, 0x8251 }), animation::EHumanoidBones::RightLittleIntermediate); // 右小指２
-		BoneNameTable.emplace(HexToWstr({ 0x8945, 0x8fac, 0x8e77, 0x8252 }), animation::EHumanoidBones::RightLittleDistal); // 右小指３
+		BoneNameTable.emplace(HexToWstr({ 0x8db6, 0x9065, 0x8e77, 0x824f }), animation::EHumanoidBones::RightThumbProximal); // 左親指０
+		BoneNameTable.emplace(HexToWstr({ 0x8db6, 0x9065, 0x8e77, 0x8250 }), animation::EHumanoidBones::RightThumbIntermediate); // 左親指１
+		BoneNameTable.emplace(HexToWstr({ 0x8db6, 0x9065, 0x8e77, 0x8251 }), animation::EHumanoidBones::RightThumbDistal); // 左親指２
+		BoneNameTable.emplace(HexToWstr({ 0x8db6, 0x906c, 0x8e77, 0x8250 }), animation::EHumanoidBones::RightIndexProximal); // 左人指１
+		BoneNameTable.emplace(HexToWstr({ 0x8db6, 0x906c, 0x8e77, 0x8251 }), animation::EHumanoidBones::RightIndexIntermediate); // 左人指２
+		BoneNameTable.emplace(HexToWstr({ 0x8db6, 0x906c, 0x8e77, 0x8252 }), animation::EHumanoidBones::RightIndexDistal); // 左人指３
+		BoneNameTable.emplace(HexToWstr({ 0x8db6, 0x9286, 0x8e77, 0x8250 }), animation::EHumanoidBones::RightMiddleProximal); // 左中指１
+		BoneNameTable.emplace(HexToWstr({ 0x8db6, 0x9286, 0x8e77, 0x8251 }), animation::EHumanoidBones::RightMiddleIntermediate); // 左中指２
+		BoneNameTable.emplace(HexToWstr({ 0x8db6, 0x9286, 0x8e77, 0x8252 }), animation::EHumanoidBones::RightMiddleDistal); // 左中指３
+		BoneNameTable.emplace(HexToWstr({ 0x8db6, 0x96f2, 0x8e77, 0x8250 }), animation::EHumanoidBones::RightRingProximal); // 左薬指１
+		BoneNameTable.emplace(HexToWstr({ 0x8db6, 0x96f2, 0x8e77, 0x8251 }), animation::EHumanoidBones::RightRingIntermediate); // 左薬指２
+		BoneNameTable.emplace(HexToWstr({ 0x8db6, 0x96f2, 0x8e77, 0x8252 }), animation::EHumanoidBones::RightRingDistal); // 左薬指３
+		BoneNameTable.emplace(HexToWstr({ 0x8db6, 0x8fac, 0x8e77, 0x8250 }), animation::EHumanoidBones::RightLittleProximal); // 左小指１
+		BoneNameTable.emplace(HexToWstr({ 0x8db6, 0x8fac, 0x8e77, 0x8251 }), animation::EHumanoidBones::RightLittleIntermediate); // 左小指２
+		BoneNameTable.emplace(HexToWstr({ 0x8db6, 0x8fac, 0x8e77, 0x8252 }), animation::EHumanoidBones::RightLittleDistal); // 左小指３
+		BoneNameTable.emplace(HexToWstr({ 0x8945, 0x9065, 0x8e77, 0x3000 }), animation::EHumanoidBones::LeftThumbProximal); // 右親指0
+		BoneNameTable.emplace(HexToWstr({ 0x8945, 0x9065, 0x8e77, 0x8250 }), animation::EHumanoidBones::LeftThumbIntermediate); // 右親指１
+		BoneNameTable.emplace(HexToWstr({ 0x8945, 0x9065, 0x8e77, 0x8251 }), animation::EHumanoidBones::LeftThumbDistal); // 右親指２
+		BoneNameTable.emplace(HexToWstr({ 0x8945, 0x906c, 0x8e77, 0x8250 }), animation::EHumanoidBones::LeftIndexProximal); // 右人指１
+		BoneNameTable.emplace(HexToWstr({ 0x8945, 0x906c, 0x8e77, 0x8251 }), animation::EHumanoidBones::LeftIndexIntermediate); // 右人指２
+		BoneNameTable.emplace(HexToWstr({ 0x8945, 0x906c, 0x8e77, 0x8252 }), animation::EHumanoidBones::LeftIndexDistal); // 右人指３
+		BoneNameTable.emplace(HexToWstr({ 0x8945, 0x9286, 0x8e77, 0x8250 }), animation::EHumanoidBones::LeftMiddleProximal); // 右中指１
+		BoneNameTable.emplace(HexToWstr({ 0x8945, 0x9286, 0x8e77, 0x8251 }), animation::EHumanoidBones::LeftMiddleIntermediate); // 右中指２
+		BoneNameTable.emplace(HexToWstr({ 0x8945, 0x9286, 0x8e77, 0x8252 }), animation::EHumanoidBones::LeftMiddleDistal); // 右中指３
+		BoneNameTable.emplace(HexToWstr({ 0x8945, 0x96f2, 0x8e77, 0x8250 }), animation::EHumanoidBones::LeftRingProximal); // 右薬指１
+		BoneNameTable.emplace(HexToWstr({ 0x8945, 0x96f2, 0x8e77, 0x8251 }), animation::EHumanoidBones::LeftRingIntermediate); // 右薬指２
+		BoneNameTable.emplace(HexToWstr({ 0x8945, 0x96f2, 0x8e77, 0x8252 }), animation::EHumanoidBones::LeftRingDistal); // 右薬指３
+		BoneNameTable.emplace(HexToWstr({ 0x8945, 0x8fac, 0x8e77, 0x8250 }), animation::EHumanoidBones::LeftLittleProximal); // 右小指１
+		BoneNameTable.emplace(HexToWstr({ 0x8945, 0x8fac, 0x8e77, 0x8251 }), animation::EHumanoidBones::LeftLittleIntermediate); // 右小指２
+		BoneNameTable.emplace(HexToWstr({ 0x8945, 0x8fac, 0x8e77, 0x8252 }), animation::EHumanoidBones::LeftLittleDistal); // 右小指３
 
 		m_TableListU16.emplace(EBonePattern::VMD, BoneNameTable);
 	}
