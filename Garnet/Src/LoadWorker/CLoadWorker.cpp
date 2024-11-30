@@ -29,7 +29,7 @@ namespace resource
 		std::shared_ptr<graphics::CMaterialCreateInfo> createInfo = std::make_shared<graphics::CMaterialCreateInfo>();
 		createInfo->SetVertexShaderCode(m_VertexShader->GetData());
 		createInfo->SetFragmentShaderCode(m_FragmentShader->GetData());
-		auto Material = pGraphicsAPI->CreateMaterial(createInfo, 1, graphics::ECullMode::CULL_BACK);
+		auto Material = pGraphicsAPI->CreateMaterial(createInfo, 1, graphics::ECullMode::CULL_NONE);
 
 		auto UniforBuffer = createInfo->CreateUniformBuffer("UniformBufferObject", {graphics::SBindingLayout("UniformBufferObject", 0, false)});
 		UniforBuffer->AddData("rate", graphics::EUniformValueType::VALUE_TYPE_FLOAT, &glm::vec1(0.0f)[0], sizeof(glm::vec1), 0, graphics::SUniformValueInput{});
@@ -40,7 +40,6 @@ namespace resource
 		Material->AddShaderBuffer(UniforBuffer);
 
 		Material->SetDepthFunc(graphics::EDepthFunc::Always);
-		Material->SetCullMode(graphics::ECullMode::CULL_NONE);
 
 		// CreateŠÖ”‚ðŽÀs
 		if (!m_LoadingBar->CreatePresetSimply(pGraphicsAPI, nullptr, graphics::CPresetPrimitive::CreateBoard(pGraphicsAPI), graphics::EPresetPrimitiveType::BOARD, Material, nullptr)) return false;
