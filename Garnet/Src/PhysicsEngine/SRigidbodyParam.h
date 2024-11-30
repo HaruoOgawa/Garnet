@@ -12,9 +12,6 @@ namespace physics
 		std::pair<std::string, std::wstring> RigidbodyName = { "", L"" };
 		EPhysicsType PhysicsType = EPhysicsType::STATIC;
 
-		glm::vec3 InitWorldPos = glm::vec3(0.0f);
-		glm::vec3 InitWorldRotate = glm::vec3(0.0f);
-
 		bool UseCollideMask = false;
 
 		// CollideMask‚Í0ˆÈŠO‚Å‚ ‚é•K—v‚ª‚ ‚é

@@ -150,7 +150,7 @@ namespace resource
 			const auto objects = SceneJSON.find("objects");
 			if (objects != SceneJSON.end() && objects->is_array())
 			{
-				if (!AnalyseObjects(objects, pGraphicsAPI, pLoadWorker, pApp)) return false;
+				if (!AnalyseObjects(objects, pGraphicsAPI, pPhysicsEngine, pLoadWorker, pApp)) return false;
 			}
 		}
 
@@ -399,7 +399,7 @@ namespace resource
 	}
 #endif // USE_ANIMATION
 
-	bool CSceneLoader::AnalyseObjects(const json::iterator& objects, api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, app::CApp* pApp)
+	bool CSceneLoader::AnalyseObjects(const json::iterator& objects, api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, app::CApp* pApp)
 	{
 		for (json::iterator objectJSON = objects->begin(); objectJSON != objects->end(); objectJSON++)
 		{
@@ -455,7 +455,7 @@ namespace resource
 				{
 					if (!nodeJSON->is_object()) continue;
 
-					std::shared_ptr<object::CNode> Node = AnalyseNode(nodeJSON, Object, pApp);
+					std::shared_ptr<object::CNode> Node = AnalyseNode(nodeJSON, pPhysicsEngine, Object, pApp);
 					Object->AddNode(Node);
 				}
 			}
@@ -563,7 +563,7 @@ namespace resource
 		return true;
 	}
 
-	std::shared_ptr<object::CNode> CSceneLoader::AnalyseNode(const json::iterator& nodeJSON, const std::shared_ptr<object::C3DObject>& Object, app::CApp* pApp)
+	std::shared_ptr<object::CNode> CSceneLoader::AnalyseNode(const json::iterator& nodeJSON, physics::IPhysicsEngine* pPhysicsEngine, const std::shared_ptr<object::C3DObject>& Object, app::CApp* pApp)
 	{
 		std::string nodename = "";
 		GetString("name", nodename, nodeJSON);
@@ -608,6 +608,109 @@ namespace resource
 			}
 		}
 
+		// Collider
+		const auto collider = nodeJSON->find("collider");
+		std::string colliderShape = std::string();
+		std::vector<float> colliderSize;
+		if (collider != nodeJSON->end() && collider->is_object())
+		{
+			GetString("shape", colliderShape, collider);
+
+			GetArrayFloat32("size", colliderSize, collider);
+		}
+
+		// RigidBody
+		const auto rigidbody = nodeJSON->find("rigidbody");
+		if (rigidbody != nodeJSON->end() && rigidbody->is_object())
+		{
+			// 物理パラメーター
+			physics::SRigidbodyParam RBParam{};
+			
+			// mass
+			float mass = 0.0f;
+			GetFloat("mass", mass, rigidbody);
+
+			// physicstype
+			std::string PhysicsTypeStr = std::string();
+			GetString("physicstype", PhysicsTypeStr, rigidbody);
+			
+			if (PhysicsTypeStr == "static")
+			{
+				RBParam.PhysicsType = physics::EPhysicsType::STATIC;
+			}
+			else if (PhysicsTypeStr == "dynamic")
+			{
+				RBParam.PhysicsType = physics::EPhysicsType::DYNAMIC;
+			}
+			else if (PhysicsTypeStr == "dynamic_joint")
+			{
+				RBParam.PhysicsType = physics::EPhysicsType::DYNAMIC_JOINT;
+			}
+
+			// transdamping
+			float transdamping = 0.0f;
+			GetFloat("transdamping", transdamping, rigidbody);
+			RBParam.TransDamping = transdamping;
+
+			// rotatedamping
+			float rotatedamping = 0.0f;
+			GetFloat("rotatedamping", rotatedamping, rigidbody);
+			RBParam.RotateDamping = rotatedamping;
+
+			// repulsion
+			float repulsion = 0.0f;
+			GetFloat("repulsion", repulsion, rigidbody);
+			RBParam.Repulsion = repulsion;
+
+			// friction
+			float friction = 0.5f;
+			GetFloat("friction", friction, rigidbody);
+			RBParam.Friction = friction;
+
+			// 物理オブジェクトを生成
+			std::shared_ptr<physics::IPhysicsObject> PhysicsObject = nullptr;
+
+			if (colliderShape == "box")
+			{
+				glm::vec3 PhysicsSize = glm::vec3(1.0f);
+				if (colliderSize.size() == 3)
+				{
+					PhysicsSize.x = colliderSize[0] * 0.5f;
+					PhysicsSize.y = colliderSize[1] * 0.5f;
+					PhysicsSize.z = colliderSize[2] * 0.5f;
+				}
+
+				PhysicsObject = pPhysicsEngine->CreatePhysicsBox(PhysicsSize, (RBParam.PhysicsType == physics::EPhysicsType::STATIC), mass, RBParam);
+			}
+			else if (colliderShape == "sphere")
+			{
+				float PhysicsSize = 1.0f;
+				if (colliderSize.size() == 1)
+				{
+					PhysicsSize = colliderSize[0];
+				}
+
+				PhysicsObject = pPhysicsEngine->CreatePhysicsSphere(PhysicsSize, (RBParam.PhysicsType == physics::EPhysicsType::STATIC), mass, RBParam);
+			}
+			else if (colliderShape == "capsule")
+			{
+				glm::vec2 PhysicsSize = glm::vec2(1.0f);
+				if (colliderSize.size() == 2)
+				{
+					PhysicsSize.x = colliderSize[0];
+					PhysicsSize.y = colliderSize[1];
+				}
+
+				PhysicsObject = pPhysicsEngine->CreatePhysicsCapsule(PhysicsSize.x, PhysicsSize.y, (RBParam.PhysicsType == physics::EPhysicsType::STATIC), mass, RBParam);
+			}
+
+			if (PhysicsObject)
+			{
+				Node->AddPhysicsObject(PhysicsObject);
+			}
+		}
+
+		//
 		Node->SetEnabled(enable);
 		Node->SetName(nodename);
 		Node->SetLocalTransform(Transform);
