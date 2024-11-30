@@ -1,7 +1,5 @@
 # Garnet 3D Engine
 ## Dependencies
-* nuget packages
-  * [tbb](https://github.com/oneapi-src/oneTBB) 
 * [naga](https://github.com/gfx-rs/naga)
   * Convert SPIR-V to WGSL
 * [VSYASM](https://github.com/ShiftMediaProject/VSYASM)
