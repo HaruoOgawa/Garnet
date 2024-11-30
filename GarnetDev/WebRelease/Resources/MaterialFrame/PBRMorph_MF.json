@@ -193,7 +193,7 @@
               "name": "r_SkinMatrixBuffer",
               "type": "mat4_array",
               "useInitValue": false,
-              "arraySize": 512
+              "arraySize": 1024
             }
           ]
         }

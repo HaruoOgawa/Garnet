@@ -89,8 +89,16 @@ def Make():
 	    #
 		exportText += "call echo [%d/%d] %s" % (counter + 1, len(pathList), path) + "\n"
 		
+		# コード最適化オプション
+		opt = ""
+		if(path.find("CWebGPURenderer.cpp") != -1):
+			# blendstate.colorが設定されていないエラーが出るのでCWebGPURendererでは無効にする
+			pass
+		else:
+			opt = " -O3"
+
 		#
-		exportText += "call emcc -O3 --no-heap-copy -c " + path + " -o " + dstPath + str(counter) + ".o "
+		exportText += "call emcc" + opt + " --no-heap-copy -c " + path + " -o " + dstPath + str(counter) + ".o "
 		
 		# Include Dir
 		for inc in IncludeDirectoryList:
@@ -115,7 +123,8 @@ def Make():
 		exportText += o + " "
 
 	# Compile Options
-	exportText += "-sEXPORTED_RUNTIME_METHODS=ccall,UTF8ToString,UTF16ToString "
+	exportText += "-sEXPORTED_RUNTIME_METHODS=ccall,UTF8ToString,UTF16ToString,setValue "
+	exportText += "-sEXPORTED_FUNCTIONS=_main,_malloc,_free "
 	exportText += "-sUSE_WEBGPU=1 "
 	exportText += "-sALLOW_MEMORY_GROWTH "
 	exportText += "-sFETCH "

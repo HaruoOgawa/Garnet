@@ -244,8 +244,8 @@ namespace api
 				blendState.color.dstFactor = WGPUBlendFactor_OneMinusSrcAlpha;
 				blendState.color.operation = WGPUBlendOperation_Add;
 
-				blendState.alpha.srcFactor = WGPUBlendFactor_One;
-				blendState.alpha.dstFactor = WGPUBlendFactor_Zero;
+				blendState.alpha.srcFactor = WGPUBlendFactor_SrcAlpha;
+				blendState.alpha.dstFactor = WGPUBlendFactor_OneMinusSrcAlpha;
 				blendState.alpha.operation = WGPUBlendOperation_Add;
 
 				break;

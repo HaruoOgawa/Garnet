@@ -148,6 +148,11 @@ namespace mmd
 			Rot.y = Analyser.GetFloat();
 			Rot.z = Analyser.GetFloat();
 			Rot.w = Analyser.GetFloat();
+			
+			// VMDは鏡反転になっているので補正する
+			Pos.x *= -1.0f;
+			Rot.x *= -1.0f;
+			Rot.w *= -1.0f;
 
 			// 補完パラメーター(ベジュ曲線に使用する) - Interpolation Params
 			if (!Analyser.IsValid(4 * 4 * 4)) return false;

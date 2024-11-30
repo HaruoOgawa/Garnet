@@ -55,7 +55,7 @@ layout(binding = 0) uniform MorphUniformBufferObject{
 
 layout(binding = 1) uniform SkinMatrixBuffer
 {
-    mat4 SkinMat[512];
+    mat4 SkinMat[1024];
 } r_SkinMatrixBuffer;
 
 layout(location = 0) out vec3 f_WorldNormal;
