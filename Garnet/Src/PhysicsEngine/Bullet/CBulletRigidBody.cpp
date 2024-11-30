@@ -4,14 +4,14 @@
 
 namespace physics
 {
-	CBulletRigidBody::CBulletRigidBody(btDiscreteDynamicsWorld* pDynamicWorld, btCollisionShape* pCollisionShape, const glm::vec3& WorldPos, const glm::quat& WorldRotate, bool IsKinematic, float Mass, const SRigidbodyParam& RBParam):
+	CBulletRigidBody::CBulletRigidBody(btDiscreteDynamicsWorld* pDynamicWorld, btCollisionShape* pCollisionShape, const glm::vec3& WorldPos, const glm::quat& WorldRotate, bool IsKinematic, const SRigidbodyParam& RBParam):
 		m_RBParam(RBParam),
 		m_pDynamicWorld(pDynamicWorld),
 		m_MotionState(nullptr),
 		m_Rigidbody(nullptr),
 		m_JointType(EJointType::NONE)
 	{
-		Create(pDynamicWorld, pCollisionShape, WorldPos, WorldRotate, IsKinematic, Mass, RBParam);
+		Create(pDynamicWorld, pCollisionShape, WorldPos, WorldRotate, IsKinematic, RBParam);
 	}
 
 	CBulletRigidBody::~CBulletRigidBody()
@@ -46,7 +46,7 @@ namespace physics
 		return m_RBParam;
 	}
 
-	bool CBulletRigidBody::Create(btDiscreteDynamicsWorld* pDynamicWorld, btCollisionShape* pCollisionShape, const glm::vec3& WorldPos, const glm::quat& WorldRotate, bool IsKinematic, float Mass, const SRigidbodyParam& RBParam)
+	bool CBulletRigidBody::Create(btDiscreteDynamicsWorld* pDynamicWorld, btCollisionShape* pCollisionShape, const glm::vec3& WorldPos, const glm::quat& WorldRotate, bool IsKinematic, const SRigidbodyParam& RBParam)
 	{
 		// Transform
 		btTransform transform;
@@ -59,7 +59,7 @@ namespace physics
 
 		if (RBParam.PhysicsType != EPhysicsType::STATIC)
 		{
-			bodyMass = Mass;
+			bodyMass = RBParam.Mass;
 		}
 
 		// InertiaÇÕäµê´ÇÃà”ñ°

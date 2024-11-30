@@ -629,6 +629,7 @@ namespace resource
 			// mass
 			float mass = 0.0f;
 			GetFloat("mass", mass, rigidbody);
+			RBParam.Mass = mass;
 
 			// physicstype
 			std::string PhysicsTypeStr = std::string();
@@ -680,7 +681,7 @@ namespace resource
 					PhysicsSize.z = colliderSize[2] * 0.5f;
 				}
 
-				PhysicsObject = pPhysicsEngine->CreatePhysicsBox(PhysicsSize, (RBParam.PhysicsType == physics::EPhysicsType::STATIC), mass, RBParam);
+				PhysicsObject = pPhysicsEngine->CreatePhysicsBox(PhysicsSize, (RBParam.PhysicsType == physics::EPhysicsType::STATIC), RBParam);
 			}
 			else if (colliderShape == "sphere")
 			{
@@ -690,7 +691,7 @@ namespace resource
 					PhysicsSize = colliderSize[0];
 				}
 
-				PhysicsObject = pPhysicsEngine->CreatePhysicsSphere(PhysicsSize, (RBParam.PhysicsType == physics::EPhysicsType::STATIC), mass, RBParam);
+				PhysicsObject = pPhysicsEngine->CreatePhysicsSphere(PhysicsSize, (RBParam.PhysicsType == physics::EPhysicsType::STATIC), RBParam);
 			}
 			else if (colliderShape == "capsule")
 			{
@@ -701,7 +702,7 @@ namespace resource
 					PhysicsSize.y = colliderSize[1];
 				}
 
-				PhysicsObject = pPhysicsEngine->CreatePhysicsCapsule(PhysicsSize.x, PhysicsSize.y, (RBParam.PhysicsType == physics::EPhysicsType::STATIC), mass, RBParam);
+				PhysicsObject = pPhysicsEngine->CreatePhysicsCapsule(PhysicsSize.x, PhysicsSize.y, (RBParam.PhysicsType == physics::EPhysicsType::STATIC), RBParam);
 			}
 
 			if (PhysicsObject)

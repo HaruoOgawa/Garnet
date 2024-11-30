@@ -12,6 +12,8 @@ namespace physics
 		std::pair<std::string, std::wstring> RigidbodyName = { "", L"" };
 		EPhysicsType PhysicsType = EPhysicsType::STATIC;
 
+		float Mass = 1.0f;
+
 		bool UseCollideMask = false;
 
 		// CollideMask‚Í0ˆÈŠO‚Å‚ ‚é•K—v‚ª‚ ‚é

@@ -25,17 +25,17 @@ namespace physics
 		return true;
 	}
 
-	std::shared_ptr<IPhysicsObject> CDummyPhysicsEngine::CreatePhysicsBox(const glm::vec3& BoxHalfSize, bool Kinematic, float Mass, const SRigidbodyParam& RBParam)
+	std::shared_ptr<IPhysicsObject> CDummyPhysicsEngine::CreatePhysicsBox(const glm::vec3& BoxHalfSize, bool Kinematic, const SRigidbodyParam& RBParam)
 	{
 		return nullptr;
 	}
 
-	std::shared_ptr<IPhysicsObject> CDummyPhysicsEngine::CreatePhysicsSphere(float Radius, bool Kinematic, float Mass, const SRigidbodyParam& RBParam)
+	std::shared_ptr<IPhysicsObject> CDummyPhysicsEngine::CreatePhysicsSphere(float Radius, bool Kinematic, const SRigidbodyParam& RBParam)
 	{
 		return nullptr;
 	}
 
-	std::shared_ptr<IPhysicsObject> CDummyPhysicsEngine::CreatePhysicsCapsule(float Radius, float Height, bool Kinematic, float Mass, const SRigidbodyParam& RBParam)
+	std::shared_ptr<IPhysicsObject> CDummyPhysicsEngine::CreatePhysicsCapsule(float Radius, float Height, bool Kinematic, const SRigidbodyParam& RBParam)
 	{
 		return nullptr;
 	}

@@ -41,15 +41,6 @@
             "nodes": [
                 {
                     "name": "GroundNode",
-                    "collider":{
-                        "shape":"box",
-                        "size":[10.0, 0.1, 10.0]
-                    },
-                    "rigidbody":{
-                        
-                        "mass":0.0,
-                        "physicstype":"static"
-                    },
                     "transform": {
                         "pos": [
                             0.0,
@@ -68,6 +59,22 @@
                         ]
                     },
                     "enable": true,
+                    "collider": {
+                        "shape": "box",
+                        "size": [
+                            10.0,
+                            0.10000000149011612,
+                            10.0
+                        ]
+                    },
+                    "rigidbody": {
+                        "mass": 0.0,
+                        "physicstype": "static",
+                        "transdamping": 0.0,
+                        "rotatedamping": 0.0,
+                        "repulsion": 0.0,
+                        "friction": 0.5
+                    },
                     "meshindex": 0
                 }
             ],
@@ -144,19 +151,6 @@
             "nodes": [
                 {
                     "name": "TestBox",
-                    "collider":{
-                        "shape":"box",
-                        "size":[1.0, 1.0, 1.0]
-                    },
-                    "rigidbody":{
-                        
-                        "mass": 1.0,
-                        "physicstype":"dynamic",
-                        "transdamping" : 0.0,
-                        "rotatedamping" : 0.0,
-                        "repulsion" : 0.0,
-                        "friction" : 0.5
-                    },
                     "transform": {
                         "pos": [
                             0.0,
@@ -175,6 +169,22 @@
                         ]
                     },
                     "enable": true,
+                    "collider": {
+                        "shape": "box",
+                        "size": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ]
+                    },
+                    "rigidbody": {
+                        "mass": 1.0,
+                        "physicstype": "dynamic",
+                        "transdamping": 0.0,
+                        "rotatedamping": 0.0,
+                        "repulsion": 0.0,
+                        "friction": 0.5
+                    },
                     "meshindex": 0
                 }
             ],

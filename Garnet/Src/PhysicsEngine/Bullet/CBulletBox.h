@@ -9,7 +9,7 @@ namespace physics
 	{
 		const glm::vec3 m_BoxHalfSize;
 	public:
-		CBulletBox(const glm::vec3& BoxHalfSize, bool Kinematic, float Mass, const SRigidbodyParam& RBParam);
+		CBulletBox(const glm::vec3& BoxHalfSize, bool Kinematic, const SRigidbodyParam& RBParam);
 		virtual ~CBulletBox();
 
 		virtual bool Create(IPhysicsEngine* pPhysicsEngine, const glm::vec3& WorldPos, const glm::quat& WorldRotate, const glm::vec3& WorldScale) override;

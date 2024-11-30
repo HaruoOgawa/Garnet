@@ -413,8 +413,70 @@ namespace scene
 			// enable
 			if (TrackNameList.find("EnabledFlag") == TrackNameList.end()) node["enable"] = Node->IsEnabled();
 
+			// 物理演算
+			if (!Node->GetPhysicsObjectList().empty())
+			{
+				const auto& PhysicsObject = Node->GetPhysicsObjectList()[0];
+				const auto& RBParam = PhysicsObject->GetRbParam();
+				
+				std::string PhysicsTypeStr = std::string();
+				switch (RBParam.PhysicsType)
+				{
+				case physics::EPhysicsType::STATIC:
+					PhysicsTypeStr = "static";
+					break;
+
+				case physics::EPhysicsType::DYNAMIC:
+					PhysicsTypeStr = "dynamic";
+					break;
+
+				case physics::EPhysicsType::DYNAMIC_JOINT:
+					PhysicsTypeStr = "dynamic_joint";
+					break;
+				default:
+					break;
+				}
+
+				// Collider(物理用途以外のコライダーが増えたら分離するかも)
+				{
+					std::string PhysicsShapeStr = std::string();
+					switch (PhysicsObject->GetPhysicsShape())
+					{
+					case physics::EPhysicsShape::BOX:
+						PhysicsShapeStr = "box";
+						break;
+
+					case physics::EPhysicsShape::SPHERE:
+						PhysicsShapeStr = "sphere";
+						break;
+
+					case physics::EPhysicsShape::CAPSULE:
+						PhysicsShapeStr = "capsule";
+						break;
+
+					default:
+						break;
+					}
+
+					const auto& Size = PhysicsObject->GetSize();
+
+					node["collider"]["shape"] = PhysicsShapeStr;
+					node["collider"]["size"] = { Size.x * 2.0f, Size.y * 2.0f, Size.z * 2.0f };
+				}
+
+				// RigidBody
+				node["rigidbody"]["mass"] = RBParam.Mass;
+				node["rigidbody"]["physicstype"] = PhysicsTypeStr;
+				node["rigidbody"]["transdamping"] = RBParam.TransDamping;
+				node["rigidbody"]["rotatedamping"] = RBParam.RotateDamping;
+				node["rigidbody"]["repulsion"] = RBParam.Repulsion;
+				node["rigidbody"]["friction"] = RBParam.Friction;
+			}
+
+			//
 			node["meshindex"] = Node->GetMeshIndex();
 
+			//
 			for (int ChildIndex : Node->GetChildrenNodeIndexList())
 			{
 				node["children"].push_back(ChildIndex);

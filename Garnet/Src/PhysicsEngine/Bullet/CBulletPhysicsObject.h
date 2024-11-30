@@ -29,16 +29,17 @@ namespace physics
 	{
 	protected:
 		const bool m_Kinematic;
-		const float m_Mass;
 		const SRigidbodyParam m_RBParam;
 
 		std::shared_ptr<btCollisionShape> m_CollisionShape;
 		std::shared_ptr<CBulletRigidBody> m_RigidBody;
 
+		const EPhysicsShape m_PhysicsShape;
+
 		// Constraint
 		std::vector<std::shared_ptr<SConstraintData>> m_ConstraintList;
 	public:
-		CBulletPhysicsObject(bool Kinematic, float Mass, const SRigidbodyParam& RBParam);
+		CBulletPhysicsObject(bool Kinematic, const SRigidbodyParam& RBParam, EPhysicsShape PhysicsShape);
 		virtual ~CBulletPhysicsObject();
 
 		const std::shared_ptr<CBulletRigidBody>& GetRigidBody() const;
@@ -52,6 +53,8 @@ namespace physics
 		virtual bool IsDynamicJoint() override;
 
 		virtual glm::vec3 GetSize() override;
+
+		virtual EPhysicsShape GetPhysicsShape() const override;
 
 		virtual const SRigidbodyParam& GetRbParam() const override;
 
