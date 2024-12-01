@@ -458,6 +458,9 @@ namespace resource
 					std::shared_ptr<object::CNode> Node = AnalyseNode(nodeJSON, pPhysicsEngine, Object, pApp);
 					Object->AddNode(Node);
 				}
+
+				Object->ApplyDefaultLocalTransform();
+				Object->CalcWorldMatrix();
 			}
 
 			// meshs
@@ -553,6 +556,187 @@ namespace resource
 					
 					// ‰¼ŽÀ‘•
 					pLoadWorker->AddLoadResource(std::make_shared<resource::C3DObjectLoader>(filename, Object, MaterialFrame->second, defaultmaterialframe, AnimationInfo.RigType, AnimationInfo.HumanoidBoneList));
+				}
+			}
+
+			// Joints
+			const auto joints = objectJSON->find("joints");
+			if (joints != objectJSON->end() && joints->is_array())
+			{
+				const auto& NodeList = Object->GetNodeList();
+
+				for (json::iterator jointJSON = joints->begin(); jointJSON != joints->end(); jointJSON++)
+				{
+					if (!jointJSON->is_object()) continue;
+
+					physics::SJointParam JParam{};
+					physics::EJointType JointType = physics::EJointType::NONE;
+
+					// fixednode
+					int FixedNodeIndex = -1;
+					GetInt("fixednode", FixedNodeIndex, jointJSON);
+					if (FixedNodeIndex < 0 || FixedNodeIndex >= static_cast<int>(NodeList.size())) continue;
+
+					const auto& FixedNode = NodeList[FixedNodeIndex];
+					if (!FixedNode) continue;
+
+					// freenode
+					int FreeNodeIndex = -1;
+					GetInt("freenode", FreeNodeIndex, jointJSON);
+					if (FreeNodeIndex < 0 || FreeNodeIndex >= static_cast<int>(NodeList.size())) continue;
+
+					const auto& FreeNode = NodeList[FreeNodeIndex];
+					if (!FreeNode) continue;
+
+					// jointtype
+					std::string JointTypeStr = std::string();
+					GetString("jointtype", JointTypeStr, jointJSON);
+
+					if (JointTypeStr == "spring_6dof")
+					{
+						JointType = physics::EJointType::SPRING_6DOF;
+					}
+					else if (JointTypeStr == "generic_6dof")
+					{
+						JointType = physics::EJointType::Generic_6DOF;
+					}
+					else if (JointTypeStr == "p2p")
+					{
+						JointType = physics::EJointType::P2P;
+					}
+					else if (JointTypeStr == "cone_twist")
+					{
+						JointType = physics::EJointType::ConeTwist;
+					}
+					else if (JointTypeStr == "slider")
+					{
+						JointType = physics::EJointType::Slider;
+					}
+
+					// jointpos
+					std::vector<float> jointposArray;
+					GetArrayFloat32("jointpos", jointposArray, jointJSON);
+					
+					glm::vec3 jointpos = glm::vec3(0.0f);
+					if (jointposArray.size() == 3)
+					{
+						jointpos.x = jointposArray[0];
+						jointpos.y = jointposArray[1];
+						jointpos.z = jointposArray[2];
+					}
+
+					// jointpos
+					{
+						std::vector<float> jointposArray;
+						GetArrayFloat32("jointpos", jointposArray, jointJSON);
+
+						if (jointposArray.size() == 3)
+						{
+							JParam.JointPos.x = jointposArray[0];
+							JParam.JointPos.y = jointposArray[1];
+							JParam.JointPos.z = jointposArray[2];
+						}
+					}
+
+					// jointrotate
+					{
+						std::vector<float> jointrotateArray;
+						GetArrayFloat32("jointrotate", jointrotateArray, jointJSON);
+
+						if (jointrotateArray.size() == 3)
+						{
+							JParam.JointRotate.x = jointrotateArray[0];
+							JParam.JointRotate.y = jointrotateArray[1];
+							JParam.JointRotate.z = jointrotateArray[2];
+						}
+					}
+
+					// lowertranslimit
+					{
+						std::vector<float> lowertranslimitArray;
+						GetArrayFloat32("lowertranslimit", lowertranslimitArray, jointJSON);
+
+						if (lowertranslimitArray.size() == 3)
+						{
+							JParam.LowerTransLimit.x = lowertranslimitArray[0];
+							JParam.LowerTransLimit.y = lowertranslimitArray[1];
+							JParam.LowerTransLimit.z = lowertranslimitArray[2];
+						}
+					}
+
+					// uppertranslimit
+					{
+						std::vector<float> uppertranslimitArray;
+						GetArrayFloat32("uppertranslimit", uppertranslimitArray, jointJSON);
+
+						if (uppertranslimitArray.size() == 3)
+						{
+							JParam.UpperTransLimit.x = uppertranslimitArray[0];
+							JParam.UpperTransLimit.y = uppertranslimitArray[1];
+							JParam.UpperTransLimit.z = uppertranslimitArray[2];
+						}
+					}
+
+					// lowerrotatelimit
+					{
+						std::vector<float> lowerrotatelimitArray;
+						GetArrayFloat32("lowerrotatelimit", lowerrotatelimitArray, jointJSON);
+
+						if (lowerrotatelimitArray.size() == 3)
+						{
+							JParam.LowerRotateLimit.x = lowerrotatelimitArray[0];
+							JParam.LowerRotateLimit.y = lowerrotatelimitArray[1];
+							JParam.LowerRotateLimit.z = lowerrotatelimitArray[2];
+						}
+					}
+
+					// upperrotatelimit
+					{
+						std::vector<float> upperrotatelimitArray;
+						GetArrayFloat32("upperrotatelimit", upperrotatelimitArray, jointJSON);
+
+						if (upperrotatelimitArray.size() == 3)
+						{
+							JParam.UpperRotateLimit.x = upperrotatelimitArray[0];
+							JParam.UpperRotateLimit.y = upperrotatelimitArray[1];
+							JParam.UpperRotateLimit.z = upperrotatelimitArray[2];
+						}
+					}
+
+					// transspring
+					{
+						std::vector<float> transspringArray;
+						GetArrayFloat32("transspring", transspringArray, jointJSON);
+
+						if (transspringArray.size() == 3)
+						{
+							JParam.TransSpring.x = transspringArray[0];
+							JParam.TransSpring.y = transspringArray[1];
+							JParam.TransSpring.z = transspringArray[2];
+						}
+					}
+
+					// rotatespring
+					{
+						std::vector<float> rotatespringArray;
+						GetArrayFloat32("rotatespring", rotatespringArray, jointJSON);
+
+						if (rotatespringArray.size() == 3)
+						{
+							JParam.RotateSpring.x = rotatespringArray[0];
+							JParam.RotateSpring.y = rotatespringArray[1];
+							JParam.RotateSpring.z = rotatespringArray[2];
+						}
+					}
+
+					// ƒWƒ‡ƒCƒ“ƒg‚ð—\–ñ
+					if (JointType != physics::EJointType::NONE && !FixedNode->GetPhysicsObjectList().empty() && !FreeNode->GetPhysicsObjectList().empty())
+					{
+						const auto& FixedPhysicsObject = FixedNode->GetPhysicsObjectList()[0];
+						const auto& FreePhysicsObject = FreeNode->GetPhysicsObjectList()[0];
+
+						FreePhysicsObject->ReserveConstraint(FixedPhysicsObject, JointType, JParam);
+					}
 				}
 			}
 
@@ -676,9 +860,9 @@ namespace resource
 				glm::vec3 PhysicsSize = glm::vec3(1.0f);
 				if (colliderSize.size() == 3)
 				{
-					PhysicsSize.x = colliderSize[0] * 0.5f;
-					PhysicsSize.y = colliderSize[1] * 0.5f;
-					PhysicsSize.z = colliderSize[2] * 0.5f;
+					PhysicsSize.x = colliderSize[0];
+					PhysicsSize.y = colliderSize[1];
+					PhysicsSize.z = colliderSize[2];
 				}
 
 				PhysicsObject = pPhysicsEngine->CreatePhysicsBox(PhysicsSize, (RBParam.PhysicsType == physics::EPhysicsType::STATIC), RBParam);

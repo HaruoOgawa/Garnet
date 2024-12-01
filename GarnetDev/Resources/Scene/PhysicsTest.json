@@ -62,9 +62,9 @@
                     "collider": {
                         "shape": "box",
                         "size": [
-                            10.0,
-                            0.10000000149011612,
-                            10.0
+                            5.0,
+                            0.05000000074505806,
+                            5.0
                         ]
                     },
                     "rigidbody": {
@@ -127,6 +127,73 @@
             "filename": "",
             "renderpass": "MainResultPass",
             "depthpass": "",
+            "joints":[
+                {
+                    "fixednode" : 1,
+                    "freenode" : 2,
+                    "jointtype" : "spring_6dof",
+                    "jointpos" : [0.0, 5.0, 0.0],
+                    "jointrotate" : [0.0, 0.0, 0.0],
+                    "lowertranslimit" : [0.0, 0.0, 0.0],
+                    "uppertranslimit" : [0.0, 0.0, 0.0],
+                    "lowerrotatelimit" : [-6.28, -6.28, -6.28],
+                    "upperrotatelimit" : [6.28, 6.28, 6.28],
+                    "transspring" : [35.0, 35.0, 35.0],
+                    "rotatespring" : [35.0, 35.0, 35.0]
+                },
+                {
+                    "fixednode" : 2,
+                    "freenode" : 3,
+                    "jointtype" : "spring_6dof",
+                    "jointpos" : [-1.0, 5.0, 0.0],
+                    "jointrotate" : [0.0, 0.0, 0.0],
+                    "lowertranslimit" : [0.0, 0.0, 0.0],
+                    "uppertranslimit" : [0.0, 0.0, 0.0],
+                    "lowerrotatelimit" : [-6.28, -6.28, -6.28],
+                    "upperrotatelimit" : [6.28, 6.28, 6.28],
+                    "transspring" : [35.0, 35.0, 35.0],
+                    "rotatespring" : [35.0, 35.0, 35.0]
+                },
+                {
+                    "fixednode" : 3,
+                    "freenode" : 4,
+                    "jointtype" : "spring_6dof",
+                    "jointpos" : [-2.0, 5.0, 0.0],
+                    "jointrotate" : [0.0, 0.0, 0.0],
+                    "lowertranslimit" : [0.0, 0.0, 0.0],
+                    "uppertranslimit" : [0.0, 0.0, 0.0],
+                    "lowerrotatelimit" : [-6.28, -6.28, -6.28],
+                    "upperrotatelimit" : [6.28, 6.28, 6.28],
+                    "transspring" : [35.0, 35.0, 35.0],
+                    "rotatespring" : [35.0, 35.0, 35.0]
+                },
+                {
+                    "fixednode" : 4,
+                    "freenode" : 5,
+                    "jointtype" : "spring_6dof",
+                    "jointpos" : [-3.0, 5.0, 0.0],
+                    "jointrotate" : [0.0, 0.0, 0.0],
+                    "lowertranslimit" : [0.0, 0.0, 0.0],
+                    "uppertranslimit" : [0.0, 0.0, 0.0],
+                    "lowerrotatelimit" : [-6.28, -6.28, -6.28],
+                    "upperrotatelimit" : [6.28, 6.28, 6.28],
+                    "transspring" : [35.0, 35.0, 35.0],
+                    "rotatespring" : [35.0, 35.0, 35.0]
+                },
+                {
+                    "fixednode" : 5,
+                    "freenode" : 6,
+                    "jointtype" : "spring_6dof",
+                    "jointpos" : [-4.0, 5.0, 0.0],
+                    "jointrotate" : [0.0, 0.0, 0.0],
+                    "lowertranslimit" : [0.0, 0.0, 0.0],
+                    "uppertranslimit" : [0.0, 0.0, 0.0],
+                    "lowerrotatelimit" : [-6.28, -6.28, -6.28],
+                    "upperrotatelimit" : [6.28, 6.28, 6.28],
+                    "transspring" : [35.0, 35.0, 35.0],
+                    "rotatespring" : [35.0, 35.0, 35.0]
+                }
+            ],
             "transform": {
                 "pos": [
                     0.0,
@@ -146,7 +213,13 @@
             },
             "enable": true,
             "rootnodes": [
-                0
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6
             ],
             "nodes": [
                 {
@@ -154,7 +227,7 @@
                     "transform": {
                         "pos": [
                             0.0,
-                            3.0,
+                            5.0,
                             0.0
                         ],
                         "rotate": [
@@ -172,6 +245,82 @@
                     "collider": {
                         "shape": "box",
                         "size": [
+                            0.5,
+                            0.5,
+                            0.5
+                        ]
+                    },
+                    "rigidbody": {
+                        "mass": 1.0,
+                        "physicstype": "dynamic",
+                        "transdamping": 0.0,
+                        "rotatedamping": 0.0,
+                        "repulsion": 0.0,
+                        "friction": 0.5
+                    },
+                    "meshindex": 0
+                },
+                {
+                    "name": "Joint_0",
+                    "transform": {
+                        "pos": [
+                            0.0,
+                            5.0,
+                            0.0
+                        ],
+                        "rotate": [
+                            0.0,
+                            -0.0,
+                            0.0
+                        ],
+                        "scale": [
+                            0.25,
+                            0.25,
+                            0.25
+                        ]
+                    },
+                    "enable": true,
+                    "collider": {
+                        "shape": "sphere",
+                        "size": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ]
+                    },
+                    "rigidbody": {
+                        "mass": 0.0,
+                        "physicstype": "static",
+                        "transdamping": 0.0,
+                        "rotatedamping": 0.0,
+                        "repulsion": 0.0,
+                        "friction": 0.5
+                    },
+                    "meshindex": 1
+                },
+                {
+                    "name": "Joint_1",
+                    "transform": {
+                        "pos": [
+                            -1.0,
+                            5.0,
+                            0.0
+                        ],
+                        "rotate": [
+                            0.0,
+                            -0.0,
+                            0.0
+                        ],
+                        "scale": [
+                            0.25,
+                            0.25,
+                            0.25
+                        ]
+                    },
+                    "enable": true,
+                    "collider": {
+                        "shape": "sphere",
+                        "size": [
                             1.0,
                             1.0,
                             1.0
@@ -185,7 +334,159 @@
                         "repulsion": 0.0,
                         "friction": 0.5
                     },
-                    "meshindex": 0
+                    "meshindex": 2
+                },
+                {
+                    "name": "Joint_2",
+                    "transform": {
+                        "pos": [
+                            -2.0,
+                            5.0,
+                            0.0
+                        ],
+                        "rotate": [
+                            0.0,
+                            -0.0,
+                            0.0
+                        ],
+                        "scale": [
+                            0.25,
+                            0.25,
+                            0.25
+                        ]
+                    },
+                    "enable": true,
+                    "collider": {
+                        "shape": "sphere",
+                        "size": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ]
+                    },
+                    "rigidbody": {
+                        "mass": 1.0,
+                        "physicstype": "dynamic",
+                        "transdamping": 0.0,
+                        "rotatedamping": 0.0,
+                        "repulsion": 0.0,
+                        "friction": 0.5
+                    },
+                    "meshindex": 3
+                },
+                {
+                    "name": "Joint_3",
+                    "transform": {
+                        "pos": [
+                            -3.0,
+                            5.0,
+                            0.0
+                        ],
+                        "rotate": [
+                            0.0,
+                            -0.0,
+                            0.0
+                        ],
+                        "scale": [
+                            0.25,
+                            0.25,
+                            0.25
+                        ]
+                    },
+                    "enable": true,
+                    "collider": {
+                        "shape": "sphere",
+                        "size": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ]
+                    },
+                    "rigidbody": {
+                        "mass": 1.0,
+                        "physicstype": "dynamic",
+                        "transdamping": 0.0,
+                        "rotatedamping": 0.0,
+                        "repulsion": 0.0,
+                        "friction": 0.5
+                    },
+                    "meshindex": 4
+                },
+                {
+                    "name": "Joint_4",
+                    "transform": {
+                        "pos": [
+                            -4.0,
+                            5.0,
+                            0.0
+                        ],
+                        "rotate": [
+                            0.0,
+                            -0.0,
+                            0.0
+                        ],
+                        "scale": [
+                            0.25,
+                            0.25,
+                            0.25
+                        ]
+                    },
+                    "enable": true,
+                    "collider": {
+                        "shape": "sphere",
+                        "size": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ]
+                    },
+                    "rigidbody": {
+                        "mass": 1.0,
+                        "physicstype": "dynamic",
+                        "transdamping": 0.0,
+                        "rotatedamping": 0.0,
+                        "repulsion": 0.0,
+                        "friction": 0.5
+                    },
+                    "meshindex": 5
+                },
+                {
+                    "name": "Joint_5",
+                    "transform": {
+                        "pos": [
+                            -5.0,
+                            5.0,
+                            0.0
+                        ],
+                        "rotate": [
+                            0.0,
+                            -0.0,
+                            0.0
+                        ],
+                        "scale": [
+                            0.25,
+                            0.25,
+                            0.25
+                        ]
+                    },
+                    "enable": true,
+                    "collider": {
+                        "shape": "sphere",
+                        "size": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ]
+                    },
+                    "rigidbody": {
+                        "mass": 1.0,
+                        "physicstype": "dynamic",
+                        "transdamping": 0.0,
+                        "rotatedamping": 0.0,
+                        "repulsion": 0.0,
+                        "friction": 0.5
+                    },
+                    "meshindex": 6
                 }
             ],
             "meshs": [
@@ -194,6 +495,54 @@
                         {
                             "materialindex": 0,
                             "type": "cube"
+                        }
+                    ]
+                },
+                {
+                    "primitives": [
+                        {
+                            "materialindex": 0,
+                            "type": "sphere"
+                        }
+                    ]
+                },
+                {
+                    "primitives": [
+                        {
+                            "materialindex": 0,
+                            "type": "sphere"
+                        }
+                    ]
+                },
+                {
+                    "primitives": [
+                        {
+                            "materialindex": 0,
+                            "type": "sphere"
+                        }
+                    ]
+                },
+                {
+                    "primitives": [
+                        {
+                            "materialindex": 0,
+                            "type": "sphere"
+                        }
+                    ]
+                },
+                {
+                    "primitives": [
+                        {
+                            "materialindex": 0,
+                            "type": "sphere"
+                        }
+                    ]
+                },
+                {
+                    "primitives": [
+                        {
+                            "materialindex": 0,
+                            "type": "sphere"
                         }
                     ]
                 }

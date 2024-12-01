@@ -461,7 +461,7 @@ namespace scene
 					const auto& Size = PhysicsObject->GetSize();
 
 					node["collider"]["shape"] = PhysicsShapeStr;
-					node["collider"]["size"] = { Size.x * 2.0f, Size.y * 2.0f, Size.z * 2.0f };
+					node["collider"]["size"] = { Size.x, Size.y, Size.z };
 				}
 
 				// RigidBody
