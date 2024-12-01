@@ -69,6 +69,8 @@ namespace app
 		return true;
 	}
 
+	// USE_RCCPP
+
 	bool CDevApp::Initialize(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker)
 	{
 		//pLoadWorker->AddScene(std::make_shared<resource::CSceneLoader>("Resources\\Scene\\CCDIK.json", m_SceneController));
