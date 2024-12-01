@@ -129,22 +129,22 @@ namespace physics
 		return true;
 	}
 
-	std::shared_ptr<IPhysicsObject> CBulletPhysicsEngine::CreatePhysicsBox(const glm::vec3& BoxHalfSize, bool Kinematic, float Mass, const SRigidbodyParam& RBParam)
+	std::shared_ptr<IPhysicsObject> CBulletPhysicsEngine::CreatePhysicsBox(const glm::vec3& BoxHalfSize, bool Kinematic, const SRigidbodyParam& RBParam)
 	{
-		std::shared_ptr<CBulletBox> Box = std::make_shared<CBulletBox>(BoxHalfSize, Kinematic, Mass, RBParam);
+		std::shared_ptr<CBulletBox> Box = std::make_shared<CBulletBox>(BoxHalfSize, Kinematic, RBParam);
 
 		return Box;
 	}
-	std::shared_ptr<IPhysicsObject> CBulletPhysicsEngine::CreatePhysicsSphere(float Radius, bool Kinematic, float Mass, const SRigidbodyParam& RBParam)
+	std::shared_ptr<IPhysicsObject> CBulletPhysicsEngine::CreatePhysicsSphere(float Radius, bool Kinematic, const SRigidbodyParam& RBParam)
 	{
-		std::shared_ptr<CBulletSphere> Sphere = std::make_shared<CBulletSphere>(Radius, Kinematic, Mass, RBParam);
+		std::shared_ptr<CBulletSphere> Sphere = std::make_shared<CBulletSphere>(Radius, Kinematic, RBParam);
 
 		return Sphere;
 	}
 
-	std::shared_ptr<IPhysicsObject> CBulletPhysicsEngine::CreatePhysicsCapsule(float Radius, float Height, bool Kinematic, float Mass, const SRigidbodyParam& RBParam)
+	std::shared_ptr<IPhysicsObject> CBulletPhysicsEngine::CreatePhysicsCapsule(float Radius, float Height, bool Kinematic, const SRigidbodyParam& RBParam)
 	{
-		std::shared_ptr<CBulletCapsule> capsule = std::make_shared<CBulletCapsule>(Radius, Height, Kinematic, Mass, RBParam);
+		std::shared_ptr<CBulletCapsule> capsule = std::make_shared<CBulletCapsule>(Radius, Height, Kinematic, RBParam);
 
 		return capsule;
 	}

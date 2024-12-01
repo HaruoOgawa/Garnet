@@ -364,6 +364,11 @@ namespace scene
 				if (!WriteTextureSet(ObjectJSON, Object.get(), TextureInfoList)) return false;
 			}
 
+			// joints
+			{
+				if (!WriteJoints(ObjectJSON, Object.get())) return false;
+			}
+
 			// objectsに追加
 			SceneJSON["objects"].push_back(ObjectJSON);
 		}
@@ -413,8 +418,70 @@ namespace scene
 			// enable
 			if (TrackNameList.find("EnabledFlag") == TrackNameList.end()) node["enable"] = Node->IsEnabled();
 
+			// 物理演算
+			if (!Node->GetPhysicsObjectList().empty())
+			{
+				const auto& PhysicsObject = Node->GetPhysicsObjectList()[0];
+				const auto& RBParam = PhysicsObject->GetRbParam();
+				
+				std::string PhysicsTypeStr = std::string();
+				switch (RBParam.PhysicsType)
+				{
+				case physics::EPhysicsType::STATIC:
+					PhysicsTypeStr = "static";
+					break;
+
+				case physics::EPhysicsType::DYNAMIC:
+					PhysicsTypeStr = "dynamic";
+					break;
+
+				case physics::EPhysicsType::DYNAMIC_JOINT:
+					PhysicsTypeStr = "dynamic_joint";
+					break;
+				default:
+					break;
+				}
+
+				// Collider(物理用途以外のコライダーが増えたら分離するかも)
+				{
+					std::string PhysicsShapeStr = std::string();
+					switch (PhysicsObject->GetPhysicsShape())
+					{
+					case physics::EPhysicsShape::BOX:
+						PhysicsShapeStr = "box";
+						break;
+
+					case physics::EPhysicsShape::SPHERE:
+						PhysicsShapeStr = "sphere";
+						break;
+
+					case physics::EPhysicsShape::CAPSULE:
+						PhysicsShapeStr = "capsule";
+						break;
+
+					default:
+						break;
+					}
+
+					const auto& Size = PhysicsObject->GetSize();
+
+					node["collider"]["shape"] = PhysicsShapeStr;
+					node["collider"]["size"] = { Size.x, Size.y, Size.z };
+				}
+
+				// RigidBody
+				node["rigidbody"]["mass"] = RBParam.Mass;
+				node["rigidbody"]["physicstype"] = PhysicsTypeStr;
+				node["rigidbody"]["transdamping"] = RBParam.TransDamping;
+				node["rigidbody"]["rotatedamping"] = RBParam.RotateDamping;
+				node["rigidbody"]["repulsion"] = RBParam.Repulsion;
+				node["rigidbody"]["friction"] = RBParam.Friction;
+			}
+
+			//
 			node["meshindex"] = Node->GetMeshIndex();
 
+			//
 			for (int ChildIndex : Node->GetChildrenNodeIndexList())
 			{
 				node["children"].push_back(ChildIndex);
@@ -809,6 +876,88 @@ namespace scene
 		}
 
 		ObjectJSON["animation"] = animationJSON;
+
+		return true;
+	}
+
+	bool CSceneWriter::WriteJoints(ordered_json& ObjectJSON, object::C3DObject* pObject)
+	{
+		// 物理オブジェクトとノードインデックスのペアを作成
+		std::map<std::shared_ptr<physics::IPhysicsObject>, int> PhysObjIndexList;
+		for (const auto& Node : pObject->GetNodeList())
+		{
+			// シーン側では単一の物理オブジェクトしか考慮していない
+			if (Node->GetPhysicsObjectList().empty()) continue;
+
+			if (Node->GetSelfNodeIndex() == -1) continue;
+
+			PhysObjIndexList.emplace(Node->GetPhysicsObjectList()[0], Node->GetSelfNodeIndex());
+		}
+
+		// Jointを登録
+		for (const auto& Node : pObject->GetNodeList())
+		{
+			// シーン側では単一の物理オブジェクトしか考慮していない
+			if (Node->GetPhysicsObjectList().empty()) continue;
+
+			if (Node->GetSelfNodeIndex() == -1) continue;
+
+			const auto& FreePhysicsObject = Node->GetPhysicsObjectList()[0];
+			int FreeNodeIndex = Node->GetSelfNodeIndex();
+
+			for (const auto& Constraint : FreePhysicsObject->GetConstraintList())
+			{
+				const auto it = PhysObjIndexList.find(Constraint->FixedObject);
+				if (it == PhysObjIndexList.end()) continue;
+
+				int FixedNodeIndex = it->second;
+
+				physics::EJointType JointType = Constraint->JointType;
+				std::string JointTypeStr = std::string();
+				
+				switch (JointType)
+				{
+				case physics::EJointType::NONE:
+					break;
+				case physics::EJointType::SPRING_6DOF:
+					JointTypeStr = "spring_6dof";
+					break;
+				case physics::EJointType::Generic_6DOF:
+					JointTypeStr = "generic_6dof";
+					break;
+				case physics::EJointType::P2P:
+					JointTypeStr = "p2p";
+					break;
+				case physics::EJointType::ConeTwist:
+					JointTypeStr = "cone_twist";
+					break;
+				case physics::EJointType::Slider:
+					JointTypeStr = "slider";
+					break;
+				default:
+					break;
+				}
+
+				if (JointTypeStr.empty()) continue;
+
+				// 書き出し
+				ordered_json jointJSON;
+
+				jointJSON["fixednode"] = FixedNodeIndex;
+				jointJSON["freenode"] = FreeNodeIndex;
+				jointJSON["jointtype"] = JointTypeStr;
+				jointJSON["jointpos"] = { Constraint->JParam.JointPos.x, Constraint->JParam.JointPos.y, Constraint->JParam.JointPos.z };
+				jointJSON["jointrotate"] = { Constraint->JParam.JointRotate.x, Constraint->JParam.JointRotate.y, Constraint->JParam.JointRotate.z };
+				jointJSON["lowertranslimit"] = { Constraint->JParam.LowerTransLimit.x, Constraint->JParam.LowerTransLimit.y, Constraint->JParam.LowerTransLimit.z };
+				jointJSON["uppertranslimit"] = { Constraint->JParam.UpperTransLimit.x, Constraint->JParam.UpperTransLimit.y, Constraint->JParam.UpperTransLimit.z };
+				jointJSON["lowerrotatelimit"] = { Constraint->JParam.LowerRotateLimit.x, Constraint->JParam.LowerRotateLimit.y, Constraint->JParam.LowerRotateLimit.z };
+				jointJSON["upperrotatelimit"] = { Constraint->JParam.UpperRotateLimit.x, Constraint->JParam.UpperRotateLimit.y, Constraint->JParam.UpperRotateLimit.z };
+				jointJSON["transspring"] = { Constraint->JParam.TransSpring.x, Constraint->JParam.TransSpring.y, Constraint->JParam.TransSpring.z };
+				jointJSON["rotatespring"] = { Constraint->JParam.RotateSpring.x, Constraint->JParam.RotateSpring.y, Constraint->JParam.RotateSpring.z };
+
+				ObjectJSON["joints"].push_back(jointJSON);
+			}
+		}
 
 		return true;
 	}

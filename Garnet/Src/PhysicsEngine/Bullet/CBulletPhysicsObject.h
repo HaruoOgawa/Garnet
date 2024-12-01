@@ -11,39 +11,24 @@
 
 namespace physics
 {
-	struct SConstraintData
-	{
-		std::shared_ptr<IPhysicsObject> FixedObject = nullptr;
-		EJointType JointType = EJointType::NONE;
-		SJointParam JParam = {};
-
-		SConstraintData(const std::shared_ptr<IPhysicsObject>& object, EJointType t, const SJointParam& param) :
-			FixedObject(object),
-			JointType(t),
-			JParam(param)
-		{
-		}
-	};
-
 	class CBulletPhysicsObject : public IPhysicsObject
 	{
 	protected:
 		const bool m_Kinematic;
-		const float m_Mass;
 		const SRigidbodyParam m_RBParam;
 
 		std::shared_ptr<btCollisionShape> m_CollisionShape;
 		std::shared_ptr<CBulletRigidBody> m_RigidBody;
 
+		const EPhysicsShape m_PhysicsShape;
+
 		// Constraint
 		std::vector<std::shared_ptr<SConstraintData>> m_ConstraintList;
 	public:
-		CBulletPhysicsObject(bool Kinematic, float Mass, const SRigidbodyParam& RBParam);
+		CBulletPhysicsObject(bool Kinematic, const SRigidbodyParam& RBParam, EPhysicsShape PhysicsShape);
 		virtual ~CBulletPhysicsObject();
 
 		const std::shared_ptr<CBulletRigidBody>& GetRigidBody() const;
-
-		const std::vector<std::shared_ptr<SConstraintData>>& GetConstraintList() const;
 
 		virtual bool Create(IPhysicsEngine* pPhysicsEngine, const glm::vec3& WorldPos, const glm::quat& WorldRotate, const glm::vec3& WorldScale) override;
 
@@ -52,6 +37,10 @@ namespace physics
 		virtual bool IsDynamicJoint() override;
 
 		virtual glm::vec3 GetSize() override;
+
+		virtual const std::vector<std::shared_ptr<SConstraintData>>& GetConstraintList() const override;
+
+		virtual EPhysicsShape GetPhysicsShape() const override;
 
 		virtual const SRigidbodyParam& GetRbParam() const override;
 

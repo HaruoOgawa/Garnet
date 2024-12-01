@@ -5,12 +5,12 @@
 
 namespace physics
 {
-	CBulletPhysicsObject::CBulletPhysicsObject(bool Kinematic, float Mass, const SRigidbodyParam& RBParam):
+	CBulletPhysicsObject::CBulletPhysicsObject(bool Kinematic, const SRigidbodyParam& RBParam, EPhysicsShape PhysicsShape):
 		m_Kinematic(Kinematic),
-		m_Mass(Mass),
 		m_RBParam(RBParam),
 		m_CollisionShape(nullptr),
-		m_RigidBody(nullptr)
+		m_RigidBody(nullptr),
+		m_PhysicsShape(PhysicsShape)
 	{
 	}
 
@@ -62,6 +62,11 @@ namespace physics
 	glm::vec3 CBulletPhysicsObject::GetSize()
 	{
 		return glm::vec3(1.0f);
+	}
+
+	EPhysicsShape CBulletPhysicsObject::GetPhysicsShape() const
+	{
+		return m_PhysicsShape;
 	}
 
 	const SRigidbodyParam& CBulletPhysicsObject::GetRbParam() const
