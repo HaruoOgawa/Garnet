@@ -732,6 +732,7 @@ namespace resource
 					// ジョイントを予約
 					if (JointType != physics::EJointType::NONE && !FixedNode->GetPhysicsObjectList().empty() && !FreeNode->GetPhysicsObjectList().empty())
 					{
+						// シーン側では単一の物理オブジェクトしか考慮していない
 						const auto& FixedPhysicsObject = FixedNode->GetPhysicsObjectList()[0];
 						const auto& FreePhysicsObject = FreeNode->GetPhysicsObjectList()[0];
 

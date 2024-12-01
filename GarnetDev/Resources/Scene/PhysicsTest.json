@@ -127,73 +127,6 @@
             "filename": "",
             "renderpass": "MainResultPass",
             "depthpass": "",
-            "joints":[
-                {
-                    "fixednode" : 1,
-                    "freenode" : 2,
-                    "jointtype" : "spring_6dof",
-                    "jointpos" : [0.0, 5.0, 0.0],
-                    "jointrotate" : [0.0, 0.0, 0.0],
-                    "lowertranslimit" : [0.0, 0.0, 0.0],
-                    "uppertranslimit" : [0.0, 0.0, 0.0],
-                    "lowerrotatelimit" : [-6.28, -6.28, -6.28],
-                    "upperrotatelimit" : [6.28, 6.28, 6.28],
-                    "transspring" : [35.0, 35.0, 35.0],
-                    "rotatespring" : [35.0, 35.0, 35.0]
-                },
-                {
-                    "fixednode" : 2,
-                    "freenode" : 3,
-                    "jointtype" : "spring_6dof",
-                    "jointpos" : [-1.0, 5.0, 0.0],
-                    "jointrotate" : [0.0, 0.0, 0.0],
-                    "lowertranslimit" : [0.0, 0.0, 0.0],
-                    "uppertranslimit" : [0.0, 0.0, 0.0],
-                    "lowerrotatelimit" : [-6.28, -6.28, -6.28],
-                    "upperrotatelimit" : [6.28, 6.28, 6.28],
-                    "transspring" : [35.0, 35.0, 35.0],
-                    "rotatespring" : [35.0, 35.0, 35.0]
-                },
-                {
-                    "fixednode" : 3,
-                    "freenode" : 4,
-                    "jointtype" : "spring_6dof",
-                    "jointpos" : [-2.0, 5.0, 0.0],
-                    "jointrotate" : [0.0, 0.0, 0.0],
-                    "lowertranslimit" : [0.0, 0.0, 0.0],
-                    "uppertranslimit" : [0.0, 0.0, 0.0],
-                    "lowerrotatelimit" : [-6.28, -6.28, -6.28],
-                    "upperrotatelimit" : [6.28, 6.28, 6.28],
-                    "transspring" : [35.0, 35.0, 35.0],
-                    "rotatespring" : [35.0, 35.0, 35.0]
-                },
-                {
-                    "fixednode" : 4,
-                    "freenode" : 5,
-                    "jointtype" : "spring_6dof",
-                    "jointpos" : [-3.0, 5.0, 0.0],
-                    "jointrotate" : [0.0, 0.0, 0.0],
-                    "lowertranslimit" : [0.0, 0.0, 0.0],
-                    "uppertranslimit" : [0.0, 0.0, 0.0],
-                    "lowerrotatelimit" : [-6.28, -6.28, -6.28],
-                    "upperrotatelimit" : [6.28, 6.28, 6.28],
-                    "transspring" : [35.0, 35.0, 35.0],
-                    "rotatespring" : [35.0, 35.0, 35.0]
-                },
-                {
-                    "fixednode" : 5,
-                    "freenode" : 6,
-                    "jointtype" : "spring_6dof",
-                    "jointpos" : [-4.0, 5.0, 0.0],
-                    "jointrotate" : [0.0, 0.0, 0.0],
-                    "lowertranslimit" : [0.0, 0.0, 0.0],
-                    "uppertranslimit" : [0.0, 0.0, 0.0],
-                    "lowerrotatelimit" : [-6.28, -6.28, -6.28],
-                    "upperrotatelimit" : [6.28, 6.28, 6.28],
-                    "transspring" : [35.0, 35.0, 35.0],
-                    "rotatespring" : [35.0, 35.0, 35.0]
-                }
-            ],
             "transform": {
                 "pos": [
                     0.0,
@@ -577,6 +510,233 @@
                             "textureindex": -1,
                             "texturename": ""
                         }
+                    ]
+                }
+            ],
+            "joints": [
+                {
+                    "fixednode": 1,
+                    "freenode": 2,
+                    "jointtype": "spring_6dof",
+                    "jointpos": [
+                        0.0,
+                        5.0,
+                        0.0
+                    ],
+                    "jointrotate": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "lowertranslimit": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "uppertranslimit": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "lowerrotatelimit": [
+                        -6.28000020980835,
+                        -6.28000020980835,
+                        -6.28000020980835
+                    ],
+                    "upperrotatelimit": [
+                        6.28000020980835,
+                        6.28000020980835,
+                        6.28000020980835
+                    ],
+                    "transspring": [
+                        35.0,
+                        35.0,
+                        35.0
+                    ],
+                    "rotatespring": [
+                        35.0,
+                        35.0,
+                        35.0
+                    ]
+                },
+                {
+                    "fixednode": 2,
+                    "freenode": 3,
+                    "jointtype": "spring_6dof",
+                    "jointpos": [
+                        -1.0,
+                        5.0,
+                        0.0
+                    ],
+                    "jointrotate": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "lowertranslimit": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "uppertranslimit": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "lowerrotatelimit": [
+                        -6.28000020980835,
+                        -6.28000020980835,
+                        -6.28000020980835
+                    ],
+                    "upperrotatelimit": [
+                        6.28000020980835,
+                        6.28000020980835,
+                        6.28000020980835
+                    ],
+                    "transspring": [
+                        35.0,
+                        35.0,
+                        35.0
+                    ],
+                    "rotatespring": [
+                        35.0,
+                        35.0,
+                        35.0
+                    ]
+                },
+                {
+                    "fixednode": 3,
+                    "freenode": 4,
+                    "jointtype": "spring_6dof",
+                    "jointpos": [
+                        -2.0,
+                        5.0,
+                        0.0
+                    ],
+                    "jointrotate": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "lowertranslimit": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "uppertranslimit": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "lowerrotatelimit": [
+                        -6.28000020980835,
+                        -6.28000020980835,
+                        -6.28000020980835
+                    ],
+                    "upperrotatelimit": [
+                        6.28000020980835,
+                        6.28000020980835,
+                        6.28000020980835
+                    ],
+                    "transspring": [
+                        35.0,
+                        35.0,
+                        35.0
+                    ],
+                    "rotatespring": [
+                        35.0,
+                        35.0,
+                        35.0
+                    ]
+                },
+                {
+                    "fixednode": 4,
+                    "freenode": 5,
+                    "jointtype": "spring_6dof",
+                    "jointpos": [
+                        -3.0,
+                        5.0,
+                        0.0
+                    ],
+                    "jointrotate": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "lowertranslimit": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "uppertranslimit": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "lowerrotatelimit": [
+                        -6.28000020980835,
+                        -6.28000020980835,
+                        -6.28000020980835
+                    ],
+                    "upperrotatelimit": [
+                        6.28000020980835,
+                        6.28000020980835,
+                        6.28000020980835
+                    ],
+                    "transspring": [
+                        35.0,
+                        35.0,
+                        35.0
+                    ],
+                    "rotatespring": [
+                        35.0,
+                        35.0,
+                        35.0
+                    ]
+                },
+                {
+                    "fixednode": 5,
+                    "freenode": 6,
+                    "jointtype": "spring_6dof",
+                    "jointpos": [
+                        -4.0,
+                        5.0,
+                        0.0
+                    ],
+                    "jointrotate": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "lowertranslimit": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "uppertranslimit": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "lowerrotatelimit": [
+                        -6.28000020980835,
+                        -6.28000020980835,
+                        -6.28000020980835
+                    ],
+                    "upperrotatelimit": [
+                        6.28000020980835,
+                        6.28000020980835,
+                        6.28000020980835
+                    ],
+                    "transspring": [
+                        35.0,
+                        35.0,
+                        35.0
+                    ],
+                    "rotatespring": [
+                        35.0,
+                        35.0,
+                        35.0
                     ]
                 }
             ]

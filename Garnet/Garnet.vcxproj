@@ -1111,6 +1111,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClInclude Include="Src\Animation\ERigType.h" />
     <ClInclude Include="Src\GraphicsAPI\CGraphicsAPI.h" />
     <ClInclude Include="Src\PhysicsEngine\EPhysicsShape.h" />
+    <ClInclude Include="Src\PhysicsEngine\SConstraintData.h" />
     <ClInclude Include="Src\Timeline\CCustomTrack.h" />
     <ClInclude Include="Src\Scriptable\CComponent.h" />
     <ClInclude Include="Src\Scriptable\CValueRegistry.h" />

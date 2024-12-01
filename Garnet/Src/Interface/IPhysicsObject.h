@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <vector>
 #include <glm/glm.hpp>
 #include <glm/gtx/quaternion.hpp>
 
@@ -8,6 +9,7 @@
 #include "../PhysicsEngine/EPhysicsShape.h"
 #include "../PhysicsEngine/SJointParam.h"
 #include "../PhysicsEngine/SRigidbodyParam.h"
+#include "../PhysicsEngine/SConstraintData.h"
 
 namespace physics
 {
@@ -23,6 +25,8 @@ namespace physics
 		virtual bool IsDynamicJoint() = 0;
 
 		virtual glm::vec3 GetSize() = 0;
+
+		virtual const std::vector<std::shared_ptr<SConstraintData>>& GetConstraintList() const = 0;
 
 		virtual EPhysicsShape GetPhysicsShape() const = 0;
 

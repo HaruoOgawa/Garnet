@@ -35,6 +35,7 @@ namespace scene
 		static bool WriteMaterials(ordered_json& ObjectJSON, object::C3DObject* pObject, const std::map<std::string, std::shared_ptr<graphics::CTexture>>& TextureInfoList, const std::shared_ptr<timeline::CTimelineController>& TimelineController);
 		static bool WriteTextureSet(ordered_json& ObjectJSON, object::C3DObject* pObject, const std::map<std::string, std::shared_ptr<graphics::CTexture>>& TextureInfoList);
 		static bool WriteAnimation(ordered_json& ObjectJSON, object::C3DObject* pObject, const SAnimationInfo& AnimationInfo);
+		static bool WriteJoints(ordered_json& ObjectJSON, object::C3DObject* pObject);
 
 		static bool WriteHumanoidBoneList(json& AnimationJSON, const std::shared_ptr<animation::CSkeleton>& Skeleton);
 	public:
