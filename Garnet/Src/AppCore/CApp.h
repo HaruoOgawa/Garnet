@@ -57,5 +57,11 @@ namespace app
 
 		// タイムライン再生停止イベント
 		virtual void OnPlayedTimeline(bool IsPlay);
+
+		// カメラモード変更イベント
+		virtual void OnChangeCameraMode(const std::string& Mode);
+
+		// シーン再生モード変更イベント
+		virtual void OnChangeScenePlayMode(const std::string& Mode);
 	};
 }

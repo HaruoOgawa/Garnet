@@ -180,7 +180,8 @@ namespace app
 #ifdef USE_GUIENGINE
 			if (pLoadWorker->IsLoaded())
 			{
-				gui::SGUIParams GUIParams = gui::SGUIParams(GetObjectList(), m_SceneController, m_FileModifier, m_TimelineController, pLoadWorker, {}, pPhysicsEngine);
+				gui::SGUIParams GUIParams = gui::SGUIParams(shared_from_this(), GetObjectList(), m_SceneController, m_FileModifier, m_TimelineController, 
+					pLoadWorker, {}, pPhysicsEngine);
 				GUIParams.CameraMode = (m_CameraSwitchToggle) ? "ViewCamera" : "TraceCamera";
 				GUIParams.Camera = m_MainCamera;
 				GUIParams.InputState = InputState;
@@ -237,7 +238,8 @@ namespace app
 
 #ifdef USE_GUIENGINE
 		{
-			gui::SGUIParams GUIParams = gui::SGUIParams(GetObjectList(), m_SceneController, m_FileModifier, m_TimelineController, pLoadWorker, {}, pPhysicsEngine);
+			gui::SGUIParams GUIParams = gui::SGUIParams(shared_from_this(), GetObjectList(), m_SceneController, m_FileModifier, m_TimelineController, 
+				pLoadWorker, {}, pPhysicsEngine);
 
 			if (!m_GraphicsEditingWindow->OnLoaded(pGraphicsAPI, GUIParams, GUIEngine)) return false;
 		}
@@ -301,5 +303,25 @@ namespace app
 	std::shared_ptr<scene::CSceneController> CDevApp::GetSceneController() const
 	{
 		return m_SceneController;
+	}
+
+	// カメラモード変更イベント
+	void CDevApp::OnChangeCameraMode(const std::string& Mode)
+	{
+		m_CameraSwitchToggle = !m_CameraSwitchToggle;
+
+		if (m_CameraSwitchToggle)
+		{
+			m_MainCamera = m_ViewCamera;
+		}
+		else
+		{
+			m_MainCamera = m_TraceCamera;
+		}
+	}
+
+	// シーン再生モード変更イベント
+	void CDevApp::OnChangeScenePlayMode(const std::string& Mode)
+	{
 	}
 }

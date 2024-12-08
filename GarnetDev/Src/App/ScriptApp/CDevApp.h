@@ -70,5 +70,11 @@ namespace app
 		// Getter
 		virtual std::vector<std::shared_ptr<object::C3DObject>> GetObjectList() const override;
 		virtual std::shared_ptr<scene::CSceneController> GetSceneController() const override;
+
+		// カメラモード変更イベント
+		virtual void OnChangeCameraMode(const std::string& Mode) override;
+
+		// シーン再生モード変更イベント
+		virtual void OnChangeScenePlayMode(const std::string& Mode) override;
 	};
 }
