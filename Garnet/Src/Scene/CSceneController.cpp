@@ -23,6 +23,14 @@ namespace scene
 	{
 	}
 
+	void CSceneController::Reset()
+	{
+		for (auto& Object : m_ObjectList)
+		{
+			Object->Reset();
+		}
+	}
+
 	void CSceneController::SetDefaultPass(const std::string& RenderPass, const std::string& DepthPass)
 	{
 		m_DefaultRenderPass = RenderPass;

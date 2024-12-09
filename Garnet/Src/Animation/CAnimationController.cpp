@@ -180,7 +180,7 @@ namespace animation
 		if (Index >= 0 && Index < m_ClipList.size())
 		{
 			const auto& Clip = m_ClipList[Index];
-			Clip->Initialize();
+			Clip->Reset(m_Skeleton);
 
 			m_CurrentMotionIndex = Index;
 			m_CurrentLayout.Clip = Clip;
@@ -200,7 +200,7 @@ namespace animation
 			m_CurrentLayout = Layout->second;
 
 			const auto& Clip = m_CurrentLayout.Clip;
-			if(Clip) Clip->Initialize();
+			if(Clip) Clip->Reset(m_Skeleton);
 		}
 
 		// åªç›ÇÃépê®Çï€ë∂Ç∑ÇÈ
@@ -250,6 +250,11 @@ namespace animation
 	const std::string& CAnimationController::GetCurrentMotionName() const
 	{
 		return m_CurrentMotionName;
+	}
+
+	const std::shared_ptr<CAnimationClip>& CAnimationController::GetCurrentClip() const
+	{
+		return m_CurrentLayout.Clip;
 	}
 
 	void CAnimationController::AddMotion(const std::string& MotionName, animation::SAnimationLayout Layout)

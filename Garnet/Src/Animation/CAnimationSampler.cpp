@@ -184,7 +184,31 @@ namespace animation
 		// キーフレームが同じなら補間せずにPrevKeyFrameの値をそのまま返す
 		if (PrevKeyFrame == NextKeyFrame)
 		{
-			Value = PrevKeyFrame->GetOutput();
+			if (PrevKeyFrame)
+			{
+				if (ValueType == animation::EInterpolateValueType::MODELMATRIX)
+				{
+					if (PrevKeyFrame->GetOutput().size() != 16) return true;
+
+					glm::vec3 DstPos = glm::vec3(0.0f);
+					glm::quat DstQuat = glm::quat();
+					glm::vec3 DstScale = glm::vec3(1.0f);
+
+					glm::mat4 mat = glm::mat4(1.0f);
+					std::memcpy(&mat[0][0], &PrevKeyFrame->GetOutput()[0], sizeof(float) * 16);
+
+					math::CTransform::CastModelMatrixToTransform(mat, DstPos, DstQuat, DstScale);
+
+					Value.push_back(DstPos.x); Value.push_back(DstPos.y); Value.push_back(DstPos.z);
+					Value.push_back(DstQuat.x); Value.push_back(DstQuat.y); Value.push_back(DstQuat.z); Value.push_back(DstQuat.w);
+					Value.push_back(DstScale.x); Value.push_back(DstScale.y); Value.push_back(DstScale.z);
+				}
+				else
+				{
+					Value = PrevKeyFrame->GetOutput();
+				}
+			}
+
 			return true;
 		}
 

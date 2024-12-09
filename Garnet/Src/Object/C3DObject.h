@@ -81,6 +81,8 @@ namespace object
 		C3DObject(const std::string& PassName, const std::string& DepthPassName);
 		virtual ~C3DObject();
 
+		void Reset();
+
 		void SetFileName(const std::string& Name);
 		const std::string& GetFileName() const;
 		

@@ -29,6 +29,37 @@ namespace object
 		m_MaterialList.clear();
 	}
 
+	void C3DObject::Reset()
+	{
+#ifdef USE_ANIMATION
+		if (m_AnimationController)
+		{
+			const auto& CurrentClip = m_AnimationController->GetCurrentClip();
+
+			if (CurrentClip)
+			{
+				CurrentClip->Reset(m_AnimationController->GetSkeleton());
+			}
+		}
+		
+		if (m_BlendShapeController)
+		{
+			for (const auto& ClipPair : m_BlendShapeController->GetBlendShapeClipMap())
+			{
+				ClipPair.second->Reset(nullptr);
+			}
+		}
+#endif
+
+		for (auto& Node : m_NodeList)
+		{
+			for (const auto& Component : Node->GetComponentList())
+			{
+				Component->Reset();
+			}
+		}
+	}
+
 	void C3DObject::SetFileName(const std::string& Name)
 	{
 		m_FileName = Name;
