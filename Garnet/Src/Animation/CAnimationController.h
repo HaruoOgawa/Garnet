@@ -50,6 +50,8 @@ namespace animation
 		int GetCurrentMotionIndex() const;
 		const std::string& GetCurrentMotionName() const;
 
+		const std::shared_ptr<CAnimationClip>& GetCurrentClip() const;
+
 		bool Update(float DeltaSecondsTime);
 
 		// IK‚ÌŒvŽZ

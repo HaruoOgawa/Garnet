@@ -137,6 +137,8 @@ namespace scene
 		CSceneController();
 		virtual ~CSceneController();
 
+		void Reset();
+
 		void SetDefaultPass(const std::string& RenderPass, const std::string& DepthPass);
 
 		void SetFileName(const std::string& Name);

@@ -25,6 +25,9 @@
 namespace app
 {
 	CDevApp::CDevApp() :
+		m_PlayMode(EPlayMode::Play),
+		m_LocalTime(0.0f),
+		m_LocalDeltaTime(0.0f),
 		m_SceneController(std::make_shared<scene::CSceneController>()),
 		m_ScriptScene(nullptr),
 		m_CameraSwitchToggle(true),
@@ -43,6 +46,10 @@ namespace app
 		m_FileModifier(std::make_shared<CFileModifier>()),
 		m_TimelineController(std::make_shared<timeline::CTimelineController>())
 	{
+#ifdef _DEBUG
+		m_PlayMode = EPlayMode::Stop;
+#endif // _DEBUG
+
 		m_ViewCamera->SetPos(glm::vec3(0.0f, 2.5f, 10.0f));
 		m_ViewCamera->SetCenter(glm::vec3(0.0f, 2.5f, 0.0f));
 		m_MainCamera = m_ViewCamera;
@@ -69,10 +76,12 @@ namespace app
 		return true;
 	}
 
+	// USE_RCCPP
+
 	bool CDevApp::Initialize(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker)
 	{
-		//pLoadWorker->AddScene(std::make_shared<resource::CSceneLoader>("Resources\\Scene\\CCDIK.json", m_SceneController));
-		pLoadWorker->AddScene(std::make_shared<resource::CSceneLoader>("Resources\\Scene\\PhysicsTest.json", m_SceneController));
+		pLoadWorker->AddScene(std::make_shared<resource::CSceneLoader>("Resources\\Scene\\CCDIK.json", m_SceneController));
+		//pLoadWorker->AddScene(std::make_shared<resource::CSceneLoader>("Resources\\Scene\\PhysicsTest.json", m_SceneController));
 
 		// オフスクリーンレンダリング
 		if (!pGraphicsAPI->CreateRenderPass("MainResultPass", api::ERenderPassFormat::COLOR_FLOAT_RENDERPASS, glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), -1, -1, 1)) return false;
@@ -102,6 +111,38 @@ namespace app
 
 	bool CDevApp::Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<input::CInputState>& InputState)
 	{
+		// カメラはローカル時間の影響を受けたくないので先に計算
+		m_MainCamera->Update(m_DrawInfo->GetDeltaSecondsTime(), InputState);
+
+		if (InputState->IsKeyUp(input::EKeyType::KEY_TYPE_SPACE))
+		{
+			m_CameraSwitchToggle = !m_CameraSwitchToggle;
+
+			if (m_CameraSwitchToggle)
+			{
+				m_MainCamera = m_ViewCamera;
+			}
+			else
+			{
+				m_MainCamera = m_TraceCamera;
+			}
+		}
+
+		// 再生時間
+		{
+			float PrevLocalTime = m_LocalTime;
+
+			if (m_PlayMode == EPlayMode::Play)
+			{
+				m_LocalTime += m_DrawInfo->GetDeltaSecondsTime();
+			}
+
+			m_LocalDeltaTime = m_LocalTime - PrevLocalTime;
+
+			m_DrawInfo->SetSecondsTime(m_LocalTime);
+			m_DrawInfo->SetDeltaSecondsTime(m_LocalDeltaTime);
+		}
+
 		if (!m_FileModifier->Update(pLoadWorker)) return false;
 
 		if (pLoadWorker->IsLoaded())
@@ -118,22 +159,6 @@ namespace app
 
 		// 再生速度を元に戻す
 		//m_DrawInfo->SetDeltaSecondsTime(PrevSelta); 
-
-		m_MainCamera->Update(m_DrawInfo->GetDeltaSecondsTime(), InputState);
-
-		if (InputState->IsKeyUp(input::EKeyType::KEY_TYPE_SPACE))
-		{
-			m_CameraSwitchToggle = !m_CameraSwitchToggle;
-
-			if (m_CameraSwitchToggle)
-			{
-				m_MainCamera = m_ViewCamera;
-			}
-			else
-			{
-				m_MainCamera = m_TraceCamera;
-			}
-		}
 
 		if (!m_MainFrameRenderer->Update(pGraphicsAPI, pPhysicsEngine, pLoadWorker, m_MainCamera, m_Projection, m_DrawInfo, InputState)) return false;
 
@@ -178,7 +203,8 @@ namespace app
 #ifdef USE_GUIENGINE
 			if (pLoadWorker->IsLoaded())
 			{
-				gui::SGUIParams GUIParams = gui::SGUIParams(GetObjectList(), m_SceneController, m_FileModifier, m_TimelineController, pLoadWorker, {}, pPhysicsEngine);
+				gui::SGUIParams GUIParams = gui::SGUIParams(shared_from_this(), GetObjectList(), m_SceneController, m_FileModifier, m_TimelineController, 
+					pLoadWorker, {}, pPhysicsEngine);
 				GUIParams.CameraMode = (m_CameraSwitchToggle) ? "ViewCamera" : "TraceCamera";
 				GUIParams.Camera = m_MainCamera;
 				GUIParams.InputState = InputState;
@@ -235,7 +261,8 @@ namespace app
 
 #ifdef USE_GUIENGINE
 		{
-			gui::SGUIParams GUIParams = gui::SGUIParams(GetObjectList(), m_SceneController, m_FileModifier, m_TimelineController, pLoadWorker, {}, pPhysicsEngine);
+			gui::SGUIParams GUIParams = gui::SGUIParams(shared_from_this(), GetObjectList(), m_SceneController, m_FileModifier, m_TimelineController, 
+				pLoadWorker, {}, pPhysicsEngine);
 
 			if (!m_GraphicsEditingWindow->OnLoaded(pGraphicsAPI, GUIParams, GUIEngine)) return false;
 		}
@@ -299,5 +326,42 @@ namespace app
 	std::shared_ptr<scene::CSceneController> CDevApp::GetSceneController() const
 	{
 		return m_SceneController;
+	}
+
+	// カメラモード変更イベント
+	void CDevApp::OnChangeCameraMode(const std::string& Mode)
+	{
+		m_CameraSwitchToggle = !m_CameraSwitchToggle;
+
+		if (m_CameraSwitchToggle)
+		{
+			m_MainCamera = m_ViewCamera;
+		}
+		else
+		{
+			m_MainCamera = m_TraceCamera;
+		}
+	}
+
+	// シーン再生モード変更イベント
+	void CDevApp::OnChangeScenePlayMode(const std::string& Mode)
+	{
+		if (Mode == "Play")
+		{
+			m_PlayMode = EPlayMode::Play;
+		}
+		else if (Mode == "Stop")
+		{
+			m_PlayMode = EPlayMode::Stop;
+
+			m_LocalTime = 0.0f;
+			m_LocalDeltaTime = 0.0f;
+
+			m_SceneController->Reset();
+		}
+		else if (Mode == "Pause")
+		{
+			m_PlayMode = EPlayMode::Pause;
+		}
 	}
 }

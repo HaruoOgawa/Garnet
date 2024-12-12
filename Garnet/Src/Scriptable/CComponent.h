@@ -36,6 +36,8 @@ namespace scriptable
 		virtual void SetValueRegistry(const std::shared_ptr<scriptable::CValueRegistry>& ValueRegistry);
 		virtual const std::shared_ptr<scriptable::CValueRegistry>& GetValueRegistry() const;
 
+		virtual void Reset();
+
 		virtual bool OnLoaded(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<scene::CSceneController>& SceneController, 
 			const std::shared_ptr<object::C3DObject>& Object, const std::shared_ptr<object::CNode>& SelfNode);
 

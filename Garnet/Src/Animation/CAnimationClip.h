@@ -43,7 +43,7 @@ namespace animation
 		virtual void SetUseIK(bool Val);
 		virtual bool IsUseIK() const;
 
-		virtual void Initialize();
+		virtual void Reset(const std::shared_ptr<CSkeleton>& Skeleton);
 
 		virtual void AddAnimationSampler(const std::shared_ptr<animation::CAnimationSampler>& Sampler);
 		virtual void AddAnimationChannel(const std::shared_ptr<animation::CAnimationChannel>& AnimationChannel);

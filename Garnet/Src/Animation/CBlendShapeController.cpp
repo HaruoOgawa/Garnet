@@ -127,7 +127,7 @@ namespace animation
 		const auto& Clip = m_BlendShapeClipMap.find(MotionName);
 		if (Clip == m_BlendShapeClipMap.end()) return;
 
-		Clip->second->Initialize();
+		Clip->second->Reset(nullptr);
 
 		m_PlayingBlendShapeSet.emplace(MotionName);
 
@@ -139,7 +139,7 @@ namespace animation
 		const auto& Clip = m_BlendShapeClipMap.find(MotionName);
 		if (Clip == m_BlendShapeClipMap.end()) return;
 
-		Clip->second->Initialize();
+		Clip->second->Reset(nullptr);
 
 		m_PlayingBlendShapeSet.erase(MotionName);
 

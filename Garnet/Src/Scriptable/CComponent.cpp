@@ -33,6 +33,10 @@ namespace scriptable
 		return m_ValueRegistry;
 	}
 
+	void CComponent::Reset()
+	{
+	}
+
 	bool CComponent::OnLoaded(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<scene::CSceneController>& SceneController,
 		const std::shared_ptr<object::C3DObject>& Object, const std::shared_ptr<object::CNode>& SelfNode)
 	{

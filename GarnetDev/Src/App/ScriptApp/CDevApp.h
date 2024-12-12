@@ -11,11 +11,22 @@ namespace camera { class CTraceCamera; }
 
 namespace app
 {
+	enum class EPlayMode
+	{
+		Play,
+		Stop,
+		Pause,
+	};
+
 	class CScriptScene;
 	class CFileModifier;
 
 	class CDevApp : public CApp
 	{
+		EPlayMode m_PlayMode;
+		float	  m_LocalTime;
+		float	  m_LocalDeltaTime;
+
 		std::shared_ptr<scene::CSceneController> m_SceneController;
 
 		std::shared_ptr<app::CScriptScene> m_ScriptScene;
@@ -70,5 +81,11 @@ namespace app
 		// Getter
 		virtual std::vector<std::shared_ptr<object::C3DObject>> GetObjectList() const override;
 		virtual std::shared_ptr<scene::CSceneController> GetSceneController() const override;
+
+		// カメラモード変更イベント
+		virtual void OnChangeCameraMode(const std::string& Mode) override;
+
+		// シーン再生モード変更イベント
+		virtual void OnChangeScenePlayMode(const std::string& Mode) override;
 	};
 }

@@ -1,5 +1,6 @@
 #ifdef USE_GUIENGINE
 #include "C3DView.h"
+#include <AppCore/CApp.h>
 #include <Camera/CCamera.h>
 
 namespace gui
@@ -50,6 +51,33 @@ namespace gui
 		if (ImGui::BeginChild("C3DView::DrawOption", WindowSize))
 		{
 			{
+				// Play
+				std::string PlayLabel = "Play##C3DView::DrawOption";
+				if (ImGui::Button(PlayLabel.c_str(), ImVec2(0, WindowSize.y)))
+				{
+					GUIParams.App->OnChangeScenePlayMode("Play");
+				}
+
+				// Stop
+				ImGui::SameLine();
+				std::string StopLabel = "Stop##C3DView::DrawOption";
+				if (ImGui::Button(StopLabel.c_str(), ImVec2(0, WindowSize.y)))
+				{
+					GUIParams.App->OnChangeScenePlayMode("Stop");
+				}
+
+				// Pause
+				ImGui::SameLine();
+				std::string PauseLabel = "Pause##C3DView::DrawOption";
+				if (ImGui::Button(PauseLabel.c_str(), ImVec2(0, WindowSize.y)))
+				{
+					GUIParams.App->OnChangeScenePlayMode("Pause");
+				}
+			}
+
+			{
+				ImGui::SameLine();
+
 				// たぶんボタンの最小サイズみたいなのでWindowを小さくしすぎると見えなくなるみたい(いったん仕様とする。普段使いには支障がないため)
 				std::string WindowModeLavel = (m_IsFullScreen ? "FrameBuffers" : "3DView");
 				WindowModeLavel += "##C3DView::DrawOption";
@@ -69,6 +97,7 @@ namespace gui
 
 				if (ImGui::Button(WindowModeLavel.c_str(), ImVec2(0, WindowSize.y)))
 				{
+					GUIParams.App->OnChangeCameraMode(std::string());
 				}
 			}
 

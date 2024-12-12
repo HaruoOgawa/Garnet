@@ -97,4 +97,14 @@ namespace app
 	void CApp::OnPlayedTimeline(bool IsPlay)
 	{
 	}
+
+	// カメラモード変更イベント
+	void CApp::OnChangeCameraMode(const std::string& Mode)
+	{
+	}
+
+	// シーン再生モード変更イベント
+	void CApp::OnChangeScenePlayMode(const std::string& Mode)
+	{
+	}
 }

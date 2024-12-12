@@ -39,9 +39,12 @@ namespace animation
 		return m_UseIK;
 	}
 
-	void CAnimationClip::Initialize()
+	void CAnimationClip::Reset(const std::shared_ptr<CSkeleton>& Skeleton)
 	{
 		m_CurrentTime = 0.0f;
+
+		// 1フレームだけ計算して初期ポーズに戻す
+		Update(0.0f, Skeleton);
 	}
 
 	void CAnimationClip::AddAnimationSampler(const std::shared_ptr<animation::CAnimationSampler>& Sampler)
