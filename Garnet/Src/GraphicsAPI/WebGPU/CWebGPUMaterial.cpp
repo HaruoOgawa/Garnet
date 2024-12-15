@@ -132,7 +132,7 @@ namespace api
 			// SharedBuffer‚Íˆ—‚µ‚È‚¢
 			if (Buffer->GetSharedBufferParam().IsShared) continue;
 
-			const auto& Data = Buffer->GetData();
+			const auto& Data = Buffer->GetBuffer();
 
 			WGPUBuffer UniformBuffer;
 			const uint64_t ByteSize = static_cast<uint64_t>(Data.size());

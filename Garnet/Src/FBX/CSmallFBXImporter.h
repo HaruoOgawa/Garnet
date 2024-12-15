@@ -89,18 +89,24 @@ namespace fbx
 		static bool CreateNode(sfbx::Object* pFBXNode, std::vector<sfbx::Object*>& pFbxNodeList, std::vector<std::shared_ptr<object::CNode>>& NodeList, const bool IsMixamoFbx);
 		static bool ConnectNodeTo(std::vector<std::shared_ptr<object::CNode>>& NodeList, const std::vector<sfbx::Object*>& pFbxNodeList, const std::vector<sfbx::Mesh*>& pFbxMeshList, const std::shared_ptr<animation::CSkeleton>& Skeleton);
 
-		static bool CreateDrawInfo(api::IGraphicsAPI* pGraphicsAPI, std::vector<sfbx::Mesh*>& pFbxMeshList, const std::vector<sfbx::Object*>& FbxBoneList, const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame,
+		static bool CreateDrawInfo(api::IGraphicsAPI* pGraphicsAPI, std::vector<sfbx::Mesh*>& pFbxMeshList, const std::vector<sfbx::Object*>& FbxBoneList, 
+			const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame,
 			sfbx::Object* pFBXNode, std::vector<std::shared_ptr<graphics::CTexture>>& TextureList,
-			std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList, std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, const std::shared_ptr<animation::CSkeleton>& Skeleton, const bool IsMixamoFbx);
+			std::vector<std::tuple<std::shared_ptr<graphics::CMaterialFrame>, std::shared_ptr<graphics::CMaterial>>>& BaseMaterialList,
+			std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList, std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, 
+			const std::shared_ptr<animation::CSkeleton>& Skeleton, const bool IsMixamoFbx);
 
-		static bool CreateMaterial(api::IGraphicsAPI* pGraphicsAPI, sfbx::Mesh* pFbxMesh, std::vector<sfbx::Material*>& pFbxMaterialList, std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList,
+		static bool CreateMaterial(api::IGraphicsAPI* pGraphicsAPI, sfbx::Mesh* pFbxMesh, std::vector<sfbx::Material*>& pFbxMaterialList, 
+			std::vector<std::tuple<std::shared_ptr<graphics::CMaterialFrame>, std::shared_ptr<graphics::CMaterial>>>& BaseMaterialList,
 			const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, const std::shared_ptr<animation::CSkeleton>& Skeleton);
 
 		static bool CreateDummyMaterial(api::IGraphicsAPI* pGraphicsAPI, std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList,
 			const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, const std::shared_ptr<animation::CSkeleton>& Skeleton);
 
-		static bool CreateMesh(api::IGraphicsAPI* pGraphicsAPI, sfbx::Object* pFBXNode, std::vector<sfbx::Mesh*>& pFbxMeshList, const std::vector<sfbx::Material*>& pFbxMaterialList, const std::vector<sfbx::Object*>& FbxBoneList,
-			std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, const std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList, const std::shared_ptr<animation::CSkeleton>& Skeleton, const bool IsMixamoFbx);
+		static bool CreateMesh(api::IGraphicsAPI* pGraphicsAPI, sfbx::Object* pFBXNode, std::vector<sfbx::Mesh*>& pFbxMeshList, const std::vector<sfbx::Material*>& pFbxMaterialList, 
+			const std::vector<sfbx::Object*>& FbxBoneList, std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, 
+			std::vector<std::tuple<std::shared_ptr<graphics::CMaterialFrame>, std::shared_ptr<graphics::CMaterial>>>& BaseMaterialList,
+			std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList, const std::shared_ptr<animation::CSkeleton>& Skeleton, const bool IsMixamoFbx);
 
 		static bool CreateAnimationSkeleton(api::IGraphicsAPI* pGraphicsAPI, sfbx::Object* pFBXNode, std::shared_ptr<animation::CSkeleton>& Skeleton, std::vector<sfbx::Object*>& FbxBoneList, const std::vector<std::shared_ptr<object::CNode>>& NodeList);
 

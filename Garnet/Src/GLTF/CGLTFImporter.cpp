@@ -120,6 +120,7 @@ namespace gltf
 		}
 
 		// マテリアル
+		// マテリアルはプリミティブ単位で生成する
 		std::vector<std::tuple<std::shared_ptr<graphics::CMaterialFrame>, std::shared_ptr<graphics::CMaterial>>> BaseMaterialList;
 		if (!CreateMaterial(pGraphicsAPI, model, BaseMaterialList, MaterialFrame, Object->GetTextureSet()))
 		{
