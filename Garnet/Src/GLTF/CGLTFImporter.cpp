@@ -120,8 +120,8 @@ namespace gltf
 		}
 
 		// マテリアル
-		std::vector<std::shared_ptr<graphics::CMaterial>> MaterialList;
-		if (!CreateMaterial(pGraphicsAPI, model, MaterialList, MaterialFrame, Object->GetTextureSet()))
+		std::vector<std::tuple<std::shared_ptr<graphics::CMaterialFrame>, std::shared_ptr<graphics::CMaterial>>> BaseMaterialList;
+		if (!CreateMaterial(pGraphicsAPI, model, BaseMaterialList, MaterialFrame, Object->GetTextureSet()))
 		{
 			Console::Log("[Error GLTFImporter] Failed to CreateMaterial\n");
 
@@ -130,7 +130,8 @@ namespace gltf
 
 		// メッシュ
 		std::vector<std::shared_ptr<graphics::CMesh>> MeshList;
-		if (!CreateMesh(pGraphicsAPI, model, MeshList, MaterialList))
+		std::vector<std::shared_ptr<graphics::CMaterial>> MaterialList;
+		if (!CreateMesh(pGraphicsAPI, model, MeshList, BaseMaterialList, MaterialList))
 		{
 			Console::Log("[Error GLTFImporter] Failed to CreateMesh\n");
 
@@ -138,7 +139,7 @@ namespace gltf
 		}
 
 		// マテリアルを持っていないのならダミーを渡す
-		if (MaterialList.size() <= 0)
+		if (BaseMaterialList.size() <= 0)
 		{
 			if (!CreateDummyMaterial(pGraphicsAPI, model, MaterialList, MaterialFrame, MeshList))
 			{
@@ -283,7 +284,8 @@ namespace gltf
 		return true;
 	}
 
-	bool CGLTFImporter::CreateMaterial(api::IGraphicsAPI* pGraphicsAPI, const tinygltf::Model& model, std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList,
+	bool CGLTFImporter::CreateMaterial(api::IGraphicsAPI* pGraphicsAPI, const tinygltf::Model& model,
+		std::vector<std::tuple<std::shared_ptr<graphics::CMaterialFrame>, std::shared_ptr<graphics::CMaterial>>>& BaseMaterialList,
 		const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, const std::shared_ptr<graphics::CTextureSet>& TextureSet)
 	{
 		//
@@ -460,13 +462,15 @@ namespace gltf
 			}
 
 			// 登録
-			MaterialList.push_back(material);
+			BaseMaterialList.push_back(std::make_pair(MaterialFrame, material));
 		}
 
 		return true;
 	}
 
-	bool CGLTFImporter::CreateMesh(api::IGraphicsAPI* pGraphicsAPI, const tinygltf::Model& model, std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, const std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList)
+	bool CGLTFImporter::CreateMesh(api::IGraphicsAPI* pGraphicsAPI, const tinygltf::Model& model, std::vector<std::shared_ptr<graphics::CMesh>>& MeshList,
+		const std::vector<std::tuple<std::shared_ptr<graphics::CMaterialFrame>, std::shared_ptr<graphics::CMaterial>>>& BaseMaterialList,
+		std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList)
 	{
 		for (const auto& glTFMesh : model.meshes)
 		{
@@ -474,8 +478,6 @@ namespace gltf
 
 			for (const auto& glTFPrimitive : glTFMesh.primitives)
 			{
-				int MaterialIndex = glTFPrimitive.material;
-
 				// 頂点バッファ本体
 				std::vector<std::vector<float>> VertexDataList;
 				std::vector<int> DimentionList;
@@ -725,16 +727,28 @@ namespace gltf
 
 				Mesh->AddIndexBuffer(IndexBuffer);
 
+				// マテリアルはプリミティブ単位で生成する
+				int GLTFMaterialIndex = glTFPrimitive.material;
+				if (GLTFMaterialIndex < 0 || GLTFMaterialIndex >= static_cast<int>(BaseMaterialList.size())) return false;
+
+				const auto& BaseMaterial = BaseMaterialList[GLTFMaterialIndex];
+				auto NewMaterial = std::get<0>(BaseMaterial)->CopyMaterial(pGraphicsAPI, std::get<1>(BaseMaterial));
+				if (!NewMaterial) return false;
+
+				MaterialList.push_back(NewMaterial);
+
+				int MaterialIndex = static_cast<int>(MaterialList.size()) - 1;
+
 				// プリミティブを作成する
 				std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(VertexBuffer, IndexBuffer, MaterialIndex);
 				Mesh->SetMorphDataList(Primitive, static_cast<int>(Mesh->GetPrimitiveList().size()), MorphDataList);
 				Mesh->AddPrimitive(Primitive);
 
 				// マテリアルに参照を追加
-				if (MaterialIndex >= 0 && MaterialIndex < static_cast<int>(MaterialList.size()))
+				/*if (MaterialIndex >= 0 && MaterialIndex < static_cast<int>(MaterialList.size()))
 				{
 					MaterialList[MaterialIndex]->AddRefCount();
-				}
+				}*/
 			}
 
 			// メッシュを登録する
@@ -753,15 +767,13 @@ namespace gltf
 		{
 			for (auto& Primirive : Mesh->GetPrimitiveList())
 			{
-				Primirive->SetMaterialIndex(0);
-				MatRefCount++;
+				auto material = MaterialFrame->CreateMaterial(pGraphicsAPI, 1, graphics::ECullMode::CULL_NONE);
+				MaterialList.push_back(material);
+
+				int MaterialIndex = static_cast<int>(MaterialList.size()) - 1;
+				Primirive->SetMaterialIndex(MaterialIndex);
 			}
 		}
-
-		// マテリアルにシェーダーを設定
-		std::shared_ptr<graphics::CMaterial> material = MaterialFrame->CreateMaterial(pGraphicsAPI, MatRefCount, graphics::ECullMode::CULL_NONE);
-		
-		MaterialList.push_back(material);
 
 		return true;
 	}
