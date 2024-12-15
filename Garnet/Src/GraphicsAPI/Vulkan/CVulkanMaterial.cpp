@@ -217,7 +217,7 @@ namespace api
 			void* BuffersMappedList;
 			vkMapMemory(m_pGraphicsAPI->GetLogicalDevice(), m_VKUniformBufferMemoryList[m_pGraphicsAPI->GetCurrentFrame()][i], ByteOffset, ByteSize, 0, &BuffersMappedList);
 
-			const auto& BufferData = m_ShaderBufferList[i]->GetData();
+			const auto& BufferData = m_ShaderBufferList[i]->GetBuffer();
 			auto bufferSize = BufferData.size();
 
 			std::memcpy(BuffersMappedList, &BufferData[0], bufferSize);
@@ -517,7 +517,7 @@ namespace api
 				// SharedBufferは処理しない
 				if (Buffer->GetSharedBufferParam().IsShared) continue;
 
-				const auto& Data = Buffer->GetData();
+				const auto& Data = Buffer->GetBuffer();
 				const uint64_t ByteSize = static_cast<uint64_t>(Data.size());
 
 				// DynamicOffsetはバッファサイズが256バイト以上でないと使用できないので使用する設定になっていてそれよりも小さい時はエラーとする

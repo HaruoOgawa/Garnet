@@ -45,7 +45,8 @@ namespace graphics
 		virtual void ReplaceData(const std::string& SrcName, const void* SrcData, int SrcByteSize, int BindingIndex);
 
 		virtual void SetData(const std::string& Name, const void* Data, int ByteSize) override;
-		virtual const std::vector<unsigned char>& GetData() const override;
+		virtual void SetBuffer(const std::vector<unsigned char>& Buffer) override;
+		virtual const std::vector<unsigned char>& GetBuffer() const override;
 
 		virtual std::vector<unsigned char> GetUniformValue(const std::string& Name);
 

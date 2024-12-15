@@ -92,6 +92,11 @@ namespace graphics
 		return m_ShaderBufferList;
 	}
 
+	void CMaterial::SetTextureBindingLayoutList(const std::vector<STextureBindingLayout>& LayoutList)
+	{
+		m_TextureBindingLayoutList = LayoutList;
+	}
+
 	const std::vector<STextureBindingLayout>& CMaterial::GetTextureBindingLayoutList() const
 	{
 		return m_TextureBindingLayoutList;

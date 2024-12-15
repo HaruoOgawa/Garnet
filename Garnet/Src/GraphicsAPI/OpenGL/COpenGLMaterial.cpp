@@ -82,8 +82,8 @@ namespace api
 
 				// データの受け渡し
 				glBindBuffer(GL_UNIFORM_BUFFER, uboIndex);
-				//glBufferData(GL_UNIFORM_BUFFER, Layout.second.ByteSize, &Buffer->GetData()[Layout.second.ByteOffset], GL_STATIC_DRAW); // Bufferのデータを初期化・メモリ確保
-				glBufferSubData(GL_UNIFORM_BUFFER, 0, Layout.second.ByteSize, &Buffer->GetData()[Layout.second.ByteOffset]); // Bufferのデータを更新
+				//glBufferData(GL_UNIFORM_BUFFER, Layout.second.ByteSize, &Buffer->GetBuffer()[Layout.second.ByteOffset], GL_STATIC_DRAW); // Bufferのデータを初期化・メモリ確保
+				glBufferSubData(GL_UNIFORM_BUFFER, 0, Layout.second.ByteSize, &Buffer->GetBuffer()[Layout.second.ByteOffset]); // Bufferのデータを更新
 				glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
 				index++;
@@ -285,7 +285,7 @@ namespace api
 
 					// データの受け渡し
 					glBindBuffer(target, uboIndex);
-					glBufferData(target, Layout.second.ByteSize, &Buffer->GetData()[Layout.second.ByteOffset], usage); // Bufferのデータを初期化・メモリ確保
+					glBufferData(target, Layout.second.ByteSize, &Buffer->GetBuffer()[Layout.second.ByteOffset], usage); // Bufferのデータを初期化・メモリ確保
 					glBindBuffer(target, 0);
 
 					m_UBOList.push_back(uboIndex);

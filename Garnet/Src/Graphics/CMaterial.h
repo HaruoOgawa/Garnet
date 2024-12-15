@@ -90,6 +90,7 @@ namespace graphics
 		virtual bool DeleteMaterialFrameReference();
 
 		virtual std::vector<std::shared_ptr<CShaderBuffer>>& GetShaderBufferList();
+		virtual void SetTextureBindingLayoutList(const std::vector<STextureBindingLayout>& LayoutList);
 		virtual const std::vector<STextureBindingLayout>& GetTextureBindingLayoutList() const;
 		virtual void SetTextureBindingLayoutTextureIndex(int BindingLayoutIndex, int TextureIndex, const std::shared_ptr<graphics::CTextureSet>& TextureSet);
 

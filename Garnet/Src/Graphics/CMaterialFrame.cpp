@@ -147,6 +147,29 @@ namespace graphics
 		return Material;
 	}
 
+	std::shared_ptr<CMaterial> CMaterialFrame::CopyMaterial(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CMaterial>& SrcMaterial)
+	{
+		if (!SrcMaterial) return nullptr;
+
+		std::shared_ptr<CMaterial> DstMaterial = CreateMaterial(pGraphicsAPI, 1, SrcMaterial->GetCullMode());
+
+		// ShaderBufferの値をコピー
+		if (DstMaterial->GetShaderBufferList().size() != SrcMaterial->GetShaderBufferList().size()) return nullptr;
+
+		for (int i = 0; i < static_cast<int>(DstMaterial->GetShaderBufferList().size()); i++)
+		{
+			const auto& SrcBuffer = SrcMaterial->GetShaderBufferList()[i];
+			const auto& DstBuffer = DstMaterial->GetShaderBufferList()[i];
+
+			DstBuffer->SetBuffer(SrcBuffer->GetBuffer());
+		}
+
+		// TextureBufferの値をコピー
+		DstMaterial->SetTextureBindingLayoutList(SrcMaterial->GetTextureBindingLayoutList());
+
+		return DstMaterial;
+	}
+
 	bool CMaterialFrame::DeleteRefMaterial(const std::shared_ptr<graphics::CMaterial>& Material)
 	{
 		const auto& it = std::find(m_RefMaterialList.begin(), m_RefMaterialList.end(), Material);

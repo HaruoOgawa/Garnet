@@ -620,7 +620,7 @@ namespace scene
 
 				for (auto& UniformBuffer : ShaderBufferList)
 				{
-					const auto& BufferData = UniformBuffer->GetData();
+					const auto& BufferData = UniformBuffer->GetBuffer();
 
 					const auto& Descriptor = UniformBuffer->GetDescriptor();
 
@@ -683,7 +683,7 @@ namespace scene
 						
 
 						// Value
-						const auto& BufferData = UniformBuffer->GetData();
+						const auto& BufferData = UniformBuffer->GetBuffer();
 
 						std::vector<float> Value;
 						Value.resize(UniformData.ByteSize / sizeof(float));

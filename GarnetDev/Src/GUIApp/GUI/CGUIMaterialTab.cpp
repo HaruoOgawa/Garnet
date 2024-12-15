@@ -215,7 +215,7 @@ namespace gui
 
 			for (auto& UniformBuffer : ShaderBufferList)
 			{
-				const auto& BufferData = UniformBuffer->GetData();
+				const auto& BufferData = UniformBuffer->GetBuffer();
 
 				const auto& Descriptor = UniformBuffer->GetDescriptor();
 
