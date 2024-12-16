@@ -94,11 +94,6 @@ namespace mmd
 
 		Object->SetAnimationSkeleton(Skeleton);
 
-		for (const auto& Material : MaterialList)
-		{
-			Object->AddMaterial(Material);
-		}
-
 		for (const auto& Texture : TextureList)
 		{
 			Object->GetTextureSet()->Add2DTexture(Texture);
@@ -598,7 +593,10 @@ namespace mmd
 				}
 
 				// プリミティブを作成する
-				std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(VertexBuffer, IndexBuffer, MaterialIndex);
+				if (MaterialIndex < 0 || MaterialIndex >= static_cast<int>(MaterialList.size()));
+				const auto& material = MaterialList[MaterialIndex];
+
+				std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(VertexBuffer, IndexBuffer, material);
 				
 				Mesh->AddPrimitive(Primitive);
 			}

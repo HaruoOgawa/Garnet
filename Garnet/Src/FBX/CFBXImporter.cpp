@@ -163,19 +163,18 @@ namespace fbx
 			// マテリアルはプリミティブ単位で生成する
 			std::vector<std::tuple<std::shared_ptr<graphics::CMaterialFrame>, std::shared_ptr<graphics::CMaterial>>> BaseMaterialList;
 			std::vector<std::shared_ptr<graphics::CTexture>> TextureList;
-			std::vector<std::shared_ptr<graphics::CMaterial>> MaterialList;
 			std::vector<std::shared_ptr<graphics::CMesh>> MeshList;
 
 			if (RootNode)
 			{
 				// 描画情報の取得
 				std::vector<FbxMesh*> pFbxMeshList;
-				if (!CreateDrawInfo(pGraphicsAPI, pFbxMeshList, MaterialFrame, pFbxNodeList, RootNode, TextureList, BaseMaterialList, MaterialList, MeshList, Skeleton, IsMixamoFbx)) return false;
+				if (!CreateDrawInfo(pGraphicsAPI, pFbxMeshList, MaterialFrame, pFbxNodeList, RootNode, TextureList, BaseMaterialList, MeshList, Skeleton, IsMixamoFbx)) return false;
 
 				// マテリアルを持っていないのならダミーを渡す
-				if (MaterialList.size() <= 0)
+				if (BaseMaterialList.size() <= 0)
 				{
-					if (!CreateDummyMaterial(pGraphicsAPI, RootNode, MaterialList, MaterialFrame, MeshList, Skeleton)) return false;
+					if (!CreateDummyMaterial(pGraphicsAPI, RootNode, MaterialFrame, MeshList, Skeleton)) return false;
 				}
 
 				// 重複を除く
@@ -200,11 +199,6 @@ namespace fbx
 			}
 
 			// オブジェクトにリソースを登録
-			for (const auto& Material : MaterialList)
-			{
-				Object->AddMaterial(Material);
-			}
-
 			for (const auto& Mesh : MeshList)
 			{
 				Object->AddMesh(Mesh);
@@ -226,8 +220,7 @@ namespace fbx
 	bool CFBXImporter::CreateDrawInfo(api::IGraphicsAPI* pGraphicsAPI, std::vector<FbxMesh*>& pFbxMeshList, const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame,
 		const std::vector<FbxNode*>& pFbxNodeList, FbxNode* pFBXNode, std::vector<std::shared_ptr<graphics::CTexture>>& TextureList,
 		std::vector<std::tuple<std::shared_ptr<graphics::CMaterialFrame>, std::shared_ptr<graphics::CMaterial>>>& BaseMaterialList,
-		std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList, std::vector<std::shared_ptr<graphics::CMesh>>& MeshList,
-		const std::shared_ptr<animation::CSkeleton>& Skeleton, const bool IsMixamoFbx)
+		std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, const std::shared_ptr<animation::CSkeleton>& Skeleton, const bool IsMixamoFbx)
 	{
 		int NodeIndex = -1;
 		const auto it = std::find(pFbxNodeList.begin(), pFbxNodeList.end(), pFBXNode);
@@ -247,7 +240,7 @@ namespace fbx
 			if (!CreateMaterial(pGraphicsAPI, pFBXNode, pFbxMaterialList, BaseMaterialList, MaterialFrame, Skeleton)) return false;
 
 			// メッシュ
-			if (!CreateMesh(pGraphicsAPI, NodeIndex, pFBXNode, pFbxMeshList, pFbxMaterialList, MeshList, BaseMaterialList, MaterialList, Skeleton, IsMixamoFbx)) return false;
+			if (!CreateMesh(pGraphicsAPI, NodeIndex, pFBXNode, pFbxMeshList, pFbxMaterialList, MeshList, BaseMaterialList, Skeleton, IsMixamoFbx)) return false;
 		}
 		
 
@@ -255,7 +248,7 @@ namespace fbx
 		for (int i = 0; i < pFBXNode->GetChildCount(); i++)
 		{
 			if (!CreateDrawInfo(pGraphicsAPI, pFbxMeshList, MaterialFrame, pFbxNodeList, pFBXNode->GetChild(i), TextureList, 
-				BaseMaterialList, MaterialList, MeshList, Skeleton, IsMixamoFbx)) return false;
+				BaseMaterialList, MeshList, Skeleton, IsMixamoFbx)) return false;
 		}
 
 		return true;
@@ -314,7 +307,7 @@ namespace fbx
 		return true;
 	}
 
-	bool CFBXImporter::CreateDummyMaterial(api::IGraphicsAPI* pGraphicsAPI, FbxNode* pFBXNode, std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList,
+	bool CFBXImporter::CreateDummyMaterial(api::IGraphicsAPI* pGraphicsAPI, FbxNode* pFBXNode,
 		const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, const std::shared_ptr<animation::CSkeleton>& Skeleton)
 	{
 		if (!MaterialFrame) return true;
@@ -349,10 +342,7 @@ namespace fbx
 					material->ReplacePreloadUniformValue("r_SkinMatrixBuffer", &SkinMatrixList[0], static_cast<int>(SkinMatrixList.size()) * sizeof(glm::mat4), 1);
 				}
 
-				MaterialList.push_back(material);
-
-				int MaterialIndex = static_cast<int>(MaterialList.size()) - 1;
-				Primirive->SetMaterialIndex(MaterialIndex);
+				Primirive->AddMaterial(material);
 			}
 		}
 
@@ -362,7 +352,7 @@ namespace fbx
 	bool CFBXImporter::CreateMesh(api::IGraphicsAPI* pGraphicsAPI, int NodeIndex, FbxNode* pFBXNode, std::vector<FbxMesh*>& pFbxMeshList,
 		const std::vector<FbxSurfaceMaterial*>& pFbxMaterialList, std::vector<std::shared_ptr<graphics::CMesh>>& MeshList,
 		const std::vector<std::tuple<std::shared_ptr<graphics::CMaterialFrame>, std::shared_ptr<graphics::CMaterial>>>& BaseMaterialList,
-		std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList, const std::shared_ptr<animation::CSkeleton>& Skeleton, const bool IsMixamoFbx)
+		const std::shared_ptr<animation::CSkeleton>& Skeleton, const bool IsMixamoFbx)
 	{
 		FbxMesh* pFbxMesh = pFBXNode->GetMesh();
 		
@@ -785,12 +775,8 @@ namespace fbx
 				auto NewMaterial = std::get<0>(BaseMaterial)->CopyMaterial(pGraphicsAPI, std::get<1>(BaseMaterial));
 				if (!NewMaterial) return false;
 
-				MaterialList.push_back(NewMaterial);
-
-				int MaterialIndex = static_cast<int>(MaterialList.size()) - 1;
-
 				// プリミティブを作成する
-				std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(VertexBuffer, IndexBuffer, MaterialIndex);
+				std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(VertexBuffer, IndexBuffer, NewMaterial);
 				Mesh->AddPrimitive(Primitive);
 			}
 

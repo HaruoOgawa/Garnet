@@ -46,8 +46,6 @@ namespace graphics
 
 		std::vector<uint32_t> m_BindingRefSizeList; // GLSLの各bindingが参照しているバッファのサイズ
 
-		std::shared_ptr<graphics::CMaterial> m_DepthMaterial;
-
 		bool m_EnabledZWrite;
 		EDepthFunc m_DepthFunc;
 
@@ -95,7 +93,6 @@ namespace graphics
 		virtual void SetTextureBindingLayoutTextureIndex(int BindingLayoutIndex, int TextureIndex, const std::shared_ptr<graphics::CTextureSet>& TextureSet);
 
 		virtual bool Create(const std::shared_ptr<graphics::CTextureSet>& TextureSet) = 0;
-		virtual bool CreateDepthMaterial(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<graphics::CMaterialFrame>& DepthMF);
 
 		virtual bool ReCreate(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, const std::vector<std::shared_ptr<CShaderBuffer>>& ShaderBufferList, const std::vector<STextureBindingLayout>& TextureBindingLayoutList);
 
@@ -103,8 +100,6 @@ namespace graphics
 
 		virtual bool CreateRefTextureList(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, const std::shared_ptr<graphics::CTextureSet>& TextureSet);
 		virtual bool ReCreateRefTextureList(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo);
-
-		virtual std::shared_ptr<graphics::CMaterial> GetDepthMaterial();
 
 		virtual void SetEnabledZWrite(bool Flag);
 		virtual bool IsEnabledZWrite() const;

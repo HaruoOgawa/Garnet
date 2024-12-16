@@ -36,7 +36,6 @@ namespace gui
 		static float GetFloat(const std::vector<unsigned char>& BufferData, int Offset);
 		static int GetInt(const std::vector<unsigned char>& BufferData, int Offset);
 
-		static std::string GetStrFromCullMode(graphics::ECullMode CullMode);
 	public:
 		static bool Draw(api::IGraphicsAPI* pGraphicsAPI, const std::vector<std::shared_ptr<object::C3DObject>>& ObjectList, const std::shared_ptr<scene::CSceneController>& SceneController, 
 			int SelectedObjectIndex, int SelectedNodeIndex);

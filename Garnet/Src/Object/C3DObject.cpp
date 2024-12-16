@@ -26,7 +26,6 @@ namespace object
 	{
 		m_IsCreated = false;
 		m_NodeList.clear();
-		m_MaterialList.clear();
 	}
 
 	void C3DObject::Reset()
@@ -155,12 +154,9 @@ namespace object
 		const std::shared_ptr<graphics::CMaterial>& Material, const std::shared_ptr<graphics::CMaterialFrame>& DepthMF, 
 		const std::shared_ptr<math::CTransform> NodeTransform, const std::shared_ptr<physics::IPhysicsObject>& PhysicsObject)
 	{
-		// Material
-		AddMaterial(Material);
-
 		// Mesh
 		std::shared_ptr<graphics::CMesh> Mesh = std::make_shared<graphics::CMesh>();
-		Mesh->CreatePresetSimpleMesh(createInfo.first, createInfo.second, 0, PresetType);
+		Mesh->CreatePresetSimpleMesh(createInfo.first, createInfo.second, Material, PresetType);
 
 		AddMesh(Mesh);
 
@@ -193,23 +189,12 @@ namespace object
 		CreatePhysics(pPhysicsEngine);
 		ApplyPhysicsConstraint(pPhysicsEngine);
 
-		// Material
-		for (auto& Material : m_MaterialList)
-		{
-			if (!Material->Create(m_TextureSet)) return false;
-			
-			if (DepthMF)
-			{
-				if (!Material->CreateDepthMaterial(pGraphicsAPI, DepthMF)) return false;
-			}
-		}
-
 		// Primitive
 		bool ExistMorph = false;
 
 		for (const auto& Mesh : m_MeshList)
 		{
-			if (!Mesh->Create(pGraphicsAPI, m_MaterialList, m_PassName, m_DepthPassName)) return false;
+			if (!Mesh->Create(pGraphicsAPI, m_TextureSet, m_PassName, m_DepthPassName)) return false;
 
 			// モーフ処理が必要かどうか
 			if (Mesh->GetMorphDataList().size() > 0)
@@ -236,11 +221,18 @@ namespace object
 			}
 
 			// Material
-			for (const auto& Material : m_MaterialList)
+			for (const auto& Mesh : m_MeshList)
 			{
-				if (!Material->GetRefTrackIDList().empty())
+				for (const auto& Primitive : Mesh->GetPrimitiveList())
 				{
-					m_TLMaterial.emplace(Material);
+					const auto& Material = Primitive->GetMaterial();
+					if (!Material) continue;
+
+					if (!Material->GetRefTrackIDList().empty())
+					{
+						m_TLMaterial.emplace(Material);
+					}
+
 				}
 			}
 		}
@@ -382,6 +374,7 @@ namespace object
 	{
 		if (!m_IsCreated) return true;
 
+		/*
 		// マテリアルの参照カウントをリセット
 		for (auto& Material : m_MaterialList)
 		{
@@ -395,6 +388,7 @@ namespace object
 			if (!DepthMaterial) continue;
 			DepthMaterial->ResetDynamicOffset();
 		}
+		*/
 
 #ifdef USE_ANIMATION
 		if (!m_AnimationController->Update(DeltaSecondsTime)) return false;
@@ -440,7 +434,7 @@ namespace object
 		return true;
 	}
 
-	bool C3DObject::Draw(api::IGraphicsAPI* pGraphicsAPI, bool IsDepthPass, bool DrawOutline, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo,
+	bool C3DObject::Draw(api::IGraphicsAPI* pGraphicsAPI, bool DrawOutline, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo,
 		const std::shared_ptr<object::C3DObject>& DebugSphere)
 	{
 		if (!m_IsCreated) return true;
@@ -449,14 +443,7 @@ namespace object
 
 		// 描画パスが違うなら描画しない
 		// ToDo: PassNameは配列にしてもいいかもしれない
-		if (IsDepthPass)
-		{
-			if (m_DepthPassName != pGraphicsAPI->GetCurrentRenderPassName()) return true;
-		}
-		else
-		{
-			if (m_PassName != pGraphicsAPI->GetCurrentRenderPassName()) return true;
-		}
+		if (m_PassName != pGraphicsAPI->GetCurrentRenderPassName()) return true;
 
 		// 描画
 		if (!m_RootNodeIndexList.empty())
@@ -468,7 +455,7 @@ namespace object
 
 				auto& RootNode = m_NodeList[RootNodeIndex];
 
-				if (!DrawFromNode(RootNode, pGraphicsAPI, IsDepthPass, DrawOutline, Camera, Projection, DrawInfo)) return false;
+				if (!DrawFromNode(RootNode, pGraphicsAPI, DrawOutline, Camera, Projection, DrawInfo)) return false;
 			}
 		}
 		else
@@ -476,7 +463,7 @@ namespace object
 			// ルートノードが指定されていないので全ノードを順番に描画
 			for (const auto& Node : m_NodeList)
 			{
-				if (!Draw(Node, pGraphicsAPI, IsDepthPass, DrawOutline, Camera, Projection, DrawInfo)) return false;
+				if (!Draw(Node, pGraphicsAPI, DrawOutline, Camera, Projection, DrawInfo)) return false;
 			}
 		}
 
@@ -486,14 +473,14 @@ namespace object
 		return true;
 	}
 
-	bool C3DObject::DrawFromNode(const std::shared_ptr<CNode>& Node, api::IGraphicsAPI* pGraphicsAPI, bool IsDepthPass, bool DrawOutline, const std::shared_ptr<camera::CCamera>& Camera,
+	bool C3DObject::DrawFromNode(const std::shared_ptr<CNode>& Node, api::IGraphicsAPI* pGraphicsAPI, bool DrawOutline, const std::shared_ptr<camera::CCamera>& Camera,
 		const std::shared_ptr<projection::CProjection>& Projection, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo)
 	{
 		// 非表示だったら子要素も描画しない
 		if (!Node->IsEnabled()) return true;
 
 		// 自分自身の描画
-		if (!Draw(Node, pGraphicsAPI, IsDepthPass, DrawOutline, Camera, Projection, DrawInfo)) return false;
+		if (!Draw(Node, pGraphicsAPI, DrawOutline, Camera, Projection, DrawInfo)) return false;
 
 		// 子要素の描画
 		for (const int ChildIndex : Node->GetChildrenNodeIndexList())
@@ -501,13 +488,13 @@ namespace object
 			if (ChildIndex < 0 || ChildIndex >= m_NodeList.size()) continue;
 
 			auto& ChildNode = m_NodeList[ChildIndex];
-			if (!DrawFromNode(ChildNode, pGraphicsAPI, IsDepthPass, DrawOutline, Camera, Projection, DrawInfo)) return false;
+			if (!DrawFromNode(ChildNode, pGraphicsAPI, DrawOutline, Camera, Projection, DrawInfo)) return false;
 		}
 
 		return true;
 	}
 
-	bool C3DObject::Draw(const std::shared_ptr<CNode>& Node, api::IGraphicsAPI* pGraphicsAPI, bool IsDepthPass, bool DrawOutline, const std::shared_ptr<camera::CCamera>& Camera,
+	bool C3DObject::Draw(const std::shared_ptr<CNode>& Node, api::IGraphicsAPI* pGraphicsAPI, bool DrawOutline, const std::shared_ptr<camera::CCamera>& Camera,
 		const std::shared_ptr<projection::CProjection>& Projection, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo)
 	{
 		for (const auto& Component : Node->GetComponentList())
@@ -528,27 +515,15 @@ namespace object
 		{
 			const auto& Primitive = Mesh->GetPrimitiveList()[PrimitiveIndex];
 
-			int MaterialIndex = Primitive->GetMaterialIndex();
-			if (MaterialIndex < 0 || MaterialIndex >= m_MaterialList.size()) return true;
-
-			std::shared_ptr<graphics::CMaterial> Material = nullptr;
-
-			if (IsDepthPass)
-			{
-				Material = m_MaterialList[MaterialIndex]->GetDepthMaterial();
-			}
-			else
-			{
-				Material = m_MaterialList[MaterialIndex];
-			}
-
+			std::shared_ptr<graphics::CMaterial> Material = Primitive->GetMaterial();
 			if (!Material) return true;
 
+			int DynamicOffsetNum = 0;
 			// マテリアルの参照カウントをダイナミックオフセットとして使用する
-			int DynamicOffsetNum = Material->GetDynamicOffset();
+			//int DynamicOffsetNum = Material->GetDynamicOffset();
 
 			// ダイナミックオフセットがマテリアル参照数よりも大きい時は終了する
-			if (DynamicOffsetNum > Material->GetRefCount()) return true;
+			//if (DynamicOffsetNum > Material->GetRefCount()) return true;
 
 			// アウトライン
 			if (DrawOutline)
@@ -587,7 +562,7 @@ namespace object
 			}
 #endif
 			// 描画実行
-			if (!Primitive->Draw(Material, DynamicOffsetNum, IsDepthPass)) return false;
+			if (!Primitive->Draw(DynamicOffsetNum)) return false;
 
 			// マテリアルの参照カウントをインクリメントする
 			Material->IncreaseDynamicOffset();
@@ -599,7 +574,7 @@ namespace object
 		return true;
 	}
 
-	bool C3DObject::DrawDebugBone(api::IGraphicsAPI* pGraphicsAPI, bool IsDepthPass, bool DrawOutline, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
+	bool C3DObject::DrawDebugBone(api::IGraphicsAPI* pGraphicsAPI, bool DrawOutline, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
 		const std::shared_ptr<graphics::CDrawInfo>& DrawInfo, const std::shared_ptr<object::C3DObject>& DebugSphere)
 	{
 #ifdef USE_ANIMATION
@@ -627,11 +602,11 @@ namespace object
 						//DebugSphere->SetPos(m_ObjectTransform->GetModelMatrix()* BoneNode->GetWorldMatrix()* glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
 					}
 
-					DebugSphere->GetMaterialList()[0]->SetUniformValue("useColor", &glm::ivec1(1)[0], sizeof(glm::ivec1));
-					DebugSphere->GetMaterialList()[0]->SetUniformValue("baseColor", &glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)[0], sizeof(glm::vec4));
-					DebugSphere->GetMaterialList()[0]->SetUniformValue("baseColorFactor", &glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)[0], sizeof(glm::vec4));
+					DebugSphere->GetMeshList()[0]->GetPrimitiveList()[0]->GetMaterial()->SetUniformValue("useColor", &glm::ivec1(1)[0], sizeof(glm::ivec1));
+					DebugSphere->GetMeshList()[0]->GetPrimitiveList()[0]->GetMaterial()->SetUniformValue("baseColor", &glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)[0], sizeof(glm::vec4));
+					DebugSphere->GetMeshList()[0]->GetPrimitiveList()[0]->GetMaterial()->SetUniformValue("baseColorFactor", &glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)[0], sizeof(glm::vec4));
 
-					if (!DebugSphere->Draw(pGraphicsAPI, IsDepthPass, false, Camera, Projection, DrawInfo)) return false;
+					if (!DebugSphere->Draw(pGraphicsAPI, false, Camera, Projection, DrawInfo)) return false;
 				}
 			}
 		}
@@ -639,7 +614,7 @@ namespace object
 		return true;
 	}
 
-	bool C3DObject::DrawDebugPhysics(api::IGraphicsAPI* pGraphicsAPI, bool IsDepthPass, bool DrawOutline, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
+	bool C3DObject::DrawDebugPhysics(api::IGraphicsAPI* pGraphicsAPI, bool DrawOutline, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
 		const std::shared_ptr<graphics::CDrawInfo>& DrawInfo, const std::shared_ptr<object::C3DObject>& DebugSphere)
 	{
 #ifdef USE_ANIMATION
@@ -656,17 +631,17 @@ namespace object
 
 					const auto& BoneNode = Bone->GetBoneNode();
 
-					DebugSphere->GetMaterialList()[0]->SetUniformValue("useColor", &glm::ivec1(1)[0], sizeof(glm::ivec1));
+					DebugSphere->GetMeshList()[0]->GetPrimitiveList()[0]->GetMaterial()->SetUniformValue("useColor", &glm::ivec1(1)[0], sizeof(glm::ivec1));
 
 					for (const auto& PhysicsObject : BoneNode->GetPhysicsObjectList())
 					{
 						if (PhysicsObject->IsStatic())
 						{
-							DebugSphere->GetMaterialList()[0]->SetUniformValue("baseColor", &glm::vec4(1.0f, 0.0f, 0.0f, 1.0f)[0], sizeof(glm::vec4));
+							DebugSphere->GetMeshList()[0]->GetPrimitiveList()[0]->GetMaterial()->SetUniformValue("baseColor", &glm::vec4(1.0f, 0.0f, 0.0f, 1.0f)[0], sizeof(glm::vec4));
 						}
 						else
 						{
-							DebugSphere->GetMaterialList()[0]->SetUniformValue("baseColor", &glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)[0], sizeof(glm::vec4));
+							DebugSphere->GetMeshList()[0]->GetPrimitiveList()[0]->GetMaterial()->SetUniformValue("baseColor", &glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)[0], sizeof(glm::vec4));
 						}
 
 						{
@@ -685,7 +660,7 @@ namespace object
 							DebugSphere->SetScale(WorldScale);
 						}
 
-						if (!DebugSphere->Draw(pGraphicsAPI, IsDepthPass, false, Camera, Projection, DrawInfo)) return false;
+						if (!DebugSphere->Draw(pGraphicsAPI, false, Camera, Projection, DrawInfo)) return false;
 					}
 				}
 			}
@@ -747,10 +722,10 @@ namespace object
 		return m_MeshList;
 	}
 
-	void C3DObject::AddMaterial(const std::shared_ptr<graphics::CMaterial>& Material)
+	/*void C3DObject::AddMaterial(const std::shared_ptr<graphics::CMaterial>& Material)
 	{
 		m_MaterialList.push_back(Material);
-	}
+	}*/
 
 	void C3DObject::AddMorphNode(const std::shared_ptr<CNode>& Node)
 	{
@@ -807,14 +782,9 @@ namespace object
 	}
 #endif
 
-	const std::vector<std::shared_ptr<graphics::CMaterial>>& C3DObject::GetMaterialList() const
-	{
-		return m_MaterialList;
-	}
-
 	bool C3DObject::ReplaceMaterial(const std::shared_ptr<graphics::CMaterial>& OldMaterial, const std::shared_ptr<graphics::CMaterial>& NewMaterial)
 	{
-		auto it = std::find(m_MaterialList.begin(), m_MaterialList.end(), OldMaterial);
+		/*auto it = std::find(m_MaterialList.begin(), m_MaterialList.end(), OldMaterial);
 		if (it == m_MaterialList.end()) return false;
 
 		OldMaterial->DeleteMaterialFrameReference();
@@ -823,7 +793,7 @@ namespace object
 
 		if (!NewMaterial->Create(m_TextureSet)) return false;
 
-		m_MaterialList[MaterialIndex] = NewMaterial;
+		m_MaterialList[MaterialIndex] = NewMaterial;*/
 
 		return true;
 	}

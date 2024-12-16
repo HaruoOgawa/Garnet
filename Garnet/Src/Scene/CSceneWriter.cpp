@@ -519,8 +519,10 @@ namespace scene
 
 			const auto& PrimitiveList = Mesh->GetPrimitiveList();
 
-			for (const auto& Primitive : PrimitiveList)
+			for (int PrimitiveIndex = 0; PrimitiveIndex < static_cast<int>(PrimitiveList.size()); PrimitiveIndex++)
 			{
+				const auto& Primitive = PrimitiveList[PrimitiveIndex];
+
 				ordered_json primitiveJSON;
 
 				graphics::EPresetPrimitiveType PresetType = Primitive->GetPresetType();
@@ -546,7 +548,6 @@ namespace scene
 					break;
 				}
 
-				primitiveJSON["materialindex"] = Primitive->GetMaterialIndex();
 				primitiveJSON["type"] = type;
 
 				meshJSON["primitives"].push_back(primitiveJSON);
@@ -560,214 +561,231 @@ namespace scene
 
 	bool CSceneWriter::WriteMaterials(ordered_json& ObjectJSON, object::C3DObject* pObject, const std::map<std::string, std::shared_ptr<graphics::CTexture>>& TextureInfoList, const std::shared_ptr<timeline::CTimelineController>& TimelineController)
 	{
-		const auto& MaterialList = pObject->GetMaterialList();
 		const auto& TextureSet = pObject->GetTextureSet();
 		const auto& Texture2DList = TextureSet->Get2DTextureList();
 
-		for (const auto& Material : MaterialList)
+		const auto& MeshList = pObject->GetMeshList();
+
+		for (int MeshIndex = 0; MeshIndex < static_cast<int>(MeshList.size()); MeshIndex++)
 		{
-			// 使用しているトラックの種類
-			std::set<std::string> TrackUniformNameList;
-			if (TimelineController)
+			const auto& Mesh = MeshList[MeshIndex];
+
+			const auto& PrimitiveList = Mesh->GetPrimitiveList();
+
+			for (int PrimitiveIndex = 0; PrimitiveIndex < static_cast<int>(PrimitiveList.size()); PrimitiveIndex++)
 			{
-				const auto& Clip = TimelineController->GetClip();
+				const auto& Primitive = PrimitiveList[PrimitiveIndex];
 
-				if (Clip)
+				const auto& Material = Primitive->GetMaterial();
+				if (!Material) continue;
+
+				// 使用しているトラックの種類
+				std::set<std::string> TrackUniformNameList;
+				if (TimelineController)
 				{
-					for (const auto& TrackID : Material->GetRefTrackIDList())
-					{
-						auto Track = Clip->FindTrack(TrackID);
-						if (!Track) continue;
+					const auto& Clip = TimelineController->GetClip();
 
-						TrackUniformNameList.emplace(Track->GetParam_String("UniformName"));
+					if (Clip)
+					{
+						for (const auto& TrackID : Material->GetRefTrackIDList())
+						{
+							auto Track = Clip->FindTrack(TrackID);
+							if (!Track) continue;
+
+							TrackUniformNameList.emplace(Track->GetParam_String("UniformName"));
+						}
 					}
 				}
-			}
 
-			ordered_json materialJSON;
+				ordered_json materialJSON;
 
-			// materialframe
-			const auto& MaterialFrame = Material->GetMaterialFrame();
-			if (!MaterialFrame) return false;
-			materialJSON["materialframe"] = MaterialFrame->GetMaterialFrameName();
+				//
+				materialJSON["meshindex"] = MeshIndex;
+				materialJSON["primitiveindex"] = PrimitiveIndex;
 
-			// cull
-			{
-				std::string cull = "";
-				graphics::ECullMode CullMode = Material->GetCullMode();
-				switch (CullMode)
+				// materialframe
+				const auto& MaterialFrame = Material->GetMaterialFrame();
+				if (!MaterialFrame) return false;
+				materialJSON["materialframe"] = MaterialFrame->GetMaterialFrameName();
+
+				// cull
 				{
-				case graphics::ECullMode::CULL_NONE:
-					cull = "none";
-					break;
-				case graphics::ECullMode::CULL_BACK:
-					cull = "back";
-					break;
-				case graphics::ECullMode::CULL_FRONT:
-					cull = "front";
-					break;
-				default:
-					cull = "none";
-					break;
+					std::string cull = "";
+					graphics::ECullMode CullMode = Material->GetCullMode();
+					switch (CullMode)
+					{
+					case graphics::ECullMode::CULL_NONE:
+						cull = "none";
+						break;
+					case graphics::ECullMode::CULL_BACK:
+						cull = "back";
+						break;
+					case graphics::ECullMode::CULL_FRONT:
+						cull = "front";
+						break;
+					default:
+						cull = "none";
+						break;
+					}
+
+					materialJSON["cull"] = cull;
 				}
 
-				materialJSON["cull"] = cull;
-			}
-
-			// uniformvalues
-			{
-				const auto& ShaderBufferList = Material->GetShaderBufferList();
-
-				for (auto& UniformBuffer : ShaderBufferList)
+				// uniformvalues
 				{
-					const auto& BufferData = UniformBuffer->GetBuffer();
+					const auto& ShaderBufferList = Material->GetShaderBufferList();
 
-					const auto& Descriptor = UniformBuffer->GetDescriptor();
-
-					for (const auto& UniformDataMap : Descriptor->GetDataList())
+					for (auto& UniformBuffer : ShaderBufferList)
 					{
-						const auto& UniformData = UniformDataMap.second;
-
-						if (UniformData.ValueInput.Hide) continue;
-
-						// name
-						const auto& UniformName = UniformData.UniformName;
-
-						// タイムラインで管理されているなら書き込みをスキップ
-						if (TrackUniformNameList.find(UniformName) != TrackUniformNameList.end()) continue;
-
-						// type
-						std::string type = std::string();
-						graphics::EUniformValueType ValueType = UniformData.ValueType;
-						switch (ValueType)
-						{
-						case graphics::EUniformValueType::NONE:
-							break;
-						case graphics::EUniformValueType::VALUE_TYPE_MAT4:
-							type = "mat4";
-							break;
-						case graphics::EUniformValueType::VALUE_TYPE_MAT3:
-							type = "mat3";
-							break;
-						case graphics::EUniformValueType::VALUE_TYPE_MAT2:
-							type = "mat2";
-							break;
-						case graphics::EUniformValueType::VALUE_TYPE_VEC4:
-							type = "vec4";
-							break;
-						case graphics::EUniformValueType::VALUE_TYPE_VEC3:
-							type = "vec3";
-							break;
-						case graphics::EUniformValueType::VALUE_TYPE_VEC2:
-							type = "vec2";
-							break;
-						case graphics::EUniformValueType::VALUE_TYPE_FLOAT:
-							type = "float";
-							break;
-						case graphics::EUniformValueType::VALUE_TYPE_INT:
-							type = "int";
-							break;
-						case graphics::EUniformValueType::VALUE_TYPE_FLOAT_ARRAY:
-							break;
-						case graphics::EUniformValueType::VALUE_TYPE_MAT4_ARRAY:
-							break;
-						default:
-							break;
-						}
-
-						if (type.empty()) continue;
-
-						// 初期値
-						std::vector<float> InitValue;
-						bool ExistInitValue = MaterialFrame->GetDefaultValue(UniformBuffer->GetBufferName(), UniformName, InitValue);
-						
-
-						// Value
 						const auto& BufferData = UniformBuffer->GetBuffer();
 
-						std::vector<float> Value;
-						Value.resize(UniformData.ByteSize / sizeof(float));
-						std::memcpy(&Value[0], &BufferData[UniformData.ByteOffset], UniformData.ByteSize);
+						const auto& Descriptor = UniformBuffer->GetDescriptor();
 
-						ordered_json valueJSON;
-
-						bool ValueUpdated = false; // 値が更新されたかどうか
-
-						for (int vIndex = 0; vIndex < static_cast<int>(Value.size()); vIndex++)
+						for (const auto& UniformDataMap : Descriptor->GetDataList())
 						{
-							auto v = Value[vIndex];
+							const auto& UniformData = UniformDataMap.second;
 
-							valueJSON.push_back(v);
+							if (UniformData.ValueInput.Hide) continue;
 
-							if (ExistInitValue)
+							// name
+							const auto& UniformName = UniformData.UniformName;
+
+							// タイムラインで管理されているなら書き込みをスキップ
+							if (TrackUniformNameList.find(UniformName) != TrackUniformNameList.end()) continue;
+
+							// type
+							std::string type = std::string();
+							graphics::EUniformValueType ValueType = UniformData.ValueType;
+							switch (ValueType)
 							{
-								// 初期値との差が0.01よりも大きいパラメーターが1つでもあれば更新された判定にする
-								if (fabs(v - InitValue[vIndex]) >= 0.01)
+							case graphics::EUniformValueType::NONE:
+								break;
+							case graphics::EUniformValueType::VALUE_TYPE_MAT4:
+								type = "mat4";
+								break;
+							case graphics::EUniformValueType::VALUE_TYPE_MAT3:
+								type = "mat3";
+								break;
+							case graphics::EUniformValueType::VALUE_TYPE_MAT2:
+								type = "mat2";
+								break;
+							case graphics::EUniformValueType::VALUE_TYPE_VEC4:
+								type = "vec4";
+								break;
+							case graphics::EUniformValueType::VALUE_TYPE_VEC3:
+								type = "vec3";
+								break;
+							case graphics::EUniformValueType::VALUE_TYPE_VEC2:
+								type = "vec2";
+								break;
+							case graphics::EUniformValueType::VALUE_TYPE_FLOAT:
+								type = "float";
+								break;
+							case graphics::EUniformValueType::VALUE_TYPE_INT:
+								type = "int";
+								break;
+							case graphics::EUniformValueType::VALUE_TYPE_FLOAT_ARRAY:
+								break;
+							case graphics::EUniformValueType::VALUE_TYPE_MAT4_ARRAY:
+								break;
+							default:
+								break;
+							}
+
+							if (type.empty()) continue;
+
+							// 初期値
+							std::vector<float> InitValue;
+							bool ExistInitValue = MaterialFrame->GetDefaultValue(UniformBuffer->GetBufferName(), UniformName, InitValue);
+
+
+							// Value
+							const auto& BufferData = UniformBuffer->GetBuffer();
+
+							std::vector<float> Value;
+							Value.resize(UniformData.ByteSize / sizeof(float));
+							std::memcpy(&Value[0], &BufferData[UniformData.ByteOffset], UniformData.ByteSize);
+
+							ordered_json valueJSON;
+
+							bool ValueUpdated = false; // 値が更新されたかどうか
+
+							for (int vIndex = 0; vIndex < static_cast<int>(Value.size()); vIndex++)
+							{
+								auto v = Value[vIndex];
+
+								valueJSON.push_back(v);
+
+								if (ExistInitValue)
 								{
+									// 初期値との差が0.01よりも大きいパラメーターが1つでもあれば更新された判定にする
+									if (fabs(v - InitValue[vIndex]) >= 0.01)
+									{
+										ValueUpdated = true;
+									}
+								}
+								else
+								{
+									// 初期値が存在しないので値は更新されたことにする
 									ValueUpdated = true;
 								}
 							}
-							else
+
+							// 値が更新されていなければスキップ
+							if (!ValueUpdated) continue;
+
+							//
+							materialJSON["uniformvalues"].push_back({
+								{ "name", UniformName },
+								{ "type", type },
+								{ "value", valueJSON}
+								});
+						}
+					}
+
+					// textures
+				}
+
+				// textures
+				{
+					const auto& TextureBindingLayoutList = Material->GetTextureBindingLayoutList();
+
+					for (const auto& TextureBindingLayout : TextureBindingLayoutList)
+					{
+						int TextureIndex = TextureBindingLayout.TextureIndex;
+						std::string RefTextureName = std::string();
+
+						if (TextureBindingLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_2D)
+						{
+							if (TextureIndex < 0 || TextureIndex >= static_cast<int>(Texture2DList.size())) continue;
+
+							const auto& Texture = Texture2DList[TextureIndex];
+							const auto& it = std::find_if(TextureInfoList.begin(), TextureInfoList.end(), [&](const auto& val) { return (Texture == val.second); });
+
+							if (it != TextureInfoList.end())
 							{
-								// 初期値が存在しないので値は更新されたことにする
-								ValueUpdated = true;
+								RefTextureName = it->first;
+
+								TextureIndex = -1;
 							}
 						}
 
-						// 値が更新されていなければスキップ
-						if (!ValueUpdated) continue;
-
-						//
-						materialJSON["uniformvalues"].push_back({
-							{ "name", UniformName },
-							{ "type", type },
-							{ "value", valueJSON}
+						materialJSON["textures"].push_back({
+							{ "texturebuffername", TextureBindingLayout.TextureName },
+							{ "textureindex", TextureIndex },
+							{ "texturename", RefTextureName }
 							});
 					}
 				}
 
-				// textures
-			}
-
-			// textures
-			{
-				const auto& TextureBindingLayoutList = Material->GetTextureBindingLayoutList();
-
-				for (const auto& TextureBindingLayout : TextureBindingLayoutList)
+				// Timeline Track ID
+				for (const auto& TrackID : Material->GetRefTrackIDList())
 				{
-					int TextureIndex = TextureBindingLayout.TextureIndex;
-					std::string RefTextureName = std::string();
-
-					if (TextureBindingLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_2D)
-					{
-						if (TextureIndex < 0 || TextureIndex >= static_cast<int>(Texture2DList.size())) continue;
-
-						const auto& Texture = Texture2DList[TextureIndex];
-						const auto& it = std::find_if(TextureInfoList.begin(), TextureInfoList.end(), [&](const auto& val) { return (Texture == val.second); });
-						
-						if (it != TextureInfoList.end())
-						{
-							RefTextureName = it->first;
-
-							TextureIndex = -1;
-						}
-					}
-
-					materialJSON["textures"].push_back({
-						{ "texturebuffername", TextureBindingLayout.TextureName },
-						{ "textureindex", TextureIndex },
-						{ "texturename", RefTextureName }
-					});
+					materialJSON["trackids"].push_back(TrackID);
 				}
-			}
 
-			// Timeline Track ID
-			for (const auto& TrackID : Material->GetRefTrackIDList())
-			{
-				materialJSON["trackids"].push_back(TrackID);
+				ObjectJSON["materials"].push_back(materialJSON);
 			}
-
-			ObjectJSON["materials"].push_back(materialJSON);
 		}
 
 		return true;

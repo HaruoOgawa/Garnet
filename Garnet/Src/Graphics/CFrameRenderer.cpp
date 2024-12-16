@@ -78,7 +78,7 @@ namespace graphics
 
 	bool CFrameRenderer::Draw(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo)
 	{
-		if (!m_RenderBoard->Draw(pGraphicsAPI, false, false, Camera, Projection, DrawInfo)) return false;
+		if (!m_RenderBoard->Draw(pGraphicsAPI, false, Camera, Projection, DrawInfo)) return false;
 
 		return true;
 	}

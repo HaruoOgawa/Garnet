@@ -46,9 +46,10 @@ namespace scene
 	struct SMaterialInfo 
 	{
 		std::string MaterialFrameName = "";
+		int MeshIndex = -1;
+		int PrimitiveIndex = -1;
 		std::vector<SUniformInfo> UniformInfoList;
 		std::vector<std::tuple<std::string, std::string, int>> Textures;
-		int RefCount = 0;
 		graphics::ECullMode CullMode = graphics::ECullMode::CULL_BACK;
 		std::vector<std::string> TrackIDList;
 	};
@@ -191,7 +192,7 @@ namespace scene
 		bool LateUpdate(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo);
 		bool FixedUpdate(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo);
 
-		bool Draw(api::IGraphicsAPI* pGraphicsAPI, bool IsDepthPass, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
+		bool Draw(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
 			const std::shared_ptr<graphics::CDrawInfo>& DrawInfo);
 	};
 }

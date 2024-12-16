@@ -431,14 +431,14 @@ namespace scene
 		return true;
 	}
 
-	bool CSceneController::Draw(api::IGraphicsAPI* pGraphicsAPI, bool IsDepthPass, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
+	bool CSceneController::Draw(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
 		const std::shared_ptr<graphics::CDrawInfo>& DrawInfo)
 	{
 		if (!m_IsLoaded) return true;
 
 		for (const auto& Object : m_ObjectList)
 		{
-			if (!Object->Draw(pGraphicsAPI, IsDepthPass, false, Camera, Projection, DrawInfo, m_DebugSphere)) return false;
+			if (!Object->Draw(pGraphicsAPI, false, Camera, Projection, DrawInfo, m_DebugSphere)) return false;
 		}
 
 		return true;
@@ -464,15 +464,15 @@ namespace scene
 
 	bool CSceneController::PrepareMaterialList(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<object::C3DObject>& Object, const std::map<std::string, int>& TexIndexMap)
 	{
-		if (static_cast<int>(Object->GetMaterialList().size()) == 0)
+		if (!Object->GetFileName().empty())
 		{
-			// MaterialListを生成
-			if (!CreateMaterialList(pGraphicsAPI, Object, TexIndexMap)) return false;
+			// ファイルからダウンロードしたモデルであればMaterial情報の更新のみを行う
+			if (!UpdateMaterialUniform(pGraphicsAPI, Object, TexIndexMap)) return false;
 		}
 		else
 		{
-			// Material情報を更新
-			if (!UpdateMaterialUniform(pGraphicsAPI, Object, TexIndexMap)) return false;
+			// MaterialListを生成
+			if (!CreateMaterialList(pGraphicsAPI, Object, TexIndexMap)) return false;
 		}
 
 		return true;
@@ -566,7 +566,7 @@ namespace scene
 			}
 
 			// Materialを生成
-			auto Material = MaterialFrame->second->CreateMaterial(pGraphicsAPI, MaterialInfo.RefCount, MaterialInfo.CullMode);
+			auto Material = MaterialFrame->second->CreateMaterial(pGraphicsAPI, 1, MaterialInfo.CullMode);
 
 			// UniformValueを設定
 			for (const auto& UniformInfo : MaterialInfo.UniformInfoList)
@@ -605,7 +605,13 @@ namespace scene
 			Material->SetRefTrackIDList(MaterialInfo.TrackIDList);
 
 			// Materialを登録
-			Object->AddMaterial(Material);
+			if (MaterialInfo.MeshIndex < 0 || MaterialInfo.MeshIndex >= static_cast<int>(Object->GetMeshList().size())) return false;
+			const auto& Mesh = Object->GetMeshList()[MaterialInfo.MeshIndex];
+
+			if (MaterialInfo.PrimitiveIndex < 0 || MaterialInfo.PrimitiveIndex >= static_cast<int>(Mesh->GetPrimitiveList().size())) return false;
+			const auto& Primitive = Mesh->GetPrimitiveList()[MaterialInfo.PrimitiveIndex];
+
+			Primitive->AddMaterial(Material);
 		}
 
 		return true;
@@ -617,17 +623,20 @@ namespace scene
 		const auto& it = m_MaterialInfoMap.find(Object);
 		if (it == m_MaterialInfoMap.end()) return true;
 
-		//
 		const auto& MaterialInfoList = it->second;
-		const auto& MaterialList = Object->GetMaterialList();
 
-		if (MaterialInfoList.size() != MaterialList.size()) return true;
-
-		//
-		for (int MaterialIndex = 0; MaterialIndex < static_cast<int>(MaterialList.size()); MaterialIndex++)
+		for (int MaterialInfoIndex = 0; MaterialInfoIndex < static_cast<int>(MaterialInfoList.size()); MaterialInfoIndex++)
 		{
-			const auto& MaterialInfo = MaterialInfoList[MaterialIndex];
-			const auto& Material = MaterialList[MaterialIndex];
+			const auto& MaterialInfo = MaterialInfoList[MaterialInfoIndex];
+
+			if (MaterialInfo.MeshIndex < 0 || MaterialInfo.MeshIndex >= static_cast<int>(Object->GetMeshList().size())) continue;
+			const auto& Mesh = Object->GetMeshList()[MaterialInfo.MeshIndex];
+
+			if (MaterialInfo.PrimitiveIndex < 0 || MaterialInfo.PrimitiveIndex >= static_cast<int>(Mesh->GetPrimitiveList().size())) continue;
+			const auto& Primitive = Mesh->GetPrimitiveList()[MaterialInfo.PrimitiveIndex];
+
+			const auto& Material = Primitive->GetMaterial();
+			if (!Material) continue;
 
 			// UniformValueを設定
 			for (const auto& UniformInfo : MaterialInfo.UniformInfoList)

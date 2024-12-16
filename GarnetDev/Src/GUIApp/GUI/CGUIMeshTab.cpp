@@ -39,8 +39,6 @@ namespace gui
 
 		const auto& Object = ObjectList[SelectedObjectIndex];
 
-		const auto& MaterialList = Object->GetMaterialList();
-
 		// Create Mesh
 		{
 			ImGui::SeparatorText("CreateMesh");
@@ -67,30 +65,55 @@ namespace gui
 			}
 
 			// Material
-			static int MaterialIndex = -1;
+			// MaterialName
+			static std::string MaterialName = std::string();
 			{
-				std::string MaterialName = std::string();
-				if (MaterialIndex >= 0 && MaterialIndex < static_cast<int>(MaterialList.size()))
-				{
-					MaterialName = MaterialList[MaterialIndex]->GetMaterialName();
-				}
+				static char buf[256] = "";
 
-				if (ImGui::BeginCombo("MaterialIndex##DrawMeshGUIOfObject_CGUIMeshTab", MaterialName.c_str()))
+				if (ImGui::InputText("MaterialName##DrawMeshGUIOfObject_CGUIMeshTab", buf, IM_ARRAYSIZE(buf)))
 				{
-					for (int i = 0; i < static_cast<int>(MaterialList.size()); i++)
+					MaterialName = std::string(buf);
+				}
+			}
+
+			static std::string CurrentMaterialFrameName = std::string();
+
+			if (ImGui::BeginCombo("MaterialFrame##DrawMeshGUIOfObject_CGUIMeshTab", CurrentMaterialFrameName.c_str()))
+			{
+				const auto& MaterialFrameMap = SceneController->GetMaterialFrameMap();
+
+				for (const auto& MaterialFrame : MaterialFrameMap)
+				{
+					std::string Name = MaterialFrame.second->GetMaterialFrameName();
+
+					const bool IsSelected = (CurrentMaterialFrameName == Name);
+
+					if (ImGui::Selectable(Name.c_str(), IsSelected) && !IsSelected)
 					{
-						const bool IsSelected = (MaterialIndex == i);
-
-						const auto& CurrentMaterial = MaterialList[i];
-
-						if (ImGui::Selectable(CurrentMaterial->GetMaterialName().c_str(), IsSelected) && !IsSelected)
-						{
-							MaterialIndex = i;
-						}
+						CurrentMaterialFrameName = MaterialFrame.second->GetMaterialFrameName();
 					}
-
-					ImGui::EndCombo();
 				}
+
+				ImGui::EndCombo();
+			}
+
+			//
+			static graphics::ECullMode CullMode = graphics::ECullMode::CULL_BACK;
+			if (ImGui::BeginCombo("CullMode##DrawMeshGUIOfObject_CGUIMeshTab", GetStrFromCullMode(CullMode).c_str()))
+			{
+				for (int i = 0; i < static_cast<int>(graphics::ECullMode::Max); i++)
+				{
+					graphics::ECullMode CurrentCullMode = static_cast<graphics::ECullMode>(i);
+
+					const bool IsSelected = (CullMode == CurrentCullMode);
+
+					if (ImGui::Selectable(GetStrFromCullMode(CurrentCullMode).c_str(), IsSelected) && !IsSelected)
+					{
+						CullMode = CurrentCullMode;
+					}
+				}
+
+				ImGui::EndCombo();
 			}
 
 			// AddMesh
@@ -99,19 +122,35 @@ namespace gui
 				{
 					if (PresetType != graphics::EPresetPrimitiveType::None)
 					{
+						// Material生成
+						std::shared_ptr<graphics::CMaterial> NewMaterial = nullptr;
+						std::shared_ptr<graphics::CMaterialFrame> CurrentMaterialFrame = SceneController->FindMaterialFrame(CurrentMaterialFrameName);
+						if (CurrentMaterialFrame)
+						{
+							NewMaterial = CurrentMaterialFrame->CreateMaterial(pGraphicsAPI, 1, CullMode);
+							NewMaterial->SetMaterialName(MaterialName);
+
+							// ToDO: 即時生成する
+							if (!NewMaterial->Create(Object->GetTextureSet())) return false;
+						}
+
+						MaterialName = std::string();
+						CurrentMaterialFrameName = std::string();
+						CullMode = graphics::ECullMode::CULL_BACK;
+
+						//
 						std::shared_ptr<graphics::CMesh> Mesh = std::make_shared<graphics::CMesh>();
 
 						const auto& CreateInfo = graphics::CPresetPrimitive::CreateFromType(pGraphicsAPI, PresetType);
-						Mesh->CreatePresetSimpleMesh(CreateInfo.first, CreateInfo.second, MaterialIndex, PresetType);
+						Mesh->CreatePresetSimpleMesh(CreateInfo.first, CreateInfo.second, NewMaterial, PresetType);
 
 						// プリセットなので即時生成
-						if (!Mesh->Create(pGraphicsAPI, MaterialList, Object->GetPassName(), Object->GetDepthPassName())) return false;
+						if (!Mesh->Create(pGraphicsAPI, Object->GetTextureSet(), Object->GetPassName(), Object->GetDepthPassName())) return false;
 
 						Object->AddMesh(Mesh);
 					}
 
 					PresetType = graphics::EPresetPrimitiveType::None;
-					MaterialIndex = -1;
 				}
 			}
 		}
@@ -164,8 +203,6 @@ namespace gui
 	bool CGUIMeshTab::DrawMeshGUI(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<object::C3DObject>& Object, const std::shared_ptr<graphics::CMesh>& Mesh, int MeshIndex,
 		const std::shared_ptr<scene::CSceneController>& SceneController)
 	{
-		const auto& MaterialList = Object->GetMaterialList();
-
 		int OperateButtonID = 0;
 
 		std::string TreeNodeLabel_Mesh = "Mesh##" + std::to_string(MeshIndex) + "GUIMeshTab_DrawMeshGUI_TreeNodeEx_Mesh_" + Object->GetObjectName();
@@ -204,12 +241,9 @@ namespace gui
 							ImGui::Text("%s", Text.c_str());
 						}
 
-						int MaterialIndex = Primitive->GetMaterialIndex();
-
-						if (MaterialIndex >= 0 && MaterialIndex < static_cast<int>(MaterialList.size()))
+						const auto& Material = Primitive->GetMaterial();
+						if (Material)
 						{
-							const auto& Material = MaterialList[MaterialIndex];
-
 							std::string Text = "MaterialName: " + Material->GetMaterialName();
 
 							ImGui::Text("%s", Text.c_str());
@@ -246,6 +280,28 @@ namespace gui
 			break;
 		case graphics::EPresetPrimitiveType::SPHERE:
 			Text = "SPHERE";
+			break;
+		default:
+			break;
+		}
+
+		return Text;
+	}
+
+	std::string CGUIMeshTab::GetStrFromCullMode(graphics::ECullMode CullMode)
+	{
+		std::string Text = "";
+
+		switch (CullMode)
+		{
+		case graphics::ECullMode::CULL_NONE:
+			Text = "CULL_NONE";
+			break;
+		case graphics::ECullMode::CULL_BACK:
+			Text = "CULL_BACK";
+			break;
+		case graphics::ECullMode::CULL_FRONT:
+			Text = "CULL_FRONT";
 			break;
 		default:
 			break;

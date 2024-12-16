@@ -1129,16 +1129,22 @@ namespace gui
 				// Select Material
 				if (ImGui::BeginCombo("Material##Timeline_AddObjectTrackDialog_Material_Combo", SelectedMaterialName.c_str()))
 				{
-					for (const auto& Material : m_ClickedObjectForAddObjectTrack->GetMaterialList())
+					for (const auto& Mesh : m_ClickedObjectForAddObjectTrack->GetMeshList())
 					{
-						const bool IsSelected = (m_SelectedMaterialForAddTrack == Material);
-
-						std::string LabelSelectable = Material->GetMaterialName() + "##Timeline_AddObjectTrackDialog_Material_Selectable";
-
-						if (ImGui::Selectable(LabelSelectable.c_str(), IsSelected) && !IsSelected)
+						for (const auto& Primitive : Mesh->GetPrimitiveList())
 						{
-							SelectedMaterialName = Material->GetMaterialName();
-							m_SelectedMaterialForAddTrack = Material;
+							const auto& Material = Primitive->GetMaterial();
+							if (!Material) continue;
+
+							const bool IsSelected = (m_SelectedMaterialForAddTrack == Material);
+
+							std::string LabelSelectable = Material->GetMaterialName() + "##Timeline_AddObjectTrackDialog_Material_Selectable";
+
+							if (ImGui::Selectable(LabelSelectable.c_str(), IsSelected) && !IsSelected)
+							{
+								SelectedMaterialName = Material->GetMaterialName();
+								m_SelectedMaterialForAddTrack = Material;
+							}
 						}
 					}
 

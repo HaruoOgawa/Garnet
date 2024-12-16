@@ -2,19 +2,19 @@
 #include "CVertexBuffer.h"
 #include "CIndexBuffer.h"
 #include "CMaterial.h"
+#include "CTextureSet.h"
 #include "../Interface/IGraphicsAPI.h"
 #include "../Interface/IRenderer.h"
 
 namespace graphics
 {
-	CPrimitive::CPrimitive(const std::shared_ptr<CVertexBuffer>& VertexBuffer, const std::shared_ptr<CIndexBuffer>& IndexBuffer, int MaterialIndex) :
+	CPrimitive::CPrimitive(const std::shared_ptr<CVertexBuffer>& VertexBuffer, const std::shared_ptr<CIndexBuffer>& IndexBuffer, const std::shared_ptr<CMaterial>& Material) :
 		m_Enabled(true),
 		m_PresetType(graphics::EPresetPrimitiveType::None),
 		m_VertexBuffer(VertexBuffer),
 		m_IndexBuffer(IndexBuffer),
 		m_Renderer(nullptr),
-		m_DepthRenderer(nullptr),
-		m_MaterialIndex(MaterialIndex),
+		m_Material(Material),
 		m_UseMorph(false)
 	{
 	}
@@ -54,36 +54,25 @@ namespace graphics
 		}
 	}
 
-	bool CPrimitive::Create(api::IGraphicsAPI* pGraphicsAPI, const std::string& PassName, const std::shared_ptr<graphics::CMaterial>& Material, bool IsDepth)
+	bool CPrimitive::Create(api::IGraphicsAPI* pGraphicsAPI, const std::string& PassName, const std::shared_ptr<graphics::CTextureSet>& TextureSet)
 	{
 		if (!m_VertexBuffer || !m_IndexBuffer) return false;
 
-		if (IsDepth)
-		{
-			m_DepthRenderer = pGraphicsAPI->CreateRenderer(PassName);
-			if (!m_DepthRenderer->Create(m_VertexBuffer, m_IndexBuffer, Material)) return false;
-		}
-		else
-		{
-			m_Renderer = pGraphicsAPI->CreateRenderer(PassName);
-			if (!m_Renderer->Create(m_VertexBuffer, m_IndexBuffer, Material)) return false;
-		}
+		if (!m_Material) return false;
+
+		if (!m_Material->Create(TextureSet)) return false;
+
+		m_Renderer = pGraphicsAPI->CreateRenderer(PassName);
+		if (!m_Renderer->Create(m_VertexBuffer, m_IndexBuffer, m_Material)) return false;
 
 		return true;
 	}
 
-	bool CPrimitive::Draw(const std::shared_ptr<CMaterial>& Material, int DynamicOffsetNum, bool IsDepth)
+	bool CPrimitive::Draw(int DynamicOffsetNum)
 	{
 		if (!IsEnabled()) return true;
 
-		if (IsDepth)
-		{
-			if (!m_DepthRenderer->Draw(m_VertexBuffer, m_IndexBuffer, Material, DynamicOffsetNum)) return false;
-		}
-		else
-		{
-			if (!m_Renderer->Draw(m_VertexBuffer, m_IndexBuffer, Material, DynamicOffsetNum)) return false;
-		}
+		if (!m_Renderer->Draw(m_VertexBuffer, m_IndexBuffer, m_Material, DynamicOffsetNum)) return false;
 		
 		return true;
 	}
@@ -93,14 +82,14 @@ namespace graphics
 		return m_Renderer;
 	}
 
-	void CPrimitive::SetMaterialIndex(int Index)
+	void CPrimitive::AddMaterial(const std::shared_ptr<CMaterial>& Material)
 	{
-		m_MaterialIndex = Index;
+		m_Material = Material;
 	}
 
-	int CPrimitive::GetMaterialIndex()const
+	const std::shared_ptr<CMaterial>& CPrimitive::GetMaterial() const
 	{
-		return m_MaterialIndex;
+		return m_Material;
 	}
 
 	const std::shared_ptr<CVertexBuffer>& CPrimitive::GetVertexBuffer() const

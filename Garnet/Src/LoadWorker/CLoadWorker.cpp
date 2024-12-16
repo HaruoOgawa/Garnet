@@ -70,7 +70,7 @@ namespace resource
 		return true;
 	}
 
-	bool CLoadWorker::Draw(api::IGraphicsAPI* pGraphicsAPI, bool IsDepthPass, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
+	bool CLoadWorker::Draw(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
 		const std::shared_ptr<graphics::CDrawInfo>& DrawInfo)
 	{
 		if(m_Status == ELoadStatus::Loaded) return true;
@@ -78,10 +78,10 @@ namespace resource
 		if (m_Status == ELoadStatus::Loading && m_LoadingBar)
 		{
 			float rate = 1.0f - (static_cast<float>(m_LoadResourceList.size()) / m_FirstResourceCount);
-			m_LoadingBar->GetMaterialList()[0]->SetUniformValue("rate", &glm::vec1(rate)[0], sizeof(float));
-			m_LoadingBar->GetMaterialList()[0]->SetUniformValue("alpha", &m_Alpha, sizeof(float));
+			m_LoadingBar->GetMeshList()[0]->GetPrimitiveList()[0]->GetMaterial()->SetUniformValue("rate", &glm::vec1(rate)[0], sizeof(float));
+			m_LoadingBar->GetMeshList()[0]->GetPrimitiveList()[0]->GetMaterial()->SetUniformValue("alpha", &m_Alpha, sizeof(float));
 
-			if (!m_LoadingBar->Draw(pGraphicsAPI, IsDepthPass, false, Camera, Projection, DrawInfo)) return false;
+			if (!m_LoadingBar->Draw(pGraphicsAPI, false, Camera, Projection, DrawInfo)) return false;
 		}
 
 		return true;

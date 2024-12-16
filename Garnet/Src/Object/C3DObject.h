@@ -42,7 +42,6 @@ namespace object
 
 		std::vector<std::shared_ptr<CNode>> m_NodeList;
 		std::vector<std::shared_ptr<graphics::CMesh>> m_MeshList;
-		std::vector<std::shared_ptr<graphics::CMaterial>> m_MaterialList;
 
 		//
 		std::set<std::shared_ptr<CNode>> m_TLNodeList;
@@ -65,10 +64,10 @@ namespace object
 
 		void ApplyParentNode(std::shared_ptr<CNode>& Node, const std::shared_ptr<CNode>& ParentNode);
 
-		bool DrawFromNode(const std::shared_ptr<CNode>& Node, api::IGraphicsAPI* pGraphicsAPI, bool IsDepthPass, bool DrawOutline, const std::shared_ptr<camera::CCamera>& Camera,
+		bool DrawFromNode(const std::shared_ptr<CNode>& Node, api::IGraphicsAPI* pGraphicsAPI, bool DrawOutline, const std::shared_ptr<camera::CCamera>& Camera,
 			const std::shared_ptr<projection::CProjection>& Projection, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo);
 
-		bool Draw(const std::shared_ptr<CNode>& Node, api::IGraphicsAPI* pGraphicsAPI, bool IsDepthPass, bool DrawOutline, const std::shared_ptr<camera::CCamera>& Camera,
+		bool Draw(const std::shared_ptr<CNode>& Node, api::IGraphicsAPI* pGraphicsAPI, bool DrawOutline, const std::shared_ptr<camera::CCamera>& Camera,
 			const std::shared_ptr<projection::CProjection>& Projection, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo);
 
 		// ï®óù
@@ -120,12 +119,12 @@ namespace object
 		virtual bool LateUpdate(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, float DeltaSecondsTime);
 		virtual bool FixedUpdate(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, float DeltaSecondsTime);
 		
-		virtual bool Draw(api::IGraphicsAPI* pGraphicsAPI, bool IsDepthPass, bool DrawOutline, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
+		virtual bool Draw(api::IGraphicsAPI* pGraphicsAPI, bool DrawOutline, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
 			const std::shared_ptr<graphics::CDrawInfo>& DrawInfo, const std::shared_ptr<object::C3DObject>& DebugSphere = nullptr);
 
-		virtual bool DrawDebugBone(api::IGraphicsAPI* pGraphicsAPI, bool IsDepthPass, bool DrawOutline, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
+		virtual bool DrawDebugBone(api::IGraphicsAPI* pGraphicsAPI, bool DrawOutline, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
 			const std::shared_ptr<graphics::CDrawInfo>& DrawInfo, const std::shared_ptr<object::C3DObject>& DebugSphere);
-		virtual bool DrawDebugPhysics(api::IGraphicsAPI* pGraphicsAPI, bool IsDepthPass, bool DrawOutline, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
+		virtual bool DrawDebugPhysics(api::IGraphicsAPI* pGraphicsAPI, bool DrawOutline, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
 			const std::shared_ptr<graphics::CDrawInfo>& DrawInfo, const std::shared_ptr<object::C3DObject>& DebugSphere);
 
 		void ApplyDefaultLocalTransform();
@@ -143,8 +142,7 @@ namespace object
 		void AddMesh(const std::shared_ptr<graphics::CMesh>& Mesh);
 		const std::vector<std::shared_ptr<graphics::CMesh>>& GetMeshList() const;
 
-		void AddMaterial(const std::shared_ptr<graphics::CMaterial>& Material);
-		const std::vector<std::shared_ptr<graphics::CMaterial>>& GetMaterialList() const;
+		//void AddMaterial(const std::shared_ptr<graphics::CMaterial>& Material);
 		bool ReplaceMaterial(const std::shared_ptr<graphics::CMaterial>& OldMaterial, const std::shared_ptr<graphics::CMaterial>& NewMaterial);
 
 		void AddMorphNode(const std::shared_ptr<CNode>& Node);

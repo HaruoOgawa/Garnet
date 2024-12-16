@@ -76,9 +76,9 @@ namespace imageeffect
 			if (!m_pGraphicsAPI->BeginRender("BlurX")) return false;
 
 			glm::vec2 OffsetV = glm::vec2(1.0f / w, 0.0f);
-			m_ScreenObjX->GetMaterialList()[0]->SetUniformValue("Direction", &OffsetV[0], sizeof(glm::vec2));
+			m_ScreenObjX->GetMeshList()[0]->GetPrimitiveList()[0]->GetMaterial()->SetUniformValue("Direction", &OffsetV[0], sizeof(glm::vec2));
 
-			if (!m_ScreenObjX->Draw(pGraphicsAPI, false, false, Camera, Projection, DrawInfo)) return false;
+			if (!m_ScreenObjX->Draw(pGraphicsAPI, false, Camera, Projection, DrawInfo)) return false;
 			if (!m_pGraphicsAPI->EndRender()) return false;
 		}
 		
@@ -86,9 +86,9 @@ namespace imageeffect
 			if (!m_pGraphicsAPI->BeginRender("BlurY")) return false;
 
 			glm::vec2 OffsetV = glm::vec2(0.0f, 1.0f / h);
-			m_ScreenObjY->GetMaterialList()[0]->SetUniformValue("Direction", &OffsetV[0], sizeof(glm::vec2));
+			m_ScreenObjY->GetMeshList()[0]->GetPrimitiveList()[0]->GetMaterial()->SetUniformValue("Direction", &OffsetV[0], sizeof(glm::vec2));
 
-			if (!m_ScreenObjY->Draw(pGraphicsAPI, false, false, Camera, Projection, DrawInfo)) return false;
+			if (!m_ScreenObjY->Draw(pGraphicsAPI, false, Camera, Projection, DrawInfo)) return false;
 			if (!m_pGraphicsAPI->EndRender()) return false;
 		}
 

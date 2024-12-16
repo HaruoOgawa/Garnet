@@ -10,7 +10,6 @@ namespace graphics
 		m_CreateInfo(createInfo),
 		m_RefCount(RefCount),
 		m_CurrentDynamicOffset(0),
-		m_DepthMaterial(nullptr),
 		m_EnabledZWrite(true),
 		m_DepthFunc(EDepthFunc::Less),
 		m_DefaultCullMode(CullMode),
@@ -109,17 +108,6 @@ namespace graphics
 		m_TextureBindingLayoutList[BindingLayoutIndex].TextureIndex = TextureIndex;
 
 		CreateRefTextureList(m_CreateInfo, TextureSet);
-	}
-
-	bool CMaterial::CreateDepthMaterial(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<graphics::CMaterialFrame>& DepthMF)
-	{
-		m_DepthMaterial = DepthMF->CreateMaterial(pGraphicsAPI, m_RefCount, m_CullMode);
-
-		m_DepthMaterial->SetCullMode(graphics::ECullMode::CULL_FRONT);
-
-		if (!m_DepthMaterial->Create(nullptr)) return false;
-
-		return true;
 	}
 
 	bool CMaterial::ReCreate(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, const std::vector<std::shared_ptr<CShaderBuffer>>& ShaderBufferList, const std::vector<STextureBindingLayout>& TextureBindingLayoutList)
@@ -317,11 +305,6 @@ namespace graphics
 		}
 
 		return true;
-	}
-
-	std::shared_ptr<graphics::CMaterial> CMaterial::GetDepthMaterial() 
-	{
-		return m_DepthMaterial; 
 	}
 
 	void CMaterial::SetEnabledZWrite(bool Flag)

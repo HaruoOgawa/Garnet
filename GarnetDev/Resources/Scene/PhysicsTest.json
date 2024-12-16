@@ -82,7 +82,7 @@
                 {
                     "primitives": [
                         {
-                            "materialindex": 0,
+                            
                             "type": "cube"
                         }
                     ]
@@ -91,34 +91,8 @@
             "materials": [
                 {
                     "materialframe": "pbr_mat",
-                    "cull": "back",
-                    "textures": [
-                        {
-                            "texturebuffername": "cubemapTexture",
-                            "textureindex": -1,
-                            "texturename": ""
-                        },
-                        {
-                            "texturebuffername": "shadowmapTexture",
-                            "textureindex": -1,
-                            "texturename": ""
-                        },
-                        {
-                            "texturebuffername": "IBL_Diffuse_Texture",
-                            "textureindex": -1,
-                            "texturename": ""
-                        },
-                        {
-                            "texturebuffername": "IBL_Specular_Texture",
-                            "textureindex": -1,
-                            "texturename": ""
-                        },
-                        {
-                            "texturebuffername": "IBL_GGXLUT_Texture",
-                            "textureindex": -1,
-                            "texturename": ""
-                        }
-                    ]
+                    "meshindex": 0,
+                    "primitiveindex": 0
                 }
             ]
         },
@@ -426,7 +400,6 @@
                 {
                     "primitives": [
                         {
-                            "materialindex": 0,
                             "type": "cube"
                         }
                     ]
@@ -434,7 +407,6 @@
                 {
                     "primitives": [
                         {
-                            "materialindex": 0,
                             "type": "sphere"
                         }
                     ]
@@ -442,7 +414,6 @@
                 {
                     "primitives": [
                         {
-                            "materialindex": 0,
                             "type": "sphere"
                         }
                     ]
@@ -450,7 +421,6 @@
                 {
                     "primitives": [
                         {
-                            "materialindex": 0,
                             "type": "sphere"
                         }
                     ]
@@ -458,7 +428,6 @@
                 {
                     "primitives": [
                         {
-                            "materialindex": 0,
                             "type": "sphere"
                         }
                     ]
@@ -466,7 +435,6 @@
                 {
                     "primitives": [
                         {
-                            "materialindex": 0,
                             "type": "sphere"
                         }
                     ]
@@ -474,7 +442,6 @@
                 {
                     "primitives": [
                         {
-                            "materialindex": 0,
                             "type": "sphere"
                         }
                     ]
@@ -483,34 +450,38 @@
             "materials": [
                 {
                     "materialframe": "pbr_mat",
-                    "cull": "back",
-                    "textures": [
-                        {
-                            "texturebuffername": "cubemapTexture",
-                            "textureindex": -1,
-                            "texturename": ""
-                        },
-                        {
-                            "texturebuffername": "shadowmapTexture",
-                            "textureindex": -1,
-                            "texturename": ""
-                        },
-                        {
-                            "texturebuffername": "IBL_Diffuse_Texture",
-                            "textureindex": -1,
-                            "texturename": ""
-                        },
-                        {
-                            "texturebuffername": "IBL_Specular_Texture",
-                            "textureindex": -1,
-                            "texturename": ""
-                        },
-                        {
-                            "texturebuffername": "IBL_GGXLUT_Texture",
-                            "textureindex": -1,
-                            "texturename": ""
-                        }
-                    ]
+                    "meshindex": 0,
+                    "primitiveindex": 0
+                },
+                {
+                    "materialframe": "pbr_mat",
+                    "meshindex": 1,
+                    "primitiveindex": 0
+                },
+                {
+                    "materialframe": "pbr_mat",
+                    "meshindex": 2,
+                    "primitiveindex": 0
+                },
+                {
+                    "materialframe": "pbr_mat",
+                    "meshindex": 3,
+                    "primitiveindex": 0
+                },
+                {
+                    "materialframe": "pbr_mat",
+                    "meshindex": 4,
+                    "primitiveindex": 0
+                },
+                {
+                    "materialframe": "pbr_mat",
+                    "meshindex": 5,
+                    "primitiveindex": 0
+                },
+                {
+                    "materialframe": "pbr_mat",
+                    "meshindex": 6,
+                    "primitiveindex": 0
                 }
             ],
             "joints": [
