@@ -25,8 +25,6 @@ namespace api
 		// API
 		api::CWebGPUAPI* m_pGraphicsAPI;
 
-		//
-		const std::string m_PassName;
 		int m_InstanceCount;
 
 		// Pipeline
@@ -39,10 +37,10 @@ namespace api
 		WGPUVertexFormat GetVertexFormat(int Dimention, graphics::EDataType DataType);
 		void			 SetDefaultDepthStencil(WGPUDepthStencilState& depthStencilState);
 	public:
-		CWebGPURenderer(api::CWebGPUAPI* pGraphicsAPI, const std::string& PassName);
+		CWebGPURenderer(api::CWebGPUAPI* pGraphicsAPI);
 		virtual ~CWebGPURenderer();
 
-		virtual bool Create(const std::shared_ptr<graphics::CVertexBuffer>& VertexBuffer, const std::shared_ptr<graphics::CIndexBuffer>& IndexBuffer, const std::shared_ptr<graphics::CMaterial>& Material) override;
+		virtual bool Create(const std::string& PassName, const std::shared_ptr<graphics::CVertexBuffer>& VertexBuffer, const std::shared_ptr<graphics::CIndexBuffer>& IndexBuffer, const std::shared_ptr<graphics::CMaterial>& Material) override;
 		virtual bool Draw(const std::shared_ptr<graphics::CVertexBuffer>& VertexBuffer, const std::shared_ptr<graphics::CIndexBuffer>& IndexBuffer, const std::shared_ptr<graphics::CMaterial>& Material, int DynamicOffsetNum) override;
 
 		virtual bool UpdateVertexBuffer(const std::vector<float>& PosAttribute, const std::shared_ptr<graphics::CVertexBuffer>& VertexBuffer) override;

@@ -12,7 +12,7 @@ namespace graphics
 	class IRenderer
 	{
 	public:
-		virtual bool Create(const std::shared_ptr<CVertexBuffer>& VertexBuffer, const std::shared_ptr<CIndexBuffer>& IndexBuffer, const std::shared_ptr<graphics::CMaterial>& Material) = 0;
+		virtual bool Create(const std::string& PassName, const std::shared_ptr<CVertexBuffer>& VertexBuffer, const std::shared_ptr<CIndexBuffer>& IndexBuffer, const std::shared_ptr<graphics::CMaterial>& Material) = 0;
 		virtual bool Draw(const std::shared_ptr<graphics::CVertexBuffer>& VertexBuffer, const std::shared_ptr<graphics::CIndexBuffer>& IndexBuffer, const std::shared_ptr<graphics::CMaterial>& Material, int DynamicOffsetNum) = 0;
 	
 		virtual bool UpdateVertexBuffer(const std::vector<float>& PosAttribute, const std::shared_ptr<CVertexBuffer>& VertexBuffer) = 0;

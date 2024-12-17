@@ -7,10 +7,8 @@
 
 namespace api
 {
-	COpenGLRenderer::COpenGLRenderer(api::COpenGLAPI* pGraphicsAPI, const std::string& PassName):
+	COpenGLRenderer::COpenGLRenderer(api::COpenGLAPI* pGraphicsAPI):
 		m_pGraphicsAPI(pGraphicsAPI),
-		m_PassName(PassName),
-		m_DynamicOffsetNum(0),
 		m_InstanceCount(1),
 		m_VertexArray(-1),
 		m_VertexBuffer(nullptr)
@@ -45,7 +43,7 @@ namespace api
 		return true;
 	}
 
-	bool COpenGLRenderer::Create(const std::shared_ptr<graphics::CVertexBuffer>& VertexBuffer, const std::shared_ptr<graphics::CIndexBuffer>& IndexBuffer, const std::shared_ptr<graphics::CMaterial>& Material)
+	bool COpenGLRenderer::Create(const std::string& PassName, const std::shared_ptr<graphics::CVertexBuffer>& VertexBuffer, const std::shared_ptr<graphics::CIndexBuffer>& IndexBuffer, const std::shared_ptr<graphics::CMaterial>& Material)
 	{
 		m_InstanceCount = VertexBuffer->GetInstanceCount();
 

@@ -8,10 +8,8 @@
 
 namespace api
 {
-	CVulkanRenderer::CVulkanRenderer(api::CVulkanAPI* pGraphicsAPI, const std::string& PassName):
+	CVulkanRenderer::CVulkanRenderer(api::CVulkanAPI* pGraphicsAPI):
 		m_pGraphicsAPI(pGraphicsAPI),
-		m_PassName(PassName),
-		m_DynamicOffsetNum(0),
 		m_InstanceCount(1),
 		m_GraphicsPipeline(nullptr)
 	{
@@ -32,14 +30,14 @@ namespace api
 		}
 	}
 
-	bool CVulkanRenderer::Create(const std::shared_ptr<graphics::CVertexBuffer>& VertexBuffer, const std::shared_ptr<graphics::CIndexBuffer>& IndexBuffer, const std::shared_ptr<graphics::CMaterial>& Material)
+	bool CVulkanRenderer::Create(const std::string& PassName, const std::shared_ptr<graphics::CVertexBuffer>& VertexBuffer, const std::shared_ptr<graphics::CIndexBuffer>& IndexBuffer, const std::shared_ptr<graphics::CMaterial>& Material)
 	{
 		const CVulkanVertexBuffer* pVulkanVertexBuffer = static_cast<const CVulkanVertexBuffer*>(VertexBuffer.get());
 		api::CVulkanMaterial* pVulkanMat = static_cast<api::CVulkanMaterial*>(Material.get());
 
 		m_InstanceCount = VertexBuffer->GetInstanceCount();
 
-		if (!CreateGraphicsPipeline(pVulkanVertexBuffer, pVulkanMat)) return false; // グラフィックパイプラインを作成
+		if (!CreateGraphicsPipeline(PassName, pVulkanVertexBuffer, pVulkanMat)) return false; // グラフィックパイプラインを作成
 
 		return true;
 	}
@@ -115,7 +113,7 @@ namespace api
 	}
 
 	// Vulkanメインロジック /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	bool CVulkanRenderer::CreateGraphicsPipeline(const CVulkanVertexBuffer* pVulkanVertexBuffer, api::CVulkanMaterial* pVulkanMat)
+	bool CVulkanRenderer::CreateGraphicsPipeline(const std::string& PassName, const CVulkanVertexBuffer* pVulkanVertexBuffer, api::CVulkanMaterial* pVulkanMat)
 	{
 		// Shader編集が有効な時はグラフィックパイプラインは生成しない
 		if (m_pGraphicsAPI->IsEnabledRuntimeShaderEditing())
@@ -367,10 +365,10 @@ namespace api
 
 		pipelineInfo.layout = pVulkanMat->GetPipelineLayout();
 
-		if (!m_PassName.empty())
+		if (!PassName.empty())
 		{
 			const auto& RenderPassMap = m_pGraphicsAPI->GetOffScreenRenderPassMap();
-			const auto& RenderPass = RenderPassMap.find(m_PassName);
+			const auto& RenderPass = RenderPassMap.find(PassName);
 			if (RenderPass != RenderPassMap.end())
 			{
 				api::CVulkanRenderPass* pVulkanRenderPass = static_cast<api::CVulkanRenderPass*>(RenderPass->second.get());

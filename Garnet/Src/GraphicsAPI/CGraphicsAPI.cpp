@@ -40,7 +40,7 @@ namespace api
 		return nullptr;
 	}
 
-	std::shared_ptr<graphics::IRenderer> CGraphicsAPI::CreateRenderer(const std::string& PassName)
+	std::shared_ptr<graphics::IRenderer> CGraphicsAPI::CreateRenderer()
 	{
 		return nullptr;
 	}

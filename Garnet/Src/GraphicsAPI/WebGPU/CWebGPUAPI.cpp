@@ -110,9 +110,9 @@ namespace api
 		return IndexBuffer;
 	}
 
-	std::shared_ptr<graphics::IRenderer> CWebGPUAPI::CreateRenderer(const std::string& PassName)
+	std::shared_ptr<graphics::IRenderer> CWebGPUAPI::CreateRenderer()
 	{
-		auto Renderer = std::make_shared<api::CWebGPURenderer>(this, PassName);
+		auto Renderer = std::make_shared<api::CWebGPURenderer>(this);
 
 		return Renderer;
 	}

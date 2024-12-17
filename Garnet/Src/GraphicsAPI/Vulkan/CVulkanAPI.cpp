@@ -141,9 +141,9 @@ namespace api
 		return IndexBuffer;
 	}
 
-	std::shared_ptr<graphics::IRenderer> CVulkanAPI::CreateRenderer(const std::string& PassName)
+	std::shared_ptr<graphics::IRenderer> CVulkanAPI::CreateRenderer()
 	{
-		auto Renderer = std::make_shared<api::CVulkanRenderer>(this, PassName);
+		auto Renderer = std::make_shared<api::CVulkanRenderer>(this);
 
 		return Renderer;
 	}

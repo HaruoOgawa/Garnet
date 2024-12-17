@@ -8,9 +8,8 @@
 
 namespace api
 {
-	CWebGPURenderer::CWebGPURenderer(api::CWebGPUAPI* pGraphicsAPI, const std::string& PassName):
+	CWebGPURenderer::CWebGPURenderer(api::CWebGPUAPI* pGraphicsAPI):
 		m_pGraphicsAPI(pGraphicsAPI),
-		m_PassName(PassName),
 		m_InstanceCount(1),
 		m_GraphicsPipeline(nullptr)
 	{
@@ -20,7 +19,7 @@ namespace api
 	{
 	}
 
-	bool CWebGPURenderer::Create(const std::shared_ptr<graphics::CVertexBuffer>& VertexBuffer, const std::shared_ptr<graphics::CIndexBuffer>& IndexBuffer, const std::shared_ptr<graphics::CMaterial>& Material)
+	bool CWebGPURenderer::Create(const std::string& PassName, const std::shared_ptr<graphics::CVertexBuffer>& VertexBuffer, const std::shared_ptr<graphics::CIndexBuffer>& IndexBuffer, const std::shared_ptr<graphics::CMaterial>& Material)
 	{
 		api::CWebGPUMaterial* pWebGPUMat = static_cast<api::CWebGPUMaterial*>(Material.get());
 

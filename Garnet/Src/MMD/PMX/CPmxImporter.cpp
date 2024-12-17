@@ -593,7 +593,7 @@ namespace mmd
 				}
 
 				// プリミティブを作成する
-				if (MaterialIndex < 0 || MaterialIndex >= static_cast<int>(MaterialList.size()));
+				if (MaterialIndex < 0 || MaterialIndex >= static_cast<int>(MaterialList.size())) return false;
 				const auto& material = MaterialList[MaterialIndex];
 
 				std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(VertexBuffer, IndexBuffer, material);

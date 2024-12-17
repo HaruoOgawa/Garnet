@@ -62,8 +62,8 @@ namespace graphics
 
 		if (!m_Material->Create(TextureSet)) return false;
 
-		m_Renderer = pGraphicsAPI->CreateRenderer(PassName);
-		if (!m_Renderer->Create(m_VertexBuffer, m_IndexBuffer, m_Material)) return false;
+		m_Renderer = pGraphicsAPI->CreateRenderer();
+		if (!m_Renderer->Create(PassName, m_VertexBuffer, m_IndexBuffer, m_Material)) return false;
 
 		return true;
 	}
