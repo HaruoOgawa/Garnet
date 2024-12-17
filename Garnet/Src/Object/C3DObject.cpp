@@ -434,7 +434,7 @@ namespace object
 		return true;
 	}
 
-	bool C3DObject::Draw(api::IGraphicsAPI* pGraphicsAPI, bool DrawOutline, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo,
+	bool C3DObject::Draw(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo,
 		const std::shared_ptr<object::C3DObject>& DebugSphere)
 	{
 		if (!m_IsCreated) return true;
@@ -455,7 +455,7 @@ namespace object
 
 				auto& RootNode = m_NodeList[RootNodeIndex];
 
-				if (!DrawFromNode(RootNode, pGraphicsAPI, DrawOutline, Camera, Projection, DrawInfo)) return false;
+				if (!DrawFromNode(RootNode, pGraphicsAPI, Camera, Projection, DrawInfo)) return false;
 			}
 		}
 		else
@@ -463,7 +463,7 @@ namespace object
 			// ルートノードが指定されていないので全ノードを順番に描画
 			for (const auto& Node : m_NodeList)
 			{
-				if (!Draw(Node, pGraphicsAPI, DrawOutline, Camera, Projection, DrawInfo)) return false;
+				if (!Draw(Node, pGraphicsAPI, Camera, Projection, DrawInfo)) return false;
 			}
 		}
 
@@ -473,14 +473,14 @@ namespace object
 		return true;
 	}
 
-	bool C3DObject::DrawFromNode(const std::shared_ptr<CNode>& Node, api::IGraphicsAPI* pGraphicsAPI, bool DrawOutline, const std::shared_ptr<camera::CCamera>& Camera,
+	bool C3DObject::DrawFromNode(const std::shared_ptr<CNode>& Node, api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<camera::CCamera>& Camera,
 		const std::shared_ptr<projection::CProjection>& Projection, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo)
 	{
 		// 非表示だったら子要素も描画しない
 		if (!Node->IsEnabled()) return true;
 
 		// 自分自身の描画
-		if (!Draw(Node, pGraphicsAPI, DrawOutline, Camera, Projection, DrawInfo)) return false;
+		if (!Draw(Node, pGraphicsAPI, Camera, Projection, DrawInfo)) return false;
 
 		// 子要素の描画
 		for (const int ChildIndex : Node->GetChildrenNodeIndexList())
@@ -488,13 +488,13 @@ namespace object
 			if (ChildIndex < 0 || ChildIndex >= m_NodeList.size()) continue;
 
 			auto& ChildNode = m_NodeList[ChildIndex];
-			if (!DrawFromNode(ChildNode, pGraphicsAPI, DrawOutline, Camera, Projection, DrawInfo)) return false;
+			if (!DrawFromNode(ChildNode, pGraphicsAPI, Camera, Projection, DrawInfo)) return false;
 		}
 
 		return true;
 	}
 
-	bool C3DObject::Draw(const std::shared_ptr<CNode>& Node, api::IGraphicsAPI* pGraphicsAPI, bool DrawOutline, const std::shared_ptr<camera::CCamera>& Camera,
+	bool C3DObject::Draw(const std::shared_ptr<CNode>& Node, api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<camera::CCamera>& Camera,
 		const std::shared_ptr<projection::CProjection>& Projection, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo)
 	{
 		for (const auto& Component : Node->GetComponentList())
@@ -524,14 +524,6 @@ namespace object
 
 			// ダイナミックオフセットがマテリアル参照数よりも大きい時は終了する
 			//if (DynamicOffsetNum > Material->GetRefCount()) return true;
-
-			// アウトライン
-			if (DrawOutline)
-			{
-				if (DrawOutline != Material->IsDrawOutline()) return true;
-
-				Material->SetCullMode(graphics::ECullMode::CULL_FRONT);
-			}
 
 			// 共通のユニフォームバッファの更新
 			glm::mat4 lightVPMat = DrawInfo->GetLightProjection()->GetPrejectionMatrix() * DrawInfo->GetLightCamera()->GetViewMatrix();
@@ -574,7 +566,7 @@ namespace object
 		return true;
 	}
 
-	bool C3DObject::DrawDebugBone(api::IGraphicsAPI* pGraphicsAPI, bool DrawOutline, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
+	bool C3DObject::DrawDebugBone(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
 		const std::shared_ptr<graphics::CDrawInfo>& DrawInfo, const std::shared_ptr<object::C3DObject>& DebugSphere)
 	{
 #ifdef USE_ANIMATION
@@ -606,7 +598,7 @@ namespace object
 					DebugSphere->GetMeshList()[0]->GetPrimitiveList()[0]->GetMaterial()->SetUniformValue("baseColor", &glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)[0], sizeof(glm::vec4));
 					DebugSphere->GetMeshList()[0]->GetPrimitiveList()[0]->GetMaterial()->SetUniformValue("baseColorFactor", &glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)[0], sizeof(glm::vec4));
 
-					if (!DebugSphere->Draw(pGraphicsAPI, false, Camera, Projection, DrawInfo)) return false;
+					if (!DebugSphere->Draw(pGraphicsAPI, Camera, Projection, DrawInfo)) return false;
 				}
 			}
 		}
@@ -614,7 +606,7 @@ namespace object
 		return true;
 	}
 
-	bool C3DObject::DrawDebugPhysics(api::IGraphicsAPI* pGraphicsAPI, bool DrawOutline, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
+	bool C3DObject::DrawDebugPhysics(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
 		const std::shared_ptr<graphics::CDrawInfo>& DrawInfo, const std::shared_ptr<object::C3DObject>& DebugSphere)
 	{
 #ifdef USE_ANIMATION
@@ -660,7 +652,7 @@ namespace object
 							DebugSphere->SetScale(WorldScale);
 						}
 
-						if (!DebugSphere->Draw(pGraphicsAPI, false, Camera, Projection, DrawInfo)) return false;
+						if (!DebugSphere->Draw(pGraphicsAPI, Camera, Projection, DrawInfo)) return false;
 					}
 				}
 			}

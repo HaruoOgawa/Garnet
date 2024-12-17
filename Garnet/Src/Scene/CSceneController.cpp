@@ -438,7 +438,7 @@ namespace scene
 
 		for (const auto& Object : m_ObjectList)
 		{
-			if (!Object->Draw(pGraphicsAPI, false, Camera, Projection, DrawInfo, m_DebugSphere)) return false;
+			if (!Object->Draw(pGraphicsAPI, Camera, Projection, DrawInfo, m_DebugSphere)) return false;
 		}
 
 		return true;

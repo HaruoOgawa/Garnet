@@ -81,7 +81,7 @@ namespace resource
 			m_LoadingBar->GetMeshList()[0]->GetPrimitiveList()[0]->GetMaterial()->SetUniformValue("rate", &glm::vec1(rate)[0], sizeof(float));
 			m_LoadingBar->GetMeshList()[0]->GetPrimitiveList()[0]->GetMaterial()->SetUniformValue("alpha", &m_Alpha, sizeof(float));
 
-			if (!m_LoadingBar->Draw(pGraphicsAPI, false, Camera, Projection, DrawInfo)) return false;
+			if (!m_LoadingBar->Draw(pGraphicsAPI, Camera, Projection, DrawInfo)) return false;
 		}
 
 		return true;
