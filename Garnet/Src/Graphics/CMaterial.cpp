@@ -9,7 +9,7 @@ namespace graphics
 		m_MaterialFrame(nullptr),
 		m_CreateInfo(createInfo),
 		m_RefCount(RefCount),
-		m_CurrentDynamicOffset(0),
+		m_CurrentDynamicOffset(1),
 		m_EnabledZWrite(true),
 		m_DepthFunc(EDepthFunc::Less),
 		m_DefaultCullMode(CullMode),
@@ -20,8 +20,6 @@ namespace graphics
 		m_EmptyCubeTexture(nullptr),
 		m_OutputColorCount(1)
 	{
-		ResetDynamicOffset();
-
 		{
 			
 			m_EmptyTexture = pGraphicsAPI->CreateTexture(false);
@@ -390,35 +388,14 @@ namespace graphics
 	{
 	}
 
-	void CMaterial::AddRefCount()
-	{
-		m_RefCount++;
-	}
-
-	int CMaterial::GetRefCount() const
-	{
-		return m_RefCount;
-	}
-
 	bool CMaterial::IsUseDynamicOffset()
 	{
 		return (m_RefCount > 1);
 	}
 
-	void CMaterial::IncreaseDynamicOffset()
-	{
-		m_CurrentDynamicOffset++;
-	}
-
 	int CMaterial::GetDynamicOffset() const
 	{
 		return m_CurrentDynamicOffset;
-	}
-
-	void CMaterial::ResetDynamicOffset()
-	{
-		// ダイナミックオフセットは１から使用できるので初期値も１にする
-		m_CurrentDynamicOffset = 1;
 	}
 
 	const std::vector<uint32_t>& CMaterial::GetBindingRefSizeList() const
