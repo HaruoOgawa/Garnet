@@ -611,7 +611,7 @@ namespace scene
 			if (MaterialInfo.PrimitiveIndex < 0 || MaterialInfo.PrimitiveIndex >= static_cast<int>(Mesh->GetPrimitiveList().size())) return false;
 			const auto& Primitive = Mesh->GetPrimitiveList()[MaterialInfo.PrimitiveIndex];
 
-			Primitive->AddMaterial(Material);
+			Primitive->AddMaterial(pGraphicsAPI, Material);
 		}
 
 		return true;
@@ -635,17 +635,22 @@ namespace scene
 			if (MaterialInfo.PrimitiveIndex < 0 || MaterialInfo.PrimitiveIndex >= static_cast<int>(Mesh->GetPrimitiveList().size())) continue;
 			const auto& Primitive = Mesh->GetPrimitiveList()[MaterialInfo.PrimitiveIndex];
 
-			const auto& Material = Primitive->GetMaterial();
-			if (!Material) continue;
-
-			// UniformValue‚ðÝ’è
-			for (const auto& UniformInfo : MaterialInfo.UniformInfoList)
+			for (const auto& Renderer : Primitive->GetRendererList())
 			{
-				Material->SetUniformValue(UniformInfo.UniformName, &UniformInfo.UniformData[0], UniformInfo.ByteSize);
-			}
+				const auto& Material = std::get<1>(Renderer);
+				if (!Material) continue;
 
-			// TrackIDList
-			Material->SetRefTrackIDList(MaterialInfo.TrackIDList);
+				if (MaterialInfo.MaterialFrameName != Material->GetMaterialFrame()->GetMaterialFrameName()) continue;
+				
+				// UniformValue‚ðÝ’è
+				for (const auto& UniformInfo : MaterialInfo.UniformInfoList)
+				{
+					Material->SetUniformValue(UniformInfo.UniformName, &UniformInfo.UniformData[0], UniformInfo.ByteSize);
+				}
+
+				// TrackIDList
+				Material->SetRefTrackIDList(MaterialInfo.TrackIDList);
+			}
 		}
 
 		return true;

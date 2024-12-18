@@ -730,7 +730,9 @@ namespace gltf
 				if (!NewMaterial) return false;
 
 				// プリミティブを作成する
-				std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(VertexBuffer, IndexBuffer, NewMaterial);
+				std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(VertexBuffer, IndexBuffer);
+				Primitive->AddMaterial(pGraphicsAPI, NewMaterial);
+
 				Mesh->SetMorphDataList(Primitive, static_cast<int>(Mesh->GetPrimitiveList().size()), MorphDataList);
 				Mesh->AddPrimitive(Primitive);
 
@@ -758,7 +760,7 @@ namespace gltf
 			for (auto& Primirive : Mesh->GetPrimitiveList())
 			{
 				auto material = MaterialFrame->CreateMaterial(pGraphicsAPI, 1, graphics::ECullMode::CULL_NONE);
-				Primirive->AddMaterial(material);
+				Primirive->AddMaterial(pGraphicsAPI, material);
 			}
 		}
 

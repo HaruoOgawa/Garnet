@@ -8,13 +8,11 @@
 
 namespace graphics
 {
-	CPrimitive::CPrimitive(const std::shared_ptr<CVertexBuffer>& VertexBuffer, const std::shared_ptr<CIndexBuffer>& IndexBuffer, const std::shared_ptr<CMaterial>& Material) :
+	CPrimitive::CPrimitive(const std::shared_ptr<CVertexBuffer>& VertexBuffer, const std::shared_ptr<CIndexBuffer>& IndexBuffer) :
 		m_Enabled(true),
 		m_PresetType(graphics::EPresetPrimitiveType::None),
 		m_VertexBuffer(VertexBuffer),
 		m_IndexBuffer(IndexBuffer),
-		m_Renderer(nullptr),
-		m_Material(Material),
 		m_UseMorph(false)
 	{
 	}
@@ -54,42 +52,50 @@ namespace graphics
 		}
 	}
 
-	bool CPrimitive::Create(api::IGraphicsAPI* pGraphicsAPI, const std::string& PassName, const std::shared_ptr<graphics::CTextureSet>& TextureSet)
+	bool CPrimitive::Create(const std::string& PassName, const std::shared_ptr<graphics::CTextureSet>& TextureSet)
 	{
 		if (!m_VertexBuffer || !m_IndexBuffer) return false;
 
-		if (!m_Material) return false;
+		if (m_RendererList.empty()) return false;
 
-		if (!m_Material->Create(TextureSet)) return false;
+		for (auto& RendererMat : m_RendererList)
+		{
+			if (!std::get<1>(RendererMat)->Create(TextureSet)) return false;
 
-		m_Renderer = pGraphicsAPI->CreateRenderer();
-		if (!m_Renderer->Create(PassName, m_VertexBuffer, m_IndexBuffer, m_Material)) return false;
+			if (!std::get<0>(RendererMat)->Create(PassName, m_VertexBuffer, m_IndexBuffer, std::get<1>(RendererMat))) return false;
+		}
 
 		return true;
 	}
 
-	bool CPrimitive::Draw(int DynamicOffsetNum)
+	bool CPrimitive::Draw()
 	{
 		if (!IsEnabled()) return true;
 
-		if (!m_Renderer->Draw(m_VertexBuffer, m_IndexBuffer, m_Material, DynamicOffsetNum)) return false;
+		// ToDo: PrimitiveとMaterialのどちらから取るか
+		int DynamicOffset = 1;
+		// マテリアルの参照カウントをダイナミックオフセットとして使用する
+		//int DynamicOffset = Material->GetDynamicOffset();
+		if (DynamicOffset < 0) return true;
+
+		for (const auto& RendererMat : m_RendererList)
+		{
+			if (!std::get<0>(RendererMat)->Draw(m_VertexBuffer, m_IndexBuffer, std::get<1>(RendererMat), DynamicOffset)) return false;
+		}
 		
 		return true;
 	}
 
-	const std::shared_ptr<graphics::IRenderer>& CPrimitive::GetRenderer() const
+	const std::vector<std::tuple<std::shared_ptr<graphics::IRenderer>, std::shared_ptr<CMaterial>>>& CPrimitive::GetRendererList() const
 	{
-		return m_Renderer;
+		return m_RendererList;
 	}
 
-	void CPrimitive::AddMaterial(const std::shared_ptr<CMaterial>& Material)
+	void CPrimitive::AddMaterial(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CMaterial>& Material)
 	{
-		m_Material = Material;
-	}
+		if (!Material) return;
 
-	const std::shared_ptr<CMaterial>& CPrimitive::GetMaterial() const
-	{
-		return m_Material;
+		m_RendererList.push_back(std::make_tuple(pGraphicsAPI->CreateRenderer(), Material));
 	}
 
 	const std::shared_ptr<CVertexBuffer>& CPrimitive::GetVertexBuffer() const

@@ -142,10 +142,10 @@ namespace gui
 						std::shared_ptr<graphics::CMesh> Mesh = std::make_shared<graphics::CMesh>();
 
 						const auto& CreateInfo = graphics::CPresetPrimitive::CreateFromType(pGraphicsAPI, PresetType);
-						Mesh->CreatePresetSimpleMesh(CreateInfo.first, CreateInfo.second, NewMaterial, PresetType);
+						Mesh->CreatePresetSimpleMesh(pGraphicsAPI, CreateInfo.first, CreateInfo.second, NewMaterial, PresetType);
 
 						// プリセットなので即時生成
-						if (!Mesh->Create(pGraphicsAPI, Object->GetTextureSet(), Object->GetPassName(), Object->GetDepthPassName())) return false;
+						if (!Mesh->Create(Object->GetTextureSet(), Object->GetPassName(), Object->GetDepthPassName())) return false;
 
 						Object->AddMesh(Mesh);
 					}
@@ -241,12 +241,15 @@ namespace gui
 							ImGui::Text("%s", Text.c_str());
 						}
 
-						const auto& Material = Primitive->GetMaterial();
-						if (Material)
+						for (const auto& Renderer : Primitive->GetRendererList())
 						{
-							std::string Text = "MaterialName: " + Material->GetMaterialName();
+							const auto& Material = std::get<1>(Renderer);
+							if (Material)
+							{
+								std::string Text = "MaterialName: " + Material->GetMaterialName();
 
-							ImGui::Text("%s", Text.c_str());
+								ImGui::Text("%s", Text.c_str());
+							}
 						}
 
 						ImGui::TreePop();

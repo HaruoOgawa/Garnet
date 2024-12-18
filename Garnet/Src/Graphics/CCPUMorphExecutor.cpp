@@ -118,10 +118,9 @@ namespace graphics
 
 	bool CCPUMorphExecutor::ApplyAttribute(const std::vector<float>& PosAttribute, const std::shared_ptr<CPrimitive>& Primitive)
 	{
-		const auto& Renderer = Primitive->GetRenderer();
-		if (Renderer)
+		for (const auto& Renderer : Primitive->GetRendererList())
 		{
-			if (!Renderer->UpdateVertexBuffer(PosAttribute, Primitive->GetVertexBuffer())) return false;
+			if (!std::get<0>(Renderer)->UpdateVertexBuffer(PosAttribute, Primitive->GetVertexBuffer())) return false;
 		}
 
 		return true;

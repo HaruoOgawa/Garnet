@@ -45,9 +45,13 @@ namespace gui
 		{
 			for (const auto& Primitive : Mesh->GetPrimitiveList())
 			{
-				const auto& Material = Primitive->GetMaterial();
+				for (const auto& Renderer : Primitive->GetRendererList())
+				{
+					const auto& Material = std::get<1>(Renderer);
+					if (!Material) continue;
 
-				if (!DrawMaterialGUI(pGraphicsAPI, Object, Material, SceneController)) return false;
+					if (!DrawMaterialGUI(pGraphicsAPI, Object, Material, SceneController)) return false;
+				}
 			}
 		}
 
@@ -82,11 +86,17 @@ namespace gui
 
 		for (const auto& Primitive : Mesh->GetPrimitiveList())
 		{
-			const auto& Material = Primitive->GetMaterial();
-			if (!Material) continue;
+			for (const auto& Renderer : Primitive->GetRendererList())
+			{
+				const auto& Material = std::get<1>(Renderer);
 
-			// Material‚ÌGUI‚ð•`‰æ
-			if (!DrawMaterialGUI(pGraphicsAPI, Object, Material, SceneController)) return false;
+				if (!Material) continue;
+
+				// Material‚ÌGUI‚ð•`‰æ
+				if (!DrawMaterialGUI(pGraphicsAPI, Object, Material, SceneController)) return false;
+			}
+
+			
 		}
 
 		return true;

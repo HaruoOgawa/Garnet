@@ -78,8 +78,21 @@ namespace resource
 		if (m_Status == ELoadStatus::Loading && m_LoadingBar)
 		{
 			float rate = 1.0f - (static_cast<float>(m_LoadResourceList.size()) / m_FirstResourceCount);
-			m_LoadingBar->GetMeshList()[0]->GetPrimitiveList()[0]->GetMaterial()->SetUniformValue("rate", &glm::vec1(rate)[0], sizeof(float));
-			m_LoadingBar->GetMeshList()[0]->GetPrimitiveList()[0]->GetMaterial()->SetUniformValue("alpha", &m_Alpha, sizeof(float));
+
+			for (const auto& Mesh : m_LoadingBar->GetMeshList())
+			{
+				for (const auto& Primitive : Mesh->GetPrimitiveList())
+				{
+					for (const auto& Renderer : Primitive->GetRendererList())
+					{
+						const auto& Material = std::get<1>(Renderer);
+						if (!Material) continue;
+
+						Material->SetUniformValue("rate", &glm::vec1(rate)[0], sizeof(float));
+						Material->SetUniformValue("alpha", &m_Alpha, sizeof(float));
+					}
+				}
+			}
 
 			if (!m_LoadingBar->Draw(pGraphicsAPI, Camera, Projection, DrawInfo)) return false;
 		}

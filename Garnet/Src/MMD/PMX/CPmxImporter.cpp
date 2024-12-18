@@ -596,8 +596,9 @@ namespace mmd
 				if (MaterialIndex < 0 || MaterialIndex >= static_cast<int>(MaterialList.size())) return false;
 				const auto& material = MaterialList[MaterialIndex];
 
-				std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(VertexBuffer, IndexBuffer, material);
-				
+				std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(VertexBuffer, IndexBuffer);
+				Primitive->AddMaterial(pGraphicsAPI, material);
+
 				Mesh->AddPrimitive(Primitive);
 			}
 

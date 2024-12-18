@@ -156,7 +156,7 @@ namespace object
 	{
 		// Mesh
 		std::shared_ptr<graphics::CMesh> Mesh = std::make_shared<graphics::CMesh>();
-		Mesh->CreatePresetSimpleMesh(createInfo.first, createInfo.second, Material, PresetType);
+		Mesh->CreatePresetSimpleMesh(pGraphicsAPI, createInfo.first, createInfo.second, Material, PresetType);
 
 		AddMesh(Mesh);
 
@@ -194,7 +194,7 @@ namespace object
 
 		for (const auto& Mesh : m_MeshList)
 		{
-			if (!Mesh->Create(pGraphicsAPI, m_TextureSet, m_PassName, m_DepthPassName)) return false;
+			if (!Mesh->Create(m_TextureSet, m_PassName, m_DepthPassName)) return false;
 
 			// モーフ処理が必要かどうか
 			if (Mesh->GetMorphDataList().size() > 0)
@@ -225,14 +225,16 @@ namespace object
 			{
 				for (const auto& Primitive : Mesh->GetPrimitiveList())
 				{
-					const auto& Material = Primitive->GetMaterial();
-					if (!Material) continue;
-
-					if (!Material->GetRefTrackIDList().empty())
+					for (const auto& Renderer : Primitive->GetRendererList())
 					{
-						m_TLMaterial.emplace(Material);
-					}
+						const auto& Material = std::get<1>(Renderer);
+						if (!Material) continue;
 
+						if (!Material->GetRefTrackIDList().empty())
+						{
+							m_TLMaterial.emplace(Material);
+						}
+					}
 				}
 			}
 		}
@@ -515,47 +517,51 @@ namespace object
 		{
 			const auto& Primitive = Mesh->GetPrimitiveList()[PrimitiveIndex];
 
-			std::shared_ptr<graphics::CMaterial> Material = Primitive->GetMaterial();
-			if (!Material) return true;
-
-			int DynamicOffset = 1;
-			// マテリアルの参照カウントをダイナミックオフセットとして使用する
-			//int DynamicOffset = Material->GetDynamicOffset();
-			if (DynamicOffset < 0) return true;
-
-			// 共通のユニフォームバッファの更新
-			glm::mat4 lightVPMat = DrawInfo->GetLightProjection()->GetPrejectionMatrix() * DrawInfo->GetLightCamera()->GetViewMatrix();
-
-			Material->SetUniformValue("drawPathIndex", &DynamicOffset, sizeof(int), DynamicOffset);
-			Material->SetUniformValue("model", &WorldMatrix[0][0], sizeof(glm::mat4), DynamicOffset);
-			Material->SetUniformValue("invModel", &InvWorldMatrix[0][0], sizeof(glm::mat4), DynamicOffset);
-			Material->SetUniformValue("view", &Camera->GetViewMatrix()[0][0], sizeof(glm::mat4), DynamicOffset);
-			Material->SetUniformValue("proj", &Projection->GetPrejectionMatrix()[0][0], sizeof(glm::mat4), DynamicOffset);
-			Material->SetUniformValue("lightVPMat", &lightVPMat[0][0], sizeof(glm::mat4), DynamicOffset);
-			glm::vec3 lightDir = DrawInfo->GetLightCamera()->GetViewDir();
-			Material->SetUniformValue("lightDir", &glm::vec4(lightDir.x, lightDir.y, lightDir.z, 0.0f)[0], sizeof(glm::vec4), DynamicOffset);
-			glm::vec3 lightPos = DrawInfo->GetLightCamera()->GetPos();
-			Material->SetUniformValue("lightPos", &glm::vec4(lightPos.x, lightPos.y, lightPos.z, 0.0f)[0], sizeof(glm::vec4), DynamicOffset);
-			Material->SetUniformValue("lightColor", &DrawInfo->GetLightColor()[0], sizeof(glm::vec4), DynamicOffset);
-			glm::vec3 CameraPos = Camera->GetPos();
-			Material->SetUniformValue("cameraPos", &glm::vec4(CameraPos.x, CameraPos.y, CameraPos.z, 1.0f)[0], sizeof(glm::vec4), DynamicOffset);
-			Material->SetUniformValue("time", &glm::vec1(DrawInfo->GetSecondsTime())[0], sizeof(float), DynamicOffset);
-			Material->SetUniformValue("deltaTime", &glm::vec1(DrawInfo->GetDeltaSecondsTime())[0], sizeof(float), DynamicOffset);
-			Material->SetUniformValue("resolution", &Projection->GetScreenResolution()[0], sizeof(glm::vec2), DynamicOffset);
-#ifdef USE_ANIMATION
-			Material->SetUniformValue("useSkinMeshAnimation", &glm::ivec1((m_AnimationController->IsEnabledSkeleton() ? 1 : 0))[0], sizeof(glm::ivec1), DynamicOffset);
-
-			// SkinMatrixをShaderに渡す
-			if (m_CurrentSkinMatrixList.size() > 0)
+			// Materialの標準パラメーターを設定
+			for (const auto& Renderer : Primitive->GetRendererList())
 			{
-				Material->SetUniformValue("r_SkinMatrixBuffer", &m_CurrentSkinMatrixList[0], sizeof(glm::mat4) * static_cast<int>(m_CurrentSkinMatrixList.size()), DynamicOffset);
-			}
-#endif
-			// 描画実行
-			if (!Primitive->Draw(DynamicOffset)) return false;
+				const auto& Material = std::get<1>(Renderer);
 
-			// 描画準備のために変更した設定を元に戻す
-			Material->ResetToDefaultCullMode();
+				if (!Material) return true;
+
+				// ToDo: PrimitiveとMaterialのどちらから取るか
+				int DynamicOffset = 1;
+				// マテリアルの参照カウントをダイナミックオフセットとして使用する
+				//int DynamicOffset = Material->GetDynamicOffset();
+				if (DynamicOffset < 0) return true;
+
+				// 共通のユニフォームバッファの更新
+				glm::mat4 lightVPMat = DrawInfo->GetLightProjection()->GetPrejectionMatrix() * DrawInfo->GetLightCamera()->GetViewMatrix();
+
+				Material->SetUniformValue("drawPathIndex", &DynamicOffset, sizeof(int), DynamicOffset);
+				Material->SetUniformValue("model", &WorldMatrix[0][0], sizeof(glm::mat4), DynamicOffset);
+				Material->SetUniformValue("invModel", &InvWorldMatrix[0][0], sizeof(glm::mat4), DynamicOffset);
+				Material->SetUniformValue("view", &Camera->GetViewMatrix()[0][0], sizeof(glm::mat4), DynamicOffset);
+				Material->SetUniformValue("proj", &Projection->GetPrejectionMatrix()[0][0], sizeof(glm::mat4), DynamicOffset);
+				Material->SetUniformValue("lightVPMat", &lightVPMat[0][0], sizeof(glm::mat4), DynamicOffset);
+				glm::vec3 lightDir = DrawInfo->GetLightCamera()->GetViewDir();
+				Material->SetUniformValue("lightDir", &glm::vec4(lightDir.x, lightDir.y, lightDir.z, 0.0f)[0], sizeof(glm::vec4), DynamicOffset);
+				glm::vec3 lightPos = DrawInfo->GetLightCamera()->GetPos();
+				Material->SetUniformValue("lightPos", &glm::vec4(lightPos.x, lightPos.y, lightPos.z, 0.0f)[0], sizeof(glm::vec4), DynamicOffset);
+				Material->SetUniformValue("lightColor", &DrawInfo->GetLightColor()[0], sizeof(glm::vec4), DynamicOffset);
+				glm::vec3 CameraPos = Camera->GetPos();
+				Material->SetUniformValue("cameraPos", &glm::vec4(CameraPos.x, CameraPos.y, CameraPos.z, 1.0f)[0], sizeof(glm::vec4), DynamicOffset);
+				Material->SetUniformValue("time", &glm::vec1(DrawInfo->GetSecondsTime())[0], sizeof(float), DynamicOffset);
+				Material->SetUniformValue("deltaTime", &glm::vec1(DrawInfo->GetDeltaSecondsTime())[0], sizeof(float), DynamicOffset);
+				Material->SetUniformValue("resolution", &Projection->GetScreenResolution()[0], sizeof(glm::vec2), DynamicOffset);
+#ifdef USE_ANIMATION
+				Material->SetUniformValue("useSkinMeshAnimation", &glm::ivec1((m_AnimationController->IsEnabledSkeleton() ? 1 : 0))[0], sizeof(glm::ivec1), DynamicOffset);
+
+				// SkinMatrixをShaderに渡す
+				if (m_CurrentSkinMatrixList.size() > 0)
+				{
+					Material->SetUniformValue("r_SkinMatrixBuffer", &m_CurrentSkinMatrixList[0], sizeof(glm::mat4) * static_cast<int>(m_CurrentSkinMatrixList.size()), DynamicOffset);
+				}
+#endif
+			}
+			
+			// 描画実行
+			if (!Primitive->Draw()) return false;
 		}
 
 		return true;
@@ -589,10 +595,22 @@ namespace object
 						//DebugSphere->SetPos(m_ObjectTransform->GetModelMatrix()* BoneNode->GetWorldMatrix()* glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
 					}
 
-					DebugSphere->GetMeshList()[0]->GetPrimitiveList()[0]->GetMaterial()->SetUniformValue("useColor", &glm::ivec1(1)[0], sizeof(glm::ivec1));
-					DebugSphere->GetMeshList()[0]->GetPrimitiveList()[0]->GetMaterial()->SetUniformValue("baseColor", &glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)[0], sizeof(glm::vec4));
-					DebugSphere->GetMeshList()[0]->GetPrimitiveList()[0]->GetMaterial()->SetUniformValue("baseColorFactor", &glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)[0], sizeof(glm::vec4));
+					for (const auto& Mesh : DebugSphere->GetMeshList())
+					{
+						for (const auto& Primitive : Mesh->GetPrimitiveList())
+						{
+							for (const auto& Renderer : Primitive->GetRendererList())
+							{
+								const auto& Material = std::get<1>(Renderer);
+								if (!Material) continue;
 
+								Material->SetUniformValue("useColor", &glm::ivec1(1)[0], sizeof(glm::ivec1));
+								Material->SetUniformValue("baseColor", &glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)[0], sizeof(glm::vec4));
+								Material->SetUniformValue("baseColorFactor", &glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)[0], sizeof(glm::vec4));
+							}
+						}
+					}
+					
 					if (!DebugSphere->Draw(pGraphicsAPI, Camera, Projection, DrawInfo)) return false;
 				}
 			}
@@ -617,18 +635,30 @@ namespace object
 					if (Bone->GetBoneName() == animation::EHumanoidBones::Center) continue;
 
 					const auto& BoneNode = Bone->GetBoneNode();
-
-					DebugSphere->GetMeshList()[0]->GetPrimitiveList()[0]->GetMaterial()->SetUniformValue("useColor", &glm::ivec1(1)[0], sizeof(glm::ivec1));
-
+					
 					for (const auto& PhysicsObject : BoneNode->GetPhysicsObjectList())
 					{
-						if (PhysicsObject->IsStatic())
+						for (const auto& Mesh : DebugSphere->GetMeshList())
 						{
-							DebugSphere->GetMeshList()[0]->GetPrimitiveList()[0]->GetMaterial()->SetUniformValue("baseColor", &glm::vec4(1.0f, 0.0f, 0.0f, 1.0f)[0], sizeof(glm::vec4));
-						}
-						else
-						{
-							DebugSphere->GetMeshList()[0]->GetPrimitiveList()[0]->GetMaterial()->SetUniformValue("baseColor", &glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)[0], sizeof(glm::vec4));
+							for (const auto& Primitive : Mesh->GetPrimitiveList())
+							{
+								for (const auto& Renderer : Primitive->GetRendererList())
+								{
+									const auto& Material = std::get<1>(Renderer);
+									if (!Material) continue;
+
+									Material->SetUniformValue("useColor", &glm::ivec1(1)[0], sizeof(glm::ivec1));
+
+									if (PhysicsObject->IsStatic())
+									{
+										Material->SetUniformValue("baseColor", &glm::vec4(1.0f, 0.0f, 0.0f, 1.0f)[0], sizeof(glm::vec4));
+									}
+									else
+									{
+										Material->SetUniformValue("baseColor", &glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)[0], sizeof(glm::vec4));
+									}
+								}
+							}
 						}
 
 						{

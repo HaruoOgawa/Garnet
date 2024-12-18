@@ -13,13 +13,13 @@ namespace graphics
 	{
 	}
 
-	bool CMesh::Create(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<graphics::CTextureSet>& TextureSet, std::string PassName, std::string DepthPassName)
+	bool CMesh::Create(const std::shared_ptr<graphics::CTextureSet>& TextureSet, std::string PassName, std::string DepthPassName)
 	{
 		if (!CreateBuffer()) return false;
 
 		for (const auto& Primitive : GetPrimitiveList())
 		{
-			if (!Primitive->Create(pGraphicsAPI, PassName, TextureSet)) return false;
+			if (!Primitive->Create(PassName, TextureSet)) return false;
 
 			// 生成処理が終わったので不要なリソースを解放する
 			Primitive->Release();
@@ -63,13 +63,15 @@ namespace graphics
 		return m_PrimitiveList;
 	}
 
-	void CMesh::CreatePresetSimpleMesh(const std::shared_ptr<CVertexBuffer>& VertexBuffer, const std::shared_ptr<CIndexBuffer>& IndexBuffer,
+	void CMesh::CreatePresetSimpleMesh(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CVertexBuffer>& VertexBuffer, const std::shared_ptr<CIndexBuffer>& IndexBuffer,
 		const std::shared_ptr<CMaterial>& Material, graphics::EPresetPrimitiveType PresetType)
 	{
 		AddVertexBuffer(VertexBuffer);
 		AddIndexBuffer(IndexBuffer);
 
-		std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(VertexBuffer, IndexBuffer, Material);
+		std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(VertexBuffer, IndexBuffer);
+		Primitive->AddMaterial(pGraphicsAPI, Material);
+
 		Primitive->SetPresetType(PresetType);
 		AddPrimitive(Primitive);
 	}

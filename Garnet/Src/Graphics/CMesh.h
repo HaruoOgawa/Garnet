@@ -27,7 +27,7 @@ namespace graphics
 		CMesh();
 		virtual ~CMesh();
 
-		bool Create(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<graphics::CTextureSet>& TextureSet, std::string PassName, std::string DepthPassName);
+		bool Create(const std::shared_ptr<graphics::CTextureSet>& TextureSet, std::string PassName, std::string DepthPassName);
 
 		bool CreateBuffer();
 
@@ -37,7 +37,7 @@ namespace graphics
 		void AddPrimitive(const std::shared_ptr<CPrimitive>& Primitive);
 		const std::vector<std::shared_ptr<CPrimitive>>& GetPrimitiveList() const;
 
-		void CreatePresetSimpleMesh(const std::shared_ptr<CVertexBuffer>& VertexBuffer, const std::shared_ptr<CIndexBuffer>& IndexBuffer, 
+		void CreatePresetSimpleMesh(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CVertexBuffer>& VertexBuffer, const std::shared_ptr<CIndexBuffer>& IndexBuffer,
 			const std::shared_ptr<CMaterial>& Material, graphics::EPresetPrimitiveType PresetType);
 
 		void SetMorphDataList(const std::shared_ptr<CPrimitive>& Primitive, int PrimitiveIndex, const std::vector<std::map<int, glm::vec3>>& MorphDataList);

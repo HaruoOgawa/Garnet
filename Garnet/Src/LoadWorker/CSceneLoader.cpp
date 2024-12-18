@@ -947,7 +947,7 @@ namespace resource
 				}
 
 				//
-				Mesh->CreatePresetSimpleMesh(createInfo.first, createInfo.second, nullptr, PrimitiveType);
+				Mesh->CreatePresetSimpleMesh(pGraphicsAPI, createInfo.first, createInfo.second, nullptr, PrimitiveType);
 			}
 		}
 

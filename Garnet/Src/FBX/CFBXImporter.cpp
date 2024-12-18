@@ -342,7 +342,7 @@ namespace fbx
 					material->ReplacePreloadUniformValue("r_SkinMatrixBuffer", &SkinMatrixList[0], static_cast<int>(SkinMatrixList.size()) * sizeof(glm::mat4), 1);
 				}
 
-				Primirive->AddMaterial(material);
+				Primirive->AddMaterial(pGraphicsAPI, material);
 			}
 		}
 
@@ -776,7 +776,9 @@ namespace fbx
 				if (!NewMaterial) return false;
 
 				// プリミティブを作成する
-				std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(VertexBuffer, IndexBuffer, NewMaterial);
+				std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(VertexBuffer, IndexBuffer);
+				Primitive->AddMaterial(pGraphicsAPI, NewMaterial);
+
 				Mesh->AddPrimitive(Primitive);
 			}
 

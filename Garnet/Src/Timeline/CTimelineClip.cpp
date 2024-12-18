@@ -127,24 +127,27 @@ namespace timeline
 			{
 				for (const auto& Primitive : Mesh->GetPrimitiveList())
 				{
-					const auto& Material = Primitive->GetMaterial();
-					if (!Material) continue;
-					
-					for (const auto& RefTrackID : Material->GetRefTrackIDList())
+					for (const auto& Renderer : Primitive->GetRendererList())
 					{
-						const auto& it = m_TrackList.find(RefTrackID);
-						if (it == m_TrackList.end())
-						{
-							// トラックが存在しなかったら削除する
-							Material->RemoveRefTrackID(RefTrackID);
+						const auto& Material = std::get<1>(Renderer);
+						if (!Material) continue;
 
-							continue;
+						for (const auto& RefTrackID : Material->GetRefTrackIDList())
+						{
+							const auto& it = m_TrackList.find(RefTrackID);
+							if (it == m_TrackList.end())
+							{
+								// トラックが存在しなかったら削除する
+								Material->RemoveRefTrackID(RefTrackID);
+
+								continue;
+							}
+
+							it->second->AssignTrackContent(Material);
 						}
 
-						it->second->AssignTrackContent(Material);
+						Material->ShrinkToFitTrackIDList();
 					}
-
-					Material->ShrinkToFitTrackIDList();
 				}
 			}
 		}
