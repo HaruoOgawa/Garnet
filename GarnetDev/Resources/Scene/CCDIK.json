@@ -5,6 +5,10 @@
             "filename": "Resources/MaterialFrame/basic_toon_mf.json"
         },
         {
+            "name": "basic_toon_outline_mat",
+            "filename": "Resources/MaterialFrame/basic_toon_outline_mf.json"
+        },
+        {
             "name": "pbr_mat",
             "filename": "Resources\\MaterialFrame\\PBR_MF.json"
         }
@@ -25,7 +29,10 @@
         {
             "name": "PmxObj",
             "filename": "Resources/Avatar/Tda_Miku/Tda_Miku.pmx",
-            "defaultmaterialframe": "basic_toon_mat",
+            "defaultmaterialframes": [
+                "basic_toon_mat",
+                "basic_toon_outline_mat"
+            ],
             "animation": {
                 "clips": null,
                 "humanoidclips": [
@@ -65,7 +72,7 @@
         {
             "name": "CCDIKTest",
             "filename": "Resources\\Models\\CCDIKTest\\CCDIKTest.glb",
-            "defaultmaterialframe": "pbr_mat",
+            "defaultmaterialframes": ["pbr_mat"],
             "renderpass": "MainResultPass",
             "depthpass": "",
             "transform": {

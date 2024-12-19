@@ -42,7 +42,7 @@
 namespace gltf
 {
 	bool CGLTFImporter::ImportFromMemory(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& Data, object::C3DObject* Object,
-		const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, resource::C3DObjectLoader* p3DObjectLoader, animation::ERigType RigType, const std::map<animation::EHumanoidBones, std::string>& HumanoidBoneList)
+		const std::vector<std::shared_ptr<graphics::CMaterialFrame>>& BaseMaterialFrameList, resource::C3DObjectLoader* p3DObjectLoader, animation::ERigType RigType, const std::map<animation::EHumanoidBones, std::string>& HumanoidBoneList)
 	{
 		tinygltf::Model model;
 		tinygltf::TinyGLTF loader;
@@ -64,13 +64,13 @@ namespace gltf
 
 		if (!result) return false;
 
-		if (!Import(pGraphicsAPI, model, Object, MaterialFrame, RigType, HumanoidBoneList)) return false;
+		if (!Import(pGraphicsAPI, model, Object, BaseMaterialFrameList, RigType, HumanoidBoneList)) return false;
 
 		return true;
 	}
 
 	bool CGLTFImporter::ImportFromString(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& Data, const std::string& BaseDir, object::C3DObject* Object,
-		const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, resource::C3DObjectLoader* p3DObjectLoader, animation::ERigType RigType, const std::map<animation::EHumanoidBones, std::string>& HumanoidBoneList)
+		const std::vector<std::shared_ptr<graphics::CMaterialFrame>>& BaseMaterialFrameList, resource::C3DObjectLoader* p3DObjectLoader, animation::ERigType RigType, const std::map<animation::EHumanoidBones, std::string>& HumanoidBoneList)
 	{
 		tinygltf::Model model;
 		tinygltf::TinyGLTF loader;
@@ -92,7 +92,7 @@ namespace gltf
 
 		if (!result) return false;
 
-		if (!Import(pGraphicsAPI, model, Object, MaterialFrame, RigType, HumanoidBoneList))
+		if (!Import(pGraphicsAPI, model, Object, BaseMaterialFrameList, RigType, HumanoidBoneList))
 		{
 			Console::Log("[Error GLTFImporter] Failed to Import\n");
 
@@ -103,7 +103,7 @@ namespace gltf
 	}
 
 	bool CGLTFImporter::Import(api::IGraphicsAPI* pGraphicsAPI, tinygltf::Model model, object::C3DObject* Object,
-		const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, animation::ERigType RigType, const std::map<animation::EHumanoidBones, std::string>& HumanoidBoneList)
+		const std::vector<std::shared_ptr<graphics::CMaterialFrame>>& BaseMaterialFrameList, animation::ERigType RigType, const std::map<animation::EHumanoidBones, std::string>& HumanoidBoneList)
 	{
 		// テクスチャ
 		std::vector<std::shared_ptr<graphics::CTexture>> TextureList;
@@ -121,8 +121,8 @@ namespace gltf
 
 		// マテリアル
 		// マテリアルはプリミティブ単位で生成する
-		std::vector<std::tuple<std::shared_ptr<graphics::CMaterialFrame>, std::shared_ptr<graphics::CMaterial>>> BaseMaterialList;
-		if (!CreateMaterial(pGraphicsAPI, model, BaseMaterialList, MaterialFrame, Object->GetTextureSet()))
+		std::vector<std::vector<std::tuple<std::shared_ptr<graphics::CMaterialFrame>, std::shared_ptr<graphics::CMaterial>>>> BaseMaterialList;
+		if (!CreateMaterial(pGraphicsAPI, model, BaseMaterialList, BaseMaterialFrameList, Object->GetTextureSet()))
 		{
 			Console::Log("[Error GLTFImporter] Failed to CreateMaterial\n");
 
@@ -141,7 +141,7 @@ namespace gltf
 		// マテリアルを持っていないのならダミーを渡す
 		if (BaseMaterialList.size() <= 0)
 		{
-			if (!CreateDummyMaterial(pGraphicsAPI, model, MaterialFrame, MeshList))
+			if (!CreateDummyMaterial(pGraphicsAPI, model, BaseMaterialFrameList, MeshList))
 			{
 				Console::Log("[Error GLTFImporter] Failed to CreateDummyMaterial\n");
 
@@ -280,8 +280,8 @@ namespace gltf
 	}
 
 	bool CGLTFImporter::CreateMaterial(api::IGraphicsAPI* pGraphicsAPI, const tinygltf::Model& model,
-		std::vector<std::tuple<std::shared_ptr<graphics::CMaterialFrame>, std::shared_ptr<graphics::CMaterial>>>& BaseMaterialList,
-		const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, const std::shared_ptr<graphics::CTextureSet>& TextureSet)
+		std::vector<std::vector<std::tuple<std::shared_ptr<graphics::CMaterialFrame>, std::shared_ptr<graphics::CMaterial>>>>& BaseMaterialList,
+		const std::vector<std::shared_ptr<graphics::CMaterialFrame>>& BaseMaterialFrameList, const std::shared_ptr<graphics::CTextureSet>& TextureSet)
 	{
 		//
 		std::vector<std::shared_ptr<graphics::CTexture>> TextureList(0);
@@ -325,146 +325,154 @@ namespace gltf
 			int normalTextureIndex = glTfMaterial.normalTexture.index;
 			int occlusionTextureIndex = glTfMaterial.occlusionTexture.index;
 			
+			// プリミティブ単位で割り当てられるマテリアルリスト
+			std::vector<std::tuple<std::shared_ptr<graphics::CMaterialFrame>, std::shared_ptr<graphics::CMaterial>>> PrimitiveMaterials;
+			
 			// マテリアルにシェーダーを設定
-			std::shared_ptr<graphics::CMaterial> material = MaterialFrame->CreateMaterial(pGraphicsAPI, 1, graphics::ECullMode::CULL_BACK);
-
-			// UBO
+			for (const auto& MaterialFrame : BaseMaterialFrameList)
 			{
-				// UBOの初期値を設定する
-				material->ReplacePreloadUniformValue("baseColorFactor", &glm::vec4(baseColorFactor[0], baseColorFactor[1], baseColorFactor[2], baseColorFactor[3])[0], sizeof(float) * 4, 0);
-				material->ReplacePreloadUniformValue("emissiveFactor", &glm::vec4(emissiveFactor[0], emissiveFactor[1], emissiveFactor[2], 0.0f)[0], sizeof(float) * 4, 0);
-				material->ReplacePreloadUniformValue("metallicFactor", &metallicFactor, sizeof(float), 0);
-				material->ReplacePreloadUniformValue("roughnessFactor", &roughnessFactor, sizeof(float), 0);
-				material->ReplacePreloadUniformValue("normalMapScale", &normalMapScale, sizeof(float), 0);
-				material->ReplacePreloadUniformValue("occlusionStrength", &occlusionStrength, sizeof(float), 0);
+				std::shared_ptr<graphics::CMaterial> material = MaterialFrame->CreateMaterial(pGraphicsAPI, 1, graphics::ECullMode::CULL_BACK);
 
-				// MipCountには反射キューブマップかIBLのSpecularMapの値が入っている(これらは必ずどちらか一方しか使用されないため)
-				float MipCount = 1.0f;
-				if (CubeTexList.size() > 0)
+				// UBO
 				{
-					MipCount = CubeTexList[0]->GetMipCount();
-				}
-				else if(Specular_Tex)
-				{
-					MipCount = Specular_Tex->GetMipCount();
-				}
+					// UBOの初期値を設定する
+					material->ReplacePreloadUniformValue("baseColorFactor", &glm::vec4(baseColorFactor[0], baseColorFactor[1], baseColorFactor[2], baseColorFactor[3])[0], sizeof(float) * 4, 0);
+					material->ReplacePreloadUniformValue("emissiveFactor", &glm::vec4(emissiveFactor[0], emissiveFactor[1], emissiveFactor[2], 0.0f)[0], sizeof(float) * 4, 0);
+					material->ReplacePreloadUniformValue("metallicFactor", &metallicFactor, sizeof(float), 0);
+					material->ReplacePreloadUniformValue("roughnessFactor", &roughnessFactor, sizeof(float), 0);
+					material->ReplacePreloadUniformValue("normalMapScale", &normalMapScale, sizeof(float), 0);
+					material->ReplacePreloadUniformValue("occlusionStrength", &occlusionStrength, sizeof(float), 0);
 
-				material->ReplacePreloadUniformValue("mipCount", &glm::vec1(MipCount)[0], sizeof(float), 0);
-
-				int ShadowMapX = 1, ShadowMapY = 1;
-				if (FrameTextureList.size() > 0)
-				{
-					// glTF FrameTextureList
-					// [0] : ShadowMap
-					// [1] : ???
-					// [2] : ???
-					ShadowMapX = FrameTextureList[0]->GetWidth();
-					ShadowMapY = FrameTextureList[0]->GetHeight();
-				}
-
-				material->ReplacePreloadUniformValue("ShadowMapX", &glm::vec1(static_cast<float>(ShadowMapX))[0], sizeof(float), 0);
-				material->ReplacePreloadUniformValue("ShadowMapY", &glm::vec1(static_cast<float>(ShadowMapY))[0], sizeof(float), 0);
-
-				// テクスチャを紐づける
-				{
-					if (baseColorTextureIndex >= 0 && baseColorTextureIndex < TextureList.size())
-					{
-						material->ReplaceTextureIndex("baseColorTexture", baseColorTextureIndex);
-						material->ReplacePreloadUniformValue("useBaseColorTexture", &glm::uvec1(1)[0], sizeof(int), 0);
-					}
-
-					if (metallicRoughnessTextureIndex >= 0 && metallicRoughnessTextureIndex < TextureList.size())
-					{
-						material->ReplaceTextureIndex("metallicRoughnessTexture", metallicRoughnessTextureIndex);
-						material->ReplacePreloadUniformValue("useMetallicRoughnessTexture", &glm::uvec1(1)[0], sizeof(int), 0);
-					}
-
-					if (emissiveTextureIndex >= 0 && emissiveTextureIndex < TextureList.size())
-					{
-						material->ReplaceTextureIndex("emissiveTexture", emissiveTextureIndex);
-						material->ReplacePreloadUniformValue("useEmissiveTexture", &glm::uvec1(1)[0], sizeof(int), 0);
-					}
-					
-					if (normalTextureIndex >= 0 && normalTextureIndex < TextureList.size())
-					{
-						material->ReplaceTextureIndex("normalTexture", normalTextureIndex);
-						material->ReplacePreloadUniformValue("useNormalTexture", &glm::uvec1(1)[0], sizeof(int), 0);
-					}
-
-					if (occlusionTextureIndex >= 0 && occlusionTextureIndex < TextureList.size())
-					{
-						material->ReplaceTextureIndex("occlusionTexture", occlusionTextureIndex);
-						material->ReplacePreloadUniformValue("useOcclusionTexture", &glm::uvec1(1)[0], sizeof(int), 0);
-					}
-
-					// CubeMap
+					// MipCountには反射キューブマップかIBLのSpecularMapの値が入っている(これらは必ずどちらか一方しか使用されないため)
+					float MipCount = 1.0f;
 					if (CubeTexList.size() > 0)
 					{
-						material->ReplaceTextureIndex("cubemapTexture", 0);
-						material->ReplacePreloadUniformValue("useCubeMap", &glm::uvec1(1)[0], sizeof(int), 0);
+						MipCount = CubeTexList[0]->GetMipCount();
+					}
+					else if (Specular_Tex)
+					{
+						MipCount = Specular_Tex->GetMipCount();
 					}
 
-					// ShadowMap
+					material->ReplacePreloadUniformValue("mipCount", &glm::vec1(MipCount)[0], sizeof(float), 0);
+
+					int ShadowMapX = 1, ShadowMapY = 1;
 					if (FrameTextureList.size() > 0)
 					{
 						// glTF FrameTextureList
 						// [0] : ShadowMap
 						// [1] : ???
 						// [2] : ???
-
-						// ひとまず末尾から取得
-						material->ReplaceTextureIndex("shadowmapTexture", 0);
-						material->ReplacePreloadUniformValue("useShadowMap", &glm::uvec1(1)[0], sizeof(int), 0);
+						ShadowMapX = FrameTextureList[0]->GetWidth();
+						ShadowMapY = FrameTextureList[0]->GetHeight();
 					}
 
-					// IBL
-					if (Diffuse_Tex && Specular_Tex && GGXLUT_Tex)
+					material->ReplacePreloadUniformValue("ShadowMapX", &glm::vec1(static_cast<float>(ShadowMapX))[0], sizeof(float), 0);
+					material->ReplacePreloadUniformValue("ShadowMapY", &glm::vec1(static_cast<float>(ShadowMapY))[0], sizeof(float), 0);
+
+					// テクスチャを紐づける
 					{
-						material->ReplaceTextureIndex("IBL_Diffuse_Texture", 0);
-						material->ReplaceTextureIndex("IBL_Specular_Texture", 0);
-						material->ReplaceTextureIndex("IBL_GGXLUT_Texture", 0);
+						if (baseColorTextureIndex >= 0 && baseColorTextureIndex < TextureList.size())
+						{
+							material->ReplaceTextureIndex("baseColorTexture", baseColorTextureIndex);
+							material->ReplacePreloadUniformValue("useBaseColorTexture", &glm::uvec1(1)[0], sizeof(int), 0);
+						}
 
-						material->ReplacePreloadUniformValue("useIBL", &glm::ivec1(1)[0], sizeof(int), 0);
+						if (metallicRoughnessTextureIndex >= 0 && metallicRoughnessTextureIndex < TextureList.size())
+						{
+							material->ReplaceTextureIndex("metallicRoughnessTexture", metallicRoughnessTextureIndex);
+							material->ReplacePreloadUniformValue("useMetallicRoughnessTexture", &glm::uvec1(1)[0], sizeof(int), 0);
+						}
+
+						if (emissiveTextureIndex >= 0 && emissiveTextureIndex < TextureList.size())
+						{
+							material->ReplaceTextureIndex("emissiveTexture", emissiveTextureIndex);
+							material->ReplacePreloadUniformValue("useEmissiveTexture", &glm::uvec1(1)[0], sizeof(int), 0);
+						}
+
+						if (normalTextureIndex >= 0 && normalTextureIndex < TextureList.size())
+						{
+							material->ReplaceTextureIndex("normalTexture", normalTextureIndex);
+							material->ReplacePreloadUniformValue("useNormalTexture", &glm::uvec1(1)[0], sizeof(int), 0);
+						}
+
+						if (occlusionTextureIndex >= 0 && occlusionTextureIndex < TextureList.size())
+						{
+							material->ReplaceTextureIndex("occlusionTexture", occlusionTextureIndex);
+							material->ReplacePreloadUniformValue("useOcclusionTexture", &glm::uvec1(1)[0], sizeof(int), 0);
+						}
+
+						// CubeMap
+						if (CubeTexList.size() > 0)
+						{
+							material->ReplaceTextureIndex("cubemapTexture", 0);
+							material->ReplacePreloadUniformValue("useCubeMap", &glm::uvec1(1)[0], sizeof(int), 0);
+						}
+
+						// ShadowMap
+						if (FrameTextureList.size() > 0)
+						{
+							// glTF FrameTextureList
+							// [0] : ShadowMap
+							// [1] : ???
+							// [2] : ???
+
+							// ひとまず末尾から取得
+							material->ReplaceTextureIndex("shadowmapTexture", 0);
+							material->ReplacePreloadUniformValue("useShadowMap", &glm::uvec1(1)[0], sizeof(int), 0);
+						}
+
+						// IBL
+						if (Diffuse_Tex && Specular_Tex && GGXLUT_Tex)
+						{
+							material->ReplaceTextureIndex("IBL_Diffuse_Texture", 0);
+							material->ReplaceTextureIndex("IBL_Specular_Texture", 0);
+							material->ReplaceTextureIndex("IBL_GGXLUT_Texture", 0);
+
+							material->ReplacePreloadUniformValue("useIBL", &glm::ivec1(1)[0], sizeof(int), 0);
+						}
 					}
+
+					material->ReplacePreloadUniformValue("useSkinMeshAnimation", &glm::ivec1(0)[0], sizeof(int), 0);
+
 				}
 
-				material->ReplacePreloadUniformValue("useSkinMeshAnimation", &glm::ivec1(0)[0], sizeof(int), 0);
-				
-			}
-
-			// SkinMatrix StorageBuffer
-			{
-				int SkinMatCount = 0;
-				for (const auto& glTFSkeleton : model.skins) { SkinMatCount += static_cast<int>(glTFSkeleton.joints.size()); }
-
-				// DynamicOffsetが256バイトからしか使えない都合上SkinMatCountの最小値は4とする(4 * 16 * 4 = 256)
-				if(SkinMatCount < 4) SkinMatCount = 4;
-
-				// SSBOのサイズは2のn乗である必要がある
-				SkinMatCount = math::CMath::CalcNextPowerOfTwo(SkinMatCount);
-
-				// 最大ボーン数よりも多いのならエラーとする
-				if (SkinMatCount > pGraphicsAPI->GetMaxBoneCount())
+				// SkinMatrix StorageBuffer
 				{
-					Console::Log("[Error] SkinMatCount is over MaxBoneCount. - SkinMatCount: %d, MaxBoneCount: %d\n", SkinMatCount, pGraphicsAPI->GetMaxBoneCount());
-					return false;
+					int SkinMatCount = 0;
+					for (const auto& glTFSkeleton : model.skins) { SkinMatCount += static_cast<int>(glTFSkeleton.joints.size()); }
+
+					// DynamicOffsetが256バイトからしか使えない都合上SkinMatCountの最小値は4とする(4 * 16 * 4 = 256)
+					if (SkinMatCount < 4) SkinMatCount = 4;
+
+					// SSBOのサイズは2のn乗である必要がある
+					SkinMatCount = math::CMath::CalcNextPowerOfTwo(SkinMatCount);
+
+					// 最大ボーン数よりも多いのならエラーとする
+					if (SkinMatCount > pGraphicsAPI->GetMaxBoneCount())
+					{
+						Console::Log("[Error] SkinMatCount is over MaxBoneCount. - SkinMatCount: %d, MaxBoneCount: %d\n", SkinMatCount, pGraphicsAPI->GetMaxBoneCount());
+						return false;
+					}
+
+					std::vector<glm::mat4> SkinMatrixList;
+					SkinMatrixList.resize(SkinMatCount, glm::mat4(0.0f));
+
+					material->ReplacePreloadUniformValue("r_SkinMatrixBuffer", &SkinMatrixList[0], static_cast<int>(SkinMatrixList.size()) * sizeof(glm::mat4), 1);
 				}
 
-				std::vector<glm::mat4> SkinMatrixList;
-				SkinMatrixList.resize(SkinMatCount, glm::mat4(0.0f));
-
-				material->ReplacePreloadUniformValue("r_SkinMatrixBuffer", &SkinMatrixList[0], static_cast<int>(SkinMatrixList.size()) * sizeof(glm::mat4), 1);
+				PrimitiveMaterials.push_back(std::make_pair(MaterialFrame, material));
 			}
 
 			// 登録
-			BaseMaterialList.push_back(std::make_pair(MaterialFrame, material));
+			BaseMaterialList.push_back(PrimitiveMaterials);
 		}
 
 		return true;
 	}
 
 	bool CGLTFImporter::CreateMesh(api::IGraphicsAPI* pGraphicsAPI, const tinygltf::Model& model, std::vector<std::shared_ptr<graphics::CMesh>>& MeshList,
-		const std::vector<std::tuple<std::shared_ptr<graphics::CMaterialFrame>, std::shared_ptr<graphics::CMaterial>>>& BaseMaterialList)
+		const std::vector<std::vector<std::tuple<std::shared_ptr<graphics::CMaterialFrame>, std::shared_ptr<graphics::CMaterial>>>>& BaseMaterialList)
 	{
 		for (const auto& glTFMesh : model.meshes)
 		{
@@ -721,17 +729,22 @@ namespace gltf
 
 				Mesh->AddIndexBuffer(IndexBuffer);
 
+				// プリミティブを作成する
+				std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(VertexBuffer, IndexBuffer);
+
 				// マテリアルはプリミティブ単位で生成する
 				int GLTFMaterialIndex = glTFPrimitive.material;
 				if (GLTFMaterialIndex < 0 || GLTFMaterialIndex >= static_cast<int>(BaseMaterialList.size())) return false;
 
-				const auto& BaseMaterial = BaseMaterialList[GLTFMaterialIndex];
-				auto NewMaterial = std::get<0>(BaseMaterial)->CopyMaterial(pGraphicsAPI, std::get<1>(BaseMaterial));
-				if (!NewMaterial) return false;
+				// プリミティブ単位で割り当てられるマテリアルリスト
+				const auto& PrimitiveMaterials = BaseMaterialList[GLTFMaterialIndex];
+				for (const auto& PrimitiveMat : PrimitiveMaterials)
+				{
+					auto NewMaterial = std::get<0>(PrimitiveMat)->CopyMaterial(pGraphicsAPI, std::get<1>(PrimitiveMat));
+					if (!NewMaterial) return false;
 
-				// プリミティブを作成する
-				std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(VertexBuffer, IndexBuffer);
-				Primitive->AddMaterial(pGraphicsAPI, NewMaterial);
+					Primitive->AddMaterial(pGraphicsAPI, NewMaterial);
+				}
 
 				Mesh->SetMorphDataList(Primitive, static_cast<int>(Mesh->GetPrimitiveList().size()), MorphDataList);
 				Mesh->AddPrimitive(Primitive);
@@ -751,7 +764,7 @@ namespace gltf
 	}
 	
 	bool CGLTFImporter::CreateDummyMaterial(api::IGraphicsAPI* pGraphicsAPI, const tinygltf::Model& model,
-		const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, std::vector<std::shared_ptr<graphics::CMesh>>& MeshList)
+		const std::vector<std::shared_ptr<graphics::CMaterialFrame>>& BaseMaterialFrameList, std::vector<std::shared_ptr<graphics::CMesh>>& MeshList)
 	{
 		// マテリアル参照数とマテリアルインデックスの設定
 		int MatRefCount = 0;
@@ -759,8 +772,11 @@ namespace gltf
 		{
 			for (auto& Primirive : Mesh->GetPrimitiveList())
 			{
-				auto material = MaterialFrame->CreateMaterial(pGraphicsAPI, 1, graphics::ECullMode::CULL_NONE);
-				Primirive->AddMaterial(pGraphicsAPI, material);
+				for (const auto& MaterialFrame : BaseMaterialFrameList)
+				{
+					auto material = MaterialFrame->CreateMaterial(pGraphicsAPI, 1, graphics::ECullMode::CULL_NONE);
+					Primirive->AddMaterial(pGraphicsAPI, material);
+				}
 			}
 		}
 

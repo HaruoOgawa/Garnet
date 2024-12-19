@@ -536,22 +536,30 @@ namespace resource
 				std::string filename = "";
 				GetString("filename", filename, objectJSON);
 
-				std::string defaultmaterialframe = "";
-				GetString("defaultmaterialframe", defaultmaterialframe, objectJSON);
+				std::vector<std::string> defaultmaterialframeList;
+				GetArrayString("defaultmaterialframes", defaultmaterialframeList, objectJSON);
 
 				if (!filename.empty())
 				{
-					const auto& MaterialFrameMap = m_Target->GetMaterialFrameMap();
-					const auto& MaterialFrame = MaterialFrameMap.find(defaultmaterialframe);
-					if (MaterialFrame == MaterialFrameMap.end())
-					{
-						Console::Log("[SceneLoader Error] defaultmaterialframe not found\n");
+					std::vector<std::shared_ptr<graphics::CMaterialFrame>> BaseMaterialFrameList;
 
-						return false;
+					const auto& MaterialFrameMap = m_Target->GetMaterialFrameMap();
+
+					for (const auto& defaultmaterialframe : defaultmaterialframeList)
+					{
+						const auto& MaterialFrame = MaterialFrameMap.find(defaultmaterialframe);
+						if (MaterialFrame == MaterialFrameMap.end())
+						{
+							Console::Log("[SceneLoader Error] defaultmaterialframe not found\n");
+
+							return false;
+						}
+
+						BaseMaterialFrameList.push_back(MaterialFrame->second);
 					}
 					
 					// ‰¼ŽÀ‘•
-					pLoadWorker->AddLoadResource(std::make_shared<resource::C3DObjectLoader>(filename, Object, MaterialFrame->second, defaultmaterialframe, AnimationInfo.RigType, AnimationInfo.HumanoidBoneList));
+					pLoadWorker->AddLoadResource(std::make_shared<resource::C3DObjectLoader>(filename, Object, BaseMaterialFrameList, defaultmaterialframeList, AnimationInfo.RigType, AnimationInfo.HumanoidBoneList));
 				}
 			}
 

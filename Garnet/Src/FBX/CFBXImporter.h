@@ -60,27 +60,27 @@ namespace fbx
 	private:
 		static bool Import(api::IGraphicsAPI* pGraphicsAPI, const std::string& FileName, bool IsUseObject, object::C3DObject* Object,
 			std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList,
-			const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, animation::ERigType RigType, const std::map<animation::EHumanoidBones, std::string>& HumanoidBoneList);
+			const std::vector<std::shared_ptr<graphics::CMaterialFrame>>& BaseMaterialFrameList, animation::ERigType RigType, const std::map<animation::EHumanoidBones, std::string>& HumanoidBoneList);
 		
 		static bool Analyse(api::IGraphicsAPI* pGraphicsAPI, FbxScene* Scene, bool IsUseObject, object::C3DObject* Object,
 			std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList,
-			const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, animation::ERigType RigType, const std::map<animation::EHumanoidBones, std::string>& HumanoidBoneList);
+			const std::vector<std::shared_ptr<graphics::CMaterialFrame>>& BaseMaterialFrameList, animation::ERigType RigType, const std::map<animation::EHumanoidBones, std::string>& HumanoidBoneList);
 
-		static bool CreateDrawInfo(api::IGraphicsAPI* pGraphicsAPI, std::vector<FbxMesh*>& pFbxMeshList, const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame,
+		static bool CreateDrawInfo(api::IGraphicsAPI* pGraphicsAPI, std::vector<FbxMesh*>& pFbxMeshList, const std::vector<std::shared_ptr<graphics::CMaterialFrame>>& BaseMaterialFrameList,
 			const std::vector<FbxNode*>& pFbxNodeList, FbxNode* pFBXNode, std::vector<std::shared_ptr<graphics::CTexture>>& TextureList,
-			std::vector<std::tuple<std::shared_ptr<graphics::CMaterialFrame>, std::shared_ptr<graphics::CMaterial>>>& BaseMaterialList,
+			std::vector<std::vector<std::tuple<std::shared_ptr<graphics::CMaterialFrame>, std::shared_ptr<graphics::CMaterial>>>>& BaseMaterialList,
 			std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, const std::shared_ptr<animation::CSkeleton>& Skeleton, const bool IsMixamoFbx);
 
 		static bool CreateMaterial(api::IGraphicsAPI* pGraphicsAPI, FbxNode* pFBXNode, std::vector<FbxSurfaceMaterial*>& pFbxMaterialList, 
-			std::vector<std::tuple<std::shared_ptr<graphics::CMaterialFrame>, std::shared_ptr<graphics::CMaterial>>>& BaseMaterialList,
-			const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, const std::shared_ptr<animation::CSkeleton>& Skeleton);
+			std::vector<std::vector<std::tuple<std::shared_ptr<graphics::CMaterialFrame>, std::shared_ptr<graphics::CMaterial>>>>& BaseMaterialList,
+			const std::vector<std::shared_ptr<graphics::CMaterialFrame>>& BaseMaterialFrameList, const std::shared_ptr<animation::CSkeleton>& Skeleton);
 		
 		static bool CreateDummyMaterial(api::IGraphicsAPI* pGraphicsAPI, FbxNode* pFBXNode,
-			const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, const std::shared_ptr<animation::CSkeleton>& Skeleton);
+			const std::vector<std::shared_ptr<graphics::CMaterialFrame>>& BaseMaterialFrameList, std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, const std::shared_ptr<animation::CSkeleton>& Skeleton);
 
 		static bool CreateMesh(api::IGraphicsAPI* pGraphicsAPI, int NodeIndex, FbxNode* pFBXNode, std::vector<FbxMesh*>& pFbxMeshList, 
 			const std::vector<FbxSurfaceMaterial*>& pFbxMaterialList, std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, 
-			const std::vector<std::tuple<std::shared_ptr<graphics::CMaterialFrame>, std::shared_ptr<graphics::CMaterial>>>& BaseMaterialList,
+			const std::vector<std::vector<std::tuple<std::shared_ptr<graphics::CMaterialFrame>, std::shared_ptr<graphics::CMaterial>>>>& BaseMaterialList,
 			const std::shared_ptr<animation::CSkeleton>& Skeleton, const bool IsMixamoFbx);
 
 		static bool CreateNodeList(FbxScene* Scene, std::vector<FbxNode*>& pFbxNodeList, std::vector<std::shared_ptr<object::CNode>>& NodeList, std::vector<int>& RootNodeIndexList, const bool IsMixamoFbx);
@@ -109,7 +109,7 @@ namespace fbx
 		static bool CheckIsMixamo(FbxNode* pFBXNode);
 	public:
 		static bool ImportFBX(api::IGraphicsAPI* pGraphicsAPI, const std::string& FileName, object::C3DObject* Object,
-			const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, resource::C3DObjectLoader* p3DObjectLoader, animation::ERigType RigType, 
+			const std::vector<std::shared_ptr<graphics::CMaterialFrame>>& BaseMaterialFrameList, resource::C3DObjectLoader* p3DObjectLoader, animation::ERigType RigType, 
 			const std::map<animation::EHumanoidBones, std::string>& HumanoidBoneList);
 
 		static bool ImportFBXAnimation(api::IGraphicsAPI* pGraphicsAPI, const std::string& FileName, std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList, 

@@ -21,16 +21,21 @@
 namespace resource
 {
 	C3DObjectLoader::C3DObjectLoader(const std::string& FileName, const std::shared_ptr<object::C3DObject>& TargetObject,
-		const std::shared_ptr<graphics::CMaterialFrame>& BaseMaterialFrame, std::string DefaultMaterialFrame, animation::ERigType RigType, const std::map<animation::EHumanoidBones, std::string>& HumanoidBoneList) :
+		const std::vector<std::shared_ptr<graphics::CMaterialFrame>>& BaseMaterialFrameList, const std::vector<std::string>& defaultmaterialframes,
+		animation::ERigType RigType, const std::map<animation::EHumanoidBones, std::string>& HumanoidBoneList) :
 		CResource(FileName, 3),
 		m_LoadState(E3DObjectLoadState::None),
 		m_TargetObject(TargetObject),
 		m_TargetRigType(RigType),
 		m_TargetHumanoidBoneList(HumanoidBoneList),
-		m_BaseMaterialFrame(BaseMaterialFrame)
+		m_BaseMaterialFrameList(BaseMaterialFrameList)
 	{
 		m_TargetObject->SetFileName(FileName);
-		m_TargetObject->SetDefaultMaterialFrame(DefaultMaterialFrame);
+
+		for (const auto& Name : defaultmaterialframes)
+		{
+			m_TargetObject->AddDefaultMaterialFrame(Name);
+		}
 	}
 
 	C3DObjectLoader::~C3DObjectLoader()
@@ -97,29 +102,29 @@ namespace resource
 		{
 #ifdef USE_GLTF
 			std::string BaseDir = format::CPathFormatter::GetParentDir(m_FileName);
-			if (!gltf::CGLTFImporter::ImportFromString(pGraphicsAPI, m_File->GetData(), BaseDir, m_TargetObject.get(), m_BaseMaterialFrame, this, m_TargetRigType, m_TargetHumanoidBoneList)) return false;
+			if (!gltf::CGLTFImporter::ImportFromString(pGraphicsAPI, m_File->GetData(), BaseDir, m_TargetObject.get(), m_BaseMaterialFrameList, this, m_TargetRigType, m_TargetHumanoidBoneList)) return false;
 #endif
 		}
 		else if (Extention == "glb")
 		{
 #ifdef USE_GLTF
-			if (!gltf::CGLTFImporter::ImportFromMemory(pGraphicsAPI, m_File->GetData(), m_TargetObject.get(), m_BaseMaterialFrame, this, m_TargetRigType, m_TargetHumanoidBoneList)) return false;
+			if (!gltf::CGLTFImporter::ImportFromMemory(pGraphicsAPI, m_File->GetData(), m_TargetObject.get(), m_BaseMaterialFrameList, this, m_TargetRigType, m_TargetHumanoidBoneList)) return false;
 #endif
 		}
 		else if (Extention == "fbx")
 		{
 #if defined(USE_FBX)
 #ifdef USE_SMALL_FBX
-			if (!fbx::CSmallFBXImporter::ImportFBX(pGraphicsAPI, m_File->GetData(), m_TargetObject.get(), m_BaseMaterialFrame, this, m_TargetRigType, m_TargetHumanoidBoneList)) return false;
+			if (!fbx::CSmallFBXImporter::ImportFBX(pGraphicsAPI, m_File->GetData(), m_TargetObject.get(), m_BaseMaterialFrameList, this, m_TargetRigType, m_TargetHumanoidBoneList)) return false;
 #else
-			if (!fbx::CFBXImporter::ImportFBX(pGraphicsAPI, m_FileName, m_TargetObject.get(), m_BaseMaterialFrame, this, m_TargetRigType, m_TargetHumanoidBoneList)) return false;
+			if (!fbx::CFBXImporter::ImportFBX(pGraphicsAPI, m_FileName, m_TargetObject.get(), m_BaseMaterialFrameList, this, m_TargetRigType, m_TargetHumanoidBoneList)) return false;
 #endif // USE_SMALL_FBX
 #endif
 		}
 		else if (Extention == "pmx")
 		{
 #ifdef USE_MMD
-			if (!mmd::CPmxImporter::ImportPmx(pGraphicsAPI, pPhysicsEngine, m_FileName, m_File->GetData(), m_TargetObject.get(), m_BaseMaterialFrame, this, m_TargetRigType, m_TargetHumanoidBoneList)) return false;
+			if (!mmd::CPmxImporter::ImportPmx(pGraphicsAPI, pPhysicsEngine, m_FileName, m_File->GetData(), m_TargetObject.get(), m_BaseMaterialFrameList, this, m_TargetRigType, m_TargetHumanoidBoneList)) return false;
 #endif
 		}
 		else

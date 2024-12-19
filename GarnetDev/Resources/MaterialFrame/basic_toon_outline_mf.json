@@ -1,5 +1,5 @@
 {
-  "name": "basic_toon_mat",
+  "name": "basic_toon_outline_mat",
   "shaderList": [
     {
       "name": "basic_toon_vert",
@@ -131,8 +131,8 @@
       ]
     },
     {
-      "name": "basic_toon_frag",
-      "shaderFile": "Resources\\Shaders\\basic_toon",
+      "name": "basic_toon_outline_frag",
+      "shaderFile": "Resources\\Shaders\\basic_toon_outline",
       "autoShaderExtension": true,
       "shadercode": "",
       "shaderType": "fragment",
@@ -145,111 +145,11 @@
           "bufferUpdateType": "cpu",
           "values": [
             {
-              "name": "lightDir",
-              "type": "vec4",
-              "initValue": [ 0.0, 0.0, 0.0, 0.0 ],
-              "input": {
-                "hide": true
-              }
-            },
-            {
-              "name": "lightColor",
-              "type": "vec4",
-              "initValue": [ 0.0, 0.0, 0.0, 0.0 ],
-              "input": {
-                "hide": true
-              }
-            },
-            {
-              "name": "cameraPos",
-              "type": "vec4",
-              "initValue": [ 0.0, 0.0, 0.0, 0.0 ],
-              "input": {
-                "hide": true
-              }
-            },
-            {
-              "name": "diffuseFactor",
-              "type": "vec4",
-              "initValue": [ 1.0, 1.0, 1.0, 1.0 ]
-            },
-            {
-              "name": "ambientFactor",
-              "type": "vec4",
-              "initValue": [ 1.0, 1.0, 1.0, 1.0 ]
-            },
-            {
-              "name": "specularFactor",
-              "type": "vec4",
-              "initValue": [ 1.0, 1.0, 1.0, 1.0 ]
-            },
-            {
               "name": "edgeColor",
               "type": "vec4",
               "initValue": [ 1.0, 1.0, 1.0, 1.0 ],
               "input": {
                 "type": "color"
-              }
-            },
-            {
-              "name": "specularIntensity",
-              "type": "float",
-              "initValue": [ 1.0 ]
-            },
-            {
-              "name": "f_pad0",
-              "type": "float",
-              "initValue": [ 1.0 ],
-              "input": {
-                "hide": true
-              }
-            },
-            {
-              "name": "f_pad1",
-              "type": "float",
-              "initValue": [ 1.0 ],
-              "input": {
-                "hide": true
-              }
-            },
-            {
-              "name": "f_pad2",
-              "type": "float",
-              "initValue": [ 1.0 ],
-              "input": {
-                "hide": true
-              }
-            },
-            {
-              "name": "UseMainTexture",
-              "type": "int",
-              "initValue": [ 0 ],
-              "input": {
-                "hide": true
-              }
-            },
-            {
-              "name": "UseToonTexture",
-              "type": "int",
-              "initValue": [ 0 ],
-              "input": {
-                "hide": true
-              }
-            },
-            {
-              "name": "UseSphereTexture",
-              "type": "int",
-              "initValue": [ 0 ],
-              "input": {
-                "hide": true
-              }
-            },
-            {
-              "name": "SphereMode",
-              "type": "int",
-              "initValue": [ 0 ],
-              "input": {
-                "hide": true
               }
             },
             {
@@ -285,30 +185,6 @@
               }
             }
           ]
-        },
-        {
-          "name": "MainTexture",
-          "viewBinding": 3,
-          "samplerBinding": 4,
-          "textureIndex": -1,
-          "type": "texture",
-          "textureUsage": "2d"
-        },
-        {
-          "name": "ToonTexture",
-          "viewBinding": 5,
-          "samplerBinding": 6,
-          "textureIndex": -1,
-          "type": "texture",
-          "textureUsage": "2d"
-        },
-        {
-          "name": "SphereTexture",
-          "viewBinding": 7,
-          "samplerBinding": 8,
-          "textureIndex": -1,
-          "type": "texture",
-          "textureUsage": "2d"
         }
       ]
     }

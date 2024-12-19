@@ -350,7 +350,10 @@ namespace gui
 						RigType = animation::ERigType::Humanoid;
 					}
 
-					GUIParams.SceneController->AddObjectWithLoading(GUIParams.pLoadWorker, Object, fileName, DefaultMaterialframe, RigType);
+					std::vector<std::string> defaultmaterialframeList;
+					defaultmaterialframeList.push_back(DefaultMaterialframe);
+
+					GUIParams.SceneController->AddObjectWithLoading(GUIParams.pLoadWorker, Object, fileName, defaultmaterialframeList, RigType);
 
 					ObjectName = std::string();
 					PassName = std::string();

@@ -300,7 +300,10 @@ namespace scene
 
 			if (StoredFile3DModel)
 			{
-				ObjectJSON["defaultmaterialframe"] = Object->GetDefaultMaterialFrame();
+				for (const auto& defaultmaterialframe : Object->GetDefaultMaterialFrameList())
+				{
+					ObjectJSON["defaultmaterialframes"].push_back(defaultmaterialframe);
+				}
 			}
 
 			ObjectJSON["renderpass"] = Object->GetPassName();

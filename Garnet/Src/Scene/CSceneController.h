@@ -151,7 +151,7 @@ namespace scene
 		//
 		void AddObject(const std::shared_ptr<object::C3DObject>& Object);
 		void AddObjectWithLoading(resource::CLoadWorker* pLoadWorker, const std::shared_ptr<object::C3DObject>& Object, const std::string& FileName, 
-			const std::string& DefaultMaterialframeName, animation::ERigType RigType);
+			const std::vector<std::string>& defaultmaterialframeList, animation::ERigType RigType);
 		std::vector<std::shared_ptr<object::C3DObject>> GetObjectList() const;
 		std::shared_ptr<object::C3DObject> FindObjectByName(const std::string& Name);
 		std::shared_ptr<object::C3DObject> FindObjectByIndex(int Index);

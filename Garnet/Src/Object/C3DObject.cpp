@@ -6,7 +6,6 @@ namespace object
 	C3DObject::C3DObject(const std::string& PassName, const std::string& DepthPassName):
 		m_IsCreated(false),
 		m_FileName(std::string()),
-		m_DefaultMaterialFrame(std::string()),
 		m_PassName(PassName),
 		m_DepthPassName(DepthPassName),
 		m_ObjectName("3DObject"),
@@ -69,14 +68,14 @@ namespace object
 		return m_FileName;
 	}
 
-	void C3DObject::SetDefaultMaterialFrame(const std::string& Name)
+	void C3DObject::AddDefaultMaterialFrame(const std::string& Name)
 	{
-		m_DefaultMaterialFrame = Name;
+		m_DefaultMaterialFrameList.push_back(Name);
 	}
 
-	const std::string& C3DObject::GetDefaultMaterialFrame() const
+	const std::vector<std::string>& C3DObject::GetDefaultMaterialFrameList() const
 	{
-		return m_DefaultMaterialFrame;
+		return m_DefaultMaterialFrameList;
 	}
 
 	void C3DObject::SetObjectName(const std::string& Name)
