@@ -39,7 +39,7 @@ namespace fbx
 	bool CFBXImporter::ImportFBXAnimation(api::IGraphicsAPI* pGraphicsAPI, const std::string& FileName, std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList, 
 		animation::ERigType RigType, const std::map<animation::EHumanoidBones, std::string>& HumanoidBoneList)
 	{
-		std::shared_ptr<object::C3DObject> Object = std::make_shared<object::C3DObject>("", "");
+		std::shared_ptr<object::C3DObject> Object = std::make_shared<object::C3DObject>();
 
 		Object->SetObjectName(FileName);
 
@@ -272,7 +272,7 @@ namespace fbx
 			// マテリアルにシェーダーを設定
 			for (const auto& MaterialFrame : BaseMaterialFrameList)
 			{
-				std::shared_ptr<graphics::CMaterial> material = MaterialFrame->CreateMaterial(pGraphicsAPI, 1, graphics::ECullMode::CULL_BACK);
+				std::shared_ptr<graphics::CMaterial> material = MaterialFrame->CreateMaterial(pGraphicsAPI, graphics::ECullMode::CULL_BACK);
 
 				{
 					const auto& prop = pFbxMaterial->FindProperty(fbxsdk::FbxSurfaceMaterial::sDiffuse);
@@ -331,7 +331,7 @@ namespace fbx
 				for (const auto& MaterialFrame : BaseMaterialFrameList)
 				{
 					// マテリアルにシェーダーを設定
-					std::shared_ptr<graphics::CMaterial> material = MaterialFrame->CreateMaterial(pGraphicsAPI, 1, graphics::ECullMode::CULL_NONE);
+					std::shared_ptr<graphics::CMaterial> material = MaterialFrame->CreateMaterial(pGraphicsAPI, graphics::ECullMode::CULL_NONE);
 
 					// SkinMatrix StorageBuffer
 					{

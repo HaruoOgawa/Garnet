@@ -3,6 +3,7 @@
 #include "../../Interface/IRenderer.h"
 #include <vector>
 #include <string>
+#include <map>
 #include <glm/glm.hpp>
 #include <glm/gtx/quaternion.hpp>
 #include "CWebGPUAPI.h"
@@ -28,10 +29,10 @@ namespace api
 		int m_InstanceCount;
 
 		// Pipeline
-		WGPURenderPipeline m_GraphicsPipeline;
+		std::map<std::string, WGPURenderPipeline> m_GraphicsPipelineList;
 	private:
 		// WebGPU Main Logic /////////////////////////////////////////////////////////////////////
-		bool CreateGraphicsPipeline(const std::shared_ptr<graphics::CVertexBuffer>& VertexBuffer, const std::shared_ptr<graphics::CIndexBuffer>& IndexBuffer, api::CWebGPUMaterial* pWebGPUMat);
+		bool CreateGraphicsPipeline(const std::vector<std::string>& PassNameList, const std::shared_ptr<graphics::CVertexBuffer>& VertexBuffer, const std::shared_ptr<graphics::CIndexBuffer>& IndexBuffer, api::CWebGPUMaterial* pWebGPUMat);
 		
 		// Helper Function ///////////////////////////////////////////////////////////////////////
 		WGPUVertexFormat GetVertexFormat(int Dimention, graphics::EDataType DataType);
@@ -40,8 +41,9 @@ namespace api
 		CWebGPURenderer(api::CWebGPUAPI* pGraphicsAPI);
 		virtual ~CWebGPURenderer();
 
-		virtual bool Create(const std::string& PassName, const std::shared_ptr<graphics::CVertexBuffer>& VertexBuffer, const std::shared_ptr<graphics::CIndexBuffer>& IndexBuffer, const std::shared_ptr<graphics::CMaterial>& Material) override;
-		virtual bool Draw(const std::shared_ptr<graphics::CVertexBuffer>& VertexBuffer, const std::shared_ptr<graphics::CIndexBuffer>& IndexBuffer, const std::shared_ptr<graphics::CMaterial>& Material, int DynamicOffsetNum) override;
+		virtual bool Create(const std::vector<std::string>& PassNameList, const std::shared_ptr<graphics::CVertexBuffer>& VertexBuffer, const std::shared_ptr<graphics::CIndexBuffer>& IndexBuffer, const std::shared_ptr<graphics::CMaterial>& Material) override;
+		virtual bool Draw(const std::shared_ptr<graphics::CVertexBuffer>& VertexBuffer, const std::shared_ptr<graphics::CIndexBuffer>& IndexBuffer, 
+			const std::shared_ptr<graphics::CMaterial>& Material) override;
 
 		virtual bool UpdateVertexBuffer(const std::vector<float>& PosAttribute, const std::shared_ptr<graphics::CVertexBuffer>& VertexBuffer) override;
 	};

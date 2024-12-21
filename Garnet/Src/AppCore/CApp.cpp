@@ -43,8 +43,7 @@ namespace app
 		return true;
 	}
 
-
-	const std::shared_ptr<graphics::CDrawInfo>& CApp::GetDrawInfo() const
+	std::shared_ptr<graphics::CDrawInfo> CApp::GetDrawInfo() const
 	{
 		return nullptr;
 	}

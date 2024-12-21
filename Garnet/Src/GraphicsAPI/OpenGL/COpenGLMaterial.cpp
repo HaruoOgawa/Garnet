@@ -10,8 +10,8 @@
 
 namespace api
 {
-	COpenGLMaterial::COpenGLMaterial(api::COpenGLAPI* pGraphicsAPI, const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, int RefCount, graphics::ECullMode CullMode):
-		CMaterial(pGraphicsAPI, createInfo, RefCount, CullMode),
+	COpenGLMaterial::COpenGLMaterial(api::COpenGLAPI* pGraphicsAPI, const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, graphics::ECullMode CullMode):
+		CMaterial(pGraphicsAPI, createInfo, CullMode),
 		m_pGraphicsAPI(pGraphicsAPI),
 
 		m_ShaderPrg(-1)
@@ -59,7 +59,7 @@ namespace api
 		return true;
 	}
 
-	bool COpenGLMaterial::BuildDrawBuffer(int DynamicOffsetNum)
+	bool COpenGLMaterial::BuildDrawBuffer()
 	{
 		int index = 0;
 		for (const auto& Buffer : m_ShaderBufferList)
@@ -148,7 +148,7 @@ namespace api
 		return true;
 	}
 
-	void COpenGLMaterial::SetUniformValue(const std::string Name, const void* Data, int ByteSize, int DynamicOffsetNum)
+	void COpenGLMaterial::SetUniformValue(const std::string Name, const void* Data, int ByteSize)
 	{
 		for (int i = 0; i < m_ShaderBufferList.size(); i++)
 		{

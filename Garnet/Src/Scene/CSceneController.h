@@ -122,7 +122,6 @@ namespace scene
 
 		// PassNameが設定されていない時のデフォルトの値
 		std::string m_DefaultRenderPass;
-		std::string m_DefaultDepthPass;
 
 		std::shared_ptr<object::C3DObject> m_DebugSphere = nullptr;
 
@@ -140,7 +139,7 @@ namespace scene
 
 		void Reset();
 
-		void SetDefaultPass(const std::string& RenderPass, const std::string& DepthPass);
+		void SetDefaultPass(const std::string& RenderPass);
 
 		void SetFileName(const std::string& Name);
 		const std::string& GetFileName() const;

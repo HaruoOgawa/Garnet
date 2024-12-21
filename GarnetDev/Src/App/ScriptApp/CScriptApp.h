@@ -51,7 +51,7 @@ namespace app
 		virtual bool Draw(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<input::CInputState>& InputState,
 			const std::shared_ptr<gui::IGUIEngine>& GUIEngine) override;
 
-		virtual const std::shared_ptr<graphics::CDrawInfo>& GetDrawInfo() const override;
+		virtual std::shared_ptr<graphics::CDrawInfo> GetDrawInfo() const override;
 
 		// ‹N“®€”õŠ®—¹
 		virtual bool OnStartup(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<gui::IGUIEngine>& GUIEngine) override;

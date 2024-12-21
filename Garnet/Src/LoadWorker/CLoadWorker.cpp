@@ -10,10 +10,11 @@ namespace resource
 		m_ResourceManager(std::make_shared<CResourceManager>()),
 		m_FirstResourceCount(0),
 		m_Alpha(1.0f),
-		m_LoadingBar(std::make_shared<object::C3DObject>("", "ShadowPass")),
+		m_LoadingBar(std::make_shared<object::C3DObject>()),
 		m_VertexShader(std::make_shared<resource::CFile>("Resources\\Shaders\\loadingbar" + pGraphicsAPI->GetVertexShaderExtension())),
 		m_FragmentShader(std::make_shared<resource::CFile>("Resources\\Shaders\\loadingbar" + pGraphicsAPI->GetFragmentShaderExtension()))
 	{
+		m_LoadingBar->AddPassName("");
 		m_InitialResourceList.push_back(m_VertexShader);
 		m_InitialResourceList.push_back(m_FragmentShader);
 	}
@@ -29,7 +30,7 @@ namespace resource
 		std::shared_ptr<graphics::CMaterialCreateInfo> createInfo = std::make_shared<graphics::CMaterialCreateInfo>();
 		createInfo->SetVertexShaderCode(m_VertexShader->GetData());
 		createInfo->SetFragmentShaderCode(m_FragmentShader->GetData());
-		auto Material = pGraphicsAPI->CreateMaterial(createInfo, 1, graphics::ECullMode::CULL_NONE);
+		auto Material = pGraphicsAPI->CreateMaterial(createInfo, graphics::ECullMode::CULL_NONE);
 
 		auto UniforBuffer = createInfo->CreateUniformBuffer("UniformBufferObject", {graphics::SBindingLayout("UniformBufferObject", 0, false)});
 		UniforBuffer->AddData("rate", graphics::EUniformValueType::VALUE_TYPE_FLOAT, &glm::vec1(0.0f)[0], sizeof(glm::vec1), 0, graphics::SUniformValueInput{});

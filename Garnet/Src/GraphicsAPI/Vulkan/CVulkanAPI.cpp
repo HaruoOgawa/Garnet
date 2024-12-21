@@ -148,9 +148,9 @@ namespace api
 		return Renderer;
 	}
 
-	std::shared_ptr<graphics::CMaterial> CVulkanAPI::CreateMaterial(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, int RefCount, graphics::ECullMode CullMode)
+	std::shared_ptr<graphics::CMaterial> CVulkanAPI::CreateMaterial(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, graphics::ECullMode CullMode)
 	{
-		auto Material = std::make_shared<api::CVulkanMaterial>(this, createInfo, RefCount, CullMode);
+		auto Material = std::make_shared<api::CVulkanMaterial>(this, createInfo, CullMode);
 
 		return Material;
 	}

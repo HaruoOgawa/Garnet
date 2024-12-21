@@ -52,7 +52,7 @@ namespace graphics
 		}
 	}
 
-	bool CPrimitive::Create(const std::string& PassName, const std::shared_ptr<graphics::CTextureSet>& TextureSet)
+	bool CPrimitive::Create(const std::vector<std::string>& PassNameList, const std::shared_ptr<graphics::CTextureSet>& TextureSet)
 	{
 		if (!m_VertexBuffer || !m_IndexBuffer) return false;
 
@@ -60,9 +60,9 @@ namespace graphics
 
 		for (auto& RendererMat : m_RendererList)
 		{
-			if (!std::get<1>(RendererMat)->Create(TextureSet)) return false;
+			if (!std::get<1>(RendererMat)->Create(PassNameList, TextureSet)) return false;
 
-			if (!std::get<0>(RendererMat)->Create(PassName, m_VertexBuffer, m_IndexBuffer, std::get<1>(RendererMat))) return false;
+			if (!std::get<0>(RendererMat)->Create(PassNameList, m_VertexBuffer, m_IndexBuffer, std::get<1>(RendererMat))) return false;
 		}
 
 		return true;
@@ -80,7 +80,7 @@ namespace graphics
 
 		for (const auto& RendererMat : m_RendererList)
 		{
-			if (!std::get<0>(RendererMat)->Draw(m_VertexBuffer, m_IndexBuffer, std::get<1>(RendererMat), DynamicOffset)) return false;
+			if (!std::get<0>(RendererMat)->Draw(m_VertexBuffer, m_IndexBuffer, std::get<1>(RendererMat))) return false;
 		}
 		
 		return true;

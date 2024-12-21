@@ -306,8 +306,10 @@ namespace scene
 				}
 			}
 
-			ObjectJSON["renderpass"] = Object->GetPassName();
-			ObjectJSON["depthpass"] = Object->GetDepthPassName();
+			for (const auto& renderpass : Object->GetPassNameList())
+			{
+				ObjectJSON["renderpasslist"].push_back(renderpass);
+			}
 
 			// animation
 			if (StoredFile3DModel)

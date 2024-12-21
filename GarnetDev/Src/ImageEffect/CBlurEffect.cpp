@@ -15,9 +15,11 @@ namespace imageeffect
 		m_IsLoaded(false),
 		m_KernelSize(0),
 		m_BlurMF(std::make_shared<graphics::CMaterialFrame>()),
-		m_ScreenObjX(std::make_shared<object::C3DObject>("BlurX", "")),
-		m_ScreenObjY(std::make_shared<object::C3DObject>("BlurY", ""))
+		m_ScreenObjX(std::make_shared<object::C3DObject>()),
+		m_ScreenObjY(std::make_shared<object::C3DObject>())
 	{
+		m_ScreenObjX->AddPassName("BlurX");
+		m_ScreenObjY->AddPassName("BlurY");
 	}
 
 	bool CBlurEffect::IsLoaded()
@@ -178,7 +180,7 @@ namespace imageeffect
 	bool CBlurEffect::Load()
 	{
 		// MaterialX
-		auto MaterialX = m_BlurMF->CreateMaterial(m_pGraphicsAPI, 1, graphics::ECullMode::CULL_BACK);
+		auto MaterialX = m_BlurMF->CreateMaterial(m_pGraphicsAPI, graphics::ECullMode::CULL_BACK);
 		MaterialX->SetDepthFunc(graphics::EDepthFunc::Always);
 		MaterialX->SetCullMode(graphics::ECullMode::CULL_NONE);
 		
@@ -193,7 +195,7 @@ namespace imageeffect
 		}
 
 		// MaterialY
-		auto MaterialY = m_BlurMF->CreateMaterial(m_pGraphicsAPI, 1, graphics::ECullMode::CULL_BACK);
+		auto MaterialY = m_BlurMF->CreateMaterial(m_pGraphicsAPI, graphics::ECullMode::CULL_BACK);
 		MaterialY->SetDepthFunc(graphics::EDepthFunc::Always);
 		MaterialY->SetCullMode(graphics::ECullMode::CULL_NONE);
 

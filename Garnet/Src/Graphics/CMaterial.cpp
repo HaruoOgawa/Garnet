@@ -3,13 +3,11 @@
 
 namespace graphics
 {
-	CMaterial::CMaterial(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CMaterialCreateInfo>& createInfo, int RefCount, ECullMode CullMode):
+	CMaterial::CMaterial(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CMaterialCreateInfo>& createInfo, ECullMode CullMode):
 		timeline::CTimelineTrackContent(),
 		m_MaterialName(std::string()),
 		m_MaterialFrame(nullptr),
 		m_CreateInfo(createInfo),
-		m_RefCount(RefCount),
-		m_CurrentDynamicOffset(1),
 		m_EnabledZWrite(true),
 		m_DepthFunc(EDepthFunc::Less),
 		m_DefaultCullMode(CullMode),
@@ -36,9 +34,29 @@ namespace graphics
 		}
 	}
 
+	bool CMaterial::Create(const std::vector<std::string>& PassNameList, const std::shared_ptr<graphics::CTextureSet>& TextureSet)
+	{
+		for (int PassIndex = 0; PassIndex < static_cast<int>(PassNameList.size()); PassIndex++)
+		{
+			const auto& PassName = PassNameList[PassIndex];
+
+			m_PassNameDynamicOffsetMap.emplace(PassName, PassIndex);
+		}
+
+		//
+		if (!Create(TextureSet)) return false;
+
+		return true;
+	}
+
 	bool CMaterial::Create(const std::shared_ptr<graphics::CTextureSet>& TextureSet)
 	{
 		return true;
+	}
+
+	const std::map<std::string, int>& CMaterial::GetPassNameDynamicOffsetMap() const
+	{
+		return m_PassNameDynamicOffsetMap;
 	}
 
 	bool CMaterial::IsUseShaderBuffer()
@@ -384,18 +402,13 @@ namespace graphics
 		}
 	}
 
-	void CMaterial::SetUniformValue(const std::string Name, const void* Data, int ByteSize, int DynamicOffsetNum)
+	void CMaterial::SetUniformValue(const std::string Name, const void* Data, int ByteSize)
 	{
 	}
 
 	bool CMaterial::IsUseDynamicOffset()
 	{
-		return (m_RefCount > 1);
-	}
-
-	int CMaterial::GetDynamicOffset() const
-	{
-		return m_CurrentDynamicOffset;
+		return (m_PassNameDynamicOffsetMap.size() > 1);
 	}
 
 	const std::vector<uint32_t>& CMaterial::GetBindingRefSizeList() const

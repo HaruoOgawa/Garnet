@@ -9,10 +9,11 @@ namespace graphics
 		m_IsLoaded(false),
 		m_pGraphicsAPI(pGraphicsAPI),
 		m_MaterialFrame(std::make_shared<graphics::CMaterialFrame>()),
-		m_RenderBoard(std::make_shared<object::C3DObject>(DrawTargetPassName, "")),
+		m_RenderBoard(std::make_shared<object::C3DObject>()),
 		m_Material(nullptr),
 		m_TextureList(TextureList)
 	{
+		m_RenderBoard->AddPassName(DrawTargetPassName);
 	}
 
 	CFrameRenderer::~CFrameRenderer()
@@ -33,7 +34,7 @@ namespace graphics
 
 	bool CFrameRenderer::Load()
 	{
-		m_Material = m_MaterialFrame->CreateMaterial(m_pGraphicsAPI, 1, graphics::ECullMode::CULL_NONE);
+		m_Material = m_MaterialFrame->CreateMaterial(m_pGraphicsAPI, graphics::ECullMode::CULL_NONE);
 
 		for (int Index = 0; Index < static_cast<int>(m_Material->GetTextureBindingLayoutList().size()); Index++)
 		{

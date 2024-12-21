@@ -13,13 +13,13 @@ namespace graphics
 	{
 	}
 
-	bool CMesh::Create(const std::shared_ptr<graphics::CTextureSet>& TextureSet, std::string PassName, std::string DepthPassName)
+	bool CMesh::Create(const std::shared_ptr<graphics::CTextureSet>& TextureSet, const std::vector<std::string>& PassNameList)
 	{
 		if (!CreateBuffer()) return false;
 
 		for (const auto& Primitive : GetPrimitiveList())
 		{
-			if (!Primitive->Create(PassName, TextureSet)) return false;
+			if (!Primitive->Create(PassNameList, TextureSet)) return false;
 
 			// 生成処理が終わったので不要なリソースを解放する
 			Primitive->Release();

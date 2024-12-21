@@ -28,6 +28,9 @@
     "objects": [
         {
             "name": "PmxObj",
+            "renderpasslist": [
+                "MainResultPass"
+            ],
             "filename": "Resources/Avatar/Tda_Miku/Tda_Miku.pmx",
             "defaultmaterialframes": [
                 "basic_toon_mat",
@@ -73,7 +76,9 @@
             "name": "CCDIKTest",
             "filename": "Resources\\Models\\CCDIKTest\\CCDIKTest.glb",
             "defaultmaterialframes": ["pbr_mat"],
-            "renderpass": "MainResultPass",
+            "renderpasslist": [
+                "MainResultPass"
+            ],
             "depthpass": "",
             "transform": {
                 "pos": [

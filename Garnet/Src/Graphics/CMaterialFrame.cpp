@@ -96,11 +96,11 @@ namespace graphics
 		m_TextureBufferList = TextureBufferList;
 	}
 
-	std::shared_ptr<CMaterial> CMaterialFrame::CreateMaterial(api::IGraphicsAPI* pGraphicsAPI, int RefCount, graphics::ECullMode CullMode)
+	std::shared_ptr<CMaterial> CMaterialFrame::CreateMaterial(api::IGraphicsAPI* pGraphicsAPI, graphics::ECullMode CullMode)
 	{
 		if (!m_CreateInfo) return nullptr;
 
-		std::shared_ptr<CMaterial> Material = pGraphicsAPI->CreateMaterial(m_CreateInfo, RefCount, CullMode);
+		std::shared_ptr<CMaterial> Material = pGraphicsAPI->CreateMaterial(m_CreateInfo, CullMode);
 
 		// MaterialName
 		std::string MaterialName = m_MaterialFrameName + "_" + std::to_string(m_CreateCounter);
@@ -161,7 +161,7 @@ namespace graphics
 	{
 		if (!SrcMaterial) return nullptr;
 
-		std::shared_ptr<CMaterial> DstMaterial = CreateMaterial(pGraphicsAPI, 1, SrcMaterial->GetCullMode());
+		std::shared_ptr<CMaterial> DstMaterial = CreateMaterial(pGraphicsAPI, SrcMaterial->GetCullMode());
 
 		// ShaderBufferの値をコピー
 		if (DstMaterial->GetShaderBufferList().size() != SrcMaterial->GetShaderBufferList().size()) return nullptr;

@@ -238,9 +238,6 @@ namespace mmd
 
 		for (const auto& PmxMaterial : PmxMaterilList)
 		{
-			// アウトラインにも使用するので2つ参照する
-			int MatRefCount = 2;
-
 			const graphics::ECullMode CommonCullMode = (PmxMaterial->IsDrawDoubleSlided()) ? graphics::ECullMode::CULL_NONE : graphics::ECullMode::CULL_BACK;
 
 			// プリミティブ単位で割り当てられるマテリアルリスト
@@ -263,7 +260,7 @@ namespace mmd
 				}
 
 				// マテリアルにシェーダーを設定
-				std::shared_ptr<graphics::CMaterial> material = MaterialFrame->CreateMaterial(pGraphicsAPI, MatRefCount, CullMode);
+				std::shared_ptr<graphics::CMaterial> material = MaterialFrame->CreateMaterial(pGraphicsAPI, CullMode);
 
 				material->ReplacePreloadUniformValue("edgeSize", &glm::vec1(PmxMaterial->GetEdgeSize())[0], sizeof(float), 0);
 

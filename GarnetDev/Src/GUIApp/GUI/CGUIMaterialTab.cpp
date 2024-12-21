@@ -127,7 +127,7 @@ namespace gui
 							if (ImGui::Selectable(Label.c_str(), IsSelected) && !IsSelected)
 							{
 								// マテリアルの置き換え
-								auto NewMaterial = MaterialFrame.second->CreateMaterial(pGraphicsAPI, 1, Material->GetCullMode());
+								auto NewMaterial = MaterialFrame.second->CreateMaterial(pGraphicsAPI, Material->GetCullMode());
 								Object->ReplaceMaterial(Material, NewMaterial);
 							}
 						}

@@ -46,7 +46,7 @@ namespace api
 	{
 		if (!m_ComputeMaterial) return false;
 
-		if (!m_ComputeMaterial->Create(nullptr)) return false;
+		if (!m_ComputeMaterial->Create(std::vector<std::string>(), nullptr)) return false;
 		if (!CreateComputePipeline()) return false; // Compute Pipeline‚ðì¬
 		if (!m_pGraphicsAPI->CreateCommandPool(m_CommandPool)) return false;
 		if (!m_pGraphicsAPI->CreateCommandBuffer(m_CommandBuffer, m_CommandPool)) return false;
@@ -98,7 +98,7 @@ namespace api
 		pVulkanMat->SetUniformValue("time", &glm::vec1(DrawInfo->GetSecondsTime())[0], sizeof(float));
 		pVulkanMat->SetUniformValue("deltaTime", &glm::vec1(DrawInfo->GetDeltaSecondsTime())[0], sizeof(float));
 
-		if (!pVulkanMat->BuildDrawBuffer(0)) return false;
+		if (!pVulkanMat->BuildDrawBuffer()) return false;
 
 		DrawInfo->SetDeltaSecondsTime(CurrentDeltaSecondsTime); // DeltaTime‚ðŒ³‚É–ß‚·
 

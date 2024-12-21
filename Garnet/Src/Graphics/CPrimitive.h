@@ -40,7 +40,7 @@ namespace graphics
 
 		void Release();
 
-		bool Create(const std::string& PassName, const std::shared_ptr<graphics::CTextureSet>& TextureSet);
+		bool Create(const std::vector<std::string>& PassNameList, const std::shared_ptr<graphics::CTextureSet>& TextureSet);
 
 		bool Draw();
 

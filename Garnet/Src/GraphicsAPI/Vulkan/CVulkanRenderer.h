@@ -6,6 +6,7 @@
 #include <vector>
 #include <array>
 #include <string>
+#include <map>
 
 #include "../../Interface/IRenderer.h"
 #include "../../Graphics/ECullMode.h"
@@ -35,10 +36,10 @@ namespace api
 		int m_InstanceCount;
 
 		// Pipeline
-		VkPipeline m_GraphicsPipeline;
+		std::map<std::string, VkPipeline> m_GraphicsPipelineList;
 	private:
 		// Vulkanメインロジック /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		bool CreateGraphicsPipeline(const std::string& PassName, const CVulkanVertexBuffer* pVulkanVertexBuffer, api::CVulkanMaterial* pVulkanMat);
+		bool CreateGraphicsPipeline(const std::vector<std::string>& PassNameList, const CVulkanVertexBuffer* pVulkanVertexBuffer, api::CVulkanMaterial* pVulkanMat);
 		
 		void SetRuntimeGraphicsSettings(const CVulkanVertexBuffer* pVulkanVertexBuffer, api::CVulkanMaterial* pVulkanMat);
 
@@ -52,8 +53,9 @@ namespace api
 
 		void Release();
 
-		virtual bool Create(const std::string& PassName, const std::shared_ptr<graphics::CVertexBuffer>& VertexBuffer, const std::shared_ptr<graphics::CIndexBuffer>& IndexBuffer, const std::shared_ptr<graphics::CMaterial>& Material) override;
-		virtual bool Draw(const std::shared_ptr<graphics::CVertexBuffer>& VertexBuffer, const std::shared_ptr<graphics::CIndexBuffer>& IndexBuffer, const std::shared_ptr<graphics::CMaterial>& Material, int DynamicOffsetNum) override;
+		virtual bool Create(const std::vector<std::string>& PassNameList, const std::shared_ptr<graphics::CVertexBuffer>& VertexBuffer, const std::shared_ptr<graphics::CIndexBuffer>& IndexBuffer, const std::shared_ptr<graphics::CMaterial>& Material) override;
+		virtual bool Draw(const std::shared_ptr<graphics::CVertexBuffer>& VertexBuffer, const std::shared_ptr<graphics::CIndexBuffer>& IndexBuffer, 
+			const std::shared_ptr<graphics::CMaterial>& Material) override;
 	
 		virtual bool UpdateVertexBuffer(const std::vector<float>& PosAttribute, const std::shared_ptr<graphics::CVertexBuffer>& VertexBuffer) override;
 	};

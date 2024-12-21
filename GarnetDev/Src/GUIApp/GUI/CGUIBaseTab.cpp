@@ -12,7 +12,8 @@ namespace gui
 			{
 				const auto& Object = ObjectList[SelectedObjectIndex];
 
-				// PassName
+				// Œã‰ñ‚µ
+				/*// PassName
 				{
 					std::string PassName = Object->GetPassName();
 
@@ -25,22 +26,7 @@ namespace gui
 
 						Object->SetPassName(PassName);
 					}
-				}
-
-				// DepthPass
-				{
-					std::string DepthPass = Object->GetDepthPassName();
-
-					char buf[256] = "";
-					std::memcpy(&buf[0], &DepthPass[0], DepthPass.size());
-					
-					if (ImGui::InputText("DepthPass##CGUIBaseTab::Draw", buf, IM_ARRAYSIZE(buf)))
-					{
-						DepthPass = std::string(buf);
-
-						Object->SetDepthPassName(DepthPass);
-					}
-				}
+				}*/
 
 				const auto& NodeList = Object->GetNodeList();
 				const auto& MeshList = Object->GetMeshList();

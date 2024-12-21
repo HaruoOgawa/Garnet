@@ -127,11 +127,11 @@ namespace gui
 						std::shared_ptr<graphics::CMaterialFrame> CurrentMaterialFrame = SceneController->FindMaterialFrame(CurrentMaterialFrameName);
 						if (CurrentMaterialFrame)
 						{
-							NewMaterial = CurrentMaterialFrame->CreateMaterial(pGraphicsAPI, 1, CullMode);
+							NewMaterial = CurrentMaterialFrame->CreateMaterial(pGraphicsAPI, CullMode);
 							NewMaterial->SetMaterialName(MaterialName);
 
 							// ToDO: 即時生成する
-							if (!NewMaterial->Create(Object->GetTextureSet())) return false;
+							if (!NewMaterial->Create(Object->GetPassNameList(), Object->GetTextureSet())) return false;
 						}
 
 						MaterialName = std::string();
@@ -145,7 +145,7 @@ namespace gui
 						Mesh->CreatePresetSimpleMesh(pGraphicsAPI, CreateInfo.first, CreateInfo.second, NewMaterial, PresetType);
 
 						// プリセットなので即時生成
-						if (!Mesh->Create(Object->GetTextureSet(), Object->GetPassName(), Object->GetDepthPassName())) return false;
+						if (!Mesh->Create(Object->GetTextureSet(), Object->GetPassNameList())) return false;
 
 						Object->AddMesh(Mesh);
 					}

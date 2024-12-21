@@ -3,6 +3,7 @@
 #include <vector>
 #include <memory>
 #include <string>
+#include <map>
 #include "CShaderBuffer.h"
 #include "CShaderBufferDescriptor.h"
 #include "../GraphicsAPI/CMaterialCreateInfo.h"
@@ -33,16 +34,14 @@ namespace graphics
 	protected:
 		std::shared_ptr<CMaterialFrame> m_MaterialFrame;
 
+		std::map<std::string, int> m_PassNameDynamicOffsetMap;
+
 		std::string m_MaterialName;
 
 		std::shared_ptr<CMaterialCreateInfo> m_CreateInfo;
 
 		std::vector<std::shared_ptr<CShaderBuffer>> m_ShaderBufferList;
 		std::vector<STextureBindingLayout> m_TextureBindingLayoutList;
-
-		// VulkanやWebGPUはOpenGLの様に何も考えずにマテリアルを使いまわすことができないのでその数をあらかじめ設定しておく必要がある
-		int m_RefCount;
-		int m_CurrentDynamicOffset;
 
 		std::vector<uint32_t> m_BindingRefSizeList; // GLSLの各bindingが参照しているバッファのサイズ
 
@@ -70,9 +69,14 @@ namespace graphics
 
 		// カラーバッファへのアウトプット数(MRTで使用)
 		int m_OutputColorCount;
+
+	protected:
+		virtual bool Create(const std::shared_ptr<graphics::CTextureSet>& TextureSet) = 0;
 	public:
-		CMaterial(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CMaterialCreateInfo>& createInfo, int RefCount, ECullMode CullMode);
+		CMaterial(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CMaterialCreateInfo>& createInfo, ECullMode CullMode);
 		virtual ~CMaterial() = default;
+
+		virtual const std::map<std::string, int>& GetPassNameDynamicOffsetMap() const;
 
 		virtual bool IsUseShaderBuffer();
 
@@ -92,8 +96,8 @@ namespace graphics
 		virtual const std::vector<STextureBindingLayout>& GetTextureBindingLayoutList() const;
 		virtual void SetTextureBindingLayoutTextureIndex(int BindingLayoutIndex, int TextureIndex, const std::shared_ptr<graphics::CTextureSet>& TextureSet);
 
-		virtual bool Create(const std::shared_ptr<graphics::CTextureSet>& TextureSet) = 0;
-
+		virtual bool Create(const std::vector<std::string>& PassNameList, const std::shared_ptr<graphics::CTextureSet>& TextureSet);
+		
 		virtual bool ReCreate(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, const std::vector<std::shared_ptr<CShaderBuffer>>& ShaderBufferList, const std::vector<STextureBindingLayout>& TextureBindingLayoutList);
 
 		virtual bool ReCreateBuffer(const std::vector<std::shared_ptr<graphics::CShaderBuffer>>& ShaderBufferList, const std::vector<graphics::STextureBindingLayout>& TextureBindingLayoutList);
@@ -114,7 +118,7 @@ namespace graphics
 		virtual void SetBlendType(EBlendType BlendType);
 		virtual EBlendType GetBlendType() const;
 
-		virtual bool BuildDrawBuffer(int DynamicOffsetNum) = 0;
+		virtual bool BuildDrawBuffer() = 0;
 
 		virtual void AddShaderBuffer(const std::shared_ptr<CShaderBuffer>& Buffer);
 		virtual void AddTextureBindingLayout(const STextureBindingLayout& Layout);
@@ -122,11 +126,9 @@ namespace graphics
 
 		virtual void ReplacePreloadUniformValue(const std::string& Name, const void* Data, int ByteSize, int BindingIndex);
 
-		virtual void SetUniformValue(const std::string Name, const void* Data, int ByteSize, int DynamicOffsetNum = -1) = 0;
+		virtual void SetUniformValue(const std::string Name, const void* Data, int ByteSize) = 0;
 
 		virtual bool IsUseDynamicOffset();
-
-		virtual int GetDynamicOffset() const;
 
 		virtual const std::vector<uint32_t>& GetBindingRefSizeList() const;
 

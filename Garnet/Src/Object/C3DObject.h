@@ -3,6 +3,7 @@
 #include <vector>
 #include <memory>
 #include <set>
+#include <string>
 
 #include "E3DObjectType.h"
 #include "CNode.h"
@@ -32,8 +33,7 @@ namespace object
 
 		std::vector<std::string> m_DefaultMaterialFrameList;
 
-		std::string m_PassName;
-		std::string m_DepthPassName;
+		std::vector<std::string> m_PassNameList;
 		
 		std::string						  m_ObjectName;
 		std::shared_ptr<math::CTransform> m_ObjectTransform;
@@ -77,7 +77,7 @@ namespace object
 		void ApplyPhysicsWorldMatrix();
 		void AlignPhysicsJoint();
 	public:
-		C3DObject(const std::string& PassName, const std::string& DepthPassName);
+		C3DObject();
 		virtual ~C3DObject();
 
 		void Reset();
@@ -91,10 +91,8 @@ namespace object
 		void SetObjectName(const std::string& Name);
 		const std::string& GetObjectName() const;
 
-		const std::string& GetPassName() const;
-		void SetPassName(const std::string& Name);
-		const std::string& GetDepthPassName() const;
-		void SetDepthPassName(const std::string& Name);
+		const std::vector<std::string>& GetPassNameList() const;
+		void AddPassName(const std::string& Name);
 
 		bool HasTLTrackContent() const;
 		void AddTLNode(const std::shared_ptr<CNode>& Node);

@@ -69,22 +69,22 @@ namespace api
 		// ÉwÉãÉpÅ[ä÷êî ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		bool CreateShaderModule(VkShaderModule& shaderModule, const std::string& code);
 	public:
-		CVulkanMaterial(api::CVulkanAPI* pGraphicsAPI, const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, int RefCount, graphics::ECullMode CullMode);
+		CVulkanMaterial(api::CVulkanAPI* pGraphicsAPI, const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, graphics::ECullMode CullMode);
 		virtual ~CVulkanMaterial();
 
 		virtual bool Create(const std::shared_ptr<graphics::CTextureSet>& TextureSet) override;
 
 		virtual bool ReCreate(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, const std::vector<std::shared_ptr<graphics::CShaderBuffer>>& ShaderBufferList, const std::vector<graphics::STextureBindingLayout>& TextureBindingLayoutList) override;
 
-		virtual bool BuildDrawBuffer(int DynamicOffsetNum) override;
+		virtual bool BuildDrawBuffer() override;
 
-		virtual void SetUniformValue(const std::string Name, const void* Data, int ByteSize, int DynamicOffsetNum = -1) override;
+		virtual void SetUniformValue(const std::string Name, const void* Data, int ByteSize) override;
 
 		bool IsAvailable() const;
 
 		void SetActive();
 
-		void BindUBO(int DynamicOffsetNum);
+		void BindUBO();
 
 		const std::vector<VkPipelineShaderStageCreateInfo>& GetShaderStages()const { return m_ShaderStages; }
 		const VkDescriptorSetLayout& GetDescriptorSetLayout() const { return m_DescriptorSetLayout; }

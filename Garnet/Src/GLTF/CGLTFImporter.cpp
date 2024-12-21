@@ -331,7 +331,7 @@ namespace gltf
 			// マテリアルにシェーダーを設定
 			for (const auto& MaterialFrame : BaseMaterialFrameList)
 			{
-				std::shared_ptr<graphics::CMaterial> material = MaterialFrame->CreateMaterial(pGraphicsAPI, 1, graphics::ECullMode::CULL_BACK);
+				std::shared_ptr<graphics::CMaterial> material = MaterialFrame->CreateMaterial(pGraphicsAPI, graphics::ECullMode::CULL_BACK);
 
 				// UBO
 				{
@@ -774,7 +774,7 @@ namespace gltf
 			{
 				for (const auto& MaterialFrame : BaseMaterialFrameList)
 				{
-					auto material = MaterialFrame->CreateMaterial(pGraphicsAPI, 1, graphics::ECullMode::CULL_NONE);
+					auto material = MaterialFrame->CreateMaterial(pGraphicsAPI, graphics::ECullMode::CULL_NONE);
 					Primirive->AddMaterial(pGraphicsAPI, material);
 				}
 			}

@@ -10,8 +10,7 @@ namespace api
 {
 	CWebGPURenderer::CWebGPURenderer(api::CWebGPUAPI* pGraphicsAPI):
 		m_pGraphicsAPI(pGraphicsAPI),
-		m_InstanceCount(1),
-		m_GraphicsPipeline(nullptr)
+		m_InstanceCount(1)
 	{
 	}
 
@@ -19,28 +18,33 @@ namespace api
 	{
 	}
 
-	bool CWebGPURenderer::Create(const std::string& PassName, const std::shared_ptr<graphics::CVertexBuffer>& VertexBuffer, const std::shared_ptr<graphics::CIndexBuffer>& IndexBuffer, const std::shared_ptr<graphics::CMaterial>& Material)
+	bool CWebGPURenderer::Create(const std::vector<std::string>& PassNameList, const std::shared_ptr<graphics::CVertexBuffer>& VertexBuffer, 
+		const std::shared_ptr<graphics::CIndexBuffer>& IndexBuffer, const std::shared_ptr<graphics::CMaterial>& Material)
 	{
 		api::CWebGPUMaterial* pWebGPUMat = static_cast<api::CWebGPUMaterial*>(Material.get());
 
 		m_InstanceCount = VertexBuffer->GetInstanceCount();
 
-		if (!CreateGraphicsPipeline(VertexBuffer, IndexBuffer, pWebGPUMat)) return false; // グラフィックスパイプラインを生成
+		if (!CreateGraphicsPipeline(PassNameList, VertexBuffer, IndexBuffer, pWebGPUMat)) return false; // グラフィックスパイプラインを生成
 		
 		return true;
 	}
 
-	bool CWebGPURenderer::Draw(const std::shared_ptr<graphics::CVertexBuffer>& VertexBuffer, const std::shared_ptr<graphics::CIndexBuffer>& IndexBuffer, const std::shared_ptr<graphics::CMaterial>& Material, int DynamicOffsetNum)
+	bool CWebGPURenderer::Draw(const std::shared_ptr<graphics::CVertexBuffer>& VertexBuffer, const std::shared_ptr<graphics::CIndexBuffer>& IndexBuffer, 
+		const std::shared_ptr<graphics::CMaterial>& Material)
 	{
+		const auto& GraphicsPipeline = m_GraphicsPipelineList.find(m_pGraphicsAPI->GetCurrentRenderPassName());
+		if (GraphicsPipeline == m_GraphicsPipelineList.end()) return false;
+
 		const CWebGPUVertexBuffer* pWebGPUVertexBuffer = static_cast<const CWebGPUVertexBuffer*>(VertexBuffer.get());
 		const CWebGPUIndexBuffer* pWebGPUIndexBuffer = static_cast<const CWebGPUIndexBuffer*>(IndexBuffer.get());
 		api::CWebGPUMaterial* pWebGPUMat = static_cast<api::CWebGPUMaterial*>(Material.get());
 
 		// ユニフォームバッファの準備
-		if (!pWebGPUMat->BuildDrawBuffer(DynamicOffsetNum)) return false;
+		if (!pWebGPUMat->BuildDrawBuffer()) return false;
 
 		// レンダーパスにパイプラインを割り当てる
-		wgpuRenderPassEncoderSetPipeline(m_pGraphicsAPI->GetCurrentRenderPass(), m_GraphicsPipeline); 
+		wgpuRenderPassEncoderSetPipeline(m_pGraphicsAPI->GetCurrentRenderPass(), GraphicsPipeline->second);
 
 		// 頂点バッファを割り当てる
 		for (int i = 0; i < static_cast<int>(pWebGPUVertexBuffer->GetVertexBufferList().size()); i++)
@@ -61,15 +65,21 @@ namespace api
 		// バインドグループを割り当てる
 		if (pWebGPUMat->IsUseShaderBuffer())
 		{
-			std::vector<uint32_t> dynamicOffsetList;
-			for (const auto& Size : pWebGPUMat->GetBindingRefSizeList())
-			{
-				uint32_t dynamicOffset = (DynamicOffsetNum - 1) * Size;
-				dynamicOffsetList.push_back(dynamicOffset);
-			}
-
 			if (pWebGPUMat->IsUseDynamicOffset())
 			{
+				std::vector<uint32_t> dynamicOffsetList;
+				for (const auto& Size : pWebGPUMat->GetBindingRefSizeList())
+				{
+					const auto& PassNameDynamicOffsetMap = pWebGPUMat->GetPassNameDynamicOffsetMap();
+
+					const auto it = PassNameDynamicOffsetMap.find(m_pGraphicsAPI->GetCurrentRenderPassName());
+					if (it == PassNameDynamicOffsetMap.end()) return false;
+
+					uint32_t dynamicOffset = it->second * Size;
+
+					dynamicOffsetList.push_back(dynamicOffset);
+				}
+
 				wgpuRenderPassEncoderSetBindGroup(m_pGraphicsAPI->GetCurrentRenderPass(), 0, pWebGPUMat->GetBindGroup(), static_cast<uint32_t>(dynamicOffsetList.size()), &dynamicOffsetList[0]);
 			}
 			else
@@ -101,219 +111,226 @@ namespace api
 	}
 
 	// WebGPU Main Logic /////////////////////////////////////////////////////////////////////
-	bool CWebGPURenderer::CreateGraphicsPipeline(const std::shared_ptr<graphics::CVertexBuffer>& VertexBuffer, const std::shared_ptr<graphics::CIndexBuffer>& IndexBuffer, api::CWebGPUMaterial* pWebGPUMat)
+	bool CWebGPURenderer::CreateGraphicsPipeline(const std::vector<std::string>& PassNameList, const std::shared_ptr<graphics::CVertexBuffer>& VertexBuffer, const std::shared_ptr<graphics::CIndexBuffer>& IndexBuffer, api::CWebGPUMaterial* pWebGPUMat)
 	{
-		const CWebGPUVertexBuffer* pWebGPUVertexBuffer = static_cast<const CWebGPUVertexBuffer*>(VertexBuffer.get());
-		const CWebGPUIndexBuffer* pWebGPUIndexBuffer = static_cast<const CWebGPUIndexBuffer*>(IndexBuffer.get());
-
-		// パイプラインの設定 //////////////////////////////////////////////////////////////////////////
-		WGPURenderPipelineDescriptor pipelineDesc{};
-		pipelineDesc.nextInChain = nullptr; // 拡張機
-		
-		// 頂点バッファレイアウト
-		std::vector<WGPUVertexBufferLayout> vertexBufferLayouts(pWebGPUVertexBuffer->GetVertexBufferList().size());
-		std::vector<WGPUVertexAttribute> attributes(pWebGPUVertexBuffer->GetVertexBufferList().size()); // ここベクターにしないとなんかvertexBufferLayoutsに入れておいてもメモリが解放されててなんか数値がおかしなことに・・・
-		// ↑↑↑ 確かにスタックメモリに格納する変数はスコープを抜けたら解放されるよね・・・
-		// そしてその解放されたものを使用していると当然おかしくなる
-		// メモリの解放タイミングと使用タイミングには留意しよう！
-
-		for (int i = 0; i < static_cast<int>(pWebGPUVertexBuffer->GetVertexBufferList().size()); i++)
+		for (int PassIndex = 0; PassIndex < static_cast<int>(PassNameList.size()); PassIndex++)
 		{
-			//
-			int Dimension = pWebGPUVertexBuffer->GetAttributeDimensions()[i];
-			int ByteStride = pWebGPUVertexBuffer->GetAttribByteStrides()[i];
+			const auto& PassName = PassNameList[PassIndex];
 
-			//
-			attributes[i].shaderLocation = i; // Shaderでのアトリビュートインデックス
-			attributes[i].format = GetVertexFormat(Dimension, pWebGPUVertexBuffer->GetAttribDataTypes()[i]);
-			attributes[i].offset = 0;
+			const CWebGPUVertexBuffer* pWebGPUVertexBuffer = static_cast<const CWebGPUVertexBuffer*>(VertexBuffer.get());
+			const CWebGPUIndexBuffer* pWebGPUIndexBuffer = static_cast<const CWebGPUIndexBuffer*>(IndexBuffer.get());
 
-			//
-			vertexBufferLayouts[i].attributeCount = 1;
-			vertexBufferLayouts[i].attributes = &attributes[i];
-			vertexBufferLayouts[i].arrayStride = (ByteStride != 0) ? ByteStride : (Dimension * sizeof(pWebGPUVertexBuffer->GetVertices()[i][0])); // ストライドとは連続する要素間のバイト数のこと
-			vertexBufferLayouts[i].stepMode = WGPUVertexStepMode_Vertex; // ??? 頂点データが同じインスタンスなら共有されることを示す設定 ???
-		}
+			// パイプラインの設定 //////////////////////////////////////////////////////////////////////////
+			WGPURenderPipelineDescriptor pipelineDesc{};
+			pipelineDesc.nextInChain = nullptr; // 拡張機
 
-		// 頂点シェーダー
-		pipelineDesc.vertex.nextInChain = nullptr;
-		pipelineDesc.vertex.bufferCount = static_cast<uint32_t>(vertexBufferLayouts.size()); // 頂点バッファ
-		pipelineDesc.vertex.buffers = &vertexBufferLayouts[0];
-		pipelineDesc.vertex.module = pWebGPUMat->GetVertexShaderModele(); // 頂点シェーダー
-		pipelineDesc.vertex.entryPoint = "main";
-		pipelineDesc.vertex.constantCount = 0; // ??? ユニフォームの指定に使用するやつかな？
-		pipelineDesc.vertex.constants = nullptr;
+			// 頂点バッファレイアウト
+			std::vector<WGPUVertexBufferLayout> vertexBufferLayouts(pWebGPUVertexBuffer->GetVertexBufferList().size());
+			std::vector<WGPUVertexAttribute> attributes(pWebGPUVertexBuffer->GetVertexBufferList().size()); // ここベクターにしないとなんかvertexBufferLayoutsに入れておいてもメモリが解放されててなんか数値がおかしなことに・・・
+			// ↑↑↑ 確かにスタックメモリに格納する変数はスコープを抜けたら解放されるよね・・・
+			// そしてその解放されたものを使用していると当然おかしくなる
+			// メモリの解放タイミングと使用タイミングには留意しよう！
 
-		// プリミティブの設定
-		pipelineDesc.primitive.nextInChain = nullptr;
-		pipelineDesc.primitive.topology = WGPUPrimitiveTopology_TriangleList; // トポロジー
-		pipelineDesc.primitive.stripIndexFormat = WGPUIndexFormat_Undefined; // インデックスバッファの型かな
-		pipelineDesc.primitive.frontFace = WGPUFrontFace_CCW; // カリングの方向
-		
-		switch (pWebGPUMat->GetCullMode())
-		{
-		case graphics::ECullMode::CULL_BACK:
-			pipelineDesc.primitive.cullMode = WGPUCullMode_Back; // カリングモードの設定
-			break;
-
-		case graphics::ECullMode::CULL_FRONT:
-			pipelineDesc.primitive.cullMode = WGPUCullMode_Front; // カリングモードの設定
-			break;
-
-		case graphics::ECullMode::CULL_NONE:
-			pipelineDesc.primitive.cullMode = WGPUCullMode_None; // カリングモードの設定
-			break;
-
-		default:
-			pipelineDesc.primitive.cullMode = WGPUCullMode_Back; // カリングモードの設定
-			break;
-		}
-
-		// ステンシルバッファ・デプスバッファ
-		WGPUDepthStencilState depthStencilState;
-		SetDefaultDepthStencil(depthStencilState);
-		depthStencilState.nextInChain = nullptr;
-
-		// Depth
-		{
-			depthStencilState.depthWriteEnabled = pWebGPUMat->IsEnabledZWrite();
-
-			graphics::EDepthFunc DepthFunc = pWebGPUMat->GetDepthFunc();
-			switch (DepthFunc)
+			for (int i = 0; i < static_cast<int>(pWebGPUVertexBuffer->GetVertexBufferList().size()); i++)
 			{
-			case graphics::EDepthFunc::Never:
-				depthStencilState.depthCompare = WGPUCompareFunction_Never;
-				break;
-			case graphics::EDepthFunc::Less:
-				depthStencilState.depthCompare = WGPUCompareFunction_Less;
-				break;
-			case graphics::EDepthFunc::LessEqual:
-				depthStencilState.depthCompare = WGPUCompareFunction_LessEqual;
-				break;
-			case graphics::EDepthFunc::Greater:
-				depthStencilState.depthCompare = WGPUCompareFunction_Greater;
-				break;
-			case graphics::EDepthFunc::GreaterEqual:
-				depthStencilState.depthCompare = WGPUCompareFunction_GreaterEqual;
-				break;
-			case graphics::EDepthFunc::Equal:
-				depthStencilState.depthCompare = WGPUCompareFunction_Equal;
-				break;
-			case graphics::EDepthFunc::NotEqual:
-				depthStencilState.depthCompare = WGPUCompareFunction_NotEqual;
-				break;
-			case graphics::EDepthFunc::Always:
-				depthStencilState.depthCompare = WGPUCompareFunction_Always;
-				break;
-			default:
-				depthStencilState.depthCompare = WGPUCompareFunction_Less;
-				break;
+				//
+				int Dimension = pWebGPUVertexBuffer->GetAttributeDimensions()[i];
+				int ByteStride = pWebGPUVertexBuffer->GetAttribByteStrides()[i];
+
+				//
+				attributes[i].shaderLocation = i; // Shaderでのアトリビュートインデックス
+				attributes[i].format = GetVertexFormat(Dimension, pWebGPUVertexBuffer->GetAttribDataTypes()[i]);
+				attributes[i].offset = 0;
+
+				//
+				vertexBufferLayouts[i].attributeCount = 1;
+				vertexBufferLayouts[i].attributes = &attributes[i];
+				vertexBufferLayouts[i].arrayStride = (ByteStride != 0) ? ByteStride : (Dimension * sizeof(pWebGPUVertexBuffer->GetVertices()[i][0])); // ストライドとは連続する要素間のバイト数のこと
+				vertexBufferLayouts[i].stepMode = WGPUVertexStepMode_Vertex; // ??? 頂点データが同じインスタンスなら共有されることを示す設定 ???
 			}
-		}
-		
-		WGPUTextureFormat depthTextureFormat = WGPUTextureFormat_Depth24Plus;
-		depthStencilState.format = depthTextureFormat;
-		depthStencilState.stencilReadMask = 0; // ステンシルバッファの読み書きをオフにしておく
-		depthStencilState.stencilWriteMask = 0;
 
-		pipelineDesc.depthStencil = &depthStencilState;
+			// 頂点シェーダー
+			pipelineDesc.vertex.nextInChain = nullptr;
+			pipelineDesc.vertex.bufferCount = static_cast<uint32_t>(vertexBufferLayouts.size()); // 頂点バッファ
+			pipelineDesc.vertex.buffers = &vertexBufferLayouts[0];
+			pipelineDesc.vertex.module = pWebGPUMat->GetVertexShaderModele(); // 頂点シェーダー
+			pipelineDesc.vertex.entryPoint = "main";
+			pipelineDesc.vertex.constantCount = 0; // ??? ユニフォームの指定に使用するやつかな？
+			pipelineDesc.vertex.constants = nullptr;
 
-		// 描画先のカラーバッファの設定
-		// MRTの時は複数個必要
-		std::vector<WGPUColorTargetState> colorTargetList;
-		for (int ColorIndex = 0; ColorIndex < pWebGPUMat->GetOutputColorCount(); ColorIndex++)
-		{
-			// ブレンディング
-		// <計算式> rgba = srcFactor * rgba [operation] dstFactor * rgba
-			WGPUBlendState blendState{};
-			switch (pWebGPUMat->GetBlendType())
+			// プリミティブの設定
+			pipelineDesc.primitive.nextInChain = nullptr;
+			pipelineDesc.primitive.topology = WGPUPrimitiveTopology_TriangleList; // トポロジー
+			pipelineDesc.primitive.stripIndexFormat = WGPUIndexFormat_Undefined; // インデックスバッファの型かな
+			pipelineDesc.primitive.frontFace = WGPUFrontFace_CCW; // カリングの方向
+
+			switch (pWebGPUMat->GetCullMode())
 			{
-			case graphics::EBlendType::BLEND_TYPE_ADDITIVE:
-				blendState.color.srcFactor = WGPUBlendFactor_One;
-				blendState.color.dstFactor = WGPUBlendFactor_Zero;
-				blendState.color.operation = WGPUBlendOperation_Add;
-
-				blendState.alpha.srcFactor = WGPUBlendFactor_One;
-				blendState.alpha.dstFactor = WGPUBlendFactor_Zero;
-				blendState.alpha.operation = WGPUBlendOperation_Add;
-
+			case graphics::ECullMode::CULL_BACK:
+				pipelineDesc.primitive.cullMode = WGPUCullMode_Back; // カリングモードの設定
 				break;
-			case graphics::EBlendType::BLEND_TYPE_TRANSPARENT_ALPHA:
-				blendState.color.srcFactor = WGPUBlendFactor_SrcAlpha;
-				blendState.color.dstFactor = WGPUBlendFactor_OneMinusSrcAlpha;
-				blendState.color.operation = WGPUBlendOperation_Add;
 
-				blendState.alpha.srcFactor = WGPUBlendFactor_SrcAlpha;
-				blendState.alpha.dstFactor = WGPUBlendFactor_OneMinusSrcAlpha;
-				blendState.alpha.operation = WGPUBlendOperation_Add;
-
+			case graphics::ECullMode::CULL_FRONT:
+				pipelineDesc.primitive.cullMode = WGPUCullMode_Front; // カリングモードの設定
 				break;
+
+			case graphics::ECullMode::CULL_NONE:
+				pipelineDesc.primitive.cullMode = WGPUCullMode_None; // カリングモードの設定
+				break;
+
 			default:
-				blendState.color.srcFactor = WGPUBlendFactor_One;
-				blendState.color.dstFactor = WGPUBlendFactor_Zero;
-				blendState.color.operation = WGPUBlendOperation_Add;
-
-				blendState.alpha.srcFactor = WGPUBlendFactor_One;
-				blendState.alpha.dstFactor = WGPUBlendFactor_Zero;
-				blendState.alpha.operation = WGPUBlendOperation_Add;
-
+				pipelineDesc.primitive.cullMode = WGPUCullMode_Back; // カリングモードの設定
 				break;
 			}
 
+			// ステンシルバッファ・デプスバッファ
+			WGPUDepthStencilState depthStencilState;
+			SetDefaultDepthStencil(depthStencilState);
+			depthStencilState.nextInChain = nullptr;
 
-			WGPUColorTargetState colorTarget{};
-			colorTarget.nextInChain = nullptr;
-			colorTarget.format = m_pGraphicsAPI->GetSwapChainFormat();
-			colorTarget.blend = &blendState;
-			colorTarget.writeMask = WGPUColorWriteMask_All;
+			// Depth
+			{
+				depthStencilState.depthWriteEnabled = pWebGPUMat->IsEnabledZWrite();
 
-			colorTargetList.push_back(colorTarget);
-		}
-		
-		// マルチサンプリング(MSAA)
-		pipelineDesc.multisample.nextInChain = nullptr;
-		pipelineDesc.multisample.count = 1;
-		pipelineDesc.multisample.mask = ~0u; // ??? Bit Mask ???
-		pipelineDesc.multisample.alphaToCoverageEnabled = false; // ???
+				graphics::EDepthFunc DepthFunc = pWebGPUMat->GetDepthFunc();
+				switch (DepthFunc)
+				{
+				case graphics::EDepthFunc::Never:
+					depthStencilState.depthCompare = WGPUCompareFunction_Never;
+					break;
+				case graphics::EDepthFunc::Less:
+					depthStencilState.depthCompare = WGPUCompareFunction_Less;
+					break;
+				case graphics::EDepthFunc::LessEqual:
+					depthStencilState.depthCompare = WGPUCompareFunction_LessEqual;
+					break;
+				case graphics::EDepthFunc::Greater:
+					depthStencilState.depthCompare = WGPUCompareFunction_Greater;
+					break;
+				case graphics::EDepthFunc::GreaterEqual:
+					depthStencilState.depthCompare = WGPUCompareFunction_GreaterEqual;
+					break;
+				case graphics::EDepthFunc::Equal:
+					depthStencilState.depthCompare = WGPUCompareFunction_Equal;
+					break;
+				case graphics::EDepthFunc::NotEqual:
+					depthStencilState.depthCompare = WGPUCompareFunction_NotEqual;
+					break;
+				case graphics::EDepthFunc::Always:
+					depthStencilState.depthCompare = WGPUCompareFunction_Always;
+					break;
+				default:
+					depthStencilState.depthCompare = WGPUCompareFunction_Less;
+					break;
+				}
+			}
 
-		// フラグメントシェーダー
-		WGPUFragmentState fragmentState{};
-		fragmentState.nextInChain = nullptr;
-		fragmentState.module = pWebGPUMat->GetFragmentShaderModele();
-		fragmentState.entryPoint = "main";
-		fragmentState.constantCount = 0;
-		fragmentState.constants = nullptr;
-		fragmentState.targetCount = static_cast<uint32_t>(colorTargetList.size());
-		fragmentState.targets = &colorTargetList[0];
+			WGPUTextureFormat depthTextureFormat = WGPUTextureFormat_Depth24Plus;
+			depthStencilState.format = depthTextureFormat;
+			depthStencilState.stencilReadMask = 0; // ステンシルバッファの読み書きをオフにしておく
+			depthStencilState.stencilWriteMask = 0;
 
-		pipelineDesc.fragment = &fragmentState;
-		
-		// パイプラインレイアウトの指定
-		// パイプラインレイアウトは、レンダリングパイプラインで使用されるすべてのリソースをどのようにバインドする必要があるかを示す
-		WGPUPipelineLayoutDescriptor layoutDesc{};
-		layoutDesc.nextInChain = nullptr;
-		if (pWebGPUMat->IsUseShaderBuffer())
-		{
-			layoutDesc.bindGroupLayoutCount = 1;
-			layoutDesc.bindGroupLayouts = &pWebGPUMat->GetBindGroupLayout();//&m_BindGroupLayout;
-		}
-		else
-		{
-			layoutDesc.bindGroupLayoutCount = 0;
-			layoutDesc.bindGroupLayouts = nullptr;
-		}
-		
-		WGPUPipelineLayout layout = wgpuDeviceCreatePipelineLayout(m_pGraphicsAPI->GetLogicalDevice(), &layoutDesc);
+			pipelineDesc.depthStencil = &depthStencilState;
 
-		pipelineDesc.layout = layout;
+			// 描画先のカラーバッファの設定
+			// MRTの時は複数個必要
+			std::vector<WGPUColorTargetState> colorTargetList;
+			for (int ColorIndex = 0; ColorIndex < pWebGPUMat->GetOutputColorCount(); ColorIndex++)
+			{
+				// ブレンディング
+			// <計算式> rgba = srcFactor * rgba [operation] dstFactor * rgba
+				WGPUBlendState blendState{};
+				switch (pWebGPUMat->GetBlendType())
+				{
+				case graphics::EBlendType::BLEND_TYPE_ADDITIVE:
+					blendState.color.srcFactor = WGPUBlendFactor_One;
+					blendState.color.dstFactor = WGPUBlendFactor_Zero;
+					blendState.color.operation = WGPUBlendOperation_Add;
 
-		// パイプラインの生成 /////////////////////////////////////////////////////////////////////////////
-		m_GraphicsPipeline = wgpuDeviceCreateRenderPipeline(m_pGraphicsAPI->GetLogicalDevice(), &pipelineDesc);
+					blendState.alpha.srcFactor = WGPUBlendFactor_One;
+					blendState.alpha.dstFactor = WGPUBlendFactor_Zero;
+					blendState.alpha.operation = WGPUBlendOperation_Add;
 
-		if (!m_GraphicsPipeline)
-		{
-			Console::Log("[Error] m_GraphicsPipeline is null\n");
-			return false;
+					break;
+				case graphics::EBlendType::BLEND_TYPE_TRANSPARENT_ALPHA:
+					blendState.color.srcFactor = WGPUBlendFactor_SrcAlpha;
+					blendState.color.dstFactor = WGPUBlendFactor_OneMinusSrcAlpha;
+					blendState.color.operation = WGPUBlendOperation_Add;
+
+					blendState.alpha.srcFactor = WGPUBlendFactor_SrcAlpha;
+					blendState.alpha.dstFactor = WGPUBlendFactor_OneMinusSrcAlpha;
+					blendState.alpha.operation = WGPUBlendOperation_Add;
+
+					break;
+				default:
+					blendState.color.srcFactor = WGPUBlendFactor_One;
+					blendState.color.dstFactor = WGPUBlendFactor_Zero;
+					blendState.color.operation = WGPUBlendOperation_Add;
+
+					blendState.alpha.srcFactor = WGPUBlendFactor_One;
+					blendState.alpha.dstFactor = WGPUBlendFactor_Zero;
+					blendState.alpha.operation = WGPUBlendOperation_Add;
+
+					break;
+				}
+
+
+				WGPUColorTargetState colorTarget{};
+				colorTarget.nextInChain = nullptr;
+				colorTarget.format = m_pGraphicsAPI->GetSwapChainFormat();
+				colorTarget.blend = &blendState;
+				colorTarget.writeMask = WGPUColorWriteMask_All;
+
+				colorTargetList.push_back(colorTarget);
+			}
+
+			// マルチサンプリング(MSAA)
+			pipelineDesc.multisample.nextInChain = nullptr;
+			pipelineDesc.multisample.count = 1;
+			pipelineDesc.multisample.mask = ~0u; // ??? Bit Mask ???
+			pipelineDesc.multisample.alphaToCoverageEnabled = false; // ???
+
+			// フラグメントシェーダー
+			WGPUFragmentState fragmentState{};
+			fragmentState.nextInChain = nullptr;
+			fragmentState.module = pWebGPUMat->GetFragmentShaderModele();
+			fragmentState.entryPoint = "main";
+			fragmentState.constantCount = 0;
+			fragmentState.constants = nullptr;
+			fragmentState.targetCount = static_cast<uint32_t>(colorTargetList.size());
+			fragmentState.targets = &colorTargetList[0];
+
+			pipelineDesc.fragment = &fragmentState;
+
+			// パイプラインレイアウトの指定
+			// パイプラインレイアウトは、レンダリングパイプラインで使用されるすべてのリソースをどのようにバインドする必要があるかを示す
+			WGPUPipelineLayoutDescriptor layoutDesc{};
+			layoutDesc.nextInChain = nullptr;
+			if (pWebGPUMat->IsUseShaderBuffer())
+			{
+				layoutDesc.bindGroupLayoutCount = 1;
+				layoutDesc.bindGroupLayouts = &pWebGPUMat->GetBindGroupLayout();//&m_BindGroupLayout;
+			}
+			else
+			{
+				layoutDesc.bindGroupLayoutCount = 0;
+				layoutDesc.bindGroupLayouts = nullptr;
+			}
+
+			WGPUPipelineLayout layout = wgpuDeviceCreatePipelineLayout(m_pGraphicsAPI->GetLogicalDevice(), &layoutDesc);
+
+			pipelineDesc.layout = layout;
+
+			// パイプラインの生成 /////////////////////////////////////////////////////////////////////////////
+			WGPURenderPipeline GraphicsPipeline = wgpuDeviceCreateRenderPipeline(m_pGraphicsAPI->GetLogicalDevice(), &pipelineDesc);
+
+			if (!GraphicsPipeline)
+			{
+				Console::Log("[Error] m_GraphicsPipeline is null\n");
+				return false;
+			}
+
+			m_GraphicsPipelineList.emplace(PassName, GraphicsPipeline);
 		}
 
 		return true;

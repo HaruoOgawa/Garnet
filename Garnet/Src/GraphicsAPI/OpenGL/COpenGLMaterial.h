@@ -42,16 +42,16 @@ namespace api
 	public:
 		static bool CompileShader(const std::vector<unsigned char>& shaderCode, graphics::EShaderStage ShaderStage, GLuint& shader, std::string& ErrorMsg);
 
-		COpenGLMaterial(api::COpenGLAPI* pGraphicsAPI, const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, int RefCount, graphics::ECullMode CullMode);
+		COpenGLMaterial(api::COpenGLAPI* pGraphicsAPI, const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, graphics::ECullMode CullMode);
 		virtual ~COpenGLMaterial();
 
 		virtual bool Create(const std::shared_ptr<graphics::CTextureSet>& TextureSet) override;
 
 		virtual bool ReCreate(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, const std::vector<std::shared_ptr<graphics::CShaderBuffer>>& ShaderBufferList, const std::vector<graphics::STextureBindingLayout>& TextureBindingLayoutList) override;
 
-		virtual bool BuildDrawBuffer(int DynamicOffsetNum) override;
+		virtual bool BuildDrawBuffer() override;
 
-		virtual void SetUniformValue(const std::string Name, const void* Data, int ByteSize, int DynamicOffsetNum = -1) override;
+		virtual void SetUniformValue(const std::string Name, const void* Data, int ByteSize) override;
 
 		void SetActive();
 

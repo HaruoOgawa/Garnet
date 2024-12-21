@@ -58,7 +58,7 @@ namespace app
 		m_DrawInfo->GetLightProjection()->SetNear(2.0f);
 		m_DrawInfo->GetLightProjection()->SetFar(100.0f);
 
-		m_SceneController->SetDefaultPass("MainResultPass", "");
+		m_SceneController->SetDefaultPass("MainResultPass");
 
 #ifdef USE_GUIENGINE
 		m_GraphicsEditingWindow->SetDefaultPass("MainResultPass", "");
@@ -228,7 +228,7 @@ namespace app
 		return true;
 	}
 
-	const std::shared_ptr<graphics::CDrawInfo>& CDevApp::GetDrawInfo() const
+	std::shared_ptr<graphics::CDrawInfo> CDevApp::GetDrawInfo() const
 	{
 		return m_DrawInfo;
 	}

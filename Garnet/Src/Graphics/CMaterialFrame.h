@@ -66,7 +66,7 @@ namespace graphics
 		void SetShaderBufferList(const std::vector<SShaderBufferSet>& ShaderBufferList);
 		void SetTextureBufferList(const std::vector<graphics::STextureBindingLayout>& TextureBufferList);
 
-		std::shared_ptr<CMaterial> CreateMaterial(api::IGraphicsAPI* pGraphicsAPI, int RefCount, graphics::ECullMode CullMode);
+		std::shared_ptr<CMaterial> CreateMaterial(api::IGraphicsAPI* pGraphicsAPI, graphics::ECullMode CullMode);
 		std::shared_ptr<CMaterial> CopyMaterial(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CMaterial>& SrcMaterial);
 		bool DeleteRefMaterial(const std::shared_ptr<graphics::CMaterial>& Material);
 

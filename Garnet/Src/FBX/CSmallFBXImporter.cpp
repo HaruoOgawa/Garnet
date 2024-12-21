@@ -36,7 +36,7 @@ namespace fbx
 	bool CSmallFBXImporter::ImportFBXAnimation(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& Data, std::vector<std::shared_ptr<animation::CAnimationClip>>& AnimationClipList, 
 		animation::ERigType RigType, const std::map<animation::EHumanoidBones, std::string>& HumanoidBoneList)
 	{
-		std::shared_ptr<object::C3DObject> Object = std::make_shared<object::C3DObject>("", "");
+		std::shared_ptr<object::C3DObject> Object = std::make_shared<object::C3DObject>();
 
 		if (!Import(pGraphicsAPI, Data, false, Object.get(), AnimationClipList, std::vector<std::shared_ptr<graphics::CMaterialFrame>>(), RigType, HumanoidBoneList)) return false;
 
@@ -415,7 +415,7 @@ namespace fbx
 
 			for (const auto& MaterialFrame : BaseMaterialFrameList)
 			{
-				std::shared_ptr<graphics::CMaterial> material = MaterialFrame->CreateMaterial(pGraphicsAPI, 1, graphics::ECullMode::CULL_BACK);
+				std::shared_ptr<graphics::CMaterial> material = MaterialFrame->CreateMaterial(pGraphicsAPI, graphics::ECullMode::CULL_BACK);
 
 				material->ReplacePreloadUniformValue("baseColorFactor", &glm::vec4(1.0f)[0], sizeof(glm::vec4), 0);
 
@@ -475,7 +475,7 @@ namespace fbx
 				for (const auto& MaterialFrame : BaseMaterialFrameList)
 				{
 					// マテリアルにシェーダーを設定
-					std::shared_ptr<graphics::CMaterial> material = MaterialFrame->CreateMaterial(pGraphicsAPI, 1, graphics::ECullMode::CULL_NONE);
+					std::shared_ptr<graphics::CMaterial> material = MaterialFrame->CreateMaterial(pGraphicsAPI, graphics::ECullMode::CULL_NONE);
 
 					// SkinMatrix StorageBuffer
 					{

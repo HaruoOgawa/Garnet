@@ -3,11 +3,9 @@
 
 namespace object
 {
-	C3DObject::C3DObject(const std::string& PassName, const std::string& DepthPassName):
+	C3DObject::C3DObject():
 		m_IsCreated(false),
 		m_FileName(std::string()),
-		m_PassName(PassName),
-		m_DepthPassName(DepthPassName),
 		m_ObjectName("3DObject"),
 		m_ObjectTransform(std::make_shared<math::CTransform>()),
 		m_Enabled(true),
@@ -87,24 +85,14 @@ namespace object
 		return m_ObjectName;
 	}
 
-	const std::string& C3DObject::GetPassName() const
+	const std::vector<std::string>& C3DObject::GetPassNameList() const
 	{
-		return m_PassName;
+		return m_PassNameList;
 	}
 
-	void C3DObject::SetPassName(const std::string& Name)
+	void C3DObject::AddPassName(const std::string& Name)
 	{
-		m_PassName = Name;
-	}
-	
-	const std::string& C3DObject::GetDepthPassName() const
-	{
-		return m_DepthPassName;
-	}
-
-	void C3DObject::SetDepthPassName(const std::string& Name)
-	{
-		m_DepthPassName = Name;
+		m_PassNameList.push_back(Name);
 	}
 
 	bool C3DObject::HasTLTrackContent() const
@@ -193,7 +181,7 @@ namespace object
 
 		for (const auto& Mesh : m_MeshList)
 		{
-			if (!Mesh->Create(m_TextureSet, m_PassName, m_DepthPassName)) return false;
+			if (!Mesh->Create(m_TextureSet, m_PassNameList)) return false;
 
 			// モーフ処理が必要かどうか
 			if (Mesh->GetMorphDataList().size() > 0)
@@ -443,8 +431,8 @@ namespace object
 		if (!m_Enabled) return true;
 
 		// 描画パスが違うなら描画しない
-		// ToDo: PassNameは配列にしてもいいかもしれない
-		if (m_PassName != pGraphicsAPI->GetCurrentRenderPassName()) return true;
+		auto it = std::find(m_PassNameList.begin(), m_PassNameList.end(), pGraphicsAPI->GetCurrentRenderPassName());
+		if (it == m_PassNameList.end()) return true;
 
 		// 描画
 		if (!m_RootNodeIndexList.empty())
@@ -532,29 +520,27 @@ namespace object
 				// 共通のユニフォームバッファの更新
 				glm::mat4 lightVPMat = DrawInfo->GetLightProjection()->GetPrejectionMatrix() * DrawInfo->GetLightCamera()->GetViewMatrix();
 
-				Material->SetUniformValue("drawPathIndex", &DynamicOffset, sizeof(int), DynamicOffset);
-				Material->SetUniformValue("model", &WorldMatrix[0][0], sizeof(glm::mat4), DynamicOffset);
-				Material->SetUniformValue("invModel", &InvWorldMatrix[0][0], sizeof(glm::mat4), DynamicOffset);
-				Material->SetUniformValue("view", &Camera->GetViewMatrix()[0][0], sizeof(glm::mat4), DynamicOffset);
-				Material->SetUniformValue("proj", &Projection->GetPrejectionMatrix()[0][0], sizeof(glm::mat4), DynamicOffset);
-				Material->SetUniformValue("lightVPMat", &lightVPMat[0][0], sizeof(glm::mat4), DynamicOffset);
+				Material->SetUniformValue("invModel", &InvWorldMatrix[0][0], sizeof(glm::mat4));
+				Material->SetUniformValue("view", &Camera->GetViewMatrix()[0][0], sizeof(glm::mat4));
+				Material->SetUniformValue("proj", &Projection->GetPrejectionMatrix()[0][0], sizeof(glm::mat4));
+				Material->SetUniformValue("lightVPMat", &lightVPMat[0][0], sizeof(glm::mat4));
 				glm::vec3 lightDir = DrawInfo->GetLightCamera()->GetViewDir();
-				Material->SetUniformValue("lightDir", &glm::vec4(lightDir.x, lightDir.y, lightDir.z, 0.0f)[0], sizeof(glm::vec4), DynamicOffset);
+				Material->SetUniformValue("lightDir", &glm::vec4(lightDir.x, lightDir.y, lightDir.z, 0.0f)[0], sizeof(glm::vec4));
 				glm::vec3 lightPos = DrawInfo->GetLightCamera()->GetPos();
-				Material->SetUniformValue("lightPos", &glm::vec4(lightPos.x, lightPos.y, lightPos.z, 0.0f)[0], sizeof(glm::vec4), DynamicOffset);
-				Material->SetUniformValue("lightColor", &DrawInfo->GetLightColor()[0], sizeof(glm::vec4), DynamicOffset);
+				Material->SetUniformValue("lightPos", &glm::vec4(lightPos.x, lightPos.y, lightPos.z, 0.0f)[0], sizeof(glm::vec4));
+				Material->SetUniformValue("lightColor", &DrawInfo->GetLightColor()[0], sizeof(glm::vec4));
 				glm::vec3 CameraPos = Camera->GetPos();
-				Material->SetUniformValue("cameraPos", &glm::vec4(CameraPos.x, CameraPos.y, CameraPos.z, 1.0f)[0], sizeof(glm::vec4), DynamicOffset);
-				Material->SetUniformValue("time", &glm::vec1(DrawInfo->GetSecondsTime())[0], sizeof(float), DynamicOffset);
-				Material->SetUniformValue("deltaTime", &glm::vec1(DrawInfo->GetDeltaSecondsTime())[0], sizeof(float), DynamicOffset);
-				Material->SetUniformValue("resolution", &Projection->GetScreenResolution()[0], sizeof(glm::vec2), DynamicOffset);
+				Material->SetUniformValue("cameraPos", &glm::vec4(CameraPos.x, CameraPos.y, CameraPos.z, 1.0f)[0], sizeof(glm::vec4));
+				Material->SetUniformValue("time", &glm::vec1(DrawInfo->GetSecondsTime())[0], sizeof(float));
+				Material->SetUniformValue("deltaTime", &glm::vec1(DrawInfo->GetDeltaSecondsTime())[0], sizeof(float));
+				Material->SetUniformValue("resolution", &Projection->GetScreenResolution()[0], sizeof(glm::vec2));
 #ifdef USE_ANIMATION
-				Material->SetUniformValue("useSkinMeshAnimation", &glm::ivec1((m_AnimationController->IsEnabledSkeleton() ? 1 : 0))[0], sizeof(glm::ivec1), DynamicOffset);
+				Material->SetUniformValue("useSkinMeshAnimation", &glm::ivec1((m_AnimationController->IsEnabledSkeleton() ? 1 : 0))[0], sizeof(glm::ivec1));
 
 				// SkinMatrixをShaderに渡す
 				if (m_CurrentSkinMatrixList.size() > 0)
 				{
-					Material->SetUniformValue("r_SkinMatrixBuffer", &m_CurrentSkinMatrixList[0], sizeof(glm::mat4) * static_cast<int>(m_CurrentSkinMatrixList.size()), DynamicOffset);
+					Material->SetUniformValue("r_SkinMatrixBuffer", &m_CurrentSkinMatrixList[0], sizeof(glm::mat4) * static_cast<int>(m_CurrentSkinMatrixList.size()));
 				}
 #endif
 			}

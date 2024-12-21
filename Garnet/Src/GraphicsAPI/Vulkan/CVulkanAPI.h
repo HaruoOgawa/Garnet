@@ -181,7 +181,7 @@ namespace api
 		virtual std::shared_ptr<graphics::CVertexBuffer> CreateVertexBuffer() override;
 		virtual std::shared_ptr<graphics::CIndexBuffer> CreateIndexBuffer() override;
 		virtual std::shared_ptr<graphics::IRenderer> CreateRenderer() override;
-		virtual std::shared_ptr<graphics::CMaterial> CreateMaterial(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, int RefCount, graphics::ECullMode CullMode) override;
+		virtual std::shared_ptr<graphics::CMaterial> CreateMaterial(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, graphics::ECullMode CullMode) override;
 		virtual std::shared_ptr<graphics::CTexture> CreateTexture(bool UseMipMap = false) override;
 #ifdef USE_GPGPU
 		virtual std::shared_ptr<api::IGPGPUHandler> CreateGPGPUHandler(const std::shared_ptr<graphics::CMaterial>& ComputeMaterial) override;

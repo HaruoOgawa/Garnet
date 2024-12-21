@@ -9,8 +9,8 @@
 
 namespace api
 {
-	CWebGPUMaterial::CWebGPUMaterial(api::CWebGPUAPI* pGraphicsAPI, const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, int RefCount, graphics::ECullMode CullMode):
-		CMaterial(pGraphicsAPI, createInfo, RefCount, CullMode),
+	CWebGPUMaterial::CWebGPUMaterial(api::CWebGPUAPI* pGraphicsAPI, const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, graphics::ECullMode CullMode):
+		CMaterial(pGraphicsAPI, createInfo, CullMode),
 		m_pGraphicsAPI(pGraphicsAPI),
 		m_VertexShaderModele(nullptr),
 		m_FragmentShaderModele(nullptr),
@@ -41,12 +41,12 @@ namespace api
 		return true;
 	}
 
-	bool CWebGPUMaterial::BuildDrawBuffer(int DynamicOffsetNum)
+	bool CWebGPUMaterial::BuildDrawBuffer()
 	{
 		return true;
 	}
 
-	void CWebGPUMaterial::SetUniformValue(const std::string Name, const void* Data, int ByteSize, int DynamicOffsetNum)
+	void CWebGPUMaterial::SetUniformValue(const std::string Name, const void* Data, int ByteSize)
 	{
 		for (int i = 0; i < m_ShaderBufferList.size(); i++)
 		{
@@ -68,17 +68,18 @@ namespace api
 				// API側のBufferを更新
 				if (IsUseDynamicOffset())
 				{
-					if (DynamicOffsetNum == -1)
+					// DynamicOffset全部分更新する
+					//if (DynamicOffsetNum == -1)
 					{
-						for (int r = 0; r < m_RefCount; r++)
+						for (int r = 0; r < static_cast<int>(m_PassNameDynamicOffsetMap.size()); r++)
 						{
 							wgpuQueueWriteBuffer(m_pGraphicsAPI->GetQueue(), m_WGPUUniformBufferList[i], ByteOffset + UniformBufferByteSize * r, Data, ByteSize);
 						}
 					}
-					else
+					/*else
 					{
 						wgpuQueueWriteBuffer(m_pGraphicsAPI->GetQueue(), m_WGPUUniformBufferList[i], ByteOffset + UniformBufferByteSize * (DynamicOffsetNum - 1), Data, ByteSize);
-					}
+					}*/
 				}
 				else
 				{
@@ -474,19 +475,21 @@ namespace api
 	{
 		// たぶんWebGPU, Vulkanでもvec3は16バイトオフセットと換算されるっぽいからvec3分(12バイト分)のパディングを入れたい場合はvec3ではなくfloatの変数を3つ定義するべき
 
+		const int RefCount = static_cast<int>(m_PassNameDynamicOffsetMap.size());
+
 		WGPUBufferDescriptor bufferDesc{};
 		bufferDesc.nextInChain = nullptr; // 拡張機
 		bufferDesc.label = "Buffer";
 		bufferDesc.usage = Usage; // バッファの用途
 		bufferDesc.mappedAtCreation = false; // ???
-		bufferDesc.size = ByteSize * m_RefCount;
+		bufferDesc.size = ByteSize * RefCount;
 
 		Buffer = wgpuDeviceCreateBuffer(m_pGraphicsAPI->GetLogicalDevice(), &bufferDesc);
 
 		// バッファにデータを書き込む
 		if (IsUseDynamicOffset())
 		{
-			for (int i = 0; i < m_RefCount; i++)
+			for (int i = 0; i < RefCount; i++)
 			{
 				wgpuQueueWriteBuffer(m_pGraphicsAPI->GetQueue(), Buffer, ByteSize * i, Data, ByteSize);
 			}

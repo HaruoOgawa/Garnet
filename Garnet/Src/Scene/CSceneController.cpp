@@ -13,8 +13,7 @@ namespace scene
 		m_BGM(std::make_tuple(nullptr, false, false)),
 		m_IsLoaded(false),
 		m_TimelineFileName(std::string()),
-		m_DefaultRenderPass(std::string()),
-		m_DefaultDepthPass(std::string())
+		m_DefaultRenderPass(std::string())
 	{
 
 	}
@@ -31,10 +30,9 @@ namespace scene
 		}
 	}
 
-	void CSceneController::SetDefaultPass(const std::string& RenderPass, const std::string& DepthPass)
+	void CSceneController::SetDefaultPass(const std::string& RenderPass)
 	{
 		m_DefaultRenderPass = RenderPass;
-		m_DefaultDepthPass = DepthPass;
 	}
 
 	void CSceneController::SetFileName(const std::string& Name)
@@ -60,14 +58,9 @@ namespace scene
 	void CSceneController::AddObject(const std::shared_ptr<object::C3DObject>& Object)
 	{
 		// レンダーパス名が空ならデフォルトの値を設定する
-		if (Object->GetPassName().empty())
+		if (Object->GetPassNameList().empty())
 		{
-			Object->SetPassName(m_DefaultRenderPass);
-		}
-
-		if (Object->GetDepthPassName().empty())
-		{
-			Object->SetDepthPassName(m_DefaultDepthPass);
+			Object->AddPassName(m_DefaultRenderPass);
 		}
 
 		// SceneTextureSet
@@ -349,11 +342,12 @@ namespace scene
 			auto MaterialFrame = m_MaterialFrameMap.find("pbr_mat");
 			if (MaterialFrame != m_MaterialFrameMap.end())
 			{
-				auto Material = MaterialFrame->second->CreateMaterial(pGraphicsAPI, pGraphicsAPI->GetMaxBoneCount(), graphics::ECullMode::CULL_BACK);
+				auto Material = MaterialFrame->second->CreateMaterial(pGraphicsAPI, graphics::ECullMode::CULL_BACK);
 
 				Material->SetDepthFunc(graphics::EDepthFunc::Always);
 
-				m_DebugSphere = std::make_shared<object::C3DObject>(m_DefaultRenderPass, m_DefaultDepthPass);
+				m_DebugSphere = std::make_shared<object::C3DObject>();
+				m_DebugSphere->AddPassName(m_DefaultRenderPass);
 				if (!m_DebugSphere->CreatePresetSimply(pGraphicsAPI, nullptr, graphics::CPresetPrimitive::CreateSphere(pGraphicsAPI), graphics::EPresetPrimitiveType::SPHERE, Material, nullptr)) return false;
 			}
 		}
@@ -576,7 +570,7 @@ namespace scene
 			}
 
 			// Materialを生成
-			auto Material = MaterialFrame->second->CreateMaterial(pGraphicsAPI, 1, MaterialInfo.CullMode);
+			auto Material = MaterialFrame->second->CreateMaterial(pGraphicsAPI, MaterialInfo.CullMode);
 
 			// UniformValueを設定
 			for (const auto& UniformInfo : MaterialInfo.UniformInfoList)

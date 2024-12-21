@@ -27,7 +27,7 @@ namespace graphics
 		CMesh();
 		virtual ~CMesh();
 
-		bool Create(const std::shared_ptr<graphics::CTextureSet>& TextureSet, std::string PassName, std::string DepthPassName);
+		bool Create(const std::shared_ptr<graphics::CTextureSet>& TextureSet, const std::vector<std::string>& PassNameList);
 
 		bool CreateBuffer();
 
