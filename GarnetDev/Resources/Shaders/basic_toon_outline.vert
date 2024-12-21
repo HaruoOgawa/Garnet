@@ -79,7 +79,23 @@ void main(){
     vec2 SphereUV = VNormal.xy * 0.5 + 0.5;
 
     // Pos
-    gl_Position = ubo.proj * ubo.view * WorldPos;
+    bool ViewSpaceOutline = false;
+
+    if(ViewSpaceOutline)
+    {
+        vec4 CameraPos = ubo.view * WorldPos;
+        vec3 CameraNormal = (ubo.view * vec4(WorldNormal, 0.0)).xyz;
+
+        CameraPos.xy += normalize(CameraNormal).xy * ubo.edgeSize * 0.001;
+
+        gl_Position = ubo.proj * CameraPos;
+    }
+    else
+    {
+        WorldPos.xyz += normalize(WorldNormal) * ubo.edgeSize * 0.001;
+
+        gl_Position = ubo.proj * ubo.view * WorldPos;
+    }
 
     //
     f_WorldNormal = WorldNormal;

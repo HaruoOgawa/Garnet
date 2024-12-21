@@ -241,13 +241,27 @@ namespace mmd
 			// アウトラインにも使用するので2つ参照する
 			int MatRefCount = 2;
 
-			graphics::ECullMode CullMode = (PmxMaterial->IsDrawDoubleSlided()) ? graphics::ECullMode::CULL_NONE : graphics::ECullMode::CULL_BACK;
+			const graphics::ECullMode CommonCullMode = (PmxMaterial->IsDrawDoubleSlided()) ? graphics::ECullMode::CULL_NONE : graphics::ECullMode::CULL_BACK;
 
 			// プリミティブ単位で割り当てられるマテリアルリスト
 			std::vector<std::shared_ptr<graphics::CMaterial>> PrimitiveMaterials;
 
 			for (const auto& MaterialFrame : BaseMaterialFrameList)
 			{
+				graphics::ECullMode CullMode = CommonCullMode;
+
+				// MFにカリングモードが設定されているのならそれに従う
+				if (MaterialFrame->GetCullMode() != graphics::ECullMode::NOT_SET)
+				{
+					CullMode = MaterialFrame->GetCullMode();
+				}
+
+				// 裏面描画のMFでかつアウトラインがオフならマテリアル作成をスキップする
+				if (CullMode == graphics::ECullMode::CULL_FRONT && !PmxMaterial->IsDrawEdge())
+				{
+					continue;
+				}
+
 				// マテリアルにシェーダーを設定
 				std::shared_ptr<graphics::CMaterial> material = MaterialFrame->CreateMaterial(pGraphicsAPI, MatRefCount, CullMode);
 

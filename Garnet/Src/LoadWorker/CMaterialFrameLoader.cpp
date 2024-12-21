@@ -9,6 +9,7 @@ namespace resource
 		m_AnalyseDone(false),
 		m_CreateInfo(std::make_shared<graphics::CMaterialCreateInfo>()),
 		m_MaterialFrameName(std::string()),
+		m_CullMode(graphics::ECullMode::NOT_SET),
 		m_OutputColorCount(1)
 	{
 		m_TargetMaterialFrameSet.emplace(TargetMaterialFrame);
@@ -141,6 +142,30 @@ namespace resource
 		if (MaterialName != m_MfJson.end() && MaterialName->is_string())
 		{
 			m_MaterialFrameName = MaterialName.value();
+		}
+
+		// Cull Mode
+		const auto cull = m_MfJson.find("cull");
+		if (cull != m_MfJson.end() && cull->is_string())
+		{
+			std::string cull_str = cull.value();
+
+			if (cull_str == "none")
+			{
+				m_CullMode = graphics::ECullMode::CULL_NONE;
+			}
+			else if (cull_str == "back")
+			{
+				m_CullMode = graphics::ECullMode::CULL_BACK;
+			}
+			else if (cull_str == "front")
+			{
+				m_CullMode = graphics::ECullMode::CULL_FRONT;
+			}
+			else
+			{
+				m_CullMode = graphics::ECullMode::NOT_SET;
+			}
 		}
 
 		// outcolorcount
@@ -655,6 +680,7 @@ namespace resource
 			if (MaterialFrame)
 			{
 				MaterialFrame->SetMaterialFrameName(m_MaterialFrameName);
+				MaterialFrame->SetCullMode(m_CullMode);
 				MaterialFrame->SetCreateInfo(m_CreateInfo);
 				MaterialFrame->SetShaderBufferList(m_ShaderBufferList);
 				MaterialFrame->SetTextureBufferList(m_TextureBufferList);

@@ -25,6 +25,16 @@ namespace graphics
 		return m_MaterialFrameName;
 	}
 
+	void CMaterialFrame::SetCullMode(graphics::ECullMode CullMode)
+	{
+		m_CullMode = CullMode;
+	}
+
+	graphics::ECullMode CMaterialFrame::GetCullMode() const
+	{
+		return m_CullMode;
+	}
+
 	void CMaterialFrame::SetFileName(const std::string& Name)
 	{
 		m_FileName = Name;

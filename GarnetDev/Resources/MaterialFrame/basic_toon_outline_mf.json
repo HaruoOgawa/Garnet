@@ -1,9 +1,10 @@
 {
   "name": "basic_toon_outline_mat",
+  "cull": "front",
   "shaderList": [
     {
-      "name": "basic_toon_vert",
-      "shaderFile": "Resources\\Shaders\\basic_toon",
+      "name": "basic_toon_outline_vert",
+      "shaderFile": "Resources\\Shaders\\basic_toon_outline",
       "autoShaderExtension": true,
       "shadercode": "",
       "shaderType": "vertex",
