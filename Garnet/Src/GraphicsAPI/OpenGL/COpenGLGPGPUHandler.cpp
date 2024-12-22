@@ -18,7 +18,7 @@ namespace api
 	{
 		if (!m_ComputeMaterial) return false;
 
-		if (!m_ComputeMaterial->Create(nullptr)) return false;
+		if (!m_ComputeMaterial->Create(std::vector<std::string>(), nullptr)) return false;
 
 		return true;
 	}
@@ -34,7 +34,7 @@ namespace api
 		pSharedOpenGLMat->SetUniformValue("time", &glm::vec1(DrawInfo->GetSecondsTime())[0], sizeof(glm::vec1));
 		pSharedOpenGLMat->SetUniformValue("deltaTime", &glm::vec1(DrawInfo->GetDeltaSecondsTime())[0], sizeof(glm::vec1));
 
-		if (!pSharedOpenGLMat->BuildDrawBuffer(0)) return false;
+		if (!pSharedOpenGLMat->BuildDrawBuffer()) return false;
 
 		glDispatchCompute(GroupCount.x, GroupCount.y, GroupCount.z);
 

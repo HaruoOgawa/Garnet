@@ -84,7 +84,7 @@ namespace api
 
 	std::shared_ptr<graphics::CMaterial> COpenGLAPI::CreateMaterial(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, graphics::ECullMode CullMode)
 	{
-		auto Material = std::make_shared<api::COpenGLMaterial>(this, createInfo, RefCount, CullMode);
+		auto Material = std::make_shared<api::COpenGLMaterial>(this, createInfo, CullMode);
 
 		return Material;
 	}
