@@ -8,12 +8,9 @@
 
 namespace api
 {
-	CVulkanRenderer::CVulkanRenderer(api::CVulkanAPI* pGraphicsAPI, const std::string& PassName):
+	CVulkanRenderer::CVulkanRenderer(api::CVulkanAPI* pGraphicsAPI):
 		m_pGraphicsAPI(pGraphicsAPI),
-		m_PassName(PassName),
-		m_DynamicOffsetNum(0),
-		m_InstanceCount(1),
-		m_GraphicsPipeline(nullptr)
+		m_InstanceCount(1)
 	{
 	}
 
@@ -25,27 +22,36 @@ namespace api
 	void CVulkanRenderer::Release()
 	{
 		// グラフィックパイプラインの破棄
-		if (m_GraphicsPipeline)
+		for (auto& Pipeline : m_GraphicsPipelineList)
 		{
-			vkDestroyPipeline(m_pGraphicsAPI->GetLogicalDevice(), m_GraphicsPipeline, nullptr);
-			m_GraphicsPipeline = nullptr;
+			if (Pipeline.second)
+			{
+				vkDestroyPipeline(m_pGraphicsAPI->GetLogicalDevice(), Pipeline.second, nullptr);
+			}
 		}
+
+		m_GraphicsPipelineList.clear();
 	}
 
-	bool CVulkanRenderer::Create(const std::shared_ptr<graphics::CVertexBuffer>& VertexBuffer, const std::shared_ptr<graphics::CIndexBuffer>& IndexBuffer, const std::shared_ptr<graphics::CMaterial>& Material)
+	bool CVulkanRenderer::Create(const std::vector<std::string>& PassNameList, const std::shared_ptr<graphics::CVertexBuffer>& VertexBuffer, 
+		const std::shared_ptr<graphics::CIndexBuffer>& IndexBuffer, const std::shared_ptr<graphics::CMaterial>& Material)
 	{
 		const CVulkanVertexBuffer* pVulkanVertexBuffer = static_cast<const CVulkanVertexBuffer*>(VertexBuffer.get());
 		api::CVulkanMaterial* pVulkanMat = static_cast<api::CVulkanMaterial*>(Material.get());
 
 		m_InstanceCount = VertexBuffer->GetInstanceCount();
 
-		if (!CreateGraphicsPipeline(pVulkanVertexBuffer, pVulkanMat)) return false; // グラフィックパイプラインを作成
+		if (!CreateGraphicsPipeline(PassNameList, pVulkanVertexBuffer, pVulkanMat)) return false; // グラフィックパイプラインを作成
 
 		return true;
 	}
 
-	bool CVulkanRenderer::Draw(const std::shared_ptr<graphics::CVertexBuffer>& VertexBuffer, const std::shared_ptr<graphics::CIndexBuffer>& IndexBuffer, const std::shared_ptr<graphics::CMaterial>& Material, int DynamicOffsetNum)
+	bool CVulkanRenderer::Draw(const std::shared_ptr<graphics::CVertexBuffer>& VertexBuffer, const std::shared_ptr<graphics::CIndexBuffer>& IndexBuffer, 
+		const std::shared_ptr<graphics::CMaterial>& Material)
 	{
+		const auto& GraphicsPipeline = m_GraphicsPipelineList.find(m_pGraphicsAPI->GetCurrentRenderPassName());
+		if (GraphicsPipeline == m_GraphicsPipelineList.end()) return false;
+
 		const CVulkanVertexBuffer* pVulkanVertexBuffer = static_cast<const CVulkanVertexBuffer*>(VertexBuffer.get());
 		const CVulkanIndexBuffer* pVulkanIndexBuffer = static_cast<const CVulkanIndexBuffer*>(IndexBuffer.get());
 		api::CVulkanMaterial* pVulkanMat = static_cast<api::CVulkanMaterial*>(Material.get());
@@ -53,7 +59,7 @@ namespace api
 		if (!pVulkanMat->IsAvailable()) return true;
 
 		// ユニフォームバッファの準備
-		if (!pVulkanMat->BuildDrawBuffer(DynamicOffsetNum)) return false;
+		if (!pVulkanMat->BuildDrawBuffer()) return false;
 
 		if (m_pGraphicsAPI->IsEnabledRuntimeShaderEditing())
 		{
@@ -63,7 +69,7 @@ namespace api
 		else
 		{
 			// グラフィックパイプラインをコマンドにバインド
-			vkCmdBindPipeline(m_pGraphicsAPI->GetCurrentCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, m_GraphicsPipeline);
+			vkCmdBindPipeline(m_pGraphicsAPI->GetCurrentCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, GraphicsPipeline->second);
 
 			// カリングモードを設定
 			SetCullMode(pVulkanMat->GetCullMode());
@@ -76,7 +82,7 @@ namespace api
 		pVulkanIndexBuffer->Bind();
 
 		// UBOのセット
-		pVulkanMat->BindUBO(DynamicOffsetNum);
+		pVulkanMat->BindUBO();
 
 		// 描画コマンドを発行
 		vkCmdDrawIndexed(m_pGraphicsAPI->GetCurrentCommandBuffer(), pVulkanIndexBuffer->GetIndicesCount(), m_InstanceCount, 0, 0, 0);
@@ -115,7 +121,7 @@ namespace api
 	}
 
 	// Vulkanメインロジック /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	bool CVulkanRenderer::CreateGraphicsPipeline(const CVulkanVertexBuffer* pVulkanVertexBuffer, api::CVulkanMaterial* pVulkanMat)
+	bool CVulkanRenderer::CreateGraphicsPipeline(const std::vector<std::string>& PassNameList, const CVulkanVertexBuffer* pVulkanVertexBuffer, api::CVulkanMaterial* pVulkanMat)
 	{
 		// Shader編集が有効な時はグラフィックパイプラインは生成しない
 		if (m_pGraphicsAPI->IsEnabledRuntimeShaderEditing())
@@ -123,277 +129,286 @@ namespace api
 			return true;
 		}
 
-		// グラフィックパイプラインの固定機の設定 ///////////////////////////////////////////////////////////////////////////////////////
+		for (int PassIndex = 0; PassIndex < static_cast<int>(PassNameList.size()); PassIndex++)
+		{
+			const auto& PassName = PassNameList[PassIndex];
+
+			// グラフィックパイプラインの固定機の設定 ///////////////////////////////////////////////////////////////////////////////////////
 		// 動的状態(ダイナミックステート)の設定(パイプラインにベイクせずにマイフレームの描画時に設定できるようにするパラメーターの設定)
-		std::vector<VkDynamicState> dynamicStates = {
-			VK_DYNAMIC_STATE_VIEWPORT,
-			VK_DYNAMIC_STATE_SCISSOR,
-			VK_DYNAMIC_STATE_CULL_MODE
-		};
+			std::vector<VkDynamicState> dynamicStates = {
+				VK_DYNAMIC_STATE_VIEWPORT,
+				VK_DYNAMIC_STATE_SCISSOR,
+				VK_DYNAMIC_STATE_CULL_MODE
+			};
 
-		VkPipelineDynamicStateCreateInfo dynamicStateCreateInfo{};
-		dynamicStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
-		dynamicStateCreateInfo.dynamicStateCount = static_cast<uint32_t>(dynamicStates.size());
-		dynamicStateCreateInfo.pDynamicStates = dynamicStates.data();
+			VkPipelineDynamicStateCreateInfo dynamicStateCreateInfo{};
+			dynamicStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
+			dynamicStateCreateInfo.dynamicStateCount = static_cast<uint32_t>(dynamicStates.size());
+			dynamicStateCreateInfo.pDynamicStates = dynamicStates.data();
 
-		// 頂点バッファ入力(Vertex Shaderに渡すデータ形式について設定する)
-		int Size = static_cast<int>(pVulkanVertexBuffer->GetVertexBufferList().size());
-		std::vector<VkVertexInputBindingDescription> bindingDescriptions(Size);
-		std::vector<VkVertexInputAttributeDescription> attributeDescriptions(Size);
+			// 頂点バッファ入力(Vertex Shaderに渡すデータ形式について設定する)
+			int Size = static_cast<int>(pVulkanVertexBuffer->GetVertexBufferList().size());
+			std::vector<VkVertexInputBindingDescription> bindingDescriptions(Size);
+			std::vector<VkVertexInputAttributeDescription> attributeDescriptions(Size);
 
-		for (int i = 0; i < Size; i++)
-		{
-			//
-			int Dimension = pVulkanVertexBuffer->GetAttributeDimensions()[i];
-			int ByteStride = pVulkanVertexBuffer->GetAttribByteStrides()[i];
+			for (int i = 0; i < Size; i++)
+			{
+				//
+				int Dimension = pVulkanVertexBuffer->GetAttributeDimensions()[i];
+				int ByteStride = pVulkanVertexBuffer->GetAttribByteStrides()[i];
 
-			// 頂点バッファのバインドに関する説明,設定(頂点バッファレイアウト)
-			bindingDescriptions[i].binding = i; // バインドする頂点バッファのインデックス(?)違う形式で頂点バッファを用意するときに使用する？
-			bindingDescriptions[i].stride = (ByteStride != 0)? ByteStride : (Dimension * sizeof(pVulkanVertexBuffer->GetVertices()[i][0])); // 頂点バッファ内の要素一つあたりのサイズ。次の要素までのバイト数
-			bindingDescriptions[i].inputRate = VK_VERTEX_INPUT_RATE_VERTEX; // よくわからぬ。各頂点の後、次のデータ エントリに移動します。らしい
+				// 頂点バッファのバインドに関する説明,設定(頂点バッファレイアウト)
+				bindingDescriptions[i].binding = i; // バインドする頂点バッファのインデックス(?)違う形式で頂点バッファを用意するときに使用する？
+				bindingDescriptions[i].stride = (ByteStride != 0) ? ByteStride : (Dimension * sizeof(pVulkanVertexBuffer->GetVertices()[i][0])); // 頂点バッファ内の要素一つあたりのサイズ。次の要素までのバイト数
+				bindingDescriptions[i].inputRate = VK_VERTEX_INPUT_RATE_VERTEX; // よくわからぬ。各頂点の後、次のデータ エントリに移動します。らしい
 
-			// アトリビュート(頂点データ)の設定
-			attributeDescriptions[i].binding = i; // BindingDescriptionの内どのバインド設定を使用するかのインデックス
-			attributeDescriptions[i].location = i; // Shaderのlayout(location = 0)に設定すｒ数値
-			attributeDescriptions[i].format = GetVertexFormat(Dimension, pVulkanVertexBuffer->GetAttribDataTypes()[i]); // データ型. SFLOAT --> Signed Float
-			attributeDescriptions[i].offset = 0; // データオフセット
-		}
+				// アトリビュート(頂点データ)の設定
+				attributeDescriptions[i].binding = i; // BindingDescriptionの内どのバインド設定を使用するかのインデックス
+				attributeDescriptions[i].location = i; // Shaderのlayout(location = 0)に設定すｒ数値
+				attributeDescriptions[i].format = GetVertexFormat(Dimension, pVulkanVertexBuffer->GetAttribDataTypes()[i]); // データ型. SFLOAT --> Signed Float
+				attributeDescriptions[i].offset = 0; // データオフセット
+			}
 
-		VkPipelineVertexInputStateCreateInfo vertexInputInto{};
-		vertexInputInto.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-		vertexInputInto.vertexBindingDescriptionCount = static_cast<uint32_t>(bindingDescriptions.size()); // 頂点バッファのバインドに関するの設定
-		vertexInputInto.pVertexBindingDescriptions = &bindingDescriptions[0];
-		vertexInputInto.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size());  // 頂点データ(アトリビュート)の設定
-		vertexInputInto.pVertexAttributeDescriptions = &attributeDescriptions[0];
+			VkPipelineVertexInputStateCreateInfo vertexInputInto{};
+			vertexInputInto.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+			vertexInputInto.vertexBindingDescriptionCount = static_cast<uint32_t>(bindingDescriptions.size()); // 頂点バッファのバインドに関するの設定
+			vertexInputInto.pVertexBindingDescriptions = &bindingDescriptions[0];
+			vertexInputInto.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size());  // 頂点データ(アトリビュート)の設定
+			vertexInputInto.pVertexAttributeDescriptions = &attributeDescriptions[0];
 
-		// 入力アセンブリ(頂点から描画されるジオメトリの種類など, GL_TRIANGLE_STRIPみたいなのを設定する場所)
-		VkPipelineInputAssemblyStateCreateInfo inputAssemblyInfo{};
-		inputAssemblyInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
-		inputAssemblyInfo.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
-		inputAssemblyInfo.primitiveRestartEnable = VK_FALSE; // Trueにすると自分で定義したインデックスバッファが使用できる？
+			// 入力アセンブリ(頂点から描画されるジオメトリの種類など, GL_TRIANGLE_STRIPみたいなのを設定する場所)
+			VkPipelineInputAssemblyStateCreateInfo inputAssemblyInfo{};
+			inputAssemblyInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
+			inputAssemblyInfo.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+			inputAssemblyInfo.primitiveRestartEnable = VK_FALSE; // Trueにすると自分で定義したインデックスバッファが使用できる？
 
-		// ビューポートの設定
-		// 上記のダイナミックステートのことで動的変更を可にする
-		VkViewport viewport{};
-		viewport.x = 0.0f; // 基準の座標
-		viewport.y = 0.0f;
-		viewport.width = (float)m_pGraphicsAPI->GetSwapChainExtent().width;
-		viewport.height = (float)m_pGraphicsAPI->GetSwapChainExtent().height;
-		viewport.minDepth = 0.0f;
-		viewport.maxDepth = 1.0f;
+			// ビューポートの設定
+			// 上記のダイナミックステートのことで動的変更を可にする
+			VkViewport viewport{};
+			viewport.x = 0.0f; // 基準の座標
+			viewport.y = 0.0f;
+			viewport.width = (float)m_pGraphicsAPI->GetSwapChainExtent().width;
+			viewport.height = (float)m_pGraphicsAPI->GetSwapChainExtent().height;
+			viewport.minDepth = 0.0f;
+			viewport.maxDepth = 1.0f;
 
-		// シザーの設定(シザーとはピクセルが実際に格納される領域を定義する. シザーよりも外側の領域はラスタライザにより破棄される)
-		// 上記のダイナミックステートのことで動的変更を可にする
-		VkRect2D scissor{};
-		scissor.offset = { 0, 0 };
-		scissor.extent = m_pGraphicsAPI->GetSwapChainExtent(); // 解像度
+			// シザーの設定(シザーとはピクセルが実際に格納される領域を定義する. シザーよりも外側の領域はラスタライザにより破棄される)
+			// 上記のダイナミックステートのことで動的変更を可にする
+			VkRect2D scissor{};
+			scissor.offset = { 0, 0 };
+			scissor.extent = m_pGraphicsAPI->GetSwapChainExtent(); // 解像度
 
-		// ビューポートとシザーの作成
-		VkPipelineViewportStateCreateInfo viewportStateInfo{};
-		viewportStateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
-		viewportStateInfo.viewportCount = 1;
-		viewportStateInfo.pViewports = &viewport;
-		viewportStateInfo.scissorCount = 1;
-		viewportStateInfo.pScissors = &scissor;
+			// ビューポートとシザーの作成
+			VkPipelineViewportStateCreateInfo viewportStateInfo{};
+			viewportStateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
+			viewportStateInfo.viewportCount = 1;
+			viewportStateInfo.pViewports = &viewport;
+			viewportStateInfo.scissorCount = 1;
+			viewportStateInfo.pScissors = &scissor;
 
-		// ラスタライザの設定
-		VkPipelineRasterizationStateCreateInfo rasterizer{};
-		rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
-		rasterizer.depthClampEnable = VK_FALSE;
-		rasterizer.rasterizerDiscardEnable = VK_FALSE;
-		rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
-		rasterizer.lineWidth = 1.0f;
-		
-		switch (pVulkanMat->GetCullMode())
-		{
-			case graphics::ECullMode::CULL_BACK :
+			// ラスタライザの設定
+			VkPipelineRasterizationStateCreateInfo rasterizer{};
+			rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
+			rasterizer.depthClampEnable = VK_FALSE;
+			rasterizer.rasterizerDiscardEnable = VK_FALSE;
+			rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
+			rasterizer.lineWidth = 1.0f;
+
+			switch (pVulkanMat->GetCullMode())
+			{
+			case graphics::ECullMode::CULL_BACK:
 				rasterizer.cullMode = VK_CULL_MODE_BACK_BIT; // カリングの設定
 				break;
 
-			case graphics::ECullMode::CULL_FRONT :
+			case graphics::ECullMode::CULL_FRONT:
 				rasterizer.cullMode = VK_CULL_MODE_FRONT_BIT; // カリングの設定
 				break;
 
-			case graphics::ECullMode::CULL_NONE :
+			case graphics::ECullMode::CULL_NONE:
 				rasterizer.cullMode = VK_CULL_MODE_NONE; // カリングの設定
 				break;
 
 			default:
 				rasterizer.cullMode = VK_CULL_MODE_BACK_BIT; // カリングの設定
 				break;
-		}
-
-		rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE; // カリングする際の頂点の順番かな？ GL_CWWみたいな
-		rasterizer.depthBiasEnable = VK_FALSE; // デプステストに関する設定
-		rasterizer.depthBiasConstantFactor = 0.0f;
-		rasterizer.depthBiasClamp = 0.0f;
-		rasterizer.depthBiasSlopeFactor = 0.0f;
-
-		// マルチサンプリング(アンチエイリアシング)
-		VkPipelineMultisampleStateCreateInfo multisampling{};
-		multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
-		multisampling.sampleShadingEnable = VK_FALSE; // アンチエイリアシングを無効にしておく
-		multisampling.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
-		multisampling.minSampleShading = 1.0f;
-		multisampling.pSampleMask = nullptr;
-		multisampling.alphaToCoverageEnable = VK_FALSE;
-		multisampling.alphaToOneEnable = VK_FALSE;
-
-		// デプステスト, ステンシルテスト 
-		// ひとまず今は何もしない
-
-		// カラーブレンディング /////////////////////////////////////////////
-		// ローカルカラーブレンディング(アタッチされたフレームバッファごとの設定)
-		std::vector<VkPipelineColorBlendAttachmentState> colorBlendAttachmentList;
-
-		// MRTの時は複数個必要
-		for (int ColorIndex = 0; ColorIndex < pVulkanMat->GetOutputColorCount(); ColorIndex++)
-		{
-			VkPipelineColorBlendAttachmentState colorBlendAttachment{};
-			colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
-			colorBlendAttachment.blendEnable = VK_TRUE;
-
-			switch (pVulkanMat->GetBlendType())
-			{
-			case graphics::EBlendType::BLEND_TYPE_ADDITIVE:
-				colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_ONE;
-				colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ZERO;
-				colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
-
-				colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
-				colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
-				colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
-				break;
-			case graphics::EBlendType::BLEND_TYPE_TRANSPARENT_ALPHA:
-				colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
-				colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
-				colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
-
-				colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
-				colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
-				colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
-
-				break;
-			default:
-				colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_ONE;
-				colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ZERO;
-				colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
-
-				colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
-				colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
-				colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
-
-				break;
 			}
 
-			colorBlendAttachmentList.push_back(colorBlendAttachment);
-		}
-		
-		// グローバルカラーブレンディング(全体で共通の設定???)
-		VkPipelineColorBlendStateCreateInfo colorBlendingInfo{};
-		colorBlendingInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
-		colorBlendingInfo.logicOpEnable = VK_FALSE;
-		colorBlendingInfo.logicOp = VK_LOGIC_OP_COPY;
-		colorBlendingInfo.attachmentCount = static_cast<uint32_t>(colorBlendAttachmentList.size());
-		colorBlendingInfo.pAttachments = &colorBlendAttachmentList[0];
-		colorBlendingInfo.blendConstants[0] = 0.0f;
-		colorBlendingInfo.blendConstants[1] = 0.0f;
-		colorBlendingInfo.blendConstants[2] = 0.0f;
-		colorBlendingInfo.blendConstants[3] = 0.0f;
+			rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE; // カリングする際の頂点の順番かな？ GL_CWWみたいな
+			rasterizer.depthBiasEnable = VK_FALSE; // デプステストに関する設定
+			rasterizer.depthBiasConstantFactor = 0.0f;
+			rasterizer.depthBiasClamp = 0.0f;
+			rasterizer.depthBiasSlopeFactor = 0.0f;
 
-		// レンダリングパイプラインでデプスとステンシルを有効にする
-		VkPipelineDepthStencilStateCreateInfo depthStencil{};
-		depthStencil.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
+			// マルチサンプリング(アンチエイリアシング)
+			VkPipelineMultisampleStateCreateInfo multisampling{};
+			multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
+			multisampling.sampleShadingEnable = VK_FALSE; // アンチエイリアシングを無効にしておく
+			multisampling.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
+			multisampling.minSampleShading = 1.0f;
+			multisampling.pSampleMask = nullptr;
+			multisampling.alphaToCoverageEnable = VK_FALSE;
+			multisampling.alphaToOneEnable = VK_FALSE;
 
-		// Depth
-		{
-			depthStencil.depthTestEnable = (pVulkanMat->IsEnabledZWrite()) ? VK_TRUE : VK_FALSE;
-			depthStencil.depthWriteEnable = (pVulkanMat->IsEnabledZWrite()) ? VK_TRUE : VK_FALSE;
+			// デプステスト, ステンシルテスト 
+			// ひとまず今は何もしない
 
-			graphics::EDepthFunc DepthFunc = pVulkanMat->GetDepthFunc();
-			switch (DepthFunc)
+			// カラーブレンディング /////////////////////////////////////////////
+			// ローカルカラーブレンディング(アタッチされたフレームバッファごとの設定)
+			std::vector<VkPipelineColorBlendAttachmentState> colorBlendAttachmentList;
+
+			// MRTの時は複数個必要
+			for (int ColorIndex = 0; ColorIndex < pVulkanMat->GetOutputColorCount(); ColorIndex++)
 			{
-			case graphics::EDepthFunc::Never:
-				depthStencil.depthCompareOp = VK_COMPARE_OP_NEVER;
-				break;
-			case graphics::EDepthFunc::Less:
-				depthStencil.depthCompareOp = VK_COMPARE_OP_LESS;
-				break;
-			case graphics::EDepthFunc::LessEqual:
-				depthStencil.depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
-				break;
-			case graphics::EDepthFunc::Greater:
-				depthStencil.depthCompareOp = VK_COMPARE_OP_GREATER;
-				break;
-			case graphics::EDepthFunc::GreaterEqual:
-				depthStencil.depthCompareOp = VK_COMPARE_OP_GREATER_OR_EQUAL;
-				break;
-			case graphics::EDepthFunc::Equal:
-				depthStencil.depthCompareOp = VK_COMPARE_OP_EQUAL;
-				break;
-			case graphics::EDepthFunc::NotEqual:
-				depthStencil.depthCompareOp = VK_COMPARE_OP_NOT_EQUAL;
-				break;
-			case graphics::EDepthFunc::Always:
-				depthStencil.depthCompareOp = VK_COMPARE_OP_ALWAYS;
-				break;
-			default:
-				depthStencil.depthCompareOp = VK_COMPARE_OP_LESS;
-				break;
+				VkPipelineColorBlendAttachmentState colorBlendAttachment{};
+				colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+				colorBlendAttachment.blendEnable = VK_TRUE;
+
+				switch (pVulkanMat->GetBlendType())
+				{
+				case graphics::EBlendType::BLEND_TYPE_ADDITIVE:
+					colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_ONE;
+					colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ZERO;
+					colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
+
+					colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+					colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
+					colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
+					break;
+				case graphics::EBlendType::BLEND_TYPE_TRANSPARENT_ALPHA:
+					colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
+					colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+					colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
+
+					colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
+					colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+					colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
+
+					break;
+				default:
+					colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_ONE;
+					colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ZERO;
+					colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
+
+					colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+					colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
+					colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
+
+					break;
+				}
+
+				colorBlendAttachmentList.push_back(colorBlendAttachment);
 			}
-		}
 
-		depthStencil.depthBoundsTestEnable = VK_FALSE;
-		depthStencil.minDepthBounds = 0.0f;
-		depthStencil.maxDepthBounds = 1.0f;
-		depthStencil.stencilTestEnable = VK_FALSE;
-		depthStencil.front = {};
-		depthStencil.back = {};
+			// グローバルカラーブレンディング(全体で共通の設定???)
+			VkPipelineColorBlendStateCreateInfo colorBlendingInfo{};
+			colorBlendingInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
+			colorBlendingInfo.logicOpEnable = VK_FALSE;
+			colorBlendingInfo.logicOp = VK_LOGIC_OP_COPY;
+			colorBlendingInfo.attachmentCount = static_cast<uint32_t>(colorBlendAttachmentList.size());
+			colorBlendingInfo.pAttachments = &colorBlendAttachmentList[0];
+			colorBlendingInfo.blendConstants[0] = 0.0f;
+			colorBlendingInfo.blendConstants[1] = 0.0f;
+			colorBlendingInfo.blendConstants[2] = 0.0f;
+			colorBlendingInfo.blendConstants[3] = 0.0f;
 
-		// これまでの情報をもとにレンダリングパイプラインを構築
-		VkGraphicsPipelineCreateInfo pipelineInfo{};
-		pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-		pipelineInfo.stageCount = static_cast<uint32_t>(pVulkanMat->GetShaderStages().size()); // シェーダーステージの数
-		pipelineInfo.pStages = pVulkanMat->GetShaderStages().data();
+			// レンダリングパイプラインでデプスとステンシルを有効にする
+			VkPipelineDepthStencilStateCreateInfo depthStencil{};
+			depthStencil.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
 
-		pipelineInfo.pVertexInputState = &vertexInputInto;
-		pipelineInfo.pInputAssemblyState = &inputAssemblyInfo;
-		pipelineInfo.pViewportState = &viewportStateInfo;
-		pipelineInfo.pRasterizationState = &rasterizer;
-		pipelineInfo.pMultisampleState = &multisampling;
-		pipelineInfo.pDepthStencilState = &depthStencil;
-		pipelineInfo.pColorBlendState = &colorBlendingInfo;
-		pipelineInfo.pDynamicState = &dynamicStateCreateInfo;
-
-		pipelineInfo.layout = pVulkanMat->GetPipelineLayout();
-
-		if (!m_PassName.empty())
-		{
-			const auto& RenderPassMap = m_pGraphicsAPI->GetOffScreenRenderPassMap();
-			const auto& RenderPass = RenderPassMap.find(m_PassName);
-			if (RenderPass != RenderPassMap.end())
+			// Depth
 			{
-				api::CVulkanRenderPass* pVulkanRenderPass = static_cast<api::CVulkanRenderPass*>(RenderPass->second.get());
-				if (pVulkanRenderPass) pipelineInfo.renderPass = pVulkanRenderPass->GetRenderPass();
+				depthStencil.depthTestEnable = (pVulkanMat->IsEnabledZWrite()) ? VK_TRUE : VK_FALSE;
+				depthStencil.depthWriteEnable = (pVulkanMat->IsEnabledZWrite()) ? VK_TRUE : VK_FALSE;
+
+				graphics::EDepthFunc DepthFunc = pVulkanMat->GetDepthFunc();
+				switch (DepthFunc)
+				{
+				case graphics::EDepthFunc::Never:
+					depthStencil.depthCompareOp = VK_COMPARE_OP_NEVER;
+					break;
+				case graphics::EDepthFunc::Less:
+					depthStencil.depthCompareOp = VK_COMPARE_OP_LESS;
+					break;
+				case graphics::EDepthFunc::LessEqual:
+					depthStencil.depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
+					break;
+				case graphics::EDepthFunc::Greater:
+					depthStencil.depthCompareOp = VK_COMPARE_OP_GREATER;
+					break;
+				case graphics::EDepthFunc::GreaterEqual:
+					depthStencil.depthCompareOp = VK_COMPARE_OP_GREATER_OR_EQUAL;
+					break;
+				case graphics::EDepthFunc::Equal:
+					depthStencil.depthCompareOp = VK_COMPARE_OP_EQUAL;
+					break;
+				case graphics::EDepthFunc::NotEqual:
+					depthStencil.depthCompareOp = VK_COMPARE_OP_NOT_EQUAL;
+					break;
+				case graphics::EDepthFunc::Always:
+					depthStencil.depthCompareOp = VK_COMPARE_OP_ALWAYS;
+					break;
+				default:
+					depthStencil.depthCompareOp = VK_COMPARE_OP_LESS;
+					break;
+				}
+			}
+
+			depthStencil.depthBoundsTestEnable = VK_FALSE;
+			depthStencil.minDepthBounds = 0.0f;
+			depthStencil.maxDepthBounds = 1.0f;
+			depthStencil.stencilTestEnable = VK_FALSE;
+			depthStencil.front = {};
+			depthStencil.back = {};
+
+			// これまでの情報をもとにレンダリングパイプラインを構築
+			VkGraphicsPipelineCreateInfo pipelineInfo{};
+			pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+			pipelineInfo.stageCount = static_cast<uint32_t>(pVulkanMat->GetShaderStages().size()); // シェーダーステージの数
+			pipelineInfo.pStages = pVulkanMat->GetShaderStages().data();
+
+			pipelineInfo.pVertexInputState = &vertexInputInto;
+			pipelineInfo.pInputAssemblyState = &inputAssemblyInfo;
+			pipelineInfo.pViewportState = &viewportStateInfo;
+			pipelineInfo.pRasterizationState = &rasterizer;
+			pipelineInfo.pMultisampleState = &multisampling;
+			pipelineInfo.pDepthStencilState = &depthStencil;
+			pipelineInfo.pColorBlendState = &colorBlendingInfo;
+			pipelineInfo.pDynamicState = &dynamicStateCreateInfo;
+
+			pipelineInfo.layout = pVulkanMat->GetPipelineLayout();
+
+			if (!PassName.empty())
+			{
+				const auto& RenderPassMap = m_pGraphicsAPI->GetOffScreenRenderPassMap();
+				const auto& RenderPass = RenderPassMap.find(PassName);
+				if (RenderPass != RenderPassMap.end())
+				{
+					api::CVulkanRenderPass* pVulkanRenderPass = static_cast<api::CVulkanRenderPass*>(RenderPass->second.get());
+					if (pVulkanRenderPass) pipelineInfo.renderPass = pVulkanRenderPass->GetRenderPass();
+				}
+				else
+				{
+					// デフォルトレンダーパスを使用(スワップチェーンに渡すやつ)
+					pipelineInfo.renderPass = m_pGraphicsAPI->GetSwapChainRenderPass();
+				}
 			}
 			else
 			{
 				// デフォルトレンダーパスを使用(スワップチェーンに渡すやつ)
 				pipelineInfo.renderPass = m_pGraphicsAPI->GetSwapChainRenderPass();
 			}
-		}
-		else
-		{
-			// デフォルトレンダーパスを使用(スワップチェーンに渡すやつ)
-			pipelineInfo.renderPass = m_pGraphicsAPI->GetSwapChainRenderPass();
-		}
-		
-		pipelineInfo.subpass = 0;
 
-		pipelineInfo.basePipelineHandle = VK_NULL_HANDLE; // パイプラインから新しいパイプラインを派生して作成するためのフィールド?
-		pipelineInfo.basePipelineIndex = -1; // 今は何もしていない
+			pipelineInfo.subpass = 0;
 
-		if (vkCreateGraphicsPipelines(m_pGraphicsAPI->GetLogicalDevice(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_GraphicsPipeline) != VK_SUCCESS) return false;
+			pipelineInfo.basePipelineHandle = VK_NULL_HANDLE; // パイプラインから新しいパイプラインを派生して作成するためのフィールド?
+			pipelineInfo.basePipelineIndex = -1; // 今は何もしていない
+
+			VkPipeline GraphicsPipeline;
+
+			if (vkCreateGraphicsPipelines(m_pGraphicsAPI->GetLogicalDevice(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &GraphicsPipeline) != VK_SUCCESS) return false;
+
+			m_GraphicsPipelineList.emplace(PassName, GraphicsPipeline);
+		}
 
 		return true;
 	}

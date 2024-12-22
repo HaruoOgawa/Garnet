@@ -17,6 +17,7 @@ namespace object {
 namespace graphics {
 	class CMesh;
 	enum class EPresetPrimitiveType;
+	enum class ECullMode;
 }
 
 namespace gui
@@ -34,6 +35,8 @@ namespace gui
 			const std::shared_ptr<scene::CSceneController>& SceneController);
 
 		static std::string GetStrFromPresetPrimitiveType(graphics::EPresetPrimitiveType PresetType);
+
+		static std::string GetStrFromCullMode(graphics::ECullMode CullMode);
 	public:
 		static bool Draw(api::IGraphicsAPI* pGraphicsAPI, const std::vector<std::shared_ptr<object::C3DObject>>& ObjectList, const std::shared_ptr<scene::CSceneController>& SceneController,
 			int SelectedObjectIndex, int SelectedNodeIndex);

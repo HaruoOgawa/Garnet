@@ -48,7 +48,7 @@ namespace app
 		m_DrawInfo->GetLightProjection()->SetNear(2.0f);
 		m_DrawInfo->GetLightProjection()->SetFar(100.0f);
 
-		m_SceneController->SetDefaultPass("MainResultPass", "");
+		m_SceneController->SetDefaultPass("MainResultPass");
 
 #ifdef USE_GUIENGINE
 		m_GraphicsEditingWindow->SetDefaultPass("MainResultPass", "");
@@ -153,7 +153,7 @@ namespace app
 		// MainResultPass
 		{
 			if (!pGraphicsAPI->BeginRender("MainResultPass")) return false;
-			if (!m_SceneController->Draw(pGraphicsAPI, false, m_MainCamera, m_Projection, m_DrawInfo)) return false;
+			if (!m_SceneController->Draw(pGraphicsAPI, m_MainCamera, m_Projection, m_DrawInfo)) return false;
 			if (!pGraphicsAPI->EndRender()) return false;
 		}
 
@@ -182,7 +182,7 @@ namespace app
 			}
 #endif // USE_GUIENGINE
 
-			if (!pLoadWorker->Draw(pGraphicsAPI, false, m_MainCamera, m_Projection, m_DrawInfo)) return false;
+			if (!pLoadWorker->Draw(pGraphicsAPI, m_MainCamera, m_Projection, m_DrawInfo)) return false;
 
 			if (!pGraphicsAPI->EndRender()) return false;
 		}
@@ -190,7 +190,7 @@ namespace app
 		return true;
 	}
 
-	const std::shared_ptr<graphics::CDrawInfo>& CScriptApp::GetDrawInfo() const
+	std::shared_ptr<graphics::CDrawInfo> CScriptApp::GetDrawInfo() const
 	{
 		return m_DrawInfo;
 	}

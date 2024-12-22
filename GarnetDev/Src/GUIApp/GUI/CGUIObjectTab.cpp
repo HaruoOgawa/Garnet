@@ -251,6 +251,10 @@ namespace gui
 				}
 			}
 
+			static int PassNum = 1;
+			std::string PassNumLabel = "PassNum##PassNumLabel_CGUIObjectTab_DrawAddObjectDialog";
+			ImGui::InputInt(PassNumLabel.c_str(), &PassNum);
+
 			// PassName
 			static std::string PassName = std::string();
 			{
@@ -259,17 +263,6 @@ namespace gui
 				if (ImGui::InputText("PassName##AddObjectDialog", buf, IM_ARRAYSIZE(buf)))
 				{
 					PassName = std::string(buf);
-				}
-			}
-
-			// DepthPassName
-			static std::string DepthPassName = std::string();
-			{
-				static char buf[256] = "";
-
-				if (ImGui::InputText("DepthPassName##AddObjectDialog", buf, IM_ARRAYSIZE(buf)))
-				{
-					DepthPassName = std::string(buf);
 				}
 			}
 
@@ -313,10 +306,9 @@ namespace gui
 				m_ShowAddObjectDialog = false;
 
 				// ObjectçÏê¨
-				std::shared_ptr<object::C3DObject> Object = std::make_shared<object::C3DObject>("", "");
+				std::shared_ptr<object::C3DObject> Object = std::make_shared<object::C3DObject>();
 				Object->SetObjectName(ObjectName);
-				Object->SetPassName(PassName);
-				Object->SetDepthPassName(DepthPassName);
+				Object->AddPassName(PassName);
 
 				// ToDo: ë¶éûê∂ê¨Ç∑ÇÈ
 				if (!Object->Create(pGraphicsAPI, nullptr, nullptr)) return false;
@@ -325,7 +317,6 @@ namespace gui
 
 				ObjectName = std::string();
 				PassName = std::string();
-				DepthPassName = std::string();
 				Rig = std::string();
 			}
 
@@ -339,10 +330,9 @@ namespace gui
 					m_ShowAddObjectDialog = false;
 
 					// ObjectçÏê¨
-					std::shared_ptr<object::C3DObject> Object = std::make_shared<object::C3DObject>("", "");
+					std::shared_ptr<object::C3DObject> Object = std::make_shared<object::C3DObject>();
 					Object->SetObjectName(ObjectName);
-					Object->SetPassName(PassName);
-					Object->SetDepthPassName(DepthPassName);
+					Object->AddPassName(PassName);
 
 					animation::ERigType RigType = animation::ERigType::None;
 					if (Rig == "humanoid")
@@ -350,11 +340,13 @@ namespace gui
 						RigType = animation::ERigType::Humanoid;
 					}
 
-					GUIParams.SceneController->AddObjectWithLoading(GUIParams.pLoadWorker, Object, fileName, DefaultMaterialframe, RigType);
+					std::vector<std::string> defaultmaterialframeList;
+					defaultmaterialframeList.push_back(DefaultMaterialframe);
+
+					GUIParams.SceneController->AddObjectWithLoading(GUIParams.pLoadWorker, Object, fileName, defaultmaterialframeList, RigType);
 
 					ObjectName = std::string();
 					PassName = std::string();
-					DepthPassName = std::string();
 					Rig = std::string();
 				}
 

@@ -32,7 +32,7 @@ namespace app
 		virtual bool Draw(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<input::CInputState>& InputState,
 			const std::shared_ptr<gui::IGUIEngine>& GUIEngine);
 
-		virtual const std::shared_ptr<graphics::CDrawInfo>& GetDrawInfo() const;
+		virtual std::shared_ptr<graphics::CDrawInfo> GetDrawInfo() const;
 
 		virtual std::vector<unsigned char> GetEmbeddedBinary(const std::string& Key);
 

@@ -2,19 +2,17 @@
 #include "CVertexBuffer.h"
 #include "CIndexBuffer.h"
 #include "CMaterial.h"
+#include "CTextureSet.h"
 #include "../Interface/IGraphicsAPI.h"
 #include "../Interface/IRenderer.h"
 
 namespace graphics
 {
-	CPrimitive::CPrimitive(const std::shared_ptr<CVertexBuffer>& VertexBuffer, const std::shared_ptr<CIndexBuffer>& IndexBuffer, int MaterialIndex) :
+	CPrimitive::CPrimitive(const std::shared_ptr<CVertexBuffer>& VertexBuffer, const std::shared_ptr<CIndexBuffer>& IndexBuffer) :
 		m_Enabled(true),
 		m_PresetType(graphics::EPresetPrimitiveType::None),
 		m_VertexBuffer(VertexBuffer),
 		m_IndexBuffer(IndexBuffer),
-		m_Renderer(nullptr),
-		m_DepthRenderer(nullptr),
-		m_MaterialIndex(MaterialIndex),
 		m_UseMorph(false)
 	{
 	}
@@ -54,53 +52,50 @@ namespace graphics
 		}
 	}
 
-	bool CPrimitive::Create(api::IGraphicsAPI* pGraphicsAPI, const std::string& PassName, const std::shared_ptr<graphics::CMaterial>& Material, bool IsDepth)
+	bool CPrimitive::Create(const std::vector<std::string>& PassNameList, const std::shared_ptr<graphics::CTextureSet>& TextureSet)
 	{
 		if (!m_VertexBuffer || !m_IndexBuffer) return false;
 
-		if (IsDepth)
+		if (m_RendererList.empty()) return false;
+
+		for (auto& RendererMat : m_RendererList)
 		{
-			m_DepthRenderer = pGraphicsAPI->CreateRenderer(PassName);
-			if (!m_DepthRenderer->Create(m_VertexBuffer, m_IndexBuffer, Material)) return false;
-		}
-		else
-		{
-			m_Renderer = pGraphicsAPI->CreateRenderer(PassName);
-			if (!m_Renderer->Create(m_VertexBuffer, m_IndexBuffer, Material)) return false;
+			if (!std::get<1>(RendererMat)->Create(PassNameList, TextureSet)) return false;
+
+			if (!std::get<0>(RendererMat)->Create(PassNameList, m_VertexBuffer, m_IndexBuffer, std::get<1>(RendererMat))) return false;
 		}
 
 		return true;
 	}
 
-	bool CPrimitive::Draw(const std::shared_ptr<CMaterial>& Material, int DynamicOffsetNum, bool IsDepth)
+	bool CPrimitive::Draw()
 	{
 		if (!IsEnabled()) return true;
 
-		if (IsDepth)
+		// ToDo: PrimitiveとMaterialのどちらから取るか
+		int DynamicOffset = 1;
+		// マテリアルの参照カウントをダイナミックオフセットとして使用する
+		//int DynamicOffset = Material->GetDynamicOffset();
+		if (DynamicOffset < 0) return true;
+
+		for (const auto& RendererMat : m_RendererList)
 		{
-			if (!m_DepthRenderer->Draw(m_VertexBuffer, m_IndexBuffer, Material, DynamicOffsetNum)) return false;
-		}
-		else
-		{
-			if (!m_Renderer->Draw(m_VertexBuffer, m_IndexBuffer, Material, DynamicOffsetNum)) return false;
+			if (!std::get<0>(RendererMat)->Draw(m_VertexBuffer, m_IndexBuffer, std::get<1>(RendererMat))) return false;
 		}
 		
 		return true;
 	}
 
-	const std::shared_ptr<graphics::IRenderer>& CPrimitive::GetRenderer() const
+	const std::vector<std::tuple<std::shared_ptr<graphics::IRenderer>, std::shared_ptr<CMaterial>>>& CPrimitive::GetRendererList() const
 	{
-		return m_Renderer;
+		return m_RendererList;
 	}
 
-	void CPrimitive::SetMaterialIndex(int Index)
+	void CPrimitive::AddMaterial(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CMaterial>& Material)
 	{
-		m_MaterialIndex = Index;
-	}
+		if (!Material) return;
 
-	int CPrimitive::GetMaterialIndex()const
-	{
-		return m_MaterialIndex;
+		m_RendererList.push_back(std::make_tuple(pGraphicsAPI->CreateRenderer(), Material));
 	}
 
 	const std::shared_ptr<CVertexBuffer>& CPrimitive::GetVertexBuffer() const

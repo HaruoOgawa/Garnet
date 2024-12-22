@@ -25,6 +25,16 @@ namespace graphics
 		return m_MaterialFrameName;
 	}
 
+	void CMaterialFrame::SetCullMode(graphics::ECullMode CullMode)
+	{
+		m_CullMode = CullMode;
+	}
+
+	graphics::ECullMode CMaterialFrame::GetCullMode() const
+	{
+		return m_CullMode;
+	}
+
 	void CMaterialFrame::SetFileName(const std::string& Name)
 	{
 		m_FileName = Name;
@@ -86,11 +96,11 @@ namespace graphics
 		m_TextureBufferList = TextureBufferList;
 	}
 
-	std::shared_ptr<CMaterial> CMaterialFrame::CreateMaterial(api::IGraphicsAPI* pGraphicsAPI, int RefCount, graphics::ECullMode CullMode)
+	std::shared_ptr<CMaterial> CMaterialFrame::CreateMaterial(api::IGraphicsAPI* pGraphicsAPI, graphics::ECullMode CullMode)
 	{
 		if (!m_CreateInfo) return nullptr;
 
-		std::shared_ptr<CMaterial> Material = pGraphicsAPI->CreateMaterial(m_CreateInfo, RefCount, CullMode);
+		std::shared_ptr<CMaterial> Material = pGraphicsAPI->CreateMaterial(m_CreateInfo, CullMode);
 
 		// MaterialName
 		std::string MaterialName = m_MaterialFrameName + "_" + std::to_string(m_CreateCounter);
@@ -145,6 +155,29 @@ namespace graphics
 		m_RefMaterialList.push_back(Material);
 
 		return Material;
+	}
+
+	std::shared_ptr<CMaterial> CMaterialFrame::CopyMaterial(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CMaterial>& SrcMaterial)
+	{
+		if (!SrcMaterial) return nullptr;
+
+		std::shared_ptr<CMaterial> DstMaterial = CreateMaterial(pGraphicsAPI, SrcMaterial->GetCullMode());
+
+		// ShaderBufferの値をコピー
+		if (DstMaterial->GetShaderBufferList().size() != SrcMaterial->GetShaderBufferList().size()) return nullptr;
+
+		for (int i = 0; i < static_cast<int>(DstMaterial->GetShaderBufferList().size()); i++)
+		{
+			const auto& SrcBuffer = SrcMaterial->GetShaderBufferList()[i];
+			const auto& DstBuffer = DstMaterial->GetShaderBufferList()[i];
+
+			DstBuffer->SetBuffer(SrcBuffer->GetBuffer());
+		}
+
+		// TextureBufferの値をコピー
+		DstMaterial->SetTextureBindingLayoutList(SrcMaterial->GetTextureBindingLayoutList());
+
+		return DstMaterial;
 	}
 
 	bool CMaterialFrame::DeleteRefMaterial(const std::shared_ptr<graphics::CMaterial>& Material)

@@ -1129,16 +1129,26 @@ namespace gui
 				// Select Material
 				if (ImGui::BeginCombo("Material##Timeline_AddObjectTrackDialog_Material_Combo", SelectedMaterialName.c_str()))
 				{
-					for (const auto& Material : m_ClickedObjectForAddObjectTrack->GetMaterialList())
+					for (const auto& Mesh : m_ClickedObjectForAddObjectTrack->GetMeshList())
 					{
-						const bool IsSelected = (m_SelectedMaterialForAddTrack == Material);
-
-						std::string LabelSelectable = Material->GetMaterialName() + "##Timeline_AddObjectTrackDialog_Material_Selectable";
-
-						if (ImGui::Selectable(LabelSelectable.c_str(), IsSelected) && !IsSelected)
+						for (const auto& Primitive : Mesh->GetPrimitiveList())
 						{
-							SelectedMaterialName = Material->GetMaterialName();
-							m_SelectedMaterialForAddTrack = Material;
+							for (const auto& Renderer : Primitive->GetRendererList())
+							{
+								const auto& Material = std::get<1>(Renderer);
+
+								if (!Material) continue;
+
+								const bool IsSelected = (m_SelectedMaterialForAddTrack == Material);
+
+								std::string LabelSelectable = Material->GetMaterialName() + "##Timeline_AddObjectTrackDialog_Material_Selectable";
+
+								if (ImGui::Selectable(LabelSelectable.c_str(), IsSelected) && !IsSelected)
+								{
+									SelectedMaterialName = Material->GetMaterialName();
+									m_SelectedMaterialForAddTrack = Material;
+								}
+							}
 						}
 					}
 
@@ -1155,7 +1165,7 @@ namespace gui
 
 						for (auto& UniformBuffer : ShaderBufferList)
 						{
-							const auto& BufferData = UniformBuffer->GetData();
+							const auto& BufferData = UniformBuffer->GetBuffer();
 
 							const auto& Descriptor = UniformBuffer->GetDescriptor();
 

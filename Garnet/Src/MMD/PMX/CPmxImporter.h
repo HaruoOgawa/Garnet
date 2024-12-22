@@ -54,13 +54,14 @@ namespace mmd
 		static bool CreateAnimationSkeleton(api::IGraphicsAPI* pGraphicsAPI, const CPmxModel& model, std::shared_ptr<animation::CSkeleton>& Skeleton, std::vector<std::shared_ptr<object::CNode>>& NodeList, const std::shared_ptr<object::CNode>& RootNode);
 		static bool CalcInverseBindPose(std::shared_ptr<animation::CSkeleton>& Skeleton);
 
-		static bool CreateMaterialList(api::IGraphicsAPI* pGraphicsAPI, const CPmxModel& model, std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList, 
+		static bool CreateMaterialList(api::IGraphicsAPI* pGraphicsAPI, const CPmxModel& model, 
+			std::vector<std::vector<std::shared_ptr<graphics::CMaterial>>>& BaseMaterialList,
 			std::map<int, std::vector<std::shared_ptr<graphics::CMaterial>>>& SharedToonUsingList,
-			const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, const std::shared_ptr<animation::CSkeleton>& Skeleton);
+			const std::vector<std::shared_ptr<graphics::CMaterialFrame>>& BaseMaterialFrameList, const std::shared_ptr<animation::CSkeleton>& Skeleton);
 
 		static bool CreateMeshList(api::IGraphicsAPI* pGraphicsAPI, object::C3DObject* Object, const CPmxModel& model, std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, 
 			const std::shared_ptr<object::CNode>& RootNode, std::vector<std::shared_ptr<object::CNode>>& NodeList,
-			const std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList, bool ExistSkeleton);
+			const std::vector<std::vector<std::shared_ptr<graphics::CMaterial>>>& BaseMaterialList, bool ExistSkeleton);
 
 		static bool CreateTextureList(api::IGraphicsAPI* pGraphicsAPI, resource::C3DObjectLoader* p3DObjectLoader, const std::string& ModelFileName, const CPmxModel& model, 
 			std::vector<std::shared_ptr<graphics::CTexture>>& TextureList, std::map<int, std::vector<std::shared_ptr<graphics::CMaterial>>>& SharedToonUsingList);
@@ -73,7 +74,7 @@ namespace mmd
 		static glm::vec3 CovertToZYX(const glm::vec3& Val);
 	public:
 		static bool ImportPmx(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, const std::string& ModelFileName, const std::vector<unsigned char>& Data, object::C3DObject* Object,
-			const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, resource::C3DObjectLoader* p3DObjectLoader, 
+			const std::vector<std::shared_ptr<graphics::CMaterialFrame>>& BaseMaterialFrameList, resource::C3DObjectLoader* p3DObjectLoader, 
 			animation::ERigType RigType, const std::map<animation::EHumanoidBones, std::string>& HumanoidBoneList);
 	};
 }

@@ -6,6 +6,7 @@
 #include <vector>
 #include <array>
 #include <string>
+#include <map>
 
 #include "../../Interface/IRenderer.h"
 #include "../../Graphics/ECullMode.h"
@@ -32,16 +33,13 @@ namespace api
 		// API
 		api::CVulkanAPI* m_pGraphicsAPI;
 
-		//
-		const std::string m_PassName;
-		int	m_DynamicOffsetNum;
 		int m_InstanceCount;
 
 		// Pipeline
-		VkPipeline m_GraphicsPipeline;
+		std::map<std::string, VkPipeline> m_GraphicsPipelineList;
 	private:
 		// Vulkanメインロジック /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		bool CreateGraphicsPipeline(const CVulkanVertexBuffer* pVulkanVertexBuffer, api::CVulkanMaterial* pVulkanMat);
+		bool CreateGraphicsPipeline(const std::vector<std::string>& PassNameList, const CVulkanVertexBuffer* pVulkanVertexBuffer, api::CVulkanMaterial* pVulkanMat);
 		
 		void SetRuntimeGraphicsSettings(const CVulkanVertexBuffer* pVulkanVertexBuffer, api::CVulkanMaterial* pVulkanMat);
 
@@ -50,13 +48,14 @@ namespace api
 		// ヘルパー関数 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		VkFormat GetVertexFormat(int Dimention, graphics::EDataType DataType);
 	public:
-		CVulkanRenderer(api::CVulkanAPI* pGraphicsAPI, const std::string& PassName);
+		CVulkanRenderer(api::CVulkanAPI* pGraphicsAPI);
 		virtual ~CVulkanRenderer();
 
 		void Release();
 
-		virtual bool Create(const std::shared_ptr<graphics::CVertexBuffer>& VertexBuffer, const std::shared_ptr<graphics::CIndexBuffer>& IndexBuffer, const std::shared_ptr<graphics::CMaterial>& Material) override;
-		virtual bool Draw(const std::shared_ptr<graphics::CVertexBuffer>& VertexBuffer, const std::shared_ptr<graphics::CIndexBuffer>& IndexBuffer, const std::shared_ptr<graphics::CMaterial>& Material, int DynamicOffsetNum) override;
+		virtual bool Create(const std::vector<std::string>& PassNameList, const std::shared_ptr<graphics::CVertexBuffer>& VertexBuffer, const std::shared_ptr<graphics::CIndexBuffer>& IndexBuffer, const std::shared_ptr<graphics::CMaterial>& Material) override;
+		virtual bool Draw(const std::shared_ptr<graphics::CVertexBuffer>& VertexBuffer, const std::shared_ptr<graphics::CIndexBuffer>& IndexBuffer, 
+			const std::shared_ptr<graphics::CMaterial>& Material) override;
 	
 		virtual bool UpdateVertexBuffer(const std::vector<float>& PosAttribute, const std::shared_ptr<graphics::CVertexBuffer>& VertexBuffer) override;
 	};

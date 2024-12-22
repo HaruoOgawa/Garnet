@@ -26,7 +26,7 @@ namespace api
 	{
 		if (!m_ComputeMaterial) return false;
 
-		if (!m_ComputeMaterial->Create(nullptr)) return false;
+		if (!m_ComputeMaterial->Create(std::vector<std::string>(), nullptr)) return false;
 		if (!CreateComputePipeline()) return false; // Compute Pipelineを作成
 
 		return true;
@@ -79,7 +79,7 @@ namespace api
 		pWebGPUMat->SetUniformValue("time", &glm::vec1(DrawInfo->GetSecondsTime())[0], sizeof(glm::vec1));
 		pWebGPUMat->SetUniformValue("deltaTime", &glm::vec1(DrawInfo->GetDeltaSecondsTime())[0], sizeof(glm::vec1));
 
-		if (!pWebGPUMat->BuildDrawBuffer(0)) return false;
+		if (!pWebGPUMat->BuildDrawBuffer()) return false;
 
 		// コマンドバッファの記録開始
 		if (!BeginRecordCommandBuffer()) return false;

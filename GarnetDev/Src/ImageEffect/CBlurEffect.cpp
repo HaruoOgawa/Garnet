@@ -15,9 +15,11 @@ namespace imageeffect
 		m_IsLoaded(false),
 		m_KernelSize(0),
 		m_BlurMF(std::make_shared<graphics::CMaterialFrame>()),
-		m_ScreenObjX(std::make_shared<object::C3DObject>("BlurX", "")),
-		m_ScreenObjY(std::make_shared<object::C3DObject>("BlurY", ""))
+		m_ScreenObjX(std::make_shared<object::C3DObject>()),
+		m_ScreenObjY(std::make_shared<object::C3DObject>())
 	{
+		m_ScreenObjX->AddPassName("BlurX");
+		m_ScreenObjY->AddPassName("BlurY");
 	}
 
 	bool CBlurEffect::IsLoaded()
@@ -76,9 +78,22 @@ namespace imageeffect
 			if (!m_pGraphicsAPI->BeginRender("BlurX")) return false;
 
 			glm::vec2 OffsetV = glm::vec2(1.0f / w, 0.0f);
-			m_ScreenObjX->GetMaterialList()[0]->SetUniformValue("Direction", &OffsetV[0], sizeof(glm::vec2));
 
-			if (!m_ScreenObjX->Draw(pGraphicsAPI, false, false, Camera, Projection, DrawInfo)) return false;
+			for (const auto& Mesh : m_ScreenObjX->GetMeshList())
+			{
+				for (const auto& Primitive : Mesh->GetPrimitiveList())
+				{
+					for (const auto& Renderer : Primitive->GetRendererList())
+					{
+						const auto& Material = std::get<1>(Renderer);
+						if (!Material) continue;
+
+						Material->SetUniformValue("Direction", &OffsetV[0], sizeof(glm::vec2));
+					}
+				}
+			}
+
+			if (!m_ScreenObjX->Draw(pGraphicsAPI, Camera, Projection, DrawInfo)) return false;
 			if (!m_pGraphicsAPI->EndRender()) return false;
 		}
 		
@@ -86,9 +101,22 @@ namespace imageeffect
 			if (!m_pGraphicsAPI->BeginRender("BlurY")) return false;
 
 			glm::vec2 OffsetV = glm::vec2(0.0f, 1.0f / h);
-			m_ScreenObjY->GetMaterialList()[0]->SetUniformValue("Direction", &OffsetV[0], sizeof(glm::vec2));
+			
+			for (const auto& Mesh : m_ScreenObjY->GetMeshList())
+			{
+				for (const auto& Primitive : Mesh->GetPrimitiveList())
+				{
+					for (const auto& Renderer : Primitive->GetRendererList())
+					{
+						const auto& Material = std::get<1>(Renderer);
+						if (!Material) continue;
 
-			if (!m_ScreenObjY->Draw(pGraphicsAPI, false, false, Camera, Projection, DrawInfo)) return false;
+						Material->SetUniformValue("Direction", &OffsetV[0], sizeof(glm::vec2));
+					}
+				}
+			}
+
+			if (!m_ScreenObjY->Draw(pGraphicsAPI, Camera, Projection, DrawInfo)) return false;
 			if (!m_pGraphicsAPI->EndRender()) return false;
 		}
 
@@ -152,7 +180,7 @@ namespace imageeffect
 	bool CBlurEffect::Load()
 	{
 		// MaterialX
-		auto MaterialX = m_BlurMF->CreateMaterial(m_pGraphicsAPI, 1, graphics::ECullMode::CULL_BACK);
+		auto MaterialX = m_BlurMF->CreateMaterial(m_pGraphicsAPI, graphics::ECullMode::CULL_BACK);
 		MaterialX->SetDepthFunc(graphics::EDepthFunc::Always);
 		MaterialX->SetCullMode(graphics::ECullMode::CULL_NONE);
 		
@@ -167,7 +195,7 @@ namespace imageeffect
 		}
 
 		// MaterialY
-		auto MaterialY = m_BlurMF->CreateMaterial(m_pGraphicsAPI, 1, graphics::ECullMode::CULL_BACK);
+		auto MaterialY = m_BlurMF->CreateMaterial(m_pGraphicsAPI, graphics::ECullMode::CULL_BACK);
 		MaterialY->SetDepthFunc(graphics::EDepthFunc::Always);
 		MaterialY->SetCullMode(graphics::ECullMode::CULL_NONE);
 

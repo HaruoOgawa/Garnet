@@ -10,8 +10,8 @@
 
 namespace api
 {
-	COpenGLMaterial::COpenGLMaterial(api::COpenGLAPI* pGraphicsAPI, const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, int RefCount, graphics::ECullMode CullMode):
-		CMaterial(pGraphicsAPI, createInfo, RefCount, CullMode),
+	COpenGLMaterial::COpenGLMaterial(api::COpenGLAPI* pGraphicsAPI, const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, graphics::ECullMode CullMode):
+		CMaterial(pGraphicsAPI, createInfo, CullMode),
 		m_pGraphicsAPI(pGraphicsAPI),
 
 		m_ShaderPrg(-1)
@@ -59,7 +59,7 @@ namespace api
 		return true;
 	}
 
-	bool COpenGLMaterial::BuildDrawBuffer(int DynamicOffsetNum)
+	bool COpenGLMaterial::BuildDrawBuffer()
 	{
 		int index = 0;
 		for (const auto& Buffer : m_ShaderBufferList)
@@ -82,8 +82,8 @@ namespace api
 
 				// データの受け渡し
 				glBindBuffer(GL_UNIFORM_BUFFER, uboIndex);
-				//glBufferData(GL_UNIFORM_BUFFER, Layout.second.ByteSize, &Buffer->GetData()[Layout.second.ByteOffset], GL_STATIC_DRAW); // Bufferのデータを初期化・メモリ確保
-				glBufferSubData(GL_UNIFORM_BUFFER, 0, Layout.second.ByteSize, &Buffer->GetData()[Layout.second.ByteOffset]); // Bufferのデータを更新
+				//glBufferData(GL_UNIFORM_BUFFER, Layout.second.ByteSize, &Buffer->GetBuffer()[Layout.second.ByteOffset], GL_STATIC_DRAW); // Bufferのデータを初期化・メモリ確保
+				glBufferSubData(GL_UNIFORM_BUFFER, 0, Layout.second.ByteSize, &Buffer->GetBuffer()[Layout.second.ByteOffset]); // Bufferのデータを更新
 				glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
 				index++;
@@ -148,7 +148,7 @@ namespace api
 		return true;
 	}
 
-	void COpenGLMaterial::SetUniformValue(const std::string Name, const void* Data, int ByteSize, int DynamicOffsetNum)
+	void COpenGLMaterial::SetUniformValue(const std::string Name, const void* Data, int ByteSize)
 	{
 		for (int i = 0; i < m_ShaderBufferList.size(); i++)
 		{
@@ -285,7 +285,7 @@ namespace api
 
 					// データの受け渡し
 					glBindBuffer(target, uboIndex);
-					glBufferData(target, Layout.second.ByteSize, &Buffer->GetData()[Layout.second.ByteOffset], usage); // Bufferのデータを初期化・メモリ確保
+					glBufferData(target, Layout.second.ByteSize, &Buffer->GetBuffer()[Layout.second.ByteOffset], usage); // Bufferのデータを初期化・メモリ確保
 					glBindBuffer(target, 0);
 
 					m_UBOList.push_back(uboIndex);

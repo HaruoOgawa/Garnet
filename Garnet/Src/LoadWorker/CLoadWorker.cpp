@@ -10,10 +10,11 @@ namespace resource
 		m_ResourceManager(std::make_shared<CResourceManager>()),
 		m_FirstResourceCount(0),
 		m_Alpha(1.0f),
-		m_LoadingBar(std::make_shared<object::C3DObject>("", "ShadowPass")),
+		m_LoadingBar(std::make_shared<object::C3DObject>()),
 		m_VertexShader(std::make_shared<resource::CFile>("Resources\\Shaders\\loadingbar" + pGraphicsAPI->GetVertexShaderExtension())),
 		m_FragmentShader(std::make_shared<resource::CFile>("Resources\\Shaders\\loadingbar" + pGraphicsAPI->GetFragmentShaderExtension()))
 	{
+		m_LoadingBar->AddPassName("");
 		m_InitialResourceList.push_back(m_VertexShader);
 		m_InitialResourceList.push_back(m_FragmentShader);
 	}
@@ -29,7 +30,7 @@ namespace resource
 		std::shared_ptr<graphics::CMaterialCreateInfo> createInfo = std::make_shared<graphics::CMaterialCreateInfo>();
 		createInfo->SetVertexShaderCode(m_VertexShader->GetData());
 		createInfo->SetFragmentShaderCode(m_FragmentShader->GetData());
-		auto Material = pGraphicsAPI->CreateMaterial(createInfo, 1, graphics::ECullMode::CULL_NONE);
+		auto Material = pGraphicsAPI->CreateMaterial(createInfo, graphics::ECullMode::CULL_NONE);
 
 		auto UniforBuffer = createInfo->CreateUniformBuffer("UniformBufferObject", {graphics::SBindingLayout("UniformBufferObject", 0, false)});
 		UniforBuffer->AddData("rate", graphics::EUniformValueType::VALUE_TYPE_FLOAT, &glm::vec1(0.0f)[0], sizeof(glm::vec1), 0, graphics::SUniformValueInput{});
@@ -70,7 +71,7 @@ namespace resource
 		return true;
 	}
 
-	bool CLoadWorker::Draw(api::IGraphicsAPI* pGraphicsAPI, bool IsDepthPass, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
+	bool CLoadWorker::Draw(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
 		const std::shared_ptr<graphics::CDrawInfo>& DrawInfo)
 	{
 		if(m_Status == ELoadStatus::Loaded) return true;
@@ -78,10 +79,23 @@ namespace resource
 		if (m_Status == ELoadStatus::Loading && m_LoadingBar)
 		{
 			float rate = 1.0f - (static_cast<float>(m_LoadResourceList.size()) / m_FirstResourceCount);
-			m_LoadingBar->GetMaterialList()[0]->SetUniformValue("rate", &glm::vec1(rate)[0], sizeof(float));
-			m_LoadingBar->GetMaterialList()[0]->SetUniformValue("alpha", &m_Alpha, sizeof(float));
 
-			if (!m_LoadingBar->Draw(pGraphicsAPI, IsDepthPass, false, Camera, Projection, DrawInfo)) return false;
+			for (const auto& Mesh : m_LoadingBar->GetMeshList())
+			{
+				for (const auto& Primitive : Mesh->GetPrimitiveList())
+				{
+					for (const auto& Renderer : Primitive->GetRendererList())
+					{
+						const auto& Material = std::get<1>(Renderer);
+						if (!Material) continue;
+
+						Material->SetUniformValue("rate", &glm::vec1(rate)[0], sizeof(float));
+						Material->SetUniformValue("alpha", &m_Alpha, sizeof(float));
+					}
+				}
+			}
+
+			if (!m_LoadingBar->Draw(pGraphicsAPI, Camera, Projection, DrawInfo)) return false;
 		}
 
 		return true;

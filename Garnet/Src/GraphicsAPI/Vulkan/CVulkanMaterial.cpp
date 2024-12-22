@@ -10,8 +10,8 @@
 
 namespace api
 {
-	CVulkanMaterial::CVulkanMaterial(api::CVulkanAPI* pGraphicsAPI, const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, int RefCount, graphics::ECullMode CullMode):
-		CMaterial(pGraphicsAPI, createInfo, RefCount, CullMode),
+	CVulkanMaterial::CVulkanMaterial(api::CVulkanAPI* pGraphicsAPI, const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, graphics::ECullMode CullMode):
+		CMaterial(pGraphicsAPI, createInfo, CullMode),
 		m_pGraphicsAPI(pGraphicsAPI),
 
 		m_VertShaderModule(nullptr),
@@ -201,7 +201,7 @@ namespace api
 		return true;
 	}
 
-	bool CVulkanMaterial::BuildDrawBuffer(int DynamicOffsetNum)
+	bool CVulkanMaterial::BuildDrawBuffer()
 	{
 		for (int i = 0; i < m_ShaderBufferList.size(); i++)
 		{
@@ -211,13 +211,20 @@ namespace api
 			if (m_ShaderBufferList[i]->GetBufferUpdateType() != graphics::EBufferUpdateType::UPDATE_TYPE_CPU) continue;
 
 			auto ByteSize = m_VKUniformBufferSizeList[m_pGraphicsAPI->GetCurrentFrame()][i];
-			auto ByteOffset = ((IsUseDynamicOffset())? (DynamicOffsetNum - 1) * ByteSize : 0);
+			int ByteOffset = 0;
+			if (IsUseDynamicOffset())
+			{
+				const auto it = m_PassNameDynamicOffsetMap.find(m_pGraphicsAPI->GetCurrentRenderPassName());
+				if (it == m_PassNameDynamicOffsetMap.end()) return false;
+
+				ByteOffset = it->second * ByteSize;
+			}
 
 			// バッファデータの更新
 			void* BuffersMappedList;
 			vkMapMemory(m_pGraphicsAPI->GetLogicalDevice(), m_VKUniformBufferMemoryList[m_pGraphicsAPI->GetCurrentFrame()][i], ByteOffset, ByteSize, 0, &BuffersMappedList);
 
-			const auto& BufferData = m_ShaderBufferList[i]->GetData();
+			const auto& BufferData = m_ShaderBufferList[i]->GetBuffer();
 			auto bufferSize = BufferData.size();
 
 			std::memcpy(BuffersMappedList, &BufferData[0], bufferSize);
@@ -228,7 +235,7 @@ namespace api
 		return true;
 	}
 
-	void CVulkanMaterial::SetUniformValue(const std::string Name, const void* Data, int ByteSize, int DynamicOffsetNum)
+	void CVulkanMaterial::SetUniformValue(const std::string Name, const void* Data, int ByteSize)
 	{
 		for (int i = 0; i < m_ShaderBufferList.size(); i++)
 		{
@@ -270,14 +277,23 @@ namespace api
 		}
 	}
 
-	void CVulkanMaterial::BindUBO(int DynamicOffsetNum)
+	void CVulkanMaterial::BindUBO()
 	{
 		if (IsUseShaderBuffer())
 		{
 			std::vector<uint32_t> dynamicOffsetList;
 			for (const auto& Size : GetBindingRefSizeList())
 			{
-				uint32_t dynamicOffset = (DynamicOffsetNum - 1) * Size;
+				uint32_t dynamicOffset = 0;
+
+				if (IsUseDynamicOffset())
+				{
+					const auto it = m_PassNameDynamicOffsetMap.find(m_pGraphicsAPI->GetCurrentRenderPassName());
+					if (it == m_PassNameDynamicOffsetMap.end()) return;
+
+					dynamicOffset = it->second * Size;
+				}
+
 				dynamicOffsetList.push_back(dynamicOffset);
 			}
 
@@ -517,7 +533,7 @@ namespace api
 				// SharedBufferは処理しない
 				if (Buffer->GetSharedBufferParam().IsShared) continue;
 
-				const auto& Data = Buffer->GetData();
+				const auto& Data = Buffer->GetBuffer();
 				const uint64_t ByteSize = static_cast<uint64_t>(Data.size());
 
 				// DynamicOffsetはバッファサイズが256バイト以上でないと使用できないので使用する設定になっていてそれよりも小さい時はエラーとする
@@ -531,12 +547,14 @@ namespace api
 				VkBuffer UniformBuffer = nullptr;
 				VkDeviceMemory BufferMemory = nullptr;
 
+				const int RefCount = static_cast<int>(m_PassNameDynamicOffsetMap.size());
+
 				// バッファの作成
 				if (Buffer->GetBufferType() == graphics::EBufferType::UNIFORM)
 				{
 					if (IsUseDynamicOffset())
 					{
-						m_pGraphicsAPI->CreateBuffer(ByteSize * m_RefCount, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, UniformBuffer, BufferMemory);
+						m_pGraphicsAPI->CreateBuffer(ByteSize * RefCount, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, UniformBuffer, BufferMemory);
 					}
 					else
 					{
@@ -547,7 +565,7 @@ namespace api
 				{
 					if (IsUseDynamicOffset())
 					{
-						m_pGraphicsAPI->CreateBuffer(ByteSize * m_RefCount, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, UniformBuffer, BufferMemory);
+						m_pGraphicsAPI->CreateBuffer(ByteSize * RefCount, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, UniformBuffer, BufferMemory);
 					}
 					else
 					{

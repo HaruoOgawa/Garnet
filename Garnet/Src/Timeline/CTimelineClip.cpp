@@ -123,23 +123,32 @@ namespace timeline
 			}
 
 			// Material
-			for (const auto& Material : Object->GetMaterialList())
+			for (const auto& Mesh : Object->GetMeshList())
 			{
-				for (const auto& RefTrackID : Material->GetRefTrackIDList())
+				for (const auto& Primitive : Mesh->GetPrimitiveList())
 				{
-					const auto& it = m_TrackList.find(RefTrackID);
-					if (it == m_TrackList.end())
+					for (const auto& Renderer : Primitive->GetRendererList())
 					{
-						// トラックが存在しなかったら削除する
-						Material->RemoveRefTrackID(RefTrackID);
+						const auto& Material = std::get<1>(Renderer);
+						if (!Material) continue;
 
-						continue;
+						for (const auto& RefTrackID : Material->GetRefTrackIDList())
+						{
+							const auto& it = m_TrackList.find(RefTrackID);
+							if (it == m_TrackList.end())
+							{
+								// トラックが存在しなかったら削除する
+								Material->RemoveRefTrackID(RefTrackID);
+
+								continue;
+							}
+
+							it->second->AssignTrackContent(Material);
+						}
+
+						Material->ShrinkToFitTrackIDList();
 					}
-
-					it->second->AssignTrackContent(Material);
 				}
-
-				Material->ShrinkToFitTrackIDList();
 			}
 		}
 		

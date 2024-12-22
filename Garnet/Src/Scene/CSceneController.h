@@ -46,9 +46,10 @@ namespace scene
 	struct SMaterialInfo 
 	{
 		std::string MaterialFrameName = "";
+		int MeshIndex = -1;
+		int PrimitiveIndex = -1;
 		std::vector<SUniformInfo> UniformInfoList;
 		std::vector<std::tuple<std::string, std::string, int>> Textures;
-		int RefCount = 0;
 		graphics::ECullMode CullMode = graphics::ECullMode::CULL_BACK;
 		std::vector<std::string> TrackIDList;
 	};
@@ -121,7 +122,6 @@ namespace scene
 
 		// PassNameが設定されていない時のデフォルトの値
 		std::string m_DefaultRenderPass;
-		std::string m_DefaultDepthPass;
 
 		std::shared_ptr<object::C3DObject> m_DebugSphere = nullptr;
 
@@ -139,7 +139,7 @@ namespace scene
 
 		void Reset();
 
-		void SetDefaultPass(const std::string& RenderPass, const std::string& DepthPass);
+		void SetDefaultPass(const std::string& RenderPass);
 
 		void SetFileName(const std::string& Name);
 		const std::string& GetFileName() const;
@@ -150,7 +150,7 @@ namespace scene
 		//
 		void AddObject(const std::shared_ptr<object::C3DObject>& Object);
 		void AddObjectWithLoading(resource::CLoadWorker* pLoadWorker, const std::shared_ptr<object::C3DObject>& Object, const std::string& FileName, 
-			const std::string& DefaultMaterialframeName, animation::ERigType RigType);
+			const std::vector<std::string>& defaultmaterialframeList, animation::ERigType RigType);
 		std::vector<std::shared_ptr<object::C3DObject>> GetObjectList() const;
 		std::shared_ptr<object::C3DObject> FindObjectByName(const std::string& Name);
 		std::shared_ptr<object::C3DObject> FindObjectByIndex(int Index);
@@ -191,7 +191,7 @@ namespace scene
 		bool LateUpdate(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo);
 		bool FixedUpdate(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo);
 
-		bool Draw(api::IGraphicsAPI* pGraphicsAPI, bool IsDepthPass, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
+		bool Draw(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
 			const std::shared_ptr<graphics::CDrawInfo>& DrawInfo);
 	};
 }

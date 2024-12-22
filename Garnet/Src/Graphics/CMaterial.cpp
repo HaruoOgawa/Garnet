@@ -3,14 +3,11 @@
 
 namespace graphics
 {
-	CMaterial::CMaterial(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CMaterialCreateInfo>& createInfo, int RefCount, ECullMode CullMode):
+	CMaterial::CMaterial(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CMaterialCreateInfo>& createInfo, ECullMode CullMode):
 		timeline::CTimelineTrackContent(),
 		m_MaterialName(std::string()),
 		m_MaterialFrame(nullptr),
 		m_CreateInfo(createInfo),
-		m_RefCount(RefCount),
-		m_CurrentDynamicOffset(0),
-		m_DepthMaterial(nullptr),
 		m_EnabledZWrite(true),
 		m_DepthFunc(EDepthFunc::Less),
 		m_DefaultCullMode(CullMode),
@@ -21,8 +18,6 @@ namespace graphics
 		m_EmptyCubeTexture(nullptr),
 		m_OutputColorCount(1)
 	{
-		ResetDynamicOffset();
-
 		{
 			
 			m_EmptyTexture = pGraphicsAPI->CreateTexture(false);
@@ -39,9 +34,29 @@ namespace graphics
 		}
 	}
 
+	bool CMaterial::Create(const std::vector<std::string>& PassNameList, const std::shared_ptr<graphics::CTextureSet>& TextureSet)
+	{
+		for (int PassIndex = 0; PassIndex < static_cast<int>(PassNameList.size()); PassIndex++)
+		{
+			const auto& PassName = PassNameList[PassIndex];
+
+			m_PassNameDynamicOffsetMap.emplace(PassName, PassIndex);
+		}
+
+		//
+		if (!Create(TextureSet)) return false;
+
+		return true;
+	}
+
 	bool CMaterial::Create(const std::shared_ptr<graphics::CTextureSet>& TextureSet)
 	{
 		return true;
+	}
+
+	const std::map<std::string, int>& CMaterial::GetPassNameDynamicOffsetMap() const
+	{
+		return m_PassNameDynamicOffsetMap;
 	}
 
 	bool CMaterial::IsUseShaderBuffer()
@@ -92,6 +107,11 @@ namespace graphics
 		return m_ShaderBufferList;
 	}
 
+	void CMaterial::SetTextureBindingLayoutList(const std::vector<STextureBindingLayout>& LayoutList)
+	{
+		m_TextureBindingLayoutList = LayoutList;
+	}
+
 	const std::vector<STextureBindingLayout>& CMaterial::GetTextureBindingLayoutList() const
 	{
 		return m_TextureBindingLayoutList;
@@ -104,17 +124,6 @@ namespace graphics
 		m_TextureBindingLayoutList[BindingLayoutIndex].TextureIndex = TextureIndex;
 
 		CreateRefTextureList(m_CreateInfo, TextureSet);
-	}
-
-	bool CMaterial::CreateDepthMaterial(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<graphics::CMaterialFrame>& DepthMF)
-	{
-		m_DepthMaterial = DepthMF->CreateMaterial(pGraphicsAPI, m_RefCount, m_CullMode);
-
-		m_DepthMaterial->SetCullMode(graphics::ECullMode::CULL_FRONT);
-
-		if (!m_DepthMaterial->Create(nullptr)) return false;
-
-		return true;
 	}
 
 	bool CMaterial::ReCreate(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, const std::vector<std::shared_ptr<CShaderBuffer>>& ShaderBufferList, const std::vector<STextureBindingLayout>& TextureBindingLayoutList)
@@ -314,11 +323,6 @@ namespace graphics
 		return true;
 	}
 
-	std::shared_ptr<graphics::CMaterial> CMaterial::GetDepthMaterial() 
-	{
-		return m_DepthMaterial; 
-	}
-
 	void CMaterial::SetEnabledZWrite(bool Flag)
 	{
 		m_EnabledZWrite = Flag;
@@ -398,39 +402,13 @@ namespace graphics
 		}
 	}
 
-	void CMaterial::SetUniformValue(const std::string Name, const void* Data, int ByteSize, int DynamicOffsetNum)
+	void CMaterial::SetUniformValue(const std::string Name, const void* Data, int ByteSize)
 	{
-	}
-
-	void CMaterial::AddRefCount()
-	{
-		m_RefCount++;
-	}
-
-	int CMaterial::GetRefCount() const
-	{
-		return m_RefCount;
 	}
 
 	bool CMaterial::IsUseDynamicOffset()
 	{
-		return (m_RefCount > 1);
-	}
-
-	void CMaterial::IncreaseDynamicOffset()
-	{
-		m_CurrentDynamicOffset++;
-	}
-
-	int CMaterial::GetDynamicOffset() const
-	{
-		return m_CurrentDynamicOffset;
-	}
-
-	void CMaterial::ResetDynamicOffset()
-	{
-		// ダイナミックオフセットは１から使用できるので初期値も１にする
-		m_CurrentDynamicOffset = 1;
+		return (m_PassNameDynamicOffsetMap.size() > 1);
 	}
 
 	const std::vector<uint32_t>& CMaterial::GetBindingRefSizeList() const

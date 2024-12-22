@@ -7,6 +7,7 @@
 #include "../Graphics/SBindingLayout.h"
 #include "../Graphics/SBufferValueLayout.h"
 #include "../Graphics/STextureBindingLayout.h"
+#include "../Graphics/ECullMode.h"
 #include "../GraphicsAPI/CMaterialCreateInfo.h"
 
 #include "CMaterial.h"
@@ -29,6 +30,9 @@ namespace graphics
 
 		std::string m_MaterialFrameName;
 
+		// ƒJƒŠƒ“ƒO
+		graphics::ECullMode m_CullMode;
+
 		std::string m_FileName;
 
 		std::shared_ptr<graphics::CMaterialCreateInfo> m_CreateInfo;
@@ -45,6 +49,9 @@ namespace graphics
 		void SetMaterialFrameName(const std::string& Name);
 		const std::string& GetMaterialFrameName() const;
 
+		void SetCullMode(graphics::ECullMode CullMode);
+		graphics::ECullMode GetCullMode() const;
+
 		void SetFileName(const std::string& Name);
 		const std::string& GetFileName() const;
 
@@ -59,7 +66,8 @@ namespace graphics
 		void SetShaderBufferList(const std::vector<SShaderBufferSet>& ShaderBufferList);
 		void SetTextureBufferList(const std::vector<graphics::STextureBindingLayout>& TextureBufferList);
 
-		std::shared_ptr<CMaterial> CreateMaterial(api::IGraphicsAPI* pGraphicsAPI, int RefCount, graphics::ECullMode CullMode);
+		std::shared_ptr<CMaterial> CreateMaterial(api::IGraphicsAPI* pGraphicsAPI, graphics::ECullMode CullMode);
+		std::shared_ptr<CMaterial> CopyMaterial(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CMaterial>& SrcMaterial);
 		bool DeleteRefMaterial(const std::shared_ptr<graphics::CMaterial>& Material);
 
 		bool Reload();

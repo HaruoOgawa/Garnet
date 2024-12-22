@@ -48,8 +48,8 @@ namespace resource
 
 		std::shared_ptr<math::CTransform> AnalyseTransform(const json::iterator& Object);
 		std::shared_ptr<object::CNode> AnalyseNode(const json::iterator& nodeJSON, physics::IPhysicsEngine* pPhysicsEngine, const std::shared_ptr<object::C3DObject>& Object, app::CApp* pApp);
-		std::shared_ptr<graphics::CMesh> AnalyseMesh(api::IGraphicsAPI* pGraphicsAPI, const json::iterator& meshJSON, std::map<int, int>& MatRefCountMap);
-		scene::SMaterialInfo AnalyseMaterialInfo(const json::iterator& materialJSON, int MaterialIndex, const std::map<int, int>& MatRefCountMap);
+		std::shared_ptr<graphics::CMesh> AnalyseMesh(api::IGraphicsAPI* pGraphicsAPI, const json::iterator& meshJSON);
+		scene::SMaterialInfo AnalyseMaterialInfo(const json::iterator& materialJSON);
 		scene::SAnimationInfo AnalyseAnimationInfo(const json::iterator& animationJSON);
 
 		void GetString(const std::string& Key, std::string& Value, const json::iterator& Object);

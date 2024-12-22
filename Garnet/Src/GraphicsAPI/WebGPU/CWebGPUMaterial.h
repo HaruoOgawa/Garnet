@@ -43,13 +43,13 @@ namespace api
 		bool             CreateWGUniformBuffer(WGPUBuffer& Buffer, WGPUBufferUsageFlags Usage, void const* Data, uint64_t ByteSize);
 		void			 InitDefalutBindGroupLayoutEntry(WGPUBindGroupLayoutEntry& bindingLayout);
 	public:
-		CWebGPUMaterial(api::CWebGPUAPI* pGraphicsAPI, const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, int RefCount, graphics::ECullMode CullMode);
+		CWebGPUMaterial(api::CWebGPUAPI* pGraphicsAPI, const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, graphics::ECullMode CullMode);
 		virtual ~CWebGPUMaterial();
 
 		virtual bool Create(const std::shared_ptr<graphics::CTextureSet>& TextureSet) override;
-		virtual bool BuildDrawBuffer(int DynamicOffsetNum) override;
+		virtual bool BuildDrawBuffer() override;
 
-		virtual void SetUniformValue(const std::string Name, const void* Data, int ByteSize, int DynamicOffsetNum = -1) override;
+		virtual void SetUniformValue(const std::string Name, const void* Data, int ByteSize) override;
 
 		const WGPUShaderModule& GetVertexShaderModele() { return m_VertexShaderModele; }
 		const WGPUShaderModule& GetFragmentShaderModele() { return m_FragmentShaderModele; }

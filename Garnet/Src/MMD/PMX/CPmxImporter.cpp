@@ -20,7 +20,8 @@
 namespace mmd
 {
 	bool CPmxImporter::ImportPmx(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, const std::string& ModelFileName, 
-		const std::vector<unsigned char>& Data, object::C3DObject* Object, const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, resource::C3DObjectLoader* p3DObjectLoader, 
+		const std::vector<unsigned char>& Data, object::C3DObject* Object, const std::vector<std::shared_ptr<graphics::CMaterialFrame>>& BaseMaterialFrameList,
+		resource::C3DObjectLoader* p3DObjectLoader, 
 		animation::ERigType RigType, const std::map<animation::EHumanoidBones, std::string>& HumanoidBoneList)
 	{
 		CPmxModel model;
@@ -60,9 +61,9 @@ namespace mmd
 		Skeleton->MakeGrantBoneList();
 
 		// マテリアルリスト
-		std::vector<std::shared_ptr<graphics::CMaterial>> MaterialList;
+		std::vector<std::vector<std::shared_ptr<graphics::CMaterial>>> BaseMaterialList;
 		std::map<int, std::vector<std::shared_ptr<graphics::CMaterial>>> SharedToonUsingList;
-		if (!CreateMaterialList(pGraphicsAPI, model, MaterialList, SharedToonUsingList, MaterialFrame, Skeleton)) return false;
+		if (!CreateMaterialList(pGraphicsAPI, model, BaseMaterialList, SharedToonUsingList, BaseMaterialFrameList, Skeleton)) return false;
 
 		// テクスチャリスト
 		std::vector<std::shared_ptr<graphics::CTexture>> TextureList;
@@ -71,7 +72,7 @@ namespace mmd
 
 		// メッシュ
 		std::vector<std::shared_ptr<graphics::CMesh>> MeshList;
-		if (!CreateMeshList(pGraphicsAPI, Object, model, MeshList, RootNode, NodeList, MaterialList, (Skeleton->GetBoneList().size() > 0))) return false;
+		if (!CreateMeshList(pGraphicsAPI, Object, model, MeshList, RootNode, NodeList, BaseMaterialList, (Skeleton->GetBoneList().size() > 0))) return false;
 
 		// 物理演算
 		if (pPhysicsEngine->IsEnabled())
@@ -93,11 +94,6 @@ namespace mmd
 		}
 
 		Object->SetAnimationSkeleton(Skeleton);
-
-		for (const auto& Material : MaterialList)
-		{
-			Object->AddMaterial(Material);
-		}
 
 		for (const auto& Texture : TextureList)
 		{
@@ -231,109 +227,129 @@ namespace mmd
 		return true;
 	}
 
-	bool CPmxImporter::CreateMaterialList(api::IGraphicsAPI* pGraphicsAPI, const CPmxModel& model, std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList,
+	bool CPmxImporter::CreateMaterialList(api::IGraphicsAPI* pGraphicsAPI, const CPmxModel& model, 
+		std::vector<std::vector<std::shared_ptr<graphics::CMaterial>>>& BaseMaterialList,
 		std::map<int, std::vector<std::shared_ptr<graphics::CMaterial>>>& SharedToonUsingList,
-		const std::shared_ptr<graphics::CMaterialFrame>& MaterialFrame, const std::shared_ptr<animation::CSkeleton>& Skeleton)
+		const std::vector<std::shared_ptr<graphics::CMaterialFrame>>& BaseMaterialFrameList, const std::shared_ptr<animation::CSkeleton>& Skeleton)
 	{
-		if (!MaterialFrame) return false;
+		if (BaseMaterialFrameList.empty()) return false;
 
 		const auto& PmxMaterilList = model.GetPmxMaterialList();
 
 		for (const auto& PmxMaterial : PmxMaterilList)
 		{
-			// アウトラインにも使用するので2つ参照する
-			int MatRefCount = 2;
+			const graphics::ECullMode CommonCullMode = (PmxMaterial->IsDrawDoubleSlided()) ? graphics::ECullMode::CULL_NONE : graphics::ECullMode::CULL_BACK;
 
-			graphics::ECullMode CullMode = (PmxMaterial->IsDrawDoubleSlided()) ? graphics::ECullMode::CULL_NONE : graphics::ECullMode::CULL_BACK;
+			// プリミティブ単位で割り当てられるマテリアルリスト
+			std::vector<std::shared_ptr<graphics::CMaterial>> PrimitiveMaterials;
 
-			// マテリアルにシェーダーを設定
-			std::shared_ptr<graphics::CMaterial> material = MaterialFrame->CreateMaterial(pGraphicsAPI, MatRefCount, CullMode);
-
-			material->ReplacePreloadUniformValue("edgeSize", &glm::vec1(PmxMaterial->GetEdgeSize())[0], sizeof(float), 0);
-
-			material->ReplacePreloadUniformValue("baseColorFactor", &PmxMaterial->GetDiffuse()[0], sizeof(glm::vec4), 2);
-			material->ReplacePreloadUniformValue("ambientFactor", &PmxMaterial->GetAmbient()[0], sizeof(glm::vec4), 2);
-			material->ReplacePreloadUniformValue("specularFactor", &PmxMaterial->GetSpecular()[0], sizeof(glm::vec4), 2);
-			material->ReplacePreloadUniformValue("edgeColor", &PmxMaterial->GetEdgeColor()[0], sizeof(glm::vec4), 2);
-			material->ReplacePreloadUniformValue("specularIntensity", &glm::vec1(PmxMaterial->GetSpecularCoef())[0], sizeof(float), 2);
-
-			// アウトライン
-			material->SetIsDrawOutline(PmxMaterial->IsDrawEdge());
-
-			// アルファブレンド(ひとまず全部で有効にする
-			material->SetBlendType(graphics::EBlendType::BLEND_TYPE_TRANSPARENT_ALPHA);
-
-			// MainTexture
+			for (const auto& MaterialFrame : BaseMaterialFrameList)
 			{
-				int TextureIndex = PmxMaterial->GetMainTexIndex();
+				graphics::ECullMode CullMode = CommonCullMode;
 
-				if (TextureIndex != -1)
+				// MFにカリングモードが設定されているのならそれに従う
+				if (MaterialFrame->GetCullMode() != graphics::ECullMode::NOT_SET)
 				{
-					material->ReplacePreloadUniformValue("UseMainTexture", &glm::ivec1(1)[0], sizeof(int), 2);
-					material->ReplaceTextureIndex("MainTexture", TextureIndex);
+					CullMode = MaterialFrame->GetCullMode();
 				}
+
+				// 裏面描画のMFでかつアウトラインがオフならマテリアル作成をスキップする
+				if (CullMode == graphics::ECullMode::CULL_FRONT && !PmxMaterial->IsDrawEdge())
+				{
+					continue;
+				}
+
+				// マテリアルにシェーダーを設定
+				std::shared_ptr<graphics::CMaterial> material = MaterialFrame->CreateMaterial(pGraphicsAPI, CullMode);
+
+				material->ReplacePreloadUniformValue("edgeSize", &glm::vec1(PmxMaterial->GetEdgeSize())[0], sizeof(float), 0);
+
+				material->ReplacePreloadUniformValue("baseColorFactor", &PmxMaterial->GetDiffuse()[0], sizeof(glm::vec4), 2);
+				material->ReplacePreloadUniformValue("ambientFactor", &PmxMaterial->GetAmbient()[0], sizeof(glm::vec4), 2);
+				material->ReplacePreloadUniformValue("specularFactor", &PmxMaterial->GetSpecular()[0], sizeof(glm::vec4), 2);
+				material->ReplacePreloadUniformValue("edgeColor", &PmxMaterial->GetEdgeColor()[0], sizeof(glm::vec4), 2);
+				material->ReplacePreloadUniformValue("specularIntensity", &glm::vec1(PmxMaterial->GetSpecularCoef())[0], sizeof(float), 2);
+
+				// アウトライン
+				material->SetIsDrawOutline(PmxMaterial->IsDrawEdge());
+
+				// アルファブレンド(ひとまず全部で有効にする
+				material->SetBlendType(graphics::EBlendType::BLEND_TYPE_TRANSPARENT_ALPHA);
+
+				// MainTexture
+				{
+					int TextureIndex = PmxMaterial->GetMainTexIndex();
+
+					if (TextureIndex != -1)
+					{
+						material->ReplacePreloadUniformValue("UseMainTexture", &glm::ivec1(1)[0], sizeof(int), 2);
+						material->ReplaceTextureIndex("MainTexture", TextureIndex);
+					}
+				}
+
+				// ToonTexture
+				{
+					int ToonTexIndex = PmxMaterial->GetToonTexIndex();
+					int SharedToonTexIndex = PmxMaterial->GetSharedToonTexIndex();
+
+					if (ToonTexIndex >= 0 && ToonTexIndex < model.GetPmxTextureList().size())
+					{
+						material->ReplacePreloadUniformValue("UseToonTexture", &glm::ivec1(1)[0], sizeof(int), 2);
+						material->ReplaceTextureIndex("ToonTexture", ToonTexIndex);
+					}
+					else if (SharedToonTexIndex >= 0 && SharedToonTexIndex < model.GetPmxTextureList().size())
+					{
+						// 共通トゥーンテクスチャ使用リストに追加
+						if (SharedToonUsingList.find(SharedToonTexIndex) == SharedToonUsingList.end()) SharedToonUsingList.emplace(SharedToonTexIndex, std::vector<std::shared_ptr<graphics::CMaterial>>());
+
+						SharedToonUsingList[SharedToonTexIndex].push_back(material);
+					}
+				}
+
+				// SphereTexture
+				{
+					int SphereTexIndex = PmxMaterial->GetSphereTexIndex();
+					EPmxSphereMode SphereMode = PmxMaterial->GetSphereMode();
+
+					if (SphereTexIndex >= 0 && SphereTexIndex < model.GetPmxTextureList().size())
+					{
+						material->ReplacePreloadUniformValue("UseSphereTexture", &glm::ivec1(1)[0], sizeof(int), 2);
+						material->ReplacePreloadUniformValue("SphereMode", &glm::ivec1(static_cast<int>(SphereMode))[0], sizeof(int), 2);
+
+						material->ReplaceTextureIndex("SphereTexture", SphereTexIndex);
+					}
+				}
+
+				// SkinMatrix StorageBuffer
+				{
+					// SkinMatは存在するBoneの数だけ用意する必要がある
+					// DynamicOffsetが256バイトからしか使えない都合上SkinMatCountの最小値は4とする(4 * 16 * 4 = 256)
+					int SkinMatCount = 0;
+					if (Skeleton && Skeleton->GetBoneList().size() > 0) SkinMatCount = static_cast<int>(Skeleton->GetBoneList().size());
+
+					// DynamicOffsetが256バイトからしか使えない都合上SkinMatCountの最小値は4とする(4 * 16 * 4 = 256)
+					if (SkinMatCount < 4) SkinMatCount = 4;
+
+					// SSBOのサイズは2のn乗である必要がある
+					SkinMatCount = math::CMath::CalcNextPowerOfTwo(SkinMatCount);
+
+					// 最大ボーン数よりも多いのならエラーとする
+					if (SkinMatCount > pGraphicsAPI->GetMaxBoneCount())
+					{
+						Console::Log("[Error] SkinMatCount is over MaxBoneCount. - SkinMatCount: %d, MaxBoneCount: %d\n", SkinMatCount, pGraphicsAPI->GetMaxBoneCount());
+						return false;
+					}
+
+					std::vector<glm::mat4> SkinMatrixList;
+					SkinMatrixList.resize(SkinMatCount, glm::mat4(1.0f));
+
+					material->ReplacePreloadUniformValue("r_SkinMatrixBuffer", &SkinMatrixList[0], static_cast<int>(SkinMatrixList.size()) * sizeof(glm::mat4), 1);
+				}
+
+				PrimitiveMaterials.push_back(material);
 			}
 
-			// ToonTexture
-			{
-				int ToonTexIndex = PmxMaterial->GetToonTexIndex();
-				int SharedToonTexIndex = PmxMaterial->GetSharedToonTexIndex();
-
-				if (ToonTexIndex >= 0 && ToonTexIndex < model.GetPmxTextureList().size())
-				{
-					material->ReplacePreloadUniformValue("UseToonTexture", &glm::ivec1(1)[0], sizeof(int), 2);
-					material->ReplaceTextureIndex("ToonTexture", ToonTexIndex);
-				}
-				else if (SharedToonTexIndex >= 0 && SharedToonTexIndex < model.GetPmxTextureList().size())
-				{
-					// 共通トゥーンテクスチャ使用リストに追加
-					if (SharedToonUsingList.find(SharedToonTexIndex) == SharedToonUsingList.end()) SharedToonUsingList.emplace(SharedToonTexIndex, std::vector<std::shared_ptr<graphics::CMaterial>>());
-
-					SharedToonUsingList[SharedToonTexIndex].push_back(material);
-				}
-			}
-
-			// SphereTexture
-			{
-				int SphereTexIndex = PmxMaterial->GetSphereTexIndex();
-				EPmxSphereMode SphereMode = PmxMaterial->GetSphereMode();
-
-				if (SphereTexIndex >= 0 && SphereTexIndex < model.GetPmxTextureList().size())
-				{
-					material->ReplacePreloadUniformValue("UseSphereTexture", &glm::ivec1(1)[0], sizeof(int), 2);
-					material->ReplacePreloadUniformValue("SphereMode", &glm::ivec1(static_cast<int>(SphereMode))[0], sizeof(int), 2);
-
-					material->ReplaceTextureIndex("SphereTexture", SphereTexIndex);
-				}
-			}
-
-			// SkinMatrix StorageBuffer
-			{
-				// SkinMatは存在するBoneの数だけ用意する必要がある
-				// DynamicOffsetが256バイトからしか使えない都合上SkinMatCountの最小値は4とする(4 * 16 * 4 = 256)
-				int SkinMatCount = 0;
-				if (Skeleton && Skeleton->GetBoneList().size() > 0) SkinMatCount = static_cast<int>(Skeleton->GetBoneList().size());
-
-				// DynamicOffsetが256バイトからしか使えない都合上SkinMatCountの最小値は4とする(4 * 16 * 4 = 256)
-				if (SkinMatCount < 4) SkinMatCount = 4;
-
-				// SSBOのサイズは2のn乗である必要がある
-				SkinMatCount = math::CMath::CalcNextPowerOfTwo(SkinMatCount);
-
-				// 最大ボーン数よりも多いのならエラーとする
-				if (SkinMatCount > pGraphicsAPI->GetMaxBoneCount())
-				{
-					Console::Log("[Error] SkinMatCount is over MaxBoneCount. - SkinMatCount: %d, MaxBoneCount: %d\n", SkinMatCount, pGraphicsAPI->GetMaxBoneCount());
-					return false;
-				}
-
-				std::vector<glm::mat4> SkinMatrixList;
-				SkinMatrixList.resize(SkinMatCount, glm::mat4(1.0f));
-
-				material->ReplacePreloadUniformValue("r_SkinMatrixBuffer", &SkinMatrixList[0], static_cast<int>(SkinMatrixList.size()) * sizeof(glm::mat4), 1);
-			}
-
-			MaterialList.push_back(material);
+			BaseMaterialList.push_back(PrimitiveMaterials);
 		}
 
 		return true;
@@ -341,7 +357,7 @@ namespace mmd
 
 	bool CPmxImporter::CreateMeshList(api::IGraphicsAPI* pGraphicsAPI, object::C3DObject* Object, const CPmxModel& model, std::vector<std::shared_ptr<graphics::CMesh>>& MeshList, 
 		const std::shared_ptr<object::CNode>& RootNode, std::vector<std::shared_ptr<object::CNode>>& NodeList,
-		const std::vector<std::shared_ptr<graphics::CMaterial>>& MaterialList, bool ExistSkeleton)
+		const std::vector<std::vector<std::shared_ptr<graphics::CMaterial>>>& BaseMaterialList, bool ExistSkeleton)
 	{
 		// 明示的にMeshNodeを作成
 		std::shared_ptr<object::CNode> MeshNode = std::make_shared<object::CNode>(-1, static_cast<int>(NodeList.size()));
@@ -598,8 +614,16 @@ namespace mmd
 				}
 
 				// プリミティブを作成する
-				std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(VertexBuffer, IndexBuffer, MaterialIndex);
-				
+				std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(VertexBuffer, IndexBuffer);
+
+				if (MaterialIndex < 0 || MaterialIndex >= static_cast<int>(BaseMaterialList.size())) return false;
+				const auto& PrimitiveMaterials = BaseMaterialList[MaterialIndex];
+
+				for (const auto& material : PrimitiveMaterials)
+				{
+					Primitive->AddMaterial(pGraphicsAPI, material);
+				}
+
 				Mesh->AddPrimitive(Primitive);
 			}
 

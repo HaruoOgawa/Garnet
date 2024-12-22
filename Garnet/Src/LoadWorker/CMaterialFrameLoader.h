@@ -15,6 +15,7 @@
 #include "../Graphics/SBindingLayout.h"
 #include "../Graphics/SBufferValueLayout.h"
 #include "../Graphics/STextureBindingLayout.h"
+#include "../Graphics/ECullMode.h"
 #include "../GraphicsAPI/CMaterialCreateInfo.h"
 
 using namespace nlohmann;
@@ -37,6 +38,9 @@ namespace resource
 
 		// MfData
 		std::string m_MaterialFrameName;
+
+		// カリング
+		graphics::ECullMode m_CullMode;
 
 		// カラーバッファへのアウトプット数(MRTで使用)
 		int m_OutputColorCount;

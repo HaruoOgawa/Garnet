@@ -1,7 +1,8 @@
 #pragma once
 #include <memory>
 #include <string>
-
+#include <vector>
+#include <tuple>
 #include "CPresetPrimitive.h"
 
 namespace api { class IGraphicsAPI; }
@@ -12,6 +13,7 @@ namespace graphics
 	class CMaterial;
 	class CVertexBuffer;
 	class CIndexBuffer;
+	class CTextureSet;
 
 	class CPrimitive
 	{
@@ -22,15 +24,12 @@ namespace graphics
 		std::shared_ptr<CVertexBuffer> m_VertexBuffer;
 		std::shared_ptr<CIndexBuffer> m_IndexBuffer;
 
-		std::shared_ptr<graphics::IRenderer>				 m_Renderer;
-		std::shared_ptr<graphics::IRenderer>				 m_DepthRenderer;
-		
-		int													 m_MaterialIndex;
+		std::vector<std::tuple<std::shared_ptr<graphics::IRenderer>, std::shared_ptr<CMaterial>>> m_RendererList;
 
 		// ÉÇÅ[Ét
 		bool m_UseMorph;
 	public:
-		CPrimitive(const std::shared_ptr<CVertexBuffer>& VertexBuffer, const std::shared_ptr<CIndexBuffer>& IndexBuffer, int MaterialIndex);
+		CPrimitive(const std::shared_ptr<CVertexBuffer>& VertexBuffer, const std::shared_ptr<CIndexBuffer>& IndexBuffer);
 		virtual ~CPrimitive();
 
 		void SetEnabled(bool Flag);
@@ -41,14 +40,13 @@ namespace graphics
 
 		void Release();
 
-		bool Create(api::IGraphicsAPI* pGraphicsAPI, const std::string& PassName, const std::shared_ptr<graphics::CMaterial>& Material, bool IsDepth);
+		bool Create(const std::vector<std::string>& PassNameList, const std::shared_ptr<graphics::CTextureSet>& TextureSet);
 
-		bool Draw(const std::shared_ptr<CMaterial>& Material, int DynamicOffsetNum, bool IsDepth);
+		bool Draw();
 
-		const std::shared_ptr<graphics::IRenderer>& GetRenderer() const;
+		const std::vector<std::tuple<std::shared_ptr<graphics::IRenderer>, std::shared_ptr<CMaterial>>>& GetRendererList() const;
 
-		void SetMaterialIndex(int Index);
-		int GetMaterialIndex() const;
+		void AddMaterial(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CMaterial>& Material);
 
 		const std::shared_ptr<CVertexBuffer>& GetVertexBuffer() const;
 

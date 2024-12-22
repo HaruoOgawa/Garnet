@@ -122,7 +122,12 @@ namespace graphics
 		}
 	}
 
-	const std::vector<unsigned char>& CShaderBuffer::GetData() const
+	void CShaderBuffer::SetBuffer(const std::vector<unsigned char>& Buffer)
+	{
+		m_Buffer = Buffer;
+	}
+
+	const std::vector<unsigned char>& CShaderBuffer::GetBuffer() const
 	{
 		return m_Buffer;
 	}

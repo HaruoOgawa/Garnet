@@ -405,16 +405,17 @@ namespace resource
 		{
 			if (!objectJSON->is_object()) continue;
 
-			// renderpass
-			std::string renderpass = std::string();
-			GetString("renderpass", renderpass, objectJSON);
-			
-			// renderpass
-			std::string depthpass = std::string();
-			GetString("depthpass", depthpass, objectJSON);
+			// renderpasslist
+			std::vector<std::string> renderpasslist;
+			GetArrayString("renderpasslist", renderpasslist, objectJSON);
 
 			// C3DObject生成
-			std::shared_ptr<object::C3DObject> Object = std::make_shared<object::C3DObject>(renderpass, depthpass);
+			std::shared_ptr<object::C3DObject> Object = std::make_shared<object::C3DObject>();
+
+			for (const auto& renderpass : renderpasslist)
+			{
+				Object->AddPassName(renderpass);
+			}
 
 			// ObjectName
 			{
@@ -464,8 +465,6 @@ namespace resource
 			}
 
 			// meshs
-			std::map<int, int> MatRefCountMap;
-
 			const auto meshs = objectJSON->find("meshs");
 			if (meshs != objectJSON->end() && meshs->is_array())
 			{
@@ -473,7 +472,7 @@ namespace resource
 				{
 					if (!meshJSON->is_object()) continue;
 
-					std::shared_ptr<graphics::CMesh> Mesh = AnalyseMesh(pGraphicsAPI, meshJSON, MatRefCountMap);
+					std::shared_ptr<graphics::CMesh> Mesh = AnalyseMesh(pGraphicsAPI, meshJSON);
 					Object->AddMesh(Mesh);
 				}
 			}
@@ -488,9 +487,7 @@ namespace resource
 				{
 					if (!materialJSON->is_object()) continue;
 
-					int MaterialIndex = static_cast<int>(MaterialInfoList.size());
-
-					scene::SMaterialInfo MaterialInfo = AnalyseMaterialInfo(materialJSON, MaterialIndex, MatRefCountMap);
+					scene::SMaterialInfo MaterialInfo = AnalyseMaterialInfo(materialJSON);
 					MaterialInfoList.push_back(MaterialInfo);
 				}
 
@@ -540,22 +537,30 @@ namespace resource
 				std::string filename = "";
 				GetString("filename", filename, objectJSON);
 
-				std::string defaultmaterialframe = "";
-				GetString("defaultmaterialframe", defaultmaterialframe, objectJSON);
+				std::vector<std::string> defaultmaterialframeList;
+				GetArrayString("defaultmaterialframes", defaultmaterialframeList, objectJSON);
 
 				if (!filename.empty())
 				{
-					const auto& MaterialFrameMap = m_Target->GetMaterialFrameMap();
-					const auto& MaterialFrame = MaterialFrameMap.find(defaultmaterialframe);
-					if (MaterialFrame == MaterialFrameMap.end())
-					{
-						Console::Log("[SceneLoader Error] defaultmaterialframe not found\n");
+					std::vector<std::shared_ptr<graphics::CMaterialFrame>> BaseMaterialFrameList;
 
-						return false;
+					const auto& MaterialFrameMap = m_Target->GetMaterialFrameMap();
+
+					for (const auto& defaultmaterialframe : defaultmaterialframeList)
+					{
+						const auto& MaterialFrame = MaterialFrameMap.find(defaultmaterialframe);
+						if (MaterialFrame == MaterialFrameMap.end())
+						{
+							Console::Log("[SceneLoader Error] defaultmaterialframe not found\n");
+
+							return false;
+						}
+
+						BaseMaterialFrameList.push_back(MaterialFrame->second);
 					}
 					
 					// 仮実装
-					pLoadWorker->AddLoadResource(std::make_shared<resource::C3DObjectLoader>(filename, Object, MaterialFrame->second, defaultmaterialframe, AnimationInfo.RigType, AnimationInfo.HumanoidBoneList));
+					pLoadWorker->AddLoadResource(std::make_shared<resource::C3DObjectLoader>(filename, Object, BaseMaterialFrameList, defaultmaterialframeList, AnimationInfo.RigType, AnimationInfo.HumanoidBoneList));
 				}
 			}
 
@@ -906,7 +911,7 @@ namespace resource
 		return Node;
 	}
 
-	std::shared_ptr<graphics::CMesh> CSceneLoader::AnalyseMesh(api::IGraphicsAPI* pGraphicsAPI, const json::iterator& meshJSON, std::map<int, int>& MatRefCountMap)
+	std::shared_ptr<graphics::CMesh> CSceneLoader::AnalyseMesh(api::IGraphicsAPI* pGraphicsAPI, const json::iterator& meshJSON)
 	{
 		std::shared_ptr<graphics::CMesh> Mesh = std::make_shared<graphics::CMesh>();
 
@@ -916,18 +921,6 @@ namespace resource
 			for (json::iterator primitiveJSON = primitives->begin(); primitiveJSON != primitives->end(); primitiveJSON++)
 			{
 				if (!primitiveJSON->is_object()) continue;
-
-				int materialindex = -1;
-				GetInt("materialindex", materialindex, primitiveJSON);
-
-				// マテリアル参照数の追加
-				{
-					auto it = MatRefCountMap.find(materialindex);
-
-					if (it == MatRefCountMap.end()) MatRefCountMap.emplace(materialindex, 0);
-
-					MatRefCountMap[materialindex]++;
-				}
 
 				std::string type = "";
 				GetString("type", type, primitiveJSON);
@@ -963,32 +956,31 @@ namespace resource
 				}
 
 				//
-				Mesh->CreatePresetSimpleMesh(createInfo.first, createInfo.second, materialindex, PrimitiveType);
+				Mesh->CreatePresetSimpleMesh(pGraphicsAPI, createInfo.first, createInfo.second, nullptr, PrimitiveType);
 			}
 		}
 
 		return Mesh;
 	}
 
-	scene::SMaterialInfo CSceneLoader::AnalyseMaterialInfo(const json::iterator& materialJSON, int MaterialIndex, const std::map<int, int>& MatRefCountMap)
+	scene::SMaterialInfo CSceneLoader::AnalyseMaterialInfo(const json::iterator& materialJSON)
 	{
 		scene::SMaterialInfo MaterialInfo{};
 
 		// マテリアルフレーム名
 		std::string materialframe = "";
 		GetString("materialframe", materialframe, materialJSON);
-
 		MaterialInfo.MaterialFrameName = materialframe;
 
-		// マテリアル参照数
-		{
-			auto it = MatRefCountMap.find(MaterialIndex);
+		// メッシュインデックス
+		int meshindex = -1;
+		GetInt("meshindex", meshindex, materialJSON);
+		MaterialInfo.MeshIndex = meshindex;
 
-			if (it != MatRefCountMap.end())
-			{
-				MaterialInfo.RefCount = it->second;
-			}
-		}
+		// プリミティブインデックス
+		int primitiveindex = -1;
+		GetInt("primitiveindex", primitiveindex, materialJSON);
+		MaterialInfo.PrimitiveIndex = primitiveindex;
 
 		// Uniformリスト
 		const auto uniformvalues = materialJSON->find("uniformvalues");

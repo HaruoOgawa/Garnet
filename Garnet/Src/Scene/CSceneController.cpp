@@ -13,8 +13,7 @@ namespace scene
 		m_BGM(std::make_tuple(nullptr, false, false)),
 		m_IsLoaded(false),
 		m_TimelineFileName(std::string()),
-		m_DefaultRenderPass(std::string()),
-		m_DefaultDepthPass(std::string())
+		m_DefaultRenderPass(std::string())
 	{
 
 	}
@@ -31,10 +30,9 @@ namespace scene
 		}
 	}
 
-	void CSceneController::SetDefaultPass(const std::string& RenderPass, const std::string& DepthPass)
+	void CSceneController::SetDefaultPass(const std::string& RenderPass)
 	{
 		m_DefaultRenderPass = RenderPass;
-		m_DefaultDepthPass = DepthPass;
 	}
 
 	void CSceneController::SetFileName(const std::string& Name)
@@ -60,14 +58,9 @@ namespace scene
 	void CSceneController::AddObject(const std::shared_ptr<object::C3DObject>& Object)
 	{
 		// レンダーパス名が空ならデフォルトの値を設定する
-		if (Object->GetPassName().empty())
+		if (Object->GetPassNameList().empty())
 		{
-			Object->SetPassName(m_DefaultRenderPass);
-		}
-
-		if (Object->GetDepthPassName().empty())
-		{
-			Object->SetDepthPassName(m_DefaultDepthPass);
+			Object->AddPassName(m_DefaultRenderPass);
 		}
 
 		// SceneTextureSet
@@ -91,16 +84,26 @@ namespace scene
 	}
 
 	void CSceneController::AddObjectWithLoading(resource::CLoadWorker* pLoadWorker, const std::shared_ptr<object::C3DObject>& Object, const std::string& FileName,
-		const std::string& DefaultMaterialframeName, animation::ERigType RigType)
+		const std::vector<std::string>& defaultmaterialframeList, animation::ERigType RigType)
 	{
-		const auto MaterialFrame = FindMaterialFrame(DefaultMaterialframeName);
-		if (!MaterialFrame) return;
+		std::vector<std::shared_ptr<graphics::CMaterialFrame>> BaseMaterialFrameList;
+		
+		for (const auto& Name : defaultmaterialframeList)
+		{
+			const auto MaterialFrame = FindMaterialFrame(Name);
+			if (!MaterialFrame) continue;
+
+			BaseMaterialFrameList.push_back(MaterialFrame);
+		}
+
+		if (BaseMaterialFrameList.empty()) return;
 
 		// ObjectListに追加
 		AddObject(Object);
 
 		// ロードワーカーに渡してロード開始
-		pLoadWorker->AddLoadResource(std::make_shared<resource::C3DObjectLoader>(FileName, Object, MaterialFrame, DefaultMaterialframeName, RigType, std::map<animation::EHumanoidBones, std::string>()));
+		pLoadWorker->AddLoadResource(std::make_shared<resource::C3DObjectLoader>(FileName, Object, BaseMaterialFrameList, defaultmaterialframeList, 
+			RigType, std::map<animation::EHumanoidBones, std::string>()));
 	}
 
 	std::vector<std::shared_ptr<object::C3DObject>> CSceneController::GetObjectList() const
@@ -339,11 +342,12 @@ namespace scene
 			auto MaterialFrame = m_MaterialFrameMap.find("pbr_mat");
 			if (MaterialFrame != m_MaterialFrameMap.end())
 			{
-				auto Material = MaterialFrame->second->CreateMaterial(pGraphicsAPI, pGraphicsAPI->GetMaxBoneCount(), graphics::ECullMode::CULL_BACK);
+				auto Material = MaterialFrame->second->CreateMaterial(pGraphicsAPI, graphics::ECullMode::CULL_BACK);
 
 				Material->SetDepthFunc(graphics::EDepthFunc::Always);
 
-				m_DebugSphere = std::make_shared<object::C3DObject>(m_DefaultRenderPass, m_DefaultDepthPass);
+				m_DebugSphere = std::make_shared<object::C3DObject>();
+				m_DebugSphere->AddPassName(m_DefaultRenderPass);
 				if (!m_DebugSphere->CreatePresetSimply(pGraphicsAPI, nullptr, graphics::CPresetPrimitive::CreateSphere(pGraphicsAPI), graphics::EPresetPrimitiveType::SPHERE, Material, nullptr)) return false;
 			}
 		}
@@ -431,14 +435,14 @@ namespace scene
 		return true;
 	}
 
-	bool CSceneController::Draw(api::IGraphicsAPI* pGraphicsAPI, bool IsDepthPass, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
+	bool CSceneController::Draw(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
 		const std::shared_ptr<graphics::CDrawInfo>& DrawInfo)
 	{
 		if (!m_IsLoaded) return true;
 
 		for (const auto& Object : m_ObjectList)
 		{
-			if (!Object->Draw(pGraphicsAPI, IsDepthPass, false, Camera, Projection, DrawInfo, m_DebugSphere)) return false;
+			if (!Object->Draw(pGraphicsAPI, Camera, Projection, DrawInfo, m_DebugSphere)) return false;
 		}
 
 		return true;
@@ -464,15 +468,15 @@ namespace scene
 
 	bool CSceneController::PrepareMaterialList(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<object::C3DObject>& Object, const std::map<std::string, int>& TexIndexMap)
 	{
-		if (static_cast<int>(Object->GetMaterialList().size()) == 0)
+		if (!Object->GetFileName().empty())
 		{
-			// MaterialListを生成
-			if (!CreateMaterialList(pGraphicsAPI, Object, TexIndexMap)) return false;
+			// ファイルからダウンロードしたモデルであればMaterial情報の更新のみを行う
+			if (!UpdateMaterialUniform(pGraphicsAPI, Object, TexIndexMap)) return false;
 		}
 		else
 		{
-			// Material情報を更新
-			if (!UpdateMaterialUniform(pGraphicsAPI, Object, TexIndexMap)) return false;
+			// MaterialListを生成
+			if (!CreateMaterialList(pGraphicsAPI, Object, TexIndexMap)) return false;
 		}
 
 		return true;
@@ -566,7 +570,7 @@ namespace scene
 			}
 
 			// Materialを生成
-			auto Material = MaterialFrame->second->CreateMaterial(pGraphicsAPI, MaterialInfo.RefCount, MaterialInfo.CullMode);
+			auto Material = MaterialFrame->second->CreateMaterial(pGraphicsAPI, MaterialInfo.CullMode);
 
 			// UniformValueを設定
 			for (const auto& UniformInfo : MaterialInfo.UniformInfoList)
@@ -605,7 +609,13 @@ namespace scene
 			Material->SetRefTrackIDList(MaterialInfo.TrackIDList);
 
 			// Materialを登録
-			Object->AddMaterial(Material);
+			if (MaterialInfo.MeshIndex < 0 || MaterialInfo.MeshIndex >= static_cast<int>(Object->GetMeshList().size())) return false;
+			const auto& Mesh = Object->GetMeshList()[MaterialInfo.MeshIndex];
+
+			if (MaterialInfo.PrimitiveIndex < 0 || MaterialInfo.PrimitiveIndex >= static_cast<int>(Mesh->GetPrimitiveList().size())) return false;
+			const auto& Primitive = Mesh->GetPrimitiveList()[MaterialInfo.PrimitiveIndex];
+
+			Primitive->AddMaterial(pGraphicsAPI, Material);
 		}
 
 		return true;
@@ -617,26 +627,34 @@ namespace scene
 		const auto& it = m_MaterialInfoMap.find(Object);
 		if (it == m_MaterialInfoMap.end()) return true;
 
-		//
 		const auto& MaterialInfoList = it->second;
-		const auto& MaterialList = Object->GetMaterialList();
 
-		if (MaterialInfoList.size() != MaterialList.size()) return true;
-
-		//
-		for (int MaterialIndex = 0; MaterialIndex < static_cast<int>(MaterialList.size()); MaterialIndex++)
+		for (int MaterialInfoIndex = 0; MaterialInfoIndex < static_cast<int>(MaterialInfoList.size()); MaterialInfoIndex++)
 		{
-			const auto& MaterialInfo = MaterialInfoList[MaterialIndex];
-			const auto& Material = MaterialList[MaterialIndex];
+			const auto& MaterialInfo = MaterialInfoList[MaterialInfoIndex];
 
-			// UniformValueを設定
-			for (const auto& UniformInfo : MaterialInfo.UniformInfoList)
+			if (MaterialInfo.MeshIndex < 0 || MaterialInfo.MeshIndex >= static_cast<int>(Object->GetMeshList().size())) continue;
+			const auto& Mesh = Object->GetMeshList()[MaterialInfo.MeshIndex];
+
+			if (MaterialInfo.PrimitiveIndex < 0 || MaterialInfo.PrimitiveIndex >= static_cast<int>(Mesh->GetPrimitiveList().size())) continue;
+			const auto& Primitive = Mesh->GetPrimitiveList()[MaterialInfo.PrimitiveIndex];
+
+			for (const auto& Renderer : Primitive->GetRendererList())
 			{
-				Material->SetUniformValue(UniformInfo.UniformName, &UniformInfo.UniformData[0], UniformInfo.ByteSize);
-			}
+				const auto& Material = std::get<1>(Renderer);
+				if (!Material) continue;
 
-			// TrackIDList
-			Material->SetRefTrackIDList(MaterialInfo.TrackIDList);
+				if (MaterialInfo.MaterialFrameName != Material->GetMaterialFrame()->GetMaterialFrameName()) continue;
+				
+				// UniformValueを設定
+				for (const auto& UniformInfo : MaterialInfo.UniformInfoList)
+				{
+					Material->SetUniformValue(UniformInfo.UniformName, &UniformInfo.UniformData[0], UniformInfo.ByteSize);
+				}
+
+				// TrackIDList
+				Material->SetRefTrackIDList(MaterialInfo.TrackIDList);
+			}
 		}
 
 		return true;

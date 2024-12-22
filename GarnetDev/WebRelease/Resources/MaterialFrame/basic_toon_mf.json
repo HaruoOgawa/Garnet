@@ -93,15 +93,15 @@
               }
             },
             {
-              "name": "drawPathIndex",
+              "name": "pad1",
               "type": "int",
-              "initValue": [ -1 ],
+              "initValue": [ 0 ],
               "input": {
                 "hide": true
               }
             },
             {
-              "name": "pad1",
+              "name": "pad2",
               "type": "int",
               "initValue": [ 0 ],
               "input": {
@@ -246,38 +246,6 @@
             },
             {
               "name": "SphereMode",
-              "type": "int",
-              "initValue": [ 0 ],
-              "input": {
-                "hide": true
-              }
-            },
-            {
-              "name": "drawPathIndex",
-              "type": "int",
-              "initValue": [ -1 ],
-              "input": {
-                "hide": true
-              }
-            },
-            {
-              "name": "iPad0",
-              "type": "int",
-              "initValue": [ 0 ],
-              "input": {
-                "hide": true
-              }
-            },
-            {
-              "name": "iPad1",
-              "type": "int",
-              "initValue": [ 0 ],
-              "input": {
-                "hide": true
-              }
-            },
-            {
-              "name": "iPad2",
               "type": "int",
               "initValue": [ 0 ],
               "input": {

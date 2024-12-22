@@ -7,10 +7,8 @@
 
 namespace api
 {
-	COpenGLRenderer::COpenGLRenderer(api::COpenGLAPI* pGraphicsAPI, const std::string& PassName):
+	COpenGLRenderer::COpenGLRenderer(api::COpenGLAPI* pGraphicsAPI):
 		m_pGraphicsAPI(pGraphicsAPI),
-		m_PassName(PassName),
-		m_DynamicOffsetNum(0),
 		m_InstanceCount(1),
 		m_VertexArray(-1),
 		m_VertexBuffer(nullptr)
@@ -45,7 +43,7 @@ namespace api
 		return true;
 	}
 
-	bool COpenGLRenderer::Create(const std::shared_ptr<graphics::CVertexBuffer>& VertexBuffer, const std::shared_ptr<graphics::CIndexBuffer>& IndexBuffer, const std::shared_ptr<graphics::CMaterial>& Material)
+	bool COpenGLRenderer::Create(const std::vector<std::string>& PassNameList, const std::shared_ptr<graphics::CVertexBuffer>& VertexBuffer, const std::shared_ptr<graphics::CIndexBuffer>& IndexBuffer, const std::shared_ptr<graphics::CMaterial>& Material)
 	{
 		m_InstanceCount = VertexBuffer->GetInstanceCount();
 
@@ -68,7 +66,8 @@ namespace api
 		return true;
 	}
 
-	bool COpenGLRenderer::Draw(const std::shared_ptr<graphics::CVertexBuffer>& VertexBuffer, const std::shared_ptr<graphics::CIndexBuffer>& IndexBuffer, const std::shared_ptr<graphics::CMaterial>& Material, int DynamicOffsetNum)
+	bool COpenGLRenderer::Draw(const std::shared_ptr<graphics::CVertexBuffer>& VertexBuffer, const std::shared_ptr<graphics::CIndexBuffer>& IndexBuffer, 
+		const std::shared_ptr<graphics::CMaterial>& Material)
 	{
 		const COpenGLVertexBuffer* pOpenGLVertexBuffer = static_cast<const COpenGLVertexBuffer*>(VertexBuffer.get());
 		const COpenGLIndexBuffer* pOpenGLIndexBuffer = static_cast<const COpenGLIndexBuffer*>(IndexBuffer.get());
@@ -81,7 +80,7 @@ namespace api
 		pOpenGLMat->SetActive();
 
 		// ユニフォームバッファの準備
-		if (!pOpenGLMat->BuildDrawBuffer(DynamicOffsetNum)) return false;
+		if (!pOpenGLMat->BuildDrawBuffer()) return false;
 
 		// 描画方法の設定
 		// Depth

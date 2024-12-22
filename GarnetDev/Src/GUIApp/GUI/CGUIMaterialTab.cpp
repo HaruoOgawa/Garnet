@@ -40,88 +40,18 @@ namespace gui
 
 		const auto& Object = ObjectList[SelectedObjectIndex];
 
-		// CreateMaterial
-		{
-			ImGui::SeparatorText("CreateMaterial");
-
-			// MaterialName
-			static std::string MaterialName = std::string();
-			{
-				static char buf[256] = "";
-
-				if (ImGui::InputText("MaterialName##AddObjectDialog", buf, IM_ARRAYSIZE(buf)))
-				{
-					MaterialName = std::string(buf);
-				}
-			}
-
-			static std::string CurrentMaterialFrameName = std::string();
-
-			if (ImGui::BeginCombo("MaterialFrame##DrawMaterialGUIOfObject_CGUIMaterialTab", CurrentMaterialFrameName.c_str()))
-			{
-				const auto& MaterialFrameMap = SceneController->GetMaterialFrameMap();
-
-				for (const auto& MaterialFrame : MaterialFrameMap)
-				{
-					std::string Name = MaterialFrame.second->GetMaterialFrameName();
-
-					const bool IsSelected = (CurrentMaterialFrameName == Name);
-
-					if (ImGui::Selectable(Name.c_str(), IsSelected) && !IsSelected)
-					{
-						CurrentMaterialFrameName = MaterialFrame.second->GetMaterialFrameName();
-					}
-				}
-
-				ImGui::EndCombo();
-			}
-
-			//
-			static graphics::ECullMode CullMode = graphics::ECullMode::CULL_BACK;
-			if (ImGui::BeginCombo("CullMode##DrawMaterialGUIOfObject_CGUIMaterialTab", GetStrFromCullMode(CullMode).c_str()))
-			{
-				for (int i = 0; i < static_cast<int>(graphics::ECullMode::Max); i++)
-				{
-					graphics::ECullMode CurrentCullMode = static_cast<graphics::ECullMode>(i);
-
-					const bool IsSelected = (CullMode == CurrentCullMode);
-
-					if (ImGui::Selectable(GetStrFromCullMode(CurrentCullMode).c_str(), IsSelected) && !IsSelected)
-					{
-						CullMode = CurrentCullMode;
-					}
-				}
-
-				ImGui::EndCombo();
-			}
-
-			//
-			if (ImGui::Button("AddMaterial##GUIMaterialTab_MaterialGUIOfObject"))
-			{
-				std::shared_ptr<graphics::CMaterialFrame> CurrentMaterialFrame = SceneController->FindMaterialFrame(CurrentMaterialFrameName);
-				if (CurrentMaterialFrame)
-				{
-					const auto& NewMaterial = CurrentMaterialFrame->CreateMaterial(pGraphicsAPI, 1, CullMode);
-					NewMaterial->SetMaterialName(MaterialName);
-
-					// ToDO: ‘¦Žž¶¬‚·‚é
-					if (!NewMaterial->Create(Object->GetTextureSet())) return false;
-
-					Object->AddMaterial(NewMaterial);
-				}
-
-				MaterialName = std::string();
-				CurrentMaterialFrameName = std::string();
-				CullMode = graphics::ECullMode::CULL_BACK;
-			}
-		}
-
 		// MaterialGUI
+		for (const auto& Mesh : Object->GetMeshList())
 		{
-			ImGui::SeparatorText("MaterialList");
-			for (const auto& Material : Object->GetMaterialList())
+			for (const auto& Primitive : Mesh->GetPrimitiveList())
 			{
-				if (!DrawMaterialGUI(pGraphicsAPI, Object, Material, SceneController)) return false;
+				for (const auto& Renderer : Primitive->GetRendererList())
+				{
+					const auto& Material = std::get<1>(Renderer);
+					if (!Material) continue;
+
+					if (!DrawMaterialGUI(pGraphicsAPI, Object, Material, SceneController)) return false;
+				}
 			}
 		}
 
@@ -156,20 +86,17 @@ namespace gui
 
 		for (const auto& Primitive : Mesh->GetPrimitiveList())
 		{
-			MaterialIndexSet.emplace(Primitive->GetMaterialIndex());
-		}
-
-		// Material‚ÌGUI‚ð•`‰æ
-		const auto& MaterialList = Object->GetMaterialList();
-
-		for (int MaterialIndex : MaterialIndexSet)
-		{
-			if (MaterialIndex >= 0 && MaterialIndex < static_cast<int>(MaterialList.size()))
+			for (const auto& Renderer : Primitive->GetRendererList())
 			{
-				const auto& Material = MaterialList[MaterialIndex];
+				const auto& Material = std::get<1>(Renderer);
 
+				if (!Material) continue;
+
+				// Material‚ÌGUI‚ð•`‰æ
 				if (!DrawMaterialGUI(pGraphicsAPI, Object, Material, SceneController)) return false;
 			}
+
+			
 		}
 
 		return true;
@@ -200,7 +127,7 @@ namespace gui
 							if (ImGui::Selectable(Label.c_str(), IsSelected) && !IsSelected)
 							{
 								// ƒ}ƒeƒŠƒAƒ‹‚Ì’u‚«Š·‚¦
-								auto NewMaterial = MaterialFrame.second->CreateMaterial(pGraphicsAPI, Material->GetRefCount(), Material->GetCullMode());
+								auto NewMaterial = MaterialFrame.second->CreateMaterial(pGraphicsAPI, Material->GetCullMode());
 								Object->ReplaceMaterial(Material, NewMaterial);
 							}
 						}
@@ -215,7 +142,7 @@ namespace gui
 
 			for (auto& UniformBuffer : ShaderBufferList)
 			{
-				const auto& BufferData = UniformBuffer->GetData();
+				const auto& BufferData = UniformBuffer->GetBuffer();
 
 				const auto& Descriptor = UniformBuffer->GetDescriptor();
 
@@ -499,28 +426,6 @@ namespace gui
 		int Dst = *reinterpret_cast<const int*>(&val);
 
 		return Dst;
-	}
-
-	std::string CGUIMaterialTab::GetStrFromCullMode(graphics::ECullMode CullMode)
-	{
-		std::string Text = "";
-
-		switch (CullMode)
-		{
-		case graphics::ECullMode::CULL_NONE:
-			Text = "CULL_NONE";
-			break;
-		case graphics::ECullMode::CULL_BACK:
-			Text = "CULL_BACK";
-			break;
-		case graphics::ECullMode::CULL_FRONT:
-			Text = "CULL_FRONT";
-			break;
-		default:
-			break;
-		}
-
-		return Text;
 	}
 }
 #endif

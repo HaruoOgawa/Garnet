@@ -110,16 +110,16 @@ namespace api
 		return IndexBuffer;
 	}
 
-	std::shared_ptr<graphics::IRenderer> CWebGPUAPI::CreateRenderer(const std::string& PassName)
+	std::shared_ptr<graphics::IRenderer> CWebGPUAPI::CreateRenderer()
 	{
-		auto Renderer = std::make_shared<api::CWebGPURenderer>(this, PassName);
+		auto Renderer = std::make_shared<api::CWebGPURenderer>(this);
 
 		return Renderer;
 	}
 
-	std::shared_ptr<graphics::CMaterial> CWebGPUAPI::CreateMaterial(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, int RefCount, graphics::ECullMode CullMode)
+	std::shared_ptr<graphics::CMaterial> CWebGPUAPI::CreateMaterial(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, graphics::ECullMode CullMode)
 	{
-		auto Material = std::make_shared<api::CWebGPUMaterial>(this, createInfo, RefCount, CullMode);
+		auto Material = std::make_shared<api::CWebGPUMaterial>(this, createInfo, CullMode);
 
 		return Material;
 	}
