@@ -86,6 +86,7 @@ namespace app
 
 		// オフスクリーンレンダリング
 		if (!pGraphicsAPI->CreateRenderPass("MainResultPass", api::ERenderPassFormat::COLOR_FLOAT_RENDERPASS, glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), -1, -1, 1)) return false;
+		if (!pGraphicsAPI->CreateRenderPass("ShadowPass", api::ERenderPassFormat::COLOR_FLOAT_RENDERPASS, glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), -1, -1, 1)) return false;
 
 		m_MainFrameRenderer = std::make_shared<graphics::CFrameRenderer>(pGraphicsAPI, "", pGraphicsAPI->FindOffScreenRenderPass("MainResultPass")->GetFrameTextureList());
 		if (!m_MainFrameRenderer->Create(pLoadWorker, "Resources\\MaterialFrame\\FrameTexture_MF.json")) return false;
@@ -191,6 +192,16 @@ namespace app
 		{
 			if (!pGraphicsAPI->BeginRender("MainResultPass")) return false;
 			if (!m_SceneController->Draw(pGraphicsAPI, m_MainCamera, m_Projection, m_DrawInfo)) return false;
+			if (!pGraphicsAPI->EndRender()) return false;
+		}
+		
+		// ShadowPass
+		{
+			std::shared_ptr<camera::CCamera> ShadowCamera = std::make_shared<camera::CCamera>();
+			ShadowCamera->SetPos(glm::vec3(5.0f, 5.0f, 5.0f));
+
+			if (!pGraphicsAPI->BeginRender("ShadowPass")) return false;
+			if (!m_SceneController->Draw(pGraphicsAPI, ShadowCamera, m_Projection, m_DrawInfo)) return false;
 			if (!pGraphicsAPI->EndRender()) return false;
 		}
 

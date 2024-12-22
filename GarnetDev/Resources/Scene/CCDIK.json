@@ -29,7 +29,8 @@
         {
             "name": "PmxObj",
             "renderpasslist": [
-                "MainResultPass"
+                "MainResultPass",
+                "ShadowPass"
             ],
             "filename": "Resources/Avatar/Tda_Miku/Tda_Miku.pmx",
             "defaultmaterialframes": [
@@ -77,7 +78,8 @@
             "filename": "Resources\\Models\\CCDIKTest\\CCDIKTest.glb",
             "defaultmaterialframes": ["pbr_mat"],
             "renderpasslist": [
-                "MainResultPass"
+                "MainResultPass",
+                "ShadowPass"
             ],
             "depthpass": "",
             "transform": {

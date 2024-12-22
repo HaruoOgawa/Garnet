@@ -68,18 +68,15 @@ namespace api
 				// API側のBufferを更新
 				if (IsUseDynamicOffset())
 				{
-					// DynamicOffset全部分更新する
-					//if (DynamicOffsetNum == -1)
+					int DynamicOffset = 0;
+
+					const auto it = m_PassNameDynamicOffsetMap.find(m_pGraphicsAPI->GetCurrentRenderPassName());
+					if (it != m_PassNameDynamicOffsetMap.end())
 					{
-						for (int r = 0; r < static_cast<int>(m_PassNameDynamicOffsetMap.size()); r++)
-						{
-							wgpuQueueWriteBuffer(m_pGraphicsAPI->GetQueue(), m_WGPUUniformBufferList[i], ByteOffset + UniformBufferByteSize * r, Data, ByteSize);
-						}
+						DynamicOffset = it->second;
 					}
-					/*else
-					{
-						wgpuQueueWriteBuffer(m_pGraphicsAPI->GetQueue(), m_WGPUUniformBufferList[i], ByteOffset + UniformBufferByteSize * (DynamicOffsetNum - 1), Data, ByteSize);
-					}*/
+
+					wgpuQueueWriteBuffer(m_pGraphicsAPI->GetQueue(), m_WGPUUniformBufferList[i], ByteOffset + UniformBufferByteSize * DynamicOffset, Data, ByteSize);
 				}
 				else
 				{
