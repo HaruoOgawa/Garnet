@@ -200,8 +200,8 @@ void Compiler::RunCompile(	const std::vector<FileSystemUtils::Path>&	filesToComp
 #endif
 		//send initial set up command
 		m_pImplData->m_CmdProcess.WriteInput(cmdSetParams);
-		std::string InputText = std::string("chcp 65001\n");
-        m_pImplData->m_CmdProcess.WriteInput(InputText); // set utf-8 console locale
+		std::string locale = "chcp 65001\n";
+        m_pImplData->m_CmdProcess.WriteInput(locale); // set utf-8 console locale
 	}
 
 	flags += compilerOptions_.compileOptions;
@@ -411,15 +411,6 @@ void GetPathsOfVisualStudioInstalls( std::vector<VSVersionInfo>* pVersions, ICom
 		break;
 	case 1930: // VS 2022
 	case 1931: // VS 2022
-	case 1932: // VS 2022
-	case 1933: // VS 2022
-	case 1934: // VS 2022
-	case 1935: // VS 2022
-	case 1936: // VS 2022
-	case 1937: // VS 2022
-	case 1938: // VS 2022
-	case 1939: // VS 2022
-	case 1940: // VS 2022
 		startVersion = 8;
 		break;
 	default:
@@ -732,6 +723,7 @@ void CmdProcess::InitialiseProcess()
 
 	//launch threaded read.
 	_beginthread(ReadAndHandleOutputThread, 0, this); //this will exit when process for compile is closed
+
 
 /*ERROR_EXIT:
 	if( hOutputReadTmp )

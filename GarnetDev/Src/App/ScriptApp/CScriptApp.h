@@ -10,14 +10,12 @@ namespace camera { class CTraceCamera; }
 
 namespace app
 {
-	class CScriptScene;
 	class CFileModifier;
 
 	class CScriptApp : public CApp
 	{
 		std::shared_ptr<scene::CSceneController> m_SceneController;
 
-		std::shared_ptr<app::CScriptScene> m_ScriptScene;
 		std::shared_ptr<camera::CCamera> m_MainCamera;
 		std::shared_ptr<camera::CCamera> m_ViewCamera;
 		std::shared_ptr<camera::CTraceCamera> m_TraceCamera;

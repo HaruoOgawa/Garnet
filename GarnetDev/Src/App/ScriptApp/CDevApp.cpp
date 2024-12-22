@@ -1,24 +1,23 @@
 #include "CDevApp.h"
-#include "Scene/CScriptScene.h"
 
-#include "../../Graphics/CDrawInfo.h"
-#include "../../Graphics/CFrameRenderer.h"
+#include <Graphics/CDrawInfo.h>
+#include <Graphics/CFrameRenderer.h>
 
-#include "../../Camera/CCamera.h"
-#include "../../Camera/CTraceCamera.h"
+#include <Camera/CCamera.h>
+#include <Camera/CTraceCamera.h>
 #ifdef USE_VIEWER_CAMERA
-#include "../../Camera/CViewerCamera.h"
+#include <Camera/CViewerCamera.h>
 #endif // USE_VIEWER_CAMERA
 
-#include "../../LoadWorker/CLoadWorker.h"
-#include "../../Projection/CProjection.h"
-#include "../../Message/Console.h"
-#include "../../Interface/IGUIEngine.h"
+#include <LoadWorker/CLoadWorker.h>
+#include <Projection/CProjection.h>
+#include <Message/Console.h>
+#include <Interface/IGUIEngine.h>
+#include <Timeline/CTimelineController.h>
+#include <Scene/CSceneController.h>
 
 #include "../../GUIApp/GUI/CGraphicsEditingWindow.h"
 #include "../../GUIApp/Model/CFileModifier.h"
-#include <Timeline/CTimelineController.h>
-#include <Scene/CSceneController.h>
 
 #include "../../Component/CCDIKTest.h"
 
@@ -29,7 +28,6 @@ namespace app
 		m_LocalTime(0.0f),
 		m_LocalDeltaTime(0.0f),
 		m_SceneController(std::make_shared<scene::CSceneController>()),
-		m_ScriptScene(nullptr),
 		m_CameraSwitchToggle(true),
 		m_MainCamera(nullptr),
 #ifdef USE_VIEWER_CAMERA
@@ -67,12 +65,6 @@ namespace app
 
 	bool CDevApp::Release(api::IGraphicsAPI* pGraphicsAPI)
 	{
-		if (m_ScriptScene)
-		{
-			m_ScriptScene.reset();
-			m_ScriptScene = nullptr;
-		}
-
 		return true;
 	}
 
@@ -90,9 +82,6 @@ namespace app
 
 		m_MainFrameRenderer = std::make_shared<graphics::CFrameRenderer>(pGraphicsAPI, "", pGraphicsAPI->FindOffScreenRenderPass("MainResultPass")->GetFrameTextureList());
 		if (!m_MainFrameRenderer->Create(pLoadWorker, "Resources\\MaterialFrame\\FrameTexture_MF.json")) return false;
-
-		// ViewÇÃèâä˙âª
-		m_ScriptScene = std::make_shared<app::CScriptScene>(pGraphicsAPI, pLoadWorker, pPhysicsEngine);
 
 		return true;
 	}
@@ -157,7 +146,6 @@ namespace app
 		//m_DrawInfo->SetDeltaSecondsTime(1.0f / 500.0f);
 
 		if (!m_SceneController->Update(pGraphicsAPI, pPhysicsEngine, pLoadWorker, m_MainCamera, m_Projection, m_DrawInfo, InputState, m_TimelineController)) return false;
-		if (!m_ScriptScene->Update(pGraphicsAPI, pPhysicsEngine, pLoadWorker, m_MainCamera, m_Projection, m_DrawInfo, InputState)) return false;
 
 		// çƒê∂ë¨ìxÇå≥Ç…ñﬂÇ∑
 		//m_DrawInfo->SetDeltaSecondsTime(PrevSelta); 
@@ -171,16 +159,12 @@ namespace app
 	{
 		if (!m_SceneController->LateUpdate(pGraphicsAPI, pPhysicsEngine, pLoadWorker, m_DrawInfo)) return false;
 
-		if (!m_ScriptScene->LateUpdate(pGraphicsAPI, pPhysicsEngine, pLoadWorker, m_DrawInfo)) return false;
-
 		return true;
 	}
 
 	bool CDevApp::FixedUpdate(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker)
 	{
 		if (!m_SceneController->FixedUpdate(pGraphicsAPI, pPhysicsEngine, pLoadWorker, m_DrawInfo)) return false;
-
-		if (!m_ScriptScene->FixedUpdate(pGraphicsAPI, pPhysicsEngine, pLoadWorker, m_DrawInfo)) return false;
 
 		return true;
 	}
@@ -267,8 +251,6 @@ namespace app
 
 		if (!m_SceneController->Create(pGraphicsAPI, pPhysicsEngine)) return false;
 
-		if (!m_ScriptScene->OnLoaded(pGraphicsAPI, pPhysicsEngine, pLoadWorker)) return false;
-
 		if (!m_TimelineController->Initialize(shared_from_this())) return false;
 
 #ifdef USE_GUIENGINE
@@ -322,14 +304,6 @@ namespace app
 		for (const auto& Object : m_SceneController->GetObjectList())
 		{
 			ObjectList.push_back(Object);
-		}
-
-		if (m_ScriptScene)
-		{
-			for (const auto& Object : m_ScriptScene->GetObjectList())
-			{
-				ObjectList.push_back(Object);
-			}
 		}
 
 		return ObjectList;

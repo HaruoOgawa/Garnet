@@ -458,10 +458,10 @@
       </Command>
     </PostBuildEvent>
     <Lib>
-      <AdditionalDependencies>glfw3.lib;vulkan-1.lib;libfbxsdk-md.lib;libxml2-md.lib;zlib-md.lib;Winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glfw3.lib;vulkan-1.lib;libfbxsdk-md.lib;libxml2-md.lib;zlib-md.lib;Winmm.lib;RuntimeObjectSystem.lib;RuntimeCompiler_VS2010.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Lib>
     <Lib>
-      <AdditionalLibraryDirectories>$(ProjectDir)src\Library\GLFW\lib;$(ProjectDir)src\Library\Vulkan\lib;$(ProjectDir)Src\Library\FBX-SDK\lib\vs2022\x64\debug;$(ProjectDir)Src\Library\FBX-SDK\lib\vs2022\x64\release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)src\Library\GLFW\lib;$(ProjectDir)src\Library\Vulkan\lib;$(ProjectDir)Src\Library\FBX-SDK\lib\vs2022\x64\debug;$(ProjectDir)Src\Library\FBX-SDK\lib\vs2022\x64\release;$(ProjectDir)Src\Library\RuntimeCompiledCPlusPlus\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugGLFW|x64'">
@@ -485,10 +485,10 @@
       </Command>
     </PostBuildEvent>
     <Lib>
-      <AdditionalDependencies>glfw3.lib;opengl32.lib;libfbxsdk-md.lib;libxml2-md.lib;zlib-md.lib;Winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glfw3.lib;opengl32.lib;libfbxsdk-md.lib;libxml2-md.lib;zlib-md.lib;Winmm.lib;RuntimeObjectSystem.lib;RuntimeCompiler_VS2010.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Lib>
     <Lib>
-      <AdditionalLibraryDirectories>$(ProjectDir)src\Library\GLFW\lib;$(ProjectDir)Src\Library\FBX-SDK\lib\vs2022\x64\debug;$(ProjectDir)Src\Library\FBX-SDK\lib\vs2022\x64\release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)src\Library\GLFW\lib;$(ProjectDir)Src\Library\FBX-SDK\lib\vs2022\x64\debug;$(ProjectDir)Src\Library\FBX-SDK\lib\vs2022\x64\release;$(ProjectDir)Src\Library\RuntimeCompiledCPlusPlus\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugGL|x64'">
@@ -512,10 +512,10 @@
       </Command>
     </PostBuildEvent>
     <Lib>
-      <AdditionalDependencies>opengl32.lib;libfbxsdk-md.lib;libxml2-md.lib;zlib-md.lib;Winmm.lib;libz-static.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;libfbxsdk-md.lib;libxml2-md.lib;zlib-md.lib;Winmm.lib;libz-static.lib;RuntimeObjectSystem.lib;RuntimeCompiler_VS2010.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Lib>
     <Lib>
-      <AdditionalLibraryDirectories>$(ProjectDir)Src\Library\FBX-SDK\lib\vs2022\x64\debug;$(ProjectDir)Src\Library\FBX-SDK\lib\vs2022\x64\release;$(ProjectDir)Src\Library\zlib\lib\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)Src\Library\FBX-SDK\lib\vs2022\x64\debug;$(ProjectDir)Src\Library\FBX-SDK\lib\vs2022\x64\release;$(ProjectDir)Src\Library\zlib\lib\Debug;$(ProjectDir)Src\Library\RuntimeCompiledCPlusPlus\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugWG|x64'">
@@ -539,10 +539,10 @@
 </Command>
     </PostBuildEvent>
     <Lib>
-      <AdditionalDependencies>glfw3.lib;dxguid.lib;zlib.lib;Winmm.lib;SmallFBX.lib;wgpu_native.lib;//$(ProjectDir)Src\Library\DawnLib\bin\src\dawn\native\Debug\webgpu_dawn.lib;//$(ProjectDir)Src\Library\DawnLib\bin\src\dawn\Debug\dawncpp.lib;//$(ProjectDir)Src\Library\DawnLib\bin\src\dawn\native\Debug\dawn_native.lib;//$(ProjectDir)Src\Library\DawnLib\bin\src\dawn\platform\Debug\dawn_platform.lib;//$(ProjectDir)Src\Library\DawnLib\bin\src\tint\Debug\tint.lib;//$(ProjectDir)Src\Library\DawnLib\bin\src\tint\Debug\tint_diagnostic_utils.lib;//$(ProjectDir)Src\Library\DawnLib\bin\third_party\spirv-tools\source\opt\Debug\SPIRV-Tools-opt.lib;//$(ProjectDir)Src\Library\DawnLib\bin\third_party\spirv-tools\source\Debug\SPIRV-Tools.lib;//$(ProjectDir)Src\Library\DawnLib\bin\third_party\abseil\absl\strings\Debug\absl_str_format_internal.lib;//$(ProjectDir)Src\Library\DawnLib\bin\third_party\abseil\absl\strings\Debug\absl_strings.lib;//$(ProjectDir)Src\Library\DawnLib\bin\third_party\abseil\absl\strings\Debug\absl_strings_internal.lib;//$(ProjectDir)Src\Library\DawnLib\bin\third_party\abseil\absl\base\Debug\absl_base.lib;//$(ProjectDir)Src\Library\DawnLib\bin\third_party\abseil\absl\base\Debug\absl_spinlock_wait.lib;//$(ProjectDir)Src\Library\DawnLib\bin\third_party\abseil\absl\numeric\Debug\absl_int128.lib;//$(ProjectDir)Src\Library\DawnLib\bin\third_party\abseil\absl\base\Debug\absl_throw_delegate.lib;//$(ProjectDir)Src\Library\DawnLib\bin\third_party\abseil\absl\base\Debug\absl_raw_logging_internal.lib;//$(ProjectDir)Src\Library\DawnLib\bin\third_party\abseil\absl\base\Debug\absl_log_severity.lib;//$(ProjectDir)Src\Library\DawnLib\bin\src\dawn\common\Debug\dawn_common.lib;//$(ProjectDir)Src\Library\DawnLib\bin\src\dawn\Debug\dawncpp_headers.lib;//$(ProjectDir)Src\Library\DawnLib\bin\src\dawn\Debug\dawn_headers.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glfw3.lib;dxguid.lib;zlib.lib;Winmm.lib;SmallFBX.lib;RuntimeObjectSystem.lib;RuntimeCompiler_VS2010.lib;wgpu_native.lib;//$(ProjectDir)Src\Library\DawnLib\bin\src\dawn\native\Debug\webgpu_dawn.lib;//$(ProjectDir)Src\Library\DawnLib\bin\src\dawn\Debug\dawncpp.lib;//$(ProjectDir)Src\Library\DawnLib\bin\src\dawn\native\Debug\dawn_native.lib;//$(ProjectDir)Src\Library\DawnLib\bin\src\dawn\platform\Debug\dawn_platform.lib;//$(ProjectDir)Src\Library\DawnLib\bin\src\tint\Debug\tint.lib;//$(ProjectDir)Src\Library\DawnLib\bin\src\tint\Debug\tint_diagnostic_utils.lib;//$(ProjectDir)Src\Library\DawnLib\bin\third_party\spirv-tools\source\opt\Debug\SPIRV-Tools-opt.lib;//$(ProjectDir)Src\Library\DawnLib\bin\third_party\spirv-tools\source\Debug\SPIRV-Tools.lib;//$(ProjectDir)Src\Library\DawnLib\bin\third_party\abseil\absl\strings\Debug\absl_str_format_internal.lib;//$(ProjectDir)Src\Library\DawnLib\bin\third_party\abseil\absl\strings\Debug\absl_strings.lib;//$(ProjectDir)Src\Library\DawnLib\bin\third_party\abseil\absl\strings\Debug\absl_strings_internal.lib;//$(ProjectDir)Src\Library\DawnLib\bin\third_party\abseil\absl\base\Debug\absl_base.lib;//$(ProjectDir)Src\Library\DawnLib\bin\third_party\abseil\absl\base\Debug\absl_spinlock_wait.lib;//$(ProjectDir)Src\Library\DawnLib\bin\third_party\abseil\absl\numeric\Debug\absl_int128.lib;//$(ProjectDir)Src\Library\DawnLib\bin\third_party\abseil\absl\base\Debug\absl_throw_delegate.lib;//$(ProjectDir)Src\Library\DawnLib\bin\third_party\abseil\absl\base\Debug\absl_raw_logging_internal.lib;//$(ProjectDir)Src\Library\DawnLib\bin\third_party\abseil\absl\base\Debug\absl_log_severity.lib;//$(ProjectDir)Src\Library\DawnLib\bin\src\dawn\common\Debug\dawn_common.lib;//$(ProjectDir)Src\Library\DawnLib\bin\src\dawn\Debug\dawncpp_headers.lib;//$(ProjectDir)Src\Library\DawnLib\bin\src\dawn\Debug\dawn_headers.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Lib>
     <Lib>
-      <AdditionalLibraryDirectories>$(ProjectDir)src\Library\GLFW\lib;//$(ProjectDir)Src\Library\DawnLib\bin;$(ProjectDir)Src\Library\WebGPU\windows-x86_64;$(ProjectDir)Src\Library\SmallFBX\lib\debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)src\Library\GLFW\lib;//$(ProjectDir)Src\Library\DawnLib\bin;$(ProjectDir)Src\Library\WebGPU\windows-x86_64;$(ProjectDir)Src\Library\SmallFBX\lib\debug;$(ProjectDir)Src\Library\RuntimeCompiledCPlusPlus\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -1106,34 +1106,6 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClInclude Include="Src\Library\bullet3\src\LinearMath\btTransformUtil.h" />
     <ClInclude Include="Src\Library\bullet3\src\LinearMath\btVector3.h" />
     <ClInclude Include="Src\Library\bullet3\src\LinearMath\TaskScheduler\btThreadSupportInterface.h" />
-    <ClInclude Include="Src\Library\RuntimeCompiledCPlusPlus\RuntimeCompiler\AUArray.h" />
-    <ClInclude Include="Src\Library\RuntimeCompiledCPlusPlus\RuntimeCompiler\BuildTool.h" />
-    <ClInclude Include="Src\Library\RuntimeCompiledCPlusPlus\RuntimeCompiler\CompileOptions.h" />
-    <ClInclude Include="Src\Library\RuntimeCompiledCPlusPlus\RuntimeCompiler\Compiler.h" />
-    <ClInclude Include="Src\Library\RuntimeCompiledCPlusPlus\RuntimeCompiler\FileChangeNotifier.h" />
-    <ClInclude Include="Src\Library\RuntimeCompiledCPlusPlus\RuntimeCompiler\FileSystemUtils.h" />
-    <ClInclude Include="Src\Library\RuntimeCompiledCPlusPlus\RuntimeCompiler\ICompilerLogger.h" />
-    <ClInclude Include="Src\Library\RuntimeCompiledCPlusPlus\RuntimeCompiler\IFileChangeNotifier.h" />
-    <ClInclude Include="Src\Library\RuntimeCompiledCPlusPlus\RuntimeCompiler\SimpleFileWatcher\FileWatcher.h" />
-    <ClInclude Include="Src\Library\RuntimeCompiledCPlusPlus\RuntimeCompiler\SimpleFileWatcher\FileWatcherImpl.h" />
-    <ClInclude Include="Src\Library\RuntimeCompiledCPlusPlus\RuntimeCompiler\SimpleFileWatcher\FileWatcherLinux.h" />
-    <ClInclude Include="Src\Library\RuntimeCompiledCPlusPlus\RuntimeCompiler\SimpleFileWatcher\FileWatcherOSX.h" />
-    <ClInclude Include="Src\Library\RuntimeCompiledCPlusPlus\RuntimeCompiler\SimpleFileWatcher\FileWatcherWin32.h" />
-    <ClInclude Include="Src\Library\RuntimeCompiledCPlusPlus\RuntimeCompiler\SimpleFileWatcher\FileWatcherWin32_AltImpl.h" />
-    <ClInclude Include="Src\Library\RuntimeCompiledCPlusPlus\RuntimeObjectSystem\IObject.h" />
-    <ClInclude Include="Src\Library\RuntimeCompiledCPlusPlus\RuntimeObjectSystem\IObjectFactorySystem.h" />
-    <ClInclude Include="Src\Library\RuntimeCompiledCPlusPlus\RuntimeObjectSystem\IRuntimeObjectSystem.h" />
-    <ClInclude Include="Src\Library\RuntimeCompiledCPlusPlus\RuntimeObjectSystem\ISimpleSerializer.h" />
-    <ClInclude Include="Src\Library\RuntimeCompiledCPlusPlus\RuntimeObjectSystem\ObjectFactorySystem\ObjectFactorySystem.h" />
-    <ClInclude Include="Src\Library\RuntimeCompiledCPlusPlus\RuntimeObjectSystem\ObjectInterface.h" />
-    <ClInclude Include="Src\Library\RuntimeCompiledCPlusPlus\RuntimeObjectSystem\ObjectInterfacePerModule.h" />
-    <ClInclude Include="Src\Library\RuntimeCompiledCPlusPlus\RuntimeObjectSystem\RuntimeInclude.h" />
-    <ClInclude Include="Src\Library\RuntimeCompiledCPlusPlus\RuntimeObjectSystem\RuntimeLinkLibrary.h" />
-    <ClInclude Include="Src\Library\RuntimeCompiledCPlusPlus\RuntimeObjectSystem\RuntimeObjectSystem.h" />
-    <ClInclude Include="Src\Library\RuntimeCompiledCPlusPlus\RuntimeObjectSystem\RuntimeProtector.h" />
-    <ClInclude Include="Src\Library\RuntimeCompiledCPlusPlus\RuntimeObjectSystem\RuntimeSourceDependency.h" />
-    <ClInclude Include="Src\Library\RuntimeCompiledCPlusPlus\RuntimeObjectSystem\RuntimeTracking.h" />
-    <ClInclude Include="Src\Library\RuntimeCompiledCPlusPlus\RuntimeObjectSystem\SimpleSerializer\SimpleSerializer.h" />
     <ClInclude Include="Src\PhysicsEngine\Bullet\CBulletTaskSchedulerManager.h" />
     <ClInclude Include="Src\Animation\EBonePattern.h" />
     <ClInclude Include="Src\Animation\ERigType.h" />
@@ -8893,20 +8865,6 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
       <DebugInformationFormat Condition="'$(Configuration)|$(Platform)'=='DebugWG|x64'">ProgramDatabase</DebugInformationFormat>
       <SupportJustMyCode Condition="'$(Configuration)|$(Platform)'=='DebugWG|x64'">false</SupportJustMyCode>
     </ClCompile>
-    <ClCompile Include="Src\Library\RuntimeCompiledCPlusPlus\RuntimeCompiler\BuildTool.cpp" />
-    <ClCompile Include="Src\Library\RuntimeCompiledCPlusPlus\RuntimeCompiler\Compiler_PlatformPosix.cpp" />
-    <ClCompile Include="Src\Library\RuntimeCompiledCPlusPlus\RuntimeCompiler\Compiler_PlatformWindows.cpp" />
-    <ClCompile Include="Src\Library\RuntimeCompiledCPlusPlus\RuntimeCompiler\FileChangeNotifier.cpp" />
-    <ClCompile Include="Src\Library\RuntimeCompiledCPlusPlus\RuntimeCompiler\SimpleFileWatcher\FileWatcher.cpp" />
-    <ClCompile Include="Src\Library\RuntimeCompiledCPlusPlus\RuntimeCompiler\SimpleFileWatcher\FileWatcherLinux.cpp" />
-    <ClCompile Include="Src\Library\RuntimeCompiledCPlusPlus\RuntimeCompiler\SimpleFileWatcher\FileWatcherOSX.cpp" />
-    <ClCompile Include="Src\Library\RuntimeCompiledCPlusPlus\RuntimeCompiler\SimpleFileWatcher\FileWatcherWin32.cpp" />
-    <ClCompile Include="Src\Library\RuntimeCompiledCPlusPlus\RuntimeObjectSystem\ObjectFactorySystem\ObjectFactorySystem.cpp" />
-    <ClCompile Include="Src\Library\RuntimeCompiledCPlusPlus\RuntimeObjectSystem\ObjectInterfacePerModuleSource.cpp" />
-    <ClCompile Include="Src\Library\RuntimeCompiledCPlusPlus\RuntimeObjectSystem\RuntimeObjectSystem.cpp" />
-    <ClCompile Include="Src\Library\RuntimeCompiledCPlusPlus\RuntimeObjectSystem\RuntimeObjectSystem_PlatformPosix.cpp" />
-    <ClCompile Include="Src\Library\RuntimeCompiledCPlusPlus\RuntimeObjectSystem\RuntimeObjectSystem_PlatformWindows.cpp" />
-    <ClCompile Include="Src\Library\RuntimeCompiledCPlusPlus\RuntimeObjectSystem\SimpleSerializer\SimpleSerializer.cpp" />
     <ClCompile Include="Src\PhysicsEngine\Bullet\CBulletTaskSchedulerManager.cpp" />
     <ClCompile Include="Src\GraphicsAPI\CGraphicsAPI.cpp" />
     <ClCompile Include="Src\AppCore\CApp.cpp" />
