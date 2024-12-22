@@ -14,19 +14,15 @@ struct FragUniformBufferObject {
     UseToonTexture: i32,
     UseSphereTexture: i32,
     SphereMode: i32,
-    drawPathIndex: i32,
-    iPad0_: i32,
-    iPad1_: i32,
-    iPad2_: i32,
     mPad0_: mat4x4<f32>,
     mPad1_: mat4x4<f32>,
     mPad2_: mat4x4<f32>,
     mPad3_: mat4x4<f32>,
 }
 
+var<private> f_WorldNormal_1: vec3<f32>;
 @group(0) @binding(2) 
 var<uniform> fragUbo: FragUniformBufferObject;
-var<private> f_WorldNormal_1: vec3<f32>;
 var<private> f_WorldPos_1: vec4<f32>;
 @group(0) @binding(3) 
 var MainTexture: texture_2d<f32>;
@@ -62,87 +58,78 @@ fn main_1() {
 
     col = vec3<f32>(1.0, 1.0, 1.0);
     alpha = 1.0;
-    let _e50 = fragUbo.drawPathIndex;
-    if (_e50 == 1) {
-        let _e52 = f_WorldNormal_1;
-        let _e54 = fragUbo.lightDir;
-        NdotL = max(0.0, dot(_e52, -(_e54.xyz)));
-        let _e60 = fragUbo.cameraPos;
-        let _e62 = f_WorldPos_1;
-        v = normalize((_e60.xyz - _e62.xyz));
-        let _e67 = fragUbo.lightDir;
-        l = (_e67.xyz * -1.0);
-        let _e70 = v;
-        let _e71 = l;
-        HalfVector = normalize((_e70 + _e71));
-        let _e75 = fragUbo.diffuseFactor;
-        diffuseColor = _e75;
-        let _e77 = fragUbo.UseToonTexture;
-        if (_e77 == 0) {
-        }
-        let _e80 = fragUbo.UseMainTexture;
-        if (_e80 != 0) {
-            let _e82 = f_Texcoord_1;
-            let _e83 = textureSample(MainTexture, MainTextureSampler, _e82);
-            MainColor = _e83;
-            let _e84 = MainColor;
-            let _e85 = diffuseColor;
-            diffuseColor = (_e85 * _e84);
-        }
-        let _e87 = diffuseColor;
-        col = _e87.xyz;
-        let _e90 = diffuseColor[3u];
-        alpha = _e90;
-        let _e92 = fragUbo.UseSphereTexture;
-        if (_e92 != 0) {
-            let _e94 = f_SphereUV_1;
-            let _e95 = textureSample(SphereTexture, SphereTextureSampler, _e94);
-            SphereColor = _e95.xyz;
-            let _e98 = fragUbo.SphereMode;
-            if (_e98 == 1) {
-                let _e100 = SphereColor;
-                let _e101 = col;
-                col = (_e101 * _e100);
-            } else {
-                let _e104 = fragUbo.SphereMode;
-                if (_e104 == 2) {
-                    let _e106 = SphereColor;
-                    let _e107 = col;
-                    col = (_e107 + _e106);
-                }
+    let _e47 = f_WorldNormal_1;
+    let _e49 = fragUbo.lightDir;
+    NdotL = max(0.0, dot(_e47, -(_e49.xyz)));
+    let _e55 = fragUbo.cameraPos;
+    let _e57 = f_WorldPos_1;
+    v = normalize((_e55.xyz - _e57.xyz));
+    let _e62 = fragUbo.lightDir;
+    l = (_e62.xyz * -1.0);
+    let _e65 = v;
+    let _e66 = l;
+    HalfVector = normalize((_e65 + _e66));
+    let _e70 = fragUbo.diffuseFactor;
+    diffuseColor = _e70;
+    let _e72 = fragUbo.UseToonTexture;
+    if (_e72 == 0) {
+    }
+    let _e75 = fragUbo.UseMainTexture;
+    if (_e75 != 0) {
+        let _e77 = f_Texcoord_1;
+        let _e78 = textureSample(MainTexture, MainTextureSampler, _e77);
+        MainColor = _e78;
+        let _e79 = MainColor;
+        let _e80 = diffuseColor;
+        diffuseColor = (_e80 * _e79);
+    }
+    let _e82 = diffuseColor;
+    col = _e82.xyz;
+    let _e85 = diffuseColor[3u];
+    alpha = _e85;
+    let _e87 = fragUbo.UseSphereTexture;
+    if (_e87 != 0) {
+        let _e89 = f_SphereUV_1;
+        let _e90 = textureSample(SphereTexture, SphereTextureSampler, _e89);
+        SphereColor = _e90.xyz;
+        let _e93 = fragUbo.SphereMode;
+        if (_e93 == 1) {
+            let _e95 = SphereColor;
+            let _e96 = col;
+            col = (_e96 * _e95);
+        } else {
+            let _e99 = fragUbo.SphereMode;
+            if (_e99 == 2) {
+                let _e101 = SphereColor;
+                let _e102 = col;
+                col = (_e102 + _e101);
             }
         }
-        let _e110 = fragUbo.UseToonTexture;
-        if (_e110 != 0) {
-            let _e112 = NdotL;
-            let _e114 = textureSample(ToonTexture, ToonTextureSampler, vec2<f32>(0.0, _e112));
-            ToonColor = _e114.xyz;
-            let _e116 = ToonColor;
-            let _e117 = NdotL;
-            let _e123 = col;
-            col = (_e123 * mix(_e116, vec3<f32>(1.0, 1.0, 1.0), vec3<f32>(clamp(((_e117 * 16.0) + 0.5), 0.0, 1.0))));
-        }
-        let _e126 = fragUbo.specularIntensity;
-        if (_e126 > 0.0) {
-            let _e129 = fragUbo.specularFactor;
-            let _e131 = HalfVector;
-            let _e132 = f_WorldNormal_1;
-            let _e136 = fragUbo.specularIntensity;
-            specularColor = (_e129.xyz * pow(max(0.0, dot(_e131, _e132)), _e136));
-            let _e139 = specularColor;
-            let _e140 = col;
-            col = (_e140 + _e139);
-        }
-    } else {
-        let _e143 = fragUbo.drawPathIndex;
-        if (_e143 == 2) {
-            let _e146 = fragUbo.edgeColor;
-            col = _e146.xyz;
-        }
     }
-    let _e148 = col;
-    let _e149 = alpha;
-    outColor = vec4<f32>(_e148.x, _e148.y, _e148.z, _e149);
+    let _e105 = fragUbo.UseToonTexture;
+    if (_e105 != 0) {
+        let _e107 = NdotL;
+        let _e109 = textureSample(ToonTexture, ToonTextureSampler, vec2<f32>(0.0, _e107));
+        ToonColor = _e109.xyz;
+        let _e111 = ToonColor;
+        let _e112 = NdotL;
+        let _e118 = col;
+        col = (_e118 * mix(_e111, vec3<f32>(1.0, 1.0, 1.0), vec3<f32>(clamp(((_e112 * 16.0) + 0.5), 0.0, 1.0))));
+    }
+    let _e121 = fragUbo.specularIntensity;
+    if (_e121 > 0.0) {
+        let _e124 = fragUbo.specularFactor;
+        let _e126 = HalfVector;
+        let _e127 = f_WorldNormal_1;
+        let _e131 = fragUbo.specularIntensity;
+        specularColor = (_e124.xyz * pow(max(0.0, dot(_e126, _e127)), _e131));
+        let _e134 = specularColor;
+        let _e135 = col;
+        col = (_e135 + _e134);
+    }
+    let _e137 = col;
+    let _e138 = alpha;
+    outColor = vec4<f32>(_e137.x, _e137.y, _e137.z, _e138);
     return;
 }
 
