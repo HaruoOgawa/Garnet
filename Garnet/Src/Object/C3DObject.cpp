@@ -519,7 +519,7 @@ namespace object
 
 				// 共通のユニフォームバッファの更新
 				glm::mat4 lightVPMat = DrawInfo->GetLightProjection()->GetPrejectionMatrix() * DrawInfo->GetLightCamera()->GetViewMatrix();
-
+				Material->SetUniformValue("model", &WorldMatrix[0][0], sizeof(glm::mat4));
 				Material->SetUniformValue("invModel", &InvWorldMatrix[0][0], sizeof(glm::mat4));
 				Material->SetUniformValue("view", &Camera->GetViewMatrix()[0][0], sizeof(glm::mat4));
 				Material->SetUniformValue("proj", &Projection->GetPrejectionMatrix()[0][0], sizeof(glm::mat4));
