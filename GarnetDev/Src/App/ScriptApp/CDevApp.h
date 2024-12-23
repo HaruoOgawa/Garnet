@@ -18,7 +18,6 @@ namespace app
 		Pause,
 	};
 
-	class CScriptScene;
 	class CFileModifier;
 
 	class CDevApp : public CApp
@@ -29,7 +28,6 @@ namespace app
 
 		std::shared_ptr<scene::CSceneController> m_SceneController;
 
-		std::shared_ptr<app::CScriptScene> m_ScriptScene;
 		std::shared_ptr<camera::CCamera> m_MainCamera;
 		std::shared_ptr<camera::CCamera> m_ViewCamera;
 		std::shared_ptr<camera::CTraceCamera> m_TraceCamera;
