@@ -9,7 +9,7 @@
 namespace scene
 {
 	CSceneController::CSceneController():
-		m_SceneTextureSet(nullptr),
+		m_SceneTextureSet(std::make_shared<graphics::CTextureSet>()),
 		m_BGM(std::make_tuple(nullptr, false, false)),
 		m_IsLoaded(false),
 		m_TimelineFileName(std::string()),
@@ -77,6 +77,11 @@ namespace scene
 			if (Diffuse_Tex && Specular_Tex && GGXLUT_Tex)
 			{
 				Object->GetTextureSet()->AddIBLTexture(Diffuse_Tex, Specular_Tex, GGXLUT_Tex);
+			}
+
+			for (const auto& FrameTexture : m_SceneTextureSet->GetFrameTextureList())
+			{
+				Object->GetTextureSet()->AddFrameTexture(FrameTexture);
 			}
 		}
 
@@ -215,14 +220,19 @@ namespace scene
 		return m_AnimationClipSetMap;
 	}
 
-	void CSceneController::SetSceneTextureSet(const std::shared_ptr<graphics::CTextureSet>& TextureSet)
-	{
-		m_SceneTextureSet = TextureSet;
-	}
-
 	const std::shared_ptr<graphics::CTextureSet>& CSceneController::GetSceneTextureSet() const
 	{
 		return m_SceneTextureSet;
+	}
+
+	std::shared_ptr<graphics::CTextureSet>& CSceneController::GetSceneTextureSet()
+	{
+		return m_SceneTextureSet;
+	}
+
+	void CSceneController::AddFrameTexture(const std::shared_ptr<graphics::CTexture>& Texture)
+	{
+		m_SceneTextureSet->AddFrameTexture(Texture);
 	}
 
 	void CSceneController::AddMaterialInfo(const std::shared_ptr<object::C3DObject>& Object, const std::vector<SMaterialInfo>& MaterialInfoList)
