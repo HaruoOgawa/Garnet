@@ -52,7 +52,7 @@ namespace app
 		m_ViewCamera->SetCenter(glm::vec3(0.0f, 2.5f, 0.0f));
 		m_MainCamera = m_ViewCamera;
 
-		m_DrawInfo->GetLightCamera()->SetPos(glm::vec3(-2.358f, 15.6f, -0.59f));
+		m_DrawInfo->GetLightCamera()->SetPos(glm::vec3(5.0f, 5.0f, 5.0f));
 		m_DrawInfo->GetLightProjection()->SetNear(2.0f);
 		m_DrawInfo->GetLightProjection()->SetFar(100.0f);
 
@@ -82,6 +82,13 @@ namespace app
 
 		m_MainFrameRenderer = std::make_shared<graphics::CFrameRenderer>(pGraphicsAPI, "", pGraphicsAPI->FindOffScreenRenderPass("MainResultPass")->GetFrameTextureList());
 		if (!m_MainFrameRenderer->Create(pLoadWorker, "Resources\\MaterialFrame\\FrameTexture_MF.json")) return false;
+
+		//
+		const auto& ShadowPass = pGraphicsAPI->FindOffScreenRenderPass("ShadowPass");
+		if (ShadowPass)
+		{
+			m_SceneController->AddFrameTexture(ShadowPass->GetDepthTexture());
+		}
 
 		return true;
 	}
@@ -181,11 +188,8 @@ namespace app
 		
 		// ShadowPass
 		{
-			std::shared_ptr<camera::CCamera> ShadowCamera = std::make_shared<camera::CCamera>();
-			ShadowCamera->SetPos(glm::vec3(5.0f, 5.0f, 5.0f));
-
 			if (!pGraphicsAPI->BeginRender("ShadowPass")) return false;
-			if (!m_SceneController->Draw(pGraphicsAPI, ShadowCamera, m_Projection, m_DrawInfo)) return false;
+			if (!m_SceneController->Draw(pGraphicsAPI, m_DrawInfo->GetLightCamera(), m_Projection, m_DrawInfo)) return false;
 			if (!pGraphicsAPI->EndRender()) return false;
 		}
 

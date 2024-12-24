@@ -67,11 +67,7 @@ namespace resource
 			const auto scenetexturesetJSON = SceneJSON.find("scenetextureset");
 			if (scenetexturesetJSON != SceneJSON.end() && scenetexturesetJSON->is_object())
 			{
-				std::shared_ptr<graphics::CTextureSet> SceneTextureSet = std::make_shared<graphics::CTextureSet>();
-
-				if (!AnalyseSceneTextureSet(scenetexturesetJSON, pGraphicsAPI, pLoadWorker, SceneTextureSet)) return false;
-
-				m_Target->SetSceneTextureSet(SceneTextureSet);
+				if (!AnalyseSceneTextureSet(scenetexturesetJSON, pGraphicsAPI, pLoadWorker, m_Target->GetSceneTextureSet())) return false;
 			}
 		}
 #endif // USE_TEXTURE_LOADER
@@ -271,7 +267,8 @@ namespace resource
 	}
 
 #ifdef USE_TEXTURE_LOADER
-	bool CSceneLoader::AnalyseSceneTextureSet(const json::iterator& scenetexturesetJSON, api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, std::shared_ptr<graphics::CTextureSet>& SceneTextureSet)
+	bool CSceneLoader::AnalyseSceneTextureSet(const json::iterator& scenetexturesetJSON, api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker, 
+		std::shared_ptr<graphics::CTextureSet>& SceneTextureSet)
 	{
 		// cubemaps
 		const auto cubemaps = scenetexturesetJSON->find("cubemaps");
