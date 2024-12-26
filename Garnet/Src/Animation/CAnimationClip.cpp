@@ -197,6 +197,11 @@ namespace animation
 		return Result;
 	}
 
+	void CAnimationClip::SetCurrentTime(float Time)
+	{
+		m_CurrentTime = Time;
+	}
+
 	float CAnimationClip::GetCurrentTime() const
 	{
 		return m_CurrentTime;

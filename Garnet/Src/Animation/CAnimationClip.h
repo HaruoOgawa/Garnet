@@ -62,6 +62,7 @@ namespace animation
 		// ˆê”ÔƒtƒŒ[ƒ€”‚ª‘½‚¢Sampler‚ğæ“¾‚·‚é
 		virtual std::shared_ptr<animation::CAnimationSampler> GetSamplerWithMostFrames();
 
+		virtual void SetCurrentTime(float Time);
 		virtual float GetCurrentTime() const;
 
 		virtual bool IsEnd();
