@@ -709,32 +709,62 @@ namespace scene
 								// Value
 								const auto& BufferData = UniformBuffer->GetBuffer();
 
-								std::vector<float> Value;
-								Value.resize(UniformData.ByteSize / sizeof(float));
-								std::memcpy(&Value[0], &BufferData[UniformData.ByteOffset], UniformData.ByteSize);
-
 								ordered_json valueJSON;
 
 								bool ValueUpdated = false; // 値が更新されたかどうか
 
-								for (int vIndex = 0; vIndex < static_cast<int>(Value.size()); vIndex++)
+								if (type == "int")
 								{
-									auto v = Value[vIndex];
+									std::vector<int> Value;
+									Value.resize(UniformData.ByteSize / sizeof(int));
+									std::memcpy(&Value[0], &BufferData[UniformData.ByteOffset], UniformData.ByteSize);
 
-									valueJSON.push_back(v);
-
-									if (ExistInitValue)
+									for (int vIndex = 0; vIndex < static_cast<int>(Value.size()); vIndex++)
 									{
-										// 初期値との差が0.01よりも大きいパラメーターが1つでもあれば更新された判定にする
-										if (fabs(v - InitValue[vIndex]) >= 0.01)
+										auto v = Value[vIndex];
+
+										valueJSON.push_back(v);
+
+										if (ExistInitValue)
 										{
+											// 初期値との差が0.01よりも大きいパラメーターが1つでもあれば更新された判定にする
+											if (fabs(v - InitValue[vIndex]) >= 1)
+											{
+												ValueUpdated = true;
+											}
+										}
+										else
+										{
+											// 初期値が存在しないので値は更新されたことにする
 											ValueUpdated = true;
 										}
 									}
-									else
+								}
+								else
+								{
+									std::vector<float> Value;
+									Value.resize(UniformData.ByteSize / sizeof(float));
+									std::memcpy(&Value[0], &BufferData[UniformData.ByteOffset], UniformData.ByteSize);
+
+									for (int vIndex = 0; vIndex < static_cast<int>(Value.size()); vIndex++)
 									{
-										// 初期値が存在しないので値は更新されたことにする
-										ValueUpdated = true;
+										auto v = Value[vIndex];
+
+										valueJSON.push_back(v);
+
+										if (ExistInitValue)
+										{
+											// 初期値との差が0.01よりも大きいパラメーターが1つでもあれば更新された判定にする
+											if (fabs(v - InitValue[vIndex]) >= 0.01)
+											{
+												ValueUpdated = true;
+											}
+										}
+										else
+										{
+											// 初期値が存在しないので値は更新されたことにする
+											ValueUpdated = true;
+										}
 									}
 								}
 

@@ -3,8 +3,8 @@
 #include "CWebGPUAPI.h"
 namespace api
 {
-	CWebGPUTexture::CWebGPUTexture(api::CWebGPUAPI* pGraphicsAPI, bool UseMipMap):
-		CTexture(UseMipMap),
+	CWebGPUTexture::CWebGPUTexture(api::CWebGPUAPI* pGraphicsAPI, bool UseMipMap, const graphics::STextureSamplerParam& SamplerParam):
+		CTexture(UseMipMap, SamplerParam),
 		m_pGraphicsAPI(pGraphicsAPI),
 		m_TextureImageView(nullptr),
 		m_TextureSampler(nullptr)
@@ -259,11 +259,54 @@ namespace api
 	bool CWebGPUTexture::CreateTextureSampler()
 	{
 		WGPUSamplerDescriptor samplerDesc{};
-		samplerDesc.addressModeU = WGPUAddressMode_Repeat;
-		samplerDesc.addressModeV = WGPUAddressMode_Repeat;
-		samplerDesc.addressModeW = WGPUAddressMode_Repeat;
-		samplerDesc.magFilter = WGPUFilterMode_Linear;
-		samplerDesc.minFilter = WGPUFilterMode_Linear;
+
+		switch (m_SamplerParam.FilterMode)
+		{
+			case graphics::ETextureFilterMode::LINEAR:
+			{
+				samplerDesc.magFilter = WGPUFilterMode_Linear;
+				samplerDesc.minFilter = WGPUFilterMode_Linear;
+				break;
+			}
+			case graphics::ETextureFilterMode::NEAREST:
+			{
+				samplerDesc.magFilter = WGPUFilterMode_Nearest;
+				samplerDesc.minFilter = WGPUFilterMode_Nearest;
+				break;
+			}
+			default:
+			{
+				samplerDesc.magFilter = WGPUFilterMode_Linear;
+				samplerDesc.minFilter = WGPUFilterMode_Linear;
+				break;
+		}
+		}
+
+		switch (m_SamplerParam.WrapMode)
+		{
+			case graphics::ETextureWrapMode::CLAMP_TO_EDGE:
+			{
+				samplerDesc.addressModeU = WGPUAddressMode_ClampToEdge;
+				samplerDesc.addressModeV = WGPUAddressMode_ClampToEdge;
+				samplerDesc.addressModeW = WGPUAddressMode_ClampToEdge;
+				break;
+			}
+			case graphics::ETextureWrapMode::REPEAT:
+			{
+				samplerDesc.addressModeU = WGPUAddressMode_Repeat;
+				samplerDesc.addressModeV = WGPUAddressMode_Repeat;
+				samplerDesc.addressModeW = WGPUAddressMode_Repeat;
+				break;
+			}
+			default:
+			{
+				samplerDesc.addressModeU = WGPUAddressMode_ClampToEdge;
+				samplerDesc.addressModeV = WGPUAddressMode_ClampToEdge;
+				samplerDesc.addressModeW = WGPUAddressMode_ClampToEdge;
+				break;
+			}
+		}
+
 		samplerDesc.lodMinClamp = 0.0f;
 		samplerDesc.lodMaxClamp = m_MipCount;
 		samplerDesc.compare = WGPUCompareFunction_Undefined;

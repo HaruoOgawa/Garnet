@@ -39,7 +39,7 @@ namespace api
 		// Helper Function ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		bool GenerateMipMap(uint32_t layer);
 	public:
-		CVulkanTexture(api::CVulkanAPI* pGraphicsAPI, bool UseMipMap);
+		CVulkanTexture(api::CVulkanAPI* pGraphicsAPI, bool UseMipMap, const graphics::STextureSamplerParam& SamplerParam);
 		virtual ~CVulkanTexture();
 
 		virtual bool CreateFrameTexture(int Width, int Height, api::ERenderPassFormat RenderPassFormat) override;

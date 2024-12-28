@@ -4,8 +4,8 @@
 #include "../../Message/Console.h"
 namespace api
 {
-	CVulkanTexture::CVulkanTexture(api::CVulkanAPI* pGraphicsAPI, bool UseMipMap):
-		CTexture(UseMipMap),
+	CVulkanTexture::CVulkanTexture(api::CVulkanAPI* pGraphicsAPI, bool UseMipMap, const graphics::STextureSamplerParam& SamplerParam):
+		CTexture(UseMipMap, SamplerParam),
 		m_pGraphicsAPI(pGraphicsAPI),
 		m_TextureImage(nullptr),
 		m_TextureImageMemory(nullptr),
@@ -233,12 +233,54 @@ namespace api
 	{
 		VkSamplerCreateInfo samplerInfo{};
 		samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
-		samplerInfo.magFilter = VK_FILTER_LINEAR;
-		samplerInfo.minFilter = VK_FILTER_LINEAR;
-		samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-		samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-		samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
 
+		switch (m_SamplerParam.FilterMode)
+		{
+			case graphics::ETextureFilterMode::LINEAR:
+			{
+				samplerInfo.magFilter = VK_FILTER_LINEAR;
+				samplerInfo.minFilter = VK_FILTER_LINEAR;
+				break;
+			}
+			case graphics::ETextureFilterMode::NEAREST:
+			{
+				samplerInfo.magFilter = VK_FILTER_NEAREST;
+				samplerInfo.minFilter = VK_FILTER_NEAREST;
+				break;
+			}
+			default:
+			{
+				samplerInfo.magFilter = VK_FILTER_LINEAR;
+				samplerInfo.minFilter = VK_FILTER_LINEAR;
+				break;
+			}
+		}
+
+		switch (m_SamplerParam.WrapMode)
+		{
+			case graphics::ETextureWrapMode::CLAMP_TO_EDGE:
+			{
+				samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+				samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+				samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+				break;
+			}
+			case graphics::ETextureWrapMode::REPEAT:
+			{
+				samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+				samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+				samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+				break;
+			}
+			default:
+			{
+				samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+				samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+				samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+				break;
+			}
+		}
+		
 		VkPhysicalDeviceProperties properties{};
 		vkGetPhysicalDeviceProperties(m_pGraphicsAPI->GetPhysicalDevice(), &properties);
 		samplerInfo.anisotropyEnable = VK_TRUE; // 異方性フィルタリング --> 遠くの方のテクスチャがぼけてしまうのを調整する機

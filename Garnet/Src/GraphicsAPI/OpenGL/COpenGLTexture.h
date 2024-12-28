@@ -13,8 +13,12 @@ namespace api
 
 		//
 		GLuint m_TextureID;
+
+	private:
+		void CreateTextureSampler(GLenum target);
+
 	public:
-		COpenGLTexture(api::COpenGLAPI* pGraphicsAPI, bool UseMipMap);
+		COpenGLTexture(api::COpenGLAPI* pGraphicsAPI, bool UseMipMap, const graphics::STextureSamplerParam& SamplerParam);
 		virtual ~COpenGLTexture();
 
 		virtual bool CreateFrameTexture(int Width, int Height, api::ERenderPassFormat RenderPassFormat) override;

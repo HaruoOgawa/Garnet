@@ -89,9 +89,9 @@ namespace api
 		return Material;
 	}
 
-	std::shared_ptr<graphics::CTexture> COpenGLAPI::CreateTexture(bool UseMipMap)
+	std::shared_ptr<graphics::CTexture> COpenGLAPI::CreateTexture(bool UseMipMap, graphics::STextureSamplerParam SamplerParam)
 	{
-		auto Texture = std::make_shared<api::COpenGLTexture>(this, UseMipMap);
+		auto Texture = std::make_shared<api::COpenGLTexture>(this, UseMipMap, SamplerParam);
 
 		return Texture;
 	}
