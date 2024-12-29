@@ -23,6 +23,7 @@ namespace camera
 		virtual glm::mat4 GetViewMatrix();
 
 		virtual glm::vec3 GetViewDir() const;
+		virtual float GetViewLength() const;
 
 		virtual void SetPos(const glm::vec3& Pos);
 		virtual const glm::vec3& GetPos() const;
