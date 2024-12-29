@@ -32,23 +32,33 @@ namespace api
 			internalformat = GL_RGBA;
 			format = GL_RGBA;
 			type = GL_UNSIGNED_BYTE;
+			break;
 		}
-		break;
+		
 		case api::ERenderPassFormat::COLOR_FLOAT_RENDERPASS:
 		{
 			internalformat = GL_RGBA16F;
 			format = GL_RGBA;
 			type = GL_FLOAT;
+			break;
 		}
-		break;
+		
 		case api::ERenderPassFormat::DEPTH_RENDERPASS:
+		{
+			internalformat = GL_DEPTH_COMPONENT;
+			format = GL_DEPTH_COMPONENT;
+			type = GL_UNSIGNED_BYTE;
+			break;
+
+		}
 		case api::ERenderPassFormat::DEPTH_FLOAT_RENDERPASS:
 		{
-			internalformat = GL_DEPTH24_STENCIL8;
-			format = GL_DEPTH_STENCIL;
-			type = GL_DEPTH24_STENCIL8;
+			internalformat = GL_DEPTH_COMPONENT;
+			format = GL_DEPTH_COMPONENT;
+			type = GL_FLOAT;
+			break;
 		}
-		break;
+		
 		default:
 		{
 			internalformat = GL_RGBA;
