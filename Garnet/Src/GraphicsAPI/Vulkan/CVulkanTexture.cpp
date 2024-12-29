@@ -124,23 +124,37 @@ namespace api
 
 		switch (RenderPassFormat)
 		{
-		case api::ERenderPassFormat::COLOR_RENDERPASS:
-			ImageFormat = VK_FORMAT_R8G8B8A8_UNORM;
-			Usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-			break;
-		case api::ERenderPassFormat::COLOR_FLOAT_RENDERPASS:
-			ImageFormat = VK_FORMAT_R16G16B16A16_SFLOAT;
-			Usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-			break;
-		case api::ERenderPassFormat::DEPTH_RENDERPASS:
-		case api::ERenderPassFormat::DEPTH_FLOAT_RENDERPASS:
-			ImageFormat = m_pGraphicsAPI->FindDepthFormat();
-			Usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-			break;
-		default:
-			ImageFormat = VK_FORMAT_R8G8B8A8_UNORM;
-			Usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-			break;
+			case api::ERenderPassFormat::COLOR_RENDERPASS:
+			{
+				ImageFormat = VK_FORMAT_R8G8B8A8_UNORM;
+				Usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+				break;
+			}
+			case api::ERenderPassFormat::COLOR_FLOAT_RENDERPASS:
+			{
+				ImageFormat = VK_FORMAT_R16G16B16A16_SFLOAT;
+				Usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+				break;
+			}
+			case api::ERenderPassFormat::DEPTH_RENDERPASS:
+			{
+				ImageFormat = VK_FORMAT_D16_UNORM;
+				//ImageFormat = m_pGraphicsAPI->FindDepthFormat();
+				Usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+				break;
+			}
+			case api::ERenderPassFormat::DEPTH_FLOAT_RENDERPASS:
+			{
+				ImageFormat = VK_FORMAT_D32_SFLOAT;
+				Usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+				break;
+			}
+			default:
+			{
+				ImageFormat = VK_FORMAT_R8G8B8A8_UNORM;
+				Usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+				break;
+			}
 		}
 
 		if (!CreateFrameTextureImage(ImageFormat, Usage)) return false; // テクスチャイメージの生成

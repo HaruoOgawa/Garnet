@@ -58,7 +58,7 @@ namespace api
 		}
 
 		m_DepthTexture = m_pGraphicsAPI->CreateTexture(false);
-		if (!m_DepthTexture->CreateFrameTexture(Width, Height, api::ERenderPassFormat::DEPTH_RENDERPASS)) return false;
+		if (!m_DepthTexture->CreateFrameTexture(Width, Height, api::ERenderPassFormat::DEPTH_FLOAT_RENDERPASS)) return false;
 
 		if (!CreateFrameBuffer()) return false; // フレームバッファの作成
 		for(int AttachmentIndex = 0; AttachmentIndex < RenderTargetCount; AttachmentIndex++){ if (!CreateColorBuffer(AttachmentIndex)) return false; } // カラーバッファの作成
