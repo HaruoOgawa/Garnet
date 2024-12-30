@@ -50,7 +50,7 @@ namespace api
 		return nullptr;
 	}
 
-	std::shared_ptr<graphics::CTexture> CGraphicsAPI::CreateTexture(bool UseMipMap)
+	std::shared_ptr<graphics::CTexture> CGraphicsAPI::CreateTexture(bool UseMipMap, graphics::STextureSamplerParam SamplerParam)
 	{
 		return nullptr;
 	}

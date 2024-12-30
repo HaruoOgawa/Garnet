@@ -518,11 +518,16 @@ namespace object
 				if (DynamicOffset < 0) return true;
 
 				// 共通のユニフォームバッファの更新
-				glm::mat4 lightVPMat = DrawInfo->GetLightProjection()->GetPrejectionMatrix() * DrawInfo->GetLightCamera()->GetViewMatrix();
+				glm::mat4 lightVMat = DrawInfo->GetLightCamera()->GetViewMatrix();
+				glm::mat4 lightPMat = DrawInfo->GetLightProjection()->GetPrejectionMatrix();
+				glm::mat4 lightVPMat = lightPMat * lightVMat;
+
 				Material->SetUniformValue("model", &WorldMatrix[0][0], sizeof(glm::mat4));
 				Material->SetUniformValue("invModel", &InvWorldMatrix[0][0], sizeof(glm::mat4));
 				Material->SetUniformValue("view", &Camera->GetViewMatrix()[0][0], sizeof(glm::mat4));
 				Material->SetUniformValue("proj", &Projection->GetPrejectionMatrix()[0][0], sizeof(glm::mat4));
+				Material->SetUniformValue("lightVMat", &lightVMat[0][0], sizeof(glm::mat4));
+				Material->SetUniformValue("lightPMat", &lightPMat[0][0], sizeof(glm::mat4));
 				Material->SetUniformValue("lightVPMat", &lightVPMat[0][0], sizeof(glm::mat4));
 				glm::vec3 lightDir = DrawInfo->GetLightCamera()->GetViewDir();
 				Material->SetUniformValue("lightDir", &glm::vec4(lightDir.x, lightDir.y, lightDir.z, 0.0f)[0], sizeof(glm::vec4));

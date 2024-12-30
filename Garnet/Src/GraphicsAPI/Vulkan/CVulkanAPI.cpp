@@ -155,9 +155,9 @@ namespace api
 		return Material;
 	}
 
-	std::shared_ptr<graphics::CTexture> CVulkanAPI::CreateTexture(bool UseMipMap)
+	std::shared_ptr<graphics::CTexture> CVulkanAPI::CreateTexture(bool UseMipMap, graphics::STextureSamplerParam SamplerParam)
 	{
-		auto Texture = std::make_shared<api::CVulkanTexture>(this, UseMipMap);
+		auto Texture = std::make_shared<api::CVulkanTexture>(this, UseMipMap, SamplerParam);
 
 		return Texture;
 	}

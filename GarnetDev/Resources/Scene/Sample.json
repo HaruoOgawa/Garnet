@@ -11,6 +11,9 @@
   "objects": [
     {
       "name": "SampleObj",
+      "renderpasslist":[
+        "MainResultPass"
+      ],
       "transform": {
         "pos": [ 0.0, 0.0, 0.0 ],
         "rotate": [ 0.0, 0.0, 0.0 ],
@@ -35,7 +38,6 @@
         {
           "primitives": [
             {
-              "materialindex": 0,
               "type": "cube"
             }
           ]
@@ -43,6 +45,8 @@
       ],
       "materials": [
         {
+          "meshindex": 0,
+          "primitiveindex": 0,
           "materialframe": "pbr_mat",
           "uniformvalues": [
           ],

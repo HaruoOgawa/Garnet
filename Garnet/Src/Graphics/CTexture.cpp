@@ -16,16 +16,17 @@
 
 namespace graphics
 {
-	CTexture::CTexture(bool UseMipMap):
+	CTexture::CTexture(bool UseMipMap, const STextureSamplerParam& SamplerParam):
+		m_TextureType(ETextureType::TEXTURE_2D),
+		m_RenderPassFormat(api::ERenderPassFormat::NONE),
+		m_FileName(std::string()),
 		m_Width(1),
 		m_Height(1),
-		m_FileName(std::string()),
 		m_NumOfChannels(1),
 		m_UseMipMap(UseMipMap),
 		m_HasMipData(false),
 		m_MipCount(1.0f),
-		m_TextureType(ETextureType::TEXTURE_2D),
-		m_RenderPassFormat(api::ERenderPassFormat::NONE)
+		m_SamplerParam(SamplerParam)
 	{
 	}
 

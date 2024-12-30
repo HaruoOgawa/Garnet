@@ -4,8 +4,8 @@
 #include "../../Message/Console.h"
 namespace api
 {
-	CVulkanTexture::CVulkanTexture(api::CVulkanAPI* pGraphicsAPI, bool UseMipMap):
-		CTexture(UseMipMap),
+	CVulkanTexture::CVulkanTexture(api::CVulkanAPI* pGraphicsAPI, bool UseMipMap, const graphics::STextureSamplerParam& SamplerParam):
+		CTexture(UseMipMap, SamplerParam),
 		m_pGraphicsAPI(pGraphicsAPI),
 		m_TextureImage(nullptr),
 		m_TextureImageMemory(nullptr),
@@ -124,23 +124,37 @@ namespace api
 
 		switch (RenderPassFormat)
 		{
-		case api::ERenderPassFormat::COLOR_RENDERPASS:
-			ImageFormat = VK_FORMAT_R8G8B8A8_UNORM;
-			Usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-			break;
-		case api::ERenderPassFormat::COLOR_FLOAT_RENDERPASS:
-			ImageFormat = VK_FORMAT_R16G16B16A16_SFLOAT;
-			Usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-			break;
-		case api::ERenderPassFormat::DEPTH_RENDERPASS:
-		case api::ERenderPassFormat::DEPTH_FLOAT_RENDERPASS:
-			ImageFormat = m_pGraphicsAPI->FindDepthFormat();
-			Usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-			break;
-		default:
-			ImageFormat = VK_FORMAT_R8G8B8A8_UNORM;
-			Usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-			break;
+			case api::ERenderPassFormat::COLOR_RENDERPASS:
+			{
+				ImageFormat = VK_FORMAT_R8G8B8A8_UNORM;
+				Usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+				break;
+			}
+			case api::ERenderPassFormat::COLOR_FLOAT_RENDERPASS:
+			{
+				ImageFormat = VK_FORMAT_R16G16B16A16_SFLOAT;
+				Usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+				break;
+			}
+			case api::ERenderPassFormat::DEPTH_RENDERPASS:
+			{
+				ImageFormat = VK_FORMAT_D16_UNORM;
+				//ImageFormat = m_pGraphicsAPI->FindDepthFormat();
+				Usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+				break;
+			}
+			case api::ERenderPassFormat::DEPTH_FLOAT_RENDERPASS:
+			{
+				ImageFormat = VK_FORMAT_D32_SFLOAT;
+				Usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+				break;
+			}
+			default:
+			{
+				ImageFormat = VK_FORMAT_R8G8B8A8_UNORM;
+				Usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+				break;
+			}
 		}
 
 		if (!CreateFrameTextureImage(ImageFormat, Usage)) return false; // テクスチャイメージの生成
@@ -233,12 +247,54 @@ namespace api
 	{
 		VkSamplerCreateInfo samplerInfo{};
 		samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
-		samplerInfo.magFilter = VK_FILTER_LINEAR;
-		samplerInfo.minFilter = VK_FILTER_LINEAR;
-		samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-		samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-		samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
 
+		switch (m_SamplerParam.FilterMode)
+		{
+			case graphics::ETextureFilterMode::LINEAR:
+			{
+				samplerInfo.magFilter = VK_FILTER_LINEAR;
+				samplerInfo.minFilter = VK_FILTER_LINEAR;
+				break;
+			}
+			case graphics::ETextureFilterMode::NEAREST:
+			{
+				samplerInfo.magFilter = VK_FILTER_NEAREST;
+				samplerInfo.minFilter = VK_FILTER_NEAREST;
+				break;
+			}
+			default:
+			{
+				samplerInfo.magFilter = VK_FILTER_LINEAR;
+				samplerInfo.minFilter = VK_FILTER_LINEAR;
+				break;
+			}
+		}
+
+		switch (m_SamplerParam.WrapMode)
+		{
+			case graphics::ETextureWrapMode::CLAMP_TO_EDGE:
+			{
+				samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+				samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+				samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+				break;
+			}
+			case graphics::ETextureWrapMode::REPEAT:
+			{
+				samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+				samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+				samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+				break;
+			}
+			default:
+			{
+				samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+				samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+				samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+				break;
+			}
+		}
+		
 		VkPhysicalDeviceProperties properties{};
 		vkGetPhysicalDeviceProperties(m_pGraphicsAPI->GetPhysicalDevice(), &properties);
 		samplerInfo.anisotropyEnable = VK_TRUE; // 異方性フィルタリング --> 遠くの方のテクスチャがぼけてしまうのを調整する機

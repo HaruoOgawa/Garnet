@@ -23,7 +23,7 @@ namespace api
 		// Helper Function ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		bool ComputeShrinkPixels(const std::vector<unsigned char>& SrcPixels, std::vector<unsigned char>& DstPixles, uint32_t w, uint32_t h);
 	public:
-		CWebGPUTexture(api::CWebGPUAPI* pGraphicsAPI, bool UseMipMap);
+		CWebGPUTexture(api::CWebGPUAPI* pGraphicsAPI, bool UseMipMap, const graphics::STextureSamplerParam& SamplerParam);
 		virtual ~CWebGPUTexture();
 
 		virtual bool CreateFrameTexture(int Width, int Height, api::ERenderPassFormat RenderPassFormat) override;

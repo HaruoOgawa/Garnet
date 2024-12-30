@@ -4,6 +4,7 @@
 #include <vector>
 #include "ETextureType.h"
 #include "../GraphicsAPI/ERenderPassFormat.h"
+#include "STextureSamplerParam.h"
 
 namespace graphics
 {
@@ -23,10 +24,12 @@ namespace graphics
 		const bool m_UseMipMap;
 		bool  m_HasMipData; // 画像データ生成時に拡張子名から自動判断
 		float m_MipCount;
+
+		const STextureSamplerParam m_SamplerParam;
 	private:
 		bool IsPowerOfTwo(int n);
 	public:
-		CTexture(bool UseMipMap);
+		CTexture(bool UseMipMap, const STextureSamplerParam& SamplerParam);
 		virtual ~CTexture();
 
 		void SetFileName(const std::string& Name);

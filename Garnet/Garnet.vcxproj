@@ -676,6 +676,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Src\Graphics\STextureSamplerParam.h" />
     <ClInclude Include="Src\Library\bullet3\src\btBulletCollisionCommon.h" />
     <ClInclude Include="Src\Library\bullet3\src\btBulletDynamicsCommon.h" />
     <ClInclude Include="Src\Library\bullet3\src\Bullet3Collision\BroadPhaseCollision\b3BroadphaseCallback.h" />

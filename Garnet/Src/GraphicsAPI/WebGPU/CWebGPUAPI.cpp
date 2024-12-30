@@ -124,9 +124,9 @@ namespace api
 		return Material;
 	}
 
-	std::shared_ptr<graphics::CTexture> CWebGPUAPI::CreateTexture(bool UseMipMap)
+	std::shared_ptr<graphics::CTexture> CWebGPUAPI::CreateTexture(bool UseMipMap, graphics::STextureSamplerParam SamplerParam)
 	{
-		auto Texture = std::make_shared<api::CWebGPUTexture>(this, UseMipMap);
+		auto Texture = std::make_shared<api::CWebGPUTexture>(this, UseMipMap, SamplerParam);
 
 		return Texture;
 	}

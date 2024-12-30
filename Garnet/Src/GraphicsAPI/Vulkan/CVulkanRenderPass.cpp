@@ -75,16 +75,20 @@ namespace api
 		m_Height = Height;
 		m_RenderTargetCount = RenderTargetCount;
 
+		graphics::STextureSamplerParam SamplerParam;
+		SamplerParam.FilterMode = graphics::ETextureFilterMode::LINEAR;
+		SamplerParam.WrapMode = graphics::ETextureWrapMode::CLAMP_TO_EDGE;
+
 		for (int AttachmentIndex = 0; AttachmentIndex < RenderTargetCount; AttachmentIndex++)
 		{
-			auto FrameTexture = m_pGraphicsAPI->CreateTexture(false);
+			auto FrameTexture = std::make_shared<CVulkanTexture>(m_pGraphicsAPI, false, SamplerParam);
 			if (!FrameTexture->CreateFrameTexture(Width, Height, m_RenderPassFormat)) return false;
 
 			m_FrameTextureList.push_back(FrameTexture);
 		}
-		
-		m_DepthTexture = std::make_shared<CVulkanTexture>(m_pGraphicsAPI, false);
-		if (!m_DepthTexture->CreateFrameTexture(Width, Height, api::ERenderPassFormat::DEPTH_RENDERPASS)) return false;
+
+		m_DepthTexture = std::make_shared<CVulkanTexture>(m_pGraphicsAPI, false, SamplerParam);
+		if (!m_DepthTexture->CreateFrameTexture(Width, Height, api::ERenderPassFormat::DEPTH_FLOAT_RENDERPASS)) return false;
 
 		if (!CreateRenderPass(RenderTargetCount)) return false; // レンダーパスの作成(描画全体のマネージャー。実際に描画に使用するのがサブパス。サブパスを複数個用意することでポストプロセスもできる)
 		if (!CreateFrameBuffer(Width, Height)) return false; // フレームバッファの作成

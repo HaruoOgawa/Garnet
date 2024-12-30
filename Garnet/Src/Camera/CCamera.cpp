@@ -27,6 +27,11 @@ namespace camera
 		return ViewDir;
 	}
 
+	float CCamera::GetViewLength() const
+	{
+		return glm::length(m_Center - m_Pos);
+	}
+
 	void CCamera::SetPos(const glm::vec3& Pos)
 	{
 		m_Pos = Pos;

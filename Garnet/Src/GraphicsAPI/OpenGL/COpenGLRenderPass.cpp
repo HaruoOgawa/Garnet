@@ -58,7 +58,7 @@ namespace api
 		}
 
 		m_DepthTexture = m_pGraphicsAPI->CreateTexture(false);
-		if (!m_DepthTexture->CreateFrameTexture(Width, Height, api::ERenderPassFormat::DEPTH_RENDERPASS)) return false;
+		if (!m_DepthTexture->CreateFrameTexture(Width, Height, api::ERenderPassFormat::DEPTH_FLOAT_RENDERPASS)) return false;
 
 		if (!CreateFrameBuffer()) return false; // フレームバッファの作成
 		for(int AttachmentIndex = 0; AttachmentIndex < RenderTargetCount; AttachmentIndex++){ if (!CreateColorBuffer(AttachmentIndex)) return false; } // カラーバッファの作成
@@ -67,7 +67,8 @@ namespace api
 		// フレームバッファに使用するカラーバッファを指定
 		std::vector<unsigned int> Attachments;
 		for (int AttachmentIndex = 0; AttachmentIndex < RenderTargetCount; AttachmentIndex++) { Attachments.push_back(GL_COLOR_ATTACHMENT0 + AttachmentIndex); }
-		glDrawBuffers(RenderTargetCount, &Attachments[0]);
+		Attachments.push_back(GL_DEPTH_ATTACHMENT);
+		glDrawBuffers(RenderTargetCount + 1, &Attachments[0]);
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0); // 後続の描画が映らなくなるのでバインドを解除しておく
 
@@ -96,14 +97,17 @@ namespace api
 
 	bool COpenGLRenderPass::CreateDepthBuffer()
 	{
-		glGenRenderbuffers(1, &m_DepthBuffer);
+		COpenGLTexture* pOpenGLTexture = static_cast<COpenGLTexture*>(m_DepthTexture.get());
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, pOpenGLTexture->GetTextureID(), 0);
+
+		/*glGenRenderbuffers(1, &m_DepthBuffer);
 		glBindRenderbuffer(GL_RENDERBUFFER, m_DepthBuffer);
 
 		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT32F, m_Width, m_Height);
 
 		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_DepthBuffer);
 
-		glBindRenderbuffer(GL_RENDERBUFFER, 0);
+		glBindRenderbuffer(GL_RENDERBUFFER, 0);*/
 
 		return true;
 	}
