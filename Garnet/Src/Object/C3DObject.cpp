@@ -359,6 +359,24 @@ namespace object
 		}
 	}
 
+	glm::mat4 C3DObject::CalcNoScaledWorldMatrix(const std::shared_ptr<object::CNode>& ChildNode)
+	{
+		glm::mat4 result = glm::mat4(1.0f);
+
+		auto Target = ChildNode;
+
+		for (;;)
+		{
+			if (!Target) break;
+
+			result = glm::translate(glm::mat4(1.0f), Target->GetPos()) * glm::toMat4(Target->GetRot()) * result;
+
+			Target = Target->GetParentNode();
+		}
+
+		return result;
+	}
+
 	bool C3DObject::Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, float DeltaSecondsTime)
 	{
 		if (!m_IsCreated) return true;

@@ -5,7 +5,7 @@ namespace camera
 	CCamera::CCamera():
 		m_Pos(0.0f, 0.0f, 1.0f),
 		m_Center(0.0f, 0.0f, 0.0f),
-		m_Up(0.0f, 1.0f, 0.0f)
+		m_UpVector(0.0f, 1.0f, 0.0f)
 	{
 	}
 
@@ -15,7 +15,7 @@ namespace camera
 
 	glm::mat4 CCamera::GetViewMatrix()
 	{
-		glm::mat4 vmat = glm::lookAt(m_Pos, m_Center, m_Up);
+		glm::mat4 vmat = glm::lookAt(m_Pos, m_Center, m_UpVector);
 
 		return vmat;
 	}
@@ -50,5 +50,15 @@ namespace camera
 	const glm::vec3& CCamera::GetCenter() const
 	{
 		return m_Center;
+	}
+
+	void CCamera::SetUpVector(const glm::vec3& UpVector)
+	{
+		m_UpVector = UpVector;
+	}
+
+	const glm::vec3& CCamera::GetUpVector() const
+	{
+		return m_UpVector;
 	}
 }
