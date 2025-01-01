@@ -5,6 +5,9 @@ namespace graphics
 	CMaterialFrame::CMaterialFrame():
 		m_CreateCounter(0),
 		m_MaterialFrameName(std::string()),
+		m_EnabledZWrite(true),
+		m_DepthFunc(graphics::EDepthFunc::Less),
+		m_CullMode(graphics::ECullMode::NOT_SET),
 		m_FileName(std::string()),
 		m_CreateInfo(nullptr),
 		m_OutputColorCount(1)
@@ -23,6 +26,26 @@ namespace graphics
 	const std::string& CMaterialFrame::GetMaterialFrameName() const
 	{
 		return m_MaterialFrameName;
+	}
+
+	void CMaterialFrame::SetEnabledZWrite(bool ZWrite)
+	{
+		m_EnabledZWrite = ZWrite;
+	}
+
+	bool CMaterialFrame::IsEnabledZWrite() const
+	{
+		return m_EnabledZWrite;
+	}
+
+	void CMaterialFrame::SetDepthFunc(graphics::EDepthFunc DepthFunc)
+	{
+		m_DepthFunc = DepthFunc;
+	}
+
+	graphics::EDepthFunc CMaterialFrame::GetDepthFunc() const
+	{
+		return m_DepthFunc;
 	}
 
 	void CMaterialFrame::SetCullMode(graphics::ECullMode CullMode)
@@ -147,6 +170,11 @@ namespace graphics
 		{
 			Material->AddTextureBindingLayout({ TextureBuffer.TextureName, TextureBuffer.ViewBindingIndex, TextureBuffer.SamplerBindingIndex,TextureBuffer.TextureIndex,TextureBuffer.TextureUsage });
 		}
+
+		// その他パラメーター
+		Material->SetEnabledZWrite(m_EnabledZWrite);
+		Material->SetDepthFunc(m_DepthFunc);
+		Material->SetCullMode(m_CullMode);
 
 		// カウンターを更新
 		m_CreateCounter++;

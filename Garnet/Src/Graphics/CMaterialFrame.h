@@ -8,6 +8,7 @@
 #include "../Graphics/SBufferValueLayout.h"
 #include "../Graphics/STextureBindingLayout.h"
 #include "../Graphics/ECullMode.h"
+#include "../Graphics/EDepthFunc.h"
 #include "../GraphicsAPI/CMaterialCreateInfo.h"
 
 #include "CMaterial.h"
@@ -30,6 +31,10 @@ namespace graphics
 
 		std::string m_MaterialFrameName;
 
+		// DepthTest
+		bool m_EnabledZWrite;
+		graphics::EDepthFunc m_DepthFunc;
+
 		// ƒJƒŠƒ“ƒO
 		graphics::ECullMode m_CullMode;
 
@@ -48,6 +53,12 @@ namespace graphics
 
 		void SetMaterialFrameName(const std::string& Name);
 		const std::string& GetMaterialFrameName() const;
+
+		void SetEnabledZWrite(bool ZWrite);
+		bool IsEnabledZWrite() const;
+
+		void SetDepthFunc(graphics::EDepthFunc DepthFunc);
+		graphics::EDepthFunc GetDepthFunc() const;
 
 		void SetCullMode(graphics::ECullMode CullMode);
 		graphics::ECullMode GetCullMode() const;

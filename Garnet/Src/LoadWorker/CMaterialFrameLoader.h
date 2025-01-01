@@ -16,6 +16,7 @@
 #include "../Graphics/SBufferValueLayout.h"
 #include "../Graphics/STextureBindingLayout.h"
 #include "../Graphics/ECullMode.h"
+#include "../Graphics/EDepthFunc.h"
 #include "../GraphicsAPI/CMaterialCreateInfo.h"
 
 using namespace nlohmann;
@@ -38,6 +39,10 @@ namespace resource
 
 		// MfData
 		std::string m_MaterialFrameName;
+
+		// DepthTest
+		bool m_EnabledZWrite;
+		graphics::EDepthFunc m_DepthFunc;
 
 		// ƒJƒŠƒ“ƒO
 		graphics::ECullMode m_CullMode;

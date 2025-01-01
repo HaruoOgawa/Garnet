@@ -9,6 +9,8 @@ namespace resource
 		m_AnalyseDone(false),
 		m_CreateInfo(std::make_shared<graphics::CMaterialCreateInfo>()),
 		m_MaterialFrameName(std::string()),
+		m_EnabledZWrite(true),
+		m_DepthFunc(graphics::EDepthFunc::Less),
 		m_CullMode(graphics::ECullMode::NOT_SET),
 		m_OutputColorCount(1)
 	{
@@ -142,6 +144,54 @@ namespace resource
 		if (MaterialName != m_MfJson.end() && MaterialName->is_string())
 		{
 			m_MaterialFrameName = MaterialName.value();
+		}
+
+		// DepthTest
+		{
+			const auto zwrite = m_MfJson.find("zwrite");
+			if (zwrite != m_MfJson.end() && zwrite->is_boolean())
+			{
+				m_EnabledZWrite = zwrite.value();
+			}
+
+			const auto depthfunc = m_MfJson.find("depthfunc");
+			if (depthfunc != m_MfJson.end() && depthfunc->is_string())
+			{
+				std::string depthfunc_str = depthfunc.value();
+
+				if (depthfunc_str == "never")
+				{
+					m_DepthFunc = graphics::EDepthFunc::Never;
+				}
+				else if (depthfunc_str == "less")
+				{
+					m_DepthFunc = graphics::EDepthFunc::Less;
+				}
+				else if (depthfunc_str == "lessequal")
+				{
+					m_DepthFunc = graphics::EDepthFunc::LessEqual;
+				}
+				else if (depthfunc_str == "greater")
+				{
+					m_DepthFunc = graphics::EDepthFunc::Greater;
+				}
+				else if (depthfunc_str == "greaterequal")
+				{
+					m_DepthFunc = graphics::EDepthFunc::GreaterEqual;
+				}
+				else if (depthfunc_str == "equal")
+				{
+					m_DepthFunc = graphics::EDepthFunc::Equal;
+				}
+				else if (depthfunc_str == "notequal")
+				{
+					m_DepthFunc = graphics::EDepthFunc::NotEqual;
+				}
+				else if (depthfunc_str == "always")
+				{
+					m_DepthFunc = graphics::EDepthFunc::Always;
+				}
+			}
 		}
 
 		// Cull Mode
@@ -680,6 +730,8 @@ namespace resource
 			if (MaterialFrame)
 			{
 				MaterialFrame->SetMaterialFrameName(m_MaterialFrameName);
+				MaterialFrame->SetEnabledZWrite(m_EnabledZWrite);
+				MaterialFrame->SetDepthFunc(m_DepthFunc);
 				MaterialFrame->SetCullMode(m_CullMode);
 				MaterialFrame->SetCreateInfo(m_CreateInfo);
 				MaterialFrame->SetShaderBufferList(m_ShaderBufferList);
