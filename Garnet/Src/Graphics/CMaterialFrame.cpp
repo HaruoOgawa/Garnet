@@ -9,6 +9,7 @@ namespace graphics
 		m_DepthFunc(graphics::EDepthFunc::Less),
 		m_StencilParam({}),
 		m_CullMode(graphics::ECullMode::NOT_SET),
+		m_BlendType(graphics::EBlendType::BLEND_TYPE_ADDITIVE),
 		m_FileName(std::string()),
 		m_CreateInfo(nullptr),
 		m_OutputColorCount(1)
@@ -67,6 +68,16 @@ namespace graphics
 	graphics::ECullMode CMaterialFrame::GetCullMode() const
 	{
 		return m_CullMode;
+	}
+
+	void CMaterialFrame::SetBlendType(graphics::EBlendType Type)
+	{
+		m_BlendType = Type;
+	}
+
+	graphics::EBlendType CMaterialFrame::GetBlendType() const
+	{
+		return m_BlendType;
 	}
 
 	void CMaterialFrame::SetFileName(const std::string& Name)
@@ -187,6 +198,7 @@ namespace graphics
 		Material->SetDepthFunc(m_DepthFunc);
 		Material->SetStencilParam(m_StencilParam);
 		Material->SetCullMode(m_CullMode);
+		Material->SetBlendType(m_BlendType);
 
 		// カウンターを更新
 		m_CreateCounter++;

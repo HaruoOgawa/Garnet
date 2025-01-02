@@ -42,6 +42,9 @@ namespace graphics
 		// カリング
 		graphics::ECullMode m_CullMode;
 
+		// ブレンドタイプ
+		graphics::EBlendType m_BlendType;
+
 		std::string m_FileName;
 
 		std::shared_ptr<graphics::CMaterialCreateInfo> m_CreateInfo;
@@ -69,6 +72,9 @@ namespace graphics
 
 		void SetCullMode(graphics::ECullMode CullMode);
 		graphics::ECullMode GetCullMode() const;
+
+		void SetBlendType(graphics::EBlendType Type);
+		graphics::EBlendType GetBlendType() const;
 
 		void SetFileName(const std::string& Name);
 		const std::string& GetFileName() const;

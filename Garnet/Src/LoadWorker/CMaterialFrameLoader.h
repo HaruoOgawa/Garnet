@@ -16,6 +16,7 @@
 #include "../Graphics/SBufferValueLayout.h"
 #include "../Graphics/STextureBindingLayout.h"
 #include "../Graphics/ECullMode.h"
+#include "../Graphics/EBlendType.h"
 #include "../Graphics/EDepthFunc.h"
 #include "../Graphics/SStencilParam.h"
 #include "../GraphicsAPI/CMaterialCreateInfo.h"
@@ -50,6 +51,9 @@ namespace resource
 
 		// カリング
 		graphics::ECullMode m_CullMode;
+
+		// ブレンドタイプ
+		graphics::EBlendType m_BlendType;
 
 		// カラーバッファへのアウトプット数(MRTで使用)
 		int m_OutputColorCount;
