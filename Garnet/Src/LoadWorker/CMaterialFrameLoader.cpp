@@ -11,6 +11,7 @@ namespace resource
 		m_MaterialFrameName(std::string()),
 		m_EnabledZWrite(true),
 		m_DepthFunc(graphics::EDepthFunc::Less),
+		m_StencilParam({}),
 		m_CullMode(graphics::ECullMode::NOT_SET),
 		m_OutputColorCount(1)
 	{
@@ -190,6 +191,82 @@ namespace resource
 				else if (depthfunc_str == "always")
 				{
 					m_DepthFunc = graphics::EDepthFunc::Always;
+				}
+			}
+		}
+
+		// m_StencilParam
+		// StencilTest
+		const auto stencil = m_MfJson.find("stencil");
+		if (stencil != m_MfJson.end() && stencil->is_object())
+		{
+			//
+			bool enabled = false;
+			GetBoolean("enabled", enabled, stencil);
+			m_StencilParam.Enabled = enabled;
+
+			//
+			int value = 0;
+			GetInt("value", value, stencil);
+			m_StencilParam.RefValue = static_cast<char>(value);
+
+			//
+			std::string comp_str = std::string();
+			GetString("comp", comp_str, stencil);
+			{
+				if (comp_str == "never")
+				{
+					m_StencilParam.Func = graphics::EStencilFunc::Never;
+				}
+				else if (comp_str == "less")
+				{
+					m_StencilParam.Func = graphics::EStencilFunc::Less;
+				}
+				else if (comp_str == "lessequal")
+				{
+					m_StencilParam.Func = graphics::EStencilFunc::LessEqual;
+				}
+				else if (comp_str == "greater")
+				{
+					m_StencilParam.Func = graphics::EStencilFunc::Greater;
+				}
+				else if (comp_str == "greaterequal")
+				{
+					m_StencilParam.Func = graphics::EStencilFunc::GreaterEqual;
+				}
+				else if (comp_str == "equal")
+				{
+					m_StencilParam.Func = graphics::EStencilFunc::Equal;
+				}
+				else if (comp_str == "notequal")
+				{
+					m_StencilParam.Func = graphics::EStencilFunc::NotEqual;
+				}
+				else if (comp_str == "always")
+				{
+					m_StencilParam.Func = graphics::EStencilFunc::Always;
+				}
+			}
+
+			//
+			std::string pass_str = std::string();
+			GetString("pass", pass_str, stencil);
+			{
+				if (pass_str == "keep")
+				{
+					m_StencilParam.DpPass = graphics::EStencilOp::Keep;
+				}
+				else if (pass_str == "replace")
+				{
+					m_StencilParam.DpPass = graphics::EStencilOp::Replace;
+				}
+				else if (pass_str == "incr")
+				{
+					m_StencilParam.DpPass = graphics::EStencilOp::Incr;
+				}
+				else if (pass_str == "decr")
+				{
+					m_StencilParam.DpPass = graphics::EStencilOp::Decr;
 				}
 			}
 		}
@@ -732,6 +809,7 @@ namespace resource
 				MaterialFrame->SetMaterialFrameName(m_MaterialFrameName);
 				MaterialFrame->SetEnabledZWrite(m_EnabledZWrite);
 				MaterialFrame->SetDepthFunc(m_DepthFunc);
+				MaterialFrame->SetStencilParam(m_StencilParam);
 				MaterialFrame->SetCullMode(m_CullMode);
 				MaterialFrame->SetCreateInfo(m_CreateInfo);
 				MaterialFrame->SetShaderBufferList(m_ShaderBufferList);

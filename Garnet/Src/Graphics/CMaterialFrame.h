@@ -9,6 +9,7 @@
 #include "../Graphics/STextureBindingLayout.h"
 #include "../Graphics/ECullMode.h"
 #include "../Graphics/EDepthFunc.h"
+#include "../Graphics/SStencilParam.h"
 #include "../GraphicsAPI/CMaterialCreateInfo.h"
 
 #include "CMaterial.h"
@@ -35,6 +36,9 @@ namespace graphics
 		bool m_EnabledZWrite;
 		graphics::EDepthFunc m_DepthFunc;
 
+		// StencilTest
+		graphics::SStencilParam m_StencilParam;
+
 		// ƒJƒŠƒ“ƒO
 		graphics::ECullMode m_CullMode;
 
@@ -59,6 +63,9 @@ namespace graphics
 
 		void SetDepthFunc(graphics::EDepthFunc DepthFunc);
 		graphics::EDepthFunc GetDepthFunc() const;
+
+		void SetStencilParam(const SStencilParam& Param);
+		const SStencilParam& GetStencilParam() const;
 
 		void SetCullMode(graphics::ECullMode CullMode);
 		graphics::ECullMode GetCullMode() const;

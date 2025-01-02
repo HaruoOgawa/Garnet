@@ -7,6 +7,7 @@ namespace graphics
 		m_MaterialFrameName(std::string()),
 		m_EnabledZWrite(true),
 		m_DepthFunc(graphics::EDepthFunc::Less),
+		m_StencilParam({}),
 		m_CullMode(graphics::ECullMode::NOT_SET),
 		m_FileName(std::string()),
 		m_CreateInfo(nullptr),
@@ -46,6 +47,16 @@ namespace graphics
 	graphics::EDepthFunc CMaterialFrame::GetDepthFunc() const
 	{
 		return m_DepthFunc;
+	}
+
+	void CMaterialFrame::SetStencilParam(const SStencilParam& Param)
+	{
+		m_StencilParam = Param;
+	}
+
+	const SStencilParam& CMaterialFrame::GetStencilParam() const
+	{
+		return m_StencilParam;
 	}
 
 	void CMaterialFrame::SetCullMode(graphics::ECullMode CullMode)
@@ -174,6 +185,7 @@ namespace graphics
 		// その他パラメーター
 		Material->SetEnabledZWrite(m_EnabledZWrite);
 		Material->SetDepthFunc(m_DepthFunc);
+		Material->SetStencilParam(m_StencilParam);
 		Material->SetCullMode(m_CullMode);
 
 		// カウンターを更新

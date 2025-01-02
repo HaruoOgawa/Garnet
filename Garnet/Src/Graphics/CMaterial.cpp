@@ -13,6 +13,7 @@ namespace graphics
 		m_DefaultCullMode(CullMode),
 		m_CullMode(CullMode),
 		m_BlendType(EBlendType::BLEND_TYPE_ADDITIVE),
+		m_StencilParam({}),
 		m_IsDrawOutline(false),
 		m_EmptyTexture(nullptr),
 		m_EmptyCubeTexture(nullptr),
@@ -366,6 +367,16 @@ namespace graphics
 	EBlendType CMaterial::GetBlendType() const
 	{
 		return m_BlendType;
+	}
+
+	void CMaterial::SetStencilParam(const SStencilParam& Param)
+	{
+		m_StencilParam = Param;
+	}
+
+	const SStencilParam& CMaterial::GetStencilParam() const
+	{
+		return m_StencilParam;
 	}
 
 	void CMaterial::AddShaderBuffer(const std::shared_ptr<CShaderBuffer>& Buffer)

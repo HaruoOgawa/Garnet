@@ -71,8 +71,23 @@ namespace api
 		// フレームバッファに使用するカラーバッファを指定
 		std::vector<unsigned int> Attachments;
 		for (int AttachmentIndex = 0; AttachmentIndex < RenderTargetCount; AttachmentIndex++) { Attachments.push_back(GL_COLOR_ATTACHMENT0 + AttachmentIndex); }
-		Attachments.push_back(GL_DEPTH_ATTACHMENT);
-		glDrawBuffers(RenderTargetCount + 1, &Attachments[0]);
+		
+		//
+		int BufferCount = RenderTargetCount;
+
+		// Depth_Stencilの分を追加しておく
+		BufferCount += 1;
+
+		if (m_UseStencil)
+		{
+			Attachments.push_back(GL_DEPTH_STENCIL_ATTACHMENT);
+		}
+		else
+		{
+			Attachments.push_back(GL_DEPTH_ATTACHMENT);
+		}
+
+		glDrawBuffers(BufferCount, &Attachments[0]);
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0); // 後続の描画が映らなくなるのでバインドを解除しておく
 
@@ -112,14 +127,16 @@ namespace api
 			glBindRenderbuffer(GL_RENDERBUFFER, m_DepthBuffer);
 
 			GLenum internalformat = GL_DEPTH_COMPONENT32F;
+			GLenum attachment = GL_DEPTH_ATTACHMENT;
 			if (UseStencil)
 			{
 				internalformat = GL_DEPTH24_STENCIL8;
+				attachment = GL_DEPTH_STENCIL_ATTACHMENT;
 			}
 
 			glRenderbufferStorage(GL_RENDERBUFFER, internalformat, m_Width, m_Height);
 
-			glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_DepthBuffer);
+			glFramebufferRenderbuffer(GL_FRAMEBUFFER, attachment, GL_RENDERBUFFER, m_DepthBuffer);
 
 			glBindRenderbuffer(GL_RENDERBUFFER, 0);
 		}
@@ -132,13 +149,18 @@ namespace api
 		glBindFramebuffer(GL_FRAMEBUFFER, m_FrameBuffer);
 		glViewport(0, 0, m_Width, m_Height);
 		glClearColor(m_InitColor.r, m_InitColor.g, m_InitColor.b, m_InitColor.a);
-		
+		glClearDepth(1.0f);
+
 		GLbitfield clearMask = GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT;
 
 		if (m_UseStencil)
 		{
+			glClearStencil(0);
+
 			clearMask |= GL_STENCIL_BUFFER_BIT;
-			glStencilMask(0x00); // ステンシルマスクは使わない
+			// glStencilMaskはglColorMask・glDepthMaskと同じ関数でフレームバッファへの書き込みを有効にしたり無効にしたりする
+			// 0xFFにすることで有効になる?
+			glStencilMask(0xff);
 		}
 
 		glClear(clearMask);

@@ -17,6 +17,7 @@
 #include "../Graphics/STextureBindingLayout.h"
 #include "../Graphics/ECullMode.h"
 #include "../Graphics/EDepthFunc.h"
+#include "../Graphics/SStencilParam.h"
 #include "../GraphicsAPI/CMaterialCreateInfo.h"
 
 using namespace nlohmann;
@@ -43,6 +44,9 @@ namespace resource
 		// DepthTest
 		bool m_EnabledZWrite;
 		graphics::EDepthFunc m_DepthFunc;
+
+		// StencilTest
+		graphics::SStencilParam m_StencilParam;
 
 		// ƒJƒŠƒ“ƒO
 		graphics::ECullMode m_CullMode;

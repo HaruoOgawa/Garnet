@@ -133,8 +133,13 @@ namespace api
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 			glViewport(0, 0, m_Width, m_Height);
 			glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+			glClearDepth(1.0f);
+			glClearStencil(0);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-			glStencilMask(0x00); // ステンシルマスクは使わない
+
+			// glStencilMaskはglColorMask・glDepthMaskと同じ関数でフレームバッファへの書き込みを有効にしたり無効にしたりする
+			// 0xFFにすることで有効になる?
+			glStencilMask(0xff);
 		}
 
 		m_CurrentRenderPassName = PassName;
