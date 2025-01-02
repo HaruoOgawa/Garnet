@@ -153,20 +153,21 @@ namespace api
 		// Alpha Test(ひとまず通常のアルファブレンドのみ)
 		switch (pOpenGLMat->GetBlendType())
 		{
-		case graphics::EBlendType::BLEND_TYPE_ADDITIVE:
+		case graphics::EBlendType::BLEND_TYPE_NONE:
 			glEnable(GL_BLEND);
 			glBlendFunc(GL_ONE, GL_ZERO);
-
+			break;
+		case graphics::EBlendType::BLEND_TYPE_ADDITIVE:
+			glEnable(GL_BLEND);
+			glBlendFunc(GL_ONE, GL_ONE);
 			break;
 		case graphics::EBlendType::BLEND_TYPE_TRANSPARENT_ALPHA:
 			glEnable(GL_BLEND);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
 			break;
 		default:
 			glEnable(GL_BLEND);
 			glBlendFunc(GL_ONE, GL_ZERO);
-
 			break;
 		}
 

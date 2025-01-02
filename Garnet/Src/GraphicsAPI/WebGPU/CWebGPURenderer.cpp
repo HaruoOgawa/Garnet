@@ -242,13 +242,23 @@ namespace api
 				WGPUBlendState blendState{};
 				switch (pWebGPUMat->GetBlendType())
 				{
-				case graphics::EBlendType::BLEND_TYPE_ADDITIVE:
+				case graphics::EBlendType::BLEND_TYPE_NONE:
 					blendState.color.srcFactor = WGPUBlendFactor_One;
 					blendState.color.dstFactor = WGPUBlendFactor_Zero;
 					blendState.color.operation = WGPUBlendOperation_Add;
 
 					blendState.alpha.srcFactor = WGPUBlendFactor_One;
 					blendState.alpha.dstFactor = WGPUBlendFactor_Zero;
+					blendState.alpha.operation = WGPUBlendOperation_Add;
+
+					break;
+				case graphics::EBlendType::BLEND_TYPE_ADDITIVE:
+					blendState.color.srcFactor = WGPUBlendFactor_One;
+					blendState.color.dstFactor = WGPUBlendFactor_One;
+					blendState.color.operation = WGPUBlendOperation_Add;
+
+					blendState.alpha.srcFactor = WGPUBlendFactor_One;
+					blendState.alpha.dstFactor = WGPUBlendFactor_One;
 					blendState.alpha.operation = WGPUBlendOperation_Add;
 
 					break;

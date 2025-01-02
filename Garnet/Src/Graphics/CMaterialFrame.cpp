@@ -9,7 +9,7 @@ namespace graphics
 		m_DepthFunc(graphics::EDepthFunc::Less),
 		m_StencilParam({}),
 		m_CullMode(graphics::ECullMode::NOT_SET),
-		m_BlendType(graphics::EBlendType::BLEND_TYPE_ADDITIVE),
+		m_BlendType(graphics::EBlendType::BLEND_TYPE_NONE),
 		m_FileName(std::string()),
 		m_CreateInfo(nullptr),
 		m_OutputColorCount(1)

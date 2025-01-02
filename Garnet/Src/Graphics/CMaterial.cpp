@@ -12,7 +12,7 @@ namespace graphics
 		m_DepthFunc(EDepthFunc::Less),
 		m_DefaultCullMode(CullMode),
 		m_CullMode(CullMode),
-		m_BlendType(EBlendType::BLEND_TYPE_ADDITIVE),
+		m_BlendType(EBlendType::BLEND_TYPE_NONE),
 		m_StencilParam({}),
 		m_IsDrawOutline(false),
 		m_EmptyTexture(nullptr),

@@ -13,7 +13,7 @@ namespace resource
 		m_DepthFunc(graphics::EDepthFunc::Less),
 		m_StencilParam({}),
 		m_CullMode(graphics::ECullMode::NOT_SET),
-		m_BlendType(graphics::EBlendType::BLEND_TYPE_ADDITIVE),
+		m_BlendType(graphics::EBlendType::BLEND_TYPE_NONE),
 		m_OutputColorCount(1)
 	{
 		m_TargetMaterialFrameSet.emplace(TargetMaterialFrame);
@@ -302,13 +302,21 @@ namespace resource
 		{
 			std::string blendtype_str = blendtype.value();
 
-			if (blendtype_str == "additive")
+			if (blendtype_str == "none")
 			{
-				m_BlendType = graphics::EBlendType::BLEND_TYPE_ADDITIVE;
+				m_BlendType = graphics::EBlendType::BLEND_TYPE_NONE;
 			}
 			else if (blendtype_str == "transparent")
 			{
 				m_BlendType = graphics::EBlendType::BLEND_TYPE_TRANSPARENT_ALPHA;
+			}
+			else if (blendtype_str == "additive")
+			{
+				m_BlendType = graphics::EBlendType::BLEND_TYPE_ADDITIVE;
+			}
+			else
+			{
+				m_BlendType = graphics::EBlendType::BLEND_TYPE_NONE;
 			}
 		}
 

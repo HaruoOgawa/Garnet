@@ -265,13 +265,22 @@ namespace api
 
 				switch (pVulkanMat->GetBlendType())
 				{
-				case graphics::EBlendType::BLEND_TYPE_ADDITIVE:
+				case graphics::EBlendType::BLEND_TYPE_NONE:
 					colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_ONE;
 					colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ZERO;
 					colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
 
 					colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
 					colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
+					colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
+					break;
+				case graphics::EBlendType::BLEND_TYPE_ADDITIVE:
+					colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_ONE;
+					colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ONE;
+					colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
+
+					colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+					colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
 					colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
 					break;
 				case graphics::EBlendType::BLEND_TYPE_TRANSPARENT_ALPHA:
@@ -583,13 +592,22 @@ namespace api
 
 			switch (pVulkanMat->GetBlendType())
 			{
-			case graphics::EBlendType::BLEND_TYPE_ADDITIVE:
+			case graphics::EBlendType::BLEND_TYPE_NONE:
 				colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_ONE;
 				colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ZERO;
 				colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
 
 				colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
 				colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
+				colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
+				break;
+			case graphics::EBlendType::BLEND_TYPE_ADDITIVE:
+				colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_ONE;
+				colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ONE;
+				colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
+
+				colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+				colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
 				colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
 				break;
 			case graphics::EBlendType::BLEND_TYPE_TRANSPARENT_ALPHA:
