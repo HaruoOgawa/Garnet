@@ -50,6 +50,7 @@ namespace api
 			type = GL_UNSIGNED_BYTE;
 			break;
 		}
+
 		case api::ERenderPassFormat::DEPTH_FLOAT_RENDERPASS:
 		{
 			internalformat = GL_DEPTH_COMPONENT;

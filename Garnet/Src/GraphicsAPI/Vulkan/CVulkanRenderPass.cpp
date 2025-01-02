@@ -69,7 +69,7 @@ namespace api
 		return m_DepthTexture;
 	}
 
-	bool CVulkanRenderPass::Create(int Width, int Height, int RenderTargetCount)
+	bool CVulkanRenderPass::Create(int Width, int Height, int RenderTargetCount, bool UseColorTexture, bool UseDepthTexture, bool UseStencil)
 	{
 		m_Width = Width;
 		m_Height = Height;

@@ -58,7 +58,7 @@ namespace api
 		VkRenderPass GetRenderPass() const { return m_RenderPass; }
 		VkCommandBuffer GetCommandBuffer() const { return m_CommandBuffer; }
 
-		bool Create(int Width, int Height, int RenderTargetCount) override;
+		bool Create(int Width, int Height, int RenderTargetCount, bool UseColorTexture, bool UseDepthTexture, bool UseStencil) override;
 
 		virtual bool BeginRenderPass() override;
 		virtual bool EndRenderPass() override;

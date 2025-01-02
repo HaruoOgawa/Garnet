@@ -25,7 +25,8 @@ namespace api
 	{
 	}
 
-	bool CGraphicsAPI::CreateRenderPass(const std::string& PassName, ERenderPassFormat RenderPassFormat, const glm::vec4& InitColor, int Width, int Height, int RenderTargetCount)
+	bool CGraphicsAPI::CreateRenderPass(const std::string& PassName, ERenderPassFormat RenderPassFormat, const glm::vec4& InitColor, int Width, int Height, int RenderTargetCount,
+		bool UseColorTexture, bool UseDepthTexture, bool UseStencil)
 	{
 		return true;
 	}

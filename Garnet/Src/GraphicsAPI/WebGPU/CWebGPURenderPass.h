@@ -39,7 +39,7 @@ namespace api
 		virtual const std::shared_ptr<graphics::CTexture>& GetDepthTexture() const override;
 		WGPURenderPassEncoder GetRenderPass() const { return m_RenderPass; }
 
-		virtual bool Create(int Width, int Height, int RenderTargetCount) override;
+		virtual bool Create(int Width, int Height, int RenderTargetCount, bool UseColorTexture, bool UseDepthTexture, bool UseStencil) override;
 
 		virtual bool BeginRenderPass() override;
 		virtual bool EndRenderPass() override;

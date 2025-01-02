@@ -39,7 +39,7 @@ namespace api
 		return m_DepthTexture;
 	}
 
-	bool CWebGPURenderPass::Create(int Width, int Height, int RenderTargetCount)
+	bool CWebGPURenderPass::Create(int Width, int Height, int RenderTargetCount, bool UseColorTexture, bool UseDepthTexture, bool UseStencil)
 	{
 		graphics::STextureSamplerParam SamplerParam;
 		SamplerParam.FilterMode = graphics::ETextureFilterMode::LINEAR;
