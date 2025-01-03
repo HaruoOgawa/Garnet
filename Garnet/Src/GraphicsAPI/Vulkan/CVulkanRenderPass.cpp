@@ -17,10 +17,9 @@ namespace api
 		m_InitColor(InitColor),
 		m_RenderPassFormat(RenderPassFormat),
 		m_DepthTexture(nullptr),
-		
+		m_UseStencil(false),
 		m_CommandPool(nullptr),
 		m_CommandBuffer(nullptr),
-
 		m_RenderPass(nullptr),
 		m_FrameBuffer(nullptr)
 	{
@@ -74,6 +73,7 @@ namespace api
 		m_Width = Width;
 		m_Height = Height;
 		m_RenderTargetCount = RenderTargetCount;
+		m_UseStencil = UseStencil;
 
 		graphics::STextureSamplerParam SamplerParam;
 		SamplerParam.FilterMode = graphics::ETextureFilterMode::LINEAR;
@@ -88,7 +88,9 @@ namespace api
 		}
 
 		m_DepthTexture = std::make_shared<CVulkanTexture>(m_pGraphicsAPI, false, SamplerParam);
-		if (!m_DepthTexture->CreateFrameTexture(Width, Height, api::ERenderPassFormat::DEPTH_FLOAT_RENDERPASS)) return false;
+		if (!m_DepthTexture->CreateFrameTexture(Width, Height, 
+			(m_UseStencil? api::ERenderPassFormat::DEPTH_STENCIL_FLOAT_RENDERPASS : api::ERenderPassFormat::DEPTH_FLOAT_RENDERPASS) 
+		)) return false;
 
 		if (!CreateRenderPass(RenderTargetCount)) return false; // レンダーパスの作成(描画全体のマネージャー。実際に描画に使用するのがサブパス。サブパスを複数個用意することでポストプロセスもできる)
 		if (!CreateFrameBuffer(Width, Height)) return false; // フレームバッファの作成
@@ -139,8 +141,16 @@ namespace api
 		depthAttachment.samples = VK_SAMPLE_COUNT_1_BIT; // マルチサンプリング
 		depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR; // レンダリングの前後にどのような処理を施すか(クリアの方法など)。デプスバッファに適応
 		depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE; // レンダリング結果をメモリに保存し読み取り可にする。デプスバッファに適応
-		depthAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE; // 上記の設定をステンシルバッファに適応。 DONT_CAREは何もしない
-		depthAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE; // 上記の設定をステンシルバッファに適応
+		if (m_UseStencil)
+		{
+			depthAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_CLEAR; // 上記の設定をステンシルバッファに適応。 DONT_CAREは何もしない
+			depthAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_STORE; // 上記の設定をステンシルバッファに適応
+		}
+		else
+		{
+			depthAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE; // 上記の設定をステンシルバッファに適応。 DONT_CAREは何もしない
+			depthAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE; // 上記の設定をステンシルバッファに適応
+		}
 		depthAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED; // レンダリング前にどのようなレイアウトとして使用するか
 		depthAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL; // レンダリング後にどのようなレイアウトとして使用するか
 

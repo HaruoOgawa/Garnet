@@ -34,6 +34,8 @@ namespace api
 		std::vector<std::shared_ptr<graphics::CTexture>> m_FrameTextureList;
 		std::shared_ptr<graphics::CTexture> m_DepthTexture;
 
+		bool m_UseStencil;
+
 		// Command
 		VkCommandPool   m_CommandPool;
 		VkCommandBuffer m_CommandBuffer;

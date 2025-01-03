@@ -28,7 +28,7 @@ namespace api
 		// Vulkanメインロジック /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		bool CreateFrameTextureImage(VkFormat ImageFormat, VkImageUsageFlags Usage);
 		bool CreateTextureImage(const std::vector<unsigned char>& pixelData, int pixelSize, VkFormat ImageFormat);
-		bool CreateTextureImageView(VkFormat ImageFormat);
+		bool CreateTextureImageView(VkFormat ImageFormat, bool UseStencil);
 		bool CreateTextureSampler();
 
 		// ImGuiが使用
