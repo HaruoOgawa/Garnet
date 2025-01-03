@@ -113,7 +113,7 @@ namespace scene
 		std::tuple<std::shared_ptr<audio::CAudioClip>, bool, bool> m_BGM;
 
 		//
-		std::map<std::shared_ptr<object::C3DObject>, std::vector<SMaterialInfo>> m_MaterialInfoMap;
+		std::map<std::shared_ptr<object::C3DObject>, std::map<std::tuple<int, int>, std::vector<SMaterialInfo>>> m_MaterialInfoMap;
 		std::map<std::shared_ptr<object::C3DObject>, std::map<std::string, std::shared_ptr<graphics::CTexture>>> m_TextureInfoMap;
 		std::map<std::shared_ptr<object::C3DObject>, SAnimationInfo> m_AnimationInfoMap;
 
@@ -175,8 +175,7 @@ namespace scene
 		const std::tuple<std::shared_ptr<audio::CAudioClip>, bool, bool>& GetSound() const;
 
 		//
-		void AddMaterialInfo(const std::shared_ptr<object::C3DObject>& Object, const std::vector<SMaterialInfo>& MaterialInfoList);
-		const std::map<std::shared_ptr<object::C3DObject>, std::vector<SMaterialInfo>>& GetMaterialInfoMap() const;
+		void AddMaterialInfo(const std::shared_ptr<object::C3DObject>& Object, const std::map<std::tuple<int, int>, std::vector<SMaterialInfo>>& MaterialInfoList);
 
 		void AddTextureInfo(const std::shared_ptr<object::C3DObject>& Object, const std::map<std::string, std::shared_ptr<graphics::CTexture>>& TextureInfoList);
 		const std::map<std::shared_ptr<object::C3DObject>, std::map<std::string, std::shared_ptr<graphics::CTexture>>>& GetTextureInfoMap() const;

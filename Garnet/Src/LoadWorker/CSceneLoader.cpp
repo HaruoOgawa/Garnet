@@ -478,14 +478,21 @@ namespace resource
 			const auto materials = objectJSON->find("materials");
 			if (materials != objectJSON->end() && materials->is_array())
 			{
-				std::vector<scene::SMaterialInfo> MaterialInfoList;
+				std::map<std::tuple<int, int>, std::vector<scene::SMaterialInfo>> MaterialInfoList;
 
 				for (json::iterator materialJSON = materials->begin(); materialJSON != materials->end(); materialJSON++)
 				{
 					if (!materialJSON->is_object()) continue;
 
 					scene::SMaterialInfo MaterialInfo = AnalyseMaterialInfo(materialJSON);
-					MaterialInfoList.push_back(MaterialInfo);
+
+					std::tuple<int, int> RendererKey = std::make_tuple(MaterialInfo.MeshIndex, MaterialInfo.PrimitiveIndex);
+					if (MaterialInfoList.find(RendererKey) == MaterialInfoList.end())
+					{
+						MaterialInfoList.emplace(RendererKey, std::vector<scene::SMaterialInfo>());
+					}
+
+					MaterialInfoList[RendererKey].push_back(MaterialInfo);
 				}
 
 				// SceneController‚É“o˜^

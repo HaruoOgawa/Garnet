@@ -45,6 +45,7 @@ namespace graphics
 		bool Draw();
 
 		const std::vector<std::tuple<std::shared_ptr<graphics::IRenderer>, std::shared_ptr<CMaterial>>>& GetRendererList() const;
+		void ReplaceMaterial(const std::tuple<std::shared_ptr<graphics::IRenderer>, std::shared_ptr<CMaterial>>& Renderer, const std::shared_ptr<CMaterial>& NewMaterial);
 
 		void AddMaterial(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CMaterial>& Material);
 
