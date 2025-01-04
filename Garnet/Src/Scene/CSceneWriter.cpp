@@ -631,7 +631,7 @@ namespace scene
 							cull = "front";
 							break;
 						default:
-							cull = "none";
+							cull = "back";
 							break;
 						}
 

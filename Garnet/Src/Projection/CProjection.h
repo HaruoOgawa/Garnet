@@ -22,6 +22,7 @@ namespace projection
 		CProjection();
 		virtual ~CProjection() = default;
 
+		glm::mat4 GetPerspectiveMatrix();
 		glm::mat4 GetPrejectionMatrix();
 
 		void SetFOV(float FOV);

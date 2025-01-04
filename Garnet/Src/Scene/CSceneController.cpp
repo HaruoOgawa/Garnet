@@ -683,6 +683,36 @@ namespace scene
 						Material->SetUniformValue(UniformInfo.UniformName, &UniformInfo.UniformData[0], UniformInfo.ByteSize);
 					}
 
+					// CullMode
+					Material->SetCullMode(MaterialInfo.CullMode);
+
+					// Textureを設定
+					for (const auto& Texture : MaterialInfo.Textures)
+					{
+						const auto& TextureBufferName = std::get<0>(Texture);
+						const auto& TextureName = std::get<1>(Texture);
+						int Index = std::get<2>(Texture);
+
+						int TextureIndex = -1;
+
+						auto TexIndexIT = TexIndexMap.find(TextureName);
+						if (TexIndexIT != TexIndexMap.end())
+						{
+							TextureIndex = TexIndexIT->second;
+						}
+						else if (Index != -1)
+						{
+							TextureIndex = Index;
+						}
+
+						if (TextureIndex == -1) continue;
+
+						Material->ReplaceTextureIndex(TextureBufferName, TextureIndex);
+					}
+
+					// テクスチャリストを再作成
+					Material->CreateRefTextureList(Object->GetTextureSet());
+
 					// TrackIDList
 					Material->SetRefTrackIDList(MaterialInfo.TrackIDList);
 				}

@@ -186,6 +186,12 @@ namespace graphics
 		return true;
 	}
 
+	bool CMaterial::CreateRefTextureList(const std::shared_ptr<graphics::CTextureSet>& TextureSet)
+	{
+		if (!CreateRefTextureList(m_CreateInfo, TextureSet)) return false;
+		return true;
+	}
+
 	bool CMaterial::CreateRefTextureList(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, const std::shared_ptr<graphics::CTextureSet>& TextureSet)
 	{
 		m_RefTextureMap.clear();

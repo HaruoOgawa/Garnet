@@ -12,7 +12,7 @@ namespace projection
 	{
 	}
 
-	glm::mat4 CProjection::GetPrejectionMatrix()
+	glm::mat4 CProjection::GetPerspectiveMatrix()
 	{
 		float Aspect = m_ScreenResolution.x / m_ScreenResolution.y;
 
@@ -20,6 +20,13 @@ namespace projection
 #ifndef USE_OPENGL
 		pmat[1][1] *= -1.0f; /// YÀ•W‚ÌŒü‚«‚ğ”½“]BVulkan(WebGPU)‚ÆOpenGL‚Í‹t‚È‚Ì‚©‚ÈH
 #endif // !USE_OPENGL
+
+		return pmat;
+	}
+
+	glm::mat4 CProjection::GetPrejectionMatrix()
+	{
+		glm::mat4 pmat = GetPerspectiveMatrix();
 
 		if (m_UseObliqueMat)
 		{
