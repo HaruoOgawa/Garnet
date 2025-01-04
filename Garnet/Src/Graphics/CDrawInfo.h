@@ -16,6 +16,8 @@ namespace graphics
 
 		float m_SecondsTime;
 		float m_DeltaSecondsTime;
+
+		bool  m_FlipCullMode;
 	public:
 		CDrawInfo();
 		virtual ~CDrawInfo() = default;
@@ -33,5 +35,8 @@ namespace graphics
 		
 		void SetDeltaSecondsTime(float DeltaSecondsTime);
 		float GetDeltaSecondsTime() const;
+
+		void  SetFlipCullMode(bool Mode);
+		bool  IsFlipCullMode() const;
 	};
 }

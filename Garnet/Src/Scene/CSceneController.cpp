@@ -655,6 +655,8 @@ namespace scene
 				for (int RendererIndex = 0; RendererIndex < static_cast<int>(RendererList.size()); RendererIndex++)
 				{
 					const auto& Renderer = RendererList[RendererIndex];
+
+					if (RendererIndex >= static_cast<int>(MaterialInfoList->second.size())) continue;
 					const auto& MaterialInfo = MaterialInfoList->second[RendererIndex];
 
 					auto Material = std::get<1>(Renderer);
