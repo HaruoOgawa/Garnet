@@ -843,10 +843,10 @@ namespace scene
 			switch (FilterMode)
 			{
 			case graphics::ETextureFilterMode::NEAREST:
-				filter_str = "linear";
+				filter_str = "nearest";
 				break;
 			case graphics::ETextureFilterMode::LINEAR:
-				filter_str = "nearest";
+				filter_str = "linear";
 				break;
 			default:
 				break;

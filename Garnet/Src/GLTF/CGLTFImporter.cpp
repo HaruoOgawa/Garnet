@@ -264,7 +264,8 @@ namespace gltf
 
 				std::memcpy(&textureData[0], &buffer.data[byteOffset], byteLength);
 
-				std::shared_ptr<graphics::CTexture> Texture = pGraphicsAPI->CreateTexture();
+				// ToDo: glTF‚Ìsampler‚É‚à‘Î‰ž‚·‚é
+				std::shared_ptr<graphics::CTexture> Texture = pGraphicsAPI->CreateTexture(false, { graphics::ETextureFilterMode::LINEAR, graphics::ETextureWrapMode::REPEAT });
 				if (!Texture->Create(textureData)) return false;
 
 				// “o˜^‚·‚é

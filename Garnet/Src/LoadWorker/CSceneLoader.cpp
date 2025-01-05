@@ -298,7 +298,7 @@ namespace resource
 
 				std::vector<std::string> FileNameList = { right, left, top, bottom, front, back };
 
-				auto Texture = pGraphicsAPI->CreateTexture();
+				auto Texture = pGraphicsAPI->CreateTexture(true, { graphics::ETextureFilterMode::LINEAR, graphics::ETextureWrapMode::REPEAT });
 				pLoadWorker->AddLoadResource(std::make_shared<resource::CTextureLoader>(pGraphicsAPI, FileNameList, Texture));
 				SceneTextureSet->AddCubeMap(Texture);
 			}

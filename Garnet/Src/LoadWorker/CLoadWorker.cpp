@@ -226,14 +226,15 @@ namespace resource
 
 	void CLoadWorker::AddLoadResource(const std::shared_ptr<resource::IResource>& Resource)
 	{
-		auto LoadingResource = GetLoadingResource(Resource->GetFilename());
+		// ToDo: ResouceがMF以外の時のロード完了周りが設計されていないのでいったん使用しないようにする
+		/*auto LoadingResource = GetLoadingResource(Resource->GetFilename());
 
 		if (LoadingResource)
 		{
 			// リソースにターゲットの参照だけを追加する
 			LoadingResource->AddReference(Resource);
 		}
-		else
+		else*/
 		{
 			// mapに新規追加する
 			m_LoadResourceList.push_back(Resource);
