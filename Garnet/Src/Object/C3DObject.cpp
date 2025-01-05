@@ -750,11 +750,6 @@ namespace object
 		return m_MeshList;
 	}
 
-	/*void C3DObject::AddMaterial(const std::shared_ptr<graphics::CMaterial>& Material)
-	{
-		m_MaterialList.push_back(Material);
-	}*/
-
 	void C3DObject::AddMorphNode(const std::shared_ptr<CNode>& Node)
 	{
 		m_MorphController->AddMorphNode(Node);
@@ -809,22 +804,6 @@ namespace object
 		return m_AnimationController->IsPlayingAnimation();
 	}
 #endif
-
-	bool C3DObject::ReplaceMaterial(const std::shared_ptr<graphics::CMaterial>& OldMaterial, const std::shared_ptr<graphics::CMaterial>& NewMaterial)
-	{
-		/*auto it = std::find(m_MaterialList.begin(), m_MaterialList.end(), OldMaterial);
-		if (it == m_MaterialList.end()) return false;
-
-		OldMaterial->DeleteMaterialFrameReference();
-
-		int MaterialIndex = static_cast<int>(it - m_MaterialList.begin());
-
-		if (!NewMaterial->Create(m_TextureSet)) return false;
-
-		m_MaterialList[MaterialIndex] = NewMaterial;*/
-
-		return true;
-	}
 
 	void C3DObject::SetRootNodeIndexList(const std::vector<int>& RootNodeIndexList)
 	{
