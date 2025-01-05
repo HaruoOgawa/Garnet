@@ -557,7 +557,9 @@ namespace object
 				Material->SetUniformValue("time", &glm::vec1(DrawInfo->GetSecondsTime())[0], sizeof(float));
 				Material->SetUniformValue("deltaTime", &glm::vec1(DrawInfo->GetDeltaSecondsTime())[0], sizeof(float));
 				Material->SetUniformValue("resolution", &Projection->GetScreenResolution()[0], sizeof(glm::vec2));
-				Material->SetUniformValue("flipcullmode", &glm::ivec1(DrawInfo->IsFlipCullMode() ? 1 : 0)[0], sizeof(int));
+
+				Material->SetUniformValue("useSpatialCulling", &glm::ivec1(DrawInfo->IsSpatialCulling() ? 1 : 0)[0], sizeof(int));
+				Material->SetUniformValue("spatialCullPos", &DrawInfo->GetSpatialCullPos()[0], sizeof(float) * 4);
 #ifdef USE_ANIMATION
 				Material->SetUniformValue("useSkinMeshAnimation", &glm::ivec1((m_AnimationController->IsEnabledSkeleton() ? 1 : 0))[0], sizeof(glm::ivec1));
 
