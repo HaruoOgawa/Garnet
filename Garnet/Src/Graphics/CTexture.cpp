@@ -34,6 +34,16 @@ namespace graphics
 	{
 	}
 
+	bool CTexture::IsUseMipMap() const
+	{
+		return m_UseMipMap;
+	}
+
+	const STextureSamplerParam& CTexture::GetSamplerParam() const
+	{
+		return m_SamplerParam;
+	}
+
 	void CTexture::SetFileName(const std::string& Name)
 	{
 		m_FileName = Name;
