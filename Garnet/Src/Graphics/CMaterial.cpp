@@ -12,7 +12,8 @@ namespace graphics
 		m_DepthFunc(EDepthFunc::Less),
 		m_DefaultCullMode(CullMode),
 		m_CullMode(CullMode),
-		m_BlendType(EBlendType::BLEND_TYPE_ADDITIVE),
+		m_BlendType(EBlendType::BLEND_TYPE_NONE),
+		m_StencilParam({}),
 		m_IsDrawOutline(false),
 		m_EmptyTexture(nullptr),
 		m_EmptyCubeTexture(nullptr),
@@ -182,6 +183,12 @@ namespace graphics
 			}
 		}
 
+		return true;
+	}
+
+	bool CMaterial::CreateRefTextureList(const std::shared_ptr<graphics::CTextureSet>& TextureSet)
+	{
+		if (!CreateRefTextureList(m_CreateInfo, TextureSet)) return false;
 		return true;
 	}
 
@@ -366,6 +373,16 @@ namespace graphics
 	EBlendType CMaterial::GetBlendType() const
 	{
 		return m_BlendType;
+	}
+
+	void CMaterial::SetStencilParam(const SStencilParam& Param)
+	{
+		m_StencilParam = Param;
+	}
+
+	const SStencilParam& CMaterial::GetStencilParam() const
+	{
+		return m_StencilParam;
 	}
 
 	void CMaterial::AddShaderBuffer(const std::shared_ptr<CShaderBuffer>& Buffer)

@@ -16,6 +16,9 @@
 #include "../Graphics/SBufferValueLayout.h"
 #include "../Graphics/STextureBindingLayout.h"
 #include "../Graphics/ECullMode.h"
+#include "../Graphics/EBlendType.h"
+#include "../Graphics/EDepthFunc.h"
+#include "../Graphics/SStencilParam.h"
 #include "../GraphicsAPI/CMaterialCreateInfo.h"
 
 using namespace nlohmann;
@@ -39,8 +42,18 @@ namespace resource
 		// MfData
 		std::string m_MaterialFrameName;
 
+		// DepthTest
+		bool m_EnabledZWrite;
+		graphics::EDepthFunc m_DepthFunc;
+
+		// StencilTest
+		graphics::SStencilParam m_StencilParam;
+
 		// カリング
 		graphics::ECullMode m_CullMode;
+
+		// ブレンドタイプ
+		graphics::EBlendType m_BlendType;
 
 		// カラーバッファへのアウトプット数(MRTで使用)
 		int m_OutputColorCount;

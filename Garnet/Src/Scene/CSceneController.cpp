@@ -235,14 +235,9 @@ namespace scene
 		m_SceneTextureSet->AddFrameTexture(Texture);
 	}
 
-	void CSceneController::AddMaterialInfo(const std::shared_ptr<object::C3DObject>& Object, const std::vector<SMaterialInfo>& MaterialInfoList)
+	void CSceneController::AddMaterialInfo(const std::shared_ptr<object::C3DObject>& Object, const std::map<std::tuple<int, int>, std::vector<SMaterialInfo>>& MaterialInfoList)
 	{
 		m_MaterialInfoMap.emplace(Object, MaterialInfoList);
-	}
-
-	const std::map<std::shared_ptr<object::C3DObject>, std::vector<SMaterialInfo>>& CSceneController::GetMaterialInfoMap() const
-	{
-		return m_MaterialInfoMap;
 	}
 
 	void CSceneController::AddTextureInfo(const std::shared_ptr<object::C3DObject>& Object, const std::map<std::string, std::shared_ptr<graphics::CTexture>>& TextureInfoList)
@@ -566,66 +561,69 @@ namespace scene
 			return true;
 		}
 
-		const auto& MaterialInfoList = it->second;
+		const auto& RendererKeyMaterialInfoList = it->second;
 
-		for (const auto& MaterialInfo : MaterialInfoList)
+		for (const auto& MaterialInfoList : RendererKeyMaterialInfoList)
 		{
-			// MaterialFrameを取得
-			const auto& MaterialFrame = m_MaterialFrameMap.find(MaterialInfo.MaterialFrameName);
-			if (MaterialFrame == m_MaterialFrameMap.end())
+			for (const auto& MaterialInfo : MaterialInfoList.second)
 			{
-				Console::Log("[SceneController Error] MaterialFrame Not Found\n");
-
-				return false;
-			}
-
-			// Materialを生成
-			auto Material = MaterialFrame->second->CreateMaterial(pGraphicsAPI, MaterialInfo.CullMode);
-
-			// UniformValueを設定
-			for (const auto& UniformInfo : MaterialInfo.UniformInfoList)
-			{
-				Material->SetUniformValue(UniformInfo.UniformName, &UniformInfo.UniformData[0], UniformInfo.ByteSize);
-			}
-
-			// CullMode
-			Material->SetCullMode(MaterialInfo.CullMode);
-
-			// Textureを設定
-			for (const auto& Texture : MaterialInfo.Textures)
-			{
-				const auto& TextureBufferName = std::get<0>(Texture);
-				const auto& TextureName = std::get<1>(Texture);
-				int Index = std::get<2>(Texture);
-
-				int TextureIndex = -1;
-
-				auto TexIndexIT = TexIndexMap.find(TextureName);
-				if (TexIndexIT != TexIndexMap.end())
+				// MaterialFrameを取得
+				const auto& MaterialFrame = m_MaterialFrameMap.find(MaterialInfo.MaterialFrameName);
+				if (MaterialFrame == m_MaterialFrameMap.end())
 				{
-					TextureIndex = TexIndexIT->second;
-				}
-				else if (Index != -1)
-				{
-					TextureIndex = Index;
+					Console::Log("[SceneController Error] MaterialFrame Not Found\n");
+
+					return false;
 				}
 
-				if (TextureIndex == -1) continue;
+				// Materialを生成
+				auto Material = MaterialFrame->second->CreateMaterial(pGraphicsAPI, MaterialInfo.CullMode);
 
-				Material->ReplaceTextureIndex(TextureBufferName, TextureIndex);
+				// UniformValueを設定
+				for (const auto& UniformInfo : MaterialInfo.UniformInfoList)
+				{
+					Material->SetUniformValue(UniformInfo.UniformName, &UniformInfo.UniformData[0], UniformInfo.ByteSize);
+				}
+
+				// CullMode
+				Material->SetCullMode(MaterialInfo.CullMode);
+
+				// Textureを設定
+				for (const auto& Texture : MaterialInfo.Textures)
+				{
+					const auto& TextureBufferName = std::get<0>(Texture);
+					const auto& TextureName = std::get<1>(Texture);
+					int Index = std::get<2>(Texture);
+
+					int TextureIndex = -1;
+
+					auto TexIndexIT = TexIndexMap.find(TextureName);
+					if (TexIndexIT != TexIndexMap.end())
+					{
+						TextureIndex = TexIndexIT->second;
+					}
+					else if (Index != -1)
+					{
+						TextureIndex = Index;
+					}
+
+					if (TextureIndex == -1) continue;
+
+					Material->ReplaceTextureIndex(TextureBufferName, TextureIndex);
+				}
+
+				// TrackIDList
+				Material->SetRefTrackIDList(MaterialInfo.TrackIDList);
+
+				// Materialを登録
+				if (MaterialInfo.MeshIndex < 0 || MaterialInfo.MeshIndex >= static_cast<int>(Object->GetMeshList().size())) return false;
+				const auto& Mesh = Object->GetMeshList()[MaterialInfo.MeshIndex];
+
+				if (MaterialInfo.PrimitiveIndex < 0 || MaterialInfo.PrimitiveIndex >= static_cast<int>(Mesh->GetPrimitiveList().size())) return false;
+				const auto& Primitive = Mesh->GetPrimitiveList()[MaterialInfo.PrimitiveIndex];
+
+				Primitive->AddMaterial(pGraphicsAPI, Material);
 			}
-
-			// TrackIDList
-			Material->SetRefTrackIDList(MaterialInfo.TrackIDList);
-
-			// Materialを登録
-			if (MaterialInfo.MeshIndex < 0 || MaterialInfo.MeshIndex >= static_cast<int>(Object->GetMeshList().size())) return false;
-			const auto& Mesh = Object->GetMeshList()[MaterialInfo.MeshIndex];
-
-			if (MaterialInfo.PrimitiveIndex < 0 || MaterialInfo.PrimitiveIndex >= static_cast<int>(Mesh->GetPrimitiveList().size())) return false;
-			const auto& Primitive = Mesh->GetPrimitiveList()[MaterialInfo.PrimitiveIndex];
-
-			Primitive->AddMaterial(pGraphicsAPI, Material);
 		}
 
 		return true;
@@ -637,33 +635,87 @@ namespace scene
 		const auto& it = m_MaterialInfoMap.find(Object);
 		if (it == m_MaterialInfoMap.end()) return true;
 
-		const auto& MaterialInfoList = it->second;
+		const auto& RendererKeyMaterialInfoList = it->second;
 
-		for (int MaterialInfoIndex = 0; MaterialInfoIndex < static_cast<int>(MaterialInfoList.size()); MaterialInfoIndex++)
+		const auto& MeshList = Object->GetMeshList();
+		for (int MeshIndex = 0; MeshIndex < static_cast<int>(MeshList.size()); MeshIndex++)
 		{
-			const auto& MaterialInfo = MaterialInfoList[MaterialInfoIndex];
+			const auto& Mesh = Object->GetMeshList()[MeshIndex];
 
-			if (MaterialInfo.MeshIndex < 0 || MaterialInfo.MeshIndex >= static_cast<int>(Object->GetMeshList().size())) continue;
-			const auto& Mesh = Object->GetMeshList()[MaterialInfo.MeshIndex];
-
-			if (MaterialInfo.PrimitiveIndex < 0 || MaterialInfo.PrimitiveIndex >= static_cast<int>(Mesh->GetPrimitiveList().size())) continue;
-			const auto& Primitive = Mesh->GetPrimitiveList()[MaterialInfo.PrimitiveIndex];
-
-			for (const auto& Renderer : Primitive->GetRendererList())
+			const auto& PrimitiveList = Mesh->GetPrimitiveList();
+			for (int PrimitiveIndex = 0; PrimitiveIndex < static_cast<int>(PrimitiveList.size()); PrimitiveIndex++)
 			{
-				const auto& Material = std::get<1>(Renderer);
-				if (!Material) continue;
+				const auto& Primitive = Mesh->GetPrimitiveList()[PrimitiveIndex];
 
-				if (MaterialInfo.MaterialFrameName != Material->GetMaterialFrame()->GetMaterialFrameName()) continue;
-				
-				// UniformValueを設定
-				for (const auto& UniformInfo : MaterialInfo.UniformInfoList)
+				std::tuple<int, int> RendererKey = std::make_tuple(MeshIndex, PrimitiveIndex);
+				const auto& MaterialInfoList = RendererKeyMaterialInfoList.find(RendererKey);
+				if (MaterialInfoList == RendererKeyMaterialInfoList.end()) continue;
+
+				const auto& RendererList = Primitive->GetRendererList();
+				for (int RendererIndex = 0; RendererIndex < static_cast<int>(RendererList.size()); RendererIndex++)
 				{
-					Material->SetUniformValue(UniformInfo.UniformName, &UniformInfo.UniformData[0], UniformInfo.ByteSize);
-				}
+					const auto& Renderer = RendererList[RendererIndex];
 
-				// TrackIDList
-				Material->SetRefTrackIDList(MaterialInfo.TrackIDList);
+					if (RendererIndex >= static_cast<int>(MaterialInfoList->second.size())) continue;
+					const auto& MaterialInfo = MaterialInfoList->second[RendererIndex];
+
+					auto Material = std::get<1>(Renderer);
+					if (!Material) continue;
+
+					// マテリアルを差し替える
+					if (MaterialInfo.MaterialFrameName != Material->GetMaterialFrame()->GetMaterialFrameName())
+					{
+						const auto& OldMF = Material->GetMaterialFrame();
+						const auto& NewMF = m_MaterialFrameMap.find(MaterialInfo.MaterialFrameName);
+						if (NewMF == m_MaterialFrameMap.end()) continue;
+
+						OldMF->DeleteRefMaterial(Material);
+
+						auto NewMat = NewMF->second->CreateMaterial(pGraphicsAPI, NewMF->second->GetCullMode());
+						Primitive->ReplaceMaterial(Renderer, NewMat);
+
+						Material = NewMat;
+					}
+
+					// UniformValueを設定
+					for (const auto& UniformInfo : MaterialInfo.UniformInfoList)
+					{
+						Material->SetUniformValue(UniformInfo.UniformName, &UniformInfo.UniformData[0], UniformInfo.ByteSize);
+					}
+
+					// CullMode
+					Material->SetCullMode(MaterialInfo.CullMode);
+
+					// Textureを設定
+					for (const auto& Texture : MaterialInfo.Textures)
+					{
+						const auto& TextureBufferName = std::get<0>(Texture);
+						const auto& TextureName = std::get<1>(Texture);
+						int Index = std::get<2>(Texture);
+
+						int TextureIndex = -1;
+
+						auto TexIndexIT = TexIndexMap.find(TextureName);
+						if (TexIndexIT != TexIndexMap.end())
+						{
+							TextureIndex = TexIndexIT->second;
+						}
+						else if (Index != -1)
+						{
+							TextureIndex = Index;
+						}
+
+						if (TextureIndex == -1) continue;
+
+						Material->ReplaceTextureIndex(TextureBufferName, TextureIndex);
+					}
+
+					// テクスチャリストを再作成
+					Material->CreateRefTextureList(Object->GetTextureSet());
+
+					// TrackIDList
+					Material->SetRefTrackIDList(MaterialInfo.TrackIDList);
+				}
 			}
 		}
 

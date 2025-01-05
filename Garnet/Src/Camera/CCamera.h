@@ -13,7 +13,7 @@ namespace camera
 	protected:
 		glm::vec3 m_Pos;
 		glm::vec3 m_Center;
-		glm::vec3 m_Up;
+		glm::vec3 m_UpVector;
 	public:
 		CCamera();
 		virtual ~CCamera() = default;
@@ -30,5 +30,8 @@ namespace camera
 
 		virtual void SetCenter(const glm::vec3& Center);
 		virtual const glm::vec3& GetCenter() const;
+		
+		virtual void SetUpVector(const glm::vec3& UpVector);
+		virtual const glm::vec3& GetUpVector() const;
 	};
 }

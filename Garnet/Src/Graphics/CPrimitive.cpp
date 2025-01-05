@@ -91,6 +91,17 @@ namespace graphics
 		return m_RendererList;
 	}
 
+	void CPrimitive::ReplaceMaterial(const std::tuple<std::shared_ptr<graphics::IRenderer>, std::shared_ptr<CMaterial>>& Renderer, const std::shared_ptr<CMaterial>& NewMaterial)
+	{
+		for (int i = 0; i < static_cast<int>(m_RendererList.size()); i++)
+		{
+			if (m_RendererList[i] != Renderer) continue;
+
+			m_RendererList[i] = std::make_tuple(std::get<0>(m_RendererList[i]), NewMaterial);
+			break;
+		}
+	}
+
 	void CPrimitive::AddMaterial(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CMaterial>& Material)
 	{
 		if (!Material) return;

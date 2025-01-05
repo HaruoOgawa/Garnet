@@ -43,17 +43,18 @@ namespace api
 	{
 	}
 
-	bool COpenGLAPI::CreateRenderPass(const std::string& PassName, ERenderPassFormat RenderPassFormat, const glm::vec4& InitColor, int Width, int Height, int RenderTargetCount)
+	bool COpenGLAPI::CreateRenderPass(const std::string& PassName, ERenderPassFormat RenderPassFormat, const glm::vec4& InitColor, int Width, int Height, int RenderTargetCount,
+		bool UseColorTexture, bool UseDepthTexture, bool UseStencil)
 	{
 		std::shared_ptr<COpenGLRenderPass> RenderPass = std::make_shared<COpenGLRenderPass>(this, PassName, RenderPassFormat, InitColor);
 
 		if (Width != -1 && Height != -1)
 		{
-			if (!RenderPass->Create(Width, Height, RenderTargetCount)) return false;
+			if (!RenderPass->Create(Width, Height, RenderTargetCount, UseColorTexture, UseDepthTexture, UseStencil)) return false;
 		}
 		else
 		{
-			if (!RenderPass->Create(m_Width, m_Height, RenderTargetCount)) return false;
+			if (!RenderPass->Create(m_Width, m_Height, RenderTargetCount, UseColorTexture, UseDepthTexture, UseStencil)) return false;
 		}
 
 		m_OffScreenRenderPassMap.insert({ PassName, RenderPass });
@@ -132,7 +133,13 @@ namespace api
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 			glViewport(0, 0, m_Width, m_Height);
 			glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			glClearDepth(1.0f);
+			glClearStencil(0);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+			// glStencilMaskはglColorMask・glDepthMaskと同じ関数でフレームバッファへの書き込みを有効にしたり無効にしたりする
+			// 0xFFにすることで有効になる?
+			glStencilMask(0xff);
 		}
 
 		m_CurrentRenderPassName = PassName;

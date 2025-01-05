@@ -27,7 +27,7 @@ namespace camera
 		glm::vec3 ZVector = glm::normalize(glm::vec3(glm::toMat4(NodeRotate) * glm::vec4(0.0f, 0.0f, 1.0f, 0.0f)));
 
 		m_Center = ZVector + NodePos;
-		m_Up = YVector;
+		m_UpVector = YVector;
 	}
 
 	/*glm::mat4 CTraceCamera::GetViewMatrix()

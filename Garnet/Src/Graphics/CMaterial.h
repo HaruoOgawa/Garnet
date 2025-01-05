@@ -15,6 +15,7 @@
 #include "ECullMode.h"
 #include "EBlendType.h"
 #include "EDepthFunc.h"
+#include "SStencilParam.h"
 
 #include "../Camera/CCamera.h"
 #include "../Timeline/CTimelineTrackContent.h"
@@ -52,6 +53,8 @@ namespace graphics
 		ECullMode m_CullMode;
 		
 		EBlendType m_BlendType;
+
+		SStencilParam m_StencilParam;
 
 		bool m_IsDrawOutline;
 
@@ -102,6 +105,7 @@ namespace graphics
 
 		virtual bool ReCreateBuffer(const std::vector<std::shared_ptr<graphics::CShaderBuffer>>& ShaderBufferList, const std::vector<graphics::STextureBindingLayout>& TextureBindingLayoutList);
 
+		virtual bool CreateRefTextureList(const std::shared_ptr<graphics::CTextureSet>& TextureSet);
 		virtual bool CreateRefTextureList(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, const std::shared_ptr<graphics::CTextureSet>& TextureSet);
 		virtual bool ReCreateRefTextureList(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo);
 
@@ -117,6 +121,9 @@ namespace graphics
 		
 		virtual void SetBlendType(EBlendType BlendType);
 		virtual EBlendType GetBlendType() const;
+
+		virtual void SetStencilParam(const SStencilParam& Param);
+		virtual const SStencilParam& GetStencilParam() const;
 
 		virtual bool BuildDrawBuffer() = 0;
 

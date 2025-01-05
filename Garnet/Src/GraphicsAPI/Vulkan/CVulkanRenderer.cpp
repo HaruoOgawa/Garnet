@@ -265,13 +265,22 @@ namespace api
 
 				switch (pVulkanMat->GetBlendType())
 				{
-				case graphics::EBlendType::BLEND_TYPE_ADDITIVE:
+				case graphics::EBlendType::BLEND_TYPE_NONE:
 					colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_ONE;
 					colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ZERO;
 					colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
 
 					colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
 					colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
+					colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
+					break;
+				case graphics::EBlendType::BLEND_TYPE_ADDITIVE:
+					colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_ONE;
+					colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ONE;
+					colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
+
+					colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+					colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
 					colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
 					break;
 				case graphics::EBlendType::BLEND_TYPE_TRANSPARENT_ALPHA:
@@ -356,9 +365,142 @@ namespace api
 			depthStencil.depthBoundsTestEnable = VK_FALSE;
 			depthStencil.minDepthBounds = 0.0f;
 			depthStencil.maxDepthBounds = 1.0f;
-			depthStencil.stencilTestEnable = VK_FALSE;
-			depthStencil.front = {};
-			depthStencil.back = {};
+
+			// Stencil Test
+			const auto& StencilParam = pVulkanMat->GetStencilParam();
+			if (StencilParam.Enabled)
+			{
+				depthStencil.stencilTestEnable = VK_TRUE;
+				VkStencilOpState front{};
+				VkStencilOpState back{};
+
+				//
+				VkStencilOp failOp = VK_STENCIL_OP_KEEP;
+				switch (StencilParam.SFail)
+				{
+				case graphics::EStencilOp::Keep:
+					failOp = VK_STENCIL_OP_KEEP;
+					break;
+				case graphics::EStencilOp::Replace:
+					failOp = VK_STENCIL_OP_REPLACE;
+					break;
+				case graphics::EStencilOp::Incr:
+					failOp = VK_STENCIL_OP_INCREMENT_AND_CLAMP;
+					break;
+				case graphics::EStencilOp::Decr:
+					failOp = VK_STENCIL_OP_DECREMENT_AND_CLAMP;
+					break;
+				default:
+					failOp = VK_STENCIL_OP_KEEP;
+					break;
+				}
+
+				front.failOp = failOp;
+				back.failOp = failOp;
+
+				//
+				VkStencilOp depthFailOp = VK_STENCIL_OP_KEEP;
+				switch (StencilParam.DpFail)
+				{
+				case graphics::EStencilOp::Keep:
+					depthFailOp = VK_STENCIL_OP_KEEP;
+					break;
+				case graphics::EStencilOp::Replace:
+					depthFailOp = VK_STENCIL_OP_REPLACE;
+					break;
+				case graphics::EStencilOp::Incr:
+					depthFailOp = VK_STENCIL_OP_INCREMENT_AND_CLAMP;
+					break;
+				case graphics::EStencilOp::Decr:
+					depthFailOp = VK_STENCIL_OP_DECREMENT_AND_CLAMP;
+					break;
+				default:
+					depthFailOp = VK_STENCIL_OP_KEEP;
+					break;
+				}
+
+				front.depthFailOp = depthFailOp;
+				back.depthFailOp = depthFailOp;
+
+				//
+				VkStencilOp passOp = VK_STENCIL_OP_KEEP;
+				switch (StencilParam.DpPass)
+				{
+				case graphics::EStencilOp::Keep:
+					passOp = VK_STENCIL_OP_KEEP;
+					break;
+				case graphics::EStencilOp::Replace:
+					passOp = VK_STENCIL_OP_REPLACE;
+					break;
+				case graphics::EStencilOp::Incr:
+					passOp = VK_STENCIL_OP_INCREMENT_AND_CLAMP;
+					break;
+				case graphics::EStencilOp::Decr:
+					passOp = VK_STENCIL_OP_DECREMENT_AND_CLAMP;
+					break;
+				default:
+					passOp = VK_STENCIL_OP_KEEP;
+					break;
+				}
+
+				front.passOp = passOp;
+				back.passOp = passOp;
+
+				//
+				VkCompareOp compareOp = VK_COMPARE_OP_ALWAYS;
+				switch (StencilParam.Func)
+				{
+				case graphics::EStencilFunc::Never:
+					compareOp = VK_COMPARE_OP_NEVER;
+					break;
+				case graphics::EStencilFunc::Less:
+					compareOp = VK_COMPARE_OP_LESS;
+					break;
+				case graphics::EStencilFunc::LessEqual:
+					compareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
+					break;
+				case graphics::EStencilFunc::Greater:
+					compareOp = VK_COMPARE_OP_GREATER;
+					break;
+				case graphics::EStencilFunc::GreaterEqual:
+					compareOp = VK_COMPARE_OP_GREATER_OR_EQUAL;
+					break;
+				case graphics::EStencilFunc::Equal:
+					compareOp = VK_COMPARE_OP_EQUAL;
+					break;
+				case graphics::EStencilFunc::NotEqual:
+					compareOp = VK_COMPARE_OP_NOT_EQUAL;
+					break;
+				case graphics::EStencilFunc::Always:
+					compareOp = VK_COMPARE_OP_ALWAYS;
+					break;
+				default:
+					compareOp = VK_COMPARE_OP_ALWAYS;
+					break;
+				}
+
+				front.compareOp = compareOp;
+				back.compareOp = compareOp;
+
+				//
+				front.reference = StencilParam.RefValue;
+				back.reference = StencilParam.RefValue;
+
+				front.writeMask = StencilParam.Mask;
+				back.writeMask = StencilParam.Mask;
+
+				front.compareMask = 0xff;
+				back.compareMask = 0xff;
+
+				depthStencil.front = front;
+				depthStencil.back = back;
+			}
+			else
+			{
+				depthStencil.stencilTestEnable = VK_FALSE;
+				depthStencil.front = {};
+				depthStencil.back = {};
+			}
 
 			// これまでの情報をもとにレンダリングパイプラインを構築
 			VkGraphicsPipelineCreateInfo pipelineInfo{};
@@ -557,15 +699,148 @@ namespace api
 		depthStencil.depthBoundsTestEnable = VK_FALSE;
 		depthStencil.minDepthBounds = 0.0f;
 		depthStencil.maxDepthBounds = 1.0f;
-		depthStencil.stencilTestEnable = VK_FALSE;
-		depthStencil.front = {};
-		depthStencil.back = {};
+
+		// Stencil Test
+		const auto& StencilParam = pVulkanMat->GetStencilParam();
+		if (StencilParam.Enabled)
+		{
+			depthStencil.stencilTestEnable = VK_TRUE;
+			VkStencilOpState front{};
+			VkStencilOpState back{};
+
+			//
+			VkStencilOp failOp = VK_STENCIL_OP_KEEP;
+			switch (StencilParam.SFail)
+			{
+			case graphics::EStencilOp::Keep:
+				failOp = VK_STENCIL_OP_KEEP;
+				break;
+			case graphics::EStencilOp::Replace:
+				failOp = VK_STENCIL_OP_REPLACE;
+				break;
+			case graphics::EStencilOp::Incr:
+				failOp = VK_STENCIL_OP_INCREMENT_AND_CLAMP;
+				break;
+			case graphics::EStencilOp::Decr:
+				failOp = VK_STENCIL_OP_DECREMENT_AND_CLAMP;
+				break;
+			default:
+				failOp = VK_STENCIL_OP_KEEP;
+				break;
+			}
+
+			front.failOp = failOp;
+			back.failOp = failOp;
+
+			//
+			VkStencilOp depthFailOp = VK_STENCIL_OP_KEEP;
+			switch (StencilParam.DpFail)
+			{
+			case graphics::EStencilOp::Keep:
+				depthFailOp = VK_STENCIL_OP_KEEP;
+				break;
+			case graphics::EStencilOp::Replace:
+				depthFailOp = VK_STENCIL_OP_REPLACE;
+				break;
+			case graphics::EStencilOp::Incr:
+				depthFailOp = VK_STENCIL_OP_INCREMENT_AND_CLAMP;
+				break;
+			case graphics::EStencilOp::Decr:
+				depthFailOp = VK_STENCIL_OP_DECREMENT_AND_CLAMP;
+				break;
+			default:
+				depthFailOp = VK_STENCIL_OP_KEEP;
+				break;
+			}
+
+			front.depthFailOp = depthFailOp;
+			back.depthFailOp = depthFailOp;
+
+			//
+			VkStencilOp passOp = VK_STENCIL_OP_KEEP;
+			switch (StencilParam.DpPass)
+			{
+			case graphics::EStencilOp::Keep:
+				passOp = VK_STENCIL_OP_KEEP;
+				break;
+			case graphics::EStencilOp::Replace:
+				passOp = VK_STENCIL_OP_REPLACE;
+				break;
+			case graphics::EStencilOp::Incr:
+				passOp = VK_STENCIL_OP_INCREMENT_AND_CLAMP;
+				break;
+			case graphics::EStencilOp::Decr:
+				passOp = VK_STENCIL_OP_DECREMENT_AND_CLAMP;
+				break;
+			default:
+				passOp = VK_STENCIL_OP_KEEP;
+				break;
+			}
+
+			front.passOp = passOp;
+			back.passOp = passOp;
+
+			//
+			VkCompareOp compareOp = VK_COMPARE_OP_ALWAYS;
+			switch (StencilParam.Func)
+			{
+			case graphics::EStencilFunc::Never:
+				compareOp = VK_COMPARE_OP_NEVER;
+				break;
+			case graphics::EStencilFunc::Less:
+				compareOp = VK_COMPARE_OP_LESS;
+				break;
+			case graphics::EStencilFunc::LessEqual:
+				compareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
+				break;
+			case graphics::EStencilFunc::Greater:
+				compareOp = VK_COMPARE_OP_GREATER;
+				break;
+			case graphics::EStencilFunc::GreaterEqual:
+				compareOp = VK_COMPARE_OP_GREATER_OR_EQUAL;
+				break;
+			case graphics::EStencilFunc::Equal:
+				compareOp = VK_COMPARE_OP_EQUAL;
+				break;
+			case graphics::EStencilFunc::NotEqual:
+				compareOp = VK_COMPARE_OP_NOT_EQUAL;
+				break;
+			case graphics::EStencilFunc::Always:
+				compareOp = VK_COMPARE_OP_ALWAYS;
+				break;
+			default:
+				compareOp = VK_COMPARE_OP_ALWAYS;
+				break;
+			}
+
+			front.compareOp = compareOp;
+			back.compareOp = compareOp;
+
+			//
+			front.reference = StencilParam.RefValue;
+			back.reference = StencilParam.RefValue;
+
+			front.writeMask = StencilParam.Mask;
+			back.writeMask = StencilParam.Mask;
+
+			front.compareMask = 0xff;
+			back.compareMask = 0xff;
+
+			depthStencil.front = front;
+			depthStencil.back = back;
+		}
+		else
+		{
+			depthStencil.stencilTestEnable = VK_FALSE;
+			depthStencil.front = {};
+			depthStencil.back = {};
+		}
 
 		m_pGraphicsAPI->SetDepthTestEnableEXT(m_pGraphicsAPI->GetCurrentCommandBuffer(), depthStencil.depthTestEnable);
 		m_pGraphicsAPI->SetDepthWriteEnableEXT(m_pGraphicsAPI->GetCurrentCommandBuffer(), depthStencil.depthWriteEnable);
 		m_pGraphicsAPI->SetDepthCompareOpEXT(m_pGraphicsAPI->GetCurrentCommandBuffer(), depthStencil.depthCompareOp);
 		m_pGraphicsAPI->SetDepthBiasEnableEXT(m_pGraphicsAPI->GetCurrentCommandBuffer(), VK_FALSE);
-		m_pGraphicsAPI->SetStencilTestEnableEXT(m_pGraphicsAPI->GetCurrentCommandBuffer(), VK_FALSE);
+		m_pGraphicsAPI->SetStencilTestEnableEXT(m_pGraphicsAPI->GetCurrentCommandBuffer(), (StencilParam.Enabled)? VK_TRUE : VK_FALSE);
 
 		// カラーブレンディング /////////////////////////////////////////////
 		// カラーブレンディング /////////////////////////////////////////////
@@ -583,13 +858,22 @@ namespace api
 
 			switch (pVulkanMat->GetBlendType())
 			{
-			case graphics::EBlendType::BLEND_TYPE_ADDITIVE:
+			case graphics::EBlendType::BLEND_TYPE_NONE:
 				colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_ONE;
 				colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ZERO;
 				colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
 
 				colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
 				colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
+				colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
+				break;
+			case graphics::EBlendType::BLEND_TYPE_ADDITIVE:
+				colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_ONE;
+				colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ONE;
+				colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
+
+				colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+				colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
 				colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
 				break;
 			case graphics::EBlendType::BLEND_TYPE_TRANSPARENT_ALPHA:

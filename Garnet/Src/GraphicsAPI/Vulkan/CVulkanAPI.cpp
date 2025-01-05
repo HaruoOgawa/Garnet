@@ -109,17 +109,18 @@ namespace api
 		vkDestroyInstance(m_Instance, nullptr);
 	}
 
-	bool CVulkanAPI::CreateRenderPass(const std::string& PassName, ERenderPassFormat RenderPassFormat, const glm::vec4& InitColor, int Width, int Height, int RenderTargetCount)
+	bool CVulkanAPI::CreateRenderPass(const std::string& PassName, ERenderPassFormat RenderPassFormat, const glm::vec4& InitColor, int Width, int Height, int RenderTargetCount,
+		bool UseColorTexture, bool UseDepthTexture, bool UseStencil)
 	{
 		std::shared_ptr<CVulkanRenderPass> RenderPass = std::make_shared<CVulkanRenderPass>(this, PassName, RenderPassFormat, InitColor);
 		
 		if (Width != -1 && Height != -1)
 		{
-			if (!RenderPass->Create(Width, Height, RenderTargetCount)) return false;
+			if (!RenderPass->Create(Width, Height, RenderTargetCount, UseColorTexture, UseDepthTexture, UseStencil)) return false;
 		}
 		else
 		{
-			if (!RenderPass->Create(m_Width, m_Height, RenderTargetCount)) return false;
+			if (!RenderPass->Create(m_Width, m_Height, RenderTargetCount, UseColorTexture, UseDepthTexture, UseStencil)) return false;
 		}
 
 		m_OffScreenRenderPassMap.insert({ PassName, RenderPass });
@@ -751,7 +752,7 @@ namespace api
 		depthAttachment.samples = VK_SAMPLE_COUNT_1_BIT; // マルチサンプリング
 		depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR; // レンダリングの前後にどのような処理を施すか(クリアの方法など)。デプスバッファに適応
 		depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE; // レンダリング結果をメモリに保存し読み取り可にする。デプスバッファに適応
-		depthAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE; // 上記の設定をステンシルバッファに適応。 DONT_CAREは何もしない
+		depthAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_CLEAR; // 上記の設定をステンシルバッファに適応。 DONT_CAREは何もしない
 		depthAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE; // 上記の設定をステンシルバッファに適応
 		depthAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED; // レンダリング前にどのようなレイアウトとして使用するか
 		depthAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL; // レンダリング後にどのようなレイアウトとして使用するか
@@ -801,11 +802,14 @@ namespace api
 
 	bool CVulkanAPI::CreateSwapChainDepthResources()
 	{
-		VkFormat depthFormat = FindDepthFormat();
+		//VkFormat depthFormat = FindDepthFormat();
+		VkFormat depthFormat = VK_FORMAT_D32_SFLOAT_S8_UINT;
+
 		CreateImage(m_SwapChainExtent.width, m_SwapChainExtent.height, depthFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
 			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_SwapChainDepthImage, m_SwapChainDepthImageMemory, graphics::ETextureType::TEXTURE_2D, 1, false);
 
-		m_SwapChainDepthImageView = CreateImageView(m_SwapChainDepthImage, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT, graphics::ETextureType::TEXTURE_2D, 1, false);
+		m_SwapChainDepthImageView = CreateImageView(m_SwapChainDepthImage, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT, graphics::ETextureType::TEXTURE_2D, 1, false);
+		//m_SwapChainDepthImageView = CreateImageView(m_SwapChainDepthImage, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT, graphics::ETextureType::TEXTURE_2D, 1, false);
 
 		return true;
 	}

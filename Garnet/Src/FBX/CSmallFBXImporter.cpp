@@ -475,7 +475,7 @@ namespace fbx
 				for (const auto& MaterialFrame : BaseMaterialFrameList)
 				{
 					// マテリアルにシェーダーを設定
-					std::shared_ptr<graphics::CMaterial> material = MaterialFrame->CreateMaterial(pGraphicsAPI, graphics::ECullMode::CULL_NONE);
+					std::shared_ptr<graphics::CMaterial> material = MaterialFrame->CreateMaterial(pGraphicsAPI, graphics::ECullMode::CULL_BACK);
 
 					// SkinMatrix StorageBuffer
 					{

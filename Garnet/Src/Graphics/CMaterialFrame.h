@@ -8,6 +8,8 @@
 #include "../Graphics/SBufferValueLayout.h"
 #include "../Graphics/STextureBindingLayout.h"
 #include "../Graphics/ECullMode.h"
+#include "../Graphics/EDepthFunc.h"
+#include "../Graphics/SStencilParam.h"
 #include "../GraphicsAPI/CMaterialCreateInfo.h"
 
 #include "CMaterial.h"
@@ -30,8 +32,18 @@ namespace graphics
 
 		std::string m_MaterialFrameName;
 
+		// DepthTest
+		bool m_EnabledZWrite;
+		graphics::EDepthFunc m_DepthFunc;
+
+		// StencilTest
+		graphics::SStencilParam m_StencilParam;
+
 		// カリング
 		graphics::ECullMode m_CullMode;
+
+		// ブレンドタイプ
+		graphics::EBlendType m_BlendType;
 
 		std::string m_FileName;
 
@@ -49,8 +61,20 @@ namespace graphics
 		void SetMaterialFrameName(const std::string& Name);
 		const std::string& GetMaterialFrameName() const;
 
+		void SetEnabledZWrite(bool ZWrite);
+		bool IsEnabledZWrite() const;
+
+		void SetDepthFunc(graphics::EDepthFunc DepthFunc);
+		graphics::EDepthFunc GetDepthFunc() const;
+
+		void SetStencilParam(const SStencilParam& Param);
+		const SStencilParam& GetStencilParam() const;
+
 		void SetCullMode(graphics::ECullMode CullMode);
 		graphics::ECullMode GetCullMode() const;
+
+		void SetBlendType(graphics::EBlendType Type);
+		graphics::EBlendType GetBlendType() const;
 
 		void SetFileName(const std::string& Name);
 		const std::string& GetFileName() const;

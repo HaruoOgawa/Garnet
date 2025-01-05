@@ -7,7 +7,8 @@ namespace graphics
 		m_LightColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)),
 		m_LightProjection(std::make_shared<projection::CProjection>()),
 		m_SecondsTime(0.0f),
-		m_DeltaSecondsTime(0.0f)
+		m_DeltaSecondsTime(0.0f),
+		m_FlipCullMode(false)
 	{
 	}
 
@@ -49,5 +50,15 @@ namespace graphics
 	float CDrawInfo::GetDeltaSecondsTime() const
 	{
 		return m_DeltaSecondsTime;
+	}
+
+	void  CDrawInfo::SetFlipCullMode(bool Mode)
+	{
+		m_FlipCullMode = Mode;
+	}
+
+	bool  CDrawInfo::IsFlipCullMode() const
+	{
+		return m_FlipCullMode;
 	}
 }

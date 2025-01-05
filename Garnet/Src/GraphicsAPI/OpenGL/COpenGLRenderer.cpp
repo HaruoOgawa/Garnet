@@ -153,21 +153,129 @@ namespace api
 		// Alpha Test(ひとまず通常のアルファブレンドのみ)
 		switch (pOpenGLMat->GetBlendType())
 		{
-		case graphics::EBlendType::BLEND_TYPE_ADDITIVE:
+		case graphics::EBlendType::BLEND_TYPE_NONE:
 			glEnable(GL_BLEND);
 			glBlendFunc(GL_ONE, GL_ZERO);
-
+			break;
+		case graphics::EBlendType::BLEND_TYPE_ADDITIVE:
+			glEnable(GL_BLEND);
+			glBlendFunc(GL_ONE, GL_ONE);
 			break;
 		case graphics::EBlendType::BLEND_TYPE_TRANSPARENT_ALPHA:
 			glEnable(GL_BLEND);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
 			break;
 		default:
 			glEnable(GL_BLEND);
 			glBlendFunc(GL_ONE, GL_ZERO);
-
 			break;
+		}
+
+		// Stencil Test
+		const auto& StencilParam = pOpenGLMat->GetStencilParam();
+		if (StencilParam.Enabled)
+		{
+			glEnable(GL_STENCIL_TEST);
+			GLenum sfail = GL_KEEP;
+			GLenum dpfail = GL_KEEP;
+			GLenum dppass = GL_KEEP;
+
+			switch (StencilParam.SFail)
+			{
+			case graphics::EStencilOp::Keep:
+				sfail = GL_KEEP;
+				break;
+			case graphics::EStencilOp::Replace:
+				sfail = GL_REPLACE;
+				break;
+			case graphics::EStencilOp::Incr:
+				sfail = GL_INCR;
+				break;
+			case graphics::EStencilOp::Decr:
+				sfail = GL_DECR;
+				break;
+			default:
+				sfail = GL_KEEP;
+				break;
+			}
+
+			switch (StencilParam.DpFail)
+			{
+			case graphics::EStencilOp::Keep:
+				dpfail = GL_KEEP;
+				break;
+			case graphics::EStencilOp::Replace:
+				dpfail = GL_REPLACE;
+				break;
+			case graphics::EStencilOp::Incr:
+				dpfail = GL_INCR;
+				break;
+			case graphics::EStencilOp::Decr:
+				dpfail = GL_DECR;
+				break;
+			default:
+				dpfail = GL_KEEP;
+				break;
+			}
+
+			switch (StencilParam.DpPass)
+			{
+			case graphics::EStencilOp::Keep:
+				dppass = GL_KEEP;
+				break;
+			case graphics::EStencilOp::Replace:
+				dppass = GL_REPLACE;
+				break;
+			case graphics::EStencilOp::Incr:
+				dppass = GL_INCR;
+				break;
+			case graphics::EStencilOp::Decr:
+				dppass = GL_DECR;
+				break;
+			default:
+				dppass = GL_KEEP;
+				break;
+			}
+
+			GLenum func = GL_ALWAYS;
+
+			switch (StencilParam.Func)
+			{
+			case graphics::EStencilFunc::Never:
+				func = GL_NEVER;
+				break;
+			case graphics::EStencilFunc::Less:
+				func = GL_LESS;
+				break;
+			case graphics::EStencilFunc::LessEqual:
+				func = GL_LEQUAL;
+				break;
+			case graphics::EStencilFunc::Greater:
+				func = GL_GREATER;
+				break;
+			case graphics::EStencilFunc::GreaterEqual:
+				func = GL_GEQUAL;
+				break;
+			case graphics::EStencilFunc::Equal:
+				func = GL_EQUAL;
+				break;
+			case graphics::EStencilFunc::NotEqual:
+				func = GL_NOTEQUAL;
+				break;
+			case graphics::EStencilFunc::Always:
+				func = GL_ALWAYS;
+				break;
+			default:
+				func = GL_ALWAYS;
+				break;
+			}
+
+			glStencilOp(sfail, dpfail, dppass);
+			glStencilFunc(func, StencilParam.RefValue, StencilParam.Mask);
+		}
+		else
+		{
+			glDisable(GL_STENCIL_TEST);
 		}
 
 		// 描画を実行

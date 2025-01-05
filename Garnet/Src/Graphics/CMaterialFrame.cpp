@@ -5,6 +5,11 @@ namespace graphics
 	CMaterialFrame::CMaterialFrame():
 		m_CreateCounter(0),
 		m_MaterialFrameName(std::string()),
+		m_EnabledZWrite(true),
+		m_DepthFunc(graphics::EDepthFunc::Less),
+		m_StencilParam({}),
+		m_CullMode(graphics::ECullMode::NOT_SET),
+		m_BlendType(graphics::EBlendType::BLEND_TYPE_NONE),
 		m_FileName(std::string()),
 		m_CreateInfo(nullptr),
 		m_OutputColorCount(1)
@@ -25,6 +30,36 @@ namespace graphics
 		return m_MaterialFrameName;
 	}
 
+	void CMaterialFrame::SetEnabledZWrite(bool ZWrite)
+	{
+		m_EnabledZWrite = ZWrite;
+	}
+
+	bool CMaterialFrame::IsEnabledZWrite() const
+	{
+		return m_EnabledZWrite;
+	}
+
+	void CMaterialFrame::SetDepthFunc(graphics::EDepthFunc DepthFunc)
+	{
+		m_DepthFunc = DepthFunc;
+	}
+
+	graphics::EDepthFunc CMaterialFrame::GetDepthFunc() const
+	{
+		return m_DepthFunc;
+	}
+
+	void CMaterialFrame::SetStencilParam(const SStencilParam& Param)
+	{
+		m_StencilParam = Param;
+	}
+
+	const SStencilParam& CMaterialFrame::GetStencilParam() const
+	{
+		return m_StencilParam;
+	}
+
 	void CMaterialFrame::SetCullMode(graphics::ECullMode CullMode)
 	{
 		m_CullMode = CullMode;
@@ -33,6 +68,16 @@ namespace graphics
 	graphics::ECullMode CMaterialFrame::GetCullMode() const
 	{
 		return m_CullMode;
+	}
+
+	void CMaterialFrame::SetBlendType(graphics::EBlendType Type)
+	{
+		m_BlendType = Type;
+	}
+
+	graphics::EBlendType CMaterialFrame::GetBlendType() const
+	{
+		return m_BlendType;
 	}
 
 	void CMaterialFrame::SetFileName(const std::string& Name)
@@ -147,6 +192,13 @@ namespace graphics
 		{
 			Material->AddTextureBindingLayout({ TextureBuffer.TextureName, TextureBuffer.ViewBindingIndex, TextureBuffer.SamplerBindingIndex,TextureBuffer.TextureIndex,TextureBuffer.TextureUsage });
 		}
+
+		// その他パラメーター
+		Material->SetEnabledZWrite(m_EnabledZWrite);
+		Material->SetDepthFunc(m_DepthFunc);
+		Material->SetStencilParam(m_StencilParam);
+		Material->SetCullMode(m_CullMode);
+		Material->SetBlendType(m_BlendType);
 
 		// カウンターを更新
 		m_CreateCounter++;

@@ -359,6 +359,24 @@ namespace object
 		}
 	}
 
+	glm::mat4 C3DObject::CalcNoScaledWorldMatrix(const std::shared_ptr<object::CNode>& ChildNode)
+	{
+		glm::mat4 result = glm::mat4(1.0f);
+
+		auto Target = ChildNode;
+
+		for (;;)
+		{
+			if (!Target) break;
+
+			result = glm::translate(glm::mat4(1.0f), Target->GetPos()) * glm::toMat4(Target->GetRot()) * result;
+
+			Target = Target->GetParentNode();
+		}
+
+		return result;
+	}
+
 	bool C3DObject::Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, float DeltaSecondsTime)
 	{
 		if (!m_IsCreated) return true;
@@ -539,6 +557,7 @@ namespace object
 				Material->SetUniformValue("time", &glm::vec1(DrawInfo->GetSecondsTime())[0], sizeof(float));
 				Material->SetUniformValue("deltaTime", &glm::vec1(DrawInfo->GetDeltaSecondsTime())[0], sizeof(float));
 				Material->SetUniformValue("resolution", &Projection->GetScreenResolution()[0], sizeof(glm::vec2));
+				Material->SetUniformValue("flipcullmode", &glm::ivec1(DrawInfo->IsFlipCullMode() ? 1 : 0)[0], sizeof(int));
 #ifdef USE_ANIMATION
 				Material->SetUniformValue("useSkinMeshAnimation", &glm::ivec1((m_AnimationController->IsEnabledSkeleton() ? 1 : 0))[0], sizeof(glm::ivec1));
 

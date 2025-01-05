@@ -128,6 +128,7 @@ namespace object
 		void ApplyDefaultLocalTransform();
 
 		void CalcWorldMatrix();
+		glm::mat4 CalcNoScaledWorldMatrix(const std::shared_ptr<object::CNode>& ChildNode);
 
 		void ApplyParentNode();
 

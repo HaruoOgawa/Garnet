@@ -774,7 +774,7 @@ namespace gltf
 			{
 				for (const auto& MaterialFrame : BaseMaterialFrameList)
 				{
-					auto material = MaterialFrame->CreateMaterial(pGraphicsAPI, graphics::ECullMode::CULL_NONE);
+					auto material = MaterialFrame->CreateMaterial(pGraphicsAPI, graphics::ECullMode::CULL_BACK);
 					Primirive->AddMaterial(pGraphicsAPI, material);
 				}
 			}

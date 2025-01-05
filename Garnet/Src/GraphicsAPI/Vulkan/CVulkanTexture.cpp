@@ -122,6 +122,8 @@ namespace api
 		VkFormat ImageFormat = VK_FORMAT_UNDEFINED;
 		VkImageUsageFlags Usage;
 
+		bool UseStencil = false;
+
 		switch (RenderPassFormat)
 		{
 			case api::ERenderPassFormat::COLOR_RENDERPASS:
@@ -139,7 +141,6 @@ namespace api
 			case api::ERenderPassFormat::DEPTH_RENDERPASS:
 			{
 				ImageFormat = VK_FORMAT_D16_UNORM;
-				//ImageFormat = m_pGraphicsAPI->FindDepthFormat();
 				Usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
 				break;
 			}
@@ -147,6 +148,20 @@ namespace api
 			{
 				ImageFormat = VK_FORMAT_D32_SFLOAT;
 				Usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+				break;
+			}
+			case api::ERenderPassFormat::DEPTH_STENCIL_RENDERPASS:
+			{
+				ImageFormat = VK_FORMAT_D16_UNORM_S8_UINT;
+				Usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+				UseStencil = true;
+				break;
+			}
+			case api::ERenderPassFormat::DEPTH_STENCIL_FLOAT_RENDERPASS:
+			{
+				ImageFormat = VK_FORMAT_D32_SFLOAT_S8_UINT;
+				Usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+				UseStencil = true;
 				break;
 			}
 			default:
@@ -158,7 +173,7 @@ namespace api
 		}
 
 		if (!CreateFrameTextureImage(ImageFormat, Usage)) return false; // テクスチャイメージの生成
-		if (!CreateTextureImageView(ImageFormat)) return false;// シェーダーで取り扱う用のImageViewを作成(イメージマネージャーみたいなやつかな)
+		if (!CreateTextureImageView(ImageFormat, UseStencil)) return false;// シェーダーで取り扱う用のImageViewを作成(イメージマネージャーみたいなやつかな)
 		if (!CreateTextureSampler()) return false; // テクスチャサンプラーを作成.サンプラーとはテクスチャデータをフラグメント(3Dモデル)に合うように調整する機構
 
 		return true;
@@ -171,7 +186,7 @@ namespace api
 
 		// Texture Buffer
 		if (!CreateTextureImage(pixelData, pixelSize, ImageFormat)) return false; // テクスチャイメージの生成
-		if (!CreateTextureImageView(ImageFormat)) return false;// シェーダーで取り扱う用のImageViewを作成(イメージマネージャーみたいなやつかな)
+		if (!CreateTextureImageView(ImageFormat, false)) return false;// シェーダーで取り扱う用のImageViewを作成(イメージマネージャーみたいなやつかな)
 		if (!CreateTextureSampler()) return false; // テクスチャサンプラーを作成.サンプラーとはテクスチャデータをフラグメント(3Dモデル)に合うように調整する機構
 
 		return true;
@@ -236,9 +251,12 @@ namespace api
 		return true;
 	}
 
-	bool CVulkanTexture::CreateTextureImageView(VkFormat ImageFormat)
+	bool CVulkanTexture::CreateTextureImageView(VkFormat ImageFormat, bool UseStencil)
 	{
-		m_TextureImageView = m_pGraphicsAPI->CreateImageView(m_TextureImage, ImageFormat, VK_IMAGE_ASPECT_COLOR_BIT, m_TextureType, m_MipCount, m_UseMipMap);
+		VkImageAspectFlags aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		if (UseStencil) aspectMask |= VK_IMAGE_ASPECT_STENCIL_BIT;
+
+		m_TextureImageView = m_pGraphicsAPI->CreateImageView(m_TextureImage, ImageFormat, aspectMask, m_TextureType, m_MipCount, m_UseMipMap);
 
 		return true;
 	}
