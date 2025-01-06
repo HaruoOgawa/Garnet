@@ -139,6 +139,9 @@ namespace graphics
 		std::vector<STextureBindingLayout> PrevTextureBindingLayoutList = m_TextureBindingLayoutList;
 
 		// バッファの更新
+		m_ShaderBufferList.clear();
+		m_TextureBindingLayoutList.clear();
+
 		for (auto& ShaderBuffer : ShaderBufferList)
 		{
 			m_ShaderBufferList.push_back(std::make_shared<CShaderBuffer>(*ShaderBuffer));
