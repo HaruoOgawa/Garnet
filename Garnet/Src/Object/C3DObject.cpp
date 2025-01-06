@@ -518,6 +518,18 @@ namespace object
 
 		int SkeletonIndex = Node->GetSkeletonIndex();
 
+		float MipCount = 1.0f;
+		const auto& CubeTexList = m_TextureSet->GetCubeMapList();
+		const auto& Specular_Tex = m_TextureSet->GetSpecular_Tex();
+		if (CubeTexList.size() > 0)
+		{
+			MipCount = CubeTexList[0]->GetMipCount();
+		}
+		else if (Specular_Tex)
+		{
+			MipCount = Specular_Tex->GetMipCount();
+		}
+
 		for (int PrimitiveIndex = 0; PrimitiveIndex < Mesh->GetPrimitiveList().size(); PrimitiveIndex++)
 		{
 			const auto& Primitive = Mesh->GetPrimitiveList()[PrimitiveIndex];
@@ -569,6 +581,8 @@ namespace object
 					Material->SetUniformValue("r_SkinMatrixBuffer", &m_CurrentSkinMatrixList[0], sizeof(glm::mat4) * static_cast<int>(m_CurrentSkinMatrixList.size()));
 				}
 #endif
+				Material->SetUniformValue("mipCount", &glm::vec1(MipCount)[0], sizeof(float));
+
 			}
 			
 			// ï`âÊé¿çs
