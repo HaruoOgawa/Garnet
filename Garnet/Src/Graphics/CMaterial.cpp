@@ -139,7 +139,11 @@ namespace graphics
 		std::vector<STextureBindingLayout> PrevTextureBindingLayoutList = m_TextureBindingLayoutList;
 
 		// バッファの更新
-		m_ShaderBufferList = ShaderBufferList;
+		for (auto& ShaderBuffer : ShaderBufferList)
+		{
+			m_ShaderBufferList.push_back(std::make_shared<CShaderBuffer>(*ShaderBuffer));
+		}
+
 		m_TextureBindingLayoutList = TextureBindingLayoutList;
 
 		// 設定済みの値を反映
@@ -152,7 +156,7 @@ namespace graphics
 				{
 					const auto& Descriptor = ShaderBuffer->GetDescriptor();
 
-					for (const auto& UniformDataMap : Descriptor->GetDataList())
+					for (const auto& UniformDataMap : Descriptor.GetDataList())
 					{
 						const auto& UniformData = UniformDataMap.second;
 

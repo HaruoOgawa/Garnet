@@ -245,7 +245,7 @@ namespace api
 			auto& UniformBuffer = m_ShaderBufferList[i];
 			const auto& UniformDesc = UniformBuffer->GetDescriptor();
 
-			const auto& DataList = UniformDesc->GetDataList();
+			const auto& DataList = UniformDesc.GetDataList();
 			const auto& UniformData = DataList.find(Name);
 			if (UniformData != DataList.end())
 			{

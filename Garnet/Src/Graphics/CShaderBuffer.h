@@ -9,10 +9,10 @@
 #include "SBindingLayout.h"
 #include "EBufferUpdateTypeh.h"
 #include "EUniformValueType.h"
+#include "CShaderBufferDescriptor.h"
 
 namespace graphics
 {
-	class CShaderBufferDescriptor;
 	class CMaterial;
 
 	struct SSharedBufferParam
@@ -27,7 +27,7 @@ namespace graphics
 		std::string m_BufferName;
 
 		std::vector<unsigned char> m_Buffer;
-		std::shared_ptr<CShaderBufferDescriptor> m_Descriptor;
+		CShaderBufferDescriptor m_Descriptor;
 		std::map<int, SBindingLayout> m_BindingLayoutList;
 
 		const EBufferType m_BufferType;
@@ -52,7 +52,7 @@ namespace graphics
 
 		void SetValue(const void* Value, int ByteOffset, int ByteSize);
 
-		virtual std::shared_ptr<CShaderBufferDescriptor> GetDescriptor() const;
+		virtual const CShaderBufferDescriptor& GetDescriptor() const;
 		virtual const std::map<int, SBindingLayout>& GetBindingLayoutList() const;
 
 		virtual EBufferType GetBufferType() const override;

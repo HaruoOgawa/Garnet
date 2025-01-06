@@ -648,7 +648,7 @@ namespace scene
 
 							const auto& Descriptor = UniformBuffer->GetDescriptor();
 
-							for (const auto& UniformDataMap : Descriptor->GetDataList())
+							for (const auto& UniformDataMap : Descriptor.GetDataList())
 							{
 								const auto& UniformData = UniformDataMap.second;
 
