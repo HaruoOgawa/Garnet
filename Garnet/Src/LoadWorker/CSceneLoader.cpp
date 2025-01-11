@@ -1067,14 +1067,23 @@ namespace resource
 					UniformInfo.ByteSize = ByteSize;
 				}
 
-				//
-				std::vector<float> value;
-				GetArrayFloat32("value", value, uniformJSON);
-
 				std::vector<unsigned char> UniformData;
 				UniformData.resize(ByteSize);
 
-				std::memcpy(&UniformData[0], &value[0], ByteSize);
+				//
+				if (UniformType == "int")
+				{
+					// float‚Æ‚µ‚Ä•Ï‚È’l‚É‰ðŽß‚³‚ê‚Ä‚µ‚Ü‚¤‚Ì‚Åint‚¾‚¯•Ê‚ÉŽæ“¾‚·‚é
+					std::vector<int> value;
+					GetArrayInt32("value", value, uniformJSON);
+					std::memcpy(&UniformData[0], &value[0], ByteSize);
+				}
+				else
+				{
+					std::vector<float> value;
+					GetArrayFloat32("value", value, uniformJSON);
+					std::memcpy(&UniformData[0], &value[0], ByteSize);
+				}
 
 				UniformInfo.UniformData = UniformData;
 
