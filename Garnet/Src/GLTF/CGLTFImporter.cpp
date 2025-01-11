@@ -326,6 +326,20 @@ namespace gltf
 			int normalTextureIndex = glTfMaterial.normalTexture.index;
 			int occlusionTextureIndex = glTfMaterial.occlusionTexture.index;
 			
+			// emissiveStrength Extension
+			float emissiveStrength = 1.0f;
+			{
+				const auto& it = glTfMaterial.extensions.find("KHR_materials_emissive_strength");
+				if (it != glTfMaterial.extensions.end())
+				{
+					const auto& KHR_materials_emissive_strength = it->second;
+					if (KHR_materials_emissive_strength.IsObject())
+					{
+						emissiveStrength = static_cast<float>(KHR_materials_emissive_strength.Get("emissiveStrength").GetNumberAsDouble());
+					}
+				}
+			}
+
 			// プリミティブ単位で割り当てられるマテリアルリスト
 			std::vector<std::tuple<std::shared_ptr<graphics::CMaterialFrame>, std::shared_ptr<graphics::CMaterial>>> PrimitiveMaterials;
 			
@@ -339,6 +353,7 @@ namespace gltf
 					// UBOの初期値を設定する
 					material->ReplacePreloadUniformValue("baseColorFactor", &glm::vec4(baseColorFactor[0], baseColorFactor[1], baseColorFactor[2], baseColorFactor[3])[0], sizeof(float) * 4, 0);
 					material->ReplacePreloadUniformValue("emissiveFactor", &glm::vec4(emissiveFactor[0], emissiveFactor[1], emissiveFactor[2], 0.0f)[0], sizeof(float) * 4, 0);
+					material->ReplacePreloadUniformValue("emissiveStrength", &emissiveStrength, sizeof(float), 0);
 					material->ReplacePreloadUniformValue("metallicFactor", &metallicFactor, sizeof(float), 0);
 					material->ReplacePreloadUniformValue("roughnessFactor", &roughnessFactor, sizeof(float), 0);
 					material->ReplacePreloadUniformValue("normalMapScale", &normalMapScale, sizeof(float), 0);
