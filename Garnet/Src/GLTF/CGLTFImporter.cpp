@@ -131,7 +131,7 @@ namespace gltf
 
 		// メッシュ
 		std::vector<std::shared_ptr<graphics::CMesh>> MeshList;
-		if (!CreateMesh(pGraphicsAPI, model, MeshList, BaseMaterialList))
+		if (!CreateMesh(pGraphicsAPI, model, MeshList, BaseMaterialFrameList, BaseMaterialList))
 		{
 			Console::Log("[Error GLTFImporter] Failed to CreateMesh\n");
 
@@ -488,6 +488,7 @@ namespace gltf
 	}
 
 	bool CGLTFImporter::CreateMesh(api::IGraphicsAPI* pGraphicsAPI, const tinygltf::Model& model, std::vector<std::shared_ptr<graphics::CMesh>>& MeshList,
+		const std::vector<std::shared_ptr<graphics::CMaterialFrame>>& BaseMaterialFrameList,
 		const std::vector<std::vector<std::tuple<std::shared_ptr<graphics::CMaterialFrame>, std::shared_ptr<graphics::CMaterial>>>>& BaseMaterialList)
 	{
 		for (const auto& glTFMesh : model.meshes)
@@ -750,26 +751,30 @@ namespace gltf
 
 				// マテリアルはプリミティブ単位で生成する
 				int GLTFMaterialIndex = glTFPrimitive.material;
-				if (GLTFMaterialIndex < 0 || GLTFMaterialIndex >= static_cast<int>(BaseMaterialList.size())) return false;
-
-				// プリミティブ単位で割り当てられるマテリアルリスト
-				const auto& PrimitiveMaterials = BaseMaterialList[GLTFMaterialIndex];
-				for (const auto& PrimitiveMat : PrimitiveMaterials)
+				if (GLTFMaterialIndex >= 0 && GLTFMaterialIndex < static_cast<int>(BaseMaterialList.size()))
 				{
-					auto NewMaterial = std::get<0>(PrimitiveMat)->CopyMaterial(pGraphicsAPI, std::get<1>(PrimitiveMat));
-					if (!NewMaterial) return false;
+					// プリミティブ単位で割り当てられるマテリアルリスト
+					const auto& PrimitiveMaterials = BaseMaterialList[GLTFMaterialIndex];
+					for (const auto& PrimitiveMat : PrimitiveMaterials)
+					{
+						auto NewMaterial = std::get<0>(PrimitiveMat)->CopyMaterial(pGraphicsAPI, std::get<1>(PrimitiveMat));
+						if (!NewMaterial) return false;
 
-					Primitive->AddMaterial(pGraphicsAPI, NewMaterial);
+						Primitive->AddMaterial(pGraphicsAPI, NewMaterial);
+					}
+				}
+				else
+				{
+					// ダミーマテリアルを割り当てる
+					for (const auto& MaterialFrame : BaseMaterialFrameList)
+					{
+						auto material = MaterialFrame->CreateMaterial(pGraphicsAPI, graphics::ECullMode::CULL_BACK);
+						Primitive->AddMaterial(pGraphicsAPI, material);
+					}
 				}
 
 				Mesh->SetMorphDataList(Primitive, static_cast<int>(Mesh->GetPrimitiveList().size()), MorphDataList);
 				Mesh->AddPrimitive(Primitive);
-
-				// マテリアルに参照を追加
-				/*if (MaterialIndex >= 0 && MaterialIndex < static_cast<int>(MaterialList.size()))
-				{
-					MaterialList[MaterialIndex]->AddRefCount();
-				}*/
 			}
 
 			// メッシュを登録する
@@ -783,7 +788,6 @@ namespace gltf
 		const std::vector<std::shared_ptr<graphics::CMaterialFrame>>& BaseMaterialFrameList, std::vector<std::shared_ptr<graphics::CMesh>>& MeshList)
 	{
 		// マテリアル参照数とマテリアルインデックスの設定
-		int MatRefCount = 0;
 		for (auto& Mesh : MeshList)
 		{
 			for (auto& Primirive : Mesh->GetPrimitiveList())
