@@ -209,6 +209,50 @@ namespace graphics
 		return Material;
 	}
 
+	// 全てのマテリアルの値を受け継ぐ
+	std::shared_ptr<CMaterial> CMaterialFrame::CreateAndOverriteMaterial(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<graphics::CMaterial>& SrcMaterial)
+	{
+		auto NewMaterial = CreateMaterial(pGraphicsAPI, SrcMaterial->GetCullMode());
+
+		SetCullMode(SrcMaterial->GetCullMode());
+
+		// UniformValueを設定
+		for (const auto& UniformBuffer : SrcMaterial->GetShaderBufferList())
+		{
+			const auto& BufferData = UniformBuffer->GetBuffer();
+
+			const auto& Descriptor = UniformBuffer->GetDescriptor();
+
+			for (const auto& UniformDataMap : Descriptor.GetDataList())
+			{
+				const auto& UniformData = UniformDataMap.second;
+				const std::string& UniformName = UniformData.UniformName;
+
+				const auto& UniformValue = UniformBuffer->GetUniformValue(UniformName);
+				if (UniformValue.empty()) continue;
+
+				NewMaterial->SetUniformValue(UniformName, &UniformValue[0], UniformData.ByteSize);
+			}
+		}
+
+		// Textureを設定
+		for (const auto& TextureBindingLayout : SrcMaterial->GetTextureBindingLayoutList())
+		{
+			const auto& TextureName = TextureBindingLayout.TextureName;
+
+			int TextureIndex = TextureBindingLayout.TextureIndex;
+
+			if (TextureIndex == -1) continue;
+
+			NewMaterial->ReplaceTextureIndex(TextureName, TextureIndex);
+		}
+
+		// TrackIDList
+		NewMaterial->SetRefTrackIDList(SrcMaterial->GetRefTrackIDList());
+
+		return NewMaterial;
+	}
+
 	std::shared_ptr<CMaterial> CMaterialFrame::CopyMaterial(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CMaterial>& SrcMaterial)
 	{
 		if (!SrcMaterial) return nullptr;
