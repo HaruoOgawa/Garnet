@@ -141,9 +141,6 @@ namespace object
 		void AddMesh(const std::shared_ptr<graphics::CMesh>& Mesh);
 		const std::vector<std::shared_ptr<graphics::CMesh>>& GetMeshList() const;
 
-		//void AddMaterial(const std::shared_ptr<graphics::CMaterial>& Material);
-		bool ReplaceMaterial(const std::shared_ptr<graphics::CMaterial>& OldMaterial, const std::shared_ptr<graphics::CMaterial>& NewMaterial);
-
 		void AddMorphNode(const std::shared_ptr<CNode>& Node);
 
 #ifdef USE_ANIMATION

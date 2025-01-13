@@ -648,7 +648,7 @@ namespace scene
 
 							const auto& Descriptor = UniformBuffer->GetDescriptor();
 
-							for (const auto& UniformDataMap : Descriptor->GetDataList())
+							for (const auto& UniformDataMap : Descriptor.GetDataList())
 							{
 								const auto& UniformData = UniformDataMap.second;
 
@@ -838,9 +838,46 @@ namespace scene
 			const auto& it = std::find_if(TextureInfoList.begin(), TextureInfoList.end(), [&](const auto& val) { return (val.second == Texture2D); });
 			if (it == TextureInfoList.end()) continue;
 
+			std::string filter_str = std::string();
+			graphics::ETextureFilterMode FilterMode = Texture2D->GetSamplerParam().FilterMode;
+			switch (FilterMode)
+			{
+			case graphics::ETextureFilterMode::NEAREST:
+				filter_str = "nearest";
+				break;
+			case graphics::ETextureFilterMode::LINEAR:
+				filter_str = "linear";
+				break;
+			default:
+				break;
+			}
+
+			std::string wrap_str = std::string();
+			graphics::ETextureWrapMode WrapMode = Texture2D->GetSamplerParam().WrapMode;
+			switch (WrapMode)
+			{
+			case graphics::ETextureWrapMode::REPEAT:
+				wrap_str = "repeat";
+				break;
+			case graphics::ETextureWrapMode::MIRRORED_REPEAT:
+				wrap_str = "mirroredrepeat";
+				break;
+			case graphics::ETextureWrapMode::CLAMP_TO_EDGE:
+				wrap_str = "clamptoedge";
+				break;
+			case graphics::ETextureWrapMode::CLAMP_TO_BORDER:
+				wrap_str = "clamptoborder";
+				break;
+			default:
+				break;
+			}
+
 			ObjectJSON["textureset"].push_back({
 				{ "name", it->first }, 
 				{ "filename", Texture2D->GetFileName() },
+				{ "mipmap", Texture2D->IsUseMipMap() },
+				{ "filter", filter_str },
+				{ "wrap", wrap_str }
 			});
 		}
 

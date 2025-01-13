@@ -91,6 +91,10 @@ namespace graphics
 		void SetTextureBufferList(const std::vector<graphics::STextureBindingLayout>& TextureBufferList);
 
 		std::shared_ptr<CMaterial> CreateMaterial(api::IGraphicsAPI* pGraphicsAPI, graphics::ECullMode CullMode);
+
+		// 全てのマテリアルの値を受け継ぐ
+		std::shared_ptr<CMaterial> CreateAndOverriteMaterial(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<graphics::CMaterial>& SrcMaterial);
+
 		std::shared_ptr<CMaterial> CopyMaterial(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CMaterial>& SrcMaterial);
 		bool DeleteRefMaterial(const std::shared_ptr<graphics::CMaterial>& Material);
 

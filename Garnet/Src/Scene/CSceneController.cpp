@@ -663,6 +663,7 @@ namespace scene
 					if (!Material) continue;
 
 					// マテリアルを差し替える
+					bool MatReplaced = false;
 					if (MaterialInfo.MaterialFrameName != Material->GetMaterialFrame()->GetMaterialFrameName())
 					{
 						const auto& OldMF = Material->GetMaterialFrame();
@@ -672,9 +673,12 @@ namespace scene
 						OldMF->DeleteRefMaterial(Material);
 
 						auto NewMat = NewMF->second->CreateMaterial(pGraphicsAPI, NewMF->second->GetCullMode());
+						
 						Primitive->ReplaceMaterial(Renderer, NewMat);
 
 						Material = NewMat;
+
+						MatReplaced = true;
 					}
 
 					// UniformValueを設定
@@ -710,11 +714,14 @@ namespace scene
 						Material->ReplaceTextureIndex(TextureBufferName, TextureIndex);
 					}
 
-					// テクスチャリストを再作成
-					Material->CreateRefTextureList(Object->GetTextureSet());
-
 					// TrackIDList
 					Material->SetRefTrackIDList(MaterialInfo.TrackIDList);
+
+					// マテリアルを置き換えたので再生成する
+					if (MatReplaced)
+					{
+						if (!Material->Create(Object->GetPassNameList(), Object->GetTextureSet())) return false;
+					}
 				}
 			}
 		}

@@ -59,7 +59,7 @@ namespace api
 			auto UniformBufferByteSize = static_cast<uint64_t>(m_WGPUUniformBufferByteSizeList[i]);
 			const auto& UniformDesc = UniformBuffer->GetDescriptor();
 
-			const auto& DataList = UniformDesc->GetDataList();
+			const auto& DataList = UniformDesc.GetDataList();
 			const auto& UniformData = DataList.find(Name);
 			if (UniformData != DataList.end())
 			{

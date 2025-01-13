@@ -8,7 +8,6 @@ namespace graphics
 {
 	CShaderBuffer::CShaderBuffer(const std::string& BufferName, EBufferType BufferType, const std::vector<SBindingLayout>& BindingLayoutList, EBufferUpdateType BufferUpdateType) :
 		m_BufferName(BufferName),
-		m_Descriptor(std::make_shared<CShaderBufferDescriptor>()),
 		m_BufferType(BufferType),
 		m_BufferUpdateType(BufferUpdateType)
 	{
@@ -55,7 +54,7 @@ namespace graphics
 			ByteOffset,
 			ValueInput
 		};
-		m_Descriptor->AddData(Name, value);
+		m_Descriptor.AddData(Name, value);
 
 		// BINDING LAYOUT
 		m_BindingLayoutList[BindingIndex].ByteSize += ByteSize;
@@ -70,8 +69,8 @@ namespace graphics
 		}
 
 		// 既にBufferに追加済みのデータを更新する
-		const auto it = m_Descriptor->GetDataList().find(SrcName);
-		if (it == m_Descriptor->GetDataList().end()) return;
+		const auto it = m_Descriptor.GetDataList().find(SrcName);
+		if (it == m_Descriptor.GetDataList().end()) return;
 
 		// バイトサイズの更新が許されるのはSSBOのみである
 		int ByteOffset = it->second.ByteOffset;
@@ -96,7 +95,7 @@ namespace graphics
 				0
 			};
 
-			m_Descriptor->SetData(SrcName, value);
+			m_Descriptor.SetData(SrcName, value);
 
 			// BINDING LAYOUT
 			m_BindingLayoutList[BindingIndex].ByteSize = SrcByteSize;
@@ -108,17 +107,14 @@ namespace graphics
 
 	void CShaderBuffer::SetData(const std::string& Name, const void* Data, int ByteSize)
 	{
-		if (m_Descriptor)
+		const auto& DataList = m_Descriptor.GetDataList();
+		const auto& UniformData = DataList.find(Name);
+		if (UniformData != DataList.end())
 		{
-			const auto& DataList = m_Descriptor->GetDataList();
-			const auto& UniformData = DataList.find(Name);
-			if (UniformData != DataList.end())
-			{
-				const int Offset = UniformData->second.ByteOffset;
-				const int Size = UniformData->second.ByteSize;
+			const int Offset = UniformData->second.ByteOffset;
+			const int Size = UniformData->second.ByteSize;
 
-				if (ByteSize == Size) SetValue(Data, Offset, Size);
-			}
+			if (ByteSize == Size) SetValue(Data, Offset, Size);
 		}
 	}
 
@@ -134,7 +130,7 @@ namespace graphics
 
 	std::vector<unsigned char> CShaderBuffer::GetUniformValue(const std::string& Name)
 	{
-		for (const auto& UniformDataMap : m_Descriptor->GetDataList())
+		for (const auto& UniformDataMap : m_Descriptor.GetDataList())
 		{
 			const auto& UniformData = UniformDataMap.second;
 			if (Name != UniformData.UniformName) continue;
@@ -158,7 +154,7 @@ namespace graphics
 		std::memcpy(&m_Buffer[ByteOffset], Value, ByteSize);
 	}
 
-	std::shared_ptr<CShaderBufferDescriptor> CShaderBuffer::GetDescriptor() const
+	const CShaderBufferDescriptor& CShaderBuffer::GetDescriptor() const
 	{
 		return m_Descriptor;
 	}

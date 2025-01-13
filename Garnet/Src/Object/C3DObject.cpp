@@ -518,6 +518,18 @@ namespace object
 
 		int SkeletonIndex = Node->GetSkeletonIndex();
 
+		float MipCount = 1.0f;
+		const auto& CubeTexList = m_TextureSet->GetCubeMapList();
+		const auto& Specular_Tex = m_TextureSet->GetSpecular_Tex();
+		if (CubeTexList.size() > 0)
+		{
+			MipCount = CubeTexList[0]->GetMipCount();
+		}
+		else if (Specular_Tex)
+		{
+			MipCount = Specular_Tex->GetMipCount();
+		}
+
 		for (int PrimitiveIndex = 0; PrimitiveIndex < Mesh->GetPrimitiveList().size(); PrimitiveIndex++)
 		{
 			const auto& Primitive = Mesh->GetPrimitiveList()[PrimitiveIndex];
@@ -557,7 +569,9 @@ namespace object
 				Material->SetUniformValue("time", &glm::vec1(DrawInfo->GetSecondsTime())[0], sizeof(float));
 				Material->SetUniformValue("deltaTime", &glm::vec1(DrawInfo->GetDeltaSecondsTime())[0], sizeof(float));
 				Material->SetUniformValue("resolution", &Projection->GetScreenResolution()[0], sizeof(glm::vec2));
-				Material->SetUniformValue("flipcullmode", &glm::ivec1(DrawInfo->IsFlipCullMode() ? 1 : 0)[0], sizeof(int));
+
+				Material->SetUniformValue("useSpatialCulling", &glm::ivec1(DrawInfo->IsSpatialCulling() ? 1 : 0)[0], sizeof(int));
+				Material->SetUniformValue("spatialCullPos", &DrawInfo->GetSpatialCullPos()[0], sizeof(float) * 4);
 #ifdef USE_ANIMATION
 				Material->SetUniformValue("useSkinMeshAnimation", &glm::ivec1((m_AnimationController->IsEnabledSkeleton() ? 1 : 0))[0], sizeof(glm::ivec1));
 
@@ -567,6 +581,8 @@ namespace object
 					Material->SetUniformValue("r_SkinMatrixBuffer", &m_CurrentSkinMatrixList[0], sizeof(glm::mat4) * static_cast<int>(m_CurrentSkinMatrixList.size()));
 				}
 #endif
+				Material->SetUniformValue("mipCount", &glm::vec1(MipCount)[0], sizeof(float));
+
 			}
 			
 			// ï`âÊé¿çs
@@ -748,11 +764,6 @@ namespace object
 		return m_MeshList;
 	}
 
-	/*void C3DObject::AddMaterial(const std::shared_ptr<graphics::CMaterial>& Material)
-	{
-		m_MaterialList.push_back(Material);
-	}*/
-
 	void C3DObject::AddMorphNode(const std::shared_ptr<CNode>& Node)
 	{
 		m_MorphController->AddMorphNode(Node);
@@ -807,22 +818,6 @@ namespace object
 		return m_AnimationController->IsPlayingAnimation();
 	}
 #endif
-
-	bool C3DObject::ReplaceMaterial(const std::shared_ptr<graphics::CMaterial>& OldMaterial, const std::shared_ptr<graphics::CMaterial>& NewMaterial)
-	{
-		/*auto it = std::find(m_MaterialList.begin(), m_MaterialList.end(), OldMaterial);
-		if (it == m_MaterialList.end()) return false;
-
-		OldMaterial->DeleteMaterialFrameReference();
-
-		int MaterialIndex = static_cast<int>(it - m_MaterialList.begin());
-
-		if (!NewMaterial->Create(m_TextureSet)) return false;
-
-		m_MaterialList[MaterialIndex] = NewMaterial;*/
-
-		return true;
-	}
 
 	void C3DObject::SetRootNodeIndexList(const std::vector<int>& RootNodeIndexList)
 	{

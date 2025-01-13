@@ -298,7 +298,7 @@ namespace resource
 
 				std::vector<std::string> FileNameList = { right, left, top, bottom, front, back };
 
-				auto Texture = pGraphicsAPI->CreateTexture();
+				auto Texture = pGraphicsAPI->CreateTexture(true, { graphics::ETextureFilterMode::LINEAR, graphics::ETextureWrapMode::REPEAT });
 				pLoadWorker->AddLoadResource(std::make_shared<resource::CTextureLoader>(pGraphicsAPI, FileNameList, Texture));
 				SceneTextureSet->AddCubeMap(Texture);
 			}
@@ -319,13 +319,13 @@ namespace resource
 
 			if (!diffuse.empty() && !specular.empty() && !ggx.empty())
 			{
-				auto diffuseTexture = pGraphicsAPI->CreateTexture();
+				auto diffuseTexture = pGraphicsAPI->CreateTexture(true, { graphics::ETextureFilterMode::LINEAR, graphics::ETextureWrapMode::REPEAT });
 				pLoadWorker->AddLoadResource(std::make_shared<resource::CTextureLoader>(pGraphicsAPI, diffuse, diffuseTexture));
 
-				auto specularTexture = pGraphicsAPI->CreateTexture();
+				auto specularTexture = pGraphicsAPI->CreateTexture(true, { graphics::ETextureFilterMode::LINEAR, graphics::ETextureWrapMode::REPEAT });
 				pLoadWorker->AddLoadResource(std::make_shared<resource::CTextureLoader>(pGraphicsAPI, specular, specularTexture));
 
-				auto ggxTexture = pGraphicsAPI->CreateTexture();
+				auto ggxTexture = pGraphicsAPI->CreateTexture(false, { graphics::ETextureFilterMode::NEAREST, graphics::ETextureWrapMode::REPEAT });
 				pLoadWorker->AddLoadResource(std::make_shared<resource::CTextureLoader>(pGraphicsAPI, ggx, ggxTexture));
 
 				SceneTextureSet->AddIBLTexture(diffuseTexture, specularTexture, ggxTexture);
@@ -516,7 +516,34 @@ namespace resource
 					std::string TextureFileName = "";
 					GetString("filename", TextureFileName, textureJSON);
 
-					auto Texture = pGraphicsAPI->CreateTexture();
+					bool mipmap = false;
+					GetBoolean("mipmap", mipmap, textureJSON);
+
+					graphics::STextureSamplerParam SamplerParam{};
+
+					std::string filter = std::string();
+					GetString("filter", filter, textureJSON);
+					if (filter == "linear")
+					{
+						SamplerParam.FilterMode = graphics::ETextureFilterMode::LINEAR;
+					}
+					else if (filter == "nearest")
+					{
+						SamplerParam.FilterMode = graphics::ETextureFilterMode::NEAREST;
+					}
+
+					std::string wrap = std::string();
+					GetString("wrap", wrap, textureJSON);
+					if (wrap == "clamptoedge")
+					{
+						SamplerParam.WrapMode = graphics::ETextureWrapMode::CLAMP_TO_EDGE;
+					}
+					else if (wrap == "repeat")
+					{
+						SamplerParam.WrapMode = graphics::ETextureWrapMode::REPEAT;
+					}
+
+					auto Texture = pGraphicsAPI->CreateTexture(mipmap, SamplerParam);
 					pLoadWorker->AddLoadResource(std::make_shared<resource::CTextureLoader>(pGraphicsAPI, TextureFileName, Texture));
 
 					TextureInfoList.emplace(TextureName, Texture);
@@ -1040,14 +1067,23 @@ namespace resource
 					UniformInfo.ByteSize = ByteSize;
 				}
 
-				//
-				std::vector<float> value;
-				GetArrayFloat32("value", value, uniformJSON);
-
 				std::vector<unsigned char> UniformData;
 				UniformData.resize(ByteSize);
 
-				std::memcpy(&UniformData[0], &value[0], ByteSize);
+				//
+				if (UniformType == "int")
+				{
+					// float‚Æ‚µ‚Ä•Ï‚È’l‚É‰ðŽß‚³‚ê‚Ä‚µ‚Ü‚¤‚Ì‚Åint‚¾‚¯•Ê‚ÉŽæ“¾‚·‚é
+					std::vector<int> value;
+					GetArrayInt32("value", value, uniformJSON);
+					std::memcpy(&UniformData[0], &value[0], ByteSize);
+				}
+				else
+				{
+					std::vector<float> value;
+					GetArrayFloat32("value", value, uniformJSON);
+					std::memcpy(&UniformData[0], &value[0], ByteSize);
+				}
 
 				UniformInfo.UniformData = UniformData;
 

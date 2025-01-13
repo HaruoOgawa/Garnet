@@ -17,7 +17,8 @@ namespace graphics
 		float m_SecondsTime;
 		float m_DeltaSecondsTime;
 
-		bool  m_FlipCullMode;
+		bool  m_SpatialCulling;
+		glm::vec4 m_SpatialCullPos;
 	public:
 		CDrawInfo();
 		virtual ~CDrawInfo() = default;
@@ -36,7 +37,10 @@ namespace graphics
 		void SetDeltaSecondsTime(float DeltaSecondsTime);
 		float GetDeltaSecondsTime() const;
 
-		void  SetFlipCullMode(bool Mode);
-		bool  IsFlipCullMode() const;
+		void  SetSpatialCulling(bool Flag);
+		bool  IsSpatialCulling() const;
+
+		void SetSpatialCullPos(const glm::vec4& Pos);
+		const glm::vec4& GetSpatialCullPos() const;
 	};
 }

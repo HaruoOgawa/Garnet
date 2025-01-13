@@ -8,7 +8,8 @@ namespace graphics
 		m_LightProjection(std::make_shared<projection::CProjection>()),
 		m_SecondsTime(0.0f),
 		m_DeltaSecondsTime(0.0f),
-		m_FlipCullMode(false)
+		m_SpatialCulling(false),
+		m_SpatialCullPos(glm::vec4(0.0f))
 	{
 	}
 
@@ -52,13 +53,23 @@ namespace graphics
 		return m_DeltaSecondsTime;
 	}
 
-	void  CDrawInfo::SetFlipCullMode(bool Mode)
+	void  CDrawInfo::SetSpatialCulling(bool Flag)
 	{
-		m_FlipCullMode = Mode;
+		m_SpatialCulling = Flag;
 	}
 
-	bool  CDrawInfo::IsFlipCullMode() const
+	bool  CDrawInfo::IsSpatialCulling() const
 	{
-		return m_FlipCullMode;
+		return m_SpatialCulling;
+	}
+
+	void CDrawInfo::SetSpatialCullPos(const glm::vec4& Pos)
+	{
+		m_SpatialCullPos = Pos;
+	}
+
+	const glm::vec4& CDrawInfo::GetSpatialCullPos() const
+	{
+		return m_SpatialCullPos;
 	}
 }

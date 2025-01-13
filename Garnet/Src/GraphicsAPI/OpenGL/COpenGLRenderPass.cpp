@@ -75,16 +75,20 @@ namespace api
 		//
 		int BufferCount = RenderTargetCount;
 
-		// Depth_Stencilの分を追加しておく
-		BufferCount += 1;
+		// カラーバッファのアウトプットが複数個ある時にデプスの方もアタッチするようにすると1つしかカラーがアウトプットされなくなるので深度テクスチャが不要なら追加しない
+		if (UseDepthTexture)
+		{
+			// Depth_Stencilの分を追加しておく
+			BufferCount += 1;
 
-		if (m_UseStencil)
-		{
-			Attachments.push_back(GL_DEPTH_STENCIL_ATTACHMENT);
-		}
-		else
-		{
-			Attachments.push_back(GL_DEPTH_ATTACHMENT);
+			if (m_UseStencil)
+			{
+				Attachments.push_back(GL_DEPTH_STENCIL_ATTACHMENT);
+			}
+			else
+			{
+				Attachments.push_back(GL_DEPTH_ATTACHMENT);
+			}
 		}
 
 		glDrawBuffers(BufferCount, &Attachments[0]);
