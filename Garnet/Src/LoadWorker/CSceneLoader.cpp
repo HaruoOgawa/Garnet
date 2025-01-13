@@ -325,7 +325,7 @@ namespace resource
 				auto specularTexture = pGraphicsAPI->CreateTexture(true, { graphics::ETextureFilterMode::LINEAR, graphics::ETextureWrapMode::REPEAT });
 				pLoadWorker->AddLoadResource(std::make_shared<resource::CTextureLoader>(pGraphicsAPI, specular, specularTexture));
 
-				auto ggxTexture = pGraphicsAPI->CreateTexture(false, { graphics::ETextureFilterMode::LINEAR, graphics::ETextureWrapMode::REPEAT });
+				auto ggxTexture = pGraphicsAPI->CreateTexture(false, { graphics::ETextureFilterMode::NEAREST, graphics::ETextureWrapMode::REPEAT });
 				pLoadWorker->AddLoadResource(std::make_shared<resource::CTextureLoader>(pGraphicsAPI, ggx, ggxTexture));
 
 				SceneTextureSet->AddIBLTexture(diffuseTexture, specularTexture, ggxTexture);
