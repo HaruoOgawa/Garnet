@@ -243,16 +243,45 @@ namespace resource
 						else if (type == "int")
 						{
 							ValueType = graphics::EUniformValueType::VALUE_TYPE_INT;
+							
 							ByteSize = sizeof(int);
+						}
+						else if (type == "string")
+						{
+							ValueType = graphics::EUniformValueType::VALUE_TYPE_STRING;
+
+							// ByteSizeÇÕå„Ç≈ê›íË
 						}
 					}
 
-					std::vector<float> initValue;
-					GetArrayFloat32("initValue", initValue, valueJSON);
-
 					std::vector<unsigned char> Buffer;
-					Buffer.resize(ByteSize);
-					std::memcpy(&Buffer[0], &initValue[0], ByteSize);
+
+					//
+					if (type == "int")
+					{
+						std::vector<int> initValue;
+						GetArrayInt32("initValue", initValue, valueJSON);
+
+						Buffer.resize(ByteSize);
+						std::memcpy(&Buffer[0], &initValue[0], ByteSize);
+					}
+					else if (type == "string")
+					{
+						std::string initValue = std::string();
+						GetString("initValue", initValue, valueJSON);
+						ByteSize = static_cast<int>(initValue.size());
+
+						Buffer.resize(ByteSize);
+						std::memcpy(&Buffer[0], &initValue[0], ByteSize);
+					}
+					else
+					{
+						std::vector<float> initValue;
+						GetArrayFloat32("initValue", initValue, valueJSON);
+
+						Buffer.resize(ByteSize);
+						std::memcpy(&Buffer[0], &initValue[0], ByteSize);
+					}
 
 					//
 					ValueRegistry->SetValue(name, ValueType, &Buffer[0], ByteSize);

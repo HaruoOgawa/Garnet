@@ -292,13 +292,6 @@ namespace scene
 			{
 				for (const auto& Component : Object->GetNodeList()[NodeIndex]->GetComponentList())
 				{
-					// OnLoaded‚ðŽÀs
-					if (!Component->OnLoaded(pGraphicsAPI, shared_from_this(), Object, Object->GetNodeList()[NodeIndex]))
-					{
-						Console::Log("[Error] Faield to load Component.\n");
-						return false;
-					}
-
 					// ValueRegistry‚Ì“o˜^
 					{
 						const auto& RegistryName = Component->GetRegistryName();
@@ -308,6 +301,13 @@ namespace scene
 						if (ValueRegistry == m_ValueRegistryList.end()) continue;
 
 						Component->SetValueRegistry(ValueRegistry->second);
+					}
+
+					// OnLoaded‚ðŽÀs
+					if (!Component->OnLoaded(pGraphicsAPI, shared_from_this(), Object, Object->GetNodeList()[NodeIndex]))
+					{
+						Console::Log("[Error] Faield to load Component.\n");
+						return false;
 					}
 				}
 			}

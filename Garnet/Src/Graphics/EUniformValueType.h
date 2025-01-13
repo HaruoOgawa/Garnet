@@ -17,6 +17,7 @@ namespace graphics
 		VALUE_TYPE_INT,
 		VALUE_TYPE_FLOAT_ARRAY,
 		VALUE_TYPE_MAT4_ARRAY,
+		VALUE_TYPE_STRING,
 	};
 
 	class CUniformValueType

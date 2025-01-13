@@ -131,6 +131,9 @@ namespace scene
 				case graphics::EUniformValueType::VALUE_TYPE_INT:
 					type = "int";
 					break;
+				case graphics::EUniformValueType::VALUE_TYPE_STRING:
+					type = "string";
+					break;
 				case graphics::EUniformValueType::VALUE_TYPE_FLOAT_ARRAY:
 					break;
 				case graphics::EUniformValueType::VALUE_TYPE_MAT4_ARRAY:
@@ -143,15 +146,37 @@ namespace scene
 
 				ValueJSON["type"] = type;
 
-				// Value
-				std::vector<float> DstValue(Value.second.ByteSize / 4);
-				std::memcpy(&DstValue[0], &Value.second.Buffer[0], Value.second.ByteSize);
-
 				ordered_json valueJSON;
 
-				for (auto v : DstValue)
+				// Value
+				if (type == "int")
 				{
-					ValueJSON["initValue"].push_back(v);
+					std::vector<int> DstValue(Value.second.ByteSize / 4);
+					std::memcpy(&DstValue[0], &Value.second.Buffer[0], Value.second.ByteSize);
+
+					for (auto v : DstValue)
+					{
+						ValueJSON["initValue"].push_back(v);
+					}
+				}
+				else if (type == "string")
+				{
+					std::string DstValue = std::string();
+					DstValue.resize(Value.second.ByteSize);
+
+					std::memcpy(&DstValue[0], &Value.second.Buffer[0], Value.second.ByteSize);
+
+					ValueJSON["initValue"] = DstValue;
+				}
+				else
+				{
+					std::vector<float> DstValue(Value.second.ByteSize / 4);
+					std::memcpy(&DstValue[0], &Value.second.Buffer[0], Value.second.ByteSize);
+
+					for (auto v : DstValue)
+					{
+						ValueJSON["initValue"].push_back(v);
+					}
 				}
 
 				//
