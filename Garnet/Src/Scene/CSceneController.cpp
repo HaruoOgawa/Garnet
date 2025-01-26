@@ -108,7 +108,7 @@ namespace scene
 
 		// ロードワーカーに渡してロード開始
 		pLoadWorker->AddLoadResource(std::make_shared<resource::C3DObjectLoader>(FileName, Object, BaseMaterialFrameList, defaultmaterialframeList, 
-			RigType, std::map<animation::EHumanoidBones, std::string>()));
+			RigType, std::map<animation::EHumanoidBones, std::string>(), 1));
 	}
 
 	std::vector<std::shared_ptr<object::C3DObject>> CSceneController::GetObjectList() const

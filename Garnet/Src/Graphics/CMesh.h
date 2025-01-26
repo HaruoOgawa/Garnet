@@ -32,6 +32,8 @@ namespace graphics
 		bool CreateBuffer();
 
 		void AddVertexBuffer(const std::shared_ptr<CVertexBuffer>& Buffer);
+		const std::vector<std::shared_ptr<CVertexBuffer>>& GetVertexBufferList() const;
+
 		void AddIndexBuffer(const std::shared_ptr<CIndexBuffer>& Buffer);
 
 		void AddPrimitive(const std::shared_ptr<CPrimitive>& Primitive);

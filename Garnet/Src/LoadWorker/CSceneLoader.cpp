@@ -600,6 +600,9 @@ namespace resource
 				std::vector<std::string> defaultmaterialframeList;
 				GetArrayString("defaultmaterialframes", defaultmaterialframeList, objectJSON);
 
+				int InstanceCount = 1;
+				GetInt("instancecount", InstanceCount, objectJSON);
+
 				if (!filename.empty())
 				{
 					std::vector<std::shared_ptr<graphics::CMaterialFrame>> BaseMaterialFrameList;
@@ -620,7 +623,8 @@ namespace resource
 					}
 					
 					// ‰¼ŽÀ‘•
-					pLoadWorker->AddLoadResource(std::make_shared<resource::C3DObjectLoader>(filename, Object, BaseMaterialFrameList, defaultmaterialframeList, AnimationInfo.RigType, AnimationInfo.HumanoidBoneList));
+					pLoadWorker->AddLoadResource(std::make_shared<resource::C3DObjectLoader>(filename, Object, BaseMaterialFrameList, defaultmaterialframeList, 
+						AnimationInfo.RigType, AnimationInfo.HumanoidBoneList, InstanceCount));
 				}
 			}
 

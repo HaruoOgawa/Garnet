@@ -7,6 +7,7 @@
 #include "../LoadWorker/CFile.h"
 #include "../Timeline/CTimelineController.h"
 #include "../Interface/IPhysicsEngine.h"
+#include "../Graphics/CVertexBuffer.h"
 
 namespace scene
 {
@@ -330,6 +331,17 @@ namespace scene
 					ObjectJSON["defaultmaterialframes"].push_back(defaultmaterialframe);
 				}
 			}
+
+			int InstanceCount = 1;
+			for (const auto& Mesh : Object->GetMeshList())
+			{
+				for (const auto& VertexBuffer : Mesh->GetVertexBufferList())
+				{
+					InstanceCount = std::max(InstanceCount, VertexBuffer->GetInstanceCount());
+				}
+			}
+
+			if(InstanceCount > 1) ObjectJSON["instancecount"] = InstanceCount;
 
 			for (const auto& renderpass : Object->GetPassNameList())
 			{
