@@ -395,21 +395,13 @@ namespace scene
 		//
 		for (const auto& Object : m_ObjectList)
 		{
-			if (!Object->Update(pGraphicsAPI, pPhysicsEngine, DrawInfo->GetDeltaSecondsTime())) return false;
-
-			for (const auto& Node : Object->GetNodeList())
-			{
-				for (const auto& Component : Node->GetComponentList())
-				{
-					if (!Component->Update(pGraphicsAPI, pPhysicsEngine, pLoadWorker, Camera, Projection, DrawInfo, InputState)) return false;
-				}
-			}
+			if (!Object->Update(pGraphicsAPI, pPhysicsEngine, DrawInfo->GetDeltaSecondsTime(), pLoadWorker, Camera, Projection, DrawInfo, InputState)) return false;
 		}
 
 #ifdef _DEBUG
 		if (m_DebugSphere)
 		{
-			if (!m_DebugSphere->Update(pGraphicsAPI, pPhysicsEngine, DrawInfo->GetDeltaSecondsTime())) return false;
+			if (!m_DebugSphere->Update(pGraphicsAPI, pPhysicsEngine, DrawInfo->GetDeltaSecondsTime(), pLoadWorker, Camera, Projection, DrawInfo, InputState)) return false;
 		}
 #endif
 

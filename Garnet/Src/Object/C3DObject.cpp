@@ -377,25 +377,11 @@ namespace object
 		return result;
 	}
 
-	bool C3DObject::Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, float DeltaSecondsTime)
+	bool C3DObject::Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, float DeltaSecondsTime, resource::CLoadWorker* pLoadWorker,
+		const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
+		const std::shared_ptr<graphics::CDrawInfo>& DrawInfo, const std::shared_ptr<input::CInputState>& InputState)
 	{
 		if (!m_IsCreated) return true;
-
-		/*
-		// マテリアルの参照カウントをリセット
-		for (auto& Material : m_MaterialList)
-		{
-			//
-			if (!Material) continue;
-			Material->ResetDynamicOffset();
-
-			//
-			auto DepthMaterial = Material->GetDepthMaterial();
-
-			if (!DepthMaterial) continue;
-			DepthMaterial->ResetDynamicOffset();
-		}
-		*/
 
 #ifdef USE_ANIMATION
 		if (!m_AnimationController->Update(DeltaSecondsTime)) return false;
@@ -418,6 +404,14 @@ namespace object
 #endif
 		// 物理ジョイントの位置をボーン位置に合わせる
 		//AlignPhysicsJoint();
+
+		for (const auto& Node : GetNodeList())
+		{
+			for (const auto& Component : Node->GetComponentList())
+			{
+				if (!Component->Update(pGraphicsAPI, pPhysicsEngine, pLoadWorker, Camera, Projection, DrawInfo, InputState)) return false;
+			}
+		}
 
 		return true;
 	}

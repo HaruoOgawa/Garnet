@@ -62,7 +62,7 @@ namespace resource
 		// ローディングバー
 		if (m_LoadingBar)
 		{
-			if (!m_LoadingBar->Update(pGraphicsAPI, nullptr, 0.0f)) return false;
+			if (!m_LoadingBar->Update(pGraphicsAPI, nullptr, 0.0f, this, nullptr, nullptr, nullptr, nullptr)) return false;
 		}
 
 		// ローディング
