@@ -287,20 +287,41 @@ namespace scene
 #endif // USE_ANIMATION
 
 
-			// コンポーネントを追加 Component
+			// コンポーネントの初期化
+			for (const auto& Component : Object->GetComponentList())
+			{
+				// ValueRegistryの登録
+				const auto& RegistryName = Component->GetRegistryName();
+				if (!RegistryName.empty())
+				{
+					const auto& ValueRegistry = m_ValueRegistryList.find(RegistryName);
+					if (ValueRegistry != m_ValueRegistryList.end())
+					{
+						Component->SetValueRegistry(ValueRegistry->second);
+					}
+				}
+
+				// OnLoadedを実行
+				if (!Component->OnLoaded(pGraphicsAPI, shared_from_this(), Object, nullptr))
+				{
+					Console::Log("[Error] Faield to load Component.\n");
+					return false;
+				}
+			}
+
 			for (size_t NodeIndex = 0; NodeIndex < Object->GetNodeList().size(); NodeIndex++)
 			{
 				for (const auto& Component : Object->GetNodeList()[NodeIndex]->GetComponentList())
 				{
 					// ValueRegistryの登録
+					const auto& RegistryName = Component->GetRegistryName();
+					if (!RegistryName.empty())
 					{
-						const auto& RegistryName = Component->GetRegistryName();
-						if (RegistryName.empty()) continue;
-
 						const auto& ValueRegistry = m_ValueRegistryList.find(RegistryName);
-						if (ValueRegistry == m_ValueRegistryList.end()) continue;
-
-						Component->SetValueRegistry(ValueRegistry->second);
+						if (ValueRegistry != m_ValueRegistryList.end())
+						{
+							Component->SetValueRegistry(ValueRegistry->second);
+						}
 					}
 
 					// OnLoadedを実行

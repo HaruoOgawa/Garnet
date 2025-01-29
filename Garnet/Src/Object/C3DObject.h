@@ -34,6 +34,9 @@ namespace object
 		std::vector<std::string> m_DefaultMaterialFrameList;
 
 		std::vector<std::string> m_PassNameList;
+
+		// コンポーネント
+		std::vector<std::shared_ptr<scriptable::CComponent>> m_ComponentList;
 		
 		std::string						  m_ObjectName;
 		std::shared_ptr<math::CTransform> m_ObjectTransform;
@@ -93,6 +96,10 @@ namespace object
 
 		const std::vector<std::string>& GetPassNameList() const;
 		void AddPassName(const std::string& Name);
+
+		// コンポーネント
+		void AddComponent(const std::shared_ptr<scriptable::CComponent>& Component);
+		const std::vector<std::shared_ptr<scriptable::CComponent>>& GetComponentList() const;
 
 		bool HasTLTrackContent() const;
 		void AddTLNode(const std::shared_ptr<CNode>& Node);

@@ -411,6 +411,16 @@ namespace scene
 				if (!WriteJoints(ObjectJSON, Object.get())) return false;
 			}
 
+			// コンポーネント
+			for (const auto& Component : Object->GetComponentList())
+			{
+				ordered_json componentJSON;
+				componentJSON["type"] = Component->GetComponentName();
+				if (!Component->GetRegistryName().empty()) componentJSON["valueregistry"] = Component->GetRegistryName();
+
+				ObjectJSON["components"].push_back(componentJSON);
+			}
+
 			// objectsに追加
 			SceneJSON["objects"].push_back(ObjectJSON);
 		}

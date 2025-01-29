@@ -592,6 +592,27 @@ namespace resource
 				m_Target->AddAnimationInfo(Object, AnimationInfo);
 			}
 
+			// コンポーネント
+			const auto components = objectJSON->find("components");
+			if (components != objectJSON->end() && components->is_array())
+			{
+				for (json::iterator componentJSON = components->begin(); componentJSON != components->end(); componentJSON++)
+				{
+					std::string type = std::string();
+					GetString("type", type, componentJSON);
+
+					std::string valueregistry = std::string();
+					GetString("valueregistry", valueregistry, componentJSON);
+
+					// コンポーネントを作成
+					auto Component = pApp->CreateComponent(type, valueregistry);
+					if (Component)
+					{
+						Object->AddComponent(Component);
+					}
+				}
+			}
+
 			// ファイルロード開始
 			{
 				std::string filename = "";
