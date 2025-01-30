@@ -149,7 +149,7 @@ namespace animation
 
 	bool CAnimationSampler::IsEnd(float CurrentTime)
 	{
-		return (CurrentTime > m_EndTime);
+		return (CurrentTime >= m_EndTime);
 	}
 
 	std::vector<float> CAnimationSampler::CopyFromNumComponent(int NumComponent, const std::vector<float>& Src, int Offset)
