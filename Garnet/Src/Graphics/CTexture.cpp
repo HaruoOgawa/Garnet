@@ -222,6 +222,19 @@ namespace graphics
 		return true;
 	}
 
+	bool CTexture::Create(const std::vector<unsigned char>& Data, int Width, int Height, int NumOfChannels)
+	{
+		m_Width = Width;
+		m_Height = Height;
+		m_NumOfChannels = NumOfChannels;
+
+		int pixelSize = Width * Height;
+
+		if (!Create(Data, pixelSize)) return false;
+
+		return true;
+	}
+
 	bool CTexture::Create(const std::vector<unsigned char>& pixelData, int pixelSize)
 	{
 		return true;
