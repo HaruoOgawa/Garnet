@@ -222,13 +222,14 @@ namespace graphics
 		return true;
 	}
 
-	bool CTexture::Create(const std::vector<unsigned char>& Data, int Width, int Height, int NumOfChannels)
+	bool CTexture::Create(const std::vector<unsigned char>& Data, int Width, int Height, int NumOfChannels, api::ERenderPassFormat RenderPassFormat)
 	{
 		m_Width = Width;
 		m_Height = Height;
 		m_NumOfChannels = NumOfChannels;
+		m_RenderPassFormat = RenderPassFormat;
 
-		int pixelSize = Width * Height;
+		int pixelSize = static_cast<int>(Data.size());
 
 		if (!Create(Data, pixelSize)) return false;
 
