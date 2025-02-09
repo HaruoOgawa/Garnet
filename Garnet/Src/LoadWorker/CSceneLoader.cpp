@@ -243,16 +243,45 @@ namespace resource
 						else if (type == "int")
 						{
 							ValueType = graphics::EUniformValueType::VALUE_TYPE_INT;
+							
 							ByteSize = sizeof(int);
+						}
+						else if (type == "string")
+						{
+							ValueType = graphics::EUniformValueType::VALUE_TYPE_STRING;
+
+							// ByteSizeは後で設定
 						}
 					}
 
-					std::vector<float> initValue;
-					GetArrayFloat32("initValue", initValue, valueJSON);
-
 					std::vector<unsigned char> Buffer;
-					Buffer.resize(ByteSize);
-					std::memcpy(&Buffer[0], &initValue[0], ByteSize);
+
+					//
+					if (type == "int")
+					{
+						std::vector<int> initValue;
+						GetArrayInt32("initValue", initValue, valueJSON);
+
+						Buffer.resize(ByteSize);
+						std::memcpy(&Buffer[0], &initValue[0], ByteSize);
+					}
+					else if (type == "string")
+					{
+						std::string initValue = std::string();
+						GetString("initValue", initValue, valueJSON);
+						ByteSize = static_cast<int>(initValue.size());
+
+						Buffer.resize(ByteSize);
+						std::memcpy(&Buffer[0], &initValue[0], ByteSize);
+					}
+					else
+					{
+						std::vector<float> initValue;
+						GetArrayFloat32("initValue", initValue, valueJSON);
+
+						Buffer.resize(ByteSize);
+						std::memcpy(&Buffer[0], &initValue[0], ByteSize);
+					}
 
 					//
 					ValueRegistry->SetValue(name, ValueType, &Buffer[0], ByteSize);
@@ -563,6 +592,27 @@ namespace resource
 				m_Target->AddAnimationInfo(Object, AnimationInfo);
 			}
 
+			// コンポーネント
+			const auto components = objectJSON->find("components");
+			if (components != objectJSON->end() && components->is_array())
+			{
+				for (json::iterator componentJSON = components->begin(); componentJSON != components->end(); componentJSON++)
+				{
+					std::string type = std::string();
+					GetString("type", type, componentJSON);
+
+					std::string valueregistry = std::string();
+					GetString("valueregistry", valueregistry, componentJSON);
+
+					// コンポーネントを作成
+					auto Component = pApp->CreateComponent(type, valueregistry);
+					if (Component)
+					{
+						Object->AddComponent(Component);
+					}
+				}
+			}
+
 			// ファイルロード開始
 			{
 				std::string filename = "";
@@ -570,6 +620,9 @@ namespace resource
 
 				std::vector<std::string> defaultmaterialframeList;
 				GetArrayString("defaultmaterialframes", defaultmaterialframeList, objectJSON);
+
+				int InstanceCount = 1;
+				GetInt("instancecount", InstanceCount, objectJSON);
 
 				if (!filename.empty())
 				{
@@ -591,7 +644,8 @@ namespace resource
 					}
 					
 					// 仮実装
-					pLoadWorker->AddLoadResource(std::make_shared<resource::C3DObjectLoader>(filename, Object, BaseMaterialFrameList, defaultmaterialframeList, AnimationInfo.RigType, AnimationInfo.HumanoidBoneList));
+					pLoadWorker->AddLoadResource(std::make_shared<resource::C3DObjectLoader>(filename, Object, BaseMaterialFrameList, defaultmaterialframeList, 
+						AnimationInfo.RigType, AnimationInfo.HumanoidBoneList, InstanceCount));
 				}
 			}
 

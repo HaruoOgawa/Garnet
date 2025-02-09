@@ -72,7 +72,7 @@ namespace graphics
 			m_IsLoaded = true;
 		}
 
-		if (!m_RenderBoard->Update(pGraphicsAPI, pPhysicsEngine, DrawInfo->GetDeltaSecondsTime())) return false;
+		if (!m_RenderBoard->Update(pGraphicsAPI, pPhysicsEngine, DrawInfo->GetDeltaSecondsTime(), pLoadWorker, Camera, Projection, DrawInfo, InputState)) return false;
 
 		return true;
 	}

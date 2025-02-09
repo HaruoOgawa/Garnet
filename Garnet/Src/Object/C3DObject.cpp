@@ -47,6 +47,11 @@ namespace object
 		}
 #endif
 
+		for (const auto& Component : m_ComponentList)
+		{
+			Component->Reset();
+		}
+
 		for (auto& Node : m_NodeList)
 		{
 			for (const auto& Component : Node->GetComponentList())
@@ -93,6 +98,17 @@ namespace object
 	void C3DObject::AddPassName(const std::string& Name)
 	{
 		m_PassNameList.push_back(Name);
+	}
+
+	// コンポーネント
+	void C3DObject::AddComponent(const std::shared_ptr<scriptable::CComponent>& Component)
+	{
+		m_ComponentList.push_back(Component);
+	}
+
+	const std::vector<std::shared_ptr<scriptable::CComponent>>& C3DObject::GetComponentList() const
+	{
+		return m_ComponentList;
 	}
 
 	bool C3DObject::HasTLTrackContent() const
@@ -377,25 +393,11 @@ namespace object
 		return result;
 	}
 
-	bool C3DObject::Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, float DeltaSecondsTime)
+	bool C3DObject::Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, float DeltaSecondsTime, resource::CLoadWorker* pLoadWorker,
+		const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
+		const std::shared_ptr<graphics::CDrawInfo>& DrawInfo, const std::shared_ptr<input::CInputState>& InputState)
 	{
 		if (!m_IsCreated) return true;
-
-		/*
-		// マテリアルの参照カウントをリセット
-		for (auto& Material : m_MaterialList)
-		{
-			//
-			if (!Material) continue;
-			Material->ResetDynamicOffset();
-
-			//
-			auto DepthMaterial = Material->GetDepthMaterial();
-
-			if (!DepthMaterial) continue;
-			DepthMaterial->ResetDynamicOffset();
-		}
-		*/
 
 #ifdef USE_ANIMATION
 		if (!m_AnimationController->Update(DeltaSecondsTime)) return false;
@@ -418,6 +420,20 @@ namespace object
 #endif
 		// 物理ジョイントの位置をボーン位置に合わせる
 		//AlignPhysicsJoint();
+
+		// コンポーネント
+		for (const auto& Component : m_ComponentList)
+		{
+			if (!Component->Update(pGraphicsAPI, pPhysicsEngine, pLoadWorker, Camera, Projection, DrawInfo, InputState)) return false;
+		}
+		
+		for (const auto& Node : GetNodeList())
+		{
+			for (const auto& Component : Node->GetComponentList())
+			{
+				if (!Component->Update(pGraphicsAPI, pPhysicsEngine, pLoadWorker, Camera, Projection, DrawInfo, InputState)) return false;
+			}
+		}
 
 		return true;
 	}
@@ -504,6 +520,11 @@ namespace object
 	bool C3DObject::Draw(const std::shared_ptr<CNode>& Node, api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<camera::CCamera>& Camera,
 		const std::shared_ptr<projection::CProjection>& Projection, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo)
 	{
+		for (const auto& Component : m_ComponentList)
+		{
+			if (!Component->Draw(pGraphicsAPI, Camera, Projection, DrawInfo, shared_from_this(), Node)) return false;
+		}
+
 		for (const auto& Component : Node->GetComponentList())
 		{
 			if (!Component->Draw(pGraphicsAPI, Camera, Projection, DrawInfo, shared_from_this(), Node)) return false;

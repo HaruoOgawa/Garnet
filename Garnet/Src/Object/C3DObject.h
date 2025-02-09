@@ -34,6 +34,9 @@ namespace object
 		std::vector<std::string> m_DefaultMaterialFrameList;
 
 		std::vector<std::string> m_PassNameList;
+
+		// コンポーネント
+		std::vector<std::shared_ptr<scriptable::CComponent>> m_ComponentList;
 		
 		std::string						  m_ObjectName;
 		std::shared_ptr<math::CTransform> m_ObjectTransform;
@@ -94,6 +97,10 @@ namespace object
 		const std::vector<std::string>& GetPassNameList() const;
 		void AddPassName(const std::string& Name);
 
+		// コンポーネント
+		void AddComponent(const std::shared_ptr<scriptable::CComponent>& Component);
+		const std::vector<std::shared_ptr<scriptable::CComponent>>& GetComponentList() const;
+
 		bool HasTLTrackContent() const;
 		void AddTLNode(const std::shared_ptr<CNode>& Node);
 		const std::set<std::shared_ptr<CNode>>& GetTLNodeList() const;
@@ -113,7 +120,9 @@ namespace object
 		
 		bool		 Create(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, const std::shared_ptr<graphics::CMaterialFrame>& DepthMF);
 		
-		virtual bool Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, float DeltaSecondsTime);
+		virtual bool Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, float DeltaSecondsTime, resource::CLoadWorker* pLoadWorker, 
+			const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
+			const std::shared_ptr<graphics::CDrawInfo>& DrawInfo, const std::shared_ptr<input::CInputState>& InputState);
 		virtual bool LateUpdate(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, float DeltaSecondsTime);
 		virtual bool FixedUpdate(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, float DeltaSecondsTime);
 		

@@ -6,8 +6,7 @@
 namespace animation
 {
 	CAnimationController::CAnimationController():
-		m_MaxBlendingTime(0.5f),
-		m_CurrBlendingTime(0.0f),
+		m_CurrentBlendingTime(0.0f),
 		m_SavedPrevTrs(false),
 		m_Skeleton(nullptr),
 		m_CurrentLayout(SAnimationLayout()),
@@ -23,7 +22,7 @@ namespace animation
 
 	void CAnimationController::Reset()
 	{
-		m_CurrBlendingTime = 0.0f;
+		m_CurrentBlendingTime = 0.0f;
 		m_SavedPrevTrs = false;
 		m_CurrentLayout = {};
 		m_CurrentMotionIndex = -1;
@@ -401,17 +400,21 @@ namespace animation
 
 	bool CAnimationController::BlendMotion(float DeltaSecondsTime)
 	{
-		if (m_CurrBlendingTime < m_MaxBlendingTime)
+		if (!m_CurrentLayout.Clip) return true;
+
+		const float MaxBlendingTime = m_CurrentLayout.Clip->GetMaxBlendTime();
+		
+		if (m_CurrentBlendingTime < MaxBlendingTime)
 		{
 			// ŽžŠÔXV
-			m_CurrBlendingTime += DeltaSecondsTime;
+			m_CurrentBlendingTime += DeltaSecondsTime;
 
-			m_CurrBlendingTime = fmaxf(m_CurrBlendingTime, 0.0f);
-			m_CurrBlendingTime = fminf(m_CurrBlendingTime, m_MaxBlendingTime);
+			m_CurrentBlendingTime = fmaxf(m_CurrentBlendingTime, 0.0f);
+			m_CurrentBlendingTime = fminf(m_CurrentBlendingTime, MaxBlendingTime);
 
 			// Œ»Ý‚ÌŽp¨‚Æ‘JˆÚ‘O‚ÌŽp¨‚ð•âŠ®‚·‚é
 			std::vector<std::shared_ptr<object::CNode>> ComputedNodeList;
-			float L = 1.0f - (m_MaxBlendingTime - m_CurrBlendingTime) / m_MaxBlendingTime;
+			float L = 1.0f - (MaxBlendingTime - m_CurrentBlendingTime) / MaxBlendingTime;
 
 			if(m_Skeleton)
 			{

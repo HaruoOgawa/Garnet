@@ -1,7 +1,7 @@
 #include "C3DObjectLoader.h"
 #include "CResourceManager.h"
 #include "../Message/Console.h"
-
+#include "../Graphics/CVertexBuffer.h"
 #include "../Format/CPathFormatter.h"
 #include "../LoadWorker/CLoadWorker.h"
 #include "../GLTF/CGLTFImporter.h"
@@ -22,13 +22,14 @@ namespace resource
 {
 	C3DObjectLoader::C3DObjectLoader(const std::string& FileName, const std::shared_ptr<object::C3DObject>& TargetObject,
 		const std::vector<std::shared_ptr<graphics::CMaterialFrame>>& BaseMaterialFrameList, const std::vector<std::string>& defaultmaterialframes,
-		animation::ERigType RigType, const std::map<animation::EHumanoidBones, std::string>& HumanoidBoneList) :
+		animation::ERigType RigType, const std::map<animation::EHumanoidBones, std::string>& HumanoidBoneList, int InstanceCount) :
 		CResource(FileName, 3),
 		m_LoadState(E3DObjectLoadState::None),
 		m_TargetObject(TargetObject),
 		m_TargetRigType(RigType),
 		m_TargetHumanoidBoneList(HumanoidBoneList),
-		m_BaseMaterialFrameList(BaseMaterialFrameList)
+		m_BaseMaterialFrameList(BaseMaterialFrameList),
+		m_InstanceCount(InstanceCount)
 	{
 		m_TargetObject->SetFileName(FileName);
 
@@ -82,6 +83,15 @@ namespace resource
 
 		// リソースマネージャーに登録
 		pLoadWorker->GetResourceManager()->AddOnMemoryResource(shared_from_this(), nullptr);
+
+		// インスタンス描画数を設定
+		for (const auto& Mesh : m_TargetObject->GetMeshList())
+		{
+			for (const auto& VertexBuffer : Mesh->GetVertexBufferList())
+			{
+				VertexBuffer->SetInstanceDrawCount(m_InstanceCount);
+			}
+		}
 
 		// Object生成
 		if (!m_TargetObject->Create(pGraphicsAPI, pPhysicsEngine, nullptr)) return false;

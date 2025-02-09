@@ -48,6 +48,11 @@ namespace graphics
 		m_VertexBufferList.push_back(Buffer);
 	}
 
+	const std::vector<std::shared_ptr<CVertexBuffer>>& CMesh::GetVertexBufferList() const
+	{
+		return m_VertexBufferList;
+	}
+
 	void CMesh::AddIndexBuffer(const std::shared_ptr<CIndexBuffer>& Buffer)
 	{
 		m_IndexBufferList.push_back(Buffer);

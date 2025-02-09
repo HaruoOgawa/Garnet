@@ -108,7 +108,7 @@ namespace scene
 
 		// ロードワーカーに渡してロード開始
 		pLoadWorker->AddLoadResource(std::make_shared<resource::C3DObjectLoader>(FileName, Object, BaseMaterialFrameList, defaultmaterialframeList, 
-			RigType, std::map<animation::EHumanoidBones, std::string>()));
+			RigType, std::map<animation::EHumanoidBones, std::string>(), 1));
 	}
 
 	std::vector<std::shared_ptr<object::C3DObject>> CSceneController::GetObjectList() const
@@ -287,27 +287,48 @@ namespace scene
 #endif // USE_ANIMATION
 
 
-			// コンポーネントを追加 Component
+			// コンポーネントの初期化
+			for (const auto& Component : Object->GetComponentList())
+			{
+				// ValueRegistryの登録
+				const auto& RegistryName = Component->GetRegistryName();
+				if (!RegistryName.empty())
+				{
+					const auto& ValueRegistry = m_ValueRegistryList.find(RegistryName);
+					if (ValueRegistry != m_ValueRegistryList.end())
+					{
+						Component->SetValueRegistry(ValueRegistry->second);
+					}
+				}
+
+				// OnLoadedを実行
+				if (!Component->OnLoaded(pGraphicsAPI, shared_from_this(), Object, nullptr))
+				{
+					Console::Log("[Error] Faield to load Component.\n");
+					return false;
+				}
+			}
+
 			for (size_t NodeIndex = 0; NodeIndex < Object->GetNodeList().size(); NodeIndex++)
 			{
 				for (const auto& Component : Object->GetNodeList()[NodeIndex]->GetComponentList())
 				{
+					// ValueRegistryの登録
+					const auto& RegistryName = Component->GetRegistryName();
+					if (!RegistryName.empty())
+					{
+						const auto& ValueRegistry = m_ValueRegistryList.find(RegistryName);
+						if (ValueRegistry != m_ValueRegistryList.end())
+						{
+							Component->SetValueRegistry(ValueRegistry->second);
+						}
+					}
+
 					// OnLoadedを実行
 					if (!Component->OnLoaded(pGraphicsAPI, shared_from_this(), Object, Object->GetNodeList()[NodeIndex]))
 					{
 						Console::Log("[Error] Faield to load Component.\n");
 						return false;
-					}
-
-					// ValueRegistryの登録
-					{
-						const auto& RegistryName = Component->GetRegistryName();
-						if (RegistryName.empty()) continue;
-
-						const auto& ValueRegistry = m_ValueRegistryList.find(RegistryName);
-						if (ValueRegistry == m_ValueRegistryList.end()) continue;
-
-						Component->SetValueRegistry(ValueRegistry->second);
 					}
 				}
 			}
@@ -395,21 +416,13 @@ namespace scene
 		//
 		for (const auto& Object : m_ObjectList)
 		{
-			if (!Object->Update(pGraphicsAPI, pPhysicsEngine, DrawInfo->GetDeltaSecondsTime())) return false;
-
-			for (const auto& Node : Object->GetNodeList())
-			{
-				for (const auto& Component : Node->GetComponentList())
-				{
-					if (!Component->Update(pGraphicsAPI, pPhysicsEngine, pLoadWorker, Camera, Projection, DrawInfo, InputState)) return false;
-				}
-			}
+			if (!Object->Update(pGraphicsAPI, pPhysicsEngine, DrawInfo->GetDeltaSecondsTime(), pLoadWorker, Camera, Projection, DrawInfo, InputState)) return false;
 		}
 
 #ifdef _DEBUG
 		if (m_DebugSphere)
 		{
-			if (!m_DebugSphere->Update(pGraphicsAPI, pPhysicsEngine, DrawInfo->GetDeltaSecondsTime())) return false;
+			if (!m_DebugSphere->Update(pGraphicsAPI, pPhysicsEngine, DrawInfo->GetDeltaSecondsTime(), pLoadWorker, Camera, Projection, DrawInfo, InputState)) return false;
 		}
 #endif
 

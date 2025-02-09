@@ -7,6 +7,7 @@
 #include "../LoadWorker/CFile.h"
 #include "../Timeline/CTimelineController.h"
 #include "../Interface/IPhysicsEngine.h"
+#include "../Graphics/CVertexBuffer.h"
 
 namespace scene
 {
@@ -131,6 +132,9 @@ namespace scene
 				case graphics::EUniformValueType::VALUE_TYPE_INT:
 					type = "int";
 					break;
+				case graphics::EUniformValueType::VALUE_TYPE_STRING:
+					type = "string";
+					break;
 				case graphics::EUniformValueType::VALUE_TYPE_FLOAT_ARRAY:
 					break;
 				case graphics::EUniformValueType::VALUE_TYPE_MAT4_ARRAY:
@@ -143,15 +147,37 @@ namespace scene
 
 				ValueJSON["type"] = type;
 
-				// Value
-				std::vector<float> DstValue(Value.second.ByteSize / 4);
-				std::memcpy(&DstValue[0], &Value.second.Buffer[0], Value.second.ByteSize);
-
 				ordered_json valueJSON;
 
-				for (auto v : DstValue)
+				// Value
+				if (type == "int")
 				{
-					ValueJSON["initValue"].push_back(v);
+					std::vector<int> DstValue(Value.second.ByteSize / 4);
+					std::memcpy(&DstValue[0], &Value.second.Buffer[0], Value.second.ByteSize);
+
+					for (auto v : DstValue)
+					{
+						ValueJSON["initValue"].push_back(v);
+					}
+				}
+				else if (type == "string")
+				{
+					std::string DstValue = std::string();
+					DstValue.resize(Value.second.ByteSize);
+
+					std::memcpy(&DstValue[0], &Value.second.Buffer[0], Value.second.ByteSize);
+
+					ValueJSON["initValue"] = DstValue;
+				}
+				else
+				{
+					std::vector<float> DstValue(Value.second.ByteSize / 4);
+					std::memcpy(&DstValue[0], &Value.second.Buffer[0], Value.second.ByteSize);
+
+					for (auto v : DstValue)
+					{
+						ValueJSON["initValue"].push_back(v);
+					}
 				}
 
 				//
@@ -306,6 +332,17 @@ namespace scene
 				}
 			}
 
+			int InstanceCount = 1;
+			for (const auto& Mesh : Object->GetMeshList())
+			{
+				for (const auto& VertexBuffer : Mesh->GetVertexBufferList())
+				{
+					InstanceCount = std::max(InstanceCount, VertexBuffer->GetInstanceCount());
+				}
+			}
+
+			if(InstanceCount > 1) ObjectJSON["instancecount"] = InstanceCount;
+
 			for (const auto& renderpass : Object->GetPassNameList())
 			{
 				ObjectJSON["renderpasslist"].push_back(renderpass);
@@ -372,6 +409,16 @@ namespace scene
 			// joints
 			{
 				if (!WriteJoints(ObjectJSON, Object.get())) return false;
+			}
+
+			// コンポーネント
+			for (const auto& Component : Object->GetComponentList())
+			{
+				ordered_json componentJSON;
+				componentJSON["type"] = Component->GetComponentName();
+				if (!Component->GetRegistryName().empty()) componentJSON["valueregistry"] = Component->GetRegistryName();
+
+				ObjectJSON["components"].push_back(componentJSON);
 			}
 
 			// objectsに追加
