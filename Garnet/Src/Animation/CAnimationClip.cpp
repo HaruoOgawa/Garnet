@@ -9,6 +9,7 @@ namespace animation
 		m_CurrentTime(0.0f),
 		m_ClipStartTime(0.0f),
 		m_ClipEndTime(0.0f),
+		m_MaxBlendTime(0.5f),
 		m_IsLoop(false),
 		m_UseIK(false),
 		m_DefaultSkeleton(nullptr)
@@ -215,6 +216,16 @@ namespace animation
 		}
 
 		return 0.0f;
+	}
+
+	void CAnimationClip::SetMaxBlendTime(float Time)
+	{
+		m_MaxBlendTime = Time;
+	}
+
+	float CAnimationClip::GetMaxBlendTime() const
+	{
+		return m_MaxBlendTime;
 	}
 
 	bool CAnimationClip::IsEnd()

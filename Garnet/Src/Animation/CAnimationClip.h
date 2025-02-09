@@ -21,6 +21,8 @@ namespace animation
 		float m_ClipStartTime;
 		float m_ClipEndTime;
 
+		float m_MaxBlendTime;
+
 		bool m_IsLoop;
 
 		bool m_UseIK;
@@ -65,6 +67,9 @@ namespace animation
 		virtual void SetCurrentTime(float Time);
 		virtual float GetCurrentTime() const;
 		virtual float GetEndTime() const;
+
+		virtual void SetMaxBlendTime(float Time);
+		virtual float GetMaxBlendTime() const;
 
 		virtual bool IsEnd();
 	};

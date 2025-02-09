@@ -15,8 +15,7 @@ namespace animation
 {
 	class CAnimationController
 	{
-		const float m_MaxBlendingTime;
-		float m_CurrBlendingTime;
+		float m_CurrentBlendingTime;
 		bool m_SavedPrevTrs;
 
 		std::vector<std::shared_ptr<animation::CAnimationClip>> m_ClipList;
