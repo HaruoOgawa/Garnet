@@ -207,6 +207,16 @@ namespace animation
 		return m_CurrentTime;
 	}
 
+	float CAnimationClip::GetEndTime() const
+	{
+		if (m_SamplerList.size() > 0)
+		{
+			return m_SamplerList[0]->GetEndTime();
+		}
+
+		return 0.0f;
+	}
+
 	bool CAnimationClip::IsEnd()
 	{
 		if (m_SamplerList.size() > 0)

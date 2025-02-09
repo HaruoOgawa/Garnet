@@ -64,6 +64,7 @@ namespace animation
 
 		virtual void SetCurrentTime(float Time);
 		virtual float GetCurrentTime() const;
+		virtual float GetEndTime() const;
 
 		virtual bool IsEnd();
 	};

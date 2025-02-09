@@ -99,7 +99,8 @@ namespace api
 			
 			case api::ERenderPassFormat::COLOR_FLOAT_RENDERPASS:
 			{
-				internalformat = GL_RGBA16F;
+				// GL_RGBA16FÇ©ÇÁGL_RGBA32FÇ…ïœçXÇµÇΩ
+				internalformat = GL_RGBA32F;
 				format = GL_RGBA;
 				type = GL_FLOAT;
 				break;

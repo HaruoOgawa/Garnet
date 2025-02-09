@@ -40,6 +40,7 @@
 #define GL_DYNAMIC_DRAW                   0x88E8
 #define GL_CLAMP_TO_EDGE                  0x812F
 #define GL_RGBA16F                        0x881A
+#define GL_RGBA32F                        0x8814
 #define GL_DEPTH24_STENCIL8               0x88F0
 #define GL_DEPTH_STENCIL                  0x84F9
 #define GL_TEXTURE0                       0x84C0
