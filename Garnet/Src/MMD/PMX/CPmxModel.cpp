@@ -1336,7 +1336,7 @@ namespace mmd
 			}
 
 			// 関連ボーンIndex - 関連なしの場合は-1
-			int RelationBoneIndex = GetMultiTypeValueAsInterger(Analyser, MetaData.BoneIndexSize);
+			int RelationBoneIndex = GetMultiTypeValueAsInterger(Analyser, MetaData.BoneIndexSize, true);
 
 			// グループ
 			// ここのバイナリに入っているのは左シフト数
@@ -1588,7 +1588,7 @@ namespace mmd
 		return true;
 	}
 
-	int CPmxModel::GetMultiTypeValueAsInterger(binary::CBinaryReader& Analyser, int ByteSize)
+	int CPmxModel::GetMultiTypeValueAsInterger(binary::CBinaryReader& Analyser, int ByteSize, bool UseSign)
 	{
 		int Result = -1;
 
@@ -1601,10 +1601,20 @@ namespace mmd
 		}
 		else if (ByteSize == 2)
 		{
-			unsigned short Index = 0;
-			if (!Analyser.GetUShort(Index)) return -1;
+			if (UseSign)
+			{
+				short Index = 0;
+				if (!Analyser.GetShort(Index)) return -1;
 
-			Result = static_cast<int>(Index);
+				Result = static_cast<int>(Index);
+			}
+			else
+			{
+				unsigned short Index = 0;
+				if (!Analyser.GetUShort(Index)) return -1;
+
+				Result = static_cast<int>(Index);
+			}
 		}
 		else if (ByteSize == 4)
 		{

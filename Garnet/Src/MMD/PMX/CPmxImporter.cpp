@@ -784,9 +784,10 @@ namespace mmd
 			}
 
 			// 物理オブジェクトを割り当てる
-			if (PmxRigidbody.RelationBoneIndex < 0 || PmxRigidbody.RelationBoneIndex >= BoneList.size()) continue;
-
-			std::get<1>(BoneList[PmxRigidbody.RelationBoneIndex])->GetBoneNode()->AddPhysicsObject(PhysicsObject);
+			if (PmxRigidbody.RelationBoneIndex >= 0 && PmxRigidbody.RelationBoneIndex < BoneList.size())
+			{
+				std::get<1>(BoneList[PmxRigidbody.RelationBoneIndex])->GetBoneNode()->AddPhysicsObject(PhysicsObject);
+			}
 
 			//
 			PhysicsObjectList.push_back(PhysicsObject);

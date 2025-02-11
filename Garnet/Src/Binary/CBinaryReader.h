@@ -51,6 +51,9 @@ namespace binary
 
 		bool GetUShort(unsigned short& Dst);
 		unsigned short GetUShort();
+		
+		bool GetShort(short& Dst);
+		short GetShort();
 
 		bool GetBinary(size_t DstByteOffset, std::vector<unsigned char>& Dst, size_t ByteSize);
 	};
