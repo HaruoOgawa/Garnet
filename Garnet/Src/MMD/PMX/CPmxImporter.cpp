@@ -280,7 +280,7 @@ namespace mmd
 				{
 					int TextureIndex = PmxMaterial->GetMainTexIndex();
 
-					if (TextureIndex != -1)
+					if (TextureIndex >= 0 && TextureIndex < model.GetPmxTextureList().size())
 					{
 						material->ReplacePreloadUniformValue("UseMainTexture", &glm::ivec1(1)[0], sizeof(int), 2);
 						material->ReplaceTextureIndex("MainTexture", TextureIndex);
