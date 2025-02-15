@@ -54,7 +54,7 @@ namespace api
 		}
 		
 		m_DepthTexture = std::make_shared<CWebGPUTexture>(m_pGraphicsAPI, false, SamplerParam);
-		if (!m_DepthTexture->CreateFrameTexture(Width, Height, api::ERenderPassFormat::DEPTH_FLOAT_RENDERPASS)) return false;
+		if (!m_DepthTexture->CreateFrameTexture(Width, Height, api::ERenderPassFormat::DEPTH_RENDERPASS)) return false;
 
 		return true;
 	}
