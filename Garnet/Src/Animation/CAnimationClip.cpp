@@ -152,13 +152,18 @@ namespace animation
 			if (it != BoneTable.end() && it->second) return it->second->GetBoneNode();
 		}
 
-		// 非ヒューマノイドボーン(普通のスキンメッシュアニメーション)
+		// 非ヒューマノイドボーン
 		// ヒューマノイドボーンが見つからなかったらこっちから探す
 		{
 			const auto& BoneList = Skeleton->GetBoneList();
 			const auto it = std::find_if(BoneList.begin(), BoneList.end(), [&](const auto& Src) { return (std::get<0>(Src) == Channel->GetTargetNodeName()); });
 
 			if (it != BoneList.end()) return std::get<1>(*it)->GetBoneNode();
+		}
+
+		// 階層アニメーション(非ボーンアニメーション)
+		{
+			return Channel->GetDefaultTargetNode();
 		}
 
 		return nullptr;

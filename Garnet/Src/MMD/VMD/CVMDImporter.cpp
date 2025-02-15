@@ -138,7 +138,8 @@ namespace mmd
 
 				animation::EHumanoidBones BoneName = Frame.first;
 
-				std::shared_ptr<animation::CAnimationChannel> Channel = std::make_shared<animation::CAnimationChannel>(UseAnimLocalAxis, IsTransOffset, TargetSamplerIndex, AnimationTarget, std::string(), BoneName);
+				std::shared_ptr<animation::CAnimationChannel> Channel = std::make_shared<animation::CAnimationChannel>(UseAnimLocalAxis, IsTransOffset, TargetSamplerIndex, AnimationTarget, 
+					std::string(), BoneName, nullptr);
 
 				// Channel‚ðClip‚É“o˜^
 				AnimationClip->AddAnimationChannel(Channel);
@@ -244,7 +245,8 @@ namespace mmd
 
 					const int TargetSamplerIndex = Index;
 
-					std::shared_ptr<animation::CAnimationChannel> Channel = std::make_shared<animation::CAnimationChannel>(false, false, TargetSamplerIndex, AnimationTarget, std::string(), animation::EHumanoidBones::None);
+					std::shared_ptr<animation::CAnimationChannel> Channel = std::make_shared<animation::CAnimationChannel>(false, false, TargetSamplerIndex, AnimationTarget, 
+						std::string(), animation::EHumanoidBones::None, nullptr);
 
 					// Channel‚ðClip‚É“o˜^
 					BlendShapeClip->AddAnimationChannel(Frame.first, Channel);

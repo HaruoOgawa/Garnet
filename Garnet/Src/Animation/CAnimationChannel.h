@@ -27,6 +27,10 @@ namespace animation
 
 		std::string m_TargetNodeName;
 		EHumanoidBones m_BoneName;
+
+		// アニメーションの元の持ち主が指していたノード
+		// アニメーションを他のモデルに渡すことがない非ボーンの階層アニメーションでこれを使う
+		std::shared_ptr<object::CNode> m_DefaultTargetNode;
 	private:
 		bool UpdateTranslation(const std::vector<float>& Value, const std::shared_ptr<object::CNode>& TargetNode);
 		bool UpdateRotation(const std::vector<float>& Value, const std::shared_ptr<object::CNode>& TargetNode);
@@ -34,7 +38,8 @@ namespace animation
 		bool UpdateWeights(const std::vector<float>& Value, const std::shared_ptr<object::CNode>& TargetNode);
 		bool UpdateModelMatrix(const std::vector<float>& Value, const std::shared_ptr<object::CNode>& TargetNode);
 	public:
-		CAnimationChannel(bool UseAnimLocalAxis, bool TransOffset, int SamplerIndex, EAnimationTarget AnimationTarget, const std::string& TargetNodeName, EHumanoidBones BoneName);
+		CAnimationChannel(bool UseAnimLocalAxis, bool TransOffset, int SamplerIndex, EAnimationTarget AnimationTarget, 
+			const std::string& TargetNodeName, EHumanoidBones BoneName, const std::shared_ptr<object::CNode>& DefaultTargetNode);
 		virtual ~CAnimationChannel();
 
 		bool IsUseAnimLocalAxis() const;
@@ -46,6 +51,8 @@ namespace animation
 		EHumanoidBones GetBoneName() const;
 
 		std::string GetTargetNodeName() const;
+
+		const std::shared_ptr<object::CNode>& GetDefaultTargetNode() const;
 
 		bool Update(const std::vector<float>& Value, const std::shared_ptr<object::CNode>& TargetNode);
 	};
