@@ -40,5 +40,8 @@ namespace scriptable
 		void SetValue(const std::string& Key, graphics::EUniformValueType ValueType, const void* Data, int ByteSize);
 		void SetValue(const std::string& Key, const void* Data);
 		SValue GetValue(const std::string& Key) const;
+		float GetValueFloat(const std::string& Key) const;
+		int GetValueInt(const std::string& Key) const;
+		std::string GetValueString(const std::string& Key) const;
 	};
 }

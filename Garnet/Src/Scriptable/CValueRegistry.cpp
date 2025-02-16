@@ -91,4 +91,38 @@ namespace scriptable
 
 		return it->second;
 	}
+
+	float CValueRegistry::GetValueFloat(const std::string& Key) const
+	{
+		const auto value = GetValue(Key);
+		if (value.Buffer.empty()) return 0.0f;
+
+		if (value.Type != graphics::EUniformValueType::VALUE_TYPE_FLOAT) return 0.0f;
+
+		return *reinterpret_cast<const float*>(value.Buffer.data());
+	}
+
+	int CValueRegistry::GetValueInt(const std::string& Key) const
+	{
+		const auto value = GetValue(Key);
+		if (value.Buffer.empty()) return 0;
+
+		if (value.Type != graphics::EUniformValueType::VALUE_TYPE_INT) return 0;
+
+		return *reinterpret_cast<const int*>(value.Buffer.data());
+	}
+
+	std::string CValueRegistry::GetValueString(const std::string& Key) const
+	{
+		const auto value = GetValue(Key);
+		if (value.Buffer.empty()) return std::string();
+
+		if (value.Type != graphics::EUniformValueType::VALUE_TYPE_STRING) return 0;
+
+		std::string str = std::string();
+		str.resize(value.Buffer.size());
+		std::memcpy(&str[0], &value.Buffer[0], value.ByteSize);
+
+		return str;
+	}
 }
