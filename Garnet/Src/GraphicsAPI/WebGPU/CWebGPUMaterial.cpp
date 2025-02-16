@@ -268,7 +268,7 @@ namespace api
 				WGPUBindGroupLayoutEntry bindingLayout{};
 				InitDefalutBindGroupLayoutEntry(bindingLayout);
 				bindingLayout.binding = TexLayout.ViewBindingIndex;
-				bindingLayout.visibility = WGPUShaderStage_Fragment;
+				bindingLayout.visibility = WGPUShaderStage_Vertex | WGPUShaderStage_Fragment | WGPUShaderStage_Compute;
 				bindingLayout.texture.sampleType = WGPUTextureSampleType_Float;
 				bindingLayout.texture.viewDimension = (Texture->GetTextureType() == graphics::ETextureType::TEXTURE_CUBE) ? WGPUTextureViewDimension_Cube : WGPUTextureViewDimension_2D;
 
@@ -279,7 +279,7 @@ namespace api
 				WGPUBindGroupLayoutEntry bindingLayout{};
 				InitDefalutBindGroupLayoutEntry(bindingLayout);
 				bindingLayout.binding = TexLayout.SamplerBindingIndex;
-				bindingLayout.visibility = WGPUShaderStage_Fragment;
+				bindingLayout.visibility = WGPUShaderStage_Vertex | WGPUShaderStage_Fragment | WGPUShaderStage_Compute;
 				bindingLayout.sampler.type = WGPUSamplerBindingType_Filtering;
 
 				bindingLayoutList.push_back(bindingLayout);
