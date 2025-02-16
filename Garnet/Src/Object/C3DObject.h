@@ -63,6 +63,8 @@ namespace object
 		std::vector<glm::mat4> m_CurrentSkinMatrixList;
 #endif
 	private:
+		void AsignTrackRef();
+
 		void CalcWorldMatrix(std::shared_ptr<CNode>& Node, const glm::mat4& ParentWorldMatrix);
 
 		void ApplyParentNode(std::shared_ptr<CNode>& Node, const std::shared_ptr<CNode>& ParentNode);

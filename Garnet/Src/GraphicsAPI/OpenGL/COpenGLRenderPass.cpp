@@ -139,6 +139,7 @@ namespace api
 			}
 
 			glRenderbufferStorage(GL_RENDERBUFFER, internalformat, m_Width, m_Height);
+			//glRenderbufferStorageMultisample(GL_RENDERBUFFER, 4, internalformat, m_Width, m_Height);
 
 			glFramebufferRenderbuffer(GL_FRAMEBUFFER, attachment, GL_RENDERBUFFER, m_DepthBuffer);
 

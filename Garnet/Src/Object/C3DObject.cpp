@@ -177,6 +177,10 @@ namespace object
 
 	bool C3DObject::Create(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, const std::shared_ptr<graphics::CMaterialFrame>& DepthMF)
 	{
+		// タイムライントラックの参照リストを追加
+		AsignTrackRef();
+
+		// 既に作られていたらスキップ
 		if (m_IsCreated) return true;
 
 		// DefaultLocalTransformを保存する
@@ -212,39 +216,40 @@ namespace object
 			if (!m_MorphController->Create(m_MeshList)) return false;
 		}
 
+		m_IsCreated = true;
+
+		return true;
+	}
+
+	void C3DObject::AsignTrackRef()
+	{
 		// TrackID参照リスト
+		// Node
+		for (const auto& Node : m_NodeList)
 		{
-			// Node
-			for (const auto& Node : m_NodeList)
+			if (!Node->GetRefTrackIDList().empty())
 			{
-				if (!Node->GetRefTrackIDList().empty())
-				{
-					m_TLNodeList.emplace(Node);
-				}
+				m_TLNodeList.emplace(Node);
 			}
+		}
 
-			// Material
-			for (const auto& Mesh : m_MeshList)
+		// Material
+		for (const auto& Mesh : m_MeshList)
+		{
+			for (const auto& Primitive : Mesh->GetPrimitiveList())
 			{
-				for (const auto& Primitive : Mesh->GetPrimitiveList())
+				for (const auto& Renderer : Primitive->GetRendererList())
 				{
-					for (const auto& Renderer : Primitive->GetRendererList())
-					{
-						const auto& Material = std::get<1>(Renderer);
-						if (!Material) continue;
+					const auto& Material = std::get<1>(Renderer);
+					if (!Material) continue;
 
-						if (!Material->GetRefTrackIDList().empty())
-						{
-							m_TLMaterial.emplace(Material);
-						}
+					if (!Material->GetRefTrackIDList().empty())
+					{
+						m_TLMaterial.emplace(Material);
 					}
 				}
 			}
 		}
-
-		m_IsCreated = true;
-
-		return true;
 	}
 
 	void C3DObject::ApplyDefaultLocalTransform()
