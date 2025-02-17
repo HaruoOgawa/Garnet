@@ -109,7 +109,7 @@ namespace scriptable
 
 		if (value.Type != graphics::EUniformValueType::VALUE_TYPE_INT) return 0;
 
-		return *reinterpret_cast<const int*>(value.Buffer.data());
+		return static_cast<int>(*reinterpret_cast<const float*>(value.Buffer.data()));
 	}
 
 	std::string CValueRegistry::GetValueString(const std::string& Key) const
@@ -117,7 +117,7 @@ namespace scriptable
 		const auto value = GetValue(Key);
 		if (value.Buffer.empty()) return std::string();
 
-		if (value.Type != graphics::EUniformValueType::VALUE_TYPE_STRING) return 0;
+		if (value.Type != graphics::EUniformValueType::VALUE_TYPE_STRING) return std::string();
 
 		std::string str = std::string();
 		str.resize(value.Buffer.size());
