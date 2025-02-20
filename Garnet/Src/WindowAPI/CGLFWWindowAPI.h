@@ -18,7 +18,7 @@ namespace window
 
 		GLFWwindow* m_pWindow;
 	private:
-		bool InitWindow(int Width, int Height);
+		bool InitWindow(app::SAppSettings Settings);
 	public:
 		CGLFWWindowAPI();
 		virtual ~CGLFWWindowAPI() = default;
