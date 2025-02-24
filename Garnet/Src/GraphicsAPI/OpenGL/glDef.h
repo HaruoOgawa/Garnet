@@ -61,6 +61,7 @@
 #define GL_DEPTH_STENCIL_ATTACHMENT       0x821A
 #define GL_SHADER_STORAGE_BUFFER          0x90D2
 #define GL_SHADER_STORAGE_BLOCK           0x92E6
+#define GL_MAX_SAMPLES                    0x8D57
 
 typedef char GLchar;
 typedef ptrdiff_t GLintptr;

@@ -138,8 +138,13 @@ namespace api
 				attachment = GL_DEPTH_STENCIL_ATTACHMENT;
 			}
 
-			glRenderbufferStorage(GL_RENDERBUFFER, internalformat, m_Width, m_Height);
-			//glRenderbufferStorageMultisample(GL_RENDERBUFFER, 4, internalformat, m_Width, m_Height);
+			//int maxSamples = 0;
+			//glGetIntegerv(GL_MAX_SAMPLES, &maxSamples);
+
+			int sampleCount = 8;
+
+			//glRenderbufferStorage(GL_RENDERBUFFER, internalformat, m_Width, m_Height);
+			glRenderbufferStorageMultisample(GL_RENDERBUFFER, sampleCount, internalformat, m_Width, m_Height);
 
 			glFramebufferRenderbuffer(GL_FRAMEBUFFER, attachment, GL_RENDERBUFFER, m_DepthBuffer);
 
