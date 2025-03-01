@@ -68,18 +68,18 @@ namespace api
 		return m_DepthTexture;
 	}
 
-	bool CVulkanRenderPass::Create(int Width, int Height, int RenderTargetCount, bool UseColorTexture, bool UseDepthTexture, bool UseStencil)
+	bool CVulkanRenderPass::Create(int Width, int Height, const graphics::SRenderPassState& PassState)
 	{
 		m_Width = Width;
 		m_Height = Height;
-		m_RenderTargetCount = RenderTargetCount;
-		m_UseStencil = UseStencil;
+		m_RenderTargetCount = PassState.RenderTargetCount;
+		m_UseStencil = PassState.Stencil;
 
 		graphics::STextureSamplerParam SamplerParam;
 		SamplerParam.FilterMode = graphics::ETextureFilterMode::LINEAR;
 		SamplerParam.WrapMode = graphics::ETextureWrapMode::CLAMP_TO_EDGE;
 
-		for (int AttachmentIndex = 0; AttachmentIndex < RenderTargetCount; AttachmentIndex++)
+		for (int AttachmentIndex = 0; AttachmentIndex < PassState.RenderTargetCount; AttachmentIndex++)
 		{
 			auto FrameTexture = std::make_shared<CVulkanTexture>(m_pGraphicsAPI, false, SamplerParam);
 			if (!FrameTexture->CreateFrameTexture(Width, Height, m_RenderPassFormat)) return false;
@@ -92,7 +92,7 @@ namespace api
 			(m_UseStencil? api::ERenderPassFormat::DEPTH_STENCIL_FLOAT_RENDERPASS : api::ERenderPassFormat::DEPTH_FLOAT_RENDERPASS) 
 		)) return false;
 
-		if (!CreateRenderPass(RenderTargetCount)) return false; // レンダーパスの作成(描画全体のマネージャー。実際に描画に使用するのがサブパス。サブパスを複数個用意することでポストプロセスもできる)
+		if (!CreateRenderPass(PassState.RenderTargetCount)) return false; // レンダーパスの作成(描画全体のマネージャー。実際に描画に使用するのがサブパス。サブパスを複数個用意することでポストプロセスもできる)
 		if (!CreateFrameBuffer(Width, Height)) return false; // フレームバッファの作成
 		if (!m_pGraphicsAPI->CreateCommandPool(m_CommandPool)) return false;
 		if (!m_pGraphicsAPI->CreateCommandBuffer(m_CommandBuffer, m_CommandPool)) return false;
@@ -356,6 +356,16 @@ namespace api
 		}
 
 		return true;
+	}
+
+	int CVulkanRenderPass::GetWidth() const
+	{
+		return m_Width;
+	}
+
+	int CVulkanRenderPass::GetHeight() const
+	{
+		return m_Height;
 	}
 }
 #endif
