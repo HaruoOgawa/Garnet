@@ -197,7 +197,6 @@ namespace graphics
 		Material->SetEnabledZWrite(m_EnabledZWrite);
 		Material->SetDepthFunc(m_DepthFunc);
 		Material->SetStencilParam(m_StencilParam);
-		Material->SetCullMode(m_CullMode);
 		Material->SetBlendType(m_BlendType);
 
 		// カウンターを更新
