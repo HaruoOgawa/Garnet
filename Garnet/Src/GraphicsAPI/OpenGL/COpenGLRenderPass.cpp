@@ -118,6 +118,20 @@ namespace api
 			glBindRenderbuffer(GL_RENDERBUFFER, m_ColorBuffer);
 
 			GLenum internalformat = GL_RGBA8;
+			switch (m_RenderPassFormat)
+			{
+			case api::ERenderPassFormat::NONE:
+				break;
+			case api::ERenderPassFormat::COLOR_RENDERPASS:
+				internalformat = GL_RGBA8;
+				break;
+			case api::ERenderPassFormat::COLOR_FLOAT_RENDERPASS:
+				internalformat = GL_RGBA16F;
+				break;
+			default:
+				break;
+			}
+
 			GLenum attachment = GL_COLOR_ATTACHMENT0 + AttachmentIndex;
 
 			// アンチエイリアス
