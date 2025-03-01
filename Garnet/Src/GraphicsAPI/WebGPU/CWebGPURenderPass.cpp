@@ -8,8 +8,9 @@ namespace api
 {
 	CWebGPURenderPass::CWebGPURenderPass(api::CWebGPUAPI* pGraphicsAPI, const std::string& PassName, ERenderPassFormat RenderPassFormat, const glm::vec4& InitColor):
 		m_pGraphicsAPI(pGraphicsAPI),
-		
 		m_PassName(PassName),
+		m_Width(0),
+		m_Height(0),
 		m_InitColor(InitColor),
 		m_RenderPassFormat(RenderPassFormat),
 		m_DepthTexture(nullptr),
@@ -39,13 +40,16 @@ namespace api
 		return m_DepthTexture;
 	}
 
-	bool CWebGPURenderPass::Create(int Width, int Height, int RenderTargetCount, bool UseColorTexture, bool UseDepthTexture, bool UseStencil)
+	bool CWebGPURenderPass::Create(int Width, int Height, const graphics::SRenderPassState& PassState)
 	{
+		m_Width = Width;
+		m_Height = Height;
+
 		graphics::STextureSamplerParam SamplerParam;
 		SamplerParam.FilterMode = graphics::ETextureFilterMode::LINEAR;
 		SamplerParam.WrapMode = graphics::ETextureWrapMode::CLAMP_TO_EDGE;
 
-		for (int AttachmentIndex = 0; AttachmentIndex < RenderTargetCount; AttachmentIndex++)
+		for (int AttachmentIndex = 0; AttachmentIndex < PassState.RenderTargetCount; AttachmentIndex++)
 		{
 			auto FrameTexture = std::make_shared<CWebGPUTexture>(m_pGraphicsAPI, false, SamplerParam);
 			if (!FrameTexture->CreateFrameTexture(Width, Height, m_RenderPassFormat)) return false;
@@ -54,7 +58,7 @@ namespace api
 		}
 		
 		m_DepthTexture = std::make_shared<CWebGPUTexture>(m_pGraphicsAPI, false, SamplerParam);
-		if (!m_DepthTexture->CreateFrameTexture(Width, Height, api::ERenderPassFormat::DEPTH_FLOAT_RENDERPASS)) return false;
+		if (!m_DepthTexture->CreateFrameTexture(Width, Height, api::ERenderPassFormat::DEPTH_RENDERPASS)) return false;
 
 		return true;
 	}
@@ -112,6 +116,16 @@ namespace api
 		wgpuRenderPassEncoderEnd(m_RenderPass);
 
 		return true;
+	}
+
+	int CWebGPURenderPass::GetWidth() const
+	{
+		return m_Width;
+	}
+
+	int CWebGPURenderPass::GetHeight() const
+	{
+		return m_Height;
 	}
 }
 #endif

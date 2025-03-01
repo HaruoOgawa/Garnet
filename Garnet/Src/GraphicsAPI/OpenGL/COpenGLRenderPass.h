@@ -38,8 +38,8 @@ namespace api
 		GLuint m_DepthBuffer;
 	private:
 		bool CreateFrameBuffer();
-		bool CreateColorBuffer(int AttachmentIndex);
-		bool CreateDepthBuffer(bool UseDepthTexture, bool UseStencil);
+		bool CreateColorBuffer(int AttachmentIndex, const graphics::SRenderPassState& PassState);
+		bool CreateDepthBuffer(const graphics::SRenderPassState& PassState);
 	public:
 		COpenGLRenderPass(api::COpenGLAPI* pGraphicsAPI, const std::string& PassName, ERenderPassFormat RenderPassFormat, const glm::vec4& InitColor);
 		virtual ~COpenGLRenderPass();
@@ -48,10 +48,13 @@ namespace api
 		virtual const std::vector<std::shared_ptr<graphics::CTexture>>& GetFrameTextureList() const override;
 		virtual const std::shared_ptr<graphics::CTexture>& GetDepthTexture() const override;
 
-		bool Create(int Width, int Height, int RenderTargetCount, bool UseColorTexture, bool UseDepthTexture, bool UseStencil) override;
+		bool Create(int Width, int Height, const graphics::SRenderPassState& PassState) override;
 
 		virtual bool BeginRenderPass() override;
 		virtual bool EndRenderPass() override;
+
+		virtual int GetWidth() const override;
+		virtual int GetHeight() const override;
 
 		GLuint GetFrameBuffer() const;
 	};

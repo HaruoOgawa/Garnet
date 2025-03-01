@@ -61,6 +61,7 @@
 #define GL_DEPTH_STENCIL_ATTACHMENT       0x821A
 #define GL_SHADER_STORAGE_BUFFER          0x90D2
 #define GL_SHADER_STORAGE_BLOCK           0x92E6
+#define GL_MAX_SAMPLES                    0x8D57
 
 typedef char GLchar;
 typedef ptrdiff_t GLintptr;
@@ -114,6 +115,7 @@ typedef ptrdiff_t GLsizeiptr;
 	GL_FUNC(void,	DispatchCompute, 	  GLuint num_groups_x, GLuint num_groups_y, GLuint num_groups_z) \
 	GL_FUNC(void,	DrawBuffers, 	      GLsizei n, const GLenum* bufs) \
 	GL_FUNC(void,	BlitFramebuffer, 	  GLint srcX0, GLint srcY0, GLint srcX1, GLint srcY1, GLint dstX0, GLint dstY0, GLint dstX1, GLint dstY1, GLbitfield mask, GLenum filter) \
+	GL_FUNC(void,	RenderbufferStorageMultisample, GLenum target, GLsizei samples, GLenum internalformat, GLsizei width, GLsizei height) \
 /* end */
 
 // プリプロセッサ芸でまずGL_FUNC_LISTの中身をtypedef や externで展開する

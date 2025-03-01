@@ -1337,7 +1337,8 @@ namespace fbx
 						// Bone Name ‚ðŽæ“¾
 						animation::EHumanoidBones BoneName = pGraphicsAPI->GetBoneNameProvider()->GetBoneName(Name);
 
-						std::shared_ptr<animation::CAnimationChannel> AnimationChannel = std::make_shared<animation::CAnimationChannel>(UseAnimLocalAxis, false, TargetSamplerIndex, AnimationTarget, TargetNode->GetName(), BoneName);
+						std::shared_ptr<animation::CAnimationChannel> AnimationChannel = std::make_shared<animation::CAnimationChannel>(UseAnimLocalAxis, false, TargetSamplerIndex, 
+							AnimationTarget, TargetNode->GetName(), BoneName, TargetNode);
 
 						AnimationClip->AddAnimationChannel(AnimationChannel);
 					}

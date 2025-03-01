@@ -60,14 +60,18 @@ namespace api
 			textureFormat = WGPUTextureFormat_BGRA8Unorm;
 			break;
 		case api::ERenderPassFormat::DEPTH_RENDERPASS:
-			textureFormat = WGPUTextureFormat_Depth16Unorm;
+			// エラーで動かなくなるのでWGPUTextureFormat_Depth24Plusにする
+			textureFormat = WGPUTextureFormat_Depth24Plus;
+			//textureFormat = WGPUTextureFormat_Depth16Unorm;
 			aspect = WGPUTextureAspect_DepthOnly;
 			break;
 		case api::ERenderPassFormat::COLOR_FLOAT_RENDERPASS:
 			textureFormat = WGPUTextureFormat_BGRA8Unorm;
 			break;
 		case api::ERenderPassFormat::DEPTH_FLOAT_RENDERPASS:
-			textureFormat = WGPUTextureFormat_Depth32Float;
+			// エラーで動かなくなるのでWGPUTextureFormat_Depth24Plusにする
+			textureFormat = WGPUTextureFormat_Depth24Plus;
+			//textureFormat = WGPUTextureFormat_Depth32Float;
 			aspect = WGPUTextureAspect_DepthOnly;
 			break;
 		default:

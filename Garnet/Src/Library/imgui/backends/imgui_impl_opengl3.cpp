@@ -1,4 +1,4 @@
-#ifdef USE_OPENGL
+#if defined(USE_OPENGL)  && defined(USE_GUIENGINE)
 // dear imgui: Renderer Backend for modern OpenGL with shaders / programmatic pipeline
 // - Desktop GL: 2.x 3.x 4.x
 // - Embedded GL: ES 2.0 (WebGL 1.0), ES 3.0 (WebGL 2.0)

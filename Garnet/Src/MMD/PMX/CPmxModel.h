@@ -83,7 +83,7 @@ namespace mmd
 		static bool GetMultiTypeValue(binary::CBinaryReader& Analyser, int ByteSize, std::vector<unsigned int>& UIntValueList, std::vector<unsigned char>& ByteValueList, std::vector<unsigned short>& UShortValueList);
 		static bool AddEmptyMultiTypeValue(int ByteSize, std::vector<unsigned int>& UIntValueList, std::vector<unsigned char>& ByteValueList, std::vector<unsigned short>& UShortValueList);
 
-		static int GetMultiTypeValueAsInterger(binary::CBinaryReader& Analyser, int ByteSize);
+		static int GetMultiTypeValueAsInterger(binary::CBinaryReader& Analyser, int ByteSize, bool UseSign = false);
 	public:
 		CPmxModel();
 		virtual ~CPmxModel();

@@ -43,18 +43,18 @@ namespace api
 	{
 	}
 
-	bool COpenGLAPI::CreateRenderPass(const std::string& PassName, ERenderPassFormat RenderPassFormat, const glm::vec4& InitColor, int Width, int Height, int RenderTargetCount,
-		bool UseColorTexture, bool UseDepthTexture, bool UseStencil)
+	bool COpenGLAPI::CreateRenderPass(const std::string& PassName, ERenderPassFormat RenderPassFormat, const glm::vec4& InitColor, int Width, int Height, 
+		const graphics::SRenderPassState& PassState)
 	{
 		std::shared_ptr<COpenGLRenderPass> RenderPass = std::make_shared<COpenGLRenderPass>(this, PassName, RenderPassFormat, InitColor);
 
 		if (Width != -1 && Height != -1)
 		{
-			if (!RenderPass->Create(Width, Height, RenderTargetCount, UseColorTexture, UseDepthTexture, UseStencil)) return false;
+			if (!RenderPass->Create(Width, Height, PassState)) return false;
 		}
 		else
 		{
-			if (!RenderPass->Create(m_Width, m_Height, RenderTargetCount, UseColorTexture, UseDepthTexture, UseStencil)) return false;
+			if (!RenderPass->Create(m_Width, m_Height, PassState)) return false;
 		}
 
 		m_OffScreenRenderPassMap.insert({ PassName, RenderPass });
@@ -206,6 +206,36 @@ namespace api
 		return it->second;
 	}
 
+	bool COpenGLAPI::CopyRenderPass(const std::string& SrcPassName, const std::string& DstPassName, bool Color, bool Depth)
+	{
+		GLuint SrcFrameBuffer = GetFrameBuffer(SrcPassName);
+		GLuint DstFrameBuffer = GetFrameBuffer(DstPassName);
+
+		if (SrcFrameBuffer == -1 || DstFrameBuffer == -1) return false;
+
+		//
+		const auto& it = m_OffScreenRenderPassMap.find(SrcPassName);
+		if (it == m_OffScreenRenderPassMap.end()) return false;
+		COpenGLRenderPass* pSrcRenderPass = static_cast<COpenGLRenderPass*>(it->second.get());
+
+		int Width = pSrcRenderPass->GetWidth();
+		int Height = pSrcRenderPass->GetHeight();
+
+		//
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, SrcFrameBuffer);
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, DstFrameBuffer);
+
+		GLbitfield mask = 0;
+		if (Color) mask |= GL_COLOR_BUFFER_BIT;
+		if (Depth) mask |= GL_DEPTH_BUFFER_BIT;
+
+		glBlitFramebuffer(0, 0, Width, Height, 0, 0, Width, Height, mask, GL_NEAREST);
+
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+		return true;
+	}
+
 	bool COpenGLAPI::CopyColorBuffer(const std::string& SrcPassName, const std::string& DstPassName)
 	{
 		GLuint SrcFrameBuffer = GetFrameBuffer(SrcPassName);
@@ -218,8 +248,8 @@ namespace api
 		if (it == m_OffScreenRenderPassMap.end()) return false;
 		COpenGLRenderPass* pSrcRenderPass = static_cast<COpenGLRenderPass*>(it->second.get());
 
-		int Width = pSrcRenderPass->GetFrameTexture()->GetWidth();
-		int Height = pSrcRenderPass->GetFrameTexture()->GetHeight();
+		int Width = pSrcRenderPass->GetWidth();
+		int Height = pSrcRenderPass->GetHeight();
 
 		//
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, SrcFrameBuffer);
@@ -244,8 +274,8 @@ namespace api
 		if (it == m_OffScreenRenderPassMap.end()) return false;
 		COpenGLRenderPass* pSrcRenderPass = static_cast<COpenGLRenderPass*>(it->second.get());
 
-		int Width = pSrcRenderPass->GetDepthTexture()->GetWidth();
-		int Height = pSrcRenderPass->GetDepthTexture()->GetHeight();
+		int Width = pSrcRenderPass->GetWidth();
+		int Height = pSrcRenderPass->GetHeight();
 
 		//
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, SrcFrameBuffer);

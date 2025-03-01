@@ -51,7 +51,7 @@ namespace window
 	{
 		m_pCAppCore = pAppCore;
 
-		if (!InitWindow(Settings.ScreenWidth, Settings.ScreenHeight)) return false;
+		if (!InitWindow(Settings)) return false;
 
 		return true;
 	}
@@ -266,7 +266,7 @@ namespace window
 		AppCore->FocusWindow((focused == 1));
 	}
 
-	bool CGLFWWindowAPI::InitWindow(int Width, int Height)
+	bool CGLFWWindowAPI::InitWindow(app::SAppSettings Settings)
 	{
 		glfwInit();
 
@@ -284,7 +284,25 @@ namespace window
 		std::string Title = "Garnet (OpenGL)";
 #endif // USE_WEBGPU
 
-		m_pWindow = glfwCreateWindow(Width, Height, Title.c_str(), nullptr, nullptr);
+		if (Settings.FullScreen)
+		{
+			GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+
+			// モニターのビデオモードを取得
+			const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+
+			// リフレッシュレートをモニターのデフォルトに設定
+			glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
+			glfwWindowHint(GLFW_RED_BITS, mode->redBits);
+			glfwWindowHint(GLFW_GREEN_BITS, mode->greenBits);
+			glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
+
+			m_pWindow = glfwCreateWindow(mode->width, mode->height, Title.c_str(), monitor, nullptr);
+		}
+		else
+		{
+			m_pWindow = glfwCreateWindow(Settings.ScreenWidth, Settings.ScreenHeight, Title.c_str(), nullptr, nullptr);
+		}
 
 #ifdef USE_OPENGL
 		glfwMakeContextCurrent(m_pWindow);

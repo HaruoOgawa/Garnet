@@ -23,6 +23,8 @@ namespace api
 
 		// Base Param
 		std::string m_PassName;
+		int m_Width;
+		int m_Height;
 		glm::vec4 m_InitColor;
 		api::ERenderPassFormat m_RenderPassFormat;
 		std::vector<std::shared_ptr<graphics::CTexture>> m_FrameTextureList;
@@ -39,10 +41,13 @@ namespace api
 		virtual const std::shared_ptr<graphics::CTexture>& GetDepthTexture() const override;
 		WGPURenderPassEncoder GetRenderPass() const { return m_RenderPass; }
 
-		virtual bool Create(int Width, int Height, int RenderTargetCount, bool UseColorTexture, bool UseDepthTexture, bool UseStencil) override;
+		virtual bool Create(int Width, int Height, const graphics::SRenderPassState& PassState) override;
 
 		virtual bool BeginRenderPass() override;
 		virtual bool EndRenderPass() override;
+
+		virtual int GetWidth() const override;
+		virtual int GetHeight() const override;
 	};
 }
 #endif

@@ -162,6 +162,13 @@ namespace physics
 			true
 		);
 
+		// Joint‚Ì„‘ÌAEB‚ª“¯‚¶‚È‚ç¶¬‚µ‚È‚¢
+		if (&Constraint->getRigidBodyA() == &Constraint->getRigidBodyB())
+		{
+			Console::Log("[Waring] Joint(%s) has same rigidbody as A and B. We can not make a new Joint.\n", JParam.JointName.first.c_str());
+			return;
+		}
+
 		// ŠÖ”–¼‚Ì’Ê‚èˆÚ“®‚Å‚«‚é”ÍˆÍE‰ñ“]‚Å‚«‚é”ÍˆÍ‚ðÝ’è
 		{
 			Constraint->setLinearLowerLimit(btVector3(JParam.LowerTransLimit.x, JParam.LowerTransLimit.y, JParam.LowerTransLimit.z));

@@ -218,6 +218,26 @@ namespace binary
 		return Dst;
 	}
 
+	bool CBinaryReader::GetShort(short& Dst)
+	{
+		if (!IsValid(sizeof(short))) return false;
+
+		Dst = GetShort();
+
+		return true;
+	}
+
+	short CBinaryReader::GetShort()
+	{
+		auto val = ((m_Pointer[1] << 8) | (m_Pointer[0]));
+
+		short Dst = *reinterpret_cast<const short*>(&val);
+
+		UpdatePointer(sizeof(short));
+
+		return Dst;
+	}
+
 	bool CBinaryReader::GetBinary(size_t DstByteOffset, std::vector<unsigned char>& Dst, size_t ByteSize)
 	{
 		if (!IsValid(ByteSize)) return false;

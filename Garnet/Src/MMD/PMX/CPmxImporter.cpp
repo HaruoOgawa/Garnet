@@ -280,7 +280,7 @@ namespace mmd
 				{
 					int TextureIndex = PmxMaterial->GetMainTexIndex();
 
-					if (TextureIndex != -1)
+					if (TextureIndex >= 0 && TextureIndex < model.GetPmxTextureList().size())
 					{
 						material->ReplacePreloadUniformValue("UseMainTexture", &glm::ivec1(1)[0], sizeof(int), 2);
 						material->ReplaceTextureIndex("MainTexture", TextureIndex);
@@ -784,9 +784,10 @@ namespace mmd
 			}
 
 			// 物理オブジェクトを割り当てる
-			if (PmxRigidbody.RelationBoneIndex < 0 || PmxRigidbody.RelationBoneIndex >= BoneList.size()) continue;
-
-			std::get<1>(BoneList[PmxRigidbody.RelationBoneIndex])->GetBoneNode()->AddPhysicsObject(PhysicsObject);
+			if (PmxRigidbody.RelationBoneIndex >= 0 && PmxRigidbody.RelationBoneIndex < BoneList.size())
+			{
+				std::get<1>(BoneList[PmxRigidbody.RelationBoneIndex])->GetBoneNode()->AddPhysicsObject(PhysicsObject);
+			}
 
 			//
 			PhysicsObjectList.push_back(PhysicsObject);

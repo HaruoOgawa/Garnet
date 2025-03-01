@@ -5,13 +5,15 @@
 
 namespace animation
 {
-	CAnimationChannel::CAnimationChannel(bool UseAnimLocalAxis, bool TransOffset, int SamplerIndex, EAnimationTarget AnimationTarget, const std::string& TargetNodeName, EHumanoidBones BoneName):
+	CAnimationChannel::CAnimationChannel(bool UseAnimLocalAxis, bool TransOffset, int SamplerIndex, EAnimationTarget AnimationTarget,
+		const std::string& TargetNodeName, EHumanoidBones BoneName, const std::shared_ptr<object::CNode>& DefaultTargetNode) :
 		m_UseAnimLocalAxis(UseAnimLocalAxis),
 		m_IsTransOffset(TransOffset),
 		m_SamplerIndex(SamplerIndex),
 		m_AnimationTarget(AnimationTarget),
 		m_TargetNodeName(TargetNodeName),
-		m_BoneName(BoneName)
+		m_BoneName(BoneName),
+		m_DefaultTargetNode(DefaultTargetNode)
 	{
 	}
 
@@ -47,6 +49,11 @@ namespace animation
 	std::string CAnimationChannel::GetTargetNodeName() const
 	{
 		return m_TargetNodeName;
+	}
+
+	const std::shared_ptr<object::CNode>& CAnimationChannel::GetDefaultTargetNode() const
+	{
+		return m_DefaultTargetNode;
 	}
 
 	bool CAnimationChannel::Update(const std::vector<float>& Value, const std::shared_ptr<object::CNode>& TargetNode)

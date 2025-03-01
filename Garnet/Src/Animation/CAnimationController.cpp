@@ -380,7 +380,8 @@ namespace animation
 
 			std::string TargetNodeName = (TargetNode)? TargetNode->GetName() : std::string();
 
-			std::shared_ptr<animation::CAnimationChannel> TargetChannel = std::make_shared<animation::CAnimationChannel>(SourceChannel->IsUseAnimLocalAxis(), SourceChannel->IsTransOffset(), SourceChannel->GetSamplerIndex(), SourceChannel->GetAnimationTarget(), TargetNodeName, SourceChannel->GetBoneName());
+			std::shared_ptr<animation::CAnimationChannel> TargetChannel = std::make_shared<animation::CAnimationChannel>(SourceChannel->IsUseAnimLocalAxis(), 
+				SourceChannel->IsTransOffset(), SourceChannel->GetSamplerIndex(), SourceChannel->GetAnimationTarget(), TargetNodeName, SourceChannel->GetBoneName(), TargetNode);
 
 			Dst->AddAnimationChannel(TargetChannel);
 		}
