@@ -25,8 +25,8 @@ namespace api
 	{
 	}
 
-	bool CGraphicsAPI::CreateRenderPass(const std::string& PassName, ERenderPassFormat RenderPassFormat, const glm::vec4& InitColor, int Width, int Height, int RenderTargetCount,
-		bool UseColorTexture, bool UseDepthTexture, bool UseStencil)
+	bool CGraphicsAPI::CreateRenderPass(const std::string& PassName, ERenderPassFormat RenderPassFormat, const glm::vec4& InitColor, int Width, int Height, 
+		const graphics::SRenderPassState& PassState)
 	{
 		return true;
 	}
@@ -146,6 +146,11 @@ namespace api
 	const std::string& CGraphicsAPI::GetCurrentRenderPassName() const
 	{
 		return m_CurrentRenderPassName;
+	}
+
+	bool CGraphicsAPI::CopyRenderPass(const std::string& SrcPassName, const std::string& DstPassName, bool Color, bool Depth)
+	{
+		return true;
 	}
 
 	bool CGraphicsAPI::CopyColorBuffer(const std::string& SrcPassName, const std::string& DstPassName)

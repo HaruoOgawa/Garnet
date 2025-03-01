@@ -31,8 +31,8 @@ namespace api
 		
 		virtual void Release() override;
 
-		virtual bool CreateRenderPass(const std::string& PassName, ERenderPassFormat RenderPassFormat, const glm::vec4& InitColor, int Width = -1, int Height = -1, int RenderTargetCount = 1,
-			bool UseColorTexture = true, bool UseDepthTexture = false, bool UseStencil = false) override;
+		virtual bool CreateRenderPass(const std::string& PassName, ERenderPassFormat RenderPassFormat, const glm::vec4& InitColor, int Width = -1, int Height = -1, 
+			const graphics::SRenderPassState& PassState = {}) override;
 		virtual std::shared_ptr<graphics::CVertexBuffer> CreateVertexBuffer() override;
 		virtual std::shared_ptr<graphics::CIndexBuffer> CreateIndexBuffer() override;
 		virtual std::shared_ptr<graphics::IRenderer> CreateRenderer() override;
@@ -60,6 +60,7 @@ namespace api
 		virtual int GetHeight() const override;
 
 		virtual std::shared_ptr<graphics::IRenderPass> FindOffScreenRenderPass(const std::string& PassName) override;
+		virtual bool CopyRenderPass(const std::string& SrcPassName, const std::string& DstPassName, bool Color, bool Depth) override;
 		virtual bool CopyColorBuffer(const std::string& SrcPassName, const std::string& DstPassName) override;
 		virtual bool CopyDepthBuffer(const std::string& SrcPassName, const std::string& DstPassName) override;
 

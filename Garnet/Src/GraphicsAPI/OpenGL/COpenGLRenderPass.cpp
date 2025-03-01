@@ -44,39 +44,30 @@ namespace api
 		return m_DepthTexture;
 	}
 
-	bool COpenGLRenderPass::Create(int Width, int Height, int RenderTargetCount, bool UseColorTexture, bool UseDepthTexture, bool UseStencil)
+	bool COpenGLRenderPass::Create(int Width, int Height, const graphics::SRenderPassState& PassState)
 	{
 		m_Width = Width;
 		m_Height = Height;
-		m_UseStencil = UseStencil;
+		m_UseStencil = PassState.Stencil;
 
-		for (int AttachmentIndex = 0; AttachmentIndex < RenderTargetCount; AttachmentIndex++)
-		{
-			auto FrameTexture = m_pGraphicsAPI->CreateTexture(false);
-			if (!FrameTexture->CreateFrameTexture(Width, Height, m_RenderPassFormat)) return false;
+		// フレームバッファの作成
+		if (!CreateFrameBuffer()) return false; 
 
-			m_FrameTextureList.push_back(FrameTexture);
-		}
-
-		if (UseDepthTexture)
-		{
-			m_DepthTexture = m_pGraphicsAPI->CreateTexture(false);
-			if (!m_DepthTexture->CreateFrameTexture(Width, Height, api::ERenderPassFormat::DEPTH_FLOAT_RENDERPASS)) return false;
-		}
-
-		if (!CreateFrameBuffer()) return false; // フレームバッファの作成
-		for(int AttachmentIndex = 0; AttachmentIndex < RenderTargetCount; AttachmentIndex++){ if (!CreateColorBuffer(AttachmentIndex)) return false; } // カラーバッファの作成
-		if (!CreateDepthBuffer(UseDepthTexture, UseStencil)) return false; // デプスバッファの作成
+		// カラーバッファの作成
+		for(int AttachmentIndex = 0; AttachmentIndex < PassState.RenderTargetCount; AttachmentIndex++){ if (!CreateColorBuffer(AttachmentIndex, PassState)) return false; } 
+		
+		// デプスバッファの作成
+		if (!CreateDepthBuffer(PassState)) return false; 
 
 		// フレームバッファに使用するカラーバッファを指定
 		std::vector<unsigned int> Attachments;
-		for (int AttachmentIndex = 0; AttachmentIndex < RenderTargetCount; AttachmentIndex++) { Attachments.push_back(GL_COLOR_ATTACHMENT0 + AttachmentIndex); }
+		for (int AttachmentIndex = 0; AttachmentIndex < PassState.RenderTargetCount; AttachmentIndex++) { Attachments.push_back(GL_COLOR_ATTACHMENT0 + AttachmentIndex); }
 		
 		//
-		int BufferCount = RenderTargetCount;
+		int BufferCount = PassState.RenderTargetCount;
 
 		// カラーバッファのアウトプットが複数個ある時にデプスの方もアタッチするようにすると1つしかカラーがアウトプットされなくなるので深度テクスチャが不要なら追加しない
-		if (UseDepthTexture)
+		if (PassState.DepthBuffer && PassState.DepthTexture)
 		{
 			// Depth_Stencilの分を追加しておく
 			BufferCount += 1;
@@ -106,22 +97,62 @@ namespace api
 		return true;
 	}
 
-	bool COpenGLRenderPass::CreateColorBuffer(int AttachmentIndex)
+	bool COpenGLRenderPass::CreateColorBuffer(int AttachmentIndex, const graphics::SRenderPassState& PassState)
 	{
-		if (AttachmentIndex < 0 || AttachmentIndex >= static_cast<int>(m_FrameTextureList.size())) return false;
+		// カラーバッファを作成しない
+		if (!PassState.ColorBuffer) return true;
 
-		COpenGLTexture* pOpenGLTexture = static_cast<COpenGLTexture*>(m_FrameTextureList[AttachmentIndex].get());
+		if (PassState.ColorTexture)
+		{
+			auto FrameTexture = m_pGraphicsAPI->CreateTexture(false);
+			if (!FrameTexture->CreateFrameTexture(m_Width, m_Height, m_RenderPassFormat)) return false;
+			m_FrameTextureList.push_back(FrameTexture);
 
-		// ひとまずテクスチャだけ対応しておく
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + AttachmentIndex, GL_TEXTURE_2D, pOpenGLTexture->GetTextureID(), 0);
+			COpenGLTexture* pOpenGLTexture = static_cast<COpenGLTexture*>(FrameTexture.get());
+
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + AttachmentIndex, GL_TEXTURE_2D, pOpenGLTexture->GetTextureID(), 0);
+		}
+		else
+		{
+			if(m_ColorBuffer == -1) glGenRenderbuffers(1, &m_ColorBuffer);
+			glBindRenderbuffer(GL_RENDERBUFFER, m_ColorBuffer);
+
+			GLenum internalformat = GL_RGBA8;
+			GLenum attachment = GL_COLOR_ATTACHMENT0 + AttachmentIndex;
+
+			// アンチエイリアス
+			if (PassState.EnabledAA)
+			{
+				int maxSamples = 0;
+				glGetIntegerv(GL_MAX_SAMPLES, &maxSamples);
+
+				int sampleCount = std::min(std::max(PassState.AASampleNum, 1), maxSamples);
+
+				glRenderbufferStorageMultisample(GL_RENDERBUFFER, sampleCount, internalformat, m_Width, m_Height);
+			}
+			else
+			{
+				glRenderbufferStorage(GL_RENDERBUFFER, internalformat, m_Width, m_Height);
+			}
+
+			glFramebufferRenderbuffer(GL_FRAMEBUFFER, attachment, GL_RENDERBUFFER, m_ColorBuffer);
+
+			glBindRenderbuffer(GL_RENDERBUFFER, 0);
+		}
 
 		return true;
 	}
 
-	bool COpenGLRenderPass::CreateDepthBuffer(bool UseDepthTexture, bool UseStencil)
+	bool COpenGLRenderPass::CreateDepthBuffer(const graphics::SRenderPassState& PassState)
 	{
-		if (UseDepthTexture)
+		// デプスバッファを生成しない
+		if (!PassState.DepthBuffer) return true;
+
+		if (PassState.DepthTexture)
 		{
+			m_DepthTexture = m_pGraphicsAPI->CreateTexture(false);
+			if (!m_DepthTexture->CreateFrameTexture(m_Width, m_Height, api::ERenderPassFormat::DEPTH_FLOAT_RENDERPASS)) return false;
+
 			COpenGLTexture* pOpenGLTexture = static_cast<COpenGLTexture*>(m_DepthTexture.get());
 			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, pOpenGLTexture->GetTextureID(), 0);
 		}
@@ -132,19 +163,26 @@ namespace api
 
 			GLenum internalformat = GL_DEPTH_COMPONENT32F;
 			GLenum attachment = GL_DEPTH_ATTACHMENT;
-			if (UseStencil)
+			if (PassState.Stencil)
 			{
 				internalformat = GL_DEPTH24_STENCIL8;
 				attachment = GL_DEPTH_STENCIL_ATTACHMENT;
 			}
 
-			//int maxSamples = 0;
-			//glGetIntegerv(GL_MAX_SAMPLES, &maxSamples);
+			// アンチエイリアス
+			if (PassState.EnabledAA)
+			{
+				int maxSamples = 0;
+				glGetIntegerv(GL_MAX_SAMPLES, &maxSamples);
 
-			int sampleCount = 8;
+				int sampleCount = std::min(std::max(PassState.AASampleNum, 1), maxSamples);
 
-			//glRenderbufferStorage(GL_RENDERBUFFER, internalformat, m_Width, m_Height);
-			glRenderbufferStorageMultisample(GL_RENDERBUFFER, sampleCount, internalformat, m_Width, m_Height);
+				glRenderbufferStorageMultisample(GL_RENDERBUFFER, sampleCount, internalformat, m_Width, m_Height);
+			}
+			else
+			{
+				glRenderbufferStorage(GL_RENDERBUFFER, internalformat, m_Width, m_Height);
+			}
 
 			glFramebufferRenderbuffer(GL_FRAMEBUFFER, attachment, GL_RENDERBUFFER, m_DepthBuffer);
 
@@ -181,6 +219,16 @@ namespace api
 	bool COpenGLRenderPass::EndRenderPass()
 	{
 		return true;
+	}
+
+	int COpenGLRenderPass::GetWidth() const
+	{
+		return m_Width;
+	}
+
+	int COpenGLRenderPass::GetHeight() const
+	{
+		return m_Height;
 	}
 
 	GLuint COpenGLRenderPass::GetFrameBuffer() const

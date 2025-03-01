@@ -22,8 +22,8 @@ namespace api
 
 		virtual void Release() = 0;
 
-		virtual bool CreateRenderPass(const std::string& PassName, ERenderPassFormat RenderPassFormat, const glm::vec4& InitColor, int Width = -1, int Height = -1, int RenderTargetCount = 1,
-			bool UseColorTexture = true, bool UseDepthTexture = false, bool UseStencil = false) = 0;
+		virtual bool CreateRenderPass(const std::string& PassName, ERenderPassFormat RenderPassFormat, const glm::vec4& InitColor, int Width = -1, int Height = -1, 
+			const graphics::SRenderPassState& PassState = {}) = 0;
 		virtual std::shared_ptr<graphics::CVertexBuffer> CreateVertexBuffer() = 0;
 		virtual std::shared_ptr<graphics::CIndexBuffer> CreateIndexBuffer() = 0;
 		virtual std::shared_ptr<graphics::IRenderer> CreateRenderer() = 0;
@@ -54,8 +54,9 @@ namespace api
 		virtual const std::map<std::string, std::shared_ptr<graphics::IRenderPass>>& GetOffScreenRenderPassMap() const override;
 		virtual std::shared_ptr<graphics::IRenderPass> FindOffScreenRenderPass(const std::string& PassName) = 0;
 		virtual const std::string& GetCurrentRenderPassName() const override;
-		virtual bool CopyColorBuffer(const std::string& SrcPassName, const std::string& DstPassName) = 0;
-		virtual bool CopyDepthBuffer(const std::string& SrcPassName, const std::string& DstPassName) = 0;
+		virtual bool CopyRenderPass(const std::string& SrcPassName, const std::string& DstPassName, bool Color, bool Depth) override;
+		virtual bool CopyColorBuffer(const std::string& SrcPassName, const std::string& DstPassName) override;
+		virtual bool CopyDepthBuffer(const std::string& SrcPassName, const std::string& DstPassName) override;
 
 		virtual bool IsEnabledRuntimeShaderEditing() const = 0;
 
