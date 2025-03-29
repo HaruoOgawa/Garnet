@@ -13,7 +13,7 @@
       * cd dawnbuild
       * cmake ..\dawn -DDAWN_FETCH_DEPENDENCIES=ON
       * dawnbuildにできたDawn.slnを開く
-      * ビルドを実行
+      * VSビルドを実行
   * [ninja 1.11.1](https://github.com/ninja-build/ninja)
 ## Overview
 Garnet is Computer Graphics Engine running on Vulkan and WebGPU.
