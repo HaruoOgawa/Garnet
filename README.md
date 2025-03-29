@@ -7,6 +7,13 @@
 * emsdk 3.1.44
 * webgpu
   * Google Dawn [chromium/5904](https://dawn.googlesource.com/dawn/+/refs/heads/chromium/5904)
+    * ビルド手順
+      * cd Garnet\Src\Library
+      * mkdir dawnbuild
+      * cd dawnbuild
+      * cmake ..\dawn -DDAWN_FETCH_DEPENDENCIES=ON
+      * dawnbuildにできたDawn.slnを開く
+      * ビルドを実行
   * [ninja 1.11.1](https://github.com/ninja-build/ninja)
 ## Overview
 Garnet is Computer Graphics Engine running on Vulkan and WebGPU.
