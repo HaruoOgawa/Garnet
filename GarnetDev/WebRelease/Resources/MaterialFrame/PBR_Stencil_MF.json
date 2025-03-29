@@ -1,6 +1,11 @@
 {
-  "name": "pbr_mrt_mat",
-  "outputcolorcount": 4,
+  "name": "pbr_stencil_mat",
+  "stencil":{
+    "enabled" : true,
+    "value" : 1,
+    "comp" : "always",
+    "pass" : "replace"
+  },
   "shaderList": [
     {
       "name": "pbr_vert",
@@ -41,7 +46,15 @@
               }
             },
             {
-              "name": "lightVPMat",
+              "name": "lightVMat",
+              "type": "mat4",
+              "initValue": [ 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0 ],
+              "input": {
+                "hide": true
+              }
+            },
+            {
+              "name": "lightPMat",
               "type": "mat4",
               "initValue": [ 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0 ],
               "input": {
@@ -91,6 +104,22 @@
               }
             },
             {
+              "name": "spatialCullPos",
+              "type": "vec4",
+              "initValue": [ 0.0, 0.0, 0.0, 0.0 ],
+              "input": {
+                "hide": true
+              }
+            },
+            {
+              "name": "ambientColor",
+              "type": "vec4",
+              "initValue": [ 0.0, 0.0, 0.0, 1.0 ],
+              "input": {
+                "type": "color"
+              }
+            },
+            {
               "name": "time",
               "type": "float",
               "initValue": [ 0.0 ],
@@ -104,8 +133,8 @@
               "initValue": [ 0.0 ],
               "input": {
                 "type": "range",
-                "minvalue": 0.0,
-                "maxvalue": 1.0
+                "minvalue":  0.0,
+                "maxvalue":  1.0
               }
             },
             {
@@ -141,7 +170,6 @@
               "type": "float",
               "initValue": [ 1.0 ],
               "input": {
-                "hide": true
               }
             },
             {
@@ -149,13 +177,14 @@
               "type": "float",
               "initValue": [ 1.0 ],
               "input": {
-                "hide": true
               }
             },
             {
               "name": "emissiveStrength",
               "type": "float",
-              "initValue": [ 1.0 ]
+              "initValue": [ 1.0 ],
+              "input": {
+              }
             },
             {
               "name": "fPad0",
@@ -253,7 +282,7 @@
               }
             },
             {
-              "name": "pad1",
+              "name": "useSpatialCulling",
               "type": "int",
               "initValue": [ 0 ],
               "input": {
@@ -291,8 +320,8 @@
       ]
     },
     {
-      "name": "pbr_mrt_frag",
-      "shaderFile": "Resources\\Shaders\\pbr_mrt",
+      "name": "pbr_frag",
+      "shaderFile": "Resources\\Shaders\\pbr",
       "autoShaderExtension": true,
       "shadercode": "",
       "shaderType": "fragment",

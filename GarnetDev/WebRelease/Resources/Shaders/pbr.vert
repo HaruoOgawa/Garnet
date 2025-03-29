@@ -11,7 +11,8 @@ layout(binding = 0) uniform UniformBufferObject{
 	mat4 model;
     mat4 view;
     mat4 proj;
-	mat4 lightVPMat;
+	mat4 lightVMat;
+	mat4 lightPMat;
 
 	vec4 lightDir;
 	vec4 lightColor;
@@ -19,6 +20,8 @@ layout(binding = 0) uniform UniformBufferObject{
 
 	vec4 baseColorFactor;
 	vec4 emissiveFactor;
+    vec4 spatialCullPos;
+    vec4 ambientColor;
 
     float time;
     float metallicFactor;
@@ -29,6 +32,11 @@ layout(binding = 0) uniform UniformBufferObject{
     float mipCount;
     float ShadowMapX;
     float ShadowMapY;
+
+    float emissiveStrength;
+    float fPad0;
+    float fPad1;
+    float fPad2;
 
     int   useBaseColorTexture;
     int   useMetallicRoughnessTexture;
@@ -99,5 +107,5 @@ void main(){
     f_WorldPos = WorldPos;
     f_WorldTangent = WorldTangent;
     f_WorldBioTangent = WorldBioTangent;
-    f_LightSpacePos = ubo.lightVPMat * WorldPos;
+    f_LightSpacePos = ubo.lightPMat * ubo.lightVMat * WorldPos;
 }

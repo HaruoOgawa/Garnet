@@ -29,39 +29,40 @@ fn main_1() {
     var phi: f32;
 
     col = vec4<f32>(1.0, 1.0, 1.0, 1.0);
-    let _e27 = fUV_1;
-    st = _e27;
-    let _e29 = fbo_0_.useTexColor;
-    if (_e29 != 0) {
-        let _e32 = fbo_0_.useDirSampling;
-        if (_e32 != 0) {
+    let _e26 = fUV_1;
+    st = _e26;
+    let _e28 = fbo_0_.useTexColor;
+    if (_e28 != 0) {
+        let _e31 = fbo_0_.useDirSampling;
+        if (_e31 != 0) {
             pi = 3.1414999961853027;
-            let _e35 = fViewDir_1[1u];
-            theta = acos(_e35);
-            let _e38 = fViewDir_1[2u];
-            let _e40 = fViewDir_1[0u];
-            phi = atan2(_e38, _e40);
-            let _e42 = phi;
-            let _e43 = pi;
-            let _e46 = theta;
-            let _e47 = pi;
-            st = vec2<f32>((_e42 / (2.0 * _e43)), (_e46 / _e47));
+            let _e34 = fViewDir_1[1u];
+            theta = acos(_e34);
+            let _e37 = fViewDir_1[2u];
+            let _e39 = fViewDir_1[0u];
+            phi = atan2(_e37, _e39);
+            let _e41 = phi;
+            let _e42 = pi;
+            let _e45 = theta;
+            let _e46 = pi;
+            st = vec2<f32>((_e41 / (2.0 * _e42)), (_e45 / _e46));
         }
-        let _e50 = st;
-        let _e51 = textureSample(texImage, texSampler, _e50);
-        let _e52 = _e51.xyz;
-        col[0u] = _e52.x;
-        col[1u] = _e52.y;
-        col[2u] = _e52.z;
-    } else {
-        let _e60 = fbo_0_.useColor;
-        if (_e60 != 0) {
-            let _e63 = fbo_0_.baseColor;
-            col = _e63;
-        }
+        let _e49 = st;
+        let _e50 = textureSample(texImage, texSampler, _e49);
+        let _e52 = col;
+        let _e54 = (_e52.xyz * _e50.xyz);
+        col[0u] = _e54.x;
+        col[1u] = _e54.y;
+        col[2u] = _e54.z;
     }
+    let _e62 = fbo_0_.baseColor;
     let _e64 = col;
-    outColor = _e64;
+    let _e66 = (_e64.xyz * _e62.xyz);
+    col[0u] = _e66.x;
+    col[1u] = _e66.y;
+    col[2u] = _e66.z;
+    let _e73 = col;
+    outColor = _e73;
     return;
 }
 
