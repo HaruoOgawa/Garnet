@@ -47,10 +47,7 @@ namespace gui
 			{
 				for (const auto& Renderer : Primitive->GetRendererList())
 				{
-					const auto& Material = std::get<1>(Renderer);
-					if (!Material) continue;
-
-					if (!DrawMaterialGUI(pGraphicsAPI, Object, Material, SceneController)) return false;
+					if (!DrawMaterialGUI(pGraphicsAPI, Object, Primitive, Renderer, SceneController)) return false;
 				}
 			}
 		}
@@ -88,12 +85,8 @@ namespace gui
 		{
 			for (const auto& Renderer : Primitive->GetRendererList())
 			{
-				const auto& Material = std::get<1>(Renderer);
-
-				if (!Material) continue;
-
 				// MaterialのGUIを描画
-				if (!DrawMaterialGUI(pGraphicsAPI, Object, Material, SceneController)) return false;
+				if (!DrawMaterialGUI(pGraphicsAPI, Object, Primitive, Renderer, SceneController)) return false;
 			}
 
 			
@@ -102,14 +95,17 @@ namespace gui
 		return true;
 	}
 
-	bool CGUIMaterialTab::DrawMaterialGUI(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<object::C3DObject>& Object, const std::shared_ptr<graphics::CMaterial>& Material,
-		const std::shared_ptr<scene::CSceneController>& SceneController)
+	bool CGUIMaterialTab::DrawMaterialGUI(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<object::C3DObject>& Object, const std::shared_ptr<graphics::CPrimitive>& Primitive,
+		const std::tuple<std::shared_ptr<graphics::IRenderer>, std::shared_ptr<graphics::CMaterial>>& Renderer, const std::shared_ptr<scene::CSceneController>& SceneController)
 	{
+		const auto& Material = std::get<1>(Renderer);
+		if (!Material) return true;
+
 		// マテリアル名
 		if (ImGui::TreeNodeEx(Material->GetMaterialName().c_str(), ImGuiTreeNodeFlags_Framed))
 		{
 			// MaterialFrame
-			if (pGraphicsAPI->IsEnabledRuntimeShaderEditing())
+			//if (pGraphicsAPI->IsEnabledRuntimeShaderEditing())
 			{
 				const auto& CurrentMaterialFrame = Material->GetMaterialFrame();
 
@@ -124,11 +120,15 @@ namespace gui
 							const bool IsSelected = (CurrentMaterialFrame == MaterialFrame.second);
 
 							std::string Label = MaterialFrame.second->GetMaterialFrameName();
+							// マテリアルの置き換え
 							if (ImGui::Selectable(Label.c_str(), IsSelected) && !IsSelected)
 							{
+								auto NewMaterial = MaterialFrame.second->CreateAndOverriteMaterial(pGraphicsAPI, Material);
+
+								if (!NewMaterial->Create(Object->GetPassNameList(), Object->GetTextureSet())) return false;
+
 								// マテリアルの置き換え
-								auto NewMaterial = MaterialFrame.second->CreateMaterial(pGraphicsAPI, Material->GetCullMode());
-								Object->ReplaceMaterial(Material, NewMaterial);
+								Primitive->ReplaceMaterial(Renderer, NewMaterial);
 							}
 						}
 
@@ -146,7 +146,7 @@ namespace gui
 
 				const auto& Descriptor = UniformBuffer->GetDescriptor();
 
-				for (const auto& UniformDataMap : Descriptor->GetDataList())
+				for (const auto& UniformDataMap : Descriptor.GetDataList())
 				{
 					const auto& UniformData = UniformDataMap.second;
 					const auto ValueInput = UniformData.ValueInput;
@@ -340,7 +340,7 @@ namespace gui
 			}
 
 			// Texture
-			if (pGraphicsAPI->IsEnabledRuntimeShaderEditing())
+			//if (pGraphicsAPI->IsEnabledRuntimeShaderEditing())
 			{
 				const auto& TextureSet = Object->GetTextureSet();
 

@@ -61,20 +61,6 @@
               "initValue": [ 0 ]
             }
           ]
-        },
-        {
-          "name": "SkinMatrixBuffer",
-          "binding": 3,
-          "isWritable": false,
-          "type": "ssbo",
-          "bufferUpdateType": "cpu",
-          "values": [
-            {
-              "name": "r_SkinMatrixBuffer",
-              "type": "mat4",
-              "initValue": [ 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0 ]
-            }
-          ]
         }
       ]
     },
@@ -84,16 +70,7 @@
       "autoShaderExtension": true,
       "shadercode": "",
       "shaderType": "fragment",
-      "uniformBlockList": [
-        {
-          "name": "baseColorTexture",
-          "viewBinding": 1,
-          "samplerBinding": 2,
-          "textureIndex": -1,
-          "type": "texture",
-          "textureUsage": "2d"
-        }
-      ]
+      "uniformBlockList": []
     }
   ]
 }

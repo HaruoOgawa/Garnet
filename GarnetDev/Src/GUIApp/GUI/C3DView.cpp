@@ -103,10 +103,20 @@ namespace gui
 
 			if(GUIParams.Camera)
 			{
+				//
 				ImGui::SameLine();
-
 				const auto& CameraPos = GUIParams.Camera->GetPos();
 				ImGui::Text("[CameraPos] x: %f, y: %f, z: %f", CameraPos.x, CameraPos.y, CameraPos.z);
+
+				//
+				ImGui::SameLine();
+				const auto& CameraCenter = GUIParams.Camera->GetCenter();
+				ImGui::Text("[CameraCenter] x: %f, y: %f, z: %f", CameraCenter.x, CameraCenter.y, CameraCenter.z);
+				
+				//
+				ImGui::SameLine();
+				const auto& CameraUp = GUIParams.Camera->GetUpVector();
+				ImGui::Text("[CameraUp] x: %f, y: %f, z: %f", CameraUp.x, CameraUp.y, CameraUp.z);
 			}
 
 			ImGui::EndChild();

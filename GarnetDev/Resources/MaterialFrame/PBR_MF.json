@@ -40,7 +40,15 @@
               }
             },
             {
-              "name": "lightVPMat",
+              "name": "lightVMat",
+              "type": "mat4",
+              "initValue": [ 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0 ],
+              "input": {
+                "hide": true
+              }
+            },
+            {
+              "name": "lightPMat",
               "type": "mat4",
               "initValue": [ 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0 ],
               "input": {
@@ -87,6 +95,22 @@
                 "type": "range",
                 "minvalue": 0.0,
                 "maxvalue": 1.0
+              }
+            },
+            {
+              "name": "spatialCullPos",
+              "type": "vec4",
+              "initValue": [ 0.0, 0.0, 0.0, 0.0 ],
+              "input": {
+                "hide": true
+              }
+            },
+            {
+              "name": "ambientColor",
+              "type": "vec4",
+              "initValue": [ 0.0, 0.0, 0.0, 1.0 ],
+              "input": {
+                "type": "color"
               }
             },
             {
@@ -140,13 +164,40 @@
               "type": "float",
               "initValue": [ 1.0 ],
               "input": {
-                "hide": true
               }
             },
             {
               "name": "ShadowMapY",
               "type": "float",
               "initValue": [ 1.0 ],
+              "input": {
+              }
+            },
+            {
+              "name": "emissiveStrength",
+              "type": "float",
+              "initValue": [ 1.0 ]
+            },
+            {
+              "name": "fPad0",
+              "type": "float",
+              "initValue": [ 0.0 ],
+              "input": {
+                "hide": true
+              }
+            },
+            {
+              "name": "fPad1",
+              "type": "float",
+              "initValue": [ 0.0 ],
+              "input": {
+                "hide": true
+              }
+            },
+            {
+              "name": "fPad2",
+              "type": "float",
+              "initValue": [ 0.0 ],
               "input": {
                 "hide": true
               }
@@ -223,7 +274,7 @@
               }
             },
             {
-              "name": "pad1",
+              "name": "useSpatialCulling",
               "type": "int",
               "initValue": [ 0 ],
               "input": {
