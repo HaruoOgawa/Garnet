@@ -13,7 +13,8 @@ layout(binding = 0) uniform UniformBufferObject{
 	mat4 model;
     mat4 view;
     mat4 proj;
-	mat4 lightVPMat;
+	mat4 lightVMat;
+	mat4 lightPMat;
 
 	vec4 lightDir;
 	vec4 lightColor;
@@ -21,6 +22,8 @@ layout(binding = 0) uniform UniformBufferObject{
 
 	vec4 baseColorFactor;
 	vec4 emissiveFactor;
+	vec4 spatialCullPos;
+	vec4 ambientColor;
 
     float time;
     float metallicFactor;
@@ -28,10 +31,14 @@ layout(binding = 0) uniform UniformBufferObject{
     float normalMapScale;
 
 	float occlusionStrength;
-    // MipCountには反射キューブマップかIBLのSpecularMapの値が入っている(これらは必ずどちらか一方しか使用されないため)
-	float mipCount;
+    float mipCount;
     float ShadowMapX;
     float ShadowMapY;
+
+	float emissiveStrength;
+	float fPad0;
+    float fPad1;
+    float fPad2;
 
     int   useBaseColorTexture;
     int   useMetallicRoughnessTexture;
@@ -43,7 +50,7 @@ layout(binding = 0) uniform UniformBufferObject{
     int   useShadowMap;
     int   useIBL;
 
-	int   useSkinMeshAnimation;
+    int   useSkinMeshAnimation;
     int   useDirCubemap;
     int   pad1;
     int   pad2;
@@ -176,7 +183,10 @@ vec3 CalcFrenelReflection(PBRParam param)
 // この記事によると拡散色のBRDFは近似的に『1.0 / PI』と定まるとのこと
 vec3 CalcDiffuseBRDF(PBRParam param)
 {
-	return param.diffuseColor / PI;
+	float oneminus = (1.0 - 0.04) - param.metallic * (1.0 - 0.04);
+
+	return param.diffuseColor * oneminus;
+	// return param.diffuseColor / PI;
 }
 
 // 法線の取得(ノーマルマップを使うことがある. → ついでに勉強する)
@@ -303,6 +313,11 @@ float CalcShadow(vec3 lsp, vec3 nomral, vec3 lightDir)
 {
 	vec2 moments = ComputePCF(lsp.xy);
 
+	#ifndef USE_OPENGL
+	// Vulkan・WebGPUではDepthBufferの値が-1.0 ~ 1.0になっているので0.0 ~ 1.0に補正する
+	moments = moments * 0.5 + 0.5;
+	#endif
+
 	// マッハバンド対策のShadow Bias
 	// ShadowBiasとは深度のオフセットのこと
 	// マッハバンドはShawMapの解像度により発生する。複数のフラグメントが光源から比較的離れている場合、深度マップから同じ値をサンプリングする可能性がある。
@@ -311,17 +326,19 @@ float CalcShadow(vec3 lsp, vec3 nomral, vec3 lightDir)
 	// https://drive.google.com/file/d/1tyDT7xQVSYzKnZXt6vvDwt-rlWEjVGDP/view?usp=sharing
 	// 床の法線とライト方向の成す角度が垂直になるほど、Biasを強くする
 	// https://learnopengl.com/Advanced-Lighting/Shadows/Shadow-Mapping
-	float ShadowBias = max(0.005, 0.05 * (1.0 - dot(nomral, lightDir)) );
+	float ShadowBias = max(0.0, 0.001 * (1.0 - dot(nomral, lightDir)) );
 
 	float distance = lsp.z - ShadowBias;
 
 	// ShadowMapの深度よりも手前なので普通に描画する
-	if((distance) <= moments.x)
+	if(distance <= moments.x)
 	{
 		return 1.0;
 	}
 	
-	// 後ろなので影にする
+	return 0.1;
+
+	/*// 後ろなので影にする
 	// バリアンスの計算
 	float variance = moments.y - (moments.x * moments.x);
 	variance = max(0.005, variance);
@@ -332,7 +349,7 @@ float CalcShadow(vec3 lsp, vec3 nomral, vec3 lightDir)
 	// 本来影になるところに光がにじんでいるようなアーティファクトが出ることがあるのでその対策
 	//p_max = ReduceLightBleeding(0.1, p_max);
 
-	return p_max;
+	return p_max;*/
 }
 
 vec2 CastDirToSt(vec3 Dir)
@@ -356,9 +373,9 @@ vec3 ComputeReflectionColor(PBRParam pbrParam, vec3 v, vec3 n)
 		float mipCount = ubo.mipCount;
 		float lod = mipCount * pbrParam.perceptualRoughness;
 		#ifdef USE_OPENGL
-		reflectColor = LINEARtoSRGB(textureLod(cubemapTexture, reflect(v, n), lod)).rgb;
+		reflectColor = SRGBtoLINEAR(textureLod(cubemapTexture, reflect(v, n), lod)).rgb;
 		#else
-		reflectColor = LINEARtoSRGB(textureLod(samplerCube(cubemapTexture, cubemapTextureSampler), reflect(v, n), lod)).rgb;
+		reflectColor = SRGBtoLINEAR(textureLod(samplerCube(cubemapTexture, cubemapTextureSampler), reflect(v, n), lod)).rgb;
 		#endif
 	}
 	else if(ubo.useDirCubemap != 0)
@@ -368,9 +385,9 @@ vec3 ComputeReflectionColor(PBRParam pbrParam, vec3 v, vec3 n)
 		float mipCount = ubo.mipCount;
 		float lod = mipCount * pbrParam.perceptualRoughness;
 		#ifdef USE_OPENGL
-		reflectColor = LINEARtoSRGB(textureLod(cubeMap2DTexture, st, lod)).rgb;
+		reflectColor = SRGBtoLINEAR(textureLod(cubeMap2DTexture, st, lod)).rgb;
 		#else
-		reflectColor = LINEARtoSRGB(textureLod(sampler2D(cubeMap2DTexture, cubeMap2DTextureSampler), st, lod)).rgb;
+		reflectColor = SRGBtoLINEAR(textureLod(sampler2D(cubeMap2DTexture, cubeMap2DTextureSampler), st, lod)).rgb;
 		#endif
 	}
 
@@ -409,11 +426,12 @@ vec3 ComputeIBL(PBRParam pbrParam, vec3 v, vec3 n)
 	vec3 diffuse = diffuseLight * pbrParam.diffuseColor;
 	vec3 specular = specularLight * (pbrParam.specularColor * brdf.x + brdf.y);
 
-	return diffuse + specular;
+	return specular;
 }
 
-void main(){
-	vec4 col = vec4(1.0);
+vec4 CalcSurface()
+{
+	vec3 col = vec3(0.0);
 
 	// ラフネスとメタリックを取得。テクスチャにパッキングされていることもある
 	float perceptualRoughness = ubo.roughnessFactor;
@@ -460,7 +478,7 @@ void main(){
 	// たぶんこの0.04という数値は経験から得られた値で物理学者がいい感じにチューニングして得た綺麗な描画結果を出すのにちょうどいい値ということだと思う
 	// → さらに調べてみるとこの0.04は入射反射率4%という意味らしく、たぶんどんな物体でも最低でも4%は反射するということなのかもしれない
 	vec3 diffuseColor = baseColor.rgb * (vec3(1.0) - f0); // 0.04だけ減衰させる. たぶん光エネルギーが色以外のとこで減衰した分を考慮している(?)
-	diffuseColor *= (1.0 - metallic); // metallicが1.0ならdiffuseColorは0になる。完全な金属の表面色は周りの映り込み色だけになることを表している
+	//diffuseColor *= (1.0 - metallic); // metallicが1.0ならdiffuseColorは0になる。完全な金属の表面色は周りの映り込み色だけになることを表している
 	// specularColor. 意味は鏡面色. サーフェイス上のハイライトの色らしい.
 	// https://help.autodesk.com/view/3DSMAX/2023/ENU/?guid=GUID-90065A74-C223-474C-8D85-7596D70E5004
 	// 金属であるほどハイライト色がベースカラーに近づく.
@@ -543,24 +561,24 @@ void main(){
 		col.rgb = NdotL * (specular + diffuse);
 	}
 
-	// よくわからんが、if文が2回ネストになっているとComputeIBLが動かないのでひとまずif文の外に置いておく
+	// 間接光
+	// ハイライトだけでは光が当たらない部分が真っ黒になってしまうので間接光を適応する必要がある
 	if(ubo.useIBL != 0)
 	{
 		// IBL
 		col.rgb += ComputeIBL(pbrParam, v, n);
 	}
-	else
+	else if(ubo.useCubeMap != 0 || ubo.useDirCubemap != 0)
 	{
 		// 反射カラーを計算
 		col.rgb += ComputeReflectionColor(pbrParam, v, n) * F;
-
-		// 疑似的な環境光(ライトの反対方向が暗くなりすぎないようにするための対策)
-		// 本来はGIやIBLで代用するところだが、ひとまずこのような簡易的な方法で代用
-		// GIやIBLを使用するときはプリプロセッサでここは実行されないようにする
-		// (Cubemapを外したとき、これがないと真っ暗になる)
+	}
+	else
+	{
+		// IBLやリフレクションプローブが有効な時はそれらが間接光の役割を果たすが、そうでない時はAmbientLight(単純な色の加算)を使用する
 		// https://cgworld.jp/terms/%E3%82%A2%E3%83%B3%E3%83%93%E3%82%A8%E3%83%B3%E3%83%88.html
-		vec3 gi_diffuse = clamp(specular, 0.04, 1.0);
-		col.rgb += gi_diffuse * diffuse;
+		vec3 gi_diffuse = ubo.ambientColor.rgb;
+		col.rgb += gi_diffuse;
 	}
 
 	// AO Mapの適応
@@ -575,29 +593,34 @@ void main(){
 		col.rgb = mix(col.rgb, col.rgb * ao, ubo.occlusionStrength);
 	}
 
-	// Emissive Mapの適応
+	// Emissive
+	vec3 emissive = ubo.emissiveFactor.rgb * ubo.emissiveStrength;
 	if(ubo.useEmissiveTexture != 0)
 	{
 		#ifdef USE_OPENGL
-		vec3 emissive = SRGBtoLINEAR(texture(emissiveTexture, f_Texcoord)).rgb * ubo.emissiveFactor.rgb;
+		emissive *= SRGBtoLINEAR(texture(emissiveTexture, f_Texcoord)).rgb;
 		#else
-		vec3 emissive = SRGBtoLINEAR(texture(sampler2D(emissiveTexture, emissiveTextureSampler), f_Texcoord)).rgb * ubo.emissiveFactor.rgb;
+		emissive *= SRGBtoLINEAR(texture(sampler2D(emissiveTexture, emissiveTextureSampler), f_Texcoord)).rgb;
 		#endif
-		
-		col.rgb += emissive;
 	}
+
+	col.rgb += emissive;
 
 	// Shadow
 	// LightSpaceScreenPos
 	if(ubo.useShadowMap != 0)
 	{
+		// https://qiita.com/Haru86_/items/d563ce1f65cf55e547a3
+		// 正規化デバイス座標(NDC)に変換する
 		vec3 lsp = f_LightSpacePos.xyz / f_LightSpacePos.w;
+		// スクリーンUVとデプスを取り出す
 		lsp = lsp * 0.5 + 0.5;
+		
 		float shadowCol = 1.0;
 
-		//bool outSide = f_LightSpacePos.z <= 0.0f || (lsp.x < 0 || lsp.y < 0) || (lsp.x > 1 || lsp.y > 1);
+		bool outSide = (lsp.x < 0.0 || lsp.y < 0.0 || lsp.z < 0.0) || (lsp.x > 1.0 || lsp.y > 1.0 || lsp.z > 1.0);
 
-		//if(!outSide)
+		if(!outSide)
 		{
 			shadowCol = CalcShadow(lsp, n, l);
 		}
@@ -609,7 +632,16 @@ void main(){
 	col.rgb = pow(col.rgb, vec3(1.0/2.2));
 
 	// アルファを指定
-	col.a = baseColor.a;
+	float alpha = baseColor.a;
 
-	outColor = col;
+	vec4 result = vec4(col, alpha);
+	return result;
+}
+
+void main()
+{
+	vec4 result = vec4(0.0);
+	result = CalcSurface();
+
+	outColor = result;
 }

@@ -45,15 +45,13 @@ void main()
 		}
 
 		#ifdef USE_OPENGL
-		col.rgb = texture(texImage, st).rgb;
+		col.rgb *= texture(texImage, st).rgb;
 		#else
-		col.rgb = texture(sampler2D(texImage, texSampler), st).rgb;
+		col.rgb *= texture(sampler2D(texImage, texSampler), st).rgb;
 		#endif
 	}
-	else if(fbo_0.useColor != 0)
-	{
-		col = fbo_0.baseColor;
-	}	
+
+	col.rgb *= fbo_0.baseColor.rgb;
 
 	outColor = col;
 }

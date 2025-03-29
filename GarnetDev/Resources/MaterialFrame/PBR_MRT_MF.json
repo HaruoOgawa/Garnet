@@ -153,6 +153,35 @@
               }
             },
             {
+              "name": "emissiveStrength",
+              "type": "float",
+              "initValue": [ 1.0 ]
+            },
+            {
+              "name": "fPad0",
+              "type": "float",
+              "initValue": [ 0.0 ],
+              "input": {
+                "hide": true
+              }
+            },
+            {
+              "name": "fPad1",
+              "type": "float",
+              "initValue": [ 0.0 ],
+              "input": {
+                "hide": true
+              }
+            },
+            {
+              "name": "fPad2",
+              "type": "float",
+              "initValue": [ 0.0 ],
+              "input": {
+                "hide": true
+              }
+            },
+            {
               "name": "useBaseColorTexture",
               "type": "int",
               "initValue": [ 0 ],

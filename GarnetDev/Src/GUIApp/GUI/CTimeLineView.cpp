@@ -1169,7 +1169,7 @@ namespace gui
 
 							const auto& Descriptor = UniformBuffer->GetDescriptor();
 
-							for (const auto& UniformDataMap : Descriptor->GetDataList())
+							for (const auto& UniformDataMap : Descriptor.GetDataList())
 							{
 								const auto& UniformData = UniformDataMap.second;
 								const auto ValueInput = UniformData.ValueInput;

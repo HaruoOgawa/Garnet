@@ -21,11 +21,6 @@ layout(binding = 0) uniform UniformBufferObject{
     int pad2;
 } ubo;
 
-readonly layout(std430, binding = 3) buffer SkinMatrixBuffer
-{
-    mat4 SkinMat[];
-} r_SkinMatrixBuffer;
-
 layout(location = 0) out vec3 f_WorldNormal;
 layout(location = 1) out vec2 f_Texcoord;
 layout(location = 2) out vec4 f_WorldPos;
@@ -35,7 +30,7 @@ layout(location = 3) out vec4 f_Color;
 
 void main(){
 
-    gl_Position = ubo.proj * ubo.view * ubo.model * r_SkinMatrixBuffer.SkinMat[0] * vec4(inPosition, 1.0);
+    gl_Position = ubo.proj * ubo.view * ubo.model * vec4(inPosition, 1.0);
     f_WorldNormal = (ubo.model * vec4(inNormal, 0.0)).xyz;
     f_Texcoord = inTexcoord;
     f_WorldPos = ubo.model * vec4(inPosition, 1.0);

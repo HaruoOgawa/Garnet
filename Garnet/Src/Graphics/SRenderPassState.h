@@ -5,9 +5,9 @@ namespace graphics
 	struct SRenderPassState
 	{
 		int RenderTargetCount = 1;
-		bool ColorBuffer = false;
-		bool ColorTexture = false;
-		bool DepthBuffer = false;
+		bool ColorBuffer = true;
+		bool ColorTexture = true;
+		bool DepthBuffer = true;
 		bool DepthTexture = false;
 		bool Stencil = false;
 		bool EnabledAA = false; // アンチエイリアス
