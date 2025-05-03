@@ -119,58 +119,9 @@ namespace api
 		m_Height = Height;
 		m_RenderPassFormat = RenderPassFormat;
 
-		VkFormat ImageFormat = VK_FORMAT_UNDEFINED;
-		VkImageUsageFlags Usage;
-
-		bool UseStencil = false;
-
-		switch (RenderPassFormat)
-		{
-			case api::ERenderPassFormat::COLOR_RENDERPASS:
-			{
-				ImageFormat = VK_FORMAT_R8G8B8A8_UNORM;
-				Usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-				break;
-			}
-			case api::ERenderPassFormat::COLOR_FLOAT_RENDERPASS:
-			{
-				ImageFormat = VK_FORMAT_R16G16B16A16_SFLOAT;
-				Usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-				break;
-			}
-			case api::ERenderPassFormat::DEPTH_RENDERPASS:
-			{
-				ImageFormat = VK_FORMAT_D16_UNORM;
-				Usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-				break;
-			}
-			case api::ERenderPassFormat::DEPTH_FLOAT_RENDERPASS:
-			{
-				ImageFormat = VK_FORMAT_D32_SFLOAT;
-				Usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-				break;
-			}
-			case api::ERenderPassFormat::DEPTH_STENCIL_RENDERPASS:
-			{
-				ImageFormat = VK_FORMAT_D16_UNORM_S8_UINT;
-				Usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-				UseStencil = true;
-				break;
-			}
-			case api::ERenderPassFormat::DEPTH_STENCIL_FLOAT_RENDERPASS:
-			{
-				ImageFormat = VK_FORMAT_D32_SFLOAT_S8_UINT;
-				Usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-				UseStencil = true;
-				break;
-			}
-			default:
-			{
-				ImageFormat = VK_FORMAT_R8G8B8A8_UNORM;
-				Usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-				break;
-			}
-		}
+		const VkFormat ImageFormat = m_pGraphicsAPI->FindImageFormat(RenderPassFormat);
+		const VkImageUsageFlags Usage = m_pGraphicsAPI->FindImageUsage(RenderPassFormat);
+		const bool UseStencil = (RenderPassFormat == api::ERenderPassFormat::DEPTH_STENCIL_RENDERPASS || RenderPassFormat == api::ERenderPassFormat::DEPTH_STENCIL_FLOAT_RENDERPASS);
 
 		if (!CreateFrameTextureImage(ImageFormat, Usage)) return false; // テクスチャイメージの生成
 		if (!CreateTextureImageView(ImageFormat, UseStencil)) return false;// シェーダーで取り扱う用のImageViewを作成(イメージマネージャーみたいなやつかな)

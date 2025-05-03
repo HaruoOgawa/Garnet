@@ -30,7 +30,8 @@ namespace api
 		int m_Width;
 		int m_Height;
 		glm::vec4 m_InitColor;
-		api::ERenderPassFormat m_RenderPassFormat;
+		api::ERenderPassFormat m_RenderPassFormat_Color;
+		api::ERenderPassFormat m_RenderPassFormat_Depth;
 		std::vector<std::shared_ptr<graphics::CTexture>> m_FrameTextureList;
 		std::shared_ptr<graphics::CTexture> m_DepthTexture;
 

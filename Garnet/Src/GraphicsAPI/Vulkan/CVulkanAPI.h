@@ -91,7 +91,8 @@ namespace api
 		// SwapChain/Image
 		VkSwapchainKHR m_SwapChain;
 		std::vector<VkImage> m_SwapChainImages;
-		VkFormat m_SwapChainImageFormat;
+		VkFormat m_SwapChainColorImageFormat;
+		VkFormat m_SwapChainDepthImageFormat;
 		VkExtent2D m_SwapChainExtent;
 		std::vector<VkImageView> m_SwapChainImageViews;
 
@@ -233,10 +234,8 @@ namespace api
 		// Rendering
 		const VkRenderPass& GetCurrentRenderPass() const;
 
-		// Depth
-		VkFormat FindDepthFormat();
-		VkFormat FindSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features);
-		bool	 HasStencilComponent(VkFormat format);
+		VkFormat FindImageFormat(api::ERenderPassFormat RenderPassFormat) const;
+		VkImageUsageFlags FindImageUsage(api::ERenderPassFormat RenderPassFormat) const;
 
 		// Command
 		VkCommandBuffer BeginSingleTimeCommands();

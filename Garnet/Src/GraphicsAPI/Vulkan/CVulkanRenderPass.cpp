@@ -15,7 +15,8 @@ namespace api
 		m_Width(0),
 		m_Height(0),
 		m_InitColor(InitColor),
-		m_RenderPassFormat(RenderPassFormat),
+		m_RenderPassFormat_Color(RenderPassFormat),
+		m_RenderPassFormat_Depth(ERenderPassFormat::NONE),
 		m_DepthTexture(nullptr),
 		m_UseStencil(false),
 		m_CommandPool(nullptr),
@@ -74,6 +75,7 @@ namespace api
 		m_Height = Height;
 		m_RenderTargetCount = PassState.RenderTargetCount;
 		m_UseStencil = PassState.Stencil;
+		m_RenderPassFormat_Depth = (m_UseStencil ? api::ERenderPassFormat::DEPTH_STENCIL_FLOAT_RENDERPASS : api::ERenderPassFormat::DEPTH_FLOAT_RENDERPASS);
 
 		graphics::STextureSamplerParam SamplerParam;
 		SamplerParam.FilterMode = graphics::ETextureFilterMode::LINEAR;
@@ -82,15 +84,13 @@ namespace api
 		for (int AttachmentIndex = 0; AttachmentIndex < PassState.RenderTargetCount; AttachmentIndex++)
 		{
 			auto FrameTexture = std::make_shared<CVulkanTexture>(m_pGraphicsAPI, false, SamplerParam);
-			if (!FrameTexture->CreateFrameTexture(Width, Height, m_RenderPassFormat)) return false;
+			if (!FrameTexture->CreateFrameTexture(Width, Height, m_RenderPassFormat_Color)) return false;
 
 			m_FrameTextureList.push_back(FrameTexture);
 		}
 
 		m_DepthTexture = std::make_shared<CVulkanTexture>(m_pGraphicsAPI, false, SamplerParam);
-		if (!m_DepthTexture->CreateFrameTexture(Width, Height, 
-			(m_UseStencil? api::ERenderPassFormat::DEPTH_STENCIL_FLOAT_RENDERPASS : api::ERenderPassFormat::DEPTH_FLOAT_RENDERPASS) 
-		)) return false;
+		if (!m_DepthTexture->CreateFrameTexture(Width, Height, m_RenderPassFormat_Depth)) return false;
 
 		if (!CreateRenderPass(PassState.RenderTargetCount)) return false; // レンダーパスの作成(描画全体のマネージャー。実際に描画に使用するのがサブパス。サブパスを複数個用意することでポストプロセスもできる)
 		if (!CreateFrameBuffer(Width, Height)) return false; // フレームバッファの作成
@@ -110,7 +110,7 @@ namespace api
 		for (int AttachmentIndex = 0; AttachmentIndex < RenderTargetCount; AttachmentIndex++)
 		{
 			VkAttachmentDescription colorAttachment{};
-			colorAttachment.format = (m_RenderPassFormat == ERenderPassFormat::COLOR_FLOAT_RENDERPASS) ? VK_FORMAT_R16G16B16A16_SFLOAT : VK_FORMAT_R8G8B8A8_UNORM;
+			colorAttachment.format = m_pGraphicsAPI->FindImageFormat(m_RenderPassFormat_Color);
 			colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT; // マルチサンプリング
 			colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR; // レンダリングの前後にどのような処理を施すか(クリアの方法など)
 			colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE; // レンダリング結果をメモリに保存し読み取り可にする
@@ -137,7 +137,7 @@ namespace api
 		// <デプスバッファ> ////////////////////////////////////////////////////////////////
 		// レンダーパスの基本的な設定
 		VkAttachmentDescription depthAttachment{};
-		depthAttachment.format = m_pGraphicsAPI->FindDepthFormat();
+		depthAttachment.format = m_pGraphicsAPI->FindImageFormat(m_RenderPassFormat_Depth);
 		depthAttachment.samples = VK_SAMPLE_COUNT_1_BIT; // マルチサンプリング
 		depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR; // レンダリングの前後にどのような処理を施すか(クリアの方法など)。デプスバッファに適応
 		depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE; // レンダリング結果をメモリに保存し読み取り可にする。デプスバッファに適応

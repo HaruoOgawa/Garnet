@@ -32,7 +32,8 @@ namespace api
 		m_ComputeQueue(nullptr),
 		m_PresentQueue(nullptr),
 		m_SwapChain(nullptr),
-		m_SwapChainImageFormat(VK_FORMAT_UNDEFINED),
+		m_SwapChainColorImageFormat(VK_FORMAT_UNDEFINED),
+		m_SwapChainDepthImageFormat(VK_FORMAT_UNDEFINED),
 		m_SwapChainRenderPass(nullptr),
 		m_CurrentRenderPass(nullptr),
 		m_pCurrentVulkanRenderPass(nullptr),
@@ -406,6 +407,98 @@ namespace api
 		return m_CurrentRenderPass;
 	}
 
+	VkFormat CVulkanAPI::FindImageFormat(api::ERenderPassFormat RenderPassFormat) const
+	{
+		VkFormat ImageFormat = VK_FORMAT_UNDEFINED;
+
+		switch (RenderPassFormat)
+		{
+			case api::ERenderPassFormat::COLOR_RENDERPASS:
+			{
+				ImageFormat = VK_FORMAT_R8G8B8A8_UNORM;
+				break;
+			}
+			case api::ERenderPassFormat::COLOR_FLOAT_RENDERPASS:
+			{
+				ImageFormat = VK_FORMAT_R16G16B16A16_SFLOAT;
+				break;
+			}
+			case api::ERenderPassFormat::DEPTH_RENDERPASS:
+			{
+				ImageFormat = VK_FORMAT_D16_UNORM;
+				break;
+			}
+			case api::ERenderPassFormat::DEPTH_FLOAT_RENDERPASS:
+			{
+				ImageFormat = VK_FORMAT_D32_SFLOAT;
+				break;
+			}
+			case api::ERenderPassFormat::DEPTH_STENCIL_RENDERPASS:
+			{
+				ImageFormat = VK_FORMAT_D16_UNORM_S8_UINT;
+				break;
+			}
+			case api::ERenderPassFormat::DEPTH_STENCIL_FLOAT_RENDERPASS:
+			{
+				ImageFormat = VK_FORMAT_D32_SFLOAT_S8_UINT;
+				break;
+			}
+			default:
+			{
+				ImageFormat = VK_FORMAT_R8G8B8A8_UNORM;
+				break;
+			}
+		}
+
+		return ImageFormat;
+	}
+
+	VkImageUsageFlags CVulkanAPI::FindImageUsage(api::ERenderPassFormat RenderPassFormat) const
+	{
+		VkImageUsageFlags Usage;
+
+		switch (RenderPassFormat)
+		{
+			case api::ERenderPassFormat::COLOR_RENDERPASS:
+			{
+				Usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+				break;
+			}
+			case api::ERenderPassFormat::COLOR_FLOAT_RENDERPASS:
+			{
+				Usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+				break;
+			}
+			case api::ERenderPassFormat::DEPTH_RENDERPASS:
+			{
+				Usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+				break;
+			}
+			case api::ERenderPassFormat::DEPTH_FLOAT_RENDERPASS:
+			{
+				Usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+				break;
+			}
+			case api::ERenderPassFormat::DEPTH_STENCIL_RENDERPASS:
+			{
+				Usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+				break;
+			}
+			case api::ERenderPassFormat::DEPTH_STENCIL_FLOAT_RENDERPASS:
+			{
+				Usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+				break;
+			}
+			default:
+			{
+				Usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+				break;
+			}
+		}
+
+		return Usage;
+	}
+
 	// Vulkanメインロジック ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// インスタンスを作成
 	bool CVulkanAPI::CreateInstance()
@@ -706,7 +799,8 @@ namespace api
 		vkGetSwapchainImagesKHR(m_LogicalDevice, m_SwapChain, &imageCount, &m_SwapChainImages[0]);
 
 		// スワップチェーンの色空間を指定 ///////////////////////////////////////////////
-		m_SwapChainImageFormat = surfaceFormat.format;
+		m_SwapChainColorImageFormat = surfaceFormat.format;
+		m_SwapChainDepthImageFormat = VK_FORMAT_D32_SFLOAT_S8_UINT;
 		m_SwapChainExtent = extent;
 
 		return true;
@@ -720,7 +814,7 @@ namespace api
 
 		for (size_t i = 0; i < m_SwapChainImages.size(); i++)
 		{
-			m_SwapChainImageViews[i] = CreateImageView(m_SwapChainImages[i], m_SwapChainImageFormat, VK_IMAGE_ASPECT_COLOR_BIT, graphics::ETextureType::TEXTURE_2D, 1, false);
+			m_SwapChainImageViews[i] = CreateImageView(m_SwapChainImages[i], m_SwapChainColorImageFormat, VK_IMAGE_ASPECT_COLOR_BIT, graphics::ETextureType::TEXTURE_2D, 1, false);
 		}
 
 		return true;
@@ -731,7 +825,7 @@ namespace api
 		// <カラーバッファ> ////////////////////////////////////////////////////////////////
 		// レンダーパスの基本的な設定
 		VkAttachmentDescription colorAttachment{};
-		colorAttachment.format = m_SwapChainImageFormat;
+		colorAttachment.format = m_SwapChainColorImageFormat;
 		colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT; // マルチサンプリング
 		colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR; // レンダリングの前後にどのような処理を施すか(クリアの方法など)。デプスバッファに適応
 		colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE; // レンダリング結果をメモリに保存し読み取り可にする。デプスバッファに適応
@@ -748,7 +842,7 @@ namespace api
 		// <デプスバッファ> ////////////////////////////////////////////////////////////////
 		// レンダーパスの基本的な設定
 		VkAttachmentDescription depthAttachment{};
-		depthAttachment.format = FindDepthFormat();
+		depthAttachment.format = m_SwapChainDepthImageFormat;
 		depthAttachment.samples = VK_SAMPLE_COUNT_1_BIT; // マルチサンプリング
 		depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR; // レンダリングの前後にどのような処理を施すか(クリアの方法など)。デプスバッファに適応
 		depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE; // レンダリング結果をメモリに保存し読み取り可にする。デプスバッファに適応
@@ -1687,38 +1781,6 @@ namespace api
 
 		// コマンドバッファの記録終了(Singleなので同時に実行も行われる?)
 		EndSingleTimeCommands(commandBuffer);
-	}
-
-	// Depth
-	VkFormat CVulkanAPI::FindDepthFormat()
-	{
-		return FindSupportedFormat({ VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT },
-			VK_IMAGE_TILING_OPTIMAL, VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
-	}
-
-	VkFormat CVulkanAPI::FindSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features)
-	{
-		for (VkFormat format : candidates)
-		{
-			VkFormatProperties props;
-			vkGetPhysicalDeviceFormatProperties(m_PhysicalDevice, format, &props);
-
-			if (tiling == VK_IMAGE_TILING_LINEAR && (props.linearTilingFeatures & features) == features)
-			{
-				return format;
-			}
-			else if (tiling == VK_IMAGE_TILING_OPTIMAL && (props.optimalTilingFeatures & features) == features)
-			{
-				return format;
-			}
-		}
-
-		throw std::runtime_error("failed to find supported format!\n");
-	}
-
-	bool CVulkanAPI::HasStencilComponent(VkFormat format)
-	{
-		return format == VK_FORMAT_D32_SFLOAT_S8_UINT || format == VK_FORMAT_D24_UNORM_S8_UINT;
 	}
 
 	// Command
