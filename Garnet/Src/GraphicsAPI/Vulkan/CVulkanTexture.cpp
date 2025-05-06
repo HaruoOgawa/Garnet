@@ -113,7 +113,7 @@ namespace api
 		return m_GUIDescriptorSet;
 	}
 
-	bool CVulkanTexture::CreateFrameTexture(int Width, int Height, api::ERenderPassFormat RenderPassFormat)
+	bool CVulkanTexture::CreateFrameTexture(int Width, int Height, api::ERenderPassFormat RenderPassFormat, int AASampleNum)
 	{
 		m_Width = Width;
 		m_Height = Height;
@@ -122,8 +122,9 @@ namespace api
 		const VkFormat ImageFormat = m_pGraphicsAPI->FindImageFormat(RenderPassFormat);
 		const VkImageUsageFlags Usage = m_pGraphicsAPI->FindImageUsage(RenderPassFormat);
 		const bool UseStencil = (RenderPassFormat == api::ERenderPassFormat::DEPTH_STENCIL_RENDERPASS || RenderPassFormat == api::ERenderPassFormat::DEPTH_STENCIL_FLOAT_RENDERPASS);
+		VkSampleCountFlagBits msaaSamples = m_pGraphicsAPI->GetMSAASampleFormat(AASampleNum);
 
-		if (!CreateFrameTextureImage(ImageFormat, Usage)) return false; // テクスチャイメージの生成
+		if (!CreateFrameTextureImage(ImageFormat, Usage, msaaSamples)) return false; // テクスチャイメージの生成
 		if (!CreateTextureImageView(ImageFormat, UseStencil)) return false;// シェーダーで取り扱う用のImageViewを作成(イメージマネージャーみたいなやつかな)
 		if (!CreateTextureSampler()) return false; // テクスチャサンプラーを作成.サンプラーとはテクスチャデータをフラグメント(3Dモデル)に合うように調整する機構
 
@@ -144,10 +145,10 @@ namespace api
 	}
 
 	// Vulkanメインロジック /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	bool CVulkanTexture::CreateFrameTextureImage(VkFormat ImageFormat, VkImageUsageFlags Usage)
+	bool CVulkanTexture::CreateFrameTextureImage(VkFormat ImageFormat, VkImageUsageFlags Usage, VkSampleCountFlagBits msaaSamples)
 	{
 		// テクスチャイメージオブジェクトを生成
-		m_pGraphicsAPI->CreateImage(m_Width, m_Height, ImageFormat, VK_IMAGE_TILING_OPTIMAL, Usage,
+		m_pGraphicsAPI->CreateImage(m_Width, m_Height, msaaSamples, ImageFormat, VK_IMAGE_TILING_OPTIMAL, Usage,
 			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_TextureImage, m_TextureImageMemory, m_TextureType, m_MipCount, m_UseMipMap);
 
 		return true;
@@ -156,7 +157,7 @@ namespace api
 	bool CVulkanTexture::CreateTextureImage(const std::vector<unsigned char>& pixelData, int pixelSize, VkFormat ImageFormat)
 	{
 		// テクスチャイメージオブジェクトを生成
-		m_pGraphicsAPI->CreateImage(m_Width, m_Height, ImageFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
+		m_pGraphicsAPI->CreateImage(m_Width, m_Height, VK_SAMPLE_COUNT_1_BIT, ImageFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
 			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_TextureImage, m_TextureImageMemory, m_TextureType, m_MipCount, m_UseMipMap);
 
 		// テクスチャイメージのステージングバッファを作成

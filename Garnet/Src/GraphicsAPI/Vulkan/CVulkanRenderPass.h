@@ -23,7 +23,7 @@ namespace api
 		// API
 		api::CVulkanAPI* m_pGraphicsAPI;
 
-		int m_RenderTargetCount;
+		graphics::SRenderPassState m_PassState;
 
 		// Base Param
 		std::string m_PassName;
@@ -34,8 +34,7 @@ namespace api
 		api::ERenderPassFormat m_RenderPassFormat_Depth;
 		std::vector<std::shared_ptr<graphics::CTexture>> m_FrameTextureList;
 		std::shared_ptr<graphics::CTexture> m_DepthTexture;
-
-		bool m_UseStencil;
+		std::vector<std::shared_ptr<graphics::CTexture>> m_MSAAResolveTextureList;
 
 		// Command
 		VkCommandPool   m_CommandPool;
@@ -48,7 +47,7 @@ namespace api
 		bool BeginRecordCommandBuffer();
 		bool EndRecordCommandBuffer();
 
-		bool CreateRenderPass(int RenderTargetCount);
+		bool CreateRenderPass(const graphics::SRenderPassState& PassState);
 		bool CreateFrameBuffer(int Width, int Height);
 	public:
 		CVulkanRenderPass(api::CVulkanAPI* pGraphicsAPI, const std::string& PassName, ERenderPassFormat RenderPassFormat, const glm::vec4& InitColor);
@@ -57,6 +56,8 @@ namespace api
 		virtual std::shared_ptr<graphics::CTexture> GetFrameTexture(int Index = 0) override;
 		virtual const std::vector<std::shared_ptr<graphics::CTexture>>& GetFrameTextureList() const override;
 		virtual const std::shared_ptr<graphics::CTexture>& GetDepthTexture() const override;
+
+		const graphics::SRenderPassState& GetPassState() const;
 
 		VkRenderPass GetRenderPass() const { return m_RenderPass; }
 		VkCommandBuffer GetCommandBuffer() const { return m_CommandBuffer; }

@@ -133,6 +133,8 @@ namespace api
 		{
 			const auto& PassName = PassNameList[PassIndex];
 
+			const auto& RenderPass = m_pGraphicsAPI->FindOffScreenRenderPass(PassName);
+
 			// グラフィックパイプラインの固定機の設定 ///////////////////////////////////////////////////////////////////////////////////////
 		// 動的状態(ダイナミックステート)の設定(パイプラインにベイクせずにマイフレームの描画時に設定できるようにするパラメーターの設定)
 			std::vector<VkDynamicState> dynamicStates = {
@@ -238,16 +240,6 @@ namespace api
 			rasterizer.depthBiasConstantFactor = 0.0f;
 			rasterizer.depthBiasClamp = 0.0f;
 			rasterizer.depthBiasSlopeFactor = 0.0f;
-
-			// マルチサンプリング(アンチエイリアシング)
-			VkPipelineMultisampleStateCreateInfo multisampling{};
-			multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
-			multisampling.sampleShadingEnable = VK_FALSE; // アンチエイリアシングを無効にしておく
-			multisampling.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
-			multisampling.minSampleShading = 1.0f;
-			multisampling.pSampleMask = nullptr;
-			multisampling.alphaToCoverageEnable = VK_FALSE;
-			multisampling.alphaToOneEnable = VK_FALSE;
 
 			// デプステスト, ステンシルテスト 
 			// ひとまず今は何もしない
@@ -504,20 +496,7 @@ namespace api
 
 			// これまでの情報をもとにレンダリングパイプラインを構築
 			VkGraphicsPipelineCreateInfo pipelineInfo{};
-			pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-			pipelineInfo.stageCount = static_cast<uint32_t>(pVulkanMat->GetShaderStages().size()); // シェーダーステージの数
-			pipelineInfo.pStages = pVulkanMat->GetShaderStages().data();
-
-			pipelineInfo.pVertexInputState = &vertexInputInto;
-			pipelineInfo.pInputAssemblyState = &inputAssemblyInfo;
-			pipelineInfo.pViewportState = &viewportStateInfo;
-			pipelineInfo.pRasterizationState = &rasterizer;
-			pipelineInfo.pMultisampleState = &multisampling;
-			pipelineInfo.pDepthStencilState = &depthStencil;
-			pipelineInfo.pColorBlendState = &colorBlendingInfo;
-			pipelineInfo.pDynamicState = &dynamicStateCreateInfo;
-
-			pipelineInfo.layout = pVulkanMat->GetPipelineLayout();
+			VkPipelineMultisampleStateCreateInfo multisampling{};
 
 			if (!PassName.empty())
 			{
@@ -526,22 +505,41 @@ namespace api
 				if (RenderPass != RenderPassMap.end())
 				{
 					api::CVulkanRenderPass* pVulkanRenderPass = static_cast<api::CVulkanRenderPass*>(RenderPass->second.get());
-					if (pVulkanRenderPass) pipelineInfo.renderPass = pVulkanRenderPass->GetRenderPass();
+					if (pVulkanRenderPass)
+					{
+						const auto& PassState = pVulkanRenderPass->GetPassState();
+
+						pipelineInfo.renderPass = pVulkanRenderPass->GetRenderPass();
+						multisampling = CreateMSAAInfo(PassState.EnabledAA, PassState.AASampleNum);
+					}
 				}
 				else
 				{
 					// デフォルトレンダーパスを使用(スワップチェーンに渡すやつ)
 					pipelineInfo.renderPass = m_pGraphicsAPI->GetSwapChainRenderPass();
+					multisampling = CreateMSAAInfo(false, 1);
 				}
 			}
 			else
 			{
 				// デフォルトレンダーパスを使用(スワップチェーンに渡すやつ)
 				pipelineInfo.renderPass = m_pGraphicsAPI->GetSwapChainRenderPass();
+				multisampling = CreateMSAAInfo(false, 1);
 			}
 
+			pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+			pipelineInfo.stageCount = static_cast<uint32_t>(pVulkanMat->GetShaderStages().size()); // シェーダーステージの数
+			pipelineInfo.pStages = pVulkanMat->GetShaderStages().data();
+			pipelineInfo.pMultisampleState = &multisampling;
+			pipelineInfo.pVertexInputState = &vertexInputInto;
+			pipelineInfo.pInputAssemblyState = &inputAssemblyInfo;
+			pipelineInfo.pViewportState = &viewportStateInfo;
+			pipelineInfo.pRasterizationState = &rasterizer;
+			pipelineInfo.pDepthStencilState = &depthStencil;
+			pipelineInfo.pColorBlendState = &colorBlendingInfo;
+			pipelineInfo.pDynamicState = &dynamicStateCreateInfo;
+			pipelineInfo.layout = pVulkanMat->GetPipelineLayout();
 			pipelineInfo.subpass = 0;
-
 			pipelineInfo.basePipelineHandle = VK_NULL_HANDLE; // パイプラインから新しいパイプラインを派生して作成するためのフィールド?
 			pipelineInfo.basePipelineIndex = -1; // 今は何もしていない
 
@@ -553,6 +551,21 @@ namespace api
 		}
 
 		return true;
+	}
+
+	VkPipelineMultisampleStateCreateInfo CVulkanRenderer::CreateMSAAInfo(bool EnabledMSAA, int SampleCount)
+	{
+		// マルチサンプリング(アンチエイリアシング)
+		VkPipelineMultisampleStateCreateInfo multisampling{};
+		multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
+		multisampling.sampleShadingEnable = (EnabledMSAA)? VK_TRUE : VK_FALSE; // アンチエイリアシングを無効にしておく
+		multisampling.rasterizationSamples = (EnabledMSAA)? m_pGraphicsAPI->GetMSAASampleFormat(SampleCount) : VK_SAMPLE_COUNT_1_BIT;
+		multisampling.minSampleShading = 1.0f;
+		multisampling.pSampleMask = nullptr;
+		multisampling.alphaToCoverageEnable = VK_FALSE;
+		multisampling.alphaToOneEnable = VK_FALSE;
+
+		return multisampling;
 	}
 
 	void CVulkanRenderer::SetRuntimeGraphicsSettings(const CVulkanVertexBuffer* pVulkanVertexBuffer, api::CVulkanMaterial* pVulkanMat)

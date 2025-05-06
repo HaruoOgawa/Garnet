@@ -49,7 +49,7 @@ namespace graphics
 		api::ERenderPassFormat GetRenderPassFormat()const;
 		float GetMipCount() const;
 
-		virtual bool CreateFrameTexture(int Width, int Height, api::ERenderPassFormat RenderPassFormat) = 0;
+		virtual bool CreateFrameTexture(int Width, int Height, api::ERenderPassFormat RenderPassFormat, int AASampleNum) = 0;
 #ifdef USE_TEXTURE_LOADER
 		virtual bool Create(const std::vector<unsigned char>& Data);
 		virtual bool Create(const std::vector<std::vector<unsigned char>>& DataList);

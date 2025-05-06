@@ -52,9 +52,9 @@ namespace api
 
 		// Layer
 #ifdef _DEBUG
-		//bool m_IsUseDebugValidationLayer = true;
+		bool m_IsUseDebugValidationLayer = true;
 		// デバッグログが見えないのでとりあえずオフにする
-		bool m_IsUseDebugValidationLayer = false;
+		//bool m_IsUseDebugValidationLayer = false;
 #else
 		bool m_IsUseDebugValidationLayer = false;
 #endif // _DEBUG
@@ -237,6 +237,8 @@ namespace api
 		VkFormat FindImageFormat(api::ERenderPassFormat RenderPassFormat) const;
 		VkImageUsageFlags FindImageUsage(api::ERenderPassFormat RenderPassFormat) const;
 
+		VkSampleCountFlagBits GetMSAASampleFormat(int AASampleNum) const;
+
 		// Command
 		VkCommandBuffer BeginSingleTimeCommands();
 		void EndSingleTimeCommands(VkCommandBuffer commandBuffer);
@@ -258,7 +260,7 @@ namespace api
 
 		// Texture
 		VkImageView CreateImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, graphics::ETextureType TextureType, float MipCount, bool UseMipMap);
-		bool CreateImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage,
+		bool CreateImage(uint32_t width, uint32_t height, VkSampleCountFlagBits msaaSamples, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage,
 			VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory, graphics::ETextureType TextureType, float MipCount, bool UseMipMap);
 		void TransitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, float MipCount, bool UseMipMap);
 		void CopyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height, graphics::ETextureType TextureType, float MipCount, bool UseMipMap, bool HasMipData);

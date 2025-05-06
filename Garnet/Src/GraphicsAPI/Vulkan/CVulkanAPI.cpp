@@ -499,6 +499,41 @@ namespace api
 		return Usage;
 	}
 
+	VkSampleCountFlagBits CVulkanAPI::GetMSAASampleFormat(int AASampleNum) const
+	{
+		VkSampleCountFlagBits format = VK_SAMPLE_COUNT_1_BIT;
+
+		switch (AASampleNum)
+		{
+		case 1:
+			format = VK_SAMPLE_COUNT_1_BIT;
+			break;
+		case 2:
+			format = VK_SAMPLE_COUNT_2_BIT;
+			break;
+		case 4:
+			format = VK_SAMPLE_COUNT_4_BIT;
+			break;
+		case 8:
+			format = VK_SAMPLE_COUNT_8_BIT;
+			break;
+		case 16:
+			format = VK_SAMPLE_COUNT_16_BIT;
+			break;
+		case 32:
+			format = VK_SAMPLE_COUNT_32_BIT;
+			break;
+		case 64:
+			format = VK_SAMPLE_COUNT_64_BIT;
+			break;
+		default:
+			format = VK_SAMPLE_COUNT_1_BIT;
+			break;
+		}
+
+		return format;
+	}
+
 	// Vulkanメインロジック ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// インスタンスを作成
 	bool CVulkanAPI::CreateInstance()
@@ -899,7 +934,7 @@ namespace api
 		//VkFormat depthFormat = FindDepthFormat();
 		VkFormat depthFormat = VK_FORMAT_D32_SFLOAT_S8_UINT;
 
-		CreateImage(m_SwapChainExtent.width, m_SwapChainExtent.height, depthFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
+		CreateImage(m_SwapChainExtent.width, m_SwapChainExtent.height, VK_SAMPLE_COUNT_1_BIT, depthFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
 			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_SwapChainDepthImage, m_SwapChainDepthImageMemory, graphics::ETextureType::TEXTURE_2D, 1, false);
 
 		m_SwapChainDepthImageView = CreateImageView(m_SwapChainDepthImage, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT, graphics::ETextureType::TEXTURE_2D, 1, false);
@@ -1589,7 +1624,7 @@ namespace api
 		return imageView;
 	}
 
-	bool CVulkanAPI::CreateImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage,
+	bool CVulkanAPI::CreateImage(uint32_t width, uint32_t height, VkSampleCountFlagBits msaaSamples, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage,
 		VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory, graphics::ETextureType TextureType, float MipCount, bool UseMipMap)
 	{
 		// テクスチャイメージを生成
@@ -1606,7 +1641,7 @@ namespace api
 		imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 		imageInfo.usage = usage;
 		imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-		imageInfo.samples = VK_SAMPLE_COUNT_1_BIT; // マルチサンプリングに関連
+		imageInfo.samples = msaaSamples; // マルチサンプリングに関連
 		imageInfo.flags = 0;
 
 		if (vkCreateImage(m_LogicalDevice, &imageInfo, nullptr, &image) != VK_SUCCESS)
