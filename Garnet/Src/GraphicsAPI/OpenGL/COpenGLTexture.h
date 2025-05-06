@@ -21,7 +21,7 @@ namespace api
 		COpenGLTexture(api::COpenGLAPI* pGraphicsAPI, bool UseMipMap, const graphics::STextureSamplerParam& SamplerParam);
 		virtual ~COpenGLTexture();
 
-		virtual bool CreateFrameTexture(int Width, int Height, api::ERenderPassFormat RenderPassFormat) override;
+		virtual bool CreateFrameTexture(int Width, int Height, api::ERenderPassFormat RenderPassFormat, int AASampleNum) override;
 		
 		virtual bool Create(const std::vector<unsigned char>& pixelData, int pixelSize) override;
 		

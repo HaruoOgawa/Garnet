@@ -413,6 +413,7 @@ namespace api
 
 		if (vkQueueSubmit(m_pGraphicsAPI->GetGraphicsQueue(), 1, &submitInfo, Fence) != VK_SUCCESS)
 		{
+			Console::Log("[Error] Failed to Submit Queue.\n");
 			return false;
 		}
 
