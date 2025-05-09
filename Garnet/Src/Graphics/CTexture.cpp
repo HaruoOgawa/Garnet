@@ -94,7 +94,7 @@ namespace graphics
 		return m_MipCount;
 	}
 
-	bool CTexture::CreateFrameTexture(int Width, int Height, api::ERenderPassFormat RenderPassFormat, int AASampleNum)
+	bool CTexture::CreateFrameTexture(int Width, int Height, api::ERenderPassFormat RenderPassFormat, int AASampleNum, bool ReadOnShader)
 	{
 		return true;
 	}

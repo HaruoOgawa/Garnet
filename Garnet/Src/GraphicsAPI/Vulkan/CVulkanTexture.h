@@ -26,7 +26,7 @@ namespace api
 		VkDescriptorSet m_GUIDescriptorSet;
 	private:
 		// Vulkanメインロジック /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		bool CreateFrameTextureImage(VkFormat ImageFormat, VkImageUsageFlags Usage, VkSampleCountFlagBits msaaSamples);
+		bool CreateFrameTextureImage(VkFormat ImageFormat, VkImageUsageFlags Usage, VkMemoryPropertyFlags properties, VkSampleCountFlagBits msaaSamples);
 		bool CreateTextureImage(const std::vector<unsigned char>& pixelData, int pixelSize, VkFormat ImageFormat);
 		bool CreateTextureImageView(VkFormat ImageFormat, bool UseStencil);
 		bool CreateTextureSampler();
@@ -42,7 +42,7 @@ namespace api
 		CVulkanTexture(api::CVulkanAPI* pGraphicsAPI, bool UseMipMap, const graphics::STextureSamplerParam& SamplerParam);
 		virtual ~CVulkanTexture();
 
-		virtual bool CreateFrameTexture(int Width, int Height, api::ERenderPassFormat RenderPassFormat, int AASampleNum) override;
+		virtual bool CreateFrameTexture(int Width, int Height, api::ERenderPassFormat RenderPassFormat, int AASampleNum, bool ReadOnShader) override;
 		virtual bool Create(const std::vector<unsigned char>& pixelData, int pixelSize) override;
 
 		const VkImage& GetTextureImage() const;

@@ -33,8 +33,8 @@ namespace api
 		api::ERenderPassFormat m_RenderPassFormat_Color;
 		api::ERenderPassFormat m_RenderPassFormat_Depth;
 		std::vector<std::shared_ptr<graphics::CTexture>> m_FrameTextureList;
+		std::vector<std::shared_ptr<graphics::CTexture>> m_ResolveTextureList;
 		std::shared_ptr<graphics::CTexture> m_DepthTexture;
-		std::vector<std::shared_ptr<graphics::CTexture>> m_MSAAResolveTextureList;
 
 		// Command
 		VkCommandPool   m_CommandPool;

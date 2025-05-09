@@ -105,7 +105,7 @@ namespace api
 		if (PassState.ColorTexture)
 		{
 			auto FrameTexture = m_pGraphicsAPI->CreateTexture(false);
-			if (!FrameTexture->CreateFrameTexture(m_Width, m_Height, m_RenderPassFormat, 1)) return false;
+			if (!FrameTexture->CreateFrameTexture(m_Width, m_Height, m_RenderPassFormat, 1, true)) return false;
 			m_FrameTextureList.push_back(FrameTexture);
 
 			COpenGLTexture* pOpenGLTexture = static_cast<COpenGLTexture*>(FrameTexture.get());
@@ -165,7 +165,7 @@ namespace api
 		if (PassState.DepthTexture)
 		{
 			m_DepthTexture = m_pGraphicsAPI->CreateTexture(false);
-			if (!m_DepthTexture->CreateFrameTexture(m_Width, m_Height, api::ERenderPassFormat::DEPTH_FLOAT_RENDERPASS, 1)) return false;
+			if (!m_DepthTexture->CreateFrameTexture(m_Width, m_Height, api::ERenderPassFormat::DEPTH_FLOAT_RENDERPASS, 1, true)) return false;
 
 			COpenGLTexture* pOpenGLTexture = static_cast<COpenGLTexture*>(m_DepthTexture.get());
 			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, pOpenGLTexture->GetTextureID(), 0);

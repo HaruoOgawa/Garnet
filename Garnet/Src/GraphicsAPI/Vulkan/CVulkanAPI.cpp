@@ -198,10 +198,7 @@ namespace api
 		beginInfo.flags = 0; // このコマンドバッファをどのように使用するか
 		beginInfo.pInheritanceInfo = nullptr;
 
-		if (vkBeginCommandBuffer(m_CommandBuffers[m_CurrentFrame], &beginInfo) != VK_SUCCESS)
-		{
-			return false;
-		}
+		VK_CHECK_RESULT(vkBeginCommandBuffer(m_CommandBuffers[m_CurrentFrame], &beginInfo));
 
 		return true;
 	}
@@ -453,45 +450,45 @@ namespace api
 		return ImageFormat;
 	}
 
-	VkImageUsageFlags CVulkanAPI::FindImageUsage(api::ERenderPassFormat RenderPassFormat) const
+	VkImageUsageFlags CVulkanAPI::FindImageUsage(api::ERenderPassFormat RenderPassFormat, bool ReadOnShader) const
 	{
 		VkImageUsageFlags Usage;
 
-		switch (RenderPassFormat)
+		if (ReadOnShader)
 		{
+			switch (RenderPassFormat)
+			{
 			case api::ERenderPassFormat::COLOR_RENDERPASS:
-			{
-				Usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-				break;
-			}
 			case api::ERenderPassFormat::COLOR_FLOAT_RENDERPASS:
-			{
 				Usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
 				break;
-			}
 			case api::ERenderPassFormat::DEPTH_RENDERPASS:
-			{
-				Usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-				break;
-			}
 			case api::ERenderPassFormat::DEPTH_FLOAT_RENDERPASS:
-			{
-				Usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-				break;
-			}
 			case api::ERenderPassFormat::DEPTH_STENCIL_RENDERPASS:
-			{
-				Usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-				break;
-			}
 			case api::ERenderPassFormat::DEPTH_STENCIL_FLOAT_RENDERPASS:
-			{
 				Usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
 				break;
-			}
 			default:
-			{
 				Usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+				break;
+			}
+		}
+		else
+		{
+			switch (RenderPassFormat)
+			{
+			case api::ERenderPassFormat::COLOR_RENDERPASS:
+			case api::ERenderPassFormat::COLOR_FLOAT_RENDERPASS:
+				Usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT;
+				break;
+			case api::ERenderPassFormat::DEPTH_RENDERPASS:
+			case api::ERenderPassFormat::DEPTH_FLOAT_RENDERPASS:
+			case api::ERenderPassFormat::DEPTH_STENCIL_RENDERPASS:
+			case api::ERenderPassFormat::DEPTH_STENCIL_FLOAT_RENDERPASS:
+				Usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT;
+				break;
+			default:
+				Usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT;
 				break;
 			}
 		}
@@ -531,7 +528,30 @@ namespace api
 			break;
 		}
 
+		const VkSampleCountFlagBits MaxSample = GetMSAAMaxUsableSampleCount();
+
+		if (format > MaxSample)
+		{
+			format = MaxSample;
+		}
+
 		return format;
+	}
+
+	VkSampleCountFlagBits CVulkanAPI::GetMSAAMaxUsableSampleCount() const
+	{
+		VkPhysicalDeviceProperties physicalDeviceProperties;
+		vkGetPhysicalDeviceProperties(m_PhysicalDevice, &physicalDeviceProperties);
+
+		VkSampleCountFlags counts = physicalDeviceProperties.limits.framebufferColorSampleCounts & physicalDeviceProperties.limits.framebufferDepthSampleCounts;
+		if (counts & VK_SAMPLE_COUNT_64_BIT) { return VK_SAMPLE_COUNT_64_BIT; }
+		if (counts & VK_SAMPLE_COUNT_32_BIT) { return VK_SAMPLE_COUNT_32_BIT; }
+		if (counts & VK_SAMPLE_COUNT_16_BIT) { return VK_SAMPLE_COUNT_16_BIT; }
+		if (counts & VK_SAMPLE_COUNT_8_BIT) { return VK_SAMPLE_COUNT_8_BIT; }
+		if (counts & VK_SAMPLE_COUNT_4_BIT) { return VK_SAMPLE_COUNT_4_BIT; }
+		if (counts & VK_SAMPLE_COUNT_2_BIT) { return VK_SAMPLE_COUNT_2_BIT; }
+
+		return VK_SAMPLE_COUNT_1_BIT;
 	}
 
 	// Vulkanメインロジック ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

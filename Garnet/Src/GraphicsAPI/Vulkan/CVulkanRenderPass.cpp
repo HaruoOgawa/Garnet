@@ -28,8 +28,8 @@ namespace api
 	CVulkanRenderPass::~CVulkanRenderPass()
 	{
 		m_FrameTextureList.clear();
+		m_ResolveTextureList.clear();
 		m_DepthTexture = nullptr;
-		m_MSAAResolveTextureList.clear();
 
 		if (m_CommandPool)
 		{
@@ -56,9 +56,9 @@ namespace api
 	{
 		if (m_PassState.EnabledAA)
 		{
-			if (Index < 0 || Index >= static_cast<int>(m_MSAAResolveTextureList.size())) return nullptr;
+			if (Index < 0 || Index >= static_cast<int>(m_ResolveTextureList.size())) return nullptr;
 
-			return m_MSAAResolveTextureList[Index];
+			return m_ResolveTextureList[Index];
 		}
 		else
 		{
@@ -73,7 +73,7 @@ namespace api
 	{
 		if (m_PassState.EnabledAA)
 		{
-			return m_MSAAResolveTextureList;
+			return m_ResolveTextureList;
 		}
 		else
 		{
@@ -102,28 +102,41 @@ namespace api
 		SamplerParam.FilterMode = graphics::ETextureFilterMode::LINEAR;
 		SamplerParam.WrapMode = graphics::ETextureWrapMode::CLAMP_TO_EDGE;
 
+		// Color
 		for (int AttachmentIndex = 0; AttachmentIndex < PassState.RenderTargetCount; AttachmentIndex++)
 		{
+			bool ReadOnShader = true;
+
+			// AAが有効ならここは一時テクスチャとなるのでシェーダーに描画しないテクスチャとして設定する
+			if (PassState.EnabledAA)
+			{
+				ReadOnShader = false;
+			}
+
 			auto FrameTexture = std::make_shared<CVulkanTexture>(m_pGraphicsAPI, false, SamplerParam);
 			const int AASampleNum = (PassState.EnabledAA) ? PassState.AASampleNum : 1;
-			if (!FrameTexture->CreateFrameTexture(Width, Height, m_RenderPassFormat_Color, AASampleNum)) return false;
+			if (!FrameTexture->CreateFrameTexture(Width, Height, m_RenderPassFormat_Color, AASampleNum, ReadOnShader)) return false;
 
 			m_FrameTextureList.push_back(FrameTexture);
 		}
 
-		m_DepthTexture = std::make_shared<CVulkanTexture>(m_pGraphicsAPI, false, SamplerParam);
-		if (!m_DepthTexture->CreateFrameTexture(Width, Height, m_RenderPassFormat_Depth, 1)) return false;
-
+		// Resolve Color
 		if (PassState.EnabledAA)
 		{
 			for (int AttachmentIndex = 0; AttachmentIndex < PassState.RenderTargetCount; AttachmentIndex++)
 			{
-				auto FrameTexture = std::make_shared<CVulkanTexture>(m_pGraphicsAPI, false, SamplerParam);
-				if (!FrameTexture->CreateFrameTexture(Width, Height, m_RenderPassFormat_Color, 1)) return false;
+				bool ReadOnShader = true;
 
-				m_MSAAResolveTextureList.push_back(FrameTexture);
+				auto FrameTexture = std::make_shared<CVulkanTexture>(m_pGraphicsAPI, false, SamplerParam);
+				if (!FrameTexture->CreateFrameTexture(Width, Height, m_RenderPassFormat_Color, 1, ReadOnShader)) return false;
+
+				m_ResolveTextureList.push_back(FrameTexture);
 			}
 		}
+
+		// Depth
+		m_DepthTexture = std::make_shared<CVulkanTexture>(m_pGraphicsAPI, false, SamplerParam);
+		if (!m_DepthTexture->CreateFrameTexture(Width, Height, m_RenderPassFormat_Depth, 1, true)) return false;
 
 		if (!CreateRenderPass(PassState)) return false; // レンダーパスの作成(描画全体のマネージャー。実際に描画に使用するのがサブパス。サブパスを複数個用意することでポストプロセスもできる)
 		if (!CreateFrameBuffer(Width, Height)) return false; // フレームバッファの作成
@@ -135,7 +148,6 @@ namespace api
 
 	bool CVulkanRenderPass::CreateRenderPass(const graphics::SRenderPassState& PassState)
 	{
-		//
 		std::vector<VkAttachmentDescription> attachments;
 
 		// <カラーバッファ> ////////////////////////////////////////////////////////////////
@@ -146,7 +158,7 @@ namespace api
 			colorAttachment.format = m_pGraphicsAPI->FindImageFormat(m_RenderPassFormat_Color);
 			colorAttachment.samples = (PassState.EnabledAA)? m_pGraphicsAPI->GetMSAASampleFormat(PassState.AASampleNum) : VK_SAMPLE_COUNT_1_BIT; // マルチサンプリング
 			colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR; // レンダリングの前後にどのような処理を施すか(クリアの方法など)
-			colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE; // レンダリング結果をメモリに保存し読み取り可にする
+			colorAttachment.storeOp = (PassState.EnabledAA) ? VK_ATTACHMENT_STORE_OP_DONT_CARE : VK_ATTACHMENT_STORE_OP_STORE; // レンダリング結果をメモリに保存し読み取り可にする
 			colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE; // 上記の設定をステンシルバッファに適応。 DONT_CAREは何もしない
 			colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE; // 上記の設定をステンシルバッファに適応
 			colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED; // レンダリング前にどのようなレイアウトとして使用するか
@@ -169,6 +181,38 @@ namespace api
 			colorAttachmentRefs.push_back(attachmentRef);
 
 			CurrentAttachmentIndex++;
+		}
+
+		// <MSAA用レンダーパスの設定> //////////////////////////////////////////////////////////////////////////////////////////////
+		// MSAA付きで描画したパスをコピーするレンダーパスの準備
+		// MSAAは2つレンダーパスを準備する必要がある
+		// Resolve Passともいう
+		std::vector<VkAttachmentReference> colorAttachmentResolveRefs;
+		if (PassState.EnabledAA)
+		{
+			for (int i = 0; i < PassState.RenderTargetCount; i++)
+			{
+				VkAttachmentDescription colorAttachmentResolve{};
+				colorAttachmentResolve.format = m_pGraphicsAPI->FindImageFormat(m_RenderPassFormat_Color);
+				colorAttachmentResolve.samples = VK_SAMPLE_COUNT_1_BIT; // マルチサンプリング
+				colorAttachmentResolve.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE; // レンダリングの前後にどのような処理を施すか(クリアの方法など)
+				colorAttachmentResolve.storeOp = VK_ATTACHMENT_STORE_OP_STORE; // レンダリング結果をメモリに保存し読み取り可にする
+				colorAttachmentResolve.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE; // 上記の設定をステンシルバッファに適応。 DONT_CAREは何もしない
+				colorAttachmentResolve.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE; // 上記の設定をステンシルバッファに適応
+				colorAttachmentResolve.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED; // レンダリング前にどのようなレイアウトとして使用するか
+
+				colorAttachmentResolve.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL; // レンダリング後にどのようなレイアウトとして使用するか
+
+				attachments.push_back(colorAttachmentResolve);
+
+				VkAttachmentReference colorAttachmentResolveRef{};
+				colorAttachmentResolveRef.attachment = CurrentAttachmentIndex;
+				colorAttachmentResolveRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL; // カラーレンダーバッファとして使用することを明示???
+
+				colorAttachmentResolveRefs.push_back(colorAttachmentResolveRef);
+
+				CurrentAttachmentIndex++;
+			}
 		}
 
 		// <デプスバッファ> ////////////////////////////////////////////////////////////////
@@ -199,40 +243,7 @@ namespace api
 		CurrentAttachmentIndex++;
 		depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL; // カラーレンダーバッファとして使用することを明示???
 
-		// <MSAA用レンダーパスの設定> //////////////////////////////////////////////////////////////////////////////////////////////
-		// MSAA付きで描画したパスをコピーするレンダーパスの準備
-		// MSAAは2つレンダーパスを準備する必要がある
-		std::vector<VkAttachmentReference> colorAttachmentResolveRefs;
-		if (PassState.EnabledAA)
-		{
-			for (int i = 0; i < PassState.RenderTargetCount; i++)
-			{
-				VkAttachmentDescription colorAttachmentResolve{};
-				colorAttachmentResolve.format = m_pGraphicsAPI->FindImageFormat(m_RenderPassFormat_Color);
-				colorAttachmentResolve.samples = VK_SAMPLE_COUNT_1_BIT; // マルチサンプリング
-				colorAttachmentResolve.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE; // レンダリングの前後にどのような処理を施すか(クリアの方法など)
-				colorAttachmentResolve.storeOp = VK_ATTACHMENT_STORE_OP_STORE; // レンダリング結果をメモリに保存し読み取り可にする
-				colorAttachmentResolve.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE; // 上記の設定をステンシルバッファに適応。 DONT_CAREは何もしない
-				colorAttachmentResolve.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE; // 上記の設定をステンシルバッファに適応
-				colorAttachmentResolve.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED; // レンダリング前にどのようなレイアウトとして使用するか
-
-				//colorAttachmentResolve.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR; // レンダリング後にどのようなレイアウトとして使用するか
-				colorAttachmentResolve.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL; // レンダリング後にどのようなレイアウトとして使用するか
-
-				attachments.push_back(colorAttachmentResolve);
-
-				VkAttachmentReference colorAttachmentResolveRef{};
-				colorAttachmentResolveRef.attachment = CurrentAttachmentIndex;
-				colorAttachmentResolveRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL; // カラーレンダーバッファとして使用することを明示???
-
-				colorAttachmentResolveRefs.push_back(colorAttachmentResolveRef);
-
-				CurrentAttachmentIndex++;
-			}
-		}
-
 		///////////////////////////////////////////////////////////////////////////////////
-		//
 		VkSubpassDescription subpass{}; // 実際に使用するサブパスの設定
 		subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS; // グラフィック用のサブパスであることを指定する
 		subpass.colorAttachmentCount = PassState.RenderTargetCount;
@@ -286,19 +297,19 @@ namespace api
 			attachments.push_back(pVulkanTexture->GetTextureImageView());
 		}
 
-		// Depth
-		attachments.push_back(static_cast<CVulkanTexture*>(m_DepthTexture.get())->GetTextureImageView());
-
-		// MSAA
+		// Resolve Color
 		if (m_PassState.EnabledAA)
 		{
-			for (const auto& FrameTexture : m_MSAAResolveTextureList)
+			for (const auto& FrameTexture : m_ResolveTextureList)
 			{
 				CVulkanTexture* pVulkanTexture = static_cast<CVulkanTexture*>(FrameTexture.get());
 
 				attachments.push_back(pVulkanTexture->GetTextureImageView());
 			}
 		}
+
+		// Depth
+		attachments.push_back(static_cast<CVulkanTexture*>(m_DepthTexture.get())->GetTextureImageView());
 
 		VkFramebufferCreateInfo frameBufferInfo{};
 		frameBufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
@@ -332,6 +343,7 @@ namespace api
 		
 		std::vector<VkClearValue> clearValues;
 
+		// Clear Color
 		for (int i = 0; i < m_PassState.RenderTargetCount; i++)
 		{
 			VkClearValue clearValue{};
@@ -340,13 +352,7 @@ namespace api
 			clearValues.push_back(clearValue);
 		}
 		
-		{
-			VkClearValue clearValue{};
-			clearValue.depthStencil = { 1.0f, 0 };
-
-			clearValues.push_back(clearValue);
-		}
-
+		// Clear Resolve Color
 		if (m_PassState.EnabledAA)
 		{
 			for (int i = 0; i < m_PassState.RenderTargetCount; i++)
@@ -356,6 +362,14 @@ namespace api
 
 				clearValues.push_back(clearValue);
 			}
+		}
+
+		// Clear DepthStencil
+		{
+			VkClearValue clearValue{};
+			clearValue.depthStencil = { 1.0f, 0 };
+
+			clearValues.push_back(clearValue);
 		}
 
 		renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
@@ -411,11 +425,7 @@ namespace api
 		// 描画が終わるまでフェンスで次の処理を待たせる
 		const auto& Fence = m_pGraphicsAPI->GetInFlightFence();
 
-		if (vkQueueSubmit(m_pGraphicsAPI->GetGraphicsQueue(), 1, &submitInfo, Fence) != VK_SUCCESS)
-		{
-			Console::Log("[Error] Failed to Submit Queue.\n");
-			return false;
-		}
+		VK_CHECK_RESULT(vkQueueSubmit(m_pGraphicsAPI->GetGraphicsQueue(), 1, &submitInfo, Fence));
 
 		return true;
 	}

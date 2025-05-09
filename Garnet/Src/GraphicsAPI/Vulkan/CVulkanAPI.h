@@ -11,10 +11,21 @@
 #include "../CGraphicsAPI.h"
 
 #include <vulkan/vulkan.h>
+#include <vulkan/vk_enum_string_helper.h>
 
 namespace api
 {
 	class CVulkanRenderPass;
+
+#define VK_CHECK_RESULT(f) \
+	{\
+		VkResult res = (f);\
+		if (res != VK_SUCCESS)\
+		{\
+			Console::Log("[Error] Vulkan Status : %s\n", string_VkResult(res));\
+			assert(res == VK_SUCCESS);\
+		}\
+	}\
 
 	struct QueueFamiryIndices
 	{
@@ -235,9 +246,10 @@ namespace api
 		const VkRenderPass& GetCurrentRenderPass() const;
 
 		VkFormat FindImageFormat(api::ERenderPassFormat RenderPassFormat) const;
-		VkImageUsageFlags FindImageUsage(api::ERenderPassFormat RenderPassFormat) const;
+		VkImageUsageFlags FindImageUsage(api::ERenderPassFormat RenderPassFormat, bool ReadOnShader) const;
 
 		VkSampleCountFlagBits GetMSAASampleFormat(int AASampleNum) const;
+		VkSampleCountFlagBits GetMSAAMaxUsableSampleCount() const;
 
 		// Command
 		VkCommandBuffer BeginSingleTimeCommands();

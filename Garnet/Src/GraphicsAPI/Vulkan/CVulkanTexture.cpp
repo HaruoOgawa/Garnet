@@ -113,18 +113,19 @@ namespace api
 		return m_GUIDescriptorSet;
 	}
 
-	bool CVulkanTexture::CreateFrameTexture(int Width, int Height, api::ERenderPassFormat RenderPassFormat, int AASampleNum)
+	bool CVulkanTexture::CreateFrameTexture(int Width, int Height, api::ERenderPassFormat RenderPassFormat, int AASampleNum, bool ReadOnShader)
 	{
 		m_Width = Width;
 		m_Height = Height;
 		m_RenderPassFormat = RenderPassFormat;
 
 		const VkFormat ImageFormat = m_pGraphicsAPI->FindImageFormat(RenderPassFormat);
-		const VkImageUsageFlags Usage = m_pGraphicsAPI->FindImageUsage(RenderPassFormat);
+		const VkImageUsageFlags Usage = m_pGraphicsAPI->FindImageUsage(RenderPassFormat, ReadOnShader);
+		const VkMemoryPropertyFlags properties = (ReadOnShader) ? VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT : VK_MEMORY_PROPERTY_LAZILY_ALLOCATED_BIT;
 		const bool UseStencil = (RenderPassFormat == api::ERenderPassFormat::DEPTH_STENCIL_RENDERPASS || RenderPassFormat == api::ERenderPassFormat::DEPTH_STENCIL_FLOAT_RENDERPASS);
 		VkSampleCountFlagBits msaaSamples = m_pGraphicsAPI->GetMSAASampleFormat(AASampleNum);
 
-		if (!CreateFrameTextureImage(ImageFormat, Usage, msaaSamples)) return false; // テクスチャイメージの生成
+		if (!CreateFrameTextureImage(ImageFormat, Usage, properties, msaaSamples)) return false; // テクスチャイメージの生成
 		if (!CreateTextureImageView(ImageFormat, UseStencil)) return false;// シェーダーで取り扱う用のImageViewを作成(イメージマネージャーみたいなやつかな)
 		if (!CreateTextureSampler()) return false; // テクスチャサンプラーを作成.サンプラーとはテクスチャデータをフラグメント(3Dモデル)に合うように調整する機構
 
@@ -145,11 +146,11 @@ namespace api
 	}
 
 	// Vulkanメインロジック /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	bool CVulkanTexture::CreateFrameTextureImage(VkFormat ImageFormat, VkImageUsageFlags Usage, VkSampleCountFlagBits msaaSamples)
+	bool CVulkanTexture::CreateFrameTextureImage(VkFormat ImageFormat, VkImageUsageFlags Usage, VkMemoryPropertyFlags properties, VkSampleCountFlagBits msaaSamples)
 	{
 		// テクスチャイメージオブジェクトを生成
 		m_pGraphicsAPI->CreateImage(m_Width, m_Height, msaaSamples, ImageFormat, VK_IMAGE_TILING_OPTIMAL, Usage,
-			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_TextureImage, m_TextureImageMemory, m_TextureType, m_MipCount, m_UseMipMap);
+			properties, m_TextureImage, m_TextureImageMemory, m_TextureType, m_MipCount, m_UseMipMap);
 
 		return true;
 	}
