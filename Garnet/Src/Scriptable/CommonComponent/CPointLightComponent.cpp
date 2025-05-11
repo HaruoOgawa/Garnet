@@ -1,4 +1,4 @@
-#include "CDirectionalLightComponent.h"
+#include "CPointLightComponent.h"
 
 #include <LoadWorker/CLoadWorker.h>
 #include <Object/C3DObject.h>
@@ -6,7 +6,7 @@
 
 namespace scriptable
 {
-	CDirectionalLightComponent::CDirectionalLightComponent(const std::string& ComponentName, const std::string& RegistryName):
+	CPointLightComponent::CPointLightComponent(const std::string& ComponentName, const std::string& RegistryName) :
 		CComponent(ComponentName, RegistryName),
 		m_Status(resource::ELoadStatus::None),
 		m_Loader(nullptr),
@@ -14,19 +14,19 @@ namespace scriptable
 	{
 	}
 
-	CDirectionalLightComponent::~CDirectionalLightComponent()
+	CPointLightComponent::~CPointLightComponent()
 	{
 	}
 
-	bool CDirectionalLightComponent::OnLoaded(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<scene::CSceneController>& SceneController,
+	bool CPointLightComponent::OnLoaded(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<scene::CSceneController>& SceneController,
 		const std::shared_ptr<object::C3DObject>& Object, const std::shared_ptr<object::CNode>& SelfNode)
 	{
 		return true;
 	}
 
-	bool CDirectionalLightComponent::Initialize(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker)
+	bool CPointLightComponent::Initialize(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker)
 	{
-		std::string filename = "Resources/MaterialFrame/DirectionalLight_MF.json";
+		std::string filename = "Resources/MaterialFrame/PointLight_MF.json";
 
 		std::shared_ptr<graphics::CMaterialFrame> MaterialFrame = std::make_shared<graphics::CMaterialFrame>();
 		m_Loader = std::make_shared<resource::CMaterialFrameLoader>(filename, MaterialFrame);
@@ -38,9 +38,9 @@ namespace scriptable
 		return true;
 	}
 
-	bool CDirectionalLightComponent::Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, 
+	bool CPointLightComponent::Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker,
 		const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
-		const std::shared_ptr<graphics::CDrawInfo>& DrawInfo, const std::shared_ptr<input::CInputState>& InputState, 
+		const std::shared_ptr<graphics::CDrawInfo>& DrawInfo, const std::shared_ptr<input::CInputState>& InputState,
 		const std::shared_ptr<object::C3DObject>& Object, const std::shared_ptr<object::CNode>& SelfNode)
 	{
 		bool Loaded = false;
@@ -56,7 +56,7 @@ namespace scriptable
 			m_LightObject->SetRot(SelfNode->GetRot());
 			m_LightObject->SetScale(SelfNode->GetScale());
 		}
-		else if(Object)
+		else if (Object)
 		{
 			m_LightObject->SetPos(Object->GetPos());
 			m_LightObject->SetRot(Object->GetRot());
@@ -68,7 +68,7 @@ namespace scriptable
 		return true;
 	}
 
-	bool CDirectionalLightComponent::Draw(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
+	bool CPointLightComponent::Draw(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
 		const std::shared_ptr<graphics::CDrawInfo>& DrawInfo, const std::shared_ptr<object::C3DObject>& Object, const std::shared_ptr<object::CNode>& SelfNode)
 	{
 		if (m_Status != resource::ELoadStatus::Loaded) return true;
@@ -79,7 +79,7 @@ namespace scriptable
 		return true;
 	}
 
-	bool CDirectionalLightComponent::CheckIsLoading(bool& Loaded, api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker,
+	bool CPointLightComponent::CheckIsLoading(bool& Loaded, api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker,
 		const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
 		const std::shared_ptr<graphics::CDrawInfo>& DrawInfo, const std::shared_ptr<input::CInputState>& InputState, const std::shared_ptr<object::C3DObject>& Object)
 	{
@@ -99,7 +99,7 @@ namespace scriptable
 		Loaded = true;
 
 		m_LightObject = std::make_shared<object::C3DObject>();
-		
+
 		// PassName
 		for (const auto& PassName : Object->GetPassNameList())
 		{
@@ -131,8 +131,8 @@ namespace scriptable
 			Material->ReplaceTextureIndex("gCustomParam0Texture", 4);
 
 			// BoardかSphereかをライトタイプで変えるようにするとライトクラスが1つに統一できるかも？
-			if (!m_LightObject->CreatePresetSimply(pGraphicsAPI, pPhysicsEngine, graphics::CPresetPrimitive::CreateBoard(pGraphicsAPI), graphics::EPresetPrimitiveType::BOARD, Material)) return false;
-		
+			if (!m_LightObject->CreatePresetSimply(pGraphicsAPI, pPhysicsEngine, graphics::CPresetPrimitive::CreateSphere(pGraphicsAPI), graphics::EPresetPrimitiveType::SPHERE, Material)) return false;
+
 			// 1つ分しか見ない
 			break;
 		}

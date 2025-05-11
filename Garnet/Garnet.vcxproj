@@ -762,6 +762,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Src\Scriptable\CommonComponent\CPointLightComponent.h" />
     <ClInclude Include="Src\Scriptable\CommonComponent\CDirectionalLightComponent.h" />
     <ClInclude Include="Src\Scriptable\CComponentResolver.h" />
     <ClInclude Include="Src\Graphics\SRenderPassState.h" />
@@ -1826,6 +1827,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClInclude Include="Src\Interface\IRenderer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\Scriptable\CommonComponent\CPointLightComponent.cpp" />
     <ClCompile Include="Src\Scriptable\CommonComponent\CDirectionalLightComponent.cpp" />
     <ClCompile Include="Src\Scriptable\CComponentResolver.cpp" />
     <ClCompile Include="Src\Library\bullet3\src\btBulletCollisionAll.cpp">
