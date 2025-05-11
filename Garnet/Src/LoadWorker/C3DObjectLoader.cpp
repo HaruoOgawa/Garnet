@@ -94,7 +94,7 @@ namespace resource
 		}
 
 		// Object¶¬
-		if (!m_TargetObject->Create(pGraphicsAPI, pPhysicsEngine, nullptr)) return false;
+		if (!m_TargetObject->Create(pGraphicsAPI, pPhysicsEngine)) return false;
 
 		return true;
 	}

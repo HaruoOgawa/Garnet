@@ -43,7 +43,7 @@ namespace resource
 		Material->SetDepthFunc(graphics::EDepthFunc::Always);
 
 		// CreateŠÖ”‚ðŽÀs
-		if (!m_LoadingBar->CreatePresetSimply(pGraphicsAPI, nullptr, graphics::CPresetPrimitive::CreateBoard(pGraphicsAPI), graphics::EPresetPrimitiveType::BOARD, Material, nullptr)) return false;
+		if (!m_LoadingBar->CreatePresetSimply(pGraphicsAPI, nullptr, graphics::CPresetPrimitive::CreateBoard(pGraphicsAPI), graphics::EPresetPrimitiveType::BOARD, Material)) return false;
 
 		return true;
 	}

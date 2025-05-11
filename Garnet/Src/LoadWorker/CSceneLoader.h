@@ -47,7 +47,8 @@ namespace resource
 		bool AnalyseObjects(const json::iterator& objects, api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, app::CApp* pApp);
 
 		std::shared_ptr<math::CTransform> AnalyseTransform(const json::iterator& Object);
-		std::shared_ptr<object::CNode> AnalyseNode(const json::iterator& nodeJSON, physics::IPhysicsEngine* pPhysicsEngine, const std::shared_ptr<object::C3DObject>& Object, app::CApp* pApp);
+		std::shared_ptr<object::CNode> AnalyseNode(const json::iterator& nodeJSON, const std::shared_ptr<object::C3DObject>& Object, app::CApp* pApp, 
+			api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker);
 		std::shared_ptr<graphics::CMesh> AnalyseMesh(api::IGraphicsAPI* pGraphicsAPI, const json::iterator& meshJSON);
 		scene::SMaterialInfo AnalyseMaterialInfo(const json::iterator& materialJSON);
 		scene::SAnimationInfo AnalyseAnimationInfo(const json::iterator& animationJSON);

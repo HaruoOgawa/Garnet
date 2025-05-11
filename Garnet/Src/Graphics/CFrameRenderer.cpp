@@ -50,8 +50,7 @@ namespace graphics
 			m_Material->ReplaceTextureIndex(TexLayout.TextureName, Index);
 		}
 
-		if (!m_RenderBoard->CreatePresetSimply(m_pGraphicsAPI, nullptr, graphics::CPresetPrimitive::CreateBoard(m_pGraphicsAPI), graphics::EPresetPrimitiveType::BOARD,
-			m_Material, nullptr)) return false;
+		if (!m_RenderBoard->CreatePresetSimply(m_pGraphicsAPI, nullptr, graphics::CPresetPrimitive::CreateBoard(m_pGraphicsAPI), graphics::EPresetPrimitiveType::BOARD, m_Material)) return false;
 
 		// g‚í‚È‚¢‚Ì‚ÅƒŠƒŠ[ƒX‚µ‚Ä‚¨‚­
 		m_TextureList.clear();

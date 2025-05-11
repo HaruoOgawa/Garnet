@@ -762,6 +762,8 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Src\Scriptable\CommonComponent\CDirectionalLightComponent.h" />
+    <ClInclude Include="Src\Scriptable\CComponentResolver.h" />
     <ClInclude Include="Src\Graphics\SRenderPassState.h" />
     <ClInclude Include="Src\Graphics\SStencilParam.h" />
     <ClInclude Include="Src\Graphics\STextureSamplerParam.h" />
@@ -1824,6 +1826,8 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClInclude Include="Src\Interface\IRenderer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\Scriptable\CommonComponent\CDirectionalLightComponent.cpp" />
+    <ClCompile Include="Src\Scriptable\CComponentResolver.cpp" />
     <ClCompile Include="Src\Library\bullet3\src\btBulletCollisionAll.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='DebugGL|x64'">MaxSpeed</Optimization>
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">MaxSpeed</Optimization>
