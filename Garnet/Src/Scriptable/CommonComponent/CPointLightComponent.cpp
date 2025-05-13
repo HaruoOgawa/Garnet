@@ -63,6 +63,16 @@ namespace scriptable
 			m_LightObject->SetScale(Object->GetScale());
 		}
 
+		// ƒJƒƒ‰‚ª‹…‚Ì’†‚É“Ë“ü‚µ‚½‚ç–Ê‚ð— •Ô‚·
+		float radius = 1.0f * m_LightObject->GetScale().x + Projection->GetNear();
+		float dist = glm::distance(Camera->GetPos(), m_LightObject->GetPos());
+		const bool IsFlip = (dist <= radius);
+
+		if (IsFlip)
+		{
+			m_LightObject->SetScale(-1.0f * m_LightObject->GetScale());
+		}
+
 		if (!m_LightObject->Update(pGraphicsAPI, pPhysicsEngine, 0.0f, pLoadWorker, Camera, Projection, DrawInfo, InputState)) return false;
 
 		return true;
