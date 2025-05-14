@@ -8,6 +8,7 @@ namespace object {
 	class CNode;
 }
 namespace resource { class CMaterialFrameLoader; }
+namespace graphics { class CMaterial; }
 
 namespace scriptable
 {
@@ -18,6 +19,7 @@ namespace scriptable
 		std::shared_ptr<resource::CMaterialFrameLoader> m_Loader;
 
 		std::shared_ptr<object::C3DObject> m_LightObject;
+		std::shared_ptr<graphics::CMaterial> m_Material;
 	private:
 		bool CheckIsLoading(bool& Loaded, api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker,
 			const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,

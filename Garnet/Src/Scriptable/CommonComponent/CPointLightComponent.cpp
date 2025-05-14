@@ -10,7 +10,8 @@ namespace scriptable
 		CComponent(ComponentName, RegistryName),
 		m_Status(resource::ELoadStatus::None),
 		m_Loader(nullptr),
-		m_LightObject(nullptr)
+		m_LightObject(nullptr),
+		m_Material(nullptr)
 	{
 	}
 
@@ -74,6 +75,16 @@ namespace scriptable
 		}
 
 		if (!m_LightObject->Update(pGraphicsAPI, pPhysicsEngine, 0.0f, pLoadWorker, Camera, Projection, DrawInfo, InputState)) return false;
+
+		if (m_Material)
+		{
+			glm::vec3 Pos = m_LightObject->GetPos();
+			glm::vec3 Scale = m_LightObject->GetScale();
+			float MaxScale = fmaxf(Scale.x, fmaxf(Scale.y, Scale.z));
+
+			m_Material->SetUniformValue("radius", &glm::vec1(MaxScale)[0], sizeof(float));
+			m_Material->SetUniformValue("pos", &glm::vec4(Pos.x, Pos.y, Pos.z, 1.0f)[0], sizeof(float) * 4);
+		}
 
 		return true;
 	}
@@ -142,6 +153,8 @@ namespace scriptable
 
 			// BoardかSphereかをライトタイプで変えるようにするとライトクラスが1つに統一できるかも？
 			if (!m_LightObject->CreatePresetSimply(pGraphicsAPI, pPhysicsEngine, graphics::CPresetPrimitive::CreateSphere(pGraphicsAPI), graphics::EPresetPrimitiveType::SPHERE, Material)) return false;
+
+			m_Material = Material;
 
 			// 1つ分しか見ない
 			break;
