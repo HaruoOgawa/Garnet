@@ -26,7 +26,7 @@ namespace api
 		CWebGPUTexture(api::CWebGPUAPI* pGraphicsAPI, bool UseMipMap, const graphics::STextureSamplerParam& SamplerParam);
 		virtual ~CWebGPUTexture();
 
-		virtual bool CreateFrameTexture(int Width, int Height, api::ERenderPassFormat RenderPassFormat) override;
+		virtual bool CreateFrameTexture(int Width, int Height, api::ERenderPassFormat RenderPassFormat, int AASampleNum, bool ReadOnShader) override;
 		virtual bool Create(const std::vector<unsigned char>& pixelData, int pixelSize) override;
 
 		const WGPUTextureView& GetTextureImageView() const;
