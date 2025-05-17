@@ -65,21 +65,22 @@ namespace api
 		// バインドグループを割り当てる
 		if (pWebGPUMat->IsUseShaderBuffer())
 		{
-			if (pWebGPUMat->IsUseDynamicOffset())
+			std::vector<uint32_t> dynamicOffsetList;
+
+			for (const auto& Size : pWebGPUMat->GetBindingRefSizeList())
 			{
-				std::vector<uint32_t> dynamicOffsetList;
-				for (const auto& Size : pWebGPUMat->GetBindingRefSizeList())
-				{
-					const auto& PassNameDynamicOffsetMap = pWebGPUMat->GetPassNameDynamicOffsetMap();
+				const auto& PassNameDynamicOffsetMap = pWebGPUMat->GetPassNameDynamicOffsetMap();
 
-					const auto it = PassNameDynamicOffsetMap.find(m_pGraphicsAPI->GetCurrentRenderPassName());
-					if (it == PassNameDynamicOffsetMap.end()) return false;
+				const auto it = PassNameDynamicOffsetMap.find(m_pGraphicsAPI->GetCurrentRenderPassName());
+				if (it == PassNameDynamicOffsetMap.end()) return false;
 
-					uint32_t dynamicOffset = it->second * Size;
+				uint32_t dynamicOffset = it->second * Size;
 
-					dynamicOffsetList.push_back(dynamicOffset);
-				}
+				dynamicOffsetList.push_back(dynamicOffset);
+			}
 
+			if (pWebGPUMat->IsUseDynamicOffset() && !dynamicOffsetList.empty())
+			{
 				wgpuRenderPassEncoderSetBindGroup(m_pGraphicsAPI->GetCurrentRenderPass(), 0, pWebGPUMat->GetBindGroup(), static_cast<uint32_t>(dynamicOffsetList.size()), &dynamicOffsetList[0]);
 			}
 			else

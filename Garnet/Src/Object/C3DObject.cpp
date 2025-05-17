@@ -154,7 +154,7 @@ namespace object
 	bool C3DObject::CreatePresetSimply(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine,
 		const std::pair<std::shared_ptr<graphics::CVertexBuffer>, std::shared_ptr<graphics::CIndexBuffer>>& createInfo,
 		graphics::EPresetPrimitiveType PresetType,
-		const std::shared_ptr<graphics::CMaterial>& Material, const std::shared_ptr<graphics::CMaterialFrame>& DepthMF, 
+		const std::shared_ptr<graphics::CMaterial>& Material, 
 		const std::shared_ptr<math::CTransform> NodeTransform, const std::shared_ptr<physics::IPhysicsObject>& PhysicsObject)
 	{
 		// Mesh
@@ -170,12 +170,12 @@ namespace object
 		AddNode(Node);
 
 		// Create
-		if (!Create(pGraphicsAPI, pPhysicsEngine, DepthMF)) return false;
+		if (!Create(pGraphicsAPI, pPhysicsEngine)) return false;
 
 		return true;
 	}
 
-	bool C3DObject::Create(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, const std::shared_ptr<graphics::CMaterialFrame>& DepthMF)
+	bool C3DObject::Create(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine)
 	{
 		// タイムライントラックの参照リストを追加
 		AsignTrackRef();
@@ -429,14 +429,14 @@ namespace object
 		// コンポーネント
 		for (const auto& Component : m_ComponentList)
 		{
-			if (!Component->Update(pGraphicsAPI, pPhysicsEngine, pLoadWorker, Camera, Projection, DrawInfo, InputState)) return false;
+			if (!Component->Update(pGraphicsAPI, pPhysicsEngine, pLoadWorker, Camera, Projection, DrawInfo, InputState, shared_from_this(), nullptr)) return false;
 		}
 		
 		for (const auto& Node : GetNodeList())
 		{
 			for (const auto& Component : Node->GetComponentList())
 			{
-				if (!Component->Update(pGraphicsAPI, pPhysicsEngine, pLoadWorker, Camera, Projection, DrawInfo, InputState)) return false;
+				if (!Component->Update(pGraphicsAPI, pPhysicsEngine, pLoadWorker, Camera, Projection, DrawInfo, InputState, shared_from_this(), Node)) return false;
 			}
 		}
 

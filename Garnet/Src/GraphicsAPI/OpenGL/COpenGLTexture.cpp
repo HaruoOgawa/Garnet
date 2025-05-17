@@ -15,7 +15,7 @@ namespace api
 		glDeleteTextures(1, &m_TextureID);
 	}
 
-	bool COpenGLTexture::CreateFrameTexture(int Width, int Height, api::ERenderPassFormat RenderPassFormat)
+	bool COpenGLTexture::CreateFrameTexture(int Width, int Height, api::ERenderPassFormat RenderPassFormat, int AASampleNum, bool ReadOnShader)
 	{
 		m_Width = Width;
 		m_Height = Height;

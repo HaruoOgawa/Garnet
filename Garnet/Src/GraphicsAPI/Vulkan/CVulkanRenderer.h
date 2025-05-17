@@ -41,6 +41,8 @@ namespace api
 		// Vulkanメインロジック /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		bool CreateGraphicsPipeline(const std::vector<std::string>& PassNameList, const CVulkanVertexBuffer* pVulkanVertexBuffer, api::CVulkanMaterial* pVulkanMat);
 		
+		VkPipelineMultisampleStateCreateInfo CreateMSAAInfo(bool EnabledMSAA, int SampleCount);
+
 		void SetRuntimeGraphicsSettings(const CVulkanVertexBuffer* pVulkanVertexBuffer, api::CVulkanMaterial* pVulkanMat);
 
 		void SetCullMode(graphics::ECullMode CullMode);

@@ -8,6 +8,7 @@
 #include "../Scene/CSceneController.h"
 #include "../Object/C3DObject.h"
 #include "../../Message/Console.h"
+#include "../Scriptable/CComponentResolver.h"
 
 namespace resource
 {
@@ -482,7 +483,7 @@ namespace resource
 				{
 					if (!nodeJSON->is_object()) continue;
 
-					std::shared_ptr<object::CNode> Node = AnalyseNode(nodeJSON, pPhysicsEngine, Object, pApp);
+					std::shared_ptr<object::CNode> Node = AnalyseNode(nodeJSON, Object, pApp, pGraphicsAPI, pPhysicsEngine, pLoadWorker);
 					Object->AddNode(Node);
 				}
 
@@ -605,9 +606,10 @@ namespace resource
 					GetString("valueregistry", valueregistry, componentJSON);
 
 					// コンポーネントを作成
-					auto Component = pApp->CreateComponent(type, valueregistry);
+					auto Component = scriptable::CComponentResolver::Resolve(pApp, type, valueregistry);
 					if (Component)
 					{
+						Component->Initialize(pGraphicsAPI, pLoadWorker);
 						Object->AddComponent(Component);
 					}
 				}
@@ -838,7 +840,8 @@ namespace resource
 		return true;
 	}
 
-	std::shared_ptr<object::CNode> CSceneLoader::AnalyseNode(const json::iterator& nodeJSON, physics::IPhysicsEngine* pPhysicsEngine, const std::shared_ptr<object::C3DObject>& Object, app::CApp* pApp)
+	std::shared_ptr<object::CNode> CSceneLoader::AnalyseNode(const json::iterator& nodeJSON, const std::shared_ptr<object::C3DObject>& Object, app::CApp* pApp,
+		api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker)
 	{
 		std::string nodename = "";
 		GetString("name", nodename, nodeJSON);
@@ -875,9 +878,10 @@ namespace resource
 				GetString("valueregistry", valueregistry, componentJSON);
 
 				// コンポーネントを作成
-				auto Component = pApp->CreateComponent(type, valueregistry);
+				auto Component = scriptable::CComponentResolver::Resolve(pApp, type, valueregistry);
 				if (Component)
 				{
+					Component->Initialize(pGraphicsAPI, pLoadWorker);
 					Node->AddComponent(Component);
 				}
 			}

@@ -297,7 +297,8 @@ namespace api
 				dynamicOffsetList.push_back(dynamicOffset);
 			}
 
-			if (IsUseDynamicOffset())
+			// ShaderBuffer‚ðŽ‚Á‚Ä‚¢‚È‚¢‚ÆdynamicOffsetList‚ª‹ó‚É‚È‚é‚±‚Æ‚ª‚ ‚é‚ªA‚±‚ê‚ÍDynamicOffset‚ª•s—v‚Æ‚¢‚¤‚±‚Æ‚Å‚ ‚é
+			if (IsUseDynamicOffset() && !dynamicOffsetList.empty())
 			{
 				vkCmdBindDescriptorSets(m_pGraphicsAPI->GetCurrentCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS,
 					GetPipelineLayout(), 0, 1, &GetDescriptorSets()[m_pGraphicsAPI->GetCurrentFrame()], static_cast<uint32_t>(dynamicOffsetList.size()), &dynamicOffsetList[0]);

@@ -116,12 +116,7 @@ namespace gui
 		createInfo.poolSizeCount = (uint32_t)(IM_ARRAYSIZE(poolSizes));
 		createInfo.pPoolSizes = poolSizes;
 
-		VkResult result = vkCreateDescriptorPool(pVulkanAPI->GetLogicalDevice(), &createInfo, nullptr, &m_ImGuiDescriptorPool);
-		if (result != VK_SUCCESS)
-		{
-			Console::Log("[Error] vkCreateDescriptorPool\n");
-			return false;
-		}
+		VK_CHECK_RESULT(vkCreateDescriptorPool(pVulkanAPI->GetLogicalDevice(), &createInfo, nullptr, &m_ImGuiDescriptorPool));
 
 		return true;
 	}

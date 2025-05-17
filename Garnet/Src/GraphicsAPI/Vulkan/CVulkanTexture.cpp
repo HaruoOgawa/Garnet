@@ -113,66 +113,19 @@ namespace api
 		return m_GUIDescriptorSet;
 	}
 
-	bool CVulkanTexture::CreateFrameTexture(int Width, int Height, api::ERenderPassFormat RenderPassFormat)
+	bool CVulkanTexture::CreateFrameTexture(int Width, int Height, api::ERenderPassFormat RenderPassFormat, int AASampleNum, bool ReadOnShader)
 	{
 		m_Width = Width;
 		m_Height = Height;
 		m_RenderPassFormat = RenderPassFormat;
 
-		VkFormat ImageFormat = VK_FORMAT_UNDEFINED;
-		VkImageUsageFlags Usage;
+		const VkFormat ImageFormat = m_pGraphicsAPI->FindImageFormat(RenderPassFormat);
+		const VkImageUsageFlags Usage = m_pGraphicsAPI->FindImageUsage(RenderPassFormat, ReadOnShader);
+		const VkMemoryPropertyFlags properties = (ReadOnShader) ? VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT : VK_MEMORY_PROPERTY_LAZILY_ALLOCATED_BIT;
+		const bool UseStencil = (RenderPassFormat == api::ERenderPassFormat::DEPTH_STENCIL_RENDERPASS || RenderPassFormat == api::ERenderPassFormat::DEPTH_STENCIL_FLOAT_RENDERPASS);
+		VkSampleCountFlagBits msaaSamples = m_pGraphicsAPI->GetMSAASampleFormat(AASampleNum);
 
-		bool UseStencil = false;
-
-		switch (RenderPassFormat)
-		{
-			case api::ERenderPassFormat::COLOR_RENDERPASS:
-			{
-				ImageFormat = VK_FORMAT_R8G8B8A8_UNORM;
-				Usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-				break;
-			}
-			case api::ERenderPassFormat::COLOR_FLOAT_RENDERPASS:
-			{
-				ImageFormat = VK_FORMAT_R16G16B16A16_SFLOAT;
-				Usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-				break;
-			}
-			case api::ERenderPassFormat::DEPTH_RENDERPASS:
-			{
-				ImageFormat = VK_FORMAT_D16_UNORM;
-				Usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-				break;
-			}
-			case api::ERenderPassFormat::DEPTH_FLOAT_RENDERPASS:
-			{
-				ImageFormat = VK_FORMAT_D32_SFLOAT;
-				Usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-				break;
-			}
-			case api::ERenderPassFormat::DEPTH_STENCIL_RENDERPASS:
-			{
-				ImageFormat = VK_FORMAT_D16_UNORM_S8_UINT;
-				Usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-				UseStencil = true;
-				break;
-			}
-			case api::ERenderPassFormat::DEPTH_STENCIL_FLOAT_RENDERPASS:
-			{
-				ImageFormat = VK_FORMAT_D32_SFLOAT_S8_UINT;
-				Usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-				UseStencil = true;
-				break;
-			}
-			default:
-			{
-				ImageFormat = VK_FORMAT_R8G8B8A8_UNORM;
-				Usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-				break;
-			}
-		}
-
-		if (!CreateFrameTextureImage(ImageFormat, Usage)) return false; // テクスチャイメージの生成
+		if (!CreateFrameTextureImage(ImageFormat, Usage, properties, msaaSamples)) return false; // テクスチャイメージの生成
 		if (!CreateTextureImageView(ImageFormat, UseStencil)) return false;// シェーダーで取り扱う用のImageViewを作成(イメージマネージャーみたいなやつかな)
 		if (!CreateTextureSampler()) return false; // テクスチャサンプラーを作成.サンプラーとはテクスチャデータをフラグメント(3Dモデル)に合うように調整する機構
 
@@ -193,11 +146,11 @@ namespace api
 	}
 
 	// Vulkanメインロジック /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	bool CVulkanTexture::CreateFrameTextureImage(VkFormat ImageFormat, VkImageUsageFlags Usage)
+	bool CVulkanTexture::CreateFrameTextureImage(VkFormat ImageFormat, VkImageUsageFlags Usage, VkMemoryPropertyFlags properties, VkSampleCountFlagBits msaaSamples)
 	{
 		// テクスチャイメージオブジェクトを生成
-		m_pGraphicsAPI->CreateImage(m_Width, m_Height, ImageFormat, VK_IMAGE_TILING_OPTIMAL, Usage,
-			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_TextureImage, m_TextureImageMemory, m_TextureType, m_MipCount, m_UseMipMap);
+		m_pGraphicsAPI->CreateImage(m_Width, m_Height, msaaSamples, ImageFormat, VK_IMAGE_TILING_OPTIMAL, Usage,
+			properties, m_TextureImage, m_TextureImageMemory, m_TextureType, m_MipCount, m_UseMipMap);
 
 		return true;
 	}
@@ -205,7 +158,7 @@ namespace api
 	bool CVulkanTexture::CreateTextureImage(const std::vector<unsigned char>& pixelData, int pixelSize, VkFormat ImageFormat)
 	{
 		// テクスチャイメージオブジェクトを生成
-		m_pGraphicsAPI->CreateImage(m_Width, m_Height, ImageFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
+		m_pGraphicsAPI->CreateImage(m_Width, m_Height, VK_SAMPLE_COUNT_1_BIT, ImageFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
 			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_TextureImage, m_TextureImageMemory, m_TextureType, m_MipCount, m_UseMipMap);
 
 		// テクスチャイメージのステージングバッファを作成

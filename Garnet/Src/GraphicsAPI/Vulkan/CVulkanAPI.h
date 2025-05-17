@@ -11,10 +11,21 @@
 #include "../CGraphicsAPI.h"
 
 #include <vulkan/vulkan.h>
+#include <vulkan/vk_enum_string_helper.h>
 
 namespace api
 {
 	class CVulkanRenderPass;
+
+#define VK_CHECK_RESULT(f) \
+	{\
+		VkResult res = (f);\
+		if (res != VK_SUCCESS)\
+		{\
+			Console::Log("[Error] Vulkan Status : %s\n", string_VkResult(res));\
+			assert(res == VK_SUCCESS);\
+		}\
+	}\
 
 	struct QueueFamiryIndices
 	{
@@ -53,6 +64,8 @@ namespace api
 		// Layer
 #ifdef _DEBUG
 		bool m_IsUseDebugValidationLayer = true;
+		// デバッグログが見えないのでとりあえずオフにする
+		//bool m_IsUseDebugValidationLayer = false;
 #else
 		bool m_IsUseDebugValidationLayer = false;
 #endif // _DEBUG
@@ -89,7 +102,8 @@ namespace api
 		// SwapChain/Image
 		VkSwapchainKHR m_SwapChain;
 		std::vector<VkImage> m_SwapChainImages;
-		VkFormat m_SwapChainImageFormat;
+		VkFormat m_SwapChainColorImageFormat;
+		VkFormat m_SwapChainDepthImageFormat;
 		VkExtent2D m_SwapChainExtent;
 		std::vector<VkImageView> m_SwapChainImageViews;
 
@@ -231,10 +245,11 @@ namespace api
 		// Rendering
 		const VkRenderPass& GetCurrentRenderPass() const;
 
-		// Depth
-		VkFormat FindDepthFormat();
-		VkFormat FindSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features);
-		bool	 HasStencilComponent(VkFormat format);
+		VkFormat FindImageFormat(api::ERenderPassFormat RenderPassFormat) const;
+		VkImageUsageFlags FindImageUsage(api::ERenderPassFormat RenderPassFormat, bool ReadOnShader) const;
+
+		VkSampleCountFlagBits GetMSAASampleFormat(int AASampleNum) const;
+		VkSampleCountFlagBits GetMSAAMaxUsableSampleCount() const;
 
 		// Command
 		VkCommandBuffer BeginSingleTimeCommands();
@@ -257,7 +272,7 @@ namespace api
 
 		// Texture
 		VkImageView CreateImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, graphics::ETextureType TextureType, float MipCount, bool UseMipMap);
-		bool CreateImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage,
+		bool CreateImage(uint32_t width, uint32_t height, VkSampleCountFlagBits msaaSamples, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage,
 			VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory, graphics::ETextureType TextureType, float MipCount, bool UseMipMap);
 		void TransitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, float MipCount, bool UseMipMap);
 		void CopyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height, graphics::ETextureType TextureType, float MipCount, bool UseMipMap, bool HasMipData);

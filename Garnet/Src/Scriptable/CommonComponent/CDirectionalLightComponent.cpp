@@ -1,0 +1,142 @@
+#include "CDirectionalLightComponent.h"
+
+#include <LoadWorker/CLoadWorker.h>
+#include <Object/C3DObject.h>
+#include <Graphics/CMesh.h>
+
+namespace scriptable
+{
+	CDirectionalLightComponent::CDirectionalLightComponent(const std::string& ComponentName, const std::string& RegistryName):
+		CComponent(ComponentName, RegistryName),
+		m_Status(resource::ELoadStatus::None),
+		m_Loader(nullptr),
+		m_LightObject(nullptr)
+	{
+	}
+
+	CDirectionalLightComponent::~CDirectionalLightComponent()
+	{
+	}
+
+	bool CDirectionalLightComponent::OnLoaded(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<scene::CSceneController>& SceneController,
+		const std::shared_ptr<object::C3DObject>& Object, const std::shared_ptr<object::CNode>& SelfNode)
+	{
+		return true;
+	}
+
+	bool CDirectionalLightComponent::Initialize(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker)
+	{
+		std::string filename = "Resources/MaterialFrame/DirectionalLight_MF.json";
+
+		std::shared_ptr<graphics::CMaterialFrame> MaterialFrame = std::make_shared<graphics::CMaterialFrame>();
+		m_Loader = std::make_shared<resource::CMaterialFrameLoader>(filename, MaterialFrame);
+
+		pLoadWorker->AddLoadResource(m_Loader);
+
+		m_Status = resource::ELoadStatus::Loading;
+
+		return true;
+	}
+
+	bool CDirectionalLightComponent::Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, 
+		const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
+		const std::shared_ptr<graphics::CDrawInfo>& DrawInfo, const std::shared_ptr<input::CInputState>& InputState, 
+		const std::shared_ptr<object::C3DObject>& Object, const std::shared_ptr<object::CNode>& SelfNode)
+	{
+		bool Loaded = false;
+		if (!CheckIsLoading(Loaded, pGraphicsAPI, pPhysicsEngine, pLoadWorker, Camera, Projection, DrawInfo, InputState, Object)) return false;
+
+		if (!Loaded) return true;
+
+		if (!m_LightObject) return true;
+
+		if (SelfNode)
+		{
+			m_LightObject->SetPos(SelfNode->GetPos());
+			m_LightObject->SetRot(SelfNode->GetRot());
+			m_LightObject->SetScale(SelfNode->GetScale());
+		}
+		else if(Object)
+		{
+			m_LightObject->SetPos(Object->GetPos());
+			m_LightObject->SetRot(Object->GetRot());
+			m_LightObject->SetScale(Object->GetScale());
+		}
+
+		if (!m_LightObject->Update(pGraphicsAPI, pPhysicsEngine, 0.0f, pLoadWorker, Camera, Projection, DrawInfo, InputState)) return false;
+
+		return true;
+	}
+
+	bool CDirectionalLightComponent::Draw(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
+		const std::shared_ptr<graphics::CDrawInfo>& DrawInfo, const std::shared_ptr<object::C3DObject>& Object, const std::shared_ptr<object::CNode>& SelfNode)
+	{
+		if (m_Status != resource::ELoadStatus::Loaded) return true;
+		if (!m_LightObject) return true;
+
+		if (!m_LightObject->Draw(pGraphicsAPI, Camera, Projection, DrawInfo)) return false;
+
+		return true;
+	}
+
+	bool CDirectionalLightComponent::CheckIsLoading(bool& Loaded, api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker,
+		const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
+		const std::shared_ptr<graphics::CDrawInfo>& DrawInfo, const std::shared_ptr<input::CInputState>& InputState, const std::shared_ptr<object::C3DObject>& Object)
+	{
+		// ロード済み
+		if (m_Status == resource::ELoadStatus::Loaded)
+		{
+			Loaded = true;
+			return true;
+		}
+
+		// ロード中
+		if (!m_Loader) return true;
+		if (!m_Loader->IsLoaded()) return true;
+
+		// ロード完了
+		m_Status = resource::ELoadStatus::Loaded;
+		Loaded = true;
+
+		m_LightObject = std::make_shared<object::C3DObject>();
+		
+		// PassName
+		for (const auto& PassName : Object->GetPassNameList())
+		{
+			m_LightObject->AddPassName(PassName);
+		}
+
+		// TextureList
+		const auto& RenderPass = pGraphicsAPI->FindOffScreenRenderPass("GBufferGenPass");
+		if (!RenderPass) return false;
+
+		const auto& TextureList = RenderPass->GetFrameTextureList();
+		if (TextureList.size() != 5) return false;
+
+		for (const auto& Texture : TextureList)
+		{
+			m_LightObject->GetTextureSet()->AddFrameTexture(Texture);
+		}
+
+		// Mesh & Material
+		for (const auto& MaterialFrame : m_Loader->GetTargetMaterialFrameSet())
+		{
+			const auto& Material = MaterialFrame->CreateMaterial(pGraphicsAPI, graphics::ECullMode::CULL_BACK);
+			Material->SetBlendType(graphics::EBlendType::BLEND_TYPE_ADDITIVE);
+
+			Material->ReplaceTextureIndex("gPositionTexture", 0);
+			Material->ReplaceTextureIndex("gNormalTexture", 1);
+			Material->ReplaceTextureIndex("gAlbedoTexture", 2);
+			Material->ReplaceTextureIndex("gDepthTexture", 3);
+			Material->ReplaceTextureIndex("gCustomParam0Texture", 4);
+
+			// BoardかSphereかをライトタイプで変えるようにするとライトクラスが1つに統一できるかも？
+			if (!m_LightObject->CreatePresetSimply(pGraphicsAPI, pPhysicsEngine, graphics::CPresetPrimitive::CreateBoard(pGraphicsAPI), graphics::EPresetPrimitiveType::BOARD, Material)) return false;
+		
+			// 1つ分しか見ない
+			break;
+		}
+
+		return true;
+	}
+}

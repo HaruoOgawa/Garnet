@@ -334,7 +334,7 @@ namespace scene
 			}
 
 			// Object¶¬
-			if (!Object->Create(pGraphicsAPI, pPhysicsEngine, nullptr)) return false;
+			if (!Object->Create(pGraphicsAPI, pPhysicsEngine)) return false;
 		}
 
 		// Audio
@@ -374,7 +374,7 @@ namespace scene
 
 				m_DebugSphere = std::make_shared<object::C3DObject>();
 				m_DebugSphere->AddPassName(m_DefaultRenderPass);
-				if (!m_DebugSphere->CreatePresetSimply(pGraphicsAPI, nullptr, graphics::CPresetPrimitive::CreateSphere(pGraphicsAPI), graphics::EPresetPrimitiveType::SPHERE, Material, nullptr)) return false;
+				if (!m_DebugSphere->CreatePresetSimply(pGraphicsAPI, nullptr, graphics::CPresetPrimitive::CreateSphere(pGraphicsAPI), graphics::EPresetPrimitiveType::SPHERE, Material)) return false;
 			}
 		}
 #endif // _DEBUG
