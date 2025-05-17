@@ -1,5 +1,7 @@
 # Garnet 3D Engine
 ## Dependencies
+* [FBXSDK 2020.3.7](https://aps.autodesk.com/developer/overview/fbx-sdk)
+  * copy FBXSDK folder to Garnet\Garnet\Src\Library
 * [naga](https://github.com/gfx-rs/naga)
   * Convert SPIR-V to WGSL
 * [VSYASM](https://github.com/ShiftMediaProject/VSYASM)

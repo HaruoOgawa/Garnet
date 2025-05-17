@@ -15,7 +15,7 @@ namespace api
 	{
 	}
 
-	bool CWebGPUTexture::CreateFrameTexture(int Width, int Height, api::ERenderPassFormat RenderPassFormat)
+	bool CWebGPUTexture::CreateFrameTexture(int Width, int Height, api::ERenderPassFormat RenderPassFormat, int AASampleNum, bool ReadOnShader)
 	{
 		m_Width = Width;
 		m_Height = Height;

@@ -52,13 +52,13 @@ namespace api
 		for (int AttachmentIndex = 0; AttachmentIndex < PassState.RenderTargetCount; AttachmentIndex++)
 		{
 			auto FrameTexture = std::make_shared<CWebGPUTexture>(m_pGraphicsAPI, false, SamplerParam);
-			if (!FrameTexture->CreateFrameTexture(Width, Height, m_RenderPassFormat)) return false;
+			if (!FrameTexture->CreateFrameTexture(Width, Height, m_RenderPassFormat, 1, true)) return false;
 
 			m_FrameTextureList.push_back(FrameTexture);
 		}
 		
 		m_DepthTexture = std::make_shared<CWebGPUTexture>(m_pGraphicsAPI, false, SamplerParam);
-		if (!m_DepthTexture->CreateFrameTexture(Width, Height, api::ERenderPassFormat::DEPTH_RENDERPASS)) return false;
+		if (!m_DepthTexture->CreateFrameTexture(Width, Height, api::ERenderPassFormat::DEPTH_RENDERPASS, 1, true)) return false;
 
 		return true;
 	}
