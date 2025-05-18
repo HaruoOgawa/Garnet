@@ -62,18 +62,18 @@ namespace scene
 
 	bool CSceneWriter::WriteValueRegistries(ordered_json& SceneJSON, CSceneController* pSceneController, const std::shared_ptr<timeline::CTimelineController>& TimelineController)
 	{
-		// Scene
-		for (const auto& ValueRegistry : pSceneController->GetValueRegistryList())
-		{
-			if (!WriteValueRegistry(SceneJSON, ValueRegistry, TimelineController)) return false;
-		}
+		std::set<std::string> WrittenRegistrySet;
 
-		
 		for (const auto& Object : pSceneController->GetObjectList())
 		{
 			// Object
 			for (const auto& Component : Object->GetComponentList())
 			{
+				const auto& it = WrittenRegistrySet.find(Component->GetRegistryName());
+				if (it != WrittenRegistrySet.end()) continue;
+
+				WrittenRegistrySet.emplace(Component->GetRegistryName());
+
 				if (!WriteValueRegistry(SceneJSON, std::make_pair(Component->GetRegistryName(), Component->GetValueRegistry()), TimelineController)) return false;
 			}
 
@@ -82,9 +82,25 @@ namespace scene
 			{
 				for (const auto& Component : Node->GetComponentList())
 				{
+					const auto& it = WrittenRegistrySet.find(Component->GetRegistryName());
+					if (it != WrittenRegistrySet.end()) continue;
+
+					WrittenRegistrySet.emplace(Component->GetRegistryName());
+
 					if (!WriteValueRegistry(SceneJSON, std::make_pair(Component->GetRegistryName(), Component->GetValueRegistry()), TimelineController)) return false;
 				}
 			}
+		}
+
+		// Scene
+		for (const auto& ValueRegistry : pSceneController->GetValueRegistryList())
+		{
+			const auto& it = WrittenRegistrySet.find(ValueRegistry.first);
+			if (it != WrittenRegistrySet.end()) continue;
+
+			WrittenRegistrySet.emplace(ValueRegistry.first);
+
+			if (!WriteValueRegistry(SceneJSON, ValueRegistry, TimelineController)) return false;
 		}
 
 		return true;
