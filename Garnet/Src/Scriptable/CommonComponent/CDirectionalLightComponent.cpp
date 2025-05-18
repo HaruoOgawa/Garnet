@@ -123,7 +123,7 @@ namespace scriptable
 		{
 			const auto& Material = MaterialFrame->CreateMaterial(pGraphicsAPI, graphics::ECullMode::CULL_BACK);
 			Material->SetBlendType(graphics::EBlendType::BLEND_TYPE_ADDITIVE);
-
+			Material->SetEnabledZWrite(false);
 			Material->ReplaceTextureIndex("gPositionTexture", 0);
 			Material->ReplaceTextureIndex("gNormalTexture", 1);
 			Material->ReplaceTextureIndex("gAlbedoTexture", 2);
