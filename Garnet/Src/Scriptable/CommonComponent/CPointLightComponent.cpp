@@ -13,6 +13,8 @@ namespace scriptable
 		m_LightObject(nullptr),
 		m_Material(nullptr)
 	{
+		GetValueRegistry()->SetValue("intensity", graphics::EUniformValueType::VALUE_TYPE_FLOAT, &glm::vec1(1.0f)[0], sizeof(float));
+		GetValueRegistry()->SetValue("color", graphics::EUniformValueType::VALUE_TYPE_VEC4, &glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)[0], sizeof(float) * 4);
 	}
 
 	CPointLightComponent::~CPointLightComponent()
@@ -82,8 +84,13 @@ namespace scriptable
 			glm::vec3 Scale = m_LightObject->GetScale();
 			float MaxScale = fmaxf(Scale.x, fmaxf(Scale.y, Scale.z));
 
+			float intensity = GetValueRegistry()->GetValueFloat("intensity");
+			std::vector<float> color = GetValueRegistry()->GetValueVec4("color");
+
 			m_Material->SetUniformValue("radius", &glm::vec1(MaxScale)[0], sizeof(float));
 			m_Material->SetUniformValue("pos", &glm::vec4(Pos.x, Pos.y, Pos.z, 1.0f)[0], sizeof(float) * 4);
+			m_Material->SetUniformValue("intensity", &glm::vec1(intensity)[0], sizeof(float));
+			m_Material->SetUniformValue("color", &color[0], sizeof(float) * color.size());
 		}
 
 		return true;

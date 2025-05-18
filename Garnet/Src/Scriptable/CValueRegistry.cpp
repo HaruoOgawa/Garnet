@@ -1,5 +1,6 @@
 #include "CValueRegistry.h"
 #include <Scene/CSceneController.h>
+#include <random>
 
 namespace scriptable
 {
@@ -7,6 +8,20 @@ namespace scriptable
 		timeline::CTimelineTrackContent(),
 		m_RegistryName(RegistryName)
 	{
+	}
+
+	CValueRegistry::CValueRegistry(const std::string& ComponentName, const std::string& RegistryName):
+		CValueRegistry(RegistryName)
+	{
+		// RegistryNameÇ™ãÛÇ»ÇÁé©ìÆÇ≈ñΩñºÇµÇƒÉåÉWÉXÉgÉäÇ‡çÏê¨Ç∑ÇÈ
+		if (m_RegistryName.empty())
+		{
+			int rand_A = std::rand();
+			int rand_B = std::rand();
+			std::string AutoName = ComponentName + "_" + std::to_string(rand_A) + "_" + std::to_string(rand_B);
+
+			m_RegistryName = AutoName;
+		}
 	}
 
 	CValueRegistry::~CValueRegistry()
@@ -100,6 +115,20 @@ namespace scriptable
 		if (value.Type != graphics::EUniformValueType::VALUE_TYPE_FLOAT) return 0.0f;
 
 		return *reinterpret_cast<const float*>(value.Buffer.data());
+	}
+
+	std::vector<float> CValueRegistry::GetValueVec4(const std::string& Key) const
+	{
+		const auto value = GetValue(Key);
+		if (value.Buffer.empty()) return std::vector<float>({ 0.0f, 0.0f, 0.0f, 0.0f });
+
+		if (value.Type != graphics::EUniformValueType::VALUE_TYPE_VEC4) return std::vector<float>({ 0.0f, 0.0f, 0.0f, 0.0f });
+
+		std::vector<float> dst;
+		dst.resize(4);
+		std::memcpy(&dst[0], value.Buffer.data(), sizeof(float) * 4);
+
+		return dst;
 	}
 
 	int CValueRegistry::GetValueInt(const std::string& Key) const

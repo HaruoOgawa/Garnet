@@ -4,8 +4,7 @@ namespace scriptable
 {
 	CComponent::CComponent(const std::string& ComponentName, const std::string& RegistryName):
 		m_ComponentName(ComponentName),
-		m_RegistryName(RegistryName),
-		m_ValueRegistry(std::make_shared<scriptable::CValueRegistry>(RegistryName))
+		m_ValueRegistry(std::make_shared<scriptable::CValueRegistry>(ComponentName, RegistryName))
 	{
 	}
 
@@ -20,7 +19,7 @@ namespace scriptable
 
 	const std::string CComponent::GetRegistryName() const
 	{
-		return m_RegistryName;
+		return m_ValueRegistry->GetRegistryName();
 	}
 
 	void CComponent::SetValueRegistry(const std::shared_ptr<scriptable::CValueRegistry>& ValueRegistry)
@@ -28,8 +27,14 @@ namespace scriptable
 		auto PrevValueRegistry = m_ValueRegistry; // ˆø‚«Œp‚®
 		m_ValueRegistry = ValueRegistry;
 
+		const auto& NewValueList = m_ValueRegistry->GetValueList();
 		for (const auto& Value : PrevValueRegistry->GetValueList())
 		{
+			// PrevValueRegistry‚Ì’l‚ðm_ValueRegistry‚ªŽ‚Á‚Ä‚¢‚È‚¯‚ê‚Î“o˜^‚·‚é
+			// m_ValueRegistry‚É‚ÍƒV[ƒ“‚Å‹Lq‚µ‚½’l‚µ‚©“ü‚Á‚Ä‚±‚È‚¢‚½‚ß
+			const auto& it = NewValueList.find(Value.first);
+			if (it != NewValueList.end()) continue;
+
 			m_ValueRegistry->SetValue(Value.second.Name, Value.second.Type, &Value.second.Buffer[0], Value.second.ByteSize);
 		}
 	}

@@ -23,7 +23,6 @@ namespace scriptable
 	class CComponent
 	{
 		const std::string m_ComponentName;
-		const std::string m_RegistryName;
 
 		std::shared_ptr<scriptable::CValueRegistry> m_ValueRegistry;
 	public:

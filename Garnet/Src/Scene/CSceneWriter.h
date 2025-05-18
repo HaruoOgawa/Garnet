@@ -10,6 +10,7 @@ namespace graphics { class CTexture; }
 namespace timeline { class CTimelineController; }
 namespace animation { class CSkeleton; }
 namespace physics { class IPhysicsEngine; }
+namespace scriptable { class CValueRegistry; }
 
 namespace scene
 {
@@ -23,6 +24,8 @@ namespace scene
 		static bool WriteScene(ordered_json& SceneJSON, CSceneController* pSceneController, const std::shared_ptr<timeline::CTimelineController>& TimelineController, physics::IPhysicsEngine* pPhysicsEngine);
 		static bool WriteMaterialFrames(ordered_json& SceneJSON, CSceneController* pSceneController);
 		static bool WriteValueRegistries(ordered_json& SceneJSON, CSceneController* pSceneController, const std::shared_ptr<timeline::CTimelineController>& TimelineController);
+		static bool WriteValueRegistry(ordered_json& SceneJSON, const std::pair<std::string, std::shared_ptr<scriptable::CValueRegistry>>& ValueRegistry,
+			const std::shared_ptr<timeline::CTimelineController>& TimelineController);
 		static bool WriteSceneTextureSet(ordered_json& SceneJSON, CSceneController* pSceneController);
 		static bool WriteAnimations(ordered_json& SceneJSON, CSceneController* pSceneController);
 		static bool WriteSound(ordered_json& SceneJSON, CSceneController* pSceneController);
