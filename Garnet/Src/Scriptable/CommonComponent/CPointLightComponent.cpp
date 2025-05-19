@@ -82,7 +82,7 @@ namespace scriptable
 		{
 			glm::vec3 Pos = m_LightObject->GetPos();
 			glm::vec3 Scale = m_LightObject->GetScale();
-			float MaxScale = fmaxf(Scale.x, fmaxf(Scale.y, Scale.z));
+			float MaxScale = fmaxf(fabsf(Scale.x), fmaxf(fabsf(Scale.y), fabsf(Scale.z)));
 
 			float intensity = GetValueRegistry()->GetValueFloat("intensity");
 			std::vector<float> color = GetValueRegistry()->GetValueVec4("color");
