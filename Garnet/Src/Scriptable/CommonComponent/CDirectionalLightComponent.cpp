@@ -10,8 +10,12 @@ namespace scriptable
 		CComponent(ComponentName, RegistryName),
 		m_Status(resource::ELoadStatus::None),
 		m_Loader(nullptr),
-		m_LightObject(nullptr)
+		m_LightObject(nullptr),
+		m_Material(nullptr)
 	{
+		GetValueRegistry()->SetValue("intensity", graphics::EUniformValueType::VALUE_TYPE_FLOAT, &glm::vec1(1.0f)[0], sizeof(float));
+		GetValueRegistry()->SetValue("dir", graphics::EUniformValueType::VALUE_TYPE_VEC4, &glm::vec4(2.358f, -15.6f, 0.59f, 0.0f)[0], sizeof(float) * 4);
+		GetValueRegistry()->SetValue("color", graphics::EUniformValueType::VALUE_TYPE_VEC4, &glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)[0], sizeof(float) * 4);
 	}
 
 	CDirectionalLightComponent::~CDirectionalLightComponent()
@@ -64,6 +68,17 @@ namespace scriptable
 		}
 
 		if (!m_LightObject->Update(pGraphicsAPI, pPhysicsEngine, 0.0f, pLoadWorker, Camera, Projection, DrawInfo, InputState)) return false;
+
+		if (m_Material)
+		{
+			float intensity = GetValueRegistry()->GetValueFloat("intensity");
+			std::vector<float> dir = GetValueRegistry()->GetValueVec4("dir");
+			std::vector<float> color = GetValueRegistry()->GetValueVec4("color");
+
+			m_Material->SetUniformValue("intensity", &glm::vec1(intensity)[0], sizeof(float));
+			m_Material->SetUniformValue("dir", &dir[0], sizeof(float) * dir.size());
+			m_Material->SetUniformValue("color", &color[0], sizeof(float) * color.size());
+		}
 
 		return true;
 	}
@@ -123,7 +138,7 @@ namespace scriptable
 		{
 			const auto& Material = MaterialFrame->CreateMaterial(pGraphicsAPI, graphics::ECullMode::CULL_BACK);
 			Material->SetBlendType(graphics::EBlendType::BLEND_TYPE_ADDITIVE);
-
+			Material->SetEnabledZWrite(false);
 			Material->ReplaceTextureIndex("gPositionTexture", 0);
 			Material->ReplaceTextureIndex("gNormalTexture", 1);
 			Material->ReplaceTextureIndex("gAlbedoTexture", 2);
@@ -133,6 +148,8 @@ namespace scriptable
 			// BoardかSphereかをライトタイプで変えるようにするとライトクラスが1つに統一できるかも？
 			if (!m_LightObject->CreatePresetSimply(pGraphicsAPI, pPhysicsEngine, graphics::CPresetPrimitive::CreateBoard(pGraphicsAPI), graphics::EPresetPrimitiveType::BOARD, Material)) return false;
 		
+			m_Material = Material;
+
 			// 1つ分しか見ない
 			break;
 		}

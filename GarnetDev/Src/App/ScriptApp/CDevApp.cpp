@@ -48,11 +48,10 @@ namespace app
 		m_PlayMode = EPlayMode::Stop;
 #endif // _DEBUG
 
-		m_ViewCamera->SetPos(glm::vec3(0.0f, 2.5f, 10.0f));
-		m_ViewCamera->SetCenter(glm::vec3(0.0f, 2.5f, 0.0f));
+		m_ViewCamera->SetPos(glm::vec3(-7.0f, 1.0f, 0.0f));
 		m_MainCamera = m_ViewCamera;
 
-		m_DrawInfo->GetLightCamera()->SetPos(glm::vec3(5.0f, 5.0f, 5.0f));
+		m_DrawInfo->GetLightCamera()->SetPos(glm::vec3(-2.358f, 15.6f, -0.59f));
 		m_DrawInfo->GetLightProjection()->SetNear(2.0f);
 		m_DrawInfo->GetLightProjection()->SetFar(100.0f);
 

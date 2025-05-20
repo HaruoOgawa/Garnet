@@ -23,12 +23,13 @@ namespace scriptable
 
 	class CValueRegistry : public std::enable_shared_from_this<CValueRegistry>, public timeline::CTimelineTrackContent
 	{
-		const std::string m_RegistryName;
+		std::string m_RegistryName;
 
 		std::map<std::string, SValue> m_ValueList;
 		
 	public:
 		explicit CValueRegistry(const std::string& RegistryName);
+		CValueRegistry(const std::string& ComponentName, const std::string& RegistryName);
 		virtual ~CValueRegistry();
 
 		virtual void OnLoaded(const std::shared_ptr<scene::CSceneController>& SceneController);
@@ -41,6 +42,7 @@ namespace scriptable
 		void SetValue(const std::string& Key, const void* Data);
 		SValue GetValue(const std::string& Key) const;
 		float GetValueFloat(const std::string& Key) const;
+		std::vector<float> GetValueVec4(const std::string& Key) const;
 		int GetValueInt(const std::string& Key) const;
 		std::string GetValueString(const std::string& Key) const;
 	};

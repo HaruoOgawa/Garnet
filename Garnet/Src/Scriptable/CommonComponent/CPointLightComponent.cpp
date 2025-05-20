@@ -13,6 +13,8 @@ namespace scriptable
 		m_LightObject(nullptr),
 		m_Material(nullptr)
 	{
+		GetValueRegistry()->SetValue("intensity", graphics::EUniformValueType::VALUE_TYPE_FLOAT, &glm::vec1(1.0f)[0], sizeof(float));
+		GetValueRegistry()->SetValue("color", graphics::EUniformValueType::VALUE_TYPE_VEC4, &glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)[0], sizeof(float) * 4);
 	}
 
 	CPointLightComponent::~CPointLightComponent()
@@ -64,26 +66,21 @@ namespace scriptable
 			m_LightObject->SetScale(Object->GetScale());
 		}
 
-		// ƒJƒƒ‰‚ª‹…‚Ì’†‚É“Ë“ü‚µ‚½‚ç–Ê‚ð— •Ô‚·
-		float radius = 1.0f * m_LightObject->GetScale().x + Projection->GetNear();
-		float dist = glm::distance(Camera->GetPos(), m_LightObject->GetPos());
-		const bool IsFlip = (dist <= radius);
-
-		if (IsFlip)
-		{
-			m_LightObject->SetScale(-1.0f * m_LightObject->GetScale());
-		}
-
 		if (!m_LightObject->Update(pGraphicsAPI, pPhysicsEngine, 0.0f, pLoadWorker, Camera, Projection, DrawInfo, InputState)) return false;
 
 		if (m_Material)
 		{
 			glm::vec3 Pos = m_LightObject->GetPos();
 			glm::vec3 Scale = m_LightObject->GetScale();
-			float MaxScale = fmaxf(Scale.x, fmaxf(Scale.y, Scale.z));
+			float MaxScale = fmaxf(fabsf(Scale.x), fmaxf(fabsf(Scale.y), fabsf(Scale.z)));
+
+			float intensity = GetValueRegistry()->GetValueFloat("intensity");
+			std::vector<float> color = GetValueRegistry()->GetValueVec4("color");
 
 			m_Material->SetUniformValue("radius", &glm::vec1(MaxScale)[0], sizeof(float));
 			m_Material->SetUniformValue("pos", &glm::vec4(Pos.x, Pos.y, Pos.z, 1.0f)[0], sizeof(float) * 4);
+			m_Material->SetUniformValue("intensity", &glm::vec1(intensity)[0], sizeof(float));
+			m_Material->SetUniformValue("color", &color[0], sizeof(float) * color.size());
 		}
 
 		return true;
@@ -142,7 +139,7 @@ namespace scriptable
 		// Mesh & Material
 		for (const auto& MaterialFrame : m_Loader->GetTargetMaterialFrameSet())
 		{
-			const auto& Material = MaterialFrame->CreateMaterial(pGraphicsAPI, graphics::ECullMode::CULL_BACK);
+			const auto& Material = MaterialFrame->CreateMaterial(pGraphicsAPI, graphics::ECullMode::CULL_FRONT);
 			Material->SetBlendType(graphics::EBlendType::BLEND_TYPE_ADDITIVE);
 
 			Material->ReplaceTextureIndex("gPositionTexture", 0);

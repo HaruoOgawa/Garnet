@@ -62,130 +62,174 @@ namespace scene
 
 	bool CSceneWriter::WriteValueRegistries(ordered_json& SceneJSON, CSceneController* pSceneController, const std::shared_ptr<timeline::CTimelineController>& TimelineController)
 	{
+		std::set<std::string> WrittenRegistrySet;
+
+		for (const auto& Object : pSceneController->GetObjectList())
+		{
+			// Object
+			for (const auto& Component : Object->GetComponentList())
+			{
+				const auto& it = WrittenRegistrySet.find(Component->GetRegistryName());
+				if (it != WrittenRegistrySet.end()) continue;
+
+				WrittenRegistrySet.emplace(Component->GetRegistryName());
+
+				if (!WriteValueRegistry(SceneJSON, std::make_pair(Component->GetRegistryName(), Component->GetValueRegistry()), TimelineController)) return false;
+			}
+
+			// Node
+			for (const auto& Node : Object->GetNodeList())
+			{
+				for (const auto& Component : Node->GetComponentList())
+				{
+					const auto& it = WrittenRegistrySet.find(Component->GetRegistryName());
+					if (it != WrittenRegistrySet.end()) continue;
+
+					WrittenRegistrySet.emplace(Component->GetRegistryName());
+
+					if (!WriteValueRegistry(SceneJSON, std::make_pair(Component->GetRegistryName(), Component->GetValueRegistry()), TimelineController)) return false;
+				}
+			}
+		}
+
+		// Scene
 		for (const auto& ValueRegistry : pSceneController->GetValueRegistryList())
 		{
-			// 使用しているトラックの種類
-			std::set<std::string> TrackValueNameList;
-			if (TimelineController)
-			{
-				const auto& Clip = TimelineController->GetClip();
+			const auto& it = WrittenRegistrySet.find(ValueRegistry.first);
+			if (it != WrittenRegistrySet.end()) continue;
 
-				if (Clip)
-				{
-					for (const auto& TrackID : ValueRegistry.second->GetRefTrackIDList())
-					{
-						auto Track = Clip->FindTrack(TrackID);
-						if (!Track) continue;
+			WrittenRegistrySet.emplace(ValueRegistry.first);
 
-						TrackValueNameList.emplace(Track->GetParam_String("ValueName"));
-					}
-				}
-			}
-
-			ordered_json ValueRegistryJSON;
-
-			ValueRegistryJSON["registryname"] = ValueRegistry.first;
-
-			// Timeline Track ID
-			for (const auto& TrackID : ValueRegistry.second->GetRefTrackIDList())
-			{
-				ValueRegistryJSON["trackids"].push_back(TrackID);
-			}
-
-			for (const auto& Value : ValueRegistry.second->GetValueList())
-			{
-				// タイムラインで管理されていたら書き込まない
-				//if (TrackValueNameList.find(Value.second.Name) != TrackValueNameList.end()) continue;
-
-				ordered_json ValueJSON;
-
-				ValueJSON["name"] = Value.second.Name;
-
-				// type
-				std::string type = std::string();
-				graphics::EUniformValueType ValueType = Value.second.Type;
-				switch (ValueType)
-				{
-				case graphics::EUniformValueType::NONE:
-					break;
-				case graphics::EUniformValueType::VALUE_TYPE_MAT4:
-					type = "mat4";
-					break;
-				case graphics::EUniformValueType::VALUE_TYPE_MAT3:
-					type = "mat3";
-					break;
-				case graphics::EUniformValueType::VALUE_TYPE_MAT2:
-					type = "mat2";
-					break;
-				case graphics::EUniformValueType::VALUE_TYPE_VEC4:
-					type = "vec4";
-					break;
-				case graphics::EUniformValueType::VALUE_TYPE_VEC3:
-					type = "vec3";
-					break;
-				case graphics::EUniformValueType::VALUE_TYPE_VEC2:
-					type = "vec2";
-					break;
-				case graphics::EUniformValueType::VALUE_TYPE_FLOAT:
-					type = "float";
-					break;
-				case graphics::EUniformValueType::VALUE_TYPE_INT:
-					type = "int";
-					break;
-				case graphics::EUniformValueType::VALUE_TYPE_STRING:
-					type = "string";
-					break;
-				case graphics::EUniformValueType::VALUE_TYPE_FLOAT_ARRAY:
-					break;
-				case graphics::EUniformValueType::VALUE_TYPE_MAT4_ARRAY:
-					break;
-				default:
-					break;
-				}
-
-				if (type.empty()) continue;
-
-				ValueJSON["type"] = type;
-
-				ordered_json valueJSON;
-
-				// Value
-				if (type == "int")
-				{
-					std::vector<int> DstValue(Value.second.ByteSize / 4);
-					std::memcpy(&DstValue[0], &Value.second.Buffer[0], Value.second.ByteSize);
-
-					for (auto v : DstValue)
-					{
-						ValueJSON["initValue"].push_back(v);
-					}
-				}
-				else if (type == "string")
-				{
-					std::string DstValue = std::string();
-					DstValue.resize(Value.second.ByteSize);
-
-					std::memcpy(&DstValue[0], &Value.second.Buffer[0], Value.second.ByteSize);
-
-					ValueJSON["initValue"] = DstValue;
-				}
-				else
-				{
-					std::vector<float> DstValue(Value.second.ByteSize / 4);
-					std::memcpy(&DstValue[0], &Value.second.Buffer[0], Value.second.ByteSize);
-
-					for (auto v : DstValue)
-					{
-						ValueJSON["initValue"].push_back(v);
-					}
-				}
-
-				//
-				ValueRegistryJSON["values"].push_back(ValueJSON);
-			}
-
-			SceneJSON["valueregistries"].push_back(ValueRegistryJSON);
+			if (!WriteValueRegistry(SceneJSON, ValueRegistry, TimelineController)) return false;
 		}
+
+		return true;
+	}
+
+	bool CSceneWriter::WriteValueRegistry(ordered_json& SceneJSON, const std::pair<std::string, std::shared_ptr<scriptable::CValueRegistry>>& ValueRegistry,
+		const std::shared_ptr<timeline::CTimelineController>& TimelineController)
+	{
+		// 使用しているトラックの種類
+		std::set<std::string> TrackValueNameList;
+		if (TimelineController)
+		{
+			const auto& Clip = TimelineController->GetClip();
+
+			if (Clip)
+			{
+				for (const auto& TrackID : ValueRegistry.second->GetRefTrackIDList())
+				{
+					auto Track = Clip->FindTrack(TrackID);
+					if (!Track) continue;
+
+					TrackValueNameList.emplace(Track->GetParam_String("ValueName"));
+				}
+			}
+		}
+
+		ordered_json ValueRegistryJSON;
+
+		ValueRegistryJSON["registryname"] = ValueRegistry.first;
+
+		// Timeline Track ID
+		for (const auto& TrackID : ValueRegistry.second->GetRefTrackIDList())
+		{
+			ValueRegistryJSON["trackids"].push_back(TrackID);
+		}
+
+		for (const auto& Value : ValueRegistry.second->GetValueList())
+		{
+			// タイムラインで管理されていたら書き込まない
+			//if (TrackValueNameList.find(Value.second.Name) != TrackValueNameList.end()) continue;
+
+			ordered_json ValueJSON;
+
+			ValueJSON["name"] = Value.second.Name;
+
+			// type
+			std::string type = std::string();
+			graphics::EUniformValueType ValueType = Value.second.Type;
+			switch (ValueType)
+			{
+			case graphics::EUniformValueType::NONE:
+				break;
+			case graphics::EUniformValueType::VALUE_TYPE_MAT4:
+				type = "mat4";
+				break;
+			case graphics::EUniformValueType::VALUE_TYPE_MAT3:
+				type = "mat3";
+				break;
+			case graphics::EUniformValueType::VALUE_TYPE_MAT2:
+				type = "mat2";
+				break;
+			case graphics::EUniformValueType::VALUE_TYPE_VEC4:
+				type = "vec4";
+				break;
+			case graphics::EUniformValueType::VALUE_TYPE_VEC3:
+				type = "vec3";
+				break;
+			case graphics::EUniformValueType::VALUE_TYPE_VEC2:
+				type = "vec2";
+				break;
+			case graphics::EUniformValueType::VALUE_TYPE_FLOAT:
+				type = "float";
+				break;
+			case graphics::EUniformValueType::VALUE_TYPE_INT:
+				type = "int";
+				break;
+			case graphics::EUniformValueType::VALUE_TYPE_STRING:
+				type = "string";
+				break;
+			case graphics::EUniformValueType::VALUE_TYPE_FLOAT_ARRAY:
+				break;
+			case graphics::EUniformValueType::VALUE_TYPE_MAT4_ARRAY:
+				break;
+			default:
+				break;
+			}
+
+			if (type.empty()) continue;
+
+			ValueJSON["type"] = type;
+
+			ordered_json valueJSON;
+
+			// Value
+			if (type == "int")
+			{
+				std::vector<int> DstValue(Value.second.ByteSize / 4);
+				std::memcpy(&DstValue[0], &Value.second.Buffer[0], Value.second.ByteSize);
+
+				for (auto v : DstValue)
+				{
+					ValueJSON["initValue"].push_back(v);
+				}
+			}
+			else if (type == "string")
+			{
+				std::string DstValue = std::string();
+				DstValue.resize(Value.second.ByteSize);
+
+				std::memcpy(&DstValue[0], &Value.second.Buffer[0], Value.second.ByteSize);
+
+				ValueJSON["initValue"] = DstValue;
+			}
+			else
+			{
+				std::vector<float> DstValue(Value.second.ByteSize / 4);
+				std::memcpy(&DstValue[0], &Value.second.Buffer[0], Value.second.ByteSize);
+
+				for (auto v : DstValue)
+				{
+					ValueJSON["initValue"].push_back(v);
+				}
+			}
+
+			//
+			ValueRegistryJSON["values"].push_back(ValueJSON);
+		}
+
+		SceneJSON["valueregistries"].push_back(ValueRegistryJSON);
 
 		return true;
 	}
