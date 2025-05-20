@@ -274,94 +274,43 @@ namespace graphics
 		// Indices
 		std::vector<unsigned short> Indices;
 
-		// Sphere Function
-		// https://www.songho.ca/opengl/gl_sphere.html
-
 		//
-		float radius = 1.0f;
-		float PI = 3.1415f;
-		float sectorCount = 32.0f; // â°ÇÃêî
-		float stackCount = 32.0f; // ècÇÃêî
+		float pi = 3.14159265f, row = 32.0f, column = 32.0f, rad = 1.0f;
 
-		//
-		float x, y, z, xy;                              // vertex position
-		float nx, ny, nz, lengthInv = 1.0f / radius;    // vertex normal
-		float s, t;                                     // vertex texCoord
+		for (auto i = 0; i <= row; i++) {
+			auto r = pi / row * i;
+			auto ry = glm::cos(r);
+			auto rr = glm::sin(r);
+			for (auto ii = 0; ii <= column; ii++) {
+				float tr = pi * 2 / column * ii;
+				float tx = rr * rad * glm::cos(tr);
+				float ty = ry * rad;
+				float tz = rr * rad * glm::sin(tr);
+				float rx = rr * glm::cos(tr);
+				float rz = rr * glm::sin(tr);
 
-		float sectorStep = 2 * PI / sectorCount;
-		float stackStep = PI / stackCount;
-		float sectorAngle, stackAngle;
+				Pos.push_back(tx); Pos.push_back(ty); Pos.push_back(tz);
+				Normal.push_back(rx); Normal.push_back(ry); Normal.push_back(rz);
+				UV.push_back(static_cast<float>(1 - 1 / column * ii)); UV.push_back(static_cast<float>(1 / row * i));
+			}
+		}
 
-		for (int i = 0; i <= stackCount; ++i)
-		{
-			stackAngle = PI / 2 - i * stackStep;        // starting from pi/2 to -pi/2
-			xy = radius * cosf(stackAngle);             // r * cos(u)
-			z = radius * sinf(stackAngle);              // r * sin(u)
+		for (int i = 0; i < row; i++) {
+			for (int ii = 0; ii < static_cast<int>(column); ii++) {
+				int r = (static_cast<int>(column) + 1) * i + ii;
 
-			// add (sectorCount+1) vertices per stack
-			// first and last vertices have same position and normal, but different tex coords
-			for (int j = 0; j <= sectorCount; ++j)
-			{
-				sectorAngle = j * sectorStep;           // starting from 0 to 2pi
-
-				// vertex position (x, y, z)
-				x = xy * cosf(sectorAngle);             // r * cos(u) * cos(v)
-				y = xy * sinf(sectorAngle);             // r * cos(u) * sin(v)
-				Pos.push_back(x);
-				Pos.push_back(y);
-				Pos.push_back(z);
-
-				// normalized vertex normal (nx, ny, nz)
-				nx = x * lengthInv;
-				ny = y * lengthInv;
-				nz = z * lengthInv;
-				Normal.push_back(nx);
-				Normal.push_back(ny);
-				Normal.push_back(nz);
-
-				// vertex tex coord (s, t) range between [0, 1]
-				s = (float)j / sectorCount;
-				t = (float)i / stackCount;
-				UV.push_back(s);
-				UV.push_back(t);
+				Indices.push_back(static_cast<int>(r));
+				Indices.push_back(static_cast<int>(r + 1));
+				Indices.push_back(static_cast<int>(r + static_cast<int>(column) + 2));
+				Indices.push_back(static_cast<int>(r));
+				Indices.push_back(static_cast<int>(r + static_cast<int>(column) + 2));
+				Indices.push_back(static_cast<int>(r + static_cast<int>(column) + 1));
 			}
 		}
 
 		Tangent.resize(Pos.size() / 3 * 4, 0.0f);
 		Joints.resize(Pos.size() / 3 * 4, 0.0f);
 		Weights.resize(Pos.size() / 3 * 4, 0.0f);
-
-		// generate CCW index list of sphere triangles
-// k1--k1+1
-// |  / |
-// | /  |
-// k2--k2+1
-		int k1, k2;
-		for (int i = 0; i < stackCount; ++i)
-		{
-			k1 = i * (sectorCount + 1);     // beginning of current stack
-			k2 = k1 + sectorCount + 1;      // beginning of next stack
-
-			for (int j = 0; j < sectorCount; ++j, ++k1, ++k2)
-			{
-				// 2 triangles per sector excluding first and last stacks
-				// k1 => k2 => k1+1
-				if (i != 0)
-				{
-					Indices.push_back(k1);
-					Indices.push_back(k2);
-					Indices.push_back(k1 + 1);
-				}
-
-				// k1+1 => k2 => k2+1
-				if (i != (stackCount - 1))
-				{
-					Indices.push_back(k1 + 1);
-					Indices.push_back(k2);
-					Indices.push_back(k2 + 1);
-				}
-			}
-		}
 
 		//
 		std::vector<std::vector<float>> Vertices = {
@@ -370,7 +319,7 @@ namespace graphics
 
 		createInfo.first->SetVertices(Vertices);
 		createInfo.second->SetIndices(Indices);
-		createInfo.first->SetAttributeDimensions(std::vector<int>({ 3 , 3 , 2, 4, 4, 4}));
+		createInfo.first->SetAttributeDimensions(std::vector<int>({ 3 , 3 , 2, 4, 4, 4 }));
 		createInfo.first->SetAttribDataTypes(std::vector<graphics::EDataType>({ graphics::EDataType::TYPE_FLOAT , graphics::EDataType::TYPE_FLOAT , graphics::EDataType::TYPE_FLOAT , graphics::EDataType::TYPE_FLOAT, graphics::EDataType::TYPE_UNSIGNED_INT, graphics::EDataType::TYPE_FLOAT }));
 		createInfo.first->SetAttribByteStrides(std::vector<int>({ 0, 0, 0, 0, 0, 0 }));
 
