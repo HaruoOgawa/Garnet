@@ -135,8 +135,11 @@ namespace api
 		}
 
 		// Depth
-		m_DepthTexture = std::make_shared<CVulkanTexture>(m_pGraphicsAPI, false, SamplerParam);
-		if (!m_DepthTexture->CreateFrameTexture(Width, Height, m_RenderPassFormat_Depth, 1, true)) return false;
+		{
+			const int AASampleNum = (PassState.EnabledAA) ? PassState.AASampleNum : 1;
+			m_DepthTexture = std::make_shared<CVulkanTexture>(m_pGraphicsAPI, false, SamplerParam);
+			if (!m_DepthTexture->CreateFrameTexture(Width, Height, m_RenderPassFormat_Depth, AASampleNum, true)) return false;
+		}
 
 		if (!CreateRenderPass(PassState)) return false; // レンダーパスの作成(描画全体のマネージャー。実際に描画に使用するのがサブパス。サブパスを複数個用意することでポストプロセスもできる)
 		if (!CreateFrameBuffer(Width, Height)) return false; // フレームバッファの作成

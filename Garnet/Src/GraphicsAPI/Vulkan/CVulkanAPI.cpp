@@ -1160,12 +1160,7 @@ namespace api
 		// レンダリングのような複数コマンドを記録するにはキューが必須である
 		
 		// そしてそのキューには格納できるコマンドの種類が決まっていて、描画系だとGraphicsQueue、プレゼント系だとPresentQueueといった感じで分かれている
-		if (vkQueueSubmit(m_GraphicsQueue, 1, &submitInfo, m_InFlightFences[m_CurrentFrame]) != VK_SUCCESS)
-		{
-			Console::Log("[Error] Failed to vkQueueSubmit\n");
-
-			return false;
-		}
+		VK_CHECK_RESULT(vkQueueSubmit(m_GraphicsQueue, 1, &submitInfo, m_InFlightFences[m_CurrentFrame]));
 
 		// プレゼンテーション(結果をスワップチェーンに送信して最終結果を画面に示する)
 		VkPresentInfoKHR presentInfo{};
@@ -1678,7 +1673,10 @@ namespace api
 		allocInfo.allocationSize = memRequirements.size;
 		
 		uint32_t MemoryType = FindMemoryType(memRequirements.memoryTypeBits, properties);
-		if (MemoryType == -1) return false;
+		if (MemoryType == -1)
+		{
+			return false;
+		}
 		allocInfo.memoryTypeIndex = MemoryType;
 
 		if (vkAllocateMemory(m_LogicalDevice, &allocInfo, nullptr, &imageMemory) != VK_SUCCESS)

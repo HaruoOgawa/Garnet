@@ -121,7 +121,7 @@ namespace api
 
 		const VkFormat ImageFormat = m_pGraphicsAPI->FindImageFormat(RenderPassFormat);
 		const VkImageUsageFlags Usage = m_pGraphicsAPI->FindImageUsage(RenderPassFormat, ReadOnShader);
-		const VkMemoryPropertyFlags properties = (ReadOnShader) ? VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT : VK_MEMORY_PROPERTY_LAZILY_ALLOCATED_BIT;
+		const VkMemoryPropertyFlags properties = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
 		const bool UseStencil = (RenderPassFormat == api::ERenderPassFormat::DEPTH_STENCIL_RENDERPASS || RenderPassFormat == api::ERenderPassFormat::DEPTH_STENCIL_FLOAT_RENDERPASS);
 		VkSampleCountFlagBits msaaSamples = m_pGraphicsAPI->GetMSAASampleFormat(AASampleNum);
 
