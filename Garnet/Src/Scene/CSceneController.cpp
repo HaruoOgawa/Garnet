@@ -730,11 +730,12 @@ namespace scene
 					// TrackIDList
 					Material->SetRefTrackIDList(MaterialInfo.TrackIDList);
 
+					// CSceneControllerで生成するのでここでは無視(C3DObjectLoader・CSceneController)
 					// マテリアルを置き換えたので再生成する
-					if (MatReplaced)
+					/*if (MatReplaced)
 					{
 						if (!Material->Create(Object->GetPassNameList(), Object->GetTextureSet())) return false;
-					}
+					}*/
 				}
 			}
 		}

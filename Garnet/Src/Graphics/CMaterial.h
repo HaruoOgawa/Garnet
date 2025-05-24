@@ -33,6 +33,8 @@ namespace graphics
 	class CMaterial : public std::enable_shared_from_this<CMaterial>, public timeline::CTimelineTrackContent
 	{
 	protected:
+		bool m_Created;
+
 		std::shared_ptr<CMaterialFrame> m_MaterialFrame;
 
 		std::map<std::string, int> m_PassNameDynamicOffsetMap;

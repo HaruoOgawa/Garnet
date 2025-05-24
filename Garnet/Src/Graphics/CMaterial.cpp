@@ -5,6 +5,7 @@ namespace graphics
 {
 	CMaterial::CMaterial(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<CMaterialCreateInfo>& createInfo, ECullMode CullMode):
 		timeline::CTimelineTrackContent(),
+		m_Created(false),
 		m_MaterialName(std::string()),
 		m_MaterialFrame(nullptr),
 		m_CreateInfo(createInfo),
@@ -37,6 +38,10 @@ namespace graphics
 
 	bool CMaterial::Create(const std::vector<std::string>& PassNameList, const std::shared_ptr<graphics::CTextureSet>& TextureSet)
 	{
+		// àÍìxÇµÇ©ê∂ê¨ÇµÇ»Ç¢
+		if (m_Created) return true;
+		m_Created = true;
+
 		for (int PassIndex = 0; PassIndex < static_cast<int>(PassNameList.size()); PassIndex++)
 		{
 			const auto& PassName = PassNameList[PassIndex];
@@ -44,7 +49,6 @@ namespace graphics
 			m_PassNameDynamicOffsetMap.emplace(PassName, PassIndex);
 		}
 
-		//
 		if (!Create(TextureSet)) return false;
 
 		return true;

@@ -72,17 +72,18 @@ namespace api
 			vkDestroyPipelineLayout(m_pGraphicsAPI->GetLogicalDevice(), m_PipelineLayout, nullptr);
 			m_PipelineLayout = nullptr;
 		}
-
-		// DescriptorSetsの破棄
-		vkFreeDescriptorSets(m_pGraphicsAPI->GetLogicalDevice(), m_DescriptorPool, static_cast<uint32_t>(m_DescriptorSets.size()), &m_DescriptorSets[0]);
-		m_DescriptorSets.clear();
-
+		
 		// 記述子プールの破棄
 		if (m_DescriptorPool)
 		{
+			vkFreeDescriptorSets(m_pGraphicsAPI->GetLogicalDevice(), m_DescriptorPool, static_cast<uint32_t>(m_DescriptorSets.size()), &m_DescriptorSets[0]);
+
 			vkDestroyDescriptorPool(m_pGraphicsAPI->GetLogicalDevice(), m_DescriptorPool, nullptr);
 			m_DescriptorPool = nullptr;
 		}
+
+		// DescriptorSetsの破棄
+		m_DescriptorSets.clear();
 
 		// ユニフォームレイアウトセットを破棄
 		if (m_DescriptorSetLayout)
@@ -656,6 +657,7 @@ namespace api
 
 		VkDescriptorPoolCreateInfo poolInfo{};
 		poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+		poolInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
 		poolInfo.poolSizeCount = static_cast<uint32_t>(poolSizes.size());
 		poolInfo.pPoolSizes = poolSizes.data();
 		poolInfo.maxSets = static_cast<uint32_t>(m_pGraphicsAPI->GetMaxFramesInFlight());
