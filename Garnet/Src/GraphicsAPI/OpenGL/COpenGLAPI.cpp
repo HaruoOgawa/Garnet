@@ -121,7 +121,6 @@ namespace api
 
 	bool COpenGLAPI::BeginRender(const std::string& PassName)
 	{
-
 		// レンダーパスを切り替える
 		const auto& OffScreenRenderPass = m_OffScreenRenderPassMap.find(PassName);
 		if (OffScreenRenderPass != m_OffScreenRenderPassMap.end())
@@ -149,6 +148,21 @@ namespace api
 
 	bool COpenGLAPI::EndRender()
 	{
+		// 記録終了
+		const auto& OffScreenRenderPass = m_OffScreenRenderPassMap.find(m_CurrentRenderPassName);
+		if (OffScreenRenderPass != m_OffScreenRenderPassMap.end())
+		{
+			// オフスクリーンレンダーパス
+			if (!OffScreenRenderPass->second->EndRenderPass()) return false;
+
+			m_CurrentRenderPassName = std::string();
+		}
+		else
+		{
+			// デフォルトレンダーパス
+			// OpenGLでは何もしない
+		}
+
 		return true;
 	}
 
