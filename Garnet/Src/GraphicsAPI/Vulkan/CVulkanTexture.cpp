@@ -280,10 +280,7 @@ namespace api
 		samplerInfo.minLod = 0.0f;
 		samplerInfo.maxLod = m_MipCount;
 
-		if (vkCreateSampler(m_pGraphicsAPI->GetLogicalDevice(), &samplerInfo, nullptr, &m_TextureSampler) != VK_SUCCESS)
-		{
-			return false;
-		}
+		VK_CHECK_RESULT(vkCreateSampler(m_pGraphicsAPI->GetLogicalDevice(), &samplerInfo, nullptr, &m_TextureSampler));
 
 		return true;
 	}
@@ -302,10 +299,7 @@ namespace api
 		layoutInfo.bindingCount = 1; // ƒoƒCƒ“ƒh‚·‚é”
 		layoutInfo.pBindings = &samplerLayoutBinding;
 
-		if (vkCreateDescriptorSetLayout(m_pGraphicsAPI->GetLogicalDevice(), &layoutInfo, nullptr, &m_GUIDescriptorSetLayout) != VK_SUCCESS)
-		{
-			return false;
-		}
+		VK_CHECK_RESULT(vkCreateDescriptorSetLayout(m_pGraphicsAPI->GetLogicalDevice(), &layoutInfo, nullptr, &m_GUIDescriptorSetLayout));
 
 		return true;
 	}
@@ -322,10 +316,7 @@ namespace api
 		poolInfo.pPoolSizes = &poolSize;
 		poolInfo.maxSets = 1;
 
-		if (vkCreateDescriptorPool(m_pGraphicsAPI->GetLogicalDevice(), &poolInfo, nullptr, &m_GUIDescriptorPool) != VK_SUCCESS)
-		{
-			return false;
-		}
+		VK_CHECK_RESULT(vkCreateDescriptorPool(m_pGraphicsAPI->GetLogicalDevice(), &poolInfo, nullptr, &m_GUIDescriptorPool));
 
 		return true;
 	}
@@ -340,10 +331,7 @@ namespace api
 		allocInfo.descriptorSetCount = 1;
 		allocInfo.pSetLayouts = &m_GUIDescriptorSetLayout;
 
-		if (vkAllocateDescriptorSets(m_pGraphicsAPI->GetLogicalDevice(), &allocInfo, &m_GUIDescriptorSet) != VK_SUCCESS)
-		{
-			return false;
-		}
+		VK_CHECK_RESULT(vkAllocateDescriptorSets(m_pGraphicsAPI->GetLogicalDevice(), &allocInfo, &m_GUIDescriptorSet));
 
 		VkDescriptorImageInfo imageInfo = {};
 		imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;

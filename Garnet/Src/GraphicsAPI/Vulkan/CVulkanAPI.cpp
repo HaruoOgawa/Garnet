@@ -206,12 +206,7 @@ namespace api
 	bool CVulkanAPI::EndRecordCommandBuffer()
 	{
 		// コマンドバッファの記録を終了
-		if (vkEndCommandBuffer(m_CommandBuffers[m_CurrentFrame]) != VK_SUCCESS)
-		{
-			Console::Log("[Error] Failed to vkEndCommandBuffer\n");
-
-			return false;
-		}
+		VK_CHECK_RESULT(vkEndCommandBuffer(m_CommandBuffers[m_CurrentFrame]));
 
 		return true;
 	}
@@ -289,10 +284,7 @@ namespace api
 		// レンダリングのような複数コマンドを記録するにはキューが必須である
 
 		// そしてそのキューには格納できるコマンドの種類が決まっていて、描画系だとGraphicsQueue、プレゼント系だとPresentQueueといった感じで分かれている
-		if (vkQueueSubmit(m_GraphicsQueue, 1, &submitInfo, m_InFlightFences[m_CurrentFrame]) != VK_SUCCESS)
-		{
-			return false;
-		}
+		VK_CHECK_RESULT(vkQueueSubmit(m_GraphicsQueue, 1, &submitInfo, m_InFlightFences[m_CurrentFrame]));
 
 		return true;
 	}
@@ -558,8 +550,6 @@ namespace api
 	// インスタンスを作成
 	bool CVulkanAPI::CreateInstance()
 	{
-		VkResult result = VK_SUCCESS;
-
 		// 使用可レイヤーリストの初期化
 		InitAvailableLayerList();
 
@@ -612,9 +602,9 @@ namespace api
 		InstanceInfo.ppEnabledExtensionNames = &extensions[0];
 
 		// インスタンスを作成
-		result = vkCreateInstance(&InstanceInfo, nullptr, &m_Instance);
+		VK_CHECK_RESULT(vkCreateInstance(&InstanceInfo, nullptr, &m_Instance));
 
-		return (result == VK_SUCCESS);
+		return true;
 	}
 
 	// Vulkanのウィンドウサーフェイスを作成(ウィンドウシステムとやり取りをする箇所)
@@ -625,18 +615,10 @@ namespace api
 		createInfo.hwnd = glfwGetWin32Window(m_pWindow); // ウィンドウへのハンドル
 		createInfo.hinstance = GetModuleHandle(nullptr); // 現在のプロセスへのハンドル
 
-		if (vkCreateWin32SurfaceKHR(m_Instance, &createInfo, nullptr, &m_Surface) != VK_SUCCESS)
-		{
-			Console::Log("[Error] vkCreateWin32SurfaceKHR\n");
-			return false;
-		}
+		VK_CHECK_RESULT(vkCreateWin32SurfaceKHR(m_Instance, &createInfo, nullptr, &m_Surface));
 
 		// VulkanのウィンドウサーフェイスとGLFWを結び付ける
-		if (glfwCreateWindowSurface(m_Instance, m_pWindow, nullptr, &m_Surface) != VK_SUCCESS)
-		{
-			Console::Log("[Error] glfwCreateWindowSurface\n");
-			return false;
-		}
+		VK_CHECK_RESULT(glfwCreateWindowSurface(m_Instance, m_pWindow, nullptr, &m_Surface));
 
 		return true;
 	}
@@ -770,14 +752,14 @@ namespace api
 		deviceCreateInfo.pNext = ExtensionFeatureList.data();*/
 
 		// 論理デバイスを作成
-		VkResult result = vkCreateDevice(m_PhysicalDevice, &deviceCreateInfo, nullptr, &m_LogicalDevice);
+		VK_CHECK_RESULT(vkCreateDevice(m_PhysicalDevice, &deviceCreateInfo, nullptr, &m_LogicalDevice));
 
 		// キューへのハンドルを取得
 		vkGetDeviceQueue(m_LogicalDevice, indices.m_GraphicsAndComputeFamily.value(), 0, &m_GraphicsQueue);
 		vkGetDeviceQueue(m_LogicalDevice, indices.m_GraphicsAndComputeFamily.value(), 0, &m_ComputeQueue); // 同期するので同じQueueIndexでいいのかな？
 		vkGetDeviceQueue(m_LogicalDevice, indices.m_PresentFamily.value(), 0, &m_PresentQueue);
 
-		return (result == VK_SUCCESS);
+		return true;
 	}
 
 	bool CVulkanAPI::CreateSwapChain()
@@ -843,10 +825,7 @@ namespace api
 		createInfo.oldSwapchain = VK_NULL_HANDLE;
 
 		// スワップチェインの作成
-		if (vkCreateSwapchainKHR(m_LogicalDevice, &createInfo, nullptr, &m_SwapChain) != VK_SUCCESS)
-		{
-			throw std::runtime_error("failed to create swap chain!\n");
-		}
+		VK_CHECK_RESULT(vkCreateSwapchainKHR(m_LogicalDevice, &createInfo, nullptr, &m_SwapChain));
 
 		// スワップチェインのイメージのハンドルを取得する
 		vkGetSwapchainImagesKHR(m_LogicalDevice, m_SwapChain, &imageCount, nullptr);
@@ -941,10 +920,7 @@ namespace api
 		renderPassInfo.dependencyCount = 1;
 		renderPassInfo.pDependencies = &dependency;
 
-		if (vkCreateRenderPass(m_LogicalDevice, &renderPassInfo, nullptr, &m_SwapChainRenderPass) != VK_SUCCESS)
-		{
-			throw std::runtime_error("failed to create render pass!\n");
-		}
+		VK_CHECK_RESULT(vkCreateRenderPass(m_LogicalDevice, &renderPassInfo, nullptr, &m_SwapChainRenderPass));
 
 		return true;
 	}
@@ -983,10 +959,7 @@ namespace api
 			frameBufferInfo.height = m_SwapChainExtent.height;
 			frameBufferInfo.layers = 1;
 
-			if (vkCreateFramebuffer(m_LogicalDevice, &frameBufferInfo, nullptr, &m_SwapChainFrameBuffers[i]) != VK_SUCCESS)
-			{
-				return false;
-			}
+			VK_CHECK_RESULT(vkCreateFramebuffer(m_LogicalDevice, &frameBufferInfo, nullptr, &m_SwapChainFrameBuffers[i]));
 		}
 
 		return true;
@@ -1001,10 +974,7 @@ namespace api
 		poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
 		poolInfo.queueFamilyIndex = queueFamilyIndices.m_GraphicsAndComputeFamily.value();
 
-		if (vkCreateCommandPool(m_LogicalDevice, &poolInfo, nullptr, &m_CommandPool) != VK_SUCCESS)
-		{
-			return false;
-		}
+		VK_CHECK_RESULT(vkCreateCommandPool(m_LogicalDevice, &poolInfo, nullptr, &m_CommandPool));
 
 		return true;
 	}
@@ -1020,10 +990,7 @@ namespace api
 		allocInfo.commandBufferCount = (uint32_t)m_CommandBuffers.size();
 
 		// Allocate は確保するという意味
-		if (vkAllocateCommandBuffers(m_LogicalDevice, &allocInfo, m_CommandBuffers.data()) != VK_SUCCESS)
-		{
-			return false;
-		}
+		VK_CHECK_RESULT(vkAllocateCommandBuffers(m_LogicalDevice, &allocInfo, m_CommandBuffers.data()));
 
 		return true;
 	}
@@ -1050,15 +1017,11 @@ namespace api
 		// 両者をまとめて作成
 		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
 		{
-			if (vkCreateSemaphore(m_LogicalDevice, &semaphoreInfo, nullptr, &m_ImageAvailableSemaphones[i]) != VK_SUCCESS ||
-				vkCreateSemaphore(m_LogicalDevice, &semaphoreInfo, nullptr, &m_RenderFinishedSemaphores[i]) != VK_SUCCESS ||
-				vkCreateSemaphore(m_LogicalDevice, &semaphoreInfo, nullptr, &m_ComputeFinishedSemaphores[i]) != VK_SUCCESS ||
-				vkCreateFence(m_LogicalDevice, &fenceInfo, nullptr, &m_InFlightFences[i]) != VK_SUCCESS ||
-				vkCreateFence(m_LogicalDevice, &fenceInfo, nullptr, &m_ComputeInFlightFences[i]) != VK_SUCCESS
-			)
-			{
-				throw std::runtime_error("failed to create semaphores!");
-			}
+			VK_CHECK_RESULT(vkCreateSemaphore(m_LogicalDevice, &semaphoreInfo, nullptr, &m_ImageAvailableSemaphones[i]));
+			VK_CHECK_RESULT(vkCreateSemaphore(m_LogicalDevice, &semaphoreInfo, nullptr, &m_RenderFinishedSemaphores[i]));
+			VK_CHECK_RESULT(vkCreateSemaphore(m_LogicalDevice, &semaphoreInfo, nullptr, &m_ComputeFinishedSemaphores[i]));
+			VK_CHECK_RESULT(vkCreateFence(m_LogicalDevice, &fenceInfo, nullptr, &m_InFlightFences[i]));
+			VK_CHECK_RESULT(vkCreateFence(m_LogicalDevice, &fenceInfo, nullptr, &m_ComputeInFlightFences[i]));
 		}
 
 		return true;
@@ -1330,8 +1293,8 @@ namespace api
 		VkDebugUtilsMessengerCreateInfoEXT createInfo;
 		SetDebugMessengerCreateInfo(createInfo);
 
-		VkResult result = CreateDebugUtilsMessengerEXT(m_Instance, &createInfo, nullptr, &m_DebugMessenger);
-		return (result == VK_SUCCESS);
+		VK_CHECK_RESULT(CreateDebugUtilsMessengerEXT(m_Instance, &createInfo, nullptr, &m_DebugMessenger));
+		return true;
 	}
 
 	VkResult CVulkanAPI::CreateDebugUtilsMessengerEXT(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT * pCreateInfo,
@@ -1553,10 +1516,7 @@ namespace api
 		bufferInfo.usage = usage;
 		bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-		if (vkCreateBuffer(m_LogicalDevice, &bufferInfo, nullptr, &buffer) != VK_SUCCESS)
-		{
-			throw std::runtime_error("failed to create vertex buffer!");
-		}
+		VK_CHECK_RESULT(vkCreateBuffer(m_LogicalDevice, &bufferInfo, nullptr, &buffer));
 
 		// バッファに割り当てるメモリオブジェクトを作成する
 		VkMemoryRequirements memRequirements;
@@ -1567,10 +1527,7 @@ namespace api
 		allocInfo.allocationSize = memRequirements.size;
 		allocInfo.memoryTypeIndex = FindMemoryType(memRequirements.memoryTypeBits, properties);
 
-		if (vkAllocateMemory(m_LogicalDevice, &allocInfo, nullptr, &bufferMemory) != VK_SUCCESS)
-		{
-			throw std::runtime_error("failed to allocate vertex buffer memory\n");
-		}
+		VK_CHECK_RESULT(vkAllocateMemory(m_LogicalDevice, &allocInfo, nullptr, &bufferMemory));
 
 		// メモリオブジェクトをバッファに割り当てる
 		vkBindBufferMemory(m_LogicalDevice, buffer, bufferMemory, 0);
@@ -1631,10 +1588,7 @@ namespace api
 		viewInfo.subresourceRange.layerCount = 1;
 
 		VkImageView imageView;
-		if (vkCreateImageView(m_LogicalDevice, &viewInfo, nullptr, &imageView) != VK_SUCCESS)
-		{
-			throw std::runtime_error("failed to create texture image view!");
-		}
+		VK_CHECK_RESULT(vkCreateImageView(m_LogicalDevice, &viewInfo, nullptr, &imageView));
 
 		return imageView;
 	}
@@ -1659,10 +1613,7 @@ namespace api
 		imageInfo.samples = msaaSamples; // マルチサンプリングに関連
 		imageInfo.flags = 0;
 
-		if (vkCreateImage(m_LogicalDevice, &imageInfo, nullptr, &image) != VK_SUCCESS)
-		{
-			return false;
-		}
+		VK_CHECK_RESULT(vkCreateImage(m_LogicalDevice, &imageInfo, nullptr, &image));
 
 		// テクスチャイメージにメモリを割り当てる
 		VkMemoryRequirements memRequirements;
@@ -1673,16 +1624,10 @@ namespace api
 		allocInfo.allocationSize = memRequirements.size;
 		
 		uint32_t MemoryType = FindMemoryType(memRequirements.memoryTypeBits, properties);
-		if (MemoryType == -1)
-		{
-			return false;
-		}
+		if (MemoryType == -1) return false;
 		allocInfo.memoryTypeIndex = MemoryType;
 
-		if (vkAllocateMemory(m_LogicalDevice, &allocInfo, nullptr, &imageMemory) != VK_SUCCESS)
-		{
-			return false;
-		}
+		VK_CHECK_RESULT(vkAllocateMemory(m_LogicalDevice, &allocInfo, nullptr, &imageMemory));
 
 		vkBindImageMemory(m_LogicalDevice, image, imageMemory, 0);
 
@@ -1883,10 +1828,7 @@ namespace api
 		poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
 		poolInfo.queueFamilyIndex = queueFamilyIndices.m_GraphicsAndComputeFamily.value();
 
-		if (vkCreateCommandPool(GetLogicalDevice(), &poolInfo, nullptr, &CommandPool) != VK_SUCCESS)
-		{
-			return false;
-		}
+		VK_CHECK_RESULT(vkCreateCommandPool(GetLogicalDevice(), &poolInfo, nullptr, &CommandPool));
 
 		return true;
 	}
@@ -1900,10 +1842,7 @@ namespace api
 		allocInfo.commandBufferCount = 1;
 
 		// Allocate は確保するという意味
-		if (vkAllocateCommandBuffers(GetLogicalDevice(), &allocInfo, &CommandBuffer) != VK_SUCCESS)
-		{
-			return false;
-		}
+		VK_CHECK_RESULT(vkAllocateCommandBuffers(GetLogicalDevice(), &allocInfo, &CommandBuffer));
 
 		return true;
 	}

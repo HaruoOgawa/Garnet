@@ -278,12 +278,7 @@ namespace api
 		renderPassInfo.dependencyCount = 1;
 		renderPassInfo.pDependencies = &dependency;
 
-		if (vkCreateRenderPass(m_pGraphicsAPI->GetLogicalDevice(), &renderPassInfo, nullptr, &m_RenderPass) != VK_SUCCESS)
-		{
-			Console::Log("[ERROR] failed to create render pass!\n");
-
-			return false;
-		}
+		VK_CHECK_RESULT(vkCreateRenderPass(m_pGraphicsAPI->GetLogicalDevice(), &renderPassInfo, nullptr, &m_RenderPass));
 
 		return true;
 	}
@@ -323,10 +318,7 @@ namespace api
 		frameBufferInfo.height = Height;
 		frameBufferInfo.layers = 1;
 
-		if (vkCreateFramebuffer(m_pGraphicsAPI->GetLogicalDevice(), &frameBufferInfo, nullptr, &m_FrameBuffer) != VK_SUCCESS)
-		{
-			return false;
-		}
+		VK_CHECK_RESULT(vkCreateFramebuffer(m_pGraphicsAPI->GetLogicalDevice(), &frameBufferInfo, nullptr, &m_FrameBuffer));
 
 		return true;
 	}
@@ -451,10 +443,7 @@ namespace api
 		beginInfo.flags = 0;
 		beginInfo.pInheritanceInfo = nullptr;
 
-		if (vkBeginCommandBuffer(m_CommandBuffer, &beginInfo) != VK_SUCCESS)
-		{
-			return false;
-		}
+		VK_CHECK_RESULT(vkBeginCommandBuffer(m_CommandBuffer, &beginInfo));
 
 		return true;
 	}
@@ -462,10 +451,7 @@ namespace api
 	bool CVulkanRenderPass::EndRecordCommandBuffer()
 	{
 		// コマンドバッファの記録を終了
-		if (vkEndCommandBuffer(m_CommandBuffer) != VK_SUCCESS)
-		{
-			return false;
-		}
+		VK_CHECK_RESULT(vkEndCommandBuffer(m_CommandBuffer));
 
 		return true;
 	}
