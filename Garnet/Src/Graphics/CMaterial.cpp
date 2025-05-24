@@ -185,11 +185,9 @@ namespace graphics
 			{
 				if (TextureBindingLayout.TextureName == PrevTextureBindingLayout.TextureName)
 				{
-					TextureBindingLayout.TextureName = PrevTextureBindingLayout.TextureName;
-					TextureBindingLayout.ViewBindingIndex = PrevTextureBindingLayout.ViewBindingIndex;
-					TextureBindingLayout.SamplerBindingIndex = PrevTextureBindingLayout.SamplerBindingIndex;
-					TextureBindingLayout.TextureIndex = PrevTextureBindingLayout.TextureIndex;
-					TextureBindingLayout.TextureUsage = PrevTextureBindingLayout.TextureUsage;
+					TextureBindingLayout = graphics::STextureBindingLayout(PrevTextureBindingLayout.TextureName, PrevTextureBindingLayout.ViewBindingIndex,
+						PrevTextureBindingLayout.SamplerBindingIndex, PrevTextureBindingLayout.TextureIndex, PrevTextureBindingLayout.TextureUsage,
+						PrevTextureBindingLayout.ReadOnFragment, PrevTextureBindingLayout.ReadOnVertex);
 				}
 			}
 		}

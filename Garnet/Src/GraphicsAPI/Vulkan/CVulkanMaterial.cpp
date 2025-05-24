@@ -491,7 +491,9 @@ namespace api
 				LayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE; // バッファタイプ
 
 				LayoutBinding.descriptorCount = 1; // 
-				LayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT; // アクセス権限。ここでは頂点シェーダーのみ読み取り可
+				LayoutBinding.stageFlags = 0;
+				if(TexLayout.ReadOnFragment) LayoutBinding.stageFlags |= VK_SHADER_STAGE_FRAGMENT_BIT;
+				if(TexLayout.ReadOnVertex) LayoutBinding.stageFlags |= VK_SHADER_STAGE_VERTEX_BIT;
 				LayoutBinding.pImmutableSamplers = nullptr; // 画像のサンプリングに使用するフィールド
 
 				bindings.push_back(LayoutBinding);
@@ -504,7 +506,9 @@ namespace api
 				LayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER; // バッファタイプ
 
 				LayoutBinding.descriptorCount = 1; // 
-				LayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT; // アクセス権限。ここでは頂点シェーダーのみ読み取り可
+				LayoutBinding.stageFlags = 0;
+				if (TexLayout.ReadOnFragment) LayoutBinding.stageFlags |= VK_SHADER_STAGE_FRAGMENT_BIT;
+				if (TexLayout.ReadOnVertex) LayoutBinding.stageFlags |= VK_SHADER_STAGE_VERTEX_BIT;
 				LayoutBinding.pImmutableSamplers = nullptr; // 画像のサンプリングに使用するフィールド
 
 				bindings.push_back(LayoutBinding);

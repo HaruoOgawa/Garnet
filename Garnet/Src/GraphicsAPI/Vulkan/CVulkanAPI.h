@@ -65,8 +65,6 @@ namespace api
 		// Layer
 #ifdef _DEBUG
 		bool m_IsUseDebugValidationLayer = true;
-		// デバッグログが見えないのでとりあえずオフにする
-		//bool m_IsUseDebugValidationLayer = false;
 #else
 		bool m_IsUseDebugValidationLayer = false;
 #endif // _DEBUG
