@@ -20,5 +20,6 @@ namespace graphics
 	{
 		ETextureFilterMode FilterMode = ETextureFilterMode::LINEAR;
 		ETextureWrapMode WrapMode = ETextureWrapMode::CLAMP_TO_EDGE;
+		bool EnabledAnisotropy = true; // 異方性フィルタリング。斜めからテクスチャを見たときに汚く見えないようにするための技術
 	};
 }

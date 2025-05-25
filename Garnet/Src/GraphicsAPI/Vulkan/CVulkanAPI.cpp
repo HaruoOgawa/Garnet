@@ -412,7 +412,7 @@ namespace api
 			}
 			case api::ERenderPassFormat::COLOR_FLOAT_RENDERPASS:
 			{
-				ImageFormat = VK_FORMAT_R16G16B16A16_SFLOAT;
+				ImageFormat = VK_FORMAT_R32G32B32A32_SFLOAT;
 				UseColor = true;
 				UseDepth = false;
 				UseStencil = false;

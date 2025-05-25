@@ -44,9 +44,7 @@ namespace graphics
 		virtual void SetAttribByteStrides(const std::vector<int>& AttribByteStrides);
 		virtual const std::vector<int>& GetAttribByteStrides() const;
 
-#ifdef USE_GPGPU
 		virtual void SetInstanceDrawCount(int InstanceCount);
-#endif // USE_GPGPU
 		virtual int  GetInstanceCount() const;
 	};
 }

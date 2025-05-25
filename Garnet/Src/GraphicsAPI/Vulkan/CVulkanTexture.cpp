@@ -137,12 +137,15 @@ namespace api
 
 	bool CVulkanTexture::Create(const std::vector<unsigned char>& pixelData, int pixelSize)
 	{
-		VkFormat ImageFormat = VK_FORMAT_R8G8B8A8_UNORM;
-		m_RenderPassFormat = api::ERenderPassFormat::COLOR_RENDERPASS;
+		bool UseColor = false;
+		bool UseDepth = false;
+		bool UseStencil = false;
+
+		const VkFormat ImageFormat = m_pGraphicsAPI->FindImageFormat(m_RenderPassFormat, UseColor, UseDepth, UseStencil);
 
 		// Texture Buffer
 		if (!CreateTextureImage(pixelData, pixelSize, ImageFormat)) return false; // テクスチャイメージの生成
-		if (!CreateTextureImageView(ImageFormat, true, false, false)) return false;// シェーダーで取り扱う用のImageViewを作成(イメージマネージャーみたいなやつかな)
+		if (!CreateTextureImageView(ImageFormat, UseColor, UseDepth, UseStencil)) return false;// シェーダーで取り扱う用のImageViewを作成(イメージマネージャーみたいなやつかな)
 		if (!CreateTextureSampler()) return false; // テクスチャサンプラーを作成.サンプラーとはテクスチャデータをフラグメント(3Dモデル)に合うように調整する機構
 
 		return true;
@@ -247,38 +250,40 @@ namespace api
 			{
 				samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
 				samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
-				samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
 				break;
 			}
 			case graphics::ETextureWrapMode::REPEAT:
 			{
 				samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
 				samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-				samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
 				break;
 			}
 			default:
 			{
 				samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
 				samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
-				samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
 				break;
 			}
+
+			samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
 		}
 		
 		VkPhysicalDeviceProperties properties{};
 		vkGetPhysicalDeviceProperties(m_pGraphicsAPI->GetPhysicalDevice(), &properties);
-		samplerInfo.anisotropyEnable = VK_TRUE; // 異方性フィルタリング --> 遠くの方のテクスチャがぼけてしまうのを調整する機
-		samplerInfo.maxAnisotropy = static_cast<float>(properties.limits.maxSamplerAnisotropy);
+		if (m_SamplerParam.EnabledAnisotropy)
+		{
+			samplerInfo.anisotropyEnable = VK_TRUE; // 異方性フィルタリング --> 遠くの方のテクスチャがぼけてしまうのを調整する機
+			samplerInfo.maxAnisotropy = static_cast<float>(properties.limits.maxSamplerAnisotropy);
+		}
 
 		samplerInfo.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
 		samplerInfo.unnormalizedCoordinates = VK_FALSE;
 		samplerInfo.compareEnable = VK_TRUE;
 		samplerInfo.compareOp = VK_COMPARE_OP_ALWAYS;
-		samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+		samplerInfo.mipmapMode = (m_UseMipMap) ? VK_SAMPLER_MIPMAP_MODE_LINEAR : VK_SAMPLER_MIPMAP_MODE_NEAREST;
 		samplerInfo.mipLodBias = 0.0f;
 		samplerInfo.minLod = 0.0f;
-		samplerInfo.maxLod = m_MipCount;
+		samplerInfo.maxLod = (m_UseMipMap) ? m_MipCount : 0.0f;
 
 		VK_CHECK_RESULT(vkCreateSampler(m_pGraphicsAPI->GetLogicalDevice(), &samplerInfo, nullptr, &m_TextureSampler));
 
