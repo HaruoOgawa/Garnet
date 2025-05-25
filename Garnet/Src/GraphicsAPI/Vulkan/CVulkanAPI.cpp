@@ -694,6 +694,7 @@ namespace api
 		requiredFeatures.tessellationShader = VK_TRUE;
 		requiredFeatures.geometryShader = VK_TRUE;
 		requiredFeatures.samplerAnisotropy = VK_TRUE;
+		requiredFeatures.sampleRateShading = VK_TRUE;
 
 		// ファミリーキューの設定
 		QueueFamiryIndices indices = FindQueueFamilies(m_PhysicalDevice);
@@ -1121,18 +1122,20 @@ namespace api
 		VkSubmitInfo submitInfo{};
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
-		VkSemaphore waitSemaphore[] = { m_ComputeFinishedSemaphores[m_CurrentFrame] , m_ImageAvailableSemaphones[m_CurrentFrame] }; // セマフォで待つ
-		VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_VERTEX_INPUT_BIT | VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
-		submitInfo.waitSemaphoreCount = 2;
-		submitInfo.pWaitSemaphores = waitSemaphore;
-		submitInfo.pWaitDstStageMask = waitStages;
+		// 警告が出るのでとりあえずコンピュートバッファのSemaphoreは無視。GPGPUの時に何か問題が出たら確認する
+		//std::vector<VkSemaphore> waitSemaphore = { m_ComputeFinishedSemaphores[m_CurrentFrame] , m_ImageAvailableSemaphones[m_CurrentFrame] }; // セマフォで待つ
+		std::vector<VkSemaphore> waitSemaphore = { m_ImageAvailableSemaphones[m_CurrentFrame] }; // セマフォで待つ
+		VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_VERTEX_INPUT_BIT , VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
+		submitInfo.waitSemaphoreCount = static_cast<uint32_t>(waitSemaphore.size());
+		submitInfo.pWaitSemaphores = &waitSemaphore[0];
+		submitInfo.pWaitDstStageMask = &waitStages[0];
 
 		submitInfo.commandBufferCount = 1;
 		submitInfo.pCommandBuffers = &m_CommandBuffers[m_CurrentFrame];
 
 		VkSemaphore signalSemaphores[] = { m_RenderFinishedSemaphores[m_CurrentFrame] }; // コマンドの実行が終了したことを知らせるセマフォ
 		submitInfo.signalSemaphoreCount = 1;
-		submitInfo.pSignalSemaphores = signalSemaphores;
+		submitInfo.pSignalSemaphores = &signalSemaphores[0];
 
 		// コマンドバッファをグラフィックキューに送信
 		// コマンドバッファにはコマンドが入っていてそのコマンドをキューが実行する
@@ -1154,7 +1157,7 @@ namespace api
 		// イメージを示するスワップチェーンを選択
 		VkSwapchainKHR swapChains[] = { m_SwapChain };
 		presentInfo.swapchainCount = 1;
-		presentInfo.pSwapchains = swapChains;
+		presentInfo.pSwapchains = &swapChains[0];
 		presentInfo.pImageIndices = &m_CurrentImageIndex;
 
 		presentInfo.pResults = nullptr;
@@ -1612,7 +1615,7 @@ namespace api
 		viewInfo.subresourceRange.baseMipLevel = 0;
 		viewInfo.subresourceRange.levelCount = (UseMipMap) ? static_cast<uint32_t>(MipCount) : 1;
 		viewInfo.subresourceRange.baseArrayLayer = 0;
-		viewInfo.subresourceRange.layerCount = 1;
+		viewInfo.subresourceRange.layerCount = (TextureType == graphics::ETextureType::TEXTURE_CUBE)? 6 : 1;
 
 		VkImageView imageView;
 		VK_CHECK_RESULT(vkCreateImageView(m_LogicalDevice, &viewInfo, nullptr, &imageView));
@@ -1840,7 +1843,7 @@ namespace api
 		submitInfo.commandBufferCount = 1;
 		submitInfo.pCommandBuffers = &commandBuffer;
 
-		vkQueueSubmit(m_GraphicsQueue, 1, &submitInfo, VK_NULL_HANDLE);
+		VK_CHECK_RESULT(vkQueueSubmit(m_GraphicsQueue, 1, &submitInfo, VK_NULL_HANDLE));
 		vkQueueWaitIdle(m_GraphicsQueue);
 
 		vkFreeCommandBuffers(m_LogicalDevice, m_CommandPool, 1, &commandBuffer);
