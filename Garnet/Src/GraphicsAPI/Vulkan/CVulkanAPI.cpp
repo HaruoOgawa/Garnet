@@ -396,7 +396,7 @@ namespace api
 		return m_CurrentRenderPass;
 	}
 
-	VkFormat CVulkanAPI::FindImageFormat(api::ERenderPassFormat RenderPassFormat) const
+	VkFormat CVulkanAPI::FindImageFormat(api::ERenderPassFormat RenderPassFormat, bool& UseColor, bool& UseDepth, bool& UseStencil) const
 	{
 		VkFormat ImageFormat = VK_FORMAT_UNDEFINED;
 
@@ -405,36 +405,57 @@ namespace api
 			case api::ERenderPassFormat::COLOR_RENDERPASS:
 			{
 				ImageFormat = VK_FORMAT_R8G8B8A8_UNORM;
+				UseColor = true;
+				UseDepth = false;
+				UseStencil = false;
 				break;
 			}
 			case api::ERenderPassFormat::COLOR_FLOAT_RENDERPASS:
 			{
 				ImageFormat = VK_FORMAT_R16G16B16A16_SFLOAT;
+				UseColor = true;
+				UseDepth = false;
+				UseStencil = false;
 				break;
 			}
 			case api::ERenderPassFormat::DEPTH_RENDERPASS:
 			{
 				ImageFormat = VK_FORMAT_D16_UNORM;
+				UseColor = false;
+				UseDepth = true;
+				UseStencil = false;
 				break;
 			}
 			case api::ERenderPassFormat::DEPTH_FLOAT_RENDERPASS:
 			{
 				ImageFormat = VK_FORMAT_D32_SFLOAT;
+				UseColor = false;
+				UseDepth = true;
+				UseStencil = false;
 				break;
 			}
 			case api::ERenderPassFormat::DEPTH_STENCIL_RENDERPASS:
 			{
 				ImageFormat = VK_FORMAT_D16_UNORM_S8_UINT;
+				UseColor = false;
+				UseDepth = true;
+				UseStencil = true;
 				break;
 			}
 			case api::ERenderPassFormat::DEPTH_STENCIL_FLOAT_RENDERPASS:
 			{
 				ImageFormat = VK_FORMAT_D32_SFLOAT_S8_UINT;
+				UseColor = false;
+				UseDepth = true;
+				UseStencil = true;
 				break;
 			}
 			default:
 			{
 				ImageFormat = VK_FORMAT_R8G8B8A8_UNORM;
+				UseColor = true;
+				UseDepth = false;
+				UseStencil = false;
 				break;
 			}
 		}
@@ -672,6 +693,7 @@ namespace api
 		requiredFeatures.multiDrawIndirect = supportedFeatures.multiDrawIndirect;
 		requiredFeatures.tessellationShader = VK_TRUE;
 		requiredFeatures.geometryShader = VK_TRUE;
+		requiredFeatures.samplerAnisotropy = VK_TRUE;
 
 		// ファミリーキューの設定
 		QueueFamiryIndices indices = FindQueueFamilies(m_PhysicalDevice);
@@ -848,7 +870,7 @@ namespace api
 
 		for (size_t i = 0; i < m_SwapChainImages.size(); i++)
 		{
-			m_SwapChainImageViews[i] = CreateImageView(m_SwapChainImages[i], m_SwapChainColorImageFormat, VK_IMAGE_ASPECT_COLOR_BIT, graphics::ETextureType::TEXTURE_2D, 1, false);
+			m_SwapChainImageViews[i] = CreateImageView(m_SwapChainImages[i], m_SwapChainColorImageFormat, graphics::ETextureType::TEXTURE_2D, 1, false, true, false, false);
 		}
 
 		return true;
@@ -933,8 +955,7 @@ namespace api
 		CreateImage(m_SwapChainExtent.width, m_SwapChainExtent.height, VK_SAMPLE_COUNT_1_BIT, depthFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
 			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_SwapChainDepthImage, m_SwapChainDepthImageMemory, graphics::ETextureType::TEXTURE_2D, 1, false);
 
-		m_SwapChainDepthImageView = CreateImageView(m_SwapChainDepthImage, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT, graphics::ETextureType::TEXTURE_2D, 1, false);
-		//m_SwapChainDepthImageView = CreateImageView(m_SwapChainDepthImage, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT, graphics::ETextureType::TEXTURE_2D, 1, false);
+		m_SwapChainDepthImageView = CreateImageView(m_SwapChainDepthImage, depthFormat, graphics::ETextureType::TEXTURE_2D, 1, false, false, true, true);
 
 		return true;
 	}
@@ -1574,8 +1595,14 @@ namespace api
 	}
 
 	// Texture
-	VkImageView CVulkanAPI::CreateImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, graphics::ETextureType TextureType, float MipCount, bool UseMipMap)
+	VkImageView CVulkanAPI::CreateImageView(VkImage image, VkFormat format, graphics::ETextureType TextureType, float MipCount, 
+		bool UseMipMap, bool UseColor, bool UseDepth, bool UseStencil)
 	{
+		VkImageAspectFlags aspectFlags = 0;
+		if (UseColor) aspectFlags |= VK_IMAGE_ASPECT_COLOR_BIT;
+		if (UseDepth) aspectFlags |= VK_IMAGE_ASPECT_DEPTH_BIT;
+		if (UseStencil) aspectFlags |= VK_IMAGE_ASPECT_STENCIL_BIT;
+
 		VkImageViewCreateInfo viewInfo{};
 		viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
 		viewInfo.image = image;
