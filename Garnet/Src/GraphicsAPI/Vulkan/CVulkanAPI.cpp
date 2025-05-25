@@ -1133,8 +1133,8 @@ namespace api
 		submitInfo.commandBufferCount = 1;
 		submitInfo.pCommandBuffers = &m_CommandBuffers[m_CurrentFrame];
 
-		VkSemaphore signalSemaphores[] = { m_RenderFinishedSemaphores[m_CurrentFrame] }; // コマンドの実行が終了したことを知らせるセマフォ
-		submitInfo.signalSemaphoreCount = 1;
+		std::vector<VkSemaphore> signalSemaphores = { m_RenderFinishedSemaphores[m_CurrentFrame] }; // コマンドの実行が終了したことを知らせるセマフォ
+		submitInfo.signalSemaphoreCount = static_cast<uint32_t>(signalSemaphores.size());
 		submitInfo.pSignalSemaphores = &signalSemaphores[0];
 
 		// コマンドバッファをグラフィックキューに送信
@@ -1152,8 +1152,8 @@ namespace api
 		// プレゼンテーション(結果をスワップチェーンに送信して最終結果を画面に示する)
 		VkPresentInfoKHR presentInfo{};
 		presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
-		presentInfo.waitSemaphoreCount = 1;
-		presentInfo.pWaitSemaphores = signalSemaphores;
+		presentInfo.waitSemaphoreCount = static_cast<uint32_t>(signalSemaphores.size());
+		presentInfo.pWaitSemaphores = &signalSemaphores[0];
 		// イメージを示するスワップチェーンを選択
 		VkSwapchainKHR swapChains[] = { m_SwapChain };
 		presentInfo.swapchainCount = 1;
@@ -1641,7 +1641,7 @@ namespace api
 		imageInfo.usage = usage;
 		imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 		imageInfo.samples = msaaSamples; // マルチサンプリングに関連
-		imageInfo.flags = 0;
+		imageInfo.flags = (TextureType == graphics::ETextureType::TEXTURE_CUBE) ? VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT : 0;
 
 		VK_CHECK_RESULT(vkCreateImage(m_LogicalDevice, &imageInfo, nullptr, &image));
 
@@ -1797,7 +1797,7 @@ namespace api
 					region.imageSubresource.baseArrayLayer = layer; // 最初の0を基準としてもいいかもしれないが、ここでは1つずつMipMapを計算したいので今のレベルにしている
 					// layerの数はCreateImageの時に指定したarrayLayersの数
 					region.imageSubresource.layerCount = 1; // 6つ全部ではなく1つずつ計算
-					region.imageOffset = { 0 ,0, static_cast<int>(layer) };
+					region.imageOffset = { 0 ,0, 0 };
 					region.imageExtent = { width, height, 1 };
 
 					regionList.push_back(region);
