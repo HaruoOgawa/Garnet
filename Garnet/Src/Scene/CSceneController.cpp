@@ -281,14 +281,6 @@ namespace scene
 			// マテリアルの追加
 			if (!PrepareMaterialList(pGraphicsAPI, Object, TexIndexMap)) return false;
 			
-			// Object生成
-			if (!Object->Create(pGraphicsAPI, pPhysicsEngine)) return false;
-
-#ifdef USE_ANIMATION
-			// アニメーションを追加
-			if (!PrepareAnimationList(pGraphicsAPI, Object)) return false;
-#endif // USE_ANIMATION
-
 			// コンポーネントの初期化
 			for (const auto& Component : Object->GetComponentList())
 			{
@@ -310,6 +302,14 @@ namespace scene
 					return false;
 				}
 			}
+
+			// Object生成
+			if (!Object->Create(pGraphicsAPI, pPhysicsEngine)) return false;
+
+#ifdef USE_ANIMATION
+			// アニメーションを追加
+			if (!PrepareAnimationList(pGraphicsAPI, Object)) return false;
+#endif // USE_ANIMATION
 
 			for (size_t NodeIndex = 0; NodeIndex < Object->GetNodeList().size(); NodeIndex++)
 			{
