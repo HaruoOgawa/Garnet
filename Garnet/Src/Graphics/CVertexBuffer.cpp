@@ -61,12 +61,10 @@ namespace graphics
 		return m_AttribByteStrides;
 	}
 
-#ifdef USE_GPGPU
 	void CVertexBuffer::SetInstanceDrawCount(int InstanceCount)
 	{
 		m_InstanceCount = InstanceCount;
 	}
-#endif // USE_GPGPU
 
 	int CVertexBuffer::GetInstanceCount() const
 	{

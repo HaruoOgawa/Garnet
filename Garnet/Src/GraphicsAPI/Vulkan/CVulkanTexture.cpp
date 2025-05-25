@@ -119,14 +119,17 @@ namespace api
 		m_Height = Height;
 		m_RenderPassFormat = RenderPassFormat;
 
-		const VkFormat ImageFormat = m_pGraphicsAPI->FindImageFormat(RenderPassFormat);
+		bool UseColor = false;
+		bool UseDepth = false;
+		bool UseStencil = false;
+
+		const VkFormat ImageFormat = m_pGraphicsAPI->FindImageFormat(RenderPassFormat, UseColor, UseDepth, UseStencil);
 		const VkImageUsageFlags Usage = m_pGraphicsAPI->FindImageUsage(RenderPassFormat, ReadOnShader);
-		const VkMemoryPropertyFlags properties = (ReadOnShader) ? VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT : VK_MEMORY_PROPERTY_LAZILY_ALLOCATED_BIT;
-		const bool UseStencil = (RenderPassFormat == api::ERenderPassFormat::DEPTH_STENCIL_RENDERPASS || RenderPassFormat == api::ERenderPassFormat::DEPTH_STENCIL_FLOAT_RENDERPASS);
+		const VkMemoryPropertyFlags properties = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
 		VkSampleCountFlagBits msaaSamples = m_pGraphicsAPI->GetMSAASampleFormat(AASampleNum);
 
 		if (!CreateFrameTextureImage(ImageFormat, Usage, properties, msaaSamples)) return false; // テクスチャイメージの生成
-		if (!CreateTextureImageView(ImageFormat, UseStencil)) return false;// シェーダーで取り扱う用のImageViewを作成(イメージマネージャーみたいなやつかな)
+		if (!CreateTextureImageView(ImageFormat, UseColor, UseDepth, UseStencil)) return false;// シェーダーで取り扱う用のImageViewを作成(イメージマネージャーみたいなやつかな)
 		if (!CreateTextureSampler()) return false; // テクスチャサンプラーを作成.サンプラーとはテクスチャデータをフラグメント(3Dモデル)に合うように調整する機構
 
 		return true;
@@ -134,12 +137,15 @@ namespace api
 
 	bool CVulkanTexture::Create(const std::vector<unsigned char>& pixelData, int pixelSize)
 	{
-		VkFormat ImageFormat = VK_FORMAT_R8G8B8A8_UNORM;
-		m_RenderPassFormat = api::ERenderPassFormat::COLOR_RENDERPASS;
+		bool UseColor = false;
+		bool UseDepth = false;
+		bool UseStencil = false;
+
+		const VkFormat ImageFormat = m_pGraphicsAPI->FindImageFormat(m_RenderPassFormat, UseColor, UseDepth, UseStencil);
 
 		// Texture Buffer
 		if (!CreateTextureImage(pixelData, pixelSize, ImageFormat)) return false; // テクスチャイメージの生成
-		if (!CreateTextureImageView(ImageFormat, false)) return false;// シェーダーで取り扱う用のImageViewを作成(イメージマネージャーみたいなやつかな)
+		if (!CreateTextureImageView(ImageFormat, UseColor, UseDepth, UseStencil)) return false;// シェーダーで取り扱う用のImageViewを作成(イメージマネージャーみたいなやつかな)
 		if (!CreateTextureSampler()) return false; // テクスチャサンプラーを作成.サンプラーとはテクスチャデータをフラグメント(3Dモデル)に合うように調整する機構
 
 		return true;
@@ -204,12 +210,9 @@ namespace api
 		return true;
 	}
 
-	bool CVulkanTexture::CreateTextureImageView(VkFormat ImageFormat, bool UseStencil)
+	bool CVulkanTexture::CreateTextureImageView(VkFormat ImageFormat, bool UseColor, bool UseDepth, bool UseStencil)
 	{
-		VkImageAspectFlags aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-		if (UseStencil) aspectMask |= VK_IMAGE_ASPECT_STENCIL_BIT;
-
-		m_TextureImageView = m_pGraphicsAPI->CreateImageView(m_TextureImage, ImageFormat, aspectMask, m_TextureType, m_MipCount, m_UseMipMap);
+		m_TextureImageView = m_pGraphicsAPI->CreateImageView(m_TextureImage, ImageFormat, m_TextureType, m_MipCount, m_UseMipMap, UseColor, UseDepth, UseStencil);
 
 		return true;
 	}
@@ -247,43 +250,42 @@ namespace api
 			{
 				samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
 				samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
-				samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
 				break;
 			}
 			case graphics::ETextureWrapMode::REPEAT:
 			{
 				samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
 				samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-				samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
 				break;
 			}
 			default:
 			{
 				samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
 				samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
-				samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
 				break;
 			}
+
+			samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
 		}
 		
 		VkPhysicalDeviceProperties properties{};
 		vkGetPhysicalDeviceProperties(m_pGraphicsAPI->GetPhysicalDevice(), &properties);
-		samplerInfo.anisotropyEnable = VK_TRUE; // 異方性フィルタリング --> 遠くの方のテクスチャがぼけてしまうのを調整する機
-		samplerInfo.maxAnisotropy = static_cast<float>(properties.limits.maxSamplerAllocationCount);
+		if (m_SamplerParam.EnabledAnisotropy)
+		{
+			samplerInfo.anisotropyEnable = VK_TRUE; // 異方性フィルタリング --> 遠くの方のテクスチャがぼけてしまうのを調整する機
+			samplerInfo.maxAnisotropy = static_cast<float>(properties.limits.maxSamplerAnisotropy);
+		}
 
 		samplerInfo.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
 		samplerInfo.unnormalizedCoordinates = VK_FALSE;
 		samplerInfo.compareEnable = VK_TRUE;
 		samplerInfo.compareOp = VK_COMPARE_OP_ALWAYS;
-		samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+		samplerInfo.mipmapMode = (m_UseMipMap) ? VK_SAMPLER_MIPMAP_MODE_LINEAR : VK_SAMPLER_MIPMAP_MODE_NEAREST;
 		samplerInfo.mipLodBias = 0.0f;
 		samplerInfo.minLod = 0.0f;
-		samplerInfo.maxLod = m_MipCount;
+		samplerInfo.maxLod = (m_UseMipMap) ? m_MipCount : 0.0f;
 
-		if (vkCreateSampler(m_pGraphicsAPI->GetLogicalDevice(), &samplerInfo, nullptr, &m_TextureSampler) != VK_SUCCESS)
-		{
-			return false;
-		}
+		VK_CHECK_RESULT(vkCreateSampler(m_pGraphicsAPI->GetLogicalDevice(), &samplerInfo, nullptr, &m_TextureSampler));
 
 		return true;
 	}
@@ -302,10 +304,7 @@ namespace api
 		layoutInfo.bindingCount = 1; // バインドする数
 		layoutInfo.pBindings = &samplerLayoutBinding;
 
-		if (vkCreateDescriptorSetLayout(m_pGraphicsAPI->GetLogicalDevice(), &layoutInfo, nullptr, &m_GUIDescriptorSetLayout) != VK_SUCCESS)
-		{
-			return false;
-		}
+		VK_CHECK_RESULT(vkCreateDescriptorSetLayout(m_pGraphicsAPI->GetLogicalDevice(), &layoutInfo, nullptr, &m_GUIDescriptorSetLayout));
 
 		return true;
 	}
@@ -322,10 +321,7 @@ namespace api
 		poolInfo.pPoolSizes = &poolSize;
 		poolInfo.maxSets = 1;
 
-		if (vkCreateDescriptorPool(m_pGraphicsAPI->GetLogicalDevice(), &poolInfo, nullptr, &m_GUIDescriptorPool) != VK_SUCCESS)
-		{
-			return false;
-		}
+		VK_CHECK_RESULT(vkCreateDescriptorPool(m_pGraphicsAPI->GetLogicalDevice(), &poolInfo, nullptr, &m_GUIDescriptorPool));
 
 		return true;
 	}
@@ -340,10 +336,7 @@ namespace api
 		allocInfo.descriptorSetCount = 1;
 		allocInfo.pSetLayouts = &m_GUIDescriptorSetLayout;
 
-		if (vkAllocateDescriptorSets(m_pGraphicsAPI->GetLogicalDevice(), &allocInfo, &m_GUIDescriptorSet) != VK_SUCCESS)
-		{
-			return false;
-		}
+		VK_CHECK_RESULT(vkAllocateDescriptorSets(m_pGraphicsAPI->GetLogicalDevice(), &allocInfo, &m_GUIDescriptorSet));
 
 		VkDescriptorImageInfo imageInfo = {};
 		imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;

@@ -190,7 +190,10 @@ namespace graphics
 		// TextureBuffer
 		for (const auto& TextureBuffer : m_TextureBufferList)
 		{
-			Material->AddTextureBindingLayout({ TextureBuffer.TextureName, TextureBuffer.ViewBindingIndex, TextureBuffer.SamplerBindingIndex,TextureBuffer.TextureIndex,TextureBuffer.TextureUsage });
+			Material->AddTextureBindingLayout(graphics::STextureBindingLayout(
+				TextureBuffer.TextureName, TextureBuffer.ViewBindingIndex, TextureBuffer.SamplerBindingIndex, TextureBuffer.
+				TextureIndex, TextureBuffer.TextureUsage, TextureBuffer.ReadOnFragment, TextureBuffer.ReadOnVertex
+			));
 		}
 
 		// その他パラメーター
@@ -336,7 +339,10 @@ namespace graphics
 		// TextureBuffer
 		for (const auto& TextureBuffer : m_TextureBufferList)
 		{
-			TextureBindingLayoutList.push_back({ TextureBuffer.TextureName, TextureBuffer.ViewBindingIndex, TextureBuffer.SamplerBindingIndex,TextureBuffer.TextureIndex,TextureBuffer.TextureUsage });
+			TextureBindingLayoutList.push_back(graphics::STextureBindingLayout(
+				TextureBuffer.TextureName, TextureBuffer.ViewBindingIndex, TextureBuffer.SamplerBindingIndex, TextureBuffer.
+				TextureIndex, TextureBuffer.TextureUsage, TextureBuffer.ReadOnFragment, TextureBuffer.ReadOnVertex
+			));
 		}
 
 		//

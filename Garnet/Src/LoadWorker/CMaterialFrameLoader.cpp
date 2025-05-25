@@ -700,6 +700,12 @@ namespace resource
 		std::string textureUsage_str = "";
 		GetString("textureUsage", textureUsage_str, uniform);
 
+		bool readOnFragment = true;
+		GetBoolean("readOnFragment", readOnFragment, uniform);
+
+		bool readOnVertex = false;
+		GetBoolean("readOnVertex", readOnVertex, uniform);
+
 		graphics::ETextureUsage TextureUsage = graphics::ETextureUsage::TEXTURE_USAGE_2D;
 		
 		if (textureUsage_str == "2d")
@@ -728,7 +734,8 @@ namespace resource
 		}
 
 		// TextureBindingLayoutÇçÏê¨
-		graphics::STextureBindingLayout BindingLayout = { name , viewBinding, samplerBinding, textureIndex,TextureUsage };
+		graphics::STextureBindingLayout BindingLayout = graphics::STextureBindingLayout(
+			name, viewBinding, samplerBinding, textureIndex, TextureUsage, readOnFragment, readOnVertex);
 
 		// îzóÒÇ…ìoò^
 		m_TextureBufferList.push_back(BindingLayout);

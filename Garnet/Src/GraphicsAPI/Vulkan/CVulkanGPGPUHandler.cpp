@@ -64,10 +64,7 @@ namespace api
 		pipelineLayoutInfo.setLayoutCount = 1;
 		pipelineLayoutInfo.pSetLayouts = &pVulkanMat->GetDescriptorSetLayout();
 
-		if (vkCreatePipelineLayout(m_pGraphicsAPI->GetLogicalDevice(), &pipelineLayoutInfo, nullptr, &m_ComputePipelineLayout) != VK_SUCCESS)
-		{
-			return false;
-		}
+		VK_CHECK_RESULT(vkCreatePipelineLayout(m_pGraphicsAPI->GetLogicalDevice(), &pipelineLayoutInfo, nullptr, &m_ComputePipelineLayout));
 
 		// Pipelineの作成
 		VkComputePipelineCreateInfo pipelineInfo{};
@@ -75,10 +72,7 @@ namespace api
 		pipelineInfo.layout = m_ComputePipelineLayout;
 		pipelineInfo.stage = pVulkanMat->GetShaderStages()[0];
 
-		if (vkCreateComputePipelines(m_pGraphicsAPI->GetLogicalDevice(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_ComputePipeline) != VK_SUCCESS)
-		{
-			return false;
-		}
+		VK_CHECK_RESULT(vkCreateComputePipelines(m_pGraphicsAPI->GetLogicalDevice(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_ComputePipeline));
 
 		return true;
 	}
@@ -136,10 +130,7 @@ namespace api
 		beginInfo.pInheritanceInfo = nullptr;
 
 		// Begin
-		if (vkBeginCommandBuffer(m_CommandBuffer, &beginInfo) != VK_SUCCESS)
-		{
-			return false;
-		}
+		VK_CHECK_RESULT(vkBeginCommandBuffer(m_CommandBuffer, &beginInfo));
 
 		return true;
 	}
@@ -147,10 +138,7 @@ namespace api
 	bool CVulkanGPGPUHandler::EndRecordCommandBuffer()
 	{
 		// コマンドバッファの記録終了
-		if (vkEndCommandBuffer(m_CommandBuffer) != VK_SUCCESS)
-		{
-			return false;
-		}
+		VK_CHECK_RESULT(vkEndCommandBuffer(m_CommandBuffer));
 
 		// コマンドバッファの送信
 		const auto& Semaphore = m_pGraphicsAPI->GetComputeFlightSemaphore();
@@ -166,10 +154,8 @@ namespace api
 		submitInfo.signalSemaphoreCount = 1;
 		submitInfo.pSignalSemaphores = &Semaphore;
 
-		if (vkQueueSubmit(m_pGraphicsAPI->GetComputeQueue(), 1, &submitInfo, Fence) != VK_SUCCESS) // Compute Queueを実行
-		{
-			return false;
-		}
+		// Compute Queueを実行
+		VK_CHECK_RESULT(vkQueueSubmit(m_pGraphicsAPI->GetComputeQueue(), 1, &submitInfo, Fence));
 
 		return true;
 	}

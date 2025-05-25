@@ -545,7 +545,7 @@ namespace api
 
 			VkPipeline GraphicsPipeline;
 
-			if (vkCreateGraphicsPipelines(m_pGraphicsAPI->GetLogicalDevice(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &GraphicsPipeline) != VK_SUCCESS) return false;
+			VK_CHECK_RESULT(vkCreateGraphicsPipelines(m_pGraphicsAPI->GetLogicalDevice(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &GraphicsPipeline));
 
 			m_GraphicsPipelineList.emplace(PassName, GraphicsPipeline);
 		}

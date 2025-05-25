@@ -9,6 +9,7 @@
 #include <map>
 
 #include "../CGraphicsAPI.h"
+#include "../../Message/Console.h"
 
 #include <vulkan/vulkan.h>
 #include <vulkan/vk_enum_string_helper.h>
@@ -64,8 +65,6 @@ namespace api
 		// Layer
 #ifdef _DEBUG
 		bool m_IsUseDebugValidationLayer = true;
-		// デバッグログが見えないのでとりあえずオフにする
-		//bool m_IsUseDebugValidationLayer = false;
 #else
 		bool m_IsUseDebugValidationLayer = false;
 #endif // _DEBUG
@@ -245,7 +244,7 @@ namespace api
 		// Rendering
 		const VkRenderPass& GetCurrentRenderPass() const;
 
-		VkFormat FindImageFormat(api::ERenderPassFormat RenderPassFormat) const;
+		VkFormat FindImageFormat(api::ERenderPassFormat RenderPassFormat, bool& UseColor, bool& UseDepth, bool& UseStencil) const;
 		VkImageUsageFlags FindImageUsage(api::ERenderPassFormat RenderPassFormat, bool ReadOnShader) const;
 
 		VkSampleCountFlagBits GetMSAASampleFormat(int AASampleNum) const;
@@ -271,7 +270,8 @@ namespace api
 		VkFence GetComputeInFlightFence()const { return m_ComputeInFlightFences[m_CurrentFrame]; }
 
 		// Texture
-		VkImageView CreateImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, graphics::ETextureType TextureType, float MipCount, bool UseMipMap);
+		VkImageView CreateImageView(VkImage image, VkFormat format, graphics::ETextureType TextureType, float MipCount, 
+			bool UseMipMap, bool UseColor, bool UseDepth, bool UseStencil);
 		bool CreateImage(uint32_t width, uint32_t height, VkSampleCountFlagBits msaaSamples, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage,
 			VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory, graphics::ETextureType TextureType, float MipCount, bool UseMipMap);
 		void TransitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, float MipCount, bool UseMipMap);

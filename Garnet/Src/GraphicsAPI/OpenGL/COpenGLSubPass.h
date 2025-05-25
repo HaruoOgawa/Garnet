@@ -1,0 +1,65 @@
+#pragma once
+
+#ifdef USE_OPENGL
+
+#include "../ERenderPassFormat.h"
+#include "COpenGLAPI.h"
+#include <glm/glm.hpp>
+#include <string>
+
+namespace graphics { class CTexture; }
+
+namespace api
+{
+	class COpenGLTexture;
+
+	class COpenGLSubPass
+	{
+		// API
+		api::COpenGLAPI* m_pGraphicsAPI;
+
+		// Base Param
+		std::string m_PassName;
+		int m_Width;
+		int m_Height;
+		glm::vec4 m_InitColor;
+		api::ERenderPassFormat m_RenderPassFormat;
+		std::vector<std::shared_ptr<graphics::CTexture>> m_FrameTextureList;
+		std::shared_ptr<graphics::CTexture> m_DepthTexture;
+
+		bool m_UseStencil;
+
+		// Frame Buffer
+		GLuint m_FrameBuffer;
+
+		// Color Buffer
+		GLuint m_ColorBuffer;
+
+		// Depth Buffer
+		GLuint m_DepthBuffer;
+
+	private:
+		bool CreateFrameBuffer();
+		bool CreateColorBuffer(int AttachmentIndex, const graphics::SRenderPassState& PassState, bool IsMSAASubPass);
+		bool CreateDepthBuffer(const graphics::SRenderPassState& PassState, bool IsMSAASubPass);
+
+	public:
+		COpenGLSubPass(api::COpenGLAPI* pGraphicsAPI, const std::string& PassName, ERenderPassFormat RenderPassFormat, const glm::vec4& InitColor);
+		~COpenGLSubPass();
+
+		std::shared_ptr<graphics::CTexture> GetFrameTexture(int Index = 0);
+		const std::vector<std::shared_ptr<graphics::CTexture>>& GetFrameTextureList() const;
+		const std::shared_ptr<graphics::CTexture>& GetDepthTexture() const;
+
+		bool Create(int Width, int Height, const graphics::SRenderPassState& PassState, bool IsMSAASubPass);
+
+		bool BeginRenderPass();
+		bool EndRenderPass();
+
+		int GetWidth() const;
+		int GetHeight() const;
+
+		GLuint GetFrameBuffer() const;
+	};
+}
+#endif

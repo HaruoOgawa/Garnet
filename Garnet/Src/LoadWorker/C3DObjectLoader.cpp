@@ -93,8 +93,9 @@ namespace resource
 			}
 		}
 
+		// CSceneController‚Å¶¬‚·‚é‚Ì‚Å‚±‚±‚Å‚Í–³Ž‹(C3DObjectLoaderECSceneController)
 		// Object¶¬
-		if (!m_TargetObject->Create(pGraphicsAPI, pPhysicsEngine)) return false;
+		//if (!m_TargetObject->Create(pGraphicsAPI, pPhysicsEngine)) return false;
 
 		return true;
 	}

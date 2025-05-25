@@ -762,6 +762,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Src\GraphicsAPI\OpenGL\COpenGLSubPass.h" />
     <ClInclude Include="Src\Scriptable\CommonComponent\CPointLightComponent.h" />
     <ClInclude Include="Src\Scriptable\CommonComponent\CDirectionalLightComponent.h" />
     <ClInclude Include="Src\Scriptable\CComponentResolver.h" />
@@ -1827,6 +1828,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClInclude Include="Src\Interface\IRenderer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\GraphicsAPI\OpenGL\COpenGLSubPass.cpp" />
     <ClCompile Include="Src\Scriptable\CommonComponent\CPointLightComponent.cpp" />
     <ClCompile Include="Src\Scriptable\CommonComponent\CDirectionalLightComponent.cpp" />
     <ClCompile Include="Src\Scriptable\CComponentResolver.cpp" />

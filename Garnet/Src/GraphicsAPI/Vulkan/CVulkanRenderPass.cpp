@@ -135,8 +135,11 @@ namespace api
 		}
 
 		// Depth
-		m_DepthTexture = std::make_shared<CVulkanTexture>(m_pGraphicsAPI, false, SamplerParam);
-		if (!m_DepthTexture->CreateFrameTexture(Width, Height, m_RenderPassFormat_Depth, 1, true)) return false;
+		{
+			const int AASampleNum = (PassState.EnabledAA) ? PassState.AASampleNum : 1;
+			m_DepthTexture = std::make_shared<CVulkanTexture>(m_pGraphicsAPI, false, SamplerParam);
+			if (!m_DepthTexture->CreateFrameTexture(Width, Height, m_RenderPassFormat_Depth, AASampleNum, true)) return false;
+		}
 
 		if (!CreateRenderPass(PassState)) return false; // レンダーパスの作成(描画全体のマネージャー。実際に描画に使用するのがサブパス。サブパスを複数個用意することでポストプロセスもできる)
 		if (!CreateFrameBuffer(Width, Height)) return false; // フレームバッファの作成
@@ -154,8 +157,10 @@ namespace api
 		// レンダーパスの基本的な設定
 		for (int i = 0; i < PassState.RenderTargetCount; i++)
 		{
+			bool UseColor, UseDepth, UseStencil;
+
 			VkAttachmentDescription colorAttachment{};
-			colorAttachment.format = m_pGraphicsAPI->FindImageFormat(m_RenderPassFormat_Color);
+			colorAttachment.format = m_pGraphicsAPI->FindImageFormat(m_RenderPassFormat_Color, UseColor, UseDepth, UseStencil);
 			colorAttachment.samples = (PassState.EnabledAA)? m_pGraphicsAPI->GetMSAASampleFormat(PassState.AASampleNum) : VK_SAMPLE_COUNT_1_BIT; // マルチサンプリング
 			colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR; // レンダリングの前後にどのような処理を施すか(クリアの方法など)
 			colorAttachment.storeOp = (PassState.EnabledAA) ? VK_ATTACHMENT_STORE_OP_DONT_CARE : VK_ATTACHMENT_STORE_OP_STORE; // レンダリング結果をメモリに保存し読み取り可にする
@@ -192,8 +197,10 @@ namespace api
 		{
 			for (int i = 0; i < PassState.RenderTargetCount; i++)
 			{
+				bool UseColor, UseDepth, UseStencil;
+
 				VkAttachmentDescription colorAttachmentResolve{};
-				colorAttachmentResolve.format = m_pGraphicsAPI->FindImageFormat(m_RenderPassFormat_Color);
+				colorAttachmentResolve.format = m_pGraphicsAPI->FindImageFormat(m_RenderPassFormat_Color, UseColor, UseDepth, UseStencil);
 				colorAttachmentResolve.samples = VK_SAMPLE_COUNT_1_BIT; // マルチサンプリング
 				colorAttachmentResolve.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE; // レンダリングの前後にどのような処理を施すか(クリアの方法など)
 				colorAttachmentResolve.storeOp = VK_ATTACHMENT_STORE_OP_STORE; // レンダリング結果をメモリに保存し読み取り可にする
@@ -217,25 +224,28 @@ namespace api
 
 		// <デプスバッファ> ////////////////////////////////////////////////////////////////
 		// レンダーパスの基本的な設定
-		VkAttachmentDescription depthAttachment{};
-		depthAttachment.format = m_pGraphicsAPI->FindImageFormat(m_RenderPassFormat_Depth);
-		depthAttachment.samples = (PassState.EnabledAA) ? m_pGraphicsAPI->GetMSAASampleFormat(PassState.AASampleNum) : VK_SAMPLE_COUNT_1_BIT; // マルチサンプリング
-		depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR; // レンダリングの前後にどのような処理を施すか(クリアの方法など)。デプスバッファに適応
-		depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE; // レンダリング結果をメモリに保存し読み取り可にする。デプスバッファに適応
-		if (PassState.Stencil)
 		{
-			depthAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_CLEAR; // 上記の設定をステンシルバッファに適応。 DONT_CAREは何もしない
-			depthAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_STORE; // 上記の設定をステンシルバッファに適応
-		}
-		else
-		{
-			depthAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE; // 上記の設定をステンシルバッファに適応。 DONT_CAREは何もしない
-			depthAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE; // 上記の設定をステンシルバッファに適応
-		}
-		depthAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED; // レンダリング前にどのようなレイアウトとして使用するか
-		depthAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL; // レンダリング後にどのようなレイアウトとして使用するか
+			bool UseColor, UseDepth, UseStencil;
+			VkAttachmentDescription depthAttachment{};
+			depthAttachment.format = m_pGraphicsAPI->FindImageFormat(m_RenderPassFormat_Depth, UseColor, UseDepth, UseStencil);
+			depthAttachment.samples = (PassState.EnabledAA) ? m_pGraphicsAPI->GetMSAASampleFormat(PassState.AASampleNum) : VK_SAMPLE_COUNT_1_BIT; // マルチサンプリング
+			depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR; // レンダリングの前後にどのような処理を施すか(クリアの方法など)。デプスバッファに適応
+			depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE; // レンダリング結果をメモリに保存し読み取り可にする。デプスバッファに適応
+			if (PassState.Stencil)
+			{
+				depthAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_CLEAR; // 上記の設定をステンシルバッファに適応。 DONT_CAREは何もしない
+				depthAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_STORE; // 上記の設定をステンシルバッファに適応
+			}
+			else
+			{
+				depthAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE; // 上記の設定をステンシルバッファに適応。 DONT_CAREは何もしない
+				depthAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE; // 上記の設定をステンシルバッファに適応
+			}
+			depthAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED; // レンダリング前にどのようなレイアウトとして使用するか
+			depthAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL; // レンダリング後にどのようなレイアウトとして使用するか
 
-		attachments.push_back(depthAttachment);
+			attachments.push_back(depthAttachment);
+		}
 
 		// サブパスの設定(サブパスとは前のパスのフレームバッファの内容を参照するレンダリング操作。ポストプロセスなどに有用)
 		VkAttachmentReference depthAttachmentRef{}; // 前のパスの参照方法の定義(かな？)
@@ -275,12 +285,7 @@ namespace api
 		renderPassInfo.dependencyCount = 1;
 		renderPassInfo.pDependencies = &dependency;
 
-		if (vkCreateRenderPass(m_pGraphicsAPI->GetLogicalDevice(), &renderPassInfo, nullptr, &m_RenderPass) != VK_SUCCESS)
-		{
-			Console::Log("[ERROR] failed to create render pass!\n");
-
-			return false;
-		}
+		VK_CHECK_RESULT(vkCreateRenderPass(m_pGraphicsAPI->GetLogicalDevice(), &renderPassInfo, nullptr, &m_RenderPass));
 
 		return true;
 	}
@@ -320,10 +325,7 @@ namespace api
 		frameBufferInfo.height = Height;
 		frameBufferInfo.layers = 1;
 
-		if (vkCreateFramebuffer(m_pGraphicsAPI->GetLogicalDevice(), &frameBufferInfo, nullptr, &m_FrameBuffer) != VK_SUCCESS)
-		{
-			return false;
-		}
+		VK_CHECK_RESULT(vkCreateFramebuffer(m_pGraphicsAPI->GetLogicalDevice(), &frameBufferInfo, nullptr, &m_FrameBuffer));
 
 		return true;
 	}
@@ -448,10 +450,7 @@ namespace api
 		beginInfo.flags = 0;
 		beginInfo.pInheritanceInfo = nullptr;
 
-		if (vkBeginCommandBuffer(m_CommandBuffer, &beginInfo) != VK_SUCCESS)
-		{
-			return false;
-		}
+		VK_CHECK_RESULT(vkBeginCommandBuffer(m_CommandBuffer, &beginInfo));
 
 		return true;
 	}
@@ -459,10 +458,7 @@ namespace api
 	bool CVulkanRenderPass::EndRecordCommandBuffer()
 	{
 		// コマンドバッファの記録を終了
-		if (vkEndCommandBuffer(m_CommandBuffer) != VK_SUCCESS)
-		{
-			return false;
-		}
+		VK_CHECK_RESULT(vkEndCommandBuffer(m_CommandBuffer));
 
 		return true;
 	}

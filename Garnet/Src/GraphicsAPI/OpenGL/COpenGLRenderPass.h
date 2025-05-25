@@ -10,6 +10,7 @@ namespace graphics { class CTexture; }
 
 namespace api
 {
+	class COpenGLSubPass;
 	class COpenGLTexture;
 
 	class COpenGLRenderPass : public graphics::IRenderPass
@@ -19,27 +20,20 @@ namespace api
 
 		// Base Param
 		std::string m_PassName;
-		int m_Width;
-		int m_Height;
 		glm::vec4 m_InitColor;
 		api::ERenderPassFormat m_RenderPassFormat;
-		std::vector<std::shared_ptr<graphics::CTexture>> m_FrameTextureList;
-		std::shared_ptr<graphics::CTexture> m_DepthTexture;
 
-		bool m_UseStencil;
+		bool m_UseColorBuffer;
+		bool m_UseDepthBuffer;
+		bool m_UseMSAA;
 
-		// Frame Buffer
-		GLuint m_FrameBuffer;
+		// SubPass
+		std::shared_ptr<COpenGLSubPass> m_SubPass;
+		std::shared_ptr<COpenGLSubPass> m_ResolveSubPass;
 
-		// Color Buffer
-		GLuint m_ColorBuffer;
-
-		// Depth Buffer
-		GLuint m_DepthBuffer;
 	private:
-		bool CreateFrameBuffer();
-		bool CreateColorBuffer(int AttachmentIndex, const graphics::SRenderPassState& PassState);
-		bool CreateDepthBuffer(const graphics::SRenderPassState& PassState);
+		bool CopyRenderPass();
+
 	public:
 		COpenGLRenderPass(api::COpenGLAPI* pGraphicsAPI, const std::string& PassName, ERenderPassFormat RenderPassFormat, const glm::vec4& InitColor);
 		virtual ~COpenGLRenderPass();
