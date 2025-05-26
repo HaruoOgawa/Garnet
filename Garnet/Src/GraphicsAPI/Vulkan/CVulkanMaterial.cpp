@@ -32,6 +32,9 @@ namespace api
 
 	void CVulkanMaterial::Release()
 	{
+		// 論理デバイスの処理がすべて終わるまで待つ
+		vkDeviceWaitIdle(m_pGraphicsAPI->GetLogicalDevice());
+
 		//
 		m_ShaderStages.clear();
 

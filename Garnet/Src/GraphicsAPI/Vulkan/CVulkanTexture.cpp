@@ -19,6 +19,9 @@ namespace api
 
 	CVulkanTexture::~CVulkanTexture()
 	{
+		// 論理デバイスの処理がすべて終わるまで待つ
+		vkDeviceWaitIdle(m_pGraphicsAPI->GetLogicalDevice());
+
 		//
 		if (m_GUIDescriptorSet)
 		{
