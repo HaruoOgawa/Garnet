@@ -285,7 +285,6 @@ namespace api
 
 		bool BeginRecordCommandBuffer();
 		bool EndRecordCommandBuffer();
-		bool SubmitCommandNoSemaphore();
 
 		// Frame Buffer
 		uint32_t GetCurrentFrame() const;

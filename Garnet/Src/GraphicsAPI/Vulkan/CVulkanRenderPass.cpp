@@ -18,8 +18,6 @@ namespace api
 		m_RenderPassFormat_Color(RenderPassFormat),
 		m_RenderPassFormat_Depth(ERenderPassFormat::NONE),
 		m_DepthTexture(nullptr),
-		m_CommandPool(nullptr),
-		m_CommandBuffer(nullptr),
 		m_RenderPass(nullptr),
 		m_FrameBuffer(nullptr)
 	{
@@ -30,12 +28,6 @@ namespace api
 		m_FrameTextureList.clear();
 		m_ResolveTextureList.clear();
 		m_DepthTexture = nullptr;
-
-		if (m_CommandPool)
-		{
-			vkDestroyCommandPool(m_pGraphicsAPI->GetLogicalDevice(), m_CommandPool, nullptr);
-			m_CommandPool = nullptr;
-		}
 		
 		// フレームバッファの破棄
 		if (m_FrameBuffer)
@@ -143,8 +135,6 @@ namespace api
 
 		if (!CreateRenderPass(PassState)) return false; // レンダーパスの作成(描画全体のマネージャー。実際に描画に使用するのがサブパス。サブパスを複数個用意することでポストプロセスもできる)
 		if (!CreateFrameBuffer(Width, Height)) return false; // フレームバッファの作成
-		if (!m_pGraphicsAPI->CreateCommandPool(m_CommandPool)) return false;
-		if (!m_pGraphicsAPI->CreateCommandBuffer(m_CommandBuffer, m_CommandPool)) return false;
 
 		return true;
 	}
@@ -332,9 +322,6 @@ namespace api
 
 	bool CVulkanRenderPass::BeginRenderPass()
 	{
-		// コマンドバッファの記録開始
-		if (!BeginRecordCommandBuffer()) return false;
-
 		// レンダーパス開始 
 		VkRenderPassBeginInfo renderPassInfo{};
 		renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
@@ -378,7 +365,7 @@ namespace api
 		renderPassInfo.pClearValues = clearValues.data();
 
 		// レンダーパス開始コマンドを発行
-		vkCmdBeginRenderPass(m_CommandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+		vkCmdBeginRenderPass(m_pGraphicsAPI->GetCurrentCommandBuffer(), &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
 		// 動的指定にしたビューポートとシザーの設定をここで行う(ウィンドウのリサイズにとても役立つやつ)
 		VkViewport viewport{};
@@ -388,12 +375,12 @@ namespace api
 		viewport.height = static_cast<float>(m_Height);
 		viewport.minDepth = 0.0f;
 		viewport.maxDepth = 1.0f;
-		vkCmdSetViewport(m_CommandBuffer, 0, 1, &viewport); // ビューポート再設定用のコマンドを発行
+		vkCmdSetViewport(m_pGraphicsAPI->GetCurrentCommandBuffer(), 0, 1, &viewport); // ビューポート再設定用のコマンドを発行
 
 		VkRect2D scissor{};
 		scissor.offset = { 0, 0 };
 		scissor.extent = { static_cast<unsigned int>(m_Width), static_cast<unsigned int>(m_Height) };
-		vkCmdSetScissor(m_CommandBuffer, 0, 1, &scissor); // シザーの再設定用のコマンドを発行
+		vkCmdSetScissor(m_pGraphicsAPI->GetCurrentCommandBuffer(), 0, 1, &scissor); // シザーの再設定用のコマンドを発行
 
 		return true;
 	}
@@ -401,64 +388,7 @@ namespace api
 	bool CVulkanRenderPass::EndRenderPass()
 	{
 		// レンダーパス終了
-		vkCmdEndRenderPass(m_CommandBuffer);
-
-		// コマンドバッファの記録を終了
-		if (!EndRecordCommandBuffer()) return false;
-
-		// コマンドバッファの送信
-		VkSubmitInfo submitInfo{};
-		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-
-		submitInfo.commandBufferCount = 1;
-		submitInfo.pCommandBuffers = &m_CommandBuffer;
-
-		submitInfo.waitSemaphoreCount = 0;
-		submitInfo.pWaitSemaphores = nullptr;
-		submitInfo.pWaitDstStageMask = nullptr;
-		submitInfo.signalSemaphoreCount = 0;
-		submitInfo.pSignalSemaphores = nullptr;
-
-		// コマンドバッファをグラフィックキューに送信
-		// コマンドバッファにはコマンドが入っていてそのコマンドをキューが実行する
-		// キューはタスクでその具体的なタスク内容がコマンドという理解もできる
-		// レンダーパスへの描画コマンドを実行する
-
-		// 描画が終わるまでフェンスで次の処理を待たせる
-		const auto& Fence = m_pGraphicsAPI->GetInFlightFence();
-
-		VK_CHECK_RESULT(vkQueueSubmit(m_pGraphicsAPI->GetGraphicsQueue(), 1, &submitInfo, Fence));
-
-		return true;
-	}
-
-	bool CVulkanRenderPass::BeginRecordCommandBuffer()
-	{
-		// 前のフレームの処理が終わるのを待つ
-		const auto& Fence = m_pGraphicsAPI->GetInFlightFence();
-		vkWaitForFences(m_pGraphicsAPI->GetLogicalDevice(), 1, &Fence, VK_TRUE, UINT32_MAX);
-
-		// 処理が終わったのでフェンスをリセットしてまた使える状態にしておく
-		vkResetFences(m_pGraphicsAPI->GetLogicalDevice(), 1, &Fence);
-
-		// コマンドバッファをリセットする
-		vkResetCommandBuffer(m_CommandBuffer, 0);
-
-		// コマンドバッファの記録開始
-		VkCommandBufferBeginInfo beginInfo{};
-		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-		beginInfo.flags = 0;
-		beginInfo.pInheritanceInfo = nullptr;
-
-		VK_CHECK_RESULT(vkBeginCommandBuffer(m_CommandBuffer, &beginInfo));
-
-		return true;
-	}
-
-	bool CVulkanRenderPass::EndRecordCommandBuffer()
-	{
-		// コマンドバッファの記録を終了
-		VK_CHECK_RESULT(vkEndCommandBuffer(m_CommandBuffer));
+		vkCmdEndRenderPass(m_pGraphicsAPI->GetCurrentCommandBuffer());
 
 		return true;
 	}

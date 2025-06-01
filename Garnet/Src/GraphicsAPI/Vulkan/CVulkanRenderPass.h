@@ -36,17 +36,10 @@ namespace api
 		std::vector<std::shared_ptr<graphics::CTexture>> m_ResolveTextureList;
 		std::shared_ptr<graphics::CTexture> m_DepthTexture;
 
-		// Command
-		VkCommandPool   m_CommandPool;
-		VkCommandBuffer m_CommandBuffer;
-
 		// Rendering
 		VkRenderPass m_RenderPass;
 		VkFramebuffer m_FrameBuffer;
 	private:
-		bool BeginRecordCommandBuffer();
-		bool EndRecordCommandBuffer();
-
 		bool CreateRenderPass(const graphics::SRenderPassState& PassState);
 		bool CreateFrameBuffer(int Width, int Height);
 	public:
@@ -60,7 +53,6 @@ namespace api
 		const graphics::SRenderPassState& GetPassState() const;
 
 		VkRenderPass GetRenderPass() const { return m_RenderPass; }
-		VkCommandBuffer GetCommandBuffer() const { return m_CommandBuffer; }
 
 		bool Create(int Width, int Height, const graphics::SRenderPassState& PassState) override;
 
