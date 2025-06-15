@@ -136,7 +136,7 @@ namespace scriptable
 		// Mesh & Material
 		for (const auto& MaterialFrame : m_Loader->GetTargetMaterialFrameSet())
 		{
-			const auto& Material = MaterialFrame->CreateMaterial(pGraphicsAPI, graphics::ECullMode::CULL_BACK);
+			const auto& Material = MaterialFrame->CreateMaterial(pGraphicsAPI, graphics::ECullMode::CULL_NONE);
 			Material->SetBlendType(graphics::EBlendType::BLEND_TYPE_ADDITIVE);
 			Material->SetEnabledZWrite(false);
 			Material->ReplaceTextureIndex("gPositionTexture", 0);

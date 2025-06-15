@@ -7,6 +7,7 @@
 #include "CVulkanMaterial.h"
 #include "CVulkanTexture.h"
 #include "CVulkanGPGPUHandler.h"
+#include "../../Graphics/Vulkan/CVulkanRTXGIController.h"
 #include "../../Message/Console.h"
 
 namespace api
@@ -172,6 +173,11 @@ namespace api
 		return GPGPUHandler;
 	}
 #endif // USE_GPGPU
+
+	std::shared_ptr<graphics::CRTXGIController> CVulkanAPI::CreateRTXGIController()
+	{
+		return std::make_shared<graphics::CVulkanRTXGIController>();
+	}
 
 	bool CVulkanAPI::Resize(int Width, int Height)
 	{
