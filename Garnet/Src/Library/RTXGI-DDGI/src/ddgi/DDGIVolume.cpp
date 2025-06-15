@@ -1,3 +1,5 @@
+#ifdef USE_RTXGI
+
 /*
 * Copyright (c) 2019-2023, NVIDIA CORPORATION.  All rights reserved.
 *
@@ -517,3 +519,4 @@ namespace rtxgi
     }
 
 }
+#endif // USE_RTXGI

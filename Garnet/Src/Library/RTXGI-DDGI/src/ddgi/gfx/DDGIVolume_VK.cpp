@@ -1,3 +1,4 @@
+#ifdef USE_RTXGI 
 /*
 * Copyright (c) 2019-2023, NVIDIA CORPORATION.  All rights reserved.
 *
@@ -1857,3 +1858,4 @@ namespace rtxgi
     #endif // RTXGI_MANAGED_RESOURCES
     } // namespace vulkan
 } // namespace rtxgi
+#endif // USE_RTXGI
