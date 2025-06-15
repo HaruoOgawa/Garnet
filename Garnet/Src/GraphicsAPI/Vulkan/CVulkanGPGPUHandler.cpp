@@ -113,13 +113,6 @@ namespace api
 
 	bool CVulkanGPGPUHandler::BeginRecordCommandBuffer()
 	{
-		// 前のフレームの処理が終わるのを待つ
-		const auto& Fence = m_pGraphicsAPI->GetComputeInFlightFence();
-		vkWaitForFences(m_pGraphicsAPI->GetLogicalDevice(), 1, &Fence, VK_TRUE, UINT64_MAX);
-
-		// 処理が終わったのでフェンスをリセットしてまた使える状態にしておく
-		vkResetFences(m_pGraphicsAPI->GetLogicalDevice(), 1, &Fence);
-
 		// コマンドバッファをリセットする
 		vkResetCommandBuffer(m_CommandBuffer, 0);
 
@@ -140,9 +133,10 @@ namespace api
 		// コマンドバッファの記録終了
 		VK_CHECK_RESULT(vkEndCommandBuffer(m_CommandBuffer));
 
+		const auto& Fence = m_pGraphicsAPI->GetComputeInFlightFence();
+
 		// コマンドバッファの送信
 		const auto& Semaphore = m_pGraphicsAPI->GetComputeFlightSemaphore();
-		const auto& Fence = m_pGraphicsAPI->GetComputeInFlightFence();
 		VkSemaphore waitSemaphore[] = { m_pGraphicsAPI->GetRenderFlightSemaphore()}; // セマフォで待つ
 
 		VkSubmitInfo submitInfo{};
@@ -156,6 +150,15 @@ namespace api
 
 		// Compute Queueを実行
 		VK_CHECK_RESULT(vkQueueSubmit(m_pGraphicsAPI->GetComputeQueue(), 1, &submitInfo, Fence));
+
+		// ComutePassが終わるのを待つ
+		// レンダリングの方はスワップチェーンパスやオフスクリーンレンダリングパスも含めた全体でvkQueueSubmitやvkWaitForFencesを行うが、
+		// ComputePassはレンダリングと同期させる(ComputePassが終わった後にレンダリングを行う)といったことがしたいので
+		// 個別にこれらの関数を呼んであげる必要がある
+		vkWaitForFences(m_pGraphicsAPI->GetLogicalDevice(), 1, &Fence, VK_TRUE, UINT64_MAX);
+
+		// 処理が終わったのでフェンスをリセットしてまた使える状態にしておく
+		vkResetFences(m_pGraphicsAPI->GetLogicalDevice(), 1, &Fence);
 
 		return true;
 	}

@@ -120,7 +120,7 @@ namespace api
 		VkImageView m_SwapChainDepthImageView;
 
 		// Frame Buffer
-		const int MAX_FRAMES_IN_FLIGHT = 2;
+		const int MAX_FRAMES_IN_FLIGHT = 3;
 		std::vector<VkFramebuffer> m_SwapChainFrameBuffers;
 		uint32_t m_CurrentFrame = 0;
 
@@ -285,7 +285,6 @@ namespace api
 
 		bool BeginRecordCommandBuffer();
 		bool EndRecordCommandBuffer();
-		bool SubmitCommandNoSemaphore();
 
 		// Frame Buffer
 		uint32_t GetCurrentFrame() const;

@@ -19,6 +19,9 @@ namespace api
 
 	CVulkanTexture::~CVulkanTexture()
 	{
+		// 論理デバイスの処理がすべて終わるまで待つ
+		vkDeviceWaitIdle(m_pGraphicsAPI->GetLogicalDevice());
+
 		//
 		if (m_GUIDescriptorSet)
 		{
@@ -396,16 +399,16 @@ namespace api
 			// 縮小コマンドの設定
 			VkImageBlit blit{};
 			// Srcの設定
-			blit.srcOffsets[0] = { 0, 0, static_cast<int>(layer) }; // srcOffsets, dstOffsetsが大きさ2の配列になっているのは、ピクセル領域の使用範囲を決めるためである
-			blit.srcOffsets[1] = { m_Width >> (level - 1) , m_Height >> (level - 1), static_cast<int>(layer) }; // Blit用に入ってきたイメージのピクセル範囲
+			blit.srcOffsets[0] = { 0 ,0, 0 }; // srcOffsets, dstOffsetsが大きさ2の配列になっているのは、ピクセル領域の使用範囲を決めるためである
+			blit.srcOffsets[1] = { m_Width >> (level - 1) , m_Height >> (level - 1), 1 }; // Blit用に入ってきたイメージのピクセル範囲
 			blit.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 			blit.srcSubresource.mipLevel = level - 1; // ミップレベル. 設定値はインデックス
 			blit.srcSubresource.baseArrayLayer = layer; // イメージ配列のレイヤーインデックス
 			blit.srcSubresource.layerCount = 1;
 
 			// Dstの設定
-			blit.dstOffsets[0] = { 0, 0, static_cast<int>(layer) }; // 書き出すイメージのピクセル範囲
-			blit.dstOffsets[1] = { m_Width >> level , m_Height >> level, static_cast<int>(layer) };
+			blit.dstOffsets[0] = { 0 ,0, 0 }; // 書き出すイメージのピクセル範囲
+			blit.dstOffsets[1] = { m_Width >> level , m_Height >> level, 1 };
 			blit.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 			blit.dstSubresource.mipLevel = level; // ミップレベル. 設定値はインデックス
 			blit.dstSubresource.baseArrayLayer = layer; // イメージ配列のレイヤーインデックス
