@@ -2,6 +2,7 @@
 
 #if defined(USE_RTXGI) && defined(USE_VULKAN)
 
+#include <string>
 #include "../CRTXGIController.h"
 #include <rtxgi/ddgi/gfx/DDGIVolume_VK.h>
 
@@ -11,6 +12,7 @@ namespace graphics
 	{
 
 	private:
+		bool CreateDDGIVolume(api::IGraphicsAPI* pGraphicsAPI);
 
 	public:
 		CVulkanRTXGIController();
