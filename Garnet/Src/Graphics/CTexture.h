@@ -49,7 +49,11 @@ namespace graphics
 		api::ERenderPassFormat GetRenderPassFormat()const;
 		float GetMipCount() const;
 
+		// フレームバッファテクスチャの生成
 		virtual bool CreateFrameTexture(int Width, int Height, api::ERenderPassFormat RenderPassFormat, int AASampleNum, bool ReadOnShader) = 0;
+		
+		// コンピュートシェーダー用テクスチャを生成
+		virtual bool CreateComputeTexture(int Width, int Height) = 0;
 #ifdef USE_TEXTURE_LOADER
 		virtual bool Create(const std::vector<unsigned char>& Data);
 		virtual bool Create(const std::vector<std::vector<unsigned char>>& DataList);

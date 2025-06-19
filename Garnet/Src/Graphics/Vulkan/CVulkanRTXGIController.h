@@ -3,8 +3,12 @@
 #if defined(USE_RTXGI) && defined(USE_VULKAN)
 
 #include <string>
-#include "../CRTXGIController.h"
 #include <rtxgi/ddgi/gfx/DDGIVolume_VK.h>
+
+#include "../CRTXGIController.h"
+#include "../../Graphics/CTexture.h"
+
+namespace api { class CVulkanAPI; }
 
 namespace graphics
 {
@@ -12,7 +16,11 @@ namespace graphics
 	{
 
 	private:
+		bool CreateTextures(api::IGraphicsAPI* pGraphicsAPI);
+		
 		bool CreateDDGIVolume(api::IGraphicsAPI* pGraphicsAPI);
+		rtxgi::DDGIVolumeDesc CreateDDGIVolumeDesc();
+		rtxgi::vulkan::DDGIVolumeResources CreateDDGIVolumeResources(api::IGraphicsAPI* pGraphicsAPI);
 
 	public:
 		CVulkanRTXGIController();

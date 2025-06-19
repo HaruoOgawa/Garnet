@@ -1,5 +1,7 @@
 #if defined(USE_RTXGI) && defined(USE_VULKAN)
 #include "CVulkanRTXGIController.h"
+#include <dxc/dxcapi.h>
+#include "../../GraphicsAPI/Vulkan/CVulkanAPI.h"
 
 using namespace rtxgi;
 using namespace rtxgi::vulkan;
@@ -17,13 +19,37 @@ namespace graphics
 
 	bool CVulkanRTXGIController::Initialize(api::IGraphicsAPI* pGraphicsAPI)
 	{
+		if (!CreateTextures(pGraphicsAPI)) return false;
+		//if (!LoadAndCompileShaders(vk, resources, numVolumes, log)) return false;
+		//if (!CreateDescriptorSets(vk, vkResources, resources, log)) return false;
+		//if (!CreatePipelines(vk, vkResources, resources, log)) return false;
+		//if (!CreateShaderTable(vk, resources, log)) return false;
+
+		// Create the DDGIVolume resource indices structured buffer
+		//if (!CreateDDGIVolumeResourceIndicesBuffer(vk, vkResources, resources, numVolumes, log)) return false;
+
+		// Create the DDGIVolume constants structured buffer
+		//if (!CreateDDGIVolumeConstantsBuffer(vk, vkResources, resources, numVolumes, log)) return false;
+
 		if (!CreateDDGIVolume(pGraphicsAPI)) return false;
+
+		return true;
+	}
+
+	bool CVulkanRTXGIController::CreateTextures(api::IGraphicsAPI* pGraphicsAPI)
+	{
+		auto OutputTexture = pGraphicsAPI->CreateTexture();
+		if (!OutputTexture->CreateComputeTexture(pGraphicsAPI->GetWidth(), pGraphicsAPI->GetHeight())) return false;
 
 		return true;
 	}
 
 	bool CVulkanRTXGIController::Update(api::IGraphicsAPI* pGraphicsAPI)
 	{
+		// RTXGI用のComputeShaderをコンパイル
+		// HLSLが用意されているが、それをDXC(DirectX Compiler)でSPIR-Vにして利用する
+		// DXCはコード版の方を使ってランタイムでコンパイルする
+
 		return true;
 	}
 
@@ -34,7 +60,21 @@ namespace graphics
 
 	bool CVulkanRTXGIController::CreateDDGIVolume(api::IGraphicsAPI* pGraphicsAPI)
 	{
-		// ボリュームの設定 //////////////////////////////////////////////////////////////////////////////////////////////
+		// ボリュームの設定
+		DDGIVolumeDesc volumeDesc = CreateDDGIVolumeDesc();
+
+		// ボリュームリソースの設定 
+		DDGIVolumeResources volumeResources = CreateDDGIVolumeResources(pGraphicsAPI);
+
+		// ボリューム生成
+		DDGIVolume* volume = new DDGIVolume();
+		ERTXGIStatus status = volume->Create(volumeDesc, volumeResources);
+
+		return true;
+	}
+
+	DDGIVolumeDesc CVulkanRTXGIController::CreateDDGIVolumeDesc()
+	{
 		std::string VolumeName = "TestVolume";
 		size_t size = VolumeName.size();
 
@@ -52,12 +92,12 @@ namespace graphics
 		volumeDesc.probeNumRays = 256; // 1フレームの間に1つのプローブから出るレイの数
 		volumeDesc.probeNumIrradianceTexels = 8; // 放射照度テクスチャの1つの次元(RGBAチャンネルのそれぞれ)で使われるテクセルの数。外枠あり
 		// 放射照度テクスチャの1つの次元(RGBAチャンネルのそれぞれ)で使われるテクセルの数。外枠を除くので2を引く
-		volumeDesc.probeNumIrradianceInteriorTexels = volumeDesc.probeNumIrradianceTexels - 2; 
+		volumeDesc.probeNumIrradianceInteriorTexels = volumeDesc.probeNumIrradianceTexels - 2;
 		volumeDesc.probeNumDistanceTexels = 16; // 距離テクスチャの1つの次元(RGBAチャンネルのそれぞれ)で使われるテクセルの数。外枠あり
 		// 距離テクスチャの1つの次元(RGBAチャンネルのそれぞれ)で使われるテクセルの数。外枠を除くので2を引く
 		volumeDesc.probeNumDistanceInteriorTexels = volumeDesc.probeNumDistanceTexels - 2;
 		// プローブの位置などが更新されたときにどれぐらい影響を受けるかの割合。1に近いほどゆっくり変化する
-		volumeDesc.probeHysteresis = 0.97f; 
+		volumeDesc.probeHysteresis = 0.97f;
 		volumeDesc.probeMaxRayDistance = 10.0f; // ワールドスペースにてプローブから出たレイが進む最大距離
 		volumeDesc.probeNormalBias = 0.02f; // 計算誤差を防ぐための法線方向の小さなオフセット
 		volumeDesc.probeViewBias = 0.1f; // 計算誤差を防ぐためのカメラビューベクトル方向の小さなオフセット
@@ -83,14 +123,23 @@ namespace graphics
 		if (Move) volumeDesc.movementType = EDDGIVolumeMovementType::Scrolling;
 		else volumeDesc.movementType = EDDGIVolumeMovementType::Default;
 
-		// ボリュームリソースの設定 //////////////////////////////////////////////////////////////////////////////////////////////
+		return volumeDesc;
+	}
+
+	DDGIVolumeResources CVulkanRTXGIController::CreateDDGIVolumeResources(api::IGraphicsAPI* pGraphicsAPI)
+	{
 		DDGIVolumeResources volumeResources;
 
-		// ボリューム生成
-		DDGIVolume* volume = new DDGIVolume();
-		ERTXGIStatus status = volume->Create(volumeDesc, volumeResources);
+		// bindless: よくわからない
+		//volumeResources.bindless.enabled = (bool)RTXGI_DDGI_BIND
 
-		return true;
+		// managed: よくわからない。とりあえずsampleでは使ってないみたいなので無視？
+		//volumeResources.managed
+
+		// unmanaged
+		volumeResources.unmanaged.enabled = true;
+
+		return volumeResources;
 	}
 }
 #endif // USE_RTXGI && USE_VULKAN
