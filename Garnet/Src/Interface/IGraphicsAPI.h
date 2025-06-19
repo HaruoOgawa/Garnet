@@ -27,6 +27,7 @@ namespace graphics
 	enum class ECullMode;
 	class CVertexBuffer;
 	class CIndexBuffer;
+	class CRTXGIController;
 }
 
 namespace animation { 
@@ -55,6 +56,8 @@ namespace api
 #ifdef USE_GPGPU
 		virtual std::shared_ptr<api::IGPGPUHandler> CreateGPGPUHandler(const std::shared_ptr<graphics::CMaterial>& ComputeMaterial) = 0;
 #endif // USE_GPGPU
+		virtual std::shared_ptr<graphics::CRTXGIController> CreateRTXGIController() = 0;
+
 		virtual bool Resize(int Width, int Height) = 0;
 
 		virtual bool PrepareRender() = 0;

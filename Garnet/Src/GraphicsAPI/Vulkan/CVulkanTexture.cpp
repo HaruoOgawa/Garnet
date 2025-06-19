@@ -138,6 +138,28 @@ namespace api
 		return true;
 	}
 
+	bool CVulkanTexture::CreateComputeTexture(int Width, int Height)
+	{
+		m_Width = Width;
+		m_Height = Height;
+		//m_RenderPassFormat = RenderPassFormat;
+
+		bool UseColor = false;
+		bool UseDepth = false;
+		bool UseStencil = false;
+
+		const VkFormat ImageFormat = VK_FORMAT_R16G16B16A16_SFLOAT;
+		const VkImageUsageFlags Usage = VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
+		const VkMemoryPropertyFlags properties = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+		VkSampleCountFlagBits msaaSamples = m_pGraphicsAPI->GetMSAASampleFormat(1);
+
+		if (!CreateComputeTextureImage(ImageFormat, Usage, properties, msaaSamples)) return false; // テクスチャイメージの生成
+		if (!CreateTextureImageView(ImageFormat, UseColor, UseDepth, UseStencil)) return false;// シェーダーで取り扱う用のImageViewを作成(イメージマネージャーみたいなやつかな)
+		if (!CreateTextureSampler()) return false; // テクスチャサンプラーを作成.サンプラーとはテクスチャデータをフラグメント(3Dモデル)に合うように調整する機構
+
+		return true;
+	}
+
 	bool CVulkanTexture::Create(const std::vector<unsigned char>& pixelData, int pixelSize)
 	{
 		bool UseColor = false;
@@ -160,6 +182,35 @@ namespace api
 		// テクスチャイメージオブジェクトを生成
 		m_pGraphicsAPI->CreateImage(m_Width, m_Height, msaaSamples, ImageFormat, VK_IMAGE_TILING_OPTIMAL, Usage,
 			properties, m_TextureImage, m_TextureImageMemory, m_TextureType, m_MipCount, m_UseMipMap);
+
+		return true;
+	}
+
+	bool CVulkanTexture::CreateComputeTextureImage(VkFormat ImageFormat, VkImageUsageFlags Usage, VkMemoryPropertyFlags properties, VkSampleCountFlagBits msaaSamples)
+	{
+		// テクスチャイメージオブジェクトを生成
+		m_pGraphicsAPI->CreateImage(m_Width, m_Height, msaaSamples, ImageFormat, VK_IMAGE_TILING_OPTIMAL, Usage,
+			properties, m_TextureImage, m_TextureImageMemory, m_TextureType, m_MipCount, m_UseMipMap);
+
+		//
+		// コマンドバッファの記録開始
+		VkCommandBuffer commandBuffer = m_pGraphicsAPI->BeginSingleTimeCommands();
+
+		VkImageMemoryBarrier imageMemoryBarrier = {};
+		imageMemoryBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+		imageMemoryBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+		imageMemoryBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+		imageMemoryBarrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+		imageMemoryBarrier.newLayout = VK_IMAGE_LAYOUT_GENERAL;
+		imageMemoryBarrier.image = m_TextureImage;
+		imageMemoryBarrier.subresourceRange = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
+
+		imageMemoryBarrier.srcAccessMask = 0;
+
+		vkCmdPipelineBarrier(commandBuffer, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, 0, 0, nullptr, 0, nullptr, 1, &imageMemoryBarrier);
+
+		// 記録終了
+		m_pGraphicsAPI->EndSingleTimeCommands(commandBuffer);
 
 		return true;
 	}

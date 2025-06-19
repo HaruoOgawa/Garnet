@@ -27,6 +27,7 @@ namespace api
 	private:
 		// Vulkanメインロジック /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		bool CreateFrameTextureImage(VkFormat ImageFormat, VkImageUsageFlags Usage, VkMemoryPropertyFlags properties, VkSampleCountFlagBits msaaSamples);
+		bool CreateComputeTextureImage(VkFormat ImageFormat, VkImageUsageFlags Usage, VkMemoryPropertyFlags properties, VkSampleCountFlagBits msaaSamples);
 		bool CreateTextureImage(const std::vector<unsigned char>& pixelData, int pixelSize, VkFormat ImageFormat);
 		bool CreateTextureImageView(VkFormat ImageFormat, bool UseColor, bool UseDepth, bool UseStencil);
 		bool CreateTextureSampler();
@@ -43,6 +44,7 @@ namespace api
 		virtual ~CVulkanTexture();
 
 		virtual bool CreateFrameTexture(int Width, int Height, api::ERenderPassFormat RenderPassFormat, int AASampleNum, bool ReadOnShader) override;
+		virtual bool CreateComputeTexture(int Width, int Height) override;
 		virtual bool Create(const std::vector<unsigned char>& pixelData, int pixelSize) override;
 
 		const VkImage& GetTextureImage() const;

@@ -99,6 +99,11 @@ namespace graphics
 		return true;
 	}
 
+	bool CTexture::CreateComputeTexture(int Width, int Height)
+	{
+		return true;
+	}
+
 #ifdef USE_TEXTURE_LOADER
 	bool CTexture::Create(const std::vector<unsigned char>& Data)
 	{
