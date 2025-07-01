@@ -174,10 +174,12 @@ namespace api
 	}
 #endif // USE_GPGPU
 
+#ifdef USE_RTXGI
 	std::shared_ptr<graphics::CRTXGIController> CVulkanAPI::CreateRTXGIController()
 	{
 		return std::make_shared<graphics::CVulkanRTXGIController>();
 	}
+#endif
 
 	bool CVulkanAPI::Resize(int Width, int Height)
 	{

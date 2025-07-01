@@ -37,6 +37,13 @@ namespace api
 		return true;
 	}
 
+	// コンピュートシェーダー用テクスチャを生成
+	bool CWebGPUTexture::CreateComputeTexture(int Width, int Height)
+	{
+		// 未対応
+		return false;
+	}
+
 	const WGPUTextureView& CWebGPUTexture::GetTextureImageView() const
 	{
 		return m_TextureImageView;

@@ -56,7 +56,10 @@ namespace api
 #ifdef USE_GPGPU
 		virtual std::shared_ptr<api::IGPGPUHandler> CreateGPGPUHandler(const std::shared_ptr<graphics::CMaterial>& ComputeMaterial) = 0;
 #endif // USE_GPGPU
+
+#ifdef USE_RTXGI
 		virtual std::shared_ptr<graphics::CRTXGIController> CreateRTXGIController() = 0;
+#endif
 
 		virtual bool Resize(int Width, int Height) = 0;
 

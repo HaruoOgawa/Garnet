@@ -29,6 +29,9 @@ namespace api
 		virtual bool CreateFrameTexture(int Width, int Height, api::ERenderPassFormat RenderPassFormat, int AASampleNum, bool ReadOnShader) override;
 		virtual bool Create(const std::vector<unsigned char>& pixelData, int pixelSize) override;
 
+		// コンピュートシェーダー用テクスチャを生成
+		virtual bool CreateComputeTexture(int Width, int Height) override;
+
 		const WGPUTextureView& GetTextureImageView() const;
 		const WGPUSampler& GetTextureSampler() const;
 	};

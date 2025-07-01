@@ -173,6 +173,13 @@ namespace api
 		return true;
 	}
 
+	// コンピュートシェーダー用テクスチャを生成
+	bool COpenGLTexture::CreateComputeTexture(int Width, int Height)
+	{
+		// 未対応
+		return false;
+	}
+
 	void COpenGLTexture::CreateTextureSampler(GLenum target)
 	{
 		switch (m_SamplerParam.FilterMode)

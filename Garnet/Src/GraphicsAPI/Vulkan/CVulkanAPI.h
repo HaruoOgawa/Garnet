@@ -200,7 +200,10 @@ namespace api
 #ifdef USE_GPGPU
 		virtual std::shared_ptr<api::IGPGPUHandler> CreateGPGPUHandler(const std::shared_ptr<graphics::CMaterial>& ComputeMaterial) override;
 #endif // USE_GPGPU
+
+#ifdef USE_RTXGI
 		virtual std::shared_ptr<graphics::CRTXGIController> CreateRTXGIController() override;
+#endif
 
 		virtual bool Resize(int Width, int Height) override;
 
