@@ -344,6 +344,9 @@ namespace graphics
 		int segments = 32;
 		float angleStep = 2.0f * 3.14159265f / segments;
 
+		// 下端を中心に合わせる
+		float offset = height * 0.5f;
+
 		// 蓋をしめるかどうか
 		bool FillCap = true;
 
@@ -353,12 +356,12 @@ namespace graphics
 			float x = radius * cos(angle);
 			float z = radius * sin(angle);
 			// 上面の頂点
-			Pos.push_back(x); Pos.push_back(height / 2.0f); Pos.push_back(z);
+			Pos.push_back(x); Pos.push_back(height / 2.0f + offset); Pos.push_back(z);
 			Normal.push_back(0.0f); Normal.push_back(1.0f); Normal.push_back(0.0f);
 			UV.push_back(static_cast<float>(i) / segments); UV.push_back(1.0f);
 			
 			// 下面の頂点
-			Pos.push_back(x); Pos.push_back(-height / 2.0f); Pos.push_back(z);
+			Pos.push_back(x); Pos.push_back(-height / 2.0f + offset); Pos.push_back(z);
 			Normal.push_back(0.0f); Normal.push_back(-1.0f); Normal.push_back(0.0f);
 			UV.push_back(static_cast<float>(i) / segments); UV.push_back(0.0f);
 		}
@@ -368,10 +371,10 @@ namespace graphics
 			float x = radius * cos(angle);
 			float z = radius * sin(angle);
 			// 側面の頂点
-			Pos.push_back(x); Pos.push_back(height / 2.0f); Pos.push_back(z);
+			Pos.push_back(x); Pos.push_back(height / 2.0f + offset); Pos.push_back(z);
 			Normal.push_back(cos(angle)); Normal.push_back(0.0f); Normal.push_back(sin(angle));
 			UV.push_back(static_cast<float>(i) / segments); UV.push_back(1.0f);
-			Pos.push_back(x); Pos.push_back(-height / 2.0f); Pos.push_back(z);
+			Pos.push_back(x); Pos.push_back(-height / 2.0f + offset); Pos.push_back(z);
 			Normal.push_back(cos(angle)); Normal.push_back(0.0f); Normal.push_back(sin(angle));
 			UV.push_back(static_cast<float>(i) / segments); UV.push_back(0.0f);
 		}
@@ -380,12 +383,12 @@ namespace graphics
 		if (FillCap)
 		{
 			// 上面の中心頂点
-			Pos.push_back(0.0f); Pos.push_back(height / 2.0f); Pos.push_back(0.0);
+			Pos.push_back(0.0f); Pos.push_back(height / 2.0f + offset); Pos.push_back(0.0);
 			Normal.push_back(0.0f); Normal.push_back(1.0f); Normal.push_back(0.0f);
 			UV.push_back(0.0f); UV.push_back(1.0f);
 
 			// 下面の中心頂点
-			Pos.push_back(0.0f); Pos.push_back(-height / 2.0f); Pos.push_back(0.0f);
+			Pos.push_back(0.0f); Pos.push_back(-height / 2.0f + offset); Pos.push_back(0.0f);
 			Normal.push_back(0.0f); Normal.push_back(-1.0f); Normal.push_back(0.0f);
 			UV.push_back(0.0f); UV.push_back(0.0f);
 		}

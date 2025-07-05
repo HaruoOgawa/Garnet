@@ -3,6 +3,7 @@
 #include "../AppCore/CApp.h"
 #include "CommonComponent/CDirectionalLightComponent.h"
 #include "CommonComponent/CPointLightComponent.h"
+#include "CommonComponent/CSpotLightComponent.h"
 
 namespace scriptable
 {
@@ -23,6 +24,7 @@ namespace scriptable
 		}
 		else if (ComponentType == "SpotLight")
 		{
+			return std::make_shared<scriptable::CSpotLightComponent>(ComponentType, ValueRegistry);
 		}
 		else if (ComponentType == "RectLight")
 		{
