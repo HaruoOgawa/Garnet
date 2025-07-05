@@ -17,8 +17,9 @@ namespace graphics
 		CUBE = 1,
 		POINT = 2,
 		SPHERE = 3,
+		CYLINDER = 4,
 
-		Max = 4
+		Max = 5,
 	};
 
 	class CPresetPrimitive
@@ -30,5 +31,6 @@ namespace graphics
 		static std::pair<std::shared_ptr<graphics::CVertexBuffer>, std::shared_ptr<graphics::CIndexBuffer>> CreateBox(api::IGraphicsAPI* pGraphicsAPI);
 		static std::pair<std::shared_ptr<graphics::CVertexBuffer>, std::shared_ptr<graphics::CIndexBuffer>> CreatePoint(api::IGraphicsAPI* pGraphicsAPI);
 		static std::pair<std::shared_ptr<graphics::CVertexBuffer>, std::shared_ptr<graphics::CIndexBuffer>> CreateSphere(api::IGraphicsAPI* pGraphicsAPI);
+		static std::pair<std::shared_ptr<graphics::CVertexBuffer>, std::shared_ptr<graphics::CIndexBuffer>> CreateCylinder(api::IGraphicsAPI* pGraphicsAPI);
 	};
 }

@@ -640,6 +640,9 @@ namespace scene
 				case graphics::EPresetPrimitiveType::SPHERE:
 					type = "sphere";
 					break;
+				case graphics::EPresetPrimitiveType::CYLINDER:
+					type = "cylinder";
+					break;
 				default:
 					break;
 				}

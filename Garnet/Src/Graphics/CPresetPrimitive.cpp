@@ -325,4 +325,125 @@ namespace graphics
 
 		return createInfo;
 	}
+
+	std::pair<std::shared_ptr<graphics::CVertexBuffer>, std::shared_ptr<graphics::CIndexBuffer>> CPresetPrimitive::CreateCylinder(api::IGraphicsAPI* pGraphicsAPI)
+	{
+		// 半径1.0f, 高さ1.0f, 分割数32の円柱を生成
+		std::pair<std::shared_ptr<graphics::CVertexBuffer>, std::shared_ptr<graphics::CIndexBuffer>> createInfo = std::make_pair(pGraphicsAPI->CreateVertexBuffer(), pGraphicsAPI->CreateIndexBuffer());
+
+		// Vertex Buffer
+		std::vector<float> Pos;
+		std::vector<float> Normal;
+		std::vector<float> UV;
+		std::vector<float> Tangent;
+		std::vector<float> Joints;
+		std::vector<float> Weights;
+		std::vector<unsigned short> Indices;
+		float radius = 1.0f;
+		float height = 1.0f;
+		int segments = 32;
+		float angleStep = 2.0f * 3.14159265f / segments;
+
+		// 蓋をしめるかどうか
+		bool FillCap = true;
+
+		// 円柱の上面と下面の頂点を生成
+		for (int i = 0; i < segments; ++i) {
+			float angle = i * angleStep;
+			float x = radius * cos(angle);
+			float z = radius * sin(angle);
+			// 上面の頂点
+			Pos.push_back(x); Pos.push_back(height / 2.0f); Pos.push_back(z);
+			Normal.push_back(0.0f); Normal.push_back(1.0f); Normal.push_back(0.0f);
+			UV.push_back(static_cast<float>(i) / segments); UV.push_back(1.0f);
+			
+			// 下面の頂点
+			Pos.push_back(x); Pos.push_back(-height / 2.0f); Pos.push_back(z);
+			Normal.push_back(0.0f); Normal.push_back(-1.0f); Normal.push_back(0.0f);
+			UV.push_back(static_cast<float>(i) / segments); UV.push_back(0.0f);
+		}
+		// 円柱の側面の頂点を生成
+		for (int i = 0; i < segments; ++i) {
+			float angle = i * angleStep;
+			float x = radius * cos(angle);
+			float z = radius * sin(angle);
+			// 側面の頂点
+			Pos.push_back(x); Pos.push_back(height / 2.0f); Pos.push_back(z);
+			Normal.push_back(cos(angle)); Normal.push_back(0.0f); Normal.push_back(sin(angle));
+			UV.push_back(static_cast<float>(i) / segments); UV.push_back(1.0f);
+			Pos.push_back(x); Pos.push_back(-height / 2.0f); Pos.push_back(z);
+			Normal.push_back(cos(angle)); Normal.push_back(0.0f); Normal.push_back(sin(angle));
+			UV.push_back(static_cast<float>(i) / segments); UV.push_back(0.0f);
+		}
+
+		// 蓋をしめるように上下されぞれの円の中心を追加
+		if (FillCap)
+		{
+			// 上面の中心頂点
+			Pos.push_back(0.0f); Pos.push_back(height / 2.0f); Pos.push_back(0.0);
+			Normal.push_back(0.0f); Normal.push_back(1.0f); Normal.push_back(0.0f);
+			UV.push_back(0.0f); UV.push_back(1.0f);
+
+			// 下面の中心頂点
+			Pos.push_back(0.0f); Pos.push_back(-height / 2.0f); Pos.push_back(0.0f);
+			Normal.push_back(0.0f); Normal.push_back(-1.0f); Normal.push_back(0.0f);
+			UV.push_back(0.0f); UV.push_back(0.0f);
+		}
+
+		// 頂点数
+		const int NumOfVertex = static_cast<int>(Pos.size()) / 3;
+
+		// インデックスバッファの生成
+		for (int i = 0; i < segments; ++i) {
+			// 側面のインデックスを生成
+			int topIndex = i * 2;
+			int bottomIndex = topIndex + 1;
+			int nextTopIndex = ((i + 1) % segments) * 2;
+			int nextBottomIndex = nextTopIndex + 1;
+
+			// 側面の三角形
+			Indices.push_back(topIndex);
+			Indices.push_back(nextTopIndex);
+			Indices.push_back(bottomIndex);
+
+			Indices.push_back(bottomIndex);
+			Indices.push_back(nextTopIndex);
+			Indices.push_back(nextBottomIndex);
+			
+			// 蓋
+			if (FillCap)
+			{
+				// 上下中心のインデックス
+				int topCenterIndex = NumOfVertex - 2;
+				int bottomCenterIndex = NumOfVertex - 1;
+
+				// 上面の三角形
+				Indices.push_back(topCenterIndex);
+				Indices.push_back(nextTopIndex);
+				Indices.push_back(topIndex);
+
+				// 下面の三角形
+				Indices.push_back(bottomCenterIndex);
+				Indices.push_back(nextBottomIndex);
+				Indices.push_back(bottomIndex);
+			}
+		}
+
+		// Tangent, Joints, Weightsの初期化
+		Tangent.resize(Pos.size() / 3 * 4, 0.0f);
+		Joints.resize(Pos.size() / 3 * 4, 0.0f);
+		Weights.resize(Pos.size() / 3 * 4, 0.0f);
+
+		std::vector<std::vector<float>> Vertices = {
+			Pos, Normal, UV, Tangent, Joints, Weights
+		};
+
+		createInfo.first->SetVertices(Vertices);
+		createInfo.second->SetIndices(Indices);
+		createInfo.first->SetAttributeDimensions(std::vector<int>({ 3 , 3 , 2, 4, 4, 4 }));
+		createInfo.first->SetAttribDataTypes(std::vector<graphics::EDataType>({ graphics::EDataType::TYPE_FLOAT , graphics::EDataType::TYPE_FLOAT , graphics::EDataType::TYPE_FLOAT , graphics::EDataType::TYPE_FLOAT, graphics::EDataType::TYPE_UNSIGNED_INT, graphics::EDataType::TYPE_FLOAT }));
+		createInfo.first->SetAttribByteStrides(std::vector<int>({ 0, 0, 0, 0, 0, 0 }));
+
+		return createInfo;
+	}
 }

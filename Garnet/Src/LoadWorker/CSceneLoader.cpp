@@ -1038,6 +1038,11 @@ namespace resource
 					createInfo = graphics::CPresetPrimitive::CreatePoint(pGraphicsAPI);
 					PrimitiveType = graphics::EPresetPrimitiveType::POINT;
 				}
+				else if(type == "cylinder")
+				{
+					createInfo = graphics::CPresetPrimitive::CreateCylinder(pGraphicsAPI);
+					PrimitiveType = graphics::EPresetPrimitiveType::CYLINDER;
+				}
 				else
 				{
 					createInfo = graphics::CPresetPrimitive::CreateBox(pGraphicsAPI);
