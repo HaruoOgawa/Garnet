@@ -48,7 +48,7 @@ namespace graphics
 
 		std::vector<uint32_t> m_BindingRefSizeList; // GLSLの各bindingが参照しているバッファのサイズ
 
-		bool m_EnabledZWrite;
+		bool m_EnabledZTest;
 		EDepthFunc m_DepthFunc;
 
 		const ECullMode m_DefaultCullMode;
@@ -111,8 +111,8 @@ namespace graphics
 		virtual bool CreateRefTextureList(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, const std::shared_ptr<graphics::CTextureSet>& TextureSet);
 		virtual bool ReCreateRefTextureList(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo);
 
-		virtual void SetEnabledZWrite(bool Flag);
-		virtual bool IsEnabledZWrite() const;
+		virtual void SetEnabledZTest(bool Flag);
+		virtual bool IsEnabledZTest() const;
 
 		virtual void SetDepthFunc(EDepthFunc DepthFunc);
 		virtual EDepthFunc GetDepthFunc() const;

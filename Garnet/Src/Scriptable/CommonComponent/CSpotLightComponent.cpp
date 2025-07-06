@@ -159,6 +159,9 @@ namespace scriptable
 			const auto& Material = MaterialFrame->CreateMaterial(pGraphicsAPI, graphics::ECullMode::CULL_BACK);
 			Material->SetBlendType(graphics::EBlendType::BLEND_TYPE_ADDITIVE);
 
+			// ‘¼‚Ìƒ‰ƒCƒg‚ª•`‰æ‚Å‚«‚È‚­‚È‚é‚Ì‚ÅZTest‚Í‚µ‚È‚¢
+			Material->SetEnabledZTest(false);
+
 			Material->ReplaceTextureIndex("gPositionTexture", 0);
 			Material->ReplaceTextureIndex("gNormalTexture", 1);
 			Material->ReplaceTextureIndex("gAlbedoTexture", 2);

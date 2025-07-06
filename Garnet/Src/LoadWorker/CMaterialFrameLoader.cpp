@@ -9,7 +9,7 @@ namespace resource
 		m_AnalyseDone(false),
 		m_CreateInfo(std::make_shared<graphics::CMaterialCreateInfo>()),
 		m_MaterialFrameName(std::string()),
-		m_EnabledZWrite(true),
+		m_EnabledZTest(true),
 		m_DepthFunc(graphics::EDepthFunc::Less),
 		m_StencilParam({}),
 		m_CullMode(graphics::ECullMode::NOT_SET),
@@ -153,7 +153,7 @@ namespace resource
 			const auto zwrite = m_MfJson.find("zwrite");
 			if (zwrite != m_MfJson.end() && zwrite->is_boolean())
 			{
-				m_EnabledZWrite = zwrite.value();
+				m_EnabledZTest = zwrite.value();
 			}
 
 			const auto depthfunc = m_MfJson.find("depthfunc");
@@ -839,7 +839,7 @@ namespace resource
 			if (MaterialFrame)
 			{
 				MaterialFrame->SetMaterialFrameName(m_MaterialFrameName);
-				MaterialFrame->SetEnabledZWrite(m_EnabledZWrite);
+				MaterialFrame->SetEnabledZTest(m_EnabledZTest);
 				MaterialFrame->SetDepthFunc(m_DepthFunc);
 				MaterialFrame->SetStencilParam(m_StencilParam);
 				MaterialFrame->SetCullMode(m_CullMode);

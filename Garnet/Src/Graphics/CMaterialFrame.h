@@ -33,7 +33,7 @@ namespace graphics
 		std::string m_MaterialFrameName;
 
 		// DepthTest
-		bool m_EnabledZWrite;
+		bool m_EnabledZTest;
 		graphics::EDepthFunc m_DepthFunc;
 
 		// StencilTest
@@ -61,8 +61,8 @@ namespace graphics
 		void SetMaterialFrameName(const std::string& Name);
 		const std::string& GetMaterialFrameName() const;
 
-		void SetEnabledZWrite(bool ZWrite);
-		bool IsEnabledZWrite() const;
+		void SetEnabledZTest(bool ZWrite);
+		bool IsEnabledZTest() const;
 
 		void SetDepthFunc(graphics::EDepthFunc DepthFunc);
 		graphics::EDepthFunc GetDepthFunc() const;

@@ -5,7 +5,7 @@ namespace graphics
 	CMaterialFrame::CMaterialFrame():
 		m_CreateCounter(0),
 		m_MaterialFrameName(std::string()),
-		m_EnabledZWrite(true),
+		m_EnabledZTest(true),
 		m_DepthFunc(graphics::EDepthFunc::Less),
 		m_StencilParam({}),
 		m_CullMode(graphics::ECullMode::NOT_SET),
@@ -30,14 +30,14 @@ namespace graphics
 		return m_MaterialFrameName;
 	}
 
-	void CMaterialFrame::SetEnabledZWrite(bool ZWrite)
+	void CMaterialFrame::SetEnabledZTest(bool ZWrite)
 	{
-		m_EnabledZWrite = ZWrite;
+		m_EnabledZTest = ZWrite;
 	}
 
-	bool CMaterialFrame::IsEnabledZWrite() const
+	bool CMaterialFrame::IsEnabledZTest() const
 	{
-		return m_EnabledZWrite;
+		return m_EnabledZTest;
 	}
 
 	void CMaterialFrame::SetDepthFunc(graphics::EDepthFunc DepthFunc)
@@ -197,7 +197,7 @@ namespace graphics
 		}
 
 		// その他パラメーター
-		Material->SetEnabledZWrite(m_EnabledZWrite);
+		Material->SetEnabledZTest(m_EnabledZTest);
 		Material->SetDepthFunc(m_DepthFunc);
 		Material->SetStencilParam(m_StencilParam);
 		Material->SetBlendType(m_BlendType);

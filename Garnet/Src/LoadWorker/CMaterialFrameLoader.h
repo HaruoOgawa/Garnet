@@ -43,7 +43,7 @@ namespace resource
 		std::string m_MaterialFrameName;
 
 		// DepthTest
-		bool m_EnabledZWrite;
+		bool m_EnabledZTest;
 		graphics::EDepthFunc m_DepthFunc;
 
 		// StencilTest

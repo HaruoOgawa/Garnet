@@ -85,7 +85,7 @@ namespace api
 		// •`‰æ•û–@‚ÌÝ’è
 		// Depth
 		{
-			if (pOpenGLMat->IsEnabledZWrite())
+			if (pOpenGLMat->IsEnabledZTest())
 			{
 				glEnable(GL_DEPTH_TEST);
 			}

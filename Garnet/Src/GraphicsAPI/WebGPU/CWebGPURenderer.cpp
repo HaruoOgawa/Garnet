@@ -191,7 +191,7 @@ namespace api
 
 			// Depth
 			{
-				depthStencilState.depthWriteEnabled = pWebGPUMat->IsEnabledZWrite();
+				depthStencilState.depthWriteEnabled = pWebGPUMat->IsEnabledZTest();
 
 				graphics::EDepthFunc DepthFunc = pWebGPUMat->GetDepthFunc();
 				switch (DepthFunc)
