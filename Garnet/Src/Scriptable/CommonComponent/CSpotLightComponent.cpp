@@ -91,6 +91,13 @@ namespace scriptable
 			// color
 			std::vector<float> color = GetValueRegistry()->GetValueVec4("color");
 			m_Material->SetUniformValue("color", &color[0], sizeof(float) * color.size());
+
+			// dir
+			glm::vec4 dir = glm::vec4(0.0f, -1.0f, 0.0f, 0.0f);
+			const auto& WorldMatrix = m_LightObject->GetObjectTransform()->GetModelMatrix();
+			dir = WorldMatrix * dir;
+			dir = glm::normalize(dir);
+			m_Material->SetUniformValue("dir", &dir[0], sizeof(float) * 4);
 		}
 
 		return true;
