@@ -148,13 +148,34 @@ namespace network
 		unsigned char Physical = 0;
 		if (!Analyser.GetByte(Physical)) return false;
 
-		// 出力先ユニバース番号
-		unsigned short Universe = 0;
-		if (!Analyser.GetUShort(Universe)) return false;
+		// 出力先ユニバース番号(AbsoluteUniverse: ユニバース番号の絶対値)
+		// ユニバースは簡単にいうとこの信号をどの機材に渡すかどうかを判別するためのラベルのようなもの
+		// Art-Netのバイナリで届くときは絶対値表記されていて0 から 32767 の間の数値が入っているが
+		// Art-Netの仕様としては、「Net: 0 ～ 127」「SubNet: 0 ～ 15」「Universe: 0 ～ 15」で3つの大きな単位に分かれている
+		// Netの中にSubNetがあり、SubNetの中にUniverseがある
+		// これらの数値を計算すると、 128 x 16 x 16 で 32768 となる → この3つを計算したのがAbsoluteUniverse
+		// https://qiita.com/LUDO/items/eec489555ecf3a872197#%E3%83%A6%E3%83%8B%E3%83%90%E3%83%BC%E3%82%B9%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6
+		unsigned short AbsoluteUniverse = 0;
+		if (!Analyser.GetUShort(AbsoluteUniverse)) return false;
 
+		// AbsoluteUniverseをNet・SubNet・Universeに分解する
+		unsigned short Net = 0;
+		unsigned short SubNet = 0;
+		unsigned short Universe = 0;
+
+		if (!DecomposeAbsoluteUniverse(AbsoluteUniverse, Net, SubNet, Universe)) return false;
+
+		// DMXは513バイトのバイナリ
+		// 1バイト目はデータサイズで512が入っている
+		// 残りの512バイトがDMX本体
+		// DMXは1チャンネル1バイトで0～255の間の整数をとる
+		// つまりTDから浮動小数点を渡そうとすると0に丸め込まれるので必ず0から255までの整数を指定することに注意
+		// ちなみにもしかすると4バイト分使ってその整数をいい感じに使えば、小数も表現できるかもしれない
+		// (このテクニックはカメラ制御に使えるかも。まぁ現場では本当はそんな使い方しないんだろうけど、勉強がてらね)
+		
 		// データ長
 		unsigned short DataLength = 0;
-		if (!Analyser.GetUShort(DataLength)) return false;
+		if (!Analyser.GetUShortReverse(DataLength)) return false;
 
 		// データ本体
 		std::vector<unsigned char> DataBuffer;
@@ -164,11 +185,20 @@ namespace network
 		if (OpCode == 0x5000)
 		{
 			// ArtDMXパケットの処理
-			Console::Log("Received ArtDMX packet: OpCode=0x%04X, ProtocolVersion=%d, Sequence=%d, Physical=%d, Universe=%d, DataLength=%d\n",
-				OpCode, ProtocolVersion, Sequence, Physical, Universe, DataLength);
+			Console::Log("Received ArtDMX packet: OpCode=0x%04X, ProtocolVersion=%d, Sequence=%d, Physical=%d, AbsoluteUniverse=%d, DataLength=%d\n",
+				OpCode, ProtocolVersion, Sequence, Physical, AbsoluteUniverse, DataLength);
 			// 受信したDMXデータをアプリケーションに通知する
-			//pApp->OnArtNetDMXDataReceived(Universe, DataBuffer);
+			//pApp->OnArtNetDMXDataReceived(Net, SubNet, Universe, DataBuffer);
 		}
+
+		return true;
+	}
+
+	bool CUDPSocket::DecomposeAbsoluteUniverse(unsigned short AbsoluteUniverse, unsigned short& Net, unsigned short& SubNet, unsigned short& Universe)
+	{
+		Net = (AbsoluteUniverse >> 8) & 0x7f;
+		SubNet = (AbsoluteUniverse >> 4) & 0x0f;
+		Universe = (AbsoluteUniverse) & 0x0f;
 
 		return true;
 	}

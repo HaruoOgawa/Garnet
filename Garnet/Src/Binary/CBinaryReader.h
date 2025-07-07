@@ -52,6 +52,8 @@ namespace binary
 
 		bool GetUShort(unsigned short& Dst);
 		unsigned short GetUShort();
+		bool GetUShortReverse(unsigned short& Dst);
+		unsigned short GetUShortReverse();
 		
 		bool GetShort(short& Dst);
 		short GetShort();

@@ -238,6 +238,26 @@ namespace binary
 		return Dst;
 	}
 
+	bool CBinaryReader::GetUShortReverse(unsigned short& Dst)
+	{
+		if (!IsValid(sizeof(unsigned short))) return false;
+
+		Dst = GetUShortReverse();
+
+		return true;
+	}
+
+	unsigned short CBinaryReader::GetUShortReverse()
+	{
+		auto val = ((m_Pointer[0] << 8) | (m_Pointer[1]));
+
+		unsigned short Dst = *reinterpret_cast<const unsigned short*>(&val);
+
+		UpdatePointer(sizeof(unsigned short));
+
+		return Dst;
+	}
+
 	bool CBinaryReader::GetShort(short& Dst)
 	{
 		if (!IsValid(sizeof(short))) return false;

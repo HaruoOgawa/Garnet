@@ -25,6 +25,8 @@ namespace network
 		bool AnalyseData(app::CApp* pApp, binary::CBinaryReader& Analyser);
 		bool AnalyseArtNet(app::CApp* pApp, binary::CBinaryReader& Analyser);
 
+		static bool DecomposeAbsoluteUniverse(unsigned short AbsoluteUniverse, unsigned short& Net, unsigned short& SubNet, unsigned short& Universe);
+
 	public:
 		CUDPSocket(const std::string& Address, int Port);
 		virtual ~CUDPSocket();
