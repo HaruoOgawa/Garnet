@@ -10,8 +10,8 @@ namespace scriptable
 		CComponent(ComponentName, RegistryName),
 		m_Status(resource::ELoadStatus::None),
 		m_Loader(nullptr),
-		m_LightObject(nullptr),
-		m_Material(nullptr)
+		m_SecondLoader(nullptr),
+		m_LightObject(nullptr)
 	{
 		GetValueRegistry()->SetValue("intensity", graphics::EUniformValueType::VALUE_TYPE_FLOAT, &glm::vec1(1.0f)[0], sizeof(float));
 		GetValueRegistry()->SetValue("color", graphics::EUniformValueType::VALUE_TYPE_VEC4, &glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)[0], sizeof(float) * 4);
@@ -31,12 +31,25 @@ namespace scriptable
 
 	bool CSpotLightComponent::Initialize(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker)
 	{
-		std::string filename = "Resources/MaterialFrame/SpotLight_MF.json";
+		// GBuffer Draw
+		{
+			std::string filename = "Resources/MaterialFrame/SpotLight_MF.json";
 
-		std::shared_ptr<graphics::CMaterialFrame> MaterialFrame = std::make_shared<graphics::CMaterialFrame>();
-		m_Loader = std::make_shared<resource::CMaterialFrameLoader>(filename, MaterialFrame);
+			std::shared_ptr<graphics::CMaterialFrame> MaterialFrame = std::make_shared<graphics::CMaterialFrame>();
+			m_Loader = std::make_shared<resource::CMaterialFrameLoader>(filename, MaterialFrame);
 
-		pLoadWorker->AddLoadResource(m_Loader);
+			pLoadWorker->AddLoadResource(m_Loader);
+		}
+
+		// SpotLight Geometry
+		{
+			std::string filename = "Resources/MaterialFrame/SpotLight_Geom_MF.json";
+
+			std::shared_ptr<graphics::CMaterialFrame> MaterialFrame = std::make_shared<graphics::CMaterialFrame>();
+			m_SecondLoader = std::make_shared<resource::CMaterialFrameLoader>(filename, MaterialFrame);
+
+			pLoadWorker->AddLoadResource(m_SecondLoader);
+		}
 
 		m_Status = resource::ELoadStatus::Loading;
 
@@ -70,36 +83,39 @@ namespace scriptable
 
 		if (!m_LightObject->Update(pGraphicsAPI, pPhysicsEngine, 0.0f, pLoadWorker, Camera, Projection, DrawInfo, InputState)) return false;
 
-		if (m_Material)
+		for (auto& Material : m_MaterialList)
 		{
-			// angle
-			float angle = GetValueRegistry()->GetValueFloat("angle");
-			m_Material->SetUniformValue("angle", &glm::vec1(angle)[0], sizeof(float));
-			
-			// height
-			float height = GetValueRegistry()->GetValueFloat("height");
-			m_Material->SetUniformValue("height", &glm::vec1(height)[0], sizeof(float));
+			if (Material)
+			{
+				// angle
+				float angle = GetValueRegistry()->GetValueFloat("angle");
+				Material->SetUniformValue("angle", &glm::vec1(angle)[0], sizeof(float));
 
-			// pos
-			glm::vec3 Pos = m_LightObject->GetPos();
-			m_Material->SetUniformValue("pos", &glm::vec4(Pos.x, Pos.y, Pos.z, 1.0f)[0], sizeof(float) * 4);
+				// height
+				float height = GetValueRegistry()->GetValueFloat("height");
+				Material->SetUniformValue("height", &glm::vec1(height)[0], sizeof(float));
 
-			// intensity
-			float intensity = GetValueRegistry()->GetValueFloat("intensity");
-			m_Material->SetUniformValue("intensity", &glm::vec1(intensity)[0], sizeof(float));
+				// pos
+				glm::vec3 Pos = m_LightObject->GetPos();
+				Material->SetUniformValue("pos", &glm::vec4(Pos.x, Pos.y, Pos.z, 1.0f)[0], sizeof(float) * 4);
 
-			// color
-			std::vector<float> color = GetValueRegistry()->GetValueVec4("color");
-			m_Material->SetUniformValue("color", &color[0], sizeof(float) * color.size());
+				// intensity
+				float intensity = GetValueRegistry()->GetValueFloat("intensity");
+				Material->SetUniformValue("intensity", &glm::vec1(intensity)[0], sizeof(float));
 
-			// dir
-			glm::vec4 dir = glm::vec4(0.0f, -1.0f, 0.0f, 0.0f);
-			const auto& WorldMatrix = m_LightObject->GetObjectTransform()->GetModelMatrix();
-			dir = WorldMatrix * dir;
-			dir = glm::normalize(dir);
-			m_Material->SetUniformValue("dir", &dir[0], sizeof(float) * 4);
+				// color
+				std::vector<float> color = GetValueRegistry()->GetValueVec4("color");
+				Material->SetUniformValue("color", &color[0], sizeof(float) * static_cast<int>(color.size()));
+
+				// dir
+				glm::vec4 dir = glm::vec4(0.0f, -1.0f, 0.0f, 0.0f);
+				const auto& WorldMatrix = m_LightObject->GetObjectTransform()->GetModelMatrix();
+				dir = WorldMatrix * dir;
+				dir = glm::normalize(dir);
+				Material->SetUniformValue("dir", &dir[0], sizeof(float) * 4);
+			}
 		}
-
+		
 		return true;
 	}
 
@@ -128,6 +144,9 @@ namespace scriptable
 		// ロード中
 		if (!m_Loader) return true;
 		if (!m_Loader->IsLoaded()) return true;
+		
+		if (!m_SecondLoader) return true;
+		if (!m_SecondLoader->IsLoaded()) return true;
 
 		// ロード完了
 		m_Status = resource::ELoadStatus::Loaded;
@@ -169,13 +188,30 @@ namespace scriptable
 			Material->ReplaceTextureIndex("gCustomParam0Texture", 4);
 
 			// BoardかSphereかをライトタイプで変えるようにするとライトクラスが1つに統一できるかも？
-			if (!m_LightObject->CreatePresetSimply(pGraphicsAPI, pPhysicsEngine, graphics::CPresetPrimitive::CreateCylinder(pGraphicsAPI), graphics::EPresetPrimitiveType::CYLINDER, Material)) return false;
+			if (!m_LightObject->AddPresetSimply(pGraphicsAPI, pPhysicsEngine, graphics::CPresetPrimitive::CreateCylinder(pGraphicsAPI), graphics::EPresetPrimitiveType::CYLINDER, Material)) return false;
 
-			m_Material = Material;
+			m_MaterialList.push_back(Material);
 
 			// 1つ分しか見ない
 			break;
 		}
+
+		for (const auto& MaterialFrame : m_SecondLoader->GetTargetMaterialFrameSet())
+		{
+			const auto& Material = MaterialFrame->CreateMaterial(pGraphicsAPI, graphics::ECullMode::CULL_BACK);
+			Material->SetBlendType(graphics::EBlendType::BLEND_TYPE_TRANSPARENT_ALPHA);
+
+			// BoardかSphereかをライトタイプで変えるようにするとライトクラスが1つに統一できるかも？
+			if (!m_LightObject->AddPresetSimply(pGraphicsAPI, pPhysicsEngine, graphics::CPresetPrimitive::CreateCylinder(pGraphicsAPI), graphics::EPresetPrimitiveType::CYLINDER, Material)) return false;
+
+			m_MaterialList.push_back(Material);
+
+			// 1つ分しか見ない
+			break;
+		}
+
+		// 生成
+		if (!m_LightObject->Create(pGraphicsAPI, pPhysicsEngine)) return false;
 
 		return true;
 	}

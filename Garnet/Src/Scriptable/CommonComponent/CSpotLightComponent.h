@@ -17,9 +17,10 @@ namespace scriptable
 		resource::ELoadStatus m_Status;
 
 		std::shared_ptr<resource::CMaterialFrameLoader> m_Loader;
+		std::shared_ptr<resource::CMaterialFrameLoader> m_SecondLoader;
 
 		std::shared_ptr<object::C3DObject> m_LightObject;
-		std::shared_ptr<graphics::CMaterial> m_Material;
+		std::vector<std::shared_ptr<graphics::CMaterial>> m_MaterialList;
 
 	private:
 		bool CheckIsLoading(bool& Loaded, api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker,
