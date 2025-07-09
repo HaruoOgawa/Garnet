@@ -50,6 +50,7 @@ namespace graphics
 
 		bool m_EnabledZTest;
 		EDepthFunc m_DepthFunc;
+		bool m_EnabledZWrite;
 
 		const ECullMode m_DefaultCullMode;
 		ECullMode m_CullMode;
@@ -116,6 +117,9 @@ namespace graphics
 
 		virtual void SetDepthFunc(EDepthFunc DepthFunc);
 		virtual EDepthFunc GetDepthFunc() const;
+
+		virtual void SetEnabledZWrite(bool Flag);
+		virtual bool IsEnabledZWrite() const;
 
 		virtual void SetCullMode(ECullMode CullMode);
 		virtual ECullMode GetCullMode() const;

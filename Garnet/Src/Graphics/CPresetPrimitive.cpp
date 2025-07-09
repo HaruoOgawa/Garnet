@@ -348,7 +348,7 @@ namespace graphics
 		float offset = height * 0.5f;
 
 		// ŠW‚ğ‚µ‚ß‚é‚©‚Ç‚¤‚©
-		bool FillCap = true;
+		bool FillCap = false;
 
 		// ‰~’Œ‚Ìã–Ê‚Æ‰º–Ê‚Ì’¸“_‚ğ¶¬
 		for (int i = 0; i < segments; ++i) {

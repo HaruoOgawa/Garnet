@@ -175,7 +175,7 @@ namespace scriptable
 		// Mesh & Material
 		for (const auto& MaterialFrame : m_Loader->GetTargetMaterialFrameSet())
 		{
-			const auto& Material = MaterialFrame->CreateMaterial(pGraphicsAPI, graphics::ECullMode::CULL_BACK);
+			const auto& Material = MaterialFrame->CreateMaterial(pGraphicsAPI, graphics::ECullMode::CULL_FRONT);
 			Material->SetBlendType(graphics::EBlendType::BLEND_TYPE_ADDITIVE);
 
 			// 他のライトが描画できなくなるのでZTestはしない
@@ -198,8 +198,17 @@ namespace scriptable
 
 		for (const auto& MaterialFrame : m_SecondLoader->GetTargetMaterialFrameSet())
 		{
-			const auto& Material = MaterialFrame->CreateMaterial(pGraphicsAPI, graphics::ECullMode::CULL_BACK);
+			const auto& Material = MaterialFrame->CreateMaterial(pGraphicsAPI, graphics::ECullMode::CULL_NONE);
 			Material->SetBlendType(graphics::EBlendType::BLEND_TYPE_TRANSPARENT_ALPHA);
+
+			// 他のライトが描画できなくなるのでZTestはしない
+			Material->SetEnabledZTest(false);
+
+			Material->ReplaceTextureIndex("gPositionTexture", 0);
+			Material->ReplaceTextureIndex("gNormalTexture", 1);
+			Material->ReplaceTextureIndex("gAlbedoTexture", 2);
+			Material->ReplaceTextureIndex("gDepthTexture", 3);
+			Material->ReplaceTextureIndex("gCustomParam0Texture", 4);
 
 			// BoardかSphereかをライトタイプで変えるようにするとライトクラスが1つに統一できるかも？
 			if (!m_LightObject->AddPresetSimply(pGraphicsAPI, pPhysicsEngine, graphics::CPresetPrimitive::CreateCylinder(pGraphicsAPI), graphics::EPresetPrimitiveType::CYLINDER, Material)) return false;

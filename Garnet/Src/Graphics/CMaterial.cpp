@@ -11,6 +11,7 @@ namespace graphics
 		m_CreateInfo(createInfo),
 		m_EnabledZTest(true),
 		m_DepthFunc(EDepthFunc::Less),
+		m_EnabledZWrite(true),
 		m_DefaultCullMode(CullMode),
 		m_CullMode(CullMode),
 		m_BlendType(EBlendType::BLEND_TYPE_NONE),
@@ -357,6 +358,16 @@ namespace graphics
 	EDepthFunc CMaterial::GetDepthFunc() const
 	{
 		return m_DepthFunc;
+	}
+
+	void CMaterial::SetEnabledZWrite(bool Flag)
+	{
+		m_EnabledZWrite = Flag;
+	}
+
+	bool CMaterial::IsEnabledZWrite() const
+	{
+		return m_EnabledZWrite;
 	}
 
 	void CMaterial::SetCullMode(ECullMode CullMode)
