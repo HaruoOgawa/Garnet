@@ -40,6 +40,7 @@ namespace api
 				SubPassState.DepthBuffer = true;
 
 				// 引き継ぐ
+				SubPassState.RenderTargetCount = PassState.RenderTargetCount;
 				SubPassState.EnabledAA = PassState.EnabledAA;
 				SubPassState.AASampleNum = PassState.AASampleNum;
 				SubPassState.Stencil = PassState.Stencil; 
@@ -55,6 +56,7 @@ namespace api
 				SubPassState.DepthBuffer = true;
 
 				// 引き継ぐ
+				SubPassState.RenderTargetCount = PassState.RenderTargetCount;
 				SubPassState.Stencil = PassState.Stencil; 
 
 				m_ResolveSubPass = std::make_shared<COpenGLSubPass>(m_pGraphicsAPI, m_PassName, m_RenderPassFormat, m_InitColor);
@@ -103,17 +105,31 @@ namespace api
 		int Width = m_SubPass->GetWidth();
 		int Height = m_SubPass->GetHeight();
 
-		//
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, SrcFrameBuffer);
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, DstFrameBuffer);
+		// カラーデプスアタッチメントの数だけバッファのコピーを行う
+		for (const auto& Attachment : m_ResolveSubPass->GetAttachments())
+		{
+			glBindFramebuffer(GL_READ_FRAMEBUFFER, SrcFrameBuffer);
+			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, DstFrameBuffer);
 
-		GLbitfield mask = 0;
-		if (m_UseColorBuffer) mask |= GL_COLOR_BUFFER_BIT;
-		if (m_UseDepthBuffer) mask |= GL_DEPTH_BUFFER_BIT;
+			glReadBuffer(Attachment);
+			glDrawBuffer(Attachment);
 
-		glBlitFramebuffer(0, 0, Width, Height, 0, 0, Width, Height, mask, GL_NEAREST);
+			GLbitfield mask = 0;
+			if (Attachment == GL_DEPTH_ATTACHMENT || Attachment == GL_DEPTH_STENCIL_ATTACHMENT)
+			{
+				// デプスアタッチメント
+				mask |= GL_DEPTH_BUFFER_BIT;
+			}
+			else
+			{
+				// カラーアタッチメント
+				mask |= GL_COLOR_BUFFER_BIT;
+			}
 
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+			glBlitFramebuffer(0, 0, Width, Height, 0, 0, Width, Height, mask, GL_NEAREST);
+
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		}
 
 		return true;
 	}

@@ -33,10 +33,13 @@ namespace api
 		GLuint m_FrameBuffer;
 
 		// Color Buffer
-		GLuint m_ColorBuffer;
+		std::vector<GLuint> m_ColorBufferList;
 
 		// Depth Buffer
 		GLuint m_DepthBuffer;
+
+		// Attachment
+		std::vector<unsigned int> m_Attachments;
 
 	private:
 		bool CreateFrameBuffer();
@@ -60,6 +63,9 @@ namespace api
 		int GetHeight() const;
 
 		GLuint GetFrameBuffer() const;
+
+		// Attachment
+		const std::vector<unsigned int>& GetAttachments() const;
 	};
 }
 #endif

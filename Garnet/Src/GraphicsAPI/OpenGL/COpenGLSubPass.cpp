@@ -18,7 +18,6 @@ namespace api
 		m_DepthTexture(nullptr),
 		m_UseStencil(false),
 		m_FrameBuffer(-1),
-		m_ColorBuffer(-1),
 		m_DepthBuffer(-1)
 	{
 	}
@@ -86,6 +85,8 @@ namespace api
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0); // å„ë±ÇÃï`âÊÇ™âfÇÁÇ»Ç≠Ç»ÇÈÇÃÇ≈ÉoÉCÉìÉhÇâèúÇµÇƒÇ®Ç≠
 
+		m_Attachments = Attachments;
+
 		return true;
 	}
 
@@ -114,8 +115,10 @@ namespace api
 		}
 		else
 		{
-			if (m_ColorBuffer == -1) glGenRenderbuffers(1, &m_ColorBuffer);
-			glBindRenderbuffer(GL_RENDERBUFFER, m_ColorBuffer);
+			GLuint ColorBuffer;
+
+			glGenRenderbuffers(1, &ColorBuffer);
+			glBindRenderbuffer(GL_RENDERBUFFER, ColorBuffer);
 
 			GLenum internalformat = GL_RGBA8;
 			switch (m_RenderPassFormat)
@@ -149,9 +152,11 @@ namespace api
 				glRenderbufferStorage(GL_RENDERBUFFER, internalformat, m_Width, m_Height);
 			}
 
-			glFramebufferRenderbuffer(GL_FRAMEBUFFER, attachment, GL_RENDERBUFFER, m_ColorBuffer);
+			glFramebufferRenderbuffer(GL_FRAMEBUFFER, attachment, GL_RENDERBUFFER, ColorBuffer);
 
 			glBindRenderbuffer(GL_RENDERBUFFER, 0);
+
+			m_ColorBufferList.push_back(ColorBuffer);
 		}
 
 		return true;
@@ -248,6 +253,12 @@ namespace api
 	GLuint COpenGLSubPass::GetFrameBuffer() const
 	{
 		return m_FrameBuffer;
+	}
+
+	// Attachment
+	const std::vector<unsigned int>& COpenGLSubPass::GetAttachments() const
+	{
+		return m_Attachments;
 	}
 }
 #endif
