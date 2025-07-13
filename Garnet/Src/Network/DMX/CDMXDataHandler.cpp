@@ -1,5 +1,6 @@
 #ifdef USE_NETWORK
 #include "CDMXDataHandler.h"
+#include "../../Scriptable/CScriptCallback.h"
 
 namespace network
 {
@@ -12,17 +13,17 @@ namespace network
 	}
 
 	// フィクスチャを登録
-	void CDMXDataHandler::RegistDeviceFixture(unsigned short Net, unsigned short SubNet, unsigned short Universe, const std::string& DeviceName, const SDMXFixture& Fixture)
+	void CDMXDataHandler::RegistDeviceFixture(unsigned short Net, unsigned short SubNet, unsigned short Universe, const SDMXFixture& Fixture)
 	{
-		m_UniverseDeviceMap.emplace(std::make_tuple(Net, SubNet, Universe), DeviceName);
-		m_DeviceFixtureMap.emplace(DeviceName, Fixture);
+		m_UniverseDeviceMap.emplace(std::make_tuple(Net, SubNet, Universe), Fixture.DeviceName);
+		m_DeviceFixtureMap.emplace(Fixture.DeviceName, Fixture);
 	}
 
 	// 照明灯体を追加する
-	void CDMXDataHandler::AddDevice(const std::string& DeviceName, const std::shared_ptr<IScriptCallback>& Callback)
+	void CDMXDataHandler::AddDevice(const std::string& DeviceName, const std::shared_ptr<scriptable::CScriptCallback>& Callback)
 	{
 		const auto& it = m_ScriptCallbackMap.find(DeviceName);
-		if (it == m_ScriptCallbackMap.end()) m_ScriptCallbackMap.emplace(DeviceName, std::vector<std::shared_ptr<IScriptCallback>>());
+		if (it == m_ScriptCallbackMap.end()) m_ScriptCallbackMap.emplace(DeviceName, std::vector<std::shared_ptr<scriptable::CScriptCallback>>());
 
 		m_ScriptCallbackMap[DeviceName].push_back(Callback);
 	}
@@ -49,7 +50,7 @@ namespace network
 		
 		int RealByteSize = static_cast<int>(DataBuffer.size());
 
-		if (ExpectedByteSize != RealByteSize) return false;
+		if (ExpectedByteSize > RealByteSize) return false;
 
 		// データ解析
 		for (int i = 0; i < DeviceCount; i++)
@@ -64,7 +65,7 @@ namespace network
 			std::memcpy(&DataPerDevice[0], &DataBuffer[ByteOffset], DeviceByteSize);
 
 			// DMXデータをデバイスに渡す
-			if (!Callback->OnReceiveDMXData(FixtureIT->second, DataPerDevice)) return false;
+			Callback->OnReceiveDMXData(FixtureIT->second, DataPerDevice);
 		}
 
 		return true;

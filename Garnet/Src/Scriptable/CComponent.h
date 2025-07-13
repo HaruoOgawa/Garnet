@@ -4,6 +4,7 @@
 #include <vector>
 #include <tuple>
 #include <Interface/IGraphicsAPI.h>
+#include <Scriptable/CScriptCallback.h>
 #include <Scriptable/CValueRegistry.h>
 
 namespace resource { class CLoadWorker; }
@@ -20,7 +21,7 @@ namespace object {
 
 namespace scriptable
 {
-	class CComponent
+	class CComponent : public CScriptCallback
 	{
 		const std::string m_ComponentName;
 

@@ -762,7 +762,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Src\Interface\IScriptCallback.h" />
+    <ClInclude Include="Src\Scriptable\CScriptCallback.h" />
     <ClInclude Include="Src\Network\DMX\SDMXFixture.h" />
     <ClInclude Include="Src\Scriptable\CommonComponent\CSpotLightComponent.h" />
     <ClInclude Include="Src\Network\DMX\CDMXDataHandler.h" />
@@ -1845,6 +1845,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClInclude Include="Src\Interface\IRenderer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\Scriptable\CScriptCallback.cpp" />
     <ClCompile Include="Src\Scriptable\CommonComponent\CSpotLightComponent.cpp" />
     <ClCompile Include="Src\Network\DMX\CDMXDataHandler.cpp" />
     <ClCompile Include="Src\Network\CUDPSocket.cpp" />

@@ -42,5 +42,9 @@ namespace scriptable
 
 		virtual bool Draw(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
 			const std::shared_ptr<graphics::CDrawInfo>& DrawInfo, const std::shared_ptr<object::C3DObject>& Object, const std::shared_ptr<object::CNode>& SelfNode) override;
+
+#ifdef USE_NETWORK
+		virtual void OnReceiveDMXData(const network::SDMXFixture& Fixture, const std::vector<unsigned char>& DMXData) override;
+#endif // USE_NETWORK
 	};
 }

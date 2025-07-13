@@ -130,6 +130,16 @@ namespace scriptable
 		return true;
 	}
 
+#ifdef USE_NETWORK
+	void CSpotLightComponent::OnReceiveDMXData(const network::SDMXFixture& Fixture, const std::vector<unsigned char>& DMXData)
+	{
+		if (Fixture.DeviceName == "DefaultSpotLight")
+		{
+
+		}
+	}
+#endif // USE_NETWORK
+
 	bool CSpotLightComponent::CheckIsLoading(bool& Loaded, api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker,
 		const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
 		const std::shared_ptr<graphics::CDrawInfo>& DrawInfo, const std::shared_ptr<input::CInputState>& InputState, const std::shared_ptr<object::C3DObject>& Object)
