@@ -17,6 +17,8 @@ namespace scriptable
 		GetValueRegistry()->SetValue("color", graphics::EUniformValueType::VALUE_TYPE_VEC4, &glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)[0], sizeof(float) * 4);
 		GetValueRegistry()->SetValue("angle", graphics::EUniformValueType::VALUE_TYPE_FLOAT, &glm::vec1(45.0f)[0], sizeof(float));
 		GetValueRegistry()->SetValue("height", graphics::EUniformValueType::VALUE_TYPE_FLOAT, &glm::vec1(1.0f)[0], sizeof(float));
+		GetValueRegistry()->SetValue("pan", graphics::EUniformValueType::VALUE_TYPE_FLOAT, &glm::vec1(0.0f)[0], sizeof(float));
+		GetValueRegistry()->SetValue("tilt", graphics::EUniformValueType::VALUE_TYPE_FLOAT, &glm::vec1(0.0f)[0], sizeof(float));
 	}
 
 	CSpotLightComponent::~CSpotLightComponent()
@@ -81,6 +83,7 @@ namespace scriptable
 			m_LightObject->SetScale(Object->GetScale());
 		}
 
+		//
 		if (!m_LightObject->Update(pGraphicsAPI, pPhysicsEngine, 0.0f, pLoadWorker, Camera, Projection, DrawInfo, InputState)) return false;
 
 		for (auto& Material : m_MaterialList)
@@ -94,6 +97,14 @@ namespace scriptable
 				// height
 				float height = GetValueRegistry()->GetValueFloat("height");
 				Material->SetUniformValue("height", &glm::vec1(height)[0], sizeof(float));
+				
+				// pan
+				float pan = GetValueRegistry()->GetValueFloat("pan");
+				Material->SetUniformValue("pan", &glm::vec1(pan)[0], sizeof(float));
+				
+				// tilt
+				float tilt = GetValueRegistry()->GetValueFloat("tilt");
+				Material->SetUniformValue("tilt", &glm::vec1(tilt)[0], sizeof(float));
 
 				// pos
 				glm::vec3 Pos = m_LightObject->GetPos();
@@ -135,7 +146,38 @@ namespace scriptable
 	{
 		if (Fixture.DeviceName == "DefaultSpotLight")
 		{
+			if (Fixture.ChannelNameList.size() != 8) return;
 
+			// Color
+			float R = static_cast<float>(DMXData[0]) / 255.0f;
+			float G = static_cast<float>(DMXData[1]) / 255.0f;
+			float B = static_cast<float>(DMXData[2]) / 255.0f;
+
+			std::vector<float> color = { R, G, B, 1.0f };
+
+			GetValueRegistry()->SetValue("color", graphics::EUniformValueType::VALUE_TYPE_VEC4, &color[0], sizeof(float) * static_cast<int>(color.size()));
+
+			// Dimmer(intensity)
+			// 10.0まで明るさが指定できる照明とする
+			float intensity = 10.0f * static_cast<float>(DMXData[3]) / 255.0f;
+			GetValueRegistry()->SetValue("intensity", graphics::EUniformValueType::VALUE_TYPE_FLOAT, &intensity, sizeof(float));
+			
+			// Pan
+			float Pan = 2.0f * 3.1415f * static_cast<float>(DMXData[4]) / 255.0f;
+			GetValueRegistry()->SetValue("pan", graphics::EUniformValueType::VALUE_TYPE_FLOAT, &Pan, sizeof(float));
+			
+			// Tilt
+			float Tilt = 2.0f * 3.1415f * static_cast<float>(DMXData[5]) / 255.0f;
+			GetValueRegistry()->SetValue("tilt", graphics::EUniformValueType::VALUE_TYPE_FLOAT, &Tilt, sizeof(float));
+
+			// Angle
+			float Angle = 90.0f * static_cast<float>(DMXData[6]) / 255.0f;
+			GetValueRegistry()->SetValue("angle", graphics::EUniformValueType::VALUE_TYPE_FLOAT, &Angle, sizeof(float));
+
+			// Height
+			// 50mまで届くライトとする
+			float Height = 50.0f * static_cast<float>(DMXData[7]) / 255.0f;
+			GetValueRegistry()->SetValue("height", graphics::EUniformValueType::VALUE_TYPE_FLOAT, &Height, sizeof(float));
 		}
 	}
 #endif // USE_NETWORK
@@ -189,7 +231,9 @@ namespace scriptable
 			Material->SetBlendType(graphics::EBlendType::BLEND_TYPE_ADDITIVE);
 
 			// 他のライトが描画できなくなるのでZTestはしない
-			Material->SetEnabledZTest(false);
+			//Material->SetEnabledZTest(false);
+			Material->SetEnabledZWrite(false);
+			Material->SetDepthFunc(graphics::EDepthFunc::Always);
 
 			Material->ReplaceTextureIndex("gPositionTexture", 0);
 			Material->ReplaceTextureIndex("gNormalTexture", 1);
@@ -208,11 +252,11 @@ namespace scriptable
 
 		for (const auto& MaterialFrame : m_SecondLoader->GetTargetMaterialFrameSet())
 		{
-			const auto& Material = MaterialFrame->CreateMaterial(pGraphicsAPI, graphics::ECullMode::CULL_NONE);
+			const auto& Material = MaterialFrame->CreateMaterial(pGraphicsAPI, graphics::ECullMode::CULL_BACK);
 			Material->SetBlendType(graphics::EBlendType::BLEND_TYPE_TRANSPARENT_ALPHA);
 
 			// 他のライトが描画できなくなるのでZTestはしない
-			Material->SetEnabledZTest(false);
+			//Material->SetEnabledZTest(false);
 
 			Material->ReplaceTextureIndex("gPositionTexture", 0);
 			Material->ReplaceTextureIndex("gNormalTexture", 1);
