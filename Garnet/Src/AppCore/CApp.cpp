@@ -106,4 +106,9 @@ namespace app
 	void CApp::OnChangeScenePlayMode(const std::string& Mode)
 	{
 	}
+
+	// DMXデータ受信イベント
+	void CApp::OnReceiveArtNetDMX(unsigned short Net, unsigned short SubNet, unsigned short Universe, const std::vector<unsigned char>& DataBuffer)
+	{
+	}
 }

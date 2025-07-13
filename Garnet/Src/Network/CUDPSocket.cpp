@@ -185,10 +185,11 @@ namespace network
 		if (OpCode == 0x5000)
 		{
 			// ArtDMXパケットの処理
-			Console::Log("Received ArtDMX packet: OpCode=0x%04X, ProtocolVersion=%d, Sequence=%d, Physical=%d, AbsoluteUniverse=%d, DataLength=%d\n",
-				OpCode, ProtocolVersion, Sequence, Physical, AbsoluteUniverse, DataLength);
+			//Console::Log("Received ArtDMX packet: OpCode=0x%04X, ProtocolVersion=%d, Sequence=%d, Physical=%d, AbsoluteUniverse=%d, DataLength=%d\n",
+				//OpCode, ProtocolVersion, Sequence, Physical, AbsoluteUniverse, DataLength);
+			
 			// 受信したDMXデータをアプリケーションに通知する
-			//pApp->OnArtNetDMXDataReceived(Net, SubNet, Universe, DataBuffer);
+			pApp->OnReceiveArtNetDMX(Net, SubNet, Universe, DataBuffer);
 		}
 
 		return true;

@@ -762,8 +762,10 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Src\Interface\IScriptCallback.h" />
+    <ClInclude Include="Src\Network\DMX\SDMXFixture.h" />
     <ClInclude Include="Src\Scriptable\CommonComponent\CSpotLightComponent.h" />
-    <ClInclude Include="Src\Network\CDMXDataHandler.h" />
+    <ClInclude Include="Src\Network\DMX\CDMXDataHandler.h" />
     <ClInclude Include="Src\Network\CUDPSocket.h" />
     <ClInclude Include="Src\Graphics\Vulkan\CVulkanRTXGIController.h" />
     <ClInclude Include="Src\Graphics\CRTXGIController.h" />
@@ -1844,7 +1846,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\Scriptable\CommonComponent\CSpotLightComponent.cpp" />
-    <ClCompile Include="Src\Network\CDMXDataHandler.cpp" />
+    <ClCompile Include="Src\Network\DMX\CDMXDataHandler.cpp" />
     <ClCompile Include="Src\Network\CUDPSocket.cpp" />
     <ClCompile Include="Src\Graphics\Vulkan\CVulkanRTXGIController.cpp" />
     <ClCompile Include="Src\Graphics\CRTXGIController.cpp" />
