@@ -22,12 +22,11 @@ namespace api
 		std::string m_PassName;
 		int m_Width;
 		int m_Height;
-		glm::vec4 m_InitColor;
 		api::ERenderPassFormat m_RenderPassFormat;
+		graphics::SRenderPassState m_PassState;
+
 		std::vector<std::shared_ptr<graphics::CTexture>> m_FrameTextureList;
 		std::shared_ptr<graphics::CTexture> m_DepthTexture;
-
-		bool m_UseStencil;
 
 		// Frame Buffer
 		GLuint m_FrameBuffer;
@@ -47,7 +46,7 @@ namespace api
 		bool CreateDepthBuffer(const graphics::SRenderPassState& PassState, bool IsMSAASubPass);
 
 	public:
-		COpenGLSubPass(api::COpenGLAPI* pGraphicsAPI, const std::string& PassName, ERenderPassFormat RenderPassFormat, const glm::vec4& InitColor);
+		COpenGLSubPass(api::COpenGLAPI* pGraphicsAPI, const std::string& PassName, ERenderPassFormat RenderPassFormat);
 		~COpenGLSubPass();
 
 		std::shared_ptr<graphics::CTexture> GetFrameTexture(int Index = 0);

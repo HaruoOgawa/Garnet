@@ -7,16 +7,15 @@
 
 namespace api
 {
-	COpenGLSubPass::COpenGLSubPass(api::COpenGLAPI* pGraphicsAPI, const std::string& PassName, ERenderPassFormat RenderPassFormat, const glm::vec4& InitColor) :
+	COpenGLSubPass::COpenGLSubPass(api::COpenGLAPI* pGraphicsAPI, const std::string& PassName, ERenderPassFormat RenderPassFormat) :
 		m_pGraphicsAPI(pGraphicsAPI),
 
 		m_PassName(PassName),
 		m_Width(0),
 		m_Height(0),
-		m_InitColor(InitColor),
 		m_RenderPassFormat(RenderPassFormat),
+		m_PassState(graphics::SRenderPassState()),
 		m_DepthTexture(nullptr),
-		m_UseStencil(false),
 		m_FrameBuffer(-1),
 		m_DepthBuffer(-1)
 	{
@@ -45,10 +44,10 @@ namespace api
 
 	bool COpenGLSubPass::Create(int Width, int Height, const graphics::SRenderPassState& PassState, bool IsMSAASubPass)
 	{
+		m_PassState = PassState;
 		m_Width = Width;
 		m_Height = Height;
-		m_UseStencil = PassState.Stencil;
-
+		
 		// フレームバッファの作成
 		if (!CreateFrameBuffer()) return false;
 
@@ -71,7 +70,7 @@ namespace api
 			// Depth_Stencilの分を追加しておく
 			BufferCount += 1;
 
-			if (m_UseStencil)
+			if (m_PassState.Stencil)
 			{
 				Attachments.push_back(GL_DEPTH_STENCIL_ATTACHMENT);
 			}
@@ -215,12 +214,12 @@ namespace api
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, m_FrameBuffer);
 		glViewport(0, 0, m_Width, m_Height);
-		glClearColor(m_InitColor.r, m_InitColor.g, m_InitColor.b, m_InitColor.a);
+
 		glClearDepth(1.0f);
 
 		GLbitfield clearMask = GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT;
 
-		if (m_UseStencil)
+		if (m_PassState.Stencil)
 		{
 			glClearStencil(0);
 
@@ -231,6 +230,18 @@ namespace api
 		}
 
 		glClear(clearMask);
+
+		// カラーバッファ単位で初期化
+		if (m_PassState.RenderTargetCount != static_cast<int>(m_PassState.InitColorList.size())) return false;
+
+		for (int i = 0; i < m_PassState.RenderTargetCount; i++)
+		{
+			const auto& InitColor = m_PassState.InitColorList[i];
+
+			GLfloat clearColor[4] = { InitColor.r, InitColor.g, InitColor.b, InitColor.a };
+
+			glClearBufferfv(GL_COLOR, i, clearColor);
+		}
 
 		return true;
 	}

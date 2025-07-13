@@ -116,7 +116,8 @@ typedef ptrdiff_t GLsizeiptr;
 	GL_FUNC(void,	DrawBuffers, 	      GLsizei n, const GLenum* bufs) \
 	GL_FUNC(void,	BlitFramebuffer, 	  GLint srcX0, GLint srcY0, GLint srcX1, GLint srcY1, GLint dstX0, GLint dstY0, GLint dstX1, GLint dstY1, GLbitfield mask, GLenum filter) \
 	GL_FUNC(void,	RenderbufferStorageMultisample, GLenum target, GLsizei samples, GLenum internalformat, GLsizei width, GLsizei height) \
-	GL_FUNC(void,	BlendFuncSeparate, GLenum srcRGB, GLenum dstRGB, GLenum srcAlpha, GLenum dstAlpha) \
+	GL_FUNC(void,	BlendFuncSeparate,	  GLenum srcRGB, GLenum dstRGB, GLenum srcAlpha, GLenum dstAlpha) \
+	GL_FUNC(void,	ClearBufferfv, 		  GLenum buffer, GLint drawbuffer, const GLfloat* value) \
 /* end */
 
 // プリプロセッサ芸でまずGL_FUNC_LISTの中身をtypedef や externで展開する

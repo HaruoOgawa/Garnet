@@ -8,10 +8,9 @@
 
 namespace api
 {
-	COpenGLRenderPass::COpenGLRenderPass(api::COpenGLAPI* pGraphicsAPI, const std::string& PassName, ERenderPassFormat RenderPassFormat, const glm::vec4& InitColor) :
+	COpenGLRenderPass::COpenGLRenderPass(api::COpenGLAPI* pGraphicsAPI, const std::string& PassName, ERenderPassFormat RenderPassFormat) :
 		m_pGraphicsAPI(pGraphicsAPI),
 		m_PassName(PassName),
-		m_InitColor(InitColor),
 		m_RenderPassFormat(RenderPassFormat),
 		m_UseColorBuffer(false),
 		m_UseDepthBuffer(false),
@@ -34,7 +33,7 @@ namespace api
 		if (m_UseMSAA)
 		{
 			{
-				graphics::SRenderPassState SubPassState{};
+				graphics::SRenderPassState SubPassState = graphics::SRenderPassState(PassState.RenderTargetCount);
 				SubPassState.ColorBuffer = true;
 				SubPassState.ColorTexture = false;
 				SubPassState.DepthBuffer = true;
@@ -44,13 +43,14 @@ namespace api
 				SubPassState.EnabledAA = PassState.EnabledAA;
 				SubPassState.AASampleNum = PassState.AASampleNum;
 				SubPassState.Stencil = PassState.Stencil; 
+				SubPassState.InitColorList = PassState.InitColorList;
 
-				m_SubPass = std::make_shared<COpenGLSubPass>(m_pGraphicsAPI, m_PassName, m_RenderPassFormat, m_InitColor);
+				m_SubPass = std::make_shared<COpenGLSubPass>(m_pGraphicsAPI, m_PassName, m_RenderPassFormat);
 				if (!m_SubPass->Create(Width, Height, SubPassState, true)) return false;
 			}
 
 			{
-				graphics::SRenderPassState SubPassState{};
+				graphics::SRenderPassState SubPassState = graphics::SRenderPassState(PassState.RenderTargetCount);
 				SubPassState.ColorBuffer = true;
 				SubPassState.ColorTexture = true;
 				SubPassState.DepthBuffer = true;
@@ -58,8 +58,9 @@ namespace api
 				// ˆø‚«Œp‚®
 				SubPassState.RenderTargetCount = PassState.RenderTargetCount;
 				SubPassState.Stencil = PassState.Stencil; 
+				SubPassState.InitColorList = PassState.InitColorList;
 
-				m_ResolveSubPass = std::make_shared<COpenGLSubPass>(m_pGraphicsAPI, m_PassName, m_RenderPassFormat, m_InitColor);
+				m_ResolveSubPass = std::make_shared<COpenGLSubPass>(m_pGraphicsAPI, m_PassName, m_RenderPassFormat);
 				if (!m_ResolveSubPass->Create(Width, Height, SubPassState, false)) return false;
 			}
 		}
@@ -67,7 +68,7 @@ namespace api
 		{
 			graphics::SRenderPassState SubPassState = PassState;
 
-			m_SubPass = std::make_shared<COpenGLSubPass>(m_pGraphicsAPI, m_PassName, m_RenderPassFormat, m_InitColor);
+			m_SubPass = std::make_shared<COpenGLSubPass>(m_pGraphicsAPI, m_PassName, m_RenderPassFormat);
 			if (!m_SubPass->Create(Width, Height, SubPassState, false)) return false;
 		}
 
