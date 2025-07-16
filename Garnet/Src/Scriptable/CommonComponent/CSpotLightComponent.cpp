@@ -159,7 +159,7 @@ namespace scriptable
 
 			// Dimmer(intensity)
 			// 10.0‚Ü‚Å–¾‚é‚³‚ªw’è‚Å‚«‚éÆ–¾‚Æ‚·‚é
-			float intensity = 10.0f * static_cast<float>(DMXData[3]) / 255.0f;
+			float intensity = static_cast<float>(DMXData[3]) / 255.0f;
 			GetValueRegistry()->SetValue("intensity", graphics::EUniformValueType::VALUE_TYPE_FLOAT, &intensity, sizeof(float));
 			
 			// Pan
@@ -257,6 +257,8 @@ namespace scriptable
 
 			// ‘¼‚Ìƒ‰ƒCƒg‚ª•`‰æ‚Å‚«‚È‚­‚È‚é‚Ì‚ÅZTest‚Í‚µ‚È‚¢
 			//Material->SetEnabledZTest(false);
+			Material->SetEnabledZWrite(false);
+			Material->SetDepthFunc(graphics::EDepthFunc::Always);
 
 			Material->ReplaceTextureIndex("gPositionTexture", 0);
 			Material->ReplaceTextureIndex("gNormalTexture", 1);
