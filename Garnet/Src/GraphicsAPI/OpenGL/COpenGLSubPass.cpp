@@ -215,36 +215,45 @@ namespace api
 		glBindFramebuffer(GL_FRAMEBUFFER, m_FrameBuffer);
 		glViewport(0, 0, m_Width, m_Height);
 
-		glClearDepth(1.0f);
-
 		GLbitfield clearMask = 0;
 
 		if (m_PassState.ClearColor) clearMask |= GL_COLOR_BUFFER_BIT;
 
-		if (m_PassState.ClearDepth) clearMask |= GL_DEPTH_BUFFER_BIT;
+		if (m_PassState.ClearDepth)
+		{
+			glClearDepth(1.0f);
+			clearMask |= GL_DEPTH_BUFFER_BIT;
+		}
 
-		if (m_PassState.Stencil)
+		if (m_PassState.Stencil && m_PassState.ClearStencil)
 		{
 			glClearStencil(0);
 
-			if (m_PassState.ClearStencil) clearMask |= GL_STENCIL_BUFFER_BIT;
+			clearMask |= GL_STENCIL_BUFFER_BIT;
+
 			// glStencilMaskはglColorMask・glDepthMaskと同じ関数でフレームバッファへの書き込みを有効にしたり無効にしたりする
 			// 0xFFにすることで有効になる?
 			glStencilMask(0xff);
 		}
 
-		glClear(clearMask);
+		if (clearMask != 0)
+		{
+			glClear(clearMask);
+		}
 
 		// カラーバッファ単位で初期化
-		if (m_PassState.RenderTargetCount != static_cast<int>(m_PassState.InitColorList.size())) return false;
-
-		for (int i = 0; i < m_PassState.RenderTargetCount; i++)
+		if (m_PassState.ClearColor)
 		{
-			const auto& InitColor = m_PassState.InitColorList[i];
+			if (m_PassState.RenderTargetCount != static_cast<int>(m_PassState.InitColorList.size())) return false;
 
-			GLfloat clearColor[4] = { InitColor.r, InitColor.g, InitColor.b, InitColor.a };
+			for (int i = 0; i < m_PassState.RenderTargetCount; i++)
+			{
+				const auto& InitColor = m_PassState.InitColorList[i];
 
-			glClearBufferfv(GL_COLOR, i, clearColor);
+				GLfloat clearColor[4] = { InitColor.r, InitColor.g, InitColor.b, InitColor.a };
+
+				glClearBufferfv(GL_COLOR, i, clearColor);
+			}
 		}
 
 		return true;

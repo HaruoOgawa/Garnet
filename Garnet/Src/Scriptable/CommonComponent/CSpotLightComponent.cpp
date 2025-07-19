@@ -11,7 +11,8 @@ namespace scriptable
 		m_Status(resource::ELoadStatus::None),
 		m_Loader(nullptr),
 		m_SecondLoader(nullptr),
-		m_LightObject(nullptr)
+		m_LightObject(nullptr),
+		m_LightGeomObject(nullptr)
 	{
 		GetValueRegistry()->SetValue("intensity", graphics::EUniformValueType::VALUE_TYPE_FLOAT, &glm::vec1(1.0f)[0], sizeof(float));
 		GetValueRegistry()->SetValue("color", graphics::EUniformValueType::VALUE_TYPE_VEC4, &glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)[0], sizeof(float) * 4);
@@ -68,23 +69,32 @@ namespace scriptable
 
 		if (!Loaded) return true;
 
-		if (!m_LightObject) return true;
+		if (!m_LightObject || !m_LightGeomObject) return true;
 
 		if (SelfNode)
 		{
 			m_LightObject->SetPos(SelfNode->GetPos());
 			m_LightObject->SetRot(SelfNode->GetRot());
 			m_LightObject->SetScale(SelfNode->GetScale());
+			
+			m_LightGeomObject->SetPos(SelfNode->GetPos());
+			m_LightGeomObject->SetRot(SelfNode->GetRot());
+			m_LightGeomObject->SetScale(SelfNode->GetScale());
 		}
 		else if (Object)
 		{
 			m_LightObject->SetPos(Object->GetPos());
 			m_LightObject->SetRot(Object->GetRot());
 			m_LightObject->SetScale(Object->GetScale());
+			
+			m_LightGeomObject->SetPos(Object->GetPos());
+			m_LightGeomObject->SetRot(Object->GetRot());
+			m_LightGeomObject->SetScale(Object->GetScale());
 		}
 
 		//
 		if (!m_LightObject->Update(pGraphicsAPI, pPhysicsEngine, 0.0f, pLoadWorker, Camera, Projection, DrawInfo, InputState)) return false;
+		if (!m_LightGeomObject->Update(pGraphicsAPI, pPhysicsEngine, 0.0f, pLoadWorker, Camera, Projection, DrawInfo, InputState)) return false;
 
 		// angle
 		float angle = GetValueRegistry()->GetValueFloat("angle");
@@ -139,9 +149,10 @@ namespace scriptable
 		const std::shared_ptr<graphics::CDrawInfo>& DrawInfo, const std::shared_ptr<object::C3DObject>& Object, const std::shared_ptr<object::CNode>& SelfNode)
 	{
 		if (m_Status != resource::ELoadStatus::Loaded) return true;
-		if (!m_LightObject) return true;
+		if (!m_LightObject || !m_LightGeomObject) return true;
 
 		if (!m_LightObject->Draw(pGraphicsAPI, Camera, Projection, DrawInfo)) return false;
+		if (!m_LightGeomObject->Draw(pGraphicsAPI, Camera, Projection, DrawInfo)) return false;
 
 		return true;
 	}
@@ -210,12 +221,11 @@ namespace scriptable
 		Loaded = true;
 
 		m_LightObject = std::make_shared<object::C3DObject>();
+		m_LightGeomObject = std::make_shared<object::C3DObject>();
 
 		// PassName
-		for (const auto& PassName : Object->GetPassNameList())
-		{
-			m_LightObject->AddPassName(PassName);
-		}
+		m_LightObject->AddPassName("GBufferLightPass");
+		m_LightGeomObject->AddPassName("MainResultPass");
 
 		// TextureList
 		const auto& RenderPass = pGraphicsAPI->FindOffScreenRenderPass("GBufferGenPass");
@@ -227,6 +237,7 @@ namespace scriptable
 		for (const auto& Texture : TextureList)
 		{
 			m_LightObject->GetTextureSet()->AddFrameTexture(Texture);
+			m_LightGeomObject->GetTextureSet()->AddFrameTexture(Texture);
 		}
 
 		// Mesh & Material
@@ -255,7 +266,7 @@ namespace scriptable
 
 		for (const auto& MaterialFrame : m_SecondLoader->GetTargetMaterialFrameSet())
 		{
-			const auto& Material = MaterialFrame->CreateMaterial(pGraphicsAPI, graphics::ECullMode::CULL_BACK);
+			const auto& Material = MaterialFrame->CreateMaterial(pGraphicsAPI, graphics::ECullMode::CULL_NONE);
 			Material->SetBlendType(graphics::EBlendType::BLEND_TYPE_TRANSPARENT_ALPHA);
 
 			// 他のライトが描画できなくなるので書き込まない
@@ -268,7 +279,7 @@ namespace scriptable
 			Material->ReplaceTextureIndex("gCustomParam0Texture", 4);
 
 			// BoardかSphereかをライトタイプで変えるようにするとライトクラスが1つに統一できるかも？
-			if (!m_LightObject->AddPresetSimply(pGraphicsAPI, pPhysicsEngine, graphics::CPresetPrimitive::CreateCylinder(pGraphicsAPI), graphics::EPresetPrimitiveType::CYLINDER, Material)) return false;
+			if (!m_LightGeomObject->AddPresetSimply(pGraphicsAPI, pPhysicsEngine, graphics::CPresetPrimitive::CreateCylinder(pGraphicsAPI), graphics::EPresetPrimitiveType::CYLINDER, Material)) return false;
 
 			m_MaterialList.push_back(Material);
 
@@ -278,6 +289,7 @@ namespace scriptable
 
 		// 生成
 		if (!m_LightObject->Create(pGraphicsAPI, pPhysicsEngine)) return false;
+		if (!m_LightGeomObject->Create(pGraphicsAPI, pPhysicsEngine)) return false;
 
 		return true;
 	}

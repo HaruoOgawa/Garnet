@@ -119,10 +119,8 @@ namespace scriptable
 		m_LightObject = std::make_shared<object::C3DObject>();
 
 		// PassName
-		for (const auto& PassName : Object->GetPassNameList())
-		{
-			m_LightObject->AddPassName(PassName);
-		}
+		m_LightObject->AddPassName("GBufferLightPass");
+
 
 		// TextureList
 		const auto& RenderPass = pGraphicsAPI->FindOffScreenRenderPass("GBufferGenPass");

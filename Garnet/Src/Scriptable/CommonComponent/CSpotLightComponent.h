@@ -20,6 +20,7 @@ namespace scriptable
 		std::shared_ptr<resource::CMaterialFrameLoader> m_SecondLoader;
 
 		std::shared_ptr<object::C3DObject> m_LightObject;
+		std::shared_ptr<object::C3DObject> m_LightGeomObject;
 		std::vector<std::shared_ptr<graphics::CMaterial>> m_MaterialList;
 
 	private:
