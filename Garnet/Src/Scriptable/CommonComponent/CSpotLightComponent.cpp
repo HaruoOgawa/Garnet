@@ -246,8 +246,9 @@ namespace scriptable
 			const auto& Material = MaterialFrame->CreateMaterial(pGraphicsAPI, graphics::ECullMode::CULL_FRONT);
 			Material->SetBlendType(graphics::EBlendType::BLEND_TYPE_ADDITIVE);
 
-			// 他のライトが描画できなくなるので書き込まない
-			Material->SetEnabledZWrite(false);
+			// GBuffer生成パスで既に深度が決まっているのでここで深度テストは行わない
+			// また、ライトの描画範囲決定に影響がでることも理由の1つ
+			Material->SetEnabledZTest(false);
 
 			Material->ReplaceTextureIndex("gPositionTexture", 0);
 			Material->ReplaceTextureIndex("gNormalTexture", 1);
@@ -270,6 +271,7 @@ namespace scriptable
 			Material->SetBlendType(graphics::EBlendType::BLEND_TYPE_TRANSPARENT_ALPHA);
 
 			// 他のライトが描画できなくなるので書き込まない
+			// カメラ距離&RenderQueueによるソートが実装されたらここは削除できるはず
 			Material->SetEnabledZWrite(false);
 
 			Material->ReplaceTextureIndex("gPositionTexture", 0);
