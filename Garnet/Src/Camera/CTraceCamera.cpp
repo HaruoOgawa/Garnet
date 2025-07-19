@@ -4,6 +4,7 @@
 namespace camera
 {
 	CTraceCamera::CTraceCamera():
+		CCamera(),
 		m_TargetNode(nullptr)
 	{
 	}

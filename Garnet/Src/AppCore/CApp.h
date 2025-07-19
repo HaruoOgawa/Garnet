@@ -66,5 +66,8 @@ namespace app
 
 		// DMXデータ受信イベント
 		virtual void OnReceiveArtNetDMX(unsigned short Net, unsigned short SubNet, unsigned short Universe, const std::vector<unsigned char>& DataBuffer);
+
+		// カスタムイベント発火
+		virtual void OnRaisedEvent(const std::string& Type, const std::string& Params);
 	};
 }

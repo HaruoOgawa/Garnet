@@ -111,4 +111,9 @@ namespace app
 	void CApp::OnReceiveArtNetDMX(unsigned short Net, unsigned short SubNet, unsigned short Universe, const std::vector<unsigned char>& DataBuffer)
 	{
 	}
+
+	// カスタムイベント発火
+	void CApp::OnRaisedEvent(const std::string& Type, const std::string& Params)
+	{
+	}
 }

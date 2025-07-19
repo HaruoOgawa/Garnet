@@ -5,7 +5,6 @@
 #include <memory>
 #include "../Input/CInputState.h"
 
-
 namespace camera
 {
 	class CCamera
