@@ -217,13 +217,17 @@ namespace api
 
 		glClearDepth(1.0f);
 
-		GLbitfield clearMask = GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT;
+		GLbitfield clearMask = 0;
+
+		if (m_PassState.ClearColor) clearMask |= GL_COLOR_BUFFER_BIT;
+
+		if (m_PassState.ClearDepth) clearMask |= GL_DEPTH_BUFFER_BIT;
 
 		if (m_PassState.Stencil)
 		{
 			glClearStencil(0);
 
-			clearMask |= GL_STENCIL_BUFFER_BIT;
+			if (m_PassState.ClearStencil) clearMask |= GL_STENCIL_BUFFER_BIT;
 			// glStencilMaskはglColorMask・glDepthMaskと同じ関数でフレームバッファへの書き込みを有効にしたり無効にしたりする
 			// 0xFFにすることで有効になる?
 			glStencilMask(0xff);

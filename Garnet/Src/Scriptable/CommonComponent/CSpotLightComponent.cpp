@@ -230,10 +230,8 @@ namespace scriptable
 			const auto& Material = MaterialFrame->CreateMaterial(pGraphicsAPI, graphics::ECullMode::CULL_FRONT);
 			Material->SetBlendType(graphics::EBlendType::BLEND_TYPE_ADDITIVE);
 
-			// ‘¼‚Ìƒ‰ƒCƒg‚ª•`‰æ‚Å‚«‚È‚­‚È‚é‚Ì‚ÅZTest‚Í‚µ‚È‚¢
-			//Material->SetEnabledZTest(false);
+			// ‘¼‚Ìƒ‰ƒCƒg‚ª•`‰æ‚Å‚«‚È‚­‚È‚é‚Ì‚Å‘‚«ž‚Ü‚È‚¢
 			Material->SetEnabledZWrite(false);
-			Material->SetDepthFunc(graphics::EDepthFunc::Always);
 
 			Material->ReplaceTextureIndex("gPositionTexture", 0);
 			Material->ReplaceTextureIndex("gNormalTexture", 1);
@@ -255,10 +253,8 @@ namespace scriptable
 			const auto& Material = MaterialFrame->CreateMaterial(pGraphicsAPI, graphics::ECullMode::CULL_BACK);
 			Material->SetBlendType(graphics::EBlendType::BLEND_TYPE_TRANSPARENT_ALPHA);
 
-			// ‘¼‚Ìƒ‰ƒCƒg‚ª•`‰æ‚Å‚«‚È‚­‚È‚é‚Ì‚ÅZTest‚Í‚µ‚È‚¢
-			//Material->SetEnabledZTest(false);
+			// ‘¼‚Ìƒ‰ƒCƒg‚ª•`‰æ‚Å‚«‚È‚­‚È‚é‚Ì‚Å‘‚«ž‚Ü‚È‚¢
 			Material->SetEnabledZWrite(false);
-			Material->SetDepthFunc(graphics::EDepthFunc::Always);
 
 			Material->ReplaceTextureIndex("gPositionTexture", 0);
 			Material->ReplaceTextureIndex("gNormalTexture", 1);

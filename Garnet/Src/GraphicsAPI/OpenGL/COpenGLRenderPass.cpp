@@ -34,16 +34,15 @@ namespace api
 		{
 			{
 				graphics::SRenderPassState SubPassState = graphics::SRenderPassState(PassState.RenderTargetCount);
+
+				// ˆø‚«Œp‚®
+				SubPassState = PassState;
+
+				// ŒÂ•Êİ’è
 				SubPassState.ColorBuffer = true;
 				SubPassState.ColorTexture = false;
 				SubPassState.DepthBuffer = true;
-
-				// ˆø‚«Œp‚®
-				SubPassState.RenderTargetCount = PassState.RenderTargetCount;
-				SubPassState.EnabledAA = PassState.EnabledAA;
-				SubPassState.AASampleNum = PassState.AASampleNum;
-				SubPassState.Stencil = PassState.Stencil; 
-				SubPassState.InitColorList = PassState.InitColorList;
+				SubPassState.DepthTexture = false;
 
 				m_SubPass = std::make_shared<COpenGLSubPass>(m_pGraphicsAPI, m_PassName, m_RenderPassFormat);
 				if (!m_SubPass->Create(Width, Height, SubPassState, true)) return false;
@@ -51,14 +50,15 @@ namespace api
 
 			{
 				graphics::SRenderPassState SubPassState = graphics::SRenderPassState(PassState.RenderTargetCount);
+
+				// ˆø‚«Œp‚®
+				SubPassState = PassState;
+
+				// ŒÂ•Êİ’è
 				SubPassState.ColorBuffer = true;
 				SubPassState.ColorTexture = true;
 				SubPassState.DepthBuffer = true;
-
-				// ˆø‚«Œp‚®
-				SubPassState.RenderTargetCount = PassState.RenderTargetCount;
-				SubPassState.Stencil = PassState.Stencil; 
-				SubPassState.InitColorList = PassState.InitColorList;
+				SubPassState.DepthTexture = true;
 
 				m_ResolveSubPass = std::make_shared<COpenGLSubPass>(m_pGraphicsAPI, m_PassName, m_RenderPassFormat);
 				if (!m_ResolveSubPass->Create(Width, Height, SubPassState, false)) return false;

@@ -17,6 +17,11 @@ namespace graphics
 		int  AASampleNum = 1; // アンチエイリアスのサンプリング数
 		std::vector<glm::vec4> InitColorList;
 
+		// クリアフラグ
+		bool ClearColor = true;
+		bool ClearDepth = true;
+		bool ClearStencil = true;
+
 	public:
 		SRenderPassState(int _RenderTargetCount = 1, const glm::vec4& _CommonInitColor = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)):
 			RenderTargetCount(_RenderTargetCount)

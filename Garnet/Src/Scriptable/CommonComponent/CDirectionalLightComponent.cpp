@@ -137,6 +137,10 @@ namespace scriptable
 		for (const auto& MaterialFrame : m_Loader->GetTargetMaterialFrameSet())
 		{
 			const auto& Material = MaterialFrame->CreateMaterial(pGraphicsAPI, graphics::ECullMode::CULL_NONE);
+
+			// ‘¼‚Ìƒ‰ƒCƒg‚ª•`‰æ‚Å‚«‚È‚­‚È‚é‚Ì‚Å‘‚«ž‚Ü‚È‚¢
+			Material->SetEnabledZWrite(false);
+
 			Material->SetBlendType(graphics::EBlendType::BLEND_TYPE_ADDITIVE);
 			Material->SetEnabledZTest(false);
 			Material->ReplaceTextureIndex("gPositionTexture", 0);
