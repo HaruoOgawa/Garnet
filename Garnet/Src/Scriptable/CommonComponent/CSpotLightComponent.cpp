@@ -86,43 +86,48 @@ namespace scriptable
 		//
 		if (!m_LightObject->Update(pGraphicsAPI, pPhysicsEngine, 0.0f, pLoadWorker, Camera, Projection, DrawInfo, InputState)) return false;
 
+		// angle
+		float angle = GetValueRegistry()->GetValueFloat("angle");
+
+		// height
+		float height = GetValueRegistry()->GetValueFloat("height");
+
+		// pan
+		float pan = GetValueRegistry()->GetValueFloat("pan");
+
+		// tilt
+		float tilt = GetValueRegistry()->GetValueFloat("tilt");
+
+		// pos
+		glm::vec3 Pos = m_LightObject->GetPos();
+
+		// intensity
+		float intensity = GetValueRegistry()->GetValueFloat("intensity");
+
+		// color
+		std::vector<float> color = GetValueRegistry()->GetValueVec4("color");
+
+		// dir
+		glm::vec4 dir = glm::vec4(0.0f, -1.0f, 0.0f, 0.0f);
+		const auto& WorldMatrix = m_LightObject->GetObjectTransform()->GetModelMatrix();
+		glm::mat4 RotPan = glm::toMat4(glm::angleAxis(-pan, glm::vec3(1.0f, 0.0f, 0.0f)));
+		glm::mat4 RotTilt = glm::toMat4(glm::angleAxis(tilt, glm::vec3(0.0f, 1.0f, 0.0f)));
+
+		dir = WorldMatrix * RotTilt * RotPan * dir;
+		dir = glm::normalize(dir);
+
+		//
 		for (auto& Material : m_MaterialList)
 		{
 			if (Material)
 			{
-				// angle
-				float angle = GetValueRegistry()->GetValueFloat("angle");
 				Material->SetUniformValue("angle", &glm::vec1(angle)[0], sizeof(float));
-
-				// height
-				float height = GetValueRegistry()->GetValueFloat("height");
 				Material->SetUniformValue("height", &glm::vec1(height)[0], sizeof(float));
-				
-				// pan
-				float pan = GetValueRegistry()->GetValueFloat("pan");
 				Material->SetUniformValue("pan", &glm::vec1(pan)[0], sizeof(float));
-				
-				// tilt
-				float tilt = GetValueRegistry()->GetValueFloat("tilt");
 				Material->SetUniformValue("tilt", &glm::vec1(tilt)[0], sizeof(float));
-
-				// pos
-				glm::vec3 Pos = m_LightObject->GetPos();
 				Material->SetUniformValue("pos", &glm::vec4(Pos.x, Pos.y, Pos.z, 1.0f)[0], sizeof(float) * 4);
-
-				// intensity
-				float intensity = GetValueRegistry()->GetValueFloat("intensity");
 				Material->SetUniformValue("intensity", &glm::vec1(intensity)[0], sizeof(float));
-
-				// color
-				std::vector<float> color = GetValueRegistry()->GetValueVec4("color");
 				Material->SetUniformValue("color", &color[0], sizeof(float) * static_cast<int>(color.size()));
-
-				// dir
-				glm::vec4 dir = glm::vec4(0.0f, -1.0f, 0.0f, 0.0f);
-				const auto& WorldMatrix = m_LightObject->GetObjectTransform()->GetModelMatrix();
-				dir = WorldMatrix * dir;
-				dir = glm::normalize(dir);
 				Material->SetUniformValue("dir", &dir[0], sizeof(float) * 4);
 			}
 		}
