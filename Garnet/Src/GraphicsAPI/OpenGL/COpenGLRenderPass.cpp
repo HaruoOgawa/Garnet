@@ -8,10 +8,9 @@
 
 namespace api
 {
-	COpenGLRenderPass::COpenGLRenderPass(api::COpenGLAPI* pGraphicsAPI, const std::string& PassName, ERenderPassFormat RenderPassFormat, const glm::vec4& InitColor) :
+	COpenGLRenderPass::COpenGLRenderPass(api::COpenGLAPI* pGraphicsAPI, const std::string& PassName, ERenderPassFormat RenderPassFormat) :
 		m_pGraphicsAPI(pGraphicsAPI),
 		m_PassName(PassName),
-		m_InitColor(InitColor),
 		m_RenderPassFormat(RenderPassFormat),
 		m_UseColorBuffer(false),
 		m_UseDepthBuffer(false),
@@ -34,30 +33,34 @@ namespace api
 		if (m_UseMSAA)
 		{
 			{
-				graphics::SRenderPassState SubPassState{};
+				graphics::SRenderPassState SubPassState = graphics::SRenderPassState(PassState.RenderTargetCount);
+
+				// 引き継ぐ
+				SubPassState = PassState;
+
+				// 個別設定
 				SubPassState.ColorBuffer = true;
 				SubPassState.ColorTexture = false;
 				SubPassState.DepthBuffer = true;
+				SubPassState.DepthTexture = false;
 
-				// 引き継ぐ
-				SubPassState.EnabledAA = PassState.EnabledAA;
-				SubPassState.AASampleNum = PassState.AASampleNum;
-				SubPassState.Stencil = PassState.Stencil; 
-
-				m_SubPass = std::make_shared<COpenGLSubPass>(m_pGraphicsAPI, m_PassName, m_RenderPassFormat, m_InitColor);
+				m_SubPass = std::make_shared<COpenGLSubPass>(m_pGraphicsAPI, m_PassName, m_RenderPassFormat);
 				if (!m_SubPass->Create(Width, Height, SubPassState, true)) return false;
 			}
 
 			{
-				graphics::SRenderPassState SubPassState{};
+				graphics::SRenderPassState SubPassState = graphics::SRenderPassState(PassState.RenderTargetCount);
+
+				// 引き継ぐ
+				SubPassState = PassState;
+
+				// 個別設定
 				SubPassState.ColorBuffer = true;
 				SubPassState.ColorTexture = true;
 				SubPassState.DepthBuffer = true;
+				SubPassState.DepthTexture = true;
 
-				// 引き継ぐ
-				SubPassState.Stencil = PassState.Stencil; 
-
-				m_ResolveSubPass = std::make_shared<COpenGLSubPass>(m_pGraphicsAPI, m_PassName, m_RenderPassFormat, m_InitColor);
+				m_ResolveSubPass = std::make_shared<COpenGLSubPass>(m_pGraphicsAPI, m_PassName, m_RenderPassFormat);
 				if (!m_ResolveSubPass->Create(Width, Height, SubPassState, false)) return false;
 			}
 		}
@@ -65,7 +68,7 @@ namespace api
 		{
 			graphics::SRenderPassState SubPassState = PassState;
 
-			m_SubPass = std::make_shared<COpenGLSubPass>(m_pGraphicsAPI, m_PassName, m_RenderPassFormat, m_InitColor);
+			m_SubPass = std::make_shared<COpenGLSubPass>(m_pGraphicsAPI, m_PassName, m_RenderPassFormat);
 			if (!m_SubPass->Create(Width, Height, SubPassState, false)) return false;
 		}
 
@@ -103,17 +106,31 @@ namespace api
 		int Width = m_SubPass->GetWidth();
 		int Height = m_SubPass->GetHeight();
 
-		//
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, SrcFrameBuffer);
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, DstFrameBuffer);
+		// カラーデプスアタッチメントの数だけバッファのコピーを行う
+		for (const auto& Attachment : m_ResolveSubPass->GetAttachments())
+		{
+			glBindFramebuffer(GL_READ_FRAMEBUFFER, SrcFrameBuffer);
+			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, DstFrameBuffer);
 
-		GLbitfield mask = 0;
-		if (m_UseColorBuffer) mask |= GL_COLOR_BUFFER_BIT;
-		if (m_UseDepthBuffer) mask |= GL_DEPTH_BUFFER_BIT;
+			glReadBuffer(Attachment);
+			glDrawBuffer(Attachment);
 
-		glBlitFramebuffer(0, 0, Width, Height, 0, 0, Width, Height, mask, GL_NEAREST);
+			GLbitfield mask = 0;
+			if (Attachment == GL_DEPTH_ATTACHMENT || Attachment == GL_DEPTH_STENCIL_ATTACHMENT)
+			{
+				// デプスアタッチメント
+				mask |= GL_DEPTH_BUFFER_BIT;
+			}
+			else
+			{
+				// カラーアタッチメント
+				mask |= GL_COLOR_BUFFER_BIT;
+			}
 
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+			glBlitFramebuffer(0, 0, Width, Height, 0, 0, Width, Height, mask, GL_NEAREST);
+
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		}
 
 		return true;
 	}

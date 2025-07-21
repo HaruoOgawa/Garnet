@@ -151,12 +151,15 @@ namespace object
 		return m_Enabled;
 	}
 	
-	bool C3DObject::CreatePresetSimply(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine,
+	bool C3DObject::AddPresetSimply(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine,
 		const std::pair<std::shared_ptr<graphics::CVertexBuffer>, std::shared_ptr<graphics::CIndexBuffer>>& createInfo,
 		graphics::EPresetPrimitiveType PresetType,
 		const std::shared_ptr<graphics::CMaterial>& Material, 
 		const std::shared_ptr<math::CTransform> NodeTransform, const std::shared_ptr<physics::IPhysicsObject>& PhysicsObject)
 	{
+		int MeshIndex = static_cast<int>(m_MeshList.size());
+		int NodeIndex = static_cast<int>(m_NodeList.size());
+
 		// Mesh
 		std::shared_ptr<graphics::CMesh> Mesh = std::make_shared<graphics::CMesh>();
 		Mesh->CreatePresetSimpleMesh(pGraphicsAPI, createInfo.first, createInfo.second, Material, PresetType);
@@ -164,10 +167,21 @@ namespace object
 		AddMesh(Mesh);
 
 		// Node
-		std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(0, 0);
+		std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(MeshIndex, NodeIndex);
 		Node->SetLocalTransform(NodeTransform);
 		Node->AddPhysicsObject(PhysicsObject);
 		AddNode(Node);
+
+		return true;
+	}
+	
+	bool C3DObject::CreatePresetSimply(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine,
+		const std::pair<std::shared_ptr<graphics::CVertexBuffer>, std::shared_ptr<graphics::CIndexBuffer>>& createInfo,
+		graphics::EPresetPrimitiveType PresetType,
+		const std::shared_ptr<graphics::CMaterial>& Material, 
+		const std::shared_ptr<math::CTransform> NodeTransform, const std::shared_ptr<physics::IPhysicsObject>& PhysicsObject)
+	{
+		if (!AddPresetSimply(pGraphicsAPI, pPhysicsEngine, createInfo, PresetType, Material, NodeTransform, PhysicsObject)) return false;
 
 		// Create
 		if (!Create(pGraphicsAPI, pPhysicsEngine)) return false;

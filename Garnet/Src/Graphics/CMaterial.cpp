@@ -9,8 +9,9 @@ namespace graphics
 		m_MaterialName(std::string()),
 		m_MaterialFrame(nullptr),
 		m_CreateInfo(createInfo),
-		m_EnabledZWrite(true),
+		m_EnabledZTest(true),
 		m_DepthFunc(EDepthFunc::Less),
+		m_EnabledZWrite(true),
 		m_DefaultCullMode(CullMode),
 		m_CullMode(CullMode),
 		m_BlendType(EBlendType::BLEND_TYPE_NONE),
@@ -339,14 +340,14 @@ namespace graphics
 		return true;
 	}
 
-	void CMaterial::SetEnabledZWrite(bool Flag)
+	void CMaterial::SetEnabledZTest(bool Flag)
 	{
-		m_EnabledZWrite = Flag;
+		m_EnabledZTest = Flag;
 	}
 
-	bool CMaterial::IsEnabledZWrite() const
+	bool CMaterial::IsEnabledZTest() const
 	{
-		return m_EnabledZWrite;
+		return m_EnabledZTest;
 	}
 
 	void CMaterial::SetDepthFunc(EDepthFunc DepthFunc)
@@ -357,6 +358,16 @@ namespace graphics
 	EDepthFunc CMaterial::GetDepthFunc() const
 	{
 		return m_DepthFunc;
+	}
+
+	void CMaterial::SetEnabledZWrite(bool Flag)
+	{
+		m_EnabledZWrite = Flag;
+	}
+
+	bool CMaterial::IsEnabledZWrite() const
+	{
+		return m_EnabledZWrite;
 	}
 
 	void CMaterial::SetCullMode(ECullMode CullMode)

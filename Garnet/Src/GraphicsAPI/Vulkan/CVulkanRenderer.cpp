@@ -318,8 +318,8 @@ namespace api
 
 			// Depth
 			{
-				depthStencil.depthTestEnable = (pVulkanMat->IsEnabledZWrite()) ? VK_TRUE : VK_FALSE;
-				depthStencil.depthWriteEnable = (pVulkanMat->IsEnabledZWrite()) ? VK_TRUE : VK_FALSE;
+				depthStencil.depthTestEnable = (pVulkanMat->IsEnabledZTest()) ? VK_TRUE : VK_FALSE;
+				depthStencil.depthWriteEnable = (pVulkanMat->IsEnabledZTest()) ? VK_TRUE : VK_FALSE;
 
 				graphics::EDepthFunc DepthFunc = pVulkanMat->GetDepthFunc();
 				switch (DepthFunc)
@@ -673,8 +673,8 @@ namespace api
 
 		// Depth
 		{
-			depthStencil.depthTestEnable = (pVulkanMat->IsEnabledZWrite()) ? VK_TRUE : VK_FALSE;
-			depthStencil.depthWriteEnable = (pVulkanMat->IsEnabledZWrite()) ? VK_TRUE : VK_FALSE;
+			depthStencil.depthTestEnable = (pVulkanMat->IsEnabledZTest()) ? VK_TRUE : VK_FALSE;
+			depthStencil.depthWriteEnable = (pVulkanMat->IsEnabledZTest()) ? VK_TRUE : VK_FALSE;
 
 			graphics::EDepthFunc DepthFunc = pVulkanMat->GetDepthFunc();
 			switch (DepthFunc)

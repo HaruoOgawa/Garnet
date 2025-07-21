@@ -20,7 +20,6 @@ namespace api
 
 		// Base Param
 		std::string m_PassName;
-		glm::vec4 m_InitColor;
 		api::ERenderPassFormat m_RenderPassFormat;
 
 		bool m_UseColorBuffer;
@@ -35,7 +34,7 @@ namespace api
 		bool CopyRenderPass();
 
 	public:
-		COpenGLRenderPass(api::COpenGLAPI* pGraphicsAPI, const std::string& PassName, ERenderPassFormat RenderPassFormat, const glm::vec4& InitColor);
+		COpenGLRenderPass(api::COpenGLAPI* pGraphicsAPI, const std::string& PassName, ERenderPassFormat RenderPassFormat);
 		virtual ~COpenGLRenderPass();
 
 		virtual std::shared_ptr<graphics::CTexture> GetFrameTexture(int Index = 0) override;

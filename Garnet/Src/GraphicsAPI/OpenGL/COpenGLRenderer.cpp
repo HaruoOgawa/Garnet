@@ -85,7 +85,7 @@ namespace api
 		// •`‰æ•û–@‚ÌÝ’è
 		// Depth
 		{
-			if (pOpenGLMat->IsEnabledZWrite())
+			if (pOpenGLMat->IsEnabledZTest())
 			{
 				glEnable(GL_DEPTH_TEST);
 			}
@@ -125,6 +125,8 @@ namespace api
 				glDepthFunc(GL_LESS);
 				break;
 			}
+		
+			glDepthMask((pOpenGLMat->IsEnabledZWrite()) ? GL_TRUE : GL_FALSE);
 		}
 
 		// Culling
@@ -159,7 +161,8 @@ namespace api
 			break;
 		case graphics::EBlendType::BLEND_TYPE_ADDITIVE:
 			glEnable(GL_BLEND);
-			glBlendFunc(GL_ONE, GL_ONE);
+			//glBlendFunc(GL_ONE, GL_ONE);
+			glBlendFuncSeparate(GL_ONE, GL_ONE, GL_ONE, GL_ZERO);
 			break;
 		case graphics::EBlendType::BLEND_TYPE_TRANSPARENT_ALPHA:
 			glEnable(GL_BLEND);
@@ -289,6 +292,9 @@ namespace api
 			glDrawElements(GL_TRIANGLES, pOpenGLIndexBuffer->GetIndicesCount(), pOpenGLIndexBuffer->GetGLIndiceType(), nullptr);
 		}
 		
+		// ƒtƒ‰ƒO‚ð‚à‚Æ‚É–ß‚·
+		glDepthMask(GL_TRUE);
+
 		return true;
 	}
 

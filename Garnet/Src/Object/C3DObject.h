@@ -114,6 +114,12 @@ namespace object
 		void SetEnabled(bool Flag);
 		bool IsEnabled() const;
 
+		bool AddPresetSimply(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine,
+			const std::pair<std::shared_ptr<graphics::CVertexBuffer>, std::shared_ptr<graphics::CIndexBuffer>>& createInfo,
+			graphics::EPresetPrimitiveType PresetType,
+			const std::shared_ptr<graphics::CMaterial>& Material,
+			const std::shared_ptr<math::CTransform> NodeTransform = std::make_shared<math::CTransform>(), const std::shared_ptr<physics::IPhysicsObject>& PhysicsObject = nullptr);
+
 		bool CreatePresetSimply(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine,
 			const std::pair<std::shared_ptr<graphics::CVertexBuffer>, std::shared_ptr<graphics::CIndexBuffer>>& createInfo,
 			graphics::EPresetPrimitiveType PresetType,

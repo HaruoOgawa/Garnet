@@ -63,5 +63,11 @@ namespace app
 
 		// シーン再生モード変更イベント
 		virtual void OnChangeScenePlayMode(const std::string& Mode);
+
+		// DMXデータ受信イベント
+		virtual void OnReceiveArtNetDMX(unsigned short Net, unsigned short SubNet, unsigned short Universe, const std::vector<unsigned char>& DataBuffer);
+
+		// カスタムイベント発火
+		virtual void OnRaisedEvent(const std::string& Type, const std::string& Params);
 	};
 }

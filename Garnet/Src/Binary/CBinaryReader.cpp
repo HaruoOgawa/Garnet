@@ -63,6 +63,26 @@ namespace binary
 		return true;
 	}
 
+	bool CBinaryReader::GetStringToZeroByte(std::string& Dst)
+	{
+		size_t ByteSize = 0;
+		int CurrentOffset = m_Offset;
+
+		for (;;)
+		{
+			if (m_Data[CurrentOffset] == 0) break;
+
+			Dst += static_cast<char>(m_Data[CurrentOffset]);
+
+			ByteSize++;
+			CurrentOffset++;
+		}
+
+		UpdatePointer(ByteSize + 1);
+
+		return true;
+	}
+
 	bool CBinaryReader::GetUTF16String(std::wstring& Dst, size_t ByteSize)
 	{
 		if (!IsValid(ByteSize)) return false;
@@ -210,6 +230,26 @@ namespace binary
 	unsigned short CBinaryReader::GetUShort()
 	{
 		auto val = ((m_Pointer[1] << 8) | (m_Pointer[0]));
+
+		unsigned short Dst = *reinterpret_cast<const unsigned short*>(&val);
+
+		UpdatePointer(sizeof(unsigned short));
+
+		return Dst;
+	}
+
+	bool CBinaryReader::GetUShortReverse(unsigned short& Dst)
+	{
+		if (!IsValid(sizeof(unsigned short))) return false;
+
+		Dst = GetUShortReverse();
+
+		return true;
+	}
+
+	unsigned short CBinaryReader::GetUShortReverse()
+	{
+		auto val = ((m_Pointer[0] << 8) | (m_Pointer[1]));
 
 		unsigned short Dst = *reinterpret_cast<const unsigned short*>(&val);
 

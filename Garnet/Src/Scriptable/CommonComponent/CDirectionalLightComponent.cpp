@@ -116,10 +116,7 @@ namespace scriptable
 		m_LightObject = std::make_shared<object::C3DObject>();
 		
 		// PassName
-		for (const auto& PassName : Object->GetPassNameList())
-		{
-			m_LightObject->AddPassName(PassName);
-		}
+		m_LightObject->AddPassName("GBufferLightPass");
 
 		// TextureList
 		const auto& RenderPass = pGraphicsAPI->FindOffScreenRenderPass("GBufferGenPass");
@@ -137,8 +134,12 @@ namespace scriptable
 		for (const auto& MaterialFrame : m_Loader->GetTargetMaterialFrameSet())
 		{
 			const auto& Material = MaterialFrame->CreateMaterial(pGraphicsAPI, graphics::ECullMode::CULL_NONE);
+
+			// GBuffer生成パスで既に深度が決まっているのでここで深度テストは行わない
+			// また、ライトの描画範囲決定に影響がでることも理由の1つ
+			Material->SetEnabledZTest(false);
+
 			Material->SetBlendType(graphics::EBlendType::BLEND_TYPE_ADDITIVE);
-			Material->SetEnabledZWrite(false);
 			Material->ReplaceTextureIndex("gPositionTexture", 0);
 			Material->ReplaceTextureIndex("gNormalTexture", 1);
 			Material->ReplaceTextureIndex("gAlbedoTexture", 2);

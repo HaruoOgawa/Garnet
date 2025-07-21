@@ -25,6 +25,9 @@ namespace api
 		
 		virtual bool Create(const std::vector<unsigned char>& pixelData, int pixelSize) override;
 		
+		// コンピュートシェーダー用テクスチャを生成
+		virtual bool CreateComputeTexture(int Width, int Height) override;
+
 		void SetActive(GLenum texture);
 		void SetEactive(GLenum texture);
 

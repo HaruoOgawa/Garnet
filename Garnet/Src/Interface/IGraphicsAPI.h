@@ -46,8 +46,8 @@ namespace api
 
 		virtual void Release() = 0;
 		
-		virtual bool CreateRenderPass(const std::string& PassName, ERenderPassFormat RenderPassFormat, const glm::vec4& InitColor, int Width = -1, int Height = -1, 
-			const graphics::SRenderPassState& PassState = {}) = 0;
+		virtual bool CreateRenderPass(const std::string& PassName, ERenderPassFormat RenderPassFormat, int Width = -1, int Height = -1, 
+			const graphics::SRenderPassState& PassState = graphics::SRenderPassState(1)) = 0;
 		virtual std::shared_ptr<graphics::CVertexBuffer> CreateVertexBuffer() = 0;
 		virtual std::shared_ptr<graphics::CIndexBuffer> CreateIndexBuffer() = 0;
 		virtual std::shared_ptr<graphics::IRenderer> CreateRenderer() = 0;
@@ -56,7 +56,10 @@ namespace api
 #ifdef USE_GPGPU
 		virtual std::shared_ptr<api::IGPGPUHandler> CreateGPGPUHandler(const std::shared_ptr<graphics::CMaterial>& ComputeMaterial) = 0;
 #endif // USE_GPGPU
+
+#ifdef USE_RTXGI
 		virtual std::shared_ptr<graphics::CRTXGIController> CreateRTXGIController() = 0;
+#endif
 
 		virtual bool Resize(int Width, int Height) = 0;
 
