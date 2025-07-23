@@ -30,6 +30,11 @@ namespace scene
 		}
 	}
 
+	bool CSceneController::IsLoaded() const
+	{
+		return m_IsLoaded;
+	}
+
 	void CSceneController::SetDefaultPass(const std::string& RenderPass)
 	{
 		m_DefaultRenderPass = RenderPass;

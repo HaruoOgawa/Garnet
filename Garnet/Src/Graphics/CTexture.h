@@ -60,5 +60,8 @@ namespace graphics
 		virtual bool Create(const std::vector<unsigned char>& Data, int Width, int Height, int NumOfChannels, api::ERenderPassFormat RenderPassFormat);
 #endif // USE_TEXTURE_LOADER
 		virtual bool Create(const std::vector<unsigned char>& pixelData, int pixelSize) = 0;
+
+		// ピクセルデータ差し替え
+		virtual bool ReplacePixelData(const std::vector<unsigned char>& pixelData, int Width, int Height, api::ERenderPassFormat RenderPassFormat);
 	};
 }

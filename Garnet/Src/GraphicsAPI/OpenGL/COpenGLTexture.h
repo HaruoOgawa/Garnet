@@ -17,6 +17,8 @@ namespace api
 	private:
 		void CreateTextureSampler(GLenum target);
 
+		static void FindTextureFormatSet(api::ERenderPassFormat RenderPassFormat, GLuint& internalformat, GLenum& format, GLenum& type);
+
 	public:
 		COpenGLTexture(api::COpenGLAPI* pGraphicsAPI, bool UseMipMap, const graphics::STextureSamplerParam& SamplerParam);
 		virtual ~COpenGLTexture();
@@ -27,6 +29,9 @@ namespace api
 		
 		// コンピュートシェーダー用テクスチャを生成
 		virtual bool CreateComputeTexture(int Width, int Height) override;
+
+		// ピクセルデータ差し替え
+		virtual bool ReplacePixelData(const std::vector<unsigned char>& pixelData, int Width, int Height, api::ERenderPassFormat RenderPassFormat) override;
 
 		void SetActive(GLenum texture);
 		void SetEactive(GLenum texture);

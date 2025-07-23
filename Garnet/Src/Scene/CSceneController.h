@@ -139,6 +139,8 @@ namespace scene
 
 		void Reset();
 
+		bool IsLoaded() const;
+
 		void SetDefaultPass(const std::string& RenderPass);
 
 		void SetFileName(const std::string& Name);
