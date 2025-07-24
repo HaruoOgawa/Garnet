@@ -53,47 +53,6 @@ namespace network
 		return true;
 	}
 
-	// YUV→RGB変換（BT.601）
-	void CNDIReceiver::YUV2RGB(unsigned char Y, unsigned char U, unsigned char V, unsigned char& R, unsigned char& G, unsigned char& B)
-	{
-		int C = Y - 16;
-		int D = U - 128;
-		int E = V - 128;
-		int r = (298 * C + 409 * E + 128) >> 8;
-		int g = (298 * C - 100 * D - 208 * E + 128) >> 8;
-		int b = (298 * C + 516 * D + 128) >> 8;
-		R = static_cast<unsigned char>(std::clamp(r, 0, 255));
-		G = static_cast<unsigned char>(std::clamp(g, 0, 255));
-		B = static_cast<unsigned char>(std::clamp(b, 0, 255));
-	}
-
-	// UYVY → BGRA変換
-	void CNDIReceiver::ConvertUYVYtoBGRA(const unsigned char* uyvy, int width, int height, int stride, std::vector<unsigned char>& bgra)
-	{
-		bgra.resize(width * height * 4);
-		for (int y = 0; y < height; ++y)
-		{
-			const unsigned char* src = uyvy + y * stride;
-			unsigned char* dst = bgra.data() + y * width * 4;
-			for (int x = 0; x < width; x += 2)
-			{
-				unsigned char U = src[0];
-				unsigned char Y0 = src[1];
-				unsigned char V = src[2];
-				unsigned char Y1 = src[3];
-
-				unsigned char R, G, B;
-				YUV2RGB(Y0, U, V, R, G, B);
-				dst[0] = B; dst[1] = G; dst[2] = R; dst[3] = 255; // BGRA
-				YUV2RGB(Y1, U, V, R, G, B);
-				dst[4] = B; dst[5] = G; dst[6] = R; dst[7] = 255; // BGRA
-
-				src += 4;
-				dst += 8;
-			}
-		}
-	}
-
 	bool CNDIReceiver::Update(app::CApp* pApp)
 	{
 		if (!m_Connected || !m_NDI_recv) return true;
@@ -108,39 +67,26 @@ namespace network
 
 		if (frameType == NDIlib_frame_type_video)
 		{
-			std::vector<unsigned char> pixelBuffer;
+			std::vector<unsigned char> pixelData;
 
-			if (videoFrame.FourCC == NDIlib_FourCC_video_type_UYVY)
+			// 変換処理が重いのでBGRAしか見ない
+			// TouchDesignerでUYVYではなくBGRAを受け取るにはAlphaチャンネルを含める必要がある
+			if (videoFrame.FourCC == NDIlib_FourCC_video_type_BGRA)
 			{
-				ConvertUYVYtoBGRA(
-					videoFrame.p_data,
-					videoFrame.xres,
-					videoFrame.yres,
-					videoFrame.line_stride_in_bytes,
-					pixelBuffer
-				);
-				// pixelBufferにBGRAデータが格納される
+				int ByteSize = videoFrame.xres * videoFrame.yres * 4;
+				pixelData.resize(ByteSize);
+				
+				std::memcpy(&pixelData[0], videoFrame.p_data, ByteSize);
+
+				// ビデオフォーマット的にはBGRAは一般的らしいのでひとまずこれを使う
+				Format = api::ERenderPassFormat::COLOR_BGRA;
+
+				// Appに通知
+				pApp->OnReceiveNDIImage(pixelData, Width, Height, Format);
 			}
-			else if (videoFrame.FourCC == NDIlib_FourCC_video_type_BGRA)
-			{
-				// BGRAならそのままコピー
-				pixelBuffer.resize(videoFrame.xres * videoFrame.yres * 4);
-				for (int y = 0; y < videoFrame.yres; ++y)
-				{
-					const unsigned char* src = videoFrame.p_data + y * videoFrame.line_stride_in_bytes;
-					unsigned char* dst = pixelBuffer.data() + y * videoFrame.xres * 4;
-					std::copy(src, src + videoFrame.xres * 4, dst);
-				}
-			}
-
-			// ビデオフォーマット的にはBGRAは一般的らしいのでひとまずこれを使う
-			Format = api::ERenderPassFormat::COLOR_BGRA;
-
-			NDIlib_recv_free_video_v2(m_NDI_recv, &videoFrame);
-
-			// Appに通知
-			pApp->OnReceiveNDIImage(pixelBuffer, Width, Height, Format);
 		}
+
+		NDIlib_recv_free_video_v2(m_NDI_recv, &videoFrame);
 
 		return true;
 	}

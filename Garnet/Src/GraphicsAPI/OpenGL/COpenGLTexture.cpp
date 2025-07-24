@@ -108,7 +108,7 @@ namespace api
 		FindTextureFormatSet(m_RenderPassFormat, internalformat, format, type);
 
 		glBindTexture(GL_TEXTURE_2D, m_TextureID);
-		glTexImage2D(GL_TEXTURE_2D, 0, internalformat, m_Width, m_Height, 0, format, type, &pixelData[0]);
+		glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_Width, m_Height, format, type, &pixelData[0]);
 		glBindTexture(GL_TEXTURE_2D, 0);
 
 		return true;

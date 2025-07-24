@@ -19,11 +19,6 @@ namespace network
 		bool m_Connected;
 
 	private:
-		// YUV¨RGB•ÏŠ·iBT.601j
-		static void YUV2RGB(unsigned char Y, unsigned char U, unsigned char V, unsigned char& R, unsigned char& G, unsigned char& B);
-
-		// UYVY ¨ BGRA•ÏŠ·
-		static void ConvertUYVYtoBGRA(const unsigned char* uyvy, int width, int height, int stride, std::vector<unsigned char>& bgra);
 
 	public:
 		CNDIReceiver();
