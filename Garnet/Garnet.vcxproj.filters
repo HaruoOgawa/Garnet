@@ -3309,6 +3309,12 @@
     <ClInclude Include="Src\Network\CNDIReceiver.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Graphics\PostProcess\CPostProcess.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Graphics\PostProcess\CPostProcessFXAA.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\WindowAPI\CGLFWWindowAPI.cpp">
@@ -4479,6 +4485,12 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Src\Network\CNDIReceiver.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Graphics\PostProcess\CPostProcess.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Graphics\PostProcess\CPostProcessFXAA.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
