@@ -27,6 +27,8 @@ namespace graphics
 
 		std::shared_ptr<graphics::CFrameRenderer> m_FXAAFrameRenderer;
 		std::shared_ptr<graphics::CFrameRenderer> m_ResultFrameRenderer;
+
+		std::shared_ptr<graphics::CTexture> m_TargetTexture;
 	public:
 		CPostProcessFXAA(const std::string& TargetPassName);
 		virtual ~CPostProcessFXAA();

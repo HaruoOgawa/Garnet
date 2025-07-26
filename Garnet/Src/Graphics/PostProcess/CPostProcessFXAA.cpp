@@ -6,7 +6,8 @@ namespace graphics
 {
 	CPostProcessFXAA::CPostProcessFXAA(const std::string& TargetPassName) :
 		CValueRegistry("PostProcessFXAARegistry"),
-		m_TargetPassName(TargetPassName)
+		m_TargetPassName(TargetPassName),
+		m_TargetTexture(nullptr)
 	{
 	}
 
@@ -19,8 +20,12 @@ namespace graphics
 		// FrameBuffer
 		if (!pGraphicsAPI->CreateRenderPass("PostProcess_FXAA", api::ERenderPassFormat::COLOR_FLOAT_RENDERPASS)) return false;
 
+		const auto& TargetTextureList = pGraphicsAPI->FindOffScreenRenderPass(m_TargetPassName)->GetFrameTextureList();
+		if (!TargetTextureList.empty()) m_TargetTexture = TargetTextureList[0];
+		if (!m_TargetTexture) return false;
+
 		// FrameBufferRenderer
-		m_FXAAFrameRenderer = std::make_shared<graphics::CFrameRenderer>(pGraphicsAPI, "PostProcess_FXAA", pGraphicsAPI->FindOffScreenRenderPass(m_TargetPassName)->GetFrameTextureList());
+		m_FXAAFrameRenderer = std::make_shared<graphics::CFrameRenderer>(pGraphicsAPI, "PostProcess_FXAA", TargetTextureList);
 		if (!m_FXAAFrameRenderer->Create(pLoadWorker, "Resources\\MaterialFrame\\PostProcess_FXAA_MF.json")) return false;
 
 		m_ResultFrameRenderer = std::make_shared<graphics::CFrameRenderer>(pGraphicsAPI, m_TargetPassName, pGraphicsAPI->FindOffScreenRenderPass("PostProcess_FXAA")->GetFrameTextureList());
@@ -45,9 +50,9 @@ namespace graphics
 		{
 			if (!pGraphicsAPI->BeginRender("PostProcess_FXAA")) return false;
 			const auto& Material = m_FXAAFrameRenderer->GetMaterial();
-			if (Material)
+			if (Material && m_TargetTexture)
 			{
-				const auto& texelSize = 1.0f / Projection->GetScreenResolution();
+				const auto& texelSize = 1.0f / glm::vec2(m_TargetTexture->GetWidth(), m_TargetTexture->GetHeight());
 				Material->SetUniformValue("texelSize", &texelSize[0], sizeof(float) * 2);
 			}
 			if (!m_FXAAFrameRenderer->Draw(pGraphicsAPI, Camera, Projection, DrawInfo)) return false;
