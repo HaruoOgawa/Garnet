@@ -112,6 +112,11 @@ namespace app
 	{
 	}
 
+	// NDIデータ受信イベント
+	void CApp::OnReceiveNDIImage(const std::vector<unsigned char>& pixelData, int Width, int Height, api::ERenderPassFormat RenderPassFormat)
+	{
+	}
+
 	// カスタムイベント発火
 	void CApp::OnRaisedEvent(const std::string& Type, const std::string& Params)
 	{

@@ -2,6 +2,7 @@
 
 namespace api
 {
+	// ToDo:この列挙型はレンダーパス以外のテクスチャフォーマット指定にも使っているので名前をリファクタリングしたい
 	enum class ERenderPassFormat
 	{
 		NONE = -1,
@@ -12,5 +13,7 @@ namespace api
 		DEPTH_FLOAT_RENDERPASS,
 		DEPTH_STENCIL_RENDERPASS,
 		DEPTH_STENCIL_FLOAT_RENDERPASS,
+
+		COLOR_BGRA,
 	};
 }

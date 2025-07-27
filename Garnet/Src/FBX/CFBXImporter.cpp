@@ -64,7 +64,7 @@ namespace fbx
 		FbxImporter* Importer = FbxImporter::Create(Manager, "");
 
 		// StreamÇçÏê¨
-		//CFBXStream Stream(Manager, "rb", "Resources\\Motions\\Walking_WithSkeleton.fbx");
+		//CFBXStream Stream(Manager, "rb", "Resources/Common/Motions/Walking_WithSkeleton.fbx");
 		//CFBXMomoryStream Stream(Manager, Data);
 		//void* streamData = NULL;
 

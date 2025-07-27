@@ -14,6 +14,14 @@ namespace scriptable
 		m_LightObject(nullptr),
 		m_LightGeomObject(nullptr)
 	{
+		std::string DefferdPassName = "GBufferGenPass";
+		std::string LightingPassName = "GBufferLightPass";
+		std::string ForegroundPassName = "MainGeometryPass";
+
+		GetValueRegistry()->SetValue("DefferdPassName", graphics::EUniformValueType::VALUE_TYPE_STRING, DefferdPassName.c_str(), sizeof(char) * DefferdPassName.size());
+		GetValueRegistry()->SetValue("LightingPassName", graphics::EUniformValueType::VALUE_TYPE_STRING, LightingPassName.c_str(), sizeof(char) * LightingPassName.size());
+		GetValueRegistry()->SetValue("ForegroundPassName", graphics::EUniformValueType::VALUE_TYPE_STRING, ForegroundPassName.c_str(), sizeof(char) * ForegroundPassName.size());
+
 		GetValueRegistry()->SetValue("intensity", graphics::EUniformValueType::VALUE_TYPE_FLOAT, &glm::vec1(1.0f)[0], sizeof(float));
 		GetValueRegistry()->SetValue("color", graphics::EUniformValueType::VALUE_TYPE_VEC4, &glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)[0], sizeof(float) * 4);
 		GetValueRegistry()->SetValue("angle", graphics::EUniformValueType::VALUE_TYPE_FLOAT, &glm::vec1(45.0f)[0], sizeof(float));
@@ -36,7 +44,7 @@ namespace scriptable
 	{
 		// GBuffer Draw
 		{
-			std::string filename = "Resources/MaterialFrame/SpotLight_MF.json";
+			std::string filename = "Resources\\Common\\MaterialFrame\\SpotLight_MF.json";
 
 			std::shared_ptr<graphics::CMaterialFrame> MaterialFrame = std::make_shared<graphics::CMaterialFrame>();
 			m_Loader = std::make_shared<resource::CMaterialFrameLoader>(filename, MaterialFrame);
@@ -46,7 +54,7 @@ namespace scriptable
 
 		// SpotLight Geometry
 		{
-			std::string filename = "Resources/MaterialFrame/SpotLight_Geom_MF.json";
+			std::string filename = "Resources\\Common\\MaterialFrame\\SpotLight_Geom_MF.json";
 
 			std::shared_ptr<graphics::CMaterialFrame> MaterialFrame = std::make_shared<graphics::CMaterialFrame>();
 			m_SecondLoader = std::make_shared<resource::CMaterialFrameLoader>(filename, MaterialFrame);
@@ -223,12 +231,17 @@ namespace scriptable
 		m_LightObject = std::make_shared<object::C3DObject>();
 		m_LightGeomObject = std::make_shared<object::C3DObject>();
 
+		// ƒpƒX–¼‚ðŽæ“¾
+		std::string DefferdPassName = GetValueRegistry()->GetValueString("DefferdPassName");
+		std::string LightingPassName = GetValueRegistry()->GetValueString("LightingPassName");
+		std::string ForegroundPassName = GetValueRegistry()->GetValueString("ForegroundPassName");
+
 		// PassName
-		m_LightObject->AddPassName("GBufferLightPass");
-		m_LightGeomObject->AddPassName("MainResultPass");
+		m_LightObject->AddPassName(LightingPassName);
+		m_LightGeomObject->AddPassName(ForegroundPassName);
 
 		// TextureList
-		const auto& RenderPass = pGraphicsAPI->FindOffScreenRenderPass("GBufferGenPass");
+		const auto& RenderPass = pGraphicsAPI->FindOffScreenRenderPass(DefferdPassName);
 		if (!RenderPass) return false;
 
 		const auto& TextureList = RenderPass->GetFrameTextureList();

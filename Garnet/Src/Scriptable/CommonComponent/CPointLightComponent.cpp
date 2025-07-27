@@ -29,7 +29,7 @@ namespace scriptable
 
 	bool CPointLightComponent::Initialize(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker)
 	{
-		std::string filename = "Resources/MaterialFrame/PointLight_MF.json";
+		std::string filename = "Resources\\Common\\MaterialFrame\\PointLight_MF.json";
 
 		std::shared_ptr<graphics::CMaterialFrame> MaterialFrame = std::make_shared<graphics::CMaterialFrame>();
 		m_Loader = std::make_shared<resource::CMaterialFrameLoader>(filename, MaterialFrame);

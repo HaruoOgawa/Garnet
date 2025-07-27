@@ -16,6 +16,7 @@ namespace object { class C3DObject; }
 namespace scene { class CSceneController; }
 namespace gui { class IGUIEngine; }
 namespace scriptable { class CComponent; }
+namespace api { enum class ERenderPassFormat; }
 
 namespace app
 {
@@ -66,6 +67,9 @@ namespace app
 
 		// DMXデータ受信イベント
 		virtual void OnReceiveArtNetDMX(unsigned short Net, unsigned short SubNet, unsigned short Universe, const std::vector<unsigned char>& DataBuffer);
+
+		// NDIデータ受信イベント
+		virtual void OnReceiveNDIImage(const std::vector<unsigned char>& pixelData, int Width, int Height, api::ERenderPassFormat RenderPassFormat);
 
 		// カスタムイベント発火
 		virtual void OnRaisedEvent(const std::string& Type, const std::string& Params);

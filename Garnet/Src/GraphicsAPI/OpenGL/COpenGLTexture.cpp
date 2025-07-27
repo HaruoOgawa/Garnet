@@ -24,49 +24,7 @@ namespace api
 		GLuint internalformat;
 		GLenum format;
 		GLenum type = GL_UNSIGNED_BYTE;
-
-		switch (m_RenderPassFormat)
-		{
-		case api::ERenderPassFormat::COLOR_RENDERPASS:
-		{
-			internalformat = GL_RGBA;
-			format = GL_RGBA;
-			type = GL_UNSIGNED_BYTE;
-			break;
-		}
-		
-		case api::ERenderPassFormat::COLOR_FLOAT_RENDERPASS:
-		{
-			internalformat = GL_RGBA16F;
-			format = GL_RGBA;
-			type = GL_FLOAT;
-			break;
-		}
-		
-		case api::ERenderPassFormat::DEPTH_RENDERPASS:
-		{
-			internalformat = GL_DEPTH_COMPONENT;
-			format = GL_DEPTH_COMPONENT;
-			type = GL_UNSIGNED_BYTE;
-			break;
-		}
-
-		case api::ERenderPassFormat::DEPTH_FLOAT_RENDERPASS:
-		{
-			internalformat = GL_DEPTH_COMPONENT;
-			format = GL_DEPTH_COMPONENT;
-			type = GL_FLOAT;
-			break;
-		}
-		
-		default:
-		{
-			internalformat = GL_RGBA;
-			format = GL_RGBA;
-			type = GL_UNSIGNED_BYTE;
-		}
-		break;
-		}
+		FindTextureFormatSet(m_RenderPassFormat, internalformat, format, type);
 
 		glGenTextures(1, &m_TextureID);
 		glBindTexture(GL_TEXTURE_2D, m_TextureID);
@@ -86,50 +44,7 @@ namespace api
 		GLuint internalformat;
 		GLenum format;
 		GLenum type = GL_UNSIGNED_BYTE;
-
-		switch (m_RenderPassFormat)
-		{
-			case api::ERenderPassFormat::COLOR_RENDERPASS:
-			{
-				internalformat = GL_RGBA;
-				format = GL_RGBA;
-				type = GL_UNSIGNED_BYTE;
-				break;
-			}
-			
-			case api::ERenderPassFormat::COLOR_FLOAT_RENDERPASS:
-			{
-				// GL_RGBA16FからGL_RGBA32Fに変更した
-				internalformat = GL_RGBA32F;
-				format = GL_RGBA;
-				type = GL_FLOAT;
-				break;
-			}
-
-			case api::ERenderPassFormat::DEPTH_RENDERPASS:
-			{
-				internalformat = GL_DEPTH_COMPONENT;
-				format = GL_DEPTH_COMPONENT;
-				type = GL_UNSIGNED_BYTE;
-				break;
-			}
-
-			case api::ERenderPassFormat::DEPTH_FLOAT_RENDERPASS:
-			{
-				internalformat = GL_DEPTH_COMPONENT;
-				format = GL_DEPTH_COMPONENT;
-				type = GL_FLOAT;
-				break;
-			}
-
-			default:
-			{
-				internalformat = GL_RGBA;
-				format = GL_RGBA;
-				type = GL_UNSIGNED_BYTE;
-				break;
-			}
-		}
+		FindTextureFormatSet(m_RenderPassFormat, internalformat, format, type);
 
 		if (m_TextureType == graphics::ETextureType::TEXTURE_2D)
 		{
@@ -178,6 +93,79 @@ namespace api
 	{
 		// 未対応
 		return false;
+	}
+
+	// ピクセルデータ差し替え
+	bool COpenGLTexture::ReplacePixelData(const std::vector<unsigned char>& pixelData, int Width, int Height, api::ERenderPassFormat RenderPassFormat)
+	{
+		m_Width = Width;
+		m_Height = Height;
+		m_RenderPassFormat = RenderPassFormat;
+
+		GLuint internalformat;
+		GLenum format;
+		GLenum type = GL_UNSIGNED_BYTE;
+		FindTextureFormatSet(m_RenderPassFormat, internalformat, format, type);
+
+		glBindTexture(GL_TEXTURE_2D, m_TextureID);
+		glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_Width, m_Height, format, type, &pixelData[0]);
+		glBindTexture(GL_TEXTURE_2D, 0);
+
+		return true;
+	}
+
+	void COpenGLTexture::FindTextureFormatSet(api::ERenderPassFormat RenderPassFormat, GLuint& internalformat, GLenum& format, GLenum& type)
+	{
+		switch (RenderPassFormat)
+		{
+		case api::ERenderPassFormat::COLOR_RENDERPASS:
+		{
+			internalformat = GL_RGBA;
+			format = GL_RGBA;
+			type = GL_UNSIGNED_BYTE;
+			break;
+		}
+
+		case api::ERenderPassFormat::COLOR_FLOAT_RENDERPASS:
+		{
+			internalformat = GL_RGBA32F;
+			format = GL_RGBA;
+			type = GL_FLOAT;
+			break;
+		}
+
+		case api::ERenderPassFormat::DEPTH_RENDERPASS:
+		{
+			internalformat = GL_DEPTH_COMPONENT;
+			format = GL_DEPTH_COMPONENT;
+			type = GL_UNSIGNED_BYTE;
+			break;
+		}
+
+		case api::ERenderPassFormat::DEPTH_FLOAT_RENDERPASS:
+		{
+			internalformat = GL_DEPTH_COMPONENT;
+			format = GL_DEPTH_COMPONENT;
+			type = GL_FLOAT;
+			break;
+		}
+
+		case api::ERenderPassFormat::COLOR_BGRA:
+		{
+			internalformat = GL_BGRA_EXT;
+			format = GL_BGRA_EXT;
+			type = GL_UNSIGNED_BYTE;
+			break;
+		}
+
+		default:
+		{
+			internalformat = GL_RGBA;
+			format = GL_RGBA;
+			type = GL_UNSIGNED_BYTE;
+			break;
+		}
+		}
 	}
 
 	void COpenGLTexture::CreateTextureSampler(GLenum target)

@@ -525,7 +525,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;USE_GLFW;USE_OPENGL;NOMINMAX;USE_TEXTURE_LOADER;USE_GLTF;USE_VIEWER_CAMERA;USE_INPUT_SYSTEM;USE_GPGPU;USE_FBX;USE_ANIMATION;USE_MMD;USE_PHYSICS;_CRT_SECURE_NO_WARNINGS;B3_USE_CLEW;USE_GUIENGINE;USE_BINARY_READ;USE_BINARY_WRITE;USE_RCCPP;USE_NETWORK;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)Src;$(ProjectDir)src\Library\glm;$(ProjectDir)Src\Library\json;$(ProjectDir)src\Library\GLFW\include;$(ProjectDir)src\Library\tinygltf\;$(ProjectDir)Src\Library\FBXSDK\2020.3.7\include;$(ProjectDir)Src\Library\bullet3\src;$(ProjectDir)Src\Library\imgui;$(ProjectDir)Src\Library\imgui\backends;$(ProjectDir)Src\Library\RuntimeCompiledCPlusPlus;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)Src;$(ProjectDir)src\Library\glm;$(ProjectDir)Src\Library\json;$(ProjectDir)src\Library\GLFW\include;$(ProjectDir)src\Library\tinygltf\;$(ProjectDir)Src\Library\FBXSDK\2020.3.7\include;$(ProjectDir)Src\Library\bullet3\src;$(ProjectDir)Src\Library\imgui;$(ProjectDir)Src\Library\imgui\backends;$(ProjectDir)Src\Library\RuntimeCompiledCPlusPlus;$(ProjectDir)Src\Library\NDI\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
@@ -540,10 +540,10 @@
       </Command>
     </PostBuildEvent>
     <Lib>
-      <AdditionalDependencies>glfw3.lib;opengl32.lib;libfbxsdk-md.lib;libxml2-md.lib;zlib-md.lib;Winmm.lib;RuntimeObjectSystem.lib;RuntimeCompiler_VS2010.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glfw3.lib;opengl32.lib;libfbxsdk-md.lib;libxml2-md.lib;zlib-md.lib;Winmm.lib;RuntimeObjectSystem.lib;RuntimeCompiler_VS2010.lib;Processing.NDI.Lib.x64.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Lib>
     <Lib>
-      <AdditionalLibraryDirectories>$(ProjectDir)src\Library\GLFW\lib;$(ProjectDir)Src\Library\FBXSDK\2020.3.7\lib\x64\debug;$(ProjectDir)Src\Library\RuntimeCompiledCPlusPlus\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)src\Library\GLFW\lib;$(ProjectDir)Src\Library\FBXSDK\2020.3.7\lib\x64\debug;$(ProjectDir)Src\Library\RuntimeCompiledCPlusPlus\lib;$(ProjectDir)Src\Library\NDI\Lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugGL|x64'">
@@ -552,7 +552,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;RUNTIME_SHADER_EDITING;USE_OPENGL;NOMINMAX;USE_WIN32_WindowAPI;USE_TEXTURE_LOADER;USE_GLTF;USE_VIEWER_CAMERA;USE_INPUT_SYSTEM;USE_GPGPU;USE_FBX;USE_ANIMATION;USE_MMD;USE_PHYSICS;_CRT_SECURE_NO_WARNINGS;B3_USE_CLEW;USE_GUIENGINE;USE_BINARY_READ;USE_BINARY_WRITE;USE_RCCPP;USE_NETWORK;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)Src;$(ProjectDir)src\Library\glm;$(ProjectDir)Src\Library\json;$(ProjectDir)src\Library\tinygltf\;$(ProjectDir)Src\Library\FBXSDK\2020.3.7\include;$(ProjectDir)Src\Library\bullet3\src;$(ProjectDir)Src\Library\imgui;$(ProjectDir)Src\Library\imgui\backends;$(ProjectDir)Src\Library\zlib;$(ProjectDir)Src\Library\RuntimeCompiledCPlusPlus;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)Src;$(ProjectDir)src\Library\glm;$(ProjectDir)Src\Library\json;$(ProjectDir)src\Library\tinygltf\;$(ProjectDir)Src\Library\FBXSDK\2020.3.7\include;$(ProjectDir)Src\Library\bullet3\src;$(ProjectDir)Src\Library\imgui;$(ProjectDir)Src\Library\imgui\backends;$(ProjectDir)Src\Library\zlib;$(ProjectDir)Src\Library\RuntimeCompiledCPlusPlus;$(ProjectDir)Src\Library\NDI\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
@@ -762,7 +762,26 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Src\Graphics\PostProcess\CPostProcess.h" />
+    <ClInclude Include="Src\Graphics\PostProcess\CPostProcessBloom.h" />
+    <ClInclude Include="Src\Graphics\PostProcess\CPostProcessFXAA.h" />
+    <ClInclude Include="Src\Network\CNDIReceiver.h" />
     <ClInclude Include="Src\Camera\CLookUpTraceCamera.h" />
+    <ClInclude Include="Src\Library\NDI\Include\Processing.NDI.compat.h" />
+    <ClInclude Include="Src\Library\NDI\Include\Processing.NDI.deprecated.h" />
+    <ClInclude Include="Src\Library\NDI\Include\Processing.NDI.DynamicLoad.h" />
+    <ClInclude Include="Src\Library\NDI\Include\Processing.NDI.Find.h" />
+    <ClInclude Include="Src\Library\NDI\Include\Processing.NDI.FrameSync.h" />
+    <ClInclude Include="Src\Library\NDI\Include\Processing.NDI.Lib.cplusplus.h" />
+    <ClInclude Include="Src\Library\NDI\Include\Processing.NDI.Lib.h" />
+    <ClInclude Include="Src\Library\NDI\Include\Processing.NDI.Recv.ex.h" />
+    <ClInclude Include="Src\Library\NDI\Include\Processing.NDI.Recv.h" />
+    <ClInclude Include="Src\Library\NDI\Include\Processing.NDI.RecvAdvertiser.h" />
+    <ClInclude Include="Src\Library\NDI\Include\Processing.NDI.RecvListener.h" />
+    <ClInclude Include="Src\Library\NDI\Include\Processing.NDI.Routing.h" />
+    <ClInclude Include="Src\Library\NDI\Include\Processing.NDI.Send.h" />
+    <ClInclude Include="Src\Library\NDI\Include\Processing.NDI.structs.h" />
+    <ClInclude Include="Src\Library\NDI\Include\Processing.NDI.utilities.h" />
     <ClInclude Include="Src\Scriptable\CScriptCallback.h" />
     <ClInclude Include="Src\Network\DMX\SDMXFixture.h" />
     <ClInclude Include="Src\Scriptable\CommonComponent\CSpotLightComponent.h" />
@@ -1846,6 +1865,10 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClInclude Include="Src\Interface\IRenderer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\Graphics\PostProcess\CPostProcess.cpp" />
+    <ClCompile Include="Src\Graphics\PostProcess\CPostProcessBloom.cpp" />
+    <ClCompile Include="Src\Graphics\PostProcess\CPostProcessFXAA.cpp" />
+    <ClCompile Include="Src\Network\CNDIReceiver.cpp" />
     <ClCompile Include="Src\Camera\CLookUpTraceCamera.cpp" />
     <ClCompile Include="Src\Scriptable\CScriptCallback.cpp" />
     <ClCompile Include="Src\Scriptable\CommonComponent\CSpotLightComponent.cpp" />

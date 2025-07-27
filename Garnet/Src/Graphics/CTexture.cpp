@@ -258,4 +258,10 @@ namespace graphics
 		}
 		return true;
 	}
+
+	// ピクセルデータ差し替え
+	bool CTexture::ReplacePixelData(const std::vector<unsigned char>& pixelData, int Width, int Height, api::ERenderPassFormat RenderPassFormat)
+	{
+		return false;
+	}
 }
