@@ -1,0 +1,450 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="E:\CppDev\Garnet\Garnet\Src\Animation\CAnimationChannel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\CppDev\Garnet\Garnet\Src\Animation\CAnimationClip.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\CppDev\Garnet\Garnet\Src\Animation\CAnimationSampler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\CppDev\Garnet\Garnet\Src\Animation\CBoneNameProvider.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\CppDev\Garnet\Garnet\Src\Animation\CJoint.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\CppDev\Garnet\Garnet\Src\Animation\CKeyFrame.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\CppDev\Garnet\Garnet\Src\Animation\CSkin.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\CppDev\Garnet\Garnet\Src\App\CDemoAppManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\CppDev\Garnet\Garnet\Src\App\CDescAppManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\CppDev\Garnet\Garnet\Src\App\ScriptApp\CScriptApp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\CppDev\Garnet\Garnet\Src\Camera\CCamera.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\CppDev\Garnet\Garnet\Src\Camera\CViewerCamera.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\CppDev\Garnet\Garnet\Src\FBX\CFBXImporter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\CppDev\Garnet\Garnet\Src\FBX\CFBXMomoryStream.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\CppDev\Garnet\Garnet\Src\FBX\CFBXStream.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\CppDev\Garnet\Garnet\Src\FBX\CSmallFBXImporter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\CppDev\Garnet\Garnet\Src\GLTF\CGLTFImporter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\CppDev\Garnet\Garnet\Src\Graphics\CDrawInfo.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\CppDev\Garnet\Garnet\Src\Graphics\CMaterial.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\CppDev\Garnet\Garnet\Src\Graphics\CMaterialFrame.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\CppDev\Garnet\Garnet\Src\Graphics\CMesh.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\CppDev\Garnet\Garnet\Src\Graphics\CPresetPrimitive.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\CppDev\Garnet\Garnet\Src\Graphics\CPrimitive.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\CppDev\Garnet\Garnet\Src\Graphics\CShaderBuffer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\CppDev\Garnet\Garnet\Src\Graphics\CShaderBufferDescriptor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\CppDev\Garnet\Garnet\Src\Graphics\CTexture.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\CppDev\Garnet\Garnet\Src\Graphics\CTextureSet.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\CppDev\Garnet\Garnet\Src\GraphicsAPI\CMaterialCreateInfo.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\CppDev\Garnet\Garnet\Src\GraphicsAPI\CRendererCreateInfo.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\CppDev\Garnet\Garnet\Src\GraphicsAPI\OpenGL\COpenGLAPI.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\CppDev\Garnet\Garnet\Src\GraphicsAPI\OpenGL\COpenGLGPGPUHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\CppDev\Garnet\Garnet\Src\GraphicsAPI\OpenGL\COpenGLMaterial.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\CppDev\Garnet\Garnet\Src\GraphicsAPI\OpenGL\COpenGLRenderer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\CppDev\Garnet\Garnet\Src\GraphicsAPI\OpenGL\COpenGLRenderPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\CppDev\Garnet\Garnet\Src\GraphicsAPI\OpenGL\COpenGLTexture.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\CppDev\Garnet\Garnet\Src\GraphicsAPI\Vulkan\CVulkanGPGPUHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\CppDev\Garnet\Garnet\Src\GraphicsAPI\Vulkan\CVulkanMaterial.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\CppDev\Garnet\Garnet\Src\GraphicsAPI\Vulkan\CVulkanRenderPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\CppDev\Garnet\Garnet\Src\GraphicsAPI\Vulkan\CVulkanTexture.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\CppDev\Garnet\Garnet\Src\GraphicsAPI\WebGPU\CWebGPUAPI.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\CppDev\Garnet\Garnet\Src\GraphicsAPI\WebGPU\CWebGPUGPGPUHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\CppDev\Garnet\Garnet\Src\GraphicsAPI\WebGPU\CWebGPUMaterial.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\CppDev\Garnet\Garnet\Src\GraphicsAPI\WebGPU\CWebGPURenderer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\CppDev\Garnet\Garnet\Src\GraphicsAPI\WebGPU\CWebGPURenderPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\CppDev\Garnet\Garnet\Src\GraphicsAPI\WebGPU\CWebGPUTexture.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\CppDev\Garnet\Garnet\Src\ImageEffect\CBlurEffect.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\CppDev\Garnet\Garnet\Src\Input\CInputState.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\CppDev\Garnet\Garnet\Src\LoadWorker\C3DObjectLoader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\CppDev\Garnet\Garnet\Src\LoadWorker\CFile.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\CppDev\Garnet\Garnet\Src\LoadWorker\CLoadWorker.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\CppDev\Garnet\Garnet\Src\LoadWorker\CMaterialFrameLoader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\CppDev\Garnet\Garnet\Src\LoadWorker\CTextureLoader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\CppDev\Garnet\Garnet\Src\Main\DemoMain\DemoMain.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\CppDev\Garnet\Garnet\Src\Main\DescMain\DescMain.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\CppDev\Garnet\Garnet\Src\Math\CTransform.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\CppDev\Garnet\Garnet\Src\Object\C3DObject.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\CppDev\Garnet\Garnet\Src\Object\CNode.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\CppDev\Garnet\Garnet\Src\Projection\CProjection.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\CppDev\Garnet\Garnet\Src\Scene\CScriptScene.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\CppDev\Garnet\Garnet\Src\Library\glfw3webgpu\glfw3webgpu.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="E:\CppDev\Garnet\Garnet\Src\Animation\CAnimationChannel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\CppDev\Garnet\Garnet\Src\Animation\CAnimationClip.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\CppDev\Garnet\Garnet\Src\Animation\CAnimationSampler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\CppDev\Garnet\Garnet\Src\Animation\CBoneNameProvider.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\CppDev\Garnet\Garnet\Src\Animation\CJoint.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\CppDev\Garnet\Garnet\Src\Animation\CKeyFrame.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\CppDev\Garnet\Garnet\Src\Animation\CSkin.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\CppDev\Garnet\Garnet\Src\Animation\EAnimationTarget.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\CppDev\Garnet\Garnet\Src\Animation\EHumanoidBones.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\CppDev\Garnet\Garnet\Src\App\CDemoAppManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\CppDev\Garnet\Garnet\Src\App\CDescAppManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\CppDev\Garnet\Garnet\Src\App\EAppType.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\CppDev\Garnet\Garnet\Src\App\ScriptApp\CScriptApp.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\CppDev\Garnet\Garnet\Src\Camera\CCamera.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\CppDev\Garnet\Garnet\Src\Camera\CViewerCamera.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\CppDev\Garnet\Garnet\Src\Debug\Message\Console.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\CppDev\Garnet\Garnet\Src\FBX\CFBXImporter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\CppDev\Garnet\Garnet\Src\FBX\CFBXMomoryStream.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\CppDev\Garnet\Garnet\Src\FBX\CFBXStream.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\CppDev\Garnet\Garnet\Src\FBX\CSmallFBXImporter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\CppDev\Garnet\Garnet\Src\GLTF\CGLTFImporter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\CppDev\Garnet\Garnet\Src\Graphics\CDrawInfo.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\CppDev\Garnet\Garnet\Src\Graphics\CMaterial.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\CppDev\Garnet\Garnet\Src\Graphics\CMaterialFrame.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\CppDev\Garnet\Garnet\Src\Graphics\CMesh.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\CppDev\Garnet\Garnet\Src\Graphics\CPresetPrimitive.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\CppDev\Garnet\Garnet\Src\Graphics\CPrimitive.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\CppDev\Garnet\Garnet\Src\Graphics\CShaderBuffer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\CppDev\Garnet\Garnet\Src\Graphics\CShaderBufferDescriptor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\CppDev\Garnet\Garnet\Src\Graphics\CTexture.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\CppDev\Garnet\Garnet\Src\Graphics\CTextureSet.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\CppDev\Garnet\Garnet\Src\Graphics\EBlendType.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\CppDev\Garnet\Garnet\Src\Graphics\EBufferUpdateTypeh.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\CppDev\Garnet\Garnet\Src\Graphics\ECullMode.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\CppDev\Garnet\Garnet\Src\Graphics\ETextureType.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\CppDev\Garnet\Garnet\Src\Graphics\ETextureUsage.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\CppDev\Garnet\Garnet\Src\Graphics\SBindingLayout.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\CppDev\Garnet\Garnet\Src\Graphics\SBufferValueLayout.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\CppDev\Garnet\Garnet\Src\Graphics\STextureBindingLayout.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\CppDev\Garnet\Garnet\Src\GraphicsAPI\CMaterialCreateInfo.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\CppDev\Garnet\Garnet\Src\GraphicsAPI\CRendererCreateInfo.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\CppDev\Garnet\Garnet\Src\GraphicsAPI\ERenderPassFormat.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\CppDev\Garnet\Garnet\Src\GraphicsAPI\OpenGL\COpenGLAPI.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\CppDev\Garnet\Garnet\Src\GraphicsAPI\OpenGL\COpenGLGPGPUHandler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\CppDev\Garnet\Garnet\Src\GraphicsAPI\OpenGL\COpenGLMaterial.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\CppDev\Garnet\Garnet\Src\GraphicsAPI\OpenGL\COpenGLRenderer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\CppDev\Garnet\Garnet\Src\GraphicsAPI\OpenGL\COpenGLRenderPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\CppDev\Garnet\Garnet\Src\GraphicsAPI\OpenGL\COpenGLTexture.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\CppDev\Garnet\Garnet\Src\GraphicsAPI\OpenGL\glDef.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\CppDev\Garnet\Garnet\Src\GraphicsAPI\OpenGL\wglDef.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\CppDev\Garnet\Garnet\Src\GraphicsAPI\Vulkan\CVulkanGPGPUHandler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\CppDev\Garnet\Garnet\Src\GraphicsAPI\Vulkan\CVulkanMaterial.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\CppDev\Garnet\Garnet\Src\GraphicsAPI\Vulkan\CVulkanRenderPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\CppDev\Garnet\Garnet\Src\GraphicsAPI\Vulkan\CVulkanTexture.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\CppDev\Garnet\Garnet\Src\GraphicsAPI\WebGPU\CWebGPUAPI.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\CppDev\Garnet\Garnet\Src\GraphicsAPI\WebGPU\CWebGPUGPGPUHandler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\CppDev\Garnet\Garnet\Src\GraphicsAPI\WebGPU\CWebGPUMaterial.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\CppDev\Garnet\Garnet\Src\GraphicsAPI\WebGPU\CWebGPURenderer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\CppDev\Garnet\Garnet\Src\GraphicsAPI\WebGPU\CWebGPURenderPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\CppDev\Garnet\Garnet\Src\GraphicsAPI\WebGPU\CWebGPUTexture.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\CppDev\Garnet\Garnet\Src\ImageEffect\CBlurEffect.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\CppDev\Garnet\Garnet\Src\Input\CInputState.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\CppDev\Garnet\Garnet\Src\Interface\IApp.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\CppDev\Garnet\Garnet\Src\Interface\IBuffer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\CppDev\Garnet\Garnet\Src\Interface\IDescriptor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\CppDev\Garnet\Garnet\Src\Interface\IGPGPUHandler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\CppDev\Garnet\Garnet\Src\Interface\IGraphicsAPI.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\CppDev\Garnet\Garnet\Src\Interface\IRenderer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\CppDev\Garnet\Garnet\Src\Interface\IRenderPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\CppDev\Garnet\Garnet\Src\Interface\IResource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\CppDev\Garnet\Garnet\Src\LoadWorker\C3DObjectLoader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\CppDev\Garnet\Garnet\Src\LoadWorker\CFile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\CppDev\Garnet\Garnet\Src\LoadWorker\CLoadWorker.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\CppDev\Garnet\Garnet\Src\LoadWorker\CMaterialFrameLoader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\CppDev\Garnet\Garnet\Src\LoadWorker\CTextureLoader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\CppDev\Garnet\Garnet\Src\LoadWorker\ELoadStatus.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\CppDev\Garnet\Garnet\Src\Math\CMath.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\CppDev\Garnet\Garnet\Src\Math\CTransform.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\CppDev\Garnet\Garnet\Src\Object\C3DObject.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\CppDev\Garnet\Garnet\Src\Object\CNode.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\CppDev\Garnet\Garnet\Src\Object\E3DObjectType.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\CppDev\Garnet\Garnet\Src\Projection\CProjection.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\CppDev\Garnet\Garnet\Src\Scene\CScriptScene.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\CppDev\Garnet\Garnet\Src\Library\glfw3webgpu\glfw3webgpu.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="E:\CppDev\Garnet\Garnet\CMakeBuild\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{24F3FC7D-45F6-3160-8807-9FE2A3D7895B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{B157E786-3E8D-3068-842B-1AFD8C691A45}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

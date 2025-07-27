@@ -12,7 +12,7 @@ Garnet/DebugGL/
 Garnet/ReleaseGL/
 Garnet/imgui.ini
 Garnet/Src/Library/FBXSDK
-GarnetDev/imgui.ini
+GarnetTemplate/imgui.ini
 GarnetLauncher/GarnetFrame/imgui.ini
 GarnetLauncher_Python/GarnetLauncher/GarnetLauncher/GarnetLauncher.spec
 GarnetLauncher_Python/GarnetLauncher/GarnetLauncher/build/
