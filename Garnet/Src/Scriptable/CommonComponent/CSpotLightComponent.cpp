@@ -44,7 +44,7 @@ namespace scriptable
 	{
 		// GBuffer Draw
 		{
-			std::string filename = "Resources/MaterialFrame/SpotLight_MF.json";
+			std::string filename = "Resources\\Common\\MaterialFrame\\SpotLight_MF.json";
 
 			std::shared_ptr<graphics::CMaterialFrame> MaterialFrame = std::make_shared<graphics::CMaterialFrame>();
 			m_Loader = std::make_shared<resource::CMaterialFrameLoader>(filename, MaterialFrame);
@@ -54,7 +54,7 @@ namespace scriptable
 
 		// SpotLight Geometry
 		{
-			std::string filename = "Resources/MaterialFrame/SpotLight_Geom_MF.json";
+			std::string filename = "Resources\\Common\\MaterialFrame\\SpotLight_Geom_MF.json";
 
 			std::shared_ptr<graphics::CMaterialFrame> MaterialFrame = std::make_shared<graphics::CMaterialFrame>();
 			m_SecondLoader = std::make_shared<resource::CMaterialFrameLoader>(filename, MaterialFrame);

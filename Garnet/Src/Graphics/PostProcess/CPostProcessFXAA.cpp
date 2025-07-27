@@ -26,10 +26,10 @@ namespace graphics
 
 		// FrameBufferRenderer
 		m_FXAAFrameRenderer = std::make_shared<graphics::CFrameRenderer>(pGraphicsAPI, "PostProcess_FXAA", TargetTextureList);
-		if (!m_FXAAFrameRenderer->Create(pLoadWorker, "Resources\\MaterialFrame\\PostProcess_FXAA_MF.json")) return false;
+		if (!m_FXAAFrameRenderer->Create(pLoadWorker, "Resources\\Common\\MaterialFrame\\PostProcess_FXAA_MF.json")) return false;
 
 		m_ResultFrameRenderer = std::make_shared<graphics::CFrameRenderer>(pGraphicsAPI, m_TargetPassName, pGraphicsAPI->FindOffScreenRenderPass("PostProcess_FXAA")->GetFrameTextureList());
-		if (!m_ResultFrameRenderer->Create(pLoadWorker, "Resources\\MaterialFrame\\FrameTexture_MF.json")) return false;
+		if (!m_ResultFrameRenderer->Create(pLoadWorker, "Resources\\Common\\MaterialFrame\\FrameTexture_MF.json")) return false;
 
 		return true;
 	}

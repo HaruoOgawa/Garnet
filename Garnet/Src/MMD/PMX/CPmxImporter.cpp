@@ -724,7 +724,7 @@ namespace mmd
 			std::string NumberStr = std::to_string(SharedToonIndex);
 			if (NumberStr.length() < 2) NumberStr = "0" + NumberStr;
 
-			std::string FullPath = "Resources/Textures/SharedToon/toon" + NumberStr + ".bmp";
+			std::string FullPath = "Resources/Common/Textures/SharedToon/toon" + NumberStr + ".bmp";
 
 			TexLoader = std::make_shared<resource::CTextureLoader>(pGraphicsAPI, FullPath, Texture);
 

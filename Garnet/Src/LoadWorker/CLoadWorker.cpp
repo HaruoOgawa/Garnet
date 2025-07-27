@@ -11,8 +11,8 @@ namespace resource
 		m_FirstResourceCount(0),
 		m_Alpha(1.0f),
 		m_LoadingBar(std::make_shared<object::C3DObject>()),
-		m_VertexShader(std::make_shared<resource::CFile>("Resources\\Shaders\\loadingbar" + pGraphicsAPI->GetVertexShaderExtension())),
-		m_FragmentShader(std::make_shared<resource::CFile>("Resources\\Shaders\\loadingbar" + pGraphicsAPI->GetFragmentShaderExtension()))
+		m_VertexShader(std::make_shared<resource::CFile>("Resources\\Common\\Shaders\\loadingbar" + pGraphicsAPI->GetVertexShaderExtension())),
+		m_FragmentShader(std::make_shared<resource::CFile>("Resources\\Common\\Shaders\\loadingbar" + pGraphicsAPI->GetFragmentShaderExtension()))
 	{
 		m_LoadingBar->AddPassName("");
 		m_InitialResourceList.push_back(m_VertexShader);

@@ -56,7 +56,7 @@ namespace graphics
 		// FrameBufferRenderer
 		// BrigtnessPass
 		m_BrightFrameRenderer = std::make_shared<graphics::CFrameRenderer>(pGraphicsAPI, "BrigtnessPass", pGraphicsAPI->FindOffScreenRenderPass(m_TargetPassName)->GetFrameTextureList());
-		if (!m_BrightFrameRenderer->Create(pLoadWorker, "Resources\\MaterialFrame\\Brigtness_MF.json")) return false;
+		if (!m_BrightFrameRenderer->Create(pLoadWorker, "Resources\\Common\\MaterialFrame\\Brigtness_MF.json")) return false;
 		
 		for (int i = 0; i < static_cast<int>(m_ReduceBufList.size()); i++)
 		{
@@ -71,7 +71,7 @@ namespace graphics
 				TextureList.push_back(pGraphicsAPI->FindOffScreenRenderPass(ReduceBuf.SrcPass)->GetFrameTexture());
 
 				ReduceFrameRenderer = std::make_shared<graphics::CFrameRenderer>(pGraphicsAPI, ReduceBuf.DstPass, TextureList);
-				if (!ReduceFrameRenderer->Create(pLoadWorker, "Resources\\MaterialFrame\\ReduceBuffer_MF.json")) return false;
+				if (!ReduceFrameRenderer->Create(pLoadWorker, "Resources\\Common\\MaterialFrame\\ReduceBuffer_MF.json")) return false;
 			}
 
 			// ReducePass_XBlur
@@ -83,7 +83,7 @@ namespace graphics
 				TextureList.push_back(pGraphicsAPI->FindOffScreenRenderPass(ReduceBuf.SrcPass)->GetFrameTexture());
 
 				XBlurFrameRenderer = std::make_shared<graphics::CFrameRenderer>(pGraphicsAPI, ReduceBuf.DstPass, TextureList);
-				if (!XBlurFrameRenderer->Create(pLoadWorker, "Resources\\MaterialFrame\\Blur1Pass_MF.json")) return false;
+				if (!XBlurFrameRenderer->Create(pLoadWorker, "Resources\\Common\\MaterialFrame\\Blur1Pass_MF.json")) return false;
 			}
 
 			// ReducePass_YBlur
@@ -95,7 +95,7 @@ namespace graphics
 				TextureList.push_back(pGraphicsAPI->FindOffScreenRenderPass(ReduceBuf.SrcPass)->GetFrameTexture());
 
 				YBlurFrameRenderer = std::make_shared<graphics::CFrameRenderer>(pGraphicsAPI, ReduceBuf.DstPass, TextureList);
-				if (!YBlurFrameRenderer->Create(pLoadWorker, "Resources\\MaterialFrame\\Blur1Pass_MF.json")) return false;
+				if (!YBlurFrameRenderer->Create(pLoadWorker, "Resources\\Common\\MaterialFrame\\Blur1Pass_MF.json")) return false;
 			}
 
 			m_ReduceFrameRendererList.push_back(std::make_tuple(ReduceFrameRenderer, XBlurFrameRenderer, YBlurFrameRenderer));
@@ -115,7 +115,7 @@ namespace graphics
 			TextureList.push_back(pGraphicsAPI->FindOffScreenRenderPass("ReducePass_8x8_YBlur")->GetFrameTexture());
 
 			m_BloomMixPassRenderer = std::make_shared<graphics::CFrameRenderer>(pGraphicsAPI, m_TargetPassName, TextureList);
-			if (!m_BloomMixPassRenderer->Create(pLoadWorker, "Resources\\MaterialFrame\\BloomMix_MF.json")) return false;
+			if (!m_BloomMixPassRenderer->Create(pLoadWorker, "Resources\\Common\\MaterialFrame\\BloomMix_MF.json")) return false;
 		}
 
 		return true;
