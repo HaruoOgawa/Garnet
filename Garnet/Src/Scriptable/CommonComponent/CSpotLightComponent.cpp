@@ -225,7 +225,7 @@ namespace scriptable
 
 		// PassName
 		m_LightObject->AddPassName("GBufferLightPass");
-		m_LightGeomObject->AddPassName("MainResultPass");
+		m_LightGeomObject->AddPassName("MainGeometryPass");
 
 		// TextureList
 		const auto& RenderPass = pGraphicsAPI->FindOffScreenRenderPass("GBufferGenPass");

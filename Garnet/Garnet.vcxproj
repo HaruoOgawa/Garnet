@@ -763,6 +763,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Src\Graphics\PostProcess\CPostProcess.h" />
+    <ClInclude Include="Src\Graphics\PostProcess\CPostProcessBloom.h" />
     <ClInclude Include="Src\Graphics\PostProcess\CPostProcessFXAA.h" />
     <ClInclude Include="Src\Network\CNDIReceiver.h" />
     <ClInclude Include="Src\Camera\CLookUpTraceCamera.h" />
@@ -1865,6 +1866,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\Graphics\PostProcess\CPostProcess.cpp" />
+    <ClCompile Include="Src\Graphics\PostProcess\CPostProcessBloom.cpp" />
     <ClCompile Include="Src\Graphics\PostProcess\CPostProcessFXAA.cpp" />
     <ClCompile Include="Src\Network\CNDIReceiver.cpp" />
     <ClCompile Include="Src\Camera\CLookUpTraceCamera.cpp" />
