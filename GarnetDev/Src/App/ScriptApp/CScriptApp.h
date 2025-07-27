@@ -2,7 +2,10 @@
 #include <memory>
 #include <AppCore/CApp.h>
 
-namespace graphics { class CFrameRenderer; }
+namespace graphics { 
+	class CFrameRenderer; 
+	class CPostProcess;
+}
 namespace gui { class CGraphicsEditingWindow; }
 namespace timeline { class CTimelineController; }
 namespace scene { class CSceneController; }
@@ -23,6 +26,8 @@ namespace app
 		std::shared_ptr<graphics::CDrawInfo> m_DrawInfo;
 
 		std::shared_ptr<graphics::CFrameRenderer> m_MainFrameRenderer;
+
+		std::shared_ptr<graphics::CPostProcess> m_PostProcess;
 
 		std::shared_ptr<CFileModifier> m_FileModifier;
 #ifdef USE_GUIENGINE

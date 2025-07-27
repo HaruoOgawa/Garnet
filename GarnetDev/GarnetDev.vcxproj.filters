@@ -18,13 +18,37 @@
     <ClCompile Include="Src\Main\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Src\App\ScriptApp\CScriptApp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\GUIApp\GUI\C3DView.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="Src\GUIApp\GUI\CGraphicsEditingWindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\GUIApp\GUI\CGUIAnimationTab.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\GUIApp\GUI\CGUIBaseTab.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Src\GUIApp\GUI\CGUICameraTab.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Src\GUIApp\GUI\CGUICustomTab.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\GUIApp\GUI\CGUILogTab.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\GUIApp\GUI\CGUIMaterialFrameTab.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="Src\GUIApp\GUI\CGUIMaterialTab.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\GUIApp\GUI\CGUIMeshTab.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Src\GUIApp\GUI\CGUIObjectTab.cpp">
@@ -36,54 +60,45 @@
     <ClCompile Include="Src\GUIApp\GUI\CGUIResourcesTab.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Src\GUIApp\Model\CFileModifier.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\App\ScriptApp\CScriptApp.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\ImageEffect\CBlurEffect.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Src\GUIApp\GUI\CTimeLineView.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Src\App\ScriptApp\CDevApp.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\GUIApp\GUI\CGUIMaterialFrameTab.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\GUIApp\GUI\CGUIMeshTab.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\GUIApp\GUI\CGUILogTab.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\GUIApp\GUI\C3DView.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\GUIApp\GUI\CGUIBaseTab.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\GUIApp\GUI\CGUICustomTab.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Component\CCDIKTest.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\GUIApp\GUI\CGUIAnimationTab.cpp">
+    <ClCompile Include="Src\GUIApp\Model\CFileModifier.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Src\App\ScriptApp\CScriptApp.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\GUIApp\GUI\C3DView.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="Src\GUIApp\GUI\CGraphicsEditingWindow.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\GUIApp\GUI\CGUIAnimationTab.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\GUIApp\GUI\CGUIBaseTab.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Src\GUIApp\GUI\CGUICameraTab.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Src\GUIApp\GUI\CGUICustomTab.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\GUIApp\GUI\CGUILogTab.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\GUIApp\GUI\CGUIMaterialFrameTab.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="Src\GUIApp\GUI\CGUIMaterialTab.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\GUIApp\GUI\CGUIMeshTab.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Src\GUIApp\GUI\CGUIObjectTab.h">
@@ -95,46 +110,13 @@
     <ClInclude Include="Src\GUIApp\GUI\CGUIResourcesTab.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Src\GUIApp\Model\CFileModifier.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\App\ScriptApp\CScriptApp.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\ImageEffect\CBlurEffect.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Src\GUIApp\GUI\CTimeLineView.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\App\ScriptApp\CDevApp.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Src\GUIApp\GUI\SGUIParams.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Src\GUIApp\GUI\CGUIMaterialFrameTab.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\GUIApp\GUI\CGUIMeshTab.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\GUIApp\GUI\CGUILogTab.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\GUIApp\GUI\C3DView.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\GUIApp\GUI\CGUIBaseTab.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\GUIApp\GUI\CGUICustomTab.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Component\CCDIKTest.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\GUIApp\GUI\CGUIAnimationTab.h">
+    <ClInclude Include="Src\GUIApp\Model\CFileModifier.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

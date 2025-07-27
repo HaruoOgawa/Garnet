@@ -2,6 +2,7 @@
 
 #include <Graphics/CDrawInfo.h>
 #include <Graphics/CFrameRenderer.h>
+#include <Graphics/PostProcess/CPostProcess.h>
 
 #include <Camera/CCamera.h>
 #include <Camera/CTraceCamera.h>
@@ -37,7 +38,8 @@ namespace app
 		m_GraphicsEditingWindow(std::make_shared<gui::CGraphicsEditingWindow>()),
 #endif // USE_GUIENGINE
 		m_FileModifier(std::make_shared<CFileModifier>()),
-		m_TimelineController(std::make_shared<timeline::CTimelineController>())
+		m_TimelineController(std::make_shared<timeline::CTimelineController>()),
+		m_PostProcess(std::make_shared<graphics::CPostProcess>("MainResultPass"))
 	{
 		m_ViewCamera->SetPos(glm::vec3(-7.0f, 1.0f, 0.0f));
 		m_MainCamera = m_ViewCamera;
@@ -46,7 +48,7 @@ namespace app
 		m_DrawInfo->GetLightProjection()->SetNear(2.0f);
 		m_DrawInfo->GetLightProjection()->SetFar(100.0f);
 
-		m_SceneController->SetDefaultPass("MainResultPass");
+		m_SceneController->SetDefaultPass("MainGeometryPass");
 
 #ifdef USE_GUIENGINE
 		m_GraphicsEditingWindow->SetDefaultPass("MainResultPass", "");
@@ -60,13 +62,46 @@ namespace app
 
 	bool CScriptApp::Initialize(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker)
 	{
-		pLoadWorker->AddScene(std::make_shared<resource::CSceneLoader>("Resources\\Scene\\Sample.json", m_SceneController));
+		pLoadWorker->AddScene(std::make_shared<resource::CSceneLoader>("Resources\\User\\Scene\\Sample.json", m_SceneController));
 
 		// オフスクリーンレンダリング
-		if (!pGraphicsAPI->CreateRenderPass("MainResultPass", api::ERenderPassFormat::COLOR_FLOAT_RENDERPASS, glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), -1, -1, {})) return false;
+		// GBufferを組み込んだレンダリングパイプラインではフレームバッファコピー周りがややこしく非効率なことになるのでMSAAは使わない
+		// 代わりにFXAAのポストプロセスでアンチエイリアシングを行う
+		{
+			graphics::SRenderPassState State = graphics::SRenderPassState(5);
+			State.InitColorList[3] = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+			if (!pGraphicsAPI->CreateRenderPass("GBufferGenPass", api::ERenderPassFormat::COLOR_FLOAT_RENDERPASS, -1, -1, State)) return false;
+		}
+
+		{
+			graphics::SRenderPassState State = graphics::SRenderPassState(1);
+
+			// GBufferパスの深度をフォアグラウンドパスにコピーするので深度は初期化しない
+			State.ClearDepth = false;
+
+			if (!pGraphicsAPI->CreateRenderPass("GBufferLightPass", api::ERenderPassFormat::COLOR_FLOAT_RENDERPASS, -1, -1, State)) return false;
+		}
+
+		{
+			graphics::SRenderPassState State = graphics::SRenderPassState(1);
+
+			// GBufferパスの深度をフォアグラウンドパスにコピーするので深度は初期化しない
+			State.ClearColor = false;
+			State.ClearDepth = false;
+			State.ClearStencil = false;
+
+			if (!pGraphicsAPI->CreateRenderPass("MainGeometryPass", api::ERenderPassFormat::COLOR_FLOAT_RENDERPASS, -1, -1, State)) return false;
+		}
+
+		if (!pGraphicsAPI->CreateRenderPass("MainResultPass", api::ERenderPassFormat::COLOR_FLOAT_RENDERPASS, -1, -1)) return false;
+
+		// ポストプロセス
+		m_PostProcess->SetUseFXAA(true);
+		m_PostProcess->SetUseBloom(true);
+		if (!m_PostProcess->Initialize(pGraphicsAPI, pLoadWorker)) return false;
 
 		m_MainFrameRenderer = std::make_shared<graphics::CFrameRenderer>(pGraphicsAPI, "", pGraphicsAPI->FindOffScreenRenderPass("MainResultPass")->GetFrameTextureList());
-		if (!m_MainFrameRenderer->Create(pLoadWorker, "Resources\\MaterialFrame\\FrameTexture_MF.json")) return false;
+		if (!m_MainFrameRenderer->Create(pLoadWorker, "Resources\\Common\\MaterialFrame\\FrameTexture_MF.json")) return false;
 
 		return true;
 	}
@@ -112,6 +147,7 @@ namespace app
 			}
 		}
 
+		if (!m_PostProcess->Update(pGraphicsAPI, pPhysicsEngine, pLoadWorker, m_MainCamera, m_Projection, m_DrawInfo, InputState)) return false;
 		if (!m_MainFrameRenderer->Update(pGraphicsAPI, pPhysicsEngine, pLoadWorker, m_MainCamera, m_Projection, m_DrawInfo, InputState)) return false;
 
 		return true;
@@ -134,12 +170,44 @@ namespace app
 	bool CScriptApp::Draw(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<input::CInputState>& InputState,
 		const std::shared_ptr<gui::IGUIEngine>& GUIEngine)
 	{
-		// MainResultPass
+		// GBufferGenPass
 		{
-			if (!pGraphicsAPI->BeginRender("MainResultPass")) return false;
+			if (!pGraphicsAPI->BeginRender("GBufferGenPass")) return false;
 			if (!m_SceneController->Draw(pGraphicsAPI, m_MainCamera, m_Projection, m_DrawInfo)) return false;
 			if (!pGraphicsAPI->EndRender()) return false;
 		}
+
+		// GBufferLightPass
+		{
+			// フォアグラウンドパス(GBufferLightPass)にデファードパスの深度をコピーする
+			if (!pGraphicsAPI->CopyDepthBuffer("GBufferGenPass", "GBufferLightPass")) return false;
+
+			if (!pGraphicsAPI->BeginRender("GBufferLightPass")) return false;
+			if (!m_SceneController->Draw(pGraphicsAPI, m_MainCamera, m_Projection, m_DrawInfo)) return false;
+			if (!pGraphicsAPI->EndRender()) return false;
+		}
+
+		// MainGeometryPass
+		{
+			// フォアグラウンドパス(MainGeometryPass)にGBufferLightPassのカラー・深度をコピーする
+			if (!pGraphicsAPI->CopyRenderPass("GBufferLightPass", "MainGeometryPass", true, true)) return false;
+
+			if (!pGraphicsAPI->BeginRender("MainGeometryPass")) return false;
+			if (!m_SceneController->Draw(pGraphicsAPI, m_MainCamera, m_Projection, m_DrawInfo)) return false;
+			if (!pGraphicsAPI->EndRender()) return false;
+		}
+
+		// MainResultPass 
+		{
+			// ポストプロセスに渡すためにここではコピーだけを行う
+			// パスを始めてしまうとせっかくコピーした内容がリセットされてしまう
+			// MainGeometryPassとMainResultPassを分離したのはMainGeometryPassではカラー・デプスを初期化しないようにしているため、
+			// その影響でうまくポストプロセスが効かなくなるから
+			if (!pGraphicsAPI->CopyRenderPass("MainGeometryPass", "MainResultPass", true, true)) return false;
+		}
+
+		// ポストプロセス
+		if (!m_PostProcess->Draw(pGraphicsAPI, m_MainCamera, m_Projection, m_DrawInfo)) return false;
 
 		// Main FrameBuffer
 		{
@@ -155,6 +223,7 @@ namespace app
 				GUIParams.CameraMode = (m_CameraSwitchToggle) ? "ViewCamera" : "TraceCamera";
 				GUIParams.Camera = m_MainCamera;
 				GUIParams.InputState = InputState;
+				GUIParams.ValueRegistryList.emplace(m_PostProcess->GetBloomFilter()->GetRegistryName(), m_PostProcess->GetBloomFilter());
 
 				if (!GUIEngine->BeginFrame(pGraphicsAPI)) return false;
 				if (!m_GraphicsEditingWindow->Draw(pGraphicsAPI, GUIParams, GUIEngine))
@@ -193,11 +262,14 @@ namespace app
 	{
 		if (!m_SceneController->Create(pGraphicsAPI, pPhysicsEngine)) return false;
 
+		m_PostProcess->GetBloomFilter()->OnLoaded(m_SceneController);
+
 		if (!m_TimelineController->Initialize(shared_from_this())) return false;
 
 #ifdef USE_GUIENGINE
 		{
 			gui::SGUIParams GUIParams = gui::SGUIParams(shared_from_this(), GetObjectList(), m_SceneController, m_FileModifier, m_TimelineController, pLoadWorker, {}, pPhysicsEngine);
+			GUIParams.ValueRegistryList.emplace(m_PostProcess->GetBloomFilter()->GetRegistryName(), m_PostProcess->GetBloomFilter());
 
 			if (!m_GraphicsEditingWindow->OnLoaded(pGraphicsAPI, GUIParams, GUIEngine)) return false;
 		}
