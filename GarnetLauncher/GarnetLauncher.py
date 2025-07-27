@@ -88,14 +88,14 @@ def Main():
     shutil.copytree(GarnetTemplatePath + "EmscriptenBuild/obj_lib", GeneratePath + "EmscriptenBuild/obj_lib", dirs_exist_ok=True)
 
     # Resouces
-    shutil.copytree(GarnetTemplatePath + "Resources/Shaders", GeneratePath + "Resources/Shaders", dirs_exist_ok=True)
+    shutil.copytree(GarnetTemplatePath + "Resources/Common/Shaders", GeneratePath + "Resources/Common/Shaders", dirs_exist_ok=True)
     
-    shutil.copytree(GarnetTemplatePath + "Resources/MaterialFrame", GeneratePath + "Resources/MaterialFrame", dirs_exist_ok=True)
+    shutil.copytree(GarnetTemplatePath + "Resources/Common/MaterialFrame", GeneratePath + "Resources/Common/MaterialFrame", dirs_exist_ok=True)
 
-    if not os.path.exists(GeneratePath + "Resources/Scene"):
-        os.makedirs(GeneratePath + "Resources/Scene")
+    if not os.path.exists(GeneratePath + "Resources/User/Scene"):
+        os.makedirs(GeneratePath + "Resources/User/Scene")
 
-    shutil.copy(GarnetTemplatePath + "Resources/Scene/Sample.json", GeneratePath + "Resources/Scene/Sample.json")
+    shutil.copy(GarnetTemplatePath + "Resources/User/Scene/Sample.json", GeneratePath + "Resources/User/Scene/Sample.json")
 
     # Garnetのルートディレクトリとプロジェクトは同じディレクトリに配置する必要がある(GeneratePathもその前提)
     LocalGarnetPath = "..\\Garnet\\Garnet\\"
