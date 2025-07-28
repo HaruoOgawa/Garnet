@@ -269,6 +269,11 @@ namespace api
 
 	bool CVulkanAPI::EndRender()
 	{
+		// ソート描画実行(レンダーキューとカメラからの距離を考慮した描画)
+#ifdef USE_DRAW_SORT
+		if (!DoSortedDraw()) return false;
+#endif // USE_DRAW_SORT
+
 		// 記録終了
 		if (m_CurrentRenderPass != m_SwapChainRenderPass)
 		{

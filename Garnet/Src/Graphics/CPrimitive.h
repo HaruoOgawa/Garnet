@@ -4,8 +4,11 @@
 #include <vector>
 #include <tuple>
 #include "CPresetPrimitive.h"
+#include <glm/glm.hpp>
 
 namespace api { class IGraphicsAPI; }
+namespace camera { class CCamera; }
+namespace projection { class CProjection; }
 
 namespace graphics
 {
@@ -42,7 +45,7 @@ namespace graphics
 
 		bool Create(const std::vector<std::string>& PassNameList, const std::shared_ptr<graphics::CTextureSet>& TextureSet);
 
-		bool Draw();
+		bool Draw(api::IGraphicsAPI* pGraphicsAPI, const glm::mat4& WorldMatrix, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection);
 
 		const std::vector<std::tuple<std::shared_ptr<graphics::IRenderer>, std::shared_ptr<CMaterial>>>& GetRendererList() const;
 		void ReplaceMaterial(const std::tuple<std::shared_ptr<graphics::IRenderer>, std::shared_ptr<CMaterial>>& Renderer, const std::shared_ptr<CMaterial>& NewMaterial);

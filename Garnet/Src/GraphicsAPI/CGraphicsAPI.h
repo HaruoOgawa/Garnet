@@ -2,6 +2,7 @@
 
 #include "../../Interface/IGraphicsAPI.h"
 #include "../Graphics/STextureSamplerParam.h"
+#include <map>
 
 namespace api
 {
@@ -11,6 +12,9 @@ namespace api
 
 		std::shared_ptr<animation::CBoneNameProvider> m_BoneNameProvider;
 		std::shared_ptr<animation::CBlendShapeNameProvider> m_BlendShapeNameProvider;
+
+		// ソート描画オブジェクトリスト(レンダーキューとカメラからの距離を考慮した描画)
+		std::map<int, std::multimap<float, api::SDrawObj, std::greater<float>>> m_DrawObjList;
 	protected:
 		std::map<std::string, std::shared_ptr<graphics::IRenderPass>> m_OffScreenRenderPassMap;
 		std::string m_CurrentRenderPassName;
@@ -64,5 +68,11 @@ namespace api
 
 		virtual const std::shared_ptr<animation::CBoneNameProvider>& GetBoneNameProvider() const override;
 		virtual const std::shared_ptr<animation::CBlendShapeNameProvider>& GetBlendShapeNameProvider() const override;
+
+		// ソート描画用オブジェクト追加
+		virtual bool AddDrawObj(const api::SDrawObj& DrawObj) override;
+
+		// ソート描画実行(レンダーキューとカメラからの距離を考慮した描画)
+		virtual bool DoSortedDraw();
 	};
 }

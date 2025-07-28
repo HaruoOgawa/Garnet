@@ -58,6 +58,9 @@ namespace resource
 		// カラーバッファへのアウトプット数(MRTで使用)
 		int m_OutputColorCount;
 
+		// 描画優先順位
+		int m_RenderQueue;
+
 		std::vector<graphics::SShaderBufferSet> m_ShaderBufferList;
 		std::vector<graphics::STextureBindingLayout> m_TextureBufferList;
 

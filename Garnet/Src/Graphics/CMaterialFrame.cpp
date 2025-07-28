@@ -12,7 +12,8 @@ namespace graphics
 		m_BlendType(graphics::EBlendType::BLEND_TYPE_NONE),
 		m_FileName(std::string()),
 		m_CreateInfo(nullptr),
-		m_OutputColorCount(1)
+		m_OutputColorCount(1),
+		m_RenderQueue(2000)
 	{
 	}
 
@@ -126,6 +127,17 @@ namespace graphics
 		return m_OutputColorCount;
 	}
 
+	// 描画優先順位
+	void CMaterialFrame::SetRenderQueue(int Val)
+	{
+		m_RenderQueue = Val;
+	}
+
+	int CMaterialFrame::GetRenderQueue() const
+	{
+		return m_RenderQueue;
+	}
+
 	void CMaterialFrame::SetCreateInfo(const std::shared_ptr<graphics::CMaterialCreateInfo>& CreateInfo)
 	{
 		m_CreateInfo = CreateInfo;
@@ -151,6 +163,7 @@ namespace graphics
 		std::string MaterialName = m_MaterialFrameName + "_" + std::to_string(m_CreateCounter);
 		Material->SetMaterialName(MaterialName);
 		Material->SetOutputColorCount(m_OutputColorCount);
+		Material->SetRenderQueue(m_RenderQueue);
 
 		// ShaderBuffer
 		for (const auto& ShaderBuffer : m_ShaderBufferList)
@@ -349,6 +362,7 @@ namespace graphics
 		for (auto& Material : m_RefMaterialList)
 		{
 			Material->SetOutputColorCount(m_OutputColorCount);
+			Material->SetRenderQueue(m_RenderQueue);
 
 			// APIレベルでマテリアルを更新する
 			if (!Material->ReCreate(m_CreateInfo, ShaderBufferList, TextureBindingLayoutList)) return false;

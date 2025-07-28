@@ -19,7 +19,8 @@ namespace graphics
 		m_IsDrawOutline(false),
 		m_EmptyTexture(nullptr),
 		m_EmptyCubeTexture(nullptr),
-		m_OutputColorCount(1)
+		m_OutputColorCount(1),
+		m_RenderQueue(2000)
 	{
 		{
 			
@@ -89,6 +90,17 @@ namespace graphics
 	int CMaterial::GetOutputColorCount() const
 	{
 		return m_OutputColorCount;
+	}
+
+	// •`‰æ—Dæ‡ˆÊ
+	void CMaterial::SetRenderQueue(int Val)
+	{
+		m_RenderQueue = Val;
+	}
+
+	int CMaterial::GetRenderQueue() const
+	{
+		return m_RenderQueue;
 	}
 
 	const std::shared_ptr<CMaterialFrame>& CMaterial::GetMaterialFrame() const

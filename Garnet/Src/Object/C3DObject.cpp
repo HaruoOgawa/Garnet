@@ -553,7 +553,6 @@ namespace object
 		if (MeshIndex < 0 || MeshIndex >= m_MeshList.size()) return true;
 
 		const auto& WorldMatrix = m_ObjectTransform->GetModelMatrix() * Node->GetWorldMatrix();
-		const auto& InvWorldMatrix = glm::inverse(WorldMatrix);
 		const auto& Mesh = m_MeshList[MeshIndex];
 
 		int SkeletonIndex = Node->GetSkeletonIndex();
@@ -581,19 +580,12 @@ namespace object
 
 				if (!Material) return true;
 
-				// ToDo: PrimitiveとMaterialのどちらから取るか
-				int DynamicOffset = 1;
-				// マテリアルの参照カウントをダイナミックオフセットとして使用する
-				//int DynamicOffset = Material->GetDynamicOffset();
-				if (DynamicOffset < 0) return true;
-
 				// 共通のユニフォームバッファの更新
 				glm::mat4 lightVMat = DrawInfo->GetLightCamera()->GetViewMatrix();
 				glm::mat4 lightPMat = DrawInfo->GetLightProjection()->GetPrejectionMatrix();
 				glm::mat4 lightVPMat = lightPMat * lightVMat;
 
 				Material->SetUniformValue("model", &WorldMatrix[0][0], sizeof(glm::mat4));
-				Material->SetUniformValue("invModel", &InvWorldMatrix[0][0], sizeof(glm::mat4));
 				Material->SetUniformValue("view", &Camera->GetViewMatrix()[0][0], sizeof(glm::mat4));
 				Material->SetUniformValue("proj", &Projection->GetPrejectionMatrix()[0][0], sizeof(glm::mat4));
 				Material->SetUniformValue("lightVMat", &lightVMat[0][0], sizeof(glm::mat4));
@@ -626,7 +618,7 @@ namespace object
 			}
 			
 			// 描画実行
-			if (!Primitive->Draw()) return false;
+			if (!Primitive->Draw(pGraphicsAPI, WorldMatrix, Camera, Projection)) return false;
 		}
 
 		return true;
