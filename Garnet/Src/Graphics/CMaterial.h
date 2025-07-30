@@ -76,6 +76,9 @@ namespace graphics
 		// カラーバッファへのアウトプット数(MRTで使用)
 		int m_OutputColorCount;
 
+		// 描画優先順位
+		int m_RenderQueue;
+
 	protected:
 		virtual bool Create(const std::shared_ptr<graphics::CTextureSet>& TextureSet) = 0;
 	public:
@@ -92,6 +95,10 @@ namespace graphics
 		// カラーバッファへのアウトプット数(MRTで使用)
 		virtual void SetOutputColorCount(int Val);
 		virtual int GetOutputColorCount() const;
+
+		// 描画優先順位
+		virtual void SetRenderQueue(int Val);
+		virtual int GetRenderQueue() const;
 
 		virtual const std::shared_ptr<CMaterialFrame>& GetMaterialFrame() const;
 		virtual void SetMaterialFrame(const std::shared_ptr<CMaterialFrame>& MaterialFrame);

@@ -54,6 +54,9 @@ namespace graphics
 
 		// カラーバッファへのアウトプット数(MRTで使用)
 		int m_OutputColorCount;
+
+		// 描画優先順位
+		int m_RenderQueue;
 	public:
 		CMaterialFrame();
 		virtual ~CMaterialFrame();
@@ -84,6 +87,10 @@ namespace graphics
 		// カラーバッファへのアウトプット数(MRTで使用)
 		void SetOutputColorCount(int Val);
 		int GetOutputColorCount() const;
+		
+		// 描画優先順位
+		void SetRenderQueue(int Val);
+		int GetRenderQueue() const;
 
 		void SetCreateInfo(const std::shared_ptr<graphics::CMaterialCreateInfo>& CreateInfo);
 

@@ -5,6 +5,7 @@
 #include "CTextureSet.h"
 #include "../Interface/IGraphicsAPI.h"
 #include "../Interface/IRenderer.h"
+#include "../GraphicsAPI/SDrawObj.h"
 
 namespace graphics
 {
@@ -68,19 +69,23 @@ namespace graphics
 		return true;
 	}
 
-	bool CPrimitive::Draw()
+	bool CPrimitive::Draw(api::IGraphicsAPI* pGraphicsAPI, const glm::mat4& WorldMatrix, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection)
 	{
 		if (!IsEnabled()) return true;
 
-		// ToDo: PrimitiveとMaterialのどちらから取るか
-		int DynamicOffset = 1;
-		// マテリアルの参照カウントをダイナミックオフセットとして使用する
-		//int DynamicOffset = Material->GetDynamicOffset();
-		if (DynamicOffset < 0) return true;
-
 		for (const auto& RendererMat : m_RendererList)
 		{
+#ifdef USE_DRAW_SORT
+			const int RenderQueue = std::get<1>(RendererMat)->GetRenderQueue();
+
+			glm::vec3 WorldPos = glm::vec3(WorldMatrix[3][0], WorldMatrix[3][1], WorldMatrix[3][2]);
+			float ToCameraDist = glm::distance(Camera->GetPos(), WorldPos);
+
+			api::SDrawObj DrawObj = { RenderQueue, ToCameraDist, RendererMat, m_VertexBuffer, m_IndexBuffer, WorldMatrix };
+			if (!pGraphicsAPI->AddDrawObj(DrawObj)) return false;
+#else
 			if (!std::get<0>(RendererMat)->Draw(m_VertexBuffer, m_IndexBuffer, std::get<1>(RendererMat))) return false;
+#endif // USE_DRAW_SORT
 		}
 		
 		return true;

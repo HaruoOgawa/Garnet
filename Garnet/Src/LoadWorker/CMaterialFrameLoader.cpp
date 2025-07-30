@@ -14,7 +14,8 @@ namespace resource
 		m_StencilParam({}),
 		m_CullMode(graphics::ECullMode::NOT_SET),
 		m_BlendType(graphics::EBlendType::BLEND_TYPE_NONE),
-		m_OutputColorCount(1)
+		m_OutputColorCount(1),
+		m_RenderQueue(2000)
 	{
 		m_TargetMaterialFrameSet.emplace(TargetMaterialFrame);
 
@@ -325,6 +326,13 @@ namespace resource
 		if (outputcolorcount != m_MfJson.end() && outputcolorcount->is_number_integer())
 		{
 			m_OutputColorCount = outputcolorcount.value();
+		}
+
+		// renderqueue
+		const auto renderqueue = m_MfJson.find("renderqueue");
+		if (renderqueue != m_MfJson.end() && renderqueue->is_number_integer())
+		{
+			m_RenderQueue = renderqueue.value();
 		}
 
 		// shaderList
@@ -848,6 +856,7 @@ namespace resource
 				MaterialFrame->SetShaderBufferList(m_ShaderBufferList);
 				MaterialFrame->SetTextureBufferList(m_TextureBufferList);
 				MaterialFrame->SetOutputColorCount(m_OutputColorCount);
+				MaterialFrame->SetRenderQueue(m_RenderQueue);
 
 				// リロードなのでLoaderを参照しているマテリアルフレームにも更新を実行する
 				if (m_Releoading)

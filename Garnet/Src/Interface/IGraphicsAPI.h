@@ -3,11 +3,12 @@
 #include <string>
 #include <map>
 #include <glm/glm.hpp>
+#include <functional>
 
 #include "IRenderer.h"
 #include "IRenderPass.h"
 #include "IWindowAPI.h"
-
+#include "../GraphicsAPI/SDrawObj.h"
 #include "../GraphicsAPI/ERenderPassFormat.h"
 #include "../Graphics/EShaderStage.h"
 #include "../Graphics/STextureSamplerParam.h"
@@ -65,7 +66,7 @@ namespace api
 
 		virtual bool PrepareRender() = 0;
 		virtual bool BeginRender(const std::string& PassName = "") = 0;
-		virtual bool EndRender() = 0;
+		virtual bool EndRender(std::function<bool(void)> AfterSortDrawCallback = nullptr) = 0;
 		virtual bool SubmitRender() = 0;
 
 		virtual int GetMaxBoneCount() = 0;
@@ -93,5 +94,7 @@ namespace api
 
 		virtual const std::shared_ptr<animation::CBoneNameProvider>& GetBoneNameProvider() const = 0;
 		virtual const std::shared_ptr<animation::CBlendShapeNameProvider>& GetBlendShapeNameProvider() const = 0;
+
+		virtual bool AddDrawObj(const api::SDrawObj& DrawObj) = 0;
 	};
 }

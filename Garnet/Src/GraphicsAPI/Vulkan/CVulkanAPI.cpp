@@ -267,8 +267,19 @@ namespace api
 		return true;
 	}
 
-	bool CVulkanAPI::EndRender()
+	bool CVulkanAPI::EndRender(std::function<bool(void)> AfterSortDrawCallback)
 	{
+		// ソート描画実行(レンダーキューとカメラからの距離を考慮した描画)
+#ifdef USE_DRAW_SORT
+		if (!DoSortedDraw()) return false;
+#endif // USE_DRAW_SORT
+
+		// ソート後描画
+		if (AfterSortDrawCallback)
+		{
+			if (!AfterSortDrawCallback()) return false;
+		}
+
 		// 記録終了
 		if (m_CurrentRenderPass != m_SwapChainRenderPass)
 		{
