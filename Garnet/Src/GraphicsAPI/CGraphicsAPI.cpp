@@ -80,7 +80,7 @@ namespace api
 		return true;
 	}
 
-	bool CGraphicsAPI::EndRender()
+	bool CGraphicsAPI::EndRender(std::function<bool(void)> AfterSortDrawCallback)
 	{
 		return true;
 	}

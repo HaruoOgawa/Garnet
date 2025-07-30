@@ -3,6 +3,7 @@
 #include <string>
 #include <map>
 #include <glm/glm.hpp>
+#include <functional>
 
 #include "IRenderer.h"
 #include "IRenderPass.h"
@@ -65,7 +66,7 @@ namespace api
 
 		virtual bool PrepareRender() = 0;
 		virtual bool BeginRender(const std::string& PassName = "") = 0;
-		virtual bool EndRender() = 0;
+		virtual bool EndRender(std::function<bool(void)> AfterSortDrawCallback = nullptr) = 0;
 		virtual bool SubmitRender() = 0;
 
 		virtual int GetMaxBoneCount() = 0;

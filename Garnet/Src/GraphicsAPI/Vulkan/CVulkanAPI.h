@@ -209,7 +209,7 @@ namespace api
 
 		virtual bool PrepareRender() override;
 		virtual bool BeginRender(const std::string& PassName = "") override;
-		virtual bool EndRender() override;
+		virtual bool EndRender(std::function<bool(void)> AfterSortDrawCallback = nullptr) override;
 		virtual bool SubmitRender() override;
 
 		virtual std::string GetVertexShaderExtension() const override;
