@@ -15,6 +15,7 @@ namespace camera
 		glm::vec3 m_UpVector;
 	public:
 		CCamera();
+		CCamera(const glm::vec3& Pos, const glm::vec3& Center, const glm::vec3& UpVector);
 		virtual ~CCamera() = default;
 
 		virtual void Update(float DeltaTime, const std::shared_ptr<input::CInputState>& InputState);

@@ -6,10 +6,16 @@
 namespace camera
 {
 	CViewerCamera::CViewerCamera() :
-		CCamera(),
+		CViewerCamera(glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f))
+	{
+	}
+
+	CViewerCamera::CViewerCamera(const glm::vec3& Pos, const glm::vec3& Center, const glm::vec3& UpVector) :
+		CCamera(Pos, Center, UpVector),
 		m_MinDistance(1.0f),
 		m_MaxDistance(30.0f)
 	{
+
 	}
 
 	void CViewerCamera::SetPos(const glm::vec3& Pos)

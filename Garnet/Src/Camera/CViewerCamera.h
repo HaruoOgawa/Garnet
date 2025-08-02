@@ -14,6 +14,7 @@ namespace camera
 		void KeyAction(float DeltaTime, const std::shared_ptr<input::CInputState>& InputState);
 	public:
 		CViewerCamera();
+		CViewerCamera(const glm::vec3& Pos, const glm::vec3& Center, const glm::vec3& UpVector);
 		virtual ~CViewerCamera() = default;
 
 		virtual void SetPos(const glm::vec3& Pos) override;
