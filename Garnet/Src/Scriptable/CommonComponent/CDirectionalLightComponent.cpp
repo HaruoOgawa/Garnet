@@ -14,7 +14,7 @@ namespace scriptable
 		m_Material(nullptr)
 	{
 		GetValueRegistry()->SetValue("intensity", graphics::EUniformValueType::VALUE_TYPE_FLOAT, &glm::vec1(1.0f)[0], sizeof(float));
-		GetValueRegistry()->SetValue("dir", graphics::EUniformValueType::VALUE_TYPE_VEC4, &glm::vec4(2.358f, -15.6f, 0.59f, 0.0f)[0], sizeof(float) * 4);
+		GetValueRegistry()->SetValue("dir", graphics::EUniformValueType::VALUE_TYPE_VEC4, &glm::vec4(0.0f, -1.0f, -1.0f, 0.0f)[0], sizeof(float) * 4);
 		GetValueRegistry()->SetValue("color", graphics::EUniformValueType::VALUE_TYPE_VEC4, &glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)[0], sizeof(float) * 4);
 	}
 
@@ -130,6 +130,24 @@ namespace scriptable
 			m_LightObject->GetTextureSet()->AddFrameTexture(Texture);
 		}
 
+		// IBL設定
+		const auto& SrcObjectTextureSet = Object->GetTextureSet();
+
+		std::shared_ptr<graphics::CTexture> Diffuse_Tex = nullptr;
+		if (SrcObjectTextureSet) Diffuse_Tex = SrcObjectTextureSet->GetDiffuse_Tex();
+
+		std::shared_ptr<graphics::CTexture> Specular_Tex = nullptr;
+		if (SrcObjectTextureSet) Specular_Tex = SrcObjectTextureSet->GetSpecular_Tex();
+
+		std::shared_ptr<graphics::CTexture> GGXLUT_Tex = nullptr;
+		if (SrcObjectTextureSet) GGXLUT_Tex = SrcObjectTextureSet->GetGGXLUT_Tex();
+
+		const bool ExistIBL = (Diffuse_Tex && Specular_Tex && GGXLUT_Tex);
+		if (ExistIBL)
+		{
+			m_LightObject->GetTextureSet()->AddIBLTexture(Diffuse_Tex, Specular_Tex, GGXLUT_Tex);
+		}
+
 		// Mesh & Material
 		for (const auto& MaterialFrame : m_Loader->GetTargetMaterialFrameSet())
 		{
@@ -145,6 +163,23 @@ namespace scriptable
 			Material->ReplaceTextureIndex("gAlbedoTexture", 2);
 			Material->ReplaceTextureIndex("gDepthTexture", 3);
 			Material->ReplaceTextureIndex("gCustomParam0Texture", 4);
+
+			if (ExistIBL)
+			{
+				Material->ReplaceTextureIndex("IBL_Diffuse_Texture", 0);
+				Material->ReplaceTextureIndex("IBL_Specular_Texture", 0);
+				Material->ReplaceTextureIndex("IBL_GGXLUT_Texture", 0);
+
+				Material->ReplacePreloadUniformValue("useIBL", &glm::ivec1(1)[0], sizeof(int), 1);
+
+				// MipCountには反射キューブマップかIBLのSpecularMapの値が入っている(これらは必ずどちらか一方しか使用されないため)
+				float MipCount = 1.0f;
+				if (Specular_Tex)
+				{
+					MipCount = Specular_Tex->GetMipCount();
+				}
+				Material->ReplacePreloadUniformValue("mipCount", &glm::vec1(MipCount)[0], sizeof(float), 1);
+			}
 
 			// BoardかSphereかをライトタイプで変えるようにするとライトクラスが1つに統一できるかも？
 			if (!m_LightObject->CreatePresetSimply(pGraphicsAPI, pPhysicsEngine, graphics::CPresetPrimitive::CreateBoard(pGraphicsAPI), graphics::EPresetPrimitiveType::BOARD, Material)) return false;
