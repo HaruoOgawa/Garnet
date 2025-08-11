@@ -13,6 +13,11 @@ namespace scriptable
 		m_LightObject(nullptr),
 		m_Material(nullptr)
 	{
+		std::string DefferdPassName = "GBufferGenPass";
+		std::string LightingPassName = "GBufferLightPass";
+
+		GetValueRegistry()->SetValue("DefferdPassName", graphics::EUniformValueType::VALUE_TYPE_STRING, DefferdPassName.c_str(), sizeof(char) * DefferdPassName.size());
+		GetValueRegistry()->SetValue("LightingPassName", graphics::EUniformValueType::VALUE_TYPE_STRING, LightingPassName.c_str(), sizeof(char) * LightingPassName.size());
 		GetValueRegistry()->SetValue("intensity", graphics::EUniformValueType::VALUE_TYPE_FLOAT, &glm::vec1(1.0f)[0], sizeof(float));
 		GetValueRegistry()->SetValue("color", graphics::EUniformValueType::VALUE_TYPE_VEC4, &glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)[0], sizeof(float) * 4);
 	}
@@ -118,12 +123,15 @@ namespace scriptable
 
 		m_LightObject = std::make_shared<object::C3DObject>();
 
-		// PassName
-		m_LightObject->AddPassName("GBufferLightPass");
+		// ƒpƒX–¼‚ðŽæ“¾
+		std::string DefferdPassName = GetValueRegistry()->GetValueString("DefferdPassName");
+		std::string LightingPassName = GetValueRegistry()->GetValueString("LightingPassName");
 
+		// PassName
+		m_LightObject->AddPassName(LightingPassName);
 
 		// TextureList
-		const auto& RenderPass = pGraphicsAPI->FindOffScreenRenderPass("GBufferGenPass");
+		const auto& RenderPass = pGraphicsAPI->FindOffScreenRenderPass(DefferdPassName);
 		if (!RenderPass) return false;
 
 		const auto& TextureList = RenderPass->GetFrameTextureList();
