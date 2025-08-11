@@ -252,7 +252,15 @@ namespace api
 
 		GLbitfield mask = 0;
 		if (Color) mask |= GL_COLOR_BUFFER_BIT;
-		if (Depth) mask |= GL_DEPTH_BUFFER_BIT;
+		if (Depth)
+		{
+			mask |= GL_DEPTH_BUFFER_BIT;
+
+			if(pSrcRenderPass->IsUseStencil())
+			{
+				mask |= GL_STENCIL_BUFFER_BIT;
+			}
+		}
 
 		glBlitFramebuffer(0, 0, Width, Height, 0, 0, Width, Height, mask, GL_NEAREST);
 
@@ -302,11 +310,17 @@ namespace api
 		int Width = pSrcRenderPass->GetWidth();
 		int Height = pSrcRenderPass->GetHeight();
 
+		GLbitfield mask = GL_DEPTH_BUFFER_BIT;
+		if (pSrcRenderPass->IsUseStencil())
+		{
+			mask |= GL_STENCIL_BUFFER_BIT;
+		}
+
 		//
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, SrcFrameBuffer);
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, DstFrameBuffer);
 
-		glBlitFramebuffer(0, 0, Width, Height, 0, 0, Width, Height, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+		glBlitFramebuffer(0, 0, Width, Height, 0, 0, Width, Height, mask, GL_NEAREST);
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
