@@ -135,7 +135,7 @@ namespace scriptable
 		if (!RenderPass) return false;
 
 		const auto& TextureList = RenderPass->GetFrameTextureList();
-		if (TextureList.size() != 5) return false;
+		if (TextureList.size() != 6) return false;
 
 		for (const auto& Texture : TextureList)
 		{
@@ -157,6 +157,7 @@ namespace scriptable
 			Material->ReplaceTextureIndex("gAlbedoTexture", 2);
 			Material->ReplaceTextureIndex("gDepthTexture", 3);
 			Material->ReplaceTextureIndex("gCustomParam0Texture", 4);
+			Material->ReplaceTextureIndex("gEmissionTexture", 5);
 
 			// BoardかSphereかをライトタイプで変えるようにするとライトクラスが1つに統一できるかも？
 			if (!m_LightObject->CreatePresetSimply(pGraphicsAPI, pPhysicsEngine, graphics::CPresetPrimitive::CreateSphere(pGraphicsAPI), graphics::EPresetPrimitiveType::SPHERE, Material)) return false;

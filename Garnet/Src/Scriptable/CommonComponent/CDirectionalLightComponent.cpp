@@ -134,7 +134,7 @@ namespace scriptable
 		if (!RenderPass) return false;
 
 		const auto& TextureList = RenderPass->GetFrameTextureList();
-		if (TextureList.size() != 5) return false;
+		if (TextureList.size() != 6) return false;
 
 		int FrameTexCount = 0;
 		for (const auto& Texture : TextureList)
@@ -188,6 +188,7 @@ namespace scriptable
 			Material->ReplaceTextureIndex("gAlbedoTexture", 2);
 			Material->ReplaceTextureIndex("gDepthTexture", 3);
 			Material->ReplaceTextureIndex("gCustomParam0Texture", 4);
+			Material->ReplaceTextureIndex("gEmissionTexture", 5);
 
 			// IBL
 			if (ExistIBL)
