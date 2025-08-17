@@ -19,6 +19,12 @@ namespace object {
 	class CNode;
 }
 
+/*
+* CComponentのようにGarnetライブラリ側だけでなくプロジェクト側でも使用する可能性のあるクラスが使っているプリプロセッサの定義が
+* ライブラリとプロジェクトでずれがあるとnullエラーが発生する可能性があるので注意
+* 例えばUSE_NETWORKプリプロセッサ。これをライブラリ側でしか定義していないと実行時にエラーになる
+*/
+
 namespace scriptable
 {
 	class CComponent : public CScriptCallback
