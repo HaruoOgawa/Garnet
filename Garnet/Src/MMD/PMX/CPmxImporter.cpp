@@ -688,14 +688,17 @@ namespace mmd
 					}
 				}
 
-				// Pmxでは頂点バッファは１つでインデックスバッファが複数個あり、頂点バッファは全体で共有なので最初のプリミティブを指定する
-				// 共有頂点バッファを更新すれば全体のメッシュにモーフが適応できるため
-				Mesh->SetMorphDataList(Mesh->GetPrimitiveList()[0], 0, MorphDataList);
-
-				// Pmxは特殊なので他のプリミティブは明示的にモーフを持っているということにする
-				for (const auto& Primitive : Mesh->GetPrimitiveList())
+				if (!MorphDataList.empty())
 				{
-					Primitive->SetUseMorph(true);
+					// Pmxでは頂点バッファは１つでインデックスバッファが複数個あり、頂点バッファは全体で共有なので最初のプリミティブを指定する
+					// 共有頂点バッファを更新すれば全体のメッシュにモーフが適応できるため
+					Mesh->SetMorphDataList(Mesh->GetPrimitiveList()[0], 0, MorphDataList);
+
+					// Pmxは特殊なので他のプリミティブは明示的にモーフを持っているということにする
+					for (const auto& Primitive : Mesh->GetPrimitiveList())
+					{
+						Primitive->SetUseMorph(true);
+					}
 				}
 
 				// メッシュを登録

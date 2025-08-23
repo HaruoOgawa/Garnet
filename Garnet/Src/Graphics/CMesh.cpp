@@ -83,6 +83,8 @@ namespace graphics
 
 	void CMesh::SetMorphDataList(const std::shared_ptr<CPrimitive>& Primitive, int PrimitiveIndex, const std::vector<std::map<int, glm::vec3>>& MorphDataList)
 	{
+		if (MorphDataList.empty()) return;
+
 		Primitive->SetUseMorph(true);
 
 		m_MorphDataList.emplace(PrimitiveIndex, MorphDataList);
