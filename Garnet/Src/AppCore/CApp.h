@@ -47,6 +47,9 @@ namespace app
 		// ロード完了イベント
 		virtual bool OnLoaded(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<gui::IGUIEngine>& GUIEngine);
 
+		// オブジェクト個別のロード完了イベント
+		virtual bool OnObjectLoaded(const std::shared_ptr<object::C3DObject>& Object, api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker);
+
 		// フォーカスイベント
 		virtual void OnFocus(bool Focused, api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker);
 
