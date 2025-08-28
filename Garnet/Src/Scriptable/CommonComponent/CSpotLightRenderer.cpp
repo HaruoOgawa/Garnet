@@ -1,4 +1,4 @@
-#include "CSpotLightComponent.h"
+#include "CSpotLightRenderer.h"
 
 #include <LoadWorker/CLoadWorker.h>
 #include <Object/C3DObject.h>
@@ -6,7 +6,7 @@
 
 namespace scriptable
 {
-	CSpotLightComponent::CSpotLightComponent(const std::string& ComponentName, const std::string& RegistryName) :
+	CSpotLightRenderer::CSpotLightRenderer(const std::string& ComponentName, const std::string& RegistryName) :
 		CComponent(ComponentName, RegistryName),
 		m_Status(resource::ELoadStatus::None),
 		m_Loader(nullptr),
@@ -30,17 +30,17 @@ namespace scriptable
 		GetValueRegistry()->SetValue("tilt", graphics::EUniformValueType::VALUE_TYPE_FLOAT, &glm::vec1(0.0f)[0], sizeof(float));
 	}
 
-	CSpotLightComponent::~CSpotLightComponent()
+	CSpotLightRenderer::~CSpotLightRenderer()
 	{
 	}
 
-	bool CSpotLightComponent::OnLoaded(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<scene::CSceneController>& SceneController,
+	bool CSpotLightRenderer::OnLoaded(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<scene::CSceneController>& SceneController,
 		const std::shared_ptr<object::C3DObject>& Object, const std::shared_ptr<object::CNode>& SelfNode)
 	{
 		return true;
 	}
 
-	bool CSpotLightComponent::Initialize(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker)
+	bool CSpotLightRenderer::Initialize(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker)
 	{
 		// GBuffer Draw
 		{
@@ -67,7 +67,7 @@ namespace scriptable
 		return true;
 	}
 
-	bool CSpotLightComponent::Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker,
+	bool CSpotLightRenderer::Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker,
 		const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
 		const std::shared_ptr<graphics::CDrawInfo>& DrawInfo, const std::shared_ptr<input::CInputState>& InputState,
 		const std::shared_ptr<object::C3DObject>& Object, const std::shared_ptr<object::CNode>& SelfNode)
@@ -153,7 +153,7 @@ namespace scriptable
 		return true;
 	}
 
-	bool CSpotLightComponent::Draw(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
+	bool CSpotLightRenderer::Draw(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
 		const std::shared_ptr<graphics::CDrawInfo>& DrawInfo, const std::shared_ptr<object::C3DObject>& Object, const std::shared_ptr<object::CNode>& SelfNode)
 	{
 		if (m_Status != resource::ELoadStatus::Loaded) return true;
@@ -166,7 +166,7 @@ namespace scriptable
 	}
 
 #ifdef USE_NETWORK
-	void CSpotLightComponent::OnReceiveDMXData(const network::SDMXFixture& Fixture, const std::vector<unsigned char>& DMXData)
+	void CSpotLightRenderer::OnReceiveDMXData(const network::SDMXFixture& Fixture, const std::vector<unsigned char>& DMXData)
 	{
 		if (Fixture.DeviceName == "DefaultSpotLight")
 		{
@@ -206,7 +206,7 @@ namespace scriptable
 	}
 #endif // USE_NETWORK
 
-	bool CSpotLightComponent::CheckIsLoading(bool& Loaded, api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker,
+	bool CSpotLightRenderer::CheckIsLoading(bool& Loaded, api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker,
 		const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
 		const std::shared_ptr<graphics::CDrawInfo>& DrawInfo, const std::shared_ptr<input::CInputState>& InputState, const std::shared_ptr<object::C3DObject>& Object)
 	{

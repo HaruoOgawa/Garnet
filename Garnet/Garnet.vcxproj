@@ -762,6 +762,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Src\Scriptable\CommonComponent\CSpotLightDMXController.h" />
     <ClInclude Include="Src\Graphics\PostProcess\CPostProcess.h" />
     <ClInclude Include="Src\Graphics\PostProcess\CPostProcessBloom.h" />
     <ClInclude Include="Src\Graphics\PostProcess\CPostProcessFXAA.h" />
@@ -785,7 +786,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClInclude Include="Src\Library\NDI\Include\Processing.NDI.utilities.h" />
     <ClInclude Include="Src\Scriptable\CScriptCallback.h" />
     <ClInclude Include="Src\Network\DMX\SDMXFixture.h" />
-    <ClInclude Include="Src\Scriptable\CommonComponent\CSpotLightComponent.h" />
+    <ClInclude Include="Src\Scriptable\CommonComponent\CSpotLightRenderer.h" />
     <ClInclude Include="Src\Network\DMX\CDMXDataHandler.h" />
     <ClInclude Include="Src\Network\CUDPSocket.h" />
     <ClInclude Include="Src\Graphics\Vulkan\CVulkanRTXGIController.h" />
@@ -1866,13 +1867,14 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClInclude Include="Src\Interface\IRenderer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\Scriptable\CommonComponent\CSpotLightDMXController.cpp" />
     <ClCompile Include="Src\Graphics\PostProcess\CPostProcess.cpp" />
     <ClCompile Include="Src\Graphics\PostProcess\CPostProcessBloom.cpp" />
     <ClCompile Include="Src\Graphics\PostProcess\CPostProcessFXAA.cpp" />
     <ClCompile Include="Src\Network\CNDIReceiver.cpp" />
     <ClCompile Include="Src\Camera\CLookUpTraceCamera.cpp" />
     <ClCompile Include="Src\Scriptable\CScriptCallback.cpp" />
-    <ClCompile Include="Src\Scriptable\CommonComponent\CSpotLightComponent.cpp" />
+    <ClCompile Include="Src\Scriptable\CommonComponent\CSpotLightRenderer.cpp" />
     <ClCompile Include="Src\Network\DMX\CDMXDataHandler.cpp" />
     <ClCompile Include="Src\Network\CUDPSocket.cpp" />
     <ClCompile Include="Src\Graphics\Vulkan\CVulkanRTXGIController.cpp" />

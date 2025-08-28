@@ -77,6 +77,8 @@ namespace scriptable
 		Value.Type = ValueType;
 		Value.ByteSize = ByteSize;
 
+		if (ByteSize <= 0) return;
+
 		Value.Buffer.clear();
 		Value.Buffer.shrink_to_fit();
 		Value.Buffer.resize(ByteSize);

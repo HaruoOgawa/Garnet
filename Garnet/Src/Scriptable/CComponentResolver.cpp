@@ -3,7 +3,8 @@
 #include "../AppCore/CApp.h"
 #include "CommonComponent/CDirectionalLightComponent.h"
 #include "CommonComponent/CPointLightComponent.h"
-#include "CommonComponent/CSpotLightComponent.h"
+#include "CommonComponent/CSpotLightRenderer.h"
+#include "CommonComponent/CSpotLightDMXController.h"
 
 namespace scriptable
 {
@@ -24,10 +25,14 @@ namespace scriptable
 		}
 		else if (ComponentType == "SpotLight")
 		{
-			return std::make_shared<scriptable::CSpotLightComponent>(ComponentType, ValueRegistry);
+			return std::make_shared<scriptable::CSpotLightRenderer>(ComponentType, ValueRegistry);
 		}
 		else if (ComponentType == "RectLight")
 		{
+		}
+		else if (ComponentType == "SpotLightDMXController")
+		{
+			return std::make_shared<scriptable::CSpotLightDMXController>(ComponentType, ValueRegistry);
 		}
 
 		return nullptr;
