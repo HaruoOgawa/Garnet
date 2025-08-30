@@ -140,7 +140,8 @@ namespace scriptable
 
 		if (value.Type != graphics::EUniformValueType::VALUE_TYPE_INT) return 0;
 
-		return static_cast<int>(*reinterpret_cast<const float*>(value.Buffer.data()));
+		//return static_cast<int>(*reinterpret_cast<const float*>(value.Buffer.data()));
+		return *reinterpret_cast<const int*>(value.Buffer.data());
 	}
 
 	std::string CValueRegistry::GetValueString(const std::string& Key) const

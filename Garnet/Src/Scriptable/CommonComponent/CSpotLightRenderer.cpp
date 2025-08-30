@@ -173,49 +173,6 @@ namespace scriptable
 		return true;
 	}
 
-#ifdef USE_NETWORK
-	void CSpotLightRenderer::OnReceiveDMXData(const network::SDMXFixture& Fixture, const std::vector<unsigned char>& DMXData)
-	{
-		std::string DMXFixtureName = GetValueRegistry()->GetValueString("DMXFixtureName");
-
-		if (Fixture.DeviceName == DMXFixtureName)
-		{
-			if (Fixture.ChannelNameList.size() != 8) return;
-
-			// Color
-			float R = static_cast<float>(DMXData[0]) / 255.0f;
-			float G = static_cast<float>(DMXData[1]) / 255.0f;
-			float B = static_cast<float>(DMXData[2]) / 255.0f;
-
-			std::vector<float> color = { R, G, B, 1.0f };
-
-			GetValueRegistry()->SetValue("color", graphics::EUniformValueType::VALUE_TYPE_VEC4, &color[0], sizeof(float) * static_cast<int>(color.size()));
-
-			// Dimmer(intensity)
-			// 10.0Ç‹Ç≈ñæÇÈÇ≥Ç™éwíËÇ≈Ç´ÇÈè∆ñæÇ∆Ç∑ÇÈ
-			float intensity = static_cast<float>(DMXData[3]) / 255.0f;
-			GetValueRegistry()->SetValue("intensity", graphics::EUniformValueType::VALUE_TYPE_FLOAT, &intensity, sizeof(float));
-			
-			// Pan
-			float Pan = 2.0f * 3.1415f * static_cast<float>(DMXData[4]) / 255.0f;
-			GetValueRegistry()->SetValue("pan", graphics::EUniformValueType::VALUE_TYPE_FLOAT, &Pan, sizeof(float));
-			
-			// Tilt
-			float Tilt = 2.0f * 3.1415f * static_cast<float>(DMXData[5]) / 255.0f;
-			GetValueRegistry()->SetValue("tilt", graphics::EUniformValueType::VALUE_TYPE_FLOAT, &Tilt, sizeof(float));
-
-			// Angle
-			float Angle = 90.0f * static_cast<float>(DMXData[6]) / 255.0f;
-			GetValueRegistry()->SetValue("angle", graphics::EUniformValueType::VALUE_TYPE_FLOAT, &Angle, sizeof(float));
-
-			// Height
-			// 50mÇ‹Ç≈ìÕÇ≠ÉâÉCÉgÇ∆Ç∑ÇÈ
-			float Height = 50.0f * static_cast<float>(DMXData[7]) / 255.0f;
-			GetValueRegistry()->SetValue("height", graphics::EUniformValueType::VALUE_TYPE_FLOAT, &Height, sizeof(float));
-		}
-	}
-#endif // USE_NETWORK
-
 	bool CSpotLightRenderer::CheckIsLoading(bool& Loaded, api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker,
 		const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
 		const std::shared_ptr<graphics::CDrawInfo>& DrawInfo, const std::shared_ptr<input::CInputState>& InputState, const std::shared_ptr<object::C3DObject>& Object)
