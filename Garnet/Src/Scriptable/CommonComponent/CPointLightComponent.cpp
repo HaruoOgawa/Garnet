@@ -97,6 +97,8 @@ namespace scriptable
 		if (m_Status != resource::ELoadStatus::Loaded) return true;
 		if (!m_LightObject) return true;
 
+		if (!Object->IsEnabled() || !SelfNode->IsEnabled()) return true;
+
 		if (!m_LightObject->Draw(pGraphicsAPI, Camera, Projection, DrawInfo)) return false;
 
 		return true;

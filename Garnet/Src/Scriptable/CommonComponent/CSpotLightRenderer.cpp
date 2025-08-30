@@ -147,6 +147,9 @@ namespace scriptable
 				Material->SetUniformValue("intensity", &glm::vec1(intensity)[0], sizeof(float));
 				Material->SetUniformValue("color", &color[0], sizeof(float) * static_cast<int>(color.size()));
 				Material->SetUniformValue("dir", &dir[0], sizeof(float) * 4);
+
+				// ひとまず強制的にライティングが機能するようにしておく
+				Material->SetUniformValue("ForceLighting", &glm::ivec1(1)[0], sizeof(int));
 			}
 		}
 		
@@ -158,6 +161,8 @@ namespace scriptable
 	{
 		if (m_Status != resource::ELoadStatus::Loaded) return true;
 		if (!m_LightObject || !m_LightGeomObject) return true;
+
+		if (!Object->IsEnabled() || !SelfNode->IsEnabled()) return true;
 
 		if (!m_LightObject->Draw(pGraphicsAPI, Camera, Projection, DrawInfo)) return false;
 		if (!m_LightGeomObject->Draw(pGraphicsAPI, Camera, Projection, DrawInfo)) return false;
