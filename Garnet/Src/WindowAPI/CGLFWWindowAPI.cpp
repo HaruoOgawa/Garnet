@@ -297,7 +297,13 @@ namespace window
 			glfwWindowHint(GLFW_GREEN_BITS, mode->greenBits);
 			glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
 
+			// カーソルが別ウィンドウをフォーカスしたときに自動で最小化しないようにする
+			glfwWindowHint(GLFW_AUTO_ICONIFY, GLFW_FALSE);
+
 			m_pWindow = glfwCreateWindow(mode->width, mode->height, Title.c_str(), monitor, nullptr);
+
+			// GLFWウィンドウ上にマウスカーソルを表示させない
+			glfwSetInputMode(m_pWindow, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 		}
 		else
 		{
