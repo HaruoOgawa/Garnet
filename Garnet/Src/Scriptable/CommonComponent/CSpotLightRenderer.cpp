@@ -14,10 +14,13 @@ namespace scriptable
 		m_LightObject(nullptr),
 		m_LightGeomObject(nullptr)
 	{
+		std::string DMXFixtureName = "DefaultSpotLight";
 		std::string DefferdPassName = "GBufferGenPass";
 		std::string LightingPassName = "GBufferLightPass";
 		std::string ForegroundPassName = "MainGeometryPass";
 
+		GetValueRegistry()->SetValue("DMXFixtureName", graphics::EUniformValueType::VALUE_TYPE_STRING, DMXFixtureName.c_str(), sizeof(char) * DMXFixtureName.size());
+		
 		GetValueRegistry()->SetValue("DefferdPassName", graphics::EUniformValueType::VALUE_TYPE_STRING, DefferdPassName.c_str(), sizeof(char) * DefferdPassName.size());
 		GetValueRegistry()->SetValue("LightingPassName", graphics::EUniformValueType::VALUE_TYPE_STRING, LightingPassName.c_str(), sizeof(char) * LightingPassName.size());
 		GetValueRegistry()->SetValue("ForegroundPassName", graphics::EUniformValueType::VALUE_TYPE_STRING, ForegroundPassName.c_str(), sizeof(char) * ForegroundPassName.size());
@@ -173,7 +176,9 @@ namespace scriptable
 #ifdef USE_NETWORK
 	void CSpotLightRenderer::OnReceiveDMXData(const network::SDMXFixture& Fixture, const std::vector<unsigned char>& DMXData)
 	{
-		if (Fixture.DeviceName == "DefaultSpotLight")
+		std::string DMXFixtureName = GetValueRegistry()->GetValueString("DMXFixtureName");
+
+		if (Fixture.DeviceName == DMXFixtureName)
 		{
 			if (Fixture.ChannelNameList.size() != 8) return;
 
