@@ -104,37 +104,38 @@ namespace scriptable
 
 		if (Fixture.DeviceName == DMXFixtureName)
 		{
-			if (Fixture.ChannelNameList.size() != 8) return;
+			if (Fixture.ChannelNameList.size() != 9) return;
 
 			// Color
 			float R = static_cast<float>(DMXData[0]) / 255.0f;
 			float G = static_cast<float>(DMXData[1]) / 255.0f;
 			float B = static_cast<float>(DMXData[2]) / 255.0f;
+			float A = static_cast<float>(DMXData[3]) / 255.0f;
 
-			std::vector<float> color = { R, G, B, 1.0f };
+			std::vector<float> color = { R, G, B, A };
 
 			SpotLightComponent->GetValueRegistry()->SetValue("color", graphics::EUniformValueType::VALUE_TYPE_VEC4, &color[0], sizeof(float) * static_cast<int>(color.size()));
 
 			// Dimmer(intensity)
 			// 10.0まで明るさが指定できる照明とする
-			float intensity = static_cast<float>(DMXData[3]) / 255.0f;
+			float intensity = static_cast<float>(DMXData[4]) / 255.0f;
 			SpotLightComponent->GetValueRegistry()->SetValue("intensity", graphics::EUniformValueType::VALUE_TYPE_FLOAT, &intensity, sizeof(float));
 
 			// Pan
-			float Pan = 2.0f * 3.1415f * static_cast<float>(DMXData[4]) / 255.0f;
+			float Pan = 2.0f * 3.1415f * static_cast<float>(DMXData[5]) / 255.0f;
 			SpotLightComponent->GetValueRegistry()->SetValue("pan", graphics::EUniformValueType::VALUE_TYPE_FLOAT, &Pan, sizeof(float));
 
 			// Tilt
-			float Tilt = 2.0f * 3.1415f * static_cast<float>(DMXData[5]) / 255.0f;
+			float Tilt = 2.0f * 3.1415f * static_cast<float>(DMXData[6]) / 255.0f;
 			SpotLightComponent->GetValueRegistry()->SetValue("tilt", graphics::EUniformValueType::VALUE_TYPE_FLOAT, &Tilt, sizeof(float));
 
 			// Angle
-			float Angle = 90.0f * static_cast<float>(DMXData[6]) / 255.0f;
+			float Angle = 90.0f * static_cast<float>(DMXData[7]) / 255.0f;
 			SpotLightComponent->GetValueRegistry()->SetValue("angle", graphics::EUniformValueType::VALUE_TYPE_FLOAT, &Angle, sizeof(float));
 
 			// Height
 			// 50mまで届くライトとする
-			float Height = 50.0f * static_cast<float>(DMXData[7]) / 255.0f;
+			float Height = 50.0f * static_cast<float>(DMXData[8]) / 255.0f;
 			SpotLightComponent->GetValueRegistry()->SetValue("height", graphics::EUniformValueType::VALUE_TYPE_FLOAT, &Height, sizeof(float));
 
 			// Tilt(Y軸回転)をメッシュに反映
