@@ -68,7 +68,7 @@ namespace app
 		// GBufferを組み込んだレンダリングパイプラインではフレームバッファコピー周りがややこしく非効率なことになるのでMSAAは使わない
 		// 代わりにFXAAのポストプロセスでアンチエイリアシングを行う
 		{
-			graphics::SRenderPassState State = graphics::SRenderPassState(5);
+			graphics::SRenderPassState State = graphics::SRenderPassState(6);
 			State.InitColorList[3] = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
 			if (!pGraphicsAPI->CreateRenderPass("GBufferGenPass", api::ERenderPassFormat::COLOR_FLOAT_RENDERPASS, -1, -1, State)) return false;
 		}
