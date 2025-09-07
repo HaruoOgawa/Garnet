@@ -31,6 +31,8 @@ namespace scriptable
 		GetValueRegistry()->SetValue("height", graphics::EUniformValueType::VALUE_TYPE_FLOAT, &glm::vec1(1.0f)[0], sizeof(float));
 		GetValueRegistry()->SetValue("pan", graphics::EUniformValueType::VALUE_TYPE_FLOAT, &glm::vec1(0.0f)[0], sizeof(float));
 		GetValueRegistry()->SetValue("tilt", graphics::EUniformValueType::VALUE_TYPE_FLOAT, &glm::vec1(0.0f)[0], sizeof(float));
+
+		GetValueRegistry()->SetValue("showGeom", graphics::EUniformValueType::VALUE_TYPE_INT, &glm::ivec1(1)[0], sizeof(int));
 	}
 
 	CSpotLightRenderer::~CSpotLightRenderer()
@@ -168,8 +170,13 @@ namespace scriptable
 		if (!Object->IsEnabled() || !SelfNode->IsEnabled()) return true;
 
 		if (!m_LightObject->Draw(pGraphicsAPI, Camera, Projection, DrawInfo)) return false;
-		if (!m_LightGeomObject->Draw(pGraphicsAPI, Camera, Projection, DrawInfo)) return false;
 
+		int showGeom = GetValueRegistry()->GetValueInt("showGeom");
+		if (showGeom == 1)
+		{
+			if (!m_LightGeomObject->Draw(pGraphicsAPI, Camera, Projection, DrawInfo)) return false;
+		}
+		
 		return true;
 	}
 
@@ -248,7 +255,7 @@ namespace scriptable
 
 		for (const auto& MaterialFrame : m_SecondLoader->GetTargetMaterialFrameSet())
 		{
-			const auto& Material = MaterialFrame->CreateMaterial(pGraphicsAPI, graphics::ECullMode::CULL_NONE);
+			const auto& Material = MaterialFrame->CreateMaterial(pGraphicsAPI, graphics::ECullMode::CULL_FRONT);
 			Material->SetBlendType(graphics::EBlendType::BLEND_TYPE_TRANSPARENT_ALPHA);
 
 			// ‘¼‚Ìƒ‰ƒCƒg‚ª•`‰æ‚Å‚«‚È‚­‚È‚é‚Ì‚Å‘‚«ž‚Ü‚È‚¢
