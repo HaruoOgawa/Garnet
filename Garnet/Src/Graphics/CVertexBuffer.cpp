@@ -15,7 +15,8 @@ namespace graphics
 	void CVertexBuffer::Release()
 	{
 		m_Vertices.clear();
-		
+		m_Vertices.shrink_to_fit();
+
 		// Vulkan‚ÌShaderObject‚ÅŽg—p‚·‚é‚Ì‚ÅŽc‚µ‚Ä‚¨‚­
 		/*m_AttributeDimensions.clear();
 		m_AttribDataTypes.clear();

@@ -15,7 +15,10 @@ namespace graphics
 	void CIndexBuffer::Release()
 	{
 		m_Indices.clear();
+		m_Indices.shrink_to_fit();
+
 		m_UINTIndices.clear();
+		m_UINTIndices.shrink_to_fit();
 	}
 
 	void CIndexBuffer::SetIndices(const std::vector<unsigned short>& Indices)

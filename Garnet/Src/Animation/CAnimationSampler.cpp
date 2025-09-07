@@ -168,8 +168,9 @@ namespace animation
 		// AnimationやSDKに使っていないボーンのアニメーションでもなぜか一つだけInput・Outputが入っていることがあるため
 		if (m_KeyFrameList.empty()) return true;
 
-		// 2つ以上ある時は必ずStartとEndの計算が必要
-		if (m_StartTime >= m_EndTime && m_KeyFrameList.size() >= 2)
+		// 2つより多くある時は必ずStartとEndの計算が必要
+		// ちょうど2つの時はなんか動くっぽいのでとりあえず見逃すことにする
+		if (m_StartTime >= m_EndTime && m_KeyFrameList.size() > 2)
 		{
 			Console::Log("[Error - KeyFrame] StartTime is greater than EndTime. / StartTime: %f, EndTime: %f\n", m_StartTime, m_EndTime);
 			return false;

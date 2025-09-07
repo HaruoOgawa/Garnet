@@ -13,8 +13,13 @@ namespace scriptable
 		m_LightObject(nullptr),
 		m_Material(nullptr)
 	{
+		std::string DefferdPassName = "GBufferGenPass";
+		std::string LightingPassName = "GBufferLightPass";
+
+		GetValueRegistry()->SetValue("DefferdPassName", graphics::EUniformValueType::VALUE_TYPE_STRING, DefferdPassName.c_str(), sizeof(char) * DefferdPassName.size());
+		GetValueRegistry()->SetValue("LightingPassName", graphics::EUniformValueType::VALUE_TYPE_STRING, LightingPassName.c_str(), sizeof(char) * LightingPassName.size());
 		GetValueRegistry()->SetValue("intensity", graphics::EUniformValueType::VALUE_TYPE_FLOAT, &glm::vec1(1.0f)[0], sizeof(float));
-		GetValueRegistry()->SetValue("dir", graphics::EUniformValueType::VALUE_TYPE_VEC4, &glm::vec4(2.358f, -15.6f, 0.59f, 0.0f)[0], sizeof(float) * 4);
+		GetValueRegistry()->SetValue("dir", graphics::EUniformValueType::VALUE_TYPE_VEC4, &glm::vec4(0.0f, -1.0f, -1.0f, 0.0f)[0], sizeof(float) * 4);
 		GetValueRegistry()->SetValue("color", graphics::EUniformValueType::VALUE_TYPE_VEC4, &glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)[0], sizeof(float) * 4);
 	}
 
@@ -89,6 +94,8 @@ namespace scriptable
 		if (m_Status != resource::ELoadStatus::Loaded) return true;
 		if (!m_LightObject) return true;
 
+		if (!Object->IsEnabled() || !SelfNode->IsEnabled()) return true;
+
 		if (!m_LightObject->Draw(pGraphicsAPI, Camera, Projection, DrawInfo)) return false;
 
 		return true;
@@ -115,20 +122,58 @@ namespace scriptable
 
 		m_LightObject = std::make_shared<object::C3DObject>();
 		
+		const auto& SrcObjectTextureSet = Object->GetTextureSet();
+
+		// パス名を取得
+		std::string DefferdPassName = GetValueRegistry()->GetValueString("DefferdPassName");
+		std::string LightingPassName = GetValueRegistry()->GetValueString("LightingPassName");
+
 		// PassName
-		m_LightObject->AddPassName("GBufferLightPass");
+		m_LightObject->AddPassName(LightingPassName);
 
 		// TextureList
-		const auto& RenderPass = pGraphicsAPI->FindOffScreenRenderPass("GBufferGenPass");
+		const auto& RenderPass = pGraphicsAPI->FindOffScreenRenderPass(DefferdPassName);
 		if (!RenderPass) return false;
 
 		const auto& TextureList = RenderPass->GetFrameTextureList();
-		if (TextureList.size() != 5) return false;
+		if (TextureList.size() != 6) return false;
 
+		int FrameTexCount = 0;
 		for (const auto& Texture : TextureList)
 		{
 			m_LightObject->GetTextureSet()->AddFrameTexture(Texture);
+			FrameTexCount++;
 		}
+
+		// IBL設定
+		std::shared_ptr<graphics::CTexture> Diffuse_Tex = nullptr;
+		if (SrcObjectTextureSet) Diffuse_Tex = SrcObjectTextureSet->GetDiffuse_Tex();
+
+		std::shared_ptr<graphics::CTexture> Specular_Tex = nullptr;
+		if (SrcObjectTextureSet) Specular_Tex = SrcObjectTextureSet->GetSpecular_Tex();
+
+		std::shared_ptr<graphics::CTexture> GGXLUT_Tex = nullptr;
+		if (SrcObjectTextureSet) GGXLUT_Tex = SrcObjectTextureSet->GetGGXLUT_Tex();
+
+		const bool ExistIBL = (Diffuse_Tex && Specular_Tex && GGXLUT_Tex);
+		if (ExistIBL)
+		{
+			m_LightObject->GetTextureSet()->AddIBLTexture(Diffuse_Tex, Specular_Tex, GGXLUT_Tex);
+		}
+
+		// ShadowMap設定
+		// ToDo: ひとまず今は一番最初のフレームテクスチャをシャドーマップとしている
+		// (ぶっちゃけフレームテクスチャはシャドーマップにしか使ったことないんだよな。だから専用にしてもいいのかも？)
+		std::vector<std::shared_ptr<graphics::CTexture>> FrameTextureList(0);
+		if (SrcObjectTextureSet) FrameTextureList = SrcObjectTextureSet->GetFrameTextureList();
+
+		if(FrameTextureList.size() > 0)
+		{
+			m_LightObject->GetTextureSet()->AddFrameTexture(FrameTextureList[0]);
+			FrameTexCount++;
+		}
+
+		const int LightUBOBindingIndex = 1;
 
 		// Mesh & Material
 		for (const auto& MaterialFrame : m_Loader->GetTargetMaterialFrameSet())
@@ -145,6 +190,44 @@ namespace scriptable
 			Material->ReplaceTextureIndex("gAlbedoTexture", 2);
 			Material->ReplaceTextureIndex("gDepthTexture", 3);
 			Material->ReplaceTextureIndex("gCustomParam0Texture", 4);
+			Material->ReplaceTextureIndex("gEmissionTexture", 5);
+
+			// IBL
+			if (ExistIBL)
+			{
+				Material->ReplaceTextureIndex("IBL_Diffuse_Texture", 0);
+				Material->ReplaceTextureIndex("IBL_Specular_Texture", 0);
+				Material->ReplaceTextureIndex("IBL_GGXLUT_Texture", 0);
+
+				Material->ReplacePreloadUniformValue("useIBL", &glm::ivec1(1)[0], sizeof(int), LightUBOBindingIndex);
+
+				// MipCountには反射キューブマップかIBLのSpecularMapの値が入っている(これらは必ずどちらか一方しか使用されないため)
+				float MipCount = 1.0f;
+				if (Specular_Tex)
+				{
+					MipCount = Specular_Tex->GetMipCount();
+				}
+				Material->ReplacePreloadUniformValue("mipCount", &glm::vec1(MipCount)[0], sizeof(float), LightUBOBindingIndex);
+			}
+
+			// 影
+			int ShadowMapX = 1, ShadowMapY = 1;
+			if (FrameTextureList.size() > 0)
+			{
+				// FrameTextureList
+				// [0] : ShadowMap
+				// [1] : ???
+				// [2] : ???
+				ShadowMapX = FrameTextureList[0]->GetWidth();
+				ShadowMapY = FrameTextureList[0]->GetHeight();
+
+				// ひとまず末尾から取得
+				Material->ReplaceTextureIndex("shadowmapTexture", (FrameTexCount - 1));
+				Material->ReplacePreloadUniformValue("useShadowMap", &glm::uvec1(1)[0], sizeof(int), LightUBOBindingIndex);
+			}
+
+			Material->ReplacePreloadUniformValue("ShadowMapX", &glm::vec1(static_cast<float>(ShadowMapX))[0], sizeof(float), LightUBOBindingIndex);
+			Material->ReplacePreloadUniformValue("ShadowMapY", &glm::vec1(static_cast<float>(ShadowMapY))[0], sizeof(float), LightUBOBindingIndex);
 
 			// BoardかSphereかをライトタイプで変えるようにするとライトクラスが1つに統一できるかも？
 			if (!m_LightObject->CreatePresetSimply(pGraphicsAPI, pPhysicsEngine, graphics::CPresetPrimitive::CreateBoard(pGraphicsAPI), graphics::EPresetPrimitiveType::BOARD, Material)) return false;

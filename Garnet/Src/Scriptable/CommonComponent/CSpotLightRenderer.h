@@ -12,7 +12,7 @@ namespace graphics { class CMaterial; }
 
 namespace scriptable
 {
-	class CSpotLightComponent : public scriptable::CComponent
+	class CSpotLightRenderer : public scriptable::CComponent
 	{
 		resource::ELoadStatus m_Status;
 
@@ -29,8 +29,8 @@ namespace scriptable
 			const std::shared_ptr<graphics::CDrawInfo>& DrawInfo, const std::shared_ptr<input::CInputState>& InputState, const std::shared_ptr<object::C3DObject>& Object);
 
 	public:
-		CSpotLightComponent(const std::string& ComponentName, const std::string& RegistryName);
-		virtual ~CSpotLightComponent();
+		CSpotLightRenderer(const std::string& ComponentName, const std::string& RegistryName);
+		virtual ~CSpotLightRenderer();
 
 		virtual bool OnLoaded(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<scene::CSceneController>& SceneController,
 			const std::shared_ptr<object::C3DObject>& Object, const std::shared_ptr<object::CNode>& SelfNode) override;
@@ -43,9 +43,5 @@ namespace scriptable
 
 		virtual bool Draw(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
 			const std::shared_ptr<graphics::CDrawInfo>& DrawInfo, const std::shared_ptr<object::C3DObject>& Object, const std::shared_ptr<object::CNode>& SelfNode) override;
-
-#ifdef USE_NETWORK
-		virtual void OnReceiveDMXData(const network::SDMXFixture& Fixture, const std::vector<unsigned char>& DMXData) override;
-#endif // USE_NETWORK
 	};
 }

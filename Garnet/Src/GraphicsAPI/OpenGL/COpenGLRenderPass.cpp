@@ -15,6 +15,7 @@ namespace api
 		m_UseColorBuffer(false),
 		m_UseDepthBuffer(false),
 		m_UseMSAA(false),
+		m_UseStencil(false),
 		m_SubPass(nullptr),
 		m_ResolveSubPass(nullptr)
 	{
@@ -29,6 +30,7 @@ namespace api
 		m_UseColorBuffer = PassState.ColorBuffer;
 		m_UseDepthBuffer = PassState.DepthBuffer;
 		m_UseMSAA = PassState.EnabledAA;
+		m_UseStencil = PassState.Stencil;
 
 		if (m_UseMSAA)
 		{
@@ -120,6 +122,11 @@ namespace api
 			{
 				// デプスアタッチメント
 				mask |= GL_DEPTH_BUFFER_BIT;
+
+				if (m_UseStencil)
+				{
+					mask |= GL_STENCIL_BUFFER_BIT;
+				}
 			}
 			else
 			{
@@ -205,6 +212,11 @@ namespace api
 		{
 			return m_SubPass->GetFrameBuffer();
 		}
+	}
+
+	bool COpenGLRenderPass::IsUseStencil() const
+	{
+		return m_UseStencil;
 	}
 }
 #endif

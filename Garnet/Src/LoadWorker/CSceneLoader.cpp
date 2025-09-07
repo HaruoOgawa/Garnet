@@ -615,42 +615,6 @@ namespace resource
 				}
 			}
 
-			// ファイルロード開始
-			{
-				std::string filename = "";
-				GetString("filename", filename, objectJSON);
-
-				std::vector<std::string> defaultmaterialframeList;
-				GetArrayString("defaultmaterialframes", defaultmaterialframeList, objectJSON);
-
-				int InstanceCount = 1;
-				GetInt("instancecount", InstanceCount, objectJSON);
-
-				if (!filename.empty())
-				{
-					std::vector<std::shared_ptr<graphics::CMaterialFrame>> BaseMaterialFrameList;
-
-					const auto& MaterialFrameMap = m_Target->GetMaterialFrameMap();
-
-					for (const auto& defaultmaterialframe : defaultmaterialframeList)
-					{
-						const auto& MaterialFrame = MaterialFrameMap.find(defaultmaterialframe);
-						if (MaterialFrame == MaterialFrameMap.end())
-						{
-							Console::Log("[SceneLoader Error] defaultmaterialframe not found\n");
-
-							return false;
-						}
-
-						BaseMaterialFrameList.push_back(MaterialFrame->second);
-					}
-					
-					// 仮実装
-					pLoadWorker->AddLoadResource(std::make_shared<resource::C3DObjectLoader>(filename, Object, BaseMaterialFrameList, defaultmaterialframeList, 
-						AnimationInfo.RigType, AnimationInfo.HumanoidBoneList, InstanceCount));
-				}
-			}
-
 			// Joints
 			const auto joints = objectJSON->find("joints");
 			if (joints != objectJSON->end() && joints->is_array())
@@ -830,6 +794,47 @@ namespace resource
 
 						FreePhysicsObject->ReserveConstraint(FixedPhysicsObject, JointType, JParam);
 					}
+				}
+			}
+
+			// ファイルロード開始
+			{
+				std::string filename = "";
+				GetString("filename", filename, objectJSON);
+
+				std::vector<std::string> defaultmaterialframeList;
+				GetArrayString("defaultmaterialframes", defaultmaterialframeList, objectJSON);
+
+				int InstanceCount = 1;
+				GetInt("instancecount", InstanceCount, objectJSON);
+
+				if (!filename.empty())
+				{
+					std::vector<std::shared_ptr<graphics::CMaterialFrame>> BaseMaterialFrameList;
+
+					const auto& MaterialFrameMap = m_Target->GetMaterialFrameMap();
+
+					for (const auto& defaultmaterialframe : defaultmaterialframeList)
+					{
+						const auto& MaterialFrame = MaterialFrameMap.find(defaultmaterialframe);
+						if (MaterialFrame == MaterialFrameMap.end())
+						{
+							Console::Log("[SceneLoader Error] defaultmaterialframe not found\n");
+
+							return false;
+						}
+
+						BaseMaterialFrameList.push_back(MaterialFrame->second);
+					}
+
+					// 仮実装
+					pLoadWorker->AddLoadResource(std::make_shared<resource::C3DObjectLoader>(filename, Object, BaseMaterialFrameList, defaultmaterialframeList,
+						AnimationInfo.RigType, AnimationInfo.HumanoidBoneList, InstanceCount));
+				}
+				else
+				{
+					// ファイルオブジェクトではないので即時ロード完了を通知する
+					pApp->OnObjectLoaded(Object, pGraphicsAPI, pLoadWorker);
 				}
 			}
 

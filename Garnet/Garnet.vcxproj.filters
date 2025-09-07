@@ -3249,7 +3249,7 @@
     <ClInclude Include="Src\Network\DMX\CDMXDataHandler.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Src\Scriptable\CommonComponent\CSpotLightComponent.h">
+    <ClInclude Include="Src\Scriptable\CommonComponent\CSpotLightRenderer.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Src\Network\DMX\SDMXFixture.h">
@@ -3319,6 +3319,9 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Src\GraphicsAPI\SDrawObj.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Scriptable\CommonComponent\CSpotLightDMXController.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
@@ -4481,7 +4484,7 @@
     <ClCompile Include="Src\Network\DMX\CDMXDataHandler.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Scriptable\CommonComponent\CSpotLightComponent.cpp">
+    <ClCompile Include="Src\Scriptable\CommonComponent\CSpotLightRenderer.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Src\Scriptable\CScriptCallback.cpp">
@@ -4500,6 +4503,9 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Src\Graphics\PostProcess\CPostProcessBloom.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Scriptable\CommonComponent\CSpotLightDMXController.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>

@@ -3,9 +3,14 @@
 namespace camera
 {
 	CCamera::CCamera():
-		m_Pos(0.0f, 0.0f, 1.0f),
-		m_Center(0.0f, 0.0f, 0.0f),
-		m_UpVector(0.0f, 1.0f, 0.0f)
+		CCamera(glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f))
+	{
+	}
+
+	CCamera::CCamera(const glm::vec3& Pos, const glm::vec3& Center, const glm::vec3& UpVector):
+		m_Pos(Pos),
+		m_Center(Center),
+		m_UpVector(UpVector)
 	{
 	}
 

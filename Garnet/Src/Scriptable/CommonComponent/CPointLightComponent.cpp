@@ -13,6 +13,11 @@ namespace scriptable
 		m_LightObject(nullptr),
 		m_Material(nullptr)
 	{
+		std::string DefferdPassName = "GBufferGenPass";
+		std::string LightingPassName = "GBufferLightPass";
+
+		GetValueRegistry()->SetValue("DefferdPassName", graphics::EUniformValueType::VALUE_TYPE_STRING, DefferdPassName.c_str(), sizeof(char) * DefferdPassName.size());
+		GetValueRegistry()->SetValue("LightingPassName", graphics::EUniformValueType::VALUE_TYPE_STRING, LightingPassName.c_str(), sizeof(char) * LightingPassName.size());
 		GetValueRegistry()->SetValue("intensity", graphics::EUniformValueType::VALUE_TYPE_FLOAT, &glm::vec1(1.0f)[0], sizeof(float));
 		GetValueRegistry()->SetValue("color", graphics::EUniformValueType::VALUE_TYPE_VEC4, &glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)[0], sizeof(float) * 4);
 	}
@@ -92,6 +97,8 @@ namespace scriptable
 		if (m_Status != resource::ELoadStatus::Loaded) return true;
 		if (!m_LightObject) return true;
 
+		if (!Object->IsEnabled() || !SelfNode->IsEnabled()) return true;
+
 		if (!m_LightObject->Draw(pGraphicsAPI, Camera, Projection, DrawInfo)) return false;
 
 		return true;
@@ -118,16 +125,19 @@ namespace scriptable
 
 		m_LightObject = std::make_shared<object::C3DObject>();
 
-		// PassName
-		m_LightObject->AddPassName("GBufferLightPass");
+		// パス名を取得
+		std::string DefferdPassName = GetValueRegistry()->GetValueString("DefferdPassName");
+		std::string LightingPassName = GetValueRegistry()->GetValueString("LightingPassName");
 
+		// PassName
+		m_LightObject->AddPassName(LightingPassName);
 
 		// TextureList
-		const auto& RenderPass = pGraphicsAPI->FindOffScreenRenderPass("GBufferGenPass");
+		const auto& RenderPass = pGraphicsAPI->FindOffScreenRenderPass(DefferdPassName);
 		if (!RenderPass) return false;
 
 		const auto& TextureList = RenderPass->GetFrameTextureList();
-		if (TextureList.size() != 5) return false;
+		if (TextureList.size() != 6) return false;
 
 		for (const auto& Texture : TextureList)
 		{
@@ -149,6 +159,7 @@ namespace scriptable
 			Material->ReplaceTextureIndex("gAlbedoTexture", 2);
 			Material->ReplaceTextureIndex("gDepthTexture", 3);
 			Material->ReplaceTextureIndex("gCustomParam0Texture", 4);
+			Material->ReplaceTextureIndex("gEmissionTexture", 5);
 
 			// BoardかSphereかをライトタイプで変えるようにするとライトクラスが1つに統一できるかも？
 			if (!m_LightObject->CreatePresetSimply(pGraphicsAPI, pPhysicsEngine, graphics::CPresetPrimitive::CreateSphere(pGraphicsAPI), graphics::EPresetPrimitiveType::SPHERE, Material)) return false;

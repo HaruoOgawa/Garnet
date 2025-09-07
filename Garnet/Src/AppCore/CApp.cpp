@@ -71,6 +71,12 @@ namespace app
 		return true;
 	}
 
+	// オブジェクト個別のロード完了イベント
+	bool CApp::OnObjectLoaded(const std::shared_ptr<object::C3DObject>& Object, api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker)
+	{
+		return true;
+	}
+
 	// フォーカスイベント
 	void CApp::OnFocus(bool Focused, api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker)
 	{

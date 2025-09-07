@@ -1,4 +1,4 @@
-#include "CSpotLightComponent.h"
+#include "CSpotLightRenderer.h"
 
 #include <LoadWorker/CLoadWorker.h>
 #include <Object/C3DObject.h>
@@ -6,7 +6,7 @@
 
 namespace scriptable
 {
-	CSpotLightComponent::CSpotLightComponent(const std::string& ComponentName, const std::string& RegistryName) :
+	CSpotLightRenderer::CSpotLightRenderer(const std::string& ComponentName, const std::string& RegistryName) :
 		CComponent(ComponentName, RegistryName),
 		m_Status(resource::ELoadStatus::None),
 		m_Loader(nullptr),
@@ -14,10 +14,13 @@ namespace scriptable
 		m_LightObject(nullptr),
 		m_LightGeomObject(nullptr)
 	{
+		std::string DMXFixtureName = "DefaultSpotLight";
 		std::string DefferdPassName = "GBufferGenPass";
 		std::string LightingPassName = "GBufferLightPass";
 		std::string ForegroundPassName = "MainGeometryPass";
 
+		GetValueRegistry()->SetValue("DMXFixtureName", graphics::EUniformValueType::VALUE_TYPE_STRING, DMXFixtureName.c_str(), sizeof(char) * DMXFixtureName.size());
+		
 		GetValueRegistry()->SetValue("DefferdPassName", graphics::EUniformValueType::VALUE_TYPE_STRING, DefferdPassName.c_str(), sizeof(char) * DefferdPassName.size());
 		GetValueRegistry()->SetValue("LightingPassName", graphics::EUniformValueType::VALUE_TYPE_STRING, LightingPassName.c_str(), sizeof(char) * LightingPassName.size());
 		GetValueRegistry()->SetValue("ForegroundPassName", graphics::EUniformValueType::VALUE_TYPE_STRING, ForegroundPassName.c_str(), sizeof(char) * ForegroundPassName.size());
@@ -28,19 +31,21 @@ namespace scriptable
 		GetValueRegistry()->SetValue("height", graphics::EUniformValueType::VALUE_TYPE_FLOAT, &glm::vec1(1.0f)[0], sizeof(float));
 		GetValueRegistry()->SetValue("pan", graphics::EUniformValueType::VALUE_TYPE_FLOAT, &glm::vec1(0.0f)[0], sizeof(float));
 		GetValueRegistry()->SetValue("tilt", graphics::EUniformValueType::VALUE_TYPE_FLOAT, &glm::vec1(0.0f)[0], sizeof(float));
+
+		GetValueRegistry()->SetValue("showGeom", graphics::EUniformValueType::VALUE_TYPE_INT, &glm::ivec1(1)[0], sizeof(int));
 	}
 
-	CSpotLightComponent::~CSpotLightComponent()
+	CSpotLightRenderer::~CSpotLightRenderer()
 	{
 	}
 
-	bool CSpotLightComponent::OnLoaded(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<scene::CSceneController>& SceneController,
+	bool CSpotLightRenderer::OnLoaded(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<scene::CSceneController>& SceneController,
 		const std::shared_ptr<object::C3DObject>& Object, const std::shared_ptr<object::CNode>& SelfNode)
 	{
 		return true;
 	}
 
-	bool CSpotLightComponent::Initialize(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker)
+	bool CSpotLightRenderer::Initialize(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker)
 	{
 		// GBuffer Draw
 		{
@@ -67,7 +72,7 @@ namespace scriptable
 		return true;
 	}
 
-	bool CSpotLightComponent::Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker,
+	bool CSpotLightRenderer::Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker,
 		const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
 		const std::shared_ptr<graphics::CDrawInfo>& DrawInfo, const std::shared_ptr<input::CInputState>& InputState,
 		const std::shared_ptr<object::C3DObject>& Object, const std::shared_ptr<object::CNode>& SelfNode)
@@ -147,66 +152,35 @@ namespace scriptable
 				Material->SetUniformValue("intensity", &glm::vec1(intensity)[0], sizeof(float));
 				Material->SetUniformValue("color", &color[0], sizeof(float) * static_cast<int>(color.size()));
 				Material->SetUniformValue("dir", &dir[0], sizeof(float) * 4);
+
+				// ひとまず強制的にライティングが機能するようにしておく
+				Material->SetUniformValue("ForceLighting", &glm::ivec1(1)[0], sizeof(int));
 			}
 		}
 		
 		return true;
 	}
 
-	bool CSpotLightComponent::Draw(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
+	bool CSpotLightRenderer::Draw(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
 		const std::shared_ptr<graphics::CDrawInfo>& DrawInfo, const std::shared_ptr<object::C3DObject>& Object, const std::shared_ptr<object::CNode>& SelfNode)
 	{
 		if (m_Status != resource::ELoadStatus::Loaded) return true;
 		if (!m_LightObject || !m_LightGeomObject) return true;
 
-		if (!m_LightObject->Draw(pGraphicsAPI, Camera, Projection, DrawInfo)) return false;
-		if (!m_LightGeomObject->Draw(pGraphicsAPI, Camera, Projection, DrawInfo)) return false;
+		if (!Object->IsEnabled() || !SelfNode->IsEnabled()) return true;
 
+		if (!m_LightObject->Draw(pGraphicsAPI, Camera, Projection, DrawInfo)) return false;
+
+		int showGeom = GetValueRegistry()->GetValueInt("showGeom");
+		if (showGeom == 1)
+		{
+			if (!m_LightGeomObject->Draw(pGraphicsAPI, Camera, Projection, DrawInfo)) return false;
+		}
+		
 		return true;
 	}
 
-#ifdef USE_NETWORK
-	void CSpotLightComponent::OnReceiveDMXData(const network::SDMXFixture& Fixture, const std::vector<unsigned char>& DMXData)
-	{
-		if (Fixture.DeviceName == "DefaultSpotLight")
-		{
-			if (Fixture.ChannelNameList.size() != 8) return;
-
-			// Color
-			float R = static_cast<float>(DMXData[0]) / 255.0f;
-			float G = static_cast<float>(DMXData[1]) / 255.0f;
-			float B = static_cast<float>(DMXData[2]) / 255.0f;
-
-			std::vector<float> color = { R, G, B, 1.0f };
-
-			GetValueRegistry()->SetValue("color", graphics::EUniformValueType::VALUE_TYPE_VEC4, &color[0], sizeof(float) * static_cast<int>(color.size()));
-
-			// Dimmer(intensity)
-			// 10.0まで明るさが指定できる照明とする
-			float intensity = static_cast<float>(DMXData[3]) / 255.0f;
-			GetValueRegistry()->SetValue("intensity", graphics::EUniformValueType::VALUE_TYPE_FLOAT, &intensity, sizeof(float));
-			
-			// Pan
-			float Pan = 2.0f * 3.1415f * static_cast<float>(DMXData[4]) / 255.0f;
-			GetValueRegistry()->SetValue("pan", graphics::EUniformValueType::VALUE_TYPE_FLOAT, &Pan, sizeof(float));
-			
-			// Tilt
-			float Tilt = 2.0f * 3.1415f * static_cast<float>(DMXData[5]) / 255.0f;
-			GetValueRegistry()->SetValue("tilt", graphics::EUniformValueType::VALUE_TYPE_FLOAT, &Tilt, sizeof(float));
-
-			// Angle
-			float Angle = 90.0f * static_cast<float>(DMXData[6]) / 255.0f;
-			GetValueRegistry()->SetValue("angle", graphics::EUniformValueType::VALUE_TYPE_FLOAT, &Angle, sizeof(float));
-
-			// Height
-			// 50mまで届くライトとする
-			float Height = 50.0f * static_cast<float>(DMXData[7]) / 255.0f;
-			GetValueRegistry()->SetValue("height", graphics::EUniformValueType::VALUE_TYPE_FLOAT, &Height, sizeof(float));
-		}
-	}
-#endif // USE_NETWORK
-
-	bool CSpotLightComponent::CheckIsLoading(bool& Loaded, api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker,
+	bool CSpotLightRenderer::CheckIsLoading(bool& Loaded, api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker,
 		const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
 		const std::shared_ptr<graphics::CDrawInfo>& DrawInfo, const std::shared_ptr<input::CInputState>& InputState, const std::shared_ptr<object::C3DObject>& Object)
 	{
@@ -245,7 +219,7 @@ namespace scriptable
 		if (!RenderPass) return false;
 
 		const auto& TextureList = RenderPass->GetFrameTextureList();
-		if (TextureList.size() != 5) return false;
+		if (TextureList.size() != 6) return false;
 
 		for (const auto& Texture : TextureList)
 		{
@@ -268,6 +242,7 @@ namespace scriptable
 			Material->ReplaceTextureIndex("gAlbedoTexture", 2);
 			Material->ReplaceTextureIndex("gDepthTexture", 3);
 			Material->ReplaceTextureIndex("gCustomParam0Texture", 4);
+			Material->ReplaceTextureIndex("gEmissionTexture", 5);
 
 			// BoardかSphereかをライトタイプで変えるようにするとライトクラスが1つに統一できるかも？
 			if (!m_LightObject->AddPresetSimply(pGraphicsAPI, pPhysicsEngine, graphics::CPresetPrimitive::CreateCylinder(pGraphicsAPI), graphics::EPresetPrimitiveType::CYLINDER, Material)) return false;
@@ -280,7 +255,7 @@ namespace scriptable
 
 		for (const auto& MaterialFrame : m_SecondLoader->GetTargetMaterialFrameSet())
 		{
-			const auto& Material = MaterialFrame->CreateMaterial(pGraphicsAPI, graphics::ECullMode::CULL_NONE);
+			const auto& Material = MaterialFrame->CreateMaterial(pGraphicsAPI, graphics::ECullMode::CULL_FRONT);
 			Material->SetBlendType(graphics::EBlendType::BLEND_TYPE_TRANSPARENT_ALPHA);
 
 			// 他のライトが描画できなくなるので書き込まない

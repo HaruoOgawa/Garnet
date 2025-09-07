@@ -487,6 +487,11 @@ namespace object
 		auto it = std::find(m_PassNameList.begin(), m_PassNameList.end(), pGraphicsAPI->GetCurrentRenderPassName());
 		if (it == m_PassNameList.end()) return true;
 
+		for (const auto& Component : m_ComponentList)
+		{
+			if (!Component->Draw(pGraphicsAPI, Camera, Projection, DrawInfo, shared_from_this(), nullptr)) return false;
+		}
+
 		// •`‰æ
 		if (!m_RootNodeIndexList.empty())
 		{
@@ -509,8 +514,8 @@ namespace object
 			}
 		}
 
-		//if (!DrawDebugBone(pGraphicsAPI ,IsDepthPass, DrawOutline, Camera, Projection, DrawInfo, DebugSphere)) return false;
-		//if (!DrawDebugPhysics(pGraphicsAPI, IsDepthPass, DrawOutline, Camera, Projection, DrawInfo, DebugSphere)) return false;
+		//if (!DrawDebugBone(pGraphicsAPI , Camera, Projection, DrawInfo, DebugSphere)) return false;
+		//if (!DrawDebugPhysics(pGraphicsAPI, Camera, Projection, DrawInfo, DebugSphere)) return false;
 
 		return true;
 	}
@@ -539,11 +544,6 @@ namespace object
 	bool C3DObject::Draw(const std::shared_ptr<CNode>& Node, api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<camera::CCamera>& Camera,
 		const std::shared_ptr<projection::CProjection>& Projection, const std::shared_ptr<graphics::CDrawInfo>& DrawInfo)
 	{
-		for (const auto& Component : m_ComponentList)
-		{
-			if (!Component->Draw(pGraphicsAPI, Camera, Projection, DrawInfo, shared_from_this(), Node)) return false;
-		}
-
 		for (const auto& Component : Node->GetComponentList())
 		{
 			if (!Component->Draw(pGraphicsAPI, Camera, Projection, DrawInfo, shared_from_this(), Node)) return false;

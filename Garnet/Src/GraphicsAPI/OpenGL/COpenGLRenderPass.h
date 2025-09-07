@@ -25,6 +25,7 @@ namespace api
 		bool m_UseColorBuffer;
 		bool m_UseDepthBuffer;
 		bool m_UseMSAA;
+		bool m_UseStencil;
 
 		// SubPass
 		std::shared_ptr<COpenGLSubPass> m_SubPass;
@@ -50,6 +51,8 @@ namespace api
 		virtual int GetHeight() const override;
 
 		GLuint GetFrameBuffer() const;
+
+		bool IsUseStencil() const;
 	};
 }
 #endif

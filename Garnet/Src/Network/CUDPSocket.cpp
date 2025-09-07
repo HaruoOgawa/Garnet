@@ -4,6 +4,8 @@
 #include "../Message/Console.h"
 #include "../Binary/CBinaryReader.h"
 
+#include <thread>
+
 #pragma comment(lib, "ws2_32.lib")
 #pragma warning(disable:4996) // inet_addr()関数で警告が出る場合は以下で警告を無効化する。
 
@@ -12,7 +14,9 @@ namespace network
 	CUDPSocket::CUDPSocket(const std::string& Address, int Port):
 		m_Address(Address),
 		m_Port(Port),
-		m_Socket(INVALID_SOCKET)
+		m_Socket(INVALID_SOCKET),
+		m_App(nullptr),
+		m_WaitTimeMillSeconds(0.0)
 	{
 	}
 
@@ -21,8 +25,11 @@ namespace network
 		Close();
 	}
 
-	bool CUDPSocket::Initialize()
+	bool CUDPSocket::Initialize(const std::shared_ptr<app::CApp>& App, bool MultiThread, long long WaitTimeMillSeconds)
 	{
+		m_App = App;
+		m_WaitTimeMillSeconds = WaitTimeMillSeconds;
+
 		WSAData wsaData;
 
 		// MAKEWORD(2, 0) はWinSocketのバージョン
@@ -68,7 +75,37 @@ namespace network
 			return false;
 		}
 
+		// 別スレッドで受信処理を開始する
+		if (MultiThread)
+		{
+			std::thread recieveThread(&CUDPSocket::Receive, this);
+			// joinは呼び出したスレッドが終了するまで待機する(ここでメインスレッドがストップする)
+			// detachは呼び出したスレッドをメインスレッドから切り離してバックグラウンドで動かす(メインスレッドは止まらない)
+			recieveThread.detach();
+		}
+
 		return true;
+	}
+
+	void CUDPSocket::Receive()
+	{
+		for (;;)
+		{
+			// ソケットが無効になったら終了する
+			if (m_Socket == INVALID_SOCKET)
+			{
+				Console::Log("UDP socket is invalid, stopping receive thread.\n");
+				break;
+			}
+
+			// 適宜スリープを入れてCPU負荷を下げる
+			if (m_WaitTimeMillSeconds > 0.0)
+			{
+				std::this_thread::sleep_for(std::chrono::milliseconds(m_WaitTimeMillSeconds));
+			}
+
+			if (!Update(m_App.get())) break;
+		}
 	}
 
 	void CUDPSocket::Close()
@@ -85,6 +122,8 @@ namespace network
 
 	bool CUDPSocket::Update(app::CApp* pApp)
 	{
+		if (!pApp) return true;
+
 		const int BufferSize = 1024; // 受信バッファのサイズを指定
 
 		char buffer[BufferSize];

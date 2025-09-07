@@ -139,13 +139,16 @@ namespace physics
 		for (int i = 0; i < m_ConstraintList.size(); i++)
 		{
 			const auto& Constraint = m_ConstraintList[i];
+			if (!Constraint) continue;
 
 			if (Constraint->JointType == EJointType::SPRING_6DOF)
 			{
 				// Constraints‚ð’Ç‰Á‚·‚é
 				const auto* FixedObject = static_cast<CBulletPhysicsObject*>(Constraint->FixedObject.get());
+				if (!FixedObject) continue;
 
 				const auto& TargetRigidBody = FixedObject->GetRigidBody();
+				if (!TargetRigidBody) continue;
 
 				m_RigidBody->Add6DofSpringConstraint(pBulletPhysics->GetDynamicsWorld(), TargetRigidBody, Constraint->JParam);
 			}

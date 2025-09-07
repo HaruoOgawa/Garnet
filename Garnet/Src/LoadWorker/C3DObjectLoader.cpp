@@ -97,6 +97,8 @@ namespace resource
 		// Object¶¬
 		//if (!m_TargetObject->Create(pGraphicsAPI, pPhysicsEngine)) return false;
 
+		pApp->OnObjectLoaded(m_TargetObject, pGraphicsAPI, pLoadWorker);
+
 		return true;
 	}
 
