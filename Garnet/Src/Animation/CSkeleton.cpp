@@ -1,6 +1,7 @@
 #ifdef USE_ANIMATION
 
 #include "CSkeleton.h"
+#include "../Object/C3DObject.h"
 #include "../Object/CNode.h"
 
 namespace animation
@@ -83,6 +84,9 @@ namespace animation
 			if (CurrentBoneName == animation::EHumanoidBones::None) continue;
 
 			m_BoneTable.emplace(CurrentBoneName, std::get<1>(Bone));
+
+			//
+			m_NodeBoneMap.emplace(std::get<1>(Bone)->GetBoneNode(), std::get<1>(Bone));
 		}
 
 		// ボーンテーブルを再構築
@@ -100,6 +104,9 @@ namespace animation
 			Bone->SetBoneName(BoneName);
 
 			AddHumanoidBone(BoneName, Bone);
+
+			//
+			m_NodeBoneMap.emplace(Bone->GetBoneNode(), Bone);
 		}
 	}
 
@@ -152,6 +159,11 @@ namespace animation
 		}
 	}
 
+	void CSkeleton::RemoveIKLoneryBone()
+	{
+
+	}
+
 	bool CSkeleton::SolveIK()
 	{
 		for (const auto& IKSolver : m_IKSolverList)
@@ -182,6 +194,93 @@ namespace animation
 	const std::vector<std::shared_ptr<CBone>>& CSkeleton::GetGrantBoneList() const
 	{
 		return m_GrantBoneList;
+	}
+
+	// ロンリーボーン
+	void CSkeleton::MakeLoneryBone(std::set<std::shared_ptr<animation::CBone>>& LoneryBoneSet, object::C3DObject* Object)
+	{
+		// まずIKで動くボーンだったらロンリーボーンから除外する
+		// ロンリーボーンがIKによって動くボーンとして登録されていれば除外する
+		for (const auto& solver : m_IKSolverList)
+		{
+			for (const auto& chain : solver->GetIKChainList())
+			{
+				auto it = std::find_if(LoneryBoneSet.begin(), LoneryBoneSet.end(),
+					[&chain](const std::shared_ptr<animation::CBone>& bone) {
+						return bone->GetBoneNode().get() == chain.get();
+					}
+				);
+
+				if (it != LoneryBoneSet.end()) {
+					LoneryBoneSet.erase(it);
+				}
+			}
+		}
+
+		//
+		if (!Object) return;
+		const auto& NodeList = Object->GetNodeList();
+
+		// ロンリーボーンを構築する
+		// 標準ボーン・付与ボーン・IKボーン・物理ボーンのどれでもないボーンは同じ階層の自分より1つ前のボーンに
+		// 常に回転を合わせるようにする(強制的に付与ボーンにする)
+		for(const auto& LoneryBone : LoneryBoneSet)
+		{
+			const auto& BoneNode = LoneryBone->GetBoneNode();
+
+			const auto& ParentBoneNone = BoneNode->GetParentNode();
+			if (!ParentBoneNone) continue;
+
+			const auto& ChildrenNodeIndexList = ParentBoneNone->GetChildrenNodeIndexList();
+			if (ChildrenNodeIndexList.size() <= 1) continue;
+
+			// 一番近い標準ボーンを取得
+			std::shared_ptr<CBone> FollowBone = nullptr;
+			for (size_t ChildIndex : ChildrenNodeIndexList)
+			{
+				const auto& child = NodeList[ChildIndex];
+				if (!child) continue;
+
+				if (FindNearestStandardBone(child, FollowBone, NodeList)) break;
+			}
+
+			if (!FollowBone) continue;
+
+			m_LoneryBoneMap.emplace(LoneryBone, FollowBone);
+		}
+	}
+
+	const std::map<std::shared_ptr<CBone>, std::shared_ptr<CBone>>& CSkeleton::GetLoneryBoneMap() const
+	{
+		return m_LoneryBoneMap;
+	}
+
+	bool CSkeleton::FindNearestStandardBone(const std::shared_ptr<object::CNode>& Node, std::shared_ptr<CBone>& FollowBone,
+		const std::vector<std::shared_ptr<object::CNode>>& NodeList)
+	{
+		const auto& BoneIT = m_NodeBoneMap.find(Node);
+		if (BoneIT == m_NodeBoneMap.end()) return false;
+
+		const auto& Bone = BoneIT->second;
+
+		if (Bone && Bone->GetBoneName() != EHumanoidBones::None)
+		{
+			FollowBone = Bone;
+			return true;
+		}
+
+		const auto& ChildrenNodeIndexList = FollowBone->GetBoneNode()->GetChildrenNodeIndexList();
+		if (ChildrenNodeIndexList.size() <= 1) return false;
+
+		for (size_t ChildIndex : ChildrenNodeIndexList)
+		{
+			const auto& child = NodeList[ChildIndex];
+			if (!child) continue;
+
+			if (FindNearestStandardBone(child, FollowBone, NodeList)) return true;
+		}
+
+		return false;
 	}
 
 	void CSkeleton::ResetToDefaultSkeletonLocal()

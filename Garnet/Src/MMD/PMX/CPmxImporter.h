@@ -4,6 +4,7 @@
 #include <vector>
 #include <memory>
 #include <map>
+#include <set>
 
 #include "../../Interface/IGraphicsAPI.h"
 #include "../../Interface/IResource.h"
@@ -51,7 +52,9 @@ namespace mmd
 	class CPmxImporter
 	{
 	private:
-		static bool CreateAnimationSkeleton(api::IGraphicsAPI* pGraphicsAPI, const CPmxModel& model, std::shared_ptr<animation::CSkeleton>& Skeleton, std::vector<std::shared_ptr<object::CNode>>& NodeList, const std::shared_ptr<object::CNode>& RootNode);
+		static bool CreateAnimationSkeleton(api::IGraphicsAPI* pGraphicsAPI, const CPmxModel& model, std::shared_ptr<animation::CSkeleton>& Skeleton, 
+			std::vector<std::shared_ptr<object::CNode>>& NodeList, std::set<std::shared_ptr<animation::CBone>>& LoneryBoneSet,
+			const std::shared_ptr<object::CNode>& RootNode);
 		static bool CalcInverseBindPose(std::shared_ptr<animation::CSkeleton>& Skeleton);
 
 		static bool CreateMaterialList(api::IGraphicsAPI* pGraphicsAPI, const CPmxModel& model, 
@@ -67,7 +70,8 @@ namespace mmd
 			std::vector<std::shared_ptr<graphics::CTexture>>& TextureList, std::map<int, std::vector<std::shared_ptr<graphics::CMaterial>>>& SharedToonUsingList);
 
 		static bool CreateRigidbody(physics::IPhysicsEngine* pPhysicsEngine, const CPmxModel& model, std::shared_ptr<animation::CSkeleton>& Skeleton, 
-			std::vector<std::shared_ptr<physics::IPhysicsObject>>& PhysicsObjectList);
+			std::vector<std::shared_ptr<physics::IPhysicsObject>>& PhysicsObjectList, std::set<std::shared_ptr<animation::CBone>>& LoneryBoneSet);
+
 		static bool CreateJoint(physics::IPhysicsEngine* pPhysicsEngine, const CPmxModel& model, std::shared_ptr<animation::CSkeleton>& Skeleton, 
 			const std::vector<std::shared_ptr<physics::IPhysicsObject>>& PhysicsObjectList);
 

@@ -47,9 +47,12 @@ namespace mmd
 
 		RootNodeIndexList.push_back(0);
 
+		// 標準ボーン・付与ボーン・IKボーン・物理ボーンのどれでもないボーンのリスト
+		std::set<std::shared_ptr<animation::CBone>> LoneryBoneSet;
+
 		// Skeleton
 		std::shared_ptr<animation::CSkeleton> Skeleton = std::make_shared<animation::CSkeleton>(RigType, (Object->GetObjectName() + "(Skeleton)"));
-		if (!CreateAnimationSkeleton(pGraphicsAPI, model, Skeleton, NodeList, RootNode)) return false;
+		if (!CreateAnimationSkeleton(pGraphicsAPI, model, Skeleton, NodeList, LoneryBoneSet, RootNode)) return false;
 
 		// BoneTableを作成
 		Skeleton->MakeHumanoidBoneTable(HumanoidBoneList);
@@ -79,7 +82,7 @@ namespace mmd
 		{
 			// 剛体
 			std::vector<std::shared_ptr<physics::IPhysicsObject>> PhysicsObjectList;
-			if (!CreateRigidbody(pPhysicsEngine, model, Skeleton, PhysicsObjectList)) return false;
+			if (!CreateRigidbody(pPhysicsEngine, model, Skeleton, PhysicsObjectList, LoneryBoneSet)) return false;
 
 			// ジョイント
 			if (!CreateJoint(pPhysicsEngine, model, Skeleton, PhysicsObjectList)) return false;
@@ -117,10 +120,15 @@ namespace mmd
 		// 逆バインドポーズを計算する
 		if (!CalcInverseBindPose(Skeleton)) return false;
 
+		// 全ての資材をチェックしたので最終的なロンリーボーンを構築
+		Skeleton->MakeLoneryBone(LoneryBoneSet, Object);
+
 		return true;
 	}
 
-	bool CPmxImporter::CreateAnimationSkeleton(api::IGraphicsAPI* pGraphicsAPI, const CPmxModel& model, std::shared_ptr<animation::CSkeleton>& Skeleton, std::vector<std::shared_ptr<object::CNode>>& NodeList, const std::shared_ptr<object::CNode>& RootNode)
+	bool CPmxImporter::CreateAnimationSkeleton(api::IGraphicsAPI* pGraphicsAPI, const CPmxModel& model, std::shared_ptr<animation::CSkeleton>& Skeleton,
+		std::vector<std::shared_ptr<object::CNode>>& NodeList, std::set<std::shared_ptr<animation::CBone>>& LoneryBoneSet,
+		const std::shared_ptr<object::CNode>& RootNode)
 	{
 		// PmxではBoneとBoneは全くの別物でそれぞれ違う役割を持っているので厳格に名前分けする必要がある!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 		const auto& PmxBoneList = model.GetPmxBoneList();
@@ -167,21 +175,32 @@ namespace mmd
 			Bone->SetBoneName(BoneName);
 
 			// ボーンの付与
+			bool IsGrantBone = false;
 			if (PmxBone->IsRotateGrant())
 			{
 				// 回転付与
 				Bone->SetRotateGrant(PmxBone->GetGrantParentBoneIndex(), PmxBone->GetGrantRate());
+
+				IsGrantBone = true;
 			}
 			else if (PmxBone->IsMoveGrant())
 			{
 				// 移動付与
 				Bone->SetMoveGrant(PmxBone->GetGrantParentBoneIndex(), PmxBone->GetGrantRate());
+
+				IsGrantBone = true;
 			}
 
 			// IK
 			Bone->SetIKParam(PmxBone->GetIKParam());
 
 			Skeleton->AddBone(Bone);
+
+			// 非標準ボーン・付与ボーン・IKボーンでもなければいったんロンリーボーンとする
+			if (Bone->GetBoneName() == animation::EHumanoidBones::None && !IsGrantBone && !Bone->GetIKParam())
+			{
+				LoneryBoneSet.emplace(Bone);
+			}
 		}
 
 		// BoneNodeに子要素を設定する
@@ -784,8 +803,8 @@ namespace mmd
 		return true;
 	}
 
-	bool CPmxImporter::CreateRigidbody(physics::IPhysicsEngine* pPhysicsEngine, const CPmxModel& model, std::shared_ptr<animation::CSkeleton>& Skeleton, 
-		std::vector<std::shared_ptr<physics::IPhysicsObject>>& PhysicsObjectList)
+	bool CPmxImporter::CreateRigidbody(physics::IPhysicsEngine* pPhysicsEngine, const CPmxModel& model, std::shared_ptr<animation::CSkeleton>& Skeleton,
+		std::vector<std::shared_ptr<physics::IPhysicsObject>>& PhysicsObjectList, std::set<std::shared_ptr<animation::CBone>>& LoneryBoneSet)
 	{
 		const auto& BoneList = Skeleton->GetBoneList();
 
@@ -822,10 +841,22 @@ namespace mmd
 				continue;
 			}
 
-			// 物理オブジェクトを割り当てる
+			// 物理オブジェクトをボーンノードに割り当てる
 			if (PmxRigidbody.RelationBoneIndex >= 0 && PmxRigidbody.RelationBoneIndex < BoneList.size())
 			{
-				std::get<1>(BoneList[PmxRigidbody.RelationBoneIndex])->GetBoneNode()->AddPhysicsObject(PhysicsObject);
+				const auto& BoneNode = std::get<1>(BoneList[PmxRigidbody.RelationBoneIndex])->GetBoneNode();
+				BoneNode->AddPhysicsObject(PhysicsObject);
+
+				// 物理ボーンだったらロンリーボーンから除外する
+				auto it = std::find_if(LoneryBoneSet.begin(), LoneryBoneSet.end(),
+					[&BoneNode](const std::shared_ptr<animation::CBone>& bone) {
+						return bone->GetBoneNode().get() == BoneNode.get();
+					}
+				);
+
+				if (it != LoneryBoneSet.end()) {
+					LoneryBoneSet.erase(it);
+				}
 			}
 
 			//

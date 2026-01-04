@@ -59,6 +59,9 @@ namespace animation
 		// 付与ボーンの計算
 		bool CalculateGrantBone(const std::vector<std::shared_ptr<object::CNode>>& NodeList);
 
+		// ロンリーボーンの計算
+		bool CalculateLoneryBone();
+
 		void ChangeMotion(int Index); // インデックス指定でモーションを変更
 		void ChangeMotion(const std::string& MotionName); // 名前指定でモーションを変更
 
