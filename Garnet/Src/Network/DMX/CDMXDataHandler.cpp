@@ -4,7 +4,8 @@
 
 namespace network
 {
-	CDMXDataHandler::CDMXDataHandler()
+	CDMXDataHandler::CDMXDataHandler():
+		m_CurrentTimeCode(0.0f)
 	{
 	}
 
@@ -45,19 +46,36 @@ namespace network
 		const int DeviceCount = static_cast<int>(ScriptCallbackList->second.size());
 
 		// 事前にデータサイズを確認
+		int TimeCodeByte = 4;
 		int DeviceByteSize = sizeof(unsigned char) * ChennelCount;
-		int ExpectedByteSize = DeviceByteSize * DeviceCount;
+		int ExpectedByteSize = DeviceByteSize * DeviceCount + TimeCodeByte;
 		
 		int RealByteSize = static_cast<int>(DataBuffer.size());
 
 		if (ExpectedByteSize > RealByteSize) return false;
 
+		// タイムコードをチェックして古いデータは捨てる
+		{
+			unsigned char Frame = DataBuffer[0];
+			unsigned char Second = DataBuffer[1];
+			unsigned char Minute = DataBuffer[2];
+			unsigned char Hour = DataBuffer[3];
+
+			float TimeCode = ((float)Hour) * 60.0f * 60.0f + ((float)Minute) * 60.0f + ((float)Second) + ((float)Frame) / 30.0f;
+			if (TimeCode < m_CurrentTimeCode) return true;
+			m_CurrentTimeCode = TimeCode;
+		}
+
 		// データ解析
+		// 各デバイスにバイト列を分けて送信
+		int ByteOffset = 0;
+
+		// タイムコード分だけ飛ばす
+		ByteOffset += TimeCodeByte;
+
 		for (int i = 0; i < DeviceCount; i++)
 		{
 			auto& Callback = ScriptCallbackList->second[i];
-
-			int ByteOffset = DeviceByteSize * i;
 
 			std::vector<unsigned char> DataPerDevice;
 			DataPerDevice.resize(DeviceByteSize);
@@ -66,6 +84,9 @@ namespace network
 
 			// DMXデータをデバイスに渡す
 			Callback->OnReceiveDMXData(FixtureIT->second, DataPerDevice);
+
+			// オフセット更新
+			ByteOffset += DeviceByteSize;
 		}
 
 		return true;

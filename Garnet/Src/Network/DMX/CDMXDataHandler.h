@@ -16,6 +16,8 @@ namespace network
 {
 	class CDMXDataHandler
 	{
+		float m_CurrentTimeCode;
+
 		std::map<std::tuple<int, int, int>, std::string> m_UniverseDeviceMap;
 		std::map<std::string, SDMXFixture> m_DeviceFixtureMap;
 		std::map<std::string, std::vector<std::shared_ptr<scriptable::CScriptCallback>>> m_ScriptCallbackMap;
