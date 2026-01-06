@@ -232,7 +232,7 @@ namespace animation
 			if (!ParentBoneNone) continue;
 
 			const auto& ChildrenNodeIndexList = ParentBoneNone->GetChildrenNodeIndexList();
-			if (ChildrenNodeIndexList.size() <= 1) continue;
+			if (ChildrenNodeIndexList.size() == 0) continue;
 
 			// 一番近い標準ボーンを取得
 			std::shared_ptr<CBone> FollowBone = nullptr;
@@ -259,18 +259,22 @@ namespace animation
 		const std::vector<std::shared_ptr<object::CNode>>& NodeList)
 	{
 		const auto& BoneIT = m_NodeBoneMap.find(Node);
-		if (BoneIT == m_NodeBoneMap.end()) return false;
 
-		const auto& Bone = BoneIT->second;
-
-		if (Bone && Bone->GetBoneName() != EHumanoidBones::None)
+		// 標準ボーンであれば返す
+		if (BoneIT != m_NodeBoneMap.end())
 		{
-			FollowBone = Bone;
-			return true;
-		}
+			const auto& Bone = BoneIT->second;
 
-		const auto& ChildrenNodeIndexList = FollowBone->GetBoneNode()->GetChildrenNodeIndexList();
-		if (ChildrenNodeIndexList.size() <= 1) return false;
+			if (Bone && Bone->GetBoneName() != EHumanoidBones::None)
+			{
+				FollowBone = Bone;
+				return true;
+			}
+		}
+		
+		// 非標準ボーンなのでさらに子要素から標準ボーンを探す
+		const auto& ChildrenNodeIndexList = Node->GetChildrenNodeIndexList();
+		if (ChildrenNodeIndexList.size() == 0) return false;
 
 		for (size_t ChildIndex : ChildrenNodeIndexList)
 		{
