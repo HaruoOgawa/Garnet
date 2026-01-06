@@ -65,6 +65,8 @@ namespace animation
 		void ChangeMotion(int Index); // インデックス指定でモーションを変更
 		void ChangeMotion(const std::string& MotionName); // 名前指定でモーションを変更
 
+		void SetPlayTime(float Time);
+
 		bool CalCSkinMatrixList(std::vector<glm::mat4>& MatrixList, const glm::mat4& ObjectModelMatrix);
 
 		void AddMotion(const std::string& MotionName, animation::SAnimationLayout Layout);

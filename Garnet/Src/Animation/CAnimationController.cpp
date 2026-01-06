@@ -238,6 +238,14 @@ namespace animation
 		}
 	}
 
+	void CAnimationController::SetPlayTime(float Time)
+	{
+		auto& Clip = m_CurrentLayout.Clip;
+		if (!Clip) return;
+
+		Clip->SetCurrentTime(Time);
+	}
+
 	bool CAnimationController::CalCSkinMatrixList(std::vector<glm::mat4>& MatrixList, const glm::mat4& ObjectModelMatrix)
 	{
 		//if (IsPlayingAnimation())
