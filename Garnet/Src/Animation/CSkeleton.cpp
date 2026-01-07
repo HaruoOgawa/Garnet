@@ -232,7 +232,10 @@ namespace animation
 			if (!ParentBoneNone) continue;
 
 			const auto& ChildrenNodeIndexList = ParentBoneNone->GetChildrenNodeIndexList();
-			if (ChildrenNodeIndexList.size() == 0) continue;
+			
+			// 親要素が1つしか子要素(つまり自分自身しか子要素でない)時はスキップする
+			// 自身の子要素をFollowBoneにしたくないため
+			if (ChildrenNodeIndexList.size() <= 1) continue;
 
 			// 一番近い標準ボーンを取得
 			std::shared_ptr<CBone> FollowBone = nullptr;
@@ -273,10 +276,7 @@ namespace animation
 		}
 		
 		// 非標準ボーンなのでさらに子要素から標準ボーンを探す
-		const auto& ChildrenNodeIndexList = Node->GetChildrenNodeIndexList();
-		if (ChildrenNodeIndexList.size() == 0) return false;
-
-		for (size_t ChildIndex : ChildrenNodeIndexList)
+		for (size_t ChildIndex : Node->GetChildrenNodeIndexList())
 		{
 			const auto& child = NodeList[ChildIndex];
 			if (!child) continue;
