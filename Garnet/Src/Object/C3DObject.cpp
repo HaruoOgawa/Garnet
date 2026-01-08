@@ -473,6 +473,9 @@ namespace object
 		if (!m_AnimationController->CalCSkinMatrixList(m_CurrentSkinMatrixList, m_ObjectTransform->GetModelMatrix())) return false;
 #endif
 
+		// ロンリーボーンの計算
+		if (!m_AnimationController->CalculateLoneryBone()) return false;
+
 		return true;
 	}
 

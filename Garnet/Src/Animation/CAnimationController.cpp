@@ -155,6 +155,27 @@ namespace animation
 		return true;
 	}
 
+	// ロンリーボーンの計算
+	bool CAnimationController::CalculateLoneryBone()
+	{
+		if (m_Skeleton)
+		{
+			for (const auto& LoneryBonePair : m_Skeleton->GetLoneryBoneMap())
+			{
+				const auto& LoneryBone = LoneryBonePair.first;
+				const auto& FollowBone = LoneryBonePair.second;
+
+				if (!LoneryBone || !FollowBone) continue;
+
+				LoneryBone->GetBoneNode()->SetRot(FollowBone->GetBoneNode()->GetRot());
+
+				LoneryBone->GetBoneNode()->CalcWorldMatrix();
+			}
+		}
+
+		return true;
+	}
+
 	void CAnimationController::CalcWorldMatrix(const glm::mat4& ParentWorldMatrix, const std::shared_ptr<object::CNode>& Node, const std::vector<std::shared_ptr<object::CNode>>& NodeList)
 	{
 		glm::mat4 WorldMatrix = ParentWorldMatrix * Node->GetLocalMatrix();
@@ -215,6 +236,14 @@ namespace animation
 
 			m_SavedPrevTrs = true;
 		}
+	}
+
+	void CAnimationController::SetPlayTime(float Time)
+	{
+		auto& Clip = m_CurrentLayout.Clip;
+		if (!Clip) return;
+
+		Clip->SetCurrentTime(Time);
 	}
 
 	bool CAnimationController::CalCSkinMatrixList(std::vector<glm::mat4>& MatrixList, const glm::mat4& ObjectModelMatrix)

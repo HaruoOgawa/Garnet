@@ -10,12 +10,18 @@
 #include <map>
 #include <tuple>
 #include <string>
+#include <set>
 #include <glm/glm.hpp>
 
 #include "CBone.h"
 #include "CIKSolver.h"
 #include "ERigType.h"
 #include "EHumanoidBones.h"
+
+namespace object {
+	class C3DObject;
+	class CNode;
+}
 
 namespace animation
 {
@@ -28,6 +34,7 @@ namespace animation
 		std::vector<std::tuple<std::string, std::shared_ptr<CBone>>> m_BoneList;
 		
 		std::map<EHumanoidBones, std::shared_ptr<CBone>> m_BoneTable;
+		std::map<std::shared_ptr<object::CNode>, std::shared_ptr<CBone>> m_NodeBoneMap;
 
 		// IK
 		std::vector<std::shared_ptr<CIKSolver>> m_IKSolverList;
@@ -36,6 +43,16 @@ namespace animation
 
 		// 付与ボーンリスト
 		std::vector<std::shared_ptr<CBone>> m_GrantBoneList;
+
+		// ロンリーボーン
+		// 標準ボーン・付与ボーン・IKボーン・物理ボーンのどれでもないボーンのリスト
+		// ロンリーボーン・追従ボーンのペア
+		std::map<std::shared_ptr<CBone>, std::shared_ptr<CBone>> m_LoneryBoneMap;
+	
+	private:
+		bool FindNearestStandardBone(const std::shared_ptr<object::CNode>& Node, std::shared_ptr<CBone>& FollowBone,
+			const std::vector<std::shared_ptr<object::CNode>>& NodeList);
+	
 	public:
 		CSkeleton(ERigType RigType, const std::string& Name);
 		virtual ~CSkeleton();
@@ -58,6 +75,7 @@ namespace animation
 
 		// IK
 		void MakeIKBoneList();
+		void RemoveIKLoneryBone();
 		bool SolveIK();
 
 		const std::vector<std::shared_ptr<CBone>>& GetIKBoneList() const;
@@ -65,6 +83,10 @@ namespace animation
 		// 付与ボーン
 		void MakeGrantBoneList();
 		const std::vector<std::shared_ptr<CBone>>& GetGrantBoneList() const;
+
+		// ロンリーボーン
+		void MakeLoneryBone(std::set<std::shared_ptr<animation::CBone>>& LoneryBoneSet, object::C3DObject* Object);
+		const std::map<std::shared_ptr<CBone>, std::shared_ptr<CBone>>& GetLoneryBoneMap() const;
 
 		//
 		void ResetToDefaultSkeletonLocal();

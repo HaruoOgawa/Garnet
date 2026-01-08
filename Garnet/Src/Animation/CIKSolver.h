@@ -25,6 +25,8 @@ namespace animation
 		CIKSolver();
 		virtual ~CIKSolver();
 
+		const std::vector<std::shared_ptr<object::CNode>>& GetIKChainList() const;
+
 		bool Create(const std::shared_ptr<CBone>& IKTargetBone, const std::vector<std::tuple<std::string, std::shared_ptr<CBone>>>& BoneList);
 
 		bool Solve();

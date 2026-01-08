@@ -16,6 +16,11 @@ namespace animation
 	{
 	}
 
+	const std::vector<std::shared_ptr<object::CNode>>& CIKSolver::GetIKChainList() const
+	{
+		return m_IKChainList;
+	}
+
 	bool CIKSolver::Create(const std::shared_ptr<CBone>& IKTargetBone, const std::vector<std::tuple<std::string, std::shared_ptr<CBone>>>& BoneList)
 	{
 		m_IKTarget = IKTargetBone->GetBoneNode();
