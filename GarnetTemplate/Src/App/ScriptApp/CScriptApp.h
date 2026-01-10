@@ -27,8 +27,6 @@ namespace app
 
 		std::shared_ptr<graphics::CFrameRenderer> m_MainFrameRenderer;
 
-		std::shared_ptr<graphics::CPostProcess> m_PostProcess;
-
 		std::shared_ptr<CFileModifier> m_FileModifier;
 #ifdef USE_GUIENGINE
 		std::shared_ptr<gui::CGraphicsEditingWindow> m_GraphicsEditingWindow;

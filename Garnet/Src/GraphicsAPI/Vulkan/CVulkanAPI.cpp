@@ -424,13 +424,18 @@ namespace api
 	{
 		return m_Height;
 	}
-
+	
 	std::shared_ptr<graphics::IRenderPass> CVulkanAPI::FindOffScreenRenderPass(const std::string& PassName)
 	{
 		auto it = m_OffScreenRenderPassMap.find(PassName);
 		if (it == m_OffScreenRenderPassMap.end()) return nullptr;
 
 		return it->second;
+	}
+
+	bool CVulkanAPI::CopyRenderPass(const std::string& SrcPassName, const std::string& DstPassName, bool Color, bool Depth)
+	{
+		return true;
 	}
 
 	bool CVulkanAPI::CopyColorBuffer(const std::string& SrcPassName, const std::string& DstPassName)
