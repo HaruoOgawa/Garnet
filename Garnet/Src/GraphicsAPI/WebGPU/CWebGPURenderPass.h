@@ -21,11 +21,12 @@ namespace api
 		// API
 		api::CWebGPUAPI* m_pGraphicsAPI;
 
+		graphics::SRenderPassState m_PassState;
+
 		// Base Param
 		std::string m_PassName;
 		int m_Width;
 		int m_Height;
-		glm::vec4 m_InitColor;
 		api::ERenderPassFormat m_RenderPassFormat;
 		std::vector<std::shared_ptr<graphics::CTexture>> m_FrameTextureList;
 		std::shared_ptr<graphics::CTexture> m_DepthTexture;
@@ -33,7 +34,7 @@ namespace api
 		// RenderPass
 		WGPURenderPassEncoder m_RenderPass;
 	public:
-		CWebGPURenderPass(api::CWebGPUAPI* pGraphicsAPI, const std::string& PassName, ERenderPassFormat RenderPassFormat, const glm::vec4& InitColor);
+		CWebGPURenderPass(api::CWebGPUAPI* pGraphicsAPI, const std::string& PassName, ERenderPassFormat RenderPassFormat);
 		virtual ~CWebGPURenderPass();
 
 		virtual std::shared_ptr<graphics::CTexture> GetFrameTexture(int Index = 0) override;

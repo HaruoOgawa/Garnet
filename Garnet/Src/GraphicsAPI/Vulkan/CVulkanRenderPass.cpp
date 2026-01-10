@@ -8,13 +8,12 @@
 
 namespace api
 {
-	CVulkanRenderPass::CVulkanRenderPass(api::CVulkanAPI* pGraphicsAPI, const std::string& PassName, ERenderPassFormat RenderPassFormat, const glm::vec4& InitColor):
+	CVulkanRenderPass::CVulkanRenderPass(api::CVulkanAPI* pGraphicsAPI, const std::string& PassName, ERenderPassFormat RenderPassFormat):
 		m_pGraphicsAPI(pGraphicsAPI),
 		m_PassState({}),
 		m_PassName(PassName),
 		m_Width(0),
 		m_Height(0),
-		m_InitColor(InitColor),
 		m_RenderPassFormat_Color(RenderPassFormat),
 		m_RenderPassFormat_Depth(ERenderPassFormat::NONE),
 		m_DepthTexture(nullptr),
@@ -332,28 +331,39 @@ namespace api
 		
 		std::vector<VkClearValue> clearValues;
 
-		// Clear Color
-		for (int i = 0; i < m_PassState.RenderTargetCount; i++)
+		// カラーバッファ単位で初期化
+		if (m_PassState.ClearColor)
 		{
-			VkClearValue clearValue{};
-			clearValue.color = { {m_InitColor.x, m_InitColor.y, m_InitColor.z, m_InitColor.w} };
+			if (m_PassState.RenderTargetCount != static_cast<int>(m_PassState.InitColorList.size())) return false;
 
-			clearValues.push_back(clearValue);
-		}
-		
-		// Clear Resolve Color
-		if (m_PassState.EnabledAA)
-		{
+			// Clear Color
 			for (int i = 0; i < m_PassState.RenderTargetCount; i++)
 			{
+				const auto& InitColor = m_PassState.InitColorList[i];
+
 				VkClearValue clearValue{};
-				clearValue.color = { {m_InitColor.x, m_InitColor.y, m_InitColor.z, m_InitColor.w} };
+				clearValue.color = { {InitColor.r, InitColor.g, InitColor.b, InitColor.a} };
 
 				clearValues.push_back(clearValue);
+			}
+
+			// Clear Resolve Color
+			if (m_PassState.EnabledAA)
+			{
+				for (int i = 0; i < m_PassState.RenderTargetCount; i++)
+				{
+					const auto& InitColor = m_PassState.InitColorList[i];
+
+					VkClearValue clearValue{};
+					clearValue.color = { {InitColor.r, InitColor.g, InitColor.b, InitColor.a} };
+
+					clearValues.push_back(clearValue);
+				}
 			}
 		}
 
 		// Clear DepthStencil
+		if(m_PassState.ClearDepth)
 		{
 			VkClearValue clearValue{};
 			clearValue.depthStencil = { 1.0f, 0 };

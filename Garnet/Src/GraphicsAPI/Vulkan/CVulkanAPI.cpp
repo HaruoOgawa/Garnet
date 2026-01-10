@@ -114,7 +114,7 @@ namespace api
 	bool CVulkanAPI::CreateRenderPass(const std::string& PassName, ERenderPassFormat RenderPassFormat, int Width, int Height, 
 		const graphics::SRenderPassState& PassState)
 	{
-		std::shared_ptr<CVulkanRenderPass> RenderPass = std::make_shared<CVulkanRenderPass>(this, PassName, RenderPassFormat, InitColor);
+		std::shared_ptr<CVulkanRenderPass> RenderPass = std::make_shared<CVulkanRenderPass>(this, PassName, RenderPassFormat);
 		
 		if (Width != -1 && Height != -1)
 		{

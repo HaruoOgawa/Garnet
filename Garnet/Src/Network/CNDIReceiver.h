@@ -1,6 +1,6 @@
 #pragma once
 
-#ifdef USE_NETWORK
+#if defined(USE_NETWORK) && defined(USE_NDI)
 
 #include <vector>
 
