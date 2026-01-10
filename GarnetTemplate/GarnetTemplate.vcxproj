@@ -348,7 +348,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;USE_GLFW;USE_VULKAN;NOMINMAX;VK_USE_PLATFORM_WIN32_KHR;GLFW_INCLUDE_VULKAN;GLFW_EXPOSE_NATIVE_WIN32;USE_TEXTURE_LOADER;USE_GLTF;USE_VIEWER_CAMERA;USE_INPUT_SYSTEM;USE_GPGPU;USE_FBX;USE_ANIMATION;USE_MMD;USE_PHYSICS;B3_USE_CLEW;USE_GUIENGINE;USE_GUI_APP;USE_BINARY_WRITE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;USE_GLFW;USE_VULKAN;NOMINMAX;VK_USE_PLATFORM_WIN32_KHR;GLFW_INCLUDE_VULKAN;GLFW_EXPOSE_NATIVE_WIN32;USE_TEXTURE_LOADER;USE_GLTF;USE_VIEWER_CAMERA;USE_INPUT_SYSTEM;USE_GPGPU;USE_FBX;USE_ANIMATION;USE_MMD;USE_PHYSICS;_CRT_SECURE_NO_WARNINGS;B3_USE_CLEW;USE_GUIENGINE;USE_BINARY_READ;USE_BINARY_WRITE;USE_RCCPP;USE_RTXGI;RTXGI_DDGI_RESOURCE_MANAGEMENT=0;RTXGI_COORDINATE_SYSTEM=0;USE_NETWORK;USE_NDI;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>..\Garnet\Src;..\Garnet\Src\Library\glm;..\Garnet\Src\Library\imgui\backends;..\Garnet\Src\Library\imgui;..\Garnet\Src\Library\json;..\Garnet\Src\Library\GLFW\include;..\Garnet\src\Library\Vulkan\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -357,12 +357,16 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy $(ProjectDir)..\Garnet\Src\Library\NDI\Bin\x64\Processing.NDI.Lib.x64.dll $(TargetDir) /y /s /I
+xcopy $(ProjectDir)..\Garnet\Src\Library\RTXGI-DDGI\bin\Release\rtxgi-vulkan.dll $(TargetDir) /y /s /I</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugWG|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;USE_GLFW;USE_WEBGPU;NOMINMAX;USE_WebGPUNative;USE_TEXTURE_LOADER;USE_GLTF;USE_VIEWER_CAMERA;USE_INPUT_SYSTEM;USE_GPGPU;USE_FBX;USE_ANIMATION;USE_SMALL_FBX;mrDebug;USE_MMD;USE_PHYSICS;B3_USE_CLEW;USE_GUIENGINE;USE_GUI_APP;USE_BINARY_WRITE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;USE_GLFW;USE_WEBGPU;NOMINMAX;USE_WebGPUNative;USE_TEXTURE_LOADER;USE_GLTF;USE_VIEWER_CAMERA;USE_INPUT_SYSTEM;USE_GPGPU;USE_FBX;USE_ANIMATION;USE_SMALL_FBX;mrDebug;USE_MMD;USE_PHYSICS;_CRT_SECURE_NO_WARNINGS;B3_USE_CLEW;USE_GUIENGINE;USE_BINARY_READ;USE_BINARY_WRITE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>..\Garnet\Src;..\Garnet\Src\Library\glm;..\Garnet\Src\Library\imgui\backends;..\Garnet\Src\Library\imgui;..\Garnet\Src\Library\json;..\Garnet\src\Library\GLFW\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -373,6 +377,9 @@
       <AdditionalLibraryDirectories>..\Garnet\Src\Library\SmallFBX\lib\debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>zlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy $(ProjectDir)..\Garnet\Src\Library\NDI\Bin\x64\Processing.NDI.Lib.x64.dll $(TargetDir) /y /s /I</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugGLFW|x64'">
     <ClCompile>
@@ -387,6 +394,9 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy $(ProjectDir)..\Garnet\Src\Library\NDI\Bin\x64\Processing.NDI.Lib.x64.dll $(TargetDir) /y /s /I</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugGL|x64'">
     <ClCompile>
@@ -401,6 +411,9 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy $(ProjectDir)..\Garnet\Src\Library\NDI\Bin\x64\Processing.NDI.Lib.x64.dll $(TargetDir) /y /s /I</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -419,6 +432,9 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy $(ProjectDir)..\Garnet\Src\Library\NDI\Bin\x64\Processing.NDI.Lib.x64.dll $(TargetDir) /y /s /I</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseWG|x64'">
     <ClCompile>
@@ -437,6 +453,9 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy $(ProjectDir)..\Garnet\Src\Library\NDI\Bin\x64\Processing.NDI.Lib.x64.dll $(TargetDir) /y /s /I</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseGL|x64'">
     <ClCompile>
@@ -455,6 +474,9 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy $(ProjectDir)..\Garnet\Src\Library\NDI\Bin\x64\Processing.NDI.Lib.x64.dll $(TargetDir) /y /s /I</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='CompGL|x64'">
     <ClCompile>

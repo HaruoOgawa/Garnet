@@ -56,7 +56,7 @@ namespace api
 		virtual int GetHeight() const = 0;
 
 		virtual const std::map<std::string, std::shared_ptr<graphics::IRenderPass>>& GetOffScreenRenderPassMap() const override;
-		virtual std::shared_ptr<graphics::IRenderPass> FindOffScreenRenderPass(const std::string& PassName) = 0;
+		virtual std::shared_ptr<graphics::IRenderPass> FindOffScreenRenderPass(const std::string& PassName) override;
 		virtual const std::string& GetCurrentRenderPassName() const override;
 		virtual bool CopyRenderPass(const std::string& SrcPassName, const std::string& DstPassName, bool Color, bool Depth) override;
 		virtual bool CopyColorBuffer(const std::string& SrcPassName, const std::string& DstPassName) override;

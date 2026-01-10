@@ -1,4 +1,5 @@
-#ifdef USE_NETWORK
+#if defined(USE_NETWORK) && defined(USE_NDI)
+
 #include "CNDIReceiver.h"
 #include "../AppCore/CApp.h"
 #include "../Message/Console.h"

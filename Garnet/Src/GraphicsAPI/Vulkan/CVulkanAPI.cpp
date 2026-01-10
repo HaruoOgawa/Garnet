@@ -114,7 +114,7 @@ namespace api
 	bool CVulkanAPI::CreateRenderPass(const std::string& PassName, ERenderPassFormat RenderPassFormat, int Width, int Height, 
 		const graphics::SRenderPassState& PassState)
 	{
-		std::shared_ptr<CVulkanRenderPass> RenderPass = std::make_shared<CVulkanRenderPass>(this, PassName, RenderPassFormat, InitColor);
+		std::shared_ptr<CVulkanRenderPass> RenderPass = std::make_shared<CVulkanRenderPass>(this, PassName, RenderPassFormat);
 		
 		if (Width != -1 && Height != -1)
 		{
@@ -424,13 +424,18 @@ namespace api
 	{
 		return m_Height;
 	}
-
+	
 	std::shared_ptr<graphics::IRenderPass> CVulkanAPI::FindOffScreenRenderPass(const std::string& PassName)
 	{
 		auto it = m_OffScreenRenderPassMap.find(PassName);
 		if (it == m_OffScreenRenderPassMap.end()) return nullptr;
 
 		return it->second;
+	}
+
+	bool CVulkanAPI::CopyRenderPass(const std::string& SrcPassName, const std::string& DstPassName, bool Color, bool Depth)
+	{
+		return true;
 	}
 
 	bool CVulkanAPI::CopyColorBuffer(const std::string& SrcPassName, const std::string& DstPassName)

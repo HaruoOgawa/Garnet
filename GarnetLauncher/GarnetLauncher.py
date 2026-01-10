@@ -76,7 +76,6 @@ def Main():
     shutil.copy(GarnetTemplatePath + "GarnetTemplate.sln", GeneratePath + ProjectName + ".sln")
     shutil.copy(GarnetTemplatePath + "GarnetTemplate.vcxproj", GeneratePath + ProjectName + ".vcxproj")
     shutil.copy(GarnetTemplatePath + "GarnetTemplate.vcxproj.filters", GeneratePath + ProjectName + ".vcxproj.filters")
-    shutil.copy(GarnetTemplatePath + "GarnetTemplate.vcxproj.user", GeneratePath + ProjectName + ".vcxproj.user")
 
     # EmscriptenBuild
     if not os.path.exists(GeneratePath + "EmscriptenBuild"):

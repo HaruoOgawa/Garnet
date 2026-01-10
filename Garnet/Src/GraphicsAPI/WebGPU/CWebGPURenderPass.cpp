@@ -6,12 +6,11 @@
 
 namespace api
 {
-	CWebGPURenderPass::CWebGPURenderPass(api::CWebGPUAPI* pGraphicsAPI, const std::string& PassName, ERenderPassFormat RenderPassFormat, const glm::vec4& InitColor):
+	CWebGPURenderPass::CWebGPURenderPass(api::CWebGPUAPI* pGraphicsAPI, const std::string& PassName, ERenderPassFormat RenderPassFormat):
 		m_pGraphicsAPI(pGraphicsAPI),
 		m_PassName(PassName),
 		m_Width(0),
 		m_Height(0),
-		m_InitColor(InitColor),
 		m_RenderPassFormat(RenderPassFormat),
 		m_DepthTexture(nullptr),
 
@@ -44,6 +43,7 @@ namespace api
 	{
 		m_Width = Width;
 		m_Height = Height;
+		m_PassState = PassState;
 
 		graphics::STextureSamplerParam SamplerParam;
 		SamplerParam.FilterMode = graphics::ETextureFilterMode::LINEAR;
@@ -67,16 +67,25 @@ namespace api
 	{
 		// レンダーパスの設定
 		std::vector<WGPURenderPassColorAttachment> renderPassColorAttachments;
-		for (const auto& FrameTexture : m_FrameTextureList)
-		{
-			WGPURenderPassColorAttachment colorAttachment = {};
-			colorAttachment.view = static_cast<CWebGPUTexture*>(FrameTexture.get())->GetTextureImageView(); // レンダリングの描画先テクスチャを指定
-			colorAttachment.resolveTarget = nullptr; // マルチサンプリングの設定
-			colorAttachment.loadOp = WGPULoadOp_Clear; // レンダー パスを実行する前にビューで実行するロード操作を示します。例えばクリア値に初期化するだったり
-			colorAttachment.storeOp = WGPUStoreOp_Store; // レンダリング実行後の操作
-			colorAttachment.clearValue = WGPUColor{ m_InitColor.x, m_InitColor.y, m_InitColor.z, m_InitColor.w }; // 初期カラー
 
-			renderPassColorAttachments.push_back(colorAttachment);
+		{
+			if (m_PassState.RenderTargetCount != static_cast<int>(m_PassState.InitColorList.size())) return false;
+			if (m_PassState.RenderTargetCount != static_cast<int>(m_FrameTextureList.size())) return false;
+
+			for (int i = 0; i < m_PassState.RenderTargetCount; i++)
+			{
+				const auto& FrameTexture = m_FrameTextureList[i];
+				const auto& InitColor = m_PassState.InitColorList[i];
+
+				WGPURenderPassColorAttachment colorAttachment = {};
+				colorAttachment.view = static_cast<CWebGPUTexture*>(FrameTexture.get())->GetTextureImageView(); // レンダリングの描画先テクスチャを指定
+				colorAttachment.resolveTarget = nullptr; // マルチサンプリングの設定
+				colorAttachment.loadOp = WGPULoadOp_Clear; // レンダー パスを実行する前にビューで実行するロード操作を示します。例えばクリア値に初期化するだったり
+				colorAttachment.storeOp = WGPUStoreOp_Store; // レンダリング実行後の操作
+				colorAttachment.clearValue = WGPUColor{ InitColor.r, InitColor.g, InitColor.b, InitColor.a }; // 初期カラー
+
+				renderPassColorAttachments.push_back(colorAttachment);
+			}
 		}
 
 		// デプスステンシルバッファの設定

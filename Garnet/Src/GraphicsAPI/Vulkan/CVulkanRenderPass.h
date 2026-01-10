@@ -29,7 +29,6 @@ namespace api
 		std::string m_PassName;
 		int m_Width;
 		int m_Height;
-		glm::vec4 m_InitColor;
 		api::ERenderPassFormat m_RenderPassFormat_Color;
 		api::ERenderPassFormat m_RenderPassFormat_Depth;
 		std::vector<std::shared_ptr<graphics::CTexture>> m_FrameTextureList;
@@ -43,7 +42,7 @@ namespace api
 		bool CreateRenderPass(const graphics::SRenderPassState& PassState);
 		bool CreateFrameBuffer(int Width, int Height);
 	public:
-		CVulkanRenderPass(api::CVulkanAPI* pGraphicsAPI, const std::string& PassName, ERenderPassFormat RenderPassFormat, const glm::vec4& InitColor);
+		CVulkanRenderPass(api::CVulkanAPI* pGraphicsAPI, const std::string& PassName, ERenderPassFormat RenderPassFormat);
 		virtual ~CVulkanRenderPass();
 
 		virtual std::shared_ptr<graphics::CTexture> GetFrameTexture(int Index = 0) override;
