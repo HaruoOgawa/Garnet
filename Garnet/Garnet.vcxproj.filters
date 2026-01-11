@@ -3168,6 +3168,9 @@
     <ClInclude Include="Src\Timeline\CCustomTrack.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Debug\Message\Console.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\WindowAPI\CGLFWWindowAPI.cpp">
