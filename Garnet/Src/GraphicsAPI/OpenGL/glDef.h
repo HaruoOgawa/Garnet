@@ -2,6 +2,7 @@
 //#pragma once
 
 // Reference: https://github.com/ApoorvaJ/Papaya/blob/3808e39b0f45d4ca4972621c847586e4060c042a/src/libs/gl_lite.h#L113
+// gl definition: https://registry.khronos.org/OpenGL/api/GL/glext.h
 
 #ifdef USE_OPENGL
 
@@ -62,10 +63,36 @@
 #define GL_SHADER_STORAGE_BUFFER          0x90D2
 #define GL_SHADER_STORAGE_BLOCK           0x92E6
 #define GL_MAX_SAMPLES                    0x8D57
+#define GL_FRAMEBUFFER_BINDING            0x8CA6
+#define GL_CURRENT_PROGRAM                0x8B8D
+#define GL_ACTIVE_TEXTURE                 0x84E0
+#define GL_VERTEX_ATTRIB_ARRAY_ENABLED    0x8622
+#define GL_BLEND_DST_RGB                  0x80C8
+#define GL_BLEND_SRC_RGB                  0x80C9
+#define GL_BLEND_DST_ALPHA                0x80CA
+#define GL_BLEND_SRC_ALPHA                0x80CB
+#define GL_TEXTURE_MAX_ANISOTROPY_EXT     0x84FE
+#define GL_VALIDATE_STATUS                0x8B83
 
 typedef char GLchar;
 typedef ptrdiff_t GLintptr;
 typedef ptrdiff_t GLsizeiptr;
+
+typedef unsigned int GLenum;
+typedef unsigned char GLboolean;
+typedef unsigned int GLbitfield;
+typedef signed char GLbyte;
+typedef short GLshort;
+typedef int GLint;
+typedef int GLsizei;
+typedef unsigned char GLubyte;
+typedef unsigned short GLushort;
+typedef unsigned int GLuint;
+typedef float GLfloat;
+typedef float GLclampf;
+typedef double GLdouble;
+typedef double GLclampd;
+typedef void GLvoid;
 
 #include <gl/GL.h>
 
@@ -107,17 +134,25 @@ typedef ptrdiff_t GLsizeiptr;
 	GL_FUNC(void,   GenFramebuffers,	  GLsizei n, GLuint* ids) \
 	GL_FUNC(void,   BindFramebuffer,	  GLenum target, GLuint framebuffer) \
 	GL_FUNC(void,   FramebufferTexture2D, GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level) \
+	GL_FUNC(void,   FramebufferRenderbuffer, GLenum target, GLenum attachment, GLenum renderbuffertarget, GLuint renderbuffer) \
+	GL_FUNC(void,	BlitFramebuffer, 	  GLint srcX0, GLint srcY0, GLint srcX1, GLint srcY1, GLint dstX0, GLint dstY0, GLint dstX1, GLint dstY1, GLbitfield mask, GLenum filter) \
+	GL_FUNC(void,	DeleteFramebuffers,   GLsizei n, const GLuint *framebuffers) \
 	GL_FUNC(void,   GenRenderbuffers,	  GLsizei n, GLuint* renderbuffers) \
 	GL_FUNC(void,   BindRenderbuffer,	  GLenum target, GLuint renderbuffer) \
 	GL_FUNC(void,   RenderbufferStorage,  GLenum target, GLenum internalformat, GLsizei width, GLsizei height) \
-	GL_FUNC(void,   FramebufferRenderbuffer, GLenum target, GLenum attachment, GLenum renderbuffertarget, GLuint renderbuffer) \
 	GL_FUNC(void,	DrawElementsInstanced,GLenum mode, GLsizei count, GLenum type, const void* indices, GLsizei instancecount) \
 	GL_FUNC(void,	DispatchCompute, 	  GLuint num_groups_x, GLuint num_groups_y, GLuint num_groups_z) \
 	GL_FUNC(void,	DrawBuffers, 	      GLsizei n, const GLenum* bufs) \
-	GL_FUNC(void,	BlitFramebuffer, 	  GLint srcX0, GLint srcY0, GLint srcX1, GLint srcY1, GLint dstX0, GLint dstY0, GLint dstX1, GLint dstY1, GLbitfield mask, GLenum filter) \
 	GL_FUNC(void,	RenderbufferStorageMultisample, GLenum target, GLsizei samples, GLenum internalformat, GLsizei width, GLsizei height) \
 	GL_FUNC(void,	BlendFuncSeparate,	  GLenum srcRGB, GLenum dstRGB, GLenum srcAlpha, GLenum dstAlpha) \
 	GL_FUNC(void,	ClearBufferfv, 		  GLenum buffer, GLint drawbuffer, const GLfloat* value) \
+	GL_FUNC(void,	DisableVertexAttribArray , GLuint index) \
+	GL_FUNC(void,	GetVertexAttribiv ,   GLuint index, GLenum pname, GLint *params) \
+	GL_FUNC(GLint,	GetAttribLocation ,   GLuint program, const GLchar *name) \
+	GL_FUNC(void,	UniformMatrix4fv  ,   GLint location, GLsizei count, GLboolean transpose, const GLfloat *value) \
+	GL_FUNC(void,	ValidateProgram  ,    GLuint program) \
+	GL_FUNC(void,	DetachShader  ,		  GLuint program, GLuint shader) \
+	GL_FUNC(void,	Uniform4f  ,		  GLint location, GLfloat v0, GLfloat v1, GLfloat v2, GLfloat v3) \
 /* end */
 
 // プリプロセッサ芸でまずGL_FUNC_LISTの中身をtypedef や externで展開する
