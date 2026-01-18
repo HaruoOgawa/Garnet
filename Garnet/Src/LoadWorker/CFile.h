@@ -26,6 +26,7 @@ namespace resource
 		
 		const std::string m_Filename;
 		std::string m_Extention;
+		std::string m_Directory;
 
 		bool m_IsSync; // 同期的にロードするかどうか. 基本的には非同期
 
@@ -38,6 +39,7 @@ namespace resource
 		virtual ~CFile();
 
 		const std::string& GetExtention() const;
+		std::string GetDirectory() const;
 
 		void SetIsSync(bool IsSync);
 

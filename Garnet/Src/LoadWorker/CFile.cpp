@@ -18,6 +18,7 @@ namespace resource
 		m_AssertedErrorMessage(std::string())
 	{
 		m_Extention = format::CPathFormatter::GetExtention(filename);
+		m_Directory = format::CPathFormatter::GetParentDir(filename);
 	}
 
 	CFile::~CFile()
@@ -27,6 +28,11 @@ namespace resource
 	const std::string& CFile::GetExtention() const
 	{
 		return m_Extention;
+	}
+
+	std::string CFile::GetDirectory() const
+	{
+		return m_Directory;
 	}
 
 	void CFile::SetIsSync(bool IsSync)
