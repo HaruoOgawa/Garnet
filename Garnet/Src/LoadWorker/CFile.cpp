@@ -18,7 +18,7 @@ namespace resource
 		m_AssertedErrorMessage(std::string())
 	{
 		m_Extention = format::CPathFormatter::GetExtention(filename);
-		m_Directory = format::CPathFormatter::GetParentDir(filename);
+		m_Directory = AddPunct(format::CPathFormatter::GetParentDir(filename));
 	}
 
 	CFile::~CFile()
