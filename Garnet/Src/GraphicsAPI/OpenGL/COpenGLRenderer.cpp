@@ -28,6 +28,11 @@ namespace api
 		}
 	}
 
+	void COpenGLRenderer::SetDisactive() const
+	{
+		glBindVertexArray(0);
+	}
+
 	const std::shared_ptr<graphics::CVertexBuffer>& COpenGLRenderer::GetVertexBuffer() const
 	{
 		return m_VertexBuffer;
@@ -37,8 +42,6 @@ namespace api
 	{
 		glGenVertexArrays(1, &m_VertexArray);
 		glBindVertexArray(m_VertexArray);
-
-		//glBindVertexArray(0);
 
 		return true;
 	}
@@ -294,6 +297,9 @@ namespace api
 		
 		// フラグをもとに戻す
 		glDepthMask(GL_TRUE);
+
+		// レンダラーをアンバインド
+		SetDisactive();
 
 		return true;
 	}
