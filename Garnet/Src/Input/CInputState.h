@@ -24,6 +24,11 @@ namespace input
 		KEY_TYPE_3,
 		KEY_TYPE_4,
 		KEY_TYPE_5,
+		KEY_TYPE_6,
+		KEY_TYPE_7,
+		KEY_TYPE_8,
+		KEY_TYPE_9,
+		KEY_TYPE_0,
 
 		KEY_TYPE_F1,
 	};

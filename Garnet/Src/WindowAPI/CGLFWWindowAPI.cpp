@@ -92,19 +92,44 @@ namespace window
 				KeyType = input::EKeyType::KEY_TYPE_D;
 				break;
 			case GLFW_KEY_1:
+			case GLFW_KEY_KP_1:
 				KeyType = input::EKeyType::KEY_TYPE_1;
 				break;
 			case GLFW_KEY_2:
+			case GLFW_KEY_KP_2:
 				KeyType = input::EKeyType::KEY_TYPE_2;
 				break;
 			case GLFW_KEY_3:
+			case GLFW_KEY_KP_3:
 				KeyType = input::EKeyType::KEY_TYPE_3;
 				break;
 			case GLFW_KEY_4:
+			case GLFW_KEY_KP_4:
 				KeyType = input::EKeyType::KEY_TYPE_4;
 				break;
 			case GLFW_KEY_5:
+			case GLFW_KEY_KP_5:
 				KeyType = input::EKeyType::KEY_TYPE_5;
+				break;
+			case GLFW_KEY_6:
+			case GLFW_KEY_KP_6:
+				KeyType = input::EKeyType::KEY_TYPE_6;
+				break;
+			case GLFW_KEY_7:
+			case GLFW_KEY_KP_7:
+				KeyType = input::EKeyType::KEY_TYPE_7;
+				break;
+			case GLFW_KEY_8:
+			case GLFW_KEY_KP_8:
+				KeyType = input::EKeyType::KEY_TYPE_8;
+				break;
+			case GLFW_KEY_9:
+			case GLFW_KEY_KP_9:
+				KeyType = input::EKeyType::KEY_TYPE_9;
+				break;
+			case GLFW_KEY_0:
+			case GLFW_KEY_KP_0:
+				KeyType = input::EKeyType::KEY_TYPE_0;
 				break;
 			case GLFW_KEY_F1:
 				KeyType = input::EKeyType::KEY_TYPE_F1;
