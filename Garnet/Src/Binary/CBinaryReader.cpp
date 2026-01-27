@@ -15,6 +15,11 @@ namespace binary
 	{
 	}
 
+	const std::vector<unsigned char>& CBinaryReader::GetData() const
+	{
+		return m_Data;
+	}
+
 	unsigned char* CBinaryReader::GetPointer() const
 	{
 		return m_Pointer;
@@ -70,6 +75,8 @@ namespace binary
 
 		for (;;)
 		{
+			if (IsEnd()) break;
+
 			if (m_Data[CurrentOffset] == 0) break;
 
 			Dst += static_cast<char>(m_Data[CurrentOffset]);

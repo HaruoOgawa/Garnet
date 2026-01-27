@@ -165,6 +165,10 @@ namespace network
 		{
 			if (!AnalyseArtNet(pApp, Analyser)) return false;
 		}
+		else
+		{
+			if (!pApp->OnReceiveBinary(Analyser.GetData())) return false;
+		}
 
 		return true;
 	}

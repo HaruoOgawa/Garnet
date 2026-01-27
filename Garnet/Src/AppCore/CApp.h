@@ -77,5 +77,8 @@ namespace app
 
 		// カスタムイベント発火
 		virtual void OnRaisedEvent(const std::string& Type, const std::string& Params);
+
+		// バイナリ受信イベント
+		virtual bool OnReceiveBinary(const std::vector<unsigned char>& Binary);
 	};
 }
