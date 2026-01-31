@@ -3,6 +3,8 @@
 #include "../Animation/CBlendShapeNameProvider.h"
 #include "../Interface/IRenderer.h"
 #include "../Graphics/CMaterial.h"
+#include "../Graphics/CDrawObj.h"
+#include <algorithm>
 
 namespace api
 {
@@ -186,15 +188,9 @@ namespace api
 	}
 
 	// ソート描画用オブジェクト追加
-	bool CGraphicsAPI::AddDrawObj(const api::SDrawObj& DrawObj)
+	bool CGraphicsAPI::AddDrawObj(const std::shared_ptr<graphics::CDrawObj>& DrawObj)
 	{
-		// 空なら新しく追加
-		if (m_DrawObjList.find(DrawObj.RenderQueue) == m_DrawObjList.end())
-		{
-			m_DrawObjList.emplace(DrawObj.RenderQueue, std::multimap<float, api::SDrawObj, std::greater<float>>());
-		}
-
-		m_DrawObjList[DrawObj.RenderQueue].emplace(DrawObj.ToCameraDist, DrawObj);
+		m_DrawObjList[DrawObj->GetRenderQueue()].push_back(DrawObj);
 
 		return true;
 	}
@@ -202,15 +198,16 @@ namespace api
 	// ソート描画実行
 	bool CGraphicsAPI::DoSortedDraw()
 	{
-		for (const auto& Queue : m_DrawObjList)
+		for (auto& Queue : m_DrawObjList)
 		{
-			for (const auto& DistDrawObjPair : Queue.second)
-			{
-				const auto& DrawObj = DistDrawObjPair.second;
-				
-				std::get<1>(DrawObj.RendererMat)->SetUniformValue("model", &DrawObj.WorldMatrix[0][0], sizeof(glm::mat4));
+			// 並べ替え
+			std::sort(Queue.second.begin(), Queue.second.end(), [](auto a, auto b) {
+				return (a->GetToCameraDist() > b->GetToCameraDist());
+			});
 
-				if (!std::get<0>(DrawObj.RendererMat)->Draw(DrawObj.VertexBuffer, DrawObj.IndexBuffer, std::get<1>(DrawObj.RendererMat))) return false;
+			for (auto& DrawObj : Queue.second)
+			{
+				if (!DrawObj->Draw()) return false;
 			}
 		}
 

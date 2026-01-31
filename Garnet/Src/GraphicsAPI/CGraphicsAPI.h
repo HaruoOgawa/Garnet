@@ -14,7 +14,7 @@ namespace api
 		std::shared_ptr<animation::CBlendShapeNameProvider> m_BlendShapeNameProvider;
 
 		// ソート描画オブジェクトリスト(レンダーキューとカメラからの距離を考慮した描画)
-		std::map<int, std::multimap<float, api::SDrawObj, std::greater<float>>> m_DrawObjList;
+		std::map<int, std::vector<std::shared_ptr<graphics::CDrawObj>>> m_DrawObjList;
 	protected:
 		std::map<std::string, std::shared_ptr<graphics::IRenderPass>> m_OffScreenRenderPassMap;
 		std::string m_CurrentRenderPassName;
@@ -70,7 +70,7 @@ namespace api
 		virtual const std::shared_ptr<animation::CBlendShapeNameProvider>& GetBlendShapeNameProvider() const override;
 
 		// ソート描画用オブジェクト追加
-		virtual bool AddDrawObj(const api::SDrawObj& DrawObj) override;
+		virtual bool AddDrawObj(const std::shared_ptr<graphics::CDrawObj>& DrawObj) override;
 
 		// ソート描画実行(レンダーキューとカメラからの距離を考慮した描画)
 		virtual bool DoSortedDraw();

@@ -762,11 +762,12 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Src\Graphics\CDrawObj.h" />
+    <ClInclude Include="Src\Graphics\C3DDrawObj.h" />
     <ClInclude Include="Src\Scriptable\CommonComponent\CSpotLightDMXController.h" />
     <ClInclude Include="Src\Graphics\PostProcess\CPostProcess.h" />
     <ClInclude Include="Src\Graphics\PostProcess\CPostProcessBloom.h" />
     <ClInclude Include="Src\Graphics\PostProcess\CPostProcessFXAA.h" />
-    <ClInclude Include="Src\GraphicsAPI\SDrawObj.h" />
     <ClInclude Include="Src\Network\CNDIReceiver.h" />
     <ClInclude Include="Src\Camera\CLookUpTraceCamera.h" />
     <ClInclude Include="Src\Library\NDI\Include\Processing.NDI.compat.h" />
@@ -1867,6 +1868,8 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClInclude Include="Src\Interface\IRenderer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\Graphics\CDrawObj.cpp" />
+    <ClCompile Include="Src\Graphics\C3DDrawObj.cpp" />
     <ClCompile Include="Src\Scriptable\CommonComponent\CSpotLightDMXController.cpp" />
     <ClCompile Include="Src\Graphics\PostProcess\CPostProcess.cpp" />
     <ClCompile Include="Src\Graphics\PostProcess\CPostProcessBloom.cpp" />
