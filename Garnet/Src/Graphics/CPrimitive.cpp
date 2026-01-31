@@ -3,9 +3,9 @@
 #include "CIndexBuffer.h"
 #include "CMaterial.h"
 #include "CTextureSet.h"
+#include "C3DDrawObj.h"
 #include "../Interface/IGraphicsAPI.h"
 #include "../Interface/IRenderer.h"
-#include "../GraphicsAPI/SDrawObj.h"
 
 namespace graphics
 {
@@ -81,7 +81,7 @@ namespace graphics
 			glm::vec3 WorldPos = glm::vec3(WorldMatrix[3][0], WorldMatrix[3][1], WorldMatrix[3][2]);
 			float ToCameraDist = glm::distance(Camera->GetPos(), WorldPos);
 
-			api::SDrawObj DrawObj = { RenderQueue, ToCameraDist, RendererMat, m_VertexBuffer, m_IndexBuffer, WorldMatrix };
+			std::shared_ptr<graphics::C3DDrawObj> DrawObj = std::make_shared<graphics::C3DDrawObj>(RenderQueue, ToCameraDist, std::get<0>(RendererMat), std::get<1>(RendererMat), m_VertexBuffer, m_IndexBuffer, WorldMatrix);
 			if (!pGraphicsAPI->AddDrawObj(DrawObj)) return false;
 #else
 			if (!std::get<0>(RendererMat)->Draw(m_VertexBuffer, m_IndexBuffer, std::get<1>(RendererMat))) return false;

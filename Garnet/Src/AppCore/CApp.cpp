@@ -127,4 +127,10 @@ namespace app
 	void CApp::OnRaisedEvent(const std::string& Type, const std::string& Params)
 	{
 	}
+
+	// バイナリ受信イベント
+	bool CApp::OnReceiveBinary(const std::vector<unsigned char>& Binary)
+	{
+		return true;
+	}
 }

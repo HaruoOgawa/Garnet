@@ -36,6 +36,7 @@ namespace api
 		virtual ~COpenGLRenderer();
 
 		void SetActive() const;
+		void SetDisactive() const;
 
 		const std::shared_ptr<graphics::CVertexBuffer>& GetVertexBuffer() const;
 

@@ -21,6 +21,8 @@ namespace binary
 		CBinaryReader(const std::vector<unsigned char>& Data);
 		virtual ~CBinaryReader();
 
+		const std::vector<unsigned char>& GetData() const;
+
 		unsigned char* GetPointer() const;
 
 		bool IsValid(size_t ByteSize);
