@@ -90,6 +90,28 @@ namespace binary
 		return true;
 	}
 
+	bool CBinaryReader::GetStringToLineBreak(std::string& Dst)
+	{
+		size_t ByteSize = 0;
+		int CurrentOffset = m_Offset;
+
+		for (;;)
+		{
+			if (IsEnd()) break;
+
+			if (m_Data[CurrentOffset] == '\n') break;
+
+			Dst += static_cast<char>(m_Data[CurrentOffset]);
+
+			ByteSize++;
+			CurrentOffset++;
+		}
+
+		UpdatePointer(ByteSize + 1);
+
+		return true;
+	}
+
 	bool CBinaryReader::GetUTF16String(std::wstring& Dst, size_t ByteSize)
 	{
 		if (!IsValid(ByteSize)) return false;
