@@ -5,6 +5,7 @@
 #include "../Format/CPathFormatter.h"
 #include "../LoadWorker/CLoadWorker.h"
 #include "../GLTF/CGLTFImporter.h"
+#include "../OBJ/COBJImporter.h"
 
 #if defined(USE_FBX)
 #ifdef USE_SMALL_FBX
@@ -139,6 +140,11 @@ namespace resource
 #ifdef USE_MMD
 			if (!mmd::CPmxImporter::ImportPmx(pGraphicsAPI, pPhysicsEngine, m_FileName, m_File->GetData(), m_TargetObject.get(), m_BaseMaterialFrameList, this, m_TargetRigType, m_TargetHumanoidBoneList)) return false;
 #endif
+		}
+		else if (Extention == "obj")
+		{
+			std::string BaseDir = format::CPathFormatter::GetParentDir(m_FileName);
+			if (!obj::COBJImporter::Import(pGraphicsAPI, m_File->GetData(), BaseDir, m_TargetObject.get(), m_BaseMaterialFrameList, this)) return false;
 		}
 		else
 		{
