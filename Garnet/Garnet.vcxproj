@@ -762,6 +762,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Src\OBJ\CMTLImporter.h" />
     <ClInclude Include="Src\Format\CStringFormatter.h" />
     <ClInclude Include="Src\OBJ\COBJImporter.h" />
     <ClInclude Include="Src\Graphics\CDrawObj.h" />
@@ -1870,6 +1871,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClInclude Include="Src\Interface\IRenderer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\OBJ\CMTLImporter.cpp" />
     <ClCompile Include="Src\Format\CStringFormatter.cpp" />
     <ClCompile Include="Src\OBJ\COBJImporter.cpp" />
     <ClCompile Include="Src\Graphics\CDrawObj.cpp" />

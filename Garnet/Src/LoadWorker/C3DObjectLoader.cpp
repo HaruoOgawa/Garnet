@@ -6,6 +6,7 @@
 #include "../LoadWorker/CLoadWorker.h"
 #include "../GLTF/CGLTFImporter.h"
 #include "../OBJ/COBJImporter.h"
+#include "../OBJ/CMTLImporter.h"
 
 #if defined(USE_FBX)
 #ifdef USE_SMALL_FBX
@@ -144,7 +145,12 @@ namespace resource
 		else if (Extention == "obj")
 		{
 			std::string BaseDir = format::CPathFormatter::GetParentDir(m_FileName);
-			if (!obj::COBJImporter::Import(pGraphicsAPI, m_File->GetData(), BaseDir, m_TargetObject.get(), m_BaseMaterialFrameList, this)) return false;
+			if (!obj::COBJImporter::Import(pGraphicsAPI, m_File->GetData(), BaseDir, m_TargetObject, m_BaseMaterialFrameList, this)) return false;
+		}
+		else if (Extention == "mtl")
+		{
+			std::string BaseDir = format::CPathFormatter::GetParentDir(m_FileName);
+			if (!obj::CMTLImporter::Import(pGraphicsAPI, m_File->GetData(), BaseDir, m_TargetObject, m_BaseMaterialFrameList, this)) return false;
 		}
 		else
 		{

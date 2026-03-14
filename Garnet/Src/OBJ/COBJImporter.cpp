@@ -12,9 +12,12 @@
 namespace obj
 {
 	bool COBJImporter::Import(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& Data,
-		const std::string& BaseDir, object::C3DObject* Object,
-		const std::vector<std::shared_ptr<graphics::CMaterialFrame>>& BaseMaterialFrameList, resource::C3DObjectLoader* p3DObjectLoader)
+		const std::string& BaseDir, const std::shared_ptr<object::C3DObject>& Object,
+		const std::vector<std::shared_ptr<graphics::CMaterialFrame>>& BaseMaterialFrameList,
+		resource::C3DObjectLoader* p3DObjectLoader)
 	{
+		if (!p3DObjectLoader) return false;
+
 		binary::CBinaryReader Analyzer(Data);
 
 		std::vector<std::string> LineList;
@@ -33,13 +36,15 @@ namespace obj
 			std::vector<std::string> ParamList = format::CStringFormatter::Sprint(CurrentLine, ' ');
 			if (ParamList.empty()) continue;
 
-			Analyze(ParamList, CurrentLine, Vertices, Texcoords, Normals);
+			Analyze(ParamList, CurrentLine, BaseDir, Object, p3DObjectLoader, Vertices, Texcoords, Normals);
 		}
 
 		return true;
 	}
 
 	void COBJImporter::Analyze(const std::vector<std::string>& ParamList, const std::string& CurrentLine,
+		const std::string& BaseDir, const std::shared_ptr<object::C3DObject>& Object,
+		resource::C3DObjectLoader* p3DObjectLoader,
 		std::vector<float>& Vertices, std::vector<float>& Texcoords, std::vector<float>& Normals)
 	{
 		if (ParamList[0] == "v" && ParamList.size() >= 4)
@@ -70,6 +75,27 @@ namespace obj
 		{
 			// プリミティブ名(ここでプリミティブを分割する)
 			std::string PrimitiveName = ParamList[1];
+		}
+		else if (ParamList[0] == "mtllib" && ParamList.size() >= 2)
+		{
+			// mtllibファイル名
+			std::string mtllibName = ParamList[1];
+			std::string fullPathMtl = BaseDir + "/" + mtllibName;
+
+			std::vector<std::shared_ptr<graphics::CMaterialFrame>> BaseMaterialFrameList;
+			std::vector<std::string> defaultmaterialframes;
+			std::map<animation::EHumanoidBones, std::string> HumanoidBoneList;
+
+			std::shared_ptr<resource::C3DObjectLoader> mtllibResource = std::make_shared<resource::C3DObjectLoader>(
+				fullPathMtl, Object, BaseMaterialFrameList, defaultmaterialframes, animation::ERigType::None, HumanoidBoneList, 0
+			);
+
+			p3DObjectLoader->AddSubResource(mtllibResource);
+		}
+		else if (ParamList[0] == "#")
+		{
+			// コメントなので何もしない
+			return;
 		}
 		else
 		{
