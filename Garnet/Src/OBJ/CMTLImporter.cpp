@@ -28,7 +28,7 @@ namespace obj
 			if (!Analyzer.GetStringToLineBreak(CurrentLine)) return false;
 			LineList.push_back(CurrentLine);
 
-			std::vector<std::string> ParamList = format::CStringFormatter::Sprint(CurrentLine, ' ');
+			std::vector<std::string> ParamList = format::CStringFormatter::Sprit(CurrentLine, ' ');
 			if (ParamList.empty()) continue;
 
 			Analyze(ParamList, CurrentLine, BaseDir, Object, p3DObjectLoader);

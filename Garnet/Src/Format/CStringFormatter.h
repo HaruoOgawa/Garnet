@@ -8,6 +8,6 @@ namespace format
 	class CStringFormatter
 	{
 	public:
-		static std::vector<std::string> Sprint(std::string Src, char Key);
+		static std::vector<std::string> Sprit(std::string Src, char Key);
 	};
 }

@@ -2,7 +2,7 @@
 
 namespace format
 {
-	std::vector<std::string> CStringFormatter::Sprint(std::string Src, char Key)
+	std::vector<std::string> CStringFormatter::Sprit(std::string Src, char Key)
 	{
 		std::vector<std::string> ParamList;
 
