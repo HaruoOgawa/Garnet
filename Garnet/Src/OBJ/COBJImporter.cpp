@@ -2,6 +2,8 @@
 #include "../../Interface/IGraphicsAPI.h"
 #include "../../Object/C3DObject.h"
 #include "../../Graphics/CMaterialFrame.h"
+#include "../../Graphics/CVertexBuffer.h"
+#include "../../Graphics/CIndexBuffer.h"
 #include "../../LoadWorker/C3DObjectLoader.h"
 #include "../../Binary/CBinaryReader.h"
 #include "../../Format/CStringFormatter.h"
@@ -46,7 +48,7 @@ namespace obj
 		}
 
 		// Objectデータ構築
-		if (!Build(Object, BaseMaterialFrameList, Positions, Texcoords, Normals, VertexDataIndexes)) return false;
+		if (!Build(pGraphicsAPI, Object, BaseMaterialFrameList, Positions, Texcoords, Normals, VertexDataIndexes)) return false;
 
 		return true;
 	}
@@ -118,7 +120,7 @@ namespace obj
 		}
 	}
 
-	bool COBJImporter::Build(const std::shared_ptr<object::C3DObject>& Object,
+	bool COBJImporter::Build(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<object::C3DObject>& Object,
 		const std::vector<std::shared_ptr<graphics::CMaterialFrame>>& BaseMaterialFrameList,
 		const std::vector<float>& SrcPositions, const std::vector<float>& SrcTexcoords, const std::vector<float>& SrcNormals,
 		const std::map<std::string, std::vector<std::string>>& SrcVertexDataIndexes)
@@ -141,6 +143,8 @@ namespace obj
 			int MeshIndex = static_cast<int>(Object->GetMeshList().size());
 			int SelfNodeIndex = static_cast<int>(Object->GetNodeList().size());
 
+			std::shared_ptr<graphics::CMesh> Mesh = std::make_shared<graphics::CMesh>();
+
 			// ノード生成
 			std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(MeshIndex, SelfNodeIndex);
 			Node->SetName(MeshName);
@@ -156,6 +160,36 @@ namespace obj
 				ResultNormals.resize(NumOfVertex * 3, 0.0f);
 			}
 
+			// メッシュを作成する
+			std::shared_ptr<graphics::CMesh> Mesh = std::make_shared<graphics::CMesh>();
+
+			// 頂点バッファ本体
+			std::vector<std::vector<float>> VertexDataList;
+			std::vector<int> DimentionList;
+			std::vector<graphics::EDataType> DataTypeList;
+			std::vector<int> ByteStrideList;
+
+			std::vector<unsigned short> Indices;
+			std::vector<unsigned int> UINTIndices;
+
+			// 頂点データの初期化用(例えばWeightとかNormalを持っていないならそれを0埋めするみたいな処理)
+			std::vector<std::string> NeedAttribNameList = {
+				"POSITION",
+				"NORMAL",
+				"TEXCOORD_0",
+				"TANGENT",
+				"JOINTS_0",
+				"WEIGHTS_0",
+			};
+
+			std::map<std::string, std::vector<float>> ReservedVertexDataList;
+			std::map<std::string, graphics::EDataType> ReservedDataTypeList;
+			std::map<std::string, int> ReservedByteStrideList;
+
+			// OBJは常にタンジェントの計算が必要
+			const bool NeedRecalculateTangent = true;
+
+			//
 			for (int v = 0; v < DataIndexes.size(); v += 3)
 			{
 				std::tuple<int, int, int> DataStructure_0 = GetDataStructure(DataIndexes[v + 0], ExistPosition, ExistTexcoord, ExistNormal);
@@ -202,6 +236,12 @@ namespace obj
 					AddVertexNormal(NumOfVertex, std::get<0>(DataStructure_1), 3, Normal, ResultNormals);
 					AddVertexNormal(NumOfVertex, std::get<0>(DataStructure_2), 3, Normal, ResultNormals);
 				}
+
+				// DataIndexesはポリゴン構成順に並んでいるので頂点インデックスはそのままインデックスをインクリメントしていくだけでいい
+				int VertexIndex = static_cast<int>(UINTIndices.size());
+				UINTIndices.push_back(VertexIndex + 0);
+				UINTIndices.push_back(VertexIndex + 1);
+				UINTIndices.push_back(VertexIndex + 2);
 			}
 
 			// 法線を正規化
@@ -210,10 +250,143 @@ namespace obj
 				NormalizeNormals(ResultNormals);
 			}
 
-			// メッシュ・マテリアル生成
+			// アトリビュートと紐づけ
+			{
+				{
+					ReservedVertexDataList.emplace("POSITION", ResultPositions);
+					ReservedDataTypeList.emplace("POSITION", graphics::EDataType::TYPE_FLOAT);
+					ReservedByteStrideList.emplace("POSITION", 0);
+				}
+
+				{
+					ReservedVertexDataList.emplace("NORMAL", ResultNormals);
+					ReservedDataTypeList.emplace("NORMAL", graphics::EDataType::TYPE_FLOAT);
+					ReservedByteStrideList.emplace("NORMAL", 0);
+				}
+
+				{
+					ReservedVertexDataList.emplace("TEXCOORD_0", ResultTexcoords);
+					ReservedDataTypeList.emplace("TEXCOORD_0", graphics::EDataType::TYPE_FLOAT);
+					ReservedByteStrideList.emplace("TEXCOORD_0", 0);
+				}
+
+				{
+					// 接線は後で再計算するので今は0で初期化しておく
+					std::vector<float> AttributeData;
+					AttributeData.resize(NumOfVertex * 4, 0.0f);
+
+					ReservedVertexDataList.emplace("TANGENT", AttributeData);
+					ReservedDataTypeList.emplace("TANGENT", graphics::EDataType::TYPE_FLOAT);
+					ReservedByteStrideList.emplace("TANGENT", 0);
+				}
+
+				{
+					std::vector<float> AttributeData;
+					AttributeData.resize(NumOfVertex * 4, 0.0f);
+
+					ReservedVertexDataList.emplace("JOINTS_0", AttributeData);
+					ReservedDataTypeList.emplace("JOINTS_0", graphics::EDataType::TYPE_UNSIGNED_INT);
+					ReservedByteStrideList.emplace("JOINTS_0", 4 * 4);
+				}
+
+				{
+					std::vector<float> AttributeData;
+					AttributeData.resize(NumOfVertex * 4, 0.0f);
+
+					ReservedVertexDataList.emplace("WEIGHTS_0", AttributeData);
+					ReservedDataTypeList.emplace("WEIGHTS_0", graphics::EDataType::TYPE_FLOAT);
+					ReservedByteStrideList.emplace("WEIGHTS_0", 0);
+				}
+			}
+
+			// OBJは接線を持っていないので毎回再計算
+			if (NeedRecalculateTangent)
+			{
+				if (Indices.size() > 0)
+				{
+					if (!RecalculateTangent(ReservedVertexDataList["TANGENT"], ReservedVertexDataList["POSITION"], ReservedVertexDataList["TEXCOORD_0"], Indices)) return false;
+				}
+				else if (UINTIndices.size() > 0)
+				{
+					if (!RecalculateTangentWithUINT(ReservedVertexDataList["TANGENT"], ReservedVertexDataList["POSITION"], ReservedVertexDataList["TEXCOORD_0"], UINTIndices)) return false;
+				}
+			}
+
+			// 頂点バッファを構築
+			auto VertexBuffer = pGraphicsAPI->CreateVertexBuffer();
+			{
+				for (const auto& AttribName : NeedAttribNameList)
+				{
+					// ディメンションを登録
+					int Dimention = 1;
+
+					if (AttribName == "POSITION" || AttribName == "NORMAL")
+					{
+						Dimention = 3;
+					}
+					else if (AttribName == "TEXCOORD_0")
+					{
+						Dimention = 2;
+					}
+					else if (AttribName == "TANGENT" || AttribName == "JOINTS_0" || AttribName == "WEIGHTS_0")
+					{
+						Dimention = 4;
+					}
+
+					DimentionList.push_back(Dimention);
+
+					// 頂点バッファにデータを渡す
+					VertexDataList.push_back(ReservedVertexDataList[AttribName]);
+
+					// データタイプ
+					DataTypeList.push_back(ReservedDataTypeList[AttribName]);
+
+					// ByteStride
+					ByteStrideList.push_back(ReservedByteStrideList[AttribName]);
+				}
+
+				// メッシュ情報を渡す
+				VertexBuffer->SetVertices(VertexDataList);
+				VertexBuffer->SetAttributeDimensions(DimentionList);
+				VertexBuffer->SetAttribDataTypes(DataTypeList);
+				VertexBuffer->SetAttribByteStrides(ByteStrideList);
+
+				Mesh->AddVertexBuffer(VertexBuffer);
+			}
+
+			// インデックスバッファ生成
+			auto IndexBuffer = pGraphicsAPI->CreateIndexBuffer();
+			{
+				if (Indices.size() > 0)
+				{
+					unsigned int size = math::CMath::CalcClosestPowerOfFour(static_cast<unsigned int>(Indices.size()));
+
+					Indices.resize(size, 0);
+
+					// Indicesを登録
+					IndexBuffer->SetIndices(Indices);
+				}
+				else if (UINTIndices.size() > 0)
+				{
+					unsigned int size = math::CMath::CalcClosestPowerOfFour(static_cast<unsigned int>(UINTIndices.size()));
+
+					UINTIndices.resize(size, 0);
+
+					// Indicesを登録
+					IndexBuffer->SetUINTIndices(UINTIndices);
+				}
+
+				Mesh->AddIndexBuffer(IndexBuffer);
+			}
+
+			// マテリアル生成
 			
-			//std::shared_ptr<graphics::CPrimitive>
-			//Object->AddMesh
+			// プリミティブを作成する
+			std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(VertexBuffer, IndexBuffer);
+			// AddMaterial
+
+			Mesh->AddPrimitive(Primitive);
+			Object->AddMesh(Mesh);
 		}
 
 		return true;
@@ -337,4 +510,104 @@ namespace obj
 			ResultNormals[i + 2] = Normal.z;
 		}
 	}
+
+
+	bool COBJImporter::RecalculateTangent(std::vector<float>& TangentData, const std::vector<float>& PosotionData, const std::vector<float>& TexcoordData, const std::vector<unsigned short>& Indices)
+	{
+		for (int i = 0; i < Indices.size(); i += 3)
+		{
+			// 頂点情報を取得
+			unsigned short Index0 = Indices[i + 0], Index1 = Indices[i + 1], Index2 = Indices[i + 2];
+
+			glm::vec3 Pos0 = glm::vec3(PosotionData[Index0 * 3 + 0], PosotionData[Index0 * 3 + 1], PosotionData[Index0 * 3 + 2]);
+			glm::vec3 Pos1 = glm::vec3(PosotionData[Index1 * 3 + 0], PosotionData[Index1 * 3 + 1], PosotionData[Index1 * 3 + 2]);
+			glm::vec3 Pos2 = glm::vec3(PosotionData[Index2 * 3 + 0], PosotionData[Index2 * 3 + 1], PosotionData[Index2 * 3 + 2]);
+
+			glm::vec2 Texcoord0 = glm::vec2(TexcoordData[Index0 * 2 + 0], TexcoordData[Index0 * 2 + 1]);
+			glm::vec2 Texcoord1 = glm::vec2(TexcoordData[Index1 * 2 + 0], TexcoordData[Index1 * 2 + 1]);
+			glm::vec2 Texcoord2 = glm::vec2(TexcoordData[Index2 * 2 + 0], TexcoordData[Index2 * 2 + 1]);
+
+			// 計算に使用するデータの下準備
+			glm::vec3 E1 = Pos0 - Pos1;
+			glm::vec3 E2 = Pos2 - Pos1;
+			glm::vec2 dUV1 = Texcoord0 - Texcoord1;
+			glm::vec2 dUV2 = Texcoord2 - Texcoord1;
+
+			float f = 1.0f / (dUV1.x * dUV2.y - dUV2.x * dUV1.y);
+
+			glm::vec4 Tangent = glm::vec4(0.0f);
+			glm::vec4 BioTangent = glm::vec4(0.0f);
+
+			// 接線と複接線を計算
+			Tangent.x = f * (dUV2.y * E1.x - dUV1.y * E2.x);
+			Tangent.y = f * (dUV2.y * E1.y - dUV1.y * E2.y);
+			Tangent.z = f * (dUV2.y * E1.z - dUV1.y * E2.z);
+
+			BioTangent.x = f * (-dUV2.x * E1.x + dUV1.x * E2.x);
+			BioTangent.y = f * (-dUV2.x * E1.y + dUV1.x * E2.y);
+			BioTangent.z = f * (-dUV2.x * E1.z + dUV1.x * E2.z);
+
+			// データを書き込む
+			TangentData[Index0 * 4 + 0] = Tangent.x; TangentData[Index0 * 4 + 1] = Tangent.y; TangentData[Index0 * 4 + 2] = Tangent.z; TangentData[Index0 * 4 + 3] = Tangent.w;
+			TangentData[Index1 * 4 + 0] = Tangent.x; TangentData[Index1 * 4 + 1] = Tangent.y; TangentData[Index1 * 4 + 2] = Tangent.z; TangentData[Index1 * 4 + 3] = Tangent.w;
+			TangentData[Index2 * 4 + 0] = Tangent.x; TangentData[Index2 * 4 + 1] = Tangent.y; TangentData[Index2 * 4 + 2] = Tangent.z; TangentData[Index2 * 4 + 3] = Tangent.w;
+
+			// BioTangentはShaderで計算する
+			/*BioTangentData[Index0 * 4 + 0] = BioTangent.x; BioTangentData[Index0 * 4 + 1] = BioTangent.y; BioTangentData[Index0 * 4 + 2] = BioTangent.z; BioTangentData[Index0 * 4 + 3] = BioTangent.w;
+			BioTangentData[Index1 * 4 + 0] = BioTangent.x; BioTangentData[Index1 * 4 + 1] = BioTangent.y; BioTangentData[Index1 * 4 + 2] = BioTangent.z; BioTangentData[Index1 * 4 + 3] = BioTangent.w;
+			BioTangentData[Index2 * 4 + 0] = BioTangent.x; BioTangentData[Index2 * 4 + 1] = BioTangent.y; BioTangentData[Index2 * 4 + 2] = BioTangent.z; BioTangentData[Index2 * 4 + 3] = BioTangent.w;*/
+		}
+
+		return true;
+	}
+
+	bool COBJImporter::RecalculateTangentWithUINT(std::vector<float>& TangentData, const std::vector<float>& PosotionData, const std::vector<float>& TexcoordData, const std::vector<unsigned int>& Indices)
+	{
+		for (int i = 0; i < Indices.size(); i += 3)
+		{
+			// 頂点情報を取得
+			unsigned int Index0 = Indices[i + 0], Index1 = Indices[i + 1], Index2 = Indices[i + 2];
+
+			glm::vec3 Pos0 = glm::vec3(PosotionData[Index0 * 3 + 0], PosotionData[Index0 * 3 + 1], PosotionData[Index0 * 3 + 2]);
+			glm::vec3 Pos1 = glm::vec3(PosotionData[Index1 * 3 + 0], PosotionData[Index1 * 3 + 1], PosotionData[Index1 * 3 + 2]);
+			glm::vec3 Pos2 = glm::vec3(PosotionData[Index2 * 3 + 0], PosotionData[Index2 * 3 + 1], PosotionData[Index2 * 3 + 2]);
+
+			glm::vec2 Texcoord0 = glm::vec2(TexcoordData[Index0 * 2 + 0], TexcoordData[Index0 * 2 + 1]);
+			glm::vec2 Texcoord1 = glm::vec2(TexcoordData[Index1 * 2 + 0], TexcoordData[Index1 * 2 + 1]);
+			glm::vec2 Texcoord2 = glm::vec2(TexcoordData[Index2 * 2 + 0], TexcoordData[Index2 * 2 + 1]);
+
+			// 計算に使用するデータの下準備
+			glm::vec3 E1 = Pos0 - Pos1;
+			glm::vec3 E2 = Pos2 - Pos1;
+			glm::vec2 dUV1 = Texcoord0 - Texcoord1;
+			glm::vec2 dUV2 = Texcoord2 - Texcoord1;
+
+			float f = 1.0f / (dUV1.x * dUV2.y - dUV2.x * dUV1.y);
+
+			glm::vec4 Tangent = glm::vec4(0.0f);
+			glm::vec4 BioTangent = glm::vec4(0.0f);
+
+			// 接線と複接線を計算
+			Tangent.x = f * (dUV2.y * E1.x - dUV1.y * E2.x);
+			Tangent.y = f * (dUV2.y * E1.y - dUV1.y * E2.y);
+			Tangent.z = f * (dUV2.y * E1.z - dUV1.y * E2.z);
+
+			BioTangent.x = f * (-dUV2.x * E1.x + dUV1.x * E2.x);
+			BioTangent.y = f * (-dUV2.x * E1.y + dUV1.x * E2.y);
+			BioTangent.z = f * (-dUV2.x * E1.z + dUV1.x * E2.z);
+
+			// データを書き込む
+			TangentData[Index0 * 4 + 0] = Tangent.x; TangentData[Index0 * 4 + 1] = Tangent.y; TangentData[Index0 * 4 + 2] = Tangent.z; TangentData[Index0 * 4 + 3] = Tangent.w;
+			TangentData[Index1 * 4 + 0] = Tangent.x; TangentData[Index1 * 4 + 1] = Tangent.y; TangentData[Index1 * 4 + 2] = Tangent.z; TangentData[Index1 * 4 + 3] = Tangent.w;
+			TangentData[Index2 * 4 + 0] = Tangent.x; TangentData[Index2 * 4 + 1] = Tangent.y; TangentData[Index2 * 4 + 2] = Tangent.z; TangentData[Index2 * 4 + 3] = Tangent.w;
+
+			// BioTangentはShaderで計算する
+			/*BioTangentData[Index0 * 4 + 0] = BioTangent.x; BioTangentData[Index0 * 4 + 1] = BioTangent.y; BioTangentData[Index0 * 4 + 2] = BioTangent.z; BioTangentData[Index0 * 4 + 3] = BioTangent.w;
+			BioTangentData[Index1 * 4 + 0] = BioTangent.x; BioTangentData[Index1 * 4 + 1] = BioTangent.y; BioTangentData[Index1 * 4 + 2] = BioTangent.z; BioTangentData[Index1 * 4 + 3] = BioTangent.w;
+			BioTangentData[Index2 * 4 + 0] = BioTangent.x; BioTangentData[Index2 * 4 + 1] = BioTangent.y; BioTangentData[Index2 * 4 + 2] = BioTangent.z; BioTangentData[Index2 * 4 + 3] = BioTangent.w;*/
+		}
+
+		return true;
+	}
+
 }

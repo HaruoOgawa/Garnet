@@ -35,7 +35,7 @@ namespace obj
 			std::vector<float>& Positions, std::vector<float>& Texcoords, std::vector<float>& Normals,
 			std::map<std::string, std::vector<std::string>>& VertexDataIndexes);
 
-		static bool Build(const std::shared_ptr<object::C3DObject>& Object,
+		static bool Build(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<object::C3DObject>& Object,
 			const std::vector<std::shared_ptr<graphics::CMaterialFrame>>& BaseMaterialFrameList,
 			const std::vector<float>& SrcPositions, const std::vector<float>& SrcTexcoords, const std::vector<float>& SrcNormals,
 			const std::map<std::string, std::vector<std::string>>& SrcVertexDataIndexes);
@@ -48,6 +48,10 @@ namespace obj
 			int PosIndex_0, int PosIndex_1, int PosIndex_2);
 		static void AddVertexNormal(int NumOfData, int Index, int Dimention, const glm::vec3& Normal, std::vector<float>& ResultNormals);
 		static void NormalizeNormals(std::vector<float>& ResultNormals);
+
+		static bool RecalculateTangent(std::vector<float>& TangentDat, const std::vector<float>& PosotionData, const std::vector<float>& TexcoordData, const std::vector<unsigned short>& Indices);
+		static bool RecalculateTangentWithUINT(std::vector<float>& TangentData, const std::vector<float>& PosotionData, const std::vector<float>& TexcoordData, const std::vector<unsigned int>& Indices);
+
 	public:
 		static bool Import(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& Data, 
 			const std::string& BaseDir, const std::shared_ptr<object::C3DObject>& Object,
