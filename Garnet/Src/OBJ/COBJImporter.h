@@ -36,7 +36,7 @@ namespace obj
 			std::map<std::string, std::vector<std::string>>& VertexDataIndexes);
 
 		static bool Build(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<object::C3DObject>& Object,
-			const std::vector<std::shared_ptr<graphics::CMaterialFrame>>& BaseMaterialFrameList,
+			std::vector<int>& RootNodeIndexList, const std::vector<std::shared_ptr<graphics::CMaterialFrame>>& BaseMaterialFrameList,
 			const std::vector<float>& SrcPositions, const std::vector<float>& SrcTexcoords, const std::vector<float>& SrcNormals,
 			const std::map<std::string, std::vector<std::string>>& SrcVertexDataIndexes);
 

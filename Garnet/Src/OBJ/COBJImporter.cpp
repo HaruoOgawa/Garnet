@@ -32,6 +32,8 @@ namespace obj
 
 		std::string CurrentMeshName = std::string();
 
+		std::vector<int> RootNodeIndexList;
+
 		// データをパース
 		for (;;)
 		{
@@ -48,7 +50,19 @@ namespace obj
 		}
 
 		// Objectデータ構築
-		if (!Build(pGraphicsAPI, Object, BaseMaterialFrameList, Positions, Texcoords, Normals, VertexDataIndexes)) return false;
+		if (!Build(pGraphicsAPI, Object, RootNodeIndexList, BaseMaterialFrameList, Positions, Texcoords, Normals, VertexDataIndexes)) return false;
+
+		//
+		Object->SetRootNodeIndexList(RootNodeIndexList);
+
+		// DefaultLocalTransformを保存する
+		Object->ApplyDefaultLocalTransform();
+
+		// 親ノードを設定
+		Object->ApplyParentNode();
+
+		// ワールド行列の計算
+		Object->CalcWorldMatrix();
 
 		return true;
 	}
@@ -121,10 +135,12 @@ namespace obj
 	}
 
 	bool COBJImporter::Build(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<object::C3DObject>& Object,
-		const std::vector<std::shared_ptr<graphics::CMaterialFrame>>& BaseMaterialFrameList,
+		std::vector<int>& RootNodeIndexList, const std::vector<std::shared_ptr<graphics::CMaterialFrame>>& BaseMaterialFrameList,
 		const std::vector<float>& SrcPositions, const std::vector<float>& SrcTexcoords, const std::vector<float>& SrcNormals,
 		const std::map<std::string, std::vector<std::string>>& SrcVertexDataIndexes)
 	{
+		if (BaseMaterialFrameList.empty()) return false;
+
 		const bool ExistPosition = !SrcPositions.empty();
 		const bool ExistTexcoord = !SrcTexcoords.empty();
 		const bool ExistNormal   = !SrcNormals.empty();
@@ -143,12 +159,12 @@ namespace obj
 			int MeshIndex = static_cast<int>(Object->GetMeshList().size());
 			int SelfNodeIndex = static_cast<int>(Object->GetNodeList().size());
 
-			std::shared_ptr<graphics::CMesh> Mesh = std::make_shared<graphics::CMesh>();
-
 			// ノード生成
 			std::shared_ptr<object::CNode> Node = std::make_shared<object::CNode>(MeshIndex, SelfNodeIndex);
 			Node->SetName(MeshName);
 			Object->AddNode(Node);
+
+			RootNodeIndexList.push_back(SelfNodeIndex);
 
 			// 頂点バッファ・インデックスバッファ生成
 			std::vector<float> ResultPositions;
@@ -380,10 +396,13 @@ namespace obj
 			}
 
 			// マテリアル生成
-			
+			// 最初のマテリアルしか使わない
+			auto MaterialFrame = BaseMaterialFrameList[0];
+			auto material = MaterialFrame->CreateMaterial(pGraphicsAPI, graphics::ECullMode::CULL_BACK);
+
 			// プリミティブを作成する
 			std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(VertexBuffer, IndexBuffer);
-			// AddMaterial
+			Primitive->AddMaterial(pGraphicsAPI, material);
 
 			Mesh->AddPrimitive(Primitive);
 			Object->AddMesh(Mesh);
