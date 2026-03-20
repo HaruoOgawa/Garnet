@@ -33,6 +33,7 @@ namespace binary
 
 		bool GetString(std::string& Dst, size_t ByteSize);
 		bool GetStringToZeroByte(std::string& Dst);
+		bool GetStringToLineBreak(std::string& Dst);
 
 		bool GetUTF16String(std::wstring& Dst, size_t ByteSize);
 		bool GetUTF16ReverseString(std::wstring& Dst, size_t ByteSize);
