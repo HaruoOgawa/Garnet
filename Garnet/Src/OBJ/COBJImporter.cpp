@@ -148,9 +148,6 @@ namespace obj
 		// Positionは必須
 		if (!ExistPosition) return false;
 
-		const int NumOfVertex = (static_cast<int>(SrcPositions.size()) / 3);
-		const int NumOfPolygon = NumOfVertex / 3;
-
 		for (const auto& NameIndexPair : SrcVertexDataIndexes)
 		{
 			const auto& MeshName = NameIndexPair.first;
@@ -170,12 +167,7 @@ namespace obj
 			std::vector<float> ResultPositions;
 			std::vector<float> ResultTexcoords;
 			std::vector<float> ResultNormals;
-
-			if (!ExistNormal)
-			{
-				ResultNormals.resize(NumOfVertex * 3, 0.0f);
-			}
-
+			
 			// メッシュを作成する
 			std::shared_ptr<graphics::CMesh> Mesh = std::make_shared<graphics::CMesh>();
 
@@ -205,6 +197,11 @@ namespace obj
 			// OBJは常にタンジェントの計算が必要
 			const bool NeedRecalculateTangent = true;
 
+			// DataIndexTupleと頂点インデックスのペア
+			std::map<std::tuple<int, int, int>, int> DataVertexMap;
+
+			int CurrentVertexIndex = 0;
+
 			//
 			for (int v = 0; v < DataIndexes.size(); v += 3)
 			{
@@ -213,29 +210,66 @@ namespace obj
 				std::tuple<int, int, int> DataStructure_2 = GetDataStructure(DataIndexes[v + 2], ExistPosition, ExistTexcoord, ExistNormal);
 
 				// Position
-				PushVertexData(std::get<0>(DataStructure_0), 3, SrcPositions, ResultPositions);
-				PushVertexData(std::get<0>(DataStructure_1), 3, SrcPositions, ResultPositions);
-				PushVertexData(std::get<0>(DataStructure_2), 3, SrcPositions, ResultPositions);
+				if (DataVertexMap.find(DataStructure_0) == DataVertexMap.end()) PushVertexData(std::get<0>(DataStructure_0), 3, SrcPositions, ResultPositions);
+				if (DataVertexMap.find(DataStructure_1) == DataVertexMap.end()) PushVertexData(std::get<0>(DataStructure_1), 3, SrcPositions, ResultPositions);
+				if (DataVertexMap.find(DataStructure_2) == DataVertexMap.end()) PushVertexData(std::get<0>(DataStructure_2), 3, SrcPositions, ResultPositions);
 				
 				// Texcoord
 				if (ExistTexcoord)
 				{
-					PushVertexData(std::get<1>(DataStructure_0), 2, SrcTexcoords, ResultTexcoords);
-					PushVertexData(std::get<1>(DataStructure_1), 2, SrcTexcoords, ResultTexcoords);
-					PushVertexData(std::get<1>(DataStructure_2), 2, SrcTexcoords, ResultTexcoords);
+					if (DataVertexMap.find(DataStructure_0) == DataVertexMap.end()) PushVertexData(std::get<1>(DataStructure_0), 2, SrcTexcoords, ResultTexcoords);
+					if (DataVertexMap.find(DataStructure_1) == DataVertexMap.end()) PushVertexData(std::get<1>(DataStructure_1), 2, SrcTexcoords, ResultTexcoords);
+					if (DataVertexMap.find(DataStructure_2) == DataVertexMap.end()) PushVertexData(std::get<1>(DataStructure_2), 2, SrcTexcoords, ResultTexcoords);
 				}
 
 				// Normal
 				if (ExistNormal)
 				{
-					PushVertexData(std::get<2>(DataStructure_0), 3, SrcNormals, ResultNormals);
-					PushVertexData(std::get<2>(DataStructure_1), 3, SrcNormals, ResultNormals);
-					PushVertexData(std::get<2>(DataStructure_2), 3, SrcNormals, ResultNormals);
+					if (DataVertexMap.find(DataStructure_0) == DataVertexMap.end()) PushVertexData(std::get<2>(DataStructure_0), 3, SrcNormals, ResultNormals);
+					if (DataVertexMap.find(DataStructure_1) == DataVertexMap.end()) PushVertexData(std::get<2>(DataStructure_1), 3, SrcNormals, ResultNormals);
+					if (DataVertexMap.find(DataStructure_2) == DataVertexMap.end()) PushVertexData(std::get<2>(DataStructure_2), 3, SrcNormals, ResultNormals);
 				}
-				else
+
+				// 頂点データ登録
+				if (DataVertexMap.find(DataStructure_0) == DataVertexMap.end())
 				{
+					DataVertexMap[DataStructure_0] = CurrentVertexIndex;
+					CurrentVertexIndex++;
+				}
+
+				if (DataVertexMap.find(DataStructure_1) == DataVertexMap.end())
+				{
+					DataVertexMap[DataStructure_1] = CurrentVertexIndex;
+					CurrentVertexIndex++;
+				}
+
+				if (DataVertexMap.find(DataStructure_2) == DataVertexMap.end())
+				{
+					DataVertexMap[DataStructure_2] = CurrentVertexIndex;
+					CurrentVertexIndex++;
+				}
+
+				// DataIndexesはポリゴン構成順に並んでいるので頂点インデックスはそのままインデックスをインクリメントしていくだけでいい
+				UINTIndices.push_back(DataVertexMap[DataStructure_0]);
+				UINTIndices.push_back(DataVertexMap[DataStructure_1]);
+				UINTIndices.push_back(DataVertexMap[DataStructure_2]);
+			}
+
+			// 法線が存在しない場合の処理
+			if (!ExistNormal && ResultNormals.empty())
+			{
+				const int NumOfVertex = static_cast<int>(ResultPositions.size()) / 3;
+				ResultNormals.resize(NumOfVertex * 3, 0.0f);
+
+				// 法線再計算
+				for (int v = 0; v < DataIndexes.size(); v += 3)
+				{
+					std::tuple<int, int, int> DataStructure_0 = GetDataStructure(DataIndexes[v + 0], ExistPosition, ExistTexcoord, ExistNormal);
+					std::tuple<int, int, int> DataStructure_1 = GetDataStructure(DataIndexes[v + 1], ExistPosition, ExistTexcoord, ExistNormal);
+					std::tuple<int, int, int> DataStructure_2 = GetDataStructure(DataIndexes[v + 2], ExistPosition, ExistTexcoord, ExistNormal);
+
 					// 法線をSurfaceのポジションから再計算する
-					glm::vec3 Normal = RecalcNormalFromLastPosition(SrcPositions, NumOfVertex,
+					glm::vec3 Normal = RecalcNormalFromLastPosition(SrcPositions,
 						std::get<0>(DataStructure_0), std::get<0>(DataStructure_1), std::get<0>(DataStructure_2));
 
 					// 3頂点全部に同じ法線だとフラットシェーディングになってしまうので何か補正を考える必要があるかも
@@ -248,26 +282,19 @@ namespace obj
 				   /____\/____\
 					*/
 
-					AddVertexNormal(NumOfVertex, std::get<0>(DataStructure_0), 3, Normal, ResultNormals);
-					AddVertexNormal(NumOfVertex, std::get<0>(DataStructure_1), 3, Normal, ResultNormals);
-					AddVertexNormal(NumOfVertex, std::get<0>(DataStructure_2), 3, Normal, ResultNormals);
+					AddVertexNormal(DataVertexMap[DataStructure_0], 3, Normal, ResultNormals);
+					AddVertexNormal(DataVertexMap[DataStructure_1], 3, Normal, ResultNormals);
+					AddVertexNormal(DataVertexMap[DataStructure_2], 3, Normal, ResultNormals);
 				}
 
-				// DataIndexesはポリゴン構成順に並んでいるので頂点インデックスはそのままインデックスをインクリメントしていくだけでいい
-				int VertexIndex = static_cast<int>(UINTIndices.size());
-				UINTIndices.push_back(VertexIndex + 0);
-				UINTIndices.push_back(VertexIndex + 1);
-				UINTIndices.push_back(VertexIndex + 2);
-			}
-
-			// 法線を正規化
-			if (!ExistNormal)
-			{
+				// 法線を正規化
 				NormalizeNormals(ResultNormals);
 			}
 
 			// アトリビュートと紐づけ
 			{
+				const int NumOfVertex = static_cast<int>(ResultPositions.size()) / 3;
+
 				{
 					ReservedVertexDataList.emplace("POSITION", ResultPositions);
 					ReservedDataTypeList.emplace("POSITION", graphics::EDataType::TYPE_FLOAT);
@@ -315,7 +342,7 @@ namespace obj
 				}
 			}
 
-			// OBJは接線を持っていないので毎回再計算
+			/*// OBJは接線を持っていないので毎回再計算
 			if (NeedRecalculateTangent)
 			{
 				if (Indices.size() > 0)
@@ -326,7 +353,7 @@ namespace obj
 				{
 					if (!RecalculateTangentWithUINT(ReservedVertexDataList["TANGENT"], ReservedVertexDataList["POSITION"], ReservedVertexDataList["TEXCOORD_0"], UINTIndices)) return false;
 				}
-			}
+			}*/
 
 			// 頂点バッファを構築
 			auto VertexBuffer = pGraphicsAPI->CreateVertexBuffer();
@@ -428,6 +455,9 @@ namespace obj
 			{
 				int index = std::stoi(ParamList.back());
 
+				// Wavefront OBJのインデックスは1スタートなので0からに治す
+				index -= 1;
+
 				std::get<0>(DataStructure) = index;
 
 				ParamList.pop_back();
@@ -437,6 +467,9 @@ namespace obj
 			{
 				int index = std::stoi(ParamList.back());
 
+				// Wavefront OBJのインデックスは1スタートなので0からに治す
+				index -= 1;
+
 				std::get<1>(DataStructure) = index;
 
 				ParamList.pop_back();
@@ -445,6 +478,9 @@ namespace obj
 			else if (type == EOBJAttributeType::Normal && ExistNormal)
 			{
 				int index = std::stoi(ParamList.back());
+
+				// Wavefront OBJのインデックスは1スタートなので0からに治す
+				index -= 1;
 
 				std::get<2>(DataStructure) = index;
 
@@ -468,9 +504,11 @@ namespace obj
 		}
 	}
 
-	glm::vec3 COBJImporter::RecalcNormalFromLastPosition(const std::vector<float>& SrcPositions, int NumOfData,
+	glm::vec3 COBJImporter::RecalcNormalFromLastPosition(const std::vector<float>& SrcPositions,
 		int PosIndex_0, int PosIndex_1, int PosIndex_2)
 	{
+		const int NumOfData = (static_cast<int>(SrcPositions.size()) / 3);
+
 		// Wavefront OBJの頂点はPolygon Faceの順番で並んでいる想定
 		glm::vec3 Normal = glm::vec3(0.0f, 1.0f, 0.0f);
 
@@ -507,13 +545,11 @@ namespace obj
 		return Normal;
 	}
 
-	void COBJImporter::AddVertexNormal(int NumOfData, int Index, int Dimention, const glm::vec3& Normal, std::vector<float>& ResultNormals)
+	void COBJImporter::AddVertexNormal(int VertexIndex, int Dimention, const glm::vec3& Normal, std::vector<float>& ResultNormals)
 	{
-		if (Index < 0 || Index >= NumOfData) return;
-
 		for (int n = 0; n < Dimention; n++)
 		{
-			ResultNormals[Index * Dimention + n] += Normal[n];
+			ResultNormals[VertexIndex * Dimention + n] += Normal[n];
 		}
 	}
 

@@ -44,9 +44,9 @@ namespace obj
 
 		static void PushVertexData(int Index, int Dimention, const std::vector<float>& SrcData, std::vector<float>& DstVertexData);
 
-		static glm::vec3 RecalcNormalFromLastPosition(const std::vector<float>& SrcPositions, int NumOfData,
+		static glm::vec3 RecalcNormalFromLastPosition(const std::vector<float>& SrcPositions,
 			int PosIndex_0, int PosIndex_1, int PosIndex_2);
-		static void AddVertexNormal(int NumOfData, int Index, int Dimention, const glm::vec3& Normal, std::vector<float>& ResultNormals);
+		static void AddVertexNormal(int VertexIndex, int Dimention, const glm::vec3& Normal, std::vector<float>& ResultNormals);
 		static void NormalizeNormals(std::vector<float>& ResultNormals);
 
 		static bool RecalculateTangent(std::vector<float>& TangentDat, const std::vector<float>& PosotionData, const std::vector<float>& TexcoordData, const std::vector<unsigned short>& Indices);
