@@ -426,6 +426,7 @@ namespace obj
 			// 最初のマテリアルしか使わない
 			auto MaterialFrame = BaseMaterialFrameList[0];
 			auto material = MaterialFrame->CreateMaterial(pGraphicsAPI, graphics::ECullMode::CULL_BACK);
+			material->SetMaterialName(MeshName);
 
 			// プリミティブを作成する
 			std::shared_ptr<graphics::CPrimitive> Primitive = std::make_shared<graphics::CPrimitive>(VertexBuffer, IndexBuffer);
