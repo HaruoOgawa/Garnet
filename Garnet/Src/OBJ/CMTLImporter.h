@@ -28,7 +28,10 @@ namespace obj
 
 		static bool IsSkipChara(char c);
 
-		static void SetMaterialUniform(const std::string& CurrentMeshName, const std::string& UniformName, const std::vector<float> Values,
+		static void SetMaterialUniform_Float(const std::string& CurrentMeshName, const std::string& UniformName, const std::vector<float> Values,
+			std::map<std::string, std::vector<std::shared_ptr<graphics::CMaterial>>>& MaterialMap);
+			
+		static void SetMaterialUniform_Int(const std::string& CurrentMeshName, const std::string& UniformName, const std::vector<int> Values,
 			std::map<std::string, std::vector<std::shared_ptr<graphics::CMaterial>>>& MaterialMap);
 
 		static void SetTextureUniform(api::IGraphicsAPI* pGraphicsAPI, const std::string& BaseDir,

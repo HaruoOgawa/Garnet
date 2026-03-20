@@ -80,13 +80,13 @@ namespace obj
 		else if (ParamList[0] == "Ka" && ParamList.size() >= 4)
 		{
 			// アンビエントカラー
-			SetMaterialUniform(CurrentMeshName, "ambientColor", 
+			SetMaterialUniform_Float(CurrentMeshName, "ambientColor", 
 				{ std::stof(ParamList[1]), std::stof(ParamList[2]), std::stof(ParamList[3]), 1.0f }, MaterialMap);
 		}
 		else if (ParamList[0] == "Kd" && ParamList.size() >= 4)
 		{
 			// ディフューズカラー(拡散反射色)
-			SetMaterialUniform(CurrentMeshName, "baseColorFactor",
+			SetMaterialUniform_Float(CurrentMeshName, "baseColorFactor",
 				{ std::stof(ParamList[1]), std::stof(ParamList[2]), std::stof(ParamList[3]), 1.0f }, MaterialMap);
 		}
 		else if (ParamList[0] == "Ks" && ParamList.size() >= 4)
@@ -96,7 +96,7 @@ namespace obj
 		else if (ParamList[0] == "Ke" && ParamList.size() >= 4)
 		{
 			// エミッシブカラー
-			SetMaterialUniform(CurrentMeshName, "emissiveFactor",
+			SetMaterialUniform_Float(CurrentMeshName, "emissiveFactor",
 				{ std::stof(ParamList[1]), std::stof(ParamList[2]), std::stof(ParamList[3]), 1.0f }, MaterialMap);
 		}
 		else if (ParamList[0] == "Ns" && ParamList.size() >= 2)
@@ -110,10 +110,10 @@ namespace obj
 			float Exponent = std::stof(ParamList[1]);
 
 			float Roughness = glm::sqrt(2.0f / (Exponent + 2.0f));
-			SetMaterialUniform(CurrentMeshName, "roughnessFactor", { Roughness }, MaterialMap);
+			SetMaterialUniform_Float(CurrentMeshName, "roughnessFactor", { Roughness }, MaterialMap);
 
 			// メタリックは常に0とする
-			SetMaterialUniform(CurrentMeshName, "metallicFactor", { 0.0f }, MaterialMap);
+			SetMaterialUniform_Float(CurrentMeshName, "metallicFactor", { 0.0f }, MaterialMap);
 		}
 		else if (ParamList[0] == "Ni" && ParamList.size() >= 2)
 		{
@@ -146,11 +146,13 @@ namespace obj
 		else if (ParamList[0] == "map_Kd" && ParamList.size() >= 2)
 		{
 			// ディフューズマップ
+			SetMaterialUniform_Int(CurrentMeshName, "useBaseColorTexture", { 1 }, MaterialMap);
 			SetTextureUniform(pGraphicsAPI, BaseDir, p3DObjectLoader, CurrentMeshName, "baseColorTexture", ParamList[1], MaterialMap, TextureList, TextureIndexMap);
 		}
 		else if (ParamList[0] == "map_bump" && ParamList.size() >= 2)
 		{
 			// バンプマップ
+			SetMaterialUniform_Int(CurrentMeshName, "useNormalTexture", { 1 }, MaterialMap);
 			SetTextureUniform(pGraphicsAPI, BaseDir, p3DObjectLoader, CurrentMeshName, "normalTexture", ParamList[1], MaterialMap, TextureList, TextureIndexMap);
 		}
 		else if (ParamList[0] == "#")
@@ -201,7 +203,7 @@ namespace obj
 		return false;
 	}
 
-	void CMTLImporter::SetMaterialUniform(const std::string& CurrentMeshName, const std::string& UniformName, const std::vector<float> Values,
+	void CMTLImporter::SetMaterialUniform_Float(const std::string& CurrentMeshName, const std::string& UniformName, const std::vector<float> Values,
 		std::map<std::string, std::vector<std::shared_ptr<graphics::CMaterial>>>& MaterialMap)
 	{
 		const auto& it = MaterialMap.find(CurrentMeshName);
@@ -214,6 +216,23 @@ namespace obj
 			for (auto& Material : MaterialList)
 			{
 				Material->ReplacePreloadUniformValue(UniformName, &Values[0], sizeof(float) * Dimention, 0);
+			}
+		}
+	}
+
+	void CMTLImporter::SetMaterialUniform_Int(const std::string& CurrentMeshName, const std::string& UniformName, const std::vector<int> Values,
+		std::map<std::string, std::vector<std::shared_ptr<graphics::CMaterial>>>& MaterialMap)
+	{
+		const auto& it = MaterialMap.find(CurrentMeshName);
+		if (it != MaterialMap.end())
+		{
+			const int Dimention = static_cast<int>(Values.size());
+
+			auto& MaterialList = it->second;
+
+			for (auto& Material : MaterialList)
+			{
+				Material->ReplacePreloadUniformValue(UniformName, &Values[0], sizeof(int) * Dimention, 0);
 			}
 		}
 	}
