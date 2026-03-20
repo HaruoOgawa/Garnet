@@ -255,7 +255,11 @@ namespace obj
 			// ロードする
 			std::string FullPath = BaseDir + "/" + TextureName;
 
-			std::shared_ptr<graphics::CTexture> Texture = pGraphicsAPI->CreateTexture();
+			// OBJはUVが0~1に収まっていない場合があるのでリピートにする
+			graphics::STextureSamplerParam Sampler{};
+			Sampler.WrapMode = graphics::ETextureWrapMode::REPEAT;
+
+			std::shared_ptr<graphics::CTexture> Texture = pGraphicsAPI->CreateTexture(false, Sampler);
 			std::shared_ptr<resource::CTextureLoader> TexLoader = std::make_shared<resource::CTextureLoader>(pGraphicsAPI, FullPath, Texture);
 
 			TextureList.push_back(Texture);
