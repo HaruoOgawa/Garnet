@@ -342,7 +342,7 @@ namespace obj
 				}
 			}
 
-			/*// OBJは接線を持っていないので毎回再計算
+			// OBJは接線を持っていないので毎回再計算
 			if (NeedRecalculateTangent)
 			{
 				if (Indices.size() > 0)
@@ -353,7 +353,7 @@ namespace obj
 				{
 					if (!RecalculateTangentWithUINT(ReservedVertexDataList["TANGENT"], ReservedVertexDataList["POSITION"], ReservedVertexDataList["TEXCOORD_0"], UINTIndices)) return false;
 				}
-			}*/
+			}
 
 			// 頂点バッファを構築
 			auto VertexBuffer = pGraphicsAPI->CreateVertexBuffer();
