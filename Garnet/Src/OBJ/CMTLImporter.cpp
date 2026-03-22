@@ -64,6 +64,8 @@ namespace obj
 			Object->GetTextureSet()->Add2DTexture(Texture);
 		}
 
+		AssignEnvMap(Object);
+
 		return true;
 	}
 
@@ -283,6 +285,97 @@ namespace obj
 					for (auto& Material : MaterialList)
 					{
 						Material->ReplaceTextureIndex(UniformName, TextureIndex);
+					}
+				}
+			}
+		}
+	}
+
+	void CMTLImporter::AssignEnvMap(const std::shared_ptr<object::C3DObject>& Object)
+	{
+		if (!Object) return;
+
+		const auto& TextureSet = Object->GetTextureSet();
+
+		std::vector<std::shared_ptr<graphics::CTexture>> CubeTexList(0);
+		if (TextureSet) CubeTexList = TextureSet->GetCubeMapList();
+
+		std::vector<std::shared_ptr<graphics::CTexture>> FrameTextureList(0);
+		if (TextureSet) FrameTextureList = TextureSet->GetFrameTextureList();
+
+		std::shared_ptr<graphics::CTexture> Diffuse_Tex = nullptr;
+		if (TextureSet) Diffuse_Tex = TextureSet->GetDiffuse_Tex();
+
+		std::shared_ptr<graphics::CTexture> Specular_Tex = nullptr;
+		if (TextureSet) Specular_Tex = TextureSet->GetSpecular_Tex();
+
+		std::shared_ptr<graphics::CTexture> GGXLUT_Tex = nullptr;
+		if (TextureSet) GGXLUT_Tex = TextureSet->GetGGXLUT_Tex();
+
+		// MipCountには反射キューブマップかIBLのSpecularMapの値が入っている(これらは必ずどちらか一方しか使用されないため)
+		float MipCount = 1.0f;
+		if (CubeTexList.size() > 0)
+		{
+			MipCount = CubeTexList[0]->GetMipCount();
+		}
+		else if (Specular_Tex)
+		{
+			MipCount = Specular_Tex->GetMipCount();
+		}
+
+		for (const auto& Mesh : Object->GetMeshList())
+		{
+			for (const auto& Primitive : Mesh->GetPrimitiveList())
+			{
+				for (const auto& Renderer : Primitive->GetRendererList())
+				{
+					const auto& material = std::get<1>(Renderer);
+					if (!material) continue;
+
+					material->ReplacePreloadUniformValue("mipCount", &glm::vec1(MipCount)[0], sizeof(float), 0);
+
+					int ShadowMapX = 1, ShadowMapY = 1;
+					if (FrameTextureList.size() > 0)
+					{
+						// glTF FrameTextureList
+						// [0] : ShadowMap
+						// [1] : ???
+						// [2] : ???
+						ShadowMapX = FrameTextureList[0]->GetWidth();
+						ShadowMapY = FrameTextureList[0]->GetHeight();
+					}
+
+					material->ReplacePreloadUniformValue("ShadowMapX", &glm::vec1(static_cast<float>(ShadowMapX))[0], sizeof(float), 0);
+					material->ReplacePreloadUniformValue("ShadowMapY", &glm::vec1(static_cast<float>(ShadowMapY))[0], sizeof(float), 0);
+
+					// CubeMap
+					if (CubeTexList.size() > 0)
+					{
+						material->ReplaceTextureIndex("cubemapTexture", 0);
+						material->ReplacePreloadUniformValue("useCubeMap", &glm::uvec1(1)[0], sizeof(int), 0);
+					}
+
+					// ShadowMap
+					if (FrameTextureList.size() > 0)
+					{
+						// glTF FrameTextureList
+						// [0] : ShadowMap
+						// [1] : ???
+						// [2] : ???
+
+						// ひとまず末尾から取得
+						material->ReplaceTextureIndex("shadowmapTexture", 0);
+						material->ReplacePreloadUniformValue("useShadowMap", &glm::uvec1(1)[0], sizeof(int), 0);
+					}
+
+					// IBL
+					if (Diffuse_Tex && Specular_Tex && GGXLUT_Tex)
+					{
+						material->ReplaceTextureIndex("IBL_Diffuse_Texture", 0);
+						material->ReplaceTextureIndex("IBL_Specular_Texture", 0);
+						material->ReplaceTextureIndex("IBL_GGXLUT_Texture", 0);
+
+						material->ReplacePreloadUniformValue("useIBL", &glm::ivec1(1)[0], sizeof(int), 0);
 					}
 				}
 			}

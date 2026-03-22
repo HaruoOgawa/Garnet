@@ -39,6 +39,8 @@ namespace obj
 			const std::string& CurrentMeshName, const std::string& UniformName, const std::string& TextureName,
 			std::map<std::string, std::vector<std::shared_ptr<graphics::CMaterial>>>& MaterialMap,
 			std::vector<std::shared_ptr<graphics::CTexture>>& TextureList, std::map<std::string, int>& TextureIndexMap);
+
+		static void AssignEnvMap(const std::shared_ptr<object::C3DObject>& Object);
 	public:
 		static bool Import(api::IGraphicsAPI* pGraphicsAPI, const std::vector<unsigned char>& Data,
 			const std::string& BaseDir, const std::shared_ptr<object::C3DObject>& Object,
