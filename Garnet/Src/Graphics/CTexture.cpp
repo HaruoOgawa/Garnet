@@ -1,6 +1,7 @@
 #include "CTexture.h"
 
 #include "../Message/Console.h"
+#include "../../Format/CPathFormatter.h"
 
 #if defined(USE_TEXTURE_LOADER)
 	#ifdef USE_PNG_PARSER
@@ -123,15 +124,39 @@ namespace graphics
 #else
 		// stbi /////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// stbiでテクスチャバイナリを解析してピクセルデータを取得する
-		stbi_uc* stbi_pixelData = stbi_load_from_memory(reinterpret_cast<const stbi_uc*>(&Data[0]), static_cast<int>(Data.size()), &m_Width, &m_Height, &m_NumOfChannels, STBI_rgb_alpha);
+		std::string Extention = format::CPathFormatter::GetExtention(m_FileName);
 
-		// stbiから取得したピクセルデータを扱いやすいデータにコピーしておく
-		int pixelSize = m_Width * m_Height * 4;
-		std::vector<unsigned char> pixelData(pixelSize);
-		std::memcpy(&pixelData[0], stbi_pixelData, pixelSize);
+		int pixelSize = 0;
+		std::vector<unsigned char> pixelData;
 
-		// stbiのメモリを解放
-		stbi_image_free(stbi_pixelData);
+		if (Extention == "hdr" || Extention == "edr")
+		{
+			// 32ビットテクスチャとしてロードする
+			float* stbi_pixelData = stbi_loadf_from_memory(reinterpret_cast<const stbi_uc*>(&Data[0]), static_cast<int>(Data.size()), &m_Width, &m_Height, &m_NumOfChannels, STBI_rgb_alpha);
+
+			// stbiから取得したピクセルデータを扱いやすいデータにコピーしておく
+			pixelSize = m_Width * m_Height * 4 * sizeof(float);
+
+			pixelData.resize(pixelSize);
+			std::memcpy(&pixelData[0], stbi_pixelData, pixelSize);
+
+			// HDRなので強制的にFloatテクスチャにする
+			m_RenderPassFormat = api::ERenderPassFormat::COLOR_FLOAT_RENDERPASS;
+		}
+		else
+		{
+			stbi_uc* stbi_pixelData = stbi_load_from_memory(reinterpret_cast<const stbi_uc*>(&Data[0]), static_cast<int>(Data.size()), &m_Width, &m_Height, &m_NumOfChannels, STBI_rgb_alpha);
+
+			// stbiから取得したピクセルデータを扱いやすいデータにコピーしておく
+			pixelSize = m_Width * m_Height * 4 * sizeof(stbi_uc);
+
+			pixelData.resize(pixelSize);
+			std::memcpy(&pixelData[0], stbi_pixelData, pixelSize);
+
+			// stbiのメモリを解放
+			stbi_image_free(stbi_pixelData);
+		}
+
 #endif // USE_PNG_PARSER
 
 		// MipCountを計算
@@ -174,17 +199,39 @@ namespace graphics
 		for (int i = 0; i < DataList.size(); i++)
 		{
 			// stbiでテクスチャバイナリを解析してピクセルデータを取得する
-			stbi_uc* stbi_pixelData = stbi_load_from_memory(reinterpret_cast<const stbi_uc*>(&DataList[i][0]), static_cast<int>(DataList[i].size()), &m_Width, &m_Height, &m_NumOfChannels, STBI_rgb_alpha);
+			std::string Extention = format::CPathFormatter::GetExtention(m_FileNameList[i]);
 
-			// stbiから取得したピクセルデータを扱いやすいデータにコピーしておく
-			int pixelSize = m_Width * m_Height * 4;
-			std::vector<unsigned char> pixelData(pixelSize);
-			std::memcpy(&pixelData[0], stbi_pixelData, pixelSize);
+			int pixelSize = 0;
+			std::vector<unsigned char> pixelData;
+			
+			if (Extention == "hdr" || Extention == "edr")
+			{
+				// 32ビットテクスチャとしてロードする
+				float* stbi_pixelData = stbi_loadf_from_memory(reinterpret_cast<const stbi_uc*>(&DataList[i][0]), static_cast<int>(DataList[i].size()), &m_Width, &m_Height, &m_NumOfChannels, STBI_rgb_alpha);
+			
+				// stbiから取得したピクセルデータを扱いやすいデータにコピーしておく
+				pixelSize = m_Width * m_Height * 4 * sizeof(float);
 
-			// stbiのメモリを解放
-			stbi_image_free(stbi_pixelData);
+				pixelData.resize(pixelSize);
+				std::memcpy(&pixelData[0], stbi_pixelData, pixelSize);
 
-			//
+				// HDRなので強制的にUShortテクスチャにする
+				m_RenderPassFormat = api::ERenderPassFormat::COLOR_FLOAT_RENDERPASS;
+			}
+			else
+			{
+				 stbi_uc* stbi_pixelData = stbi_load_from_memory(reinterpret_cast<const stbi_uc*>(&DataList[i][0]), static_cast<int>(DataList[i].size()), &m_Width, &m_Height, &m_NumOfChannels, STBI_rgb_alpha);
+			
+				 // stbiから取得したピクセルデータを扱いやすいデータにコピーしておく
+				 pixelSize = m_Width * m_Height * 4 * sizeof(stbi_uc);
+
+				 pixelData.resize(pixelSize);
+				 std::memcpy(&pixelData[0], stbi_pixelData, pixelSize);
+
+				 // stbiのメモリを解放
+				 stbi_image_free(stbi_pixelData);
+			}
+
 			pixelDataList.push_back(pixelData);
 			pixelSizeList.push_back(pixelSize);
 		}
