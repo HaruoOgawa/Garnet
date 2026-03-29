@@ -157,6 +157,14 @@ namespace api
 			type = GL_UNSIGNED_BYTE;
 			break;
 		}
+		
+		case api::ERenderPassFormat::COLOR_USHORT_RENDERPASS:
+		{
+			internalformat = GL_RGBA16;
+			format = GL_RGBA;
+			type = GL_UNSIGNED_SHORT;
+			break;
+		}
 
 		default:
 		{

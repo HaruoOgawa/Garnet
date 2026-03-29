@@ -316,6 +316,8 @@ namespace resource
 
 	std::string CFile::AddPunct(const std::string& Path)
 	{
+		if (Path.empty()) return Path;
+
 		if (Path[Path.length() - 1] == '\\' || Path[Path.length() - 1] == '/')
 		{
 			return Path;
