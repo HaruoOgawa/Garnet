@@ -141,7 +141,7 @@ namespace scriptable
 
 		for (const auto& Texture : TextureList)
 		{
-			m_LightObject->GetTextureSet()->AddFrameTexture(Texture);
+			m_LightObject->GetTextureSet()->AddFrameTexture(DefferdPassName, Texture);
 		}
 
 		// Mesh & Material

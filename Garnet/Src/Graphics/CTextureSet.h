@@ -1,6 +1,10 @@
 #pragma once
-#include <memory>
+
+#include <map>
+#include <string>
 #include <vector>
+#include <memory>
+#include <tuple>
 #include "../Graphics/CTexture.h"
 
 // テクスチャの受け渡しは全てここに集約する
@@ -15,7 +19,7 @@ namespace graphics
 		std::vector<std::shared_ptr<graphics::CTexture>> m_CubeMapList;
 
 		// TEXTURE_FRAME
-		std::vector<std::shared_ptr<graphics::CTexture>> m_FrameTextureList;
+		std::map<std::string, std::vector<std::shared_ptr<graphics::CTexture>>> m_FrameTextureMap;
 
 		// TEXTURE_IBL
 		std::shared_ptr<graphics::CTexture> m_IBL_Diffuse_Tex;
@@ -24,8 +28,12 @@ namespace graphics
 	public:
 		CTextureSet();
 		CTextureSet(const std::shared_ptr<graphics::CTexture>& Texture);
-		CTextureSet(const std::vector<std::shared_ptr<graphics::CTexture>>& TextureList, const std::vector<std::shared_ptr<graphics::CTexture>>& CubeMapList, const std::vector<std::shared_ptr<graphics::CTexture>>& FrameTextureList, 
-			const std::shared_ptr<graphics::CTexture>& IBL_Diffuse_Tex, const std::shared_ptr<graphics::CTexture>& IBL_Specular_Tex, const std::shared_ptr<graphics::CTexture>& IBL_GGXLUT_Tex);
+		CTextureSet(const std::vector<std::shared_ptr<graphics::CTexture>>& TextureList, 
+			const std::vector<std::shared_ptr<graphics::CTexture>>& CubeMapList, 
+			const std::map<std::string, std::vector<std::shared_ptr<graphics::CTexture>>>& FrameTextureMap,
+			const std::shared_ptr<graphics::CTexture>& IBL_Diffuse_Tex, 
+			const std::shared_ptr<graphics::CTexture>& IBL_Specular_Tex, 
+			const std::shared_ptr<graphics::CTexture>& IBL_GGXLUT_Tex);
 		virtual ~CTextureSet();
 
 		void Add2DTexture(const std::shared_ptr<graphics::CTexture>& Texture);
@@ -34,8 +42,8 @@ namespace graphics
 		void AddCubeMap(const std::shared_ptr<graphics::CTexture>& CubeMap);
 		const std::vector<std::shared_ptr<graphics::CTexture>>& GetCubeMapList() const;
 
-		void AddFrameTexture(const std::shared_ptr<graphics::CTexture>& FrameTexture);
-		const std::vector<std::shared_ptr<graphics::CTexture>>& GetFrameTextureList() const;
+		void AddFrameTexture(const std::string& PassName, const std::shared_ptr<graphics::CTexture>& FrameTexture);
+		const std::map<std::string, std::vector<std::shared_ptr<graphics::CTexture>>>& GetFrameTextureMap() const;
 
 		void AddIBLTexture(const std::shared_ptr<graphics::CTexture>& IBL_Diffuse_Tex, const std::shared_ptr<graphics::CTexture>& IBL_Specular_Tex, const std::shared_ptr<graphics::CTexture>& IBL_GGXLUT_Tex);
 		const std::shared_ptr<graphics::CTexture>& GetDiffuse_Tex() const;

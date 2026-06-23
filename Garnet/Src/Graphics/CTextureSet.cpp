@@ -18,11 +18,15 @@ namespace graphics
 		m_2DTextureList.push_back(Texture);
 	}
 
-	CTextureSet::CTextureSet(const std::vector<std::shared_ptr<graphics::CTexture>>& TextureList, const std::vector<std::shared_ptr<graphics::CTexture>>& CubeMapList, const std::vector<std::shared_ptr<graphics::CTexture>>& FrameTextureList,
-		const std::shared_ptr<graphics::CTexture>& IBL_Diffuse_Tex, const std::shared_ptr<graphics::CTexture>& IBL_Specular_Tex, const std::shared_ptr<graphics::CTexture>& IBL_GGXLUT_Tex):
+	CTextureSet::CTextureSet(const std::vector<std::shared_ptr<graphics::CTexture>>& TextureList,
+		const std::vector<std::shared_ptr<graphics::CTexture>>& CubeMapList,
+		const std::map<std::string, std::vector<std::shared_ptr<graphics::CTexture>>>& FrameTextureMap,
+		const std::shared_ptr<graphics::CTexture>& IBL_Diffuse_Tex,
+		const std::shared_ptr<graphics::CTexture>& IBL_Specular_Tex,
+		const std::shared_ptr<graphics::CTexture>& IBL_GGXLUT_Tex) :
 		m_2DTextureList(TextureList),
 		m_CubeMapList(CubeMapList),
-		m_FrameTextureList(FrameTextureList),
+		m_FrameTextureMap(FrameTextureMap),
 		m_IBL_Diffuse_Tex(IBL_Diffuse_Tex),
 		m_IBL_Specular_Tex(IBL_Specular_Tex),
 		m_IBL_GGXLUT_Tex(IBL_GGXLUT_Tex)
@@ -53,14 +57,14 @@ namespace graphics
 		return m_CubeMapList;
 	}
 
-	void CTextureSet::AddFrameTexture(const std::shared_ptr<graphics::CTexture>& FrameTexture)
+	void CTextureSet::AddFrameTexture(const std::string& PassName, const std::shared_ptr<graphics::CTexture>& FrameTexture)
 	{
-		m_FrameTextureList.push_back(FrameTexture);
+		m_FrameTextureMap[PassName].push_back(FrameTexture);
 	}
 
-	const std::vector<std::shared_ptr<graphics::CTexture>>& CTextureSet::GetFrameTextureList() const
+	const std::map<std::string, std::vector<std::shared_ptr<graphics::CTexture>>>& CTextureSet::GetFrameTextureMap() const
 	{
-		return m_FrameTextureList;
+		return m_FrameTextureMap;
 	}
 
 	void CTextureSet::AddIBLTexture(const std::shared_ptr<graphics::CTexture>& IBL_Diffuse_Tex, const std::shared_ptr<graphics::CTexture>& IBL_Specular_Tex, const std::shared_ptr<graphics::CTexture>& IBL_GGXLUT_Tex)

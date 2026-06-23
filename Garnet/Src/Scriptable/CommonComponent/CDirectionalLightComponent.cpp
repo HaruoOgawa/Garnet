@@ -141,7 +141,7 @@ namespace scriptable
 		int FrameTexCount = 0;
 		for (const auto& Texture : TextureList)
 		{
-			m_LightObject->GetTextureSet()->AddFrameTexture(Texture);
+			m_LightObject->GetTextureSet()->AddFrameTexture(DefferdPassName, Texture);
 			FrameTexCount++;
 		}
 
@@ -162,15 +162,20 @@ namespace scriptable
 		}
 
 		// ShadowMap設定
-		// ToDo: ひとまず今は一番最初のフレームテクスチャをシャドーマップとしている
-		// (ぶっちゃけフレームテクスチャはシャドーマップにしか使ったことないんだよな。だから専用にしてもいいのかも？)
-		std::vector<std::shared_ptr<graphics::CTexture>> FrameTextureList(0);
-		if (SrcObjectTextureSet) FrameTextureList = SrcObjectTextureSet->GetFrameTextureList();
+		std::map<std::string, std::vector<std::shared_ptr<graphics::CTexture>>> FrameTextureMap;
+		if (SrcObjectTextureSet) FrameTextureMap = SrcObjectTextureSet->GetFrameTextureMap();
 
-		if(FrameTextureList.size() > 0)
+		const auto& ShadowPassIT = FrameTextureMap.find("ShadowPass");
+
+		if (ShadowPassIT != FrameTextureMap.end())
 		{
-			m_LightObject->GetTextureSet()->AddFrameTexture(FrameTextureList[0]);
-			FrameTexCount++;
+			if (!ShadowPassIT->second.empty())
+			{
+				const auto& ShadowMap = ShadowPassIT->second[0];
+
+				m_LightObject->GetTextureSet()->AddFrameTexture(ShadowPassIT->first, ShadowMap);
+				FrameTexCount++;
+			}
 		}
 
 		const int LightUBOBindingIndex = 1;
@@ -212,18 +217,17 @@ namespace scriptable
 
 			// 影
 			int ShadowMapX = 1, ShadowMapY = 1;
-			if (FrameTextureList.size() > 0)
+			if (ShadowPassIT != FrameTextureMap.end())
 			{
-				// FrameTextureList
-				// [0] : ShadowMap
-				// [1] : ???
-				// [2] : ???
-				ShadowMapX = FrameTextureList[0]->GetWidth();
-				ShadowMapY = FrameTextureList[0]->GetHeight();
+				if (!ShadowPassIT->second.empty())
+				{
+					const auto& ShadowMap = ShadowPassIT->second[0];
 
-				// ひとまず末尾から取得
-				Material->ReplaceTextureIndex("shadowmapTexture", (FrameTexCount - 1));
-				Material->ReplacePreloadUniformValue("useShadowMap", &glm::uvec1(1)[0], sizeof(int), LightUBOBindingIndex);
+					ShadowMapX = ShadowMap->GetWidth();
+					ShadowMapY = ShadowMap->GetHeight();
+
+					Material->ReplacePreloadUniformValue("useShadowMap", &glm::uvec1(1)[0], sizeof(int), LightUBOBindingIndex);
+				}
 			}
 
 			Material->ReplacePreloadUniformValue("ShadowMapX", &glm::vec1(static_cast<float>(ShadowMapX))[0], sizeof(float), LightUBOBindingIndex);

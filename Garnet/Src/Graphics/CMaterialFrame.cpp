@@ -205,7 +205,8 @@ namespace graphics
 		{
 			Material->AddTextureBindingLayout(graphics::STextureBindingLayout(
 				TextureBuffer.TextureName, TextureBuffer.ViewBindingIndex, TextureBuffer.SamplerBindingIndex, TextureBuffer.
-				TextureIndex, TextureBuffer.TextureUsage, TextureBuffer.ReadOnFragment, TextureBuffer.ReadOnVertex
+				TextureIndex, TextureBuffer.TextureUsage, TextureBuffer.ReadOnFragment, TextureBuffer.ReadOnVertex,
+				TextureBuffer.FrameName, TextureBuffer.FrameIndex
 			));
 		}
 
@@ -354,7 +355,8 @@ namespace graphics
 		{
 			TextureBindingLayoutList.push_back(graphics::STextureBindingLayout(
 				TextureBuffer.TextureName, TextureBuffer.ViewBindingIndex, TextureBuffer.SamplerBindingIndex, TextureBuffer.
-				TextureIndex, TextureBuffer.TextureUsage, TextureBuffer.ReadOnFragment, TextureBuffer.ReadOnVertex
+				TextureIndex, TextureBuffer.TextureUsage, TextureBuffer.ReadOnFragment, TextureBuffer.ReadOnVertex,
+				TextureBuffer.FrameName, TextureBuffer.FrameIndex
 			));
 		}
 
