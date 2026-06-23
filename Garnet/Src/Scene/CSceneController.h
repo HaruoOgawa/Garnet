@@ -171,7 +171,7 @@ namespace scene
 
 		const std::shared_ptr<graphics::CTextureSet>& GetSceneTextureSet() const;
 		std::shared_ptr<graphics::CTextureSet>& GetSceneTextureSet();
-		void AddFrameTexture(const std::shared_ptr<graphics::CTexture>& Texture);
+		void AddFrameTexture(const std::string& PassName, const std::shared_ptr<graphics::CTexture>& Texture);
 
 		void AddBGM(const std::shared_ptr<audio::CAudioClip>& AudioClip, bool autoplay, bool loop);
 		const std::tuple<std::shared_ptr<audio::CAudioClip>, bool, bool>& GetSound() const;

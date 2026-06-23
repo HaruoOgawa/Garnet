@@ -110,9 +110,18 @@ namespace api
 			}
 			else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_FRAME)
 			{
-				const auto& it = m_RefFrameTextureMap.find(TexLayout.TextureName);
+				Texture = m_EmptyTexture;
 
-				Texture = (it != m_RefFrameTextureMap.end()) ? it->second : m_EmptyTexture;
+				const auto& it = m_RefFrameTextureMap.find(TexLayout.FrameName);
+				if (it != m_RefFrameTextureMap.end())
+				{
+					int FrameIndex = TexLayout.FrameIndex;
+
+					if (FrameIndex >= 0 && FrameIndex < static_cast<int>(it->second.size()))
+					{
+						Texture = it->second[FrameIndex];
+					}
+				}
 			}
 			else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_IBL_Diffuse)
 			{
