@@ -79,10 +79,6 @@ namespace api
 
 	bool COpenGLRenderPass::BeginRenderPass()
 	{
-#ifdef _DEBUG
-		glPushDebugGroup(0, -1, m_PassName.length(), m_PassName.c_str()); // RenderPass名記入開始
-#endif // _DEBUG
-
 		if (!m_SubPass->BeginRenderPass()) return false;
 
 		return true;
@@ -91,10 +87,6 @@ namespace api
 	bool COpenGLRenderPass::EndRenderPass()
 	{
 		if (!m_SubPass->EndRenderPass()) return false;
-
-#ifdef _DEBUG
-		glPopDebugGroup(); // RenderPass名記入終了
-#endif // _DEBUG
 
 		// MSAAが有効ならフレームバッファのコピーを行う
 		if (m_UseMSAA)

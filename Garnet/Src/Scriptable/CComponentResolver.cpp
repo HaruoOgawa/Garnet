@@ -5,7 +5,6 @@
 #include "CommonComponent/CPointLightComponent.h"
 #include "CommonComponent/CSpotLightRenderer.h"
 #include "CommonComponent/CSpotLightDMXController.h"
-#include "CommonComponent/CIndirectLightComponent.h"
 
 namespace scriptable
 {
@@ -30,10 +29,6 @@ namespace scriptable
 		}
 		else if (ComponentType == "RectLight")
 		{
-		}
-		else if (ComponentType == "IndirectLight")
-		{
-			return std::make_shared<scriptable::CIndirectLightComponent>(ComponentType, ValueRegistry);
 		}
 		else if (ComponentType == "SpotLightDMXController")
 		{

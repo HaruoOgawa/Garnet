@@ -84,12 +84,9 @@ namespace scene
 				Object->GetTextureSet()->AddIBLTexture(Diffuse_Tex, Specular_Tex, GGXLUT_Tex);
 			}
 
-			for (const auto& FrameTextureMap : m_SceneTextureSet->GetFrameTextureMap())
+			for (const auto& FrameTexture : m_SceneTextureSet->GetFrameTextureList())
 			{
-				for (const auto& FrameTexture : FrameTextureMap.second)
-				{
-					Object->GetTextureSet()->AddFrameTexture(FrameTextureMap.first, FrameTexture);
-				}
+				Object->GetTextureSet()->AddFrameTexture(FrameTexture);
 			}
 		}
 
@@ -238,9 +235,9 @@ namespace scene
 		return m_SceneTextureSet;
 	}
 
-	void CSceneController::AddFrameTexture(const std::string& PassName, const std::shared_ptr<graphics::CTexture>& Texture)
+	void CSceneController::AddFrameTexture(const std::shared_ptr<graphics::CTexture>& Texture)
 	{
-		m_SceneTextureSet->AddFrameTexture(PassName, Texture);
+		m_SceneTextureSet->AddFrameTexture(Texture);
 	}
 
 	void CSceneController::AddMaterialInfo(const std::shared_ptr<object::C3DObject>& Object, const std::map<std::tuple<int, int>, std::vector<SMaterialInfo>>& MaterialInfoList)
