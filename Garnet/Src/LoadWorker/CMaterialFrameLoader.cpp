@@ -741,16 +741,9 @@ namespace resource
 			TextureUsage = graphics::ETextureUsage::TEXTURE_USAGE_IBL_GGXLUT;
 		}
 
-		std::string frameName = std::string();
-		GetString("frameName", frameName, uniform);
-		
-		int frameIndex = -1;
-		GetInt("frameIndex", frameIndex, uniform);
-
 		// TextureBindingLayoutÇçÏê¨
 		graphics::STextureBindingLayout BindingLayout = graphics::STextureBindingLayout(
-			name, viewBinding, samplerBinding, textureIndex, TextureUsage, readOnFragment, readOnVertex, frameName, frameIndex
-		);
+			name, viewBinding, samplerBinding, textureIndex, TextureUsage, readOnFragment, readOnVertex);
 
 		// îzóÒÇ…ìoò^
 		m_TextureBufferList.push_back(BindingLayout);

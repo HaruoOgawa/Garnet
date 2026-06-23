@@ -68,7 +68,7 @@ namespace graphics
 		// 参照中のテクスチャリスト
 		std::map<std::string, std::shared_ptr<graphics::CTexture>> m_RefTextureMap;
 		std::map<std::string, std::shared_ptr<graphics::CTexture>> m_RefCubeMapMap;
-		std::map<std::string, std::vector<std::shared_ptr<graphics::CTexture>>> m_RefFrameTextureMap;
+		std::map<std::string, std::shared_ptr<graphics::CTexture>> m_RefFrameTextureMap;
 		std::shared_ptr<graphics::CTexture> m_RefDiffuse_Tex = nullptr;
 		std::shared_ptr<graphics::CTexture> m_RefSpecular_Tex = nullptr;
 		std::shared_ptr<graphics::CTexture> m_RefGGXLUT_Tex = nullptr;

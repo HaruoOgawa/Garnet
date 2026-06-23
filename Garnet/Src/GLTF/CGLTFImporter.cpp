@@ -291,8 +291,8 @@ namespace gltf
 		std::vector<std::shared_ptr<graphics::CTexture>> CubeTexList(0);
 		if (TextureSet) CubeTexList = TextureSet->GetCubeMapList();
 		
-		std::map<std::string, std::vector<std::shared_ptr<graphics::CTexture>>> FrameTextureMap;
-		if (TextureSet) FrameTextureMap = TextureSet->GetFrameTextureMap();
+		std::vector<std::shared_ptr<graphics::CTexture>> FrameTextureList(0);
+		if (TextureSet) FrameTextureList = TextureSet->GetFrameTextureList();
 
 		std::shared_ptr<graphics::CTexture> Diffuse_Tex = nullptr;
 		if (TextureSet) Diffuse_Tex = TextureSet->GetDiffuse_Tex();
@@ -302,8 +302,6 @@ namespace gltf
 
 		std::shared_ptr<graphics::CTexture> GGXLUT_Tex = nullptr;
 		if (TextureSet) GGXLUT_Tex = TextureSet->GetGGXLUT_Tex();
-
-		const auto& ShadowPassIT = FrameTextureMap.find("ShadowPass");
 
 		//
 		for (const auto& glTfMaterial : model.materials)
@@ -375,15 +373,14 @@ namespace gltf
 					material->ReplacePreloadUniformValue("mipCount", &glm::vec1(MipCount)[0], sizeof(float), 0);
 
 					int ShadowMapX = 1, ShadowMapY = 1;
-					if (ShadowPassIT != FrameTextureMap.end())
+					if (FrameTextureList.size() > 0)
 					{
-						if (!ShadowPassIT->second.empty())
-						{
-							const auto& ShadowMap = ShadowPassIT->second[0];
-
-							ShadowMapX = ShadowMap->GetWidth();
-							ShadowMapY = ShadowMap->GetHeight();
-						}
+						// glTF FrameTextureList
+						// [0] : ShadowMap
+						// [1] : ???
+						// [2] : ???
+						ShadowMapX = FrameTextureList[0]->GetWidth();
+						ShadowMapY = FrameTextureList[0]->GetHeight();
 					}
 
 					material->ReplacePreloadUniformValue("ShadowMapX", &glm::vec1(static_cast<float>(ShadowMapX))[0], sizeof(float), 0);
@@ -429,9 +426,15 @@ namespace gltf
 						}
 
 						// ShadowMap
-						if (ShadowPassIT != FrameTextureMap.end())
+						if (FrameTextureList.size() > 0)
 						{
+							// glTF FrameTextureList
+							// [0] : ShadowMap
+							// [1] : ???
+							// [2] : ???
+
 							// ‚Ð‚Æ‚Ü‚¸––”ö‚©‚çŽæ“¾
+							material->ReplaceTextureIndex("shadowmapTexture", 0);
 							material->ReplacePreloadUniformValue("useShadowMap", &glm::uvec1(1)[0], sizeof(int), 0);
 						}
 
