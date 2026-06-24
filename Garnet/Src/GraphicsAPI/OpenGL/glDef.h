@@ -153,6 +153,8 @@ typedef void GLvoid;
 	GL_FUNC(void,	ValidateProgram  ,    GLuint program) \
 	GL_FUNC(void,	DetachShader  ,		  GLuint program, GLuint shader) \
 	GL_FUNC(void,	Uniform4f  ,		  GLint location, GLfloat v0, GLfloat v1, GLfloat v2, GLfloat v3) \
+	GL_FUNC(void,	PushDebugGroup  ,	  GLenum source, GLuint id, GLsizei length, const GLchar *message) \
+	GL_FUNC(void,	PopDebugGroup) \
 /* end */
 
 // プリプロセッサ芸でまずGL_FUNC_LISTの中身をtypedef や externで展開する

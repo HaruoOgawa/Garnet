@@ -47,7 +47,6 @@ namespace graphics
 			const auto& TexLayout = m_Material->GetTextureBindingLayoutList()[Index];
 
 			m_RenderBoard->GetTextureSet()->Add2DTexture(m_TextureList[Index]);
-			m_RenderBoard->GetTextureSet()->AddFrameTexture(m_TextureList[Index]);
 			m_Material->ReplaceTextureIndex(TexLayout.TextureName, Index);
 		}
 
