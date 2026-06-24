@@ -4,16 +4,35 @@
 
 namespace graphics
 {
-	// DrawResourceName: フレームテクスチャの参照元, DrawTargetPassName: m_RenderBoardの描画先
+	// TextureUsage::2Dのテクスチャを取り扱う場合
 	CFrameRenderer::CFrameRenderer(api::IGraphicsAPI* pGraphicsAPI, const std::string& DrawTargetPassName, const std::vector<std::shared_ptr<graphics::CTexture>>& TextureList) :
 		m_IsLoaded(false),
 		m_pGraphicsAPI(pGraphicsAPI),
 		m_MaterialFrame(std::make_shared<graphics::CMaterialFrame>()),
 		m_RenderBoard(std::make_shared<object::C3DObject>()),
 		m_Material(nullptr),
+		m_InputPassName(std::string()),
 		m_TextureList(TextureList)
 	{
 		m_RenderBoard->AddPassName(DrawTargetPassName);
+	}
+
+	// TextureUsage::Frameのテクスチャを取り扱う場合
+	CFrameRenderer::CFrameRenderer(api::IGraphicsAPI* pGraphicsAPI, const std::string& DrawTargetPassName, const std::string& InputPassName) :
+		m_IsLoaded(false),
+		m_pGraphicsAPI(pGraphicsAPI),
+		m_MaterialFrame(std::make_shared<graphics::CMaterialFrame>()),
+		m_RenderBoard(std::make_shared<object::C3DObject>()),
+		m_Material(nullptr),
+		m_InputPassName(InputPassName)
+	{
+		m_RenderBoard->AddPassName(DrawTargetPassName);
+
+		const auto& renderPass = m_pGraphicsAPI->FindOffScreenRenderPass(m_InputPassName);
+		if (renderPass)
+		{
+			m_TextureList = renderPass->GetFrameTextureList();
+		}
 	}
 
 	CFrameRenderer::~CFrameRenderer()
@@ -46,8 +65,17 @@ namespace graphics
 
 			const auto& TexLayout = m_Material->GetTextureBindingLayoutList()[Index];
 
-			m_RenderBoard->GetTextureSet()->Add2DTexture(m_TextureList[Index]);
-			m_Material->ReplaceTextureIndex(TexLayout.TextureName, Index);
+			if (!m_InputPassName.empty())
+			{
+				// Frame Texture
+				m_RenderBoard->GetTextureSet()->AddFrameTexture(m_InputPassName, m_TextureList[Index]);
+			}
+			else
+			{
+				// 2D Texture
+				m_RenderBoard->GetTextureSet()->Add2DTexture(m_TextureList[Index]);
+				m_Material->ReplaceTextureIndex(TexLayout.TextureName, Index);
+			}
 		}
 
 		if (!m_RenderBoard->CreatePresetSimply(m_pGraphicsAPI, nullptr, graphics::CPresetPrimitive::CreateBoard(m_pGraphicsAPI), graphics::EPresetPrimitiveType::BOARD, m_Material)) return false;

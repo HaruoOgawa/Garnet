@@ -25,12 +25,14 @@ namespace graphics
 
 		std::shared_ptr<CMaterial> m_Material;
 
+		std::string m_InputPassName;
 		std::vector<std::shared_ptr<graphics::CTexture>> m_TextureList;
 
 	private:
 		bool Load();
 	public:
 		CFrameRenderer(api::IGraphicsAPI* pGraphicsAPI, const std::string& DrawTargetPassName, const std::vector<std::shared_ptr<graphics::CTexture>>& TextureList);
+		CFrameRenderer(api::IGraphicsAPI* pGraphicsAPI, const std::string& DrawTargetPassName, const std::string& InputPassName);
 		virtual ~CFrameRenderer();
 
 		const std::shared_ptr<CMaterial>& GetMaterial() const;
