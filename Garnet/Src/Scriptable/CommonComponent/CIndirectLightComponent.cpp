@@ -14,10 +14,13 @@ namespace scriptable
 		m_Material(nullptr)
 	{
 		std::string DefferdPassName = "GBufferGenPass";
+		std::string SSAOBlurPassName = "GBufferSSAOBlurPass";
 		std::string IndirectLightPassName = "GBufferIndirectLightPass";
 		std::string LightingPassName = "GBufferLightPass";
+		
 
 		GetValueRegistry()->SetValue("DefferdPassName", graphics::EUniformValueType::VALUE_TYPE_STRING, DefferdPassName.c_str(), sizeof(char) * DefferdPassName.size());
+		GetValueRegistry()->SetValue("SSAOBlurPassName", graphics::EUniformValueType::VALUE_TYPE_STRING, SSAOBlurPassName.c_str(), sizeof(char) * SSAOBlurPassName.size());
 		GetValueRegistry()->SetValue("LightingPassName", graphics::EUniformValueType::VALUE_TYPE_STRING, LightingPassName.c_str(), sizeof(char) * LightingPassName.size());
 		GetValueRegistry()->SetValue("IndirectLightPassName", graphics::EUniformValueType::VALUE_TYPE_STRING, IndirectLightPassName.c_str(), sizeof(char) * IndirectLightPassName.size());
 	}
@@ -114,6 +117,7 @@ namespace scriptable
 
 		// ƒpƒX–¼‚ğæ“¾
 		std::string DefferdPassName = GetValueRegistry()->GetValueString("DefferdPassName");
+		std::string SSAOBlurPassName = GetValueRegistry()->GetValueString("SSAOBlurPassName");
 		std::string LightingPassName = GetValueRegistry()->GetValueString("LightingPassName");
 		std::string IndirectLightPassName = GetValueRegistry()->GetValueString("IndirectLightPassName");
 
@@ -144,6 +148,17 @@ namespace scriptable
 			if (!Texture) return false;
 
 			m_LightObject->GetTextureSet()->AddFrameTexture(LightingPassName, Texture);
+		}
+		
+		{
+			// GBufferSSAOBlur
+			const auto& RenderPass = pGraphicsAPI->FindOffScreenRenderPass(SSAOBlurPassName);
+			if (!RenderPass) return false;
+
+			const auto& Texture = RenderPass->GetFrameTexture();
+			if (!Texture) return false;
+
+			m_LightObject->GetTextureSet()->AddFrameTexture(SSAOBlurPassName, Texture);
 		}
 
 		// IBLİ’è
