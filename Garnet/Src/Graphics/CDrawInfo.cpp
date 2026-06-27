@@ -3,6 +3,7 @@
 namespace graphics
 {
 	CDrawInfo::CDrawInfo() :
+		m_CurrentFrame(0),
 		m_LightCamera(std::make_shared<camera::CCamera>()),
 		m_LightColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)),
 		m_LightProjection(std::make_shared<projection::CProjection>()),
@@ -11,6 +12,23 @@ namespace graphics
 		m_SpatialCulling(false),
 		m_SpatialCullPos(glm::vec4(0.0f))
 	{
+	}
+
+	void CDrawInfo::DoNextFrame()
+	{
+		if (m_CurrentFrame == INT_MAX)
+		{
+			m_CurrentFrame = 0;
+		}
+		else
+		{
+			m_CurrentFrame++;
+		}
+	}
+
+	int CDrawInfo::GetCurrentFrame() const
+	{
+		return m_CurrentFrame;
 	}
 
 	void CDrawInfo::SetLightCamera(const std::shared_ptr<camera::CCamera>& LightCamera)

@@ -10,6 +10,8 @@ namespace graphics
 {
 	class CDrawInfo
 	{
+		int m_CurrentFrame;
+
 		std::shared_ptr<camera::CCamera> m_LightCamera;
 		glm::vec4 m_LightColor;
 		std::shared_ptr<projection::CProjection> m_LightProjection;
@@ -22,6 +24,9 @@ namespace graphics
 	public:
 		CDrawInfo();
 		virtual ~CDrawInfo() = default;
+
+		void DoNextFrame();
+		int GetCurrentFrame() const;
 
 		void SetLightCamera(const std::shared_ptr<camera::CCamera>& LightCamera);
 		const std::shared_ptr<camera::CCamera>& GetLightCamera() const;
