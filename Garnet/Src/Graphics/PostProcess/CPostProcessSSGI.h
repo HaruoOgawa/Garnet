@@ -28,6 +28,11 @@ namespace graphics
 		std::shared_ptr<graphics::CFrameRenderer> m_SSGIMainFrameRenderer;
 		std::shared_ptr<graphics::CFrameRenderer> m_Reduce2x2FrameRenderer;
 		std::shared_ptr<graphics::CFrameRenderer> m_Reduce4x4FrameRenderer;
+		std::shared_ptr<graphics::CFrameRenderer> m_BilinearBlur4x4FrameRenderer;
+		std::shared_ptr<graphics::CFrameRenderer> m_UpSampling2x2FrameRenderer;
+		std::shared_ptr<graphics::CFrameRenderer> m_BilinearBlur2x2FrameRenderer;
+		std::shared_ptr<graphics::CFrameRenderer> m_UpSamplingOriginFrameRenderer;
+		std::shared_ptr<graphics::CFrameRenderer> m_TemporalFrameRenderer;
 	public:
 		CPostProcessSSGI(const std::string& TargetPassName);
 		virtual ~CPostProcessSSGI();
