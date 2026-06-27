@@ -762,6 +762,8 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Src\Graphics\CPostProcessSSGI.h" />
+    <ClInclude Include="Src\Interface\IPostProcessFilter.h" />
     <ClInclude Include="Src\Scriptable\CommonComponent\CIndirectLightComponent.h" />
     <ClInclude Include="Src\OBJ\CMTLImporter.h" />
     <ClInclude Include="Src\Format\CStringFormatter.h" />
@@ -1872,6 +1874,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClInclude Include="Src\Interface\IRenderer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\Graphics\CPostProcessSSGI.cpp" />
     <ClCompile Include="Src\Scriptable\CommonComponent\CIndirectLightComponent.cpp" />
     <ClCompile Include="Src\OBJ\CMTLImporter.cpp" />
     <ClCompile Include="Src\Format\CStringFormatter.cpp" />

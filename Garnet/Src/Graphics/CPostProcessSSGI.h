@@ -1,6 +1,5 @@
 #pragma once
 
-#include <string>
 #include <memory>
 #include <vector>
 #include <tuple>
@@ -22,17 +21,13 @@ namespace graphics
 
 namespace graphics
 {
-	class CPostProcessFXAA : public IPostProcessFilter, public scriptable::CValueRegistry
+	class CPostProcessSSGI : public IPostProcessFilter, public scriptable::CValueRegistry
 	{
 		std::string m_TargetPassName;
 
-		std::shared_ptr<graphics::CFrameRenderer> m_FXAAFrameRenderer;
-		std::shared_ptr<graphics::CFrameRenderer> m_ResultFrameRenderer;
-
-		std::shared_ptr<graphics::CTexture> m_TargetTexture;
 	public:
-		CPostProcessFXAA(const std::string& TargetPassName);
-		virtual ~CPostProcessFXAA();
+		CPostProcessSSGI(const std::string& TargetPassName);
+		virtual ~CPostProcessSSGI();
 
 		bool Initialize(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker) override;
 
@@ -43,5 +38,3 @@ namespace graphics
 			const std::shared_ptr<graphics::CDrawInfo>& DrawInfo) override;
 	};
 }
-
-
