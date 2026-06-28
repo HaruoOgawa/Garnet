@@ -262,6 +262,8 @@ namespace api
 			}
 		}
 
+		// ２つのフレームバッファの条件が異なるとBlitに失敗するので注意
+		// 例えば一方はステンシルオンなのにもう一方はオフだと失敗する
 		glBlitFramebuffer(0, 0, Width, Height, 0, 0, Width, Height, mask, GL_NEAREST);
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);

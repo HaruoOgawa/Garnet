@@ -15,7 +15,8 @@ namespace graphics
 		m_BilateralXBlur2x2FrameRenderer(nullptr),
 		m_BilateralYBlur2x2FrameRenderer(nullptr),
 		m_UpSamplingOriginFrameRenderer(nullptr),
-		m_TemporalAccumulationFrameRenderer(nullptr)
+		m_TemporalAccumulationFrameRenderer(nullptr),
+		m_SSGIMixFrameRenderer(nullptr)
 	{
 	}
 
@@ -27,7 +28,7 @@ namespace graphics
 	{
 		int TexWidth = 0, TexHeight = 0;
 		{
-			graphics::SRenderPassState State = graphics::SRenderPassState(1);
+			graphics::SRenderPassState State = graphics::SRenderPassState(2);
 			if (!pGraphicsAPI->CreateRenderPass("GBufferSSGIMainPass", api::ERenderPassFormat::COLOR_FLOAT_RENDERPASS, -1, -1, State)) return false;
 
 			const auto& Pass = pGraphicsAPI->FindOffScreenRenderPass("GBufferSSGIMainPass");
@@ -112,7 +113,10 @@ namespace graphics
 
 		// GBufferSSGIReduce2x2Pass
 		{
-			m_Reduce2x2FrameRenderer = std::make_shared<graphics::CFrameRenderer>(pGraphicsAPI, "GBufferSSGIReduce2x2Pass", pGraphicsAPI->FindOffScreenRenderPass("GBufferSSGIMainPass")->GetFrameTextureList());
+			std::vector<std::shared_ptr<CTexture>> TextureList;
+			TextureList.push_back(pGraphicsAPI->FindOffScreenRenderPass("GBufferSSGIMainPass")->GetFrameTexture(0));
+
+			m_Reduce2x2FrameRenderer = std::make_shared<graphics::CFrameRenderer>(pGraphicsAPI, "GBufferSSGIReduce2x2Pass", TextureList);
 			
 			// フレームテクスチャのフィルターモードがLINEARになっている前提
 			// サイズを小さくしたフレームバッファに描画しただけで、バイリニアフィルタつきのダウンサンプリングの想定
@@ -191,6 +195,26 @@ namespace graphics
 			if (!m_TemporalAccumulationFrameRenderer->Create(pLoadWorker, "Resources\\Common\\MaterialFrame\\GBufferSSGITemporalAccumulation_MF.json")) return false;
 		}
 
+		// SSGIMix
+		{
+			std::vector<std::shared_ptr<graphics::CTexture>> TextureList;
+
+			auto GBufferGenPass = pGraphicsAPI->FindOffScreenRenderPass("GBufferGenPass");
+			if (GBufferGenPass)
+			{
+				for (const auto& Texture : GBufferGenPass->GetFrameTextureList())
+				{
+					TextureList.push_back(Texture);
+				}
+			}
+
+			TextureList.push_back(pGraphicsAPI->FindOffScreenRenderPass("GBufferSSGITemporalPass")->GetFrameTexture());
+			TextureList.push_back(pGraphicsAPI->FindOffScreenRenderPass("GBufferSSGIMainPass")->GetFrameTexture(1));
+
+			m_SSGIMixFrameRenderer = std::make_shared<graphics::CFrameRenderer>(pGraphicsAPI, m_TargetPassName, TextureList);
+			if (!m_SSGIMixFrameRenderer->Create(pLoadWorker, "Resources\\Common\\MaterialFrame\\GBufferSSGIMix_MF.json")) return false;
+		}
+
 		return true;
 	}
 
@@ -208,6 +232,7 @@ namespace graphics
 		if (!m_BilateralYBlur2x2FrameRenderer->Update(pGraphicsAPI, pPhysicsEngine, pLoadWorker, Camera, Projection, DrawInfo, InputState)) return false;
 		if (!m_UpSamplingOriginFrameRenderer->Update(pGraphicsAPI, pPhysicsEngine, pLoadWorker, Camera, Projection, DrawInfo, InputState)) return false;
 		if (!m_TemporalAccumulationFrameRenderer->Update(pGraphicsAPI, pPhysicsEngine, pLoadWorker, Camera, Projection, DrawInfo, InputState)) return false;
+		if (!m_SSGIMixFrameRenderer->Update(pGraphicsAPI, pPhysicsEngine, pLoadWorker, Camera, Projection, DrawInfo, InputState)) return false;
 
 		return true;
 	}
@@ -350,6 +375,11 @@ namespace graphics
 		if (!pGraphicsAPI->CopyRenderPass("GBufferSSGITemporalPass", "GBufferSSGIResultPass", true, true)) return false;
 
 		// 最終描画結果にフィードバック
+		{
+			if (!pGraphicsAPI->BeginRender(m_TargetPassName)) return false;
+			if (!m_SSGIMixFrameRenderer->Draw(pGraphicsAPI, Camera, Projection, DrawInfo)) return false;
+			if (!pGraphicsAPI->EndRender()) return false;
+		}
 
 		return true;
 	}
