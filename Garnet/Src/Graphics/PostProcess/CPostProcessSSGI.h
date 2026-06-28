@@ -28,9 +28,11 @@ namespace graphics
 		std::shared_ptr<graphics::CFrameRenderer> m_SSGIMainFrameRenderer;
 		std::shared_ptr<graphics::CFrameRenderer> m_Reduce2x2FrameRenderer;
 		std::shared_ptr<graphics::CFrameRenderer> m_Reduce4x4FrameRenderer;
-		std::shared_ptr<graphics::CFrameRenderer> m_BilateralBlur4x4FrameRenderer;
+		std::shared_ptr<graphics::CFrameRenderer> m_BilateralXBlur4x4FrameRenderer;
+		std::shared_ptr<graphics::CFrameRenderer> m_BilateralYBlur4x4FrameRenderer;
 		std::shared_ptr<graphics::CFrameRenderer> m_UpSampling2x2FrameRenderer;
-		std::shared_ptr<graphics::CFrameRenderer> m_BilateralBlur2x2FrameRenderer;
+		std::shared_ptr<graphics::CFrameRenderer> m_BilateralXBlur2x2FrameRenderer;
+		std::shared_ptr<graphics::CFrameRenderer> m_BilateralYBlur2x2FrameRenderer;
 		std::shared_ptr<graphics::CFrameRenderer> m_UpSamplingOriginFrameRenderer;
 		std::shared_ptr<graphics::CFrameRenderer> m_TemporalFrameRenderer;
 	public:
