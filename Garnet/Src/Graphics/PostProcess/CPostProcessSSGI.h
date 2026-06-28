@@ -34,7 +34,7 @@ namespace graphics
 		std::shared_ptr<graphics::CFrameRenderer> m_BilateralXBlur2x2FrameRenderer;
 		std::shared_ptr<graphics::CFrameRenderer> m_BilateralYBlur2x2FrameRenderer;
 		std::shared_ptr<graphics::CFrameRenderer> m_UpSamplingOriginFrameRenderer;
-		std::shared_ptr<graphics::CFrameRenderer> m_TemporalFrameRenderer;
+		std::shared_ptr<graphics::CFrameRenderer> m_TemporalAccumulationFrameRenderer;
 	public:
 		CPostProcessSSGI(const std::string& TargetPassName);
 		virtual ~CPostProcessSSGI();

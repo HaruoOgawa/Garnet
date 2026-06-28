@@ -15,7 +15,7 @@ namespace graphics
 		m_BilateralXBlur2x2FrameRenderer(nullptr),
 		m_BilateralYBlur2x2FrameRenderer(nullptr),
 		m_UpSamplingOriginFrameRenderer(nullptr),
-		m_TemporalFrameRenderer(nullptr)
+		m_TemporalAccumulationFrameRenderer(nullptr)
 	{
 	}
 
@@ -187,8 +187,8 @@ namespace graphics
 			TextureList.push_back(pGraphicsAPI->FindOffScreenRenderPass("GBufferSSGIOriginUpSamplingPass")->GetFrameTexture());
 			TextureList.push_back(pGraphicsAPI->FindOffScreenRenderPass("GBufferSSGIResultPass")->GetFrameTexture());
 
-			//m_TemporalFrameRenderer = std::make_shared<graphics::CFrameRenderer>(pGraphicsAPI, "GBufferSSGITemporalPass", TextureList);
-			//if (!m_TemporalFrameRenderer->Create(pLoadWorker, "Resources\\Common\\MaterialFrame\\GBufferSSGITemporal_MF.json")) return false;
+			m_TemporalAccumulationFrameRenderer = std::make_shared<graphics::CFrameRenderer>(pGraphicsAPI, "GBufferSSGITemporalPass", TextureList);
+			if (!m_TemporalAccumulationFrameRenderer->Create(pLoadWorker, "Resources\\Common\\MaterialFrame\\GBufferSSGITemporalAccumulation_MF.json")) return false;
 		}
 
 		return true;
@@ -207,7 +207,7 @@ namespace graphics
 		if (!m_BilateralXBlur2x2FrameRenderer->Update(pGraphicsAPI, pPhysicsEngine, pLoadWorker, Camera, Projection, DrawInfo, InputState)) return false;
 		if (!m_BilateralYBlur2x2FrameRenderer->Update(pGraphicsAPI, pPhysicsEngine, pLoadWorker, Camera, Projection, DrawInfo, InputState)) return false;
 		if (!m_UpSamplingOriginFrameRenderer->Update(pGraphicsAPI, pPhysicsEngine, pLoadWorker, Camera, Projection, DrawInfo, InputState)) return false;
-		//if (!m_TemporalFrameRenderer->Update(pGraphicsAPI, pPhysicsEngine, pLoadWorker, Camera, Projection, DrawInfo, InputState)) return false;
+		if (!m_TemporalAccumulationFrameRenderer->Update(pGraphicsAPI, pPhysicsEngine, pLoadWorker, Camera, Projection, DrawInfo, InputState)) return false;
 
 		return true;
 	}
@@ -342,7 +342,7 @@ namespace graphics
 		// GBufferSSGITemporalPass
 		{
 			if (!pGraphicsAPI->BeginRender("GBufferSSGITemporalPass")) return false;
-			//if (!m_TemporalFrameRenderer->Draw(pGraphicsAPI, Camera, Projection, DrawInfo)) return false;
+			if (!m_TemporalAccumulationFrameRenderer->Draw(pGraphicsAPI, Camera, Projection, DrawInfo)) return false;
 			if (!pGraphicsAPI->EndRender()) return false;
 		}
 
