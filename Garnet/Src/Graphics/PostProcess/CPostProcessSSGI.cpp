@@ -1,11 +1,14 @@
 #include "CPostProcessSSGI.h"
 #include <Graphics/CFrameRenderer.h>
+#include <LoadWorker/CLoadWorker.h>
 
 namespace graphics
 {
 	CPostProcessSSGI::CPostProcessSSGI(const std::string& TargetPassName):
 		CValueRegistry("PostProcessSSGIRegistry"),
 		m_TargetPassName(TargetPassName),
+		m_Sharpness(10.0f),
+		m_MaxDistance(15.0f),
 		m_SSGIMainFrameRenderer(nullptr),
 		m_Reduce2x2FrameRenderer(nullptr),
 		m_Reduce4x4FrameRenderer(nullptr),
@@ -105,6 +108,21 @@ namespace graphics
 			if (GBufferResultPass)
 			{
 				TextureList.push_back(GBufferResultPass->GetFrameTexture());
+			}
+
+			// Blue Noise
+			{
+				auto Texture = pGraphicsAPI->CreateTexture();
+				auto TexLoader = std::make_shared<resource::CTextureLoader>(pGraphicsAPI, "Resources\\Common\\Textures\\Noise\\BlueNoise.png", Texture);
+				pLoadWorker->AddLoadResource(TexLoader);
+
+				TextureList.push_back(Texture);
+			}
+
+			auto MainResultPass = pGraphicsAPI->FindOffScreenRenderPass("MainResultPass");
+			if (MainResultPass)
+			{
+				TextureList.push_back(MainResultPass->GetFrameTexture());
 			}
 
 			m_SSGIMainFrameRenderer = std::make_shared<graphics::CFrameRenderer>(pGraphicsAPI, "GBufferSSGIMainPass", TextureList);
@@ -243,7 +261,15 @@ namespace graphics
 	{
 		// GBufferSSGIMainPass
 		{
+			const auto& Material = m_SSGIMainFrameRenderer->GetMaterial();
+
 			if (!pGraphicsAPI->BeginRender("GBufferSSGIMainPass")) return false;
+
+			if (Material)
+			{
+				Material->SetUniformValue("maxDistance", &glm::vec1(m_MaxDistance)[0], sizeof(float));
+			}
+
 			if (!m_SSGIMainFrameRenderer->Draw(pGraphicsAPI, Camera, Projection, DrawInfo)) return false;
 			if (!pGraphicsAPI->EndRender()) return false;
 		}
@@ -271,7 +297,7 @@ namespace graphics
 			if (Material)
 			{
 				Material->SetUniformValue("g_InvResolutionDirection", &glm::vec2(1.0f, 0.0f)[0], sizeof(float) * 2); // X方向ブラー
-				Material->SetUniformValue("g_Sharpness", &glm::vec1(1.5f)[0], sizeof(float));
+				Material->SetUniformValue("g_Sharpness", &glm::vec1(m_Sharpness)[0], sizeof(float));
 				Material->SetUniformValue("near", &glm::vec1(Projection->GetNear())[0], sizeof(float));
 				Material->SetUniformValue("far", &glm::vec1(Projection->GetFar())[0], sizeof(float));
 			}
@@ -289,7 +315,7 @@ namespace graphics
 			if (Material)
 			{
 				Material->SetUniformValue("g_InvResolutionDirection", &glm::vec2(0.0f, 1.0f)[0], sizeof(float) * 2); // Y方向ブラー
-				Material->SetUniformValue("g_Sharpness", &glm::vec1(1.5f)[0], sizeof(float));
+				Material->SetUniformValue("g_Sharpness", &glm::vec1(m_Sharpness)[0], sizeof(float));
 				Material->SetUniformValue("near", &glm::vec1(Projection->GetNear())[0], sizeof(float));
 				Material->SetUniformValue("far", &glm::vec1(Projection->GetFar())[0], sizeof(float));
 			}
@@ -322,7 +348,7 @@ namespace graphics
 			if (Material)
 			{
 				Material->SetUniformValue("g_InvResolutionDirection", &glm::vec2(1.0f, 0.0f)[0], sizeof(float) * 2); // X方向ブラー
-				Material->SetUniformValue("g_Sharpness", &glm::vec1(1.5f)[0], sizeof(float));
+				Material->SetUniformValue("g_Sharpness", &glm::vec1(m_Sharpness)[0], sizeof(float));
 				Material->SetUniformValue("near", &glm::vec1(Projection->GetNear())[0], sizeof(float));
 				Material->SetUniformValue("far", &glm::vec1(Projection->GetFar())[0], sizeof(float));
 			}
@@ -340,7 +366,7 @@ namespace graphics
 			if (Material)
 			{
 				Material->SetUniformValue("g_InvResolutionDirection", &glm::vec2(0.0f, 1.0f)[0], sizeof(float) * 2); // Y方向ブラー
-				Material->SetUniformValue("g_Sharpness", &glm::vec1(1.5f)[0], sizeof(float));
+				Material->SetUniformValue("g_Sharpness", &glm::vec1(m_Sharpness)[0], sizeof(float));
 				Material->SetUniformValue("near", &glm::vec1(Projection->GetNear())[0], sizeof(float));
 				Material->SetUniformValue("far", &glm::vec1(Projection->GetFar())[0], sizeof(float));
 			}
