@@ -8,7 +8,7 @@ namespace graphics
 		CValueRegistry("PostProcessSSGIRegistry"),
 		m_TargetPassName(TargetPassName),
 		m_Sharpness(10.0f),
-		m_MaxDistance(15.0f),
+		m_MaxDistance(0.5f),
 		m_SSGIMainFrameRenderer(nullptr),
 		m_Reduce2x2FrameRenderer(nullptr),
 		m_Reduce4x4FrameRenderer(nullptr),
@@ -268,6 +268,8 @@ namespace graphics
 			if (Material)
 			{
 				Material->SetUniformValue("maxDistance", &glm::vec1(m_MaxDistance)[0], sizeof(float));
+				Material->SetUniformValue("near", &glm::vec1(Projection->GetNear())[0], sizeof(float));
+				Material->SetUniformValue("far", &glm::vec1(Projection->GetFar())[0], sizeof(float));
 			}
 
 			if (!m_SSGIMainFrameRenderer->Draw(pGraphicsAPI, Camera, Projection, DrawInfo)) return false;

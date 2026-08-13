@@ -604,7 +604,7 @@ namespace object
 				Material->SetUniformValue("time", &glm::vec1(DrawInfo->GetSecondsTime())[0], sizeof(float));
 				Material->SetUniformValue("deltaTime", &glm::vec1(DrawInfo->GetDeltaSecondsTime())[0], sizeof(float));
 				Material->SetUniformValue("resolution", &Projection->GetScreenResolution()[0], sizeof(glm::vec2));
-				Material->SetUniformValue("frame", &glm::vec1(DrawInfo->GetCurrentFrame())[0], sizeof(int));
+				Material->SetUniformValue("frame", &glm::ivec1(DrawInfo->GetCurrentFrame())[0], sizeof(int));
 
 				Material->SetUniformValue("useSpatialCulling", &glm::ivec1(DrawInfo->IsSpatialCulling() ? 1 : 0)[0], sizeof(int));
 				Material->SetUniformValue("spatialCullPos", &DrawInfo->GetSpatialCullPos()[0], sizeof(float) * 4);
