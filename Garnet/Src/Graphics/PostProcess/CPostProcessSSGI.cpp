@@ -7,8 +7,11 @@ namespace graphics
 	CPostProcessSSGI::CPostProcessSSGI(const std::string& TargetPassName):
 		CValueRegistry("PostProcessSSGIRegistry"),
 		m_TargetPassName(TargetPassName),
-		m_Sharpness(10.0f),
-		m_MaxDistance(0.5f),
+		m_Sharpness(1.0f),
+		m_NormalExponent(1.0f),
+		m_FilterRadius(0.003f),
+		m_KernelRadius(6),
+		m_MaxDistance(2.0f),
 		m_SSGIMainFrameRenderer(nullptr),
 		m_Reduce2x2FrameRenderer(nullptr),
 		m_Reduce4x4FrameRenderer(nullptr),
@@ -110,15 +113,6 @@ namespace graphics
 				TextureList.push_back(GBufferResultPass->GetFrameTexture());
 			}
 
-			// Blue Noise
-			{
-				auto Texture = pGraphicsAPI->CreateTexture();
-				auto TexLoader = std::make_shared<resource::CTextureLoader>(pGraphicsAPI, "Resources\\Common\\Textures\\Noise\\BlueNoise.png", Texture);
-				pLoadWorker->AddLoadResource(TexLoader);
-
-				TextureList.push_back(Texture);
-			}
-
 			auto MainResultPass = pGraphicsAPI->FindOffScreenRenderPass("MainResultPass");
 			if (MainResultPass)
 			{
@@ -155,6 +149,7 @@ namespace graphics
 			std::vector<std::shared_ptr<graphics::CTexture>> TextureList;
 			TextureList.push_back(pGraphicsAPI->FindOffScreenRenderPass("GBufferSSGIReduce4x4Pass")->GetFrameTexture());
 			TextureList.push_back(pGraphicsAPI->FindOffScreenRenderPass("GBufferGenPass")->GetFrameTexture(3));
+			TextureList.push_back(pGraphicsAPI->FindOffScreenRenderPass("GBufferGenPass")->GetFrameTexture(1));
 
 			m_BilateralXBlur4x4FrameRenderer = std::make_shared<graphics::CFrameRenderer>(pGraphicsAPI, "GBufferSSGIBilateralXBlur4x4Pass", TextureList);
 			if (!m_BilateralXBlur4x4FrameRenderer->Create(pLoadWorker, "Resources\\Common\\MaterialFrame\\BilateralFilter_MF.json")) return false;
@@ -165,6 +160,7 @@ namespace graphics
 			std::vector<std::shared_ptr<graphics::CTexture>> TextureList;
 			TextureList.push_back(pGraphicsAPI->FindOffScreenRenderPass("GBufferSSGIBilateralXBlur4x4Pass")->GetFrameTexture());
 			TextureList.push_back(pGraphicsAPI->FindOffScreenRenderPass("GBufferGenPass")->GetFrameTexture(3));
+			TextureList.push_back(pGraphicsAPI->FindOffScreenRenderPass("GBufferGenPass")->GetFrameTexture(1));
 
 			m_BilateralYBlur4x4FrameRenderer = std::make_shared<graphics::CFrameRenderer>(pGraphicsAPI, "GBufferSSGIBilateralYBlur4x4Pass", TextureList);
 			if (!m_BilateralYBlur4x4FrameRenderer->Create(pLoadWorker, "Resources\\Common\\MaterialFrame\\BilateralFilter_MF.json")) return false;
@@ -181,6 +177,7 @@ namespace graphics
 			std::vector<std::shared_ptr<graphics::CTexture>> TextureList;
 			TextureList.push_back(pGraphicsAPI->FindOffScreenRenderPass("GBufferSSGIUpSampling2x2Pass")->GetFrameTexture());
 			TextureList.push_back(pGraphicsAPI->FindOffScreenRenderPass("GBufferGenPass")->GetFrameTexture(3));
+			TextureList.push_back(pGraphicsAPI->FindOffScreenRenderPass("GBufferGenPass")->GetFrameTexture(1));
 
 			m_BilateralXBlur2x2FrameRenderer = std::make_shared<graphics::CFrameRenderer>(pGraphicsAPI, "GBufferSSGIBilateralXBlur2x2Pass", TextureList);
 			if (!m_BilateralXBlur2x2FrameRenderer->Create(pLoadWorker, "Resources\\Common\\MaterialFrame\\BilateralFilter_MF.json")) return false;
@@ -191,6 +188,7 @@ namespace graphics
 			std::vector<std::shared_ptr<graphics::CTexture>> TextureList;
 			TextureList.push_back(pGraphicsAPI->FindOffScreenRenderPass("GBufferSSGIBilateralXBlur2x2Pass")->GetFrameTexture());
 			TextureList.push_back(pGraphicsAPI->FindOffScreenRenderPass("GBufferGenPass")->GetFrameTexture(3));
+			TextureList.push_back(pGraphicsAPI->FindOffScreenRenderPass("GBufferGenPass")->GetFrameTexture(1));
 
 			m_BilateralYBlur2x2FrameRenderer = std::make_shared<graphics::CFrameRenderer>(pGraphicsAPI, "GBufferSSGIBilateralYBlur2x2Pass", TextureList);
 			if (!m_BilateralYBlur2x2FrameRenderer->Create(pLoadWorker, "Resources\\Common\\MaterialFrame\\BilateralFilter_MF.json")) return false;
@@ -300,6 +298,8 @@ namespace graphics
 			{
 				Material->SetUniformValue("g_InvResolutionDirection", &glm::vec2(1.0f, 0.0f)[0], sizeof(float) * 2); // X方向ブラー
 				Material->SetUniformValue("g_Sharpness", &glm::vec1(m_Sharpness)[0], sizeof(float));
+				Material->SetUniformValue("nExponent", &glm::vec1(m_NormalExponent)[0], sizeof(float));
+				Material->SetUniformValue("kernelRadius", &m_KernelRadius, sizeof(int));
 				Material->SetUniformValue("near", &glm::vec1(Projection->GetNear())[0], sizeof(float));
 				Material->SetUniformValue("far", &glm::vec1(Projection->GetFar())[0], sizeof(float));
 			}
@@ -318,6 +318,8 @@ namespace graphics
 			{
 				Material->SetUniformValue("g_InvResolutionDirection", &glm::vec2(0.0f, 1.0f)[0], sizeof(float) * 2); // Y方向ブラー
 				Material->SetUniformValue("g_Sharpness", &glm::vec1(m_Sharpness)[0], sizeof(float));
+				Material->SetUniformValue("nExponent", &glm::vec1(m_NormalExponent)[0], sizeof(float));
+				Material->SetUniformValue("kernelRadius", &m_KernelRadius, sizeof(int));
 				Material->SetUniformValue("near", &glm::vec1(Projection->GetNear())[0], sizeof(float));
 				Material->SetUniformValue("far", &glm::vec1(Projection->GetFar())[0], sizeof(float));
 			}
@@ -334,7 +336,7 @@ namespace graphics
 
 			if (Material)
 			{
-				Material->SetUniformValue("filterRadius", &glm::vec1(0.003f)[0], sizeof(float));
+				Material->SetUniformValue("filterRadius", &m_FilterRadius, sizeof(float));
 			}
 
 			if (!m_UpSampling2x2FrameRenderer->Draw(pGraphicsAPI, Camera, Projection, DrawInfo)) return false;
@@ -351,6 +353,8 @@ namespace graphics
 			{
 				Material->SetUniformValue("g_InvResolutionDirection", &glm::vec2(1.0f, 0.0f)[0], sizeof(float) * 2); // X方向ブラー
 				Material->SetUniformValue("g_Sharpness", &glm::vec1(m_Sharpness)[0], sizeof(float));
+				Material->SetUniformValue("nExponent", &glm::vec1(m_NormalExponent)[0], sizeof(float));
+				Material->SetUniformValue("kernelRadius", &m_KernelRadius, sizeof(int));
 				Material->SetUniformValue("near", &glm::vec1(Projection->GetNear())[0], sizeof(float));
 				Material->SetUniformValue("far", &glm::vec1(Projection->GetFar())[0], sizeof(float));
 			}
@@ -369,6 +373,8 @@ namespace graphics
 			{
 				Material->SetUniformValue("g_InvResolutionDirection", &glm::vec2(0.0f, 1.0f)[0], sizeof(float) * 2); // Y方向ブラー
 				Material->SetUniformValue("g_Sharpness", &glm::vec1(m_Sharpness)[0], sizeof(float));
+				Material->SetUniformValue("nExponent", &glm::vec1(m_NormalExponent)[0], sizeof(float));
+				Material->SetUniformValue("kernelRadius", &m_KernelRadius, sizeof(int));
 				Material->SetUniformValue("near", &glm::vec1(Projection->GetNear())[0], sizeof(float));
 				Material->SetUniformValue("far", &glm::vec1(Projection->GetFar())[0], sizeof(float));
 			}
@@ -385,7 +391,7 @@ namespace graphics
 
 			if (Material)
 			{
-				Material->SetUniformValue("filterRadius", &glm::vec1(0.003f)[0], sizeof(float));
+				Material->SetUniformValue("filterRadius", &m_FilterRadius, sizeof(float));
 			}
 
 			if (!m_UpSamplingOriginFrameRenderer->Draw(pGraphicsAPI, Camera, Projection, DrawInfo)) return false;

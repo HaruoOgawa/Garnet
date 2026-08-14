@@ -25,9 +25,17 @@ namespace graphics
 	{
 		std::string m_TargetPassName;
 
-		float m_Sharpness;
+		// SSGI
 		float m_MaxDistance;
 
+		//Biliteral Filter
+		float m_Sharpness;
+		float m_NormalExponent;
+		int   m_KernelRadius;
+
+		// Upsampling
+		float m_FilterRadius;
+		
 		std::shared_ptr<graphics::CFrameRenderer> m_SSGIMainFrameRenderer;
 		std::shared_ptr<graphics::CFrameRenderer> m_Reduce2x2FrameRenderer;
 		std::shared_ptr<graphics::CFrameRenderer> m_Reduce4x4FrameRenderer;
