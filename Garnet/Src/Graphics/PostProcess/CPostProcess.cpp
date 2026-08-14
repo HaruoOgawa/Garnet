@@ -5,8 +5,10 @@ namespace graphics
 {
 	CPostProcess::CPostProcess(const std::string& TargetPassName):
 		m_UseFXAA(false),
+		m_UseToneMapping(false),
 		m_UseBloom(false),
 		m_FXAAFilter(std::make_shared<CPostProcessFXAA>(TargetPassName)),
+		m_ToneMappingFilter(std::make_shared<CPostProcessToneMapping>(TargetPassName)),
 		m_BloomFilter(std::make_shared<CPostProcessBloom>(TargetPassName))
 	{
 	}
@@ -19,6 +21,11 @@ namespace graphics
 	{
 		m_UseFXAA = Flag;
 	}
+	
+	void CPostProcess::SetUseToneMapping(bool Flag)
+	{
+		m_UseToneMapping = Flag;
+	}
 
 	void CPostProcess::SetUseBloom(bool Flag)
 	{
@@ -28,6 +35,11 @@ namespace graphics
 	const std::shared_ptr<CPostProcessFXAA>& CPostProcess::GetFXAAFilter() const
 	{
 		return m_FXAAFilter;
+	}
+	
+	const std::shared_ptr<CPostProcessToneMapping>& CPostProcess::GetToneMappingFilter() const
+	{
+		return m_ToneMappingFilter;
 	}
 
 	const std::shared_ptr<CPostProcessBloom>& CPostProcess::GetBloomFilter() const
@@ -40,6 +52,11 @@ namespace graphics
 		if (m_UseFXAA)
 		{
 			if (!m_FXAAFilter->Initialize(pGraphicsAPI, pLoadWorker)) return false;
+		}
+		
+		if (m_UseToneMapping)
+		{
+			if (!m_ToneMappingFilter->Initialize(pGraphicsAPI, pLoadWorker)) return false;
 		}
 
 		if (m_UseBloom)
@@ -57,6 +74,11 @@ namespace graphics
 		{
 			if (!m_FXAAFilter->Update(pGraphicsAPI, pPhysicsEngine, pLoadWorker, Camera, Projection, DrawInfo, InputState)) return false;
 		}
+		
+		if (m_UseToneMapping)
+		{
+			if (!m_ToneMappingFilter->Update(pGraphicsAPI, pPhysicsEngine, pLoadWorker, Camera, Projection, DrawInfo, InputState)) return false;
+		}
 
 		if (m_UseBloom)
 		{
@@ -72,6 +94,11 @@ namespace graphics
 		if (m_UseFXAA)
 		{
 			if (!m_FXAAFilter->Draw(pGraphicsAPI, Camera, Projection, DrawInfo)) return false;
+		}
+		
+		if (m_UseToneMapping)
+		{
+			if (!m_ToneMappingFilter->Draw(pGraphicsAPI, Camera, Projection, DrawInfo)) return false;
 		}
 
 		if (m_UseBloom)

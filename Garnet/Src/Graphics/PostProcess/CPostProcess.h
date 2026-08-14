@@ -7,6 +7,7 @@
 #include <Interface/IGraphicsAPI.h>
 #include <Scriptable/CValueRegistry.h>
 #include "CPostProcessFXAA.h"
+#include "CPostProcessToneMapping.h"
 #include "CPostProcessBloom.h"
 
 namespace resource { class CLoadWorker; }
@@ -26,9 +27,11 @@ namespace graphics
 	class CPostProcess
 	{
 		bool m_UseFXAA;
+		bool m_UseToneMapping;
 		bool m_UseBloom;
 
 		std::shared_ptr<CPostProcessFXAA> m_FXAAFilter;
+		std::shared_ptr<CPostProcessToneMapping> m_ToneMappingFilter;
 		std::shared_ptr<CPostProcessBloom> m_BloomFilter;
 
 	public:
@@ -36,9 +39,11 @@ namespace graphics
 		virtual ~CPostProcess();
 
 		void SetUseFXAA(bool Flag);
+		void SetUseToneMapping(bool Flag);
 		void SetUseBloom(bool Flag);
 
 		const std::shared_ptr<CPostProcessFXAA>& GetFXAAFilter() const;
+		const std::shared_ptr<CPostProcessToneMapping>& GetToneMappingFilter() const;
 		const std::shared_ptr<CPostProcessBloom>& GetBloomFilter() const;
 
 		bool Initialize(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker);
