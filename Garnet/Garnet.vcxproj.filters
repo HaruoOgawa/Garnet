@@ -3348,6 +3348,9 @@
     <ClInclude Include="Src\Graphics\PostProcess\CPostProcessToneMapping.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Graphics\PostProcess\CPostProcessSSR.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\WindowAPI\CGLFWWindowAPI.cpp">
@@ -4554,6 +4557,9 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Src\Graphics\PostProcess\CPostProcessToneMapping.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Graphics\PostProcess\CPostProcessSSR.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
