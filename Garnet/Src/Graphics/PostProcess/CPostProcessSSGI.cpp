@@ -266,8 +266,6 @@ namespace graphics
 			if (Material)
 			{
 				Material->SetUniformValue("maxDistance", &glm::vec1(m_MaxDistance)[0], sizeof(float));
-				Material->SetUniformValue("near", &glm::vec1(Projection->GetNear())[0], sizeof(float));
-				Material->SetUniformValue("far", &glm::vec1(Projection->GetFar())[0], sizeof(float));
 			}
 
 			if (!m_SSGIMainFrameRenderer->Draw(pGraphicsAPI, Camera, Projection, DrawInfo)) return false;
@@ -300,8 +298,6 @@ namespace graphics
 				Material->SetUniformValue("g_Sharpness", &glm::vec1(m_Sharpness)[0], sizeof(float));
 				Material->SetUniformValue("nExponent", &glm::vec1(m_NormalExponent)[0], sizeof(float));
 				Material->SetUniformValue("kernelRadius", &m_KernelRadius, sizeof(int));
-				Material->SetUniformValue("near", &glm::vec1(Projection->GetNear())[0], sizeof(float));
-				Material->SetUniformValue("far", &glm::vec1(Projection->GetFar())[0], sizeof(float));
 			}
 			
 			if (!m_BilateralXBlur4x4FrameRenderer->Draw(pGraphicsAPI, Camera, Projection, DrawInfo)) return false;
@@ -320,8 +316,6 @@ namespace graphics
 				Material->SetUniformValue("g_Sharpness", &glm::vec1(m_Sharpness)[0], sizeof(float));
 				Material->SetUniformValue("nExponent", &glm::vec1(m_NormalExponent)[0], sizeof(float));
 				Material->SetUniformValue("kernelRadius", &m_KernelRadius, sizeof(int));
-				Material->SetUniformValue("near", &glm::vec1(Projection->GetNear())[0], sizeof(float));
-				Material->SetUniformValue("far", &glm::vec1(Projection->GetFar())[0], sizeof(float));
 			}
 
 			if (!m_BilateralYBlur4x4FrameRenderer->Draw(pGraphicsAPI, Camera, Projection, DrawInfo)) return false;
@@ -355,8 +349,6 @@ namespace graphics
 				Material->SetUniformValue("g_Sharpness", &glm::vec1(m_Sharpness)[0], sizeof(float));
 				Material->SetUniformValue("nExponent", &glm::vec1(m_NormalExponent)[0], sizeof(float));
 				Material->SetUniformValue("kernelRadius", &m_KernelRadius, sizeof(int));
-				Material->SetUniformValue("near", &glm::vec1(Projection->GetNear())[0], sizeof(float));
-				Material->SetUniformValue("far", &glm::vec1(Projection->GetFar())[0], sizeof(float));
 			}
 			
 			if (!m_BilateralXBlur2x2FrameRenderer->Draw(pGraphicsAPI, Camera, Projection, DrawInfo)) return false;
@@ -375,8 +367,6 @@ namespace graphics
 				Material->SetUniformValue("g_Sharpness", &glm::vec1(m_Sharpness)[0], sizeof(float));
 				Material->SetUniformValue("nExponent", &glm::vec1(m_NormalExponent)[0], sizeof(float));
 				Material->SetUniformValue("kernelRadius", &m_KernelRadius, sizeof(int));
-				Material->SetUniformValue("near", &glm::vec1(Projection->GetNear())[0], sizeof(float));
-				Material->SetUniformValue("far", &glm::vec1(Projection->GetFar())[0], sizeof(float));
 			}
 			
 			if (!m_BilateralYBlur2x2FrameRenderer->Draw(pGraphicsAPI, Camera, Projection, DrawInfo)) return false;

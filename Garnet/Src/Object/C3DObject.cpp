@@ -605,7 +605,8 @@ namespace object
 				Material->SetUniformValue("deltaTime", &glm::vec1(DrawInfo->GetDeltaSecondsTime())[0], sizeof(float));
 				Material->SetUniformValue("resolution", &Projection->GetScreenResolution()[0], sizeof(glm::vec2));
 				Material->SetUniformValue("frame", &glm::ivec1(DrawInfo->GetCurrentFrame())[0], sizeof(int));
-
+				Material->SetUniformValue("near", &glm::vec1(Projection->GetNear())[0], sizeof(float));
+				Material->SetUniformValue("far", &glm::vec1(Projection->GetFar())[0], sizeof(float));
 				Material->SetUniformValue("useSpatialCulling", &glm::ivec1(DrawInfo->IsSpatialCulling() ? 1 : 0)[0], sizeof(int));
 				Material->SetUniformValue("spatialCullPos", &DrawInfo->GetSpatialCullPos()[0], sizeof(float) * 4);
 #ifdef USE_ANIMATION
