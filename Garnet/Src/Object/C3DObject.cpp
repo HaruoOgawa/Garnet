@@ -556,6 +556,19 @@ namespace object
 		if (MeshIndex < 0 || MeshIndex >= m_MeshList.size()) return true;
 
 		const auto& WorldMatrix = m_ObjectTransform->GetModelMatrix() * Node->GetWorldMatrix();
+		const auto& ViewMatrix = Camera->GetViewMatrix();
+		const auto& ProjMatrix = Projection->GetPrejectionMatrix();
+		const auto& MVPMatrix = ProjMatrix * ViewMatrix * WorldMatrix;
+
+		// １つ前のフレームのMVP行列を取得してキャッシュを更新
+		const auto& PassName = pGraphicsAPI->GetCurrentRenderPassName();
+		glm::mat4 PrevMVPMatrix = Node->GetPrevMVPMatrix(PassName);
+		Node->CacheMVPMatrix(MVPMatrix, PassName);
+
+		glm::mat4 lightVMat = DrawInfo->GetLightCamera()->GetViewMatrix();
+		glm::mat4 lightPMat = DrawInfo->GetLightProjection()->GetPrejectionMatrix();
+		glm::mat4 lightVPMat = lightPMat * lightVMat;
+
 		const auto& Mesh = m_MeshList[MeshIndex];
 
 		int SkeletonIndex = Node->GetSkeletonIndex();
@@ -584,13 +597,10 @@ namespace object
 				if (!Material) return true;
 
 				// 共通のユニフォームバッファの更新
-				glm::mat4 lightVMat = DrawInfo->GetLightCamera()->GetViewMatrix();
-				glm::mat4 lightPMat = DrawInfo->GetLightProjection()->GetPrejectionMatrix();
-				glm::mat4 lightVPMat = lightPMat * lightVMat;
-
 				Material->SetUniformValue("model", &WorldMatrix[0][0], sizeof(glm::mat4));
-				Material->SetUniformValue("view", &Camera->GetViewMatrix()[0][0], sizeof(glm::mat4));
-				Material->SetUniformValue("proj", &Projection->GetPrejectionMatrix()[0][0], sizeof(glm::mat4));
+				Material->SetUniformValue("view", &ViewMatrix[0][0], sizeof(glm::mat4));
+				Material->SetUniformValue("proj", &ProjMatrix[0][0], sizeof(glm::mat4));
+				Material->SetUniformValue("prevMVP", &PrevMVPMatrix[0][0], sizeof(glm::mat4));
 				Material->SetUniformValue("lightVMat", &lightVMat[0][0], sizeof(glm::mat4));
 				Material->SetUniformValue("lightPMat", &lightPMat[0][0], sizeof(glm::mat4));
 				Material->SetUniformValue("lightVPMat", &lightVPMat[0][0], sizeof(glm::mat4));
