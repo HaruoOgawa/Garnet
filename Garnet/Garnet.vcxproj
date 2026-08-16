@@ -762,6 +762,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Src\Graphics\PostProcess\CPostProcessSSAO.h" />
     <ClInclude Include="Src\Graphics\PostProcess\CPostProcessSSR.h" />
     <ClInclude Include="Src\Graphics\PostProcess\CPostProcessToneMapping.h" />
     <ClInclude Include="Src\Graphics\PostProcess\CPostProcessSSGI.h" />
@@ -1876,6 +1877,7 @@ xcopy $(ProjectDir)Src\Library\GLFW\lib\glfw3.dll $(OutDir) /y /s /i</Command>
     <ClInclude Include="Src\Interface\IRenderer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\Graphics\PostProcess\CPostProcessSSAO.cpp" />
     <ClCompile Include="Src\Graphics\PostProcess\CPostProcessSSR.cpp" />
     <ClCompile Include="Src\Graphics\PostProcess\CPostProcessToneMapping.cpp" />
     <ClCompile Include="Src\Graphics\PostProcess\CPostProcessSSGI.cpp" />
