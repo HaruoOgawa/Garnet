@@ -107,10 +107,10 @@ namespace graphics
 				}
 			}
 
-			auto GBufferResultPass = pGraphicsAPI->FindOffScreenRenderPass(m_TargetPassName);
-			if (GBufferResultPass)
+			auto TargetPass = pGraphicsAPI->FindOffScreenRenderPass(m_TargetPassName);
+			if (TargetPass)
 			{
-				TextureList.push_back(GBufferResultPass->GetFrameTexture());
+				TextureList.push_back(TargetPass->GetFrameTexture());
 			}
 
 			auto MainResultPass = pGraphicsAPI->FindOffScreenRenderPass("MainResultPass");

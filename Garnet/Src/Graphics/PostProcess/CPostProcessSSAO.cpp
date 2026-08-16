@@ -5,14 +5,14 @@
 namespace graphics
 {
 	CPostProcessSSAO::CPostProcessSSAO(const std::string& TargetPassName):
-		CValueRegistry("PostProcessSSGIRegistry"),
+		CValueRegistry("PostProcessSSAORegistry"),
 		m_TargetPassName(TargetPassName),
-		m_Sharpness(1.0f),
+		m_Sharpness(10.0f),
 		m_NormalExponent(1.0f),
 		m_FilterRadius(0.003f),
 		m_KernelRadius(6),
-		m_MaxDistance(2.0f),
-		m_SSGIMainFrameRenderer(nullptr),
+		m_AORadius(0.1),
+		m_SSAOMainFrameRenderer(nullptr),
 		m_Reduce2x2FrameRenderer(nullptr),
 		m_Reduce4x4FrameRenderer(nullptr),
 		m_BilateralXBlur4x4FrameRenderer(nullptr),
@@ -22,7 +22,7 @@ namespace graphics
 		m_BilateralYBlur2x2FrameRenderer(nullptr),
 		m_UpSamplingOriginFrameRenderer(nullptr),
 		m_TemporalAccumulationFrameRenderer(nullptr),
-		m_SSGIMixFrameRenderer(nullptr)
+		m_SSAOMixFrameRenderer(nullptr)
 	{
 	}
 
@@ -35,9 +35,9 @@ namespace graphics
 		int TexWidth = 0, TexHeight = 0;
 		{
 			graphics::SRenderPassState State = graphics::SRenderPassState(2);
-			if (!pGraphicsAPI->CreateRenderPass("GBufferSSGIMainPass", api::ERenderPassFormat::COLOR_FLOAT_RENDERPASS, -1, -1, State)) return false;
+			if (!pGraphicsAPI->CreateRenderPass("GBufferSSAOMainPass", api::ERenderPassFormat::COLOR_FLOAT_RENDERPASS, -1, -1, State)) return false;
 
-			const auto& Pass = pGraphicsAPI->FindOffScreenRenderPass("GBufferSSGIMainPass");
+			const auto& Pass = pGraphicsAPI->FindOffScreenRenderPass("GBufferSSAOMainPass");
 			if (Pass)
 			{
 				TexWidth = Pass->GetWidth();
@@ -47,52 +47,52 @@ namespace graphics
 
 		{
 			graphics::SRenderPassState State = graphics::SRenderPassState(1);
-			if (!pGraphicsAPI->CreateRenderPass("GBufferSSGIReduce2x2Pass", api::ERenderPassFormat::COLOR_FLOAT_RENDERPASS, TexWidth / 2, TexHeight / 2, State)) return false;
+			if (!pGraphicsAPI->CreateRenderPass("GBufferSSAOReduce2x2Pass", api::ERenderPassFormat::COLOR_FLOAT_RENDERPASS, TexWidth / 2, TexHeight / 2, State)) return false;
 		}
 		
 		{
 			graphics::SRenderPassState State = graphics::SRenderPassState(1);
-			if (!pGraphicsAPI->CreateRenderPass("GBufferSSGIReduce4x4Pass", api::ERenderPassFormat::COLOR_FLOAT_RENDERPASS, TexWidth / 4, TexHeight / 4, State)) return false;
+			if (!pGraphicsAPI->CreateRenderPass("GBufferSSAOReduce4x4Pass", api::ERenderPassFormat::COLOR_FLOAT_RENDERPASS, TexWidth / 4, TexHeight / 4, State)) return false;
 		}
 		
 		{
 			graphics::SRenderPassState State = graphics::SRenderPassState(1);
-			if (!pGraphicsAPI->CreateRenderPass("GBufferSSGIBilateralXBlur4x4Pass", api::ERenderPassFormat::COLOR_FLOAT_RENDERPASS, TexWidth / 4, TexHeight / 4, State)) return false;
+			if (!pGraphicsAPI->CreateRenderPass("GBufferSSAOBilateralXBlur4x4Pass", api::ERenderPassFormat::COLOR_FLOAT_RENDERPASS, TexWidth / 4, TexHeight / 4, State)) return false;
 		}
 		
 		{
 			graphics::SRenderPassState State = graphics::SRenderPassState(1);
-			if (!pGraphicsAPI->CreateRenderPass("GBufferSSGIBilateralYBlur4x4Pass", api::ERenderPassFormat::COLOR_FLOAT_RENDERPASS, TexWidth / 4, TexHeight / 4, State)) return false;
+			if (!pGraphicsAPI->CreateRenderPass("GBufferSSAOBilateralYBlur4x4Pass", api::ERenderPassFormat::COLOR_FLOAT_RENDERPASS, TexWidth / 4, TexHeight / 4, State)) return false;
 		}
 		
 		{
 			graphics::SRenderPassState State = graphics::SRenderPassState(1);
-			if (!pGraphicsAPI->CreateRenderPass("GBufferSSGIUpSampling2x2Pass", api::ERenderPassFormat::COLOR_FLOAT_RENDERPASS, TexWidth / 2, TexHeight / 2, State)) return false;
+			if (!pGraphicsAPI->CreateRenderPass("GBufferSSAOUpSampling2x2Pass", api::ERenderPassFormat::COLOR_FLOAT_RENDERPASS, TexWidth / 2, TexHeight / 2, State)) return false;
 		}
 
 		{
 			graphics::SRenderPassState State = graphics::SRenderPassState(1);
-			if (!pGraphicsAPI->CreateRenderPass("GBufferSSGIBilateralXBlur2x2Pass", api::ERenderPassFormat::COLOR_FLOAT_RENDERPASS, TexWidth / 2, TexHeight / 2, State)) return false;
+			if (!pGraphicsAPI->CreateRenderPass("GBufferSSAOBilateralXBlur2x2Pass", api::ERenderPassFormat::COLOR_FLOAT_RENDERPASS, TexWidth / 2, TexHeight / 2, State)) return false;
 		}
 		
 		{
 			graphics::SRenderPassState State = graphics::SRenderPassState(1);
-			if (!pGraphicsAPI->CreateRenderPass("GBufferSSGIBilateralYBlur2x2Pass", api::ERenderPassFormat::COLOR_FLOAT_RENDERPASS, TexWidth / 2, TexHeight / 2, State)) return false;
+			if (!pGraphicsAPI->CreateRenderPass("GBufferSSAOBilateralYBlur2x2Pass", api::ERenderPassFormat::COLOR_FLOAT_RENDERPASS, TexWidth / 2, TexHeight / 2, State)) return false;
 		}
 
 		{
 			graphics::SRenderPassState State = graphics::SRenderPassState(1);
-			if (!pGraphicsAPI->CreateRenderPass("GBufferSSGIOriginUpSamplingPass", api::ERenderPassFormat::COLOR_FLOAT_RENDERPASS, TexWidth, TexHeight, State)) return false;
+			if (!pGraphicsAPI->CreateRenderPass("GBufferSSAOOriginUpSamplingPass", api::ERenderPassFormat::COLOR_FLOAT_RENDERPASS, TexWidth, TexHeight, State)) return false;
 		}
 		
 		{
 			graphics::SRenderPassState State = graphics::SRenderPassState(1);
-			if (!pGraphicsAPI->CreateRenderPass("GBufferSSGITemporalPass", api::ERenderPassFormat::COLOR_FLOAT_RENDERPASS, TexWidth, TexHeight, State)) return false;
+			if (!pGraphicsAPI->CreateRenderPass("GBufferSSAOTemporalPass", api::ERenderPassFormat::COLOR_FLOAT_RENDERPASS, TexWidth, TexHeight, State)) return false;
 		}
 
 		{
 			graphics::SRenderPassState State = graphics::SRenderPassState(1);
-			if (!pGraphicsAPI->CreateRenderPass("GBufferSSGIResultPass", api::ERenderPassFormat::COLOR_FLOAT_RENDERPASS, TexWidth, TexHeight, State)) return false;
+			if (!pGraphicsAPI->CreateRenderPass("GBufferSSAOResultPass", api::ERenderPassFormat::COLOR_FLOAT_RENDERPASS, TexWidth, TexHeight, State)) return false;
 		}
 
 		{
@@ -107,111 +107,106 @@ namespace graphics
 				}
 			}
 
-			auto GBufferResultPass = pGraphicsAPI->FindOffScreenRenderPass(m_TargetPassName);
-			if (GBufferResultPass)
+			auto TargetPass = pGraphicsAPI->FindOffScreenRenderPass(m_TargetPassName);
+			if (TargetPass)
 			{
-				TextureList.push_back(GBufferResultPass->GetFrameTexture());
+				TextureList.push_back(TargetPass->GetFrameTexture());
 			}
 
-			auto MainResultPass = pGraphicsAPI->FindOffScreenRenderPass("MainResultPass");
-			if (MainResultPass)
-			{
-				TextureList.push_back(MainResultPass->GetFrameTexture());
-			}
-
-			m_SSGIMainFrameRenderer = std::make_shared<graphics::CFrameRenderer>(pGraphicsAPI, "GBufferSSGIMainPass", TextureList);
-			if (!m_SSGIMainFrameRenderer->Create(pLoadWorker, "Resources\\Common\\MaterialFrame\\GBufferSSGIMain_MF.json")) return false;
+			m_SSAOMainFrameRenderer = std::make_shared<graphics::CFrameRenderer>(pGraphicsAPI, "GBufferSSAOMainPass", TextureList);
+			if (!m_SSAOMainFrameRenderer->Create(pLoadWorker, "Resources\\Common\\MaterialFrame\\GBufferSSAO_MF.json")) return false;
 		}
 
-		// GBufferSSGIReduce2x2Pass
+		// GBufferSSAOReduce2x2Pass
 		{
 			std::vector<std::shared_ptr<CTexture>> TextureList;
-			TextureList.push_back(pGraphicsAPI->FindOffScreenRenderPass("GBufferSSGIMainPass")->GetFrameTexture(0));
+			TextureList.push_back(pGraphicsAPI->FindOffScreenRenderPass("GBufferSSAOMainPass")->GetFrameTexture(0));
 
-			m_Reduce2x2FrameRenderer = std::make_shared<graphics::CFrameRenderer>(pGraphicsAPI, "GBufferSSGIReduce2x2Pass", TextureList);
+			m_Reduce2x2FrameRenderer = std::make_shared<graphics::CFrameRenderer>(pGraphicsAPI, "GBufferSSAOReduce2x2Pass", TextureList);
 			
 			// フレームテクスチャのフィルターモードがLINEARになっている前提
 			// サイズを小さくしたフレームバッファに描画しただけで、バイリニアフィルタつきのダウンサンプリングの想定
 			if (!m_Reduce2x2FrameRenderer->Create(pLoadWorker, "Resources\\Common\\MaterialFrame\\FrameTexture_MF.json")) return false;
 		}
 		
-		// GBufferSSGIReduce4x4Pass
+		// GBufferSSAOReduce4x4Pass
 		{
-			m_Reduce4x4FrameRenderer = std::make_shared<graphics::CFrameRenderer>(pGraphicsAPI, "GBufferSSGIReduce4x4Pass", pGraphicsAPI->FindOffScreenRenderPass("GBufferSSGIReduce2x2Pass")->GetFrameTextureList());
+			m_Reduce4x4FrameRenderer = std::make_shared<graphics::CFrameRenderer>(pGraphicsAPI, "GBufferSSAOReduce4x4Pass", pGraphicsAPI->FindOffScreenRenderPass("GBufferSSAOReduce2x2Pass")->GetFrameTextureList());
 			
 			// フレームテクスチャのフィルターモードがLINEARになっている前提
 			// サイズを小さくしたフレームバッファに描画しただけで、バイリニアフィルタつきのダウンサンプリングの想定
 			if (!m_Reduce4x4FrameRenderer->Create(pLoadWorker, "Resources\\Common\\MaterialFrame\\FrameTexture_MF.json")) return false;
 		}
 		
-		// GBufferSSGIBilateralXBlur4x4Pass
+		// GBufferSSAOBilateralXBlur4x4Pass
 		{
 			std::vector<std::shared_ptr<graphics::CTexture>> TextureList;
-			TextureList.push_back(pGraphicsAPI->FindOffScreenRenderPass("GBufferSSGIReduce4x4Pass")->GetFrameTexture());
+			TextureList.push_back(pGraphicsAPI->FindOffScreenRenderPass("GBufferSSAOReduce4x4Pass")->GetFrameTexture());
 			TextureList.push_back(pGraphicsAPI->FindOffScreenRenderPass("GBufferGenPass")->GetFrameTexture(3));
 			TextureList.push_back(pGraphicsAPI->FindOffScreenRenderPass("GBufferGenPass")->GetFrameTexture(1));
 
-			m_BilateralXBlur4x4FrameRenderer = std::make_shared<graphics::CFrameRenderer>(pGraphicsAPI, "GBufferSSGIBilateralXBlur4x4Pass", TextureList);
+			m_BilateralXBlur4x4FrameRenderer = std::make_shared<graphics::CFrameRenderer>(pGraphicsAPI, "GBufferSSAOBilateralXBlur4x4Pass", TextureList);
 			if (!m_BilateralXBlur4x4FrameRenderer->Create(pLoadWorker, "Resources\\Common\\MaterialFrame\\BilateralFilter_MF.json")) return false;
 		}
 		
-		// GBufferSSGIBilateralYBlur4x4Pass
+		// GBufferSSAOBilateralYBlur4x4Pass
 		{
 			std::vector<std::shared_ptr<graphics::CTexture>> TextureList;
-			TextureList.push_back(pGraphicsAPI->FindOffScreenRenderPass("GBufferSSGIBilateralXBlur4x4Pass")->GetFrameTexture());
+			TextureList.push_back(pGraphicsAPI->FindOffScreenRenderPass("GBufferSSAOBilateralXBlur4x4Pass")->GetFrameTexture());
 			TextureList.push_back(pGraphicsAPI->FindOffScreenRenderPass("GBufferGenPass")->GetFrameTexture(3));
 			TextureList.push_back(pGraphicsAPI->FindOffScreenRenderPass("GBufferGenPass")->GetFrameTexture(1));
 
-			m_BilateralYBlur4x4FrameRenderer = std::make_shared<graphics::CFrameRenderer>(pGraphicsAPI, "GBufferSSGIBilateralYBlur4x4Pass", TextureList);
+			m_BilateralYBlur4x4FrameRenderer = std::make_shared<graphics::CFrameRenderer>(pGraphicsAPI, "GBufferSSAOBilateralYBlur4x4Pass", TextureList);
 			if (!m_BilateralYBlur4x4FrameRenderer->Create(pLoadWorker, "Resources\\Common\\MaterialFrame\\BilateralFilter_MF.json")) return false;
 		}
 		
-		// GBufferSSGIUpSampling2x2Pass
+		// GBufferSSAOUpSampling2x2Pass
 		{
-			m_UpSampling2x2FrameRenderer = std::make_shared<graphics::CFrameRenderer>(pGraphicsAPI, "GBufferSSGIUpSampling2x2Pass", pGraphicsAPI->FindOffScreenRenderPass("GBufferSSGIBilateralYBlur4x4Pass")->GetFrameTextureList());
+			m_UpSampling2x2FrameRenderer = std::make_shared<graphics::CFrameRenderer>(pGraphicsAPI, "GBufferSSAOUpSampling2x2Pass", pGraphicsAPI->FindOffScreenRenderPass("GBufferSSAOBilateralYBlur4x4Pass")->GetFrameTextureList());
 			if (!m_UpSampling2x2FrameRenderer->Create(pLoadWorker, "Resources\\Common\\MaterialFrame\\UpSampling_MF.json")) return false;
 		}
 		
-		// GBufferSSGIBilateralXBlur2x2Pass
+		// GBufferSSAOBilateralXBlur2x2Pass
 		{
 			std::vector<std::shared_ptr<graphics::CTexture>> TextureList;
-			TextureList.push_back(pGraphicsAPI->FindOffScreenRenderPass("GBufferSSGIUpSampling2x2Pass")->GetFrameTexture());
+			TextureList.push_back(pGraphicsAPI->FindOffScreenRenderPass("GBufferSSAOUpSampling2x2Pass")->GetFrameTexture());
 			TextureList.push_back(pGraphicsAPI->FindOffScreenRenderPass("GBufferGenPass")->GetFrameTexture(3));
 			TextureList.push_back(pGraphicsAPI->FindOffScreenRenderPass("GBufferGenPass")->GetFrameTexture(1));
 
-			m_BilateralXBlur2x2FrameRenderer = std::make_shared<graphics::CFrameRenderer>(pGraphicsAPI, "GBufferSSGIBilateralXBlur2x2Pass", TextureList);
+			m_BilateralXBlur2x2FrameRenderer = std::make_shared<graphics::CFrameRenderer>(pGraphicsAPI, "GBufferSSAOBilateralXBlur2x2Pass", TextureList);
 			if (!m_BilateralXBlur2x2FrameRenderer->Create(pLoadWorker, "Resources\\Common\\MaterialFrame\\BilateralFilter_MF.json")) return false;
 		}
 		
-		// GBufferSSGIBilateralYBlur2x2Pass
+		// GBufferSSAOBilateralYBlur2x2Pass
 		{
 			std::vector<std::shared_ptr<graphics::CTexture>> TextureList;
-			TextureList.push_back(pGraphicsAPI->FindOffScreenRenderPass("GBufferSSGIBilateralXBlur2x2Pass")->GetFrameTexture());
+			TextureList.push_back(pGraphicsAPI->FindOffScreenRenderPass("GBufferSSAOBilateralXBlur2x2Pass")->GetFrameTexture());
 			TextureList.push_back(pGraphicsAPI->FindOffScreenRenderPass("GBufferGenPass")->GetFrameTexture(3));
 			TextureList.push_back(pGraphicsAPI->FindOffScreenRenderPass("GBufferGenPass")->GetFrameTexture(1));
 
-			m_BilateralYBlur2x2FrameRenderer = std::make_shared<graphics::CFrameRenderer>(pGraphicsAPI, "GBufferSSGIBilateralYBlur2x2Pass", TextureList);
+			m_BilateralYBlur2x2FrameRenderer = std::make_shared<graphics::CFrameRenderer>(pGraphicsAPI, "GBufferSSAOBilateralYBlur2x2Pass", TextureList);
 			if (!m_BilateralYBlur2x2FrameRenderer->Create(pLoadWorker, "Resources\\Common\\MaterialFrame\\BilateralFilter_MF.json")) return false;
 		}
 		
-		// GBufferSSGIOriginUpSamplingPass
+		// GBufferSSAOOriginUpSamplingPass
 		{
-			m_UpSamplingOriginFrameRenderer = std::make_shared<graphics::CFrameRenderer>(pGraphicsAPI, "GBufferSSGIOriginUpSamplingPass", pGraphicsAPI->FindOffScreenRenderPass("GBufferSSGIBilateralYBlur2x2Pass")->GetFrameTextureList());
+			m_UpSamplingOriginFrameRenderer = std::make_shared<graphics::CFrameRenderer>(pGraphicsAPI, "GBufferSSAOOriginUpSamplingPass", pGraphicsAPI->FindOffScreenRenderPass("GBufferSSAOBilateralYBlur2x2Pass")->GetFrameTextureList());
 			if (!m_UpSamplingOriginFrameRenderer->Create(pLoadWorker, "Resources\\Common\\MaterialFrame\\UpSampling_MF.json")) return false;
 		}
 		
-		// GBufferSSGITemporalPass
+		// GBufferSSAOTemporalPass
 		{
 			std::vector<std::shared_ptr<graphics::CTexture>> TextureList;
 
-			TextureList.push_back(pGraphicsAPI->FindOffScreenRenderPass("GBufferSSGIOriginUpSamplingPass")->GetFrameTexture());
-			TextureList.push_back(pGraphicsAPI->FindOffScreenRenderPass("GBufferSSGIResultPass")->GetFrameTexture());
+			TextureList.push_back(pGraphicsAPI->FindOffScreenRenderPass("GBufferSSAOOriginUpSamplingPass")->GetFrameTexture());
+			TextureList.push_back(pGraphicsAPI->FindOffScreenRenderPass("GBufferSSAOResultPass")->GetFrameTexture());
+			TextureList.push_back(pGraphicsAPI->FindOffScreenRenderPass("GBufferGenPass")->GetFrameTexture(6));
 
-			m_TemporalAccumulationFrameRenderer = std::make_shared<graphics::CFrameRenderer>(pGraphicsAPI, "GBufferSSGITemporalPass", TextureList);
-			if (!m_TemporalAccumulationFrameRenderer->Create(pLoadWorker, "Resources\\Common\\MaterialFrame\\GBufferSSGITemporalAccumulation_MF.json")) return false;
+			m_TemporalAccumulationFrameRenderer = std::make_shared<graphics::CFrameRenderer>(pGraphicsAPI, "GBufferSSAOTemporalPass", TextureList);
+			if (!m_TemporalAccumulationFrameRenderer->Create(pLoadWorker, "Resources\\Common\\MaterialFrame\\TemporalAccumulation_MF.json")) return false;
 		}
 
-		// SSGIMix
+		// SSAOMix
 		{
 			std::vector<std::shared_ptr<graphics::CTexture>> TextureList;
 
@@ -224,11 +219,11 @@ namespace graphics
 				}
 			}
 
-			TextureList.push_back(pGraphicsAPI->FindOffScreenRenderPass("GBufferSSGITemporalPass")->GetFrameTexture());
-			TextureList.push_back(pGraphicsAPI->FindOffScreenRenderPass("GBufferSSGIMainPass")->GetFrameTexture(1));
+			TextureList.push_back(pGraphicsAPI->FindOffScreenRenderPass("GBufferSSAOTemporalPass")->GetFrameTexture());
+			TextureList.push_back(pGraphicsAPI->FindOffScreenRenderPass("GBufferSSAOMainPass")->GetFrameTexture(1));
 
-			m_SSGIMixFrameRenderer = std::make_shared<graphics::CFrameRenderer>(pGraphicsAPI, m_TargetPassName, TextureList);
-			if (!m_SSGIMixFrameRenderer->Create(pLoadWorker, "Resources\\Common\\MaterialFrame\\GBufferSSGIMix_MF.json")) return false;
+			m_SSAOMixFrameRenderer = std::make_shared<graphics::CFrameRenderer>(pGraphicsAPI, m_TargetPassName, TextureList);
+			if (!m_SSAOMixFrameRenderer->Create(pLoadWorker, "Resources\\Common\\MaterialFrame\\GBufferSSAOMix_MF.json")) return false;
 		}
 
 		return true;
@@ -238,7 +233,7 @@ namespace graphics
 		const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
 		const std::shared_ptr<graphics::CDrawInfo>& DrawInfo, const std::shared_ptr<input::CInputState>& InputState)
 	{
-		if (!m_SSGIMainFrameRenderer->Update(pGraphicsAPI, pPhysicsEngine, pLoadWorker, Camera, Projection, DrawInfo, InputState)) return false;
+		if (!m_SSAOMainFrameRenderer->Update(pGraphicsAPI, pPhysicsEngine, pLoadWorker, Camera, Projection, DrawInfo, InputState)) return false;
 		if (!m_Reduce2x2FrameRenderer->Update(pGraphicsAPI, pPhysicsEngine, pLoadWorker, Camera, Projection, DrawInfo, InputState)) return false;
 		if (!m_Reduce4x4FrameRenderer->Update(pGraphicsAPI, pPhysicsEngine, pLoadWorker, Camera, Projection, DrawInfo, InputState)) return false;
 		if (!m_BilateralXBlur4x4FrameRenderer->Update(pGraphicsAPI, pPhysicsEngine, pLoadWorker, Camera, Projection, DrawInfo, InputState)) return false;
@@ -248,7 +243,7 @@ namespace graphics
 		if (!m_BilateralYBlur2x2FrameRenderer->Update(pGraphicsAPI, pPhysicsEngine, pLoadWorker, Camera, Projection, DrawInfo, InputState)) return false;
 		if (!m_UpSamplingOriginFrameRenderer->Update(pGraphicsAPI, pPhysicsEngine, pLoadWorker, Camera, Projection, DrawInfo, InputState)) return false;
 		if (!m_TemporalAccumulationFrameRenderer->Update(pGraphicsAPI, pPhysicsEngine, pLoadWorker, Camera, Projection, DrawInfo, InputState)) return false;
-		if (!m_SSGIMixFrameRenderer->Update(pGraphicsAPI, pPhysicsEngine, pLoadWorker, Camera, Projection, DrawInfo, InputState)) return false;
+		if (!m_SSAOMixFrameRenderer->Update(pGraphicsAPI, pPhysicsEngine, pLoadWorker, Camera, Projection, DrawInfo, InputState)) return false;
 
 		return true;
 	}
@@ -257,40 +252,40 @@ namespace graphics
 		const std::shared_ptr<projection::CProjection>& Projection,
 		const std::shared_ptr<graphics::CDrawInfo>& DrawInfo)
 	{
-		// GBufferSSGIMainPass
+		// GBufferSSAOMainPass
 		{
-			const auto& Material = m_SSGIMainFrameRenderer->GetMaterial();
+			const auto& Material = m_SSAOMainFrameRenderer->GetMaterial();
 
-			if (!pGraphicsAPI->BeginRender("GBufferSSGIMainPass")) return false;
+			if (!pGraphicsAPI->BeginRender("GBufferSSAOMainPass")) return false;
 
 			if (Material)
 			{
-				Material->SetUniformValue("maxDistance", &glm::vec1(m_MaxDistance)[0], sizeof(float));
+				Material->SetUniformValue("aoRadius", &glm::vec1(m_AORadius)[0], sizeof(float));
 			}
 
-			if (!m_SSGIMainFrameRenderer->Draw(pGraphicsAPI, Camera, Projection, DrawInfo)) return false;
+			if (!m_SSAOMainFrameRenderer->Draw(pGraphicsAPI, Camera, Projection, DrawInfo)) return false;
 			if (!pGraphicsAPI->EndRender()) return false;
 		}
 		
-		// GBufferSSGIReduce2x2Pass
+		// GBufferSSAOReduce2x2Pass
 		{
-			if (!pGraphicsAPI->BeginRender("GBufferSSGIReduce2x2Pass")) return false;
+			if (!pGraphicsAPI->BeginRender("GBufferSSAOReduce2x2Pass")) return false;
 			if (!m_Reduce2x2FrameRenderer->Draw(pGraphicsAPI, Camera, Projection, DrawInfo)) return false;
 			if (!pGraphicsAPI->EndRender()) return false;
 		}
 		
-		// GBufferSSGIReduce4x4Pass
+		// GBufferSSAOReduce4x4Pass
 		{
-			if (!pGraphicsAPI->BeginRender("GBufferSSGIReduce4x4Pass")) return false;
+			if (!pGraphicsAPI->BeginRender("GBufferSSAOReduce4x4Pass")) return false;
 			if (!m_Reduce4x4FrameRenderer->Draw(pGraphicsAPI, Camera, Projection, DrawInfo)) return false;
 			if (!pGraphicsAPI->EndRender()) return false;
 		}
 		
-		// GBufferSSGIBilateralXBlur4x4Pass
+		// GBufferSSAOBilateralXBlur4x4Pass
 		{
 			const auto& Material = m_BilateralXBlur4x4FrameRenderer->GetMaterial();
 
-			if (!pGraphicsAPI->BeginRender("GBufferSSGIBilateralXBlur4x4Pass")) return false;
+			if (!pGraphicsAPI->BeginRender("GBufferSSAOBilateralXBlur4x4Pass")) return false;
 			
 			if (Material)
 			{
@@ -304,11 +299,11 @@ namespace graphics
 			if (!pGraphicsAPI->EndRender()) return false;
 		}
 		
-		// GBufferSSGIBilateralYBlur4x4Pass
+		// GBufferSSAOBilateralYBlur4x4Pass
 		{
 			const auto& Material = m_BilateralYBlur4x4FrameRenderer->GetMaterial();
 
-			if (!pGraphicsAPI->BeginRender("GBufferSSGIBilateralYBlur4x4Pass")) return false;
+			if (!pGraphicsAPI->BeginRender("GBufferSSAOBilateralYBlur4x4Pass")) return false;
 
 			if (Material)
 			{
@@ -322,11 +317,11 @@ namespace graphics
 			if (!pGraphicsAPI->EndRender()) return false;
 		}
 		
-		// GBufferSSGIUpSampling2x2Pass
+		// GBufferSSAOUpSampling2x2Pass
 		{
 			const auto& Material = m_UpSampling2x2FrameRenderer->GetMaterial();
 
-			if (!pGraphicsAPI->BeginRender("GBufferSSGIUpSampling2x2Pass")) return false;
+			if (!pGraphicsAPI->BeginRender("GBufferSSAOUpSampling2x2Pass")) return false;
 
 			if (Material)
 			{
@@ -337,11 +332,11 @@ namespace graphics
 			if (!pGraphicsAPI->EndRender()) return false;
 		}
 		
-		// GBufferSSGIBilateralXBlur2x2Pass
+		// GBufferSSAOBilateralXBlur2x2Pass
 		{
 			const auto& Material = m_BilateralXBlur2x2FrameRenderer->GetMaterial();
 
-			if (!pGraphicsAPI->BeginRender("GBufferSSGIBilateralXBlur2x2Pass")) return false;
+			if (!pGraphicsAPI->BeginRender("GBufferSSAOBilateralXBlur2x2Pass")) return false;
 
 			if (Material)
 			{
@@ -355,11 +350,11 @@ namespace graphics
 			if (!pGraphicsAPI->EndRender()) return false;
 		}
 		
-		// GBufferSSGIBilateralYBlur2x2Pass
+		// GBufferSSAOBilateralYBlur2x2Pass
 		{
 			const auto& Material = m_BilateralYBlur2x2FrameRenderer->GetMaterial();
 
-			if (!pGraphicsAPI->BeginRender("GBufferSSGIBilateralYBlur2x2Pass")) return false;
+			if (!pGraphicsAPI->BeginRender("GBufferSSAOBilateralYBlur2x2Pass")) return false;
 
 			if (Material)
 			{
@@ -373,11 +368,11 @@ namespace graphics
 			if (!pGraphicsAPI->EndRender()) return false;
 		}
 		
-		// GBufferSSGIOriginUpSamplingPass
+		// GBufferSSAOOriginUpSamplingPass
 		{
 			const auto& Material = m_UpSamplingOriginFrameRenderer->GetMaterial();
 
-			if (!pGraphicsAPI->BeginRender("GBufferSSGIOriginUpSamplingPass")) return false;
+			if (!pGraphicsAPI->BeginRender("GBufferSSAOOriginUpSamplingPass")) return false;
 
 			if (Material)
 			{
@@ -388,20 +383,20 @@ namespace graphics
 			if (!pGraphicsAPI->EndRender()) return false;
 		}
 		
-		// GBufferSSGITemporalPass
+		// GBufferSSAOTemporalPass
 		{
-			if (!pGraphicsAPI->BeginRender("GBufferSSGITemporalPass")) return false;
+			if (!pGraphicsAPI->BeginRender("GBufferSSAOTemporalPass")) return false;
 			if (!m_TemporalAccumulationFrameRenderer->Draw(pGraphicsAPI, Camera, Projection, DrawInfo)) return false;
 			if (!pGraphicsAPI->EndRender()) return false;
 		}
 
-		// SSGIの最終結果としてコピーしておく
-		if (!pGraphicsAPI->CopyRenderPass("GBufferSSGITemporalPass", "GBufferSSGIResultPass", true, true)) return false;
+		// SSAOの最終結果としてコピーしておく
+		if (!pGraphicsAPI->CopyRenderPass("GBufferSSAOTemporalPass", "GBufferSSAOResultPass", true, true)) return false;
 
 		// 最終描画結果にフィードバック
 		{
 			if (!pGraphicsAPI->BeginRender(m_TargetPassName)) return false;
-			if (!m_SSGIMixFrameRenderer->Draw(pGraphicsAPI, Camera, Projection, DrawInfo)) return false;
+			if (!m_SSAOMixFrameRenderer->Draw(pGraphicsAPI, Camera, Projection, DrawInfo)) return false;
 			if (!pGraphicsAPI->EndRender()) return false;
 		}
 

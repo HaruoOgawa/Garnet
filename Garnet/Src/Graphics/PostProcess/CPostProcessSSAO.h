@@ -25,8 +25,8 @@ namespace graphics
 	{
 		std::string m_TargetPassName;
 
-		// SSGI
-		float m_MaxDistance;
+		// SSAO
+		float m_AORadius;
 
 		//Biliteral Filter
 		float m_Sharpness;
@@ -36,7 +36,7 @@ namespace graphics
 		// Upsampling
 		float m_FilterRadius;
 		
-		std::shared_ptr<graphics::CFrameRenderer> m_SSGIMainFrameRenderer;
+		std::shared_ptr<graphics::CFrameRenderer> m_SSAOMainFrameRenderer;
 		std::shared_ptr<graphics::CFrameRenderer> m_Reduce2x2FrameRenderer;
 		std::shared_ptr<graphics::CFrameRenderer> m_Reduce4x4FrameRenderer;
 		std::shared_ptr<graphics::CFrameRenderer> m_BilateralXBlur4x4FrameRenderer;
@@ -46,7 +46,7 @@ namespace graphics
 		std::shared_ptr<graphics::CFrameRenderer> m_BilateralYBlur2x2FrameRenderer;
 		std::shared_ptr<graphics::CFrameRenderer> m_UpSamplingOriginFrameRenderer;
 		std::shared_ptr<graphics::CFrameRenderer> m_TemporalAccumulationFrameRenderer;
-		std::shared_ptr<graphics::CFrameRenderer> m_SSGIMixFrameRenderer;
+		std::shared_ptr<graphics::CFrameRenderer> m_SSAOMixFrameRenderer;
 	public:
 		CPostProcessSSAO(const std::string& TargetPassName);
 		virtual ~CPostProcessSSAO();
