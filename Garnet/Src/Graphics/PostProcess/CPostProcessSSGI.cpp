@@ -206,9 +206,10 @@ namespace graphics
 
 			TextureList.push_back(pGraphicsAPI->FindOffScreenRenderPass("GBufferSSGIOriginUpSamplingPass")->GetFrameTexture());
 			TextureList.push_back(pGraphicsAPI->FindOffScreenRenderPass("GBufferSSGIResultPass")->GetFrameTexture());
+			TextureList.push_back(pGraphicsAPI->FindOffScreenRenderPass("GBufferGenPass")->GetFrameTexture(6));
 
 			m_TemporalAccumulationFrameRenderer = std::make_shared<graphics::CFrameRenderer>(pGraphicsAPI, "GBufferSSGITemporalPass", TextureList);
-			if (!m_TemporalAccumulationFrameRenderer->Create(pLoadWorker, "Resources\\Common\\MaterialFrame\\GBufferSSGITemporalAccumulation_MF.json")) return false;
+			if (!m_TemporalAccumulationFrameRenderer->Create(pLoadWorker, "Resources\\Common\\MaterialFrame\\TemporalAccumulation_MF.json")) return false;
 		}
 
 		// SSGIMix
