@@ -132,7 +132,7 @@ namespace graphics
 			
 			// フレームテクスチャのフィルターモードがLINEARになっている前提
 			// サイズを小さくしたフレームバッファに描画しただけで、バイリニアフィルタつきのダウンサンプリングの想定
-			if (!m_Reduce2x2FrameRenderer->Create(pLoadWorker, "Resources\\Common\\MaterialFrame\\FrameTexture_MF.json")) return false;
+			if (!m_Reduce2x2FrameRenderer->Create(pLoadWorker, "Resources\\Common\\MaterialFrame\\Downsample_MF.json")) return false;
 		}
 		
 		// GBufferSSGIReduce4x4Pass
@@ -141,7 +141,7 @@ namespace graphics
 			
 			// フレームテクスチャのフィルターモードがLINEARになっている前提
 			// サイズを小さくしたフレームバッファに描画しただけで、バイリニアフィルタつきのダウンサンプリングの想定
-			if (!m_Reduce4x4FrameRenderer->Create(pLoadWorker, "Resources\\Common\\MaterialFrame\\FrameTexture_MF.json")) return false;
+			if (!m_Reduce4x4FrameRenderer->Create(pLoadWorker, "Resources\\Common\\MaterialFrame\\Downsample_MF.json")) return false;
 		}
 		
 		// GBufferSSGIBilateralXBlur4x4Pass
