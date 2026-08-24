@@ -161,15 +161,15 @@ namespace api
 
 	bool CWebGPUMaterial::CreateBindGroup(const std::shared_ptr<graphics::CMaterialCreateInfo>& createInfo, const std::shared_ptr<graphics::CTextureSet>& TextureSet)
 	{
-		//
+		/*//
 		std::vector<std::shared_ptr<graphics::CTexture>> TextureList(0);
 		if (TextureSet) TextureList = TextureSet->Get2DTextureList();
 
 		std::vector<std::shared_ptr<graphics::CTexture>> CubeMapList(0);
 		if (TextureSet) CubeMapList = TextureSet->GetCubeMapList();
 
-		std::vector<std::shared_ptr<graphics::CTexture>> FrameTextureList(0);
-		if (TextureSet) FrameTextureList = TextureSet->GetFrameTextureList();
+		std::map<std::string, std::vector<std::shared_ptr<graphics::CTexture>>> FrameTextureMap;
+		if (TextureSet) FrameTextureMap = TextureSet->GetFrameTextureMap();
 
 		std::shared_ptr<graphics::CTexture> Diffuse_Tex = nullptr;
 		if(TextureSet) Diffuse_Tex = TextureSet->GetDiffuse_Tex();
@@ -178,7 +178,7 @@ namespace api
 		if (TextureSet) Specular_Tex = TextureSet->GetSpecular_Tex();
 
 		std::shared_ptr<graphics::CTexture> GGXLUT_Tex = nullptr;
-		if (TextureSet) GGXLUT_Tex = TextureSet->GetGGXLUT_Tex();
+		if (TextureSet) GGXLUT_Tex = TextureSet->GetGGXLUT_Tex();*/
 
 		// バインドレイアウトを作成
 		// どのようにメモリに配置されるか, バインドインデックスや読み取り専用かなど
@@ -241,9 +241,18 @@ namespace api
 			}
 			else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_FRAME)
 			{
-				const auto& it = m_RefFrameTextureMap.find(TexLayout.TextureName);
+				Texture = m_EmptyTexture;
 
-				Texture = (it != m_RefFrameTextureMap.end()) ? it->second : m_EmptyTexture;
+				const auto& it = m_RefFrameTextureMap.find(TexLayout.FrameName);
+				if (it != m_RefFrameTextureMap.end())
+				{
+					int FrameIndex = TexLayout.FrameIndex;
+
+					if (FrameIndex >= 0 && FrameIndex < static_cast<int>(it->second.size()))
+					{
+						Texture = it->second[FrameIndex];
+					}
+				}
 			}
 			else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_IBL_Diffuse)
 			{
@@ -368,9 +377,18 @@ namespace api
 			}
 			else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_FRAME)
 			{
-				const auto& it = m_RefFrameTextureMap.find(TexLayout.TextureName);
+				Texture = m_EmptyTexture;
 
-				Texture = (it != m_RefFrameTextureMap.end()) ? it->second : m_EmptyTexture;
+				const auto& it = m_RefFrameTextureMap.find(TexLayout.FrameName);
+				if (it != m_RefFrameTextureMap.end())
+				{
+					int FrameIndex = TexLayout.FrameIndex;
+
+					if (FrameIndex >= 0 && FrameIndex < static_cast<int>(it->second.size()))
+					{
+						Texture = it->second[FrameIndex];
+					}
+				}
 			}
 			else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_IBL_Diffuse)
 			{
