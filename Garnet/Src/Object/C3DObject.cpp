@@ -556,6 +556,19 @@ namespace object
 		if (MeshIndex < 0 || MeshIndex >= m_MeshList.size()) return true;
 
 		const auto& WorldMatrix = m_ObjectTransform->GetModelMatrix() * Node->GetWorldMatrix();
+		const auto& ViewMatrix = Camera->GetViewMatrix();
+		const auto& ProjMatrix = Projection->GetPrejectionMatrix();
+		const auto& MVPMatrix = ProjMatrix * ViewMatrix * WorldMatrix;
+
+		// １つ前のフレームのMVP行列を取得してキャッシュを更新
+		const auto& PassName = pGraphicsAPI->GetCurrentRenderPassName();
+		glm::mat4 PrevMVPMatrix = Node->GetPrevMVPMatrix(PassName);
+		Node->CacheMVPMatrix(MVPMatrix, PassName);
+
+		glm::mat4 lightVMat = DrawInfo->GetLightCamera()->GetViewMatrix();
+		glm::mat4 lightPMat = DrawInfo->GetLightProjection()->GetPrejectionMatrix();
+		glm::mat4 lightVPMat = lightPMat * lightVMat;
+
 		const auto& Mesh = m_MeshList[MeshIndex];
 
 		int SkeletonIndex = Node->GetSkeletonIndex();
@@ -584,13 +597,10 @@ namespace object
 				if (!Material) return true;
 
 				// 共通のユニフォームバッファの更新
-				glm::mat4 lightVMat = DrawInfo->GetLightCamera()->GetViewMatrix();
-				glm::mat4 lightPMat = DrawInfo->GetLightProjection()->GetPrejectionMatrix();
-				glm::mat4 lightVPMat = lightPMat * lightVMat;
-
 				Material->SetUniformValue("model", &WorldMatrix[0][0], sizeof(glm::mat4));
-				Material->SetUniformValue("view", &Camera->GetViewMatrix()[0][0], sizeof(glm::mat4));
-				Material->SetUniformValue("proj", &Projection->GetPrejectionMatrix()[0][0], sizeof(glm::mat4));
+				Material->SetUniformValue("view", &ViewMatrix[0][0], sizeof(glm::mat4));
+				Material->SetUniformValue("proj", &ProjMatrix[0][0], sizeof(glm::mat4));
+				Material->SetUniformValue("prevMVP", &PrevMVPMatrix[0][0], sizeof(glm::mat4));
 				Material->SetUniformValue("lightVMat", &lightVMat[0][0], sizeof(glm::mat4));
 				Material->SetUniformValue("lightPMat", &lightPMat[0][0], sizeof(glm::mat4));
 				Material->SetUniformValue("lightVPMat", &lightVPMat[0][0], sizeof(glm::mat4));
@@ -604,7 +614,9 @@ namespace object
 				Material->SetUniformValue("time", &glm::vec1(DrawInfo->GetSecondsTime())[0], sizeof(float));
 				Material->SetUniformValue("deltaTime", &glm::vec1(DrawInfo->GetDeltaSecondsTime())[0], sizeof(float));
 				Material->SetUniformValue("resolution", &Projection->GetScreenResolution()[0], sizeof(glm::vec2));
-
+				Material->SetUniformValue("frame", &glm::ivec1(DrawInfo->GetCurrentFrame())[0], sizeof(int));
+				Material->SetUniformValue("near", &glm::vec1(Projection->GetNear())[0], sizeof(float));
+				Material->SetUniformValue("far", &glm::vec1(Projection->GetFar())[0], sizeof(float));
 				Material->SetUniformValue("useSpatialCulling", &glm::ivec1(DrawInfo->IsSpatialCulling() ? 1 : 0)[0], sizeof(int));
 				Material->SetUniformValue("spatialCullPos", &DrawInfo->GetSpatialCullPos()[0], sizeof(float) * 4);
 #ifdef USE_ANIMATION

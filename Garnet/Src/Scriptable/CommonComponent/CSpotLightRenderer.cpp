@@ -219,12 +219,10 @@ namespace scriptable
 		if (!RenderPass) return false;
 
 		const auto& TextureList = RenderPass->GetFrameTextureList();
-		if (TextureList.size() != 6) return false;
 
 		for (const auto& Texture : TextureList)
 		{
-			m_LightObject->GetTextureSet()->AddFrameTexture(Texture);
-			m_LightGeomObject->GetTextureSet()->AddFrameTexture(Texture);
+			m_LightObject->GetTextureSet()->AddFrameTexture(DefferdPassName, Texture);
 		}
 
 		// Mesh & Material

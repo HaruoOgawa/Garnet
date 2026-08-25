@@ -439,4 +439,19 @@ namespace object
 	{
 		return m_InverseBindMatrix;
 	}
+
+	void CNode::CacheMVPMatrix(const glm::mat4& Matrix, const std::string& PassName)
+	{
+		if (PassName.empty()) return;
+
+		m_PrevMVPMatrixMap[PassName] = Matrix;
+	}
+
+	glm::mat4 CNode::GetPrevMVPMatrix(const std::string& PassName) const
+	{
+		const auto& it = m_PrevMVPMatrixMap.find(PassName);
+		if (it == m_PrevMVPMatrixMap.end()) return glm::mat4(1.0f);
+
+		return it->second;
+	}
 }

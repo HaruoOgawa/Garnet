@@ -31,6 +31,9 @@ namespace object
 
 		glm::mat4 m_InverseBindMatrix;
 
+		// パス単位でキャッシュしておく
+		std::map<std::string, glm::mat4> m_PrevMVPMatrixMap;
+
 		std::shared_ptr<CNode> m_ParentNode;
 
 		// コンポーネント
@@ -132,5 +135,8 @@ namespace object
 
 		void SetInverseBindMatrix(const glm::mat4& Matrix);
 		const glm::mat4& GeInverseBindMatrix() const;
+
+		void CacheMVPMatrix(const glm::mat4& Matrix, const std::string& PassName);
+		glm::mat4 GetPrevMVPMatrix(const std::string& PassName) const;
 	};
 }

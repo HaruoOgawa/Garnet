@@ -200,7 +200,8 @@ namespace graphics
 				{
 					TextureBindingLayout = graphics::STextureBindingLayout(PrevTextureBindingLayout.TextureName, PrevTextureBindingLayout.ViewBindingIndex,
 						PrevTextureBindingLayout.SamplerBindingIndex, PrevTextureBindingLayout.TextureIndex, PrevTextureBindingLayout.TextureUsage,
-						PrevTextureBindingLayout.ReadOnFragment, PrevTextureBindingLayout.ReadOnVertex);
+						PrevTextureBindingLayout.ReadOnFragment, PrevTextureBindingLayout.ReadOnVertex,
+						PrevTextureBindingLayout.FrameName, PrevTextureBindingLayout.FrameIndex);
 				}
 			}
 		}
@@ -230,8 +231,8 @@ namespace graphics
 		std::vector<std::shared_ptr<graphics::CTexture>> CubeMapList(0);
 		if (TextureSet) CubeMapList = TextureSet->GetCubeMapList();
 
-		std::vector<std::shared_ptr<graphics::CTexture>> FrameTextureList(0);
-		if (TextureSet) FrameTextureList = TextureSet->GetFrameTextureList();
+		std::map<std::string, std::vector<std::shared_ptr<graphics::CTexture>>> FrameTextureMap;
+		if (TextureSet) FrameTextureMap = TextureSet->GetFrameTextureMap();
 
 		std::shared_ptr<graphics::CTexture> Diffuse_Tex = nullptr;
 		if (TextureSet) Diffuse_Tex = TextureSet->GetDiffuse_Tex();
@@ -265,9 +266,20 @@ namespace graphics
 			}
 			else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_FRAME)
 			{
-				const std::shared_ptr<graphics::CTexture>& Texture = (TextureIndex >= 0 && TextureIndex < FrameTextureList.size()) ? FrameTextureList[TextureIndex] : m_EmptyTexture;
+				auto Texture = m_EmptyTexture;
 
-				m_RefFrameTextureMap.emplace(TexLayout.TextureName, Texture);
+				const auto& FrameTextureList = FrameTextureMap.find(TexLayout.FrameName);
+				if (FrameTextureList != FrameTextureMap.end())
+				{
+					int FrameIndex = TexLayout.FrameIndex;
+
+					if (FrameIndex >= 0 && FrameIndex < static_cast<int>(FrameTextureList->second.size()))
+					{
+						Texture = FrameTextureList->second[FrameIndex];
+					}
+				}
+
+				m_RefFrameTextureMap[TexLayout.FrameName].push_back(Texture);
 			}
 			else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_IBL_Diffuse)
 			{
@@ -332,8 +344,11 @@ namespace graphics
 			}
 			else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_FRAME)
 			{
-				const auto& it = PrevRefFrameTextureMap.find(TexLayout.TextureName);
-				if (it != PrevRefFrameTextureMap.end()) m_RefFrameTextureMap.emplace(it->first, it->second);
+				const auto& it = PrevRefFrameTextureMap.find(TexLayout.FrameName);
+				if (it != PrevRefFrameTextureMap.end())
+				{
+					m_RefFrameTextureMap[it->first] = it->second;
+				}
 			}
 			else if (TexLayout.TextureUsage == graphics::ETextureUsage::TEXTURE_USAGE_IBL_Diffuse)
 			{

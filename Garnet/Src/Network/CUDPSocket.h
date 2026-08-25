@@ -4,7 +4,7 @@
 
 #include <stdio.h>
 #include <string>
-#include <WinSock2.h> // WindowsのUDPとかのSocket通信ライブラリ
+//#include <WinSock2.h> // WindowsのUDPとかのSocket通信ライブラリ
 #include <Windows.h>
 #include <windowsx.h> // Windowsのメッセージ処理とかに必要
 #include <memory>

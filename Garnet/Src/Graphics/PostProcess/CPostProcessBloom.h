@@ -4,6 +4,7 @@
 #include <vector>
 #include <tuple>
 #include <Interface/IGraphicsAPI.h>
+#include <Interface/IPostProcessFilter.h>
 #include <Scriptable/CValueRegistry.h>
 
 namespace resource { class CLoadWorker; }
@@ -26,7 +27,7 @@ namespace graphics
 		std::string SrcPass = std::string();
 	};
 
-	class CPostProcessBloom : public scriptable::CValueRegistry
+	class CPostProcessBloom : public IPostProcessFilter, public scriptable::CValueRegistry
 	{
 		std::string m_TargetPassName;
 
@@ -41,12 +42,12 @@ namespace graphics
 		CPostProcessBloom(const std::string& TargetPassName);
 		virtual ~CPostProcessBloom();
 
-		bool Initialize(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker);
+		bool Initialize(api::IGraphicsAPI* pGraphicsAPI, resource::CLoadWorker* pLoadWorker) override;
 
 		bool Update(api::IGraphicsAPI* pGraphicsAPI, physics::IPhysicsEngine* pPhysicsEngine, resource::CLoadWorker* pLoadWorker, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection,
-			const std::shared_ptr<graphics::CDrawInfo>& DrawInfo, const std::shared_ptr<input::CInputState>& InputState);
+			const std::shared_ptr<graphics::CDrawInfo>& DrawInfo, const std::shared_ptr<input::CInputState>& InputState) override;
 
 		bool Draw(api::IGraphicsAPI* pGraphicsAPI, const std::shared_ptr<camera::CCamera>& Camera, const std::shared_ptr<projection::CProjection>& Projection, 
-			const std::shared_ptr<graphics::CDrawInfo>& DrawInfo);
+			const std::shared_ptr<graphics::CDrawInfo>& DrawInfo) override;
 	};
 }
