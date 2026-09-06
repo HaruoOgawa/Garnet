@@ -34,8 +34,10 @@ def Generate():
     images = []
 
     # MSDFGenを実行しテクスチャを作成
+    index = 0
     for char in sdf_chars:
-        temp_tex_dir = os.path.join(temp, char + "_.png")
+        # temp_tex_dir = os.path.join(temp, char + "_.png")
+        temp_tex_dir = os.path.join(temp, str(index) + "_.png")
         
         command = [msdf_path, mode, "-font", font, "\'" + str(char) + "\'", "-o", temp_tex_dir, "-dimensions", str(dimension_width), str(dimension_height), "-autoframe"]
 
@@ -46,6 +48,8 @@ def Generate():
         print("[TempOutput] ", temp_tex_dir)
 
         images.append(Image.open(temp_tex_dir))
+
+        index+=1
         
     # 複数枚のMSDFテクスチャを1つにまとめる
     # 合計サイズ
